@@ -1,0 +1,94 @@
+
+# Define Epics system name. It should be unique.
+TARGET = susepics
+
+# Straight seqiencer code
+SRC = src/epics/seq/daqConfig.st
+
+# Tacking number generates the numbered version of the base sequencer program.
+# This is required in few cases to run same code multiple times as all state code
+# is not reentrant.
+#SRC += src/epics/seq/daqConfig1.st
+#SRC += src/epics/seq/daqConfig2.st
+#SRC += src/epics/seq/daqConfig3.st
+#SRC += src/epics/seq/daqConfig4.st
+
+# ASC
+#SRC += src/epics/seq/asc2.st
+# Referencing build directory here indicates fmseq.pl built sequencer
+# Source for asc.st will be rts/src/epics/fmseq/asc file, which gets processed
+# by rts/src/epics/util/fmseq.pl script.
+#SRC += build/$(TARGET)/asc.st
+
+# IOO WFS
+#SRC += src/epics/seq/ascmc2.st
+#SRC += build/$(TARGET)/ascmc.st
+
+# LSC
+#SRC += src/epics/seq/xycom.st
+#SRC += src/epics/seq/controllerG2.st
+SRC += build/$(TARGET)/sus.st
+
+SRC += src/drv/rfm.c
+SRC += src/drv/param.c
+SRC += src/drv/crc.c
+SRC += src/drv/fmReadCoeff.c
+
+# Database files to be loaded on target system on all inteferometers
+DB = src/epics/db/susdaq.db
+#DB += src/epics/db/ascmcDaqConfig.db
+#DB += src/epics/db/lscDaqConfig.db
+#DB += src/epics/db/5565.db
+#DB += src/epics/db/tpSlot.db
+
+# Epics datbase files to be loaded on target system on indicated interferometers only
+#DBH2 += src/epics/db/lhofb.db
+#DBL1 += src/epics/db/llofb.db
+#DBH1 += src/epics/db/gps.db
+#DBL1 += src/epics/db/gps.db
+
+# ASC
+#DB += build/$(TARGET)/asc1.db
+#DB += src/epics/db/asc2.db
+#DB += build/$(TARGET)/ascmc1.db
+#DB += src/epics/db/ascmc2.db
+#LSC
+DB += build/$(TARGET)/sus1.db
+
+# Define which interferometers this is intended for
+IFO = M1 
+SITE = mit
+
+# Define which state programs to run, specify parameters
+SEQ += 'daqConfig,("ifo=M1,site=mit,sys=QUAD,sysnum=20")'
+#SEQ += 'daqConfig1,("ifo=%IFO%,site=%SITE%,sys=QUAD,sysnum=9")'
+#SEQ += 'daqConfig2,("ifo=%IFO%,site=%SITE%,sys=IOO,sysnum=26")'
+# ASC
+#SEQ += 'asc,("ifo=%IFO%,site=%SITE%,sys=ASC-,sysnum=18")'
+#SEQ += 'ascSuper,("ifo=%IFO%")'
+# IOO WFS
+#SEQ += 'ascmc,("ifo=%IFO%,site=%SITE%,sys=IOO-,sysnum=26")'
+#SEQ += 'ascSuperMC,("ifo=%IFO%")'
+# LSC
+#SEQL1 += 'lscSuper,("ifo=%IFO%,server=10.100.0.3")'
+#SEQH1 += 'lscSuper,("ifo=%IFO%,server=10.1.0.2")'
+#SEQH2 += 'lscSuper,("ifo=%IFO%,server=10.1.0.2")'
+SEQ += 'sus,("ifo=M1, site=mit, sys=SUS-, sysnum=20")'
+#SEQ += 'xycom,("ifo=%IFO%")'
+
+# Define if need to be on 5579 net
+#CFLAGS += -DRFM_5579
+#LIBFLAGS += -L/usr/lib/rmnet -lrmnet
+
+# Define if need to be on 5565 net
+#CFLAGS += -DRFM_5565
+#LIBFLAGS += -L/usr/lib/rfm2g -lrfm2g
+
+# Build rules
+include config/Makefile.linux
+
+
+# Extra build rules
+build/$(TARGET)/sus1.db: build/$(TARGET)/sus.db
+	sed 's/%SYS%/SUS-/g' $< > $@
+

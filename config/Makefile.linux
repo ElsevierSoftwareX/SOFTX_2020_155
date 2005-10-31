@@ -1,0 +1,263 @@
+# Linux Epics IOC system build rules
+
+EPICS_ROOT=/opt/epics-3.14.7-linux-prof
+#EPICS_ROOT=/cvs/cds/epics/release/r3.14.linux
+
+# Switching to 3.14.6 Epics; 28 Oct 2004
+# EPICS_ROOT=/opt/CDS/h/alex/epics/base-3.14.6
+# Also need to get rid of *_foo.cc files:
+# comment out
+#    SEQ_OBJ += $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%.st=%_foo.o))) 
+#
+
+###
+EPICS_BASE=$(EPICS_ROOT)/base
+EPICS_SEQ_BASE=$(EPICS_ROOT)/seq
+EPICS_HOST_ARCH=linux-x86-debug
+
+# Do not delete these intermediate files
+.SECONDARY: build/$(TARGET)/%.i
+.SECONDARY: build/$(TARGET)/%.st
+
+# Preprocessor is used on .st file to get .i which is later fed to SNC
+PREPROCESS = /usr/bin/gcc -x c -E -P
+
+# Standard C and C++ compiler and C preprocessor flags
+CFLAGS += $(EXTRA_CFLAGS)
+CFLAGS += -I$(EPICS_BASE)/include/os/Linux -I$(EPICS_BASE)/include 
+CFLAGS += -I$(EPICS_SEQ_BASE)/include
+CFLAGS += -I/usr/lib/rmnet -I/usr/lib/rfm2g
+CFLAGS += -Isrc/include -Isrc/include/drv
+CFLAGS += -I/usr/lib64
+ifeq (,$(findstring tcsepics, $(TARGET)))
+CFLAGS += -DRFM_EPICS -DNO_FM10GEN_C_CODE
+endif
+ifeq (rtlepics,$(findstring rtlepics, $(TARGET)))
+CFLAGS += -DNO_RFM_EPICS_RECORD_SUPPORT
+endif
+CFLAGS += -D_POSIX_C_SOURCE=199506L -D_POSIX_THREADS  
+CFLAGS += -DOSITHREAD_USE_DEFAULT_STACK  -D_X86_  -DUNIX  -D_BSD_SOURCE -Dlinux
+CFLAGS += -D_REENTRANT -g  -pg -fPIC 
+CFLAGS += -DINLINE=inline
+CXXFLAGS = $(CFLAGS)
+SNCFLAGS += +a
+
+# Sequencer file (.st) compiler
+SNC = $(EPICS_SEQ_BASE)/bin/linux-x86-debug/snc $(SNCFLAGS)
+
+# Sequencer generator files
+FMSEQFILES = src/epics/util/fmseq.pl src/epics/util/skeleton.db src/epics/util/skeleton.st
+
+# Standard Epics IOC server library flags
+LIBFLAGS += -g -pg
+LIBFLAGS += -L$(EPICS_BASE)/lib/linux-x86-debug 
+LIBFLAGS += -L$(EPICS_SEQ_BASE)/lib/linux-x86-debug
+#LIBFLAGS += $(EPICS_SEQ_BASE)/bin/linux-x86-debug/devSequencer.o
+LIBFLAGS += -lseq -lseqDev -lpv -lsoftDevIoc -lrecIoc
+ifeq (,$(findstring tcsepics, $(TARGET)))
+LIBFLAGS += -ltestDevIoc 
+endif
+LIBFLAGS += -lrecIoc
+LIBFLAGS += -liocsh -lmiscIoc -lrsrvIoc -ldbtoolsIoc
+LIBFLAGS += -lasIoc -ldbIoc -lregistryIoc -ldbStaticIoc -lca -lCom
+LIBFLAGS += -lpthread  -lreadline -lcurses -lrt
+
+# User Makefiles's $(SRC) variable is split here in sequencer source
+# and all the rest, which should be C files
+SEQ_SRCS = $(filter %.st, $(SRC))
+CSRCS = $(filter-out %.st, $(SRC))
+CSRCS += src/epics/seq/main.c
+# Required Epics files
+CCSRCS += src/epics/seq/registerRecordDeviceDriver.cc
+
+# Each .st file gets preprocessed twice to make one C and one C++
+# file. C++ file has different name. Both files are exactly the same
+# in content
+SEQ_ISRC = $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%st=%i)))
+SEQ_CCSRC = $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%.st=%_foo.cc)))
+SEQ_CCSRC += $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%st=%c)))
+SEQ_OBJ = $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%st=%o)))
+#SEQ_OBJ += $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%.st=%_foo.o)))
+SEQ_OBJ += $(addprefix build/$(TARGET)/, $(notdir $(CSRCS:%.c=%.o)))
+SEQ_OBJ += $(addprefix build/$(TARGET)/, $(notdir $(CCSRCS:%.cc=%.o)))
+
+# Standard Epics IOC database definition file
+DBD += src/epics/dbd/a.dbd
+
+# Main target to make an Epics IOC server
+all: target build/$(TARGET)/$(TARGET) install
+
+# Install built epics IOC into target/$(TARGET)
+install: $(DB) $(DBH1) $(DBH2) $(DBL1)
+	mkdir -p target/$(TARGET)/dbd
+	mkdir -p target/$(TARGET)/db
+	cp build/$(TARGET)/$(TARGET) target/$(TARGET)
+	for i in $(DBD) ; do \
+	  cp $$i target/$(TARGET)/dbd/`basename $$i`; \
+	done
+	/bin/rm -f target/$(TARGET)/db/*/autoBurt.req
+	for ifo in $(IFO) ; do \
+	  ifo0=`echo $$ifo | sed 's/[0-9]/0/g'`; \
+	  mkdir -p target/$(TARGET)/db/$$ifo; \
+	  echo "#!/bin/sh" > target/$(TARGET)/startup$$ifo; \
+	  echo ./$(TARGET) $(TARGET)$$ifo.cmd \>\& ioc$$ifo.log \& >> target/$(TARGET)/startup$$ifo ; \
+	  echo echo $(TARGET) $$ifo IOC Server started >> target/$(TARGET)/startup$$ifo ; \
+	  chmod +x target/$(TARGET)/startup$$ifo ; \
+	  /bin/rm -f target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
+	  for i in $(DBD) ; do \
+	    echo "dbLoadDatabase \"dbd/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+	  done ; \
+	  echo 'sus_registerRecordDeviceDriver(pdbbase)' >> target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
+	  for i in $(DB) ; do \
+		cat $$i | sed s/%IFO%/$$ifo/g\;s/%IFO0%/$$ifo0/g > target/$(TARGET)/db/$$ifo/`basename $$i`; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+	  done ; \
+	done
+	for i in $(DBH1) ; do \
+		cat $$i | sed s/%IFO%/H1/g\;s/%IFO0%/H0/g > target/$(TARGET)/db/H1/`basename $$i`; \
+		grep record  target/$(TARGET)/db/H1/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/H1/autoBurt.req; \
+		grep record  target/$(TARGET)/db/H1/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' >> target/$(TARGET)/db/H1/autoBurt.req; \
+		echo "dbLoadRecords \"db/H1/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)H1.cmd; \
+	done
+	for i in $(DBH2) ; do \
+		cat $$i | sed s/%IFO%/H2/g\;s/%IFO0%/H0/g > target/$(TARGET)/db/H2/`basename $$i`; \
+		grep record  target/$(TARGET)/db/H2/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/H2/autoBurt.req; \
+		grep record  target/$(TARGET)/db/H2/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' >> target/$(TARGET)/db/H2/autoBurt.req; \
+		echo "dbLoadRecords \"db/H2/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)H2.cmd; \
+	done
+	for i in $(DBL1) ; do \
+		cat $$i | sed s/%IFO%/L1/g\;s/%IFO0%/L0/g > target/$(TARGET)/db/L1/`basename $$i`; \
+		grep record  target/$(TARGET)/db/L1/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/L1/autoBurt.req; \
+		grep record  target/$(TARGET)/db/L1/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' >> target/$(TARGET)/db/L1/autoBurt.req; \
+		echo "dbLoadRecords \"db/L1/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)L1.cmd; \
+	done
+	for ifo in $(IFO) ; do \
+	  echo "iocInit" >> target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
+	  for i in $(SEQ) ; do \
+		echo "seq &$$i" | sed s/%IFO%/$$ifo/g\;s/%SITE%/`if test $$ifo = L1 ; then echo llo ; else echo lho ; fi`/g >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+	  done ; \
+	done
+	for i in $(SEQH1) ; do \
+		echo "seq &$$i" | sed s/%IFO%/H1/g\;s/%SITE%/lho/g >> target/$(TARGET)/$(TARGET)H1.cmd; \
+	done
+	for i in $(SEQH2) ; do \
+		echo "seq &$$i" | sed s/%IFO%/H2/g\;s/%SITE%/lho/g >> target/$(TARGET)/$(TARGET)H2.cmd; \
+	done
+	for i in $(SEQL1) ; do \
+		echo "seq &$$i" | sed s/%IFO%/L1/g\;s/%SITE%/llo/g >> target/$(TARGET)/$(TARGET)L1.cmd; \
+	done
+	echo 'This is generated directory. Please make changes in CVS and reinstall from scratch.' > target/$(TARGET)/README.making_changes
+	echo 'Changes made to files in this directory will be lost.' >> target/$(TARGET)/README.making_changes
+	echo >> target/$(TARGET)/README.making_changes
+	echo 'Built on date' `date` >> target/$(TARGET)/README.making_changes
+
+# Epics IOC server link target
+build/$(TARGET)/$(TARGET): $(SEQ_OBJ)
+	$(CXX) -o $@ $? $(LIBFLAGS)
+
+# Object files depend on sources
+$(SEQ_OBJ): $(SEQ_CCSRC) $(CCSRCS) $(CSRCS)
+
+# Need to get .i files before we can run SNC to produce sources
+$(SEQ_CCSRC): $(SEQ_ISRC)
+
+# Make installation target directory
+target:
+	@mkdir -p build/$(TARGET)
+
+# Preprocess a sequencer file
+build/$(TARGET)/%.i: src/epics/seq/%.st
+	$(PREPROCESS) $(CFLAGS) $< > $@
+
+build/$(TARGET)/%.i: src/epics/seq/lsc/%.st
+	$(PREPROCESS) $(CFLAGS) $< > $@
+
+build/$(TARGET)/%.i: src/epics/seq/sus/%.st
+	$(PREPROCESS) $(CFLAGS) $< > $@
+
+# Preprocess generated sequencer file
+# Preprocess generated sequencer file
+build/$(TARGET)/%.i: build/$(TARGET)/%.st
+	$(PREPROCESS) $(CFLAGS) $< > $@
+
+# Generate sequencer file using fmseq.pl
+build/$(TARGET)/%.st: src/epics/fmseq/% $(FMSEQFILES)
+	(cd src/epics/fmseq; \
+	 cat $(notdir $<) | cpp $(CFLAGS) -  | grep -v ^# | $(if $(FMSEQ), $(FMSEQ), ../util/fmseq.pl) $(notdir $<) &&\
+	 mv $(notdir $<).* ../../../build/$(TARGET))
+
+
+# Replicate sequencer source, because I am too lazy to write re-entrant code
+# Following block of rules used to replicate fmseq.pl generated sequencers
+build/$(TARGET)/%1.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\11/g > $@
+build/$(TARGET)/%2.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\12/g > $@
+build/$(TARGET)/%3.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\13/g > $@
+build/$(TARGET)/%4.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\14/g > $@
+build/$(TARGET)/%5.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\15/g > $@
+build/$(TARGET)/%6.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\16/g > $@
+build/$(TARGET)/%7.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\17/g > $@
+build/$(TARGET)/%8.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\18/g > $@
+build/$(TARGET)/%9.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\19/g > $@
+build/$(TARGET)/%10.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\110/g > $@
+
+# Replicate sequncers
+build/$(TARGET)/%1.st: src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\11/g > $@
+build/$(TARGET)/%2.st: src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\12/g > $@
+build/$(TARGET)/%3.st: src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\13/g > $@
+build/$(TARGET)/%4.st: src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\14/g > $@
+build/$(TARGET)/%5.st: src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\15/g > $@
+build/$(TARGET)/%6.st: src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\16/g > $@
+build/$(TARGET)/%7.st: src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\17/g > $@
+build/$(TARGET)/%8.st: src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\18/g > $@
+build/$(TARGET)/%9.st: src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\19/g > $@
+build/$(TARGET)/%10.st: src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\110/g > $@
+
+# Build C++ version of sequencer code
+build/$(TARGET)/%_foo.cc: build/$(TARGET)/%.i
+	$(SNC) $< -o $@
+
+# Build C version of sequencer code
+%.c: %.i
+	$(SNC) $< -o $@
+
+# Compile sequencer-related C code
+build/$(TARGET)/%o: src/epics/seq/%c
+	$(CC) -c $(CFLAGS) $< -o $@
+
+# Compile driver C code
+build/$(TARGET)/%o: src/drv/%c
+	$(CC) -c $(CFLAGS) $< -o $@
+
+# Compile sequencer-related C++ code
+build/$(TARGET)/%o: src/epics/seq/%cc
+	$(CXX) -c $(CFLAGS) $< -o $@
+
+# Compile generate C++ code
+build/$(TARGET)/%_foo.o: build/$(TARGET)/%_foo.cc
+	$(CXX) -c $(CFLAGS) $< -o $@
+
+# Targets not files
+.PHONY: target
+.PHONY: install
