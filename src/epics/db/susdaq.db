@@ -1,0 +1,7 @@
+grecord(ai,"%IFO%:DAQ-QUAD_LOAD_CONFIG")
+grecord(ai,"%IFO%:DAQ-QUAD_CHAN_CNT")
+grecord(ai,"%IFO%:DAQ-QUAD_TOTAL")
+grecord(ai,"%IFO%:DAQ-QUAD_MSG")
+
+grecord(ai,"%IFO%:SUS-BURT_RESTORE")
+
