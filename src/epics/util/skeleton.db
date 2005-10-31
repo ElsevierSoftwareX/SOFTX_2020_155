@@ -1,0 +1,53 @@
+grecord(ai,"%IFO%:%SYS%%FILTER%_INMON")
+{
+	field(PREC,"%PREC1%")
+}
+grecord(ai,"%IFO%:%SYS%%FILTER%_EXCMON")
+{
+	field(PREC,"%PREC1%")
+}
+grecord(ai,"%IFO%:%SYS%%FILTER%_OFFSET")
+{
+	field(PREC,"1")
+}
+grecord(ai,"%IFO%:%SYS%%FILTER%_GAIN")
+{
+	field(PREC,"3")
+}
+grecord(ai,"%IFO%:%SYS%%FILTER%_TRAMP")
+{
+	field(PREC,"3")
+}
+grecord(ai,"%IFO%:%SYS%%FILTER%_LIMIT")
+{
+	field(PREC,"1")
+}
+grecord(ai,"%IFO%:%SYS%%FILTER%_OUTMON")
+{
+	field(PREC,"1")
+}
+grecord(ai,"%IFO%:%SYS%%FILTER%_OUT16")
+{
+	field(PREC,"%PREC1%")
+}
+grecord(ai,"%IFO%:%SYS%%FILTER%_OUTPUT")
+{
+	field(PREC,"%PREC1%")
+}
+grecord(ai,"%IFO%:%SYS%%FILTER%_SW1")
+grecord(ai,"%IFO%:%SYS%%FILTER%_SW2")
+grecord(ai,"%IFO%:%SYS%%FILTER%_RSET")
+grecord(ai,"%IFO%:%SYS%%FILTER%_SW1R")
+grecord(ai,"%IFO%:%SYS%%FILTER%_SW2R")
+grecord(ai,"%IFO%:%SYS%%FILTER%_SW1S")
+grecord(ai,"%IFO%:%SYS%%FILTER%_SW2S")
+grecord(stringin,"%IFO%:%SYS%%FILTER%_Name00")
+grecord(stringin,"%IFO%:%SYS%%FILTER%_Name01")
+grecord(stringin,"%IFO%:%SYS%%FILTER%_Name02")
+grecord(stringin,"%IFO%:%SYS%%FILTER%_Name03")
+grecord(stringin,"%IFO%:%SYS%%FILTER%_Name04")
+grecord(stringin,"%IFO%:%SYS%%FILTER%_Name05")
+grecord(stringin,"%IFO%:%SYS%%FILTER%_Name06")
+grecord(stringin,"%IFO%:%SYS%%FILTER%_Name07")
+grecord(stringin,"%IFO%:%SYS%%FILTER%_Name08")
+grecord(stringin,"%IFO%:%SYS%%FILTER%_Name09")
