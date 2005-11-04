@@ -5,6 +5,7 @@
 #include <drv/gsaadc.h>		/* GSA ADC module defs */
 #include <drv/gsadac.h>		/* GSA DAC module defs */
 #include <drv/plx9056.h>	/* PCI interface chip for GSA products */
+#include <drv/gmnet.h>
 
 #define RFM_WRITE	0x0
 #define RFM_READ	0x8
@@ -391,4 +392,281 @@ else {
   pci_free_consistent(pcidev,0x2000,cpu_addr,rfmDmaHandle);
   return(0);
 }
+}
+
+// *****************************************************************
+static void
+my_send_callback (struct gm_port *port, void *the_context,
+                  gm_status_t the_status)
+{         
+  /* One pending callback has been received */
+  (*(int *)the_context)--;
+          
+  switch (the_status)
+    {                                
+    case GM_SUCCESS:
+      break;
+        
+    case GM_SEND_DROPPED:
+      printk ("**** Send dropped!\n");
+      break;
+          
+    default:
+      gm_perror ("Send completed with error", the_status);
+    }
+}
+
+
+// *****************************************************************
+int myriNetInit()
+{
+  char receiver_nodename[64];
+  int expected_messages = 0;
+  unsigned long send_length;
+  int ii;
+
+  // Initialize interface
+  gm_init();
+
+  /* Open a port on our local interface. */
+  gm_strncpy (receiver_nodename,  /* Mandatory 1st parameter */
+              "gwave-108",
+              sizeof (receiver_nodename) - 1);
+
+  main_status = gm_open (&netPort, my_board_num,
+                         GM_PORT_NUM_SEND,
+                         "gm_simple_example_send",
+                         (enum gm_api_version) GM_API_VERSION_1_1);
+  if (main_status == GM_SUCCESS)
+    {
+      printk ("[send] Opened board %d port %d\n",
+                 my_board_num, GM_PORT_NUM_SEND);
+    }
+  else
+    {
+      gm_perror ("[send] Couldn't open GM port", main_status);
+    }
+
+  /* Allocate DMAable message buffers. */
+
+  netOutBuffer = gm_dma_calloc (netPort, GM_RCV_BUFFER_COUNT,
+                              GM_RCV_BUFFER_LENGTH);
+  if (netOutBuffer == 0)
+    {
+      printk ("[send] Couldn't allocate out_buffer\n");
+      main_status = GM_OUT_OF_MEMORY;
+    }
+
+  netInBuffer = gm_dma_calloc (netPort, GM_RCV_BUFFER_COUNT,
+                             GM_RCV_BUFFER_LENGTH);
+  if (netInBuffer == 0)
+    {
+      printk ("[send] Couldn't allocate netInBuffer\n");
+      main_status = GM_OUT_OF_MEMORY;
+    }
+
+  netDmaBuffer = gm_dma_calloc (netPort,
+                                        GM_16HZ_BUFFER_COUNT,
+                                        GM_16HZ_SEND_BUFFER_LENGTH);
+  if (netDmaBuffer == 0)
+    {
+      printk ("[send] Couldn't allocate directed_send_buffer\n");
+      main_status = GM_OUT_OF_MEMORY;
+    }
+
+  /* Tell GM where our receive buffer is */
+
+  gm_provide_receive_buffer (netPort, netInBuffer, GM_RCV_MESSAGE_SIZE,
+                             GM_DAQ_PRIORITY);
+
+
+  main_status = gm_host_name_to_node_id_ex
+    (netPort, 10000000, receiver_nodename, &receiver_node_id);
+  if (main_status == GM_SUCCESS)
+    {
+      printk ("[send] receiver node ID is %d\n", receiver_node_id);
+    }
+  else
+    {
+      printk ("[send] Conversion of nodename %s to node id failed\n",
+                 receiver_nodename);
+      gm_perror ("[send]", main_status);
+    }
+
+  daqSendMessage = (daqMessage *)netOutBuffer;
+  sprintf (daqSendMessage->message, "STT");
+  daqSendMessage->dcuId = 0;
+  daqSendMessage->channelCount = 16;
+  daqSendMessage->fileCrc = 0x3879d7b;
+  daqSendMessage->dataBlockSize = GM_DAQ_XFER_BYTE;
+
+  /*  Now send a regular message, which will signal the receiver to look at
+      its directed-send buffer                                              */
+  send_length = (unsigned long) sizeof(*daqSendMessage) + 1;
+  gm_send_with_callback (netPort,
+                         netOutBuffer,
+                         GM_RCV_MESSAGE_SIZE,
+                         send_length,
+                         GM_DAQ_PRIORITY,
+                         receiver_node_id,
+                         GM_PORT_NUM_RECV,
+                         my_send_callback,
+                         &expected_callbacks);
+  expected_callbacks = 1;
+  expected_messages = 1;
+
+  while (expected_messages)
+    {
+
+      event = gm_receive (netPort);
+      recv_length = gm_ntoh_u32 (event->recv.length);
+
+      switch (GM_RECV_EVENT_TYPE(event))
+        {
+        case GM_RECV_EVENT:
+        case GM_PEER_RECV_EVENT:
+        case GM_FAST_PEER_RECV_EVENT:
+          if (recv_length != sizeof (gm_s_e_id_message_t))
+            {
+              printk ("[send] *** ERROR: incoming message length %d "
+                         "incorrect; should be %ld\n",
+                         recv_length, sizeof (gm_s_e_id_message_t));
+              main_status = GM_FAILURE; /* Unexpected incoming message */
+            }
+
+
+          id_message = gm_ntohp (event->recv.message);
+          receiver_global_id = gm_ntoh_u32(id_message->global_id);
+          directed_send_addr =
+            gm_ntoh_u64(id_message->directed_recv_buffer_addr);
+          for(ii=0;ii<16;ii++) directed_send_subaddr[ii] = directed_send_addr + GM_DAQ_XFER_BYTE * ii;
+          main_status = gm_global_id_to_node_id(netPort,
+                                                receiver_global_id,
+                                                &receiver_node_id);
+          if (main_status != GM_SUCCESS)
+            {
+              gm_perror ("[send] Couldn't convert global ID to node ID",
+                         main_status);
+            }
+
+          expected_messages--;
+printk("Received node id from rcvr\n");
+
+          /* Return the buffer for reuse */
+
+          recv_buffer = gm_ntohp (event->recv.buffer);
+          size = (unsigned int)gm_ntoh_u8 (event->recv.size);
+          gm_provide_receive_buffer (netPort, recv_buffer, size,
+                                     GM_DAQ_PRIORITY);
+          break;
+
+        case GM_NO_RECV_EVENT:
+          break;
+
+        default:
+          gm_unknown (netPort, event);  /* gm_unknown calls the callback */
+        }
+    } /* while */
+
+
+return(1);
+
+
+}
+
+// *****************************************************************
+int myriNetClose()
+{
+  main_status = GM_SUCCESS;
+
+  gm_dma_free (netPort, netOutBuffer);
+  gm_dma_free (netPort, netInBuffer);
+  gm_dma_free (netPort, netDmaBuffer);
+  gm_close (netPort);
+  gm_finalize();
+
+  gm_exit (main_status);
+
+  return(0);
+
+}
+
+// *****************************************************************
+int myriNetCheckCallback()
+{
+  if (expected_callbacks)
+    {
+      event = gm_receive (netPort);
+
+      switch (GM_RECV_EVENT_TYPE(event))
+        {
+        case GM_RECV_EVENT:
+        case GM_PEER_RECV_EVENT:
+        case GM_FAST_PEER_RECV_EVENT:
+          printk ("[send] Receive Event (UNEXPECTED)\n");
+          main_status = GM_FAILURE; /* Unexpected incoming message */
+
+        case GM_NO_RECV_EVENT:
+          break;
+
+        default:
+          gm_unknown (netPort, event);  /* gm_unknown calls the callback */
+	}
+   }
+  return(0);
+
+}
+
+
+
+// *****************************************************************
+int myriNetDaqSend(int cycle, int subCycle, unsigned int fileCrc, char *dataBuffer)
+{
+
+  unsigned int *daqDataBuffer;
+  int send_length;
+  int ii,kk;
+
+  sprintf (daqSendMessage->message, "DAT");
+  daqSendMessage->cycle = cycle;
+  daqSendMessage->offset = subCycle;
+  daqSendMessage->fileCrc = fileCrc;
+  daqSendMessage->dataCount = GM_DAQ_XFER_BYTE;
+  daqSendData = (daqData *)netDmaBuffer;
+  daqDataBuffer = (unsigned int *)dataBuffer;
+  daqDataBuffer += subCycle * GM_DAQ_XFER_SIZE;
+  for(kk=0;kk<GM_DAQ_XFER_SIZE;kk++) 
+  {
+	daqSendData->data[kk] = *daqDataBuffer;
+	daqDataBuffer ++;
+  }
+  gm_directed_send_with_callback (netPort,
+                                  netDmaBuffer,
+                                  (gm_remote_ptr_t) (directed_send_subaddr[subCycle] + 65536 * cycle),
+                                  (unsigned long)
+                                  sizeof (*daqSendData),
+                                  GM_DAQ_PRIORITY,
+                                  receiver_node_id,
+                                  GM_PORT_NUM_RECV,
+                                  my_send_callback,
+                                  &expected_callbacks);
+  expected_callbacks++;
+
+
+  /*  Now send a regular message, which will signal the receiver to look at
+      its directed-send buffer                                              */
+if(subCycle == 15) {
+  send_length = (unsigned long) sizeof(*daqSendMessage) + 1;
+  gm_send_with_callback (netPort,
+                         netOutBuffer,
+                         GM_RCV_MESSAGE_SIZE,
+                         send_length,
+                         GM_DAQ_PRIORITY,
+                         receiver_node_id,
+                         GM_PORT_NUM_RECV,
+                         my_send_callback,
+                         &expected_callbacks);
+  expected_callbacks++;
+}
+  return(0);
 }
