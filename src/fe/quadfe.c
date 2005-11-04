@@ -87,7 +87,7 @@ sem_t irqsem;
 #include "fpvalidate.h"	/* Valid FP number ck	*/
 #include "drv/daqLib.c"	/* DAQ connection 	*/
 #include "drv/epicsXfer.c"
-#include "./mycode.c"
+#include "./quad.c"
 #if 0
 #include "drv/gdsLib.c"	/* GDS connection 	*/
 #endif
@@ -109,6 +109,11 @@ extern int gsaAdcDma(int byteCount);
 extern long mapDac();
 extern void trigDac(short dacData[]);
 extern int gsaDacDma();
+extern int myriNetInit();
+extern int myriNetClose();
+extern int myriNetCheckCallback();
+extern int myriNetDaqSend(int cycle, int subCycle, unsigned int fileCrc, char *dataBuffer);
+
 
 
 /* Timing diag variables */
@@ -752,7 +757,11 @@ void *fe_start(void *arg)
 	status = gsaDacDma();
 
 	// Write daq values once we are synched to 1pps
-  	if(firstTime != 0) status = daqWrite(1,20,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr);
+  	if(firstTime != 0) 
+	{
+		status = daqWrite(1,20,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr);
+		status = myriNetCheckCallback();
+	}
 
 	/* Update Epics variables */
 	vmeDone = updateEpics(subcycle,epicsInAddShm,epicsOutAddShm,epicsInAddLoc,epicsOutAddLoc,
@@ -802,18 +811,12 @@ int main(int argc, char **argv)
         }
 
         _pci_adc = mapAdc();
-	if(status == -1) {
-		printf("map adc card failure\n");
-		return(0);
-	}
 
 	_pci_dac = mapDac();
 
-        _pci_rfm = mapcard(1, 60*1024*1024);
-	if(_pci_rfm == 0) {
-		printf("map card 5579??\n");
-		_pci_rfm = &daqArea[0];
-	}
+	_pci_rfm = (long)&daqArea[0];
+ 
+	status = myriNetInit();
 #if 0
 	_pci_rfm = &daqArea[0];
 	pRfmMem = _epics_shm;
@@ -855,6 +858,7 @@ int main(int argc, char **argv)
 
  out:
 
+	status = myriNetClose();
         /* kill the threads */
         rtl_pthread_cancel(wthread);
         rtl_pthread_join(wthread, NULL);
