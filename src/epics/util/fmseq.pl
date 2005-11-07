@@ -94,6 +94,29 @@ while (<IN>) {
 	$vardb .= "    $v_efield3\n";
 	$vardb .= "    $v_efield4\n";
 	$vardb .= "}\n";
+    } elsif (substr($_,0,9) eq "MOMENTARY") {
+	die "Unspecified EPICS parameters" unless $epics_specified;
+	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
+	$vdecl .= "$v_type evar_$v_name;\n";
+	$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}{subsys}${v_name}\";\n";
+
+	$vinit .= "%% evar_$v_name  = $v_init;\n";
+	$vinit .= "pvPut(evar_$v_name);\n";
+	$vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
+
+	$vupdate .= "pvGet(evar_$v_name);\n";
+	$vupdate .= "rfm_assign(pEpics->${v_var}, evar_$v_name);\n";
+	$vupdate .= "%% evar_$v_name  = $v_init;\n";
+	$vupdate .= "pvPut(evar_$v_name);\n";
+
+	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%${v_name}\")\n";
+	$vardb .= "{\n";
+#	$vardb .= "    field(PREC,\"3\")\n";
+	$vardb .= "    $v_efield1\n";
+	$vardb .= "    $v_efield2\n";
+	$vardb .= "    $v_efield3\n";
+	$vardb .= "    $v_efield4\n";
+	$vardb .= "}\n";
     } elsif (substr($_,0,11) eq "OUTVARIABLE") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
