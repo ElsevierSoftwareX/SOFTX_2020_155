@@ -113,6 +113,8 @@ extern int myriNetInit();
 extern int myriNetClose();
 extern int myriNetCheckCallback();
 extern int myriNetDaqSend(int cycle, int subCycle, unsigned int fileCrc, char *dataBuffer);
+extern int myriNetReconnect();
+extern int myriNetCheckReconnect();
 
 
 
@@ -371,6 +373,9 @@ void *fe_start(void *arg)
   RFM_FE_COMMS *pEpicsComms;
   int cycleTime;
   int timeHold = 0;
+  int myGmError2 = 0;
+  int attemptingReconnect = 0;
+  int netRestored = 0;
 #if 0
   double fmIn;
   double m0SenOut[6];
@@ -390,9 +395,7 @@ void *fe_start(void *arg)
   double l3Out[6];
 #endif
   int status;
-  int sid;
   float onePps;
-  unsigned short clkCounter;
   short dacData[16];
   double dWord[64];
   int dacOut[32];
@@ -457,7 +460,7 @@ void *fe_start(void *arg)
 
 
   // Initialize DAQ function
-  status = daqWrite(0,20,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr);
+  status = daqWrite(0,20,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,0);
   if(status == -1) 
   {
     printf("DAQ init failed -- exiting\n");
@@ -759,8 +762,56 @@ void *fe_start(void *arg)
 	// Write daq values once we are synched to 1pps
   	if(firstTime != 0) 
 	{
-		status = daqWrite(1,20,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr);
-		status = myriNetCheckCallback();
+		// Call daqLib
+		status = daqWrite(1,20,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2);
+		if(!attemptingReconnect)
+		{
+			// Check and clear network callbacks.
+			status = myriNetCheckCallback();
+			// If callbacks pending count is high, try to fix net connection.
+			if(status > 6)
+			{
+				// Set error flag, which will cause daqLib to quit sending
+				// data to FB until problem is fixed.
+				myGmError2 = 1;
+				if(!attemptingReconnect)
+				{
+					attemptingReconnect = 2;
+					// Send a reconnect request to FB.
+					status = myriNetReconnect();
+					netRestored = 0;
+					printf("Net fail - recon try\n");
+				}
+			}
+		}
+		// If net reconnect requested, check for receipt of return message from FB
+		if(attemptingReconnect == 2) 
+		{
+			status = myriNetCheckReconnect();
+			if(status == 0)
+			{
+				netRestored = 100000;
+				attemptingReconnect = 1;
+				printf("Net recon established\n");
+			}
+		}
+		// If net successfully reconnected, wait 4-5sec before storing xmission of DAQ data.
+		// This is done to make sure that the callback counter is cleared below the
+		// error set point.
+		if(attemptingReconnect == 1) 
+		{
+			netRestored --;
+			// Reduce the callback counter.
+			status = myriNetCheckCallback();
+			// Go back to sending DAQ data.
+			if(netRestored <= 0)
+			{
+				netRestored = 0;
+				attemptingReconnect = 0;		
+				myGmError2 = 0;
+				printf("Continue sending DAQ data\n");
+			}
+		}
 	}
 
 	/* Update Epics variables */
@@ -778,6 +829,7 @@ void *fe_start(void *arg)
         {
 	  pLocalEpics.epicsOutput.cpuMeter = timeHold;
           timeHold = 0;
+	        if(myGmError2 != 0) printf("Network error %d %d %d\n",myGmError2,attemptingReconnect,netRestored);
         }
 
   }
@@ -810,20 +862,22 @@ int main(int argc, char **argv)
                 return (void *)-1;
         }
 
+	printf("Initializing ADC\n");
         _pci_adc = mapAdc();
 
+	printf("Initializing DAC\n");
 	_pci_dac = mapDac();
 
+	printf("Initializing space for daqLib buffers\n");
 	_pci_rfm = (long)&daqArea[0];
  
+	printf("Initializing Network\n");
 	status = myriNetInit();
 #if 0
 	_pci_rfm = &daqArea[0];
 	pRfmMem = _epics_shm;
-#endif
 
 	printf("Local IO addr ptr = 0x%lx\n",(long)pRfmMem);
-#if 0
 
         /* initialize the semaphore */
         sem_init (&irqsem, 1, 0);
