@@ -105,5 +105,5 @@ MATRIX Q1_L1_INMTRX_ 4x3 epicsInput.l1InputMatrix
 MATRIX Q1_L2_INMTRX_ 4x3 epicsInput.l2InputMatrix
 MATRIX Q1_L3_INMTRX_ 3x5 epicsInput.l3OutputMatrix
 
-INVARIABLE VME_RESET epicsInput.vmeReset int ai 0
+MOMENTARY VME_RESET epicsInput.vmeReset int ai 0
 OUTVARIABLE CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,"60") field(LOPR,"0")
