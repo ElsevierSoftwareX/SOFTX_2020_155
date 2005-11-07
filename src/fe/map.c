@@ -395,6 +395,10 @@ else {
 }
 
 // *****************************************************************
+// Called by gm_unknown().
+// Decriments expected_callbacks variable ((*(int *)the_context)--),
+// which is a network health monitor for the FE software.
+// *****************************************************************
 static void
 my_send_callback (struct gm_port *port, void *the_context,
                   gm_status_t the_status)
@@ -418,12 +422,14 @@ my_send_callback (struct gm_port *port, void *the_context,
 
 
 // *****************************************************************
+// Initialize the myrinet connection to Framebuilder.
 int myriNetInit()
 {
   char receiver_nodename[64];
   int expected_messages = 0;
   unsigned long send_length;
   int ii;
+  int status;
 
   // Initialize interface
   gm_init();
@@ -493,6 +499,80 @@ int myriNetInit()
       gm_perror ("[send]", main_status);
     }
 
+  // Send message to FB requesting DMA memory location for DAQ data.
+  status = myriNetReconnect();
+  // Wait for return message from FB.
+  do{
+    status = myriNetCheckReconnect();
+  }while(status != 0);
+
+return(1);
+
+
+}
+
+// *****************************************************************
+// Cleanup the myrinet connection when code is killed.
+// *****************************************************************
+int myriNetClose()
+{
+  main_status = GM_SUCCESS;
+
+  gm_dma_free (netPort, netOutBuffer);
+  gm_dma_free (netPort, netInBuffer);
+  gm_dma_free (netPort, netDmaBuffer);
+  gm_close (netPort);
+  gm_finalize();
+
+  gm_exit (main_status);
+
+  return(0);
+
+}
+
+// *****************************************************************
+// Network health check.
+// If expected_callbacks get too high, FE will know to take
+// corrective action.
+// *****************************************************************
+int myriNetCheckCallback()
+{
+  if (expected_callbacks)
+    {
+      event = gm_receive (netPort);
+
+      switch (GM_RECV_EVENT_TYPE(event))
+        {
+        case GM_RECV_EVENT:
+        case GM_PEER_RECV_EVENT:
+        case GM_FAST_PEER_RECV_EVENT:
+          printk ("[send] Receive Event (UNEXPECTED)\n");
+
+          recv_buffer = gm_ntohp (event->recv.buffer);
+          size = (unsigned int)gm_ntoh_u8 (event->recv.size);
+          gm_provide_receive_buffer (netPort, recv_buffer, size,
+                                     GM_DAQ_PRIORITY);
+          main_status = GM_FAILURE; /* Unexpected incoming message */
+
+        case GM_NO_RECV_EVENT:
+          break;
+
+        default:
+          gm_unknown (netPort, event);  /* gm_unknown calls the callback */
+	}
+   }
+  return(expected_callbacks);
+
+}
+
+// *****************************************************************
+// Send a connection message to the Framebuilder requesting its
+// DMA memory location for the writing of DAQ data.
+// *****************************************************************
+int myriNetReconnect()
+{
+  unsigned long send_length;
+
   daqSendMessage = (daqMessage *)netOutBuffer;
   sprintf (daqSendMessage->message, "STT");
   daqSendMessage->dcuId = 0;
@@ -500,8 +580,6 @@ int myriNetInit()
   daqSendMessage->fileCrc = 0x3879d7b;
   daqSendMessage->dataBlockSize = GM_DAQ_XFER_BYTE;
 
-  /*  Now send a regular message, which will signal the receiver to look at
-      its directed-send buffer                                              */
   send_length = (unsigned long) sizeof(*daqSendMessage) + 1;
   gm_send_with_callback (netPort,
                          netOutBuffer,
@@ -512,11 +590,21 @@ int myriNetInit()
                          GM_PORT_NUM_RECV,
                          my_send_callback,
                          &expected_callbacks);
-  expected_callbacks = 1;
-  expected_messages = 1;
+  expected_callbacks ++;
+  return(expected_callbacks);
+}
 
-  while (expected_messages)
-    {
+// *****************************************************************
+// Check if the connection request message has been received.
+// Returns (0) if success, (-1) if fail.
+// *****************************************************************
+int myriNetCheckReconnect()
+{
+
+int eMessage;
+
+  eMessage = -1;
+  int ii;
 
       event = gm_receive (netPort);
       recv_length = gm_ntoh_u32 (event->recv.length);
@@ -549,8 +637,7 @@ int myriNetInit()
                          main_status);
             }
 
-          expected_messages--;
-printk("Received node id from rcvr\n");
+          eMessage = 0;
 
           /* Return the buffer for reuse */
 
@@ -566,72 +653,21 @@ printk("Received node id from rcvr\n");
         default:
           gm_unknown (netPort, event);  /* gm_unknown calls the callback */
         }
-    } /* while */
-
-
-return(1);
-
-
+  return(eMessage);
 }
+
 
 // *****************************************************************
-int myriNetClose()
-{
-  main_status = GM_SUCCESS;
-
-  gm_dma_free (netPort, netOutBuffer);
-  gm_dma_free (netPort, netInBuffer);
-  gm_dma_free (netPort, netDmaBuffer);
-  gm_close (netPort);
-  gm_finalize();
-
-  gm_exit (main_status);
-
-  return(0);
-
-}
-
-// *****************************************************************
-int myriNetCheckCallback()
-{
-  if (expected_callbacks)
-    {
-      event = gm_receive (netPort);
-
-      switch (GM_RECV_EVENT_TYPE(event))
-        {
-        case GM_RECV_EVENT:
-        case GM_PEER_RECV_EVENT:
-        case GM_FAST_PEER_RECV_EVENT:
-          printk ("[send] Receive Event (UNEXPECTED)\n");
-          main_status = GM_FAILURE; /* Unexpected incoming message */
-
-        case GM_NO_RECV_EVENT:
-          break;
-
-        default:
-          gm_unknown (netPort, event);  /* gm_unknown calls the callback */
-	}
-   }
-  return(0);
-
-}
-
-
-
+// Send a 1/256 sec block of data from FE to DAQ Framebuilder.
 // *****************************************************************
 int myriNetDaqSend(int cycle, int subCycle, unsigned int fileCrc, char *dataBuffer)
 {
 
   unsigned int *daqDataBuffer;
   int send_length;
-  int ii,kk;
+  int kk;
 
-  sprintf (daqSendMessage->message, "DAT");
-  daqSendMessage->cycle = cycle;
-  daqSendMessage->offset = subCycle;
-  daqSendMessage->fileCrc = fileCrc;
-  daqSendMessage->dataCount = GM_DAQ_XFER_BYTE;
+  // Load data into xmit buffer from daqLib buffer.
   daqSendData = (daqData *)netDmaBuffer;
   daqDataBuffer = (unsigned int *)dataBuffer;
   daqDataBuffer += subCycle * GM_DAQ_XFER_SIZE;
@@ -640,6 +676,8 @@ int myriNetDaqSend(int cycle, int subCycle, unsigned int fileCrc, char *dataBuff
 	daqSendData->data[kk] = *daqDataBuffer;
 	daqDataBuffer ++;
   }
+
+  // Send data directly to designated memory space in Framebuilder.
   gm_directed_send_with_callback (netPort,
                                   netDmaBuffer,
                                   (gm_remote_ptr_t) (directed_send_subaddr[subCycle] + 65536 * cycle),
@@ -653,9 +691,13 @@ int myriNetDaqSend(int cycle, int subCycle, unsigned int fileCrc, char *dataBuff
   expected_callbacks++;
 
 
-  /*  Now send a regular message, which will signal the receiver to look at
-      its directed-send buffer                                              */
+// Once every 1/16 second, send a message to signal FB that data is ready.
 if(subCycle == 15) {
+  sprintf (daqSendMessage->message, "DAT");
+  daqSendMessage->cycle = cycle;
+  daqSendMessage->offset = subCycle;
+  daqSendMessage->fileCrc = fileCrc;
+  daqSendMessage->dataCount = GM_DAQ_XFER_BYTE;
   send_length = (unsigned long) sizeof(*daqSendMessage) + 1;
   gm_send_with_callback (netPort,
                          netOutBuffer,
