@@ -67,7 +67,7 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.1 2005/11/04 01:44:11 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.2 2005/11/08 22:34:38 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024
 #define DAQ_2K_SAMPLE_SIZE	128
@@ -119,7 +119,8 @@ int daqWrite(int flag,
 		     DAQ_RANGE daqRange,
 		     int sysRate,
 		     float *pFloatData[],
-		     FILT_MOD *dspPtr[])
+		     FILT_MOD *dspPtr[],
+		     int netStatus)
 {
 int ii,jj;
 int status;
@@ -234,6 +235,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     /* Set up pointer to DAQ IPC area for passing status info to DAQ */
 
     crcLength = 0;
+printf("daqLib DCU_ID = %d\n",dcuId);
 
     /* Set up pointer to DAQ configuration information on RFM network */
     pInfo = (DAQ_INFO_BLOCK *)(_epics_shm + DAQ_INFO_ADDRESS + (dcuId * sizeof(DAQ_INFO_BLOCK)));
@@ -555,13 +557,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     } /* end swing buffer write loop */
 
 
-  /* Write DAQ data to the RFM network */
-  if(!daqWaitCycle)
-  {
-	status = myriNetDaqSend(daqBlockNum, daqWriteCycle, fileCrc, pReadBuffer);
-	daqWriteCycle = (daqWriteCycle + 1) % 16;
-  }
-
   if(!xferDone)
   {
     /* Do CRC check sum calculation */
@@ -571,18 +566,26 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
     xferLength -= xferSize;
   }
+  if(daqSlot == (sysRate - 1))
+  /* Done with 1/16 second data block */
+  {
+
+      /* Complete CRC checksum calc and send to ipc area */
+      crcTest = crc_len(crcLength, crcTest);
+  }
+
+  /* Write DAQ data to the RFM network */
+  if(!daqWaitCycle)
+  {
+	if(!netStatus) status = myriNetDaqSend(dcuId,daqBlockNum, daqWriteCycle, fileCrc, 
+						crcTest,crcLength,pReadBuffer);
+	daqWriteCycle = (daqWriteCycle + 1) % 16;
+  }
 }
 
     if(daqSlot == (sysRate - 1))
     /* Done with 1/16 second data block */
     {
-      /* Calc and write daq cycle to ipc area */
-      ii = daqBlockNum - 1;
-      if(ii<0) ii+=16;
-
-      /* Complete CRC checksum calc and send to ipc area */
-      crcTest = crc_len(crcLength, crcTest);
-
       /* Swap swing buffers */
       phase = (phase + 1) % 2;
       pReadBuffer = (char *)pDaqBuffer[phase];
