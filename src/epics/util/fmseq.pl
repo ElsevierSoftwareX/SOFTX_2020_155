@@ -144,6 +144,16 @@ while (<IN>) {
 	$vardb .= "    $v_efield3\n";
 	$vardb .= "    $v_efield4\n";
 	$vardb .= "}\n";
+    } elsif (substr($_,0,6) eq "DAQVAR") {
+	die "Unspecified EPICS parameters" unless $epics_specified;
+	($junk, $v_name, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
+
+	$vardb .= "grecord(${ve_type},\"%IFO%:DAQ-${v_name}\")\n";
+    } elsif (substr($_,0,5) eq "DUMMY") {
+	die "Unspecified EPICS parameters" unless $epics_specified;
+	($junk, $v_name, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
+	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%${v_name}\")\n";
+
     } elsif (substr($_,0,6) eq "MATRIX") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $m_name, $m_dims, $m_var ) = split(/\s+/, $_);
