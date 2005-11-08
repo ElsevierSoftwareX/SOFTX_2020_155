@@ -113,7 +113,7 @@ extern int myriNetInit();
 extern int myriNetClose();
 extern int myriNetCheckCallback();
 extern int myriNetDaqSend(int cycle, int subCycle, unsigned int fileCrc, char *dataBuffer);
-extern int myriNetReconnect();
+extern int myriNetReconnect(int waitReply, int dcuId);
 extern int myriNetCheckReconnect();
 
 
@@ -399,6 +399,7 @@ void *fe_start(void *arg)
   short dacData[16];
   double dWord[64];
   int dacOut[32];
+  int dcuId;
 
 
 
@@ -422,8 +423,17 @@ void *fe_start(void *arg)
 
   pLocalEpicsRfm->epicsInput.vmeReset = 0;
 
+  printf("Waiting for EPICS BURT\n");
+  do{
+	usleep(1000000);
+  }while(!pLocalEpicsRfm->epicsInput.burtRestore);
+
   /* Get all epics input data from SHM */
   getEpicsData(epicsInAddShm, epicsInAddLoc,EPICS_IN_SIZE,0);
+
+  dcuId = pLocalEpicsRfm->epicsInput.dcuId;
+  printf("DCU ID = %d\n",dcuId);
+  status = myriNetReconnect(1,dcuId);
 
   /* Initialize filter banks */
   for(ii=0;ii<MAX_MODULES;ii++){
@@ -460,7 +470,7 @@ void *fe_start(void *arg)
 
 
   // Initialize DAQ function
-  status = daqWrite(0,20,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,0);
+  status = daqWrite(0,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,0);
   if(status == -1) 
   {
     printf("DAQ init failed -- exiting\n");
@@ -763,7 +773,7 @@ void *fe_start(void *arg)
   	if(firstTime != 0) 
 	{
 		// Call daqLib
-		status = daqWrite(1,20,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2);
+		status = daqWrite(1,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2);
 		if(!attemptingReconnect)
 		{
 			// Check and clear network callbacks.
@@ -778,7 +788,7 @@ void *fe_start(void *arg)
 				{
 					attemptingReconnect = 2;
 					// Send a reconnect request to FB.
-					status = myriNetReconnect();
+					status = myriNetReconnect(0,dcuId);
 					netRestored = 0;
 					printf("Net fail - recon try\n");
 				}
