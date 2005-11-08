@@ -58,6 +58,9 @@ assign chnCnt to "{ifo}:DAQ-{daqsys}_CHAN_CNT";
 int dataSize;
 assign dataSize to "{ifo}:DAQ-{daqsys}_TOTAL";
 
+int dcuId;
+assign dcuId to "{ifo}:DAQ-{daqsys}_DCU_ID";
+
 
 %DECL2%
 
@@ -181,7 +184,6 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 %% static DAQ_INFO_BLOCK *info;
 %% static void *base;
 %% static DAQ_INFO_BLOCK infoTmp;
-%% static int daqsysnum;
 %% static char site[160];
 %% static char ifo[160];
 %% static char daqsys[160];
@@ -687,15 +689,17 @@ state daqInit
 {
   when()
     {
-        daqsysnum = atoi(macValueGet("sysnum"));
-%%      if (daqsysnum < 0 || daqsysnum >= DCU_COUNT) {
-%%        fprintf(stderr, "Invalid system number %d\n", daqsysnum);
+        dcuId = atoi(macValueGet("sysnum"));
+%%      if (dcuId < 0 || dcuId >= DCU_COUNT) {
+%%        fprintf(stderr, "Invalid system number %d\n", dcuId);
 %%        exit(1);
 %%      }
         strcpy(site, macValueGet("site"));
         strcpy(ifo, macValueGet("ifo"));
         strcpy(daqsys, macValueGet("daqsys"));
-%%      info = ((DAQ_INFO_BLOCK *)((base = (volatile void *)findRfmCard(0)) + DAQ_INFO_ADDRESS)) + daqsysnum;
+%%      info = ((DAQ_INFO_BLOCK *)((base = (volatile void *)findRfmCard(0)) + DAQ_INFO_ADDRESS)) + dcuId;
+	pvPut(dcuId);
+%%    rfm_assign(pEpics->epicsInput.dcuId, dcuId);
 %%      printf("daq info at 0x%lx\n",(long)info);
 %%      memset(&infoTmp, 0, sizeof(infoTmp));
 %%      info->reconfig = 0;
