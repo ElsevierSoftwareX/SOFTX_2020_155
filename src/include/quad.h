@@ -1,5 +1,5 @@
 
-#define EPICS_IN_SIZE	184
+#define EPICS_IN_SIZE	186
 #define EPICS_OUT_SIZE	4
 
 /* Assign filter names to filter number */
@@ -110,6 +110,8 @@ typedef struct CDS_EPICS_IN {
 	float l2InputMatrix[4][3];
 	float l3OutputMatrix[3][5];
 	float vmeReset;
+	int burtRestore;
+	int dcuId;
 } CDS_EPICS_IN;
 
 typedef struct CDS_EPICS_OUT {
