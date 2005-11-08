@@ -107,3 +107,8 @@ MATRIX Q1_L3_INMTRX_ 3x5 epicsInput.l3OutputMatrix
 
 MOMENTARY VME_RESET epicsInput.vmeReset int ai 0
 OUTVARIABLE CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,"60") field(LOPR,"0")
+DAQVAR QUAD_LOAD_CONFIG int ai 0
+DAQVAR QUAD_CHAN_CNT int ai 0
+DAQVAR QUAD_TOTAL int ai 0
+DAQVAR QUAD_MSG int ai 0
+INVARIABLE BURT_RESTORE epicsInput.burtRestore int ai 0
