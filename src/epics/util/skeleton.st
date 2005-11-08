@@ -8,6 +8,9 @@ program %SEQUENCER_NAME%
 %% #include <math.h>
 %% #include <unistd.h>
 %% #include <fpvalidate.h>
+%% #include <daqmap.h>
+%% #include <param.h>
+
 %% #define INLINE
 #if defined(RFM_EPICS)
 %% #define SERVO16K
@@ -42,6 +45,19 @@ assign msg to "{ifo}:{sys}{subsys}MSG";
 
 int allNewCoeff;
 assign allNewCoeff to "{ifo}:{sys}{subsys}LOAD_NEW_COEFF";
+
+int reload;
+assign reload to "{ifo}:DAQ-{daqsys}_LOAD_CONFIG";
+
+int dcmsg;
+assign dcmsg to "{ifo}:DAQ-{daqsys}_MSG";
+
+int chnCnt;
+assign chnCnt to "{ifo}:DAQ-{daqsys}_CHAN_CNT";
+
+int dataSize;
+assign dataSize to "{ifo}:DAQ-{daqsys}_TOTAL";
+
 
 %DECL2%
 
@@ -161,6 +177,27 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
        pvPut(labels8[ii]);\
        strcpy(labels9[ii],pVmeCoeff->vmeCoeffs[ii].filtName[9]);\
        pvPut(labels9[ii]);
+
+%% static DAQ_INFO_BLOCK *info;
+%% static void *base;
+%% static DAQ_INFO_BLOCK infoTmp;
+%% static int daqsysnum;
+%% static char site[160];
+%% static char ifo[160];
+%% static char daqsys[160];
+
+%% static void copy_info() {
+%%   int i;
+%%   for (i = 0; i < infoTmp.numChans; i++) {
+%%     info -> tp [i].tpnum = infoTmp.tp [i].tpnum;
+%%     info -> tp [i].dataType = infoTmp.tp [i].dataType;
+%%     info -> tp [i].dataRate = infoTmp.tp [i].dataRate;
+%%     info -> tp [i].dataGain = infoTmp.tp [i].dataGain;
+%%   }
+%%   info -> configFileCRC = infoTmp.configFileCRC;
+%%   info->numChans = infoTmp.numChans;
+%% }
+
 
 ss monitorFilt{
  
@@ -302,16 +339,12 @@ state init
     pvPut(allNewCoeff);
 
 %% }
-  } state monScreen
+  } state daqInit
 }
 
 state monScreen{
 
-#if defined HEPI
-  when(delay(.4)){
-#else
   when(delay(.2)){
-#endif
 %% int ii, jj;	
 
    /* Coefficient update request */	
@@ -648,6 +681,81 @@ state monScreen{
 
 %DECL4%
 
-  }state monScreen
+  }state daqProcess
 }
+state daqInit
+{
+  when()
+    {
+        daqsysnum = atoi(macValueGet("sysnum"));
+%%      if (daqsysnum < 0 || daqsysnum >= DCU_COUNT) {
+%%        fprintf(stderr, "Invalid system number %d\n", daqsysnum);
+%%        exit(1);
+%%      }
+        strcpy(site, macValueGet("site"));
+        strcpy(ifo, macValueGet("ifo"));
+        strcpy(daqsys, macValueGet("daqsys"));
+%%      info = ((DAQ_INFO_BLOCK *)((base = (volatile void *)findRfmCard(0)) + DAQ_INFO_ADDRESS)) + daqsysnum;
+%%      printf("daq info at 0x%lx\n",(long)info);
+%%      memset(&infoTmp, 0, sizeof(infoTmp));
+%%      info->reconfig = 0;
+%%      if (loadDaqConfigFile(&infoTmp, site, ifo, daqsys)) {
+%%         copy_info();
+%%         printf("%s%s daqConfig info is at rfm offset 0x%x\n", ifo, daqsys, ((char *)info) - ((char *)base));
+%%         info -> reconfig = 1;
+%%         dcmsg = infoTmp.configFileCRC;
+%%         chnCnt = infoTmp.numChans;
+%%         dataSize = 0;
+%%         { int i;
+%%              for(i=0; i < infoTmp.numChans; i++) {
+%%                      dataSize += infoTmp.tp[i].dataRate * DAQ_DATA_TYPE_SIZE(infoTmp.tp[i].dataType);
+%%              }
+%%         }
+%%         dataSize /= 1024;
+%%      } else {
+%%         dcmsg = 0xffffffff;
+%%         chnCnt = 0;
+%%         dataSize = 0;
+%%      }
+        pvPut(dcmsg);
+        pvPut(chnCnt);
+        pvPut(dataSize);
+    } state monScreen
+}
+state daqProcess
+{
+  when()
+    {
+        pvGet(reload);
+        if (reload)
+%%        {
+%%          info -> reconfig = 0;
+%%          if (loadDaqConfigFile(&infoTmp, site, ifo, daqsys)) {
+%%            copy_info();
+%%            printf("%s%s daqConfig info is at rfm offset 0x%x\n", ifo, daqsys, ((char *)info) - ((char *)base))
+;
+%%            info -> reconfig = 1;
+%%            dcmsg = infoTmp.configFileCRC;
+%%            chnCnt = infoTmp.numChans;
+%%            dataSize = 0;
+%%            { int i;
+%%              for(i=0; i < infoTmp.numChans; i++) {
+%%                      dataSize += infoTmp.tp[i].dataRate * DAQ_DATA_TYPE_SIZE(infoTmp.tp[i].dataType);
+%%              }
+%%            }
+%%            dataSize /= 1024;
+%%          } else {
+%%            dcmsg = 0xffffffff;
+%%            chnCnt = 0;
+%%            dataSize = 0;
+%%          }
+            pvPut(dcmsg);
+            pvPut(chnCnt);
+            pvPut(dataSize);
+%%        }
+        reload = 0;
+        pvPut(reload);
+    } state monScreen
+}
+
 }
