@@ -499,12 +499,14 @@ int myriNetInit()
       gm_perror ("[send]", main_status);
     }
 
+#if 0
   // Send message to FB requesting DMA memory location for DAQ data.
   status = myriNetReconnect();
   // Wait for return message from FB.
   do{
     status = myriNetCheckReconnect();
   }while(status != 0);
+#endif
 
 return(1);
 
@@ -569,13 +571,14 @@ int myriNetCheckCallback()
 // Send a connection message to the Framebuilder requesting its
 // DMA memory location for the writing of DAQ data.
 // *****************************************************************
-int myriNetReconnect()
+int myriNetReconnect(int waitReply, int dcuId)
 {
   unsigned long send_length;
+  int status;
 
   daqSendMessage = (daqMessage *)netOutBuffer;
   sprintf (daqSendMessage->message, "STT");
-  daqSendMessage->dcuId = 0;
+  daqSendMessage->dcuId = dcuId;
   daqSendMessage->channelCount = 16;
   daqSendMessage->fileCrc = 0x3879d7b;
   daqSendMessage->dataBlockSize = GM_DAQ_XFER_BYTE;
@@ -591,6 +594,13 @@ int myriNetReconnect()
                          my_send_callback,
                          &expected_callbacks);
   expected_callbacks ++;
+  if(waitReply)
+  {
+	  // Wait for return message from FB.
+	  do{
+	    status = myriNetCheckReconnect();
+	  }while(status != 0);
+  }
   return(expected_callbacks);
 }
 
@@ -660,7 +670,13 @@ int eMessage;
 // *****************************************************************
 // Send a 1/256 sec block of data from FE to DAQ Framebuilder.
 // *****************************************************************
-int myriNetDaqSend(int cycle, int subCycle, unsigned int fileCrc, char *dataBuffer)
+int myriNetDaqSend(	int dcuId, 
+			int cycle, 
+			int subCycle, 
+			unsigned int fileCrc, 
+			unsigned int blockCrc,
+			int crcSize,
+			char *dataBuffer)
 {
 
   unsigned int *daqDataBuffer;
@@ -694,10 +710,12 @@ int myriNetDaqSend(int cycle, int subCycle, unsigned int fileCrc, char *dataBuff
 // Once every 1/16 second, send a message to signal FB that data is ready.
 if(subCycle == 15) {
   sprintf (daqSendMessage->message, "DAT");
+  daqSendMessage->cycle = dcuId;
   daqSendMessage->cycle = cycle;
   daqSendMessage->offset = subCycle;
   daqSendMessage->fileCrc = fileCrc;
-  daqSendMessage->dataCount = GM_DAQ_XFER_BYTE;
+  daqSendMessage->blockCrc = blockCrc;
+  daqSendMessage->dataCount = crcSize;
   send_length = (unsigned long) sizeof(*daqSendMessage) + 1;
   gm_send_with_callback (netPort,
                          netOutBuffer,
