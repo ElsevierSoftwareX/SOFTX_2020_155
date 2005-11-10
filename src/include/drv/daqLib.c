@@ -67,7 +67,7 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.2 2005/11/08 22:34:38 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.3 2005/11/10 01:52:03 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024
 #define DAQ_2K_SAMPLE_SIZE	128
@@ -146,7 +146,9 @@ float *pFloat;
 short *pShort;
 char *pData;
 char *bufPtr;
-static unsigned long crcTest;
+static unsigned int crcTest;
+static unsigned int crcSend;
+static int crcComplete;
 static DAQ_INFO_BLOCK dataInfo;
 volatile char *pRfmData;
 volatile char *pLocalData;
@@ -211,6 +213,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     daqBlockNum = 15;
     secondCounter = 0;
     configInProgress = -1;
+    crcComplete = 0;
 
     /* Allocate memory for two local data swing buffers */
     for(ii=0;ii<2;ii++) 
@@ -455,6 +458,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 	xferLength = crcLength;
 	xferSize = xferSize1;
 	xferDone = 0;
+	crcComplete = 0;
     }
 
     /* If size of data remaining to be sent is less than calc xfer size, reduce xfer size
@@ -566,19 +570,21 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 
     xferLength -= xferSize;
   }
-  if(daqSlot == (sysRate - 1))
+    if(daqSlot == (sysRate - 1))
   /* Done with 1/16 second data block */
   {
 
       /* Complete CRC checksum calc and send to ipc area */
       crcTest = crc_len(crcLength, crcTest);
+      crcComplete = 1;
+      crcSend = crcTest;
   }
 
   /* Write DAQ data to the RFM network */
   if(!daqWaitCycle)
   {
 	if(!netStatus) status = myriNetDaqSend(dcuId,daqBlockNum, daqWriteCycle, fileCrc, 
-						crcTest,crcLength,pReadBuffer);
+						crcSend,crcLength,pReadBuffer);
 	daqWriteCycle = (daqWriteCycle + 1) % 16;
   }
 }
