@@ -710,8 +710,10 @@ int myriNetDaqSend(	int dcuId,
 // Once every 1/16 second, send a message to signal FB that data is ready.
 if(subCycle == 15) {
   sprintf (daqSendMessage->message, "DAT");
-  daqSendMessage->cycle = dcuId;
-  daqSendMessage->cycle = cycle;
+  daqSendMessage->dcuId = dcuId;
+  if(cycle > 0) 
+    daqSendMessage->cycle = cycle - 1;
+  if(cycle == 0) daqSendMessage->cycle = 15;
   daqSendMessage->offset = subCycle;
   daqSendMessage->fileCrc = fileCrc;
   daqSendMessage->blockCrc = blockCrc;
