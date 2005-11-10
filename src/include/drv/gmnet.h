@@ -60,6 +60,8 @@ typedef struct
   int dataBlockSize;
   unsigned int blockCrc;
   unsigned int dataCount;
+  int tpCount;
+  int tpNum[32];
 }daqMessage;
 
 /* Definition of data sent to Framebuilder */
