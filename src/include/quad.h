@@ -1,6 +1,6 @@
 
-#define EPICS_IN_SIZE	186
-#define EPICS_OUT_SIZE	4
+#define EPICS_IN_SIZE	187
+#define EPICS_OUT_SIZE	5
 
 /* Assign filter names to filter number */
 #define FILT_M0_SEN1    0
@@ -112,13 +112,15 @@ typedef struct CDS_EPICS_IN {
 	float vmeReset;
 	int burtRestore;
 	int dcuId;
+	int diagReset;
 } CDS_EPICS_IN;
 
 typedef struct CDS_EPICS_OUT {
-	float olSum;
-	float olPitch;
-	float olYaw;
+	int onePps;
+	int adcWaitTime;
+	int diagWord;
 	int cpuMeter;
+	int cpuMeterMax;
 } CDS_EPICS_OUT;
 
 typedef struct CDS_EPICS {
