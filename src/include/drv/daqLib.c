@@ -67,7 +67,7 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.4 2005/11/11 01:29:25 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.5 2005/11/11 03:03:57 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024
 #define DAQ_2K_SAMPLE_SIZE	128
@@ -121,7 +121,7 @@ int daqWrite(int flag,
 		     float *pFloatData[],
 		     FILT_MOD *dspPtr[],
 		     int netStatus,
-		     int gdsMonitor[][32])
+		     int gdsMonitor[])
 {
 int ii,jj;
 int status;
@@ -361,10 +361,10 @@ printf("daqLib DCU_ID = %d\n",dcuId);
     tpStart = offsetAccum;
     totalChans = dataInfo.numChans;
     printf("Start of TP data is at offset 0x%x\n",tpStart);
-    usleep(1000000);
     gdsPtr = (GDS_CNTRL_BLOCK *)(_epics_shm + DAQ_GDS_BLOCK_ADD);
     for(ii=0;ii<32;ii++) gdsPtr->tp[3][0][ii] = 0;
-    usleep(1000000);
+    gdsPtr->tp[3][0][0] = 11001;
+    gdsPtr->tp[3][0][1] = 11002;
 
 
     /* Set rfm net address to first data block to be written */
@@ -647,9 +647,11 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 		  jj -= localTable[ii].sysNum * daqRange.filtTpSize;
           	  localTable[totalChans].fmNum = jj / 3;
           	  localTable[totalChans].sigNum = jj % 3; 
+	  	  localTable[totalChans].decFactor = 1;
+      		  dataInfo.tp[totalChans].dataType = 4;
 		  offsetAccum += sysRate * 4;
 		  localTable[totalChans+1].offset = offsetAccum;
-          	  gdsMonitor[0][ii] = testVal;
+          	  gdsMonitor[ii] = testVal;
           	  gdsPtr->tp[3][1][ii] = 0;
 		  tpNum[validTp] = testVal;
 		  validTp ++;
@@ -667,7 +669,9 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 		  localTable[totalChans].sigNum = jj;
 		  offsetAccum += sysRate * 4;
 		  localTable[totalChans+1].offset = offsetAccum;
-		  gdsMonitor[0][ii] = testVal;
+	  	  localTable[totalChans].decFactor = 1;
+      		  dataInfo.tp[totalChans].dataType = 4;
+		  gdsMonitor[ii] = testVal;
 		  gdsPtr->tp[3][1][ii] = 0;
 		  tpNum[validTp] = testVal;
 		  validTp ++;
@@ -678,7 +682,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 		   lookup table.                                                                */
 		else
 		{
-		  gdsMonitor[0][ii] = 0;
+		  gdsMonitor[ii] = 0;
 		}
 
 	    }  /* End for loop */
