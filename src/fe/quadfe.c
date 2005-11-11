@@ -473,7 +473,7 @@ void *fe_start(void *arg)
 
 
   // Initialize DAQ function
-  status = daqWrite(0,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,0,gdsMon);
+  status = daqWrite(0,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,0,pLocalEpics.epicsOutput.gdsMon);
   if(status == -1) 
   {
     printf("DAQ init failed -- exiting\n");
@@ -575,7 +575,7 @@ void *fe_start(void *arg)
   	if(firstTime != 0) 
 	{
 		// Call daqLib
-		status = daqWrite(1,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2,gdsMon);
+		status = daqWrite(1,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2,pLocalEpics.epicsOutput.gdsMon);
 		if(!attemptingReconnect)
 		{
 			// Check and clear network callbacks.
