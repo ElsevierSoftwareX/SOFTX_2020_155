@@ -112,7 +112,7 @@ extern int gsaDacDma();
 extern int myriNetInit();
 extern int myriNetClose();
 extern int myriNetCheckCallback();
-extern int myriNetDaqSend(int cycle, int subCycle, unsigned int fileCrc, char *dataBuffer);
+extern int myriNetDaqSend(int cycle, int subCycle, unsigned int fileCrc, int tpCount, int tpNum[], char *dataBuffer);
 extern int myriNetReconnect(int waitReply, int dcuId);
 extern int myriNetCheckReconnect();
 
@@ -396,6 +396,7 @@ void *fe_start(void *arg)
   int dcuId;
   static int adcTime;
   static int adcHoldTime;
+  static int gdsMon[2][32];
 
 
 
@@ -430,6 +431,11 @@ void *fe_start(void *arg)
   dcuId = pLocalEpicsRfm->epicsInput.dcuId;
   printf("DCU ID = %d\n",dcuId);
   status = myriNetReconnect(1,dcuId);
+  if(status == -1)
+  {
+	printf("Net connect problem\n");
+	return(-1);
+  }
 
   /* Initialize filter banks */
   for(ii=0;ii<MAX_MODULES;ii++){
@@ -467,7 +473,7 @@ void *fe_start(void *arg)
 
 
   // Initialize DAQ function
-  status = daqWrite(0,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,0);
+  status = daqWrite(0,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,0,gdsMon);
   if(status == -1) 
   {
     printf("DAQ init failed -- exiting\n");
@@ -569,7 +575,7 @@ void *fe_start(void *arg)
   	if(firstTime != 0) 
 	{
 		// Call daqLib
-		status = daqWrite(1,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2);
+		status = daqWrite(1,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2,gdsMon);
 		if(!attemptingReconnect)
 		{
 			// Check and clear network callbacks.
