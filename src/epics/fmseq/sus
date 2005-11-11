@@ -106,9 +106,15 @@ MATRIX Q1_L2_INMTRX_ 4x3 epicsInput.l2InputMatrix
 MATRIX Q1_L3_INMTRX_ 3x5 epicsInput.l3OutputMatrix
 
 MOMENTARY VME_RESET epicsInput.vmeReset int ai 0
+MOMENTARY DIAG_RESET epicsInput.diagReset int ai 0
 OUTVARIABLE CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,"60") field(LOPR,"0")
+OUTVARIABLE CPU_METER_MAX epicsOutput.cpuMeterMax int ai 0 field(HOPR,"60") field(LOPR,"0")
+OUTVARIABLE ADC_WAIT epicsOutput.adcWaitTime int ai 0 field(HOPR,"60") field(LOPR,"0")
+OUTVARIABLE ONE_PPS epicsOutput.onePps int ai 0
+OUTVARIABLE DIAG_WORD epicsOutput.diagWord int ai 0
 DAQVAR QUAD_LOAD_CONFIG int ai 0
 DAQVAR QUAD_CHAN_CNT int ai 0
 DAQVAR QUAD_TOTAL int ai 0
 DAQVAR QUAD_MSG int ai 0
+DAQVAR QUAD_DCU_ID int ai 0
 INVARIABLE BURT_RESTORE epicsInput.burtRestore int ai 0
