@@ -6,6 +6,7 @@
 #include <drv/gsadac.h>		/* GSA DAC module defs */
 #include <drv/plx9056.h>	/* PCI interface chip for GSA products */
 #include <drv/gmnet.h>
+#include <msr.h>
 
 #define RFM_WRITE	0x0
 #define RFM_READ	0x8
@@ -19,6 +20,27 @@ char *_adc_add;				/* ADC register address space */
 char *_dac_add;				/* DAC register address space */
 volatile GSA_ADC_REG *adcPtr;		/* Ptr to ADC registers */
 volatile GSA_DAC_REG *dacPtr;		/* Ptr to DAC registers */
+int myriNetCheckReconnect();
+
+static void *netOutBuffer;
+static void *netInBuffer;
+static void *netDmaBuffer;
+gm_remote_ptr_t directed_send_addr;
+gm_remote_ptr_t directed_send_subaddr[16];
+gm_recv_event_t *event;
+
+int my_board_num = 0;                 /* Default board_num is 0 */
+gm_u32_t receiver_node_id;
+gm_u32_t receiver_global_id;
+gm_status_t main_status;
+void *recv_buffer;
+unsigned int size;
+gm_s_e_id_message_t *id_message;
+gm_u32_t recv_length;
+static int expected_callbacks = 0;
+static struct gm_port *netPort = 0;
+daqMessage *daqSendMessage;
+daqData *daqSendData;
 
 
 // *****************************************************************************
@@ -575,6 +597,8 @@ int myriNetReconnect(int waitReply, int dcuId)
 {
   unsigned long send_length;
   int status;
+  int cpuClock[2];
+  int tmr = 0;
 
   daqSendMessage = (daqMessage *)netOutBuffer;
   sprintf (daqSendMessage->message, "STT");
@@ -583,7 +607,7 @@ int myriNetReconnect(int waitReply, int dcuId)
   daqSendMessage->fileCrc = 0x3879d7b;
   daqSendMessage->dataBlockSize = GM_DAQ_XFER_BYTE;
 
-  send_length = (unsigned long) sizeof(*daqSendMessage) + 1;
+  send_length = (unsigned long) sizeof(*daqSendMessage);
   gm_send_with_callback (netPort,
                          netOutBuffer,
                          GM_RCV_MESSAGE_SIZE,
@@ -594,14 +618,18 @@ int myriNetReconnect(int waitReply, int dcuId)
                          my_send_callback,
                          &expected_callbacks);
   expected_callbacks ++;
+  rdtscl(cpuClock[0]);
   if(waitReply)
   {
 	  // Wait for return message from FB.
 	  do{
 	    status = myriNetCheckReconnect();
-	  }while(status != 0);
+	    rdtscl(cpuClock[1]);
+	    tmr = (cpuClock[1] - cpuClock[0])/2800;
+	  }while((status != 0) && (tmr < 2000000));
   }
-  return(expected_callbacks);
+  if(tmr >= 2000000) return(-1);
+  else return(expected_callbacks);
 }
 
 // *****************************************************************
@@ -676,6 +704,8 @@ int myriNetDaqSend(	int dcuId,
 			unsigned int fileCrc, 
 			unsigned int blockCrc,
 			int crcSize,
+			int tpCount,
+			int tpNum[],
 			char *dataBuffer)
 {
 
@@ -718,6 +748,8 @@ if(subCycle == 15) {
   daqSendMessage->fileCrc = fileCrc;
   daqSendMessage->blockCrc = blockCrc;
   daqSendMessage->dataCount = crcSize;
+  daqSendMessage->tpCount = tpCount;
+  for(kk=0;kk<20;kk++) daqSendMessage->tpNum[kk] = tpNum[kk];
   send_length = (unsigned long) sizeof(*daqSendMessage) + 1;
   gm_send_with_callback (netPort,
                          netOutBuffer,
