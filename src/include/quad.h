@@ -1,6 +1,6 @@
 
 #define EPICS_IN_SIZE	187
-#define EPICS_OUT_SIZE	5
+#define EPICS_OUT_SIZE	37
 
 /* Assign filter names to filter number */
 #define FILT_M0_SEN1    0
@@ -121,6 +121,7 @@ typedef struct CDS_EPICS_OUT {
 	int diagWord;
 	int cpuMeter;
 	int cpuMeterMax;
+	int gdsMon[32];
 } CDS_EPICS_OUT;
 
 typedef struct CDS_EPICS {
