@@ -118,3 +118,23 @@ DAQVAR QUAD_TOTAL int ai 0
 DAQVAR QUAD_MSG int ai 0
 DAQVAR QUAD_DCU_ID int ai 0
 INVARIABLE BURT_RESTORE epicsInput.burtRestore int ai 0
+OUTVARIABLE GDS_MON_00 epicsOutput.gdsMon[0] int ai 0 
+OUTVARIABLE GDS_MON_01 epicsOutput.gdsMon[1] int ai 0 
+OUTVARIABLE GDS_MON_02 epicsOutput.gdsMon[2] int ai 0 
+OUTVARIABLE GDS_MON_03 epicsOutput.gdsMon[3] int ai 0 
+OUTVARIABLE GDS_MON_04 epicsOutput.gdsMon[4] int ai 0 
+OUTVARIABLE GDS_MON_05 epicsOutput.gdsMon[5] int ai 0 
+OUTVARIABLE GDS_MON_06 epicsOutput.gdsMon[6] int ai 0 
+OUTVARIABLE GDS_MON_07 epicsOutput.gdsMon[7] int ai 0 
+OUTVARIABLE GDS_MON_08 epicsOutput.gdsMon[8] int ai 0 
+OUTVARIABLE GDS_MON_09 epicsOutput.gdsMon[9] int ai 0 
+OUTVARIABLE GDS_MON_10 epicsOutput.gdsMon[10] int ai 0 
+OUTVARIABLE GDS_MON_11 epicsOutput.gdsMon[11] int ai 0 
+OUTVARIABLE GDS_MON_12 epicsOutput.gdsMon[12] int ai 0 
+OUTVARIABLE GDS_MON_13 epicsOutput.gdsMon[13] int ai 0 
+OUTVARIABLE GDS_MON_14 epicsOutput.gdsMon[14] int ai 0 
+OUTVARIABLE GDS_MON_15 epicsOutput.gdsMon[15] int ai 0 
+OUTVARIABLE GDS_MON_16 epicsOutput.gdsMon[16] int ai 0 
+OUTVARIABLE GDS_MON_17 epicsOutput.gdsMon[17] int ai 0 
+OUTVARIABLE GDS_MON_18 epicsOutput.gdsMon[18] int ai 0 
+OUTVARIABLE GDS_MON_19 epicsOutput.gdsMon[19] int ai 0 
