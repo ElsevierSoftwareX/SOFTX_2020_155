@@ -67,7 +67,7 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.3 2005/11/10 01:52:03 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.4 2005/11/11 01:29:25 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024
 #define DAQ_2K_SAMPLE_SIZE	128
@@ -120,7 +120,8 @@ int daqWrite(int flag,
 		     int sysRate,
 		     float *pFloatData[],
 		     FILT_MOD *dspPtr[],
-		     int netStatus)
+		     int netStatus,
+		     int gdsMonitor[][32])
 {
 int ii,jj;
 int status;
@@ -156,9 +157,15 @@ static UINT32 fileCrc;
 static int secondCounter;
 int decSlot;
 int offsetAccum;
+static int tpStart;
 static int daqReconfig;
 static int configInProgress;
 unsigned int *pXfer[2];
+static volatile GDS_CNTRL_BLOCK *gdsPtr;
+int testVal;
+static int validTp;
+static int tpNum[20];
+static int totalChans;
 
 #ifdef DAQ_DEC_FILTER
 /* 6th order eliptic cutoff at 128 Hz, 80 db 
@@ -351,6 +358,14 @@ printf("daqLib DCU_ID = %d\n",dcuId);
       }
     }
 
+    tpStart = offsetAccum;
+    totalChans = dataInfo.numChans;
+    printf("Start of TP data is at offset 0x%x\n",tpStart);
+    usleep(1000000);
+    gdsPtr = (GDS_CNTRL_BLOCK *)(_epics_shm + DAQ_GDS_BLOCK_ADD);
+    for(ii=0;ii<32;ii++) gdsPtr->tp[3][0][ii] = 0;
+    usleep(1000000);
+
 
     /* Set rfm net address to first data block to be written */
    daqWaitCycle = -1;
@@ -471,7 +486,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 
 
     /* Write data into local swing buffer */
-    for(ii=0;ii<dataInfo.numChans;ii++)
+    for(ii=0;ii<totalChans;ii++)
     {
 
       /* Read in the data to a local variable, either from a FM TP or other TP */
@@ -584,7 +599,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
   if(!daqWaitCycle)
   {
 	if(!netStatus) status = myriNetDaqSend(dcuId,daqBlockNum, daqWriteCycle, fileCrc, 
-						crcSend,crcLength,pReadBuffer);
+						crcSend,crcLength,validTp,tpNum,pReadBuffer);
 	daqWriteCycle = (daqWriteCycle + 1) % 16;
   }
 }
@@ -609,8 +624,67 @@ printf("daqLib DCU_ID = %d\n",dcuId);
       {
 	configInProgress = -1;
       }
-      if(DAQ_TEST) secondCounter = (secondCounter + 1) % 32;
-    }
+      // Check for new TP
+      if(daqBlockNum == 0)
+      {
+ 	totalChans = dataInfo.numChans;
+	offsetAccum = tpStart;
+	validTp = 0;
+	for(ii=0;ii<20;ii++)
+	{
+		/* Get TP number from shared memory */
+		testVal = gdsPtr->tp[3][0][ii];
+
+		/* Check if the TP selection is valid for this front end's filter module TP
+		   If it is, load the local table with the proper lookup values to find the
+		   signal and clear the TP status in shared mem.                           */
+        	if((testVal >= daqRange.filtTpMin) &&
+           	   (testVal < daqRange.filtTpMax))
+        	{
+		  jj = dataInfo.tp[ii].tpnum - daqRange.filtTpMin;
+		  localTable[totalChans].type = 0;
+          	  localTable[totalChans].sysNum = jj / daqRange.filtTpSize;
+		  jj -= localTable[ii].sysNum * daqRange.filtTpSize;
+          	  localTable[totalChans].fmNum = jj / 3;
+          	  localTable[totalChans].sigNum = jj % 3; 
+		  offsetAccum += sysRate * 4;
+		  localTable[totalChans+1].offset = offsetAccum;
+          	  gdsMonitor[0][ii] = testVal;
+          	  gdsPtr->tp[3][1][ii] = 0;
+		  tpNum[validTp] = testVal;
+		  validTp ++;
+		  totalChans ++;
+        	}
+
+		/* Check if the TP selection is valid for other front end TP signals.
+		   If it is, load the local table with the proper lookup values to find the
+		   signal and clear the TP status in RFM.                                       */
+		else if( (testVal >= daqRange.xTpMin) &&
+			 (testVal < daqRange.xTpMax))
+		{
+	 	  jj = dataInfo.tp[ii].tpnum - daqRange.xTpMin;
+		  localTable[totalChans].type = 1;
+		  localTable[totalChans].sigNum = jj;
+		  offsetAccum += sysRate * 4;
+		  localTable[totalChans+1].offset = offsetAccum;
+		  gdsMonitor[0][ii] = testVal;
+		  gdsPtr->tp[3][1][ii] = 0;
+		  tpNum[validTp] = testVal;
+		  validTp ++;
+		  totalChans ++;
+		}
+
+		/* If this TP select is not valid for this front end, deselect it in the local
+		   lookup table.                                                                */
+		else
+		{
+		  gdsMonitor[0][ii] = 0;
+		}
+
+	    }  /* End for loop */
+      } /* End normal check for new TP numbers */
+
+    } /* End done 16Hz Cycle */
 
   } /* End case write */
   return(dataInfo.numChans);
