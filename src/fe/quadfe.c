@@ -1,44 +1,12 @@
 /*----------------------------------------------------------------------*/
 /*                                                                      */
-/* Module Name: lsc.c                                                   */
-/*                                                                      */
-/* Module Description: LSC frontend code, with Lock Acq. incorp.        */
-/*                                                                      */
-/* Module Arguments:    Code started by 'sp lsc_start'			*/
-/*                                                                      */
-/* Revision History:                                                    */
-/* Rel   Date    Engineer   Comments                                    */
-/* 1.0   16Apr02 R. Bork    Initial installation test release. 		*/
-/*                                                                      */
-/* Documentation References:                                            */
-/*      Man Pages:                                                      */
-/*      References:                                                     */
-/*                                                                      */
-/* Author Information:                                                  */
-/*      Name          Telephone    Fax          e-mail                  */
-/*      Rolf Bork   . (626)3953182 (626)5770424 rolf@ligo.caltech.edu   */
-/*                                                                      */
-/* Code Compilation and Runtime Specifications:                         */
-/*      Code Compiled on: Sun Ultra60  running Solaris2.8               */
-/*      Compiler Used: cc386		                                */
-/*      Runtime environment: PentiumIII 1.2G running VxWorks 5.4.1      */
-/*                                                                      */
-/* Hardware Required:
-	1) Pentium 1.2GHz CPU w/2 VMIC5579 and one VMIC5565PMC RFM modules
-	2) Three Pentek Adc/Dac Modules set to 0xff00, 0xfe00, & 0xfd00 SIO.
-	3) Clock Driver Module set to 0x9000 in SIO.
-	4) Xycom 220 Module set to 0xc800 SIO.
-	5) Latest rev Pentek clock fanout module.			*/
-/*                                                                      */
-/* Known Bugs, Limitations, Caveats:                                    */
-/*                                                                      */
 /*                      -------------------                             */
 /*                                                                      */
 /*                             LIGO                                     */
 /*                                                                      */
 /*        THE LASER INTERFEROMETER GRAVITATIONAL WAVE OBSERVATORY.      */
 /*                                                                      */
-/*                     (C) The LIGO Project, 2002.                      */
+/*                     (C) The LIGO Project, 2005.                      */
 /*                                                                      */
 /*                                                                      */
 /*                                                                      */
@@ -65,10 +33,6 @@
 #define MAX_MODULES     96      /* Max number of modules to one file 	*/
 #define INLINE  inline
 #define MMAP_SIZE (64*1024*1024 - 5000)
-#if 0
-#include "drv/vmic5579.h"
-#include "drv/vmic5565.h"
-#endif
 char *_epics_shm;
 long _pci_rfm;
 long _pci_adc;
@@ -131,13 +95,9 @@ CDS_EPICS *pLocalEpicsRfm; /* Local mem ptr to EPICS control data	*/
 CDS_EPICS *plocalEpics;   /* Local mem ptr to EPICS control data	*/
 
 
-/*  DAQS Info		*/
-short daqShort[100];
-float daqFloat[100];
-
 /* 1/16 sec cycle counters for DAQS and ISC RFM IPC		*/
 int subcycle = 0;			/* Internal cycle counter	*/ 
-unsigned long daqCycle;		/* DAQS cycle counter		*/
+unsigned int daqCycle;		/* DAQS cycle counter		*/
 
 int firstTime;
 
@@ -370,24 +330,6 @@ void *fe_start(void *arg)
   int myGmError2 = 0;
   int attemptingReconnect = 0;
   int netRestored = 0;
-#if 0
-  double fmIn;
-  double m0SenOut[6];
-  double m0DofOut[6];
-  double m0Out[6];
-  double r0SenOut[6];
-  double r0DofOut[6];
-  double r0Out[6];
-  double l1SenOut[6];
-  double l1DofOut[6];
-  double l1Out[6];
-  double l2SenOut[6];
-  double l2DofOut[6];
-  double l2Out[6];
-  double l3SenOut[6];
-  double l3DofOut[6];
-  double l3Out[6];
-#endif
   int status;
   float onePps;
   short dacData[16];
