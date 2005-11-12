@@ -67,7 +67,7 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.5 2005/11/11 03:03:57 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.6 2005/11/12 01:10:17 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024
 #define DAQ_2K_SAMPLE_SIZE	128
@@ -362,9 +362,10 @@ printf("daqLib DCU_ID = %d\n",dcuId);
     totalChans = dataInfo.numChans;
     printf("Start of TP data is at offset 0x%x\n",tpStart);
     gdsPtr = (GDS_CNTRL_BLOCK *)(_epics_shm + DAQ_GDS_BLOCK_ADD);
-    for(ii=0;ii<32;ii++) gdsPtr->tp[3][0][ii] = 0;
-    gdsPtr->tp[3][0][0] = 11001;
-    gdsPtr->tp[3][0][1] = 11002;
+    printf("gdsCntrl block is at 0x%lx\n",(long)gdsPtr);
+    for(ii=0;ii<32;ii++) gdsPtr->tp[2][0][ii] = 0;
+    // gdsPtr->tp[3][0][0] = 11001;
+    // gdsPtr->tp[3][0][1] = 11002;
 
 
     /* Set rfm net address to first data block to be written */
@@ -555,16 +556,6 @@ printf("daqLib DCU_ID = %d\n",dcuId);
       	  pFloat += decSlot;
       	}
 
-
-      	if(DAQ_TEST == ii) 
-      	{
-/*
-	  if(daqSlot < (sysRate/10)) dWord = (secondCounter/16*1000) +((ii+1)*100) / ((daqBlockNum+1)%16+1);
-	  else dWord = 0;
-*/
-	  dWord = (float)daqSlot;
-      	}
-
 	/* Write the data into the local swing buffer */
       	if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
       		/* Write data as short into swing buffer */
@@ -633,7 +624,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 	for(ii=0;ii<20;ii++)
 	{
 		/* Get TP number from shared memory */
-		testVal = gdsPtr->tp[3][0][ii];
+		testVal = gdsPtr->tp[2][0][ii];
 
 		/* Check if the TP selection is valid for this front end's filter module TP
 		   If it is, load the local table with the proper lookup values to find the
@@ -652,7 +643,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 		  offsetAccum += sysRate * 4;
 		  localTable[totalChans+1].offset = offsetAccum;
           	  gdsMonitor[ii] = testVal;
-          	  gdsPtr->tp[3][1][ii] = 0;
+          	  gdsPtr->tp[2][1][ii] = 0;
 		  tpNum[validTp] = testVal;
 		  validTp ++;
 		  totalChans ++;
@@ -672,7 +663,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 	  	  localTable[totalChans].decFactor = 1;
       		  dataInfo.tp[totalChans].dataType = 4;
 		  gdsMonitor[ii] = testVal;
-		  gdsPtr->tp[3][1][ii] = 0;
+		  gdsPtr->tp[2][1][ii] = 0;
 		  tpNum[validTp] = testVal;
 		  validTp ++;
 		  totalChans ++;
@@ -682,7 +673,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 		   lookup table.                                                                */
 		else
 		{
-		  gdsMonitor[ii] = 0;
+		  gdsMonitor[ii] = testVal;
 		}
 
 	    }  /* End for loop */
