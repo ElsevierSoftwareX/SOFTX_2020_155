@@ -397,6 +397,7 @@ void *fe_start(void *arg)
   static int adcTime;
   static int adcHoldTime;
   static int gdsMon[2][32];
+  int netRetry;
 
 
 
@@ -429,12 +430,25 @@ void *fe_start(void *arg)
   getEpicsData(epicsInAddShm, epicsInAddLoc,EPICS_IN_SIZE,0);
 
   dcuId = pLocalEpicsRfm->epicsInput.dcuId;
-  printf("DCU ID = %d\n",dcuId);
-  status = myriNetReconnect(1,dcuId);
-  if(status == -1)
+  printf("Waiting for Network connect to FB - %d\n",dcuId);
+  netRetry = 0;
+  status = myriNetReconnect(0,dcuId);
+  do{
+	usleep(10000);
+	status = myriNetCheckReconnect();
+	netRetry ++;
+  }while((status != 0) && (netRetry < 10));
+
+  if(netRetry >= 10)
   {
-	printf("Net connect problem\n");
-	return(-1);
+  	printf("Net Connect to FB FAILED!!! - %d\n",dcuId);
+	// Set error flag, which will cause daqLib to quit sending
+	// data to FB until problem is fixed.
+	myGmError2 = 1;
+	attemptingReconnect = 2;
+	netRestored = 0;
+	printf("Net fail - recon try\n");
+	pLocalEpics.epicsOutput.diagWord |= 4;
   }
 
   /* Initialize filter banks */
@@ -654,7 +668,6 @@ void *fe_start(void *arg)
 		timeHoldMax = 0;
 printf("DIAG RESET\n");
 	  }
-	  if(myGmError2 != 0) printf("Network error %d %d %d\n",myGmError2,attemptingReconnect,netRestored);
         }
 
   }
