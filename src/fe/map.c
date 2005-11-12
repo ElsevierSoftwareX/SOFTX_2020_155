@@ -315,8 +315,6 @@ long mapcard(int state, int memsize) {
   static long cpu_addr;
   static unsigned int dmaAddress;
   static unsigned int csrAddress;
-  int *dataOut;
-  int ii;
 
   if(state == 1)
   {
@@ -448,10 +446,6 @@ my_send_callback (struct gm_port *port, void *the_context,
 int myriNetInit()
 {
   char receiver_nodename[64];
-  int expected_messages = 0;
-  unsigned long send_length;
-  int ii;
-  int status;
 
   // Initialize interface
   gm_init();
