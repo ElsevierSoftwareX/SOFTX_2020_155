@@ -1,35 +1,36 @@
 #include <linux/types.h>
 #include <linux/pci.h>
+#ifdef USE_VMIC_RFM
 #include <drv/vmic5579.h>
 #include <drv/vmic5565.h>
+#endif
 #include <drv/gsaadc.h>		/* GSA ADC module defs */
 #include <drv/gsadac.h>		/* GSA DAC module defs */
 #include <drv/plx9056.h>	/* PCI interface chip for GSA products */
 #include <drv/gmnet.h>
-#include <msr.h>
+#include <drv/cdsHardware.h>
 
 #define RFM_WRITE	0x0
 #define RFM_READ	0x8
 
-volatile PLX_9056_DMA *adcDma;	/* DMA struct for GSA ADC */
-volatile PLX_9056_DMA *dacDma;	/* DMA struct for GSA DAC */
-volatile PLX_9056_INTCTRL *plxIcr;	/* Ptr to interrupt cntrl reg on PLX chip */
-dma_addr_t adc_dma_handle;		/* PCI add of ADC DMA memory */
-dma_addr_t dac_dma_handle;		/* PCI add of ADC DMA memory */
-char *_adc_add;				/* ADC register address space */
-char *_dac_add;				/* DAC register address space */
-volatile GSA_ADC_REG *adcPtr;		/* Ptr to ADC registers */
-volatile GSA_DAC_REG *dacPtr;		/* Ptr to DAC registers */
-int myriNetCheckReconnect();
+// PCI Device variables
+volatile PLX_9056_DMA *adcDma[MAX_ADC_MODULES];	/* DMA struct for GSA ADC */
+volatile PLX_9056_DMA *dacDma[MAX_DAC_MODULES];	/* DMA struct for GSA DAC */
+volatile PLX_9056_INTCTRL *plxIcr;		/* Ptr to interrupt cntrl reg on PLX chip */
+dma_addr_t adc_dma_handle[MAX_ADC_MODULES];	/* PCI add of ADC DMA memory */
+dma_addr_t dac_dma_handle[MAX_DAC_MODULES];	/* PCI add of ADC DMA memory */
+volatile GSA_ADC_REG *adcPtr[MAX_ADC_MODULES];	/* Ptr to ADC registers */
+volatile GSA_DAC_REG *dacPtr[MAX_DAC_MODULES];	/* Ptr to DAC registers */
 
-static void *netOutBuffer;
-static void *netInBuffer;
-static void *netDmaBuffer;
-gm_remote_ptr_t directed_send_addr;
-gm_remote_ptr_t directed_send_subaddr[16];
+// Myrinet Variables
+static void *netOutBuffer;			/* Buffer for outbound myrinet messages */
+static void *netInBuffer;			/* Buffer for incoming myrinet messages */
+static void *netDmaBuffer;			/* Buffer for outbound myrinet DMA messages */
+gm_remote_ptr_t directed_send_addr;		/* Pointer to FB memory block */
+gm_remote_ptr_t directed_send_subaddr[16];	/* Pointers to FB 1/16 sec memory blocks */
 gm_recv_event_t *event;
 
-int my_board_num = 0;                 /* Default board_num is 0 */
+int my_board_num = 0;                 		/* Default board_num is 0 */
 gm_u32_t receiver_node_id;
 gm_u32_t receiver_global_id;
 gm_status_t main_status;
@@ -43,6 +44,7 @@ daqMessage *daqSendMessage;
 daqData *daqSendData;
 
 
+#ifdef USE_VMIC_RFM
 // *****************************************************************************
 // Generic function to DMA data to/from VMIC5565 RFM Module
 // *****************************************************************************
@@ -65,28 +67,34 @@ int rfm5565DmaDone()
 	if((p5565Dma->DMA_CSR & 0x11) == 0x11) return (1);
 	else return(0);
 }
+#endif
 
 // *****************************************************************************
 // Function checks if DMA from ADC module is complete
 // *****************************************************************************
 int adcDmaDone()
 {
-	if(adcDma->DMA_CSR & GSAI_DMA_DONE) return (1);
+	if(adcDma[0]->DMA_CSR & GSAI_DMA_DONE) return (1);
 	else return(0);
 }
 
 // *****************************************************************************
 // Function clears ADC buffer and starts acquisition via external clock
 // *****************************************************************************
-int gsaAdcTrigger()
+int gsaAdcTrigger(int adcCount)
 {
+int ii;
 #if 0
   adcPtr->INTCR |= GSAI_ISR_ON_SAMPLE;
   plxIcr->INTCSR |= PLX_INT_ENABLE;
   adcPtr->RAG &= ~(GSAI_SAMPLE_START);
 #endif
-  adcPtr->IDBC = GSAI_CLEAR_BUFFER;
-  adcPtr->BCR |= GSAI_ENABLE_X_SYNC;
+  for(ii=0;ii<adcCount;ii++)
+  {
+	  adcPtr[ii]->IDBC = GSAI_CLEAR_BUFFER;
+	  adcPtr[ii]->BCR |= GSAI_ENABLE_X_SYNC;
+  }
+  return(0);
 }
 
 // *****************************************************************************
@@ -99,7 +107,8 @@ int gsaAdcStop()
   adcPtr->INTCR = 0;
   adcPtr->RAG |= GSAI_SAMPLE_START;
 #endif
-  adcPtr->BCR &= ~(GSAI_ENABLE_X_SYNC);
+  adcPtr[0]->BCR &= ~(GSAI_ENABLE_X_SYNC);
+  return(0);
 }
 
 
@@ -111,7 +120,7 @@ int checkAdcRdy(int count)
   int dataCount;
 
     do {
-        dataCount = adcPtr->BUF_SIZE;
+        dataCount = adcPtr[0]->BUF_SIZE;
   }while(dataCount < count);
   return(1);
 
@@ -120,31 +129,32 @@ int checkAdcRdy(int count)
 // *****************************************************************************
 // DMA 32 samples from ADC module
 // *****************************************************************************
-int gsaAdcDma(int byteCount)
+int gsaAdcDma(int modNum, int byteCount)
 {
-  adcDma->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
-  adcDma->DMA0_PCI_ADD = (int)adc_dma_handle;
-  adcDma->DMA0_LOC_ADD = GSAI_DMA_LOCAL_ADDR;
-  adcDma->DMA0_BTC = byteCount;
-  adcDma->DMA0_DESC = GSAI_DMA_TO_PCI;
-  adcDma->DMA_CSR = GSAI_DMA_START;
+  adcDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
+  adcDma[modNum]->DMA0_PCI_ADD = (int)adc_dma_handle[modNum];
+  adcDma[modNum]->DMA0_LOC_ADD = GSAI_DMA_LOCAL_ADDR;
+  adcDma[modNum]->DMA0_BTC = byteCount;
+  adcDma[modNum]->DMA0_DESC = GSAI_DMA_TO_PCI;
+  adcDma[modNum]->DMA_CSR = GSAI_DMA_START;
   return(1);
 }
 
 // *****************************************************************************
 // DMA 16 samples to DAC module
 // *****************************************************************************
-int gsaDacDma()
+int gsaDacDma(int modNum)
 {
-  dacDma->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
-  dacDma->DMA0_PCI_ADD = (int)dac_dma_handle;
-  dacDma->DMA0_LOC_ADD = 0x18;
-  dacDma->DMA0_BTC = 0x40;
-  dacDma->DMA0_DESC = 0x0;
-  dacDma->DMA_CSR = GSAI_DMA_START;
+  dacDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
+  dacDma[modNum]->DMA0_PCI_ADD = (int)dac_dma_handle[modNum];
+  dacDma[modNum]->DMA0_LOC_ADD = 0x18;
+  dacDma[modNum]->DMA0_BTC = 0x40;
+  dacDma[modNum]->DMA0_DESC = 0x0;
+  dacDma[modNum]->DMA_CSR = GSAI_DMA_START;
   return(1);
 }
 
+#if 0
 // *****************************************************************************
 // Load DAC one value at a time - not normally used
 // *****************************************************************************
@@ -158,16 +168,127 @@ int ii;
   }
   // dacPtr->BOR |= (GSAO_SFT_TRIG);
 }
+#endif
+// *****************************************************************************
+// Routine to initialize DAC modules
+// *****************************************************************************
+int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
+{
+  int devNum;
+  char *_dac_add;				/* DAC register address space */
+  static unsigned int pci_io_addr;
+
+	  devNum = pHardware->dacCount;
+          // Enable the device, PCI required
+          pci_enable_device(dacdev);
+          // Register module as Master capable, required for DMA
+          pci_set_master(dacdev);
+          // Get the PLX chip PCI address, it is advertised at address 0
+          pci_read_config_dword(dacdev,PCI_BASE_ADDRESS_0,&pci_io_addr);
+          printk("pci0 = 0x%x\n",pci_io_addr);
+          _dac_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
+          // Set up a pointer to DMA registers on PLX chip
+          dacDma[devNum] = (PLX_9056_DMA *)_dac_add;
+
+	  // Get the DAC register address
+	  pci_read_config_dword(dacdev,PCI_BASE_ADDRESS_2,&pci_io_addr);
+	  printk("dac pci2 = 0x%x\n",pci_io_addr);
+	  _dac_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
+	  printk("DAC I/O address=0x%x  0x%lx\n", pci_io_addr,(long)_dac_add);
+	  dacPtr[devNum] = (GSA_DAC_REG *)_dac_add;
+
+	  printk("DAC BCR = 0x%x\n",dacPtr[devNum]->BCR);
+	  // Reset the DAC board and wait for it to finish (3msec)
+	  dacPtr[devNum]->BCR |= GSAO_RESET;
+	
+
+	  do{
+	  }while((dacPtr[devNum]->BCR & GSAO_RESET) != 0);
+
+	  // Following setting will also enable 2s complement by clearing offset binary bit
+	  dacPtr[devNum]->BCR = (GSAO_OUT_RANGE_05 | GSAO_SIMULT_OUT);
+	  printk("DAC BCR after init = 0x%x\n",dacPtr[devNum]->BCR);
+	  printk("DAC CSR = 0x%x\n",dacPtr[devNum]->CSR);
+
+	  dacPtr[devNum]->BOR = GSAO_FIFO_16;
+	  // dacPtr->BOR |= (GSAO_ENABLE_CLK | GSAO_EXTERN_CLK);
+	  dacPtr[devNum]->BOR |= (GSAO_ENABLE_CLK);
+	  printk("DAC BOR = 0x%x\n",dacPtr[devNum]->BOR);
+	  pHardware->pci_dac[devNum] = 
+		pci_alloc_consistent(dacdev,0x200,&dac_dma_handle[devNum]);
+	  pHardware->dacCount ++;
+	  return(0);
+}
 
 // *****************************************************************************
-// Routine to find and map GSA DAC modules
+// Routine to initialize GSA ADC modules
 // *****************************************************************************
-long mapDac()
+int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
+{
+  static unsigned int pci_io_addr;
+  int devNum;
+  char *_adc_add;				/* ADC register address space */
+
+
+  devNum = pHardware->adcCount;
+  pci_enable_device(adcdev);
+  pci_set_master(adcdev);
+ // Get the PLX chip address
+  pci_read_config_dword(adcdev,PCI_BASE_ADDRESS_0,&pci_io_addr);
+  printk("pci0 = 0x%x\n",pci_io_addr);
+  _adc_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
+  adcDma[devNum] = (PLX_9056_DMA *)_adc_add;
+  if(devNum == 0) plxIcr = (PLX_9056_INTCTRL *)_adc_add;
+
+  // Get the ADC register address
+  pci_read_config_dword(adcdev,PCI_BASE_ADDRESS_2,&pci_io_addr);
+  printk("pci2 = 0x%x\n",pci_io_addr);
+  _adc_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
+  printk("ADC I/O address=0x%x  0x%lx\n", pci_io_addr,(long)_adc_add);
+  adcPtr[devNum] = (GSA_ADC_REG *)_adc_add;
+
+  printk("BCR = 0x%x\n",adcPtr[devNum]->BCR);
+  // Reset the ADC board
+  adcPtr[devNum]->BCR |= GSAI_RESET;
+  do{
+  }while((adcPtr[devNum]->BCR & GSAI_RESET) != 0);
+
+  // Write in a sync word
+  adcPtr[devNum]->SMUW = 0x0002;
+  adcPtr[devNum]->SMLW = 0x0001;
+
+  // Set ADC to 64 channel = 32 differential channels
+  adcPtr[devNum]->SSC = (GSAI_64_CHANNEL);
+  // adcPtr->SSC = GSAI_64_CHANNEL;
+  printk("SSC = 0x%x\n",adcPtr[devNum]->SSC);
+  adcPtr[devNum]->BCR |= (GSAI_FULL_DIFFERENTIAL);
+  adcPtr[devNum]->BCR &= ~(GSAI_SET_2S_COMP);
+
+  // Set sample rate close to 16384Hz
+  adcPtr[devNum]->RAG = 0x10BEC;
+  printk("RAG = 0x%x\n",adcPtr[devNum]->RAG);
+  printk("BCR = 0x%x\n",adcPtr[devNum]->BCR);
+  adcPtr[devNum]->RAG &= ~(GSAI_SAMPLE_START);
+  adcPtr[devNum]->BCR |= GSAI_AUTO_CAL;
+  do {
+  }while((adcPtr[devNum]->BCR & GSAI_AUTO_CAL) != 0);
+  adcPtr[devNum]->RAG |= GSAI_SAMPLE_START;
+  adcPtr[devNum]->IDBC = GSAI_CLEAR_BUFFER;
+  adcPtr[devNum]->SSC = (GSAI_64_CHANNEL | GSAI_EXTERNAL_SYNC);
+  pHardware->pci_adc[devNum] = pci_alloc_consistent(adcdev,0x2000,&adc_dma_handle[devNum]);
+  pHardware->adcCount ++;
+  return(0);
+
+}
+
+// *****************************************************************************
+// Routine to find and map PCI adc/dac modules
+// *****************************************************************************
+int mapPciModules(CDS_HARDWARE *pCds)
 {
   static struct pci_dev *dacdev;
-  static unsigned int pci_io_addr;
   int status;
-  static long cpu_addr;
+  int modCount = 0;
 
   dacdev = NULL;
   status = 0;
@@ -180,126 +301,22 @@ long mapDac()
                 printk("dac card on bus %d; device %d\n",
                         dacdev->bus->number,
                         dacdev->devfn);
-                status = 1;
+                status = mapDac(pCds,dacdev);
+		modCount ++;
         }
-        if(status) break;
-  }
-  if(status)
-  {
-	  // Enable the device, PCI required
-	  pci_enable_device(dacdev);
-	  // Register module as Master capable, required for DMA
-	  pci_set_master(dacdev);
-	  // Get the PLX chip PCI address, it is advertised at address 0
-	  pci_read_config_dword(dacdev,PCI_BASE_ADDRESS_0,&pci_io_addr);
-	  printk("pci0 = 0x%x\n",pci_io_addr);
-	  _dac_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
-	  // Set up a pointer to DMA registers on PLX chip
-	  dacDma = (PLX_9056_DMA *)_dac_add;
-
-	  // Get the DAC register address
-	  pci_read_config_dword(dacdev,PCI_BASE_ADDRESS_2,&pci_io_addr);
-	  printk("dac pci2 = 0x%x\n",pci_io_addr);
-	  _dac_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
-	  printk("DAC I/O address=0x%x  0x%lx\n", pci_io_addr,(long)_dac_add);
-	  dacPtr = (GSA_DAC_REG *)_dac_add;
-
-	  printk("DAC BCR = 0x%x\n",dacPtr->BCR);
-	  // Reset the DAC board and wait for it to finish (3msec)
-	  dacPtr->BCR |= GSAO_RESET;
-
-	  do{
-	  }while((dacPtr->BCR & GSAO_RESET) != 0);
-
-	  // Following setting will also enable 2s complement by clearing offset binary bit
-	  dacPtr->BCR = (GSAO_OUT_RANGE_05 | GSAO_SIMULT_OUT);
-	  printk("DAC BCR after init = 0x%x\n",dacPtr->BCR);
-	  printk("DAC CSR = 0x%x\n",dacPtr->CSR);
-
-	  dacPtr->BOR = GSAO_FIFO_16;
-	  // dacPtr->BOR |= (GSAO_ENABLE_CLK | GSAO_EXTERN_CLK);
-	  dacPtr->BOR |= (GSAO_ENABLE_CLK);
-	  printk("DAC BOR = 0x%x\n",dacPtr->BOR);
-	  cpu_addr = pci_alloc_consistent(dacdev,0x200,&dac_dma_handle);
-	  return(cpu_addr);
-  }
-  else {
-	return (-1);
-  }
-
-}
-
-// *****************************************************************************
-// Routine to find and map GSA ADC modules
-// *****************************************************************************
-long mapAdc()
-{
-  static struct pci_dev *adcdev;
-  static unsigned int pci_io_addr;
-  int status;
-  static long cpu_addr;
-
-  adcdev = NULL;
-  status = 0;
-  while((adcdev = pci_find_device(PLX_VID, PLX_TID, adcdev))) {
-	if((adcdev->subsystem_device == ADC_SS_ID) && (adcdev->subsystem_vendor == PLX_VID))
+	if((dacdev->subsystem_device == ADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
 	{
 		printk("adc card on bus %d; device %d\n",
-			adcdev->bus->number,
-			adcdev->devfn);
-		status = 1;
+			dacdev->bus->number,
+			dacdev->devfn);
+		status = mapAdc(pCds,dacdev);
+		modCount ++;
 	}
-	if(status) break;
   }
-  pci_enable_device(adcdev);
-  pci_set_master(adcdev);
- // Get the PLX chip address
-  pci_read_config_dword(adcdev,PCI_BASE_ADDRESS_0,&pci_io_addr);
-  printk("pci0 = 0x%x\n",pci_io_addr);
-  _adc_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
-  adcDma = (PLX_9056_DMA *)_adc_add;
-  plxIcr = (PLX_9056_INTCTRL *)_adc_add;
-
-  // Get the ADC register address
-  pci_read_config_dword(adcdev,PCI_BASE_ADDRESS_2,&pci_io_addr);
-  printk("pci2 = 0x%x\n",pci_io_addr);
-  _adc_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
-  printk("ADC I/O address=0x%x  0x%lx\n", pci_io_addr,(long)_adc_add);
-  adcPtr = (GSA_ADC_REG *)_adc_add;
-
-  printk("BCR = 0x%x\n",adcPtr->BCR);
-  // Reset the ADC board
-  adcPtr->BCR |= GSAI_RESET;
-  do{
-  }while((adcPtr->BCR & GSAI_RESET) != 0);
-
-  // Write in a sync word
-  adcPtr->SMUW = 0x0002;
-  adcPtr->SMLW = 0x0001;
-
-  // Set ADC to 64 channel = 32 differential channels
-  adcPtr->SSC = (GSAI_64_CHANNEL);
-  // adcPtr->SSC = GSAI_64_CHANNEL;
-  printk("SSC = 0x%x\n",adcPtr->SSC);
-  adcPtr->BCR |= (GSAI_FULL_DIFFERENTIAL);
-  adcPtr->BCR &= ~(GSAI_SET_2S_COMP);
-
-  // Set sample rate close to 16384Hz
-  adcPtr->RAG = 0x10BEC;
-  printk("RAG = 0x%x\n",adcPtr->RAG);
-  printk("BCR = 0x%x\n",adcPtr->BCR);
-  adcPtr->RAG &= ~(GSAI_SAMPLE_START);
-  adcPtr->BCR |= GSAI_AUTO_CAL;
-  do {
-  }while((adcPtr->BCR & GSAI_AUTO_CAL) != 0);
-  adcPtr->RAG |= GSAI_SAMPLE_START;
-  adcPtr->IDBC = GSAI_CLEAR_BUFFER;
-  adcPtr->SSC = (GSAI_64_CHANNEL | GSAI_EXTERNAL_SYNC);
-  cpu_addr = pci_alloc_consistent(adcdev,0x2000,&adc_dma_handle);
-  return(cpu_addr);
-
+  return(modCount);
 }
 
+#ifdef USE_VMIC_RFM
 // *****************************************************************************
 // Routine to find and map VMIC RFM modules
 // *****************************************************************************
@@ -413,6 +430,7 @@ else {
   return(0);
 }
 }
+#endif
 
 // *****************************************************************
 // Called by gm_unknown().
@@ -587,12 +605,9 @@ int myriNetCheckCallback()
 // Send a connection message to the Framebuilder requesting its
 // DMA memory location for the writing of DAQ data.
 // *****************************************************************
-int myriNetReconnect(int waitReply, int dcuId)
+int myriNetReconnect(int dcuId)
 {
   unsigned long send_length;
-  int status;
-  int cpuClock[2];
-  int tmr = 0;
 
   daqSendMessage = (daqMessage *)netOutBuffer;
   sprintf (daqSendMessage->message, "STT");
@@ -612,18 +627,7 @@ int myriNetReconnect(int waitReply, int dcuId)
                          my_send_callback,
                          &expected_callbacks);
   expected_callbacks ++;
-  rdtscl(cpuClock[0]);
-  if(waitReply)
-  {
-	  // Wait for return message from FB.
-	  do{
-	    status = myriNetCheckReconnect();
-	    rdtscl(cpuClock[1]);
-	    tmr = (cpuClock[1] - cpuClock[0])/2800;
-	  }while((status != 0) && (tmr < 2000000));
-  }
-  if(tmr >= 2000000) return(-1);
-  else return(expected_callbacks);
+  return(expected_callbacks);
 }
 
 // *****************************************************************
