@@ -67,7 +67,7 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.6 2005/11/12 01:10:17 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.7 2005/11/14 23:33:18 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024
 #define DAQ_2K_SAMPLE_SIZE	128
@@ -115,13 +115,13 @@ extern long _pci_rfm;
 /* Routine to connect and write to LIGO DAQ system       		*/
 /* ******************************************************************** */
 int daqWrite(int flag,
-		     int dcuId,
-		     DAQ_RANGE daqRange,
-		     int sysRate,
-		     float *pFloatData[],
-		     FILT_MOD *dspPtr[],
-		     int netStatus,
-		     int gdsMonitor[])
+	     int dcuId,
+	     DAQ_RANGE daqRange,
+	     int sysRate,
+	     float *pFloatData[],
+	     FILT_MOD *dspPtr[],
+	     int netStatus,
+	     int gdsMonitor[])
 {
 int ii,jj;
 int status;
@@ -134,7 +134,6 @@ static int xferLength;
 static int xferDone;
 static int crcLength;
 static char *pDaqBuffer[2];
-static char pdspace[2][1000000];
 static DAQ_LKUP_TABLE localTable[DCU_MAX_CHANNELS];
 static char *pWriteBuffer;
 static char *pReadBuffer;
@@ -167,7 +166,6 @@ static int validTp;
 static int tpNum[20];
 static int totalChans;
 
-#ifdef DAQ_DEC_FILTER
 /* 6th order eliptic cutoff at 128 Hz, 80 db 
 static double dCoeff[13] =
 	{0.00028490832406584,
@@ -206,7 +204,6 @@ static double dCoeff32x[13] =
         -1.96299410148309,    0.96594271100631,   -1.98391795425616,    1.00000000000000,
         -1.98564991068275,    0.98982555984543,   -1.89550394774336,    1.00000000000000};
 static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
-#endif
 
 
 
@@ -230,11 +227,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       printf("DAQ buffer %ld is at 0x%x\n",ii,(long long)pDaqBuffer[ii]);
     }
 
-#ifdef DAQ_DEC_FILTER
     for(ii=0;ii<DCU_MAX_CHANNELS;ii++)
 	for(jj=0;jj<MAX_HISTRY;jj++)
 	     dHistory[ii][jj] = 0.0;
-#endif
 
     /* Set pointers to two swing buffers */
     pWriteBuffer = (char *)pDaqBuffer[phase^1];
@@ -384,89 +379,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
     daqSlot = (daqSlot + 1) % sysRate;
     daqWaitCycle = (daqWaitCycle + 1) % daqWriteTime;
 
-    /* This section provides for on the fly reconfiguration of DAQ channels. It is
-	initiated by a command from DAQ system. It essentially replacates what was
-	done in the DAQ connect section of the software above.			 */
-    if(daqReconfig)
-    {
-      if((daqSlot + configInProgress * sysRate)  == 0)
-      {
-  	crcLength = 0;
-	fileCrc = pInfo->configFileCRC;
-	dataInfo.numChans = pInfo->numChans;
-      }
-      if((daqSlot + configInProgress * sysRate) < dataInfo.numChans)
-      {
-	ii = daqSlot + configInProgress * sysRate;
-	dataInfo.tp[ii].tpnum = pInfo->tp[ii].tpnum;
-        dataInfo.tp[ii].dataType = pInfo->tp[ii].dataType;
-        dataInfo.tp[ii].dataRate = pInfo->tp[ii].dataRate;
-        if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
-          crcLength += 2 * dataInfo.tp[ii].dataRate / 16;
-        else
-          crcLength += 4 * dataInfo.tp[ii].dataRate / 16;
-      }
-      if((daqSlot + configInProgress * sysRate) == dataInfo.numChans)
-      {
-	xferSize1 = crcLength/sysRate;
-    	if(((crcLength/xferSize1) > sysRate) || ((xferSize1 % 8) > 0))
-            xferSize1 = ((xferSize1/8) + 1) * 8;
-      }
-      if((daqSlot + configInProgress * sysRate) == (dataInfo.numChans + 1))
-      {
-    	localTable[0].offset = 0;
-    	offsetAccum = 0;
-	pInfo->reconfig = 0;
-
-    	for(ii=0;ii<dataInfo.numChans;ii++)
-    	{
-#ifdef DAQ_DEC_FILTER
-	      for(jj=0;jj<MAX_HISTRY;jj++) dHistory[ii][jj] = 0.0;
-#endif
-	      localTable[ii].decFactor = sysRate/(dataInfo.tp[ii].dataRate / 16);
-	      if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
-		offsetAccum += (sysRate/localTable[ii].decFactor * 2);
-	      else
-		offsetAccum += (sysRate/localTable[ii].decFactor * 4);
-	      localTable[ii+1].offset = offsetAccum;
-	      if((dataInfo.tp[ii].tpnum >= daqRange.filtTpMin) &&
-		 (dataInfo.tp[ii].tpnum < daqRange.filtTpMax))
-	      /* This is a filter module testpoint */
-	      {
-		jj = dataInfo.tp[ii].tpnum - daqRange.filtTpMin;
-		/* Mark as coming from a filter module testpoint */
-		localTable[ii].type = 0;
-		/* Mark which system filter module is in */
-		localTable[ii].sysNum = jj / daqRange.filtTpSize;
-		/* Mark which filter module within a system */
-		localTable[ii].fmNum = jj / 3;
-		/* Mark which of three testpoints to store */
-		localTable[ii].sigNum = jj % 3;
-	      }
-	      else if((dataInfo.tp[ii].tpnum >= daqRange.xTpMin) &&
-		 (dataInfo.tp[ii].tpnum < daqRange.xTpMax))
-	      /* This testpoint is not part of a filter module */
-	      {
-		jj = dataInfo.tp[ii].tpnum - daqRange.xTpMin;
-		/* Mark as a non filter module testpoint */
-		localTable[ii].type = 1;
-		/* Mark the offset into the local data buffer */
-		localTable[ii].sigNum = jj;
-	      }
-	      else
-	      {
-		printf("Invalid chan num found %d = %d\n",ii,dataInfo.tp[ii].tpnum);
-		return(-1);
-	      }
-
-      	}
-      }
-    }
-/* End DAQ Reconfiguration */
-
     /* This section of code sends data to the DAQ system */
-    else
-    {
 
     /* At start of 1/16 sec. data block, reset the xfer sizes and done bit */
     if(daqSlot == 0)
@@ -516,13 +429,11 @@ printf("daqLib DCU_ID = %d\n",dcuId);
         dWord = *(pFloatData[localTable[ii].sigNum]);
       }
 
-#ifdef DAQ_DEC_FILTER
       if(localTable[ii].decFactor == 2) dWord = iir_filter(dWord,&dCoeff2x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 4) dWord = iir_filter(dWord,&dCoeff4x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 8) dWord = iir_filter(dWord,&dCoeff8x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 16) dWord = iir_filter(dWord,&dCoeff16x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 32) dWord = iir_filter(dWord,&dCoeff32x[0],DTAPS,&dHistory[ii][0]);
-#endif
 
       if((daqSlot % localTable[ii].decFactor) == 0)
       {
@@ -593,7 +504,6 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 						crcSend,crcLength,validTp,tpNum,pReadBuffer);
 	daqWriteCycle = (daqWriteCycle + 1) % 16;
   }
-}
 
     if(daqSlot == (sysRate - 1))
     /* Done with 1/16 second data block */
@@ -606,15 +516,94 @@ printf("daqLib DCU_ID = %d\n",dcuId);
       /* Move to next RFM buffer */
       daqBlockNum = (daqBlockNum + 1) % 16;
       daqReconfig = 0;
-      if(pInfo->reconfig == 1)
+
+      // Check for reconfig request
+      if((pInfo->reconfig == 1) && (daqBlockNum == 0))
       {
-	daqReconfig = 1;
-	configInProgress ++;
-      }
-      else
-      {
-	configInProgress = -1;
-      }
+	    printf("New daq config\n");
+	    status = pInfo->numChans;
+	    pInfo->reconfig = 0;
+	    if((status > 0) && (status <= DCU_MAX_CHANNELS))
+	    {
+		    /* Get the .INI file crc checksum to pass to DAQ Framebuilders for config checking */
+		    fileCrc = pInfo->configFileCRC;
+		    /* Get the number of channels to be acquired */
+		    dataInfo.numChans = pInfo->numChans;
+		    crcLength = 0;
+		    /* Get the DAQ configuration information for all channels and calc a crc checksum length */
+		    for(ii=0;ii<dataInfo.numChans;ii++)
+		    {
+		      dataInfo.tp[ii].tpnum = pInfo->tp[ii].tpnum;
+		      dataInfo.tp[ii].dataType = pInfo->tp[ii].dataType;
+		      dataInfo.tp[ii].dataRate = pInfo->tp[ii].dataRate;
+		      if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
+			crcLength += 2 * dataInfo.tp[ii].dataRate / 16;
+		      else
+			crcLength += 4 * dataInfo.tp[ii].dataRate / 16;
+		    }
+		    /* Calculate the number of bytes to xfer on each call, based on total number
+		       of bytes to write each 1/16sec and the front end data rate (2048/16384Hz) */
+		    xferSize1 = crcLength/sysRate;
+
+		    /*  Maintain 8 byte data boundaries for writing data, particularly important
+			when DMA xfers are used on 5565 RFM modules. Note that this usually results
+			in data not being written on every 2048/16384 cycle and last data xfer
+			in a 1/16 sec block well may be shorter than the rest.                  */
+		    if(((crcLength/xferSize1) > sysRate) || ((xferSize1 % 8) > 0))
+			xferSize1 = ((xferSize1/8) + 1) * 8;
+
+		    localTable[0].offset = 0;
+		    offsetAccum = 0;
+
+		    for(ii=0;ii<dataInfo.numChans;ii++)
+		    {
+		      /* Need to develop a table of offset pointers to load data into swing buffers     */
+		      /* This is based on decimation factors and data size                              */
+		      localTable[ii].decFactor = sysRate/(dataInfo.tp[ii].dataRate / 16);
+		      if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
+			offsetAccum += (sysRate/localTable[ii].decFactor * 2);
+		      else
+			offsetAccum += (sysRate/localTable[ii].decFactor * 4);
+		      localTable[ii+1].offset = offsetAccum;
+		      /* Need to determine if data is from a filter module TP or non-FM TP */
+		      if((dataInfo.tp[ii].tpnum >= daqRange.filtTpMin) &&
+			 (dataInfo.tp[ii].tpnum < daqRange.filtTpMax))
+		      /* This is a filter module testpoint */
+		      {
+			jj = dataInfo.tp[ii].tpnum - daqRange.filtTpMin;
+			/* Mark as coming from a filter module testpoint */
+			localTable[ii].type = 0;
+			/* Mark which system filter module is in */
+			localTable[ii].sysNum = jj / daqRange.filtTpSize;
+			jj -= localTable[ii].sysNum * daqRange.filtTpSize;
+			/* Mark which filter module within a system */
+			localTable[ii].fmNum = jj / 3;
+			/* Mark which of three testpoints to store */
+			localTable[ii].sigNum = jj % 3;
+		      }
+		      else if((dataInfo.tp[ii].tpnum >= daqRange.xTpMin) &&
+			 (dataInfo.tp[ii].tpnum < daqRange.xTpMax))
+		      /* This testpoint is not part of a filter module */
+		      {
+			jj = dataInfo.tp[ii].tpnum - daqRange.xTpMin;
+			/* Mark as a non filter module testpoint */
+			localTable[ii].type = 1;
+			/* Mark the offset into the local data buffer */
+			localTable[ii].sigNum = jj;
+		      }
+		      else
+		      {
+			printf("Invalid chan num found %d = %d\n",ii,dataInfo.tp[ii].tpnum);
+			return(-1);
+		      }
+		      for(jj=0;jj<MAX_HISTRY;jj++) dHistory[ii][jj] = 0.0;
+		    }
+
+		    tpStart = offsetAccum;
+		    totalChans = dataInfo.numChans;
+
+	    }
+	}
       // Check for new TP
       if(daqBlockNum == 0)
       {
@@ -673,7 +662,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 		   lookup table.                                                                */
 		else
 		{
-		  gdsMonitor[ii] = testVal;
+		  gdsMonitor[ii] = 0;
 		}
 
 	    }  /* End for loop */
