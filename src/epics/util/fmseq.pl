@@ -105,7 +105,9 @@ while (<IN>) {
 	$vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
 
 	$vupdate .= "pvGet(evar_$v_name);\n";
+	$vupdate .= "%% if(evar_$v_name != 0) {\n";
 	$vupdate .= "rfm_assign(pEpics->${v_var}, evar_$v_name);\n";
+	$vupdate .= "%% }\n";
 	$vupdate .= "%% evar_$v_name  = $v_init;\n";
 	$vupdate .= "pvPut(evar_$v_name);\n";
 
