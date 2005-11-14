@@ -29,16 +29,16 @@
 #include <stdlib.h>
 #include <semaphore.h>
 #include <linux/slab.h>
+#include <drv/cdsHardware.h>
 #define MAX_FILTERS     960     /* Max number of filters to one file 	*/
 #define MAX_MODULES     96      /* Max number of modules to one file 	*/
 #define INLINE  inline
 #define MMAP_SIZE (64*1024*1024 - 5000)
 char *_epics_shm;
 long _pci_rfm;
-long _pci_adc;
-long _pci_dac;
 extern char *pRfmMem;
 sem_t irqsem;
+CDS_HARDWARE cdsPciModules;
 
 #include "msr.h"
 #include "fm10Gen.h"		/* CDS filter module defs and C code	*/
@@ -64,20 +64,20 @@ int rfd, wfd;
 extern long mapcard(int state, int memsize);
 extern int rfm5565dma(int rfmMemLocator, int byteCount, int direction);
 extern int rfm5565DmaDone();
-extern long gsaAdcTrigger();
+extern long gsaAdcTrigger(int);
 extern long gsaAdcStop();
-extern long mapAdc();
+// extern long mapAdc();
 extern int adcDmaDone();
 extern int checkAdcRdy(int count);
-extern int gsaAdcDma(int byteCount);
-extern long mapDac();
+extern int gsaAdcDma(int,int);
+extern int mapPciModules(CDS_HARDWARE *);
 extern void trigDac(short dacData[]);
-extern int gsaDacDma();
+extern int gsaDacDma(int);
 extern int myriNetInit();
 extern int myriNetClose();
 extern int myriNetCheckCallback();
 extern int myriNetDaqSend(int cycle, int subCycle, unsigned int fileCrc, int tpCount, int tpNum[], char *dataBuffer);
-extern int myriNetReconnect(int waitReply, int dcuId);
+extern int myriNetReconnect(int);
 extern int myriNetCheckReconnect();
 
 
@@ -148,6 +148,9 @@ unsigned int intr_handler(unsigned int irq, struct rtl_frame *regs)
          * This code is not running in a RTLinux thread but in an
          * "interrupt context".
          */
+
+        adcPtr->INTCR = 0x3;
+
 
 
         /*
@@ -338,7 +341,6 @@ void *fe_start(void *arg)
   int dcuId;
   static int adcTime;
   static int adcHoldTime;
-  static int gdsMon[2][32];
   int netRetry;
 
 
@@ -374,7 +376,7 @@ void *fe_start(void *arg)
   dcuId = pLocalEpicsRfm->epicsInput.dcuId;
   printf("Waiting for Network connect to FB - %d\n",dcuId);
   netRetry = 0;
-  status = myriNetReconnect(0,dcuId);
+  status = myriNetReconnect(dcuId);
   do{
 	usleep(10000);
 	status = myriNetCheckReconnect();
@@ -442,7 +444,7 @@ void *fe_start(void *arg)
 
   printf("entering the loop\n");
   // Trigger the ADC to start running
-  gsaAdcTrigger();
+  gsaAdcTrigger(1);
   adcHoldTime = 0;
   /*  Run in continuous loop */
   while(!vmeDone){
@@ -454,7 +456,7 @@ void *fe_start(void *arg)
 	// Read CPU clock for timing info
         rdtscl(cpuClock[0]);
 	// Start reading ADC data
-	status = gsaAdcDma(ADC_DMA_BYTES);
+	status = gsaAdcDma(0,ADC_DMA_BYTES);
     
         // Update internal cycle counters
         if(firstTime != 0)
@@ -480,7 +482,7 @@ void *fe_start(void *arg)
 	}while(!status);
 
 	// Read adc data into local variables
-	packedData = (int *)_pci_adc;
+	packedData = (int *)cdsPciModules.pci_adc[0];
 #ifdef OVERSAMPLE
 	for(jj=0;jj<8;jj++)
 	{
@@ -515,7 +517,7 @@ void *fe_start(void *arg)
 	feCode(dWord,dacOut,dspPtr[0],dspCoeff,plocalEpics);
 
 	// Check Dac output overflow and write to DMA buffer
-	pDacData = (unsigned int *)_pci_dac;
+	pDacData = (unsigned int *)cdsPciModules.pci_dac[0];
 	for(ii=0;ii<16;ii++)
 	{
 		if(dacOut[ii] > 32000) dacOut[ii] = 32000;
@@ -525,7 +527,7 @@ void *fe_start(void *arg)
 		pDacData ++;
 	}
 	// DMA out dac values
-	status = gsaDacDma();
+	status = gsaDacDma(0);
 
 	// Write daq values once we are synched to 1pps
   	if(firstTime != 0) 
@@ -537,14 +539,14 @@ void *fe_start(void *arg)
 			// Check and clear network callbacks.
 			status = myriNetCheckCallback();
 			// If callbacks pending count is high, try to fix net connection.
-			if(status > 6)
+			if(status > 4)
 			{
 				// Set error flag, which will cause daqLib to quit sending
 				// data to FB until problem is fixed.
 				myGmError2 = 1;
 				attemptingReconnect = 2;
 				// Send a reconnect request to FB.
-				status = myriNetReconnect(0,dcuId);
+				status = myriNetReconnect(dcuId);
 				netRestored = 0;
 				printf("Net fail - recon try\n");
 				pLocalEpics.epicsOutput.diagWord |= 4;
@@ -608,7 +610,7 @@ void *fe_start(void *arg)
 		pLocalEpicsRfm->epicsInput.diagReset = 0;
 		adcHoldTime = 0;
 		timeHoldMax = 0;
-printf("DIAG RESET\n");
+		printf("DIAG RESET\n");
 	  }
         }
 
@@ -620,9 +622,7 @@ printf("DIAG RESET\n");
 int main(int argc, char **argv)
 {
         pthread_attr_t attr;
-  	int ret;
  	int status;
-	char *daqMem;
 
         /*
          * Create the shared memory area.  By passing a non-zero value
@@ -639,14 +639,14 @@ int main(int argc, char **argv)
         if (_epics_shm == MAP_FAILED) {
                 printf("mmap failed for writer\n");
                 rtl_perror("mmap()");
-                return (void *)-1;
+                return (void *)(-1);
         }
 
-	printf("Initializing ADC\n");
-        _pci_adc = mapAdc();
-
-	printf("Initializing DAC\n");
-	_pci_dac = mapDac();
+	printf("Initializing PCI Modules\n");
+	status = mapPciModules(&cdsPciModules);
+	printf("%d PCI cards found\n",status);
+	printf("%d ADC cards found\n",cdsPciModules.adcCount);
+	printf("%d DAC cards found\n",cdsPciModules.dacCount);
 
 	printf("Initializing space for daqLib buffers\n");
 	_pci_rfm = (long)&daqArea[0];
