@@ -34,11 +34,10 @@
 #define MAX_MODULES     96      /* Max number of modules to one file 	*/
 #define INLINE  inline
 #define MMAP_SIZE (64*1024*1024 - 5000)
-char *_epics_shm;
-long _pci_rfm;
-extern char *pRfmMem;
-sem_t irqsem;
-CDS_HARDWARE cdsPciModules;
+char *_epics_shm;		/* Ptr to computer shared memory		*/
+long daqBuffer;			/* Address for daq dual buffers in daqLib.c	*/
+sem_t irqsem;			/* Semaphore if in IRQ mode.			*/
+CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
 
 #include "msr.h"
 #include "fm10Gen.h"		/* CDS filter module defs and C code	*/
@@ -46,39 +45,29 @@ CDS_HARDWARE cdsPciModules;
 #include "daqmap.h"		/* DAQ network layout			*/
 #include "gdsLib.h"
 #define CPURATE	2800
-#define MEM_LOCATOR	0x7
 
-#include "fpvalidate.h"	/* Valid FP number ck	*/
-#include "drv/daqLib.c"	/* DAQ connection 	*/
-#include "drv/epicsXfer.c"
-#include "./quad.c"
-#if 0
-#include "drv/gdsLib.c"	/* GDS connection 	*/
-#endif
+#include "fpvalidate.h"		/* Valid FP number ck			*/
+#include "drv/daqLib.c"		/* DAQ/GDS connection 			*/
+#include "drv/epicsXfer.c"	/* Transfers EPICS data to/from shmem	*/
+#include "./quad.c"		/* User code for quad control.		*/
 
-DAQ_RANGE daq;
+DAQ_RANGE daq;			/* Range settings for daqLib.c		*/
 
 rtl_pthread_t wthread;
 int rfd, wfd;
 
-extern long mapcard(int state, int memsize);
-extern int rfm5565dma(int rfmMemLocator, int byteCount, int direction);
-extern int rfm5565DmaDone();
-extern long gsaAdcTrigger(int);
-extern long gsaAdcStop();
-// extern long mapAdc();
-extern int adcDmaDone();
-extern int checkAdcRdy(int count);
-extern int gsaAdcDma(int,int);
-extern int mapPciModules(CDS_HARDWARE *);
-extern void trigDac(short dacData[]);
-extern int gsaDacDma(int);
-extern int myriNetInit();
-extern int myriNetClose();
-extern int myriNetCheckCallback();
-extern int myriNetDaqSend(int cycle, int subCycle, unsigned int fileCrc, int tpCount, int tpNum[], char *dataBuffer);
-extern int myriNetReconnect(int);
-extern int myriNetCheckReconnect();
+extern int mapPciModules(CDS_HARDWARE *);	/* Init routine to map adc/dac cards	*/
+extern long gsaAdcTrigger(int);			/* Starts ADC acquisition.		*/
+extern long gsaAdcStop();			/* Stops ADC acquisition.		*/
+extern int adcDmaDone();			/* Checks if ADC DMA complete.		*/
+extern int checkAdcRdy(int count);		/* Checks if ADC has samples avail.	*/
+extern int gsaAdcDma(int,int);			/* Send data to ADC via DMA.		*/
+extern int gsaDacDma(int);			/* Send data to DAC via DMA.		*/
+extern int myriNetInit();			/* Initialize myrinet card.		*/
+extern int myriNetClose();			/* Clean up myrinet on exit.		*/
+extern int myriNetCheckCallback();		/* Check for messages on myrinet.	*/
+extern int myriNetReconnect(int);		/* Make connects to FB.			*/
+extern int myriNetCheckReconnect();		/* Check FB net connected.		*/
 
 
 /* ADC/DAC overflow variables */
@@ -90,31 +79,29 @@ int ovHoldDac[2][8];
 float *testpoint[20];
 
 
-CDS_EPICS pLocalEpics;   /* Local mem ptr to EPICS control data	*/
-CDS_EPICS *pLocalEpicsRfm; /* Local mem ptr to EPICS control data	*/
-CDS_EPICS *plocalEpics;   /* Local mem ptr to EPICS control data	*/
+CDS_EPICS pLocalEpics;   	/* Local mem ptr to EPICS control data	*/
+CDS_EPICS *pLocalEpicsRfm; 	/* Local mem ptr to EPICS control data	*/
+CDS_EPICS *plocalEpics;   	/* Local mem ptr to EPICS control data	*/
 
 
 /* 1/16 sec cycle counters for DAQS and ISC RFM IPC		*/
-int subcycle = 0;			/* Internal cycle counter	*/ 
+int subcycle = 0;		/* Internal cycle counter	*/ 
 unsigned int daqCycle;		/* DAQS cycle counter		*/
 
-int firstTime;
+int firstTime;			/* Dummy var for startup sync.	*/
 
-FILT_MOD dsp;
-FILT_MOD *dspPtr[1];
-FILT_MOD *pDsp;
-COEF dspCoeffMemSpace;
-COEF *dspCoeff;
-VME_COEF *pCoeff;
-int *epicsInAddShm;
-int *epicsInAddLoc;
-int *epicsOutAddLoc;
-int *epicsOutAddShm;
-#ifdef MYTEST
-int resetCycle = 0;
-#endif
-char daqArea[0x300000];
+FILT_MOD dsp;			/* SFM structure.		*/
+FILT_MOD *dspPtr[1];		/* SFM structure pointer.	*/
+FILT_MOD *pDsp;			/* Ptr to SFM in shmem.		*/
+COEF dspCoeffMemSpace;		/* Local mem for SFM coeffs.	*/
+COEF *dspCoeff;			/* Ptr to SFM coeffs in local mem.	*/
+VME_COEF *pCoeff;		/* Ptr to SFM coeffs in shmem		*/
+int *epicsInAddShm;		/* Ptr to epics inputs in shmem		*/
+int *epicsInAddLoc;		/* Ptr to epics inputs in local mem	*/
+int *epicsOutAddLoc;		/* Ptr to epics outputs in local mem	*/
+int *epicsOutAddShm;		/* Ptr to epics outputs in shmem.	*/
+char daqArea[0x300000];		/* Space allocation for daqLib buffers	*/
+
 #ifdef OVERSAMPLE
 #define ADC_SAMPLE_COUNT	0x100
 #define ADC_DMA_BYTES		0x400
@@ -135,6 +122,9 @@ double dHistory[64][40];
 #endif
 
 #if 0
+// **************************************************************************
+// Interrupt handler if using interrupts for ADC module
+// **************************************************************************
 unsigned int intr_handler(unsigned int irq, struct rtl_frame *regs)
 {
   unsigned int status;
@@ -166,155 +156,10 @@ unsigned int intr_handler(unsigned int irq, struct rtl_frame *regs)
 }
 #endif
 
-#if 0
-
-/* Read EPICS data from RFM */
-inline void getEpicsData(int *pRfmData, int *pLocalData, int count,int reset)
-{
-  static UINT32 *rfmPtr;
-  static UINT32 *localPtr;
-  int ii;
-
-  if(reset==0)
-  {
-    rfmPtr = (UINT32 *)pRfmData;
-    localPtr = (UINT32 *)pLocalData;
-  }
-
-  for(ii=0;ii<count;ii++)
-  {
-    *localPtr = *rfmPtr;
-    localPtr ++;
-    rfmPtr ++;
-  }
-}
-
-/* Write EPICS data to RFM */
-inline void putEpicsData(int *pRfmData, int *pLocalData, int count,int reset)
-{
-  static int *rfmPtr;
-  static int *localPtr;
-  int ii;
-
-  if(reset==0)
-  {
-    rfmPtr = (int *)pRfmData;
-    localPtr = (int *)pLocalData;
-  }
-
-  for(ii=0;ii<count;ii++)
-  {
-    *rfmPtr = *localPtr;
-    localPtr ++;
-    rfmPtr ++;
-  }
-}
-
-
-
-
-/************************************************************************/
-/* TASK: updateEpics()						*/
-/*	Initiates/performs functions required on particular clock cycle	*/
-/*	counts. Due to performace reqs of LSC, do not want to do more	*/
-/* 	than one housekeeping I/O function per LSC cycle. Resulting 	*/
-/* 	update rate to/from EPICS is 16Hz.				*/
-/************************************************************************/
-inline int updateEpics(){
-  
-int ii;
-
-  ii = subcycle;
-  /* Get EPICS input variables */
-  if((ii >= 0) && (ii < (EPICS_IN_SIZE))) 
-	  getEpicsData(epicsInAddShm, epicsInAddLoc,1,ii);
-  ii -= EPICS_IN_SIZE;
-
-  /* Send EPICS output variables */
-  if((ii >= 0) && (ii < (EPICS_OUT_SIZE))) 
-	  putEpicsData(epicsOutAddShm, epicsOutAddLoc,1,ii);
-  ii -= EPICS_OUT_SIZE;
-
-  /* Check for new filter coeffs or history resets */
-  if((ii >= 0) && (ii < MAX_MODULES)) 
-	checkFiltReset(ii, &dsp, pDsp, dspCoeff, MAX_MODULES, pCoeff);
-  ii -= MAX_MODULES;
-
-  /* Get filter switch settings from EPICS */
-  if((ii >= 0) && (ii < MAX_MODULES)) 
-	dsp.inputs[ii].opSwitchE = pDsp->inputs[ii].opSwitchE;
-  ii -= MAX_MODULES;
-
-  /* Send filter module input data to EPICS */
-  if((ii >= 0) && (ii < MAX_MODULES)) 
-{
-	pDsp->data[ii].filterInput = dsp.data[ii].filterInput;
-	pDsp->data[ii].exciteInput = dsp.data[ii].exciteInput;
-}
-  ii -= MAX_MODULES;
-
-  /* Send filter module 16Hz filtered output to EPICS */
-  if((ii >= 0) && (ii < MAX_MODULES)) 
-{
-	pDsp->data[ii].output16Hz = dsp.data[ii].output16Hz;
-	pDsp->data[ii].output = dsp.data[ii].output;
-}
-  ii -= MAX_MODULES;
-
-  /* Send filter module test point output data to EPICS */
-  if((ii >= 0) && (ii < MAX_MODULES)) 
-{
-	pDsp->data[ii].testpoint = dsp.data[ii].testpoint;
-        dsp.inputs[ii].gain_ramp_time = pDsp->inputs[ii].gain_ramp_time;
-}
-  ii -= MAX_MODULES;
-
-  /* Send filter module switch settings to EPICS */
-  if((ii >= 0) && (ii < MAX_MODULES)) 
-{
-	pDsp->inputs[ii].opSwitchP = dsp.inputs[ii].opSwitchP;
-	dsp.inputs[ii].offset = pDsp->inputs[ii].offset;
-}
-  ii -= MAX_MODULES;
-
-  /* Get filter module gain settings from EPICS */
-  if((ii >= 0) && (ii < MAX_MODULES)) 
-{
-	dsp.inputs[ii].outgain = pDsp->inputs[ii].outgain;
-	dsp.inputs[ii].limiter = pDsp->inputs[ii].limiter;
-}
-  ii -= MAX_MODULES;
-
-     if (pLocalEpics.epicsInput.vmeReset) {
-	printf("VME_RESET PUSHED !!! \n");
-	gsaAdcStop();
-        return(1);
-     }
-  ii -= 1;
-
-#ifdef TODO
-  /* Check for overflow counter reset command */
-  if(ii==0) {
-	  if(pLocal_epics->overflowReset == 1)
-	  {
-		pLocal_epics->ovAccum = 0;
-	  	pLocalEpicsRfm->overflowReset = 0;
-	  }
-	if(pLocal_epics->ovAccum > 10000000) pLocal_epics->ovAccum = 0;
-  }
-#endif
-
-  return(0);
-
-}
-#endif
-
 
 /************************************************************************/
 /* TASK: fe_start()							*/
-/* This routine is used to start up the lscfe. It calls all of the 	*/
-/* initialization routines, spawns the primary servo loop code, and 	*/
-/* then exits.								*/
+/* This routine is the skeleton for all front end code			*/
 /************************************************************************/
 void *fe_start(void *arg)
 {
@@ -341,10 +186,13 @@ void *fe_start(void *arg)
   int dcuId;
   static int adcTime;
   static int adcHoldTime;
+  static int usrTime;
+  static int usrHoldTime;
   int netRetry;
   float xExc[10];
 
 
+// Do all of the initalization
 
   /* Init comms with EPICS processor */
   pEpicsComms = (RFM_FE_COMMS *)_epics_shm;
@@ -359,13 +207,16 @@ void *fe_start(void *arg)
 
   printf("Local epics 0x%lx 0x%lx 0x%lx\n",(long)plocalEpics, epicsInAddLoc, epicsOutAddLoc);
 
+  // Set pointers to SFM data buffers
   pDsp = (FILT_MOD *)(&pEpicsComms->dspSpace);
   pCoeff = (VME_COEF *)(&pEpicsComms->coeffSpace);
   dspCoeff = (COEF *)&dspCoeffMemSpace;
   dspPtr[0] = (FILT_MOD *)&dsp;
 
+  // Clear the FE reset which comes from Epics
   pLocalEpicsRfm->epicsInput.vmeReset = 0;
 
+  // Do not proceed until EPICS has had a BURT restore
   printf("Waiting for EPICS BURT\n");
   do{
 	usleep(1000000);
@@ -374,7 +225,10 @@ void *fe_start(void *arg)
   /* Get all epics input data from SHM */
   getEpicsData(epicsInAddShm, epicsInAddLoc,EPICS_IN_SIZE,0);
 
+  // Need this FE dcuId to make connection to FB
   dcuId = pLocalEpicsRfm->epicsInput.dcuId;
+
+  // Make connections to FrameBuilder
   printf("Waiting for Network connect to FB - %d\n",dcuId);
   netRetry = 0;
   status = myriNetReconnect(dcuId);
@@ -384,6 +238,8 @@ void *fe_start(void *arg)
 	netRetry ++;
   }while((status != 0) && (netRetry < 10));
 
+  // If there is no answer from FB for connection request, continue,
+  // but mark net as bad and needs retry later.
   if(netRetry >= 10)
   {
   	printf("Net Connect to FB FAILED!!! - %d\n",dcuId);
@@ -444,15 +300,21 @@ void *fe_start(void *arg)
     return(0);
   }
 
-  firstTime = 0; /* Marks that next Pentek intr will be the first */
+  // Clear the startup sync counter
+  firstTime = 0;
 
+  // Clear the code exit flag
   vmeDone = 0;
 
   printf("entering the loop\n");
   // Trigger the ADC to start running
   gsaAdcTrigger(1);
+
+  // Clear a couple of timing diags.
   adcHoldTime = 0;
-  /*  Run in continuous loop */
+  usrHoldTime = 0;
+
+  // Enter the coninuous FE control loop  **********************************************************
   while(!vmeDone){
 
   	pLocalEpics.epicsOutput.diagWord = 0;
@@ -517,10 +379,16 @@ void *fe_start(void *arg)
 	{
 		if(onePps < 1000) firstTime += 100;
 	}
+
+	// Check if front end continues to be in sync with 1pps
+	// If not, set sync error flag
 	if(onePps < 1000)  pLocalEpics.epicsOutput.onePps = clock16K;
 	if(pLocalEpics.epicsOutput.onePps > 4) pLocalEpics.epicsOutput.diagWord |= 1;
 
+	// Call the front end specific software
+        rdtscl(cpuClock[4]);
 	feCode(dWord,dacOut,dspPtr[0],dspCoeff,plocalEpics);
+        rdtscl(cpuClock[5]);
 
 	// Check Dac output overflow and write to DMA buffer
 	pDacData = (unsigned int *)cdsPciModules.pci_dac[0];
@@ -532,10 +400,11 @@ void *fe_start(void *arg)
 		*pDacData = dacData[ii] & 0xffff;
 		pDacData ++;
 	}
+
 	// DMA out dac values
 	status = gsaDacDma(0);
 
-	// Write daq values once we are synched to 1pps
+	// Write DAQ and GDS values once we are synched to 1pps
   	if(firstTime != 0) 
 	{
 		// Call daqLib
@@ -570,7 +439,7 @@ void *fe_start(void *arg)
 				printf("Net recon established\n");
 			}
 		}
-		// If net successfully reconnected, wait 4-5sec before storing xmission of DAQ data.
+		// If net successfully reconnected, wait 4-5sec before restoring xmission of DAQ data.
 		// This is done to make sure that the callback counter is cleared below the
 		// error set point.
 		if(attemptingReconnect == 1) 
@@ -597,11 +466,17 @@ void *fe_start(void *arg)
         rdtscl(cpuClock[1]);
 
 
+	// Compute max time of one cycle.
 	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
+	// Hold the max cycle time over the last 1 second
 	if(cycleTime > timeHold) timeHold = cycleTime;
+	// Hold the max cycle time since last diag reset
 	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
 	adcTime = (cpuClock[0] - cpuClock[2])/CPURATE;
 	if(adcTime > adcHoldTime) adcHoldTime = adcTime;
+	// Calc the max time of one cycle of the user code
+	usrTime = (cpuClock[5] - cpuClock[4])/CPURATE;
+	if(usrTime > usrHoldTime) usrHoldTime = usrTime;
 
         if((subcycle == 0) && (daqCycle == 15))
         {
@@ -618,6 +493,11 @@ void *fe_start(void *arg)
 		timeHoldMax = 0;
 		printf("DIAG RESET\n");
 	  }
+        }
+        if((subcycle == 2) && (daqCycle == 15))
+        {
+	  pLocalEpics.epicsOutput.diags[0] = usrHoldTime;
+	  usrHoldTime = 0;
         }
 
   }
@@ -655,16 +535,11 @@ int main(int argc, char **argv)
 	printf("%d DAC cards found\n",cdsPciModules.dacCount);
 
 	printf("Initializing space for daqLib buffers\n");
-	_pci_rfm = (long)&daqArea[0];
+	daqBuffer = (long)&daqArea[0];
  
 	printf("Initializing Network\n");
 	status = myriNetInit();
 #if 0
-	_pci_rfm = &daqArea[0];
-	pRfmMem = _epics_shm;
-
-	printf("Local IO addr ptr = 0x%lx\n",(long)pRfmMem);
-
         /* initialize the semaphore */
         sem_init (&irqsem, 1, 0);
 #endif
