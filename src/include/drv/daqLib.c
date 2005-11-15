@@ -67,7 +67,7 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.7 2005/11/14 23:33:18 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.8 2005/11/15 01:31:50 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024
 #define DAQ_2K_SAMPLE_SIZE	128
@@ -97,6 +97,11 @@ typedef struct DAQ_RANGE {
 	int filtTpSize;
 	int xTpMin;
 	int xTpMax;
+	int filtExMin;
+	int filtExMax;
+	int filtExSize;
+	int xExMin;
+	int xExMax;
 } DAQ_RANGE;
 
 
@@ -121,13 +126,15 @@ int daqWrite(int flag,
 	     float *pFloatData[],
 	     FILT_MOD *dspPtr[],
 	     int netStatus,
-	     int gdsMonitor[])
+	     int gdsMonitor[],
+	     float excSignal[])
 {
 int ii,jj;
 int status;
 float dWord;
 static long daqDataAddress[DAQ_NUM_DATA_BLOCKS];
 static int daqBlockNum;
+static int excBlockNum;
 static int xferSize;
 static int xferSize1;
 static int xferLength;
@@ -139,6 +146,7 @@ static char *pWriteBuffer;
 static char *pReadBuffer;
 static int phase;
 static int daqSlot;
+static int excSlot;
 static int daqWaitCycle;
 static int daqWriteTime;
 static int daqWriteCycle;
@@ -150,8 +158,6 @@ static unsigned int crcTest;
 static unsigned int crcSend;
 static int crcComplete;
 static DAQ_INFO_BLOCK dataInfo;
-volatile char *pRfmData;
-volatile char *pLocalData;
 static UINT32 fileCrc;
 static int secondCounter;
 int decSlot;
@@ -159,12 +165,16 @@ int offsetAccum;
 static int tpStart;
 static int daqReconfig;
 static int configInProgress;
-unsigned int *pXfer[2];
 static volatile GDS_CNTRL_BLOCK *gdsPtr;
+static volatile char *exciteDataPtr;
 int testVal;
 static int validTp;
+static int validEx;
 static int tpNum[20];
 static int totalChans;
+int *statusPtr;
+float *dataPtr;
+int exChanOffset;
 
 /* 6th order eliptic cutoff at 128 Hz, 80 db 
 static double dCoeff[13] =
@@ -215,6 +225,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     /* First block to write out is last from previous second */
     phase = 0;
     daqBlockNum = 15;
+    excBlockNum = 0;
     secondCounter = 0;
     configInProgress = -1;
     crcComplete = 0;
@@ -235,6 +246,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     pWriteBuffer = (char *)pDaqBuffer[phase^1];
     pReadBuffer = (char *)pDaqBuffer[phase];
     daqSlot = -1;
+    excSlot = 0;
 
 
     /* Set up pointer to DAQ IPC area for passing status info to DAQ */
@@ -358,9 +370,23 @@ printf("daqLib DCU_ID = %d\n",dcuId);
     printf("Start of TP data is at offset 0x%x\n",tpStart);
     gdsPtr = (GDS_CNTRL_BLOCK *)(_epics_shm + DAQ_GDS_BLOCK_ADD);
     printf("gdsCntrl block is at 0x%lx\n",(long)gdsPtr);
-    for(ii=0;ii<32;ii++) gdsPtr->tp[2][0][ii] = 0;
+    for(ii=0;ii<24;ii++) gdsPtr->tp[2][0][ii] = 0;
+    for(ii=0;ii<8;ii++) gdsPtr->tp[0][0][ii] = 0;
     // gdsPtr->tp[3][0][0] = 11001;
     // gdsPtr->tp[3][0][1] = 11002;
+    // gdsPtr->tp[0][0][0] = 1000;
+    exciteDataPtr = (char *)(_epics_shm + DATA_OFFSET_DCU(DCU_ID_EX_16K));
+    for(ii=0;ii<16;ii++)
+    {
+	statusPtr = (int *)(exciteDataPtr + ii * DAQ_DCU_BLOCK_SIZE);
+	*statusPtr = 0;
+	dataPtr = (float *)(exciteDataPtr + ii * DAQ_DCU_BLOCK_SIZE + 4);
+	for(jj=0;jj<1024;jj++)
+	{
+		*dataPtr = (float)(ii * 1000 + jj);
+		dataPtr ++;
+	}
+    }
 
 
     /* Set rfm net address to first data block to be written */
@@ -403,6 +429,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
     for(ii=0;ii<totalChans;ii++)
     {
 
+      dWord = 0;
       /* Read in the data to a local variable, either from a FM TP or other TP */
       if(localTable[ii].type == 0)
       /* Data if from filter module testpoint */
@@ -423,10 +450,15 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 	    break;
 	}
       }
-      else
+      else if(localTable[ii].type == 1)
       /* Data is from non filter module  testpoint */
       {
-        dWord = *(pFloatData[localTable[ii].sigNum]);
+	    dWord = *(pFloatData[localTable[ii].sigNum]);
+      }
+      else if(localTable[ii].type == 2)
+      /* Data is from non filter module  testpoint */
+      {
+	    dWord = dspPtr[localTable[ii].sysNum]->data[localTable[ii].fmNum].exciteInput;
       }
 
       if(localTable[ii].decFactor == 2) dWord = iir_filter(dWord,&dCoeff2x[0],DTAPS,&dHistory[ii][0]);
@@ -504,6 +536,26 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 						crcSend,crcLength,validTp,tpNum,pReadBuffer);
 	daqWriteCycle = (daqWriteCycle + 1) % 16;
   }
+
+  excSlot = (excSlot + 1) % sysRate;
+  if(validEx)
+  {
+  	for(ii=validEx;ii<totalChans;ii++)
+  	{
+		exChanOffset = localTable[ii].sigNum * 0x1004;
+		statusPtr = (int *)(exciteDataPtr + excBlockNum * DAQ_DCU_BLOCK_SIZE + exChanOffset);
+		if(*statusPtr == 0)
+		{
+			dataPtr = (float *)(exciteDataPtr + excBlockNum * DAQ_DCU_BLOCK_SIZE + exChanOffset +
+					    excSlot * 4 + 4);
+			if(localTable[ii].type == 2)
+			{
+				dspPtr[localTable[ii].sysNum]->data[localTable[ii].fmNum].exciteInput = *dataPtr;
+			}
+		}
+  	}
+  }
+  if(excSlot == (sysRate - 1)) excBlockNum = (excBlockNum + 1) % 16;
 
     if(daqSlot == (sysRate - 1))
     /* Done with 1/16 second data block */
@@ -621,7 +673,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
         	if((testVal >= daqRange.filtTpMin) &&
            	   (testVal < daqRange.filtTpMax))
         	{
-		  jj = dataInfo.tp[ii].tpnum - daqRange.filtTpMin;
+		  jj = testVal - daqRange.filtTpMin;
 		  localTable[totalChans].type = 0;
           	  localTable[totalChans].sysNum = jj / daqRange.filtTpSize;
 		  jj -= localTable[ii].sysNum * daqRange.filtTpSize;
@@ -644,7 +696,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 		else if( (testVal >= daqRange.xTpMin) &&
 			 (testVal < daqRange.xTpMax))
 		{
-	 	  jj = dataInfo.tp[ii].tpnum - daqRange.xTpMin;
+	 	  jj = testVal - daqRange.xTpMin;
 		  localTable[totalChans].type = 1;
 		  localTable[totalChans].sigNum = jj;
 		  offsetAccum += sysRate * 4;
@@ -665,7 +717,66 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 		  gdsMonitor[ii] = 0;
 		}
 
-	    }  /* End for loop */
+	}  /* End for loop */
+	validEx = 0;
+	for(ii=0;ii<8;ii++)
+	{
+		/* Get TP number from shared memory */
+		testVal = gdsPtr->tp[0][0][ii];
+
+		/* Check if the TP selection is valid for this front end's filter module TP
+		   If it is, load the local table with the proper lookup values to find the
+		   signal and clear the TP status in shared mem.                           */
+        	if((testVal >= daqRange.filtExMin) &&
+           	   (testVal < daqRange.filtExMax))
+        	{
+		  jj = testVal - daqRange.filtExMin;
+		  localTable[totalChans].type = 2;
+          	  localTable[totalChans].sysNum = jj / daqRange.filtExSize;
+          	  localTable[totalChans].fmNum = jj % daqRange.filtExSize;
+          	  localTable[totalChans].sigNum = ii; 
+	  	  localTable[totalChans].decFactor = 1;
+      		  dataInfo.tp[totalChans].dataType = 4;
+		  offsetAccum += sysRate * 4;
+		  localTable[totalChans+1].offset = offsetAccum;
+          	  gdsMonitor[ii+24] = testVal;
+          	  gdsPtr->tp[0][1][ii] = 0;
+		  tpNum[validTp] = testVal;
+		  validTp ++;
+		  if(!validEx) validEx = totalChans;
+		  totalChans ++;
+        	}
+
+		/* Check if the TP selection is valid for other front end TP signals.
+		   If it is, load the local table with the proper lookup values to find the
+		   signal and clear the TP status in RFM.                                       */
+		else if( (testVal >= daqRange.xExMin) &&
+			 (testVal < daqRange.xExMax))
+		{
+	 	  jj = testVal - daqRange.xExMin;
+		  localTable[totalChans].type = 3;
+          	  localTable[totalChans].fmNum = jj;
+		  localTable[totalChans].sigNum = ii;
+		  offsetAccum += sysRate * 4;
+		  localTable[totalChans+1].offset = offsetAccum;
+	  	  localTable[totalChans].decFactor = 1;
+      		  dataInfo.tp[totalChans].dataType = 4;
+		  gdsMonitor[ii+24] = testVal;
+		  gdsPtr->tp[0][1][ii] = 0;
+		  tpNum[validTp] = testVal;
+		  validTp ++;
+		  if(!validEx) validEx = totalChans;
+		  totalChans ++;
+		}
+
+		/* If this TP select is not valid for this front end, deselect it in the local
+		   lookup table.                                                                */
+		else
+		{
+		  gdsMonitor[ii+24] = 0;
+		}
+
+	 }  /* End for loop */
       } /* End normal check for new TP numbers */
 
     } /* End done 16Hz Cycle */
