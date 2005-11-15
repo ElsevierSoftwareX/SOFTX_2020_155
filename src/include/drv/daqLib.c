@@ -1,96 +1,78 @@
-/*----------------------------------------------------------------------*/
-/*                                                                      */
-/* Module Name: daqLib.c                                                */
-/*                                                                      */
-/* Module Description: 							*/
-/* 	This code provides two library functions used by many LIGO VME
-	front end processors:
-	1) rfm_refresh(): Sends requests to EPICS processors to update
-	   selected reflected memory locations. This is important on 
-	   startup as the FE CPU may have been powered down or otherwise
-	   disconnected from the RFM loop.
-	2) daqWrite(): Provides the front ends with the capability to
-	   receive DAQ configuration information from and write data 
-	   from any of its defined test points to the LIGO DAQ system 
-	   via the RFM networks.			
-									*/
-/*                                                                      */
-/* Module Arguments:    						*/
-/*	rfm_refresh(uint offs - byte offset from beginning of RFM memory
-		    uint size - Size in bytes to be refreshed.
-		    )
+/*----------------------------------------------------------------------------- */
+/*                                                                      	*/
+/* Module Name: daqLib.c                                                	*/
+/*                                                                      	*/
+/* Module Description: 								*/
+/*
+	This module provides the generic routines for:
+		- Writing DAQ, GDS TP and GDS EXC signals to the
+		  Framebuilder.
+		- Reading GDS EXC signals from shmem and writing them
+		  to the requested front end code exc channels.
+										*/
+/*                                                                      	*/
+/* Module Arguments:    							*/
+/*
 		
 	daqWrite(int flag - 0 to initialize or 1 to write data.
 		 int dcuId - DAQ node ID of this front end.
 		 DAQ_RANGE daqRange - struct defining front end valid
-				      test point ranges.
-		 int sysRate - Data rate of front end CPU.
-		 float *pFloatData[] - Pointer to TP data array.
+				      test point and exc ranges.
+		 int sysRate - Data rate of front end CPU / 16.
+		 float *pFloatData[] - Pointer to TP data not associated
+				       with filter modules.
 		 FILT_MOD *dspPtr[] - Point to array of FM data.
-									*/
-/*                                                                      */
-/* Documentation References:                                            */
-/*      Man Pages:                                                      */
-/*      References:                                                     */
-/*                                                                      */
-/* Author Information:                                                  */
-/*      Name          Telephone    Fax          e-mail                  */
-/*      Rolf Bork   . (626)3953182 (626)5770424 rolf@ligo.caltech.edu   */
-/*                                                                      */
-/* Code Compilation and Runtime Specifications:                         */
-/*      Code Compiled on: Sun Ultra60  running Solaris2.8               */
-/*      Compiler Used: cc386                                            */
-/*      Runtime environment: PentiumIII running VxWorks 5.4.1      	*/
-/*                                                                      */
-/* Hardware Required:
-        1) Pentium CPU w/either VMIC5579 or VMIC5565PMC RFM module	*/
-/*                                                                      */
-/* Known Bugs, Limitations, Caveats:                                    */
-/*                                                                      */
-/*                      -------------------                             */
-/*                                                                      */
-/*                             LIGO                                     */
-/*                                                                      */
-/*        THE LASER INTERFEROMETER GRAVITATIONAL WAVE OBSERVATORY.      */
-/*                                                                      */
-/*                     (C) The LIGO Project, 2004.                      */
-/*                                                                      */
-/*                                                                      */
-/*                                                                      */
-/* California Institute of Technology                                   */
-/* LIGO Project MS 18-34                                                */
-/* Pasadena CA 91125                                                    */
-/*                                                                      */
-/* Massachusetts Institute of Technology                                */
-/* LIGO Project MS 20B-145                                              */
-/* Cambridge MA 01239                                                   */
-/*                                                                      */
-/*----------------------------------------------------------------------*/
+		 int netStatus - Status of myrinet
+		 int gdsMonitor[] - Array to return values of GDS
+				    TP/EXC selections.
+		 float excSignal[] - Array to write EXC signals not
+				     associated with filter modules.
+										*/
+/*                                                                      	*/
+/*                                                                      	*/
+/*                      -------------------                             	*/
+/*                                                                      	*/
+/*                             LIGO                                     	*/
+/*                                                                      	*/
+/*        THE LASER INTERFEROMETER GRAVITATIONAL WAVE OBSERVATORY.      	*/
+/*                                                                      	*/
+/*                     (C) The LIGO Project, 2005.                      	*/
+/*                                                                      	*/
+/*                                                                      	*/
+/*                                                                      	*/
+/* 		California Institute of Technology                             	*/
+/* 		LIGO Project MS 18-34                                          	*/
+/* 		Pasadena CA 91125                                              	*/
+/*                                                                      	*/
+/* 		Massachusetts Institute of Technology                          	*/
+/* 		LIGO Project MIT NW17-161                                     	*/
+/* 		Cambridge MA 02139                                             	*/
+/*                                                                      	*/
+/*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.8 2005/11/15 01:31:50 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.9 2005/11/15 22:00:21 rolf Exp $";
 
-#define DAQ_16K_SAMPLE_SIZE	1024
-#define DAQ_2K_SAMPLE_SIZE	128
+#define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
+#define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
 #define DAQ_CONNECT		0
 #define DAQ_WRITE		1
 
-#define VMIC5565_NET    1
-#define VMIC5579_NET    0
-
-#define DTAPS	3
+#define DTAPS	3	/* Num SOS in decimation filters.	*/
 
 
 /* Structure for maintaining DAQ channel information */
 typedef struct DAQ_LKUP_TABLE {
-	int type;	
-	int sysNum;
-	int fmNum;
-	int sigNum;
-	int decFactor;
-	int offset;
+	int type;	/* 0=SFM, 1=nonSFM TP, 2= SFM EXC, 3=nonSFM EXC 	*/	
+	int sysNum;	/* If multi-dim SFM array, which one to use.		*/
+	int fmNum;	/* Filter module with signal of interest.		*/
+	int sigNum;	/* Which signal within a filter.			*/
+	int decFactor;	/* Decimation factor to use.				*/
+	int offset;	/* Offset to beginning of next channel in local buff.	*/
 }DAQ_LKUP_TABLE;
 
-/* Structure for maintaining TP channel number ranges */
+// Structure for maintaining TP channel number ranges
+// which are valid for this front end. These typically
+// come from gdsLib.h.
 typedef struct DAQ_RANGE {
 	int filtTpMin;
 	int filtTpMax;
@@ -105,14 +87,23 @@ typedef struct DAQ_RANGE {
 } DAQ_RANGE;
 
 
-int DAQ_TEST = -1;
-volatile DAQ_INFO_BLOCK *pInfo;
+volatile DAQ_INFO_BLOCK *pInfo;		/* Ptr to DAQ config in shmem.	*/
 
 /* Fast Pentium FPU SQRT command */
 inline double lsqrt (double __x) { register double __result; __asm __volatile__ ("fsqrt" : "=t" (__result) : "0" (__x)); return __result; }
 
-extern char *_epics_shm;
-extern long _pci_rfm;
+extern char *_epics_shm;		/* Ptr to EPICS shmem block		*/
+extern long daqBuffer;			/* Address of daqLib swing buffers.	*/
+// Prototype of routine in map.c used to xmit data to the Framebuilder.
+extern int myriNetDaqSend(int dcuId,
+                        int cycle,
+                        int subCycle,
+                        unsigned int fileCrc,
+                        unsigned int blockCrc,
+                        int crcSize,
+                        int tpCount,
+                        int tpNum[],
+                        char *dataBuffer);
 
 
 
@@ -129,65 +120,49 @@ int daqWrite(int flag,
 	     int gdsMonitor[],
 	     float excSignal[])
 {
-int ii,jj;
-int status;
-float dWord;
-static long daqDataAddress[DAQ_NUM_DATA_BLOCKS];
-static int daqBlockNum;
-static int excBlockNum;
-static int xferSize;
+int ii,jj;			/* Loop counters.			*/
+int status;			/* Return value from called routines.	*/
+float dWord;			/* Temp value for storage of DAQ values */
+static int daqBlockNum;		/* 1-16, tracks DAQ block to write to.	*/
+static int excBlockNum;		/* 1-16, tracks EXC block to read from.	*/
+static int xferSize;		/* Tracks remaining xfer size for crc	*/
 static int xferSize1;
 static int xferLength;
 static int xferDone;
-static int crcLength;
-static char *pDaqBuffer[2];
+static int crcLength;		/* Number of bytes in 1/16 sec data 	*/
+static char *pDaqBuffer[2];	/* Pointers to local swing buffers.	*/
 static DAQ_LKUP_TABLE localTable[DCU_MAX_CHANNELS];
-static char *pWriteBuffer;
-static char *pReadBuffer;
-static int phase;
-static int daqSlot;
-static int excSlot;
-static int daqWaitCycle;
-static int daqWriteTime;
-static int daqWriteCycle;
-float *pFloat;
-short *pShort;
-char *pData;
-char *bufPtr;
-static unsigned int crcTest;
-static unsigned int crcSend;
-static int crcComplete;
-static DAQ_INFO_BLOCK dataInfo;
-static UINT32 fileCrc;
-static int secondCounter;
-int decSlot;
-int offsetAccum;
-static int tpStart;
-static int daqReconfig;
-static int configInProgress;
-static volatile GDS_CNTRL_BLOCK *gdsPtr;
-static volatile char *exciteDataPtr;
-int testVal;
-static int validTp;
-static int validEx;
-static int tpNum[20];
-static int totalChans;
+static char *pWriteBuffer;	/* Ptr to swing buff to write data	*/
+static char *pReadBuffer;	/* Ptr to swing buff to xmit data to FB */
+static int phase;		/* 0-1, switches swing buffers.		*/
+static int daqSlot;		/* 0-sysRate, data slot to write data	*/
+static int excSlot;		/* 0-sysRate, slot to read exc data	*/
+static int daqWaitCycle;	/* If 0, write to FB (256Hz)		*/
+static int daqWriteTime;	/* Num daq cycles between writes.	*/
+static int daqWriteCycle;	/* Cycle count to xmit to FB.		*/
+float *pFloat;			/* Temp ptr to write float data.	*/
+short *pShort;			/* Temp ptr to write short data.	*/
+char *pData;			/* Ptr to start of data set in swing	*/
+char *bufPtr;			/* Ptr to data for crc calculation.	*/
+static unsigned int crcTest;	/* Continuous calc of CRC.		*/
+static unsigned int crcSend;	/* CRC sent to FB.			*/
+static DAQ_INFO_BLOCK dataInfo; /* Local DAQ config info buffer.	*/
+static UINT32 fileCrc;		/* .ini file CRC, sent to FB.		*/
+int decSlot;			/* Tracks decimated data positions.	*/
+int offsetAccum;		/* Used to set localTable.offset	*/
+static int tpStart;		/* Marks address of first TP data	*/
+static volatile GDS_CNTRL_BLOCK *gdsPtr;  /* Ptr to GDS table in shmem.	*/
+static volatile char *exciteDataPtr;	  /* Ptr to EXC data in shmem.	*/
+int testVal;			/* Temp TP value for valid check.	*/
+static int validTp;		/* Number of valid GDS sigs selected.	*/
+static int validEx;		/* Local chan number of 1st EXC signal.	*/
+static int tpNum[32];		/* TP/EXC selects to send to FB.	*/
+static int totalChans;		/* DAQ + TP + EXC chans selected.	*/
 int *statusPtr;
-float *dataPtr;
-int exChanOffset;
+float *dataPtr;			/* Ptr to excitation chan data.		*/
+int exChanOffset;		/* shmem offset to next EXC value.	*/
 
-/* 6th order eliptic cutoff at 128 Hz, 80 db 
-static double dCoeff[13] =
-	{0.00028490832406584,
-	-1.79846205926774, 0.81981757589904, -1.52610762089641, 1.00000000000000,
-	-1.79404316559046, 0.88268926712295, -1.24646518445109, 1.00000000000000,
-	-1.81292897340225, 0.96129731435968,  0.46049665114190, 1.00000000000000};
-4th order eliptic corner at 90 Hz, 80 db 
-static double dCoeff[9] =
-	{0.020434809427619,
-	-1.84093680779922, 0.86745935572456, -1.84775906502257, 1.0,
-	-1.84957110082436, 0.91429341707980, -1.33211653915933, 0.88389819700609};
-*/
+// Decimation filter coefficient definitions.		
 static double dCoeff2x[13] =
 	{0.014605318489015,
 	-1.00613305346332,    0.31290490560439,   -0.00000330106714,    0.99667220785946,
@@ -218,7 +193,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
 
 
- 
+// ************************************************************************************** 
   if(flag == DAQ_CONNECT)	/* Initialize DAQ connection */
   {
 
@@ -226,18 +201,16 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     phase = 0;
     daqBlockNum = 15;
     excBlockNum = 0;
-    secondCounter = 0;
-    configInProgress = -1;
-    crcComplete = 0;
 
     /* Allocate memory for two local data swing buffers */
     for(ii=0;ii<2;ii++) 
     {
-      pDaqBuffer[ii] = (char *)_pci_rfm;
+      pDaqBuffer[ii] = (char *)daqBuffer;
       pDaqBuffer[ii] += 0x100000 * ii;
       printf("DAQ buffer %ld is at 0x%x\n",ii,(long long)pDaqBuffer[ii]);
     }
 
+    // Clear the decimation filter histories
     for(ii=0;ii<DCU_MAX_CHANNELS;ii++)
 	for(jj=0;jj<MAX_HISTRY;jj++)
 	     dHistory[ii][jj] = 0.0;
@@ -249,20 +222,21 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     excSlot = 0;
 
 
-    /* Set up pointer to DAQ IPC area for passing status info to DAQ */
 
     crcLength = 0;
-printf("daqLib DCU_ID = %d\n",dcuId);
+    printf("daqLib DCU_ID = %d\n",dcuId);
 
-    /* Set up pointer to DAQ configuration information on RFM network */
+    /* Set up pointer to DAQ configuration information in shmem */
     pInfo = (DAQ_INFO_BLOCK *)(_epics_shm + DAQ_INFO_ADDRESS + (dcuId * sizeof(DAQ_INFO_BLOCK)));
     printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
 
     /* Get the .INI file crc checksum to pass to DAQ Framebuilders for config checking */
     fileCrc = pInfo->configFileCRC;
+    // Clear the reconfiguration flag in shmem.
     pInfo->reconfig = 0;
     /* Get the number of channels to be acquired */
     dataInfo.numChans = pInfo->numChans;
+    // Verify number of channels is legal
     if((dataInfo.numChans < 1) || (dataInfo.numChans > DCU_MAX_CHANNELS))
     {
 	printf("Invalid num daq chans = %d\n",dataInfo.numChans);
@@ -281,12 +255,9 @@ printf("daqLib DCU_ID = %d\n",dcuId);
         crcLength += 4 * dataInfo.tp[ii].dataRate / 16;
     }
 
-    /* Communicate DAQ channel count and file crc chksum to Framebuilders */
-    printf("FILE CRC = 0x%x\n",fileCrc);
-
-
     /* Calculate the number of bytes to xfer on each call, based on total number
        of bytes to write each 1/16sec and the front end data rate (2048/16384Hz) */
+    // Note, this is left over from RFM net. Now used only to calc CRC
     xferSize1 = crcLength/sysRate;
     
     /* 	Maintain 8 byte data boundaries for writing data, particularly important
@@ -301,13 +272,8 @@ printf("daqLib DCU_ID = %d\n",dcuId);
     printf("Daq XferSize = %d\n",xferSize1);
     printf("Daq xfer should complete in %d cycles\n",(crcLength/xferSize1));
 
-    /* Set addresses for all 1/16 sec rfm data blocks */
-    for(ii=0;ii<DAQ_NUM_DATA_BLOCKS;ii++) 
-    {
-      daqDataAddress[ii] = (DATA_OFFSET_DCU(dcuId) + ii * DAQ_DCU_BLOCK_SIZE);
-      if(ii<2) printf("Daq Block %d = 0x%x\n",ii,daqDataAddress[ii]);
-    }
 
+    // Fill in the local lookup table for finding data.
     localTable[0].offset = 0;
     offsetAccum = 0;
 
@@ -321,9 +287,6 @@ printf("daqLib DCU_ID = %d\n",dcuId);
       else
 	offsetAccum += (sysRate/localTable[ii].decFactor * 4);
       localTable[ii+1].offset = offsetAccum;
-#ifdef DEBUG_ON
-      printf("ch %d = %d   DecFactor = %d   Offset = %d\n",ii,dataInfo.tp[ii].tpnum,localTable[ii].decFactor,localTable[ii].offset);
-#endif
       /* Need to determine if data is from a filter module TP or non-FM TP */
       if((dataInfo.tp[ii].tpnum >= daqRange.filtTpMin) &&
 	 (dataInfo.tp[ii].tpnum < daqRange.filtTpMax))
@@ -339,10 +302,6 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 	localTable[ii].fmNum = jj / 3;
 	/* Mark which of three testpoints to store */
 	localTable[ii].sigNum = jj % 3;
-#ifdef DEBUG_ON
-	printf("type = %d  system = %d fmnum = %d  signum = %d\n",
-		localTable[ii].type,localTable[ii].sysNum,localTable[ii].fmNum, localTable[ii].sigNum);
-#endif
       }
       else if((dataInfo.tp[ii].tpnum >= daqRange.xTpMin) &&
 	 (dataInfo.tp[ii].tpnum < daqRange.xTpMax))
@@ -353,10 +312,6 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 	localTable[ii].type = 1;
 	/* Mark the offset into the local data buffer */
 	localTable[ii].sigNum = jj;
-#ifdef DEBUG_ON
-        dWord = *(pFloatData[localTable[ii].sigNum]);
-	printf("XTP %d =  %d = %f\n",ii,localTable[ii].sigNum,dWord);
-#endif
       }
       else
       {
@@ -365,17 +320,24 @@ printf("daqLib DCU_ID = %d\n",dcuId);
       }
     }
 
+    // Set the start of TP data after DAQ data.
     tpStart = offsetAccum;
     totalChans = dataInfo.numChans;
-    printf("Start of TP data is at offset 0x%x\n",tpStart);
+    // Set pointer to GDS table in shmem
     gdsPtr = (GDS_CNTRL_BLOCK *)(_epics_shm + DAQ_GDS_BLOCK_ADD);
     printf("gdsCntrl block is at 0x%lx\n",(long)gdsPtr);
+    // Clear out the GDS TP selections.
     for(ii=0;ii<24;ii++) gdsPtr->tp[2][0][ii] = 0;
     for(ii=0;ii<8;ii++) gdsPtr->tp[0][0][ii] = 0;
+    // Following can be uncommented for testing.
     // gdsPtr->tp[3][0][0] = 11001;
     // gdsPtr->tp[3][0][1] = 11002;
     // gdsPtr->tp[0][0][0] = 1000;
+
+    // Set pointer to EXC data in shmem.
     exciteDataPtr = (char *)(_epics_shm + DATA_OFFSET_DCU(DCU_ID_EX_16K));
+
+    // Following just sets in some dummy data for testing.
     for(ii=0;ii<16;ii++)
     {
 	statusPtr = (int *)(exciteDataPtr + ii * DAQ_DCU_BLOCK_SIZE);
@@ -389,15 +351,15 @@ printf("daqLib DCU_ID = %d\n",dcuId);
     }
 
 
-    /* Set rfm net address to first data block to be written */
-   daqWaitCycle = -1;
-   daqWriteCycle = -1;
-   daqWriteTime = sysRate / 16;
+    // Initialize network variables.
+    daqWaitCycle = -1;
+    daqWriteCycle = -1;
+    daqWriteTime = sysRate / 16;
 
   } /* End DAQ CONNECT */
 
 /* ******************************************************************************** */
-/* Write Data to RFM 			******************************************* */
+/* Write Data to FB 			******************************************* */
 /* ******************************************************************************** */
   if(flag == DAQ_WRITE)
   {
@@ -405,15 +367,12 @@ printf("daqLib DCU_ID = %d\n",dcuId);
     daqSlot = (daqSlot + 1) % sysRate;
     daqWaitCycle = (daqWaitCycle + 1) % daqWriteTime;
 
-    /* This section of code sends data to the DAQ system */
-
     /* At start of 1/16 sec. data block, reset the xfer sizes and done bit */
     if(daqSlot == 0)
     {
 	xferLength = crcLength;
 	xferSize = xferSize1;
 	xferDone = 0;
-	crcComplete = 0;
     }
 
     /* If size of data remaining to be sent is less than calc xfer size, reduce xfer size
@@ -456,17 +415,19 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 	    dWord = *(pFloatData[localTable[ii].sigNum]);
       }
       else if(localTable[ii].type == 2)
-      /* Data is from non filter module  testpoint */
+      /* Data is from filter module excitation */
       {
 	    dWord = dspPtr[localTable[ii].sysNum]->data[localTable[ii].fmNum].exciteInput;
       }
 
+      // Perform decimation filtering, if required.
       if(localTable[ii].decFactor == 2) dWord = iir_filter(dWord,&dCoeff2x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 4) dWord = iir_filter(dWord,&dCoeff4x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 8) dWord = iir_filter(dWord,&dCoeff8x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 16) dWord = iir_filter(dWord,&dCoeff16x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 32) dWord = iir_filter(dWord,&dCoeff32x[0],DTAPS,&dHistory[ii][0]);
 
+      // Write the data into the swing buffer.
       if((daqSlot % localTable[ii].decFactor) == 0)
       {
 	/* Set the buffer pointer to the start of this channels data */
@@ -516,20 +477,17 @@ printf("daqLib DCU_ID = %d\n",dcuId);
     bufPtr = (char *)pReadBuffer + daqSlot * xferSize1;
     if(daqSlot == 0) crcTest = crc_ptr(bufPtr, xferSize, 0);
     else crcTest = crc_ptr(bufPtr, xferSize, crcTest);
-
     xferLength -= xferSize;
   }
     if(daqSlot == (sysRate - 1))
   /* Done with 1/16 second data block */
   {
-
-      /* Complete CRC checksum calc and send to ipc area */
+      /* Complete CRC checksum calc */
       crcTest = crc_len(crcLength, crcTest);
-      crcComplete = 1;
       crcSend = crcTest;
   }
 
-  /* Write DAQ data to the RFM network */
+  /* Write DAQ data to the Framebuilder 256 times per second */
   if(!daqWaitCycle)
   {
 	if(!netStatus) status = myriNetDaqSend(dcuId,daqBlockNum, daqWriteCycle, fileCrc, 
@@ -537,6 +495,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 	daqWriteCycle = (daqWriteCycle + 1) % 16;
   }
 
+  // Read in any selected EXC signals.
   excSlot = (excSlot + 1) % sysRate;
   if(validEx)
   {
@@ -555,21 +514,22 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 		}
   	}
   }
+
+  // Move to the next 1/16 EXC signal data block
   if(excSlot == (sysRate - 1)) excBlockNum = (excBlockNum + 1) % 16;
 
     if(daqSlot == (sysRate - 1))
-    /* Done with 1/16 second data block */
+    /* Done with 1/16 second DAQ data block */
     {
       /* Swap swing buffers */
       phase = (phase + 1) % 2;
       pReadBuffer = (char *)pDaqBuffer[phase];
       pWriteBuffer = (char *)pDaqBuffer[(phase^1)];
 
-      /* Move to next RFM buffer */
+      /* Increment the 1/16 sec block counter */
       daqBlockNum = (daqBlockNum + 1) % 16;
-      daqReconfig = 0;
 
-      // Check for reconfig request
+      // Check for reconfig request at start of each second
       if((pInfo->reconfig == 1) && (daqBlockNum == 0))
       {
 	    printf("New daq config\n");
@@ -718,15 +678,17 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 		}
 
 	}  /* End for loop */
+
+	// Check list of EXC channels
 	validEx = 0;
 	for(ii=0;ii<8;ii++)
 	{
-		/* Get TP number from shared memory */
+		/* Get EXC number from shared memory */
 		testVal = gdsPtr->tp[0][0][ii];
 
-		/* Check if the TP selection is valid for this front end's filter module TP
+		/* Check if the EXC selection is valid for this front end's filter module EXC 
 		   If it is, load the local table with the proper lookup values to find the
-		   signal and clear the TP status in shared mem.                           */
+		   signal and clear the EXC status in shared mem.                           */
         	if((testVal >= daqRange.filtExMin) &&
            	   (testVal < daqRange.filtExMax))
         	{
@@ -747,9 +709,9 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 		  totalChans ++;
         	}
 
-		/* Check if the TP selection is valid for other front end TP signals.
+		/* Check if the EXC selection is valid for other front end EXC signals.
 		   If it is, load the local table with the proper lookup values to find the
-		   signal and clear the TP status in RFM.                                       */
+		   signal and clear the EXC status in shmem.                               */
 		else if( (testVal >= daqRange.xExMin) &&
 			 (testVal < daqRange.xExMax))
 		{
@@ -769,7 +731,7 @@ printf("daqLib DCU_ID = %d\n",dcuId);
 		  totalChans ++;
 		}
 
-		/* If this TP select is not valid for this front end, deselect it in the local
+		/* If this EXC select is not valid for this front end, deselect it in the local
 		   lookup table.                                                                */
 		else
 		{
