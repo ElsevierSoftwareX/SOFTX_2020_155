@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.9 2005/11/15 22:00:21 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.10 2005/11/15 22:03:42 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -188,6 +188,10 @@ static double dCoeff32x[13] =
         -1.94077236718909,    0.94207456685786,   -1.99036946487329,    1.00000000000000,
         -1.96299410148309,    0.96594271100631,   -1.98391795425616,    1.00000000000000,
         -1.98564991068275,    0.98982555984543,   -1.89550394774336,    1.00000000000000};
+static double dCoeff64x[9] =
+        {0.0033803482406795,
+        -1.97723317288580,    0.97769671166054,   -1.99036945334439,    1.00000000000000,
+        -1.99094221621559,    0.99261635146438,   -1.97616224554465,    1.00000000000000};
 static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
 
@@ -426,6 +430,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       if(localTable[ii].decFactor == 8) dWord = iir_filter(dWord,&dCoeff8x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 16) dWord = iir_filter(dWord,&dCoeff16x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 32) dWord = iir_filter(dWord,&dCoeff32x[0],DTAPS,&dHistory[ii][0]);
+      if(localTable[ii].decFactor == 64) dWord = iir_filter(dWord,&dCoeff64x[0],2,&dHistory[ii][0]);
 
       // Write the data into the swing buffer.
       if((daqSlot % localTable[ii].decFactor) == 0)
