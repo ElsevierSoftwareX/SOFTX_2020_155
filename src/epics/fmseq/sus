@@ -138,3 +138,15 @@ OUTVARIABLE GDS_MON_16 epicsOutput.gdsMon[16] int ai 0
 OUTVARIABLE GDS_MON_17 epicsOutput.gdsMon[17] int ai 0 
 OUTVARIABLE GDS_MON_18 epicsOutput.gdsMon[18] int ai 0 
 OUTVARIABLE GDS_MON_19 epicsOutput.gdsMon[19] int ai 0 
+OUTVARIABLE GDS_MON_20 epicsOutput.gdsMon[20] int ai 0 
+OUTVARIABLE GDS_MON_21 epicsOutput.gdsMon[21] int ai 0 
+OUTVARIABLE GDS_MON_22 epicsOutput.gdsMon[22] int ai 0 
+OUTVARIABLE GDS_MON_23 epicsOutput.gdsMon[23] int ai 0 
+OUTVARIABLE GDS_MON_24 epicsOutput.gdsMon[24] int ai 0 
+OUTVARIABLE GDS_MON_25 epicsOutput.gdsMon[25] int ai 0 
+OUTVARIABLE GDS_MON_26 epicsOutput.gdsMon[26] int ai 0 
+OUTVARIABLE GDS_MON_27 epicsOutput.gdsMon[27] int ai 0 
+OUTVARIABLE GDS_MON_28 epicsOutput.gdsMon[28] int ai 0 
+OUTVARIABLE GDS_MON_29 epicsOutput.gdsMon[29] int ai 0 
+OUTVARIABLE GDS_MON_30 epicsOutput.gdsMon[30] int ai 0 
+OUTVARIABLE GDS_MON_31 epicsOutput.gdsMon[31] int ai 0 
