@@ -342,6 +342,7 @@ void *fe_start(void *arg)
   static int adcTime;
   static int adcHoldTime;
   int netRetry;
+  float xExc[10];
 
 
 
@@ -424,6 +425,11 @@ void *fe_start(void *arg)
   daq.filtTpSize = GDS_SUS1_TP_SIZE;
   daq.xTpMin = GDS_SUS1_VALID_XTP_LOW;
   daq.xTpMax = GDS_SUS1_VALID_XTP_HI;
+  daq.filtExMin = GDS_SUS1_VALID_EX_MIN;
+  daq.filtExMax = GDS_SUS1_VALID_EX_MAX;
+  daq.filtExSize = GDS_SUS1_EXC_SIZE;
+  daq.xExMin = GDS_SUS1_VALID_XEX_LOW;
+  daq.xExMax = GDS_SUS1_VALID_XEX_HI;
 
   // Set an xtra TP to read out one pps signal
   testpoint[0] = (float *)&onePps;
@@ -431,7 +437,7 @@ void *fe_start(void *arg)
 
 
   // Initialize DAQ function
-  status = daqWrite(0,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,0,pLocalEpics.epicsOutput.gdsMon);
+  status = daqWrite(0,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,0,pLocalEpics.epicsOutput.gdsMon,xExc);
   if(status == -1) 
   {
     printf("DAQ init failed -- exiting\n");
@@ -533,7 +539,7 @@ void *fe_start(void *arg)
   	if(firstTime != 0) 
 	{
 		// Call daqLib
-		status = daqWrite(1,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2,pLocalEpics.epicsOutput.gdsMon);
+		status = daqWrite(1,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2,pLocalEpics.epicsOutput.gdsMon,xExc);
 		if(!attemptingReconnect)
 		{
 			// Check and clear network callbacks.
