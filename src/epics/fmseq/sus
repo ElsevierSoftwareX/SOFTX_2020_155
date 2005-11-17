@@ -151,3 +151,5 @@ OUTVARIABLE GDS_MON_29 epicsOutput.gdsMon[29] int ai 0
 OUTVARIABLE GDS_MON_30 epicsOutput.gdsMon[30] int ai 0 
 OUTVARIABLE GDS_MON_31 epicsOutput.gdsMon[31] int ai 0 
 OUTVARIABLE USR_TIME epicsOutput.diags[0] int ai 0 
+OUTVARIABLE RESYNC_COUNT epicsOutput.diags[1] int ai 0 
+OUTVARIABLE NET_ERR_COUNT epicsOutput.diags[2] int ai 0 
