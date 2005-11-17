@@ -58,7 +58,6 @@ int rfd, wfd;
 
 extern int mapPciModules(CDS_HARDWARE *);	/* Init routine to map adc/dac cards	*/
 extern long gsaAdcTrigger(int);			/* Starts ADC acquisition.		*/
-extern long gsaAdcStop();			/* Stops ADC acquisition.		*/
 extern int adcDmaDone();			/* Checks if ADC DMA complete.		*/
 extern int checkAdcRdy(int count);		/* Checks if ADC has samples avail.	*/
 extern int gsaAdcDma(int,int);			/* Send data to ADC via DMA.		*/
@@ -68,6 +67,7 @@ extern int myriNetClose();			/* Clean up myrinet on exit.		*/
 extern int myriNetCheckCallback();		/* Check for messages on myrinet.	*/
 extern int myriNetReconnect(int);		/* Make connects to FB.			*/
 extern int myriNetCheckReconnect();		/* Check FB net connected.		*/
+extern int cdsNetStatus;
 
 
 /* ADC/DAC overflow variables */
@@ -290,6 +290,8 @@ void *fe_start(void *arg)
   // Set an xtra TP to read out one pps signal
   testpoint[0] = (float *)&onePps;
   pLocalEpics.epicsOutput.diagWord = 0;
+  pLocalEpics.epicsOutput.diags[1] = 0;
+  pLocalEpics.epicsOutput.diags[2] = 0;
 
 
   // Initialize DAQ function
@@ -380,9 +382,9 @@ void *fe_start(void *arg)
 		if(onePps < 1000) firstTime += 100;
 	}
 
+	if(onePps < 1000)  pLocalEpics.epicsOutput.onePps = clock16K;
 	// Check if front end continues to be in sync with 1pps
 	// If not, set sync error flag
-	if(onePps < 1000)  pLocalEpics.epicsOutput.onePps = clock16K;
 	if(pLocalEpics.epicsOutput.onePps > 4) pLocalEpics.epicsOutput.diagWord |= 1;
 
 	// Call the front end specific software
@@ -454,6 +456,7 @@ void *fe_start(void *arg)
 				attemptingReconnect = 0;		
 				myGmError2 = 0;
 				printf("Continue sending DAQ data\n");
+				pLocalEpics.epicsOutput.diags[2] = 0;
 			}
 		}
 	}
@@ -498,6 +501,12 @@ void *fe_start(void *arg)
         {
 	  pLocalEpics.epicsOutput.diags[0] = usrHoldTime;
 	  usrHoldTime = 0;
+	  if(attemptingReconnect && (cdsNetStatus != 0))
+	  {
+		status = myriNetReconnect(dcuId);
+		cdsNetStatus = 0;
+		pLocalEpics.epicsOutput.diags[2] ++;
+	  }
         }
 
   }

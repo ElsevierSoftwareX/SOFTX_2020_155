@@ -3,6 +3,8 @@
 #ifdef USE_VMIC_RFM
 #include <drv/vmic5579.h>
 #include <drv/vmic5565.h>
+#define RFM_WRITE	0x0
+#define RFM_READ	0x8
 #endif
 #include <drv/gsaadc.h>		/* GSA ADC module defs */
 #include <drv/gsadac.h>		/* GSA DAC module defs */
@@ -10,8 +12,6 @@
 #include <drv/gmnet.h>
 #include <drv/cdsHardware.h>
 
-#define RFM_WRITE	0x0
-#define RFM_READ	0x8
 
 // PCI Device variables
 volatile PLX_9056_DMA *adcDma[MAX_ADC_MODULES];	/* DMA struct for GSA ADC */
@@ -42,6 +42,7 @@ static int expected_callbacks = 0;
 static struct gm_port *netPort = 0;
 daqMessage *daqSendMessage;
 daqData *daqSendData;
+int cdsNetStatus = 0;
 
 
 #ifdef USE_VMIC_RFM
@@ -295,7 +296,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 
   // Search system for any module with PLX-9056 and PLX id
   while((dacdev = pci_find_device(PLX_VID, PLX_TID, dacdev))) {
-	// if found, verify it is a DAC module
+	// if found, check if it is a DAC module
         if((dacdev->subsystem_device == DAC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
         {
                 printk("dac card on bus %d; device %d\n",
@@ -304,6 +305,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
                 status = mapDac(pCds,dacdev);
 		modCount ++;
         }
+	// if found, check if it is an ADC module
 	if((dacdev->subsystem_device == ADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
 	{
 		printk("adc card on bus %d; device %d\n",
@@ -450,11 +452,19 @@ my_send_callback (struct gm_port *port, void *the_context,
       break;
         
     case GM_SEND_DROPPED:
-      printk ("**** Send dropped!\n");
+      // cdsNetStatus = (int)the_status;
+      // printk ("**** Send dropped!\n");
       break;
           
     default:
-      gm_perror ("Send completed with error", the_status);
+	cdsNetStatus = (int)the_status;
+  	gm_drop_sends 	(netPort,
+                         GM_DAQ_PRIORITY,
+                         receiver_node_id,
+                         GM_PORT_NUM_RECV,
+                         my_send_callback,
+                         &expected_callbacks);
+      // gm_perror ("Send completed with error", the_status);
     }
 }
 
