@@ -20,10 +20,7 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
 
         // Do M0 input filtering
         for(ii=0;ii<6;ii++)
-        {
-                fmIn = dWord[ii];
-                m0SenOut[ii] = filterModuleD(dspPtr,dspCoeff,ii,fmIn,0);
-        }
+                m0SenOut[ii] = filterModuleD(dspPtr,dspCoeff,ii,dWord[ii],0);
 
         // Do M0 input matrix and DOF filtering
         for(ii=0;ii<6;ii++)
@@ -57,8 +54,7 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
         for(ii=0;ii<6;ii++)
         {
                 kk = ii + 18;
-                fmIn = dWord[ii+6];
-                r0SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,fmIn,0);
+                r0SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[ii+6],0);
         }
 
 
@@ -94,8 +90,7 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
         for(ii=0;ii<4;ii++)
         {
                 kk = ii + FILT_L1_ULSEN;
-                fmIn = dWord[ii+12];
-                l1SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,fmIn,0);
+                l1SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[ii+12],0);
         }
 
         // Do L1 input matrix and DOF filtering
@@ -113,8 +108,7 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
         for(ii=0;ii<3;ii++)
         {
                 kk = ii + FILT_L1_LSC;
-                fmIn = dWord[ii+12];
-                l1DofOut[ii] += filterModuleD(dspPtr,dspCoeff,kk,fmIn,0);
+                l1DofOut[ii] += filterModuleD(dspPtr,dspCoeff,kk,dWord[ii+12],0);
         }
 
         // L1 Output Filter Matrix
@@ -142,8 +136,7 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
         for(ii=0;ii<4;ii++)
         {
                 kk = ii + FILT_L1_ULOUT;
-                fmIn = l1Out[ii];
-                l1Out[ii] += filterModuleD(dspPtr,dspCoeff,kk,fmIn,0);
+                l1Out[ii] += filterModuleD(dspPtr,dspCoeff,kk,l1Out[ii],0);
                 dacOut[ii+12] = (int)l1Out[ii];
         }
 
@@ -151,8 +144,7 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
         for(ii=0;ii<4;ii++)
         {
                 kk = ii + FILT_L2_ULSEN;
-                fmIn = dWord[ii+16];
-                l2SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,fmIn,0);
+                l2SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[ii+16],0);
         }
 
         // Do L2 input matrix and DOF filtering
@@ -170,8 +162,7 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
         for(ii=0;ii<3;ii++)
         {
                 kk = ii + FILT_L2_LSC;
-                fmIn = dWord[ii+12];
-                l2DofOut[ii] += filterModuleD(dspPtr,dspCoeff,kk,fmIn,0);
+                l2DofOut[ii] += filterModuleD(dspPtr,dspCoeff,kk,dWord[ii+12],0);
         }
 
         // L2 Output Filter Matrix
@@ -199,16 +190,14 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
         for(ii=0;ii<4;ii++)
         {
                 kk = ii + FILT_L2_ULOUT;
-                fmIn = l2Out[ii];
-                l2Out[ii] += filterModuleD(dspPtr,dspCoeff,kk,fmIn,0);
+                l2Out[ii] += filterModuleD(dspPtr,dspCoeff,kk,l2Out[ii],0);
         }
 
         // Place for L3 LSC, ASCP, ASCY
         for(ii=0;ii<3;ii++)
         {
                 kk = ii + FILT_L3_LSC;
-                fmIn = dWord[ii+12];
-                l3DofOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,fmIn,0);
+                l3DofOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[ii+12],0);
         }
 
         // Do R0 output matrix and DOF filtering
