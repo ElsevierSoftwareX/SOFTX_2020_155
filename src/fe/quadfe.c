@@ -43,7 +43,6 @@ CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
 #include "fm10Gen.h"		/* CDS filter module defs and C code	*/
 #include "iscNetDsc.h"		/* Lvea control RFM network defs.	*/
 #include "daqmap.h"		/* DAQ network layout			*/
-#include "gdsLib.h"
 #define CPURATE	2800
 
 #include "fpvalidate.h"		/* Valid FP number ck			*/
@@ -276,16 +275,20 @@ void *fe_start(void *arg)
 
 
   /* Set data range limits for daqLib routine */
-  daq.filtTpMin = GDS_SUS1_VALID_TP_MIN;
-  daq.filtTpMax = GDS_SUS1_VALID_TP_MAX;
-  daq.filtTpSize = GDS_SUS1_TP_SIZE;
-  daq.xTpMin = GDS_SUS1_VALID_XTP_LOW;
-  daq.xTpMax = GDS_SUS1_VALID_XTP_HI;
-  daq.filtExMin = GDS_SUS1_VALID_EX_MIN;
-  daq.filtExMax = GDS_SUS1_VALID_EX_MAX;
-  daq.filtExSize = GDS_SUS1_EXC_SIZE;
-  daq.xExMin = GDS_SUS1_VALID_XEX_LOW;
-  daq.xExMax = GDS_SUS1_VALID_XEX_HI;
+  daq.filtExMin = (dcuId-5) * GDS_TP_MAX_FE;
+  daq.filtExMax = daq.filtExMin + MAX_MODULES;
+  daq.filtExSize = MAX_MODULES;
+  daq.xExMin = -1;
+  daq.xExMax = -1;
+  daq.filtTpMin = daq.filtExMin + 10000;
+  daq.filtTpMax = daq.filtTpMin + MAX_MODULES * 3;
+  daq.filtTpSize = MAX_MODULES * 3;
+  daq.xTpMin = daq.filtTpMax;
+  daq.xTpMax = daq.xTpMin + 50;
+
+  printf("DAQ Ex Min/Max = %d %d\n",daq.filtExMin,daq.filtExMax);
+  printf("DAQ Tp Min/Max = %d %d\n",daq.filtTpMin,daq.filtTpMax);
+  printf("DAQ XTp Min/Max = %d %d\n",daq.xTpMin,daq.xTpMax);
 
   // Set an xtra TP to read out one pps signal
   testpoint[0] = (float *)&onePps;
