@@ -468,6 +468,17 @@ my_send_callback (struct gm_port *port, void *the_context,
     }
 }
 
+int myriNetDrop()
+{
+gm_drop_sends   (netPort,
+                         GM_DAQ_PRIORITY,
+                         receiver_node_id,
+                         GM_PORT_NUM_RECV,
+                         my_send_callback,
+                         &expected_callbacks);
+return(0);
+}
+
 
 // *****************************************************************
 // Initialize the myrinet connection to Framebuilder.
@@ -714,29 +725,33 @@ int myriNetDaqSend(	int dcuId,
 			int crcSize,
 			int tpCount,
 			int tpNum[],
+			int xferSize,
 			char *dataBuffer)
 {
 
   unsigned int *daqDataBuffer;
   int send_length;
   int kk;
+  int xferWords;
 
   // Load data into xmit buffer from daqLib buffer.
   daqSendData = (daqData *)netDmaBuffer;
   daqDataBuffer = (unsigned int *)dataBuffer;
-  daqDataBuffer += subCycle * GM_DAQ_XFER_SIZE;
-  for(kk=0;kk<GM_DAQ_XFER_SIZE;kk++) 
+  xferWords = xferSize / 4;
+  daqDataBuffer += subCycle * xferWords;
+  for(kk=0;kk<xferWords;kk++) 
   {
 	daqSendData->data[kk] = *daqDataBuffer;
 	daqDataBuffer ++;
   }
+  directed_send_subaddr[0] = directed_send_addr + xferSize * subCycle;
 
   // Send data directly to designated memory space in Framebuilder.
   gm_directed_send_with_callback (netPort,
                                   netDmaBuffer,
-                                  (gm_remote_ptr_t) (directed_send_subaddr[subCycle] + 65536 * cycle),
+                                  (gm_remote_ptr_t) (directed_send_subaddr[0] + GM_DAQ_BLOCK_SIZE * cycle),
                                   (unsigned long)
-                                  sizeof (*daqSendData),
+                                  xferSize,
                                   GM_DAQ_PRIORITY,
                                   receiver_node_id,
                                   GM_PORT_NUM_RECV,
