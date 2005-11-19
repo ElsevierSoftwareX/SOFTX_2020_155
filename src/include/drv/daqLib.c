@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.10 2005/11/15 22:03:42 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.11 2005/11/19 01:27:30 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -103,6 +103,7 @@ extern int myriNetDaqSend(int dcuId,
                         int crcSize,
                         int tpCount,
                         int tpNum[],
+			int xferSize,
                         char *dataBuffer);
 
 
@@ -127,6 +128,7 @@ static int daqBlockNum;		/* 1-16, tracks DAQ block to write to.	*/
 static int excBlockNum;		/* 1-16, tracks EXC block to read from.	*/
 static int xferSize;		/* Tracks remaining xfer size for crc	*/
 static int xferSize1;
+static int mnDaqSize;
 static int xferLength;
 static int xferDone;
 static int crcLength;		/* Number of bytes in 1/16 sec data 	*/
@@ -158,6 +160,7 @@ static int validTp;		/* Number of valid GDS sigs selected.	*/
 static int validEx;		/* Local chan number of 1st EXC signal.	*/
 static int tpNum[32];		/* TP/EXC selects to send to FB.	*/
 static int totalChans;		/* DAQ + TP + EXC chans selected.	*/
+static int totalSize;		/* DAQ + TP + EXC chans size in bytes.	*/
 int *statusPtr;
 float *dataPtr;			/* Ptr to excitation chan data.		*/
 int exChanOffset;		/* shmem offset to next EXC value.	*/
@@ -210,7 +213,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     for(ii=0;ii<2;ii++) 
     {
       pDaqBuffer[ii] = (char *)daqBuffer;
-      pDaqBuffer[ii] += 0x100000 * ii;
+      pDaqBuffer[ii] += 0x200000 * ii;
       printf("DAQ buffer %ld is at 0x%x\n",ii,(long long)pDaqBuffer[ii]);
     }
 
@@ -263,6 +266,8 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
        of bytes to write each 1/16sec and the front end data rate (2048/16384Hz) */
     // Note, this is left over from RFM net. Now used only to calc CRC
     xferSize1 = crcLength/sysRate;
+    mnDaqSize = crcLength/16;
+    totalSize = mnDaqSize;
     
     /* 	Maintain 8 byte data boundaries for writing data, particularly important
         when DMA xfers are used on 5565 RFM modules. Note that this usually results
@@ -275,6 +280,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     printf("Daq chan count = %d\nBlockSize = 0x%x\n",dataInfo.numChans,crcLength);
     printf("Daq XferSize = %d\n",xferSize1);
     printf("Daq xfer should complete in %d cycles\n",(crcLength/xferSize1));
+    printf("Daq xmit Size = %d\n",mnDaqSize);
 
 
     // Fill in the local lookup table for finding data.
@@ -496,7 +502,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
   if(!daqWaitCycle)
   {
 	if(!netStatus) status = myriNetDaqSend(dcuId,daqBlockNum, daqWriteCycle, fileCrc, 
-						crcSend,crcLength,validTp,tpNum,pReadBuffer);
+						crcSend,crcLength,validTp,tpNum,totalSize,pReadBuffer);
 	daqWriteCycle = (daqWriteCycle + 1) % 16;
   }
 
@@ -561,6 +567,8 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		    /* Calculate the number of bytes to xfer on each call, based on total number
 		       of bytes to write each 1/16sec and the front end data rate (2048/16384Hz) */
 		    xferSize1 = crcLength/sysRate;
+    		    mnDaqSize = crcLength/16;
+    		    totalSize = mnDaqSize;
 
 		    /*  Maintain 8 byte data boundaries for writing data, particularly important
 			when DMA xfers are used on 5565 RFM modules. Note that this usually results
@@ -625,6 +633,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       if(daqBlockNum == 0)
       {
  	totalChans = dataInfo.numChans;
+	totalSize = mnDaqSize;
 	offsetAccum = tpStart;
 	validTp = 0;
 	for(ii=0;ii<20;ii++)
@@ -653,6 +662,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		  tpNum[validTp] = testVal;
 		  validTp ++;
 		  totalChans ++;
+		  totalSize += 256;
         	}
 
 		/* Check if the TP selection is valid for other front end TP signals.
@@ -673,6 +683,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		  tpNum[validTp] = testVal;
 		  validTp ++;
 		  totalChans ++;
+		  totalSize += 256;
 		}
 
 		/* If this TP select is not valid for this front end, deselect it in the local
@@ -712,6 +723,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		  validTp ++;
 		  if(!validEx) validEx = totalChans;
 		  totalChans ++;
+		  totalSize += 256;
         	}
 
 		/* Check if the EXC selection is valid for other front end EXC signals.
@@ -734,6 +746,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		  validTp ++;
 		  if(!validEx) validEx = totalChans;
 		  totalChans ++;
+		  totalSize += 256;
 		}
 
 		/* If this EXC select is not valid for this front end, deselect it in the local
@@ -749,6 +762,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     } /* End done 16Hz Cycle */
 
   } /* End case write */
-  return(dataInfo.numChans);
+  return((totalSize*256)/1000);
 
 }
