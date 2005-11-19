@@ -66,14 +66,13 @@ extern int myriNetClose();			/* Clean up myrinet on exit.		*/
 extern int myriNetCheckCallback();		/* Check for messages on myrinet.	*/
 extern int myriNetReconnect(int);		/* Make connects to FB.			*/
 extern int myriNetCheckReconnect();		/* Check FB net connected.		*/
+extern int myriNetDrop();		/* Check FB net connected.		*/
 extern int cdsNetStatus;
 
 
 /* ADC/DAC overflow variables */
-int overflowAdc[4][8];;
-int overflowDac[2][8];;
-int ovHoldAdc[4][8];
-int ovHoldDac[2][8];
+int overflowAdc[4][32];;
+int overflowDac[4][16];;
 
 float *testpoint[20];
 
@@ -99,7 +98,7 @@ int *epicsInAddShm;		/* Ptr to epics inputs in shmem		*/
 int *epicsInAddLoc;		/* Ptr to epics inputs in local mem	*/
 int *epicsOutAddLoc;		/* Ptr to epics outputs in local mem	*/
 int *epicsOutAddShm;		/* Ptr to epics outputs in shmem.	*/
-char daqArea[0x300000];		/* Space allocation for daqLib buffers	*/
+char daqArea[0x400000];		/* Space allocation for daqLib buffers	*/
 
 #ifdef OVERSAMPLE
 #define ADC_SAMPLE_COUNT	0x100
@@ -166,8 +165,9 @@ void *fe_start(void *arg)
   static int vmeDone;
   int ii,jj,kk;
   int clock16K = 0;
-  int cpuClock[6];
-  short adcData[32];
+  int clock1Min = 0;
+  int cpuClock[10];
+  short adcData[4][32];
   int *packedData;
   unsigned int *pDacData;
   RFM_FE_COMMS *pEpicsComms;
@@ -189,6 +189,8 @@ void *fe_start(void *arg)
   static int usrHoldTime;
   int netRetry;
   float xExc[10];
+  static int skipCycle = 0;
+  static int dropSends = 0;
 
 
 // Do all of the initalization
@@ -246,6 +248,7 @@ void *fe_start(void *arg)
 	// data to FB until problem is fixed.
 	myGmError2 = 1;
 	attemptingReconnect = 2;
+	rdtscl(cpuClock[8]);
 	netRestored = 0;
 	printf("Net fail - recon try\n");
 	pLocalEpics.epicsOutput.diagWord |= 4;
@@ -330,12 +333,20 @@ void *fe_start(void *arg)
         rdtscl(cpuClock[0]);
 	// Start reading ADC data
 	status = gsaAdcDma(0,ADC_DMA_BYTES);
+
+	// Wait for completion of DMA of Adc data
+	do{
+		status = adcDmaDone();
+	}while(!status);
+
     
         // Update internal cycle counters
-        if(firstTime != 0)
+        if((firstTime != 0) && (!skipCycle))
         {
           clock16K += 1;
           clock16K %= 16384;
+	  clock1Min += 1;
+	  clock1Min %= 983040;
           if(subcycle == 770) daqCycle = (daqCycle + 1) % 16;
           if(subcycle == 1023) /*we have reached the 16Hz second barrier*/
             {
@@ -349,11 +360,6 @@ void *fe_start(void *arg)
           }
         }
 
-	// Wait for completion of DMA of Adc data
-	do{
-		status = adcDmaDone();
-	}while(!status);
-
 	// Read adc data into local variables
 	packedData = (int *)cdsPciModules.pci_adc[0];
 #ifdef OVERSAMPLE
@@ -361,20 +367,30 @@ void *fe_start(void *arg)
 	{
 	for(ii=0;ii<32;ii++)
 	{
-		adcData[ii] = (*packedData & 0xffff);
-		dWord[ii] = iir_filter((double)adcData[ii],&dCoeff8x[0],2,&dHistory[ii][0]);
+		adcData[0][ii] = (*packedData & 0xffff);
+		dWord[ii] = iir_filter((double)adcData[0][ii],&dCoeff8x[0],2,&dHistory[ii][0]);
 		packedData ++;
 	}
 	}
 #else
 	for(ii=0;ii<32;ii++)
 	{
-		adcData[ii] = (*packedData & 0xffff);
-		dWord[ii] = adcData[ii];
+		adcData[0][ii] = (*packedData & 0xffff);
+		dWord[ii] = adcData[0][ii];
 		packedData ++;
 	}
 #endif
-
+	for(jj=0;jj<cdsPciModules.adcCount;jj++)
+	{
+		for(ii=0;ii<32;ii++)
+		{
+			if((adcData[jj][ii] > 32000) || (adcData[jj][ii] < -32000))
+			  {
+				overflowAdc[jj][ii] ++;
+				pLocalEpics.epicsOutput.ovAccum ++;
+			  }
+		}
+	}
 
 	// Assign chan 32 to onePps 
 	onePps = dWord[31];
@@ -390,34 +406,50 @@ void *fe_start(void *arg)
 	// If not, set sync error flag
 	if(pLocalEpics.epicsOutput.onePps > 4) pLocalEpics.epicsOutput.diagWord |= 1;
 
+	if(!skipCycle)
+ 	{
 	// Call the front end specific software
         rdtscl(cpuClock[4]);
 	feCode(dWord,dacOut,dspPtr[0],dspCoeff,plocalEpics);
         rdtscl(cpuClock[5]);
 
-	// Check Dac output overflow and write to DMA buffer
-	pDacData = (unsigned int *)cdsPciModules.pci_dac[0];
-	for(ii=0;ii<16;ii++)
+	// Write out data to DAC modules
+	for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	{
-		if(dacOut[ii] > 32000) dacOut[ii] = 32000;
-		if(dacOut[ii] < -32000) dacOut[ii] = -32000;
-		dacData[ii] = (short)dacOut[ii];
-		*pDacData = dacData[ii] & 0xffff;
-		pDacData ++;
+		// Check Dac output overflow and write to DMA buffer
+		pDacData = (unsigned int *)cdsPciModules.pci_dac[jj];
+		for(ii=0;ii<16;ii++)
+		{
+			if(dacOut[ii] > 32000) 
+			{
+				dacOut[ii] = 32000;
+				overflowDac[jj][ii] ++;
+				pLocalEpics.epicsOutput.ovAccum ++;
+			}
+			if(dacOut[ii] < -32000) 
+			{
+				dacOut[ii] = -32000;
+				overflowDac[jj][ii] ++;
+				pLocalEpics.epicsOutput.ovAccum ++;
+			}
+			*pDacData = (short)(dacOut[ii] & 0xffff);
+			pDacData ++;
+		}
+		// DMA out dac values
+		status = gsaDacDma(jj);
 	}
-
-	// DMA out dac values
-	status = gsaDacDma(0);
 
 	// Write DAQ and GDS values once we are synched to 1pps
   	if(firstTime != 0) 
 	{
 		// Call daqLib
-		status = daqWrite(1,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2,pLocalEpics.epicsOutput.gdsMon,xExc);
+		pLocalEpics.epicsOutput.diags[3] = 
+			daqWrite(1,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2,pLocalEpics.epicsOutput.gdsMon,xExc);
 		if(!attemptingReconnect)
 		{
 			// Check and clear network callbacks.
 			status = myriNetCheckCallback();
+			dropSends = 0;
 			// If callbacks pending count is high, try to fix net connection.
 			if(status > 4)
 			{
@@ -430,6 +462,7 @@ void *fe_start(void *arg)
 				netRestored = 0;
 				printf("Net fail - recon try\n");
 				pLocalEpics.epicsOutput.diagWord |= 4;
+        			rdtscl(cpuClock[8]);
 			}
 		}
 		// If net reconnect requested, check for receipt of return message from FB
@@ -439,9 +472,14 @@ void *fe_start(void *arg)
 			status = myriNetCheckReconnect();
 			if(status == 0)
 			{
-				netRestored = 100000;
+				netRestored = 65000;
 				attemptingReconnect = 1;
 				printf("Net recon established\n");
+				dropSends = 0;
+			}
+			if((status != 0) && (!clock1Min))
+			{
+					dropSends = 1;
 			}
 		}
 		// If net successfully reconnected, wait 4-5sec before restoring xmission of DAQ data.
@@ -463,6 +501,9 @@ void *fe_start(void *arg)
 			}
 		}
 	}
+	}
+
+	skipCycle = 0;
 
 	/* Update Epics variables */
 	vmeDone = updateEpics(subcycle,epicsInAddShm,epicsOutAddShm,epicsInAddLoc,epicsOutAddLoc,
@@ -500,15 +541,45 @@ void *fe_start(void *arg)
 		printf("DIAG RESET\n");
 	  }
         }
-        if((subcycle == 2) && (daqCycle == 15))
+        if((subcycle == 0) && (daqCycle == 14))
         {
 	  pLocalEpics.epicsOutput.diags[0] = usrHoldTime;
 	  usrHoldTime = 0;
-	  if(attemptingReconnect && (cdsNetStatus != 0))
+	  if(attemptingReconnect && ((cdsNetStatus != 0) || (dropSends != 0)))
 	  {
 		status = myriNetReconnect(dcuId);
 		cdsNetStatus = 0;
 		pLocalEpics.epicsOutput.diags[2] ++;
+		dropSends = 0;
+	  }
+  	  if(pLocalEpicsRfm->epicsInput.syncReset)
+	  {
+		pLocalEpicsRfm->epicsInput.syncReset = 0;
+		skipCycle = 1;
+	  }
+  	  if((pLocalEpicsRfm->epicsInput.overflowReset) || (pLocalEpics.epicsOutput.ovAccum > 0x1000000))
+	  {
+		pLocalEpicsRfm->epicsInput.overflowReset = 0;
+		pLocalEpics.epicsOutput.ovAccum = 0;
+	  }
+        }
+        if((subcycle == 0) && (daqCycle == 13))
+        {
+	  for(jj=0;jj<cdsPciModules.adcCount;jj++)
+	  {
+	    for(ii=0;ii<32;ii++)
+	    {
+		pLocalEpics.epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
+		overflowAdc[jj][ii] = 0;
+	    }
+	  }
+	  for(jj=0;jj<cdsPciModules.dacCount;jj++)
+	  {
+	    for(ii=0;ii<16;ii++)
+	    {
+		pLocalEpics.epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
+		overflowDac[jj][ii] = 0;
+	    }
 	  }
         }
 
