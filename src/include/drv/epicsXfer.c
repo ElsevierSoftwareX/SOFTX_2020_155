@@ -1,3 +1,5 @@
+extern int gsaAdcStop();                        /* Stops ADC acquisition.               */
+
 /* Read EPICS data from RFM */
 inline void getEpicsData(int *pRfmData, int *pLocalData, int count,int reset)
 {
