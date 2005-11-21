@@ -30,8 +30,7 @@
 #include <semaphore.h>
 #include <linux/slab.h>
 #include <drv/cdsHardware.h>
-#define MAX_FILTERS     960     /* Max number of filters to one file 	*/
-#define MAX_MODULES     96      /* Max number of modules to one file 	*/
+#include <quad.h>
 #define INLINE  inline
 #define MMAP_SIZE (64*1024*1024 - 5000)
 char *_epics_shm;		/* Ptr to computer shared memory		*/
@@ -103,17 +102,12 @@ char daqArea[0x400000];		/* Space allocation for daqLib buffers	*/
 #ifdef OVERSAMPLE
 #define ADC_SAMPLE_COUNT	0x100
 #define ADC_DMA_BYTES		0x400
-double dCoeff8x[9] =
-	{0.0020893039272331,
-	-1.76081044819067, 0.79178857629531, -1.33077060017586, 1.0,
-	-1.81299681613251, 0.91908202908703, 0.09475575216002,1.0};
-#if 0
-double dCoeff8x[9] =
-	{0.0012231229599977,
-	-1.88212816674877, 0.89023589750808, -1.81125517371268, 1.0,
-	-1.93089044909424, 0.95813764806104, -1.14714341559299, 1.0};
-#endif
-double dHistory[64][40];
+double feCoeff8x[13] =
+        {0.0019451746049824,
+        -1.75819687682033,    0.77900344926987,   -1.84669761259482,    0.99885145868275,
+        -1.81776674036645,    0.86625937590562,   -1.73730291821706,    0.97396693941237,
+        -1.89162859406079,    0.96263319997793,   -0.81263245399030,    0.83542699550059};
+double dHistory[96][40];
 #else
 #define ADC_SAMPLE_COUNT	0x20
 #define ADC_DMA_BYTES		0x80
@@ -167,7 +161,7 @@ void *fe_start(void *arg)
   int clock16K = 0;
   int clock1Min = 0;
   int cpuClock[10];
-  short adcData[4][32];
+  short adcData[MAX_ADC_MODULES][32];
   int *packedData;
   unsigned int *pDacData;
   RFM_FE_COMMS *pEpicsComms;
@@ -179,9 +173,8 @@ void *fe_start(void *arg)
   int netRestored = 0;
   int status;
   float onePps;
-  short dacData[16];
-  double dWord[64];
-  int dacOut[32];
+  double dWord[MAX_ADC_MODULES][32];
+  int dacOut[MAX_DAC_MODULES][16];
   int dcuId;
   static int adcTime;
   static int adcHoldTime;
@@ -368,7 +361,7 @@ void *fe_start(void *arg)
 	for(ii=0;ii<32;ii++)
 	{
 		adcData[0][ii] = (*packedData & 0xffff);
-		dWord[ii] = iir_filter((double)adcData[0][ii],&dCoeff8x[0],2,&dHistory[ii][0]);
+		dWord[0][ii] = iir_filter((double)adcData[0][ii],&feCoeff8x[0],3,&dHistory[ii][0]);
 		packedData ++;
 	}
 	}
@@ -376,7 +369,7 @@ void *fe_start(void *arg)
 	for(ii=0;ii<32;ii++)
 	{
 		adcData[0][ii] = (*packedData & 0xffff);
-		dWord[ii] = adcData[0][ii];
+		dWord[0][ii] = adcData[0][ii];
 		packedData ++;
 	}
 #endif
@@ -393,7 +386,7 @@ void *fe_start(void *arg)
 	}
 
 	// Assign chan 32 to onePps 
-	onePps = dWord[31];
+	onePps = dWord[0][31];
 
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
@@ -420,19 +413,19 @@ void *fe_start(void *arg)
 		pDacData = (unsigned int *)cdsPciModules.pci_dac[jj];
 		for(ii=0;ii<16;ii++)
 		{
-			if(dacOut[ii] > 32000) 
+			if(dacOut[jj][ii] > 32000) 
 			{
-				dacOut[ii] = 32000;
+				dacOut[jj][ii] = 32000;
 				overflowDac[jj][ii] ++;
 				pLocalEpics.epicsOutput.ovAccum ++;
 			}
-			if(dacOut[ii] < -32000) 
+			if(dacOut[jj][ii] < -32000) 
 			{
-				dacOut[ii] = -32000;
+				dacOut[jj][ii] = -32000;
 				overflowDac[jj][ii] ++;
 				pLocalEpics.epicsOutput.ovAccum ++;
 			}
-			*pDacData = (short)(dacOut[ii] & 0xffff);
+			*pDacData = (short)(dacOut[jj][ii] & 0xffff);
 			pDacData ++;
 		}
 		// DMA out dac values
