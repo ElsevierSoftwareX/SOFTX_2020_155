@@ -1,4 +1,4 @@
-void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPICS *pLocalEpics)
+void feCode(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPICS *pLocalEpics)
 {
   double fmIn;
   double m0SenOut[6];
@@ -20,7 +20,7 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
 
         // Do M0 input filtering
         for(ii=0;ii<6;ii++)
-                m0SenOut[ii] = filterModuleD(dspPtr,dspCoeff,ii,dWord[ii],0);
+                m0SenOut[ii] = filterModuleD(dspPtr,dspCoeff,ii,dWord[0][ii],0);
 
         // Do M0 input matrix and DOF filtering
         for(ii=0;ii<6;ii++)
@@ -47,14 +47,14 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
                         m0DofOut[4] * pLocalEpics->epicsInput.m0OutputMatrix[ii][4] +
                         m0DofOut[5] * pLocalEpics->epicsInput.m0OutputMatrix[ii][5];
                 m0Out[ii] = filterModuleD(dspPtr,dspCoeff,kk,fmIn,0);
-                dacOut[ii] = (int)m0Out[ii];
+                dacOut[0][ii] = (int)m0Out[ii];
         }
 
         // Do R0 input filtering
         for(ii=0;ii<6;ii++)
         {
                 kk = ii + 18;
-                r0SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[ii+6],0);
+                r0SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[0][ii+6],0);
         }
 
 
@@ -83,14 +83,14 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
                         r0DofOut[4] * pLocalEpics->epicsInput.r0OutputMatrix[ii][4] +
                         r0DofOut[5] * pLocalEpics->epicsInput.r0OutputMatrix[ii][5];
                 r0Out[ii] = filterModuleD(dspPtr,dspCoeff,kk,fmIn,0);
-                dacOut[ii+6] = (int)r0Out[ii];
+                dacOut[0][ii+6] = (int)r0Out[ii];
         }
 
         // Do L1 input filtering
         for(ii=0;ii<4;ii++)
         {
                 kk = ii + FILT_L1_ULSEN;
-                l1SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[ii+12],0);
+                l1SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[0][ii+12],0);
         }
 
         // Do L1 input matrix and DOF filtering
@@ -108,7 +108,7 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
         for(ii=0;ii<3;ii++)
         {
                 kk = ii + FILT_L1_LSC;
-                l1DofOut[ii] += filterModuleD(dspPtr,dspCoeff,kk,dWord[ii+12],0);
+                l1DofOut[ii] += filterModuleD(dspPtr,dspCoeff,kk,dWord[0][ii+12],0);
         }
 
         // L1 Output Filter Matrix
@@ -137,14 +137,14 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
         {
                 kk = ii + FILT_L1_ULOUT;
                 l1Out[ii] += filterModuleD(dspPtr,dspCoeff,kk,l1Out[ii],0);
-                dacOut[ii+12] = (int)l1Out[ii];
+                dacOut[0][ii+12] = (int)l1Out[ii];
         }
 
         // Do L2 input filtering
         for(ii=0;ii<4;ii++)
         {
                 kk = ii + FILT_L2_ULSEN;
-                l2SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[ii+16],0);
+                l2SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[0][ii+16],0);
         }
 
         // Do L2 input matrix and DOF filtering
@@ -162,7 +162,7 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
         for(ii=0;ii<3;ii++)
         {
                 kk = ii + FILT_L2_LSC;
-                l2DofOut[ii] += filterModuleD(dspPtr,dspCoeff,kk,dWord[ii+12],0);
+                l2DofOut[ii] += filterModuleD(dspPtr,dspCoeff,kk,dWord[0][ii+12],0);
         }
 
         // L2 Output Filter Matrix
@@ -197,7 +197,7 @@ void feCode(double dWord[],int dacOut[],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPIC
         for(ii=0;ii<3;ii++)
         {
                 kk = ii + FILT_L3_LSC;
-                l3DofOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[ii+12],0);
+                l3DofOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[0][ii+12],0);
         }
 
         // Do R0 output matrix and DOF filtering
