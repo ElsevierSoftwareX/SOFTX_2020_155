@@ -76,9 +76,7 @@ int overflowDac[4][16];;
 float *testpoint[20];
 
 
-CDS_EPICS pLocalEpics;   	/* Local mem ptr to EPICS control data	*/
-CDS_EPICS *pLocalEpicsRfm; 	/* Local mem ptr to EPICS control data	*/
-CDS_EPICS *plocalEpics;   	/* Local mem ptr to EPICS control data	*/
+CDS_EPICS *pLocalEpics;   	/* Local mem ptr to EPICS control data	*/
 
 
 /* 1/16 sec cycle counters for DAQS and ISC RFM IPC		*/
@@ -93,10 +91,6 @@ FILT_MOD *pDsp;			/* Ptr to SFM in shmem.		*/
 COEF dspCoeffMemSpace;		/* Local mem for SFM coeffs.	*/
 COEF *dspCoeff;			/* Ptr to SFM coeffs in local mem.	*/
 VME_COEF *pCoeff;		/* Ptr to SFM coeffs in shmem		*/
-int *epicsInAddShm;		/* Ptr to epics inputs in shmem		*/
-int *epicsInAddLoc;		/* Ptr to epics inputs in local mem	*/
-int *epicsOutAddLoc;		/* Ptr to epics outputs in local mem	*/
-int *epicsOutAddShm;		/* Ptr to epics outputs in shmem.	*/
 char daqArea[0x400000];		/* Space allocation for daqLib buffers	*/
 
 #ifdef OVERSAMPLE
@@ -184,22 +178,15 @@ void *fe_start(void *arg)
   float xExc[10];
   static int skipCycle = 0;
   static int dropSends = 0;
+  int diagWord = 0;
 
 
 // Do all of the initalization
 
   /* Init comms with EPICS processor */
   pEpicsComms = (RFM_FE_COMMS *)_epics_shm;
-  plocalEpics = (CDS_EPICS *)&pLocalEpics;
-  pLocalEpicsRfm = (CDS_EPICS *)&pEpicsComms->epicsSpace;
+  pLocalEpics = (CDS_EPICS *)&pEpicsComms->epicsSpace;
 
-  // Get addresses of epics in shared memory
-  epicsInAddShm = (int *)&pEpicsComms->epicsSpace.epicsShm.epicsInput;
-  epicsOutAddShm = (int *)&pEpicsComms->epicsSpace.epicsShm.epicsOutput;
-  epicsInAddLoc = (int *)&plocalEpics->epicsInput;
-  epicsOutAddLoc = (int *)&plocalEpics->epicsOutput;
-
-  printf("Local epics 0x%lx 0x%lx 0x%lx\n",(long)plocalEpics, epicsInAddLoc, epicsOutAddLoc);
 
   // Set pointers to SFM data buffers
   pDsp = (FILT_MOD *)(&pEpicsComms->dspSpace);
@@ -208,19 +195,16 @@ void *fe_start(void *arg)
   dspPtr[0] = (FILT_MOD *)&dsp;
 
   // Clear the FE reset which comes from Epics
-  pLocalEpicsRfm->epicsInput.vmeReset = 0;
+  pLocalEpics->epicsInput.vmeReset = 0;
 
   // Do not proceed until EPICS has had a BURT restore
   printf("Waiting for EPICS BURT\n");
   do{
 	usleep(1000000);
-  }while(!pLocalEpicsRfm->epicsInput.burtRestore);
-
-  /* Get all epics input data from SHM */
-  getEpicsData(epicsInAddShm, epicsInAddLoc,EPICS_IN_SIZE,0);
+  }while(!pLocalEpics->epicsInput.burtRestore);
 
   // Need this FE dcuId to make connection to FB
-  dcuId = pLocalEpicsRfm->epicsInput.dcuId;
+  dcuId = pLocalEpics->epicsInput.dcuId;
 
   // Make connections to FrameBuilder
   printf("Waiting for Network connect to FB - %d\n",dcuId);
@@ -244,7 +228,7 @@ void *fe_start(void *arg)
 	rdtscl(cpuClock[8]);
 	netRestored = 0;
 	printf("Net fail - recon try\n");
-	pLocalEpics.epicsOutput.diagWord |= 4;
+	pLocalEpics->epicsOutput.diagWord |= 4;
   }
 
   /* Initialize filter banks */
@@ -288,13 +272,13 @@ void *fe_start(void *arg)
 
   // Set an xtra TP to read out one pps signal
   testpoint[0] = (float *)&onePps;
-  pLocalEpics.epicsOutput.diagWord = 0;
-  pLocalEpics.epicsOutput.diags[1] = 0;
-  pLocalEpics.epicsOutput.diags[2] = 0;
+  pLocalEpics->epicsOutput.diagWord = 0;
+  pLocalEpics->epicsOutput.diags[1] = 0;
+  pLocalEpics->epicsOutput.diags[2] = 0;
 
 
   // Initialize DAQ function
-  status = daqWrite(0,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,0,pLocalEpics.epicsOutput.gdsMon,xExc);
+  status = daqWrite(0,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,0,pLocalEpics->epicsOutput.gdsMon,xExc);
   if(status == -1) 
   {
     printf("DAQ init failed -- exiting\n");
@@ -318,7 +302,7 @@ void *fe_start(void *arg)
   // Enter the coninuous FE control loop  **********************************************************
   while(!vmeDone){
 
-  	pLocalEpics.epicsOutput.diagWord = 0;
+  	diagWord = 0;
         rdtscl(cpuClock[2]);
 	// Check ADC has data ready; hang here until it does
 	status = checkAdcRdy(ADC_SAMPLE_COUNT);
@@ -380,7 +364,7 @@ void *fe_start(void *arg)
 			if((adcData[jj][ii] > 32000) || (adcData[jj][ii] < -32000))
 			  {
 				overflowAdc[jj][ii] ++;
-				pLocalEpics.epicsOutput.ovAccum ++;
+				pLocalEpics->epicsOutput.ovAccum ++;
 			  }
 		}
 	}
@@ -394,16 +378,16 @@ void *fe_start(void *arg)
 		if(onePps < 1000) firstTime += 100;
 	}
 
-	if(onePps < 1000)  pLocalEpics.epicsOutput.onePps = clock16K;
+	if(onePps < 1000)  pLocalEpics->epicsOutput.onePps = clock16K;
 	// Check if front end continues to be in sync with 1pps
 	// If not, set sync error flag
-	if(pLocalEpics.epicsOutput.onePps > 4) pLocalEpics.epicsOutput.diagWord |= 1;
+	if(pLocalEpics->epicsOutput.onePps > 4) diagWord |= 1;
 
 	if(!skipCycle)
  	{
 	// Call the front end specific software
         rdtscl(cpuClock[4]);
-	feCode(dWord,dacOut,dspPtr[0],dspCoeff,plocalEpics);
+	feCode(dWord,dacOut,dspPtr[0],dspCoeff,pLocalEpics);
         rdtscl(cpuClock[5]);
 
 	// Write out data to DAC modules
@@ -417,13 +401,13 @@ void *fe_start(void *arg)
 			{
 				dacOut[jj][ii] = 32000;
 				overflowDac[jj][ii] ++;
-				pLocalEpics.epicsOutput.ovAccum ++;
+				pLocalEpics->epicsOutput.ovAccum ++;
 			}
 			if(dacOut[jj][ii] < -32000) 
 			{
 				dacOut[jj][ii] = -32000;
 				overflowDac[jj][ii] ++;
-				pLocalEpics.epicsOutput.ovAccum ++;
+				pLocalEpics->epicsOutput.ovAccum ++;
 			}
 			*pDacData = (short)(dacOut[jj][ii] & 0xffff);
 			pDacData ++;
@@ -436,8 +420,8 @@ void *fe_start(void *arg)
   	if(firstTime != 0) 
 	{
 		// Call daqLib
-		pLocalEpics.epicsOutput.diags[3] = 
-			daqWrite(1,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2,pLocalEpics.epicsOutput.gdsMon,xExc);
+		pLocalEpics->epicsOutput.diags[3] = 
+			daqWrite(1,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
 		if(!attemptingReconnect)
 		{
 			// Check and clear network callbacks.
@@ -454,14 +438,14 @@ void *fe_start(void *arg)
 				status = myriNetReconnect(dcuId);
 				netRestored = 0;
 				printf("Net fail - recon try\n");
-				pLocalEpics.epicsOutput.diagWord |= 4;
+				diagWord |= 4;
         			rdtscl(cpuClock[8]);
 			}
 		}
 		// If net reconnect requested, check for receipt of return message from FB
 		if(attemptingReconnect == 2) 
 		{
-			pLocalEpics.epicsOutput.diagWord |= 4;
+			diagWord |= 4;
 			status = myriNetCheckReconnect();
 			if(status == 0)
 			{
@@ -490,7 +474,7 @@ void *fe_start(void *arg)
 				attemptingReconnect = 0;		
 				myGmError2 = 0;
 				printf("Continue sending DAQ data\n");
-				pLocalEpics.epicsOutput.diags[2] = 0;
+				pLocalEpics->epicsOutput.diags[2] = 0;
 			}
 		}
 	}
@@ -499,8 +483,7 @@ void *fe_start(void *arg)
 	skipCycle = 0;
 
 	/* Update Epics variables */
-	vmeDone = updateEpics(subcycle,epicsInAddShm,epicsOutAddShm,epicsInAddLoc,epicsOutAddLoc,
-				dspPtr[0],pDsp,dspCoeff,pCoeff,plocalEpics);	
+	vmeDone = updateEpics(subcycle, dspPtr[0],pDsp,dspCoeff,pCoeff,pLocalEpics);	
 
 	// Measure time to complete 1 cycle
         rdtscl(cpuClock[1]);
@@ -520,15 +503,15 @@ void *fe_start(void *arg)
 
         if((subcycle == 0) && (daqCycle == 15))
         {
-	  pLocalEpics.epicsOutput.cpuMeter = timeHold;
-	  pLocalEpics.epicsOutput.cpuMeterMax = timeHoldMax;
+	  pLocalEpics->epicsOutput.cpuMeter = timeHold;
+	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
           timeHold = 0;
-	  pLocalEpics.epicsOutput.adcWaitTime = adcHoldTime;
-	  if(adcHoldTime > 60) pLocalEpics.epicsOutput.diagWord |= 2;
-	  if(timeHoldMax > 60) pLocalEpics.epicsOutput.diagWord |= 8;
-  	  if(pLocalEpicsRfm->epicsInput.diagReset)
+	  pLocalEpics->epicsOutput.adcWaitTime = adcHoldTime;
+	  if(adcHoldTime > 60) diagWord |= 2;
+	  if(timeHoldMax > 60) diagWord |= 8;
+  	  if(pLocalEpics->epicsInput.diagReset)
 	  {
-		pLocalEpicsRfm->epicsInput.diagReset = 0;
+		pLocalEpics->epicsInput.diagReset = 0;
 		adcHoldTime = 0;
 		timeHoldMax = 0;
 		printf("DIAG RESET\n");
@@ -536,24 +519,24 @@ void *fe_start(void *arg)
         }
         if((subcycle == 0) && (daqCycle == 14))
         {
-	  pLocalEpics.epicsOutput.diags[0] = usrHoldTime;
+	  pLocalEpics->epicsOutput.diags[0] = usrHoldTime;
 	  usrHoldTime = 0;
 	  if(attemptingReconnect && ((cdsNetStatus != 0) || (dropSends != 0)))
 	  {
 		status = myriNetReconnect(dcuId);
 		cdsNetStatus = 0;
-		pLocalEpics.epicsOutput.diags[2] ++;
+		pLocalEpics->epicsOutput.diags[2] ++;
 		dropSends = 0;
 	  }
-  	  if(pLocalEpicsRfm->epicsInput.syncReset)
+  	  if(pLocalEpics->epicsInput.syncReset)
 	  {
-		pLocalEpicsRfm->epicsInput.syncReset = 0;
+		pLocalEpics->epicsInput.syncReset = 0;
 		skipCycle = 1;
 	  }
-  	  if((pLocalEpicsRfm->epicsInput.overflowReset) || (pLocalEpics.epicsOutput.ovAccum > 0x1000000))
+  	  if((pLocalEpics->epicsInput.overflowReset) || (pLocalEpics->epicsOutput.ovAccum > 0x1000000))
 	  {
-		pLocalEpicsRfm->epicsInput.overflowReset = 0;
-		pLocalEpics.epicsOutput.ovAccum = 0;
+		pLocalEpics->epicsInput.overflowReset = 0;
+		pLocalEpics->epicsOutput.ovAccum = 0;
 	  }
         }
         if((subcycle == 0) && (daqCycle == 13))
@@ -562,7 +545,7 @@ void *fe_start(void *arg)
 	  {
 	    for(ii=0;ii<32;ii++)
 	    {
-		pLocalEpics.epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
+		pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
 		overflowAdc[jj][ii] = 0;
 	    }
 	  }
@@ -570,11 +553,12 @@ void *fe_start(void *arg)
 	  {
 	    for(ii=0;ii<16;ii++)
 	    {
-		pLocalEpics.epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
+		pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
 		overflowDac[jj][ii] = 0;
 	    }
 	  }
         }
+	pLocalEpics->epicsOutput.diagWord = diagWord;
 
   }
 
