@@ -1,7 +1,3 @@
-
-#define EPICS_IN_SIZE	189
-#define EPICS_OUT_SIZE	234
-
 /* Assign filter names to filter number */
 #define FILT_M0_SEN1    0
 #define FILT_M0_SEN2    1
