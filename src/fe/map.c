@@ -212,8 +212,8 @@ int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 	  printk("DAC CSR = 0x%x\n",dacPtr[devNum]->CSR);
 
 	  dacPtr[devNum]->BOR = GSAO_FIFO_16;
-	  // dacPtr->BOR |= (GSAO_ENABLE_CLK | GSAO_EXTERN_CLK);
-	  dacPtr[devNum]->BOR |= (GSAO_ENABLE_CLK);
+	  dacPtr[devNum]->BOR |= (GSAO_ENABLE_CLK | GSAO_EXTERN_CLK);
+	  // dacPtr[devNum]->BOR |= (GSAO_ENABLE_CLK);
 	  printk("DAC BOR = 0x%x\n",dacPtr[devNum]->BOR);
 	  pHardware->pci_dac[devNum] = 
 		pci_alloc_consistent(dacdev,0x200,&dac_dma_handle[devNum]);
@@ -603,7 +603,7 @@ int myriNetCheckCallback()
         case GM_RECV_EVENT:
         case GM_PEER_RECV_EVENT:
         case GM_FAST_PEER_RECV_EVENT:
-          printk ("[send] Receive Event (UNEXPECTED)\n");
+          // printk ("[send] Receive Event (UNEXPECTED)\n");
 
           recv_buffer = gm_ntohp (event->recv.buffer);
           size = (unsigned int)gm_ntoh_u8 (event->recv.size);
