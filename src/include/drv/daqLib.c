@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.12 2005/12/02 00:43:33 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.13 2005/12/02 02:02:34 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -524,6 +524,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 				dspPtr[localTable[ii].sysNum]->data[localTable[ii].fmNum].exciteInput = *dataPtr;
 			}
 		}
+		else dspPtr[localTable[ii].sysNum]->data[localTable[ii].fmNum].exciteInput = 0.0;
   	}
   }
 
