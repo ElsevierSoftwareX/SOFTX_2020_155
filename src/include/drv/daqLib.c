@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.11 2005/11/19 01:27:30 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.12 2005/12/02 00:43:33 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -134,6 +134,7 @@ static int xferDone;
 static int crcLength;		/* Number of bytes in 1/16 sec data 	*/
 static char *pDaqBuffer[2];	/* Pointers to local swing buffers.	*/
 static DAQ_LKUP_TABLE localTable[DCU_MAX_CHANNELS];
+static DAQ_LKUP_TABLE excTable[8];
 static char *pWriteBuffer;	/* Ptr to swing buff to write data	*/
 static char *pReadBuffer;	/* Ptr to swing buff to xmit data to FB */
 static int phase;		/* 0-1, switches swing buffers.		*/
@@ -342,7 +343,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     // Following can be uncommented for testing.
     // gdsPtr->tp[3][0][0] = 11001;
     // gdsPtr->tp[3][0][1] = 11002;
-    // gdsPtr->tp[0][0][0] = 1000;
+    // gdsPtr->tp[0][0][0] = 5000;
 
     // Set pointer to EXC data in shmem.
     exciteDataPtr = (char *)(_epics_shm + DATA_OFFSET_DCU(DCU_ID_EX_16K));
@@ -702,6 +703,13 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		/* Get EXC number from shared memory */
 		testVal = gdsPtr->tp[0][0][ii];
 
+		// Have to clear an exc if it goes away
+		if((testVal != excTable[ii].sigNum) && (excTable[ii].sigNum != 0))
+		{
+		  dspPtr[excTable[ii].sysNum]->data[excTable[ii].fmNum].exciteInput = 0.0;
+		  excTable[ii].sigNum = 0;
+		}
+
 		/* Check if the EXC selection is valid for this front end's filter module EXC 
 		   If it is, load the local table with the proper lookup values to find the
 		   signal and clear the EXC status in shared mem.                           */
@@ -714,6 +722,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
           	  localTable[totalChans].fmNum = jj % daqRange.filtExSize;
           	  localTable[totalChans].sigNum = ii; 
 	  	  localTable[totalChans].decFactor = 1;
+		  excTable[ii].sigNum = testVal;
+		  excTable[ii].sysNum = localTable[totalChans].sysNum;
+		  excTable[ii].fmNum = localTable[totalChans].fmNum;
       		  dataInfo.tp[totalChans].dataType = 4;
 		  offsetAccum += sysRate * 4;
 		  localTable[totalChans+1].offset = offsetAccum;
