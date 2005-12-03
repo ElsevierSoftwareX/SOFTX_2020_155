@@ -207,7 +207,7 @@ int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 	  }while((dacPtr[devNum]->BCR & GSAO_RESET) != 0);
 
 	  // Following setting will also enable 2s complement by clearing offset binary bit
-	  dacPtr[devNum]->BCR = (GSAO_OUT_RANGE_05 | GSAO_SIMULT_OUT);
+	  dacPtr[devNum]->BCR = (GSAO_OUT_RANGE_10 | GSAO_SIMULT_OUT);
 	  printk("DAC BCR after init = 0x%x\n",dacPtr[devNum]->BCR);
 	  printk("DAC CSR = 0x%x\n",dacPtr[devNum]->CSR);
 
