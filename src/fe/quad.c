@@ -136,7 +136,7 @@ void feCode(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspCoeff,
         for(ii=0;ii<4;ii++)
         {
                 kk = ii + FILT_L1_ULOUT;
-                l1Out[ii] += filterModuleD(dspPtr,dspCoeff,kk,l1Out[ii],0);
+                l1Out[ii] = filterModuleD(dspPtr,dspCoeff,kk,l1Out[ii],0);
                 dacOut[1][ii] = (int)l1Out[ii];
         }
 
@@ -190,7 +190,7 @@ void feCode(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspCoeff,
         for(ii=0;ii<4;ii++)
         {
                 kk = ii + FILT_L2_ULOUT;
-                l2Out[ii] += filterModuleD(dspPtr,dspCoeff,kk,l2Out[ii],0);
+                l2Out[ii] = filterModuleD(dspPtr,dspCoeff,kk,l2Out[ii],0);
                 dacOut[1][ii+4] = (int)l2Out[ii];
         }
 
