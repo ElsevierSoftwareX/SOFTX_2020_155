@@ -18,6 +18,43 @@ void feCode(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspCoeff,
 
   int ii,kk;
 
+	/* ADC Mapping: *************************************************
+		00 = M0 Face1			16 = NC
+		01 = M0 Face2			17 = NC
+		02 = M0 Face3			18 = L2-UL
+		03 = M0 Left			19 = L2-LL
+		04 = M0 Right			20 = L2-UR
+		05 = M0 Side			21 = L2-LR
+		06 = R0 Face1
+		07 = R0 Face2
+		08 = R0 Face3
+		09 = R0 Left
+		10 = R0 Right
+		11 = R0 Side
+		12 = Upper Inter L1-UL
+		13 = Upper Inter L1-LL
+		14 = Upper Inter L1-UR
+		15 = Upper Inter L1-LR
+	*/
+	/* DAC Mapping: *************************************************
+		00 = M0 Face1			00 = NC
+		01 = M0 Face2			01 = NC
+		02 = M0 Face3			02 = L2-UL
+		03 = M0 Left			03 = L2-LL
+		04 = M0 Right			04 = L2-UR
+		05 = M0 Side			05 = L2-LR
+		06 = R0 Face1			06 = NC
+		07 = R0 Face2			07 = NC
+		08 = R0 Face3			08 = ESD Bias
+		09 = R0 Left			09 = ESD Quad 1
+		10 = R0 Right			10 = ESD Quad 2
+		11 = R0 Side			11 = ESD Quad 3
+		12 = Upper Inter L1-UL		12 = ESD Quad 4
+		13 = Upper Inter L1-LL		13 = NC
+		14 = Upper Inter L1-UR		14 = NC
+		15 = Upper Inter L1-LR		15 = NC
+	*/
+
         // Do M0 input filtering
         for(ii=0;ii<6;ii++)
                 m0SenOut[ii] = filterModuleD(dspPtr,dspCoeff,ii,dWord[0][ii],0);
@@ -137,14 +174,14 @@ void feCode(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspCoeff,
         {
                 kk = ii + FILT_L1_ULOUT;
                 l1Out[ii] = filterModuleD(dspPtr,dspCoeff,kk,l1Out[ii],0);
-                dacOut[1][ii] = (int)l1Out[ii];
+                dacOut[0][ii+12] = (int)l1Out[ii];
         }
 
         // Do L2 input filtering
         for(ii=0;ii<4;ii++)
         {
                 kk = ii + FILT_L2_ULSEN;
-                l2SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[0][ii+16],0);
+                l2SenOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,dWord[0][ii+18],0);
         }
 
         // Do L2 input matrix and DOF filtering
@@ -191,20 +228,20 @@ void feCode(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspCoeff,
         {
                 kk = ii + FILT_L2_ULOUT;
                 l2Out[ii] = filterModuleD(dspPtr,dspCoeff,kk,l2Out[ii],0);
-                dacOut[1][ii+4] = (int)l2Out[ii];
+                dacOut[1][ii+2] = (int)l2Out[ii];
         }
 
         // Place for L3 LSC, ASCP, ASCY
         for(ii=0;ii<3;ii++)
         {
-                kk = ii + FILT_L3_LSC;
+                kk = ii + FILT_ESD_LSC;
                 l3DofOut[ii] = filterModuleD(dspPtr,dspCoeff,kk,0.0,0);
         }
 
         // Do L3 output matrix and DOF filtering
         for(ii=0;ii<5;ii++)
         {
-                kk = ii + FILT_L3_ULOUT;
+                kk = ii + FILT_ESD_BIAS;
                 fmIn =
                         l3DofOut[0] * pLocalEpics->epicsInput.l3OutputMatrix[0][ii] +
                         l3DofOut[1] * pLocalEpics->epicsInput.l3OutputMatrix[1][ii] +
