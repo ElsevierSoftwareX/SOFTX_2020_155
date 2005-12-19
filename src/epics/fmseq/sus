@@ -86,14 +86,14 @@ Q1_L2_ULOUT
 Q1_L2_LLOUT
 Q1_L2_UROUT
 Q1_L2_LROUT
-Q1_L3_LSC
-Q1_L3_ASCP
-Q1_L3_ASCY
-Q1_L3_ULOUT
-Q1_L3_LLOUT
-Q1_L3_UROUT
-Q1_L3_LROUT
-Q1_L3_SDOUT
+Q1_ESD_LSC
+Q1_ESD_ASCP
+Q1_ESD_ASCY
+Q1_ESD_BIAS
+Q1_ESD_Q1
+Q1_ESD_Q2
+Q1_ESD_Q3
+Q1_ESD_Q4
 
 EPICS CDS_EPICS dspSpace coeffSpace epicsSpace
 
@@ -103,7 +103,7 @@ MATRIX Q1_R0_INMTRX_ 6x6 epicsInput.r0InputMatrix
 MATRIX Q1_R0_OUTMTRX_ 6x6 epicsInput.r0OutputMatrix
 MATRIX Q1_L1_INMTRX_ 4x3 epicsInput.l1InputMatrix
 MATRIX Q1_L2_INMTRX_ 4x3 epicsInput.l2InputMatrix
-MATRIX Q1_L3_INMTRX_ 3x5 epicsInput.l3OutputMatrix
+MATRIX Q1_ESD_INMTRX_ 3x5 epicsInput.l3OutputMatrix
 
 MOMENTARY VME_RESET epicsInput.vmeReset int ai 0
 MOMENTARY DIAG_RESET epicsInput.diagReset int ai 0
