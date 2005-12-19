@@ -30,7 +30,9 @@
 #include <semaphore.h>
 #include <linux/slab.h>
 #include <drv/cdsHardware.h>
-#include <quad.h>
+#define MAX_FILTERS     960     /* Max number of filters to one file    */
+#define MAX_MODULES     96      /* Max number of modules to one file    */
+
 #define INLINE  inline
 #define MMAP_SIZE (64*1024*1024 - 5000)
 char *_epics_shm;		/* Ptr to computer shared memory		*/
@@ -67,6 +69,7 @@ extern int myriNetReconnect(int);		/* Make connects to FB.			*/
 extern int myriNetCheckReconnect();		/* Check FB net connected.		*/
 extern int myriNetDrop();		/* Check FB net connected.		*/
 extern int cdsNetStatus;
+extern unsigned int readDio(CDS_HARDWARE *,int);
 
 
 /* ADC/DAC overflow variables */
@@ -389,6 +392,7 @@ void *fe_start(void *arg)
         rdtscl(cpuClock[4]);
 	feCode(dWord,dacOut,dspPtr[0],dspCoeff,pLocalEpics);
         rdtscl(cpuClock[5]);
+ //status = readDio(&cdsPciModules,0);
 
 	// Write out data to DAC modules
 	for(jj=0;jj<cdsPciModules.dacCount;jj++)
@@ -593,6 +597,7 @@ int main(int argc, char **argv)
 	printf("%d PCI cards found\n",status);
 	printf("%d ADC cards found\n",cdsPciModules.adcCount);
 	printf("%d DAC cards found\n",cdsPciModules.dacCount);
+	printf("%d DIO cards found\n",cdsPciModules.dioCount);
 
 	printf("Initializing space for daqLib buffers\n");
 	daqBuffer = (long)&daqArea[0];
