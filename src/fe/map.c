@@ -1,5 +1,8 @@
 #include <linux/types.h>
 #include <linux/pci.h>
+#include <asm/io.h>
+#include <asm/uaccess.h>
+
 #ifdef USE_VMIC_RFM
 #include <drv/vmic5579.h>
 #include <drv/vmic5565.h>
@@ -170,6 +173,38 @@ int ii;
   // dacPtr->BOR |= (GSAO_SFT_TRIG);
 }
 #endif
+
+// *****************************************************************************
+// Routine to initialize ACCESS DIO modules
+// *****************************************************************************
+unsigned int readDio(CDS_HARDWARE *pHardware,int modNum)
+{
+  unsigned int status;
+	status = inw(0x3400);
+	return(status);
+}
+
+// *****************************************************************************
+// Routine to initialize ACCESS DIO modules
+// *****************************************************************************
+int mapDio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
+{
+  static unsigned int pci_io_addr;
+  int devNum;
+
+	  devNum = pHardware->dioCount;
+	  pci_enable_device(diodev);
+	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_2,&pci_io_addr);
+	  printk("dio pci2 = 0x%x\n",pci_io_addr);
+	  pHardware->pci_dio[devNum] = (pci_io_addr - 1);
+	  printk("diospace = 0x%x\n",pHardware->pci_dio[devNum]);
+	  outb_p(DIO_C_OUTPUT,pHardware->pci_dio[devNum]+DIO_CTRL_REG);
+	  outb(0x00,pHardware->pci_dio[devNum]+DIO_C_REG);
+
+	  pHardware->dioCount ++;
+	  return(0);
+}
+
 // *****************************************************************************
 // Routine to initialize DAC modules
 // *****************************************************************************
@@ -314,6 +349,17 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		status = mapAdc(pCds,dacdev);
 		modCount ++;
 	}
+  }
+
+  dacdev = NULL;
+  status = 0;
+  // Search system for Digital I/O modules
+  while((dacdev = pci_find_device(ACC_VID, ACC_TID, dacdev))) {
+		printk("dio card on bus %d; device %d\n",
+			dacdev->bus->number,
+			dacdev->devfn);
+		status = mapDio(pCds,dacdev);
+		modCount ++;
   }
   return(modCount);
 }
