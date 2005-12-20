@@ -87,14 +87,14 @@
 #define FILT_L2_LLOUT    85
 #define FILT_L2_UROUT    86
 #define FILT_L2_LROUT    87
-#define FILT_L3_LSC    88
-#define FILT_L3_ASCP    89
-#define FILT_L3_ASCY    90
-#define FILT_L3_ULOUT    91
-#define FILT_L3_LLOUT    92
-#define FILT_L3_UROUT    93
-#define FILT_L3_LROUT    94
-#define FILT_L3_SDOUT    95
+#define FILT_ESD_LSC    88
+#define FILT_ESD_ASCP    89
+#define FILT_ESD_ASCY    90
+#define FILT_ESD_BIAS    91
+#define FILT_ESD_Q1    92
+#define FILT_ESD_Q2    93
+#define FILT_ESD_Q3    94
+#define FILT_ESD_Q4    95
 
 
 typedef struct CDS_EPICS_IN {
