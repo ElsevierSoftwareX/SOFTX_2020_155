@@ -9,9 +9,6 @@
 #define RFM_WRITE	0x0
 #define RFM_READ	0x8
 #endif
-#include <drv/gsaadc.h>		/* GSA ADC module defs */
-#include <drv/gsadac.h>		/* GSA DAC module defs */
-#include <drv/plx9056.h>	/* PCI interface chip for GSA products */
 #include <drv/gmnet.h>
 #include <drv/cdsHardware.h>
 
