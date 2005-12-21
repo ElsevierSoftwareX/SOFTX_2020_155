@@ -1,16 +1,46 @@
+/*----------------------------------------------------------------------------- */
+/*                                                                      	*/
+/*                      -------------------                             	*/
+/*                                                                      	*/
+/*                             LIGO                                     	*/
+/*                                                                      	*/
+/*        THE LASER INTERFEROMETER GRAVITATIONAL WAVE OBSERVATORY.      	*/
+/*                                                                      	*/
+/*                     (C) The LIGO Project, 2005.                      	*/
+/*                                                                      	*/
+/*                                                                      	*/
+/* File: cdsHardware.h								*/
+/* Description:									*/
+/*	Standard header files describing all PCI hardware used in CDS		*/
+/*	front end control systems.						*/
+/*                                                                      	*/
+/* California Institute of Technology                                   	*/
+/* LIGO Project MS 18-34                                                	*/
+/* Pasadena CA 91125                                                    	*/
+/*                                                                      	*/
+/* Massachusetts Institute of Technology                                	*/
+/* LIGO Project MS 20B-145                                              	*/
+/* Cambridge MA 01239                                                   	*/
+/*                                                                      	*/
+/*----------------------------------------------------------------------------- */
+
+
+/* Define maximum number of each PCI module supported.				*/
 #define MAX_ADC_MODULES		4
 #define MAX_DAC_MODULES		4
 #define MAX_DIO_MODULES		4
+
+/* Standard structure to maintain PCI module information.			*/
 typedef struct CDS_HARDWARE{
-	int dacCount;
-	long pci_dac[MAX_DAC_MODULES];
-	int adcCount;
-	long pci_adc[MAX_ADC_MODULES];
-	int dioCount;
-	unsigned short pci_dio[MAX_DIO_MODULES];
+	int dacCount;			/* Number of DAC modules found 		*/
+	long pci_dac[MAX_DAC_MODULES];	/* Remapped addresses of DAC modules	*/
+	int adcCount;			/* Number of ADC modules found		*/
+	long pci_adc[MAX_ADC_MODULES];	/* Remapped addresses of ADC modules	*/
+	int dioCount;			/* Number of DIO modules found		*/
+	unsigned short pci_dio[MAX_DIO_MODULES];	/* io registers of DIO	*/
 }CDS_HARDWARE;
 
-/* ACCESS DIO Module Definitions ***************************************************** */
+/* ACCESS DIO Module Definitions ********************************************** */
 #define ACC_VID	0x494F
 #define ACC_TID	0x0C50
 #define DIO_ALL_INPUT	0x9B
@@ -21,7 +51,8 @@ typedef struct CDS_HARDWARE{
 #define DIO_C_REG	0x2
 #define DIO_CTRL_REG	0x3
 
-/* PLX Chip Definitions for GSA ADC/DAC Modules ************************************** */
+/* PLX Chip Definitions for GSA ADC/DAC Modules ******************************* */
+/* Common DMA register definition		*/
 typedef struct PLX_9056_DMA{
         unsigned int pad[32];   /* DMA register is at 0x80 offset from base of PLX chip */
         unsigned int DMA0_MODE;         /* 0x80 */
@@ -37,18 +68,20 @@ typedef struct PLX_9056_DMA{
         unsigned int DMA_CSR;           /* 0xA8 */
 }PLX_9056_DMA;
 
+/* Struct to point to interrupt control register when using interrupts from ADC	*/
 typedef struct PLX_9056_INTCTRL{
         unsigned int pad[26];
         unsigned int INTCSR;
 }PLX_9056_INTCTRL;
 
-#define PLX_VID         0x10b5
-#define PLX_TID         0x9056
+#define PLX_VID         0x10b5		/* PLX9056 Vendor Id	*/
+#define PLX_TID         0x9056		/* PLX9056 Type Id	*/
 
 
 /* GSA ADC Module Definitions ********************************************************* */
-#define ADC_SS_ID       0x3101
+#define ADC_SS_ID       0x3101	/* Subsystem ID to locate module on PCI bus	*/
 
+/* Structure defining ADC module PCI register layout	*/
 typedef struct GSA_ADC_REG{
         unsigned int BCR;       /* 0x0 */
         unsigned int INTCR;     /* 0x4 */
@@ -90,6 +123,7 @@ typedef struct GSA_ADC_REG{
 #define GSAI_AUTO_CAL           0x2000
 
 /* GSA DAC Module Definitions ********************************************************* */
+/* Structure defining DAC module PCI register layout	*/
 typedef struct GSA_DAC_REG{
         unsigned int BCR;               /* 0x00 */
         unsigned int CSR;               /* 0x04 */
@@ -101,7 +135,7 @@ typedef struct GSA_DAC_REG{
         unsigned int ADJ_CLK;           /* 0x1C */
 }GSA_DAC_REG;
 
-#define DAC_SS_ID               0x3120
+#define DAC_SS_ID               0x3120	/* Subsystem ID to find module on PCI bus	*/
 #define GSAO_RESET              0x8000
 #define GSAO_OUT_RANGE_25       0x10000
 #define GSAO_OUT_RANGE_05       0x20000
