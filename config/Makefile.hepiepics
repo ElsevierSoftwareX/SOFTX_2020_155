@@ -1,0 +1,42 @@
+
+# Define Epics system name. It should be unique.
+TARGET = hepiepics
+
+# Straight seqiencer code
+# SRC = src/epics/seq/daqConfig.st
+
+SRC = build/$(TARGET)/hepi.st
+
+SRC += src/drv/rfm.c
+SRC += src/drv/param.c
+SRC += src/drv/crc.c
+SRC += src/drv/fmReadCoeff.c
+
+# Database files to be loaded on target system on all inteferometers
+DB += build/$(TARGET)/hepi1.db
+
+# Define which interferometers this is intended for
+IFO = M1 
+SITE = mit
+
+# Define which state programs to run, specify parameters
+SEQ += 'hepi,("ifo=M1, site=mit, sys=SEI-, daqsys=HEPI,sysnum=21")'
+
+# Define if need to be on 5579 net
+#CFLAGS += -DRFM_5579
+#LIBFLAGS += -L/usr/lib/rmnet -lrmnet
+
+# Define if need to be on 5565 net
+#CFLAGS += -DRFM_5565
+#LIBFLAGS += -L/usr/lib/rfm2g -lrfm2g
+
+CFLAGS += -DHEPI
+
+# Build rules
+include config/Makefile.linux
+
+
+# Extra build rules
+build/$(TARGET)/hepi1.db: build/$(TARGET)/hepi.db
+	sed 's/%SYS%/SEI-/g' $< > $@
+
