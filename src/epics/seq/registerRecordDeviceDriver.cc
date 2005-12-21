@@ -68,14 +68,14 @@ static const dset * const devsl[7] = {
 };
 
 epicsShareExtern void (*pvar_func_susRegistrar)(void);
-epicsShareExtern void (*pvar_func_daqConfigRegistrar)(void);
+// epicsShareExtern void (*pvar_func_daqConfigRegistrar)(void);
 
 int sus_registerRecordDeviceDriver(DBBASE *pbase)
 {
     registerRecordTypes(pbase, 7, recordTypeNames, rtl);
     registerDevices(pbase, 7, deviceSupportNames, devsl);
     (*pvar_func_susRegistrar)();
-    (*pvar_func_daqConfigRegistrar)();
+//    (*pvar_func_daqConfigRegistrar)();
     return 0;
 }
 
