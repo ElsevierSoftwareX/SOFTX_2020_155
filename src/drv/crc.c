@@ -1,4 +1,4 @@
-unsigned long crctab[256] =
+unsigned int crctab[256] =
 {
   0x0,
   0x04C11DB7, 0x09823B6E, 0x0D4326D9, 0x130476DC, 0x17C56B6B,
@@ -56,8 +56,8 @@ unsigned long crctab[256] =
 
 /* Calculate CRC checksum on array 'cp' of length 'bytes'.
    Use new checksum to the 'crc' */
-unsigned long
-crc_ptr(char* cp, unsigned int bytes, unsigned long crc)
+unsigned int
+crc_ptr(char* cp, unsigned int bytes, unsigned int crc)
 {
   while (bytes--)
     crc = (crc << 8) ^ crctab[((crc >> 24) ^ *(cp++)) & 0xFF];
@@ -66,8 +66,8 @@ crc_ptr(char* cp, unsigned int bytes, unsigned long crc)
 }
 
 /* Finish calculating the CRC checksum using the total length 'bytes' */
-unsigned long
-crc_len(unsigned long bytes, unsigned long crc)
+unsigned int
+crc_len(unsigned int bytes, unsigned int crc)
 {
   while (bytes > 0 ) {
     crc = (crc << 8) ^ crctab[((crc >> 24) ^ bytes) & 0xFF];
