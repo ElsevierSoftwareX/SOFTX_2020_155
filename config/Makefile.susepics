@@ -3,7 +3,7 @@
 TARGET = susepics
 
 # Straight seqiencer code
-SRC = src/epics/seq/daqConfig.st
+# SRC = src/epics/seq/daqConfig.st
 
 # Tacking number generates the numbered version of the base sequencer program.
 # This is required in few cases to run same code multiple times as all state code
@@ -27,7 +27,7 @@ SRC = src/epics/seq/daqConfig.st
 # LSC
 #SRC += src/epics/seq/xycom.st
 #SRC += src/epics/seq/controllerG2.st
-SRC += build/$(TARGET)/sus.st
+SRC = build/$(TARGET)/sus.st
 
 SRC += src/drv/rfm.c
 SRC += src/drv/param.c
@@ -35,7 +35,7 @@ SRC += src/drv/crc.c
 SRC += src/drv/fmReadCoeff.c
 
 # Database files to be loaded on target system on all inteferometers
-DB = src/epics/db/susdaq.db
+#DB = src/epics/db/susdaq.db
 #DB += src/epics/db/ascmcDaqConfig.db
 #DB += src/epics/db/lscDaqConfig.db
 #DB += src/epics/db/5565.db
@@ -60,7 +60,7 @@ IFO = M1
 SITE = mit
 
 # Define which state programs to run, specify parameters
-SEQ += 'daqConfig,("ifo=M1,site=mit,sys=QUAD,sysnum=20")'
+#SEQ += 'daqConfig,("ifo=M1,site=mit,sys=QUAD,daqsys=SUS-,sysnum=20")'
 #SEQ += 'daqConfig1,("ifo=%IFO%,site=%SITE%,sys=QUAD,sysnum=9")'
 #SEQ += 'daqConfig2,("ifo=%IFO%,site=%SITE%,sys=IOO,sysnum=26")'
 # ASC
@@ -73,7 +73,7 @@ SEQ += 'daqConfig,("ifo=M1,site=mit,sys=QUAD,sysnum=20")'
 #SEQL1 += 'lscSuper,("ifo=%IFO%,server=10.100.0.3")'
 #SEQH1 += 'lscSuper,("ifo=%IFO%,server=10.1.0.2")'
 #SEQH2 += 'lscSuper,("ifo=%IFO%,server=10.1.0.2")'
-SEQ += 'sus,("ifo=M1, site=mit, sys=SUS-, sysnum=20")'
+SEQ += 'sus,("ifo=M1, site=mit, sys=SUS-, daqsys=QUAD,sysnum=9")'
 #SEQ += 'xycom,("ifo=%IFO%")'
 
 # Define if need to be on 5579 net
@@ -83,6 +83,7 @@ SEQ += 'sus,("ifo=M1, site=mit, sys=SUS-, sysnum=20")'
 # Define if need to be on 5565 net
 #CFLAGS += -DRFM_5565
 #LIBFLAGS += -L/usr/lib/rfm2g -lrfm2g
+CFLAGS += -DQUAD
 
 # Build rules
 include config/Makefile.linux
