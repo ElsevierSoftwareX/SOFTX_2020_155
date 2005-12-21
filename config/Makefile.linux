@@ -1,6 +1,6 @@
 # Linux Epics IOC system build rules
 
-EPICS_ROOT=/opt/epics-3.14.7-linux-prof
+EPICS_ROOT=/opt/epics-3.14.7-linux
 #EPICS_ROOT=/cvs/cds/epics/release/r3.14.linux
 
 # Switching to 3.14.6 Epics; 28 Oct 2004
@@ -13,7 +13,7 @@ EPICS_ROOT=/opt/epics-3.14.7-linux-prof
 ###
 EPICS_BASE=$(EPICS_ROOT)/base
 EPICS_SEQ_BASE=$(EPICS_ROOT)/seq
-EPICS_HOST_ARCH=linux-x86-debug
+EPICS_HOST_ARCH=linux-x86
 
 # Do not delete these intermediate files
 .SECONDARY: build/$(TARGET)/%.i
@@ -43,16 +43,16 @@ CXXFLAGS = $(CFLAGS)
 SNCFLAGS += +a
 
 # Sequencer file (.st) compiler
-SNC = $(EPICS_SEQ_BASE)/bin/linux-x86-debug/snc $(SNCFLAGS)
+SNC = $(EPICS_SEQ_BASE)/bin/linux-x86/snc $(SNCFLAGS)
 
 # Sequencer generator files
 FMSEQFILES = src/epics/util/fmseq.pl src/epics/util/skeleton.db src/epics/util/skeleton.st
 
 # Standard Epics IOC server library flags
 LIBFLAGS += -g -pg
-LIBFLAGS += -L$(EPICS_BASE)/lib/linux-x86-debug 
-LIBFLAGS += -L$(EPICS_SEQ_BASE)/lib/linux-x86-debug
-#LIBFLAGS += $(EPICS_SEQ_BASE)/bin/linux-x86-debug/devSequencer.o
+LIBFLAGS += -L$(EPICS_BASE)/lib/linux-x86
+LIBFLAGS += -L$(EPICS_SEQ_BASE)/lib/linux-x86
+#LIBFLAGS += $(EPICS_SEQ_BASE)/bin/linux-x86/devSequencer.o
 LIBFLAGS += -lseq -lseqDev -lpv -lsoftDevIoc -lrecIoc
 ifeq (,$(findstring tcsepics, $(TARGET)))
 LIBFLAGS += -ltestDevIoc 
