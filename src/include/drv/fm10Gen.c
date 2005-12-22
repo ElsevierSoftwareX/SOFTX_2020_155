@@ -1,62 +1,32 @@
-/***********************************************************************/
-/* Module Name: fm10Gen.c                                              */
-/*                                                                     */
-/* Module Description: Generic Filter Module Functions                 */
-/*                                                                     */
-/* Module Functions:                                                   */
-/*  double iir_filter(double input,double *coef,int n,double *history) */
-/*  double filterModule(...)                                           */
-/*  double inputModule(FILT_MOD *pFilt, int modNum)                    */
-/*  void   outputModule(FILT_MOD *pFilt,int modNum, double modOut)     */
-/*                                                                     */
-/* Revision History:                                                   */
-/* Rel   Date       Engineer    Comments                               */
-/*                                                                     */
-/* 1.0   30Jan02    Lori Hines  Built to specifications described in   */
-/*                              Rolf's CDS Standard Digital Filter     */
-/*                              Software document.                     */
-/*                                                                     */
-/* Documentation References:                                           */
-/*      Man Pages:                                                     */
-/*      References:                                                    */
-/*                                                                     */
-/* Author Information:                                                 */
-/*      Name          Telephone          e-mail                        */
-/*      L.Hines       395-2856           lrobison@ligo.caltech.edu     */
-/*                                                                     */
-/* Code Compilation and Runtime Specifications:                        */
-/*      Code Compiled on: Solaris 5.8 / Linux 2                        */
-/*      Compiler Used: cc386 for Pentium III or gcc for Linux          */
-/*      Runtime environment: Pentium III running VxWorks 5.3.1         */
-/*			     Pentium 4 running Linux.		       */
-/*                                                                     */
-/* Code Standards Conformance:                                         */
-/*      Code conforms to: LIGO standards.        OK                    */
-/*      Lint.                                    TBD                   */
-/*      ANSI                                     OK                    */
-/*      POSIX                                    TBD                   */
-/*                                                                     */
-/* Known Bugs, Limitations, Caveats:                                   */
-/*                                                                     */
-/*        -------------------------------------------------            */
-/*                           LIGO                                      */
-/*     THE LASER INTERFEROMETER GRAVITATIONAL WAVE OBSERVATORY         */
-/*                                                                     */
-/*                (C) The LIGO Project, 2005.                          */
-/*                                                                     */
-/*                                                                     */
-/* California Institute of Technology                                  */
-/* LIGO Project MS 18-34                                               */
-/* Pasadena CA 91125                                                   */
-/*                                                                     */
-/* Massachusetts Institute of Technology                               */
-/* LIGO Project MS 20B-145                                             */
-/* Cambridge MA 01239                                                  */
-/*                                                                     */
-/***********************************************************************/
+/*----------------------------------------------------------------------------- */
+/*                                                                              */
+/*                      -------------------                                     */
+/*                                                                              */
+/*                             LIGO                                             */
+/*                                                                              */
+/*        THE LASER INTERFEROMETER GRAVITATIONAL WAVE OBSERVATORY.              */
+/*                                                                              */
+/*                     (C) The LIGO Project, 2005.                              */
+/*                                                                              */
+/*                                                                              */
+/* File: fm10Gen.c 	                                                        */
+/* Description:                                                                 */
+/*      CDS generic code for calculating IIR filters.			        */
+/*                                                                              */
+/* California Institute of Technology                                           */
+/* LIGO Project MS 18-34                                                        */
+/* Pasadena CA 91125                                                            */
+/*                                                                              */
+/* Massachusetts Institute of Technology                                        */
+/* LIGO Project MS 20B-145                                                      */
+/* Cambridge MA 01239                                                           */
+/*                                                                              */
+/*----------------------------------------------------------------------------- */
+
+
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.1 2005/12/20 16:27:58 rolf Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.2 2005/12/22 00:10:42 rolf Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
