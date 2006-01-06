@@ -262,12 +262,10 @@ build/$(TARGET)/%o: src/epics/seq/%cc
 #	$(CXX) -c $(CFLAGS) $< -o $@
 
 # Generate records and sequencers generation code
-build/$(TARGET)/registerRecordDeviceDriver.cc: build/$(TARGET)/full.dbd
-	$(REGGEN) $< registerRecordDeviceDriver > $@
-
-# Produce combined dbd file
-build/$(TARGET)/full.dbd: 
-	cat $(DBD) > $@
+build/$(TARGET)/registerRecordDeviceDriver.cc: 
+	cat $(DBD) > build/$(TARGET)/full.dbd
+	$(REGGEN) build/$(TARGET)/full.dbd  registerRecordDeviceDriver > $@
+	/bin/rm -f build/$(TARGET)/full.dbd
 
 # Targets not files
 .PHONY: target
