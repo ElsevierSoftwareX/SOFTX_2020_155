@@ -5,7 +5,6 @@ TARGET = susepics
 # Straight sequencer code
 
 SRC = build/$(TARGET)/sus.st
-SRC += src/epics/seq/daqConfig.st
 
 SRC += src/drv/rfm.c
 SRC += src/drv/param.c
