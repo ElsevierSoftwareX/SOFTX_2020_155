@@ -45,6 +45,9 @@ SNCFLAGS += +a
 # Sequencer file (.st) compiler
 SNC = $(EPICS_SEQ_BASE)/bin/linux-x86/snc $(SNCFLAGS)
 
+# registration code generator
+REGGEN = $(EPICS_BASE)/bin/linux-x86/registerRecordDeviceDriver.pl
+
 # Sequencer generator files
 FMSEQFILES = src/epics/util/fmseq.pl src/epics/util/skeleton.db src/epics/util/skeleton.st
 
@@ -68,13 +71,13 @@ SEQ_SRCS = $(filter %.st, $(SRC))
 CSRCS = $(filter-out %.st, $(SRC))
 CSRCS += src/epics/seq/main.c
 # Required Epics files
-CCSRCS += src/epics/seq/registerRecordDeviceDriver.cc
+CCSRCS += build/$(TARGET)/registerRecordDeviceDriver.cc
 
 # Each .st file gets preprocessed twice to make one C and one C++
 # file. C++ file has different name. Both files are exactly the same
 # in content
 SEQ_ISRC = $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%st=%i)))
-SEQ_CCSRC = $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%.st=%_foo.cc)))
+#SEQ_CCSRC = $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%.st=%_foo.cc)))
 SEQ_CCSRC += $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%st=%c)))
 SEQ_OBJ = $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%st=%o)))
 #SEQ_OBJ += $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%.st=%_foo.o)))
@@ -82,7 +85,7 @@ SEQ_OBJ += $(addprefix build/$(TARGET)/, $(notdir $(CSRCS:%.c=%.o)))
 SEQ_OBJ += $(addprefix build/$(TARGET)/, $(notdir $(CCSRCS:%.cc=%.o)))
 
 # Standard Epics IOC database definition file
-DBD += src/epics/dbd/a.dbd
+DBD += src/epics/dbd/a.dbd build/$(TARGET)/*.dbd
 
 # Main target to make an Epics IOC server
 all: target build/$(TARGET)/$(TARGET) install
@@ -107,7 +110,7 @@ install: $(DB) $(DBH1) $(DBH2) $(DBL1)
 	  for i in $(DBD) ; do \
 	    echo "dbLoadDatabase \"dbd/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 	  done ; \
-	  echo 'sus_registerRecordDeviceDriver(pdbbase)' >> target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
+	  echo 'registerRecordDeviceDriver(pdbbase)' >> target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
 	  for i in $(DB) ; do \
 		cat $$i | sed s/%IFO%/$$ifo/g\;s/%IFO0%/$$ifo0/g > target/$(TARGET)/db/$$ifo/`basename $$i`; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
@@ -235,12 +238,12 @@ build/$(TARGET)/%10.st: src/epics/seq/%.st
 	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\110/g > $@
 
 # Build C++ version of sequencer code
-build/$(TARGET)/%_foo.cc: build/$(TARGET)/%.i
-	$(SNC) $< -o $@
-
+#build/$(TARGET)/%_foo.cc: build/$(TARGET)/%.i
+#	$(SNC) $< -o $@
 # Build C version of sequencer code
 %.c: %.i
 	$(SNC) $< -o $@
+	echo 'registrar('`basename $(@:%.c=%)`'Registrar)' > $(@:%c=%dbd) 
 
 # Compile sequencer-related C code
 build/$(TARGET)/%o: src/epics/seq/%c
@@ -255,8 +258,16 @@ build/$(TARGET)/%o: src/epics/seq/%cc
 	$(CXX) -c $(CFLAGS) $< -o $@
 
 # Compile generate C++ code
-build/$(TARGET)/%_foo.o: build/$(TARGET)/%_foo.cc
-	$(CXX) -c $(CFLAGS) $< -o $@
+#build/$(TARGET)/%_foo.o: build/$(TARGET)/%_foo.cc
+#	$(CXX) -c $(CFLAGS) $< -o $@
+
+# Generate records and sequencers generation code
+build/$(TARGET)/registerRecordDeviceDriver.cc: build/$(TARGET)/full.dbd
+	$(REGGEN) $< registerRecordDeviceDriver > $@
+
+# Produce combined dbd file
+build/$(TARGET)/full.dbd: 
+	cat $(DBD) > $@
 
 # Targets not files
 .PHONY: target
