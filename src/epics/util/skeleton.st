@@ -26,7 +26,7 @@ program %SEQUENCER_NAME%
 %% #include "fm10Gen.h"
 %% #define FM_SUBSYS_NUM  1
 %% #include "fmReadCoeff.h"
-%% #include "iscNetDsc.h"
+%% #include "feComms.h"
 
 #if defined(RFM_EPICS)
 %% #define rfm_assign(a,b) if ((a) != (b)) { a = (b); }
@@ -715,7 +715,7 @@ state daqInit
 %%                      dataSize += infoTmp.tp[i].dataRate * DAQ_DATA_TYPE_SIZE(infoTmp.tp[i].dataType);
 %%              }
 %%         }
-%%         dataSize /= 1024;
+%%         dataSize /= 1000;
 %%      } else {
 %%         dcmsg = 0xffffffff;
 %%         chnCnt = 0;
@@ -747,7 +747,7 @@ state daqProcess
 %%                      dataSize += infoTmp.tp[i].dataRate * DAQ_DATA_TYPE_SIZE(infoTmp.tp[i].dataType);
 %%              }
 %%            }
-%%            dataSize /= 1024;
+%%            dataSize /= 1000;
 %%          } else {
 %%            dcmsg = 0xffffffff;
 %%            chnCnt = 0;
