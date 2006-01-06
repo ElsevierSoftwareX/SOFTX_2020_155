@@ -2,9 +2,10 @@
 # Define Epics system name. It should be unique.
 TARGET = susepics
 
-# Straight seqiencer code
+# Straight sequencer code
 
 SRC = build/$(TARGET)/sus.st
+SRC += src/epics/seq/daqConfig.st
 
 SRC += src/drv/rfm.c
 SRC += src/drv/param.c

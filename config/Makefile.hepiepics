@@ -2,7 +2,7 @@
 # Define Epics system name. It should be unique.
 TARGET = hepiepics
 
-# Straight seqiencer code
+# Straight sequencer code
 # SRC = src/epics/seq/daqConfig.st
 
 SRC = build/$(TARGET)/hepi.st
