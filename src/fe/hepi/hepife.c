@@ -43,7 +43,7 @@ CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
 
 #include "msr.h"
 #include "fm10Gen.h"		/* CDS filter module defs and C code	*/
-#include "iscNetDsc2.h"		/* Lvea control RFM network defs.	*/
+#include "feComms.h"		/* Lvea control RFM network defs.	*/
 #include "daqmap.h"		/* DAQ network layout			*/
 #define CPURATE	2400
 
