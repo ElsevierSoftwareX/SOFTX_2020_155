@@ -30,3 +30,8 @@ hepiepics: config/Makefile.hepiepics
 fe:
 	cd src/fe; $(MAKE) all
 
+# Show all predefined preprocessor definitions
+dump_predefines:
+	gcc -E -dM -x c /dev/null
+
+
