@@ -259,53 +259,37 @@ static float wdTarget[4];
 
 
 	  /* ***************************************************************
-		Have to shuffle data around to match final wiring, as above for 
-		Pentek channels. New connection is:
-		0 - H4		16 - STS Mass Pos X
-		1 - H3		17 - STS Mass Pos Y
-		2 - H2		18 - STS Mass Pos Z
-		3 - H1		19 - Spare 2
-		4 - V4	
-		5 - V3
-		6 - V2
-		7 - V1
-		8 - Witness 4
-		9 - Witness 3
-	       10 - Witness 2
-	       11 - Witness 1
-	       12 - STS X
-	       13 - STS Y
-	       14 - STS Z
-	       15 - Spare 1
+		ADC Channel assignments:
+		0 - GEO H1		16 - Witness 1
+		1 - GEO H2		17 - Witness 2
+		2 - GEO H3		18 - Witness 3
+		3 - GEO H4		19 - Witness 4
+		4 - GEO V1		20 - STS Mass Pos U
+		5 - GEO V2		21 - STS Mass Pos V
+		6 - GEO V3		22 - STS Mass Pos W
+		7 - GEO V4		23 - STS X
+		8 - POS H1		24 - STS Y
+		9 - POS H2		25 - STS Z
+	       10 - POS H3		26 - Front panel spare 1
+	       11 - POS H4		27 - Front panel spare 2
+	       12 - POS V1		28 - Rear panel spare 1
+	       13 - POS V2		29 - Rear panel spare 2
+	       14 - POS V3		30 - Rear panel spare 3
+	       15 - POS V4		31 - One PPS
 	  ***************************************************************** */
 
 
 	for(ii=0;ii<STS_COUNT;ii++)
 	{
 	   kk = ii * 16;
-	   pLocalEpics->sts[ii].stsIn[0] = adc[0][12+kk];
-	   pLocalEpics->sts[ii].stsIn[1] = adc[0][13+kk];
-	   pLocalEpics->sts[ii].stsIn[2] = adc[0][14+kk];
+	   pLocalEpics->sts[ii].stsIn[0] = adc[ii][23];
+	   pLocalEpics->sts[ii].stsIn[1] = adc[ii][24];
+	   pLocalEpics->sts[ii].stsIn[2] = adc[ii][25];
 	}
 	for(ii=0;ii<CHAMBERS;ii++)
 	{
-		kk = ii * 16;
-	  	posSen[ii][0] = adc[0][kk+7];
-	  	posSen[ii][1] = adc[0][kk+6];
-	  	posSen[ii][2] = adc[0][kk+5];
-	  	posSen[ii][3] = adc[0][kk+4];
-	  	posSen[ii][4] = adc[0][kk+3];
-	  	posSen[ii][5] = adc[0][kk+2];
-	  	posSen[ii][6] = adc[0][kk+1];
-	  	posSen[ii][7] = adc[0][kk];
-	  	geoSen[ii][0] = adc[0][kk+7];
-	  	geoSen[ii][1] = adc[0][kk+6];
-	  	geoSen[ii][2] = adc[0][kk+5];
-	  	geoSen[ii][3] = adc[0][kk+4];
-	  	geoSen[ii][4] = adc[0][kk+3];
-	  	geoSen[ii][5] = adc[0][kk+2];
-	  	geoSen[ii][6] = adc[0][kk+1];
-	  	geoSen[ii][7] = adc[0][kk];
+		for(kk=0;kk<8;kk++) geoSen[ii][kk] = adc[ii][kk];
+		for(kk=0;kk<8;kk++) posSen[ii][kk] = adc[ii][kk+8];
 	}
 	for(ii=0;ii<STS_COUNT;ii++)
 	{
@@ -412,7 +396,7 @@ static float wdTarget[4];
 		  if(wdVal[chamber][ii+3] < 0.0) wdVal[chamber][ii+3] *= -1;
 		  if((wdVal[chamber][ii+3] > 32766) || (wdVal[chamber][ii+3] == 0))
 			wdSenCounter[chamber][ii+3] ++;
-		  kk = ii + POS_V1E;
+		  kk = kk + POS_V1E;
 		  eOut = (float)filterModuleD(dsp,dspCoeff,kk,posSen[chamber][ii], 0);
 		  if(eOut < 0.0) eOut *= -1;
 		  wdValFilt[chamber][ii+3] = eOut;
