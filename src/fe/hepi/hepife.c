@@ -282,7 +282,7 @@ void *fe_start(void *arg)
 
 
   // Initialize DAQ function
-  status = daqWrite(0,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,0,pLocalEpics->epicsOutput.gdsMon,xExc);
+  status = daqWrite(0,dcuId,daq,DAQ_2K_SAMPLE_SIZE,testpoint,dspPtr,0,pLocalEpics->epicsOutput.gdsMon,xExc);
   if(status == -1) 
   {
     printf("DAQ init failed -- exiting\n");
@@ -372,6 +372,11 @@ void *fe_start(void *arg)
 			  }
 		}
 	}
+if(cdsPciModules.adcCount < 3)
+{
+	for(ii=0;ii<32;ii++) dWord[1][ii] = dWord[0][ii];
+	for(ii=0;ii<32;ii++) dWord[2][ii] = dWord[0][ii];
+}
 
 	// Assign chan 32 to onePps 
 	onePps = dWord[0][31];
@@ -426,7 +431,7 @@ void *fe_start(void *arg)
 	{
 		// Call daqLib
 		pLocalEpics->epicsOutput.diags[3] = 
-			daqWrite(1,dcuId,daq,DAQ_16K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
+			daqWrite(1,dcuId,daq,DAQ_2K_SAMPLE_SIZE,testpoint,dspPtr,myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
 		if(!attemptingReconnect)
 		{
 			// Check and clear network callbacks.
@@ -488,7 +493,7 @@ void *fe_start(void *arg)
 	skipCycle = 0;
 
 	/* Update Epics variables */
-	epicsCycle = (epicsCycle + 1) % 256;
+	epicsCycle = (epicsCycle + 1) % (MAX_MODULES + 2);
 	vmeDone = updateEpics(epicsCycle, dspPtr[0],pDsp,dspCoeff,pCoeff,pLocalEpics);	
 
 	// Measure time to complete 1 cycle
@@ -513,8 +518,8 @@ void *fe_start(void *arg)
 	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
           timeHold = 0;
 	  pLocalEpics->epicsOutput.adcWaitTime = adcHoldTime;
-	  if(adcHoldTime > 60) diagWord |= 2;
-	  if(timeHoldMax > 60) diagWord |= 8;
+	  if(adcHoldTime > 480) diagWord |= 2;
+	  if(timeHoldMax > 480) diagWord |= 8;
   	  if(pLocalEpics->epicsInput.diagReset)
 	  {
 		pLocalEpics->epicsInput.diagReset = 0;
