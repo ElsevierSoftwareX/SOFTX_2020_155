@@ -20,7 +20,7 @@ IFO = M1
 SITE = mit
 
 # Define which state programs to run, specify parameters
-SEQ += 'hepi,("ifo=M1, site=mit, sys=SEI-, daqsys=HEPI,sysnum=21")'
+SEQ += 'hepi,("ifo=M1, site=mit, sys=SEI-, daqsys=HEPI,sysnum=22")'
 
 # Define if need to be on 5579 net
 #CFLAGS += -DRFM_5579
