@@ -21,7 +21,7 @@
 		 int sysRate - Data rate of front end CPU / 16.
 		 float *pFloatData[] - Pointer to TP data not associated
 				       with filter modules.
-		 FILT_MOD *dspPtr[] - Point to array of FM data.
+		 FILT_MOD *dspPtr - Point to array of FM data.
 		 int netStatus - Status of myrinet
 		 int gdsMonitor[] - Array to return values of GDS
 				    TP/EXC selections.
@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.13 2005/12/02 02:02:34 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.14 2006/01/31 15:08:28 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -116,7 +116,7 @@ int daqWrite(int flag,
 	     DAQ_RANGE daqRange,
 	     int sysRate,
 	     float *pFloatData[],
-	     FILT_MOD *dspPtr[],
+	     FILT_MOD *dspPtr,
 	     int netStatus,
 	     int gdsMonitor[],
 	     float excSignal[])
@@ -165,6 +165,8 @@ static int totalSize;		/* DAQ + TP + EXC chans size in bytes.	*/
 int *statusPtr;
 float *dataPtr;			/* Ptr to excitation chan data.		*/
 int exChanOffset;		/* shmem offset to next EXC value.	*/
+int tpx;
+int tpAdd;
 
 // Decimation filter coefficient definitions.		
 static double dCoeff2x[13] =
@@ -338,10 +340,14 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     gdsPtr = (GDS_CNTRL_BLOCK *)(_epics_shm + DAQ_GDS_BLOCK_ADD);
     printf("gdsCntrl block is at 0x%lx\n",(long)gdsPtr);
     // Clear out the GDS TP selections.
-    for(ii=0;ii<24;ii++) gdsPtr->tp[2][0][ii] = 0;
-    for(ii=0;ii<8;ii++) gdsPtr->tp[0][0][ii] = 0;
+    if(sysRate == DAQ_2K_SAMPLE_SIZE) tpx = 3;
+    else tpx = 2;
+    for(ii=0;ii<24;ii++) gdsPtr->tp[tpx][0][ii] = 0;
+    if(sysRate == DAQ_2K_SAMPLE_SIZE) tpx = 1;
+    else tpx = 0;
+    for(ii=0;ii<8;ii++) gdsPtr->tp[tpx][0][ii] = 0;
     // Following can be uncommented for testing.
-    // gdsPtr->tp[3][0][0] = 11001;
+    // gdsPtr->tp[3][0][0] = 31250;
     // gdsPtr->tp[3][0][1] = 11002;
     // gdsPtr->tp[0][0][0] = 5000;
 
@@ -407,13 +413,13 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	switch(localTable[ii].sigNum)
 	{
 	  case 0:
-	    dWord = dspPtr[localTable[ii].sysNum]->data[localTable[ii].fmNum].filterInput;
+	    dWord = dspPtr->data[localTable[ii].fmNum].filterInput;
 	    break;
 	  case 1:
-	    dWord = dspPtr[localTable[ii].sysNum]->data[localTable[ii].fmNum].inputTestpoint;
+	    dWord = dspPtr->data[localTable[ii].fmNum].inputTestpoint;
 	    break;
 	  case 2:
-	    dWord = dspPtr[localTable[ii].sysNum]->data[localTable[ii].fmNum].testpoint;
+	    dWord = dspPtr->data[localTable[ii].fmNum].testpoint;
 	    break;
  	  default:
 	    dWord = 0.0;
@@ -428,7 +434,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       else if(localTable[ii].type == 2)
       /* Data is from filter module excitation */
       {
-	    dWord = dspPtr[localTable[ii].sysNum]->data[localTable[ii].fmNum].exciteInput;
+	    dWord = dspPtr->data[localTable[ii].fmNum].exciteInput;
       }
 
       // Perform decimation filtering, if required.
@@ -521,10 +527,10 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 					    excSlot * 4 + 4);
 			if(localTable[ii].type == 2)
 			{
-				dspPtr[localTable[ii].sysNum]->data[localTable[ii].fmNum].exciteInput = *dataPtr;
+				dspPtr->data[localTable[ii].fmNum].exciteInput = *dataPtr;
 			}
 		}
-		else dspPtr[localTable[ii].sysNum]->data[localTable[ii].fmNum].exciteInput = 0.0;
+		else dspPtr->data[localTable[ii].fmNum].exciteInput = 0.0;
   	}
   }
 
@@ -638,10 +644,20 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	totalSize = mnDaqSize;
 	offsetAccum = tpStart;
 	validTp = 0;
+	if(sysRate == DAQ_2K_SAMPLE_SIZE)
+	{
+		tpx = 3;
+		tpAdd = 32;
+	}
+	else 
+	{
+		tpx = 2;
+		tpAdd = 256;
+	}
 	for(ii=0;ii<20;ii++)
 	{
 		/* Get TP number from shared memory */
-		testVal = gdsPtr->tp[2][0][ii];
+		testVal = gdsPtr->tp[tpx][0][ii];
 
 		/* Check if the TP selection is valid for this front end's filter module TP
 		   If it is, load the local table with the proper lookup values to find the
@@ -660,11 +676,11 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		  offsetAccum += sysRate * 4;
 		  localTable[totalChans+1].offset = offsetAccum;
           	  gdsMonitor[ii] = testVal;
-          	  gdsPtr->tp[2][1][ii] = 0;
+          	  gdsPtr->tp[tpx][1][ii] = 0;
 		  tpNum[validTp] = testVal;
 		  validTp ++;
 		  totalChans ++;
-		  totalSize += 256;
+		  totalSize += tpAdd;
         	}
 
 		/* Check if the TP selection is valid for other front end TP signals.
@@ -681,11 +697,11 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	  	  localTable[totalChans].decFactor = 1;
       		  dataInfo.tp[totalChans].dataType = 4;
 		  gdsMonitor[ii] = testVal;
-		  gdsPtr->tp[2][1][ii] = 0;
+		  gdsPtr->tp[tpx][1][ii] = 0;
 		  tpNum[validTp] = testVal;
 		  validTp ++;
 		  totalChans ++;
-		  totalSize += 256;
+		  totalSize += tpAdd;
 		}
 
 		/* If this TP select is not valid for this front end, deselect it in the local
@@ -699,15 +715,18 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
 	// Check list of EXC channels
 	validEx = 0;
+	if(sysRate == DAQ_2K_SAMPLE_SIZE)
+		tpx = 1;
+	else tpx = 0;
 	for(ii=0;ii<8;ii++)
 	{
 		/* Get EXC number from shared memory */
-		testVal = gdsPtr->tp[0][0][ii];
+		testVal = gdsPtr->tp[tpx][0][ii];
 
 		// Have to clear an exc if it goes away
 		if((testVal != excTable[ii].sigNum) && (excTable[ii].sigNum != 0))
 		{
-		  dspPtr[excTable[ii].sysNum]->data[excTable[ii].fmNum].exciteInput = 0.0;
+		  dspPtr->data[excTable[ii].fmNum].exciteInput = 0.0;
 		  excTable[ii].sigNum = 0;
 		}
 
@@ -730,12 +749,12 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		  offsetAccum += sysRate * 4;
 		  localTable[totalChans+1].offset = offsetAccum;
           	  gdsMonitor[ii+24] = testVal;
-          	  gdsPtr->tp[0][1][ii] = 0;
+          	  gdsPtr->tp[tpx][1][ii] = 0;
 		  tpNum[validTp] = testVal;
 		  validTp ++;
 		  if(!validEx) validEx = totalChans;
 		  totalChans ++;
-		  totalSize += 256;
+		  totalSize += tpAdd;
         	}
 
 		/* Check if the EXC selection is valid for other front end EXC signals.
@@ -753,12 +772,12 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	  	  localTable[totalChans].decFactor = 1;
       		  dataInfo.tp[totalChans].dataType = 4;
 		  gdsMonitor[ii+24] = testVal;
-		  gdsPtr->tp[0][1][ii] = 0;
+		  gdsPtr->tp[tpx][1][ii] = 0;
 		  tpNum[validTp] = testVal;
 		  validTp ++;
 		  if(!validEx) validEx = totalChans;
 		  totalChans ++;
-		  totalSize += 256;
+		  totalSize += tpAdd;
 		}
 
 		/* If this EXC select is not valid for this front end, deselect it in the local
@@ -774,6 +793,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     } /* End done 16Hz Cycle */
 
   } /* End case write */
+  /* Return the FE total DAQ data rate */
   return((totalSize*256)/1000);
 
 }
