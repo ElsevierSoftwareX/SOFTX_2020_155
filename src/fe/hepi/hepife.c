@@ -89,7 +89,7 @@ unsigned int daqCycle;		/* DAQS cycle counter		*/
 int firstTime;			/* Dummy var for startup sync.	*/
 
 FILT_MOD dsp;			/* SFM structure.		*/
-FILT_MOD *dspPtr[1];		/* SFM structure pointer.	*/
+FILT_MOD *dspPtr;		/* SFM structure pointer.	*/
 FILT_MOD *pDsp;			/* Ptr to SFM in shmem.		*/
 COEF dspCoeffMemSpace;		/* Local mem for SFM coeffs.	*/
 COEF *dspCoeff;			/* Ptr to SFM coeffs in local mem.	*/
@@ -195,8 +195,9 @@ void *fe_start(void *arg)
   // Set pointers to SFM data buffers
   pDsp = (FILT_MOD *)(&pEpicsComms->dspSpace);
   pCoeff = (VME_COEF *)(&pEpicsComms->coeffSpace);
+printf("coeffs at 0x%x\n",(int)pCoeff);
   dspCoeff = (COEF *)&dspCoeffMemSpace;
-  dspPtr[0] = (FILT_MOD *)&dsp;
+  dspPtr = (FILT_MOD *)&dsp;
 
   // Clear the FE reset which comes from Epics
   pLocalEpics->epicsInput.vmeReset = 0;
@@ -386,6 +387,7 @@ if(cdsPciModules.adcCount < 3)
 	{
 		if(onePps < 1000) firstTime += 100;
 		firstTime += 100;
+printf("found 1pps\n");
 	}
 
 	if(onePps < 1000)  pLocalEpics->epicsOutput.onePps = clock16K;
@@ -397,7 +399,7 @@ if(cdsPciModules.adcCount < 3)
  	{
 	// Call the front end specific software
         rdtscl(cpuClock[4]);
-	feCode(dWord,dacOut,dspPtr[0],dspCoeff,pLocalEpics);
+	feCode(dWord,dacOut,dspPtr,dspCoeff,pLocalEpics);
         rdtscl(cpuClock[5]);
 
 	// Write out data to DAC modules
@@ -494,7 +496,7 @@ if(cdsPciModules.adcCount < 3)
 
 	/* Update Epics variables */
 	epicsCycle = (epicsCycle + 1) % (MAX_MODULES + 2);
-	vmeDone = updateEpics(epicsCycle, dspPtr[0],pDsp,dspCoeff,pCoeff,pLocalEpics);	
+	vmeDone = updateEpics(epicsCycle, dspPtr,pDsp,dspCoeff,pCoeff,pLocalEpics);	
 
 	// Measure time to complete 1 cycle
         rdtscl(cpuClock[1]);
