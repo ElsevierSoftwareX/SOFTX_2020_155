@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.2 2005/12/22 00:10:42 rolf Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.3 2006/01/31 15:09:35 rolf Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -891,7 +891,7 @@ filterModule2(FILT_MOD *pFilt,     /* Filter module data  */
   double output;
   double fmInput;
 
-  fmInput = 1e-35;
+  fmInput = 0;
   pFilt->data[modNum].filterInput = (float)(filterInput + fmInput);
   fmInput += (double)pFilt->data[modNum].exciteInput;
   if (pFilt->inputs[modNum].opSwitchE & OPSWITCH_INPUT_ENABLE)
@@ -920,7 +920,7 @@ filterModule2(FILT_MOD *pFilt,     /* Filter module data  */
     sw_in = sType < 20 || sw_out || (sType == 22 && sw);
 
     /* Calculate filter */
-    filtData = iir_filter(sw_in?fmInput:1e-35,
+    filtData = iir_filter(sw_in?fmInput:0,
 			  pC->coeffs[modNum].filtCoeff[ii],
 			  pC->coeffs[modNum].filtSections[ii],
 			  pC->coeffs[modNum].filtHist[ii]);
@@ -1083,7 +1083,7 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
   /* Set the input to a very small number. If input is zero, code timing becomes a problem. */
   /* This is not fully understood, but it may be due to floating point underflow when the   */
   /* remaining calculations are done.							    */
-  fmInput = 1e-35;
+  fmInput = 0;
 
   /* Load the filter input testpoint to the input value. */
   pFilt->data[modNum].filterInput = (float)(filterInput + fmInput);
@@ -1119,7 +1119,7 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
     sw_in = sType < 20 || sw_out || (sType == 22 && sw);
 
     /* Calculate filter */
-    filtData = iir_filter(sw_in?fmInput:1e-35,
+    filtData = iir_filter(sw_in?fmInput:0,
 			  pC->coeffs[modNum].filtCoeff[ii],
 			  pC->coeffs[modNum].filtSections[ii],
 			  pC->coeffs[modNum].filtHist[ii]);
@@ -1278,7 +1278,6 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
     }
     output = fmInput * cur_gain;
   if(output > 1e20) output = 1e20;
-  if(output < -1e20) output = -1e20;
 
     /* Limiting */
     /* If the limit switch is on, limit the output accordingly. */
