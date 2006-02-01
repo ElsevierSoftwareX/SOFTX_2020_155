@@ -27,11 +27,11 @@ typedef struct RFM_FE_COMMS {
       CDS_EPICS epicsShm;
     }epicsSpace;
     union{				/*		0x0000 1000 */
-      char sysdsp[0x100000];
+      char sysdsp[0x200000];
       FILT_MOD epicsDsp;
     }dspSpace;
     union{				/*		0x0000 2000 */
-      char syscoeff[0x2000000];
+      char syscoeff[0x400000];
       VME_COEF epicsCoeff;
     }coeffSpace;
 }RFM_FE_COMMS;
