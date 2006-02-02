@@ -59,7 +59,7 @@ CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
 	#include "./hepi.c"	/* User code for HEPI control.		*/
 #endif
 #ifdef QUAD
-	#include "./quad.c"	/* User code for quad control.		*/
+	#include "quad/quad.c"	/* User code for quad control.		*/
 #endif
 
 #ifdef SERVO16K
