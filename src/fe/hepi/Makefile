@@ -10,6 +10,8 @@ $(TARGET_RTL): $(LIBRARY_OBJS)
 
 map.o: ../map.c
 	$(CC) $(CFLAGS) -D__KERNEL__ -c $<
+hepife.o: ../controller.c
+	$(CC) $(CFLAGS) -c $< -o $@
 fm10Gen.o: fm10Gen.c
 	$(CC) $(CFLAGS) -D__KERNEL__ -DSERVO16K -c $<
 crc.o: crc.c
@@ -29,7 +31,7 @@ CFLAGS += -DHEPI
 all: $(ALL)
 
 clean:
-	rm -f $(ALL)
+	rm -f $(ALL) *.o
 
 include /opt/rtldk-2.2/rtlinuxpro/Rules.make
 
