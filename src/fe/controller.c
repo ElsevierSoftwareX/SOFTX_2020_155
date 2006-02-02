@@ -31,14 +31,11 @@
 #include <linux/slab.h>
 #include <drv/cdsHardware.h>
 #ifdef HEPI
-	#define MAX_FILTERS     3000    /* Max number of filters to one file    */
-	#define MAX_MODULES     300     /* Max number of modules to one file    */
+	#include "hepi.h"
 #endif
 #ifdef QUAD
-	#define MAX_FILTERS     960     /* Max number of filters to one file    */
-	#define MAX_MODULES     96      /* Max number of modules to one file    */
+	#include "quad.h"
 #endif
-
 #define INLINE  inline
 #define MMAP_SIZE (64*1024*1024 - 5000)
 char *_epics_shm;		/* Ptr to computer shared memory		*/
@@ -56,7 +53,7 @@ CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
 #include "drv/daqLib.c"		/* DAQ/GDS connection 			*/
 #include "drv/epicsXfer.c"	/* Transfers EPICS data to/from shmem	*/
 #ifdef HEPI
-	#include "./hepi.c"	/* User code for HEPI control.		*/
+	#include "hepi/hepi.c"	/* User code for HEPI control.		*/
 #endif
 #ifdef QUAD
 	#include "quad/quad.c"	/* User code for quad control.		*/
@@ -342,7 +339,7 @@ void *fe_start(void *arg)
   // Enter the coninuous FE control loop  **********************************************************
   while(!vmeDone){
 
-  	diagWord = 0;
+  	// diagWord = 0;
         rdtscl(cpuClock[2]);
 	// Check ADC has data ready; hang here until it does
 	status = checkAdcRdy(ADC_SAMPLE_COUNT);
@@ -387,6 +384,7 @@ void *fe_start(void *arg)
 		printf("DIAG RESET\n");
 	  }
 	  pLocalEpics->epicsOutput.diagWord = diagWord;
+	  diagWord = 0;
         }
 
 	/* Update Epics variables */
@@ -400,6 +398,8 @@ void *fe_start(void *arg)
 	// Wait for completion of DMA of Adc data
   	for(kk=0;kk<cdsPciModules.adcCount;kk++)
 	{
+		// Waits for DMA complete
+		// Return 0x10 if first ADC channel does not have sync bit set
 		diagWord |= adcDmaDone(kk,(int *)cdsPciModules.pci_adc[kk]);
 
 		// Read adc data into local variables
@@ -434,6 +434,13 @@ void *fe_start(void *arg)
 
 	// Assign chan 32 to onePps 
 	onePps = dWord[0][31];
+#ifdef HEPI
+	if(cdsPciModules.adcCount < 3)
+	{           
+		for(ii=0;ii<32;ii++) dWord[1][ii] = dWord[0][ii];
+		for(ii=0;ii<32;ii++) dWord[2][ii] = dWord[0][ii];
+	}
+#endif
 
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
