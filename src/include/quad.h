@@ -1,3 +1,6 @@
+#ifndef QUAD_H_INCLUDED
+#define QUAD_H_INCLUDED
+
 /* Assign filter names to filter number */
 #define FILT_M0_SEN1    0
 #define FILT_M0_SEN2    1
@@ -130,3 +133,7 @@ typedef struct CDS_EPICS {
 	CDS_EPICS_IN epicsInput;
 	CDS_EPICS_OUT epicsOutput;
 } CDS_EPICS;
+
+#define MAX_FILTERS     960     /* Max number of filters to one file */
+#define MAX_MODULES     96      /* Max number of modules to one file */
+#endif
