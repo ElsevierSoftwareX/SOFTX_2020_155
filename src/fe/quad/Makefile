@@ -8,6 +8,8 @@ LDFLAGS_$(TARGET_RTL) := $(LIBRARY_OBJS)
 
 $(TARGET_RTL): $(LIBRARY_OBJS)
 
+quadfe.o: ../controller.c
+	$(CC) $(CFLAGS) -c $< -o $@
 map.o: ../map.c
 	$(CC) $(CFLAGS) -D__KERNEL__ -c $<
 fm10Gen.o: fm10Gen.c
@@ -28,7 +30,7 @@ CFLAGS += -DQUAD
 all: $(ALL)
 
 clean:
-	rm -f $(ALL)
+	rm -f $(ALL) *.o
 
 include /opt/rtldk-2.2/rtlinuxpro/Rules.make
 
