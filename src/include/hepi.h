@@ -1,3 +1,6 @@
+#ifndef HEPI_H_INCLUDED
+#define HEPI_H_INCLUDED
+
 #include "fmFir.h"
 #define CHAM_FILT	96
 
@@ -195,3 +198,6 @@ typedef struct CDS_EPICS {
 	STS sts[2];
 } CDS_EPICS;
 
+#define MAX_FILTERS     3000    /* Max number of filters to one file */
+#define MAX_MODULES     300     /* Max number of modules to one file */
+#endif
