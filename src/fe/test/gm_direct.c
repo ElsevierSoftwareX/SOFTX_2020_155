@@ -52,6 +52,7 @@ typedef struct
 } gm_s_e_context_t;
 
 gm_s_e_context_t context;
+int send_complete = 0;
 
 /* This function is called inside gm_unknown() when there is a callback
    ready to be processed.  It tells us that a send has completed, either
@@ -66,6 +67,7 @@ my_send_callback (struct gm_port *port, void *the_context,
   switch (the_status)
     {
     case GM_SUCCESS:
+      send_complete = 1;
       break;
 
     case GM_SEND_DROPPED:
@@ -158,6 +160,7 @@ main(int argc, char *argv[])
 	daqSendMessage = (daqMessage *)netOutBuffer;
         sprintf (daqSendMessage->message, "STT");
 	send_length = (unsigned long) sizeof(*daqSendMessage);
+	send_complete = 0;
 	gm_send_with_callback (netPort,
                          netOutBuffer,
                          GM_RCV_MESSAGE_SIZE,
@@ -168,6 +171,7 @@ main(int argc, char *argv[])
                          my_send_callback,
                          &context);
         context.callbacks_pending++;
+	for(;send_complete;);
      }
   } else {
      int i;
@@ -176,7 +180,7 @@ main(int argc, char *argv[])
 
 for ( i = 0; i < 100; i++) {
      /* Slave receives init message from master */
-     event = gm_blocking_receive_no_spin (netPort);
+     event = gm_receive (netPort);
      switch (GM_RECV_EVENT_TYPE(event)) {
        case GM_RECV_EVENT:
        case GM_HIGH_RECV_EVENT:
