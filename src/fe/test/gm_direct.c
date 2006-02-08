@@ -247,13 +247,11 @@ main(int argc, char *argv[])
 	}
 	send_init_message(receiver_node_id);
         gm_u32_t node_id = recv_init_message();
-	send_init_message(receiver_node_id);
         recv_init_message();
   } else {
         gm_u32_t node_id = recv_init_message();
 	send_init_message(node_id);
-        node_id = recv_init_message();
-	send_init_message(node_id);
+        recv_init_message();
   }
   cleanup();
   return 0;
