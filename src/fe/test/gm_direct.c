@@ -110,6 +110,7 @@ recv_init_message() {
      gm_recv_event_t *event;
      daqMessage *rcvData;
      gm_u32_t node_id = 0;
+     gm_s_e_id_message_t *id_message;
 
 for ( i = 0; i < 100; i++) {
      /* Slave receives init message from master */
@@ -124,6 +125,16 @@ for ( i = 0; i < 100; i++) {
                printf("received zero pointer\n");
                break;
            }
+
+	   if (gm_ntoh_u32 (event->recv.length)
+			 == sizeof (gm_s_e_id_message_t)) {
+	          id_message = gm_ntohp (event->recv.message);
+          	  receiver_global_id = gm_ntoh_u32(id_message->global_id);
+          	  directed_send_addr =
+            		gm_ntoh_u64(id_message->directed_recv_buffer_addr);
+	          printf("received remote buffer pointer\n");
+	   } else
+
            // Received startup message
            // All clients must send this message on startup
            if (strcmp(rcvData->message,"STT") == 0) {
@@ -140,19 +151,7 @@ for ( i = 0; i < 100; i++) {
                                  &context);
                context.callbacks_pending++;
 	   } else {
-	      gm_s_e_id_message_t *id_message;
-
-
-	      if (gm_ntoh_u32 (event->recv.length)
-			 == sizeof (gm_s_e_id_message_t)) {
-	          id_message = gm_ntohp (event->recv.message);
-          	  receiver_global_id = gm_ntoh_u32(id_message->global_id);
-          	  directed_send_addr =
-            		gm_ntoh_u64(id_message->directed_recv_buffer_addr);
-	          printf("received remote buffer pointer\n");
-	      } else {
-	         printf("invalid message received\n");
-	      }
+	       printf("invalid message received\n");
 	   }
   	   gm_provide_receive_buffer (netPort, netInBuffer, GM_RCV_MESSAGE_SIZE,
                              GM_DAQ_PRIORITY);
