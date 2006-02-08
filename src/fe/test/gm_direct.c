@@ -188,7 +188,7 @@ send_test_data(gm_u32_t nid) {
                                   (unsigned long) test_size,
                                   GM_DAQ_PRIORITY,
                                   nid,
-                                  GM_PORT_NUM_RECV,
+                                  2,
                                   my_send_callback,
                                   &context);
   context.callbacks_pending++;
