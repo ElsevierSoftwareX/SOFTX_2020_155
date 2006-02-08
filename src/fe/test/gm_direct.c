@@ -79,6 +79,29 @@ my_send_callback (struct gm_port *port, void *the_context,
     }
 }
 
+/* Transmit init message to slave */  
+void
+send_init_message(gm_u32_t nid) {
+	unsigned long send_length;
+	daqMessage *daqSendMessage;
+	daqSendMessage = (daqMessage *)netOutBuffer;
+        sprintf (daqSendMessage->message, "STT");
+	send_length = (unsigned long) sizeof(*daqSendMessage);
+	send_complete = 0;
+	gm_send_with_callback (netPort,
+                         netOutBuffer,
+                         GM_RCV_MESSAGE_SIZE,
+                         send_length,
+                         GM_DAQ_PRIORITY,
+                         nid,
+                         2,
+                         my_send_callback,
+                         &context);
+        context.callbacks_pending++;
+	for(;send_complete;);
+}
+
+
 void
 recv_init_message() {
      int i;
@@ -204,26 +227,7 @@ main(int argc, char *argv[])
           cleanup();
           return 1;
 	}
-     /* Transmit init message to slave */  
-     {
-	unsigned long send_length;
-	daqMessage *daqSendMessage;
-	daqSendMessage = (daqMessage *)netOutBuffer;
-        sprintf (daqSendMessage->message, "STT");
-	send_length = (unsigned long) sizeof(*daqSendMessage);
-	send_complete = 0;
-	gm_send_with_callback (netPort,
-                         netOutBuffer,
-                         GM_RCV_MESSAGE_SIZE,
-                         send_length,
-                         GM_DAQ_PRIORITY,
-                         receiver_node_id,
-                         2,
-                         my_send_callback,
-                         &context);
-        context.callbacks_pending++;
-	for(;send_complete;);
-     }
+	send_init_message(receiver_node_id);
   } else {
 	recv_init_message();
   }
