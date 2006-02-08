@@ -41,7 +41,7 @@ cleanup() {
     gm_close (netPort);
     gm_finalize();
   }
-  gm_exit (status);
+  //gm_exit (status);
 }
 
 
@@ -170,9 +170,11 @@ main(int argc, char *argv[])
         context.callbacks_pending++;
      }
   } else {
+     int i;
      gm_recv_event_t *event;
      daqMessage *rcvData;
 
+for ( i = 0; i < 100; i++) {
      /* Slave receives init message from master */
      event = gm_blocking_receive_no_spin (netPort);
      switch (GM_RECV_EVENT_TYPE(event)) {
@@ -200,8 +202,16 @@ main(int argc, char *argv[])
                                  my_send_callback,
                                  &context);
                context.callbacks_pending++;
+	   } else {
+	       printf("invalid message received\n");
 	   }
+	   break;
+	default:
+		printf("received unknown message type\n");
+		gm_unknown (netPort, event);  
+		break;
       }
+}
   }
   cleanup();
   return 0;
