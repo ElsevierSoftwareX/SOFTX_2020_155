@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "msr.h"
 
 #include <drv/gmnet.h>
 
@@ -17,6 +18,9 @@ char receiver_nodename[64];
 /* if we are running in slave mode */
 int slave = 0;
 
+#define CPU_RATE 2800
+
+int test_size = 32;
 struct gm_port *netPort = 0;
 void *netInBuffer = 0;
 static void *netOutBuffer = 0;
@@ -168,9 +172,32 @@ for ( i = 0; i < 100; i++) {
 return 0;
 }
 
+inline void wait_for_test_data() {
+	for (;((int *)netInBuffer) [test_size-1] == 0;);
+}
+
+inline void
+send_test_data(gm_u32_t nid) {
+  int i;
+  for (i = 0 ; i < test_size; i++)
+	((int *)netOutBuffer)[i] = 1;
+
+  gm_directed_send_with_callback (netPort,
+                                  netOutBuffer,
+                                  directed_send_addr,
+                                  (unsigned long) test_size,
+                                  GM_DAQ_PRIORITY,
+                                  nid,
+                                  GM_PORT_NUM_RECV,
+                                  my_send_callback,
+                                  &context);
+  context.callbacks_pending++;
+}
+
 int
 main(int argc, char *argv[])
 {
+  int i;
 
   if (argc != 2) {
 	printf ("Usage: %s --slave | %s <receive node name>\n",
@@ -229,6 +256,9 @@ main(int argc, char *argv[])
   gm_hton_u64((gm_size_t)netInBuffer);
   id_message->global_id = gm_hton_u32(my_global_id);
 
+  for (i = 0; i < test_size; i++)
+	((int *)netInBuffer) [i] = 0;
+
   gm_allow_remote_memory_access (netPort);
 
   if (!slave) {
@@ -246,12 +276,26 @@ main(int argc, char *argv[])
 	}
 	send_init_message(receiver_node_id);
         gm_u32_t node_id = recv_init_message();
-        recv_init_message();
+        recv_init_message(); /* receive remote buffer pointer */
+	{
+		int cpuClock[2];
+
+		rdtscl(cpuClock[0]);
+		send_test_data(node_id);
+		wait_for_test_data();
+		rdtscl(cpuClock[1]);
+		printf("roundtrip time is %d\n", (cpuClock[1] - cpuClock[0])/CPU_RATE);
+	}
   } else {
         gm_u32_t node_id = recv_init_message();
 	send_init_message(node_id);
-        recv_init_message();
+        recv_init_message(); /* receive remote buffer pointer */
+	wait_for_test_data();
+	send_test_data(node_id);
   }
   cleanup();
   return 0;
 }
+
+
+
