@@ -277,7 +277,7 @@ main(int argc, char *argv[])
 	send_init_message(receiver_node_id);
         gm_u32_t node_id = recv_init_message();
         recv_init_message(); /* receive remote buffer pointer */
-	if (0){
+	{
 		int cpuClock[2];
 
 		rdtscl(cpuClock[0]);
@@ -290,8 +290,8 @@ main(int argc, char *argv[])
         gm_u32_t node_id = recv_init_message();
 	send_init_message(node_id);
         recv_init_message(); /* receive remote buffer pointer */
-//	wait_for_test_data();
-	//send_test_data(node_id);
+	wait_for_test_data();
+	send_test_data(node_id);
   }
   cleanup();
   return 0;
