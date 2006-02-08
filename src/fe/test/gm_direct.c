@@ -139,6 +139,7 @@ for ( i = 0; i < 100; i++) {
 	       return node_id;
 	   } else {
 	       printf("invalid message received\n");
+	       return 0;
 	   }
 	   break;
         case GM_NO_RECV_EVENT:
@@ -169,7 +170,7 @@ main(int argc, char *argv[])
   status = gm_open (&netPort, 0 /* board */, 2 /*port */, "blah",
 		    (enum gm_api_version) GM_API_VERSION_1_1);
   if (status != GM_SUCCESS) {
-	gm_perror ("[send] Couldn't open GM port", status);
+	gm_perror ("Couldn't open GM port", status);
 	cleanup();
 	return 1;
   }
@@ -187,7 +188,7 @@ main(int argc, char *argv[])
   netOutBuffer = gm_dma_calloc (netPort, GM_RCV_BUFFER_COUNT,
                               GM_RCV_BUFFER_LENGTH);
   if (netOutBuffer == 0) {
-      printf("[send] Couldn't allocate out_buffer\n");
+      printf("Couldn't allocate out_buffer\n");
       cleanup();
       return 1;
   }
@@ -219,11 +220,11 @@ main(int argc, char *argv[])
 					    receiver_nodename,
 					    &receiver_node_id);
 	if (status == GM_SUCCESS)
-          printf ("[send] receiver node ID is %d\n", receiver_node_id);
+          printf ("receiver node ID is %d\n", receiver_node_id);
   	else {
-      	  printf ("[send] Conversion of nodename %s to node id failed\n",
+      	  printf ("Conversion of nodename %s to node id failed\n",
                  receiver_nodename);
-          gm_perror ("[send]", status);
+          gm_perror ("", status);
           cleanup();
           return 1;
 	}
