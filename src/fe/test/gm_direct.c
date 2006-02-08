@@ -180,7 +180,7 @@ main(int argc, char *argv[])
      gm_recv_event_t *event;
      daqMessage *rcvData;
 
-for ( i = 0; i < 1000; i++) {
+for ( i = 0; i < 100; i++) {
      /* Slave receives init message from master */
      event = gm_receive (netPort);
      switch (GM_RECV_EVENT_TYPE(event)) {
@@ -217,7 +217,6 @@ for ( i = 0; i < 1000; i++) {
           break;
 
 	default:
-		printf("received unknown message type\n");
 		gm_unknown (netPort, event);  
 		break;
       }
