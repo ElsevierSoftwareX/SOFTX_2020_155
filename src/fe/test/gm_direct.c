@@ -167,7 +167,7 @@ main(int argc, char *argv[])
                          send_length,
                          GM_DAQ_PRIORITY,
                          receiver_node_id,
-                         GM_PORT_NUM_RECV,
+                         2,
                          my_send_callback,
                          &context);
         context.callbacks_pending++;
@@ -202,7 +202,7 @@ for ( i = 0; i < 100; i++) {
                                  sizeof(*id_message),
                                  GM_DAQ_PRIORITY,
                                  node_id,
-                                 GM_PORT_NUM_SEND,
+                                 2,
                                  my_send_callback,
                                  &context);
                context.callbacks_pending++;
