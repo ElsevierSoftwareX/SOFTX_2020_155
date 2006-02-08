@@ -150,6 +150,7 @@ for ( i = 0; i < 100; i++) {
           	  directed_send_addr =
             		gm_ntoh_u64(id_message->directed_recv_buffer_addr);
 	          printf("received remote buffer pointer\n");
+		  return 0;
 	      } else {
 	         printf("invalid message received\n");
 	         return 0;
@@ -164,6 +165,7 @@ for ( i = 0; i < 100; i++) {
 		break;
       }
 }
+return 0;
 }
 
 int
