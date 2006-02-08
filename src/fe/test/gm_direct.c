@@ -22,7 +22,7 @@ int slave = 0;
 
 int test_size = 32;
 struct gm_port *netPort = 0;
-void *netInBuffer = 0;
+volatile void *netInBuffer = 0;
 static void *netOutBuffer = 0;
 gm_status_t status;
 gm_u32_t receiver_node_id;
@@ -198,6 +198,9 @@ int
 main(int argc, char *argv[])
 {
   int i;
+  pthread_attr_t attr;
+  rtl_pthread_t wthread;
+  void *fe_start(void *);
 
   if (argc != 2) {
 	printf ("Usage: %s --slave | %s <receive node name>\n",
@@ -258,7 +261,22 @@ main(int argc, char *argv[])
 
   gm_allow_remote_memory_access (netPort);
 
+#if 0
+  rtl_pthread_attr_init(&attr);
+  rtl_pthread_attr_setcpu_np(&attr, 1);
+  /* mark this CPU as reserved - only RTLinux runs on it */         rtl_pthread_attr_setreserve_np(&attr, 1);
+  rtl_pthread_create(&wthread, &attr, fe_start, 0);
+#endif
+  fe_start(0);
+
+  //rtl_main_wait();
+}
+
+void*
+fe_start(void *args) {
+  int i;
   if (!slave) {
+       unsigned long cpuClock[2];
        status = gm_host_name_to_node_id_ex (netPort, 10000000,
 					    receiver_nodename,
 					    &receiver_node_id);
@@ -271,23 +289,19 @@ main(int argc, char *argv[])
           cleanup();
           return 1;
 	}
+		rdtscl(cpuClock[0]);
 	send_init_message(receiver_node_id);
         gm_u32_t node_id = recv_init_message();
-        recv_init_message(); /* receive remote buffer pointer */
-	{
-		int cpuClock[2];
-
-		rdtscl(cpuClock[0]);
+		rdtscl(cpuClock[1]);
+		printf("roundtrip time is %d\n", (cpuClock[1] - cpuClock[0])/CPU_RATE);
   		for (i = 0; i < test_size; i++)
 			((int *)netInBuffer) [i] = 0;
 
-		send_test_data(node_id);
+        recv_init_message(); /* receive remote buffer pointer */
+		//send_test_data(node_id);
 		//wait_for_test_data();
-		usleep(1000);
+		usleep(1000000);
 		printf("data %d\n", *((int *)netInBuffer));
-		rdtscl(cpuClock[1]);
-		printf("roundtrip time is %d\n", (cpuClock[1] - cpuClock[0])/CPU_RATE);
-	}
   } else {
         gm_u32_t node_id = recv_init_message();
 	send_init_message(node_id);
@@ -298,7 +312,7 @@ main(int argc, char *argv[])
 	send_test_data(node_id);
   }
   cleanup();
-  return 0;
+  return -1;
 }
 
 
