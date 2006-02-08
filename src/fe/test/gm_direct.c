@@ -102,7 +102,7 @@ send_init_message(gm_u32_t nid) {
 }
 
 
-void
+gm_u32_t
 recv_init_message() {
      int i;
      gm_recv_event_t *event;
@@ -136,10 +136,10 @@ for ( i = 0; i < 100; i++) {
                                  my_send_callback,
                                  &context);
                context.callbacks_pending++;
+	       return node_id;
 	   } else {
 	       printf("invalid message received\n");
 	   }
-	   i = 100;
 	   break;
         case GM_NO_RECV_EVENT:
           break;
@@ -228,8 +228,10 @@ main(int argc, char *argv[])
           return 1;
 	}
 	send_init_message(receiver_node_id);
+        gm_u32_t node_id = recv_init_message();
   } else {
-	recv_init_message();
+        gm_u32_t node_id = recv_init_message();
+	send_init_message(node_id);
   }
   cleanup();
   return 0;
