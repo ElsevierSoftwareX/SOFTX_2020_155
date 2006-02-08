@@ -25,6 +25,8 @@ gm_u32_t receiver_node_id;
 gm_s_e_id_message_t *id_message = 0;
 unsigned int my_global_id = 0;
 gm_u32_t my_node_id;
+gm_u32_t receiver_global_id;
+gm_remote_ptr_t directed_send_addr;
 
 void
 cleanup() {
@@ -138,8 +140,20 @@ for ( i = 0; i < 100; i++) {
                context.callbacks_pending++;
 	       return node_id;
 	   } else {
-	       printf("invalid message received\n");
-	       return 0;
+	      gm_s_e_id_message_t *id_message;
+
+
+	      if (gm_ntoh_u32 (event->recv.length)
+			 == sizeof (gm_s_e_id_message_t)) {
+	          id_message = gm_ntohp (event->recv.message);
+          	  receiver_global_id = gm_ntoh_u32(id_message->global_id);
+          	  directed_send_addr =
+            		gm_ntoh_u64(id_message->directed_recv_buffer_addr);
+	          printf("received remote buffer pointer\n");
+	      } else {
+	         printf("invalid message received\n");
+	         return 0;
+	      }
 	   }
 	   break;
         case GM_NO_RECV_EVENT:
