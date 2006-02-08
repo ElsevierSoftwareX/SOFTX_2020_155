@@ -140,6 +140,8 @@ main(int argc, char *argv[])
     gm_hton_u64((gm_size_t)netInBuffer);
   id_message->global_id = gm_hton_u32(my_global_id);
 
+  gm_allow_remote_memory_access (netPort);
+
   if (!slave) {
        status = gm_host_name_to_node_id_ex (netPort, 10000000,
 					    receiver_nodename,
@@ -178,7 +180,7 @@ main(int argc, char *argv[])
      gm_recv_event_t *event;
      daqMessage *rcvData;
 
-for ( i = 0; i < 100; i++) {
+for ( i = 0; i < 1000; i++) {
      /* Slave receives init message from master */
      event = gm_receive (netPort);
      switch (GM_RECV_EVENT_TYPE(event)) {
@@ -209,7 +211,11 @@ for ( i = 0; i < 100; i++) {
 	   } else {
 	       printf("invalid message received\n");
 	   }
+	   i = 100;
 	   break;
+        case GM_NO_RECV_EVENT:
+          break;
+
 	default:
 		printf("received unknown message type\n");
 		gm_unknown (netPort, event);  
