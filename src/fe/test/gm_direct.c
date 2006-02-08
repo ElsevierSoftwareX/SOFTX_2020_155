@@ -282,7 +282,9 @@ main(int argc, char *argv[])
 
 		rdtscl(cpuClock[0]);
 		send_test_data(node_id);
-		wait_for_test_data();
+		//wait_for_test_data();
+		usleep(1000);
+		printf("data %d\n", *((int *)netInBuffer));
 		rdtscl(cpuClock[1]);
 		printf("roundtrip time is %d\n", (cpuClock[1] - cpuClock[0])/CPU_RATE);
 	}
@@ -290,7 +292,7 @@ main(int argc, char *argv[])
         gm_u32_t node_id = recv_init_message();
 	send_init_message(node_id);
         recv_init_message(); /* receive remote buffer pointer */
-	wait_for_test_data();
+	//wait_for_test_data();
 	send_test_data(node_id);
   }
   cleanup();
