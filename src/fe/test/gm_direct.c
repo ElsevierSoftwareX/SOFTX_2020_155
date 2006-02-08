@@ -156,6 +156,8 @@ for ( i = 0; i < 100; i++) {
 	         return 0;
 	      }
 	   }
+  	   gm_provide_receive_buffer (netPort, netInBuffer, GM_RCV_MESSAGE_SIZE,
+                             GM_DAQ_PRIORITY);
 	   break;
         case GM_NO_RECV_EVENT:
           break;
