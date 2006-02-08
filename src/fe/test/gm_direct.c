@@ -184,8 +184,8 @@ send_test_data(gm_u32_t nid) {
 
   gm_directed_send_with_callback (netPort,
                                   netOutBuffer,
-                                  directed_send_addr,
-                                  (unsigned long) test_size,
+                                  (gm_remote_ptr_t)directed_send_addr,
+                                  (unsigned long) sizeof(int) * test_size,
                                   GM_DAQ_PRIORITY,
                                   nid,
                                   2,
