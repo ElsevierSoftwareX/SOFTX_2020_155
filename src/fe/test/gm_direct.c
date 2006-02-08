@@ -256,9 +256,6 @@ main(int argc, char *argv[])
   gm_hton_u64((gm_size_t)netInBuffer);
   id_message->global_id = gm_hton_u32(my_global_id);
 
-  for (i = 0; i < test_size; i++)
-	((int *)netInBuffer) [i] = 0;
-
   gm_allow_remote_memory_access (netPort);
 
   if (!slave) {
@@ -281,6 +278,9 @@ main(int argc, char *argv[])
 		int cpuClock[2];
 
 		rdtscl(cpuClock[0]);
+  		for (i = 0; i < test_size; i++)
+			((int *)netInBuffer) [i] = 0;
+
 		send_test_data(node_id);
 		//wait_for_test_data();
 		usleep(1000);
@@ -292,6 +292,8 @@ main(int argc, char *argv[])
         gm_u32_t node_id = recv_init_message();
 	send_init_message(node_id);
         recv_init_message(); /* receive remote buffer pointer */
+  	for (i = 0; i < test_size; i++)
+		((int *)netInBuffer) [i] = 0;
 	//wait_for_test_data();
 	send_test_data(node_id);
   }
