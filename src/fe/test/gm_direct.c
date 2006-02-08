@@ -87,7 +87,7 @@ main(int argc, char *argv[])
 	return 1;
   }
   if (!strcmp(argv[1], "--slave")) slave = 1;
-  else strcpy(receiver_nodename, argv[0]);
+  else strcpy(receiver_nodename, argv[1]);
 
   // Initialize interface
   gm_init();
@@ -143,9 +143,9 @@ main(int argc, char *argv[])
 					    receiver_nodename,
 					    &receiver_node_id);
 	if (status == GM_SUCCESS)
-          printk ("[send] receiver node ID is %d\n", receiver_node_id);
+          printf ("[send] receiver node ID is %d\n", receiver_node_id);
   	else {
-      	  printk ("[send] Conversion of nodename %s to node id failed\n",
+      	  printf ("[send] Conversion of nodename %s to node id failed\n",
                  receiver_nodename);
           gm_perror ("[send]", status);
           cleanup();
