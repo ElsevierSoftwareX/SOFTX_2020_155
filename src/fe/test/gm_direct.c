@@ -116,8 +116,8 @@ for ( i = 0; i < 100; i++) {
      switch (GM_RECV_EVENT_TYPE(event)) {
        case GM_RECV_EVENT:
        case GM_HIGH_RECV_EVENT:
-       //case GM_PEER_RECV_EVENT:
-       //case GM_FAST_PEER_RECV_EVENT:
+       case GM_PEER_RECV_EVENT:
+       case GM_FAST_PEER_RECV_EVENT:
            rcvData = (daqMessage *)gm_ntohp(event->recv.buffer);
            if (rcvData == 0) {
                printf("received zero pointer\n");
