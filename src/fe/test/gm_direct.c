@@ -87,7 +87,7 @@ recv_init_message() {
 
 for ( i = 0; i < 100; i++) {
      /* Slave receives init message from master */
-     event = gm_receive (netPort);
+     event = gm_blocking_receive (netPort);
      switch (GM_RECV_EVENT_TYPE(event)) {
        case GM_RECV_EVENT:
        case GM_HIGH_RECV_EVENT:
