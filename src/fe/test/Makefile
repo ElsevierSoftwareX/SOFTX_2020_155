@@ -2,7 +2,7 @@
 include /opt/rtldk-2.2/rtlinuxpro/rtl.mk
 
 
-TARGET_RTL := gm_simple_example_recv.rtl
+TARGET_RTL := gm_direct.rtl
 LDFLAGS_$(TARGET_RTL) := $(LIBRARY_OBJS)
 
 $(TARGET_RTL): $(LIBRARY_OBJS)

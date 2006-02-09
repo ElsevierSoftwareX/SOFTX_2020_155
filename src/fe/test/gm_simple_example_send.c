@@ -102,7 +102,7 @@ main (int argc, char **argv)
 
   if (argc > 2)
     {
-      gm_printf ("USAGE: gm_simple_example_send [<local_board_num>]\n");
+      printf ("USAGE: gm_simple_example_send [<local_board_num>]\n");
       main_status = GM_INVALID_PARAMETER;
       goto abort_with_nothing;
     }
@@ -119,7 +119,7 @@ main (int argc, char **argv)
 			 (enum gm_api_version) GM_API_VERSION_1_1);
   if (main_status == GM_SUCCESS)
     {
-      gm_printf ("[send] Opened board %d port %d\n",
+      printf ("[send] Opened board %d port %d\n",
 		 my_board_num, GM_SIMPLE_EXAMPLE_PORT_NUM_SEND);
     }
   else
@@ -134,7 +134,7 @@ main (int argc, char **argv)
 			      GM_SIMPLE_EXAMPLE_BUFFER_LENGTH);
   if (out_buffer == 0)
     {
-      gm_printf ("[send] Couldn't allocate out_buffer\n");
+      printf ("[send] Couldn't allocate out_buffer\n");
       main_status = GM_OUT_OF_MEMORY;
       goto abort_with_open_port;
     }
@@ -143,7 +143,7 @@ main (int argc, char **argv)
 			     GM_SIMPLE_EXAMPLE_BUFFER_LENGTH);
   if (in_buffer == 0)
     {
-      gm_printf ("[send] Couldn't allocate in_buffer\n");
+      printf ("[send] Couldn't allocate in_buffer\n");
       main_status = GM_OUT_OF_MEMORY;
       goto abort_with_out_buffer;
     }
@@ -153,7 +153,7 @@ main (int argc, char **argv)
 					GM_SIMPLE_EXAMPLE_BUFFER_LENGTH);
   if (directed_send_buffer == 0)
     {
-      gm_printf ("[send] Couldn't allocate directed_send_buffer\n");
+      printf ("[send] Couldn't allocate directed_send_buffer\n");
       main_status = GM_OUT_OF_MEMORY;
       goto abort_with_in_buffer;
     }
@@ -184,7 +184,7 @@ main (int argc, char **argv)
 	case GM_FAST_PEER_RECV_EVENT:
 	  if (recv_length != sizeof (gm_s_e_id_message_t))
 	    {
-	      gm_printf ("[send] *** ERROR: incoming message length %d "
+	      printf ("[send] *** ERROR: incoming message length %d "
 			 "incorrect; should be %ld\n",
 			 recv_length, sizeof (gm_s_e_id_message_t));
 	      main_status = GM_FAILURE; /* Unexpected incoming message */
@@ -266,7 +266,7 @@ main (int argc, char **argv)
 	case GM_RECV_EVENT:
 	case GM_PEER_RECV_EVENT:
 	case GM_FAST_PEER_RECV_EVENT:
-	  gm_printf ("[send] Receive Event (UNEXPECTED)\n");
+	  printf ("[send] Receive Event (UNEXPECTED)\n");
 	  main_status = GM_FAILURE; /* Unexpected incoming message */
 	  goto abort_with_directed_send_buffer;
 
@@ -278,7 +278,7 @@ main (int argc, char **argv)
 	}
     }
 
-  gm_printf ("[send] gm_simple_example_send completed successfully\n");
+  printf ("[send] gm_simple_example_send completed successfully\n");
   main_status = GM_SUCCESS;
 
  abort_with_directed_send_buffer:
@@ -311,7 +311,7 @@ my_send_callback (struct gm_port *port, void *the_context,
       break;
 
     case GM_SEND_DROPPED:
-      gm_printf ("**** Send dropped!\n");
+      printf ("**** Send dropped!\n");
       break;
 
     default:
