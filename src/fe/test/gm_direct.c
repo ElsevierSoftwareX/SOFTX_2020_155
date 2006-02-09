@@ -74,6 +74,7 @@ my_send_callback (struct gm_port *port, void *the_context,
     {
     case GM_SUCCESS:
       send_complete = 1;
+      printf ("**** Send complete!\n");
       break;
 
     case GM_SEND_DROPPED:
@@ -182,6 +183,7 @@ send_test_data(gm_u32_t nid) {
   for (i = 0 ; i < test_size; i++)
 	((int *)netOutBuffer)[i] = 1;
 
+  send_complete = 0;
   gm_directed_send_with_callback (netPort,
                                   netOutBuffer,
                                   (gm_remote_ptr_t)directed_send_addr,
@@ -192,6 +194,7 @@ send_test_data(gm_u32_t nid) {
                                   my_send_callback,
                                   &context);
   context.callbacks_pending++;
+  for(;send_complete;);
 }
 
 int
@@ -306,18 +309,11 @@ fe_start(void *args) {
         gm_u32_t node_id = recv_init_message();
 	send_init_message(node_id);
         recv_init_message(); /* receive remote buffer pointer */
-  	for (i = 0; i < test_size; i++)
-		((int *)netInBuffer) [i] = 0;
+//  	for (i = 0; i < test_size; i++)
+//		((int *)netInBuffer) [i] = 0;
 	//wait_for_test_data();
-	send_test_data(node_id);
-	send_test_data(node_id);
-	send_test_data(node_id);
-	send_test_data(node_id);
 	send_test_data(node_id);
   }
   cleanup();
   return -1;
 }
-
-
-
