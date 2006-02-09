@@ -301,7 +301,7 @@ fe_start(void *args) {
 		//send_test_data(node_id);
 		//wait_for_test_data();
 		usleep(1000000);
-		printf("data %d\n", *((int *)netInBuffer));
+		printf("data %d\n", *((volatile int *)netInBuffer));
   } else {
         gm_u32_t node_id = recv_init_message();
 	send_init_message(node_id);
@@ -309,6 +309,10 @@ fe_start(void *args) {
   	for (i = 0; i < test_size; i++)
 		((int *)netInBuffer) [i] = 0;
 	//wait_for_test_data();
+	send_test_data(node_id);
+	send_test_data(node_id);
+	send_test_data(node_id);
+	send_test_data(node_id);
 	send_test_data(node_id);
   }
   cleanup();

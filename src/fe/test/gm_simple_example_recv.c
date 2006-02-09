@@ -96,14 +96,14 @@ main (int argc, char **argv)
   
   if ((argc < 2) || (argc > 3))
     {
-      gm_printf ("USAGE: gm_simple_example_recv <sender_nodename> "
+      printf ("USAGE: gm_simple_example_recv <sender_nodename> "
 		 "[<local_board_num>]\n");
       main_status = GM_INVALID_PARAMETER;
       goto abort_with_nothing;
     }
   if (gm_strlen (argv[1]) + 1 > sizeof (sender_nodename))
     {
-      gm_printf ("[recv] *** ERROR: "
+      printf ("[recv] *** ERROR: "
 		 "sender nodename length %ld exceeds maximum of %ld\n",
 		 gm_strlen (argv[1]), sizeof (sender_nodename) - 1);
       main_status = GM_INVALID_PARAMETER;
@@ -125,7 +125,7 @@ main (int argc, char **argv)
 			 (enum gm_api_version) GM_API_VERSION_1_1);
   if (main_status == GM_SUCCESS)
     {
-      gm_printf ("[recv] Opened board %d port %d\n",
+      printf ("[recv] Opened board %d port %d\n",
 		 my_board_num, GM_SIMPLE_EXAMPLE_PORT_NUM_RECV);
     }
   else
@@ -148,18 +148,18 @@ main (int argc, char **argv)
     (my_port, 10000000, sender_nodename, &sender_node_id);
   if (main_status == GM_SUCCESS)
     {
-      gm_printf ("[recv] sender node ID is %d\n", sender_node_id);
+      printf ("[recv] sender node ID is %d\n", sender_node_id);
     }
   else
     {
-      gm_printf ("[recv] Conversion of nodename %s to node id failed\n",
+      printf ("[recv] Conversion of nodename %s to node id failed\n",
 		 sender_nodename);
       gm_perror ("[recv]", main_status);
       goto abort_with_open_port;
     }
   if (my_node_id == sender_node_id)
     {
-      gm_printf ("[recv] NOTE: sender and receiver are same node, id=%d\n",
+      printf ("[recv] NOTE: sender and receiver are same node, id=%d\n",
 		 my_node_id);
     }
 
@@ -169,7 +169,7 @@ main (int argc, char **argv)
   id_message = (gm_s_e_id_message_t *)gm_dma_calloc (my_port, 1, alloc_length);
   if (id_message == 0)
     {
-      gm_printf ("[recv] Couldn't allocate output buffer for id_message\n");
+      printf ("[recv] Couldn't allocate output buffer for id_message\n");
       main_status = GM_OUT_OF_MEMORY;
       goto abort_with_open_port;
     }
@@ -178,7 +178,7 @@ main (int argc, char **argv)
 			     GM_SIMPLE_EXAMPLE_BUFFER_LENGTH);
   if (in_buffer == 0)
     {
-      gm_printf ("[recv] Couldn't allocate in_buffer\n");
+      printf ("[recv] Couldn't allocate in_buffer\n");
       main_status = GM_OUT_OF_MEMORY;
       goto abort_with_id_message;
     }
@@ -188,7 +188,7 @@ main (int argc, char **argv)
 					   GM_SIMPLE_EXAMPLE_BUFFER_LENGTH);
   if (directed_receive_buffer == 0)
     {
-      gm_printf ("[recv] Couldn't allocate directed_receive_buffer\n");
+      printf ("[recv] Couldn't allocate directed_receive_buffer\n");
       main_status = GM_OUT_OF_MEMORY;
       goto abort_with_in_buffer;
     }
@@ -233,12 +233,12 @@ main (int argc, char **argv)
 
   wait_for_events (my_port, &context);
 
-  gm_printf ("[recv] "
+  printf ("[recv] "
 	     "Having received the incoming message from the sender, the\n"
 	     "       directed-receive buffer contains \"%s\"\n",
 	     directed_receive_buffer);
 
-  gm_printf ("[recv] gm_simple_example_recv completed successfully\n");
+  printf ("[recv] gm_simple_example_recv completed successfully\n");
 
   gm_dma_free (my_port, directed_receive_buffer);
   main_status = GM_SUCCESS;
@@ -272,7 +272,7 @@ wait_for_events (struct gm_port *my_port, gm_s_e_context_t *the_context)
 	case GM_RECV_EVENT:
 	case GM_PEER_RECV_EVENT:
 	case GM_FAST_PEER_RECV_EVENT:
-	  gm_printf ("[recv] Received incoming message: \"%s\"\n",
+	  printf ("[recv] Received incoming message: \"%s\"\n",
 		     (char *) gm_ntohp (event->recv.message));
 	  the_context->messages_expected--;
 	  /* Return the buffer for reuse */
@@ -308,7 +308,7 @@ my_send_callback (struct gm_port *port, void *the_context,
       break;
 
     case GM_SEND_DROPPED:
-      gm_printf ("**** Send dropped!\n");
+      printf ("**** Send dropped!\n");
       break;
 
     default:
