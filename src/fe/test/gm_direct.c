@@ -23,6 +23,8 @@ int slave = 0;
 int test_size = 32;
 struct gm_port *netPort = 0;
 volatile void *netInBuffer = 0;
+volatile void *netDmaInBuffer = 0;
+volatile void *netDmaOutBuffer = 0;
 static void *netOutBuffer = 0;
 gm_status_t status;
 gm_u32_t receiver_node_id;
@@ -35,6 +37,12 @@ gm_remote_ptr_t directed_send_addr;
 void
 cleanup() {
   if (netPort) {
+    if (netDmaInBuffer) {
+      gm_dma_free (netPort, netDmaInBuffer);
+    }
+    if (netDmaOutBuffer) {
+      gm_dma_free (netPort, netDmaOutBuffer);
+    }
     if (netInBuffer) {
       gm_dma_free (netPort, netInBuffer);
     }
@@ -181,11 +189,11 @@ inline void
 send_test_data(gm_u32_t nid) {
   int i;
   for (i = 0 ; i < test_size; i++)
-	((int *)netOutBuffer)[i] = 1;
+	((int *)netDmaOutBuffer)[i] = 1;
 
   send_complete = 0;
   gm_directed_send_with_callback (netPort,
-                                  netOutBuffer,
+                                  netDmaOutBuffer,
                                   (gm_remote_ptr_t)directed_send_addr,
                                   (unsigned long) sizeof(int) * test_size,
                                   GM_DAQ_PRIORITY,
@@ -224,6 +232,22 @@ main(int argc, char *argv[])
 	return 1;
   }
 
+  netDmaInBuffer = gm_dma_calloc (netPort, GM_RCV_BUFFER_COUNT,
+                                  GM_RCV_BUFFER_LENGTH);
+  if (netDmaInBuffer == 0) {
+      printf ("Couldn't allocate netDmaInBuffer\n");
+      cleanup();
+      return 1;
+  }
+
+  netDmaOutBuffer = gm_dma_calloc (netPort, GM_RCV_BUFFER_COUNT,
+                                   GM_RCV_BUFFER_LENGTH);
+  if (netDmaOutBuffer == 0) {
+      printf ("Couldn't allocate netDmaOutBuffer\n");
+      cleanup();
+      return 1;
+  }
+
   netInBuffer = gm_dma_calloc (netPort, GM_RCV_BUFFER_COUNT,
                                GM_RCV_BUFFER_LENGTH);
   if (netInBuffer == 0) {
@@ -259,7 +283,7 @@ main(int argc, char *argv[])
   }
 
   id_message->directed_recv_buffer_addr =
-  gm_hton_u64((gm_size_t)netInBuffer);
+  gm_hton_u64((gm_size_t)netDmaInBuffer);
   id_message->global_id = gm_hton_u32(my_global_id);
 
   gm_allow_remote_memory_access (netPort);
@@ -298,19 +322,19 @@ fe_start(void *args) {
 		rdtscl(cpuClock[1]);
 		printf("roundtrip time is %d\n", (cpuClock[1] - cpuClock[0])/CPU_RATE);
   		for (i = 0; i < test_size; i++)
-			((int *)netInBuffer) [i] = 0;
+			((int *)netDmaInBuffer) [i] = 0;
 
         recv_init_message(); /* receive remote buffer pointer */
 		//send_test_data(node_id);
 		//wait_for_test_data();
 		usleep(1000000);
-		printf("data %d\n", *((volatile int *)netInBuffer));
+		printf("data %d\n", *((volatile int *)netDmaInBuffer));
   } else {
         gm_u32_t node_id = recv_init_message();
 	send_init_message(node_id);
         recv_init_message(); /* receive remote buffer pointer */
 //  	for (i = 0; i < test_size; i++)
-//		((int *)netInBuffer) [i] = 0;
+//		((int *)netDmaInBuffer) [i] = 0;
 	//wait_for_test_data();
 	send_test_data(node_id);
   }
