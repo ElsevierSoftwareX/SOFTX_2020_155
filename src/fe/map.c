@@ -73,10 +73,19 @@ int rfm5565DmaDone()
 // *****************************************************************************
 // Function checks if DMA from ADC module is complete
 // *****************************************************************************
-int adcDmaDone()
+int adcDmaDone(int module, int *data)
 {
-	if(adcDma[0]->DMA_CSR & GSAI_DMA_DONE) return (1);
+#if 0
+	if(adcDma[0]->DMA_CSR & GSAI_DMA_DONE) {
+  return(1);
+}
 	else return(0);
+#endif
+	do{
+	}while((adcDma[module]->DMA_CSR & GSAI_DMA_DONE) == 0);
+	// First channel should be marked with an upper bit set
+	if(*data & 0xf0000) return(0);
+	else return(16);
 }
 
 // *****************************************************************************
@@ -123,7 +132,7 @@ int checkAdcRdy(int count)
     do {
         dataCount = adcPtr[0]->BUF_SIZE;
   }while(dataCount < count);
-  return(1);
+  return(dataCount);
 
 }
 
@@ -140,6 +149,19 @@ int gsaAdcDma(int modNum, int byteCount)
   adcDma[modNum]->DMA_CSR = GSAI_DMA_START;
   return(1);
 }
+int gsaAdcDma1(int modNum, int byteCount)
+{
+  adcDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
+  adcDma[modNum]->DMA0_PCI_ADD = (int)adc_dma_handle[modNum];
+  adcDma[modNum]->DMA0_LOC_ADD = GSAI_DMA_LOCAL_ADDR;
+  adcDma[modNum]->DMA0_BTC = byteCount;
+  adcDma[modNum]->DMA0_DESC = GSAI_DMA_TO_PCI;
+  return(1);
+}
+void gsaAdcDma2(int modNum)
+{
+  adcDma[modNum]->DMA_CSR = GSAI_DMA_START;
+}
 
 // *****************************************************************************
 // DMA 16 samples to DAC module
@@ -153,6 +175,19 @@ int gsaDacDma(int modNum)
   dacDma[modNum]->DMA0_DESC = 0x0;
   dacDma[modNum]->DMA_CSR = GSAI_DMA_START;
   return(1);
+}
+int gsaDacDma1(int modNum)
+{
+  dacDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
+  dacDma[modNum]->DMA0_PCI_ADD = (int)dac_dma_handle[modNum];
+  dacDma[modNum]->DMA0_LOC_ADD = 0x18;
+  dacDma[modNum]->DMA0_BTC = 0x20;
+  dacDma[modNum]->DMA0_DESC = 0x0;
+  return(1);
+}
+void gsaDacDma2(int modNum)
+{
+  dacDma[modNum]->DMA_CSR = GSAI_DMA_START;
 }
 
 #if 0
@@ -534,7 +569,7 @@ int myriNetInit()
 
   /* Open a port on our local interface. */
   gm_strncpy (receiver_nodename,  /* Mandatory 1st parameter */
-              "gwave-108",
+              "gwave-111",
               sizeof (receiver_nodename) - 1);
 
   main_status = gm_open (&netPort, my_board_num,
