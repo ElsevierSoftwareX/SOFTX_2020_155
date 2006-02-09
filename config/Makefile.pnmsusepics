@@ -1,0 +1,47 @@
+TARGET = pnmsusepics
+
+# Straight sequencer code
+
+SRC = build/$(TARGET)/pnm_sus.st
+#SRC = build/$(TARGET)/pnm_asc.st
+#SRC += build/$(TARGET)/pnm_lsc.st
+
+SRC += src/drv/rfm.c
+SRC += src/drv/param.c
+SRC += src/drv/crc.c
+SRC += src/drv/fmReadCoeff.c
+
+# Database files to be loaded on target system on all inteferometers
+DB += build/$(TARGET)/pnm_sus1.db
+#DB += build/$(TARGET)/pnm_asc1.db
+#DB += build/$(TARGET)/pnm_lsc1.db
+
+# Define which interferometers this is intended for
+IFO = M1 
+SITE = mit
+
+# Define which state programs to run, specify parameters
+SEQ += 'pnm_sus,("ifo=M1, site=mit, sys=PNM-SUS_, daqsys=PNM_SUS, sysnum=10")'
+#SEQ += 'pnm_sus,("ifo=M1, site=mit, sys=PNM-ASC_, daqsys=PNM_ASC, sysnum=12")'
+#SEQ += 'pnm_lsc,("ifo=M1, site=mit, sys=PNM-LSC_, daqsys=PNM_LSC, sysnum=11")'
+
+# Define if need to be on 5579 net
+#CFLAGS += -DRFM_5579
+#LIBFLAGS += -L/usr/lib/rmnet -lrmnet
+
+# Define if need to be on 5565 net
+#CFLAGS += -DRFM_5565
+#LIBFLAGS += -L/usr/lib/rfm2g -lrfm2g
+CFLAGS += -DPNM -DPNM_SUS
+
+# Build rules
+include config/Makefile.linux
+
+
+# Extra build rules
+build/$(TARGET)/pnm_sus1.db: build/$(TARGET)/pnm_sus.db
+	sed 's/%SYS%/PNM-SUS_/g' $< > $@
+#build/$(TARGET)/pnm_lsc1.db: build/$(TARGET)/pnm_lsc.db
+#	sed 's/%SYS%/PNM-LSC_/g' $< > $@
+#build/$(TARGET)/pnm_asc1.db: build/$(TARGET)/pnm_asc.db
+#	sed 's/%SYS%/PNM-ASC_/g' $< > $@
