@@ -197,6 +197,7 @@ void *fe_start(void *arg)
   int netRestored = 0;
   int status;
   float onePps;
+  int onePpsHi = 0;
   double dWord[MAX_ADC_MODULES][32];
   int dacOut[MAX_DAC_MODULES][16];
   int dcuId;
@@ -445,10 +446,19 @@ void *fe_start(void *arg)
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
 	{
-		if(onePps < 10000) firstTime += 100;
+		if(onePps > 8000) 
+		 {
+			firstTime += 100;
+			onePpsHi = 0;
+		 }
 	}
 
-	if(onePps < 10000)  pLocalEpics->epicsOutput.onePps = clock16K;
+	if((onePps > 8000) && (onePpsHi == 0))  
+	{
+		pLocalEpics->epicsOutput.onePps = clock16K;
+		onePpsHi = 1;
+	}
+	if(onePps < 8000) onePpsHi = 0;  
 	// Check if front end continues to be in sync with 1pps
 	// If not, set sync error flag
 	if(pLocalEpics->epicsOutput.onePps > 4) diagWord |= 1;
