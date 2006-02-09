@@ -5,6 +5,18 @@
 #include <quad.h>
 #endif
 
+#ifdef PNM
+#ifdef PNM_LSC
+#include <pnm/lsc.h>
+#elif defined(PNM_ASC)
+#include <pnm/asc.h>
+#elif defined(PNM_SUS)
+#include <pnm/sus.h>
+#else
+#error Undefined PNM subsystem
+#endif
+#endif
+
 /* Vme bus reset */
 #define SYSVME_RESET_MAGIC_WORD 0x13571113
 

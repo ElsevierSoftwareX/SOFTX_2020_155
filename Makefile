@@ -14,7 +14,14 @@ realclean:
 endif
 
 # Build Epics IOC systems
-epics: susepics hepiepics
+epics: susepics hepiepics pnmepics
+
+pnmepics: pnmsusepics
+
+pnmsusepics: config/Makefile.pnmsusepics
+	@echo Making pnmsusepics...
+	@make -f $<  >& pnmsusepics.makelog || \
+	(echo "FAILED: check pnmsusepics.makelog"; false)
 
 susepics: config/Makefile.susepics
 	@echo Making susepics...
