@@ -44,6 +44,9 @@ daqMessage *daqSendMessage;
 daqData *daqSendData;
 int cdsNetStatus = 0;
 
+// Prototypes
+void gsaAdcDma2(int);
+
 
 #ifdef USE_VMIC_RFM
 // *****************************************************************************
@@ -75,17 +78,27 @@ int rfm5565DmaDone()
 // *****************************************************************************
 int adcDmaDone(int module, int *data)
 {
+int mytime;
+int sttime;
+int totTime;
 #if 0
 	if(adcDma[0]->DMA_CSR & GSAI_DMA_DONE) {
   return(1);
 }
 	else return(0);
 #endif
+	rdtscl(sttime);
 	do{
-	}while((adcDma[module]->DMA_CSR & GSAI_DMA_DONE) == 0);
+		rdtscl(mytime);
+		totTime = (mytime - sttime)/2400;
+	}while(((adcDma[module]->DMA_CSR & GSAI_DMA_DONE) == 0) &&
+		(totTime < 10));
 	// First channel should be marked with an upper bit set
+	if((totTime >= 10) && (module == 0)) return(16);
+	if((totTime >= 10) && (module == 1)) return(32);
+	// if(totTime >= 10) return(16*(module+1));
 	if(*data & 0xf0000) return(0);
-	else return(16);
+	else return(64);
 }
 
 // *****************************************************************************
@@ -125,17 +138,18 @@ int gsaAdcStop()
 // *****************************************************************************
 // Test if ADC has a sample ready
 // *****************************************************************************
-int checkAdcRdy(int count)
+int checkAdcRdy(int count,int numAdc)
 {
   int dataCount;
+  int ii;
 
     do {
         dataCount = adcPtr[0]->BUF_SIZE;
   }while(dataCount < count);
+  // for(ii=0;ii<numAdc;ii++) gsaAdcDma2(ii);
   return(dataCount);
 
 }
-
 // *****************************************************************************
 // DMA 32 samples from ADC module
 // *****************************************************************************
@@ -212,7 +226,7 @@ int ii;
 unsigned int readDio(CDS_HARDWARE *pHardware,int modNum)
 {
   unsigned int status;
-	status = inw(0x3400);
+	status = inw(pHardware->pci_dio[modNum]);
 	return(status);
 }
 
@@ -560,7 +574,7 @@ return(0);
 
 // *****************************************************************
 // Initialize the myrinet connection to Framebuilder.
-int myriNetInit()
+int myriNetInit(int fbId)
 {
   char receiver_nodename[64];
 
@@ -568,9 +582,21 @@ int myriNetInit()
   gm_init();
 
   /* Open a port on our local interface. */
-  gm_strncpy (receiver_nodename,  /* Mandatory 1st parameter */
-              "gwave-111",
-              sizeof (receiver_nodename) - 1);
+  switch(fbId)
+  {
+	case GWAVE111:
+		gm_strncpy (receiver_nodename, "gwave-111", sizeof (receiver_nodename) - 1);
+	  	break;
+	case GWAVE83:
+		gm_strncpy (receiver_nodename, "gwave-83", sizeof (receiver_nodename) - 1);
+	  	break;
+	case GWAVE122:
+		gm_strncpy (receiver_nodename, "gwave-211", sizeof (receiver_nodename) - 1);
+	  	break;
+	default:
+		return(-1);
+		break;
+  }
 
   main_status = gm_open (&netPort, my_board_num,
                          GM_PORT_NUM_SEND,

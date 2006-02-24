@@ -47,7 +47,7 @@ CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
 #include "fm10Gen.h"		/* CDS filter module defs and C code	*/
 #include "feComms.h"		/* Lvea control RFM network defs.	*/
 #include "daqmap.h"		/* DAQ network layout			*/
-#define CPURATE	2800
+#define CPURATE	2.400
 
 // #include "fpvalidate.h"		/* Valid FP number ck			*/
 #include "drv/daqLib.c"		/* DAQ/GDS connection 			*/
@@ -57,6 +57,16 @@ CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
 #endif
 #ifdef QUAD
 	#include "quad/quad.c"	/* User code for quad control.		*/
+#endif
+
+#ifdef SERVO128K
+        #define CYCLE_PER_SECOND        131072
+        #define CYCLE_PER_MINUTE        7864320
+        #define DAQ_CYCLE_CHANGE        8000
+        #define END_OF_DAQ_BLOCK        8191
+        #define DAQ_RATE                8192
+        #define NET_SEND_WAIT           655360
+        #define CYCLE_TIME_ALRM         7
 #endif
 
 #ifdef SERVO16K
@@ -85,11 +95,14 @@ int rfd, wfd;
 
 extern int mapPciModules(CDS_HARDWARE *);	/* Init routine to map adc/dac cards	*/
 extern long gsaAdcTrigger(int);			/* Starts ADC acquisition.		*/
-extern int adcDmaDone();			/* Checks if ADC DMA complete.		*/
-extern int checkAdcRdy(int count);		/* Checks if ADC has samples avail.	*/
+extern int adcDmaDone(int,int *);		/* Checks if ADC DMA complete.		*/
+extern int checkAdcRdy(int,int);		/* Checks if ADC has samples avail.	*/
 extern int gsaAdcDma(int,int);			/* Send data to ADC via DMA.		*/
+extern int gsaAdcDma1(int,int);			/* Send data to ADC via DMA.		*/
 extern int gsaDacDma(int);			/* Send data to DAC via DMA.		*/
-extern int myriNetInit();			/* Initialize myrinet card.		*/
+extern int gsaDacDma1(int);			/* Send data to DAC via DMA.		*/
+extern void gsaDacDma2(int);			/* Send data to DAC via DMA.		*/
+extern int myriNetInit(int);			/* Initialize myrinet card.		*/
 extern int myriNetClose();			/* Clean up myrinet on exit.		*/
 extern int myriNetCheckCallback();		/* Check for messages on myrinet.	*/
 extern int myriNetReconnect(int);		/* Make connects to FB.			*/
@@ -325,7 +338,7 @@ void *fe_start(void *arg)
 
   printf("entering the loop\n");
   // Trigger the ADC to start running
-  gsaAdcTrigger(1);
+  gsaAdcTrigger(cdsPciModules.adcCount);
 
   // Clear a couple of timing diags.
   adcHoldTime = 0;
@@ -342,13 +355,16 @@ void *fe_start(void *arg)
 
   	// diagWord = 0;
         rdtscl(cpuClock[2]);
-	// Check ADC has data ready; hang here until it does
-	status = checkAdcRdy(ADC_SAMPLE_COUNT);
+	// Following call blocks until ADC has correct number of samples ready
+	// The call then starts the DMA input of all ADC modules.
+	status = checkAdcRdy(ADC_SAMPLE_COUNT,cdsPciModules.adcCount);
+	// status = checkAdcRdy(ADC_SAMPLE_COUNT,1);
 	// Read CPU clock for timing info
+// usleep(0);
         rdtscl(cpuClock[0]);
 	// Start reading ADC data
-  	for(jj=0;jj<cdsPciModules.adcCount;jj++)
-		gsaAdcDma2(jj);
+  	//for(jj=0;jj<cdsPciModules.adcCount;jj++)
+	gsaAdcDma2(0);
     
         // Update internal cycle counters
         if((firstTime != 0) && (!skipCycle))
@@ -371,7 +387,7 @@ void *fe_start(void *arg)
         }
         if((subcycle == 0) && (daqCycle == 15))
         {
-	  pLocalEpics->epicsOutput.cpuMeter = timeHold;
+	  pLocalEpics->epicsOutput.cpuMeter = timeHold-usrHoldTime;
 	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
           timeHold = 0;
 	  pLocalEpics->epicsOutput.adcWaitTime = adcHoldTime;
@@ -402,6 +418,8 @@ void *fe_start(void *arg)
 		// Waits for DMA complete
 		// Return 0x10 if first ADC channel does not have sync bit set
 		diagWord |= adcDmaDone(kk,(int *)cdsPciModules.pci_adc[kk]);
+		jj = kk +1;
+		if(jj<cdsPciModules.adcCount) gsaAdcDma2(jj);
 
 		// Read adc data into local variables
 		packedData = (int *)cdsPciModules.pci_adc[kk];
@@ -419,7 +437,7 @@ void *fe_start(void *arg)
 		for(ii=0;ii<32;ii++)
 		{
 			adcData[kk][ii] = (*packedData & 0xffff);
-			dWord[kk][ii] = adcData[0][ii];
+			dWord[kk][ii] = adcData[kk][ii];
 			packedData ++;
 		}
 #endif
@@ -432,6 +450,7 @@ void *fe_start(void *arg)
 			  }
 		}
 	}
+
 
 	// Assign chan 32 to onePps 
 	onePps = dWord[0][31];
@@ -469,7 +488,7 @@ void *fe_start(void *arg)
         rdtscl(cpuClock[4]);
 	feCode(dWord,dacOut,dspPtr,dspCoeff,pLocalEpics);
         rdtscl(cpuClock[5]);
- //status = readDio(&cdsPciModules,0);
+  	// pLocalEpics->epicsOutput.diags[1]  = readDio(&cdsPciModules,0);
 
 	// Write out data to DAC modules
 	for(jj=0;jj<cdsPciModules.dacCount;jj++)
@@ -659,7 +678,7 @@ int main(int argc, char **argv)
 	daqBuffer = (long)&daqArea[0];
  
 	printf("Initializing Network\n");
-	status = myriNetInit();
+	status = myriNetInit(2);
 #if 0
         /* initialize the semaphore */
         sem_init (&irqsem, 1, 0);
