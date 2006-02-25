@@ -363,8 +363,8 @@ void *fe_start(void *arg)
 // usleep(0);
         rdtscl(cpuClock[0]);
 	// Start reading ADC data
-  	//for(jj=0;jj<cdsPciModules.adcCount;jj++)
-	gsaAdcDma2(0);
+  	for(jj=0;jj<cdsPciModules.adcCount;jj++)
+		gsaAdcDma2(jj);
     
         // Update internal cycle counters
         if((firstTime != 0) && (!skipCycle))
@@ -417,9 +417,10 @@ void *fe_start(void *arg)
 	{
 		// Waits for DMA complete
 		// Return 0x10 if first ADC channel does not have sync bit set
-		diagWord |= adcDmaDone(kk,(int *)cdsPciModules.pci_adc[kk]);
+		status = adcDmaDone(kk,(int *)cdsPciModules.pci_adc[kk]);
 		jj = kk +1;
-		if(jj<cdsPciModules.adcCount) gsaAdcDma2(jj);
+		diagWord |= status * jj;
+		// if(jj<cdsPciModules.adcCount) gsaAdcDma2(jj);
 
 		// Read adc data into local variables
 		packedData = (int *)cdsPciModules.pci_adc[kk];
