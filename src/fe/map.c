@@ -78,27 +78,11 @@ int rfm5565DmaDone()
 // *****************************************************************************
 int adcDmaDone(int module, int *data)
 {
-int mytime;
-int sttime;
-int totTime;
-#if 0
-	if(adcDma[0]->DMA_CSR & GSAI_DMA_DONE) {
-  return(1);
-}
-	else return(0);
-#endif
-	rdtscl(sttime);
 	do{
-		rdtscl(mytime);
-		totTime = (mytime - sttime)/2400;
-	}while(((adcDma[module]->DMA_CSR & GSAI_DMA_DONE) == 0) &&
-		(totTime < 10));
+	}while((adcDma[module]->DMA_CSR & GSAI_DMA_DONE) == 0);
 	// First channel should be marked with an upper bit set
-	if((totTime >= 10) && (module == 0)) return(16);
-	if((totTime >= 10) && (module == 1)) return(32);
-	// if(totTime >= 10) return(16*(module+1));
 	if(*data & 0xf0000) return(0);
-	else return(64);
+	else return(16);
 }
 
 // *****************************************************************************
