@@ -19,6 +19,10 @@
 #define GM_16HZ_SEND_BUFFER_LENGTH \
  (gm_max_length_for_size(GM_16HZ_SEND_SIZE))
 
+#define GWAVE111	0
+#define GWAVE83		1
+#define GWAVE122	2
+
 
 typedef struct				/* Receiver-to-sender ID message */
 {
