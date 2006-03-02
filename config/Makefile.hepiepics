@@ -20,7 +20,7 @@ IFO = M1
 SITE = mit
 
 # Define which state programs to run, specify parameters
-SEQ += 'hepi,("ifo=M1, site=mit, sys=SEI-, daqsys=HEPI,sysnum=22")'
+SEQ += 'hepi,("ifo=M1, site=mit, sys=SEI, sysnum=22")'
 
 # Define if need to be on 5579 net
 #CFLAGS += -DRFM_5579
@@ -38,5 +38,4 @@ include config/Makefile.linux
 
 # Extra build rules
 build/$(TARGET)/hepi1.db: build/$(TARGET)/hepi.db
-	sed 's/%SYS%/SEI-/g' $< > $@
-
+	sed 's/%SYS%/SEI/g;s/%SUBSYS%//g' $< > $@

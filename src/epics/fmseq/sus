@@ -114,11 +114,11 @@ OUTVARIABLE CPU_METER_MAX epicsOutput.cpuMeterMax int ai 0 field(HOPR,"60") fiel
 OUTVARIABLE ADC_WAIT epicsOutput.adcWaitTime int ai 0 field(HOPR,"60") field(LOPR,"0")
 OUTVARIABLE ONE_PPS epicsOutput.onePps int ai 0
 OUTVARIABLE DIAG_WORD epicsOutput.diagWord int ai 0
-DAQVAR QUAD_LOAD_CONFIG int ai 0
-DAQVAR QUAD_CHAN_CNT int ai 0
-DAQVAR QUAD_TOTAL int ai 0
-DAQVAR QUAD_MSG int ai 0
-DAQVAR QUAD_DCU_ID int ai 0
+DAQVAR LOAD_CONFIG int ai 0
+DAQVAR CHAN_CNT int ai 0
+DAQVAR TOTAL int ai 0
+DAQVAR MSG int ai 0
+DAQVAR DCU_ID int ai 0
 INVARIABLE BURT_RESTORE epicsInput.burtRestore int ai 0
 OUTVARIABLE GDS_MON_00 epicsOutput.gdsMon[0] int ai 0 
 OUTVARIABLE GDS_MON_01 epicsOutput.gdsMon[1] int ai 0 

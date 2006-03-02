@@ -101,19 +101,14 @@
 
 
 typedef struct CDS_EPICS_IN {
-	float m0InputMatrix[6][6];
-	float m0OutputMatrix[6][6];
-	float r0InputMatrix[6][6];
-	float r0OutputMatrix[6][6];
-	float l1InputMatrix[4][3];
-	float l2InputMatrix[4][3];
-	float l3OutputMatrix[3][5];
+	float inputMatrix[4][3];
 	float vmeReset;
 	int burtRestore;
 	int dcuId;
 	int diagReset;
 	int syncReset;
 	int overflowReset;
+	float phaser1[2];
 } CDS_EPICS_IN;
 
 typedef struct CDS_EPICS_OUT {
