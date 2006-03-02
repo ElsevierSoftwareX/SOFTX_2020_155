@@ -336,11 +336,11 @@ MOMENTARY VME_RESET epicsInput.vmeReset int ai 0
 MOMENTARY DIAG_RESET epicsInput.diagReset int ai 0
 MOMENTARY SYNC_RESET epicsInput.syncReset int ai 0
 MOMENTARY OVERFLOW_RESET epicsInput.overflowReset int ai 0
-DAQVAR HEPI_LOAD_CONFIG int ai 0
-DAQVAR HEPI_CHAN_CNT int ai 0
-DAQVAR HEPI_TOTAL int ai 0
-DAQVAR HEPI_MSG int ai 0
-DAQVAR HEPI_DCU_ID int ai 0
+DAQVAR LOAD_CONFIG int ai 0
+DAQVAR CHAN_CNT int ai 0
+DAQVAR TOTAL int ai 0
+DAQVAR MSG int ai 0
+DAQVAR DCU_ID int ai 0
 OUTVARIABLE CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,"480") field(LOPR,"0")
 OUTVARIABLE CPU_METER_MAX epicsOutput.cpuMeterMax int ai 0 field(HOPR,"480") field(LOPR,"0")
 OUTVARIABLE ADC_WAIT epicsOutput.adcWaitTime int ai 0 field(HOPR,"480") field(LOPR,"0")

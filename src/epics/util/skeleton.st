@@ -41,25 +41,25 @@ program %SEQUENCER_NAME%
 %DECL1%
 
 string msg;
-assign msg to "{ifo}:{sys}{subsys}MSG";
+assign msg to "{ifo}:{sys}-{subsys}MSG";
 
 int allNewCoeff;
-assign allNewCoeff to "{ifo}:{sys}{subsys}LOAD_NEW_COEFF";
+assign allNewCoeff to "{ifo}:{sys}-{subsys}LOAD_NEW_COEFF";
 
 int reload;
-assign reload to "{ifo}:DAQ-{daqsys}_LOAD_CONFIG";
+assign reload to "{ifo}:DAQ-{sys}_{subsys}LOAD_CONFIG";
 
 int dcmsg;
-assign dcmsg to "{ifo}:DAQ-{daqsys}_MSG";
+assign dcmsg to "{ifo}:DAQ-{sys}_{subsys}MSG";
 
 int chnCnt;
-assign chnCnt to "{ifo}:DAQ-{daqsys}_CHAN_CNT";
+assign chnCnt to "{ifo}:DAQ-{sys}_{subsys}CHAN_CNT";
 
 int dataSize;
-assign dataSize to "{ifo}:DAQ-{daqsys}_TOTAL";
+assign dataSize to "{ifo}:DAQ-{sys}_{subsys}TOTAL";
 
 int dcuId;
-assign dcuId to "{ifo}:DAQ-{daqsys}_DCU_ID";
+assign dcuId to "{ifo}:DAQ-{sys}_{subsys}DCU_ID";
 
 
 %DECL2%
@@ -96,28 +96,28 @@ assign dcuId to "{ifo}:DAQ-{daqsys}_DCU_ID";
 #define FILT_QUAD_SIZE 10
 int filt[FILT_QUAD_SIZE];
 assign filt to
-{"{ifo}:{sys}WFS1_I_QUAD","{ifo}:{sys}WFS1_Q_QUAD","{ifo}:{sys}WFS2_I_QUAD",
- "{ifo}:{sys}WFS2_Q_QUAD","{ifo}:{sys}WFS3_I_QUAD","{ifo}:{sys}WFS3_Q_QUAD",
- "{ifo}:{sys}WFS4_I_QUAD","{ifo}:{sys}WFS4_Q_QUAD","{ifo}:{sys}WFS5_I_QUAD",
- "{ifo}:{sys}WFS5_Q_QUAD"};
+{"{ifo}:{sys}-WFS1_I_QUAD","{ifo}:{sys}-WFS1_Q_QUAD","{ifo}:{sys}-WFS2_I_QUAD",
+ "{ifo}:{sys}-WFS2_Q_QUAD","{ifo}:{sys}-WFS3_I_QUAD","{ifo}:{sys}-WFS3_Q_QUAD",
+ "{ifo}:{sys}-WFS4_I_QUAD","{ifo}:{sys}-WFS4_Q_QUAD","{ifo}:{sys}-WFS5_I_QUAD",
+ "{ifo}:{sys}-WFS5_Q_QUAD"};
 #endif
 
 #ifdef SEQUENCER_NAME_asc40m
 #define FILT_QUAD_SIZE 12
 int filt[FILT_QUAD_SIZE];
 assign filt to
-{"{ifo}:{sys}WFS1_I_QUAD","{ifo}:{sys}WFS1_Q_QUAD","{ifo}:{sys}WFS2_I_QUAD",
- "{ifo}:{sys}WFS2_Q_QUAD","{ifo}:{sys}WFS3_I_QUAD","{ifo}:{sys}WFS3_Q_QUAD",
- "{ifo}:{sys}WFS4_I_QUAD","{ifo}:{sys}WFS4_Q_QUAD","{ifo}:{sys}WFS5_I_QUAD",
- "{ifo}:{sys}WFS5_Q_QUAD","{ifo}:{sys}WFS6_I_QUAD","{ifo}:{sys}WFS6_Q_QUAD"};
+{"{ifo}:{sys}-WFS1_I_QUAD","{ifo}:{sys}-WFS1_Q_QUAD","{ifo}:{sys}-WFS2_I_QUAD",
+ "{ifo}:{sys}-WFS2_Q_QUAD","{ifo}:{sys}-WFS3_I_QUAD","{ifo}:{sys}-WFS3_Q_QUAD",
+ "{ifo}:{sys}-WFS4_I_QUAD","{ifo}:{sys}-WFS4_Q_QUAD","{ifo}:{sys}-WFS5_I_QUAD",
+ "{ifo}:{sys}-WFS5_Q_QUAD","{ifo}:{sys}-WFS6_I_QUAD","{ifo}:{sys}-WFS6_Q_QUAD"};
 #endif
 
 #ifdef SEQUENCER_NAME_ascmc
 #define FILT_QUAD_SIZE 4
 int filt[FILT_QUAD_SIZE];
 assign filt to
-{"{ifo}:{sys}WFS1_I_QUAD","{ifo}:{sys}WFS1_Q_QUAD","{ifo}:{sys}WFS2_I_QUAD",
- "{ifo}:{sys}WFS2_Q_QUAD"};
+{"{ifo}:{sys}-WFS1_I_QUAD","{ifo}:{sys}-WFS1_Q_QUAD","{ifo}:{sys}-WFS2_I_QUAD",
+ "{ifo}:{sys}-WFS2_Q_QUAD"};
 #endif
 
 #ifdef SEQUENCER_NAME_lsc
@@ -187,6 +187,7 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 %% static char site[160];
 %% static char ifo[160];
 %% static char daqsys[160];
+
 
 %% static void copy_info() {
 %%   int i;
@@ -696,7 +697,8 @@ state daqInit
 %%      }
         strcpy(site, macValueGet("site"));
         strcpy(ifo, macValueGet("ifo"));
-        strcpy(daqsys, macValueGet("daqsys"));
+	strcpy(daqsys, fmc.system);
+	if (fmc.subSys[0].name[0]) strcat(strcat(daqsys, "-"), fmc.subSys[0].name);
 %%      info = ((DAQ_INFO_BLOCK *)((base = (volatile void *)findRfmCard(0)) + DAQ_INFO_ADDRESS)) + dcuId;
 	pvPut(dcuId);
 %%    rfm_assign(pEpics->epicsInput.dcuId, dcuId);

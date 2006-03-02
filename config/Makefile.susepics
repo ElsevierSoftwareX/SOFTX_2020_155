@@ -19,7 +19,7 @@ IFO = M1
 SITE = mit
 
 # Define which state programs to run, specify parameters
-SEQ += 'sus,("ifo=M1, site=mit, sys=SUS-, daqsys=QUAD,sysnum=9")'
+SEQ += 'sus,("ifo=M1, site=mit, sys=SUS, sysnum=9")'
 
 # Define if need to be on 5579 net
 #CFLAGS += -DRFM_5579
@@ -36,5 +36,5 @@ include config/Makefile.linux
 
 # Extra build rules
 build/$(TARGET)/sus1.db: build/$(TARGET)/sus.db
-	sed 's/%SYS%/SUS-/g' $< > $@
+	sed 's/%SYS%/SUS/g;s/%SUBSYS%//g' $< > $@
 
