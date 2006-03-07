@@ -23,7 +23,7 @@ CFLAGS += -I/opt/gm/include
 CFLAGS += -DSERVO16K 
 CFLAGS += -DLSC_LVEA 
 CFLAGS += -DDSC 
-CFLAGS += -DQUAD 
+CFLAGS += -DPNM -DPNM_SUS
  
 #CFLAGS += -DRFM 
 

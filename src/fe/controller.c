@@ -31,10 +31,13 @@
 #include <linux/slab.h>
 #include <drv/cdsHardware.h>
 #ifdef HEPI
-	#include "hepi.h"
-#endif
-#ifdef QUAD
-	#include "quad.h"
+	#include "hepi.h"	/* User code for HEPI control.		*/
+#elif defined(QUAD)
+	#include "quad.h"	/* User code for quad control.		*/
+#elif defined(PNM)
+	#include "pnm/sus.h"	/* User code for Ponderomotive control. */
+#else
+	#error
 #endif
 #define INLINE  inline
 #define MMAP_SIZE (64*1024*1024 - 5000)
@@ -54,9 +57,12 @@ CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
 #include "drv/epicsXfer.c"	/* Transfers EPICS data to/from shmem	*/
 #ifdef HEPI
 	#include "hepi/hepi.c"	/* User code for HEPI control.		*/
-#endif
-#ifdef QUAD
+#elif defined(QUAD)
 	#include "quad/quad.c"	/* User code for quad control.		*/
+#elif defined(PNM)
+	#include "pnm/pnm.c"	/* User code for Ponderomotive control. */
+#else
+	#error
 #endif
 
 #ifdef SERVO128K

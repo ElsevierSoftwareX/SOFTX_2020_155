@@ -244,6 +244,10 @@ $names2 .= "};\n";
 printf "$cnt filters\n";
 printf "$mcnt matrices\n";
 
+if ($cnt == 0) {
+	$skeleton = "../util/skeleton_nofm.st";
+}
+
 close IN;
 open(IN,"<" . $skeleton) || die "cannot open sequencer Skeleton file $skeleton";
 open(OUT,">./$ARGV[0].st") || die "cannot open $ARGV[0].st file for writing";
@@ -258,6 +262,7 @@ $fpar{"gain_ramp_time"} = "TRAMP";
 $decl1 .= $vdecl . "\n" . $mdecl;
 $decl1 .= "\n";
 
+if ($cnt > 0) {
 while (($h, $t) = splice(@a, 0, 2)) {
 while ( ($n1, $n2) = each %$h ) {
 #    print "$t, $n1 => $n2\n";
@@ -267,7 +272,7 @@ while ( ($n1, $n2) = each %$h ) {
 	$decl1 =~ s/%PAR%/$n2/g;
 	}
 }
-
+}
 select(OUT);
 
 $minit .= $vinit;

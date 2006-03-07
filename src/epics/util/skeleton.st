@@ -698,7 +698,7 @@ state daqInit
         strcpy(site, macValueGet("site"));
         strcpy(ifo, macValueGet("ifo"));
 	strcpy(daqsys, fmc.system);
-	if (fmc.subSys[0].name[0]) strcat(strcat(daqsys, "-"), fmc.subSys[0].name);
+	if (fmc.subSys[0].name[0]) strcat(strcat(daqsys, "_"), fmc.subSys[0].name);
 %%      info = ((DAQ_INFO_BLOCK *)((base = (volatile void *)findRfmCard(0)) + DAQ_INFO_ADDRESS)) + dcuId;
 	pvPut(dcuId);
 %%    rfm_assign(pEpics->epicsInput.dcuId, dcuId);
