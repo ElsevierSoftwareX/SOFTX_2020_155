@@ -5,6 +5,7 @@ SRC += build/$(TARGET)/pnm_sus2.st
 SRC += build/$(TARGET)/pnm_sus3.st
 SRC += build/$(TARGET)/pnm_sus4.st
 SRC += build/$(TARGET)/pnm_sus5.st
+SRC += build/$(TARGET)/pnm_common.st
 
 
 #SRC = build/$(TARGET)/pnm_asc.st
@@ -18,6 +19,7 @@ SRC += src/drv/crc.c
 SRC += src/drv/fmReadCoeff.c
 
 # Database files to be loaded on target system on all inteferometers
+DB += build/$(TARGET)/common.db
 DB += build/$(TARGET)/bs.db
 DB += build/$(TARGET)/itmx.db
 DB += build/$(TARGET)/itmy.db
@@ -31,6 +33,7 @@ IFO = M1
 SITE = mit
 
 # Define which state programs to run, specify parameters
+SEQ += 'pnm_common,("ifo=M1, site=mit, sys=PNM")'
 SEQ += 'pnm_sus1,("ifo=M1, site=mit, sys=PNM, subsys=BS_, sysnum=10")'
 SEQ += 'pnm_sus2,("ifo=M1, site=mit, sys=PNM, subsys=ITMX_, sysnum=11")'
 SEQ += 'pnm_sus3,("ifo=M1, site=mit, sys=PNM, subsys=ITMY_, sysnum=12")'
@@ -53,6 +56,8 @@ include config/Makefile.linux
 
 
 # Extra build rules
+build/$(TARGET)/common.db: build/$(TARGET)/pnm_common.db
+	sed 's/%SYS%/PNM/g;s/%SUBSYS%//g' $< > $@
 build/$(TARGET)/bs.db: build/$(TARGET)/pnm_sus.db
 	sed 's/%SYS%/PNM/g;s/%SUBSYS%/BS_/g' $< > $@
 build/$(TARGET)/itmx.db: build/$(TARGET)/pnm_sus.db

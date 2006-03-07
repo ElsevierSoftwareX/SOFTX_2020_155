@@ -41,11 +41,19 @@ typedef struct RFM_FE_COMMS {
     union{				/*		0x0000 1000 */
       char sysdsp[0x200000];
       FILT_MOD epicsDsp;
-    }dspSpace;
+    }dspSpace
+#ifdef PNM_SUS
+	[NUM_SYSTEMS]
+#endif
+    ;
     union{				/*		0x0000 2000 */
       char syscoeff[0x400000];
       VME_COEF epicsCoeff;
-    }coeffSpace;
+    }coeffSpace
+#ifdef PNM_SUS
+	[NUM_SYSTEMS]
+#endif
+    ;
 }RFM_FE_COMMS;
 
 typedef struct GDS_SELECTIONS {
