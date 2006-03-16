@@ -1,7 +1,7 @@
 #ifndef PNM_SUS_H_INCLUDED
 #define PNM_SUS_H_INCLUDED
 
-#define NUM_SYSTEMS 5
+#define NUM_SYSTEMS 7
 
 /* Assign filter names to filter number */
 #define ULSEN	0
@@ -38,6 +38,17 @@
 
 typedef struct CDS_EPICS_IN {
 	float inputMatrix[NUM_SYSTEMS][4][3];
+	float ascPhase[4][2];
+	float wfsInputMatrixI[4][3];
+	float wfsInputMatrixQ[4][3];
+	float wfsInputMatrixP[2][4];
+	float wfsInputMatrixY[2][4];
+	float wfsOutputMatrixP[4][4];
+	float wfsOutputMatrixY[4][4];
+	float lscReflPhase[2];
+	float lscASRFPhase[2];
+	float lscInputMatrix[4][3];
+	float lscOutputMatrix[3][6];
 	float vmeReset;
 	int burtRestore;
 	int dcuId;

@@ -6,15 +6,7 @@
 #endif
 
 #ifdef PNM
-#ifdef PNM_LSC
-#include <pnm/lsc.h>
-#elif defined(PNM_ASC)
-#include <pnm/asc.h>
-#elif defined(PNM_SUS)
-#include <pnm/sus.h>
-#else
-#error Undefined PNM subsystem
-#endif
+#include <pnm.h>
 #endif
 
 /* Vme bus reset */
@@ -42,7 +34,7 @@ typedef struct RFM_FE_COMMS {
       char sysdsp[0x200000];
       FILT_MOD epicsDsp;
     }dspSpace
-#ifdef PNM_SUS
+#ifdef PNM
 	[NUM_SYSTEMS]
 #endif
     ;
@@ -50,7 +42,7 @@ typedef struct RFM_FE_COMMS {
       char syscoeff[0x400000];
       VME_COEF epicsCoeff;
     }coeffSpace
-#ifdef PNM_SUS
+#ifdef PNM
 	[NUM_SYSTEMS]
 #endif
     ;

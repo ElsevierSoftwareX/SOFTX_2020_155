@@ -1,0 +1,43 @@
+I1
+Q1
+I2
+Q2
+I3
+Q3
+I4
+Q4
+PIT
+YAW
+1
+2
+SPARE15
+SPARE14
+SPARE13
+SPARE12
+SPARE11
+SPARE10
+SPARE9
+SPARE8
+SPARE7
+SPARE6
+SPARE5
+SPARE4
+SPARE3
+SPARE2
+SPARE1
+
+EPICS CDS_EPICS dspSpace[sysnum] coeffSpace[sysnum] epicsSpace
+
+MATRIX INMTRX_I 4x3 epicsInput.wfsInputMatrixI
+MATRIX INMTRX_Q 4x3 epicsInput.wfsInputMatrixQ
+MATRIX INMTRX_P 2x4 epicsInput.wfsInputMatrixP
+MATRIX INMTRX_Y 2x4 epicsInput.wfsInputMatrixY
+MATRIX MP 4x4 epicsInput.wfsOutputMatrixP
+MATRIX MY 4x4 epicsInput.wfsOutputMatrixY
+PHASE  PHASE1 epicsInput.ascPhase[0] float ai 0.0
+PHASE  PHASE2 epicsInput.ascPhase[1] float ai 0.0
+PHASE  PHASE3 epicsInput.ascPhase[2] float ai 0.0
+PHASE  PHASE4 epicsInput.ascPhase[3] float ai 0.0
+
+systems PNM-ASC_
+gds_config 5000 15000 1250 1250

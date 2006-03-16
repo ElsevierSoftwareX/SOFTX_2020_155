@@ -1,0 +1,37 @@
+TRANS_X
+TRANS_Y
+REFL_I
+REFL_Q
+ASRF_I
+ASRF_Q
+ASPD1_DC
+ASPD2_DC
+ASPD2_DC
+LOCKIN_DC
+DIV
+DOF1
+DOF2
+DOF3
+SPARE13
+SPARE12
+SPARE11
+SPARE10
+SPARE9
+SPARE8
+SPARE7
+SPARE6
+SPARE5
+SPARE4
+SPARE3
+SPARE2
+SPARE1
+
+EPICS CDS_EPICS dspSpace[sysnum] coeffSpace[sysnum] epicsSpace
+
+MATRIX INMTRX 4x3 epicsInput.lscInputMatrix
+MATRIX OUTMTRX 3x6 epicsInput.lscOutputMatrix
+PHASE  REFL_PHASE epicsInput.lscReflPhase float ai 0.0
+PHASE  ASRF_PHASE epicsInput.lscASRFPhase float ai 0.0
+
+systems PNM-LSC_
+gds_config 5000 15000 1250 1250
