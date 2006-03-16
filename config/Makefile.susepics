@@ -10,6 +10,7 @@ SRC += src/drv/rfm.c
 SRC += src/drv/param.c
 SRC += src/drv/crc.c
 SRC += src/drv/fmReadCoeff.c
+SRC += src/drv/sync.c
 
 # Database files to be loaded on target system on all inteferometers
 DB += build/$(TARGET)/sus1.db

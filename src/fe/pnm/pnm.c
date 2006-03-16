@@ -114,15 +114,81 @@ void feCodeLSC(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspCoe
   for (ii=0; ii < 3; ii++) {
     double fmIn =  0.0;
     for (jj=0; jj < 4; jj++) fmIn += senOut[jj] * pLocalEpics->epicsInput.lscInputMatrix[jj][ii];
-    dofOut[ii] = filterModuleD(dspPtr, dspCoeff, DOF1 + ii, fmIn, 0);
+    dofOut[ii] = filterModuleD(dspPtr, dspCoeff, LSC_DOF1 + ii, fmIn + divOut, 0);
   }
 
+  double lscOut[8];
+
+  /* Calculate output matrix */
+  for (ii = 0; ii < 6; ii++) {
+    lscOut[ii] = 0.0;
+    for (jj = 0; jj < 3; jj++) {
+      lscOut[ii] += dofOut[jj] * pLocalEpics->epicsInput.lscOutputMatrix[jj][ii];
+    }
+  }
   /* TODO: outputs */
 }
 
+#include <pnm_asc.h>
 
 void feCodeASC(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPICS *pLocalEpics, int optic)
 {
+  int ii, jj;
+
+  double senOut[8];
+
+  /* Do sensor filters */
+  for (ii=0; ii < 8; ii++) {
+      senOut[ii] = filterModuleD(dspPtr, dspCoeff, WFS_I1 + ii, dWord[1][ii], 0);
+  }
+
+  double matInputI[4];
+  double matInputQ[4];
+
+  for (ii = 0; ii < 4; ii++) { 
+    /* WFS I matrix input */
+    matInputI[ii] = senOut[WFS_I1 + ii]* pLocalEpics->epicsInput.ascPhase[ii][1]  /* cos */
+                + senOut[WFS_Q1 + ii]* pLocalEpics->epicsInput.ascPhase[ii][0];  /* sin */
+    /* WFS Q matrix input */
+    matInputQ[ii] = senOut[WFS_Q1 + ii]* pLocalEpics->epicsInput.ascPhase[ii][1]  /* cos */
+                - senOut[WFS_I1 + ii]* pLocalEpics->epicsInput.ascPhase[ii][0];  /* sin */
+  }
+
+  double matOutputI[3];
+  double matOutputQ[3];
+  /* Calculate I & Q Matrices */
+  for (ii=0; ii < 3; ii++) {
+    matOutputI[ii] = 0.0;
+    matOutputQ[ii] = 0.0;
+    for (jj=0; jj < 4; jj++) matOutputI[ii] += matInputI[jj] * pLocalEpics->epicsInput.wfsInputMatrixI[jj][ii];
+    for (jj=0; jj < 4; jj++) matOutputQ[ii] += matInputQ[jj] * pLocalEpics->epicsInput.wfsInputMatrixQ[jj][ii];
+  }
+
+
+  double dofOut[4];
+  double matInput[4];
+  matInput[0] = matOutputI[0];
+  matInput[1] = matOutputI[1];
+  matInput[2] = matOutputQ[0];
+  matInput[3] = matOutputQ[1];
+
+  /* Calculate Input matrix and DOF filters */
+  for (ii=0; ii < 4; ii++) {
+    double fmIn =  0.0;
+    for (jj=0; jj < 4; jj++) fmIn += matInput[jj] * pLocalEpics->epicsInput.wfsInputMatrix[jj][ii];
+    dofOut[ii] = filterModuleD(dspPtr, dspCoeff, WFS_P + ii, fmIn, 0);
+  }
+
+   
+  double ascOut[4];
+
+  /* Calculate output matrix */
+  for (ii = 0; ii < 4; ii++) {
+    ascOut[ii] = 0.0;
+    for (jj = 0; jj < 4; jj++) {
+      ascOut[ii] += dofOut[jj] * pLocalEpics->epicsInput.wfsOutputMatrix[jj][ii];
+    }
+  }
 }
 
 void feCodeOptic(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPICS *pLocalEpics, int optic)

@@ -41,10 +41,8 @@ typedef struct CDS_EPICS_IN {
 	float ascPhase[4][2];
 	float wfsInputMatrixI[4][3];
 	float wfsInputMatrixQ[4][3];
-	float wfsInputMatrixP[2][4];
-	float wfsInputMatrixY[2][4];
-	float wfsOutputMatrixP[4][4];
-	float wfsOutputMatrixY[4][4];
+	float wfsInputMatrix[4][4];
+	float wfsOutputMatrix[4][4];
 	float lscReflPhase[2];
 	float lscASRFPhase[2];
 	float lscInputMatrix[4][3];
