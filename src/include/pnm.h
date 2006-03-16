@@ -1,5 +1,5 @@
-#ifndef PNM_SUS_H_INCLUDED
-#define PNM_SUS_H_INCLUDED
+#ifndef PNM_H_INCLUDED
+#define PNM_H_INCLUDED
 
 #define NUM_SYSTEMS 7
 

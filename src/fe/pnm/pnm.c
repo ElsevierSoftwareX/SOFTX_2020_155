@@ -1,23 +1,7 @@
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-
-pthread_cond_t go1 = PTHREAD_COND_INITIALIZER;
-pthread_cond_t go2 = PTHREAD_COND_INITIALIZER;
-pthread_cond_t done = PTHREAD_COND_INITIALIZER;
-volatile unsigned int waiting1 = 1;
-volatile unsigned int waiting2 = 1;
-volatile unsigned int done1 = 0;
-volatile unsigned int done2 = 0;
-
-
-void feCodeOptic(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPICS *pLocalEpics, int optic)
-{
-  double fmIn;
-  double senOut[5];
-  double dofOut[3];
-  double cOut[4];
-  int ii, jj;
-
 	/* ADC Mapping: *************************************************
+
+		Module 1
+
 		00 = ETMX UL		16 = ETMY UL
 		01 = ETMX UR  		17 = ETMY UR
 		02 = ETMX LR 		18 = ETMY LR
@@ -33,7 +17,26 @@ void feCodeOptic(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspC
 		12 = BS	  LR
 		13 = BS   LL
 		14 = BS   Side
-		15 = 
+		15 = 			31 = One PPS Timing Signal
+
+		Module 2
+
+		00 = WFS I1		16 = ASPD1 I
+		01 = WFS I2   		17 = ASPD1 Q
+		02 = WFS I3  		18 = ASPD1 DC
+		03 = WFS I4  		19 =
+		04 = WFS Q1    		20 = REFL PD I
+		05 = WFS Q2  		21 = REFL PD Q
+		06 = WFS Q3 		22 = REFL PD DC
+		07 = WFS Q4 		23 = 
+		08 =        		24 = ASPD2 DC
+		09 =          		25 = ASPD3 DC
+		10 =       		26 = Xarm Trans 
+		11 =        		27 = Yarm Trans
+		12 =        
+		13 =        
+		14 =          
+		15 = 			
 	*/
 	/* DAC Mapping: *************************************************
 		Module 0
@@ -46,8 +49,89 @@ void feCodeOptic(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspC
 		---------
 		0,1,2,3,4	= ITMX	UL, UR, LR, LL, Side
 		5,6,7,8,9 	= ITMY	UL, UR, LR, LL, Side
+		10,11		= M1 PZT Pitch, M1 PZT Yaw
+		12,13		= M2 PZT Pitch, M2 PZT Yaw
+		14		= Lazer Control
+		15 		= M3 LSC
 	*/
 
+
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+
+pthread_cond_t go1 = PTHREAD_COND_INITIALIZER;
+pthread_cond_t go2 = PTHREAD_COND_INITIALIZER;
+pthread_cond_t done = PTHREAD_COND_INITIALIZER;
+volatile unsigned int waiting1 = 1;
+volatile unsigned int waiting2 = 1;
+volatile unsigned int done1 = 0;
+volatile unsigned int done2 = 0;
+
+#include <pnm_lsc.h>
+
+void feCodeLSC(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPICS *pLocalEpics, int optic)
+{
+  int ii, jj;
+  double senIn[10];
+  double senOut[10];
+
+  senIn[0] = dWord[1][26]; /* Xarm Trans */
+  senIn[1] = dWord[1][27]; /* Yarm Trans */
+  senIn[2] = dWord[1][20]; /* Refl I */
+  senIn[3] = dWord[1][21]; /* Refl Q */
+  senIn[4] = dWord[1][16]; /* ASPD1 I */
+  senIn[5] = dWord[1][17]; /* ASPD1 Q */
+  senIn[6] = dWord[1][18]; /* ASPD1 DC */
+  senIn[7] = dWord[1][24]; /* ASPD2 DC */
+  senIn[8] = dWord[1][25]; /* ASPD3 DC */
+  senIn[9] = dWord[1][28]; /* Lock in DC ??? */
+
+  /* Do sensor filters */
+  for (ii=0; ii < 10; ii++) {
+      senOut[ii] = filterModuleD(dspPtr, dspCoeff, XARM_TRANS + ii, senIn[ii], 0);
+  }
+
+  double matInput[4];
+
+  /* Phase rotation */
+  /* Refl I matrix input */
+  matInput[0] = senOut[REFL_I]* pLocalEpics->epicsInput.lscReflPhase[1]  /* cos */
+                + senOut[REFL_Q]* pLocalEpics->epicsInput.lscReflPhase[0];  /* sin */
+  /* Refl Q matrix input */
+  matInput[1] = senOut[REFL_Q]* pLocalEpics->epicsInput.lscReflPhase[1]  /* cos */
+                - senOut[REFL_I]* pLocalEpics->epicsInput.lscReflPhase[0];  /* sin */
+  /* ASRF1 I matrix input */
+  matInput[2] = senOut[ASRF_I]* pLocalEpics->epicsInput.lscASRFPhase[1]  /* cos */
+                + senOut[ASRF_Q]* pLocalEpics->epicsInput.lscASRFPhase[0];  /* sin */
+  /* ASRF1 Q matrix input */
+  matInput[3] = senOut[ASRF_Q]* pLocalEpics->epicsInput.lscASRFPhase[1]  /* cos */
+                - senOut[ASRF_I]* pLocalEpics->epicsInput.lscASRFPhase[0];  /* sin */
+
+  /* Do strange DIV filter ??? */
+  double divOut = filterModuleD(dspPtr, dspCoeff, DIV, senOut[XARM_TRANS] + senOut[YARM_TRANS], 0);
+  double dofOut[3];
+ 
+  /* Calculate Input matrix and DOF filters */
+  for (ii=0; ii < 3; ii++) {
+    double fmIn =  0.0;
+    for (jj=0; jj < 4; jj++) fmIn += senOut[jj] * pLocalEpics->epicsInput.lscInputMatrix[jj][ii];
+    dofOut[ii] = filterModuleD(dspPtr, dspCoeff, DOF1 + ii, fmIn, 0);
+  }
+
+  /* TODO: outputs */
+}
+
+
+void feCodeASC(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPICS *pLocalEpics, int optic)
+{
+}
+
+void feCodeOptic(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspCoeff,CDS_EPICS *pLocalEpics, int optic)
+{
+  double fmIn;
+  double senOut[5];
+  double dofOut[3];
+  double cOut[4];
+  int ii, jj;
         // Input filtering, corners and side
         for (ii=0; ii < 5; ii++) {
                 senOut[ii] = filterModuleD(dspPtr, dspCoeff, ULSEN + ii, dWord[0][ii], 0);
@@ -79,6 +163,8 @@ void feCodeOptic(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtr,COEF *dspC
         for (ii=0; ii < 4; ii++) {
                 dacOut[0][ii] = filterModuleD(dspPtr, dspCoeff, ULCOIL + ii, cOut[ii], 0);
         }
+
+	/* :TODO: outputs must be routed to correct D/A channels for each optic */
 }
 
 volatile unsigned int cpu2go = 0;
@@ -95,6 +181,8 @@ void feCode(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtrArg,COEF *dspCoe
   pthread_mutex_unlock(&lock);
 #endif
 
+  feCodeASC(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
+  feCodeLSC(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
   cpu2go = cpu3go = 1;
   for (system = 0; system < 3; system++)
     feCodeOptic(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
