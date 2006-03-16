@@ -37,10 +37,11 @@ CFLAGS += -DNO_RFM_EPICS_RECORD_SUPPORT
 endif
 CFLAGS += -D_POSIX_C_SOURCE=199506L -D_POSIX_THREADS  
 CFLAGS += -DOSITHREAD_USE_DEFAULT_STACK  -D_X86_  -DUNIX  -D_BSD_SOURCE -Dlinux
-CFLAGS += -D_REENTRANT -g  -pg -fPIC 
+CFLAGS += -D_REENTRANT -g  -fPIC 
 CFLAGS += -DINLINE=inline
 CXXFLAGS = $(CFLAGS)
 SNCFLAGS += +a
+#SNCFLAGS += -e
 
 # Sequencer file (.st) compiler
 SNC = $(EPICS_SEQ_BASE)/bin/linux-x86/snc $(SNCFLAGS)
@@ -52,7 +53,7 @@ REGGEN = $(EPICS_BASE)/bin/linux-x86/registerRecordDeviceDriver.pl
 FMSEQFILES = src/epics/util/fmseq.pl src/epics/util/skeleton.db src/epics/util/skeleton.st
 
 # Standard Epics IOC server library flags
-LIBFLAGS += -g -pg
+LIBFLAGS += -g
 LIBFLAGS += -L$(EPICS_BASE)/lib/linux-x86
 LIBFLAGS += -L$(EPICS_SEQ_BASE)/lib/linux-x86
 #LIBFLAGS += $(EPICS_SEQ_BASE)/bin/linux-x86/devSequencer.o

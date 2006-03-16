@@ -35,7 +35,7 @@
 #elif defined(QUAD)
 	#include "quad.h"	/* User code for quad control.		*/
 #elif defined(PNM)
-	#include "pnm/sus.h"	/* User code for Ponderomotive control. */
+	#include "pnm.h"	/* User code for Ponderomotive control. */
 #else
 	#error
 #endif

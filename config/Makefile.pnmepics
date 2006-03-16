@@ -1,15 +1,14 @@
-TARGET = pnmsusepics
+TARGET = pnmepics
 
-SRC = build/$(TARGET)/pnm_sus1.st
+SRC = build/$(TARGET)/pnm_asc.st
+SRC += build/$(TARGET)/pnm_lsc.st
+SRC += build/$(TARGET)/pnm_sus1.st
 SRC += build/$(TARGET)/pnm_sus2.st
 SRC += build/$(TARGET)/pnm_sus3.st
 SRC += build/$(TARGET)/pnm_sus4.st
 SRC += build/$(TARGET)/pnm_sus5.st
 SRC += build/$(TARGET)/pnm_common.st
-
-
-#SRC = build/$(TARGET)/pnm_asc.st
-#SRC += build/$(TARGET)/pnm_lsc.st
+SRC += src/epics/seq/daqConfig.st
 
 
 
@@ -17,6 +16,7 @@ SRC += src/drv/rfm.c
 SRC += src/drv/param.c
 SRC += src/drv/crc.c
 SRC += src/drv/fmReadCoeff.c
+SRC += src/drv/sync.c
 
 # Database files to be loaded on target system on all inteferometers
 DB += build/$(TARGET)/common.db
@@ -25,8 +25,8 @@ DB += build/$(TARGET)/itmx.db
 DB += build/$(TARGET)/itmy.db
 DB += build/$(TARGET)/etmx.db
 DB += build/$(TARGET)/etmy.db
-#DB += build/$(TARGET)/pnm_asc1.db
-#DB += build/$(TARGET)/pnm_lsc1.db
+DB += build/$(TARGET)/asc.db
+DB += build/$(TARGET)/lsc.db
 
 # Define which interferometers this is intended for
 IFO = M1 
@@ -34,11 +34,15 @@ SITE = mit
 
 # Define which state programs to run, specify parameters
 SEQ += 'pnm_common,("ifo=M1, site=mit, sys=PNM")'
-SEQ += 'pnm_sus1,("ifo=M1, site=mit, sys=PNM, subsys=BS_, sysnum=10")'
-SEQ += 'pnm_sus2,("ifo=M1, site=mit, sys=PNM, subsys=ITMX_, sysnum=11")'
-SEQ += 'pnm_sus3,("ifo=M1, site=mit, sys=PNM, subsys=ITMY_, sysnum=12")'
-SEQ += 'pnm_sus4,("ifo=M1, site=mit, sys=PNM, subsys=ETMX_, sysnum=13")'
-SEQ += 'pnm_sus5,("ifo=M1, site=mit, sys=PNM, subsys=ETMY_, sysnum=14")'
+SEQ += 'pnm_asc,("ifo=M1, site=mit, sys=PNM, subsys=ASC_, sysnum=5")'
+SEQ += 'pnm_lsc,("ifo=M1, site=mit, sys=PNM, subsys=LSC_, sysnum=6")'
+SEQ += 'pnm_sus1,("ifo=M1, site=mit, sys=PNM, subsys=ETMX_, sysnum=0")'
+SEQ += 'pnm_sus2,("ifo=M1, site=mit, sys=PNM, subsys=ITMX_, sysnum=1")'
+SEQ += 'pnm_sus3,("ifo=M1, site=mit, sys=PNM, subsys=BS_, sysnum=2")'
+SEQ += 'pnm_sus4,("ifo=M1, site=mit, sys=PNM, subsys=ETMY_, sysnum=3")'
+SEQ += 'pnm_sus5,("ifo=M1, site=mit, sys=PNM, subsys=ETMY_, sysnum=4")'
+SEQ += 'daqConfig,("ifo=M1,site=mit, sys=PNM, sysnum=10")'
+
 #SEQ += 'pnm_sus,("ifo=M1, site=mit, sys=PNM-ASC_, sysnum=12")'
 #SEQ += 'pnm_lsc,("ifo=M1, site=mit, sys=PNM-LSC_, sysnum=11")'
 
@@ -49,7 +53,7 @@ SEQ += 'pnm_sus5,("ifo=M1, site=mit, sys=PNM, subsys=ETMY_, sysnum=14")'
 # Define if need to be on 5565 net
 #CFLAGS += -DRFM_5565
 #LIBFLAGS += -L/usr/lib/rfm2g -lrfm2g
-CFLAGS += -DPNM -DPNM_SUS
+CFLAGS += -DPNM -DPNM_SUS -DNO_DAQ_IN_SKELETON
 
 # Build rules
 include config/Makefile.linux
@@ -68,4 +72,7 @@ build/$(TARGET)/etmx.db: build/$(TARGET)/pnm_sus.db
 	sed 's/%SYS%/PNM/g;s/%SUBSYS%/ETMX_/g' $< > $@
 build/$(TARGET)/etmy.db: build/$(TARGET)/pnm_sus.db
 	sed 's/%SYS%/PNM/g;s/%SUBSYS%/ETMY_/g' $< > $@
-
+build/$(TARGET)/asc.db: build/$(TARGET)/pnm_asc.db
+	sed 's/%SYS%/PNM/g;s/%SUBSYS%/ASC_/g' $< > $@
+build/$(TARGET)/lsc.db: build/$(TARGET)/pnm_lsc.db
+	sed 's/%SYS%/PNM/g;s/%SUBSYS%/LSC_/g' $< > $@
