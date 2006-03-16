@@ -7,6 +7,7 @@ program %SEQUENCER_NAME%
 %% #include <string.h>
 %% #include <math.h>
 %% #include <unistd.h>
+%% #include <pthread.h>
 %% #include <fpvalidate.h>
 %% #include <daqmap.h>
 %% #include <param.h>
@@ -23,6 +24,7 @@ program %SEQUENCER_NAME%
 %DECL1%
 
 %% static const float conv = 0.000152588;
+%% extern pthread_mutex_t seq_lock;
 
 #if defined(RFM_EPICS)
 %% static RFM_FE_COMMS *pRfm;
@@ -60,8 +62,9 @@ state init
 state monScreen{
   when(delay(.2)){
 %% int ii, jj;	
-
+%% pthread_mutex_lock (&seq_lock);
 %DECL4%
+%% pthread_mutex_unlock (&seq_lock);
 
   }state monScreen
 }

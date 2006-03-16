@@ -565,6 +565,7 @@ int myriNetInit(int fbId)
   // Initialize interface
   gm_init();
 
+#if 0
   /* Open a port on our local interface. */
   switch(fbId)
   {
@@ -581,6 +582,8 @@ int myriNetInit(int fbId)
 		return(-1);
 		break;
   }
+#endif
+  gm_strncpy (receiver_nodename, "fb", sizeof (receiver_nodename) - 1);
 
   main_status = gm_open (&netPort, my_board_num,
                          GM_PORT_NUM_SEND,
