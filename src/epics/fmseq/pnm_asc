@@ -30,10 +30,8 @@ EPICS CDS_EPICS dspSpace[sysnum] coeffSpace[sysnum] epicsSpace
 
 MATRIX INMTRX_I 4x3 epicsInput.wfsInputMatrixI
 MATRIX INMTRX_Q 4x3 epicsInput.wfsInputMatrixQ
-MATRIX INMTRX_P 2x4 epicsInput.wfsInputMatrixP
-MATRIX INMTRX_Y 2x4 epicsInput.wfsInputMatrixY
-MATRIX MP 4x4 epicsInput.wfsOutputMatrixP
-MATRIX MY 4x4 epicsInput.wfsOutputMatrixY
+MATRIX INMTRX 4x4 epicsInput.wfsInputMatrix
+MATRIX OUTMTRX 4x4 epicsInput.wfsOutputMatrix
 PHASE  PHASE1 epicsInput.ascPhase[0] float ai 0.0
 PHASE  PHASE2 epicsInput.ascPhase[1] float ai 0.0
 PHASE  PHASE3 epicsInput.ascPhase[2] float ai 0.0
