@@ -7,6 +7,7 @@ program %SEQUENCER_NAME%
 %% #include <string.h>
 %% #include <math.h>
 %% #include <unistd.h>
+%% #include <pthread.h>
 %% #include <fpvalidate.h>
 %% #include <daqmap.h>
 %% #include <param.h>
@@ -46,6 +47,8 @@ assign msg to "{ifo}:{sys}-{subsys}MSG";
 int allNewCoeff;
 assign allNewCoeff to "{ifo}:{sys}-{subsys}LOAD_NEW_COEFF";
 
+#ifndef NO_DAQ_IN_SKELETON
+
 int reload;
 assign reload to "{ifo}:DAQ-{sys}_{subsys}LOAD_CONFIG";
 
@@ -60,6 +63,7 @@ assign dataSize to "{ifo}:DAQ-{sys}_{subsys}TOTAL";
 
 int dcuId;
 assign dcuId to "{ifo}:DAQ-{sys}_{subsys}DCU_ID";
+#endif
 
 
 %DECL2%
@@ -70,6 +74,7 @@ assign dcuId to "{ifo}:DAQ-{sys}_{subsys}DCU_ID";
 
 %% static const float conv = 0.000152588;
 %% static const int mask[2] = {0xAAA0,0x10AA};
+%% extern pthread_mutex_t seq_lock;
 
 #if defined(RFM_EPICS)
 %% static RFM_FE_COMMS *pRfm;
@@ -342,13 +347,19 @@ state init
     pvPut(allNewCoeff);
 
 %% }
+#ifdef NO_DAQ_IN_SKELETON
+  } state monScreen
+#else
   } state daqInit
+#endif
 }
 
 state monScreen{
 
   when(delay(.2)){
 %% int ii, jj;	
+
+%% pthread_mutex_lock (&seq_lock);
 
    /* Coefficient update request */	
     pvGet(allNewCoeff);
@@ -684,8 +695,15 @@ state monScreen{
 
 %DECL4%
 
+%% pthread_mutex_unlock (&seq_lock);
+#ifndef NO_DAQ_IN_SKELETON
   }state daqProcess
+#else
+  }state monScreen
+#endif
 }
+
+#ifndef NO_DAQ_IN_SKELETON
 state daqInit
 {
   when()
@@ -728,10 +746,14 @@ state daqInit
         pvPut(dataSize);
     } state monScreen
 }
+
 state daqProcess
 {
   when()
     {
+
+%% pthread_mutex_lock (&seq_lock);
+
         pvGet(reload);
         if (reload)
 %%        {
@@ -761,7 +783,10 @@ state daqProcess
 %%        }
         reload = 0;
         pvPut(reload);
+%% pthread_mutex_unlock (&seq_lock);
+
     } state monScreen
 }
+#endif
 
 }

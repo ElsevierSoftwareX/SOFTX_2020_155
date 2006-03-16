@@ -4,33 +4,37 @@
 #define NUM_SYSTEMS 5
 
 /* Assign filter names to filter number */
-#define LSC	0
-#define SUSPOS	1	
-#define SUSPIT	2
-#define SUSYAW	3
-#define ASCPIT	4
-#define ASCYAW	5
-#define ULPOS	6
-#define ULPIT	7
-#define ULYAW	8
-#define LLPOS	9
-#define LLPIT	10
-#define LLYAW	11
-#define URPOS	12
-#define URPIT	13
-#define URYAW	14
-#define LRPOS	15
-#define LRPIT	16
-#define LRYAW	17
-#define ULCOIL	18
-#define LLCOIL	19
-#define URCOIL	20
-#define LRCOIL	21
-#define ULSEN	22
-#define LLSEN	23
-#define URSEN	24
-#define LRSEN	25
-#define SDSEN	26
+#define ULSEN	0
+#define URSEN	1
+#define LRSEN	2
+#define LLSEN	3
+#define SDSEN	4
+
+#define SUSPOS	5
+#define SUSPIT	6
+#define SUSYAW	7
+
+#define LSC	8
+#define ASCPIT	9
+#define ASCYAW	10
+
+#define ULPOS	11
+#define ULPIT	12
+#define ULYAW	13
+#define URPOS	14
+#define URPIT	15
+#define URYAW	16
+#define LRPOS	17
+#define LRPIT	18
+#define LRYAW	19
+#define LLPOS	20
+#define LLPIT	21
+#define LLYAW	22
+
+#define ULCOIL	23
+#define URCOIL	24
+#define LRCOIL	25
+#define LLCOIL	26
 
 typedef struct CDS_EPICS_IN {
 	float inputMatrix[NUM_SYSTEMS][4][3];

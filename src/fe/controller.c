@@ -39,12 +39,18 @@
 #else
 	#error
 #endif
+
+#ifndef NUM_SYSTEMS
+#define NUM_SYSTEMS 1
+#endif
+
 #define INLINE  inline
 #define MMAP_SIZE (64*1024*1024 - 5000)
 char *_epics_shm;		/* Ptr to computer shared memory		*/
 long daqBuffer;			/* Address for daq dual buffers in daqLib.c	*/
 sem_t irqsem;			/* Semaphore if in IRQ mode.			*/
 CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
+volatile int vmeDone = 0;
 
 #include "msr.h"
 #include "fm10Gen.h"		/* CDS filter module defs and C code	*/
@@ -55,16 +61,6 @@ CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
 // #include "fpvalidate.h"		/* Valid FP number ck			*/
 #include "drv/daqLib.c"		/* DAQ/GDS connection 			*/
 #include "drv/epicsXfer.c"	/* Transfers EPICS data to/from shmem	*/
-#ifdef HEPI
-	#include "hepi/hepi.c"	/* User code for HEPI control.		*/
-#elif defined(QUAD)
-	#include "quad/quad.c"	/* User code for quad control.		*/
-#elif defined(PNM)
-	#include "pnm/pnm.c"	/* User code for Ponderomotive control. */
-#else
-	#error
-#endif
-
 #ifdef SERVO128K
         #define CYCLE_PER_SECOND        131072
         #define CYCLE_PER_MINUTE        7864320
@@ -134,12 +130,24 @@ unsigned int daqCycle;		/* DAQS cycle counter		*/
 
 int firstTime;			/* Dummy var for startup sync.	*/
 
-FILT_MOD dsp;			/* SFM structure.		*/
-FILT_MOD *dspPtr;		/* SFM structure pointer.	*/
-FILT_MOD *pDsp;			/* Ptr to SFM in shmem.		*/
-COEF dspCoeffMemSpace;		/* Local mem for SFM coeffs.	*/
-COEF *dspCoeff;			/* Ptr to SFM coeffs in local mem.	*/
-VME_COEF *pCoeff;		/* Ptr to SFM coeffs in shmem		*/
+FILT_MOD dsp[NUM_SYSTEMS];			/* SFM structure.		*/
+FILT_MOD *dspPtr[NUM_SYSTEMS];		/* SFM structure pointer.	*/
+FILT_MOD *pDsp[NUM_SYSTEMS];			/* Ptr to SFM in shmem.		*/
+COEF dspCoeff[NUM_SYSTEMS];	/* Local mem for SFM coeffs.	*/
+VME_COEF *pCoeff[NUM_SYSTEMS];		/* Ptr to SFM coeffs in shmem		*/
+double dWord[MAX_ADC_MODULES][32];
+int dacOut[MAX_DAC_MODULES][16];
+
+#ifdef HEPI
+	#include "hepi/hepi.c"	/* User code for HEPI control.		*/
+#elif defined(QUAD)
+	#include "quad/quad.c"	/* User code for quad control.		*/
+#elif defined(PNM)
+	#include "pnm/pnm.c"	/* User code for Ponderomotive control. */
+#else
+	#error
+#endif
+
 char daqArea[0x400000];		/* Space allocation for daqLib buffers	*/
 
 #ifdef OVERSAMPLE
@@ -199,7 +207,6 @@ unsigned int intr_handler(unsigned int irq, struct rtl_frame *regs)
 void *fe_start(void *arg)
 {
 
-  static int vmeDone;
   int ii,jj,kk;
   int clock16K = 0;
   int clock1Min = 0;
@@ -217,8 +224,6 @@ void *fe_start(void *arg)
   int status;
   float onePps;
   int onePpsHi = 0;
-  double dWord[MAX_ADC_MODULES][32];
-  int dacOut[MAX_DAC_MODULES][16];
   int dcuId;
   static int adcTime;
   static int adcHoldTime;
@@ -230,6 +235,7 @@ void *fe_start(void *arg)
   static int dropSends = 0;
   int diagWord = 0;
   int epicsCycle = 0;
+  int system = 0;
 
 
 // Do all of the initalization
@@ -240,10 +246,17 @@ void *fe_start(void *arg)
 
 
   // Set pointers to SFM data buffers
-  pDsp = (FILT_MOD *)(&pEpicsComms->dspSpace);
-  pCoeff = (VME_COEF *)(&pEpicsComms->coeffSpace);
-  dspCoeff = (COEF *)&dspCoeffMemSpace;
-  dspPtr = (FILT_MOD *)&dsp;
+#if NUM_SYSTEMS > 1
+  for (system = 0; system < NUM_SYSTEMS; system++) {
+    pDsp[system] = (FILT_MOD *)(&pEpicsComms->dspSpace[system]);
+    pCoeff[system] = (VME_COEF *)(&pEpicsComms->coeffSpace[system]);
+    dspPtr[system] = dsp + system;
+  }
+#else
+    pDsp[system] = (FILT_MOD *)(&pEpicsComms->dspSpace);
+    pCoeff[system] = (VME_COEF *)(&pEpicsComms->coeffSpace);
+    dspPtr[system] = dsp;
+#endif
 
   // Clear the FE reset which comes from Epics
   pLocalEpics->epicsInput.vmeReset = 0;
@@ -257,6 +270,7 @@ void *fe_start(void *arg)
   // Need this FE dcuId to make connection to FB
   dcuId = pLocalEpics->epicsInput.dcuId;
 
+#ifndef NO_DAQ
   // Make connections to FrameBuilder
   printf("Waiting for Network connect to FB - %d\n",dcuId);
   netRetry = 0;
@@ -281,24 +295,29 @@ void *fe_start(void *arg)
 	printf("Net fail - recon try\n");
 	pLocalEpics->epicsOutput.diagWord |= 4;
   }
+#endif
 
   /* Initialize filter banks */
-  for(ii=0;ii<MAX_MODULES;ii++){
-    for(jj=0;jj<FILTERS;jj++){
-      for(kk=0;kk<MAX_COEFFS;kk++){
-        dspCoeff->coeffs[ii].filtCoeff[jj][kk] = 0.0;
+  for (system = 0; system < NUM_SYSTEMS; system++) {
+    for(ii=0;ii<MAX_MODULES;ii++){
+      for(jj=0;jj<FILTERS;jj++){
+        for(kk=0;kk<MAX_COEFFS;kk++){
+          dspCoeff[system].coeffs[ii].filtCoeff[jj][kk] = 0.0;
+        }
+        dspCoeff[system].coeffs[ii].filtSections[jj] = 0;
       }
-      dspCoeff->coeffs[ii].filtSections[jj] = 0;
     }
   }
 
   /* Initialize all filter module excitation signals to zero */
-  for(ii=0;ii<MAX_MODULES;ii++)
-        dsp.data[ii].exciteInput = 0.0;
+  for (system = 0; system < NUM_SYSTEMS; system++)
+    for(ii=0;ii<MAX_MODULES;ii++)
+       dsp[system].data[ii].exciteInput = 0.0;
 
 
-    /* Initialize DSP filter bank values */
-  initVars(&dsp,pDsp,dspCoeff,MAX_MODULES,pCoeff);
+  /* Initialize DSP filter bank values */
+  for (system = 0; system < NUM_SYSTEMS; system++)
+    initVars(dsp + system, pDsp[system], dspCoeff + system, MAX_MODULES, pCoeff[system]);
 
   printf("Initialized servo control parameters.\n");
 
@@ -328,6 +347,7 @@ void *fe_start(void *arg)
   pLocalEpics->epicsOutput.diags[2] = 0;
 
 
+#ifndef NO_DAQ
   // Initialize DAQ function
   status = daqWrite(0,dcuId,daq,DAQ_RATE,testpoint,dspPtr,0,pLocalEpics->epicsOutput.gdsMon,xExc);
   if(status == -1) 
@@ -335,6 +355,7 @@ void *fe_start(void *arg)
     printf("DAQ init failed -- exiting\n");
     return(0);
   }
+#endif
 
   // Clear the startup sync counter
   firstTime = 0;
@@ -416,8 +437,11 @@ void *fe_start(void *arg)
 #else
 	epicsCycle = subcycle;
 #endif
-        vmeDone = updateEpics(epicsCycle, dspPtr,pDsp,dspCoeff,pCoeff,pLocalEpics);
+  	for (system = 0; system < NUM_SYSTEMS; system++)
+		updateEpics(epicsCycle, dspPtr[system], pDsp[system],
+			    dspCoeff + system, pCoeff[system]);
 
+        vmeDone =  checkEpicsReset(epicsCycle, pLocalEpics);
 	// Wait for completion of DMA of Adc data
   	for(kk=0;kk<cdsPciModules.adcCount;kk++)
 	{
@@ -493,7 +517,12 @@ void *fe_start(void *arg)
  	{
 	// Call the front end specific software
         rdtscl(cpuClock[4]);
-	feCode(dWord,dacOut,dspPtr,dspCoeff,pLocalEpics);
+#if (NUM_SYSTEMS > 1) && !defined(PNM)
+  	for (system = 0; system < 1; system++)
+	  feCode(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
+#else
+	feCode(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics);
+#endif
         rdtscl(cpuClock[5]);
   	// pLocalEpics->epicsOutput.diags[1]  = readDio(&cdsPciModules,0);
 
@@ -523,6 +552,7 @@ void *fe_start(void *arg)
 		gsaDacDma2(jj);
 	}
 
+#ifndef NO_DAQ
 	// Write DAQ and GDS values once we are synched to 1pps
   	if(firstTime != 0) 
 	{
@@ -585,6 +615,7 @@ void *fe_start(void *arg)
 			}
 		}
 	}
+#endif
 	}
 
 	skipCycle = 0;
@@ -608,6 +639,7 @@ void *fe_start(void *arg)
         {
 	  pLocalEpics->epicsOutput.diags[0] = usrHoldTime;
 	  usrHoldTime = 0;
+#ifndef NO_DAQ
 	  if(attemptingReconnect && ((cdsNetStatus != 0) || (dropSends != 0)))
 	  {
 		status = myriNetReconnect(dcuId);
@@ -615,6 +647,7 @@ void *fe_start(void *arg)
 		pLocalEpics->epicsOutput.diags[2] ++;
 		dropSends = 0;
 	  }
+#endif
   	  if(pLocalEpics->epicsInput.syncReset)
 	  {
 		pLocalEpics->epicsInput.syncReset = 0;
@@ -647,6 +680,10 @@ void *fe_start(void *arg)
         }
 
   }
+
+#if (NUM_SYSTEMS > 1) && !defined(PNM)
+  feDone();
+#endif
 
   /* System reset command received */
   return (void *)-1;
@@ -685,7 +722,9 @@ int main(int argc, char **argv)
 	daqBuffer = (long)&daqArea[0];
  
 	printf("Initializing Network\n");
+#ifndef NO_DAQ
 	status = myriNetInit(2);
+#endif
 #if 0
         /* initialize the semaphore */
         sem_init (&irqsem, 1, 0);
@@ -694,11 +733,23 @@ int main(int argc, char **argv)
 
 
         rtl_pthread_attr_init(&attr);
+#ifdef RESERVE_CPU2
+        rtl_pthread_attr_setcpu_np(&attr, 2);
+        rtl_pthread_attr_setreserve_np(&attr, 1);
+        rtl_pthread_create(&wthread, &attr, cpu2_start, 0);
+#endif
+
+#ifdef RESERVE_CPU3
+        rtl_pthread_attr_setcpu_np(&attr, 3);
+        rtl_pthread_attr_setreserve_np(&attr, 1);
+        rtl_pthread_create(&wthread, &attr, cpu3_start, 0);
+#endif
+
         rtl_pthread_attr_setcpu_np(&attr, 1);
         /* mark this CPU as reserved - only RTLinux runs on it */
         rtl_pthread_attr_setreserve_np(&attr, 1);
-
         rtl_pthread_create(&wthread, &attr, fe_start, 0);
+
 
 #if 0
         /* install a handler for this IRQ */
@@ -720,7 +771,10 @@ int main(int argc, char **argv)
 
  out:
 
+#ifndef NO_DAQ
 	status = myriNetClose();
+#endif
+
         /* kill the threads */
         rtl_pthread_cancel(wthread);
         rtl_pthread_join(wthread, NULL);

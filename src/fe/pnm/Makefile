@@ -8,6 +8,7 @@ LDFLAGS_$(TARGET_RTL) := $(LIBRARY_OBJS)
 
 $(TARGET_RTL): $(LIBRARY_OBJS)
 
+pnm.o: pnm.c
 pnm.o: ../controller.c
 	$(CC) $(CFLAGS) -c $< -o $@
 map.o: ../map.c
@@ -24,8 +25,10 @@ CFLAGS += -DSERVO16K
 CFLAGS += -DLSC_LVEA 
 CFLAGS += -DDSC 
 CFLAGS += -DPNM -DPNM_SUS
- 
+CFLAGS += -DNO_DAQ
 #CFLAGS += -DRFM 
+CFLAGS += -DRESERVE_CPU2=1
+CFLAGS += -DRESERVE_CPU3=1
 
 all: $(ALL)
 

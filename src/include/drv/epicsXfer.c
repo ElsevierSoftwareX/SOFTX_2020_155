@@ -7,13 +7,12 @@ extern int gsaAdcStop();                        /* Stops ADC acquisition.       
 /*      than one housekeeping I/O function per LSC cycle. Resulting     */
 /*      update rate to/from EPICS is 16Hz.                              */
 /************************************************************************/
-inline int updateEpics(int subcycle,
+inline void updateEpics(int subcycle,
 			FILT_MOD *dsp,
 			FILT_MOD *pDsp,
 			COEF *dspCoeff,
-			VME_COEF *pCoeff,
-			CDS_EPICS *plocalEpics){
-
+			VME_COEF *pCoeff)
+{
 int ii;
 
   ii = subcycle;
@@ -33,8 +32,13 @@ int ii;
         dsp->inputs[ii].outgain = pDsp->inputs[ii].outgain;
         dsp->inputs[ii].limiter = pDsp->inputs[ii].limiter;
   }
+}
 
 
+inline int checkEpicsReset(int subcycle, CDS_EPICS *plocalEpics){
+  int ii;
+
+  ii = subcycle;
 
   if ((ii==MAX_MODULES) && (plocalEpics->epicsInput.vmeReset)) {
         printf("VME_RESET PUSHED !!! \n");

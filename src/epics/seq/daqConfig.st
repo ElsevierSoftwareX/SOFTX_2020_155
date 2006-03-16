@@ -20,11 +20,12 @@ program daqConfig
 %% #include <string.h>
 %% #include <stdlib.h>
 %% #include <math.h>
+%% #include <pthread.h>
 %% #include <daqmap.h>
 %% #include <param.h>
 
 
-%% static char *daqConfig_st_cvsid = "$Id: daqConfig.st,v 1.1 2005/10/31 14:37:13 rolf Exp $";
+%% static char *daqConfig_st_cvsid = "$Id: daqConfig.st,v 1.2 2006/03/16 00:01:05 aivanov Exp $";
 
 int reload;
 assign reload to "{ifo}:DAQ-{sys}_LOAD_CONFIG";
@@ -45,6 +46,7 @@ assign dataSize to "{ifo}:DAQ-{sys}_TOTAL";
 %% static char site[160];
 %% static char ifo[160];
 %% static char sys[160];
+%% extern pthread_mutex_t seq_lock;
 
 %% static void copy_info() {
 %%   int i;
@@ -106,7 +108,9 @@ state process
 {
   when(delay(0.2))
     {
+%%	pthread_mutex_lock (&seq_lock);
 	pvGet(reload);
+%%	pthread_mutex_unlock (&seq_lock);
 	if (reload)
 %%	  {
 %%	    info -> reconfig = 0;
