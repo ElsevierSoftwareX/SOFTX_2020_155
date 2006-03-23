@@ -356,6 +356,7 @@ void *fe_start(void *arg)
   if(status == -1) 
   {
     printf("DAQ init failed -- exiting\n");
+    vmeDone = 1;
     return(0);
   }
 #endif
