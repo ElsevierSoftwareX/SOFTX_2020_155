@@ -51,6 +51,7 @@ long daqBuffer;			/* Address for daq dual buffers in daqLib.c	*/
 sem_t irqsem;			/* Semaphore if in IRQ mode.			*/
 CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
 volatile int vmeDone = 0;
+volatile int stop_working_threads = 0;
 
 #include "msr.h"
 #include "fm10Gen.h"		/* CDS filter module defs and C code	*/
@@ -93,6 +94,8 @@ volatile int vmeDone = 0;
 DAQ_RANGE daq;			/* Range settings for daqLib.c		*/
 
 rtl_pthread_t wthread;
+rtl_pthread_t wthread1;
+rtl_pthread_t wthread2;
 int rfd, wfd;
 
 extern int mapPciModules(CDS_HARDWARE *);	/* Init routine to map adc/dac cards	*/
@@ -441,7 +444,7 @@ void *fe_start(void *arg)
 		updateEpics(epicsCycle, dspPtr[system], pDsp[system],
 			    dspCoeff + system, pCoeff[system]);
 
-        vmeDone =  checkEpicsReset(epicsCycle, pLocalEpics);
+        vmeDone = stop_working_threads | checkEpicsReset(epicsCycle, pLocalEpics);
 	// Wait for completion of DMA of Adc data
   	for(kk=0;kk<cdsPciModules.adcCount;kk++)
 	{
@@ -736,13 +739,13 @@ int main(int argc, char **argv)
 #ifdef RESERVE_CPU2
         rtl_pthread_attr_setcpu_np(&attr, 2);
         rtl_pthread_attr_setreserve_np(&attr, 1);
-        rtl_pthread_create(&wthread, &attr, cpu2_start, 0);
+        rtl_pthread_create(&wthread1, &attr, cpu2_start, 0);
 #endif
 
 #ifdef RESERVE_CPU3
         rtl_pthread_attr_setcpu_np(&attr, 3);
         rtl_pthread_attr_setreserve_np(&attr, 1);
-        rtl_pthread_create(&wthread, &attr, cpu3_start, 0);
+        rtl_pthread_create(&wthread2, &attr, cpu3_start, 0);
 #endif
 
         rtl_pthread_attr_setcpu_np(&attr, 1);
@@ -775,9 +778,21 @@ int main(int argc, char **argv)
 	status = myriNetClose();
 #endif
 
+	printf("Killing work threads\n");
+	stop_working_threads = 1;
+
         /* kill the threads */
         rtl_pthread_cancel(wthread);
         rtl_pthread_join(wthread, NULL);
+
+#ifdef RESERVE_CPU2
+        rtl_pthread_cancel(wthread1);
+        rtl_pthread_join(wthread1, NULL);
+#endif
+#ifdef RESERVE_CPU3
+        rtl_pthread_cancel(wthread2);
+        rtl_pthread_join(wthread2, NULL);
+#endif
 
         /* unmap the shared memory areas */
         munmap(_epics_shm, MMAP_SIZE);
