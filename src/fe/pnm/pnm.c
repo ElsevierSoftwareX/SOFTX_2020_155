@@ -247,11 +247,19 @@ void feCode(double dWord[][32],int dacOut[][16],FILT_MOD *dspPtrArg,COEF *dspCoe
   pthread_mutex_unlock(&lock);
 #endif
 
+  system = 5;
   feCodeASC(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
+  system = 6;
   feCodeLSC(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
   cpu2go = cpu3go = 1;
-  for (system = 0; system < 3; system++)
-    feCodeOptic(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
+  //for(;cpu2go || cpu3go;);
+  //cpu2go = cpu3go = 1;
+  system = 0;
+  feCodeOptic(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
+  system = 1;
+  feCodeOptic(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
+  system = 2;
+  feCodeOptic(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
   for(;cpu2go || cpu3go;);
 #if 0
   pthread_mutex_lock(&lock);
@@ -270,8 +278,13 @@ cpu2_start() {
   while (waiting1) pthread_cond_wait(&go1, &lock);
   pthread_mutex_unlock(&lock);
 #endif
-  for (system = 3; system < 4; system++)
-    feCodeOptic(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
+//  system = 5;
+  //feCodeASC(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
+  //cpu2go = 0;
+  //system = 1;
+  //feCodeOptic(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
+  system = 3;
+  feCodeOptic(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
   cpu2go = 0;
 #if 0
   pthread_mutex_lock(&lock);
@@ -292,8 +305,13 @@ cpu3_start() {
   pthread_mutex_unlock(&lock);
 #endif
   for(;cpu3go == 0;);
-  for (system = 4; system < 5; system++)
-    feCodeOptic(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
+  //system = 6;
+  //feCodeLSC(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
+  //cpu3go = 0;
+  //system = 3;
+  //feCodeOptic(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
+  system = 4;
+  feCodeOptic(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
   cpu3go = 0;
 #if 0
   pthread_mutex_lock(&lock);

@@ -18,7 +18,9 @@ fm10Gen.o: fm10Gen.c
 crc.o: crc.c
 	$(CC) $(CFLAGS) -D__KERNEL__ -c $<
 
-ALL +=  user_mmap $(TARGET_RTL)
+ALL +=  $(TARGET_RTL)
+LDFLAGS += -g
+CFLAGS += -g
 CFLAGS += -I../../include 
 CFLAGS += -I/opt/gm/include
 CFLAGS += -DSERVO16K 
