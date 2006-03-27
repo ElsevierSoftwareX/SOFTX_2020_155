@@ -15,6 +15,9 @@ EPICS_BASE=$(EPICS_ROOT)/base
 EPICS_SEQ_BASE=$(EPICS_ROOT)/seq
 EPICS_HOST_ARCH=linux-x86
 
+# Sequencer synchronization; to fix broken seq package
+SRC += src/drv/sync.c
+
 # Do not delete these intermediate files
 .SECONDARY: build/$(TARGET)/%.i
 .SECONDARY: build/$(TARGET)/%.st
@@ -267,6 +270,7 @@ build/$(TARGET)/registerRecordDeviceDriver.cc:
 	cat $(DBD) > build/$(TARGET)/full.dbd
 	$(REGGEN) build/$(TARGET)/full.dbd  registerRecordDeviceDriver > $@
 	/bin/rm -f build/$(TARGET)/full.dbd
+
 
 # Targets not files
 .PHONY: target
