@@ -32,8 +32,8 @@
 #include <drv/cdsHardware.h>
 #ifdef HEPI
 	#include "hepi.h"	/* User code for HEPI control.		*/
-#elif defined(QD)
-	#include "quad.h"	/* User code for quad control.		*/
+#elif defined(SUS_CODE)
+	#include "sus.h"	/* User code for quad control.		*/
 #elif defined(PNM)
 	#include "pnm.h"	/* User code for Ponderomotive control. */
 #else
@@ -143,8 +143,8 @@ int dacOut[MAX_DAC_MODULES][16];
 
 #ifdef HEPI
 	#include "hepi/hepi.c"	/* User code for HEPI control.		*/
-#elif defined(QD)
-	#include "quadauto/quad.c"	/* User code for quad control.		*/
+#elif defined(SUS_CODE)
+	#include "sus/sus.c"	/* User code for quad control.		*/
 #elif defined(PNM)
 	#include "pnm/pnm.c"	/* User code for Ponderomotive control. */
 #else
