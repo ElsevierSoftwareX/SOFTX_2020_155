@@ -850,8 +850,8 @@ print EPICS "\nEPICS CDS_EPICS dspSpace coeffSpace epicsSpace\n\n";
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if($partType[$ii] eq "MATRIX") {
-		print EPICS "MATRIX $xpartName[$ii]_ $partInCnt[$ii]x$partOutCnt[$ii] $systemName\.$xpartName[$ii]\n";
-		print OUTH "\tfloat $xpartName[$ii]\[$partInCnt[$ii]\]\[$partOutCnt[$ii]\];\n";
+		print EPICS "MATRIX $xpartName[$ii]_ $partOutCnt[$ii]x$partInCnt[$ii] $systemName\.$xpartName[$ii]\n";
+		print OUTH "\tfloat $xpartName[$ii]\[$partOutCnt[$ii]\]\[$partInCnt[$ii]\];\n";
 	}
 }
 print EPICS "\n\n";
@@ -916,7 +916,7 @@ print OUT "{\n\nint ii,jj;\n\n";
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if($partType[$ii] eq "MATRIX") {
-		print OUT "double $xpartName[$ii]\[$partInCnt[$ii]\]\[$partOutCnt[$ii]\];\n";
+		print OUT "double $xpartName[$ii]\[$partOutCnt[$ii]\]\[$partInCnt[$ii]\];\n";
 	}
 	if($partType[$ii] eq "SUM") {
 		print OUT "double $xpartName[$ii];\n";
