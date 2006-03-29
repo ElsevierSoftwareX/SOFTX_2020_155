@@ -124,9 +124,9 @@ typedef struct CDS_EPICS_OUT {
 } CDS_EPICS_OUT;
 
 typedef struct SUS {
-	float Q1_ESD_INMTRX[3][5];
-	float Q1_L1_INMTRX[4][3];
-	float Q1_L2_INMTRX[4][3];
+	float Q1_ESD_INMTRX[5][3];
+	float Q1_L1_INMTRX[3][4];
+	float Q1_L2_INMTRX[3][4];
 	float Q1_M0_INMTRX[6][6];
 	float Q1_M0_OUTMTRX[6][6];
 	float Q1_R0_INMTRX[6][6];
