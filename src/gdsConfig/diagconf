@@ -1,0 +1,13 @@
+service diagconf
+{
+	disable			= no
+	port			= 5355
+	socket_type		= dgram
+	protocol		= udp
+	wait			= yes
+	user			= root
+	passenv			= PATH
+	server			= /opt/gds/diagconfd
+	env			= HOME=/opt/gds
+	server_args		= /opt/gds/param/diag_M.conf
+}

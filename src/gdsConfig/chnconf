@@ -1,0 +1,13 @@
+service chnconf
+{
+	disable			= no
+	type 			= RPC
+	rpc_version		= 2-3
+	socket_type		= stream
+	protocol		= tcp
+	wait			= yes
+	user			= root
+	server			= /opt/gds/chnconfd
+	env			= HOME=/opt/gds
+	server_args		= /opt/gds/param/tpchn_M1.par
+}
