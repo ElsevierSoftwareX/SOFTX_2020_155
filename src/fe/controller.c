@@ -32,7 +32,7 @@
 #include <drv/cdsHardware.h>
 #ifdef HEPI
 	#include "hepi.h"	/* User code for HEPI control.		*/
-#elif defined(QUAD)
+#elif defined(QD)
 	#include "quad.h"	/* User code for quad control.		*/
 #elif defined(PNM)
 	#include "pnm.h"	/* User code for Ponderomotive control. */
@@ -57,7 +57,7 @@ volatile int stop_working_threads = 0;
 #include "fm10Gen.h"		/* CDS filter module defs and C code	*/
 #include "feComms.h"		/* Lvea control RFM network defs.	*/
 #include "daqmap.h"		/* DAQ network layout			*/
-#define CPURATE	2.400
+#define CPURATE	2400
 
 // #include "fpvalidate.h"		/* Valid FP number ck			*/
 #include "drv/daqLib.c"		/* DAQ/GDS connection 			*/
@@ -143,8 +143,8 @@ int dacOut[MAX_DAC_MODULES][16];
 
 #ifdef HEPI
 	#include "hepi/hepi.c"	/* User code for HEPI control.		*/
-#elif defined(QUAD)
-	#include "quad/quad.c"	/* User code for quad control.		*/
+#elif defined(QD)
+	#include "quadauto/quad.c"	/* User code for quad control.		*/
 #elif defined(PNM)
 	#include "pnm/pnm.c"	/* User code for Ponderomotive control. */
 #else
@@ -352,7 +352,7 @@ void *fe_start(void *arg)
 
 #ifndef NO_DAQ
   // Initialize DAQ function
-  status = daqWrite(0,dcuId,daq,DAQ_RATE,testpoint,dspPtr,0,pLocalEpics->epicsOutput.gdsMon,xExc);
+  status = daqWrite(0,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],0,pLocalEpics->epicsOutput.gdsMon,xExc);
   if(status == -1) 
   {
     printf("DAQ init failed -- exiting\n");
@@ -418,7 +418,7 @@ void *fe_start(void *arg)
         }
         if((subcycle == 0) && (daqCycle == 15))
         {
-	  pLocalEpics->epicsOutput.cpuMeter = timeHold-usrHoldTime;
+	  pLocalEpics->epicsOutput.cpuMeter = timeHold;
 	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
           timeHold = 0;
 	  pLocalEpics->epicsOutput.adcWaitTime = adcHoldTime;
@@ -443,7 +443,7 @@ void *fe_start(void *arg)
 #endif
   	for (system = 0; system < NUM_SYSTEMS; system++)
 		updateEpics(epicsCycle, dspPtr[system], pDsp[system],
-			    dspCoeff + system, pCoeff[system]);
+			    &dspCoeff[system], pCoeff[system]);
 
         vmeDone = stop_working_threads | checkEpicsReset(epicsCycle, pLocalEpics);
 	// Wait for completion of DMA of Adc data
@@ -500,19 +500,19 @@ void *fe_start(void *arg)
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
 	{
-		if(onePps > 8000) 
+		if(onePps > 6000) 
 		 {
 			firstTime += 100;
 			onePpsHi = 0;
 		 }
 	}
 
-	if((onePps > 8000) && (onePpsHi == 0))  
+	if((onePps > 6000) && (onePpsHi == 0))  
 	{
 		pLocalEpics->epicsOutput.onePps = clock16K;
 		onePpsHi = 1;
 	}
-	if(onePps < 8000) onePpsHi = 0;  
+	if(onePps < 6000) onePpsHi = 0;  
 	// Check if front end continues to be in sync with 1pps
 	// If not, set sync error flag
 	if(pLocalEpics->epicsOutput.onePps > 4) diagWord |= 1;
@@ -525,7 +525,7 @@ void *fe_start(void *arg)
   	for (system = 0; system < 1; system++)
 	  feCode(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
 #else
-	feCode(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics);
+	feCode(dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics);
 #endif
         rdtscl(cpuClock[5]);
   	// pLocalEpics->epicsOutput.diags[1]  = readDio(&cdsPciModules,0);
@@ -562,7 +562,7 @@ void *fe_start(void *arg)
 	{
 		// Call daqLib
 		pLocalEpics->epicsOutput.diags[3] = 
-			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr,myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
+			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
 		if(!attemptingReconnect)
 		{
 			// Check and clear network callbacks.
