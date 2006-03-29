@@ -1,8 +1,8 @@
 #ifdef HEPI
 #include <hepi.h>
 #endif
-#ifdef QUAD
-#include <quad.h>
+#ifdef SUS_CODE
+#include <sus.h>
 #endif
 
 #ifdef PNM
