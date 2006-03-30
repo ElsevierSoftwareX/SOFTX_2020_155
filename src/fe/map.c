@@ -179,7 +179,7 @@ int gsaDacDma1(int modNum)
   dacDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
   dacDma[modNum]->DMA0_PCI_ADD = (int)dac_dma_handle[modNum];
   dacDma[modNum]->DMA0_LOC_ADD = 0x18;
-  dacDma[modNum]->DMA0_BTC = 0x20;
+  dacDma[modNum]->DMA0_BTC = 0x40;
   dacDma[modNum]->DMA0_DESC = 0x0;
   return(1);
 }
@@ -570,7 +570,7 @@ int myriNetInit(int fbId)
   switch(fbId)
   {
 	case GWAVE111:
-		gm_strncpy (receiver_nodename, "gwave-111", sizeof (receiver_nodename) - 1);
+		gm_strncpy (receiver_nodename, "fb", sizeof (receiver_nodename) - 1);
 	  	break;
 	case GWAVE83:
 		gm_strncpy (receiver_nodename, "gwave-83", sizeof (receiver_nodename) - 1);
