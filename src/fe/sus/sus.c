@@ -11,8 +11,8 @@ void feCode(double dWord[][32],	/* ADC inputs */
 
 int ii,jj;
 
-double Q1_ESD_INMTRX[3][5];
-double Q1_L1_INMTRX[4][3];
+double Q1_ESD_INMTRX[5][3];
+double Q1_L1_INMTRX[3][4];
 double Q1_L1_Sum;
 double Q1_L1_Sum1;
 double Q1_L1_Sum2;
@@ -20,7 +20,7 @@ double Q1_L1_Sum3;
 double Q1_L1_Sum4;
 double Q1_L1_Sum5;
 double Q1_L1_Sum6;
-double Q1_L2_INMTRX[4][3];
+double Q1_L2_INMTRX[3][4];
 double Q1_L2_Sum;
 double Q1_L2_Sum1;
 double Q1_L2_Sum2;
@@ -51,11 +51,11 @@ Q1_L2_Sum6 = 0.0;
 
 //Start of subsystem **************************************************
 
-Q1_ESD_INMTRX[0][0] = filterModuleD(dspPtr,dspCoeff,Q1_ESD_LSC,dWord[0][27],0); 
+Q1_ESD_INMTRX[0][0] = filterModuleD(dspPtr,dspCoeff,Q1_ESD_LSC,dWord[0][24],0); 
 
-Q1_ESD_INMTRX[0][1] = filterModuleD(dspPtr,dspCoeff,Q1_ESD_ASCP,dWord[0][28],0); 
+Q1_ESD_INMTRX[0][1] = filterModuleD(dspPtr,dspCoeff,Q1_ESD_ASCP,dWord[0][25],0); 
 
-Q1_ESD_INMTRX[0][2] = filterModuleD(dspPtr,dspCoeff,Q1_ESD_ASCY,dWord[0][29],0); 
+Q1_ESD_INMTRX[0][2] = filterModuleD(dspPtr,dspCoeff,Q1_ESD_ASCY,dWord[0][26],0); 
 
 
 // Perform Matrix Calc **********************
