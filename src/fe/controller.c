@@ -482,6 +482,7 @@ void *fe_start(void *arg)
 			  {
 				overflowAdc[kk][ii] ++;
 				pLocalEpics->epicsOutput.ovAccum ++;
+				diagWord |= 0x100 *  jj;
 			  }
 		}
 	}
@@ -542,12 +543,14 @@ void *fe_start(void *arg)
 				dacOut[jj][ii] = 32000;
 				overflowDac[jj][ii] ++;
 				pLocalEpics->epicsOutput.ovAccum ++;
+				diagWord |= 0x1000 *  (jj+1);
 			}
 			if(dacOut[jj][ii] < -32000) 
 			{
 				dacOut[jj][ii] = -32000;
 				overflowDac[jj][ii] ++;
 				pLocalEpics->epicsOutput.ovAccum ++;
+				diagWord |= 0x1000 *  (jj+1);
 			}
 			*pDacData = (short)(dacOut[jj][ii] & 0xffff);
 			pDacData ++;
