@@ -5,7 +5,7 @@ die "Usage: $PROGRAM_NAME <MDL file> <Output file name> <DCUID number>"
         if (@ARGV != 3);
 
 $skeleton = $ARGV[1];
-printf("file out is $skeleton\n");
+print "file out is $skeleton\n";
 $cFile = "../../fe/";
 $cFile .= $ARGV[1];
 $cFile .= "/";
@@ -46,6 +46,7 @@ $endBranch = 0;
 $adcCnt = 0;
 $dacCnt = 0;
 $filtCnt = 0;
+$firCnt = 0;
 
 # Clear the part input and output counters
 for($ii=0;$ii<300;$ii++)
@@ -174,8 +175,8 @@ while (<IN>) {
 		# annotate part input information
 		if($conDes eq $xpartName[$ii])
 		{
-			$partInput[$ii][$partInCnt[$ii]] = $conSrc;
-			$partInputPort[$ii][$partInCnt[$ii]] = $conSrcPort-1;
+			$partInput[$ii][($conDesPort-1)] = $conSrc;
+			$partInputPort[$ii][($conDesPort-1)] = $conSrcPort-1;
 			if(substr($conDes,0,3) eq "DAC")
 			{
 				# $partOutputPort[$ii][$partInCnt[$ii]] = $conDesPort-1;
@@ -338,40 +339,91 @@ while (<IN>) {
     # Presently, 4 types of Reference blocks are supported.
     # Info on the part type is in the SourceBlock field.
     if(($inBlock == 1) && ($inRef == 1 ) && ($var1 eq "SourceBlock")){
+	$partErr = 1;
 	if (substr($var2,0,9) eq "cdsSwitch") {
 		$partType[$partCnt] = MULTI_SW;
 		#print "$partCnt is type MULTI_SW\n";
+		$partErr = 0;
 	}
 	if (substr($var2,0,13) eq "cdsRampSwitch") {
 		$partType[$partCnt] = RAMP_SW;
-		print "$partCnt is type RAMP_SW\n";
+		# print "$partCnt is type RAMP_SW\n";
+		$partErr = 0;
 	}
 	if (substr($var2,0,11) eq "cdsSubtract") {
 		$partType[$partCnt] = DIFF_JUNC;
 		#print "$partCnt is type DIFF_JUNCT\n";
+		$partErr = 0;
 	}
 	if (substr($var2,0,10) eq "cdsProduct") {
 		$partType[$partCnt] = PRODUCT;
 		#print "$partCnt is type PRODUCT\n";
+		$partErr = 0;
+	}
+	if (substr($var2,0,10) eq "cdsEpicsIn") {
+		$partType[$partCnt] = EPICS_INPUT;
+		$partErr = 0;
+	}
+	if (substr($var2,0,11) eq "cdsEpicsOut") {
+		$partType[$partCnt] = EPICS_OUTPUT;
+		$partErr = 0;
+	}
+	if (substr($var2,0,8) eq "cdsPPFIR") {
+		$partType[$partCnt] = FIR_FILTER;
+		#print "$partCnt is type FIR\n";
+		$firName = $xpartName[$partCnt];
+		print OUTH "#define $firName \t $filtCnt\n";
+		print EPICS "$firName\n";
+		$filtCnt ++;
+		$firName = $xpartName[$partCnt];
+		$firName .= _DF;
+		print OUTH "#define $firName \t $filtCnt\n";
+		print EPICS "$firName\n";
+		$filtCnt ++;
+		$firName = $xpartName[$partCnt];
+		$firName .= _UF;
+		print OUTH "#define $firName \t $filtCnt\n";
+		print EPICS "$firName\n";
+		$filtCnt ++;
+		$firName = $xpartName[$partCnt];
+		$firName .= _CF;
+		print OUTH "#define $firName \t $filtCnt\n";
+		print EPICS "$firName\n";
+		$filtCnt ++;
+		$firName = $xpartName[$partCnt];
+		$firName .= _FIR;
+		print OUTH "#define $firName \t $firCnt\n";
+		$firCnt ++;
+		$partErr = 0;
 	}
 	if (substr($var2,0,3) eq "adc") {
 		$partType[$partCnt] = ADC;
 		$adcPartNum[$adcCnt] = $partCnt;
 		$adcCnt ++;
+		$partUsed[$partCnt] = 1;
+		$partErr = 0;
 	}
 	if (substr($var2,0,3) eq "dac") {
 		$partType[$partCnt] = DAC;
 		$dacPartNum[$dacCnt] = $partCnt;
 		$dacCnt ++;
+		$partErr = 0;
 	}
 	if (substr($var2,0,6) eq "Matrix") {
 		$partType[$partCnt] = MATRIX;
+		$partErr = 0;
 	}
 	if (substr($var2,0,8) eq "dsparch4") {
 		$partType[$partCnt] = FILT;
 		print OUTH "#define $xpartName[$partCnt] \t $filtCnt\n";
 		print EPICS "$xpartName[$partCnt]\n";
 		$filtCnt ++;
+		$partErr = 0;
+	}
+	if ($partErr)
+	{
+		print "Unknow part type $var2\nExiting script\n";
+		exit;
 	}
 
     }
@@ -454,7 +506,7 @@ $foundCon = 0;
 			#$partOutNum[$ii][$jj] = $kk;
 			$partSysFrom[$kk] = $partSubNum[$ii];
 			# print "Connection from $xpartName[$ii] $fromNum $fromPort to $xpartName[$kk] $toNum $toPort\n";
-			print"\t$xpartName[$fromNum] $fromPort to $xpartName[$toNum] $toPort\n";
+			#print"\t$xpartName[$fromNum] $fromPort to $xpartName[$toNum] $toPort\n";
                        $fromNum = $partInNum[$ii][$jj];
                        $fromPort = $partInputPort[$ii][$jj];
                        $toNum = $partOutNum[$kk][$ll];
@@ -574,7 +626,7 @@ for($ll=0;$ll<$subSys;$ll++)
 {
 $xx = $subSysPartStop[$ll] - $subSysPartStart[$ll];
 $subCntr[$ll] = 0;
-	print "SubSys $ll from $subSysPartStart[$ll] to $subSysPartStop[$ll]\n";
+	print "SubSys $ll $subSysName[$ll] from $subSysPartStart[$ll] to $subSysPartStop[$ll]\n";
 print OUTD "\nSubSystem $ll has $xx parts ************************************\n";
 for($ii=$subSysPartStart[$ll];$ii<$subSysPartStop[$ll];$ii++)
 {
@@ -632,7 +684,7 @@ for($ii=0;$ii<$subSys;$ii++)
 	$ssCnt = 0;
 	for($jj=$subSysPartStart[$ii];$jj<$subSysPartStop[$ii];$jj++)
 	{
-		if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "GROUND"))
+		if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "EPICS_INPUT"))
 		{
 			$partsRemaining --;
 			$partUsed[$jj] = 1;
@@ -705,7 +757,7 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 		$searchPart[$partsRemaining] = $xx;
 		$searchCnt ++;
 		$partsRemaining ++;
-		#print "Part num $xx $partName[$xx] is remaining\n";
+		print "Part num $xx $partName[$xx] is remaining\n";
 	}
 }
 $subRemaining = $subSys;
@@ -726,8 +778,32 @@ $allADC = 1;
 		$seqList[$seqCnt] = $ii;
 		$seqType[$seqCnt] = "SUBSYS";
 		$seqCnt ++;
-		#print "Subsys $ii $subSysName[$ii] has all ADC inputs and can go $seqCnt\n";
+		print "Subsys $ii $subSysName[$ii] has all ADC inputs and can go $seqCnt\n";
 		$subRemaining --;
+	}
+}
+for($ii=0;$ii<$searchCnt;$ii++)
+{
+	$allADC = 1;
+	$xx = $searchPart[$ii];
+	if($partUsed[$xx] == 0)
+	{
+		for($jj=0;$jj<$partInCnt[$xx];$jj++)
+		{
+                        $from = $partInNum[$xx][0];
+			if($partType[$from] ne "ADC")
+			{
+					$allADC = 0;
+			}
+		}
+		if($allADC == 1) {
+			print "Part $xx $xpartName[$xx] can go next\n";
+			$partUsed[$xx] = 1;
+			$partsRemaining --;
+			$seqList[$seqCnt] = $xx;
+			$seqType[$seqCnt] = "PART";
+			$seqCnt ++;
+		}
 	}
 }
 until(($partsRemaining < 1) && ($subRemaining < 1))
@@ -743,18 +819,20 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 				if(($yy<100) && ($subUsed[$yy] != 1))
 				{
 					$allADC = 0;
+						# print "FallIn $ii\n";
 				}
 				$yy = $subInputs[$ii][$jj] - 100;
 				for($kk=0;$kk<$searchCnt;$kk++)
 				{
 					if($partUsed[$yy] != 1)
 					{
+						#print "Fallout $ii\n";
 						$allADC = 0;
 					}
 				}
 			}
 			if($allADC == 1) {
-				#print "Subsys $ii $subSysName[$ii] can go next\n";
+				print "Subsys $ii $subSysName[$ii] can go next\n";
 				$subUsed[$ii] = 1;
 				$subRemaining --;
 				$seqList[$seqCnt] = $ii;
@@ -778,7 +856,7 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 				}
 			}
 			if($allADC == 1) {
-				#print "Part $xx $xpartName[$xx] can go next\n";
+				print "Part $xx $xpartName[$xx] can go next\n";
 				$partUsed[$xx] = 1;
 				$partsRemaining --;
 				$seqList[$seqCnt] = $xx;
@@ -825,6 +903,8 @@ $inCnt = 0;
 print OUTH "\n\n#define MAX_MODULES \t $filtCnt\n";
 $filtCnt *= 10;
 print OUTH "#define MAX_FILTERS \t $filtCnt\n\n";
+print OUTH "#define MAX_FIR \t $firCnt\n";
+print OUTH "#define MAX_FIR_POLY \t $firCnt\n\n";
 print OUTH "typedef struct CDS_EPICS_IN {\n";
 print OUTH "\tfloat vmeReset;\n";
 print OUTH "\tint burtRestore;\n";
@@ -853,6 +933,23 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print EPICS "MATRIX $xpartName[$ii]_ $partOutCnt[$ii]x$partInCnt[$ii] $systemName\.$xpartName[$ii]\n";
 		print OUTH "\tfloat $xpartName[$ii]\[$partOutCnt[$ii]\]\[$partInCnt[$ii]\];\n";
 	}
+	if($partType[$ii] eq "RAMP_SW") {
+		print OUTH "\tint $xpartName[$ii];\n";
+	}
+	if($partType[$ii] eq "MULTI_SW") {
+		print OUTH "\tint $xpartName[$ii];\n";
+	}
+	if($partType[$ii] eq "EPICS_INPUT") {
+		print OUTH "\tfloat $xpartName[$ii];\n";
+	}
+	if($partType[$ii] eq "EPICS_OUTPUT") {
+		print OUTH "\tfloat $xpartName[$ii];\n";
+	}
+	if($partType[$ii] eq "PRODUCT") {
+		print OUTH "\tfloat $xpartName[$ii];\n";
+		print OUTH "\tint $xpartName[$ii]\_TRAMP;\n";
+		print OUTH "\tint $xpartName[$ii]\_RMON;\n";
+	}
 }
 print EPICS "\n\n";
 print OUTH "} \U$systemName;\n\n";
@@ -879,6 +976,28 @@ print EPICS "OUTVARIABLE USR_TIME epicsOutput.diags[0] int ai 0\n";
 print EPICS "OUTVARIABLE RESYNC_COUNT epicsOutput.diags[1] int ai 0\n";
 print EPICS "OUTVARIABLE NET_ERR_COUNT epicsOutput.diags[2] int ai 0\n";
 print EPICS "OUTVARIABLE DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0\n";
+print EPICS "\n\n";
+#Load EPICS I/O Parts
+for($ii=0;$ii<$partCnt;$ii++)
+{
+	if($partType[$ii] eq "MULTI_SW") {
+		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
+	}
+	if($partType[$ii] eq "RAMP_SW") {
+		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
+	}
+	if($partType[$ii] eq "EPICS_INPUT") {
+		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
+	}
+	if($partType[$ii] eq "EPICS_OUTPUT") {
+		print EPICS "OUTVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
+	}
+	if($partType[$ii] eq "PRODUCT") {
+		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_TRAMP $systemName\.$xpartName[$ii]\_TRAMP int ai 0 field(PREC,\"0\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_RMON $systemName\.$xpartName[$ii]\_RMON int ai 0 field(PREC,\"0\")\n";
+	}
+}
 print EPICS "\n\n";
 for($ii=0;$ii<$adcCnt;$ii++)
 {
@@ -920,6 +1039,19 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 	if($partType[$ii] eq "SUM") {
 		print OUT "double $xpartName[$ii];\n";
+	}
+	if($partType[$ii] eq "DIFF_JUNC") {
+		print OUT "double $xpartName[$ii]\[16\];\n";
+	}
+	if($partType[$ii] eq "RAMP_SW") {
+		print OUT "double $xpartName[$ii]\[4\];\n";
+	}
+	if($partType[$ii] eq "MULTI_SW") {
+		print OUT "double $xpartName[$ii]\[$partOutCnt[$ii]\];\n";
+	}
+	if($partType[$ii] eq "PRODUCT") {
+		print OUT "double $xpartName[$ii]\[$partOutCnt[$ii]\];\n";
+		print OUT "float $xpartName[$ii]\_CALC;\n";
 	}
 }
 print OUT "\n\n";
@@ -1009,7 +1141,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 		if(($partType[$to] eq "MULTI_SW") || ($partType[$to] eq "PRODUCT"))
 		{
 			$toType = 6;
-			$toPort = $partOutputPort[$mm][0] - 1;
+			$toPort = $partOutputPort[$mm][0];
 			$toName = $xpartName[$to];
 			$outExp = "$toName\[";
 			$outExp .= $toPort;
@@ -1127,7 +1259,19 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$calcExp .= "\[";
 			$calcExp .= $fromPort;
 			$calcExp .= "\],0); \n";
-			#print "FROM FILTER $xpartName[$mm]  $calcExp\n";
+		}
+		if($partType[$from] eq "EPICS_OUTPUT")
+		{
+			$fromType = 9;
+			$fromPort = $partInputPort[$mm][0];
+			$fromName = $xpartName[$from];
+			$calcExp .= $xpartName[$mm];
+			$calcExp .= ",";
+			$calcExp .= "pLocalEpics->";
+			$calcExp .= $systemName;
+			$calcExp .= "\.";
+			$calcExp .= $xpartName[$from];
+			$calcExp .= ",0); \n";
 		}
 		}
 
@@ -1149,12 +1293,34 @@ for($xx=0;$xx<$processCnt;$xx++)
 	if($partType[$mm] eq "MATRIX")
 	{
 	   	#print "Found Matrix $xpartName[$mm] in loop\n";
+		
+		for($qq=0;$qq<$partOutCnt[$mm];$qq++)
+		{
+			$portUsed[$qq] = 0;
+		}
+		$matOuts = 0;
+		for($qq=0;$qq<$partOutCnt[$mm];$qq++)
+		{
+			$to = $partOutNum[$mm][$qq];
+		   	for($zz=0;$zz<$partInCnt[$to];$zz++)
+			{
+			$fromPort = $partInputPort[$to][$zz];
+			if(($portUsed[$fromPort] == 0) && ($xpartName[$mm] eq $partInput[$to][$zz]))
+			{
+			#print "Matrix $xpartName[$mm] $qq con to $xpartName[$to] port $fromPort\n";
+				$portUsed[$fromPort] = 1;
+				$matOuts ++;
+			}
+			}
+		}
+		#print "$xpartName[$mm] has $matOuts Outputs\n";
 		print OUT "\n";
 		print OUT "\/\/ Perform Matrix Calc **********************\n\n";
-		print OUT "for(ii=0;ii<$partOutCnt[$mm];ii++)\n{\n";
+		print OUT "for(ii=0;ii<$matOuts;ii++)\n{\n";
 		print OUT "$xpartName[$mm]\[1\]\[ii\] = \n";
 		for($qq=0;$qq<$partInCnt[$mm];$qq++)
 		{
+			$done = 0;
 			$outExp = $toName;
 			$to = $partInNum[$mm][$qq];
 			$toType = $partType[$to];
@@ -1162,12 +1328,21 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$fromPort1 = $partInputPort[$mm][$qq];
 			if($toType eq "ADC")
 			{
-				print "Found MATRIX with ADC input on $qq\n";
-				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[0\]\[$qq\] * dWord\[0\]\[$fromPort1\]";
+				$fromPort = substr($partName[$to],4,1);
+				#print "Found MATRIX with ADC input on $qq\n";
+				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * dWord\[$fromPort\]\[$fromPort1\]";
+				#print "\tpLocalEpics->$systemName\.$xpartName[$mm]\[0\]\[$qq\] * dWord\[$fromPort\]\[$fromPort1\]\n";
+				$done = 1;
 			}
-			else
+			if ($toType eq "EPICS_INPUT")
+                        {
+				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * pLocalEpics->$systemName\.$xpartName[$to]";
+				$done = 1;
+			}
+			if(!$done)
 			{
 				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * $xpartName[$mm]\[0\]\[$qq\]";
+				#print "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * $xpartName[$mm]\[0\]\[$qq\];\n";
 			}
 			if($qq == ($partInCnt[$mm] - 1))
 			{
@@ -1188,10 +1363,71 @@ for($xx=0;$xx<$processCnt;$xx++)
 		#print "\tUsed Sum $xpartName[$mm] $partOutCnt[$mm]\n";
 		#print OUT "pLocalEpics->$systemName\.$xpartName[$mm] = $xpartName[$mm]\[0\] + $xpartName[$mm]\[1\]\n";
 	}
+	# ******** SUMMING JUNC ********************************************************************
+	if($partType[$mm] eq "DIFF_JUNC")
+	{
+	   $zz = 0;
+	   for($qq=0;$qq<16;$qq+=2)
+	   {
+		$to = $partOutNum[$mm][$zz];
+		$toPort = $partOutputPort[$mm][$zz];
+		$from = $partInNum[$mm][$qq];
+		$from1 = $partInNum[$mm][$qq+1];
+		if($partType[$to] eq "MATRIX")
+		{
+			print OUT "$xpartName[$to]\[0\]\[$toPort\] = ";
+		}
+		else
+		{
+			print "Error in DIFF JUNC  $xpartName[$mm] - Unsupported output type\n";
+			exit;
+		}
+		if($partType[$from1] eq "MATRIX")
+		{
+			print OUT "$xpartName[$to]\[0\]\[$toPort\] = ";
+		}
+		else
+		{
+			$yy = $qq+1;
+			print OUT "$xpartName[$mm]\[$yy\] - ";
+		}
+		if($partType[$from] eq "MATRIX")
+		{
+			print OUT "$xpartName[$from]\[0\]\[$toPort\];\n";
+		}
+		else
+		{
+			print OUT "$xpartName[$mm];\n";
+		}
+		$zz++;
+	   }
+	}
 	# ******** GROUND INPUT ********************************************************************
 	if(($partType[$mm] eq "GROUND") && ($partUsed[$mm] == 0))
 	{
 	   #print "Found GROUND $xpartName[$mm] in loop\n";
+	}
+	# ******** EPICS OUTPUT ********************************************************************
+	if($partType[$mm] eq "EPICS_OUTPUT")
+	{
+	   print "Found EPICS OUTPUT $xpartName[$mm] in loop\n";
+		$from = $partInNum[$mm][0];
+		$fromType = $partType[$from];
+		$fromPort = $partInputPort[$mm][0];
+		$to = $partOutNum[$mm][0];
+		$toType = $partType[$to];
+		$toName = $xpartName[$to];
+		if($fromType eq "ADC")
+		{
+			$fromPort1 = substr($partName[$from],4,1);
+			print OUT "pLocalEpics->$systemName\.$xpartName[$mm] = ";
+			print OUT "dWord\[$fromPort1\]\[$fromPort\];\n";
+		}
+		else
+		{
+			print "Error - EPICS OUTPUT only supports ADC input type\n";
+			exit;
+		}
 	}
 	# ******** MULTI_SW ************************************************************************
 	if($partType[$mm] eq "MULTI_SW")
@@ -1200,6 +1436,14 @@ for($xx=0;$xx<$processCnt;$xx++)
 		print OUT "{\n";
 		print OUT "\tfor(ii=0;ii< $partOutCnt[$mm];ii++) $xpartName[$mm]\[ii\] = 0.0;\n";
 		print OUT "}\n\n";
+	   $from = $partInNum[$mm][0];
+	   $fromType = $partType[$from];
+	   if($fromType eq "MATRIX")
+	   {
+		print OUT "else {\n";
+		print OUT "\tfor(ii=0;ii< $partOutCnt[$mm];ii++) $xpartName[$mm]\[ii\] = $xpartName[$from]\[1\]\[ii\];\n";
+		print OUT "}\n";
+	   }
 	   for($jj=0;$jj<$partOutCnt[$mm];$jj++)
 	   {
 		$fromType = 0;
@@ -1225,6 +1469,34 @@ for($xx=0;$xx<$processCnt;$xx++)
 		}
 	   }
 	}
+	if($partType[$mm] eq "FIR_FILTER")
+	{
+		$from = $partInNum[$mm][0];
+		$fromType = $partType[$from];
+		$fromPort = $partInputPort[$mm][0];
+		$to = $partOutNum[$mm][0];
+		$toType = $partType[$to];
+		$toName = $xpartName[$to];
+		print "Found FIR $from $fromType $fromPort\n";
+		$firName = $xpartName[$mm];
+		$firName .= _FIR;
+	   	$calcExp = "filterPolyPhase(dspPtr,firCoeff,$xpartName[$mm],$firName,";
+		if($toType eq "MATRIX")
+		{
+			$toPort = $partOutputPort[$mm][0];
+			print "\t$xpartName[$to]\[0\]\[$toPort\] = ";
+		}
+		if($fromType eq "ADC")
+		{
+			$fromPort1 = substr($partName[$from],4,1);
+			$calcExp .= "dWord\[";
+			$calcExp .= $fromPort1;
+			$calcExp .= "\]\[";
+			$calcExp .= $fromPort;
+			$calcExp .= "\],0);\n";
+			print "$calcExp";
+		}
+	}
 	if($partType[$mm] eq "RAMP_SW")
 	{
 	   for($jj=0;$jj<$partInCnt[$mm];$jj++)
@@ -1249,6 +1521,11 @@ for($xx=0;$xx<$processCnt;$xx++)
 	}
 	if($partType[$mm] eq "PRODUCT")
 	{
+	print OUT "pLocalEpics->$systemName\.$xpartName[$mm]";
+	print OUT "_RMON = \n\tgainRamp(pLocalEpics->$systemName\.$xpartName[$mm],";
+	print OUT "pLocalEpics->$systemName\.$xpartName[$mm]";
+	print OUT "_TRAMP,0,\&$xpartName[$mm]\_CALC);";
+	print OUT "\n";
 	   for($jj=0;$jj<$partInCnt[$mm];$jj++)
 	   {
 		$from = $partInNum[$mm][$jj];
@@ -1259,11 +1536,11 @@ for($xx=0;$xx<$processCnt;$xx++)
 		$toPort = $partOutputPort[$mm][$jj];
 		if(($fromType eq "MATRIX") && ($toType eq "MULTI_SW"))
 		{
-			print OUT "$xpartName[$to]\[$jj\] = pLocalEpics->$systemName\.$xpartName[$mm] * $xpartName[$from]\[1\]\[$fromPort\];\n";
+			print OUT "$xpartName[$to]\[$jj\] = $xpartName[$mm]\_CALC * $xpartName[$from]\[1\]\[$fromPort\];\n";
 		}
 		if(($fromType eq "FILT") && ($toType eq "MULTI_SW"))
 		{
-			print OUT "$xpartName[$to]\[$toPort\] = pLocalEpics->$systemName\.$xpartName[$mm] * $xpartName[$mm]\[$jj\];\n";
+			print OUT "$xpartName[$to]\[$toPort\] = $xpartName[$mm]\_CALC * $xpartName[$mm]\[$jj\];\n";
 		}
 	   }
 	}
@@ -1300,29 +1577,45 @@ print OUTM "# RTLinux makefile\n";
 print OUTM "include /opt/rtldk-2.2/rtlinuxpro/rtl.mk\n";
 print OUTM "\n";
 print OUTM "\n";
-print OUTM "TARGET_RTL := $systemName";
+print OUTM "TARGET_RTL := $skeleton";
 print OUTM "fe\.rtl\n";
 print OUTM "LIBRARY_OBJS := map.o\n";
 print OUTM "LDFLAGS_\$(TARGET_RTL) := \$(LIBRARY_OBJS)\n";
 print OUTM "\n";
 print OUTM "\$(TARGET_RTL): \$(LIBRARY_OBJS)\n";
 print OUTM "\n";
-print OUTM "$systemName";
+print OUTM "$skeleton";
 print OUTM "fe\.o: ../controller.c\n";
 print OUTM "\t\$(CC) \$(CFLAGS) -c \$< -o \$\@\n";
 print OUTM "map.o: ../map.c\n";
 print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
 print OUTM "fm10Gen.o: fm10Gen.c\n";
+if($rate == 60)
+{
+print "SERVO IS 16K\n";
 print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO16K -c \$<\n";
+}
+else
+{
+print "SERVO IS 2K\n";
+print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO2K -c \$<\n";
+}
 print OUTM "crc.o: crc.c\n";
 print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
 print OUTM "\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
 print OUTM "CFLAGS += -I../../include\n";
 print OUTM "CFLAGS += -I/opt/gm/include\n";
+if($rate == 60)
+{
 print OUTM "CFLAGS += -DSERVO16K\n";
+}
+else
+{
+print OUTM "CFLAGS += -DSERVO2K\n";
+}
 print OUTM "CFLAGS += -D";
-print OUTM "\U$systemName";
+print OUTM "\U$skeleton";
 print OUTM "_CODE\n";
 print OUTM "\n";
 print OUTM "all: \$(ALL)\n";
@@ -1336,11 +1629,11 @@ close OUTM;
 
 print OUTME "\n";
 print OUTME "# Define Epics system name. It should be unique.\n";
-print OUTME "TARGET = $systemName";
+print OUTME "TARGET = $skeleton";
 print OUTME "epics\n";
 print OUTME "\n";
 print OUTME "SRC = build/\$(TARGET)/";
-print OUTME "$systemName";
+print OUTME "$skeleton";
 print OUTME "\.st\n";
 print OUTME "\n";
 print OUTME "SRC += src/drv/rfm.c\n";
@@ -1349,26 +1642,26 @@ print OUTME "SRC += src/drv/crc.c\n";
 print OUTME "SRC += src/drv/fmReadCoeff.c\n";
 print OUTME "\n";
 print OUTME "DB += build/\$(TARGET)/";
-print OUTME "$systemName";
+print OUTME "$skeleton";
 print OUTME "1\.db\n";
 print OUTME "\n";
 print OUTME "IFO = M1\n";
 print OUTME "SITE = mit\n";
 print OUTME "\n";
 print OUTME "SEQ += \'";
-print OUTME "$systemName";
+print OUTME "$skeleton";
 print OUTME ",(\"ifo=M1, site=mit, sys=\U$systemName\, \Lsysnum= $dcuId\")\'\n";
 print OUTME "\n";
 print OUTME "CFLAGS += -D";
-print OUTME "\U$systemName";
+print OUTME "\U$skeleton";
 print OUTME "_CODE\n";
 print OUTME "\n";
 print OUTME "include config/Makefile.linux\n";
 print OUTME "\n";
 print OUTME "build/\$(TARGET)/";
-print OUTME "$systemName";
+print OUTME "$skeleton";
 print OUTME "1\.db: build/\$(TARGET)/";
-print OUTME "$systemName";
+print OUTME "$skeleton";
 print OUTME "\.db\n";
 print OUTME "\tsed 's/%SYS%/";
 print OUTME "\U$systemName";
