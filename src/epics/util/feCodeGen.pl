@@ -522,10 +522,17 @@ $foundCon = 0;
                        $fromPort = $partInputPort[$ii][$jj];
                        $toNum = $partOutNum[$kk][$ll];
                        $toPort = $partOutputPort[$kk][$ll];
-                       $partOutput[$fromNum][$fromPort] = $xpartName[$toNum];
-                       $partOutputType[$fromNum][$fromPort] = $partType[$toNum];
-                       $partOutNum[$fromNum][$fromPort] = $toNum;
-                       $partOutputPort[$fromNum][$fromPort] = $toPort;
+			for($vv=0;$vv<$partOutCnt[$fromNum];$vv++)
+			{
+				if($partOutput[$fromNum][$vv] eq $xpartName[$ii])
+				{
+					$fromLink = $vv;
+				}
+			}
+                       $partOutput[$fromNum][$fromLink] = $xpartName[$toNum];
+                       $partOutputType[$fromNum][$fromLink] = $partType[$toNum];
+                       $partOutNum[$fromNum][$fromLink] = $toNum;
+                       $partOutputPort[$fromNum][$fromLink] = $toPort;
                        $partInput[$toNum][$toPort] = $xpartName[$fromNum];
                        $partInputType[$toNum][$toPort] = $partType[$fromNum];
                        $partInNum[$toNum][$toPort] = $fromNum;
