@@ -57,12 +57,15 @@ for($ii=0;$ii<300;$ii++)
 	$conMade[$ii] = 0;
 }
 $openBrace = 0;
+$openBlock = 0;
 $nonSubCnt = 0;
 
 # Read .mdl input file
 while (<IN>) {
     # Strip out quotes and blank spaces
     tr/\"/ /;
+    tr/\</ /;
+    tr/\>/ /;
     s/^\s+//;
     s/\s+$//;
     $lcntr ++;
@@ -85,6 +88,7 @@ while (<IN>) {
     # Start searching for blocks (parts) and determine Type
     if(($mySeq == 2) && ($var1 eq "BlockType")){
 	if($inSub == 1) {$openBrace ++;}
+	$openBlock ++;
 	$inBlock = 1;
 	$blockType = $var2;
 	# Reference blocks are parts defined in separate files.
@@ -97,6 +101,8 @@ while (<IN>) {
 	if($blockType eq "Sum") {$partType[$partCnt] = SUM;}
 	if($blockType eq "Ground") {$partType[$partCnt] = GROUND;}
 	if($blockType eq "Terminator") {$partType[$partCnt] = TERM;}
+	if($blockType eq "BusCreator") {$partType[$partCnt] = BUSC; $adcCnt ++;}
+	if($blockType eq "BusSelector") {$partType[$partCnt] = BUSS;}
 	# Need to find subsystems, as these contain internal parts and links
 	# which need to be "flattened" to connect all parts together
 	if($blockType eq "SubSystem") {
@@ -106,6 +112,7 @@ while (<IN>) {
 		$lookingForName = 1;
 		$openBrace = 2;
 		$subSysPartStart[$subSys] = $partCnt;
+		$openBlock --;
 	}
 	#print "BlockType $blockType ";
     }
@@ -177,11 +184,6 @@ while (<IN>) {
 		{
 			$partInput[$ii][($conDesPort-1)] = $conSrc;
 			$partInputPort[$ii][($conDesPort-1)] = $conSrcPort-1;
-			if(substr($conDes,0,3) eq "DAC")
-			{
-				# $partOutputPort[$ii][$partInCnt[$ii]] = $conDesPort-1;
-				# print "$xpartName[$ii] $partInCnt[$ii] has link to $partInput[$ii][$partInCnt[$ii]] $partOutputPort[$ii][$partInCnt[$ii]]\n";
-			}
 			$partInCnt[$ii] ++;
 		}
 		# If connection input name corresponds to a part name,
@@ -190,10 +192,7 @@ while (<IN>) {
 		{
 			$partOutput[$ii][$partOutCnt[$ii]] = $conDes;
 			$partOutputPort[$ii][$partOutCnt[$ii]] = $conDesPort-1;
-			if(substr($conSrc,0,3) eq "ADC")
-			{
-				# $partInputPort[$ii][$partOutCnt[$ii]] = $conSrcPort-1;
-			}
+			$partOutputPortUsed[$ii][$partOutCnt[$ii]] = $conSrcPort-1;
 			$partOutCnt[$ii] ++;
 		}
 	}
@@ -223,10 +222,7 @@ while (<IN>) {
 		{
 			$partOutput[$ii][$partOutCnt[$ii]] = $conDes;
 			$partOutputPort[$ii][$partOutCnt[$ii]] = $conDesPort-1;
-			if(substr($conSrc,0,3) eq "ADC")
-			{
-				$partInputPort[$ii][$partOutCnt[$ii]] = $conSrcPort-1;
-			}
+			$partOutputPortUsed[$ii][$partOutCnt[$ii]] = $conSrcPort-1;
 			$partOutCnt[$ii] ++;
 		}
 	}
@@ -275,10 +271,7 @@ while (<IN>) {
 		{
 			$partOutput[$ii][$partOutCnt[$ii]] = $conDes;
 			$partOutputPort[$ii][$partOutCnt[$ii]] = $conDesPort-1;
-			if(substr($conSrc,0,3) eq "ADC")
-			{
-				$partInputPort[$ii][$partOutCnt[$ii]] = $conSrcPort-1;
-			}
+			$partOutputPortUsed[$ii][$partOutCnt[$ii]] = $conSrcPort-1;
 			$partOutCnt[$ii] ++;
 		}
 		# If connection output name corresponds to a part name,
@@ -299,7 +292,7 @@ while (<IN>) {
     }
 
     # Get block (part) names.
-    if(($inBlock == 1) && ($var1 eq "Name") && ($inSub == 0)){
+    if(($inBlock == 1) && ($var1 eq "Name") && ($inSub == 0) && ($openBlock == 1)){
 	#print "$var2";
 	$partName[$partCnt] = $var2;
 	$xpartName[$partCnt] = $var2;
@@ -334,6 +327,16 @@ while (<IN>) {
     if(($inBlock == 1) && ($var1 eq "Port") && ($inSub == 1) && ($partType[$partCnt] eq "OUTPUT")){
 	$partPort[$partCnt] = $var2;
 	$partOutputPort[$partCnt][0] = $var2;
+    }
+    if(($inBlock == 1) && ($var1 eq "Port") && ($partType[$partCnt] eq "BUSS")){
+	$openBlock ++;
+    }
+    if(($inBlock == 1) && ($var1 eq "PortNumber") && ($partType[$partCnt] eq "BUSS")){
+	$busPort = $var2 - 1;
+    }
+    if(($inBlock == 1) && ($var1 eq "Name") && ($partType[$partCnt] eq "BUSS")){
+	$partInput[$partCnt][$busPort] = $var2;
+	$partInCnt[$partCnt] ++;
     }
 
     # Presently, 4 types of Reference blocks are supported.
@@ -431,13 +434,14 @@ while (<IN>) {
     # End of blocks/lines are denoted by } in .mdl file.
     if(($mySeq == 2) && ($var1 eq "}")){
 	if($inSub == 1) {$openBrace --;}
+	if($inBlock) {$openBlock --;}
 	$ob ++;
 	$inRef = 0;
-    	if($inBlock == 1){
+    	if(($inBlock == 1) && ($openBlock == 0)){
 	#print " $partCnt\n";
 	$partCnt ++;
-	}
 	$inBlock = 0;
+	}
     }
     if(($mySeq == 2) && ($var1 ne "}")){
 	$ob = 0;
@@ -455,6 +459,7 @@ while (<IN>) {
 	$subSys ++;
 	#print "Think end of subsys $subSys is at $lcntr\n";
 	#print "End of Subsystem *********** $subSys\n";
+	$openBlock = 0;
     }
     # print "$var1\n";
 }
@@ -470,12 +475,17 @@ for($ii=0;$ii<$partCnt;$ii++)
 		if($partOutput[$ii][$jj] eq $xpartName[$kk])
 		{
 			$partOutNum[$ii][$jj] = $kk;
+			$partOutputType[$ii][$jj] = $partType[$kk];
 		}
 	   }
 	}
 }
 for($ii=0;$ii<$partCnt;$ii++)
 {
+	if($partType[$ii] eq "BUSS") 
+	{
+		$partInCnt[$ii] -= 2;
+	}
 	for($jj=0;$jj<$partInCnt[$ii];$jj++)
 	{
 	   for($kk=0;$kk<$partCnt;$kk++)
@@ -483,6 +493,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 		if($partInput[$ii][$jj] eq $xpartName[$kk])
 		{
 			$partInNum[$ii][$jj] = $kk;
+			$partInputType[$ii][$jj] = $partType[$kk];
 		}
 	   }
 	}
@@ -512,12 +523,16 @@ $foundCon = 0;
                        $toNum = $partOutNum[$kk][$ll];
                        $toPort = $partOutputPort[$kk][$ll];
                        $partOutput[$fromNum][$fromPort] = $xpartName[$toNum];
+                       $partOutputType[$fromNum][$fromPort] = $partType[$toNum];
                        $partOutNum[$fromNum][$fromPort] = $toNum;
                        $partOutputPort[$fromNum][$fromPort] = $toPort;
                        $partInput[$toNum][$toPort] = $xpartName[$fromNum];
+                       $partInputType[$toNum][$toPort] = $partType[$fromNum];
                        $partInNum[$toNum][$toPort] = $fromNum;
                        $partInputPort[$toNum][$toPort] = $fromPort;
                        $partSysFrom[$kk] = $partSubNum[$ii];
+                       $partInputType[$kk][0] = "SUBSYS";
+                       $partInNum[$kk][0] = $partSubNum[$ii];
 
 			$foundCon = 1;
 		}
@@ -537,6 +552,7 @@ $foundCon = 0;
 				$fromNum = $partInNum[$ii][$jj];
 				$fromPort = $partInputPort[$ii][$jj];
 				$partOutput[$fromNum][$fromPort] = $xpartName[$xx];
+				$partOutputType[$fromNum][$fromPort] = $partType[$xx];
 				$partOutNum[$fromNum][$fromPort] = $xx;
 				$partOutputPort[$fromNum][$fromPort] = $partOutputPort[$ii][$jj];
                        		$partSysFromx[$xx][$fromCnt[$xx]] = $partSubNum[$ii];
@@ -555,7 +571,7 @@ $foundCon = 0;
 for($ii=0;$ii<$nonSubCnt;$ii++)
 {
 	$xx = $nonSubPart[$ii];
-	if($partType[$xx] eq "ADC")
+	if($partType[$xx] eq "BUSS")
 	{
 		for($jj=0;$jj<$partOutCnt[$xx];$jj++)
 		{
@@ -566,28 +582,56 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 			{
 				if(($partOutput[$xx][$jj] eq $partInput[$kk][0]) && ($mm == $partInputPort[$kk][0]))
 				{
-				#print "Found ADC connect to $xpartName[$kk] $partInputPort[$xx][$jj]\n";
 				$fromNum = $xx;
-				$fromPort = $partInputPort[$xx][$jj];
+				$fromPort = $partOutputPortUsed[$xx][$jj];
+				# $fromPort = $partInputPort[$kk][0];
 				$partInput[$kk][0] = $xpartName[$xx];
+				$partInputType[$kk][0] = "ADC";
 				$partInNum[$kk][0] = $xx;
-				$partInputPort[$kk][0] = $fromPort;
+				#$partInputPort[$kk][0] = $fromPort;
 				$partSysFrom[$kk] = 100 + $xx;
+				#print "Found ADC INPUT connect from $xpartName[$xx] to $xpartName[$kk] $partOutputPort[$xx][$jj] $jj  input $partInputPort[$kk][0]\n";
 				for($ll=0;$ll<$partOutCnt[$kk];$ll++)
 				{
+					$adcName = $partInput[$xx][$fromPort];
+					$adcNum = substr($adcName,4,1);
+					$adcChan = substr($adcName,6,2);
 					$toNum = $partOutNum[$kk][$ll];
 				        $toPort = $partOutputPort[$kk][$ll];
-					$partInNum[$toNum][$toPort] = $xx;
-					$partInput[$toNum][$toPort] = $xpartName[$xx];
-					$partInputPort[$toNum][$toPort] = $fromPort;
-					#print "New adc connect to partnum $toNum\n";
+					$partInNum[$toNum][$toPort] = $adcNum;
+					#$partInput[$toNum][$toPort] = $xpartName[$xx];
+					$partInput[$toNum][$toPort] = $adcName;
+					$partInputPort[$toNum][$toPort] = $adcChan;
+					$partInputType[$toNum][$toPort] = "ADC";
+					#print "\tNew adc connect $xpartName[$toNum] $adcNum $adcChan to partnum $partInput[$toNum][$toPort]\n";
 				}
+				}
+			}
+			if($partType[$kk] ne "INPUT")
+			{
+				if(($partOutput[$xx][$jj] eq $xpartName[$kk]))
+				{
+				#print "Found ADC NP connect to $xpartName[$kk] $partOutputPort[$xx][$jj]\n";
+				$fromNum = $xx;
+				#$fromPort = $jj;
+				$fromPort = $partInputPort[$kk][0];
+				#$fromPort = $partOutputPort[$xx][$jj];
+				$partInput[$kk][0] = $xpartName[$xx];
+				$partInputType[$kk][0] = "ADC";
+				$partInNum[$kk][0] = $xx;
+				$partInputPort[$kk][0] = $fromPort;
+					$adcName = $partInput[$xx][$fromPort];
+					$adcNum = substr($adcName,4,1);
+					$adcChan = substr($adcName,6,2);
+					$partInput[$kk][0] = $adcName;
+					$partInputPort[$kk][0] = $adcChan;
+					$partInNum[$kk][0] = $adcNum;
 				}
 			}
 		   }
 		}
 	}
-	if($partType[$xx] ne "ADC")
+	if($partType[$xx] ne "BUSS")
 	{
 		for($jj=0;$jj<$partOutCnt[$xx];$jj++)
 		{
@@ -598,6 +642,9 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 			{
 				if(($partOutput[$xx][$jj] eq $partInput[$kk][0]) && ($mm == $partInputPort[$kk][0]))
 				{
+                       $partInputType[$kk][0] = "PART";
+                       $partInNum[$kk][0] = $xx;
+				
 				for($ll=0;$ll<$partOutCnt[$kk];$ll++)
 				{
 					$toNum = $partOutNum[$kk][$ll];
@@ -606,10 +653,12 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 					$partInNum[$toNum][$toPort] = $xx;
 					$partInput[$toNum][$toPort] = $xpartName[$xx];
 					$partInputPort[$toNum][$toPort] = $mm;
+					$partInputType[$toNum][$toPort] = $partType[$mm];
 
 					$partOutput[$xx][$jj] = $xpartName[$toNum];
 					$partOutputPort[$xx][$jj] = $toPort;
 					$partOutNum[$xx][$jj] = $toNum;
+					$partOutputType[$xx][$jj] = $partType[$toNum];
 				}
 				$partSysFrom[$kk] = 100 + $xx;
 				}
@@ -634,21 +683,22 @@ for($ii=$subSysPartStart[$ll];$ii<$subSysPartStop[$ll];$ii++)
 	print OUTD "INS FROM:\n";
 	for($jj=0;$jj<$partInCnt[$ii];$jj++)
 	{
-                        $from = $partInNum[$ii][$jj];
-		print OUTD "\t$partInput[$ii][$jj]\t$partType[$from]\t$partInNum[$ii][$jj]\t$partInputPort[$ii][$jj]\n";
+                        #$from = $partInNum[$ii][$jj];
+		print OUTD "\t$partInput[$ii][$jj]\t$partInputType[$ii][$jj]\t$partInNum[$ii][$jj]\t$partInputPort[$ii][$jj]\n";
 		if($partType[$ii] eq "INPUT")
 		{
 			print OUTD "From Subsystem $partSysFrom[$ii]\n";
 			$subInputs[$ll][$subCntr[$ll]] = $partSysFrom[$ii];
+			$subInputsType[$ll][$subCntr[$ll]] = $partInputType[$ii][$jj];
 			$subCntr[$ll] ++;
 		}
 	}
 	print OUTD "OUT TO:\n";
+	print OUTD "\tPart Name\tType\tNum\tPort\tPort Used\n";
 	for($jj=0;$jj<$partOutCnt[$ii];$jj++)
 	{
-		$to = $partOutNum[$ii][$jj];
-		print OUTD "\t$partOutput[$ii][$jj]\t$partType[$to]\t$partOutNum[$ii][$jj]\t$partOutputPort[$ii][$jj]\n";
-#		print OUTD "\t$partOutput[$ii][$jj]\t$partOutputPort[$ii][$jj] type $partType[$to] $partOutNum[$ii][$jj]\n";
+		#$to = $partOutNum[$ii][$jj];
+		print OUTD "\t$partOutput[$ii][$jj]\t$partOutputType[$ii][$jj]\t$partOutNum[$ii][$jj]\t$partOutputPort[$ii][$jj]\t$partOutputPortUsed[$ii][$jj]\n";
 	}
 	print OUTD "\n****************************************************************\n";
 }
@@ -661,21 +711,31 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 	print OUTD "INS FROM:\n";
 	for($jj=0;$jj<$partInCnt[$xx];$jj++)
 	{
-                        $from = $partInNum[$xx][0];
-		print OUTD "\t$partInput[$xx][$jj]\t$partType[$from]\t$partInNum[$xx][$jj]\t$partInputPort[$xx][$jj] subsys $partSysFromx[$xx][$jj]\n";
+                        #$from = $partInNum[$xx][0];
+		print OUTD "\t$partInput[$xx][$jj]\t$partInputType[$xx][$jj]\t$partInNum[$xx][$jj]\t$partInputPort[$xx][$jj] subsys $partSysFromx[$xx][$jj]\n";
 	}
 	print OUTD "OUT TO:\n";
 	for($jj=0;$jj<$partOutCnt[$xx];$jj++)
 	{
 		$to = $partOutNum[$xx][$jj];
-		print OUTD "\t$partOutput[$xx][$jj]\t$partType[$to]\t$partOutNum[$xx][$jj]\t$partOutputPort[$xx][$jj]\n";
+		print OUTD "\t$partOutput[$xx][$jj]\t$partOutputType[$xx][$jj]\t$partOutNum[$xx][$jj]\t$partOutputPort[$xx][$jj]\t$partOutputPortUsed[$xx][$jj]\n";
 #		print OUTD "\t$partOutput[$xx][$jj]\t$partOutputPort[$xx][$jj] type $partType[$to] $partOutNum[$xx][$jj]\n";
 	}
 	print OUTD "\n****************************************************************\n";
 }
+for($ii=0;$ii<$subSys;$ii++)
+{
+	print OUTD "\nSUBS $ii $subSysName[$ii] *******************************\n";
+
+for($ll=0;$ll<$subCntr[$ii];$ll++)
+{
+	print OUTD "$ll $subInputs[$ii][$ll] $subInputsType[$ii][$ll]\n";
+}
+}
 close(OUTD);
 print "Found $adcCnt ADC modules part is $adcPartNum[0]\n";
 print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
+
 
 for($ii=0;$ii<$subSys;$ii++)
 {
@@ -695,7 +755,7 @@ for($ii=0;$ii<$subSys;$ii++)
 				$counter ++;
 			}
 		}
-		if(($partType[$jj] eq "OUTPUT") || ($partType[$jj] eq "TERM"))
+		if(($partType[$jj] eq "OUTPUT") || ($partType[$jj] eq "TERM") || ($partType[$jj] eq "BUSC") || ($partType[$jj] eq "BUSS"))
 		{
 			$partsRemaining --;
 			$partUsed[$jj] = 1;
@@ -752,12 +812,12 @@ $searchCnt = 0;
 for($ii=0;$ii<$nonSubCnt;$ii++)
 {
       	$xx = $nonSubPart[$ii];
-	if(($partType[$xx] ne "ADC") && ($partType[$xx] ne "DAC"))
+	if(($partType[$xx] ne "BUSC") && ($partType[$xx] ne "DAC") && ($partType[$xx] ne "BUSS"))
 	{
 		$searchPart[$partsRemaining] = $xx;
 		$searchCnt ++;
 		$partsRemaining ++;
-		print "Part num $xx $partName[$xx] is remaining\n";
+		#print "Part num $xx $partName[$xx] is remaining\n";
 	}
 }
 $subRemaining = $subSys;
@@ -767,7 +827,7 @@ for($ii=0;$ii<$subSys;$ii++)
 $allADC = 1;
 	for($jj=0;$jj<$subCntr[$ii];$jj++)
 	{
-		if(($subInputs[$ii][$jj] - 100) != $adcPartNum[0])
+		if($subInputsType[$ii][$jj] ne "ADC")
 		{
 			$allADC = 0;
 		}
@@ -790,8 +850,8 @@ for($ii=0;$ii<$searchCnt;$ii++)
 	{
 		for($jj=0;$jj<$partInCnt[$xx];$jj++)
 		{
-                        $from = $partInNum[$xx][0];
-			if($partType[$from] ne "ADC")
+			if($partInputType[$jj] ne "ADC")
+
 			{
 					$allADC = 0;
 			}
@@ -824,7 +884,7 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 				$yy = $subInputs[$ii][$jj] - 100;
 				for($kk=0;$kk<$searchCnt;$kk++)
 				{
-					if($partUsed[$yy] != 1)
+					if(($partUsed[$yy] != 1) && ($subInputsType[$ii][$jj] ne "ADC"))
 					{
 						#print "Fallout $ii\n";
 						$allADC = 0;
@@ -850,7 +910,7 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 			for($jj=0;$jj<$partInCnt[$xx];$jj++)
 			{
 				$yy = $partSysFromx[$xx][$jj];
-				if($subUsed[$yy] != 1)
+				if(($subUsed[$yy] != 1) && ($partInputType[$xx][$jj] ne "ADC"))
 				{
 						$allADC = 0;
 				}
@@ -1176,7 +1236,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 		if($jj == 0)
 		{
 		# Figure INPUT connection type **************************************
-		if($partType[$from] eq "MATRIX")
+		if($partInputType[$mm][0] eq "MATRIX")
 		{
 			$fromType = 1;
 			$fromPort = $partInputPort[$mm][0];
@@ -1220,10 +1280,10 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$calcExp .= ",0.0,0);\n";
 			# print "FROM GROUND $xpartName[$mm]  $calcExp\n";
 		}
-		if($partType[$from] eq "ADC")
+		if($partInputType[$mm][0] eq "ADC")
 		{
 			$fromType = 5;
-			$fromPort = substr($partName[$from],4,1);
+			$fromPort = $partInNum[$mm][0];
 			$fromPort1 = $partInputPort[$mm][0];
 			$calcExp .= $xpartName[$mm];
 			$calcExp .= ",dWord\[";
@@ -1231,7 +1291,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$calcExp .= "\]\[";
 			$calcExp .= $fromPort1;
 			$calcExp .= "\],0); \n";
-			#print "ADC $xpartName[$mm]  $outExp\n";
+			#print "ADC $xpartName[$mm]  $calcExp\n";
 		}
 		if($partType[$from] eq "RAMP_SW")
 		{
@@ -1299,18 +1359,14 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$portUsed[$qq] = 0;
 		}
 		$matOuts = 0;
+#FIX
 		for($qq=0;$qq<$partOutCnt[$mm];$qq++)
 		{
-			$to = $partOutNum[$mm][$qq];
-		   	for($zz=0;$zz<$partInCnt[$to];$zz++)
+			$fromPort = $partOutputPortUsed[$mm][$qq];
+			if($portUsed[$fromPort] == 0)
 			{
-			$fromPort = $partInputPort[$to][$zz];
-			if(($portUsed[$fromPort] == 0) && ($xpartName[$mm] eq $partInput[$to][$zz]))
-			{
-			#print "Matrix $xpartName[$mm] $qq con to $xpartName[$to] port $fromPort\n";
 				$portUsed[$fromPort] = 1;
 				$matOuts ++;
-			}
 			}
 		}
 		#print "$xpartName[$mm] has $matOuts Outputs\n";
@@ -1321,22 +1377,29 @@ for($xx=0;$xx<$processCnt;$xx++)
 		for($qq=0;$qq<$partInCnt[$mm];$qq++)
 		{
 			$done = 0;
-			$outExp = $toName;
 			$to = $partInNum[$mm][$qq];
+			$fromType = $partInputType[$mm][$qq];
 			$toType = $partType[$to];
 			$toName = $xpartName[$to];
 			$fromPort1 = $partInputPort[$mm][$qq];
-			if($toType eq "ADC")
+			if($fromType eq "ADC")
 			{
-				$fromPort = substr($partName[$to],4,1);
 				#print "Found MATRIX with ADC input on $qq\n";
-				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * dWord\[$fromPort\]\[$fromPort1\]";
-				#print "\tpLocalEpics->$systemName\.$xpartName[$mm]\[0\]\[$qq\] * dWord\[$fromPort\]\[$fromPort1\]\n";
+				$card = $partInNum[$mm][$qq];
+				$chan = $partInputPort[$mm][$qq];
+				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * dWord\[$card\]\[$chan\]";
+				#print "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * dWord\[$card\]\[$chan\]\n";
 				$done = 1;
 			}
 			if ($toType eq "EPICS_INPUT")
                         {
 				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * pLocalEpics->$systemName\.$xpartName[$to]";
+				$done = 1;
+			}
+			if ($toType eq "RAMP_SW")
+                        {
+				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * $xpartName[$to]\[$fromPort1\]";
+				#print "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * $xpartName[$to]\[$fromPort1\]\n";
 				$done = 1;
 			}
 			if(!$done)
@@ -1354,6 +1417,13 @@ for($xx=0;$xx<$processCnt;$xx++)
 			}
 		}
 		print OUT "}\n";
+		for($qq=0;$qq<$partOutCnt[$mm];$qq++)
+		{
+			if($partOutputType[$mm][$qq] eq "SUM")
+			{
+				print OUT "$partOutput[$mm][$qq] += $xpartName[$mm]\[1\]\[$partOutputPortUsed[$mm][$qq]\];\n";
+			}
+		}
 		print OUT "\/\/ End Matrix Calc ***************************\n\n\n";
 	}
 	# ******** SUMMING JUNC ********************************************************************
@@ -1363,7 +1433,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 		#print "\tUsed Sum $xpartName[$mm] $partOutCnt[$mm]\n";
 		#print OUT "pLocalEpics->$systemName\.$xpartName[$mm] = $xpartName[$mm]\[0\] + $xpartName[$mm]\[1\]\n";
 	}
-	# ******** SUMMING JUNC ********************************************************************
+	# ******** DIFF JUNC ********************************************************************
 	if($partType[$mm] eq "DIFF_JUNC")
 	{
 	   $zz = 0;
@@ -1384,7 +1454,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 		}
 		if($partType[$from1] eq "MATRIX")
 		{
-			print OUT "$xpartName[$to]\[0\]\[$toPort\] = ";
+			print OUT "$xpartName[$to]\[1\]\[$toPort\] = ";
 		}
 		else
 		{
@@ -1393,7 +1463,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 		}
 		if($partType[$from] eq "MATRIX")
 		{
-			print OUT "$xpartName[$from]\[0\]\[$toPort\];\n";
+			print OUT "$xpartName[$from]\[1\]\[$toPort\];\n";
 		}
 		else
 		{
@@ -1410,18 +1480,17 @@ for($xx=0;$xx<$processCnt;$xx++)
 	# ******** EPICS OUTPUT ********************************************************************
 	if($partType[$mm] eq "EPICS_OUTPUT")
 	{
-	   print "Found EPICS OUTPUT $xpartName[$mm] in loop\n";
-		$from = $partInNum[$mm][0];
-		$fromType = $partType[$from];
-		$fromPort = $partInputPort[$mm][0];
+	   #print "Found EPICS OUTPUT $xpartName[$mm] $partInputType[$mm][0] in loop\n";
+		$fromType = $partInputType[$mm][0];
+		$fromCard = $partInNum[$mm][0];
+		$fromChan = $partInputPort[$mm][0];
 		$to = $partOutNum[$mm][0];
 		$toType = $partType[$to];
 		$toName = $xpartName[$to];
 		if($fromType eq "ADC")
 		{
-			$fromPort1 = substr($partName[$from],4,1);
 			print OUT "pLocalEpics->$systemName\.$xpartName[$mm] = ";
-			print OUT "dWord\[$fromPort1\]\[$fromPort\];\n";
+			print OUT "dWord\[$fromCard\]\[$fromChan\];\n";
 		}
 		else
 		{
@@ -1472,7 +1541,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 	if($partType[$mm] eq "FIR_FILTER")
 	{
 		$from = $partInNum[$mm][0];
-		$fromType = $partType[$from];
+		$fromType = $partInputType[$mm][0];
 		$fromPort = $partInputPort[$mm][0];
 		$to = $partOutNum[$mm][0];
 		$toType = $partType[$to];
@@ -1488,11 +1557,12 @@ for($xx=0;$xx<$processCnt;$xx++)
 		}
 		if($fromType eq "ADC")
 		{
-			$fromPort1 = substr($partName[$from],4,1);
+			$card = $from;
+			$chan = $fromPort;
 			$calcExp .= "dWord\[";
-			$calcExp .= $fromPort1;
+			$calcExp .= $card;
 			$calcExp .= "\]\[";
-			$calcExp .= $fromPort;
+			$calcExp .= $chan;
 			$calcExp .= "\],0);\n";
 			print "$calcExp";
 		}
@@ -1502,11 +1572,12 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   for($jj=0;$jj<$partInCnt[$mm];$jj++)
 	   {
 		$from = $partInNum[$mm][$jj];
-		$fromType = $partType[$from];
+		$fromType = $partInputType[$mm][$jj];
 		$fromPort = $partInputPort[$mm][$jj];
+#print "\nFound RAMP_SW from $xpartName[$from] type $fromType port $fromPort\n";
 		if($fromType eq "ADC")
 		{
-			print OUT "$xpartName[$mm]\[$jj\] = dWord\[0\]\[$fromPort\];\n";
+			print OUT "$xpartName[$mm]\[$jj\] = dWord\[$from\]\[$fromPort\];\n";
 		}
 	   }
 	   print OUT "if(pLocalEpics->$systemName\.$xpartName[$mm] == 0)\n";
