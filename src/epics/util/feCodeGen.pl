@@ -103,6 +103,7 @@ while (<IN>) {
 	if($blockType eq "Terminator") {$partType[$partCnt] = TERM;}
 	if($blockType eq "BusCreator") {$partType[$partCnt] = BUSC; $adcCnt ++;}
 	if($blockType eq "BusSelector") {$partType[$partCnt] = BUSS;}
+	if($blockType eq "UnitDelay") {$partType[$partCnt] = DELAY;}
 	# Need to find subsystems, as these contain internal parts and links
 	# which need to be "flattened" to connect all parts together
 	if($blockType eq "SubSystem") {
@@ -831,6 +832,7 @@ $subRemaining = $subSys;
 $seqCnt = 0;
 for($ii=0;$ii<$subSys;$ii++)
 {
+$subUsed[$ii] = 0;
 $allADC = 1;
 	for($jj=0;$jj<$subCntr[$ii];$jj++)
 	{
@@ -849,6 +851,7 @@ $allADC = 1;
 		$subRemaining --;
 	}
 }
+#print "Searching parts $searchCnt\n";
 for($ii=0;$ii<$searchCnt;$ii++)
 {
 	$allADC = 1;
@@ -857,7 +860,7 @@ for($ii=0;$ii<$searchCnt;$ii++)
 	{
 		for($jj=0;$jj<$partInCnt[$xx];$jj++)
 		{
-			if($partInputType[$jj] ne "ADC")
+			if(($partInputType[$xx][$jj] ne "ADC") && ($partInputType[$xx][$jj] ne "DELAY"))
 
 			{
 					$allADC = 0;
@@ -886,14 +889,13 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 				if(($yy<100) && ($subUsed[$yy] != 1))
 				{
 					$allADC = 0;
-						# print "FallIn $ii\n";
 				}
 				$yy = $subInputs[$ii][$jj] - 100;
 				for($kk=0;$kk<$searchCnt;$kk++)
 				{
-					if(($partUsed[$yy] != 1) && ($subInputsType[$ii][$jj] ne "ADC"))
+#FIX
+					if(($partUsed[$yy] != 1) && ($subInputsType[$ii][$jj] ne "ADC") && ($partType[$yy] ne "DELAY"))
 					{
-						#print "Fallout $ii\n";
 						$allADC = 0;
 					}
 				}
@@ -1116,6 +1118,9 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 	if($partType[$ii] eq "MULTI_SW") {
 		print OUT "double $xpartName[$ii]\[$partOutCnt[$ii]\];\n";
+	}
+	if($partType[$ii] eq "DELAY") {
+		print OUT "double $xpartName[$ii];\n";
 	}
 	if($partType[$ii] eq "PRODUCT") {
 		print OUT "double $xpartName[$ii]\[$partOutCnt[$ii]\];\n";
@@ -1370,7 +1375,6 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$portUsed[$qq] = 0;
 		}
 		$matOuts = 0;
-#FIX
 		for($qq=0;$qq<$partOutCnt[$mm];$qq++)
 		{
 			$fromPort = $partOutputPortUsed[$mm][$qq];
@@ -1525,6 +1529,12 @@ for($xx=0;$xx<$processCnt;$xx++)
 			print OUT "dacOut\[$toPort\]\[$toPort1\] = ";
 			print OUT "pLocalEpics->$systemName\.$xpartName[$mm];\n";
 		}
+		if($toType eq "SUM")
+		{
+			$toPort = $partOutputPort[$mm][0] + 1;
+			print OUT "\t$xpartName[$to]\[$toPort\] = ";
+			print OUT "pLocalEpics->$systemName\.$xpartName[$mm];\n";
+		}
 	}
 	# ******** MULTI_SW ************************************************************************
 	if($partType[$mm] eq "MULTI_SW")
@@ -1567,10 +1577,28 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$toPort = $partOutputPort[$mm][$jj] + 1;
 			print OUT "\t$xpartName[$to]\[$toPort\] = $xpartName[$mm]\[$fromPort\];\n";
 		}
+		if($toType eq "DELAY")
+		{
+			print OUT "\t$xpartName[$to] = $xpartName[$mm]\[$fromPort\];\n";
+		}
 		if($toType eq "EPICS_OUTPUT")
 		{
 			print OUT "pLocalEpics->$systemName\.$xpartName[$to] = ";
 			print OUT "$xpartName[$mm]\[$partOutputPortUsed[$mm][$jj]\];\n";
+		}
+	   }
+	}
+	if($partType[$mm] eq "DELAY")
+	{
+	   for($jj=0;$jj<$partOutCnt[$mm];$jj++)
+	   {
+		$to = $partOutNum[$mm][$jj];
+		$toType = $partType[$to];
+		$toName = $xpartName[$to];
+		$toPort = $partOutputPort[$mm][$jj]+1;
+		if($toType eq "SUM")
+		{
+			print OUT "\t$xpartName[$to]\[$toPort\] = $xpartName[$mm];\n";
 		}
 	   }
 	}
