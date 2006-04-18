@@ -283,7 +283,7 @@ while (<IN>) {
 			if(substr($conDes,0,3) eq "DAC")
 			{
 				$partOutputPort[$ii][$partInCnt[$ii]] = $conDesPort-1;
-				# print "$xpartName[$ii] $partInCnt[$ii] has link to $partInput[$ii][$partInCnt[$ii]] $partOutputPort[$ii][$partInCnt[$ii]]\n";
+				#print "$xpartName[$ii] $partInCnt[$ii] has link to $partInput[$ii][$partInCnt[$ii]] $partOutputPort[$ii][$partInCnt[$ii]]\n";
 			}
 			$partInCnt[$ii] ++;
 		}
@@ -675,7 +675,7 @@ for($ll=0;$ll<$subSys;$ll++)
 {
 $xx = $subSysPartStop[$ll] - $subSysPartStart[$ll];
 $subCntr[$ll] = 0;
-	print "SubSys $ll $subSysName[$ll] from $subSysPartStart[$ll] to $subSysPartStop[$ll]\n";
+	#print "SubSys $ll $subSysName[$ll] from $subSysPartStart[$ll] to $subSysPartStop[$ll]\n";
 print OUTD "\nSubSystem $ll has $xx parts ************************************\n";
 for($ii=$subSysPartStart[$ll];$ii<$subSysPartStop[$ll];$ii++)
 {
@@ -838,7 +838,7 @@ $allADC = 1;
 		$seqList[$seqCnt] = $ii;
 		$seqType[$seqCnt] = "SUBSYS";
 		$seqCnt ++;
-		print "Subsys $ii $subSysName[$ii] has all ADC inputs and can go $seqCnt\n";
+		#print "Subsys $ii $subSysName[$ii] has all ADC inputs and can go $seqCnt\n";
 		$subRemaining --;
 	}
 }
@@ -857,7 +857,7 @@ for($ii=0;$ii<$searchCnt;$ii++)
 			}
 		}
 		if($allADC == 1) {
-			print "Part $xx $xpartName[$xx] can go next\n";
+			#print "Part $xx $xpartName[$xx] can go next\n";
 			$partUsed[$xx] = 1;
 			$partsRemaining --;
 			$seqList[$seqCnt] = $xx;
@@ -892,7 +892,7 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 				}
 			}
 			if($allADC == 1) {
-				print "Subsys $ii $subSysName[$ii] can go next\n";
+				#print "Subsys $ii $subSysName[$ii] can go next\n";
 				$subUsed[$ii] = 1;
 				$subRemaining --;
 				$seqList[$seqCnt] = $ii;
@@ -916,7 +916,7 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 				}
 			}
 			if($allADC == 1) {
-				print "Part $xx $xpartName[$xx] can go next\n";
+				#print "Part $xx $xpartName[$xx] can go next\n";
 				$partUsed[$xx] = 1;
 				$partsRemaining --;
 				$seqList[$seqCnt] = $xx;
@@ -1198,7 +1198,17 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$outExp .= "\]";
 			#print "DAC $xpartName[$mm]  $outExp\n";
 		}
-		if(($partType[$to] eq "MULTI_SW") || ($partType[$to] eq "PRODUCT"))
+		if($partType[$to] eq "MULTI_SW")
+		{
+			$toType = 6;
+			$toPort = $partOutputPort[$mm][0];
+			$toName = $xpartName[$to];
+			$outExp = "$toName\[";
+			$outExp .= $toPort;
+			$outExp .= "\]";
+			#print "FILT $xpartName[$mm]  $outExp\n";
+		}
+		if($partType[$to] eq "PRODUCT")
 		{
 			$toType = 6;
 			$toPort = $partOutputPort[$mm][0];
@@ -1481,21 +1491,25 @@ for($xx=0;$xx<$processCnt;$xx++)
 	if($partType[$mm] eq "EPICS_OUTPUT")
 	{
 	   #print "Found EPICS OUTPUT $xpartName[$mm] $partInputType[$mm][0] in loop\n";
+		$done = 0;
 		$fromType = $partInputType[$mm][0];
-		$fromCard = $partInNum[$mm][0];
-		$fromChan = $partInputPort[$mm][0];
 		$to = $partOutNum[$mm][0];
 		$toType = $partType[$to];
 		$toName = $xpartName[$to];
 		if($fromType eq "ADC")
 		{
+			$fromCard = $partInNum[$mm][0];
+			$fromChan = $partInputPort[$mm][0];
 			print OUT "pLocalEpics->$systemName\.$xpartName[$mm] = ";
 			print OUT "dWord\[$fromCard\]\[$fromChan\];\n";
+			$done = 1;
 		}
-		else
+		if($toType eq "DAC")
 		{
-			print "Error - EPICS OUTPUT only supports ADC input type\n";
-			exit;
+			$toPort = substr($partName[$to],4,1);
+			$toPort1 = $partOutputPort[$mm][0];
+			print OUT "dacOut\[$toPort\]\[$toPort1\] = ";
+			print OUT "pLocalEpics->$systemName\.$xpartName[$mm];\n";
 		}
 	}
 	# ******** MULTI_SW ************************************************************************
@@ -1524,8 +1538,9 @@ for($xx=0;$xx<$processCnt;$xx++)
 		}
 		if($toType eq "DAC")
 		{
-			$toPort = $partOutputPort[$mm][$jj];
-			print OUT "\tdacOut\[0\]\[$toPort\] = $xpartName[$mm]\[$jj\];\n";
+			$toPort = substr($partName[$to],4,1);
+			$toPort1 = $partOutputPort[$mm][$jj] - 1;
+			print OUT "\tdacOut\[$toPort\]\[$toPort1\] = $xpartName[$mm]\[$jj\];\n";
 		}
 		if($toType eq "MATRIX")
 		{
@@ -1535,6 +1550,11 @@ for($xx=0;$xx<$processCnt;$xx++)
 		if($toType eq "SUM")
 		{
 			print OUT "\t$xpartName[$to] += $xpartName[$mm]\[$jj\];\n";
+		}
+		if($toType eq "EPICS_OUTPUT")
+		{
+			print OUT "pLocalEpics->$systemName\.$xpartName[$to] = ";
+			print OUT "$xpartName[$mm]\[$partOutputPortUsed[$mm][$jj]\];\n";
 		}
 	   }
 	}
