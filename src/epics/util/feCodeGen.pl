@@ -1098,7 +1098,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUT "double $xpartName[$ii]\[$partOutCnt[$ii]\]\[$partInCnt[$ii]\];\n";
 	}
 	if($partType[$ii] eq "SUM") {
-		print OUT "double $xpartName[$ii];\n";
+		print OUT "static double $xpartName[$ii]\[3\];\n";
 	}
 	if($partType[$ii] eq "DIFF_JUNC") {
 		print OUT "double $xpartName[$ii]\[16\];\n";
@@ -1115,12 +1115,6 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 }
 print OUT "\n\n";
-for($ii=0;$ii<$partCnt;$ii++)
-{
-	if($partType[$ii] eq "SUM") {
-		print OUT "$xpartName[$ii] = 0.0;\n";
-	}
-}
 
 print "*****************************************************\n";
 
@@ -1174,7 +1168,10 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$toPort = $partOutputPort[$mm][0];
 			$toName = $xpartName[$to];
 			$outExp = $toName;
-			#print "SUM $xpartName[$mm]  $outExp\n";
+			$outExp .= "\[";
+			$outExp .= $toPort + 1;
+			$outExp .= "\]";
+			print "SUM from filt $xpartName[$mm] $outExp\n";
 		}
 		if($partType[$to] eq "FILT")
 		{
@@ -1269,7 +1266,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$calcExp .= $xpartName[$mm];
 			$calcExp .= ",";
 			$calcExp .= $xpartName[$from];
-			$calcExp .= ",0);\n";
+			$calcExp .= "\[0\],0);\n";
 			#print "FROM SUM $xpartName[$mm]  $calcExp\n";
 		}
 		if($partType[$from] eq "FILT")
@@ -1346,13 +1343,9 @@ for($xx=0;$xx<$processCnt;$xx++)
 		}
 
 		$codeLine = $outExp;
-		if(($toType != 3) && ($toType != 0))
+		if($toType != 0)
 		{
 			$codeLine .= " = ";
-		}
-		if($toType == 3)
-		{
-			$codeLine .= " += ";
 		}
 		$codeLine .= $calcExp;
 		print OUT "$codeLine";
@@ -1431,7 +1424,8 @@ for($xx=0;$xx<$processCnt;$xx++)
 		{
 			if($partOutputType[$mm][$qq] eq "SUM")
 			{
-				print OUT "$partOutput[$mm][$qq] += $xpartName[$mm]\[1\]\[$partOutputPortUsed[$mm][$qq]\];\n";
+				$port = $partOutputPort[$mm][$qq]+1;
+				print OUT "$partOutput[$mm][$qq]\[$port\] = $xpartName[$mm]\[1\]\[$partOutputPortUsed[$mm][$qq]\];\n";
 			}
 		}
 		print OUT "\/\/ End Matrix Calc ***************************\n\n\n";
@@ -1441,7 +1435,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 	{
 	   #print "Found SUM $xpartName[$mm] in loop\n";
 		#print "\tUsed Sum $xpartName[$mm] $partOutCnt[$mm]\n";
-		#print OUT "pLocalEpics->$systemName\.$xpartName[$mm] = $xpartName[$mm]\[0\] + $xpartName[$mm]\[1\]\n";
+		print OUT "$xpartName[$mm]\[0\] = $xpartName[$mm]\[1\] + $xpartName[$mm]\[2\];\n";
 	}
 	# ******** DIFF JUNC ********************************************************************
 	if($partType[$mm] eq "DIFF_JUNC")
@@ -1530,6 +1524,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   for($jj=0;$jj<$partOutCnt[$mm];$jj++)
 	   {
 		$fromType = 0;
+		$fromPort = $partOutputPortUsed[$mm][$jj];
 		$to = $partOutNum[$mm][$jj];
 		$toType = $partType[$to];
 		$toName = $xpartName[$to];
@@ -1540,16 +1535,17 @@ for($xx=0;$xx<$processCnt;$xx++)
 		{
 			$toPort = substr($partName[$to],4,1);
 			$toPort1 = $partOutputPort[$mm][$jj] - 1;
-			print OUT "\tdacOut\[$toPort\]\[$toPort1\] = $xpartName[$mm]\[$jj\];\n";
+			print OUT "\tdacOut\[$toPort\]\[$toPort1\] = $xpartName[$mm]\[$fromPort\];\n";
 		}
 		if($toType eq "MATRIX")
 		{
 			$toPort = $partOutputPort[$mm][$jj];
-			print OUT "\t$xpartName[$to]\[0\]\[$jj\] = $xpartName[$mm]\[$jj\];\n";
+			print OUT "\t$xpartName[$to]\[0\]\[$jj\] = $xpartName[$mm]\[$fromPort\];\n";
 		}
 		if($toType eq "SUM")
 		{
-			print OUT "\t$xpartName[$to] += $xpartName[$mm]\[$jj\];\n";
+			$toPort = $partOutputPort[$mm][$jj] + 1;
+			print OUT "\t$xpartName[$to]\[$toPort\] = $xpartName[$mm]\[$fromPort\];\n";
 		}
 		if($toType eq "EPICS_OUTPUT")
 		{
