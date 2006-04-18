@@ -1098,7 +1098,8 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUT "double $xpartName[$ii]\[$partOutCnt[$ii]\]\[$partInCnt[$ii]\];\n";
 	}
 	if($partType[$ii] eq "SUM") {
-		print OUT "static double $xpartName[$ii]\[3\];\n";
+		$port = $partInCnt[$ii];
+		print OUT "static double $xpartName[$ii]\[$port\];\n";
 	}
 	if($partType[$ii] eq "DIFF_JUNC") {
 		print OUT "double $xpartName[$ii]\[16\];\n";
@@ -1171,7 +1172,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$outExp .= "\[";
 			$outExp .= $toPort + 1;
 			$outExp .= "\]";
-			print "SUM from filt $xpartName[$mm] $outExp\n";
+			#print "SUM from filt $xpartName[$mm] $outExp\n";
 		}
 		if($partType[$to] eq "FILT")
 		{
@@ -1435,7 +1436,19 @@ for($xx=0;$xx<$processCnt;$xx++)
 	{
 	   #print "Found SUM $xpartName[$mm] in loop\n";
 		#print "\tUsed Sum $xpartName[$mm] $partOutCnt[$mm]\n";
-		print OUT "$xpartName[$mm]\[0\] = $xpartName[$mm]\[1\] + $xpartName[$mm]\[2\];\n";
+		$port = $partInCnt[$mm];
+		print OUT "$xpartName[$mm]\[0\] = ";
+		for($qq=0;$qq<$port;$qq++)
+		{
+		    $zz = $qq+1;
+		    if(($zz - $port) == 0)
+	 	    {
+			print OUT "$xpartName[$mm]\[$zz\];\n";
+		    }
+		    else {
+			print OUT "$xpartName[$mm]\[$zz\] + ";
+		    }
+		}
 	}
 	# ******** DIFF JUNC ********************************************************************
 	if($partType[$mm] eq "DIFF_JUNC")
