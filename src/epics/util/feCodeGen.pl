@@ -605,7 +605,7 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 				$partInNum[$kk][0] = $xx;
 				#$partInputPort[$kk][0] = $fromPort;
 				$partSysFrom[$kk] = 100 + $xx;
-				#print "Found ADC INPUT connect from $xpartName[$xx] to $xpartName[$kk] $partOutputPort[$xx][$jj] $jj  input $partInputPort[$kk][0]\n";
+				#print "Found ADC INPUT connect from $xpartName[$xx] to $xpartName[$kk] $partOutputPort[$xx][$jj] $jj  input $fromPort $partInput[$xx][$fromPort]\n";
 				for($ll=0;$ll<$partOutCnt[$kk];$ll++)
 				{
 					$adcName = $partInput[$xx][$fromPort];
@@ -1020,7 +1020,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 				$matOuts[$ii] ++;
 			}
 		}
-		print "$xpartName[$ii] has $matOuts[$ii] Outputs\n";
+		#print "$xpartName[$ii] has $matOuts[$ii] Outputs\n";
 		print EPICS "MATRIX $xpartName[$ii]_ $matOuts[$ii]x$partInCnt[$ii] $systemName\.$xpartName[$ii]\n";
 		print OUTH "\tfloat $xpartName[$ii]\[$matOuts[$ii]\]\[$partInCnt[$ii]\];\n";
 	}
@@ -1126,26 +1126,32 @@ print OUT "{\n\nint ii,jj;\n\n";
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if($partType[$ii] eq "MATRIX") {
-		print OUT "double $xpartName[$ii]\[$matOuts[$ii]\]\[$partInCnt[$ii]\];\n";
+		print OUT "double \L$xpartName[$ii]\[$matOuts[$ii]\]\[$partInCnt[$ii]\];\n";
 	}
 	if($partType[$ii] eq "SUM") {
 		$port = $partInCnt[$ii];
-		print OUT "static double $xpartName[$ii]\[$port\];\n";
+		print OUT "double \L$xpartName[$ii];\n";
 	}
 	if($partType[$ii] eq "DIFF_JUNC") {
-		print OUT "double $xpartName[$ii]\[16\];\n";
+		print OUT "double \L$xpartName[$ii]\[16\];\n";
+	}
+	if($partType[$ii] eq "FILT") {
+		print OUT "double \L$xpartName[$ii];\n";
+	}
+	if($partType[$ii] eq "FIR_FILTER") {
+		print OUT "double \L$xpartName[$ii];\n";
 	}
 	if($partType[$ii] eq "RAMP_SW") {
-		print OUT "double $xpartName[$ii]\[4\];\n";
+		print OUT "double \L$xpartName[$ii]\[4\];\n";
 	}
 	if($partType[$ii] eq "MULTI_SW") {
-		print OUT "double $xpartName[$ii]\[$partOutCnt[$ii]\];\n";
+		print OUT "double \L$xpartName[$ii]\[$partOutCnt[$ii]\];\n";
 	}
 	if($partType[$ii] eq "DELAY") {
-		print OUT "double $xpartName[$ii];\n";
+		print OUT "static double \L$xpartName[$ii];\n";
 	}
 	if($partType[$ii] eq "PRODUCT") {
-		print OUT "double $xpartName[$ii]\[$partOutCnt[$ii]\];\n";
+		print OUT "double \L$xpartName[$ii]\[$partOutCnt[$ii]\];\n";
 		print OUT "float $xpartName[$ii]\_CALC;\n";
 	}
 }
@@ -1168,365 +1174,139 @@ for($xx=0;$xx<$processCnt;$xx++)
 	}
 	$mm = $processPartNum[$xx];
 	#print "looking for part $mm\n";
+	$inCnt = $partInCnt[$mm];
+	for($qq=0;$qq<$inCnt;$qq++)
+	{
+		$indone = 0;
+		if($partInputType[$mm][$qq] eq "ADC")
+		{
+			$card = $partInNum[$mm][$qq];
+			$chan = $partInputPort[$mm][$qq];
+			$fromExp[$qq] = "dWord\[";
+			$fromExp[$qq] .= $card;
+			$fromExp[$qq] .= "\]\[";
+			$fromExp[$qq] .= $chan;
+			$fromExp[$qq] .= "\]";
+			$indone = 1;
+		}
+		if($partInputType[$mm][$qq] eq "MATRIX")
+		{
+			$from = $partInNum[$mm][$qq];
+			$fromPort = $partInputPort[$mm][$qq];
+			$fromExp[$qq] = "\L$xpartName[$from]";
+			$fromExp[$qq] .= "\[1\]\[";
+			$fromExp[$qq] .= $fromPort;
+			$fromExp[$qq] .= "\]";
+			$indone = 1;
+		}
+		if(($partInputType[$mm][$qq] eq "EPICS_OUTPUT") || ($partInputType[$mm][$qq] eq "EPICS_INPUT"))
+		{
+			$from = $partInNum[$mm][$qq];
+			$fromPort = $partInputPort[$mm][$qq];
+			$fromExp[$qq] = "pLocalEpics->";
+			$fromExp[$qq] .= $systemName;
+			$fromExp[$qq] .= "\.";
+			$fromExp[$qq] .= $xpartName[$from];
+			$indone = 1;
+		}
+		if(($partInputType[$mm][$qq] eq "RAMP_SW") || ($partInputType[$mm][$qq] eq "MULTI_SW") || ($partInputType[$mm][$qq] eq "PRODUCT") || ($partInputType[$mm][$qq] eq "DIFF_JUNC"))
+		{
+			$from = $partInNum[$mm][$qq];
+			$fromPort = $partInputPort[$mm][$qq];
+			$fromExp[$qq] = "\L$xpartName[$from]";
+			$fromExp[$qq] .= "\[";
+			$fromExp[$qq] .= $fromPort;
+			$fromExp[$qq] .= "\]";
+			$indone = 1;
+		}
+		if($indone == 0)
+		{
+			$from = $partInNum[$mm][$qq];
+			$fromExp[$qq] = "\L$xpartName[$from]";
+			#print "$xpartName[$mm]  $fromExp[$qq]\n";
+		}
+	}
+	# ******** FILTER *************************************************************************
 	if($partType[$mm] eq "FILT")
 	{
-	   $calcExp = "filterModuleD(dspPtr,dspCoeff,";
-	   # print "Found Filt $xpartName[$mm] in loop $partOutCnt[$mm]\n";
-	   for($jj=0;$jj<$partOutCnt[$mm];$jj++)
-	   {
-		$fromType = 0;
-		$toType = 0;
-		$to = $partOutNum[$mm][$jj];
-		$from = $partInNum[$mm][0];
-		if($jj == 1)
-		{
-			$calcExp = $outExp;
-			$calcExp .= ";\n";
-		}
-
-		# Figure OUTPUT connection type **************************************
-		if($partType[$to] eq "MATRIX")
-		{
-			$toType = 1;
-			$toPort = $partOutputPort[$mm][0];
-			$toName = $xpartName[$to];
-			#print "FILT has output to matrix $toName port $toPort\n";
-			$outExp = $toName;
-			$outExp .= "\[0\]\[";
-			$outExp .= $toPort;
-			$outExp .= "\]";
-			#print "MATRIX $xpartName[$mm]  $outExp\n";
-		}
-		if($partType[$to] eq "SUM")
-		{
-			$toType = 3;
-			$toPort = $partOutputPort[$mm][0];
-			$toName = $xpartName[$to];
-			$outExp = $toName;
-			$outExp .= "\[";
-			$outExp .= $toPort + 1;
-			$outExp .= "\]";
-			#print "SUM from filt $xpartName[$mm] $outExp\n";
-		}
-		if($partType[$to] eq "FILT")
-		{
-			$toType = 4;
-			$toPort = $partOutputPort[$mm][0];
-			$toName = $xpartName[$to];
-			$outExp = "filtIn\[";
-			$outExp .= $toName;
-			$outExp .= "\]";
-			#print "FILT $xpartName[$mm]  $outExp\n";
-		}
-		if($partType[$to] eq "DAC")
-		{
-			$toPort = substr($partName[$to],4,1);
-			$toType = 2;
-			$toPort1 = $partOutputPort[$mm][0] - 1;
-			$outExp = "dacOut\[";
-			$outExp .= $toPort;
-			$outExp .= "\]\[";
-			$outExp .= $toPort1;
-			$outExp .= "\]";
-			#print "DAC $xpartName[$mm]  $outExp\n";
-		}
-		if($partType[$to] eq "MULTI_SW")
-		{
-			$toType = 6;
-			$toPort = $partOutputPort[$mm][0];
-			$toName = $xpartName[$to];
-			$outExp = "$toName\[";
-			$outExp .= $toPort;
-			$outExp .= "\]";
-			#print "FILT $xpartName[$mm]  $outExp\n";
-		}
-		if($partType[$to] eq "PRODUCT")
-		{
-			$toType = 6;
-			$toPort = $partOutputPort[$mm][0];
-			$toName = $xpartName[$to];
-			$outExp = "$toName\[";
-			$outExp .= $toPort;
-			$outExp .= "\]";
-			#print "FILT $xpartName[$mm]  $outExp\n";
-		}
-		if($partType[$to] eq "DIFF_JUNC")
-		{
-			$toType = 7;
-			$toPort = $partOutputPort[$mm][0];
-			$toName = $xpartName[$to];
-			$outExp = "$toName\[";
-			$outExp .= $toPort;
-			$outExp .= "\]";
-			#print "FILT $xpartName[$mm]  $outExp\n";
-		}
-		if($partType[$to] eq "RAMP_SW")
-		{
-			$toType = 8;
-			$toPort = $partOutputPort[$mm][0];
-			$toName = $xpartName[$to];
-			$outExp = "$toName\[";
-			$outExp .= $toPort;
-			$outExp .= "\]";
-			#print "FILT $xpartName[$mm]  $outExp\n";
-		}
-		if($partType[$to] eq "TERM")
-		{
-			$toType = 0;
-			$outExp = "";
-		}
-		if($jj == 0)
-		{
-		# Figure INPUT connection type **************************************
-		if($partInputType[$mm][0] eq "MATRIX")
-		{
-			$fromType = 1;
-			$fromPort = $partInputPort[$mm][0];
-			$fromName = $xpartName[$from];
-			#print "FILT has input from matrix $fromName port $fromPort\n";
-			$calcExp .= $xpartName[$mm];
-			$calcExp .= ",";
-			$calcExp .= $fromName;
-			$calcExp .= "\[1\]\[";
-			$calcExp .= $fromPort;
-			$calcExp .= "\],0);\n";
-			#print "FROM MATRIX $xpartName[$mm]  $calcExp\n";
-		}
-		if($partType[$from] eq "SUM")
-		{
-			$fromType = 3;
-			$fromPort = $partInputPort[$mm][0];
-			$fromName = $xpartName[$from];
-			#print "FILT has input from SUM $fromName port $fromPort\n";
-			$calcExp .= $xpartName[$mm];
-			$calcExp .= ",";
-			$calcExp .= $xpartName[$from];
-			$calcExp .= "\[0\],0);\n";
-			#print "FROM SUM $xpartName[$mm]  $calcExp\n";
-		}
-		if($partType[$from] eq "FILT")
-		{
-			$fromType = 4;
-			$fromPort = $partInputPort[$mm][0];
-			$fromName = $xpartName[$from];
-			#print "FILT has input from FILT $fromName port $fromPort\n";
-			$calcExp .= $xpartName[$mm];
-			$calcExp .= ",filtIn\[";
-			$calcExp .= $xpartName[$mm];
-			$calcExp .= "\],0); \n";
-			#print "FROM FILTER $xpartName[$mm]  $calcExp\n";
-		}
-		if($partType[$from] eq "GROUND")
-		{
-			$calcExp .= $xpartName[$mm];
-			$calcExp .= ",0.0,0);\n";
-			# print "FROM GROUND $xpartName[$mm]  $calcExp\n";
-		}
-		if($partInputType[$mm][0] eq "ADC")
-		{
-			$fromType = 5;
-			$fromPort = $partInNum[$mm][0];
-			$fromPort1 = $partInputPort[$mm][0];
-			$calcExp .= $xpartName[$mm];
-			$calcExp .= ",dWord\[";
-			$calcExp .= $fromPort;
-			$calcExp .= "\]\[";
-			$calcExp .= $fromPort1;
-			$calcExp .= "\],0); \n";
-			#print "ADC $xpartName[$mm]  $calcExp\n";
-		}
-		if($partType[$from] eq "RAMP_SW")
-		{
-			$fromType = 8;
-			$fromPort = $partInputPort[$mm][0];
-			$fromName = $xpartName[$from];
-			#print "FILT has input from FILT $fromName port $fromPort\n";
-			$calcExp .= $xpartName[$mm];
-			$calcExp .= ",";
-			$calcExp .= $fromName;
-			$calcExp .= "\[";
-			$calcExp .= $fromPort;
-			$calcExp .= "\],0); \n";
-			#print "FROM FILTER $xpartName[$mm]  $calcExp\n";
-		}
-		if($partType[$from] eq "MULTI_SW")
-		{
-			$fromType = 6;
-			$fromPort = $partInputPort[$mm][0];
-			$fromName = $xpartName[$from];
-			#print "FILT has input from FILT $fromName port $fromPort\n";
-			$calcExp .= $xpartName[$mm];
-			$calcExp .= ",";
-			$calcExp .= $fromName;
-			$calcExp .= "\[";
-			$calcExp .= $fromPort;
-			$calcExp .= "\],0); \n";
-		}
-		if($partType[$from] eq "EPICS_OUTPUT")
-		{
-			$fromType = 9;
-			$fromPort = $partInputPort[$mm][0];
-			$fromName = $xpartName[$from];
-			$calcExp .= $xpartName[$mm];
-			$calcExp .= ",";
-			$calcExp .= "pLocalEpics->";
-			$calcExp .= $systemName;
-			$calcExp .= "\.";
-			$calcExp .= $xpartName[$from];
-			$calcExp .= ",0); \n";
-		}
-		}
-
-		$codeLine = $outExp;
-		if($toType != 0)
-		{
-			$codeLine .= " = ";
-		}
-		$codeLine .= $calcExp;
-		print OUT "$codeLine";
-
-	   }
+	   print OUT "// FILTER MODULE\n";
+	   $calcExp = "\L$xpartName[$mm]";
+	   $calcExp .= " = ";
+	   $calcExp .= "filterModuleD(dspPtr,dspCoeff,";
+	   $calcExp .= $xpartName[$mm];
+	   $calcExp .= ",";
+	   $calcExp .= $fromExp[0];
+	   $calcExp .= ",0);\n";
+	   print OUT "$calcExp";
 	}
 	# ******** MATRIX *************************************************************************
 	if($partType[$mm] eq "MATRIX")
 	{
-	   	#print "Found Matrix $xpartName[$mm] in loop\n";
+		print OUT "// MATRIX CALC\n";
+		print OUT "for(ii=0;ii<$matOuts[$mm];ii++)\n{\n";
+		print OUT "\L$xpartName[$mm]\[1\]\[ii\] = \n";
 		
-		for($qq=0;$qq<$partOutCnt[$mm];$qq++)
-		{
-			$portUsed[$qq] = 0;
-		}
-		$matOuts = 0;
-		for($qq=0;$qq<$partOutCnt[$mm];$qq++)
-		{
-			$fromPort = $partOutputPortUsed[$mm][$qq];
-			if($portUsed[$fromPort] == 0)
-			{
-				$portUsed[$fromPort] = 1;
-				$matOuts ++;
-			}
-		}
-		#print "$xpartName[$mm] has $matOuts Outputs\n";
-		print OUT "\n";
-		print OUT "\/\/ Perform Matrix Calc **********************\n\n";
-		print OUT "for(ii=0;ii<$matOuts;ii++)\n{\n";
-		print OUT "$xpartName[$mm]\[1\]\[ii\] = \n";
 		for($qq=0;$qq<$partInCnt[$mm];$qq++)
 		{
-			$done = 0;
-			$to = $partInNum[$mm][$qq];
-			$fromType = $partInputType[$mm][$qq];
-			$toType = $partType[$to];
-			$toName = $xpartName[$to];
-			$fromPort1 = $partInputPort[$mm][$qq];
-			if($fromType eq "ADC")
-			{
-				#print "Found MATRIX with ADC input on $qq\n";
-				$card = $partInNum[$mm][$qq];
-				$chan = $partInputPort[$mm][$qq];
-				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * dWord\[$card\]\[$chan\]";
-				#print "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * dWord\[$card\]\[$chan\]\n";
-				$done = 1;
-			}
-			if($fromType eq "EPICS_OUTPUT")
-			{
-				#print "Found MATRIX with EPICS input on $qq\n";
-				$card = $partInNum[$mm][$qq];
-				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * pLocalEpics->$systemName\.$xpartName[$card]";
-				$done = 1;
-			}
-			if ($toType eq "EPICS_INPUT")
-                        {
-				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * pLocalEpics->$systemName\.$xpartName[$to]";
-				$done = 1;
-			}
-			if ($toType eq "RAMP_SW")
-                        {
-				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * $xpartName[$to]\[$fromPort1\]";
-				#print "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * $xpartName[$to]\[$fromPort1\]\n";
-				$done = 1;
-			}
-			if(!$done)
-			{
-				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * $xpartName[$mm]\[0\]\[$qq\]";
-				#print "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * $xpartName[$mm]\[0\]\[$qq\];\n";
-			}
+			$calcExp = "\tpLocalEpics->$systemName\.";
+			$calcExp .= $xpartName[$mm];
+			$calcExp .= "\[ii\]\[";
+			$calcExp .= $qq;
+			$calcExp .= "\] * ";
+			$calcExp .= $fromExp[$qq];
 			if($qq == ($partInCnt[$mm] - 1))
 			{
-				print OUT ";\n";
+				$calcExp .= ";\n";
 			}
 			else
 			{
-				print OUT " +\n";
+				$calcExp .= " +\n";
 			}
+			print OUT "$calcExp";
 		}
 		print OUT "}\n";
-		for($qq=0;$qq<$partOutCnt[$mm];$qq++)
-		{
-			if($partOutputType[$mm][$qq] eq "SUM")
-			{
-				$port = $partOutputPort[$mm][$qq]+1;
-				print OUT "$partOutput[$mm][$qq]\[$port\] = $xpartName[$mm]\[1\]\[$partOutputPortUsed[$mm][$qq]\];\n";
-			}
-		}
-		print OUT "\/\/ End Matrix Calc ***************************\n\n\n";
 	}
 	# ******** SUMMING JUNC ********************************************************************
 	if($partType[$mm] eq "SUM")
 	{
-	   #print "Found SUM $xpartName[$mm] in loop\n";
+	   print OUT "// SUM\n";
 		#print "\tUsed Sum $xpartName[$mm] $partOutCnt[$mm]\n";
-		$port = $partInCnt[$mm];
-		print OUT "$xpartName[$mm]\[0\] = ";
-		for($qq=0;$qq<$port;$qq++)
+		$calcExp = "\L$xpartName[$mm]";
+		$calcExp .= " = ";
+		for($qq=0;$qq<$inCnt;$qq++)
 		{
 		    $zz = $qq+1;
-		    if(($zz - $port) == 0)
+		    if(($zz - $inCnt) == 0)
 	 	    {
-			print OUT "$xpartName[$mm]\[$zz\];\n";
+			$calcExp .= $fromExp[$qq];
+			$calcExp .= ";\n";
 		    }
 		    else {
-			print OUT "$xpartName[$mm]\[$zz\] + ";
+			$calcExp .= $fromExp[$qq];
+			$calcExp .= " + ";
 		    }
 		}
+		print OUT "$calcExp";
 	}
 	# ******** DIFF JUNC ********************************************************************
 	if($partType[$mm] eq "DIFF_JUNC")
 	{
+	   print OUT "// DIFF_JUNC\n";
 	   $zz = 0;
-	   for($qq=0;$qq<16;$qq+=2)
-	   {
-		$to = $partOutNum[$mm][$zz];
-		$toPort = $partOutputPort[$mm][$zz];
-		$from = $partInNum[$mm][$qq];
-		$from1 = $partInNum[$mm][$qq+1];
-		if($partType[$to] eq "MATRIX")
-		{
-			print OUT "$xpartName[$to]\[0\]\[$toPort\] = ";
-		}
-		else
-		{
-			print "Error in DIFF JUNC  $xpartName[$mm] - Unsupported output type\n";
-			exit;
-		}
-		if($partType[$from1] eq "MATRIX")
-		{
-			print OUT "$xpartName[$to]\[1\]\[$toPort\] = ";
-		}
-		else
-		{
-			$yy = $qq+1;
-			print OUT "$xpartName[$mm]\[$yy\] - ";
-		}
-		if($partType[$from] eq "MATRIX")
-		{
-			print OUT "$xpartName[$from]\[1\]\[$toPort\];\n";
-		}
-		else
-		{
-			print OUT "$xpartName[$mm];\n";
-		}
-		$zz++;
+           for($qq=0;$qq<16;$qq+=2)
+           {
+
+		$yy = $qq + 1;
+		$calcExp = "\L$xpartName[$mm]";
+		$calcExp .= "\[";
+		$calcExp .= $zz;
+		$calcExp .= "\] = ";
+		$calcExp .= $fromExp[$yy];
+		$calcExp .= " - ";
+		$calcExp .= $fromExp[$qq];
+		$calcExp .= ";\n";
+		print OUT "$calcExp";
+		$zz ++;
 	   }
 	}
 	# ******** GROUND INPUT ********************************************************************
@@ -1538,99 +1318,40 @@ for($xx=0;$xx<$processCnt;$xx++)
 	if($partType[$mm] eq "EPICS_OUTPUT")
 	{
 	   #print "Found EPICS OUTPUT $xpartName[$mm] $partInputType[$mm][0] in loop\n";
-		$done = 0;
-		$fromType = $partInputType[$mm][0];
-		$to = $partOutNum[$mm][0];
-		$toType = $partType[$to];
-		$toName = $xpartName[$to];
-		if($fromType eq "ADC")
-		{
-			$fromCard = $partInNum[$mm][0];
-			$fromChan = $partInputPort[$mm][0];
+	   	print OUT "// EPICS_OUTPUT\n";
 			print OUT "pLocalEpics->$systemName\.$xpartName[$mm] = ";
-			print OUT "dWord\[$fromCard\]\[$fromChan\];\n";
-			$done = 1;
-		}
-		if($toType eq "DAC")
-		{
-			$toPort = substr($partName[$to],4,1);
-			$toPort1 = $partOutputPort[$mm][0];
-			print OUT "dacOut\[$toPort\]\[$toPort1\] = ";
-			print OUT "pLocalEpics->$systemName\.$xpartName[$mm];\n";
-		}
-		if($toType eq "SUM")
-		{
-			$toPort = $partOutputPort[$mm][0] + 1;
-			print OUT "\t$xpartName[$to]\[$toPort\] = ";
-			print OUT "pLocalEpics->$systemName\.$xpartName[$mm];\n";
-		}
+			print OUT "$fromExp[0];\n";
 	}
 	# ******** MULTI_SW ************************************************************************
 	if($partType[$mm] eq "MULTI_SW")
 	{
+	   print OUT "// MULTI_SW\n";
+           for($qq=0;$qq<$inCnt;$qq++)
+           {
+		$calcExp = "\L$xpartName[$mm]";
+		$calcExp .= "\[";
+		$calcExp .= $qq;
+		$calcExp .= "\] = ";
+		$calcExp .= $fromExp[$qq];
+		$calcExp .= ";\n";
+		print OUT "$calcExp";
+	   }
 		print OUT "if(pLocalEpics->$systemName\.$xpartName[$mm] == 0)\n";
 		print OUT "{\n";
-		print OUT "\tfor(ii=0;ii< $partOutCnt[$mm];ii++) $xpartName[$mm]\[ii\] = 0.0;\n";
+		print OUT "\tfor(ii=0;ii< $partOutCnt[$mm];ii++) \L$xpartName[$mm]\[ii\] = 0.0;\n";
 		print OUT "}\n\n";
-	   $from = $partInNum[$mm][0];
-	   $fromType = $partType[$from];
-	   if($fromType eq "MATRIX")
-	   {
-		print OUT "else {\n";
-		print OUT "\tfor(ii=0;ii< $partOutCnt[$mm];ii++) $xpartName[$mm]\[ii\] = $xpartName[$from]\[1\]\[ii\];\n";
-		print OUT "}\n";
-	   }
-	   for($jj=0;$jj<$partOutCnt[$mm];$jj++)
-	   {
-		$fromType = 0;
-		$fromPort = $partOutputPortUsed[$mm][$jj];
-		$to = $partOutNum[$mm][$jj];
-		$toType = $partType[$to];
-		$toName = $xpartName[$to];
-		if($toType eq "FILT")
-		{
-		}
-		if($toType eq "DAC")
-		{
-			$toPort = substr($partName[$to],4,1);
-			$toPort1 = $partOutputPort[$mm][$jj] - 1;
-			print OUT "\tdacOut\[$toPort\]\[$toPort1\] = $xpartName[$mm]\[$fromPort\];\n";
-		}
-		if($toType eq "MATRIX")
-		{
-			$toPort = $partOutputPort[$mm][$jj];
-			print OUT "\t$xpartName[$to]\[0\]\[$jj\] = $xpartName[$mm]\[$fromPort\];\n";
-		}
-		if($toType eq "SUM")
-		{
-			$toPort = $partOutputPort[$mm][$jj] + 1;
-			print OUT "\t$xpartName[$to]\[$toPort\] = $xpartName[$mm]\[$fromPort\];\n";
-		}
-		if($toType eq "DELAY")
-		{
-			print OUT "\t$xpartName[$to] = $xpartName[$mm]\[$fromPort\];\n";
-		}
-		if($toType eq "EPICS_OUTPUT")
-		{
-			print OUT "pLocalEpics->$systemName\.$xpartName[$to] = ";
-			print OUT "$xpartName[$mm]\[$partOutputPortUsed[$mm][$jj]\];\n";
-		}
-	   }
 	}
+	# ******** DELAY ************************************************************************
 	if($partType[$mm] eq "DELAY")
 	{
-	   for($jj=0;$jj<$partOutCnt[$mm];$jj++)
-	   {
-		$to = $partOutNum[$mm][$jj];
-		$toType = $partType[$to];
-		$toName = $xpartName[$to];
-		$toPort = $partOutputPort[$mm][$jj]+1;
-		if($toType eq "SUM")
-		{
-			print OUT "\t$xpartName[$to]\[$toPort\] = $xpartName[$mm];\n";
-		}
-	   }
+	   print OUT "// DELAY\n";
+		$calcExp = "\L$xpartName[$mm]";
+		$calcExp .= " = ";
+		$calcExp .= $fromExp[0];
+		$calcExp .= ";\n";
+		print OUT "$calcExp";
 	}
+	# ******** FIR_FILTER ************************************************************************
 	if($partType[$mm] eq "FIR_FILTER")
 	{
 		$from = $partInNum[$mm][0];
@@ -1660,53 +1381,54 @@ for($xx=0;$xx<$processCnt;$xx++)
 			print "$calcExp";
 		}
 	}
+	# ******** RAMP_SW ************************************************************************
 	if($partType[$mm] eq "RAMP_SW")
 	{
-	   for($jj=0;$jj<$partInCnt[$mm];$jj++)
+	   print OUT "// RAMP_SW\n";
+		$calcExp = "\L$xpartName[$mm]";
+		$calcExp .= " = ";
+		$calcExp .= $fromExp[0];
+		$calcExp .= ";\n";
+	   for($qq=0;$qq<$inCnt;$qq++)
 	   {
-		$from = $partInNum[$mm][$jj];
-		$fromType = $partInputType[$mm][$jj];
-		$fromPort = $partInputPort[$mm][$jj];
-#print "\nFound RAMP_SW from $xpartName[$from] type $fromType port $fromPort\n";
-		if($fromType eq "ADC")
-		{
-			print OUT "$xpartName[$mm]\[$jj\] = dWord\[$from\]\[$fromPort\];\n";
-		}
+		$calcExp = "\L$xpartName[$mm]\[";
+		$calcExp .= $qq;
+		$calcExp .= "\] = ";
+		$calcExp .= $fromExp[$qq];
+		$calcExp .= ";\n";
+		print OUT "$calcExp";
 	   }
 	   print OUT "if(pLocalEpics->$systemName\.$xpartName[$mm] == 0)\n";
 		print OUT "{\n";
-		print OUT "\t$xpartName[$mm]\[1\] = $xpartName[$mm]\[2\];\n";
+		print OUT "\t\L$xpartName[$mm]\[1\] = \L$xpartName[$mm]\[2\];\n";
 		print OUT "}\n";
 		print OUT "else\n";
 		print OUT "{\n";
-		print OUT "\t$xpartName[$mm]\[0\] = $xpartName[$mm]\[1\];\n";
-		print OUT "\t$xpartName[$mm]\[1\] = $xpartName[$mm]\[3\];\n";
+		print OUT "\t\L$xpartName[$mm]\[0\] = \L$xpartName[$mm]\[1\];\n";
+		print OUT "\t\L$xpartName[$mm]\[1\] = \L$xpartName[$mm]\[3\];\n";
 		print OUT "}\n\n";
 	}
+	# ******** PRODUCT ************************************************************************
 	if($partType[$mm] eq "PRODUCT")
 	{
-	print OUT "pLocalEpics->$systemName\.$xpartName[$mm]";
-	print OUT "_RMON = \n\tgainRamp(pLocalEpics->$systemName\.$xpartName[$mm],";
-	print OUT "pLocalEpics->$systemName\.$xpartName[$mm]";
-	print OUT "_TRAMP,0,\&$xpartName[$mm]\_CALC);";
-	print OUT "\n";
-	   for($jj=0;$jj<$partInCnt[$mm];$jj++)
-	   {
-		$from = $partInNum[$mm][$jj];
-		$fromType = $partType[$from];
-		$fromPort = $partInputPort[$mm][$jj];
-		$to = $partOutNum[$mm][$jj];
-		$toType = $partType[$to];
-		$toPort = $partOutputPort[$mm][$jj];
-		if(($fromType eq "MATRIX") && ($toType eq "MULTI_SW"))
-		{
-			print OUT "$xpartName[$to]\[$jj\] = $xpartName[$mm]\_CALC * $xpartName[$from]\[1\]\[$fromPort\];\n";
-		}
-		if(($fromType eq "FILT") && ($toType eq "MULTI_SW"))
-		{
-			print OUT "$xpartName[$to]\[$toPort\] = $xpartName[$mm]\_CALC * $xpartName[$mm]\[$jj\];\n";
-		}
-	   }
+	   	print OUT "// PRODUCT\n";
+	   	print OUT "pLocalEpics->$systemName\.$xpartName[$mm]";
+	   	print OUT "_RMON = \n\tgainRamp(pLocalEpics->$systemName\.$xpartName[$mm],";
+	   	print OUT "pLocalEpics->$systemName\.$xpartName[$mm]";
+	   	print OUT "_TRAMP,0,\&$xpartName[$mm]\_CALC);";
+	   	print OUT "\n\n";
+	   	for($qq=0;$qq<$inCnt;$qq++)
+	   	{
+			$calcExp = "\L$xpartName[$mm]";
+			$calcExp .= "\[";
+			$calcExp .= $qq;
+			$calcExp .= "\] = ";
+			$calcExp .= "$xpartName[$mm]";
+			$calcExp .= "_CALC * ";
+			$calcExp .= $fromExp[$qq];
+			$calcExp .= ";\n";
+			print OUT "$calcExp";
+	   	}
 	}
 
 
