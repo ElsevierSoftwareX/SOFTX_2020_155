@@ -556,14 +556,21 @@ $foundCon = 0;
 	      $xx = $nonSubPart[$kk];
 			if($partOutput[$ii][$jj] eq $partName[$xx])
 			{
-			#print "\t Maybe $xpartName[$xx] port $partOutputPort[$ii][$jj]\n";
 				$fromNum = $partInNum[$ii][$jj];
 				$fromPort = $partInputPort[$ii][$jj];
+			#print "\t Maybe $xpartName[$xx] port $partOutputPort[$ii][$jj] $xpartName[$fromNum] $partType[$fromNum] $fromPort\n";
+				# Make output connection at source part
 				$partOutput[$fromNum][$fromPort] = $xpartName[$xx];
 				$partOutputType[$fromNum][$fromPort] = $partType[$xx];
 				$partOutNum[$fromNum][$fromPort] = $xx;
 				$partOutputPort[$fromNum][$fromPort] = $partOutputPort[$ii][$jj];
                        		$partSysFromx[$xx][$fromCnt[$xx]] = $partSubNum[$ii];
+				# Make input connection at destination part
+				$qq = $partOutputPort[$ii][$jj] - 1;
+				$partInput[$xx][$qq] = $xpartName[$fromNum];
+				$partInputType[$xx][$qq] = $partType[$fromNum];
+				$partInNum[$xx][$qq] = $fromNum;
+				$partInputPort[$xx][$qq] = $fromPort;
 				$fromCnt[$xx] ++;
 				$foundCon = 1;
 			}
