@@ -664,11 +664,12 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 				{
 					$toNum = $partOutNum[$kk][$ll];
 					$toPort = $partOutputPort[$kk][$ll];
+					$toPort1 = $partOutputPortUsed[$kk][$ll];
 				#print "Found nonADC connect from $xpartName[$xx] port $mm to $xpartName[$toNum] $partInputPort[$xx][$jj]\n";
 					$partInNum[$toNum][$toPort] = $xx;
 					$partInput[$toNum][$toPort] = $xpartName[$xx];
-					$partInputPort[$toNum][$toPort] = $mm;
-					$partInputType[$toNum][$toPort] = $partType[$mm];
+					$partInputPort[$toNum][$toPort] = $toPort1;
+					$partInputType[$toNum][$toPort] = $partType[$xx];
 
 					$partOutput[$xx][$jj] = $xpartName[$toNum];
 					$partOutputPort[$xx][$jj] = $toPort;
@@ -730,11 +731,11 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 		print OUTD "\t$partInput[$xx][$jj]\t$partInputType[$xx][$jj]\t$partInNum[$xx][$jj]\t$partInputPort[$xx][$jj] subsys $partSysFromx[$xx][$jj]\n";
 	}
 	print OUTD "OUT TO:\n";
+	print OUTD "\tPart Name\tType\tNum\tPort\tPort Used\n";
 	for($jj=0;$jj<$partOutCnt[$xx];$jj++)
 	{
 		$to = $partOutNum[$xx][$jj];
 		print OUTD "\t$partOutput[$xx][$jj]\t$partOutputType[$xx][$jj]\t$partOutNum[$xx][$jj]\t$partOutputPort[$xx][$jj]\t$partOutputPortUsed[$xx][$jj]\n";
-#		print OUTD "\t$partOutput[$xx][$jj]\t$partOutputPort[$xx][$jj] type $partType[$to] $partOutNum[$xx][$jj]\n";
 	}
 	print OUTD "\n****************************************************************\n";
 }
@@ -900,7 +901,6 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 				$yy = $subInputs[$ii][$jj] - 100;
 				for($kk=0;$kk<$searchCnt;$kk++)
 				{
-#FIX
 					if(($partUsed[$yy] != 1) && ($subInputsType[$ii][$jj] ne "ADC") && ($partType[$yy] ne "DELAY"))
 					{
 						$allADC = 0;
@@ -1006,8 +1006,23 @@ print EPICS "\nEPICS CDS_EPICS dspSpace coeffSpace epicsSpace\n\n";
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if($partType[$ii] eq "MATRIX") {
-		print EPICS "MATRIX $xpartName[$ii]_ $partOutCnt[$ii]x$partInCnt[$ii] $systemName\.$xpartName[$ii]\n";
-		print OUTH "\tfloat $xpartName[$ii]\[$partOutCnt[$ii]\]\[$partInCnt[$ii]\];\n";
+		for($qq=0;$qq<$partOutCnt[$ii];$qq++)
+		{
+			$portUsed[$qq] = 0;
+		}
+		$matOuts[$ii] = 0;
+		for($qq=0;$qq<$partOutCnt[$ii];$qq++)
+		{
+			$fromPort = $partOutputPortUsed[$ii][$qq];
+			if($portUsed[$fromPort] == 0)
+			{
+				$portUsed[$fromPort] = 1;
+				$matOuts[$ii] ++;
+			}
+		}
+		print "$xpartName[$ii] has $matOuts[$ii] Outputs\n";
+		print EPICS "MATRIX $xpartName[$ii]_ $matOuts[$ii]x$partInCnt[$ii] $systemName\.$xpartName[$ii]\n";
+		print OUTH "\tfloat $xpartName[$ii]\[$matOuts[$ii]\]\[$partInCnt[$ii]\];\n";
 	}
 	if($partType[$ii] eq "RAMP_SW") {
 		print OUTH "\tint $xpartName[$ii];\n";
@@ -1111,7 +1126,7 @@ print OUT "{\n\nint ii,jj;\n\n";
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if($partType[$ii] eq "MATRIX") {
-		print OUT "double $xpartName[$ii]\[$partOutCnt[$ii]\]\[$partInCnt[$ii]\];\n";
+		print OUT "double $xpartName[$ii]\[$matOuts[$ii]\]\[$partInCnt[$ii]\];\n";
 	}
 	if($partType[$ii] eq "SUM") {
 		$port = $partInCnt[$ii];
@@ -1411,6 +1426,13 @@ for($xx=0;$xx<$processCnt;$xx++)
 				$chan = $partInputPort[$mm][$qq];
 				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * dWord\[$card\]\[$chan\]";
 				#print "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * dWord\[$card\]\[$chan\]\n";
+				$done = 1;
+			}
+			if($fromType eq "EPICS_OUTPUT")
+			{
+				#print "Found MATRIX with EPICS input on $qq\n";
+				$card = $partInNum[$mm][$qq];
+				print OUT "\tpLocalEpics->$systemName\.$xpartName[$mm]\[ii\]\[$qq\] * pLocalEpics->$systemName\.$xpartName[$card]";
 				$done = 1;
 			}
 			if ($toType eq "EPICS_INPUT")
