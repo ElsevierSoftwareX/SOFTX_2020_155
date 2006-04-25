@@ -25,13 +25,13 @@ program daqConfig
 %% #include <param.h>
 
 
-%% static char *daqConfig_st_cvsid = "$Id: daqConfig.st,v 1.2 2006/03/16 00:01:05 aivanov Exp $";
+%% static char *daqConfig_st_cvsid = "$Id: daqConfig.st,v 1.3 2006/04/25 16:34:46 rolf Exp $";
 
 int reload;
 assign reload to "{ifo}:DAQ-{sys}_LOAD_CONFIG";
 
-int msg;
-assign msg to "{ifo}:DAQ-{sys}_MSG";
+int dcmsg;
+assign dcmsg to "{ifo}:DAQ-{sys}_MSG";
 
 int chnCnt;
 assign chnCnt to "{ifo}:DAQ-{sys}_CHAN_CNT";
@@ -83,7 +83,7 @@ state init
 %%	   copy_info();
 %%	   printf("%s%s daqConfig info is at rfm offset 0x%x\n", ifo, sys, ((char *)info) - ((char *)base));
 %%	   info -> reconfig = 1;
-%%	   msg = infoTmp.configFileCRC;
+%%	   dcmsg = infoTmp.configFileCRC;
 %%	   chnCnt = infoTmp.numChans;
 %%	   dataSize = 0;
 %%	   { int i; 
@@ -93,11 +93,11 @@ state init
 %%	   }
 %%	   dataSize /= 1024;
 %%	} else {
-%%	   msg = 0xffffffff;
+%%	   dcmsg = 0xffffffff;
 %%	   chnCnt = 0;
 %%	   dataSize = 0;
 %%	}
-        pvPut(msg);
+        pvPut(dcmsg);
         pvPut(chnCnt);
         pvPut(dataSize);
     } state process
@@ -118,7 +118,7 @@ state process
 %%	      copy_info();
 %%	      printf("%s%s daqConfig info is at rfm offset 0x%x\n", ifo, sys, ((char *)info) - ((char *)base));
 %%	      info -> reconfig = 1;
-%%	      msg = infoTmp.configFileCRC;
+%%	      dcmsg = infoTmp.configFileCRC;
 %%	      chnCnt = infoTmp.numChans;
 %%	      dataSize = 0;
 %%	      { int i;
@@ -128,11 +128,11 @@ state process
 %%	      }
 %%	      dataSize /= 1024;
 %%	    } else {
-%%	      msg = 0xffffffff;
+%%	      dcmsg = 0xffffffff;
 %%	      chnCnt = 0;
 %%	      dataSize = 0;
 %%	    }
-            pvPut(msg);
+            pvPut(dcmsg);
             pvPut(chnCnt);
             pvPut(dataSize);
 %%	  }
