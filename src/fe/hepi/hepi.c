@@ -1,750 +1,920 @@
-/*                      -------------------                             */
-/*                                                                      */
-/*                             LIGO                                     */
-/*                                                                      */
-/*        THE LASER INTERFEROMETER GRAVITATIONAL WAVE OBSERVATORY.      */
-/*                                                                      */
-/*                     (C) The LIGO Project, 2005.                      */
-/*                                                                      */
-/*                                                                      */
-/*                                                                      */
-/* California Institute of Technology                                   */
-/* LIGO Project MS 18-34                                                */
-/* Pasadena CA 91125                                                    */
-/*                                                                      */
-/* Massachusetts Institute of Technology                                */
-/* LIGO Project MS 20B-145                                              */
-/* Cambridge MA 01239                                                   */
-/*                                                                      */
-/*                                                                      */
-/*----------------------------------------------------------------------*/
-
-#define CHAMBERS	3
-#define STS_COUNT	2
+// ******* This is a computer generated file *******
+// ******* DO NOT HAND EDIT ************************
 
 
-/**************************************************************************
-
-fir_filter - Perform fir filtering sample by sample on floats
-
-Requires array of filter coefficients and pointer to history.
-Returns one output sample for each input sample.
-
-float fir_filter(float input,float *coef,int n,float *history)
-
-    float input        new float input sample
-    float *coef        pointer to filter coefficients
-    int n              number of coefficients in filter
-    float *history     history array pointer
-
-Returns float value giving the current output.
-
-*************************************************************************/
-
-inline float fir_filter(float input,float *coef,int n,float *history)
+void feCode(double dWord[][32],	/* ADC inputs */
+		int dacOut[][16],	/* DAC outputs */
+		FILT_MOD *dspPtr,	/* Filter Mod variables */
+		COEF *dspCoeff,		/* Filter Mod coeffs */
+		CDS_EPICS *pLocalEpics)	/* EPICS variables */
 {
-    int i;
-    float *hist_ptr,*hist1_ptr,*coef_ptr;
-    float output;
 
-    hist_ptr = history;
-    hist1_ptr = hist_ptr;             /* use for history update */
-    coef_ptr = coef + n - 1;          /* point to last coef */
+int ii,jj;
 
-/* form output accumulation */
-    output = *hist_ptr++ * (*coef_ptr--);
-    for(i = 2 ; i < n ; i++) {
-        *hist1_ptr++ = *hist_ptr;            /* update history array */
-        output += (*hist_ptr++) * (*coef_ptr--);
-    }
-    output += input * (*coef_ptr);           /* input tap */
-    *hist1_ptr = input;                      /* last history */
+double bsc_hp;
+double bsc_loop_gain[8];
+float BSC_LOOP_GAIN_CALC;
+double bsc_loop_sw[16];
+double bsc_mtrx[8][8];
+double bsc_rx;
+double bsc_ry;
+double bsc_rz;
+double bsc_sum;
+double bsc_sum1;
+double bsc_sum2;
+double bsc_sum3;
+double bsc_sum4;
+double bsc_sum5;
+double bsc_sum6;
+double bsc_sum7;
+double bsc_tiltcorr_gain[8];
+float BSC_TILTCORR_GAIN_CALC;
+double bsc_tiltcorr_h1;
+double bsc_tiltcorr_h2;
+double bsc_tiltcorr_h3;
+double bsc_tiltcorr_h4;
+double bsc_tiltcorr_sw[8];
+double bsc_tiltcorr_v1;
+double bsc_tiltcorr_v2;
+double bsc_tiltcorr_v3;
+double bsc_tiltcorr_v4;
+double bsc_vp;
+double bsc_x;
+double bsc_y;
+double bsc_z;
+double bsc_act_gain[8];
+float BSC_ACT_GAIN_CALC;
+double bsc_act_h1;
+double bsc_act_h2;
+double bsc_act_h3;
+double bsc_act_h4;
+double bsc_act_sw[8];
+double bsc_act_sum;
+double bsc_act_sum1;
+double bsc_act_sum2;
+double bsc_act_sum3;
+double bsc_act_sum4;
+double bsc_act_sum5;
+double bsc_act_sum6;
+double bsc_act_sum7;
+double bsc_act_v1;
+double bsc_act_v2;
+double bsc_act_v3;
+double bsc_act_v4;
+double bsc_dc_bias_mtrx[8][6];
+double bsc_dc_bias_sw[8];
+double bsc_fir_mtrx[2][4];
+double bsc_fir_x_out;
+double bsc_fir_y_out;
+double bsc_geo_h1;
+double bsc_geo_h1e;
+double bsc_geo_h2;
+double bsc_geo_h2e;
+double bsc_geo_h3;
+double bsc_geo_h3e;
+double bsc_geo_h4;
+double bsc_geo_h4e;
+double bsc_geo_hp;
+double bsc_geo_mtrx[8][8];
+double bsc_geo_rx;
+double bsc_geo_ry;
+double bsc_geo_rz;
+double bsc_geo_sw[8];
+double bsc_geo_sum;
+double bsc_geo_sum1;
+double bsc_geo_sum2;
+double bsc_geo_sum3;
+double bsc_geo_sum4;
+double bsc_geo_sum5;
+double bsc_geo_sum6;
+double bsc_geo_sum7;
+double bsc_geo_v1;
+double bsc_geo_v1e;
+double bsc_geo_v2;
+double bsc_geo_v2e;
+double bsc_geo_v3;
+double bsc_geo_v3e;
+double bsc_geo_v4;
+double bsc_geo_v4e;
+double bsc_geo_vp;
+double bsc_geo_x;
+double bsc_geo_y;
+double bsc_geo_z;
+double bsc_pos_h1;
+double bsc_pos_h1e;
+double bsc_pos_h2;
+double bsc_pos_h2e;
+double bsc_pos_h3;
+double bsc_pos_h3e;
+double bsc_pos_h4;
+double bsc_pos_h4e;
+double bsc_pos_hp;
+double bsc_pos_mtrx[8][8];
+double bsc_pos_norm[16];
+double bsc_pos_rx;
+double bsc_pos_ry;
+double bsc_pos_rz;
+double bsc_pos_sw[8];
+double bsc_pos_sum;
+double bsc_pos_sum1;
+double bsc_pos_v1;
+double bsc_pos_v1e;
+double bsc_pos_v2;
+double bsc_pos_v2e;
+double bsc_pos_v3;
+double bsc_pos_v3e;
+double bsc_pos_v4;
+double bsc_pos_v4e;
+double bsc_pos_vp;
+double bsc_pos_x;
+double bsc_pos_y;
+double bsc_pos_z;
+double bsc_spare_fp1;
+double bsc_spare_fp2;
+double bsc_spare_rp1;
+double bsc_spare_rp2;
+double bsc_spare_rp3;
+double bsc_sts_in_mtrx[3][6];
+double bsc_sts_mtrx[8][3];
+double bsc_sts_ramp_sw[4];
+double bsc_sts_x;
+double bsc_sts_xe;
+double bsc_sts_x_rx;
+double bsc_sts_x_ry;
+double bsc_sts_y;
+double bsc_sts_ye;
+double bsc_sts_z;
+double bsc_sts_ze;
+static double delay1;
+static double delay2;
+static double delay3;
+static double delay4;
+static double delay5;
+static double delay6;
+static double delay7;
+static double delay8;
+double sts1_fir_x;
+double sts1_fir_y;
+double sts2_fir_x;
+double sts2_fir_y;
 
-    return(output);
+
+
+//Start of subsystem **************************************************
+
+// MATRIX CALC
+for(ii=0;ii<8;ii++)
+{
+bsc_dc_bias_mtrx[1][ii] = 
+	pLocalEpics->sei.BSC_DC_BIAS_MTRX[ii][0] * pLocalEpics->sei.BSC_DC_BIAS_1 +
+	pLocalEpics->sei.BSC_DC_BIAS_MTRX[ii][1] * pLocalEpics->sei.BSC_DC_BIAS_2 +
+	pLocalEpics->sei.BSC_DC_BIAS_MTRX[ii][2] * pLocalEpics->sei.BSC_DC_BIAS_3 +
+	pLocalEpics->sei.BSC_DC_BIAS_MTRX[ii][3] * pLocalEpics->sei.BSC_DC_BIAS_4 +
+	pLocalEpics->sei.BSC_DC_BIAS_MTRX[ii][4] * pLocalEpics->sei.BSC_DC_BIAS_5 +
+	pLocalEpics->sei.BSC_DC_BIAS_MTRX[ii][5] * pLocalEpics->sei.BSC_DC_BIAS_6;
+}
+
+// MULTI_SW
+bsc_dc_bias_sw[0] = bsc_dc_bias_mtrx[1][0];
+bsc_dc_bias_sw[1] = bsc_dc_bias_mtrx[1][1];
+bsc_dc_bias_sw[2] = bsc_dc_bias_mtrx[1][2];
+bsc_dc_bias_sw[3] = bsc_dc_bias_mtrx[1][3];
+bsc_dc_bias_sw[4] = bsc_dc_bias_mtrx[1][4];
+bsc_dc_bias_sw[5] = bsc_dc_bias_mtrx[1][5];
+bsc_dc_bias_sw[6] = bsc_dc_bias_mtrx[1][6];
+bsc_dc_bias_sw[7] = bsc_dc_bias_mtrx[1][7];
+if(pLocalEpics->sei.BSC_DC_BIAS_SW == 0)
+{
+	for(ii=0;ii< 8;ii++) bsc_dc_bias_sw[ii] = 0.0;
 }
 
 
-/* ***********************************************************************************  */
-/* seiwd()                                                                              */
-/* Main SEI watchdog routine.                                                           */
-/* ***********************************************************************************  */
 
-inline int seiwd(float input_sensors[], int max_var[])
+//End of subsystem **************************************************
+
+
+
+//Start of subsystem **************************************************
+
+// FILTER MODULE
+bsc_spare_fp1 = filterModuleD(dspPtr,dspCoeff,BSC_SPARE_FP1,dWord[0][26],0);
+
+// FILTER MODULE
+bsc_spare_fp2 = filterModuleD(dspPtr,dspCoeff,BSC_SPARE_FP2,dWord[0][27],0);
+
+// FILTER MODULE
+bsc_spare_rp1 = filterModuleD(dspPtr,dspCoeff,BSC_SPARE_RP1,dWord[0][28],0);
+
+// FILTER MODULE
+bsc_spare_rp2 = filterModuleD(dspPtr,dspCoeff,BSC_SPARE_RP2,dWord[0][29],0);
+
+// FILTER MODULE
+bsc_spare_rp3 = filterModuleD(dspPtr,dspCoeff,BSC_SPARE_RP3,dWord[0][30],0);
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_WIT_1_SENSOR = dWord[0][16];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_WIT_2_SENSOR = dWord[0][17];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_WIT_3_SENSOR = dWord[0][18];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_WIT_4_SENSOR = dWord[0][19];
+
+
+
+// EPICS_OUTPUT
+pLocalEpics->sei.STS1_X = dWord[0][23];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.STS1_Y = dWord[0][24];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.STS1_Z = dWord[0][25];
+
+
+
+// EPICS_OUTPUT
+pLocalEpics->sei.STS2_X = dWord[1][23];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.STS2_Y = dWord[1][24];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.STS2_Z = dWord[1][25];
+
+
+//End of subsystem **************************************************
+
+
+
+//Start of subsystem **************************************************
+
+// MATRIX CALC
+for(ii=0;ii<2;ii++)
 {
-int watchdog_byte;
-
-        watchdog_byte = 0;
-
-        /* Compare the STS sensor inputs */
-        if(input_sensors[0] > max_var[0]) watchdog_byte |= 0x1;         /* Bit 0 */
-        if(input_sensors[1] > max_var[0]) watchdog_byte |= 0x2;         /* Bit 1 */
-        if(input_sensors[2] > max_var[0]) watchdog_byte |= 0x4;         /* Bit 2 */
-
-        /* Compare the POS V sensor inputs */
-        if(input_sensors[3] > max_var[1]) watchdog_byte |= 0x8;         /* Bit 3 */
-        if(input_sensors[4] > max_var[1]) watchdog_byte |= 0x10;        /* Bit 4 */
-        if(input_sensors[5] > max_var[1]) watchdog_byte |= 0x20;        /* Bit 5 */
-        if(input_sensors[6] > max_var[1]) watchdog_byte |= 0x40;        /* Bit 6 */
-
-        /* Compare the POS H sensor inputs */
-        if(input_sensors[7] > max_var[2]) watchdog_byte  |= 0x80;       /* Bit 7 */
-        if(input_sensors[8] > max_var[2]) watchdog_byte  |= 0x100;      /* Bit 8 */
-        if(input_sensors[9] > max_var[2]) watchdog_byte  |= 0x200;      /* Bit 9 */
-        if(input_sensors[10] > max_var[2]) watchdog_byte |= 0x400;      /* Bit 10 */
-
-        /* Compare the GEO V sensor inputs */
-        if(input_sensors[11] > max_var[3]) watchdog_byte |= 0x10000;    /* Bit 16 */
-        if(input_sensors[12] > max_var[3]) watchdog_byte |= 0x20000;    /* Bit 17 */
-        if(input_sensors[13] > max_var[3]) watchdog_byte |= 0x40000;    /* Bit 18 */
-        if(input_sensors[14] > max_var[3]) watchdog_byte |= 0x80000;    /* Bit 19 */
-
-        /* Compare the GEO H sensor inputs */
-        if(input_sensors[15] > max_var[4]) watchdog_byte |= 0x100000;   /* Bit 20 */
-        if(input_sensors[16] > max_var[4]) watchdog_byte |= 0x200000;   /* Bit 21 */
-        if(input_sensors[17] > max_var[4]) watchdog_byte |= 0x400000;   /* Bit 22 */
-        if(input_sensors[18] > max_var[4]) watchdog_byte |= 0x800000;   /* Bit 23 */
-
-        return(watchdog_byte);
+bsc_fir_mtrx[1][ii] = 
+	pLocalEpics->sei.BSC_FIR_MTRX[ii][0] * sts1_fir_x +
+	pLocalEpics->sei.BSC_FIR_MTRX[ii][1] * sts1_fir_y +
+	pLocalEpics->sei.BSC_FIR_MTRX[ii][2] * sts2_fir_x +
+	pLocalEpics->sei.BSC_FIR_MTRX[ii][3] * sts2_fir_y;
 }
 
-inline float gainRamp(float gainReq, int rampTime, int id, int sw)
+// FILTER MODULE
+bsc_fir_x_out = filterModuleD(dspPtr,dspCoeff,BSC_FIR_X_OUT,bsc_fir_mtrx[1][0],0);
+
+// FILTER MODULE
+bsc_fir_y_out = filterModuleD(dspPtr,dspCoeff,BSC_FIR_Y_OUT,bsc_fir_mtrx[1][1],0);
+
+
+//End of subsystem **************************************************
+
+
+
+//Start of subsystem **************************************************
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_GEO_SV1 = dWord[0][4];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_GEO_SV2 = dWord[0][5];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_GEO_SV3 = dWord[0][6];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_GEO_SV4 = dWord[0][7];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_GEO_SH1 = dWord[0][0];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_GEO_SH2 = dWord[0][1];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_GEO_SH3 = dWord[0][2];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_GEO_SH4 = dWord[0][3];
+
+// SUM
+bsc_geo_sum = pLocalEpics->sei.BSC_GEO_SV1 + delay1;
+
+// SUM
+bsc_geo_sum1 = pLocalEpics->sei.BSC_GEO_SV2 + delay2;
+
+// SUM
+bsc_geo_sum2 = pLocalEpics->sei.BSC_GEO_SV3 + delay3;
+
+// SUM
+bsc_geo_sum3 = pLocalEpics->sei.BSC_GEO_SV4 + delay4;
+
+// SUM
+bsc_geo_sum4 = pLocalEpics->sei.BSC_GEO_SH1 + delay5;
+
+// SUM
+bsc_geo_sum5 = pLocalEpics->sei.BSC_GEO_SH2 + delay6;
+
+// SUM
+bsc_geo_sum6 = pLocalEpics->sei.BSC_GEO_SH3 + delay7;
+
+// SUM
+bsc_geo_sum7 = pLocalEpics->sei.BSC_GEO_SH4 + delay8;
+
+// FILTER MODULE
+bsc_geo_v1 = filterModuleD(dspPtr,dspCoeff,BSC_GEO_V1,bsc_geo_sum,0);
+
+// FILTER MODULE
+bsc_geo_v1e = filterModuleD(dspPtr,dspCoeff,BSC_GEO_V1E,bsc_geo_sum,0);
+
+// FILTER MODULE
+bsc_geo_v2 = filterModuleD(dspPtr,dspCoeff,BSC_GEO_V2,bsc_geo_sum1,0);
+
+// FILTER MODULE
+bsc_geo_v2e = filterModuleD(dspPtr,dspCoeff,BSC_GEO_V2E,bsc_geo_sum1,0);
+
+// FILTER MODULE
+bsc_geo_v3 = filterModuleD(dspPtr,dspCoeff,BSC_GEO_V3,bsc_geo_sum2,0);
+
+// FILTER MODULE
+bsc_geo_v3e = filterModuleD(dspPtr,dspCoeff,BSC_GEO_V3E,bsc_geo_sum2,0);
+
+// FILTER MODULE
+bsc_geo_v4 = filterModuleD(dspPtr,dspCoeff,BSC_GEO_V4,bsc_geo_sum3,0);
+
+// FILTER MODULE
+bsc_geo_v4e = filterModuleD(dspPtr,dspCoeff,BSC_GEO_V4E,bsc_geo_sum3,0);
+
+// FILTER MODULE
+bsc_geo_h1 = filterModuleD(dspPtr,dspCoeff,BSC_GEO_H1,bsc_geo_sum4,0);
+
+// FILTER MODULE
+bsc_geo_h1e = filterModuleD(dspPtr,dspCoeff,BSC_GEO_H1E,bsc_geo_sum4,0);
+
+// FILTER MODULE
+bsc_geo_h2 = filterModuleD(dspPtr,dspCoeff,BSC_GEO_H2,bsc_geo_sum5,0);
+
+// FILTER MODULE
+bsc_geo_h2e = filterModuleD(dspPtr,dspCoeff,BSC_GEO_H2E,bsc_geo_sum5,0);
+
+// FILTER MODULE
+bsc_geo_h3 = filterModuleD(dspPtr,dspCoeff,BSC_GEO_H3,bsc_geo_sum6,0);
+
+// FILTER MODULE
+bsc_geo_h3e = filterModuleD(dspPtr,dspCoeff,BSC_GEO_H3E,bsc_geo_sum6,0);
+
+// FILTER MODULE
+bsc_geo_h4 = filterModuleD(dspPtr,dspCoeff,BSC_GEO_H4,bsc_geo_sum7,0);
+
+// FILTER MODULE
+bsc_geo_h4e = filterModuleD(dspPtr,dspCoeff,BSC_GEO_H4E,bsc_geo_sum7,0);
+
+// MATRIX CALC
+for(ii=0;ii<8;ii++)
 {
+bsc_geo_mtrx[1][ii] = 
+	pLocalEpics->sei.BSC_GEO_MTRX[ii][0] * bsc_geo_v1 +
+	pLocalEpics->sei.BSC_GEO_MTRX[ii][1] * bsc_geo_v2 +
+	pLocalEpics->sei.BSC_GEO_MTRX[ii][2] * bsc_geo_v3 +
+	pLocalEpics->sei.BSC_GEO_MTRX[ii][3] * bsc_geo_v4 +
+	pLocalEpics->sei.BSC_GEO_MTRX[ii][4] * bsc_geo_h1 +
+	pLocalEpics->sei.BSC_GEO_MTRX[ii][5] * bsc_geo_h2 +
+	pLocalEpics->sei.BSC_GEO_MTRX[ii][6] * bsc_geo_h3 +
+	pLocalEpics->sei.BSC_GEO_MTRX[ii][7] * bsc_geo_h4;
+}
 
-static int dir[4][10];
-static float inc[4][10];
-static float gainFinal[4][10];
-static float gainOut[4][10];
+// FILTER MODULE
+bsc_geo_x = filterModuleD(dspPtr,dspCoeff,BSC_GEO_X,bsc_geo_mtrx[1][0],0);
 
-        if(gainFinal[sw][id] != gainReq)
-        {
-                inc[sw][id] = rampTime * 2048;
-                inc[sw][id] = (gainReq - gainOut[sw][id]) / inc[sw][id];
-                if(inc[sw][id] <= 0.0) dir[sw][id] = 0;
-                else dir[sw][id] = 1;
-                gainFinal[sw][id] = gainReq;
-        }
-        if(gainFinal[sw][id] == gainOut[sw][id])
-        {
-                return(gainOut[sw][id]);
-        }
-        gainOut[sw][id] += inc[sw][id];
-        if((dir[sw][id] == 1) && (gainOut[sw][id] >= gainFinal[sw][id]))
-                gainOut[sw][id] = gainFinal[sw][id];
-        if((dir[sw][id] == 0) && (gainOut[sw][id] <= gainFinal[sw][id]))
-                gainOut[sw][id] = gainFinal[sw][id];
-        return(gainOut[sw][id]);
+// FILTER MODULE
+bsc_geo_y = filterModuleD(dspPtr,dspCoeff,BSC_GEO_Y,bsc_geo_mtrx[1][1],0);
+
+// FILTER MODULE
+bsc_geo_z = filterModuleD(dspPtr,dspCoeff,BSC_GEO_Z,bsc_geo_mtrx[1][2],0);
+
+// FILTER MODULE
+bsc_geo_rz = filterModuleD(dspPtr,dspCoeff,BSC_GEO_RZ,bsc_geo_mtrx[1][5],0);
+
+// FILTER MODULE
+bsc_geo_vp = filterModuleD(dspPtr,dspCoeff,BSC_GEO_VP,bsc_geo_mtrx[1][6],0);
+
+// FILTER MODULE
+bsc_geo_hp = filterModuleD(dspPtr,dspCoeff,BSC_GEO_HP,bsc_geo_mtrx[1][7],0);
+
+// FILTER MODULE
+bsc_geo_rx = filterModuleD(dspPtr,dspCoeff,BSC_GEO_RX,bsc_geo_mtrx[1][3],0);
+
+// FILTER MODULE
+bsc_geo_ry = filterModuleD(dspPtr,dspCoeff,BSC_GEO_RY,bsc_geo_mtrx[1][4],0);
+
+// MULTI_SW
+bsc_geo_sw[0] = bsc_geo_x;
+bsc_geo_sw[1] = bsc_geo_y;
+bsc_geo_sw[2] = bsc_geo_z;
+bsc_geo_sw[3] = bsc_geo_rx;
+bsc_geo_sw[4] = bsc_geo_ry;
+bsc_geo_sw[5] = bsc_geo_rz;
+bsc_geo_sw[6] = bsc_geo_vp;
+bsc_geo_sw[7] = bsc_geo_hp;
+if(pLocalEpics->sei.BSC_GEO_SW == 0)
+{
+	for(ii=0;ii< 8;ii++) bsc_geo_sw[ii] = 0.0;
 }
 
 
-/* ******************************************************************** */
-/* Main HEPI control thread						*/
-/* ******************************************************************** */
-void feCode(double adc[][32],int dac[][16],FILT_MOD *dsp,COEF *dspCoeff,CDS_EPICS *pLocalEpics)
+
+//End of subsystem **************************************************
+
+
+
+//Start of subsystem **************************************************
+
+// MATRIX CALC
+for(ii=0;ii<3;ii++)
 {
-int ii,jj,kk;			/* Loop counters.			*/
-int binaryOut;			/* Output to xycom220 module.		*/
-static int firNum;
-float posSen[4][8];		/* Position sensors from ICS110B mods	*/
-float geoSen[4][8];		/* Geophone sensors from Pentek mods	*/
-double pos[8];
-double posOut[8];
-double geo[8];
-double geoTilt[4][8];
-double geoOut[8];
-double modal[8];
-double imodalXform[8];
-double dcmXform[8];
-double actIn[8];
-double actOut[8];
-double stsXRY[4];
-double stsYRX[4];
-float wdVal[4][24];		/* Values to compare to WD limits (pre-filters)	*/
-int wdWord[4][2];		/* WD output word, indicates cause of trips.	*/
-float wdValFilt[4][24];		/* Values to compare to WD limits (post-filters) */
-float wdValFiltMax[4][24];	/* Values to compare to WD limits (post-filters) */
-int wdLimit[4][6];		/* WD comparison limits (pre-filters).		*/
-int wdLimitF[4][6];		/* WD comparison limits (post-filters).         */
-int wdReset[4];			/* WD Resets.					*/
-static int wdTrip[4];		/* WD Trip indicators.				*/
-static int wdTimer[4];		/* WD Trip indicators.				*/
-float geoOutAvg[4][2][3];
-float tcGain[4];
-float outGain[4];
-float loopGain[4];
-static float ramp[4];
-float firDs;
-float firUs;
-float firComp;
-static int cycle;
-static float firOutput[2][2][32];
-static float firHistory[4][32][1024];
-double fmInput;
-int chamber;
-int chamSize;
-float stsIn[6];
-float stsOut[6];
-float sts2pos[4][8];            /* STS input to sts2pos matrix          */
-static double eOut;
-static double tcMatOut[8];
-static double tidal[3];
-static float wdSenCounter[4][24];
-static double rmsTmp;
-static int output;
-static int hepiMain[4];
-static int hepiTilt[4];
-static int hepiLoop[4];
-static float firGain[2][2];
-static float firOffset[2][2];
-static float wdGain[4];
-static float wdTarget[4];
+bsc_sts_in_mtrx[1][ii] = 
+	pLocalEpics->sei.BSC_STS_IN_MTRX[ii][0] * pLocalEpics->sei.STS1_X +
+	pLocalEpics->sei.BSC_STS_IN_MTRX[ii][1] * pLocalEpics->sei.STS1_Y +
+	pLocalEpics->sei.BSC_STS_IN_MTRX[ii][2] * pLocalEpics->sei.STS1_Z +
+	pLocalEpics->sei.BSC_STS_IN_MTRX[ii][3] * dWord[1][23] +
+	pLocalEpics->sei.BSC_STS_IN_MTRX[ii][4] * dWord[1][24] +
+	pLocalEpics->sei.BSC_STS_IN_MTRX[ii][5] * dWord[1][25];
+}
 
-#if 0
-	/* Read/Write Xycom modules. */
-	/* NOTE: HEPI 1 does not contain these modules */
-	if(intrProcessCycle == 0) 
-	{
-	  /* Read Xycom 212 binary inputs (Pump station status) 	*/
-	  pLocalEpics->comms[coff].hepiBinary[0] = (xycom212[0]->lowValue & 0xffff);
-	  /* Write Xycom 220 binary outputs (STS control bits)	*/
-	  binaryOut = pLocalEpics->comms[coff].hepiSwitch[9] +
-		pLocalEpics->comms[coff].hepiSwitch[10] * 2 +
-		pLocalEpics->comms[coff].hepiSwitch[11] * 4 +
-		pLocalEpics->comms[coff].hepiSwitch[12] * 8;
-	  xycom[0]->lowValue = (binaryOut & 0xffff);
-	  xycom[0]->hiValue = ((binaryOut >> 16) & 0xffff);
-	}
-#endif
+// FILTER MODULE
+bsc_sts_y = filterModuleD(dspPtr,dspCoeff,BSC_STS_Y,bsc_sts_in_mtrx[1][1],0);
 
-	for(ii=0;ii<CHAMBERS;ii++)
-	{
-	  /* Do ramp calcs for switching to/from STS FIR/STS IIR */
-	  if(pLocalEpics->hepi[ii].hepiSwitch[5] == 0)
-	  {
-	    ramp[ii] += 1.0/pLocalEpics->hepi[ii].rampTime;
-	    if(ramp[ii] > 1.0) ramp[ii] = 1.0;
-	  }
-	  else
-	  {
-	    ramp[ii] -= 1.0/pLocalEpics->hepi[ii].rampTime;
-	    if(ramp[ii] < 0.0) ramp[ii] = 0.0;
-	  }
-	  
-	  /* Compute tilt correction gain */
-	  tcGain[ii] = gainRamp(pLocalEpics->hepi[ii].tcGain,
-			pLocalEpics->hepi[ii].tramp[0], ii,0);
+// FILTER MODULE
+bsc_sts_ye = filterModuleD(dspPtr,dspCoeff,BSC_STS_YE,bsc_sts_in_mtrx[1][1],0);
 
-	  if(tcGain[ii] == pLocalEpics->hepi[ii].tcGain)
-			pLocalEpics->hepi[ii].tramp[3] &= ~0x1;
-	  else pLocalEpics->hepi[ii].tramp[3] |= 0x1;
+// FILTER MODULE
+bsc_sts_x = filterModuleD(dspPtr,dspCoeff,BSC_STS_X,bsc_sts_in_mtrx[1][0],0);
 
-	  /* Compute loop gain */
-	  loopGain[ii] = gainRamp(pLocalEpics->hepi[ii].loopGain,
-			pLocalEpics->hepi[ii].tramp[1], ii,1);
+// FILTER MODULE
+bsc_sts_xe = filterModuleD(dspPtr,dspCoeff,BSC_STS_XE,bsc_sts_in_mtrx[1][0],0);
 
-	  if(loopGain[ii] == pLocalEpics->hepi[ii].loopGain)
-			pLocalEpics->hepi[ii].tramp[3] &= ~0x2;
-	  else pLocalEpics->hepi[ii].tramp[3] |= 2;
+// FILTER MODULE
+bsc_sts_z = filterModuleD(dspPtr,dspCoeff,BSC_STS_Z,bsc_sts_in_mtrx[1][2],0);
 
-	  /* Compute output gain */
-	  outGain[ii] = gainRamp(pLocalEpics->hepi[ii].gain,
-			pLocalEpics->hepi[ii].tramp[2], ii,2);
+// FILTER MODULE
+bsc_sts_ze = filterModuleD(dspPtr,dspCoeff,BSC_STS_ZE,bsc_sts_in_mtrx[1][2],0);
 
-	  if(outGain[ii] == pLocalEpics->hepi[ii].gain)
-			pLocalEpics->hepi[ii].tramp[3] &= ~0x4;
-	  else pLocalEpics->hepi[ii].tramp[3] |= 4;
-	  
-	  /* Compute STS watchdog gain */
-	  wdGain[ii] = gainRamp(wdTarget[ii],10,ii,3);
-	}
+// RAMP_SW
+bsc_sts_ramp_sw[0] = bsc_sts_x;
+bsc_sts_ramp_sw[1] = bsc_fir_x_out;
+bsc_sts_ramp_sw[2] = bsc_sts_y;
+bsc_sts_ramp_sw[3] = bsc_fir_y_out;
+if(pLocalEpics->sei.BSC_STS_RAMP_SW == 0)
+{
+	bsc_sts_ramp_sw[1] = bsc_sts_ramp_sw[2];
+}
+else
+{
+	bsc_sts_ramp_sw[0] = bsc_sts_ramp_sw[1];
+	bsc_sts_ramp_sw[1] = bsc_sts_ramp_sw[3];
+}
 
 
-	  /* ***************************************************************
-		ADC Channel assignments:
-		0 - GEO H1		16 - Witness 1
-		1 - GEO H2		17 - Witness 2
-		2 - GEO H3		18 - Witness 3
-		3 - GEO H4		19 - Witness 4
-		4 - GEO V1		20 - STS Mass Pos U
-		5 - GEO V2		21 - STS Mass Pos V
-		6 - GEO V3		22 - STS Mass Pos W
-		7 - GEO V4		23 - STS X
-		8 - POS H1		24 - STS Y
-		9 - POS H2		25 - STS Z
-	       10 - POS H3		26 - Front panel spare 1
-	       11 - POS H4		27 - Front panel spare 2
-	       12 - POS V1		28 - Rear panel spare 1
-	       13 - POS V2		29 - Rear panel spare 2
-	       14 - POS V3		30 - Rear panel spare 3
-	       15 - POS V4		31 - One PPS
-	  ***************************************************************** */
+// FILTER MODULE
+bsc_sts_x_ry = filterModuleD(dspPtr,dspCoeff,BSC_STS_X_RY,bsc_sts_ramp_sw[1],0);
+
+// MATRIX CALC
+for(ii=0;ii<8;ii++)
+{
+bsc_sts_mtrx[1][ii] = 
+	pLocalEpics->sei.BSC_STS_MTRX[ii][0] * bsc_sts_ramp_sw[0] +
+	pLocalEpics->sei.BSC_STS_MTRX[ii][1] * bsc_sts_ramp_sw[1] +
+	pLocalEpics->sei.BSC_STS_MTRX[ii][2] * bsc_sts_z;
+}
+
+// FILTER MODULE
+bsc_sts_x_rx = filterModuleD(dspPtr,dspCoeff,BSC_STS_X_RX,bsc_sts_ramp_sw[0],0);
 
 
-	for(ii=0;ii<STS_COUNT;ii++)
-	{
-	   kk = ii * 16;
-	   pLocalEpics->sts[ii].stsIn[0] = adc[ii][23];
-	   pLocalEpics->sts[ii].stsIn[1] = adc[ii][24];
-	   pLocalEpics->sts[ii].stsIn[2] = adc[ii][25];
-	}
-	for(ii=0;ii<CHAMBERS;ii++)
-	{
-		for(kk=0;kk<8;kk++) geoSen[ii][kk] = adc[ii][kk];
-		for(kk=0;kk<8;kk++) posSen[ii][kk] = adc[ii][kk+8];
-	}
-	for(ii=0;ii<STS_COUNT;ii++)
-	{
-	   for(jj=0;jj<2;jj++)
-	   {
-		   kk = jj + ii * 6;
-		   /* Run FIR Downsample and compensation filters ***************** */
-		   /* Run downsample filter */
-		   firDs = filterModuleD(dsp,dspCoeff,FIR_DF_X1+kk,pLocalEpics->sts[ii].stsIn[jj],0);
-
-		   /* Add in fir filter offset */
-		   firDs += firOffset[ii][jj];
-
-		   /* Run fir compensation filter */
-		   firComp = filterModuleD(dsp,dspCoeff,FIR_CF_X1+kk,pLocalEpics->sts[ii].stsIn[jj],0);
-
-		   /* Run PFIR at downsample 64Hz ********************************** */
-		   if((cycle % 32) == 0)
-		   {
-			firNum = (cycle / 32) % 32;
-			firOutput[ii][jj][firNum] = 
-				fir_filter(firDs, &firCoeff[0], FIR_TAPS, firHistory[ii*2+jj][firNum]);
-		   }
-
-		   /* Run upsample filter and output sum of upsample and comp filters ******************** */
-		   /* Load fir upsampling filter w/output FIR * FIR gain setting */
-		   fmInput = firOutput[ii][jj][firNum] * firGain[ii][jj];
-		   /* Run fir upsampling filter */
-		   firUs = filterModuleD(dsp,dspCoeff,FIR_UF_X1+kk,fmInput, 0);
-
-		   /* Output upsample and comp filter results to RFM */
-		   pLocalEpics->sts[ii].stsOut[jj] = (float) (firUs + firComp);
-   	   }
-
-	}
-
-	for(chamber=0;chamber<CHAMBERS;chamber++)
-	{
-	  chamSize = CHAM_FILT * chamber;
-	  for(ii=0;ii<3;ii++)
-	  {
-		stsIn[ii] = pLocalEpics->sts[0].stsIn[ii] * pLocalEpics->hepi[chamber].sts_in_matrix[0][ii] +
-			    pLocalEpics->sts[1].stsIn[ii] * pLocalEpics->hepi[chamber].sts_in_matrix[1][ii];
-	  }
-          /* STS Sensor Filtering */
-          for(ii=0;ii<3;ii++)
-          {
-          	kk = ii + STS_X + chamSize;
-          	stsOut[ii] = filterModuleD(dsp,dspCoeff,kk,stsIn[ii], 0);
-		wdVal[chamber][ii] = stsIn[ii];
-		if(wdVal[chamber][ii] < 0.0) wdVal[chamber][ii] *= -1;
-		if((wdVal[chamber][ii] > 32767) || (wdVal[chamber][ii] == 0))
-			wdSenCounter[chamber][ii] ++;
-          	kk = ii + STS_XE + chamSize;
-		eOut = filterModuleD(dsp,dspCoeff,kk,stsIn[ii], 0);
-		if(eOut < 0.0) eOut *= -1;
-		wdValFilt[chamber][ii] = eOut;
-		if(wdValFilt[chamber][ii] > wdValFiltMax[chamber][ii])
-                	wdValFiltMax[chamber][ii] = wdValFilt[chamber][ii];
-          }
-
-          /* Max Vel Filtering */
-	  /* Function deleted but set switch for continuity */
-          pLocalEpics->hepi[chamber].hepiBinary[1] |= 0x1;  /* Enable ff by default         */
-
-          /* Filter the outputs of the FIR filter path on an individual chamber basis.
-           Only STS X and Y go through FIR filters.                                             */
-          for(ii=0;ii<2;ii++)
-          {
-		kk = ii + FIR_X_OUT + chamSize;
-		/* Matrix in outputs from both STS2 FIR filters */
-		fmInput =
-			pLocalEpics->sts[0].stsOut[ii] * pLocalEpics->hepi[chamber].sts_in_matrix[0][ii+3] +
-			pLocalEpics->sts[1].stsOut[ii] * pLocalEpics->hepi[chamber].sts_in_matrix[1][ii+3];
-		stsOut[ii+3] = filterModuleD(dsp,dspCoeff,kk,fmInput, 0);
-		stsOut[ii+3] *= wdGain[chamber];
-          }
-
-          /* Added STSX>RY and STSY>RX filtering */
-          fmInput = (stsOut[0] * ramp[chamber] + stsOut[3] * (1 - ramp[chamber]));
-          stsXRY[chamber] = filterModuleD(dsp,dspCoeff,STS_X_RY+chamSize,fmInput,0);
-          fmInput = (stsOut[1] * ramp[chamber] + stsOut[4] * (1 - ramp[chamber]));
-          stsYRX[chamber] = filterModuleD(dsp,dspCoeff,STS_Y_RX+chamSize,fmInput,0);
-
-          /* STS to Position Xform */
-          /* The switching between using the STS IIR filter outputs or the STS FIR filter outputs
-             has a ramping feature, included in the matrix calc below.                            */
-          for(ii=0;ii<8;ii++)
-          {
-            sts2pos[chamber][ii] =
-                ((stsOut[0] * ramp[chamber] + stsOut[3] * (1 - ramp[chamber])) *
-                	pLocalEpics->hepi[chamber].sts_matrix[ii][0]) +
-                ((stsOut[1] * ramp[chamber] + stsOut[4] * (1 - ramp[chamber])) *
-                	pLocalEpics->hepi[chamber].sts_matrix[ii][1]) +
-                (stsOut[2] * pLocalEpics->hepi[chamber].sts_matrix[ii][2]);
-          }
-
-          /* Position Filtering *************************************************** */
-          for(ii=0;ii<8;ii++)
-          {
-		kk = ii+chamSize;
-		pos[ii] = filterModuleD(dsp,dspCoeff,kk,posSen[chamber][ii],0);
-		  wdVal[chamber][ii+3] = posSen[chamber][ii];
-		  if(wdVal[chamber][ii+3] < 0.0) wdVal[chamber][ii+3] *= -1;
-		  if((wdVal[chamber][ii+3] > 32766) || (wdVal[chamber][ii+3] == 0))
-			wdSenCounter[chamber][ii+3] ++;
-		  kk = kk + POS_V1E;
-		  eOut = (float)filterModuleD(dsp,dspCoeff,kk,posSen[chamber][ii], 0);
-		  if(eOut < 0.0) eOut *= -1;
-		  wdValFilt[chamber][ii+3] = eOut;
-		  if(wdValFilt[chamber][ii+3] > wdValFiltMax[chamber][ii+3])
-			wdValFiltMax[chamber][ii+3] = wdValFilt[chamber][ii+3];
-          }
-          /* Tilt Correction Xform ************************************************* */
-          for(ii=0;ii<8;ii++)
-          {
-             	tcMatOut[ii] =
-			(geoTilt[chamber][0] * pLocalEpics->hepi[chamber].tc_matrix[0][ii]) +
-			(geoTilt[chamber][1] * pLocalEpics->hepi[chamber].tc_matrix[1][ii]) +
-			(geoTilt[chamber][2] * pLocalEpics->hepi[chamber].tc_matrix[2][ii]) +
-			(geoTilt[chamber][3] * pLocalEpics->hepi[chamber].tc_matrix[3][ii]) +
-			(geoTilt[chamber][4] * pLocalEpics->hepi[chamber].tc_matrix[4][ii]) +
-			(geoTilt[chamber][5] * pLocalEpics->hepi[chamber].tc_matrix[5][ii]) +
-			(geoTilt[chamber][6] * pLocalEpics->hepi[chamber].tc_matrix[6][ii]) +
-			(geoTilt[chamber][7] * pLocalEpics->hepi[chamber].tc_matrix[7][ii]);
-             	/* Multiply by TC gain slider */
-           	tcMatOut[ii] *= tcGain[chamber];
-		pLocalEpics->hepi[chamber].tcMatOut[ii] = (float)tcMatOut[ii];
-           	/* Set outputs to zero if TC or Master Switch is OFF */
-           	if(hepiTilt[chamber] == 0) tcMatOut[ii] = 0.0;
-          }
-          /* Geophone Filtering *************************************************** */
-          for(ii=0;ii<8;ii++)
-          {
-          	kk = ii + GEO_V1 + chamSize;
-          	fmInput = geoSen[chamber][ii] + tcMatOut[ii];
-          	geo[ii] = filterModuleD(dsp,dspCoeff,kk,fmInput,0);
-          	wdVal[chamber][ii+11] = geoSen[chamber][ii];
-		if(wdVal[chamber][ii+11] < 0.0) wdVal[chamber][ii+11] *= -1;
-          	if((wdVal[chamber][ii+11] > 32766) || (wdVal[chamber][ii+11] == 0))
-                	wdSenCounter[chamber][ii+11] ++;
-          	kk = ii+ GEO_V1E + chamSize;
-          	pLocalEpics->hepi[chamber].geoSen[ii] = geoSen[chamber][ii];
-          	eOut = (float)filterModuleD(dsp,dspCoeff,kk,fmInput,0);
-		if(eOut < 0.0) eOut *= -1;
-          	wdValFilt[chamber][ii+11] = eOut;
-          	if(wdValFilt[chamber][ii+11] > wdValFiltMax[chamber][ii+11])
-                	wdValFiltMax[chamber][ii+11] = wdValFilt[chamber][ii+11];
-          }
-          /* Subtract out STS positions prior to Position to Modal Xform */
-          for(ii=0;ii<8;ii++) pos[ii] -= sts2pos[chamber][ii];
-
-          /* Position Local to Modal Xform ************************************** */
-          for(ii=0;ii<8;ii++)
-          {
-           posOut[ii] =
-                (pos[0] * pLocalEpics->hepi[chamber].pos_matrix[0][ii]) +
-                (pos[1] * pLocalEpics->hepi[chamber].pos_matrix[1][ii]) +
-                (pos[2] * pLocalEpics->hepi[chamber].pos_matrix[2][ii]) +
-                (pos[3] * pLocalEpics->hepi[chamber].pos_matrix[3][ii]) +
-                (pos[4] * pLocalEpics->hepi[chamber].pos_matrix[4][ii]) +
-                (pos[5] * pLocalEpics->hepi[chamber].pos_matrix[5][ii]) +
-                (pos[6] * pLocalEpics->hepi[chamber].pos_matrix[6][ii]) +
-                (pos[7] * pLocalEpics->hepi[chamber].pos_matrix[7][ii]);
-          }
+//End of subsystem **************************************************
 
 
-          /* Geophone Local to Modal Xform ************************************* */
-          for(ii=0;ii<8;ii++)
-          {
-           geoOut[ii] =
-                (geo[0] * pLocalEpics->hepi[chamber].geo_matrix[0][ii]) +
-                (geo[1] * pLocalEpics->hepi[chamber].geo_matrix[1][ii]) +
-                (geo[2] * pLocalEpics->hepi[chamber].geo_matrix[2][ii]) +
-                (geo[3] * pLocalEpics->hepi[chamber].geo_matrix[3][ii]) +
-                (geo[4] * pLocalEpics->hepi[chamber].geo_matrix[4][ii]) +
-                (geo[5] * pLocalEpics->hepi[chamber].geo_matrix[5][ii]) +
-                (geo[6] * pLocalEpics->hepi[chamber].geo_matrix[6][ii]) +
-                (geo[7] * pLocalEpics->hepi[chamber].geo_matrix[7][ii]);
-          }
 
-#if 0
-          /* Do LSC filtering ************************************************* */
-          for(ii=0;ii<3;ii++)
-          {
-		  kk = ii + LSC_X + chamSize;
-		  tidal[ii] = filterModuleD(dsp,dspCoeff,kk,lscPostMtrx[chamber][ii],0);
-          }
-#endif
+//Start of subsystem **************************************************
 
-          /* Position Modal Filtering **************************************** */
-          for(ii=0;ii<8;ii++)
-          {
-		  kk = ii+POS_X+chamSize;
-		  if(ii==3) posOut[ii] += stsYRX[chamber];
-		  if(ii==4) posOut[ii] += stsXRY[chamber];
-		  pos[ii] = filterModuleD(dsp,dspCoeff,kk,posOut[ii],0);
-          }
+// FILTER MODULE
+bsc_pos_v1 = filterModuleD(dspPtr,dspCoeff,BSC_POS_V1,dWord[0][12],0);
 
-          /* Geophone Modal Filtering **************************************** */
-          for(ii=0;ii<8;ii++)
-          {
-		  kk = ii+GEO_X+chamSize;
-		  geo[ii] = filterModuleD(dsp,dspCoeff,kk,geoOut[ii],0);
-          }
+// FILTER MODULE
+bsc_pos_v1e = filterModuleD(dspPtr,dspCoeff,BSC_POS_V1E,dWord[0][12],0);
 
-          /* Geophone RMS Filtering Part 1 *********************************** */
-          for(ii=0;ii<3;ii++)
-          {
-		  kk = ii+GEO_X_RMS+chamSize;
-		  rmsTmp = filterModuleD(dsp,dspCoeff,kk,geoOut[ii],0);
-		  if(rmsTmp > 2000) rmsTmp = 2000;
-		  if(rmsTmp < -2000) rmsTmp = 2000;
-		  rmsTmp = rmsTmp * rmsTmp;
-		  geoOutAvg[chamber][0][ii] = rmsTmp * .00005 + geoOutAvg[chamber][0][ii] * 0.99995;
-		  pLocalEpics->hepi[chamber].geoRms[ii] = lsqrt(geoOutAvg[chamber][0][ii]);
-          }
+// FILTER MODULE
+bsc_pos_v2 = filterModuleD(dspPtr,dspCoeff,BSC_POS_V2,dWord[0][13],0);
 
-          /* Geophone RMS Filtering Part 2 ********************************** */
-          for(ii=0;ii<3;ii++)
-          {
-		  kk = ii+GEO_X_RMS2+chamSize;
-		  rmsTmp = filterModuleD(dsp,dspCoeff,kk,geoOut[ii],0);
-		  if(rmsTmp > 2000) rmsTmp = 2000;
-		  if(rmsTmp < -2000) rmsTmp = 2000;
-		  rmsTmp = rmsTmp * rmsTmp;
-		  geoOutAvg[chamber][1][ii] = rmsTmp * .00005 + geoOutAvg[chamber][1][ii] * 0.99995;
-		  pLocalEpics->hepi[chamber].geoRms[ii+3] = lsqrt(geoOutAvg[chamber][1][ii]);
-          }
+// FILTER MODULE
+bsc_pos_v2e = filterModuleD(dspPtr,dspCoeff,BSC_POS_V2E,dWord[0][13],0);
 
-          /* Set pos matrix outputs to zero if switch is OFF */
-          if(!pLocalEpics->hepi[chamber].hepiSwitch[2])
-                for(ii=0;ii<8;ii++) pos[ii] = 0.0;
+// FILTER MODULE
+bsc_pos_v3 = filterModuleD(dspPtr,dspCoeff,BSC_POS_V3,dWord[0][14],0);
 
-          /* Set geo matrix outputs to zero if switch is OFF */
-          if(!pLocalEpics->hepi[chamber].hepiSwitch[3])
-                for(ii=0;ii<8;ii++) geo[ii] = 0.0;
+// FILTER MODULE
+bsc_pos_v3e = filterModuleD(dspPtr,dspCoeff,BSC_POS_V3E,dWord[0][14],0);
 
-          /*  Combined Modal Filtering */
-          for(ii=0;ii<8;ii++)
-          {
-		 kk = ii+MODAL_X+chamSize;
-		 fmInput = geo[ii] + pos[ii];
-		 /* Add LSC to MODAL X,Y,Z */
-		 if(ii<3) fmInput += tidal[ii];
-		 modal[ii] = filterModuleD(dsp,dspCoeff,kk,fmInput,0);
-          }
+// FILTER MODULE
+bsc_pos_v4 = filterModuleD(dspPtr,dspCoeff,BSC_POS_V4,dWord[0][15],0);
 
-          /* Inverse Modal Xform */
-          for(ii=0;ii<8;ii++)
-          {
-		   imodalXform[ii] =
-			(modal[0] * pLocalEpics->hepi[chamber].act_matrix[0][ii]) +
-			(modal[1] * pLocalEpics->hepi[chamber].act_matrix[1][ii]) +
-			(modal[2] * pLocalEpics->hepi[chamber].act_matrix[2][ii]) +
-			(modal[3] * pLocalEpics->hepi[chamber].act_matrix[3][ii]) +
-			(modal[4] * pLocalEpics->hepi[chamber].act_matrix[4][ii]) +
-			(modal[5] * pLocalEpics->hepi[chamber].act_matrix[5][ii]) +
-			(modal[6] * pLocalEpics->hepi[chamber].act_matrix[6][ii]) +
-			(modal[7] * pLocalEpics->hepi[chamber].act_matrix[7][ii]);
-		   pLocalEpics->hepi[chamber].modalMatOut[ii] = (float)imodalXform[ii];
-		   imodalXform[ii] *= loopGain[chamber];
-          }
-          if(!hepiLoop[chamber]) for(ii=0;ii<8;ii++) imodalXform[ii] = 0.0;
+// FILTER MODULE
+bsc_pos_v4e = filterModuleD(dspPtr,dspCoeff,BSC_POS_V4E,dWord[0][15],0);
 
-          /* DC Modal Bias Xform */
-          if(pLocalEpics->hepi[chamber].hepiSwitch[8])
-          {
-                for(ii=0;ii<8;ii++)
-                {
-                   dcmXform[ii] =
-                        (pLocalEpics->hepi[chamber].dcModalBias[0][0] * pLocalEpics->hepi[chamber].dcm_matrix[ii][0]) +
-                        (pLocalEpics->hepi[chamber].dcModalBias[0][1] * pLocalEpics->hepi[chamber].dcm_matrix[ii][1]) +
-                        (pLocalEpics->hepi[chamber].dcModalBias[0][2] * pLocalEpics->hepi[chamber].dcm_matrix[ii][2]) +
-                        (pLocalEpics->hepi[chamber].dcModalBias[0][3] * pLocalEpics->hepi[chamber].dcm_matrix[ii][3]) +
-                        (pLocalEpics->hepi[chamber].dcModalBias[0][4] * pLocalEpics->hepi[chamber].dcm_matrix[ii][4]) +
-                        (pLocalEpics->hepi[chamber].dcModalBias[0][5] * pLocalEpics->hepi[chamber].dcm_matrix[ii][5]);
-                }
-          }
-          else for(ii=0;ii<8;ii++) dcmXform[ii] = 0.0;
+// FILTER MODULE
+bsc_pos_h1 = filterModuleD(dspPtr,dspCoeff,BSC_POS_H1,dWord[0][8],0);
 
-          /* Do TC filtering for next cycle *************************************************** */
-          for(ii=0;ii<8;ii++)
-          {
-		  kk = ii + TILTCORR_V1 + chamSize;
-		  geoTilt[chamber][ii] = filterModuleD(dsp,dspCoeff,kk,imodalXform[ii],0);
-          }
+// FILTER MODULE
+bsc_pos_h1e = filterModuleD(dspPtr,dspCoeff,BSC_POS_H1E,dWord[0][8],0);
 
-          /*  ACT Filtering and DAC outputs ************************************************** */
-          for(ii=0;ii<8;ii++)
-          {
-		   kk = ii+ACT_V1+chamSize;
-		   actIn[ii] = dcmXform[ii] + imodalXform[ii];
-		   actOut[ii] = filterModuleD(dsp,dspCoeff,kk,actIn[ii],0);
+// FILTER MODULE
+bsc_pos_h2 = filterModuleD(dspPtr,dspCoeff,BSC_POS_H2,dWord[0][9],0);
 
-		   /* Load DAC Outputs */
-		   if(!hepiMain[chamber]) output = 0;
-		   else output = (int)(actOut[ii] * outGain[chamber]);
-		   dac[0][ii+chamber*8] = output;
-		   pLocalEpics->hepi[chamber].hepiOutput[ii] = dac[0][ii+chamber*8];
-          }
+// FILTER MODULE
+bsc_pos_h2e = filterModuleD(dspPtr,dspCoeff,BSC_POS_H2E,dWord[0][9],0);
 
-	} /* End chamber loop */
+// FILTER MODULE
+bsc_pos_h3 = filterModuleD(dspPtr,dspCoeff,BSC_POS_H3,dWord[0][10],0);
 
-	/* Perform WatchDog Functions */
-	for(ii=0;ii<CHAMBERS;ii++)
-	{
-		wdWord[ii][1] = 0;
-		wdWord[ii][1] = seiwd(wdValFilt[ii],pLocalEpics->hepi[ii].wdLimitF);
-		if((wdWord[ii][1]) && (wdTrip[ii] == 0)) 
-		{
-			pLocalEpics->hepi[ii].wdTrip = 3;
-			wdTarget[ii] = 0.0;
-			wdTrip[ii] = 1;
-			wdTimer[ii] = 0;
-			pLocalEpics->hepi[ii].wdLoBytesF =  wdWord[ii][1] & 0x7ff;
-			pLocalEpics->hepi[ii].wdHiBytesF = (wdWord[ii][1] >> 16) & 0xff;
-		}
-		if((wdWord[ii][1]) && (wdTrip[ii] == 2)) 
-		{
-			pLocalEpics->hepi[ii].wdTrip = 15;
-			wdTrip[ii] = 3;
-			wdTimer[ii] = 0;
-			pLocalEpics->hepi[ii].wdLoBytesF =  wdWord[ii][1] & 0x7ff;
-			pLocalEpics->hepi[ii].wdHiBytesF = (wdWord[ii][1] >> 16) & 0xff;
-			hepiLoop[ii] = 0;
-			pLocalEpics->hepi[ii].hepiSwitch[6] = 0;
-		}
-		if((wdWord[ii][1]) && (wdTrip[ii] == 4)) 
-		{
-			pLocalEpics->hepi[ii].wdTrip = 31;
-			wdTrip[ii] = 5;
-			wdTimer[ii] = 0;
-			pLocalEpics->hepi[ii].wdLoBytesF =  wdWord[ii][1] & 0x7ff;
-			pLocalEpics->hepi[ii].wdHiBytesF = (wdWord[ii][1] >> 16) & 0xff;
-			hepiMain[ii] = 0;
-			pLocalEpics->hepi[ii].hepiSwitch[0] = 0;
-		}
+// FILTER MODULE
+bsc_pos_h3e = filterModuleD(dspPtr,dspCoeff,BSC_POS_H3E,dWord[0][10],0);
+
+// FILTER MODULE
+bsc_pos_h4 = filterModuleD(dspPtr,dspCoeff,BSC_POS_H4,dWord[0][11],0);
+
+// FILTER MODULE
+bsc_pos_h4e = filterModuleD(dspPtr,dspCoeff,BSC_POS_H4E,dWord[0][11],0);
+
+// DIFF_JUNC
+bsc_pos_norm[0] = bsc_pos_v1 - bsc_sts_mtrx[1][0];
+bsc_pos_norm[1] = bsc_pos_v2 - bsc_sts_mtrx[1][1];
+bsc_pos_norm[2] = bsc_pos_v3 - bsc_sts_mtrx[1][2];
+bsc_pos_norm[3] = bsc_pos_v4 - bsc_sts_mtrx[1][3];
+bsc_pos_norm[4] = bsc_pos_h1 - bsc_sts_mtrx[1][4];
+bsc_pos_norm[5] = bsc_pos_h2 - bsc_sts_mtrx[1][5];
+bsc_pos_norm[6] = bsc_pos_h3 - bsc_sts_mtrx[1][6];
+bsc_pos_norm[7] = bsc_pos_h4 - bsc_sts_mtrx[1][7];
+
+// SEI WD GOES HERE ***
+
+// bsc_pos_watchdogFilt[0] = bsc_pos_v1e;
+// bsc_pos_watchdogRaw[0] = dWord[0][12];
+// bsc_pos_watchdogFilt[1] = bsc_pos_v2e;
+// bsc_pos_watchdogRaw[1] = dWord[0][13];
+// bsc_pos_watchdogFilt[2] = bsc_pos_v3e;
+// bsc_pos_watchdogRaw[2] = dWord[0][14];
+// bsc_pos_watchdogFilt[3] = bsc_pos_v4e;
+// bsc_pos_watchdogRaw[3] = dWord[0][15];
+// bsc_pos_watchdogFilt[4] = bsc_pos_h1e;
+// bsc_pos_watchdogRaw[4] = dWord[0][8];
+// bsc_pos_watchdogFilt[5] = bsc_pos_h2e;
+// bsc_pos_watchdogRaw[5] = dWord[0][9];
+// bsc_pos_watchdogFilt[6] = bsc_pos_h3e;
+// bsc_pos_watchdogRaw[6] = dWord[0][10];
+// bsc_pos_watchdogFilt[7] = bsc_pos_h4e;
+// bsc_pos_watchdogRaw[7] = dWord[0][11];
+// seiWd1(bsc_pos_watchdogRaw, bsc_pos_watchdogFilt,&pLocalEpics->BSC_POS_WATCHDOG)
+
+// MATRIX CALC
+for(ii=0;ii<8;ii++)
+{
+bsc_pos_mtrx[1][ii] = 
+	pLocalEpics->sei.BSC_POS_MTRX[ii][0] * bsc_pos_norm[0] +
+	pLocalEpics->sei.BSC_POS_MTRX[ii][1] * bsc_pos_norm[1] +
+	pLocalEpics->sei.BSC_POS_MTRX[ii][2] * bsc_pos_norm[2] +
+	pLocalEpics->sei.BSC_POS_MTRX[ii][3] * bsc_pos_norm[3] +
+	pLocalEpics->sei.BSC_POS_MTRX[ii][4] * bsc_pos_norm[4] +
+	pLocalEpics->sei.BSC_POS_MTRX[ii][5] * bsc_pos_norm[5] +
+	pLocalEpics->sei.BSC_POS_MTRX[ii][6] * bsc_pos_norm[6] +
+	pLocalEpics->sei.BSC_POS_MTRX[ii][7] * bsc_pos_norm[7];
+}
+
+// FILTER MODULE
+bsc_pos_x = filterModuleD(dspPtr,dspCoeff,BSC_POS_X,bsc_pos_mtrx[1][0],0);
+
+// FILTER MODULE
+bsc_pos_y = filterModuleD(dspPtr,dspCoeff,BSC_POS_Y,bsc_pos_mtrx[1][1],0);
+
+// FILTER MODULE
+bsc_pos_z = filterModuleD(dspPtr,dspCoeff,BSC_POS_Z,bsc_pos_mtrx[1][2],0);
+
+// FILTER MODULE
+bsc_pos_rz = filterModuleD(dspPtr,dspCoeff,BSC_POS_RZ,bsc_pos_mtrx[1][5],0);
+
+// FILTER MODULE
+bsc_pos_vp = filterModuleD(dspPtr,dspCoeff,BSC_POS_VP,bsc_pos_mtrx[1][6],0);
+
+// FILTER MODULE
+bsc_pos_hp = filterModuleD(dspPtr,dspCoeff,BSC_POS_HP,bsc_pos_mtrx[1][7],0);
+
+// SUM
+bsc_pos_sum = bsc_pos_mtrx[1][3] + bsc_sts_x_rx;
+
+// SUM
+bsc_pos_sum1 = bsc_pos_mtrx[1][4] + bsc_sts_x_ry;
+
+// FILTER MODULE
+bsc_pos_rx = filterModuleD(dspPtr,dspCoeff,BSC_POS_RX,bsc_pos_sum,0);
+
+// FILTER MODULE
+bsc_pos_ry = filterModuleD(dspPtr,dspCoeff,BSC_POS_RY,bsc_pos_sum1,0);
+
+// MULTI_SW
+bsc_pos_sw[0] = bsc_pos_x;
+bsc_pos_sw[1] = bsc_pos_y;
+bsc_pos_sw[2] = bsc_pos_z;
+bsc_pos_sw[3] = bsc_pos_rx;
+bsc_pos_sw[4] = bsc_pos_ry;
+bsc_pos_sw[5] = bsc_pos_rz;
+bsc_pos_sw[6] = bsc_pos_vp;
+bsc_pos_sw[7] = bsc_pos_hp;
+if(pLocalEpics->sei.BSC_POS_SW == 0)
+{
+	for(ii=0;ii< 8;ii++) bsc_pos_sw[ii] = 0.0;
+}
 
 
-	}
 
-	if(cycle == 0)
-	{
-		for(ii=0;ii<CHAMBERS;ii++)
-		{
-			wdWord[ii][0] = 0;
-			wdWord[ii][0] = seiwd(wdSenCounter[ii],pLocalEpics->hepi[ii].wdLimit);
-			if((wdTrip[ii] == 0) && (wdWord[ii][0])) 
-			{
-				pLocalEpics->hepi[ii].wdTrip = 1;
-				wdTarget[ii] = 0.0;
-				wdTimer[ii] = 0;
-				wdTrip[ii] = 1;
-				pLocalEpics->hepi[ii].wdLoBytes =  wdWord[ii][0] & 0x7ff;
-				pLocalEpics->hepi[ii].wdHiBytes = (wdWord[ii][0] >> 16) & 0xff;
-			}
-			for(jj=0;jj<19;jj++)
-			{
-				pLocalEpics->hepi[ii].wdFabs[0][jj] = wdSenCounter[ii][jj];
-				wdSenCounter[ii][jj] = 0.0;
-				pLocalEpics->hepi[ii].wdFabs[1][jj] = wdValFiltMax[ii][jj];
-				wdValFiltMax[ii][jj] = 0.0;
-			}
-			if((wdTimer[ii] > 30) && (wdTrip[ii] == 1))
-			{
-				wdTrip[ii] = 2;
-				wdTimer[ii] = 0;
-				// pLocalEpics->hepi[ii].wdTrip = 7;
-			}
-			if((wdTimer[ii] > 30) && (wdTrip[ii] == 3))
-			{
-				wdTrip[ii] = 4;
-				wdTimer[ii] = 0;
-			}
-			if(pLocalEpics->hepi[ii].wdReset == 1)
-			{
-				pLocalEpics->hepi[ii].wdTrip = 0;
-				pLocalEpics->hepi[ii].wdReset = 0;
-				wdTrip[ii] = 0;
-				pLocalEpics->hepi[ii].wdLoBytesF =  0;
-				pLocalEpics->hepi[ii].wdHiBytesF = 0;
-				pLocalEpics->hepi[ii].wdLoBytes =  0;
-				pLocalEpics->hepi[ii].wdHiBytes = 0;
-			}
-		   	if((!pLocalEpics->hepi[ii].wdTrip)) wdTarget[ii] = 1.0;
-			else wdTimer[ii] ++;
-			if(wdGain[ii] == 0.0) pLocalEpics->hepi[ii].wdTrip |= 4;
-			else pLocalEpics->hepi[ii].wdTrip &= ~4;
-		}
+//End of subsystem **************************************************
 
-	}
-	if(cycle == 1)
-	{
-		for(ii=0;ii<CHAMBERS;ii++)
-		{
-		   if(pLocalEpics->hepi[ii].hepiSwitch[0])
-		   {
-			if(wdTrip[ii] < 5)
-			   hepiMain[ii] ^= 1;
-			   pLocalEpics->hepi[ii].hepiSwitch[0] = 0;
-		   }
-		   if(pLocalEpics->hepi[ii].hepiSwitch[6])
-		   {
-			if(wdTrip[ii] < 3)
-			   hepiLoop[ii] ^= 1;
-			   pLocalEpics->hepi[ii].hepiSwitch[6] = 0;
-		   }
-		   if(pLocalEpics->hepi[ii].hepiSwitch[4])
-		   {
-			   hepiTilt[ii] ^= 1;
-			   pLocalEpics->hepi[ii].hepiSwitch[4] = 0;
-		   }
-		   if(hepiMain[ii] == 0) hepiTilt[ii] = 0;
-		   pLocalEpics->hepi[ii].hepiSwitch[13] = hepiMain[ii] + hepiLoop[ii] * 2 + hepiTilt[ii] * 4;
 
-		}
-	}
-	if(cycle == 2)
-	{
-		if(pLocalEpics->sts[0].firSw1[0])
-		{
-			pLocalEpics->sts[0].firSw1R[0] ^= pLocalEpics->sts[0].firSw1[0];
-			pLocalEpics->sts[0].firSw1[0] = 0;
-		}
-		if(pLocalEpics->sts[0].firSw1[1])
-		{
-			pLocalEpics->sts[0].firSw1R[1] ^= pLocalEpics->sts[0].firSw1[1];
-			pLocalEpics->sts[0].firSw1[1] = 0;
-		}
-		if(pLocalEpics->sts[1].firSw1[0])
-		{
-			pLocalEpics->sts[1].firSw1R[0] ^= pLocalEpics->sts[1].firSw1[0];
-			pLocalEpics->sts[1].firSw1[0] = 0;
-		}
-		if(pLocalEpics->sts[1].firSw1[1])
-		{
-			pLocalEpics->sts[1].firSw1R[1] ^= pLocalEpics->sts[1].firSw1[1];
-			pLocalEpics->sts[1].firSw1[1] = 0;
-		}
-		jj = ((pLocalEpics->sts[0].firSw1R[0] >> 3) & 1);
-		firGain[0][0] = pLocalEpics->sts[0].firGain[0] * jj;
-		jj = ((pLocalEpics->sts[0].firSw1R[1] >> 3) & 1);
-		firGain[0][1] = pLocalEpics->sts[0].firGain[1] * jj;
-		jj = ((pLocalEpics->sts[1].firSw1R[0] >> 3) & 1);
-		firGain[1][0] = pLocalEpics->sts[1].firGain[0] * jj;
-		jj = ((pLocalEpics->sts[1].firSw1R[1] >> 3) & 1);
-		firGain[1][1] = pLocalEpics->sts[1].firGain[1] * jj;
-		firOffset[0][0] = pLocalEpics->sts[0].firOffset[0] * (pLocalEpics->sts[0].firSw1R[0] & 1);
-		firOffset[0][1] = pLocalEpics->sts[0].firOffset[1] * (pLocalEpics->sts[0].firSw1R[1] & 1);
-		firOffset[1][0] = pLocalEpics->sts[1].firOffset[0] * (pLocalEpics->sts[1].firSw1R[0] & 1);
-		firOffset[1][1] = pLocalEpics->sts[1].firOffset[1] * (pLocalEpics->sts[1].firSw1R[1] & 1);
-	}
-	cycle = (cycle + 1) % 2048;
 
+//Start of subsystem **************************************************
+
+// SUM
+bsc_sum = bsc_pos_sw[0] + bsc_geo_sw[0];
+
+// SUM
+bsc_sum1 = bsc_pos_sw[1] + bsc_geo_sw[1];
+
+// SUM
+bsc_sum2 = bsc_pos_sw[2] + bsc_geo_sw[2];
+
+// SUM
+bsc_sum3 = bsc_pos_sw[3] + bsc_geo_sw[3];
+
+// SUM
+bsc_sum4 = bsc_pos_sw[4] + bsc_geo_sw[4];
+
+// SUM
+bsc_sum5 = bsc_pos_sw[5] + bsc_geo_sw[5];
+
+// SUM
+bsc_sum6 = bsc_pos_sw[6] + bsc_geo_sw[6];
+
+// SUM
+bsc_sum7 = bsc_pos_sw[7] + bsc_geo_sw[7];
+
+// FILTER MODULE
+bsc_x = filterModuleD(dspPtr,dspCoeff,BSC_X,bsc_sum,0);
+
+// FILTER MODULE
+bsc_y = filterModuleD(dspPtr,dspCoeff,BSC_Y,bsc_sum1,0);
+
+// FILTER MODULE
+bsc_z = filterModuleD(dspPtr,dspCoeff,BSC_Z,bsc_sum2,0);
+
+// FILTER MODULE
+bsc_rx = filterModuleD(dspPtr,dspCoeff,BSC_RX,bsc_sum3,0);
+
+// FILTER MODULE
+bsc_ry = filterModuleD(dspPtr,dspCoeff,BSC_RY,bsc_sum4,0);
+
+// FILTER MODULE
+bsc_rz = filterModuleD(dspPtr,dspCoeff,BSC_RZ,bsc_sum5,0);
+
+// FILTER MODULE
+bsc_vp = filterModuleD(dspPtr,dspCoeff,BSC_VP,bsc_sum6,0);
+
+// FILTER MODULE
+bsc_hp = filterModuleD(dspPtr,dspCoeff,BSC_HP,bsc_sum7,0);
+
+// MATRIX CALC
+for(ii=0;ii<8;ii++)
+{
+bsc_mtrx[1][ii] = 
+	pLocalEpics->sei.BSC_MTRX[ii][0] * bsc_x +
+	pLocalEpics->sei.BSC_MTRX[ii][1] * bsc_y +
+	pLocalEpics->sei.BSC_MTRX[ii][2] * bsc_z +
+	pLocalEpics->sei.BSC_MTRX[ii][3] * bsc_rx +
+	pLocalEpics->sei.BSC_MTRX[ii][4] * bsc_ry +
+	pLocalEpics->sei.BSC_MTRX[ii][5] * bsc_rz +
+	pLocalEpics->sei.BSC_MTRX[ii][6] * bsc_vp +
+	pLocalEpics->sei.BSC_MTRX[ii][7] * bsc_hp;
+}
+
+// PRODUCT
+pLocalEpics->sei.BSC_LOOP_GAIN_RMON = 
+	gainRamp(pLocalEpics->sei.BSC_LOOP_GAIN,pLocalEpics->sei.BSC_LOOP_GAIN_TRAMP,0,&BSC_LOOP_GAIN_CALC);
+
+bsc_loop_gain[0] = BSC_LOOP_GAIN_CALC * bsc_mtrx[1][0];
+bsc_loop_gain[1] = BSC_LOOP_GAIN_CALC * bsc_mtrx[1][1];
+bsc_loop_gain[2] = BSC_LOOP_GAIN_CALC * bsc_mtrx[1][2];
+bsc_loop_gain[3] = BSC_LOOP_GAIN_CALC * bsc_mtrx[1][3];
+bsc_loop_gain[4] = BSC_LOOP_GAIN_CALC * bsc_mtrx[1][4];
+bsc_loop_gain[5] = BSC_LOOP_GAIN_CALC * bsc_mtrx[1][5];
+bsc_loop_gain[6] = BSC_LOOP_GAIN_CALC * bsc_mtrx[1][6];
+bsc_loop_gain[7] = BSC_LOOP_GAIN_CALC * bsc_mtrx[1][7];
+
+// MULTI_SW
+bsc_loop_sw[0] = bsc_loop_gain[0];
+bsc_loop_sw[1] = bsc_loop_gain[1];
+bsc_loop_sw[2] = bsc_loop_gain[2];
+bsc_loop_sw[3] = bsc_loop_gain[3];
+bsc_loop_sw[4] = bsc_loop_gain[4];
+bsc_loop_sw[5] = bsc_loop_gain[5];
+bsc_loop_sw[6] = bsc_loop_gain[6];
+bsc_loop_sw[7] = bsc_loop_gain[7];
+if(pLocalEpics->sei.BSC_LOOP_SW == 0)
+{
+	for(ii=0;ii< 16;ii++) bsc_loop_sw[ii] = 0.0;
+}
+
+
+// FILTER MODULE
+bsc_tiltcorr_v1 = filterModuleD(dspPtr,dspCoeff,BSC_TILTCORR_V1,bsc_loop_sw[0],0);
+
+// FILTER MODULE
+bsc_tiltcorr_v2 = filterModuleD(dspPtr,dspCoeff,BSC_TILTCORR_V2,bsc_loop_sw[1],0);
+
+// FILTER MODULE
+bsc_tiltcorr_v3 = filterModuleD(dspPtr,dspCoeff,BSC_TILTCORR_V3,bsc_loop_sw[2],0);
+
+// FILTER MODULE
+bsc_tiltcorr_v4 = filterModuleD(dspPtr,dspCoeff,BSC_TILTCORR_V4,bsc_loop_sw[3],0);
+
+// FILTER MODULE
+bsc_tiltcorr_h1 = filterModuleD(dspPtr,dspCoeff,BSC_TILTCORR_H1,bsc_loop_sw[4],0);
+
+// FILTER MODULE
+bsc_tiltcorr_h2 = filterModuleD(dspPtr,dspCoeff,BSC_TILTCORR_H2,bsc_loop_sw[5],0);
+
+// FILTER MODULE
+bsc_tiltcorr_h3 = filterModuleD(dspPtr,dspCoeff,BSC_TILTCORR_H3,bsc_loop_sw[6],0);
+
+// FILTER MODULE
+bsc_tiltcorr_h4 = filterModuleD(dspPtr,dspCoeff,BSC_TILTCORR_H4,bsc_loop_sw[7],0);
+
+// PRODUCT
+pLocalEpics->sei.BSC_TILTCORR_GAIN_RMON = 
+	gainRamp(pLocalEpics->sei.BSC_TILTCORR_GAIN,pLocalEpics->sei.BSC_TILTCORR_GAIN_TRAMP,0,&BSC_TILTCORR_GAIN_CALC);
+
+bsc_tiltcorr_gain[0] = BSC_TILTCORR_GAIN_CALC * bsc_tiltcorr_v1;
+bsc_tiltcorr_gain[1] = BSC_TILTCORR_GAIN_CALC * bsc_tiltcorr_v2;
+bsc_tiltcorr_gain[2] = BSC_TILTCORR_GAIN_CALC * bsc_tiltcorr_v3;
+bsc_tiltcorr_gain[3] = BSC_TILTCORR_GAIN_CALC * bsc_tiltcorr_v4;
+bsc_tiltcorr_gain[4] = BSC_TILTCORR_GAIN_CALC * bsc_tiltcorr_h1;
+bsc_tiltcorr_gain[5] = BSC_TILTCORR_GAIN_CALC * bsc_tiltcorr_h2;
+bsc_tiltcorr_gain[6] = BSC_TILTCORR_GAIN_CALC * bsc_tiltcorr_h3;
+bsc_tiltcorr_gain[7] = BSC_TILTCORR_GAIN_CALC * bsc_tiltcorr_h4;
+
+// MULTI_SW
+bsc_tiltcorr_sw[0] = bsc_tiltcorr_gain[0];
+bsc_tiltcorr_sw[1] = bsc_tiltcorr_gain[1];
+bsc_tiltcorr_sw[2] = bsc_tiltcorr_gain[2];
+bsc_tiltcorr_sw[3] = bsc_tiltcorr_gain[3];
+bsc_tiltcorr_sw[4] = bsc_tiltcorr_gain[4];
+bsc_tiltcorr_sw[5] = bsc_tiltcorr_gain[5];
+bsc_tiltcorr_sw[6] = bsc_tiltcorr_gain[6];
+bsc_tiltcorr_sw[7] = bsc_tiltcorr_gain[7];
+if(pLocalEpics->sei.BSC_TILTCORR_SW == 0)
+{
+	for(ii=0;ii< 8;ii++) bsc_tiltcorr_sw[ii] = 0.0;
+}
+
+
+
+//End of subsystem **************************************************
+
+
+
+//Start of subsystem **************************************************
+
+// SUM
+bsc_act_sum = bsc_loop_sw[0] + bsc_dc_bias_sw[0];
+
+// SUM
+bsc_act_sum1 = bsc_loop_sw[1] + bsc_dc_bias_sw[1];
+
+// SUM
+bsc_act_sum2 = bsc_loop_sw[2] + bsc_dc_bias_sw[2];
+
+// SUM
+bsc_act_sum3 = bsc_loop_sw[3] + bsc_dc_bias_sw[3];
+
+// SUM
+bsc_act_sum4 = bsc_loop_sw[4] + bsc_dc_bias_sw[4];
+
+// SUM
+bsc_act_sum5 = bsc_loop_sw[5] + bsc_dc_bias_sw[5];
+
+// SUM
+bsc_act_sum6 = bsc_loop_sw[6] + bsc_dc_bias_sw[6];
+
+// SUM
+bsc_act_sum7 = bsc_loop_sw[7] + bsc_dc_bias_sw[7];
+
+// FILTER MODULE
+bsc_act_v1 = filterModuleD(dspPtr,dspCoeff,BSC_ACT_V1,bsc_act_sum,0);
+
+// FILTER MODULE
+bsc_act_v2 = filterModuleD(dspPtr,dspCoeff,BSC_ACT_V2,bsc_act_sum1,0);
+
+// FILTER MODULE
+bsc_act_v3 = filterModuleD(dspPtr,dspCoeff,BSC_ACT_V3,bsc_act_sum2,0);
+
+// FILTER MODULE
+bsc_act_v4 = filterModuleD(dspPtr,dspCoeff,BSC_ACT_V4,bsc_act_sum3,0);
+
+// FILTER MODULE
+bsc_act_h1 = filterModuleD(dspPtr,dspCoeff,BSC_ACT_H1,bsc_act_sum4,0);
+
+// FILTER MODULE
+bsc_act_h2 = filterModuleD(dspPtr,dspCoeff,BSC_ACT_H2,bsc_act_sum5,0);
+
+// FILTER MODULE
+bsc_act_h3 = filterModuleD(dspPtr,dspCoeff,BSC_ACT_H3,bsc_act_sum6,0);
+
+// FILTER MODULE
+bsc_act_h4 = filterModuleD(dspPtr,dspCoeff,BSC_ACT_H4,bsc_act_sum7,0);
+
+// PRODUCT
+pLocalEpics->sei.BSC_ACT_GAIN_RMON = 
+	gainRamp(pLocalEpics->sei.BSC_ACT_GAIN,pLocalEpics->sei.BSC_ACT_GAIN_TRAMP,0,&BSC_ACT_GAIN_CALC);
+
+bsc_act_gain[0] = BSC_ACT_GAIN_CALC * bsc_act_v1;
+bsc_act_gain[1] = BSC_ACT_GAIN_CALC * bsc_act_v2;
+bsc_act_gain[2] = BSC_ACT_GAIN_CALC * bsc_act_v3;
+bsc_act_gain[3] = BSC_ACT_GAIN_CALC * bsc_act_v4;
+bsc_act_gain[4] = BSC_ACT_GAIN_CALC * bsc_act_h1;
+bsc_act_gain[5] = BSC_ACT_GAIN_CALC * bsc_act_h2;
+bsc_act_gain[6] = BSC_ACT_GAIN_CALC * bsc_act_h3;
+bsc_act_gain[7] = BSC_ACT_GAIN_CALC * bsc_act_h4;
+
+// MULTI_SW
+bsc_act_sw[0] = bsc_act_gain[0];
+bsc_act_sw[1] = bsc_act_gain[1];
+bsc_act_sw[2] = bsc_act_gain[2];
+bsc_act_sw[3] = bsc_act_gain[3];
+bsc_act_sw[4] = bsc_act_gain[4];
+bsc_act_sw[5] = bsc_act_gain[5];
+bsc_act_sw[6] = bsc_act_gain[6];
+bsc_act_sw[7] = bsc_act_gain[7];
+if(pLocalEpics->sei.BSC_ACT_SW == 0)
+{
+	for(ii=0;ii< 8;ii++) bsc_act_sw[ii] = 0.0;
+}
+
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_DAC_OUTPUT_H1 = bsc_act_sw[4];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_DAC_OUTPUT_H2 = bsc_act_sw[5];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_DAC_OUTPUT_H3 = bsc_act_sw[6];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_DAC_OUTPUT_H4 = bsc_act_sw[7];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_DAC_OUTPUT_V1 = bsc_act_sw[0];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_DAC_OUTPUT_V2 = bsc_act_sw[1];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_DAC_OUTPUT_V3 = bsc_act_sw[2];
+
+// EPICS_OUTPUT
+pLocalEpics->sei.BSC_DAC_OUTPUT_V4 = bsc_act_sw[3];
+
+// DELAY
+delay1 = bsc_tiltcorr_sw[0];
+
+// DELAY
+delay2 = bsc_tiltcorr_sw[1];
+
+// DELAY
+delay3 = bsc_tiltcorr_sw[2];
+
+// DELAY
+delay4 = bsc_tiltcorr_sw[3];
+
+// DELAY
+delay5 = bsc_tiltcorr_sw[4];
+
+// DELAY
+delay6 = bsc_tiltcorr_sw[5];
+
+// DELAY
+delay7 = bsc_tiltcorr_sw[6];
+
+// DELAY
+delay8 = bsc_tiltcorr_sw[7];
 
 }
 
