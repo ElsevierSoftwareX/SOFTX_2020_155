@@ -1,4 +1,4 @@
-#ifdef HEPI
+#ifdef HEPI_CODE
 #include <hepi.h>
 #endif
 #ifdef SUS_CODE
