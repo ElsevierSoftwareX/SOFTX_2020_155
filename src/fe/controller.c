@@ -30,7 +30,7 @@
 #include <semaphore.h>
 #include <linux/slab.h>
 #include <drv/cdsHardware.h>
-#ifdef HEPI
+#ifdef HEPI_CODE
 	#include "hepi.h"	/* User code for HEPI control.		*/
 #elif defined(SUS_CODE)
 	#include "sus.h"	/* User code for quad control.		*/
@@ -141,7 +141,7 @@ VME_COEF *pCoeff[NUM_SYSTEMS];		/* Ptr to SFM coeffs in shmem		*/
 double dWord[MAX_ADC_MODULES][32];
 int dacOut[MAX_DAC_MODULES][16];
 
-#ifdef HEPI
+#ifdef HEPI_CODE
 	#include "hepi/hepi.c"	/* User code for HEPI control.		*/
 #elif defined(SUS_CODE)
 	#include "sus/sus.c"	/* User code for quad control.		*/
@@ -436,7 +436,7 @@ void *fe_start(void *arg)
         }
 
 	/* Update Epics variables */
-#ifdef HEPI
+#ifdef HEPI_CODE
 	epicsCycle = (epicsCycle + 1) % (MAX_MODULES + 2);
 #else
 	epicsCycle = subcycle;
@@ -490,7 +490,7 @@ void *fe_start(void *arg)
 
 	// Assign chan 32 to onePps 
 	onePps = dWord[0][31];
-#ifdef HEPI
+#ifdef HEPI_CODE
 	if(cdsPciModules.adcCount < 3)
 	{           
 		for(ii=0;ii<32;ii++) dWord[1][ii] = dWord[0][ii];
