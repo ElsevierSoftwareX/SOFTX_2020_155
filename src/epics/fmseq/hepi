@@ -1,336 +1,117 @@
-BSC_POS_V1
-BSC_POS_V2
-BSC_POS_V3
-BSC_POS_V4
-BSC_POS_H1
-BSC_POS_H2
-BSC_POS_H3
-BSC_POS_H4
-BSC_GEO_V1
-BSC_GEO_V2
-BSC_GEO_V3
-BSC_GEO_V4
-BSC_GEO_H1
-BSC_GEO_H2
-BSC_GEO_H3
-BSC_GEO_H4
-BSC_TILTCORR_V1
-BSC_TILTCORR_V2
-BSC_TILTCORR_V3
-BSC_TILTCORR_V4
+BSC_HP
+BSC_RX
+BSC_RY
+BSC_RZ
 BSC_TILTCORR_H1
 BSC_TILTCORR_H2
 BSC_TILTCORR_H3
 BSC_TILTCORR_H4
-BSC_POS_X
-BSC_POS_Y
-BSC_POS_Z
-BSC_POS_RX
-BSC_POS_RY
-BSC_POS_RZ
-BSC_POS_VP
-BSC_POS_HP
-BSC_GEO_X
-BSC_GEO_Y
-BSC_GEO_Z
-BSC_GEO_RX
-BSC_GEO_RY
-BSC_GEO_RZ
-BSC_GEO_VP
-BSC_GEO_HP
+BSC_TILTCORR_V1
+BSC_TILTCORR_V2
+BSC_TILTCORR_V3
+BSC_TILTCORR_V4
+BSC_VP
 BSC_X
 BSC_Y
 BSC_Z
-BSC_RX
-BSC_RY
-BSC_RZ
-BSC_VP
-BSC_HP
-BSC_ACT_V1
-BSC_ACT_V2
-BSC_ACT_V3
-BSC_ACT_V4
 BSC_ACT_H1
 BSC_ACT_H2
 BSC_ACT_H3
 BSC_ACT_H4
-BSC_TIDAL_DM
-BSC_TIDAL_CM
-BSC_TIDAL_PD
-BSC_POS_V1E
-BSC_POS_V2E
-BSC_POS_V3E
-BSC_POS_V4E
-BSC_POS_H1E
-BSC_POS_H2E
-BSC_POS_H3E
-BSC_POS_H4E
-BSC_GEO_V1E
-BSC_GEO_V2E
-BSC_GEO_V3E
-BSC_GEO_V4E
-BSC_GEO_H1E
-BSC_GEO_H2E
-BSC_GEO_H3E
-BSC_GEO_H4E
-BSC_STS_XE
-BSC_STS_YE
-BSC_STS_ZE
-BSC_GEO_X_RMS
-BSC_GEO_Y_RMS
-BSC_GEO_Z_RMS
-BSC_GEO_X_RMS2
-BSC_GEO_Y_RMS2
-BSC_GEO_Z_RMS2
-BSC_LSC_X
-BSC_LSC_Y
-BSC_LSC_Z
-BSC_OPTLEV_P
-BSC_OPTLEV_Y
-BSC_STS_X_RY
-BSC_STS_Y_RX
+BSC_ACT_V1
+BSC_ACT_V2
+BSC_ACT_V3
+BSC_ACT_V4
 BSC_FIR_X_OUT
 BSC_FIR_Y_OUT
+BSC_GEO_H1
+BSC_GEO_H1E
+BSC_GEO_H2
+BSC_GEO_H2E
+BSC_GEO_H3
+BSC_GEO_H3E
+BSC_GEO_H4
+BSC_GEO_H4E
+BSC_GEO_HP
+BSC_GEO_RX
+BSC_GEO_RY
+BSC_GEO_RZ
+BSC_GEO_V1
+BSC_GEO_V1E
+BSC_GEO_V2
+BSC_GEO_V2E
+BSC_GEO_V3
+BSC_GEO_V3E
+BSC_GEO_V4
+BSC_GEO_V4E
+BSC_GEO_VP
+BSC_GEO_X
+BSC_GEO_Y
+BSC_GEO_Z
+BSC_POS_H1
+BSC_POS_H1E
+BSC_POS_H2
+BSC_POS_H2E
+BSC_POS_H3
+BSC_POS_H3E
+BSC_POS_H4
+BSC_POS_H4E
+BSC_POS_HP
+BSC_POS_RX
+BSC_POS_RY
+BSC_POS_RZ
+BSC_POS_V1
+BSC_POS_V1E
+BSC_POS_V2
+BSC_POS_V2E
+BSC_POS_V3
+BSC_POS_V3E
+BSC_POS_V4
+BSC_POS_V4E
+BSC_POS_VP
+BSC_POS_X
+BSC_POS_Y
+BSC_POS_Z
+BSC_SPARE_FP1
+BSC_SPARE_FP2
+BSC_SPARE_RP1
+BSC_SPARE_RP2
+BSC_SPARE_RP3
 BSC_STS_X
+BSC_STS_XE
+BSC_STS_X_RX
+BSC_STS_X_RY
 BSC_STS_Y
+BSC_STS_YE
 BSC_STS_Z
-HAMX_POS_V1
-HAMX_POS_V2
-HAMX_POS_V3
-HAMX_POS_V4
-HAMX_POS_H1
-HAMX_POS_H2
-HAMX_POS_H3
-HAMX_POS_H4
-HAMX_GEO_V1
-HAMX_GEO_V2
-HAMX_GEO_V3
-HAMX_GEO_V4
-HAMX_GEO_H1
-HAMX_GEO_H2
-HAMX_GEO_H3
-HAMX_GEO_H4
-HAMX_TILTCORR_V1
-HAMX_TILTCORR_V2
-HAMX_TILTCORR_V3
-HAMX_TILTCORR_V4
-HAMX_TILTCORR_H1
-HAMX_TILTCORR_H2
-HAMX_TILTCORR_H3
-HAMX_TILTCORR_H4
-HAMX_POS_X
-HAMX_POS_Y
-HAMX_POS_Z
-HAMX_POS_RX
-HAMX_POS_RY
-HAMX_POS_RZ
-HAMX_POS_VP
-HAMX_POS_HP
-HAMX_GEO_X
-HAMX_GEO_Y
-HAMX_GEO_Z
-HAMX_GEO_RX
-HAMX_GEO_RY
-HAMX_GEO_RZ
-HAMX_GEO_VP
-HAMX_GEO_HP
-HAMX_X
-HAMX_Y
-HAMX_Z
-HAMX_RX
-HAMX_RY
-HAMX_RZ
-HAMX_VP
-HAMX_HP
-HAMX_ACT_V1
-HAMX_ACT_V2
-HAMX_ACT_V3
-HAMX_ACT_V4
-HAMX_ACT_H1
-HAMX_ACT_H2
-HAMX_ACT_H3
-HAMX_ACT_H4
-HAMX_TIDAL_DM
-HAMX_TIDAL_CM
-HAMX_TIDAL_PD
-HAMX_POS_V1E
-HAMX_POS_V2E
-HAMX_POS_V3E
-HAMX_POS_V4E
-HAMX_POS_H1E
-HAMX_POS_H2E
-HAMX_POS_H3E
-HAMX_POS_H4E
-HAMX_GEO_V1E
-HAMX_GEO_V2E
-HAMX_GEO_V3E
-HAMX_GEO_V4E
-HAMX_GEO_H1E
-HAMX_GEO_H2E
-HAMX_GEO_H3E
-HAMX_GEO_H4E
-HAMX_STS_XE
-HAMX_STS_YE
-HAMX_STS_ZE
-HAMX_GEO_X_RMS
-HAMX_GEO_Y_RMS
-HAMX_GEO_Z_RMS
-HAMX_GEO_X_RMS2
-HAMX_GEO_Y_RMS2
-HAMX_GEO_Z_RMS2
-HAMX_LSC_X
-HAMX_LSC_Y
-HAMX_LSC_Z
-HAMX_OPTLEV_P
-HAMX_OPTLEV_Y
-HAMX_STS_X_RY
-HAMX_STS_Y_RX
-HAMX_FIR_X_OUT
-HAMX_FIR_Y_OUT
-HAMX_STS_X
-HAMX_STS_Y
-HAMX_STS_Z
-HAMY_POS_V1
-HAMY_POS_V2
-HAMY_POS_V3
-HAMY_POS_V4
-HAMY_POS_H1
-HAMY_POS_H2
-HAMY_POS_H3
-HAMY_POS_H4
-HAMY_GEO_V1
-HAMY_GEO_V2
-HAMY_GEO_V3
-HAMY_GEO_V4
-HAMY_GEO_H1
-HAMY_GEO_H2
-HAMY_GEO_H3
-HAMY_GEO_H4
-HAMY_TILTCORR_V1
-HAMY_TILTCORR_V2
-HAMY_TILTCORR_V3
-HAMY_TILTCORR_V4
-HAMY_TILTCORR_H1
-HAMY_TILTCORR_H2
-HAMY_TILTCORR_H3
-HAMY_TILTCORR_H4
-HAMY_POS_X
-HAMY_POS_Y
-HAMY_POS_Z
-HAMY_POS_RX
-HAMY_POS_RY
-HAMY_POS_RZ
-HAMY_POS_VP
-HAMY_POS_HP
-HAMY_GEO_X
-HAMY_GEO_Y
-HAMY_GEO_Z
-HAMY_GEO_RX
-HAMY_GEO_RY
-HAMY_GEO_RZ
-HAMY_GEO_VP
-HAMY_GEO_HP
-HAMY_X
-HAMY_Y
-HAMY_Z
-HAMY_RX
-HAMY_RY
-HAMY_RZ
-HAMY_VP
-HAMY_HP
-HAMY_ACT_V1
-HAMY_ACT_V2
-HAMY_ACT_V3
-HAMY_ACT_V4
-HAMY_ACT_H1
-HAMY_ACT_H2
-HAMY_ACT_H3
-HAMY_ACT_H4
-HAMY_TIDAL_DM
-HAMY_TIDAL_CM
-HAMY_TIDAL_PD
-HAMY_POS_V1E
-HAMY_POS_V2E
-HAMY_POS_V3E
-HAMY_POS_V4E
-HAMY_POS_H1E
-HAMY_POS_H2E
-HAMY_POS_H3E
-HAMY_POS_H4E
-HAMY_GEO_V1E
-HAMY_GEO_V2E
-HAMY_GEO_V3E
-HAMY_GEO_V4E
-HAMY_GEO_H1E
-HAMY_GEO_H2E
-HAMY_GEO_H3E
-HAMY_GEO_H4E
-HAMY_STS_XE
-HAMY_STS_YE
-HAMY_STS_ZE
-HAMY_GEO_X_RMS
-HAMY_GEO_Y_RMS
-HAMY_GEO_Z_RMS
-HAMY_GEO_X_RMS2
-HAMY_GEO_Y_RMS2
-HAMY_GEO_Z_RMS2
-HAMY_LSC_X
-HAMY_LSC_Y
-HAMY_LSC_Z
-HAMY_OPTLEV_P
-HAMY_OPTLEV_Y
-HAMY_STS_X_RY
-HAMY_STS_Y_RX
-HAMY_FIR_X_OUT
-HAMY_FIR_Y_OUT
-HAMY_STS_X
-HAMY_STS_Y
-HAMY_STS_Z
+BSC_STS_ZE
+STS1_FIR_X
 STS1_FIR_X_DF
-STS1_FIR_Y_DF
 STS1_FIR_X_UF
-STS1_FIR_Y_UF
 STS1_FIR_X_CF
+STS1_FIR_Y
+STS1_FIR_Y_DF
+STS1_FIR_Y_UF
 STS1_FIR_Y_CF
+STS2_FIR_X
 STS2_FIR_X_DF
-STS2_FIR_Y_DF
 STS2_FIR_X_UF
-STS2_FIR_Y_UF
 STS2_FIR_X_CF
+STS2_FIR_Y
+STS2_FIR_Y_DF
+STS2_FIR_Y_UF
 STS2_FIR_Y_CF
 
 EPICS CDS_EPICS dspSpace coeffSpace epicsSpace
 
-MATRIX BSC_STS_MTRX_    	8x4 hepi[0].sts_matrix
-MATRIX BSC_POS_MTRX_    	8x8 hepi[0].pos_matrix
-MATRIX BSC_GEO_MTRX_    	8x8 hepi[0].geo_matrix
-MATRIX BSC_ACT_MTRX_    	8x8 hepi[0].act_matrix
-MATRIX BSC_BIAS_MTRX_   	8x6 hepi[0].dcm_matrix
-MATRIX BSC_DC_IN_MTRX_  	2x6 hepi[0].dcModalBias
-MATRIX BSC_STS_IN_MTRX_  	2x6 hepi[0].sts_in_matrix
-MATRIX BSC_LSC_IN_MTRX_  	3x8 hepi[0].lscMatrix
-MATRIX BSC_OL_IN_MTRX_  	2x2 hepi[0].olMatrix
-MATRIX BSC_TILTCORR_MTRX_  	8x8 hepi[0].tc_matrix
-MATRIX HAMX_STS_MTRX_    	8x4 hepi[1].sts_matrix
-MATRIX HAMX_POS_MTRX_    	8x8 hepi[1].pos_matrix
-MATRIX HAMX_GEO_MTRX_    	8x8 hepi[1].geo_matrix
-MATRIX HAMX_ACT_MTRX_    	8x8 hepi[1].act_matrix
-MATRIX HAMX_BIAS_MTRX_   	8x6 hepi[1].dcm_matrix
-MATRIX HAMX_DC_IN_MTRX_  	2x6 hepi[1].dcModalBias
-MATRIX HAMX_STS_IN_MTRX_  	2x6 hepi[1].sts_in_matrix
-MATRIX HAMX_LSC_IN_MTRX_  	3x8 hepi[1].lscMatrix
-MATRIX HAMX_OL_IN_MTRX_  	2x2 hepi[1].olMatrix
-MATRIX HAMX_TILTCORR_MTRX_  	8x8 hepi[1].tc_matrix
-MATRIX HAMY_STS_MTRX_    	8x4 hepi[2].sts_matrix
-MATRIX HAMY_POS_MTRX_    	8x8 hepi[2].pos_matrix
-MATRIX HAMY_GEO_MTRX_    	8x8 hepi[2].geo_matrix
-MATRIX HAMY_ACT_MTRX_    	8x8 hepi[2].act_matrix
-MATRIX HAMY_BIAS_MTRX_   	8x6 hepi[2].dcm_matrix
-MATRIX HAMY_DC_IN_MTRX_  	2x6 hepi[2].dcModalBias
-MATRIX HAMY_STS_IN_MTRX_  	2x6 hepi[2].sts_in_matrix
-MATRIX HAMY_LSC_IN_MTRX_  	3x8 hepi[2].lscMatrix
-MATRIX HAMY_OL_IN_MTRX_  	2x2 hepi[2].olMatrix
-MATRIX HAMY_TILTCORR_MTRX_  	8x8 hepi[2].tc_matrix
+MATRIX BSC_MTRX_ 8x8 sei.BSC_MTRX
+MATRIX BSC_DC_BIAS_MTRX_ 8x6 sei.BSC_DC_BIAS_MTRX
+MATRIX BSC_FIR_MTRX_ 2x4 sei.BSC_FIR_MTRX
+MATRIX BSC_GEO_MTRX_ 8x8 sei.BSC_GEO_MTRX
+MATRIX BSC_POS_MTRX_ 8x8 sei.BSC_POS_MTRX
+MATRIX BSC_STS_IN_MTRX_ 3x6 sei.BSC_STS_IN_MTRX
+MATRIX BSC_STS_MTRX_ 8x3 sei.BSC_STS_MTRX
+
 
 MOMENTARY VME_RESET epicsInput.vmeReset int ai 0
 MOMENTARY DIAG_RESET epicsInput.diagReset int ai 0
@@ -347,16 +128,16 @@ OUTVARIABLE ADC_WAIT epicsOutput.adcWaitTime int ai 0 field(HOPR,"480") field(LO
 OUTVARIABLE ONE_PPS epicsOutput.onePps int ai 0
 OUTVARIABLE DIAG_WORD epicsOutput.diagWord int ai 0
 INVARIABLE BURT_RESTORE epicsInput.burtRestore int ai 0
-OUTVARIABLE GDS_MON_00 epicsOutput.gdsMon[0] int ai 0
-OUTVARIABLE GDS_MON_01 epicsOutput.gdsMon[1] int ai 0
-OUTVARIABLE GDS_MON_02 epicsOutput.gdsMon[2] int ai 0
-OUTVARIABLE GDS_MON_03 epicsOutput.gdsMon[3] int ai 0
-OUTVARIABLE GDS_MON_04 epicsOutput.gdsMon[4] int ai 0
-OUTVARIABLE GDS_MON_05 epicsOutput.gdsMon[5] int ai 0
-OUTVARIABLE GDS_MON_06 epicsOutput.gdsMon[6] int ai 0
-OUTVARIABLE GDS_MON_07 epicsOutput.gdsMon[7] int ai 0
-OUTVARIABLE GDS_MON_08 epicsOutput.gdsMon[8] int ai 0
-OUTVARIABLE GDS_MON_09 epicsOutput.gdsMon[9] int ai 0
+OUTVARIABLE GDS_MON_0 epicsOutput.gdsMon[0] int ai 0
+OUTVARIABLE GDS_MON_1 epicsOutput.gdsMon[1] int ai 0
+OUTVARIABLE GDS_MON_2 epicsOutput.gdsMon[2] int ai 0
+OUTVARIABLE GDS_MON_3 epicsOutput.gdsMon[3] int ai 0
+OUTVARIABLE GDS_MON_4 epicsOutput.gdsMon[4] int ai 0
+OUTVARIABLE GDS_MON_5 epicsOutput.gdsMon[5] int ai 0
+OUTVARIABLE GDS_MON_6 epicsOutput.gdsMon[6] int ai 0
+OUTVARIABLE GDS_MON_7 epicsOutput.gdsMon[7] int ai 0
+OUTVARIABLE GDS_MON_8 epicsOutput.gdsMon[8] int ai 0
+OUTVARIABLE GDS_MON_9 epicsOutput.gdsMon[9] int ai 0
 OUTVARIABLE GDS_MON_10 epicsOutput.gdsMon[10] int ai 0
 OUTVARIABLE GDS_MON_11 epicsOutput.gdsMon[11] int ai 0
 OUTVARIABLE GDS_MON_12 epicsOutput.gdsMon[12] int ai 0
@@ -385,511 +166,66 @@ OUTVARIABLE NET_ERR_COUNT epicsOutput.diags[2] int ai 0
 OUTVARIABLE DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0
 
 
-INVARIABLE BSC_BOOST_SW hepi[0].hepiSwitch[1] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE BSC_POS_SW hepi[0].hepiSwitch[2] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE BSC_GEO_SW hepi[0].hepiSwitch[3] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE BSC_RAMP_SW hepi[0].hepiSwitch[5] int bi 1 field(ZNAM,"IIR") field(ONAM,"FIR")
-MOMENTARY BSC_TILTCORR_SW hepi[0].hepiSwitch[4] int ai 0
-MOMENTARY BSC_MODAL_SW hepi[0].hepiSwitch[6] int ai 0
-MOMENTARY BSC_MASTER_SW hepi[0].hepiSwitch[0] int ai 0
-INVARIABLE BSC_TIDAL_SW hepi[0].hepiSwitch[7] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE BSC_DC_BIAS_SW hepi[0].hepiSwitch[8] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE BSC_STS_SW1 hepi[0].hepiSwitch[9] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE BSC_STS_SW2 hepi[0].hepiSwitch[10] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE BSC_STS_SW3 hepi[0].hepiSwitch[11] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE BSC_STS_SW4 hepi[0].hepiSwitch[12] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE BSC_OUT_GAIN hepi[0].gain float ai 1 field(PREC,"3") field(HOPR,"1.5") field(LOPR,"0")
-INVARIABLE BSC_RAMP_TIME hepi[0].rampTime int ai 1 field(HOPR,"64000") field(LOPR,"0")
-INVARIABLE BSC_TC_TRAMP hepi[0].tramp[0] int ai 1 field(HOPR,"600") field(LOPR,"0")
-INVARIABLE BSC_LOOP_TRAMP hepi[0].tramp[1] int ai 1 field(HOPR,"600") field(LOPR,"0")
-INVARIABLE BSC_MASTER_TRAMP hepi[0].tramp[2] int ai 1 field(HOPR,"600") field(LOPR,"0")
-INVARIABLE BSC_TIDAL_DM_LIMITER hepi[0].tidalLimit[0] float ai 1 field(PREC,"2") 
-INVARIABLE BSC_TIDAL_CM_LIMITER hepi[0].tidalLimit[1] float ai 1 field(PREC,"2") 
-INVARIABLE BSC_TIDAL_PD_LIMITER hepi[0].tidalLimit[2] float ai 1 field(PREC,"2") 
-INVARIABLE BSC_LSC_X_LIMITER hepi[0].lscLimit[0] float ai 1 field(PREC,"2") 
-INVARIABLE BSC_LSC_Y_LIMITER hepi[0].lscLimit[1] float ai 1 field(PREC,"2") 
-INVARIABLE BSC_LSC_Z_LIMITER hepi[0].lscLimit[2] float ai 1 field(PREC,"2") 
-INVARIABLE BSC_LOOP_GAIN hepi[0].loopGain float ai 1 field(PREC,"2") field(HOPR,"1.0") field(LOPR,"0")
-INVARIABLE BSC_TILTCORR_GAIN hepi[0].tcGain float ai 1 field(PREC,"2") field(HOPR,"1.0") field(LOPR,"0")
-INVARIABLE BSC_STS_MAX hepi[0].wdLimit[0] int ai 40000
-INVARIABLE BSC_POS_V_MAX hepi[0].wdLimit[1] int ai 10000
-INVARIABLE BSC_POS_H_MAX hepi[0].wdLimit[2] int ai 10000
-INVARIABLE BSC_GEO_V_MAX hepi[0].wdLimit[3] int ai 34000
-INVARIABLE BSC_GEO_H_MAX hepi[0].wdLimit[4] int ai 34000
-INVARIABLE BSC_STS_MAX_F hepi[0].wdLimitF[0] int ai 40000
-INVARIABLE BSC_POS_V_MAX_F hepi[0].wdLimitF[1] int ai 10000
-INVARIABLE BSC_POS_H_MAX_F hepi[0].wdLimitF[2] int ai 10000
-INVARIABLE BSC_GEO_V_MAX_F hepi[0].wdLimitF[3] int ai 34000
-INVARIABLE BSC_GEO_H_MAX_F hepi[0].wdLimitF[4] int ai 34000
-INVARIABLE BSC_TIDAL_DELAY hepi[0].lscLockTime int ai 60
-OUTVARIABLE BSC_TIDAL_DM_SIG hepi[0].tidal[0] float ai 0
-OUTVARIABLE BSC_TIDAL_CM_SIG hepi[0].tidal[1] float ai 0
-OUTVARIABLE BSC_TIDAL_PD_SIG hepi[0].tidal[2] float ai 0
-OUTVARIABLE BSC_TIDAL_SUM hepi[0].tidal[3] float ai 0
-OUTVARIABLE BSC_PUMP_STATUS hepi[0].hepiBinary[0] int ai 1
-OUTVARIABLE BSC_STS_STATUS hepi[0].hepiBinary[1] int ai 1
-OUTVARIABLE BSC_DAC_OUTPUT_V1 hepi[0].hepiOutput[0] int ai 1
-OUTVARIABLE BSC_DAC_OUTPUT_V2 hepi[0].hepiOutput[1] int ai 1
-OUTVARIABLE BSC_DAC_OUTPUT_V3 hepi[0].hepiOutput[2] int ai 1
-OUTVARIABLE BSC_DAC_OUTPUT_V4 hepi[0].hepiOutput[3] int ai 1
-OUTVARIABLE BSC_DAC_OUTPUT_H1 hepi[0].hepiOutput[4] int ai 1
-OUTVARIABLE BSC_DAC_OUTPUT_H2 hepi[0].hepiOutput[5] int ai 1
-OUTVARIABLE BSC_DAC_OUTPUT_H3 hepi[0].hepiOutput[6] int ai 1
-OUTVARIABLE BSC_DAC_OUTPUT_H4 hepi[0].hepiOutput[7] int ai 1
-OUTVARIABLE BSC_MODAL_MAT_OUT_X hepi[0].modalMatOut[0] int ai 1
-OUTVARIABLE BSC_MODAL_MAT_OUT_Y hepi[0].modalMatOut[1] int ai 1
-OUTVARIABLE BSC_MODAL_MAT_OUT_Z hepi[0].modalMatOut[2] int ai 1
-OUTVARIABLE BSC_MODAL_MAT_OUT_A hepi[0].modalMatOut[3] int ai 1
-OUTVARIABLE BSC_MODAL_MAT_OUT_B hepi[0].modalMatOut[4] int ai 1
-OUTVARIABLE BSC_MODAL_MAT_OUT_P hepi[0].modalMatOut[5] int ai 1
-OUTVARIABLE BSC_MODAL_MAT_OUT_V hepi[0].modalMatOut[6] int ai 1
-OUTVARIABLE BSC_MODAL_MAT_OUT_H hepi[0].modalMatOut[7] int ai 1
-OUTVARIABLE BSC_TILTCORR_MAT_V1 hepi[0].tcMatOut[0] int ai 1
-OUTVARIABLE BSC_TILTCORR_MAT_V2 hepi[0].tcMatOut[1] int ai 1
-OUTVARIABLE BSC_TILTCORR_MAT_V3 hepi[0].tcMatOut[2] int ai 1
-OUTVARIABLE BSC_TILTCORR_MAT_V4 hepi[0].tcMatOut[3] int ai 1
-OUTVARIABLE BSC_TILTCORR_MAT_H1 hepi[0].tcMatOut[4] int ai 1
-OUTVARIABLE BSC_TILTCORR_MAT_H2 hepi[0].tcMatOut[5] int ai 1
-OUTVARIABLE BSC_TILTCORR_MAT_H3 hepi[0].tcMatOut[6] int ai 1
-OUTVARIABLE BSC_TILTCORR_MAT_H4 hepi[0].tcMatOut[7] int ai 1
-OUTVARIABLE BSC_GEO_V1_OVERFLOW epicsOutput.overflowAdc[0][0] int ai 0
-OUTVARIABLE BSC_GEO_V2_OVERFLOW epicsOutput.overflowAdc[0][1] int ai 0
-OUTVARIABLE BSC_GEO_V3_OVERFLOW epicsOutput.overflowAdc[0][2] int ai 0
-OUTVARIABLE BSC_GEO_V4_OVERFLOW epicsOutput.overflowAdc[0][3] int ai 0
-OUTVARIABLE BSC_GEO_H1_OVERFLOW epicsOutput.overflowAdc[0][4] int ai 0
-OUTVARIABLE BSC_GEO_H2_OVERFLOW epicsOutput.overflowAdc[0][5] int ai 0
-OUTVARIABLE BSC_GEO_H3_OVERFLOW epicsOutput.overflowAdc[0][6] int ai 0
-OUTVARIABLE BSC_GEO_H4_OVERFLOW epicsOutput.overflowAdc[0][7] int ai 0
-OUTVARIABLE BSC_POS_V1_OVERFLOW epicsOutput.overflowAdc[0][8] int ai 0
-OUTVARIABLE BSC_POS_V2_OVERFLOW epicsOutput.overflowAdc[0][9] int ai 0
-OUTVARIABLE BSC_POS_V3_OVERFLOW epicsOutput.overflowAdc[0][10] int ai 0
-OUTVARIABLE BSC_POS_V4_OVERFLOW epicsOutput.overflowAdc[0][11] int ai 0
-OUTVARIABLE BSC_POS_H1_OVERFLOW epicsOutput.overflowAdc[0][12] int ai 0
-OUTVARIABLE BSC_POS_H2_OVERFLOW epicsOutput.overflowAdc[0][13] int ai 0
-OUTVARIABLE BSC_POS_H3_OVERFLOW epicsOutput.overflowAdc[0][14] int ai 0
-OUTVARIABLE BSC_POS_H4_OVERFLOW epicsOutput.overflowAdc[0][15] int ai 0
-OUTVARIABLE BSC_WIT_1_OVERFLOW epicsOutput.overflowAdc[0][16] int ai 0
-OUTVARIABLE BSC_WIT_2_OVERFLOW epicsOutput.overflowAdc[0][17] int ai 0
-OUTVARIABLE BSC_WIT_3_OVERFLOW epicsOutput.overflowAdc[0][18] int ai 0
-OUTVARIABLE BSC_WIT_4_OVERFLOW epicsOutput.overflowAdc[0][19] int ai 0
-OUTVARIABLE BSC_SPARE1 hepi[0].spares[0] int ai 0
-OUTVARIABLE BSC_SPARE2 hepi[0].spares[1] int ai 0
-OUTVARIABLE BSC_LSC_LOCK hepi[0].lscLock int ai 0
-OUTVARIABLE BSC_WD_LO_BYTE hepi[0].wdLoBytes int ai 0
-OUTVARIABLE BSC_WD_HI_BYTE hepi[0].wdHiBytes int ai 0
-OUTVARIABLE BSC_WD_LO_BYTE_F hepi[0].wdLoBytesF int ai 0
-OUTVARIABLE BSC_WD_HI_BYTE_F hepi[0].wdHiBytesF int ai 0
-OUTVARIABLE BSC_WD_TRIP hepi[0].wdTrip int ai 0
-MOMENTARY BSC_WD_RESET hepi[0].wdReset int ai 0
-OUTVARIABLE BSC_STS_X_ABS hepi[0].wdFabs[0][0] float ai 0
-OUTVARIABLE BSC_STS_Y_ABS hepi[0].wdFabs[0][1] float ai 0
-OUTVARIABLE BSC_STS_Z_ABS hepi[0].wdFabs[0][2] float ai 0
-OUTVARIABLE BSC_POS_V1_ABS hepi[0].wdFabs[0][3] float ai 0
-OUTVARIABLE BSC_POS_V2_ABS hepi[0].wdFabs[0][4] float ai 0
-OUTVARIABLE BSC_POS_V3_ABS hepi[0].wdFabs[0][5] float ai 0
-OUTVARIABLE BSC_POS_V4_ABS hepi[0].wdFabs[0][6] float ai 0
-OUTVARIABLE BSC_POS_H1_ABS hepi[0].wdFabs[0][7] float ai 0
-OUTVARIABLE BSC_POS_H2_ABS hepi[0].wdFabs[0][8] float ai 0
-OUTVARIABLE BSC_POS_H3_ABS hepi[0].wdFabs[0][9] float ai 0
-OUTVARIABLE BSC_POS_H4_ABS hepi[0].wdFabs[0][10] float ai 0
-OUTVARIABLE BSC_GEO_V1_ABS hepi[0].wdFabs[0][11] float ai 0
-OUTVARIABLE BSC_GEO_V2_ABS hepi[0].wdFabs[0][12] float ai 0
-OUTVARIABLE BSC_GEO_V3_ABS hepi[0].wdFabs[0][13] float ai 0
-OUTVARIABLE BSC_GEO_V4_ABS hepi[0].wdFabs[0][14] float ai 0
-OUTVARIABLE BSC_GEO_H1_ABS hepi[0].wdFabs[0][15] float ai 0
-OUTVARIABLE BSC_GEO_H2_ABS hepi[0].wdFabs[0][16] float ai 0
-OUTVARIABLE BSC_GEO_H3_ABS hepi[0].wdFabs[0][17] float ai 0
-OUTVARIABLE BSC_GEO_H4_ABS hepi[0].wdFabs[0][18] float ai 0
-OUTVARIABLE BSC_STS_X_FABS hepi[0].wdFabs[1][0] float ai 0
-OUTVARIABLE BSC_STS_Y_FABS hepi[0].wdFabs[1][1] float ai 0
-OUTVARIABLE BSC_STS_Z_FABS hepi[0].wdFabs[1][2] float ai 0
-OUTVARIABLE BSC_POS_V1_FABS hepi[0].wdFabs[1][3] float ai 0
-OUTVARIABLE BSC_POS_V2_FABS hepi[0].wdFabs[1][4] float ai 0
-OUTVARIABLE BSC_POS_V3_FABS hepi[0].wdFabs[1][5] float ai 0
-OUTVARIABLE BSC_POS_V4_FABS hepi[0].wdFabs[1][6] float ai 0
-OUTVARIABLE BSC_POS_H1_FABS hepi[0].wdFabs[1][7] float ai 0
-OUTVARIABLE BSC_POS_H2_FABS hepi[0].wdFabs[1][8] float ai 0
-OUTVARIABLE BSC_POS_H3_FABS hepi[0].wdFabs[1][9] float ai 0
-OUTVARIABLE BSC_POS_H4_FABS hepi[0].wdFabs[1][10] float ai 0
-OUTVARIABLE BSC_GEO_V1_FABS hepi[0].wdFabs[1][11] float ai 0
-OUTVARIABLE BSC_GEO_V2_FABS hepi[0].wdFabs[1][12] float ai 0
-OUTVARIABLE BSC_GEO_V3_FABS hepi[0].wdFabs[1][13] float ai 0
-OUTVARIABLE BSC_GEO_V4_FABS hepi[0].wdFabs[1][14] float ai 0
-OUTVARIABLE BSC_GEO_H1_FABS hepi[0].wdFabs[1][15] float ai 0
-OUTVARIABLE BSC_GEO_H2_FABS hepi[0].wdFabs[1][16] float ai 0
-OUTVARIABLE BSC_GEO_H3_FABS hepi[0].wdFabs[1][17] float ai 0
-OUTVARIABLE BSC_GEO_H4_FABS hepi[0].wdFabs[1][18] float ai 0
-OUTVARIABLE BSC_TRAMP_MON hepi[0].tramp[3] int ai 0
-OUTVARIABLE BSC_GEO_X_RMS_1 hepi[0].geoRms[0] float ai 0 field(PREC,"2")
-OUTVARIABLE BSC_GEO_Y_RMS_1 hepi[0].geoRms[1] float ai 0 field(PREC,"2")
-OUTVARIABLE BSC_GEO_Z_RMS_1 hepi[0].geoRms[2] float ai 0 field(PREC,"2")
-OUTVARIABLE BSC_GEO_X_RMS_2 hepi[0].geoRms[3] float ai 0 field(PREC,"2")
-OUTVARIABLE BSC_GEO_Y_RMS_2 hepi[0].geoRms[4] float ai 0 field(PREC,"2")
-OUTVARIABLE BSC_GEO_Z_RMS_2 hepi[0].geoRms[5] float ai 0 field(PREC,"2")
-OUTVARIABLE BSC_GEO_SV1 hepi[0].geoSen[0] int ai 0
-OUTVARIABLE BSC_GEO_SV2 hepi[0].geoSen[1] int ai 0
-OUTVARIABLE BSC_GEO_SV3 hepi[0].geoSen[2] int ai 0
-OUTVARIABLE BSC_GEO_SV4 hepi[0].geoSen[3] int ai 0
-OUTVARIABLE BSC_GEO_SH1 hepi[0].geoSen[4] int ai 0
-OUTVARIABLE BSC_GEO_SH2 hepi[0].geoSen[5] int ai 0
-OUTVARIABLE BSC_GEO_SH3 hepi[0].geoSen[6] int ai 0
-OUTVARIABLE BSC_GEO_SH4 hepi[0].geoSen[7] int ai 0
-OUTVARIABLE BSC_MMT_SW hepi[0].hepiSwitch[13] int ai 0
+INVARIABLE BSC_LOOP_GAIN sei.BSC_LOOP_GAIN float ai 0 field(PREC,"3")
+INVARIABLE BSC_LOOP_GAIN_TRAMP sei.BSC_LOOP_GAIN_TRAMP int ai 0 field(PREC,"0")
+OUTVARIABLE BSC_LOOP_GAIN_RMON sei.BSC_LOOP_GAIN_RMON int ai 0 field(PREC,"0")
+INVARIABLE BSC_LOOP_SW sei.BSC_LOOP_SW int bi 0 field(ZNAM,"OFF") field(ONAM,"ON")
+INVARIABLE BSC_TILTCORR_GAIN sei.BSC_TILTCORR_GAIN float ai 0 field(PREC,"3")
+INVARIABLE BSC_TILTCORR_GAIN_TRAMP sei.BSC_TILTCORR_GAIN_TRAMP int ai 0 field(PREC,"0")
+OUTVARIABLE BSC_TILTCORR_GAIN_RMON sei.BSC_TILTCORR_GAIN_RMON int ai 0 field(PREC,"0")
+INVARIABLE BSC_TILTCORR_SW sei.BSC_TILTCORR_SW int bi 0 field(ZNAM,"OFF") field(ONAM,"ON")
+INVARIABLE BSC_ACT_GAIN sei.BSC_ACT_GAIN float ai 0 field(PREC,"3")
+INVARIABLE BSC_ACT_GAIN_TRAMP sei.BSC_ACT_GAIN_TRAMP int ai 0 field(PREC,"0")
+OUTVARIABLE BSC_ACT_GAIN_RMON sei.BSC_ACT_GAIN_RMON int ai 0 field(PREC,"0")
+INVARIABLE BSC_ACT_SW sei.BSC_ACT_SW int bi 0 field(ZNAM,"OFF") field(ONAM,"ON")
+OUTVARIABLE BSC_DAC_OUTPUT_H1 sei.BSC_DAC_OUTPUT_H1 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_DAC_OUTPUT_H2 sei.BSC_DAC_OUTPUT_H2 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_DAC_OUTPUT_H3 sei.BSC_DAC_OUTPUT_H3 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_DAC_OUTPUT_H4 sei.BSC_DAC_OUTPUT_H4 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_DAC_OUTPUT_V1 sei.BSC_DAC_OUTPUT_V1 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_DAC_OUTPUT_V2 sei.BSC_DAC_OUTPUT_V2 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_DAC_OUTPUT_V3 sei.BSC_DAC_OUTPUT_V3 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_DAC_OUTPUT_V4 sei.BSC_DAC_OUTPUT_V4 float ai 0 field(PREC,"3")
+INVARIABLE BSC_DC_BIAS_1 sei.BSC_DC_BIAS_1 float ai 0 field(PREC,"3")
+INVARIABLE BSC_DC_BIAS_2 sei.BSC_DC_BIAS_2 float ai 0 field(PREC,"3")
+INVARIABLE BSC_DC_BIAS_3 sei.BSC_DC_BIAS_3 float ai 0 field(PREC,"3")
+INVARIABLE BSC_DC_BIAS_4 sei.BSC_DC_BIAS_4 float ai 0 field(PREC,"3")
+INVARIABLE BSC_DC_BIAS_5 sei.BSC_DC_BIAS_5 float ai 0 field(PREC,"3")
+INVARIABLE BSC_DC_BIAS_6 sei.BSC_DC_BIAS_6 float ai 0 field(PREC,"3")
+INVARIABLE BSC_DC_BIAS_SW sei.BSC_DC_BIAS_SW int bi 0 field(ZNAM,"OFF") field(ONAM,"ON")
+OUTVARIABLE BSC_GEO_SH1 sei.BSC_GEO_SH1 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_GEO_SH2 sei.BSC_GEO_SH2 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_GEO_SH3 sei.BSC_GEO_SH3 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_GEO_SH4 sei.BSC_GEO_SH4 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_GEO_SV1 sei.BSC_GEO_SV1 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_GEO_SV2 sei.BSC_GEO_SV2 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_GEO_SV3 sei.BSC_GEO_SV3 float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_GEO_SV4 sei.BSC_GEO_SV4 float ai 0 field(PREC,"3")
+INVARIABLE BSC_GEO_SW sei.BSC_GEO_SW int bi 0 field(ZNAM,"OFF") field(ONAM,"ON")
+INVARIABLE BSC_POS_SW sei.BSC_POS_SW int bi 0 field(ZNAM,"OFF") field(ONAM,"ON")
+INVARIABLE BSC_STS_RAMP_SW sei.BSC_STS_RAMP_SW int bi 0 field(ZNAM,"OFF") field(ONAM,"ON")
+OUTVARIABLE BSC_WIT_1_SENSOR sei.BSC_WIT_1_SENSOR float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_WIT_2_SENSOR sei.BSC_WIT_2_SENSOR float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_WIT_3_SENSOR sei.BSC_WIT_3_SENSOR float ai 0 field(PREC,"3")
+OUTVARIABLE BSC_WIT_4_SENSOR sei.BSC_WIT_4_SENSOR float ai 0 field(PREC,"3")
+OUTVARIABLE STS1_X sei.STS1_X float ai 0 field(PREC,"3")
+OUTVARIABLE STS1_Y sei.STS1_Y float ai 0 field(PREC,"3")
+OUTVARIABLE STS1_Z sei.STS1_Z float ai 0 field(PREC,"3")
+OUTVARIABLE STS2_X sei.STS2_X float ai 0 field(PREC,"3")
+OUTVARIABLE STS2_Y sei.STS2_Y float ai 0 field(PREC,"3")
+OUTVARIABLE STS2_Z sei.STS2_Z float ai 0 field(PREC,"3")
 
 
-INVARIABLE HAMX_BOOST_SW hepi[1].hepiSwitch[1] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMX_POS_SW hepi[1].hepiSwitch[2] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMX_GEO_SW hepi[1].hepiSwitch[3] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMX_RAMP_SW hepi[1].hepiSwitch[5] int bi 1 field(ZNAM,"IIR") field(ONAM,"FIR")
-MOMENTARY HAMX_TILTCORR_SW hepi[1].hepiSwitch[4] int ai 0
-MOMENTARY HAMX_MODAL_SW hepi[1].hepiSwitch[6] int ai 0
-MOMENTARY HAMX_MASTER_SW hepi[1].hepiSwitch[0] int ai 0
-INVARIABLE HAMX_TIDAL_SW hepi[1].hepiSwitch[7] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMX_DC_BIAS_SW hepi[1].hepiSwitch[8] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMX_STS_SW1 hepi[1].hepiSwitch[9] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMX_STS_SW2 hepi[1].hepiSwitch[10] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMX_STS_SW3 hepi[1].hepiSwitch[11] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMX_STS_SW4 hepi[1].hepiSwitch[12] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMX_OUT_GAIN hepi[1].gain float ai 1 field(PREC,"3") field(HOPR,"1.5") field(LOPR,"0")
-INVARIABLE HAMX_RAMP_TIME hepi[1].rampTime int ai 1 field(HOPR,"64000") field(LOPR,"0")
-INVARIABLE HAMX_TC_TRAMP hepi[1].tramp[0] int ai 1 field(HOPR,"600") field(LOPR,"0")
-INVARIABLE HAMX_LOOP_TRAMP hepi[1].tramp[1] int ai 1 field(HOPR,"600") field(LOPR,"0")
-INVARIABLE HAMX_MASTER_TRAMP hepi[1].tramp[2] int ai 1 field(HOPR,"600") field(LOPR,"0")
-INVARIABLE HAMX_TIDAL_DM_LIMITER hepi[1].tidalLimit[0] float ai 1 field(PREC,"2") 
-INVARIABLE HAMX_TIDAL_CM_LIMITER hepi[1].tidalLimit[1] float ai 1 field(PREC,"2") 
-INVARIABLE HAMX_TIDAL_PD_LIMITER hepi[1].tidalLimit[2] float ai 1 field(PREC,"2") 
-INVARIABLE HAMX_LSC_X_LIMITER hepi[1].lscLimit[0] float ai 1 field(PREC,"2") 
-INVARIABLE HAMX_LSC_Y_LIMITER hepi[1].lscLimit[1] float ai 1 field(PREC,"2") 
-INVARIABLE HAMX_LSC_Z_LIMITER hepi[1].lscLimit[2] float ai 1 field(PREC,"2") 
-INVARIABLE HAMX_LOOP_GAIN hepi[1].loopGain float ai 1 field(PREC,"2") field(HOPR,"1.0") field(LOPR,"0")
-INVARIABLE HAMX_TILTCORR_GAIN hepi[1].tcGain float ai 1 field(PREC,"2") field(HOPR,"1.0") field(LOPR,"0")
-INVARIABLE HAMX_STS_MAX hepi[1].wdLimit[0] int ai 40000
-INVARIABLE HAMX_POS_V_MAX hepi[1].wdLimit[1] int ai 10000
-INVARIABLE HAMX_POS_H_MAX hepi[1].wdLimit[2] int ai 10000
-INVARIABLE HAMX_GEO_V_MAX hepi[1].wdLimit[3] int ai 34000
-INVARIABLE HAMX_GEO_H_MAX hepi[1].wdLimit[4] int ai 34000
-INVARIABLE HAMX_STS_MAX_F hepi[1].wdLimitF[0] int ai 40000
-INVARIABLE HAMX_POS_V_MAX_F hepi[1].wdLimitF[1] int ai 10000
-INVARIABLE HAMX_POS_H_MAX_F hepi[1].wdLimitF[2] int ai 10000
-INVARIABLE HAMX_GEO_V_MAX_F hepi[1].wdLimitF[3] int ai 34000
-INVARIABLE HAMX_GEO_H_MAX_F hepi[1].wdLimitF[4] int ai 34000
-INVARIABLE HAMX_TIDAL_DELAY hepi[1].lscLockTime int ai 60
-OUTVARIABLE HAMX_TIDAL_DM_SIG hepi[1].tidal[0] float ai 0
-OUTVARIABLE HAMX_TIDAL_CM_SIG hepi[1].tidal[1] float ai 0
-OUTVARIABLE HAMX_TIDAL_PD_SIG hepi[1].tidal[2] float ai 0
-OUTVARIABLE HAMX_TIDAL_SUM hepi[1].tidal[3] float ai 0
-OUTVARIABLE HAMX_PUMP_STATUS hepi[1].hepiBinary[0] int ai 1
-OUTVARIABLE HAMX_STS_STATUS hepi[1].hepiBinary[1] int ai 1
-OUTVARIABLE HAMX_DAC_OUTPUT_V1 hepi[1].hepiOutput[0] int ai 1
-OUTVARIABLE HAMX_DAC_OUTPUT_V2 hepi[1].hepiOutput[1] int ai 1
-OUTVARIABLE HAMX_DAC_OUTPUT_V3 hepi[1].hepiOutput[2] int ai 1
-OUTVARIABLE HAMX_DAC_OUTPUT_V4 hepi[1].hepiOutput[3] int ai 1
-OUTVARIABLE HAMX_DAC_OUTPUT_H1 hepi[1].hepiOutput[4] int ai 1
-OUTVARIABLE HAMX_DAC_OUTPUT_H2 hepi[1].hepiOutput[5] int ai 1
-OUTVARIABLE HAMX_DAC_OUTPUT_H3 hepi[1].hepiOutput[6] int ai 1
-OUTVARIABLE HAMX_DAC_OUTPUT_H4 hepi[1].hepiOutput[7] int ai 1
-OUTVARIABLE HAMX_MODAL_MAT_OUT_X hepi[1].modalMatOut[0] int ai 1
-OUTVARIABLE HAMX_MODAL_MAT_OUT_Y hepi[1].modalMatOut[1] int ai 1
-OUTVARIABLE HAMX_MODAL_MAT_OUT_Z hepi[1].modalMatOut[2] int ai 1
-OUTVARIABLE HAMX_MODAL_MAT_OUT_A hepi[1].modalMatOut[3] int ai 1
-OUTVARIABLE HAMX_MODAL_MAT_OUT_B hepi[1].modalMatOut[4] int ai 1
-OUTVARIABLE HAMX_MODAL_MAT_OUT_P hepi[1].modalMatOut[5] int ai 1
-OUTVARIABLE HAMX_MODAL_MAT_OUT_V hepi[1].modalMatOut[6] int ai 1
-OUTVARIABLE HAMX_MODAL_MAT_OUT_H hepi[1].modalMatOut[7] int ai 1
-OUTVARIABLE HAMX_TILTCORR_MAT_V1 hepi[1].tcMatOut[0] int ai 1
-OUTVARIABLE HAMX_TILTCORR_MAT_V2 hepi[1].tcMatOut[1] int ai 1
-OUTVARIABLE HAMX_TILTCORR_MAT_V3 hepi[1].tcMatOut[2] int ai 1
-OUTVARIABLE HAMX_TILTCORR_MAT_V4 hepi[1].tcMatOut[3] int ai 1
-OUTVARIABLE HAMX_TILTCORR_MAT_H1 hepi[1].tcMatOut[4] int ai 1
-OUTVARIABLE HAMX_TILTCORR_MAT_H2 hepi[1].tcMatOut[5] int ai 1
-OUTVARIABLE HAMX_TILTCORR_MAT_H3 hepi[1].tcMatOut[6] int ai 1
-OUTVARIABLE HAMX_TILTCORR_MAT_H4 hepi[1].tcMatOut[7] int ai 1
-OUTVARIABLE HAMX_GEO_V1_OVERFLOW epicsOutput.overflowAdc[0][0] int ai 0
-OUTVARIABLE HAMX_GEO_V2_OVERFLOW epicsOutput.overflowAdc[0][1] int ai 0
-OUTVARIABLE HAMX_GEO_V3_OVERFLOW epicsOutput.overflowAdc[0][2] int ai 0
-OUTVARIABLE HAMX_GEO_V4_OVERFLOW epicsOutput.overflowAdc[0][3] int ai 0
-OUTVARIABLE HAMX_GEO_H1_OVERFLOW epicsOutput.overflowAdc[0][4] int ai 0
-OUTVARIABLE HAMX_GEO_H2_OVERFLOW epicsOutput.overflowAdc[0][5] int ai 0
-OUTVARIABLE HAMX_GEO_H3_OVERFLOW epicsOutput.overflowAdc[0][6] int ai 0
-OUTVARIABLE HAMX_GEO_H4_OVERFLOW epicsOutput.overflowAdc[0][7] int ai 0
-OUTVARIABLE HAMX_POS_V1_OVERFLOW epicsOutput.overflowAdc[0][8] int ai 0
-OUTVARIABLE HAMX_POS_V2_OVERFLOW epicsOutput.overflowAdc[0][9] int ai 0
-OUTVARIABLE HAMX_POS_V3_OVERFLOW epicsOutput.overflowAdc[0][10] int ai 0
-OUTVARIABLE HAMX_POS_V4_OVERFLOW epicsOutput.overflowAdc[0][11] int ai 0
-OUTVARIABLE HAMX_POS_H1_OVERFLOW epicsOutput.overflowAdc[0][12] int ai 0
-OUTVARIABLE HAMX_POS_H2_OVERFLOW epicsOutput.overflowAdc[0][13] int ai 0
-OUTVARIABLE HAMX_POS_H3_OVERFLOW epicsOutput.overflowAdc[0][14] int ai 0
-OUTVARIABLE HAMX_POS_H4_OVERFLOW epicsOutput.overflowAdc[0][15] int ai 0
-OUTVARIABLE HAMX_WIT_1_OVERFLOW epicsOutput.overflowAdc[0][16] int ai 0
-OUTVARIABLE HAMX_WIT_2_OVERFLOW epicsOutput.overflowAdc[0][17] int ai 0
-OUTVARIABLE HAMX_WIT_3_OVERFLOW epicsOutput.overflowAdc[0][18] int ai 0
-OUTVARIABLE HAMX_WIT_4_OVERFLOW epicsOutput.overflowAdc[0][19] int ai 0
-OUTVARIABLE HAMX_SPARE1 hepi[1].spares[0] int ai 0
-OUTVARIABLE HAMX_SPARE2 hepi[1].spares[1] int ai 0
-OUTVARIABLE HAMX_LSC_LOCK hepi[1].lscLock int ai 0
-OUTVARIABLE HAMX_WD_LO_BYTE hepi[1].wdLoBytes int ai 0
-OUTVARIABLE HAMX_WD_HI_BYTE hepi[1].wdHiBytes int ai 0
-OUTVARIABLE HAMX_WD_LO_BYTE_F hepi[1].wdLoBytesF int ai 0
-OUTVARIABLE HAMX_WD_HI_BYTE_F hepi[1].wdHiBytesF int ai 0
-OUTVARIABLE HAMX_WD_TRIP hepi[1].wdTrip int ai 0
-MOMENTARY HAMX_WD_RESET hepi[1].wdReset int ai 0
-OUTVARIABLE HAMX_STS_X_ABS hepi[1].wdFabs[0][0] float ai 0
-OUTVARIABLE HAMX_STS_Y_ABS hepi[1].wdFabs[0][1] float ai 0
-OUTVARIABLE HAMX_STS_Z_ABS hepi[1].wdFabs[0][2] float ai 0
-OUTVARIABLE HAMX_POS_V1_ABS hepi[1].wdFabs[0][3] float ai 0
-OUTVARIABLE HAMX_POS_V2_ABS hepi[1].wdFabs[0][4] float ai 0
-OUTVARIABLE HAMX_POS_V3_ABS hepi[1].wdFabs[0][5] float ai 0
-OUTVARIABLE HAMX_POS_V4_ABS hepi[1].wdFabs[0][6] float ai 0
-OUTVARIABLE HAMX_POS_H1_ABS hepi[1].wdFabs[0][7] float ai 0
-OUTVARIABLE HAMX_POS_H2_ABS hepi[1].wdFabs[0][8] float ai 0
-OUTVARIABLE HAMX_POS_H3_ABS hepi[1].wdFabs[0][9] float ai 0
-OUTVARIABLE HAMX_POS_H4_ABS hepi[1].wdFabs[0][10] float ai 0
-OUTVARIABLE HAMX_GEO_V1_ABS hepi[1].wdFabs[0][11] float ai 0
-OUTVARIABLE HAMX_GEO_V2_ABS hepi[1].wdFabs[0][12] float ai 0
-OUTVARIABLE HAMX_GEO_V3_ABS hepi[1].wdFabs[0][13] float ai 0
-OUTVARIABLE HAMX_GEO_V4_ABS hepi[1].wdFabs[0][14] float ai 0
-OUTVARIABLE HAMX_GEO_H1_ABS hepi[1].wdFabs[0][15] float ai 0
-OUTVARIABLE HAMX_GEO_H2_ABS hepi[1].wdFabs[0][16] float ai 0
-OUTVARIABLE HAMX_GEO_H3_ABS hepi[1].wdFabs[0][17] float ai 0
-OUTVARIABLE HAMX_GEO_H4_ABS hepi[1].wdFabs[0][18] float ai 0
-OUTVARIABLE HAMX_STS_X_FABS hepi[1].wdFabs[1][0] float ai 0
-OUTVARIABLE HAMX_STS_Y_FABS hepi[1].wdFabs[1][1] float ai 0
-OUTVARIABLE HAMX_STS_Z_FABS hepi[1].wdFabs[1][2] float ai 0
-OUTVARIABLE HAMX_POS_V1_FABS hepi[1].wdFabs[1][3] float ai 0
-OUTVARIABLE HAMX_POS_V2_FABS hepi[1].wdFabs[1][4] float ai 0
-OUTVARIABLE HAMX_POS_V3_FABS hepi[1].wdFabs[1][5] float ai 0
-OUTVARIABLE HAMX_POS_V4_FABS hepi[1].wdFabs[1][6] float ai 0
-OUTVARIABLE HAMX_POS_H1_FABS hepi[1].wdFabs[1][7] float ai 0
-OUTVARIABLE HAMX_POS_H2_FABS hepi[1].wdFabs[1][8] float ai 0
-OUTVARIABLE HAMX_POS_H3_FABS hepi[1].wdFabs[1][9] float ai 0
-OUTVARIABLE HAMX_POS_H4_FABS hepi[1].wdFabs[1][10] float ai 0
-OUTVARIABLE HAMX_GEO_V1_FABS hepi[1].wdFabs[1][11] float ai 0
-OUTVARIABLE HAMX_GEO_V2_FABS hepi[1].wdFabs[1][12] float ai 0
-OUTVARIABLE HAMX_GEO_V3_FABS hepi[1].wdFabs[1][13] float ai 0
-OUTVARIABLE HAMX_GEO_V4_FABS hepi[1].wdFabs[1][14] float ai 0
-OUTVARIABLE HAMX_GEO_H1_FABS hepi[1].wdFabs[1][15] float ai 0
-OUTVARIABLE HAMX_GEO_H2_FABS hepi[1].wdFabs[1][16] float ai 0
-OUTVARIABLE HAMX_GEO_H3_FABS hepi[1].wdFabs[1][17] float ai 0
-OUTVARIABLE HAMX_GEO_H4_FABS hepi[1].wdFabs[1][18] float ai 0
-OUTVARIABLE HAMX_TRAMP_MON hepi[1].tramp[3] int ai 0
-OUTVARIABLE HAMX_GEO_X_RMS_1 hepi[1].geoRms[0] float ai 0 field(PREC,"2")
-OUTVARIABLE HAMX_GEO_Y_RMS_1 hepi[1].geoRms[1] float ai 0 field(PREC,"2")
-OUTVARIABLE HAMX_GEO_Z_RMS_1 hepi[1].geoRms[2] float ai 0 field(PREC,"2")
-OUTVARIABLE HAMX_GEO_X_RMS_2 hepi[1].geoRms[3] float ai 0 field(PREC,"2")
-OUTVARIABLE HAMX_GEO_Y_RMS_2 hepi[1].geoRms[4] float ai 0 field(PREC,"2")
-OUTVARIABLE HAMX_GEO_Z_RMS_2 hepi[1].geoRms[5] float ai 0 field(PREC,"2")
-OUTVARIABLE HAMX_GEO_SV1 hepi[1].geoSen[0] int ai 0
-OUTVARIABLE HAMX_GEO_SV2 hepi[1].geoSen[1] int ai 0
-OUTVARIABLE HAMX_GEO_SV3 hepi[1].geoSen[2] int ai 0
-OUTVARIABLE HAMX_GEO_SV4 hepi[1].geoSen[3] int ai 0
-OUTVARIABLE HAMX_GEO_SH1 hepi[1].geoSen[4] int ai 0
-OUTVARIABLE HAMX_GEO_SH2 hepi[1].geoSen[5] int ai 0
-OUTVARIABLE HAMX_GEO_SH3 hepi[1].geoSen[6] int ai 0
-OUTVARIABLE HAMX_GEO_SH4 hepi[1].geoSen[7] int ai 0
-OUTVARIABLE HAMX_MMT_SW hepi[1].hepiSwitch[13] int ai 0
-
-
-INVARIABLE HAMY_BOOST_SW hepi[2].hepiSwitch[1] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMY_POS_SW hepi[2].hepiSwitch[2] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMY_GEO_SW hepi[2].hepiSwitch[3] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMY_RAMP_SW hepi[2].hepiSwitch[5] int bi 1 field(ZNAM,"IIR") field(ONAM,"FIR")
-MOMENTARY HAMY_TILTCORR_SW hepi[2].hepiSwitch[4] int ai 0
-MOMENTARY HAMY_MODAL_SW hepi[2].hepiSwitch[6] int ai 0
-MOMENTARY HAMY_MASTER_SW hepi[2].hepiSwitch[0] int ai 0
-INVARIABLE HAMY_TIDAL_SW hepi[2].hepiSwitch[7] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMY_DC_BIAS_SW hepi[2].hepiSwitch[8] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMY_STS_SW1 hepi[2].hepiSwitch[9] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMY_STS_SW2 hepi[2].hepiSwitch[10] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMY_STS_SW3 hepi[2].hepiSwitch[11] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMY_STS_SW4 hepi[2].hepiSwitch[12] int bi 1 field(ZNAM,"OFF") field(ONAM,"ON")
-INVARIABLE HAMY_OUT_GAIN hepi[2].gain float ai 1 field(PREC,"3") field(HOPR,"1.5") field(LOPR,"0")
-INVARIABLE HAMY_RAMP_TIME hepi[2].rampTime int ai 1 field(HOPR,"64000") field(LOPR,"0")
-INVARIABLE HAMY_TC_TRAMP hepi[2].tramp[0] int ai 1 field(HOPR,"600") field(LOPR,"0")
-INVARIABLE HAMY_LOOP_TRAMP hepi[2].tramp[1] int ai 1 field(HOPR,"600") field(LOPR,"0")
-INVARIABLE HAMY_MASTER_TRAMP hepi[2].tramp[2] int ai 1 field(HOPR,"600") field(LOPR,"0")
-INVARIABLE HAMY_TIDAL_DM_LIMITER hepi[2].tidalLimit[0] float ai 1 field(PREC,"2") 
-INVARIABLE HAMY_TIDAL_CM_LIMITER hepi[2].tidalLimit[1] float ai 1 field(PREC,"2") 
-INVARIABLE HAMY_TIDAL_PD_LIMITER hepi[2].tidalLimit[2] float ai 1 field(PREC,"2") 
-INVARIABLE HAMY_LSC_X_LIMITER hepi[2].lscLimit[0] float ai 1 field(PREC,"2") 
-INVARIABLE HAMY_LSC_Y_LIMITER hepi[2].lscLimit[1] float ai 1 field(PREC,"2") 
-INVARIABLE HAMY_LSC_Z_LIMITER hepi[2].lscLimit[2] float ai 1 field(PREC,"2") 
-INVARIABLE HAMY_LOOP_GAIN hepi[2].loopGain float ai 1 field(PREC,"2") field(HOPR,"1.0") field(LOPR,"0")
-INVARIABLE HAMY_TILTCORR_GAIN hepi[2].tcGain float ai 1 field(PREC,"2") field(HOPR,"1.0") field(LOPR,"0")
-INVARIABLE HAMY_STS_MAX hepi[2].wdLimit[0] int ai 40000
-INVARIABLE HAMY_POS_V_MAX hepi[2].wdLimit[1] int ai 10000
-INVARIABLE HAMY_POS_H_MAX hepi[2].wdLimit[2] int ai 10000
-INVARIABLE HAMY_GEO_V_MAX hepi[2].wdLimit[3] int ai 34000
-INVARIABLE HAMY_GEO_H_MAX hepi[2].wdLimit[4] int ai 34000
-INVARIABLE HAMY_STS_MAX_F hepi[2].wdLimitF[0] int ai 40000
-INVARIABLE HAMY_POS_V_MAX_F hepi[2].wdLimitF[1] int ai 10000
-INVARIABLE HAMY_POS_H_MAX_F hepi[2].wdLimitF[2] int ai 10000
-INVARIABLE HAMY_GEO_V_MAX_F hepi[2].wdLimitF[3] int ai 34000
-INVARIABLE HAMY_GEO_H_MAX_F hepi[2].wdLimitF[4] int ai 34000
-INVARIABLE HAMY_TIDAL_DELAY hepi[2].lscLockTime int ai 60
-OUTVARIABLE HAMY_TIDAL_DM_SIG hepi[2].tidal[0] float ai 0
-OUTVARIABLE HAMY_TIDAL_CM_SIG hepi[2].tidal[1] float ai 0
-OUTVARIABLE HAMY_TIDAL_PD_SIG hepi[2].tidal[2] float ai 0
-OUTVARIABLE HAMY_TIDAL_SUM hepi[2].tidal[3] float ai 0
-OUTVARIABLE HAMY_PUMP_STATUS hepi[2].hepiBinary[0] int ai 1
-OUTVARIABLE HAMY_STS_STATUS hepi[2].hepiBinary[1] int ai 1
-OUTVARIABLE HAMY_DAC_OUTPUT_V1 hepi[2].hepiOutput[0] int ai 1
-OUTVARIABLE HAMY_DAC_OUTPUT_V2 hepi[2].hepiOutput[1] int ai 1
-OUTVARIABLE HAMY_DAC_OUTPUT_V3 hepi[2].hepiOutput[2] int ai 1
-OUTVARIABLE HAMY_DAC_OUTPUT_V4 hepi[2].hepiOutput[3] int ai 1
-OUTVARIABLE HAMY_DAC_OUTPUT_H1 hepi[2].hepiOutput[4] int ai 1
-OUTVARIABLE HAMY_DAC_OUTPUT_H2 hepi[2].hepiOutput[5] int ai 1
-OUTVARIABLE HAMY_DAC_OUTPUT_H3 hepi[2].hepiOutput[6] int ai 1
-OUTVARIABLE HAMY_DAC_OUTPUT_H4 hepi[2].hepiOutput[7] int ai 1
-OUTVARIABLE HAMY_MODAL_MAT_OUT_X hepi[2].modalMatOut[0] int ai 1
-OUTVARIABLE HAMY_MODAL_MAT_OUT_Y hepi[2].modalMatOut[1] int ai 1
-OUTVARIABLE HAMY_MODAL_MAT_OUT_Z hepi[2].modalMatOut[2] int ai 1
-OUTVARIABLE HAMY_MODAL_MAT_OUT_A hepi[2].modalMatOut[3] int ai 1
-OUTVARIABLE HAMY_MODAL_MAT_OUT_B hepi[2].modalMatOut[4] int ai 1
-OUTVARIABLE HAMY_MODAL_MAT_OUT_P hepi[2].modalMatOut[5] int ai 1
-OUTVARIABLE HAMY_MODAL_MAT_OUT_V hepi[2].modalMatOut[6] int ai 1
-OUTVARIABLE HAMY_MODAL_MAT_OUT_H hepi[2].modalMatOut[7] int ai 1
-OUTVARIABLE HAMY_TILTCORR_MAT_V1 hepi[2].tcMatOut[0] int ai 1
-OUTVARIABLE HAMY_TILTCORR_MAT_V2 hepi[2].tcMatOut[1] int ai 1
-OUTVARIABLE HAMY_TILTCORR_MAT_V3 hepi[2].tcMatOut[2] int ai 1
-OUTVARIABLE HAMY_TILTCORR_MAT_V4 hepi[2].tcMatOut[3] int ai 1
-OUTVARIABLE HAMY_TILTCORR_MAT_H1 hepi[2].tcMatOut[4] int ai 1
-OUTVARIABLE HAMY_TILTCORR_MAT_H2 hepi[2].tcMatOut[5] int ai 1
-OUTVARIABLE HAMY_TILTCORR_MAT_H3 hepi[2].tcMatOut[6] int ai 1
-OUTVARIABLE HAMY_TILTCORR_MAT_H4 hepi[2].tcMatOut[7] int ai 1
-OUTVARIABLE HAMY_GEO_V1_OVERFLOW epicsOutput.overflowAdc[0][0] int ai 0
-OUTVARIABLE HAMY_GEO_V2_OVERFLOW epicsOutput.overflowAdc[0][1] int ai 0
-OUTVARIABLE HAMY_GEO_V3_OVERFLOW epicsOutput.overflowAdc[0][2] int ai 0
-OUTVARIABLE HAMY_GEO_V4_OVERFLOW epicsOutput.overflowAdc[0][3] int ai 0
-OUTVARIABLE HAMY_GEO_H1_OVERFLOW epicsOutput.overflowAdc[0][4] int ai 0
-OUTVARIABLE HAMY_GEO_H2_OVERFLOW epicsOutput.overflowAdc[0][5] int ai 0
-OUTVARIABLE HAMY_GEO_H3_OVERFLOW epicsOutput.overflowAdc[0][6] int ai 0
-OUTVARIABLE HAMY_GEO_H4_OVERFLOW epicsOutput.overflowAdc[0][7] int ai 0
-OUTVARIABLE HAMY_POS_V1_OVERFLOW epicsOutput.overflowAdc[0][8] int ai 0
-OUTVARIABLE HAMY_POS_V2_OVERFLOW epicsOutput.overflowAdc[0][9] int ai 0
-OUTVARIABLE HAMY_POS_V3_OVERFLOW epicsOutput.overflowAdc[0][10] int ai 0
-OUTVARIABLE HAMY_POS_V4_OVERFLOW epicsOutput.overflowAdc[0][11] int ai 0
-OUTVARIABLE HAMY_POS_H1_OVERFLOW epicsOutput.overflowAdc[0][12] int ai 0
-OUTVARIABLE HAMY_POS_H2_OVERFLOW epicsOutput.overflowAdc[0][13] int ai 0
-OUTVARIABLE HAMY_POS_H3_OVERFLOW epicsOutput.overflowAdc[0][14] int ai 0
-OUTVARIABLE HAMY_POS_H4_OVERFLOW epicsOutput.overflowAdc[0][15] int ai 0
-OUTVARIABLE HAMY_WIT_1_OVERFLOW epicsOutput.overflowAdc[0][16] int ai 0
-OUTVARIABLE HAMY_WIT_2_OVERFLOW epicsOutput.overflowAdc[0][17] int ai 0
-OUTVARIABLE HAMY_WIT_3_OVERFLOW epicsOutput.overflowAdc[0][18] int ai 0
-OUTVARIABLE HAMY_WIT_4_OVERFLOW epicsOutput.overflowAdc[0][19] int ai 0
-OUTVARIABLE HAMY_SPARE1 hepi[2].spares[0] int ai 0
-OUTVARIABLE HAMY_SPARE2 hepi[2].spares[1] int ai 0
-OUTVARIABLE HAMY_LSC_LOCK hepi[2].lscLock int ai 0
-OUTVARIABLE HAMY_WD_LO_BYTE hepi[2].wdLoBytes int ai 0
-OUTVARIABLE HAMY_WD_HI_BYTE hepi[2].wdHiBytes int ai 0
-OUTVARIABLE HAMY_WD_LO_BYTE_F hepi[2].wdLoBytesF int ai 0
-OUTVARIABLE HAMY_WD_HI_BYTE_F hepi[2].wdHiBytesF int ai 0
-OUTVARIABLE HAMY_WD_TRIP hepi[2].wdTrip int ai 0
-MOMENTARY HAMY_WD_RESET hepi[2].wdReset int ai 0
-OUTVARIABLE HAMY_STS_X_ABS hepi[2].wdFabs[0][0] float ai 0
-OUTVARIABLE HAMY_STS_Y_ABS hepi[2].wdFabs[0][1] float ai 0
-OUTVARIABLE HAMY_STS_Z_ABS hepi[2].wdFabs[0][2] float ai 0
-OUTVARIABLE HAMY_POS_V1_ABS hepi[2].wdFabs[0][3] float ai 0
-OUTVARIABLE HAMY_POS_V2_ABS hepi[2].wdFabs[0][4] float ai 0
-OUTVARIABLE HAMY_POS_V3_ABS hepi[2].wdFabs[0][5] float ai 0
-OUTVARIABLE HAMY_POS_V4_ABS hepi[2].wdFabs[0][6] float ai 0
-OUTVARIABLE HAMY_POS_H1_ABS hepi[2].wdFabs[0][7] float ai 0
-OUTVARIABLE HAMY_POS_H2_ABS hepi[2].wdFabs[0][8] float ai 0
-OUTVARIABLE HAMY_POS_H3_ABS hepi[2].wdFabs[0][9] float ai 0
-OUTVARIABLE HAMY_POS_H4_ABS hepi[2].wdFabs[0][10] float ai 0
-OUTVARIABLE HAMY_GEO_V1_ABS hepi[2].wdFabs[0][11] float ai 0
-OUTVARIABLE HAMY_GEO_V2_ABS hepi[2].wdFabs[0][12] float ai 0
-OUTVARIABLE HAMY_GEO_V3_ABS hepi[2].wdFabs[0][13] float ai 0
-OUTVARIABLE HAMY_GEO_V4_ABS hepi[2].wdFabs[0][14] float ai 0
-OUTVARIABLE HAMY_GEO_H1_ABS hepi[2].wdFabs[0][15] float ai 0
-OUTVARIABLE HAMY_GEO_H2_ABS hepi[2].wdFabs[0][16] float ai 0
-OUTVARIABLE HAMY_GEO_H3_ABS hepi[2].wdFabs[0][17] float ai 0
-OUTVARIABLE HAMY_GEO_H4_ABS hepi[2].wdFabs[0][18] float ai 0
-OUTVARIABLE HAMY_STS_X_FABS hepi[2].wdFabs[1][0] float ai 0
-OUTVARIABLE HAMY_STS_Y_FABS hepi[2].wdFabs[1][1] float ai 0
-OUTVARIABLE HAMY_STS_Z_FABS hepi[2].wdFabs[1][2] float ai 0
-OUTVARIABLE HAMY_POS_V1_FABS hepi[2].wdFabs[1][3] float ai 0
-OUTVARIABLE HAMY_POS_V2_FABS hepi[2].wdFabs[1][4] float ai 0
-OUTVARIABLE HAMY_POS_V3_FABS hepi[2].wdFabs[1][5] float ai 0
-OUTVARIABLE HAMY_POS_V4_FABS hepi[2].wdFabs[1][6] float ai 0
-OUTVARIABLE HAMY_POS_H1_FABS hepi[2].wdFabs[1][7] float ai 0
-OUTVARIABLE HAMY_POS_H2_FABS hepi[2].wdFabs[1][8] float ai 0
-OUTVARIABLE HAMY_POS_H3_FABS hepi[2].wdFabs[1][9] float ai 0
-OUTVARIABLE HAMY_POS_H4_FABS hepi[2].wdFabs[1][10] float ai 0
-OUTVARIABLE HAMY_GEO_V1_FABS hepi[2].wdFabs[1][11] float ai 0
-OUTVARIABLE HAMY_GEO_V2_FABS hepi[2].wdFabs[1][12] float ai 0
-OUTVARIABLE HAMY_GEO_V3_FABS hepi[2].wdFabs[1][13] float ai 0
-OUTVARIABLE HAMY_GEO_V4_FABS hepi[2].wdFabs[1][14] float ai 0
-OUTVARIABLE HAMY_GEO_H1_FABS hepi[2].wdFabs[1][15] float ai 0
-OUTVARIABLE HAMY_GEO_H2_FABS hepi[2].wdFabs[1][16] float ai 0
-OUTVARIABLE HAMY_GEO_H3_FABS hepi[2].wdFabs[1][17] float ai 0
-OUTVARIABLE HAMY_GEO_H4_FABS hepi[2].wdFabs[1][18] float ai 0
-OUTVARIABLE HAMY_TRAMP_MON hepi[2].tramp[3] int ai 0
-OUTVARIABLE HAMY_GEO_X_RMS_1 hepi[2].geoRms[0] float ai 0 field(PREC,"2")
-OUTVARIABLE HAMY_GEO_Y_RMS_1 hepi[2].geoRms[1] float ai 0 field(PREC,"2")
-OUTVARIABLE HAMY_GEO_Z_RMS_1 hepi[2].geoRms[2] float ai 0 field(PREC,"2")
-OUTVARIABLE HAMY_GEO_X_RMS_2 hepi[2].geoRms[3] float ai 0 field(PREC,"2")
-OUTVARIABLE HAMY_GEO_Y_RMS_2 hepi[2].geoRms[4] float ai 0 field(PREC,"2")
-OUTVARIABLE HAMY_GEO_Z_RMS_2 hepi[2].geoRms[5] float ai 0 field(PREC,"2")
-OUTVARIABLE HAMY_GEO_SV1 hepi[2].geoSen[0] int ai 0
-OUTVARIABLE HAMY_GEO_SV2 hepi[2].geoSen[1] int ai 0
-OUTVARIABLE HAMY_GEO_SV3 hepi[2].geoSen[2] int ai 0
-OUTVARIABLE HAMY_GEO_SV4 hepi[2].geoSen[3] int ai 0
-OUTVARIABLE HAMY_GEO_SH1 hepi[2].geoSen[4] int ai 0
-OUTVARIABLE HAMY_GEO_SH2 hepi[2].geoSen[5] int ai 0
-OUTVARIABLE HAMY_GEO_SH3 hepi[2].geoSen[6] int ai 0
-OUTVARIABLE HAMY_GEO_SH4 hepi[2].geoSen[7] int ai 0
-OUTVARIABLE HAMY_MMT_SW hepi[2].hepiSwitch[13] int ai 0
-
-OUTVARIABLE STS1_X sts[0].stsIn[0] int ai 0
-OUTVARIABLE STS1_Y sts[0].stsIn[1] int ai 0
-OUTVARIABLE STS1_Z sts[0].stsIn[2] int ai 0
-OUTVARIABLE STS2_X sts[1].stsIn[0] int ai 0
-OUTVARIABLE STS2_Y sts[1].stsIn[1] int ai 0
-OUTVARIABLE STS2_Z sts[1].stsIn[2] int ai 0
-MOMENTARY STS1_FIR_X_SW1 sts[0].firSw1[0] int ai 0
-MOMENTARY STS1_FIR_Y_SW1 sts[0].firSw1[1] int ai 0
-MOMENTARY STS2_FIR_X_SW1 sts[1].firSw1[0] int ai 0
-MOMENTARY STS2_FIR_Y_SW1 sts[1].firSw1[1] int ai 0
-INVARIABLE STS1_FIR_X_OFFSET sts[0].firOffset[0] int ai 0
-INVARIABLE STS1_FIR_Y_OFFSET sts[0].firOffset[1] int ai 0
-INVARIABLE STS2_FIR_X_OFFSET sts[1].firOffset[0] int ai 0
-INVARIABLE STS2_FIR_Y_OFFSET sts[1].firOffset[1] int ai 0
-INVARIABLE STS1_FIR_X_GAIN sts[0].firGain[0] int ai 0
-INVARIABLE STS1_FIR_Y_GAIN sts[0].firGain[1] int ai 0
-INVARIABLE STS2_FIR_X_GAIN sts[1].firGain[0] int ai 0
-INVARIABLE STS2_FIR_Y_GAIN sts[1].firGain[1] int ai 0
-INVARIABLE STS1_FIR_X_LIMIT sts[0].firLimit[0] int ai 0
-INVARIABLE STS1_FIR_Y_LIMIT sts[0].firLimit[1] int ai 0
-INVARIABLE STS2_FIR_X_LIMIT sts[1].firLimit[0] int ai 0
-INVARIABLE STS2_FIR_Y_LIMIT sts[1].firLimit[1] int ai 0
-OUTVARIABLE STS1_MASS_POS_X sts[0].massPos[0] int ai 0
-OUTVARIABLE STS1_MASS_POS_Y sts[0].massPos[1] int ai 0
-OUTVARIABLE STS1_MASS_POS_Z sts[0].massPos[2] int ai 0
-OUTVARIABLE STS2_MASS_POS_X sts[1].massPos[0] int ai 0
-OUTVARIABLE STS2_MASS_POS_Y sts[1].massPos[1] int ai 0
-OUTVARIABLE STS2_MASS_POS_Z sts[1].massPos[2] int ai 0
-OUTVARIABLE STS1_FIR_X_SW1R sts[0].firSw1R[0] int ai 0
-OUTVARIABLE STS1_FIR_Y_SW1R sts[0].firSw1R[1] int ai 0
-OUTVARIABLE STS2_FIR_X_SW1R sts[1].firSw1R[0] int ai 0
-OUTVARIABLE STS2_FIR_Y_SW1R sts[1].firSw1R[1] int ai 0
-OUTVARIABLE STS1_X_OVERFLOW epicsOutput.overflowAdc[0][20] int ai 0
-OUTVARIABLE STS1_Y_OVERFLOW epicsOutput.overflowAdc[0][21] int ai 0
-OUTVARIABLE STS1_Z_OVERFLOW epicsOutput.overflowAdc[0][22] int ai 0
-OUTVARIABLE STS2_X_OVERFLOW epicsOutput.overflowAdc[0][20] int ai 0
-OUTVARIABLE STS2_Y_OVERFLOW epicsOutput.overflowAdc[0][21] int ai 0
-OUTVARIABLE STS2_Z_OVERFLOW epicsOutput.overflowAdc[0][22] int ai 0
-OUTVARIABLE MASTER_OVERFLOW epicsOutput.ovAccum int ai 0
-
-OUTVARIABLE ADC_OVERFLOW_0_00 epicsOutput.overflowAdc[0][0] int ai 0
-OUTVARIABLE ADC_OVERFLOW_0_01 epicsOutput.overflowAdc[0][1] int ai 0
-OUTVARIABLE ADC_OVERFLOW_0_02 epicsOutput.overflowAdc[0][2] int ai 0
-OUTVARIABLE ADC_OVERFLOW_0_03 epicsOutput.overflowAdc[0][3] int ai 0
-OUTVARIABLE ADC_OVERFLOW_0_04 epicsOutput.overflowAdc[0][4] int ai 0
-OUTVARIABLE ADC_OVERFLOW_0_05 epicsOutput.overflowAdc[0][5] int ai 0
-OUTVARIABLE ADC_OVERFLOW_0_06 epicsOutput.overflowAdc[0][6] int ai 0
-OUTVARIABLE ADC_OVERFLOW_0_07 epicsOutput.overflowAdc[0][7] int ai 0
-OUTVARIABLE ADC_OVERFLOW_0_08 epicsOutput.overflowAdc[0][8] int ai 0
-OUTVARIABLE ADC_OVERFLOW_0_09 epicsOutput.overflowAdc[0][9] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_0 epicsOutput.overflowAdc[0][0] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_1 epicsOutput.overflowAdc[0][1] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_2 epicsOutput.overflowAdc[0][2] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_3 epicsOutput.overflowAdc[0][3] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_4 epicsOutput.overflowAdc[0][4] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_5 epicsOutput.overflowAdc[0][5] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_6 epicsOutput.overflowAdc[0][6] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_7 epicsOutput.overflowAdc[0][7] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_8 epicsOutput.overflowAdc[0][8] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_9 epicsOutput.overflowAdc[0][9] int ai 0
 OUTVARIABLE ADC_OVERFLOW_0_10 epicsOutput.overflowAdc[0][10] int ai 0
 OUTVARIABLE ADC_OVERFLOW_0_11 epicsOutput.overflowAdc[0][11] int ai 0
 OUTVARIABLE ADC_OVERFLOW_0_12 epicsOutput.overflowAdc[0][12] int ai 0
@@ -912,16 +248,16 @@ OUTVARIABLE ADC_OVERFLOW_0_28 epicsOutput.overflowAdc[0][28] int ai 0
 OUTVARIABLE ADC_OVERFLOW_0_29 epicsOutput.overflowAdc[0][29] int ai 0
 OUTVARIABLE ADC_OVERFLOW_0_30 epicsOutput.overflowAdc[0][30] int ai 0
 OUTVARIABLE ADC_OVERFLOW_0_31 epicsOutput.overflowAdc[0][31] int ai 0
-OUTVARIABLE ADC_OVERFLOW_1_00 epicsOutput.overflowAdc[1][0] int ai 0
-OUTVARIABLE ADC_OVERFLOW_1_01 epicsOutput.overflowAdc[1][1] int ai 0
-OUTVARIABLE ADC_OVERFLOW_1_02 epicsOutput.overflowAdc[1][2] int ai 0
-OUTVARIABLE ADC_OVERFLOW_1_03 epicsOutput.overflowAdc[1][3] int ai 0
-OUTVARIABLE ADC_OVERFLOW_1_04 epicsOutput.overflowAdc[1][4] int ai 0
-OUTVARIABLE ADC_OVERFLOW_1_05 epicsOutput.overflowAdc[1][5] int ai 0
-OUTVARIABLE ADC_OVERFLOW_1_06 epicsOutput.overflowAdc[1][6] int ai 0
-OUTVARIABLE ADC_OVERFLOW_1_07 epicsOutput.overflowAdc[1][7] int ai 0
-OUTVARIABLE ADC_OVERFLOW_1_08 epicsOutput.overflowAdc[1][8] int ai 0
-OUTVARIABLE ADC_OVERFLOW_1_09 epicsOutput.overflowAdc[1][9] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_0 epicsOutput.overflowAdc[1][0] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_1 epicsOutput.overflowAdc[1][1] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_2 epicsOutput.overflowAdc[1][2] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_3 epicsOutput.overflowAdc[1][3] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_4 epicsOutput.overflowAdc[1][4] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_5 epicsOutput.overflowAdc[1][5] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_6 epicsOutput.overflowAdc[1][6] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_7 epicsOutput.overflowAdc[1][7] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_8 epicsOutput.overflowAdc[1][8] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_9 epicsOutput.overflowAdc[1][9] int ai 0
 OUTVARIABLE ADC_OVERFLOW_1_10 epicsOutput.overflowAdc[1][10] int ai 0
 OUTVARIABLE ADC_OVERFLOW_1_11 epicsOutput.overflowAdc[1][11] int ai 0
 OUTVARIABLE ADC_OVERFLOW_1_12 epicsOutput.overflowAdc[1][12] int ai 0
@@ -944,40 +280,28 @@ OUTVARIABLE ADC_OVERFLOW_1_28 epicsOutput.overflowAdc[1][28] int ai 0
 OUTVARIABLE ADC_OVERFLOW_1_29 epicsOutput.overflowAdc[1][29] int ai 0
 OUTVARIABLE ADC_OVERFLOW_1_30 epicsOutput.overflowAdc[1][30] int ai 0
 OUTVARIABLE ADC_OVERFLOW_1_31 epicsOutput.overflowAdc[1][31] int ai 0
-OUTVARIABLE DAC_OVERFLOW_0_00 epicsOutput.overflowDac[0][0] int ai 0
-OUTVARIABLE DAC_OVERFLOW_0_01 epicsOutput.overflowDac[0][1] int ai 0
-OUTVARIABLE DAC_OVERFLOW_0_02 epicsOutput.overflowDac[0][2] int ai 0
-OUTVARIABLE DAC_OVERFLOW_0_03 epicsOutput.overflowDac[0][3] int ai 0
-OUTVARIABLE DAC_OVERFLOW_0_04 epicsOutput.overflowDac[0][4] int ai 0
-OUTVARIABLE DAC_OVERFLOW_0_05 epicsOutput.overflowDac[0][5] int ai 0
-OUTVARIABLE DAC_OVERFLOW_0_06 epicsOutput.overflowDac[0][6] int ai 0
-OUTVARIABLE DAC_OVERFLOW_0_07 epicsOutput.overflowDac[0][7] int ai 0
-OUTVARIABLE DAC_OVERFLOW_0_08 epicsOutput.overflowDac[0][8] int ai 0
-OUTVARIABLE DAC_OVERFLOW_0_09 epicsOutput.overflowDac[0][9] int ai 0
+
+
+OUTVARIABLE DAC_OVERFLOW_0_0 epicsOutput.overflowDac[0][0] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_1 epicsOutput.overflowDac[0][1] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_2 epicsOutput.overflowDac[0][2] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_3 epicsOutput.overflowDac[0][3] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_4 epicsOutput.overflowDac[0][4] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_5 epicsOutput.overflowDac[0][5] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_6 epicsOutput.overflowDac[0][6] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_7 epicsOutput.overflowDac[0][7] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_8 epicsOutput.overflowDac[0][8] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_9 epicsOutput.overflowDac[0][9] int ai 0
 OUTVARIABLE DAC_OVERFLOW_0_10 epicsOutput.overflowDac[0][10] int ai 0
 OUTVARIABLE DAC_OVERFLOW_0_11 epicsOutput.overflowDac[0][11] int ai 0
 OUTVARIABLE DAC_OVERFLOW_0_12 epicsOutput.overflowDac[0][12] int ai 0
 OUTVARIABLE DAC_OVERFLOW_0_13 epicsOutput.overflowDac[0][13] int ai 0
 OUTVARIABLE DAC_OVERFLOW_0_14 epicsOutput.overflowDac[0][14] int ai 0
 OUTVARIABLE DAC_OVERFLOW_0_15 epicsOutput.overflowDac[0][15] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_00 epicsOutput.overflowDac[1][0] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_01 epicsOutput.overflowDac[1][1] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_02 epicsOutput.overflowDac[1][2] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_03 epicsOutput.overflowDac[1][3] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_04 epicsOutput.overflowDac[1][4] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_05 epicsOutput.overflowDac[1][5] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_06 epicsOutput.overflowDac[1][6] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_07 epicsOutput.overflowDac[1][7] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_08 epicsOutput.overflowDac[1][8] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_09 epicsOutput.overflowDac[1][9] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_10 epicsOutput.overflowDac[1][10] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_11 epicsOutput.overflowDac[1][11] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_12 epicsOutput.overflowDac[1][12] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_13 epicsOutput.overflowDac[1][13] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_14 epicsOutput.overflowDac[1][14] int ai 0
-OUTVARIABLE DAC_OVERFLOW_1_15 epicsOutput.overflowDac[1][15] int ai 0
+OUTVARIABLE ACCUM_OVERFLOW epicsOutput.ovAccum int ai 0
 
 
 systems SEI-
-gds_config 21250 31250 400 1200
+gds_config 20000 30000 1250 1250
+
 
