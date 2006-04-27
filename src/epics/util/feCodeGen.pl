@@ -47,6 +47,7 @@ $adcCnt = 0;
 $dacCnt = 0;
 $filtCnt = 0;
 $firCnt = 0;
+$useWd = 0;
 
 # Clear the part input and output counters
 for($ii=0;$ii<300;$ii++)
@@ -349,6 +350,12 @@ while (<IN>) {
 		#print "$partCnt is type MULTI_SW\n";
 		$partErr = 0;
 	}
+	if (substr($var2,0,7) eq "cdsSWD1") {
+		$partType[$partCnt] = SEI_WD1;
+		#print "$partCnt is type MULTI_SW\n";
+		$useWd = 1;
+		$partErr = 0;
+	}
 	if (substr($var2,0,13) eq "cdsRampSwitch") {
 		$partType[$partCnt] = RAMP_SW;
 		# print "$partCnt is type RAMP_SW\n";
@@ -510,9 +517,9 @@ $foundCon = 0;
 	   {
 		if($partType[$kk] eq "INPUT")
 		{
-	      for($ll=0;$ll<$partInCnt[$kk];$ll++)
+	      for($ll=0;$ll<$partOutCnt[$kk];$ll++)
         	{
-		if(($partOutput[$ii][$jj] eq $partInput[$kk][$ll]) && ($partOutputPort[$ii][$jj] == $partInputPort[$kk][$ll]))
+		if(($partOutput[$ii][$jj] eq $partInput[$kk][0]) && ($partOutputPort[$ii][$jj] == $partInputPort[$kk][0]))
 		{
 			#$partOutput[$ii][$jj] = $xpartName[$kk];
 			#$partOutNum[$ii][$jj] = $kk;
@@ -1001,6 +1008,21 @@ print OUTH "\tint overflowAdc[4][32];\n";
 print OUTH "\tint overflowDac[4][16];\n";
 print OUTH "\tint ovAccum;\n";
 print OUTH "} CDS_EPICS_OUT;\n\n";
+if($useWd)
+{
+print OUTH "typedef struct SEI_WATCHDOG {\n";
+print OUTH "\tint trip;\n";
+print OUTH "\tint reset;\n";
+print OUTH "\tint status\[3\];\n";
+print OUTH "\tint senCount[20];\n";
+print OUTH "\tint senCountHold[20];\n";
+print OUTH "\tint filtMax[20];\n";
+print OUTH "\tint filtMaxHold[20];\n";
+print OUTH "\tint tripSetF[5];\n";
+print OUTH "\tint tripSetR[5];\n";
+print OUTH "\tint tripState;\n";
+print OUTH "} SEI_WATCHDOG;\n\n";
+}
 print OUTH "typedef struct \U$systemName {\n";
 print EPICS "\nEPICS CDS_EPICS dspSpace coeffSpace epicsSpace\n\n";
 for($ii=0;$ii<$partCnt;$ii++)
@@ -1040,6 +1062,9 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUTH "\tfloat $xpartName[$ii];\n";
 		print OUTH "\tint $xpartName[$ii]\_TRAMP;\n";
 		print OUTH "\tint $xpartName[$ii]\_RMON;\n";
+	}
+	if($partType[$ii] eq "SEI_WD1") {
+		print OUTH "\tSEI_WATCHDOG $xpartName[$ii];\n";
 	}
 }
 print EPICS "\n\n";
@@ -1088,6 +1113,61 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print EPICS "INVARIABLE $xpartName[$ii]\_TRAMP $systemName\.$xpartName[$ii]\_TRAMP int ai 0 field(PREC,\"0\")\n";
 		print EPICS "OUTVARIABLE $xpartName[$ii]\_RMON $systemName\.$xpartName[$ii]\_RMON int ai 0 field(PREC,\"0\")\n";
 	}
+	if($partType[$ii] eq "SEI_WD1") {
+		print EPICS "DUMMY $xpartName[$ii]\_STATUS int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_S0 $systemName\.$xpartName[$ii]\.status[0] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_S1 $systemName\.$xpartName[$ii]\.status[1] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_S2 $systemName\.$xpartName[$ii]\.status[2] int ai 0 \n";
+		print EPICS "DUMMY $xpartName[$ii]\_RESET int ai 0 \n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_MAX_S $systemName\.$xpartName[$ii]\.tripSetR\[0\] int ai 0 \n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_MAX_PV $systemName\.$xpartName[$ii]\.tripSetR\[1\] int ai 0 \n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_MAX_PH $systemName\.$xpartName[$ii]\.tripSetR\[2\] int ai 0 \n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_MAX_GV $systemName\.$xpartName[$ii]\.tripSetR\[3\] int ai 0 \n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_MAX_GH $systemName\.$xpartName[$ii]\.tripSetR\[4\] int ai 0 \n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_MAX_SF $systemName\.$xpartName[$ii]\.tripSetF\[0\] int ai 0 \n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_MAX_PVF $systemName\.$xpartName[$ii]\.tripSetF\[1\] int ai 0 \n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_MAX_PHF $systemName\.$xpartName[$ii]\.tripSetF\[2\] int ai 0 \n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_MAX_GVF $systemName\.$xpartName[$ii]\.tripSetF\[3\] int ai 0 \n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_MAX_GHF $systemName\.$xpartName[$ii]\.tripSetF\[4\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_STXF $systemName\.$xpartName[$ii]\.filtMaxHold\[0\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_STYF $systemName\.$xpartName[$ii]\.filtMaxHold\[1\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_STZF $systemName\.$xpartName[$ii]\.filtMaxHold\[2\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PV1F $systemName\.$xpartName[$ii]\.filtMaxHold\[3\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PV2F $systemName\.$xpartName[$ii]\.filtMaxHold\[4\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PV3F $systemName\.$xpartName[$ii]\.filtMaxHold\[5\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PV4F $systemName\.$xpartName[$ii]\.filtMaxHold\[6\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PH1F $systemName\.$xpartName[$ii]\.filtMaxHold\[7\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PH2F $systemName\.$xpartName[$ii]\.filtMaxHold\[8\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PH3F $systemName\.$xpartName[$ii]\.filtMaxHold\[9\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PH4F $systemName\.$xpartName[$ii]\.filtMaxHold\[10\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GV1F $systemName\.$xpartName[$ii]\.filtMaxHold\[11\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GV2F $systemName\.$xpartName[$ii]\.filtMaxHold\[12\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GV3F $systemName\.$xpartName[$ii]\.filtMaxHold\[13\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GV4F $systemName\.$xpartName[$ii]\.filtMaxHold\[14\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GH1F $systemName\.$xpartName[$ii]\.filtMaxHold\[15\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GH2F $systemName\.$xpartName[$ii]\.filtMaxHold\[16\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GH3F $systemName\.$xpartName[$ii]\.filtMaxHold\[17\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GH4F $systemName\.$xpartName[$ii]\.filtMaxHold\[18\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_STX $systemName\.$xpartName[$ii]\.senCountHold\[0\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_STY $systemName\.$xpartName[$ii]\.senCountHold\[1\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_STZ $systemName\.$xpartName[$ii]\.senCountHold\[2\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PV1 $systemName\.$xpartName[$ii]\.senCountHold\[3\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PV2 $systemName\.$xpartName[$ii]\.senCountHold\[4\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PV3 $systemName\.$xpartName[$ii]\.senCountHold\[5\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PV4 $systemName\.$xpartName[$ii]\.senCountHold\[6\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PH1 $systemName\.$xpartName[$ii]\.senCountHold\[7\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PH2 $systemName\.$xpartName[$ii]\.senCountHold\[8\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PH3 $systemName\.$xpartName[$ii]\.senCountHold\[9\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_PH4 $systemName\.$xpartName[$ii]\.senCountHold\[10\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GV1 $systemName\.$xpartName[$ii]\.senCountHold\[11\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GV2 $systemName\.$xpartName[$ii]\.senCountHold\[12\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GV3 $systemName\.$xpartName[$ii]\.senCountHold\[13\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GV4 $systemName\.$xpartName[$ii]\.senCountHold\[14\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GH1 $systemName\.$xpartName[$ii]\.senCountHold\[15\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GH2 $systemName\.$xpartName[$ii]\.senCountHold\[16\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GH3 $systemName\.$xpartName[$ii]\.senCountHold\[17\] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_GH4 $systemName\.$xpartName[$ii]\.senCountHold\[18\] int ai 0 \n";
+	}
 }
 print EPICS "\n\n";
 for($ii=0;$ii<$adcCnt;$ii++)
@@ -1117,7 +1197,7 @@ print EPICS "\n\n";
 print OUT "// ******* This is a computer generated file *******\n";
 print OUT "// ******* DO NOT HAND EDIT ************************\n";
 print OUT "\n\n";
-print OUT "void feCode(double dWord[][32],\t\/* ADC inputs *\/\n";
+print OUT "void feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
 print OUT "\t\tint dacOut[][16],\t\/* DAC outputs *\/\n";
 print OUT "\t\tFILT_MOD *dspPtr,\t\/* Filter Mod variables *\/\n";
 print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
@@ -1153,6 +1233,12 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "PRODUCT") {
 		print OUT "double \L$xpartName[$ii]\[$partOutCnt[$ii]\];\n";
 		print OUT "float $xpartName[$ii]\_CALC;\n";
+	}
+	if($partType[$ii] eq "SEI_WD1"){
+		print OUT "float \L$xpartName[$ii]";
+		print OUT "Filt\[20\];\n";
+		print OUT "float \L$xpartName[$ii]";
+		print OUT "Raw\[20\];\n";
 	}
 }
 print OUT "\n\n";
@@ -1238,6 +1324,40 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   $calcExp .= $fromExp[0];
 	   $calcExp .= ",0);\n";
 	   print OUT "$calcExp";
+	}
+	# ******** SEI_WD1 *************************************************************************
+	if($partType[$mm] eq "SEI_WD1")
+	{
+		$zz = 0;
+		print OUT "// SEI WD GOES HERE ***\n\n";
+		for($qq=0;$qq<$inCnt;$qq+=2)
+		{
+	   		$calcExp = "\L$xpartName[$mm]";
+	   		$calcExp .= "Raw\[";
+	   		$calcExp .= $zz;
+	   		$calcExp .= "\] = ";
+	   		$calcExp .= $fromExp[$qq];
+	   		$calcExp .= ";\n";
+			print OUT "$calcExp";
+			$yy = $qq+1;
+	   		$calcExp = "\L$xpartName[$mm]";
+	   		$calcExp .= "Filt\[";
+	   		$calcExp .= $zz;
+	   		$calcExp .= "\] = ";
+	   		$calcExp .= $fromExp[$yy];
+	   		$calcExp .= ";\n";
+			print OUT "$calcExp";
+			$zz ++;
+		}
+		$calcExp = "seiwd1(cycle,\L$xpartName[$mm]";
+		$calcExp .= "Raw, \L$xpartName[$mm]";
+		$calcExp .= "Filt,\&pLocalEpics->";
+		$calcExp .= $systemName;
+		$calcExp .= "\.";
+		$calcExp .= $xpartName[$mm];
+		$calcExp .= ");\n";
+			print OUT "$calcExp";
+		
 	}
 	# ******** MATRIX *************************************************************************
 	if($partType[$mm] eq "MATRIX")
@@ -1526,6 +1646,10 @@ print OUTME "SRC += src/drv/rfm.c\n";
 print OUTME "SRC += src/drv/param.c\n";
 print OUTME "SRC += src/drv/crc.c\n";
 print OUTME "SRC += src/drv/fmReadCoeff.c\n";
+if($useWd)
+{
+	print OUTME "SRC += src/epics/seq/hepiWatchdog.st\n";
+}
 print OUTME "\n";
 print OUTME "DB += build/\$(TARGET)/";
 print OUTME "$skeleton";
@@ -1537,6 +1661,12 @@ print OUTME "\n";
 print OUTME "SEQ += \'";
 print OUTME "$skeleton";
 print OUTME ",(\"ifo=M1, site=mit, sys=\U$systemName\, \Lsysnum= $dcuId\")\'\n";
+if($useWd)
+{
+print OUTME "SEQ += \'";
+print OUTME "hepiWatchdog";
+print OUTME ",(\"ifo=M1, sys=\U$systemName\")\'\n";
+}
 print OUTME "\n";
 print OUTME "CFLAGS += -D";
 print OUTME "\U$skeleton";
