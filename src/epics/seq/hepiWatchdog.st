@@ -20,7 +20,10 @@ program hepiWatchdog
 %% #include <stdlib.h>
 %% #include <string.h>
 %% #include <math.h>
+%% #include <pthread.h>
 %% #include <fpvalidate.h>
+
+%% extern pthread_mutex_t seq_lock;
 
 %% #define rfm_assign(a,b) if ((a) != (b)) { a = (b); }
 %% #define HEPI_OK		0
@@ -126,7 +129,9 @@ state monWD{
   when(delay(.2)){
 
     /* Process operator requests for WD reset, Loop on/off, master on/off. */
+%%      pthread_mutex_lock (&seq_lock);
         pvGet(wdReset);
+%%      pthread_mutex_unlock (&seq_lock);
 %%      if(wdReset == 1) 
 %%	{
 		/* Send WD reset to front end. */
@@ -163,7 +168,9 @@ state monWD{
 %%      }
 
 	/* Read in Loop On/Off Request */
+%%      pthread_mutex_lock (&seq_lock);
 	pvGet(modalSw);
+%%      pthread_mutex_unlock (&seq_lock);
 	/* If WD at or past LOOP_OFF state, clear the request */
 %%	if(modalSw && (tripState >= HEPI_TRIP_LOOP_OFF))
 %%	{
@@ -172,7 +179,9 @@ state monWD{
 %%	}
 
 	/* Read master on/off switch request. */
+%%      pthread_mutex_lock (&seq_lock);
 	pvGet(masterSw);
+%%      pthread_mutex_unlock (&seq_lock);
 
 	/* If WD has tripped off master switch, clear any ON requests. */
 %%	if(masterSw && (tripState == HEPI_TRIP_MASTER_OFF))
@@ -191,10 +200,12 @@ state monWD{
 %%		tripped = 1;
 		/* Get present sts output filter ramp time and gain settings.
 		   These will be put back on WD reset.				*/
+%%      pthread_mutex_lock (&seq_lock);
 		pvGet(gainX);
 		pvGet(gainY);
 		pvGet(trampX);
 		pvGet(trampY);
+%%      pthread_mutex_unlock (&seq_lock);
 %%		gainXhold = gainX;
 %%		gainYhold = gainY;
 %%		trampHoldX = trampX;
@@ -219,8 +230,10 @@ state monWD{
 	   off the output filters. */
 %%	if((tripState == HEPI_TRIP_RAMP) && (tripCounter > 50))
 %%	{
+%%      pthread_mutex_lock (&seq_lock);
 		pvGet(swXr);
 		pvGet(swYr);
+%%      pthread_mutex_unlock (&seq_lock);
 %%		swX = (swXr & 0x400);
 		pvPut(swX);
 %%		swY = (swYr & 0x400);
@@ -283,7 +296,9 @@ state monWD{
 
 /* ****************************************************************************	*/
 /* Check for Suspension watchdog trips.						*/
+%%      pthread_mutex_lock (&seq_lock);
 	pvGet(masterSw);
+%%      pthread_mutex_unlock (&seq_lock);
 %%	if(masterSw == 0)
 %%	{
 		tiltSw = 0;
