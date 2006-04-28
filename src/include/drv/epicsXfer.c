@@ -50,4 +50,35 @@ inline int checkEpicsReset(int subcycle, CDS_EPICS *plocalEpics){
 
 }
 
+int gainRamp(float gainReq, int rampTime, int id, float *gain)
+{
+
+static int dir[40];
+static float inc[40];
+static float gainFinal[40];
+static float gainOut[40];
+
+        if(gainFinal[id] != gainReq)
+        {
+                inc[id] = rampTime * 2048;
+                inc[id] = (gainReq - gainOut[id]) / inc[id];
+                if(inc[id] <= 0.0) dir[id] = 0;
+                else dir[id] = 1;
+                gainFinal[id] = gainReq;
+        }
+        if(gainFinal[id] == gainOut[id])
+        {
+		*gain = gainOut[id];
+                return(0);
+        }
+        gainOut[id] += inc[id];
+        if((dir[id] == 1) && (gainOut[id] >= gainFinal[id]))
+                gainOut[id] = gainFinal[id];
+        if((dir[id] == 0) && (gainOut[id] <= gainFinal[id]))
+                gainOut[id] = gainFinal[id];
+	*gain = gainOut[id];
+        return(1);
+}
+
+
 
