@@ -48,6 +48,7 @@ $dacCnt = 0;
 $filtCnt = 0;
 $firCnt = 0;
 $useWd = 0;
+$gainCnt = 0;
 
 # Clear the part input and output counters
 for($ii=0;$ii<300;$ii++)
@@ -348,6 +349,10 @@ while (<IN>) {
 	if (substr($var2,0,9) eq "cdsSwitch") {
 		$partType[$partCnt] = MULTI_SW;
 		#print "$partCnt is type MULTI_SW\n";
+		$partErr = 0;
+	}
+	if (substr($var2,0,6) eq "cdsRms") {
+		$partType[$partCnt] = RMS;
 		$partErr = 0;
 	}
 	if (substr($var2,0,7) eq "cdsSWD1") {
@@ -835,7 +840,7 @@ $searchCnt = 0;
 for($ii=0;$ii<$nonSubCnt;$ii++)
 {
       	$xx = $nonSubPart[$ii];
-	if(($partType[$xx] ne "BUSC") && ($partType[$xx] ne "DAC") && ($partType[$xx] ne "BUSS"))
+	if(($partType[$xx] ne "BUSC") && ($partType[$xx] ne "BUSS"))
 	{
 		$searchPart[$partsRemaining] = $xx;
 		$searchCnt ++;
@@ -1115,6 +1120,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 	if($partType[$ii] eq "SEI_WD1") {
 		print EPICS "DUMMY $xpartName[$ii]\_STATUS int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_TRIP $systemName\.$xpartName[$ii]\.trip int ai 0 \n";
 		print EPICS "OUTVARIABLE $xpartName[$ii]\_S0 $systemName\.$xpartName[$ii]\.status[0] int ai 0 \n";
 		print EPICS "OUTVARIABLE $xpartName[$ii]\_S1 $systemName\.$xpartName[$ii]\.status[1] int ai 0 \n";
 		print EPICS "OUTVARIABLE $xpartName[$ii]\_S2 $systemName\.$xpartName[$ii]\.status[2] int ai 0 \n";
@@ -1233,6 +1239,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "PRODUCT") {
 		print OUT "double \L$xpartName[$ii]\[$partOutCnt[$ii]\];\n";
 		print OUT "float $xpartName[$ii]\_CALC;\n";
+	}
+	if($partType[$ii] eq "RMS") {
+		print OUT "float \L$xpartName[$ii];\n";
+		print OUT "float \L$xpartName[$ii]\_avg;\n";
 	}
 	if($partType[$ii] eq "SEI_WD1"){
 		print OUT "float \L$xpartName[$ii]";
@@ -1442,6 +1452,23 @@ for($xx=0;$xx<$processCnt;$xx++)
 			print OUT "pLocalEpics->$systemName\.$xpartName[$mm] = ";
 			print OUT "$fromExp[0];\n";
 	}
+	# ******** DAC OUTPUT ********************************************************************
+	if($partType[$mm] eq "DAC")
+	{
+		$dacNum = substr($xpartName[$mm],4,1);
+		print OUT "// DAC number is $dacNum\n";
+           for($qq=0;$qq<$inCnt;$qq++)
+           {
+		$calcExp = "dacOut\[";
+		$calcExp .= $dacNum;
+		$calcExp .= "\]\[";
+		$calcExp .= $partOutputPort[$mm][$qq];
+		$calcExp .= "\] = ";
+		$calcExp .= $fromExp[$qq];
+		$calcExp .= ";\n";
+		print OUT "$calcExp";
+	   }
+	}
 	# ******** MULTI_SW ************************************************************************
 	if($partType[$mm] eq "MULTI_SW")
 	{
@@ -1535,7 +1562,8 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   	print OUT "pLocalEpics->$systemName\.$xpartName[$mm]";
 	   	print OUT "_RMON = \n\tgainRamp(pLocalEpics->$systemName\.$xpartName[$mm],";
 	   	print OUT "pLocalEpics->$systemName\.$xpartName[$mm]";
-	   	print OUT "_TRAMP,0,\&$xpartName[$mm]\_CALC);";
+	   	print OUT "_TRAMP,";
+	   	print OUT "$gainCnt\,\&$xpartName[$mm]\_CALC);";
 	   	print OUT "\n\n";
 	   	for($qq=0;$qq<$inCnt;$qq++)
 	   	{
@@ -1549,6 +1577,28 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$calcExp .= ";\n";
 			print OUT "$calcExp";
 	   	}
+		$gainCnt ++;
+	}
+	# ******** RMS ************************************************************************
+	if($partType[$mm] eq "RMS")
+	{
+	   	print OUT "// RMS\n";
+		$calcExp = "\L$xpartName[$mm]";
+		$calcExp .= " = ";
+		$calcExp .= $fromExp[0];
+		$calcExp .= ";\n";
+		print OUT "$calcExp";
+		$calcExp = "if(\L$xpartName[$mm]\ \> 2000\) \L$xpartName[$mm] = 2000;\n";
+		print OUT "$calcExp";
+		$calcExp = "if(\L$xpartName[$mm]\ \< -2000\) \L$xpartName[$mm] = 2000;\n";
+		print OUT "$calcExp";
+		$calcExp = "\L$xpartName[$mm] = \L$xpartName[$mm] * \L$xpartName[$mm];\n";
+		print OUT "$calcExp";
+		$calcExp = "\L$xpartName[$mm]\_avg = \L$xpartName[$mm] * \.00005 + ";
+		$calcExp .= "\L$xpartName[$mm]\_avg * 0\.99995;\n";
+		print OUT "$calcExp";
+		$calcExp = "\L$xpartName[$mm] = lsqrt(\L$xpartName[$mm]\_avg);\n";
+		print OUT "$calcExp";
 	}
 
 
