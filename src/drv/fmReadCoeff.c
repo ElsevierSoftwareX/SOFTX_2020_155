@@ -10,12 +10,12 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-char *readSusCoeff_c_cvsid = "$Id: fmReadCoeff.c,v 1.1 2005/10/31 14:30:24 rolf Exp $";
+char *readSusCoeff_c_cvsid = "$Id: fmReadCoeff.c,v 1.2 2006/05/02 21:25:12 aivanov Exp $";
 
 #ifdef unix_test
 /* The number of subsystems (optics) */
-#define FM_SUBSYS_NUM  5
-#define MAX_MODULES    100
+#define FM_SUBSYS_NUM  1
+#define MAX_MODULES    46
 #else
 #ifdef SOLARIS
 #define MAX_MODULES    1
@@ -103,6 +103,10 @@ void memcpy_swap_words(void *dest, void *src) {
   ((char *)dest)[7] = ((char *)src)[3];
 }
 
+#ifdef FIR_FILTERS
+  /* Temporary storage for FIR filter coefficients */
+  double firFiltCoeff[MAX_FIR_MODULES][FILTERS][1 + FIR_TAPS];
+#endif
 
 /* Read system 'fmc' coeffs for subsys 'n' */
 int
@@ -239,6 +243,7 @@ fmReadCoeffFile(fmReadCoeff *fmc, int n)
 #else
     char linebuf[linesize];      /* Lines are put in here when they are read */
 #endif
+    int nFIRFilters = 0;	/* FIR filter count */
 
     for (lineno = 1; fgets(linebuf, linesize, iFile); lineno++) {
       /* Checksum the line */
@@ -282,9 +287,19 @@ fmReadCoeffFile(fmReadCoeff *fmc, int n)
 	      }
 
 	      /* Put the data into placeholder */
-	      for (j = 0; j < 4; j++)
-		curFilter->fmd.filtCoeff[curFilterNum][5 + 4*(curFilter->fmd.filtSections[curFilterNum] - inFilter - 2) + j]
-		  = filtCoeff[j];
+	      if (curFilter->fmd.filterType[curFilterNum]) {
+#ifdef FIR_FILTERS
+		/* FIR filter coeffs */
+	        for (j = 0; j < 4; j++)
+		  firFiltCoeff[curFilter->fmd.filterType[curFilterNum] - 1][curFilterNum][5 + 4*(curFilter->fmd.filtSections[curFilterNum] - inFilter - 2) + j]
+		    = filtCoeff[j];
+#endif
+	      } else {
+		/* IIR filter coeffs */
+	        for (j = 0; j < 4; j++)
+		  curFilter->fmd.filtCoeff[curFilterNum][5 + 4*(curFilter->fmd.filtSections[curFilterNum] - inFilter - 2) + j]
+		    = filtCoeff[j];
+	      }
 	    }
 	  } else {
 	    int num;   /* Filter number in the bank 0-9 */
@@ -294,6 +309,7 @@ fmReadCoeffFile(fmReadCoeff *fmc, int n)
 	    int timeout;
 	    char filtName[32];
 	    double filtCoeff[5];
+	    int filterType;
 
 	    curFilter = 0; curFilterNum = 0;
 
@@ -338,8 +354,30 @@ fmReadCoeffFile(fmReadCoeff *fmc, int n)
 	      return FM_INVALID_INPUT_FILE;
 	    }
 
-	    if (filtSections > 0  && filtSections <= MAX_SO_SECTIONS) {
+	    if (filtSections > 0  && filtSections <=
+#ifdef FIR_FILTERS
+		MAX_FIR_SO_SECTIONS
+#else
+		MAX_SO_SECTIONS
+#endif
+	       )
+	    {
 	      inFilter = filtSections-1; /* Number of continuation lines there should be in the file next */
+#ifdef FIR_FILTERS
+	      /* 0 - IIR; N - FIR */
+	      if (filtSections > MAX_SO_SECTIONS) {
+		/* This is FIR filter */
+		if (nFIRFilters >= MAX_FIR_MODULES) {
+		  sprintf(fmErrMsgTxt, "Too many FIR filters; Maximum is %d\n", MAX_FIR_MODULES);
+              	  sprintf(fmShortErrMsgTxt, "Too many FIRs");
+              	  return FM_INVALID_INPUT_FILE;
+		}
+		++nFIRFilters;
+		filterType = nFIRFilters;
+	      } else filterType = 0;
+#else
+	      filterType = 0;
+#endif
 	    } else {
 	      fatal();
 	      sprintf(fmErrMsgTxt, "Invalid number of SOS on line %d in `%s'\n", lineno, fname);
@@ -413,8 +451,16 @@ fmReadCoeffFile(fmReadCoeff *fmc, int n)
 		curFilter->fmd.ramp[num] = ramp;
 		curFilter->fmd.timout[num] = timeout;
 		strcpy(curFilter->fmd.filtName[num], filtName);
-		for (j = 0; j < 5; j++)
-		  curFilter->fmd.filtCoeff[num][j] = filtCoeff[j];
+		curFilter->fmd.filterType[num] = filterType;
+		if (filterType > 0) {
+#ifdef FIR_FILTERS
+		  for (j = 0; j < 5; j++)
+		    firFiltCoeff[filterType-1][num][j] = filtCoeff[j];
+#endif
+		} else {
+		  for (j = 0; j < 5; j++)
+		    curFilter->fmd.filtCoeff[num][j] = filtCoeff[j];
+		}
 		break;
 	      }
 	    }
@@ -471,6 +517,23 @@ fmReadCoeffFile(fmReadCoeff *fmc, int n)
         coef_crc_len += 3 * sizeof(int);
       }
 
+      unsigned int filterType = fmc->subSys[n].map[i].fmd.filterType[j];
+      fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].filterType[j] = filterType;
+#ifdef FIR_FILTERS
+      if (filterType) {
+        for (k = 0; k < ncoefs; k++) {
+#if defined(__i386__)  || defined(__amd64__)
+	  fmc->pVmeCoeff->firFiltCoeff[filterType-1][j][k] = firFiltCoeff[filterType-1][j][k];
+#else
+#error
+#endif
+	  if (nsections > 0) {
+            coef_crc = crc_ptr ((char *)&(firFiltCoeff[filterType-1][j][k]), sizeof(double), coef_crc);
+	    coef_crc_len += sizeof(double);
+	  }
+        }
+      } else
+#endif
       for (k = 0; k < ncoefs; k++) {
 #if defined(__i386__)  || defined(__amd64__)
 	fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].filtCoeff[j][k] = fmc->subSys[n].map[i].fmd.filtCoeff[j][k];
@@ -554,13 +617,14 @@ fmSubSysMap   mmt3Map[26] = {
   {"OPLEVPIT", 44}, {"OPLEVYAW", 45}
 };
 
-VME_COEF vme_win[MAX_MODULES];
+
+VME_COEF vme_win;
 
 fmReadCoeff fmc = {
   "test", /* Site */
   "h1",  /* Ifo  */
   "sus", /* System */
-  vme_win,
+  &vme_win,
   /* Subsystems */
   {
     {"itmx", "input", 5, itmxMap},
@@ -582,14 +646,34 @@ int main ()
     }
   }
 
-  for (i = 0; i < FM_SUBSYS_NUM; i++){ 
+  for (i = 0; i < MAX_MODULES; i++) {
+    for (j = 0; j < FILTERS; j++) {
+      if (vme_win.vmeCoeffs[i].filterType[j] > 0) {
+	unsigned int fnum = vme_win.vmeCoeffs[i].filterType[j] - 1;
+	printf("Filter module %d; bank %d is FIR\n", i, j);
+	unsigned int nsect = vme_win.vmeCoeffs[i].filtSections[j];
+	unsigned int ncoef = nsect * 4 + 1;
+	printf("Sections=%d; ncoef=%d\n", nsect, ncoef);
+	printf("Gain = %f\n", vme_win.firFiltCoeff[fnum][j][0]);
+	for (k = 1; k < ncoef; k += 4) {
+	  printf("%f %f %f %f\n", vme_win.firFiltCoeff[fnum][j][k],
+				  vme_win.firFiltCoeff[fnum][j][k+1],
+				  vme_win.firFiltCoeff[fnum][j][k+2],
+				  vme_win.firFiltCoeff[fnum][j][k+3]);
+	}
+      }
+    }
+  }
+#if 0
+  for (i = 0; i < FM_SUBSYS_NUM; i++) {
     printf ("%s has %d elements\n", fmc.subSys[i].name, fmc.subSys[i].numMap);
     for (j = 0; j < fmc.subSys[i].numMap; j++) {
       fmSubSysMap *f = fmc.subSys[i].map + j;
-      printf ("\t%s -> %d has %d filters\n", f->name, f->fmModNum, f->filters);
+      printf ("\t%s -> %d has %d filters \n", f->name, f->fmModNum, f->filters);
       for (k = 0; k < FILTERS; k++) {
 	if (f->fmd.filtSections[k]) {
-	  printf("%d %d %d %d %d %s %e %e %e %e %e\n",
+	  printf("%s %d %d %d %d %d %s %e %e %e %e %e\n",
+	         f->fmd.filterType[k]? "FIR": "IIR",
 		 k,
 		 f->fmd.sType[k],
 		 f->fmd.filtSections[k],
@@ -612,6 +696,7 @@ int main ()
       }
     }
   }
+#endif
   return 0;
 }
 #endif

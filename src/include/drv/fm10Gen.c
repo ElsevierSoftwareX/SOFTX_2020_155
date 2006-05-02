@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.4 2006/03/29 13:30:54 rolf Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.5 2006/05/02 21:25:12 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -129,6 +129,48 @@ inline double iir_filter(double input,double *coef,int n,double *history){
   
   return(output);
 }
+
+#ifdef FIR_FILTERS
+/**************************************************************************
+
+fir_filter - Perform fir filtering sample by sample on floats
+
+Requires array of filter coefficients and pointer to history.
+Returns one output sample for each input sample.
+
+float fir_filter(float input,float *coef,int n,float *history)
+
+    double input        new float input sample
+    double *coef        pointer to filter coefficients
+    int n               number of coefficients in filter
+    double *history     history array pointer
+
+Returns float value giving the current output.
+
+*************************************************************************/
+inline double fir_filter(double input, double *coef, int n, double *history)
+{
+    int i;
+    double *hist_ptr,*hist1_ptr,*coef_ptr;
+    double output;
+
+    hist_ptr = history;
+    hist1_ptr = hist_ptr;             /* use for history update */
+    coef_ptr = coef + n - 1;          /* point to last coef */
+
+    /* form output accumulation */
+    output = *hist_ptr++ * (*coef_ptr--);
+    for(i = 2 ; i < n ; i++) {
+        *hist1_ptr++ = *hist_ptr;            /* update history array */
+        output += (*hist_ptr++) * (*coef_ptr--);
+    }
+    output += input * (*coef_ptr);           /* input tap */
+    *hist1_ptr = input;                      /* last history */
+
+    return(output);
+}
+#endif
+
 
 
 /**************************************************************************
@@ -520,14 +562,22 @@ handleEpicsSwitch(UINT32 sw,       /* New input values for the opSwitchE (from t
 /************************************************************************/
 inline void readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_COEF *pRfmCoeff)
 {
-  int ii,jj,kk;
+  int ii,jj,kk,l;
 
   for(ii=bF;ii<sF;ii++)
   {
+#ifdef FIR_FILTERS
+    for(jj = 0; jj < MAX_FIR_MODULES; jj++) {
+	for (kk = 0; kk < FILTERS; kk++) 
+	     for (l = 0; l < MAX_FIR_COEFFS; l++)
+	        filtC->firFiltCoeff[jj][kk][l] = pRfmCoeff->firFiltCoeff[jj][kk][l];
+    }
+#endif
     for(jj=0;jj<FILTERS;jj++)
     {
       if(pRfmCoeff->vmeCoeffs[ii].filtSections[jj])
       {
+        filtC->coeffs[ii].filterType[jj] = pRfmCoeff->vmeCoeffs[ii].filterType[jj];
 	filtC->coeffs[ii].filtSections[jj] =pRfmCoeff->vmeCoeffs[ii].filtSections[jj];
 	filtC->coeffs[ii].sType[jj] = pRfmCoeff->vmeCoeffs[ii].sType[jj];
       	fmt->inputs[ii].rmpcmp[jj] = pRfmCoeff->vmeCoeffs[ii].ramp[jj];
@@ -769,7 +819,15 @@ initVarsId(FILT_MOD *pL,
          volatile VME_COEF *pRfmCoeff,
 	 int id)                         /* System id (HEPI) */
 {
-  int ii,kk,hh;
+  int ii,kk,ll,hh;
+
+#ifdef FIR_FILTERS
+    for (ii = 0; ii < MAX_FIR_MODULES; ii++)
+      for (kk = 0; kk < FILTERS; kk++)
+        for (ll = 0; ll < FIR_POLYPHASE_SIZE; ll++)
+          for (hh = 0; hh < FIR_TAPS; hh++)
+    		pC->firHistory[ii][kk][ll][hh] = 0.0;
+#endif
 
   /*Initialize all the variables */
   for(ii=0;ii<totMod;ii++){
@@ -1120,6 +1178,20 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
     /* If sType is type 22, then the input will go to filter if filter is turning on (ramping up)*/
     sw_in = sType < 20 || sw_out || (sType == 22 && sw);
 
+#ifdef FIR_FILTERS
+    int filterType = pC->coeffs[modNum].filterType[ii];
+    extern int clock16K;
+    int firNum = (clock16K / 32) % 32;
+    if (filterType) {
+	/* FIR filter */
+  	--filterType;
+	double input = fmInput * pC->firFiltCoeff[filterType][ii][0]; /* overall input scale factor */
+	filtData = fir_filter(sw_in?input:0,
+			      &(pC->firFiltCoeff[filterType][ii][1]),
+			      pC->coeffs[modNum].filtSections[ii]*4,
+			      pC->firHistory[filterType][ii][firNum]);
+    } else
+#endif
     /* Calculate filter */
     filtData = iir_filter(sw_in?fmInput:0,
 			  pC->coeffs[modNum].filtCoeff[ii],

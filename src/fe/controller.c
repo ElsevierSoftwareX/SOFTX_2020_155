@@ -167,6 +167,8 @@ double dHistory[96][40];
 #define ADC_DMA_BYTES		0x80
 #endif
 
+int clock16K = 0;
+
 #if 0
 // **************************************************************************
 // Interrupt handler if using interrupts for ADC module
@@ -211,7 +213,6 @@ void *fe_start(void *arg)
 {
 
   int ii,jj,kk;
-  int clock16K = 0;
   int clock1Min = 0;
   int cpuClock[10];
   short adcData[MAX_ADC_MODULES][32];
@@ -501,11 +502,16 @@ void *fe_start(void *arg)
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
 	{
+#if 0
 		if(onePps > 6000) 
 		 {
 			firstTime += 100;
 			onePpsHi = 0;
 		 }
+#endif
+                 firstTime += 100;
+                 onePpsHi = 0;
+
 	}
 
 	if((onePps > 6000) && (onePpsHi == 0))  

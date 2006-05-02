@@ -1,7 +1,7 @@
 #ifndef FM10GEN_H
 #define FM10GEN_H
 
-static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.1 2005/12/20 16:32:09 rolf Exp $";
+static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.2 2006/05/02 21:25:12 aivanov Exp $";
 
 /*****************************************************************************/
 /*ORGANIZATION OF THE SWITCH CONTROL REGISTER*/
@@ -64,6 +64,14 @@ static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.1 2005/12/20 16:32:09 r
 #define MAX_HISTRY      20      /* Max num filter history elements */
 #define MAX_SO_SECTIONS 10	/* Maximum number of second order sections supported */
 
+#ifdef FIR_FILTERS
+#define MAX_FIR_MODULES 4      /* Maximum total number of FIR filters allowed per system */
+#include "fmFir.h"
+#define MAX_FIR_SO_SECTIONS (FIR_TAPS/4)	/* Maximum SOS supported for FIR filters */
+#define MAX_FIR_COEFFS	(FIR_TAPS+1)
+#define FIR_POLYPHASE_SIZE	32		/* The number of parallel polyphase filters */
+#endif
+
 /*masks*/
 #define COEF_MASK       0xFFFFFFFE
 #define HIST_MASK       0xFFFFFFFD
@@ -78,14 +86,14 @@ static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.1 2005/12/20 16:32:09 r
 /*STRUCTURES*/
 
 
-/* Struct of operator input to each optic servo*/
+/* Struct of operator input to each filter module */
 
 typedef struct FM_OP_IN{
   UINT32 opSwitchE;     /* Epics Switch Control Register; 28/32 bits used*/
   UINT32 opSwitchP;     /* PIII Switch Control Register; 28/32 bits used*/
   UINT32 rset;          /* reset switches */
-  float offset;         /* optic servo offset */
-  float outgain;        /*  module gain */
+  float offset;         /* signal offset */
+  float outgain;        /* module gain */
   float limiter;        /* used to limit the filter output to +/- limit val */
   int rmpcmp[FILTERS];  /* ramp counts: ramps on a filter for type 2 output*/
                         /* comparison limit: compare limit for type 3 output*/
@@ -103,7 +111,7 @@ typedef struct FM_GAIN_RAMP {
   unsigned int ramp_cycles_left; /* cycles left to ramp gain */
 } FM_GAIN_RAMP;
 
-/* Struct of data output for each optic servo */
+/* Struct of data output for each filter module */
 
 typedef struct FM_OP_DATA{
   float filterInput;    /* Input to the filter bank module */
@@ -123,12 +131,21 @@ typedef struct FM_OP_COEF{
   int sType[FILTERS];   /* indicates the filter switch in/out type */
   /* float decHist[1024];   history for the decimation filter */
   double decHist[8];
+  /* 0 - IIR; N - FIR, where 0 > N < MAX_FIR_MODULES */
+  /* N-1 shows where coeffictients are. COEF.firFiltCoeff[N-1] */
+  int filterType[FILTERS];
 }FM_OP_COEF;
 
 
 typedef struct COEF{
-
   FM_OP_COEF coeffs[MAX_MODULES];
+
+#ifdef FIR_FILTERS
+  double firFiltCoeff[MAX_FIR_MODULES][FILTERS][MAX_FIR_COEFFS];
+  /* firHistory is huge, 5 megabytes. may need to get rid of FILTERS dimension */
+  double firHistory[MAX_FIR_MODULES][FILTERS][FIR_POLYPHASE_SIZE][FIR_TAPS];
+#endif
+
 }COEF;
 
 typedef struct VME_FM_OP_COEF{
@@ -140,10 +157,16 @@ typedef struct VME_FM_OP_COEF{
   int ramp[FILTERS];
   int timout[FILTERS];
   unsigned int crc;     /* Epics-calculated data checksum */
+  int filterType[FILTERS];       /* 0 - IIR; N - FIR, where 0 > N < MAX_FIR_MODULES  */
 }VME_FM_OP_COEF;
 
 typedef struct VME_COEF{
   VME_FM_OP_COEF vmeCoeffs[MAX_MODULES];
+
+#ifdef FIR_FILTERS
+  double firFiltCoeff[MAX_FIR_MODULES][FILTERS][MAX_FIR_COEFFS];
+#endif
+
 }VME_COEF;
 
 /* Struct of filter names for use in epics screens */
@@ -153,12 +176,12 @@ typedef struct FILT_NAME{
 }FILT_NAME;
 
 
-/*Overall structure for a complete Filter Module*/
+/* Filter modules all in one structure */
 
 typedef struct FILT_MOD{
 
-  FM_OP_IN   inputs[MAX_MODULES];  /*operator inputs to each optic servo*/
-  FM_OP_DATA data[MAX_MODULES];    /*data output for each optic servo*/
+  FM_OP_IN   inputs[MAX_MODULES];  /* operator inputs to each filter module */
+  FM_OP_DATA data[MAX_MODULES];    /* data output for each filter module */
   int cycle;
   int coef_load_error; /* Error flag inidicating problems loading coeffs by a front-end */
 

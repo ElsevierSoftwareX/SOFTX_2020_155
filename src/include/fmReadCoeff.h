@@ -3,7 +3,7 @@
 
 #define NO_FM10GEN_C_CODE
 
-static const char *readSusCoeff_h_cvsid = "$Id: fmReadCoeff.h,v 1.1 2005/12/21 21:42:25 rolf Exp $";
+static const char *readSusCoeff_h_cvsid = "$Id: fmReadCoeff.h,v 1.2 2006/05/02 21:25:12 aivanov Exp $";
 
 /* char vars' length */
 #define CVL  20
@@ -18,8 +18,6 @@ typedef struct fmSubSysMap {
 } fmSubSysMap;
 
 
-/* This structure is defined by the supervisor code
-   which reads the coefficient files */
 typedef struct fmReadCoeff {
 
   /*
