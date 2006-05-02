@@ -27,93 +27,95 @@
 #define BSC_FIR_X_OUT 	 24
 #define BSC_FIR_Y_OUT 	 25
 #define BSC_GEO_H1 	 26
-#define BSC_GEO_H1E 	 27
-#define BSC_GEO_H2 	 28
-#define BSC_GEO_H2E 	 29
-#define BSC_GEO_H3 	 30
-#define BSC_GEO_H3E 	 31
-#define BSC_GEO_H4 	 32
-#define BSC_GEO_H4E 	 33
-#define BSC_GEO_HP 	 34
-#define BSC_GEO_RX 	 35
-#define BSC_GEO_RY 	 36
-#define BSC_GEO_RZ 	 37
-#define BSC_GEO_V1 	 38
-#define BSC_GEO_V1E 	 39
-#define BSC_GEO_V2 	 40
-#define BSC_GEO_V2E 	 41
-#define BSC_GEO_V3 	 42
-#define BSC_GEO_V3E 	 43
-#define BSC_GEO_V4 	 44
-#define BSC_GEO_V4E 	 45
-#define BSC_GEO_VP 	 46
-#define BSC_GEO_X 	 47
-#define BSC_GEO_Y 	 48
-#define BSC_GEO_Z 	 49
-#define BSC_POS_H1 	 50
-#define BSC_POS_H1E 	 51
-#define BSC_POS_H2 	 52
-#define BSC_POS_H2E 	 53
-#define BSC_POS_H3 	 54
-#define BSC_POS_H3E 	 55
-#define BSC_POS_H4 	 56
-#define BSC_POS_H4E 	 57
-#define BSC_POS_HP 	 58
-#define BSC_POS_RX 	 59
-#define BSC_POS_RY 	 60
-#define BSC_POS_RZ 	 61
-#define BSC_POS_V1 	 62
-#define BSC_POS_V1E 	 63
-#define BSC_POS_V2 	 64
-#define BSC_POS_V2E 	 65
-#define BSC_POS_V3 	 66
-#define BSC_POS_V3E 	 67
-#define BSC_POS_V4 	 68
-#define BSC_POS_V4E 	 69
-#define BSC_POS_VP 	 70
-#define BSC_POS_X 	 71
-#define BSC_POS_Y 	 72
-#define BSC_POS_Z 	 73
-#define BSC_SPARE_FP1 	 74
-#define BSC_SPARE_FP2 	 75
-#define BSC_SPARE_RP1 	 76
-#define BSC_SPARE_RP2 	 77
-#define BSC_SPARE_RP3 	 78
-#define BSC_STS_X 	 79
-#define BSC_STS_XE 	 80
-#define BSC_STS_X_RX 	 81
-#define BSC_STS_X_RY 	 82
-#define BSC_STS_Y 	 83
-#define BSC_STS_YE 	 84
-#define BSC_STS_Z 	 85
-#define BSC_STS_ZE 	 86
-#define STS1_FIR_X 	 87
-#define STS1_FIR_X_DF 	 88
-#define STS1_FIR_X_UF 	 89
-#define STS1_FIR_X_CF 	 90
-#define STS1_FIR_X_FIR 	 0
-#define STS1_FIR_Y 	 91
-#define STS1_FIR_Y_DF 	 92
-#define STS1_FIR_Y_UF 	 93
-#define STS1_FIR_Y_CF 	 94
-#define STS1_FIR_Y_FIR 	 1
-#define STS2_FIR_X 	 95
-#define STS2_FIR_X_DF 	 96
-#define STS2_FIR_X_UF 	 97
-#define STS2_FIR_X_CF 	 98
-#define STS2_FIR_X_FIR 	 2
-#define STS2_FIR_Y 	 99
-#define STS2_FIR_Y_DF 	 100
-#define STS2_FIR_Y_UF 	 101
-#define STS2_FIR_Y_CF 	 102
-#define STS2_FIR_Y_FIR 	 3
+#define BSC_GEO_H2 	 27
+#define BSC_GEO_H3 	 28
+#define BSC_GEO_H4 	 29
+#define BSC_GEO_HP 	 30
+#define BSC_GEO_RX 	 31
+#define BSC_GEO_RY 	 32
+#define BSC_GEO_RZ 	 33
+#define BSC_GEO_V1 	 34
+#define BSC_GEO_V2 	 35
+#define BSC_GEO_V3 	 36
+#define BSC_GEO_V4 	 37
+#define BSC_GEO_VP 	 38
+#define BSC_GEO_X 	 39
+#define BSC_GEO_X_RMS 	 40
+#define BSC_GEO_X_RMS2 	 41
+#define BSC_GEO_Y 	 42
+#define BSC_GEO_Y_RMS 	 43
+#define BSC_GEO_Y_RMS2 	 44
+#define BSC_GEO_Z 	 45
+#define BSC_GEO_Z_RMS 	 46
+#define BSC_GEO_Z_RMS2 	 47
+#define BSC_POS_H1 	 48
+#define BSC_POS_H2 	 49
+#define BSC_POS_H3 	 50
+#define BSC_POS_H4 	 51
+#define BSC_POS_HP 	 52
+#define BSC_POS_RX 	 53
+#define BSC_POS_RY 	 54
+#define BSC_POS_RZ 	 55
+#define BSC_POS_V1 	 56
+#define BSC_POS_V2 	 57
+#define BSC_POS_V3 	 58
+#define BSC_POS_V4 	 59
+#define BSC_POS_VP 	 60
+#define BSC_POS_X 	 61
+#define BSC_POS_Y 	 62
+#define BSC_POS_Z 	 63
+#define BSC_SPARE_FP1 	 64
+#define BSC_SPARE_FP2 	 65
+#define BSC_SPARE_RP1 	 66
+#define BSC_SPARE_RP2 	 67
+#define BSC_SPARE_RP3 	 68
+#define BSC_STS_X 	 69
+#define BSC_STS_X_RY 	 70
+#define BSC_STS_Y 	 71
+#define BSC_STS_Y_RX 	 72
+#define BSC_STS_Z 	 73
+#define BSC_WD_GEO_H1 	 74
+#define BSC_WD_GEO_H2 	 75
+#define BSC_WD_GEO_H3 	 76
+#define BSC_WD_GEO_H4 	 77
+#define BSC_WD_GEO_V1 	 78
+#define BSC_WD_GEO_V2 	 79
+#define BSC_WD_GEO_V3 	 80
+#define BSC_WD_GEO_V4 	 81
+#define BSC_WD_POS_H1 	 82
+#define BSC_WD_POS_H2 	 83
+#define BSC_WD_POS_H3 	 84
+#define BSC_WD_POS_H4 	 85
+#define BSC_WD_POS_V1 	 86
+#define BSC_WD_POS_V2 	 87
+#define BSC_WD_POS_V3 	 88
+#define BSC_WD_POS_V4 	 89
+#define BSC_WD_STSX 	 90
+#define BSC_WD_STSY 	 91
+#define BSC_WD_STSZ 	 92
+#define STS1_FIR_X_CF 	 93
+#define STS1_FIR_X_DF 	 94
+#define STS1_FIR_X_PP 	 95
+#define STS1_FIR_X_UF 	 96
+#define STS1_FIR_Y_CF 	 97
+#define STS1_FIR_Y_DF 	 98
+#define STS1_FIR_Y_PP 	 99
+#define STS1_FIR_Y_UF 	 100
+#define STS2_FIR_X_CF 	 101
+#define STS2_FIR_X_DF 	 102
+#define STS2_FIR_X_PP 	 103
+#define STS2_FIR_X_UF 	 104
+#define STS2_FIR_Y_CF 	 105
+#define STS2_FIR_Y_DF 	 106
+#define STS2_FIR_Y_PP 	 107
+#define STS2_FIR_Y_UF 	 108
 
 
-#define MAX_MODULES 	 103
-#define MAX_FILTERS 	 1030
+#define MAX_MODULES 	 109
+#define MAX_FILTERS 	 1090
 
-#define MAX_FIR 	 4
-#define MAX_FIR_POLY 	 4
+#define MAX_FIR 	 0
+#define MAX_FIR_POLY 	 0
 
 typedef struct CDS_EPICS_IN {
 	float vmeReset;
@@ -137,6 +139,19 @@ typedef struct CDS_EPICS_OUT {
 	int ovAccum;
 } CDS_EPICS_OUT;
 
+typedef struct SEI_WATCHDOG {
+	int trip;
+	int reset;
+	int status[3];
+	int senCount[20];
+	int senCountHold[20];
+	int filtMax[20];
+	int filtMaxHold[20];
+	int tripSetF[5];
+	int tripSetR[5];
+	int tripState;
+} SEI_WATCHDOG;
+
 typedef struct SEI {
 	float BSC_LOOP_GAIN;
 	int BSC_LOOP_GAIN_TRAMP;
@@ -146,6 +161,15 @@ typedef struct SEI {
 	float BSC_TILTCORR_GAIN;
 	int BSC_TILTCORR_GAIN_TRAMP;
 	int BSC_TILTCORR_GAIN_RMON;
+	float BSC_TILTCORR_MAT_H1;
+	float BSC_TILTCORR_MAT_H2;
+	float BSC_TILTCORR_MAT_H3;
+	float BSC_TILTCORR_MAT_H4;
+	float BSC_TILTCORR_MAT_V1;
+	float BSC_TILTCORR_MAT_V2;
+	float BSC_TILTCORR_MAT_V3;
+	float BSC_TILTCORR_MAT_V4;
+	float BSC_TILTCORR_MTRX[8][8];
 	int BSC_TILTCORR_SW;
 	float BSC_ACT_GAIN;
 	int BSC_ACT_GAIN_TRAMP;
@@ -178,11 +202,18 @@ typedef struct SEI {
 	float BSC_GEO_SV3;
 	float BSC_GEO_SV4;
 	int BSC_GEO_SW;
+	float BSC_GEO_X_RMS_1;
+	float BSC_GEO_X_RMS_2;
+	float BSC_GEO_Y_RMS_1;
+	float BSC_GEO_Y_RMS_2;
+	float BSC_GEO_Z_RMS_1;
+	float BSC_GEO_Z_RMS_2;
 	float BSC_POS_MTRX[8][8];
 	int BSC_POS_SW;
 	float BSC_STS_IN_MTRX[3][6];
 	float BSC_STS_MTRX[8][3];
 	int BSC_STS_RAMP_SW;
+	SEI_WATCHDOG BSC_WD_M;
 	float BSC_WIT_1_SENSOR;
 	float BSC_WIT_2_SENSOR;
 	float BSC_WIT_3_SENSOR;
