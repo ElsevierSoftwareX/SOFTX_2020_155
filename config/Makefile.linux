@@ -184,6 +184,9 @@ build/$(TARGET)/%.i: src/epics/seq/lsc/%.st
 build/$(TARGET)/%.i: src/epics/seq/sus/%.st
 	$(PREPROCESS) $(CFLAGS) $< > $@
 
+build/$(TARGET)/%.i: src/epics/seq/quad/%.st
+	$(PREPROCESS) $(CFLAGS) $< > $@
+
 # Preprocess generated sequencer file
 # Preprocess generated sequencer file
 build/$(TARGET)/%.i: build/$(TARGET)/%.st

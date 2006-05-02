@@ -57,7 +57,9 @@ volatile int stop_working_threads = 0;
 #include "fm10Gen.h"		/* CDS filter module defs and C code	*/
 #include "feComms.h"		/* Lvea control RFM network defs.	*/
 #include "daqmap.h"		/* DAQ network layout			*/
-#define CPURATE	2400
+extern unsigned long cpu_khz;
+#define CPURATE	(cpu_khz/1000)
+
 
 // #include "fpvalidate.h"		/* Valid FP number ck			*/
 #include "drv/daqLib.c"		/* DAQ/GDS connection 			*/
@@ -142,6 +144,7 @@ double dWord[MAX_ADC_MODULES][32];
 int dacOut[MAX_DAC_MODULES][16];
 
 #ifdef HEPI_CODE
+	#include "drv/seiwd.c"	/* User code for HEPI control.		*/
 	#include "hepi/hepi.c"	/* User code for HEPI control.		*/
 #elif defined(SUS_CODE)
 	#include "sus/sus.c"	/* User code for quad control.		*/
@@ -367,6 +370,7 @@ void *fe_start(void *arg)
 
   // Clear the code exit flag
   vmeDone = 0;
+	feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,1);
 
   printf("entering the loop\n");
   // Trigger the ADC to start running
@@ -502,16 +506,15 @@ void *fe_start(void *arg)
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
 	{
-#if 0
 		if(onePps > 6000) 
 		 {
 			firstTime += 100;
 			onePpsHi = 0;
 		 }
+#ifdef NO_SYNC
+		firstTime += 100;
+			onePpsHi = 0;
 #endif
-                 firstTime += 100;
-                 onePpsHi = 0;
-
 	}
 
 	if((onePps > 6000) && (onePpsHi == 0))  
@@ -530,9 +533,9 @@ void *fe_start(void *arg)
         rdtscl(cpuClock[4]);
 #if (NUM_SYSTEMS > 1) && !defined(PNM)
   	for (system = 0; system < 1; system++)
-	  feCode(dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
+	  feCode(clock16K,dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
 #else
-	feCode(dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics);
+	feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,0);
 #endif
         rdtscl(cpuClock[5]);
   	// pLocalEpics->epicsOutput.diags[1]  = readDio(&cdsPciModules,0);
@@ -705,6 +708,7 @@ int main(int argc, char **argv)
 {
         pthread_attr_t attr;
  	int status;
+	printf("cpu clock %ld\n",cpu_khz);
 
         /*
          * Create the shared memory area.  By passing a non-zero value

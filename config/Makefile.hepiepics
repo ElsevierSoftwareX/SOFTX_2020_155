@@ -8,6 +8,7 @@ SRC += src/drv/rfm.c
 SRC += src/drv/param.c
 SRC += src/drv/crc.c
 SRC += src/drv/fmReadCoeff.c
+SRC += src/epics/seq/hepiWatchdog.st
 
 DB += build/$(TARGET)/hepi1.db
 
@@ -15,8 +16,10 @@ IFO = M1
 SITE = mit
 
 SEQ += 'hepi,("ifo=M1, site=mit, sys=SEI, sysnum= 21")'
+SEQ += 'hepiWatchdog,("ifo=M1, sys=SEI")'
 
-CFLAGS += -DHEPI_CODE -DFIR_FILTERS
+CFLAGS += -DHEPI_CODE
+CFLAGS += -DFIR_FILTERS
 
 include config/Makefile.linux
 

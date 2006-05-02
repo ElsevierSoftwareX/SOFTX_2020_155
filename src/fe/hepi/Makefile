@@ -22,8 +22,9 @@ CFLAGS += -I../../include
 CFLAGS += -I/opt/gm/include
 CFLAGS += -DSERVO2K
 CFLAGS += -DHEPI_CODE
-CFLAGS += -DFIR_FILTERS
+CFLAGS += -DNO_SYNC
 CFLAGS += -DNO_DAQ
+CFLAGS += -DFIR_FILTERS
 
 all: $(ALL)
 
