@@ -16,7 +16,7 @@ SITE = mit
 
 SEQ += 'hepi,("ifo=M1, site=mit, sys=SEI, sysnum= 21")'
 
-CFLAGS += -DHEPI_CODE
+CFLAGS += -DHEPI_CODE -DFIR_FILTERS
 
 include config/Makefile.linux
 
