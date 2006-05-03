@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-char *readSusCoeff_c_cvsid = "$Id: fmReadCoeff.c,v 1.3 2006/05/03 19:27:59 aivanov Exp $";
+char *readSusCoeff_c_cvsid = "$Id: fmReadCoeff.c,v 1.4 2006/05/03 20:21:04 aivanov Exp $";
 
 #ifdef unix_test
 /* The number of subsystems (optics) */
@@ -20,7 +20,7 @@ char *readSusCoeff_c_cvsid = "$Id: fmReadCoeff.c,v 1.3 2006/05/03 19:27:59 aivan
 #ifdef SOLARIS
 #define MAX_MODULES    1
 #else
-#define MAX_MODULES    109
+#define MAX_MODULES    0
 #endif
 #define FM_SUBSYS_NUM  1
 #endif
