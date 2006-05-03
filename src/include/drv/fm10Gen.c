@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.5 2006/05/02 21:25:12 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.6 2006/05/03 19:27:59 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -158,7 +158,7 @@ inline double fir_filter(double input, double *coef, int n, double *history)
     hist1_ptr = hist_ptr;             /* use for history update */
     coef_ptr = coef + n - 1;          /* point to last coef */
 
-    /* form output accumulation */
+/* form output accumulation */
     output = *hist_ptr++ * (*coef_ptr--);
     for(i = 2 ; i < n ; i++) {
         *hist1_ptr++ = *hist_ptr;            /* update history array */
@@ -560,32 +560,44 @@ handleEpicsSwitch(UINT32 sw,       /* New input values for the opSwitchE (from t
 /************************************************************************/
 /* Read all filter coeffs via VME backplane from EPICS CPU		*/
 /************************************************************************/
-inline void readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_COEF *pRfmCoeff)
+inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_COEF *pRfmCoeff)
 {
   int ii,jj,kk,l;
 
-  for(ii=bF;ii<sF;ii++)
-  {
 #ifdef FIR_FILTERS
-    for(jj = 0; jj < MAX_FIR_MODULES; jj++) {
+  for(jj = 0; jj < MAX_FIR_MODULES; jj++)
 	for (kk = 0; kk < FILTERS; kk++) 
 	     for (l = 0; l < MAX_FIR_COEFFS; l++)
 	        filtC->firFiltCoeff[jj][kk][l] = pRfmCoeff->firFiltCoeff[jj][kk][l];
-    }
 #endif
+  for(ii=bF;ii<sF;ii++)
+  {
     for(jj=0;jj<FILTERS;jj++)
     {
       if(pRfmCoeff->vmeCoeffs[ii].filtSections[jj])
       {
         filtC->coeffs[ii].filterType[jj] = pRfmCoeff->vmeCoeffs[ii].filterType[jj];
+	if (filtC->coeffs[ii].filterType[jj] < 0 || filtC->coeffs[ii].filterType[jj] > MAX_FIR_MODULES) {
+		filtC->coeffs[ii].filterType[jj] = 0;
+		printf("Corrupted data coming from Epics: module=%d filter=%d filterType=%d\n", 
+			ii, jj, pRfmCoeff->vmeCoeffs[ii].filterType[jj]);
+		return 1;
+	}
 	filtC->coeffs[ii].filtSections[jj] =pRfmCoeff->vmeCoeffs[ii].filtSections[jj];
 	filtC->coeffs[ii].sType[jj] = pRfmCoeff->vmeCoeffs[ii].sType[jj];
       	fmt->inputs[ii].rmpcmp[jj] = pRfmCoeff->vmeCoeffs[ii].ramp[jj];
       	fmt->inputs[ii].timeout[jj] = pRfmCoeff->vmeCoeffs[ii].timout[jj];
 
-        for(kk=0;kk<filtC->coeffs[ii].filtSections[jj]*4+1;kk++)
-        {
-	  filtC->coeffs[ii].filtCoeff[jj][kk] = pRfmCoeff->vmeCoeffs[ii].filtCoeff[jj][kk];
+	if (filtC->coeffs[ii].filterType[jj] == 0) {
+	  if (filtC->coeffs[ii].filtSections[jj] > 10) {
+		printf("Corrupted Epics data:  module=%d filter=%d filterType=%d filtSections=%d\n",
+			ii, jj, pRfmCoeff->vmeCoeffs[ii].filterType[jj],
+			filtC->coeffs[ii].filtSections[jj]);
+		return 1;
+	  }
+          for(kk=0;kk<filtC->coeffs[ii].filtSections[jj]*4+1;kk++) {
+	    filtC->coeffs[ii].filtCoeff[jj][kk] = pRfmCoeff->vmeCoeffs[ii].filtCoeff[jj][kk];
+	  }
 	}
 #if 0
 	{
@@ -593,7 +605,7 @@ inline void readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_
         printf("Bank %d Filter %d has %d sections with ramp = %d and timeout %d\n",
                 ii,jj,filtC->coeffs[ii].filtSections[jj],fmt->inputs[ii].rmpcmp[jj],
 		fmt->inputs[ii].timeout[jj]);
-#if 0
+#if -
         printf("Coeffs are:\n%e %e %e %e %e\n",
                 filtC->coeffs[ii].filtCoeff[jj][0],filtC->coeffs[ii].filtCoeff[jj][1],
 		filtC->coeffs[ii].filtCoeff[jj][2],filtC->coeffs[ii].filtCoeff[jj][3],
@@ -616,6 +628,7 @@ inline void readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_
       }
     }
   }
+  return 0;
 }
 
 
@@ -811,7 +824,7 @@ inline void checkFiltReset(int bankNum, FILT_MOD *pL, volatile FILT_MOD *dspVme,
   checkFiltResetId(bankNum, pL, dspVme, pC, totMod, pRfmCoeff, 0);
 }
 
-inline void
+inline int
 initVarsId(FILT_MOD *pL,
 	 volatile FILT_MOD *pV,
 	 COEF *pC,
@@ -861,13 +874,13 @@ initVarsId(FILT_MOD *pL,
     gain_ramp[ii][id].ramp_cycles_left = 0;
   }
 
-  readCoefVme(pC, pL, 0, totMod, pRfmCoeff);
+  return readCoefVme(pC, pL, 0, totMod, pRfmCoeff);
 }
 
-inline void
+inline int
 initVars(FILT_MOD *pL, volatile FILT_MOD *pV, COEF *pC, int totMod,
          volatile VME_COEF *pRfmCoeff) {
-  initVarsId(pL, pV, pC, totMod, pRfmCoeff, 0);
+  return initVarsId(pL, pV, pC, totMod, pRfmCoeff, 0);
 }
 
 inline void
@@ -1185,11 +1198,16 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
     if (filterType) {
 	/* FIR filter */
   	--filterType;
-	double input = fmInput * pC->firFiltCoeff[filterType][ii][0]; /* overall input scale factor */
-	filtData = fir_filter(sw_in?input:0,
+	if (filterType >=0 && filterType < 4) {
+	  double input = fmInput * pC->firFiltCoeff[filterType][ii][0]; /* overall input scale factor */
+	  filtData = fir_filter(sw_in?input:0,
 			      &(pC->firFiltCoeff[filterType][ii][1]),
 			      pC->coeffs[modNum].filtSections[ii]*4,
-			      pC->firHistory[filterType][ii][firNum]);
+			      &(pC->firHistory[filterType][ii][firNum][0]));
+	} else {
+	  filtData = filterType;
+	  printf("module %d; filter %d; filterType = %d\n", modNum, ii, filterType);
+	}
     } else
 #endif
     /* Calculate filter */

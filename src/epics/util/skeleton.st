@@ -263,6 +263,7 @@ state init
 %%  pEpics = (%EPICS_TYPE%*)(&pRfm->%EPICS_EPICS_VAR%);
 %%  printf("%s pFilt is at 0x%x\n", fmc.subSys[0].name, ((int)pFilt-(int)pRfm));
 %%  printf("%s pVmeCoeff is at 0x%x\n", fmc.subSys[0].name, ((int)pVmeCoeff-(int)pRfm));
+%%  printf("%s pVmeCoeff size is 0x%x\n", fmc.subSys[0].name, sizeof(*pVmeCoeff));
 %%  printf("%s pEpics is at 0x%x\n", fmc.subSys[0].name, ((int)pEpics-(int)pRfm));
 #endif
 
@@ -272,6 +273,7 @@ state init
 %%  for(ii=0;ii<MAX_MODULES;ii++)
 %%    for(jj=0;jj<FILTERS;jj++) {
 %%        pVmeCoeff->vmeCoeffs[ii].filtSections[jj] = 0;
+%%        pVmeCoeff->vmeCoeffs[ii].filterType[jj] = 0;
 %%        strcpy((char *)(pVmeCoeff->vmeCoeffs[ii].filtName[jj]),"NA");
 %%    }
 

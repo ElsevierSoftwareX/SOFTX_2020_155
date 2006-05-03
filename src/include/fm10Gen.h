@@ -1,7 +1,7 @@
 #ifndef FM10GEN_H
 #define FM10GEN_H
 
-static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.2 2006/05/02 21:25:12 aivanov Exp $";
+static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.3 2006/05/03 19:27:59 aivanov Exp $";
 
 /*****************************************************************************/
 /*ORGANIZATION OF THE SWITCH CONTROL REGISTER*/
@@ -161,12 +161,15 @@ typedef struct VME_FM_OP_COEF{
 }VME_FM_OP_COEF;
 
 typedef struct VME_COEF{
-  VME_FM_OP_COEF vmeCoeffs[MAX_MODULES];
 
 #ifdef FIR_FILTERS
   double firFiltCoeff[MAX_FIR_MODULES][FILTERS][MAX_FIR_COEFFS];
 #endif
 
+  VME_FM_OP_COEF vmeCoeffs[MAX_MODULES];
+
+  /* Do not put anything at the end of this structure */
+  /* fmReadCoeff code gets compiled with MAX_MODULES == 0 */
 }VME_COEF;
 
 /* Struct of filter names for use in epics screens */

@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-char *readSusCoeff_c_cvsid = "$Id: fmReadCoeff.c,v 1.2 2006/05/02 21:25:12 aivanov Exp $";
+char *readSusCoeff_c_cvsid = "$Id: fmReadCoeff.c,v 1.3 2006/05/03 19:27:59 aivanov Exp $";
 
 #ifdef unix_test
 /* The number of subsystems (optics) */
@@ -20,7 +20,7 @@ char *readSusCoeff_c_cvsid = "$Id: fmReadCoeff.c,v 1.2 2006/05/02 21:25:12 aivan
 #ifdef SOLARIS
 #define MAX_MODULES    1
 #else
-#define MAX_MODULES    0
+#define MAX_MODULES    109
 #endif
 #define FM_SUBSYS_NUM  1
 #endif
@@ -447,7 +447,6 @@ fmReadCoeffFile(fmReadCoeff *fmc, int n)
 		curFilter->fmd.bankNum = curFilter->fmModNum;
 		curFilter->fmd.filtSections[num] = filtSections;
 		curFilter->fmd.sType[num] = sType;
-		curFilter->fmd.filtSections[num] = filtSections;
 		curFilter->fmd.ramp[num] = ramp;
 		curFilter->fmd.timout[num] = timeout;
 		strcpy(curFilter->fmd.filtName[num], filtName);
@@ -519,10 +518,14 @@ fmReadCoeffFile(fmReadCoeff *fmc, int n)
 
       unsigned int filterType = fmc->subSys[n].map[i].fmd.filterType[j];
       fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].filterType[j] = filterType;
+      //printf("filter module %d; filter %d; type %d\n", fmc->subSys[n].map[i].fmModNum, j, filterType);
+      //printf("ncoefs=%d; nsections=%d\n", ncoefs, nsections);
 #ifdef FIR_FILTERS
       if (filterType) {
         for (k = 0; k < ncoefs; k++) {
 #if defined(__i386__)  || defined(__amd64__)
+	 // printf("fmc->pVmeCoeff->firFiltCoeff[%d][%d][%d] = firFiltCoeff[%d][%d][%d];\n",
+		  //filterType-1, j, k, filterType-1, j, k);
 	  fmc->pVmeCoeff->firFiltCoeff[filterType-1][j][k] = firFiltCoeff[filterType-1][j][k];
 #else
 #error
