@@ -324,7 +324,10 @@ void *fe_start(void *arg)
 
   /* Initialize DSP filter bank values */
   for (system = 0; system < NUM_SYSTEMS; system++)
-    initVars(dsp + system, pDsp[system], dspCoeff + system, MAX_MODULES, pCoeff[system]);
+    if (initVars(dsp + system, pDsp[system], dspCoeff + system, MAX_MODULES, pCoeff[system])) {
+    	printf("Filter module init failed, exiting\n");
+	return 0;
+    }
 
   printf("Initialized servo control parameters.\n");
 
