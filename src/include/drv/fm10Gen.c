@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.7 2006/05/04 01:39:06 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.8 2006/05/04 03:14:23 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -728,8 +728,10 @@ inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int
 	/* Make sure all numbers check out OK */
 	if (filtNum == 9) { /* Last filter loaded in this filter bank */
 	    unsigned int vme_crc =  pRfmCoeff->vmeCoeffs[modNum1].crc;
-	    //printf("vme_crc = 0x%x; local crc = 0x%x\n", vme_crc, localCoeff.crc);
-	    //if (localCoeff.crc != vme_crc) return -1;
+	    if (localCoeff.crc != vme_crc) {
+	      printf("vme_crc = 0x%x; local crc = 0x%x\n", vme_crc, localCoeff.crc);
+	      // return -1;
+	    }
 	}
 	if(localCoeff.filtSections[filtNum])
 	{
