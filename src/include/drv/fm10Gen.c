@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.6 2006/05/03 19:27:59 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.7 2006/05/04 01:39:06 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -639,21 +639,29 @@ inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_C
 /**************************************************/
 inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int cycle, volatile VME_COEF *pRfmCoeff, int *changed)
 {
-  unsigned int ii, kk, jj;
+  unsigned int ii, kk, jj, hh;
   double temp;
   static VME_FM_OP_COEF localCoeff;
 
+#ifdef FIR_FILTERS
+# define MAX_UPDATE_CYCLE (MAX_FIR_SO_SECTIONS+1)
+  static double localFirFiltCoeff[FILTERS][MAX_FIR_COEFFS];
+#else
+# define MAX_UPDATE_CYCLE (MAX_SO_SECTIONS+1)
+#endif
+
+  int type = pRfmCoeff->vmeCoeffs[modNum1].filterType[filtNum];
+
   ii = 0;
-  switch(cycle)
-  {
-    case 0:
+  if (cycle == 0) {
 	for (ii = 0; ii < 10; ii++) changed[ii] = 0;
   	ii = pRfmCoeff->vmeCoeffs[modNum1].filtSections[filtNum];
 	if (filtNum == 0) localCoeff.crc = 0;
 	localCoeff.crc = crc_ptr((char *)&ii, sizeof(int), localCoeff.crc);
-	if((ii>0) && (ii<11))
+	if ((ii>0) && (ii<11) || (ii>10) && (type>0))
 	{
     	  localCoeff.filtSections[filtNum] = ii;
+    	  localCoeff.filterType[filtNum] = type;
 	  localCoeff.sType[filtNum] = pRfmCoeff->vmeCoeffs[modNum1].sType[filtNum];
 	  localCoeff.ramp[filtNum] =  pRfmCoeff->vmeCoeffs[modNum1].ramp[filtNum];
 	  localCoeff.timout[filtNum] = pRfmCoeff->vmeCoeffs[modNum1].timout[filtNum];
@@ -668,53 +676,77 @@ inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int
 	  fmt->inputs[modNum1].opSwitchP &= ~pow2_out[filtNum];
 	  filtC->coeffs[modNum1].filtSections[filtNum] = 0;
 	  for (ii = 0; ii < 10; ii++) changed[ii] = 1;
-	  ii = 0;
+	  localCoeff.filtSections[filtNum] = 0;
+	  ii = MAX_UPDATE_CYCLE;
 	}
-	break;
-    case 1:
-	/* Assign filter gain value */
-	temp = pRfmCoeff->vmeCoeffs[modNum1].filtCoeff[filtNum][0];
-	if (filtC->coeffs[modNum1].filtCoeff[filtNum][0] != temp) changed[filtNum]++;
-	//if (localCoeff.filtCoeff[filtNum][0] != temp) changed[filtNum]++;
-	localCoeff.filtCoeff[filtNum][0] = temp;
-        localCoeff.crc = crc_ptr ((char *)&(localCoeff.filtCoeff[filtNum][0]), sizeof(double), localCoeff.crc);
-	/* fall through, no brake */
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
-    case 10: {
-	/* Assign second-order sections 1 through 10 */
+    } else if (cycle > 0 && cycle < MAX_UPDATE_CYCLE ) {
+      if (cycle == 1) {
+	if (type > 0) {
+#ifdef FIR_FILTERS
+	  /* FIR filter */
+	  temp = pRfmCoeff->firFiltCoeff[type-1][filtNum][0];
+	  if (filtC->firFiltCoeff[type-1][filtNum][0] != temp) changed[filtNum]++;
+	  localFirFiltCoeff[filtNum][0] = temp;
+          localCoeff.crc = crc_ptr ((char *)&temp, sizeof(double), localCoeff.crc);
+	  //printf("gain = %f\n", temp);
+#endif
+	} else {
+	  /* Assign filter gain value */
+	  temp = pRfmCoeff->vmeCoeffs[modNum1].filtCoeff[filtNum][0];
+	  if (filtC->coeffs[modNum1].filtCoeff[filtNum][0] != temp) changed[filtNum]++;
+	  //if (localCoeff.filtCoeff[filtNum][0] != temp) changed[filtNum]++;
+	  localCoeff.filtCoeff[filtNum][0] = temp;
+          localCoeff.crc = crc_ptr ((char *)&(localCoeff.filtCoeff[filtNum][0]), sizeof(double), localCoeff.crc);
+	}
+      }
+      {
+	/* Assign second-order sections */
         int to = cycle * 4 + 1;
         for (kk = to - 4; kk < to; kk++) {
+	  if (type > 0) {
+#ifdef FIR_FILTERS
+	    /* FIR filter */
+	    temp = pRfmCoeff->firFiltCoeff[type-1][filtNum][kk];
+	    if (filtC->firFiltCoeff[type-1][filtNum][kk] != temp) changed[filtNum]++;
+	    localFirFiltCoeff[filtNum][kk] = temp;
+            localCoeff.crc = crc_ptr ((char *)&temp, sizeof(double), localCoeff.crc);
+	    //printf("%f ", temp);
+#endif
+	  } else {
 	      temp = pRfmCoeff->vmeCoeffs[modNum1].filtCoeff[filtNum][kk];
 	      if (filtC->coeffs[modNum1].filtCoeff[filtNum][kk] != temp) changed[filtNum]++;
 	      //if (localCoeff.filtCoeff[filtNum][kk] != temp) changed[filtNum]++;
 	      localCoeff.filtCoeff[filtNum][kk] = temp;
               localCoeff.crc = crc_ptr ((char *)&(localCoeff.filtCoeff[filtNum][kk]), sizeof(double), localCoeff.crc);
+	  }
 	}
+	//if (type > 0) printf("\n");
 	if (localCoeff.filtSections[filtNum] > cycle) ii = cycle + 1;
-	else ii = 11;
-	break;
+	else ii = MAX_UPDATE_CYCLE;
+      }
+    } else if (cycle == MAX_UPDATE_CYCLE) {
+	/* Make sure all numbers check out OK */
+	if (filtNum == 9) { /* Last filter loaded in this filter bank */
+	    unsigned int vme_crc =  pRfmCoeff->vmeCoeffs[modNum1].crc;
+	    //printf("vme_crc = 0x%x; local crc = 0x%x\n", vme_crc, localCoeff.crc);
+	    //if (localCoeff.crc != vme_crc) return -1;
 	}
-    case 11:
 	if(localCoeff.filtSections[filtNum])
 	{
-	  /* Make sure all numbers check out OK */
-	  if (filtNum == 9) { /* Last filter loaded in this filter bank */
-	    unsigned int vme_crc =  pRfmCoeff->vmeCoeffs[modNum1].crc;
-	    if (localCoeff.crc != vme_crc) return -1;
-	  }
 
 	  /* Reset filter history only if its coefficients modified */
 	  for(jj=0;jj<FILTERS;jj++) {
 	    if (changed[jj]) {
-	      for(kk=0;kk<MAX_HISTRY;kk++)
-	        filtC->coeffs[modNum1].filtHist[jj][kk] = 0.0;
+	      if (type) { /* FIR filter */
+#ifdef FIR_FILTERS
+        	for (kk = 0; kk < FIR_POLYPHASE_SIZE; kk++)
+          	  for (hh = 0; hh < FIR_TAPS; hh++)
+	            filtC->firHistory[type-1][jj][kk][hh] = 0.0;
+#endif
+	      } else {
+	        for(kk=0;kk<MAX_HISTRY;kk++)
+	          filtC->coeffs[modNum1].filtHist[jj][kk] = 0.0;
+	      }
 	    }
 	  }
 
@@ -729,17 +761,22 @@ inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int
 	  filtC->coeffs[modNum1].sType[filtNum] = localCoeff.sType[filtNum];
 	  fmt->inputs[modNum1].rmpcmp[filtNum] =  localCoeff.ramp[filtNum];
 	  fmt->inputs[modNum1].timeout[filtNum] = localCoeff.timout[filtNum];
-	  for(kk=0;kk<filtC->coeffs[modNum1].filtSections[filtNum]*4+1;kk++)
-	    filtC->coeffs[modNum1].filtCoeff[filtNum][kk] = localCoeff.filtCoeff[filtNum][kk];
-
+	  if (type > 0) {
+#ifdef FIR_FILTERS
+	    for(kk=0;kk<filtC->coeffs[modNum1].filtSections[filtNum]*4+1;kk++)
+	      filtC->firFiltCoeff[type-1][filtNum][kk] = localFirFiltCoeff[filtNum][kk];
+#endif
+	  } else {
+	    for(kk=0;kk<filtC->coeffs[modNum1].filtSections[filtNum]*4+1;kk++)
+	      filtC->coeffs[modNum1].filtCoeff[filtNum][kk] = localCoeff.filtCoeff[filtNum][kk];
+	  }
 	}
 	ii = 0;
-	break;
-    default:
+    } else {
 	ii = 0;
-	break;
-  }
+    }
   return(ii);
+#undef MAX_UPDATE_CYCLE
 }
 
 /* Filter module update globals */
@@ -767,7 +804,7 @@ struct filtResetId {
 /***************************************/
 inline void checkFiltResetId(int bankNum, FILT_MOD *pL, volatile FILT_MOD *dspVme, COEF *pC, int totMod, volatile VME_COEF *pRfmCoeff, int id)
 {
-  int jj,kk;
+  int jj,kk,hh;
   int status;
 
   if (id < 0 || id > 9) return;
@@ -803,9 +840,18 @@ inline void checkFiltResetId(int bankNum, FILT_MOD *pL, volatile FILT_MOD *dspVm
     if(status & 2)
       {
 	/* Clear out filter bank histories */
-	for(jj=0;jj<FILTERS;jj++) 
+	for(jj=0;jj<FILTERS;jj++) {
+#ifdef FIR_FILTERS
+	  int type = pC->coeffs[bankNum].filterType[jj];
+	  if (type > 0) {
+        	for (kk = 0; kk < FIR_POLYPHASE_SIZE; kk++)
+          	  for (hh = 0; hh < FIR_TAPS; hh++)
+	            pC->firHistory[type-1][jj][kk][hh] = 0.0;
+	  } else
+#endif
 	  for(kk=0;kk<MAX_HISTRY;kk++)
 	    pC->coeffs[bankNum].filtHist[jj][kk] = 0.0;
+ 	}
 
 	/* Clear decimation history */
 	for(jj = 0; jj < 8; jj++)
@@ -1198,7 +1244,7 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
     if (filterType) {
 	/* FIR filter */
   	--filterType;
-	if (filterType >=0 && filterType < 4) {
+	if (filterType >=0 && filterType < MAX_FIR_MODULES) {
 	  double input = fmInput * pC->firFiltCoeff[filterType][ii][0]; /* overall input scale factor */
 	  filtData = fir_filter(sw_in?input:0,
 			      &(pC->firFiltCoeff[filterType][ii][1]),
