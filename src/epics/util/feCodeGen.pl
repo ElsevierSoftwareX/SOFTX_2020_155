@@ -51,7 +51,7 @@ $useWd = 0;
 $gainCnt = 0;
 
 # Clear the part input and output counters
-for($ii=0;$ii<300;$ii++)
+for($ii=0;$ii<2000;$ii++)
 {
 	$partInCnt[$ii] = 0;
 	$partOutCnt[$ii] = 0;
@@ -357,8 +357,8 @@ while (<IN>) {
 	}
 	if (substr($var2,0,7) eq "cdsSWD1") {
 		$partType[$partCnt] = SEI_WD1;
-		#print "$partCnt is type MULTI_SW\n";
-		$useWd = 1;
+		$useWdName[$useWd] = substr($xpartName[$partCnt],0,3);
+		$useWd ++;
 		$partErr = 0;
 	}
 	if (substr($var2,0,13) eq "cdsRampSwitch") {
@@ -406,9 +406,9 @@ while (<IN>) {
 		print OUTH "#define $firName \t $filtCnt\n";
 		print EPICS "$firName\n";
 		$filtCnt ++;
-		$firName = $xpartName[$partCnt];
-		$firName .= _FIR;
-		print OUTH "#define $firName \t $firCnt\n";
+		#$firName = $xpartName[$partCnt];
+		#$firName .= _FIR;
+		#print OUTH "#define $firName \t $filtCnt\n";
 		$firCnt ++;
 		$partErr = 0;
 	}
@@ -867,7 +867,7 @@ $allADC = 1;
 		$seqList[$seqCnt] = $ii;
 		$seqType[$seqCnt] = "SUBSYS";
 		$seqCnt ++;
-		#print "Subsys $ii $subSysName[$ii] has all ADC inputs and can go $seqCnt\n";
+		print "Subsys $ii $subSysName[$ii] has all ADC inputs and can go $seqCnt\n";
 		$subRemaining --;
 	}
 }
@@ -887,7 +887,7 @@ for($ii=0;$ii<$searchCnt;$ii++)
 			}
 		}
 		if($allADC == 1) {
-			#print "Part $xx $xpartName[$xx] can go next\n";
+			print "Part $xx $xpartName[$xx] can go next\n";
 			$partUsed[$xx] = 1;
 			$partsRemaining --;
 			$seqList[$seqCnt] = $xx;
@@ -920,7 +920,7 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 				}
 			}
 			if($allADC == 1) {
-				#print "Subsys $ii $subSysName[$ii] can go next\n";
+				print "Subsys $ii $subSysName[$ii] can go next\n";
 				$subUsed[$ii] = 1;
 				$subRemaining --;
 				$seqList[$seqCnt] = $ii;
@@ -944,7 +944,7 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 				}
 			}
 			if($allADC == 1) {
-				#print "Part $xx $xpartName[$xx] can go next\n";
+				print "Part $xx $xpartName[$xx] can go next\n";
 				$partUsed[$xx] = 1;
 				$partsRemaining --;
 				$seqList[$seqCnt] = $xx;
@@ -1207,7 +1207,8 @@ print OUT "void feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
 print OUT "\t\tint dacOut[][16],\t\/* DAC outputs *\/\n";
 print OUT "\t\tFILT_MOD *dspPtr,\t\/* Filter Mod variables *\/\n";
 print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
-print OUT "\t\tCDS_EPICS *pLocalEpics)\t\/* EPICS variables *\/\n";
+print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
+print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
 print OUT "{\n\nint ii,jj;\n\n";
 for($ii=0;$ii<$partCnt;$ii++)
 {
@@ -1242,7 +1243,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 	if($partType[$ii] eq "RMS") {
 		print OUT "float \L$xpartName[$ii];\n";
-		print OUT "float \L$xpartName[$ii]\_avg;\n";
+		print OUT "static float \L$xpartName[$ii]\_avg;\n";
 	}
 	if($partType[$ii] eq "SEI_WD1"){
 		print OUT "float \L$xpartName[$ii]";
@@ -1252,6 +1253,15 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 }
 print OUT "\n\n";
+
+print OUT "if(feInit)\n\{\n";
+for($ii=0;$ii<$partCnt;$ii++)
+{
+	if($partType[$ii] eq "RMS") {
+		print OUT "\L$xpartName[$ii]\_avg = 0\.0;\n";
+	}
+}
+print OUT "\} else \{\n";
 
 print "*****************************************************\n";
 
@@ -1604,6 +1614,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 
 print OUT "\n";
 }
+print OUT "  }\n";
 print OUT "}\n\n";
 print OUTH "typedef struct CDS_EPICS {\n";
 print OUTH "\tCDS_EPICS_IN epicsInput;\n";
@@ -1673,6 +1684,10 @@ print OUTM "CFLAGS += -DSERVO2K\n";
 print OUTM "CFLAGS += -D";
 print OUTM "\U$skeleton";
 print OUTM "_CODE\n";
+if($systemName eq "sei")
+{
+print OUTM "CFLAGS += -DFIR_FILTERS\n";
+}
 print OUTM "\n";
 print OUTM "all: \$(ALL)\n";
 print OUTM "\n";
@@ -1696,9 +1711,11 @@ print OUTME "SRC += src/drv/rfm.c\n";
 print OUTME "SRC += src/drv/param.c\n";
 print OUTME "SRC += src/drv/crc.c\n";
 print OUTME "SRC += src/drv/fmReadCoeff.c\n";
-if($useWd)
+for($ii=0;$ii<$useWd;$ii++)
 {
-	print OUTME "SRC += src/epics/seq/hepiWatchdog.st\n";
+	print OUTME "SRC += src/epics/seq/hepiWatchdog";
+	print OUTME "\U$useWdName[$ii]";
+	print OUTME "\L\.st\n";
 }
 print OUTME "\n";
 print OUTME "DB += build/\$(TARGET)/";
@@ -1711,17 +1728,22 @@ print OUTME "\n";
 print OUTME "SEQ += \'";
 print OUTME "$skeleton";
 print OUTME ",(\"ifo=M1, site=mit, sys=\U$systemName\, \Lsysnum= $dcuId\")\'\n";
-if($useWd)
+for($ii=0;$ii<$useWd;$ii++)
 {
 print OUTME "SEQ += \'";
 print OUTME "hepiWatchdog";
-print OUTME ",(\"ifo=M1, sys=\U$systemName\")\'\n";
+print OUTME "\U$useWdName[$ii]";
+print OUTME ",(\"ifo=M1, sys=\U$systemName\,\Lsubsys=\U$useWdName[$ii]\")\'\n";
 }
 print OUTME "\n";
 print OUTME "CFLAGS += -D";
 print OUTME "\U$skeleton";
 print OUTME "_CODE\n";
 print OUTME "\n";
+if($systemName eq "sei")
+{
+print OUTME "CFLAGS += -DFIR_FILTERS\n";
+}
 print OUTME "include config/Makefile.linux\n";
 print OUTME "\n";
 print OUTME "build/\$(TARGET)/";
