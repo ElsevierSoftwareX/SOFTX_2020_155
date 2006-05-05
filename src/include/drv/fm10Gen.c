@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.8 2006/05/04 03:14:23 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.9 2006/05/05 01:42:17 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -652,6 +652,13 @@ inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int
 
   int type = pRfmCoeff->vmeCoeffs[modNum1].filterType[filtNum];
 
+#ifdef FIR_FILTERS
+  if (type < 0 || type > MAX_FIR_MODULES) {
+	printf("Vme2 bad Epics filter type: module=%d filter=%d filterType=%d\n", 
+	modNum1, filtNum, type);
+  }
+#endif
+
   ii = 0;
   if (cycle == 0) {
 	for (ii = 0; ii < 10; ii++) changed[ii] = 0;
@@ -660,6 +667,7 @@ inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int
 	localCoeff.crc = crc_ptr((char *)&ii, sizeof(int), localCoeff.crc);
 	if ((ii>0) && (ii<11) || (ii>10) && (type>0))
 	{
+	  //printf("vme2: module=%d filter=%d type=%d\n", modNum1, filtNum, type);
     	  localCoeff.filtSections[filtNum] = ii;
     	  localCoeff.filterType[filtNum] = type;
 	  localCoeff.sType[filtNum] = pRfmCoeff->vmeCoeffs[modNum1].sType[filtNum];
@@ -672,9 +680,11 @@ inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int
 	}
   	else 
 	{
+	  //printf("vme2:off  module=%d filter=%d type=%d\n", modNum1, filtNum, type);
 	  /* Turn filter status readback off */
 	  fmt->inputs[modNum1].opSwitchP &= ~pow2_out[filtNum];
 	  filtC->coeffs[modNum1].filtSections[filtNum] = 0;
+	  filtC->coeffs[modNum1].filterType[filtNum] = 0;
 	  for (ii = 0; ii < 10; ii++) changed[ii] = 1;
 	  localCoeff.filtSections[filtNum] = 0;
 	  ii = MAX_UPDATE_CYCLE;
@@ -760,6 +770,7 @@ inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int
 #endif
 
     	  filtC->coeffs[modNum1].filtSections[filtNum] = localCoeff.filtSections[filtNum];
+    	  filtC->coeffs[modNum1].filterType[filtNum] = localCoeff.filterType[filtNum];
 	  filtC->coeffs[modNum1].sType[filtNum] = localCoeff.sType[filtNum];
 	  fmt->inputs[modNum1].rmpcmp[filtNum] =  localCoeff.ramp[filtNum];
 	  fmt->inputs[modNum1].timeout[filtNum] = localCoeff.timout[filtNum];
