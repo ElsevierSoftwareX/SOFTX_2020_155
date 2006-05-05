@@ -8,7 +8,9 @@ SRC += src/drv/rfm.c
 SRC += src/drv/param.c
 SRC += src/drv/crc.c
 SRC += src/drv/fmReadCoeff.c
-SRC += src/epics/seq/hepiWatchdog.st
+SRC += src/epics/seq/hepiWatchdogBSC.st
+SRC += src/epics/seq/hepiWatchdogHMX.st
+SRC += src/epics/seq/hepiWatchdogHMY.st
 
 DB += build/$(TARGET)/hepi1.db
 
@@ -16,11 +18,13 @@ IFO = M1
 SITE = mit
 
 SEQ += 'hepi,("ifo=M1, site=mit, sys=SEI, sysnum= 21")'
-SEQ += 'hepiWatchdog,("ifo=M1, sys=SEI")'
+SEQ += 'hepiWatchdogBSC,("ifo=M1, sys=SEI,subsys=BSC")'
+SEQ += 'hepiWatchdogHMX,("ifo=M1, sys=SEI,subsys=HMX")'
+SEQ += 'hepiWatchdogHMY,("ifo=M1, sys=SEI,subsys=HMY")'
 
 CFLAGS += -DHEPI_CODE
-CFLAGS += -DFIR_FILTERS
 
+CFLAGS += -DFIR_FILTERS
 include config/Makefile.linux
 
 build/$(TARGET)/hepi1.db: build/$(TARGET)/hepi.db
