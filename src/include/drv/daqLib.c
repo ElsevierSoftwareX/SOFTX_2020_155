@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.14 2006/01/31 15:08:28 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.15 2006/05/12 20:45:33 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -126,6 +126,7 @@ int status;			/* Return value from called routines.	*/
 float dWord;			/* Temp value for storage of DAQ values */
 static int daqBlockNum;		/* 1-16, tracks DAQ block to write to.	*/
 static int excBlockNum;		/* 1-16, tracks EXC block to read from.	*/
+static int excDataSize;
 static int xferSize;		/* Tracks remaining xfer size for crc	*/
 static int xferSize1;
 static int mnDaqSize;
@@ -163,7 +164,7 @@ static int tpNum[32];		/* TP/EXC selects to send to FB.	*/
 static int totalChans;		/* DAQ + TP + EXC chans selected.	*/
 static int totalSize;		/* DAQ + TP + EXC chans size in bytes.	*/
 int *statusPtr;
-float *dataPtr;			/* Ptr to excitation chan data.		*/
+volatile float *dataPtr;	/* Ptr to excitation chan data.		*/
 int exChanOffset;		/* shmem offset to next EXC value.	*/
 int tpx;
 int tpAdd;
@@ -352,7 +353,15 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     // gdsPtr->tp[0][0][0] = 5000;
 
     // Set pointer to EXC data in shmem.
-    exciteDataPtr = (char *)(_epics_shm + DATA_OFFSET_DCU(DCU_ID_EX_16K));
+    if(sysRate == DAQ_2K_SAMPLE_SIZE)
+	{
+    	exciteDataPtr = (char *)(_epics_shm + DATA_OFFSET_DCU(DCU_ID_EX_2K));
+	excDataSize = 0x204;
+	}
+    else {
+    	exciteDataPtr = (char *)(_epics_shm + DATA_OFFSET_DCU(DCU_ID_EX_16K));
+	excDataSize = 0x1004;
+    }
 
     // Following just sets in some dummy data for testing.
     for(ii=0;ii<16;ii++)
@@ -519,7 +528,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
   {
   	for(ii=validEx;ii<totalChans;ii++)
   	{
-		exChanOffset = localTable[ii].sigNum * 0x1004;
+		exChanOffset = localTable[ii].sigNum * excDataSize;
 		statusPtr = (int *)(exciteDataPtr + excBlockNum * DAQ_DCU_BLOCK_SIZE + exChanOffset);
 		if(*statusPtr == 0)
 		{
@@ -528,6 +537,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 			if(localTable[ii].type == 2)
 			{
 				dspPtr->data[localTable[ii].fmNum].exciteInput = *dataPtr;
+#if 0
+				if((excSlot == 0) && (ii == validEx)) printf("%ld %f\n",(int)dataPtr,*dataPtr);
+#endif
 			}
 		}
 		else dspPtr->data[localTable[ii].fmNum].exciteInput = 0.0;
