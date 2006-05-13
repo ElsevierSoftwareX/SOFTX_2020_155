@@ -34,7 +34,9 @@ open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
 open(OUTH,">./".$hFile) || die "cannot open header file for writing";
 open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 $diag = "diags\.txt";
+$filtFile = "gds\.txt";
 open(OUTD,">./".$diag) || die "cannot open diag file for writing";
+open(OUTG,">./".$filtFile) || die "cannot open diag file for writing";
 
 $mySeq = 0;
 $connects = 0;
@@ -433,6 +435,7 @@ while (<IN>) {
 		$partType[$partCnt] = FILT;
 		print OUTH "#define $xpartName[$partCnt] \t $filtCnt\n";
 		print EPICS "$xpartName[$partCnt]\n";
+		$filterName[$filtCnt] = $xpartName[$partCnt];
 		$filtCnt ++;
 		$partErr = 0;
 	}
@@ -1757,3 +1760,18 @@ print OUTME "/g;s/%SUBSYS%//g' \$< > \$\@\n";
 print OUTME "\n";
 print OUTME "\n";
 close OUTME;
+$jj = $filtCnt / 40;
+$jj ++;
+print OUTG "$jj lines to print\n";
+for($ii=0;$ii<$jj;$ii++)
+{
+	$kk = $ii * 4;
+	print OUTG "\# MODULES $filterName[$kk] ";
+	$kk ++;
+	print OUTG "$filterName[$kk] ";
+	$kk ++;
+	print OUTG "$filterName[$kk] ";
+	$kk ++;
+	print OUTG "$filterName[$kk]\n";
+}
+close OUTG;
