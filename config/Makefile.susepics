@@ -19,6 +19,7 @@ SEQ += 'sus,("ifo=M1, site=mit, sys=SUS, sysnum= 9")'
 SEQ += 'suswd,("ifo=M1, sys=SUS")'
 
 CFLAGS += -DSUS_CODE
+LIBFLAGS += -lezca
 
 include config/Makefile.linux
 
