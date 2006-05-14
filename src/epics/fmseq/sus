@@ -159,6 +159,31 @@ OUTVARIABLE NET_ERR_COUNT epicsOutput.diags[2] int ai 0
 OUTVARIABLE DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0
 
 
+OUTVARIABLE Q1_WD sus.Q1_WD int ai 0 
+OUTVARIABLE Q1_WD_VAR_M0_F1 sus.Q1_WD_VAR[0] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_M0_F2 sus.Q1_WD_VAR[1] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_M0_F3 sus.Q1_WD_VAR[2] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_M0_L sus.Q1_WD_VAR[3] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_M0_R sus.Q1_WD_VAR[4] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_M0_S sus.Q1_WD_VAR[5] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_R0_F1 sus.Q1_WD_VAR[6] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_R0_F2 sus.Q1_WD_VAR[7] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_R0_F3 sus.Q1_WD_VAR[8] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_R0_L sus.Q1_WD_VAR[9] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_R0_R sus.Q1_WD_VAR[10] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_R0_S sus.Q1_WD_VAR[11] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_L1_UL sus.Q1_WD_VAR[12] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_L1_LL sus.Q1_WD_VAR[13] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_L1_UR sus.Q1_WD_VAR[14] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_L1_LR sus.Q1_WD_VAR[15] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_L2_UL sus.Q1_WD_VAR[16] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_L2_LL sus.Q1_WD_VAR[17] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_L2_UR sus.Q1_WD_VAR[18] float ai 0 field(PREC,"1")
+OUTVARIABLE Q1_WD_VAR_L2_LR sus.Q1_WD_VAR[19] float ai 0 field(PREC,"1")
+INVARIABLE Q1_WD_MAX sus.Q1_WD_MAX int ai 0 field(PREC,"0")
+INVARIABLE Q1_WD_SW sus.Q1_WD_SW int bi 0 field(ZNAM,"OFF") field(ONAM,"ON")
+
+
 OUTVARIABLE ADC_OVERFLOW_0_0 epicsOutput.overflowAdc[0][0] int ai 0
 OUTVARIABLE ADC_OVERFLOW_0_1 epicsOutput.overflowAdc[0][1] int ai 0
 OUTVARIABLE ADC_OVERFLOW_0_2 epicsOutput.overflowAdc[0][2] int ai 0

@@ -8,6 +8,7 @@ SRC += src/drv/rfm.c
 SRC += src/drv/param.c
 SRC += src/drv/crc.c
 SRC += src/drv/fmReadCoeff.c
+SRC += src/epics/seq/suswd.st
 
 DB += build/$(TARGET)/sus1.db
 
@@ -15,6 +16,7 @@ IFO = M1
 SITE = mit
 
 SEQ += 'sus,("ifo=M1, site=mit, sys=SUS, sysnum= 9")'
+SEQ += 'suswd,("ifo=M1, sys=SUS")'
 
 CFLAGS += -DSUS_CODE
 

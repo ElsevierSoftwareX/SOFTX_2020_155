@@ -101,6 +101,9 @@
 #define MAX_MODULES 	 96
 #define MAX_FILTERS 	 960
 
+#define MAX_FIR 	 0
+#define MAX_FIR_POLY 	 0
+
 typedef struct CDS_EPICS_IN {
 	float vmeReset;
 	int burtRestore;
@@ -131,6 +134,10 @@ typedef struct SUS {
 	float Q1_M0_OUTMTRX[6][6];
 	float Q1_R0_INMTRX[6][6];
 	float Q1_R0_OUTMTRX[6][6];
+	int Q1_WD;
+	int Q1_WD_MAX;
+	float Q1_WD_VAR[20];
+	int Q1_WD_SW;
 } SUS;
 
 typedef struct CDS_EPICS {
