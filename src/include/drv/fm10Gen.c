@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.9 2006/05/05 01:42:17 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.10 2006/05/14 00:09:38 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -577,12 +577,14 @@ inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_C
       if(pRfmCoeff->vmeCoeffs[ii].filtSections[jj])
       {
         filtC->coeffs[ii].filterType[jj] = pRfmCoeff->vmeCoeffs[ii].filterType[jj];
+#ifdef FIR_FILTERS
 	if (filtC->coeffs[ii].filterType[jj] < 0 || filtC->coeffs[ii].filterType[jj] > MAX_FIR_MODULES) {
 		filtC->coeffs[ii].filterType[jj] = 0;
 		printf("Corrupted data coming from Epics: module=%d filter=%d filterType=%d\n", 
 			ii, jj, pRfmCoeff->vmeCoeffs[ii].filterType[jj]);
 		return 1;
 	}
+#endif
 	filtC->coeffs[ii].filtSections[jj] =pRfmCoeff->vmeCoeffs[ii].filtSections[jj];
 	filtC->coeffs[ii].sType[jj] = pRfmCoeff->vmeCoeffs[ii].sType[jj];
       	fmt->inputs[ii].rmpcmp[jj] = pRfmCoeff->vmeCoeffs[ii].ramp[jj];
