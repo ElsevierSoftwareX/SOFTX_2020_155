@@ -9,6 +9,9 @@ program suswd
 %%
 %% #include <errno.h>
 %% #include <unistd.h>
+%% #include <tsDefs.h>
+%% #include <cadef.h>
+%% #include <ezca.h>
 
 %% #define MAX_MODULES 1
 #define MAX_MODULES 1
@@ -60,6 +63,11 @@ state monWD{
 %%	if(ii == 0) {
 		wdSwitch = 0;	
 		pvPut(wdSwitch);
+%%		{
+%%			short s[1];
+%%			s[0] = 0;
+%%  			ezcaPut("M1:SEI-BSC_ACT_SW", ezcaShort, 1, s);
+%%		}
 %%	}
 
   }state monWD
