@@ -4,6 +4,9 @@
 #ifdef SUS_CODE
 #include <sus.h>
 #endif
+#ifdef PDE_CODE
+#include <pde.h>
+#endif
 
 #ifdef PNM
 #include <pnm.h>
