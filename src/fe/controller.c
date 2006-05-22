@@ -36,6 +36,8 @@
 	#include "sus.h"	/* User code for quad control.		*/
 #elif defined(PNM)
 	#include "pnm.h"	/* User code for Ponderomotive control. */
+#elif defined(PDE_CODE)
+	#include "pde.h"	/* User code for Ponderomotive control. */
 #else
 	#error
 #endif
@@ -150,6 +152,8 @@ int dacOut[MAX_DAC_MODULES][16];
 	#include "sus/sus.c"	/* User code for quad control.		*/
 #elif defined(PNM)
 	#include "pnm/pnm.c"	/* User code for Ponderomotive control. */
+#elif defined(PDE_CODE)
+	#include "pde/pde.c"	/* User code for Ponderomotive control. */
 #else
 	#error
 #endif
