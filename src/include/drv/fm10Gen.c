@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.10 2006/05/14 00:09:38 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.11 2006/06/06 17:37:59 rolf Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -45,7 +45,7 @@ static const UINT32 pow2_in[10] = {0x10,0x40,0x100,0x400,0x1000,0x4000,0x10000,
 static const UINT32 pow2_out[10] = {0x20,0x80,0x200,0x800,0x2000,0x8000,0x20000,
 				    0x80000,0x200000,0x800000};
 
-#if defined(SERVO16K) || defined(SERVOMIXED)
+#if defined(SERVO16K) || defined(SERVOMIXED) || defined(SERVO32K)
 static double sixteenKAvgCoeff[9] = {1.9084759e-12,
 				     -1.99708675982420, 0.99709029700517, 2.00000005830747, 1.00000000739582,
 				     -1.99878510620232, 0.99879373895648, 1.99999994169253, 0.99999999260419};
@@ -58,6 +58,8 @@ static double twoKAvgCoeff[9] = {7.705446e-9,
 #endif
 
 #ifdef SERVO16K
+#define avgCoeff sixteenKAvgCoeff
+#elif defined(SERVO32K)
 #define avgCoeff sixteenKAvgCoeff
 #elif defined(SERVO2K)
 #define avgCoeff twoKAvgCoeff
@@ -196,6 +198,8 @@ static const int rate = 16384;
 static const int rate = 5;
 #elif defined(SERVO2K)
 static const int rate = 2048;
+#elif defined(SERVO32K)
+static const int rate = 32768;
 #endif
 	     
 inline double
