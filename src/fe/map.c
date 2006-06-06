@@ -9,7 +9,9 @@
 #define RFM_WRITE	0x0
 #define RFM_READ	0x8
 #endif
+#ifndef NO_DAQ
 #include <drv/gmnet.h>
+#endif
 #include <drv/cdsHardware.h>
 
 
@@ -22,6 +24,7 @@ dma_addr_t dac_dma_handle[MAX_DAC_MODULES];	/* PCI add of ADC DMA memory */
 volatile GSA_ADC_REG *adcPtr[MAX_ADC_MODULES];	/* Ptr to ADC registers */
 volatile GSA_DAC_REG *dacPtr[MAX_DAC_MODULES];	/* Ptr to DAC registers */
 
+#ifndef NO_DAQ
 // Myrinet Variables
 static void *netOutBuffer;			/* Buffer for outbound myrinet messages */
 static void *netInBuffer;			/* Buffer for incoming myrinet messages */
@@ -43,6 +46,7 @@ static struct gm_port *netPort = 0;
 daqMessage *daqSendMessage;
 daqData *daqSendData;
 int cdsNetStatus = 0;
+#endif
 
 // Prototypes
 void gsaAdcDma2(int);
@@ -510,6 +514,7 @@ else {
 }
 #endif
 
+#ifndef NO_DAQ
 // *****************************************************************
 // Called by gm_unknown().
 // Decriments expected_callbacks variable ((*(int *)the_context)--),
@@ -878,3 +883,4 @@ if(subCycle == 15) {
 }
   return(0);
 }
+#endif
