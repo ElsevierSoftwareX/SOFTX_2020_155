@@ -1,0 +1,26 @@
+
+# Define Epics system name. It should be unique.
+TARGET = pdeepics
+
+SRC = build/$(TARGET)/pde.st
+
+SRC += src/drv/rfm.c
+SRC += src/drv/param.c
+SRC += src/drv/crc.c
+SRC += src/drv/fmReadCoeff.c
+
+DB += build/$(TARGET)/pde1.db
+
+IFO = M1
+SITE = mit
+
+SEQ += 'pde,("ifo=M1, site=mit, sys=PDE, sysnum= 10")'
+
+CFLAGS += -DPDE_CODE
+
+include config/Makefile.linux
+
+build/$(TARGET)/pde1.db: build/$(TARGET)/pde.db
+	sed 's/%SYS%/PDE/g;s/%SUBSYS%//g' $< > $@
+
+
