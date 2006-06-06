@@ -1,0 +1,346 @@
+ASC_WFS1_I1
+ASC_WFS1_I2
+ASC_WFS1_I3
+ASC_WFS1_I4
+ASC_WFS1_PIT
+ASC_WFS1_Q1
+ASC_WFS1_Q2
+ASC_WFS1_Q3
+ASC_WFS1_Q4
+ASC_WFS1_YAW
+ASC_WFS2_PIT
+ASC_WFS2_YAW
+LSC_AS1DC
+LSC_AS1I
+LSC_AS1Q
+LSC_AS2DC
+LSC_AS3DC
+LSC_CARM
+LSC_DARM
+LSC_LOCK_DC
+LSC_PRC
+LSC_REFLI
+LSC_REFLQ
+LSC_X_TRANS
+LSC_Y_TRANS
+SUS_BS_ASCP
+SUS_BS_ASCY
+SUS_BS_LLOUT
+SUS_BS_LLPIT
+SUS_BS_LLPOS
+SUS_BS_LLSEN
+SUS_BS_LLYAW
+SUS_BS_LROUT
+SUS_BS_LRPIT
+SUS_BS_LRPOS
+SUS_BS_LRSEN
+SUS_BS_LRYAW
+SUS_BS_LSC
+SUS_BS_PIT
+SUS_BS_POS
+SUS_BS_SIDE
+SUS_BS_ULOUT
+SUS_BS_ULPIT
+SUS_BS_ULPOS
+SUS_BS_ULSEN
+SUS_BS_ULYAW
+SUS_BS_UROUT
+SUS_BS_URPIT
+SUS_BS_URPOS
+SUS_BS_URSEN
+SUS_BS_URYAW
+SUS_BS_YAW
+SUS_ETMX_ASCP
+SUS_ETMX_ASCY
+SUS_ETMX_LLOUT
+SUS_ETMX_LLPIT
+SUS_ETMX_LLPOS
+SUS_ETMX_LLSEN
+SUS_ETMX_LLYAW
+SUS_ETMX_LROUT
+SUS_ETMX_LRPIT
+SUS_ETMX_LRPOS
+SUS_ETMX_LRSEN
+SUS_ETMX_LRYAW
+SUS_ETMX_LSC
+SUS_ETMX_PIT
+SUS_ETMX_POS
+SUS_ETMX_SIDE
+SUS_ETMX_ULOUT
+SUS_ETMX_ULPIT
+SUS_ETMX_ULPOS
+SUS_ETMX_ULSEN
+SUS_ETMX_ULYAW
+SUS_ETMX_UROUT
+SUS_ETMX_URPIT
+SUS_ETMX_URPOS
+SUS_ETMX_URSEN
+SUS_ETMX_URYAW
+SUS_ETMX_YAW
+SUS_ETMY_ASCP
+SUS_ETMY_ASCY
+SUS_ETMY_LLOUT
+SUS_ETMY_LLPIT
+SUS_ETMY_LLPOS
+SUS_ETMY_LLSEN
+SUS_ETMY_LLYAW
+SUS_ETMY_LROUT
+SUS_ETMY_LRPIT
+SUS_ETMY_LRPOS
+SUS_ETMY_LRSEN
+SUS_ETMY_LRYAW
+SUS_ETMY_LSC
+SUS_ETMY_PIT
+SUS_ETMY_POS
+SUS_ETMY_SIDE
+SUS_ETMY_ULOUT
+SUS_ETMY_ULPIT
+SUS_ETMY_ULPOS
+SUS_ETMY_ULSEN
+SUS_ETMY_ULYAW
+SUS_ETMY_UROUT
+SUS_ETMY_URPIT
+SUS_ETMY_URPOS
+SUS_ETMY_URSEN
+SUS_ETMY_URYAW
+SUS_ETMY_YAW
+SUS_ITMX_ASCP
+SUS_ITMX_ASCY
+SUS_ITMX_LLOUT
+SUS_ITMX_LLPIT
+SUS_ITMX_LLPOS
+SUS_ITMX_LLSEN
+SUS_ITMX_LLYAW
+SUS_ITMX_LROUT
+SUS_ITMX_LRPIT
+SUS_ITMX_LRPOS
+SUS_ITMX_LRSEN
+SUS_ITMX_LRYAW
+SUS_ITMX_LSC
+SUS_ITMX_PIT
+SUS_ITMX_POS
+SUS_ITMX_SIDE
+SUS_ITMX_ULOUT
+SUS_ITMX_ULPIT
+SUS_ITMX_ULPOS
+SUS_ITMX_ULSEN
+SUS_ITMX_ULYAW
+SUS_ITMX_UROUT
+SUS_ITMX_URPIT
+SUS_ITMX_URPOS
+SUS_ITMX_URSEN
+SUS_ITMX_URYAW
+SUS_ITMX_YAW
+SUS_ITMY_ASCP
+SUS_ITMY_ASCY
+SUS_ITMY_LLOUT
+SUS_ITMY_LLPIT
+SUS_ITMY_LLPOS
+SUS_ITMY_LLSEN
+SUS_ITMY_LLYAW
+SUS_ITMY_LROUT
+SUS_ITMY_LRPIT
+SUS_ITMY_LRPOS
+SUS_ITMY_LRSEN
+SUS_ITMY_LRYAW
+SUS_ITMY_LSC
+SUS_ITMY_PIT
+SUS_ITMY_POS
+SUS_ITMY_SIDE
+SUS_ITMY_ULOUT
+SUS_ITMY_ULPIT
+SUS_ITMY_ULPOS
+SUS_ITMY_ULSEN
+SUS_ITMY_ULYAW
+SUS_ITMY_UROUT
+SUS_ITMY_URPIT
+SUS_ITMY_URPOS
+SUS_ITMY_URSEN
+SUS_ITMY_URYAW
+SUS_ITMY_YAW
+
+EPICS CDS_EPICS dspSpace coeffSpace epicsSpace
+
+MATRIX ASC_INMTRX_ 4x4 pde.ASC_INMTRX
+MATRIX ASC_I_MTRX_ 3x4 pde.ASC_I_MTRX
+MATRIX ASC_I_MTRX1_ 3x4 pde.ASC_I_MTRX1
+MATRIX ASC_OUTMTRX_ 4x4 pde.ASC_OUTMTRX
+MATRIX LSC_INMTRX_ 3x4 pde.LSC_INMTRX
+MATRIX LSC_OUTMTRX_ 6x3 pde.LSC_OUTMTRX
+MATRIX SUS_BS_INMTRX_ 3x4 pde.SUS_BS_INMTRX
+MATRIX SUS_ETMX_INMTRX_ 3x4 pde.SUS_ETMX_INMTRX
+MATRIX SUS_ETMY_INMTRX_ 3x4 pde.SUS_ETMY_INMTRX
+MATRIX SUS_ITMX_INMTRX_ 3x4 pde.SUS_ITMX_INMTRX
+MATRIX SUS_ITMY_INMTRX_ 3x4 pde.SUS_ITMY_INMTRX
+
+
+MOMENTARY VME_RESET epicsInput.vmeReset int ai 0
+MOMENTARY DIAG_RESET epicsInput.diagReset int ai 0
+MOMENTARY SYNC_RESET epicsInput.syncReset int ai 0
+MOMENTARY OVERFLOW_RESET epicsInput.overflowReset int ai 0
+DAQVAR LOAD_CONFIG int ai 0
+DAQVAR CHAN_CNT int ai 0
+DAQVAR TOTAL int ai 0
+DAQVAR MSG int ai 0
+DAQVAR DCU_ID int ai 0
+OUTVARIABLE CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,"60") field(LOPR,"0")
+OUTVARIABLE CPU_METER_MAX epicsOutput.cpuMeterMax int ai 0 field(HOPR,"60") field(LOPR,"0")
+OUTVARIABLE ADC_WAIT epicsOutput.adcWaitTime int ai 0 field(HOPR,"60") field(LOPR,"0")
+OUTVARIABLE ONE_PPS epicsOutput.onePps int ai 0
+OUTVARIABLE DIAG_WORD epicsOutput.diagWord int ai 0
+INVARIABLE BURT_RESTORE epicsInput.burtRestore int ai 0
+OUTVARIABLE GDS_MON_0 epicsOutput.gdsMon[0] int ai 0
+OUTVARIABLE GDS_MON_1 epicsOutput.gdsMon[1] int ai 0
+OUTVARIABLE GDS_MON_2 epicsOutput.gdsMon[2] int ai 0
+OUTVARIABLE GDS_MON_3 epicsOutput.gdsMon[3] int ai 0
+OUTVARIABLE GDS_MON_4 epicsOutput.gdsMon[4] int ai 0
+OUTVARIABLE GDS_MON_5 epicsOutput.gdsMon[5] int ai 0
+OUTVARIABLE GDS_MON_6 epicsOutput.gdsMon[6] int ai 0
+OUTVARIABLE GDS_MON_7 epicsOutput.gdsMon[7] int ai 0
+OUTVARIABLE GDS_MON_8 epicsOutput.gdsMon[8] int ai 0
+OUTVARIABLE GDS_MON_9 epicsOutput.gdsMon[9] int ai 0
+OUTVARIABLE GDS_MON_10 epicsOutput.gdsMon[10] int ai 0
+OUTVARIABLE GDS_MON_11 epicsOutput.gdsMon[11] int ai 0
+OUTVARIABLE GDS_MON_12 epicsOutput.gdsMon[12] int ai 0
+OUTVARIABLE GDS_MON_13 epicsOutput.gdsMon[13] int ai 0
+OUTVARIABLE GDS_MON_14 epicsOutput.gdsMon[14] int ai 0
+OUTVARIABLE GDS_MON_15 epicsOutput.gdsMon[15] int ai 0
+OUTVARIABLE GDS_MON_16 epicsOutput.gdsMon[16] int ai 0
+OUTVARIABLE GDS_MON_17 epicsOutput.gdsMon[17] int ai 0
+OUTVARIABLE GDS_MON_18 epicsOutput.gdsMon[18] int ai 0
+OUTVARIABLE GDS_MON_19 epicsOutput.gdsMon[19] int ai 0
+OUTVARIABLE GDS_MON_20 epicsOutput.gdsMon[20] int ai 0
+OUTVARIABLE GDS_MON_21 epicsOutput.gdsMon[21] int ai 0
+OUTVARIABLE GDS_MON_22 epicsOutput.gdsMon[22] int ai 0
+OUTVARIABLE GDS_MON_23 epicsOutput.gdsMon[23] int ai 0
+OUTVARIABLE GDS_MON_24 epicsOutput.gdsMon[24] int ai 0
+OUTVARIABLE GDS_MON_25 epicsOutput.gdsMon[25] int ai 0
+OUTVARIABLE GDS_MON_26 epicsOutput.gdsMon[26] int ai 0
+OUTVARIABLE GDS_MON_27 epicsOutput.gdsMon[27] int ai 0
+OUTVARIABLE GDS_MON_28 epicsOutput.gdsMon[28] int ai 0
+OUTVARIABLE GDS_MON_29 epicsOutput.gdsMon[29] int ai 0
+OUTVARIABLE GDS_MON_30 epicsOutput.gdsMon[30] int ai 0
+OUTVARIABLE GDS_MON_31 epicsOutput.gdsMon[31] int ai 0
+OUTVARIABLE USR_TIME epicsOutput.diags[0] int ai 0
+OUTVARIABLE RESYNC_COUNT epicsOutput.diags[1] int ai 0
+OUTVARIABLE NET_ERR_COUNT epicsOutput.diags[2] int ai 0
+OUTVARIABLE DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0
+
+
+OUTVARIABLE ASC_I_PIT pde.ASC_I_PIT float ai 0 field(PREC,"3")
+OUTVARIABLE ASC_I_SUM pde.ASC_I_SUM float ai 0 field(PREC,"3")
+OUTVARIABLE ASC_I_YAW pde.ASC_I_YAW float ai 0 field(PREC,"3")
+OUTVARIABLE ASC_Q_PIT pde.ASC_Q_PIT float ai 0 field(PREC,"3")
+OUTVARIABLE ASC_Q_SUM pde.ASC_Q_SUM float ai 0 field(PREC,"3")
+OUTVARIABLE ASC_Q_YAW pde.ASC_Q_YAW float ai 0 field(PREC,"3")
+INVARIABLE PZT_M1_PIT pde.PZT_M1_PIT float ai 0 field(PREC,"3")
+INVARIABLE PZT_M1_YAW pde.PZT_M1_YAW float ai 0 field(PREC,"3")
+INVARIABLE PZT_M2_PIT pde.PZT_M2_PIT float ai 0 field(PREC,"3")
+INVARIABLE PZT_M2_YAW pde.PZT_M2_YAW float ai 0 field(PREC,"3")
+
+
+OUTVARIABLE ADC_OVERFLOW_0_0 epicsOutput.overflowAdc[0][0] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_1 epicsOutput.overflowAdc[0][1] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_2 epicsOutput.overflowAdc[0][2] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_3 epicsOutput.overflowAdc[0][3] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_4 epicsOutput.overflowAdc[0][4] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_5 epicsOutput.overflowAdc[0][5] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_6 epicsOutput.overflowAdc[0][6] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_7 epicsOutput.overflowAdc[0][7] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_8 epicsOutput.overflowAdc[0][8] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_9 epicsOutput.overflowAdc[0][9] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_10 epicsOutput.overflowAdc[0][10] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_11 epicsOutput.overflowAdc[0][11] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_12 epicsOutput.overflowAdc[0][12] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_13 epicsOutput.overflowAdc[0][13] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_14 epicsOutput.overflowAdc[0][14] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_15 epicsOutput.overflowAdc[0][15] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_16 epicsOutput.overflowAdc[0][16] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_17 epicsOutput.overflowAdc[0][17] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_18 epicsOutput.overflowAdc[0][18] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_19 epicsOutput.overflowAdc[0][19] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_20 epicsOutput.overflowAdc[0][20] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_21 epicsOutput.overflowAdc[0][21] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_22 epicsOutput.overflowAdc[0][22] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_23 epicsOutput.overflowAdc[0][23] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_24 epicsOutput.overflowAdc[0][24] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_25 epicsOutput.overflowAdc[0][25] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_26 epicsOutput.overflowAdc[0][26] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_27 epicsOutput.overflowAdc[0][27] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_28 epicsOutput.overflowAdc[0][28] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_29 epicsOutput.overflowAdc[0][29] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_30 epicsOutput.overflowAdc[0][30] int ai 0
+OUTVARIABLE ADC_OVERFLOW_0_31 epicsOutput.overflowAdc[0][31] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_0 epicsOutput.overflowAdc[1][0] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_1 epicsOutput.overflowAdc[1][1] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_2 epicsOutput.overflowAdc[1][2] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_3 epicsOutput.overflowAdc[1][3] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_4 epicsOutput.overflowAdc[1][4] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_5 epicsOutput.overflowAdc[1][5] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_6 epicsOutput.overflowAdc[1][6] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_7 epicsOutput.overflowAdc[1][7] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_8 epicsOutput.overflowAdc[1][8] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_9 epicsOutput.overflowAdc[1][9] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_10 epicsOutput.overflowAdc[1][10] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_11 epicsOutput.overflowAdc[1][11] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_12 epicsOutput.overflowAdc[1][12] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_13 epicsOutput.overflowAdc[1][13] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_14 epicsOutput.overflowAdc[1][14] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_15 epicsOutput.overflowAdc[1][15] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_16 epicsOutput.overflowAdc[1][16] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_17 epicsOutput.overflowAdc[1][17] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_18 epicsOutput.overflowAdc[1][18] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_19 epicsOutput.overflowAdc[1][19] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_20 epicsOutput.overflowAdc[1][20] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_21 epicsOutput.overflowAdc[1][21] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_22 epicsOutput.overflowAdc[1][22] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_23 epicsOutput.overflowAdc[1][23] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_24 epicsOutput.overflowAdc[1][24] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_25 epicsOutput.overflowAdc[1][25] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_26 epicsOutput.overflowAdc[1][26] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_27 epicsOutput.overflowAdc[1][27] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_28 epicsOutput.overflowAdc[1][28] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_29 epicsOutput.overflowAdc[1][29] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_30 epicsOutput.overflowAdc[1][30] int ai 0
+OUTVARIABLE ADC_OVERFLOW_1_31 epicsOutput.overflowAdc[1][31] int ai 0
+
+
+OUTVARIABLE DAC_OVERFLOW_0_0 epicsOutput.overflowDac[0][0] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_1 epicsOutput.overflowDac[0][1] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_2 epicsOutput.overflowDac[0][2] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_3 epicsOutput.overflowDac[0][3] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_4 epicsOutput.overflowDac[0][4] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_5 epicsOutput.overflowDac[0][5] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_6 epicsOutput.overflowDac[0][6] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_7 epicsOutput.overflowDac[0][7] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_8 epicsOutput.overflowDac[0][8] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_9 epicsOutput.overflowDac[0][9] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_10 epicsOutput.overflowDac[0][10] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_11 epicsOutput.overflowDac[0][11] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_12 epicsOutput.overflowDac[0][12] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_13 epicsOutput.overflowDac[0][13] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_14 epicsOutput.overflowDac[0][14] int ai 0
+OUTVARIABLE DAC_OVERFLOW_0_15 epicsOutput.overflowDac[0][15] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_0 epicsOutput.overflowDac[1][0] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_1 epicsOutput.overflowDac[1][1] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_2 epicsOutput.overflowDac[1][2] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_3 epicsOutput.overflowDac[1][3] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_4 epicsOutput.overflowDac[1][4] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_5 epicsOutput.overflowDac[1][5] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_6 epicsOutput.overflowDac[1][6] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_7 epicsOutput.overflowDac[1][7] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_8 epicsOutput.overflowDac[1][8] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_9 epicsOutput.overflowDac[1][9] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_10 epicsOutput.overflowDac[1][10] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_11 epicsOutput.overflowDac[1][11] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_12 epicsOutput.overflowDac[1][12] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_13 epicsOutput.overflowDac[1][13] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_14 epicsOutput.overflowDac[1][14] int ai 0
+OUTVARIABLE DAC_OVERFLOW_1_15 epicsOutput.overflowDac[1][15] int ai 0
+OUTVARIABLE ACCUM_OVERFLOW epicsOutput.ovAccum int ai 0
+
+
+systems PDE-
+gds_config 6250 16250 1250 1250
+
+
