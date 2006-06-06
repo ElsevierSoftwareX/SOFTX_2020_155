@@ -64,7 +64,9 @@ extern unsigned long cpu_khz;
 
 
 // #include "fpvalidate.h"		/* Valid FP number ck			*/
+#ifndef NO_DAQ
 #include "drv/daqLib.c"		/* DAQ/GDS connection 			*/
+#endif
 #include "drv/epicsXfer.c"	/* Transfers EPICS data to/from shmem	*/
 #ifdef SERVO128K
         #define CYCLE_PER_SECOND        131072
@@ -74,6 +76,15 @@ extern unsigned long cpu_khz;
         #define DAQ_RATE                8192
         #define NET_SEND_WAIT           655360
         #define CYCLE_TIME_ALRM         7
+#endif
+#ifdef SERVO32K
+	#define CYCLE_PER_SECOND	32768
+	#define CYCLE_PER_MINUTE	1966080
+	#define DAQ_CYCLE_CHANGE	1540
+	#define END_OF_DAQ_BLOCK	2047
+	#define DAQ_RATE	DAQ_16K_SAMPLE_SIZE
+	#define NET_SEND_WAIT		81920
+	#define CYCLE_TIME_ALRM		30
 #endif
 
 #ifdef SERVO16K
@@ -95,7 +106,9 @@ extern unsigned long cpu_khz;
 	#define CYCLE_TIME_ALRM		480
 #endif
 
+#ifndef NO_DAQ
 DAQ_RANGE daq;			/* Range settings for daqLib.c		*/
+#endif
 
 rtl_pthread_t wthread;
 rtl_pthread_t wthread1;
@@ -111,6 +124,7 @@ extern int gsaAdcDma1(int,int);			/* Send data to ADC via DMA.		*/
 extern int gsaDacDma(int);			/* Send data to DAC via DMA.		*/
 extern int gsaDacDma1(int);			/* Send data to DAC via DMA.		*/
 extern void gsaDacDma2(int);			/* Send data to DAC via DMA.		*/
+#ifndef NO_DAQ
 extern int myriNetInit(int);			/* Initialize myrinet card.		*/
 extern int myriNetClose();			/* Clean up myrinet on exit.		*/
 extern int myriNetCheckCallback();		/* Check for messages on myrinet.	*/
@@ -118,6 +132,7 @@ extern int myriNetReconnect(int);		/* Make connects to FB.			*/
 extern int myriNetCheckReconnect();		/* Check FB net connected.		*/
 extern int myriNetDrop();		/* Check FB net connected.		*/
 extern int cdsNetStatus;
+#endif
 extern unsigned int readDio(CDS_HARDWARE *,int);
 
 
@@ -338,6 +353,7 @@ void *fe_start(void *arg)
 
 
 
+#ifndef NO_DAQ
   /* Set data range limits for daqLib routine */
   daq.filtExMin = (dcuId-5) * GDS_TP_MAX_FE;
   daq.filtExMax = daq.filtExMin + MAX_MODULES;
@@ -356,6 +372,7 @@ void *fe_start(void *arg)
 
   // Set an xtra TP to read out one pps signal
   testpoint[0] = (float *)&onePps;
+#endif
   pLocalEpics->epicsOutput.diagWord = 0;
   pLocalEpics->epicsOutput.diags[1] = 0;
   pLocalEpics->epicsOutput.diags[2] = 0;
