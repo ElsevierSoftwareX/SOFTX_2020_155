@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.15 2006/05/12 20:45:33 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.16 2006/06/28 23:37:28 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -295,7 +295,13 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     {
       /* Need to develop a table of offset pointers to load data into swing buffers 	*/
       /* This is based on decimation factors and data size				*/
+      if ((dataInfo.tp[ii].dataRate / 16) > sysRate) {
+	/* Channel data rate is greater than system rate */
+	printf("Channels %d has bad data rate %d\n", ii, dataInfo.tp[ii].dataRate);
+	return(-1);
+      } else {
       localTable[ii].decFactor = sysRate/(dataInfo.tp[ii].dataRate / 16);
+      }
       if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
 	offsetAccum += (sysRate/localTable[ii].decFactor * 2);
       else
