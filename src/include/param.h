@@ -6,6 +6,7 @@ typedef struct CHAN_PARAM {
   int datarate;
   int acquire;
   int ifoid;
+  int rmid;
   int datatype;
   int chnnum;
   int testpoint;
