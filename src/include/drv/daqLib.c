@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.16 2006/06/28 23:37:28 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.17 2006/06/29 21:14:51 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -366,7 +366,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	}
     else {
     	exciteDataPtr = (char *)(_epics_shm + DATA_OFFSET_DCU(DCU_ID_EX_16K));
-	excDataSize = 0x1004;
+	excDataSize = 4 + 4 * sysRate;
     }
 
     // Following just sets in some dummy data for testing.
@@ -670,7 +670,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	else 
 	{
 		tpx = 2;
-		tpAdd = 256;
+		tpAdd = sysRate / 4;
 	}
 	for(ii=0;ii<20;ii++)
 	{
