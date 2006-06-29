@@ -82,7 +82,7 @@ extern unsigned long cpu_khz;
 	#define CYCLE_PER_MINUTE	1966080
 	#define DAQ_CYCLE_CHANGE	1540
 	#define END_OF_DAQ_BLOCK	2047
-	#define DAQ_RATE	DAQ_16K_SAMPLE_SIZE
+	#define DAQ_RATE	(DAQ_16K_SAMPLE_SIZE*2)
 	#define NET_SEND_WAIT		81920
 	#define CYCLE_TIME_ALRM		30
 #endif
