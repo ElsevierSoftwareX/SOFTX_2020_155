@@ -274,12 +274,12 @@ static const int daqGdsTpNum[4] = { DAQ_GDS_TP_LSC_EX_NUM, DAQ_GDS_TP_ASC_EX_NUM
 */
 
 typedef union GDS_CNTRL_BLOCK {
-  unsigned short tp [4][2][DAQ_GDS_MAX_TP_NUM];
+  unsigned int tp [4][2][DAQ_GDS_MAX_TP_NUM];
   struct {
-    unsigned short excNum16k[2][DAQ_GDS_MAX_TP_NUM];
-    unsigned short excNum2k[2][DAQ_GDS_MAX_TP_NUM];
-    unsigned short tpNum16k[2][DAQ_GDS_MAX_TP_NUM];
-    unsigned short tpNum2k[2][DAQ_GDS_MAX_TP_NUM];
+    unsigned int excNum16k[2][DAQ_GDS_MAX_TP_NUM];
+    unsigned int excNum2k[2][DAQ_GDS_MAX_TP_NUM];
+    unsigned int tpNum16k[2][DAQ_GDS_MAX_TP_NUM];
+    unsigned int tpNum2k[2][DAQ_GDS_MAX_TP_NUM];
   } tpe;
 } GDS_CNTRL_BLOCK;
 
