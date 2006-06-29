@@ -677,7 +677,7 @@ int myriNetClose()
   gm_close (netPort);
   gm_finalize();
 
-  gm_exit (main_status);
+  //gm_exit (main_status);
 
   return(0);
 
