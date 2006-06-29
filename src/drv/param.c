@@ -13,7 +13,7 @@
 #endif
 
 static const CHAN_PARAM uninit = {
-  -1,-1,1,-1,-1,0,0,-99999000.0,-99999999.0,-9999999.0,"none"
+  -1,-1,-1,-1,-1,-1,0,0,-99999000.0,-99999999.0,-9999999.0,"none"
 };
 
 /*
@@ -258,6 +258,19 @@ parseConfigFile(char *fname, unsigned long *crc,
       else if(!strcasecmp(id,"ifoid")) {
 	char *endptr;
 	current.ifoid = strtol(val, &endptr,0);
+	if (endptr != (val + strlen(val))) {
+	  system_log(1, "not a integer number in %s:%d", fname, linenum);
+	  fclose(fp);
+          if (afp) {
+	    fclose(afp);
+	    unlink(afname);
+          }
+	  return 0;
+	}
+      }
+      else if(!strcasecmp(id,"rmid")) {
+	char *endptr;
+	current.rmid = strtol(val, &endptr,0);
 	if (endptr != (val + strlen(val))) {
 	  system_log(1, "not a integer number in %s:%d", fname, linenum);
 	  fclose(fp);
