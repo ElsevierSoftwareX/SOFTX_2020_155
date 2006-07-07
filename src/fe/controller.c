@@ -68,6 +68,15 @@ extern unsigned long cpu_khz;
 #include "drv/daqLib.c"		/* DAQ/GDS connection 			*/
 #endif
 #include "drv/epicsXfer.c"	/* Transfers EPICS data to/from shmem	*/
+#ifdef SERVO256K
+        #define CYCLE_PER_SECOND        (2*131072)
+        #define CYCLE_PER_MINUTE        (2*7864320)
+        #define DAQ_CYCLE_CHANGE        (2*8000)
+        #define END_OF_DAQ_BLOCK        (2*8191)
+        #define DAQ_RATE                (2*8192)
+        #define NET_SEND_WAIT           (2*655360)
+        #define CYCLE_TIME_ALRM         4
+#endif
 #ifdef SERVO128K
         #define CYCLE_PER_SECOND        131072
         #define CYCLE_PER_MINUTE        7864320
@@ -76,6 +85,15 @@ extern unsigned long cpu_khz;
         #define DAQ_RATE                8192
         #define NET_SEND_WAIT           655360
         #define CYCLE_TIME_ALRM         7
+#endif
+#ifdef SERVO64K
+	#define CYCLE_PER_SECOND	(2*32768)
+	#define CYCLE_PER_MINUTE	(2*1966080)
+	#define DAQ_CYCLE_CHANGE	(2*1540)
+	#define END_OF_DAQ_BLOCK	(2*2047)
+	#define DAQ_RATE	(DAQ_16K_SAMPLE_SIZE*4)
+	#define NET_SEND_WAIT		(2*81920)
+	#define CYCLE_TIME_ALRM		15
 #endif
 #ifdef SERVO32K
 	#define CYCLE_PER_SECOND	32768
