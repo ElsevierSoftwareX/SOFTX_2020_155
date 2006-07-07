@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.17 2006/06/29 21:14:51 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.18 2006/07/07 00:19:13 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -273,6 +273,12 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     mnDaqSize = crcLength/16;
     totalSize = mnDaqSize;
     
+    if (xferSize1 == 0) {
+	printf("DAQ size too small\n");
+	return -1;
+    }
+/*    if (xferSize1 == 0) xferSize1 = 8;  ???? */
+
     /* 	Maintain 8 byte data boundaries for writing data, particularly important
         when DMA xfers are used on 5565 RFM modules. Note that this usually results
 	in data not being written on every 2048/16384 cycle and last data xfer
