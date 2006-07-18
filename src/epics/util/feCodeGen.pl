@@ -28,7 +28,7 @@ if($dcuId < 16) {$rate = 60;}
 if($dcuId > 16) {$rate = 480;}
 if (@ARGV == 2) { $skeleton = $ARGV[1]; }
 open(EPICS,">../fmseq/".$ARGV[1]) || die "cannot open output file for writing";
-open(OUT,">./".$cFile) || die "cannot open c file for writing";
+open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
 open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
 open(OUTH,">./".$hFile) || die "cannot open header file for writing";
@@ -247,7 +247,12 @@ while (<IN>) {
 		if($conDes eq $xpartName[$ii])
 		{
 			$partInput[$ii][$partInCnt[$ii]] = $conSrc;
-			$partInputPort[$ii][$partInCnt[$ii]] = $conDesPort-1;
+			$partInputPort[$ii][$partInCnt[$ii]] = $conDesPort - 1;
+			if(substr($conDes,0,3) eq "DAC")
+			{
+				$partOutputPort[$ii][$partInCnt[$ii]] = $conDesPort - 1;
+				#print "$xpartName[$ii] $partInCnt[$ii] has link to $partInput[$ii][$partInCnt[$ii]] $partOutputPort[$ii][$partInCnt[$ii]]\n";
+			}
 			$partInCnt[$ii] ++;
 		}
 	}
@@ -288,7 +293,7 @@ while (<IN>) {
 			if(substr($conDes,0,3) eq "DAC")
 			{
 				$partOutputPort[$ii][$partInCnt[$ii]] = $conDesPort-1;
-				#print "$xpartName[$ii] $partInCnt[$ii] has link to $partInput[$ii][$partInCnt[$ii]] $partOutputPort[$ii][$partInCnt[$ii]]\n";
+				print "$xpartName[$ii] $partInCnt[$ii] has link to $partInput[$ii][$partInCnt[$ii]] $partOutputPort[$ii][$partInCnt[$ii]]\n";
 			}
 			$partInCnt[$ii] ++;
 		}
@@ -350,7 +355,14 @@ while (<IN>) {
 	$partErr = 1;
 	if (substr($var2,0,9) eq "cdsSwitch") {
 		$partType[$partCnt] = MULTI_SW;
-		#print "$partCnt is type MULTI_SW\n";
+		$partErr = 0;
+	}
+	if (substr($var2,0,9) eq "cdsSusSw2") {
+		$partType[$partCnt] = MULTI_SW;
+		$partErr = 0;
+	}
+	if (substr($var2,0,8) eq "cdsSusWd") {
+		$partType[$partCnt] = SUS_WD;
 		$partErr = 0;
 	}
 	if (substr($var2,0,6) eq "cdsRms") {
@@ -899,6 +911,7 @@ for($ii=0;$ii<$searchCnt;$ii++)
 		}
 	}
 }
+print "first pass done $partsRemaining $subRemaining\n";
 until(($partsRemaining < 1) && ($subRemaining < 1))
 {
 	for($ii=0;$ii<$subSys;$ii++)
@@ -941,9 +954,19 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 			for($jj=0;$jj<$partInCnt[$xx];$jj++)
 			{
 				$yy = $partSysFromx[$xx][$jj];
+				if($yy <= 0)
+				{
+					$zz = $partInNum[$xx][$jj];
+					if(!$partUsed[$zz])
+					{
+						$allADC = 0;
+					}
+				}
+				else {
 				if(($subUsed[$yy] != 1) && ($partInputType[$xx][$jj] ne "ADC"))
 				{
 						$allADC = 0;
+				}
 				}
 			}
 			if($allADC == 1) {
@@ -1071,6 +1094,11 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUTH "\tint $xpartName[$ii]\_TRAMP;\n";
 		print OUTH "\tint $xpartName[$ii]\_RMON;\n";
 	}
+	if($partType[$ii] eq "SUS_WD") {
+		print OUTH "\tint $xpartName[$ii];\n";
+		print OUTH "\tint $xpartName[$ii]\_MAX;\n";
+		print OUTH "\tfloat $xpartName[$ii]\_VAR\[20\];\n";
+	}
 	if($partType[$ii] eq "SEI_WD1") {
 		print OUTH "\tSEI_WATCHDOG $xpartName[$ii];\n";
 	}
@@ -1120,6 +1148,30 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 		print EPICS "INVARIABLE $xpartName[$ii]\_TRAMP $systemName\.$xpartName[$ii]\_TRAMP int ai 0 field(PREC,\"0\")\n";
 		print EPICS "OUTVARIABLE $xpartName[$ii]\_RMON $systemName\.$xpartName[$ii]\_RMON int ai 0 field(PREC,\"0\")\n";
+	}
+	if($partType[$ii] eq "SUS_WD") {
+		print EPICS "OUTVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int ai 0 \n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_M0_F1 $systemName\.$xpartName[$ii]\_VAR\[0\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_M0_F2 $systemName\.$xpartName[$ii]\_VAR\[1\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_M0_F3 $systemName\.$xpartName[$ii]\_VAR\[2\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_M0_L $systemName\.$xpartName[$ii]\_VAR\[3\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_M0_R $systemName\.$xpartName[$ii]\_VAR\[4\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_M0_S $systemName\.$xpartName[$ii]\_VAR\[5\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_R0_F1 $systemName\.$xpartName[$ii]\_VAR\[6\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_R0_F2 $systemName\.$xpartName[$ii]\_VAR\[7\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_R0_F3 $systemName\.$xpartName[$ii]\_VAR\[8\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_R0_L $systemName\.$xpartName[$ii]\_VAR\[9\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_R0_R $systemName\.$xpartName[$ii]\_VAR\[10\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_R0_S $systemName\.$xpartName[$ii]\_VAR\[11\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_L1_UL $systemName\.$xpartName[$ii]\_VAR\[12\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_L1_LL $systemName\.$xpartName[$ii]\_VAR\[13\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_L1_UR $systemName\.$xpartName[$ii]\_VAR\[14\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_L1_LR $systemName\.$xpartName[$ii]\_VAR\[15\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_L2_UL $systemName\.$xpartName[$ii]\_VAR\[16\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_L2_LL $systemName\.$xpartName[$ii]\_VAR\[17\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_L2_UR $systemName\.$xpartName[$ii]\_VAR\[18\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_L2_LR $systemName\.$xpartName[$ii]\_VAR\[19\] float ai 0 field(PREC,\"1\")\n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_MAX $systemName\.$xpartName[$ii]\_MAX int ai 0 field(PREC,\"0\")\n";
 	}
 	if($partType[$ii] eq "SEI_WD1") {
 		print EPICS "DUMMY $xpartName[$ii]\_STATUS int ai 0 \n";
@@ -1248,6 +1300,15 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUT "float \L$xpartName[$ii];\n";
 		print OUT "static float \L$xpartName[$ii]\_avg;\n";
 	}
+	if($partType[$ii] eq "GROUND") {
+		print OUT "static float \L$xpartName[$ii];\n";
+	}
+	if($partType[$ii] eq "SUS_WD") {
+	   print OUT "float \L$xpartName[$ii];\n";
+	   print OUT "static float \L$xpartName[$ii]\_avg\[20\];\n";
+	   print OUT "static float \L$xpartName[$ii]\_var\[20\];\n";
+	   print OUT "float vabs;\n";
+	}
 	if($partType[$ii] eq "SEI_WD1"){
 		print OUT "float \L$xpartName[$ii]";
 		print OUT "Filt\[20\];\n";
@@ -1262,6 +1323,15 @@ for($ii=0;$ii<$partCnt;$ii++)
 {
 	if($partType[$ii] eq "RMS") {
 		print OUT "\L$xpartName[$ii]\_avg = 0\.0;\n";
+	}
+	if($partType[$ii] eq "GROUND") {
+		print OUT "\L$xpartName[$ii] = 0\.0;\n";
+	}
+	if($partType[$ii] eq "SUS_WD") {
+	   print OUT "for\(ii=0;ii<20;ii++\) {\n";
+	   print OUT "\t\L$xpartName[$ii]\_avg\[ii\] = 0.0;\n";
+	   print OUT "\t\L$xpartName[$ii]\_var\[ii\] = 0.0;\n";
+	   print OUT "}\n";
 	}
 }
 print OUT "\} else \{\n";
@@ -1347,6 +1417,41 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   $calcExp .= $fromExp[0];
 	   $calcExp .= ",0);\n";
 	   print OUT "$calcExp";
+	}
+	if($partType[$mm] eq "SUS_WD")
+	{
+	   print OUT "// SUS_WD MODULE\n";
+		print OUT "if((cycle \% 16) == 0) {\n";
+		$calcExp = "\L$xpartName[$mm] = 16384;\n";
+		print OUT "$calcExp";
+	        print OUT "   for\(ii=0;ii<20;ii++\) {\n";
+		$calcExp = "\t\L$xpartName[$mm]\_avg\[ii\]";
+		$calcExp .= " = dWord\[0\]\[ii\] * \.00005 + ";
+		$calcExp .= "\L$xpartName[$mm]\_avg\[ii\] * 0\.99995;\n";
+		print OUT "$calcExp";
+		print OUT "\tvabs = dWord\[0\]\[ii\] - \L$xpartName[$mm]\_avg\[ii\];\n";
+		print OUT "\tif\(vabs < 0) vabs *= -1.0;\n";
+		$calcExp = "\t\L$xpartName[$mm]\_var\[ii\] = \L$xpartName[$mm]\_var\[ii\] * \.00005 + ";
+		$calcExp .= "\L$xpartName[$mm]\_var\[ii\] * 0\.99995;\n";
+		print OUT "$calcExp";
+		$calcExp = "\tpLocalEpics->$systemName\.";
+		$calcExp .= $xpartName[$mm];
+		$calcExp .= "_VAR\[ii\] = ";
+		$calcExp .= "\L$xpartName[$mm]\_var\[ii\];\n";
+		print OUT "$calcExp";
+
+		$calcExp = "\tif(\L$xpartName[$mm]\_var\[ii\] \> ";
+		$calcExp .= "pLocalEpics->$systemName\.";
+		$calcExp .= $xpartName[$mm];
+		$calcExp .= "_MAX\) ";
+		$calcExp .= "\L$xpartName[$mm] = 0;\n";
+		print OUT "$calcExp";
+		print OUT "   }\n";
+		$calcExp = "\tpLocalEpics->$systemName\.";
+		$calcExp .= $xpartName[$mm];
+		$calcExp .= " = \L$xpartName[$mm] \/ 16384;\n";
+		print OUT "$calcExp";
+		print OUT "}\n";
 	}
 	# ******** SEI_WD1 *************************************************************************
 	if($partType[$mm] eq "SEI_WD1")
