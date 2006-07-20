@@ -390,6 +390,11 @@ while (<IN>) {
 		# print "$partCnt is type RAMP_SW\n";
 		$partErr = 0;
 	}
+	if (substr($var2,0,6) eq "cdsOsc") {
+		$partType[$partCnt] = OSC;
+		print "$partCnt is type OSC\n";
+		$partErr = 0;
+	}
 	if (substr($var2,0,11) eq "cdsSubtract") {
 		$partType[$partCnt] = DIFF_JUNC;
 		#print "$partCnt is type DIFF_JUNCT\n";
@@ -610,7 +615,7 @@ $foundCon = 0;
 			{
 				$fromNum = $partInNum[$ii][$jj];
 				$fromPort = $partInputPort[$ii][$jj];
-			# print "\t Maybe $xpartName[$xx] port $partOutputPort[$ii][$jj] $xpartName[$fromNum] $partType[$fromNum] $fromPort\n";
+			print "\t Maybe $xpartName[$xx] port $partOutputPort[$ii][$jj] $xpartName[$fromNum] $partType[$fromNum] $fromPort\n";
 				# Make output connection at source part
 				$partOutput[$fromNum][$fromPort] = $xpartName[$xx];
 				$partOutputType[$fromNum][$fromPort] = $partType[$xx];
@@ -1116,6 +1121,12 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "RAMP_SW") {
 		print OUTH "\tint $xpartName[$ii];\n";
 	}
+	if($partType[$ii] eq "OSC") {
+		print OUTH "\tfloat $xpartName[$ii]\_FREQ;\n";
+		print OUTH "\tfloat $xpartName[$ii]\_CLKGAIN;\n";
+		print OUTH "\tfloat $xpartName[$ii]\_SINGAIN;\n";
+		print OUTH "\tfloat $xpartName[$ii]\_COSGAIN;\n";
+	}
 	if($partType[$ii] eq "MULTI_SW") {
 		print OUTH "\tint $xpartName[$ii];\n";
 	}
@@ -1179,6 +1190,12 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 	if($partType[$ii] eq "EPICS_INPUT") {
 		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
+	}
+	if($partType[$ii] eq "OSC") {
+		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii]\_FREQ float ai 0 field(PREC,\"1\")\n";
+		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii]\_CLKGAIN float ai 0 field(PREC,\"1\")\n";
+		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii]\_SINGAIN float ai 0 field(PREC,\"1\")\n";
+		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii]\_COSGAIN float ai 0 field(PREC,\"1\")\n";
 	}
 	if($partType[$ii] eq "PHASE") {
 		print EPICS "PHASE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
@@ -1300,6 +1317,13 @@ print EPICS "\n\n";
 print OUT "// ******* This is a computer generated file *******\n";
 print OUT "// ******* DO NOT HAND EDIT ************************\n";
 print OUT "\n\n";
+print OUT "\#ifdef SERVO32K\n";
+print OUT "\t\#define FE_RATE\t32768\n";
+print OUT "\#endif\n";
+print OUT "\#ifdef SERVO16K\n";
+print OUT "\t\#define FE_RATE\t16382\n";
+print OUT "\#endif\n";
+print OUT "\n\n";
 print OUT "void feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
 print OUT "\t\tint dacOut[][16],\t\/* DAC outputs *\/\n";
 print OUT "\t\tFILT_MOD *dspPtr,\t\/* Filter Mod variables *\/\n";
@@ -1338,6 +1362,18 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "DELAY") {
 		print OUT "static double \L$xpartName[$ii];\n";
 	}
+	if($partType[$ii] eq "OSC") {
+		print OUT "static double \L$xpartName[$ii]\[3\];\n";
+		print OUT "static double \L$xpartName[$ii]\_freq;\n";
+		print OUT "static double \L$xpartName[$ii]\_sampleRate;\n";
+		print OUT "static double \L$xpartName[$ii]\_delta;\n";
+		print OUT "static double \L$xpartName[$ii]\_alpha;\n";
+		print OUT "static double \L$xpartName[$ii]\_beta;\n";
+		print OUT "static double \L$xpartName[$ii]\_cos_prev;\n";
+		print OUT "static double \L$xpartName[$ii]\_sin_prev;\n";
+		print OUT "static double \L$xpartName[$ii]\_cos_new;\n";
+		print OUT "static double \L$xpartName[$ii]\_sin_new;\n";
+	}
 	if($partType[$ii] eq "PHASE") {
 		print OUT "static double \L$xpartName[$ii]\[2\];\n";
 	}
@@ -1375,6 +1411,24 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 	if($partType[$ii] eq "GROUND") {
 		print OUT "\L$xpartName[$ii] = 0\.0;\n";
+	}
+	if($partType[$ii] eq "OSC") {
+	   	$calcExp =  "\L$xpartName[$ii]_freq = ";
+	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$ii]\_FREQ;\n";
+	   	print OUT "$calcExp";
+	   	$calcExp =  "printf(\"OSC Freq = \%f\\n\",\L$xpartName[$ii]_freq\);\n";
+	   	print OUT "$calcExp";
+		$calcExp = "\L$xpartName[$ii]\_delta = 2.0 * 3.1415926535897932384626 * ";
+	   	$calcExp .=  "\L$xpartName[$ii]_freq / \UFE_RATE;\n";
+	   	print OUT "$calcExp";
+		$calcExp = "\L$xpartName[$ii]\_alpha = 2.0 * sin(\L$xpartName[$ii]\_delta \/ 2.0) * sin(\L$xpartName[$ii]\_delta \/ 2.0);\n";
+	   	print OUT "$calcExp";
+		$calcExp = "\L$xpartName[$ii]\_beta = sin(\L$xpartName[$ii]\_delta);\n";
+	   	print OUT "$calcExp";
+		$calcExp = "\L$xpartName[$ii]\_cos_prev = 0.0;\n";
+	   	print OUT "$calcExp";
+		$calcExp = "\L$xpartName[$ii]\_sin_prev = 1.0;\n";
+	   	print OUT "$calcExp";
 	}
 	if($partType[$ii] eq "SUS_WD") {
 	   print OUT "for\(ii=0;ii<20;ii++\) {\n";
@@ -1423,6 +1477,16 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$fromPort = $partInputPort[$mm][$qq];
 			$fromExp[$qq] = "\L$xpartName[$from]";
 			$fromExp[$qq] .= "\[1\]\[";
+			$fromExp[$qq] .= $fromPort;
+			$fromExp[$qq] .= "\]";
+			$indone = 1;
+		}
+		if($partInputType[$mm][$qq] eq "OSC")
+		{
+			$from = $partInNum[$mm][$qq];
+			$fromPort = $partInputPort[$mm][$qq];
+			$fromExp[$qq] = "\L$xpartName[$from]";
+			$fromExp[$qq] .= "\[";
 			$fromExp[$qq] .= $fromPort;
 			$fromExp[$qq] .= "\]";
 			$indone = 1;
@@ -1620,6 +1684,32 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   	$calcExp .=  " * ";
 	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]";
 	   	$calcExp .=  "\[1\]);\n";
+		print OUT "$calcExp";
+	}
+	# ******** OSC ************************************************************************
+	if($partType[$mm] eq "OSC")
+	{
+	   	print OUT "// OSC\n";
+	   	$calcExp = "\L$xpartName[$mm]\_cos_new = \(1.0 - ";
+	   	$calcExp .=  "\L$xpartName[$mm]\_alpha\) * \L$xpartName[$mm]\_cos_prev - ";
+	   	$calcExp .=  "\L$xpartName[$mm]\_beta * \L$xpartName[$mm]\_sin_prev;\n";
+		print OUT "$calcExp";
+	   	$calcExp = "\L$xpartName[$mm]\_sin_new = \(1.0 - ";
+	   	$calcExp .=  "\L$xpartName[$mm]\_alpha\) * \L$xpartName[$mm]\_sin_prev - ";
+	   	$calcExp .=  "\L$xpartName[$mm]\_beta * \L$xpartName[$mm]\_cos_prev;\n";
+		print OUT "$calcExp";
+	   	$calcExp = "\L$xpartName[$mm]\_sin_prev = \L$xpartName[$mm]\_sin_new;\n";
+		print OUT "$calcExp";
+	   	$calcExp = "\L$xpartName[$mm]\_cos_prev = \L$xpartName[$mm]\_cos_new;\n";
+		print OUT "$calcExp";
+	   	$calcExp = "\L$xpartName[$mm]\[0\] = \L$xpartName[$mm]\_sin_new * ";
+	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]\_CLKGAIN;\n";
+		print OUT "$calcExp";
+	   	$calcExp = "\L$xpartName[$mm]\[1\] = \L$xpartName[$mm]\_sin_new * ";
+	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]\_SINGAIN;\n";
+		print OUT "$calcExp";
+	   	$calcExp = "\L$xpartName[$mm]\[2\] = \L$xpartName[$mm]\_sin_new * ";
+	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]\_COSGAIN;\n";
 		print OUT "$calcExp";
 	}
 	# ******** MULTIPLY JUNC ********************************************************************
