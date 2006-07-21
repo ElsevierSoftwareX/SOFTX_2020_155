@@ -1318,7 +1318,6 @@ print EPICS "\n\n";
 print OUT "// ******* This is a computer generated file *******\n";
 print OUT "// ******* DO NOT HAND EDIT ************************\n";
 print OUT "\n\n";
-print OUT "\#include \"inlineMath.h\"\n\n";
 print OUT "\#ifdef SERVO32K\n";
 print OUT "\t\#define FE_RATE\t32768\n";
 print OUT "\#endif\n";
