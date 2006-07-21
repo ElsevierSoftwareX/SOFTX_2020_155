@@ -52,6 +52,7 @@ $firCnt = 0;
 $useWd = 0;
 $gainCnt = 0;
 $busPort = -1;
+$oscUsed = 0;
 
 # Clear the part input and output counters
 for($ii=0;$ii<2000;$ii++)
@@ -1192,10 +1193,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 	}
 	if($partType[$ii] eq "OSC") {
-		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii]\_FREQ float ai 0 field(PREC,\"1\")\n";
-		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii]\_CLKGAIN float ai 0 field(PREC,\"1\")\n";
-		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii]\_SINGAIN float ai 0 field(PREC,\"1\")\n";
-		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii]\_COSGAIN float ai 0 field(PREC,\"1\")\n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_FREQ $systemName\.$xpartName[$ii]\_FREQ float ai 0 field(PREC,\"1\")\n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_CLKGAIN $systemName\.$xpartName[$ii]\_CLKGAIN float ai 0 field(PREC,\"1\")\n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_SINGAIN $systemName\.$xpartName[$ii]\_SINGAIN float ai 0 field(PREC,\"1\")\n";
+		print EPICS "INVARIABLE $xpartName[$ii]\_COSGAIN $systemName\.$xpartName[$ii]\_COSGAIN float ai 0 field(PREC,\"1\")\n";
 	}
 	if($partType[$ii] eq "PHASE") {
 		print EPICS "PHASE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
@@ -1317,6 +1318,7 @@ print EPICS "\n\n";
 print OUT "// ******* This is a computer generated file *******\n";
 print OUT "// ******* DO NOT HAND EDIT ************************\n";
 print OUT "\n\n";
+print OUT "\#include \"inlineMath.h\"\n\n";
 print OUT "\#ifdef SERVO32K\n";
 print OUT "\t\#define FE_RATE\t32768\n";
 print OUT "\#endif\n";
@@ -1365,7 +1367,6 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "OSC") {
 		print OUT "static double \L$xpartName[$ii]\[3\];\n";
 		print OUT "static double \L$xpartName[$ii]\_freq;\n";
-		print OUT "static double \L$xpartName[$ii]\_sampleRate;\n";
 		print OUT "static double \L$xpartName[$ii]\_delta;\n";
 		print OUT "static double \L$xpartName[$ii]\_alpha;\n";
 		print OUT "static double \L$xpartName[$ii]\_beta;\n";
@@ -1373,6 +1374,11 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUT "static double \L$xpartName[$ii]\_sin_prev;\n";
 		print OUT "static double \L$xpartName[$ii]\_cos_new;\n";
 		print OUT "static double \L$xpartName[$ii]\_sin_new;\n";
+		if($oscUsed == 0)
+		{
+			print OUT "double lsinx, lcosx, valx;\n";
+			$oscUsed = 1;
+		}
 	}
 	if($partType[$ii] eq "PHASE") {
 		print OUT "static double \L$xpartName[$ii]\[2\];\n";
@@ -1421,9 +1427,17 @@ for($ii=0;$ii<$partCnt;$ii++)
 		$calcExp = "\L$xpartName[$ii]\_delta = 2.0 * 3.1415926535897932384626 * ";
 	   	$calcExp .=  "\L$xpartName[$ii]_freq / \UFE_RATE;\n";
 	   	print OUT "$calcExp";
-		$calcExp = "\L$xpartName[$ii]\_alpha = 2.0 * sin(\L$xpartName[$ii]\_delta \/ 2.0) * sin(\L$xpartName[$ii]\_delta \/ 2.0);\n";
+		$calcExp = "valx = \L$xpartName[$ii]\_delta \/ 2.0;\n";
 	   	print OUT "$calcExp";
-		$calcExp = "\L$xpartName[$ii]\_beta = sin(\L$xpartName[$ii]\_delta);\n";
+		$calcExp = "sincos\(valx, \&lsinx, \&lcosx\);\n";
+	   	print OUT "$calcExp";
+		$calcExp = "\L$xpartName[$ii]\_alpha = 2.0 * lsinx * lsinx;\n";
+	   	print OUT "$calcExp";
+		$calcExp = "valx = \L$xpartName[$ii]\_delta\;\n";
+	   	print OUT "$calcExp";
+		$calcExp = "sincos\(valx, \&lsinx, \&lcosx\);\n";
+	   	print OUT "$calcExp";
+		$calcExp = "\L$xpartName[$ii]\_beta = lsinx;\n";
 	   	print OUT "$calcExp";
 		$calcExp = "\L$xpartName[$ii]\_cos_prev = 0.0;\n";
 	   	print OUT "$calcExp";
@@ -1679,11 +1693,11 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   	$calcExp .=  "$fromExp[1]";
 	   	$calcExp .=  " * ";
 	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]";
-	   	$calcExp .=  "\[0\]\) + \(";
+	   	$calcExp .=  "\[1\]\) - \(";
 	   	$calcExp .=  "$fromExp[0]";
 	   	$calcExp .=  " * ";
 	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]";
-	   	$calcExp .=  "\[1\]);\n";
+	   	$calcExp .=  "\[0\]);\n";
 		print OUT "$calcExp";
 	}
 	# ******** OSC ************************************************************************
@@ -1695,7 +1709,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   	$calcExp .=  "\L$xpartName[$mm]\_beta * \L$xpartName[$mm]\_sin_prev;\n";
 		print OUT "$calcExp";
 	   	$calcExp = "\L$xpartName[$mm]\_sin_new = \(1.0 - ";
-	   	$calcExp .=  "\L$xpartName[$mm]\_alpha\) * \L$xpartName[$mm]\_sin_prev - ";
+	   	$calcExp .=  "\L$xpartName[$mm]\_alpha\) * \L$xpartName[$mm]\_sin_prev + ";
 	   	$calcExp .=  "\L$xpartName[$mm]\_beta * \L$xpartName[$mm]\_cos_prev;\n";
 		print OUT "$calcExp";
 	   	$calcExp = "\L$xpartName[$mm]\_sin_prev = \L$xpartName[$mm]\_sin_new;\n";
@@ -1708,7 +1722,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   	$calcExp = "\L$xpartName[$mm]\[1\] = \L$xpartName[$mm]\_sin_new * ";
 	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]\_SINGAIN;\n";
 		print OUT "$calcExp";
-	   	$calcExp = "\L$xpartName[$mm]\[2\] = \L$xpartName[$mm]\_sin_new * ";
+	   	$calcExp = "\L$xpartName[$mm]\[2\] = \L$xpartName[$mm]\_cos_new * ";
 	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]\_COSGAIN;\n";
 		print OUT "$calcExp";
 	}
