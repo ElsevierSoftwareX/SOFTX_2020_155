@@ -30,6 +30,7 @@
 #include <semaphore.h>
 #include <linux/slab.h>
 #include <drv/cdsHardware.h>
+#include "inlineMath.h"
 #ifdef HEPI_CODE
 	#include "hepi.h"	/* User code for HEPI control.		*/
 #elif defined(SUS_CODE)
@@ -38,6 +39,8 @@
 	#include "pnm.h"	/* User code for Ponderomotive control. */
 #elif defined(PDE_CODE)
 	#include "pde.h"	/* User code for Ponderomotive control. */
+#elif defined(OMC_CODE)
+	#include "omc.h"	/* User code for OMC control. */
 #else
 	#error
 #endif
@@ -59,7 +62,7 @@ volatile int stop_working_threads = 0;
 #include "fm10Gen.h"		/* CDS filter module defs and C code	*/
 #include "feComms.h"		/* Lvea control RFM network defs.	*/
 #include "daqmap.h"		/* DAQ network layout			*/
-extern unsigned long cpu_khz;
+extern unsigned int cpu_khz;
 #define CPURATE	(cpu_khz/1000)
 
 
@@ -101,7 +104,7 @@ extern unsigned long cpu_khz;
 	#define DAQ_CYCLE_CHANGE	1540
 	#define END_OF_DAQ_BLOCK	2047
 	#define DAQ_RATE	(DAQ_16K_SAMPLE_SIZE*2)
-	#define NET_SEND_WAIT		81920
+	#define NET_SEND_WAIT		(2*81920)
 	#define CYCLE_TIME_ALRM		30
 #endif
 
@@ -187,6 +190,8 @@ int dacOut[MAX_DAC_MODULES][16];
 	#include "pnm/pnm.c"	/* User code for Ponderomotive control. */
 #elif defined(PDE_CODE)
 	#include "pde/pde.c"	/* User code for Ponderomotive control. */
+#elif defined(OMC_CODE)
+	#include "omc/omc.c"	/* User code for Ponderomotive control. */
 #else
 	#error
 #endif
@@ -253,7 +258,7 @@ void *fe_start(void *arg)
 {
 
   int ii,jj,kk;
-  int clock1Min = 0;
+  static int clock1Min = 0;
   int cpuClock[10];
   short adcData[MAX_ADC_MODULES][32];
   int *packedData;
@@ -440,6 +445,7 @@ void *fe_start(void *arg)
 	// Read CPU clock for timing info
 // usleep(0);
         rdtscl(cpuClock[0]);
+
 	// Start reading ADC data
   	for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		gsaAdcDma2(jj);
@@ -776,6 +782,10 @@ int main(int argc, char **argv)
 	printf("%d ADC cards found\n",cdsPciModules.adcCount);
 	printf("%d DAC cards found\n",cdsPciModules.dacCount);
 	printf("%d DIO cards found\n",cdsPciModules.dioCount);
+
+#ifdef ONE_ADC
+	cdsPciModules.adcCount = 1;
+#endif
 
 	printf("Initializing space for daqLib buffers\n");
 	daqBuffer = (long)&daqArea[0];
