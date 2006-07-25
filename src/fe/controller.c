@@ -787,10 +787,19 @@ int main(int argc, char **argv)
 	printf("Initializing PCI Modules\n");
 	status = mapPciModules(&cdsPciModules);
 	printf("%d PCI cards found\n",status);
+#ifdef ONE_ADC
+cdsPciModules.adcCount = cdsPciModules.dacCount = 1;
+#endif
 	printf("%d ADC cards found\n",cdsPciModules.adcCount);
 	printf("%d DAC cards found\n",cdsPciModules.dacCount);
 	printf("%d DIO cards found\n",cdsPciModules.dioCount);
 
+	if (cdsPciModules.adcCount == 0 && cdsPciModules.dacCount == 0) {
+		printf("No ADC and no DAC modules found\n");
+        	munmap(_epics_shm, MMAP_SIZE);
+        	close(wfd);
+        	return 0;
+	}
 #ifdef ONE_ADC
 	cdsPciModules.adcCount = 1;
 #endif
@@ -814,12 +823,16 @@ int main(int argc, char **argv)
         rtl_pthread_attr_setcpu_np(&attr, 2);
         rtl_pthread_attr_setreserve_np(&attr, 1);
         rtl_pthread_create(&wthread1, &attr, cpu2_start, 0);
+	printf("Started cpu2 task\n");
+	usleep(1000000);
 #endif
 
 #ifdef RESERVE_CPU3
         rtl_pthread_attr_setcpu_np(&attr, 3);
         rtl_pthread_attr_setreserve_np(&attr, 1);
         rtl_pthread_create(&wthread2, &attr, cpu3_start, 0);
+	printf("Started cpu3 task\n");
+	usleep(1000000);
 #endif
 
         rtl_pthread_attr_setcpu_np(&attr, 1);
