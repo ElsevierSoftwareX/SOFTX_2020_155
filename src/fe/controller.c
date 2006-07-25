@@ -259,7 +259,7 @@ void *fe_start(void *arg)
 
   int ii,jj,kk;
   static int clock1Min = 0;
-  int cpuClock[10];
+  static int cpuClock[10];
   short adcData[MAX_ADC_MODULES][32];
   int *packedData;
   unsigned int *pDacData;
@@ -443,7 +443,7 @@ void *fe_start(void *arg)
 	status = checkAdcRdy(ADC_SAMPLE_COUNT,cdsPciModules.adcCount);
 	// status = checkAdcRdy(ADC_SAMPLE_COUNT,1);
 	// Read CPU clock for timing info
-// usleep(0);
+	usleep(0);
         rdtscl(cpuClock[0]);
 
 	// Start reading ADC data
@@ -588,6 +588,12 @@ void *fe_start(void *arg)
         rdtscl(cpuClock[5]);
   	// pLocalEpics->epicsOutput.diags[1]  = readDio(&cdsPciModules,0);
 
+#if 0
+	// Compute max time of one cycle.
+	cycleTime = (cpuClock[5] - cpuClock[0])/CPURATE;
+	dacOut[0][0] = cycleTime;
+#endif
+
 	// Write out data to DAC modules
 	for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	{
@@ -691,6 +697,8 @@ void *fe_start(void *arg)
 	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
 	// Hold the max cycle time over the last 1 second
 	if(cycleTime > timeHold) timeHold = cycleTime;
+	// if(cycleTime > 13) timeHold ++;
+        // else timeHold = 0;
 	// Hold the max cycle time since last diag reset
 	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
 	adcTime = (cpuClock[0] - cpuClock[2])/CPURATE;
