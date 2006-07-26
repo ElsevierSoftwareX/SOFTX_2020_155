@@ -427,7 +427,7 @@ int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev)
   	pci_read_config_dword(rfmdev, 
         		PCI_BASE_ADDRESS_3,
                  	&pci_io_addr);
-  	pHardware->pci_rfm[devNum] = ioremap_nocache((unsigned long)pci_io_addr, 0x1000);
+  	pHardware->pci_rfm[devNum] = ioremap_nocache((unsigned long)pci_io_addr, 0x8000);
 
   	pci_read_config_dword(rfmdev, PCI_BASE_ADDRESS_2, &csrAddress);
   	printk("CSR address is 0x%lx\n",csrAddress);
