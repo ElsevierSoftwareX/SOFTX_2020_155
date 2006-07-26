@@ -317,6 +317,12 @@ while (<IN>) {
 	$nonSubPart[$nonSubCnt] = $partCnt;
 	$nonSubCnt ++;
     }
+    #Check if MULT function is really a DIVIDE function. 
+    if(($inBlock == 1) && ($var1 eq "Inputs") && ($var2 eq "*\/") && ($partType[$partCnt] eq "MULTIPLY")){
+	#print "$var2";
+	$partType[$partCnt] = "DIVIDE";
+	#print "Found a DIVIDE with name $xpartName[$partCnt]\n";
+    }
     # If in a subsystem block, have to annotate block names with subsystem name.
     if(($inBlock == 1) && ($var1 eq "Name") && ($inSub == 1)){
 	$val = $subSysName[$subSys];
@@ -616,7 +622,7 @@ $foundCon = 0;
 			{
 				$fromNum = $partInNum[$ii][$jj];
 				$fromPort = $partInputPort[$ii][$jj];
-			print "\t Maybe $xpartName[$xx] port $partOutputPort[$ii][$jj] $xpartName[$fromNum] $partType[$fromNum] $fromPort\n";
+			# print "\t Maybe $xpartName[$xx] port $partOutputPort[$ii][$jj] $xpartName[$fromNum] $partType[$fromNum] $fromPort\n";
 				# Make output connection at source part
 				$partOutput[$fromNum][$fromPort] = $xpartName[$xx];
 				$partOutputType[$fromNum][$fromPort] = $partType[$xx];
@@ -1345,6 +1351,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 		$port = $partInCnt[$ii];
 		print OUT "double \L$xpartName[$ii];\n";
 	}
+	if($partType[$ii] eq "DIVIDE") {
+		$port = $partInCnt[$ii];
+		print OUT "double \L$xpartName[$ii];\n";
+	}
 	if($partType[$ii] eq "DIFF_JUNC") {
 		print OUT "double \L$xpartName[$ii]\[16\];\n";
 	}
@@ -1438,9 +1448,9 @@ for($ii=0;$ii<$partCnt;$ii++)
 	   	print OUT "$calcExp";
 		$calcExp = "\L$xpartName[$ii]\_beta = lsinx;\n";
 	   	print OUT "$calcExp";
-		$calcExp = "\L$xpartName[$ii]\_cos_prev = 0.0;\n";
+		$calcExp = "\L$xpartName[$ii]\_cos_prev = 1.0;\n";
 	   	print OUT "$calcExp";
-		$calcExp = "\L$xpartName[$ii]\_sin_prev = 1.0;\n";
+		$calcExp = "\L$xpartName[$ii]\_sin_prev = 0.0;\n";
 	   	print OUT "$calcExp";
 	}
 	if($partType[$ii] eq "SUS_WD") {
@@ -1724,8 +1734,39 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   	$calcExp = "\L$xpartName[$mm]\[2\] = \L$xpartName[$mm]\_cos_new * ";
 	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]\_COSGAIN;\n";
 		print OUT "$calcExp";
+
+	   	$calcExp =  "if((\L$xpartName[$mm]_freq \!= ";
+	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]\_FREQ) \&\& ";
+	   	$calcExp .=  "((cycle + 1) == \UFE_RATE))\n";
+	   	print OUT "$calcExp";
+	   	print OUT "{\n";
+	   	$calcExp =  "\L$xpartName[$mm]_freq = ";
+	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]\_FREQ;\n";
+	   	print OUT "\t$calcExp";
+	   	$calcExp =  "printf(\"OSC Freq = \%f\\n\",\L$xpartName[$mm]_freq\);\n";
+	   	print OUT "\t$calcExp";
+		$calcExp = "\L$xpartName[$mm]\_delta = 2.0 * 3.1415926535897932384626 * ";
+	   	$calcExp .=  "\L$xpartName[$mm]_freq / \UFE_RATE;\n";
+	   	print OUT "\t$calcExp";
+		$calcExp = "valx = \L$xpartName[$mm]\_delta \/ 2.0;\n";
+	   	print OUT "\t$calcExp";
+		$calcExp = "sincos\(valx, \&lsinx, \&lcosx\);\n";
+	   	print OUT "\t$calcExp";
+		$calcExp = "\L$xpartName[$mm]\_alpha = 2.0 * lsinx * lsinx;\n";
+	   	print OUT "\t$calcExp";
+		$calcExp = "valx = \L$xpartName[$mm]\_delta\;\n";
+	   	print OUT "\t$calcExp";
+		$calcExp = "sincos\(valx, \&lsinx, \&lcosx\);\n";
+	   	print OUT "\t$calcExp";
+		$calcExp = "\L$xpartName[$mm]\_beta = lsinx;\n";
+	   	print OUT "\t$calcExp";
+		$calcExp = "\L$xpartName[$mm]\_cos_prev = 1.0;\n";
+	   	print OUT "\t$calcExp";
+		$calcExp = "\L$xpartName[$mm]\_sin_prev = 0.0;\n";
+	   	print OUT "\t$calcExp";
+	   	print OUT "}\n";
 	}
-	# ******** MULTIPLY JUNC ********************************************************************
+	# ******** MULTIPLY ********************************************************************
 	if($partType[$mm] eq "MULTIPLY")
 	{
 	   print OUT "// MULTIPLY\n";
@@ -1746,6 +1787,28 @@ for($xx=0;$xx<$processCnt;$xx++)
 		    }
 		}
 		print OUT "$calcExp";
+	}
+	# ******** DIVIDE ********************************************************************
+	if($partType[$mm] eq "DIVIDE")
+	{
+	   print OUT "// DIVIDE\n";
+		# print "\tUsed Divide $xpartName[$mm] $partOutCnt[$mm]\n";
+		$calcExp = "if\(";
+		$calcExp .= "$fromExp[1] \!= 0.0)\n";
+		print OUT "$calcExp";
+		print OUT "\{\n";
+		$calcExp = "\t\L$xpartName[$mm]";
+		$calcExp .= " = ";
+		$calcExp .= $fromExp[0];
+		$calcExp .= " \/ ";
+		$calcExp .= $fromExp[1];
+		$calcExp .= ";\n";
+		print OUT "$calcExp";
+		print OUT "\}\n";
+		print OUT "else\{\n";
+		$calcExp = "\t\L$xpartName[$mm] = 0.0;\n";
+		print OUT "$calcExp";
+		print OUT "\}\n";
 	}
 	# ******** DIFF JUNC ********************************************************************
 	if($partType[$mm] eq "DIFF_JUNC")
