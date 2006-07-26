@@ -192,6 +192,7 @@ int dacOut[MAX_DAC_MODULES][16];
 	#include "pde/pde.c"	/* User code for Ponderomotive control. */
 #elif defined(OMC_CODE)
 	#include "omc/omc.c"	/* User code for Ponderomotive control. */
+	volatile float *lscRfmPtr;
 #else
 	#error
 #endif
@@ -400,6 +401,9 @@ void *fe_start(void *arg)
   pLocalEpics->epicsOutput.diags[1] = 0;
   pLocalEpics->epicsOutput.diags[2] = 0;
 
+#ifdef OMC_CODE
+	lscRfmPtr = (float *)(cdsPciModules.pci_rfm[0] + 0x3000);
+#endif
 
 #ifndef NO_DAQ
   // Initialize DAQ function
@@ -592,6 +596,9 @@ void *fe_start(void *arg)
 	// Compute max time of one cycle.
 	cycleTime = (cpuClock[5] - cpuClock[0])/CPURATE;
 	dacOut[0][0] = cycleTime;
+#endif
+#ifdef OMC_CODE
+	*lscRfmPtr = dspPtr[0]->data[LSC_DRIVE].output;
 #endif
 
 	// Write out data to DAC modules
@@ -793,6 +800,7 @@ cdsPciModules.adcCount = cdsPciModules.dacCount = 1;
 	printf("%d ADC cards found\n",cdsPciModules.adcCount);
 	printf("%d DAC cards found\n",cdsPciModules.dacCount);
 	printf("%d DIO cards found\n",cdsPciModules.dioCount);
+	printf("%d RFM cards found\n",cdsPciModules.rfmCount);
 
 	if (cdsPciModules.adcCount == 0 && cdsPciModules.dacCount == 0) {
 		printf("No ADC and no DAC modules found\n");
