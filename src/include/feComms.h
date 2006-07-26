@@ -7,6 +7,9 @@
 #ifdef PDE_CODE
 #include <pde.h>
 #endif
+#ifdef OMC_CODE
+#include <omc.h>
+#endif
 
 #ifdef PNM
 #include <pnm.h>
