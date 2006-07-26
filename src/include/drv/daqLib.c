@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.18 2006/07/07 00:19:13 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.19 2006/07/26 00:25:35 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -90,7 +90,7 @@ typedef struct DAQ_RANGE {
 volatile DAQ_INFO_BLOCK *pInfo;		/* Ptr to DAQ config in shmem.	*/
 
 /* Fast Pentium FPU SQRT command */
-inline double lsqrt (double __x) { register double __result; __asm __volatile__ ("fsqrt" : "=t" (__result) : "0" (__x)); return __result; }
+// inline double lsqrt (double __x) { register double __result; __asm __volatile__ ("fsqrt" : "=t" (__result) : "0" (__x)); return __result; }
 
 extern char *_epics_shm;		/* Ptr to EPICS shmem block		*/
 extern long daqBuffer;			/* Address of daqLib swing buffers.	*/
