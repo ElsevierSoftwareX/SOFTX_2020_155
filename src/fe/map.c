@@ -23,6 +23,7 @@ dma_addr_t adc_dma_handle[MAX_ADC_MODULES];	/* PCI add of ADC DMA memory */
 dma_addr_t dac_dma_handle[MAX_DAC_MODULES];	/* PCI add of ADC DMA memory */
 volatile GSA_ADC_REG *adcPtr[MAX_ADC_MODULES];	/* Ptr to ADC registers */
 volatile GSA_DAC_REG *dacPtr[MAX_DAC_MODULES];	/* Ptr to DAC registers */
+volatile VMIC5565_CSR *p5565Csr;
 
 #ifndef NO_DAQ
 // Myrinet Variables
@@ -335,7 +336,8 @@ int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
   adcPtr[devNum]->BCR &= ~(GSAI_SET_2S_COMP);
 
   // Set sample rate close to 16384Hz
-  adcPtr[devNum]->RAG = 0x10BEC;
+  // adcPtr[devNum]->RAG = 0x10BEC;
+  adcPtr[devNum]->RAG = 0x117D8;
   printk("RAG = 0x%x\n",adcPtr[devNum]->RAG);
   printk("BCR = 0x%x\n",adcPtr[devNum]->BCR);
   adcPtr[devNum]->RAG &= ~(GSAI_SAMPLE_START);
@@ -395,7 +397,49 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		status = mapDio(pCds,dacdev);
 		modCount ++;
   }
+
+  dacdev = NULL;
+  status = 0;
+  // Search system for VMIC RFM modules
+  while((dacdev = pci_find_device(VMIC_VID, VMIC_TID, dacdev))) {
+		printk("RFM card on bus %d; device %d\n",
+			dacdev->bus->number,
+			dacdev->devfn);
+		status = mapRfm(pCds,dacdev);
+		modCount ++;
+  }
   return(modCount);
+}
+
+// *****************************************************************************
+// Routine to initialize VMIC RFM modules
+// *****************************************************************************
+int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev)
+{
+  static unsigned int pci_io_addr;
+  int devNum;
+  static char *csrAddr;
+  static unsigned int csrAddress;
+
+	devNum = pHardware->rfmCount;
+  	pci_enable_device(rfmdev);
+
+  	pci_read_config_dword(rfmdev, 
+        		PCI_BASE_ADDRESS_3,
+                 	&pci_io_addr);
+  	pHardware->pci_rfm[devNum] = ioremap_nocache((unsigned long)pci_io_addr, 0x1000);
+
+  	pci_read_config_dword(rfmdev, PCI_BASE_ADDRESS_2, &csrAddress);
+  	printk("CSR address is 0x%lx\n",csrAddress);
+  	csrAddr = ioremap_nocache((unsigned long)csrAddress, 0x40);
+
+	p5565Csr = (VMIC5565_CSR *)csrAddr;
+	p5565Csr->LCSR1 &= ~TURN_OFF_5565_FAIL;
+	printk("Board id = 0x%x\n",p5565Csr->BID);
+	printk("Node id = 0x%x\n",p5565Csr->NID);
+
+	pHardware->rfmCount ++;
+	return(0);
 }
 
 #ifdef USE_VMIC_RFM
