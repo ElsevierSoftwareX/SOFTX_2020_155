@@ -1,0 +1,26 @@
+
+# Define Epics system name. It should be unique.
+TARGET = omcepics
+
+SRC = build/$(TARGET)/omc.st
+
+SRC += src/drv/rfm.c
+SRC += src/drv/param.c
+SRC += src/drv/crc.c
+SRC += src/drv/fmReadCoeff.c
+
+DB += build/$(TARGET)/omc1.db
+
+IFO = C1
+SITE = caltech
+
+SEQ += 'omc,("ifo=C1, site=caltech, sys=OMC, sysnum= 11")'
+
+CFLAGS += -DOMC_CODE
+
+include config/Makefile.linux
+
+build/$(TARGET)/omc1.db: build/$(TARGET)/omc.db
+	sed 's/%SYS%/OMC/g;s/%SUBSYS%//g' $< > $@
+
+
