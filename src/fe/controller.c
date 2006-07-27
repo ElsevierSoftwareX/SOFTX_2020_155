@@ -210,7 +210,11 @@ double feCoeff8x[13] =
 double dHistory[96][40];
 #else
 #define ADC_SAMPLE_COUNT	0x20
+#if defined(GSAI_ENABLE_DATA_PACKING)
+#define ADC_DMA_BYTES		(0x80/2 + 4)
+#else
 #define ADC_DMA_BYTES		0x80
+#endif
 #endif
 
 int clock16K = 0;
