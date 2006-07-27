@@ -209,10 +209,11 @@ double feCoeff8x[13] =
         -1.89162859406079,    0.96263319997793,   -0.81263245399030,    0.83542699550059};
 double dHistory[96][40];
 #else
-#define ADC_SAMPLE_COUNT	0x20
 #if defined(GSAI_ENABLE_DATA_PACKING)
+#define ADC_SAMPLE_COUNT	0x11
 #define ADC_DMA_BYTES		(0x80/2 + 4)
 #else
+#define ADC_SAMPLE_COUNT	0x20
 #define ADC_DMA_BYTES		0x80
 #endif
 #endif
@@ -448,7 +449,8 @@ void *fe_start(void *arg)
         rdtscl(cpuClock[2]);
 	// Following call blocks until ADC has correct number of samples ready
 	// The call then starts the DMA input of all ADC modules.
-	status = checkAdcRdy(ADC_SAMPLE_COUNT,cdsPciModules.adcCount);
+	status = checkAdcRdy(ADC_SAMPLE_COUNT,cdsPciModules.adcCount); 
+
 	// status = checkAdcRdy(ADC_SAMPLE_COUNT,1);
 	// Read CPU clock for timing info
 	usleep(0);
