@@ -86,8 +86,12 @@ int adcDmaDone(int module, int *data)
 	do{
 	}while((adcDma[module]->DMA_CSR & GSAI_DMA_DONE) == 0);
 	// First channel should be marked with an upper bit set
+#if defined(GSAI_ENABLE_DATA_PACKING)
+	if (*data == 0) return 0; else return 16;
+#else
 	if(*data & 0xf0000) return(0);
 	else return(16);
+#endif
 }
 
 // *****************************************************************************
@@ -325,14 +329,22 @@ int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
   }while((adcPtr[devNum]->BCR & GSAI_RESET) != 0);
 
   // Write in a sync word
+#if defined(GSAI_ENABLE_DATA_PACKING)
+  adcPtr[devNum]->SMUW = 0x0000;
+  adcPtr[devNum]->SMLW = 0x0000;
+#else
   adcPtr[devNum]->SMUW = 0x0002;
   adcPtr[devNum]->SMLW = 0x0001;
+#endif
 
   // Set ADC to 64 channel = 32 differential channels
   adcPtr[devNum]->SSC = (GSAI_64_CHANNEL);
   // adcPtr->SSC = GSAI_64_CHANNEL;
   printk("SSC = 0x%x\n",adcPtr[devNum]->SSC);
   adcPtr[devNum]->BCR |= (GSAI_FULL_DIFFERENTIAL);
+#if defined(GSAI_ENABLE_DATA_PACKING)
+  adcPtr[devNum]->BCR |= (GSAI_DATA_PACKING);
+#endif
   adcPtr[devNum]->BCR &= ~(GSAI_SET_2S_COMP);
 
   // Set sample rate close to 16384Hz
