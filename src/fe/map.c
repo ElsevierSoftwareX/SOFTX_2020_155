@@ -110,6 +110,11 @@ int ii;
 	  adcPtr[ii]->IDBC = GSAI_CLEAR_BUFFER;
 	  adcPtr[ii]->BCR |= GSAI_ENABLE_X_SYNC;
   }
+#if defined(GSAI_DEMAND_DMA_MODE_ENABLE)
+  gsaAdcDma2(0);
+  adcPtr[0]->BCR &= ~(GSAI_DMA_DEMAND_MODE);
+  adcDma[0]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR | 0x1000;
+#endif
   return(0);
 }
 
