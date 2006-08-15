@@ -456,9 +456,11 @@ void *fe_start(void *arg)
 	usleep(0);
         rdtscl(cpuClock[0]);
 
+#if !defined(GSAI_DEMAND_DMA_MODE_ENABLE)
 	// Start reading ADC data
   	for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		gsaAdcDma2(jj);
+#endif
     
         // Update internal cycle counters
         if((firstTime != 0) && (!skipCycle))
@@ -509,6 +511,7 @@ void *fe_start(void *arg)
 			    &dspCoeff[system], pCoeff[system]);
 
         vmeDone = stop_working_threads | checkEpicsReset(epicsCycle, pLocalEpics);
+	usleep(1);
 	// Wait for completion of DMA of Adc data
   	for(kk=0;kk<cdsPciModules.adcCount;kk++)
 	{
@@ -534,9 +537,13 @@ void *fe_start(void *arg)
 #else
 		for(ii=0;ii<32;ii++)
 		{
+#if defined(GSAI_ENABLE_DATA_PACKING)
+			adcData[kk][ii] = (packedData[1 +ii/2] >> ((ii&1)?16:0)) & 0xffff;
+#else
 			adcData[kk][ii] = (*packedData & 0xffff);
-			dWord[kk][ii] = adcData[kk][ii];
 			packedData ++;
+#endif
+			dWord[kk][ii] = adcData[kk][ii];
 		}
 #endif
 		for(ii=0;ii<32;ii++)
@@ -550,6 +557,9 @@ void *fe_start(void *arg)
 		}
 	}
 
+#if defined(GSAI_DEMAND_DMA_MODE_ENABLE)
+  gsaAdcDma2(0);
+#endif
 
 	// Assign chan 32 to onePps 
 	onePps = dWord[0][31];
