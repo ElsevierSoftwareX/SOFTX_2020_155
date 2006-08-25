@@ -31,12 +31,16 @@
 #define MAX_DIO_MODULES		4
 #define MAX_RFM_MODULES		2
 
+#define GSC_16AI64SSA		0
+#define GSC_16AISS8AO4		1
+
 /* Standard structure to maintain PCI module information.			*/
 typedef struct CDS_HARDWARE{
 	int dacCount;			/* Number of DAC modules found 		*/
 	long pci_dac[MAX_DAC_MODULES];	/* Remapped addresses of DAC modules	*/
 	int adcCount;			/* Number of ADC modules found		*/
 	long pci_adc[MAX_ADC_MODULES];	/* Remapped addresses of ADC modules	*/
+	int adcType[MAX_ADC_MODULES];
 	int dioCount;			/* Number of DIO modules found		*/
 	unsigned short pci_dio[MAX_DIO_MODULES];	/* io registers of DIO	*/
 	int rfmCount;			/* Number of RFM modules found		*/
@@ -219,3 +223,40 @@ typedef struct VMIC5565RTR{
         unsigned int INTCSR;
 }VMIC5565RTR;
 
+
+/* GSA 2MS ADC Module Definitions ***************************************************** */
+#define FADC_SS_ID       0x3172	/* Subsystem ID to locate module on PCI bus	*/
+
+/* Structure defining ADC module PCI register layout	*/
+typedef struct GSA_FAD_REG{
+        unsigned int BCR;       /* 0x0 */
+        unsigned int DIP;     	/* 0x4 */
+        unsigned int AO_00;     /* 0x8 */
+        unsigned int AO_01;     /* 0xc */
+        unsigned int AO_02;     /* 0x10 */
+        unsigned int AO_03;     /* 0x14 */
+        unsigned int IN_BUFF;  /* 0x18 */
+        unsigned int RAG;      /* 0x1c */
+        unsigned int RBG;       /* 0x20 */
+        unsigned int IN_CONF;      /* 0x24 */
+        unsigned int IN_BUF_SIZE;     /* 0x28 */
+        unsigned int IN_BUF_TH;    /* 0x2c */
+        unsigned int INTRC;   /* 0x30 */
+        unsigned int ASSC;   /* 0x34 */
+        unsigned int AUTO_CAL;      /* 0x38 */
+        unsigned int OUT_CONF;      /* 0x3c */
+        unsigned int OUT_BUFF_TH;      /* 0x40 */
+        unsigned int OUT_BUF_SIZE;      /* 0x44 */
+        unsigned int OUT_BUFF;      /* 0x48 */
+        unsigned int RGENC;      /* 0x4C */
+}GSA_FAD_REG;
+
+#define GSAF_FULL_DIFFERENTIAL  0x0
+#define GSAF_IN_RANGE_10        0xA0
+#define GSAF_RESET              0x80000000
+#define GSAF_SET_2S_COMP        0x2000000
+#define GSAF_RATEA_32K		0x263
+#define GSAF_INPUT_CLK_INIT	0x1000000
+#define GSAF_ENABLE_RAG		0x4000000
+#define GSAF_ENABLE_INPUT	0x1000
+#define GSAF_DMA_LOCAL_ADDR     0x18
