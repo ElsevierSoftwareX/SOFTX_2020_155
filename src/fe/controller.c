@@ -41,6 +41,8 @@
 	#include "pde.h"	/* User code for Ponderomotive control. */
 #elif defined(OMC_CODE)
 	#include "omc.h"	/* User code for OMC control. */
+#elif defined(LTB_CODE)
+	#include "ltb.h"	/* User code for LTB control. */
 #else
 	#error
 #endif
@@ -193,6 +195,8 @@ int dacOut[MAX_DAC_MODULES][16];
 #elif defined(OMC_CODE)
 	#include "omc/omc.c"	/* User code for Ponderomotive control. */
 	volatile float *lscRfmPtr;
+#elif defined(LTB_CODE)
+	#include "ltb/ltb.c"	/* User code for Ponderomotive control. */
 #else
 	#error
 #endif
@@ -267,8 +271,8 @@ void *fe_start(void *arg)
   static int clock1Min = 0;
   static int cpuClock[10];
   short adcData[MAX_ADC_MODULES][32];
-  int *packedData;
-  unsigned int *pDacData;
+  volatile int *packedData;
+  volatile unsigned int *pDacData;
   RFM_FE_COMMS *pEpicsComms;
   int cycleTime;
   int timeHold = 0;
@@ -429,18 +433,20 @@ void *fe_start(void *arg)
 	feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,1);
 
   printf("entering the loop\n");
-  // Trigger the ADC to start running
-  gsaAdcTrigger(cdsPciModules.adcCount);
 
   // Clear a couple of timing diags.
   adcHoldTime = 0;
   usrHoldTime = 0;
+  packedData = (int *)cdsPciModules.pci_adc[0];
+  *packedData = 0x10011;
 
   // Initialize the ADC/DAC DMA registers
   for(jj=0;jj<cdsPciModules.adcCount;jj++)
 	  status = gsaAdcDma1(jj,ADC_DMA_BYTES);
   for(jj=0;jj<cdsPciModules.dacCount;jj++)
 		status = gsaDacDma1(jj);
+  // Trigger the ADC to start running
+  gsaAdcTrigger(cdsPciModules.adcCount);
 
   // Enter the coninuous FE control loop  **********************************************************
   while(!vmeDone){
@@ -449,6 +455,11 @@ void *fe_start(void *arg)
         rdtscl(cpuClock[2]);
 	// Following call blocks until ADC has correct number of samples ready
 	// The call then starts the DMA input of all ADC modules.
+#if defined(GSAI_ENABLE_DATA_PACKING)
+        packedData = (int *)cdsPciModules.pci_adc[0];
+        *packedData = 0x10011;
+#endif
+
 	status = checkAdcRdy(ADC_SAMPLE_COUNT,cdsPciModules.adcCount); 
 
 	// status = checkAdcRdy(ADC_SAMPLE_COUNT,1);
@@ -511,13 +522,26 @@ void *fe_start(void *arg)
 			    &dspCoeff[system], pCoeff[system]);
 
         vmeDone = stop_working_threads | checkEpicsReset(epicsCycle, pLocalEpics);
-	usleep(1);
+	// usleep(1);
 	// Wait for completion of DMA of Adc data
   	for(kk=0;kk<cdsPciModules.adcCount;kk++)
 	{
 		// Waits for DMA complete
 		// Return 0x10 if first ADC channel does not have sync bit set
+#if defined(GSAI_ENABLE_DATA_PACKING)
+               packedData = (int *)cdsPciModules.pci_adc[kk];
+                jj = 0;
+                do {
+                        jj ++;
+                }while((*packedData > 0) && (jj < 1000000));
+                if(jj > 999998) {
+                        printf("DMA done test failed\n");
+                        vmeDone = 1;
+                }
+
+#else
 		status = adcDmaDone(kk,(int *)cdsPciModules.pci_adc[kk]);
+#endif
 		jj = kk +1;
 		diagWord |= status * jj;
 		// if(jj<cdsPciModules.adcCount) gsaAdcDma2(jj);
@@ -638,7 +662,7 @@ void *fe_start(void *arg)
 				pLocalEpics->epicsOutput.ovAccum ++;
 				diagWord |= 0x1000 *  (jj+1);
 			}
-			*pDacData = (short)(dacOut[jj][ii] & 0xffff);
+			*pDacData = (unsigned int)(dacOut[jj][ii] & 0xffff);
 			pDacData ++;
 		}
 		// DMA out dac values
@@ -773,6 +797,8 @@ void *fe_start(void *arg)
 	    }
 	  }
         }
+	usleep(1);
+	status = dacDmaDone(0);
 
   }
 
