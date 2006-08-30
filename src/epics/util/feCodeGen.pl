@@ -79,7 +79,7 @@ while (<IN>) {
 
     # Find the System keyword. This is where real stuff starts
     if(($mySeq == 0) && ($var1 eq "System")){
-	# print "System found on line $lcntr\n";
+	#print "System found on line $lcntr\n";
 	$mySeq = 1;
     }
     if(($mySeq == 1) && ($var1 eq "Name")){
@@ -912,6 +912,25 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 }
 $subRemaining = $subSys;
 $seqCnt = 0;
+
+# Total number of CPUs available to us
+$cpus = 2;
+
+# subSysName -> step*10 + cpu
+# 'step' is the processing step from one  sync point to the next
+# 'cpu' is the processor number: 0, 1 ... $cpus
+%sys_cpu_step;
+
+# Current processing step (a running counter)
+$cur_step = 1;
+
+# How many processors are available on the current processing step
+# Running counter
+$cur_step_cpus = $cpus;
+
+# First pass defines processing step 0
+# It finds all input sybsystems
+
 for($ii=0;$ii<$subSys;$ii++)
 {
 $subUsed[$ii] = 0;
@@ -931,6 +950,8 @@ $allADC = 1;
 		$seqCnt ++;
 		#print "Subsys $ii $subSysName[$ii] has all ADC inputs and can go $seqCnt\n";
 		$subRemaining --;
+		if ($cur_step_cpus == 1) { $cur_step_cpus = $cpus; }
+		$sys_cpu_step{$subSysName[$ii]} = --$cur_step_cpus;
 	}
 }
 #print "Searching parts $searchCnt\n";
@@ -949,16 +970,23 @@ for($ii=0;$ii<$searchCnt;$ii++)
 			}
 		}
 		if($allADC == 1) {
-			# print "Part $xx $xpartName[$xx] can go next\n";
+			#print "Part $xx $xpartName[$xx] can go next\n";
 			$partUsed[$xx] = 1;
 			$partsRemaining --;
 			$seqList[$seqCnt] = $xx;
 			$seqType[$seqCnt] = "PART";
 			$seqCnt ++;
+			if ($cur_step_cpus == 1) { $cur_step_cpus = $cpus; }
+			$sys_cpu_step{$xpartName[$xx]} = --$cur_step_cpus;
 		}
 	}
 }
 print "first pass done $partsRemaining $subRemaining\n";
+
+# Second multiprocessing step
+$cur_step = 1;
+$cur_step_cpus = $cpus;
+
 until(($partsRemaining < 1) && ($subRemaining < 1))
 {
 	for($ii=0;$ii<$subSys;$ii++)
@@ -989,6 +1017,8 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 				$seqList[$seqCnt] = $ii;
 				$seqType[$seqCnt] = "SUBSYS";
 				$seqCnt ++;
+				if ($cur_step_cpus == 1) { $cur_step_cpus = $cpus; }
+				$sys_cpu_step{$subSysName[$ii]} = --$cur_step_cpus + 10 * $cur_step;
 			}
 		}
 	}
@@ -1024,6 +1054,8 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 				$seqList[$seqCnt] = $xx;
 				$seqType[$seqCnt] = "PART";
 				$seqCnt ++;
+				if ($cur_step_cpus == 1) { $cur_step_cpus = $cpus; }
+				$sys_cpu_step{$xpartName[$xx]} = --$cur_step_cpus + 10* $cur_step;
 			}
 		}
 	}
@@ -1032,17 +1064,19 @@ $processCnt = 0;
 $processSeqCnt = 0;
 for($ii=0;$ii<$seqCnt;$ii++)
 {
-	# print "$ii $seqList[$ii] $seqType[$ii] $seqParts[$seqList[$ii]]\n";
+	#print "$ii $seqList[$ii] $seqType[$ii] $seqParts[$seqList[$ii]]\n";
 	if($seqType[$ii] eq "SUBSYS")
 	{
 		$processSeqStart[$processSeqCnt] = $processCnt;
 		$processSeqCnt ++;
 		$xx = $seqList[$ii];
+		# Save the name for subsystem for later use in code gennerator
+		$processSeqSubsysName[$processCnt] = $subSysName[$xx];
 		for($jj=0;$jj<$seqParts[$xx];$jj++)
 		{
 			$processName[$processCnt] = $seqName[$xx][$jj];
 			$processPartNum[$processCnt] = $seq[$xx][$jj];
-			# print "$processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
+			#print "$processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
 			$processCnt ++;
 		}
 	}
@@ -1051,11 +1085,16 @@ for($ii=0;$ii<$seqCnt;$ii++)
 		$xx = $seqList[$ii];
 		$processName[$processCnt] = $xpartName[$xx];
 		$processPartNum[$processCnt] = $xx;
-		# print "$processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
+		#print "$processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
 		$processCnt ++;
 	}
 }
 print "Total of $processCnt parts to process\n";
+
+#print "CPU_STEPS:\n";
+#while (($k, $v) = each %sys_cpu_step) {
+#	print "$k => $v\n";
+#}
 
 $fpartCnt = 0;
 $ftotal = $partCnt;
@@ -1331,13 +1370,8 @@ print OUT "\#ifdef SERVO16K\n";
 print OUT "\t\#define FE_RATE\t16382\n";
 print OUT "\#endif\n";
 print OUT "\n\n";
-print OUT "void feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
-print OUT "\t\tint dacOut[][16],\t\/* DAC outputs *\/\n";
-print OUT "\t\tFILT_MOD *dspPtr,\t\/* Filter Mod variables *\/\n";
-print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
-print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
-print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
-print OUT "{\n\nint ii,jj;\n\n";
+
+sub printVariables {
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if($partType[$ii] eq "MATRIX") {
@@ -1417,7 +1451,61 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 }
 print OUT "\n\n";
+}
 
+if ($cpus > 2) {
+
+# Output multiprocessing functions
+print OUT "/* Multi-cpu synchronization primitives */\n";
+for ($i = 2; $i < $cpus; $i++) {
+	print OUT "volatile int go$i = 0;\n";
+	print OUT "volatile int done$i = 0;\n";
+}
+print OUT "\n";
+
+# Print common to all functions variables as globals
+printVariables();
+
+for ($i = 2; $i < $cpus; $i++) {
+    print OUT "/* CPU $i code */\n";
+    print OUT "void cpu${i}_start(){\n";
+    print OUT "\tint ii, jj;\n";
+    print OUT "\twhile(!stop_working_threads) {\n";
+
+    # Processing steps
+    for ($step = 0; $step <= $cur_step; $step++) {
+      # Wait for signal from main thread
+      print OUT "\t\twhile(!go$i && !stop_working_threads);\n";
+      print OUT "\t\tgo$i = 0;\n";
+
+      # Processing for this step
+      while (($k, $v) = each %sys_cpu_step) {
+	#printf "feCode: $k => $v  %d %d\n", $v % 10, $v / 10;
+	if ($v == $step*10 + $i) {
+  	  &printSubsystem("$k");
+	}
+      }
+
+      print OUT "\t\tdone$i = 1;\n";
+    }
+    print OUT "\t}\n";
+    print OUT "\tdone$i = 1;\n";
+    print OUT "}\n\n";
+}
+
+print OUT "/* CPU 1 code */\n";
+}
+
+print OUT "void feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
+print OUT "\t\tint dacOut[][16],\t\/* DAC outputs *\/\n";
+print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
+print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
+print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
+print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
+print OUT "{\n\nint ii,jj;\n\n";
+if ($cpus < 3) {
+  printVariables();
+}
 print OUT "if(feInit)\n\{\n";
 for($ii=0;$ii<$partCnt;$ii++)
 {
@@ -1464,21 +1552,58 @@ print OUT "\} else \{\n";
 
 print "*****************************************************\n";
 
+# Print subsystems processing step by step
+# along with signalling primitives to other threads
+if ($cpus > 2) {
+  for ($step = 0; $step <= $cur_step; $step++) {
+    # Signal other threads to go
+    for ($i = 2; $i < $cpus; $i++) {
+	print OUT "go$i = 1;\n";
+    }
+
+    # Print cpu 1 subsystems for $step
+    while (($k, $v) = each %sys_cpu_step) {
+	#printf "feCode: $k => $v  %d %d\n", $v % 10, $v / 10;
+	if ($v == $step*10 + 1) {
+  	  &printSubsystem("$k");
+	}
+    }
+
+    # Wait for other threads to finish this processing step
+    for ($i = 2; $i < $cpus; $i++) {
+	print OUT "while(!done$i && !stop_working_threads);\n";
+	print OUT "done$i = 0;\n";
+    }
+  }
+} else {
+  &printSubsystem(".");
+}
+
+sub printSubsystem {
+$subsys = $_[0];
+
 $ts = 0;
 $xx = 0;
+$do_print = 0;
 for($xx=0;$xx<$processCnt;$xx++) 
 {
 	if($xx == $processSeqStart[$ts])
 	{
-		if($ts != 0)
-		{
-		print OUT "\n\/\/End of subsystem **************************************************\n\n\n";
+		if($ts != 0) {
+		  if ($do_print) {
+		    print OUT "\n\/\/End of subsystem **************************************************\n\n\n";
+		  }
+		  $do_print = 0;
 		}
-		print OUT "\n\/\/Start of subsystem **************************************************\n\n";
+		if ($processSeqSubsysName[$xx] =~ /$subsys/) {
+		  $do_print = 1; 
+		  print OUT "\n\/\/Start of subsystem $processSeqSubsysName[$xx] **************************************************\n\n";
+		}
 		$ts ++;
 	}
+	if (! $do_print)  { next; };
 	$mm = $processPartNum[$xx];
-	#print "looking for part $mm\n";
+	#print "looking for part $mm type=$partType[$mm] name=$xpartName[$mm]\n";
 	$inCnt = $partInCnt[$mm];
 	for($qq=0;$qq<$inCnt;$qq++)
 	{
@@ -1557,7 +1682,11 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   print OUT "// FILTER MODULE\n";
 	   $calcExp = "\L$xpartName[$mm]";
 	   $calcExp .= " = ";
-	   $calcExp .= "filterModuleD(dspPtr,dspCoeff,";
+	   if ($cpus > 2) {
+	     $calcExp .= "filterModuleD(dspPtr[0],dspCoeff,";
+	   } else {
+	     $calcExp .= "filterModuleD(dsp_ptr,dspCoeff,";
+	   }
 	   $calcExp .= $xpartName[$mm];
 	   $calcExp .= ",";
 	   $calcExp .= $fromExp[0];
@@ -1907,7 +2036,11 @@ for($xx=0;$xx<$processCnt;$xx++)
 		print "Found FIR $from $fromType $fromPort\n";
 		$firName = $xpartName[$mm];
 		$firName .= _FIR;
-	   	$calcExp = "filterPolyPhase(dspPtr,firCoeff,$xpartName[$mm],$firName,";
+	   	if ($cpus > 2) {
+	   	  $calcExp = "filterPolyPhase(dspPtr[0],firCoeff,$xpartName[$mm],$firName,";
+	 	} else {
+	   	  $calcExp = "filterPolyPhase(dsp_ptr,firCoeff,$xpartName[$mm],$firName,";
+		}
 		if($toType eq "MATRIX")
 		{
 			$toPort = $partOutputPort[$mm][0];
@@ -2001,6 +2134,8 @@ for($xx=0;$xx<$processCnt;$xx++)
 
 print OUT "\n";
 }
+}
+
 print OUT "  }\n";
 print OUT "}\n\n";
 print OUTH "typedef struct CDS_EPICS {\n";
@@ -2074,6 +2209,12 @@ print OUTM "_CODE\n";
 if($systemName eq "sei")
 {
 print OUTM "CFLAGS += -DFIR_FILTERS\n";
+}
+if ($cpus > 2) {
+print OUTM "CFLAGS += -DRESERVE_CPU2\n";
+}
+if ($cpus > 3) {
+print OUTM "CFLAGS += -DRESERVE_CPU3\n";
 }
 print OUTM "\n";
 print OUTM "all: \$(ALL)\n";
