@@ -1065,13 +1065,14 @@ $processSeqCnt = 0;
 for($ii=0;$ii<$seqCnt;$ii++)
 {
 	#print "$ii $seqList[$ii] $seqType[$ii] $seqParts[$seqList[$ii]]\n";
+	$processSeqStart[$processSeqCnt] = $processCnt;
+	$processSeqCnt ++;
 	if($seqType[$ii] eq "SUBSYS")
 	{
-		$processSeqStart[$processSeqCnt] = $processCnt;
-		$processSeqCnt ++;
 		$xx = $seqList[$ii];
 		# Save the name for subsystem for later use in code gennerator
 		$processSeqSubsysName[$processCnt] = $subSysName[$xx];
+		$processSeqType{$subSysName[$xx]} = $seqType[$ii];
 		for($jj=0;$jj<$seqParts[$xx];$jj++)
 		{
 			$processName[$processCnt] = $seqName[$xx][$jj];
@@ -1084,10 +1085,13 @@ for($ii=0;$ii<$seqCnt;$ii++)
 	{
 		$xx = $seqList[$ii];
 		$processName[$processCnt] = $xpartName[$xx];
+		$processSeqType{$xpartName[$xx]} = $seqType[$ii];
 		$processPartNum[$processCnt] = $xx;
 		#print "$processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
+		$processSeqSubsysName[$processCnt] = "__PART__";
 		$processCnt ++;
 	}
+	$processSeqEnd[$processSeqCnt] = $processCnt;
 }
 print "Total of $processCnt parts to process\n";
 
@@ -1575,6 +1579,9 @@ if ($cpus > 2) {
 	print OUT "done$i = 0;\n";
     }
   }
+
+  # Output standalone parts (DAC output)
+  &printSubsystem("__PART__");
 } else {
   &printSubsystem(".");
 }
@@ -1587,20 +1594,24 @@ $xx = 0;
 $do_print = 0;
 for($xx=0;$xx<$processCnt;$xx++) 
 {
+	if($xx == $processSeqEnd[$ts]) {
+		if ($do_print && ($processSeqType{$cur_sys_name} eq "SUBSYS")) {
+		    print OUT "\n\/\/End of subsystem   $cur_sys_name **************************************************\n\n\n";
+		}
+		$do_print = 0;
+	}
 	if($xx == $processSeqStart[$ts])
 	{
-		if($ts != 0) {
-		  if ($do_print) {
-		    print OUT "\n\/\/End of subsystem **************************************************\n\n\n";
-		  }
-		  $do_print = 0;
-		}
 		if ($processSeqSubsysName[$xx] =~ /$subsys/) {
 		  $do_print = 1; 
-		  print OUT "\n\/\/Start of subsystem $processSeqSubsysName[$xx] **************************************************\n\n";
+		  $cur_sys_name = $processSeqSubsysName[$xx];
+		  if ($processSeqType{$cur_sys_name} eq "SUBSYS") {
+		    print OUT "\n\/\/Start of subsystem $cur_sys_name **************************************************\n\n";
+		  }
 		}
 		$ts ++;
 	}
+
 	if (! $do_print)  { next; };
 	$mm = $processPartNum[$xx];
 	#print "looking for part $mm type=$partType[$mm] name=$xpartName[$mm]\n";
@@ -2216,6 +2227,7 @@ print OUTM "CFLAGS += -DRESERVE_CPU2\n";
 if ($cpus > 3) {
 print OUTM "CFLAGS += -DRESERVE_CPU3\n";
 }
+print OUTM "CFLAGS += -DNO_SYNC\n";
 print OUTM "\n";
 print OUTM "all: \$(ALL)\n";
 print OUTM "\n";
