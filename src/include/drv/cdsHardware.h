@@ -38,9 +38,12 @@
 typedef struct CDS_HARDWARE{
 	int dacCount;			/* Number of DAC modules found 		*/
 	long pci_dac[MAX_DAC_MODULES];	/* Remapped addresses of DAC modules	*/
+	int dacType[MAX_DAC_MODULES];
+	int dacConfig[MAX_DAC_MODULES];
 	int adcCount;			/* Number of ADC modules found		*/
 	long pci_adc[MAX_ADC_MODULES];	/* Remapped addresses of ADC modules	*/
 	int adcType[MAX_ADC_MODULES];
+	int adcConfig[MAX_ADC_MODULES];
 	int dioCount;			/* Number of DIO modules found		*/
 	unsigned short pci_dio[MAX_DIO_MODULES];	/* io registers of DIO	*/
 	int rfmCount;			/* Number of RFM modules found		*/
@@ -110,6 +113,8 @@ typedef struct GSA_ADC_REG{
 
 #define GSAI_FULL_DIFFERENTIAL  0x200
 #define GSAI_64_CHANNEL         0x6
+#define GSAI_32_CHANNEL         0x5
+#define GSAI_8_CHANNEL          0x3
 #define GSAI_SOFT_TRIGGER       0x1000
 #define GSAI_RESET              0x8000
 #define GSAI_DATA_PACKING       0x40000
@@ -118,6 +123,7 @@ typedef struct GSA_ADC_REG{
 #define GSAI_DMA_LOCAL_ADDR     0x8
 #define GSAI_DMA_TO_PCI         0xA
 #define GSAI_DMA_START          0x3
+#define GSAI_DMA1_START          0x300
 #define GSAI_DMA_DONE           0x10
 #define GSAI_ISR_ON_SAMPLE      0x3
 #define PLX_INT_ENABLE          0x900
@@ -127,7 +133,9 @@ typedef struct GSA_ADC_REG{
 #define GSAI_EXTERNAL_SYNC      0x10
 #define GSAI_ENABLE_X_SYNC      0x80
 #define GSAI_CLEAR_BUFFER       0x40000
+#define GSAI_THRESHOLD       	0x001f
 #define GSAI_AUTO_CAL           0x2000
+#define GSAI_DMA_DEMAND_MODE    0x80000
 
 /* GSA DAC Module Definitions ********************************************************* */
 /* Structure defining DAC module PCI register layout	*/
@@ -153,6 +161,7 @@ typedef struct GSA_DAC_REG{
 #define GSAO_ENABLE_CLK         0x20
 #define GSAO_SFT_TRIG           0x80
 #define GSAO_FIFO_16            0x1
+#define GSAO_FIFO_32            0xA
 
 #define VMIC_VID		0x114a
 #define VMIC_TID		0x5565
@@ -244,10 +253,10 @@ typedef struct GSA_FAD_REG{
         unsigned int INTRC;   /* 0x30 */
         unsigned int ASSC;   /* 0x34 */
         unsigned int AUTO_CAL;      /* 0x38 */
-        unsigned int OUT_CONF;      /* 0x3c */
-        unsigned int OUT_BUFF_TH;      /* 0x40 */
-        unsigned int OUT_BUF_SIZE;      /* 0x44 */
-        unsigned int OUT_BUFF;      /* 0x48 */
+        unsigned int DAC_BUFF_OPS;      /* 0x3c */
+        unsigned int DAC_BUFF_TH;      /* 0x40 */
+        unsigned int DAC_BUF_SIZE;      /* 0x44 */
+        unsigned int DAC_BUFF;      /* 0x48 */
         unsigned int RGENC;      /* 0x4C */
 }GSA_FAD_REG;
 
@@ -260,3 +269,13 @@ typedef struct GSA_FAD_REG{
 #define GSAF_ENABLE_RAG		0x4000000
 #define GSAF_ENABLE_INPUT	0x1000
 #define GSAF_DMA_LOCAL_ADDR     0x18
+
+#define GSAF_DAC_4CHAN     	0xF
+#define GSAF_DAC_CLK_INIT     	0x10
+#define GSAF_DAC_ENABLE_CLK     0x20
+#define GSAF_DAC_ENABLE_RGC     0x400000
+#define GSAF_DAC_SIMULT     	0x60000
+#define GSAF_ENABLE_BUFF_OUT    0x80000
+#define GSAF_DAC_CLR_BUFFER     0x800
+#define GSAF_DAC_DMA_LOCAL_ADDR      0x48
+#define GSAF_RATEC_1MHZ     	0x28
