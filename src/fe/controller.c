@@ -65,7 +65,7 @@ volatile int stop_working_threads = 0;
 #include "feComms.h"		/* Lvea control RFM network defs.	*/
 #include "daqmap.h"		/* DAQ network layout			*/
 extern unsigned int cpu_khz;
-#define CPURATE	(cpu_khz/1000)
+#define CPURATE	(cpu_khz/10000)
 
 
 // #include "fpvalidate.h"		/* Valid FP number ck			*/
@@ -141,6 +141,7 @@ int rfd, wfd;
 extern int mapPciModules(CDS_HARDWARE *);	/* Init routine to map adc/dac cards	*/
 extern long gsaAdcTrigger(int);			/* Starts ADC acquisition.		*/
 extern int adcDmaDone(int,int *);		/* Checks if ADC DMA complete.		*/
+extern int dacDmaDone(int);
 extern int checkAdcRdy(int,int);		/* Checks if ADC has samples avail.	*/
 extern int gsaAdcDma(int,int);			/* Send data to ADC via DMA.		*/
 extern int gsaAdcDma1(int,int);			/* Send data to ADC via DMA.		*/
@@ -213,13 +214,8 @@ double feCoeff8x[13] =
         -1.89162859406079,    0.96263319997793,   -0.81263245399030,    0.83542699550059};
 double dHistory[96][40];
 #else
-#if defined(GSAI_ENABLE_DATA_PACKING)
-#define ADC_SAMPLE_COUNT	0x11
-#define ADC_DMA_BYTES		(0x80/2 + 4)
-#else
 #define ADC_SAMPLE_COUNT	0x20
 #define ADC_DMA_BYTES		0x80
-#endif
 #endif
 
 int clock16K = 0;
@@ -437,12 +433,16 @@ void *fe_start(void *arg)
   // Clear a couple of timing diags.
   adcHoldTime = 0;
   usrHoldTime = 0;
-  packedData = (int *)cdsPciModules.pci_adc[0];
-  *packedData = 0x10011;
 
   // Initialize the ADC/DAC DMA registers
   for(jj=0;jj<cdsPciModules.adcCount;jj++)
+  {
 	  status = gsaAdcDma1(jj,ADC_DMA_BYTES);
+	  packedData = (int *)cdsPciModules.pci_adc[jj];
+	  *packedData = 0x0;
+	  packedData += 31;
+	  *packedData = 0x110000;
+  }
   for(jj=0;jj<cdsPciModules.dacCount;jj++)
 		status = gsaDacDma1(jj);
   // Trigger the ADC to start running
@@ -451,28 +451,26 @@ void *fe_start(void *arg)
   // Enter the coninuous FE control loop  **********************************************************
   while(!vmeDone){
 
-  	// diagWord = 0;
         rdtscl(cpuClock[2]);
 	// Following call blocks until ADC has correct number of samples ready
 	// The call then starts the DMA input of all ADC modules.
-#if defined(GSAI_ENABLE_DATA_PACKING)
-        packedData = (int *)cdsPciModules.pci_adc[0];
-        *packedData = 0x10011;
-#endif
-
-	status = checkAdcRdy(ADC_SAMPLE_COUNT,cdsPciModules.adcCount); 
-
-	// status = checkAdcRdy(ADC_SAMPLE_COUNT,1);
+	packedData = (int *)cdsPciModules.pci_adc[0];
+	kk = 0;
+	do {
+		kk ++;
+	}while((*packedData == 0) && (kk < 10000000));
 	// Read CPU clock for timing info
 	usleep(0);
         rdtscl(cpuClock[0]);
-
-#if !defined(GSAI_DEMAND_DMA_MODE_ENABLE)
-	// Start reading ADC data
   	for(jj=0;jj<cdsPciModules.adcCount;jj++)
-		gsaAdcDma2(jj);
-#endif
-    
+  	{
+		packedData += 31;
+		kk = 0;
+		do {
+			kk ++;
+		}while(((*packedData & 0x110000) > 0) && (kk < 10000000));
+	}
+
         // Update internal cycle counters
         if((firstTime != 0) && (!skipCycle))
         {
@@ -526,28 +524,13 @@ void *fe_start(void *arg)
 	// Wait for completion of DMA of Adc data
   	for(kk=0;kk<cdsPciModules.adcCount;kk++)
 	{
-		// Waits for DMA complete
-		// Return 0x10 if first ADC channel does not have sync bit set
-#if defined(GSAI_ENABLE_DATA_PACKING)
-               packedData = (int *)cdsPciModules.pci_adc[kk];
-                jj = 0;
-                do {
-                        jj ++;
-                }while((*packedData > 0) && (jj < 1000000));
-                if(jj > 999998) {
-                        printf("DMA done test failed\n");
-                        vmeDone = 1;
-                }
-
-#else
-		status = adcDmaDone(kk,(int *)cdsPciModules.pci_adc[kk]);
-#endif
-		jj = kk +1;
-		diagWord |= status * jj;
-		// if(jj<cdsPciModules.adcCount) gsaAdcDma2(jj);
-
 		// Read adc data into local variables
 		packedData = (int *)cdsPciModules.pci_adc[kk];
+		// Return 0x10 if first ADC channel does not have sync bit set
+		if(*packedData & 0xf0000) status = 0;
+		else status = 16;
+		jj = kk + 1;
+		diagWord |= status * jj;
 #ifdef OVERSAMPLE
 		for(jj=0;jj<8;jj++)
 		{
@@ -561,12 +544,8 @@ void *fe_start(void *arg)
 #else
 		for(ii=0;ii<32;ii++)
 		{
-#if defined(GSAI_ENABLE_DATA_PACKING)
-			adcData[kk][ii] = (packedData[1 +ii/2] >> ((ii&1)?16:0)) & 0xffff;
-#else
 			adcData[kk][ii] = (*packedData & 0xffff);
-			packedData ++;
-#endif
+                        packedData ++;
 			dWord[kk][ii] = adcData[kk][ii];
 		}
 #endif
@@ -579,11 +558,13 @@ void *fe_start(void *arg)
 				diagWord |= 0x100 *  jj;
 			  }
 		}
+		// Clear out last ADC data read for test on next cycle
+        	packedData = (int *)cdsPciModules.pci_adc[kk];
+  		*packedData = 0x0;
+  		packedData += 31;
+  		*packedData = 0x110000;
 	}
 
-#if defined(GSAI_DEMAND_DMA_MODE_ENABLE)
-  gsaAdcDma2(0);
-#endif
 
 	// Assign chan 32 to onePps 
 	onePps = dWord[0][31];
@@ -632,11 +613,6 @@ void *fe_start(void *arg)
         rdtscl(cpuClock[5]);
   	// pLocalEpics->epicsOutput.diags[1]  = readDio(&cdsPciModules,0);
 
-#if 0
-	// Compute max time of one cycle.
-	cycleTime = (cpuClock[5] - cpuClock[0])/CPURATE;
-	dacOut[0][0] = cycleTime;
-#endif
 #ifdef OMC_CODE
 	*lscRfmPtr = dspPtr[0]->data[LSC_DRIVE].output;
 #endif
@@ -736,6 +712,12 @@ void *fe_start(void *arg)
 	}
 
 	skipCycle = 0;
+	usleep(1);
+	// Reset all ADC DMA GO bits
+  	for(jj=0;jj<cdsPciModules.adcCount;jj++)
+  	{
+  		gsaAdcDma2(jj);
+	}
 
 	// Measure time to complete 1 cycle
         rdtscl(cpuClock[1]);
@@ -744,8 +726,6 @@ void *fe_start(void *arg)
 	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
 	// Hold the max cycle time over the last 1 second
 	if(cycleTime > timeHold) timeHold = cycleTime;
-	// if(cycleTime > 13) timeHold ++;
-        // else timeHold = 0;
 	// Hold the max cycle time since last diag reset
 	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
 	adcTime = (cpuClock[0] - cpuClock[2])/CPURATE;
@@ -797,8 +777,6 @@ void *fe_start(void *arg)
 	    }
 	  }
         }
-	usleep(1);
-	status = dacDmaDone(0);
 
   }
 
