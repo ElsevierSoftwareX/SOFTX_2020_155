@@ -80,41 +80,41 @@ int rfm5565DmaDone()
 
 // *****************************************************************************
 // Function checks if DMA from ADC module is complete
+// Note: This function not presently used.
 // *****************************************************************************
 int adcDmaDone(int module, int *data)
 {
 	do{
 	}while((adcDma[module]->DMA_CSR & GSAI_DMA_DONE) == 0);
 	// First channel should be marked with an upper bit set
-#if defined(GSAI_ENABLE_DATA_PACKING)
 	if (*data == 0) return 0; else return 16;
-#else
-	if(*data & 0xf0000) return(0);
-	else return(16);
-#endif
+}
+// *****************************************************************************
+// Function checks if DMA from ADC module is complete
+// Note: This function not presently used.
+// *****************************************************************************
+int dacDmaDone(int module)
+{
+	do{
+	}while((dacDma[module]->DMA_CSR & GSAI_DMA_DONE) == 0);
+	return(1);
 }
 
 // *****************************************************************************
 // Function clears ADC buffer and starts acquisition via external clock
+// Also sets up ADC for Demand DMA mode and set GO bit in DMA Mode Register
 // *****************************************************************************
 int gsaAdcTrigger(int adcCount)
 {
 int ii;
-#if 0
-  adcPtr->INTCR |= GSAI_ISR_ON_SAMPLE;
-  plxIcr->INTCSR |= PLX_INT_ENABLE;
-  adcPtr->RAG &= ~(GSAI_SAMPLE_START);
-#endif
   for(ii=0;ii<adcCount;ii++)
   {
-	  adcPtr[ii]->IDBC = GSAI_CLEAR_BUFFER;
+	  adcPtr[ii]->BCR &= ~(GSAI_DMA_DEMAND_MODE);
+	  adcDma[ii]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR | 0x1000;
+	  gsaAdcDma2(ii);
+	  adcPtr[ii]->IDBC = (GSAI_CLEAR_BUFFER | GSAI_THRESHOLD);
 	  adcPtr[ii]->BCR |= GSAI_ENABLE_X_SYNC;
   }
-#if defined(GSAI_DEMAND_DMA_MODE_ENABLE)
-  gsaAdcDma2(0);
-  adcPtr[0]->BCR &= ~(GSAI_DMA_DEMAND_MODE);
-  adcDma[0]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR | 0x1000;
-#endif
   return(0);
 }
 
@@ -334,36 +334,28 @@ int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
   }while((adcPtr[devNum]->BCR & GSAI_RESET) != 0);
 
   // Write in a sync word
-#if defined(GSAI_ENABLE_DATA_PACKING)
   adcPtr[devNum]->SMUW = 0x0000;
   adcPtr[devNum]->SMLW = 0x0000;
-#else
-  adcPtr[devNum]->SMUW = 0x0002;
-  adcPtr[devNum]->SMLW = 0x0001;
-#endif
 
   // Set ADC to 64 channel = 32 differential channels
-  adcPtr[devNum]->SSC = (GSAI_64_CHANNEL);
-  // adcPtr->SSC = GSAI_64_CHANNEL;
-  printk("SSC = 0x%x\n",adcPtr[devNum]->SSC);
   adcPtr[devNum]->BCR |= (GSAI_FULL_DIFFERENTIAL);
-#if defined(GSAI_ENABLE_DATA_PACKING)
-  adcPtr[devNum]->BCR |= (GSAI_DATA_PACKING);
-#endif
   adcPtr[devNum]->BCR &= ~(GSAI_SET_2S_COMP);
 
   // Set sample rate close to 16384Hz
-  // adcPtr[devNum]->RAG = 0x10BEC;
+  // Unit runs with external clock, so this probably not necessary
   adcPtr[devNum]->RAG = 0x117D8;
   printk("RAG = 0x%x\n",adcPtr[devNum]->RAG);
   printk("BCR = 0x%x\n",adcPtr[devNum]->BCR);
   adcPtr[devNum]->RAG &= ~(GSAI_SAMPLE_START);
+  // Perform board calibration
   adcPtr[devNum]->BCR |= GSAI_AUTO_CAL;
   do {
   }while((adcPtr[devNum]->BCR & GSAI_AUTO_CAL) != 0);
   adcPtr[devNum]->RAG |= GSAI_SAMPLE_START;
-  adcPtr[devNum]->IDBC = GSAI_CLEAR_BUFFER;
+  adcPtr[devNum]->IDBC = (GSAI_CLEAR_BUFFER | GSAI_THRESHOLD);
   adcPtr[devNum]->SSC = (GSAI_64_CHANNEL | GSAI_EXTERNAL_SYNC);
+  printk("SSC = 0x%x\n",adcPtr[devNum]->SSC);
+  printk("IDBC = 0x%x\n",adcPtr[devNum]->IDBC);
   pHardware->pci_adc[devNum] = pci_alloc_consistent(adcdev,0x2000,&adc_dma_handle[devNum]);
   pHardware->adcCount ++;
   return(0);
