@@ -22,6 +22,7 @@ volatile PLX_9056_INTCTRL *plxIcr;		/* Ptr to interrupt cntrl reg on PLX chip */
 dma_addr_t adc_dma_handle[MAX_ADC_MODULES];	/* PCI add of ADC DMA memory */
 dma_addr_t dac_dma_handle[MAX_DAC_MODULES];	/* PCI add of ADC DMA memory */
 volatile GSA_ADC_REG *adcPtr[MAX_ADC_MODULES];	/* Ptr to ADC registers */
+volatile GSA_FAD_REG *fadcPtr[MAX_ADC_MODULES]; /* Ptr to 2MS/sec ADC registers */
 volatile GSA_DAC_REG *dacPtr[MAX_DAC_MODULES];	/* Ptr to DAC registers */
 volatile VMIC5565_CSR *p5565Csr;
 
@@ -53,31 +54,6 @@ int cdsNetStatus = 0;
 void gsaAdcDma2(int);
 
 
-#ifdef USE_VMIC_RFM
-// *****************************************************************************
-// Generic function to DMA data to/from VMIC5565 RFM Module
-// *****************************************************************************
-int rfm5565dma(int rfmMemLocator, int byteCount, int direction)
-{
-	p5565Dma->DMA0_MODE = 0x1C3;
-	p5565Dma->DMA0_PCI_ADD = (int)((rfmDmaHandle & 0xffffffff));
-	p5565Dma->DMA0_PCI_DUAL = (int)(((rfmDmaHandle >> 32) & 0xffffffff));
-	p5565Dma->DMA0_LOC_ADD = rfmMemLocator;
-	p5565Dma->DMA0_BTC = byteCount;
-	p5565Dma->DMA0_DESC = direction;
-	p5565Dma->DMA_CSR = 0x3;
-}
-
-// *****************************************************************************
-// Generic function to check DMA complete to/from VMIC5565 RFM Module
-// *****************************************************************************
-int rfm5565DmaDone()
-{
-	if((p5565Dma->DMA_CSR & 0x11) == 0x11) return (1);
-	else return(0);
-}
-#endif
-
 // *****************************************************************************
 // Function checks if DMA from ADC module is complete
 // Note: This function not presently used.
@@ -104,16 +80,22 @@ int dacDmaDone(int module)
 // Function clears ADC buffer and starts acquisition via external clock
 // Also sets up ADC for Demand DMA mode and set GO bit in DMA Mode Register
 // *****************************************************************************
-int gsaAdcTrigger(int adcCount)
+int gsaAdcTrigger(int adcCount, int adcType[])
 {
 int ii;
   for(ii=0;ii<adcCount;ii++)
   {
+     if(adcType[ii] == GSC_16AI64SSA)
+     {
 	  adcPtr[ii]->BCR &= ~(GSAI_DMA_DEMAND_MODE);
 	  adcDma[ii]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR | 0x1000;
 	  gsaAdcDma2(ii);
 	  adcPtr[ii]->IDBC = (GSAI_CLEAR_BUFFER | GSAI_THRESHOLD);
 	  adcPtr[ii]->BCR |= GSAI_ENABLE_X_SYNC;
+    }else{
+	  // This is the 2MS ADC module
+          fadcPtr[ii]->BCR |= GSAF_ENABLE_INPUT;
+    }
   }
   return(0);
 }
@@ -123,11 +105,6 @@ int ii;
 // *****************************************************************************
 int gsaAdcStop()
 {
-#if 0
-  plxIcr->INTCSR &= ~(PLX_INT_DISABLE);
-  adcPtr->INTCR = 0;
-  adcPtr->RAG |= GSAI_SAMPLE_START;
-#endif
   adcPtr[0]->BCR &= ~(GSAI_ENABLE_X_SYNC);
   return(0);
 }
@@ -135,88 +112,85 @@ int gsaAdcStop()
 
 // *****************************************************************************
 // Test if ADC has a sample ready
+// Only to be used with 2MS/sec ADC module.
 // *****************************************************************************
 int checkAdcRdy(int count,int numAdc)
 {
   int dataCount;
   int ii;
 
-    do {
-        dataCount = adcPtr[0]->BUF_SIZE;
-  }while(dataCount < count);
-  // for(ii=0;ii<numAdc;ii++) gsaAdcDma2(ii);
+  // This is for the 2MS adc module
+  {
+          do {
+                dataCount = fadcPtr[0]->IN_BUF_SIZE;
+          }while(dataCount < (count / 8));
+  }
   return(dataCount);
 
 }
 // *****************************************************************************
-// DMA 32 samples from ADC module
+// This routine sets up the DMA registers once on code initialization.
 // *****************************************************************************
-int gsaAdcDma(int modNum, int byteCount)
+int gsaAdcDma1(int modNum, int adcType, int byteCount)
 {
   adcDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
   adcDma[modNum]->DMA0_PCI_ADD = (int)adc_dma_handle[modNum];
-  adcDma[modNum]->DMA0_LOC_ADD = GSAI_DMA_LOCAL_ADDR;
-  adcDma[modNum]->DMA0_BTC = byteCount;
-  adcDma[modNum]->DMA0_DESC = GSAI_DMA_TO_PCI;
-  adcDma[modNum]->DMA_CSR = GSAI_DMA_START;
-  return(1);
-}
-int gsaAdcDma1(int modNum, int byteCount)
-{
-  adcDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
-  adcDma[modNum]->DMA0_PCI_ADD = (int)adc_dma_handle[modNum];
-  adcDma[modNum]->DMA0_LOC_ADD = GSAI_DMA_LOCAL_ADDR;
-  adcDma[modNum]->DMA0_BTC = byteCount;
+  if(adcType == GSC_16AI64SSA)
+  {
+	adcDma[modNum]->DMA0_LOC_ADD = GSAI_DMA_LOCAL_ADDR;
+	adcDma[modNum]->DMA0_BTC = byteCount;
+  } else  {
+        adcDma[modNum]->DMA0_LOC_ADD = GSAF_DMA_LOCAL_ADDR;
+        adcDma[modNum]->DMA0_BTC = byteCount/8;
+  }
   adcDma[modNum]->DMA0_DESC = GSAI_DMA_TO_PCI;
   return(1);
 }
+
+// *****************************************************************************
+// This routine starts a DMA operation.
+// It must first be setup by the Dma1 call above.
+// *****************************************************************************
 void gsaAdcDma2(int modNum)
 {
   adcDma[modNum]->DMA_CSR = GSAI_DMA_START;
 }
 
 // *****************************************************************************
-// DMA 16 samples to DAC module
+// This routine sets up the DAC DMA registers once on code initialization.
 // *****************************************************************************
-int gsaDacDma(int modNum)
+int gsaDacDma1(int modNum, int dacType)
 {
-  dacDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
-  dacDma[modNum]->DMA0_PCI_ADD = (int)dac_dma_handle[modNum];
-  dacDma[modNum]->DMA0_LOC_ADD = 0x18;
-  dacDma[modNum]->DMA0_BTC = 0x40;
-  dacDma[modNum]->DMA0_DESC = 0x0;
-  dacDma[modNum]->DMA_CSR = GSAI_DMA_START;
-  return(1);
-}
-int gsaDacDma1(int modNum)
-{
-  dacDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
-  dacDma[modNum]->DMA0_PCI_ADD = (int)dac_dma_handle[modNum];
-  dacDma[modNum]->DMA0_LOC_ADD = 0x18;
-  dacDma[modNum]->DMA0_BTC = 0x40;
-  dacDma[modNum]->DMA0_DESC = 0x0;
-  return(1);
-}
-void gsaDacDma2(int modNum)
-{
-  dacDma[modNum]->DMA_CSR = GSAI_DMA_START;
-}
-
-#if 0
-// *****************************************************************************
-// Load DAC one value at a time - not normally used
-// *****************************************************************************
-void trigDac(short dacData[])
-{
-int ii;
-
-  for(ii=0;ii<16;ii++)
+  if(dacType == GSC_16AISS8AO4)
   {
-	dacPtr->ODB[0] = dacData[ii];
+          dacDma[modNum]->DMA1_MODE = GSAI_DMA_MODE_NO_INTR;
+          dacDma[modNum]->DMA1_PCI_ADD = (int)dac_dma_handle[modNum];
+          dacDma[modNum]->DMA1_LOC_ADD = GSAF_DAC_DMA_LOCAL_ADDR;
+          dacDma[modNum]->DMA1_BTC = 0x10;
+          dacDma[modNum]->DMA1_DESC = 0x0;
+  } else {
+	  dacDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
+	  dacDma[modNum]->DMA0_PCI_ADD = (int)dac_dma_handle[modNum];
+	  dacDma[modNum]->DMA0_LOC_ADD = 0x18;
+	  dacDma[modNum]->DMA0_BTC = 0x40;
+	  dacDma[modNum]->DMA0_DESC = 0x0;
   }
-  // dacPtr->BOR |= (GSAO_SFT_TRIG);
+  return(1);
 }
-#endif
+
+// *****************************************************************************
+// This routine starts a DMA operation to a DAC module.
+// It must first be setup by the Dma1 call above.
+// *****************************************************************************
+void gsaDacDma2(int modNum, int dacType)
+{
+  if(dacType == GSC_16AISS8AO4)
+  {
+        dacDma[modNum]->DMA_CSR = GSAI_DMA1_START;
+  } else {
+	dacDma[modNum]->DMA_CSR = GSAI_DMA_START;
+  }
+}
 
 // *****************************************************************************
 // Routine to initialize ACCESS DIO modules
@@ -296,6 +270,8 @@ int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 	  printk("DAC BOR = 0x%x\n",dacPtr[devNum]->BOR);
 	  pHardware->pci_dac[devNum] = 
 		pci_alloc_consistent(dacdev,0x200,&dac_dma_handle[devNum]);
+  	  pHardware->dacConfig[devNum] = dacPtr[devNum]->ASSC;
+  	  pHardware->dacType[devNum] = GSC_16AO16;
 	  pHardware->dacCount ++;
 	  return(0);
 }
@@ -357,10 +333,76 @@ int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
   printk("SSC = 0x%x\n",adcPtr[devNum]->SSC);
   printk("IDBC = 0x%x\n",adcPtr[devNum]->IDBC);
   pHardware->pci_adc[devNum] = pci_alloc_consistent(adcdev,0x2000,&adc_dma_handle[devNum]);
+  pHardware->adcType[devNum] = GSC_16AI64SSA;
+  pHardware->adcConfig[devNum] = adcPtr[devNum]->ASSC;
   pHardware->adcCount ++;
   return(0);
 
 }
+// *****************************************************************************
+// Routine to initialize GSA 2MS ADC modules
+// *****************************************************************************
+int mapFadc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
+{
+  static unsigned int pci_io_addr;
+  int devNum;
+  char *_adc_add;                               /* ADC register address space */
+
+  devNum = pHardware->adcCount;
+  pci_enable_device(adcdev);
+  pci_set_master(adcdev);
+ // Get the PLX chip address
+  pci_read_config_dword(adcdev,PCI_BASE_ADDRESS_0,&pci_io_addr);
+  printk("pci0 = 0x%x\n",pci_io_addr);
+  _adc_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
+  adcDma[devNum] = (PLX_9056_DMA *)_adc_add;
+  dacDma[pHardware->dacCount] = (PLX_9056_DMA *)_adc_add;
+  if(devNum == 0) plxIcr = (PLX_9056_INTCTRL *)_adc_add;
+
+  // Get the ADC register address
+  pci_read_config_dword(adcdev,PCI_BASE_ADDRESS_2,&pci_io_addr);
+  printk("pci2 = 0x%x\n",pci_io_addr);
+  _adc_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
+  printk("ADC I/O address=0x%x  0x%lx\n", pci_io_addr,(long)_adc_add);
+  fadcPtr[devNum] = (GSA_FAD_REG *)_adc_add;
+
+  printk("BCR = 0x%x\n",fadcPtr[devNum]->BCR);
+  printk("INPUT CONFIG = 0x%x\n",fadcPtr[devNum]->IN_CONF);
+  // Reset the ADC board
+  fadcPtr[devNum]->BCR |= GSAF_RESET;
+  do{
+  }while((fadcPtr[devNum]->BCR & GSAF_RESET) != 0);
+
+  fadcPtr[devNum]->BCR &= ~(GSAF_SET_2S_COMP);
+  fadcPtr[devNum]->RAG = GSAF_RATEA_32K;
+  fadcPtr[devNum]->IN_CONF = 0x4f000400;
+  fadcPtr[devNum]->RGENC = GSAF_RATEC_1MHZ;
+  fadcPtr[devNum]->BCR |= GSAF_ENABLE_BUFF_OUT;
+  fadcPtr[devNum]->BCR |= GSAF_DAC_SIMULT;
+  fadcPtr[devNum]->DAC_BUFF_OPS |= (GSAF_DAC_CLK_INIT | GSAF_DAC_4CHAN);
+  fadcPtr[devNum]->DAC_BUFF_OPS |= GSAF_DAC_ENABLE_CLK;
+  fadcPtr[devNum]->DAC_BUFF_OPS |= GSAF_DAC_CLR_BUFFER;
+  fadcPtr[devNum]->BCR |= GSAF_DAC_ENABLE_RGC;
+
+  printk("RAG = 0x%x\n",fadcPtr[devNum]->RAG);
+  printk("BCR = 0x%x\n",fadcPtr[devNum]->BCR);
+  printk("BOO = 0x%x\n",fadcPtr[devNum]->DAC_BUFF_OPS);
+  printk("INPUT CONFIG = 0x%x\n",fadcPtr[devNum]->IN_CONF);
+  pHardware->adcConfig[devNum] = fadcPtr[devNum]->ASSC;
+  pHardware->dacConfig[pHardware->dacCount] = fadcPtr[devNum]->ASSC;
+  printk("ASSEMBLY CONFIG = 0x%x\n",pHardware->adcConfig[devNum]);
+
+  pHardware->pci_adc[devNum] =
+                pci_alloc_consistent(adcdev,0x2000,&adc_dma_handle[devNum]);
+  pHardware->pci_dac[pHardware->dacCount] =
+                pci_alloc_consistent(adcdev,0x2000,&dac_dma_handle[devNum]);
+  pHardware->adcType[devNum] = GSC_16AISS8AO4;
+  pHardware->dacType[pHardware->dacCount] = GSC_16AISS8AO4;
+  pHardware->adcCount ++;
+  pHardware->dacCount ++;
+  return(0);
+}
+
 
 // *****************************************************************************
 // Routine to find and map PCI adc/dac modules
@@ -394,6 +436,15 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		status = mapAdc(pCds,dacdev);
 		modCount ++;
 	}
+        // if found, check if it is a Fast ADC module
+        if((dacdev->subsystem_device == FADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
+        {
+                printk("fast adc card on bus %d; device %d\n",
+                        dacdev->bus->number,
+                        dacdev->devfn);
+                status = mapFadc(pCds,dacdev);
+                modCount ++;
+        }
   }
 
   dacdev = NULL;
@@ -445,7 +496,7 @@ int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev)
 	p5565Csr = (VMIC5565_CSR *)csrAddr;
 	p5565Csr->LCSR1 &= ~TURN_OFF_5565_FAIL;
 	printk("Board id = 0x%x\n",p5565Csr->BID);
-	printk("Node id = 0x%x\n",p5565Csr->NID);
+  	pHardware->rfmConfig[devNum] = p5565Csr->NID;
 
 	pHardware->rfmCount ++;
 	return(0);
