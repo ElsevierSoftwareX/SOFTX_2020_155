@@ -33,6 +33,7 @@
 
 #define GSC_16AI64SSA		0
 #define GSC_16AISS8AO4		1
+#define GSC_16AO16		2
 
 /* Standard structure to maintain PCI module information.			*/
 typedef struct CDS_HARDWARE{
@@ -48,6 +49,7 @@ typedef struct CDS_HARDWARE{
 	unsigned short pci_dio[MAX_DIO_MODULES];	/* io registers of DIO	*/
 	int rfmCount;			/* Number of RFM modules found		*/
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
+	int rfmConfig[MAX_RFM_MODULES];
 }CDS_HARDWARE;
 
 /* ACCESS DIO Module Definitions ********************************************** */
@@ -103,7 +105,7 @@ typedef struct GSA_ADC_REG{
         unsigned int rsv1;      /* 0x1c */
         unsigned int SSC;       /* 0x20 */
         unsigned int rsv2;      /* 0x24 */
-        unsigned int BCFIG;     /* 0x28 */
+        unsigned int ASSC;     /* 0x28 */
         unsigned int AC_VAL;    /* 0x2c */
         unsigned int AUX_RWR;   /* 0x30 */
         unsigned int AUX_SIO;   /* 0x34 */
@@ -144,7 +146,7 @@ typedef struct GSA_DAC_REG{
         unsigned int CSR;               /* 0x04 */
         unsigned int SAMPLE_RATE;       /* 0x08 */
         unsigned int BOR;               /* 0x0C */
-        unsigned int FIRM_OPTS;         /* 0x10 */
+        unsigned int ASSC;         	/* 0x10 */
         unsigned int AC_VALS;           /* 0x14 */
         short ODB[2];           /* 0x18 */
         unsigned int ADJ_CLK;           /* 0x1C */
