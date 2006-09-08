@@ -65,7 +65,7 @@ volatile int stop_working_threads = 0;
 #include "feComms.h"		/* Lvea control RFM network defs.	*/
 #include "daqmap.h"		/* DAQ network layout			*/
 extern unsigned int cpu_khz;
-#define CPURATE	(cpu_khz/10000)
+#define CPURATE	(cpu_khz/1000)
 
 
 // #include "fpvalidate.h"		/* Valid FP number ck			*/
@@ -139,15 +139,14 @@ rtl_pthread_t wthread2;
 int rfd, wfd;
 
 extern int mapPciModules(CDS_HARDWARE *);	/* Init routine to map adc/dac cards	*/
-extern long gsaAdcTrigger(int);			/* Starts ADC acquisition.		*/
+extern long gsaAdcTrigger(int,int[]);		/* Starts ADC acquisition.		*/
 extern int adcDmaDone(int,int *);		/* Checks if ADC DMA complete.		*/
 extern int dacDmaDone(int);
 extern int checkAdcRdy(int,int);		/* Checks if ADC has samples avail.	*/
-extern int gsaAdcDma(int,int);			/* Send data to ADC via DMA.		*/
-extern int gsaAdcDma1(int,int);			/* Send data to ADC via DMA.		*/
-extern int gsaDacDma(int);			/* Send data to DAC via DMA.		*/
-extern int gsaDacDma1(int);			/* Send data to DAC via DMA.		*/
-extern void gsaDacDma2(int);			/* Send data to DAC via DMA.		*/
+extern int gsaAdcDma1(int,int,int);		/* Setup ADC DMA registers		*/
+extern int gsaAdcDma2(int);			/* Send GO bit to ADC DMA registers.	*/
+extern int gsaDacDma1(int,int);			/* Setup DAC DMA registers.		*/
+extern void gsaDacDma2(int,int);		/* Send GO bit to DAC DMA registers.	*/
 #ifndef NO_DAQ
 extern int myriNetInit(int);			/* Initialize myrinet card.		*/
 extern int myriNetClose();			/* Clean up myrinet on exit.		*/
@@ -437,34 +436,52 @@ void *fe_start(void *arg)
   // Initialize the ADC/DAC DMA registers
   for(jj=0;jj<cdsPciModules.adcCount;jj++)
   {
-	  status = gsaAdcDma1(jj,ADC_DMA_BYTES);
+	  status = gsaAdcDma1(jj,cdsPciModules.adcType[jj],ADC_DMA_BYTES);
 	  packedData = (int *)cdsPciModules.pci_adc[jj];
 	  *packedData = 0x0;
-	  packedData += 31;
+	  if(cdsPciModules.adcType[jj] == GSC_16AISS8AO4) packedData += 3;
+	  else packedData += 31;
 	  *packedData = 0x110000;
   }
   for(jj=0;jj<cdsPciModules.dacCount;jj++)
-		status = gsaDacDma1(jj);
+		status = gsaDacDma1(jj,cdsPciModules.dacType[jj]);
   // Trigger the ADC to start running
-  gsaAdcTrigger(cdsPciModules.adcCount);
+  gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
 
   // Enter the coninuous FE control loop  **********************************************************
   while(!vmeDone){
 
         rdtscl(cpuClock[2]);
-	// Following call blocks until ADC has correct number of samples ready
-	// The call then starts the DMA input of all ADC modules.
-	packedData = (int *)cdsPciModules.pci_adc[0];
-	kk = 0;
-	do {
-		kk ++;
-	}while((*packedData == 0) && (kk < 10000000));
+	// Wait for data ready from first ADC module.
+	if(cdsPciModules.adcType[0] == GSC_16AISS8AO4)
+	{
+		status = checkAdcRdy(ADC_SAMPLE_COUNT,0);
+	} else {
+		// ADC is running in DEMAND DMA MODE
+		packedData = (int *)cdsPciModules.pci_adc[0];
+		kk = 0;
+		do {
+			kk ++;
+		}while((*packedData == 0) && (kk < 10000000));
+	}
+
 	// Read CPU clock for timing info
 	usleep(0);
         rdtscl(cpuClock[0]);
+
   	for(jj=0;jj<cdsPciModules.adcCount;jj++)
   	{
-		packedData += 31;
+		if(cdsPciModules.adcType[jj] == GSC_16AISS8AO4)
+		{
+			gsaAdcDma2(jj);
+		}
+	}
+	// Wait until all ADC channels have been updated
+  	for(jj=0;jj<cdsPciModules.adcCount;jj++)
+  	{
+		packedData = (int *)cdsPciModules.pci_adc[jj];
+		if(cdsPciModules.adcType[jj] == GSC_16AISS8AO4) packedData += 3;
+		else packedData += 31;
 		kk = 0;
 		do {
 			kk ++;
@@ -561,7 +578,8 @@ void *fe_start(void *arg)
 		// Clear out last ADC data read for test on next cycle
         	packedData = (int *)cdsPciModules.pci_adc[kk];
   		*packedData = 0x0;
-  		packedData += 31;
+		if(cdsPciModules.adcType[kk] == GSC_16AISS8AO4) packedData += 3;
+  		else packedData += 31;
   		*packedData = 0x110000;
 	}
 
@@ -642,7 +660,7 @@ void *fe_start(void *arg)
 			pDacData ++;
 		}
 		// DMA out dac values
-		gsaDacDma2(jj);
+		gsaDacDma2(jj,cdsPciModules.dacType[jj]);
 	}
 
 #ifndef NO_DAQ
@@ -716,7 +734,10 @@ void *fe_start(void *arg)
 	// Reset all ADC DMA GO bits
   	for(jj=0;jj<cdsPciModules.adcCount;jj++)
   	{
-  		gsaAdcDma2(jj);
+                if(cdsPciModules.adcType[jj] == GSC_16AI64SSA)
+                {
+  			gsaAdcDma2(jj);
+		}
 	}
 
 	// Measure time to complete 1 cycle
@@ -791,6 +812,8 @@ int main(int argc, char **argv)
 {
         pthread_attr_t attr;
  	int status;
+	int ii,jj;
+
 	printf("cpu clock %ld\n",cpu_khz);
 
         /*
@@ -817,10 +840,74 @@ int main(int argc, char **argv)
 #ifdef ONE_ADC
 cdsPciModules.adcCount = cdsPciModules.dacCount = 1;
 #endif
+        printf("***************************************************************************\n");
 	printf("%d ADC cards found\n",cdsPciModules.adcCount);
+	for(ii=0;ii<cdsPciModules.adcCount;ii++)
+        {
+                if(cdsPciModules.adcType[ii] == GSC_16AISS8AO4)
+                {
+                        printf("\tADC %d is a GSC_16AISS8AO4 module\n",ii);
+                        if((cdsPciModules.adcConfig[ii] & 0x10000) > 0) jj = 4;
+                        else jj = 8;
+                        printf("\t\tChannels = %d \n",jj);
+                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.adcConfig[ii] & 0xfff));
+                }
+                if(cdsPciModules.adcType[ii] == GSC_16AI64SSA)
+                {
+                        printf("\tADC %d is a GSC_16AI64SSA module\n",ii);
+                        if((cdsPciModules.adcConfig[ii] & 0x10000) > 0) jj = 32;
+                        else jj = 64;
+                        printf("\t\tChannels = %d \n",jj);
+                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.adcConfig[ii] & 0xfff));
+                }
+        }
+        printf("***************************************************************************\n");
 	printf("%d DAC cards found\n",cdsPciModules.dacCount);
+	for(ii=0;ii<cdsPciModules.dacCount;ii++)
+        {
+                if(cdsPciModules.dacType[ii] == GSC_16AISS8AO4)
+                {
+                        printf("\tDAC %d is a GSC_16AISS8AO4 module\n",ii);
+                        if((cdsPciModules.dacConfig[ii] & 0x20000) > 0) jj = 0;
+                        else jj = 4;
+                        printf("\t\tChannels = %d \n",jj);
+                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.dacConfig[ii] & 0xfff));
+                }
+                if(cdsPciModules.dacType[ii] == GSC_16AO16)
+                {
+                        printf("\tDAC %d is a GSC_16AO16 module\n",ii);
+                        if((cdsPciModules.dacConfig[ii] & 0x10000) == 0x10000) jj = 8;
+                        if((cdsPciModules.dacConfig[ii] & 0x20000) == 0x20000) jj = 12;
+                        if((cdsPciModules.dacConfig[ii] & 0x30000) == 0x30000) jj = 16;
+                        printf("\t\tChannels = %d \n",jj);
+                        if((cdsPciModules.dacConfig[ii] & 0xC0000) == 0x0000)
+			{
+                        	printf("\t\tFilters = None\n");
+			}
+                        if((cdsPciModules.dacConfig[ii] & 0xC0000) == 0x40000)
+			{
+                        	printf("\t\tFilters = 10kHz\n");
+			}
+                        if((cdsPciModules.dacConfig[ii] & 0xC0000) == 0x80000)
+			{
+                        	printf("\t\tFilters = 100kHz\n");
+			}
+                        if((cdsPciModules.dacConfig[ii] & 0x100000) == 0x100000)
+			{
+                        	printf("\t\tOutput Type = Differential\n");
+			}
+                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.dacConfig[ii] & 0xfff));
+                }
+	}
+        printf("***************************************************************************\n");
 	printf("%d DIO cards found\n",cdsPciModules.dioCount);
+        printf("***************************************************************************\n");
 	printf("%d RFM cards found\n",cdsPciModules.rfmCount);
+	for(ii=0;ii<cdsPciModules.rfmCount;ii++)
+        {
+                 printf("\tRFM %d is a VMIC_5565 module with Node ID %d\n",cdsPciModules.rfmConfig[ii]);
+	}
+        printf("***************************************************************************\n");
 
 	if (cdsPciModules.adcCount == 0 && cdsPciModules.dacCount == 0) {
 		printf("No ADC and no DAC modules found\n");
