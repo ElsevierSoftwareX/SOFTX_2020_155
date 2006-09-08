@@ -10,6 +10,9 @@
 #ifdef OMC_CODE
 #include <omc.h>
 #endif
+#ifdef LTB_CODE
+#include <ltb.h>
+#endif
 
 #ifdef PNM
 #include <pnm.h>
