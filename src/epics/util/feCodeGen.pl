@@ -66,6 +66,19 @@ $openBrace = 0;
 $openBlock = 0;
 $nonSubCnt = 0;
 
+# set debug level (0 - no debug messages)
+$dbg_level = 2;
+
+# Print debug message
+# Example:
+# debug (0, "debug test: openBrace=$openBrace");
+#
+sub debug {
+  if ($dbg_level > shift @_) {
+	print @_, "\n";
+  }
+}
+
 # Read .mdl input file
 while (<IN>) {
     # Strip out quotes and blank spaces
@@ -927,6 +940,468 @@ $cur_step = 1;
 # How many processors are available on the current processing step
 # Running counter
 $cur_step_cpus = $cpus;
+
+# Parts tree root name
+$tree_root_name = "__root__";
+
+# Parts "tree" root
+# It points to ADC input groups (they are grouped for each subsystem)
+$root = {
+	NAME => $tree_root_name,
+	NEXT => [], # array of references to leaves
+};
+
+# Run a function on all tree leaves
+# Arguments:
+#	tree root reference
+#	function reference
+#
+sub do_on_leaves {
+	my($tree, $f) = @_;
+	if (0 == @{$tree->{NEXT}}) {
+		&$f($tree);
+	} else {
+		for (@{$tree->{NEXT}}) {
+                	do_on_leaves($_, $f);
+        	}
+	}
+}
+
+# Run a function on all tree nodes
+# Arguments:
+#	tree root reference
+#	function reference
+#	function argument
+sub do_on_nodes {
+	my($tree, $f, $arg) = @_;
+	&$f($tree, $arg);
+	for (@{$tree->{NEXT}}) {
+               	do_on_nodes($_, $f, $arg);
+	}
+}
+
+# Find graph node by name
+#
+sub find_node {
+	my($tree, $name) = @_;
+	if ($tree->{NAME} eq $name) {
+		return $tree;
+	} else {
+		for (@{$tree->{NEXT}}) {
+			#print $_->{NAME}, "\n";
+                	$res = find_node($_, $name);
+			if ($res) {
+				return $res;
+			}
+        	}
+	}
+	return undef;
+}
+
+# Construct parts linked list
+#
+foreach $i (0 .. $subSys-1) {
+	debug(0, "Subsystem $i ", $subSysName[$i]);
+}
+
+if ($cpus > 2) {
+foreach $i (0 .. $subSys-1) {
+	debug(2, "Subsystem $i (", $subSysName[$i], "):");
+	debug(2, " inputs=", $subCntr[$i]);
+	debug(2, "  parts=", $seqParts[$i]);
+	# See if this subsystem has ADC inputs
+	$has_inputs = 0;
+	for ($subSysPartStart[$i] .. $subSysPartStop[$i]) {
+		if ($partType[$_] eq "INPUT" && $partInputType[$_][0] eq "ADC") {
+			$has_inputs = 1;
+			break;
+		}
+	}
+
+	# insert new tree node for the group of inputs
+	# and the input parts afterwards
+	if ($has_inputs) {
+		$inputs_node = {
+			NAME => $subSysName[$i] . "_INPUTS",
+			TYPE => "input_group",
+			NEXT => [],
+			PART => -1,
+			SUBSYS => $i,
+		};
+		push @{$root->{NEXT}}, $inputs_node;
+
+		# Insert individual ADC inputs after the input group
+		for ($subSysPartStart[$i] .. $subSysPartStop[$i]) {
+			if ($partInput[$_][0] =~ m/adc_(\d+)_(\d+)/
+			    && $partInputType[$_][0] eq "ADC") {
+				$node = {
+					NAME => $xpartName[$_],
+					TYPE => $partType[$_],
+					NEXT => [],
+					PART => $_,
+					SUBSYS => $i,
+				};
+				push @{$inputs_node->{NEXT}}, $node;
+			}
+		}
+	}
+
+	# Insert all ground inputs into the root
+	for ($subSysPartStart[$i] .. $subSysPartStop[$i]) {
+		if ($partType[$_] eq "GROUND") {
+			$node = {
+				NAME => $xpartName[$_],
+				TYPE => $partType[$_],
+				NEXT => [],
+				PART => $_,
+				SUBSYS => $i,
+			};
+			push @{$root->{NEXT}}, $node;
+		}
+	}
+
+	debug(2, "  {");
+	foreach $j ($subSysPartStart[$i] .. $subSysPartStop[$i]) {
+		debug(2, "\tPart $j ", $xpartName[$j], " type=", $partType[$j], " inputs=", $partInCnt[$j], " outputs=", $partOutCnt[$j]);
+		
+		#debug(2, "\tPart Name ", $seqName[$i][$j]);
+		#debug(2, "\tPart Type ", $partType[$i][$j]);
+		#debug(2, "\t    seq=", $seq[$i][$j]);
+	}
+	debug(2, "  }");
+}
+}
+
+
+
+# Recursively insert a node into the tree
+#
+sub insert_node {
+my($tree, $pnum) = @_;
+
+# See if the node is in the tree already and return
+if (find_node($root, $xpartName[$pnum])) {
+	return;
+}
+
+#debug 1, "Node ", $xpartName[$pnum], " #", $pnum, " type=", $partType[$pnum], " not in the tree";
+
+# Make sure each input node is in the tree before inserting current node
+for (0 .. $partInCnt[$pnum] - 1) {
+	if ($partType[$pnum] eq "INPUT") {
+		debug 1, "Input Node";
+	} elsif ($partInput[$pnum][$_] =~ m/adc_(\d+)_(\d+)/) {
+		debug 1, "\tadc input node";
+		debug 1, "\t\t $partInput[$pnum][$_]\t input_type=$partInputType[$pnum][$_]\t$partInNum[$pnum][$_]";
+		# create a node for this adc input and then create a link to it from
+		# the corresponding second level node
+	} else {
+		#debug 1, "\t Recursively insert node $partInput[$pnum][$_]\t input_type=$partInputType[$pnum][$_]\t$partInNum[$pnum][$_]";
+		insert_node($tree, $partInNum[$pnum][$_]);
+	}
+}
+
+# At this point all input nodes are alredy resolved
+# Insert this node then.
+# Find in which subsystem this node is
+#
+my $subsys = -1;
+
+foreach $i (0 .. $subSys-1) {
+	if ($subSysPartStart[$i] <= $pnum && $pnum <  $subSysPartStop[$i]) {
+		$subsys = $i;
+		break;
+	}
+}
+
+$my_node = {
+	NAME => $xpartName[$pnum],
+	TYPE => $partType[$pnum],
+	NEXT => [],
+	PART => $pnum,
+	SUBSYS => $subsys,
+};
+
+# Find each input in the tree and update its NEXT field with the pointer to the node
+
+for (0 .. $partInCnt[$pnum] - 1) {
+	my $node;
+	if (($node = find_node($tree, $partInput[$pnum][$_]))) {
+		push @{$node->{NEXT}}, $my_node;
+	} else {
+		die "Node not found: $partInput[$pnum][$_]\n";
+	}
+}
+}
+
+if ($cpus > 2) {
+
+# Insert all parts into the tree
+#
+foreach $i (0 .. $subSys-1) {
+	for ($subSysPartStart[$i] .. $subSysPartStop[$i]-1) {
+	  if ($partType[$_] eq "INPUT") {
+		next;
+	  }
+	  insert_node($root, $_);
+	}
+}
+
+# Print all terminator nodes
+#do_on_leaves($root, sub {if ($_->{PRINTED} != 1) {print $_->{NAME}, "\n"; $_->{PRINTED} = 1; }});
+
+# Print the tree
+$print_no_repeats = 0;
+sub print_tree {
+	my($tree, $level) = @_;
+	my($space);
+	if ($print_no_repeats && $tree->{PRINTED}) { return; }
+	for (0 .. $level) { $space .= ' '; }
+	debug 0, $space, "{", $tree->{NAME}, " nref=", scalar @{$tree->{NEXT}}," subsys=", $tree->{SUBSYS}," type=", $tree->{TYPE}, "}";
+	for (@{$tree->{NEXT}}) {
+		print_tree($_, $level + 1);
+	}
+	if ($print_no_repeats) { $tree->{PRINTED} = 1; }
+}
+
+#debug(0, "Tree:\n");
+#print_tree($root);
+#debug(0, "\n");
+
+
+# Tag each node with the subsystem number
+sub tag_node {
+	my ($node, $subsys) = @_;
+
+	# see if this node is already tagged
+	#
+	for (@{$node->{INPUTS}}) {
+		if ($_ == $subsys) {
+			return; # already tagged
+		}
+	}
+
+	push @{$node->{INPUTS}}, $subsys;
+	#print "Tagged ", $node->{NAME}, " with $subsys\n";
+}
+
+for (@{$root->{NEXT}}) {
+	if ($_->{NAME} =~ m/.*INPUTS/) {
+		my $subsys = $_->{SUBSYS};
+		#print "Marking ", $_->{NAME}, " with $subsys\n";
+		do_on_nodes($_, \&tag_node, $subsys);
+	}
+}
+
+#do_on_nodes($root, sub {if ($_->{PRINTED} != 1) {print $_->{NAME}, " ", @{$_->{INPUTS}}, "\n"; $_->{PRINTED} = 1; }});
+
+# See how many different groups we have got
+%prog_groups;
+%prog_group_fmods; # How many filter modules in a group
+
+sub find_prog_groups {
+	my ($node) = @_;
+	my $nm;
+	if ($node->{VISITED}) { return; }
+	$node->{VISITED} = 1;
+	for (sort @{$node->{INPUTS}}) {
+		if (length $nm) { $nm .= "_"; }
+		$nm .= $_;
+	}
+	$prog_groups{$nm}++;
+	if ($node->{TYPE} eq "FILT") {
+		$prog_group_fmods{$nm}++;
+	}
+	$node->{GROUP} = $nm;
+}
+
+sub reset_visited { 
+	my ($node) = @_;
+	$node->{VISITED} = 0;
+}
+
+
+do_on_nodes($root,\&reset_visited);
+do_on_nodes($root,\&find_prog_groups);
+
+
+sub processing_order {
+	my $idx = index $a, $b;
+	#print "processing_order $a $b\n";
+	if ($a eq $b) { return 0; }
+	if ($idx >= 0) { return 1; }
+	$idx = index $b, $a;
+	if ($idx >= 0) { return -1; }
+	# independent, go by length
+	return length $a <=> length $b;
+}
+
+print "\n";
+for (sort processing_order keys %prog_groups) {
+	#print "cluster=$_ -> parts=", $prog_groups{$_}, " fmods=", $prog_group_fmods{$_}, "\n";
+}
+
+
+# Construct cluster tree
+$root1 = {
+	NAME => $tree_root_name,
+	NEXT => [], # array of references to leaves
+};
+
+sub add_refs {
+	my ($node, $ref_node) = @_;
+	if ($node->{VISITED}) { return; }
+	if ($ref_node->{NAME} eq $node->{NAME}) { return; }
+	@ref_node_nums = $ref_node->{NAME} =~ m/(\d+)/g;
+	@node_nums =  $node->{NAME} =~ m/(\d+)/g;
+	#print "ref node '", $ref_node->{NAME} ,"' nums: ", @ref_node_nums, "\n";
+	#print "node '", $node->{NAME}, "' nums: ", @node_nums, "\n";
+	$pass = 1;
+	for (@node_nums) {
+		$in_it = 0;
+		$cur_num = $_;
+		for (@ref_node_nums) {
+			if ($cur_num == $_) {
+				$in_it = 1;
+				break;
+			}
+		}
+		if (!$in_it) {
+			$pass = 0;
+			break;
+		}
+	}
+	if ($pass) {
+		push @{$node->{NEXT}}, $ref_node;
+		push @{$ref_node->{PARENTS}}, $node;
+	}
+	$node->{VISITED} = 1;
+}
+
+for (sort processing_order keys %prog_groups) {
+	if (length($_) == 0) { next; }
+	$node = {
+		NAME => $_,
+		NEXT => [],
+		PARTS => $prog_groups{$_},
+		FILTERS => $prog_group_fmods{$_},
+	};
+	# initial node
+	if (index($_, "_") == -1) {
+		#print "Initial node $_\n";
+		push @{$root1->{NEXT}}, $node;
+		push @{$node->{PARENTS}}, $root1;
+	} else {
+		do_on_nodes($root1,\&reset_visited);
+		$root1->{VISITED} = 1;
+		do_on_nodes($root1, \&add_refs, $node);
+	}
+}
+
+
+$exit_node_name = "__exit__";
+$exit_node = {
+	NAME => $exit_node_name,
+	NEXT => [], # array of references to leaves
+};
+
+# Insert exit node
+for (sort processing_order keys %prog_groups) {
+	if (length($_) == 0) { next; }
+	$node = find_node($root1, $_);
+	die "Node $_ not found\n" unless $node != undef;
+	if (scalar @{$node->{NEXT}} == 0) {
+		push @{$node->{NEXT}}, $exit_node;
+		push @{$exit_node->{PARENTS}}, $node;
+	}
+}
+
+# Calculate t-levels for each node
+for ($tree_root_name, sort processing_order keys %prog_groups, $exit_node_name) {
+	if (length($_) == 0) { next; }
+	$node = find_node($root1, $_);
+	die "Node $_ not found\n" unless $node != undef;
+	#print "Node $_ has parents: ";
+	$max_t_level = 0;
+	for (@{$node->{PARENTS}}) {
+		#print $_->{NAME}, " ";
+		$pt = $_->{T_LEVEL} + $_->{FILTERS};
+		if ($pt > $max_t_level) {
+			$max_t_level = $pt;
+		}
+	}
+	$node->{T_LEVEL} = $max_t_level;
+	#print "t_level=", $node->{T_LEVEL}, "\n";
+}
+
+# Calculate b-levels for each node
+for ($exit_node_name, reverse(sort processing_order keys %prog_groups), $tree_root_name) {
+	if (length($_) == 0) { next; }
+	$node = find_node($root1, $_);
+	die "Node $_ not found\n" unless $node != undef;
+	$max_b_level = 0;
+	for (@{$node->{NEXT}}) {
+		if ($_->{B_LEVEL} > $max_b_level) {
+			$max_b_level = $_->{B_LEVEL};
+		}
+	}
+	$node->{B_LEVEL} = $max_b_level + $node->{FILTERS};
+	#print "Node ", $node->{NAME} ," b_level=", $node->{B_LEVEL}, "\n";
+}
+
+sub b_level_order {
+	if (length($a) == 0) { return 0; }
+	if (length($b) == 0) { return 0; }
+	$anode = find_node($root1, $a);
+	$bnode = find_node($root1, $b);
+	die "Node $_ not found\n" unless $anode != undef && $bnode != undef;
+	#print $anode->{B_LEVEL}, " ", $bnode->{B_LEVEL}, "\n";
+	return $bnode->{B_LEVEL} <=> $anode->{B_LEVEL};
+}
+
+print "-----------------------\n";
+print "CPU allocation schedule\n";
+print "---------------------------------------------------\n";
+print "Node\tB-level\tcpu\tlevel\tweight\tlevel time\n";
+print "---------------------------------------------------";
+# Assign clusters to CPUs
+$level = 0;
+$cpu = 1; # goes from 1 to $cpus
+$max_level_time = 0;
+$total_time = 0;
+$cum_time = 0;
+for (sort b_level_order keys %prog_groups) {
+	if (length($_) == 0) { next; }
+	$node = find_node($root1, $_);
+	die "\nNode $_ not found\n" unless $node != undef;
+	$node->{CPU} = $cpu;
+	$node->{LEVEL} = $level;
+	print "\n", $node->{NAME} ,"\t", $node->{B_LEVEL}, "\t", $cpu, "\t", $level, "\t", $node->{FILTERS};
+	$cpu++;
+	$cum_time += $node->{FILTERS};
+	if ($node->{FILTERS} > $max_level_time) {
+		$max_level_time = $node->{FILTERS};
+	}
+	if ($cpu == $cpus) {
+		$cpu = 1;
+		print "\t", $max_level_time;
+		$total_time += $max_level_time,;
+		$max_level_time = 0;
+		$level++;
+	}
+}
+
+if ($cpu != 1) {
+	print "\t", $max_level_time;
+	$total_time += $max_level_time,;
+}
+print "\n---------------------------------------------------\n";
+print "Total time is ", $total_time, "\n";
+print "Cumulative time is ", $cum_time, "(", $cum_time/($cpus - 1), " per cpu)\n";
+#$print_no_repeats = 1;
+#print_tree($root1);
+
+} # If $cpus > 2
 
 # First pass defines processing step 0
 # It finds all input sybsystems
