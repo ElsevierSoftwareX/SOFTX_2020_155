@@ -927,7 +927,7 @@ $subRemaining = $subSys;
 $seqCnt = 0;
 
 # Total number of CPUs available to us
-$cpus = 2;
+$cpus = 4;
 
 # subSysName -> step*10 + cpu
 # 'step' is the processing step from one  sync point to the next
@@ -1248,12 +1248,19 @@ $root1 = {
 	NEXT => [], # array of references to leaves
 };
 
+sub get_nums_array {
+	my ($str) = @_;
+	return @ret = $str =~ m/(\d+)/g;
+}
+
 sub add_refs {
 	my ($node, $ref_node) = @_;
 	if ($node->{VISITED}) { return; }
 	if ($ref_node->{NAME} eq $node->{NAME}) { return; }
-	@ref_node_nums = $ref_node->{NAME} =~ m/(\d+)/g;
-	@node_nums =  $node->{NAME} =~ m/(\d+)/g;
+	#@ref_node_nums = $ref_node->{NAME} =~ m/(\d+)/g;
+	#@node_nums =  $node->{NAME} =~ m/(\d+)/g;
+	@ref_node_nums =  get_nums_array($ref_node->{NAME});
+	@node_nums =  get_nums_array($node->{NAME});
 	#print "ref node '", $ref_node->{NAME} ,"' nums: ", @ref_node_nums, "\n";
 	#print "node '", $node->{NAME}, "' nums: ", @node_nums, "\n";
 	$pass = 1;
@@ -1364,18 +1371,41 @@ print "CPU allocation schedule\n";
 print "---------------------------------------------------\n";
 print "Node\tB-level\tcpu\tlevel\tweight\tlevel time\n";
 print "---------------------------------------------------";
-# Assign clusters to CPUs
+# Assign clusters to CPUs (b-level based list algorithm)
 $level = 0;
 $cpu = 1; # goes from 1 to $cpus
 $max_level_time = 0;
 $total_time = 0;
 $cum_time = 0;
-for (sort b_level_order keys %prog_groups) {
+@sorted_clusters = sort b_level_order keys %prog_groups;
+@running_clusters = (); # currently running clusters (on CPUs)
+@saved_nodes = ();
+while(scalar @sorted_clusters) {
+	$_ = shift @sorted_clusters;
 	if (length($_) == 0) { next; }
 	$node = find_node($root1, $_);
 	die "\nNode $_ not found\n" unless $node != undef;
+	# See if just popped cluster can be run on this processing level
+	$repeat = 0;
+	for (@running_clusters) {
+		if (find_node(find_node($root1, $_), $node->{NAME}) != undef) {
+			# Current node is depends on this running cluster...
+			unshift @saved_nodes, $node->{NAME};
+			$repeat = 1;
+			break;
+		}
+	}
+	if ($repeat) {
+		next;
+	} else {
+		for (@saved_nodes) {
+			unshift @sorted_clusters, $_;
+		}
+		@saved_nodes = ();
+	}
 	$node->{CPU} = $cpu;
 	$node->{LEVEL} = $level;
+	push @running_clusters, $_;
 	print "\n", $node->{NAME} ,"\t", $node->{B_LEVEL}, "\t", $cpu, "\t", $level, "\t", $node->{FILTERS};
 	$cpu++;
 	$cum_time += $node->{FILTERS};
@@ -1385,6 +1415,7 @@ for (sort b_level_order keys %prog_groups) {
 	if ($cpu == $cpus) {
 		$cpu = 1;
 		print "\t", $max_level_time;
+		@running_clusters = ();
 		$total_time += $max_level_time,;
 		$max_level_time = 0;
 		$level++;
@@ -1400,6 +1431,14 @@ print "Total time is ", $total_time, "\n";
 print "Cumulative time is ", $cum_time, "(", $cum_time/($cpus - 1), " per cpu)\n";
 #$print_no_repeats = 1;
 #print_tree($root1);
+
+# Check all nodes are scheduled
+for (sort processing_order keys %prog_groups) {
+	if (length($_) == 0) { next; }
+	$node = find_node($root1, $_);
+	die "Node $_ not found\n" unless $node != undef;
+	die "Node $_ was not scheduled for execution\n" unless $node->{CPU};
+}
 
 } # If $cpus > 2
 
