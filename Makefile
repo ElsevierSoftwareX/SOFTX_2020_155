@@ -31,6 +31,16 @@ hepiepics: config/Makefile.hepiepics
 	@make -f $<  >& hepiepics.makelog || \
 	(echo "FAILED: check hepiepics.makelog"; false)
 
+pdeepics: config/Makefile.pdeepics
+	@echo Making pdeepics...
+	@make -f $<  >& pdeepics.makelog || \
+	(echo "FAILED: check pdeepics.makelog"; false)
+
+omcepics: config/Makefile.omcepics
+	@echo Making omcepics...
+	@make -f $<  >& omcepics.makelog || \
+	(echo "FAILED: check omcepics.makelog"; false)
+
 # Build front-end systems 
 fe:
 	cd src/fe; $(MAKE) all
