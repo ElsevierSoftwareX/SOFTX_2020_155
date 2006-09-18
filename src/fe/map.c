@@ -832,10 +832,10 @@ int myriNetReconnect(int dcuId)
 
   daqSendMessage = (daqMessage *)netOutBuffer;
   sprintf (daqSendMessage->message, "STT");
-  daqSendMessage->dcuId = dcuId;
-  daqSendMessage->channelCount = 16;
-  daqSendMessage->fileCrc = 0x3879d7b;
-  daqSendMessage->dataBlockSize = GM_DAQ_XFER_BYTE;
+  daqSendMessage->dcuId = htonl(dcuId);
+  daqSendMessage->channelCount = htonl(16);
+  daqSendMessage->fileCrc = htonl(0x3879d7b);
+  daqSendMessage->dataBlockSize = htonl(GM_DAQ_XFER_BYTE);
 
   send_length = (unsigned long) sizeof(*daqSendMessage);
   gm_send_with_callback (netPort,
@@ -963,16 +963,16 @@ int myriNetDaqSend(	int dcuId,
 // Once every 1/16 second, send a message to signal FB that data is ready.
 if(subCycle == 15) {
   sprintf (daqSendMessage->message, "DAT");
-  daqSendMessage->dcuId = dcuId;
+  daqSendMessage->dcuId = htonl(dcuId);
   if(cycle > 0) 
-    daqSendMessage->cycle = cycle - 1;
-  if(cycle == 0) daqSendMessage->cycle = 15;
-  daqSendMessage->offset = subCycle;
-  daqSendMessage->fileCrc = fileCrc;
-  daqSendMessage->blockCrc = blockCrc;
-  daqSendMessage->dataCount = crcSize;
-  daqSendMessage->tpCount = tpCount;
-  for(kk=0;kk<20;kk++) daqSendMessage->tpNum[kk] = tpNum[kk];
+    daqSendMessage->cycle = htonl(cycle - 1);
+  if(cycle == 0) daqSendMessage->cycle = htonl(15);
+  daqSendMessage->offset = htonl(subCycle);
+  daqSendMessage->fileCrc = htonl(fileCrc);
+  daqSendMessage->blockCrc = htonl(blockCrc);
+  daqSendMessage->dataCount = htonl(crcSize);
+  daqSendMessage->tpCount = htonl(tpCount);
+  for(kk=0;kk<20;kk++) daqSendMessage->tpNum[kk] = htonl(tpNum[kk]);
   send_length = (unsigned long) sizeof(*daqSendMessage) + 1;
   gm_send_with_callback (netPort,
                          netOutBuffer,
