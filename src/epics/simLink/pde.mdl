@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.35"
+    ComputedModelVersion    "1.40"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -54,8 +54,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Sep 19 15:50:32 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:35>"
+  LastModifiedDate	  "Tue Sep 19 16:17:25 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:40>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -508,9 +508,6 @@ Model {
       SampleTime	      "-1"
     }
     Block {
-      BlockType		      Reference
-    }
-    Block {
       BlockType		      "S-Function"
       FunctionName	      "system"
       SFunctionModules	      "''"
@@ -564,7 +561,7 @@ Model {
   }
   System {
     Name		    "pde"
-    Location		    [219, 103, 1682, 1108]
+    Location		    [243, 107, 1706, 1112]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -2484,14 +2481,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -2501,24 +2498,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -2528,7 +2525,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -2549,14 +2546,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -2566,24 +2563,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -2593,7 +2590,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -2614,14 +2611,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -2631,24 +2628,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -2658,7 +2655,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -2679,14 +2676,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -2696,24 +2693,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -2723,7 +2720,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -2744,14 +2741,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -2761,24 +2758,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -2788,7 +2785,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -2809,14 +2806,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -2826,24 +2823,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -2853,7 +2850,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -2874,14 +2871,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -2891,24 +2888,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -2918,7 +2915,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -2929,7 +2926,7 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "Matrix6x6/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
 	}
 	Block {
 	  BlockType		  Reference
@@ -2950,14 +2947,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -2967,24 +2964,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -2994,7 +2991,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -3005,7 +3002,7 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "Matrix6x6/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
 	}
 	Block {
 	  BlockType		  Reference
@@ -3026,14 +3023,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3043,24 +3040,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3070,7 +3067,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -3091,14 +3088,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3108,24 +3105,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3135,7 +3132,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -3156,14 +3153,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3173,24 +3170,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3200,7 +3197,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	}
 	Block {
 	  BlockType		  Terminator
@@ -3246,14 +3243,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3263,24 +3260,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3290,7 +3287,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -3311,14 +3308,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3328,24 +3325,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3355,7 +3352,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	}
 	Block {
 	  BlockType		  Outport
@@ -4212,6 +4209,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "LL_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1185, 355, 1225, 375]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "LROUT"
 	  Ports			  [1, 1]
 	  Position		  [975, 778, 1060, 832]
@@ -4537,6 +4545,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "LR_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1185, 805, 1225, 825]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "LSC"
 	  Ports			  [1, 1]
 	  Position		  [370, 388, 455, 442]
@@ -4774,6 +4793,17 @@ Model {
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "SD_DRV"
+	  Ports			  [1, 1]
+	  Position		  [380, 930, 420, 950]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
 	}
 	Block {
 	  BlockType		  Reference
@@ -5251,6 +5281,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "UL_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1195, 130, 1235, 150]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "UROUT"
 	  Ports			  [1, 1]
 	  Position		  [970, 553, 1055, 607]
@@ -5576,6 +5617,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "UR_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1185, 580, 1225, 600]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "WD"
 	  Ports			  [5, 1]
 	  Position		  [150, 939, 190, 1001]
@@ -5651,14 +5703,14 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "U_L"
-	  Position		  [1210, 133, 1240, 147]
+	  Position		  [1280, 133, 1310, 147]
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
 	}
 	Block {
 	  BlockType		  Outport
 	  Name			  "L_L"
-	  Position		  [1205, 358, 1235, 372]
+	  Position		  [1275, 358, 1305, 372]
 	  Port			  "2"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -5666,7 +5718,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "U_R"
-	  Position		  [1210, 583, 1240, 597]
+	  Position		  [1280, 583, 1310, 597]
 	  Port			  "3"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -5674,15 +5726,15 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "L_R"
-	  Position		  [1215, 808, 1245, 822]
+	  Position		  [1285, 808, 1315, 822]
 	  Port			  "4"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
 	}
 	Block {
 	  BlockType		  Outport
-	  Name			  "Out5"
-	  Position		  [385, 933, 415, 947]
+	  Name			  "S_D"
+	  Position		  [450, 933, 480, 947]
 	  Port			  "5"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -6097,12 +6149,6 @@ Model {
 	  }
 	}
 	Line {
-	  SrcBlock		  "Product"
-	  SrcPort		  1
-	  DstBlock		  "Out5"
-	  DstPort		  1
-	}
-	Line {
 	  SrcBlock		  "SIDE"
 	  SrcPort		  1
 	  Points		  [45, 0; 0, 60]
@@ -6134,27 +6180,63 @@ Model {
 	  DstPort		  1
 	}
 	Line {
+	  SrcBlock		  "Product"
+	  SrcPort		  1
+	  DstBlock		  "SD_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "SD_DRV"
+	  SrcPort		  1
+	  DstBlock		  "S_D"
+	  DstPort		  1
+	}
+	Line {
 	  SrcBlock		  "Product1"
 	  SrcPort		  1
-	  DstBlock		  "U_L"
+	  DstBlock		  "UL_DRV"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "Product2"
 	  SrcPort		  1
-	  DstBlock		  "L_L"
+	  DstBlock		  "LL_DRV"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "Product3"
 	  SrcPort		  1
-	  DstBlock		  "U_R"
+	  DstBlock		  "UR_DRV"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "Product4"
 	  SrcPort		  1
+	  DstBlock		  "LR_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "LR_DRV"
+	  SrcPort		  1
 	  DstBlock		  "L_R"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "UR_DRV"
+	  SrcPort		  1
+	  DstBlock		  "U_R"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "LL_DRV"
+	  SrcPort		  1
+	  DstBlock		  "L_L"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "UL_DRV"
+	  SrcPort		  1
+	  DstBlock		  "U_L"
 	  DstPort		  1
 	}
       }
@@ -6171,7 +6253,7 @@ Model {
       RTWSystemCode	      "Auto"
       System {
 	Name			"SUS_ETMX"
-	Location		[262, 97, 1659, 1130]
+	Location		[-264, 87, 1133, 1120]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -6707,6 +6789,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "LL_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1175, 355, 1215, 375]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "LROUT"
 	  Ports			  [1, 1]
 	  Position		  [975, 778, 1060, 832]
@@ -7032,6 +7125,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "LR_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1175, 805, 1215, 825]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "LSC"
 	  Ports			  [1, 1]
 	  Position		  [370, 388, 455, 442]
@@ -7269,6 +7373,17 @@ Model {
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "SD_DRV"
+	  Ports			  [1, 1]
+	  Position		  [375, 930, 415, 950]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
 	}
 	Block {
 	  BlockType		  Reference
@@ -7746,6 +7861,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "UL_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1185, 130, 1225, 150]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "UROUT"
 	  Ports			  [1, 1]
 	  Position		  [970, 553, 1055, 607]
@@ -8071,6 +8197,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "UR_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1175, 580, 1215, 600]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "WD"
 	  Ports			  [5, 1]
 	  Position		  [150, 939, 190, 1001]
@@ -8146,14 +8283,14 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "U_L"
-	  Position		  [1210, 133, 1240, 147]
+	  Position		  [1245, 133, 1275, 147]
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
 	}
 	Block {
 	  BlockType		  Outport
 	  Name			  "L_L"
-	  Position		  [1205, 358, 1235, 372]
+	  Position		  [1240, 358, 1270, 372]
 	  Port			  "2"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -8161,7 +8298,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "U_R"
-	  Position		  [1210, 583, 1240, 597]
+	  Position		  [1245, 583, 1275, 597]
 	  Port			  "3"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -8169,15 +8306,15 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "L_R"
-	  Position		  [1215, 808, 1245, 822]
+	  Position		  [1250, 808, 1280, 822]
 	  Port			  "4"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
 	}
 	Block {
 	  BlockType		  Outport
-	  Name			  "Out5"
-	  Position		  [385, 933, 415, 947]
+	  Name			  "S_D"
+	  Position		  [450, 933, 480, 947]
 	  Port			  "5"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -8595,12 +8732,6 @@ Model {
 	  }
 	}
 	Line {
-	  SrcBlock		  "Product"
-	  SrcPort		  1
-	  DstBlock		  "Out5"
-	  DstPort		  1
-	}
-	Line {
 	  SrcBlock		  "SIDE"
 	  SrcPort		  1
 	  Points		  [45, 0; 0, 60]
@@ -8632,19 +8763,37 @@ Model {
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "Product1"
+	  SrcBlock		  "Product2"
 	  SrcPort		  1
-	  DstBlock		  "U_L"
+	  DstBlock		  "LL_DRV"
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "Product2"
+	  SrcBlock		  "LL_DRV"
 	  SrcPort		  1
 	  DstBlock		  "L_L"
 	  DstPort		  1
 	}
 	Line {
+	  SrcBlock		  "Product1"
+	  SrcPort		  1
+	  DstBlock		  "UL_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "UL_DRV"
+	  SrcPort		  1
+	  DstBlock		  "U_L"
+	  DstPort		  1
+	}
+	Line {
 	  SrcBlock		  "Product3"
+	  SrcPort		  1
+	  DstBlock		  "UR_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "UR_DRV"
 	  SrcPort		  1
 	  DstBlock		  "U_R"
 	  DstPort		  1
@@ -8652,7 +8801,25 @@ Model {
 	Line {
 	  SrcBlock		  "Product4"
 	  SrcPort		  1
+	  DstBlock		  "LR_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "LR_DRV"
+	  SrcPort		  1
 	  DstBlock		  "L_R"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Product"
+	  SrcPort		  1
+	  DstBlock		  "SD_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "SD_DRV"
+	  SrcPort		  1
+	  DstBlock		  "S_D"
 	  DstPort		  1
 	}
       }
@@ -9205,6 +9372,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "LL_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1185, 355, 1225, 375]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "LROUT"
 	  Ports			  [1, 1]
 	  Position		  [975, 778, 1060, 832]
@@ -9530,6 +9708,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "LR_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1185, 805, 1225, 825]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "LSC"
 	  Ports			  [1, 1]
 	  Position		  [370, 388, 455, 442]
@@ -9767,6 +9956,17 @@ Model {
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "SD_DRV"
+	  Ports			  [1, 1]
+	  Position		  [375, 930, 415, 950]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
 	}
 	Block {
 	  BlockType		  Reference
@@ -10244,6 +10444,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "UL_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1195, 130, 1235, 150]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "UROUT"
 	  Ports			  [1, 1]
 	  Position		  [970, 553, 1055, 607]
@@ -10569,6 +10780,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "UR_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1185, 580, 1225, 600]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "WD"
 	  Ports			  [5, 1]
 	  Position		  [150, 939, 190, 1001]
@@ -10644,14 +10866,14 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "U_L"
-	  Position		  [1210, 133, 1240, 147]
+	  Position		  [1275, 133, 1305, 147]
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
 	}
 	Block {
 	  BlockType		  Outport
 	  Name			  "L_L"
-	  Position		  [1205, 358, 1235, 372]
+	  Position		  [1270, 358, 1300, 372]
 	  Port			  "2"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -10659,7 +10881,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "U_R"
-	  Position		  [1210, 583, 1240, 597]
+	  Position		  [1275, 583, 1305, 597]
 	  Port			  "3"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -10667,15 +10889,15 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "L_R"
-	  Position		  [1215, 808, 1245, 822]
+	  Position		  [1280, 808, 1310, 822]
 	  Port			  "4"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
 	}
 	Block {
 	  BlockType		  Outport
-	  Name			  "Out5"
-	  Position		  [385, 933, 415, 947]
+	  Name			  "S_D"
+	  Position		  [440, 933, 470, 947]
 	  Port			  "5"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -11090,12 +11312,6 @@ Model {
 	  }
 	}
 	Line {
-	  SrcBlock		  "Product"
-	  SrcPort		  1
-	  DstBlock		  "Out5"
-	  DstPort		  1
-	}
-	Line {
 	  SrcBlock		  "SIDE"
 	  SrcPort		  1
 	  Points		  [45, 0; 0, 60]
@@ -11127,27 +11343,63 @@ Model {
 	  DstPort		  1
 	}
 	Line {
+	  SrcBlock		  "Product"
+	  SrcPort		  1
+	  DstBlock		  "SD_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "SD_DRV"
+	  SrcPort		  1
+	  DstBlock		  "S_D"
+	  DstPort		  1
+	}
+	Line {
 	  SrcBlock		  "Product1"
 	  SrcPort		  1
-	  DstBlock		  "U_L"
+	  DstBlock		  "UL_DRV"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "Product2"
 	  SrcPort		  1
-	  DstBlock		  "L_L"
+	  DstBlock		  "LL_DRV"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "Product3"
 	  SrcPort		  1
-	  DstBlock		  "U_R"
+	  DstBlock		  "UR_DRV"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "Product4"
 	  SrcPort		  1
+	  DstBlock		  "LR_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "LR_DRV"
+	  SrcPort		  1
 	  DstBlock		  "L_R"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "UR_DRV"
+	  SrcPort		  1
+	  DstBlock		  "U_R"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "LL_DRV"
+	  SrcPort		  1
+	  DstBlock		  "L_L"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "UL_DRV"
+	  SrcPort		  1
+	  DstBlock		  "U_L"
 	  DstPort		  1
 	}
       }
@@ -11706,6 +11958,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "LL_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1195, 355, 1235, 375]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "LROUT"
 	  Ports			  [1, 1]
 	  Position		  [975, 778, 1060, 832]
@@ -12031,6 +12294,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "LR_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1195, 805, 1235, 825]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "LSC"
 	  Ports			  [1, 1]
 	  Position		  [370, 388, 455, 442]
@@ -12268,6 +12542,17 @@ Model {
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "SD_DRV"
+	  Ports			  [1, 1]
+	  Position		  [375, 930, 415, 950]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
 	}
 	Block {
 	  BlockType		  Reference
@@ -12745,6 +13030,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "UL_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1205, 130, 1245, 150]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "UROUT"
 	  Ports			  [1, 1]
 	  Position		  [970, 553, 1055, 607]
@@ -13070,6 +13366,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "UR_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1195, 580, 1235, 600]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "WD"
 	  Ports			  [5, 1]
 	  Position		  [150, 939, 190, 1001]
@@ -13145,14 +13452,14 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "U_L"
-	  Position		  [1210, 133, 1240, 147]
+	  Position		  [1280, 133, 1310, 147]
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
 	}
 	Block {
 	  BlockType		  Outport
 	  Name			  "L_L"
-	  Position		  [1205, 358, 1235, 372]
+	  Position		  [1275, 358, 1305, 372]
 	  Port			  "2"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -13160,7 +13467,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "U_R"
-	  Position		  [1210, 583, 1240, 597]
+	  Position		  [1280, 583, 1310, 597]
 	  Port			  "3"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -13168,15 +13475,15 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "L_R"
-	  Position		  [1215, 808, 1245, 822]
+	  Position		  [1285, 808, 1315, 822]
 	  Port			  "4"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
 	}
 	Block {
 	  BlockType		  Outport
-	  Name			  "Out5"
-	  Position		  [385, 933, 415, 947]
+	  Name			  "S_D"
+	  Position		  [445, 933, 475, 947]
 	  Port			  "5"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -13572,12 +13879,6 @@ Model {
 	  }
 	}
 	Line {
-	  SrcBlock		  "Product"
-	  SrcPort		  1
-	  DstBlock		  "Out5"
-	  DstPort		  1
-	}
-	Line {
 	  SrcBlock		  "SIDE"
 	  SrcPort		  1
 	  Points		  [45, 0; 0, 60]
@@ -13609,30 +13910,6 @@ Model {
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "Product1"
-	  SrcPort		  1
-	  DstBlock		  "U_L"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Product2"
-	  SrcPort		  1
-	  DstBlock		  "L_L"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Product3"
-	  SrcPort		  1
-	  DstBlock		  "U_R"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Product4"
-	  SrcPort		  1
-	  DstBlock		  "L_R"
-	  DstPort		  1
-	}
-	Line {
 	  SrcBlock		  "L"
 	  SrcPort		  1
 	  DstBlock		  "LSC"
@@ -13649,6 +13926,66 @@ Model {
 	  SrcBlock		  "AY"
 	  SrcPort		  1
 	  DstBlock		  "ASCY"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Product"
+	  SrcPort		  1
+	  DstBlock		  "SD_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "SD_DRV"
+	  SrcPort		  1
+	  DstBlock		  "S_D"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Product1"
+	  SrcPort		  1
+	  DstBlock		  "UL_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Product2"
+	  SrcPort		  1
+	  DstBlock		  "LL_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Product3"
+	  SrcPort		  1
+	  DstBlock		  "UR_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Product4"
+	  SrcPort		  1
+	  DstBlock		  "LR_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "LR_DRV"
+	  SrcPort		  1
+	  DstBlock		  "L_R"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "UR_DRV"
+	  SrcPort		  1
+	  DstBlock		  "U_R"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "LL_DRV"
+	  SrcPort		  1
+	  DstBlock		  "L_L"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "UL_DRV"
+	  SrcPort		  1
+	  DstBlock		  "U_L"
 	  DstPort		  1
 	}
       }
@@ -14207,6 +14544,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "LL_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1190, 355, 1230, 375]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "LROUT"
 	  Ports			  [1, 1]
 	  Position		  [975, 778, 1060, 832]
@@ -14532,6 +14880,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "LR_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1190, 805, 1230, 825]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "LSC"
 	  Ports			  [1, 1]
 	  Position		  [370, 388, 455, 442]
@@ -14769,6 +15128,17 @@ Model {
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "SD_DRV"
+	  Ports			  [1, 1]
+	  Position		  [375, 930, 415, 950]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
 	}
 	Block {
 	  BlockType		  Reference
@@ -15246,6 +15616,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "UL_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1200, 130, 1240, 150]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "UROUT"
 	  Ports			  [1, 1]
 	  Position		  [970, 553, 1055, 607]
@@ -15571,6 +15952,17 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "UR_DRV"
+	  Ports			  [1, 1]
+	  Position		  [1190, 580, 1230, 600]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  SourceBlock		  "cdsEpicsOut/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "WD"
 	  Ports			  [5, 1]
 	  Position		  [150, 939, 190, 1001]
@@ -15646,14 +16038,14 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "U_L"
-	  Position		  [1210, 133, 1240, 147]
+	  Position		  [1285, 133, 1315, 147]
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
 	}
 	Block {
 	  BlockType		  Outport
 	  Name			  "L_L"
-	  Position		  [1205, 358, 1235, 372]
+	  Position		  [1280, 358, 1310, 372]
 	  Port			  "2"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -15661,7 +16053,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "U_R"
-	  Position		  [1210, 583, 1240, 597]
+	  Position		  [1285, 583, 1315, 597]
 	  Port			  "3"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -15669,15 +16061,15 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "L_R"
-	  Position		  [1215, 808, 1245, 822]
+	  Position		  [1290, 808, 1320, 822]
 	  Port			  "4"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
 	}
 	Block {
 	  BlockType		  Outport
-	  Name			  "Out5"
-	  Position		  [385, 933, 415, 947]
+	  Name			  "S_D"
+	  Position		  [450, 933, 480, 947]
 	  Port			  "5"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -16073,12 +16465,6 @@ Model {
 	  }
 	}
 	Line {
-	  SrcBlock		  "Product"
-	  SrcPort		  1
-	  DstBlock		  "Out5"
-	  DstPort		  1
-	}
-	Line {
 	  SrcBlock		  "SIDE"
 	  SrcPort		  1
 	  Points		  [45, 0; 0, 60]
@@ -16110,30 +16496,6 @@ Model {
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "Product1"
-	  SrcPort		  1
-	  DstBlock		  "U_L"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Product2"
-	  SrcPort		  1
-	  DstBlock		  "L_L"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Product3"
-	  SrcPort		  1
-	  DstBlock		  "U_R"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Product4"
-	  SrcPort		  1
-	  DstBlock		  "L_R"
-	  DstPort		  1
-	}
-	Line {
 	  SrcBlock		  "L"
 	  SrcPort		  1
 	  DstBlock		  "LSC"
@@ -16150,6 +16512,66 @@ Model {
 	  SrcBlock		  "AY"
 	  SrcPort		  1
 	  DstBlock		  "ASCY"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Product"
+	  SrcPort		  1
+	  DstBlock		  "SD_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "SD_DRV"
+	  SrcPort		  1
+	  DstBlock		  "S_D"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Product1"
+	  SrcPort		  1
+	  DstBlock		  "UL_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Product2"
+	  SrcPort		  1
+	  DstBlock		  "LL_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Product3"
+	  SrcPort		  1
+	  DstBlock		  "UR_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Product4"
+	  SrcPort		  1
+	  DstBlock		  "LR_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "LR_DRV"
+	  SrcPort		  1
+	  DstBlock		  "L_R"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "UR_DRV"
+	  SrcPort		  1
+	  DstBlock		  "U_R"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "LL_DRV"
+	  SrcPort		  1
+	  DstBlock		  "L_L"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "UL_DRV"
+	  SrcPort		  1
+	  DstBlock		  "U_L"
 	  DstPort		  1
 	}
       }
