@@ -430,6 +430,11 @@ while (<IN>) {
 		print "$partCnt is type PHASE\n";
 		$partErr = 0;
 	}
+	if (substr($var2,0,11) eq "cdsWfsPhase") {
+		$partType[$partCnt] = WFS_PHASE;
+		print "$partCnt is type WFS_PHASE\n";
+		$partErr = 0;
+	}
 	if (substr($var2,0,10) eq "cdsEpicsIn") {
 		$partType[$partCnt] = EPICS_INPUT;
 		$partErr = 0;
@@ -926,6 +931,9 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 $subRemaining = $subSys;
 $seqCnt = 0;
 
+#
+$old_style_multiprocessing = 0;
+
 # Total number of CPUs available to us
 $cpus = 2;
 
@@ -1389,7 +1397,7 @@ while(scalar @sorted_clusters) {
 	$repeat = 0;
 	for (@running_clusters) {
 		if (find_node(find_node($root1, $_), $node->{NAME}) != undef) {
-			# Current node is depends on this running cluster...
+			# Current node depends on this running cluster...
 			unshift @saved_nodes, $node->{NAME};
 			$repeat = 1;
 			break;
@@ -1403,6 +1411,7 @@ while(scalar @sorted_clusters) {
 		}
 		@saved_nodes = ();
 	}
+	push @{$cpu_clusters[$cpu]}, $_;
 	$node->{CPU} = $cpu;
 	$node->{LEVEL} = $level;
 	push @running_clusters, $_;
@@ -1429,6 +1438,7 @@ if ($cpu != 1) {
 print "\n---------------------------------------------------\n";
 print "Total time is ", $total_time, "\n";
 print "Cumulative time is ", $cum_time, "(", $cum_time/($cpus - 1), " per cpu)\n";
+print "TODO: need to eliminate unnecessary CPU sync points (merge levels)\n";
 #$print_no_repeats = 1;
 #print_tree($root1);
 
@@ -1703,6 +1713,9 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "PHASE") {
 		print OUTH "\tfloat $xpartName[$ii]\[2\];\n";
 	}
+	if($partType[$ii] eq "WFS_PHASE") {
+		print OUTH "\tfloat $xpartName[$ii]\[2\]\[2\];\n";
+	}
 	if($partType[$ii] eq "PRODUCT") {
 		print OUTH "\tfloat $xpartName[$ii];\n";
 		print OUTH "\tint $xpartName[$ii]\_TRAMP;\n";
@@ -1763,6 +1776,9 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 	if($partType[$ii] eq "PHASE") {
 		print EPICS "PHASE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
+	}
+	if($partType[$ii] eq "WFS_PHASE") {
+		print EPICS "WFS_PHASE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 	}
 	if($partType[$ii] eq "EPICS_OUTPUT") {
 		print EPICS "OUTVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
@@ -1944,6 +1960,9 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "PHASE") {
 		print OUT "static double \L$xpartName[$ii]\[2\];\n";
 	}
+	if($partType[$ii] eq "WFS_PHASE") {
+		print OUT "static double \L$xpartName[$ii]\[2\];\n";
+	}
 	if($partType[$ii] eq "PRODUCT") {
 		print OUT "double \L$xpartName[$ii]\[$partOutCnt[$ii]\];\n";
 		print OUT "float $xpartName[$ii]\_CALC;\n";
@@ -1981,6 +2000,7 @@ for ($i = 2; $i < $cpus; $i++) {
 }
 print OUT "\n";
 
+
 # Print common to all functions variables as globals
 printVariables();
 
@@ -1990,6 +2010,7 @@ for ($i = 2; $i < $cpus; $i++) {
     print OUT "\tint ii, jj;\n";
     print OUT "\twhile(!stop_working_threads) {\n";
 
+if ($old_style_multiprocessing) {
     # Processing steps
     for ($step = 0; $step <= $cur_step; $step++) {
       # Wait for signal from main thread
@@ -2003,12 +2024,27 @@ for ($i = 2; $i < $cpus; $i++) {
   	  &printSubsystem("$k");
 	}
       }
-
       print OUT "\t\tdone$i = 1;\n";
     }
+} else {
+    for (@{$cpu_clusters[$i]}) {
+      # Wait for signal from main thread
+      print OUT "\t\twhile(!go$i && !stop_working_threads);\n";
+      print OUT "\t\tgo$i = 0;\n";
+      &printCluster($_);
+      print OUT "\t\tdone$i = 1;\n";
+    }
+}
+
     print OUT "\t}\n";
     print OUT "\tdone$i = 1;\n";
     print OUT "}\n\n";
+}
+
+sub printCluster {
+	my ($cluster) = @_;
+	print OUT "/* Do $cluster cluster */\n";
+        &printSubsystem(".", $cluster);
 }
 
 print OUT "/* CPU 1 code */\n";
@@ -2068,11 +2104,12 @@ for($ii=0;$ii<$partCnt;$ii++)
 }
 print OUT "\} else \{\n";
 
-print "*****************************************************\n";
+#print "*****************************************************\n";
 
 # Print subsystems processing step by step
 # along with signalling primitives to other threads
 if ($cpus > 2) {
+if ($old_style_multiprocessing) {
   for ($step = 0; $step <= $cur_step; $step++) {
     # Signal other threads to go
     for ($i = 2; $i < $cpus; $i++) {
@@ -2093,6 +2130,22 @@ if ($cpus > 2) {
 	print OUT "done$i = 0;\n";
     }
   }
+} else {
+    for (@{$cpu_clusters[1]}) {
+      # Signal other threads to go
+      for ($i = 2; $i < $cpus; $i++) {
+	  print OUT "go$i = 1;\n";
+      }
+
+      &printCluster($_);
+
+      # Wait for other threads to finish this processing step
+      for ($i = 2; $i < $cpus; $i++) {
+	print OUT "while(!done$i && !stop_working_threads);\n";
+	print OUT "done$i = 0;\n";
+      }
+    }
+}
 
   # Output standalone parts (DAC output)
   &printSubsystem("__PART__");
@@ -2101,11 +2154,31 @@ if ($cpus > 2) {
 }
 
 sub printSubsystem {
-$subsys = $_[0];
+my ($subsys, $cluster) = @_;
+
+$do_cluster = 0;
+
+if (scalar(@_) > 1) {
+	$do_cluster = 1;
+}
 
 $ts = 0;
 $xx = 0;
 $do_print = 0;
+@cluster_parts = ();
+
+if ($do_cluster) {
+	# get all cluster part names
+	do_on_nodes($root, \&reset_visited);
+	do_on_nodes($root, sub{ if (!$_->{VISITED} && $_->{GROUP} eq $cluster) { push @cluster_parts, $_->{NAME}; $_->{VISITED} = 1;}});
+
+	#print ("Cluster $cluster has these parts: ");
+	for (@cluster_parts) {
+		#print $_, " ";
+	}
+	#print "\n";
+}
+
 for($xx=0;$xx<$processCnt;$xx++) 
 {
 	if($xx == $processSeqEnd[$ts]) {
@@ -2129,6 +2202,16 @@ for($xx=0;$xx<$processCnt;$xx++)
 	if (! $do_print)  { next; };
 	$mm = $processPartNum[$xx];
 	#print "looking for part $mm type=$partType[$mm] name=$xpartName[$mm]\n";
+	if ($do_cluster) {
+		my $do_print = 0;
+		for (@cluster_parts) {
+			if ($xpartName[$mm] eq $_) {
+				$do_print = 1;
+				break;
+			}
+		}
+		if (! $do_print)  { next; };
+	}
 	$inCnt = $partInCnt[$mm];
 	for($qq=0;$qq<$inCnt;$qq++)
 	{
@@ -2184,7 +2267,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$fromExp[$qq] .= "\]";
 			$indone = 1;
 		}
-		if($partInputType[$mm][$qq] eq "PHASE")
+		if($partInputType[$mm][$qq] eq "PHASE" || $partInputType[$mm][$qq] eq "WFS_PHASE")
 		{
 			$from = $partInNum[$mm][$qq];
 			$fromPort = $partInputPort[$mm][$qq];
@@ -2361,6 +2444,30 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   	$calcExp .=  " * ";
 	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]";
 	   	$calcExp .=  "\[0\]);\n";
+		print OUT "$calcExp";
+	}
+	if($partType[$mm] eq "WFS_PHASE")
+	{
+	   	print OUT "// WFS PHASE\n";
+	   	$calcExp = "\L$xpartName[$mm]\[0\] = \(";
+	   	$calcExp .=  "$fromExp[0]";
+	   	$calcExp .=  " * ";
+	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]";
+	   	$calcExp .=  "\[0\]\[0\]\) - \(";
+	   	$calcExp .=  "$fromExp[1]";
+	   	$calcExp .=  " * ";
+	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]";
+	   	$calcExp .=  "\[1\]\[0\]);\n";
+		print OUT "$calcExp";
+	   	$calcExp = "\L$xpartName[$mm]\[1\] = \(";
+	   	$calcExp .=  "$fromExp[1]";
+	   	$calcExp .=  " * ";
+	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]";
+	   	$calcExp .=  "\[1\]\[1\]\) - \(";
+	   	$calcExp .=  "$fromExp[0]";
+	   	$calcExp .=  " * ";
+	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$mm]";
+	   	$calcExp .=  "\[0\]\[1\]);\n";
 		print OUT "$calcExp";
 	}
 	# ******** OSC ************************************************************************
@@ -2742,6 +2849,7 @@ if ($cpus > 3) {
 print OUTM "CFLAGS += -DRESERVE_CPU3\n";
 }
 print OUTM "CFLAGS += -DNO_SYNC\n";
+print OUTM "CFLAGS += -DNO_DAQ\n";
 print OUTM "\n";
 print OUTM "all: \$(ALL)\n";
 print OUTM "\n";
