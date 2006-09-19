@@ -99,8 +99,8 @@ while (<IN>) {
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
 	$vdecl .= "$v_type evar_${v_name}_d;\n";
 	$vdecl .= "$v_type evar_${v_name}_r;\n";
-	$vdecl .= "assign evar_$v_name_d to \"{ifo}:{sys}-{subsys}${v_name}_D\";\n";
-	$vdecl .= "assign evar_$v_name_d to \"{ifo}:{sys}-{subsys}${v_name}_R\";\n";
+	$vdecl .= "assign evar_${v_name}_d to \"{ifo}:{sys}-{subsys}${v_name}_D\";\n";
+	$vdecl .= "assign evar_${v_name}_d to \"{ifo}:{sys}-{subsys}${v_name}_R\";\n";
 
 	$vinit .= "%% evar_${v_name}_d  = $v_init;\n";
 	$vinit .= "%% evar_${v_name}_r  = $v_init;\n";
@@ -116,10 +116,10 @@ while (<IN>) {
 	$vupdate .= "evar_${v_name}_r *= M_PI/180.0;\n";
 	$vupdate .= "evar_${v_name}_d *= M_PI/180.0;\n";
 	$vupdate .= "if (evar_${v_name}_d == 0.0) evar_${v_name}_d = .1*(M_PI / 180);\n";
-	$vupdate .= "rfm_assign(pEpics->${v_var}[0][0], sin(evar_${v_name}_r + evar_${v_name}_d)/sin(evar_${v_name}_d));\n";
-	$vupdate .= "rfm_assign(pEpics->${v_var}[0][1], cos(evar_${v_name}_r + evar_${v_name}_d)/sin(evar_${v_name}_d));\n";
-	$vupdate .= "rfm_assign(pEpics->${v_var}[1][0], sin(evar_${v_name}_r)/sin(evar_${v_name}_d));\n";
-	$vupdate .= "rfm_assign(pEpics->${v_var}[1][1], cos(evar_${v_name}_r)/sin(evar_${v_name}_d));\n";
+	$vupdate .= "pEpics->${v_var}[0][0] = sin(evar_${v_name}_r + evar_${v_name}_d)/sin(evar_${v_name}_d);\n";
+	$vupdate .= "pEpics->${v_var}[0][1] = cos(evar_${v_name}_r + evar_${v_name}_d)/sin(evar_${v_name}_d);\n";
+	$vupdate .= "pEpics->${v_var}[1][0] = sin(evar_${v_name}_r)/sin(evar_${v_name}_d);\n";
+	$vupdate .= "pEpics->${v_var}[1][1] = cos(evar_${v_name}_r)/sin(evar_${v_name}_d);\n";
 
 	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}_D\")\n";
 	$vardb .= "{\n";
