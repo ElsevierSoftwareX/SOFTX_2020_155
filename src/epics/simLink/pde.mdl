@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.32"
+    ComputedModelVersion    "1.35"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -54,8 +54,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Sep 19 14:23:31 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:32>"
+  LastModifiedDate	  "Tue Sep 19 15:50:32 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:35>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -1976,38 +1976,38 @@ Model {
       Ports		      [1, 5]
       Position		      [875, 278, 885, 422]
       ShowName		      off
-      OutputSignals	      "adc_0_5,adc_0_6,adc_0_7,adc_0_8,adc_0_9"
+      OutputSignals	      "adc_0_12,adc_0_13,adc_0_14,adc_0_15,adc_0_25"
       Port {
 	PortNumber		1
-	Name			"<adc_0_5>"
+	Name			"<adc_0_12>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
 	ShowSigGenPortName	on
       }
       Port {
 	PortNumber		2
-	Name			"<adc_0_6>"
+	Name			"<adc_0_13>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
 	ShowSigGenPortName	on
       }
       Port {
 	PortNumber		3
-	Name			"<adc_0_7>"
+	Name			"<adc_0_14>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
 	ShowSigGenPortName	on
       }
       Port {
 	PortNumber		4
-	Name			"<adc_0_8>"
+	Name			"<adc_0_15>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
 	ShowSigGenPortName	on
       }
       Port {
 	PortNumber		5
-	Name			"<adc_0_9>"
+	Name			"<adc_0_25>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
 	ShowSigGenPortName	on
@@ -2019,93 +2019,7 @@ Model {
       Ports		      [1, 5]
       Position		      [875, 503, 885, 647]
       ShowName		      off
-      OutputSignals	      "adc_0_10,adc_0_11,adc_0_12,adc_0_13,adc_0_14"
-      Port {
-	PortNumber		1
-	Name			"<adc_0_10>"
-	RTWStorageClass		"Auto"
-	DataLoggingNameMode	"SignalName"
-	ShowSigGenPortName	on
-      }
-      Port {
-	PortNumber		2
-	Name			"<adc_0_11>"
-	RTWStorageClass		"Auto"
-	DataLoggingNameMode	"SignalName"
-	ShowSigGenPortName	on
-      }
-      Port {
-	PortNumber		3
-	Name			"<adc_0_12>"
-	RTWStorageClass		"Auto"
-	DataLoggingNameMode	"SignalName"
-	ShowSigGenPortName	on
-      }
-      Port {
-	PortNumber		4
-	Name			"<adc_0_13>"
-	RTWStorageClass		"Auto"
-	DataLoggingNameMode	"SignalName"
-	ShowSigGenPortName	on
-      }
-      Port {
-	PortNumber		5
-	Name			"<adc_0_14>"
-	RTWStorageClass		"Auto"
-	DataLoggingNameMode	"SignalName"
-	ShowSigGenPortName	on
-      }
-    }
-    Block {
-      BlockType		      BusSelector
-      Name		      "Bus\nSelector3"
-      Ports		      [1, 5]
-      Position		      [875, 753, 885, 897]
-      ShowName		      off
-      OutputSignals	      "adc_0_15,adc_0_16,adc_0_17,adc_0_18,adc_0_19"
-      Port {
-	PortNumber		1
-	Name			"<adc_0_15>"
-	RTWStorageClass		"Auto"
-	DataLoggingNameMode	"SignalName"
-	ShowSigGenPortName	on
-      }
-      Port {
-	PortNumber		2
-	Name			"<adc_0_16>"
-	RTWStorageClass		"Auto"
-	DataLoggingNameMode	"SignalName"
-	ShowSigGenPortName	on
-      }
-      Port {
-	PortNumber		3
-	Name			"<adc_0_17>"
-	RTWStorageClass		"Auto"
-	DataLoggingNameMode	"SignalName"
-	ShowSigGenPortName	on
-      }
-      Port {
-	PortNumber		4
-	Name			"<adc_0_18>"
-	RTWStorageClass		"Auto"
-	DataLoggingNameMode	"SignalName"
-	ShowSigGenPortName	on
-      }
-      Port {
-	PortNumber		5
-	Name			"<adc_0_19>"
-	RTWStorageClass		"Auto"
-	DataLoggingNameMode	"SignalName"
-	ShowSigGenPortName	on
-      }
-    }
-    Block {
-      BlockType		      BusSelector
-      Name		      "Bus\nSelector4"
-      Ports		      [1, 5]
-      Position		      [870, 23, 880, 167]
-      ShowName		      off
-      OutputSignals	      "adc_0_0,adc_0_1,adc_0_2,adc_0_3,adc_0_4"
+      OutputSignals	      "adc_0_0,adc_0_1,adc_0_2,adc_0_3,adc_0_23"
       Port {
 	PortNumber		1
 	Name			"<adc_0_0>"
@@ -2136,7 +2050,93 @@ Model {
       }
       Port {
 	PortNumber		5
+	Name			"<adc_0_23>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+	ShowSigGenPortName	on
+      }
+    }
+    Block {
+      BlockType		      BusSelector
+      Name		      "Bus\nSelector3"
+      Ports		      [1, 5]
+      Position		      [875, 753, 885, 897]
+      ShowName		      off
+      OutputSignals	      "adc_0_4,adc_0_5,adc_0_6,adc_0_7,adc_0_22"
+      Port {
+	PortNumber		1
 	Name			"<adc_0_4>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+	ShowSigGenPortName	on
+      }
+      Port {
+	PortNumber		2
+	Name			"<adc_0_5>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+	ShowSigGenPortName	on
+      }
+      Port {
+	PortNumber		3
+	Name			"<adc_0_6>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+	ShowSigGenPortName	on
+      }
+      Port {
+	PortNumber		4
+	Name			"<adc_0_7>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+	ShowSigGenPortName	on
+      }
+      Port {
+	PortNumber		5
+	Name			"<adc_0_22>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+	ShowSigGenPortName	on
+      }
+    }
+    Block {
+      BlockType		      BusSelector
+      Name		      "Bus\nSelector4"
+      Ports		      [1, 5]
+      Position		      [870, 23, 880, 167]
+      ShowName		      off
+      OutputSignals	      "adc_0_8,adc_0_9,adc_0_10,adc_0_11,adc_0_24"
+      Port {
+	PortNumber		1
+	Name			"<adc_0_8>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+	ShowSigGenPortName	on
+      }
+      Port {
+	PortNumber		2
+	Name			"<adc_0_9>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+	ShowSigGenPortName	on
+      }
+      Port {
+	PortNumber		3
+	Name			"<adc_0_10>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+	ShowSigGenPortName	on
+      }
+      Port {
+	PortNumber		4
+	Name			"<adc_0_11>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+	ShowSigGenPortName	on
+      }
+      Port {
+	PortNumber		5
+	Name			"<adc_0_24>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
 	ShowSigGenPortName	on
@@ -2148,38 +2148,38 @@ Model {
       Ports		      [1, 5]
       Position		      [875, 1070, 885, 1240]
       ShowName		      off
-      OutputSignals	      "adc_0_20,adc_0_21,adc_0_22,adc_0_23,adc_0_24"
+      OutputSignals	      "adc_0_16,adc_0_17,adc_0_18,adc_0_19,adc_0_21"
       Port {
 	PortNumber		1
-	Name			"<adc_0_20>"
+	Name			"<adc_0_16>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
 	ShowSigGenPortName	on
       }
       Port {
 	PortNumber		2
-	Name			"<adc_0_21>"
+	Name			"<adc_0_17>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
 	ShowSigGenPortName	on
       }
       Port {
 	PortNumber		3
-	Name			"<adc_0_22>"
+	Name			"<adc_0_18>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
 	ShowSigGenPortName	on
       }
       Port {
 	PortNumber		4
-	Name			"<adc_0_23>"
+	Name			"<adc_0_19>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
 	ShowSigGenPortName	on
       }
       Port {
 	PortNumber		5
-	Name			"<adc_0_24>"
+	Name			"<adc_0_21>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
 	ShowSigGenPortName	on
@@ -2340,7 +2340,7 @@ Model {
       BlockType		      Reference
       Name		      "DAC_0"
       Ports		      [16, 16]
-      Position		      [1295, 102, 1345, 568]
+      Position		      [1395, 312, 1445, 778]
       BackgroundColor	      "cyan"
       DropShadow	      on
       SourceBlock	      "dac/Subsystem"
@@ -2351,12 +2351,17 @@ Model {
       BlockType		      Reference
       Name		      "DAC_1"
       Ports		      [16, 16]
-      Position		      [1395, 812, 1455, 1278]
+      Position		      [1395, 872, 1455, 1338]
       BackgroundColor	      "cyan"
       DropShadow	      on
       SourceBlock	      "dac/Subsystem"
       SourceType	      "SubSystem"
       ShowPortLabels	      on
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground"
+      Position		      [1350, 990, 1370, 1010]
     }
     Block {
       BlockType		      SubSystem
@@ -16188,7 +16193,7 @@ Model {
       }
     }
     Line {
-      Name		      "<adc_0_0>"
+      Name		      "<adc_0_8>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      1
@@ -16196,7 +16201,7 @@ Model {
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_1>"
+      Name		      "<adc_0_9>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      2
@@ -16204,7 +16209,7 @@ Model {
       DstPort		      2
     }
     Line {
-      Name		      "<adc_0_2>"
+      Name		      "<adc_0_10>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      3
@@ -16212,7 +16217,7 @@ Model {
       DstPort		      3
     }
     Line {
-      Name		      "<adc_0_3>"
+      Name		      "<adc_0_11>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      4
@@ -16220,46 +16225,11 @@ Model {
       DstPort		      4
     }
     Line {
-      Name		      "<adc_0_4>"
+      Name		      "<adc_0_24>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      5
       DstBlock		      "SUS_ETMX"
-      DstPort		      5
-    }
-    Line {
-      SrcBlock		      "SUS_ETMX"
-      SrcPort		      1
-      Points		      [70, 0; 0, 80]
-      DstBlock		      "DAC_0"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "SUS_ETMX"
-      SrcPort		      2
-      Points		      [70, 0; 0, 70]
-      DstBlock		      "DAC_0"
-      DstPort		      2
-    }
-    Line {
-      SrcBlock		      "SUS_ETMX"
-      SrcPort		      3
-      Points		      [70, 0; 0, 60]
-      DstBlock		      "DAC_0"
-      DstPort		      3
-    }
-    Line {
-      SrcBlock		      "SUS_ETMX"
-      SrcPort		      4
-      Points		      [80, 0; 0, 50]
-      DstBlock		      "DAC_0"
-      DstPort		      4
-    }
-    Line {
-      SrcBlock		      "SUS_ETMX"
-      SrcPort		      5
-      Points		      [95, 0; 0, 40]
-      DstBlock		      "DAC_0"
       DstPort		      5
     }
     Line {
@@ -16367,42 +16337,42 @@ Model {
     Line {
       SrcBlock		      "LSC"
       SrcPort		      6
-      Points		      [195, 0; 0, 865; 640, 0; 0, -185]
+      Points		      [195, 0; 0, 865; 640, 0; 0, -125]
       DstBlock		      "DAC_1"
       DstPort		      11
     }
     Line {
       SrcBlock		      "LSC"
       SrcPort		      7
-      Points		      [175, 0; 0, 850; 670, 0; 0, -175]
+      Points		      [175, 0; 0, 850; 670, 0; 0, -115]
       DstBlock		      "DAC_1"
       DstPort		      12
     }
     Line {
       SrcBlock		      "PZT_M1_PIT"
       SrcPort		      1
-      Points		      [70, 0; 0, -165]
+      Points		      [70, 0; 0, -105]
       DstBlock		      "DAC_1"
       DstPort		      13
     }
     Line {
       SrcBlock		      "PZT_M1_YAW"
       SrcPort		      1
-      Points		      [80, 0; 0, -180]
+      Points		      [80, 0; 0, -120]
       DstBlock		      "DAC_1"
       DstPort		      14
     }
     Line {
       SrcBlock		      "PZT_M2_PIT"
       SrcPort		      1
-      Points		      [95, 0; 0, -190]
+      Points		      [95, 0; 0, -130]
       DstBlock		      "DAC_1"
       DstPort		      15
     }
     Line {
       SrcBlock		      "PZT_M2_YAW"
       SrcPort		      1
-      Points		      [110, 0; 0, -205]
+      Points		      [110, 0; 0, -145]
       DstBlock		      "DAC_1"
       DstPort		      16
     }
@@ -16415,16 +16385,11 @@ Model {
       DstPort		      1
     }
     Line {
-      SrcBlock		      "DAC_0"
-      SrcPort		      1
-      Points		      [-25, 0; 0, -5]
-    }
-    Line {
       Name		      "<adc_1_17>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector7"
       SrcPort		      2
-      Points		      [25, 0; 0, 5]
+      Points		      [0, 5]
       DstBlock		      "ASC"
       DstPort		      2
     }
@@ -16433,7 +16398,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector7"
       SrcPort		      3
-      Points		      [25, 0; 0, 10]
+      Points		      [0, 10]
       DstBlock		      "ASC"
       DstPort		      3
     }
@@ -16483,7 +16448,7 @@ Model {
       DstPort		      8
     }
     Line {
-      Name		      "<adc_0_5>"
+      Name		      "<adc_0_12>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector1"
       SrcPort		      1
@@ -16492,7 +16457,7 @@ Model {
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_6>"
+      Name		      "<adc_0_13>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector1"
       SrcPort		      2
@@ -16501,7 +16466,7 @@ Model {
       DstPort		      2
     }
     Line {
-      Name		      "<adc_0_7>"
+      Name		      "<adc_0_14>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector1"
       SrcPort		      3
@@ -16510,7 +16475,7 @@ Model {
       DstPort		      3
     }
     Line {
-      Name		      "<adc_0_8>"
+      Name		      "<adc_0_15>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector1"
       SrcPort		      4
@@ -16519,7 +16484,7 @@ Model {
       DstPort		      4
     }
     Line {
-      Name		      "<adc_0_9>"
+      Name		      "<adc_0_25>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector1"
       SrcPort		      5
@@ -16535,7 +16500,7 @@ Model {
       DstPort		      6
     }
     Line {
-      Name		      "<adc_0_10>"
+      Name		      "<adc_0_0>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector2"
       SrcPort		      1
@@ -16544,7 +16509,7 @@ Model {
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_11>"
+      Name		      "<adc_0_1>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector2"
       SrcPort		      2
@@ -16553,7 +16518,7 @@ Model {
       DstPort		      2
     }
     Line {
-      Name		      "<adc_0_12>"
+      Name		      "<adc_0_2>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector2"
       SrcPort		      3
@@ -16561,7 +16526,7 @@ Model {
       DstPort		      3
     }
     Line {
-      Name		      "<adc_0_13>"
+      Name		      "<adc_0_3>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector2"
       SrcPort		      4
@@ -16570,7 +16535,7 @@ Model {
       DstPort		      4
     }
     Line {
-      Name		      "<adc_0_14>"
+      Name		      "<adc_0_23>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector2"
       SrcPort		      5
@@ -16607,7 +16572,7 @@ Model {
       DstPort		      6
     }
     Line {
-      Name		      "<adc_0_19>"
+      Name		      "<adc_0_22>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      5
@@ -16615,7 +16580,7 @@ Model {
       DstPort		      5
     }
     Line {
-      Name		      "<adc_0_18>"
+      Name		      "<adc_0_7>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      4
@@ -16624,7 +16589,7 @@ Model {
       DstPort		      4
     }
     Line {
-      Name		      "<adc_0_17>"
+      Name		      "<adc_0_6>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      3
@@ -16633,7 +16598,7 @@ Model {
       DstPort		      3
     }
     Line {
-      Name		      "<adc_0_16>"
+      Name		      "<adc_0_5>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      2
@@ -16642,7 +16607,7 @@ Model {
       DstPort		      2
     }
     Line {
-      Name		      "<adc_0_15>"
+      Name		      "<adc_0_4>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      1
@@ -16672,7 +16637,7 @@ Model {
       DstPort		      6
     }
     Line {
-      Name		      "<adc_0_24>"
+      Name		      "<adc_0_21>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector5"
       SrcPort		      5
@@ -16681,7 +16646,7 @@ Model {
       DstPort		      5
     }
     Line {
-      Name		      "<adc_0_23>"
+      Name		      "<adc_0_19>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector5"
       SrcPort		      4
@@ -16689,7 +16654,7 @@ Model {
       DstPort		      4
     }
     Line {
-      Name		      "<adc_0_22>"
+      Name		      "<adc_0_18>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector5"
       SrcPort		      3
@@ -16698,7 +16663,7 @@ Model {
       DstPort		      3
     }
     Line {
-      Name		      "<adc_0_21>"
+      Name		      "<adc_0_17>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector5"
       SrcPort		      2
@@ -16707,7 +16672,7 @@ Model {
       DstPort		      2
     }
     Line {
-      Name		      "<adc_0_20>"
+      Name		      "<adc_0_16>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector5"
       SrcPort		      1
@@ -16716,144 +16681,185 @@ Model {
       DstPort		      1
     }
     Line {
-      SrcBlock		      "SUS_BS"
-      SrcPort		      5
-      Points		      [140, 0; 0, -165]
-      DstBlock		      "DAC_1"
-      DstPort		      10
-    }
-    Line {
-      SrcBlock		      "SUS_BS"
-      SrcPort		      4
-      Points		      [130, 0; 0, -155]
-      DstBlock		      "DAC_1"
-      DstPort		      9
-    }
-    Line {
-      SrcBlock		      "SUS_BS"
-      SrcPort		      3
-      Points		      [120, 0; 0, -145]
-      DstBlock		      "DAC_1"
-      DstPort		      8
-    }
-    Line {
-      SrcBlock		      "SUS_BS"
-      SrcPort		      2
-      Points		      [110, 0; 0, -135]
-      DstBlock		      "DAC_1"
-      DstPort		      7
-    }
-    Line {
-      SrcBlock		      "SUS_BS"
+      SrcBlock		      "SUS_ITMX"
       SrcPort		      1
-      Points		      [100, 0; 0, -125]
-      DstBlock		      "DAC_1"
-      DstPort		      6
+      Points		      [145, 0; 0, -215]
+      DstBlock		      "DAC_0"
+      DstPort		      1
     }
     Line {
-      SrcBlock		      "SUS_ITMY"
-      SrcPort		      5
-      Points		      [145, 0; 0, -15]
-      DstBlock		      "DAC_1"
-      DstPort		      5
+      SrcBlock		      "SUS_ITMX"
+      SrcPort		      2
+      Points		      [155, 0; 0, -225]
+      DstBlock		      "DAC_0"
+      DstPort		      2
     }
     Line {
-      SrcBlock		      "SUS_ITMY"
+      SrcBlock		      "SUS_ITMX"
+      SrcPort		      3
+      Points		      [165, 0; 0, -235]
+      DstBlock		      "DAC_0"
+      DstPort		      3
+    }
+    Line {
+      SrcBlock		      "SUS_ITMX"
       SrcPort		      4
-      Points		      [145, 0; 0, -5]
-      DstBlock		      "DAC_1"
+      Points		      [180, 0; 0, -245]
+      DstBlock		      "DAC_0"
       DstPort		      4
     }
     Line {
       SrcBlock		      "SUS_ITMY"
-      SrcPort		      3
-      Points		      [145, 0; 0, 5]
-      DstBlock		      "DAC_1"
-      DstPort		      3
+      SrcPort		      1
+      Points		      [190, 0; 0, -355]
+      DstBlock		      "DAC_0"
+      DstPort		      5
     }
     Line {
       SrcBlock		      "SUS_ITMY"
       SrcPort		      2
-      Points		      [145, 0; 0, 15]
-      DstBlock		      "DAC_1"
-      DstPort		      2
-    }
-    Line {
-      SrcBlock		      "SUS_ITMY"
-      SrcPort		      1
-      Points		      [145, 0; 0, 25]
-      DstBlock		      "DAC_1"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "SUS_ETMY"
-      SrcPort		      1
-      Points		      [95, 0; 0, -5]
+      Points		      [200, 0; 0, -365]
       DstBlock		      "DAC_0"
       DstPort		      6
     }
     Line {
-      SrcBlock		      "SUS_ETMY"
-      SrcPort		      2
-      Points		      [95, 0; 0, -15]
+      SrcBlock		      "SUS_ITMY"
+      SrcPort		      3
+      Points		      [210, 0; 0, -375]
       DstBlock		      "DAC_0"
       DstPort		      7
     }
     Line {
-      SrcBlock		      "SUS_ETMY"
-      SrcPort		      3
-      Points		      [95, 0; 0, -25]
+      SrcBlock		      "SUS_ITMY"
+      SrcPort		      4
+      Points		      [220, 0; 0, -385]
       DstBlock		      "DAC_0"
       DstPort		      8
     }
     Line {
+      SrcBlock		      "SUS_ETMX"
+      SrcPort		      1
+      Points		      [135, 0; 0, 530]
+      DstBlock		      "DAC_0"
+      DstPort		      9
+    }
+    Line {
+      SrcBlock		      "SUS_ETMX"
+      SrcPort		      2
+      Points		      [125, 0; 0, 520]
+      DstBlock		      "DAC_0"
+      DstPort		      10
+    }
+    Line {
+      SrcBlock		      "SUS_ETMX"
+      SrcPort		      3
+      Points		      [115, 0; 0, 510]
+      DstBlock		      "DAC_0"
+      DstPort		      11
+    }
+    Line {
+      SrcBlock		      "SUS_ETMX"
+      SrcPort		      4
+      Points		      [105, 0; 0, 500]
+      DstBlock		      "DAC_0"
+      DstPort		      12
+    }
+    Line {
+      SrcBlock		      "SUS_ETMY"
+      SrcPort		      1
+      Points		      [90, 0; 0, 415]
+      DstBlock		      "DAC_0"
+      DstPort		      13
+    }
+    Line {
+      SrcBlock		      "SUS_ETMY"
+      SrcPort		      2
+      Points		      [75, 0; 0, 405]
+      DstBlock		      "DAC_0"
+      DstPort		      14
+    }
+    Line {
+      SrcBlock		      "SUS_ETMY"
+      SrcPort		      3
+      Points		      [65, 0; 0, 395]
+      DstBlock		      "DAC_0"
+      DstPort		      15
+    }
+    Line {
       SrcBlock		      "SUS_ETMY"
       SrcPort		      4
-      Points		      [95, 0; 0, -35]
+      Points		      [50, 0; 0, 385]
       DstBlock		      "DAC_0"
+      DstPort		      16
+    }
+    Line {
+      SrcBlock		      "SUS_BS"
+      SrcPort		      1
+      Points		      [220, 0; 0, -215]
+      DstBlock		      "DAC_1"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "SUS_BS"
+      SrcPort		      2
+      Points		      [15, 0; 0, -35; 210, 0; 0, -190]
+      DstBlock		      "DAC_1"
+      DstPort		      2
+    }
+    Line {
+      SrcBlock		      "SUS_BS"
+      SrcPort		      3
+      Points		      [30, 0; 0, -45; 205, 0; 0, -190]
+      DstBlock		      "DAC_1"
+      DstPort		      3
+    }
+    Line {
+      SrcBlock		      "SUS_BS"
+      SrcPort		      4
+      Points		      [40, 0; 0, -80; 205, 0; 0, -165]
+      DstBlock		      "DAC_1"
+      DstPort		      4
+    }
+    Line {
+      SrcBlock		      "SUS_BS"
+      SrcPort		      5
+      Points		      [50, 0; 0, -115; 200, 0; 0, -110]
+      DstBlock		      "DAC_1"
+      DstPort		      6
+    }
+    Line {
+      SrcBlock		      "SUS_ITMY"
+      SrcPort		      5
+      Points		      [150, 0; 0, 105]
+      DstBlock		      "DAC_1"
+      DstPort		      7
+    }
+    Line {
+      SrcBlock		      "SUS_ITMX"
+      SrcPort		      5
+      Points		      [45, 0; 0, 395]
+      DstBlock		      "DAC_1"
+      DstPort		      8
+    }
+    Line {
+      SrcBlock		      "SUS_ETMX"
+      SrcPort		      5
+      Points		      [40, 0; 0, 930]
+      DstBlock		      "DAC_1"
       DstPort		      9
     }
     Line {
       SrcBlock		      "SUS_ETMY"
       SrcPort		      5
-      Points		      [110, 0; 0, -45]
-      DstBlock		      "DAC_0"
+      Points		      [30, 0; 0, 725]
+      DstBlock		      "DAC_1"
       DstPort		      10
     }
     Line {
-      SrcBlock		      "SUS_ITMX"
+      SrcBlock		      "Ground"
       SrcPort		      1
-      Points		      [120, 0; 0, -125]
-      DstBlock		      "DAC_0"
-      DstPort		      11
-    }
-    Line {
-      SrcBlock		      "SUS_ITMX"
-      SrcPort		      2
-      Points		      [135, 0; 0, -135]
-      DstBlock		      "DAC_0"
-      DstPort		      12
-    }
-    Line {
-      SrcBlock		      "SUS_ITMX"
-      SrcPort		      3
-      Points		      [150, 0; 0, -145]
-      DstBlock		      "DAC_0"
-      DstPort		      13
-    }
-    Line {
-      SrcBlock		      "SUS_ITMX"
-      SrcPort		      4
-      Points		      [165, 0; 0, -155]
-      DstBlock		      "DAC_0"
-      DstPort		      14
-    }
-    Line {
-      SrcBlock		      "SUS_ITMX"
-      SrcPort		      5
-      Points		      [180, 0; 0, -165]
-      DstBlock		      "DAC_0"
-      DstPort		      15
+      DstBlock		      "DAC_1"
+      DstPort		      5
     }
     Annotation {
       Name		      "adc0"
