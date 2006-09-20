@@ -1801,8 +1801,9 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "SUS_WD1") {
 		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 		print EPICS "OUTVARIABLE $xpartName[$ii]\_STAT $systemName\.$xpartName[$ii]_STAT int ai 0 \n";
-		for (1 .. $partInCnt[$ii]) {
-		  print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_$_ $systemName\.$xpartName[$ii]\_VAR\[$_\] float ai 0 field(PREC,\"1\")\n";
+		for (0 .. $partInCnt[$ii]-1) {
+		  my $a = 1 + $_;
+		  print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_$a $systemName\.$xpartName[$ii]\_VAR\[$_\] float ai 0 field(PREC,\"1\")\n";
 		}
 		print EPICS "INVARIABLE $xpartName[$ii]\_MAX $systemName\.$xpartName[$ii]\_MAX int ai 0 field(PREC,\"0\")\n";
 	}
