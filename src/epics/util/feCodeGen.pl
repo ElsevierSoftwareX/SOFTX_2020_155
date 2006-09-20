@@ -1994,7 +1994,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUT "static float \L$xpartName[$ii];\n";
 	}
 	if($partType[$ii] eq "SUS_WD1") {
-	   print OUT "double \L$xpartName[$ii];\n";
+	   print OUT "static double \L$xpartName[$ii];\n";
 	   print OUT "static float \L$xpartName[$ii]\_avg\[$partInCnt[$ii]\];\n";
 	   print OUT "static float \L$xpartName[$ii]\_var\[$partInCnt[$ii]\];\n";
 	   print OUT "float \L$xpartName[$ii]\_vabs;\n";
