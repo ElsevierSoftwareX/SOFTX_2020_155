@@ -1770,7 +1770,7 @@ print EPICS "\n\n";
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if($partType[$ii] eq "MULTI_SW") {
-		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(double,\"OFF\") field(ONAM,\"ON\")\n";
+		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 	}
 	if($partType[$ii] eq "RAMP_SW") {
 		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
