@@ -936,7 +936,7 @@ $subRemaining = $subSys;
 $seqCnt = 0;
 
 #
-$old_style_multiprocessing = 0;
+$old_style_multiprocessing = 1;
 
 # Total number of CPUs available to us
 $cpus = 2;
@@ -1799,7 +1799,8 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print EPICS "OUTVARIABLE $xpartName[$ii]\_RMON $systemName\.$xpartName[$ii]\_RMON int ai 0 field(PREC,\"0\")\n";
 	}
 	if($partType[$ii] eq "SUS_WD1") {
-		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
+	#	print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
+		print EPICS "MOMENTARY $xpartName[$ii] $systemName\.$xpartName[$ii] int ai 0\n";
 		print EPICS "OUTVARIABLE $xpartName[$ii]\_STAT $systemName\.$xpartName[$ii]_STAT int ai 0 \n";
 		for (0 .. $partInCnt[$ii]-1) {
 		  my $a = 1 + $_;
@@ -2126,6 +2127,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 	   print OUT "\t\L$xpartName[$ii]\_avg\[ii\] = 0.0;\n";
 	   print OUT "\t\L$xpartName[$ii]\_var\[ii\] = 0.0;\n";
 	   print OUT "}\n";
+	   print OUT "pLocalEpics->$systemName\." . $xpartName[$ii] . " = 1;\n";
 	}
 	if($partType[$ii] eq "SUS_WD") {
 	   print OUT "for\(ii=0;ii<20;ii++\) {\n";
@@ -2343,11 +2345,13 @@ for($xx=0;$xx<$processCnt;$xx++)
 	if($partType[$mm] eq "SUS_WD1")
 	{
 	   print OUT "// SUS_WD1 MODULE\n";
-		print OUT "if((cycle \% 16) == 0) {\n";
-		$calcExp = "\L$xpartName[$mm] = ";
-		$calcExp .= "pLocalEpics->$systemName\.";
+		print OUT "if((clock16K \% 16) == 0) {\n";
+		$calcExp = "if (pLocalEpics->$systemName\.";
 		$calcExp .= $xpartName[$mm];
-		$calcExp .= ";\n";
+		$calcExp .= " == 1) {\n";
+		$calcExp .= "\t\L$xpartName[$mm] = 1;\n";
+		$calcExp .= "\tpLocalEpics->$systemName\." . $xpartName[$mm] . " = 0;\n";
+		$calcExp .= "};\n";
 		print OUT "$calcExp";
 		print OUT "double ins[$partInCnt[$mm]]= {\n";
 		for (0 .. $partInCnt[$mm]-1) {
