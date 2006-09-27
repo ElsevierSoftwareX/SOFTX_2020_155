@@ -182,6 +182,7 @@ COEF dspCoeff[NUM_SYSTEMS];	/* Local mem for SFM coeffs.	*/
 VME_COEF *pCoeff[NUM_SYSTEMS];		/* Ptr to SFM coeffs in shmem		*/
 double dWord[MAX_ADC_MODULES][32];
 int dacOut[MAX_DAC_MODULES][16];
+int clock16K = 0;
 
 #ifdef HEPI_CODE
 	#include "drv/seiwd.c"	/* User code for HEPI control.		*/
@@ -217,7 +218,6 @@ double dHistory[96][40];
 #define ADC_DMA_BYTES		0x80
 #endif
 
-int clock16K = 0;
 
 #if 0
 // **************************************************************************
