@@ -324,6 +324,9 @@ void *fe_start(void *arg)
   // Need this FE dcuId to make connection to FB
   dcuId = pLocalEpics->epicsInput.dcuId;
 
+#ifdef PNM
+  dcuId = 9;
+#endif
 #ifndef NO_DAQ
   // Make connections to FrameBuilder
   printf("Waiting for Network connect to FB - %d\n",dcuId);
@@ -416,6 +419,9 @@ void *fe_start(void *arg)
   {
     printf("DAQ init failed -- exiting\n");
     vmeDone = 1;
+#if NUM_SYSTEMS > 1
+    feDone();
+#endif
     return(0);
   }
 #endif
@@ -597,7 +603,7 @@ void *fe_start(void *arg)
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
 	{
-		if(onePps > 6000) 
+		if(onePps > 4000) 
 		 {
 			firstTime += 100;
 			onePpsHi = 0;
@@ -608,12 +614,12 @@ void *fe_start(void *arg)
 #endif
 	}
 
-	if((onePps > 6000) && (onePpsHi == 0))  
+	if((onePps > 4000) && (onePpsHi == 0))  
 	{
 		pLocalEpics->epicsOutput.onePps = clock16K;
 		onePpsHi = 1;
 	}
-	if(onePps < 6000) onePpsHi = 0;  
+	if(onePps < 4000) onePpsHi = 0;  
 	// Check if front end continues to be in sync with 1pps
 	// If not, set sync error flag
 	if(pLocalEpics->epicsOutput.onePps > 4) diagWord |= 1;
