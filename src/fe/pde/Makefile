@@ -19,11 +19,11 @@ crc.o: crc.c
 
 ALL += user_mmap $(TARGET_RTL)
 CFLAGS += -I../../include
-#CFLAGS += -I/opt/gm/include
+CFLAGS += -I/opt/gm/include
 CFLAGS += -DSERVO32K
 CFLAGS += -DPDE_CODE
-CFLAGS += -DNO_SYNC
-CFLAGS += -DNO_DAQ
+#CFLAGS += -DNO_SYNC
+#CFLAGS += -DNO_DAQ
 
 all: $(ALL)
 
