@@ -1,0 +1,3064 @@
+Library {
+  Name			  "Matrix88"
+  Version		  6.2
+  MdlSubVersion		  0
+  SavedCharacterEncoding  "ibm-5348_P100-1997"
+  SaveDefaultBlockParams  on
+  SampleTimeColors	  off
+  LibraryLinkDisplay	  "none"
+  WideLines		  off
+  ShowLineDimensions	  off
+  ShowPortDataTypes	  off
+  ShowLoopsOnError	  on
+  IgnoreBidirectionalLines off
+  ShowStorageClass	  off
+  ShowTestPointIcons	  on
+  ShowViewerIcons	  on
+  SortedOrder		  off
+  ExecutionContextIcon	  off
+  ShowLinearizationAnnotations on
+  CovSaveName		  "covdata"
+  CovMetricSettings	  "dw"
+  CovNameIncrementing	  off
+  CovHtmlReporting	  on
+  covSaveCumulativeToWorkspaceVar on
+  CovSaveSingleToWorkspaceVar on
+  CovCumulativeReport	  off
+  CovReportOnPause	  on
+  ScopeRefreshTime	  0.035000
+  OverrideScopeRefreshTime on
+  DisableAllScopes	  off
+  BlockNameDataTip	  off
+  BlockParametersDataTip  off
+  BlockDescriptionStringDataTip	off
+  ToolBar		  on
+  StatusBar		  on
+  BrowserShowLibraryLinks off
+  BrowserLookUnderMasks	  off
+  Created		  "Fri Mar 10 12:20:02 2006"
+  UpdateHistory		  "UpdateHistoryNever"
+  ModifiedByFormat	  "%<Auto>"
+  LastModifiedBy	  "rolf"
+  ModifiedDateFormat	  "%<Auto>"
+  LastModifiedDate	  "Fri Mar 10 12:42:35 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:2>"
+  ConfigurationManager	  "None"
+  LinearizationMsg	  "none"
+  Profile		  off
+  ParamWorkspaceSource	  "MATLABWorkspace"
+  ExtModeBatchMode	  off
+  ExtModeEnableFloating	  on
+  ExtModeTrigType	  "manual"
+  ExtModeTrigMode	  "normal"
+  ExtModeTrigPort	  "1"
+  ExtModeTrigElement	  "any"
+  ExtModeTrigDuration	  1000
+  ExtModeTrigDurationFloating "auto"
+  ExtModeTrigHoldOff	  0
+  ExtModeTrigDelay	  0
+  ExtModeTrigDirection	  "rising"
+  ExtModeTrigLevel	  0
+  ExtModeArchiveMode	  "off"
+  ExtModeAutoIncOneShot	  off
+  ExtModeIncDirWhenArm	  off
+  ExtModeAddSuffixToVar	  off
+  ExtModeWriteAllDataToWs off
+  ExtModeArmWhenConnect	  on
+  ExtModeSkipDownloadWhenConnect off
+  ExtModeLogAll		  on
+  ExtModeAutoUpdateStatusClock on
+  StrictBusMsg		  "None"
+  ProdHWDeviceType	  "32-bit Generic"
+  ShowModelReferenceBlockVersion off
+  ShowModelReferenceBlockIO off
+  BlockDefaults {
+    Orientation		    "right"
+    ForegroundColor	    "black"
+    BackgroundColor	    "white"
+    DropShadow		    off
+    NamePlacement	    "normal"
+    FontName		    "Helvetica"
+    FontSize		    10
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+    ShowName		    on
+  }
+  BlockParameterDefaults {
+    Block {
+      BlockType		      Gain
+      Gain		      "1"
+      Multiplication	      "Element-wise(K.*u)"
+      ParameterDataTypeMode   "Same as input"
+      ParameterDataType	      "sfix(16)"
+      ParameterScalingMode    "Best Precision: Matrix-wise"
+      ParameterScaling	      "2^0"
+      OutDataTypeMode	      "Same as input"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      LockScale		      off
+      RndMeth		      "Floor"
+      SaturateOnIntegerOverflow	on
+      SampleTime	      "-1"
+    }
+    Block {
+      BlockType		      Inport
+      UseBusObject	      off
+      BusObject		      "BusObject"
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      SampleTime	      "-1"
+      DataType		      "auto"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      Interpolate	      on
+    }
+    Block {
+      BlockType		      Outport
+      Port		      "1"
+      UseBusObject	      off
+      BusObject		      "BusObject"
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      SampleTime	      "-1"
+      DataType		      "auto"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      OutputWhenDisabled      "held"
+      InitialOutput	      "[]"
+    }
+    Block {
+      BlockType		      SubSystem
+      ShowPortLabels	      on
+      Permissions	      "ReadWrite"
+      PermitHierarchicalResolution "All"
+      SystemSampleTime	      "-1"
+      RTWFcnNameOpts	      "Auto"
+      RTWFileNameOpts	      "Auto"
+      SimViewingDevice	      off
+      DataTypeOverride	      "UseLocalSettings"
+      MinMaxOverflowLogging   "UseLocalSettings"
+    }
+    Block {
+      BlockType		      Sum
+      IconShape		      "rectangular"
+      Inputs		      "++"
+      InputSameDT	      on
+      OutDataTypeMode	      "Same as first input"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      LockScale		      off
+      RndMeth		      "Floor"
+      SaturateOnIntegerOverflow	on
+      SampleTime	      "-1"
+    }
+  }
+  AnnotationDefaults {
+    HorizontalAlignment	    "center"
+    VerticalAlignment	    "middle"
+    ForegroundColor	    "black"
+    BackgroundColor	    "white"
+    DropShadow		    off
+    FontName		    "Helvetica"
+    FontSize		    10
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+  }
+  LineDefaults {
+    FontName		    "Helvetica"
+    FontSize		    9
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+  }
+  System {
+    Name		    "Matrix88"
+    Location		    [522, 99, 1606, 1092]
+    Open		    on
+    ModelBrowserVisibility  off
+    ModelBrowserWidth	    200
+    ScreenColor		    "white"
+    PaperOrientation	    "landscape"
+    PaperPositionMode	    "auto"
+    PaperType		    "usletter"
+    PaperUnits		    "inches"
+    ZoomFactor		    "100"
+    ReportName		    "simulink-default.rpt"
+    Block {
+      BlockType		      Inport
+      Name		      "In1"
+      Position		      [50, 28, 80, 42]
+      Port		      "1"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In2"
+      Position		      [50, 63, 80, 77]
+      Port		      "2"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In3"
+      Position		      [50, 98, 80, 112]
+      Port		      "3"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In4"
+      Position		      [50, 133, 80, 147]
+      Port		      "4"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In5"
+      Position		      [55, 168, 85, 182]
+      Port		      "5"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In6"
+      Position		      [55, 203, 85, 217]
+      Port		      "6"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In7"
+      Position		      [55, 238, 85, 252]
+      Port		      "7"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In8"
+      Position		      [55, 273, 85, 287]
+      Port		      "8"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      SubSystem
+      Name		      "Subsystem"
+      Ports		      [8, 8]
+      Position		      [515, 536, 555, 599]
+      TreatAsAtomicUnit	      off
+      MinAlgLoopOccurrences   off
+      RTWSystemCode	      "Auto"
+      System {
+	Name			"Subsystem"
+	Location		[547, 102, 1582, 1211]
+	Open			off
+	ModelBrowserVisibility	off
+	ModelBrowserWidth	200
+	ScreenColor		"white"
+	PaperOrientation	"landscape"
+	PaperPositionMode	"auto"
+	PaperType		"usletter"
+	PaperUnits		"inches"
+	ZoomFactor		"100"
+	Block {
+	  BlockType		  Inport
+	  Name			  "In1"
+	  Position		  [25, 28, 55, 42]
+	  Port			  "1"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In2"
+	  Position		  [25, 63, 55, 77]
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In3"
+	  Position		  [25, 98, 55, 112]
+	  Port			  "3"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In4"
+	  Position		  [25, 133, 55, 147]
+	  Port			  "4"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In5"
+	  Position		  [30, 168, 60, 182]
+	  Port			  "5"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In6"
+	  Position		  [30, 203, 60, 217]
+	  Port			  "6"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In7"
+	  Position		  [30, 238, 60, 252]
+	  Port			  "7"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In8"
+	  Position		  [30, 273, 60, 287]
+	  Port			  "8"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain"
+	  Position		  [180, 185, 210, 215]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain1"
+	  Position		  [210, 220, 240, 250]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain10"
+	  Position		  [240, 475, 270, 505]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain11"
+	  Position		  [275, 500, 305, 530]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain12"
+	  Position		  [305, 530, 335, 560]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain13"
+	  Position		  [340, 555, 370, 585]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain14"
+	  Position		  [375, 575, 405, 605]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain15"
+	  Position		  [410, 595, 440, 625]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain16"
+	  Position		  [245, 705, 275, 735]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain17"
+	  Position		  [280, 730, 310, 760]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain18"
+	  Position		  [310, 760, 340, 790]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain19"
+	  Position		  [345, 785, 375, 815]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain2"
+	  Position		  [245, 245, 275, 275]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain20"
+	  Position		  [380, 805, 410, 835]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain21"
+	  Position		  [415, 825, 445, 855]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain22"
+	  Position		  [180, 645, 210, 675]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain23"
+	  Position		  [210, 680, 240, 710]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain24"
+	  Position		  [245, 925, 275, 955]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain25"
+	  Position		  [280, 950, 310, 980]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain26"
+	  Position		  [310, 980, 340, 1010]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain27"
+	  Position		  [345, 1005, 375, 1035]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain28"
+	  Position		  [380, 1025, 410, 1055]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain29"
+	  Position		  [415, 1045, 445, 1075]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain3"
+	  Position		  [280, 270, 310, 300]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain30"
+	  Position		  [180, 865, 210, 895]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain31"
+	  Position		  [210, 900, 240, 930]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain32"
+	  Position		  [640, 195, 670, 225]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain33"
+	  Position		  [670, 230, 700, 260]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain34"
+	  Position		  [700, 485, 730, 515]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain35"
+	  Position		  [735, 510, 765, 540]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain36"
+	  Position		  [765, 540, 795, 570]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain37"
+	  Position		  [800, 565, 830, 595]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain38"
+	  Position		  [835, 585, 865, 615]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain39"
+	  Position		  [870, 605, 900, 635]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain4"
+	  Position		  [310, 300, 340, 330]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain40"
+	  Position		  [705, 715, 735, 745]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain41"
+	  Position		  [740, 740, 770, 770]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain42"
+	  Position		  [770, 770, 800, 800]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain43"
+	  Position		  [805, 795, 835, 825]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain44"
+	  Position		  [705, 255, 735, 285]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain45"
+	  Position		  [840, 815, 870, 845]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain46"
+	  Position		  [875, 835, 905, 865]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain47"
+	  Position		  [640, 655, 670, 685]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain48"
+	  Position		  [670, 690, 700, 720]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain49"
+	  Position		  [705, 935, 735, 965]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain5"
+	  Position		  [345, 325, 375, 355]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain50"
+	  Position		  [740, 960, 770, 990]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain51"
+	  Position		  [770, 990, 800, 1020]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain52"
+	  Position		  [805, 1015, 835, 1045]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain53"
+	  Position		  [840, 1035, 870, 1065]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain54"
+	  Position		  [875, 1055, 905, 1085]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain55"
+	  Position		  [740, 280, 770, 310]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain56"
+	  Position		  [640, 875, 670, 905]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain57"
+	  Position		  [670, 910, 700, 940]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain58"
+	  Position		  [770, 310, 800, 340]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain59"
+	  Position		  [805, 335, 835, 365]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain6"
+	  Position		  [380, 345, 410, 375]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain60"
+	  Position		  [840, 355, 870, 385]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain61"
+	  Position		  [875, 375, 905, 405]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain62"
+	  Position		  [635, 425, 665, 455]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain63"
+	  Position		  [665, 460, 695, 490]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain7"
+	  Position		  [415, 365, 445, 395]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain8"
+	  Position		  [175, 415, 205, 445]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain9"
+	  Position		  [205, 450, 235, 480]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum"
+	  Ports			  [2, 1]
+	  Position		  [240, 190, 260, 210]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum1"
+	  Ports			  [2, 1]
+	  Position		  [280, 190, 300, 210]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum10"
+	  Ports			  [2, 1]
+	  Position		  [355, 420, 375, 440]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum11"
+	  Ports			  [2, 1]
+	  Position		  [395, 420, 415, 440]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum12"
+	  Ports			  [2, 1]
+	  Position		  [435, 420, 455, 440]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum13"
+	  Ports			  [2, 1]
+	  Position		  [470, 420, 490, 440]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum14"
+	  Ports			  [2, 1]
+	  Position		  [360, 650, 380, 670]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum15"
+	  Ports			  [2, 1]
+	  Position		  [400, 650, 420, 670]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum16"
+	  Ports			  [2, 1]
+	  Position		  [440, 650, 460, 670]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum17"
+	  Ports			  [2, 1]
+	  Position		  [475, 650, 495, 670]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum18"
+	  Ports			  [2, 1]
+	  Position		  [240, 650, 260, 670]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum19"
+	  Ports			  [2, 1]
+	  Position		  [280, 650, 300, 670]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum2"
+	  Ports			  [2, 1]
+	  Position		  [320, 190, 340, 210]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum20"
+	  Ports			  [2, 1]
+	  Position		  [320, 650, 340, 670]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum21"
+	  Ports			  [2, 1]
+	  Position		  [360, 870, 380, 890]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum22"
+	  Ports			  [2, 1]
+	  Position		  [400, 870, 420, 890]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum23"
+	  Ports			  [2, 1]
+	  Position		  [440, 870, 460, 890]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum24"
+	  Ports			  [2, 1]
+	  Position		  [475, 870, 495, 890]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum25"
+	  Ports			  [2, 1]
+	  Position		  [240, 870, 260, 890]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum26"
+	  Ports			  [2, 1]
+	  Position		  [280, 870, 300, 890]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum27"
+	  Ports			  [2, 1]
+	  Position		  [320, 870, 340, 890]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum28"
+	  Ports			  [2, 1]
+	  Position		  [700, 200, 720, 220]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum29"
+	  Ports			  [2, 1]
+	  Position		  [740, 200, 760, 220]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum3"
+	  Ports			  [2, 1]
+	  Position		  [360, 190, 380, 210]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum30"
+	  Ports			  [2, 1]
+	  Position		  [815, 430, 835, 450]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum31"
+	  Ports			  [2, 1]
+	  Position		  [855, 430, 875, 450]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum32"
+	  Ports			  [2, 1]
+	  Position		  [895, 430, 915, 450]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum33"
+	  Ports			  [2, 1]
+	  Position		  [930, 430, 950, 450]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum34"
+	  Ports			  [2, 1]
+	  Position		  [820, 660, 840, 680]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum35"
+	  Ports			  [2, 1]
+	  Position		  [860, 660, 880, 680]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum36"
+	  Ports			  [2, 1]
+	  Position		  [900, 660, 920, 680]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum37"
+	  Ports			  [2, 1]
+	  Position		  [935, 660, 955, 680]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum38"
+	  Ports			  [2, 1]
+	  Position		  [700, 660, 720, 680]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum39"
+	  Ports			  [2, 1]
+	  Position		  [740, 660, 760, 680]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum4"
+	  Ports			  [2, 1]
+	  Position		  [400, 190, 420, 210]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum40"
+	  Ports			  [2, 1]
+	  Position		  [780, 200, 800, 220]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum41"
+	  Ports			  [2, 1]
+	  Position		  [780, 660, 800, 680]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum42"
+	  Ports			  [2, 1]
+	  Position		  [820, 880, 840, 900]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum43"
+	  Ports			  [2, 1]
+	  Position		  [860, 880, 880, 900]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum44"
+	  Ports			  [2, 1]
+	  Position		  [900, 880, 920, 900]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum45"
+	  Ports			  [2, 1]
+	  Position		  [935, 880, 955, 900]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum46"
+	  Ports			  [2, 1]
+	  Position		  [700, 880, 720, 900]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum47"
+	  Ports			  [2, 1]
+	  Position		  [740, 880, 760, 900]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum48"
+	  Ports			  [2, 1]
+	  Position		  [780, 880, 800, 900]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum49"
+	  Ports			  [2, 1]
+	  Position		  [820, 200, 840, 220]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum5"
+	  Ports			  [2, 1]
+	  Position		  [440, 190, 460, 210]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum50"
+	  Ports			  [2, 1]
+	  Position		  [860, 200, 880, 220]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum51"
+	  Ports			  [2, 1]
+	  Position		  [900, 200, 920, 220]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum52"
+	  Ports			  [2, 1]
+	  Position		  [695, 430, 715, 450]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum53"
+	  Ports			  [2, 1]
+	  Position		  [735, 430, 755, 450]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum54"
+	  Ports			  [2, 1]
+	  Position		  [935, 200, 955, 220]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum55"
+	  Ports			  [2, 1]
+	  Position		  [775, 430, 795, 450]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum6"
+	  Ports			  [2, 1]
+	  Position		  [235, 420, 255, 440]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum7"
+	  Ports			  [2, 1]
+	  Position		  [275, 420, 295, 440]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum8"
+	  Ports			  [2, 1]
+	  Position		  [475, 190, 495, 210]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum9"
+	  Ports			  [2, 1]
+	  Position		  [315, 420, 335, 440]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out1"
+	  Position		  [520, 193, 550, 207]
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out2"
+	  Position		  [515, 423, 545, 437]
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out3"
+	  Position		  [520, 653, 550, 667]
+	  Port			  "3"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out4"
+	  Position		  [520, 873, 550, 887]
+	  Port			  "4"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out5"
+	  Position		  [980, 203, 1010, 217]
+	  Port			  "5"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out6"
+	  Position		  [975, 433, 1005, 447]
+	  Port			  "6"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out7"
+	  Position		  [980, 663, 1010, 677]
+	  Port			  "7"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out8"
+	  Position		  [980, 883, 1010, 897]
+	  Port			  "8"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Line {
+	  SrcBlock		  "Gain1"
+	  SrcPort		  1
+	  Points		  [5, 0]
+	  DstBlock		  "Sum"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum"
+	  SrcPort		  1
+	  DstBlock		  "Sum1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain2"
+	  SrcPort		  1
+	  Points		  [10, 0]
+	  DstBlock		  "Sum1"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum1"
+	  SrcPort		  1
+	  DstBlock		  "Sum2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain3"
+	  SrcPort		  1
+	  Points		  [15, 0]
+	  DstBlock		  "Sum2"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum2"
+	  SrcPort		  1
+	  DstBlock		  "Sum3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum3"
+	  SrcPort		  1
+	  DstBlock		  "Sum4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum4"
+	  SrcPort		  1
+	  DstBlock		  "Sum5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum5"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum8"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain4"
+	  SrcPort		  1
+	  Points		  [25, 0]
+	  DstBlock		  "Sum3"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain5"
+	  SrcPort		  1
+	  Points		  [30, 0]
+	  DstBlock		  "Sum4"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain6"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum5"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain7"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum8"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum8"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain9"
+	  SrcPort		  1
+	  Points		  [5, 0]
+	  DstBlock		  "Sum6"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain8"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum6"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum6"
+	  SrcPort		  1
+	  DstBlock		  "Sum7"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain10"
+	  SrcPort		  1
+	  Points		  [10, 0]
+	  DstBlock		  "Sum7"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum7"
+	  SrcPort		  1
+	  DstBlock		  "Sum9"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain11"
+	  SrcPort		  1
+	  Points		  [15, 0]
+	  DstBlock		  "Sum9"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum9"
+	  SrcPort		  1
+	  DstBlock		  "Sum10"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum10"
+	  SrcPort		  1
+	  DstBlock		  "Sum11"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum11"
+	  SrcPort		  1
+	  DstBlock		  "Sum12"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum12"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum13"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain12"
+	  SrcPort		  1
+	  Points		  [25, 0]
+	  DstBlock		  "Sum10"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain13"
+	  SrcPort		  1
+	  Points		  [30, 0]
+	  DstBlock		  "Sum11"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain14"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum12"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain15"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum13"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum13"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain23"
+	  SrcPort		  1
+	  Points		  [5, 0]
+	  DstBlock		  "Sum18"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain22"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum18"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum18"
+	  SrcPort		  1
+	  DstBlock		  "Sum19"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain16"
+	  SrcPort		  1
+	  Points		  [10, 0]
+	  DstBlock		  "Sum19"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum19"
+	  SrcPort		  1
+	  DstBlock		  "Sum20"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain17"
+	  SrcPort		  1
+	  Points		  [15, 0]
+	  DstBlock		  "Sum20"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum20"
+	  SrcPort		  1
+	  DstBlock		  "Sum14"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum14"
+	  SrcPort		  1
+	  DstBlock		  "Sum15"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum15"
+	  SrcPort		  1
+	  DstBlock		  "Sum16"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum16"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum17"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain18"
+	  SrcPort		  1
+	  Points		  [25, 0]
+	  DstBlock		  "Sum14"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain19"
+	  SrcPort		  1
+	  Points		  [30, 0]
+	  DstBlock		  "Sum15"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain20"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum16"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain21"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum17"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum17"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain31"
+	  SrcPort		  1
+	  Points		  [5, 0]
+	  DstBlock		  "Sum25"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain30"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum25"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum25"
+	  SrcPort		  1
+	  DstBlock		  "Sum26"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain24"
+	  SrcPort		  1
+	  Points		  [10, 0]
+	  DstBlock		  "Sum26"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum26"
+	  SrcPort		  1
+	  DstBlock		  "Sum27"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain25"
+	  SrcPort		  1
+	  Points		  [15, 0]
+	  DstBlock		  "Sum27"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum27"
+	  SrcPort		  1
+	  DstBlock		  "Sum21"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum21"
+	  SrcPort		  1
+	  DstBlock		  "Sum22"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum22"
+	  SrcPort		  1
+	  DstBlock		  "Sum23"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum23"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum24"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain26"
+	  SrcPort		  1
+	  Points		  [25, 0]
+	  DstBlock		  "Sum21"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain27"
+	  SrcPort		  1
+	  Points		  [30, 0]
+	  DstBlock		  "Sum22"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain28"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum23"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain29"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum24"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum24"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain33"
+	  SrcPort		  1
+	  Points		  [5, 0]
+	  DstBlock		  "Sum28"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain32"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum28"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum28"
+	  SrcPort		  1
+	  DstBlock		  "Sum29"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain44"
+	  SrcPort		  1
+	  Points		  [10, 0]
+	  DstBlock		  "Sum29"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum29"
+	  SrcPort		  1
+	  DstBlock		  "Sum40"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain55"
+	  SrcPort		  1
+	  Points		  [15, 0]
+	  DstBlock		  "Sum40"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum40"
+	  SrcPort		  1
+	  DstBlock		  "Sum49"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum49"
+	  SrcPort		  1
+	  DstBlock		  "Sum50"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum50"
+	  SrcPort		  1
+	  DstBlock		  "Sum51"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum51"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum54"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain58"
+	  SrcPort		  1
+	  Points		  [25, 0]
+	  DstBlock		  "Sum49"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain59"
+	  SrcPort		  1
+	  Points		  [30, 0]
+	  DstBlock		  "Sum50"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain60"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum51"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain61"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum54"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum54"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain63"
+	  SrcPort		  1
+	  Points		  [5, 0]
+	  DstBlock		  "Sum52"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain62"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum52"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum52"
+	  SrcPort		  1
+	  DstBlock		  "Sum53"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain34"
+	  SrcPort		  1
+	  Points		  [10, 0]
+	  DstBlock		  "Sum53"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum53"
+	  SrcPort		  1
+	  DstBlock		  "Sum55"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain35"
+	  SrcPort		  1
+	  Points		  [15, 0]
+	  DstBlock		  "Sum55"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum55"
+	  SrcPort		  1
+	  DstBlock		  "Sum30"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum30"
+	  SrcPort		  1
+	  DstBlock		  "Sum31"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum31"
+	  SrcPort		  1
+	  DstBlock		  "Sum32"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum32"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum33"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain36"
+	  SrcPort		  1
+	  Points		  [25, 0]
+	  DstBlock		  "Sum30"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain37"
+	  SrcPort		  1
+	  Points		  [30, 0]
+	  DstBlock		  "Sum31"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain38"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum32"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain39"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum33"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum33"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out6"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain48"
+	  SrcPort		  1
+	  Points		  [5, 0]
+	  DstBlock		  "Sum38"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain47"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum38"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum38"
+	  SrcPort		  1
+	  DstBlock		  "Sum39"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain40"
+	  SrcPort		  1
+	  Points		  [10, 0]
+	  DstBlock		  "Sum39"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum39"
+	  SrcPort		  1
+	  DstBlock		  "Sum41"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain41"
+	  SrcPort		  1
+	  Points		  [15, 0]
+	  DstBlock		  "Sum41"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum41"
+	  SrcPort		  1
+	  DstBlock		  "Sum34"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum34"
+	  SrcPort		  1
+	  DstBlock		  "Sum35"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum35"
+	  SrcPort		  1
+	  DstBlock		  "Sum36"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum36"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum37"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain42"
+	  SrcPort		  1
+	  Points		  [25, 0]
+	  DstBlock		  "Sum34"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain43"
+	  SrcPort		  1
+	  Points		  [30, 0]
+	  DstBlock		  "Sum35"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain45"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum36"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain46"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum37"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum37"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out7"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain57"
+	  SrcPort		  1
+	  Points		  [5, 0]
+	  DstBlock		  "Sum46"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain56"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum46"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum46"
+	  SrcPort		  1
+	  DstBlock		  "Sum47"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain49"
+	  SrcPort		  1
+	  Points		  [10, 0]
+	  DstBlock		  "Sum47"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum47"
+	  SrcPort		  1
+	  DstBlock		  "Sum48"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain50"
+	  SrcPort		  1
+	  Points		  [15, 0]
+	  DstBlock		  "Sum48"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum48"
+	  SrcPort		  1
+	  DstBlock		  "Sum42"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum42"
+	  SrcPort		  1
+	  DstBlock		  "Sum43"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum43"
+	  SrcPort		  1
+	  DstBlock		  "Sum44"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum44"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Sum45"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain51"
+	  SrcPort		  1
+	  Points		  [25, 0]
+	  DstBlock		  "Sum42"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain52"
+	  SrcPort		  1
+	  Points		  [30, 0]
+	  DstBlock		  "Sum43"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain53"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum44"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Gain54"
+	  SrcPort		  1
+	  Points		  [35, 0]
+	  DstBlock		  "Sum45"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum45"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out8"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In1"
+	  SrcPort		  1
+	  Points		  [0, 0; 50, 0]
+	  Branch {
+	    Points		    [0, 165]
+	    Branch {
+	      Points		      [55, 0]
+	      DstBlock		      "Gain"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 230]
+	      Branch {
+		Points			[50, 0]
+		DstBlock		"Gain8"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 0; 0, 230]
+		Branch {
+		  Points		  [55, 0]
+		  DstBlock		  "Gain22"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 220]
+		  DstBlock		  "Gain30"
+		  DstPort		  1
+		}
+	      }
+	    }
+	  }
+	  Branch {
+	    Points		    [515, 0; 0, 175]
+	    Branch {
+	      DstBlock		      "Gain32"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [-5, 0; 0, 230]
+	      Branch {
+		DstBlock		"Gain62"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 230]
+		Branch {
+		  Points		  [5, 0]
+		  DstBlock		  "Gain47"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 220]
+		  DstBlock		  "Gain56"
+		  DstPort		  1
+		}
+	      }
+	    }
+	  }
+	}
+	Line {
+	  SrcBlock		  "In2"
+	  SrcPort		  1
+	  Points		  [0, 0; 70, 0]
+	  Branch {
+	    Points		    [485, 0; 0, 175]
+	    Branch {
+	      Points		      [40, 0]
+	      DstBlock		      "Gain33"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 230]
+	      Branch {
+		Points			[35, 0]
+		DstBlock		"Gain63"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 230]
+		Branch {
+		  Points		  [40, 0]
+		  DstBlock		  "Gain48"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 220]
+		  DstBlock		  "Gain57"
+		  DstPort		  1
+		}
+	      }
+	    }
+	  }
+	  Branch {
+	    Points		    [-10, 0; 0, 165]
+	    Branch {
+	      Points		      [75, 0]
+	      DstBlock		      "Gain1"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 230]
+	      Branch {
+		Points			[70, 0]
+		DstBlock		"Gain9"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 230]
+		Branch {
+		  Points		  [75, 0]
+		  DstBlock		  "Gain23"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 220]
+		  DstBlock		  "Gain31"
+		  DstPort		  1
+		}
+	      }
+	    }
+	  }
+	}
+	Line {
+	  SrcBlock		  "In3"
+	  SrcPort		  1
+	  Points		  [0, 0; 80, 0]
+	  Branch {
+	    Points		    [465, 0; 0, 165]
+	    Branch {
+	      Points		      [85, 0]
+	      DstBlock		      "Gain44"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 230]
+	      Branch {
+		Points			[80, 0]
+		DstBlock		"Gain34"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 230]
+		Branch {
+		  Points		  [85, 0]
+		  DstBlock		  "Gain40"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 220]
+		  DstBlock		  "Gain49"
+		  DstPort		  1
+		}
+	      }
+	    }
+	  }
+	  Branch {
+	    Points		    [-15, 0; 0, 155]
+	    Branch {
+	      Points		      [105, 0]
+	      DstBlock		      "Gain2"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 230]
+	      Branch {
+		Points			[100, 0]
+		DstBlock		"Gain10"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 230]
+		Branch {
+		  Points		  [105, 0]
+		  DstBlock		  "Gain16"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 220]
+		  DstBlock		  "Gain24"
+		  DstPort		  1
+		}
+	      }
+	    }
+	  }
+	}
+	Line {
+	  SrcBlock		  "In4"
+	  SrcPort		  1
+	  Points		  [0, -25; 535, 0; 0, 180]
+	  Branch {
+	    Points		    [130, 0]
+	    DstBlock		    "Gain55"
+	    DstPort		    1
+	  }
+	  Branch {
+	    Points		    [0, 230]
+	    Branch {
+	      Points		      [125, 0]
+	      DstBlock		      "Gain35"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 230]
+	      Branch {
+		Points			[130, 0]
+		DstBlock		"Gain41"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 220]
+		DstBlock		"Gain50"
+		DstPort			1
+	      }
+	    }
+	  }
+	}
+	Line {
+	  SrcBlock		  "In5"
+	  SrcPort		  1
+	  Points		  [0, -45; 85, 0]
+	  Branch {
+	    Points		    [435, 0; 0, 200]
+	    Branch {
+	      Points		      [170, 0]
+	      DstBlock		      "Gain58"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 225]
+	      Branch {
+		Points			[165, 0]
+		DstBlock		"Gain36"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 230]
+		Branch {
+		  Points		  [170, 0]
+		  DstBlock		  "Gain42"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 220]
+		  DstBlock		  "Gain51"
+		  DstPort		  1
+		}
+	      }
+	    }
+	  }
+	  Branch {
+	    Points		    [-15, 0; 0, 155]
+	    Branch {
+	      Points		      [130, 0]
+	      DstBlock		      "Gain3"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 230]
+	      Branch {
+		Points			[125, 0]
+		DstBlock		"Gain11"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 230]
+		Branch {
+		  Points		  [130, 0]
+		  DstBlock		  "Gain17"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 220]
+		  DstBlock		  "Gain25"
+		  DstPort		  1
+		}
+	      }
+	    }
+	  }
+	}
+	Line {
+	  SrcBlock		  "In6"
+	  SrcPort		  1
+	  Points		  [15, 0; 0, -65; 75, 0]
+	  Branch {
+	    Points		    [415, 0; 0, 205; 5, 0]
+	    Branch {
+	      Points		      [215, 0]
+	      DstBlock		      "Gain59"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 230]
+	      Branch {
+		Points			[210, 0]
+		DstBlock		"Gain37"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 230]
+		Branch {
+		  Points		  [215, 0]
+		  DstBlock		  "Gain43"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 220]
+		  DstBlock		  "Gain52"
+		  DstPort		  1
+		}
+	      }
+	    }
+	  }
+	  Branch {
+	    Points		    [0, 195]
+	    Branch {
+	      Points		      [175, 0]
+	      DstBlock		      "Gain5"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 230]
+	      Branch {
+		Points			[170, 0]
+		DstBlock		"Gain13"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 230]
+		Branch {
+		  Points		  [175, 0]
+		  DstBlock		  "Gain19"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 220]
+		  DstBlock		  "Gain27"
+		  DstPort		  1
+		}
+	      }
+	    }
+	  }
+	}
+	Line {
+	  SrcBlock		  "In7"
+	  SrcPort		  1
+	  Points		  [0, 0; 25, 0]
+	  Branch {
+	    Points		    [0, -95; 475, 0; 0, 220]
+	    Branch {
+	      Points		      [260, 0]
+	      DstBlock		      "Gain60"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 225]
+	      Branch {
+		Points			[0, 5]
+		DstBlock		"Gain38"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 235]
+		Branch {
+		  Points		  [260, 0]
+		  DstBlock		  "Gain45"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 220]
+		  DstBlock		  "Gain53"
+		  DstPort		  1
+		}
+	      }
+	    }
+	  }
+	  Branch {
+	    Points		    [0, 115]
+	    Branch {
+	      Points		      [275, 0]
+	      DstBlock		      "Gain6"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 230]
+	      Branch {
+		Points			[270, 0]
+		DstBlock		"Gain14"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 230]
+		Branch {
+		  Points		  [275, 0]
+		  DstBlock		  "Gain20"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 220]
+		  DstBlock		  "Gain28"
+		  DstPort		  1
+		}
+	      }
+	    }
+	  }
+	}
+	Line {
+	  SrcBlock		  "In8"
+	  SrcPort		  1
+	  Points		  [0, 0; 5, 0]
+	  Branch {
+	    Points		    [35, 0; 0, -115; 55, 0]
+	    Branch {
+	      Points		      [395, 0; 0, 225]
+	      Branch {
+		Points			[305, 0]
+		DstBlock		"Gain61"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 230]
+		Branch {
+		  Points		  [300, 0]
+		  DstBlock		  "Gain39"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 230]
+		  Branch {
+		    Points		    [305, 0]
+		    DstBlock		    "Gain46"
+		    DstPort		    1
+		  }
+		  Branch {
+		    Points		    [0, 220]
+		    DstBlock		    "Gain54"
+		    DstPort		    1
+		  }
+		}
+	      }
+	    }
+	    Branch {
+	      Points		      [-15, 0; 0, 150]
+	      Branch {
+		Points			[150, 0]
+		DstBlock		"Gain4"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 230]
+		Branch {
+		  Points		  [145, 0]
+		  DstBlock		  "Gain12"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 230]
+		  Branch {
+		    Points		    [150, 0]
+		    DstBlock		    "Gain18"
+		    DstPort		    1
+		  }
+		  Branch {
+		    Points		    [0, 220]
+		    DstBlock		    "Gain26"
+		    DstPort		    1
+		  }
+		}
+	      }
+	    }
+	  }
+	  Branch {
+	    Points		    [0, 100]
+	    Branch {
+	      Points		      [330, 0]
+	      DstBlock		      "Gain7"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 230]
+	      Branch {
+		Points			[325, 0]
+		DstBlock		"Gain15"
+		DstPort			1
+	      }
+	      Branch {
+		Points			[0, 230]
+		Branch {
+		  Points		  [330, 0]
+		  DstBlock		  "Gain21"
+		  DstPort		  1
+		}
+		Branch {
+		  Points		  [0, 220]
+		  DstBlock		  "Gain29"
+		  DstPort		  1
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out1"
+      Position		      [545, 193, 575, 207]
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out2"
+      Position		      [540, 423, 570, 437]
+      Port		      "2"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out3"
+      Position		      [545, 653, 575, 667]
+      Port		      "3"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out4"
+      Position		      [545, 873, 575, 887]
+      Port		      "4"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out5"
+      Position		      [1005, 203, 1035, 217]
+      Port		      "5"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out6"
+      Position		      [1000, 433, 1030, 447]
+      Port		      "6"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out7"
+      Position		      [1005, 663, 1035, 677]
+      Port		      "7"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out8"
+      Position		      [1005, 883, 1035, 897]
+      Port		      "8"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Line {
+      SrcBlock		      "In1"
+      SrcPort		      1
+      Points		      [205, 0; 0, 515]
+      DstBlock		      "Subsystem"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In2"
+      SrcPort		      1
+      Points		      [195, 0; 0, 485]
+      DstBlock		      "Subsystem"
+      DstPort		      2
+    }
+    Line {
+      SrcBlock		      "In3"
+      SrcPort		      1
+      Points		      [185, 0; 0, 455]
+      DstBlock		      "Subsystem"
+      DstPort		      3
+    }
+    Line {
+      SrcBlock		      "In4"
+      SrcPort		      1
+      Points		      [175, 0; 0, 425]
+      DstBlock		      "Subsystem"
+      DstPort		      4
+    }
+    Line {
+      SrcBlock		      "In5"
+      SrcPort		      1
+      Points		      [160, 0; 0, 395]
+      DstBlock		      "Subsystem"
+      DstPort		      5
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      1
+      Points		      [0, -95; -40, 0; 0, -255]
+      DstBlock		      "Out1"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In6"
+      SrcPort		      1
+      Points		      [150, 0; 0, 365]
+      DstBlock		      "Subsystem"
+      DstPort		      6
+    }
+    Line {
+      SrcBlock		      "In7"
+      SrcPort		      1
+      Points		      [140, 0; 0, 335]
+      DstBlock		      "Subsystem"
+      DstPort		      7
+    }
+    Line {
+      SrcBlock		      "In8"
+      SrcPort		      1
+      Points		      [130, 0; 0, 310; 280, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      8
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      2
+      Points		      [15, 0; 0, -135; -50, 0]
+      DstBlock		      "Out2"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      3
+      Points		      [5, 0; 0, 90; -35, 0]
+      DstBlock		      "Out3"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      4
+      Points		      [5, 0; 0, 85; -40, 0; 0, 230]
+      DstBlock		      "Out4"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      5
+      Points		      [420, 0; 0, -360]
+      DstBlock		      "Out5"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      6
+      Points		      [425, 0]
+      DstBlock		      "Out6"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      7
+      Points		      [430, 0]
+      DstBlock		      "Out7"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      8
+      Points		      [425, 0; 0, 305]
+      DstBlock		      "Out8"
+      DstPort		      1
+    }
+  }
+}
