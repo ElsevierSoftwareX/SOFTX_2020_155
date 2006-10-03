@@ -1,0 +1,1478 @@
+Library {
+  Name			  "cdsSWD1"
+  Version		  6.2
+  MdlSubVersion		  0
+  SavedCharacterEncoding  "ibm-5348_P100-1997"
+  SaveDefaultBlockParams  on
+  SampleTimeColors	  off
+  LibraryLinkDisplay	  "none"
+  WideLines		  off
+  ShowLineDimensions	  off
+  ShowPortDataTypes	  off
+  ShowLoopsOnError	  on
+  IgnoreBidirectionalLines off
+  ShowStorageClass	  off
+  ShowTestPointIcons	  on
+  ShowViewerIcons	  on
+  SortedOrder		  off
+  ExecutionContextIcon	  off
+  ShowLinearizationAnnotations on
+  CovSaveName		  "covdata"
+  CovMetricSettings	  "dw"
+  CovNameIncrementing	  off
+  CovHtmlReporting	  on
+  covSaveCumulativeToWorkspaceVar on
+  CovSaveSingleToWorkspaceVar on
+  CovCumulativeReport	  off
+  CovReportOnPause	  on
+  ScopeRefreshTime	  0.035000
+  OverrideScopeRefreshTime on
+  DisableAllScopes	  off
+  BlockNameDataTip	  off
+  BlockParametersDataTip  off
+  BlockDescriptionStringDataTip	off
+  ToolBar		  on
+  StatusBar		  on
+  BrowserShowLibraryLinks off
+  BrowserLookUnderMasks	  off
+  Created		  "Tue Apr 25 16:11:09 2006"
+  UpdateHistory		  "UpdateHistoryNever"
+  ModifiedByFormat	  "%<Auto>"
+  LastModifiedBy	  "rolf"
+  ModifiedDateFormat	  "%<Auto>"
+  LastModifiedDate	  "Tue Apr 25 16:20:33 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:1>"
+  ConfigurationManager	  "None"
+  LinearizationMsg	  "none"
+  Profile		  off
+  ParamWorkspaceSource	  "MATLABWorkspace"
+  ExtModeBatchMode	  off
+  ExtModeEnableFloating	  on
+  ExtModeTrigType	  "manual"
+  ExtModeTrigMode	  "normal"
+  ExtModeTrigPort	  "1"
+  ExtModeTrigElement	  "any"
+  ExtModeTrigDuration	  1000
+  ExtModeTrigDurationFloating "auto"
+  ExtModeTrigHoldOff	  0
+  ExtModeTrigDelay	  0
+  ExtModeTrigDirection	  "rising"
+  ExtModeTrigLevel	  0
+  ExtModeArchiveMode	  "off"
+  ExtModeAutoIncOneShot	  off
+  ExtModeIncDirWhenArm	  off
+  ExtModeAddSuffixToVar	  off
+  ExtModeWriteAllDataToWs off
+  ExtModeArmWhenConnect	  on
+  ExtModeSkipDownloadWhenConnect off
+  ExtModeLogAll		  on
+  ExtModeAutoUpdateStatusClock on
+  StrictBusMsg		  "None"
+  ProdHWDeviceType	  "32-bit Generic"
+  ShowModelReferenceBlockVersion off
+  ShowModelReferenceBlockIO off
+  BlockDefaults {
+    Orientation		    "right"
+    ForegroundColor	    "black"
+    BackgroundColor	    "white"
+    DropShadow		    off
+    NamePlacement	    "normal"
+    FontName		    "Helvetica"
+    FontSize		    10
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+    ShowName		    on
+  }
+  BlockParameterDefaults {
+    Block {
+      BlockType		      Inport
+      UseBusObject	      off
+      BusObject		      "BusObject"
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      SampleTime	      "-1"
+      DataType		      "auto"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      Interpolate	      on
+    }
+    Block {
+      BlockType		      SubSystem
+      ShowPortLabels	      on
+      Permissions	      "ReadWrite"
+      PermitHierarchicalResolution "All"
+      SystemSampleTime	      "-1"
+      RTWFcnNameOpts	      "Auto"
+      RTWFileNameOpts	      "Auto"
+      SimViewingDevice	      off
+      DataTypeOverride	      "UseLocalSettings"
+      MinMaxOverflowLogging   "UseLocalSettings"
+    }
+    Block {
+      BlockType		      Terminator
+    }
+  }
+  AnnotationDefaults {
+    HorizontalAlignment	    "center"
+    VerticalAlignment	    "middle"
+    ForegroundColor	    "black"
+    BackgroundColor	    "white"
+    DropShadow		    off
+    FontName		    "Helvetica"
+    FontSize		    10
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+  }
+  LineDefaults {
+    FontName		    "Helvetica"
+    FontSize		    9
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+  }
+  System {
+    Name		    "cdsSWD1"
+    Location		    [480, 104, 1715, 653]
+    Open		    on
+    ModelBrowserVisibility  off
+    ModelBrowserWidth	    200
+    ScreenColor		    "white"
+    PaperOrientation	    "landscape"
+    PaperPositionMode	    "auto"
+    PaperType		    "usletter"
+    PaperUnits		    "inches"
+    ZoomFactor		    "100"
+    ReportName		    "simulink-default.rpt"
+    Block {
+      BlockType		      Inport
+      Name		      "Xraw"
+      Position		      [105, 68, 135, 82]
+      Port		      "1"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "Xfilt"
+      Position		      [105, 113, 135, 127]
+      Port		      "2"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "Yraw"
+      Position		      [105, 153, 135, 167]
+      Port		      "3"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "Yfilt"
+      Position		      [105, 193, 135, 207]
+      Port		      "4"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "Zraw"
+      Position		      [105, 233, 135, 247]
+      Port		      "5"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "Zfilt"
+      Position		      [105, 278, 135, 292]
+      Port		      "6"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosV1"
+      Position		      [330, 78, 360, 92]
+      Port		      "7"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosV1F"
+      Position		      [330, 118, 360, 132]
+      Port		      "8"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosV2"
+      Position		      [330, 158, 360, 172]
+      Port		      "9"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosV2F"
+      Position		      [330, 198, 360, 212]
+      Port		      "10"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosV3"
+      Position		      [330, 243, 360, 257]
+      Port		      "11"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosV3F"
+      Position		      [330, 283, 360, 297]
+      Port		      "12"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosV4"
+      Position		      [330, 328, 360, 342]
+      Port		      "13"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosV4F"
+      Position		      [330, 368, 360, 382]
+      Port		      "14"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosH1"
+      Position		      [495, 78, 525, 92]
+      Port		      "15"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosH1F"
+      Position		      [495, 118, 525, 132]
+      Port		      "16"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosH2"
+      Position		      [500, 158, 530, 172]
+      Port		      "17"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosH2F"
+      Position		      [500, 198, 530, 212]
+      Port		      "18"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosH3"
+      Position		      [500, 243, 530, 257]
+      Port		      "19"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosH3F"
+      Position		      [500, 283, 530, 297]
+      Port		      "20"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosH4"
+      Position		      [500, 323, 530, 337]
+      Port		      "21"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "PosH4F"
+      Position		      [500, 363, 530, 377]
+      Port		      "22"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoV1"
+      Position		      [690, 78, 720, 92]
+      Port		      "23"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoV1F"
+      Position		      [690, 118, 720, 132]
+      Port		      "24"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoV2"
+      Position		      [695, 158, 725, 172]
+      Port		      "25"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoV2F"
+      Position		      [695, 198, 725, 212]
+      Port		      "26"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoV3"
+      Position		      [695, 238, 725, 252]
+      Port		      "27"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoV3F"
+      Position		      [695, 278, 725, 292]
+      Port		      "28"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoV4"
+      Position		      [695, 323, 725, 337]
+      Port		      "29"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoV4F"
+      Position		      [695, 363, 725, 377]
+      Port		      "30"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoH1"
+      Position		      [880, 83, 910, 97]
+      Port		      "31"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoH1F"
+      Position		      [880, 123, 910, 137]
+      Port		      "32"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoH2"
+      Position		      [880, 163, 910, 177]
+      Port		      "33"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoH2F"
+      Position		      [880, 203, 910, 217]
+      Port		      "34"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoH3"
+      Position		      [880, 238, 910, 252]
+      Port		      "35"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoH3F"
+      Position		      [880, 278, 910, 292]
+      Port		      "36"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoH4"
+      Position		      [885, 323, 915, 337]
+      Port		      "37"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "GeoH4F"
+      Position		      [885, 363, 915, 377]
+      Port		      "38"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      SubSystem
+      Name		      "Subsystem"
+      Ports		      [38]
+      Position		      [545, 215, 585, 400]
+      TreatAsAtomicUnit	      off
+      MinAlgLoopOccurrences   off
+      RTWSystemCode	      "Auto"
+      System {
+	Name			"Subsystem"
+	Location		[560, 144, 1500, 516]
+	Open			off
+	ModelBrowserVisibility	off
+	ModelBrowserWidth	200
+	ScreenColor		"white"
+	PaperOrientation	"landscape"
+	PaperPositionMode	"auto"
+	PaperType		"usletter"
+	PaperUnits		"inches"
+	ZoomFactor		"100"
+	Block {
+	  BlockType		  Inport
+	  Name			  "Xraw"
+	  Position		  [25, 28, 55, 42]
+	  Port			  "1"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "Xfilt"
+	  Position		  [25, 73, 55, 87]
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "Yraw"
+	  Position		  [25, 113, 55, 127]
+	  Port			  "3"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "Yfilt"
+	  Position		  [25, 153, 55, 167]
+	  Port			  "4"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "Zraw"
+	  Position		  [25, 193, 55, 207]
+	  Port			  "5"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "Zfilt"
+	  Position		  [25, 238, 55, 252]
+	  Port			  "6"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosV1"
+	  Position		  [250, 38, 280, 52]
+	  Port			  "7"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosV1F"
+	  Position		  [250, 78, 280, 92]
+	  Port			  "8"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosV2"
+	  Position		  [250, 118, 280, 132]
+	  Port			  "9"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosV2F"
+	  Position		  [250, 158, 280, 172]
+	  Port			  "10"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosV3"
+	  Position		  [250, 203, 280, 217]
+	  Port			  "11"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosV3F"
+	  Position		  [250, 243, 280, 257]
+	  Port			  "12"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosV4"
+	  Position		  [250, 288, 280, 302]
+	  Port			  "13"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosV4F"
+	  Position		  [250, 328, 280, 342]
+	  Port			  "14"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosH1"
+	  Position		  [415, 38, 445, 52]
+	  Port			  "15"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosH1F"
+	  Position		  [415, 78, 445, 92]
+	  Port			  "16"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosH2"
+	  Position		  [420, 118, 450, 132]
+	  Port			  "17"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosH2F"
+	  Position		  [420, 158, 450, 172]
+	  Port			  "18"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosH3"
+	  Position		  [420, 203, 450, 217]
+	  Port			  "19"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosH3F"
+	  Position		  [420, 243, 450, 257]
+	  Port			  "20"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosH4"
+	  Position		  [420, 283, 450, 297]
+	  Port			  "21"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "PosH4F"
+	  Position		  [420, 323, 450, 337]
+	  Port			  "22"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoV1"
+	  Position		  [610, 38, 640, 52]
+	  Port			  "23"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoV1F"
+	  Position		  [610, 78, 640, 92]
+	  Port			  "24"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoV2"
+	  Position		  [615, 118, 645, 132]
+	  Port			  "25"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoV2F"
+	  Position		  [615, 158, 645, 172]
+	  Port			  "26"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoV3"
+	  Position		  [615, 198, 645, 212]
+	  Port			  "27"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoV3F"
+	  Position		  [615, 238, 645, 252]
+	  Port			  "28"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoV4"
+	  Position		  [615, 283, 645, 297]
+	  Port			  "29"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoV4F"
+	  Position		  [615, 323, 645, 337]
+	  Port			  "30"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoH1"
+	  Position		  [800, 43, 830, 57]
+	  Port			  "31"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoH1F"
+	  Position		  [800, 83, 830, 97]
+	  Port			  "32"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoH2"
+	  Position		  [800, 123, 830, 137]
+	  Port			  "33"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoH2F"
+	  Position		  [800, 163, 830, 177]
+	  Port			  "34"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoH3"
+	  Position		  [800, 198, 830, 212]
+	  Port			  "35"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoH3F"
+	  Position		  [800, 238, 830, 252]
+	  Port			  "36"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoH4"
+	  Position		  [805, 283, 835, 297]
+	  Port			  "37"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "GeoH4F"
+	  Position		  [805, 323, 835, 337]
+	  Port			  "38"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator"
+	  Position		  [115, 25, 135, 45]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator1"
+	  Position		  [115, 70, 135, 90]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator10"
+	  Position		  [340, 200, 360, 220]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator11"
+	  Position		  [340, 240, 360, 260]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator12"
+	  Position		  [340, 285, 360, 305]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator13"
+	  Position		  [340, 325, 360, 345]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator14"
+	  Position		  [505, 35, 525, 55]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator15"
+	  Position		  [505, 75, 525, 95]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator16"
+	  Position		  [510, 115, 530, 135]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator17"
+	  Position		  [510, 155, 530, 175]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator18"
+	  Position		  [510, 200, 530, 220]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator19"
+	  Position		  [510, 240, 530, 260]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator2"
+	  Position		  [115, 110, 135, 130]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator20"
+	  Position		  [510, 280, 530, 300]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator21"
+	  Position		  [510, 320, 530, 340]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator22"
+	  Position		  [700, 35, 720, 55]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator23"
+	  Position		  [700, 75, 720, 95]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator24"
+	  Position		  [705, 115, 725, 135]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator25"
+	  Position		  [705, 155, 725, 175]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator26"
+	  Position		  [705, 195, 725, 215]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator27"
+	  Position		  [705, 235, 725, 255]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator28"
+	  Position		  [705, 280, 725, 300]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator29"
+	  Position		  [705, 320, 725, 340]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator3"
+	  Position		  [115, 150, 135, 170]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator30"
+	  Position		  [890, 40, 910, 60]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator31"
+	  Position		  [890, 80, 910, 100]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator32"
+	  Position		  [890, 120, 910, 140]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator33"
+	  Position		  [890, 160, 910, 180]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator34"
+	  Position		  [890, 195, 910, 215]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator35"
+	  Position		  [890, 235, 910, 255]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator36"
+	  Position		  [895, 280, 915, 300]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator37"
+	  Position		  [895, 320, 915, 340]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator4"
+	  Position		  [115, 190, 135, 210]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator5"
+	  Position		  [115, 235, 135, 255]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator6"
+	  Position		  [340, 35, 360, 55]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator7"
+	  Position		  [340, 75, 360, 95]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator8"
+	  Position		  [340, 115, 360, 135]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator9"
+	  Position		  [340, 155, 360, 175]
+	}
+	Line {
+	  SrcBlock		  "Xraw"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Xfilt"
+	  SrcPort		  1
+	  DstBlock		  "Terminator1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Yraw"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Yfilt"
+	  SrcPort		  1
+	  DstBlock		  "Terminator3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Zraw"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Zfilt"
+	  SrcPort		  1
+	  DstBlock		  "Terminator5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosV1"
+	  SrcPort		  1
+	  DstBlock		  "Terminator6"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosV1F"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator7"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosV2"
+	  SrcPort		  1
+	  DstBlock		  "Terminator8"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosV2F"
+	  SrcPort		  1
+	  DstBlock		  "Terminator9"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosV3"
+	  SrcPort		  1
+	  DstBlock		  "Terminator10"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosV3F"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator11"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosV4"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator12"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosV4F"
+	  SrcPort		  1
+	  DstBlock		  "Terminator13"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosH1"
+	  SrcPort		  1
+	  DstBlock		  "Terminator14"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosH1F"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator15"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosH2"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator16"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosH2F"
+	  SrcPort		  1
+	  DstBlock		  "Terminator17"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosH3"
+	  SrcPort		  1
+	  DstBlock		  "Terminator18"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosH3F"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator19"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosH4"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator20"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "PosH4F"
+	  SrcPort		  1
+	  DstBlock		  "Terminator21"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoV1"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator22"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoV1F"
+	  SrcPort		  1
+	  DstBlock		  "Terminator23"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoV2"
+	  SrcPort		  1
+	  DstBlock		  "Terminator24"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoV2F"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator25"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoV3"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator26"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoV3F"
+	  SrcPort		  1
+	  DstBlock		  "Terminator27"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoV4"
+	  SrcPort		  1
+	  DstBlock		  "Terminator28"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoV4F"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator29"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoH1"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator30"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoH1F"
+	  SrcPort		  1
+	  DstBlock		  "Terminator31"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoH2"
+	  SrcPort		  1
+	  DstBlock		  "Terminator32"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoH2F"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator33"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoH3"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator34"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoH3F"
+	  SrcPort		  1
+	  DstBlock		  "Terminator35"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoH4"
+	  SrcPort		  1
+	  DstBlock		  "Terminator36"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "GeoH4F"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator37"
+	  DstPort		  1
+	}
+      }
+    }
+    Line {
+      SrcBlock		      "Xraw"
+      SrcPort		      1
+      Points		      [345, 0; 0, 155; 45, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Xfilt"
+      SrcPort		      1
+      Points		      [180, 0; 0, 100]
+      DstBlock		      "Subsystem"
+      DstPort		      2
+    }
+    Line {
+      SrcBlock		      "Yraw"
+      SrcPort		      1
+      Points		      [170, 0; 0, 80; 220, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      3
+    }
+    Line {
+      SrcBlock		      "Yfilt"
+      SrcPort		      1
+      Points		      [195, 0; 0, 30]
+      DstBlock		      "Subsystem"
+      DstPort		      4
+    }
+    Line {
+      SrcBlock		      "Zraw"
+      SrcPort		      1
+      Points		      [390, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      5
+    }
+    Line {
+      SrcBlock		      "Zfilt"
+      SrcPort		      1
+      Points		      [195, 0; 0, -45]
+      DstBlock		      "Subsystem"
+      DstPort		      6
+    }
+    Line {
+      SrcBlock		      "PosV1"
+      SrcPort		      1
+      Points		      [120, 0; 0, 190; 50, 0; 0, -30]
+      DstBlock		      "Subsystem"
+      DstPort		      7
+    }
+    Line {
+      SrcBlock		      "PosV1F"
+      SrcPort		      1
+      Points		      [80, 0; 0, 125]
+      DstBlock		      "Subsystem"
+      DstPort		      8
+    }
+    Line {
+      SrcBlock		      "PosV2"
+      SrcPort		      1
+      Points		      [80, 0; 0, 90]
+      DstBlock		      "Subsystem"
+      DstPort		      9
+    }
+    Line {
+      SrcBlock		      "PosV2F"
+      SrcPort		      1
+      Points		      [80, 0; 0, 55]
+      DstBlock		      "Subsystem"
+      DstPort		      10
+    }
+    Line {
+      SrcBlock		      "PosV3"
+      SrcPort		      1
+      Points		      [80, 0; 0, 15]
+      DstBlock		      "Subsystem"
+      DstPort		      11
+    }
+    Line {
+      SrcBlock		      "PosV3F"
+      SrcPort		      1
+      Points		      [130, 0; 0, -15; 35, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      12
+    }
+    Line {
+      SrcBlock		      "PosV4"
+      SrcPort		      1
+      Points		      [125, 0; 0, -60]
+      DstBlock		      "Subsystem"
+      DstPort		      13
+    }
+    Line {
+      SrcBlock		      "PosV4F"
+      SrcPort		      1
+      Points		      [125, 0; 0, -95]
+      DstBlock		      "Subsystem"
+      DstPort		      14
+    }
+    Line {
+      SrcBlock		      "PosH1"
+      SrcPort		      1
+      DstBlock		      "Subsystem"
+      DstPort		      15
+    }
+    Line {
+      SrcBlock		      "PosH1F"
+      SrcPort		      1
+      DstBlock		      "Subsystem"
+      DstPort		      16
+    }
+    Line {
+      SrcBlock		      "PosH2"
+      SrcPort		      1
+      Points		      [-5, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      17
+    }
+    Line {
+      SrcBlock		      "PosH2F"
+      SrcPort		      1
+      Points		      [-5, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      18
+    }
+    Line {
+      SrcBlock		      "PosH3"
+      SrcPort		      1
+      Points		      [-5, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      19
+    }
+    Line {
+      SrcBlock		      "PosH3F"
+      SrcPort		      1
+      Points		      [-5, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      20
+    }
+    Line {
+      SrcBlock		      "PosH4"
+      SrcPort		      1
+      Points		      [0, -10; -5, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      21
+    }
+    Line {
+      SrcBlock		      "PosH4F"
+      SrcPort		      1
+      Points		      [0, -15; -40, 0; 0, -35]
+      DstBlock		      "Subsystem"
+      DstPort		      22
+    }
+    Line {
+      SrcBlock		      "GeoV1"
+      SrcPort		      1
+      Points		      [-100, 0; 0, 240]
+      DstBlock		      "Subsystem"
+      DstPort		      23
+    }
+    Line {
+      SrcBlock		      "GeoV1F"
+      SrcPort		      1
+      Points		      [-100, 0; 0, 205]
+      DstBlock		      "Subsystem"
+      DstPort		      24
+    }
+    Line {
+      SrcBlock		      "GeoV2"
+      SrcPort		      1
+      Points		      [-100, 0; 0, 170]
+      DstBlock		      "Subsystem"
+      DstPort		      25
+    }
+    Line {
+      SrcBlock		      "GeoV2F"
+      SrcPort		      1
+      Points		      [-100, 0; 0, 135]
+      DstBlock		      "Subsystem"
+      DstPort		      26
+    }
+    Line {
+      SrcBlock		      "GeoV3"
+      SrcPort		      1
+      Points		      [-100, 0; 0, 100]
+      DstBlock		      "Subsystem"
+      DstPort		      27
+    }
+    Line {
+      SrcBlock		      "GeoV3F"
+      SrcPort		      1
+      Points		      [5, 0; 0, 110; -245, 0; 0, -40; 40, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      28
+    }
+    Line {
+      SrcBlock		      "GeoV4"
+      SrcPort		      1
+      Points		      [0, 30; -135, 0; 0, 35; -105, 0; 0, -40]
+      DstBlock		      "Subsystem"
+      DstPort		      29
+    }
+    Line {
+      SrcBlock		      "GeoV4F"
+      SrcPort		      1
+      Points		      [5, 0; 0, 25; -245, 0; 0, -35]
+      DstBlock		      "Subsystem"
+      DstPort		      30
+    }
+    Line {
+      SrcBlock		      "GeoH1"
+      SrcPort		      1
+      Points		      [-195, 0; 0, 275]
+      DstBlock		      "Subsystem"
+      DstPort		      31
+    }
+    Line {
+      SrcBlock		      "GeoH1F"
+      SrcPort		      1
+      Points		      [-195, 0; 0, 240]
+      DstBlock		      "Subsystem"
+      DstPort		      32
+    }
+    Line {
+      SrcBlock		      "GeoH2"
+      SrcPort		      1
+      Points		      [-195, 0; 0, 205]
+      DstBlock		      "Subsystem"
+      DstPort		      33
+    }
+    Line {
+      SrcBlock		      "GeoH2F"
+      SrcPort		      1
+      Points		      [-195, 0; 0, 170]
+      DstBlock		      "Subsystem"
+      DstPort		      34
+    }
+    Line {
+      SrcBlock		      "GeoH3"
+      SrcPort		      1
+      Points		      [-195, 0; 0, 140]
+      DstBlock		      "Subsystem"
+      DstPort		      35
+    }
+    Line {
+      SrcBlock		      "GeoH3F"
+      SrcPort		      1
+      Points		      [5, 0; 0, 35; -325, 0; 0, 90; -65, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      36
+    }
+    Line {
+      SrcBlock		      "GeoH4"
+      SrcPort		      1
+      Points		      [0, 30; -325, 0; 0, 55; -65, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      37
+    }
+    Line {
+      SrcBlock		      "GeoH4F"
+      SrcPort		      1
+      Points		      [5, 0; 0, 50; -395, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      38
+    }
+  }
+}

@@ -1,0 +1,375 @@
+Library {
+  Name			  "cdsWD"
+  Version		  6.2
+  MdlSubVersion		  0
+  SavedCharacterEncoding  "ibm-5348_P100-1997"
+  SaveDefaultBlockParams  on
+  SampleTimeColors	  off
+  LibraryLinkDisplay	  "none"
+  WideLines		  off
+  ShowLineDimensions	  off
+  ShowPortDataTypes	  off
+  ShowLoopsOnError	  on
+  IgnoreBidirectionalLines off
+  ShowStorageClass	  off
+  ShowTestPointIcons	  on
+  ShowViewerIcons	  on
+  SortedOrder		  off
+  ExecutionContextIcon	  off
+  ShowLinearizationAnnotations on
+  CovSaveName		  "covdata"
+  CovMetricSettings	  "dw"
+  CovNameIncrementing	  off
+  CovHtmlReporting	  on
+  covSaveCumulativeToWorkspaceVar on
+  CovSaveSingleToWorkspaceVar on
+  CovCumulativeReport	  off
+  CovReportOnPause	  on
+  ScopeRefreshTime	  0.035000
+  OverrideScopeRefreshTime on
+  DisableAllScopes	  off
+  BlockNameDataTip	  off
+  BlockParametersDataTip  off
+  BlockDescriptionStringDataTip	off
+  ToolBar		  on
+  StatusBar		  on
+  BrowserShowLibraryLinks off
+  BrowserLookUnderMasks	  off
+  Created		  "Tue Sep 19 13:57:45 2006"
+  UpdateHistory		  "UpdateHistoryNever"
+  ModifiedByFormat	  "%<Auto>"
+  LastModifiedBy	  "rolf"
+  ModifiedDateFormat	  "%<Auto>"
+  LastModifiedDate	  "Tue Sep 19 14:01:59 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:3>"
+  ConfigurationManager	  "None"
+  LinearizationMsg	  "none"
+  Profile		  off
+  ParamWorkspaceSource	  "MATLABWorkspace"
+  ExtModeBatchMode	  off
+  ExtModeEnableFloating	  on
+  ExtModeTrigType	  "manual"
+  ExtModeTrigMode	  "normal"
+  ExtModeTrigPort	  "1"
+  ExtModeTrigElement	  "any"
+  ExtModeTrigDuration	  1000
+  ExtModeTrigDurationFloating "auto"
+  ExtModeTrigHoldOff	  0
+  ExtModeTrigDelay	  0
+  ExtModeTrigDirection	  "rising"
+  ExtModeTrigLevel	  0
+  ExtModeArchiveMode	  "off"
+  ExtModeAutoIncOneShot	  off
+  ExtModeIncDirWhenArm	  off
+  ExtModeAddSuffixToVar	  off
+  ExtModeWriteAllDataToWs off
+  ExtModeArmWhenConnect	  on
+  ExtModeSkipDownloadWhenConnect off
+  ExtModeLogAll		  on
+  ExtModeAutoUpdateStatusClock on
+  StrictBusMsg		  "None"
+  ProdHWDeviceType	  "32-bit Generic"
+  ShowModelReferenceBlockVersion off
+  ShowModelReferenceBlockIO off
+  BlockDefaults {
+    Orientation		    "right"
+    ForegroundColor	    "black"
+    BackgroundColor	    "white"
+    DropShadow		    off
+    NamePlacement	    "normal"
+    FontName		    "Helvetica"
+    FontSize		    10
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+    ShowName		    on
+  }
+  BlockParameterDefaults {
+    Block {
+      BlockType		      Gain
+      Gain		      "1"
+      Multiplication	      "Element-wise(K.*u)"
+      ParameterDataTypeMode   "Same as input"
+      ParameterDataType	      "sfix(16)"
+      ParameterScalingMode    "Best Precision: Matrix-wise"
+      ParameterScaling	      "2^0"
+      OutDataTypeMode	      "Same as input"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      LockScale		      off
+      RndMeth		      "Floor"
+      SaturateOnIntegerOverflow	on
+      SampleTime	      "-1"
+    }
+    Block {
+      BlockType		      Inport
+      UseBusObject	      off
+      BusObject		      "BusObject"
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      SampleTime	      "-1"
+      DataType		      "auto"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      Interpolate	      on
+    }
+    Block {
+      BlockType		      Outport
+      Port		      "1"
+      UseBusObject	      off
+      BusObject		      "BusObject"
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      SampleTime	      "-1"
+      DataType		      "auto"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      OutputWhenDisabled      "held"
+      InitialOutput	      "[]"
+    }
+    Block {
+      BlockType		      SubSystem
+      ShowPortLabels	      on
+      Permissions	      "ReadWrite"
+      PermitHierarchicalResolution "All"
+      SystemSampleTime	      "-1"
+      RTWFcnNameOpts	      "Auto"
+      RTWFileNameOpts	      "Auto"
+      SimViewingDevice	      off
+      DataTypeOverride	      "UseLocalSettings"
+      MinMaxOverflowLogging   "UseLocalSettings"
+    }
+    Block {
+      BlockType		      Terminator
+    }
+  }
+  AnnotationDefaults {
+    HorizontalAlignment	    "center"
+    VerticalAlignment	    "middle"
+    ForegroundColor	    "black"
+    BackgroundColor	    "white"
+    DropShadow		    off
+    FontName		    "Helvetica"
+    FontSize		    10
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+  }
+  LineDefaults {
+    FontName		    "Helvetica"
+    FontSize		    9
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+  }
+  System {
+    Name		    "cdsWD"
+    Location		    [480, 104, 1060, 386]
+    Open		    on
+    ModelBrowserVisibility  off
+    ModelBrowserWidth	    200
+    ScreenColor		    "white"
+    PaperOrientation	    "landscape"
+    PaperPositionMode	    "auto"
+    PaperType		    "usletter"
+    PaperUnits		    "inches"
+    ZoomFactor		    "100"
+    ReportName		    "simulink-default.rpt"
+    Block {
+      BlockType		      SubSystem
+      Name		      "Subsystem"
+      Ports		      [5, 1]
+      Position		      [275, 124, 315, 186]
+      TreatAsAtomicUnit	      off
+      MinAlgLoopOccurrences   off
+      RTWSystemCode	      "Auto"
+      System {
+	Name			"Subsystem"
+	Location		[595, 129, 955, 381]
+	Open			on
+	ModelBrowserVisibility	off
+	ModelBrowserWidth	200
+	ScreenColor		"white"
+	PaperOrientation	"landscape"
+	PaperPositionMode	"auto"
+	PaperType		"usletter"
+	PaperUnits		"inches"
+	ZoomFactor		"100"
+	Block {
+	  BlockType		  Inport
+	  Name			  "UL"
+	  Position		  [25, 35, 55, 49]
+	  Port			  "1"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "LL"
+	  Position		  [30, 90, 60, 104]
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "UR"
+	  Position		  [35, 140, 65, 154]
+	  Port			  "3"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "LR"
+	  Position		  [30, 195, 60, 209]
+	  Port			  "4"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "SD"
+	  Position		  [200, 90, 230, 104]
+	  Port			  "5"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain"
+	  Position		  [80, 25, 110, 55]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain1"
+	  Position		  [85, 80, 115, 110]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain2"
+	  Position		  [85, 130, 115, 160]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain3"
+	  Position		  [85, 185, 115, 215]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Gain
+	  Name			  "Gain4"
+	  Position		  [250, 80, 280, 110]
+	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator"
+	  Position		  [145, 30, 165, 50]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator1"
+	  Position		  [155, 85, 175, 105]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator2"
+	  Position		  [150, 140, 170, 160]
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator3"
+	  Position		  [145, 205, 165, 225]
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out1"
+	  Position		  [305, 90, 335, 104]
+	  IconDisplay		  "Port number"
+	}
+	Line {
+	  SrcBlock		  "Gain"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain3"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, 15]
+	  DstBlock		  "Terminator3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain2"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, 5]
+	  DstBlock		  "Terminator2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain1"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Terminator1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "UL"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Gain"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "LL"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Gain1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Gain4"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "SD"
+	  SrcPort		  1
+	  DstBlock		  "Gain4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "UR"
+	  SrcPort		  1
+	  DstBlock		  "Gain2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "LR"
+	  SrcPort		  1
+	  DstBlock		  "Gain3"
+	  DstPort		  1
+	}
+      }
+    }
+  }
+}

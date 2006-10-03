@@ -1,0 +1,993 @@
+Library {
+  Name			  "cdsSubtract8"
+  Version		  6.2
+  MdlSubVersion		  0
+  SavedCharacterEncoding  "ibm-5348_P100-1997"
+  SaveDefaultBlockParams  on
+  SampleTimeColors	  off
+  LibraryLinkDisplay	  "none"
+  WideLines		  off
+  ShowLineDimensions	  off
+  ShowPortDataTypes	  off
+  ShowLoopsOnError	  on
+  IgnoreBidirectionalLines off
+  ShowStorageClass	  off
+  ShowTestPointIcons	  on
+  ShowViewerIcons	  on
+  SortedOrder		  off
+  ExecutionContextIcon	  off
+  ShowLinearizationAnnotations on
+  CovSaveName		  "covdata"
+  CovMetricSettings	  "dw"
+  CovNameIncrementing	  off
+  CovHtmlReporting	  on
+  covSaveCumulativeToWorkspaceVar on
+  CovSaveSingleToWorkspaceVar on
+  CovCumulativeReport	  off
+  CovReportOnPause	  on
+  ScopeRefreshTime	  0.035000
+  OverrideScopeRefreshTime on
+  DisableAllScopes	  off
+  BlockNameDataTip	  off
+  BlockParametersDataTip  off
+  BlockDescriptionStringDataTip	off
+  ToolBar		  on
+  StatusBar		  on
+  BrowserShowLibraryLinks off
+  BrowserLookUnderMasks	  off
+  Created		  "Mon Mar 13 13:49:47 2006"
+  UpdateHistory		  "UpdateHistoryNever"
+  ModifiedByFormat	  "%<Auto>"
+  LastModifiedBy	  "rolf"
+  ModifiedDateFormat	  "%<Auto>"
+  LastModifiedDate	  "Mon Mar 13 13:50:23 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:1>"
+  ConfigurationManager	  "None"
+  LinearizationMsg	  "none"
+  Profile		  off
+  ParamWorkspaceSource	  "MATLABWorkspace"
+  ExtModeBatchMode	  off
+  ExtModeEnableFloating	  on
+  ExtModeTrigType	  "manual"
+  ExtModeTrigMode	  "normal"
+  ExtModeTrigPort	  "1"
+  ExtModeTrigElement	  "any"
+  ExtModeTrigDuration	  1000
+  ExtModeTrigDurationFloating "auto"
+  ExtModeTrigHoldOff	  0
+  ExtModeTrigDelay	  0
+  ExtModeTrigDirection	  "rising"
+  ExtModeTrigLevel	  0
+  ExtModeArchiveMode	  "off"
+  ExtModeAutoIncOneShot	  off
+  ExtModeIncDirWhenArm	  off
+  ExtModeAddSuffixToVar	  off
+  ExtModeWriteAllDataToWs off
+  ExtModeArmWhenConnect	  on
+  ExtModeSkipDownloadWhenConnect off
+  ExtModeLogAll		  on
+  ExtModeAutoUpdateStatusClock on
+  StrictBusMsg		  "None"
+  ProdHWDeviceType	  "32-bit Generic"
+  ShowModelReferenceBlockVersion off
+  ShowModelReferenceBlockIO off
+  BlockDefaults {
+    Orientation		    "right"
+    ForegroundColor	    "black"
+    BackgroundColor	    "white"
+    DropShadow		    off
+    NamePlacement	    "normal"
+    FontName		    "Helvetica"
+    FontSize		    10
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+    ShowName		    on
+  }
+  BlockParameterDefaults {
+    Block {
+      BlockType		      Inport
+      UseBusObject	      off
+      BusObject		      "BusObject"
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      SampleTime	      "-1"
+      DataType		      "auto"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      Interpolate	      on
+    }
+    Block {
+      BlockType		      Outport
+      Port		      "1"
+      UseBusObject	      off
+      BusObject		      "BusObject"
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      SampleTime	      "-1"
+      DataType		      "auto"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      OutputWhenDisabled      "held"
+      InitialOutput	      "[]"
+    }
+    Block {
+      BlockType		      SubSystem
+      ShowPortLabels	      on
+      Permissions	      "ReadWrite"
+      PermitHierarchicalResolution "All"
+      SystemSampleTime	      "-1"
+      RTWFcnNameOpts	      "Auto"
+      RTWFileNameOpts	      "Auto"
+      SimViewingDevice	      off
+      DataTypeOverride	      "UseLocalSettings"
+      MinMaxOverflowLogging   "UseLocalSettings"
+    }
+    Block {
+      BlockType		      Sum
+      IconShape		      "rectangular"
+      Inputs		      "++"
+      InputSameDT	      on
+      OutDataTypeMode	      "Same as first input"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      LockScale		      off
+      RndMeth		      "Floor"
+      SaturateOnIntegerOverflow	on
+      SampleTime	      "-1"
+    }
+  }
+  AnnotationDefaults {
+    HorizontalAlignment	    "center"
+    VerticalAlignment	    "middle"
+    ForegroundColor	    "black"
+    BackgroundColor	    "white"
+    DropShadow		    off
+    FontName		    "Helvetica"
+    FontSize		    10
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+  }
+  LineDefaults {
+    FontName		    "Helvetica"
+    FontSize		    9
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+  }
+  System {
+    Name		    "cdsSubtract8"
+    Location		    [197, 92, 969, 643]
+    Open		    on
+    ModelBrowserVisibility  off
+    ModelBrowserWidth	    200
+    ScreenColor		    "white"
+    PaperOrientation	    "landscape"
+    PaperPositionMode	    "auto"
+    PaperType		    "usletter"
+    PaperUnits		    "inches"
+    ZoomFactor		    "100"
+    ReportName		    "simulink-default.rpt"
+    Block {
+      BlockType		      Inport
+      Name		      "In1"
+      Position		      [225, 73, 255, 87]
+      Port		      "1"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In2"
+      Position		      [225, 103, 255, 117]
+      Port		      "2"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In3"
+      Position		      [225, 113, 255, 127]
+      Port		      "3"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In4"
+      Position		      [225, 143, 255, 157]
+      Port		      "4"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In5"
+      Position		      [225, 153, 255, 167]
+      Port		      "5"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In6"
+      Position		      [225, 183, 255, 197]
+      Port		      "6"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In7"
+      Position		      [225, 193, 255, 207]
+      Port		      "7"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In8"
+      Position		      [225, 223, 255, 237]
+      Port		      "8"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In9"
+      Position		      [225, 233, 255, 247]
+      Port		      "9"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In10"
+      Position		      [225, 263, 255, 277]
+      Port		      "10"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In11"
+      Position		      [225, 273, 255, 287]
+      Port		      "11"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In12"
+      Position		      [225, 303, 255, 317]
+      Port		      "12"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In13"
+      Position		      [225, 313, 255, 327]
+      Port		      "13"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In14"
+      Position		      [225, 343, 255, 357]
+      Port		      "14"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In15"
+      Position		      [225, 353, 255, 367]
+      Port		      "15"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In16"
+      Position		      [225, 383, 255, 397]
+      Port		      "16"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      SubSystem
+      Name		      "Subsystem"
+      Ports		      [16, 8]
+      Position		      [255, 225, 295, 300]
+      TreatAsAtomicUnit	      off
+      MinAlgLoopOccurrences   off
+      RTWSystemCode	      "Auto"
+      System {
+	Name			"Subsystem"
+	Location		[397, 134, 562, 520]
+	Open			off
+	ModelBrowserVisibility	off
+	ModelBrowserWidth	200
+	ScreenColor		"white"
+	PaperOrientation	"landscape"
+	PaperPositionMode	"auto"
+	PaperType		"usletter"
+	PaperUnits		"inches"
+	ZoomFactor		"100"
+	Block {
+	  BlockType		  Inport
+	  Name			  "In1"
+	  Position		  [25, 33, 55, 47]
+	  Port			  "1"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In2"
+	  Position		  [25, 63, 55, 77]
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In3"
+	  Position		  [25, 73, 55, 87]
+	  Port			  "3"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In4"
+	  Position		  [25, 103, 55, 117]
+	  Port			  "4"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In5"
+	  Position		  [25, 113, 55, 127]
+	  Port			  "5"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In6"
+	  Position		  [25, 143, 55, 157]
+	  Port			  "6"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In7"
+	  Position		  [25, 153, 55, 167]
+	  Port			  "7"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In8"
+	  Position		  [25, 183, 55, 197]
+	  Port			  "8"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In9"
+	  Position		  [25, 193, 55, 207]
+	  Port			  "9"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In10"
+	  Position		  [25, 223, 55, 237]
+	  Port			  "10"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In11"
+	  Position		  [25, 233, 55, 247]
+	  Port			  "11"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In12"
+	  Position		  [25, 263, 55, 277]
+	  Port			  "12"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In13"
+	  Position		  [25, 273, 55, 287]
+	  Port			  "13"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In14"
+	  Position		  [25, 303, 55, 317]
+	  Port			  "14"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In15"
+	  Position		  [25, 313, 55, 327]
+	  Port			  "15"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In16"
+	  Position		  [25, 343, 55, 357]
+	  Port			  "16"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum"
+	  Ports			  [2, 1]
+	  Position		  [65, 45, 85, 65]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "-+"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum1"
+	  Ports			  [2, 1]
+	  Position		  [65, 85, 85, 105]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "-+"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum2"
+	  Ports			  [2, 1]
+	  Position		  [65, 125, 85, 145]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "-+"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum3"
+	  Ports			  [2, 1]
+	  Position		  [65, 165, 85, 185]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "-+"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum4"
+	  Ports			  [2, 1]
+	  Position		  [65, 205, 85, 225]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "-+"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum5"
+	  Ports			  [2, 1]
+	  Position		  [65, 245, 85, 265]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "-+"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum6"
+	  Ports			  [2, 1]
+	  Position		  [65, 285, 85, 305]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "-+"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum7"
+	  Ports			  [2, 1]
+	  Position		  [65, 325, 85, 345]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "-+"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out1"
+	  Position		  [110, 48, 140, 62]
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out2"
+	  Position		  [110, 88, 140, 102]
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out3"
+	  Position		  [110, 128, 140, 142]
+	  Port			  "3"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out4"
+	  Position		  [110, 168, 140, 182]
+	  Port			  "4"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out5"
+	  Position		  [110, 208, 140, 222]
+	  Port			  "5"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out6"
+	  Position		  [110, 248, 140, 262]
+	  Port			  "6"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out7"
+	  Position		  [110, 288, 140, 302]
+	  Port			  "7"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out8"
+	  Position		  [110, 328, 140, 342]
+	  Port			  "8"
+	  IconDisplay		  "Port number"
+	}
+	Line {
+	  SrcBlock		  "In1"
+	  SrcPort		  1
+	  Points		  [15, 0]
+	  DstBlock		  "Sum"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In2"
+	  SrcPort		  1
+	  Points		  [0, 5; 15, 0]
+	  DstBlock		  "Sum"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "In3"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, -10]
+	  DstBlock		  "Sum1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum1"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In4"
+	  SrcPort		  1
+	  Points		  [0, 5; 15, 0]
+	  DstBlock		  "Sum1"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "In5"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, -10]
+	  DstBlock		  "Sum2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum2"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In6"
+	  SrcPort		  1
+	  Points		  [0, 5; 15, 0]
+	  DstBlock		  "Sum2"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "In7"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, -10]
+	  DstBlock		  "Sum3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum3"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In8"
+	  SrcPort		  1
+	  Points		  [0, 5; 15, 0]
+	  DstBlock		  "Sum3"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "In9"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, -10]
+	  DstBlock		  "Sum4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum4"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In10"
+	  SrcPort		  1
+	  Points		  [0, 5; 15, 0]
+	  DstBlock		  "Sum4"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "In11"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, -10]
+	  DstBlock		  "Sum5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum5"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out6"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In12"
+	  SrcPort		  1
+	  Points		  [0, 5; 15, 0]
+	  DstBlock		  "Sum5"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "In13"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, -10]
+	  DstBlock		  "Sum6"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum6"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out7"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In14"
+	  SrcPort		  1
+	  Points		  [0, 5; 15, 0]
+	  DstBlock		  "Sum6"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "In15"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, -10]
+	  DstBlock		  "Sum7"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum7"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out8"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In16"
+	  SrcPort		  1
+	  Points		  [15, 0]
+	  DstBlock		  "Sum7"
+	  DstPort		  2
+	}
+      }
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out1"
+      Position		      [310, 88, 340, 102]
+      IconDisplay	      "Port number"
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out2"
+      Position		      [310, 128, 340, 142]
+      Port		      "2"
+      IconDisplay	      "Port number"
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out3"
+      Position		      [310, 168, 340, 182]
+      Port		      "3"
+      IconDisplay	      "Port number"
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out4"
+      Position		      [310, 208, 340, 222]
+      Port		      "4"
+      IconDisplay	      "Port number"
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out5"
+      Position		      [310, 248, 340, 262]
+      Port		      "5"
+      IconDisplay	      "Port number"
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out6"
+      Position		      [310, 288, 340, 302]
+      Port		      "6"
+      IconDisplay	      "Port number"
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out7"
+      Position		      [310, 328, 340, 342]
+      Port		      "7"
+      IconDisplay	      "Port number"
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out8"
+      Position		      [310, 368, 340, 382]
+      Port		      "8"
+      IconDisplay	      "Port number"
+    }
+    Line {
+      SrcBlock		      "In1"
+      SrcPort		      1
+      Points		      [-10, 0; 0, 145]
+      DstBlock		      "Subsystem"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      1
+      Points		      [10, 0; 0, 10; 35, 0; 0, -120; -50, 0]
+      DstBlock		      "Out1"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In2"
+      SrcPort		      1
+      Points		      [-10, 0; 0, 120]
+      DstBlock		      "Subsystem"
+      DstPort		      2
+    }
+    Line {
+      SrcBlock		      "In3"
+      SrcPort		      1
+      Points		      [-10, 0; 0, 115]
+      DstBlock		      "Subsystem"
+      DstPort		      3
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      2
+      Points		      [45, 0; 0, -80; -50, 0]
+      DstBlock		      "Out2"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In4"
+      SrcPort		      1
+      Points		      [-10, 0; 0, 90]
+      DstBlock		      "Subsystem"
+      DstPort		      4
+    }
+    Line {
+      SrcBlock		      "In5"
+      SrcPort		      1
+      Points		      [-10, 0; 0, 85]
+      DstBlock		      "Subsystem"
+      DstPort		      5
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      3
+      Points		      [0, 20; 10, 0; 0, 10; 35, 0; 0, -80; -50, 0]
+      DstBlock		      "Out3"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In6"
+      SrcPort		      1
+      Points		      [-10, 0; 0, 60]
+      DstBlock		      "Subsystem"
+      DstPort		      6
+    }
+    Line {
+      SrcBlock		      "In7"
+      SrcPort		      1
+      Points		      [-10, 0; 0, 55]
+      DstBlock		      "Subsystem"
+      DstPort		      7
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      4
+      Points		      [5, 0; 0, 20; 40, 0; 0, -40; -40, 0; 0, -25]
+      DstBlock		      "Out4"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In8"
+      SrcPort		      1
+      Points		      [-10, 0; 0, 30]
+      DstBlock		      "Subsystem"
+      DstPort		      8
+    }
+    Line {
+      SrcBlock		      "In9"
+      SrcPort		      1
+      Points		      [-10, 0; 0, 25]
+      DstBlock		      "Subsystem"
+      DstPort		      9
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      5
+      Points		      [-5, 0]
+      DstBlock		      "Out5"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In10"
+      SrcPort		      1
+      DstBlock		      "Subsystem"
+      DstPort		      10
+    }
+    Line {
+      SrcBlock		      "In11"
+      SrcPort		      1
+      Points		      [-10, 0; 0, -5]
+      DstBlock		      "Subsystem"
+      DstPort		      11
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      6
+      Points		      [-5, 0]
+      DstBlock		      "Out6"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In12"
+      SrcPort		      1
+      Points		      [-10, 0; 0, -30]
+      DstBlock		      "Subsystem"
+      DstPort		      12
+    }
+    Line {
+      SrcBlock		      "In13"
+      SrcPort		      1
+      Points		      [-10, 0; 0, -35]
+      DstBlock		      "Subsystem"
+      DstPort		      13
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      7
+      Points		      [45, 0; 0, 35; -50, 0]
+      DstBlock		      "Out7"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In14"
+      SrcPort		      1
+      Points		      [-10, 0; 0, -60]
+      DstBlock		      "Subsystem"
+      DstPort		      14
+    }
+    Line {
+      SrcBlock		      "In15"
+      SrcPort		      1
+      Points		      [-10, 0; 0, -65]
+      DstBlock		      "Subsystem"
+      DstPort		      15
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      8
+      Points		      [-5, 0]
+      DstBlock		      "Out8"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In16"
+      SrcPort		      1
+      Points		      [-10, 0; 0, -90]
+      DstBlock		      "Subsystem"
+      DstPort		      16
+    }
+  }
+}

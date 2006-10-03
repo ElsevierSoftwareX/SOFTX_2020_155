@@ -1,0 +1,910 @@
+Library {
+  Name			  "cdsSwitch1"
+  Version		  6.2
+  MdlSubVersion		  0
+  SavedCharacterEncoding  "ibm-5348_P100-1997"
+  SaveDefaultBlockParams  on
+  SampleTimeColors	  off
+  LibraryLinkDisplay	  "none"
+  WideLines		  off
+  ShowLineDimensions	  off
+  ShowPortDataTypes	  off
+  ShowLoopsOnError	  on
+  IgnoreBidirectionalLines off
+  ShowStorageClass	  off
+  ShowTestPointIcons	  on
+  ShowViewerIcons	  on
+  SortedOrder		  off
+  ExecutionContextIcon	  off
+  ShowLinearizationAnnotations on
+  CovSaveName		  "covdata"
+  CovMetricSettings	  "dw"
+  CovNameIncrementing	  off
+  CovHtmlReporting	  on
+  covSaveCumulativeToWorkspaceVar on
+  CovSaveSingleToWorkspaceVar on
+  CovCumulativeReport	  off
+  CovReportOnPause	  on
+  ScopeRefreshTime	  0.035000
+  OverrideScopeRefreshTime on
+  DisableAllScopes	  off
+  BlockNameDataTip	  off
+  BlockParametersDataTip  off
+  BlockDescriptionStringDataTip	off
+  ToolBar		  on
+  StatusBar		  on
+  BrowserShowLibraryLinks off
+  BrowserLookUnderMasks	  off
+  Created		  "Mon Mar 13 13:36:58 2006"
+  UpdateHistory		  "UpdateHistoryNever"
+  ModifiedByFormat	  "%<Auto>"
+  LastModifiedBy	  "rolf"
+  ModifiedDateFormat	  "%<Auto>"
+  LastModifiedDate	  "Mon Mar 13 13:37:36 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:1>"
+  ConfigurationManager	  "None"
+  LinearizationMsg	  "none"
+  Profile		  off
+  ParamWorkspaceSource	  "MATLABWorkspace"
+  ExtModeBatchMode	  off
+  ExtModeEnableFloating	  on
+  ExtModeTrigType	  "manual"
+  ExtModeTrigMode	  "normal"
+  ExtModeTrigPort	  "1"
+  ExtModeTrigElement	  "any"
+  ExtModeTrigDuration	  1000
+  ExtModeTrigDurationFloating "auto"
+  ExtModeTrigHoldOff	  0
+  ExtModeTrigDelay	  0
+  ExtModeTrigDirection	  "rising"
+  ExtModeTrigLevel	  0
+  ExtModeArchiveMode	  "off"
+  ExtModeAutoIncOneShot	  off
+  ExtModeIncDirWhenArm	  off
+  ExtModeAddSuffixToVar	  off
+  ExtModeWriteAllDataToWs off
+  ExtModeArmWhenConnect	  on
+  ExtModeSkipDownloadWhenConnect off
+  ExtModeLogAll		  on
+  ExtModeAutoUpdateStatusClock on
+  StrictBusMsg		  "None"
+  ProdHWDeviceType	  "32-bit Generic"
+  ShowModelReferenceBlockVersion off
+  ShowModelReferenceBlockIO off
+  BlockDefaults {
+    Orientation		    "right"
+    ForegroundColor	    "black"
+    BackgroundColor	    "white"
+    DropShadow		    off
+    NamePlacement	    "normal"
+    FontName		    "Helvetica"
+    FontSize		    10
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+    ShowName		    on
+  }
+  BlockParameterDefaults {
+    Block {
+      BlockType		      Ground
+    }
+    Block {
+      BlockType		      Inport
+      UseBusObject	      off
+      BusObject		      "BusObject"
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      SampleTime	      "-1"
+      DataType		      "auto"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      Interpolate	      on
+    }
+    Block {
+      BlockType		      Outport
+      Port		      "1"
+      UseBusObject	      off
+      BusObject		      "BusObject"
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      SampleTime	      "-1"
+      DataType		      "auto"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      OutputWhenDisabled      "held"
+      InitialOutput	      "[]"
+    }
+    Block {
+      BlockType		      SubSystem
+      ShowPortLabels	      on
+      Permissions	      "ReadWrite"
+      PermitHierarchicalResolution "All"
+      SystemSampleTime	      "-1"
+      RTWFcnNameOpts	      "Auto"
+      RTWFileNameOpts	      "Auto"
+      SimViewingDevice	      off
+      DataTypeOverride	      "UseLocalSettings"
+      MinMaxOverflowLogging   "UseLocalSettings"
+    }
+    Block {
+      BlockType		      Switch
+      Criteria		      "u2 >= Threshold"
+      Threshold		      "0"
+      InputSameDT	      on
+      OutDataTypeMode	      "Inherit via internal rule"
+      RndMeth		      "Floor"
+      SaturateOnIntegerOverflow	on
+      ZeroCross		      on
+      SampleTime	      "-1"
+    }
+  }
+  AnnotationDefaults {
+    HorizontalAlignment	    "center"
+    VerticalAlignment	    "middle"
+    ForegroundColor	    "black"
+    BackgroundColor	    "white"
+    DropShadow		    off
+    FontName		    "Helvetica"
+    FontSize		    10
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+  }
+  LineDefaults {
+    FontName		    "Helvetica"
+    FontSize		    9
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+  }
+  System {
+    Name		    "cdsSwitch1"
+    Location		    [480, 104, 1296, 635]
+    Open		    on
+    ModelBrowserVisibility  off
+    ModelBrowserWidth	    200
+    ScreenColor		    "white"
+    PaperOrientation	    "landscape"
+    PaperPositionMode	    "auto"
+    PaperType		    "usletter"
+    PaperUnits		    "inches"
+    ZoomFactor		    "100"
+    ReportName		    "simulink-default.rpt"
+    Block {
+      BlockType		      Inport
+      Name		      "In1"
+      Position		      [325, 163, 355, 177]
+      Port		      "1"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In2"
+      Position		      [500, 163, 530, 177]
+      Port		      "2"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In3"
+      Position		      [320, 238, 350, 252]
+      Port		      "3"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In4"
+      Position		      [495, 238, 525, 252]
+      Port		      "4"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In5"
+      Position		      [320, 318, 350, 332]
+      Port		      "5"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In6"
+      Position		      [495, 318, 525, 332]
+      Port		      "6"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In7"
+      Position		      [315, 393, 345, 407]
+      Port		      "7"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "In8"
+      Position		      [490, 393, 520, 407]
+      Port		      "8"
+      IconDisplay	      "Port number"
+      LatchInput	      off
+    }
+    Block {
+      BlockType		      SubSystem
+      Name		      "Subsystem"
+      Ports		      [8, 8]
+      Position		      [430, 291, 470, 354]
+      TreatAsAtomicUnit	      off
+      MinAlgLoopOccurrences   off
+      RTWSystemCode	      "Auto"
+      System {
+	Name			"Subsystem"
+	Location		[760, 242, 1145, 591]
+	Open			off
+	ModelBrowserVisibility	off
+	ModelBrowserWidth	200
+	ScreenColor		"white"
+	PaperOrientation	"landscape"
+	PaperPositionMode	"auto"
+	PaperType		"usletter"
+	PaperUnits		"inches"
+	ZoomFactor		"100"
+	Block {
+	  BlockType		  Inport
+	  Name			  "In1"
+	  Position		  [45, 28, 75, 42]
+	  Port			  "1"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In2"
+	  Position		  [220, 28, 250, 42]
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In3"
+	  Position		  [40, 103, 70, 117]
+	  Port			  "3"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In4"
+	  Position		  [215, 103, 245, 117]
+	  Port			  "4"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In5"
+	  Position		  [40, 183, 70, 197]
+	  Port			  "5"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In6"
+	  Position		  [215, 183, 245, 197]
+	  Port			  "6"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In7"
+	  Position		  [35, 258, 65, 272]
+	  Port			  "7"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In8"
+	  Position		  [210, 258, 240, 272]
+	  Port			  "8"
+	  IconDisplay		  "Port number"
+	  LatchInput		  off
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground"
+	  Position		  [55, 75, 75, 95]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground1"
+	  Position		  [35, 35, 55, 55]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground10"
+	  Position		  [225, 150, 245, 170]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground11"
+	  Position		  [205, 110, 225, 130]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground12"
+	  Position		  [225, 230, 245, 250]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground13"
+	  Position		  [205, 190, 225, 210]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground14"
+	  Position		  [220, 305, 240, 325]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground15"
+	  Position		  [200, 265, 220, 285]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground2"
+	  Position		  [50, 150, 70, 170]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground3"
+	  Position		  [30, 110, 50, 130]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground4"
+	  Position		  [50, 230, 70, 250]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground5"
+	  Position		  [30, 190, 50, 210]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground6"
+	  Position		  [45, 305, 65, 325]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground7"
+	  Position		  [25, 265, 45, 285]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground8"
+	  Position		  [230, 75, 250, 95]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground9"
+	  Position		  [210, 35, 230, 55]
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Switch"
+	  Position		  [100, 30, 130, 60]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Switch1"
+	  Position		  [95, 105, 125, 135]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Switch2"
+	  Position		  [95, 185, 125, 215]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Switch3"
+	  Position		  [90, 260, 120, 290]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Switch4"
+	  Position		  [275, 30, 305, 60]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Switch5"
+	  Position		  [270, 105, 300, 135]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Switch6"
+	  Position		  [270, 185, 300, 215]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Switch7"
+	  Position		  [265, 260, 295, 290]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out1"
+	  Position		  [155, 38, 185, 52]
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out2"
+	  Position		  [330, 38, 360, 52]
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out3"
+	  Position		  [150, 113, 180, 127]
+	  Port			  "3"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out4"
+	  Position		  [325, 113, 355, 127]
+	  Port			  "4"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out5"
+	  Position		  [150, 193, 180, 207]
+	  Port			  "5"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out6"
+	  Position		  [325, 193, 355, 207]
+	  Port			  "6"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out7"
+	  Position		  [145, 268, 175, 282]
+	  Port			  "7"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out8"
+	  Position		  [320, 268, 350, 282]
+	  Port			  "8"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Line {
+	  SrcBlock		  "Switch7"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out8"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Switch3"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out7"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In8"
+	  SrcPort		  1
+	  DstBlock		  "Switch7"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In7"
+	  SrcPort		  1
+	  DstBlock		  "Switch3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Switch6"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out6"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Switch2"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In6"
+	  SrcPort		  1
+	  DstBlock		  "Switch6"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In5"
+	  SrcPort		  1
+	  DstBlock		  "Switch2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Switch5"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Switch1"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In4"
+	  SrcPort		  1
+	  DstBlock		  "Switch5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In3"
+	  SrcPort		  1
+	  DstBlock		  "Switch1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Switch4"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Switch"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Out1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In2"
+	  SrcPort		  1
+	  DstBlock		  "Switch4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In1"
+	  SrcPort		  1
+	  DstBlock		  "Switch"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Ground15"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Switch7"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Ground14"
+	  SrcPort		  1
+	  Points		  [0, -30]
+	  DstBlock		  "Switch7"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground13"
+	  SrcPort		  1
+	  DstBlock		  "Switch6"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Ground12"
+	  SrcPort		  1
+	  Points		  [0, -30]
+	  DstBlock		  "Switch6"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground11"
+	  SrcPort		  1
+	  DstBlock		  "Switch5"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Ground10"
+	  SrcPort		  1
+	  Points		  [0, -30]
+	  DstBlock		  "Switch5"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground9"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Switch4"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Ground8"
+	  SrcPort		  1
+	  Points		  [0, -30]
+	  DstBlock		  "Switch4"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground7"
+	  SrcPort		  1
+	  DstBlock		  "Switch3"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Ground6"
+	  SrcPort		  1
+	  Points		  [0, -30]
+	  DstBlock		  "Switch3"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground5"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Switch2"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Ground4"
+	  SrcPort		  1
+	  Points		  [0, -30]
+	  DstBlock		  "Switch2"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground3"
+	  SrcPort		  1
+	  Points		  [0, 0]
+	  DstBlock		  "Switch1"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Ground2"
+	  SrcPort		  1
+	  Points		  [0, -30]
+	  DstBlock		  "Switch1"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground1"
+	  SrcPort		  1
+	  DstBlock		  "Switch"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Ground"
+	  SrcPort		  1
+	  Points		  [0, -30]
+	  DstBlock		  "Switch"
+	  DstPort		  3
+	}
+      }
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out1"
+      Position		      [435, 173, 465, 187]
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out2"
+      Position		      [610, 173, 640, 187]
+      Port		      "2"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out3"
+      Position		      [430, 248, 460, 262]
+      Port		      "3"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out4"
+      Position		      [605, 248, 635, 262]
+      Port		      "4"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out5"
+      Position		      [430, 328, 460, 342]
+      Port		      "5"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out6"
+      Position		      [605, 328, 635, 342]
+      Port		      "6"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out7"
+      Position		      [425, 403, 455, 417]
+      Port		      "7"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Block {
+      BlockType		      Outport
+      Name		      "Out8"
+      Position		      [600, 403, 630, 417]
+      Port		      "8"
+      IconDisplay	      "Port number"
+      BusOutputAsStruct	      off
+    }
+    Line {
+      SrcBlock		      "In1"
+      SrcPort		      1
+      Points		      [25, 0; 0, 135]
+      DstBlock		      "Subsystem"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In2"
+      SrcPort		      1
+      Points		      [0, 195; -125, 0; 0, -55]
+      DstBlock		      "Subsystem"
+      DstPort		      2
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      1
+      Points		      [0, -100; -55, 0]
+      DstBlock		      "Out1"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      2
+      Points		      [15, 0; 0, -150; 105, 0]
+      DstBlock		      "Out2"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In3"
+      SrcPort		      1
+      Points		      [55, 0; 0, 70]
+      DstBlock		      "Subsystem"
+      DstPort		      3
+    }
+    Line {
+      SrcBlock		      "In4"
+      SrcPort		      1
+      Points		      [0, 35; -120, 0; 0, 40]
+      DstBlock		      "Subsystem"
+      DstPort		      4
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      3
+      Points		      [5, 0; 0, -35; -65, 0]
+      DstBlock		      "Out3"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      4
+      Points		      [15, 0; 0, -50; 100, 0]
+      DstBlock		      "Out4"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In5"
+      SrcPort		      1
+      DstBlock		      "Subsystem"
+      DstPort		      5
+    }
+    Line {
+      SrcBlock		      "In6"
+      SrcPort		      1
+      Points		      [0, 45; -115, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      6
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      5
+      Points		      [5, 0; 0, 45; -70, 0; 0, -35]
+      DstBlock		      "Out5"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      6
+      Points		      [115, 0]
+      DstBlock		      "Out6"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "In7"
+      SrcPort		      1
+      Points		      [65, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      7
+    }
+    Line {
+      SrcBlock		      "In8"
+      SrcPort		      1
+      Points		      [0, -25; -110, 0]
+      DstBlock		      "Subsystem"
+      DstPort		      8
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      7
+      Points		      [5, 0; 0, 65; -70, 0]
+      DstBlock		      "Out7"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Subsystem"
+      SrcPort		      8
+      Points		      [20, 0; 0, 50; 90, 0]
+      DstBlock		      "Out8"
+      DstPort		      1
+    }
+  }
+}
