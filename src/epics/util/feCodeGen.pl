@@ -383,14 +383,29 @@ while (<IN>) {
     # Info on the part type is in the SourceBlock field.
     if(($inBlock == 1) && ($inRef == 1 ) && ($var1 eq "SourceBlock")){
 	$partErr = 1;
-	if (substr($var2,0,9) eq "cdsSwitch") {
-		$partType[$partCnt] = MULTI_SW;
-		$partErr = 0;
+
+	($r) = $var2 =~ m%(^[^/]+)/.*%g;
+	#print "CDS part: ", $r, "\n";
+
+	# These names need a thorough cleanup !!!
+	if ($r eq "cdsSwitch" || $r eq "cdsSusSw2") {
+		$r = "MultiSwitch";
+	} elsif ($r eq "Matrix6x6" ) {
+		$r = "Matrix";
+	} elsif ($r eq "dsparch4" ) {
+		$r = "Filt";
+	} elsif ($r =~ /^cds/) {
+		# Getting rid of the leading "cds"
+		($r) = $r =~ m/^cds(.+)$/;
 	}
-	if (substr($var2,0,9) eq "cdsSusSw2") {
-		$partType[$partCnt] = MULTI_SW;
-		$partErr = 0;
-	}
+	# Capitalize first character
+	$r = uc(substr($r,0, 1)) . substr($r, 1);
+	   
+	require "lib/$r.pm";
+	$partType[$partCnt] = ("CDS::" . $r . "::partType") -> ();
+	$partErr = 0;
+
+if (0) {
 	if (substr($var2,0,8) eq "cdsSusWd") {
 		$partType[$partCnt] = SUS_WD;
 		$partErr = 0;
@@ -504,6 +519,7 @@ while (<IN>) {
 		$filtCnt ++;
 		$partErr = 0;
 	}
+}
 	if ($partErr)
 	{
 		print "Unknow part type $var2\nExiting script\n";
