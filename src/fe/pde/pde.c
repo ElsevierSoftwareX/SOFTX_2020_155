@@ -464,7 +464,7 @@ asc_outmtrx[1][ii] =
 //Start of subsystem LSC **************************************************
 
 // FILTER MODULE
-lsc_refli = filterModuleD(dsp_ptr,dspCoeff,LSC_REFLI,dWord[1][0],0);
+lsc_refli = filterModuleD(dsp_ptr,dspCoeff,LSC_REFLI,dWord[0][28],0);
 
 // FILTER MODULE
 lsc_reflq = filterModuleD(dsp_ptr,dspCoeff,LSC_REFLQ,dWord[1][1],0);
