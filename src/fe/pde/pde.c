@@ -485,13 +485,13 @@ lsc_as2dc = filterModuleD(dsp_ptr,dspCoeff,LSC_AS2DC,dWord[1][5],0);
 lsc_as3dc = filterModuleD(dsp_ptr,dspCoeff,LSC_AS3DC,dWord[1][6],0);
 
 // FILTER MODULE
-lsc_lock_dc = filterModuleD(dsp_ptr,dspCoeff,LSC_LOCK_DC,dWord[1][7],0);
+lsc_lock_dc = filterModuleD(dsp_ptr,dspCoeff,LSC_LOCK_DC,dWord[0][28],0);
 
 // FILTER MODULE
-lsc_x_trans = filterModuleD(dsp_ptr,dspCoeff,LSC_X_TRANS,dWord[1][8],0);
+lsc_x_trans = filterModuleD(dsp_ptr,dspCoeff,LSC_X_TRANS,dWord[0][29],0);
 
 // FILTER MODULE
-lsc_y_trans = filterModuleD(dsp_ptr,dspCoeff,LSC_Y_TRANS,dWord[1][9],0);
+lsc_y_trans = filterModuleD(dsp_ptr,dspCoeff,LSC_Y_TRANS,dWord[0][30],0);
 
 // MATRIX CALC
 for(ii=0;ii<3;ii++)
