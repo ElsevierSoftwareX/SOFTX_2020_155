@@ -30,6 +30,14 @@ sub printFrontEndVars  {
         ;
 }
 
+# Return front end initialization code
+# Argument 1 is the part number
+# Returns calculated code string
+sub frontEndInitCode {
+	my ($i) = @_;
+        return "";
+}
+
 # Figure out part input code
 # Argument 1 is the part number
 # Argument 2 is the input number

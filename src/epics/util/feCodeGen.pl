@@ -433,8 +433,8 @@ if (0) {
 		$partErr = 0;
 	}
 	if (substr($var2,0,6) eq "cdsOsc") {
-		$partType[$partCnt] = OSC;
-		print "$partCnt is type OSC\n";
+		$partType[$partCnt] = Osc;
+		print "$partCnt is type Osc\n";
 		$partErr = 0;
 	}
 	if (substr($var2,0,11) eq "cdsSubtract") {
@@ -1723,7 +1723,7 @@ if (0) {
 	if($partType[$ii] eq "RAMP_SW") {
 		print OUTH "\tint $xpartName[$ii];\n";
 	}
-	if($partType[$ii] eq "OSC") {
+	if($partType[$ii] eq "Osc") {
 		print OUTH "\tfloat $xpartName[$ii]\_FREQ;\n";
 		print OUTH "\tfloat $xpartName[$ii]\_CLKGAIN;\n";
 		print OUTH "\tfloat $xpartName[$ii]\_SINGAIN;\n";
@@ -1813,7 +1813,7 @@ if (0) {
 	}
 }
 
-	if($partType[$ii] eq "OSC") {
+	if($partType[$ii] eq "Osc") {
 		print EPICS "INVARIABLE $xpartName[$ii]\_FREQ $systemName\.$xpartName[$ii]\_FREQ float ai 0 field(PREC,\"1\")\n";
 		print EPICS "INVARIABLE $xpartName[$ii]\_CLKGAIN $systemName\.$xpartName[$ii]\_CLKGAIN float ai 0 field(PREC,\"1\")\n";
 		print EPICS "INVARIABLE $xpartName[$ii]\_SINGAIN $systemName\.$xpartName[$ii]\_SINGAIN float ai 0 field(PREC,\"1\")\n";
@@ -2010,7 +2010,7 @@ if (0) {
 	if($partType[$ii] eq "DELAY") {
 		print OUT "static double \L$xpartName[$ii];\n";
 	}
-	if($partType[$ii] eq "OSC") {
+	if($partType[$ii] eq "Osc") {
 		print OUT "static double \L$xpartName[$ii]\[3\];\n";
 		print OUT "static double \L$xpartName[$ii]\_freq;\n";
 		print OUT "static double \L$xpartName[$ii]\_delta;\n";
@@ -2142,13 +2142,21 @@ if ($cpus < 3) {
 print OUT "if(feInit)\n\{\n";
 for($ii=0;$ii<$partCnt;$ii++)
 {
+	if ( -e "lib/$partType[$ii].pm" ) {
+	   print OUT ("CDS::" . $partType[$ii] . "::frontEndInitCode") -> ($ii);
+	}	
+
+
 	if($partType[$ii] eq "RMS") {
 		print OUT "\L$xpartName[$ii]\_avg = 0\.0;\n";
 	}
 	if($partType[$ii] eq "GROUND") {
 		print OUT "\L$xpartName[$ii] = 0\.0;\n";
 	}
-	if($partType[$ii] eq "OSC") {
+
+
+if (0) {
+	if($partType[$ii] eq "Osc") {
 	   	$calcExp =  "\L$xpartName[$ii]_freq = ";
 	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$ii]\_FREQ;\n";
 	   	print OUT "$calcExp";
@@ -2182,6 +2190,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 	   print OUT "}\n";
 	   print OUT "pLocalEpics->$systemName\." . $xpartName[$ii] . " = 1;\n";
 	}
+}
 	if($partType[$ii] eq "SUS_WD") {
 	   print OUT "for\(ii=0;ii<20;ii++\) {\n";
 	   print OUT "\t\L$xpartName[$ii]\_avg\[ii\] = 0.0;\n";
