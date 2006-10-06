@@ -52,7 +52,9 @@ sub printFrontEndVars  {
 # Returns calculated input code
 sub fromExp {
         my ($i, $j) = @_;
-	return "";
+        my $from = $::partInNum[$i][$j];
+        my $fromPort = $::partInputPort[$i][$j];
+        return "\L$::xpartName[$from]" . "\[" . $fromPort . "\]";
 }
 
 # Return front end initialization code
@@ -68,11 +70,11 @@ sub frontEndInitCode {
         $calcExp .= "valx = \L$::xpartName[$i]\_delta \/ 2.0;\n";
         $calcExp .= "sincos\(valx, \&lsinx, \&lcosx\);\n";
         $calcExp .= "\L$::xpartName[$i]\_alpha = 2.0 * lsinx * lsinx;\n";
-        $calcExp = "valx = \L$::xpartName[$i]\_delta\;\n";
-        $calcExp = "sincos\(valx, \&lsinx, \&lcosx\);\n";
-        $calcExp = "\L$::xpartName[$i]\_beta = lsinx;\n";
-        $calcExp = "\L$::xpartName[$i]\_cos_prev = 1.0;\n";
-        $calcExp = "\L$::xpartName[$i]\_sin_prev = 0.0;\n";
+        $calcExp .= "valx = \L$::xpartName[$i]\_delta\;\n";
+        $calcExp .= "sincos\(valx, \&lsinx, \&lcosx\);\n";
+        $calcExp .= "\L$::xpartName[$i]\_beta = lsinx;\n";
+        $calcExp .= "\L$::xpartName[$i]\_cos_prev = 1.0;\n";
+        $calcExp .= "\L$::xpartName[$i]\_sin_prev = 0.0;\n";
 	return $calcExp;
 }
 
@@ -103,17 +105,17 @@ sub frontEndCode {
         $calcExp .= "((cycle + 1) == \UFE_RATE))\n";
         $calcExp .= "{\n";
         $calcExp .= "\t\L$::xpartName[$i]_freq = ";
-        $calcExp .= "\tpLocalEpics->$::systemName\.$::xpartName[$i]\_FREQ;\n";
+        $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_FREQ;\n";
         $calcExp .= "\tprintf(\"OSC Freq = \%f\\n\",\L$::xpartName[$i]_freq\);\n";
         $calcExp .= "\t\L$::xpartName[$i]\_delta = 2.0 * 3.1415926535897932384626 * ";
-        $calcExp .= "\t\L$::xpartName[$i]_freq / \UFE_RATE;\n";
+        $calcExp .= "\L$::xpartName[$i]_freq / \UFE_RATE;\n";
         $calcExp .= "\tvalx = \L$::xpartName[$i]\_delta \/ 2.0;\n";
         $calcExp .= "\tsincos\(valx, \&lsinx, \&lcosx\);\n";
         $calcExp .= "\t\L$::xpartName[$i]\_alpha = 2.0 * lsinx * lsinx;\n";
         $calcExp .= "\tvalx = \L$::xpartName[$i]\_delta\;\n";
         $calcExp .= "\tsincos\(valx, \&lsinx, \&lcosx\);\n";
         $calcExp .= "\t\L$::xpartName[$i]\_beta = lsinx;\n";
-        $calcExp .= "\L$::xpartName[$i]\_cos_prev = 1.0;\n";
-        $calcExp .= "\L$::xpartName[$i]\_sin_prev = 0.0;\n";
+        $calcExp .= "\t\L$::xpartName[$i]\_cos_prev = 1.0;\n";
+        $calcExp .= "\t\L$::xpartName[$i]\_sin_prev = 0.0;\n";
         return $calcExp . "}\n";
 }
