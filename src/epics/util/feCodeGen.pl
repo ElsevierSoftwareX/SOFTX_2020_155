@@ -2340,9 +2340,7 @@ if (0) {
 			$fromExp[$qq] .= "\]";
 			$indone = 1;
 		}
-}
-
-		if($partInputType[$mm][$qq] eq "OSC")
+		if($partInputType[$mm][$qq] eq "Osc")
 		{
 			$from = $partInNum[$mm][$qq];
 			$fromPort = $partInputPort[$mm][$qq];
@@ -2352,7 +2350,6 @@ if (0) {
 			$fromExp[$qq] .= "\]";
 			$indone = 1;
 		}
-if (0) {
 		if(($partInputType[$mm][$qq] eq "EpicsOut") || ($partInputType[$mm][$qq] eq "EpicsIn"))
 		{
 			$from = $partInNum[$mm][$qq];
