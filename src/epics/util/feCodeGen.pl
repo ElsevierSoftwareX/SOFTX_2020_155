@@ -1738,7 +1738,7 @@ if (0) {
 	if($partType[$ii] eq "EpicsOut") {
 		print OUTH "\tfloat $xpartName[$ii];\n";
 	}
-	if($partType[$ii] eq "PHASE") {
+	if($partType[$ii] eq "Phase") {
 		print OUTH "\tfloat $xpartName[$ii]\[2\];\n";
 	}
 	if($partType[$ii] eq "WfsPhase") {
@@ -1813,16 +1813,16 @@ if (0) {
 	}
 }
 
+if (0) {
 	if($partType[$ii] eq "Osc") {
 		print EPICS "INVARIABLE $xpartName[$ii]\_FREQ $systemName\.$xpartName[$ii]\_FREQ float ai 0 field(PREC,\"1\")\n";
 		print EPICS "INVARIABLE $xpartName[$ii]\_CLKGAIN $systemName\.$xpartName[$ii]\_CLKGAIN float ai 0 field(PREC,\"1\")\n";
 		print EPICS "INVARIABLE $xpartName[$ii]\_SINGAIN $systemName\.$xpartName[$ii]\_SINGAIN float ai 0 field(PREC,\"1\")\n";
 		print EPICS "INVARIABLE $xpartName[$ii]\_COSGAIN $systemName\.$xpartName[$ii]\_COSGAIN float ai 0 field(PREC,\"1\")\n";
 	}
-	if($partType[$ii] eq "PHASE") {
+	if($partType[$ii] eq "Phase") {
 		print EPICS "PHASE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 	}
-if (0) {
 	if($partType[$ii] eq "WfsPhase") {
 		print EPICS "WFS_PHASE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 	}
@@ -2010,6 +2010,7 @@ if (0) {
 	if($partType[$ii] eq "DELAY") {
 		print OUT "static double \L$xpartName[$ii];\n";
 	}
+if (0) {
 	if($partType[$ii] eq "Osc") {
 		print OUT "static double \L$xpartName[$ii]\[3\];\n";
 		print OUT "static double \L$xpartName[$ii]\_freq;\n";
@@ -2026,10 +2027,9 @@ if (0) {
 			$oscUsed = 1;
 		}
 	}
-	if($partType[$ii] eq "PHASE") {
+	if($partType[$ii] eq "Phase") {
 		print OUT "static double \L$xpartName[$ii]\[2\];\n";
 	}
-if (0) {
 	if($partType[$ii] eq "WfsPhase") {
 		print OUT "static double \L$xpartName[$ii]\[2\];\n";
 	}
@@ -2375,7 +2375,8 @@ if (0) {
 			$fromExp[$qq] .= "\]";
 			$indone = 1;
 		}
-		if($partInputType[$mm][$qq] eq "PHASE")
+if (0) {
+		if($partInputType[$mm][$qq] eq "Phase")
 		{
 			$from = $partInNum[$mm][$qq];
 			$fromPort = $partInputPort[$mm][$qq];
@@ -2385,7 +2386,6 @@ if (0) {
 			$fromExp[$qq] .= "\]";
 			$indone = 1;
 		}
-if (0) {
 		if($partInputType[$mm][$qq] eq "Wd")
 		{
 			$from = $partInNum[$mm][$qq];
@@ -2595,8 +2595,9 @@ if (0) {
 		}
 		print OUT "$calcExp";
 	}
+if (0) {
 	# ******** PHASE ************************************************************************
-	if($partType[$mm] eq "PHASE")
+	if($partType[$mm] eq "Phase")
 	{
 	   	print OUT "// PHASE\n";
 	   	$calcExp = "\L$xpartName[$mm]\[0\] = \(";
@@ -2621,7 +2622,6 @@ if (0) {
 		print OUT "$calcExp";
 	}
 
-if (0) {
 	if($partType[$mm] eq "WfsPhase")
 	{
 	   	print OUT "// WFS PHASE\n";
@@ -2646,12 +2646,11 @@ if (0) {
 	   	$calcExp .=  "\[0\]\[1\]);\n";
 		print OUT "$calcExp";
 	}
-}
 
-	# ******** OSC ************************************************************************
-	if($partType[$mm] eq "OSC")
+	# ******** Osc ************************************************************************
+	if($partType[$mm] eq "Osc")
 	{
-	   	print OUT "// OSC\n";
+	   	print OUT "// Osc\n";
 	   	$calcExp = "\L$xpartName[$mm]\_cos_new = \(1.0 - ";
 	   	$calcExp .=  "\L$xpartName[$mm]\_alpha\) * \L$xpartName[$mm]\_cos_prev - ";
 	   	$calcExp .=  "\L$xpartName[$mm]\_beta * \L$xpartName[$mm]\_sin_prev;\n";
@@ -2705,6 +2704,8 @@ if (0) {
 	   	print OUT "\t$calcExp";
 	   	print OUT "}\n";
 	}
+}
+
 	# ******** MULTIPLY ********************************************************************
 	if($partType[$mm] eq "MULTIPLY")
 	{
