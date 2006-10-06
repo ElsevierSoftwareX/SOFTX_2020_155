@@ -12,7 +12,7 @@
 
 void feCode(int cycle, double dWord[][32],	/* ADC inputs */
 		int dacOut[][16],	/* DAC outputs */
-		FILT_MOD *dspPtr,	/* Filter Mod variables */
+		FILT_MOD *dsp_ptr,	/* Filter Mod variables */
 		COEF *dspCoeff,		/* Filter Mod coeffs */
 		CDS_EPICS *pLocalEpics,	/* EPICS variables */
 		int feInit)	/* Initialization flag */
@@ -247,28 +247,28 @@ pLocalEpics->omc.ASC_PZT_2Y_DVMB = dWord[0][11];
 pLocalEpics->omc.ASC_PZT_2Y_SG = dWord[0][3];
 
 // FILTER MODULE
-asc_qpd1_s1 = filterModuleD(dspPtr,dspCoeff,ASC_QPD1_S1,dWord[0][16],0);
+asc_qpd1_s1 = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD1_S1,dWord[0][16],0);
 
 // FILTER MODULE
-asc_qpd1_s2 = filterModuleD(dspPtr,dspCoeff,ASC_QPD1_S2,dWord[0][17],0);
+asc_qpd1_s2 = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD1_S2,dWord[0][17],0);
 
 // FILTER MODULE
-asc_qpd1_s3 = filterModuleD(dspPtr,dspCoeff,ASC_QPD1_S3,dWord[0][18],0);
+asc_qpd1_s3 = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD1_S3,dWord[0][18],0);
 
 // FILTER MODULE
-asc_qpd1_s4 = filterModuleD(dspPtr,dspCoeff,ASC_QPD1_S4,dWord[0][19],0);
+asc_qpd1_s4 = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD1_S4,dWord[0][19],0);
 
 // FILTER MODULE
-asc_qpd2_s1 = filterModuleD(dspPtr,dspCoeff,ASC_QPD2_S1,dWord[0][20],0);
+asc_qpd2_s1 = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD2_S1,dWord[0][20],0);
 
 // FILTER MODULE
-asc_qpd2_s2 = filterModuleD(dspPtr,dspCoeff,ASC_QPD2_S2,dWord[0][21],0);
+asc_qpd2_s2 = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD2_S2,dWord[0][21],0);
 
 // FILTER MODULE
-asc_qpd2_s3 = filterModuleD(dspPtr,dspCoeff,ASC_QPD2_S3,dWord[0][22],0);
+asc_qpd2_s3 = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD2_S3,dWord[0][22],0);
 
 // FILTER MODULE
-asc_qpd2_s4 = filterModuleD(dspPtr,dspCoeff,ASC_QPD2_S4,dWord[0][23],0);
+asc_qpd2_s4 = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD2_S4,dWord[0][23],0);
 
 // EPICS_OUTPUT
 pLocalEpics->omc.LSC_PD1_UF = dWord[0][14];
@@ -283,16 +283,16 @@ pLocalEpics->omc.LSC_PZT_DVM_AC = dWord[0][25];
 pLocalEpics->omc.LSC_PZT_DVM_DC = dWord[0][24];
 
 // FILTER MODULE
-lsc_trans1_dc = filterModuleD(dspPtr,dspCoeff,LSC_TRANS1_DC,dWord[0][12],0);
+lsc_trans1_dc = filterModuleD(dsp_ptr,dspCoeff,LSC_TRANS1_DC,dWord[0][12],0);
 
 // FILTER MODULE
-lsc_trans1_dco = filterModuleD(dspPtr,dspCoeff,LSC_TRANS1_DCO,dWord[0][12],0);
+lsc_trans1_dco = filterModuleD(dsp_ptr,dspCoeff,LSC_TRANS1_DCO,dWord[0][12],0);
 
 // FILTER MODULE
-lsc_trans2_dc = filterModuleD(dspPtr,dspCoeff,LSC_TRANS2_DC,dWord[0][13],0);
+lsc_trans2_dc = filterModuleD(dsp_ptr,dspCoeff,LSC_TRANS2_DC,dWord[0][13],0);
 
 // FILTER MODULE
-lsc_trans2_dco = filterModuleD(dspPtr,dspCoeff,LSC_TRANS2_DCO,dWord[0][13],0);
+lsc_trans2_dco = filterModuleD(dsp_ptr,dspCoeff,LSC_TRANS2_DCO,dWord[0][13],0);
 
 // MATRIX CALC
 for(ii=0;ii<4;ii++)
@@ -405,10 +405,10 @@ lsc_outmtrx[1][ii] =
 }
 
 
-//Start of subsystem **************************************************
+//Start of subsystem ASC_P1 **************************************************
 
 // FILTER MODULE
-asc_p1_dc = filterModuleD(dspPtr,dspCoeff,ASC_P1_DC,pLocalEpics->omc.ASC_P1_MOUT,0);
+asc_p1_dc = filterModuleD(dsp_ptr,dspCoeff,ASC_P1_DC,pLocalEpics->omc.ASC_P1_MOUT,0);
 
 // OSC
 asc_p1_osc1_cos_new = (1.0 - asc_p1_osc1_alpha) * asc_p1_osc1_cos_prev - asc_p1_osc1_beta * asc_p1_osc1_sin_prev;
@@ -443,20 +443,20 @@ asc_p1_product3 = asc_p1_osc1[1] * asc_p1_dc;
 asc_p1_product2 = asc_p1_dc * asc_p1_osc1[2];
 
 // FILTER MODULE
-asc_p1_i = filterModuleD(dspPtr,dspCoeff,ASC_P1_I,asc_p1_product3,0);
+asc_p1_i = filterModuleD(dsp_ptr,dspCoeff,ASC_P1_I,asc_p1_product3,0);
 
 // FILTER MODULE
-asc_p1_q = filterModuleD(dspPtr,dspCoeff,ASC_P1_Q,asc_p1_product2,0);
+asc_p1_q = filterModuleD(dsp_ptr,dspCoeff,ASC_P1_Q,asc_p1_product2,0);
 
 
-//End of subsystem **************************************************
+//End of subsystem   ASC_P1 **************************************************
 
 
 
-//Start of subsystem **************************************************
+//Start of subsystem ASC_P2 **************************************************
 
 // FILTER MODULE
-asc_p2_dc = filterModuleD(dspPtr,dspCoeff,ASC_P2_DC,pLocalEpics->omc.ASC_P2_MOUT,0);
+asc_p2_dc = filterModuleD(dsp_ptr,dspCoeff,ASC_P2_DC,pLocalEpics->omc.ASC_P2_MOUT,0);
 
 // OSC
 asc_p2_osc1_cos_new = (1.0 - asc_p2_osc1_alpha) * asc_p2_osc1_cos_prev - asc_p2_osc1_beta * asc_p2_osc1_sin_prev;
@@ -491,20 +491,20 @@ asc_p2_product3 = asc_p2_osc1[1] * asc_p2_dc;
 asc_p2_product2 = asc_p2_dc * asc_p2_osc1[2];
 
 // FILTER MODULE
-asc_p2_i = filterModuleD(dspPtr,dspCoeff,ASC_P2_I,asc_p2_product3,0);
+asc_p2_i = filterModuleD(dsp_ptr,dspCoeff,ASC_P2_I,asc_p2_product3,0);
 
 // FILTER MODULE
-asc_p2_q = filterModuleD(dspPtr,dspCoeff,ASC_P2_Q,asc_p2_product2,0);
+asc_p2_q = filterModuleD(dsp_ptr,dspCoeff,ASC_P2_Q,asc_p2_product2,0);
 
 
-//End of subsystem **************************************************
+//End of subsystem   ASC_P2 **************************************************
 
 
 
-//Start of subsystem **************************************************
+//Start of subsystem ASC_Y1 **************************************************
 
 // FILTER MODULE
-asc_y1_dc = filterModuleD(dspPtr,dspCoeff,ASC_Y1_DC,pLocalEpics->omc.ASC_Y1_MOUT,0);
+asc_y1_dc = filterModuleD(dsp_ptr,dspCoeff,ASC_Y1_DC,pLocalEpics->omc.ASC_Y1_MOUT,0);
 
 // OSC
 asc_y1_osc1_cos_new = (1.0 - asc_y1_osc1_alpha) * asc_y1_osc1_cos_prev - asc_y1_osc1_beta * asc_y1_osc1_sin_prev;
@@ -539,20 +539,20 @@ asc_y1_product3 = asc_y1_osc1[1] * asc_y1_dc;
 asc_y1_product2 = asc_y1_dc * asc_y1_osc1[2];
 
 // FILTER MODULE
-asc_y1_i = filterModuleD(dspPtr,dspCoeff,ASC_Y1_I,asc_y1_product3,0);
+asc_y1_i = filterModuleD(dsp_ptr,dspCoeff,ASC_Y1_I,asc_y1_product3,0);
 
 // FILTER MODULE
-asc_y1_q = filterModuleD(dspPtr,dspCoeff,ASC_Y1_Q,asc_y1_product2,0);
+asc_y1_q = filterModuleD(dsp_ptr,dspCoeff,ASC_Y1_Q,asc_y1_product2,0);
 
 
-//End of subsystem **************************************************
+//End of subsystem   ASC_Y1 **************************************************
 
 
 
-//Start of subsystem **************************************************
+//Start of subsystem ASC_Y2 **************************************************
 
 // FILTER MODULE
-asc_y2_dc = filterModuleD(dspPtr,dspCoeff,ASC_Y2_DC,pLocalEpics->omc.ASC_Y2_MOUT,0);
+asc_y2_dc = filterModuleD(dsp_ptr,dspCoeff,ASC_Y2_DC,pLocalEpics->omc.ASC_Y2_MOUT,0);
 
 // OSC
 asc_y2_osc1_cos_new = (1.0 - asc_y2_osc1_alpha) * asc_y2_osc1_cos_prev - asc_y2_osc1_beta * asc_y2_osc1_sin_prev;
@@ -587,20 +587,20 @@ asc_y2_product3 = asc_y2_osc1[1] * asc_y2_dc;
 asc_y2_product2 = asc_y2_dc * asc_y2_osc1[2];
 
 // FILTER MODULE
-asc_y2_i = filterModuleD(dspPtr,dspCoeff,ASC_Y2_I,asc_y2_product3,0);
+asc_y2_i = filterModuleD(dsp_ptr,dspCoeff,ASC_Y2_I,asc_y2_product3,0);
 
 // FILTER MODULE
-asc_y2_q = filterModuleD(dspPtr,dspCoeff,ASC_Y2_Q,asc_y2_product2,0);
+asc_y2_q = filterModuleD(dsp_ptr,dspCoeff,ASC_Y2_Q,asc_y2_product2,0);
 
 
-//End of subsystem **************************************************
+//End of subsystem   ASC_Y2 **************************************************
 
 
 
-//Start of subsystem **************************************************
+//Start of subsystem LSC **************************************************
 
 // FILTER MODULE
-lsc_dc = filterModuleD(dspPtr,dspCoeff,LSC_DC,lsc_inmtrx[1][0],0);
+lsc_dc = filterModuleD(dsp_ptr,dspCoeff,LSC_DC,lsc_inmtrx[1][0],0);
 
 // OSC
 lsc_osc1_cos_new = (1.0 - lsc_osc1_alpha) * lsc_osc1_cos_prev - lsc_osc1_beta * lsc_osc1_sin_prev;
@@ -613,7 +613,7 @@ lsc_osc1[2] = lsc_osc1_cos_new * pLocalEpics->omc.LSC_OSC1_COSGAIN;
 if((lsc_osc1_freq != pLocalEpics->omc.LSC_OSC1_FREQ) && ((cycle + 1) == FE_RATE))
 {
 	lsc_osc1_freq = pLocalEpics->omc.LSC_OSC1_FREQ;
-	printf("OSC Freq = %f %d\n",lsc_osc1_freq,cycle);
+	printf("OSC Freq = %f\n",lsc_osc1_freq);
 	lsc_osc1_delta = 2.0 * 3.1415926535897932384626 * lsc_osc1_freq / FE_RATE;
 	valx = lsc_osc1_delta / 2.0;
 	sincos(valx, &lsinx, &lcosx);
@@ -635,10 +635,14 @@ lsc_product3 = lsc_osc1[1] * lsc_dc;
 lsc_product2 = lsc_dc * lsc_osc1[2];
 
 // FILTER MODULE
-lsc_i = filterModuleD(dspPtr,dspCoeff,LSC_I,lsc_product3,0);
+lsc_i = filterModuleD(dsp_ptr,dspCoeff,LSC_I,lsc_product3,0);
 
 // FILTER MODULE
-lsc_q = filterModuleD(dspPtr,dspCoeff,LSC_Q,lsc_product2,0);
+lsc_q = filterModuleD(dsp_ptr,dspCoeff,LSC_Q,lsc_product2,0);
+
+
+//End of subsystem   LSC **************************************************
+
 
 // MATRIX CALC
 for(ii=0;ii<4;ii++)
@@ -655,31 +659,31 @@ asc_outmtrx[1][ii] =
 }
 
 // FILTER MODULE
-asc_pzt_1a = filterModuleD(dspPtr,dspCoeff,ASC_PZT_1A,asc_outmtrx[1][0],0);
+asc_pzt_1a = filterModuleD(dsp_ptr,dspCoeff,ASC_PZT_1A,asc_outmtrx[1][0],0);
 
 // FILTER MODULE
-asc_pzt_1b = filterModuleD(dspPtr,dspCoeff,ASC_PZT_1B,asc_outmtrx[1][1],0);
+asc_pzt_1b = filterModuleD(dsp_ptr,dspCoeff,ASC_PZT_1B,asc_outmtrx[1][1],0);
 
 // FILTER MODULE
-asc_pzt_2a = filterModuleD(dspPtr,dspCoeff,ASC_PZT_2A,asc_outmtrx[1][2],0);
+asc_pzt_2a = filterModuleD(dsp_ptr,dspCoeff,ASC_PZT_2A,asc_outmtrx[1][2],0);
 
 // FILTER MODULE
-asc_pzt_2b = filterModuleD(dspPtr,dspCoeff,ASC_PZT_2B,asc_outmtrx[1][3],0);
+asc_pzt_2b = filterModuleD(dsp_ptr,dspCoeff,ASC_PZT_2B,asc_outmtrx[1][3],0);
 
 // FILTER MODULE
-asc_qpd1_p = filterModuleD(dspPtr,dspCoeff,ASC_QPD1_P,divide,0);
+asc_qpd1_p = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD1_P,divide,0);
 
 // FILTER MODULE
-asc_qpd1_y = filterModuleD(dspPtr,dspCoeff,ASC_QPD1_Y,divide1,0);
+asc_qpd1_y = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD1_Y,divide1,0);
 
 // FILTER MODULE
-asc_qpd2_p = filterModuleD(dspPtr,dspCoeff,ASC_QPD2_P,divide2,0);
+asc_qpd2_p = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD2_P,divide2,0);
 
 // FILTER MODULE
-asc_qpd2_y = filterModuleD(dspPtr,dspCoeff,ASC_QPD2_Y,divide3,0);
+asc_qpd2_y = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD2_Y,divide3,0);
 
 // FILTER MODULE
-lsc_drive = filterModuleD(dspPtr,dspCoeff,LSC_DRIVE,lsc_outmtrx[1][0],0);
+lsc_drive = filterModuleD(dsp_ptr,dspCoeff,LSC_DRIVE,lsc_outmtrx[1][0],0);
 
 // EPICS_OUTPUT
 pLocalEpics->omc.LSC_FEED = lsc_drive;
@@ -699,10 +703,10 @@ pLocalEpics->omc.LSC_Q_MON = lsc_phase[1];
 pLocalEpics->omc.LSC_I_MON = lsc_phase[0];
 
 // FILTER MODULE
-lsc_gain = filterModuleD(dspPtr,dspCoeff,LSC_GAIN,pLocalEpics->omc.LSC_I_MON,0);
+lsc_gain = filterModuleD(dsp_ptr,dspCoeff,LSC_GAIN,pLocalEpics->omc.LSC_I_MON,0);
 
 // FILTER MODULE
-lsc_output = filterModuleD(dspPtr,dspCoeff,LSC_OUTPUT,lsc_gain,0);
+lsc_output = filterModuleD(dsp_ptr,dspCoeff,LSC_OUTPUT,lsc_gain,0);
 
 // DAC number is 0
 dacOut[0][0] = asc_pzt_1a;
