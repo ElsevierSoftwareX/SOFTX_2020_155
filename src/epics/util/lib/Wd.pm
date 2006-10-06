@@ -39,6 +39,20 @@ sub printFrontEndVars  {
         print ::OUT "static float \L$::xpartName[$i]\_var\[$::partInCnt[$i]\];\n";
         print ::OUT "float \L$::xpartName[$i]\_vabs;\n";
 }
+
+# Return front end initialization code
+# Argument 1 is the part number
+# Returns calculated code string
+sub frontEndInitCode {
+        my ($i) = @_;
+        return "\L$::xpartName[$i] = 0.0;\n"
+        . "for \(ii=0; ii<$::partInCnt[$i]; ii++\) {\n"
+        . "\t\L$::xpartName[$i]\_avg\[ii\] = 0.0;\n"
+        . "\t\L$::xpartName[$i]\_var\[ii\] = 0.0;\n"
+        . "}\n"
+        . "pLocalEpics->$::systemName\." . $::xpartName[$i] . " = 1;\n";
+}
+
 # Figure out part input code
 # Argument 1 is the part number
 # Argument 2 is the input number
