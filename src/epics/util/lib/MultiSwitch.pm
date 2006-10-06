@@ -14,6 +14,13 @@ sub printHeaderStruct {
         print ::OUTH "\tint $::xpartName[$i];\n";
 }
 
+# Print Epics variable definitions
+# Current part number is passed as first argument
+sub printEpics {
+        my ($i) = @_;
+        print ::EPICS "INVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
+}
+
 # Print variable declarations int front-end file
 # Current part number is passed as first argument
 sub printFrontEndVars  {

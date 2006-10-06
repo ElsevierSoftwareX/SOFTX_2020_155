@@ -19,6 +19,13 @@ sub printHeaderStruct {
 	;
 }
 
+# Print Epics variable definitions
+# Current part number is passed as first argument
+sub printEpics {
+        my ($i) = @_;
+        ; 
+}
+
 
 # Print variable declarations int front-end file
 # Current part number is passed as first argument
