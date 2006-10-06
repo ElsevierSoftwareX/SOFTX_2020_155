@@ -27,6 +27,13 @@ sub printHeaderStruct {
         print ::OUTH "\tfloat $::xpartName[$i]\[$::matOuts[$i]\]\[$::partInCnt[$i]\];\n";
 }
 
+# Print Epics variable definitions
+# Current part number is passed as first argument
+sub printEpics {
+        my ($i) = @_;
+	; # already printed above
+}
+
 
 # Print variable declarations int front-end file
 # Current part number is passed as first argument

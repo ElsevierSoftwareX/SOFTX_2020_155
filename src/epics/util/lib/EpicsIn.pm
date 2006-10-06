@@ -13,6 +13,12 @@ sub printHeaderStruct {
         print ::OUTH "\tfloat $::xpartName[$i];\n";
 }
 
+# Print Epics variable definitions
+# Current part number is passed as first argument
+sub printEpics {
+        my ($i) = @_;
+	print ::EPICS "INVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] float ai 0 field(PREC,\"3\")\n";
+}
 
 # Print variable declarations int front-end file
 # Current part number is passed as first argument
@@ -20,6 +26,7 @@ sub printFrontEndVars  {
         my ($i) = @_;
         ;
 }
+
 # Figure out part input code
 # Argument 1 is the part number
 # Argument 2 is the input number

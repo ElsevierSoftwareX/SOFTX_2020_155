@@ -392,7 +392,7 @@ while (<IN>) {
 	#
 	# START part name transformation code
 	if ($r eq "cdsSwitch" || $r eq "cdsSusSw2") { $r = "MultiSwitch"; }
-	elsif ($r eq "Matrix6x6" ) { $r = "Matrix"; }
+	elsif ($r =~ /^Matrix/) { $r = "Matrix"; }
 	elsif ($r eq "dsparch4" ) { $r = "Filt"; }
 	elsif ($r eq "cdsWD" ) { $r = "Wd"; }
 	elsif ($r =~ /^cds/) {
@@ -1794,15 +1794,25 @@ print EPICS "\n\n";
 #Load EPICS I/O Parts
 for($ii=0;$ii<$partCnt;$ii++)
 {
+	if ($cdsPart[$ii]) {
+	  ("CDS::" . $partType[$ii] . "::printEpics") -> ($ii);
+	}
+
+if (0) {
 	if($partType[$ii] eq "MultiSwitch") {
 		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 	}
+}
+
 	if($partType[$ii] eq "RAMP_SW") {
 		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 	}
+if (0) {
 	if($partType[$ii] eq "EpicsIn") {
 		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 	}
+}
+
 	if($partType[$ii] eq "OSC") {
 		print EPICS "INVARIABLE $xpartName[$ii]\_FREQ $systemName\.$xpartName[$ii]\_FREQ float ai 0 field(PREC,\"1\")\n";
 		print EPICS "INVARIABLE $xpartName[$ii]\_CLKGAIN $systemName\.$xpartName[$ii]\_CLKGAIN float ai 0 field(PREC,\"1\")\n";
@@ -1812,17 +1822,20 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "PHASE") {
 		print EPICS "PHASE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 	}
+if (0) {
 	if($partType[$ii] eq "WfsPhase") {
 		print EPICS "WFS_PHASE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 	}
 	if($partType[$ii] eq "EpicsOut") {
 		print EPICS "OUTVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 	}
+}
 	if($partType[$ii] eq "PRODUCT") {
 		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 		print EPICS "INVARIABLE $xpartName[$ii]\_TRAMP $systemName\.$xpartName[$ii]\_TRAMP int ai 0 field(PREC,\"0\")\n";
 		print EPICS "OUTVARIABLE $xpartName[$ii]\_RMON $systemName\.$xpartName[$ii]\_RMON int ai 0 field(PREC,\"0\")\n";
 	}
+if (0) {
 	if($partType[$ii] eq "Wd") {
 	#	print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 		print EPICS "MOMENTARY $xpartName[$ii] $systemName\.$xpartName[$ii] int ai 0\n";
@@ -1833,6 +1846,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 		}
 		print EPICS "INVARIABLE $xpartName[$ii]\_MAX $systemName\.$xpartName[$ii]\_MAX int ai 0 field(PREC,\"0\")\n";
 	}
+}
 	if($partType[$ii] eq "SUS_WD") {
 		print EPICS "OUTVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int ai 0 \n";
 		print EPICS "OUTVARIABLE $xpartName[$ii]\_VAR_M0_F1 $systemName\.$xpartName[$ii]\_VAR\[0\] float ai 0 field(PREC,\"1\")\n";
