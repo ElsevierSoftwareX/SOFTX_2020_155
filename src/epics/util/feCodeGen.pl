@@ -269,7 +269,7 @@ while (<IN>) {
 			# $partInput[$ii][$partInCnt[$ii]] = $conSrc;
 			# $partInputPort[$ii][$partInCnt[$ii]] = $conDesPort - 1;
                        	# $partSysFromx[$ii][($conDesPort - 1)] = $subNum;
-			if(substr($conDes,0,3) eq "DAC")
+			if(substr($conDes,0,3) eq "Dac")
 			{
 				$partOutputPort[$ii][$partInCnt[$ii]] = $conDesPort - 1;
 				#print "$xpartName[$ii] $partInCnt[$ii] has link to $partInput[$ii][$partInCnt[$ii]] $partOutputPort[$ii][$partInCnt[$ii]]\n";
@@ -387,22 +387,25 @@ while (<IN>) {
 	($r) = $var2 =~ m%(^[^/]+)/.*%g;
 	#print "CDS part: ", $r, "\n";
 
+	#
 	# These names need a thorough cleanup !!!
-	if ($r eq "cdsSwitch" || $r eq "cdsSusSw2") {
-		$r = "MultiSwitch";
-	} elsif ($r eq "Matrix6x6" ) {
-		$r = "Matrix";
-	} elsif ($r eq "dsparch4" ) {
-		$r = "Filt";
-	} elsif ($r =~ /^cds/) {
+	#
+	# START part name transformation code
+	if ($r eq "cdsSwitch" || $r eq "cdsSusSw2") { $r = "MultiSwitch"; }
+	elsif ($r eq "Matrix6x6" ) { $r = "Matrix"; }
+	elsif ($r eq "dsparch4" ) { $r = "Filt"; }
+	elsif ($r eq "cdsWD" ) { $r = "Wd"; }
+	elsif ($r =~ /^cds/) {
 		# Getting rid of the leading "cds"
 		($r) = $r =~ m/^cds(.+)$/;
 	}
 	# Capitalize first character
 	$r = uc(substr($r,0, 1)) . substr($r, 1);
+	# END part name transformation code
 	   
 	require "lib/$r.pm";
 	$partType[$partCnt] = ("CDS::" . $r . "::partType") -> ();
+	$cdsPart[$partCnt] = 1;
 	$partErr = 0;
 
 if (0) {
@@ -704,7 +707,7 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 				$fromPort = $partOutputPortUsed[$xx][$jj];
 				# $fromPort = $partInputPort[$kk][0];
 				$partInput[$kk][0] = $xpartName[$xx];
-				$partInputType[$kk][0] = "ADC";
+				$partInputType[$kk][0] = "Adc";
 				$partInNum[$kk][0] = $xx;
 				#$partInputPort[$kk][0] = $fromPort;
 				$partSysFrom[$kk] = 100 + $xx;
@@ -720,7 +723,7 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 					#$partInput[$toNum][$toPort] = $xpartName[$xx];
 					$partInput[$toNum][$toPort] = $adcName;
 					$partInputPort[$toNum][$toPort] = $adcChan;
-					$partInputType[$toNum][$toPort] = "ADC";
+					$partInputType[$toNum][$toPort] = "Adc";
 					#print "\tNew adc connect $xpartName[$toNum] $adcNum $adcChan to partnum $partInput[$toNum][$toPort]\n";
 				}
 				}
@@ -737,7 +740,7 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 				#$fromPort = $partOutputPort[$xx][$jj];
 				$fromPort = $partOutputPortUsed[$xx][$jj];
 				$partInput[$kk][0] = $xpartName[$xx];
-				$partInputType[$kk][0] = "ADC";
+				$partInputType[$kk][0] = "Adc";
 				$partInNum[$kk][0] = $xx;
 				$partInputPort[$kk][0] = $fromPort;
 					$adcName = $partInput[$xx][$fromPort];
@@ -872,7 +875,7 @@ for($ii=0;$ii<$subSys;$ii++)
 	$ssCnt = 0;
 	for($jj=$subSysPartStart[$ii];$jj<$subSysPartStop[$ii];$jj++)
 	{
-		if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "EPICS_INPUT"))
+		if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "EpicsIn"))
 		{
 			$partsRemaining --;
 			$partUsed[$jj] = 1;
@@ -1040,7 +1043,7 @@ foreach $i (0 .. $subSys-1) {
 	# See if this subsystem has ADC inputs
 	$has_inputs = 0;
 	for ($subSysPartStart[$i] .. $subSysPartStop[$i]) {
-		if ($partType[$_] eq "INPUT" && $partInputType[$_][0] eq "ADC") {
+		if ($partType[$_] eq "INPUT" && $partInputType[$_][0] eq "Adc") {
 			$has_inputs = 1;
 			break;
 		}
@@ -1061,7 +1064,7 @@ foreach $i (0 .. $subSys-1) {
 		# Insert individual ADC inputs after the input group
 		for ($subSysPartStart[$i] .. $subSysPartStop[$i]) {
 			if ($partInput[$_][0] =~ m/adc_(\d+)_(\d+)/
-			    && $partInputType[$_][0] eq "ADC") {
+			    && $partInputType[$_][0] eq "Adc") {
 				$node = {
 					NAME => $xpartName[$_],
 					TYPE => $partType[$_],
@@ -1237,7 +1240,7 @@ sub find_prog_groups {
 		$nm .= $_;
 	}
 	$prog_groups{$nm}++;
-	if ($node->{TYPE} eq "FILT") {
+	if ($node->{TYPE} eq "Filt") {
 		$prog_group_fmods{$nm}++;
 	}
 	$node->{GROUP} = $nm;
@@ -1481,7 +1484,7 @@ $subUsed[$ii] = 0;
 $allADC = 1;
 	for($jj=0;$jj<$subCntr[$ii];$jj++)
 	{
-		if($subInputsType[$ii][$jj] ne "ADC")
+		if($subInputsType[$ii][$jj] ne "Adc")
 		{
 			$allADC = 0;
 		}
@@ -1507,7 +1510,7 @@ for($ii=0;$ii<$searchCnt;$ii++)
 	{
 		for($jj=0;$jj<$partInCnt[$xx];$jj++)
 		{
-			if(($partInputType[$xx][$jj] ne "ADC") && ($partInputType[$xx][$jj] ne "DELAY"))
+			if(($partInputType[$xx][$jj] ne "Adc") && ($partInputType[$xx][$jj] ne "DELAY"))
 
 			{
 					$allADC = 0;
@@ -1548,7 +1551,7 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 				$yy = $subInputs[$ii][$jj] - 100;
 				for($kk=0;$kk<$searchCnt;$kk++)
 				{
-					if(($partUsed[$yy] != 1) && ($subInputsType[$ii][$jj] ne "ADC") && ($partType[$yy] ne "DELAY"))
+					if(($partUsed[$yy] != 1) && ($subInputsType[$ii][$jj] ne "Adc") && ($partType[$yy] ne "DELAY"))
 					{
 						$allADC = 0;
 					}
@@ -1585,7 +1588,7 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 					}
 				}
 				else {
-				if(($subUsed[$yy] != 1) && ($partInputType[$xx][$jj] ne "ADC"))
+				if(($subUsed[$yy] != 1) && ($partInputType[$xx][$jj] ne "Adc"))
 				{
 						$allADC = 0;
 				}
@@ -1693,7 +1696,12 @@ print OUTH "typedef struct \U$systemName {\n";
 print EPICS "\nEPICS CDS_EPICS dspSpace coeffSpace epicsSpace\n\n";
 for($ii=0;$ii<$partCnt;$ii++)
 {
-	if($partType[$ii] eq "MATRIX") {
+	if ($cdsPart[$ii]) {
+	  ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
+	}
+
+if (0) {
+	if($partType[$ii] eq "Matrix") {
 		for($qq=0;$qq<$partOutCnt[$ii];$qq++)
 		{
 			$portUsed[$qq] = 0;
@@ -1721,19 +1729,19 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUTH "\tfloat $xpartName[$ii]\_SINGAIN;\n";
 		print OUTH "\tfloat $xpartName[$ii]\_COSGAIN;\n";
 	}
-	if($partType[$ii] eq "MULTI_SW") {
+	if($partType[$ii] eq "MultiSwitch") {
 		print OUTH "\tint $xpartName[$ii];\n";
 	}
-	if($partType[$ii] eq "EPICS_INPUT") {
+	if($partType[$ii] eq "EpicsIn") {
 		print OUTH "\tfloat $xpartName[$ii];\n";
 	}
-	if($partType[$ii] eq "EPICS_OUTPUT") {
+	if($partType[$ii] eq "EpicsOut") {
 		print OUTH "\tfloat $xpartName[$ii];\n";
 	}
 	if($partType[$ii] eq "PHASE") {
 		print OUTH "\tfloat $xpartName[$ii]\[2\];\n";
 	}
-	if($partType[$ii] eq "WFS_PHASE") {
+	if($partType[$ii] eq "WfsPhase") {
 		print OUTH "\tfloat $xpartName[$ii]\[2\]\[2\];\n";
 	}
 	if($partType[$ii] eq "PRODUCT") {
@@ -1741,7 +1749,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUTH "\tint $xpartName[$ii]\_TRAMP;\n";
 		print OUTH "\tint $xpartName[$ii]\_RMON;\n";
 	}
-	if($partType[$ii] eq "SUS_WD1") {
+	if($partType[$ii] eq "Wd") {
 		print OUTH "\tint $xpartName[$ii];\n";
 		print OUTH "\tint $xpartName[$ii]_STAT;\n";
 		print OUTH "\tint $xpartName[$ii]\_MAX;\n";
@@ -1755,6 +1763,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "SEI_WD1") {
 		print OUTH "\tSEI_WATCHDOG $xpartName[$ii];\n";
 	}
+} # if (0)
 }
 print EPICS "\n\n";
 print OUTH "} \U$systemName;\n\n";
@@ -1785,13 +1794,13 @@ print EPICS "\n\n";
 #Load EPICS I/O Parts
 for($ii=0;$ii<$partCnt;$ii++)
 {
-	if($partType[$ii] eq "MULTI_SW") {
+	if($partType[$ii] eq "MultiSwitch") {
 		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 	}
 	if($partType[$ii] eq "RAMP_SW") {
 		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 	}
-	if($partType[$ii] eq "EPICS_INPUT") {
+	if($partType[$ii] eq "EpicsIn") {
 		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 	}
 	if($partType[$ii] eq "OSC") {
@@ -1803,10 +1812,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "PHASE") {
 		print EPICS "PHASE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 	}
-	if($partType[$ii] eq "WFS_PHASE") {
+	if($partType[$ii] eq "WfsPhase") {
 		print EPICS "WFS_PHASE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 	}
-	if($partType[$ii] eq "EPICS_OUTPUT") {
+	if($partType[$ii] eq "EpicsOut") {
 		print EPICS "OUTVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 	}
 	if($partType[$ii] eq "PRODUCT") {
@@ -1814,7 +1823,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print EPICS "INVARIABLE $xpartName[$ii]\_TRAMP $systemName\.$xpartName[$ii]\_TRAMP int ai 0 field(PREC,\"0\")\n";
 		print EPICS "OUTVARIABLE $xpartName[$ii]\_RMON $systemName\.$xpartName[$ii]\_RMON int ai 0 field(PREC,\"0\")\n";
 	}
-	if($partType[$ii] eq "SUS_WD1") {
+	if($partType[$ii] eq "Wd") {
 	#	print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 		print EPICS "MOMENTARY $xpartName[$ii] $systemName\.$xpartName[$ii] int ai 0\n";
 		print EPICS "OUTVARIABLE $xpartName[$ii]\_STAT $systemName\.$xpartName[$ii]_STAT int ai 0 \n";
@@ -1944,9 +1953,15 @@ print OUT "\n\n";
 sub printVariables {
 for($ii=0;$ii<$partCnt;$ii++)
 {
-	if($partType[$ii] eq "MATRIX") {
+	if ($cdsPart[$ii]) {
+	  ("CDS::" . $partType[$ii] . "::printFrontEndVars") -> ($ii);
+	}
+
+if (0) {
+	if($partType[$ii] eq "Matrix") {
 		print OUT "double \L$xpartName[$ii]\[$matOuts[$ii]\]\[$partInCnt[$ii]\];\n";
 	}
+}
 	if($partType[$ii] eq "SUM") {
 		$port = $partInCnt[$ii];
 		print OUT "double \L$xpartName[$ii];\n";
@@ -1962,18 +1977,22 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "DIFF_JUNC") {
 		print OUT "double \L$xpartName[$ii]\[16\];\n";
 	}
-	if($partType[$ii] eq "FILT") {
+if (0) {
+	if($partType[$ii] eq "Filt") {
 		print OUT "double \L$xpartName[$ii];\n";
 	}
+}
 	if($partType[$ii] eq "FIR_FILTER") {
 		print OUT "double \L$xpartName[$ii];\n";
 	}
 	if($partType[$ii] eq "RAMP_SW") {
 		print OUT "double \L$xpartName[$ii]\[4\];\n";
 	}
-	if($partType[$ii] eq "MULTI_SW") {
+if (0) {
+	if($partType[$ii] eq "MultiSwitch") {
 		print OUT "double \L$xpartName[$ii]\[$partOutCnt[$ii]\];\n";
 	}
+}
 	if($partType[$ii] eq "DELAY") {
 		print OUT "static double \L$xpartName[$ii];\n";
 	}
@@ -1996,9 +2015,11 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "PHASE") {
 		print OUT "static double \L$xpartName[$ii]\[2\];\n";
 	}
-	if($partType[$ii] eq "WFS_PHASE") {
+if (0) {
+	if($partType[$ii] eq "WfsPhase") {
 		print OUT "static double \L$xpartName[$ii]\[2\];\n";
 	}
+}
 	if($partType[$ii] eq "PRODUCT") {
 		print OUT "double \L$xpartName[$ii]\[$partOutCnt[$ii]\];\n";
 		print OUT "float $xpartName[$ii]\_CALC;\n";
@@ -2010,12 +2031,14 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "GROUND") {
 		print OUT "static float \L$xpartName[$ii];\n";
 	}
-	if($partType[$ii] eq "SUS_WD1") {
+if (0) {
+	if($partType[$ii] eq "Wd") {
 	   print OUT "static double \L$xpartName[$ii];\n";
 	   print OUT "static float \L$xpartName[$ii]\_avg\[$partInCnt[$ii]\];\n";
 	   print OUT "static float \L$xpartName[$ii]\_var\[$partInCnt[$ii]\];\n";
 	   print OUT "float \L$xpartName[$ii]\_vabs;\n";
 	}
+}
 	if($partType[$ii] eq "SUS_WD") {
 	   print OUT "float \L$xpartName[$ii];\n";
 	   print OUT "static float \L$xpartName[$ii]\_avg\[20\];\n";
@@ -2137,7 +2160,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 		$calcExp = "\L$xpartName[$ii]\_sin_prev = 0.0;\n";
 	   	print OUT "$calcExp";
 	}
-	if($partType[$ii] eq "SUS_WD1") {
+	if($partType[$ii] eq "Wd") {
 	   print OUT "\L$xpartName[$ii] = 0.0;\n";
 	   print OUT "for\(ii=0;ii<$partInCnt[$ii];ii++\) {\n";
 	   print OUT "\t\L$xpartName[$ii]\_avg\[ii\] = 0.0;\n";
@@ -2266,7 +2289,14 @@ for($xx=0;$xx<$processCnt;$xx++)
 	for($qq=0;$qq<$inCnt;$qq++)
 	{
 		$indone = 0;
-		if($partInputType[$mm][$qq] eq "ADC")
+		if ( -e "lib/$partInputType[$mm][$qq].pm" ) {
+		  require "lib/$partInputType[$mm][$qq].pm";
+	  	  $fromExp[$qq] = ("CDS::" . $partInputType[$mm][$qq] . "::fromExp") -> ($mm, $qq);
+	    	  $indone = $fromExp[$qq] ne "";
+		}
+
+if (0) {
+		if($partInputType[$mm][$qq] eq "Adc")
 		{
 			$card = $partInNum[$mm][$qq];
 			$chan = $partInputPort[$mm][$qq];
@@ -2277,7 +2307,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$fromExp[$qq] .= "\]";
 			$indone = 1;
 		}
-		if($partInputType[$mm][$qq] eq "MATRIX")
+		if($partInputType[$mm][$qq] eq "Matrix")
 		{
 			$from = $partInNum[$mm][$qq];
 			$fromPort = $partInputPort[$mm][$qq];
@@ -2287,6 +2317,8 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$fromExp[$qq] .= "\]";
 			$indone = 1;
 		}
+}
+
 		if($partInputType[$mm][$qq] eq "OSC")
 		{
 			$from = $partInNum[$mm][$qq];
@@ -2297,7 +2329,8 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$fromExp[$qq] .= "\]";
 			$indone = 1;
 		}
-		if(($partInputType[$mm][$qq] eq "EPICS_OUTPUT") || ($partInputType[$mm][$qq] eq "EPICS_INPUT"))
+if (0) {
+		if(($partInputType[$mm][$qq] eq "EpicsOut") || ($partInputType[$mm][$qq] eq "EpicsIn"))
 		{
 			$from = $partInNum[$mm][$qq];
 			$fromPort = $partInputPort[$mm][$qq];
@@ -2307,7 +2340,9 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$fromExp[$qq] .= $xpartName[$from];
 			$indone = 1;
 		}
-		if(($partInputType[$mm][$qq] eq "RAMP_SW") || ($partInputType[$mm][$qq] eq "MULTI_SW") || ($partInputType[$mm][$qq] eq "PRODUCT") || ($partInputType[$mm][$qq] eq "DIFF_JUNC"))
+}
+
+		if(($partInputType[$mm][$qq] eq "RAMP_SW") || ($partInputType[$mm][$qq] eq "PRODUCT") || ($partInputType[$mm][$qq] eq "DIFF_JUNC"))
 		{
 			$from = $partInNum[$mm][$qq];
 			$fromPort = $partInputPort[$mm][$qq];
@@ -2317,7 +2352,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$fromExp[$qq] .= "\]";
 			$indone = 1;
 		}
-		if($partInputType[$mm][$qq] eq "PHASE" || $partInputType[$mm][$qq] eq "WFS_PHASE")
+		if($partInputType[$mm][$qq] eq "PHASE")
 		{
 			$from = $partInNum[$mm][$qq];
 			$fromPort = $partInputPort[$mm][$qq];
@@ -2327,13 +2362,15 @@ for($xx=0;$xx<$processCnt;$xx++)
 			$fromExp[$qq] .= "\]";
 			$indone = 1;
 		}
-		if($partInputType[$mm][$qq] eq "SUS_WD1")
+if (0) {
+		if($partInputType[$mm][$qq] eq "Wd")
 		{
 			$from = $partInNum[$mm][$qq];
 			$fromPort = $partInputPort[$mm][$qq];
 			$fromExp[$qq] = "\L$xpartName[$from]";
 			$indone = 1;
 		}
+}
 		if($indone == 0)
 		{
 			$from = $partInNum[$mm][$qq];
@@ -2342,7 +2379,15 @@ for($xx=0;$xx<$processCnt;$xx++)
 		}
 	}
 	# ******** FILTER *************************************************************************
-	if($partType[$mm] eq "FILT")
+
+
+
+	if ( -e "lib/$partType[$mm].pm" ) {
+	  	  print OUT ("CDS::" . $partType[$mm] . "::frontEndCode") -> ($mm);
+	}	
+
+if (0) {
+	if($partType[$mm] eq "Filt")
 	{
 	   print OUT "// FILTER MODULE\n";
 	   $calcExp = "\L$xpartName[$mm]";
@@ -2358,9 +2403,9 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   $calcExp .= ",0);\n";
 	   print OUT "$calcExp";
 	}
-	if($partType[$mm] eq "SUS_WD1")
+	if($partType[$mm] eq "Wd")
 	{
-	   print OUT "// SUS_WD1 MODULE\n";
+	   print OUT "// Wd (Watchdog) MODULE\n";
 		print OUT "if((clock16K \% 16) == 0) {\n";
 		$calcExp = "if (pLocalEpics->$systemName\.";
 		$calcExp .= $xpartName[$mm];
@@ -2403,6 +2448,8 @@ for($xx=0;$xx<$processCnt;$xx++)
 		print OUT "$calcExp";
 		print OUT "}\n";
 	}
+}
+
 	if($partType[$mm] eq "SUS_WD")
 	{
 	   print OUT "// SUS_WD MODULE\n";
@@ -2474,10 +2521,11 @@ for($xx=0;$xx<$processCnt;$xx++)
 			print OUT "$calcExp";
 		
 	}
+if (0) {
 	# ******** MATRIX *************************************************************************
-	if($partType[$mm] eq "MATRIX")
+	if($partType[$mm] eq "Matrix")
 	{
-		print OUT "// MATRIX CALC\n";
+		print OUT "// Matrix\n";
 		print OUT "for(ii=0;ii<$matOuts[$mm];ii++)\n{\n";
 		print OUT "\L$xpartName[$mm]\[1\]\[ii\] = \n";
 		
@@ -2501,6 +2549,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 		}
 		print OUT "}\n";
 	}
+}
 	# ******** SUMMING JUNC ********************************************************************
 	if($partType[$mm] eq "SUM")
 	{
@@ -2548,7 +2597,9 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   	$calcExp .=  "\[0\]);\n";
 		print OUT "$calcExp";
 	}
-	if($partType[$mm] eq "WFS_PHASE")
+
+if (0) {
+	if($partType[$mm] eq "WfsPhase")
 	{
 	   	print OUT "// WFS PHASE\n";
 	   	$calcExp = "\L$xpartName[$mm]\[0\] = \(";
@@ -2572,6 +2623,8 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   	$calcExp .=  "\[0\]\[1\]);\n";
 		print OUT "$calcExp";
 	}
+}
+
 	# ******** OSC ************************************************************************
 	if($partType[$mm] eq "OSC")
 	{
@@ -2699,16 +2752,18 @@ for($xx=0;$xx<$processCnt;$xx++)
 	{
 	   #print "Found GROUND $xpartName[$mm] in loop\n";
 	}
+
+if (0) {
 	# ******** EPICS OUTPUT ********************************************************************
-	if($partType[$mm] eq "EPICS_OUTPUT")
+	if($partType[$mm] eq "EpicsOut")
 	{
 	   #print "Found EPICS OUTPUT $xpartName[$mm] $partInputType[$mm][0] in loop\n";
-	   	print OUT "// EPICS_OUTPUT\n";
+	   	print OUT "// EpicsOut\n";
 			print OUT "pLocalEpics->$systemName\.$xpartName[$mm] = ";
 			print OUT "$fromExp[0];\n";
 	}
 	# ******** DAC OUTPUT ********************************************************************
-	if($partType[$mm] eq "DAC")
+	if($partType[$mm] eq "Dac")
 	{
 		$dacNum = substr($xpartName[$mm],4,1);
 		print OUT "// DAC number is $dacNum\n";
@@ -2730,9 +2785,9 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   }
 	}
 	# ******** MULTI_SW ************************************************************************
-	if($partType[$mm] eq "MULTI_SW")
+	if($partType[$mm] eq "MultiSwitch")
 	{
-	   print OUT "// MULTI_SW\n";
+	   print OUT "// MultiSwitch\n";
            for($qq=0;$qq<$inCnt;$qq++)
            {
 		$calcExp = "\L$xpartName[$mm]";
@@ -2748,6 +2803,8 @@ for($xx=0;$xx<$processCnt;$xx++)
 		print OUT "\tfor(ii=0;ii< $partOutCnt[$mm];ii++) \L$xpartName[$mm]\[ii\] = 0.0;\n";
 		print OUT "}\n\n";
 	}
+}
+
 	# ******** DELAY ************************************************************************
 	if($partType[$mm] eq "DELAY")
 	{
@@ -2775,12 +2832,12 @@ for($xx=0;$xx<$processCnt;$xx++)
 	 	} else {
 	   	  $calcExp = "filterPolyPhase(dsp_ptr,firCoeff,$xpartName[$mm],$firName,";
 		}
-		if($toType eq "MATRIX")
+		if($toType eq "Matrix")
 		{
 			$toPort = $partOutputPort[$mm][0];
 			print "\t$xpartName[$to]\[0\]\[$toPort\] = ";
 		}
-		if($fromType eq "ADC")
+		if($fromType eq "Adc")
 		{
 			$card = $from;
 			$chan = $fromPort;
