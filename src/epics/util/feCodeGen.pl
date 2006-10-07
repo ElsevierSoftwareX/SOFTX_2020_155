@@ -391,7 +391,7 @@ while (<IN>) {
 	# These names need a thorough cleanup !!!
 	#
 	# START part name transformation code
-	if ($r eq "cdsSwitch" || $r eq "cdsSusSw2") { $r = "MultiSwitch"; }
+	if ($r =~ /^cdsSwitch/ || $r eq "cdsSusSw2") { $r = "MultiSwitch"; }
 	elsif ($r =~ /^Matrix/) { $r = "Matrix"; }
 	elsif ($r eq "dsparch4" ) { $r = "Filt"; }
 	elsif ($r eq "cdsWD" ) { $r = "Wd"; }
@@ -438,8 +438,8 @@ if (0) {
 		$partErr = 0;
 	}
 	if (substr($var2,0,11) eq "cdsSubtract") {
-		$partType[$partCnt] = DIFF_JUNC;
-		#print "$partCnt is type DIFF_JUNCT\n";
+		$partType[$partCnt] = DiffJunc;
+		#print "$partCnt is type DiffJunc\n";
 		$partErr = 0;
 	}
 	if (substr($var2,0,10) eq "cdsProduct") {
@@ -1744,7 +1744,7 @@ if (0) {
 	if($partType[$ii] eq "WfsPhase") {
 		print OUTH "\tfloat $xpartName[$ii]\[2\]\[2\];\n";
 	}
-	if($partType[$ii] eq "PRODUCT") {
+	if($partType[$ii] eq "Product") {
 		print OUTH "\tfloat $xpartName[$ii];\n";
 		print OUTH "\tint $xpartName[$ii]\_TRAMP;\n";
 		print OUTH "\tint $xpartName[$ii]\_RMON;\n";
@@ -1829,13 +1829,11 @@ if (0) {
 	if($partType[$ii] eq "EpicsOut") {
 		print EPICS "OUTVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 	}
-}
-	if($partType[$ii] eq "PRODUCT") {
+	if($partType[$ii] eq "Product") {
 		print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] float ai 0 field(PREC,\"3\")\n";
 		print EPICS "INVARIABLE $xpartName[$ii]\_TRAMP $systemName\.$xpartName[$ii]\_TRAMP int ai 0 field(PREC,\"0\")\n";
 		print EPICS "OUTVARIABLE $xpartName[$ii]\_RMON $systemName\.$xpartName[$ii]\_RMON int ai 0 field(PREC,\"0\")\n";
 	}
-if (0) {
 	if($partType[$ii] eq "Wd") {
 	#	print EPICS "INVARIABLE $xpartName[$ii] $systemName\.$xpartName[$ii] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 		print EPICS "MOMENTARY $xpartName[$ii] $systemName\.$xpartName[$ii] int ai 0\n";
@@ -1988,10 +1986,10 @@ if (0) {
 		$port = $partInCnt[$ii];
 		print OUT "double \L$xpartName[$ii];\n";
 	}
-	if($partType[$ii] eq "DIFF_JUNC") {
+if (0) {
+	if($partType[$ii] eq "DiffJunc") {
 		print OUT "double \L$xpartName[$ii]\[16\];\n";
 	}
-if (0) {
 	if($partType[$ii] eq "Filt") {
 		print OUT "double \L$xpartName[$ii];\n";
 	}
@@ -2033,15 +2031,15 @@ if (0) {
 	if($partType[$ii] eq "WfsPhase") {
 		print OUT "static double \L$xpartName[$ii]\[2\];\n";
 	}
-}
-	if($partType[$ii] eq "PRODUCT") {
+	if($partType[$ii] eq "Product") {
 		print OUT "double \L$xpartName[$ii]\[$partOutCnt[$ii]\];\n";
 		print OUT "float $xpartName[$ii]\_CALC;\n";
 	}
-	if($partType[$ii] eq "RMS") {
+	if($partType[$ii] eq "Rms") {
 		print OUT "float \L$xpartName[$ii];\n";
 		print OUT "static float \L$xpartName[$ii]\_avg;\n";
 	}
+}
 	if($partType[$ii] eq "GROUND") {
 		print OUT "static float \L$xpartName[$ii];\n";
 	}
@@ -2147,15 +2145,15 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}	
 
 
-	if($partType[$ii] eq "RMS") {
-		print OUT "\L$xpartName[$ii]\_avg = 0\.0;\n";
-	}
 	if($partType[$ii] eq "GROUND") {
 		print OUT "\L$xpartName[$ii] = 0\.0;\n";
 	}
 
 
 if (0) {
+	if($partType[$ii] eq "Rms") {
+		print OUT "\L$xpartName[$ii]\_avg = 0\.0;\n";
+	}
 	if($partType[$ii] eq "Osc") {
 	   	$calcExp =  "\L$xpartName[$ii]_freq = ";
 	   	$calcExp .=  "pLocalEpics->$systemName\.$xpartName[$ii]\_FREQ;\n";
@@ -2362,7 +2360,7 @@ if (0) {
 		}
 }
 
-		if(($partInputType[$mm][$qq] eq "RAMP_SW") || ($partInputType[$mm][$qq] eq "PRODUCT") || ($partInputType[$mm][$qq] eq "DIFF_JUNC"))
+		if(($partInputType[$mm][$qq] eq "RAMP_SW"))
 		{
 			$from = $partInNum[$mm][$qq];
 			$fromPort = $partInputPort[$mm][$qq];
@@ -2747,8 +2745,9 @@ if (0) {
 		print OUT "$calcExp";
 		print OUT "\}\n";
 	}
+if (0) {
 	# ******** DIFF JUNC ********************************************************************
-	if($partType[$mm] eq "DIFF_JUNC")
+	if($partType[$mm] eq "DiffJunc")
 	{
 	   print OUT "// DIFF_JUNC\n";
 	   $zz = 0;
@@ -2768,6 +2767,7 @@ if (0) {
 		$zz ++;
 	   }
 	}
+}
 	# ******** GROUND INPUT ********************************************************************
 	if(($partType[$mm] eq "GROUND") && ($partUsed[$mm] == 0))
 	{
@@ -2897,8 +2897,10 @@ if (0) {
 		print OUT "\t\L$xpartName[$mm]\[1\] = \L$xpartName[$mm]\[3\];\n";
 		print OUT "}\n\n";
 	}
+
+if (0) {
 	# ******** PRODUCT ************************************************************************
-	if($partType[$mm] eq "PRODUCT")
+	if($partType[$mm] eq "Product")
 	{
 	   	print OUT "// PRODUCT\n";
 	   	print OUT "pLocalEpics->$systemName\.$xpartName[$mm]";
@@ -2922,7 +2924,7 @@ if (0) {
 		$gainCnt ++;
 	}
 	# ******** RMS ************************************************************************
-	if($partType[$mm] eq "RMS")
+	if($partType[$mm] eq "Rms")
 	{
 	   	print OUT "// RMS\n";
 		$calcExp = "\L$xpartName[$mm]";
@@ -2942,6 +2944,7 @@ if (0) {
 		$calcExp = "\L$xpartName[$mm] = lsqrt(\L$xpartName[$mm]\_avg);\n";
 		print OUT "$calcExp";
 	}
+}
 
 
 print OUT "\n";
