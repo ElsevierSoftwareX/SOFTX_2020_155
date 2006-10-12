@@ -195,7 +195,7 @@ int clock16K = 0;
 	#include "pde/pde.c"	/* User code for Ponderomotive control. */
 #elif defined(OMC_CODE)
 	#include "omc/omc.c"	/* User code for Ponderomotive control. */
-	volatile float *lscRfmPtr;
+	volatile float *lscRfmPtr = 0;
 #elif defined(LTB_CODE)
 	#include "ltb/ltb.c"	/* User code for Ponderomotive control. */
 #else
@@ -409,7 +409,11 @@ void *fe_start(void *arg)
   pLocalEpics->epicsOutput.diags[2] = 0;
 
 #ifdef OMC_CODE
+  if (cdsPciModules.pci_rfm[0] != 0) {
 	lscRfmPtr = (float *)(cdsPciModules.pci_rfm[0] + 0x3000);
+  } else {
+	lscRfmPtr = 0;
+  }
 #endif
 
 #ifndef NO_DAQ
@@ -638,7 +642,9 @@ void *fe_start(void *arg)
   	// pLocalEpics->epicsOutput.diags[1]  = readDio(&cdsPciModules,0);
 
 #ifdef OMC_CODE
-	*lscRfmPtr = dspPtr[0]->data[LSC_DRIVE].output;
+	if (lscRfmPtr != 0) {
+		*lscRfmPtr = dspPtr[0]->data[LSC_DRIVE].output;
+	}
 #endif
 
 	// Write out data to DAC modules

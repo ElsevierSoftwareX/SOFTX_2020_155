@@ -460,6 +460,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 
   dacdev = NULL;
   status = 0;
+  pCds->pci_rfm[0] = 0;
   // Search system for VMIC RFM modules
   while((dacdev = pci_find_device(VMIC_VID, VMIC_TID, dacdev))) {
 		printk("RFM card on bus %d; device %d\n",
