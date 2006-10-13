@@ -353,13 +353,17 @@ while (<IN>) {
 		$partOutputPort[$partCnt][0] = 1;
 		$partOutCnt[$partCnt] ++;
 	}
+	if($partType[$partCnt] eq "INPUT"){
+		$partPort[$partCnt] = 1;
+        	$partInput[$partCnt][0] = $subSysName[$subSys];
+        	$partInputPort[$partCnt][0] = 1;
+		$partInCnt[$partCnt] ++;
+	}
     }
     if(($inBlock == 1) && ($var1 eq "Port") && ($inSub == 1) && ($partType[$partCnt] eq "INPUT")){
 	$partPort[$partCnt] = $var2;
-	$partInput[$partCnt][0] = $subSysName[$subSys];
 	$partInputPort[$partCnt][0] = $var2;
 	#print "$xpartName[$partCnt] is input $partCnt with $partInput[$partCnt][0] $partInputPort[$partCnt][0]\n";
-	$partInCnt[$partCnt] ++;
     }
     if(($inBlock == 1) && ($var1 eq "Port") && ($inSub == 1) && ($partType[$partCnt] eq "OUTPUT")){
 	$partPort[$partCnt] = $var2;
@@ -395,6 +399,7 @@ while (<IN>) {
 	elsif ($r =~ /^Matrix/) { $r = "Matrix"; }
 	elsif ($r =~ /^cdsSubtract/) { $r = "DiffJunc"; }
 	elsif ($r eq "dsparch4" ) { $r = "Filt"; }
+	elsif ($r eq "cdsFmodule" ) { $r = "Filt"; }
 	elsif ($r eq "cdsWD" ) { $r = "Wd"; }
 	elsif ($r eq "cdsSusWd" ) { $r = "SusWd"; }
 	elsif ($r eq "cdsSWD1" ) { $r = "SeiWd"; }
