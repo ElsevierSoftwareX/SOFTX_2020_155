@@ -103,7 +103,7 @@ sub frontEndCode {
         $calcExp .= "_MAX\) ";
         $calcExp .= "\L$::xpartName[$mm] = 0;\n";
         $calcExp .= "   }\n";
-        $calcExp .= "\tpLocalEpics->$systemName\.";
+        $calcExp .= "\tpLocalEpics->$::systemName\.";
         $calcExp .= $::xpartName[$mm];
         $calcExp .= " = \L$::xpartName[$mm] \/ 16384;\n";
         $calcExp .= "}\n";
