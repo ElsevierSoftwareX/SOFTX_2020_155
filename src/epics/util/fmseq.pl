@@ -100,7 +100,7 @@ while (<IN>) {
 	$vdecl .= "$v_type evar_${v_name}_d;\n";
 	$vdecl .= "$v_type evar_${v_name}_r;\n";
 	$vdecl .= "assign evar_${v_name}_d to \"{ifo}:{sys}-{subsys}${v_name}_D\";\n";
-	$vdecl .= "assign evar_${v_name}_d to \"{ifo}:{sys}-{subsys}${v_name}_R\";\n";
+	$vdecl .= "assign evar_${v_name}_r to \"{ifo}:{sys}-{subsys}${v_name}_R\";\n";
 
 	$vinit .= "%% evar_${v_name}_d  = $v_init;\n";
 	$vinit .= "%% evar_${v_name}_r  = $v_init;\n";
