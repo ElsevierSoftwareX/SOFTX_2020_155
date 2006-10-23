@@ -124,6 +124,7 @@ while (<IN>) {
 	if($blockType eq "BusCreator") {$partType[$partCnt] = BUSC; $adcCnt ++;}
 	if($blockType eq "BusSelector") {$partType[$partCnt] = BUSS;}
 	if($blockType eq "UnitDelay") {$partType[$partCnt] = DELAY;}
+	if($blockType eq "Logic") {$partType[$partCnt] = AND;}
 	# Need to find subsystems, as these contain internal parts and links
 	# which need to be "flattened" to connect all parts together
 	if($blockType eq "SubSystem") {
@@ -1389,7 +1390,7 @@ $allADC = 1;
 		$seqList[$seqCnt] = $ii;
 		$seqType[$seqCnt] = "SUBSYS";
 		$seqCnt ++;
-		#print "Subsys $ii $subSysName[$ii] has all ADC inputs and can go $seqCnt\n";
+		# print "Subsys $ii $subSysName[$ii] has all ADC inputs and can go $seqCnt\n";
 		$subRemaining --;
 		if ($cur_step_cpus == 1) { $cur_step_cpus = $cpus; }
 		$sys_cpu_step{$subSysName[$ii]} = --$cur_step_cpus;
@@ -1427,9 +1428,10 @@ print "first pass done $partsRemaining $subRemaining\n";
 # Second multiprocessing step
 $cur_step = 1;
 $cur_step_cpus = $cpus;
-
-until(($partsRemaining < 1) && ($subRemaining < 1))
+$numTries = 0;
+until((($partsRemaining < 1) && ($subRemaining < 1)) || ($numTries > 50))
 {
+$numTries ++;
 	for($ii=0;$ii<$subSys;$ii++)
 	{
 		$allADC = 1;
@@ -1442,6 +1444,8 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 				{
 					$allADC = 0;
 				}
+				if($yy > 99)
+				{
 				$yy = $subInputs[$ii][$jj] - 100;
 				for($kk=0;$kk<$searchCnt;$kk++)
 				{
@@ -1450,9 +1454,10 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 						$allADC = 0;
 					}
 				}
+				}
 			}
 			if($allADC == 1) {
-				#print "Subsys $ii $subSysName[$ii] can go next\n";
+				print "Subsys $ii $subSysName[$ii] can go next\n";
 				$subUsed[$ii] = 1;
 				$subRemaining --;
 				$seqList[$seqCnt] = $ii;
@@ -1500,6 +1505,38 @@ until(($partsRemaining < 1) && ($subRemaining < 1))
 			}
 		}
 	}
+}
+if(($partsRemaining > 0) || ($subRemaining > 0)) {
+print "Linkage failed\n";
+	for($ii=0;$ii<$subSys;$ii++)
+	{
+		if($subUsed[$ii] == 0)
+		{
+		print "Subsys $ii $subSysName[$ii] failed to connect\n";
+			for($jj=0;$jj<$subCntr[$ii];$jj++)
+			{
+				$yy = $subInputs[$ii][$jj];
+				if(($yy<100) && ($subUsed[$yy] != 1))
+				{
+					$allADC = 0;
+					print "Subcon failed $yy\n";
+				}
+				if($yy > 99)
+				{
+				$yy = $subInputs[$ii][$jj] - 100;
+				for($kk=0;$kk<$searchCnt;$kk++)
+				{
+					if(($partUsed[$yy] != 1) && ($subInputsType[$ii][$jj] ne "Adc") && ($partType[$yy] ne "DELAY"))
+					{
+						$allADC = 0;
+					print "Partcon failed $yy\n";
+					}
+				}
+				}
+			}
+		}
+	}
+exit;
 }
 $processCnt = 0;
 $processSeqCnt = 0;
@@ -1687,6 +1724,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 	if($partType[$ii] eq "GROUND") {
 		print OUT "static float \L$xpartName[$ii];\n";
+	}
+	if($partType[$ii] eq "AND") {
+		$port = $partInCnt[$ii];
+		print OUT "int \L$xpartName[$ii];\n";
 	}
 }
 print OUT "\n\n";
@@ -1953,6 +1994,28 @@ for($xx=0;$xx<$processCnt;$xx++)
 		}
 		print OUT "$calcExp";
 	}
+	# ******** AND ********************************************************************
+	if($partType[$mm] eq "AND")
+	{
+	   print OUT "// Logical AND\n";
+		print "\tUsed AND $xpartName[$mm] $partOutCnt[$mm]\n";
+		$calcExp = "\L$xpartName[$mm]";
+		$calcExp .= " = ";
+		for($qq=0;$qq<$inCnt;$qq++)
+		{
+		    $zz = $qq+1;
+		    if(($zz - $inCnt) == 0)
+	 	    {
+			$calcExp .= $fromExp[$qq];
+			$calcExp .= ";\n";
+		    }
+		    else {
+			$calcExp .= $fromExp[$qq];
+			$calcExp .= " & ";
+		    }
+		}
+		print OUT "$calcExp";
+	}
 	# ******** DIVIDE ********************************************************************
 	if($partType[$mm] eq "DIVIDE")
 	{
@@ -2131,6 +2194,7 @@ print OUTME "CFLAGS += -D";
 print OUTME "\U$skeleton";
 print OUTME "_CODE\n";
 print OUTME "\n";
+print OUTME "LIBFLAGS += -lezca\n";
 if($systemName eq "sei")
 {
 print OUTME "CFLAGS += -DFIR_FILTERS\n";
