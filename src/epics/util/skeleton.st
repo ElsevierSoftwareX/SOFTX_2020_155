@@ -11,6 +11,10 @@ program %SEQUENCER_NAME%
 %% #include <fpvalidate.h>
 %% #include <daqmap.h>
 %% #include <param.h>
+%% #include <errno.h>
+%% #include <tsDefs.h>
+%% #include <cadef.h>
+%% #include <ezca.h>
 
 %% #define INLINE
 #if defined(RFM_EPICS)
