@@ -34,7 +34,7 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
-	print ::OUT "static double \L$::xpartName[$i];\n";
+	print ::OUT "static int \L$::xpartName[$i];\n";
 	print ::OUT "static float \L$::xpartName[$i]\_avg\[$::partInCnt[$i]\];\n";
         print ::OUT "static float \L$::xpartName[$i]\_var\[$::partInCnt[$i]\];\n";
         print ::OUT "float \L$::xpartName[$i]\_vabs;\n";
@@ -45,7 +45,7 @@ sub printFrontEndVars  {
 # Returns calculated code string
 sub frontEndInitCode {
         my ($i) = @_;
-        return "\L$::xpartName[$i] = 0.0;\n"
+        return "\L$::xpartName[$i] = 0;\n"
         . "for \(ii=0; ii<$::partInCnt[$i]; ii++\) {\n"
         . "\t\L$::xpartName[$i]\_avg\[ii\] = 0.0;\n"
         . "\t\L$::xpartName[$i]\_var\[ii\] = 0.0;\n"
