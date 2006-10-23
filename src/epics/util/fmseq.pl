@@ -212,6 +212,32 @@ while (<IN>) {
 	$vardb .= "    $v_efield3\n";
 	$vardb .= "    $v_efield4\n";
 	$vardb .= "}\n";
+    } elsif (substr($_,0,12) eq "REMOTE_INTLK") {
+	die "Unspecified EPICS parameters" unless $epics_specified;
+	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
+	$temp = $v_name;
+	$temp =~ s/\-/\_/g;
+	$vdecl .= "$v_type evar_$temp;\n";
+	$vdecl .= "assign evar_$temp to \"{ifo}:{sys}-${temp}\";\n";
+#	$vdecl .= "$v_type evar_$temp\_RI;\n";
+#	$vdecl .= "assign evar_$temp\_RI to \"{ifo}:${v_name}\";\n";
+
+	$vinit .= "%% evar_$temp  = $v_init;\n";
+	$vinit .= "%%       pEpics->${v_var} = evar_$temp;\n";
+
+	$vupdate .= "evar_$temp = pEpics->${v_var};\n";
+	$vupdate .= "pvPut(evar_$temp);\n";
+	$vupdate .= "if (evar_${temp} == 0) {\n";
+#	$vupdate .= "\tevar_$temp\_RI = 0;\n";
+#	$vupdate .= "\tpvPut(evar_$temp\_RI);\n";
+	$vupdate .= "%%\tshort s[1];\n";
+	$vupdate .= "%%\ts[0] = 0;\n";
+	$vupdate .= "%%\tezcaPut(\"M1:$v_name\", ezcaShort,1,s);\n";
+	$vupdate .= "}\n";
+
+	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${temp}\")\n";
+	$vardb .= "{\n";
+	$vardb .= "}\n";
     } elsif (substr($_,0,6) eq "DAQVAR") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
