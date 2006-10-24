@@ -1,0 +1,15 @@
+#ifdef HEPI_CODE
+	#include "hepi.h"	/* User code for HEPI control.		*/
+#elif defined(SUS_CODE)
+	#include "sus.h"	/* User code for quad control.		*/
+#elif defined(PNM)
+	#include "pnm.h"	/* User code for Ponderomotive control. */
+#elif defined(PDE_CODE)
+	#include "pde.h"	/* User code for Ponderomotive control. */
+#elif defined(OMC_CODE)
+	#include "omc.h"	/* User code for OMC control. */
+#elif defined(LTB_CODE)
+	#include "ltb.h"	/* User code for LTB control. */
+#else
+	#error
+#endif

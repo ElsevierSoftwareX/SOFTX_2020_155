@@ -31,6 +31,8 @@
 #include <linux/slab.h>
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
+#include "feSelectHeader.h"
+#if 0
 #ifdef HEPI_CODE
 	#include "hepi.h"	/* User code for HEPI control.		*/
 #elif defined(SUS_CODE)
@@ -45,6 +47,7 @@
 	#include "ltb.h"	/* User code for LTB control. */
 #else
 	#error
+#endif
 #endif
 
 #ifndef NUM_SYSTEMS
@@ -184,6 +187,9 @@ double dWord[MAX_ADC_MODULES][32];
 int dacOut[MAX_DAC_MODULES][16];
 int clock16K = 0;
 
+#include "./feSelectCode.c"
+
+#if 0
 #ifdef HEPI_CODE
 	#include "drv/seiwd.c"	/* User code for HEPI control.		*/
 	#include "hepi/hepi.c"	/* User code for HEPI control.		*/
@@ -200,6 +206,7 @@ int clock16K = 0;
 	#include "ltb/ltb.c"	/* User code for Ponderomotive control. */
 #else
 	#error
+#endif
 #endif
 
 char daqArea[0x400000];		/* Space allocation for daqLib buffers	*/
