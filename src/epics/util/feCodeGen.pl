@@ -1,9 +1,26 @@
 #!/usr/bin/perl
 
-die "Usage: $PROGRAM_NAME <MDL file> <Output file name> <DCUID number>"
-        #if (@ARGV != 1 && @ARGV != 2 && @ARGV != 3);
-        if (@ARGV != 3);
+die "Usage: $PROGRAM_NAME <MDL file> <Output file name> <DCUID number> [<site>] [<speed>]\n\t" . "site is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
+        if (@ARGV != 3 && @ARGV != 4 && @ARGV != 5);
 
+$site = "M1";
+$rate = "60"; # In microseconds
+
+if (@ARGV > 3) {
+	$site = $ARGV[3];
+}
+if (@ARGV > 4) {
+	my $param_speed = $ARGV[4];
+	if ($param_speed eq "2K") {
+		$rate = 480;
+	} elsif ($param_speed eq "16K") {
+		$rate = 60;
+	} elsif ($param_speed eq "32K") {
+		$rate = 30;
+	} elsif ($param_speed eq "64K") {
+		$rate = 15;
+	} else  { die "Invalid speed $param_speed specified\n"; }
+}
 $skeleton = $ARGV[1];
 print "file out is $skeleton\n";
 $cFile = "../../fe/";
@@ -24,8 +41,8 @@ $meFile .= $ARGV[1];
 $meFile .= epics;
 $dcuId = $ARGV[2];
 print "DCUID = $dcuId\n";
-if($dcuId < 16) {$rate = 60;}
-if($dcuId > 16) {$rate = 480;}
+#if($dcuId < 16) {$rate = 60;}
+#if($dcuId > 16) {$rate = 480;}
 if (@ARGV == 2) { $skeleton = $ARGV[1]; }
 open(EPICS,">../fmseq/".$ARGV[1]) || die "cannot open output file for writing";
 open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
@@ -2103,15 +2120,18 @@ print OUTM "\t\$(CC) \$(CFLAGS) -c \$< -o \$\@\n";
 print OUTM "map.o: ../map.c\n";
 print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
 print OUTM "fm10Gen.o: fm10Gen.c\n";
-if($rate == 60)
-{
-print "SERVO IS 16K\n";
-print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO16K -c \$<\n";
-}
-else
-{
-print "SERVO IS 2K\n";
-print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO2K -c \$<\n";
+if($rate == 480) {
+	print "SERVO IS 2K\n";
+	print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO2K -c \$<\n";
+} elsif ($rate == 60) {
+	print "SERVO IS 16K\n";
+	print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO16K -c \$<\n";
+} elsif ($rate == 30) {
+	print "SERVO IS 32K\n";
+	print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO32K -c \$<\n";
+} elsif ($rate == 15) {
+	print "SERVO IS 64K\n";
+	print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO64K -c \$<\n";
 }
 print OUTM "crc.o: crc.c\n";
 print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
@@ -2119,14 +2139,12 @@ print OUTM "\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
 print OUTM "CFLAGS += -I../../include\n";
 print OUTM "CFLAGS += -I/opt/gm/include\n";
-if($rate == 60)
-{
-print OUTM "CFLAGS += -DSERVO16K\n";
-}
-else
-{
-print OUTM "CFLAGS += -DSERVO2K\n";
-}
+
+if($rate == 480) { print OUTM "CFLAGS += -DSERVO2K\n"; }
+elsif($rate == 60) { print OUTM "CFLAGS += -DSERVO16K\n"; }
+elsif($rate == 30) { print OUTM "CFLAGS += -DSERVO32K\n"; }
+elsif($rate == 15) { print OUTM "CFLAGS += -DSERVO64K\n"; }
+
 print OUTM "CFLAGS += -D";
 print OUTM "\U$skeleton";
 print OUTM "_CODE\n";
@@ -2140,8 +2158,8 @@ print OUTM "CFLAGS += -DRESERVE_CPU2\n";
 if ($cpus > 3) {
 print OUTM "CFLAGS += -DRESERVE_CPU3\n";
 }
-print OUTM "CFLAGS += -DNO_SYNC\n";
-print OUTM "CFLAGS += -DNO_DAQ\n";
+print OUTM "#CFLAGS += -DNO_SYNC\n";
+print OUTM "#CFLAGS += -DNO_DAQ\n";
 print OUTM "\n";
 print OUTM "all: \$(ALL)\n";
 print OUTM "\n";
