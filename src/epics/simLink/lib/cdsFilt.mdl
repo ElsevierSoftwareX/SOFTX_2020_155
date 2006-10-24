@@ -1,16 +1,9 @@
-Model {
+Library {
   Name			  "cdsFilt"
   Version		  6.5
   MdlSubVersion		  0
-  GraphicalInterface {
-    NumRootInports	    0
-    NumRootOutports	    0
-    ParameterArgumentNames  ""
-    ComputedModelVersion    "1.3"
-    NumModelReferences	    0
-    NumTestPointedSignals   0
-  }
   SavedCharacterEncoding  "UTF-8"
+  LibraryType		  "BlockLibrary"
   SaveDefaultBlockParams  on
   SampleTimeColors	  off
   LibraryLinkDisplay	  "none"
@@ -28,41 +21,31 @@ Model {
   ScopeRefreshTime	  0.035000
   OverrideScopeRefreshTime on
   DisableAllScopes	  off
-  DataTypeOverride	  "UseLocalSettings"
-  MinMaxOverflowLogging	  "UseLocalSettings"
-  MinMaxOverflowArchiveMode "Overwrite"
   BlockNameDataTip	  off
   BlockParametersDataTip  off
   BlockDescriptionStringDataTip	off
   ToolBar		  on
   StatusBar		  on
-  BrowserShowLibraryLinks off
-  BrowserLookUnderMasks	  off
-  Created		  "Mon Oct 23 15:12:53 2006"
+  BrowserShowLibraryLinks on
+  BrowserLookUnderMasks	  on
+  Created		  "Mon Oct 23 16:38:35 2006"
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Mon Oct 23 15:29:41 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:3>"
+  LastModifiedDate	  "Mon Oct 23 16:40:54 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:2>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
   ParamWorkspaceSource	  "MATLABWorkspace"
-  AccelSystemTargetFile	  "accel.tlc"
-  AccelTemplateMakefile	  "accel_default_tmf"
-  AccelMakeCommand	  "make_rtw"
-  TryForcingSFcnDF	  off
-  RecordCoverage	  off
-  CovPath		  "/"
   CovSaveName		  "covdata"
   CovMetricSettings	  "dw"
   CovNameIncrementing	  off
   CovHtmlReporting	  on
   covSaveCumulativeToWorkspaceVar on
   CovSaveSingleToWorkspaceVar on
-  CovCumulativeVarName	  "covCumulativeData"
   CovCumulativeReport	  off
   CovReportOnPause	  on
   ExtModeBatchMode	  off
@@ -86,373 +69,9 @@ Model {
   ExtModeSkipDownloadWhenConnect off
   ExtModeLogAll		  on
   ExtModeAutoUpdateStatusClock off
-  BufferReuse		  on
   ProdHWDeviceType	  "32-bit Generic"
   ShowModelReferenceBlockVersion off
   ShowModelReferenceBlockIO off
-  Array {
-    Type		    "Handle"
-    Dimension		    1
-    Simulink.ConfigSet {
-      $ObjectID		      1
-      Version		      "1.2.0"
-      Array {
-	Type			"Handle"
-	Dimension		7
-	Simulink.SolverCC {
-	  $ObjectID		  2
-	  Version		  "1.2.0"
-	  StartTime		  "0.0"
-	  StopTime		  "10.0"
-	  AbsTol		  "auto"
-	  FixedStep		  "auto"
-	  InitialStep		  "auto"
-	  MaxNumMinSteps	  "-1"
-	  MaxOrder		  5
-	  ConsecutiveZCsStepRelTol "10*128*eps"
-	  MaxConsecutiveZCs	  "1000"
-	  ExtrapolationOrder	  4
-	  NumberNewtonIterations  1
-	  MaxStep		  "auto"
-	  MinStep		  "auto"
-	  MaxConsecutiveMinStep	  "1"
-	  RelTol		  "1e-3"
-	  SolverMode		  "Auto"
-	  Solver		  "ode45"
-	  SolverName		  "ode45"
-	  ZeroCrossControl	  "UseLocalSettings"
-	  AlgebraicLoopSolver	  "TrustRegion"
-	  SolverResetMethod	  "Fast"
-	  PositivePriorityOrder	  off
-	  AutoInsertRateTranBlk	  off
-	  SampleTimeConstraint	  "Unconstrained"
-	  RateTranMode		  "Deterministic"
-	}
-	Simulink.DataIOCC {
-	  $ObjectID		  3
-	  Version		  "1.2.0"
-	  Decimation		  "1"
-	  ExternalInput		  "[t, u]"
-	  FinalStateName	  "xFinal"
-	  InitialState		  "xInitial"
-	  LimitDataPoints	  on
-	  MaxDataPoints		  "1000"
-	  LoadExternalInput	  off
-	  LoadInitialState	  off
-	  SaveFinalState	  off
-	  SaveFormat		  "Array"
-	  SaveOutput		  on
-	  SaveState		  off
-	  SignalLogging		  on
-	  InspectSignalLogs	  off
-	  SaveTime		  on
-	  StateSaveName		  "xout"
-	  TimeSaveName		  "tout"
-	  OutputSaveName	  "yout"
-	  SignalLoggingName	  "logsout"
-	  OutputOption		  "RefineOutputTimes"
-	  OutputTimes		  "[]"
-	  Refine		  "1"
-	}
-	Simulink.OptimizationCC {
-	  $ObjectID		  4
-	  Array {
-	    Type		    "Cell"
-	    Dimension		    5
-	    Cell		    "ZeroExternalMemoryAtStartup"
-	    Cell		    "ZeroInternalMemoryAtStartup"
-	    Cell		    "InitFltsAndDblsToZero"
-	    Cell		    "OptimizeModelRefInitCode"
-	    Cell		    "NoFixptDivByZeroProtection"
-	    PropName		    "DisabledProps"
-	  }
-	  Version		  "1.2.0"
-	  BlockReduction	  on
-	  BooleanDataType	  on
-	  ConditionallyExecuteInputs on
-	  InlineParams		  off
-	  InlineInvariantSignals  off
-	  OptimizeBlockIOStorage  on
-	  BufferReuse		  on
-	  EnforceIntegerDowncast  on
-	  ExpressionFolding	  on
-	  FoldNonRolledExpr	  on
-	  LocalBlockOutputs	  on
-	  ParameterPooling	  on
-	  RollThreshold		  5
-	  SystemCodeInlineAuto	  off
-	  StateBitsets		  off
-	  DataBitsets		  off
-	  UseTempVars		  off
-	  ZeroExternalMemoryAtStartup on
-	  ZeroInternalMemoryAtStartup on
-	  InitFltsAndDblsToZero	  on
-	  NoFixptDivByZeroProtection off
-	  EfficientFloat2IntCast  off
-	  OptimizeModelRefInitCode off
-	  LifeSpan		  "inf"
-	  BufferReusableBoundary  on
-	}
-	Simulink.DebuggingCC {
-	  $ObjectID		  5
-	  Version		  "1.2.0"
-	  RTPrefix		  "error"
-	  ConsistencyChecking	  "none"
-	  ArrayBoundsChecking	  "none"
-	  SignalInfNanChecking	  "none"
-	  ReadBeforeWriteMsg	  "UseLocalSettings"
-	  WriteAfterWriteMsg	  "UseLocalSettings"
-	  WriteAfterReadMsg	  "UseLocalSettings"
-	  AlgebraicLoopMsg	  "warning"
-	  ArtificialAlgebraicLoopMsg "warning"
-	  CheckSSInitialOutputMsg on
-	  CheckExecutionContextPreStartOutputMsg off
-	  CheckExecutionContextRuntimeOutputMsg	off
-	  SignalResolutionControl "TryResolveAllWithWarning"
-	  BlockPriorityViolationMsg "warning"
-	  MinStepSizeMsg	  "warning"
-	  TimeAdjustmentMsg	  "none"
-	  MaxConsecutiveZCsMsg	  "error"
-	  SolverPrmCheckMsg	  "warning"
-	  InheritedTsInSrcMsg	  "warning"
-	  DiscreteInheritContinuousMsg "warning"
-	  MultiTaskDSMMsg	  "error"
-	  MultiTaskCondExecSysMsg "error"
-	  MultiTaskRateTransMsg	  "error"
-	  SingleTaskRateTransMsg  "none"
-	  TasksWithSamePriorityMsg "warning"
-	  SigSpecEnsureSampleTimeMsg "warning"
-	  CheckMatrixSingularityMsg "none"
-	  IntegerOverflowMsg	  "warning"
-	  Int32ToFloatConvMsg	  "warning"
-	  ParameterDowncastMsg	  "error"
-	  ParameterOverflowMsg	  "error"
-	  ParameterUnderflowMsg	  "none"
-	  ParameterPrecisionLossMsg "warning"
-	  UnderSpecifiedDataTypeMsg "none"
-	  UnnecessaryDatatypeConvMsg "none"
-	  VectorMatrixConversionMsg "none"
-	  InvalidFcnCallConnMsg	  "error"
-	  FcnCallInpInsideContextMsg "Use local settings"
-	  SignalLabelMismatchMsg  "none"
-	  UnconnectedInputMsg	  "warning"
-	  UnconnectedOutputMsg	  "warning"
-	  UnconnectedLineMsg	  "warning"
-	  SFcnCompatibilityMsg	  "none"
-	  UniqueDataStoreMsg	  "none"
-	  BusObjectLabelMismatch  "warning"
-	  RootOutportRequireBusObject "warning"
-	  AssertControl		  "UseLocalSettings"
-	  EnableOverflowDetection off
-	  ModelReferenceIOMsg	  "none"
-	  ModelReferenceVersionMismatchMessage "none"
-	  ModelReferenceIOMismatchMessage "none"
-	  ModelReferenceCSMismatchMessage "none"
-	  ModelReferenceSimTargetVerbose off
-	  UnknownTsInhSupMsg	  "warning"
-	  ModelReferenceDataLoggingMessage "warning"
-	  ModelReferenceSymbolNameMessage "warning"
-	  ModelReferenceExtraNoncontSigs "error"
-	  StrictBusMsg		  "Warning"
-	}
-	Simulink.HardwareCC {
-	  $ObjectID		  6
-	  Version		  "1.2.0"
-	  ProdBitPerChar	  8
-	  ProdBitPerShort	  16
-	  ProdBitPerInt		  32
-	  ProdBitPerLong	  32
-	  ProdIntDivRoundTo	  "Undefined"
-	  ProdEndianess		  "Unspecified"
-	  ProdWordSize		  32
-	  ProdShiftRightIntArith  on
-	  ProdHWDeviceType	  "32-bit Generic"
-	  TargetBitPerChar	  8
-	  TargetBitPerShort	  16
-	  TargetBitPerInt	  32
-	  TargetBitPerLong	  32
-	  TargetShiftRightIntArith on
-	  TargetIntDivRoundTo	  "Undefined"
-	  TargetEndianess	  "Unspecified"
-	  TargetWordSize	  32
-	  TargetTypeEmulationWarnSuppressLevel 0
-	  TargetPreprocMaxBitsSint 32
-	  TargetPreprocMaxBitsUint 32
-	  TargetHWDeviceType	  "Specified"
-	  TargetUnknown		  off
-	  ProdEqTarget		  on
-	}
-	Simulink.ModelReferenceCC {
-	  $ObjectID		  7
-	  Version		  "1.2.0"
-	  UpdateModelReferenceTargets "IfOutOfDateOrStructuralChange"
-	  CheckModelReferenceTargetMessage "error"
-	  ModelReferenceNumInstancesAllowed "Multi"
-	  ModelReferencePassRootInputsByReference on
-	  ModelReferenceMinAlgLoopOccurrences off
-	}
-	Simulink.RTWCC {
-	  $BackupClass		  "Simulink.RTWCC"
-	  $ObjectID		  8
-	  Array {
-	    Type		    "Cell"
-	    Dimension		    1
-	    Cell		    "IncludeHyperlinkInReport"
-	    PropName		    "DisabledProps"
-	  }
-	  Version		  "1.2.0"
-	  SystemTargetFile	  "grt.tlc"
-	  GenCodeOnly		  off
-	  MakeCommand		  "make_rtw"
-	  GenerateMakefile	  on
-	  TemplateMakefile	  "grt_default_tmf"
-	  GenerateReport	  off
-	  SaveLog		  off
-	  RTWVerbose		  on
-	  RetainRTWFile		  off
-	  ProfileTLC		  off
-	  TLCDebug		  off
-	  TLCCoverage		  off
-	  TLCAssert		  off
-	  ProcessScriptMode	  "Default"
-	  ConfigurationMode	  "Optimized"
-	  ConfigAtBuild		  off
-	  IncludeHyperlinkInReport off
-	  LaunchReport		  off
-	  TargetLang		  "C"
-	  IncludeBusHierarchyInRTWFileBlockHierarchyMap	off
-	  IncludeERTFirstTime	  off
-	  Array {
-	    Type		    "Handle"
-	    Dimension		    2
-	    Simulink.CodeAppCC {
-	      $ObjectID		      9
-	      Array {
-		Type			"Cell"
-		Dimension		16
-		Cell			"IgnoreCustomStorageClasses"
-		Cell			"InsertBlockDesc"
-		Cell			"SFDataObjDesc"
-		Cell			"SimulinkDataObjDesc"
-		Cell			"DefineNamingRule"
-		Cell			"SignalNamingRule"
-		Cell			"ParamNamingRule"
-		Cell			"InlinedPrmAccess"
-		Cell			"CustomSymbolStr"
-		Cell			"CustomSymbolStrGlobalVar"
-		Cell			"CustomSymbolStrType"
-		Cell			"CustomSymbolStrField"
-		Cell			"CustomSymbolStrFcn"
-		Cell			"CustomSymbolStrBlkIO"
-		Cell			"CustomSymbolStrTmpVar"
-		Cell			"CustomSymbolStrMacro"
-		PropName		"DisabledProps"
-	      }
-	      Version		      "1.2.0"
-	      ForceParamTrailComments off
-	      GenerateComments	      on
-	      IgnoreCustomStorageClasses on
-	      IncHierarchyInIds	      off
-	      MaxIdLength	      31
-	      PreserveName	      off
-	      PreserveNameWithParent  off
-	      ShowEliminatedStatement off
-	      IncAutoGenComments      off
-	      SimulinkDataObjDesc     off
-	      SFDataObjDesc	      off
-	      IncDataTypeInIds	      off
-	      PrefixModelToSubsysFcnNames on
-	      MangleLength	      1
-	      CustomSymbolStrGlobalVar "$R$N$M"
-	      CustomSymbolStrType     "$N$R$M"
-	      CustomSymbolStrField    "$N$M"
-	      CustomSymbolStrFcn      "$R$N$M$F"
-	      CustomSymbolStrBlkIO    "rtb_$N$M"
-	      CustomSymbolStrTmpVar   "$N$M"
-	      CustomSymbolStrMacro    "$R$N$M"
-	      DefineNamingRule	      "None"
-	      ParamNamingRule	      "None"
-	      SignalNamingRule	      "None"
-	      InsertBlockDesc	      off
-	      SimulinkBlockComments   on
-	      EnableCustomComments    off
-	      InlinedPrmAccess	      "Literals"
-	      ReqsInCode	      off
-	    }
-	    Simulink.GRTTargetCC {
-	      $BackupClass	      "Simulink.TargetCC"
-	      $ObjectID		      10
-	      Array {
-		Type			"Cell"
-		Dimension		13
-		Cell			"IncludeMdlTerminateFcn"
-		Cell			"CombineOutputUpdateFcns"
-		Cell			"SuppressErrorStatus"
-		Cell			"ERTCustomFileBanners"
-		Cell			"GenerateSampleERTMain"
-		Cell			"GenerateTestInterfaces"
-		Cell			"MultiInstanceERTCode"
-		Cell			"PurelyIntegerCode"
-		Cell			"SupportNonFinite"
-		Cell			"SupportComplex"
-		Cell			"SupportAbsoluteTime"
-		Cell			"SupportContinuousTime"
-		Cell			"SupportNonInlinedSFcns"
-		PropName		"DisabledProps"
-	      }
-	      Version		      "1.2.0"
-	      TargetFcnLib	      "ansi_tfl_tmw.mat"
-	      TargetLibSuffix	      ""
-	      TargetPreCompLibLocation ""
-	      GenFloatMathFcnCalls    "ANSI_C"
-	      UtilityFuncGeneration   "Auto"
-	      GenerateFullHeader      on
-	      GenerateSampleERTMain   off
-	      GenerateTestInterfaces  off
-	      IsPILTarget	      off
-	      ModelReferenceCompliant on
-	      IncludeMdlTerminateFcn  on
-	      CombineOutputUpdateFcns off
-	      SuppressErrorStatus     off
-	      IncludeFileDelimiter    "Auto"
-	      ERTCustomFileBanners    off
-	      SupportAbsoluteTime     on
-	      LogVarNameModifier      "rt_"
-	      MatFileLogging	      on
-	      MultiInstanceERTCode    off
-	      SupportNonFinite	      on
-	      SupportComplex	      on
-	      PurelyIntegerCode	      off
-	      SupportContinuousTime   on
-	      SupportNonInlinedSFcns  on
-	      EnableShiftOperators    on
-	      ParenthesesLevel	      "Nominal"
-	      ExtMode		      off
-	      ExtModeStaticAlloc      off
-	      ExtModeTesting	      off
-	      ExtModeStaticAllocSize  1000000
-	      ExtModeTransport	      0
-	      ExtModeMexFile	      "ext_comm"
-	      RTWCAPISignals	      off
-	      RTWCAPIParams	      off
-	      RTWCAPIStates	      off
-	      GenerateASAP2	      off
-	    }
-	    PropName		    "Components"
-	  }
-	}
-	PropName		"Components"
-      }
-      Name		      "Configuration"
-      SimulationMode	      "normal"
-      CurrentDlgPage	      "Solver"
-    }
-    PropName		    "ConfigurationSets"
-  }
-  Simulink.ConfigSet {
-    $PropName		    "ActiveConfigurationSet"
-    $ObjectID		    1
-  }
   BlockDefaults {
     Orientation		    "right"
     ForegroundColor	    "black"
@@ -516,10 +135,7 @@ Model {
       InitialOutput	      "[]"
     }
     Block {
-      BlockType		      "S-Function"
-      FunctionName	      "system"
-      SFunctionModules	      "''"
-      PortCounts	      "[]"
+      BlockType		      Reference
     }
     Block {
       BlockType		      SubSystem
@@ -559,7 +175,7 @@ Model {
   }
   System {
     Name		    "cdsFilt"
-    Location		    [302, 86, 994, 346]
+    Location		    [153, 353, 733, 613]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -576,8 +192,11 @@ Model {
     Block {
       BlockType		      SubSystem
       Name		      "Subsystem"
+      Description	      "IIR Filter Module"
       Ports		      [1, 1]
-      Position		      [290, 95, 330, 155]
+      Position		      [125, 40, 165, 100]
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Description>"
       MinAlgLoopOccurrences   off
       RTWSystemCode	      "Auto"
       FunctionWithSeparateData off
@@ -600,7 +219,7 @@ Model {
 	Block {
 	  BlockType		  Inport
 	  Name			  "In1"
-	  Position		  [25, 45, 55, 59]
+	  Position		  [25, 43, 55, 57]
 	  IconDisplay		  "Port number"
 	}
 	Block {
@@ -621,14 +240,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -638,24 +257,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -665,7 +284,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -690,14 +309,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -707,24 +326,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -734,7 +353,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -759,14 +378,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -776,24 +395,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -803,7 +422,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -828,14 +447,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -845,24 +464,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -872,7 +491,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -897,14 +516,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -914,24 +533,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -941,7 +560,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -966,14 +585,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -983,24 +602,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1010,7 +629,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1035,14 +654,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1052,24 +671,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1079,7 +698,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1104,14 +723,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1121,24 +740,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1148,7 +767,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1173,14 +792,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1190,24 +809,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1217,7 +836,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1242,14 +861,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1259,24 +878,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1286,7 +905,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1304,62 +923,20 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "Out1"
-	  Position		  [355, 220, 385, 234]
+	  Position		  [355, 218, 385, 232]
 	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
 	}
 	Line {
-	  SrcBlock		  "Digital Filter0"
+	  SrcBlock		  "Gain"
 	  SrcPort		  1
-	  DstBlock		  "Digital Filter1"
+	  DstBlock		  "Out1"
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "Digital Filter1"
+	  SrcBlock		  "In1"
 	  SrcPort		  1
-	  DstBlock		  "Digital Filter2"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Digital Filter2"
-	  SrcPort		  1
-	  DstBlock		  "Digital Filter3"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Digital Filter3"
-	  SrcPort		  1
-	  DstBlock		  "Digital Filter4"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Digital Filter4"
-	  SrcPort		  1
-	  Points		  [0, 60; -500, 0]
-	  DstBlock		  "Digital Filter5"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Digital Filter5"
-	  SrcPort		  1
-	  DstBlock		  "Digital Filter6"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Digital Filter6"
-	  SrcPort		  1
-	  DstBlock		  "Digital Filter7"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Digital Filter7"
-	  SrcPort		  1
-	  DstBlock		  "Digital Filter8"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Digital Filter8"
-	  SrcPort		  1
-	  DstBlock		  "Digital Filter9"
+	  DstBlock		  "Digital Filter0"
 	  DstPort		  1
 	}
 	Line {
@@ -1370,15 +947,58 @@ Model {
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "In1"
+	  SrcBlock		  "Digital Filter8"
 	  SrcPort		  1
-	  DstBlock		  "Digital Filter0"
+	  DstBlock		  "Digital Filter9"
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "Gain"
+	  SrcBlock		  "Digital Filter7"
 	  SrcPort		  1
-	  DstBlock		  "Out1"
+	  DstBlock		  "Digital Filter8"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Digital Filter6"
+	  SrcPort		  1
+	  DstBlock		  "Digital Filter7"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Digital Filter5"
+	  SrcPort		  1
+	  DstBlock		  "Digital Filter6"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Digital Filter4"
+	  SrcPort		  1
+	  Points		  [0, 60; -500, 0]
+	  DstBlock		  "Digital Filter5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Digital Filter3"
+	  SrcPort		  1
+	  DstBlock		  "Digital Filter4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Digital Filter2"
+	  SrcPort		  1
+	  DstBlock		  "Digital Filter3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Digital Filter1"
+	  SrcPort		  1
+	  DstBlock		  "Digital Filter2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Digital Filter0"
+	  SrcPort		  1
+	  DstBlock		  "Digital Filter1"
 	  DstPort		  1
 	}
       }
