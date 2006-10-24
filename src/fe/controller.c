@@ -32,23 +32,6 @@
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
 #include "feSelectHeader.h"
-#if 0
-#ifdef HEPI_CODE
-	#include "hepi.h"	/* User code for HEPI control.		*/
-#elif defined(SUS_CODE)
-	#include "sus.h"	/* User code for quad control.		*/
-#elif defined(PNM)
-	#include "pnm.h"	/* User code for Ponderomotive control. */
-#elif defined(PDE_CODE)
-	#include "pde.h"	/* User code for Ponderomotive control. */
-#elif defined(OMC_CODE)
-	#include "omc.h"	/* User code for OMC control. */
-#elif defined(LTB_CODE)
-	#include "ltb.h"	/* User code for LTB control. */
-#else
-	#error
-#endif
-#endif
 
 #ifndef NUM_SYSTEMS
 #define NUM_SYSTEMS 1
@@ -188,26 +171,6 @@ int dacOut[MAX_DAC_MODULES][16];
 int clock16K = 0;
 
 #include "./feSelectCode.c"
-
-#if 0
-#ifdef HEPI_CODE
-	#include "drv/seiwd.c"	/* User code for HEPI control.		*/
-	#include "hepi/hepi.c"	/* User code for HEPI control.		*/
-#elif defined(SUS_CODE)
-	#include "sus/sus.c"	/* User code for quad control.		*/
-#elif defined(PNM)
-	#include "pnm/pnm.c"	/* User code for Ponderomotive control. */
-#elif defined(PDE_CODE)
-	#include "pde/pde.c"	/* User code for Ponderomotive control. */
-#elif defined(OMC_CODE)
-	#include "omc/omc.c"	/* User code for Ponderomotive control. */
-	volatile float *lscRfmPtr = 0;
-#elif defined(LTB_CODE)
-	#include "ltb/ltb.c"	/* User code for Ponderomotive control. */
-#else
-	#error
-#endif
-#endif
 
 char daqArea[0x400000];		/* Space allocation for daqLib buffers	*/
 
