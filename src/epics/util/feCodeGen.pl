@@ -2245,3 +2245,73 @@ for($ii=0;$ii<$jj;$ii++)
 	print OUTG "$filterName[$kk]\n";
 }
 close OUTG;
+
+# Append if statements into header and front-end code select files
+my $header_select_fname = "../../include/feSelectHeader.h";
+open(IN,"<$header_select_fname") || die "cannot open $header_select_fname for reading\n";
+my @lines = <IN>;
+close IN;
+
+# Search for our line
+my $sname = uc $skeleton;
+$sname .= "_CODE";
+my $not_found = 1;
+for (@lines) {
+	if (/$sname/) {
+		print "Found $skeleton system in $header_select_fname\n";
+		$not_found = 0;
+	}
+}
+
+if ($not_found) {
+	# Output all the lines up to #else line, then add our new lines
+	# then append the rest
+	my $new_header_select_fname = "../../include/feSelectHeader_new.h";
+	open(OUT,">$new_header_select_fname") || die "cannot open $new_header_select_fname for writing\n";
+	for (@lines) {
+		if (/#else/) {
+			# Print out lines
+			print OUT "#elif defined($sname)\n";
+			print OUT "\t#include \"$skeleton.h\"\n";
+		}
+		print OUT $_;
+	}
+	close OUT;
+	rename($header_select_fname, $header_select_fname . "~");
+	rename($new_header_select_fname, $header_select_fname);
+}
+
+# Append into front-end code selection file
+my $header_select_fname = "../../fe/feSelectCode.c";
+open(IN,"<$header_select_fname") || die "cannot open $header_select_fname for reading\n";
+my @lines = <IN>;
+close IN;
+
+# Search for our line
+my $sname = uc $skeleton;
+$sname .= "_CODE";
+my $not_found = 1;
+for (@lines) {
+	if (/$sname/) {
+		print "Found $skeleton system in $header_select_fname\n";
+		$not_found = 0;
+	}
+}
+
+if ($not_found) {
+	# Output all the lines up to #else line, then add our new lines
+	# then append the rest
+	my $new_header_select_fname = "../../fe/feSelectCode_new.c";
+	open(OUT,">$new_header_select_fname") || die "cannot open $new_header_select_fname for writing\n";
+	for (@lines) {
+		if (/#else/) {
+			# Print out lines
+			print OUT "#elif defined($sname)\n";
+			print OUT "\t#include \"$skeleton/$skeleton.c\"\n";
+		}
+		print OUT $_;
+	}
+	close OUT;
+	rename($header_select_fname, $header_select_fname . "~");
+	rename($new_header_select_fname, $header_select_fname);
+}
