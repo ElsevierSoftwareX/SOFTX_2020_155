@@ -32,10 +32,10 @@ Library {
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "aivanov"
+  LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Mon Oct 23 19:35:01 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:11>"
+  LastModifiedDate	  "Tue Oct 24 14:24:34 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:18>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -134,6 +134,17 @@ Library {
       Interpolate	      on
     }
     Block {
+      BlockType		      Logic
+      Operator		      "AND"
+      Inputs		      "2"
+      IconShape		      "rectangular"
+      AllPortsSameDT	      on
+      OutDataTypeMode	      "Logical (see Configuration Parameters: Optimiza"
+"tion)"
+      LogicDataType	      "uint(8)"
+      SampleTime	      "-1"
+    }
+    Block {
       BlockType		      Outport
       Port		      "1"
       UseBusObject	      off
@@ -210,6 +221,13 @@ Library {
     Block {
       BlockType		      Terminator
     }
+    Block {
+      BlockType		      UnitDelay
+      X0		      "0"
+      SampleTime	      "1"
+      StateMustResolveToSignalObject off
+      RTWStateStorageClass    "Auto"
+    }
   }
   AnnotationDefaults {
     HorizontalAlignment	    "center"
@@ -230,7 +248,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [378, 76, 967, 765]
+    Location		    [596, 79, 1624, 820]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -249,7 +267,7 @@ Library {
       Name		      "Bus\nCreator"
       Description	      "ADC0"
       Ports		      [32, 1]
-      Position		      [340, 30, 345, 185]
+      Position		      [35, 15, 40, 170]
       ShowName		      off
       AttributesFormatString  "%<Description>"
       Inputs		      "'adc_0_0','adc_0_1','adc_0_2','adc_0_3','adc_0_"
@@ -264,7 +282,7 @@ Library {
       Name		      "Bus\nCreator1"
       Description	      "ADC1"
       Ports		      [32, 1]
-      Position		      [440, 30, 445, 185]
+      Position		      [135, 15, 140, 170]
       ShowName		      off
       AttributesFormatString  "%<Description>"
       Inputs		      "'adc_1_0','adc_1_1','adc_1_2','adc_1_3','adc_1_"
@@ -279,7 +297,7 @@ Library {
       Name		      "Bus\nSelector6"
       Description	      "ADC Selector"
       Ports		      [1, 2]
-      Position		      [380, 50, 395, 170]
+      Position		      [75, 35, 90, 155]
       ShowName		      off
       AttributesFormatString  "%<Description>"
       OutputSignals	      "adc_0_0,adc_0_1"
@@ -301,7 +319,7 @@ Library {
       Name		      "DAC_0"
       Description	      "DAC"
       Ports		      [16, 16]
-      Position		      [495, 12, 545, 478]
+      Position		      [45, 247, 95, 713]
       BackgroundColor	      "cyan"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -321,7 +339,7 @@ Library {
       Name		      "Epics Channel NAme"
       Description	      "EPICS Input"
       Ports		      [1, 1]
-      Position		      [235, 74, 285, 96]
+      Position		      [430, 219, 480, 241]
       BackgroundColor	      "green"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -341,7 +359,7 @@ Library {
       Name		      "Epics Channel Name"
       Description	      "EPICS Output"
       Ports		      [1, 1]
-      Position		      [235, 14, 280, 36]
+      Position		      [430, 159, 475, 181]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -361,7 +379,7 @@ Library {
       Name		      "FIR Filter Name"
       Description	      "FIR Filter"
       Ports		      [1, 1]
-      Position		      [140, 15, 180, 75]
+      Position		      [575, 25, 615, 85]
       BackgroundColor	      "orange"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -379,14 +397,14 @@ Library {
     Block {
       BlockType		      Ground
       Name		      "Ground"
-      Position		      [395, 210, 415, 230]
+      Position		      [90, 195, 110, 215]
     }
     Block {
       BlockType		      Reference
       Name		      "IIR Module Name"
       Description	      "IIR Filter Module"
       Ports		      [1, 1]
-      Position		      [45, 15, 85, 75]
+      Position		      [430, 25, 470, 85]
       BackgroundColor	      "darkGreen"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -402,11 +420,19 @@ Library {
       RTWMemSecDataParameters "Inherit from model"
     }
     Block {
+      BlockType		      Logic
+      Name		      "Logical\nOperator"
+      Ports		      [2, 1]
+      Position		      [200, 137, 230, 168]
+      AllPortsSameDT	      off
+      OutDataTypeMode	      "Boolean"
+    }
+    Block {
       BlockType		      Reference
       Name		      "Matrix Name"
       Description	      "Matrix"
       Ports		      [8, 8]
-      Position		      [35, 138, 85, 277]
+      Position		      [170, 407, 240, 608]
       BackgroundColor	      "yellow"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -423,10 +449,30 @@ Library {
     }
     Block {
       BlockType		      Reference
+      Name		      "Name"
+      Description	      "RMS Calc"
+      Ports		      [1, 1]
+      Position		      [745, 240, 785, 300]
+      BackgroundColor	      "[0.741176, 0.800000, 0.215686]"
+      DropShadow	      on
+      AttributesFormatString  "%<Description>"
+      SourceBlock	      "cdsRms/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
       Name		      "Oscillator Name"
       Description	      "Oscillator"
       Ports		      [1, 3]
-      Position		      [45, 330, 85, 390]
+      Position		      [745, 125, 785, 185]
       BackgroundColor	      "magenta"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -446,7 +492,7 @@ Library {
       Name		      "Phase Rotator Name"
       Description	      "Phase Rotator"
       Ports		      [2, 2]
-      Position		      [155, 330, 195, 390]
+      Position		      [895, 30, 935, 90]
       BackgroundColor	      "lightBlue"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -462,11 +508,20 @@ Library {
       RTWMemSecDataParameters "Inherit from model"
     }
     Block {
+      BlockType		      Product
+      Name		      "Product"
+      Ports		      [2, 1]
+      Position		      [205, 22, 235, 53]
+      InputSameDT	      off
+      OutDataTypeMode	      "Inherit via internal rule"
+      SaturateOnIntegerOverflow	off
+    }
+    Block {
       BlockType		      Reference
       Name		      "Product Name"
       Description	      "Product"
       Ports		      [9, 8]
-      Position		      [230, 142, 280, 278]
+      Position		      [640, 400, 695, 620]
       BackgroundColor	      "[0.932779, 1.000000, 0.419564]"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -486,7 +541,7 @@ Library {
       Name		      "Ramp Name"
       Description	      "Ramp"
       Ports		      [1, 1]
-      Position		      [50, 435, 90, 495]
+      Position		      [895, 125, 935, 185]
       BackgroundColor	      "gray"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -506,7 +561,7 @@ Library {
       Name		      "Ramp Switch Name"
       Description	      "Ramp Switch"
       Ports		      [4, 2]
-      Position		      [250, 486, 290, 549]
+      Position		      [420, 403, 465, 517]
       BackgroundColor	      "[0.790334, 0.900000, 0.363093]"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -523,10 +578,30 @@ Library {
     }
     Block {
       BlockType		      Reference
+      Name		      "Remote Channel Name"
+      Description	      "Epics intersystem intlk"
+      Ports		      [1]
+      Position		      [430, 291, 480, 319]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Description>"
+      SourceBlock	      "cdsRemoteIntlk/Name"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
       Name		      "Rotator Name"
       Description	      "WFS Phase Rotator"
       Ports		      [2, 2]
-      Position		      [265, 330, 305, 390]
+      Position		      [750, 30, 790, 90]
       BackgroundColor	      "cyan"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -546,7 +621,7 @@ Library {
       Name		      "Subtract Name"
       Description	      "Subtract"
       Ports		      [16, 8]
-      Position		      [155, 440, 210, 610]
+      Position		      [280, 408, 350, 647]
       BackgroundColor	      "[1.000000, 0.769068, 0.736422]"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -562,11 +637,23 @@ Library {
       RTWMemSecDataParameters "Inherit from model"
     }
     Block {
+      BlockType		      Sum
+      Name		      "Sum"
+      Ports		      [2, 1]
+      Position		      [205, 85, 225, 105]
+      ShowName		      off
+      IconShape		      "round"
+      Inputs		      "|++"
+      InputSameDT	      off
+      OutDataTypeMode	      "Inherit via internal rule"
+      SaturateOnIntegerOverflow	off
+    }
+    Block {
       BlockType		      Reference
       Name		      "Switch Name"
       Description	      "Switch"
       Ports		      [8, 8]
-      Position		      [135, 139, 180, 276]
+      Position		      [525, 403, 590, 622]
       BackgroundColor	      "green"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -582,11 +669,21 @@ Library {
       RTWMemSecDataParameters "Inherit from model"
     }
     Block {
+      BlockType		      Terminator
+      Name		      "Terminator"
+      Position		      [200, 215, 220, 235]
+    }
+    Block {
+      BlockType		      UnitDelay
+      Name		      "Unit Delay"
+      Position		      [195, 268, 230, 302]
+    }
+    Block {
       BlockType		      Reference
       Name		      "Watchdog Name"
       Description	      "Sus Watchdog"
       Ports		      [1, 1]
-      Position		      [355, 315, 395, 375]
+      Position		      [745, 420, 785, 480]
       BackgroundColor	      "[0.611304, 0.662320, 1.000000]"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -606,7 +703,7 @@ Library {
       Name		      "cdsWD Name"
       Description	      "cdsWD"
       Ports		      [5, 1]
-      Position		      [385, 434, 425, 496]
+      Position		      [840, 407, 900, 533]
       BackgroundColor	      "[1.000000, 0.964056, 0.268743]"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
