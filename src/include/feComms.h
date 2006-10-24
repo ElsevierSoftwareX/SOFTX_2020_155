@@ -1,22 +1,4 @@
-#ifdef HEPI_CODE
-#include <hepi.h>
-#endif
-#ifdef SUS_CODE
-#include <sus.h>
-#endif
-#ifdef PDE_CODE
-#include <pde.h>
-#endif
-#ifdef OMC_CODE
-#include <omc.h>
-#endif
-#ifdef LTB_CODE
-#include <ltb.h>
-#endif
-
-#ifdef PNM
-#include <pnm.h>
-#endif
+#include "feSelectHeader.h"
 
 /* Vme bus reset */
 #define SYSVME_RESET_MAGIC_WORD 0x13571113
