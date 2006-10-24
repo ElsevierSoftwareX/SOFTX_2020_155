@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.53"
+    ComputedModelVersion    "1.54"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Mon Oct 23 15:22:10 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:53>"
+  LastModifiedDate	  "Tue Oct 24 14:07:08 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:54>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -3712,11 +3712,13 @@ Model {
     Block {
       BlockType		      Reference
       Name		      "SEI-HMY_ACT_SW"
+      Description	      "Epics intersystem intlk"
       Ports		      [1]
-      Position		      [1375, 145, 1415, 205]
-      BackgroundColor	      "green"
+      Position		      [1375, 161, 1425, 189]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
-      SourceBlock	      "cdsRemoteIntlk/Subsystem"
+      AttributesFormatString  "%<Description>"
+      SourceBlock	      "cdsRemoteIntlk/Name"
       SourceType	      "SubSystem"
       ShowPortLabels	      on
       SystemSampleTime	      "-1"
@@ -9405,7 +9407,7 @@ Model {
       System {
 	Name			"SUS_ETMY"
 	Location		[253, 93, 1762, 1173]
-	Open			on
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -12237,7 +12239,7 @@ Model {
       System {
 	Name			"SUS_ITMX"
 	Location		[151, 93, 1693, 1173]
-	Open			on
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
