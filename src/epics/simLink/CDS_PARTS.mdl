@@ -32,10 +32,10 @@ Library {
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "rolf"
+  LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Oct 24 18:33:29 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:26>"
+  LastModifiedDate	  "Wed Oct 25 11:07:52 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:27>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -177,12 +177,6 @@ Library {
       BlockType		      Reference
     }
     Block {
-      BlockType		      "S-Function"
-      FunctionName	      "system"
-      SFunctionModules	      "''"
-      PortCounts	      "[]"
-    }
-    Block {
       BlockType		      SubSystem
       ShowPortLabels	      on
       Permissions	      "ReadWrite"
@@ -254,7 +248,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [41, 107, 1069, 848]
+    Location		    [135, 76, 1159, 816]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -494,16 +488,16 @@ Library {
     Block {
       BlockType		      Reference
       Name		      "Matrix Name"
-      Tag		      "Matrix8x8"
+      Tag		      "Matrix"
       Description	      "Purpose:                                       "
 "                          \nProvide a matrix multiplication function for up t"
 "o 8 input and 8 outputs."
       Ports		      [8, 8]
-      Position		      [170, 407, 240, 608]
+      Position		      [150, 407, 220, 628]
       BackgroundColor	      "yellow"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
-      SourceBlock	      "Matrix88/Subsystem"
+      SourceBlock	      "cdsMatrix/Subsystem"
       SourceType	      "SubSystem"
       ShowPortLabels	      on
       SystemSampleTime	      "-1"
