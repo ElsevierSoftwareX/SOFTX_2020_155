@@ -34,8 +34,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Oct 25 13:28:59 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:33>"
+  LastModifiedDate	  "Wed Oct 25 15:59:53 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:34>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -809,7 +809,7 @@ Library {
     }
     Block {
       BlockType		      Reference
-      Name		      "site=M1,G1\nrate=32K\ndcuid=10"
+      Name		      "site=M1\nrate=32K\ndcuid=10"
       Tag		      "cdsParameters"
       Ports		      [1, 1]
       Position		      [305, 35, 345, 95]
