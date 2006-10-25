@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.62"
+    ComputedModelVersion    "1.75"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Oct 25 12:00:17 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:62>"
+  LastModifiedDate	  "Wed Oct 25 14:31:54 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:75>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -547,6 +547,9 @@ Model {
       SampleTime	      "-1"
     }
     Block {
+      BlockType		      Reference
+    }
+    Block {
       BlockType		      "S-Function"
       FunctionName	      "system"
       SFunctionModules	      "''"
@@ -617,7 +620,7 @@ Model {
   }
   System {
     Name		    "pde"
-    Location		    [0, 76, 1024, 743]
+    Location		    [5, 76, 1029, 743]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -726,9 +729,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -749,9 +752,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -787,14 +790,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -804,24 +807,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -831,7 +834,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -847,9 +850,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -875,14 +878,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -892,24 +895,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -919,7 +922,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -935,9 +938,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -963,14 +966,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -980,24 +983,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1007,7 +1010,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1023,9 +1026,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1051,14 +1054,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1068,24 +1071,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1095,7 +1098,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1111,9 +1114,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1134,9 +1137,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1152,9 +1155,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1170,9 +1173,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1188,9 +1191,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1204,9 +1207,9 @@ Model {
 	  Position		  [205, 50, 245, 110]
 	  SourceBlock		  "cdsWfsPhase/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1220,9 +1223,9 @@ Model {
 	  Position		  [205, 160, 245, 220]
 	  SourceBlock		  "cdsWfsPhase/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1236,9 +1239,9 @@ Model {
 	  Position		  [205, 265, 245, 325]
 	  SourceBlock		  "cdsWfsPhase/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1252,9 +1255,9 @@ Model {
 	  Position		  [205, 370, 245, 430]
 	  SourceBlock		  "cdsWfsPhase/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1280,14 +1283,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1297,24 +1300,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1324,7 +1327,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1350,14 +1353,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1367,24 +1370,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1394,7 +1397,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1410,9 +1413,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1438,14 +1441,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1455,24 +1458,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1482,7 +1485,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1498,9 +1501,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1526,14 +1529,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1543,24 +1546,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1570,7 +1573,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1586,9 +1589,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1614,14 +1617,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1631,24 +1634,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1658,7 +1661,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1674,9 +1677,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1697,9 +1700,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1715,9 +1718,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1733,9 +1736,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1751,9 +1754,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1779,14 +1782,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1796,24 +1799,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1823,7 +1826,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -2222,7 +2225,7 @@ Model {
       BlockType		      BusCreator
       Name		      "Bus\nCreator"
       Ports		      [32, 1]
-      Position		      [125, 45, 130, 200]
+      Position		      [120, 90, 125, 245]
       ShowName		      off
       Inputs		      "'adc_0_0','adc_0_1','adc_0_2','adc_0_3','adc_0_"
 "4','adc_0_5','adc_0_6','adc_0_7','adc_0_8','adc_0_9','adc_0_10','adc_0_11','a"
@@ -2721,14 +2724,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -2738,24 +2741,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -2765,7 +2768,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -2791,14 +2794,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -2808,24 +2811,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -2835,7 +2838,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -2861,14 +2864,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -2878,24 +2881,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -2905,7 +2908,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -2931,14 +2934,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -2948,24 +2951,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -2975,7 +2978,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -3001,14 +3004,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3018,24 +3021,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3045,7 +3048,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -3071,14 +3074,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3088,24 +3091,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3115,7 +3118,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -3141,14 +3144,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3158,24 +3161,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3185,7 +3188,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -3206,9 +3209,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -3234,14 +3237,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3251,24 +3254,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3278,7 +3281,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -3299,9 +3302,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -3327,14 +3330,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3344,24 +3347,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3371,7 +3374,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -3397,14 +3400,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3414,24 +3417,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3441,7 +3444,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -3467,14 +3470,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3484,24 +3487,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3511,7 +3514,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -3562,14 +3565,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3579,24 +3582,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3606,7 +3609,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -3632,14 +3635,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  on
+	  denIgnore		  "on"
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  off
-	  allowOverrides	  on
-	  showCoeff		  off
+	  additionalParams	  "off"
+	  allowOverrides	  "on"
+	  showCoeff		  "off"
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -3649,24 +3652,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  off
+	  showOut		  "off"
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  off
+	  showAcc		  "off"
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  off
+	  showMpy		  "off"
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  off
+	  showMem		  "off"
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  off
+	  overflowMode		  "off"
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -3676,7 +3679,7 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  off
+	  LockScale		  "off"
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -4056,7 +4059,7 @@ Model {
       System {
 	Name			"SUS_BS"
 	Location		[0, 76, 1024, 743]
-	Open			on
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -4258,6 +4261,11 @@ Model {
 	  BlockType		  Ground
 	  Name			  "Ground1"
 	  Position		  [330, 645, 350, 665]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground2"
+	  Position		  [1110, 1015, 1130, 1035]
 	}
 	Block {
 	  BlockType		  Reference
@@ -5462,6 +5470,18 @@ Model {
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
+	  BlockType		  Sum
+	  Name			  "Sum7"
+	  Ports			  [2, 1]
+	  Position		  [1125, 975, 1145, 995]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
 	  BlockType		  Reference
 	  Name			  "ULOUT"
 	  Ports			  [1, 1]
@@ -6325,7 +6345,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "WD_OUT"
-	  Position		  [1135, 963, 1165, 977]
+	  Position		  [1175, 978, 1205, 992]
 	  Port			  "6"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -6713,9 +6733,9 @@ Model {
 	    DstPort		    2
 	  }
 	  Branch {
-	    Points		    [805, 0]
+	    Points		    [0, 15; 805, 0]
 	    Branch {
-	      Points		      [0, -150]
+	      Points		      [0, -165]
 	      Branch {
 		DstBlock		"Product4"
 		DstPort			2
@@ -6741,7 +6761,7 @@ Model {
 	      }
 	    }
 	    Branch {
-	      DstBlock		      "WD_OUT"
+	      DstBlock		      "Sum7"
 	      DstPort		      1
 	    }
 	  }
@@ -6877,6 +6897,18 @@ Model {
 	  DstBlock		  "SD_DRV"
 	  DstPort		  1
 	}
+	Line {
+	  SrcBlock		  "Sum7"
+	  SrcPort		  1
+	  DstBlock		  "WD_OUT"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Ground2"
+	  SrcPort		  1
+	  DstBlock		  "Sum7"
+	  DstPort		  2
+	}
       }
     }
     Block {
@@ -6892,8 +6924,8 @@ Model {
       MaskHideContents	      off
       System {
 	Name			"SUS_ETMX"
-	Location		[0, 76, 1024, 743]
-	Open			off
+	Location		[-39, 76, 985, 743]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -7095,6 +7127,11 @@ Model {
 	  BlockType		  Ground
 	  Name			  "Ground1"
 	  Position		  [330, 645, 350, 665]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground2"
+	  Position		  [1090, 990, 1110, 1010]
 	}
 	Block {
 	  BlockType		  Reference
@@ -8299,6 +8336,18 @@ Model {
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
+	  BlockType		  Sum
+	  Name			  "Sum7"
+	  Ports			  [2, 1]
+	  Position		  [1110, 960, 1130, 980]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
 	  BlockType		  Reference
 	  Name			  "ULOUT"
 	  Ports			  [1, 1]
@@ -9162,7 +9211,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "WD_OUT"
-	  Position		  [1140, 963, 1170, 977]
+	  Position		  [1160, 963, 1190, 977]
 	  Port			  "6"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -9579,7 +9628,7 @@ Model {
 	      }
 	    }
 	    Branch {
-	      DstBlock		      "WD_OUT"
+	      DstBlock		      "Sum7"
 	      DstPort		      1
 	    }
 	  }
@@ -9714,6 +9763,19 @@ Model {
 	  Points		  [15, 0; 0, 70]
 	  DstBlock		  "SD_DRV"
 	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Sum7"
+	  SrcPort		  1
+	  DstBlock		  "WD_OUT"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Ground2"
+	  SrcPort		  1
+	  Points		  [5, 0]
+	  DstBlock		  "Sum7"
+	  DstPort		  2
 	}
       }
     }
@@ -9933,6 +9995,11 @@ Model {
 	  BlockType		  Ground
 	  Name			  "Ground1"
 	  Position		  [330, 645, 350, 665]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground2"
+	  Position		  [1090, 990, 1110, 1010]
 	}
 	Block {
 	  BlockType		  Reference
@@ -11137,6 +11204,18 @@ Model {
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
+	  BlockType		  Sum
+	  Name			  "Sum7"
+	  Ports			  [2, 1]
+	  Position		  [1115, 960, 1135, 980]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
 	  BlockType		  Reference
 	  Name			  "ULOUT"
 	  Ports			  [1, 1]
@@ -12000,7 +12079,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "WD_OUT"
-	  Position		  [1135, 963, 1165, 977]
+	  Position		  [1165, 963, 1195, 977]
 	  Port			  "6"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -12388,7 +12467,7 @@ Model {
 	    DstPort		    2
 	  }
 	  Branch {
-	    Points		    [805, 0]
+	    Points		    [805, 0; 0, 0]
 	    Branch {
 	      Points		      [0, -150]
 	      Branch {
@@ -12416,7 +12495,8 @@ Model {
 	      }
 	    }
 	    Branch {
-	      DstBlock		      "WD_OUT"
+	      Points		      [0, 0]
+	      DstBlock		      "Sum7"
 	      DstPort		      1
 	    }
 	  }
@@ -12550,6 +12630,19 @@ Model {
 	  SrcPort		  5
 	  Points		  [15, 0; 0, 70]
 	  DstBlock		  "SD_DRV"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Ground2"
+	  SrcPort		  1
+	  Points		  [10, 0]
+	  DstBlock		  "Sum7"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum7"
+	  SrcPort		  1
+	  DstBlock		  "WD_OUT"
 	  DstPort		  1
 	}
       }
@@ -12774,6 +12867,11 @@ Model {
 	  multiplicandMode	  "Same as output"
 	  multiplicandWordLength  "32"
 	  multiplicandFracLength  "30"
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground2"
+	  Position		  [1115, 990, 1135, 1010]
 	}
 	Block {
 	  BlockType		  Reference
@@ -13970,6 +14068,18 @@ Model {
 	  Name			  "Sum6"
 	  Ports			  [2, 1]
 	  Position		  [485, 730, 505, 750]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Sum
+	  Name			  "Sum7"
+	  Ports			  [2, 1]
+	  Position		  [1135, 960, 1155, 980]
 	  ShowName		  off
 	  IconShape		  "round"
 	  Inputs		  "|++"
@@ -15212,7 +15322,7 @@ Model {
 	  Branch {
 	    Points		    [805, 0]
 	    Branch {
-	      Points		      [0, -150]
+	      Points		      [0, 0; 0, -150]
 	      Branch {
 		DstBlock		"Product4"
 		DstPort			2
@@ -15238,7 +15348,7 @@ Model {
 	      }
 	    }
 	    Branch {
-	      DstBlock		      "WD_OUT"
+	      DstBlock		      "Sum7"
 	      DstPort		      1
 	    }
 	  }
@@ -15394,6 +15504,19 @@ Model {
 	  Points		  [870, 0; 0, -500]
 	  DstBlock		  "MASTER_SW"
 	  DstPort		  5
+	}
+	Line {
+	  SrcBlock		  "Ground2"
+	  SrcPort		  1
+	  Points		  [5, 0]
+	  DstBlock		  "Sum7"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum7"
+	  SrcPort		  1
+	  DstBlock		  "WD_OUT"
+	  DstPort		  1
 	}
       }
     }
@@ -15617,6 +15740,11 @@ Model {
 	  multiplicandMode	  "Same as output"
 	  multiplicandWordLength  "32"
 	  multiplicandFracLength  "30"
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground2"
+	  Position		  [1115, 990, 1135, 1010]
 	}
 	Block {
 	  BlockType		  Reference
@@ -16821,6 +16949,18 @@ Model {
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
+	  BlockType		  Sum
+	  Name			  "Sum7"
+	  Ports			  [2, 1]
+	  Position		  [1135, 960, 1155, 980]
+	  ShowName		  off
+	  IconShape		  "round"
+	  Inputs		  "|++"
+	  InputSameDT		  off
+	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
 	  BlockType		  Reference
 	  Name			  "ULOUT"
 	  Ports			  [1, 1]
@@ -17684,7 +17824,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "WD_OUT"
-	  Position		  [1135, 963, 1165, 977]
+	  Position		  [1190, 963, 1220, 977]
 	  Port			  "6"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -18053,7 +18193,7 @@ Model {
 	    DstPort		    2
 	  }
 	  Branch {
-	    Points		    [805, 0]
+	    Points		    [805, 0; 0, 0]
 	    Branch {
 	      Points		      [0, -150]
 	      Branch {
@@ -18081,7 +18221,8 @@ Model {
 	      }
 	    }
 	    Branch {
-	      DstBlock		      "WD_OUT"
+	      Points		      [0, 0]
+	      DstBlock		      "Sum7"
 	      DstPort		      1
 	    }
 	  }
@@ -18238,6 +18379,19 @@ Model {
 	  DstBlock		  "MASTER_SW"
 	  DstPort		  5
 	}
+	Line {
+	  SrcBlock		  "Ground2"
+	  SrcPort		  1
+	  Points		  [5, 0]
+	  DstBlock		  "Sum7"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "Sum7"
+	  SrcPort		  1
+	  DstBlock		  "WD_OUT"
+	  DstPort		  1
+	}
       }
     }
     Block {
@@ -18250,17 +18404,35 @@ Model {
       AllPortsSameDT	      off
       OutDataTypeMode	      "Boolean"
     }
+    Block {
+      BlockType		      Reference
+      Name		      "site=M1,G1\nrate=32K\ndcuid=10"
+      Tag		      "cdsParameters"
+      Ports		      [1, 1]
+      Position		      [315, 20, 355, 80]
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsParameters/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
     Line {
       SrcBlock		      "Bus\nCreator"
       SrcPort		      1
-      Points		      [655, 0]
+      Points		      [660, 0]
       Branch {
-	Points			[0, -30]
+	Points			[0, -75]
 	DstBlock		"Bus\nSelector4"
 	DstPort			1
       }
       Branch {
-	Points			[0, 225]
+	Points			[0, 180]
 	Branch {
 	  DstBlock		  "Bus\nSelector1"
 	  DstPort		  1
@@ -19000,7 +19172,7 @@ Model {
     }
     Annotation {
       Name		      "adc0"
-      Position		      [124, 213]
+      Position		      [124, 258]
       UseDisplayTextAsClickCallback off
     }
     Annotation {
