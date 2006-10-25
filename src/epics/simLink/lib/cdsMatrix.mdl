@@ -1,5 +1,5 @@
 Library {
-  Name			  "Matrix88"
+  Name			  "cdsMatrix"
   Version		  6.2
   MdlSubVersion		  0
   SavedCharacterEncoding  "ibm-5348_P100-1997"
@@ -174,7 +174,7 @@ Library {
     FontAngle		    "normal"
   }
   System {
-    Name		    "Matrix88"
+    Name		    "cdsMatrix"
     Location		    [522, 99, 1606, 1092]
     Open		    on
     ModelBrowserVisibility  off
