@@ -2042,7 +2042,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 		    }
 		    else {
 			$calcExp .= $fromExp[$qq];
-			$calcExp .= " & ";
+			$calcExp .= " && ";
 		    }
 		}
 		print OUT "$calcExp";
