@@ -4,10 +4,22 @@ die "Usage: $PROGRAM_NAME <MDL file> <Output file name> <DCUID number> [<site>] 
         if (@ARGV != 3 && @ARGV != 4 && @ARGV != 5);
 
 $site = "M1";
+$location = "mit";
 $rate = "60"; # In microseconds
 
 if (@ARGV > 3) {
 	$site = $ARGV[3];
+	if ($site =~ /^M/) {
+		$location = "mit";
+	} elsif ($site =~ /^G/) {
+		$location = "geo";
+	} elsif ($site =~ /^H/) {
+		$location = "lho";
+	} elsif ($site =~ /^L/) {
+		$location = "llo";
+	} elsif ($site =~ /^C/) {
+		$location = "caltech";
+	}
 }
 if (@ARGV > 4) {
 	my $param_speed = $ARGV[4];
@@ -25,6 +37,7 @@ $skeleton = $ARGV[1];
 print "file out is $skeleton\n";
 $cFile = "../../fe/";
 $cFile .= $ARGV[1];
+$cFileDirectory = $cFile;
 $cFile .= "/";
 $cFile .= $ARGV[1];
 $cFile .= ".c";
@@ -45,6 +58,7 @@ print "DCUID = $dcuId\n";
 #if($dcuId > 16) {$rate = 480;}
 if (@ARGV == 2) { $skeleton = $ARGV[1]; }
 open(EPICS,">../fmseq/".$ARGV[1]) || die "cannot open output file for writing";
+mkdir $cFileDirectory, 0755;
 open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
 open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
@@ -2194,18 +2208,18 @@ print OUTME "DB += build/\$(TARGET)/";
 print OUTME "$skeleton";
 print OUTME "1\.db\n";
 print OUTME "\n";
-print OUTME "IFO = M1\n";
+print OUTME "IFO = $site\n";
 print OUTME "SITE = mit\n";
 print OUTME "\n";
 print OUTME "SEQ += \'";
 print OUTME "$skeleton";
-print OUTME ",(\"ifo=M1, site=mit, sys=\U$systemName\, \Lsysnum= $dcuId\")\'\n";
+print OUTME ",(\"ifo=$site, site=$location, sys=\U$systemName\, \Lsysnum= $dcuId\")\'\n";
 for($ii=0;$ii<$useWd;$ii++)
 {
 print OUTME "SEQ += \'";
 print OUTME "hepiWatchdog";
 print OUTME "\U$useWdName[$ii]";
-print OUTME ",(\"ifo=M1, sys=\U$systemName\,\Lsubsys=\U$useWdName[$ii]\")\'\n";
+print OUTME ",(\"ifo=$site, sys=\U$systemName\,\Lsubsys=\U$useWdName[$ii]\")\'\n";
 }
 print OUTME "\n";
 print OUTME "CFLAGS += -D";
