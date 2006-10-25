@@ -50,3 +50,10 @@ dump_predefines:
 	gcc -E -dM -x c /dev/null
 
 
+% :: src/epics/simLink/%.mdl
+	(cd src/epics/util; ./feCodeGen.pl ../simLink/$@.mdl $@  10 G1 32K)
+#pde:
+#	./feCodeGen.pl ../simLink/pde.mdl pde 10 G1 32K
+#	(cd ../../../; /bin/rm -rf target/pdeepics /build/pdeepics; make -f config/Makefile.pdeepics)
+#	(cd ../../fe/pde; make clean; make)
+
