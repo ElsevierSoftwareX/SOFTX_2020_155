@@ -10,7 +10,35 @@ sub partType {
 # Current part number is passed as first argument
 sub printHeaderStruct {
         my ($i) = @_;
-	print "Model Parameters are $::xpartName[$i];\n";
+	my @sp = split(/\\n/, $::xpartName[$i]);
+	#print "Model Parameters are $::xpartName[$i];\n";
+	#print "Split array is @sp\n";
+	for (@sp) {
+		@spp = split(/=/);
+		if (@spp == 2) {
+			if ($spp[0] eq "site") {
+				$spp[1] =~ s/,/ /g;
+				print "Site is set to $spp[1]\n";
+				$::site = $spp[1];
+			} elsif ($spp[0] eq "rate") {
+				print "Rate set to $spp[1]\n";
+        			my $param_speed = $spp[1];
+        			if ($param_speed eq "2K") {
+                			$::rate = 480;
+        			} elsif ($param_speed eq "16K") {
+                			$::rate = 60;
+        			} elsif ($param_speed eq "32K") {
+                			$::rate = 30;
+        			} elsif ($param_speed eq "64K") {
+                			$::rate = 15;
+        			} else  { die "Invalid speed $param_speed specified\n"; }
+
+			} elsif ($spp[0] eq "dcuid") {
+				print "Dcu Id is set to $spp[1]\n";
+				$::dcuId = $spp[1];
+			}
+		}
+	}
 }
 
 # Print Epics variable definitions
