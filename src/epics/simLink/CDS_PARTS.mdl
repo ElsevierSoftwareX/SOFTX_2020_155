@@ -34,8 +34,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Oct 25 11:07:52 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:27>"
+  LastModifiedDate	  "Wed Oct 25 13:28:59 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:33>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -248,7 +248,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [135, 76, 1159, 816]
+    Location		    [88, 489, 1112, 1229]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -797,6 +797,24 @@ Library {
       DropShadow	      on
       AttributesFormatString  "%<Description>"
       SourceBlock	      "cdsWD/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "site=M1,G1\nrate=32K\ndcuid=10"
+      Tag		      "cdsParameters"
+      Ports		      [1, 1]
+      Position		      [305, 35, 345, 95]
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsParameters/Subsystem"
       SourceType	      "SubSystem"
       ShowPortLabels	      on
       SystemSampleTime	      "-1"
