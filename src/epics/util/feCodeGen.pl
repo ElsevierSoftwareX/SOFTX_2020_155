@@ -1,12 +1,16 @@
 #!/usr/bin/perl
 
-die "Usage: $PROGRAM_NAME <MDL file> <Output file name> <DCUID number> [<site>] [<speed>]\n\t" . "site is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
-        if (@ARGV != 3 && @ARGV != 4 && @ARGV != 5);
+die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>] [<speed>]\n\t" . "site is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
+        if (@ARGV != 2 && @ARGV != 3 && @ARGV != 4 && @ARGV != 5);
 
 $site = "M1";
 $location = "mit";
 $rate = "60"; # In microseconds
+$dcuId = 8;
 
+if (@ARGV > 2) {
+	$dcuId = $ARGV[2];
+}
 if (@ARGV > 3) {
 	$site = $ARGV[3];
 	if ($site =~ /^M/) {
@@ -52,7 +56,6 @@ $meFile = "../../../config/";
 $meFile .= "Makefile\.";
 $meFile .= $ARGV[1];
 $meFile .= epics;
-$dcuId = $ARGV[2];
 print "DCUID = $dcuId\n";
 #if($dcuId < 16) {$rate = 60;}
 #if($dcuId > 16) {$rate = 480;}

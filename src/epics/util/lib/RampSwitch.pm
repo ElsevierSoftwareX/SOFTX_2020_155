@@ -3,6 +3,7 @@ use Exporter;
 @ISA = ('Exporter');
 
 sub partType {
+	$::useWd = 1;
 	return RampSwitch;
 }
 
@@ -25,7 +26,7 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
-	print ::OUT "double \L$::xpartName[$ii]\[4\];\n";
+	print ::OUT "double \L$::xpartName[$i]\[4\];\n";
 }
 
 # Figure out part input code
@@ -54,10 +55,10 @@ sub frontEndInitCode {
 sub frontEndCode {
 	my ($i) = @_;
         my $calcExp = "// RampSwitch\n";
-        $calcExp .= "\L$::xpartName[$i]";
-        $calcExp .= " = ";
-        $calcExp .= $::fromExp[0];
-        $calcExp .= ";\n";
+        #$calcExp .= "\L$::xpartName[$i]";
+        #$calcExp .= " = ";
+        #$calcExp .= $::fromExp[0];
+        #$calcExp .= ";\n";
         for(my $qq=0; $qq < $::inCnt; $qq++) {
           $calcExp .= "\L$::xpartName[$i]\[";
           $calcExp .= $qq;
