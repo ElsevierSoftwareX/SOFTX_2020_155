@@ -735,7 +735,7 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 $ftotal = $partCnt;
    for($kk=0;$kk<$partCnt;$kk++)
    {
-	if(($partType[$kk] eq "INPUT") || ($partType[$kk] eq "OUTPUT") || ($partType[$kk] eq "TERM") || ($partType[$kk] eq "BUSC") || ($partType[$kk] eq "BUSS") || ($partType[$kk] eq "GROUND") || ($partType[$kk] eq "EpicsIn"))
+	if(($partType[$kk] eq "INPUT") || ($partType[$kk] eq "OUTPUT") || ($partType[$kk] eq "BUSC") || ($partType[$kk] eq "BUSS") || ($partType[$kk] eq "EpicsIn") || ($partType[$kk] eq "TERM") || ($partType[$kk] eq "GROUND"))
 	{
 		$ftotal --;
 	}
@@ -1610,7 +1610,7 @@ for($ii=0;$ii<$seqCnt;$ii++)
 		{
 			$processName[$processCnt] = $seqName[$xx][$jj];
 			$processPartNum[$processCnt] = $seq[$xx][$jj];
-			#print "$processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
+			# print "$processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
 			$processCnt ++;
 		}
 	}
@@ -1618,15 +1618,21 @@ for($ii=0;$ii<$seqCnt;$ii++)
 	{
 		$xx = $seqList[$ii];
 		$processName[$processCnt] = $xpartName[$xx];
+if(($partType[$xx] eq "TERM") || ($partType[$xx] eq "GROUND") || ($partType[$xx] eq "EpicsIn")) 
+{$ftotal ++;}
 		$processSeqType{$xpartName[$xx]} = $seqType[$ii];
 		$processPartNum[$processCnt] = $xx;
-		#print "$processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
+		# print "$processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
 		$processSeqSubsysName[$processCnt] = "__PART__";
 		$processCnt ++;
 	}
 	$processSeqEnd[$processSeqCnt] = $processCnt;
 }
-print "Total of $processCnt parts to process\n";
+print "Total of $processCnt parts to process $ftotal\n";
+if($processCnt != $ftotal)
+{
+	print "Fatal error - not all parts are in processing list!!!!!\n";
+}
 
 #print "CPU_STEPS:\n";
 #while (($k, $v) = each %sys_cpu_step) {
