@@ -292,9 +292,10 @@ while (<IN>) {
 	{
 		if(($partType[$ii] eq "OUTPUT") && ($partOutput[$ii][0] eq $conSrc) && ($partOutputPort[$ii][0] == $conSrcPort) && ($conMade[$ii] == 0))
 		{
-		$partOutput[$ii][0] = $conDes;
-		$partOutputPort[$ii][0] = $conDesPort;
-		$conMade[$ii] = 1;
+			# print "Made OUT connect $xpartName[$ii] $conDes $conDesPort\n";
+			$partOutput[$ii][0] = $conDes;
+			$partOutputPort[$ii][0] = $conDesPort;
+			$conMade[$ii] = 1;
 		}
 		if($conDes eq $xpartName[$ii])
 		{
@@ -592,12 +593,22 @@ $foundCon = 0;
 			{
 				$fromNum = $partInNum[$ii][$jj];
 				$fromPort = $partInputPort[$ii][$jj];
-			# print "\t Maybe $xpartName[$xx] port $partOutputPort[$ii][$jj] $xpartName[$fromNum] $partType[$fromNum] $fromPort\n";
+				for($xxx=0;$xxx<$partOutCnt[$fromNum];$xxx++)
+				{
+					if($xpartName[$ii] eq $partOutput[$fromNum][$xxx])
+					{
+						$fromPort = $xxx;
+					}
+				}
+			# print "$xpartName[$ii]\n";
+			# print "Maybe $xpartName[$xx] port $partOutputPort[$ii][$jj] $xpartName[$fromNum] $partType[$fromNum] port $fromPort\n";
 				# Make output connection at source part
 				$partOutput[$fromNum][$fromPort] = $xpartName[$xx];
 				$partOutputType[$fromNum][$fromPort] = $partType[$xx];
 				$partOutNum[$fromNum][$fromPort] = $xx;
 				$partOutputPort[$fromNum][$fromPort] = $partOutputPort[$ii][$jj];
+#print "$xpartName[$xx] $partType[$xx] $xx $partOutputPort[$ii][$jj]\n";
+#print "$xpartName[$fromNum] $fromPort\n\n";
                        		# $partSysFromx[$xx][$fromCnt[$xx]] = $partSubNum[$ii];
 				# Make input connection at destination part
 				$qq = $partOutputPort[$ii][$jj] - 1;
@@ -662,7 +673,7 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 				if(($partOutput[$xx][$jj] eq $xpartName[$kk]))
 				{
 				# print "Found ADC NP connect $xpartName[$xx] to $xpartName[$kk] $partOutputPort[$xx][$jj]\n";
-				print "$jj $partOutputPort[$xx][$jj] $partOutputPortUsed[$xx][$jj]\n";
+				# print "$jj $partOutputPort[$xx][$jj] $partOutputPortUsed[$xx][$jj]\n";
 				$fromNum = $xx;
 				#$fromPort = $jj;
 				#$fromPort = $partInputPort[$kk][0];
@@ -721,7 +732,16 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 	}
 }
 
+$ftotal = $partCnt;
+   for($kk=0;$kk<$partCnt;$kk++)
+   {
+	if(($partType[$kk] eq "INPUT") || ($partType[$kk] eq "OUTPUT") || ($partType[$kk] eq "TERM") || ($partType[$kk] eq "BUSC") || ($partType[$kk] eq "BUSS") || ($partType[$kk] eq "GROUND") || ($partType[$kk] eq "EpicsIn"))
+	{
+		$ftotal --;
+	}
+   }
 
+print "Total parts to process $ftotal\n";
 #DIAGNOSTIC
 print "Found $subSys subsystems\n";
 for($ll=0;$ll<$subSys;$ll++)
@@ -734,6 +754,7 @@ for($ii=$subSysPartStart[$ll];$ii<$subSysPartStop[$ll];$ii++)
 {
 	print OUTD "Part $ii $xpartName[$ii] is type $partType[$ii] with $partInCnt[$ii] inputs and $partOutCnt[$ii] outputs\n";
 	print OUTD "INS FROM:\n";
+	print OUTD "\tPart Name\tType\tNum\tPort\n";
 	for($jj=0;$jj<$partInCnt[$ii];$jj++)
 	{
                         #$from = $partInNum[$ii][$jj];
@@ -1491,7 +1512,7 @@ $numTries ++;
 				}
 			}
 			if($allADC == 1) {
-				print "Subsys $ii $subSysName[$ii] can go next\n";
+				# print "Subsys $ii $subSysName[$ii] can go next\n";
 				$subUsed[$ii] = 1;
 				$subRemaining --;
 				$seqList[$seqCnt] = $ii;
@@ -1613,7 +1634,6 @@ print "Total of $processCnt parts to process\n";
 #}
 
 $fpartCnt = 0;
-$ftotal = $partCnt;
 $inCnt = 0;
 
 # Write Epics structs common to all CDS front ends to the .h file.
@@ -2032,7 +2052,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 	if($partType[$mm] eq "AND")
 	{
 	   print OUT "// Logical AND\n";
-		print "\tUsed AND $xpartName[$mm] $partOutCnt[$mm]\n";
+		# print "\tUsed AND $xpartName[$mm] $partOutCnt[$mm]\n";
 		$calcExp = "\L$xpartName[$mm]";
 		$calcExp .= " = ";
 		for($qq=0;$qq<$inCnt;$qq++)
