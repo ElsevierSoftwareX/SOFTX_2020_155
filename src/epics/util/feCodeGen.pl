@@ -611,6 +611,7 @@ $foundCon = 0;
 #print "$xpartName[$fromNum] $fromPort\n\n";
                        		# $partSysFromx[$xx][$fromCnt[$xx]] = $partSubNum[$ii];
 				# Make input connection at destination part
+				$fromPort = $partInputPort[$ii][$jj];
 				$qq = $partOutputPort[$ii][$jj] - 1;
 				$partInput[$xx][$qq] = $xpartName[$fromNum];
 				$partInputType[$xx][$qq] = $partType[$fromNum];
