@@ -168,6 +168,8 @@ COEF dspCoeff[NUM_SYSTEMS];	/* Local mem for SFM coeffs.	*/
 VME_COEF *pCoeff[NUM_SYSTEMS];		/* Ptr to SFM coeffs in shmem		*/
 double dWord[MAX_ADC_MODULES][32];
 int dacOut[MAX_DAC_MODULES][16];
+int dioInput[MAX_DIO_MODULES];
+int dioOutput[MAX_DIO_MODULES];
 int clock16K = 0;
 
 #include "./feSelectCode.c"
@@ -567,6 +569,11 @@ void *fe_start(void *arg)
 	// Assign chan 32 to onePps 
 	onePps = dWord[0][31];
 
+	// Read Dio cards
+  	for(kk=0;kk<cdsPciModules.dioCount;kk++) {
+  		dioInput[kk] = readDio(&cdsPciModules, kk) & 0xff;
+	}
+
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
 	{
@@ -636,6 +643,11 @@ void *fe_start(void *arg)
 		}
 		// DMA out dac values
 		gsaDacDma2(jj,cdsPciModules.dacType[jj]);
+	}
+
+	// Write Dio cards
+  	for(kk=0;kk<cdsPciModules.dioCount;kk++) {
+  		writeDio(&cdsPciModules, kk, dioOutput[kk]);
 	}
 
 #ifndef NO_DAQ
