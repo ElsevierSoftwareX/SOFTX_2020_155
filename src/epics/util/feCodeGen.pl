@@ -6,7 +6,9 @@ die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>
 $site = "M1";
 $location = "mit";
 $rate = "60"; # In microseconds
-$dcuId = 8;
+$dcuId = 8; # Default dcu Id
+$ifoid = 0; # Default ifoid for the DAQ
+$nodeid = 0; # Default GDS node id for awgtpman
 
 if (@ARGV > 2) {
 	$dcuId = $ARGV[2];
@@ -68,9 +70,7 @@ open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
 open(OUTH,">./".$hFile) || die "cannot open header file for writing";
 open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 $diag = "diags\.txt";
-$filtFile = "gds\.txt";
 open(OUTD,">./".$diag) || die "cannot open diag file for writing";
-open(OUTG,">./".$filtFile) || die "cannot open diag file for writing";
 
 $mySeq = 0;
 $connects = 0;
@@ -906,10 +906,10 @@ $subRemaining = $subSys;
 $seqCnt = 0;
 
 #
-$old_style_multiprocessing = 1;
+$old_style_multiprocessing = 0;
 
 # Total number of CPUs available to us
-$cpus = 2;
+$cpus = 4;
 
 # subSysName -> step*10 + cpu
 # 'step' is the processing step from one  sync point to the next
@@ -2239,7 +2239,7 @@ print OUTME "$skeleton";
 print OUTME "1\.db\n";
 print OUTME "\n";
 print OUTME "IFO = $site\n";
-print OUTME "SITE = mit\n";
+print OUTME "SITE = $location\n";
 print OUTME "\n";
 print OUTME "SEQ += \'";
 print OUTME "$skeleton";
@@ -2274,9 +2274,51 @@ print OUTME "/g;s/%SUBSYS%//g' \$< > \$\@\n";
 print OUTME "\n";
 print OUTME "\n";
 close OUTME;
+
+sub get_freq {
+if($rate == 480) {
+	return 2*1024;
+} elsif ($rate == 60) {
+	return 16*1024;
+} elsif ($rate == 30) {
+	return 32*1024;
+} elsif ($rate == 15) {
+	return 64*1024;
+}
+}
+
+# Create DAQ config file (default section and a few ADC input channels)
+my $daqFile = "$site" . uc($skeleton) . "\.ini";
+open(OUTG,">./".$daqFile) || die "cannot open diag file for writing";
+print OUTG 	"[default]\n".
+		"dcuid=$dcuId\n".
+		"datarate=" . get_freq() . "\n".
+		"gain=1.00\n".
+		"acquire=0\n".
+		"ifoid=$ifoid\n".
+		"datatype=1\n".
+		"units=V\n".
+		"slope=6.1028e-05\n".
+		"offset=0\n".
+		"\n";
+for ( 0 .. 2 ) {
+	print OUTG "[$site:" . uc($skeleton) . "-CHAN_" . $_ ."]\n";
+	print OUTG "chnnum=" . ($gdsTstart + 3*$_) . "\n";
+	print OUTG "#acquire=1\n";
+}
+close OUTG;
+
+# Create Foton filter file (with header)
 $jj = $filtCnt / 40;
 $jj ++;
-print OUTG "$jj lines to print\n";
+#print OUTG "$jj lines to print\n";
+$filtFile = "$site" . uc($skeleton) . "\.txt";
+open(OUTG,">./".$filtFile) || die "cannot open diag file for writing";
+print OUTG "# FILTERS FOR ONLINE SYSTEM\n".
+	"#\n".
+	"# Computer generated file: DO NOT EDIT\n".
+	"#\n";
+
 for($ii=0;$ii<$jj;$ii++)
 {
 	$kk = $ii * 4;
