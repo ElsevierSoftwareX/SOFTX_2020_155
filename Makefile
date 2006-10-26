@@ -21,7 +21,6 @@ clean-% :: src/epics/simLink/%.mdl
 
 # With this rule one can install any system
 # By saying 'make install-pde', for example
-# date +%y%m%d_%H%m%S
 install-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-,,$@); \
 	upper_system=`echo $$system | tr a-z A-Z`;\
