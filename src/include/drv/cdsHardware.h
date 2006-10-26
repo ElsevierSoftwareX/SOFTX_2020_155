@@ -54,7 +54,7 @@ typedef struct CDS_HARDWARE{
 
 /* ACCESS DIO Module Definitions ********************************************** */
 #define ACC_VID	0x494F
-#define ACC_TID	0x0C50
+#define ACC_TID	0x0C51
 #define DIO_ALL_INPUT	0x9B
 #define DIO_A_OUTPUT	0x8B
 #define DIO_C_OUTPUT	0x92
