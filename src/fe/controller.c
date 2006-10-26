@@ -507,7 +507,7 @@ void *fe_start(void *arg)
         }
 
 	/* Update Epics variables */
-#ifdef HEPI_CODE
+#if MAX_MODULES > END_OF_DAQ_BLOCK
 	epicsCycle = (epicsCycle + 1) % (MAX_MODULES + 2);
 #else
 	epicsCycle = subcycle;
@@ -566,13 +566,6 @@ void *fe_start(void *arg)
 
 	// Assign chan 32 to onePps 
 	onePps = dWord[0][31];
-#ifdef HEPI_CODE
-	if(cdsPciModules.adcCount < 3)
-	{           
-		for(ii=0;ii<32;ii++) dWord[1][ii] = dWord[0][ii];
-		for(ii=0;ii<32;ii++) dWord[2][ii] = dWord[0][ii];
-	}
-#endif
 
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
