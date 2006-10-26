@@ -193,13 +193,21 @@ void gsaDacDma2(int modNum, int dacType)
 }
 
 // *****************************************************************************
-// Routine to initialize ACCESS DIO modules
+// Routine to read ACCESS DIO modules
 // *****************************************************************************
-unsigned int readDio(CDS_HARDWARE *pHardware,int modNum)
+unsigned int readDio(CDS_HARDWARE *pHardware, int modNum)
 {
   unsigned int status;
-	status = inw(pHardware->pci_dio[modNum]);
+	status = inb(pHardware->pci_dio[modNum]);
 	return(status);
+}
+
+// *****************************************************************************
+// Routine to write ACCESS DIO modules
+// *****************************************************************************
+void writeDio(CDS_HARDWARE *pHardware, int modNum, int data)
+{
+	outb(data & 0xff,pHardware->pci_dio[modNum]+DIO_C_REG);
 }
 
 // *****************************************************************************
