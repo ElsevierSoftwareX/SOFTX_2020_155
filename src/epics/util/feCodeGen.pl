@@ -1563,7 +1563,7 @@ $numTries ++;
 	}
 }
 if(($partsRemaining > 0) || ($subRemaining > 0)) {
-print "Linkage failed\n";
+print "Linkage failed (parts remaining $partsRemaining; subs remaining $subRemaining)\n";
 	for($ii=0;$ii<$subSys;$ii++)
 	{
 		if($subUsed[$ii] == 0)
