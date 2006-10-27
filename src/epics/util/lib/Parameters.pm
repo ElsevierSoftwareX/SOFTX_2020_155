@@ -20,6 +20,17 @@ sub printHeaderStruct {
 				$spp[1] =~ s/,/ /g;
 				print "Site is set to $spp[1]\n";
 				$::site = $spp[1];
+			        if ($::site =~ /^M/) {
+                			$::location = "mit";
+        			} elsif ($::site =~ /^G/) {
+                			$::location = "geo";
+        			} elsif ($::site =~ /^H/) {
+                			$::location = "lho";
+        			} elsif ($site =~ /^L/) {
+                			$::location = "llo";
+        			} elsif ($::site =~ /^C/) {
+                			$::location = "caltech";
+        			}
 			} elsif ($spp[0] eq "rate") {
 				print "Rate set to $spp[1]\n";
         			my $param_speed = $spp[1];
