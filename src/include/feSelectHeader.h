@@ -1,5 +1,5 @@
 #ifdef SEI_CODE
-	#include "hepi.h"	/* User code for HEPI control.		*/
+	#include "sei.h"	/* User code for HEPI control.		*/
 #elif defined(SUS_CODE)
 	#include "sus.h"	/* User code for quad control.		*/
 #elif defined(PNM)
