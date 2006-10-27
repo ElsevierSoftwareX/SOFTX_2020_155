@@ -909,7 +909,7 @@ $seqCnt = 0;
 $old_style_multiprocessing = 0;
 
 # Total number of CPUs available to us
-$cpus = 4;
+$cpus = 2;
 
 # subSysName -> step*10 + cpu
 # 'step' is the processing step from one  sync point to the next
