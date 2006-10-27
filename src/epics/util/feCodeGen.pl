@@ -2401,3 +2401,18 @@ if ($not_found) {
 	rename($header_select_fname, $header_select_fname . "~");
 	rename($new_header_select_fname, $header_select_fname);
 }
+
+
+# Take care of generating Epics screens
+mkdir $skeleton, 0755;
+$sed_arg =  "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;";
+system("cat GDS_TP.adl | sed '$sed_arg' > $skeleton/GDS_TP.adl");
+for(0 .. $partCnt-1) {
+	if ($partType[$_] eq "Filt") {
+		my $sysname = uc($skeleton);
+		my $filt_name = $partName[$_];
+		my $sargs = $sed_arg . "s/FILTERNAME/$filt_name/g";
+		my $usite = uc $site;
+		system("cat FILTER.adl | sed '$sargs' > $skeleton/$usite$sysname" . "_" . $filt_name . ".adl");
+	}
+}
