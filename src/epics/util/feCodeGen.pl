@@ -2411,6 +2411,9 @@ for(0 .. $partCnt-1) {
 	if ($partType[$_] eq "Filt") {
 		my $sysname = uc($skeleton);
 		my $filt_name = $partName[$_];
+		if ($partSubName[$_] ne "") {
+			$filt_name = $partSubName[$_] . "_" . $filt_name;
+		}
 		my $sargs = $sed_arg . "s/FILTERNAME/$filt_name/g";
 		my $usite = uc $site;
 		system("cat FILTER.adl | sed '$sargs' > $skeleton/$usite$sysname" . "_" . $filt_name . ".adl");
