@@ -41,13 +41,18 @@ install-% :: src/epics/simLink/%.mdl
 	echo Installing /cvs/cds/$$site/target/$${system}epics;\
 	/bin/mkdir -p /cvs/cds/$$site/target_archive;\
 	/bin/mv -f /cvs/cds/$$site/target/$${system}epics /cvs/cds/$$site/target_archive/$${system}epics_$$cur_date;\
+	/bin/mkdir -p /cvs/cds/$$site/target;\
 	/bin/cp -pr target/$${system}epics /cvs/cds/$$site/target;\
 	/bin/mv -f /cvs/cds/$$site/target/$${system}epics/db/*/autoBurt.req /cvs/cds/$$site/target/$${system}epics;\
 	echo Installing /cvs/cds/$$site/target/$${system};\
 	/bin/mkdir -p /cvs/cds/$$site/target/$${system};\
 	/bin/mv -f /cvs/cds/$$site/target/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system}/$${system}fe_$${cur_date}.rtl;\
 	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system};\
-	
+	echo Installing Epics screens;\
+	/bin/mv -f /cvs/cds/$$site/medm/$${lower_ifo}/$${system} /cvs/cds/$$site/medm/$${lower_ifo}/$${system}_$${cur_date};\
+	/bin/mkdir -p /cvs/cds/$$site/medm/$${lower_ifo};\
+	/bin/cp -pr src/epics/util/$${system} /cvs/cds/$$site/medm/$${lower_ifo}
+
 #dbbepics: config/Makefile.dbbepics
 #	@echo Making dbbepics...
 #	@make -f $<  >& dbbepics.makelog || \
