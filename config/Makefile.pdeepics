@@ -18,6 +18,7 @@ SEQ += 'pde,("ifo=M1, site=mit, sys=PDE, sysnum= 10")'
 
 CFLAGS += -DPDE_CODE
 
+LIBFLAGS += -lezca
 include config/Makefile.linux
 
 build/$(TARGET)/pde1.db: build/$(TARGET)/pde.db

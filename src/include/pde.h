@@ -217,6 +217,7 @@ typedef struct PDE {
 	float PZT_M1_YAW;
 	float PZT_M2_PIT;
 	float PZT_M2_YAW;
+	int SEI_HMY_ACT_SW;
 	float SUS_BS_INMTRX[3][4];
 	float SUS_BS_LL_DRV;
 	float SUS_BS_LR_DRV;

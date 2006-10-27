@@ -181,9 +181,9 @@ DAQVAR CHAN_CNT int ai 0
 DAQVAR TOTAL int ai 0
 DAQVAR MSG int ai 0
 DAQVAR DCU_ID int ai 0
-OUTVARIABLE CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,"60") field(LOPR,"0")
-OUTVARIABLE CPU_METER_MAX epicsOutput.cpuMeterMax int ai 0 field(HOPR,"60") field(LOPR,"0")
-OUTVARIABLE ADC_WAIT epicsOutput.adcWaitTime int ai 0 field(HOPR,"60") field(LOPR,"0")
+OUTVARIABLE CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,"30") field(LOPR,"0")
+OUTVARIABLE CPU_METER_MAX epicsOutput.cpuMeterMax int ai 0 field(HOPR,"30") field(LOPR,"0")
+OUTVARIABLE ADC_WAIT epicsOutput.adcWaitTime int ai 0 field(HOPR,"30") field(LOPR,"0")
 OUTVARIABLE ONE_PPS epicsOutput.onePps int ai 0
 OUTVARIABLE DIAG_WORD epicsOutput.diagWord int ai 0
 INVARIABLE BURT_RESTORE epicsInput.burtRestore int ai 0
@@ -247,6 +247,7 @@ INVARIABLE PZT_M1_PIT pde.PZT_M1_PIT float ai 0 field(PREC,"3")
 INVARIABLE PZT_M1_YAW pde.PZT_M1_YAW float ai 0 field(PREC,"3")
 INVARIABLE PZT_M2_PIT pde.PZT_M2_PIT float ai 0 field(PREC,"3")
 INVARIABLE PZT_M2_YAW pde.PZT_M2_YAW float ai 0 field(PREC,"3")
+REMOTE_INTLK SEI-HMY_ACT_SW pde.SEI_HMY_ACT_SW int ai 0 field(PREC,"3")
 OUTVARIABLE SUS_BS_LL_DRV pde.SUS_BS_LL_DRV float ai 0 field(PREC,"3")
 OUTVARIABLE SUS_BS_LR_DRV pde.SUS_BS_LR_DRV float ai 0 field(PREC,"3")
 INVARIABLE SUS_BS_MASTER_SW pde.SUS_BS_MASTER_SW int bi 0 field(ZNAM,"OFF") field(ONAM,"ON")

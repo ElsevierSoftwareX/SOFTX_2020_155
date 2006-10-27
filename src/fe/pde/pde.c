@@ -96,7 +96,7 @@ double sus_bs_urpit;
 double sus_bs_urpos;
 double sus_bs_ursen;
 double sus_bs_uryaw;
-static double sus_bs_wd;
+static int sus_bs_wd;
 static float sus_bs_wd_avg[5];
 static float sus_bs_wd_var[5];
 float sus_bs_wd_vabs;
@@ -143,7 +143,7 @@ double sus_etmx_urpit;
 double sus_etmx_urpos;
 double sus_etmx_ursen;
 double sus_etmx_uryaw;
-static double sus_etmx_wd;
+static int sus_etmx_wd;
 static float sus_etmx_wd_avg[5];
 static float sus_etmx_wd_var[5];
 float sus_etmx_wd_vabs;
@@ -190,7 +190,7 @@ double sus_etmy_urpit;
 double sus_etmy_urpos;
 double sus_etmy_ursen;
 double sus_etmy_uryaw;
-static double sus_etmy_wd;
+static int sus_etmy_wd;
 static float sus_etmy_wd_avg[5];
 static float sus_etmy_wd_var[5];
 float sus_etmy_wd_vabs;
@@ -235,7 +235,7 @@ double sus_itmx_urpit;
 double sus_itmx_urpos;
 double sus_itmx_ursen;
 double sus_itmx_uryaw;
-static double sus_itmx_wd;
+static int sus_itmx_wd;
 static float sus_itmx_wd_avg[5];
 static float sus_itmx_wd_var[5];
 float sus_itmx_wd_vabs;
@@ -280,11 +280,12 @@ double sus_itmy_urpit;
 double sus_itmy_urpos;
 double sus_itmy_ursen;
 double sus_itmy_uryaw;
-static double sus_itmy_wd;
+static int sus_itmy_wd;
 static float sus_itmy_wd_avg[5];
 static float sus_itmy_wd_var[5];
 float sus_itmy_wd_vabs;
 double sus_itmy_yaw;
+int sus_wd_sum;
 
 
 if(feInit)
@@ -292,36 +293,36 @@ if(feInit)
 ground = 0.0;
 sus_bs_ground = 0.0;
 sus_bs_ground1 = 0.0;
-sus_bs_wd = 0.0;
-for(ii=0;ii<5;ii++) {
+sus_bs_wd = 0;
+for (ii=0; ii<5; ii++) {
 	sus_bs_wd_avg[ii] = 0.0;
 	sus_bs_wd_var[ii] = 0.0;
 }
 pLocalEpics->pde.SUS_BS_WD = 1;
 sus_etmx_ground = 0.0;
 sus_etmx_ground1 = 0.0;
-sus_etmx_wd = 0.0;
-for(ii=0;ii<5;ii++) {
+sus_etmx_wd = 0;
+for (ii=0; ii<5; ii++) {
 	sus_etmx_wd_avg[ii] = 0.0;
 	sus_etmx_wd_var[ii] = 0.0;
 }
 pLocalEpics->pde.SUS_ETMX_WD = 1;
 sus_etmy_ground = 0.0;
 sus_etmy_ground1 = 0.0;
-sus_etmy_wd = 0.0;
-for(ii=0;ii<5;ii++) {
+sus_etmy_wd = 0;
+for (ii=0; ii<5; ii++) {
 	sus_etmy_wd_avg[ii] = 0.0;
 	sus_etmy_wd_var[ii] = 0.0;
 }
 pLocalEpics->pde.SUS_ETMY_WD = 1;
-sus_itmx_wd = 0.0;
-for(ii=0;ii<5;ii++) {
+sus_itmx_wd = 0;
+for (ii=0; ii<5; ii++) {
 	sus_itmx_wd_avg[ii] = 0.0;
 	sus_itmx_wd_var[ii] = 0.0;
 }
 pLocalEpics->pde.SUS_ITMX_WD = 1;
-sus_itmy_wd = 0.0;
-for(ii=0;ii<5;ii++) {
+sus_itmy_wd = 0;
+for (ii=0; ii<5; ii++) {
 	sus_itmy_wd_avg[ii] = 0.0;
 	sus_itmy_wd_var[ii] = 0.0;
 }
@@ -370,31 +371,31 @@ asc_wfs1_phase3[1] = (asc_wfs1_q3 * pLocalEpics->pde.ASC_WFS1_PHASE3[1][1]) - (a
 asc_wfs1_phase4[0] = (asc_wfs1_i4 * pLocalEpics->pde.ASC_WFS1_PHASE4[0][0]) - (asc_wfs1_q4 * pLocalEpics->pde.ASC_WFS1_PHASE4[1][0]);
 asc_wfs1_phase4[1] = (asc_wfs1_q4 * pLocalEpics->pde.ASC_WFS1_PHASE4[1][1]) - (asc_wfs1_i4 * pLocalEpics->pde.ASC_WFS1_PHASE4[0][1]);
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_Q1_MON = asc_wfs1_phase1[1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_I1_MON = asc_wfs1_phase1[0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_Q2_MON = asc_wfs1_phase2[1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_I2_MON = asc_wfs1_phase2[0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_Q3_MON = asc_wfs1_phase3[1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_I3_MON = asc_wfs1_phase3[0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_Q4_MON = asc_wfs1_phase4[1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_I4_MON = asc_wfs1_phase4[0];
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<3;ii++)
 {
 asc_wfs1_q_mtrx[1][ii] = 
@@ -404,7 +405,7 @@ asc_wfs1_q_mtrx[1][ii] =
 	pLocalEpics->pde.ASC_WFS1_Q_MTRX[ii][3] * pLocalEpics->pde.ASC_WFS1_Q4_MON;
 }
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<3;ii++)
 {
 asc_wfs1_i_mtrx[1][ii] = 
@@ -414,25 +415,25 @@ asc_wfs1_i_mtrx[1][ii] =
 	pLocalEpics->pde.ASC_WFS1_I_MTRX[ii][3] * pLocalEpics->pde.ASC_WFS1_I4_MON;
 }
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_Q_PIT = asc_wfs1_q_mtrx[1][0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_Q_YAW = asc_wfs1_q_mtrx[1][1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_Q_SUM = asc_wfs1_q_mtrx[1][2];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_I_PIT = asc_wfs1_i_mtrx[1][0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_I_YAW = asc_wfs1_i_mtrx[1][1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.ASC_WFS1_I_SUM = asc_wfs1_i_mtrx[1][2];
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<2;ii++)
 {
 asc_inmtrx[1][ii] = 
@@ -448,7 +449,7 @@ asc_wfs1_pit = filterModuleD(dsp_ptr,dspCoeff,ASC_WFS1_PIT,asc_inmtrx[1][0],0);
 // FILTER MODULE
 asc_wfs1_yaw = filterModuleD(dsp_ptr,dspCoeff,ASC_WFS1_YAW,asc_inmtrx[1][1],0);
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<4;ii++)
 {
 asc_outmtrx[1][ii] = 
@@ -493,7 +494,7 @@ lsc_x_trans = filterModuleD(dsp_ptr,dspCoeff,LSC_X_TRANS,dWord[0][29],0);
 // FILTER MODULE
 lsc_y_trans = filterModuleD(dsp_ptr,dspCoeff,LSC_Y_TRANS,dWord[0][30],0);
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<3;ii++)
 {
 lsc_inmtrx[1][ii] = 
@@ -512,7 +513,7 @@ lsc_carm = filterModuleD(dsp_ptr,dspCoeff,LSC_CARM,lsc_inmtrx[1][1],0);
 // FILTER MODULE
 lsc_prc = filterModuleD(dsp_ptr,dspCoeff,LSC_PRC,lsc_inmtrx[1][2],0);
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<6;ii++)
 {
 lsc_outmtrx[1][ii] = 
@@ -523,6 +524,7 @@ lsc_outmtrx[1][ii] =
 
 
 //End of subsystem   LSC **************************************************
+
 
 
 
@@ -548,7 +550,7 @@ sus_bs_lrsen = filterModuleD(dsp_ptr,dspCoeff,SUS_BS_LRSEN,dWord[0][19],0);
 // FILTER MODULE
 sus_bs_side = filterModuleD(dsp_ptr,dspCoeff,SUS_BS_SIDE,dWord[0][21],0);
 
-// SUS_WD1 MODULE
+// Wd (Watchdog) MODULE
 if((clock16K % 16) == 0) {
 if (pLocalEpics->pde.SUS_BS_WD == 1) {
 	sus_bs_wd = 1;
@@ -561,7 +563,7 @@ double ins[5]= {
 	dWord[0][19],
 	dWord[0][21],
 };
-   for(ii=0;ii<5;ii++) {
+   for(ii=0; ii<5;ii++) {
 	sus_bs_wd_avg[ii] = ins[ii] * .00005 + sus_bs_wd_avg[ii] * 0.99995;
 	sus_bs_wd_vabs = ins[ii] - sus_bs_wd_avg[ii];
 	if(sus_bs_wd_vabs < 0) sus_bs_wd_vabs *= -1.0;
@@ -581,7 +583,7 @@ sus_bs_ascy = filterModuleD(dsp_ptr,dspCoeff,SUS_BS_ASCY,sus_bs_ground,0);
 // FILTER MODULE
 sus_bs_ascp = filterModuleD(dsp_ptr,dspCoeff,SUS_BS_ASCP,sus_bs_ground1,0);
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<3;ii++)
 {
 sus_bs_inmtrx[1][ii] = 
@@ -684,31 +686,30 @@ sus_bs_product3 = sus_bs_urout * sus_bs_wd;
 // MULTIPLY
 sus_bs_product4 = sus_bs_lrout * sus_bs_wd;
 
-// MULTI_SW
+// MultiSwitch
 sus_bs_master_sw[0] = sus_bs_product1;
 sus_bs_master_sw[1] = sus_bs_product2;
 sus_bs_master_sw[2] = sus_bs_product3;
 sus_bs_master_sw[3] = sus_bs_product4;
 sus_bs_master_sw[4] = sus_bs_product;
-if(pLocalEpics->pde.SUS_BS_MASTER_SW == 0)
-{
-	for(ii=0;ii< 5;ii++) sus_bs_master_sw[ii] = 0.0;
+if (pLocalEpics->pde.SUS_BS_MASTER_SW == 0) {
+	for (ii=0; ii<5; ii++) sus_bs_master_sw[ii] = 0.0;
 }
 
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_BS_UL_DRV = sus_bs_master_sw[0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_BS_LL_DRV = sus_bs_master_sw[1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_BS_UR_DRV = sus_bs_master_sw[2];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_BS_LR_DRV = sus_bs_master_sw[3];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_BS_SD_DRV = sus_bs_master_sw[4];
 
 
@@ -733,7 +734,7 @@ sus_etmx_lrsen = filterModuleD(dsp_ptr,dspCoeff,SUS_ETMX_LRSEN,dWord[0][11],0);
 // FILTER MODULE
 sus_etmx_side = filterModuleD(dsp_ptr,dspCoeff,SUS_ETMX_SIDE,dWord[0][24],0);
 
-// SUS_WD1 MODULE
+// Wd (Watchdog) MODULE
 if((clock16K % 16) == 0) {
 if (pLocalEpics->pde.SUS_ETMX_WD == 1) {
 	sus_etmx_wd = 1;
@@ -746,7 +747,7 @@ double ins[5]= {
 	dWord[0][11],
 	dWord[0][24],
 };
-   for(ii=0;ii<5;ii++) {
+   for(ii=0; ii<5;ii++) {
 	sus_etmx_wd_avg[ii] = ins[ii] * .00005 + sus_etmx_wd_avg[ii] * 0.99995;
 	sus_etmx_wd_vabs = ins[ii] - sus_etmx_wd_avg[ii];
 	if(sus_etmx_wd_vabs < 0) sus_etmx_wd_vabs *= -1.0;
@@ -766,7 +767,7 @@ sus_etmx_ascy = filterModuleD(dsp_ptr,dspCoeff,SUS_ETMX_ASCY,sus_etmx_ground,0);
 // FILTER MODULE
 sus_etmx_ascp = filterModuleD(dsp_ptr,dspCoeff,SUS_ETMX_ASCP,sus_etmx_ground1,0);
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<3;ii++)
 {
 sus_etmx_inmtrx[1][ii] = 
@@ -869,31 +870,30 @@ sus_etmx_product3 = sus_etmx_urout * sus_etmx_wd;
 // MULTIPLY
 sus_etmx_product4 = sus_etmx_lrout * sus_etmx_wd;
 
-// MULTI_SW
+// MultiSwitch
 sus_etmx_master_sw[0] = sus_etmx_product1;
 sus_etmx_master_sw[1] = sus_etmx_product2;
 sus_etmx_master_sw[2] = sus_etmx_product3;
 sus_etmx_master_sw[3] = sus_etmx_product4;
 sus_etmx_master_sw[4] = sus_etmx_product;
-if(pLocalEpics->pde.SUS_ETMX_MASTER_SW == 0)
-{
-	for(ii=0;ii< 5;ii++) sus_etmx_master_sw[ii] = 0.0;
+if (pLocalEpics->pde.SUS_ETMX_MASTER_SW == 0) {
+	for (ii=0; ii<5; ii++) sus_etmx_master_sw[ii] = 0.0;
 }
 
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ETMX_UL_DRV = sus_etmx_master_sw[0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ETMX_LL_DRV = sus_etmx_master_sw[1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ETMX_UR_DRV = sus_etmx_master_sw[2];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ETMX_LR_DRV = sus_etmx_master_sw[3];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ETMX_SD_DRV = sus_etmx_master_sw[4];
 
 
@@ -918,7 +918,7 @@ sus_etmy_lrsen = filterModuleD(dsp_ptr,dspCoeff,SUS_ETMY_LRSEN,dWord[0][15],0);
 // FILTER MODULE
 sus_etmy_side = filterModuleD(dsp_ptr,dspCoeff,SUS_ETMY_SIDE,dWord[0][25],0);
 
-// SUS_WD1 MODULE
+// Wd (Watchdog) MODULE
 if((clock16K % 16) == 0) {
 if (pLocalEpics->pde.SUS_ETMY_WD == 1) {
 	sus_etmy_wd = 1;
@@ -931,7 +931,7 @@ double ins[5]= {
 	dWord[0][15],
 	dWord[0][25],
 };
-   for(ii=0;ii<5;ii++) {
+   for(ii=0; ii<5;ii++) {
 	sus_etmy_wd_avg[ii] = ins[ii] * .00005 + sus_etmy_wd_avg[ii] * 0.99995;
 	sus_etmy_wd_vabs = ins[ii] - sus_etmy_wd_avg[ii];
 	if(sus_etmy_wd_vabs < 0) sus_etmy_wd_vabs *= -1.0;
@@ -951,7 +951,7 @@ sus_etmy_ascy = filterModuleD(dsp_ptr,dspCoeff,SUS_ETMY_ASCY,sus_etmy_ground,0);
 // FILTER MODULE
 sus_etmy_ascp = filterModuleD(dsp_ptr,dspCoeff,SUS_ETMY_ASCP,sus_etmy_ground1,0);
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<3;ii++)
 {
 sus_etmy_inmtrx[1][ii] = 
@@ -1054,31 +1054,30 @@ sus_etmy_product3 = sus_etmy_urout * sus_etmy_wd;
 // MULTIPLY
 sus_etmy_product4 = sus_etmy_lrout * sus_etmy_wd;
 
-// MULTI_SW
+// MultiSwitch
 sus_etmy_master_sw[0] = sus_etmy_product1;
 sus_etmy_master_sw[1] = sus_etmy_product2;
 sus_etmy_master_sw[2] = sus_etmy_product3;
 sus_etmy_master_sw[3] = sus_etmy_product4;
 sus_etmy_master_sw[4] = sus_etmy_product;
-if(pLocalEpics->pde.SUS_ETMY_MASTER_SW == 0)
-{
-	for(ii=0;ii< 5;ii++) sus_etmy_master_sw[ii] = 0.0;
+if (pLocalEpics->pde.SUS_ETMY_MASTER_SW == 0) {
+	for (ii=0; ii<5; ii++) sus_etmy_master_sw[ii] = 0.0;
 }
 
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ETMY_UL_DRV = sus_etmy_master_sw[0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ETMY_LL_DRV = sus_etmy_master_sw[1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ETMY_UR_DRV = sus_etmy_master_sw[2];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ETMY_LR_DRV = sus_etmy_master_sw[3];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ETMY_SD_DRV = sus_etmy_master_sw[4];
 
 
@@ -1103,7 +1102,7 @@ sus_itmx_lrsen = filterModuleD(dsp_ptr,dspCoeff,SUS_ITMX_LRSEN,dWord[0][3],0);
 // FILTER MODULE
 sus_itmx_side = filterModuleD(dsp_ptr,dspCoeff,SUS_ITMX_SIDE,dWord[0][23],0);
 
-// SUS_WD1 MODULE
+// Wd (Watchdog) MODULE
 if((clock16K % 16) == 0) {
 if (pLocalEpics->pde.SUS_ITMX_WD == 1) {
 	sus_itmx_wd = 1;
@@ -1116,7 +1115,7 @@ double ins[5]= {
 	dWord[0][3],
 	dWord[0][23],
 };
-   for(ii=0;ii<5;ii++) {
+   for(ii=0; ii<5;ii++) {
 	sus_itmx_wd_avg[ii] = ins[ii] * .00005 + sus_itmx_wd_avg[ii] * 0.99995;
 	sus_itmx_wd_vabs = ins[ii] - sus_itmx_wd_avg[ii];
 	if(sus_itmx_wd_vabs < 0) sus_itmx_wd_vabs *= -1.0;
@@ -1136,7 +1135,7 @@ sus_itmx_ascp = filterModuleD(dsp_ptr,dspCoeff,SUS_ITMX_ASCP,asc_outmtrx[1][0],0
 // FILTER MODULE
 sus_itmx_ascy = filterModuleD(dsp_ptr,dspCoeff,SUS_ITMX_ASCY,asc_outmtrx[1][1],0);
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<3;ii++)
 {
 sus_itmx_inmtrx[1][ii] = 
@@ -1239,31 +1238,30 @@ sus_itmx_product3 = sus_itmx_urout * sus_itmx_wd;
 // MULTIPLY
 sus_itmx_product4 = sus_itmx_lrout * sus_itmx_wd;
 
-// MULTI_SW
+// MultiSwitch
 sus_itmx_master_sw[0] = sus_itmx_product1;
 sus_itmx_master_sw[1] = sus_itmx_product2;
 sus_itmx_master_sw[2] = sus_itmx_product3;
 sus_itmx_master_sw[3] = sus_itmx_product4;
 sus_itmx_master_sw[4] = sus_itmx_product;
-if(pLocalEpics->pde.SUS_ITMX_MASTER_SW == 0)
-{
-	for(ii=0;ii< 5;ii++) sus_itmx_master_sw[ii] = 0.0;
+if (pLocalEpics->pde.SUS_ITMX_MASTER_SW == 0) {
+	for (ii=0; ii<5; ii++) sus_itmx_master_sw[ii] = 0.0;
 }
 
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ITMX_UL_DRV = sus_itmx_master_sw[0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ITMX_LL_DRV = sus_itmx_master_sw[1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ITMX_UR_DRV = sus_itmx_master_sw[2];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ITMX_LR_DRV = sus_itmx_master_sw[3];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ITMX_SD_DRV = sus_itmx_master_sw[4];
 
 
@@ -1288,7 +1286,7 @@ sus_itmy_lrsen = filterModuleD(dsp_ptr,dspCoeff,SUS_ITMY_LRSEN,dWord[0][7],0);
 // FILTER MODULE
 sus_itmy_side = filterModuleD(dsp_ptr,dspCoeff,SUS_ITMY_SIDE,dWord[0][22],0);
 
-// SUS_WD1 MODULE
+// Wd (Watchdog) MODULE
 if((clock16K % 16) == 0) {
 if (pLocalEpics->pde.SUS_ITMY_WD == 1) {
 	sus_itmy_wd = 1;
@@ -1301,7 +1299,7 @@ double ins[5]= {
 	dWord[0][7],
 	dWord[0][22],
 };
-   for(ii=0;ii<5;ii++) {
+   for(ii=0; ii<5;ii++) {
 	sus_itmy_wd_avg[ii] = ins[ii] * .00005 + sus_itmy_wd_avg[ii] * 0.99995;
 	sus_itmy_wd_vabs = ins[ii] - sus_itmy_wd_avg[ii];
 	if(sus_itmy_wd_vabs < 0) sus_itmy_wd_vabs *= -1.0;
@@ -1321,7 +1319,7 @@ sus_itmy_ascp = filterModuleD(dsp_ptr,dspCoeff,SUS_ITMY_ASCP,asc_outmtrx[1][2],0
 // FILTER MODULE
 sus_itmy_ascy = filterModuleD(dsp_ptr,dspCoeff,SUS_ITMY_ASCY,asc_outmtrx[1][3],0);
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<3;ii++)
 {
 sus_itmy_inmtrx[1][ii] = 
@@ -1424,31 +1422,30 @@ sus_itmy_product3 = sus_itmy_urout * sus_itmy_wd;
 // MULTIPLY
 sus_itmy_product4 = sus_itmy_lrout * sus_itmy_wd;
 
-// MULTI_SW
+// MultiSwitch
 sus_itmy_master_sw[0] = sus_itmy_product1;
 sus_itmy_master_sw[1] = sus_itmy_product2;
 sus_itmy_master_sw[2] = sus_itmy_product3;
 sus_itmy_master_sw[3] = sus_itmy_product4;
 sus_itmy_master_sw[4] = sus_itmy_product;
-if(pLocalEpics->pde.SUS_ITMY_MASTER_SW == 0)
-{
-	for(ii=0;ii< 5;ii++) sus_itmy_master_sw[ii] = 0.0;
+if (pLocalEpics->pde.SUS_ITMY_MASTER_SW == 0) {
+	for (ii=0; ii<5; ii++) sus_itmy_master_sw[ii] = 0.0;
 }
 
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ITMY_UL_DRV = sus_itmy_master_sw[0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ITMY_LL_DRV = sus_itmy_master_sw[1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ITMY_UR_DRV = sus_itmy_master_sw[2];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ITMY_LR_DRV = sus_itmy_master_sw[3];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->pde.SUS_ITMY_SD_DRV = sus_itmy_master_sw[4];
 
 
@@ -1489,6 +1486,12 @@ dacOut[1][12] = pLocalEpics->pde.PZT_M1_PIT;
 dacOut[1][13] = pLocalEpics->pde.PZT_M1_YAW;
 dacOut[1][14] = pLocalEpics->pde.PZT_M2_PIT;
 dacOut[1][15] = pLocalEpics->pde.PZT_M2_YAW;
+
+// Logical AND
+sus_wd_sum = sus_etmx_wd && sus_etmy_wd && sus_itmx_wd && sus_itmy_wd && sus_bs_wd;
+
+// RemoteIntlk
+pLocalEpics->pde.SEI_HMY_ACT_SW = sus_wd_sum;
 
   }
 }
