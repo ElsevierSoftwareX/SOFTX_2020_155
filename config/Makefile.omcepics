@@ -11,10 +11,10 @@ SRC += src/drv/fmReadCoeff.c
 
 DB += build/$(TARGET)/omc1.db
 
-IFO = C1
-SITE = caltech
+IFO = M1
+SITE = mit
 
-SEQ += 'omc,("ifo=C1, site=caltech, sys=OMC, sysnum= 11")'
+SEQ += 'omc,("ifo=M1, site=mit, sys=OMC, sysnum= 10")'
 
 CFLAGS += -DOMC_CODE
 

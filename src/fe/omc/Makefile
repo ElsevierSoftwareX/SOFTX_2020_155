@@ -13,15 +13,17 @@ omcfe.o: ../controller.c
 map.o: ../map.c
 	$(CC) $(CFLAGS) -D__KERNEL__ -c $<
 fm10Gen.o: fm10Gen.c
-	$(CC) $(CFLAGS) -D__KERNEL__ -DSERVO32K -c $<
+	$(CC) $(CFLAGS) -D__KERNEL__ -DSERVO16K -c $<
 crc.o: crc.c
 	$(CC) $(CFLAGS) -D__KERNEL__ -c $<
 
 ALL += user_mmap $(TARGET_RTL)
 CFLAGS += -I../../include
 CFLAGS += -I/opt/gm/include
-CFLAGS += -DSERVO32K
+CFLAGS += -DSERVO16K
 CFLAGS += -DOMC_CODE
+CFLAGS += -DNO_SYNC
+CFLAGS += -DNO_DAQ
 
 all: $(ALL)
 

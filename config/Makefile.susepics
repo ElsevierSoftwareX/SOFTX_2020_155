@@ -8,21 +8,15 @@ SRC += src/drv/rfm.c
 SRC += src/drv/param.c
 SRC += src/drv/crc.c
 SRC += src/drv/fmReadCoeff.c
-SRC += src/epics/seq/suswd.st
-SRC += src/epics/seq/get_local_time.st
 
 DB += build/$(TARGET)/sus1.db
-DB += src/epics/db/time.db
 
 IFO = M1
 SITE = mit
 
-SEQ += 'sus,("ifo=M1, site=mit, sys=SUS, sysnum= 9")'
-SEQ += 'suswd,("ifo=M1, sys=SUS")'
-SEQ += 'get_local_time'
+SEQ += 'sus,("ifo=M1, site=mit, sys=SUS, sysnum= 8")'
 
 CFLAGS += -DSUS_CODE
-LIBFLAGS += -lezca
 
 include config/Makefile.linux
 

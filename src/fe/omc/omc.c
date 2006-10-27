@@ -210,40 +210,40 @@ lsc_osc1_beta = lsinx;
 lsc_osc1_cos_prev = 1.0;
 lsc_osc1_sin_prev = 0.0;
 } else {
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_PZT_1X_DVMA = dWord[0][4];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_PZT_1X_DVMB = dWord[0][5];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_PZT_1X_SG = dWord[0][0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_PZT_1Y_DVMA = dWord[0][6];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_PZT_1Y_DVMB = dWord[0][7];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_PZT_1Y_SG = dWord[0][1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_PZT_2X_DVMA = dWord[0][8];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_PZT_2X_DVMB = dWord[0][9];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_PZT_2X_SG = dWord[0][2];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_PZT_2Y_DVMA = dWord[0][10];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_PZT_2Y_DVMB = dWord[0][11];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_PZT_2Y_SG = dWord[0][3];
 
 // FILTER MODULE
@@ -270,16 +270,16 @@ asc_qpd2_s3 = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD2_S3,dWord[0][22],0);
 // FILTER MODULE
 asc_qpd2_s4 = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD2_S4,dWord[0][23],0);
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.LSC_PD1_UF = dWord[0][14];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.LSC_PD2_UF = dWord[0][15];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.LSC_PZT_DVM_AC = dWord[0][25];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.LSC_PZT_DVM_DC = dWord[0][24];
 
 // FILTER MODULE
@@ -294,7 +294,7 @@ lsc_trans2_dc = filterModuleD(dsp_ptr,dspCoeff,LSC_TRANS2_DC,dWord[0][13],0);
 // FILTER MODULE
 lsc_trans2_dco = filterModuleD(dsp_ptr,dspCoeff,LSC_TRANS2_DCO,dWord[0][13],0);
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<4;ii++)
 {
 asc_inmtrx1[1][ii] = 
@@ -302,13 +302,13 @@ asc_inmtrx1[1][ii] =
 	pLocalEpics->omc.ASC_INMTRX1[ii][1] * lsc_trans2_dc;
 }
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_P1_MOUT = asc_inmtrx1[1][0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_P2_MOUT = asc_inmtrx1[1][2];
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<3;ii++)
 {
 asc_qpd1_inmtrx[1][ii] = 
@@ -318,16 +318,16 @@ asc_qpd1_inmtrx[1][ii] =
 	pLocalEpics->omc.ASC_QPD1_INMTRX[ii][3] * asc_qpd1_s4;
 }
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_QPD1_PIT = asc_qpd1_inmtrx[1][0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_QPD1_SUM = asc_qpd1_inmtrx[1][2];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_QPD1_YAW = asc_qpd1_inmtrx[1][1];
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<3;ii++)
 {
 asc_qpd2_inmtrx[1][ii] = 
@@ -337,19 +337,19 @@ asc_qpd2_inmtrx[1][ii] =
 	pLocalEpics->omc.ASC_QPD2_INMTRX[ii][3] * asc_qpd2_s4;
 }
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_QPD2_PIT = asc_qpd2_inmtrx[1][0];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_QPD2_SUM = asc_qpd2_inmtrx[1][2];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_QPD2_YAW = asc_qpd2_inmtrx[1][1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_Y1_MOUT = asc_inmtrx1[1][1];
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.ASC_Y2_MOUT = asc_inmtrx1[1][3];
 
 // DIVIDE
@@ -388,7 +388,7 @@ else{
 	divide3 = 0.0;
 }
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<1;ii++)
 {
 lsc_inmtrx[1][ii] = 
@@ -396,7 +396,7 @@ lsc_inmtrx[1][ii] =
 	pLocalEpics->omc.LSC_INMTRX[ii][1] * lsc_trans2_dc;
 }
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<1;ii++)
 {
 lsc_outmtrx[1][ii] = 
@@ -410,7 +410,7 @@ lsc_outmtrx[1][ii] =
 // FILTER MODULE
 asc_p1_dc = filterModuleD(dsp_ptr,dspCoeff,ASC_P1_DC,pLocalEpics->omc.ASC_P1_MOUT,0);
 
-// OSC
+// Osc
 asc_p1_osc1_cos_new = (1.0 - asc_p1_osc1_alpha) * asc_p1_osc1_cos_prev - asc_p1_osc1_beta * asc_p1_osc1_sin_prev;
 asc_p1_osc1_sin_new = (1.0 - asc_p1_osc1_alpha) * asc_p1_osc1_sin_prev + asc_p1_osc1_beta * asc_p1_osc1_cos_prev;
 asc_p1_osc1_sin_prev = asc_p1_osc1_sin_new;
@@ -458,7 +458,7 @@ asc_p1_q = filterModuleD(dsp_ptr,dspCoeff,ASC_P1_Q,asc_p1_product2,0);
 // FILTER MODULE
 asc_p2_dc = filterModuleD(dsp_ptr,dspCoeff,ASC_P2_DC,pLocalEpics->omc.ASC_P2_MOUT,0);
 
-// OSC
+// Osc
 asc_p2_osc1_cos_new = (1.0 - asc_p2_osc1_alpha) * asc_p2_osc1_cos_prev - asc_p2_osc1_beta * asc_p2_osc1_sin_prev;
 asc_p2_osc1_sin_new = (1.0 - asc_p2_osc1_alpha) * asc_p2_osc1_sin_prev + asc_p2_osc1_beta * asc_p2_osc1_cos_prev;
 asc_p2_osc1_sin_prev = asc_p2_osc1_sin_new;
@@ -506,7 +506,7 @@ asc_p2_q = filterModuleD(dsp_ptr,dspCoeff,ASC_P2_Q,asc_p2_product2,0);
 // FILTER MODULE
 asc_y1_dc = filterModuleD(dsp_ptr,dspCoeff,ASC_Y1_DC,pLocalEpics->omc.ASC_Y1_MOUT,0);
 
-// OSC
+// Osc
 asc_y1_osc1_cos_new = (1.0 - asc_y1_osc1_alpha) * asc_y1_osc1_cos_prev - asc_y1_osc1_beta * asc_y1_osc1_sin_prev;
 asc_y1_osc1_sin_new = (1.0 - asc_y1_osc1_alpha) * asc_y1_osc1_sin_prev + asc_y1_osc1_beta * asc_y1_osc1_cos_prev;
 asc_y1_osc1_sin_prev = asc_y1_osc1_sin_new;
@@ -554,7 +554,7 @@ asc_y1_q = filterModuleD(dsp_ptr,dspCoeff,ASC_Y1_Q,asc_y1_product2,0);
 // FILTER MODULE
 asc_y2_dc = filterModuleD(dsp_ptr,dspCoeff,ASC_Y2_DC,pLocalEpics->omc.ASC_Y2_MOUT,0);
 
-// OSC
+// Osc
 asc_y2_osc1_cos_new = (1.0 - asc_y2_osc1_alpha) * asc_y2_osc1_cos_prev - asc_y2_osc1_beta * asc_y2_osc1_sin_prev;
 asc_y2_osc1_sin_new = (1.0 - asc_y2_osc1_alpha) * asc_y2_osc1_sin_prev + asc_y2_osc1_beta * asc_y2_osc1_cos_prev;
 asc_y2_osc1_sin_prev = asc_y2_osc1_sin_new;
@@ -602,7 +602,7 @@ asc_y2_q = filterModuleD(dsp_ptr,dspCoeff,ASC_Y2_Q,asc_y2_product2,0);
 // FILTER MODULE
 lsc_dc = filterModuleD(dsp_ptr,dspCoeff,LSC_DC,lsc_inmtrx[1][0],0);
 
-// OSC
+// Osc
 lsc_osc1_cos_new = (1.0 - lsc_osc1_alpha) * lsc_osc1_cos_prev - lsc_osc1_beta * lsc_osc1_sin_prev;
 lsc_osc1_sin_new = (1.0 - lsc_osc1_alpha) * lsc_osc1_sin_prev + lsc_osc1_beta * lsc_osc1_cos_prev;
 lsc_osc1_sin_prev = lsc_osc1_sin_new;
@@ -644,7 +644,7 @@ lsc_q = filterModuleD(dsp_ptr,dspCoeff,LSC_Q,lsc_product2,0);
 //End of subsystem   LSC **************************************************
 
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<4;ii++)
 {
 asc_outmtrx[1][ii] = 
@@ -685,21 +685,21 @@ asc_qpd2_y = filterModuleD(dsp_ptr,dspCoeff,ASC_QPD2_Y,divide3,0);
 // FILTER MODULE
 lsc_drive = filterModuleD(dsp_ptr,dspCoeff,LSC_DRIVE,lsc_outmtrx[1][0],0);
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.LSC_FEED = lsc_drive;
 
 // PHASE
 lsc_phase[0] = (lsc_i * pLocalEpics->omc.LSC_PHASE[1]) + (lsc_q * pLocalEpics->omc.LSC_PHASE[0]);
 lsc_phase[1] = (lsc_q * pLocalEpics->omc.LSC_PHASE[1]) - (lsc_i * pLocalEpics->omc.LSC_PHASE[0]);
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.LSC_Q_MON = lsc_phase[1];
 
 
 
 
 
-// EPICS_OUTPUT
+// EpicsOut
 pLocalEpics->omc.LSC_I_MON = lsc_phase[0];
 
 // FILTER MODULE

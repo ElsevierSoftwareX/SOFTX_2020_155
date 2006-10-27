@@ -2,9 +2,17 @@
 // ******* DO NOT HAND EDIT ************************
 
 
+#ifdef SERVO32K
+	#define FE_RATE	32768
+#endif
+#ifdef SERVO16K
+	#define FE_RATE	16382
+#endif
+
+
 void feCode(int cycle, double dWord[][32],	/* ADC inputs */
 		int dacOut[][16],	/* DAC outputs */
-		FILT_MOD *dspPtr,	/* Filter Mod variables */
+		FILT_MOD *dsp_ptr,	/* Filter Mod variables */
 		COEF *dspCoeff,		/* Filter Mod coeffs */
 		CDS_EPICS *pLocalEpics,	/* EPICS variables */
 		int feInit)	/* Initialization flag */
@@ -156,18 +164,18 @@ for(ii=0;ii<20;ii++) {
 }
 } else {
 
-//Start of subsystem **************************************************
+//Start of subsystem Q1_ESD **************************************************
 
 // FILTER MODULE
-q1_esd_lsc = filterModuleD(dspPtr,dspCoeff,Q1_ESD_LSC,dWord[0][24],0);
+q1_esd_lsc = filterModuleD(dsp_ptr,dspCoeff,Q1_ESD_LSC,dWord[0][24],0);
 
 // FILTER MODULE
-q1_esd_ascp = filterModuleD(dspPtr,dspCoeff,Q1_ESD_ASCP,dWord[0][25],0);
+q1_esd_ascp = filterModuleD(dsp_ptr,dspCoeff,Q1_ESD_ASCP,dWord[0][25],0);
 
 // FILTER MODULE
-q1_esd_ascy = filterModuleD(dspPtr,dspCoeff,Q1_ESD_ASCY,dWord[0][26],0);
+q1_esd_ascy = filterModuleD(dsp_ptr,dspCoeff,Q1_ESD_ASCY,dWord[0][26],0);
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<5;ii++)
 {
 q1_esd_inmtrx[1][ii] = 
@@ -177,49 +185,49 @@ q1_esd_inmtrx[1][ii] =
 }
 
 // FILTER MODULE
-q1_esd_bias = filterModuleD(dspPtr,dspCoeff,Q1_ESD_BIAS,q1_esd_inmtrx[1][0],0);
+q1_esd_bias = filterModuleD(dsp_ptr,dspCoeff,Q1_ESD_BIAS,q1_esd_inmtrx[1][0],0);
 
 // FILTER MODULE
-q1_esd_q1 = filterModuleD(dspPtr,dspCoeff,Q1_ESD_Q1,q1_esd_inmtrx[1][1],0);
+q1_esd_q1 = filterModuleD(dsp_ptr,dspCoeff,Q1_ESD_Q1,q1_esd_inmtrx[1][1],0);
 
 // FILTER MODULE
-q1_esd_q2 = filterModuleD(dspPtr,dspCoeff,Q1_ESD_Q2,q1_esd_inmtrx[1][2],0);
+q1_esd_q2 = filterModuleD(dsp_ptr,dspCoeff,Q1_ESD_Q2,q1_esd_inmtrx[1][2],0);
 
 // FILTER MODULE
-q1_esd_q3 = filterModuleD(dspPtr,dspCoeff,Q1_ESD_Q3,q1_esd_inmtrx[1][3],0);
+q1_esd_q3 = filterModuleD(dsp_ptr,dspCoeff,Q1_ESD_Q3,q1_esd_inmtrx[1][3],0);
 
 // FILTER MODULE
-q1_esd_q4 = filterModuleD(dspPtr,dspCoeff,Q1_ESD_Q4,q1_esd_inmtrx[1][4],0);
+q1_esd_q4 = filterModuleD(dsp_ptr,dspCoeff,Q1_ESD_Q4,q1_esd_inmtrx[1][4],0);
 
 
-//End of subsystem **************************************************
+//End of subsystem   Q1_ESD **************************************************
 
 
 
-//Start of subsystem **************************************************
-
-// FILTER MODULE
-q1_l1_ulsen = filterModuleD(dspPtr,dspCoeff,Q1_L1_ULSEN,dWord[0][12],0);
+//Start of subsystem Q1_L1 **************************************************
 
 // FILTER MODULE
-q1_l1_llsen = filterModuleD(dspPtr,dspCoeff,Q1_L1_LLSEN,dWord[0][13],0);
+q1_l1_ulsen = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_ULSEN,dWord[0][12],0);
 
 // FILTER MODULE
-q1_l1_ursen = filterModuleD(dspPtr,dspCoeff,Q1_L1_URSEN,dWord[0][14],0);
+q1_l1_llsen = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_LLSEN,dWord[0][13],0);
 
 // FILTER MODULE
-q1_l1_lrsen = filterModuleD(dspPtr,dspCoeff,Q1_L1_LRSEN,dWord[0][15],0);
+q1_l1_ursen = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_URSEN,dWord[0][14],0);
 
 // FILTER MODULE
-q1_l1_lsc = filterModuleD(dspPtr,dspCoeff,Q1_L1_LSC,q1_l1_ground,0);
+q1_l1_lrsen = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_LRSEN,dWord[0][15],0);
 
 // FILTER MODULE
-q1_l1_ascp = filterModuleD(dspPtr,dspCoeff,Q1_L1_ASCP,q1_l1_ground1,0);
+q1_l1_lsc = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_LSC,q1_l1_ground,0);
 
 // FILTER MODULE
-q1_l1_ascy = filterModuleD(dspPtr,dspCoeff,Q1_L1_ASCY,q1_l1_ground2,0);
+q1_l1_ascp = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_ASCP,q1_l1_ground1,0);
 
-// MATRIX CALC
+// FILTER MODULE
+q1_l1_ascy = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_ASCY,q1_l1_ground2,0);
+
+// Matrix
 for(ii=0;ii<3;ii++)
 {
 q1_l1_inmtrx[1][ii] = 
@@ -230,13 +238,13 @@ q1_l1_inmtrx[1][ii] =
 }
 
 // FILTER MODULE
-q1_l1_pos = filterModuleD(dspPtr,dspCoeff,Q1_L1_POS,q1_l1_inmtrx[1][0],0);
+q1_l1_pos = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_POS,q1_l1_inmtrx[1][0],0);
 
 // FILTER MODULE
-q1_l1_pit = filterModuleD(dspPtr,dspCoeff,Q1_L1_PIT,q1_l1_inmtrx[1][1],0);
+q1_l1_pit = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_PIT,q1_l1_inmtrx[1][1],0);
 
 // FILTER MODULE
-q1_l1_yaw = filterModuleD(dspPtr,dspCoeff,Q1_L1_YAW,q1_l1_inmtrx[1][2],0);
+q1_l1_yaw = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_YAW,q1_l1_inmtrx[1][2],0);
 
 // SUM
 q1_l1_sum4 = q1_l1_lsc + q1_l1_pos;
@@ -248,40 +256,40 @@ q1_l1_sum5 = q1_l1_pit + q1_l1_ascp;
 q1_l1_sum6 = q1_l1_yaw + q1_l1_ascy;
 
 // FILTER MODULE
-q1_l1_ulpos = filterModuleD(dspPtr,dspCoeff,Q1_L1_ULPOS,q1_l1_sum4,0);
+q1_l1_ulpos = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_ULPOS,q1_l1_sum4,0);
 
 // FILTER MODULE
-q1_l1_llpos = filterModuleD(dspPtr,dspCoeff,Q1_L1_LLPOS,q1_l1_sum4,0);
+q1_l1_llpos = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_LLPOS,q1_l1_sum4,0);
 
 // FILTER MODULE
-q1_l1_urpos = filterModuleD(dspPtr,dspCoeff,Q1_L1_URPOS,q1_l1_sum4,0);
+q1_l1_urpos = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_URPOS,q1_l1_sum4,0);
 
 // FILTER MODULE
-q1_l1_lrpos = filterModuleD(dspPtr,dspCoeff,Q1_L1_LRPOS,q1_l1_sum4,0);
+q1_l1_lrpos = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_LRPOS,q1_l1_sum4,0);
 
 // FILTER MODULE
-q1_l1_ulpit = filterModuleD(dspPtr,dspCoeff,Q1_L1_ULPIT,q1_l1_sum5,0);
+q1_l1_ulpit = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_ULPIT,q1_l1_sum5,0);
 
 // FILTER MODULE
-q1_l1_llpit = filterModuleD(dspPtr,dspCoeff,Q1_L1_LLPIT,q1_l1_sum5,0);
+q1_l1_llpit = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_LLPIT,q1_l1_sum5,0);
 
 // FILTER MODULE
-q1_l1_urpit = filterModuleD(dspPtr,dspCoeff,Q1_L1_URPIT,q1_l1_sum5,0);
+q1_l1_urpit = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_URPIT,q1_l1_sum5,0);
 
 // FILTER MODULE
-q1_l1_lrpit = filterModuleD(dspPtr,dspCoeff,Q1_L1_LRPIT,q1_l1_sum5,0);
+q1_l1_lrpit = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_LRPIT,q1_l1_sum5,0);
 
 // FILTER MODULE
-q1_l1_ulyaw = filterModuleD(dspPtr,dspCoeff,Q1_L1_ULYAW,q1_l1_sum6,0);
+q1_l1_ulyaw = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_ULYAW,q1_l1_sum6,0);
 
 // FILTER MODULE
-q1_l1_llyaw = filterModuleD(dspPtr,dspCoeff,Q1_L1_LLYAW,q1_l1_sum6,0);
+q1_l1_llyaw = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_LLYAW,q1_l1_sum6,0);
 
 // FILTER MODULE
-q1_l1_uryaw = filterModuleD(dspPtr,dspCoeff,Q1_L1_URYAW,q1_l1_sum6,0);
+q1_l1_uryaw = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_URYAW,q1_l1_sum6,0);
 
 // FILTER MODULE
-q1_l1_lryaw = filterModuleD(dspPtr,dspCoeff,Q1_L1_LRYAW,q1_l1_sum6,0);
+q1_l1_lryaw = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_LRYAW,q1_l1_sum6,0);
 
 // SUM
 q1_l1_sum = q1_l1_ulpos + q1_l1_ulpit + q1_l1_ulyaw;
@@ -296,46 +304,46 @@ q1_l1_sum2 = q1_l1_urpos + q1_l1_urpit + q1_l1_uryaw;
 q1_l1_sum3 = q1_l1_lrpos + q1_l1_lrpit + q1_l1_lryaw;
 
 // FILTER MODULE
-q1_l1_ulout = filterModuleD(dspPtr,dspCoeff,Q1_L1_ULOUT,q1_l1_sum,0);
+q1_l1_ulout = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_ULOUT,q1_l1_sum,0);
 
 // FILTER MODULE
-q1_l1_llout = filterModuleD(dspPtr,dspCoeff,Q1_L1_LLOUT,q1_l1_sum1,0);
+q1_l1_llout = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_LLOUT,q1_l1_sum1,0);
 
 // FILTER MODULE
-q1_l1_urout = filterModuleD(dspPtr,dspCoeff,Q1_L1_UROUT,q1_l1_sum2,0);
+q1_l1_urout = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_UROUT,q1_l1_sum2,0);
 
 // FILTER MODULE
-q1_l1_lrout = filterModuleD(dspPtr,dspCoeff,Q1_L1_LROUT,q1_l1_sum3,0);
+q1_l1_lrout = filterModuleD(dsp_ptr,dspCoeff,Q1_L1_LROUT,q1_l1_sum3,0);
 
 
-//End of subsystem **************************************************
+//End of subsystem   Q1_L1 **************************************************
 
 
 
-//Start of subsystem **************************************************
-
-// FILTER MODULE
-q1_l2_ulsen = filterModuleD(dspPtr,dspCoeff,Q1_L2_ULSEN,dWord[0][18],0);
+//Start of subsystem Q1_L2 **************************************************
 
 // FILTER MODULE
-q1_l2_llsen = filterModuleD(dspPtr,dspCoeff,Q1_L2_LLSEN,dWord[0][19],0);
+q1_l2_ulsen = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_ULSEN,dWord[0][18],0);
 
 // FILTER MODULE
-q1_l2_ursen = filterModuleD(dspPtr,dspCoeff,Q1_L2_URSEN,dWord[0][20],0);
+q1_l2_llsen = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_LLSEN,dWord[0][19],0);
 
 // FILTER MODULE
-q1_l2_lrsen = filterModuleD(dspPtr,dspCoeff,Q1_L2_LRSEN,dWord[0][21],0);
+q1_l2_ursen = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_URSEN,dWord[0][20],0);
 
 // FILTER MODULE
-q1_l2_lsc = filterModuleD(dspPtr,dspCoeff,Q1_L2_LSC,q1_l2_ground,0);
+q1_l2_lrsen = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_LRSEN,dWord[0][21],0);
 
 // FILTER MODULE
-q1_l2_ascp = filterModuleD(dspPtr,dspCoeff,Q1_L2_ASCP,q1_l2_ground1,0);
+q1_l2_lsc = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_LSC,q1_l2_ground,0);
 
 // FILTER MODULE
-q1_l2_ascy = filterModuleD(dspPtr,dspCoeff,Q1_L2_ASCY,q1_l2_ground2,0);
+q1_l2_ascp = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_ASCP,q1_l2_ground1,0);
 
-// MATRIX CALC
+// FILTER MODULE
+q1_l2_ascy = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_ASCY,q1_l2_ground2,0);
+
+// Matrix
 for(ii=0;ii<3;ii++)
 {
 q1_l2_inmtrx[1][ii] = 
@@ -346,13 +354,13 @@ q1_l2_inmtrx[1][ii] =
 }
 
 // FILTER MODULE
-q1_l2_pos = filterModuleD(dspPtr,dspCoeff,Q1_L2_POS,q1_l2_inmtrx[1][0],0);
+q1_l2_pos = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_POS,q1_l2_inmtrx[1][0],0);
 
 // FILTER MODULE
-q1_l2_pit = filterModuleD(dspPtr,dspCoeff,Q1_L2_PIT,q1_l2_inmtrx[1][1],0);
+q1_l2_pit = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_PIT,q1_l2_inmtrx[1][1],0);
 
 // FILTER MODULE
-q1_l2_yaw = filterModuleD(dspPtr,dspCoeff,Q1_L2_YAW,q1_l2_inmtrx[1][2],0);
+q1_l2_yaw = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_YAW,q1_l2_inmtrx[1][2],0);
 
 // SUM
 q1_l2_sum4 = q1_l2_lsc + q1_l2_pos;
@@ -364,40 +372,40 @@ q1_l2_sum5 = q1_l2_pit + q1_l2_ascp;
 q1_l2_sum6 = q1_l2_yaw + q1_l2_ascy;
 
 // FILTER MODULE
-q1_l2_ulpos = filterModuleD(dspPtr,dspCoeff,Q1_L2_ULPOS,q1_l2_sum4,0);
+q1_l2_ulpos = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_ULPOS,q1_l2_sum4,0);
 
 // FILTER MODULE
-q1_l2_llpos = filterModuleD(dspPtr,dspCoeff,Q1_L2_LLPOS,q1_l2_sum4,0);
+q1_l2_llpos = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_LLPOS,q1_l2_sum4,0);
 
 // FILTER MODULE
-q1_l2_urpos = filterModuleD(dspPtr,dspCoeff,Q1_L2_URPOS,q1_l2_sum4,0);
+q1_l2_urpos = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_URPOS,q1_l2_sum4,0);
 
 // FILTER MODULE
-q1_l2_lrpos = filterModuleD(dspPtr,dspCoeff,Q1_L2_LRPOS,q1_l2_sum4,0);
+q1_l2_lrpos = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_LRPOS,q1_l2_sum4,0);
 
 // FILTER MODULE
-q1_l2_ulpit = filterModuleD(dspPtr,dspCoeff,Q1_L2_ULPIT,q1_l2_sum5,0);
+q1_l2_ulpit = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_ULPIT,q1_l2_sum5,0);
 
 // FILTER MODULE
-q1_l2_llpit = filterModuleD(dspPtr,dspCoeff,Q1_L2_LLPIT,q1_l2_sum5,0);
+q1_l2_llpit = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_LLPIT,q1_l2_sum5,0);
 
 // FILTER MODULE
-q1_l2_urpit = filterModuleD(dspPtr,dspCoeff,Q1_L2_URPIT,q1_l2_sum5,0);
+q1_l2_urpit = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_URPIT,q1_l2_sum5,0);
 
 // FILTER MODULE
-q1_l2_lrpit = filterModuleD(dspPtr,dspCoeff,Q1_L2_LRPIT,q1_l2_sum5,0);
+q1_l2_lrpit = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_LRPIT,q1_l2_sum5,0);
 
 // FILTER MODULE
-q1_l2_ulyaw = filterModuleD(dspPtr,dspCoeff,Q1_L2_ULYAW,q1_l2_sum6,0);
+q1_l2_ulyaw = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_ULYAW,q1_l2_sum6,0);
 
 // FILTER MODULE
-q1_l2_llyaw = filterModuleD(dspPtr,dspCoeff,Q1_L2_LLYAW,q1_l2_sum6,0);
+q1_l2_llyaw = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_LLYAW,q1_l2_sum6,0);
 
 // FILTER MODULE
-q1_l2_uryaw = filterModuleD(dspPtr,dspCoeff,Q1_L2_URYAW,q1_l2_sum6,0);
+q1_l2_uryaw = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_URYAW,q1_l2_sum6,0);
 
 // FILTER MODULE
-q1_l2_lryaw = filterModuleD(dspPtr,dspCoeff,Q1_L2_LRYAW,q1_l2_sum6,0);
+q1_l2_lryaw = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_LRYAW,q1_l2_sum6,0);
 
 // SUM
 q1_l2_sum = q1_l2_ulpos + q1_l2_ulpit + q1_l2_ulyaw;
@@ -412,43 +420,43 @@ q1_l2_sum2 = q1_l2_urpos + q1_l2_urpit + q1_l2_uryaw;
 q1_l2_sum3 = q1_l2_lrpos + q1_l2_lrpit + q1_l2_lryaw;
 
 // FILTER MODULE
-q1_l2_ulout = filterModuleD(dspPtr,dspCoeff,Q1_L2_ULOUT,q1_l2_sum,0);
+q1_l2_ulout = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_ULOUT,q1_l2_sum,0);
 
 // FILTER MODULE
-q1_l2_llout = filterModuleD(dspPtr,dspCoeff,Q1_L2_LLOUT,q1_l2_sum1,0);
+q1_l2_llout = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_LLOUT,q1_l2_sum1,0);
 
 // FILTER MODULE
-q1_l2_urout = filterModuleD(dspPtr,dspCoeff,Q1_L2_UROUT,q1_l2_sum2,0);
+q1_l2_urout = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_UROUT,q1_l2_sum2,0);
 
 // FILTER MODULE
-q1_l2_lrout = filterModuleD(dspPtr,dspCoeff,Q1_L2_LROUT,q1_l2_sum3,0);
+q1_l2_lrout = filterModuleD(dsp_ptr,dspCoeff,Q1_L2_LROUT,q1_l2_sum3,0);
 
 
-//End of subsystem **************************************************
+//End of subsystem   Q1_L2 **************************************************
 
 
 
-//Start of subsystem **************************************************
-
-// FILTER MODULE
-q1_m0_face1 = filterModuleD(dspPtr,dspCoeff,Q1_M0_FACE1,dWord[0][0],0);
+//Start of subsystem Q1_M0 **************************************************
 
 // FILTER MODULE
-q1_m0_face2 = filterModuleD(dspPtr,dspCoeff,Q1_M0_FACE2,dWord[0][1],0);
+q1_m0_face1 = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_FACE1,dWord[0][0],0);
 
 // FILTER MODULE
-q1_m0_face3 = filterModuleD(dspPtr,dspCoeff,Q1_M0_FACE3,dWord[0][2],0);
+q1_m0_face2 = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_FACE2,dWord[0][1],0);
 
 // FILTER MODULE
-q1_m0_left = filterModuleD(dspPtr,dspCoeff,Q1_M0_LEFT,dWord[0][3],0);
+q1_m0_face3 = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_FACE3,dWord[0][2],0);
 
 // FILTER MODULE
-q1_m0_right = filterModuleD(dspPtr,dspCoeff,Q1_M0_RIGHT,dWord[0][4],0);
+q1_m0_left = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_LEFT,dWord[0][3],0);
 
 // FILTER MODULE
-q1_m0_side = filterModuleD(dspPtr,dspCoeff,Q1_M0_SIDE,dWord[0][5],0);
+q1_m0_right = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_RIGHT,dWord[0][4],0);
 
-// MATRIX CALC
+// FILTER MODULE
+q1_m0_side = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_SIDE,dWord[0][5],0);
+
+// Matrix
 for(ii=0;ii<6;ii++)
 {
 q1_m0_inmtrx[1][ii] = 
@@ -461,24 +469,24 @@ q1_m0_inmtrx[1][ii] =
 }
 
 // FILTER MODULE
-q1_m0_dof6 = filterModuleD(dspPtr,dspCoeff,Q1_M0_DOF6,q1_m0_inmtrx[1][5],0);
+q1_m0_dof6 = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_DOF6,q1_m0_inmtrx[1][5],0);
 
 // FILTER MODULE
-q1_m0_dof5 = filterModuleD(dspPtr,dspCoeff,Q1_M0_DOF5,q1_m0_inmtrx[1][4],0);
+q1_m0_dof5 = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_DOF5,q1_m0_inmtrx[1][4],0);
 
 // FILTER MODULE
-q1_m0_dof4 = filterModuleD(dspPtr,dspCoeff,Q1_M0_DOF4,q1_m0_inmtrx[1][3],0);
+q1_m0_dof4 = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_DOF4,q1_m0_inmtrx[1][3],0);
 
 // FILTER MODULE
-q1_m0_dof3 = filterModuleD(dspPtr,dspCoeff,Q1_M0_DOF3,q1_m0_inmtrx[1][2],0);
+q1_m0_dof3 = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_DOF3,q1_m0_inmtrx[1][2],0);
 
 // FILTER MODULE
-q1_m0_dof2 = filterModuleD(dspPtr,dspCoeff,Q1_M0_DOF2,q1_m0_inmtrx[1][1],0);
+q1_m0_dof2 = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_DOF2,q1_m0_inmtrx[1][1],0);
 
 // FILTER MODULE
-q1_m0_dof1 = filterModuleD(dspPtr,dspCoeff,Q1_M0_DOF1,q1_m0_inmtrx[1][0],0);
+q1_m0_dof1 = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_DOF1,q1_m0_inmtrx[1][0],0);
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<6;ii++)
 {
 q1_m0_outmtrx[1][ii] = 
@@ -491,49 +499,49 @@ q1_m0_outmtrx[1][ii] =
 }
 
 // FILTER MODULE
-q1_m0_s_act = filterModuleD(dspPtr,dspCoeff,Q1_M0_S_ACT,q1_m0_outmtrx[1][5],0);
+q1_m0_s_act = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_S_ACT,q1_m0_outmtrx[1][5],0);
 
 // FILTER MODULE
-q1_m0_r_act = filterModuleD(dspPtr,dspCoeff,Q1_M0_R_ACT,q1_m0_outmtrx[1][4],0);
+q1_m0_r_act = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_R_ACT,q1_m0_outmtrx[1][4],0);
 
 // FILTER MODULE
-q1_m0_l_act = filterModuleD(dspPtr,dspCoeff,Q1_M0_L_ACT,q1_m0_outmtrx[1][3],0);
+q1_m0_l_act = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_L_ACT,q1_m0_outmtrx[1][3],0);
 
 // FILTER MODULE
-q1_m0_f3_act = filterModuleD(dspPtr,dspCoeff,Q1_M0_F3_ACT,q1_m0_outmtrx[1][2],0);
+q1_m0_f3_act = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_F3_ACT,q1_m0_outmtrx[1][2],0);
 
 // FILTER MODULE
-q1_m0_f2_act = filterModuleD(dspPtr,dspCoeff,Q1_M0_F2_ACT,q1_m0_outmtrx[1][1],0);
+q1_m0_f2_act = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_F2_ACT,q1_m0_outmtrx[1][1],0);
 
 // FILTER MODULE
-q1_m0_f1_act = filterModuleD(dspPtr,dspCoeff,Q1_M0_F1_ACT,q1_m0_outmtrx[1][0],0);
+q1_m0_f1_act = filterModuleD(dsp_ptr,dspCoeff,Q1_M0_F1_ACT,q1_m0_outmtrx[1][0],0);
 
 
-//End of subsystem **************************************************
+//End of subsystem   Q1_M0 **************************************************
 
 
 
-//Start of subsystem **************************************************
-
-// FILTER MODULE
-q1_r0_face1 = filterModuleD(dspPtr,dspCoeff,Q1_R0_FACE1,dWord[0][6],0);
+//Start of subsystem Q1_R0 **************************************************
 
 // FILTER MODULE
-q1_r0_face2 = filterModuleD(dspPtr,dspCoeff,Q1_R0_FACE2,dWord[0][7],0);
+q1_r0_face1 = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_FACE1,dWord[0][6],0);
 
 // FILTER MODULE
-q1_r0_face3 = filterModuleD(dspPtr,dspCoeff,Q1_R0_FACE3,dWord[0][8],0);
+q1_r0_face2 = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_FACE2,dWord[0][7],0);
 
 // FILTER MODULE
-q1_r0_left = filterModuleD(dspPtr,dspCoeff,Q1_R0_LEFT,dWord[0][9],0);
+q1_r0_face3 = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_FACE3,dWord[0][8],0);
 
 // FILTER MODULE
-q1_r0_right = filterModuleD(dspPtr,dspCoeff,Q1_R0_RIGHT,dWord[0][10],0);
+q1_r0_left = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_LEFT,dWord[0][9],0);
 
 // FILTER MODULE
-q1_r0_side = filterModuleD(dspPtr,dspCoeff,Q1_R0_SIDE,dWord[0][11],0);
+q1_r0_right = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_RIGHT,dWord[0][10],0);
 
-// MATRIX CALC
+// FILTER MODULE
+q1_r0_side = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_SIDE,dWord[0][11],0);
+
+// Matrix
 for(ii=0;ii<6;ii++)
 {
 q1_r0_inmtrx[1][ii] = 
@@ -546,24 +554,24 @@ q1_r0_inmtrx[1][ii] =
 }
 
 // FILTER MODULE
-q1_r0_dof6 = filterModuleD(dspPtr,dspCoeff,Q1_R0_DOF6,q1_r0_inmtrx[1][5],0);
+q1_r0_dof6 = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_DOF6,q1_r0_inmtrx[1][5],0);
 
 // FILTER MODULE
-q1_r0_dof5 = filterModuleD(dspPtr,dspCoeff,Q1_R0_DOF5,q1_r0_inmtrx[1][4],0);
+q1_r0_dof5 = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_DOF5,q1_r0_inmtrx[1][4],0);
 
 // FILTER MODULE
-q1_r0_dof4 = filterModuleD(dspPtr,dspCoeff,Q1_R0_DOF4,q1_r0_inmtrx[1][3],0);
+q1_r0_dof4 = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_DOF4,q1_r0_inmtrx[1][3],0);
 
 // FILTER MODULE
-q1_r0_dof3 = filterModuleD(dspPtr,dspCoeff,Q1_R0_DOF3,q1_r0_inmtrx[1][2],0);
+q1_r0_dof3 = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_DOF3,q1_r0_inmtrx[1][2],0);
 
 // FILTER MODULE
-q1_r0_dof2 = filterModuleD(dspPtr,dspCoeff,Q1_R0_DOF2,q1_r0_inmtrx[1][1],0);
+q1_r0_dof2 = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_DOF2,q1_r0_inmtrx[1][1],0);
 
 // FILTER MODULE
-q1_r0_dof1 = filterModuleD(dspPtr,dspCoeff,Q1_R0_DOF1,q1_r0_inmtrx[1][0],0);
+q1_r0_dof1 = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_DOF1,q1_r0_inmtrx[1][0],0);
 
-// MATRIX CALC
+// Matrix
 for(ii=0;ii<6;ii++)
 {
 q1_r0_outmtrx[1][ii] = 
@@ -576,24 +584,28 @@ q1_r0_outmtrx[1][ii] =
 }
 
 // FILTER MODULE
-q1_r0_s_act = filterModuleD(dspPtr,dspCoeff,Q1_R0_S_ACT,q1_r0_outmtrx[1][5],0);
+q1_r0_s_act = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_S_ACT,q1_r0_outmtrx[1][5],0);
 
 // FILTER MODULE
-q1_r0_r_act = filterModuleD(dspPtr,dspCoeff,Q1_R0_R_ACT,q1_r0_outmtrx[1][4],0);
+q1_r0_r_act = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_R_ACT,q1_r0_outmtrx[1][4],0);
 
 // FILTER MODULE
-q1_r0_l_act = filterModuleD(dspPtr,dspCoeff,Q1_R0_L_ACT,q1_r0_outmtrx[1][3],0);
+q1_r0_l_act = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_L_ACT,q1_r0_outmtrx[1][3],0);
 
 // FILTER MODULE
-q1_r0_f3_act = filterModuleD(dspPtr,dspCoeff,Q1_R0_F3_ACT,q1_r0_outmtrx[1][2],0);
+q1_r0_f3_act = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_F3_ACT,q1_r0_outmtrx[1][2],0);
 
 // FILTER MODULE
-q1_r0_f2_act = filterModuleD(dspPtr,dspCoeff,Q1_R0_F2_ACT,q1_r0_outmtrx[1][1],0);
+q1_r0_f2_act = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_F2_ACT,q1_r0_outmtrx[1][1],0);
 
 // FILTER MODULE
-q1_r0_f1_act = filterModuleD(dspPtr,dspCoeff,Q1_R0_F1_ACT,q1_r0_outmtrx[1][0],0);
+q1_r0_f1_act = filterModuleD(dsp_ptr,dspCoeff,Q1_R0_F1_ACT,q1_r0_outmtrx[1][0],0);
 
-// SUS_WD MODULE
+
+//End of subsystem   Q1_R0 **************************************************
+
+
+// SusWd Module
 if((cycle % 16) == 0) {
 q1_wd = 16384;
    for(ii=0;ii<20;ii++) {
@@ -609,7 +621,7 @@ q1_wd = 16384;
 	pLocalEpics->sus.Q1_WD = q1_wd / 16384;
 }
 
-// MULTI_SW
+// MultiSwitch
 q1_wd_sw[0] = q1_m0_f1_act;
 q1_wd_sw[1] = q1_m0_f2_act;
 q1_wd_sw[2] = q1_m0_f3_act;
@@ -635,9 +647,8 @@ q1_wd_sw[21] = q1_esd_q1;
 q1_wd_sw[22] = q1_esd_q2;
 q1_wd_sw[23] = q1_esd_q3;
 q1_wd_sw[24] = q1_esd_q4;
-if(pLocalEpics->sus.Q1_WD_SW == 0)
-{
-	for(ii=0;ii< 25;ii++) q1_wd_sw[ii] = 0.0;
+if (pLocalEpics->sus.Q1_WD_SW == 0) {
+	for (ii=0; ii<25; ii++) q1_wd_sw[ii] = 0.0;
 }
 
 
@@ -660,7 +671,6 @@ dacOut[0][14] = q1_wd_sw[14];
 dacOut[0][15] = q1_wd_sw[15];
 
 // DAC number is 1
-dacOut[1][14] = q1_wd;
 dacOut[1][0] = q1_wd_sw[16];
 dacOut[1][1] = q1_wd_sw[17];
 dacOut[1][2] = q1_wd_sw[18];
@@ -670,6 +680,7 @@ dacOut[1][7] = q1_wd_sw[21];
 dacOut[1][8] = q1_wd_sw[22];
 dacOut[1][9] = q1_wd_sw[23];
 dacOut[1][10] = q1_wd_sw[24];
+dacOut[1][14] = q1_wd;
 
   }
 }

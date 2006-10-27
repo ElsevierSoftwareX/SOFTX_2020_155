@@ -254,6 +254,6 @@ OUTVARIABLE ACCUM_OVERFLOW epicsOutput.ovAccum int ai 0
 
 
 systems SUS-
-gds_config 5000 15000 1250 1250
+gds_config 3750 13750 1250 1250
 
 

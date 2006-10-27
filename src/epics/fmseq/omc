@@ -206,6 +206,6 @@ OUTVARIABLE ACCUM_OVERFLOW epicsOutput.ovAccum int ai 0
 
 
 systems OMC-
-gds_config 7500 17500 1250 1250
+gds_config 6250 16250 1250 1250
 
 
