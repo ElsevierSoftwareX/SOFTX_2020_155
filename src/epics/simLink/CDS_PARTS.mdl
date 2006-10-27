@@ -34,8 +34,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Oct 25 15:59:53 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:34>"
+  LastModifiedDate	  "Thu Oct 26 16:57:12 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:35>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -248,7 +248,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [88, 489, 1112, 1229]
+    Location		    [163, 85, 1187, 825]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -325,6 +325,28 @@ Library {
       DropShadow	      on
       AttributesFormatString  "%<Description>"
       SourceBlock	      "dac/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "DIO name"
+      Tag		      "cdsDio"
+      Description	      "support for 8 bit input 8 bit output DIO PCI ca"
+"rd\nACCESS I/O Products model DIO-24D                "
+      Ports		      [1, 1]
+      Position		      [300, 165, 340, 225]
+      BackgroundColor	      "lightBlue"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsDio/Subsystem"
       SourceType	      "SubSystem"
       ShowPortLabels	      on
       SystemSampleTime	      "-1"
@@ -813,6 +835,8 @@ Library {
       Tag		      "cdsParameters"
       Ports		      [1, 1]
       Position		      [305, 35, 345, 95]
+      BackgroundColor	      "orange"
+      DropShadow	      on
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsParameters/Subsystem"
       SourceType	      "SubSystem"
