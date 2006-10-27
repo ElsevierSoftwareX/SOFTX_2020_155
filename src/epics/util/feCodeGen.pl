@@ -2405,17 +2405,17 @@ if ($not_found) {
 
 # Take care of generating Epics screens
 mkdir $skeleton, 0755;
+my $usite = uc $site;
+my $sysname = uc($skeleton);
 $sed_arg =  "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;";
-system("cat GDS_TP.adl | sed '$sed_arg' > $skeleton/GDS_TP.adl");
+system("cat GDS_TP.adl | sed '$sed_arg' > $skeleton/$usite$sysname" . "_GDS_TP.adl");
 for(0 .. $partCnt-1) {
 	if ($partType[$_] eq "Filt") {
-		my $sysname = uc($skeleton);
 		my $filt_name = $partName[$_];
 		if ($partSubName[$_] ne "") {
 			$filt_name = $partSubName[$_] . "_" . $filt_name;
 		}
 		my $sargs = $sed_arg . "s/FILTERNAME/$filt_name/g";
-		my $usite = uc $site;
 		system("cat FILTER.adl | sed '$sargs' > $skeleton/$usite$sysname" . "_" . $filt_name . ".adl");
 	}
 }
