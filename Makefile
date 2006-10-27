@@ -42,7 +42,7 @@ install-% :: src/epics/simLink/%.mdl
 	/bin/mkdir -p /cvs/cds/$$site/target_archive;\
 	/bin/mv -f /cvs/cds/$$site/target/$${system}epics /cvs/cds/$$site/target_archive/$${system}epics_$$cur_date;\
 	/bin/cp -pr target/$${system}epics /cvs/cds/$$site/target;\
-	/bin/mv /cvs/cds/$$site/target/$${system}epics/db/*/autoBurt.req /cvs/cds/$$site/target/$${system}epics;\
+	/bin/mv -f /cvs/cds/$$site/target/$${system}epics/db/*/autoBurt.req /cvs/cds/$$site/target/$${system}epics;\
 	echo Installing /cvs/cds/$$site/target/$${system};\
 	/bin/mkdir -p /cvs/cds/$$site/target/$${system};\
 	/bin/mv -f /cvs/cds/$$site/target/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system}/$${system}fe_$${cur_date}.rtl;\
