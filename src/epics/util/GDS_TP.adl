@@ -1,6 +1,6 @@
 
 file {
-	name="/home/aivanov/cds/advLigo/src/epics/util/GDS_TP.adl"
+	name="/mnt/aivanov/cds/advLigo/src/epics/util/GDS_TP.adl"
 	version=030003
 }
 display {
@@ -2938,7 +2938,7 @@ text {
 	"basic attribute" {
 		clr=2
 	}
-	textix="LASTI - SYSTEM_NAME"
+	textix="SITE_NAME - SYSTEM_NAME"
 }
 text {
 	object {
