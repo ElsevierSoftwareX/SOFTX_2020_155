@@ -12,13 +12,8 @@
 	volatile float *lscRfmPtr = 0;
 #elif defined(LTB_CODE)
 	#include "ltb/ltb.c"	/* User code for Ponderomotive control. */
-<<<<<<< feSelectCode.c
-#elif defined(SEI_CODE)
-	#include "sei/sei.c"
-=======
 #elif defined(DBB_CODE)
 	#include "dbb/dbb.c"
->>>>>>> 1.2
 #else
 	#error
 #endif
