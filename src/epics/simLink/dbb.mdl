@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.12"
+    ComputedModelVersion    "1.13"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -42,10 +42,10 @@ Model {
   Creator		  "rolf"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "rolf"
+  LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Oct 12 15:11:48 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:12>"
+  LastModifiedDate	  "Wed Nov  8 11:03:08 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:13>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -85,7 +85,7 @@ Model {
   ExtModeArmWhenConnect	  on
   ExtModeSkipDownloadWhenConnect off
   ExtModeLogAll		  on
-  ExtModeAutoUpdateStatusClock on
+  ExtModeAutoUpdateStatusClock off
   BufferReuse		  on
   ProdHWDeviceType	  "32-bit Generic"
   ShowModelReferenceBlockVersion off
@@ -479,22 +479,6 @@ Model {
       OutputAsBus	      off
     }
     Block {
-      BlockType		      Gain
-      Gain		      "1"
-      Multiplication	      "Element-wise(K.*u)"
-      ParameterDataTypeMode   "Same as input"
-      ParameterDataType	      "sfix(16)"
-      ParameterScalingMode    "Best Precision: Matrix-wise"
-      ParameterScaling	      "2^0"
-      OutDataTypeMode	      "Same as input"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
-      LockScale		      off
-      RndMeth		      "Floor"
-      SaturateOnIntegerOverflow	on
-      SampleTime	      "-1"
-    }
-    Block {
       BlockType		      Ground
     }
     Block {
@@ -531,19 +515,6 @@ Model {
       InitialOutput	      "[]"
     }
     Block {
-      BlockType		      Product
-      Inputs		      "2"
-      Multiplication	      "Element-wise(.*)"
-      InputSameDT	      on
-      OutDataTypeMode	      "Same as first input"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
-      LockScale		      off
-      RndMeth		      "Zero"
-      SaturateOnIntegerOverflow	on
-      SampleTime	      "-1"
-    }
-    Block {
       BlockType		      Reference
     }
     Block {
@@ -563,19 +534,6 @@ Model {
       SimViewingDevice	      off
       DataTypeOverride	      "UseLocalSettings"
       MinMaxOverflowLogging   "UseLocalSettings"
-    }
-    Block {
-      BlockType		      Sum
-      IconShape		      "rectangular"
-      Inputs		      "++"
-      InputSameDT	      on
-      OutDataTypeMode	      "Same as first input"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
-      LockScale		      off
-      RndMeth		      "Floor"
-      SaturateOnIntegerOverflow	on
-      SampleTime	      "-1"
     }
     Block {
       BlockType		      Terminator
@@ -600,7 +558,7 @@ Model {
   }
   System {
     Name		    "dbb"
-    Location		    [443, 93, 1671, 1138]
+    Location		    [241, 142, 1265, 882]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -718,9 +676,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "Matrix88/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -736,9 +694,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "Matrix88/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -754,9 +712,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -772,9 +730,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -790,9 +748,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -808,9 +766,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -826,9 +784,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -844,9 +802,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -862,9 +820,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -880,9 +838,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "Matrix88/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -898,9 +856,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "Matrix88/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -916,9 +874,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -934,9 +892,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -952,9 +910,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -970,9 +928,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -988,9 +946,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1006,9 +964,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1024,9 +982,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1042,9 +1000,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1060,9 +1018,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1078,9 +1036,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1096,9 +1054,9 @@ Model {
 	  DropShadow		  on
 	  SourceBlock		  "cdsFmodule/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1630,9 +1588,9 @@ Model {
       DropShadow	      on
       SourceBlock	      "cdsFmodule/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "on"
       SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
+      FunctionWithSeparateData "off"
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"
@@ -1648,9 +1606,9 @@ Model {
       DropShadow	      on
       SourceBlock	      "cdsFmodule/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "on"
       SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
+      FunctionWithSeparateData "off"
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"
@@ -1666,9 +1624,9 @@ Model {
       DropShadow	      on
       SourceBlock	      "cdsFmodule/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "on"
       SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
+      FunctionWithSeparateData "off"
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"
@@ -1684,9 +1642,9 @@ Model {
       DropShadow	      on
       SourceBlock	      "cdsFmodule/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "on"
       SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
+      FunctionWithSeparateData "off"
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"
@@ -1702,9 +1660,9 @@ Model {
       DropShadow	      on
       SourceBlock	      "cdsFmodule/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "on"
       SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
+      FunctionWithSeparateData "off"
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"
@@ -1720,9 +1678,9 @@ Model {
       DropShadow	      on
       SourceBlock	      "cdsFmodule/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "on"
       SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
+      FunctionWithSeparateData "off"
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"
@@ -1798,6 +1756,72 @@ Model {
       BackgroundColor	      "darkGreen"
       DropShadow	      on
       SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "site=M1\nrate=64K\ndcuid=10"
+      Tag		      "cdsParameters"
+      Description	      "Purpose:                                       "
+"                                                                             "
+"                                                                             "
+"                               \nProvide system parameters to the FE code gen"
+"erator to properly configure the generated EPICS names, rep rate of the FE co"
+"ntroller, and the Data Acquisition node ID for proper storage of data from th"
+"is FE controller.                 \n                                         "
+"                                                                             "
+"                                                                             "
+"                                     \nUseage:                               "
+"                                                                             "
+"                                                                             "
+"                                        \nThe part NAME field is used to iden"
+"tify the FE parameters. It must be of the form:                              "
+"                                                                             "
+"                                           \nsite=                           "
+"                                                                             "
+"                                                                             "
+"                                              \nrate=                        "
+"                                                                             "
+"                                                                             "
+"                                                 \ndcuid=                    "
+"                                                                             "
+"                                                                             "
+"                                                    \n                       "
+"                                                                             "
+"                                                                             "
+"                                                       \nWhere:              "
+"                                                                             "
+"                                                                             "
+"                                                          \nsite= argument ma"
+"y be H1, H2, L1, M1, G1, either as a single argument or multiple, for example"
+" site=H1,H2. These are the only names allowed. These will become the first tw"
+"o characters of all EPICS and signal names (for example G1:).\n              "
+"                                                                             "
+"                                                                             "
+"                                                                \nrate= may b"
+"e 2K, 16K, 32K, or 64K                                                       "
+"                                                                             "
+"                                                                   \n        "
+"                                                                             "
+"                                                                             "
+"                                                                      \ndcuid"
+"= is site specific ie it must be unique at each site.                        "
+"                                                                             "
+"                                                                         "
+      Ports		      [1, 1]
+      Position		      [460, 15, 500, 75]
+      BackgroundColor	      "orange"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsParameters/Subsystem"
       SourceType	      "SubSystem"
       ShowPortLabels	      on
       SystemSampleTime	      "-1"
