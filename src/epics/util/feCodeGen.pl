@@ -2409,6 +2409,7 @@ my $usite = uc $site;
 my $sysname = uc($skeleton);
 $sed_arg =  "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;";
 system("cat GDS_TP.adl | sed '$sed_arg' > $skeleton/$usite$sysname" . "_GDS_TP.adl");
+my $monitor_args = $sed_args;
 for(0 .. $partCnt-1) {
 	if ($partType[$_] eq "Filt") {
 		my $filt_name = $partName[$_];
@@ -2417,5 +2418,10 @@ for(0 .. $partCnt-1) {
 		}
 		my $sargs = $sed_arg . "s/FILTERNAME/$filt_name/g";
 		system("cat FILTER.adl | sed '$sargs' > $skeleton/$usite$sysname" . "_" . $filt_name . ".adl");
+		if ($partInputType[$_][a] eq "Adc") {
+			print "Filter $filt_name has Adc input $partInput[$_][0]\n";
+			$monitor_args .= "s/$partInput[$_][0]/$filt_name ($partInput[$_][0])/g;";
+		}
 	}
 }
+system("cat MONITOR.adl | sed '$monitor_args' > $skeleton/$usite$sysname" . "_MONITOR.adl");
