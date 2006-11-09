@@ -14,7 +14,6 @@
 #endif
 #include <drv/cdsHardware.h>
 
-
 // PCI Device variables
 volatile PLX_9056_DMA *adcDma[MAX_ADC_MODULES];	/* DMA struct for GSA ADC */
 volatile PLX_9056_DMA *dacDma[MAX_DAC_MODULES];	/* DMA struct for GSA DAC */
@@ -973,8 +972,10 @@ int myriNetDaqSend(	int dcuId,
 if(subCycle == 15) {
   sprintf (daqSendMessage->message, "DAT");
   daqSendMessage->dcuId = htonl(dcuId);
-  if(cycle > 0) 
-    daqSendMessage->cycle = htonl(cycle - 1);
+  if(cycle > 0)  {
+    int mycycle = cycle -1;
+    daqSendMessage->cycle = htonl(mycycle);
+  }
   if(cycle == 0) daqSendMessage->cycle = htonl(15);
   daqSendMessage->offset = htonl(subCycle);
   daqSendMessage->fileCrc = htonl(fileCrc);
