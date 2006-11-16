@@ -1,12 +1,12 @@
 
 file {
-	name="/home/aivanov/cds/advLigo/src/epics/util/MONITOR.adl"
+	name="/mnt/aivanov/cds/advLigo/src/epics/util/MONITOR.adl"
 	version=030003
 }
 display {
 	object {
-		x=52
-		y=55
+		x=113
+		y=71
 		width=801
 		height=657
 	}
@@ -89,7 +89,7 @@ display {
 }
 rectangle {
 	object {
-		x=0
+		x=-257
 		y=0
 		width=1058
 		height=22
@@ -125,13 +125,13 @@ text {
 }
 "text update" {
 	object {
-		x=133
+		x=201
 		y=43
 		width=60
 		height=20
 	}
 	monitor {
-		chan="ADC_0_0_EPICS_CHANNEL"
+		chan="adc_0_0_EPICS_CHANNEL"
 		clr=30
 		bclr=44
 	}
@@ -141,7 +141,7 @@ text {
 }
 text {
 	object {
-		x=18
+		x=86
 		y=43
 		width=100
 		height=18
@@ -154,13 +154,13 @@ text {
 }
 "text update" {
 	object {
-		x=133
+		x=201
 		y=69
 		width=60
 		height=20
 	}
 	monitor {
-		chan="ADC_0_1_EPICS_CHANNEL"
+		chan="adc_0_1_EPICS_CHANNEL"
 		clr=30
 		bclr=44
 	}
@@ -170,7 +170,7 @@ text {
 }
 text {
 	object {
-		x=18
+		x=86
 		y=69
 		width=100
 		height=18
@@ -178,18 +178,18 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="(ADC_0_1)"
+	textix="adc_0_1"
 	align="horiz. right"
 }
 "text update" {
 	object {
-		x=133
+		x=201
 		y=94
 		width=60
 		height=20
 	}
 	monitor {
-		chan="ADC_0_2_EPICS_CHANNEL"
+		chan="adc_0_2_EPICS_CHANNEL"
 		clr=30
 		bclr=44
 	}
@@ -199,7 +199,7 @@ text {
 }
 text {
 	object {
-		x=18
+		x=86
 		y=94
 		width=100
 		height=18
@@ -207,18 +207,18 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="(ADC_0_2)"
+	textix="adc_0_2"
 	align="horiz. right"
 }
 "text update" {
 	object {
-		x=133
+		x=201
 		y=120
 		width=60
 		height=20
 	}
 	monitor {
-		chan="ADC_0_3_EPICS_CHANNEL"
+		chan="adc_0_3_EPICS_CHANNEL"
 		clr=30
 		bclr=44
 	}
@@ -228,7 +228,7 @@ text {
 }
 text {
 	object {
-		x=18
+		x=86
 		y=120
 		width=100
 		height=18
@@ -236,18 +236,18 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="(ADC_0_3)"
+	textix="adc_0_3"
 	align="horiz. right"
 }
 "text update" {
 	object {
-		x=133
+		x=201
 		y=145
 		width=60
 		height=20
 	}
 	monitor {
-		chan="ADC_0_4_EPICS_CHANNEL"
+		chan="adc_0_4_EPICS_CHANNEL"
 		clr=30
 		bclr=44
 	}
@@ -257,7 +257,7 @@ text {
 }
 text {
 	object {
-		x=18
+		x=86
 		y=145
 		width=100
 		height=18
@@ -265,18 +265,18 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="(ADC_0_4)"
+	textix="adc_0_4"
 	align="horiz. right"
 }
 "text update" {
 	object {
-		x=133
+		x=201
 		y=171
 		width=60
 		height=20
 	}
 	monitor {
-		chan="ADC_0_5_EPICS_CHANNEL"
+		chan="adc_0_5_EPICS_CHANNEL"
 		clr=30
 		bclr=44
 	}
@@ -286,7 +286,7 @@ text {
 }
 text {
 	object {
-		x=18
+		x=86
 		y=171
 		width=100
 		height=18
@@ -294,18 +294,18 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="(ADC_0_5)"
+	textix="adc_0_5"
 	align="horiz. right"
 }
 "text update" {
 	object {
-		x=133
+		x=201
 		y=196
 		width=60
 		height=20
 	}
 	monitor {
-		chan="ADC_0_6_EPICS_CHANNEL"
+		chan="adc_0_6_EPICS_CHANNEL"
 		clr=30
 		bclr=44
 	}
@@ -315,7 +315,7 @@ text {
 }
 text {
 	object {
-		x=18
+		x=86
 		y=196
 		width=100
 		height=18
@@ -323,18 +323,18 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="(ADC_0_6)"
+	textix="adc_0_6"
 	align="horiz. right"
 }
 "text update" {
 	object {
-		x=133
+		x=201
 		y=222
 		width=60
 		height=20
 	}
 	monitor {
-		chan="ADC_0_7_EPICS_CHANNEL"
+		chan="adc_0_7_EPICS_CHANNEL"
 		clr=30
 		bclr=44
 	}
@@ -344,7 +344,7 @@ text {
 }
 text {
 	object {
-		x=18
+		x=86
 		y=222
 		width=100
 		height=18
@@ -352,6 +352,702 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="(ADC_0_7)"
+	textix="adc_0_7"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=536
+		y=42
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_8_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=421
+		y=42
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_8"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=536
+		y=68
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_9_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=421
+		y=68
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_9"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=536
+		y=93
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_10_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=421
+		y=93
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_10"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=536
+		y=119
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_11_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=421
+		y=119
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_11"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=536
+		y=144
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_12_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=421
+		y=144
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_12"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=536
+		y=170
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_13_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=421
+		y=170
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_13"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=536
+		y=195
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_14_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=421
+		y=195
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_14"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=536
+		y=221
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_15_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=421
+		y=221
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_15"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=205
+		y=318
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_16_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=90
+		y=318
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_16"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=205
+		y=344
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_17_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=90
+		y=344
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_17"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=205
+		y=369
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_18_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=90
+		y=369
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_18"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=205
+		y=395
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_19_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=90
+		y=395
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_19"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=205
+		y=420
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_20_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=90
+		y=420
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_20"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=205
+		y=446
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_21_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=90
+		y=446
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_21"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=205
+		y=471
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_22_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=90
+		y=471
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_22"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=205
+		y=497
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_23_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=90
+		y=497
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_23"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=540
+		y=317
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_24_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=425
+		y=317
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_24"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=540
+		y=343
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_25_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=425
+		y=343
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_25"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=540
+		y=368
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_26_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=425
+		y=368
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_26"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=540
+		y=394
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_27_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=425
+		y=394
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_27"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=540
+		y=419
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_28_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=425
+		y=419
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_28"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=540
+		y=445
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_29_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=425
+		y=445
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_29"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=540
+		y=470
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_30_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=425
+		y=470
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_30"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=540
+		y=496
+		width=60
+		height=20
+	}
+	monitor {
+		chan="adc_0_31_EPICS_CHANNEL"
+		clr=30
+		bclr=44
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=425
+		y=496
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="adc_0_31"
 	align="horiz. right"
 }
