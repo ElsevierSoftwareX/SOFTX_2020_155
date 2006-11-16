@@ -2418,10 +2418,16 @@ for(0 .. $partCnt-1) {
 		}
 		my $sargs = $sed_arg . "s/FILTERNAME/$filt_name/g";
 		system("cat FILTER.adl | sed '$sargs' > $skeleton/$usite$sysname" . "_" . $filt_name . ".adl");
-		if ($partInputType[$_][a] eq "Adc") {
-			#print "Filter $filt_name has Adc input $partInput[$_][0]\n";
-			$monitor_args .= "s/\"$partInput[$_][0]\"/\"$filt_name ($partInput[$_][0])\"/g;";
-			$monitor_args .= "s/\"$partInput[$_][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-$filt_name" . "_INMON"  .  "\"/g;";
+	}
+	if ($partInputType[$_][0] eq "Adc") {
+		my $part_name = $partName[$_];
+		#print "Part $part_name has Adc input $partInput[$_][0]\n";
+		if ($partType[$_] eq "Filt") {
+		  $monitor_args .= "s/\"$partInput[$_][0]\"/\"$part_name ($partInput[$_][0])\"/g;";
+		  $monitor_args .= "s/\"$partInput[$_][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-$part_name" . "_INMON"  .  "\"/g;";
+		} elsif ($partType[$_] eq "EpicsOut") {
+		  $monitor_args .= "s/\"$partInput[$_][0]\"/\"$part_name ($partInput[$_][0])\"/g;";
+		  $monitor_args .= "s/\"$partInput[$_][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-$part_name" .  "\"/g;";
 		}
 	}
 }
