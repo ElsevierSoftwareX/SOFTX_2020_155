@@ -2419,9 +2419,13 @@ for(0 .. $partCnt-1) {
 		my $sargs = $sed_arg . "s/FILTERNAME/$filt_name/g";
 		system("cat FILTER.adl | sed '$sargs' > $skeleton/$usite$sysname" . "_" . $filt_name . ".adl");
 		if ($partInputType[$_][a] eq "Adc") {
-			print "Filter $filt_name has Adc input $partInput[$_][0]\n";
-			$monitor_args .= "s/$partInput[$_][0]/$filt_name ($partInput[$_][0])/g;";
+			#print "Filter $filt_name has Adc input $partInput[$_][0]\n";
+			$monitor_args .= "s/\"$partInput[$_][0]\"/\"$filt_name ($partInput[$_][0])\"/g;";
+			$monitor_args .= "s/\"$partInput[$_][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-$filt_name" . "_INMON"  .  "\"/g;";
 		}
 	}
 }
-system("cat MONITOR.adl | sed '$monitor_args' > $skeleton/$usite$sysname" . "_MONITOR.adl");
+#print $monitor_args;
+for (0 .. $adcCnt - 1) {
+   system("cat MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$monitor_args' > $skeleton/$usite$sysname" . "_MONITOR_ADC$_.adl");
+}
