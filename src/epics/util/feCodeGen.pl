@@ -372,6 +372,10 @@ while (<IN>) {
 	$partType[$partCnt] = "DIVIDE";
 	#print "Found a DIVIDE with name $xpartName[$partCnt]\n";
     }
+    if (($inBlock == 1) && ($var1 eq "Inputs") && ($partType[$partCnt] eq "SUM")) {
+	$var2 =~ tr/+-//cd; # delete other characters
+	$partInputs[$partCnt] = $var2;
+    }
     # If in a subsystem block, have to annotate block names with subsystem name.
     if(($inBlock == 1) && ($var1 eq "Name") && ($inSub == 1)){
 	$val = $subSysName[$subSys];
@@ -2016,20 +2020,15 @@ for($xx=0;$xx<$processCnt;$xx++)
 	   print OUT "// SUM\n";
 		#print "\tUsed Sum $xpartName[$mm] $partOutCnt[$mm]\n";
 		$calcExp = "\L$xpartName[$mm]";
-		$calcExp .= " = ";
-		for($qq=0;$qq<$inCnt;$qq++)
-		{
-		    $zz = $qq+1;
-		    if(($zz - $inCnt) == 0)
-	 	    {
-			$calcExp .= $fromExp[$qq];
-			$calcExp .= ";\n";
-		    }
-		    else {
-			$calcExp .= $fromExp[$qq];
-			$calcExp .= " + ";
-		    }
+		$calcExp .= " =";
+		#print "Sum $xpartName[$mm] functions are $partInputs[$mm]\n";
+		for (0 .. $inCnt - 1) {
+		    my $op = substr($partInputs[$mm], $_, 1);
+		    if ($op eq "") { $op = "+"; }
+		    if ($_ > 0 || $op eq "-")  { $calcExp .=  " " . $op; } 
+		    $calcExp .= " " . $fromExp[$_];
 		}
+		$calcExp .= ";\n";
 		print OUT "$calcExp";
 	}
 
