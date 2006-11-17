@@ -373,8 +373,8 @@ while (<IN>) {
 	#print "Found a DIVIDE with name $xpartName[$partCnt]\n";
     }
     if (($inBlock == 1) && ($var1 eq "Inputs") && ($partType[$partCnt] eq "SUM")) {
-	$var2 =~ tr/+-//cd; # delete other characters
 	$partInputs[$partCnt] = $var2;
+	$partInputs[$partCnt] =~ tr/+-//cd; # delete other characters
     }
     # If in a subsystem block, have to annotate block names with subsystem name.
     if(($inBlock == 1) && ($var1 eq "Name") && ($inSub == 1)){
