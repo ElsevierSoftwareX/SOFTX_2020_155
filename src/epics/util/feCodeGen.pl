@@ -159,6 +159,8 @@ while (<IN>) {
 	if($blockType eq "BusSelector") {$partType[$partCnt] = BUSS;}
 	if($blockType eq "UnitDelay") {$partType[$partCnt] = DELAY;}
 	if($blockType eq "Logic") {$partType[$partCnt] = AND;}
+	if($blockType eq "Mux") {$partType[$partCnt] = MUX;}
+	if($blockType eq "Demux") {$partType[$partCnt] = DEMUX;}
 	# Need to find subsystems, as these contain internal parts and links
 	# which need to be "flattened" to connect all parts together
 	if($blockType eq "SubSystem") {
@@ -447,7 +449,8 @@ while (<IN>) {
 	elsif ($r =~ /^cds/) {
 		# Getting rid of the leading "cds"
 		($r) = $r =~ m/^cds(.+)$/;
-	}
+	} elsif ($r =~ /^SIMULINK/i) { next; }
+
 	# Capitalize first character
 	$r = uc(substr($r,0, 1)) . substr($r, 1);
 	# END part name transformation code
@@ -2282,6 +2285,9 @@ print OUTME "/g;s/%SUBSYS%//g' \$< > \$\@\n";
 print OUTME "\n";
 print OUTME "\n";
 close OUTME;
+
+
+#exit;
 
 sub get_freq {
 if($rate == 480) {
