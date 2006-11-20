@@ -1784,6 +1784,14 @@ for($ii=0;$ii<$partCnt;$ii++)
 	  ("CDS::" . $partType[$ii] . "::printFrontEndVars") -> ($ii);
 	}
 
+	if($partType[$ii] eq "MUX") {
+		$port = $partInCnt[$ii];
+		print OUT "double \L$xpartName[$ii]\[$port\];\n";
+	}
+	if($partType[$ii] eq "DEMUX") {
+		$port = $partOutCnt[$ii];
+		print OUT "double \L$xpartName[$ii]\[$port\];\n";
+	}
 	if($partType[$ii] eq "SUM") {
 		$port = $partInCnt[$ii];
 		print OUT "double \L$xpartName[$ii];\n";
@@ -2013,9 +2021,13 @@ for($xx=0;$xx<$processCnt;$xx++)
 
 		if($indone == 0)
 		{
-			$from = $partInNum[$mm][$qq];
-			$fromExp[$qq] = "\L$xpartName[$from]";
-			#print "$xpartName[$mm]  $fromExp[$qq]\n";
+			$from = $partInNum[$mm][$qq]; #part number for input $qq
+			if ($partInputType[$mm][$qq] eq "DEMUX") {
+				$fromExp[$qq] = "\L$xpartName[$from]\[$partInputPort[$mm][$qq]\]";
+			} else {
+				$fromExp[$qq] = "\L$xpartName[$from]";
+			}
+			#print "$xpartName[$mm]  $fromExp[$qq] $partInputType[$mm][$qq]\n";
 		}
 	}
 	# ******** FILTER *************************************************************************
@@ -2026,6 +2038,14 @@ for($xx=0;$xx<$processCnt;$xx++)
 	  	  print OUT ("CDS::" . $partType[$mm] . "::frontEndCode") -> ($mm);
 	}	
 
+	if ($partType[$mm] eq "MUX") {
+		print OUT "// MUX\n";
+		my $calcExp;
+		for (0 .. $inCnt - 1) {
+		  $calcExp .= "\L$xpartName[$mm]\[$_\] = $fromExp[$_];\n";
+		}
+		print OUT $calcExp;
+	}
 	# ******** SUMMING JUNC ********************************************************************
 	if($partType[$mm] eq "SUM")
 	{
