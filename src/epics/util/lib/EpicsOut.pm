@@ -41,7 +41,6 @@ sub frontEndInitCode {
 # Returns calculated input code
 sub fromExp {
         my ($i, $j) = @_;
-        my ($i, $j) = @_;
         my $from = $::partInNum[$i][$j];
         return "pLocalEpics->" . $::systemName . "\." . $::xpartName[$from];
 }
