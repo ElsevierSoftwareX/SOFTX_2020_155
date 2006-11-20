@@ -500,10 +500,15 @@ while (<IN>) {
 # Done reading the input file. ********************************************
 # Done reading the input file. ********************************************
 #Lookup all connection names and matrix to part numbers
+
+# By default, set DAC input counts to 16
 for($ii=0;$ii<$dacCnt;$ii++)
 {
 	$partInCnt[$dacPartNum[$ii]] = 16;
 }
+
+# Take all of the part outputs and find connections.
+# Fill in connected part numbers and types.
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	for($jj=0;$jj<$partOutCnt[$ii];$jj++)
@@ -518,26 +523,26 @@ for($ii=0;$ii<$partCnt;$ii++)
 	   }
 	}
 }
+
+# Take all of the part inputs and find connections.
+# Fill in connected part numbers and types.
 for($ii=0;$ii<$partCnt;$ii++)
 {
-	if($partType[$ii] eq "BUSS") 
-	{
-		# $partInCnt[$ii] -= 2;
-	}
 	for($jj=0;$jj<$partInCnt[$ii];$jj++)
 	{
 	   for($kk=0;$kk<$partCnt;$kk++)
 	   {
 		if($partInput[$ii][$jj] eq $xpartName[$kk])
 		{
-			$qq = $partOutputPort[$kk][$partInputPort[$ii][$jj]];
 			$partInNum[$ii][$jj] = $kk;
 			$partInputType[$ii][$jj] = $partType[$kk];
-                       	$partSysFromx[$xx][$jj] = -1;
+                       	$partSysFromx[$ii][$jj] = -1;
 		}
 	   }
 	}
 }
+
+# Start the process of removing subsystems OUTPUT parts 
 for($ii=0;$ii<$partCnt;$ii++)
 {
 $foundCon = 0;
@@ -547,6 +552,7 @@ $foundCon = 0;
 	{
 	   for($kk=0;$kk<$partCnt;$kk++)
 	   {
+		# If OUTPUT connects to INPUT of another subsystem
 		if($partType[$kk] eq "INPUT")
 		{
 	      for($ll=0;$ll<$partOutCnt[$kk];$ll++)
@@ -587,6 +593,8 @@ $foundCon = 0;
 		}
 	   }
 	}
+
+	# OUTPUT did not connect to INPUT, so find the part connections.
 	if($foundCon == 0){
 	for($jj=0;$jj<$partOutCnt[$ii];$jj++)
 	{
@@ -629,14 +637,19 @@ $foundCon = 0;
 	}
 
 	}
+
+	# Did not find any connections to subsystem OUTPUT, so print error.
 	if($foundCon == 0){
 	print "No connect for $xpartName[$ii]\n";
 	}
 	}
 }
+
+# Find connections for non subsystem parts
 for($ii=0;$ii<$nonSubCnt;$ii++)
 {
 	$xx = $nonSubPart[$ii];
+	# If part is BUSS, indicating an ADC input part
 	if($partType[$xx] eq "BUSS")
 	{
 		for($jj=0;$jj<$partOutCnt[$xx];$jj++)
@@ -644,6 +657,8 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 		   $mm = $partOutputPort[$xx][$jj]+1;
 		   for($kk=0;$kk<$partCnt;$kk++)
 		   {
+			# Handle ADC input connections to a subsystem, as indicated by
+			# an INPUT part.
 			if($partType[$kk] eq "INPUT")
 			{
 				if(($partOutput[$xx][$jj] eq $partInput[$kk][0]) && ($mm == $partInputPort[$kk][0]))
@@ -673,32 +688,36 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 				}
 				}
 			}
+			# Handle ADC input connections directly to a part not in a subsystem.
 			if($partType[$kk] ne "INPUT")
 			{
 				if(($partOutput[$xx][$jj] eq $xpartName[$kk]))
 				{
-				# print "Found ADC NP connect $xpartName[$xx] to $xpartName[$kk] $partOutputPort[$xx][$jj]\n";
-				# print "$jj $partOutputPort[$xx][$jj] $partOutputPortUsed[$xx][$jj]\n";
+				 # print "Found ADC NP connect $xpartName[$xx] to $xpartName[$kk] $partOutputPort[$xx][$jj]\n";
+				 # print "$jj $partOutputPort[$xx][$jj] $partOutputPortUsed[$xx][$jj]\n";
 				$fromNum = $xx;
 				#$fromPort = $jj;
 				#$fromPort = $partInputPort[$kk][0];
 				#$fromPort = $partOutputPort[$xx][$jj];
 				$fromPort = $partOutputPortUsed[$xx][$jj];
-				$partInput[$kk][0] = $xpartName[$xx];
-				$partInputType[$kk][0] = "Adc";
-				$partInNum[$kk][0] = $xx;
-				$partInputPort[$kk][0] = $fromPort;
+				$toPort = $partOutputPort[$xx][$jj];
+				$partInput[$kk][$toPort] = $xpartName[$xx];
+				$partInputType[$kk][$toPort] = "Adc";
+				$partInNum[$kk][$toPort] = $xx;
+				$partInputPort[$kk][$toPort] = $fromPort;
 					$adcName = $partInput[$xx][$fromPort];
 					$adcNum = substr($adcName,4,1);
 					$adcChan = substr($adcName,6,2);
-					$partInput[$kk][0] = $adcName;
-					$partInputPort[$kk][0] = $adcChan;
-					$partInNum[$kk][0] = $adcNum;
+					$partInput[$kk][$toPort] = $adcName;
+					$partInputPort[$kk][$toPort] = $adcChan;
+					$partInNum[$kk][$toPort] = $adcNum;
 				}
 			}
 		   }
 		}
 	}
+
+	# Handle part connections, where neither part is an ADC part.
 	if($partType[$xx] ne "BUSS")
 	{
 		for($jj=0;$jj<$partOutCnt[$xx];$jj++)
@@ -737,6 +756,8 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 	}
 }
 
+# Remove all parts which will not require further processing in the code for the part
+# total.
 $ftotal = $partCnt;
    for($kk=0;$kk<$partCnt;$kk++)
    {
@@ -749,6 +770,8 @@ $ftotal = $partCnt;
 print "Total parts to process $ftotal\n";
 #DIAGNOSTIC
 print "Found $subSys subsystems\n";
+
+# Write a parts and connection list to file for diagnostics.
 for($ll=0;$ll<$subSys;$ll++)
 {
 $xx = $subSysPartStop[$ll] - $subSysPartStart[$ll];
@@ -1573,27 +1596,13 @@ print "Linkage failed (parts remaining $partsRemaining; subs remaining $subRemai
 		if($subUsed[$ii] == 0)
 		{
 		print "Subsys $ii $subSysName[$ii] failed to connect\n";
-			for($jj=0;$jj<$subCntr[$ii];$jj++)
-			{
-				$yy = $subInputs[$ii][$jj];
-				if(($yy<100) && ($subUsed[$yy] != 1))
-				{
-					$allADC = 0;
-					print "Subcon failed $yy\n";
-				}
-				if($yy > 99)
-				{
-				$yy = $subInputs[$ii][$jj] - 100;
-				for($kk=0;$kk<$searchCnt;$kk++)
-				{
-					if(($partUsed[$yy] != 1) && ($subInputsType[$ii][$jj] ne "Adc") && ($partType[$yy] ne "DELAY"))
-					{
-						$allADC = 0;
-					print "Partcon failed $yy\n";
-					}
-				}
-				}
-			}
+		}
+	}
+	for($ii=0;$ii<$partCnt;$ii++)
+	{
+		if($partUsed[$ii] == 0)
+		{
+		print "Part $ii $xpartName[$ii] failed to connect\n";
 		}
 	}
 exit;
