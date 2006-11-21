@@ -1,5 +1,5 @@
 
-.PHONY: omc
-omc:
-	./feCodeGen.pl ../simLink/omc.mdl omc
+.PHONY: pde
+pde:
+	./feCodeGen.pl ../simLink/pde.mdl pde
 

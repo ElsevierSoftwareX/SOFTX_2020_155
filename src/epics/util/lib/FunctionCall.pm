@@ -35,7 +35,7 @@ sub printFrontEndVars  {
         my ($i) = @_;
 	# Figure out input/output dimensions
 	# declare data arrays
-	
+	print ::OUT "#include \"$::xpartName[$i].c\"\n";
         ;
 }
 
