@@ -6,7 +6,7 @@ die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>
 $site = "M1";
 $location = "mit";
 $rate = "60"; # In microseconds
-$dcuId = 8; # Default dcu Id
+$dcuId = 10; # Default dcu Id
 $ifoid = 0; # Default ifoid for the DAQ
 $nodeid = 0; # Default GDS node id for awgtpman
 
