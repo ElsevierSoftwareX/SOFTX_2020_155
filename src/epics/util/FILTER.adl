@@ -1,6 +1,6 @@
 
 file {
-	name="/home/aivanov/cds/advLigo/src/epics/util/FILTER.adl"
+	name="/export/home/controls/FILTER.adl"
 	version=030003
 }
 display {
@@ -335,19 +335,6 @@ byte {
 	}
 	sbit=2
 	ebit=2
-}
-text {
-	object {
-		x=177
-		y=38
-		width=96
-		height=28
-	}
-	"basic attribute" {
-		clr=55
-	}
-	textix="ULOUT"
-	align="horiz. centered"
 }
 "message button" {
 	object {
