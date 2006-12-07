@@ -2444,7 +2444,12 @@ my $sysname = uc($skeleton);
 $sed_arg =  "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;";
 system("cat GDS_TP.adl | sed '$sed_arg' > $skeleton/$usite$sysname" . "_GDS_TP.adl");
 my $monitor_args = $sed_args;
+my $cur_subsys_num = 0;
+
 for(0 .. $partCnt-1) {
+	if ($_ >= $subSysPartStop[$cur_subsys_num]) {
+		$cur_subsys_num += 1;
+	}
 	if ($partType[$_] eq "Filt") {
 		my $filt_name = $partName[$_];
 		if ($partSubName[$_] ne "") {
@@ -2458,7 +2463,7 @@ for(0 .. $partCnt-1) {
 		#print "Part $part_name has Adc input $partInput[$_][0]\n";
 		if ($partType[$_] eq "Filt") {
 		  $monitor_args .= "s/\"$partInput[$_][0]\"/\"$part_name ($partInput[$_][0])\"/g;";
-		  $monitor_args .= "s/\"$partInput[$_][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-$part_name" . "_INMON"  .  "\"/g;";
+		  $monitor_args .= "s/\"$partInput[$_][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  ."_$part_name" . "_INMON"  .  "\"/g;";
 		} elsif ($partType[$_] eq "EpicsOut") {
 		  $monitor_args .= "s/\"$partInput[$_][0]\"/\"$part_name ($partInput[$_][0])\"/g;";
 		  $monitor_args .= "s/\"$partInput[$_][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-$part_name" .  "\"/g;";
