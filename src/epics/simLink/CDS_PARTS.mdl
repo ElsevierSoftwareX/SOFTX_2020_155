@@ -34,8 +34,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Mon Nov 20 16:17:21 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:61>"
+  LastModifiedDate	  "Thu Dec 14 14:08:36 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:70>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -98,6 +98,12 @@ Library {
       OutputAsBus	      off
     }
     Block {
+      BlockType		      Demux
+      Outputs		      "4"
+      DisplayOption	      "none"
+      BusSelectionMode	      off
+    }
+    Block {
       BlockType		      Gain
       Gain		      "1"
       Multiplication	      "Element-wise(K.*u)"
@@ -143,6 +149,14 @@ Library {
 "tion)"
       LogicDataType	      "uint(8)"
       SampleTime	      "-1"
+    }
+    Block {
+      BlockType		      Mux
+      Inputs		      "4"
+      DisplayOption	      "none"
+      UseBusObject	      off
+      BusObject		      "BusObject"
+      NonVirtualBus	      off
     }
     Block {
       BlockType		      Outport
@@ -208,6 +222,17 @@ Library {
       SampleTime	      "-1"
     }
     Block {
+      BlockType		      Switch
+      Criteria		      "u2 >= Threshold"
+      Threshold		      "0"
+      InputSameDT	      on
+      OutDataTypeMode	      "Inherit via internal rule"
+      RndMeth		      "Floor"
+      SaturateOnIntegerOverflow	on
+      ZeroCross		      on
+      SampleTime	      "-1"
+    }
+    Block {
       BlockType		      Terminator
     }
     Block {
@@ -237,7 +262,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [183, 331, 852, 652]
+    Location		    [327, 228, 996, 549]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -251,6 +276,16 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
+    Block {
+      BlockType		      Demux
+      Name		      "Demux"
+      Ports		      [1, 2]
+      Position		      [150, 206, 155, 244]
+      BackgroundColor	      "black"
+      ShowName		      off
+      Outputs		      "2"
+      DisplayOption	      "bar"
+    }
     Block {
       BlockType		      Reference
       Name		      "DocBlock"
@@ -438,7 +473,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Filters"
-	Location		[783, 191, 1018, 470]
+	Location		[778, 196, 1013, 475]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -487,9 +522,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -511,9 +546,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsPPFIR/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -533,9 +568,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsRms/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -579,8 +614,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[210, 312, 650, 1052]
-	Open			off
+	Location		[398, 76, 838, 816]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -687,6 +722,27 @@ Library {
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
 	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "RfmIO\naddr=0x1000"
+	  Tag			  "cdsRfmIO"
+	  Description		  "VMIC5565 Reflective Memory read/write"
+	  Ports			  [1, 1]
+	  Position		  [215, 245, 255, 305]
+	  BackgroundColor	  "[0.917826, 0.413368, 1.000000]"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsRfmIO/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
 	Line {
 	  SrcBlock		  "Bus\nCreator"
 	  SrcPort		  1
@@ -707,7 +763,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"MatrixParts"
-	Location		[733, 126, 1445, 801]
+	Location		[319, 248, 1031, 700]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -720,6 +776,16 @@ Library {
 	TiledPageScale		1
 	ShowPageBoundaries	off
 	ZoomFactor		"100"
+	Block {
+	  BlockType		  Demux
+	  Name			  "Demux"
+	  Ports			  [1, 2]
+	  Position		  [215, 341, 220, 379]
+	  BackgroundColor	  "black"
+	  ShowName		  off
+	  Outputs		  "2"
+	  DisplayOption		  "bar"
+	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "Matrix"
@@ -734,9 +800,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -766,9 +832,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsProduct/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -788,9 +854,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsSubtract8/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -809,14 +875,23 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsSwitch1/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Mux
+	  Name			  "Mux"
+	  Ports			  [2, 1]
+	  Position		  [115, 341, 120, 379]
+	  ShowName		  off
+	  Inputs		  "2"
+	  DisplayOption		  "bar"
 	}
 	Block {
 	  BlockType		  Reference
@@ -830,16 +905,59 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsRampSwitch/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
 	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "cdsMuxMatrix"
+	  Tag			  "cdsMuxMatrix"
+	  Description		  "Any size matrix. Inputs and outputs must be"
+" connected using Mux and Demux parts."
+	  Ports			  [1, 1]
+	  Position		  [150, 330, 190, 390]
+	  BackgroundColor	  "green"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsMuxMatrix/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Line {
+	  SrcBlock		  "Mux"
+	  SrcPort		  1
+	  DstBlock		  "cdsMuxMatrix"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "cdsMuxMatrix"
+	  SrcPort		  1
+	  DstBlock		  "Demux"
+	  DstPort		  1
+	}
       }
+    }
+    Block {
+      BlockType		      Mux
+      Name		      "Mux"
+      Ports		      [2, 1]
+      Position		      [55, 206, 60, 244]
+      ShowName		      off
+      Inputs		      "2"
+      DisplayOption	      "bar"
     }
     Block {
       BlockType		      SubSystem
@@ -853,8 +971,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Osc/Phase"
-	Location		[545, 175, 895, 413]
-	Open			on
+	Location		[398, 256, 748, 494]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1011,7 +1129,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[249, 680, 519, 1079]
+	Location		[276, 87, 546, 486]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1147,6 +1265,18 @@ Library {
       RTWMemSecDataConstants  "Inherit from model"
       RTWMemSecDataInternal   "Inherit from model"
       RTWMemSecDataParameters "Inherit from model"
+    }
+    Line {
+      SrcBlock		      "Function Name"
+      SrcPort		      1
+      DstBlock		      "Demux"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Mux"
+      SrcPort		      1
+      DstBlock		      "Function Name"
+      DstPort		      1
     }
   }
 }
