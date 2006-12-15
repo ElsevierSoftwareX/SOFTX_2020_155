@@ -69,6 +69,7 @@ sub frontEndCode {
 	my ($i) = @_;
 	my $matOuts = $::partOutCnt[$::partOutNum[$i][0]];
 	my $matIns = $::partInCnt[$::partInNum[$i][0]];
+	my $muxName = "\L$::xpartName[$::partInNum[$i][0]]";
 	my $calcExp = "// MuxMatrix\n";
         $calcExp .= "for(ii=0;ii<$matOuts;ii++)\n{\n";
         $calcExp .= "\L$::xpartName[$i]\[1\]\[ii\] = \n";
@@ -79,7 +80,8 @@ sub frontEndCode {
           $calcExp .= "\[ii\]\[";
           $calcExp .= $_;
           $calcExp .= "\] * ";
-          $calcExp .= $::fromExp[$_];
+          $calcExp .= $muxName . "\[$_\]";
+          #$calcExp .= $::fromExp[$_];
           if ($_ == ($matIns - 1)) { $calcExp .= ";\n";}
           else { $calcExp .= " +\n"; }
 	}
