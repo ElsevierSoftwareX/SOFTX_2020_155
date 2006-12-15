@@ -1775,6 +1775,9 @@ print OUT "\#endif\n";
 print OUT "\#ifdef SERVO16K\n";
 print OUT "\t\#define FE_RATE\t16382\n";
 print OUT "\#endif\n";
+print OUT "\#ifdef SERVO2K\n";
+print OUT "\t\#define FE_RATE\t2048\n";
+print OUT "\#endif\n";
 print OUT "\n\n";
 
 sub printVariables {
@@ -2185,7 +2188,7 @@ print OUTM "\n";
 print OUTM "TARGET_RTL := $skeleton";
 print OUTM "fe\.rtl\n";
 print OUTM "LIBRARY_OBJS := map.o\n";
-print OUTM "LDFLAGS_\$(TARGET_RTL) := \$(LIBRARY_OBJS)\n";
+print OUTM "LDFLAGS_\$(TARGET_RTL) := -g \$(LIBRARY_OBJS)\n";
 print OUTM "\n";
 print OUTM "\$(TARGET_RTL): \$(LIBRARY_OBJS)\n";
 print OUTM "\n";
@@ -2233,6 +2236,7 @@ print OUTM "CFLAGS += -DRESERVE_CPU2\n";
 if ($cpus > 3) {
 print OUTM "CFLAGS += -DRESERVE_CPU3\n";
 }
+print OUTM "CFLAGS += -g\n";
 print OUTM "#CFLAGS += -DNO_SYNC\n";
 print OUTM "#CFLAGS += -DNO_DAQ\n";
 print OUTM "\n";
