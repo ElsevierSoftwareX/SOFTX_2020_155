@@ -50,7 +50,7 @@ sub fromExp {
 	if ($rfmAddress % 4 != 0) {
 		die "RfmIO Part $::xpartName[$i] invalid: address must be 4-byte aligned\n";
 	}
-        return "cdsPciModules.pci_rfm[0]? *((float *)(cdsPciModules.pci_rfm[0] + $rfmAddressString)) : 0.0";
+        return "cdsPciModules.pci_rfm[0]? *((float *)(((void *)cdsPciModules.pci_rfm[0]) + $rfmAddressString)) : 0.0";
 }
 
 # Return front end code
@@ -72,7 +72,7 @@ sub frontEndCode {
         if (($fromType ne "GROUND") && ($::partInput[$i][0] ne "NC")) {
 		return "if (cdsPciModules.pci_rfm[0] != 0) {\n"
         		. "  // RFM output\n"
-                	. "  *((float *)(cdsPciModules.pci_rfm[0] + $rfmAddressString)) = $::fromExp[0];\n"
+                	. "  *((float *)(((char *)cdsPciModules.pci_rfm[0]) + $rfmAddressString)) = $::fromExp[0];\n"
 			. "}\n";
         }
         return "";
