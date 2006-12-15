@@ -11,7 +11,7 @@ Model {
       Name		      "CLK_OUT"
     }
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.71"
+    ComputedModelVersion    "1.82"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -49,8 +49,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Dec 14 14:09:27 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:71>"
+  LastModifiedDate	  "Thu Dec 14 16:26:50 2006"
+  ModelVersionFormat	  "1.%<AutoIncrement:82>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -611,7 +611,7 @@ Model {
   }
   System {
     Name		    "das"
-    Location		    [25, 76, 1005, 741]
+    Location		    [20, 85, 1000, 750]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -651,7 +651,7 @@ Model {
       Tag		      "cdsRfmIO"
       Description	      "VMIC5565 Reflective Memory read/write"
       Ports		      [1, 1]
-      Position		      [65, 25, 105, 85]
+      Position		      [80, 25, 120, 85]
       BackgroundColor	      "[0.720570, 0.267067, 1.000000]"
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsRfmIO/Subsystem"
@@ -1400,6 +1400,11 @@ Model {
       Position		      [125, 140, 145, 160]
     }
     Block {
+      BlockType		      Ground
+      Name		      "Ground2"
+      Position		      [730, 205, 750, 225]
+    }
+    Block {
       BlockType		      Reference
       Name		      "I"
       Tag		      "cdsFilt"
@@ -1474,7 +1479,7 @@ Model {
       BlockType		      Mux
       Name		      "Mux"
       Ports		      [72, 1]
-      Position		      [780, 15, 790, 725]
+      Position		      [820, 15, 830, 725]
       ShowName		      off
       Inputs		      "72"
       DisplayOption	      "bar"
@@ -1863,7 +1868,7 @@ Model {
     Line {
       SrcBlock		      "GAIN"
       SrcPort		      1
-      Points		      [30, 0]
+      Points		      [25, 0; 0, -65]
       DstBlock		      "Mux"
       DstPort		      1
     }
@@ -1891,7 +1896,7 @@ Model {
     Line {
       SrcBlock		      "Mux"
       SrcPort		      1
-      Points		      [0, -5]
+      Points		      [-25, 0]
       DstBlock		      "SENMTRX"
       DstPort		      1
     }
@@ -2129,6 +2134,125 @@ Model {
       SrcPort		      9
       DstBlock		      "0x9000"
       DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Ground2"
+      SrcPort		      1
+      Points		      [25, 0; 0, -30]
+      Branch {
+	Points			[0, -10]
+	Branch {
+	  Points		  [0, -10]
+	  Branch {
+	    Points		    [0, -10]
+	    Branch {
+	      Points		      [0, -10]
+	      Branch {
+		Points			[0, -10]
+		Branch {
+		  Points		  [0, -10]
+		  Branch {
+		    Points		    [0, -10]
+		    Branch {
+		    Points		    [0, -10]
+		    Branch {
+		    Points		    [0, -10]
+		    Branch {
+		    DstBlock		    "Mux"
+		    DstPort		    9
+		    }
+		    Branch {
+		    Points		    [0, -10]
+		    Branch {
+		    Points		    [0, -10]
+		    Branch {
+		    Points		    [0, -10]
+		    Branch {
+		    Points		    [0, -10]
+		    Branch {
+		    Points		    [0, -10]
+		    Branch {
+		    DstBlock		    "Mux"
+		    DstPort		    4
+		    }
+		    Branch {
+		    Points		    [0, -10]
+		    Branch {
+		    Points		    [0, -10]
+		    DstBlock		    "Mux"
+		    DstPort		    2
+		    }
+		    Branch {
+		    DstBlock		    "Mux"
+		    DstPort		    3
+		    }
+		    }
+		    }
+		    Branch {
+		    DstBlock		    "Mux"
+		    DstPort		    5
+		    }
+		    }
+		    Branch {
+		    DstBlock		    "Mux"
+		    DstPort		    6
+		    }
+		    }
+		    Branch {
+		    DstBlock		    "Mux"
+		    DstPort		    7
+		    }
+		    }
+		    Branch {
+		    DstBlock		    "Mux"
+		    DstPort		    8
+		    }
+		    }
+		    }
+		    Branch {
+		    DstBlock		    "Mux"
+		    DstPort		    10
+		    }
+		    }
+		    Branch {
+		    DstBlock		    "Mux"
+		    DstPort		    11
+		    }
+		  }
+		  Branch {
+		    DstBlock		    "Mux"
+		    DstPort		    12
+		  }
+		}
+		Branch {
+		  DstBlock		  "Mux"
+		  DstPort		  13
+		}
+	      }
+	      Branch {
+		DstBlock		"Mux"
+		DstPort			14
+	      }
+	    }
+	    Branch {
+	      DstBlock		      "Mux"
+	      DstPort		      15
+	    }
+	  }
+	  Branch {
+	    DstBlock		    "Mux"
+	    DstPort		    16
+	  }
+	}
+	Branch {
+	  DstBlock		  "Mux"
+	  DstPort		  17
+	}
+      }
+      Branch {
+	DstBlock		"Mux"
+	DstPort			18
+      }
     }
   }
 }
