@@ -1,5 +1,5 @@
 
-.PHONY: pde
-pde:
-	./feCodeGen.pl ../simLink/pde.mdl pde
+.PHONY: das
+das:
+	./feCodeGen.pl ../simLink/das.mdl das
 
