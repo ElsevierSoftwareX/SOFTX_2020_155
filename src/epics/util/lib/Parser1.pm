@@ -280,25 +280,21 @@ while (<::IN>) {
 	$::partSubName[$::partCnt] = $::subSysName[$::subSys];
 	if($::partType[$::partCnt] eq "OUTPUT")
 	{
-		$::partPort[$::partCnt] = 1;
 		$::partOutput[$::partCnt][0] = $::subSysName[$::subSys];
 		$::partOutputPort[$::partCnt][0] = 1;
 		$::partOutCnt[$::partCnt] ++;
 	}
 	if($::partType[$::partCnt] eq "INPUT"){
-		$::partPort[$::partCnt] = 1;
         	$::partInput[$::partCnt][0] = $::subSysName[$::subSys];
         	$::partInputPort[$::partCnt][0] = 1;
 		$::partInCnt[$::partCnt] ++;
 	}
     }
     if(($inBlock == 1) && ($var1 eq "Port") && ($inSub == 1) && ($::partType[$::partCnt] eq "INPUT")){
-	$::partPort[$::partCnt] = $var2;
 	$::partInputPort[$::partCnt][0] = $var2;
 	#print "$::xpartName[$::partCnt] is input $::partCnt with $::partInput[$::partCnt][0] $::partInputPort[$::partCnt][0]\n";
     }
     if(($inBlock == 1) && ($var1 eq "Port") && ($inSub == 1) && ($::partType[$::partCnt] eq "OUTPUT")){
-	$::partPort[$::partCnt] = $var2;
 	$::partOutputPort[$::partCnt][0] = $var2;
     }
     if(($inBlock == 1) && ($var1 eq "Port") && ($::partType[$::partCnt] eq "BUSS")){
