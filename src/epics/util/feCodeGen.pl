@@ -135,9 +135,6 @@ $partOutputPort[0][0] = 0;	# $partOutputPort[0 .. $partCnt][0 .. $partOutCnt[$_]
 # For each part, for each output port it keeps the output port source number
 $partOutputPortUsed[0][0] = 0;	# $partOutputPortUsed[0 .. $partCnt][0 .. $partOutCnt[$_]]
 
-# ???
-$partSysFromx[0][0] = 0; # Mystery
-
 # Part names annotated with subsystem names
 $xpartName[0] = "";	# $xpartName[0 .. $partCnt]
 

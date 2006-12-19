@@ -132,7 +132,7 @@ while (<::IN>) {
 		{
 			$::partInput[$ii][($conDesPort-1)] = $conSrc;
 			$::partInputPort[$ii][($conDesPort-1)] = $conSrcPort-1;
-                       	$::partSysFromx[$ii][($conDesPort-1)] = -1;
+                       	#$::partSysFromx[$ii][($conDesPort-1)] = -1;
 			$::partInCnt[$ii] ++;
 		}
 		# If connection input name corresponds to a part name,
@@ -240,7 +240,7 @@ while (<::IN>) {
 			$qq = $conDesPort-1;
 			$::partInput[$ii][$qq] = $conSrc;
 			$::partInputPort[$ii][$qq] = $conSrcPort-1;
-                       	$::partSysFromx[$ii][$qq] = -1;
+                       	#$::partSysFromx[$ii][$qq] = -1;
 			# $::partInput[$ii][$::partInCnt[$ii]] = $conSrc;
 			# $::partInputPort[$ii][$::partInCnt[$ii]] = $conSrcPort-1;
                        	# $::partSysFromx[$ii][$::partInCnt[$ii]] = -1;
