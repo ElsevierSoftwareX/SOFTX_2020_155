@@ -3,9 +3,9 @@
 die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>] [<speed>]\n\t" . "site is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
         if (@ARGV != 2 && @ARGV != 3 && @ARGV != 4 && @ARGV != 5);
 
-$site = "M1";
-$location = "mit";
-$rate = "60"; # In microseconds
+$site = "M1"; # Default value for the site name
+$location = "mit"; # Default value for the location name
+$rate = "60"; # In microseconds (default setting)
 $dcuId = 10; # Default dcu Id
 $ifoid = 0; # Default ifoid for the DAQ
 $nodeid = 0; # Default GDS node id for awgtpman
@@ -68,7 +68,6 @@ open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
 open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
 open(OUTH,">./".$hFile) || die "cannot open header file for writing";
-open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 $diag = "diags\.txt";
 open(OUTD,">./".$diag) || die "cannot open diag file for writing";
 
@@ -113,401 +112,15 @@ sub debug {
   }
 }
 
-# Read .mdl input file
-while (<IN>) {
-    # Strip out quotes and blank spaces
-    tr/\"/ /;
-    tr/\</ /;
-    tr/\>/ /;
-    s/^\s+//;
-    s/\s+$//;
-    $lcntr ++;
-    ($var1,$var2,$var3,$var4) = split(/\s+/,$_);
-
-    # Find the System keyword. This is where real stuff starts
-    if(($mySeq == 0) && ($var1 eq "System")){
-	#print "System found on line $lcntr\n";
-	$mySeq = 1;
-    }
-    if(($mySeq == 1) && ($var1 eq "Name")){
-	$systemName = $var2;
-	#print "System Name $systemName on line $lcntr\n";
-	print OUTH "\#ifndef \U$systemName";
-	print OUTH "_H_INCLUDED\n\#define \U$systemName";
-	print OUTH "_H_INCLUDED\n";
-	$mySeq = 2;
-    }
-
-    # Start searching for blocks (parts) and determine Type
-    if(($mySeq == 2) && ($var1 eq "BlockType")){
-	if($inSub == 1) {$openBrace ++;}
-	$openBlock ++;
-	$inBlock = 1;
-	$blockType = $var2;
-	# Reference blocks are parts defined in separate files.
-	# Code now only supports DAC, ADC and IIR Filters
-	if($blockType eq "Reference") {$inRef = 1;}
-	# Need to find input/outport ports to link parts together
-	# and determine processing order.
-	if($blockType eq "Inport") {$partType[$partCnt] = INPUT;}
-	if($blockType eq "Outport") {$partType[$partCnt] = OUTPUT;}
-	if($blockType eq "Sum") {$partType[$partCnt] = SUM;}
-	if($blockType eq "Product") {$partType[$partCnt] = MULTIPLY;}
-	if($blockType eq "Ground") {$partType[$partCnt] = GROUND;}
-	if($blockType eq "Terminator") {$partType[$partCnt] = TERM;}
-	if($blockType eq "BusCreator") {$partType[$partCnt] = BUSC; $adcCnt ++;}
-	if($blockType eq "BusSelector") {$partType[$partCnt] = BUSS;}
-	if($blockType eq "UnitDelay") {$partType[$partCnt] = DELAY;}
-	if($blockType eq "Logic") {$partType[$partCnt] = AND;}
-	if($blockType eq "Mux") {$partType[$partCnt] = MUX;}
-	if($blockType eq "Demux") {$partType[$partCnt] = DEMUX;}
-	# Need to find subsystems, as these contain internal parts and links
-	# which need to be "flattened" to connect all parts together
-	if($blockType eq "SubSystem") {
-		$inSub = 1;
-		#print "Start of subsystem ********************\n";
-		$inBlock = 0;
-		$lookingForName = 1;
-		$openBrace = 2;
-		$subSysPartStart[$subSys] = $partCnt;
-		$openBlock --;
-	}
-	#print "BlockType $blockType ";
-    }
-    # Need to get the name of subsystem to annonate names of
-    # parts within the subsystem
-    if(($lookingForName == 1) && ($var1 eq "Name")){
-	$subSysName[$subSys] = $var2;
-	#print "$subSysName[$subSys]\n";
-	$lookingForName = 0;
-    }
-
-    # Line parts contain link information
-    if(($mySeq == 2) && (($var1 eq "Line") || ($var1 eq "Branch"))){
-	if($inSub == 1) {$openBrace ++;}
-	$inLine = 1;
-    }
-
-    # If in a Subsystem block, need to annotate link names with subsystem name
-    if($inSub == 1)
-    {
-	    if(($inLine == 1) && ($var1 eq "SrcBlock")) {
-		$conSrc = $subSysName[$subSys];
-		$conSrc .= "_";
-		$conSrc .= $var2;
-	    }
-	    if(($inLine == 1) && ($var1 eq "SrcPort")) {
-		$conSrcPort = $var2;
-	    }
-	    if(($inLine == 1) && ($var1 eq "DstBlock")) {
-		$conDes = $subSysName[$subSys];
-		$conDes .= "_";
-		$conDes .= $var2;
-	    }
-	    if(($inLine == 1) && ($var1 eq "DstPort")) {
-		$conDesPort = $var2;
-		$endBranch = 1;
-	    }
-    }
-
-    # If not in a Subsystem block, use link names directly.
-    if($inSub == 0)
-    {
-	    if(($inLine == 1) && ($var1 eq "SrcBlock")) {
-		$conSrc = $var2;
-	    }
-	    if(($inLine == 1) && ($var1 eq "SrcPort")) {
-		$conSrcPort = $var2;
-	    }
-	    if(($inLine == 1) && ($var1 eq "DstBlock")) {
-		$conDes = $var2;
-	    }
-	    if(($inLine == 1) && ($var1 eq "DstPort")) {
-		$conDesPort = $var2;
-		$endBranch = 1;
-	    }
-    }
-
-    # At end of line block, make connection table
-    if(($inLine == 1) && ($endBranch == 1) && ($inSub == 1)){
-	$inLine = 0;
-	$endBranch = 0;
-	# print "Connection $conSrc $conSrcPort $conDes $conDesPort\n";
-	# Compare block names with names in links
-	for($ii=0;$ii<$partCnt;$ii++)
-	{
-		# If connection output name corresponds to a part name,
-		# annotate part input information
-		if($conDes eq $xpartName[$ii])
-		{
-			$partInput[$ii][($conDesPort-1)] = $conSrc;
-			$partInputPort[$ii][($conDesPort-1)] = $conSrcPort-1;
-                       	$partSysFromx[$ii][($conDesPort-1)] = -1;
-			$partInCnt[$ii] ++;
-		}
-		# If connection input name corresponds to a part name,
-		# annotate part output information
-		if($conSrc eq $xpartName[$ii])
-		{
-			$partOutput[$ii][$partOutCnt[$ii]] = $conDes;
-			$partOutputPort[$ii][$partOutCnt[$ii]] = $conDesPort-1;
-			$partOutputPortUsed[$ii][$partOutCnt[$ii]] = $conSrcPort-1;
-			$partOutCnt[$ii] ++;
-		}
-	}
-    }
-    if(($inLine == 1) && ($endBranch == 1) && ($inSub == 0)){
-	$inLine = 0;
-	$endBranch = 0;
-	$srcType = 0;
-	$desType = 0;
-	for($ii=0;$ii<$subSys;$ii++)
-	{
-	if($conSrc eq $subSysName[$ii]) {
-		$srcType = 1;
-		$subNum = $ii;
-	}
-	if($conDes eq $subSysName[$ii]) {
-		$desType = 1;
-	}
-	}
-	# print "Connection $conSrc $conSrcPort $conDes $conDesPort\n";
-	# Compare block names with names in links
-	if(($srcType == 0) && ($desType == 1))
-	{
-	#print "Looking for $conDes $conDesPort\n";
-	for($ii=0;$ii<$partCnt;$ii++)
-	{
-		if($conSrc eq $xpartName[$ii])
-		{
-			$partOutput[$ii][$partOutCnt[$ii]] = $conDes;
-			$partOutputPort[$ii][$partOutCnt[$ii]] = $conDesPort-1;
-			$partOutputPortUsed[$ii][$partOutCnt[$ii]] = $conSrcPort-1;
-			$partOutCnt[$ii] ++;
-		}
-	}
-	}
-	if(($srcType == 1) && ($desType == 0))
-	{
-	#print "Looking for $conDes $conDesPort\n";
-	for($ii=0;$ii<$partCnt;$ii++)
-	{
-		if(($partType[$ii] eq "OUTPUT") && ($partOutput[$ii][0] eq $conSrc) && ($partOutputPort[$ii][0] == $conSrcPort) && ($conMade[$ii] == 0))
-		{
-			# print "Made OUT connect $xpartName[$ii] $conDes $conDesPort\n";
-			$partOutput[$ii][0] = $conDes;
-			$partOutputPort[$ii][0] = $conDesPort;
-			$conMade[$ii] = 1;
-		}
-		if($conDes eq $xpartName[$ii])
-		{
-			$qq = $conDesPort - 1;
-			$partInput[$ii][$qq] = $conSrc;
-			$partInputPort[$ii][$qq] = $conDesPort - 1;
-			# $partInput[$ii][$partInCnt[$ii]] = $conSrc;
-			# $partInputPort[$ii][$partInCnt[$ii]] = $conDesPort - 1;
-                       	# $partSysFromx[$ii][($conDesPort - 1)] = $subNum;
-			if(substr($conDes,0,3) eq "Dac")
-			{
-				$partOutputPort[$ii][$partInCnt[$ii]] = $conDesPort - 1;
-				#print "$xpartName[$ii] $partInCnt[$ii] has link to $partInput[$ii][$partInCnt[$ii]] $partOutputPort[$ii][$partInCnt[$ii]]\n";
-			}
-			$partInCnt[$ii] ++;
-		}
-	}
-	}
-	if(($srcType == 1) && ($desType == 1))
-	{
-	#print "Looking for $conDes $conDesPort\n";
-	for($ii=0;$ii<$partCnt;$ii++)
-	{
-		if(($partType[$ii] eq "OUTPUT") && ($partOutput[$ii][0] eq $conSrc) && ($partOutputPort[$ii][0] == $conSrcPort)&& ($conMade[$ii] == 0))
-		{
-	 	#print "Connection 3 $xpartName[$ii] $ii\n";
-		$partOutput[$ii][0] = $conDes;
-		$partOutputPort[$ii][0] = $conDesPort;
-		$conMade[$ii] = 1;
-		}
-	}
-	}
-	if(($srcType == 0) && ($desType == 0))
-	{
-	for($ii=0;$ii<$partCnt;$ii++)
-	{
-		# If connection input name corresponds to a part name,
-		# annotate part output information
-		if($conSrc eq $xpartName[$ii])
-		{
-			$partOutput[$ii][$partOutCnt[$ii]] = $conDes;
-			$partOutputPort[$ii][$partOutCnt[$ii]] = $conDesPort-1;
-			$partOutputPortUsed[$ii][$partOutCnt[$ii]] = $conSrcPort-1;
-			$partOutCnt[$ii] ++;
-		}
-		# If connection output name corresponds to a part name,
-		# annotate part input information
-		if(($conDes eq $xpartName[$ii]) && ($partType[$ii] ne "BUSS"))
-		{
-			$qq = $conDesPort-1;
-			$partInput[$ii][$qq] = $conSrc;
-			$partInputPort[$ii][$qq] = $conSrcPort-1;
-                       	$partSysFromx[$ii][$qq] = -1;
-			# $partInput[$ii][$partInCnt[$ii]] = $conSrc;
-			# $partInputPort[$ii][$partInCnt[$ii]] = $conSrcPort-1;
-                       	# $partSysFromx[$ii][$partInCnt[$ii]] = -1;
-			$partInCnt[$ii] ++;
-		}
-	}
-	}
-    }
-
-    # Get block (part) names.
-    if(($inBlock == 1) && ($var1 eq "Name") && ($inSub == 0) && ($openBlock == 1)){
-	#print "$var2";
-	$partName[$partCnt] = $var2;
-	$xpartName[$partCnt] = $var2;
-	$nonSubPart[$nonSubCnt] = $partCnt;
-	$nonSubCnt ++;
-    }
-    #Check if MULT function is really a DIVIDE function. 
-    if(($inBlock == 1) && ($var1 eq "Inputs") && ($var2 eq "*\/") && ($partType[$partCnt] eq "MULTIPLY")){
-	#print "$var2";
-	$partType[$partCnt] = "DIVIDE";
-	#print "Found a DIVIDE with name $xpartName[$partCnt]\n";
-    }
-    if (($inBlock == 1) && ($var1 eq "Inputs") && ($partType[$partCnt] eq "SUM")) {
-	$partInputs[$partCnt] = $var2;
-	$partInputs[$partCnt] =~ tr/+-//cd; # delete other characters
-    }
-    # If in a subsystem block, have to annotate block names with subsystem name.
-    if(($inBlock == 1) && ($var1 eq "Name") && ($inSub == 1)){
-	$val = $subSysName[$subSys];
-	$val .= "_";
-	$val .= $var2;
-	#print "$val";
-	$xpartName[$partCnt] = $val;
-	$partName[$partCnt] = $var2;
-	$partSubNum[$partCnt] = $subSys;
-	$partSubName[$partCnt] = $subSysName[$subSys];
-	if($partType[$partCnt] eq "OUTPUT")
-	{
-		$partPort[$partCnt] = 1;
-		$partOutput[$partCnt][0] = $subSysName[$subSys];
-		$partOutputPort[$partCnt][0] = 1;
-		$partOutCnt[$partCnt] ++;
-	}
-	if($partType[$partCnt] eq "INPUT"){
-		$partPort[$partCnt] = 1;
-        	$partInput[$partCnt][0] = $subSysName[$subSys];
-        	$partInputPort[$partCnt][0] = 1;
-		$partInCnt[$partCnt] ++;
-	}
-    }
-    if(($inBlock == 1) && ($var1 eq "Port") && ($inSub == 1) && ($partType[$partCnt] eq "INPUT")){
-	$partPort[$partCnt] = $var2;
-	$partInputPort[$partCnt][0] = $var2;
-	#print "$xpartName[$partCnt] is input $partCnt with $partInput[$partCnt][0] $partInputPort[$partCnt][0]\n";
-    }
-    if(($inBlock == 1) && ($var1 eq "Port") && ($inSub == 1) && ($partType[$partCnt] eq "OUTPUT")){
-	$partPort[$partCnt] = $var2;
-	$partOutputPort[$partCnt][0] = $var2;
-    }
-    if(($inBlock == 1) && ($var1 eq "Port") && ($partType[$partCnt] eq "BUSS")){
-	$openBlock ++;
-    }
-    if(($inBlock == 1) && ($var1 eq "PortNumber") && ($partType[$partCnt] eq "BUSS")){
-	$busPort = $var2 - 1;
-    }
-    if(($inBlock == 1) && ($var1 eq "Name") && ($partType[$partCnt] eq "BUSS") && ($busPort >= 0)){
-	$partInput[$partCnt][$busPort] = $var2;
-	# print "BUSS X $partInCnt[$partCnt] Y $busPort $partInput[$partCnt][$busPort]\n";
-	$partInCnt[$partCnt] ++;
-	# print "BUSS X $partCnt $partInCnt[$partCnt]\n";
-	$busPort = -1;
-    }
-
-    # Presently, 4 types of Reference blocks are supported.
-    # Info on the part type is in the SourceBlock field.
-    if(($inBlock == 1) && ($inRef == 1 ) && ($var1 eq "SourceBlock")){
-	$partErr = 1;
-
-	($r) = $var2 =~ m%(^[^/]+)/.*%g;
-	#print "CDS part: ", $r, "\n";
-
-	#
-	# These names need a thorough cleanup !!!
-	#
-	# START part name transformation code
-	if ($r =~ /^cdsSwitch/ || $r eq "cdsSusSw2") { $r = "MultiSwitch"; }
-	elsif ($r =~ /^Matrix/) { $r = "Matrix"; }
-	elsif ($r =~ /^cdsSubtract/) { $r = "DiffJunc"; }
-	elsif ($r eq "dsparch4" ) { $r = "Filt"; }
-	elsif ($r eq "cdsFmodule" ) { $r = "Filt"; }
-	elsif ($r eq "cdsWD" ) { $r = "Wd"; }
-	elsif ($r eq "cdsSusWd" ) { $r = "SusWd"; }
-	elsif ($r eq "cdsSWD1" ) { $r = "SeiWd"; }
-	elsif ($r eq "cdsPPFIR" ) { $r = "FirFilt"; }
-	elsif ($r =~ /^cds/) {
-		# Getting rid of the leading "cds"
-		($r) = $r =~ m/^cds(.+)$/;
-	} elsif ($r =~ /^SIMULINK/i) { next; }
-
-	# Capitalize first character
-	$r = uc(substr($r,0, 1)) . substr($r, 1);
-	# END part name transformation code
-	   
-	require "lib/$r.pm";
-	$partType[$partCnt] = ("CDS::" . $r . "::partType") -> ();
-	$cdsPart[$partCnt] = 1;
-	$partErr = 0;
-
-	if ($partErr)
-	{
-		print "Unknow part type $var2\nExiting script\n";
-		exit;
-	}
-
-    }
-
-    # End of blocks/lines are denoted by } in .mdl file.
-    if(($mySeq == 2) && ($var1 eq "}")){
-	if($inSub == 1) {$openBrace --;}
-	if($inBlock) {$openBlock --;}
-	$ob ++;
-	$inRef = 0;
-    	if(($inBlock == 1) && ($openBlock == 0)){
-	#print " $partCnt\n";
-	$partCnt ++;
-	$inBlock = 0;
-	}
-    }
-    if(($mySeq == 2) && ($var1 ne "}")){
-	$ob = 0;
-    }
-    if(($inSub == 1) && ($openBrace == 0))
-    {
-	#print "Think end of subsys is at $lcntr\n";
-    }
-
-    #Look for end of subsystem 
-    if(($mySeq == 2) && ($openBrace == 0) && ($inSub == 1)){
-	$ob = 0;
-	$inSub = 0;
-	$subSysPartStop[$subSys] = $partCnt;
-	$subSys ++;
-	#print "Think end of subsys $subSys is at $lcntr\n";
-	#print "End of Subsystem *********** $subSys\n";
-	$openBlock = 0;
-    }
-    # print "$var1\n";
-}
-# Done reading the input file. ********************************************
-# Done reading the input file. ********************************************
-#Lookup all connection names and matrix to part numbers
+# Parser input file
+require "lib/Parser1.pm";
+open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
+CDS::Parser::parse();
+close(IN);
 
 # By default, set DAC input counts to 16
-for($ii=0;$ii<$dacCnt;$ii++)
-{
-	$partInCnt[$dacPartNum[$ii]] = 16;
+for($ii=0;$ii<$dacCnt;$ii++) {
+  $partInCnt[$dacPartNum[$ii]] = 16;
 }
 
 # Take all of the part outputs and find connections.
@@ -771,83 +384,71 @@ $ftotal = $partCnt;
    }
 
 print "Total parts to process $ftotal\n";
-#DIAGNOSTIC
+
+# DIAGNOSTIC
 print "Found $subSys subsystems\n";
 
 # Write a parts and connection list to file for diagnostics.
-for($ll=0;$ll<$subSys;$ll++)
-{
-$xx = $subSysPartStop[$ll] - $subSysPartStart[$ll];
-$subCntr[$ll] = 0;
-	#print "SubSys $ll $subSysName[$ll] from $subSysPartStart[$ll] to $subSysPartStop[$ll]\n";
-print OUTD "\nSubSystem $ll has $xx parts ************************************\n";
-for($ii=$subSysPartStart[$ll];$ii<$subSysPartStop[$ll];$ii++)
-{
-	print OUTD "Part $ii $xpartName[$ii] is type $partType[$ii] with $partInCnt[$ii] inputs and $partOutCnt[$ii] outputs\n";
-	print OUTD "INS FROM:\n";
-	print OUTD "\tPart Name\tType\tNum\tPort\n";
-	for($jj=0;$jj<$partInCnt[$ii];$jj++)
-	{
-                        #$from = $partInNum[$ii][$jj];
-		print OUTD "\t$partInput[$ii][$jj]\t$partInputType[$ii][$jj]\t$partInNum[$ii][$jj]\t$partInputPort[$ii][$jj]\n";
-		if($partType[$ii] eq "INPUT")
-		{
-			print OUTD "From Subsystem $partSysFrom[$ii]\n";
-			$subInputs[$ll][$subCntr[$ll]] = $partSysFrom[$ii];
-			$subInputsType[$ll][$subCntr[$ll]] = $partInputType[$ii][$jj];
-			$subCntr[$ll] ++;
-		}
-	}
-	print OUTD "OUT TO:\n";
-	print OUTD "\tPart Name\tType\tNum\tPort\tPort Used\n";
-	for($jj=0;$jj<$partOutCnt[$ii];$jj++)
-	{
-		#$to = $partOutNum[$ii][$jj];
-		print OUTD "\t$partOutput[$ii][$jj]\t$partOutputType[$ii][$jj]\t$partOutNum[$ii][$jj]\t$partOutputPort[$ii][$jj]\t$partOutputPortUsed[$ii][$jj]\n";
-	}
-	print OUTD "\n****************************************************************\n";
-}
+for ($ll = 0; $ll < $subSys; $ll++) {
+  $xx = $subSysPartStop[$ll] - $subSysPartStart[$ll]; # Parts count for this subsystem
+  $subCntr[$ll] = 0;
+  #print "SubSys $ll $subSysName[$ll] from $subSysPartStart[$ll] to $subSysPartStop[$ll]\n";
+  print OUTD "\nSubSystem $ll has $xx parts ************************************\n";
+  for ($ii = $subSysPartStart[$ll]; $ii < $subSysPartStop[$ll]; $ii++) {
+    print OUTD "Part $ii $xpartName[$ii] is type $partType[$ii] with $partInCnt[$ii] inputs and $partOutCnt[$ii] outputs\n";
+    print OUTD "INS FROM:\n";
+    print OUTD "\tPart Name\tType\tNum\tPort\n";
+    for($jj=0;$jj<$partInCnt[$ii];$jj++) {
+      #$from = $partInNum[$ii][$jj];
+      print OUTD "\t$partInput[$ii][$jj]\t$partInputType[$ii][$jj]\t$partInNum[$ii][$jj]\t$partInputPort[$ii][$jj]\n";
+      if ($partType[$ii] eq "INPUT") {
+	print OUTD "From Subsystem $partSysFrom[$ii]\n";
+	$subInputs[$ll][$subCntr[$ll]] = $partSysFrom[$ii];
+	$subInputsType[$ll][$subCntr[$ll]] = $partInputType[$ii][$jj];
+	$subCntr[$ll] ++;
+      }
+    }
+    print OUTD "OUT TO:\n";
+    print OUTD "\tPart Name\tType\tNum\tPort\tPort Used\n";
+    for($jj = 0;$jj < $partOutCnt[$ii]; $jj++) {
+      #$to = $partOutNum[$ii][$jj];
+      print OUTD "\t$partOutput[$ii][$jj]\t$partOutputType[$ii][$jj]\t$partOutNum[$ii][$jj]\t$partOutputPort[$ii][$jj]\t$partOutputPortUsed[$ii][$jj]\n";
+    }
+    print OUTD "\n****************************************************************\n";
+  }
 }
 print OUTD "Non sub parts ************************************\n";
-for($ii=0;$ii<$nonSubCnt;$ii++)
-{
-	$xx = $nonSubPart[$ii];
-	print OUTD "Part $xx $xpartName[$xx] is type $partType[$xx] with $partInCnt[$xx] inputs and $partOutCnt[$xx] outputs\n";
-	print OUTD "INS FROM:\n";
-	for($jj=0;$jj<$partInCnt[$xx];$jj++)
-	{
-                        #$from = $partInNum[$xx][0];
-	   if($partSysFromx[$xx][$jj] == -1)
-	   {
-		print OUTD "\t$partInput[$xx][$jj]\t$partInputType[$xx][$jj]\t$partInNum[$xx][$jj]\t$partInputPort[$xx][$jj] subsys NONE\n";
-	   }
-	   else
-	   {
-		print OUTD "\t$partInput[$xx][$jj]\t$partInputType[$xx][$jj]\t$partInNum[$xx][$jj]\t$partInputPort[$xx][$jj] subsys $partSysFromx[$xx][$jj]\n";
-	   }
-	}
-	print OUTD "OUT TO:\n";
-	print OUTD "\tPart Name\tType\tNum\tPort\tPort Used\n";
-	for($jj=0;$jj<$partOutCnt[$xx];$jj++)
-	{
-		$to = $partOutNum[$xx][$jj];
-		print OUTD "\t$partOutput[$xx][$jj]\t$partOutputType[$xx][$jj]\t$partOutNum[$xx][$jj]\t$partOutputPort[$xx][$jj]\t$partOutputPortUsed[$xx][$jj]\n";
-	}
-	print OUTD "\n****************************************************************\n";
+for ($ii = 0; $ii < $nonSubCnt; $ii++) {
+  $xx = $nonSubPart[$ii];
+  print OUTD "Part $xx $xpartName[$xx] is type $partType[$xx] with $partInCnt[$xx] inputs and $partOutCnt[$xx] outputs\n";
+  print OUTD "INS FROM:\n";
+  for ($jj = 0; $jj < $partInCnt[$xx]; $jj++) {
+    #$from = $partInNum[$xx][0];
+    if ($partSysFromx[$xx][$jj] == -1) {
+      print OUTD "\t$partInput[$xx][$jj]\t$partInputType[$xx][$jj]\t$partInNum[$xx][$jj]\t$partInputPort[$xx][$jj] subsys NONE\n";
+    } else {
+      print OUTD "\t$partInput[$xx][$jj]\t$partInputType[$xx][$jj]\t$partInNum[$xx][$jj]\t$partInputPort[$xx][$jj] subsys $partSysFromx[$xx][$jj]\n";
+    }
+  }
+  print OUTD "OUT TO:\n";
+  print OUTD "\tPart Name\tType\tNum\tPort\tPort Used\n";
+  for ($jj = 0; $jj < $partOutCnt[$xx]; $jj++) {
+    $to = $partOutNum[$xx][$jj];
+    print OUTD "\t$partOutput[$xx][$jj]\t$partOutputType[$xx][$jj]\t$partOutNum[$xx][$jj]\t$partOutputPort[$xx][$jj]\t$partOutputPortUsed[$xx][$jj]\n";
+  }
+  print OUTD "\n****************************************************************\n";
 }
-for($ii=0;$ii<$subSys;$ii++)
-{
-	print OUTD "\nSUBS $ii $subSysName[$ii] *******************************\n";
-
-for($ll=0;$ll<$subCntr[$ii];$ll++)
-{
-	print OUTD "$ll $subInputs[$ii][$ll] $subInputsType[$ii][$ll]\n";
-}
+for ($ii = 0; $ii < $subSys; $ii++) {
+  print OUTD "\nSUBS $ii $subSysName[$ii] *******************************\n";
+  for($ll=0;$ll<$subCntr[$ii];$ll++) {
+    print OUTD "$ll $subInputs[$ii][$ll] $subInputsType[$ii][$ll]\n";
+  }
 }
 close(OUTD);
+# End DIAGNOSTIC
+
 print "Found $adcCnt ADC modules part is $adcPartNum[0]\n";
 print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
-
 
 for($ii=0;$ii<$subSys;$ii++)
 {
@@ -916,7 +517,6 @@ for($ii=0;$ii<$subSys;$ii++)
 	}
 	#print "Parts remaining = $partsRemaining\n";
 	$seqParts[$ii] = $ssCnt;
-    
 }
 
 $partsRemaining = 0;
