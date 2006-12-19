@@ -75,7 +75,6 @@ $mySeq = 0;
 $connects = 0;
 $ob = 0;
 $subSys = 0;
-$partCnt = 0;
 $inBranch = 0;
 $endBranch = 0;
 $adcCnt = 0;
@@ -86,18 +85,6 @@ $useWd = 0;
 $gainCnt = 0;
 $busPort = -1;
 $oscUsed = 0;
-
-# Clear the part input and output counters
-for($ii=0;$ii<2000;$ii++)
-{
-	$partInCnt[$ii] = 0;
-	$partOutCnt[$ii] = 0;
-	$partInUsed[$ii] = 0;
-	$conMade[$ii] = 0;
-}
-$openBrace = 0;
-$openBlock = 0;
-$nonSubCnt = 0;
 
 # set debug level (0 - no debug messages)
 $dbg_level = 2;
@@ -112,7 +99,75 @@ sub debug {
   }
 }
 
-# Parser input file
+# Global variables set by parser
+$systemName = "";	# model name
+$adcCnt = 0;	# Total A/D converter boards
+$nonSubCnt = 0; # Total of non-sybsystem parts found in the model
+
+# Keeps non-subsystem part numbers
+$nonSubPart[0] = 0;	# $nonSubPart[0 .. $nonSubCnt]
+
+$partCnt = 0;	# Total parts found in the simulink model
+
+# Set for CDS parts
+$cdsPart[0] = 0;	# $cdsPart[0 .. $partCnt]
+
+# Total number of inputs for each part
+$partInCnt[0] = 0;	# $partInCnt[0 .. $partCnt]
+# Source part name (a string) for each part, for each input
+# This shows which source part is connected to that input
+$partInput[0][0] = "";	# $partInput[0 .. $partCnt][0 .. $partInCnt[0]]
+# Source port number
+# This shows which source parts' port is connected to each input
+$partInputPort[0][0] = 0;	# $partInputPort[0 .. $partCnt][0 .. $partInCnt[$_]]
+$partInputs[0] = 0;		# Stores 'Inputs' field of the part declaration (used in SUM part)
+
+# Total number of outputs for each part
+$partOutCnt[0] = 0;	# $partOutCnt[0 .. $partCnt]
+# Destination part name (a string) for each part, for each output
+# Shows which destination part is connected to that output
+$partOutput[0][0] = "";	# $partOutput[0 .. $partCnt][0 .. $partOutCnt[$_]]
+# Destination port number
+# This shows which destination parts' port is connected to each output
+$partOutputPort[0][0] = 0;	# $partOutputPort[0 .. $partCnt][0 .. $partOutCnt[$_]]
+
+# Output port source number
+# For each part, for each output port it keeps the output port source number
+$partOutputPortUsed[0][0] = 0;	# $partOutputPortUsed[0 .. $partCnt][0 .. $partOutCnt[$_]]
+
+# ???
+$partSysFromx[0][0] = 0; # Mystery
+
+# Part names annotated with subsystem names
+$xpartName[0] = "";	# $xpartName[0 .. $partCnt]
+
+# Part names not annotated with subsystem names
+$partName[0] = "";	# $partName[0 .. $partCnt]
+
+# Part type
+$partType[0] = "";	# $partType[0 .. $partCnt]
+
+# Name of subsystem where part belongs
+$partSubName[0] = "";	# $partSubName[0 .. $partCnt]
+
+# For each part its subsystem number
+$partSubNum[0] = 0;	# $partSubNum[0 .. $partCnt]
+$subSys = 0;	# Subsystems counter
+$subSysName[0] = "";	# Subsystem names
+
+# Subsystem part number ranges
+$subSysPartStart[0] = 0;
+$subSysPartStop[0] = 0;
+
+
+# Clear the part input and output counters
+for ($ii = 0; $ii < 2000; $ii++) {
+  $partInCnt[$ii] = 0;
+  $partOutCnt[$ii] = 0;
+  $partInUsed[$ii] = 0;
+}
+
+# Parser input file (Simulink model)
 require "lib/Parser1.pm";
 open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 CDS::Parser::parse();
