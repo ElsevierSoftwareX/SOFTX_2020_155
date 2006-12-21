@@ -386,4 +386,5 @@ while (<::IN>) {
     }
     # print "$var1\n";
 }
+return 1;
 }
