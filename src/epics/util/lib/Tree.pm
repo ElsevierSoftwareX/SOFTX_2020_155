@@ -5,6 +5,19 @@ use Exporter;
 # Parts tree root name
 $tree_root_name = "__root__";
 
+# set debug level (0 - no debug messages)
+$dbg_level = 2;
+
+# Print debug message
+# Example:
+# debug (0, "debug test: openBrace=$openBrace");
+#
+sub debug {
+  if ($dbg_level > shift @_) {
+	print @_, "\n";
+  }
+}
+
 # Parts "tree" root
 #$root = {
 #	NAME => $tree_root_name,
@@ -62,13 +75,13 @@ sub find_node {
 #do_on_leaves($root, sub {if ($_->{PRINTED} != 1) {print $_->{NAME}, "\n"; $_->{PRINTED} = 1; }});
 
 # Print the tree
-$print_no_repeats = 0;
+$print_no_repeats = 1;
 sub print_tree {
 	my($tree, $level) = @_;
 	my($space);
 	if ($print_no_repeats && $tree->{PRINTED}) { return; }
 	for (0 .. $level) { $space .= ' '; }
-	#debug 0, $space, "{", $tree->{NAME}, " nref=", scalar @{$tree->{NEXT}}," subsys=", $tree->{SUBSYS}," type=", $tree->{TYPE}, "}";
+	debug 0, $space, "{", $tree->{NAME}, " nref=", scalar @{$tree->{NEXT}}, "}";
 	for (@{$tree->{NEXT}}) {
 		print_tree($_, $level + 1);
 	}
