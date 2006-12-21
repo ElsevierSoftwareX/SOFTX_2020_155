@@ -14,19 +14,21 @@ $root = {
 
 # Print block information, including all the fields
 sub print_node {
-   if ($_->{PRINTED} != 1) {
-	print $_->{NAME}, " ", @{$_->{INPUTS}}, "\n";
-	foreach (@{$_->{FIELDS}}) {
-		print "\t", $_->{KEY}, "\t", $_->{VALUE}, "\n";
+   ($node) =  @_;
+   #if ($node->{PRINTED} != 1) {
+	print $node->{NAME}, "\n";
+	foreach (keys %{$node->{FIELDS}}) {
+	#	%v = %{$node->{FIELDS}};
+		print "\t", $_, "\t", ${$node->{FIELDS}}{$_}, "\n";
 	}
-	$_->{PRINTED} = 1;
-   }
+	#$_->{PRINTED} = 1;
+   #}
 };
 
 sub parse() {
-push @nodes, $root;
+  push @nodes, $root;
 
-while (<::IN>) {
+  while (<::IN>) {
     # Strip out quotes and blank spaces
     #tr/\"/ /;
     #tr/\</ /;
@@ -39,7 +41,7 @@ while (<::IN>) {
 	$node = {
 		NAME => $var1,
 		NEXT => [],
-		FIELDS => [],
+		FIELDS => {},
 	};
 	# Get current node
 	my $cur_node = pop @nodes;
@@ -63,31 +65,55 @@ while (<::IN>) {
 	# See if this a string continuation line
 	if ("\"" eq substr $var1, 0, 1) {
 		# Add the whole line to the last field
-		#print "$_\n";
-		$fields = pop @{$cur_node->{FIELDS}};
-		$fields->{VALUE} .= $_;
-		push @{$cur_node->{FIELDS}}, $fields;
+		##print "$_\n";
+		$key = ${$cur_node->{LAST_FIELD_KEY}};
+		# Remove double quotes
+		s/^"//;s/"$//;
+		${$cur_node->{FIELDS}}{$key} .= $_;
 	} else {
+		# Remove double quotes
+		$var2 =~ s/^"//;
+		$var2 =~ s/"$//;
 		# Add new field to it
-		push @{$cur_node->{FIELDS}}, {KEY => $var1, VALUE => $var2};
+		${$cur_node->{FIELDS}}{$var1} = $var2;
+		${$cur_node->{LAST_FIELD_KEY}} = $var1;
 		#print "Block ", $cur_node->{NAME}, " fields are $var1 $var2\n";
 	}
-	# New node becomes current node
     }
+  }
+
+  #CDS::Tree::print_tree($root);
+  #CDS::Tree::do_on_nodes($root, \&print_node);
+  print "Lexically parsed the model file successfully\n";
+
+  # Process parsed tree to fill in the required information
+  process();
+
+  exit (0);
+  return 1;
 }
 
-#CDS::Tree::print_tree($root);
-#CDS::Tree::do_on_nodes($root, \&print_node);
-print "Lexically parsed the model file successfully\n";
-
-# Process parsed tree to fill in the required information
-process();
-
-return 1;
+sub count_adcs {
+   ($node) =  @_;
+   if ($node->{NAME} eq "Block" && ${$node->{FIELDS}}{"BlockType"} eq "BusCreator") {
+	$::adcCnt++;
+   }
 }
-
 
 sub process {
-print "PROCESS\n";
-return 1;
+
+  # Find first System node, this is the top level subsystem
+  my $system_node = CDS::Tree::find_node($root, "System");
+
+  # Set system name
+  $::systemName = ${$system_node->{FIELDS}}{"Name"};
+
+  # There is really nothing needed below System node in the tree so set new root
+  $root = $system_node;
+
+  CDS::Tree::do_on_nodes($root, \&count_adcs);
+  print "Found $::adcCnt ADCs\n";
+
+  return 1;
 }
+
