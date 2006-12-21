@@ -182,12 +182,12 @@ while (<::IN>) {
 	#print "Looking for $conDes $conDesPort\n";
 	for($ii=0;$ii<$::partCnt;$ii++)
 	{
-		if(($::partType[$ii] eq "OUTPUT") && ($::partOutput[$ii][0] eq $conSrc) && ($::partOutputPort[$ii][0] == $conSrcPort) && ($::conMade[$ii] == 0))
+		if(($::partType[$ii] eq "OUTPUT") && ($::partOutput[$ii][0] eq $conSrc) && ($::partOutputPort[$ii][0] == $conSrcPort) && ($conMade[$ii] == 0))
 		{
 			# print "Made OUT connect $::xpartName[$ii] $conDes $conDesPort\n";
 			$::partOutput[$ii][0] = $conDes;
 			$::partOutputPort[$ii][0] = $conDesPort;
-			$::conMade[$ii] = 1;
+			$conMade[$ii] = 1;
 		}
 		if($conDes eq $::xpartName[$ii])
 		{
@@ -211,12 +211,12 @@ while (<::IN>) {
 	#print "Looking for $conDes $conDesPort\n";
 	for($ii=0;$ii<$::partCnt;$ii++)
 	{
-		if(($::partType[$ii] eq "OUTPUT") && ($::partOutput[$ii][0] eq $conSrc) && ($::partOutputPort[$ii][0] == $conSrcPort)&& ($::conMade[$ii] == 0))
+		if(($::partType[$ii] eq "OUTPUT") && ($::partOutput[$ii][0] eq $conSrc) && ($::partOutputPort[$ii][0] == $conSrcPort)&& ($conMade[$ii] == 0))
 		{
 	 	#print "Connection 3 $::xpartName[$ii] $ii\n";
 		$::partOutput[$ii][0] = $conDes;
 		$::partOutputPort[$ii][0] = $conDesPort;
-		$::conMade[$ii] = 1;
+		$conMade[$ii] = 1;
 		}
 	}
 	}
