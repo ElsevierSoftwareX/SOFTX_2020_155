@@ -47,9 +47,10 @@ sub do_on_leaves {
 #	function argument
 sub do_on_nodes {
 	my($tree, $f, $arg) = @_;
-	&$f($tree, $arg);
-	for (@{$tree->{NEXT}}) {
+	if (&$f($tree, $arg) == 0) {
+	  for (@{$tree->{NEXT}}) {
                	do_on_nodes($_, $f, $arg);
+	  }
 	}
 }
 
