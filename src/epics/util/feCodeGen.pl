@@ -99,6 +99,7 @@ sub debug {
   }
 }
 
+sub init_vars {
 # Global variables set by parser
 $systemName = "";	# model name
 $adcCnt = 0;	# Total A/D converter boards
@@ -109,10 +110,11 @@ $nonSubPart[0] = 0;	# $nonSubPart[0 .. $nonSubCnt]
 
 $partCnt = 0;	# Total parts found in the simulink model
 
-# Set for CDS parts
+# Element is set to one for each CDS parts
 $cdsPart[0] = 0;	# $cdsPart[0 .. $partCnt]
 
 # Total number of inputs for each part
+# i.e. how many parts are connected to it with lines (branches)
 $partInCnt[0] = 0;	# $partInCnt[0 .. $partCnt]
 # Source part name (a string) for each part, for each input
 # This shows which source part is connected to that input
@@ -123,6 +125,7 @@ $partInputPort[0][0] = 0;	# $partInputPort[0 .. $partCnt][0 .. $partInCnt[$_]]
 $partInputs[0] = 0;		# Stores 'Inputs' field of the part declaration (used in SUM part)
 
 # Total number of outputs for each part
+# i.e. how many parts are connected with lines (branches) to it
 $partOutCnt[0] = 0;	# $partOutCnt[0 .. $partCnt]
 # Destination part name (a string) for each part, for each output
 # Shows which destination part is connected to that output
@@ -163,12 +166,30 @@ for ($ii = 0; $ii < 2000; $ii++) {
   $partOutCnt[$ii] = 0;
   $partInUsed[$ii] = 0;
 }
+}
+
+require "lib/ParsingDiagnostics.pm";
+# Old parser
+if (0) {
+init_vars();
 
 # Parser input file (Simulink model)
 require "lib/Parser1.pm";
 open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
-CDS::Parser::parse();
+die unless CDS::Parser::parse();
 close(IN);
+
+# Print diagnostics
+CDS::ParsingDiagnostics::print_diagnostics("parser_diag_good.txt");
+}
+
+init_vars();
+require "lib/Parser2.pm";
+open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
+die unless CDS::Parser::parse();
+close(IN);
+
+CDS::ParsingDiagnostics::print_diagnostics("parser_diag.txt");
 
 # By default, set DAC input counts to 16
 for($ii=0;$ii<$dacCnt;$ii++) {
