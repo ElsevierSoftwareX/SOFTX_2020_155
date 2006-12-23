@@ -22,9 +22,6 @@ while (<::IN>) {
     if(($mySeq == 1) && ($var1 eq "Name")){
 	$::systemName = $var2;
 	#print "System Name $::systemName on line $lcntr\n";
-	print OUTH "\#ifndef \U$::systemName";
-	print OUTH "_H_INCLUDED\n\#define \U$::systemName";
-	print OUTH "_H_INCLUDED\n";
 	$mySeq = 2;
     }
 

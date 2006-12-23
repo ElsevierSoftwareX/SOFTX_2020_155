@@ -270,13 +270,10 @@ sub node_processing {
 		return 1; # Do not call this function on leaves, we already did that
 	} elsif ($block_type eq "Reference") {
 		# This is CDS part
-		my $part_name = transform_part_name(${$node->{FIELDS}}{"SourceBlock"});
 
         	$::cdsPart[$::partCnt] = 1;
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name;
 		#print "CDS part $r\n";
-        	require "lib/$part_name.pm";
-        	$::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ();
 	} else {
 		# Not a CDS part
 		$::partType[$::partCnt] = $block_type;
@@ -290,6 +287,11 @@ sub node_processing {
 		$::partSubNum[$::partCnt] = $::subSys;
 		$::partSubName[$::partCnt] = $::subSysName[$::subSys];
 		$::xpartName[$::partCnt] = $::subSysName[$::subSys] . "_" . $::xpartName[$::partCnt];
+	}
+	if ($::cdsPart[$::partCnt]) {
+		my $part_name = transform_part_name(${$node->{FIELDS}}{"SourceBlock"});
+        	require "lib/$part_name.pm";
+        	$::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ();
 	}
 	# For easy access
 	#print "Part ". $::xpartName[$::partCnt] . "\n";
