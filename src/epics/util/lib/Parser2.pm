@@ -272,11 +272,11 @@ sub node_processing {
 		# This is CDS part
 		my $part_name = transform_part_name(${$node->{FIELDS}}{"SourceBlock"});
 
-        	require "lib/$part_name.pm";
-        	$::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ();
         	$::cdsPart[$::partCnt] = 1;
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name;
 		#print "CDS part $r\n";
+        	require "lib/$part_name.pm";
+        	$::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ();
 	} else {
 		# Not a CDS part
 		$::partType[$::partCnt] = $block_type;
