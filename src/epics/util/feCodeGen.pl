@@ -191,6 +191,10 @@ close(IN);
 
 CDS::ParsingDiagnostics::print_diagnostics("parser_diag.txt");
 
+print OUTH "\#ifndef \U$::systemName";
+print OUTH "_H_INCLUDED\n\#define \U$::systemName";
+print OUTH "_H_INCLUDED\n";
+
 # By default, set DAC input counts to 16
 for($ii=0;$ii<$dacCnt;$ii++) {
   $partInCnt[$dacPartNum[$ii]] = 16;
