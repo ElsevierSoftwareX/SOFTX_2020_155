@@ -32,6 +32,7 @@ sub print_node {
 };
 
 sub parse() {
+  my @nodes;
   push @nodes, $root;
 
   while (<::IN>) {
@@ -146,17 +147,13 @@ sub transform_block_type {
 sub process_line {
 	my ($src, $src_port, $dst, $dst_port, $node) = @_;
 	my $part_num = $parts{$dst};
-	# why?
-	#if ($::partType[$part_num] eq "BUSS") { return; }
 	if ($part_num ne undef) { 
+	  if ($::partType[$part_num] eq "BUSS") {
+		return; # Don't patch in any Bus Selector input links
+	  }
 	  #print " dst part " . $part_num . "\n";
           $::partInput[$part_num][$dst_port - 1] = $src;
-	  if ($::partType[$parts{$src}] eq "BUSS") {
-             $::partInput[$part_num][$dst_port - 1] = ${$node->{FIELDS}}{Name};
-		print "BUSS ",  ${$node->{FIELDS}}{Name}, "\n";
-	  } else {
-             $::partInput[$part_num][$dst_port - 1] = $src;
-	  }
+          $::partInput[$part_num][$dst_port - 1] = $src;
           $::partInputPort[$part_num][$dst_port - 1] = $src_port - 1;
 	  $::partInCnt[$part_num]++;
 	} else {
@@ -164,17 +161,27 @@ sub process_line {
 	  foreach (@{$sys_ins{$dst}}) {
 		my $port = ${$_->{FIELDS}}{Port};
 		if ($port eq undef) { $port = 1; } # Default value for the port is one
-		if ($port == $src_port) {
+		if ($port == $dst_port) {
 			$part_num = ${$_->{FIELDS}}{PartNumber};
                 	$::partInput[$part_num][0] = $dst;
                 	$::partInputPort[$part_num][0] = $dst_port;
 	  		$::partInCnt[$part_num] = 1;
-			#print "Connected InPort #" . $part_num . " part " . ${$_->{FIELDS}}{Name} . " to " . $dst . "\n";
 		}
 	  }
 	}
 
 	$part_num =  $parts{$src};
+
+	# Patch in Bus Selector information
+	if ($::partType[$part_num] eq "BUSS") {
+             $::partInput[$part_num][$src_port - 1] = ${$node->{FIELDS}}{Name};
+	     $::partInput[$part_num][$src_port - 1] =~ tr/<>//d;
+	     $::partInputPort[$part_num][$src_port - 1] = $src_port - 1;
+	     #print "partInputPort[$part_num][" . ($src_port - 1) . "]=", $src_port - 1 . "\n";
+	     $::partInCnt[$part_num]++;
+	     #print "BUSS $part_num ",  $::partInput[$part_num][$src_port - 1], "input port $src_port\n";
+	}
+
 	if ($part_num ne undef) {
 	  #print " src part " . $part_num , "\n";
           $::partOutput[$part_num][$::partOutCnt[$part_num]] = $dst;
@@ -200,6 +207,24 @@ sub process_line {
 	}
 }
 
+sub do_branches {
+	my ($node, $in_sub, $branch) = @_;
+	foreach (@{$branch->{NEXT}}) {
+		if (${$_->{FIELDS}}{DstBlock} ne undef) {
+		  #print ${$_->{FIELDS}}{DstBlock} . ":" . ${$_->{FIELDS}}{DstPort} . " ";
+		 process_line(($in_sub? $::subSysName[$::subSys] . "_": "")
+				. ${$node->{FIELDS}}{SrcBlock},
+		             ${$node->{FIELDS}}{SrcPort},
+			     ($in_sub? $::subSysName[$::subSys] . "_": "")
+			        . ${$_->{FIELDS}}{DstBlock},
+			     ${$_->{FIELDS}}{DstPort}, $node);
+		} else {
+			do_branches($node, $in_sub, $_);
+		}
+	}
+	return 0;
+}
+
 # Find parts and sybsystems
 sub node_processing {
    my ($node, $in_sub) =  @_;
@@ -212,16 +237,7 @@ sub node_processing {
 	if (1) {
 	  #print "Line connecting " . ${$node->{FIELDS}}{SrcBlock} . ":" . ${$node->{FIELDS}}{SrcPort} . " and ";
 	  if ($branches) {
-		# Branches
-		foreach (@{$node->{NEXT}}) {
-			#print ${$_->{FIELDS}}{DstBlock} . ":" . ${$_->{FIELDS}}{DstPort} . " ";
-			process_line(($in_sub? $::subSysName[$::subSys] . "_": "")
-					. ${$node->{FIELDS}}{SrcBlock},
-			             ${$node->{FIELDS}}{SrcPort},
-				     ($in_sub? $::subSysName[$::subSys] . "_": "")
-				        . ${$_->{FIELDS}}{DstBlock},
-				     ${$_->{FIELDS}}{DstPort}, $node);
-		}
+		do_branches($node, $in_sub, $node);
 	  } else {
 		# Point to point connection
 		#print ${$node->{FIELDS}}{DstBlock} . ":" . ${$node->{FIELDS}}{DstPort};
@@ -278,6 +294,7 @@ sub node_processing {
 	# For easy access
 	#print "Part ". $::xpartName[$::partCnt] . "\n";
 	$parts{$::xpartName[$::partCnt]} = $::partCnt;
+	#$nodes{$::xpartName[$::partCnt]} = $node;
 	if ($block_type eq "INPUT") {
 		if ($in_sub) {
 			push @{$sys_ins{$::subSysName[$::subSys]}},  $node;
@@ -293,6 +310,14 @@ sub node_processing {
 			# do not put these ports into top-level system
 			die "Output ports are only supported in subsystems\n";
 		}
+	}
+	if ($block_type eq "SUM") {
+		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
+		$::partInputs[$::partCnt] =~ tr/+-//cd; # delete other characters
+	} elsif ($block_type eq "MULTIPLY" &&
+		 ${$node->{FIELDS}}{Inputs} eq "*\/") {
+		$::partType[$::partCnt] = "DIVIDE";
+		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
 	}
 	${$node->{FIELDS}}{PartNumber} = $::partCnt; # Store our part number
 	$::partCnt++;
