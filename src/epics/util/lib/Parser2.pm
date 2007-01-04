@@ -341,7 +341,7 @@ sub flatten_do_branches {
        ${$_->{FIELDS}}{DstBlock} = $ant . ${$_->{FIELDS}}{DstBlock};
        print ${$_->{FIELDS}}{DstBlock}, ":", ${$_->{FIELDS}}{DstPort}, " ";
      } else {
-	flatten_do_branches($_);
+	flatten_do_branches($_, $ant);
      }
    }
 }
@@ -475,22 +475,19 @@ sub flatten {
 	    # Hook up parent branch
 
 
-	    ${$branch->{FIELDS}}{DstBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$line->{FIELDS}}{DstBlock};
-	    ${$branch->{FIELDS}}{DstPort} =  ${$line->{FIELDS}}{DstPort};
+	    #${$branch->{FIELDS}}{DstBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$line->{FIELDS}}{DstBlock};
+	    #${$branch->{FIELDS}}{DstPort} =  ${$line->{FIELDS}}{DstPort};
 
-# TODO: need to write branch insertion code
-if (0) {
-	    # Reset parent's destination
-	    ${$branch->{FIELDS}}{DstBlock} = undef;
-	    ${$branch->{FIELDS}}{DstPort} = undef;
-            # change this line into a branch 
 	    ${$line->{FIELDS}}{DstBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$line->{FIELDS}}{DstBlock};
 	    flatten_do_branches($line, ${$node->{FIELDS}}{Name} . "_");
+            # change this line into a branch 
 	    ${$line->{FIELDS}}{SrcBlock} = undef;
 	    ${$line->{FIELDS}}{SrcPort} = undef;
 	    ${$line->{FIELDS}}{Name} = "Branch";
+	    # Reset parent's destination
+	    ${$branch->{FIELDS}}{DstBlock} = undef;
+	    ${$branch->{FIELDS}}{DstPort} = undef;
 	    push @{$branch->{NEXT}}, $line;
-}
 
 	    # Remove this line from the list in this node
 	    $idx = 0;
