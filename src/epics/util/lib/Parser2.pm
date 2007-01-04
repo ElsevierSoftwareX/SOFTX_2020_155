@@ -610,7 +610,7 @@ sub process {
   # There is really nothing needed below System node in the tree so set new root
   $root = $system_node;
 
-#  CDS::Tree::do_on_nodes($root, \&flatten_nested_subsystems);
+  CDS::Tree::do_on_nodes($root, \&flatten_nested_subsystems);
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
   print "Found $::adcCnt ADCs $::partCnt parts $::subSys subsystems\n";
 
