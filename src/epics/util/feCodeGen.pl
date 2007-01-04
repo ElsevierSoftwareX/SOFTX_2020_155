@@ -184,7 +184,7 @@ CDS::ParsingDiagnostics::print_diagnostics("parser_diag_good.txt");
 }
 
 init_vars();
-require "lib/Parser1.pm";
+require "lib/Parser2.pm";
 open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 die unless CDS::Parser::parse();
 close(IN);
