@@ -331,6 +331,9 @@ sub node_processing {
 # subsystems queue
 @subsys;
 
+# subsystems level
+@subsys_level;
+
 # recursive branch processing
 # annotate names
 sub flatten_do_branches {
@@ -397,10 +400,19 @@ sub flatten {
    }
    if ($node->{NAME} eq "Block"
        && ${$node->{FIELDS}}{BlockType} eq "SubSystem") {
-     pop @subsys;
+
+#print "Subsys=";
+#foreach (@subsys) {
+  #print ${$_->{FIELDS}}{Name}, ", ";
+#}
+#print "\n";
+
      $parent = pop @subsys;
-     #print "Flattening ", ${$node->{FIELDS}}{Name}, "\n";
-     #print "Parent ", ${$parent->{FIELDS}}{Name}, "\n";
+     if ($parent == $node) {
+        $parent = pop @subsys;
+     }
+     print "Flattening ", ${$node->{FIELDS}}{Name}, "\n";
+     print "Parent ", ${$parent->{FIELDS}}{Name}, "\n";
      # Remove node from parent
      my $idx = 0;
      # Parent node has "System" node next, move down to it
@@ -577,25 +589,21 @@ if (0) {
 
 sub flatten_nested_subsystems {
    my ($node) =  @_;
-   if ($node->{NAME} eq "Block") {
-	my $block_type = ${$node->{FIELDS}}{BlockType};
-	if ($block_type eq "SubSystem") {
-		my $nested = scalar @subsys;
-		if ($nested > 2) {
-			print 'Nested ';
-		}
-		print "Subsystem ", ${$node->{FIELDS}}{Name}, "\n";
-		push @subsys, $node;
-		push @subsys, $node;
-		if ($nested > 2) {
-		  # Found first nested subsystem
-		  # Recursively flatten all subsytems starting with this one
-		  flatten($node);
-	          return 1; # Do not recurse
-		}
-		pop @subsys;
-		pop @subsys;
+
+   # Find all top-level subsystems
+   foreach (@{$node->{NEXT}}) {
+     if ($_->{NAME} eq "Block" && ${$_->{FIELDS}}{BlockType} eq "SubSystem") {
+	print "Top-level subsystem ", ${$_->{FIELDS}}{Name}, "\n";
+	# Flatten all second-level subsystems
+	my $system = $_->{NEXT}[0];
+	foreach $ssub (@{$system->{NEXT}}) {
+          if ($ssub->{NAME} eq "Block" && ${$ssub->{FIELDS}}{BlockType} eq "SubSystem") {
+	    print "Second-level subsystem ", ${$ssub->{FIELDS}}{Name}, "\n";
+	    @subsys = ($_);
+            flatten($ssub);
+	  }
 	}
+     }
    }
    return 0;
 }
@@ -612,7 +620,7 @@ sub process {
   # There is really nothing needed below System node in the tree so set new root
   $root = $system_node;
 
-  CDS::Tree::do_on_nodes($root, \&flatten_nested_subsystems);
+  flatten_nested_subsystems($root);
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
   print "Found $::adcCnt ADCs $::partCnt parts $::subSys subsystems\n";
 
