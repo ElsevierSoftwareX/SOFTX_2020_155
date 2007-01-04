@@ -473,22 +473,21 @@ sub flatten {
 		}
 	    }
 	    # Hook up parent branch
-
 	    if (0 == scalar @{$line->{NEXT}}) {
 	      ${$branch->{FIELDS}}{DstBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$line->{FIELDS}}{DstBlock};
 	      ${$branch->{FIELDS}}{DstPort} =  ${$line->{FIELDS}}{DstPort};
 
 	    } else {
-	      ${$line->{FIELDS}}{DstBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$line->{FIELDS}}{DstBlock};
 	      flatten_do_branches($line, ${$node->{FIELDS}}{Name} . "_");
               # change this line into a branch 
 	      ${$line->{FIELDS}}{SrcBlock} = undef;
 	      ${$line->{FIELDS}}{SrcPort} = undef;
-	      ${$line->{FIELDS}}{Name} = "Branch";
+	      $line->{NAME} = "Branch";
 	      # Reset parent's destination
 	      ${$branch->{FIELDS}}{DstBlock} = undef;
 	      ${$branch->{FIELDS}}{DstPort} = undef;
 	      push @{$branch->{NEXT}}, $line;
+  	      CDS::Tree::do_on_nodes($branch, \&print_node);
 	    }
 
 	    # Remove this line from the list in this node
@@ -611,7 +610,7 @@ sub process {
   # There is really nothing needed below System node in the tree so set new root
   $root = $system_node;
 
-  CDS::Tree::do_on_nodes($root, \&flatten_nested_subsystems);
+#  CDS::Tree::do_on_nodes($root, \&flatten_nested_subsystems);
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
   print "Found $::adcCnt ADCs $::partCnt parts $::subSys subsystems\n";
 
