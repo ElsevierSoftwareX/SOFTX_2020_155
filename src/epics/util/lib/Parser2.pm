@@ -152,7 +152,7 @@ sub process_line {
 	  if ($::partType[$part_num] eq "BUSS") {
 		return; # Don't patch in any Bus Selector input links
 	  }
-	  #print " dst part " . $part_num . "\n";
+	  print " dst part " . $part_num . "\n";
           $::partInput[$part_num][$dst_port - 1] = $src;
           $::partInput[$part_num][$dst_port - 1] = $src;
           $::partInputPort[$part_num][$dst_port - 1] = $src_port - 1;
@@ -237,12 +237,12 @@ sub node_processing {
 	}
 	my $branches = scalar @{$node->{NEXT}} != 0;
 	if (1) {
-	  #print "Line connecting " . ${$node->{FIELDS}}{SrcBlock} . ":" . ${$node->{FIELDS}}{SrcPort} . " and ";
+	  print "Line connecting " . ${$node->{FIELDS}}{SrcBlock} . ":" . ${$node->{FIELDS}}{SrcPort} . " and ";
 	  if ($branches) {
 		do_branches($node, $in_sub, $node);
 	  } else {
 		# Point to point connection
-		#print ${$node->{FIELDS}}{DstBlock} . ":" . ${$node->{FIELDS}}{DstPort};
+		print ${$node->{FIELDS}}{DstBlock} . ":" . ${$node->{FIELDS}}{DstPort};
 		process_line(($in_sub? $::subSysName[$::subSys] . "_": "")
 				. ${$node->{FIELDS}}{SrcBlock},
 		             ${$node->{FIELDS}}{SrcPort},
@@ -250,7 +250,7 @@ sub node_processing {
 			        . ${$node->{FIELDS}}{DstBlock},
 			     ${$node->{FIELDS}}{DstPort}, $node);
 	  }
-	  #print "\n";
+	  print "\n";
 	}
    } elsif ($node->{NAME} eq "Block") {
 	my $block_type = transform_block_type(${$node->{FIELDS}}{"BlockType"});
@@ -296,7 +296,7 @@ sub node_processing {
         	$::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ();
 	}
 	# For easy access
-	#print "Part ". $::xpartName[$::partCnt] . "\n";
+	print "Part ". $::xpartName[$::partCnt] . "\n";
 	$parts{$::xpartName[$::partCnt]} = $::partCnt;
 	#$nodes{$::xpartName[$::partCnt]} = $node;
 	if ($block_type eq "INPUT") {
@@ -427,7 +427,7 @@ sub flatten {
 	  } else {
 	    ${$_->{FIELDS}}{Name} = ${$node->{FIELDS}}{Name} . "_" . ${$_->{FIELDS}}{Name};
 	    print "Block ", $_->{NAME}, ", type=", ${$_->{FIELDS}}{BlockType}, ", name=",${$_->{FIELDS}}{Name}, "\n";
-	    push @{$parent->{NEXT}}, $_; # add to the parent's list
+	    unshift @{$parent->{NEXT}}, $_; # add to the parent's list (prepend, lines ned to stay at the end)
 	  }
  	} elsif ($_->{NAME} eq "Line") {
 	  push @lines, $_;
@@ -460,7 +460,7 @@ sub flatten {
 	# Find line connected to this input port (if any)
 	foreach $line (@lines) {
 	  if (${$line->{FIELDS}}{SrcBlock} eq $port_name) {
-	    print "Found line Source=", ${$line->{FIELDS}}{SrcBlock}, ":", ${$line->{FIELDS}}{SrcPort}, "\n";
+	    print "Found line Source=", ${$line->{FIELDS}}{SrcBlock}, ":", ${$line->{FIELDS}}{SrcPort}, " dst=",  ${$line->{FIELDS}}{DstBlock}, ":", ${$line->{FIELDS}}{DstPort}, "\n";
 	    # In the parent find the line or a branch connected to this $node and $port_num
 	    my $branch = find_branch($parent, ${$node->{FIELDS}}{Name}, $port_num);
 	    if ($branch eq undef) {
@@ -475,9 +475,10 @@ sub flatten {
 	    # Hook up parent branch
 
 
-	    #${$branch->{FIELDS}}{DstBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$line->{FIELDS}}{DstBlock};
-	    #${$branch->{FIELDS}}{DstPort} =  ${$line->{FIELDS}}{DstPort};
+	    ${$branch->{FIELDS}}{DstBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$line->{FIELDS}}{DstBlock};
+	    ${$branch->{FIELDS}}{DstPort} =  ${$line->{FIELDS}}{DstPort};
 
+if (0) {
 	    ${$line->{FIELDS}}{DstBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$line->{FIELDS}}{DstBlock};
 	    flatten_do_branches($line, ${$node->{FIELDS}}{Name} . "_");
             # change this line into a branch 
@@ -488,6 +489,7 @@ sub flatten {
 	    ${$branch->{FIELDS}}{DstBlock} = undef;
 	    ${$branch->{FIELDS}}{DstPort} = undef;
 	    push @{$branch->{NEXT}}, $line;
+}
 
 	    # Remove this line from the list in this node
 	    $idx = 0;
@@ -549,6 +551,28 @@ sub flatten {
 	  push @{$parent->{NEXT}}, $_; # add to the parent's list
  	}
      }
+
+     print "List of parent lines:\n";
+     foreach (@{$parent->{NEXT}}) {
+	if ($_->{NAME} eq "Line") {
+	  my $branches = scalar @{$_->{NEXT}} != 0;
+	  if ($branches) {
+	    print "Branched Source=", ${$_->{FIELDS}}{SrcBlock}, ":", ${$_->{FIELDS}}{SrcPort}, ", dst=";
+	    flatten_do_branches($_);
+	    print "\n";
+	  } else {
+	    print "Source=", ${$_->{FIELDS}}{SrcBlock}, ":", ${$_->{FIELDS}}{SrcPort}, ", dst=",
+		${$_->{FIELDS}}{DstBlock}, ":", ${$_->{FIELDS}}{DstPort}, "\n";
+	  }
+ 	}
+     }
+     print "List of parent blocks:\n";
+     foreach (@{$parent->{NEXT}}) {
+	if ($_->{NAME} eq "Block") {
+	  print "Block ", $_->{NAME}, ", type=", ${$_->{FIELDS}}{BlockType}, ", name=",${$_->{FIELDS}}{Name}, "\n";
+	}
+     }
+	
    }
 }
 
