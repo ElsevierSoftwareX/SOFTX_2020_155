@@ -1,5 +1,5 @@
 
-.PHONY: das
-das:
-	./feCodeGen.pl ../simLink/das.mdl das
+.PHONY: test
+test:
+	./feCodeGen.pl ../simLink/test.mdl test
 
