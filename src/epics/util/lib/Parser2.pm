@@ -31,6 +31,7 @@ sub print_node {
    #}
 };
 
+#:TODO: lexical analyzer should check MDL format syntax
 sub parse() {
   my @nodes;
   push @nodes, $root;
@@ -207,6 +208,7 @@ sub process_line {
 	}
 }
 
+# There could be nested branching structure (1 to many connection)
 sub do_branches {
 	my ($node, $in_sub, $branch) = @_;
 	foreach (@{$branch->{NEXT}}) {
@@ -327,6 +329,256 @@ sub node_processing {
    return 0;
 }
 
+# subsystems queue
+@subsys;
+
+# recursive branch processing
+# annotate names
+sub flatten_do_branches {
+   ($_, $ant) = @_;
+   foreach (@{$_->{NEXT}}) {
+     if (${$_->{FIELDS}}{DstBlock} ne undef) {
+       ${$_->{FIELDS}}{DstBlock} = $ant . ${$_->{FIELDS}}{DstBlock};
+       print ${$_->{FIELDS}}{DstBlock}, ":", ${$_->{FIELDS}}{DstPort}, " ";
+     } else {
+	flatten_do_branches($_);
+     }
+   }
+}
+
+# Find a line in the $node, starting from $src_name and $src_port
+sub find_line {
+   my ($node, $src_name, $src_port) = @_;
+   foreach (@{$node->{NEXT}}) {
+	if ($_->{NAME} eq "Line") {
+	  if (${$_->{FIELDS}}{SrcBlock} eq $src_name && ${$_->{FIELDS}}{SrcPort} == $src_port) {
+		return $_;
+	  }
+	}
+   }
+   return undef;
+}
+# Find a branch (or a line) in the $node, leading to $dst_name and $dst_port
+sub find_branch {
+   my ($node, $dst_name, $dst_port) = @_;
+   foreach (@{$node->{NEXT}}) {
+	if ($_->{NAME} eq "Line" || $_->{NAME} eq "Branch") {
+	  my $branches = scalar @{$_->{NEXT}} != 0;
+	  if ($branches) {
+   		foreach $branch (@{$_->{NEXT}}) {
+			my $block = find_branch($branch, $dst_nane, $dst_port);
+			if ($block ne undef) {
+				return $block;
+			}
+		}
+	  } else {
+		if (${$_->{FIELDS}}{DstBlock} eq $dst_name && ${$_->{FIELDS}}{DstPort} == $dst_port) {
+			return $_;
+		}
+	  }
+	}
+   }
+   return undef;
+}
+
+# This recursive function flattens the bottom most system
+# first and then flattens the rest of the systems in ascending order.
+sub flatten {
+   my @inports;
+   my @outports;
+   my @lines;
+   my ($node) =  @_;
+
+   if ($node->{NAME} eq "Block"
+       && ${$node->{FIELDS}}{BlockType} eq "SubSystem") {
+     push @subsys, $node;
+   }
+   foreach (@{$node->{NEXT}}) {
+	flatten($_);
+   }
+   if ($node->{NAME} eq "Block"
+       && ${$node->{FIELDS}}{BlockType} eq "SubSystem") {
+     pop @subsys;
+     $parent = pop @subsys;
+     print "Flattening ", ${$node->{FIELDS}}{Name}, "\n";
+     print "Parent ", ${$parent->{FIELDS}}{Name}, "\n";
+     # Remove node from parent
+     my $idx = 0;
+     # Parent node has "System" node next, move down to it
+     my $parent = ${$parent->{NEXT}}[0];
+     foreach (@{$parent->{NEXT}}) {
+	if ($_ == $node) {
+		print "Found node at index $idx\n";
+		last;
+	}
+	$idx++;
+     }
+     splice(@{$parent->{NEXT}}, $idx, 1,);
+
+     # Annotate blocks in this node with its name
+     $node = ${$node->{NEXT}}[0]; # Move down to the "System" node
+     print "Following blocks found in ", ${$node->{FIELDS}}{Name}, ":\n";
+     foreach (@{$node->{NEXT}}) {
+	if ($_->{NAME} eq "Block") {
+	  if (${$_->{FIELDS}}{BlockType} eq "Inport") {
+	    push @inports, $_; # skip all nput ports
+	  } elsif (${$_->{FIELDS}}{BlockType} eq "Outport") {
+	    push @outports, $_; # skip all output ports
+	  } else {
+	    ${$_->{FIELDS}}{Name} = ${$node->{FIELDS}}{Name} . "_" . ${$_->{FIELDS}}{Name};
+	    print "Block ", $_->{NAME}, ", type=", ${$_->{FIELDS}}{BlockType}, ", name=",${$_->{FIELDS}}{Name}, "\n";
+	    push @{$parent->{NEXT}}, $_; # add to the parent's list
+	  }
+ 	} elsif ($_->{NAME} eq "Line") {
+	  push @lines, $_;
+	  # Do not annotate lines just yet
+	  #${$_->{FIELDS}}{SrcBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$_->{FIELDS}}{SrcBlock};
+	  #${$_->{FIELDS}}{DstBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$_->{FIELDS}}{DstBlock};
+	}
+     }
+     print "Following lines found in ", ${$node->{FIELDS}}{Name}, ":\n";
+     foreach (@{$node->{NEXT}}) {
+	if ($_->{NAME} eq "Line") {
+	  my $branches = scalar @{$_->{NEXT}} != 0;
+	  if ($branches) {
+	    print "Branched Source=", ${$_->{FIELDS}}{SrcBlock}, ":", ${$_->{FIELDS}}{SrcPort}, ", dst=";
+	    flatten_do_branches($_);
+	    print "\n";
+	  } else {
+	    print "Source=", ${$_->{FIELDS}}{SrcBlock}, ":", ${$_->{FIELDS}}{SrcPort}, ", dst=",
+		${$_->{FIELDS}}{DstBlock}, ":", ${$_->{FIELDS}}{DstPort}, "\n";
+	  }
+ 	}
+     }
+
+     # Hook up input lines
+     foreach (@inports) {
+	my $port_num = ${$_->{FIELDS}}{Port};
+	if ($port_num eq undef) { $port_num = 1; }
+	my $port_name = ${$_->{FIELDS}}{Name};
+	print "Processing input port #$port_num name=$port_name\n";
+	# Find line connected to this input port (if any)
+	foreach $line (@lines) {
+	  if (${$line->{FIELDS}}{SrcBlock} eq $port_name) {
+	    print "Found line Source=", ${$line->{FIELDS}}{SrcBlock}, ":", ${$line->{FIELDS}}{SrcPort}, "\n";
+	    # In the parent find the line or a branch connected to this $node and $port_num
+	    my $branch = find_branch($parent, ${$node->{FIELDS}}{Name}, $port_num);
+	    if ($branch eq undef) {
+		die "Port $port_name disconnected\n";
+	    } else {
+		if (${$branch->{FIELDS}}{SrcBlock} ne undef) {
+		  print "Found parent line Source=", ${$branch->{FIELDS}}{SrcBlock}, ":", ${$branch->{FIELDS}}{SrcPort}, "\n";
+		} else {
+		  print "Found parent branch\n";
+		}
+	    }
+	    # Hook up parent branch
+
+
+	    ${$branch->{FIELDS}}{DstBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$line->{FIELDS}}{DstBlock};
+	    ${$branch->{FIELDS}}{DstPort} =  ${$line->{FIELDS}}{DstPort};
+
+# TODO: need to write branch insertion code
+if (0) {
+	    # Reset parent's destination
+	    ${$branch->{FIELDS}}{DstBlock} = undef;
+	    ${$branch->{FIELDS}}{DstPort} = undef;
+            # change this line into a branch 
+	    ${$line->{FIELDS}}{DstBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$line->{FIELDS}}{DstBlock};
+	    flatten_do_branches($line, ${$node->{FIELDS}}{Name} . "_");
+	    ${$line->{FIELDS}}{SrcBlock} = undef;
+	    ${$line->{FIELDS}}{SrcPort} = undef;
+	    ${$line->{FIELDS}}{Name} = "Branch";
+	    push @{$branch->{NEXT}}, $line;
+}
+
+	    # Remove this line from the list in this node
+	    $idx = 0;
+	    foreach $block (@{$node->{NEXT}}) {
+		if ($block == $line) {
+			last;
+		}
+		$idx++;
+	    }
+     	    splice(@{$node->{NEXT}}, $idx, 1,);
+	  }
+	}
+     }
+
+     # Hook up output lines
+     foreach (@outports) {
+	my $port_num = ${$_->{FIELDS}}{Port};
+	if ($port_num eq undef) { $port_num = 1; }
+	my $port_name = ${$_->{FIELDS}}{Name};
+	print "Processing output port #$port_num name=$port_name\n";
+	# Find line connected to this output port (if any)
+	my $branch = find_branch($node, $port_name, 1);
+	die "OutPort $port_name disconnected\n" if ($branch eq undef);
+	# Find parent's line connected to this node, output port $port_num
+	my $line = find_line($parent, ${$node->{FIELDS}}{Name}, $port_num);
+	die "Disconnected output port\n" if ($line eq undef);
+	# Hook the line up
+	${$line->{FIELDS}}{SrcBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$branch->{FIELDS}}{SrcBlock};
+	${$line->{FIELDS}}{SrcPort} =  ${$branch->{FIELDS}}{SrcPort};
+	
+	# Remove this line from the list in this node
+	$idx = 0;
+	foreach $block (@{$node->{NEXT}}) {
+	  if ($block == $branch) {
+		last;
+	  }
+	  $idx++;
+	}
+     	splice(@{$node->{NEXT}}, $idx, 1,);
+     }
+
+     # Annotate and add all remaining lines to the parent's list
+     print "Following lines remaining in ", ${$node->{FIELDS}}{Name}, ":\n";
+     my $ant = ${$node->{FIELDS}}{Name} . "_";
+     foreach (@{$node->{NEXT}}) {
+	if ($_->{NAME} eq "Line") {
+	  my $branches = scalar @{$_->{NEXT}} != 0;
+          ${$_->{FIELDS}}{SrcBlock} = $ant . ${$_->{FIELDS}}{SrcBlock};
+	  if ($branches) {
+	    print "Branched Source=", ${$_->{FIELDS}}{SrcBlock}, ":", ${$_->{FIELDS}}{SrcPort}, ", dst=";
+	    flatten_do_branches($_, $ant);
+	    print "\n";
+	  } else {
+            ${$_->{FIELDS}}{DstBlock} = $ant . ${$_->{FIELDS}}{DstBlock};
+	    print "Source=", ${$_->{FIELDS}}{SrcBlock}, ":", ${$_->{FIELDS}}{SrcPort}, ", dst=",
+		${$_->{FIELDS}}{DstBlock}, ":", ${$_->{FIELDS}}{DstPort}, "\n";
+	  }
+	  # Add to parent
+	  push @{$parent->{NEXT}}, $_; # add to the parent's list
+ 	}
+     }
+   }
+}
+
+sub flatten_nested_subsystems {
+   my ($node) =  @_;
+   if ($node->{NAME} eq "Block") {
+	my $block_type = ${$node->{FIELDS}}{BlockType};
+	if ($block_type eq "SubSystem") {
+		my $nested = scalar @subsys;
+		if ($nested) {
+			print 'Nested ';
+		}
+		print "Subsystem ", ${$node->{FIELDS}}{Name}, "\n";
+		push @subsys, $node;
+		push @subsys, $node;
+		if ($nested) {
+		  # Found first nested subsystem
+		  # Recursively flatten all subsytems starting with this one
+		  flatten($node);
+	          return 1; # Do not recurse
+		}
+	}
+   }
+   return 0;
+}
+
+
 sub process {
 
   # Find first System node, this is the top level subsystem
@@ -338,8 +590,11 @@ sub process {
   # There is really nothing needed below System node in the tree so set new root
   $root = $system_node;
 
+  CDS::Tree::do_on_nodes($root, \&flatten_nested_subsystems);
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
   print "Found $::adcCnt ADCs $::partCnt parts $::subSys subsystems\n";
 
   return 1;
 }
+
+return 1;
