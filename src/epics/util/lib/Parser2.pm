@@ -365,18 +365,15 @@ sub find_branch {
    my ($node, $dst_name, $dst_port) = @_;
    foreach (@{$node->{NEXT}}) {
 	if ($_->{NAME} eq "Line" || $_->{NAME} eq "Branch") {
-	  my $branches = scalar @{$_->{NEXT}} != 0;
-	  if ($branches) {
-   		foreach $branch (@{$_->{NEXT}}) {
-			my $block = find_branch($branch, $dst_nane, $dst_port);
-			if ($block ne undef) {
-				return $block;
-			}
-		}
-	  } else {
-		if (${$_->{FIELDS}}{DstBlock} eq $dst_name && ${$_->{FIELDS}}{DstPort} == $dst_port) {
-			return $_;
-		}
+	  my $dprt = ${$_->{FIELDS}}{DstPort};
+	  if ($dprt == undef) { $dprt = 1; }
+	  #print "find_branch: ", ${$_->{FIELDS}}{DstBlock}, ":", $dprt, "\n";
+	  if (${$_->{FIELDS}}{DstBlock} eq $dst_name && $dprt == $dst_port) {
+		return $_;
+	  }
+	  my $block = find_branch($_, $dst_name, $dst_port);
+	  if ($block ne undef) {
+		return $block;
 	  }
 	}
    }
@@ -401,11 +398,11 @@ sub flatten {
    if ($node->{NAME} eq "Block"
        && ${$node->{FIELDS}}{BlockType} eq "SubSystem") {
 
-#print "Subsys=";
-#foreach (@subsys) {
-  #print ${$_->{FIELDS}}{Name}, ", ";
-#}
-#print "\n";
+print "Subsys=";
+foreach (@subsys) {
+  print ${$_->{FIELDS}}{Name}, ", ";
+}
+print "\n";
 
      $parent = pop @subsys;
      if ($parent == $node) {
