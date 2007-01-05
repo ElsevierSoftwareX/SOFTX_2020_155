@@ -166,6 +166,9 @@ sub process_line {
                 	$::partInput[$part_num][0] = $dst;
                 	$::partInputPort[$part_num][0] = $dst_port;
 	  		$::partInCnt[$part_num] = 1;
+			# This is completely weird code, fitted here to match the existing code
+			# generator... All this needs to be fixed
+          	        $::partOutputPortUsed[$part_num][0] = $src_port-1;
 		}
 	  }
 	}
