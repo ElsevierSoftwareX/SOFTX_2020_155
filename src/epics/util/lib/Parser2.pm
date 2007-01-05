@@ -411,6 +411,8 @@ sub flatten {
      if ($parent == $node) {
         $parent = pop @subsys;
      }
+     push @subsys, $parent;
+
      #print "Flattening ", ${$node->{FIELDS}}{Name}, "\n";
      #print "Parent ", ${$parent->{FIELDS}}{Name}, "\n";
      # Remove node from parent
@@ -527,7 +529,12 @@ sub flatten {
 	die "OutPort $port_name disconnected\n" if ($branch eq undef);
 	# Find parent's line connected to this node, output port $port_num
 	my $line = find_line($parent, ${$node->{FIELDS}}{Name}, $port_num);
-	die "Disconnected output port\n" if ($line eq undef);
+	if ($line eq undef) {
+     		print "Flattening ", ${$node->{FIELDS}}{Name}, "\n";
+     		print "Parent ", ${$parent->{FIELDS}}{Name}, "\n";
+		print "Processing output port #$port_num name=$port_name\n";
+		die "Disconnected output port\n";
+	}
 	# Hook the line up
 	${$line->{FIELDS}}{SrcBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$branch->{FIELDS}}{SrcBlock};
 	${$line->{FIELDS}}{SrcPort} =  ${$branch->{FIELDS}}{SrcPort};
@@ -609,12 +616,12 @@ if (1) {
    # Find all top-level subsystems
    foreach (@{$node->{NEXT}}) {
      if ($_->{NAME} eq "Block" && ${$_->{FIELDS}}{BlockType} eq "SubSystem") {
-	#print "Top-level subsystem ", ${$_->{FIELDS}}{Name}, "\n";
+	print "Top-level subsystem ", ${$_->{FIELDS}}{Name}, "\n";
 	# Flatten all second-level subsystems
 	my $system = $_->{NEXT}[0];
 	foreach $ssub (@{$system->{NEXT}}) {
           if ($ssub->{NAME} eq "Block" && ${$ssub->{FIELDS}}{BlockType} eq "SubSystem") {
-	    #print "Second-level subsystem ", ${$ssub->{FIELDS}}{Name}, "\n";
+	    print "Second-level subsystem ", ${$ssub->{FIELDS}}{Name}, "\n";
 	    @subsys = ($_);
             flatten($ssub);
 	  }
@@ -638,7 +645,9 @@ sub process {
   # There is really nothing needed below System node in the tree so set new root
   $root = $system_node;
 
+  print "Flattening the model\n";
   flatten_nested_subsystems($root);
+  print "Finished flattening the model\n";
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
   print "Found $::adcCnt ADCs $::partCnt parts $::subSys subsystems\n";
 
