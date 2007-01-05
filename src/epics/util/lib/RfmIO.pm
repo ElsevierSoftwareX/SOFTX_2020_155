@@ -44,7 +44,7 @@ sub fromExp {
 	my $partName = $::partInput[$i][$j];
 	#print "Reflective memory Input $partName\n";
 	die "RfmIO Part $partName invalid: its name must be the hex address\n" unless
-		$partName =~ /^0x(\d|[abcdef])+$/;
+		$partName =~ /^0x(\d|[abcdefABCDEF])+$/;
 	my $rfmAddressString = $partName;
         my $rfmAddress =  hex $partName;
 	if ($rfmAddress % 4 != 0) {
@@ -62,7 +62,7 @@ sub frontEndCode {
 	my $partName = $::xpartName[$i];
 	#print "Reflective Memory Address is $partName\n";
 	die "RfmIO Part $partName invalid: its name must be the hex address\n" unless
-		$partName =~ /^0x(\d|[abcdef])+$/;
+		$partName =~ /^0x(\d|[abcdefABCDEF])+$/;
 	my $rfmAddressString = $partName;
 	my $rfmAddress = hex $partName;
 	if ($rfmAddress % 4 != 0) {
