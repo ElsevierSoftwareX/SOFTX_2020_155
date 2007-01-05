@@ -371,10 +371,10 @@ sub find_branch {
 	  if (${$_->{FIELDS}}{DstBlock} eq $dst_name && $dprt == $dst_port) {
 		return $_;
 	  }
-	  my $block = find_branch($_, $dst_name, $dst_port);
-	  if ($block ne undef) {
-		return $block;
-	  }
+	}
+	my $block = find_branch($_, $dst_name, $dst_port);
+	if ($block ne undef) {
+	  return $block;
 	}
    }
    return undef;
@@ -398,11 +398,11 @@ sub flatten {
    if ($node->{NAME} eq "Block"
        && ${$node->{FIELDS}}{BlockType} eq "SubSystem") {
 
-print "Subsys=";
-foreach (@subsys) {
-  print ${$_->{FIELDS}}{Name}, ", ";
-}
-print "\n";
+#print "Subsys=";
+#foreach (@subsys) {
+  #print ${$_->{FIELDS}}{Name}, ", ";
+#}
+#print "\n";
 
      $parent = pop @subsys;
      if ($parent == $node) {
@@ -413,7 +413,9 @@ print "\n";
      # Remove node from parent
      my $idx = 0;
      # Parent node has "System" node next, move down to it
-     my $parent = ${$parent->{NEXT}}[0];
+     if ($parent->{NAME} ne "System") {
+       $parent = ${$parent->{NEXT}}[0];
+     }
      foreach (@{$parent->{NEXT}}) {
 	if ($_ == $node) {
 		#print "Found node at index $idx\n";
@@ -435,7 +437,7 @@ print "\n";
 	  } else {
 	    ${$_->{FIELDS}}{Name} = ${$node->{FIELDS}}{Name} . "_" . ${$_->{FIELDS}}{Name};
 	    #print "Block ", $_->{NAME}, ", type=", ${$_->{FIELDS}}{BlockType}, ", name=",${$_->{FIELDS}}{Name}, "\n";
-	    unshift @{$parent->{NEXT}}, $_; # add to the parent's list (prepend, lines ned to stay at the end)
+	    unshift @{$parent->{NEXT}}, $_; # add to the parent's list (prepend, lines need to stay at the end)
 	  }
  	} elsif ($_->{NAME} eq "Line") {
 	  push @lines, $_;
@@ -587,6 +589,20 @@ if (0) {
 sub flatten_nested_subsystems {
    my ($node) =  @_;
 
+# This code flattens all subsystems
+# It is not working properly
+if (0) {
+   foreach (@{$node->{NEXT}}) {
+     if ($_->{NAME} eq "Block" && ${$_->{FIELDS}}{BlockType} eq "SubSystem") {
+	print "Top-level subsystem ", ${$_->{FIELDS}}{Name}, "\n";
+	@subsys = ($node);
+	flatten($_);
+     }
+   }
+}
+
+# This code flattens only second-level subsystems
+if (1) {
    # Find all top-level subsystems
    foreach (@{$node->{NEXT}}) {
      if ($_->{NAME} eq "Block" && ${$_->{FIELDS}}{BlockType} eq "SubSystem") {
@@ -602,6 +618,8 @@ sub flatten_nested_subsystems {
 	}
      }
    }
+}
+
    return 0;
 }
 
