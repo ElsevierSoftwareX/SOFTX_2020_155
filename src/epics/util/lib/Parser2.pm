@@ -411,8 +411,8 @@ sub flatten {
      if ($parent == $node) {
         $parent = pop @subsys;
      }
-     print "Flattening ", ${$node->{FIELDS}}{Name}, "\n";
-     print "Parent ", ${$parent->{FIELDS}}{Name}, "\n";
+     #print "Flattening ", ${$node->{FIELDS}}{Name}, "\n";
+     #print "Parent ", ${$parent->{FIELDS}}{Name}, "\n";
      # Remove node from parent
      my $idx = 0;
      # Parent node has "System" node next, move down to it
@@ -609,12 +609,12 @@ if (1) {
    # Find all top-level subsystems
    foreach (@{$node->{NEXT}}) {
      if ($_->{NAME} eq "Block" && ${$_->{FIELDS}}{BlockType} eq "SubSystem") {
-	print "Top-level subsystem ", ${$_->{FIELDS}}{Name}, "\n";
+	#print "Top-level subsystem ", ${$_->{FIELDS}}{Name}, "\n";
 	# Flatten all second-level subsystems
 	my $system = $_->{NEXT}[0];
 	foreach $ssub (@{$system->{NEXT}}) {
           if ($ssub->{NAME} eq "Block" && ${$ssub->{FIELDS}}{BlockType} eq "SubSystem") {
-	    print "Second-level subsystem ", ${$ssub->{FIELDS}}{Name}, "\n";
+	    #print "Second-level subsystem ", ${$ssub->{FIELDS}}{Name}, "\n";
 	    @subsys = ($_);
             flatten($ssub);
 	  }
