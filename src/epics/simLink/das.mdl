@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.149"
+    ComputedModelVersion    "1.151"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Jan  5 14:59:36 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:149>"
+  LastModifiedDate	  "Fri Jan  5 16:22:18 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:151>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -2595,7 +2595,7 @@ Model {
 	}
 	Block {
 	  BlockType		  SubSystem
-	  Name			  "PD1_X_"
+	  Name			  "PD1_X"
 	  Ports			  [19, 9]
 	  Position		  [675, 288, 775, 522]
 	  MinAlgLoopOccurrences	  off
@@ -2603,7 +2603,7 @@ Model {
 	  FunctionWithSeparateData off
 	  MaskHideContents	  off
 	  System {
-	    Name		    "PD1_X_"
+	    Name		    "PD1_X"
 	    Location		    [426, 76, 912, 701]
 	    Open		    off
 	    ModelBrowserVisibility  off
@@ -2832,9 +2832,9 @@ Model {
 		  AttributesFormatString  "%<Tag>"
 		  SourceBlock		  "cdsFilt/Subsystem"
 		  SourceType		  "SubSystem"
-		  ShowPortLabels	  "on"
+		  ShowPortLabels	  on
 		  SystemSampleTime	  "-1"
-		  FunctionWithSeparateData "off"
+		  FunctionWithSeparateData off
 		  RTWMemSecFuncInitTerm	  "Inherit from model"
 		  RTWMemSecFuncExecute	  "Inherit from model"
 		  RTWMemSecDataConstants  "Inherit from model"
@@ -2878,9 +2878,9 @@ Model {
 		  AttributesFormatString  "%<Tag>"
 		  SourceBlock		  "cdsFilt/Subsystem"
 		  SourceType		  "SubSystem"
-		  ShowPortLabels	  "on"
+		  ShowPortLabels	  on
 		  SystemSampleTime	  "-1"
-		  FunctionWithSeparateData "off"
+		  FunctionWithSeparateData off
 		  RTWMemSecFuncInitTerm	  "Inherit from model"
 		  RTWMemSecFuncExecute	  "Inherit from model"
 		  RTWMemSecDataConstants  "Inherit from model"
@@ -2904,9 +2904,9 @@ Model {
 		  AttributesFormatString  "%<Tag>"
 		  SourceBlock		  "cdsEpicsOut/Subsystem"
 		  SourceType		  "SubSystem"
-		  ShowPortLabels	  "on"
+		  ShowPortLabels	  on
 		  SystemSampleTime	  "-1"
-		  FunctionWithSeparateData "off"
+		  FunctionWithSeparateData off
 		  RTWMemSecFuncInitTerm	  "Inherit from model"
 		  RTWMemSecFuncExecute	  "Inherit from model"
 		  RTWMemSecDataConstants  "Inherit from model"
@@ -2925,9 +2925,9 @@ Model {
 		  AttributesFormatString  "%<Tag>"
 		  SourceBlock		  "cdsPhase/Subsystem"
 		  SourceType		  "SubSystem"
-		  ShowPortLabels	  "on"
+		  ShowPortLabels	  on
 		  SystemSampleTime	  "-1"
-		  FunctionWithSeparateData "off"
+		  FunctionWithSeparateData off
 		  RTWMemSecFuncInitTerm	  "Inherit from model"
 		  RTWMemSecFuncExecute	  "Inherit from model"
 		  RTWMemSecDataConstants  "Inherit from model"
@@ -2989,9 +2989,9 @@ Model {
 		  AttributesFormatString  "%<Tag>"
 		  SourceBlock		  "cdsFilt/Subsystem"
 		  SourceType		  "SubSystem"
-		  ShowPortLabels	  "on"
+		  ShowPortLabels	  on
 		  SystemSampleTime	  "-1"
-		  FunctionWithSeparateData "off"
+		  FunctionWithSeparateData off
 		  RTWMemSecFuncInitTerm	  "Inherit from model"
 		  RTWMemSecFuncExecute	  "Inherit from model"
 		  RTWMemSecDataConstants  "Inherit from model"
@@ -3015,9 +3015,9 @@ Model {
 		  AttributesFormatString  "%<Tag>"
 		  SourceBlock		  "cdsEpicsOut/Subsystem"
 		  SourceType		  "SubSystem"
-		  ShowPortLabels	  "on"
+		  ShowPortLabels	  on
 		  SystemSampleTime	  "-1"
-		  FunctionWithSeparateData "off"
+		  FunctionWithSeparateData off
 		  RTWMemSecFuncInitTerm	  "Inherit from model"
 		  RTWMemSecFuncExecute	  "Inherit from model"
 		  RTWMemSecDataConstants  "Inherit from model"
@@ -33419,7 +33419,7 @@ Model {
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  1
 	  DstBlock		  "Mux"
 	  DstPort		  1
@@ -33659,49 +33659,49 @@ Model {
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  2
 	  DstBlock		  "Mux"
 	  DstPort		  2
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  3
 	  DstBlock		  "Mux"
 	  DstPort		  3
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  4
 	  DstBlock		  "Mux"
 	  DstPort		  4
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  5
 	  DstBlock		  "Mux"
 	  DstPort		  5
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  6
 	  DstBlock		  "Mux"
 	  DstPort		  6
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  7
 	  DstBlock		  "Mux"
 	  DstPort		  7
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  8
 	  DstBlock		  "Mux"
 	  DstPort		  8
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  9
 	  DstBlock		  "Mux"
 	  DstPort		  9
@@ -34089,7 +34089,7 @@ Model {
 	  SrcPort		  2
 	  Points		  [415, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    2
 	  }
 	  Branch {
@@ -34223,7 +34223,7 @@ Model {
 	  Branch {
 	    Points		    [-15, 0; 15, 0]
 	    Branch {
-	      DstBlock		      "PD1_X_"
+	      DstBlock		      "PD1_X"
 	      DstPort		      3
 	    }
 	    Branch {
@@ -34238,7 +34238,7 @@ Model {
 	  SrcPort		  2
 	  Points		  [0, -85; 320, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    4
 	  }
 	  Branch {
@@ -34299,7 +34299,7 @@ Model {
 	  SrcPort		  3
 	  Points		  [10, 0; 0, -95; 295, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    5
 	  }
 	  Branch {
@@ -34360,7 +34360,7 @@ Model {
 	  SrcPort		  2
 	  Points		  [50, 0; 0, -275; 235, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    6
 	  }
 	  Branch {
@@ -34422,7 +34422,7 @@ Model {
 	  SrcPort		  3
 	  Points		  [60, 0; 0, -285; 210, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    7
 	  }
 	  Branch {
@@ -34483,7 +34483,7 @@ Model {
 	  SrcPort		  2
 	  Points		  [0, 5; 65, 0; 0, -495; 185, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    8
 	  }
 	  Branch {
@@ -34544,7 +34544,7 @@ Model {
 	  SrcPort		  3
 	  Points		  [75, 0; 0, -500; 160, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    9
 	  }
 	  Branch {
@@ -34623,7 +34623,7 @@ Model {
 	      Branch {
 		Points			[0, -225]
 		Branch {
-		  DstBlock		  "PD1_X_"
+		  DstBlock		  "PD1_X"
 		  DstPort		  10
 		}
 		Branch {
@@ -34684,7 +34684,7 @@ Model {
 	      Branch {
 		Points			[0, -225]
 		Branch {
-		  DstBlock		  "PD1_X_"
+		  DstBlock		  "PD1_X"
 		  DstPort		  11
 		}
 		Branch {
@@ -34751,7 +34751,7 @@ Model {
 		Branch {
 		  Points		  [0, -225]
 		  Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    12
 		  }
 		  Branch {
@@ -34812,7 +34812,7 @@ Model {
 		Branch {
 		  Points		  [0, -225]
 		  Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    13
 		  }
 		  Branch {
@@ -34879,7 +34879,7 @@ Model {
 		  Branch {
 		    Points		    [0, -225]
 		    Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    14
 		    }
 		    Branch {
@@ -34940,7 +34940,7 @@ Model {
 		  Branch {
 		    Points		    [0, -225]
 		    Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    15
 		    }
 		    Branch {
@@ -35012,7 +35012,7 @@ Model {
 		    Branch {
 		    Points		    [0, -225]
 		    Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    16
 		    }
 		    Branch {
@@ -35073,7 +35073,7 @@ Model {
 		    Branch {
 		    Points		    [0, -225]
 		    Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    17
 		    }
 		    Branch {
@@ -35135,7 +35135,7 @@ Model {
 		    Branch {
 		    Points		    [0, -225]
 		    Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    18
 		    }
 		    Branch {
@@ -35198,7 +35198,7 @@ Model {
 		    Branch {
 		    Points		    [0, -225]
 		    Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    19
 		    }
 		    Branch {
@@ -35519,7 +35519,7 @@ Model {
 	  SrcBlock		  "In1"
 	  SrcPort		  1
 	  Points		  [195, 0; 0, 130]
-	  DstBlock		  "PD1_X_"
+	  DstBlock		  "PD1_X"
 	  DstPort		  1
 	}
 	Line {
@@ -35668,7 +35668,7 @@ Model {
       System {
 	Name			"YAW"
 	Location		[0, 76, 1024, 743]
-	Open			off
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -36698,7 +36698,7 @@ Model {
 	}
 	Block {
 	  BlockType		  SubSystem
-	  Name			  "PD1_X_"
+	  Name			  "PD1_X"
 	  Ports			  [19, 9]
 	  Position		  [675, 288, 775, 522]
 	  MinAlgLoopOccurrences	  off
@@ -36706,7 +36706,7 @@ Model {
 	  FunctionWithSeparateData off
 	  MaskHideContents	  off
 	  System {
-	    Name		    "PD1_X_"
+	    Name		    "PD1_X"
 	    Location		    [426, 76, 912, 701]
 	    Open		    off
 	    ModelBrowserVisibility  off
@@ -67522,7 +67522,7 @@ Model {
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  1
 	  DstBlock		  "Mux"
 	  DstPort		  1
@@ -67762,49 +67762,49 @@ Model {
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  2
 	  DstBlock		  "Mux"
 	  DstPort		  2
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  3
 	  DstBlock		  "Mux"
 	  DstPort		  3
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  4
 	  DstBlock		  "Mux"
 	  DstPort		  4
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  5
 	  DstBlock		  "Mux"
 	  DstPort		  5
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  6
 	  DstBlock		  "Mux"
 	  DstPort		  6
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  7
 	  DstBlock		  "Mux"
 	  DstPort		  7
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  8
 	  DstBlock		  "Mux"
 	  DstPort		  8
 	}
 	Line {
-	  SrcBlock		  "PD1_X_"
+	  SrcBlock		  "PD1_X"
 	  SrcPort		  9
 	  DstBlock		  "Mux"
 	  DstPort		  9
@@ -68192,7 +68192,7 @@ Model {
 	  SrcPort		  2
 	  Points		  [415, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    2
 	  }
 	  Branch {
@@ -68326,7 +68326,7 @@ Model {
 	  Branch {
 	    Points		    [-15, 0; 15, 0]
 	    Branch {
-	      DstBlock		      "PD1_X_"
+	      DstBlock		      "PD1_X"
 	      DstPort		      3
 	    }
 	    Branch {
@@ -68341,7 +68341,7 @@ Model {
 	  SrcPort		  2
 	  Points		  [0, -85; 320, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    4
 	  }
 	  Branch {
@@ -68402,7 +68402,7 @@ Model {
 	  SrcPort		  3
 	  Points		  [10, 0; 0, -95; 295, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    5
 	  }
 	  Branch {
@@ -68463,7 +68463,7 @@ Model {
 	  SrcPort		  2
 	  Points		  [50, 0; 0, -275; 235, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    6
 	  }
 	  Branch {
@@ -68525,7 +68525,7 @@ Model {
 	  SrcPort		  3
 	  Points		  [60, 0; 0, -285; 210, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    7
 	  }
 	  Branch {
@@ -68586,7 +68586,7 @@ Model {
 	  SrcPort		  2
 	  Points		  [0, 5; 65, 0; 0, -495; 185, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    8
 	  }
 	  Branch {
@@ -68647,7 +68647,7 @@ Model {
 	  SrcPort		  3
 	  Points		  [75, 0; 0, -500; 160, 0]
 	  Branch {
-	    DstBlock		    "PD1_X_"
+	    DstBlock		    "PD1_X"
 	    DstPort		    9
 	  }
 	  Branch {
@@ -68726,7 +68726,7 @@ Model {
 	      Branch {
 		Points			[0, -225]
 		Branch {
-		  DstBlock		  "PD1_X_"
+		  DstBlock		  "PD1_X"
 		  DstPort		  10
 		}
 		Branch {
@@ -68787,7 +68787,7 @@ Model {
 	      Branch {
 		Points			[0, -225]
 		Branch {
-		  DstBlock		  "PD1_X_"
+		  DstBlock		  "PD1_X"
 		  DstPort		  11
 		}
 		Branch {
@@ -68854,7 +68854,7 @@ Model {
 		Branch {
 		  Points		  [0, -225]
 		  Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    12
 		  }
 		  Branch {
@@ -68915,7 +68915,7 @@ Model {
 		Branch {
 		  Points		  [0, -225]
 		  Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    13
 		  }
 		  Branch {
@@ -68982,7 +68982,7 @@ Model {
 		  Branch {
 		    Points		    [0, -225]
 		    Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    14
 		    }
 		    Branch {
@@ -69043,7 +69043,7 @@ Model {
 		  Branch {
 		    Points		    [0, -225]
 		    Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    15
 		    }
 		    Branch {
@@ -69115,7 +69115,7 @@ Model {
 		    Branch {
 		    Points		    [0, -225]
 		    Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    16
 		    }
 		    Branch {
@@ -69176,7 +69176,7 @@ Model {
 		    Branch {
 		    Points		    [0, -225]
 		    Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    17
 		    }
 		    Branch {
@@ -69238,7 +69238,7 @@ Model {
 		    Branch {
 		    Points		    [0, -225]
 		    Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    18
 		    }
 		    Branch {
@@ -69301,7 +69301,7 @@ Model {
 		    Branch {
 		    Points		    [0, -225]
 		    Branch {
-		    DstBlock		    "PD1_X_"
+		    DstBlock		    "PD1_X"
 		    DstPort		    19
 		    }
 		    Branch {
@@ -69622,7 +69622,7 @@ Model {
 	  SrcBlock		  "In1"
 	  SrcPort		  1
 	  Points		  [195, 0; 0, 130]
-	  DstBlock		  "PD1_X_"
+	  DstBlock		  "PD1_X"
 	  DstPort		  1
 	}
 	Line {
