@@ -261,6 +261,7 @@ state init
 
 #if defined(RFM_EPICS)
 %%  printf("Init Sequencer %s; system %d\n", fmc.subSys[0].name, sysnum);
+%%  findSharedMemory(fmc.system);
 %%  pRfm = (RFM_FE_COMMS *)(findRfmCard(0));
 %%  pFilt = (FILT_MOD *)(&pRfm->%EPICS_FILT_VAR%);
 %%  pVmeCoeff = (VME_COEF*)(&pRfm->%EPICS_COEFF_VAR%);
