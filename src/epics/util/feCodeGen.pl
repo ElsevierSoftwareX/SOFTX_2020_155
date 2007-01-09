@@ -65,7 +65,12 @@ if (@ARGV == 2) { $skeleton = $ARGV[1]; }
 open(EPICS,">../fmseq/".$ARGV[1]) || die "cannot open output file for writing";
 mkdir $cFileDirectory, 0755;
 open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
-open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
+# Do not modify existing front-end Makefile
+if (-e $mFile) {
+  open(OUTM, "/dev/null") || die "cannot open /dev/null for writing";
+} else {
+  open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
+}
 open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
 open(OUTH,">./".$hFile) || die "cannot open header file for writing";
 $diag = "diags\.txt";
@@ -172,7 +177,7 @@ my $system_name = $ARGV[1];
 print OUTH "\#ifndef \U$system_name";
 print OUTH "_H_INCLUDED\n\#define \U$system_name";
 print OUTH "_H_INCLUDED\n";
-print OUTH "\#define SYSTEM_NAME \U$system_name\n";
+print OUTH "\#define SYSTEM_NAME_STRING_LOWER \"\L$system_name\"\n";
 
 
 require "lib/ParsingDiagnostics.pm";
