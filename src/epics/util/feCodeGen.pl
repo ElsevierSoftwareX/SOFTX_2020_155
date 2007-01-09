@@ -168,6 +168,13 @@ for ($ii = 0; $ii < 2000; $ii++) {
 }
 }
 
+my $system_name = $ARGV[1];
+print OUTH "\#ifndef \U$system_name";
+print OUTH "_H_INCLUDED\n\#define \U$system_name";
+print OUTH "_H_INCLUDED\n";
+print OUTH "\#define SYSTEM_NAME \U$system_name\n";
+
+
 require "lib/ParsingDiagnostics.pm";
 # Old parser
 if (0) {
@@ -190,10 +197,6 @@ die unless CDS::Parser::parse();
 close(IN);
 
 CDS::ParsingDiagnostics::print_diagnostics("parser_diag.txt");
-
-print OUTH "\#ifndef \U$::systemName";
-print OUTH "_H_INCLUDED\n\#define \U$::systemName";
-print OUTH "_H_INCLUDED\n";
 
 # By default, set DAC input counts to 16
 for($ii=0;$ii<$dacCnt;$ii++) {
