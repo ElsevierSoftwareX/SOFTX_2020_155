@@ -46,6 +46,7 @@ sub fromExp {
 	die "RfmIO Part $partName invalid: its name must be the hex address\n" unless
 		$partName =~ /^.*0x(\d|[abcdefABCDEF])+$/;
 	my $rfmAddressString = $partName;
+	$rfmAddressString =~ s/^.*(0x(\d|[abcdefABCDEF])+)$/\1/g;
         my $rfmAddress =  hex $partName;
 	if ($rfmAddress % 4 != 0) {
 		die "RfmIO Part $::xpartName[$i] invalid: address must be 4-byte aligned\n";
@@ -64,6 +65,7 @@ sub frontEndCode {
 	die "RfmIO Part $partName invalid: its name must be the hex address\n" unless
 		$partName =~ /^.*0x(\d|[abcdefABCDEF])+$/;
 	my $rfmAddressString = $partName;
+	$rfmAddressString =~ s/^.*(0x(\d|[abcdefABCDEF])+)$/\1/g;
 	my $rfmAddress = hex $partName;
 	if ($rfmAddress % 4 != 0) {
 		die "RfmIO Part $::xpartName[$i] invalid: address must be 4-byte aligned\n";
