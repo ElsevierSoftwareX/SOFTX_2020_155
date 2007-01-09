@@ -6,7 +6,7 @@ TARGET_RTL := setup_shmem.rtl
 LIBRARY_OBJS := map.o
 
 ALL +=  setup_shmem.rtl
-CFLAGS += -I../../include 
+CFLAGS += -I../../include  -DRTL_BUILD
 
 all: $(ALL)
 
