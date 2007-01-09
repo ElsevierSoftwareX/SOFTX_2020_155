@@ -135,11 +135,46 @@ unsigned int findRfmCard(unsigned int bn)
 
 unsigned char *addr = 0;
 
+
+
+/*
+  Search shared memory device file names in /rtl_mem_*
+  These are like /rtl_mem_das for DAS system,
+  /rtl_mem_pde for PDE system.
+*/
+void *
+findSharedMemory(char *sys_name)
+{
+	char *s;
+        int fd;
+	char sys[128];
+	char fname[128];
+	strcpy(sys, sys_name);
+	for(s = sys; *s; s++) *s=tolower(*s);
+	sprintf(fname, "/rtl_mem_%s", sys);
+
+        if ((fd=open(fname, O_RDWR))<0) {
+		fprintf(stderr, "Couldn't open `%s' read/write\n", fname);
+                return 0;
+        }
+
+        addr = mmap(0, 64*1024*1024-5000, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        if (addr == MAP_FAILED) {
+                printf("return was %d\n",errno);
+                perror("mmap");
+                _exit(-1);
+        }
+	printf("mmapped address is 0x%lx\n", (long)addr);
+        return addr;
+}
+
+
 void *
 findRfmCard(unsigned int bn)
 {
     if (!addr) {
         int fd;
+
         if ((fd=open("/rtl_epics", O_RDWR))<0) {
                 perror("open(\"rtl_epics\")");
                 _exit(-1);
