@@ -428,27 +428,27 @@ int mapPciModules(CDS_HARDWARE *pCds)
 	// if found, check if it is a DAC module
         if((dacdev->subsystem_device == DAC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
         {
-                printk("dac card on bus %d; device %d\n",
+                printk("dac card on bus %x; device %x\n",
                         dacdev->bus->number,
-                        dacdev->devfn);
+			PCI_SLOT(dacdev->devfn));
                 status = mapDac(pCds,dacdev);
 		modCount ++;
         }
 	// if found, check if it is an ADC module
 	if((dacdev->subsystem_device == ADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
 	{
-		printk("adc card on bus %d; device %d\n",
+		printk("adc card on bus %x; device %x\n",
 			dacdev->bus->number,
-			dacdev->devfn);
+			PCI_SLOT(dacdev->devfn));
 		status = mapAdc(pCds,dacdev);
 		modCount ++;
 	}
         // if found, check if it is a Fast ADC module
         if((dacdev->subsystem_device == FADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
         {
-                printk("fast adc card on bus %d; device %d\n",
+                printk("fast adc card on bus %x; device %x\n",
                         dacdev->bus->number,
-                        dacdev->devfn);
+			PCI_SLOT(dacdev->devfn));
                 status = mapFadc(pCds,dacdev);
                 modCount ++;
         }
@@ -458,9 +458,9 @@ int mapPciModules(CDS_HARDWARE *pCds)
   status = 0;
   // Search system for Digital I/O modules
   while((dacdev = pci_find_device(ACC_VID, ACC_TID, dacdev))) {
-		printk("dio card on bus %d; device %d\n",
+		printk("dio card on bus %x; device %x\n",
 			dacdev->bus->number,
-			dacdev->devfn);
+			PCI_SLOT(dacdev->devfn));
 		status = mapDio(pCds,dacdev);
 		modCount ++;
   }
@@ -470,9 +470,9 @@ int mapPciModules(CDS_HARDWARE *pCds)
   pCds->pci_rfm[0] = 0;
   // Search system for VMIC RFM modules
   while((dacdev = pci_find_device(VMIC_VID, VMIC_TID, dacdev))) {
-		printk("RFM card on bus %d; device %d\n",
+		printk("RFM card on bus %x; device %x\n",
 			dacdev->bus->number,
-			dacdev->devfn);
+			PCI_SLOT(dacdev->devfn));
 		status = mapRfm(pCds,dacdev);
 		modCount ++;
   }
