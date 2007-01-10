@@ -50,6 +50,10 @@ typedef struct CDS_HARDWARE{
 	int rfmCount;			/* Number of RFM modules found		*/
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
 	int rfmConfig[MAX_RFM_MODULES];
+	/* Variables controlling ADC card usage by systems */
+	int use_adcs;			/* How many ADC boards to use		*/
+	int use_adc_bus[MAX_ADC_MODULES];	/* Bus numbers for the ADCs	*/
+	int use_adc_slot[MAX_ADC_MODULES];	/* Slot numbers for the ADCs	*/
 }CDS_HARDWARE;
 
 /* ACCESS DIO Module Definitions ********************************************** */
