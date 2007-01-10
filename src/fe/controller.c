@@ -800,6 +800,7 @@ int main(int argc, char **argv)
         pthread_attr_t attr;
  	int status;
 	int ii,jj;
+	char fname[128];
 
 	printf("cpu clock %ld\n",cpu_khz);
 
@@ -807,12 +808,19 @@ int main(int argc, char **argv)
          * Create the shared memory area.  By passing a non-zero value
          * for the mode, this means we also create a node in the GPOS.
          */       
-        wfd = shm_open("/rtl_epics", RTL_O_RDWR, 0666);
-        if (wfd == -1) {
+
+	/* See if we can open new-style shared memory file */
+	sprintf(fname, "/rtl_mem_%s", SYSTEM_NAME_STRING_LOWER);
+        wfd = shm_open(fname, RTL_O_RDWR, 0666);
+	if (wfd == -1) {
+          printf("Couldn't open `%s' read/write (errno=%d)\n", fname, errno);
+          wfd = shm_open("/rtl_epics", RTL_O_RDWR, 0666);
+          if (wfd == -1) {
                 printf("open failed for write on /rtl_epics (%d)\n",errno);
                 rtl_perror("shm_open()");
                 return -1;
-        }
+          }
+	}
 
         _epics_shm = (unsigned char *)rtl_mmap(NULL,MMAP_SIZE,PROT_READ|PROT_WRITE,MAP_SHARED,wfd,0);
         if (_epics_shm == MAP_FAILED) {
@@ -821,11 +829,20 @@ int main(int argc, char **argv)
                 return (void *)(-1);
         }
 
+	cdsPciModules.use_adcs = 0;
+#ifdef SPECIFIC_ADC_BUS
+	cdsPciModules.use_adcs = 1;
+	cdsPciModules.use_adc_bus[0] = SPECIFIC_ADC_BUS;
+	cdsPciModules.use_adc_slot[0] = SPECIFIC_ADC_SLOT;
+#endif
 	printf("Initializing PCI Modules\n");
 	status = mapPciModules(&cdsPciModules);
 	printf("%d PCI cards found\n",status);
 #ifdef ONE_ADC
-cdsPciModules.adcCount = cdsPciModules.dacCount = 1;
+	cdsPciModules.adcCount = cdsPciModules.dacCount = 1;
+#endif
+#ifdef DAC_COUNT
+	cdsPciModules.dacCount = DAC_COUNT;
 #endif
         printf("***************************************************************************\n");
 	printf("%d ADC cards found\n",cdsPciModules.adcCount);
@@ -909,8 +926,8 @@ cdsPciModules.adcCount = cdsPciModules.dacCount = 1;
 	printf("Initializing space for daqLib buffers\n");
 	daqBuffer = (long)&daqArea[0];
  
-	printf("Initializing Network\n");
 #ifndef NO_DAQ
+	printf("Initializing Network\n");
 	status = myriNetInit(2);
 #endif
 #if 0
@@ -937,7 +954,11 @@ cdsPciModules.adcCount = cdsPciModules.dacCount = 1;
 	usleep(1000000);
 #endif
 
+#ifdef SPECIFIC_CPU
+        rtl_pthread_attr_setcpu_np(&attr, SPECIFIC_CPU);
+#else
         rtl_pthread_attr_setcpu_np(&attr, 1);
+#endif
         /* mark this CPU as reserved - only RTLinux runs on it */
         rtl_pthread_attr_setreserve_np(&attr, 1);
         rtl_pthread_create(&wthread, &attr, fe_start, 0);
