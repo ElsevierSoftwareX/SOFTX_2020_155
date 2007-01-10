@@ -437,11 +437,26 @@ int mapPciModules(CDS_HARDWARE *pCds)
 	// if found, check if it is an ADC module
 	if((dacdev->subsystem_device == ADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
 	{
-		printk("adc card on bus %x; device %x\n",
+		int use_it = 1;
+		if (pCds->use_adcs) {
+		  use_it = 0;
+		  /* See if this is one of our ADC cards */
+		  int i;
+		  for (i = 0; i < pCds->use_adcs; i++) {
+		    if (dacdev->bus->number == pCds->use_adc_bus[i] 
+		        && PCI_SLOT(dacdev->devfn) == pCds->use_adc_slot[i]) {
+			use_it = 1;
+			break;
+		    }
+		  }
+		}
+		if (use_it) {
+		  printk("adc card on bus %x; device %x\n",
 			dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
-		status = mapAdc(pCds,dacdev);
-		modCount ++;
+		  status = mapAdc(pCds,dacdev);
+		  modCount ++;
+		}
 	}
         // if found, check if it is a Fast ADC module
         if((dacdev->subsystem_device == FADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
