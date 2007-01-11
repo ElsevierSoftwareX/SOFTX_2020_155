@@ -256,8 +256,14 @@ sub node_processing {
 	}
    } elsif ($node->{NAME} eq "Block") {
 	my $block_type = transform_block_type(${$node->{FIELDS}}{"BlockType"});
+	my $source_type = transform_block_type(${$node->{FIELDS}}{"SourceType"});
 	my $block_name = ${$node->{FIELDS}}{"Name"};
 	#print "Part $block_name $block_type $in_sub \n";
+	# Skip certain blocks
+ 	if ($source_type eq "DocBlock") {
+		return 0;
+	}
+
 	# Bus creator part is the ADC board
 	if ($block_type eq "BUSC") {
 		$::adcCnt++;
@@ -277,7 +283,7 @@ sub node_processing {
 
         	$::cdsPart[$::partCnt] = 1;
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name;
-		#print "CDS part $r\n";
+		#print "CDS part $block_name\n";
 	} else {
 		# Not a CDS part
 		$::partType[$::partCnt] = $block_type;
