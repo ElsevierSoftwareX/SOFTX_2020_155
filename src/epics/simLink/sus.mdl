@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.103"
+    ComputedModelVersion    "1.104"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Jan 10 16:42:43 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:103>"
+  LastModifiedDate	  "Wed Jan 10 16:47:40 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:104>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -13773,7 +13773,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "L1UL"
-	  Position		  [490, 458, 520, 472]
+	  Position		  [495, 248, 525, 262]
 	  Port			  "7"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -13781,7 +13781,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "L1LL"
-	  Position		  [490, 493, 520, 507]
+	  Position		  [495, 283, 525, 297]
 	  Port			  "8"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -13789,7 +13789,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "L1UR"
-	  Position		  [490, 528, 520, 542]
+	  Position		  [495, 318, 525, 332]
 	  Port			  "9"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -13797,7 +13797,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "L1LR"
-	  Position		  [490, 563, 520, 577]
+	  Position		  [495, 353, 525, 367]
 	  Port			  "10"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -13805,7 +13805,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "L2UL"
-	  Position		  [490, 598, 520, 612]
+	  Position		  [495, 388, 525, 402]
 	  Port			  "11"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -13813,7 +13813,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "L2LL"
-	  Position		  [490, 633, 520, 647]
+	  Position		  [495, 423, 525, 437]
 	  Port			  "12"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -13821,7 +13821,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "L2UR"
-	  Position		  [490, 668, 520, 682]
+	  Position		  [495, 458, 525, 472]
 	  Port			  "13"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
@@ -13829,45 +13829,10 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "L2LR"
-	  Position		  [490, 703, 520, 717]
+	  Position		  [495, 493, 525, 507]
 	  Port			  "14"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
-	}
-	Line {
-	  SrcBlock		  "L1"
-	  SrcPort		  1
-	  Points		  [65, 0; 0, 55]
-	  DstBlock		  "WD_SW"
-	  DstPort		  13
-	}
-	Line {
-	  SrcBlock		  "L1"
-	  SrcPort		  2
-	  Points		  [55, 0; 0, 60]
-	  DstBlock		  "WD_SW"
-	  DstPort		  14
-	}
-	Line {
-	  SrcBlock		  "L1"
-	  SrcPort		  3
-	  Points		  [45, 0; 0, 65]
-	  DstBlock		  "WD_SW"
-	  DstPort		  15
-	}
-	Line {
-	  SrcBlock		  "L2"
-	  SrcPort		  1
-	  Points		  [75, 0]
-	  DstBlock		  "WD_SW"
-	  DstPort		  17
-	}
-	Line {
-	  SrcBlock		  "L2"
-	  SrcPort		  2
-	  Points		  [75, 0]
-	  DstBlock		  "WD_SW"
-	  DstPort		  18
 	}
 	Line {
 	  SrcBlock		  "WD_SW"
@@ -13903,54 +13868,6 @@ Model {
 	  SrcBlock		  "WD_SW"
 	  SrcPort		  6
 	  DstBlock		  "M0Side"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "WD_SW"
-	  SrcPort		  13
-	  DstBlock		  "L1UL"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "WD_SW"
-	  SrcPort		  14
-	  DstBlock		  "L1LL"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "WD_SW"
-	  SrcPort		  15
-	  DstBlock		  "L1UR"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "WD_SW"
-	  SrcPort		  16
-	  DstBlock		  "L1LR"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "WD_SW"
-	  SrcPort		  17
-	  DstBlock		  "L2UL"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "WD_SW"
-	  SrcPort		  18
-	  DstBlock		  "L2LL"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "WD_SW"
-	  SrcPort		  19
-	  DstBlock		  "L2UR"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "WD_SW"
-	  SrcPort		  20
-	  DstBlock		  "L2LR"
 	  DstPort		  1
 	}
 	Line {
@@ -14001,27 +13918,6 @@ Model {
 	  Points		  [0, -5]
 	  DstBlock		  "SEI_HAMY_ACT_SW"
 	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "L1"
-	  SrcPort		  4
-	  Points		  [35, 0; 0, 70]
-	  DstBlock		  "WD_SW"
-	  DstPort		  16
-	}
-	Line {
-	  SrcBlock		  "L2"
-	  SrcPort		  3
-	  Points		  [35, 0; 0, 20]
-	  DstBlock		  "WD_SW"
-	  DstPort		  19
-	}
-	Line {
-	  SrcBlock		  "L2"
-	  SrcPort		  4
-	  Points		  [25, 0; 0, 25]
-	  DstBlock		  "WD_SW"
-	  DstPort		  20
 	}
 	Line {
 	  SrcBlock		  "M0"
@@ -14127,6 +14023,111 @@ Model {
 	  SrcPort		  1
 	  DstBlock		  "L2"
 	  DstPort		  4
+	}
+	Line {
+	  SrcBlock		  "WD_SW"
+	  SrcPort		  7
+	  DstBlock		  "L1UL"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "WD_SW"
+	  SrcPort		  8
+	  DstBlock		  "L1LL"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "WD_SW"
+	  SrcPort		  9
+	  DstBlock		  "L1UR"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "WD_SW"
+	  SrcPort		  10
+	  DstBlock		  "L1LR"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "WD_SW"
+	  SrcPort		  11
+	  DstBlock		  "L2UL"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "WD_SW"
+	  SrcPort		  12
+	  DstBlock		  "L2LL"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "WD_SW"
+	  SrcPort		  13
+	  DstBlock		  "L2UR"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "WD_SW"
+	  SrcPort		  14
+	  DstBlock		  "L2LR"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "L1"
+	  SrcPort		  1
+	  Points		  [10, 0; 0, -155]
+	  DstBlock		  "WD_SW"
+	  DstPort		  7
+	}
+	Line {
+	  SrcBlock		  "L1"
+	  SrcPort		  2
+	  Points		  [0, -5; 20, 0; 0, -145]
+	  DstBlock		  "WD_SW"
+	  DstPort		  8
+	}
+	Line {
+	  Labels		  [0, 0]
+	  SrcBlock		  "L1"
+	  SrcPort		  3
+	  Points		  [0, -5; 30, 0; 0, -140]
+	  DstBlock		  "WD_SW"
+	  DstPort		  9
+	}
+	Line {
+	  SrcBlock		  "L1"
+	  SrcPort		  4
+	  Points		  [0, -5; 40, 0; 0, -135]
+	  DstBlock		  "WD_SW"
+	  DstPort		  10
+	}
+	Line {
+	  SrcBlock		  "L2"
+	  SrcPort		  1
+	  Points		  [0, -5; 50, 0; 0, -195]
+	  DstBlock		  "WD_SW"
+	  DstPort		  11
+	}
+	Line {
+	  SrcBlock		  "L2"
+	  SrcPort		  2
+	  Points		  [0, -5; 60, 0; 0, -190]
+	  DstBlock		  "WD_SW"
+	  DstPort		  12
+	}
+	Line {
+	  SrcBlock		  "L2"
+	  SrcPort		  3
+	  Points		  [65, 0; 0, -190]
+	  DstBlock		  "WD_SW"
+	  DstPort		  13
+	}
+	Line {
+	  SrcBlock		  "L2"
+	  SrcPort		  4
+	  Points		  [75, 0]
+	  DstBlock		  "WD_SW"
+	  DstPort		  14
 	}
       }
     }
@@ -14342,50 +14343,42 @@ Model {
     }
     Line {
       Labels		      [1, 0]
-      SrcBlock		      "T1"
-      SrcPort		      7
+      Points		      [1145, 365]
       DstBlock		      "DAC_2"
       DstPort		      9
     }
     Line {
-      SrcBlock		      "T1"
-      SrcPort		      8
+      Points		      [1145, 385; 0, 15]
       DstBlock		      "DAC_2"
       DstPort		      10
     }
     Line {
-      SrcBlock		      "T1"
-      SrcPort		      9
+      Points		      [1145, 405; 0, 30]
       DstBlock		      "DAC_2"
       DstPort		      11
     }
     Line {
-      SrcBlock		      "T1"
-      SrcPort		      10
+      Points		      [1145, 430; 0, 40]
       DstBlock		      "DAC_2"
       DstPort		      12
     }
     Line {
-      SrcBlock		      "T1"
-      SrcPort		      11
+      Points		      [1145, 460; 0, 45]
       DstBlock		      "DAC_2"
       DstPort		      13
     }
     Line {
-      SrcBlock		      "T1"
-      SrcPort		      12
+      Points		      [1145, 495; 0, 45]
       DstBlock		      "DAC_2"
       DstPort		      14
     }
     Line {
-      SrcBlock		      "T1"
-      SrcPort		      13
+      Points		      [1145, 535; 0, 40]
       DstBlock		      "DAC_2"
       DstPort		      15
     }
     Line {
-      SrcBlock		      "T1"
-      SrcPort		      14
+      Points		      [1145, 595; 0, 15]
       DstBlock		      "DAC_2"
       DstPort		      16
     }
