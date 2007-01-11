@@ -1,5 +1,5 @@
 Model {
-  Name			  "das"
+  Name			  "ass"
   Version		  6.5
   MdlSubVersion		  0
   GraphicalInterface {
@@ -951,7 +951,7 @@ Model {
     FontAngle		    "normal"
   }
   System {
-    Name		    "das"
+    Name		    "ass"
     Location		    [0, 76, 1024, 743]
     Open		    on
     ModelBrowserVisibility  off
@@ -69711,7 +69711,7 @@ Model {
     }
     Block {
       BlockType		      Reference
-      Name		      "site=C1\nrate=2K\ndcuid=10"
+      Name		      "site=C1\nrate=2K\ndcuid=22"
       Tag		      "cdsParameters"
       Ports		      [1, 1]
       Position		      [665, 130, 705, 190]
