@@ -1278,7 +1278,9 @@ $numTries ++;
 	}
 }
 if(($partsRemaining > 0) || ($subRemaining > 0)) {
-print "Linkage failed (parts remaining $partsRemaining; subs remaining $subRemaining)\n";
+        print "Linkage failed (parts remaining $partsRemaining; subs remaining $subRemaining)\n";
+	exit(1);
+# FIXME: the following code doen't report correctly failed parts
 	for($ii=0;$ii<$subSys;$ii++)
 	{
 		if($subUsed[$ii] == 0)
@@ -1293,7 +1295,6 @@ print "Linkage failed (parts remaining $partsRemaining; subs remaining $subRemai
 		print "Part $ii $xpartName[$ii] failed to connect\n";
 		}
 	}
-exit;
 }
 $processCnt = 0;
 $processSeqCnt = 0;
@@ -1312,7 +1313,7 @@ for($ii=0;$ii<$seqCnt;$ii++)
 		{
 			$processName[$processCnt] = $seqName[$xx][$jj];
 			$processPartNum[$processCnt] = $seq[$xx][$jj];
-			# print "$processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
+			#print "SUBSYS $processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
 			$processCnt ++;
 		}
 	}
@@ -1324,16 +1325,17 @@ if(($partType[$xx] eq "TERM") || ($partType[$xx] eq "GROUND") || ($partType[$xx]
 {$ftotal ++;}
 		$processSeqType{$xpartName[$xx]} = $seqType[$ii];
 		$processPartNum[$processCnt] = $xx;
-		# print "$processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
+		#print "$processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
 		$processSeqSubsysName[$processCnt] = "__PART__";
 		$processCnt ++;
 	}
 	$processSeqEnd[$processSeqCnt] = $processCnt;
 }
-print "Total of $processCnt parts to process $ftotal\n";
+print "Counted $processCnt parts out of total $ftotal\n";
 if($processCnt != $ftotal)
 {
 	print "Fatal error - not all parts are in processing list!!!!!\n";
+	exit(1);
 }
 
 #print "CPU_STEPS:\n";
