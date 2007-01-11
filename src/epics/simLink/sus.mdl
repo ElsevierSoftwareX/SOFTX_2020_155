@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.101"
+    ComputedModelVersion    "1.102"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Jan 10 16:00:28 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:101>"
+  LastModifiedDate	  "Wed Jan 10 16:41:05 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:102>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -571,7 +571,7 @@ Model {
   }
   System {
     Name		    "sus"
-    Location		    [23, 97, 1047, 764]
+    Location		    [0, 76, 1024, 743]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -1010,7 +1010,7 @@ Model {
       System {
 	Name			"Q1"
 	Location		[0, 76, 1024, 743]
-	Open			off
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -7918,7 +7918,7 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
-	  Name			  "SEI-BSC_ACT_SW"
+	  Name			  "SEI_BSC_ACT_SW"
 	  Tag			  "cdsEpicsOutput"
 	  Description		  "Purpose:                                   "
 "       \nOutput a FE signal to an EPICS channel.           \n                "
@@ -8495,7 +8495,7 @@ Model {
 	Line {
 	  SrcBlock		  "SUS_WD_SUM"
 	  SrcPort		  1
-	  DstBlock		  "SEI-BSC_ACT_SW"
+	  DstBlock		  "SEI_BSC_ACT_SW"
 	  DstPort		  1
 	}
 	Line {
@@ -8681,7 +8681,7 @@ Model {
       MaskHideContents	      off
       System {
 	Name			"T1"
-	Location		[409, 87, 1080, 827]
+	Location		[0, 76, 1024, 743]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
