@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.104"
+    ComputedModelVersion    "1.105"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Jan 10 16:47:40 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:104>"
+  LastModifiedDate	  "Fri Jan 12 13:19:12 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:105>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -7933,9 +7933,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -7959,9 +7959,9 @@ Model {
 	  Position		  [395, 37, 465, 893]
 	  SourceBlock		  "cdsSusSw2/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -8682,7 +8682,7 @@ Model {
       System {
 	Name			"T1"
 	Location		[0, 76, 1024, 743]
-	Open			on
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -14342,47 +14342,6 @@ Model {
       DstPort		      7
     }
     Line {
-      Labels		      [1, 0]
-      Points		      [1145, 365]
-      DstBlock		      "DAC_2"
-      DstPort		      9
-    }
-    Line {
-      Points		      [1145, 385; 0, 15]
-      DstBlock		      "DAC_2"
-      DstPort		      10
-    }
-    Line {
-      Points		      [1145, 405; 0, 30]
-      DstBlock		      "DAC_2"
-      DstPort		      11
-    }
-    Line {
-      Points		      [1145, 430; 0, 40]
-      DstBlock		      "DAC_2"
-      DstPort		      12
-    }
-    Line {
-      Points		      [1145, 460; 0, 45]
-      DstBlock		      "DAC_2"
-      DstPort		      13
-    }
-    Line {
-      Points		      [1145, 495; 0, 45]
-      DstBlock		      "DAC_2"
-      DstPort		      14
-    }
-    Line {
-      Points		      [1145, 535; 0, 40]
-      DstBlock		      "DAC_2"
-      DstPort		      15
-    }
-    Line {
-      Points		      [1145, 595; 0, 15]
-      DstBlock		      "DAC_2"
-      DstPort		      16
-    }
-    Line {
       Name		      "<adc_0_0>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
@@ -14743,6 +14702,54 @@ Model {
 	  DstPort		  1
 	}
       }
+    }
+    Line {
+      SrcBlock		      "T1"
+      SrcPort		      14
+      DstBlock		      "DAC_2"
+      DstPort		      16
+    }
+    Line {
+      SrcBlock		      "T1"
+      SrcPort		      13
+      DstBlock		      "DAC_2"
+      DstPort		      15
+    }
+    Line {
+      SrcBlock		      "T1"
+      SrcPort		      12
+      DstBlock		      "DAC_2"
+      DstPort		      14
+    }
+    Line {
+      SrcBlock		      "T1"
+      SrcPort		      11
+      DstBlock		      "DAC_2"
+      DstPort		      13
+    }
+    Line {
+      SrcBlock		      "T1"
+      SrcPort		      10
+      DstBlock		      "DAC_2"
+      DstPort		      12
+    }
+    Line {
+      SrcBlock		      "T1"
+      SrcPort		      9
+      DstBlock		      "DAC_2"
+      DstPort		      11
+    }
+    Line {
+      SrcBlock		      "T1"
+      SrcPort		      8
+      DstBlock		      "DAC_2"
+      DstPort		      10
+    }
+    Line {
+      SrcBlock		      "T1"
+      SrcPort		      7
+      DstBlock		      "DAC_2"
+      DstPort		      9
     }
     Annotation {
       Name		      "Quad Controls"
