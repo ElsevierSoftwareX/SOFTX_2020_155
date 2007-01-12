@@ -229,6 +229,12 @@ sub do_branches {
 	return 0;
 }
 
+# Check name to contain only allowd characters
+sub name_check {
+	return @_[0] =~ /^[a-zA-Z0-9_]+$/;
+}
+
+
 # Find parts and sybsystems
 sub node_processing {
    my ($node, $in_sub) =  @_;
@@ -273,6 +279,9 @@ sub node_processing {
                 die "Cannot handle nested subsystems\n" if $in_sub;
                 $::subSysPartStart[$::subSys] = $::partCnt;
                 $::subSysName[$::subSys] = $block_name;
+		if (!name_check($block_name)) {
+			die "Invalid subsystem name \"$block_name\"";
+		}
 		foreach (@{$node->{NEXT}}) {
   			CDS::Tree::do_on_nodes($_, \&node_processing, 1);
 		}
@@ -281,7 +290,7 @@ sub node_processing {
 		return 1; # Do not call this function on leaves, we already did that
 	} elsif ($block_type eq "Reference") {
 		# Skip Parameters block
-		if ("cdsParameters/Subsystem" eq $source_block) {
+		if ($source_block =~ /^cdsParameters/) {
 		  return 0;
 	 	}
 		# This is CDS part
@@ -294,6 +303,12 @@ sub node_processing {
 		$::partType[$::partCnt] = $block_type;
         	$::cdsPart[$::partCnt] = 0;
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name;
+	}
+	# Check names; pass ADC parts and Remote Interlinks
+	if ($::partName[$::partCnt] !~ /^Bus\\n/ && $source_block !~ /^cdsRemoteIntlk/) {
+	    if (!name_check($::partName[$::partCnt])) {
+		die "Invalid part name \"$::partName[$::partCnt]\"";
+	    }
 	}
 	if (!$in_sub) {
 		$::nonSubPart[$::nonSubCnt] = $::partCnt;
