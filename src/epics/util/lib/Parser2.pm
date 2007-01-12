@@ -662,6 +662,17 @@ sub process {
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
   print "Found $::adcCnt ADCs $::partCnt parts $::subSys subsystems\n";
 
+  # See to it that ADC is on the top level
+  # This is needed because the main script can't handle ADCs in the subsystems
+  # :TODO: fix main script to handle ADC parts in subsystems
+  foreach (0 ... $::partCnt) {
+    if ($::partType[$_] eq "BUSS" || $::partType[$_] eq "BUSC" || $::partType[$_] eq "Dac") {
+      if ($::partSubName[$_] ne "") {
+	die "All ADCs and DACs must be on the top level in the model";
+      }
+    }
+  }
+
   return 1;
 }
 
