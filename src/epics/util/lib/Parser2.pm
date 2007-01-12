@@ -104,7 +104,7 @@ sub parse() {
 # Change Reference source name (CDS part)
 sub transform_part_name {
 	($r) = @_;
-	$r =~ s/\/.*$//; # Delte everything after the slash
+	$r =~ s/\/.*$//; # Delete everything after the slash
 
         if ($r =~ /^cdsSwitch/ || $r eq "cdsSusSw2") { $r = "MultiSwitch"; }
         elsif ($r =~ /^Matrix/) { $r = "Matrix"; }
@@ -257,6 +257,7 @@ sub node_processing {
    } elsif ($node->{NAME} eq "Block") {
 	my $block_type = transform_block_type(${$node->{FIELDS}}{"BlockType"});
 	my $source_type = transform_block_type(${$node->{FIELDS}}{"SourceType"});
+	my $source_block = transform_block_type(${$node->{FIELDS}}{"SourceBlock"});
 	my $block_name = ${$node->{FIELDS}}{"Name"};
 	#print "Part $block_name $block_type $in_sub \n";
 	# Skip certain blocks
@@ -279,11 +280,15 @@ sub node_processing {
                 $::subSys++;
 		return 1; # Do not call this function on leaves, we already did that
 	} elsif ($block_type eq "Reference") {
+		# Skip Parameters block
+		if ("cdsParameters/Subsystem" eq $source_block) {
+		  return 0;
+	 	}
 		# This is CDS part
 
         	$::cdsPart[$::partCnt] = 1;
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name;
-		#print "CDS part $block_name\n";
+		#print "CDS part $block_name type $source_block\n";
 	} else {
 		# Not a CDS part
 		$::partType[$::partCnt] = $block_type;
