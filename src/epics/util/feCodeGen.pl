@@ -1335,6 +1335,16 @@ print "Counted $processCnt parts out of total $ftotal\n";
 if($processCnt != $ftotal)
 {
 	print "Fatal error - not all parts are in processing list!!!!!\n";
+	%seen = ();
+	@missing = ();
+	@seen{@processName} = ();
+	foreach $item (@xpartName) {
+		push (@missing, $item) unless exists $seen{$item};
+	}
+	print "List of part not counted (FIXME: this list is too long and useless???):\n";
+	foreach  (@missing) {
+		print $_, "\n";
+	}
 	exit(1);
 }
 
