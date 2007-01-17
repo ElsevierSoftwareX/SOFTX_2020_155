@@ -367,12 +367,13 @@ sub node_processing {
 # annotate names
 sub flatten_do_branches {
    ($_, $ant) = @_;
+   if (${$_->{FIELDS}}{Parent} == 1) { return; } # Stop annotating if discovered parent's block
    foreach (@{$_->{NEXT}}) {
      if (${$_->{FIELDS}}{DstBlock} ne undef) {
        ${$_->{FIELDS}}{DstBlock} = $ant . ${$_->{FIELDS}}{DstBlock};
        #print ${$_->{FIELDS}}{DstBlock}, ":", ${$_->{FIELDS}}{DstPort}, " ";
      } else {
-	flatten_do_branches($_, $ant);
+       flatten_do_branches($_, $ant);
      }
    }
 }
@@ -562,18 +563,37 @@ sub flatten {
 		die "Disconnected output port\n";
 	}
 	# Hook the line up
-	${$line->{FIELDS}}{SrcBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$branch->{FIELDS}}{SrcBlock};
-	${$line->{FIELDS}}{SrcPort} =  ${$branch->{FIELDS}}{SrcPort};
-	
-	# Remove this line from the list in this node
-	$idx = 0;
-	foreach $block (@{$node->{NEXT}}) {
-	  if ($block == $branch) {
+	if (${$branch->{FIELDS}}{SrcBlock} ne "") {
+	  # There is no branching in the inside line, just a line
+	  # Hook parent line's input up and remove the inside line
+	  ${$line->{FIELDS}}{SrcBlock} = ${$node->{FIELDS}}{Name} . "_" . ${$branch->{FIELDS}}{SrcBlock};
+	  ${$line->{FIELDS}}{SrcPort} =  ${$branch->{FIELDS}}{SrcPort};
+
+	  # Remove this line from the list in this node
+	  $idx = 0;
+	  foreach $block (@{$node->{NEXT}}) {
+	    if ($block == $branch) {
 		last;
+	    }
+	    $idx++;
 	  }
-	  $idx++;
+     	  splice(@{$node->{NEXT}}, $idx, 1,);
+	} else {
+	  #die "Unsupported line processing $port_name in ${$node->{FIELDS}}{Name}\n";
+	  # There is some sort of branching structure in the inside subsystem
+          # Change parent line into a branch 
+	  ${$line->{FIELDS}}{SrcBlock} = undef;
+	  ${$line->{FIELDS}}{SrcPort} = undef;
+	  $line->{NAME} = "Branch";
+	  # Remove former destination
+	  ${$branch->{FIELDS}}{DstBlock} = undef;
+	  ${$branch->{FIELDS}}{DstPort} = undef;
+	  # Mark it here to stop annotating names in flatten_do_branches() later
+	  ${$branch->{FIELDS}}{Parent} = 1;
+	  # Insert parent's line into the branch
+	  push @{$branch->{NEXT}}, $line;
 	}
-     	splice(@{$node->{NEXT}}, $idx, 1,);
+	
      }
 
      # Annotate and add all remaining lines to the parent's list
