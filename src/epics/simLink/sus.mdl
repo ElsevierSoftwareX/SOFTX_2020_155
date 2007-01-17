@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.110"
+    ComputedModelVersion    "1.115"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -42,10 +42,10 @@ Model {
   Creator		  "jay"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "jay"
+  LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Jan 17 12:35:38 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:110>"
+  LastModifiedDate	  "Wed Jan 17 13:59:46 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:115>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -614,7 +614,7 @@ Model {
   }
   System {
     Name		    "sus"
-    Location		    [0, 82, 1470, 955]
+    Location		    [0, 76, 1024, 743]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -1052,7 +1052,7 @@ Model {
       MaskHideContents	      off
       System {
 	Name			"Q1"
-	Location		[0, 82, 794, 957]
+	Location		[0, 76, 1024, 743]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1238,7 +1238,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "ESD"
-	    Location		    [954, 333, 1479, 719]
+	    Location		    [138, 254, 663, 640]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -1810,7 +1810,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "L1"
-	    Location		    [32, 82, 1526, 1026]
+	    Location		    [0, 76, 1024, 743]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -3657,7 +3657,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "L2"
-	    Location		    [30, 82, 1545, 1026]
+	    Location		    [0, 76, 1024, 743]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -5504,7 +5504,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "M0"
-	    Location		    [111, 165, 1584, 940]
+	    Location		    [0, 76, 1024, 743]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -6099,6 +6099,11 @@ Model {
 	      RTWMemSecDataParameters "Inherit from model"
 	    }
 	    Block {
+	      BlockType		      Ground
+	      Name		      "Ground"
+	      Position		      [1370, 610, 1390, 630]
+	    }
+	    Block {
 	      BlockType		      Reference
 	      Name		      "INMTRX"
 	      Tag		      "Matrix"
@@ -6485,6 +6490,18 @@ Model {
 	      RTWMemSecDataParameters "Inherit from model"
 	    }
 	    Block {
+	      BlockType		      Sum
+	      Name		      "Sum"
+	      Ports		      [2, 1]
+	      Position		      [1400, 560, 1420, 580]
+	      ShowName		      off
+	      IconShape		      "round"
+	      Inputs		      "|++"
+	      InputSameDT	      off
+	      OutDataTypeMode	      "Inherit via internal rule"
+	      SaturateOnIntegerOverflow	off
+	    }
+	    Block {
 	      BlockType		      Reference
 	      Name		      "WD"
 	      Ports		      [5, 1]
@@ -6804,10 +6821,6 @@ Model {
 	      SrcPort		      1
 	      Points		      [755, 0]
 	      Branch {
-		DstBlock		"WD_OUT"
-		DstPort			1
-	      }
-	      Branch {
 		Points			[0, -115]
 		Branch {
 		  DstBlock		  "Product6"
@@ -6846,6 +6859,10 @@ Model {
 		    }
 		  }
 		}
+	      }
+	      Branch {
+		DstBlock		"Sum"
+		DstPort			1
 	      }
 	    }
 	    Line {
@@ -6964,6 +6981,19 @@ Model {
 	      SrcPort		      6
 	      Points		      [35, 0; 0, 180]
 	      DstBlock		      "SideOut"
+	      DstPort		      1
+	    }
+	    Line {
+	      SrcBlock		      "Ground"
+	      SrcPort		      1
+	      Points		      [15, 0]
+	      DstBlock		      "Sum"
+	      DstPort		      2
+	    }
+	    Line {
+	      SrcBlock		      "Sum"
+	      SrcPort		      1
+	      DstBlock		      "WD_OUT"
 	      DstPort		      1
 	    }
 	  }
@@ -6981,8 +7011,8 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "R0"
-	    Location		    [111, 165, 1584, 940]
-	    Open		    off
+	    Location		    [0, 76, 1024, 743]
+	    Open		    on
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
 	    ScreenColor		    "white"
@@ -7576,6 +7606,11 @@ Model {
 	      RTWMemSecDataParameters "Inherit from model"
 	    }
 	    Block {
+	      BlockType		      Ground
+	      Name		      "Ground"
+	      Position		      [1350, 610, 1370, 630]
+	    }
+	    Block {
 	      BlockType		      Reference
 	      Name		      "INMTRX"
 	      Tag		      "Matrix"
@@ -7962,6 +7997,18 @@ Model {
 	      RTWMemSecDataParameters "Inherit from model"
 	    }
 	    Block {
+	      BlockType		      Sum
+	      Name		      "Sum"
+	      Ports		      [2, 1]
+	      Position		      [1380, 560, 1400, 580]
+	      ShowName		      off
+	      IconShape		      "round"
+	      Inputs		      "|++"
+	      InputSameDT	      off
+	      OutDataTypeMode	      "Inherit via internal rule"
+	      SaturateOnIntegerOverflow	off
+	    }
+	    Block {
 	      BlockType		      Reference
 	      Name		      "WD"
 	      Ports		      [5, 1]
@@ -8281,10 +8328,6 @@ Model {
 	      SrcPort		      1
 	      Points		      [755, 0]
 	      Branch {
-		DstBlock		"WD_OUT"
-		DstPort			1
-	      }
-	      Branch {
 		Points			[0, -115]
 		Branch {
 		  DstBlock		  "Product6"
@@ -8323,6 +8366,10 @@ Model {
 		    }
 		  }
 		}
+	      }
+	      Branch {
+		DstBlock		"Sum"
+		DstPort			1
 	      }
 	    }
 	    Line {
@@ -8441,6 +8488,19 @@ Model {
 	      SrcPort		      6
 	      Points		      [35, 0; 0, 180]
 	      DstBlock		      "SideOut"
+	      DstPort		      1
+	    }
+	    Line {
+	      SrcBlock		      "Ground"
+	      SrcPort		      1
+	      Points		      [15, 0]
+	      DstBlock		      "Sum"
+	      DstPort		      2
+	    }
+	    Line {
+	      SrcBlock		      "Sum"
+	      SrcPort		      1
+	      DstBlock		      "WD_OUT"
 	      DstPort		      1
 	    }
 	  }
@@ -9044,8 +9104,8 @@ Model {
       MaskHideContents	      off
       System {
 	Name			"T1"
-	Location		[794, 156, 1406, 880]
-	Open			on
+	Location		[0, 76, 1024, 743]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -9167,7 +9227,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "L1"
-	    Location		    [32, 82, 1526, 1026]
+	    Location		    [0, 76, 1024, 743]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -11014,7 +11074,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "L2"
-	    Location		    [30, 82, 1545, 1026]
+	    Location		    [0, 76, 1024, 743]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -12861,7 +12921,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "M0"
-	    Location		    [111, 165, 1584, 940]
+	    Location		    [0, 76, 1024, 743]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -13456,6 +13516,11 @@ Model {
 	      RTWMemSecDataParameters "Inherit from model"
 	    }
 	    Block {
+	      BlockType		      Ground
+	      Name		      "Ground"
+	      Position		      [1415, 610, 1435, 630]
+	    }
+	    Block {
 	      BlockType		      Reference
 	      Name		      "INMTRX"
 	      Tag		      "Matrix"
@@ -13842,6 +13907,18 @@ Model {
 	      RTWMemSecDataParameters "Inherit from model"
 	    }
 	    Block {
+	      BlockType		      Sum
+	      Name		      "Sum"
+	      Ports		      [2, 1]
+	      Position		      [1445, 560, 1465, 580]
+	      ShowName		      off
+	      IconShape		      "round"
+	      Inputs		      "|++"
+	      InputSameDT	      off
+	      OutDataTypeMode	      "Inherit via internal rule"
+	      SaturateOnIntegerOverflow	off
+	    }
+	    Block {
 	      BlockType		      Reference
 	      Name		      "WD"
 	      Ports		      [5, 1]
@@ -14161,10 +14238,6 @@ Model {
 	      SrcPort		      1
 	      Points		      [755, 0]
 	      Branch {
-		DstBlock		"WD_OUT"
-		DstPort			1
-	      }
-	      Branch {
 		Points			[0, -115]
 		Branch {
 		  DstBlock		  "Product6"
@@ -14203,6 +14276,10 @@ Model {
 		    }
 		  }
 		}
+	      }
+	      Branch {
+		DstBlock		"Sum"
+		DstPort			1
 	      }
 	    }
 	    Line {
@@ -14322,6 +14399,19 @@ Model {
 	      Points		      [35, 0; 0, 180]
 	      DstBlock		      "SideOut"
 	      DstPort		      1
+	    }
+	    Line {
+	      SrcBlock		      "Sum"
+	      SrcPort		      1
+	      DstBlock		      "WD_OUT"
+	      DstPort		      1
+	    }
+	    Line {
+	      SrcBlock		      "Ground"
+	      SrcPort		      1
+	      Points		      [15, 0]
+	      DstBlock		      "Sum"
+	      DstPort		      2
 	    }
 	  }
 	}
