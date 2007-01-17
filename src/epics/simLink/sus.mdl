@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.115"
+    ComputedModelVersion    "1.120"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Jan 17 13:59:46 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:115>"
+  LastModifiedDate	  "Wed Jan 17 15:40:22 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:120>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -1052,8 +1052,8 @@ Model {
       MaskHideContents	      off
       System {
 	Name			"Q1"
-	Location		[0, 76, 1024, 743]
-	Open			on
+	Location		[-1, 76, 1023, 743]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -6099,11 +6099,6 @@ Model {
 	      RTWMemSecDataParameters "Inherit from model"
 	    }
 	    Block {
-	      BlockType		      Ground
-	      Name		      "Ground"
-	      Position		      [1370, 610, 1390, 630]
-	    }
-	    Block {
 	      BlockType		      Reference
 	      Name		      "INMTRX"
 	      Tag		      "Matrix"
@@ -6490,18 +6485,6 @@ Model {
 	      RTWMemSecDataParameters "Inherit from model"
 	    }
 	    Block {
-	      BlockType		      Sum
-	      Name		      "Sum"
-	      Ports		      [2, 1]
-	      Position		      [1400, 560, 1420, 580]
-	      ShowName		      off
-	      IconShape		      "round"
-	      Inputs		      "|++"
-	      InputSameDT	      off
-	      OutDataTypeMode	      "Inherit via internal rule"
-	      SaturateOnIntegerOverflow	off
-	    }
-	    Block {
 	      BlockType		      Reference
 	      Name		      "WD"
 	      Ports		      [5, 1]
@@ -6861,7 +6844,7 @@ Model {
 		}
 	      }
 	      Branch {
-		DstBlock		"Sum"
+		DstBlock		"WD_OUT"
 		DstPort			1
 	      }
 	    }
@@ -6983,19 +6966,6 @@ Model {
 	      DstBlock		      "SideOut"
 	      DstPort		      1
 	    }
-	    Line {
-	      SrcBlock		      "Ground"
-	      SrcPort		      1
-	      Points		      [15, 0]
-	      DstBlock		      "Sum"
-	      DstPort		      2
-	    }
-	    Line {
-	      SrcBlock		      "Sum"
-	      SrcPort		      1
-	      DstBlock		      "WD_OUT"
-	      DstPort		      1
-	    }
 	  }
 	}
 	Block {
@@ -7012,7 +6982,7 @@ Model {
 	  System {
 	    Name		    "R0"
 	    Location		    [0, 76, 1024, 743]
-	    Open		    on
+	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
 	    ScreenColor		    "white"
@@ -7606,11 +7576,6 @@ Model {
 	      RTWMemSecDataParameters "Inherit from model"
 	    }
 	    Block {
-	      BlockType		      Ground
-	      Name		      "Ground"
-	      Position		      [1350, 610, 1370, 630]
-	    }
-	    Block {
 	      BlockType		      Reference
 	      Name		      "INMTRX"
 	      Tag		      "Matrix"
@@ -7997,18 +7962,6 @@ Model {
 	      RTWMemSecDataParameters "Inherit from model"
 	    }
 	    Block {
-	      BlockType		      Sum
-	      Name		      "Sum"
-	      Ports		      [2, 1]
-	      Position		      [1380, 560, 1400, 580]
-	      ShowName		      off
-	      IconShape		      "round"
-	      Inputs		      "|++"
-	      InputSameDT	      off
-	      OutDataTypeMode	      "Inherit via internal rule"
-	      SaturateOnIntegerOverflow	off
-	    }
-	    Block {
 	      BlockType		      Reference
 	      Name		      "WD"
 	      Ports		      [5, 1]
@@ -8368,7 +8321,7 @@ Model {
 		}
 	      }
 	      Branch {
-		DstBlock		"Sum"
+		DstBlock		"WD_OUT"
 		DstPort			1
 	      }
 	    }
@@ -8488,19 +8441,6 @@ Model {
 	      SrcPort		      6
 	      Points		      [35, 0; 0, 180]
 	      DstBlock		      "SideOut"
-	      DstPort		      1
-	    }
-	    Line {
-	      SrcBlock		      "Ground"
-	      SrcPort		      1
-	      Points		      [15, 0]
-	      DstBlock		      "Sum"
-	      DstPort		      2
-	    }
-	    Line {
-	      SrcBlock		      "Sum"
-	      SrcPort		      1
-	      DstBlock		      "WD_OUT"
 	      DstPort		      1
 	    }
 	  }
@@ -9087,6 +9027,10 @@ Model {
 	  DstBlock		  "ESD"
 	  DstPort		  3
 	}
+	Annotation {
+	  Position		  [566, 495]
+	  UseDisplayTextAsClickCallback	off
+	}
       }
     }
     Block {
@@ -9105,7 +9049,7 @@ Model {
       System {
 	Name			"T1"
 	Location		[0, 76, 1024, 743]
-	Open			off
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -12922,7 +12866,7 @@ Model {
 	  System {
 	    Name		    "M0"
 	    Location		    [0, 76, 1024, 743]
-	    Open		    off
+	    Open		    on
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
 	    ScreenColor		    "white"
@@ -13516,11 +13460,6 @@ Model {
 	      RTWMemSecDataParameters "Inherit from model"
 	    }
 	    Block {
-	      BlockType		      Ground
-	      Name		      "Ground"
-	      Position		      [1415, 610, 1435, 630]
-	    }
-	    Block {
 	      BlockType		      Reference
 	      Name		      "INMTRX"
 	      Tag		      "Matrix"
@@ -13907,18 +13846,6 @@ Model {
 	      RTWMemSecDataParameters "Inherit from model"
 	    }
 	    Block {
-	      BlockType		      Sum
-	      Name		      "Sum"
-	      Ports		      [2, 1]
-	      Position		      [1445, 560, 1465, 580]
-	      ShowName		      off
-	      IconShape		      "round"
-	      Inputs		      "|++"
-	      InputSameDT	      off
-	      OutDataTypeMode	      "Inherit via internal rule"
-	      SaturateOnIntegerOverflow	off
-	    }
-	    Block {
 	      BlockType		      Reference
 	      Name		      "WD"
 	      Ports		      [5, 1]
@@ -14278,7 +14205,7 @@ Model {
 		}
 	      }
 	      Branch {
-		DstBlock		"Sum"
+		DstBlock		"WD_OUT"
 		DstPort			1
 	      }
 	    }
@@ -14399,19 +14326,6 @@ Model {
 	      Points		      [35, 0; 0, 180]
 	      DstBlock		      "SideOut"
 	      DstPort		      1
-	    }
-	    Line {
-	      SrcBlock		      "Sum"
-	      SrcPort		      1
-	      DstBlock		      "WD_OUT"
-	      DstPort		      1
-	    }
-	    Line {
-	      SrcBlock		      "Ground"
-	      SrcPort		      1
-	      Points		      [15, 0]
-	      DstBlock		      "Sum"
-	      DstPort		      2
 	    }
 	  }
 	}
@@ -14811,15 +14725,15 @@ Model {
     Line {
       SrcBlock		      "Q1"
       SrcPort		      22
-      Points		      [0, -5; 50, 0; 0, 45]
+      Points		      [50, 0; 0, 40]
       DstBlock		      "DAC_1"
       DstPort		      8
     }
     Line {
-      Labels		      [2, 0]
+      Labels		      [1, 0]
       SrcBlock		      "Q1"
       SrcPort		      21
-      Points		      [0, -5; 65, 0]
+      Points		      [65, 0]
       DstBlock		      "DAC_1"
       DstPort		      7
     }
