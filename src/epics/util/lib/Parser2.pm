@@ -290,9 +290,9 @@ sub node_processing {
 		return 1; # Do not call this function on leaves, we already did that
 	} elsif ($block_type eq "Reference") {
 		# Skip Parameters block
-		if ($source_block =~ /^cdsParameters/) {
-		  return 0;
-	 	}
+		#if ($source_block =~ /^cdsParameters/) {
+		  #return 0;
+	 	#}
 		# This is CDS part
 
         	$::cdsPart[$::partCnt] = 1;
@@ -305,7 +305,7 @@ sub node_processing {
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name;
 	}
 	# Check names; pass ADC parts and Remote Interlinks
-	if ($::partName[$::partCnt] !~ /^Bus\\n/ && $source_block !~ /^cdsRemoteIntlk/) {
+	if ($::partName[$::partCnt] !~ /^Bus\\n/ && $source_block !~ /^cdsRemoteIntlk/ && $source_block !~ /^cdsParameters/) {
 	    if (!name_check($::partName[$::partCnt])) {
 		die "Invalid part name \"$::partName[$::partCnt]\"";
 	    }
