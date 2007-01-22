@@ -58,7 +58,7 @@ $meFile = "../../../config/";
 $meFile .= "Makefile\.";
 $meFile .= $ARGV[1];
 $meFile .= epics;
-print "DCUID = $dcuId\n";
+#print "DCUID = $dcuId\n";
 #if($dcuId < 16) {$rate = 60;}
 #if($dcuId > 16) {$rate = 480;}
 if (@ARGV == 2) { $skeleton = $ARGV[1]; }
