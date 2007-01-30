@@ -38,8 +38,9 @@ sub printEpics {}
 sub printFrontEndVars  {
         my ($i) = @_;
 	my $matOuts = $::partOutCnt[$::partOutNum[$i][0]];
-	my $matIns = $::partInCnt[$::partInNum[$i][0]];
-        print ::OUT "double \L$::xpartName[$i]\[$matOuts\]\[$matIns\];\n";
+	#my $matIns = $::partInCnt[$::partInNum[$i][0]];
+        #print ::OUT "double \L$::xpartName[$i]\[$matOuts\]\[$matIns\];\n";
+        print ::OUT "double \L$::xpartName[$i]\[$matOuts\];\n";
 }
 
 # Return front end initialization code
@@ -57,8 +58,9 @@ sub frontEndInitCode {
 sub fromExp {
         my ($i, $j) = @_;
         my $from = $::partInNum[$i][$j];
-        my $fromPort = $::partInputPort[$i][$j];
-        return "\L$::xpartName[$from]" . "\[1\]\[" . $fromPort . "\]";
+        #my $fromPort = $::partInputPort[$i][$j];
+        #return "\L$::xpartName[$from]" . "\[1\]\[" . $fromPort . "\]";
+        return "\L$::xpartName[$from]";
 }
 
 # Return front end code
@@ -72,7 +74,7 @@ sub frontEndCode {
 	my $muxName = "\L$::xpartName[$::partInNum[$i][0]]";
 	my $calcExp = "// MuxMatrix\n";
         $calcExp .= "for(ii=0;ii<$matOuts;ii++)\n{\n";
-        $calcExp .= "\L$::xpartName[$i]\[1\]\[ii\] = \n";
+        $calcExp .= "\L$::xpartName[$i]\[ii\] = \n";
 
         for (0 .. $matIns - 1) {
           $calcExp .= "\tpLocalEpics->$::systemName\.";
