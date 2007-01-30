@@ -1753,7 +1753,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 		print OUT "// DEMUX\n";
 		my $calcExp;
 		for (0 .. $partOutCnt[$mm]  - 1) {
-		  $calcExp .= "\L$xpartName[$mm]\[$_\]" . "= $fromExp[0]\[". $_ . "\]\n";
+		  $calcExp .= "\L$xpartName[$mm]\[$_\]" . "= $fromExp[0]\[". $_ . "\];\n";
 		}
 		print OUT $calcExp;
 	}
