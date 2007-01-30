@@ -66,7 +66,7 @@ open(EPICS,">../fmseq/".$ARGV[1]) || die "cannot open output file for writing";
 mkdir $cFileDirectory, 0755;
 open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
 # Do not modify existing front-end Makefile
-if (-e $mFile) {
+if (-s $mFile) {
   open(OUTM, "/dev/null") || die "cannot open /dev/null for writing";
 } else {
   open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
