@@ -204,9 +204,9 @@ close(IN);
 CDS::ParsingDiagnostics::print_diagnostics("parser_diag.txt");
 
 # By default, set DAC input counts to 16
-for($ii=0;$ii<$dacCnt;$ii++) {
-  $partInCnt[$dacPartNum[$ii]] = 16;
-}
+#for($ii=0;$ii<$dacCnt;$ii++) {
+#  $partInCnt[$dacPartNum[$ii]] = 16;
+#}
 
 # Take all of the part outputs and find connections.
 # Fill in connected part numbers and types.
