@@ -1742,7 +1742,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 		print OUT "// MUX\n";
 		my $calcExp;
 		for (0 .. $inCnt - 1) {
-		  $calcExp .= "\L$xpartName[$mm]\[$_\] = $fromExp[$_];\n";
+		  $calcExp .= "\L$xpartName[$mm]\[$_\]" . "= $fromExp[$_];\n";
 		}
 		print OUT $calcExp;
 	}
