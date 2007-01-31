@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.3"
+    ComputedModelVersion    "1.4"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Jan 30 17:43:29 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:3>"
+  LastModifiedDate	  "Tue Jan 30 17:47:53 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:4>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -935,8 +935,24 @@ Model {
       RTWMemSecDataParameters "Inherit from model"
     }
     Block {
+      BlockType		      Mux
+      Name		      "Mux"
+      Ports		      [4, 1]
+      Position		      [330, 216, 335, 254]
+      ShowName		      off
+      DisplayOption	      "bar"
+    }
+    Block {
+      BlockType		      Mux
+      Name		      "Mux1"
+      Ports		      [4, 1]
+      Position		      [675, 216, 680, 254]
+      ShowName		      off
+      DisplayOption	      "bar"
+    }
+    Block {
       BlockType		      Reference
-      Name		      "IPC\naddr=0x1000"
+      Name		      "addr=0x1000"
       Tag		      "cdsIPC"
       Description	      "Inter-process communication through /rtl_epics_"
 "ipc shared memory"
@@ -955,22 +971,6 @@ Model {
       RTWMemSecDataConstants  "Inherit from model"
       RTWMemSecDataInternal   "Inherit from model"
       RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
-      BlockType		      Mux
-      Name		      "Mux"
-      Ports		      [4, 1]
-      Position		      [330, 216, 335, 254]
-      ShowName		      off
-      DisplayOption	      "bar"
-    }
-    Block {
-      BlockType		      Mux
-      Name		      "Mux1"
-      Ports		      [4, 1]
-      Position		      [675, 216, 680, 254]
-      ShowName		      off
-      DisplayOption	      "bar"
     }
     Block {
       BlockType		      Reference
@@ -1164,7 +1164,7 @@ Model {
       }
       Branch {
 	Points			[0, 75]
-	DstBlock		"IPC\naddr=0x1000"
+	DstBlock		"addr=0x1000"
 	DstPort			1
       }
     }
@@ -1197,7 +1197,7 @@ Model {
       DstPort		      4
     }
     Line {
-      SrcBlock		      "IPC\naddr=0x1000"
+      SrcBlock		      "addr=0x1000"
       SrcPort		      1
       DstBlock		      "IPC"
       DstPort		      1
