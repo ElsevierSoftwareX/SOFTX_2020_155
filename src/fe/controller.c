@@ -40,6 +40,7 @@
 #define INLINE  inline
 #define MMAP_SIZE (64*1024*1024 - 5000)
 char *_epics_shm;		/* Ptr to computer shared memory		*/
+char *_ipc_shm;			/* Ptr to inter-process communication area */
 long daqBuffer;			/* Address for daq dual buffers in daqLib.c	*/
 sem_t irqsem;			/* Semaphore if in IRQ mode.			*/
 CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
@@ -122,7 +123,7 @@ DAQ_RANGE daq;			/* Range settings for daqLib.c		*/
 rtl_pthread_t wthread;
 rtl_pthread_t wthread1;
 rtl_pthread_t wthread2;
-int rfd, wfd;
+int wfd, ipc_fd;
 
 extern int mapPciModules(CDS_HARDWARE *);	/* Init routine to map adc/dac cards	*/
 extern long gsaAdcTrigger(int,int[]);		/* Starts ADC acquisition.		*/
@@ -824,10 +825,24 @@ int main(int argc, char **argv)
 
         _epics_shm = (unsigned char *)rtl_mmap(NULL,MMAP_SIZE,PROT_READ|PROT_WRITE,MAP_SHARED,wfd,0);
         if (_epics_shm == MAP_FAILED) {
-                printf("mmap failed for writer\n");
+                printf("mmap failed for epics shared memory area\n");
                 rtl_perror("mmap()");
                 return (void *)(-1);
         }
+
+	// See if IPC area is available, open and map it
+	strcpy(fname, "/rtl_mem_ipc");
+        ipc_fd = shm_open(fname, RTL_O_RDWR, 0666);
+	if (ipc_fd == -1) {
+          //printf("Warning, couldn't open `%s' read/write (errno=%d)\n", fname, errno);
+	} else {
+          _ipc_shm = (unsigned char *)rtl_mmap(NULL,MMAP_SIZE,PROT_READ|PROT_WRITE,MAP_SHARED,ipc_fd,0);
+        if (_ipc_shm == MAP_FAILED) {
+                printf("mmap failed for IPC shared memory area\n");
+                rtl_perror("mmap()");
+                return (void *)(-1);
+        }
+
 
 	cdsPciModules.use_adcs = 0;
 #ifdef SPECIFIC_ADC_BUS
