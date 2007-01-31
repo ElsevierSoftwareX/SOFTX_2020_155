@@ -74,7 +74,7 @@ sub frontEndCode {
         if (($fromType ne "GROUND") && ($::partInput[$i][0] ne "NC")) {
 		return "if (_ipc_shm != 0) {\n"
         		. "  // IPC output\n"
-                	. "  *((float *)(((char *)_ipc_shmem) + $addressString)) = $::fromExp[0];\n"
+                	. "  *((float *)(((char *)_ipc_shm) + $addressString)) = $::fromExp[0];\n"
 			. "}\n";
         }
         return "";

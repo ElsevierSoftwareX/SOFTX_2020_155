@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.4"
+    ComputedModelVersion    "1.5"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Jan 30 17:47:53 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:4>"
+  LastModifiedDate	  "Tue Jan 30 17:53:06 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:5>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -597,6 +597,28 @@ Model {
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
     Block {
+      BlockType		      Reference
+      Name		      "0x1000"
+      Tag		      "cdsIPC"
+      Description	      "Inter-process communication through /rtl_epics_"
+"ipc shared memory"
+      Ports		      [1, 1]
+      Position		      [695, 418, 735, 482]
+      BackgroundColor	      "green"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsIPC/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
       BlockType		      BusCreator
       Name		      "Bus\nCreator"
       Tag		      "adc_0"
@@ -952,28 +974,6 @@ Model {
     }
     Block {
       BlockType		      Reference
-      Name		      "addr=0x1000"
-      Tag		      "cdsIPC"
-      Description	      "Inter-process communication through /rtl_epics_"
-"ipc shared memory"
-      Ports		      [1, 1]
-      Position		      [695, 418, 735, 482]
-      BackgroundColor	      "green"
-      DropShadow	      on
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsIPC/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      on
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
-      BlockType		      Reference
       Name		      "site=M1\nrate=64K\ndcuid=11"
       Tag		      "cdsParameters"
       Description	      "Purpose:                                       "
@@ -1164,7 +1164,7 @@ Model {
       }
       Branch {
 	Points			[0, 75]
-	DstBlock		"addr=0x1000"
+	DstBlock		"0x1000"
 	DstPort			1
       }
     }
@@ -1197,7 +1197,7 @@ Model {
       DstPort		      4
     }
     Line {
-      SrcBlock		      "addr=0x1000"
+      SrcBlock		      "0x1000"
       SrcPort		      1
       DstBlock		      "IPC"
       DstPort		      1
