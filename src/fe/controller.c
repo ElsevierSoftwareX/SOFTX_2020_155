@@ -837,10 +837,11 @@ int main(int argc, char **argv)
           //printf("Warning, couldn't open `%s' read/write (errno=%d)\n", fname, errno);
 	} else {
           _ipc_shm = (unsigned char *)rtl_mmap(NULL,MMAP_SIZE,PROT_READ|PROT_WRITE,MAP_SHARED,ipc_fd,0);
-        if (_ipc_shm == MAP_FAILED) {
+          if (_ipc_shm == MAP_FAILED) {
                 printf("mmap failed for IPC shared memory area\n");
                 rtl_perror("mmap()");
                 return (void *)(-1);
+	  }
         }
 
 
@@ -849,6 +850,12 @@ int main(int argc, char **argv)
 	cdsPciModules.use_adcs = 1;
 	cdsPciModules.use_adc_bus[0] = SPECIFIC_ADC_BUS;
 	cdsPciModules.use_adc_slot[0] = SPECIFIC_ADC_SLOT;
+#endif
+	cdsPciModules.use_dacs = 0;
+#ifdef SPECIFIC_DAC_BUS
+	cdsPciModules.use_dacs = 1;
+	cdsPciModules.use_dac_bus[0] = SPECIFIC_DAC_BUS;
+	cdsPciModules.use_dac_slot[0] = SPECIFIC_DAC_SLOT;
 #endif
 	printf("Initializing PCI Modules\n");
 	status = mapPciModules(&cdsPciModules);
@@ -944,6 +951,10 @@ int main(int argc, char **argv)
 #ifndef NO_DAQ
 	printf("Initializing Network\n");
 	status = myriNetInit(2);
+	if (status <= 0) {
+		printf("Couldn't initialize Myrinet network connection\n");
+		return 0;
+	}
 #endif
 #if 0
         /* initialize the semaphore */
