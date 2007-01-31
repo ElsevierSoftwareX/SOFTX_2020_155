@@ -813,7 +813,7 @@ int main(int argc, char **argv)
 	sprintf(fname, "/rtl_mem_%s", SYSTEM_NAME_STRING_LOWER);
         wfd = shm_open(fname, RTL_O_RDWR, 0666);
 	if (wfd == -1) {
-          printf("Couldn't open `%s' read/write (errno=%d)\n", fname, errno);
+          //printf("Warning, couldn't open `%s' read/write (errno=%d)\n", fname, errno);
           wfd = shm_open("/rtl_epics", RTL_O_RDWR, 0666);
           if (wfd == -1) {
                 printf("open failed for write on /rtl_epics (%d)\n",errno);
