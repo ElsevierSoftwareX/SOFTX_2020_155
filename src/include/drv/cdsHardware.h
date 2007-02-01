@@ -54,6 +54,10 @@ typedef struct CDS_HARDWARE{
 	int use_adcs;			/* How many ADC boards to use		*/
 	int use_adc_bus[MAX_ADC_MODULES];	/* Bus numbers for the ADCs	*/
 	int use_adc_slot[MAX_ADC_MODULES];	/* Slot numbers for the ADCs	*/
+	/* Variables controlling DAC card usage by systems */
+	int use_dacs;			/* How many DAC boards to use */
+	int use_dac_bus[MAX_DAC_MODULES];	/* Bus numbers for the DACs*/
+	int use_dac_slot[MAX_DAC_MODULES];	/* Slot numbers for the DACs*/
 }CDS_HARDWARE;
 
 /* ACCESS DIO Module Definitions ********************************************** */
