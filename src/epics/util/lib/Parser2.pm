@@ -273,7 +273,9 @@ sub node_processing {
 
 	# Bus creator part is the ADC board
 	if ($block_type eq "BUSC") {
-		$::adcCnt++;
+        	require "lib/Adc.pm";
+        	CDS::Adc::initAdc($node);
+        	$::partType[$::partCnt] = CDS::Adc::partType($node);
 	} 
 	if ($block_type eq "SubSystem") {
                 die "Cannot handle nested subsystems\n" if $in_sub;
@@ -321,6 +323,9 @@ sub node_processing {
 	if ($::cdsPart[$::partCnt]) {
 		my $part_name = transform_part_name(${$node->{FIELDS}}{"SourceBlock"});
         	require "lib/$part_name.pm";
+		if ($part_name eq "Dac") {
+        	  $::partType[$::partCnt] = CDS::Dac::initDac($node);
+		}
         	$::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ();
 	}
 	# For easy access

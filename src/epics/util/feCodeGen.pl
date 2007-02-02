@@ -108,6 +108,11 @@ sub init_vars {
 # Global variables set by parser
 $systemName = "";	# model name
 $adcCnt = 0;	# Total A/D converter boards
+$adcType[0] = 0;	# A/D board types
+$adcNum[0] = 0;	# A/D board numbers, sequential
+$dacCnt = 0;	# Total D/A converter boards
+$dacType[0] = 0;	# D/A board types
+$dacNum[0] = 0;	# D/A board numbers, sequential
 $nonSubCnt = 0; # Total of non-sybsystem parts found in the model
 
 # Keeps non-subsystem part numbers
@@ -1479,6 +1484,17 @@ print OUT "\#ifdef SERVO2K\n";
 print OUT "\t\#define FE_RATE\t2048\n";
 print OUT "\#endif\n";
 print OUT "\n\n";
+
+# Hardware configuration
+print OUT "/* Hardware configuration */\n";
+print OUT "CDS_CARDS cards_used[] = {\n";
+for (0 .. $adcCnt-1) {
+	print OUT "\t{", $adcType[$_], ",", $adcNum[$_], "},\n";
+}
+for (0 .. $dacCnt-1) {
+	print OUT "\t{", $dacType[$_], ",", $dacNum[$_], "},\n";
+}
+print OUT "};\n\n";
 
 sub printVariables {
 for($ii=0;$ii<$partCnt;$ii++)

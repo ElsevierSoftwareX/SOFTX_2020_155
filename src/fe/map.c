@@ -47,6 +47,9 @@ static struct gm_port *netPort = 0;
 daqMessage *daqSendMessage;
 daqData *daqSendData;
 int cdsNetStatus = 0;
+
+/* Local GM port we are using to send DAQ data */
+int local_gm_port = 0;
 #endif
 
 // Prototypes
@@ -419,6 +422,9 @@ int mapPciModules(CDS_HARDWARE *pCds)
   static struct pci_dev *dacdev;
   int status;
   int modCount = 0;
+  int adc_cnt = 0;
+  int fast_adc_cnt = 0;
+  int dac_cnt = 0;
 
   dacdev = NULL;
   status = 0;
@@ -428,27 +434,43 @@ int mapPciModules(CDS_HARDWARE *pCds)
 	// if found, check if it is a DAC module
         if((dacdev->subsystem_device == DAC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
         {
-                printk("dac card on bus %x; device %x\n",
+		int use_it = 1;
+		if (pCds->cards) {
+			use_it = 0;
+			/* See if ought to use this one or not */
+			int i;
+			for (i = 0; i < pCds->cards; i++) {
+				if (pCds->cards_used[i].type == GSC_16AO16
+				    && pCds->cards_used[i].instance == dac_cnt) {
+					use_it = 1;
+					break;
+				}
+			}
+		}
+		if (use_it) {
+                  printk("dac card on bus %x; device %x\n",
                         dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
-                status = mapDac(pCds,dacdev);
-		modCount ++;
+                  status = mapDac(pCds,dacdev);
+		  modCount ++;
+		}
+		dac_cnt++;
         }
 	// if found, check if it is an ADC module
 	if((dacdev->subsystem_device == ADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
 	{
 		int use_it = 1;
-		if (pCds->use_adcs) {
-		  use_it = 0;
-		  /* See if this is one of our ADC cards */
-		  int i;
-		  for (i = 0; i < pCds->use_adcs; i++) {
-		    if (dacdev->bus->number == pCds->use_adc_bus[i] 
-		        && PCI_SLOT(dacdev->devfn) == pCds->use_adc_slot[i]) {
-			use_it = 1;
-			break;
-		    }
-		  }
+		if (pCds->cards) {
+			use_it = 0;
+			/* See if ought to use this one or not */
+			int i;
+			for (i = 0; i < pCds->cards; i++) {
+				if (pCds->cards_used[i].type == GSC_16AI64SSA
+				    && pCds->cards_used[i].instance == adc_cnt) {
+					use_it = 1;
+					break;
+				}
+			}
 		}
 		if (use_it) {
 		  printk("adc card on bus %x; device %x\n",
@@ -457,15 +479,32 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		  status = mapAdc(pCds,dacdev);
 		  modCount ++;
 		}
+		adc_cnt++;
 	}
         // if found, check if it is a Fast ADC module
         if((dacdev->subsystem_device == FADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
         {
-                printk("fast adc card on bus %x; device %x\n",
+		int use_it = 1;
+		if (pCds->cards) {
+			use_it = 0;
+			/* See if ought to use this one or not */
+			int i;
+			for (i = 0; i < pCds->cards; i++) {
+				if (pCds->cards_used[i].type == "GSC_16AISS8AO4"
+				    && pCds->cards_used[i].instance == fast_adc_cnt) {
+					use_it = 1;
+					break;
+				}
+			}
+		}
+		if (use_it) {
+                   printk("fast adc card on bus %x; device %x\n",
                         dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
-                status = mapFadc(pCds,dacdev);
-                modCount ++;
+                   status = mapFadc(pCds,dacdev);
+                   modCount ++;
+		}
+		fast_adc_cnt++;
         }
   }
 
@@ -692,6 +731,7 @@ return(0);
 // Initialize the myrinet connection to Framebuilder.
 int myriNetInit(int fbId)
 {
+  int i;
   char receiver_nodename[64];
 
   // Initialize interface
@@ -717,19 +757,23 @@ int myriNetInit(int fbId)
 #endif
   gm_strncpy (receiver_nodename, "fb", sizeof (receiver_nodename) - 1);
 
-  main_status = gm_open (&netPort, my_board_num,
-                         GM_PORT_NUM_SEND,
+  /* Try upto for GM ports */
+  for (i = 0; i < 4; i++) {
+    main_status = gm_open (&netPort, my_board_num,
+                         (local_gm_port = GM_PORT_NUM_SEND + i),
                          "gm_simple_example_send",
                          (enum gm_api_version) GM_API_VERSION_1_1);
-  if (main_status == GM_SUCCESS)
-    {
-      printk ("[send] Opened board %d port %d\n",
-                 my_board_num, GM_PORT_NUM_SEND);
+    if (main_status == GM_SUCCESS) {
+      printk ("[send] Opened board %d port %d\n", my_board_num, GM_PORT_NUM_SEND);
+      break;
+    } else {
+      ;
     }
-  else
-    {
+  }
+  if (main_status != GM_SUCCESS) {
       gm_perror ("[send] Couldn't open GM port", main_status);
-    }
+      return 0;
+  }
 
   /* Allocate DMAable message buffers. */
 
@@ -856,6 +900,7 @@ int myriNetReconnect(int dcuId)
   daqSendMessage = (daqMessage *)netOutBuffer;
   sprintf (daqSendMessage->message, "STT");
   daqSendMessage->dcuId = htonl(dcuId);
+  daqSendMessage->port = htonl(local_gm_port);
   daqSendMessage->channelCount = htonl(16);
   daqSendMessage->fileCrc = htonl(0x3879d7b);
   daqSendMessage->dataBlockSize = htonl(GM_DAQ_XFER_BYTE);
