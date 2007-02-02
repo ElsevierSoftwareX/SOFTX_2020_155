@@ -35,6 +35,12 @@
 #define GSC_16AISS8AO4		1
 #define GSC_16AO16		2
 
+/* Cards configuration */
+typedef struct CDS_CARDS {
+	int type;
+	int instance;
+} CDS_CARDS;
+
 /* Standard structure to maintain PCI module information.			*/
 typedef struct CDS_HARDWARE{
 	int dacCount;			/* Number of DAC modules found 		*/
@@ -50,14 +56,10 @@ typedef struct CDS_HARDWARE{
 	int rfmCount;			/* Number of RFM modules found		*/
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
 	int rfmConfig[MAX_RFM_MODULES];
-	/* Variables controlling ADC card usage by systems */
-	int use_adcs;			/* How many ADC boards to use		*/
-	int use_adc_bus[MAX_ADC_MODULES];	/* Bus numbers for the ADCs	*/
-	int use_adc_slot[MAX_ADC_MODULES];	/* Slot numbers for the ADCs	*/
-	/* Variables controlling DAC card usage by systems */
-	int use_dacs;			/* How many DAC boards to use */
-	int use_dac_bus[MAX_DAC_MODULES];	/* Bus numbers for the DACs*/
-	int use_dac_slot[MAX_DAC_MODULES];	/* Slot numbers for the DACs*/
+
+	/* Variables controlling cards usage */
+	int cards;			/* Sizeof array below */
+	CDS_CARDS *cards_used;		/* Cards configuration */
 }CDS_HARDWARE;
 
 /* ACCESS DIO Module Definitions ********************************************** */
@@ -289,3 +291,4 @@ typedef struct GSA_FAD_REG{
 #define GSAF_DAC_CLR_BUFFER     0x800
 #define GSAF_DAC_DMA_LOCAL_ADDR      0x48
 #define GSAF_RATEC_1MHZ     	0x28
+

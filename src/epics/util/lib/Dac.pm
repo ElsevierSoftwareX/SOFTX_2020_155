@@ -2,13 +2,48 @@ package CDS::Dac;
 use Exporter;
 @ISA = ('Exporter');
 
-sub partType {
+# DAC cards we support
+%board_types = (
+	"GSC_16AO16" => 1, # General Standards board
+);
+$default_board_type = "GSC_16AO16";
+
+sub initDac {
+        my ($node) = @_;
         $::dacPartNum[$::dacCnt] = $::partCnt;
         for (0 .. 15) {
           $::partInput[$::partCnt][$_] = "NC";
         }
-        $::dacCnt++;
 
+	my $desc = ${$node->{FIELDS}}{"Description"};
+	#printf "DAC PART TYPE description `$desc'\n";
+	my ($type) = $desc =~ m/type=([^,]+)/g;
+	my ($num) = $desc =~ m/card_num=([^,]+)/g;
+	if ($type eq undef) {
+		$type = $default_board_type;
+	}
+	if ($num eq undef) {
+		$num = $::dacCnt;
+	}
+	print "DAC $::dacCnt; type=$type; num=$num\n";
+	
+	# Check if this is a supported board type
+	if ($board_types{$type} != 1) {
+		print "Unsupported board type\n";
+		print "Known board types:\n";
+		foreach (keys %board_types) {
+			print "\t$_\n";
+		}
+		exit 1;
+	}
+
+        $::dacType[$::dacCnt] = $type;
+        $::dacNum[$::dacCnt] = $num;
+        $::dacCnt++;
+}
+
+
+sub partType {
 	return Dac;
 }
 

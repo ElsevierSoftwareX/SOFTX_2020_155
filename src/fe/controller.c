@@ -844,19 +844,14 @@ int main(int argc, char **argv)
 	  }
         }
 
+	{
+	  int cards = sizeof(cards_used)/sizeof(cards_used[0]);
 
-	cdsPciModules.use_adcs = 0;
-#ifdef SPECIFIC_ADC_BUS
-	cdsPciModules.use_adcs = 1;
-	cdsPciModules.use_adc_bus[0] = SPECIFIC_ADC_BUS;
-	cdsPciModules.use_adc_slot[0] = SPECIFIC_ADC_SLOT;
-#endif
-	cdsPciModules.use_dacs = 0;
-#ifdef SPECIFIC_DAC_BUS
-	cdsPciModules.use_dacs = 1;
-	cdsPciModules.use_dac_bus[0] = SPECIFIC_DAC_BUS;
-	cdsPciModules.use_dac_slot[0] = SPECIFIC_DAC_SLOT;
-#endif
+	  //printf("configured to use %d cards\n", cards);
+	  cdsPciModules.cards = cards;
+	  cdsPciModules.cards_used = cards_used;
+          //return (void *)(-1);
+	}
 	printf("Initializing PCI Modules\n");
 	status = mapPciModules(&cdsPciModules);
 	printf("%d PCI cards found\n",status);

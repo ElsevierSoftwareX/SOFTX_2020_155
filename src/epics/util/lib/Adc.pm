@@ -2,16 +2,53 @@ package CDS::Adc;
 use Exporter;
 @ISA = ('Exporter');
 
-sub partType {
+# ADC cards we support
+%board_types = (
+	"GSC_16AI64SSA" => 1, # Slow General Standards board
+	"GSC_16AISS8AO4" => 1 # Fast General Standards board
+);
+
+# default board type (if none specified with type=<type> in block Description)
+$default_board_type = "GSC_16AI64SSA";
+
+sub initAdc {
+        my ($node) = @_;
         $::adcPartNum[$::adcCnt] = $::partCnt;
+	# Set ADC type and number
+	my $desc = ${$node->{FIELDS}}{"Description"};
+	my ($type) = $desc =~ m/type=([^,]+)/g;
+	my ($num) = $desc =~ m/card_num=([^,]+)/g;
+	if ($type eq undef) {
+		$type = $default_board_type;
+	}
+	if ($num eq undef) {
+		$num = $::adcCnt;
+	}
+	print "ADC $::adcCnt; type=$type; num=$num\n";
+	
+	# Check if this is a supported board type
+	if ($board_types{$type} != 1) {
+		print "Unsupported board type\n";
+		print "Known board types:\n";
+		foreach (keys %board_types) {
+			print "\t$_\n";
+		}
+		exit 1;
+	}
+
+        $::adcType[$::adcCnt] = $type;
+        $::adcNum[$::adcCnt] = $num;
         $::adcCnt++;
         $::partUsed[$::partCnt] = 1;
+}
+
+sub partType {
 	return Adc;
 }
 
 # Print Epics communication structure into a header file
 # Current part number is passed as first argument
-sub printHeaderStruct {
+sub erintHeaderStruct {
         my ($i) = @_;
         ;
 }
