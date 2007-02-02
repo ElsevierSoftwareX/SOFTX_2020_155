@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.5"
+    ComputedModelVersion    "1.7"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Jan 30 17:53:06 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:5>"
+  LastModifiedDate	  "Thu Feb  1 16:15:35 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:7>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -582,7 +582,7 @@ Model {
   }
   System {
     Name		    "pdx"
-    Location		    [-93, 168, 859, 742]
+    Location		    [24, 147, 976, 721]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -622,7 +622,7 @@ Model {
       BlockType		      BusCreator
       Name		      "Bus\nCreator"
       Tag		      "adc_0"
-      Description	      "ADC0"
+      Description	      "ADC0,type=GSC_16AISS8AO4,card_num=1"
       Ports		      [32, 1]
       Position		      [125, 150, 130, 305]
       ShowName		      off
@@ -671,7 +671,7 @@ Model {
     Block {
       BlockType		      Reference
       Name		      "DAC_0"
-      Description	      "DAC"
+      Description	      "DAC,type=GSC_16AO16,card_num=1"
       Ports		      [16, 16]
       Position		      [855, 72, 905, 538]
       BackgroundColor	      "cyan"
