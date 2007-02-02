@@ -490,7 +490,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 			/* See if ought to use this one or not */
 			int i;
 			for (i = 0; i < pCds->cards; i++) {
-				if (pCds->cards_used[i].type == "GSC_16AISS8AO4"
+				if (pCds->cards_used[i].type == GSC_16AISS8AO4
 				    && pCds->cards_used[i].instance == fast_adc_cnt) {
 					use_it = 1;
 					break;
