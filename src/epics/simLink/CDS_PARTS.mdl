@@ -32,10 +32,10 @@ Library {
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "aivanov"
+  LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Jan 30 17:52:10 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:74>"
+  LastModifiedDate	  "Fri Feb 02 14:12:09 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:75>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -191,6 +191,16 @@ Library {
       BlockType		      Reference
     }
     Block {
+      BlockType		      RelationalOperator
+      Operator		      ">="
+      InputSameDT	      on
+      LogicOutDataTypeMode    "Logical (see Configuration Parameters: Optimiza"
+"tion)"
+      LogicDataType	      "uint(8)"
+      ZeroCross		      on
+      SampleTime	      "-1"
+    }
+    Block {
       BlockType		      SubSystem
       ShowPortLabels	      on
       Permissions	      "ReadWrite"
@@ -219,6 +229,17 @@ Library {
       LockScale		      off
       RndMeth		      "Floor"
       SaturateOnIntegerOverflow	on
+      SampleTime	      "-1"
+    }
+    Block {
+      BlockType		      Switch
+      Criteria		      "u2 >= Threshold"
+      Threshold		      "0"
+      InputSameDT	      on
+      OutDataTypeMode	      "Inherit via internal rule"
+      RndMeth		      "Floor"
+      SaturateOnIntegerOverflow	on
+      ZeroCross		      on
       SampleTime	      "-1"
     }
     Block {
@@ -251,7 +272,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [218, 227, 887, 548]
+    Location		    [684, 99, 1353, 420]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -603,8 +624,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[580, 78, 1020, 818]
-	Open			on
+	Location		[580, 93, 1020, 833]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1140,8 +1161,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[276, 87, 546, 486]
-	Open			off
+	Location		[821, 583, 1091, 982]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1188,6 +1209,14 @@ Library {
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
+	  BlockType		  RelationalOperator
+	  Name			  "Relational\nOperator"
+	  Position		  [140, 252, 170, 283]
+	  Operator		  "<="
+	  InputSameDT		  off
+	  LogicOutDataTypeMode	  "Boolean"
+	}
+	Block {
 	  BlockType		  Sum
 	  Name			  "Sum"
 	  Ports			  [2, 1]
@@ -1197,6 +1226,13 @@ Library {
 	  Inputs		  "|++"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Switch"
+	  Position		  [140, 180, 170, 210]
+	  InputSameDT		  off
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
