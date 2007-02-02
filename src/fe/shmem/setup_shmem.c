@@ -47,9 +47,11 @@ int main(int argc, char **argv)
 		}
 		sys_count = argc - 1;
 	}
+#if 0
 	for (i = 0; i < sys_count; i++) {
 		printf("%s: adcs=%d, dacs=%d\n", sys_info[i].name, sys_info[i].adcs, sys_info[i].dacs);
 	}
+#endif
 
 	cnt = sys_count;
 	if (cnt == 0) cnt = 1;
