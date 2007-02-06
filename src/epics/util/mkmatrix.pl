@@ -1,4 +1,9 @@
 #!/usr/bin/perl -w
+#mkmatrix --cols=9 --rows=9  --x=70 --y=45\
+#         --chanbase=C1:ASS-YAW_CTRL_MTRX_ \
+#         --rowlabels=PRM,BS,ITMX,ITMY,SRM,ETMX,ETMY,PZT1,PZT2 \
+#         --collabels=DOF1,DOF2,DOF3,DOF4,DOF5,DOF6,DOF7,DOF8,DOF9 \
+#   > C1ASS_YAW_CTRL_MTRX.adl	
 
 use Getopt::Long;
 
