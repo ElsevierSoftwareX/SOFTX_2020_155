@@ -2178,6 +2178,22 @@ for(0 .. $partCnt-1) {
 	if ($_ >= $subSysPartStop[$cur_subsys_num]) {
 		$cur_subsys_num += 1;
 	}
+	if ($partType[$_] =~ /Matrix$/) {
+		my $outcnt = $partOutCnt[$_];
+		my $incnt = $partInCnt[$_];
+		if ($partType[$_] eq "MuxMatrix") {
+			# MuxMatrix uses mux and demux parts 
+			$outcnt = $partOutCnt[$partOutNum[$_][0]];
+			$incnt = $partInCnt[$partInNum[$_][0]];
+		}
+		my $basename = $partName[$_];
+		if ($partSubName[$_] ne "") {
+			$basename = $partSubName[$_] . "_" . $basename;
+		}
+		my $basename1 = $usite . ":" .$sysname ."-" . $basename . "_";
+		#print "Matrix $basename $incnt X $outcnt\n";
+		system("./mkmatrix.pl --cols=$incnt --rows=$outcnt --chanbase=$basename1 > $skeleton/$usite$sysname" . "_" . $basename . ".adl");
+	}
 	if ($partType[$_] eq "Filt") {
 		my $filt_name = $partName[$_];
 		if ($partSubName[$_] ne "") {
