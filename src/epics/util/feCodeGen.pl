@@ -1511,7 +1511,9 @@ for($ii=0;$ii<$partCnt;$ii++)
 		$port = $partOutCnt[$ii];
 		print OUT "double \L$xpartName[$ii]\[$port\];\n";
 	}
-	if($partType[$ii] eq "SUM" || $partType[$ii] eq "RelationalOperator") {
+	if($partType[$ii] eq "SUM"
+	   || $partType[$ii] eq "Switch"
+	   || $partType[$ii] eq "RelationalOperator") {
 		$port = $partInCnt[$ii];
 		print OUT "double \L$xpartName[$ii];\n";
 	}
@@ -1772,6 +1774,13 @@ for($xx=0;$xx<$processCnt;$xx++)
 		  $calcExp .= "\L$xpartName[$mm]\[$_\]" . "= $fromExp[0]\[". $_ . "\];\n";
 		}
 		print OUT $calcExp;
+	}
+	# Switch
+	if ($partType[$mm] eq "Switch") {
+	  print OUT "// Switch\n";
+	  print OUT "\L$xpartName[$mm] = ";
+	  my $op = $partInputs[$mm];
+	  print OUT "\L$xpartName[$mm]". " = ((($fromExp[1]) $op)? ($fromExp[0]): ($fromExp[1]));";
 	}
 	# Relational Operator
 	if ($partType[$mm] eq "RelationalOperator") {
