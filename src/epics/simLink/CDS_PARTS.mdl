@@ -34,8 +34,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Feb  7 19:08:31 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:78>"
+  LastModifiedDate	  "Wed Feb  7 19:32:32 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:79>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -1161,7 +1161,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[748, 338, 1018, 737]
+	Location		[708, 160, 978, 559]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1174,6 +1174,13 @@ Library {
 	TiledPageScale		1
 	ShowPageBoundaries	off
 	ZoomFactor		"100"
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice"
+	  Position		  [140, 180, 170, 210]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
 	Block {
 	  BlockType		  Product
 	  Name			  "Divide"
@@ -1237,13 +1244,6 @@ Library {
 	  BlockType		  UnitDelay
 	  Name			  "Unit Delay"
 	  Position		  [135, 93, 170, 127]
-	}
-	Block {
-	  BlockType		  Switch
-	  Name			  "cdsSwitch"
-	  Position		  [140, 180, 170, 210]
-	  InputSameDT		  off
-	  SaturateOnIntegerOverflow off
 	}
       }
     }

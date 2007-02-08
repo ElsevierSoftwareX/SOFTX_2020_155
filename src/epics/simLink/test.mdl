@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.142"
+    ComputedModelVersion    "1.148"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Jan  4 09:42:32 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:142>"
+  LastModifiedDate	  "Wed Feb  7 19:49:14 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:148>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -539,6 +539,16 @@ Model {
       BlockType		      Reference
     }
     Block {
+      BlockType		      RelationalOperator
+      Operator		      ">="
+      InputSameDT	      on
+      LogicOutDataTypeMode    "Logical (see Configuration Parameters: Optimiza"
+"tion)"
+      LogicDataType	      "uint(8)"
+      ZeroCross		      on
+      SampleTime	      "-1"
+    }
+    Block {
       BlockType		      SubSystem
       ShowPortLabels	      on
       Permissions	      "ReadWrite"
@@ -557,16 +567,14 @@ Model {
       MinMaxOverflowLogging   "UseLocalSettings"
     }
     Block {
-      BlockType		      Sum
-      IconShape		      "rectangular"
-      Inputs		      "++"
+      BlockType		      Switch
+      Criteria		      "u2 >= Threshold"
+      Threshold		      "0"
       InputSameDT	      on
-      OutDataTypeMode	      "Same as first input"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
-      LockScale		      off
+      OutDataTypeMode	      "Inherit via internal rule"
       RndMeth		      "Floor"
       SaturateOnIntegerOverflow	on
+      ZeroCross		      on
       SampleTime	      "-1"
     }
     Block {
@@ -592,7 +600,7 @@ Model {
   }
   System {
     Name		    "test"
-    Location		    [1, 76, 1025, 743]
+    Location		    [19, 74, 706, 715]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -654,6 +662,13 @@ Model {
       }
     }
     Block {
+      BlockType		      Switch
+      Name		      "Choice"
+      Position		      [275, 220, 305, 250]
+      InputSameDT	      off
+      SaturateOnIntegerOverflow	off
+    }
+    Block {
       BlockType		      Ground
       Name		      "Ground"
       Position		      [15, 35, 35, 55]
@@ -683,6 +698,13 @@ Model {
       RTWMemSecDataConstants  "Inherit from model"
       RTWMemSecDataInternal   "Inherit from model"
       RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      RelationalOperator
+      Name		      "Operator"
+      Position		      [235, 327, 265, 358]
+      InputSameDT	      off
+      LogicOutDataTypeMode    "Boolean"
     }
     Block {
       BlockType		      Reference
@@ -740,8 +762,8 @@ Model {
       MaskHideContents	      off
       System {
 	Name			"PD1_X"
-	Location		[408, 103, 894, 728]
-	Open			on
+	Location		[407, 82, 893, 707]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -785,8 +807,8 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "P1"
-	    Location		    [173, 166, 978, 559]
-	    Open		    on
+	    Location		    [172, 145, 977, 538]
+	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
 	    ScreenColor		    "white"
@@ -854,9 +876,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -904,9 +926,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -967,9 +989,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -987,8 +1009,8 @@ Model {
 	      MaskHideContents	      off
 	      System {
 		Name			"TEST1"
-		Location		[317, 181, 617, 347]
-		Open			on
+		Location		[661, 129, 961, 295]
+		Open			off
 		ModelBrowserVisibility	off
 		ModelBrowserWidth	200
 		ScreenColor		"white"
@@ -1031,9 +1053,9 @@ Model {
 		  AttributesFormatString  "%<Tag>"
 		  SourceBlock		  "cdsEpicsOut/Subsystem"
 		  SourceType		  "SubSystem"
-		  ShowPortLabels	  on
+		  ShowPortLabels	  "on"
 		  SystemSampleTime	  "-1"
-		  FunctionWithSeparateData off
+		  FunctionWithSeparateData "off"
 		  RTWMemSecFuncInitTerm	  "Inherit from model"
 		  RTWMemSecFuncExecute	  "Inherit from model"
 		  RTWMemSecDataConstants  "Inherit from model"
@@ -1051,8 +1073,8 @@ Model {
 		  MaskHideContents	  off
 		  System {
 		    Name		    "TEST2"
-		    Location		    [670, 116, 970, 282]
-		    Open		    on
+		    Location		    [669, 98, 969, 264]
+		    Open		    off
 		    ModelBrowserVisibility  off
 		    ModelBrowserWidth	    200
 		    ScreenColor		    "white"
@@ -1090,9 +1112,9 @@ Model {
 		    AttributesFormatString  "%<Tag>"
 		    SourceBlock		    "cdsPhase/Subsystem"
 		    SourceType		    "SubSystem"
-		    ShowPortLabels	    on
+		    ShowPortLabels	    "on"
 		    SystemSampleTime	    "-1"
-		    FunctionWithSeparateData off
+		    FunctionWithSeparateData "off"
 		    RTWMemSecFuncInitTerm   "Inherit from model"
 		    RTWMemSecFuncExecute    "Inherit from model"
 		    RTWMemSecDataConstants  "Inherit from model"
@@ -1116,9 +1138,9 @@ Model {
 		    AttributesFormatString  "%<Tag>"
 		    SourceBlock		    "cdsEpicsOut/Subsystem"
 		    SourceType		    "SubSystem"
-		    ShowPortLabels	    on
+		    ShowPortLabels	    "on"
 		    SystemSampleTime	    "-1"
-		    FunctionWithSeparateData off
+		    FunctionWithSeparateData "off"
 		    RTWMemSecFuncInitTerm   "Inherit from model"
 		    RTWMemSecFuncExecute    "Inherit from model"
 		    RTWMemSecDataConstants  "Inherit from model"
@@ -1442,21 +1464,6 @@ Model {
       DstPort		      1
     }
     Line {
-      Labels		      [2, 0]
-      SrcBlock		      "OSC_P1"
-      SrcPort		      2
-      Points		      [0, -10; 155, 0; 0, 145]
-      DstBlock		      "PD1_X"
-      DstPort		      2
-    }
-    Line {
-      SrcBlock		      "OSC_P1"
-      SrcPort		      3
-      Points		      [105, 0; 0, 230]
-      DstBlock		      "PD1_X"
-      DstPort		      3
-    }
-    Line {
       SrcBlock		      "0x10000"
       SrcPort		      1
       DstBlock		      "PD1"
@@ -1475,6 +1482,56 @@ Model {
       Points		      [40, 0; 0, -20]
       DstBlock		      "Terminator1"
       DstPort		      1
+    }
+    Line {
+      SrcBlock		      "OSC_P1"
+      SrcPort		      3
+      Points		      [50, 0; 0, 90]
+      Branch {
+	Points			[0, 105]
+	DstBlock		"Operator"
+	DstPort			2
+      }
+      Branch {
+	DstBlock		"Choice"
+	DstPort			3
+      }
+    }
+    Line {
+      SrcBlock		      "OSC_P1"
+      SrcPort		      2
+      Points		      [70, 0; 0, 95]
+      Branch {
+	Points			[0, 105]
+	DstBlock		"Operator"
+	DstPort			1
+      }
+      Branch {
+	Points			[0, 5]
+	DstBlock		"Choice"
+	DstPort			2
+      }
+    }
+    Line {
+      SrcBlock		      "OSC_P1"
+      SrcPort		      1
+      Points		      [135, 0; 0, 110]
+      DstBlock		      "Choice"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Choice"
+      SrcPort		      1
+      Points		      [30, 0; 0, 35]
+      DstBlock		      "PD1_X"
+      DstPort		      2
+    }
+    Line {
+      SrcBlock		      "Operator"
+      SrcPort		      1
+      Points		      [60, 0; 0, 40]
+      DstBlock		      "PD1_X"
+      DstPort		      3
     }
   }
 }
