@@ -1778,7 +1778,6 @@ for($xx=0;$xx<$processCnt;$xx++)
 	# Switch
 	if ($partType[$mm] eq "Switch") {
 	  print OUT "// Switch\n";
-	  print OUT "\L$xpartName[$mm] = ";
 	  my $op = $partInputs[$mm];
 	  print OUT "\L$xpartName[$mm]". " = ((($fromExp[1]) $op)? ($fromExp[0]): ($fromExp[1]));";
 	}
