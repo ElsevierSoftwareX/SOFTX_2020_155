@@ -309,7 +309,7 @@ sub node_processing {
 	# Check names; pass ADC parts and Remote Interlinks
 	if ($::partName[$::partCnt] !~ /^Bus\\n/ && $source_block !~ /^cdsRemoteIntlk/ && $source_block !~ /^cdsParameters/) {
 	    if (!name_check($::partName[$::partCnt])) {
-		die "Invalid part name \"$::partName[$::partCnt]\"";
+		die "Invalid part name \"$::partName[$::partCnt]\"; source_block \"$source_block\"; block  type \"$block_type\"";
 	    }
 	}
 	if (!$in_sub) {
@@ -355,6 +355,8 @@ sub node_processing {
 		 ${$node->{FIELDS}}{Inputs} eq "*\/") {
 		$::partType[$::partCnt] = "DIVIDE";
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
+	} elsif ($block_type eq "RelationalOperator") {
+		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Operator};
 	}
 	${$node->{FIELDS}}{PartNumber} = $::partCnt; # Store our part number
 	$::partCnt++;
