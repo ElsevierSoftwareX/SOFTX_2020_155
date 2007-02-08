@@ -32,10 +32,10 @@ Library {
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "rolf"
+  LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Feb 02 14:12:09 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:75>"
+  LastModifiedDate	  "Wed Feb  7 19:08:31 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:78>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -272,7 +272,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [684, 99, 1353, 420]
+    Location		    [275, 186, 944, 507]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -352,7 +352,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"EpicsParts"
-	Location		[788, 287, 998, 529]
+	Location		[787, 266, 997, 508]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -649,9 +649,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsRfmIO/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -671,9 +671,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsIPC/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -744,9 +744,9 @@ Library {
 	  AttributesFormatString  "%<Description>"
 	  SourceBlock		  "dac/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -766,9 +766,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsDio/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1161,7 +1161,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[821, 583, 1091, 982]
+	Location		[748, 338, 1018, 737]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1193,11 +1193,19 @@ Library {
 	}
 	Block {
 	  BlockType		  Logic
-	  Name			  "Logical\nOperator"
+	  Name			  "LogicalOperator"
 	  Ports			  [2, 1]
 	  Position		  [135, 22, 165, 53]
 	  AllPortsSameDT	  off
 	  OutDataTypeMode	  "Boolean"
+	}
+	Block {
+	  BlockType		  RelationalOperator
+	  Name			  "Operator"
+	  Position		  [140, 252, 170, 283]
+	  Operator		  "<="
+	  InputSameDT		  off
+	  LogicOutDataTypeMode	  "Boolean"
 	}
 	Block {
 	  BlockType		  Product
@@ -1207,14 +1215,6 @@ Library {
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
-	}
-	Block {
-	  BlockType		  RelationalOperator
-	  Name			  "Relational\nOperator"
-	  Position		  [140, 252, 170, 283]
-	  Operator		  "<="
-	  InputSameDT		  off
-	  LogicOutDataTypeMode	  "Boolean"
 	}
 	Block {
 	  BlockType		  Sum
@@ -1229,13 +1229,6 @@ Library {
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
-	  BlockType		  Switch
-	  Name			  "Switch"
-	  Position		  [140, 180, 170, 210]
-	  InputSameDT		  off
-	  SaturateOnIntegerOverflow off
-	}
-	Block {
 	  BlockType		  Terminator
 	  Name			  "Terminator"
 	  Position		  [40, 225, 60, 245]
@@ -1244,6 +1237,13 @@ Library {
 	  BlockType		  UnitDelay
 	  Name			  "Unit Delay"
 	  Position		  [135, 93, 170, 127]
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "cdsSwitch"
+	  Position		  [140, 180, 170, 210]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
 	}
       }
     }
