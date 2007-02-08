@@ -132,7 +132,7 @@ $partInput[0][0] = "";	# $partInput[0 .. $partCnt][0 .. $partInCnt[0]]
 # Source port number
 # This shows which source parts' port is connected to each input
 $partInputPort[0][0] = 0;	# $partInputPort[0 .. $partCnt][0 .. $partInCnt[$_]]
-$partInputs[0] = 0;		# Stores 'Inputs' field of the part declaration (used in SUM part)
+$partInputs[0] = 0;		# Stores 'Inputs' field of the part declaration in SUM part, 'Operator' in RelationaOperator part
 
 # Total number of outputs for each part
 # i.e. how many parts are connected with lines (branches) to it
@@ -1511,7 +1511,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 		$port = $partOutCnt[$ii];
 		print OUT "double \L$xpartName[$ii]\[$port\];\n";
 	}
-	if($partType[$ii] eq "SUM") {
+	if($partType[$ii] eq "SUM" || $partType[$ii] eq "RelationalOperator") {
 		$port = $partInCnt[$ii];
 		print OUT "double \L$xpartName[$ii];\n";
 	}
@@ -1772,6 +1772,13 @@ for($xx=0;$xx<$processCnt;$xx++)
 		  $calcExp .= "\L$xpartName[$mm]\[$_\]" . "= $fromExp[0]\[". $_ . "\];\n";
 		}
 		print OUT $calcExp;
+	}
+	# Relational Operator
+	if ($partType[$mm] eq "RelationalOperator") {
+	  my $op = $partInputs[$mm];
+	  if ($op eq "~=") { $op = "!="; };
+	  print OUT "// Relational Operator\n";
+	  print OUT "\L$xpartName[$mm]". " = (($fromExp[0]) $op ($fromExp[1]));";
 	}
 	# ******** SUMMING JUNC ********************************************************************
 	if($partType[$mm] eq "SUM")
