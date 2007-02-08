@@ -365,7 +365,7 @@ sub node_processing {
 		my $op = ${$node->{FIELDS}}{Criteria};
 		if ($op eq undef) { $op = ">="; }
 		$thresh = ${$node->{FIELDS}}{Threshold};
-		if ($op eq undef) { $thresh = "0"; }
+		if ($thresh eq undef) { $thresh = "0"; }
 	  	if ($op  =~ />=/) { $op = ">= $thresh"; }
 	  	elsif ($op  =~ />/) { $op = "> $thresh"; }
 	  	elsif ($op  =~ /~=/) { $op = "!= 0"; }
