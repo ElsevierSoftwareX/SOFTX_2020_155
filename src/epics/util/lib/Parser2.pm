@@ -356,7 +356,21 @@ sub node_processing {
 		$::partType[$::partCnt] = "DIVIDE";
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
 	} elsif ($block_type eq "RelationalOperator") {
-		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Operator};
+		if (${$node->{FIELDS}}{Operator} eq undef) {
+		  $::partInputs[$::partCnt] = ">=";
+		} else {
+		  $::partInputs[$::partCnt] = ${$node->{FIELDS}}{Operator};
+		}
+	} elsif ($block_type eq "Switch") {
+		my $op = ${$node->{FIELDS}}{Criteria};
+		if ($op eq undef) { $op = ">="; }
+		$thresh = ${$node->{FIELDS}}{Threshold};
+		if ($op eq undef) { $thresh = "0"; }
+	  	if ($op  =~ />=/) { $op = ">= $thresh"; }
+	  	elsif ($op  =~ />/) { $op = "> $thresh"; }
+	  	elsif ($op  =~ /~=/) { $op = "!= 0"; }
+		else { die "Invalid \"Choice\" block \"$block_name\" criteria"; }
+		$::partInputs[$::partCnt] = $op;
 	}
 	${$node->{FIELDS}}{PartNumber} = $::partCnt; # Store our part number
 	$::partCnt++;
@@ -691,6 +705,9 @@ sub process {
 
   # Find first System node, this is the top level subsystem
   my $system_node = CDS::Tree::find_node($root, "System");
+
+  # Find block parameter defaults
+  #$block_parameter_defaults_node = CDS::Tree::find_node($root, "BlockParameterDefaults");
 
   # Set system name
   $::systemName = ${$system_node->{FIELDS}}{"Name"};
