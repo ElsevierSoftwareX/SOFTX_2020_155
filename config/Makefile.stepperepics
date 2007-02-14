@@ -1,0 +1,7 @@
+TARGET = stepperepics
+SRC = src/epics/seq/stepper.st
+DB += src/epics/db/stepper.db
+IFO = M1
+SITE = mit
+SEQ = 'stepper,("ifo=%IFO%,sys=SAS")'
+include config/Makefile.linux
