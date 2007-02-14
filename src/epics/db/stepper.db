@@ -1,0 +1,5 @@
+grecord(ai,"%IFO%:SAS-MOTOR_SEL0")
+grecord(ai,"%IFO%:SAS-MOTOR_SEL1")
+grecord(ai,"%IFO%:SAS-MOTOR_SEL2")
+grecord(ai,"%IFO%:SAS-MOTOR_SEL3")
+
