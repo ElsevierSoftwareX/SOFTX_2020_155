@@ -69,8 +69,6 @@ sub fromExp {
 # Argument 1 is the part number
 # Returns calculated code string
 
-# :TODO: This code needs work???
-
 sub frontEndCode {
 	my ($mm) = @_;
         my $calcExp = "";
@@ -82,24 +80,27 @@ sub frontEndCode {
         my $toName = $::xpartName[$to];
         print "Found FIR $from $fromType $fromPort\n";
         my $firName = $::xpartName[$mm] . "_FIR";
-        if ($cpus > 2) {
-          $calcExp = "filterPolyPhase(dspPtr[0],firCoeff,$::xpartName[$mm],$firName,";
+        $calcExp .= "\L$::xpartName[$mm] = ";
+        if ($::cpus > 2) {
+          $calcExp .= "filterPolyPhase(dspPtr[0],firCoeff,$::xpartName[$mm],$firName,";
         } else {
-          $calcExp = "filterPolyPhase(dsp_ptr,firCoeff,a::$xpartName[$mm],$firName,";
+          $calcExp .= "filterPolyPhase(dsp_ptr,firCoeff,$::xpartName[$mm],$firName,";
         }
-        if ($toType eq "Matrix") {
-           my $toPort = $::partOutputPort[$mm][0];
-           print "\t$::xpartName[$to]\[0\]\[$toPort\] = ";
-        }
-        if ($fromType eq "Adc") {
-           my $card = $from;
-           my $chan = $fromPort;
-           $calcExp .= "dWord\[";
-           $calcExp .= $card;
-           $calcExp .= "\]\[";
-           $calcExp .= $chan;
-           $calcExp .= "\],0);\n";
-        }
+        $calcExp .= $::fromExp[0];
+	$calcExp .= ");\n";
+        #if ($toType eq "Matrix") {
+           #my $toPort = $::partOutputPort[$mm][0];
+           #print "\t$::xpartName[$to]\[0\]\[$toPort\] = ";
+        #}
+        #if ($fromType eq "Adc") {
+           #my $card = $from;
+           #my $chan = $fromPort;
+           #$calcExp .= "dWord\[";
+           #$calcExp .= $card;
+           #$calcExp .= "\]\[";
+           #$calcExp .= $chan;
+           #$calcExp .= "\],0);\n";
+        #}
 
         return $calcExp;
 }
