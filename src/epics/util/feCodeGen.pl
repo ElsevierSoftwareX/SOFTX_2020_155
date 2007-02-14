@@ -90,6 +90,7 @@ $useWd = 0;
 $gainCnt = 0;
 $busPort = -1;
 $oscUsed = 0;
+$useFIRs = 0;
 
 # set debug level (0 - no debug messages)
 $dbg_level = 2;
@@ -1965,7 +1966,7 @@ elsif($rate == 15) { print OUTM "CFLAGS += -DSERVO64K\n"; }
 print OUTM "CFLAGS += -D";
 print OUTM "\U$skeleton";
 print OUTM "_CODE\n";
-if($systemName eq "sei")
+if($systemName eq "sei" || $useFIRs)
 {
 print OUTM "CFLAGS += -DFIR_FILTERS\n";
 }
@@ -2031,7 +2032,7 @@ print OUTME "\U$skeleton";
 print OUTME "_CODE\n";
 print OUTME "\n";
 print OUTME "LIBFLAGS += -lezca\n";
-if($systemName eq "sei")
+if($systemName eq "sei" || $useFIRs)
 {
 print OUTME "CFLAGS += -DFIR_FILTERS\n";
 }
