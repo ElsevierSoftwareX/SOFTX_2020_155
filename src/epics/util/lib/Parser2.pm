@@ -114,7 +114,8 @@ sub transform_part_name {
         elsif ($r eq "cdsWD" ) { $r = "Wd"; }
         elsif ($r eq "cdsSusWd" ) { $r = "SusWd"; }
         elsif ($r eq "cdsSWD1" ) { $r = "SeiWd"; }
-        elsif ($r eq "cdsPPFIR" ) { $r = "FirFilt"; }
+        elsif ($r eq "cdsPPFIR" ) { $r = "Filt"; $::useFIRs = 1; }
+        elsif ($r eq "cdsFirFilt" ) { $r = "Filt"; $::useFIRs = 1; }
         elsif ($r =~ /^cds/) {
                 # Getting rid of the leading "cds"
                 ($r) = $r =~ m/^cds(.+)$/;
