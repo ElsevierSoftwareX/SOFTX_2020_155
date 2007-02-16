@@ -131,9 +131,25 @@ state run
 %%		if (bufptr[-1] == '\n' || bufptr[-1] == '\r') break;
 %%	   }
 %%	  *bufptr = '\0';
+%%	  if (bufptr[-1] == '\n' || bufptr[-1] == '\r') bufptr[-1] = 0;
 %%	  if (debug) {
 %%	    printf("Response read: `%s'\n", buffer);
 %%	    fflush(stdout);
+%%	  }
+%%	  /* Check responses */
+%%	  switch (buffer[0]) {
+%%	    case 'V' :
+%%	    	/* Received current position counter */
+%%		break;
+%%	    case 'Y':
+%%		/* Command completed OK */
+%%		break;
+%%	    case 'B':
+%%		/* Busy, command could not be processed */
+%%		break;
+%%	    case 'E':
+%%		/* Error processing command */
+%%		break;
 %%	  }
 %%	  }
 %%  	  close(fd);
