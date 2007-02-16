@@ -3,3 +3,7 @@ grecord(ai,"%IFO%:SAS-MOTOR_SEL1")
 grecord(ai,"%IFO%:SAS-MOTOR_SEL2")
 grecord(ai,"%IFO%:SAS-MOTOR_SEL3")
 
+grecord(stringin,"%IFO%:SAS-PORT_CMD0")
+grecord(stringin,"%IFO%:SAS-PORT_CMD1")
+grecord(stringin,"%IFO%:SAS-PORT_CMD2")
+grecord(stringin,"%IFO%:SAS-PORT_CMD3")
