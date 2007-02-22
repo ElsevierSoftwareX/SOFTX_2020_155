@@ -145,7 +145,7 @@ state run
 %%	  tcsetattr(fd, TCSANOW, &options);
 %%
 %% {
-%%    void exec(char *cmd, char *resp) {
+%%    void exec(char *cmd, char *resp, int timeout) {
 %%	  char cmd_buf[128];
 %%	  char buffer[256];
 %%
@@ -159,7 +159,7 @@ state run
 %%        FD_ZERO(&readfs);
 %%	  FD_SET(fd, &readfs);
 %%	  Timeout.tv_usec = 0;  /* milliseconds */
-%%	  Timeout.tv_sec  = 1;  /* seconds */
+%%	  Timeout.tv_sec  = timeout;  /* seconds */
 %%	  res = select(fd+1, &readfs, NULL, NULL, &Timeout);
 %%	  if (res==0) {
 %%	     printf("Response timeout\n");
@@ -200,12 +200,12 @@ state run
 %%    }
 %%	/* Select motor first */
 %%	  sprintf(cmd_buf, "B%d\r", 1 + (*(motor[i])));
-%%  	  exec(cmd_buf, buffer);
+%%  	  exec(cmd_buf, buffer, 1);
 %%	/* Execute command */
 %%	  sprintf(cmd_buf, "%s\r", cmnds[i]);
-%%  	  exec(cmd_buf, buffer);
+%%  	  exec(cmd_buf, buffer, 30);
 %%	/* Update current position */
-%%  	  exec("V1\r", buffer);
+%%  	  exec("V1\r", buffer, 1);
 %%	  if (strlen(buffer) && buffer[0] == 'V') {
 %%		int p = atoi(buffer+1);
 %%		*(pos[i][*(motor[i])]) = p;
