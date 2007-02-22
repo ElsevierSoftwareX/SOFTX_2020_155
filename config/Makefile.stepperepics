@@ -1,7 +1,11 @@
 TARGET = stepperepics
 SRC = src/epics/seq/stepper.st
+SRC += src/epics/seq/stepper_kill.st
+SRC += src/epics/seq/stepper_abort.st
 DB += src/epics/db/stepper.db
 IFO = M1
 SITE = mit
 SEQ = 'stepper,("ifo=%IFO%,sys=SAS")'
+SEQ += 'stepper_kill,("ifo=%IFO%,sys=SAS")'
+SEQ += 'stepper_abort,("ifo=%IFO%,sys=SAS")'
 include config/Makefile.linux

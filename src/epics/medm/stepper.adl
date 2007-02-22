@@ -5,10 +5,10 @@ file {
 }
 display {
 	object {
-		x=616
-		y=66
-		width=562
-		height=284
+		x=615
+		y=306
+		width=523
+		height=447
 	}
 	clr=14
 	bclr=4
@@ -87,12 +87,44 @@ display {
 		1a7309,
 	}
 }
+rectangle {
+	object {
+		x=-38
+		y=-316
+		width=40
+		height=40
+	}
+	"basic attribute" {
+		clr=62
+	}
+	"dynamic attribute" {
+		vis="if zero"
+		calc="A eq 1"
+		chan="M1:SAS-STEPPER_BUSY"
+	}
+}
+rectangle {
+	object {
+		x=196
+		y=39
+		width=200
+		height=400
+	}
+	"basic attribute" {
+		clr=24
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		calc="A eq 1"
+		chan="M1:SAS-STEPPER_BUSY"
+	}
+}
 "text entry" {
 	object {
-		x=243
-		y=32
+		x=218
+		y=68
 		width=150
-		height=34
+		height=25
 	}
 	control {
 		chan="M1:SAS-STEPPER_CMD0"
@@ -102,12 +134,103 @@ display {
 	limits {
 	}
 }
+"message button" {
+	object {
+		x=401
+		y=51
+		width=59
+		height=30
+	}
+	control {
+		chan="M1:SAS-STEPPER_KILL0"
+		clr=14
+		bclr=16
+	}
+	label="KILL"
+	press_msg="K"
+}
+"choice button" {
+	object {
+		x=112
+		y=59
+		width=75
+		height=50
+	}
+	control {
+		chan="M1:SAS-STEPPER_SEL0"
+		clr=14
+		bclr=4
+	}
+}
+"message button" {
+	object {
+		x=402
+		y=82
+		width=59
+		height=30
+	}
+	control {
+		chan="M1:SAS-STEPPER_ABORT0"
+		clr=14
+		bclr=21
+	}
+	label="ABORT"
+	press_msg="K"
+}
+"text update" {
+	object {
+		x=41
+		y=62
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS00"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=41
+		y=90
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS01"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=196
+		y=39
+		width=200
+		height=400
+	}
+	"basic attribute" {
+		clr=62
+	}
+	"dynamic attribute" {
+		vis="if zero"
+		calc="A eq 1"
+		chan="M1:SAS-STEPPER_BUSY"
+	}
+}
 "text entry" {
 	object {
-		x=315
-		y=150
+		x=220
+		y=169
 		width=150
-		height=34
+		height=25
 	}
 	control {
 		chan="M1:SAS-STEPPER_CMD1"
@@ -117,27 +240,87 @@ display {
 	limits {
 	}
 }
-"text entry" {
+"message button" {
 	object {
-		x=316
-		y=235
-		width=150
-		height=34
+		x=403
+		y=152
+		width=59
+		height=30
 	}
 	control {
-		chan="M1:SAS-STEPPER_CMD3"
+		chan="M1:SAS-STEPPER_KILL1"
+		clr=14
+		bclr=16
+	}
+	label="KILL"
+	press_msg="K"
+}
+"choice button" {
+	object {
+		x=114
+		y=160
+		width=75
+		height=50
+	}
+	control {
+		chan="M1:SAS-STEPPER_SEL1"
 		clr=14
 		bclr=4
 	}
+}
+"message button" {
+	object {
+		x=404
+		y=183
+		width=59
+		height=30
+	}
+	control {
+		chan="M1:SAS-STEPPER_ABORT1"
+		clr=14
+		bclr=21
+	}
+	label="ABORT"
+	press_msg="K"
+}
+"text update" {
+	object {
+		x=43
+		y=163
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS10"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=43
+		y=191
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS11"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
 	limits {
 	}
 }
 "text entry" {
 	object {
-		x=315
-		y=192
+		x=220
+		y=270
 		width=150
-		height=34
+		height=25
 	}
 	control {
 		chan="M1:SAS-STEPPER_CMD2"
@@ -149,113 +332,201 @@ display {
 }
 "message button" {
 	object {
-		x=410
-		y=32
+		x=403
+		y=253
 		width=59
 		height=30
 	}
 	control {
-		chan="M1:SAS-STEPPER_ABORT0"
+		chan="M1:SAS-STEPPER_KILL2"
 		clr=14
-		bclr=21
+		bclr=16
 	}
-	label="ABORT"
+	label="KILL"
 	press_msg="K"
 }
 "choice button" {
 	object {
-		x=14
-		y=16
+		x=114
+		y=261
 		width=75
-		height=60
-	}
-	control {
-		chan="M1:SAS-STEPPER_SEL0"
-		clr=14
-		bclr=4
-	}
-}
-"choice button" {
-	object {
-		x=15
-		y=150
-		width=150
-		height=34
-	}
-	control {
-		chan="M1:SAS-STEPPER_SEL1"
-		clr=14
-		bclr=4
-	}
-	stacking="column"
-}
-"choice button" {
-	object {
-		x=15
-		y=193
-		width=150
-		height=34
+		height=50
 	}
 	control {
 		chan="M1:SAS-STEPPER_SEL2"
 		clr=14
 		bclr=4
 	}
-	stacking="column"
+}
+"message button" {
+	object {
+		x=404
+		y=284
+		width=59
+		height=30
+	}
+	control {
+		chan="M1:SAS-STEPPER_ABORT2"
+		clr=14
+		bclr=21
+	}
+	label="ABORT"
+	press_msg="K"
+}
+"text update" {
+	object {
+		x=43
+		y=264
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS20"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=43
+		y=292
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS21"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=31
+		width=526
+		height=7
+	}
+	"basic attribute" {
+		clr=33
+	}
+	"dynamic attribute" {
+		chan="M1:SAS-STEPPER_ABORT1"
+	}
+}
+rectangle {
+	object {
+		x=-3
+		y=0
+		width=526
+		height=7
+	}
+	"basic attribute" {
+		clr=33
+	}
+	"dynamic attribute" {
+		chan="M1:SAS-STEPPER_ABORT1"
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=336
+		width=526
+		height=7
+	}
+	"basic attribute" {
+		clr=33
+	}
+	"dynamic attribute" {
+		chan="M1:SAS-STEPPER_ABORT1"
+	}
+}
+rectangle {
+	object {
+		x=-3
+		y=134
+		width=526
+		height=7
+	}
+	"basic attribute" {
+		clr=33
+	}
+	"dynamic attribute" {
+		chan="M1:SAS-STEPPER_ABORT1"
+	}
+}
+rectangle {
+	object {
+		x=-3
+		y=232
+		width=526
+		height=7
+	}
+	"basic attribute" {
+		clr=33
+	}
+	"dynamic attribute" {
+		chan="M1:SAS-STEPPER_ABORT1"
+	}
+}
+"text entry" {
+	object {
+		x=221
+		y=372
+		width=150
+		height=25
+	}
+	control {
+		chan="M1:SAS-STEPPER_CMD2"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+"message button" {
+	object {
+		x=404
+		y=355
+		width=59
+		height=30
+	}
+	control {
+		chan="M1:SAS-STEPPER_KILL2"
+		clr=14
+		bclr=16
+	}
+	label="KILL"
+	press_msg="K"
 }
 "choice button" {
 	object {
-		x=15
-		y=235
-		width=150
-		height=34
+		x=115
+		y=363
+		width=75
+		height=50
 	}
 	control {
-		chan="M1:SAS-STEPPER_SEL3"
+		chan="M1:SAS-STEPPER_SEL2"
 		clr=14
 		bclr=4
 	}
-	stacking="column"
 }
 "message button" {
 	object {
-		x=487
-		y=153
+		x=405
+		y=386
 		width=59
 		height=30
 	}
 	control {
-		chan="M1:SAS-STEPPER_ABORT0"
-		clr=14
-		bclr=21
-	}
-	label="ABORT"
-	press_msg="K"
-}
-"message button" {
-	object {
-		x=487
-		y=197
-		width=59
-		height=30
-	}
-	control {
-		chan="M1:SAS-STEPPER_ABORT0"
-		clr=14
-		bclr=21
-	}
-	label="ABORT"
-	press_msg="K"
-}
-"message button" {
-	object {
-		x=487
-		y=237
-		width=59
-		height=30
-	}
-	control {
-		chan="M1:SAS-STEPPER_ABORT0"
+		chan="M1:SAS-STEPPER_ABORT2"
 		clr=14
 		bclr=21
 	}
@@ -264,31 +535,73 @@ display {
 }
 "text update" {
 	object {
-		x=106
+		x=44
+		y=366
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS20"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=44
+		y=394
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS21"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=440
+		width=526
+		height=6
+	}
+	"basic attribute" {
+		clr=33
+	}
+	"dynamic attribute" {
+		chan="M1:SAS-STEPPER_ABORT1"
+	}
+}
+text {
+	object {
+		x=251
 		y=12
-		width=118
-		height=34
+		width=82
+		height=20
 	}
-	monitor {
-		chan="M1:SAS-STEPPER_POS00"
+	"basic attribute" {
 		clr=14
-		bclr=4
 	}
-	limits {
-	}
+	textix="Command"
+	align="horiz. centered"
 }
-"text update" {
+text {
 	object {
-		x=105
-		y=50
-		width=118
-		height=34
+		x=30
+		y=12
+		width=82
+		height=20
 	}
-	monitor {
-		chan="M1:SAS-STEPPER_POS01"
+	"basic attribute" {
 		clr=14
-		bclr=4
 	}
-	limits {
-	}
+	textix="Position"
+	align="horiz. centered"
 }
