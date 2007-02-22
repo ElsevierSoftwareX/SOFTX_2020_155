@@ -40,12 +40,6 @@ assign motor1 to "{ifo}:{sys}-STEPPER_SEL1";
 assign motor2 to "{ifo}:{sys}-STEPPER_SEL2";
 assign motor3 to "{ifo}:{sys}-STEPPER_SEL3";
 
-/* Current motor selection per port */
-int current_motor0;
-int current_motor1;
-int current_motor2;
-int current_motor3;
-
 /* Serial port commands */
 string command0;
 assign command0 to "{ifo}:{sys}-STEPPER_CMD0";
@@ -56,67 +50,14 @@ assign command2 to "{ifo}:{sys}-STEPPER_CMD2";
 string command3;
 assign command3 to "{ifo}:{sys}-STEPPER_CMD3";
 
-%% const int debug = 1;
-ss stepper{
+int busy;
+assign busy to "{ifo}:{sys}-STEPPER_BUSY";
 
-state init
-{
-  when() {
-       current_motor0 = motor0 = 0;
-       pvPut(motor0);
-       current_motor1 = motor1 = 0;
-       pvPut(motor1);
-       current_motor2 = motor2 = 0;
-       pvPut(motor2);
-       current_motor3 = motor3 = 0;
-       pvPut(motor3);
-%%     strcpy(command0, "");
-       pvPut(command0);
-%%     strcpy(command1, "");
-       pvPut(command1);
-%%     strcpy(command2, "");
-       pvPut(command2);
-%%     strcpy(command3, "");
-       pvPut(command3);
-  }state run
-}
-
-state run
-{
-  when(delay(.1)) {
-        pvGet(motor0);
-        pvGet(motor1);
-        pvGet(motor2);
-        pvGet(motor3);
-	
-	pvGet(command0);
-	pvGet(command1);
-	pvGet(command2);
-	pvGet(command3);
-%%      {
-%%	char *cmnds[4] = { command0, command1, command2, command3 };
-%%	int *motor[4] = { &motor0, &motor1, &motor2, &motor3 };
-%%	int *pos[4][2] = { {&pos00, &pos01}, {&pos10, &pos11}, {&pos20, &pos21}, {&pos30, &pos31} };
-%%	int i;
-%%   	for (i = 0; i < 4; i++) {
-%%	if (strlen(cmnds[i])) {
-%%	  int j;
+%%   int open_serial_port(int i) {
 %%	  int fd;
-%%	  fd_set readfs;    /* file descriptor set */
-%%	  int nread = 0;
-%%	  char buf[16];
-%%	  char cmd_buf[128];
-%%	  char buffer[256];
-%%	  char *bufptr;
 %%	  struct termios options;
-%%	  int res;
-%%	  struct timeval Timeout;
-%%
+%%	  char buf[16];
 %%	  sprintf(buf, "/dev/ttyS%d", i);
-%%	  if (debug) {
-%%  	    printf("Writing `%s' to %s\n", cmnds[i], buf);
-%%  	    fflush(stdout);
-%%	  }
 %%  	  if ((fd = open(buf, O_RDWR | O_NOCTTY  /* | O_NDELAY */)) < 0 ) {
 %%    		fprintf(stdout, "error opening device %s\n", buf);
 %%    		exit(2);
@@ -143,9 +84,15 @@ state run
 %%
 %%	  /* set the options */
 %%	  tcsetattr(fd, TCSANOW, &options);
+%%	  return fd;
+%%   }
 %%
-%% {
-%%    void exec(char *cmd, char *resp, int timeout) {
+%%    void exec(int fd, char *cmd, char *resp, int timeout) {
+%%	  fd_set readfs;    /* file descriptor set */
+%%	  struct timeval Timeout;
+%%	  int res;
+%%	  int nread = 0;
+%%	  char *bufptr;
 %%	  char cmd_buf[128];
 %%	  char buffer[256];
 %%
@@ -162,8 +109,8 @@ state run
 %%	  Timeout.tv_sec  = timeout;  /* seconds */
 %%	  res = select(fd+1, &readfs, NULL, NULL, &Timeout);
 %%	  if (res==0) {
-%%	     printf("Response timeout\n");
-%%	     fflush(stdout);
+%%	     /*printf("Response timeout\n");
+%%	     fflush(stdout);*/
 %%	     strcpy(resp, "");
 %%	  } else {
 %%	  /* read characters into our string buffer until we get a CR or NL */
@@ -176,10 +123,6 @@ state run
 %%	   }
 %%	  *bufptr = '\0';
 %%	  if (bufptr[-1] == '\n' || bufptr[-1] == '\r') bufptr[-1] = 0;
-%%	  if (debug) {
-%%	    printf("Response read: `%s'\n", buffer);
-%%	    fflush(stdout);
-%%	  }
 %%	  /* Check responses */
 %%	  switch (buffer[0]) {
 %%	    case 'V' :
@@ -198,19 +141,108 @@ state run
 %%	  strcpy(resp, buffer);
 %%	  }
 %%    }
+%%	char *cmnds[4] = { command0, command1, command2, command3 };
+%%	int *motor[4] = { &motor0, &motor1, &motor2, &motor3 };
+%%	int *pos[4][2] = { {&pos00, &pos01}, {&pos10, &pos11}, {&pos20, &pos21}, {&pos30, &pos31} };
+
+ss stepper{
+
+state init
+{
+  when() {
+%%  int i, j;
+%%  int fd;
+%%  char cmd_buf[128];
+%%  char buffer[256];
+
+    busy = 1;
+    pvPut(busy);
+
+    pos00 = pos01 = pos10 = pos11
+    = pos20 = pos21 = pos30 = pos31 = 0;
+%% for (i = 0; i < 4; i++) {
+%%  fd = open_serial_port(i);
+%%  for (j = 0; j < 2; j++) {
+%%
+%%	 /* Select motor */
+%%	 sprintf(cmd_buf, "B%d\r", 1  + j);
+%%  	 exec(fd, cmd_buf, buffer, 1);
+%%	 /* Update current position */
+%%  	 exec(fd, "V1\r", buffer, 1);
+%%	 if (strlen(buffer) && buffer[0] == 'V') {
+%%		int p = atoi(buffer+1);
+%%		*(pos[i][j]) = p;
+%%	 }
+%%  }
+%%  close(fd);
+%% }
+       pvPut(pos00);
+       pvPut(pos01);
+       pvPut(pos10);
+       pvPut(pos11);
+       pvPut(pos20);
+       pvPut(pos21);
+       pvPut(pos30);
+       pvPut(pos31);
+       motor0 = 0;
+       pvPut(motor0);
+       motor1 = 0;
+       pvPut(motor1);
+       motor2 = 0;
+       pvPut(motor2);
+       motor3 = 0;
+       pvPut(motor3);
+%%     strcpy(command0, "");
+       pvPut(command0);
+%%     strcpy(command1, "");
+       pvPut(command1);
+%%     strcpy(command2, "");
+       pvPut(command2);
+%%     strcpy(command3, "");
+       pvPut(command3);
+       busy = 0;
+       pvPut(busy);
+  }state run
+}
+
+state run
+{
+  when(delay(.1)) {
+        pvGet(motor0);
+        pvGet(motor1);
+        pvGet(motor2);
+        pvGet(motor3);
+	
+	pvGet(command0);
+	pvGet(command1);
+	pvGet(command2);
+	pvGet(command3);
+%%      {
+%%	int i;
+%%   	for (i = 0; i < 4; i++) {
+%%	if (strlen(cmnds[i])) {
+%%	  int j;
+%%	  int fd;
+%%	  char cmd_buf[128];
+%%	  char buffer[256];
+%%
+    	  busy = 1;
+    	  pvPut(busy);
+
+%%	fd = open_serial_port(i);
+%%
 %%	/* Select motor first */
 %%	  sprintf(cmd_buf, "B%d\r", 1 + (*(motor[i])));
-%%  	  exec(cmd_buf, buffer, 1);
+%%  	  exec(fd, cmd_buf, buffer, 1);
 %%	/* Execute command */
 %%	  sprintf(cmd_buf, "%s\r", cmnds[i]);
-%%  	  exec(cmd_buf, buffer, 30);
+%%  	  exec(fd, cmd_buf, buffer, 60);
 %%	/* Update current position */
-%%  	  exec("V1\r", buffer, 1);
+%%  	  exec(fd, "V1\r", buffer, 1);
 %%	  if (strlen(buffer) && buffer[0] == 'V') {
 %%		int p = atoi(buffer+1);
 %%		*(pos[i][*(motor[i])]) = p;
 %%	  }
-%% }
 %%  	  close(fd);
 %%        strcpy(cmnds[i], "");
 %%	  switch (i) {
@@ -235,6 +267,9 @@ state run
           		pvPut(pos31);
 %%			break;
 %%	  }
+    	  busy = 0;
+    	  pvPut(busy);
+
 %%      }
 %%	}
 %%      }
