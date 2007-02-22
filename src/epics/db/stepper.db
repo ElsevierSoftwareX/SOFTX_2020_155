@@ -1,9 +1,39 @@
-grecord(ai,"%IFO%:SAS-MOTOR_SEL0")
-grecord(ai,"%IFO%:SAS-MOTOR_SEL1")
-grecord(ai,"%IFO%:SAS-MOTOR_SEL2")
-grecord(ai,"%IFO%:SAS-MOTOR_SEL3")
+grecord(bi,"%IFO%:SAS-STEPPER_SEL0")
+{
+        field(ZNAM,"Stepper 0")
+        field(ONAM,"Stepper 1")
+}
+grecord(bi,"%IFO%:SAS-STEPPER_SEL1")
+{
+        field(ZNAM,"Stepper 0")
+        field(ONAM,"Stepper 1")
+}
+grecord(bi,"%IFO%:SAS-STEPPER_SEL2")
+{
+        field(ZNAM,"Stepper 0")
+        field(ONAM,"Stepper 1")
+}
+grecord(bi,"%IFO%:SAS-STEPPER_SEL3")
+{
+        field(ZNAM,"Stepper 0")
+        field(ONAM,"Stepper 1")
+}
 
-grecord(stringin,"%IFO%:SAS-PORT_CMD0")
-grecord(stringin,"%IFO%:SAS-PORT_CMD1")
-grecord(stringin,"%IFO%:SAS-PORT_CMD2")
-grecord(stringin,"%IFO%:SAS-PORT_CMD3")
+grecord(stringin,"%IFO%:SAS-STEPPER_CMD0")
+grecord(stringin,"%IFO%:SAS-STEPPER_CMD1")
+grecord(stringin,"%IFO%:SAS-STEPPER_CMD2")
+grecord(stringin,"%IFO%:SAS-STEPPER_CMD3")
+
+grecord(stringin,"%IFO%:SAS-STEPPER_ABORT0")
+grecord(stringin,"%IFO%:SAS-STEPPER_ABORT1")
+grecord(stringin,"%IFO%:SAS-STEPPER_ABORT2")
+grecord(stringin,"%IFO%:SAS-STEPPER_ABORT3")
+
+grecord(stringin,"%IFO%:SAS-STEPPER_POS00")
+grecord(stringin,"%IFO%:SAS-STEPPER_POS01")
+grecord(stringin,"%IFO%:SAS-STEPPER_POS10")
+grecord(stringin,"%IFO%:SAS-STEPPER_POS11")
+grecord(stringin,"%IFO%:SAS-STEPPER_POS20")
+grecord(stringin,"%IFO%:SAS-STEPPER_POS21")
+grecord(stringin,"%IFO%:SAS-STEPPER_POS30")
+grecord(stringin,"%IFO%:SAS-STEPPER_POS31")

@@ -12,25 +12,49 @@ program stepper
 %% #include <sys/select.h>
 
 
-/* Motor selection records (1 or 2) */
+/* Current motor position readout */
+int pos00;
+int pos01;
+assign pos00 to "{ifo}:{sys}-STEPPER_POS00";
+assign pos01 to "{ifo}:{sys}-STEPPER_POS01";
+int pos10;
+int pos11;
+assign pos10 to "{ifo}:{sys}-STEPPER_POS10";
+assign pos11 to "{ifo}:{sys}-STEPPER_POS11";
+int pos20;
+int pos21;
+assign pos20 to "{ifo}:{sys}-STEPPER_POS20";
+assign pos21 to "{ifo}:{sys}-STEPPER_POS21";
+int pos30;
+int pos31;
+assign pos30 to "{ifo}:{sys}-STEPPER_POS30";
+assign pos31 to "{ifo}:{sys}-STEPPER_POS31";
+
+/* Motor selection records (0 or 1) */
 int motor0;
 int motor1;
 int motor2;
 int motor3;
-assign motor0 to "{ifo}:{sys}-MOTOR_SEL0";
-assign motor1 to "{ifo}:{sys}-MOTOR_SEL1";
-assign motor2 to "{ifo}:{sys}-MOTOR_SEL2";
-assign motor3 to "{ifo}:{sys}-MOTOR_SEL3";
+assign motor0 to "{ifo}:{sys}-STEPPER_SEL0";
+assign motor1 to "{ifo}:{sys}-STEPPER_SEL1";
+assign motor2 to "{ifo}:{sys}-STEPPER_SEL2";
+assign motor3 to "{ifo}:{sys}-STEPPER_SEL3";
+
+/* Current motor selection per port */
+int current_motor0;
+int current_motor1;
+int current_motor2;
+int current_motor3;
 
 /* Serial port commands */
 string command0;
-assign command0 to "{ifo}:{sys}-PORT_CMD0";
+assign command0 to "{ifo}:{sys}-STEPPER_CMD0";
 string command1;
-assign command1 to "{ifo}:{sys}-PORT_CMD1";
+assign command1 to "{ifo}:{sys}-STEPPER_CMD1";
 string command2;
-assign command2 to "{ifo}:{sys}-PORT_CMD2";
+assign command2 to "{ifo}:{sys}-STEPPER_CMD2";
 string command3;
-assign command3 to "{ifo}:{sys}-PORT_CMD3";
+assign command3 to "{ifo}:{sys}-STEPPER_CMD3";
 
 %% const int debug = 1;
 ss stepper{
@@ -38,13 +62,13 @@ ss stepper{
 state init
 {
   when() {
-       motor0 = 1;
+       current_motor0 = motor0 = 0;
        pvPut(motor0);
-       motor1 = 1;
+       current_motor1 = motor1 = 0;
        pvPut(motor1);
-       motor2 = 1;
+       current_motor2 = motor2 = 0;
        pvPut(motor2);
-       motor3 = 1;
+       current_motor3 = motor3 = 0;
        pvPut(motor3);
 %%     strcpy(command0, "");
        pvPut(command0);
@@ -60,12 +84,19 @@ state init
 state run
 {
   when(delay(.1)) {
+        pvGet(motor0);
+        pvGet(motor1);
+        pvGet(motor2);
+        pvGet(motor3);
+	
 	pvGet(command0);
 	pvGet(command1);
 	pvGet(command2);
 	pvGet(command3);
 %%      {
 %%	char *cmnds[4] = { command0, command1, command2, command3 };
+%%	int *motor[4] = { &motor0, &motor1, &motor2, &motor3 };
+%%	int *pos[4][2] = { {&pos00, &pos01}, {&pos10, &pos11}, {&pos20, &pos21}, {&pos30, &pos31} };
 %%	int i;
 %%   	for (i = 0; i < 4; i++) {
 %%	if (strlen(cmnds[i])) {
@@ -73,8 +104,6 @@ state run
 %%	  int fd;
 %%	  fd_set readfs;    /* file descriptor set */
 %%	  int nread = 0;
-%%	  int checksum = 0;
-%%	  char char_checksum;
 %%	  char buf[16];
 %%	  char cmd_buf[128];
 %%	  char buffer[256];
@@ -92,35 +121,50 @@ state run
 %%    		fprintf(stdout, "error opening device %s\n", buf);
 %%    		exit(2);
 %%	  }
+%%
+%%	  tcgetattr(fd, &options);
+%%
 %%	  /* set raw input, 1 second timeout */
 %%	  options.c_cflag     |= (CLOCAL | CREAD);
 %%	  options.c_lflag     &= ~(ICANON | ECHO | ECHOE | ISIG);
 %%	  options.c_oflag     &= ~OPOST;
 %%	  options.c_cc[VMIN]  = 0;
-%%	  options.c_cc[VTIME] = 10;
+%%	  options.c_cc[VTIME] = 10; 
+%%
+%%	  cfsetispeed(&options, B9600);
+%%	  cfsetospeed(&options, B9600);
+%%
+%%	  /* Odd parity (7O2) */
+%%	  options.c_cflag |= PARENB;
+%%	  options.c_cflag |= PARODD;
+%%	  options.c_cflag |= CSTOPB;
+%%	  options.c_cflag &= ~CSIZE;
+%%	  options.c_cflag |= CS7;
 %%
 %%	  /* set the options */
-%%	  /*tcsetattr(fd, TCSANOW, &options);*/
+%%	  tcsetattr(fd, TCSANOW, &options);
 %%
-%%	  /* Calculate the checksum */
-%%	  for (j = 0; j < strlen(cmnds[i]); j++) {
-%%		checksum += (unsigned int)(cmnds[i][j]);
-%%	  }
-%%	  if (debug) {
-%%	    char_checksum = (checksum & 0x7f);
-%%  	    printf("Checksum int %d; char `%c'\n", checksum, char_checksum);
-%%  	    fflush(stdout);
-%%	  }
-%%	  sprintf(cmd_buf, "%s%c\r", cmnds[i], char_checksum);
+%% {
+%%    void exec(char *cmd, char *resp) {
+%%	  char cmd_buf[128];
+%%	  char buffer[256];
+%%
+%%	  /* Select motor */
+%%	  /*sprintf(cmd_buf, "B%d\r", 1 + (*(motor[i])));
+%%  	  write(fd, cmd_buf, strlen(cmd_buf));
+%%	  sprintf(cmd_buf, "%s\r", cmnds[i]);
+%%  	  write(fd, cmd_buf, strlen(cmd_buf));*/
+%%	  sprintf(cmd_buf, "%s\r", cmd);
 %%  	  write(fd, cmd_buf, strlen(cmd_buf));
 %%        FD_ZERO(&readfs);
 %%	  FD_SET(fd, &readfs);
 %%	  Timeout.tv_usec = 0;  /* milliseconds */
-%%	  Timeout.tv_sec  = 5;  /* seconds */
+%%	  Timeout.tv_sec  = 1;  /* seconds */
 %%	  res = select(fd+1, &readfs, NULL, NULL, &Timeout);
 %%	  if (res==0) {
 %%	     printf("Response timeout\n");
 %%	     fflush(stdout);
+%%	     strcpy(resp, "");
 %%	  } else {
 %%	  /* read characters into our string buffer until we get a CR or NL */
 %%	  bufptr = buffer;
@@ -151,21 +195,44 @@ state run
 %%		/* Error processing command */
 %%		break;
 %%	  }
+%%	  strcpy(resp, buffer);
 %%	  }
+%%    }
+%%	/* Select motor first */
+%%	  sprintf(cmd_buf, "B%d\r", 1 + (*(motor[i])));
+%%  	  exec(cmd_buf, buffer);
+%%	/* Execute command */
+%%	  sprintf(cmd_buf, "%s\r", cmnds[i]);
+%%  	  exec(cmd_buf, buffer);
+%%	/* Update current position */
+%%  	  exec("V1\r", buffer);
+%%	  if (strlen(buffer) && buffer[0] == 'V') {
+%%		int p = atoi(buffer+1);
+%%		*(pos[i][*(motor[i])]) = p;
+%%	  }
+%% }
 %%  	  close(fd);
 %%        strcpy(cmnds[i], "");
 %%	  switch (i) {
 %%		case 0:
           		pvPut(command0);
+          		pvPut(pos00);
+          		pvPut(pos01);
 %%			break;
 %%		case 1:
           		pvPut(command1);
+          		pvPut(pos10);
+          		pvPut(pos11);
 %%			break;
 %%		case 2:
           		pvPut(command2);
+          		pvPut(pos20);
+          		pvPut(pos21);
 %%			break;
 %%		case 3:
           		pvPut(command3);
+          		pvPut(pos30);
+          		pvPut(pos31);
 %%			break;
 %%	  }
 %%      }
