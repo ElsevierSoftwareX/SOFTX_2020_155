@@ -483,7 +483,7 @@ rectangle {
 		height=25
 	}
 	control {
-		chan="M1:SAS-STEPPER_CMD2"
+		chan="M1:SAS-STEPPER_CMD3"
 		clr=14
 		bclr=4
 	}
@@ -498,7 +498,7 @@ rectangle {
 		height=30
 	}
 	control {
-		chan="M1:SAS-STEPPER_KILL2"
+		chan="M1:SAS-STEPPER_KILL3"
 		clr=14
 		bclr=16
 	}
@@ -513,7 +513,7 @@ rectangle {
 		height=50
 	}
 	control {
-		chan="M1:SAS-STEPPER_SEL2"
+		chan="M1:SAS-STEPPER_SEL3"
 		clr=14
 		bclr=4
 	}
@@ -526,7 +526,7 @@ rectangle {
 		height=30
 	}
 	control {
-		chan="M1:SAS-STEPPER_ABORT2"
+		chan="M1:SAS-STEPPER_ABORT3"
 		clr=14
 		bclr=21
 	}
@@ -541,7 +541,7 @@ rectangle {
 		height=20
 	}
 	monitor {
-		chan="M1:SAS-STEPPER_POS20"
+		chan="M1:SAS-STEPPER_POS30"
 		clr=14
 		bclr=4
 	}
@@ -557,7 +557,7 @@ rectangle {
 		height=20
 	}
 	monitor {
-		chan="M1:SAS-STEPPER_POS21"
+		chan="M1:SAS-STEPPER_POS31"
 		clr=14
 		bclr=4
 	}

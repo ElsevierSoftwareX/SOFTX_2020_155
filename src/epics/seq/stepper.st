@@ -72,8 +72,8 @@ assign busy to "{ifo}:{sys}-STEPPER_BUSY";
 %%	  options.c_cc[VMIN]  = 0;
 %%	  options.c_cc[VTIME] = 10; 
 %%
-%%	  cfsetispeed(&options, B9600);
-%%	  cfsetospeed(&options, B9600);
+%%	  /*cfsetispeed(&options, i > 1? B9600: B1200);
+%%	  cfsetospeed(&options, i > 1? B9600: B1200);*/
 %%
 %%	  /* Odd parity (7O2) */
 %%	  options.c_cflag |= PARENB;
