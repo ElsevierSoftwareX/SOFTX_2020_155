@@ -19,6 +19,9 @@ clean-% :: src/epics/simLink/%.mdl
 	(/bin/rm -rf target/$@epics build/$@epics; make -f config/Makefile.$@epics)
 	(cd src/fe/$@; make clean; make)
 
+% :: config/Makefile.%epics
+	(/bin/rm -rf target/$@epics build/$@epics; make -f config/Makefile.$@epics)
+
 # With this rule one can install any system
 # By saying 'make install-pde', for example
 install-% :: src/epics/simLink/%.mdl
@@ -52,6 +55,19 @@ install-% :: src/epics/simLink/%.mdl
 	/bin/mv -f /cvs/cds/$$site/medm/$${lower_ifo}/$${system} /cvs/cds/$$site/medm/$${lower_ifo}/$${system}_$${cur_date};\
 	/bin/mkdir -p /cvs/cds/$$site/medm/$${lower_ifo};\
 	/bin/cp -pr src/epics/util/$${system} /cvs/cds/$$site/medm/$${lower_ifo}
+
+install-% :: config/Makefile.%epics
+	@system=$(subst install-,,$@); \
+	site=`grep SITE $< | sed 's/.*SITE\s*=\s*\([a-z]*\).*/\1/g'`; \
+	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
+	cur_date=`date +%y%m%d_%H%m%S`;\
+	echo Installing /cvs/cds/$$site/target/$${system}epics;\
+	/bin/mkdir -p /cvs/cds/$$site/target_archive;\
+	/bin/mv -f /cvs/cds/$$site/target/$${system}epics /cvs/cds/$$site/target_archive/$${system}epics_$$cur_date;\
+	/bin/mkdir -p /cvs/cds/$$site/target;\
+	/bin/cp -pr target/$${system}epics /cvs/cds/$$site/target;\
+	/bin/mv -f /cvs/cds/$$site/target/$${system}epics/db/*/autoBurt.req /cvs/cds/$$site/target/$${system}epics;\
 
 #dbbepics: config/Makefile.dbbepics
 #	@echo Making dbbepics...
