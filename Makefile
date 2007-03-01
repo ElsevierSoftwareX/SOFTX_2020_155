@@ -11,6 +11,10 @@ clean-% :: src/epics/simLink/%.mdl
 	/bin/rm -rf target/$${system}epics build/$${system}epics; \
 	(cd src/fe/$${system}; make clean)
 
+clean-% :: config/Makefile.%epics
+	@system=$(subst clean-,,$@); \
+	/bin/rm -rf target/$${system}epics build/$${system}epics; \
+
 # With this rule one can make any system
 # Just say 'make pde', for instance, to make PDE system
 # Epics and front-end parts
