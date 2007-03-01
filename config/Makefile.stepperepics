@@ -1,11 +1,17 @@
 TARGET = stepperepics
-SRC = src/epics/seq/stepper.st
+SRC = src/epics/seq/single_stepper.st
+SRC += src/epics/seq/single_stepper1.st
+SRC += src/epics/seq/single_stepper2.st
+SRC += src/epics/seq/single_stepper3.st
 SRC += src/epics/seq/stepper_kill.st
 SRC += src/epics/seq/stepper_abort.st
-DB += src/epics/db/stepper.db
+DB += src/epics/db/single_stepper.db
 IFO = M1
 SITE = mit
-SEQ = 'stepper,("ifo=%IFO%,sys=SAS")'
+SEQ = 'single_stepper,("ifo=%IFO%,sys=SAS,controller=0")'
+SEQ += 'single_stepper1,("ifo=%IFO%,sys=SAS,controller=1")'
+SEQ += 'single_stepper2,("ifo=%IFO%,sys=SAS,controller=2")'
+SEQ += 'single_stepper3,("ifo=%IFO%,sys=SAS,controller=3")'
 SEQ += 'stepper_kill,("ifo=%IFO%,sys=SAS")'
 SEQ += 'stepper_abort,("ifo=%IFO%,sys=SAS")'
 include config/Makefile.linux
