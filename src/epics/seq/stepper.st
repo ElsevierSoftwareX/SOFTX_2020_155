@@ -173,6 +173,8 @@ state init
 %%		int p = atoi(buffer+1);
 %%		*(pos[i][j]) = p;
 %%	 }
+%%	 /* Set default speed */
+%%  	 exec(fd, "X10,20,10\r", buffer, 1);
 %%  }
 %%  close(fd);
 %% }
