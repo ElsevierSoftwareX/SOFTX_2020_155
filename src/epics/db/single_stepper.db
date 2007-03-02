@@ -1,22 +1,22 @@
 grecord(bi,"%IFO%:SAS-STEPPER_SEL0")
 {
-        field(ZNAM,"Stepper 0")
-        field(ONAM,"Stepper 1")
+        field(ZNAM,"H1")
+        field(ONAM,"H4")
 }
-grecord(bi,"%IFO%:SAS-STEPPER_SEL1")
+grecord(bi,"M1:SAS-STEPPER_SEL1")
 {
-        field(ZNAM,"Stepper 0")
-        field(ONAM,"Stepper 1")
+        field(ZNAM,"V3")
+        field(ONAM,"V4")
 }
-grecord(bi,"%IFO%:SAS-STEPPER_SEL2")
+grecord(bi,"M1:SAS-STEPPER_SEL2")
 {
-        field(ZNAM,"Stepper 0")
-        field(ONAM,"Stepper 1")
+        field(ZNAM,"H2")
+        field(ONAM,"H3")
 }
-grecord(bi,"%IFO%:SAS-STEPPER_SEL3")
+grecord(bi,"M1:SAS-STEPPER_SEL3")
 {
-        field(ZNAM,"Stepper 0")
-        field(ONAM,"Stepper 1")
+        field(ZNAM,"V1")
+        field(ONAM,"V2")
 }
 
 grecord(stringin,"%IFO%:SAS-STEPPER_CMD0")
@@ -80,3 +80,12 @@ grecord(ai,"%IFO%:SAS-STEPPER_SIGN20")
 grecord(ai,"%IFO%:SAS-STEPPER_SIGN21")
 grecord(ai,"%IFO%:SAS-STEPPER_SIGN30")
 grecord(ai,"%IFO%:SAS-STEPPER_SIGN31")
+
+grecord(ai,"%IFO%:SAS-STEPPER_BACKLASH00")
+grecord(ai,"%IFO%:SAS-STEPPER_BACKLASH01")
+grecord(ai,"%IFO%:SAS-STEPPER_BACKLASH10")
+grecord(ai,"%IFO%:SAS-STEPPER_BACKLASH11")
+grecord(ai,"%IFO%:SAS-STEPPER_BACKLASH20")
+grecord(ai,"%IFO%:SAS-STEPPER_BACKLASH21")
+grecord(ai,"%IFO%:SAS-STEPPER_BACKLASH30")
+grecord(ai,"%IFO%:SAS-STEPPER_BACKLASH31")
