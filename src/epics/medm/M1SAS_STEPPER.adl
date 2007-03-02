@@ -1,0 +1,1431 @@
+
+file {
+	name="/cvs/cds/mit/medm/m1/sas/M1SAS_STEPPER.adl"
+	version=030003
+}
+display {
+	object {
+		x=406
+		y=148
+		width=909
+		height=324
+	}
+	clr=14
+	bclr=4
+	cmap=""
+	gridSpacing=5
+	gridOn=0
+	snapToGrid=0
+}
+"color map" {
+	ncolors=65
+	colors {
+		ffffff,
+		ececec,
+		dadada,
+		c8c8c8,
+		bbbbbb,
+		aeaeae,
+		9e9e9e,
+		919191,
+		858585,
+		787878,
+		696969,
+		5a5a5a,
+		464646,
+		2d2d2d,
+		000000,
+		00d800,
+		1ebb00,
+		339900,
+		2d7f00,
+		216c00,
+		fd0000,
+		de1309,
+		be190b,
+		a01207,
+		820400,
+		5893ff,
+		597ee1,
+		4b6ec7,
+		3a5eab,
+		27548d,
+		fbf34a,
+		f9da3c,
+		eeb62b,
+		e19015,
+		cd6100,
+		ffb0ff,
+		d67fe2,
+		ae4ebc,
+		8b1a96,
+		610a75,
+		a4aaff,
+		8793e2,
+		6a73c1,
+		4d52a4,
+		343386,
+		c7bb6d,
+		b79d5c,
+		a47e3c,
+		7d5627,
+		58340f,
+		99ffff,
+		73dfff,
+		4ea5f9,
+		2a63e4,
+		0a00b8,
+		ebf1b5,
+		d4db9d,
+		bbc187,
+		a6a462,
+		8b8239,
+		73ff6b,
+		52da3b,
+		3cb420,
+		289315,
+		1a7309,
+	}
+}
+rectangle {
+	object {
+		x=84
+		y=-7
+		width=100
+		height=331
+	}
+	"basic attribute" {
+		clr=3
+	}
+}
+rectangle {
+	object {
+		x=284
+		y=-7
+		width=195
+		height=331
+	}
+	"basic attribute" {
+		clr=3
+	}
+}
+rectangle {
+	object {
+		x=543
+		y=-7
+		width=40
+		height=331
+	}
+	"basic attribute" {
+		clr=3
+	}
+}
+rectangle {
+	object {
+		x=672
+		y=0
+		width=80
+		height=331
+	}
+	"basic attribute" {
+		clr=3
+	}
+}
+rectangle {
+	object {
+		x=837
+		y=2
+		width=106
+		height=331
+	}
+	"basic attribute" {
+		clr=3
+	}
+}
+rectangle {
+	object {
+		x=187
+		y=257
+		width=90
+		height=60
+	}
+	"basic attribute" {
+		clr=24
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		calc="A eq 1"
+		chan="M1:SAS-STEPPER_BUSY3"
+	}
+}
+rectangle {
+	object {
+		x=186
+		y=186
+		width=90
+		height=60
+	}
+	"basic attribute" {
+		clr=24
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		calc="A eq 1"
+		chan="M1:SAS-STEPPER_BUSY2"
+	}
+}
+rectangle {
+	object {
+		x=186
+		y=120
+		width=90
+		height=60
+	}
+	"basic attribute" {
+		clr=24
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		calc="A eq 1"
+		chan="M1:SAS-STEPPER_BUSY1"
+	}
+}
+rectangle {
+	object {
+		x=187
+		y=121
+		width=90
+		height=60
+	}
+	"basic attribute" {
+		clr=62
+	}
+	"dynamic attribute" {
+		vis="if zero"
+		calc="A eq 1"
+		chan="M1:SAS-STEPPER_BUSY1"
+	}
+}
+rectangle {
+	object {
+		x=-38
+		y=-316
+		width=40
+		height=40
+	}
+	"basic attribute" {
+		clr=62
+	}
+	"dynamic attribute" {
+		vis="if zero"
+		calc="A eq 1"
+		chan="M1:SAS-STEPPER_BUSY"
+	}
+}
+rectangle {
+	object {
+		x=186
+		y=49
+		width=90
+		height=60
+	}
+	"basic attribute" {
+		clr=24
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		calc="A eq 1"
+		chan="M1:SAS-STEPPER_BUSY0"
+	}
+}
+"text entry" {
+	object {
+		x=205
+		y=67
+		width=50
+		height=25
+	}
+	control {
+		chan="M1:SAS-STEPPER_CMD0"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+"message button" {
+	object {
+		x=295
+		y=61
+		width=80
+		height=30
+	}
+	control {
+		chan="M1:SAS-STEPPER_KILL0"
+		clr=14
+		bclr=16
+	}
+	label="STOP"
+	press_msg="K"
+}
+"choice button" {
+	object {
+		x=90
+		y=54
+		width=90
+		height=50
+	}
+	control {
+		chan="M1:SAS-STEPPER_SEL0"
+		clr=14
+		bclr=4
+	}
+}
+"message button" {
+	object {
+		x=379
+		y=61
+		width=80
+		height=30
+	}
+	control {
+		chan="M1:SAS-STEPPER_ABORT0"
+		clr=14
+		bclr=21
+	}
+	label="ABORT"
+	press_msg="K"
+}
+"text update" {
+	object {
+		x=8
+		y=58
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS00"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=9
+		y=86
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS01"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=187
+		y=51
+		width=90
+		height=60
+	}
+	"basic attribute" {
+		clr=62
+	}
+	"dynamic attribute" {
+		vis="if zero"
+		calc="A eq 1"
+		chan="M1:SAS-STEPPER_BUSY0"
+	}
+}
+"text entry" {
+	object {
+		x=204
+		y=139
+		width=50
+		height=25
+	}
+	control {
+		chan="M1:SAS-STEPPER_CMD1"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+"message button" {
+	object {
+		x=296
+		y=137
+		width=80
+		height=30
+	}
+	control {
+		chan="M1:SAS-STEPPER_KILL1"
+		clr=14
+		bclr=16
+	}
+	label="STOP"
+	press_msg="K"
+}
+"choice button" {
+	object {
+		x=89
+		y=124
+		width=90
+		height=50
+	}
+	control {
+		chan="M1:SAS-STEPPER_SEL1"
+		clr=14
+		bclr=4
+	}
+}
+"message button" {
+	object {
+		x=379
+		y=137
+		width=80
+		height=30
+	}
+	control {
+		chan="M1:SAS-STEPPER_ABORT1"
+		clr=14
+		bclr=21
+	}
+	label="ABORT"
+	press_msg="K"
+}
+"text update" {
+	object {
+		x=11
+		y=129
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS10"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=11
+		y=157
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS11"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=205
+		y=204
+		width=50
+		height=25
+	}
+	control {
+		chan="M1:SAS-STEPPER_CMD2"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+"message button" {
+	object {
+		x=296
+		y=203
+		width=80
+		height=30
+	}
+	control {
+		chan="M1:SAS-STEPPER_KILL2"
+		clr=14
+		bclr=16
+	}
+	label="STOP"
+	press_msg="K"
+}
+"choice button" {
+	object {
+		x=89
+		y=191
+		width=90
+		height=50
+	}
+	control {
+		chan="M1:SAS-STEPPER_SEL2"
+		clr=14
+		bclr=4
+	}
+}
+"message button" {
+	object {
+		x=379
+		y=203
+		width=80
+		height=30
+	}
+	control {
+		chan="M1:SAS-STEPPER_ABORT2"
+		clr=14
+		bclr=21
+	}
+	label="ABORT"
+	press_msg="K"
+}
+"text update" {
+	object {
+		x=12
+		y=195
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS20"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=12
+		y=223
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS21"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=0
+		width=1000
+		height=7
+	}
+	"basic attribute" {
+		clr=33
+	}
+	"dynamic attribute" {
+		chan="M1:SAS-STEPPER_ABORT1"
+	}
+}
+"text entry" {
+	object {
+		x=203
+		y=270
+		width=50
+		height=25
+	}
+	control {
+		chan="M1:SAS-STEPPER_CMD3"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+"message button" {
+	object {
+		x=297
+		y=269
+		width=80
+		height=30
+	}
+	control {
+		chan="M1:SAS-STEPPER_KILL3"
+		clr=14
+		bclr=16
+	}
+	label="STOP"
+	press_msg="K"
+}
+"choice button" {
+	object {
+		x=89
+		y=261
+		width=90
+		height=50
+	}
+	control {
+		chan="M1:SAS-STEPPER_SEL3"
+		clr=14
+		bclr=4
+	}
+}
+"message button" {
+	object {
+		x=380
+		y=269
+		width=80
+		height=30
+	}
+	control {
+		chan="M1:SAS-STEPPER_ABORT3"
+		clr=14
+		bclr=21
+	}
+	label="ABORT"
+	press_msg="K"
+}
+"text update" {
+	object {
+		x=11
+		y=264
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS30"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=11
+		y=292
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_POS31"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=201
+		y=13
+		width=60
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Move"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=1
+		y=13
+		width=82
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Position"
+	align="horiz. centered"
+}
+rectangle {
+	object {
+		x=-3
+		y=695
+		width=526
+		height=6
+	}
+	"basic attribute" {
+		clr=33
+	}
+	"dynamic attribute" {
+		chan="M1:SAS-STEPPER_ABORT1"
+	}
+}
+rectangle {
+	object {
+		x=187
+		y=188
+		width=90
+		height=60
+	}
+	"basic attribute" {
+		clr=62
+	}
+	"dynamic attribute" {
+		vis="if zero"
+		calc="A eq 1"
+		chan="M1:SAS-STEPPER_BUSY2"
+	}
+}
+rectangle {
+	object {
+		x=185
+		y=256
+		width=90
+		height=60
+	}
+	"basic attribute" {
+		clr=62
+	}
+	"dynamic attribute" {
+		vis="if zero"
+		calc="A eq 1"
+		chan="M1:SAS-STEPPER_BUSY3"
+	}
+}
+"text update" {
+	object {
+		x=549
+		y=57
+		width=30
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_SIGN00"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=528
+		y=14
+		width=70
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Sign"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=549
+		y=84
+		width=30
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_SIGN01"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=-91
+		y=41
+		width=1000
+		height=7
+	}
+	"basic attribute" {
+		clr=33
+	}
+	"dynamic attribute" {
+		chan="M1:SAS-STEPPER_ABORT1"
+	}
+}
+text {
+	object {
+		x=482
+		y=14
+		width=60
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Speed "
+	align="horiz. centered"
+}
+"text entry" {
+	object {
+		x=485
+		y=53
+		width=50
+		height=25
+	}
+	control {
+		chan="M1:SAS-STEPPER_SPEED00"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=485
+		y=82
+		width=50
+		height=25
+	}
+	control {
+		chan="M1:SAS-STEPPER_SPEED01"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=93
+		y=14
+		width=82
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Motor"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=662
+		y=14
+		width=100
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Max Speed"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=679
+		y=72
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_MAX_SPEED0"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=761
+		y=72
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_MAX_STEPS0"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=746
+		y=14
+		width=100
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Max Move"
+	align="horiz. centered"
+}
+rectangle {
+	object {
+		x=-91
+		y=112
+		width=1000
+		height=7
+	}
+	"basic attribute" {
+		clr=33
+	}
+	"dynamic attribute" {
+		chan="M1:SAS-STEPPER_ABORT1"
+	}
+}
+"text entry" {
+	object {
+		x=486
+		y=125
+		width=50
+		height=25
+	}
+	control {
+		chan="M1:SAS-STEPPER_SPEED10"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=486
+		y=153
+		width=50
+		height=25
+	}
+	control {
+		chan="M1:SAS-STEPPER_SPEED11"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=548
+		y=128
+		width=30
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_SIGN10"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=549
+		y=156
+		width=30
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_SIGN11"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=678
+		y=141
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_MAX_SPEED1"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=759
+		y=140
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_MAX_STEPS1"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=-91
+		y=180
+		width=1000
+		height=7
+	}
+	"basic attribute" {
+		clr=33
+	}
+	"dynamic attribute" {
+		chan="M1:SAS-STEPPER_ABORT1"
+	}
+}
+rectangle {
+	object {
+		x=-91
+		y=249
+		width=1000
+		height=7
+	}
+	"basic attribute" {
+		clr=33
+	}
+	"dynamic attribute" {
+		chan="M1:SAS-STEPPER_ABORT1"
+	}
+}
+"text entry" {
+	object {
+		x=486
+		y=193
+		width=50
+		height=25
+	}
+	control {
+		chan="M1:SAS-STEPPER_SPEED20"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=486
+		y=221
+		width=50
+		height=25
+	}
+	control {
+		chan="M1:SAS-STEPPER_SPEED21"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=549
+		y=195
+		width=30
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_SIGN20"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=549
+		y=222
+		width=30
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_SIGN21"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=678
+		y=208
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_MAX_SPEED2"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=759
+		y=207
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_MAX_STEPS2"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=486
+		y=259
+		width=50
+		height=25
+	}
+	control {
+		chan="M1:SAS-STEPPER_SPEED30"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=486
+		y=287
+		width=50
+		height=25
+	}
+	control {
+		chan="M1:SAS-STEPPER_SPEED31"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=549
+		y=264
+		width=30
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_SIGN30"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=549
+		y=291
+		width=30
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_SIGN31"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=680
+		y=275
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_MAX_SPEED3"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=759
+		y=275
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_MAX_STEPS3"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=-92
+		y=316
+		width=1000
+		height=7
+	}
+	"basic attribute" {
+		clr=33
+	}
+	"dynamic attribute" {
+		chan="M1:SAS-STEPPER_ABORT1"
+	}
+}
+"text update" {
+	object {
+		x=591
+		y=71
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_MIN_SPEED0"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=591
+		y=140
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_MIN_SPEED1"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=591
+		y=207
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_MIN_SPEED2"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=591
+		y=274
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_MIN_SPEED3"
+		clr=14
+		bclr=4
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=575
+		y=14
+		width=100
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Min Speed"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=825
+		y=13
+		width=100
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Backlash"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=843
+		y=57
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_BACKLASH00"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=843
+		y=126
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_BACKLASH10"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=842
+		y=196
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_BACKLASH20"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=842
+		y=264
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_BACKLASH30"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=843
+		y=82
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_BACKLASH01"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=843
+		y=150
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_BACKLASH11"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=843
+		y=221
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_BACKLASH21"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=843
+		y=287
+		width=60
+		height=20
+	}
+	monitor {
+		chan="M1:SAS-STEPPER_BACKLASH31"
+		clr=14
+		bclr=3
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
