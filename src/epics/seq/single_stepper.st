@@ -29,6 +29,26 @@ assign command0 to "{ifo}:{sys}-STEPPER_CMD{controller}";
 int busy;
 assign busy to "{ifo}:{sys}-STEPPER_BUSY{controller}";
 
+int speed0;
+int speed1;
+assign speed0 to "{ifo}:{sys}-STEPPER_SPEED{controller}0";
+assign speed1 to "{ifo}:{sys}-STEPPER_SPEED{controller}1";
+
+int max_speed;
+assign max_speed to "{ifo}:{sys}-STEPPER_MAX_SPEED{controller}";
+
+int min_speed;
+assign min_speed to "{ifo}:{sys}-STEPPER_MIN_SPEED{controller}";
+
+/* The limit of how many steps we can go in one shot */
+int max_steps;
+assign max_steps to "{ifo}:{sys}-STEPPER_MAX_STEPS{controller}";
+
+int sign0;
+int sign1;
+assign sign0 to "{ifo}:{sys}-STEPPER_SIGN{controller}0";
+assign sign1 to "{ifo}:{sys}-STEPPER_SIGN{controller}1";
+
 %%   static int open_serial_port(int i) {
 %%	  int fd;
 %%	  struct termios options;
@@ -135,6 +155,33 @@ state init
 
     pos00 = pos01  = 0;
     controller = i = atoi(macValueGet("controller"));
+    sign0 = atoi(macValueGet("sign0"));
+    pvPut(sign0);
+    sign1 = atoi(macValueGet("sign1"));
+    pvPut(sign1);
+    min_speed = atoi(macValueGet("min_speed"));
+%%  if (min_speed < 10) {
+%%	printf("Warning, controller %d minimum speed set to 10\n", controller);
+%%	min_speed = 10;
+%%  }
+    pvPut(min_speed);
+    max_speed = atoi(macValueGet("max_speed"));
+%%  if (max_speed < 10) {
+%%	printf("Warning, controller %d maximum speed set to 10\n", controller);
+%%	max_speed = 10;
+%%  }
+%%  if (max_speed <= min_speed) {
+%%	printf("Warning, controller %d maximum speed set to %d\n", controller, min_speed + 1);
+%%	max_speed = min_speed + 1;
+%%  }
+    pvPut(max_speed);
+    speed0 = max_speed;
+    speed1 = max_speed;
+    pvPut(speed0);
+    pvPut(speed1);
+    max_steps = atoi(macValueGet("max_steps"));
+    pvPut(max_steps);
+%%
 %%  fd = open_serial_port(i);
 %%  for (j = 0; j < 2; j++) {
 %%
@@ -151,8 +198,9 @@ state init
 %%		  pos01 = p;
 %%		}
 %%	 }
-%%	 /* Set default speed */
-%%  	 exec(fd, "X10,20,10\r", buffer, 1);
+%%	 /* Set maximum speed */
+%%	 sprintf(cmd_buf, "X10,%d,10\r", max_speed);
+%%  	 exec(fd, cmd_buf, buffer, 1);
 %%  }
 %%  close(fd);
        pvPut(pos00);
@@ -169,6 +217,22 @@ state init
 state run
 {
   when(delay(.1)) {
+	pvGet(speed0);
+%%	if (speed0 > max_speed) {
+	  speed0 = max_speed;
+	  pvPut(speed0);
+%%	} else if (speed0 < min_speed) {
+	  speed0 = min_speed;
+	  pvPut(speed0);
+%% 	}
+	pvGet(speed1);
+%%	if (speed1 > max_speed) {
+	  speed1 = max_speed;
+	  pvPut(speed1);
+%%	} else if (speed1 < min_speed) {
+	  speed1 = min_speed;
+	  pvPut(speed1);
+%% 	}
         pvGet(motor0);
 	pvGet(command0);
 %%	if (strlen(command0)) {
@@ -177,36 +241,50 @@ state run
 %%	  char cmd_buf[128];
 %%	  char buffer[256];
 %%
-    	  busy = 1;
-    	  pvPut(busy);
-
-%%	fd = open_serial_port(controller);
-%%
-%%	/* Select motor first */
-%%	  sprintf(cmd_buf, "B%d\r", 1 + motor0);
-%%  	  exec(fd, cmd_buf, buffer, 1);
-%%	/* Execute command */
-%%	  sprintf(cmd_buf, "%s\r", command0);
-%%  	  exec(fd, cmd_buf, buffer, 60);
-%%	/* Update current position */
-%%  	  exec(fd, "V1\r", buffer, 1);
-%%	  if (strlen(buffer) && buffer[0] == 'V') {
+%%	  /* Verify command */
+%%	  int v = atoi(command0);
+%%	  if (v != 0 && v >= -max_steps && v <= max_steps) {
+    	     busy = 1;
+    	     pvPut(busy);
+%%	     fd = open_serial_port(controller);
+%%	     /* Select motor */
+%%	     sprintf(cmd_buf, "B%d\r", 1 + motor0);
+%%  	     exec(fd, cmd_buf, buffer, 1);
+%%	     /* Set speed */
+%%	     sprintf(cmd_buf, "T%d\r", motor0? speed1: speed0);
+%%  	     exec(fd, cmd_buf, buffer, 1);
+%%	     /* Apply sign */
+%%	     if (motor0 == 0) {
+%%		if (sign0 < 0) v *= -1;
+%%	     } else {
+%%		if (sign1 < 0) v *= -1;
+%%	     }
+%%	     /* Execute command */
+%%	     sprintf(cmd_buf, "%+d\r", v);
+%%  	     exec(fd, cmd_buf, buffer, 60);
+%%	     /* Update current position */
+%%  	     exec(fd, "V1\r", buffer, 1);
+%%	     if (strlen(buffer) && buffer[0] == 'V') {
 %%		int p = atoi(buffer+1);
 %%		if (motor0 == 0) {
 %%		  pos00 = p;
 %%		} else {
 %%		  pos01 = p;
 %%		}
+%%	     }
+%%  	     close(fd);
 %%	  }
-%%  	  close(fd);
 %%        strcpy(command0, "");
           pvPut(command0);
           pvPut(pos00);
           pvPut(pos01);
     	  busy = 0;
     	  pvPut(busy);
-
 %%      }
+    	pvPut(sign0);
+    	pvPut(sign1);
+    	pvPut(max_speed);
+    	pvPut(max_steps);
   } state run
  }
 }
