@@ -218,6 +218,8 @@ state init
 %%  	 exec(fd, cmd_buf, buffer, 1);
 %%  }
 %%  close(fd);
+%%  if (sign0 < 0) pos00 *= -1;
+%%  if (sign1 < 0) pos01 *= -1;
        pvPut(pos00);
        pvPut(pos01);
        motor0 = 0;
@@ -302,6 +304,8 @@ state run
 %%	  }
 %%        strcpy(command0, "");
           pvPut(command0);
+%%  	  if (motor0 == 0 && sign0 < 0) pos00 *= -1;
+%%  	  if (motor0 == 1 && sign1 < 0) pos01 *= -1;
           pvPut(pos00);
           pvPut(pos01);
     	  busy = 0;
