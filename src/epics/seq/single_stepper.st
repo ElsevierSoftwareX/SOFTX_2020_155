@@ -54,6 +54,8 @@ int backlash1;
 assign backlash0 to "{ifo}:{sys}-STEPPER_BACKLASH{controller}0";
 assign backlash1 to "{ifo}:{sys}-STEPPER_BACKLASH{controller}1";
 
+
+
 %%   static int open_serial_port(int i) {
 %%	  int fd;
 %%	  struct termios options;
@@ -144,6 +146,7 @@ assign backlash1 to "{ifo}:{sys}-STEPPER_BACKLASH{controller}1";
 %%    }
 
 %% static int controller;
+%% static int old_v = 0;
 
 ss stepper{
 
@@ -271,20 +274,17 @@ state run
 %%	     } else {
 %%		if (sign1 < 0) v *= -1;
 %%	     }
-%%	     /* Execute backlash compensation command */
-%%	     /* moving the motor back, then add that  */
-%%	     /* count to the forward movement command */
-%%	     if (motor0 == 0 && backlash0 != 0) {
-%%		int b = v > 0? -backlash0: backlash0;
-%%	     	sprintf(cmd_buf, "%+d\r", b);
-%%  	     	exec(fd, cmd_buf, buffer, 60);
-%%		v += -b;
-%%	     } else if (motor0 == 1 && backlash1 != 0) {
-%%		int b = v > 0? -backlash1: backlash1;
-%%	     	sprintf(cmd_buf, "%+d\r", b);
-%%  	     	exec(fd, cmd_buf, buffer, 60);
-%%		v += -b;
+%%
+%%	     /* See if we are reversing direction, apply backlash comp */
+%%	     if ((old_v * v) < 0) {
+%%	       if (motor0 == 0 && backlash0 != 0) {
+%%		v += v > 0? backlash0: -backlash0;
+%%	       } else if (motor0 == 1 && backlash1 != 0) {
+%%		v += v > 0? backlash1: -backlash1;
+%%	       }
 %%	     }
+%%	     old_v = v;
+%%
 %%	     /* Execute movement command */
 %%	     sprintf(cmd_buf, "%+d\r", v);
 %%  	     exec(fd, cmd_buf, buffer, 60);
