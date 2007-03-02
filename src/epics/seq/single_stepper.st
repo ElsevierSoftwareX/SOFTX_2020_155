@@ -49,6 +49,11 @@ int sign1;
 assign sign0 to "{ifo}:{sys}-STEPPER_SIGN{controller}0";
 assign sign1 to "{ifo}:{sys}-STEPPER_SIGN{controller}1";
 
+int backlash0;
+int backlash1;
+assign backlash0 to "{ifo}:{sys}-STEPPER_BACKLASH{controller}0";
+assign backlash1 to "{ifo}:{sys}-STEPPER_BACKLASH{controller}1";
+
 %%   static int open_serial_port(int i) {
 %%	  int fd;
 %%	  struct termios options;
@@ -159,6 +164,13 @@ state init
     pvPut(sign0);
     sign1 = atoi(macValueGet("sign1"));
     pvPut(sign1);
+    backlash0 = atoi(macValueGet("backlash0"));
+%%  if (backlash0 > 50) backlash0 = 50;
+    pvPut(backlash0);
+    backlash1 = atoi(macValueGet("backlash1"));
+%%  if (backlash1 > 50) backlash1 = 50;
+    pvPut(backlash1);
+%%
     min_speed = atoi(macValueGet("min_speed"));
 %%  if (min_speed < 10) {
 %%	printf("Warning, controller %d minimum speed set to 10\n", controller);
@@ -253,13 +265,27 @@ state run
 %%	     /* Set speed */
 %%	     sprintf(cmd_buf, "T%d\r", motor0? speed1: speed0);
 %%  	     exec(fd, cmd_buf, buffer, 1);
-%%	     /* Apply sign */
+%%	     /* Apply sign to movement count */
 %%	     if (motor0 == 0) {
 %%		if (sign0 < 0) v *= -1;
 %%	     } else {
 %%		if (sign1 < 0) v *= -1;
 %%	     }
-%%	     /* Execute command */
+%%	     /* Execute backlash compensation command */
+%%	     /* moving the motor back, then add that  */
+%%	     /* count to the forward movement command */
+%%	     if (motor0 == 0 && backlash0 != 0) {
+%%		int b = v > 0? -backlash0: backlash0;
+%%	     	sprintf(cmd_buf, "%+d\r", b);
+%%  	     	exec(fd, cmd_buf, buffer, 60);
+%%		v += -b;
+%%	     } else if (motor0 == 1 && backlash1 != 0) {
+%%		int b = v > 0? -backlash1: backlash1;
+%%	     	sprintf(cmd_buf, "%+d\r", b);
+%%  	     	exec(fd, cmd_buf, buffer, 60);
+%%		v += -b;
+%%	     }
+%%	     /* Execute movement command */
 %%	     sprintf(cmd_buf, "%+d\r", v);
 %%  	     exec(fd, cmd_buf, buffer, 60);
 %%	     /* Update current position */
@@ -283,6 +309,8 @@ state run
 %%      }
     	pvPut(sign0);
     	pvPut(sign1);
+    	pvPut(backlash0);
+    	pvPut(backlash1);
     	pvPut(max_speed);
     	pvPut(max_steps);
   } state run
