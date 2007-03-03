@@ -5,9 +5,9 @@ file {
 }
 display {
 	object {
-		x=406
-		y=148
-		width=909
+		x=254
+		y=477
+		width=822
 		height=324
 	}
 	clr=14
@@ -111,8 +111,8 @@ rectangle {
 }
 rectangle {
 	object {
-		x=543
-		y=-7
+		x=430
+		y=-10
 		width=40
 		height=331
 	}
@@ -122,8 +122,8 @@ rectangle {
 }
 rectangle {
 	object {
-		x=672
-		y=0
+		x=564
+		y=-3
 		width=80
 		height=331
 	}
@@ -133,8 +133,8 @@ rectangle {
 }
 rectangle {
 	object {
-		x=837
-		y=2
+		x=729
+		y=-1
 		width=106
 		height=331
 	}
@@ -192,7 +192,7 @@ rectangle {
 }
 rectangle {
 	object {
-		x=187
+		x=186
 		y=121
 		width=90
 		height=60
@@ -281,21 +281,6 @@ rectangle {
 		bclr=4
 	}
 }
-"message button" {
-	object {
-		x=379
-		y=61
-		width=80
-		height=30
-	}
-	control {
-		chan="M1:SAS-STEPPER_ABORT0"
-		clr=14
-		bclr=21
-	}
-	label="ABORT"
-	press_msg="K"
-}
 "text update" {
 	object {
 		x=8
@@ -330,8 +315,8 @@ rectangle {
 }
 rectangle {
 	object {
-		x=187
-		y=51
+		x=186
+		y=49
 		width=90
 		height=60
 	}
@@ -386,21 +371,6 @@ rectangle {
 		clr=14
 		bclr=4
 	}
-}
-"message button" {
-	object {
-		x=379
-		y=137
-		width=80
-		height=30
-	}
-	control {
-		chan="M1:SAS-STEPPER_ABORT1"
-		clr=14
-		bclr=21
-	}
-	label="ABORT"
-	press_msg="K"
 }
 "text update" {
 	object {
@@ -476,21 +446,6 @@ rectangle {
 		clr=14
 		bclr=4
 	}
-}
-"message button" {
-	object {
-		x=379
-		y=203
-		width=80
-		height=30
-	}
-	control {
-		chan="M1:SAS-STEPPER_ABORT2"
-		clr=14
-		bclr=21
-	}
-	label="ABORT"
-	press_msg="K"
 }
 "text update" {
 	object {
@@ -581,21 +536,6 @@ rectangle {
 		bclr=4
 	}
 }
-"message button" {
-	object {
-		x=380
-		y=269
-		width=80
-		height=30
-	}
-	control {
-		chan="M1:SAS-STEPPER_ABORT3"
-		clr=14
-		bclr=21
-	}
-	label="ABORT"
-	press_msg="K"
-}
 "text update" {
 	object {
 		x=11
@@ -670,7 +610,7 @@ rectangle {
 }
 rectangle {
 	object {
-		x=187
+		x=186
 		y=188
 		width=90
 		height=60
@@ -686,8 +626,8 @@ rectangle {
 }
 rectangle {
 	object {
-		x=185
-		y=256
+		x=187
+		y=257
 		width=90
 		height=60
 	}
@@ -702,8 +642,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=549
-		y=57
+		x=441
+		y=54
 		width=30
 		height=20
 	}
@@ -718,8 +658,8 @@ rectangle {
 }
 text {
 	object {
-		x=528
-		y=14
+		x=423
+		y=11
 		width=70
 		height=20
 	}
@@ -731,8 +671,8 @@ text {
 }
 "text update" {
 	object {
-		x=549
-		y=84
+		x=441
+		y=81
 		width=30
 		height=20
 	}
@@ -761,8 +701,8 @@ rectangle {
 }
 text {
 	object {
-		x=482
-		y=14
+		x=377
+		y=11
 		width=60
 		height=20
 	}
@@ -774,8 +714,8 @@ text {
 }
 "text entry" {
 	object {
-		x=485
-		y=53
+		x=380
+		y=50
 		width=50
 		height=25
 	}
@@ -789,8 +729,8 @@ text {
 }
 "text entry" {
 	object {
-		x=485
-		y=82
+		x=380
+		y=79
 		width=50
 		height=25
 	}
@@ -817,8 +757,8 @@ text {
 }
 text {
 	object {
-		x=662
-		y=14
+		x=553
+		y=11
 		width=100
 		height=20
 	}
@@ -830,8 +770,8 @@ text {
 }
 "text update" {
 	object {
-		x=679
-		y=72
+		x=576
+		y=69
 		width=60
 		height=20
 	}
@@ -846,8 +786,8 @@ text {
 }
 "text update" {
 	object {
-		x=761
-		y=72
+		x=658
+		y=69
 		width=60
 		height=20
 	}
@@ -862,8 +802,8 @@ text {
 }
 text {
 	object {
-		x=746
-		y=14
+		x=639
+		y=11
 		width=100
 		height=20
 	}
@@ -889,8 +829,8 @@ rectangle {
 }
 "text entry" {
 	object {
-		x=486
-		y=125
+		x=381
+		y=122
 		width=50
 		height=25
 	}
@@ -904,8 +844,8 @@ rectangle {
 }
 "text entry" {
 	object {
-		x=486
-		y=153
+		x=381
+		y=150
 		width=50
 		height=25
 	}
@@ -919,8 +859,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=548
-		y=128
+		x=440
+		y=125
 		width=30
 		height=20
 	}
@@ -935,8 +875,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=549
-		y=156
+		x=441
+		y=153
 		width=30
 		height=20
 	}
@@ -951,8 +891,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=678
-		y=141
+		x=575
+		y=138
 		width=60
 		height=20
 	}
@@ -967,8 +907,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=759
-		y=140
+		x=656
+		y=137
 		width=60
 		height=20
 	}
@@ -1011,8 +951,8 @@ rectangle {
 }
 "text entry" {
 	object {
-		x=486
-		y=193
+		x=381
+		y=190
 		width=50
 		height=25
 	}
@@ -1026,8 +966,8 @@ rectangle {
 }
 "text entry" {
 	object {
-		x=486
-		y=221
+		x=381
+		y=218
 		width=50
 		height=25
 	}
@@ -1041,8 +981,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=549
-		y=195
+		x=441
+		y=192
 		width=30
 		height=20
 	}
@@ -1057,8 +997,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=549
-		y=222
+		x=441
+		y=219
 		width=30
 		height=20
 	}
@@ -1073,8 +1013,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=678
-		y=208
+		x=575
+		y=205
 		width=60
 		height=20
 	}
@@ -1089,8 +1029,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=759
-		y=207
+		x=656
+		y=204
 		width=60
 		height=20
 	}
@@ -1105,8 +1045,8 @@ rectangle {
 }
 "text entry" {
 	object {
-		x=486
-		y=259
+		x=381
+		y=256
 		width=50
 		height=25
 	}
@@ -1120,8 +1060,8 @@ rectangle {
 }
 "text entry" {
 	object {
-		x=486
-		y=287
+		x=381
+		y=284
 		width=50
 		height=25
 	}
@@ -1135,8 +1075,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=549
-		y=264
+		x=441
+		y=261
 		width=30
 		height=20
 	}
@@ -1151,8 +1091,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=549
-		y=291
+		x=441
+		y=288
 		width=30
 		height=20
 	}
@@ -1167,8 +1107,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=680
-		y=275
+		x=577
+		y=272
 		width=60
 		height=20
 	}
@@ -1183,8 +1123,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=759
-		y=275
+		x=656
+		y=272
 		width=60
 		height=20
 	}
@@ -1199,8 +1139,8 @@ rectangle {
 }
 rectangle {
 	object {
-		x=-92
-		y=316
+		x=-91
+		y=317
 		width=1000
 		height=7
 	}
@@ -1213,8 +1153,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=591
-		y=71
+		x=483
+		y=68
 		width=60
 		height=20
 	}
@@ -1229,8 +1169,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=591
-		y=140
+		x=483
+		y=137
 		width=60
 		height=20
 	}
@@ -1245,8 +1185,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=591
-		y=207
+		x=483
+		y=204
 		width=60
 		height=20
 	}
@@ -1261,8 +1201,8 @@ rectangle {
 }
 "text update" {
 	object {
-		x=591
-		y=274
+		x=483
+		y=271
 		width=60
 		height=20
 	}
@@ -1277,8 +1217,8 @@ rectangle {
 }
 text {
 	object {
-		x=575
-		y=14
+		x=466
+		y=11
 		width=100
 		height=20
 	}
@@ -1290,8 +1230,8 @@ text {
 }
 text {
 	object {
-		x=825
-		y=13
+		x=725
+		y=10
 		width=100
 		height=20
 	}
@@ -1303,8 +1243,8 @@ text {
 }
 "text update" {
 	object {
-		x=843
-		y=57
+		x=740
+		y=54
 		width=60
 		height=20
 	}
@@ -1319,8 +1259,8 @@ text {
 }
 "text update" {
 	object {
-		x=843
-		y=126
+		x=740
+		y=123
 		width=60
 		height=20
 	}
@@ -1335,8 +1275,8 @@ text {
 }
 "text update" {
 	object {
-		x=842
-		y=196
+		x=739
+		y=193
 		width=60
 		height=20
 	}
@@ -1351,8 +1291,8 @@ text {
 }
 "text update" {
 	object {
-		x=842
-		y=264
+		x=739
+		y=261
 		width=60
 		height=20
 	}
@@ -1367,8 +1307,8 @@ text {
 }
 "text update" {
 	object {
-		x=843
-		y=82
+		x=740
+		y=79
 		width=60
 		height=20
 	}
@@ -1383,8 +1323,8 @@ text {
 }
 "text update" {
 	object {
-		x=843
-		y=150
+		x=740
+		y=147
 		width=60
 		height=20
 	}
@@ -1399,8 +1339,8 @@ text {
 }
 "text update" {
 	object {
-		x=843
-		y=221
+		x=740
+		y=218
 		width=60
 		height=20
 	}
@@ -1415,8 +1355,8 @@ text {
 }
 "text update" {
 	object {
-		x=843
-		y=287
+		x=740
+		y=284
 		width=60
 		height=20
 	}
