@@ -423,10 +423,10 @@ sub find_branch {
 	  if (${$_->{FIELDS}}{DstBlock} eq $dst_name && $dprt == $dst_port) {
 		return $_;
 	  }
-	}
-	my $block = find_branch($_, $dst_name, $dst_port);
-	if ($block ne undef) {
-	  return $block;
+	  my $block = find_branch($_, $dst_name, $dst_port);
+	  if ($block ne undef) {
+	    return $block;
+	  }
 	}
    }
    return undef;
