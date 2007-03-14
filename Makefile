@@ -60,6 +60,28 @@ install-% :: src/epics/simLink/%.mdl
 	/bin/mkdir -p /cvs/cds/$$site/medm/$${lower_ifo};\
 	/bin/cp -pr src/epics/util/$${system} /cvs/cds/$$site/medm/$${lower_ifo}
 
+# Lighter installation rule, do not reinstall screens and config files
+# Install Epics and FE targets only
+reinstall-% :: src/epics/simLink/%.mdl
+	@system=$(subst reinstall-,,$@); \
+	upper_system=`echo $$system | tr a-z A-Z`;\
+	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
+	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
+	cur_date=`date +%y%m%d_%H%m%S`;\
+	/bin/mkdir -p /cvs/cds/$$site/chans;\
+	echo Installing Code Only system=$$system site=$$site ifo=$$ifo,$$lower_ifo;\
+	echo Installing /cvs/cds/$$site/target/$${system}epics;\
+	/bin/mkdir -p /cvs/cds/$$site/target_archive;\
+	/bin/mv -f /cvs/cds/$$site/target/$${system}epics /cvs/cds/$$site/target_archive/$${system}epics_$$cur_date;\
+	/bin/mkdir -p /cvs/cds/$$site/target;\
+	/bin/cp -pr target/$${system}epics /cvs/cds/$$site/target;\
+	/bin/mv -f /cvs/cds/$$site/target/$${system}epics/db/*/autoBurt.req /cvs/cds/$$site/target/$${system}epics;\
+	echo Installing /cvs/cds/$$site/target/$${system};\
+	/bin/mkdir -p /cvs/cds/$$site/target/$${system};\
+	/bin/mv -f /cvs/cds/$$site/target/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system}/$${system}fe_$${cur_date}.rtl;\
+	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system};
+
 install-% :: config/Makefile.%epics
 	@system=$(subst install-,,$@); \
 	site=`grep SITE $< | sed 's/.*SITE\s*=\s*\([a-z]*\).*/\1/g'`; \
