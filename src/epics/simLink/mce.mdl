@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.63"
+    ComputedModelVersion    "1.66"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Mar 15 13:50:53 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:63>"
+  LastModifiedDate	  "Thu Mar 15 14:22:28 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:66>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -655,7 +655,7 @@ Model {
     TiledPaperMargins	    [0.500000, 0.500000, 0.500000, 0.500000]
     TiledPageScale	    1
     ShowPageBoundaries	    off
-    ZoomFactor		    "64"
+    ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
     Block {
       BlockType		      BusCreator
@@ -1521,166 +1521,10 @@ Model {
       RTWMemSecDataParameters "Inherit from model"
     }
     Block {
-      BlockType		      Reference
-      Name		      "M0Face1Mon"
-      Tag		      "cdsEpicsOutput"
-      Description	      "Purpose:                                       "
-"   \nOutput a FE signal to an EPICS channel.           \n                    "
-"                              \nOperation:                                   "
-"     \nTakes input value and passes it to EPICS record.  \n                  "
-"                                \nUsage:                                     "
-"       \nName the part with the desired EPICS rrecord name."
-      Ports		      [1, 1]
-      Position		      [720, 209, 765, 231]
-      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
-      DropShadow	      on
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsEpicsOut/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      on
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
-      BlockType		      Reference
-      Name		      "M0Face2Mon"
-      Tag		      "cdsEpicsOutput"
-      Description	      "Purpose:                                       "
-"   \nOutput a FE signal to an EPICS channel.           \n                    "
-"                              \nOperation:                                   "
-"     \nTakes input value and passes it to EPICS record.  \n                  "
-"                                \nUsage:                                     "
-"       \nName the part with the desired EPICS rrecord name."
-      Ports		      [1, 1]
-      Position		      [795, 234, 840, 256]
-      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
-      DropShadow	      on
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsEpicsOut/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      on
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
-      BlockType		      Reference
-      Name		      "M0Face3Mon"
-      Tag		      "cdsEpicsOutput"
-      Description	      "Purpose:                                       "
-"   \nOutput a FE signal to an EPICS channel.           \n                    "
-"                              \nOperation:                                   "
-"     \nTakes input value and passes it to EPICS record.  \n                  "
-"                                \nUsage:                                     "
-"       \nName the part with the desired EPICS rrecord name."
-      Ports		      [1, 1]
-      Position		      [720, 259, 765, 281]
-      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
-      DropShadow	      on
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsEpicsOut/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      on
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
-      BlockType		      Reference
-      Name		      "M0LeftMon"
-      Tag		      "cdsEpicsOutput"
-      Description	      "Purpose:                                       "
-"   \nOutput a FE signal to an EPICS channel.           \n                    "
-"                              \nOperation:                                   "
-"     \nTakes input value and passes it to EPICS record.  \n                  "
-"                                \nUsage:                                     "
-"       \nName the part with the desired EPICS rrecord name."
-      Ports		      [1, 1]
-      Position		      [795, 284, 840, 306]
-      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
-      DropShadow	      on
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsEpicsOut/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      on
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
-      BlockType		      Reference
-      Name		      "M0RightMon"
-      Tag		      "cdsEpicsOutput"
-      Description	      "Purpose:                                       "
-"   \nOutput a FE signal to an EPICS channel.           \n                    "
-"                              \nOperation:                                   "
-"     \nTakes input value and passes it to EPICS record.  \n                  "
-"                                \nUsage:                                     "
-"       \nName the part with the desired EPICS rrecord name."
-      Ports		      [1, 1]
-      Position		      [720, 309, 765, 331]
-      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
-      DropShadow	      on
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsEpicsOut/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      on
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
-      BlockType		      Reference
-      Name		      "M0SidetMon"
-      Tag		      "cdsEpicsOutput"
-      Description	      "Purpose:                                       "
-"   \nOutput a FE signal to an EPICS channel.           \n                    "
-"                              \nOperation:                                   "
-"     \nTakes input value and passes it to EPICS record.  \n                  "
-"                                \nUsage:                                     "
-"       \nName the part with the desired EPICS rrecord name."
-      Ports		      [1, 1]
-      Position		      [795, 334, 840, 356]
-      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
-      DropShadow	      on
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsEpicsOut/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      on
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
       BlockType		      SubSystem
       Name		      "Q1"
       Description	      "Quad Suspension"
-      Ports		      [29, 25]
+      Ports		      [29, 31]
       Position		      [350, 176, 470, 1124]
       BackgroundColor	      "cyan"
       DropShadow	      on
@@ -31528,6 +31372,54 @@ Model {
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
 	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "M0Face11"
+	  Position		  [585, 113, 615, 127]
+	  Port			  "26"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "M0Face21"
+	  Position		  [585, 158, 615, 172]
+	  Port			  "27"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "M0Face31"
+	  Position		  [585, 203, 615, 217]
+	  Port			  "28"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "M0Left1"
+	  Position		  [585, 248, 615, 262]
+	  Port			  "29"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "M0Right1"
+	  Position		  [585, 293, 615, 307]
+	  Port			  "30"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "M0Side1"
+	  Position		  [585, 338, 615, 352]
+	  Port			  "31"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
 	Line {
 	  SrcBlock		  "SUS_WD_SUM"
 	  SrcPort		  1
@@ -31793,38 +31685,86 @@ Model {
 	Line {
 	  SrcBlock		  "M0"
 	  SrcPort		  1
-	  DstBlock		  "M0Face1"
-	  DstPort		  1
+	  Points		  [130, 0]
+	  Branch {
+	    DstBlock		    "M0Face1"
+	    DstPort		    1
+	  }
+	  Branch {
+	    Points		    [0, 35]
+	    DstBlock		    "M0Face11"
+	    DstPort		    1
+	  }
 	}
 	Line {
 	  SrcBlock		  "M0"
 	  SrcPort		  2
-	  DstBlock		  "M0Face2"
-	  DstPort		  1
+	  Points		  [140, 0]
+	  Branch {
+	    DstBlock		    "M0Face2"
+	    DstPort		    1
+	  }
+	  Branch {
+	    Points		    [0, 35]
+	    DstBlock		    "M0Face21"
+	    DstPort		    1
+	  }
 	}
 	Line {
 	  SrcBlock		  "M0"
 	  SrcPort		  3
-	  DstBlock		  "M0Face3"
-	  DstPort		  1
+	  Points		  [140, 0]
+	  Branch {
+	    DstBlock		    "M0Face3"
+	    DstPort		    1
+	  }
+	  Branch {
+	    Points		    [0, 35]
+	    DstBlock		    "M0Face31"
+	    DstPort		    1
+	  }
 	}
 	Line {
 	  SrcBlock		  "M0"
 	  SrcPort		  4
-	  DstBlock		  "M0Left"
-	  DstPort		  1
+	  Points		  [140, 0]
+	  Branch {
+	    DstBlock		    "M0Left"
+	    DstPort		    1
+	  }
+	  Branch {
+	    Points		    [0, 35]
+	    DstBlock		    "M0Left1"
+	    DstPort		    1
+	  }
 	}
 	Line {
 	  SrcBlock		  "M0"
 	  SrcPort		  5
-	  DstBlock		  "M0Right"
-	  DstPort		  1
+	  Points		  [140, 0]
+	  Branch {
+	    DstBlock		    "M0Right"
+	    DstPort		    1
+	  }
+	  Branch {
+	    Points		    [0, 35]
+	    DstBlock		    "M0Right1"
+	    DstPort		    1
+	  }
 	}
 	Line {
 	  SrcBlock		  "M0"
 	  SrcPort		  6
-	  DstBlock		  "M0Side"
-	  DstPort		  1
+	  Points		  [145, 0]
+	  Branch {
+	    DstBlock		    "M0Side"
+	    DstPort		    1
+	  }
+	  Branch {
+	    Points		    [0, 35]
+	    DstBlock		    "M0Side1"
+	    DstPort		    1
+	  }
 	}
 	Line {
 	  SrcBlock		  "M0"
@@ -38095,219 +38035,153 @@ Model {
     Line {
       SrcBlock		      "Q1"
       SrcPort		      1
-      Points		      [0, -10; 165, 0]
-      Branch {
-	DstBlock		"M0Face1Mon"
-	DstPort			1
-      }
-      Branch {
-	Points			[0, 980]
-	DstBlock		"COIL_MODEL"
-	DstPort			1
-      }
-    }
-    Line {
-      SrcBlock		      "Q1"
-      SrcPort		      2
-      Points		      [0, -20; 186, 0]
-      Branch {
-	DstBlock		"M0Face2Mon"
-	DstPort			1
-      }
-      Branch {
-	Labels			[2, 0]
-	Points			[-6, 0; 0, 985]
-	DstBlock		"COIL_MODEL"
-	DstPort			2
-      }
+      Points		      [0, 20]
+      DstBlock		      "DAC_0"
+      DstPort		      1
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      3
-      Points		      [0, -30; 205, 0]
-      Branch {
-	DstBlock		"M0Face3Mon"
-	DstPort			1
-      }
-      Branch {
-	Points			[-10, 0; 0, 985; -185, 0]
-	DstBlock		"COIL_MODEL"
-	DstPort			3
-      }
-    }
-    Line {
-      SrcBlock		      "Q1"
-      SrcPort		      4
-      Points		      [0, -40; 220, 0]
-      Branch {
-	DstBlock		"M0LeftMon"
-	DstPort			1
-      }
-      Branch {
-	Labels			[2, 0]
-	Points			[-11, 0; 0, 996]
-	DstBlock		"COIL_MODEL"
-	DstPort			4
-      }
+      Points		      [0, 10]
+      DstBlock		      "DAC_0"
+      DstPort		      3
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      5
-      Points		      [0, -50; 230, 0]
-      Branch {
-	DstBlock		"M0RightMon"
-	DstPort			1
-      }
-      Branch {
-	Points			[-5, 0; 0, 996; -215, 0]
-	DstBlock		"COIL_MODEL"
-	DstPort			5
-      }
-    }
-    Line {
-      SrcBlock		      "Q1"
-      SrcPort		      6
-      Points		      [0, -60; 245, 0]
-      Branch {
-	DstBlock		"M0SidetMon"
-	DstPort			1
-      }
-      Branch {
-	Points			[0, 1005]
-	DstBlock		"COIL_MODEL"
-	DstPort			6
-      }
+      DstBlock		      "DAC_0"
+      DstPort		      5
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      7
-      Points		      [0, -70]
+      Points		      [0, -10]
       DstBlock		      "DAC_0"
       DstPort		      7
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      8
-      Points		      [0, -80]
+      Points		      [0, -15]
       DstBlock		      "DAC_0"
       DstPort		      8
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      9
-      Points		      [0, -90]
+      Points		      [0, -20]
       DstBlock		      "DAC_0"
       DstPort		      9
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      10
-      Points		      [0, -100]
+      Points		      [0, -25]
       DstBlock		      "DAC_0"
       DstPort		      10
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      11
-      Points		      [0, -110]
+      Points		      [0, -30]
       DstBlock		      "DAC_0"
       DstPort		      11
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      12
-      Points		      [0, -120]
+      Points		      [0, -35]
       DstBlock		      "DAC_0"
       DstPort		      12
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      13
-      Points		      [0, -130]
+      Points		      [0, -40]
       DstBlock		      "DAC_0"
       DstPort		      13
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      14
-      Points		      [0, -140]
+      Points		      [0, -45]
       DstBlock		      "DAC_0"
       DstPort		      14
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      15
-      Points		      [0, -150]
+      Points		      [0, -50]
       DstBlock		      "DAC_0"
       DstPort		      15
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      16
-      Points		      [0, -160]
+      Points		      [0, -55]
       DstBlock		      "DAC_0"
       DstPort		      16
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      17
-      Points		      [0, -170]
+      Points		      [0, -60]
       DstBlock		      "DAC_1"
       DstPort		      1
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      18
-      Points		      [0, -180]
+      Points		      [0, -65]
       DstBlock		      "DAC_1"
       DstPort		      2
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      19
-      Points		      [0, -190]
+      Points		      [0, -70]
       DstBlock		      "DAC_1"
       DstPort		      3
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      20
-      Points		      [0, -200]
+      Points		      [0, -75]
       DstBlock		      "DAC_1"
       DstPort		      4
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      21
-      Points		      [65, -209]
+      Points		      [65, -79]
       DstBlock		      "DAC_1"
       DstPort		      7
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      22
-      Points		      [55, 0; 0, -170]
+      Points		      [55, 0; 0, -35]
       DstBlock		      "DAC_1"
       DstPort		      8
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      23
-      Points		      [45, 0; 0, -179]
+      Points		      [45, 0; 0, -39]
       DstBlock		      "DAC_1"
       DstPort		      9
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      24
-      Points		      [30, 0; 0, -190]
+      Points		      [30, 0; 0, -45]
       DstBlock		      "DAC_1"
       DstPort		      10
     }
     Line {
       SrcBlock		      "Q1"
       SrcPort		      25
-      Points		      [20, 0; 0, -200]
+      Points		      [20, 0; 0, -50]
       DstBlock		      "DAC_1"
       DstPort		      11
     }
@@ -38435,42 +38309,67 @@ Model {
       DstPort		      29
     }
     Line {
-      SrcBlock		      "M0Face1Mon"
-      SrcPort		      1
-      DstBlock		      "DAC_0"
+      SrcBlock		      "Q1"
+      SrcPort		      26
+      Points		      [20, 0; 0, 250]
+      DstBlock		      "COIL_MODEL"
       DstPort		      1
     }
     Line {
-      SrcBlock		      "M0Face2Mon"
-      SrcPort		      1
-      DstBlock		      "DAC_0"
+      SrcBlock		      "Q1"
+      SrcPort		      27
+      Points		      [15, 0; 0, 250]
+      DstBlock		      "COIL_MODEL"
       DstPort		      2
     }
     Line {
-      SrcBlock		      "M0Face3Mon"
-      SrcPort		      1
-      Points		      [10, 0; 0, 5; 80, 0]
-      DstBlock		      "DAC_0"
+      SrcBlock		      "Q1"
+      SrcPort		      28
+      Points		      [15, 0; 0, 250]
+      DstBlock		      "COIL_MODEL"
       DstPort		      3
     }
     Line {
-      SrcBlock		      "M0LeftMon"
-      SrcPort		      1
+      SrcBlock		      "Q1"
+      SrcPort		      29
+      Points		      [15, 0; 0, 250]
+      DstBlock		      "COIL_MODEL"
+      DstPort		      4
+    }
+    Line {
+      SrcBlock		      "Q1"
+      SrcPort		      30
+      Points		      [15, 0; 0, 250]
+      DstBlock		      "COIL_MODEL"
+      DstPort		      5
+    }
+    Line {
+      SrcBlock		      "Q1"
+      SrcPort		      31
+      Points		      [15, 0; 0, 250]
+      DstBlock		      "COIL_MODEL"
+      DstPort		      6
+    }
+    Line {
+      SrcBlock		      "Q1"
+      SrcPort		      6
+      Points		      [190, 0; 0, -5]
+      DstBlock		      "DAC_0"
+      DstPort		      6
+    }
+    Line {
+      SrcBlock		      "Q1"
+      SrcPort		      4
+      Points		      [190, 0; 0, 5]
       DstBlock		      "DAC_0"
       DstPort		      4
     }
     Line {
-      SrcBlock		      "M0RightMon"
-      SrcPort		      1
-      Points		      [15, 0; 0, 5; 75, 0]
+      SrcBlock		      "Q1"
+      SrcPort		      2
+      Points		      [190, 0; 0, 15]
       DstBlock		      "DAC_0"
-      DstPort		      5
-    }
-    Line {
-      SrcBlock		      "M0SidetMon"
-      SrcPort		      1
-      DstBlock		      "DAC_0"
-      DstPort		      6
+      DstPort		      2
     }
     Annotation {
       Name		      "Triple 1 Controls"
