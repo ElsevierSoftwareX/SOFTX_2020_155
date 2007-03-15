@@ -191,6 +191,8 @@ double dHistory[96][40];
 #define ADC_DMA_BYTES		0x80
 #endif
 
+// Whether run on internal timer (when no I/O cards found)
+int run_on_timer = 0;
 
 #if 0
 // **************************************************************************
@@ -428,40 +430,47 @@ void *fe_start(void *arg)
   }
   for(jj=0;jj<cdsPciModules.dacCount;jj++)
 		status = gsaDacDma1(jj,cdsPciModules.dacType[jj]);
-  // Trigger the ADC to start running
-  gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
+
+  if (!run_on_timer) {
+    // Trigger the ADC to start running
+    gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
+  }
 
   // Enter the coninuous FE control loop  **********************************************************
   while(!vmeDone){
 
         rdtscl(cpuClock[2]);
-	// Wait for data ready from first ADC module.
-	if(cdsPciModules.adcType[0] == GSC_16AISS8AO4)
-	{
-		status = checkAdcRdy(ADC_SAMPLE_COUNT,0);
+  	if (run_on_timer) {
+	  // Use real-time system timer to pause here
+	  //
 	} else {
+	  // Wait for data ready from first ADC module.
+	  if(cdsPciModules.adcType[0] == GSC_16AISS8AO4)
+	  {
+		status = checkAdcRdy(ADC_SAMPLE_COUNT,0);
+	  } else {
 		// ADC is running in DEMAND DMA MODE
 		packedData = (int *)cdsPciModules.pci_adc[0];
 		kk = 0;
 		do {
 			kk ++;
 		}while((*packedData == 0) && (kk < 10000000));
+	  }
 	}
 
 	// Read CPU clock for timing info
 	usleep(0);
         rdtscl(cpuClock[0]);
 
-  	for(jj=0;jj<cdsPciModules.adcCount;jj++)
-  	{
+  	if (!run_on_timer) {
+  	  for(jj=0;jj<cdsPciModules.adcCount;jj++) {
 		if(cdsPciModules.adcType[jj] == GSC_16AISS8AO4)
 		{
 			gsaAdcDma2(jj);
 		}
-	}
-	// Wait until all ADC channels have been updated
-  	for(jj=0;jj<cdsPciModules.adcCount;jj++)
-  	{
+	  }
+	  // Wait until all ADC channels have been updated
+  	  for(jj=0;jj<cdsPciModules.adcCount;jj++) {
 		packedData = (int *)cdsPciModules.pci_adc[jj];
 		if(cdsPciModules.adcType[jj] == GSC_16AISS8AO4) packedData += 3;
 		else packedData += 31;
@@ -469,6 +478,7 @@ void *fe_start(void *arg)
 		do {
 			kk ++;
 		}while(((*packedData & 0x110000) > 0) && (kk < 10000000));
+	  }
 	}
 
         // Update internal cycle counters
@@ -521,9 +531,9 @@ void *fe_start(void *arg)
 
         vmeDone = stop_working_threads | checkEpicsReset(epicsCycle, pLocalEpics);
 	// usleep(1);
-	// Wait for completion of DMA of Adc data
-  	for(kk=0;kk<cdsPciModules.adcCount;kk++)
-	{
+  	if (!run_on_timer) {
+	  // Wait for completion of DMA of Adc data
+  	  for(kk=0;kk<cdsPciModules.adcCount;kk++) {
 		// Read adc data into local variables
 		packedData = (int *)cdsPciModules.pci_adc[kk];
 		// Return 0x10 if first ADC channel does not have sync bit set
@@ -564,6 +574,7 @@ void *fe_start(void *arg)
 		if(cdsPciModules.adcType[kk] == GSC_16AISS8AO4) packedData += 3;
   		else packedData += 31;
   		*packedData = 0x110000;
+	  }
 	}
 
 
@@ -931,10 +942,11 @@ int main(int argc, char **argv)
         printf("***************************************************************************\n");
 
 	if (cdsPciModules.adcCount == 0 && cdsPciModules.dacCount == 0) {
-		printf("No ADC and no DAC modules found\n");
-        	munmap(_epics_shm, MMAP_SIZE);
-        	close(wfd);
-        	return 0;
+		printf("No ADC and no DAC modules found, running on timer\n");
+		run_on_timer = 1;
+        	//munmap(_epics_shm, MMAP_SIZE);
+        	//close(wfd);
+        	//return 0;
 	}
 #ifdef ONE_ADC
 	cdsPciModules.adcCount = 1;
