@@ -434,6 +434,16 @@ void *fe_start(void *arg)
   if (!run_on_timer) {
     // Trigger the ADC to start running
     gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
+  } else {
+    // Pause until this second ends
+    struct timespec next;
+    clock_gettime(CLOCK_REALTIME, &next);
+    printf("Start time %d s %d ns\n", next.tv_sec, next.tv_nsec);
+    next.tv_nsec = 0;
+    next.tv_sec += 1;
+    clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
+    clock_gettime(CLOCK_REALTIME, &next);
+    printf("Running time %d s %d ns\n", next.tv_sec, next.tv_nsec);
   }
 
   // Enter the coninuous FE control loop  **********************************************************
