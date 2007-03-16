@@ -438,12 +438,15 @@ void *fe_start(void *arg)
     // Pause until this second ends
     struct timespec next;
     clock_gettime(CLOCK_REALTIME, &next);
-    printf("Start time %d s %d ns\n", next.tv_sec, next.tv_nsec);
+    printf("Start time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
     next.tv_nsec = 0;
     next.tv_sec += 1;
     clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
     clock_gettime(CLOCK_REALTIME, &next);
-    printf("Running time %d s %d ns\n", next.tv_sec, next.tv_nsec);
+    printf("Running time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
+    printf("*******************************\n");
+    printf("* Running with RTLinux timer! *\n");
+    printf("*******************************\n");
   }
 
   // Enter the coninuous FE control loop  **********************************************************
@@ -451,8 +454,11 @@ void *fe_start(void *arg)
 
         rdtscl(cpuClock[2]);
   	if (run_on_timer) {
-	  // Use real-time system timer to pause here
-	  //
+	  // Pause until next cycle begins
+    	  struct timespec next;
+    	  clock_gettime(CLOCK_REALTIME, &next);
+    	  next.tv_nsec = 1000000000 / CYCLE_PER_SECOND * clock16K;
+          clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
 	} else {
 	  // Wait for data ready from first ADC module.
 	  if(cdsPciModules.adcType[0] == GSC_16AISS8AO4)
@@ -466,10 +472,10 @@ void *fe_start(void *arg)
 			kk ++;
 		}while((*packedData == 0) && (kk < 10000000));
 	  }
-	}
 
+	  usleep(0);
+	}
 	// Read CPU clock for timing info
-	usleep(0);
         rdtscl(cpuClock[0]);
 
   	if (!run_on_timer) {
