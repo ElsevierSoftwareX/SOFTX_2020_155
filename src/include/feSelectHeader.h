@@ -12,6 +12,20 @@
 	#include "ltb.h"	/* User code for LTB control. */
 #elif defined(DBB_CODE)
 	#include "dbb.h"
+#elif defined(DAS_CODE)
+	#include "das.h"
+#elif defined(TEST_CODE)
+	#include "test.h"
+#elif defined(SAS_CODE)
+	#include "sas.h"
+#elif defined(ASS_CODE)
+	#include "ass.h"
+#elif defined(PDX_CODE)
+	#include "pdx.h"
+#elif defined(TES_CODE)
+	#include "tes.h"
+#elif defined(MCE_CODE)
+	#include "mce.h"
 #else
 	#error
 #endif
