@@ -435,6 +435,7 @@ void *fe_start(void *arg)
     // Trigger the ADC to start running
     gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
   } else {
+#if 0
     // Pause until this second ends
     struct timespec next;
     clock_gettime(CLOCK_REALTIME, &next);
@@ -444,6 +445,7 @@ void *fe_start(void *arg)
     clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
     clock_gettime(CLOCK_REALTIME, &next);
     printf("Running time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
+#endif
     printf("*******************************\n");
     printf("* Running with RTLinux timer! *\n");
     printf("*******************************\n");
@@ -457,7 +459,12 @@ void *fe_start(void *arg)
 	  // Pause until next cycle begins
     	  struct timespec next;
     	  clock_gettime(CLOCK_REALTIME, &next);
-    	  next.tv_nsec = 1000000000 / CYCLE_PER_SECOND * clock16K;
+	  if (clock16K == 0) {
+ 	    next.tv_nsec = 0;
+	    next.tv_sec += 1;
+	  } else {
+    	    next.tv_nsec = 1000000000 / CYCLE_PER_SECOND * clock16K;
+	  }
           clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
 	} else {
 	  // Wait for data ready from first ADC module.
