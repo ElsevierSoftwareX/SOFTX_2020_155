@@ -14,6 +14,20 @@
 	#include "ltb/ltb.c"	/* User code for Ponderomotive control. */
 #elif defined(DBB_CODE)
 	#include "dbb/dbb.c"
+#elif defined(DAS_CODE)
+	#include "das/das.c"
+#elif defined(TEST_CODE)
+	#include "test/test.c"
+#elif defined(SAS_CODE)
+	#include "sas/sas.c"
+#elif defined(ASS_CODE)
+	#include "ass/ass.c"
+#elif defined(PDX_CODE)
+	#include "pdx/pdx.c"
+#elif defined(TES_CODE)
+	#include "tes/tes.c"
+#elif defined(MCE_CODE)
+	#include "mce/mce.c"
 #else
 	#error
 #endif
