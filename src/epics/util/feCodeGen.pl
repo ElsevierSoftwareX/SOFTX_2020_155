@@ -310,7 +310,7 @@ $foundCon = 0;
 	      $xx = $nonSubPart[$kk];
 			if($partOutput[$ii][$jj] eq $partName[$xx])
 			{
-				$fromNum = $partInNum[$ii][$jj];
+				$fromNum = $partInNum[$ii][0]; # OUTPUT part has only one input!
 				$fromPort = $partInputPort[$ii][$jj];
 				for($xxx=0;$xxx<$partOutCnt[$fromNum];$xxx++)
 				{
