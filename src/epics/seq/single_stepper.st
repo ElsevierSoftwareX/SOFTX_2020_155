@@ -301,11 +301,11 @@ state run
 %%		}
 %%	     }
 %%  	     close(fd);
+%%  	     if (motor0 == 0 && sign0 < 0) pos00 *= -1;
+%%  	     if (motor0 == 1 && sign1 < 0) pos01 *= -1;
 %%	  }
 %%        strcpy(command0, "");
           pvPut(command0);
-%%  	  if (motor0 == 0 && sign0 < 0) pos00 *= -1;
-%%  	  if (motor0 == 1 && sign1 < 0) pos01 *= -1;
           pvPut(pos00);
           pvPut(pos01);
     	  busy = 0;
