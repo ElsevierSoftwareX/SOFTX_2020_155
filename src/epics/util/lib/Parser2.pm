@@ -202,9 +202,9 @@ sub process_line {
 		if ($port eq undef) { $port = 1; } # Default value for the port is one
 		if ($port == $src_port) {
 			$part_num = ${$_->{FIELDS}}{PartNumber};
-                	$::partOutput[$part_num][0] = $dst;
-                	$::partOutputPort[$part_num][0] = $dst_port; # FIXME: main script is not using this variable correctly, it needs to be fixed
-	  		$::partOutCnt[$part_num] = 1;
+                	$::partOutput[$part_num][$::partOutCnt[$part_num]] = $dst;
+                	$::partOutputPort[$part_num][$::partOutCnt[$part_num]] = $dst_port; # FIXME: main script is not using this variable correctly, it needs to be fixed
+	  		$::partOutCnt[$part_num]++;
 			#print "Connected OutPort #" . $part_num . " part " . ${$_->{FIELDS}}{Name} . " to " . $dst . "\n";
 		}
 	  }
