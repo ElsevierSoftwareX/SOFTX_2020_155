@@ -9,9 +9,9 @@ DB += src/epics/db/single_stepper.db
 IFO = M1
 SITE = mit
 SEQ += 'single_stepper,("ifo=%IFO%,sys=SAS,controller=0,max_speed=20,min_speed=10,max_steps=30,sign0=+1,sign1=+1,backlash0=0,backlash1=0")'
-SEQ += 'single_stepper1,("ifo=%IFO%,sys=SAS,controller=1,max_speed=20,min_speed=10,max_steps=30,sign0=+1,sign1=+1,backlash0=0,backlash1=0")'
-SEQ += 'single_stepper2,("ifo=%IFO%,sys=SAS,controller=2,max_speed=20,min_speed=10,max_steps=30,sign0=+1,sign1=-1,backlash0=0,backlash1=0")'
-SEQ += 'single_stepper3,("ifo=%IFO%,sys=SAS,controller=3,max_speed=20,min_speed=10,max_steps=30,sign0=+1,sign1=+1,backlash0=0,backlash1=0")'
+SEQ += 'single_stepper1,("ifo=%IFO%,sys=SAS,controller=1,max_speed=20,min_speed=10,max_steps=30,sign0=-1,sign1=-1,backlash0=0,backlash1=0")'
+SEQ += 'single_stepper2,("ifo=%IFO%,sys=SAS,controller=2,max_speed=20,min_speed=10,max_steps=30,sign0=-1,sign1=+1,backlash0=0,backlash1=0")'
+SEQ += 'single_stepper3,("ifo=%IFO%,sys=SAS,controller=3,max_speed=20,min_speed=10,max_steps=30,sign0=-1,sign1=-1,backlash0=0,backlash1=0")'
 SEQ += 'stepper_kill,("ifo=%IFO%,sys=SAS")'
 SEQ += 'stepper_abort,("ifo=%IFO%,sys=SAS")'
 include config/Makefile.linux
