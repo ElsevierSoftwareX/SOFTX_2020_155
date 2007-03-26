@@ -62,11 +62,18 @@ while (<IN>) {
 	shift @systems;
 	print "systems are @systems\n";
     } elsif (substr($_,0,10) eq "gds_config") {
-	($junk, $gds_excnum_base, $gds_tpnum_base, $gds_exc_sys_inc, $gds_tp_sys_inc ) = split(/\s+/, $_);
+	$gds_rmid = 0;
+	$site = "";
+	($junk, $gds_excnum_base, $gds_tpnum_base, $gds_exc_sys_inc, $gds_tp_sys_inc, $gds_rmid, $site) = split(/\s+/, $_);
 	$gds_specified = 1;
 	$gds_datarate = $gds_excnum_base < 10000? 16384: 2048;
 	$gds_ifo = 1;
-	$gds_rmid = 0;
+	if ($gds_rmid > 0) {
+	  $gds_rmid--;
+	}
+	if ($site eq undef || $site eq "") {
+	  $site = "M1";
+	}
 	$gds_exc_dcu_id = 13 + (int ($gds_excnum_base >= 10000)) * 2;
 	$gds_tp_dcu_id = 13 + int ($gds_tpnum_base / 10000);
     } elsif (substr($_,0,5) eq "EPICS") {
@@ -232,7 +239,7 @@ while (<IN>) {
 #	$vupdate .= "\tpvPut(evar_$temp\_RI);\n";
 	$vupdate .= "%%\tshort s[1];\n";
 	$vupdate .= "%%\ts[0] = 0;\n";
-	$vupdate .= "%%\tezcaPut(\"M1:$v_name\", ezcaShort,1,s);\n";
+	$vupdate .= "%%\tezcaPut(\"$site:$v_name\", ezcaShort,1,s);\n";
 	$vupdate .= "}\n";
 
 	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${temp}\")\n";
@@ -406,7 +413,7 @@ if ($gds_specified) {
 	;
     } else {
       foreach $i ( @names ) {
-	print "[%IFO%:${systm}${i}_EXC]\n";
+	print "[$site:${systm}${i}_EXC]\n";
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
 	print "dcuid = $gds_exc_dcu_id\n";
@@ -424,7 +431,7 @@ if ($gds_specified) {
 	;
     } else {
       foreach $i ( @names ) {
-	print "[%IFO%:${systm}${i}_IN1]\n";
+	print "[$site:${systm}${i}_IN1]\n";
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
 	print "dcuid = $gds_tp_dcu_id\n";
@@ -432,7 +439,7 @@ if ($gds_specified) {
 	print "datatype = 4\n";	
 	print "datarate = $gds_datarate\n\n";
 	$tpnum++;
-	print "[%IFO%:${systm}${i}_IN2]\n";
+	print "[$site:${systm}${i}_IN2]\n";
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
 	print "dcuid = $gds_tp_dcu_id\n";
@@ -440,7 +447,7 @@ if ($gds_specified) {
 	print "datatype = 4\n";	
 	print "datarate = $gds_datarate\n\n";
 	$tpnum++;
-	print "[%IFO%:${systm}${i}_OUT]\n";
+	print "[$site:${systm}${i}_OUT]\n";
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
 	print "dcuid = $gds_tp_dcu_id\n";

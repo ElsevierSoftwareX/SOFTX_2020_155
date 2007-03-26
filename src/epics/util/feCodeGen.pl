@@ -7,6 +7,7 @@ $site = "M1"; # Default value for the site name
 $location = "mit"; # Default value for the location name
 $rate = "60"; # In microseconds (default setting)
 $dcuId = 10; # Default dcu Id
+$gdsNodeId = 0;
 $ifoid = 0; # Default ifoid for the DAQ
 $nodeid = 0; # Default GDS node id for awgtpman
 
@@ -1465,7 +1466,7 @@ print EPICS "\n\n";
 print EPICS "systems \U$systemName\-\n";
 $gdsXstart = ($dcuId - 5) * 1250;
 $gdsTstart = $gdsXstart + 10000;
-print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250\n";
+print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site\n";
 print EPICS "\n\n";
 
 # Start process of writing .c file.
