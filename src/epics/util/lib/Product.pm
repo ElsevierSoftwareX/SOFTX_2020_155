@@ -65,7 +65,7 @@ sub frontEndCode {
         $calcExp .= "_TRAMP,";
         $calcExp .= "$::gainCnt\,\&$::xpartName[$i]\_CALC);";
         $calcExp .= "\n\n";
-        for (0 .. $inCnt-1) {
+        for (0 .. $::inCnt-1) {
           $calcExp .= "\L$::xpartName[$i]";
           $calcExp .= "\[";
           $calcExp .= $_;
@@ -75,6 +75,6 @@ sub frontEndCode {
           $calcExp .= $::fromExp[$_];
           $calcExp .= ";\n";
         }
-        $gainCnt ++;
+        $::gainCnt ++;
 	return $calcExp;
 }
