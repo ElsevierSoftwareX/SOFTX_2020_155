@@ -1,4 +1,5 @@
-all: pde omc dbb sus hepi
+all: 
+	@echo Please build individual systems with 'make [system]' command
 
 clean:
 	/bin/rm -rf build
@@ -20,7 +21,10 @@ clean-% :: config/Makefile.%epics
 # Epics and front-end parts
 % :: src/epics/simLink/%.mdl
 	(cd src/epics/util; ./feCodeGen.pl ../simLink/$@.mdl $@)
+	/bin/mv -f build/$@epics/medm build/$@epics-medm
 	(/bin/rm -rf target/$@epics build/$@epics; make -f config/Makefile.$@epics)
+	/bin/mkdir -p build/$@epics
+	/bin/mv -f build/$@epics-medm build/$@epics/medm
 	(cd src/fe/$@; make clean; make)
 
 % :: config/Makefile.%epics
@@ -92,7 +96,7 @@ install-screens-% :: src/epics/simLink/%.mdl
 	echo Installing Epics screens;\
 	/bin/mv -f /cvs/cds/$$site/medm/$${lower_ifo}/$${system} /cvs/cds/$$site/medm/$${lower_ifo}/$${system}_$${cur_date};\
 	/bin/mkdir -p /cvs/cds/$$site/medm/$${lower_ifo};\
-	/bin/cp -pr src/epics/util/$${system} /cvs/cds/$$site/medm/$${lower_ifo}
+	/bin/cp -pr build/$${system}epics/medm /cvs/cds/$$site/medm/$${lower_ifo}/$${system}
 
 # Lighter installation rule, do not reinstall screens and config files
 # Install Epics and FE targets only
