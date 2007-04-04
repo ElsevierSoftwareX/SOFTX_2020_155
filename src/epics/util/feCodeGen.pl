@@ -59,6 +59,8 @@ $meFile = "../../../config/";
 $meFile .= "Makefile\.";
 $meFile .= $ARGV[1];
 $meFile .= epics;
+$epicsScreensDir = "../../../build/" . $ARGV[1] . "epics/medm";
+
 #print "DCUID = $dcuId\n";
 #if($dcuId < 16) {$rate = 60;}
 #if($dcuId > 16) {$rate = 480;}
@@ -2182,12 +2184,14 @@ if ($not_found) {
 }
 
 
+use File::Path;
+
 # Take care of generating Epics screens
-mkdir $skeleton, 0755;
+mkpath $epicsScreensDir, 0, 0755;
 my $usite = uc $site;
 my $sysname = uc($skeleton);
 $sed_arg =  "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;";
-system("cat GDS_TP.adl | sed '$sed_arg' > $skeleton/$usite$sysname" . "_GDS_TP.adl");
+system("cat GDS_TP.adl | sed '$sed_arg' > $epicsScreensDir/$usite$sysname" . "_GDS_TP.adl");
 my $monitor_args = $sed_args;
 my $cur_subsys_num = 0;
 
@@ -2209,7 +2213,7 @@ for(0 .. $partCnt-1) {
 		}
 		my $basename1 = $usite . ":" .$sysname ."-" . $basename . "_";
 		#print "Matrix $basename $incnt X $outcnt\n";
-		system("./mkmatrix.pl --cols=$incnt --rows=$outcnt --chanbase=$basename1 > $skeleton/$usite$sysname" . "_" . $basename . ".adl");
+		system("./mkmatrix.pl --cols=$incnt --rows=$outcnt --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
 	}
 	if ($partType[$_] eq "Filt") {
 		my $filt_name = $partName[$_];
@@ -2217,7 +2221,7 @@ for(0 .. $partCnt-1) {
 			$filt_name = $partSubName[$_] . "_" . $filt_name;
 		}
 		my $sargs = $sed_arg . "s/FILTERNAME/$filt_name/g";
-		system("cat FILTER.adl | sed '$sargs' > $skeleton/$usite$sysname" . "_" . $filt_name . ".adl");
+		system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$usite$sysname" . "_" . $filt_name . ".adl");
 	}
 	if ($partInputType[$_][0] eq "Adc") {
 		my $part_name = $partName[$_];
@@ -2233,5 +2237,5 @@ for(0 .. $partCnt-1) {
 }
 #print $monitor_args;
 for (0 .. $adcCnt - 1) {
-   system("cat MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$monitor_args' > $skeleton/$usite$sysname" . "_MONITOR_ADC$_.adl");
+   system("cat MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$monitor_args' > $epicsScreensDir/$usite$sysname" . "_MONITOR_ADC$_.adl");
 }
