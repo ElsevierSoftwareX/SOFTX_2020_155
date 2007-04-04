@@ -33,14 +33,11 @@ install-% :: src/epics/simLink/%.mdl
 	upper_system=`echo $$system | tr a-z A-Z`;\
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	gds_node=`grep rmid build/$${system}epics/$${system}.par | sed 's/[^0-9]*\([0-9]*\)$/\1/'`; \
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
-	cur_date=`date +%y%m%d_%H%m%S`;\
+	cur_date=`date +%y%m%d_%H%M%S`;\
 	/bin/mkdir -p /cvs/cds/$$site/chans;\
 	echo Installing system=$$system site=$$site ifo=$$ifo,$$lower_ifo;\
-	echo Installing /cvs/cds/$$site/chans/daq/$${ifo}$${upper_system}.ini;\
-	/bin/mkdir -p /cvs/cds/$$site/chans/daq/archive;\
-	/bin/mv -f  /cvs/cds/$$site/chans/daq/$${ifo}$${upper_system}.ini /cvs/cds/$$site/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini;\
-	/bin/cp src/epics/util/$${ifo}$${upper_system}.ini /cvs/cds/$$site/chans/daq;\
 	echo Installing /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt;\
 	/bin/mkdir -p /cvs/cds/$$site/chans/filter_archive/$$lower_ifo/$$system;\
 	/bin/mv -f  /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt /cvs/cds/$$site/chans/filter_archive/$$lower_ifo/$$system/$${ifo}$${upper_system}_$${cur_date}.txt;\
@@ -54,7 +51,36 @@ install-% :: src/epics/simLink/%.mdl
 	echo Installing /cvs/cds/$$site/target/$${system};\
 	/bin/mkdir -p /cvs/cds/$$site/target/$${system};\
 	/bin/mv -f /cvs/cds/$$site/target/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system}/$${system}fe_$${cur_date}.rtl;\
-	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system};
+	/bin/cp -p src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system};
+
+install-daq-% :: src/epics/simLink/%.mdl
+	@system=$(subst install-daq-,,$@); \
+	upper_system=`echo $$system | tr a-z A-Z`;\
+	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
+	upper_site=`echo $$site | tr a-z A-Z`;\
+	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
+	gds_file_node=`expr $${gds_node} + 1`; \
+	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
+	cur_date=`date +%y%m%d_%H%M%S`;\
+	echo Installing GDS node $${gds_file_node} conifguration file ;\
+	echo /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par ;\
+	/bin/mkdir -p  /cvs/cds/$${site}/target/gds/param/ ;\
+	/bin/mkdir -p  /cvs/cds/$${site}/target/gds/param/archive ;\
+	/bin/mv -f /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par /cvs/cds/$${site}/target/gds/param/archive/tpchn_M$${gds_file_node}_$${cur_date}.par ;\
+	/bin/cp -p build/$${system}epics/$${system}.par /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par ;\
+	echo Updating DAQ configuration file ;\
+	echo /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ;\
+	/bin/mkdir -p  /cvs/cds/$${site}/chans/daq ;\
+	/bin/mkdir -p  /cvs/cds/$${site}/chans/daq/archive ;\
+	if test -e /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini;\
+	then \
+	  /bin/mv -f /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini /cvs/cds/$${site}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini ;\
+	  echo src/epics/util/updateDaqConfig.pl -daq=/cvs/cds/$${site}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini -old=/cvs/cds/$${site}/target/gds/param/archive/tpchn_M$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par ;\
+	  src/epics/util/updateDaqConfig.pl -daq=/cvs/cds/$${site}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini -old=/cvs/cds/$${site}/target/gds/param/archive/tpchn_M$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par > /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ; \
+	else \
+	  /bin/cp -p src/epics/util/$${ifo}$${upper_system}.ini /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ;\
+	fi
 
 install-screens-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-screens-,,$@); \
@@ -62,7 +88,7 @@ install-screens-% :: src/epics/simLink/%.mdl
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
-	cur_date=`date +%y%m%d_%H%m%S`;\
+	cur_date=`date +%y%m%d_%H%M%S`;\
 	echo Installing Epics screens;\
 	/bin/mv -f /cvs/cds/$$site/medm/$${lower_ifo}/$${system} /cvs/cds/$$site/medm/$${lower_ifo}/$${system}_$${cur_date};\
 	/bin/mkdir -p /cvs/cds/$$site/medm/$${lower_ifo};\
@@ -76,7 +102,7 @@ reinstall-% :: src/epics/simLink/%.mdl
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
-	cur_date=`date +%y%m%d_%H%m%S`;\
+	cur_date=`date +%y%m%d_%H%M%S`;\
 	/bin/mkdir -p /cvs/cds/$$site/chans;\
 	echo Installing Code Only system=$$system site=$$site ifo=$$ifo,$$lower_ifo;\
 	echo Installing /cvs/cds/$$site/target/$${system}epics;\
@@ -95,7 +121,7 @@ install-% :: config/Makefile.%epics
 	site=`grep SITE $< | sed 's/.*SITE\s*=\s*\([a-z]*\).*/\1/g'`; \
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
-	cur_date=`date +%y%m%d_%H%m%S`;\
+	cur_date=`date +%y%m%d_%H%M%S`;\
 	echo Installing /cvs/cds/$$site/target/$${system}epics;\
 	/bin/mkdir -p /cvs/cds/$$site/target_archive;\
 	/bin/mv -f /cvs/cds/$$site/target/$${system}epics /cvs/cds/$$site/target_archive/$${system}epics_$$cur_date;\
