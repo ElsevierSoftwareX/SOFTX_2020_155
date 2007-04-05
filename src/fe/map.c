@@ -900,7 +900,7 @@ int myriNetReconnect(int dcuId)
   daqSendMessage = (daqMessage *)netOutBuffer;
   sprintf (daqSendMessage->message, "STT");
   daqSendMessage->dcuId = htonl(dcuId);
-  //daqSendMessage->port = htonl(local_gm_port);
+  daqSendMessage->port = htonl(local_gm_port);
   daqSendMessage->channelCount = htonl(16);
   daqSendMessage->fileCrc = htonl(0x3879d7b);
   daqSendMessage->dataBlockSize = htonl(GM_DAQ_XFER_BYTE);
