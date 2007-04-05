@@ -210,7 +210,7 @@ open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 die unless CDS::Parser::parse();
 close(IN);
 
-CDS::ParsingDiagnostics::print_diagnostics("parser_diag.txt");
+#CDS::ParsingDiagnostics::print_diagnostics("parser_diag.txt");
 
 # By default, set DAC input counts to 16
 #for($ii=0;$ii<$dacCnt;$ii++) {
@@ -2005,6 +2005,7 @@ print OUTME "SRC += src/drv/rfm.c\n";
 print OUTME "SRC += src/drv/param.c\n";
 print OUTME "SRC += src/drv/crc.c\n";
 print OUTME "SRC += src/drv/fmReadCoeff.c\n";
+print OUTME "SRC += src/epics/seq/get_local_time.st\n";
 for($ii=0;$ii<$useWd;$ii++)
 {
 	print OUTME "SRC += src/epics/seq/hepiWatchdog";
@@ -2012,6 +2013,7 @@ for($ii=0;$ii<$useWd;$ii++)
 	print OUTME "\L\.st\n";
 }
 print OUTME "\n";
+print OUTME "DB += src/epics/db/local_time.db\n";
 print OUTME "DB += build/\$(TARGET)/";
 print OUTME "$skeleton";
 print OUTME "1\.db\n";
@@ -2022,6 +2024,7 @@ print OUTME "\n";
 print OUTME "SEQ += \'";
 print OUTME "$skeleton";
 print OUTME ",(\"ifo=$site, site=$location, sys=\U$systemName\, \Lsysnum= $dcuId\")\'\n";
+print OUTME "SEQ += \'get_local_time,(\"ifo=$site, sys=\U$systemName\")\'\n";
 for($ii=0;$ii<$useWd;$ii++)
 {
 print OUTME "SEQ += \'";
