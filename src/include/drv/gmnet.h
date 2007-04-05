@@ -44,6 +44,7 @@ typedef struct
   char message[8];
   unsigned int cycle;
   unsigned int dcuId;
+  unsigned int port;
   unsigned int fileCrc;
   unsigned int offset;
   int channelCount;
