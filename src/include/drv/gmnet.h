@@ -3,6 +3,8 @@
 #include "gm.h"
 #include "daqmap.h"
 
+#define GM_DAQ_MAX_TPS 64
+
 #define GM_PORT_NUM_RECV 4
 #define GM_PORT_NUM_SEND 2
 
@@ -49,7 +51,7 @@ typedef struct
   unsigned int blockCrc;
   unsigned int dataCount;
   int tpCount;
-  int tpNum[32];
+  int tpNum[GM_DAQ_MAX_TPS];
 }daqMessage;
 
 /* Definition of data sent to Framebuilder */

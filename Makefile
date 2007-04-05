@@ -58,7 +58,9 @@ install-% :: src/epics/simLink/%.mdl
 	echo Installing /cvs/cds/$$site/target/$${system};\
 	/bin/mkdir -p /cvs/cds/$$site/target/$${system};\
 	/bin/mv -f /cvs/cds/$$site/target/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system}/$${system}fe_$${cur_date}.rtl;\
-	/bin/cp -p src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system};
+	/bin/cp -p src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system};\
+	echo 'sudo ' /cvs/cds/$$site/target/$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${system}/startup.cmd;\
+	/bin/chmod +x /cvs/cds/$$site/target/$${system}/startup.cmd
 
 install-daq-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-daq-,,$@); \
@@ -121,7 +123,9 @@ reinstall-% :: src/epics/simLink/%.mdl
 	echo Installing /cvs/cds/$$site/target/$${system};\
 	/bin/mkdir -p /cvs/cds/$$site/target/$${system};\
 	/bin/mv -f /cvs/cds/$$site/target/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system}/$${system}fe_$${cur_date}.rtl;\
-	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system};
+	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system};\
+	echo 'sudo ' /cvs/cds/$$site/target/$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${system}/startup.cmd;\
+	/bin/chmod +x /cvs/cds/$$site/target/$${system}/startup.cmd
 
 install-% :: config/Makefile.%epics
 	@system=$(subst install-,,$@); \
