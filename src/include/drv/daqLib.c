@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.21 2007/04/05 20:49:57 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.22 2007/04/05 22:30:05 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -135,7 +135,7 @@ static int xferDone;
 static int crcLength;		/* Number of bytes in 1/16 sec data 	*/
 static char *pDaqBuffer[2];	/* Pointers to local swing buffers.	*/
 static DAQ_LKUP_TABLE localTable[DCU_MAX_CHANNELS];
-static DAQ_LKUP_TABLE excTable[8];
+static DAQ_LKUP_TABLE excTable[DCU_MAX_CHANNELS];
 static char *pWriteBuffer;	/* Ptr to swing buff to write data	*/
 static char *pReadBuffer;	/* Ptr to swing buff to xmit data to FB */
 static int phase;		/* 0-1, switches swing buffers.		*/
@@ -168,6 +168,10 @@ volatile float *dataPtr;	/* Ptr to excitation chan data.		*/
 int exChanOffset;		/* shmem offset to next EXC value.	*/
 int tpx;
 int tpAdd;
+
+#if DCU_MAX_CHANNELS > DAQ_GDS_MAX_TP_NUM
+#error
+#endif
 
 // Decimation filter coefficient definitions.		
 static double dCoeff2x[13] =
@@ -678,7 +682,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		tpx = 2;
 		tpAdd = sysRate / 4;
 	}
-	for(ii=0;ii<20;ii++)
+	for(ii=0;ii<DCU_MAX_CHANNELS;ii++)
 	{
 		/* Get TP number from shared memory */
 		testVal = gdsPtr->tp[tpx][0][ii];
@@ -699,7 +703,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       		  dataInfo.tp[totalChans].dataType = 4;
 		  offsetAccum += sysRate * 4;
 		  localTable[totalChans+1].offset = offsetAccum;
-          	  gdsMonitor[ii] = testVal;
+		  if (ii < 24) {
+          	    gdsMonitor[ii] = testVal;
+		  }
           	  gdsPtr->tp[tpx][1][ii] = 0;
 		  tpNum[validTp] = testVal;
 		  validTp ++;
@@ -720,7 +726,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		  localTable[totalChans+1].offset = offsetAccum;
 	  	  localTable[totalChans].decFactor = 1;
       		  dataInfo.tp[totalChans].dataType = 4;
-		  gdsMonitor[ii] = testVal;
+		  if (ii < 24) {
+		    gdsMonitor[ii] = testVal;
+		  }
 		  gdsPtr->tp[tpx][1][ii] = 0;
 		  tpNum[validTp] = testVal;
 		  validTp ++;
@@ -732,7 +740,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		   lookup table.                                                                */
 		else
 		{
-		  gdsMonitor[ii] = 0;
+		  if (ii < 24) {
+		    gdsMonitor[ii] = 0;
+		  }
 		}
 
 	}  /* End for loop */
@@ -742,7 +752,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	if(sysRate == DAQ_2K_SAMPLE_SIZE)
 		tpx = 1;
 	else tpx = 0;
-	for(ii=0;ii<8;ii++)
+	for(ii=0;ii<DCU_MAX_CHANNELS;ii++)
 	{
 		/* Get EXC number from shared memory */
 		testVal = gdsPtr->tp[tpx][0][ii];
@@ -772,7 +782,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       		  dataInfo.tp[totalChans].dataType = 4;
 		  offsetAccum += sysRate * 4;
 		  localTable[totalChans+1].offset = offsetAccum;
-          	  gdsMonitor[ii+24] = testVal;
+		  if (ii < 8) {
+          	    gdsMonitor[ii+24] = testVal;
+		  }
           	  gdsPtr->tp[tpx][1][ii] = 0;
 		  tpNum[validTp] = testVal;
 		  validTp ++;
@@ -795,7 +807,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		  localTable[totalChans+1].offset = offsetAccum;
 	  	  localTable[totalChans].decFactor = 1;
       		  dataInfo.tp[totalChans].dataType = 4;
-		  gdsMonitor[ii+24] = testVal;
+		  if (ii < 8) {
+		    gdsMonitor[ii+24] = testVal;
+		  }
 		  gdsPtr->tp[tpx][1][ii] = 0;
 		  tpNum[validTp] = testVal;
 		  validTp ++;
@@ -808,7 +822,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		   lookup table.                                                                */
 		else
 		{
-		  gdsMonitor[ii+24] = 0;
+		  if (ii < 8) {
+		    gdsMonitor[ii+24] = 0;
+		  }
 		}
 
 	 }  /* End for loop */
