@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.19 2006/07/26 00:25:35 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.20 2007/04/05 15:49:55 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -217,7 +217,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     for(ii=0;ii<2;ii++) 
     {
       pDaqBuffer[ii] = (char *)daqBuffer;
-      pDaqBuffer[ii] += 0x200000 * ii;
+      pDaqBuffer[ii] += DAQ_DCU_SIZE * ii;
       printf("DAQ buffer %ld is at 0x%x\n",ii,(long long)pDaqBuffer[ii]);
     }
 
