@@ -118,7 +118,7 @@ text {
 		height=15
 	}
 	monitor {
-		chan="L0:TIM-PACIFIC_STRING"
+		chan="SITE_NAME:SYSTEM_NAME-TIME_STRING"
 		clr=2
 		bclr=54
 	}
