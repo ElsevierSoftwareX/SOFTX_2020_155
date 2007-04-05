@@ -1,6 +1,7 @@
 /* Library file for using Myricom network on CDS front ends */
 
 #include "gm.h"
+#include "daqmap.h"
 
 #define GM_PORT_NUM_RECV 4
 #define GM_PORT_NUM_SEND 2
@@ -31,7 +32,7 @@ typedef struct				/* Receiver-to-sender ID message */
   gm_u32_n_t slack;			/* Make length a multiple of 64 */
 } gm_s_e_id_message_t;
 
-#define GM_DAQ_XFER_SIZE        2048
+#define GM_DAQ_XFER_SIZE        (DAQ_DCU_SIZE/512)
 #define GM_DAQ_BLOCK_SIZE	GM_DAQ_XFER_SIZE * 64
 #define GM_DAQ_XFER_BYTE        GM_DAQ_XFER_SIZE * 4
 
