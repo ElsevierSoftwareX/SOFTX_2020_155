@@ -22,10 +22,13 @@ clean-% :: config/Makefile.%epics
 % :: src/epics/simLink/%.mdl
 	(cd src/epics/util; ./feCodeGen.pl ../simLink/$@.mdl $@)
 	/bin/rm -rf build/$@epics-medm
+	/bin/rm -rf build/$@epics-config
 	/bin/mv -f build/$@epics/medm build/$@epics-medm
+	/bin/mv -f build/$@epics/config build/$@epics-config
 	(/bin/rm -rf target/$@epics build/$@epics; make -f config/Makefile.$@epics)
 	/bin/mkdir -p build/$@epics
 	/bin/mv -f build/$@epics-medm build/$@epics/medm
+	/bin/mv -f build/$@epics-config build/$@epics/config
 	(cd src/fe/$@; make clean; make)
 
 % :: config/Makefile.%epics
@@ -46,7 +49,7 @@ install-% :: src/epics/simLink/%.mdl
 	echo Installing /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt;\
 	/bin/mkdir -p /cvs/cds/$$site/chans/filter_archive/$$lower_ifo/$$system;\
 	/bin/mv -f  /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt /cvs/cds/$$site/chans/filter_archive/$$lower_ifo/$$system/$${ifo}$${upper_system}_$${cur_date}.txt;\
-	/bin/cp src/epics/util/$${ifo}$${upper_system}.txt /cvs/cds/$$site/chans;\
+	/bin/cp build/$${system}epics/config/$${ifo}$${upper_system}.txt /cvs/cds/$$site/chans;\
 	echo Installing /cvs/cds/$$site/target/$${system}epics;\
 	/bin/mkdir -p /cvs/cds/$$site/target_archive;\
 	/bin/mv -f /cvs/cds/$$site/target/$${system}epics /cvs/cds/$$site/target_archive/$${system}epics_$$cur_date;\
@@ -84,7 +87,7 @@ install-daq-% :: src/epics/simLink/%.mdl
 	  echo src/epics/util/updateDaqConfig.pl -daq=/cvs/cds/$${site}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini -old=/cvs/cds/$${site}/target/gds/param/archive/tpchn_M$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par ;\
 	  src/epics/util/updateDaqConfig.pl -daq=/cvs/cds/$${site}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini -old=/cvs/cds/$${site}/target/gds/param/archive/tpchn_M$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par > /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ; \
 	else \
-	  /bin/cp -p src/epics/util/$${ifo}$${upper_system}.ini /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ;\
+	  /bin/cp -p build/$${system}epics/config/$${ifo}$${upper_system}.ini /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ;\
 	fi
 
 install-screens-% :: src/epics/simLink/%.mdl

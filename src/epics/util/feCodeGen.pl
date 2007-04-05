@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+use File::Path;
+
 die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>] [<speed>]\n\t" . "site is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
         if (@ARGV != 2 && @ARGV != 3 && @ARGV != 4 && @ARGV != 5);
 
@@ -60,6 +62,7 @@ $meFile .= "Makefile\.";
 $meFile .= $ARGV[1];
 $meFile .= epics;
 $epicsScreensDir = "../../../build/" . $ARGV[1] . "epics/medm";
+$configFilesDir = "../../../build/" . $ARGV[1] . "epics/config";
 
 #print "DCUID = $dcuId\n";
 #if($dcuId < 16) {$rate = 60;}
@@ -2073,9 +2076,11 @@ if($rate == 480) {
 }
 }
 
+mkpath $configFilesDir, 0, 0755;
+
 # Create DAQ config file (default section and a few ADC input channels)
-my $daqFile = "$site" . uc($skeleton) . "\.ini";
-open(OUTG,">./".$daqFile) || die "cannot open diag file for writing";
+my $daqFile = $configFilesDir . "/$site" . uc($skeleton) . "\.ini";
+open(OUTG,">".$daqFile) || die "cannot open $daqFile file for writing";
 print OUTG 	"[default]\n".
 		"dcuid=$dcuId\n".
 		"datarate=" . get_freq() . "\n".
@@ -2098,8 +2103,8 @@ close OUTG;
 $jj = $filtCnt / 40;
 $jj ++;
 #print OUTG "$jj lines to print\n";
-$filtFile = "$site" . uc($skeleton) . "\.txt";
-open(OUTG,">./".$filtFile) || die "cannot open diag file for writing";
+my $filtFile = $configFilesDir . "/$site" . uc($skeleton) . "\.txt";
+open(OUTG, ">" . $filtFile) || die "cannot open  $filtFile file for writing";
 print OUTG "# FILTERS FOR ONLINE SYSTEM\n".
 	"#\n".
 	"# Computer generated file: DO NOT EDIT\n".
@@ -2189,7 +2194,6 @@ if ($not_found) {
 }
 
 
-use File::Path;
 
 # Take care of generating Epics screens
 mkpath $epicsScreensDir, 0, 0755;
