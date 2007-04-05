@@ -9,8 +9,8 @@
 #define DAQ_BASE_ADDRESS	0x2000000
 #define DAQ_DATA_BASE_ADD	(DAQ_BASE_ADDRESS + 0x100000)
 
-#define DAQ_DCU_SIZE		0x100000
-#define DAQ_DCU_BLOCK_SIZE	0x10000
+/* Redefine this to change DAQ transmission size */
+#define DAQ_DCU_SIZE		0x200000
 
 #define DAQ_EDCU_SIZE		0x400000
 #define DAQ_EDCU_BLOCK_SIZE	0x20000
@@ -18,21 +18,23 @@
 #define DAQ_NUM_DATA_BLOCKS	16
 #define DAQ_NUM_DATA_BLOCKS_PER_SECOND	16
 
+#define DAQ_DCU_BLOCK_SIZE	(DAQ_DCU_SIZE/DAQ_NUM_DATA_BLOCKS)
+
 /*
  * Inter-processor communication structures
  */
 
 typedef struct blockProp {
   unsigned int status;
-  unsigned int timeSec;
-  unsigned int timeNSec;
-  unsigned int run;
-  unsigned int cycle;
-  unsigned int crc; /* block data CRC checksum */
+  unsigned long timeSec;
+  unsigned long timeNSec;
+  unsigned long run;
+  unsigned long cycle;
+  unsigned long crc; /* block data CRC checksum */
 } blockPropT;
 
 struct rmIpcStr {       /* IPC area structure                   */
-  unsigned int cycle;  /* Copy of latest cycle num from blocks */
+  unsigned long cycle;  /* Copy of latest cycle num from blocks */
   unsigned int dcuId;          /* id of unit, unique within each site  */
   unsigned int crc;	       /* Configuration file's checksum        */
   unsigned int command;        /* Allows DAQSC to command unit.        */
@@ -95,8 +97,20 @@ struct rmIpcStr {       /* IPC area structure                   */
 
 #define IS_ANALOG_DCU(dcuid) ((dcuid) == DCU_ID_ADCU_1 || (dcuid) == DCU_ID_ADCU_2 || (dcuid) == DCU_ID_ADCU_3 || (dcuid) == DCU_ID_ADCU_4)
 #define IS_EPICS_DCU(dcuid) ((dcuid) == DCU_ID_EDCU)
+#ifdef USE_MYRINET
+#define IS_HEPI_DCU(dcuid) ((dcuid) == DCU_ID_SUS_ETMY || (dcuid) == DCU_ID_HEPI_1 || (dcuid) == DCU_ID_HEPI_2 || (dcuid) == DCU_ID_HEPI_EX || (dcuid) == DCU_ID_HEPI_EY)
+#define IS_2K_DCU(dcuid)      IS_HEPI_DCU(dcuid)
+#define IS_32K_DCU(dcuid)     (daqd.cit_40m? dcuid == 11: dcuid == DCU_ID_SUS_2)
+#else
 #define IS_HEPI_DCU(dcuid) ((dcuid) == DCU_ID_HEPI_1 || (dcuid) == DCU_ID_HEPI_2 || (dcuid) == DCU_ID_HEPI_EX || (dcuid) == DCU_ID_HEPI_EY)
+#endif
 #define IS_EXC_DCU(dcuid) ((dcuid) == DCU_ID_EX_16K || (dcuid) == DCU_ID_EX_2K)
+
+/* define IS_MYRINET_DCU(dcuid) (((dcuid) >= DCU_ID_SUS_1 && (dcuid) <= DCU_ID_SUS_4) || ((dcuid) >= DCU_ID_SUS_SOS && (dcuid) <= DCU_ID_HEPI_EY) )
+ */
+
+/* DCU 11 is the sole 40m Myrinet DCU */
+#define IS_MYRINET_DCU(dcuid) (daqd.cit_40m? dcuid == 11  : (((dcuid) >= DCU_ID_SUS_1 && (dcuid) <= DCU_ID_SUS_4) || ((dcuid) >= DCU_ID_SUS_SOS && (dcuid) <= DCU_ID_HEPI_EY)) )
 
 static const char * const dcuName[DCU_COUNT] = {"DAQSC",
 					 "FB0", "FB1", "FB2",
@@ -107,7 +121,12 @@ static const char * const dcuName[DCU_COUNT] = {"DAQSC",
 					 "EX16K", "EX2K",
 					 "TP16K", "TP2K",
 					 "LSC", "ASC",
-					 "SOS", "SUS_EX", "SUS_EY",
+                                         "SOS", "SUS_EX",
+#ifdef USE_MYRINET
+"SEI",
+#else
+"SUS_EY",
+#endif
 					 "SEI1", "SEI2",
 					 "SEI_EX", "SEI_EY", "IOO",
 					 "FAST1", "FAST2", "FAST3",
@@ -237,7 +256,7 @@ static unsigned int const dcuNet40m[DCU_COUNT] = {2,2,2,2,0,
 typedef struct DAQ_INFO_BLOCK {
   int reconfig; /* Set to 1 by the Epics to indicate configuration change */
   int numChans; /* Defines how many channels are configured int struct tp[] */
-  unsigned int configFileCRC; /* DAQ config file checksum */
+  unsigned long configFileCRC; /* DAQ config file checksum */
   struct {
     unsigned int tpnum; /* Test point number to which this DAQ channel connects */
     unsigned int dataType;
