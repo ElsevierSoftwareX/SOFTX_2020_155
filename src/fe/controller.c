@@ -175,7 +175,7 @@ int clock16K = 0;
 
 #include "./feSelectCode.c"
 
-char daqArea[0x400000];		/* Space allocation for daqLib buffers	*/
+char daqArea[2*DAQ_DCU_SIZE];		/* Space allocation for daqLib buffers	*/
 
 #ifdef OVERSAMPLE
 #define ADC_SAMPLE_COUNT	0x100
