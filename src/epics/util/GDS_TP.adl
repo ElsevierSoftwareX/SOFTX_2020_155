@@ -1,7 +1,7 @@
 
 file {
-	name="/mnt/aivanov/cds/advLigo/src/epics/util/GDS_TP.adl"
-	version=030003
+	name="/home/aivanov/cds/advLigo/src/epics/util/GDS_TP.adl"
+	version=030000
 }
 display {
 	object {
@@ -2981,6 +2981,21 @@ text {
 		bclr=42
 	}
 	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=793
+		y=3
+		width=120
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-TIME_STRING"
+		clr=2
+		bclr=54
+	}
 	limits {
 	}
 }

@@ -1,7 +1,7 @@
 
 file {
-	name="/export/home/controls/MONITOR.adl"
-	version=030003
+	name="/home/aivanov/cds/advLigo/src/epics/util/MONITOR.adl"
+	version=030000
 }
 display {
 	object {
@@ -1038,4 +1038,19 @@ text {
 	}
 	textix="adc_0_31"
 	align="horiz. right"
+}
+"text update" {
+	object {
+		x=600
+		y=5
+		width=120
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-TIME_STRING"
+		clr=2
+		bclr=14
+	}
+	limits {
+	}
 }
