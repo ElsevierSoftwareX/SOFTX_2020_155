@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.20 2007/04/05 15:49:55 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.21 2007/04/05 20:49:57 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -160,7 +160,7 @@ static volatile char *exciteDataPtr;	  /* Ptr to EXC data in shmem.	*/
 int testVal;			/* Temp TP value for valid check.	*/
 static int validTp;		/* Number of valid GDS sigs selected.	*/
 static int validEx;		/* Local chan number of 1st EXC signal.	*/
-static int tpNum[32];		/* TP/EXC selects to send to FB.	*/
+static int tpNum[GM_DAQ_MAX_TPS]; /* TP/EXC selects to send to FB.	*/
 static int totalChans;		/* DAQ + TP + EXC chans selected.	*/
 static int totalSize;		/* DAQ + TP + EXC chans size in bytes.	*/
 int *statusPtr;
