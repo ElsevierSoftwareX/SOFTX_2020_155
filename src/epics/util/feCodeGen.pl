@@ -76,8 +76,10 @@ if (-s $mFile) {
 }
 open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
 open(OUTH,">./".$hFile) || die "cannot open header file for writing";
-$diag = "diags\.txt";
-open(OUTD,">./".$diag) || die "cannot open diag file for writing";
+
+#$diag = "./diags\.txt";
+$diag = "/dev/null";
+open(OUTD,">".$diag) || die "cannot open diag file for writing";
 
 $mySeq = 0;
 $connects = 0;
