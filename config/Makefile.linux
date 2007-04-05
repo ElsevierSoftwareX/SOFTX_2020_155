@@ -104,6 +104,7 @@ install: $(DB) $(DBH1) $(DBH2) $(DBL1)
 	done
 	/bin/rm -f target/$(TARGET)/db/*/autoBurt.req
 	for ifo in $(IFO) ; do \
+	  system=`echo $(subst epics,,$(TARGET)) | tr a-z A-Z`; \
 	  ifo0=`echo $$ifo | sed 's/[0-9]/0/g'`; \
 	  mkdir -p target/$(TARGET)/db/$$ifo; \
 	  echo "#!/bin/sh" > target/$(TARGET)/startup$$ifo; \
@@ -116,7 +117,7 @@ install: $(DB) $(DBH1) $(DBH2) $(DBL1)
 	  done ; \
 	  echo 'registerRecordDeviceDriver(pdbbase)' >> target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
 	  for i in $(DB) ; do \
-		cat $$i | sed s/%IFO%/$$ifo/g\;s/%IFO0%/$$ifo0/g > target/$(TARGET)/db/$$ifo/`basename $$i`; \
+		cat $$i | sed s/%IFO%/$$ifo/g\;s/%IFO0%/$$ifo0/g\;s/%SYS%/$$system/g > target/$(TARGET)/db/$$ifo/`basename $$i`; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
