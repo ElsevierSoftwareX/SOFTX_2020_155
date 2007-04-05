@@ -41,7 +41,6 @@ install-% :: src/epics/simLink/%.mdl
 	upper_system=`echo $$system | tr a-z A-Z`;\
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
-	gds_node=`grep rmid build/$${system}epics/$${system}.par | sed 's/[^0-9]*\([0-9]*\)$/\1/'`; \
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	/bin/mkdir -p /cvs/cds/$$site/chans;\
