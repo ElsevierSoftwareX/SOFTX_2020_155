@@ -21,6 +21,7 @@ clean-% :: config/Makefile.%epics
 # Epics and front-end parts
 % :: src/epics/simLink/%.mdl
 	(cd src/epics/util; ./feCodeGen.pl ../simLink/$@.mdl $@)
+	/bin/rm -rf build/$@epics-medm
 	/bin/mv -f build/$@epics/medm build/$@epics-medm
 	(/bin/rm -rf target/$@epics build/$@epics; make -f config/Makefile.$@epics)
 	/bin/mkdir -p build/$@epics
