@@ -1988,7 +1988,9 @@ print OUTM "CFLAGS += -DRESERVE_CPU2\n";
 if ($cpus > 3) {
 print OUTM "CFLAGS += -DRESERVE_CPU3\n";
 }
-print OUTM "CFLAGS += -g -DUSE_GM=1\n";
+print OUTM "CFLAGS += -D_ADVANCED_LIGO=1\n";
+print OUTM "CFLAGS += -DUSE_GM=1\n";
+print OUTM "CFLAGS += -g\n";
 print OUTM "#CFLAGS += -DNO_SYNC\n";
 print OUTM "#CFLAGS += -DNO_DAQ\n";
 print OUTM "\n";
