@@ -97,7 +97,7 @@ struct rmIpcStr {       /* IPC area structure                   */
 
 #define IS_ANALOG_DCU(dcuid) ((dcuid) == DCU_ID_ADCU_1 || (dcuid) == DCU_ID_ADCU_2 || (dcuid) == DCU_ID_ADCU_3 || (dcuid) == DCU_ID_ADCU_4)
 #define IS_EPICS_DCU(dcuid) ((dcuid) == DCU_ID_EDCU)
-#ifdef USE_GM
+#ifdef _ADVANCED_LIGO
 #define IS_HEPI_DCU(dcuid) ((dcuid) == DCU_ID_SUS_ETMY || (dcuid) == DCU_ID_HEPI_1 || (dcuid) == DCU_ID_HEPI_2 || (dcuid) == DCU_ID_HEPI_EX || (dcuid) == DCU_ID_HEPI_EY)
 #define IS_2K_DCU(dcuid)      IS_HEPI_DCU(dcuid)
 #define IS_32K_DCU(dcuid)     (daqd.cit_40m? dcuid == 11: dcuid == DCU_ID_SUS_2)
@@ -122,7 +122,7 @@ static const char * const dcuName[DCU_COUNT] = {"DAQSC",
 					 "TP16K", "TP2K",
 					 "LSC", "ASC",
                                          "SOS", "SUS_EX",
-#ifdef USE_GM
+#ifdef _ADVANCED_LIGO
 "SEI",
 #else
 "SUS_EY",
