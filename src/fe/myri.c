@@ -2,11 +2,12 @@
 #include <linux/pci.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
-
-#ifndef NO_DAQ
 #include <drv/gmnet.h>
+
+#if !defined(NO_DAQ) && defined(USE_GM)
 #include <drv/cdsHardware.h>
 #include <drv/myri.h>
+#include <drv/fb.h>
 
 // Myrinet Variables
 static void *netOutBuffer;			/* Buffer for outbound myrinet messages */
@@ -28,7 +29,6 @@ static int expected_callbacks = 0;
 static struct gm_port *netPort = 0;
 daqMessage *daqSendMessage;
 daqData *daqSendData;
-int cdsNetStatus = 0;
 
 /* Local GM port we are using to send DAQ data */
 int local_gm_port = 0;
