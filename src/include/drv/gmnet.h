@@ -1,3 +1,5 @@
+#ifndef GMNET_H_INCLUDED
+#define	GMNET_H_INCLUDED 1
 /* Library file for using Myricom network on CDS front ends */
 /* Undefine to compile without GM, interfacing with frame builder in shared memory */
 #define USE_GM 1
@@ -66,3 +68,4 @@ typedef struct
 {
   unsigned int data[GM_DAQ_XFER_SIZE];
 }daqData;
+#endif

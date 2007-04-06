@@ -7,6 +7,6 @@ int cdsDaqNetCheckCallback(void);/* Check for messages on 	*/
 int cdsDaqNetReconnect(int); /* Make connects to FB.		*/
 int cdsDaqNetCheckReconnect(void);/* Check FB net connected	*/
 int cdsDaqNetDrop(void);
-int cdsNetStatus;
+extern int cdsNetStatus;
 
 #endif
