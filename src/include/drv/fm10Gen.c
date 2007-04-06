@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.12 2006/07/07 00:19:31 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.13 2007/04/06 16:17:31 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -572,7 +572,7 @@ handleEpicsSwitch(UINT32 sw,       /* New input values for the opSwitchE (from t
 /************************************************************************/
 inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_COEF *pRfmCoeff)
 {
-  int ii,jj,kk,l;
+  int ii,jj,kk;
 
 #ifdef FIR_FILTERS
   for(jj = 0; jj < MAX_FIR_MODULES; jj++)
@@ -651,7 +651,10 @@ inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_C
 /**************************************************/
 inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int cycle, volatile VME_COEF *pRfmCoeff, int *changed)
 {
-  unsigned int ii, kk, jj, hh;
+  unsigned int ii, kk, jj;
+#ifdef FIR_FILTERS
+  unsigned int hh;
+#endif
   double temp;
   static VME_FM_OP_COEF localCoeff;
 
@@ -677,7 +680,7 @@ inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int
   	ii = pRfmCoeff->vmeCoeffs[modNum1].filtSections[filtNum];
 	if (filtNum == 0) localCoeff.crc = 0;
 	localCoeff.crc = crc_ptr((char *)&ii, sizeof(int), localCoeff.crc);
-	if ((ii>0) && (ii<11) || (ii>10) && (type>0))
+	if (((ii>0) && (ii<11)) || ((ii>10) && (type>0)))
 	{
 	  //printf("vme2: module=%d filter=%d type=%d\n", modNum1, filtNum, type);
     	  localCoeff.filtSections[filtNum] = ii;
@@ -829,7 +832,10 @@ struct filtResetId {
 /***************************************/
 inline void checkFiltResetId(int bankNum, FILT_MOD *pL, volatile FILT_MOD *dspVme, COEF *pC, int totMod, volatile VME_COEF *pRfmCoeff, int id)
 {
-  int jj,kk,hh;
+  int jj,kk;
+#ifdef FIR_FILTERS
+  int hh;
+#endif
   int status;
 
   if (id < 0 || id > 9) return;
@@ -903,9 +909,11 @@ initVarsId(FILT_MOD *pL,
          volatile VME_COEF *pRfmCoeff,
 	 int id)                         /* System id (HEPI) */
 {
-  int ii,kk,ll,hh;
+  int ii,kk,hh;
 
 #ifdef FIR_FILTERS
+  int ll;
+
     for (ii = 0; ii < MAX_FIR_MODULES; ii++)
       for (kk = 0; kk < FILTERS; kk++)
         for (ll = 0; ll < FIR_POLYPHASE_SIZE; ll++)

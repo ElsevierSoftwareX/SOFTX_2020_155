@@ -32,6 +32,7 @@
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
 #include "feSelectHeader.h"
+#include <string.h>
 
 #ifndef NUM_SYSTEMS
 #define NUM_SYSTEMS 1
@@ -59,8 +60,12 @@ extern unsigned int cpu_khz;
 #ifndef NO_DAQ
 #include "drv/gmnet.h"
 #include "drv/daqLib.c"		/* DAQ/GDS connection 			*/
+#include "drv/myri.h"
+#include "drv/fb.h"
 #endif
+#include "drv/map.h"
 #include "drv/epicsXfer.c"	/* Transfers EPICS data to/from shmem	*/
+
 #ifdef SERVO256K
         #define CYCLE_PER_SECOND        (2*131072)
         #define CYCLE_PER_MINUTE        (2*7864320)
@@ -125,27 +130,6 @@ rtl_pthread_t wthread;
 rtl_pthread_t wthread1;
 rtl_pthread_t wthread2;
 int wfd, ipc_fd;
-
-extern int mapPciModules(CDS_HARDWARE *);	/* Init routine to map adc/dac cards	*/
-extern long gsaAdcTrigger(int,int[]);		/* Starts ADC acquisition.		*/
-extern int adcDmaDone(int,int *);		/* Checks if ADC DMA complete.		*/
-extern int dacDmaDone(int);
-extern int checkAdcRdy(int,int);		/* Checks if ADC has samples avail.	*/
-extern int gsaAdcDma1(int,int,int);		/* Setup ADC DMA registers		*/
-extern int gsaAdcDma2(int);			/* Send GO bit to ADC DMA registers.	*/
-extern int gsaDacDma1(int,int);			/* Setup DAC DMA registers.		*/
-extern void gsaDacDma2(int,int);		/* Send GO bit to DAC DMA registers.	*/
-#ifndef NO_DAQ
-extern int myriNetInit(int);			/* Initialize myrinet card.		*/
-extern int myriNetClose();			/* Clean up myrinet on exit.		*/
-extern int myriNetCheckCallback();		/* Check for messages on myrinet.	*/
-extern int myriNetReconnect(int);		/* Make connects to FB.			*/
-extern int myriNetCheckReconnect();		/* Check FB net connected.		*/
-extern int myriNetDrop();		/* Check FB net connected.		*/
-extern int cdsNetStatus;
-#endif
-extern unsigned int readDio(CDS_HARDWARE *,int);
-
 
 /* ADC/DAC overflow variables */
 int overflowAdc[4][32];;
@@ -831,6 +815,7 @@ void *fe_start(void *arg)
   /* System reset command received */
   return (void *)-1;
 }
+
 int main(int argc, char **argv)
 {
         pthread_attr_t attr;
@@ -838,6 +823,7 @@ int main(int argc, char **argv)
 	int ii,jj;
 	char fname[128];
 
+	jj = 0;
 	printf("cpu clock %ld\n",cpu_khz);
 
         /*
@@ -862,7 +848,7 @@ int main(int argc, char **argv)
         if (_epics_shm == MAP_FAILED) {
                 printf("mmap failed for epics shared memory area\n");
                 rtl_perror("mmap()");
-                return (void *)(-1);
+                return -1;
         }
 
 	// See if IPC area is available, open and map it
@@ -875,7 +861,7 @@ int main(int argc, char **argv)
           if (_ipc_shm == MAP_FAILED) {
                 printf("mmap failed for IPC shared memory area\n");
                 rtl_perror("mmap()");
-                return (void *)(-1);
+                return -1;
 	  }
         }
 
@@ -885,7 +871,7 @@ int main(int argc, char **argv)
 	  //printf("configured to use %d cards\n", cards);
 	  cdsPciModules.cards = cards;
 	  cdsPciModules.cards_used = cards_used;
-          //return (void *)(-1);
+          //return -1;
 	}
 	printf("Initializing PCI Modules\n");
 	status = mapPciModules(&cdsPciModules);
@@ -1037,9 +1023,8 @@ int main(int argc, char **argv)
 	        /* free this IRQ */
 #if 0
         rtl_free_irq(40);
+out:
 #endif
-
- out:
 
 #ifndef NO_DAQ
 	status = myriNetClose();
