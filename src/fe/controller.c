@@ -291,10 +291,10 @@ void *fe_start(void *arg)
   // Make connections to FrameBuilder
   printf("Waiting for Network connect to FB - %d\n",dcuId);
   netRetry = 0;
-  status = myriNetReconnect(dcuId);
+  status = cdsDaqNetReconnect(dcuId);
   do{
 	usleep(10000);
-	status = myriNetCheckReconnect();
+	status = cdsDaqNetCheckReconnect();
 	netRetry ++;
   }while((status != 0) && (netRetry < 10));
 
@@ -680,7 +680,7 @@ void *fe_start(void *arg)
 		if(!attemptingReconnect)
 		{
 			// Check and clear network callbacks.
-			status = myriNetCheckCallback();
+			status = cdsDaqNetCheckCallback();
 			dropSends = 0;
 			// If callbacks pending count is high, try to fix net connection.
 			if(status > 4)
@@ -690,7 +690,7 @@ void *fe_start(void *arg)
 				myGmError2 = 1;
 				attemptingReconnect = 2;
 				// Send a reconnect request to FB.
-				status = myriNetReconnect(dcuId);
+				status = cdsDaqNetReconnect(dcuId);
 				netRestored = 0;
 				printf("Net fail - recon try\n");
 				diagWord |= 4;
@@ -701,7 +701,7 @@ void *fe_start(void *arg)
 		if(attemptingReconnect == 2) 
 		{
 			diagWord |= 4;
-			status = myriNetCheckReconnect();
+			status = cdsDaqNetCheckReconnect();
 			if(status == 0)
 			{
 				netRestored = NET_SEND_WAIT;
@@ -721,7 +721,7 @@ void *fe_start(void *arg)
 		{
 			netRestored --;
 			// Reduce the callback counter.
-			status = myriNetCheckCallback();
+			status = cdsDaqNetCheckCallback();
 			// Go back to sending DAQ data.
 			if(netRestored <= 0)
 			{
@@ -769,7 +769,7 @@ void *fe_start(void *arg)
 #ifndef NO_DAQ
 	  if(attemptingReconnect && ((cdsNetStatus != 0) || (dropSends != 0)))
 	  {
-		status = myriNetReconnect(dcuId);
+		status = cdsDaqNetReconnect(dcuId);
 		cdsNetStatus = 0;
 		pLocalEpics->epicsOutput.diags[2] ++;
 		dropSends = 0;
@@ -967,7 +967,7 @@ int main(int argc, char **argv)
  
 #ifndef NO_DAQ
 	printf("Initializing Network\n");
-	status = myriNetInit(2);
+	status = cdsDaqNetInit(2);
 	if (status <= 0) {
 		printf("Couldn't initialize Myrinet network connection\n");
 		return 0;
@@ -1027,7 +1027,7 @@ out:
 #endif
 
 #ifndef NO_DAQ
-	status = myriNetClose();
+	status = cdsDaqNetClose();
 #endif
 
 	printf("Killing work threads\n");

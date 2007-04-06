@@ -14,4 +14,3 @@ int myriNetDaqSend(     int dcuId,
                         int tpNum[],
                         int xferSize,
                         char *dataBuffer);
-

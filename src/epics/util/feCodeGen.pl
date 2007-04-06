@@ -1935,7 +1935,7 @@ print OUTM "\n";
 print OUTM "\n";
 print OUTM "TARGET_RTL := $skeleton";
 print OUTM "fe\.rtl\n";
-print OUTM "LIBRARY_OBJS := map.o\n";
+print OUTM "LIBRARY_OBJS := map.o myri.o fb.o\n";
 print OUTM "LDFLAGS_\$(TARGET_RTL) := -g \$(LIBRARY_OBJS)\n";
 print OUTM "\n";
 print OUTM "\$(TARGET_RTL): \$(LIBRARY_OBJS)\n";
@@ -1944,6 +1944,10 @@ print OUTM "$skeleton";
 print OUTM "fe\.o: ../controller.c\n";
 print OUTM "\t\$(CC) \$(CFLAGS) -c \$< -o \$\@\n";
 print OUTM "map.o: ../map.c\n";
+print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
+print OUTM "myri.o: ../myri.c\n";
+print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
+print OUTM "fb.o: ../fb.c\n";
 print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
 print OUTM "fm10Gen.o: fm10Gen.c\n";
 if($rate == 480) {
@@ -1984,7 +1988,7 @@ print OUTM "CFLAGS += -DRESERVE_CPU2\n";
 if ($cpus > 3) {
 print OUTM "CFLAGS += -DRESERVE_CPU3\n";
 }
-print OUTM "CFLAGS += -g\n";
+print OUTM "CFLAGS += -g -DUSE_GM=1\n";
 print OUTM "#CFLAGS += -DNO_SYNC\n";
 print OUTM "#CFLAGS += -DNO_DAQ\n";
 print OUTM "\n";

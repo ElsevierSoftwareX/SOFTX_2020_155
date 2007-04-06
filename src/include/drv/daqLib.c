@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.24 2007/04/06 16:31:14 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.25 2007/04/06 17:19:35 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -521,7 +521,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
   /* Write DAQ data to the Framebuilder 256 times per second */
   if(!daqWaitCycle)
   {
-	if(!netStatus) status = myriNetDaqSend(dcuId,daqBlockNum, daqWriteCycle, fileCrc, 
+	if(!netStatus) status = cdsDaqNetDaqSend(dcuId,daqBlockNum, daqWriteCycle, fileCrc, 
 						crcSend,crcLength,validTp,tpNum,totalSize,pReadBuffer);
 	daqWriteCycle = (daqWriteCycle + 1) % 16;
   }

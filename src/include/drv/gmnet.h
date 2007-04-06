@@ -2,7 +2,7 @@
 #define	GMNET_H_INCLUDED 1
 /* Library file for using Myricom network on CDS front ends */
 /* Undefine to compile without GM, interfacing with frame builder in shared memory */
-#define USE_GM 1
+
 
 #ifdef USE_GM
 #include "gm.h"
