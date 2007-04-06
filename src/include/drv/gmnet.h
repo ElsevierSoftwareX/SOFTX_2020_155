@@ -1,9 +1,16 @@
 /* Library file for using Myricom network on CDS front ends */
+/* Undefine to compile without GM, interfacing with frame builder in shared memory */
+#define USE_GM 1
 
+#ifdef USE_GM
 #include "gm.h"
+#endif
+
 #include "daqmap.h"
 
 #define GM_DAQ_MAX_TPS 64
+
+#ifdef USE_GM
 
 #define GM_PORT_NUM_RECV 4
 #define GM_PORT_NUM_SEND 2
@@ -22,10 +29,6 @@
 #define GM_16HZ_SEND_BUFFER_LENGTH \
  (gm_max_length_for_size(GM_16HZ_SEND_SIZE))
 
-#define GWAVE111	0
-#define GWAVE83		1
-#define GWAVE122	2
-
 
 typedef struct				/* Receiver-to-sender ID message */
 {
@@ -34,9 +37,12 @@ typedef struct				/* Receiver-to-sender ID message */
   gm_u32_n_t slack;			/* Make length a multiple of 64 */
 } gm_s_e_id_message_t;
 
+#endif
+
 #define GM_DAQ_XFER_SIZE        (DAQ_DCU_SIZE/512)
 #define GM_DAQ_BLOCK_SIZE	GM_DAQ_XFER_SIZE * 64
 #define GM_DAQ_XFER_BYTE        GM_DAQ_XFER_SIZE * 4
+
 
 /* Definition of message struct sent to Framebuilder each 16Hz cycle */
 typedef struct

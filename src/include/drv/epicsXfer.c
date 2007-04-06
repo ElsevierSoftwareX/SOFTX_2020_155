@@ -1,5 +1,3 @@
-extern int gsaAdcStop();                        /* Stops ADC acquisition.               */
-
 /************************************************************************/
 /* TASK: updateEpics()                                          */
 /*      Initiates/performs functions required on particular clock cycle */

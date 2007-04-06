@@ -1614,7 +1614,7 @@ print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
 print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
 print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
 print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
-print OUT "{\n\nint ii,jj;\n\n";
+print OUT "{\n\nint ii;\n\n";
 if ($cpus < 3) {
   printVariables();
 }
