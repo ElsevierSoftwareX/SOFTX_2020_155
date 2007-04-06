@@ -59,9 +59,9 @@ extern unsigned int cpu_khz;
 // #include "fpvalidate.h"		/* Valid FP number ck			*/
 #ifndef NO_DAQ
 #include "drv/gmnet.h"
-#include "drv/daqLib.c"		/* DAQ/GDS connection 			*/
-#include "drv/myri.h"
 #include "drv/fb.h"
+#include "drv/myri.h"
+#include "drv/daqLib.c"		/* DAQ/GDS connection 			*/
 #endif
 #include "drv/map.h"
 #include "drv/epicsXfer.c"	/* Transfers EPICS data to/from shmem	*/

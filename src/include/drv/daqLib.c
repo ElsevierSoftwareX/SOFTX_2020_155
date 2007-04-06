@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.23 2007/04/06 16:17:31 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.24 2007/04/06 16:31:14 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -94,18 +94,6 @@ volatile DAQ_INFO_BLOCK *pInfo;		/* Ptr to DAQ config in shmem.	*/
 
 extern char *_epics_shm;		/* Ptr to EPICS shmem block		*/
 extern long daqBuffer;			/* Address of daqLib swing buffers.	*/
-// Prototype of routine in map.c used to xmit data to the Framebuilder.
-extern int myriNetDaqSend(int dcuId,
-                        int cycle,
-                        int subCycle,
-                        unsigned int fileCrc,
-                        unsigned int blockCrc,
-                        int crcSize,
-                        int tpCount,
-                        int tpNum[],
-			int xferSize,
-                        char *dataBuffer);
-
 
 
 /* ******************************************************************** */
