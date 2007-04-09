@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.175"
+    ComputedModelVersion    "1.179"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -42,10 +42,10 @@ Model {
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "aivanov"
+  LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Oct 25 16:58:58 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:175>"
+  LastModifiedDate	  "Mon Apr 09 16:03:06 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:179>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -471,6 +471,28 @@ Model {
       OutputAsBus	      off
     }
     Block {
+      BlockType		      Demux
+      Outputs		      "4"
+      DisplayOption	      "none"
+      BusSelectionMode	      off
+    }
+    Block {
+      BlockType		      Gain
+      Gain		      "1"
+      Multiplication	      "Element-wise(K.*u)"
+      ParameterDataTypeMode   "Same as input"
+      ParameterDataType	      "sfix(16)"
+      ParameterScalingMode    "Best Precision: Matrix-wise"
+      ParameterScaling	      "2^0"
+      OutDataTypeMode	      "Same as input"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      LockScale		      off
+      RndMeth		      "Floor"
+      SaturateOnIntegerOverflow	on
+      SampleTime	      "-1"
+    }
+    Block {
       BlockType		      Inport
       Port		      "1"
       UseBusObject	      off
@@ -486,6 +508,14 @@ Model {
       LatchByDelayingOutsideSignal off
       LatchByCopyingInsideSignal off
       Interpolate	      on
+    }
+    Block {
+      BlockType		      Mux
+      Inputs		      "4"
+      DisplayOption	      "none"
+      UseBusObject	      off
+      BusObject		      "BusObject"
+      NonVirtualBus	      off
     }
     Block {
       BlockType		      Outport
@@ -505,6 +535,12 @@ Model {
     }
     Block {
       BlockType		      Reference
+    }
+    Block {
+      BlockType		      "S-Function"
+      FunctionName	      "system"
+      SFunctionModules	      "''"
+      PortCounts	      "[]"
     }
     Block {
       BlockType		      SubSystem
@@ -538,6 +574,17 @@ Model {
       SampleTime	      "-1"
     }
     Block {
+      BlockType		      Switch
+      Criteria		      "u2 >= Threshold"
+      Threshold		      "0"
+      InputSameDT	      on
+      OutDataTypeMode	      "Inherit via internal rule"
+      RndMeth		      "Floor"
+      SaturateOnIntegerOverflow	on
+      ZeroCross		      on
+      SampleTime	      "-1"
+    }
+    Block {
       BlockType		      Terminator
     }
     Block {
@@ -567,7 +614,7 @@ Model {
   }
   System {
     Name		    "sei"
-    Location		    [418, 353, 1442, 1093]
+    Location		    [356, 209, 1380, 949]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -9576,7 +9623,7 @@ Model {
       MaskHideContents	      off
       System {
 	Name			"BSC_STS"
-	Location		[150, 318, 1208, 1144]
+	Location		[664, 100, 1722, 926]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -9673,7 +9720,14 @@ Model {
 	  Position		  [585, 358, 635, 507]
 	  SourceBlock		  "cdsRampSwitch/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
 	}
 	Block {
 	  BlockType		  Reference
@@ -9682,7 +9736,7 @@ Model {
 	  Position		  [400, 413, 485, 467]
 	  ForegroundColor	  "blue"
 	  DropShadow		  on
-	  DialogController	  "dspDDGCreate"
+	  DialogController	  "dspdialog.DigitalFilter"
 	  DialogControllerArgs	  "DataTag69"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
@@ -9695,14 +9749,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -9712,24 +9766,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -9739,7 +9793,12 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
+	  FilterSource		  "Specify via dialog"
+	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
+	  multiplicandMode	  "Same as output"
+	  multiplicandWordLength  "32"
+	  multiplicandFracLength  "30"
 	}
 	Block {
 	  BlockType		  Reference
@@ -9748,7 +9807,7 @@ Model {
 	  Position		  [780, 368, 865, 422]
 	  ForegroundColor	  "blue"
 	  DropShadow		  on
-	  DialogController	  "dspDDGCreate"
+	  DialogController	  "dspdialog.DigitalFilter"
 	  DialogControllerArgs	  "DataTag70"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
@@ -9761,14 +9820,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -9778,24 +9837,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -9805,7 +9864,12 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
+	  FilterSource		  "Specify via dialog"
+	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
+	  multiplicandMode	  "Same as output"
+	  multiplicandWordLength  "32"
+	  multiplicandFracLength  "30"
 	}
 	Block {
 	  BlockType		  Reference
@@ -9814,7 +9878,7 @@ Model {
 	  Position		  [400, 488, 485, 542]
 	  ForegroundColor	  "blue"
 	  DropShadow		  on
-	  DialogController	  "dspDDGCreate"
+	  DialogController	  "dspdialog.DigitalFilter"
 	  DialogControllerArgs	  "DataTag71"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
@@ -9827,14 +9891,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -9844,24 +9908,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -9871,7 +9935,12 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
+	  FilterSource		  "Specify via dialog"
+	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
+	  multiplicandMode	  "Same as output"
+	  multiplicandWordLength  "32"
+	  multiplicandFracLength  "30"
 	}
 	Block {
 	  BlockType		  Reference
@@ -9880,7 +9949,7 @@ Model {
 	  Position		  [780, 738, 865, 792]
 	  ForegroundColor	  "blue"
 	  DropShadow		  on
-	  DialogController	  "dspDDGCreate"
+	  DialogController	  "dspdialog.DigitalFilter"
 	  DialogControllerArgs	  "DataTag72"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
@@ -9893,14 +9962,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -9910,24 +9979,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -9937,7 +10006,12 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
+	  FilterSource		  "Specify via dialog"
+	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
+	  multiplicandMode	  "Same as output"
+	  multiplicandWordLength  "32"
+	  multiplicandFracLength  "30"
 	}
 	Block {
 	  BlockType		  Reference
@@ -9946,7 +10020,7 @@ Model {
 	  Position		  [400, 563, 485, 617]
 	  ForegroundColor	  "blue"
 	  DropShadow		  on
-	  DialogController	  "dspDDGCreate"
+	  DialogController	  "dspdialog.DigitalFilter"
 	  DialogControllerArgs	  "DataTag73"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
@@ -9959,14 +10033,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -9976,24 +10050,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -10003,7 +10077,12 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
+	  FilterSource		  "Specify via dialog"
+	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
+	  multiplicandMode	  "Same as output"
+	  multiplicandWordLength  "32"
+	  multiplicandFracLength  "30"
 	}
 	Block {
 	  BlockType		  Outport
@@ -13098,7 +13177,7 @@ Model {
       BlockType		      BusSelector
       Name		      "Bus\nSelector5"
       Ports		      [1, 3]
-      Position		      [160, 1036, 165, 1144]
+      Position		      [160, 941, 165, 1049]
       ShowName		      off
       OutputSignals	      "adc_1_23,adc_1_24,adc_1_25"
       Port {
@@ -22570,7 +22649,14 @@ Model {
 	  Position		  [585, 358, 635, 507]
 	  SourceBlock		  "cdsRampSwitch/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
 	}
 	Block {
 	  BlockType		  Reference
@@ -22579,7 +22665,7 @@ Model {
 	  Position		  [400, 413, 485, 467]
 	  ForegroundColor	  "blue"
 	  DropShadow		  on
-	  DialogController	  "dspDDGCreate"
+	  DialogController	  "dspdialog.DigitalFilter"
 	  DialogControllerArgs	  "DataTag162"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
@@ -22592,14 +22678,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -22609,24 +22695,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -22636,7 +22722,12 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
+	  FilterSource		  "Specify via dialog"
+	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
+	  multiplicandMode	  "Same as output"
+	  multiplicandWordLength  "32"
+	  multiplicandFracLength  "30"
 	}
 	Block {
 	  BlockType		  Reference
@@ -22645,7 +22736,7 @@ Model {
 	  Position		  [780, 368, 865, 422]
 	  ForegroundColor	  "blue"
 	  DropShadow		  on
-	  DialogController	  "dspDDGCreate"
+	  DialogController	  "dspdialog.DigitalFilter"
 	  DialogControllerArgs	  "DataTag163"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
@@ -22658,14 +22749,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -22675,24 +22766,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -22702,7 +22793,12 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
+	  FilterSource		  "Specify via dialog"
+	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
+	  multiplicandMode	  "Same as output"
+	  multiplicandWordLength  "32"
+	  multiplicandFracLength  "30"
 	}
 	Block {
 	  BlockType		  Reference
@@ -22711,7 +22807,7 @@ Model {
 	  Position		  [400, 488, 485, 542]
 	  ForegroundColor	  "blue"
 	  DropShadow		  on
-	  DialogController	  "dspDDGCreate"
+	  DialogController	  "dspdialog.DigitalFilter"
 	  DialogControllerArgs	  "DataTag164"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
@@ -22724,14 +22820,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -22741,24 +22837,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -22768,7 +22864,12 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
+	  FilterSource		  "Specify via dialog"
+	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
+	  multiplicandMode	  "Same as output"
+	  multiplicandWordLength  "32"
+	  multiplicandFracLength  "30"
 	}
 	Block {
 	  BlockType		  Reference
@@ -22777,7 +22878,7 @@ Model {
 	  Position		  [780, 738, 865, 792]
 	  ForegroundColor	  "blue"
 	  DropShadow		  on
-	  DialogController	  "dspDDGCreate"
+	  DialogController	  "dspdialog.DigitalFilter"
 	  DialogControllerArgs	  "DataTag165"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
@@ -22790,14 +22891,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -22807,24 +22908,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -22834,7 +22935,12 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
+	  FilterSource		  "Specify via dialog"
+	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
+	  multiplicandMode	  "Same as output"
+	  multiplicandWordLength  "32"
+	  multiplicandFracLength  "30"
 	}
 	Block {
 	  BlockType		  Reference
@@ -22843,7 +22949,7 @@ Model {
 	  Position		  [400, 563, 485, 617]
 	  ForegroundColor	  "blue"
 	  DropShadow		  on
-	  DialogController	  "dspDDGCreate"
+	  DialogController	  "dspdialog.DigitalFilter"
 	  DialogControllerArgs	  "DataTag166"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
@@ -22856,14 +22962,14 @@ Model {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -22873,24 +22979,24 @@ Model {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -22900,7 +23006,12 @@ Model {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
+	  FilterSource		  "Specify via dialog"
+	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
+	  multiplicandMode	  "Same as output"
+	  multiplicandWordLength  "32"
+	  multiplicandFracLength  "30"
 	}
 	Block {
 	  BlockType		  Outport
@@ -37310,7 +37421,7 @@ Model {
       BlockType		      SubSystem
       Name		      "STS2_FIR_Y"
       Ports		      [1, 2]
-      Position		      [235, 1040, 275, 1100]
+      Position		      [260, 1040, 300, 1100]
       MinAlgLoopOccurrences   off
       RTWSystemCode	      "Auto"
       FunctionWithSeparateData off
@@ -37610,6 +37721,475 @@ Model {
       InputSameDT	      off
       OutDataTypeMode	      "Inherit via internal rule"
       SaturateOnIntegerOverflow	off
+    }
+    Block {
+      BlockType		      SubSystem
+      Name		      "TILT"
+      Ports		      [6]
+      Position		      [505, 483, 545, 547]
+      MinAlgLoopOccurrences   off
+      RTWSystemCode	      "Auto"
+      FunctionWithSeparateData off
+      MaskHideContents	      off
+      System {
+	Name			"TILT"
+	Location		[1247, 114, 1846, 520]
+	Open			off
+	ModelBrowserVisibility	off
+	ModelBrowserWidth	200
+	ScreenColor		"white"
+	PaperOrientation	"landscape"
+	PaperPositionMode	"auto"
+	PaperType		"usletter"
+	PaperUnits		"inches"
+	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
+	TiledPageScale		1
+	ShowPageBoundaries	off
+	ZoomFactor		"100"
+	Block {
+	  BlockType		  Inport
+	  Name			  "In4"
+	  Position		  [15, 45, 45, 59]
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In1"
+	  Position		  [15, 73, 45, 87]
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In2"
+	  Position		  [15, 98, 45, 112]
+	  Port			  "3"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In3"
+	  Position		  [20, 133, 50, 147]
+	  Port			  "4"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In5"
+	  Position		  [20, 168, 50, 182]
+	  Port			  "5"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In6"
+	  Position		  [20, 193, 50, 207]
+	  Port			  "6"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Demux
+	  Name			  "Demux"
+	  Ports			  [1, 6]
+	  Position		  [185, 38, 205, 212]
+	  BackgroundColor	  "black"
+	  ShowName		  off
+	  Outputs		  "6"
+	  DisplayOption		  "bar"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "MTRX"
+	  Tag			  "cdsMuxMatrix"
+	  Description		  "Any size matrix. Inputs and outputs must be"
+" connected using Mux and Demux parts."
+	  Ports			  [1, 1]
+	  Position		  [120, 95, 160, 155]
+	  BackgroundColor	  "green"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsMuxMatrix/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Mux
+	  Name			  "Mux"
+	  Ports			  [6, 1]
+	  Position		  [75, 28, 90, 222]
+	  ShowName		  off
+	  Inputs		  "6"
+	  DisplayOption		  "bar"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "X1"
+	  Tag			  "cdsFilt"
+	  Description		  "Purpose:                                   "
+"                                                                             "
+"                                                                             "
+"                                     \nStandard CDS IIR filter module.       "
+"                                                                             "
+"                                                                             "
+"                                          \n                                 "
+"                                                                             "
+"                                                                             "
+"                                               \nOperation:                  "
+"                                                                             "
+"                                                                             "
+"                                                    \nConsists of 10 second o"
+"rder section IIR filters, plus a ramped gain stage. In FE code, also provides"
+" pre-defined test points and excitation channel inputs. The filter coefficien"
+"ts are defined in the LIGO system using the 'foton' tool.\n                  "
+"                                                                             "
+"                                                                             "
+"                                                              \nUsage:       "
+"                                                                             "
+"                                                                             "
+"                                                                   \nName the"
+" part with the desired filter module name.                                   "
+"                                                                             "
+"                                                                        "
+	  Ports			  [1, 1]
+	  Position		  [295, 23, 365, 47]
+	  BackgroundColor	  "darkGreen"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsFilt/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "X2"
+	  Tag			  "cdsFilt"
+	  Description		  "Purpose:                                   "
+"                                                                             "
+"                                                                             "
+"                                     \nStandard CDS IIR filter module.       "
+"                                                                             "
+"                                                                             "
+"                                          \n                                 "
+"                                                                             "
+"                                                                             "
+"                                               \nOperation:                  "
+"                                                                             "
+"                                                                             "
+"                                                    \nConsists of 10 second o"
+"rder section IIR filters, plus a ramped gain stage. In FE code, also provides"
+" pre-defined test points and excitation channel inputs. The filter coefficien"
+"ts are defined in the LIGO system using the 'foton' tool.\n                  "
+"                                                                             "
+"                                                                             "
+"                                                              \nUsage:       "
+"                                                                             "
+"                                                                             "
+"                                                                   \nName the"
+" part with the desired filter module name.                                   "
+"                                                                             "
+"                                                                        "
+	  Ports			  [1, 1]
+	  Position		  [295, 178, 365, 202]
+	  BackgroundColor	  "darkGreen"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsFilt/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "Y1"
+	  Tag			  "cdsFilt"
+	  Description		  "Purpose:                                   "
+"                                                                             "
+"                                                                             "
+"                                     \nStandard CDS IIR filter module.       "
+"                                                                             "
+"                                                                             "
+"                                          \n                                 "
+"                                                                             "
+"                                                                             "
+"                                               \nOperation:                  "
+"                                                                             "
+"                                                                             "
+"                                                    \nConsists of 10 second o"
+"rder section IIR filters, plus a ramped gain stage. In FE code, also provides"
+" pre-defined test points and excitation channel inputs. The filter coefficien"
+"ts are defined in the LIGO system using the 'foton' tool.\n                  "
+"                                                                             "
+"                                                                             "
+"                                                              \nUsage:       "
+"                                                                             "
+"                                                                             "
+"                                                                   \nName the"
+" part with the desired filter module name.                                   "
+"                                                                             "
+"                                                                        "
+	  Ports			  [1, 1]
+	  Position		  [295, 68, 365, 92]
+	  BackgroundColor	  "darkGreen"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsFilt/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "Y2"
+	  Tag			  "cdsFilt"
+	  Description		  "Purpose:                                   "
+"                                                                             "
+"                                                                             "
+"                                     \nStandard CDS IIR filter module.       "
+"                                                                             "
+"                                                                             "
+"                                          \n                                 "
+"                                                                             "
+"                                                                             "
+"                                               \nOperation:                  "
+"                                                                             "
+"                                                                             "
+"                                                    \nConsists of 10 second o"
+"rder section IIR filters, plus a ramped gain stage. In FE code, also provides"
+" pre-defined test points and excitation channel inputs. The filter coefficien"
+"ts are defined in the LIGO system using the 'foton' tool.\n                  "
+"                                                                             "
+"                                                                             "
+"                                                              \nUsage:       "
+"                                                                             "
+"                                                                             "
+"                                                                   \nName the"
+" part with the desired filter module name.                                   "
+"                                                                             "
+"                                                                        "
+	  Ports			  [1, 1]
+	  Position		  [295, 223, 365, 247]
+	  BackgroundColor	  "darkGreen"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsFilt/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "Z1"
+	  Tag			  "cdsFilt"
+	  Description		  "Purpose:                                   "
+"                                                                             "
+"                                                                             "
+"                                     \nStandard CDS IIR filter module.       "
+"                                                                             "
+"                                                                             "
+"                                          \n                                 "
+"                                                                             "
+"                                                                             "
+"                                               \nOperation:                  "
+"                                                                             "
+"                                                                             "
+"                                                    \nConsists of 10 second o"
+"rder section IIR filters, plus a ramped gain stage. In FE code, also provides"
+" pre-defined test points and excitation channel inputs. The filter coefficien"
+"ts are defined in the LIGO system using the 'foton' tool.\n                  "
+"                                                                             "
+"                                                                             "
+"                                                              \nUsage:       "
+"                                                                             "
+"                                                                             "
+"                                                                   \nName the"
+" part with the desired filter module name.                                   "
+"                                                                             "
+"                                                                        "
+	  Ports			  [1, 1]
+	  Position		  [295, 123, 365, 147]
+	  BackgroundColor	  "darkGreen"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsFilt/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "Z2"
+	  Tag			  "cdsFilt"
+	  Description		  "Purpose:                                   "
+"                                                                             "
+"                                                                             "
+"                                     \nStandard CDS IIR filter module.       "
+"                                                                             "
+"                                                                             "
+"                                          \n                                 "
+"                                                                             "
+"                                                                             "
+"                                               \nOperation:                  "
+"                                                                             "
+"                                                                             "
+"                                                    \nConsists of 10 second o"
+"rder section IIR filters, plus a ramped gain stage. In FE code, also provides"
+" pre-defined test points and excitation channel inputs. The filter coefficien"
+"ts are defined in the LIGO system using the 'foton' tool.\n                  "
+"                                                                             "
+"                                                                             "
+"                                                              \nUsage:       "
+"                                                                             "
+"                                                                             "
+"                                                                   \nName the"
+" part with the desired filter module name.                                   "
+"                                                                             "
+"                                                                        "
+	  Ports			  [1, 1]
+	  Position		  [295, 278, 365, 302]
+	  BackgroundColor	  "darkGreen"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsFilt/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Line {
+	  SrcBlock		  "Mux"
+	  SrcPort		  1
+	  DstBlock		  "MTRX"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "MTRX"
+	  SrcPort		  1
+	  DstBlock		  "Demux"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In4"
+	  SrcPort		  1
+	  DstBlock		  "Mux"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In1"
+	  SrcPort		  1
+	  DstBlock		  "Mux"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "In2"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, 5]
+	  DstBlock		  "Mux"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "In3"
+	  SrcPort		  1
+	  DstBlock		  "Mux"
+	  DstPort		  4
+	}
+	Line {
+	  SrcBlock		  "In5"
+	  SrcPort		  1
+	  Points		  [0, -5]
+	  DstBlock		  "Mux"
+	  DstPort		  5
+	}
+	Line {
+	  SrcBlock		  "In6"
+	  SrcPort		  1
+	  DstBlock		  "Mux"
+	  DstPort		  6
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  1
+	  Points		  [35, 0; 0, -15]
+	  DstBlock		  "X1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  2
+	  DstBlock		  "Y1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  3
+	  Points		  [35, 0; 0, 25]
+	  DstBlock		  "Z1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  4
+	  Points		  [25, 0; 0, 50]
+	  DstBlock		  "X2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  5
+	  Points		  [15, 0; 0, 65]
+	  DstBlock		  "Y2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  6
+	  Points		  [5, 0; 0, 90]
+	  DstBlock		  "Z2"
+	  DstPort		  1
+	}
+      }
     }
     Block {
       BlockType		      Reference
@@ -37954,7 +38534,6 @@ Model {
       Branch {
 	Points			[0, 145]
 	Branch {
-	  Points		  [5, 0]
 	  DstBlock		  "Bus\nSelector5"
 	  DstPort		  1
 	}
@@ -38143,22 +38722,46 @@ Model {
     Line {
       SrcBlock		      "STS1_X"
       SrcPort		      1
-      Points		      [95, 0; 0, 20]
-      DstBlock		      "BSC_STS"
-      DstPort		      1
+      Points		      [80, 0]
+      Branch {
+	Points			[15, 0; 0, 20]
+	DstBlock		"BSC_STS"
+	DstPort			1
+      }
+      Branch {
+	Points			[0, 460]
+	DstBlock		"TILT"
+	DstPort			1
+      }
     }
     Line {
       SrcBlock		      "STS1_Y"
       SrcPort		      1
-      Points		      [120, 0; 0, 10]
-      DstBlock		      "BSC_STS"
-      DstPort		      2
+      Points		      [65, 0]
+      Branch {
+	Points			[55, 0; 0, 10]
+	DstBlock		"BSC_STS"
+	DstPort			2
+      }
+      Branch {
+	Points			[0, 420]
+	DstBlock		"TILT"
+	DstPort			2
+      }
     }
     Line {
       SrcBlock		      "STS1_Z"
       SrcPort		      1
-      DstBlock		      "BSC_STS"
-      DstPort		      3
+      Points		      [50, 0]
+      Branch {
+	DstBlock		"BSC_STS"
+	DstPort			3
+      }
+      Branch {
+	Points			[0, 380]
+	DstBlock		"TILT"
+	DstPort			3
+      }
     }
     Line {
       SrcBlock		      "BSC_ACT"
@@ -39571,7 +40174,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector5"
       SrcPort		      1
-      Points		      [5, 0; 0, -155]
+      Points		      [5, 0; 0, -60]
       Branch {
 	Points			[0, -70]
 	DstBlock		"STS2_X"
@@ -39587,7 +40190,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector5"
       SrcPort		      2
-      Points		      [0, -20; 10, 0]
+      Points		      [0, 75; 10, 0]
       Branch {
 	Points			[0, -80]
 	DstBlock		"STS2_Y"
@@ -39603,7 +40206,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector5"
       SrcPort		      3
-      Points		      [0, 15]
+      Points		      [0, 110]
       DstBlock		      "STS2_Z"
       DstPort		      1
     }
@@ -39684,7 +40287,7 @@ Model {
     Line {
       SrcBlock		      "STS2_FIR_Y"
       SrcPort		      2
-      Points		      [65, 0]
+      Points		      [40, 0]
       DstBlock		      "Sum4"
       DstPort		      2
     }
@@ -40910,6 +41513,27 @@ Model {
       DstBlock		      "HMX_POS"
       DstPort		      18
     }
+    Line {
+      SrcBlock		      "STS2_X"
+      SrcPort		      1
+      Points		      [150, 0; 0, -310]
+      DstBlock		      "TILT"
+      DstPort		      4
+    }
+    Line {
+      SrcBlock		      "STS2_Y"
+      SrcPort		      1
+      Points		      [115, 0; 0, -460]
+      DstBlock		      "TILT"
+      DstPort		      5
+    }
+    Line {
+      SrcBlock		      "STS2_Z"
+      SrcPort		      1
+      Points		      [120, 0; 0, -600]
+      DstBlock		      "TILT"
+      DstPort		      6
+    }
     Annotation {
       Name		      "ADC_0"
       Position		      [65, 744]
@@ -41641,33 +42265,28 @@ MatData {
   }
   DataRecord {
     Tag			    DataTag166
-    Data		    "  %)30     .    <     8    (     0         %    "
-"\"     $    !     0         .    0     8    (    !          %    \"     $    "
-"-     0         0    #0   $1I9VET86Q&:6QT97(    "
+    Data		    "  %)30     .    ,     8    (    !          %    "
+"\"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag165
-    Data		    "  %)30     .    <     8    (     0         %    "
-"\"     $    !     0         .    0     8    (    !          %    \"     $    "
-"-     0         0    #0   $1I9VET86Q&:6QT97(    "
+    Data		    "  %)30     .    ,     8    (    !          %    "
+"\"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag164
-    Data		    "  %)30     .    <     8    (     0         %    "
-"\"     $    !     0         .    0     8    (    !          %    \"     $    "
-"-     0         0    #0   $1I9VET86Q&:6QT97(    "
+    Data		    "  %)30     .    ,     8    (    !          %    "
+"\"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag163
-    Data		    "  %)30     .    <     8    (     0         %    "
-"\"     $    !     0         .    0     8    (    !          %    \"     $    "
-"-     0         0    #0   $1I9VET86Q&:6QT97(    "
+    Data		    "  %)30     .    ,     8    (    !          %    "
+"\"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag162
-    Data		    "  %)30     .    <     8    (     0         %    "
-"\"     $    !     0         .    0     8    (    !          %    \"     $    "
-"-     0         0    #0   $1I9VET86Q&:6QT97(    "
+    Data		    "  %)30     .    ,     8    (    !          %    "
+"\"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag161
@@ -42199,33 +42818,28 @@ MatData {
   }
   DataRecord {
     Tag			    DataTag73
-    Data		    "  %)30     .    <     8    (     0         %    "
-"\"     $    !     0         .    0     8    (    !          %    \"     $    "
-"-     0         0    #0   $1I9VET86Q&:6QT97(    "
+    Data		    "  %)30     .    ,     8    (    !          %    "
+"\"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag72
-    Data		    "  %)30     .    <     8    (     0         %    "
-"\"     $    !     0         .    0     8    (    !          %    \"     $    "
-"-     0         0    #0   $1I9VET86Q&:6QT97(    "
+    Data		    "  %)30     .    ,     8    (    !          %    "
+"\"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag71
-    Data		    "  %)30     .    <     8    (     0         %    "
-"\"     $    !     0         .    0     8    (    !          %    \"     $    "
-"-     0         0    #0   $1I9VET86Q&:6QT97(    "
+    Data		    "  %)30     .    ,     8    (    !          %    "
+"\"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag70
-    Data		    "  %)30     .    <     8    (     0         %    "
-"\"     $    !     0         .    0     8    (    !          %    \"     $    "
-"-     0         0    #0   $1I9VET86Q&:6QT97(    "
+    Data		    "  %)30     .    ,     8    (    !          %    "
+"\"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag69
-    Data		    "  %)30     .    <     8    (     0         %    "
-"\"     $    !     0         .    0     8    (    !          %    \"     $    "
-"-     0         0    #0   $1I9VET86Q&:6QT97(    "
+    Data		    "  %)30     .    ,     8    (    !          %    "
+"\"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag68
