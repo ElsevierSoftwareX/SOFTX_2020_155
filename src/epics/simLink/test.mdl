@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.148"
+    ComputedModelVersion    "1.149"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Feb  7 19:49:14 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:148>"
+  LastModifiedDate	  "Tue Apr 10 16:39:12 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:149>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -567,6 +567,19 @@ Model {
       MinMaxOverflowLogging   "UseLocalSettings"
     }
     Block {
+      BlockType		      Sum
+      IconShape		      "rectangular"
+      Inputs		      "++"
+      InputSameDT	      on
+      OutDataTypeMode	      "Same as first input"
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
+      LockScale		      off
+      RndMeth		      "Floor"
+      SaturateOnIntegerOverflow	on
+      SampleTime	      "-1"
+    }
+    Block {
       BlockType		      Switch
       Criteria		      "u2 >= Threshold"
       Threshold		      "0"
@@ -677,6 +690,35 @@ Model {
       BlockType		      Ground
       Name		      "Ground1"
       Position		      [15, 125, 35, 145]
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "M1:SYS-SUBSYS_CHANNEL_NAME"
+      Tag		      "cdsEzCaRead"
+      Description	      "Purpose:                                       "
+"                                       \nUsed to input a signal from an Epics"
+" channel.                                         \n                         "
+"                                                             \nOperation:    "
+"                                                                        \nRea"
+"ds an Epics channel using ezcaread() function and sends it out.              "
+"      \n                                                                     "
+"                 \nUsage: Give the name of the EPICS channel to read. For exa"
+"mple: M1:SUS-Q1_L1POS_INMON."
+      Ports		      [0, 1]
+      Position		      [195, 421, 245, 449]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "CDS_PARTS/EpicsParts/M1:SYS-SUBSYS_CHANNEL_NAME"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
     }
     Block {
       BlockType		      Reference
@@ -1416,6 +1458,18 @@ Model {
       RTWMemSecDataParameters "Inherit from model"
     }
     Block {
+      BlockType		      Sum
+      Name		      "Sum"
+      Ports		      [2, 1]
+      Position		      [310, 335, 330, 355]
+      ShowName		      off
+      IconShape		      "round"
+      Inputs		      "|++"
+      InputSameDT	      off
+      OutDataTypeMode	      "Inherit via internal rule"
+      SaturateOnIntegerOverflow	off
+    }
+    Block {
       BlockType		      Terminator
       Name		      "Terminator"
       Position		      [265, 500, 285, 520]
@@ -1529,9 +1583,22 @@ Model {
     Line {
       SrcBlock		      "Operator"
       SrcPort		      1
-      Points		      [60, 0; 0, 40]
+      DstBlock		      "Sum"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Sum"
+      SrcPort		      1
+      Points		      [15, 0; 0, 40]
       DstBlock		      "PD1_X"
       DstPort		      3
+    }
+    Line {
+      SrcBlock		      "M1:SYS-SUBSYS_CHANNEL_NAME"
+      SrcPort		      1
+      Points		      [70, 0]
+      DstBlock		      "Sum"
+      DstPort		      2
     }
   }
 }
