@@ -34,8 +34,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Feb  7 19:32:32 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:79>"
+  LastModifiedDate	  "Tue Apr 10 15:54:17 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:81>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -272,7 +272,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [275, 186, 944, 507]
+    Location		    [41, 334, 710, 655]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -352,7 +352,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"EpicsParts"
-	Location		[787, 266, 997, 508]
+	Location		[787, 266, 997, 669]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -452,7 +452,7 @@ Library {
 "a local EPICS variable for monitoring. For example, the above would result in"
 " a local EPICS variable of IFO:SUBSYS-SEI_HMY_ACT_SW."
 	  Ports			  [1]
-	  Position		  [80, 161, 130, 189]
+	  Position		  [80, 151, 130, 179]
 	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -466,6 +466,64 @@ Library {
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  SubSystem
+	  Name			  "M1:SYS-SUBSYS_CHANNEL_NAME"
+	  Tag			  "cdsEzCaRead"
+	  Description		  "Purpose:                                   "
+"                                           \nUsed to input a signal from an E"
+"pics channel.                                         \n                     "
+"                                                                 \nOperation:"
+"                                                                            "
+"\nReads an Epics channel using ezcaread() function and sends it out.         "
+"           \n                                                                "
+"                      \nUsage: Give the name of the EPICS channel to read. Fo"
+"r example: M1:SUS-Q1_L1POS_INMON."
+	  Ports			  [0, 1]
+	  Position		  [80, 231, 130, 259]
+	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  AncestorBlock		  "cdsRemoteIntlk/Name"
+	  MinAlgLoopOccurrences	  off
+	  RTWSystemCode		  "Auto"
+	  FunctionWithSeparateData off
+	  MaskHideContents	  off
+	  System {
+	    Name		    "M1:SYS-SUBSYS_CHANNEL_NAME"
+	    Location		    [298, 120, 493, 202]
+	    Open		    on
+	    ModelBrowserVisibility  off
+	    ModelBrowserWidth	    200
+	    ScreenColor		    "white"
+	    PaperOrientation	    "landscape"
+	    PaperPositionMode	    "auto"
+	    PaperType		    "usletter"
+	    PaperUnits		    "inches"
+	    TiledPaperMargins	    [0.500000, 0.500000, 0.500000, 0.500000]
+	    TiledPageScale	    1
+	    ShowPageBoundaries	    off
+	    ZoomFactor		    "100"
+	    Block {
+	      BlockType		      Ground
+	      Name		      "Ground"
+	      Position		      [70, 25, 90, 45]
+	    }
+	    Block {
+	      BlockType		      Outport
+	      Name		      "Out1"
+	      Position		      [130, 28, 160, 42]
+	      IconDisplay	      "Port number"
+	      BusOutputAsStruct	      off
+	    }
+	    Line {
+	      SrcBlock		      "Ground"
+	      SrcPort		      1
+	      DstBlock		      "Out1"
+	      DstPort		      1
+	    }
+	  }
 	}
       }
     }
@@ -624,8 +682,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[580, 93, 1020, 833]
-	Open			off
+	Location		[580, 74, 1020, 738]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -649,31 +707,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsRfmIO/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
-	}
-	Block {
-	  BlockType		  Reference
-	  Name			  "0x2000"
-	  Tag			  "cdsIPC"
-	  Description		  "Inter-process communication through /rtl_ep"
-"ics_ipc shared memory"
-	  Ports			  [1, 1]
-	  Position		  [235, 375, 275, 435]
-	  BackgroundColor	  "green"
-	  DropShadow		  on
-	  AttributesFormatString  "%<Tag>"
-	  SourceBlock		  "cdsIPC/Subsystem"
-	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -744,9 +780,9 @@ Library {
 	  AttributesFormatString  "%<Description>"
 	  SourceBlock		  "dac/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -766,9 +802,31 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsDio/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  on
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "sas:0x2000"
+	  Tag			  "cdsIPC"
+	  Description		  "Inter-process communication through /rtl_ep"
+"ics_ipc shared memory"
+	  Ports			  [1, 1]
+	  Position		  [235, 375, 275, 435]
+	  BackgroundColor	  "green"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsIPC/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1161,7 +1219,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[708, 160, 978, 559]
+	Location		[333, 426, 603, 825]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
