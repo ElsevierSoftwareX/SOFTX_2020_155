@@ -34,8 +34,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Apr 10 15:54:17 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:81>"
+  LastModifiedDate	  "Tue Apr 10 17:04:09 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:83>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -352,7 +352,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"EpicsParts"
-	Location		[787, 266, 997, 669]
+	Location		[661, 172, 871, 575]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -468,62 +468,30 @@ Library {
 	  RTWMemSecDataParameters "Inherit from model"
 	}
 	Block {
-	  BlockType		  SubSystem
-	  Name			  "M1:SYS-SUBSYS_CHANNEL_NAME"
+	  BlockType		  Reference
+	  Name			  "M1:SYS-FOO_BAR"
 	  Tag			  "cdsEzCaRead"
 	  Description		  "Purpose:                                   "
-"                                           \nUsed to input a signal from an E"
-"pics channel.                                         \n                     "
-"                                                                 \nOperation:"
-"                                                                            "
-"\nReads an Epics channel using ezcaread() function and sends it out.         "
-"           \n                                                                "
-"                      \nUsage: Give the name of the EPICS channel to read. Fo"
-"r example: M1:SUS-Q1_L1POS_INMON."
+"                    \nUsed to input an Epics signal.                         "
+"        \n                                                               \nOp"
+"eration:                                                     \nUsing ezcaread"
+"() function to get Epics input from a remote IOC.\n                          "
+"                                     \nUsage: Give the name of the EPICS chan"
+"nel to be read.          "
 	  Ports			  [0, 1]
-	  Position		  [80, 231, 130, 259]
-	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
-	  DropShadow		  on
+	  Position		  [90, 225, 130, 285]
+	  BackgroundColor	  "[0.792741, 0.563703, 0.940000]"
 	  AttributesFormatString  "%<Tag>"
-	  AncestorBlock		  "cdsRemoteIntlk/Name"
-	  MinAlgLoopOccurrences	  off
-	  RTWSystemCode		  "Auto"
+	  SourceBlock		  "cdsEzCaRead/cdsEzCaRead"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
-	  MaskHideContents	  off
-	  System {
-	    Name		    "M1:SYS-SUBSYS_CHANNEL_NAME"
-	    Location		    [298, 120, 493, 202]
-	    Open		    on
-	    ModelBrowserVisibility  off
-	    ModelBrowserWidth	    200
-	    ScreenColor		    "white"
-	    PaperOrientation	    "landscape"
-	    PaperPositionMode	    "auto"
-	    PaperType		    "usletter"
-	    PaperUnits		    "inches"
-	    TiledPaperMargins	    [0.500000, 0.500000, 0.500000, 0.500000]
-	    TiledPageScale	    1
-	    ShowPageBoundaries	    off
-	    ZoomFactor		    "100"
-	    Block {
-	      BlockType		      Ground
-	      Name		      "Ground"
-	      Position		      [70, 25, 90, 45]
-	    }
-	    Block {
-	      BlockType		      Outport
-	      Name		      "Out1"
-	      Position		      [130, 28, 160, 42]
-	      IconDisplay	      "Port number"
-	      BusOutputAsStruct	      off
-	    }
-	    Line {
-	      SrcBlock		      "Ground"
-	      SrcPort		      1
-	      DstBlock		      "Out1"
-	      DstPort		      1
-	    }
-	  }
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
 	}
       }
     }
@@ -683,7 +651,7 @@ Library {
       System {
 	Name			"IO_PARTS"
 	Location		[580, 74, 1020, 738]
-	Open			on
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1219,7 +1187,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[333, 426, 603, 825]
+	Location		[333, 339, 603, 738]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200

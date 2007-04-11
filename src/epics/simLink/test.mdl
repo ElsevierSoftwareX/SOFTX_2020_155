@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.149"
+    ComputedModelVersion    "1.150"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Apr 10 16:39:12 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:149>"
+  LastModifiedDate	  "Tue Apr 10 17:04:30 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:150>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -613,7 +613,7 @@ Model {
   }
   System {
     Name		    "test"
-    Location		    [19, 74, 706, 715]
+    Location		    [104, 96, 791, 737]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -693,23 +693,20 @@ Model {
     }
     Block {
       BlockType		      Reference
-      Name		      "M1:SYS-SUBSYS_CHANNEL_NAME"
+      Name		      "M1:SYS-FOO_BAR"
       Tag		      "cdsEzCaRead"
       Description	      "Purpose:                                       "
-"                                       \nUsed to input a signal from an Epics"
-" channel.                                         \n                         "
-"                                                             \nOperation:    "
-"                                                                        \nRea"
-"ds an Epics channel using ezcaread() function and sends it out.              "
-"      \n                                                                     "
-"                 \nUsage: Give the name of the EPICS channel to read. For exa"
-"mple: M1:SUS-Q1_L1POS_INMON."
+"                \nUsed to input an Epics signal.                             "
+"    \n                                                               \nOperat"
+"ion:                                                     \nUsing ezcaread() f"
+"unction to get Epics input from a remote IOC.\n                              "
+"                                 \nUsage: Give the name of the EPICS channel "
+"to be read.          "
       Ports		      [0, 1]
-      Position		      [195, 421, 245, 449]
-      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
-      DropShadow	      on
+      Position		      [140, 365, 180, 425]
+      BackgroundColor	      "[0.792741, 0.563703, 0.940000]"
       AttributesFormatString  "%<Tag>"
-      SourceBlock	      "CDS_PARTS/EpicsParts/M1:SYS-SUBSYS_CHANNEL_NAME"
+      SourceBlock	      "cdsEzCaRead/cdsEzCaRead"
       SourceType	      "SubSystem"
       ShowPortLabels	      on
       SystemSampleTime	      "-1"
@@ -1594,9 +1591,9 @@ Model {
       DstPort		      3
     }
     Line {
-      SrcBlock		      "M1:SYS-SUBSYS_CHANNEL_NAME"
+      SrcBlock		      "M1:SYS-FOO_BAR"
       SrcPort		      1
-      Points		      [70, 0]
+      Points		      [135, 0]
       DstBlock		      "Sum"
       DstPort		      2
     }
