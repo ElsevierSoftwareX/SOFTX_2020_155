@@ -109,7 +109,7 @@ int myriNetInit(int fbId)
 #endif
   gm_strncpy (receiver_nodename, "fb", sizeof (receiver_nodename) - 1);
 
-  /* Try upto for GM ports */
+  /* Try upto four GM ports */
   for (i = 0; i < 4; i++) {
     main_status = gm_open (&netPort, my_board_num,
                          (local_gm_port = GM_PORT_NUM_SEND + i),
