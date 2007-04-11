@@ -245,6 +245,9 @@ while (<IN>) {
 	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${temp}\")\n";
 	$vardb .= "{\n";
 	$vardb .= "}\n";
+    } elsif (substr($_,0,11) eq "EZ_CA_WRITE") {
+	($junk, $v_name, $v_var) = split(/\s+/, $_);
+	$vupdate .= "%% ezcaPut(\"$v_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
     } elsif (substr($_,0,10) eq "EZ_CA_READ") {
 	($junk, $v_name, $v_var) = split(/\s+/, $_);
 	$vupdate .= "%%ezcaGet(\"$v_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
