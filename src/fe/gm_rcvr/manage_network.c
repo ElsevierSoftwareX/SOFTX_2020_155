@@ -12,8 +12,6 @@ void *manage_network(void *foo)
 {
   int i;
 
-  /* Open Myrinet */
-
   /* Receive messages */
   for (i = 0;!stop_net_manager && i < 100; i++) {
     //block, waiting on receive event ie interrupt
