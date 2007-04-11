@@ -34,8 +34,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Apr 10 17:04:09 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:83>"
+  LastModifiedDate	  "Tue Apr 10 20:02:44 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:84>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -352,7 +352,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"EpicsParts"
-	Location		[661, 172, 871, 575]
+	Location		[782, 96, 992, 499]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -476,13 +476,39 @@ Library {
 "        \n                                                               \nOp"
 "eration:                                                     \nUsing ezcaread"
 "() function to get Epics input from a remote IOC.\n                          "
-"                                     \nUsage: Give the name of the EPICS chan"
-"nel to be read.          "
+"                                     \nUsage:                                "
+"                         \nGive the name of the EPICS channel to be read.    "
+"             "
 	  Ports			  [0, 1]
 	  Position		  [90, 225, 130, 285]
 	  BackgroundColor	  "[0.792741, 0.563703, 0.940000]"
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsEzCaRead/cdsEzCaRead"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "cdsEzCaWrite"
+	  Tag			  "cdsEzCaWrite"
+	  Description		  "Purpose:                                   "
+" \nOutput Epics channel.                       \n                            "
+"                \nOperation:                                  \nUsing ezcawri"
+"te() output an Epics channel.  \n                                            "
+"\nUsage:                                      \nGive the name of the EPICS ch"
+"annel to write."
+	  Ports			  [1]
+	  Position		  [90, 320, 130, 380]
+	  BackgroundColor	  "[0.698999, 0.245793, 1.000000]"
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsEzCaWrite/cdsEzCaWrite"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  on
 	  SystemSampleTime	  "-1"
@@ -675,9 +701,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsRfmIO/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -748,9 +774,9 @@ Library {
 	  AttributesFormatString  "%<Description>"
 	  SourceBlock		  "dac/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -770,9 +796,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsDio/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -792,9 +818,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsIPC/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"

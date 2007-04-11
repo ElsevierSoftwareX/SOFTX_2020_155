@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.150"
+    ComputedModelVersion    "1.153"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Apr 10 17:04:30 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:150>"
+  LastModifiedDate	  "Tue Apr 10 23:43:52 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:153>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -567,19 +567,6 @@ Model {
       MinMaxOverflowLogging   "UseLocalSettings"
     }
     Block {
-      BlockType		      Sum
-      IconShape		      "rectangular"
-      Inputs		      "++"
-      InputSameDT	      on
-      OutDataTypeMode	      "Same as first input"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
-      LockScale		      off
-      RndMeth		      "Floor"
-      SaturateOnIntegerOverflow	on
-      SampleTime	      "-1"
-    }
-    Block {
       BlockType		      Switch
       Criteria		      "u2 >= Threshold"
       Threshold		      "0"
@@ -613,7 +600,7 @@ Model {
   }
   System {
     Name		    "test"
-    Location		    [104, 96, 791, 737]
+    Location		    [107, 95, 794, 736]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -627,26 +614,6 @@ Model {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    Block {
-      BlockType		      Reference
-      Name		      "0x10000"
-      Tag		      "cdsRfmIO"
-      Description	      "VMIC5565 Reflective Memory read/write"
-      Ports		      [1, 1]
-      Position		      [85, 15, 125, 75]
-      BackgroundColor	      "[0.720570, 0.267067, 1.000000]"
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsRfmIO/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      on
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
     Block {
       BlockType		      BusCreator
       Name		      "Bus\nCreator"
@@ -683,17 +650,37 @@ Model {
     }
     Block {
       BlockType		      Ground
-      Name		      "Ground"
-      Position		      [15, 35, 35, 55]
-    }
-    Block {
-      BlockType		      Ground
       Name		      "Ground1"
       Position		      [15, 125, 35, 145]
     }
     Block {
       BlockType		      Reference
-      Name		      "M1:SYS-FOO_BAR"
+      Name		      "M1:TEST-PD1_GAIN"
+      Tag		      "cdsEzCaWrite"
+      Description	      "Purpose:                                    \nO"
+"utput Epics channel.                       \n                                "
+"            \nOperation:                                  \nUsing ezcawrite()"
+" output an Epics channel.  \n                                            \nUs"
+"age:                                      \nGive the name of the EPICS channe"
+"l to write."
+      Ports		      [1]
+      Position		      [600, 15, 640, 75]
+      BackgroundColor	      "[0.698999, 0.245793, 1.000000]"
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEzCaWrite/cdsEzCaWrite"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "M1:TEST-PD1_OUTPUT"
       Tag		      "cdsEzCaRead"
       Description	      "Purpose:                                       "
 "                \nUsed to input an Epics signal.                             "
@@ -703,7 +690,7 @@ Model {
 "                                 \nUsage: Give the name of the EPICS channel "
 "to be read.          "
       Ports		      [0, 1]
-      Position		      [140, 365, 180, 425]
+      Position		      [55, 15, 95, 75]
       BackgroundColor	      "[0.792741, 0.563703, 0.940000]"
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsEzCaRead/cdsEzCaRead"
@@ -915,9 +902,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -965,9 +952,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -1028,9 +1015,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -1455,18 +1442,6 @@ Model {
       RTWMemSecDataParameters "Inherit from model"
     }
     Block {
-      BlockType		      Sum
-      Name		      "Sum"
-      Ports		      [2, 1]
-      Position		      [310, 335, 330, 355]
-      ShowName		      off
-      IconShape		      "round"
-      Inputs		      "|++"
-      InputSameDT	      off
-      OutDataTypeMode	      "Inherit via internal rule"
-      SaturateOnIntegerOverflow	off
-    }
-    Block {
       BlockType		      Terminator
       Name		      "Terminator"
       Position		      [265, 500, 285, 520]
@@ -1509,23 +1484,18 @@ Model {
       Points		      [1045, 150; 15, 0]
     }
     Line {
-      SrcBlock		      "Ground"
-      SrcPort		      1
-      DstBlock		      "0x10000"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "0x10000"
-      SrcPort		      1
-      DstBlock		      "PD1"
-      DstPort		      1
-    }
-    Line {
       SrcBlock		      "PD1"
       SrcPort		      1
-      Points		      [60, 0; 0, 110]
-      DstBlock		      "PD1_X"
-      DstPort		      1
+      Points		      [55, 0]
+      Branch {
+	Points			[5, 0; 0, 110]
+	DstBlock		"PD1_X"
+	DstPort			1
+      }
+      Branch {
+	DstBlock		"M1:TEST-PD1_GAIN"
+	DstPort			1
+      }
     }
     Line {
       SrcBlock		      "PD1_X"
@@ -1580,22 +1550,15 @@ Model {
     Line {
       SrcBlock		      "Operator"
       SrcPort		      1
-      DstBlock		      "Sum"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "Sum"
-      SrcPort		      1
-      Points		      [15, 0; 0, 40]
+      Points		      [100, 0]
       DstBlock		      "PD1_X"
       DstPort		      3
     }
     Line {
-      SrcBlock		      "M1:SYS-FOO_BAR"
+      SrcBlock		      "M1:TEST-PD1_OUTPUT"
       SrcPort		      1
-      Points		      [135, 0]
-      DstBlock		      "Sum"
-      DstPort		      2
+      DstBlock		      "PD1"
+      DstPort		      1
     }
   }
 }
