@@ -24,7 +24,9 @@ int main(int argc, char **argv)
 	  return -1;
 	}
 
-        myriNetInit(-1);
+	/* Open Myrinet */
+        if (myriNetInit(-1) != 1) return 1;
+
         /* create the thread */
 	rtl_pthread_t thread;
         pthread_create(&thread, NULL, manage_network, 0);
