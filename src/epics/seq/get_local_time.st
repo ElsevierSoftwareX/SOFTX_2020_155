@@ -22,6 +22,7 @@ state run {
   when(delay(1)){
 %% time_t lt = time(0);
 %% strcpy(localtimestring, ctime(&lt));
+%% localtimestring[strlen(localtimestring) - 1] = 0; /* Delete newline character */
    pvPut(localtimestring);
   }state run
 }
