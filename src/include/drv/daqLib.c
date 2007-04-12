@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.25 2007/04/06 17:19:35 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.26 2007/04/12 23:16:45 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -670,7 +670,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		tpx = 2;
 		tpAdd = sysRate / 4;
 	}
-	for(ii=0;ii<DCU_MAX_CHANNELS;ii++)
+	for(ii=0; ii<DCU_MAX_CHANNELS && validTp < GM_DAQ_MAX_TPS; ii++)
 	{
 		/* Get TP number from shared memory */
 		testVal = gdsPtr->tp[tpx][0][ii];
@@ -740,7 +740,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	if(sysRate == DAQ_2K_SAMPLE_SIZE)
 		tpx = 1;
 	else tpx = 0;
-	for(ii=0;ii<DCU_MAX_CHANNELS;ii++)
+	for(ii=0; ii<DCU_MAX_CHANNELS && validTp < GM_DAQ_MAX_TPS; ii++)
 	{
 		/* Get EXC number from shared memory */
 		testVal = gdsPtr->tp[tpx][0][ii];
