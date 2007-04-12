@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.13 2007/04/06 16:17:31 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.14 2007/04/12 21:03:17 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -575,6 +575,7 @@ inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_C
   int ii,jj,kk;
 
 #ifdef FIR_FILTERS
+  int l;
   for(jj = 0; jj < MAX_FIR_MODULES; jj++)
 	for (kk = 0; kk < FILTERS; kk++) 
 	     for (l = 0; l < MAX_FIR_COEFFS; l++)
