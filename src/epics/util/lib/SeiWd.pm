@@ -3,6 +3,7 @@ use Exporter;
 @ISA = ('Exporter');
 
 sub partType {
+	$::useWd++;
 	return SeiWd;
 }
 
@@ -10,6 +11,9 @@ sub partType {
 # Current part number is passed as first argument
 sub printHeaderStruct {
         my ($i) = @_;
+	$::useWdName[$::useWdCounter] = $::xpartName[$i];
+	$::useWdName[$::useWdCounter] =~ s/^([A-Z]*)_.*$/\1/g;
+	$::useWdCounter++;
         print ::OUTH "\tSEI_WATCHDOG $::xpartName[$i];\n";
 }
 

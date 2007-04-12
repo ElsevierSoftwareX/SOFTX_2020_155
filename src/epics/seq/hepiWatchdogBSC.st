@@ -106,6 +106,7 @@ state init
 {
   when() {
 	/* Init pointer to HEPI EPICS in RFM. */
+	findSharedMemory(macValueGet("sys"));
 	%%  pRfm = (RFM_FE_COMMS *)(findRfmCard(0));
 	%%  pEpics = (CDS_EPICS *)(&pRfm->epicsSpace);
 

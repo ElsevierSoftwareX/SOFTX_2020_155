@@ -3,7 +3,6 @@ use Exporter;
 @ISA = ('Exporter');
 
 sub partType {
-	$::useWd = 1;
 	return RampSwitch;
 }
 
