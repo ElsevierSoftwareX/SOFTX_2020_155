@@ -1776,7 +1776,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 		}
 		print OUT $calcExp;
 	}
-	if ($partType[$mm] eq "DEMUX") {
+	if ($partType[$mm] eq "DEMUX" && $::partInputType[$mm][0] ne "FunctionCall") {
 		print OUT "// DEMUX\n";
 		my $calcExp;
 		for (0 .. $partOutCnt[$mm]  - 1) {
