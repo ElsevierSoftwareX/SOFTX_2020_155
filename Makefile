@@ -40,6 +40,7 @@ install-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-,,$@); \
 	upper_system=`echo $$system | tr a-z A-Z`;\
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
+	if test $${site}no == no; then echo Please make $$system first; exit 1; fi;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
@@ -66,6 +67,7 @@ install-daq-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-daq-,,$@); \
 	upper_system=`echo $$system | tr a-z A-Z`;\
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
+	if test $${site}no == no; then echo Please make $$system first; exit 1; fi;\
 	upper_site=`echo $$site | tr a-z A-Z`;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
@@ -95,6 +97,7 @@ install-screens-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-screens-,,$@); \
 	upper_system=`echo $$system | tr a-z A-Z`;\
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
+	if test $${site}no == no; then echo Please make $$system first; exit 1; fi;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
@@ -109,6 +112,7 @@ reinstall-% :: src/epics/simLink/%.mdl
 	@system=$(subst reinstall-,,$@); \
 	upper_system=`echo $$system | tr a-z A-Z`;\
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
+	if test $${site}no == no; then echo Please make $$system first; exit 1; fi;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
@@ -127,10 +131,27 @@ reinstall-% :: src/epics/simLink/%.mdl
 	echo 'sudo ' /cvs/cds/$$site/target/$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${system}/startup.cmd;\
 	/bin/chmod +x /cvs/cds/$$site/target/$${system}/startup.cmd
 
+reinstall-fe-% :: src/epics/simLink/%.mdl
+	@system=$(subst reinstall-fe-,,$@); \
+	upper_system=`echo $$system | tr a-z A-Z`;\
+	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
+	if test $${site}no == no; then echo Please make $$system first; exit 1; fi;\
+	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
+	cur_date=`date +%y%m%d_%H%M%S`;\
+	/bin/mkdir -p /cvs/cds/$$site/chans;\
+	echo Installing Front-end Code Only system=$$system site=$$site ifo=$$ifo,$$lower_ifo;\
+	/bin/mkdir -p /cvs/cds/$$site/target/$${system};\
+	/bin/mv -f /cvs/cds/$$site/target/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system}/$${system}fe_$${cur_date}.rtl || exit 3;\
+	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system};\
+	echo 'sudo ' /cvs/cds/$$site/target/$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${system}/startup.cmd;\
+	/bin/chmod +x /cvs/cds/$$site/target/$${system}/startup.cmd
+
 install-% :: config/Makefile.%epics
 	@system=$(subst install-,,$@); \
 	site=`grep SITE $< | sed 's/.*SITE\s*=\s*\([a-z]*\).*/\1/g'`; \
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	if test $${ifo}no == no; then echo Please make $$system first; exit 1; fi;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	echo Installing /cvs/cds/$$site/target/$${system}epics;\
