@@ -61,7 +61,19 @@ install-% :: src/epics/simLink/%.mdl
 	if test -e /cvs/cds/$$site/target/$${system}/$${system}fe.rtl; then /bin/mv -f /cvs/cds/$$site/target/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system}/$${system}fe_$${cur_date}.rtl || exit 4; fi;\
 	/bin/cp -p src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system};\
 	echo 'sudo ' /cvs/cds/$$site/target/$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${system}/startup.cmd;\
-	/bin/chmod +x /cvs/cds/$$site/target/$${system}/startup.cmd
+	/bin/chmod +x /cvs/cds/$$site/target/$${system}/startup.cmd;\
+	echo Installing start and stop scripts;\
+	/bin/mkdir -p /cvs/cds/$$site/scripts;\
+	echo '#!/bin/bash' > /cvs/cds/$$site/scripts/start$${system};\
+	/bin/chmod +x /cvs/cds/$$site/scripts/start$${system};\
+	echo '#!/bin/bash' > /cvs/cds/$$site/scripts/kill$${system};\
+	/bin/chmod +x /cvs/cds/$$site/scripts/kill$${system};\
+	echo /cvs/cds/$$site/scripts/kill$${system} >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'sudo killall ' $${system}epics $${system}fe.rtl awgtpman >> /cvs/cds/$$site/scripts/kill$${system};\
+	echo '(cd /cvs/cds/'$$site'/target/'$${system}epics' && ./startup'$${ifo}')' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo /cvs/cds/$$site/target/$${system}/startup.cmd >> /cvs/cds/$$site/scripts/start$${system};\
+	echo '(cd /cvs/cds/'$$site'/target/gds && ./startup_'$${system}'.cmd)' >> /cvs/cds/$$site/scripts/start$${system};\
+	
 
 install-daq-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-daq-,,$@); \
@@ -147,6 +159,7 @@ reinstall-fe-% :: src/epics/simLink/%.mdl
 	echo 'sudo ' /cvs/cds/$$site/target/$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${system}/startup.cmd;\
 	/bin/chmod +x /cvs/cds/$$site/target/$${system}/startup.cmd
 
+# This rule is for epics-only systems, ie. no front-end
 install-% :: config/Makefile.%epics
 	@system=$(subst install-,,$@); \
 	site=`grep SITE $< | sed 's/.*SITE\s*=\s*\([a-z]*\).*/\1/g'`; \
