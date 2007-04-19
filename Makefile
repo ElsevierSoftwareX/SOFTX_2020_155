@@ -74,7 +74,7 @@ install-daq-% :: src/epics/simLink/%.mdl
 	gds_file_node=`expr $${gds_node} + 1`; \
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
-	echo Installing GDS node $${gds_file_node} conifguration file ;\
+	echo Installing GDS node $${gds_file_node} configuration file ;\
 	echo /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par ;\
 	/bin/mkdir -p  /cvs/cds/$${site}/target/gds/param/ ;\
 	/bin/mkdir -p  /cvs/cds/$${site}/target/gds/param/archive ;\
