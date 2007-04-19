@@ -26,6 +26,8 @@
 	#include "tes.h"
 #elif defined(MCE_CODE)
 	#include "mce.h"
+#elif defined(TPT_CODE)
+	#include "tpt.h"
 #else
 	#error
 #endif

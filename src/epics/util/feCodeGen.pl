@@ -1473,7 +1473,7 @@ print EPICS "\n\n";
 print EPICS "systems \U$systemName\-\n";
 $gdsXstart = ($dcuId - 5) * 1250;
 $gdsTstart = $gdsXstart + 10000;
-print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site\n";
+print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site " . get_freq() . "\n";
 print EPICS "\n\n";
 
 # Start process of writing .c file.

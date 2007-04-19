@@ -64,9 +64,11 @@ while (<IN>) {
     } elsif (substr($_,0,10) eq "gds_config") {
 	$gds_rmid = 0;
 	$site = "";
-	($junk, $gds_excnum_base, $gds_tpnum_base, $gds_exc_sys_inc, $gds_tp_sys_inc, $gds_rmid, $site) = split(/\s+/, $_);
+	($junk, $gds_excnum_base, $gds_tpnum_base, $gds_exc_sys_inc, $gds_tp_sys_inc, $gds_rmid, $site, $gds_datarate) = split(/\s+/, $_);
 	$gds_specified = 1;
-	$gds_datarate = $gds_excnum_base < 10000? 16384: 2048;
+	if ($gds_datarate eq undef) {
+	  $gds_datarate = $gds_excnum_base < 10000? 16384: 2048;
+	}
 	$gds_ifo = 1;
 	if ($gds_rmid > 0) {
 	  $gds_rmid--;

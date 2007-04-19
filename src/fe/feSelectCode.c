@@ -28,6 +28,8 @@
 	#include "tes/tes.c"
 #elif defined(MCE_CODE)
 	#include "mce/mce.c"
+#elif defined(TPT_CODE)
+	#include "tpt/tpt.c"
 #else
 	#error
 #endif
