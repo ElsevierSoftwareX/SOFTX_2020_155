@@ -116,7 +116,11 @@ install-screens-% :: src/epics/simLink/%.mdl
 	echo Installing Epics screens;\
 	if test -e /cvs/cds/$$site/medm/$${lower_ifo}/$${system}; then /bin/mv -f /cvs/cds/$$site/medm/$${lower_ifo}/$${system} /cvs/cds/$$site/medm/$${lower_ifo}/$${system}_$${cur_date} || exit 1; fi;\
 	/bin/mkdir -p /cvs/cds/$$site/medm/$${lower_ifo};\
-	/bin/cp -pr build/$${system}epics/medm /cvs/cds/$$site/medm/$${lower_ifo}/$${system}
+	/bin/cp -pr build/$${system}epics/medm /cvs/cds/$$site/medm/$${lower_ifo}/$${system};\
+	for i in `ls /cvs/cds/$$site/medm/$${lower_ifo}/$${system}_$${cur_date}`; do \
+          cp /cvs/cds/$$site/medm/$${lower_ifo}/$${system}_$${cur_date}/$$i  /cvs/cds/$$site/medm/$${lower_ifo}/$${system}; \
+        done
+
 
 # Lighter installation rule, do not reinstall screens and config files
 # Install Epics and FE targets only
