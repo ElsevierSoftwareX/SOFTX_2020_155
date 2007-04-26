@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.170"
+    ComputedModelVersion    "1.180"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Mon Feb  5 13:54:02 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:170>"
+  LastModifiedDate	  "Wed Apr 25 17:24:36 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:180>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -899,6 +899,22 @@ Model {
       BlockType		      Reference
     }
     Block {
+      BlockType		      RelationalOperator
+      Operator		      ">="
+      InputSameDT	      on
+      LogicOutDataTypeMode    "Logical (see Configuration Parameters: Optimiza"
+"tion)"
+      LogicDataType	      "uint(8)"
+      ZeroCross		      on
+      SampleTime	      "-1"
+    }
+    Block {
+      BlockType		      "S-Function"
+      FunctionName	      "system"
+      SFunctionModules	      "''"
+      PortCounts	      "[]"
+    }
+    Block {
       BlockType		      SubSystem
       ShowPortLabels	      on
       Permissions	      "ReadWrite"
@@ -930,6 +946,17 @@ Model {
       SampleTime	      "-1"
     }
     Block {
+      BlockType		      Switch
+      Criteria		      "u2 >= Threshold"
+      Threshold		      "0"
+      InputSameDT	      on
+      OutDataTypeMode	      "Inherit via internal rule"
+      RndMeth		      "Floor"
+      SaturateOnIntegerOverflow	on
+      ZeroCross		      on
+      SampleTime	      "-1"
+    }
+    Block {
       BlockType		      Terminator
     }
   }
@@ -952,7 +979,7 @@ Model {
   }
   System {
     Name		    "ass"
-    Location		    [162, 122, 1186, 789]
+    Location		    [161, 209, 1185, 876]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -1154,6 +1181,33 @@ Model {
       }
     }
     Block {
+      BlockType		      Reference
+      Name		      "C1:LSC-LA_STATE_INT_00"
+      Tag		      "cdsEzCaRead"
+      Description	      "Purpose:                                       "
+"                \nUsed to input an Epics signal.                             "
+"    \n                                                               \nOperat"
+"ion:                                                     \nUsing ezcaread() f"
+"unction to get Epics input from a remote IOC.\n                              "
+"                                 \nUsage:                                    "
+"                     \nGive the name of the EPICS channel to be read.        "
+"         "
+      Ports		      [0, 1]
+      Position		      [115, 580, 155, 640]
+      BackgroundColor	      "[0.792741, 0.563703, 0.940000]"
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEzCaRead/cdsEzCaRead"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
       BlockType		      Ground
       Name		      "Ground"
       Position		      [15, 35, 35, 55]
@@ -1192,6 +1246,44 @@ Model {
       BlockType		      Ground
       Name		      "Ground7"
       Position		      [15, 525, 35, 545]
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "MASK"
+      Tag		      "cdsEpicsInput"
+      Description	      "Purpose:                                       "
+"                                       \nCreate an EPICS input channel connec"
+"tion to the FE realtime controls.                 \n                         "
+"                                                             \nOperation:    "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is floating point with a precision "
+"of 3..\n                                                                     "
+"                 \nUsage:                                                    "
+"                            \nName the part with the desired EPICS channel na"
+"me.                                    "
+      Ports		      [1, 1]
+      Position		      [215, 619, 265, 641]
+      BackgroundColor	      "green"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsIn/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      RelationalOperator
+      Name		      "Operator"
+      Position		      [420, 617, 450, 648]
+      Operator		      "=="
+      InputSameDT	      off
+      LogicOutDataTypeMode    "Boolean"
     }
     Block {
       BlockType		      Reference
@@ -1556,16 +1648,16 @@ Model {
     Block {
       BlockType		      SubSystem
       Name		      "PIT"
-      Ports		      [8]
-      Position		      [355, 21, 475, 234]
+      Ports		      [9]
+      Position		      [455, 28, 575, 242]
       MinAlgLoopOccurrences   off
       RTWSystemCode	      "Auto"
       FunctionWithSeparateData off
       MaskHideContents	      off
       System {
 	Name			"PIT"
-	Location		[111, 101, 1240, 930]
-	Open			on
+	Location		[110, 98, 1239, 927]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1630,6 +1722,13 @@ Model {
 	  Name			  "In8"
 	  Position		  [15, 1883, 45, 1897]
 	  Port			  "8"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In9"
+	  Position		  [25, 2103, 55, 2117]
+	  Port			  "9"
 	  IconDisplay		  "Port number"
 	}
 	Block {
@@ -1864,7 +1963,7 @@ Model {
 	  Description		  "Any size matrix. Inputs and outputs must be"
 " connected using Mux and Demux parts."
 	  Ports			  [1, 1]
-	  Position		  [1250, 1165, 1290, 1225]
+	  Position		  [1270, 1165, 1310, 1225]
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -1878,6 +1977,69 @@ Model {
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice"
+	  Position		  [1075, 855, 1105, 885]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice1"
+	  Position		  [1075, 945, 1105, 975]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice2"
+	  Position		  [1075, 1025, 1105, 1055]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice3"
+	  Position		  [1080, 1085, 1110, 1115]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice4"
+	  Position		  [1085, 1155, 1115, 1185]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice5"
+	  Position		  [1085, 1225, 1115, 1255]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice6"
+	  Position		  [1085, 1295, 1115, 1325]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice7"
+	  Position		  [1085, 1360, 1115, 1390]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice8"
+	  Position		  [1085, 1435, 1115, 1465]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1909,7 +2071,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 943, 1180, 967]
+	  Position		  [1140, 943, 1210, 967]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -1954,7 +2116,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1003, 1180, 1027]
+	  Position		  [1140, 1003, 1210, 1027]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -1999,7 +2161,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1063, 1180, 1087]
+	  Position		  [1140, 1063, 1210, 1087]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -2044,7 +2206,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1123, 1180, 1147]
+	  Position		  [1140, 1123, 1210, 1147]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -2089,7 +2251,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1183, 1180, 1207]
+	  Position		  [1140, 1183, 1210, 1207]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -2134,7 +2296,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1243, 1180, 1267]
+	  Position		  [1140, 1243, 1210, 1267]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -2179,7 +2341,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1303, 1180, 1327]
+	  Position		  [1140, 1303, 1210, 1327]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -2224,7 +2386,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1363, 1180, 1387]
+	  Position		  [1140, 1363, 1210, 1387]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -2269,7 +2431,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1423, 1180, 1447]
+	  Position		  [1140, 1423, 1210, 1447]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -2288,7 +2450,7 @@ Model {
 	  BlockType		  Demux
 	  Name			  "Demux"
 	  Ports			  [1, 9]
-	  Position		  [1075, 930, 1085, 1460]
+	  Position		  [990, 930, 1000, 1460]
 	  BackgroundColor	  "black"
 	  ShowName		  off
 	  Outputs		  "9"
@@ -2460,6 +2622,11 @@ Model {
 	}
 	Block {
 	  BlockType		  Ground
+	  Name			  "Ground"
+	  Position		  [1045, 890, 1065, 910]
+	}
+	Block {
+	  BlockType		  Ground
 	  Name			  "Ground1"
 	  Position		  [25, 315, 45, 335]
 	}
@@ -2467,6 +2634,46 @@ Model {
 	  BlockType		  Ground
 	  Name			  "Ground10"
 	  Position		  [85, 2050, 105, 2070]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground11"
+	  Position		  [1045, 1060, 1065, 1080]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground12"
+	  Position		  [1050, 1120, 1070, 1140]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground13"
+	  Position		  [1055, 1190, 1075, 1210]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground14"
+	  Position		  [1055, 1260, 1075, 1280]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground15"
+	  Position		  [1055, 1330, 1075, 1350]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground16"
+	  Position		  [1055, 1395, 1075, 1415]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground17"
+	  Position		  [1055, 1470, 1075, 1490]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground2"
+	  Position		  [1040, 970, 1060, 990]
 	}
 	Block {
 	  BlockType		  Ground
@@ -2606,7 +2813,7 @@ Model {
 	  BlockType		  Mux
 	  Name			  "Mux1"
 	  Ports			  [9, 1]
-	  Position		  [1205, 930, 1215, 1460]
+	  Position		  [1235, 930, 1245, 1460]
 	  ShowName		  off
 	  Inputs		  "9"
 	  DisplayOption		  "bar"
@@ -3057,9 +3264,9 @@ Model {
 		  AttributesFormatString  "%<Tag>"
 		  SourceBlock		  "cdsFilt/Subsystem"
 		  SourceType		  "SubSystem"
-		  ShowPortLabels	  on
+		  ShowPortLabels	  "on"
 		  SystemSampleTime	  "-1"
-		  FunctionWithSeparateData off
+		  FunctionWithSeparateData "off"
 		  RTWMemSecFuncInitTerm	  "Inherit from model"
 		  RTWMemSecFuncExecute	  "Inherit from model"
 		  RTWMemSecDataConstants  "Inherit from model"
@@ -3078,9 +3285,9 @@ Model {
 		  AttributesFormatString  "%<Tag>"
 		  SourceBlock		  "cdsPhase/Subsystem"
 		  SourceType		  "SubSystem"
-		  ShowPortLabels	  on
+		  ShowPortLabels	  "on"
 		  SystemSampleTime	  "-1"
-		  FunctionWithSeparateData off
+		  FunctionWithSeparateData "off"
 		  RTWMemSecFuncInitTerm	  "Inherit from model"
 		  RTWMemSecFuncExecute	  "Inherit from model"
 		  RTWMemSecDataConstants  "Inherit from model"
@@ -3142,9 +3349,9 @@ Model {
 		  AttributesFormatString  "%<Tag>"
 		  SourceBlock		  "cdsFilt/Subsystem"
 		  SourceType		  "SubSystem"
-		  ShowPortLabels	  on
+		  ShowPortLabels	  "on"
 		  SystemSampleTime	  "-1"
-		  FunctionWithSeparateData off
+		  FunctionWithSeparateData "off"
 		  RTWMemSecFuncInitTerm	  "Inherit from model"
 		  RTWMemSecFuncExecute	  "Inherit from model"
 		  RTWMemSecDataConstants  "Inherit from model"
@@ -25232,7 +25439,7 @@ Model {
 	  Description		  "Any size matrix. Inputs and outputs must be"
 " connected using Mux and Demux parts."
 	  Ports			  [1, 1]
-	  Position		  [995, 1165, 1035, 1225]
+	  Position		  [925, 1165, 965, 1225]
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -25569,66 +25776,6 @@ Model {
 	  SrcBlock		  "Mux"
 	  SrcPort		  1
 	  DstBlock		  "SENMTRX"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "SENMTRX"
-	  SrcPort		  1
-	  DstBlock		  "Demux"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  1
-	  DstBlock		  "DOF1"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  2
-	  DstBlock		  "DOF2"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  3
-	  DstBlock		  "DOF3"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  4
-	  DstBlock		  "DOF4"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  5
-	  DstBlock		  "DOF5"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  6
-	  DstBlock		  "DOF6"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  7
-	  DstBlock		  "DOF7"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  8
-	  DstBlock		  "DOF8"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  9
-	  DstBlock		  "DOF9"
 	  DstPort		  1
 	}
 	Line {
@@ -27799,6 +27946,267 @@ Model {
 	  DstBlock		  "0x11E220"
 	  DstPort		  1
 	}
+	Line {
+	  SrcBlock		  "Ground"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice"
+	  DstPort		  3
+	}
+	Line {
+	  Labels		  [6, 0]
+	  SrcBlock		  "In9"
+	  SrcPort		  1
+	  Points		  [75, 0; 0, 5; 830, 0; 0, -580; 55, 0; 0, -85]
+	  Branch {
+	    Points		    [0, -60]
+	    Branch {
+	      Points		      [0, -80]
+	      Branch {
+		Points			[0, -75]
+		Branch {
+		  Points		  [0, -65]
+		  Branch {
+		    Points		    [0, -70]
+		    Branch {
+		    Points		    [0, -65]
+		    Branch {
+		    Points		    [0, -75]
+		    Branch {
+		    Points		    [0, -90]
+		    DstBlock		    "Choice"
+		    DstPort		    2
+		    }
+		    Branch {
+		    DstBlock		    "Choice1"
+		    DstPort		    2
+		    }
+		    }
+		    Branch {
+		    Points		    [0, 5]
+		    DstBlock		    "Choice2"
+		    DstPort		    2
+		    }
+		    }
+		    Branch {
+		    DstBlock		    "Choice3"
+		    DstPort		    2
+		    }
+		  }
+		  Branch {
+		    DstBlock		    "Choice4"
+		    DstPort		    2
+		  }
+		}
+		Branch {
+		  Points		  [0, 5]
+		  DstBlock		  "Choice5"
+		  DstPort		  2
+		}
+	      }
+	      Branch {
+		DstBlock		"Choice6"
+		DstPort			2
+	      }
+	    }
+	    Branch {
+	      Points		      [0, -15]
+	      DstBlock		      "Choice7"
+	      DstPort		      2
+	    }
+	  }
+	  Branch {
+	    DstBlock		    "Choice8"
+	    DstPort		    2
+	  }
+	}
+	Line {
+	  SrcBlock		  "SENMTRX"
+	  SrcPort		  1
+	  DstBlock		  "Demux"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Ground2"
+	  SrcPort		  1
+	  Points		  [-5, 0]
+	  DstBlock		  "Choice1"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, -95]
+	  DstBlock		  "Choice"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice"
+	  SrcPort		  1
+	  Points		  [0, 85]
+	  DstBlock		  "DOF1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice1"
+	  SrcPort		  1
+	  Points		  [0, 55]
+	  DstBlock		  "DOF2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  2
+	  Points		  [55, 0]
+	  DstBlock		  "Choice1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Ground11"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice2"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground12"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice3"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground13"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice4"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground14"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice5"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground15"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice6"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground16"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice7"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  3
+	  Points		  [35, 0; 0, -45]
+	  DstBlock		  "Choice2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice2"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, 35]
+	  DstBlock		  "DOF3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice3"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, 35]
+	  DstBlock		  "DOF4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  4
+	  Points		  [30, 0; 0, -45]
+	  DstBlock		  "Choice3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice4"
+	  SrcPort		  1
+	  Points		  [0, 25]
+	  DstBlock		  "DOF5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  5
+	  Points		  [45, 0; 0, -35]
+	  DstBlock		  "Choice4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice5"
+	  SrcPort		  1
+	  Points		  [0, 15]
+	  DstBlock		  "DOF6"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  6
+	  Points		  [60, 0; 0, -25]
+	  DstBlock		  "Choice5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice6"
+	  SrcPort		  1
+	  Points		  [0, 5]
+	  DstBlock		  "DOF7"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  7
+	  Points		  [60, 0; 0, -15]
+	  DstBlock		  "Choice6"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Ground17"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice8"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Choice7"
+	  SrcPort		  1
+	  DstBlock		  "DOF8"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  8
+	  Points		  [30, 0; 0, -10]
+	  DstBlock		  "Choice7"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice8"
+	  SrcPort		  1
+	  Points		  [0, -15]
+	  DstBlock		  "DOF9"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  9
+	  Points		  [65, 0]
+	  DstBlock		  "Choice8"
+	  DstPort		  1
+	}
       }
     }
     Block {
@@ -27854,16 +28262,16 @@ Model {
     Block {
       BlockType		      SubSystem
       Name		      "YAW"
-      Ports		      [8]
-      Position		      [355, 341, 475, 554]
+      Ports		      [9]
+      Position		      [475, 353, 595, 567]
       MinAlgLoopOccurrences   off
       RTWSystemCode	      "Auto"
       FunctionWithSeparateData off
       MaskHideContents	      off
       System {
 	Name			"YAW"
-	Location		[84, 74, 1213, 903]
-	Open			on
+	Location		[110, 98, 1239, 927]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -27931,8 +28339,15 @@ Model {
 	  IconDisplay		  "Port number"
 	}
 	Block {
+	  BlockType		  Inport
+	  Name			  "In9"
+	  Position		  [25, 2103, 55, 2117]
+	  Port			  "9"
+	  IconDisplay		  "Port number"
+	}
+	Block {
 	  BlockType		  Reference
-	  Name			  "0x108014"
+	  Name			  "0x108010"
 	  Tag			  "cdsRfmIO"
 	  Description		  "VMIC5565 Reflective Memory read/write"
 	  Ports			  [1, 1]
@@ -27952,7 +28367,7 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
-	  Name			  "0x10A044"
+	  Name			  "0x10A040"
 	  Tag			  "cdsRfmIO"
 	  Description		  "VMIC5565 Reflective Memory read/write"
 	  Ports			  [1, 1]
@@ -27972,7 +28387,7 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
-	  Name			  "0x10C074"
+	  Name			  "0x10C070"
 	  Tag			  "cdsRfmIO"
 	  Description		  "VMIC5565 Reflective Memory read/write"
 	  Ports			  [1, 1]
@@ -27992,7 +28407,7 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
-	  Name			  "0x10E0A4"
+	  Name			  "0x10E0A0"
 	  Tag			  "cdsRfmIO"
 	  Description		  "VMIC5565 Reflective Memory read/write"
 	  Ports			  [1, 1]
@@ -28012,7 +28427,7 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
-	  Name			  "0x1100D4"
+	  Name			  "0x1100D0"
 	  Tag			  "cdsRfmIO"
 	  Description		  "VMIC5565 Reflective Memory read/write"
 	  Ports			  [1, 1]
@@ -28032,27 +28447,7 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
-	  Name			  "0x118194"
-	  Tag			  "cdsRfmIO"
-	  Description		  "VMIC5565 Reflective Memory read/write"
-	  Ports			  [1, 1]
-	  Position		  [2025, 1235, 2065, 1295]
-	  BackgroundColor	  "[0.720570, 0.267067, 1.000000]"
-	  AttributesFormatString  "%<Tag>"
-	  SourceBlock		  "cdsRfmIO/Subsystem"
-	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
-	}
-	Block {
-	  BlockType		  Reference
-	  Name			  "0x11A1C4"
+	  Name			  "0x114130"
 	  Tag			  "cdsRfmIO"
 	  Description		  "VMIC5565 Reflective Memory read/write"
 	  Ports			  [1, 1]
@@ -28072,7 +28467,27 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
-	  Name			  "0x11C1F4"
+	  Name			  "0x118190"
+	  Tag			  "cdsRfmIO"
+	  Description		  "VMIC5565 Reflective Memory read/write"
+	  Ports			  [1, 1]
+	  Position		  [2025, 1235, 2065, 1295]
+	  BackgroundColor	  "[0.720570, 0.267067, 1.000000]"
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsRfmIO/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "0x11C1F0"
 	  Tag			  "cdsRfmIO"
 	  Description		  "VMIC5565 Reflective Memory read/write"
 	  Ports			  [1, 1]
@@ -28092,7 +28507,7 @@ Model {
 	}
 	Block {
 	  BlockType		  Reference
-	  Name			  "0x11E224"
+	  Name			  "0x11E220"
 	  Tag			  "cdsRfmIO"
 	  Description		  "VMIC5565 Reflective Memory read/write"
 	  Ports			  [1, 1]
@@ -28162,7 +28577,7 @@ Model {
 	  Description		  "Any size matrix. Inputs and outputs must be"
 " connected using Mux and Demux parts."
 	  Ports			  [1, 1]
-	  Position		  [1250, 1165, 1290, 1225]
+	  Position		  [1270, 1165, 1310, 1225]
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -28176,6 +28591,69 @@ Model {
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice"
+	  Position		  [1075, 855, 1105, 885]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice1"
+	  Position		  [1075, 945, 1105, 975]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice2"
+	  Position		  [1075, 1025, 1105, 1055]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice3"
+	  Position		  [1080, 1085, 1110, 1115]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice4"
+	  Position		  [1085, 1155, 1115, 1185]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice5"
+	  Position		  [1085, 1225, 1115, 1255]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice6"
+	  Position		  [1085, 1295, 1115, 1325]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice7"
+	  Position		  [1085, 1360, 1115, 1390]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
+	}
+	Block {
+	  BlockType		  Switch
+	  Name			  "Choice8"
+	  Position		  [1085, 1435, 1115, 1465]
+	  InputSameDT		  off
+	  SaturateOnIntegerOverflow off
 	}
 	Block {
 	  BlockType		  Reference
@@ -28207,7 +28685,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 943, 1180, 967]
+	  Position		  [1140, 943, 1210, 967]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -28252,7 +28730,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1003, 1180, 1027]
+	  Position		  [1140, 1003, 1210, 1027]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -28297,7 +28775,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1063, 1180, 1087]
+	  Position		  [1140, 1063, 1210, 1087]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -28342,7 +28820,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1123, 1180, 1147]
+	  Position		  [1140, 1123, 1210, 1147]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -28387,7 +28865,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1183, 1180, 1207]
+	  Position		  [1140, 1183, 1210, 1207]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -28432,7 +28910,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1243, 1180, 1267]
+	  Position		  [1140, 1243, 1210, 1267]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -28477,7 +28955,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1303, 1180, 1327]
+	  Position		  [1140, 1303, 1210, 1327]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -28522,7 +29000,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1363, 1180, 1387]
+	  Position		  [1140, 1363, 1210, 1387]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -28567,7 +29045,7 @@ Model {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [1110, 1423, 1180, 1447]
+	  Position		  [1140, 1423, 1210, 1447]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -28586,7 +29064,7 @@ Model {
 	  BlockType		  Demux
 	  Name			  "Demux"
 	  Ports			  [1, 9]
-	  Position		  [1075, 930, 1085, 1460]
+	  Position		  [990, 930, 1000, 1460]
 	  BackgroundColor	  "black"
 	  ShowName		  off
 	  Outputs		  "9"
@@ -28758,6 +29236,11 @@ Model {
 	}
 	Block {
 	  BlockType		  Ground
+	  Name			  "Ground"
+	  Position		  [1045, 890, 1065, 910]
+	}
+	Block {
+	  BlockType		  Ground
 	  Name			  "Ground1"
 	  Position		  [25, 315, 45, 335]
 	}
@@ -28765,6 +29248,46 @@ Model {
 	  BlockType		  Ground
 	  Name			  "Ground10"
 	  Position		  [85, 2050, 105, 2070]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground11"
+	  Position		  [1045, 1060, 1065, 1080]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground12"
+	  Position		  [1050, 1120, 1070, 1140]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground13"
+	  Position		  [1055, 1190, 1075, 1210]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground14"
+	  Position		  [1055, 1260, 1075, 1280]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground15"
+	  Position		  [1055, 1330, 1075, 1350]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground16"
+	  Position		  [1055, 1395, 1075, 1415]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground17"
+	  Position		  [1055, 1470, 1075, 1490]
+	}
+	Block {
+	  BlockType		  Ground
+	  Name			  "Ground2"
+	  Position		  [1040, 970, 1060, 990]
 	}
 	Block {
 	  BlockType		  Ground
@@ -28904,7 +29427,7 @@ Model {
 	  BlockType		  Mux
 	  Name			  "Mux1"
 	  Ports			  [9, 1]
-	  Position		  [1205, 930, 1215, 1460]
+	  Position		  [1235, 930, 1245, 1460]
 	  ShowName		  off
 	  Inputs		  "9"
 	  DisplayOption		  "bar"
@@ -29284,7 +29807,7 @@ Model {
 	      MaskHideContents	      off
 	      System {
 		Name			"F1"
-		Location		[115, 185, 920, 799]
+		Location		[333, 187, 1138, 801]
 		Open			off
 		ModelBrowserVisibility	off
 		ModelBrowserWidth	200
@@ -51530,7 +52053,7 @@ Model {
 	  Description		  "Any size matrix. Inputs and outputs must be"
 " connected using Mux and Demux parts."
 	  Ports			  [1, 1]
-	  Position		  [995, 1165, 1035, 1225]
+	  Position		  [925, 1165, 965, 1225]
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -51870,66 +52393,6 @@ Model {
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "SENMTRX"
-	  SrcPort		  1
-	  DstBlock		  "Demux"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  1
-	  DstBlock		  "DOF1"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  2
-	  DstBlock		  "DOF2"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  3
-	  DstBlock		  "DOF3"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  4
-	  DstBlock		  "DOF4"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  5
-	  DstBlock		  "DOF5"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  6
-	  DstBlock		  "DOF6"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  7
-	  DstBlock		  "DOF7"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  8
-	  DstBlock		  "DOF8"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux"
-	  SrcPort		  9
-	  DstBlock		  "DOF9"
-	  DstPort		  1
-	}
-	Line {
 	  SrcBlock		  "Mux1"
 	  SrcPort		  1
 	  DstBlock		  "CTRL_MTRX"
@@ -51996,55 +52459,55 @@ Model {
 	  DstPort		  9
 	}
 	Line {
-	  SrcBlock		  "0x108014"
+	  SrcBlock		  "0x108010"
 	  SrcPort		  1
 	  DstBlock		  "Terminator1"
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "0x10A044"
+	  SrcBlock		  "0x10A040"
 	  SrcPort		  1
 	  DstBlock		  "Terminator2"
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "0x10C074"
+	  SrcBlock		  "0x10C070"
 	  SrcPort		  1
 	  DstBlock		  "Terminator3"
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "0x10E0A4"
+	  SrcBlock		  "0x10E0A0"
 	  SrcPort		  1
 	  DstBlock		  "Terminator4"
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "0x1100D4"
+	  SrcBlock		  "0x1100D0"
 	  SrcPort		  1
 	  DstBlock		  "Terminator5"
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "0x118194"
+	  SrcBlock		  "0x118190"
 	  SrcPort		  1
 	  DstBlock		  "Terminator6"
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "0x11A1C4"
+	  SrcBlock		  "0x114130"
 	  SrcPort		  1
 	  DstBlock		  "Terminator7"
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "0x11C1F4"
+	  SrcBlock		  "0x11C1F0"
 	  SrcPort		  1
 	  DstBlock		  "Terminator8"
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "0x11E224"
+	  SrcBlock		  "0x11E220"
 	  SrcPort		  1
 	  DstBlock		  "Terminator9"
 	  DstPort		  1
@@ -54046,58 +54509,337 @@ Model {
 	Line {
 	  SrcBlock		  "PRM"
 	  SrcPort		  1
-	  DstBlock		  "0x108014"
+	  DstBlock		  "0x108010"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "BS"
 	  SrcPort		  1
-	  DstBlock		  "0x10A044"
+	  DstBlock		  "0x10A040"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "ITMX"
 	  SrcPort		  1
-	  DstBlock		  "0x10C074"
+	  DstBlock		  "0x10C070"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "ITMY"
 	  SrcPort		  1
-	  DstBlock		  "0x10E0A4"
+	  DstBlock		  "0x10E0A0"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "SRM"
 	  SrcPort		  1
-	  DstBlock		  "0x1100D4"
+	  DstBlock		  "0x1100D0"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "ETMX"
 	  SrcPort		  1
-	  DstBlock		  "0x118194"
+	  DstBlock		  "0x118190"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "ETMY"
 	  SrcPort		  1
-	  DstBlock		  "0x11A1C4"
+	  DstBlock		  "0x114130"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "PZT1"
 	  SrcPort		  1
-	  DstBlock		  "0x11C1F4"
+	  DstBlock		  "0x11C1F0"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "PZT2"
 	  SrcPort		  1
-	  DstBlock		  "0x11E224"
+	  DstBlock		  "0x11E220"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Ground"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice"
+	  DstPort		  3
+	}
+	Line {
+	  Labels		  [6, 0]
+	  SrcBlock		  "In9"
+	  SrcPort		  1
+	  Points		  [75, 0; 0, 5; 830, 0; 0, -580; 55, 0; 0, -85]
+	  Branch {
+	    Points		    [0, -60]
+	    Branch {
+	      Points		      [0, -80]
+	      Branch {
+		Points			[0, -75]
+		Branch {
+		  Points		  [0, -65]
+		  Branch {
+		    Points		    [0, -70]
+		    Branch {
+		    Points		    [0, -65]
+		    Branch {
+		    Points		    [0, -75]
+		    Branch {
+		    Points		    [0, -90]
+		    DstBlock		    "Choice"
+		    DstPort		    2
+		    }
+		    Branch {
+		    DstBlock		    "Choice1"
+		    DstPort		    2
+		    }
+		    }
+		    Branch {
+		    Points		    [0, 5]
+		    DstBlock		    "Choice2"
+		    DstPort		    2
+		    }
+		    }
+		    Branch {
+		    DstBlock		    "Choice3"
+		    DstPort		    2
+		    }
+		  }
+		  Branch {
+		    DstBlock		    "Choice4"
+		    DstPort		    2
+		  }
+		}
+		Branch {
+		  Points		  [0, 5]
+		  DstBlock		  "Choice5"
+		  DstPort		  2
+		}
+	      }
+	      Branch {
+		DstBlock		"Choice6"
+		DstPort			2
+	      }
+	    }
+	    Branch {
+	      Points		      [0, -15]
+	      DstBlock		      "Choice7"
+	      DstPort		      2
+	    }
+	  }
+	  Branch {
+	    DstBlock		    "Choice8"
+	    DstPort		    2
+	  }
+	}
+	Line {
+	  SrcBlock		  "SENMTRX"
+	  SrcPort		  1
+	  DstBlock		  "Demux"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Ground2"
+	  SrcPort		  1
+	  Points		  [-5, 0]
+	  DstBlock		  "Choice1"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, -95]
+	  DstBlock		  "Choice"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice"
+	  SrcPort		  1
+	  Points		  [0, 85]
+	  DstBlock		  "DOF1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice1"
+	  SrcPort		  1
+	  Points		  [0, 55]
+	  DstBlock		  "DOF2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  2
+	  Points		  [55, 0]
+	  DstBlock		  "Choice1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Ground11"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice2"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground12"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice3"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground13"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice4"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground14"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice5"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground15"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice6"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Ground16"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice7"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  3
+	  Points		  [35, 0; 0, -45]
+	  DstBlock		  "Choice2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice2"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, 35]
+	  DstBlock		  "DOF3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice3"
+	  SrcPort		  1
+	  Points		  [5, 0; 0, 35]
+	  DstBlock		  "DOF4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  4
+	  Points		  [30, 0; 0, -45]
+	  DstBlock		  "Choice3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice4"
+	  SrcPort		  1
+	  Points		  [0, 25]
+	  DstBlock		  "DOF5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  5
+	  Points		  [45, 0; 0, -35]
+	  DstBlock		  "Choice4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice5"
+	  SrcPort		  1
+	  Points		  [0, 15]
+	  DstBlock		  "DOF6"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  6
+	  Points		  [60, 0; 0, -25]
+	  DstBlock		  "Choice5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice6"
+	  SrcPort		  1
+	  Points		  [0, 5]
+	  DstBlock		  "DOF7"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  7
+	  Points		  [60, 0; 0, -15]
+	  DstBlock		  "Choice6"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Ground17"
+	  SrcPort		  1
+	  Points		  [-10, 0]
+	  DstBlock		  "Choice8"
+	  DstPort		  3
+	}
+	Line {
+	  SrcBlock		  "Choice7"
+	  SrcPort		  1
+	  DstBlock		  "DOF8"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  8
+	  Points		  [30, 0; 0, -10]
+	  DstBlock		  "Choice7"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Choice8"
+	  SrcPort		  1
+	  Points		  [0, -15]
+	  DstBlock		  "DOF9"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Demux"
+	  SrcPort		  9
+	  Points		  [65, 0]
+	  DstBlock		  "Choice8"
 	  DstPort		  1
 	}
       }
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "and"
+      Tag		      "cdsBitwise"
+      Ports		      [2, 1]
+      Position		      [305, 570, 350, 605]
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsBitwise/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
     }
     Block {
       BlockType		      Reference
@@ -54240,7 +54982,7 @@ Model {
       SrcPort		      1
       Points		      [70, 0]
       Branch {
-	Points			[100, 0]
+	Points			[200, 0]
 	DstBlock		"PIT"
 	DstPort			1
       }
@@ -54255,7 +54997,7 @@ Model {
       SrcPort		      1
       Points		      [85, 0]
       Branch {
-	Points			[0, -50]
+	Points			[0, -55]
 	DstBlock		"PIT"
 	DstPort			2
       }
@@ -54270,7 +55012,7 @@ Model {
       SrcPort		      1
       Points		      [0, -5; 100, 0]
       Branch {
-	Points			[0, -90]
+	Points			[0, -95]
 	DstBlock		"PIT"
 	DstPort			3
       }
@@ -54285,7 +55027,7 @@ Model {
       SrcPort		      1
       Points		      [125, 0]
       Branch {
-	Points			[0, -140]
+	Points			[0, -145]
 	DstBlock		"PIT"
 	DstPort			4
       }
@@ -54300,7 +55042,7 @@ Model {
       SrcPort		      1
       Points		      [150, 0]
       Branch {
-	Points			[0, -185]
+	Points			[0, -190]
 	DstBlock		"PIT"
 	DstPort			5
       }
@@ -54315,7 +55057,7 @@ Model {
       SrcPort		      1
       Points		      [45, 0]
       Branch {
-	Points			[0, -230]
+	Points			[0, -235]
 	DstBlock		"PIT"
 	DstPort			6
       }
@@ -54330,7 +55072,7 @@ Model {
       SrcPort		      1
       Points		      [10, 0]
       Branch {
-	Points			[0, -320]
+	Points			[0, -325]
 	DstBlock		"PIT"
 	DstPort			8
       }
@@ -54344,7 +55086,7 @@ Model {
       SrcPort		      1
       Points		      [25, 0]
       Branch {
-	Points			[0, -275]
+	Points			[0, -280]
 	DstBlock		"PIT"
 	DstPort			7
       }
@@ -54352,6 +55094,49 @@ Model {
 	Points			[0, 45]
 	DstBlock		"YAW"
 	DstPort			7
+      }
+    }
+    Line {
+      SrcBlock		      "C1:LSC-LA_STATE_INT_00"
+      SrcPort		      1
+      Points		      [75, 0; 0, -30]
+      DstBlock		      "and"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "MASK"
+      SrcPort		      1
+      Points		      [0, -30; 5, 0]
+      Branch {
+	Points			[0, 40]
+	DstBlock		"Operator"
+	DstPort			2
+      }
+      Branch {
+	Points			[15, 0]
+	DstBlock		"and"
+	DstPort			2
+      }
+    }
+    Line {
+      SrcBlock		      "and"
+      SrcPort		      1
+      Points		      [15, 0; 0, 35]
+      DstBlock		      "Operator"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Operator"
+      SrcPort		      1
+      Points		      [5, 0; 0, -75]
+      Branch {
+	Points			[0, -15; -20, 0]
+	DstBlock		"PIT"
+	DstPort			9
+      }
+      Branch {
+	DstBlock		"YAW"
+	DstPort			9
       }
     }
   }
