@@ -34,8 +34,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Apr 25 17:19:09 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:89>"
+  LastModifiedDate	  "Wed Apr 25 17:29:11 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:90>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -199,6 +199,12 @@ Library {
       LogicDataType	      "uint(8)"
       ZeroCross		      on
       SampleTime	      "-1"
+    }
+    Block {
+      BlockType		      "S-Function"
+      FunctionName	      "system"
+      SFunctionModules	      "''"
+      PortCounts	      "[]"
     }
     Block {
       BlockType		      SubSystem
@@ -1213,7 +1219,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[605, 164, 818, 551]
+	Location		[752, 155, 965, 542]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1300,11 +1306,11 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "and"
-	  Tag			  "cdsBitwiseAnd"
+	  Tag			  "cdsBitwise"
 	  Ports			  [2, 1]
-	  Position		  [35, 286, 85, 319]
+	  Position		  [40, 310, 85, 345]
 	  AttributesFormatString  "%<Tag>"
-	  SourceBlock		  "cdsBitwiseAnd/Subsystem"
+	  SourceBlock		  "cdsBitwise/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  on
 	  SystemSampleTime	  "-1"
