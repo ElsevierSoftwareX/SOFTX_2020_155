@@ -21,6 +21,7 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
+        print ::OUT "unsigned int \L$::xpartName[$i];\n";
 }
 
 # Figure out part input code
@@ -29,6 +30,8 @@ sub printFrontEndVars  {
 # Returns calculated input code
 sub fromExp {
         my ($i, $j) = @_;
+        my $from = $::partInNum[$i][$j];
+        return "\L$::xpartName[$from]";
 }
 
 # Return front end initialization code
@@ -45,8 +48,17 @@ sub frontEndInitCode {
 # Returns calculated code string
 sub frontEndCode {
 	my ($i) = @_;
-        my $calcExp = "// Bitwise\n";
-        $calcExp .= $::fromExp[0] . "&" . $::fromExp[1];
+	my $op = "";
+	if ($::xpartName[$i] =~ /^and/) {
+	  $op = "&";
+	} elsif ($::xpartName[$i] =~ /^or/) {
+	  $op = "|";
+	} elsif ($::xpartName[$i] =~ /^xor/) {
+	  $op = "^";
+	}
+        my $calcExp = "// Bitwise $op\n";
+        $calcExp .= $::xpartName[$i] . " = ";
+        $calcExp .= "((unsigned int)(". $::fromExp[0] . "))$op((unsigned int)(" . $::fromExp[1] ."))";
         $calcExp .= ";\n";
 	return $calcExp;
 }
