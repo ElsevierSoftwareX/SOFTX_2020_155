@@ -1788,7 +1788,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 	if ($partType[$mm] eq "Switch") {
 	  print OUT "// Switch\n";
 	  my $op = $partInputs[$mm];
-	  print OUT "\L$xpartName[$mm]". " = ((($fromExp[1]) $op)? ($fromExp[0]): ($fromExp[1]));";
+	  print OUT "\L$xpartName[$mm]". " = ((($fromExp[1]) $op)? ($fromExp[0]): ($fromExp[2]));";
 	}
 	# Relational Operator
 	if ($partType[$mm] eq "RelationalOperator") {
