@@ -108,7 +108,7 @@ text {
 	"basic attribute" {
 		clr=2
 	}
-	textix="LASTI - SYSTEM_NAME"
+	textix="SITE_NAME - SYSTEM_NAME"
 }
 "text update" {
 	object {
