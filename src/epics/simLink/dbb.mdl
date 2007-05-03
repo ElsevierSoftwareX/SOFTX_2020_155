@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.25"
+    ComputedModelVersion    "1.23"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu May 03 07:50:01 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:25>"
+  LastModifiedDate	  "Thu May 03 05:50:43 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:23>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -589,7 +589,7 @@ Model {
   }
   System {
     Name		    "dbb"
-    Location		    [490, 160, 1977, 1163]
+    Location		    [369, 79, 1856, 1082]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
