@@ -1522,6 +1522,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 	if($partType[$ii] eq "SUM"
 	   || $partType[$ii] eq "Switch"
+	   || $partType[$ii] eq "Gain"
 	   || $partType[$ii] eq "RelationalOperator") {
 		$port = $partInCnt[$ii];
 		print OUT "double \L$xpartName[$ii];\n";
@@ -1836,6 +1837,12 @@ for($xx=0;$xx<$processCnt;$xx++)
 		    }
 		}
 		print OUT "$calcExp";
+	}
+	if($partType[$mm] eq "Gain")
+	{
+	   print OUT "// Gain\n";
+	   $calcExp = "\L$xpartName[$mm] = " . $fromExp[0] . " * " . $partInputs[$mm] . ";\n";
+	   print OUT "$calcExp";
 	}
 	# ******** AND ********************************************************************
 	if($partType[$mm] eq "AND")

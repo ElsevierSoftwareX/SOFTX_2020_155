@@ -356,6 +356,8 @@ sub node_processing {
 		 ${$node->{FIELDS}}{Inputs} eq "*\/") {
 		$::partType[$::partCnt] = "DIVIDE";
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
+	} elsif ($block_type eq "Gain") {
+		  $::partInputs[$::partCnt] = ${$node->{FIELDS}}{Gain};
 	} elsif ($block_type eq "RelationalOperator") {
 		if (${$node->{FIELDS}}{Operator} eq undef) {
 		  $::partInputs[$::partCnt] = ">=";
