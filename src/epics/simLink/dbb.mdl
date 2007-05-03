@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.18"
+    ComputedModelVersion    "1.20"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu May 03 00:51:59 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:18>"
+  LastModifiedDate	  "Thu May 03 02:24:45 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:20>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -655,9 +655,55 @@ Model {
       }
     }
     Block {
+      BlockType		      Reference
+      Name		      "CTRL0_CTRL"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                       "
+"                                                                             "
+"                                                                             "
+"                                 \nStandard CDS IIR filter module.           "
+"                                                                             "
+"                                                                             "
+"                                      \n                                     "
+"                                                                             "
+"                                                                             "
+"                                           \nOperation:                      "
+"                                                                             "
+"                                                                             "
+"                                                \nConsists of 10 second order"
+" section IIR filters, plus a ramped gain stage. In FE code, also provides pre"
+"-defined test points and excitation channel inputs. The filter coefficients a"
+"re defined in the LIGO system using the 'foton' tool.\n                      "
+"                                                                             "
+"                                                                             "
+"                                                          \nUsage:           "
+"                                                                             "
+"                                                                             "
+"                                                               \nName the par"
+"t with the desired filter module name.                                       "
+"                                                                             "
+"                                                                    "
+      Ports		      [1, 1]
+      Position		      [610, 153, 680, 177]
+      BackgroundColor	      "darkGreen"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
       BlockType		      Switch
       Name		      "Choice"
       Position		      [535, 145, 565, 175]
+      Criteria		      "u2 > Threshold"
       InputSameDT	      off
       SaturateOnIntegerOverflow	off
     }
@@ -665,7 +711,7 @@ Model {
       BlockType		      Reference
       Name		      "DAC_0"
       Ports		      [16, 16]
-      Position		      [645, 147, 695, 613]
+      Position		      [730, 147, 780, 613]
       BackgroundColor	      "cyan"
       DropShadow	      on
       SourceBlock	      "dac/Subsystem"
@@ -1118,7 +1164,14 @@ Model {
     Line {
       SrcBlock		      "Choice"
       SrcPort		      1
-      Points		      [30, 0; 0, -5]
+      Points		      [10, 0; 0, 5]
+      DstBlock		      "CTRL0_CTRL"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "CTRL0_CTRL"
+      SrcPort		      1
+      Points		      [15, 0; 0, -10]
       DstBlock		      "DAC_0"
       DstPort		      1
     }
