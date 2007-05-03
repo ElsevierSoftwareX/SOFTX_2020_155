@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.20"
+    ComputedModelVersion    "1.25"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu May 03 02:24:45 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:20>"
+  LastModifiedDate	  "Thu May 03 07:50:01 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:25>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -589,7 +589,7 @@ Model {
   }
   System {
     Name		    "dbb"
-    Location		    [399, 120, 1886, 1123]
+    Location		    [490, 160, 1977, 1163]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -603,6 +603,62 @@ Model {
     ShowPageBoundaries	    off
     ZoomFactor		    "125"
     ReportName		    "simulink-default.rpt"
+    Block {
+      BlockType		      Reference
+      Name		      "BIN_IN"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [980, 59, 1025, 81]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "BIN_OUT"
+      Tag		      "cdsEpicsInput"
+      Description	      "Purpose:                                       "
+"                                       \nCreate an EPICS input channel connec"
+"tion to the FE realtime controls.                 \n                         "
+"                                                             \nOperation:    "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is floating point with a precision "
+"of 3..\n                                                                     "
+"                 \nUsage:                                                    "
+"                            \nName the part with the desired EPICS channel na"
+"me.                                    "
+      Ports		      [1, 1]
+      Position		      [760, 59, 810, 81]
+      BackgroundColor	      "green"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsIn/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
     Block {
       BlockType		      BusCreator
       Name		      "Bus\nCreator"
@@ -684,7 +740,7 @@ Model {
 "                                                                             "
 "                                                                    "
       Ports		      [1, 1]
-      Position		      [610, 153, 680, 177]
+      Position		      [610, 148, 680, 172]
       BackgroundColor	      "darkGreen"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -711,10 +767,32 @@ Model {
       BlockType		      Reference
       Name		      "DAC_0"
       Ports		      [16, 16]
-      Position		      [730, 147, 780, 613]
+      Position		      [770, 157, 820, 623]
       BackgroundColor	      "cyan"
       DropShadow	      on
       SourceBlock	      "dac/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "DIO_0"
+      Tag		      "cdsDio"
+      Description	      "support for 8 bit input 8 bit output DIO PCI ca"
+"rd\nACCESS I/O Products model DIO-24D                "
+      Ports		      [1, 1]
+      Position		      [880, 40, 920, 100]
+      BackgroundColor	      "lightBlue"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsDio/Subsystem"
       SourceType	      "SubSystem"
       ShowPortLabels	      on
       SystemSampleTime	      "-1"
@@ -1164,15 +1242,26 @@ Model {
     Line {
       SrcBlock		      "Choice"
       SrcPort		      1
-      Points		      [10, 0; 0, 5]
       DstBlock		      "CTRL0_CTRL"
       DstPort		      1
     }
     Line {
       SrcBlock		      "CTRL0_CTRL"
       SrcPort		      1
-      Points		      [15, 0; 0, -10]
+      Points		      [0, 5]
       DstBlock		      "DAC_0"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "DIO_0"
+      SrcPort		      1
+      DstBlock		      "BIN_IN"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "BIN_OUT"
+      SrcPort		      1
+      DstBlock		      "DIO_0"
       DstPort		      1
     }
     Annotation {
