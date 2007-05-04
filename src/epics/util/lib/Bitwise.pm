@@ -49,15 +49,15 @@ sub frontEndInitCode {
 sub frontEndCode {
 	my ($i) = @_;
 	my $op = "";
-	if ($::xpartName[$i] =~ /^and/) {
+	if ("\L$::xpartName[$i]" =~ /^and/) {
 	  $op = "&";
-	} elsif ($::xpartName[$i] =~ /^or/) {
+	} elsif ("\L$::xpartName[$i]" =~ /^or/) {
 	  $op = "|";
-	} elsif ($::xpartName[$i] =~ /^xor/) {
+	} elsif ("\L$::xpartName[$i]" =~ /^xor/) {
 	  $op = "^";
 	}
         my $calcExp = "// Bitwise $op\n";
-        $calcExp .= $::xpartName[$i] . " = ";
+        $calcExp .= "\L$::xpartName[$i] = ";
         $calcExp .= "((unsigned int)(". $::fromExp[0] . "))$op((unsigned int)(" . $::fromExp[1] ."))";
         $calcExp .= ";\n";
 	return $calcExp;
