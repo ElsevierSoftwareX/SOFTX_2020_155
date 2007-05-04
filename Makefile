@@ -74,6 +74,7 @@ install-% :: src/epics/simLink/%.mdl
 	echo '(cd /cvs/cds/'$$site'/target/'$${system}epics' && ./startup'$${ifo}')' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo /cvs/cds/$$site/target/$${system}/startup.cmd >> /cvs/cds/$$site/scripts/start$${system};\
 	echo '(cd /cvs/cds/'$$site'/target/gds && ./startup_'$${system}'.cmd)' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'sleep 5; sudo killall daqd' >> /cvs/cds/$$site/scripts/start$${system};\
 	
 
 install-daq-% :: src/epics/simLink/%.mdl
