@@ -2214,7 +2214,7 @@ my $usite = uc $site;
 my $sysname = uc($skeleton);
 $sed_arg =  "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;";
 system("cat GDS_TP.adl | sed '$sed_arg' > $epicsScreensDir/$usite$sysname" . "_GDS_TP.adl");
-my $monitor_args = $sed_args;
+my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
 
 for(0 .. $partCnt-1) {
