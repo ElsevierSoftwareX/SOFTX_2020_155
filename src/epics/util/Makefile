@@ -1,5 +1,5 @@
 
-.PHONY: sas
-sas:
-	./feCodeGen.pl ../simLink/sas.mdl sas
+.PHONY: dbb
+dbb:
+	./feCodeGen.pl ../simLink/dbb.mdl dbb
 
