@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.23"
+    ComputedModelVersion    "1.29"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu May 03 05:50:43 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:23>"
+  LastModifiedDate	  "Fri May 04 02:13:07 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:29>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -589,7 +589,7 @@ Model {
   }
   System {
     Name		    "dbb"
-    Location		    [369, 79, 1856, 1082]
+    Location		    [305, 85, 1771, 1088]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -614,7 +614,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [980, 59, 1025, 81]
+      Position		      [1045, 44, 1090, 66]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -644,11 +644,37 @@ Model {
 "                            \nName the part with the desired EPICS channel na"
 "me.                                    "
       Ports		      [1, 1]
-      Position		      [760, 59, 810, 81]
+      Position		      [520, 34, 570, 56]
       BackgroundColor	      "green"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsEpicsIn/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "BIN_OUT_IO"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [835, 44, 880, 66]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
       SourceType	      "SubSystem"
       ShowPortLabels	      on
       SystemSampleTime	      "-1"
@@ -706,6 +732,89 @@ Model {
       Port {
 	PortNumber		5
 	Name			"<adc_0_4>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+    }
+    Block {
+      BlockType		      BusSelector
+      Name		      "Bus\nSelector1"
+      Ports		      [1, 6]
+      Position		      [255, 505, 265, 830]
+      ShowName		      off
+      OutputSignals	      "adc_0_5,adc_0_6,adc_0_7,adc_0_8,adc_0_9,adc_0_1"
+"0"
+      Port {
+	PortNumber		1
+	Name			"<adc_0_5>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		2
+	Name			"<adc_0_6>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		3
+	Name			"<adc_0_7>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		4
+	Name			"<adc_0_8>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		5
+	Name			"<adc_0_9>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		6
+	Name			"<adc_0_10>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+    }
+    Block {
+      BlockType		      BusSelector
+      Name		      "Bus\nSelector2"
+      Ports		      [1, 5]
+      Position		      [505, 327, 515, 653]
+      ShowName		      off
+      OutputSignals	      "adc_0_11,adc_0_12,adc_0_13,adc_0_14,adc_0_15"
+      Port {
+	PortNumber		1
+	Name			"<adc_0_11>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		2
+	Name			"<adc_0_12>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		3
+	Name			"<adc_0_13>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		4
+	Name			"<adc_0_14>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		5
+	Name			"<adc_0_15>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
       }
@@ -788,11 +897,38 @@ Model {
       Description	      "support for 8 bit input 8 bit output DIO PCI ca"
 "rd\nACCESS I/O Products model DIO-24D                "
       Ports		      [1, 1]
-      Position		      [880, 40, 920, 100]
+      Position		      [945, 25, 985, 85]
       BackgroundColor	      "lightBlue"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsDio/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Gain
+      Name		      "Gain"
+      Position		      [610, 75, 640, 105]
+      Gain		      "8"
+      ParameterDataTypeMode   "Inherit via internal rule"
+      OutDataTypeMode	      "Inherit via internal rule"
+      SaturateOnIntegerOverflow	off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "OR1"
+      Tag		      "cdsBitwise"
+      Ports		      [2, 1]
+      Position		      [715, 35, 760, 70]
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsBitwise/Subsystem"
       SourceType	      "SubSystem"
       ShowPortLabels	      on
       SystemSampleTime	      "-1"
@@ -1014,6 +1150,292 @@ Model {
     }
     Block {
       BlockType		      Reference
+      Name		      "SPARE_CH_10"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [335, 794, 380, 816]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SPARE_CH_11"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [560, 349, 605, 371]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SPARE_CH_12"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [565, 414, 610, 436]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SPARE_CH_13"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [565, 479, 610, 501]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SPARE_CH_14"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [565, 544, 610, 566]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SPARE_CH_15"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [565, 609, 610, 631]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SPARE_CH_5"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [335, 519, 380, 541]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SPARE_CH_6"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [335, 574, 380, 596]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SPARE_CH_7"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [335, 629, 380, 651]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SPARE_CH_8"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [335, 684, 380, 706]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SPARE_CH_9"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [335, 739, 380, 761]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
       Name		      "THRESHOLD"
       Tag		      "cdsEpicsInput"
       Description	      "Purpose:                                       "
@@ -1156,9 +1578,24 @@ Model {
     Line {
       SrcBlock		      "Bus\nCreator"
       SrcPort		      1
-      Points		      [60, 0; 0, 60]
-      DstBlock		      "Bus\nSelector"
-      DstPort		      1
+      Points		      [60, 0; 0, 55]
+      Branch {
+	Points			[0, 5]
+	DstBlock		"Bus\nSelector"
+	DstPort			1
+      }
+      Branch {
+	Points			[0, 155]
+	Branch {
+	  Points		  [0, 180]
+	  DstBlock		  "Bus\nSelector1"
+	  DstPort		  1
+	}
+	Branch {
+	  DstBlock		  "Bus\nSelector2"
+	  DstPort		  1
+	}
+      }
     }
     Line {
       Name		      "<adc_0_0>"
@@ -1222,9 +1659,17 @@ Model {
     Line {
       SrcBlock		      "Operator"
       SrcPort		      1
-      Points		      [60, 0; 0, 20]
-      DstBlock		      "Choice"
-      DstPort		      2
+      Points		      [55, 0]
+      Branch {
+	Points			[5, 0; 0, 20]
+	DstBlock		"Choice"
+	DstPort			2
+      }
+      Branch {
+	Points			[0, -50]
+	DstBlock		"Gain"
+	DstPort			1
+      }
     }
     Line {
       SrcBlock		      "TPD_0DB"
@@ -1259,9 +1704,116 @@ Model {
       DstPort		      1
     }
     Line {
-      SrcBlock		      "BIN_OUT"
+      SrcBlock		      "BIN_OUT_IO"
       SrcPort		      1
       DstBlock		      "DIO_0"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "BIN_OUT"
+      SrcPort		      1
+      DstBlock		      "OR1"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Gain"
+      SrcPort		      1
+      Points		      [25, 0; 0, -30]
+      DstBlock		      "OR1"
+      DstPort		      2
+    }
+    Line {
+      SrcBlock		      "OR1"
+      SrcPort		      1
+      DstBlock		      "BIN_OUT_IO"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_5>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector1"
+      SrcPort		      1
+      DstBlock		      "SPARE_CH_5"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_6>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector1"
+      SrcPort		      2
+      DstBlock		      "SPARE_CH_6"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_7>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector1"
+      SrcPort		      3
+      DstBlock		      "SPARE_CH_7"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_8>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector1"
+      SrcPort		      4
+      DstBlock		      "SPARE_CH_8"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_9>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector1"
+      SrcPort		      5
+      DstBlock		      "SPARE_CH_9"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_10>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector1"
+      SrcPort		      6
+      DstBlock		      "SPARE_CH_10"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_11>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector2"
+      SrcPort		      1
+      DstBlock		      "SPARE_CH_11"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_12>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector2"
+      SrcPort		      2
+      DstBlock		      "SPARE_CH_12"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_13>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector2"
+      SrcPort		      3
+      DstBlock		      "SPARE_CH_13"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_14>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector2"
+      SrcPort		      4
+      DstBlock		      "SPARE_CH_14"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_15>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector2"
+      SrcPort		      5
+      DstBlock		      "SPARE_CH_15"
       DstPort		      1
     }
     Annotation {
