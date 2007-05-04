@@ -69,6 +69,7 @@ install-% :: src/epics/simLink/%.mdl
 	echo '#!/bin/bash' > /cvs/cds/$$site/scripts/kill$${system};\
 	/bin/chmod +x /cvs/cds/$$site/scripts/kill$${system};\
 	echo /cvs/cds/$$site/scripts/kill$${system} >> /cvs/cds/$$site/scripts/start$${system};\
+	echo sleep 5 >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'sudo killall ' $${system}epics $${system}fe.rtl awgtpman >> /cvs/cds/$$site/scripts/kill$${system};\
 	echo '(cd /cvs/cds/'$$site'/target/'$${system}epics' && ./startup'$${ifo}')' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo /cvs/cds/$$site/target/$${system}/startup.cmd >> /cvs/cds/$$site/scripts/start$${system};\
