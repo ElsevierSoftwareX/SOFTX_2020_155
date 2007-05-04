@@ -118,7 +118,7 @@ install-screens-% :: src/epics/simLink/%.mdl
 	/bin/mkdir -p /cvs/cds/$$site/medm/$${lower_ifo};\
 	/bin/cp -pr build/$${system}epics/medm /cvs/cds/$$site/medm/$${lower_ifo}/$${system};\
 	for i in `ls /cvs/cds/$$site/medm/$${lower_ifo}/$${system}_$${cur_date}`; do \
-          cp /cvs/cds/$$site/medm/$${lower_ifo}/$${system}_$${cur_date}/$$i  /cvs/cds/$$site/medm/$${lower_ifo}/$${system}; \
+          if test ! -s /cvs/cds/$$site/medm/$${lower_ifo}/$${system}/$$i; then  cp /cvs/cds/$$site/medm/$${lower_ifo}/$${system}_$${cur_date}/$$i  /cvs/cds/$$site/medm/$${lower_ifo}/$${system};  fi;\
         done
 
 
