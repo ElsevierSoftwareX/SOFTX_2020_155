@@ -2,9 +2,9 @@
 #include <linux/pci.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
-#include <drv/gmnet.h>
 
 #if !defined(NO_DAQ) && defined(USE_GM)
+#include <drv/gmnet.h>
 #include <drv/cdsHardware.h>
 #include <drv/myri.h>
 #include <drv/fb.h>
