@@ -119,7 +119,7 @@ extern unsigned int cpu_khz;
 	#define END_OF_DAQ_BLOCK	127
 	#define DAQ_RATE	DAQ_2K_SAMPLE_SIZE
 	#define NET_SEND_WAIT		10240
-	#define CYCLE_TIME_ALRM		480
+	#define CYCLE_TIME_ALRM		487
 #endif
 
 #ifndef NO_DAQ
