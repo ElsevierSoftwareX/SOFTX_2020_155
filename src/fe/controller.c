@@ -618,6 +618,11 @@ void *fe_start(void *arg)
 		firstTime += 100;
 			onePpsHi = 0;
 #endif
+		/* Do not do 1PPS sync when running on timer */
+		if (run_on_timer) {
+			firstTime += 100;
+			onePpsHi = 0;
+		}
 	}
 
 	if((onePps > 4000) && (onePpsHi == 0))  
