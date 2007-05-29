@@ -28,6 +28,8 @@
 	#include "mce.h"
 #elif defined(TPT_CODE)
 	#include "tpt.h"
+#elif defined(OMS_CODE)
+	#include "oms.h"
 #else
 	#error
 #endif

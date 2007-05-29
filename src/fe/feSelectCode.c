@@ -30,6 +30,8 @@
 	#include "mce/mce.c"
 #elif defined(TPT_CODE)
 	#include "tpt/tpt.c"
+#elif defined(OMS_CODE)
+	#include "oms/oms.c"
 #else
 	#error
 #endif
