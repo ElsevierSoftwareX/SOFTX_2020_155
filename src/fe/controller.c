@@ -965,6 +965,8 @@ int main(int argc, char **argv)
         printf("***************************************************************************\n");
 	printf("%d DIO cards found\n",cdsPciModules.dioCount);
         printf("***************************************************************************\n");
+	printf("%d IIRO-8 Isolated DIO cards found\n",cdsPciModules.iiroDioCount);
+        printf("***************************************************************************\n");
 	printf("%d RFM cards found\n",cdsPciModules.rfmCount);
 	for(ii=0;ii<cdsPciModules.rfmCount;ii++)
         {

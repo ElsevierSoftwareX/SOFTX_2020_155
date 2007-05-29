@@ -53,6 +53,8 @@ typedef struct CDS_HARDWARE{
 	int adcConfig[MAX_ADC_MODULES];
 	int dioCount;			/* Number of DIO modules found		*/
 	unsigned short pci_dio[MAX_DIO_MODULES];	/* io registers of DIO	*/
+	int iiroDioCount;	 	/* Number of IIRO-8 isolated DIO modules found */
+	unsigned short pci_iiro_dio[MAX_DIO_MODULES];	/* io regs of IIRO mods */
 	int rfmCount;			/* Number of RFM modules found		*/
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
 	int rfmConfig[MAX_RFM_MODULES];
@@ -72,6 +74,11 @@ typedef struct CDS_HARDWARE{
 #define DIO_B_REG	0x1
 #define DIO_C_REG	0x2
 #define DIO_CTRL_REG	0x3
+
+/* ACCESS PCI-IIRO-8 isolated digital input and output */
+#define ACC_IIRO_TID 0x0f00
+#define IIRO_DIO_INPUT	0x1
+#define IIRO_DIO_OUTPUT 0x0
 
 /* PLX Chip Definitions for GSA ADC/DAC Modules ******************************* */
 /* Common DMA register definition		*/
