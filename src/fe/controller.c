@@ -179,6 +179,9 @@ double dHistory[96][40];
 // Whether run on internal timer (when no I/O cards found)
 int run_on_timer = 0;
 
+// Initial diag reset flag
+int initialDiagReset = 1;
+
 #if 0
 // **************************************************************************
 // Interrupt handler if using interrupts for ADC module
@@ -528,8 +531,9 @@ void *fe_start(void *arg)
 	  pLocalEpics->epicsOutput.adcWaitTime = adcHoldTime;
 	  if(adcHoldTime > CYCLE_TIME_ALRM) diagWord |= 2;
 	  if(timeHoldMax > CYCLE_TIME_ALRM) diagWord |= 8;
-  	  if(pLocalEpics->epicsInput.diagReset)
+  	  if(pLocalEpics->epicsInput.diagReset || initialDiagReset)
 	  {
+		initialDiagReset = 0;
 		pLocalEpics->epicsInput.diagReset = 0;
 		adcHoldTime = 0;
 		timeHoldMax = 0;
