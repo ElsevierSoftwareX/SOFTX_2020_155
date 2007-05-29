@@ -156,6 +156,8 @@ double dWord[MAX_ADC_MODULES][32];
 int dacOut[MAX_DAC_MODULES][16];
 int dioInput[MAX_DIO_MODULES];
 int dioOutput[MAX_DIO_MODULES];
+int rioInput[MAX_DIO_MODULES];
+int rioOutput[MAX_DIO_MODULES];
 int clock16K = 0;
 
 #include "./feSelectCode.c"
@@ -609,6 +611,9 @@ void *fe_start(void *arg)
   	for(kk=0;kk<cdsPciModules.dioCount;kk++) {
   		dioInput[kk] = readDio(&cdsPciModules, kk) & 0xff;
 	}
+  	for(kk=0;kk<cdsPciModules.iiroDioCount;kk++) {
+  		rioInput[kk] = readIiroDio(&cdsPciModules, kk) & 0xff;
+	}
 
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
@@ -689,6 +694,9 @@ void *fe_start(void *arg)
 	// Write Dio cards
   	for(kk=0;kk<cdsPciModules.dioCount;kk++) {
   		writeDio(&cdsPciModules, kk, dioOutput[kk]);
+	}
+  	for(kk=0;kk<cdsPciModules.iiroDioCount;kk++) {
+  		writeIiroDio(&cdsPciModules, kk, rioOutput[kk]);
 	}
 
 #ifndef NO_DAQ
