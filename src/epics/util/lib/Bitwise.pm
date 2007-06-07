@@ -42,20 +42,23 @@ sub frontEndInitCode {
 	return "";
 }
 
-
 # Return front end code
 # Argument 1 is the part number
 # Returns calculated code string
 sub frontEndCode {
 	my ($i) = @_;
 	my $op = "";
-	if ("\L$::xpartName[$i]" =~ /^and/) {
+	# Remove subsystem names
+	my $pname = ::remove_subsystem($::partName[$i]);
+
+	if ($pname =~ /^and/) {
 	  $op = "&";
-	} elsif ("\L$::xpartName[$i]" =~ /^or/) {
+	} elsif ($pname =~ /^or/) {
 	  $op = "|";
-	} elsif ("\L$::xpartName[$i]" =~ /^xor/) {
+	} elsif ($pname =~ /^xor/) {
 	  $op = "^";
 	}
+	#print "Operator is $op; part name is $::partName[$i]\n";
         my $calcExp = "// Bitwise $op\n";
         $calcExp .= "\L$::xpartName[$i] = ";
         $calcExp .= "((unsigned int)(". $::fromExp[0] . "))$op((unsigned int)(" . $::fromExp[1] ."))";
