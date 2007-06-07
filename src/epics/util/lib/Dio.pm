@@ -41,7 +41,7 @@ sub frontEndInitCode {
 # Returns calculated input code
 sub fromExp {
         my ($i, $j) = @_;
-        my $card =  substr(::remove_subsystem($::partInput[$i][$j]), 4, 1);
+        my $card =  substr($::partInput[$i][$j], 4, 1);
         return "dioInput\[" . $card . "\]";
 }
 

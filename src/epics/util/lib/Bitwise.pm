@@ -49,7 +49,7 @@ sub frontEndCode {
 	my ($i) = @_;
 	my $op = "";
 	# Remove subsystem names
-	my $pname = ::remove_subsystem($::partName[$i]);
+	my $pname = ::remove_subsystem("\L$::partName[$i]");
 
 	if ($pname =~ /^and/) {
 	  $op = "&";
