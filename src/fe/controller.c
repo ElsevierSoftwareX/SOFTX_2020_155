@@ -165,13 +165,13 @@ int clock16K = 0;
 char daqArea[2*DAQ_DCU_SIZE];		/* Space allocation for daqLib buffers	*/
 
 #ifdef OVERSAMPLE
-#define ADC_SAMPLE_COUNT	0x100
-#define ADC_DMA_BYTES		0x400
-double feCoeff8x[13] =
-        {0.0019451746049824,
-        -1.75819687682033,    0.77900344926987,   -1.84669761259482,    0.99885145868275,
-        -1.81776674036645,    0.86625937590562,   -1.73730291821706,    0.97396693941237,
-        -1.89162859406079,    0.96263319997793,   -0.81263245399030,    0.83542699550059};
+#define ADC_SAMPLE_COUNT	0x80
+#define ADC_DMA_BYTES		0x200
+double feCoeff4x[13] =
+        {0.0032897561126272,
+        -1.52626060254343,    0.60240176412244,   -1.41321371411946,    0.99858678588255,
+        -1.57309308067347,    0.75430004092087,   -1.11957678237524,    0.98454170534006,
+        -1.65602262774366,    0.92929745639579,    0.26582650057056,    0.99777026734589};
 double dHistory[96][40];
 #else
 #define ADC_SAMPLE_COUNT	0x20
@@ -568,12 +568,12 @@ void *fe_start(void *arg)
 		jj = kk + 1;
 		diagWord |= status * jj;
 #ifdef OVERSAMPLE
-		for(jj=0;jj<8;jj++)
+		for(jj=0;jj<4;jj++)
 		{
 			for(ii=0;ii<32;ii++)
 			{
 				adcData[kk][ii] = (*packedData & 0xffff);
-				dWord[kk][ii] = iir_filter((double)adcData[kk][ii],&feCoeff8x[0],3,&dHistory[ii+kk*32][0]);
+				dWord[kk][ii] = iir_filter((double)adcData[kk][ii],&feCoeff4x[0],3,&dHistory[ii+kk*32][0]);
 				packedData ++;
 			}
 		}
