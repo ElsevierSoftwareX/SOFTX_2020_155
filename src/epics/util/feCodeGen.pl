@@ -178,6 +178,12 @@ $subSysName[0] = "";	# Subsystem names
 $subSysPartStart[0] = 0;
 $subSysPartStop[0] = 0;
 
+# Remove leading subsystems name
+sub remove_subsystem {
+        my ($s) = @_;
+        return substr $s, 1 + rindex $s, "_";
+}
+
 
 # Clear the part input and output counters
 for ($ii = 0; $ii < 2000; $ii++) {
