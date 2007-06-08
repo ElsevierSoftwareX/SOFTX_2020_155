@@ -153,10 +153,11 @@ sub process_line {
 	  if ($::partType[$part_num] eq "BUSS") {
 		return; # Don't patch in any Bus Selector input links
 	  }
-	  #print " dst part " . $part_num . "\n";
+	  #print " dst part " . $part_num . "type = $::partType[$part_num]\n";
           $::partInput[$part_num][$dst_port - 1] = $src;
           $::partInputPort[$part_num][$dst_port - 1] = $src_port - 1;
-	  $::partInCnt[$part_num]++;
+	  if ($::partType[$part_num] eq "Dac") { $::partInCnt[$part_num] = 16; }
+	  else { $::partInCnt[$part_num]++; }
 	} else {
 	  # This line connected to a subsystem
 	  foreach (@{$sys_ins{$dst}}) {
