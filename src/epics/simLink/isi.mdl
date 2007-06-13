@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.19"
+    ComputedModelVersion    "1.20"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "jay"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Jun 06 12:31:43 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:19>"
+  LastModifiedDate	  "Wed Jun 13 11:50:28 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:20>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -534,12 +534,6 @@ Model {
       BlockType		      Reference
     }
     Block {
-      BlockType		      "S-Function"
-      FunctionName	      "system"
-      SFunctionModules	      "''"
-      PortCounts	      "[]"
-    }
-    Block {
       BlockType		      SubSystem
       ShowPortLabels	      on
       Permissions	      "ReadWrite"
@@ -593,7 +587,7 @@ Model {
   }
   System {
     Name		    "isi"
-    Location		    [26, 115, 1874, 1115]
+    Location		    [-1, 95, 1650, 1022]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -1375,7 +1369,7 @@ Model {
       MaskHideContents	      off
       System {
 	Name			"POD1"
-	Location		[366, 242, 833, 1176]
+	Location		[279, 111, 746, 1045]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -2808,9 +2802,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2853,9 +2847,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2898,9 +2892,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2943,9 +2937,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3097,9 +3091,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3127,9 +3121,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3247,9 +3241,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3292,9 +3286,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3337,9 +3331,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3438,9 +3432,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3468,9 +3462,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3498,9 +3492,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3516,9 +3510,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3534,9 +3528,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3552,9 +3546,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3570,9 +3564,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3795,7 +3789,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "L4C"
-	    Location		    [1203, 472, 1802, 1132]
+	    Location		    [457, 293, 1056, 953]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -4676,9 +4670,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -4721,9 +4715,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -4766,9 +4760,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -4811,9 +4805,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -4856,9 +4850,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -4901,9 +4895,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -5264,6 +5258,32 @@ Model {
 	  DstPort		  1
 	}
       }
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "POD1_CD_STATUS"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [680, 699, 725, 721]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
     }
     Block {
       BlockType		      SubSystem
@@ -5633,9 +5653,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -5678,9 +5698,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -5723,9 +5743,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -5768,9 +5788,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -5813,9 +5833,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -5858,9 +5878,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -5903,9 +5923,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -5948,9 +5968,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -5993,9 +6013,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -6038,9 +6058,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -6083,9 +6103,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -6128,9 +6148,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -6173,9 +6193,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -6218,9 +6238,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -6263,9 +6283,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -6308,9 +6328,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -6712,9 +6732,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -6757,9 +6777,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -6802,9 +6822,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -6847,9 +6867,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7001,9 +7021,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7031,9 +7051,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7151,9 +7171,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7196,9 +7216,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7241,9 +7261,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7342,9 +7362,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7372,9 +7392,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7402,9 +7422,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7420,9 +7440,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7438,9 +7458,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7456,9 +7476,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7474,9 +7494,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7746,9 +7766,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7776,9 +7796,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7906,9 +7926,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7987,9 +8007,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8032,9 +8052,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8087,9 +8107,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8117,9 +8137,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8147,9 +8167,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8165,9 +8185,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8183,9 +8203,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8201,9 +8221,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8219,9 +8239,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8580,9 +8600,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8625,9 +8645,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8670,9 +8690,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8715,9 +8735,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8760,9 +8780,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8805,9 +8825,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -9168,6 +9188,32 @@ Model {
 	  DstPort		  1
 	}
       }
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "POD2_CD_STATUS"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [1265, 694, 1310, 716]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
     }
     Block {
       BlockType		      SubSystem
@@ -9537,9 +9583,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -9582,9 +9628,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -9627,9 +9673,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -9672,9 +9718,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -9717,9 +9763,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -9762,9 +9808,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -9807,9 +9853,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -9852,9 +9898,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -9897,9 +9943,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -9942,9 +9988,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -9987,9 +10033,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -10032,9 +10078,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -10077,9 +10123,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -10122,9 +10168,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -10167,9 +10213,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -10212,9 +10258,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -10616,9 +10662,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -10661,9 +10707,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -10706,9 +10752,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -10751,9 +10797,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -10905,9 +10951,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -10935,9 +10981,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11055,9 +11101,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11100,9 +11146,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11145,9 +11191,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11246,9 +11292,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11276,9 +11322,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11306,9 +11352,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11324,9 +11370,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11342,9 +11388,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11360,9 +11406,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11378,9 +11424,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11650,9 +11696,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11680,9 +11726,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11810,9 +11856,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11891,9 +11937,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11936,9 +11982,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11991,9 +12037,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12021,9 +12067,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12051,9 +12097,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12069,9 +12115,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12087,9 +12133,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12105,9 +12151,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12123,9 +12169,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12484,9 +12530,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12529,9 +12575,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12574,9 +12620,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12619,9 +12665,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12664,9 +12710,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12709,9 +12755,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -13072,6 +13118,32 @@ Model {
 	  DstPort		  1
 	}
       }
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "POD3_CD_STATUS"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [1815, 669, 1860, 691]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      on
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
     }
     Block {
       BlockType		      Reference
@@ -14171,6 +14243,27 @@ Model {
       Points		      [65, 0; 0, 260]
       DstBlock		      "DAC_1"
       DstPort		      10
+    }
+    Line {
+      SrcBlock		      "RIO_0"
+      SrcPort		      1
+      Points		      [5, 0; 0, 165]
+      DstBlock		      "POD1_CD_STATUS"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "RIO_1"
+      SrcPort		      1
+      Points		      [10, 0; 0, 150]
+      DstBlock		      "POD2_CD_STATUS"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "RIO_2"
+      SrcPort		      1
+      Points		      [5, 0; 0, 155]
+      DstBlock		      "POD3_CD_STATUS"
+      DstPort		      1
     }
   }
 }
