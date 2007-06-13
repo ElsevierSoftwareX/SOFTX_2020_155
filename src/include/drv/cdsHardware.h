@@ -34,6 +34,7 @@
 #define GSC_16AI64SSA		0
 #define GSC_16AISS8AO4		1
 #define GSC_16AO16		2
+#define GSC_18AISS8AO8		3
 
 /* Cards configuration */
 typedef struct CDS_CARDS {
@@ -299,3 +300,31 @@ typedef struct GSA_FAD_REG{
 #define GSAF_DAC_DMA_LOCAL_ADDR      0x48
 #define GSAF_RATEC_1MHZ     	0x28
 
+/* GSA 18Bit ADC/DAC Module Definitions ***************************************************** */
+#define AD18_SS_ID       0x3172	/* Subsystem ID to locate module on PCI bus	*/
+
+/* Structure defining ADC module PCI register layout	*/
+typedef struct GSA_AD18_REG{
+        unsigned int BCR;       /* 0x0000 	Board Control */
+        unsigned int DIO;       /* 0x0004 	Digital IO Port */
+        unsigned int RES1;      /* 0x0008 	Reserved */
+        unsigned int CLS;       /* 0x000C 	Current Loop Select */
+        unsigned int RES2;      /* 0x0010 	Reserved */
+        unsigned int AIC;       /* 0x0014 	Analog Input Configuration */
+        unsigned int AIB;       /* 0x0018 	Analog Input BUFFER */
+        unsigned int RGA;       /* 0x001C 	Rate Generator A */
+        unsigned int RGB;       /* 0x0020 	Rate Generator B */
+        unsigned int ABS;       /* 0x0024 	AI Burst Block Size */
+        unsigned int IBS;       /* 0x0028 	Input Buffer Size */
+        unsigned int IBT;       /* 0x002C 	Input Buffer Threshold */
+        unsigned int PSF;       /* 0x0030 	Principal status flag */
+        unsigned int ASC;       /* 0x0034 	Assembly Configuration */
+        unsigned int AVR;       /* 0x0038 	Autocal value readback */
+        unsigned int BOO;       /* 0x003C 	Buffered Output Operation */
+        unsigned int OBT;       /* 0x0040 	Output Buffer Threshold */
+        unsigned int OBS;       /* 0x0044 	Output Buffer Size */
+        unsigned int AOB;       /* 0x0048 	Anallog Output Buffer */
+        unsigned int RGC;       /* 0x004C 	Rate Generator C */
+        unsigned int RGD;       /* 0x004C 	Rate Generator D */
+        unsigned int AOC;       /* 0x0050 	Analog Output Configuration */
+}GSA_AD18_REG;
