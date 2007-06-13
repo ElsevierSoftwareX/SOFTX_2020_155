@@ -13174,7 +13174,7 @@ Model {
     }
     Block {
       BlockType		      Reference
-      Name		      "site=C1\nrate=2K\ndcuid=22\ngds_node_id=1"
+      Name		      "site=M1\nrate=2K\ndcuid=23\ngds_node_id=5"
       Tag		      "cdsParameters"
       Ports		      [1, 1]
       Position		      [35, 20, 75, 80]
