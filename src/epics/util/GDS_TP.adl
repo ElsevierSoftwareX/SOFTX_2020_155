@@ -5,8 +5,8 @@ file {
 }
 display {
 	object {
-		x=194
-		y=448
+		x=180
+		y=396
 		width=920
 		height=530
 	}
@@ -2947,4 +2947,22 @@ text {
 	}
 	textix="Total"
 	align="horiz. right"
+}
+"shell command" {
+	object {
+		x=822
+		y=313
+		width=60
+		height=59
+	}
+	command[0] {
+		label="Clear all SYSTEM_NAME testpoits"
+		name="echo 'tp clear GDS_NODE_ID *' | diag -l"
+	}
+	command[1] {
+		label="Clear all SYSTEM_NAME AWG waveforms"
+		name="echo 'awg clear GDS_NODE_ID *' | diag -l"
+	}
+	clr=14
+	bclr=24
 }
