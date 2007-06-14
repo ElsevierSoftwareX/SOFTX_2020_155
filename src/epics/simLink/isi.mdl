@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.20"
+    ComputedModelVersion    "1.21"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,8 +44,8 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "jay"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Jun 13 11:50:28 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:20>"
+  LastModifiedDate	  "Wed Jun 13 15:56:58 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:21>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -1370,7 +1370,7 @@ Model {
       System {
 	Name			"POD1"
 	Location		[279, 111, 746, 1045]
-	Open			off
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1723,9 +1723,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -1768,9 +1768,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -1813,9 +1813,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -1858,9 +1858,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -1903,9 +1903,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -1948,9 +1948,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -1993,9 +1993,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2038,9 +2038,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2083,9 +2083,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2128,9 +2128,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2173,9 +2173,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2218,9 +2218,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2263,9 +2263,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2308,9 +2308,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2353,9 +2353,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2398,9 +2398,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      on
+	      ShowPortLabels	      "on"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3030,7 +3030,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "GS13"
-	    Location		    [850, 452, 1479, 1033]
+	    Location		    [161, 224, 790, 805]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -3073,27 +3073,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "GN1_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [95, 354, 145, 376]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [95, 353, 150, 377]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3103,27 +3102,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "GN2_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [95, 539, 145, 561]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [95, 538, 150, 562]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3241,9 +3239,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3286,9 +3284,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3331,9 +3329,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3432,9 +3430,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3444,27 +3442,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "WHT1_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [95, 264, 145, 286]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [95, 263, 150, 287]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3474,27 +3471,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "WHT2_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [95, 449, 145, 471]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [95, 448, 150, 472]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3510,9 +3506,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3528,9 +3524,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3546,9 +3542,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3564,9 +3560,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3789,7 +3785,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "L4C"
-	    Location		    [457, 293, 1056, 953]
+	    Location		    [412, 243, 1011, 903]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -3818,23 +3814,22 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "GN1_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [75, 259, 125, 281]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [75, 258, 130, 282]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
@@ -3848,23 +3843,22 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "GN2_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [75, 444, 125, 466]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [75, 443, 130, 467]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
@@ -4189,21 +4183,20 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "WHT1_EN"
-	      Tag		      "cdsEpicsBinInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [75, 169, 125, 191]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [75, 168, 130, 192]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
@@ -4219,23 +4212,22 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "WHT2_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [75, 354, 125, 376]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [75, 353, 130, 377]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
@@ -5299,8 +5291,8 @@ Model {
       MaskHideContents	      off
       System {
 	Name			"POD2"
-	Location		[366, 242, 833, 1176]
-	Open			off
+	Location		[789, 80, 1256, 1014]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -6951,7 +6943,7 @@ Model {
 	  Name			  "GS13"
 	  Description		  "GS13 Sensor"
 	  Ports			  [4, 1]
-	  Position		  [90, 603, 155, 702]
+	  Position		  [85, 603, 150, 702]
 	  BackgroundColor	  "magenta"
 	  AttributesFormatString  "%<Description>"
 	  MinAlgLoopOccurrences	  off
@@ -6960,7 +6952,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "GS13"
-	    Location		    [850, 452, 1479, 1033]
+	    Location		    [161, 224, 790, 805]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -7003,27 +6995,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "GN1_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [95, 354, 145, 376]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [95, 353, 150, 377]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7033,27 +7024,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "GN2_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [95, 539, 145, 561]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [95, 538, 150, 562]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7171,9 +7161,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7216,9 +7206,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7261,9 +7251,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7362,9 +7352,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7374,27 +7364,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "WHT1_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [95, 264, 145, 286]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [95, 263, 150, 287]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7404,27 +7393,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "WHT2_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [95, 449, 145, 471]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [95, 448, 150, 472]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7440,9 +7428,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7458,9 +7446,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7476,9 +7464,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7494,9 +7482,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7710,7 +7698,7 @@ Model {
 	  Name			  "L4C"
 	  Description		  "L4C Sensor"
 	  Ports			  [2, 3]
-	  Position		  [90, 470, 170, 570]
+	  Position		  [85, 470, 165, 570]
 	  BackgroundColor	  "magenta"
 	  AttributesFormatString  "%<Description>"
 	  MinAlgLoopOccurrences	  off
@@ -7719,7 +7707,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "L4C"
-	    Location		    [1203, 472, 1802, 1132]
+	    Location		    [412, 243, 1011, 903]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -7748,27 +7736,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "GN1_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [75, 259, 125, 281]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [75, 258, 130, 282]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7778,27 +7765,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "GN2_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [75, 444, 125, 466]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [75, 443, 130, 467]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -7926,9 +7912,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8007,9 +7993,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8052,9 +8038,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8107,9 +8093,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8119,27 +8105,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "WHT1_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [75, 169, 125, 191]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [75, 168, 130, 192]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8149,27 +8134,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "WHT2_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [75, 354, 125, 376]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [75, 353, 130, 377]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8185,9 +8169,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8203,9 +8187,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8221,9 +8205,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -8239,9 +8223,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -9229,8 +9213,8 @@ Model {
       MaskHideContents	      off
       System {
 	Name			"POD3"
-	Location		[366, 242, 833, 1176]
-	Open			off
+	Location		[1127, 73, 1594, 1007]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -10890,7 +10874,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "GS13"
-	    Location		    [850, 452, 1479, 1033]
+	    Location		    [161, 224, 790, 805]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -10933,27 +10917,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "GN1_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [95, 354, 145, 376]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [95, 353, 150, 377]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -10963,27 +10946,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "GN2_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [95, 539, 145, 561]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [95, 538, 150, 562]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11101,9 +11083,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11146,9 +11128,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11191,9 +11173,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11292,9 +11274,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11304,27 +11286,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "WHT1_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [95, 264, 145, 286]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [95, 263, 150, 287]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11334,27 +11315,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "WHT2_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [95, 449, 145, 471]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [95, 448, 150, 472]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11370,9 +11350,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11388,9 +11368,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11406,9 +11386,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11424,9 +11404,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11649,7 +11629,7 @@ Model {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "L4C"
-	    Location		    [1203, 472, 1802, 1132]
+	    Location		    [412, 243, 1011, 903]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -11678,27 +11658,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "GN1_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [75, 259, 125, 281]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [75, 258, 130, 282]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11708,27 +11687,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "GN2_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [75, 444, 125, 466]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [75, 443, 130, 467]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11856,9 +11834,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11937,9 +11915,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -11982,9 +11960,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12037,9 +12015,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12049,27 +12027,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "WHT1_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [75, 169, 125, 191]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [75, 168, 130, 192]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12079,27 +12056,26 @@ Model {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "WHT2_EN"
-	      Tag		      "cdsEpicsInput"
+	      Tag		      "cdsEpicsBinIn"
 	      Description	      "Purpose:                               "
-"                                               \nCreate an EPICS input channe"
-"l connection to the FE realtime controls.                 \n                 "
-"                                                                     \nOperat"
-"ion:                                                                         "
-"   \nOutputs value from an EPICS ai record. Value is floating point with a pr"
-"ecision of 3..\n                                                             "
-"                         \nUsage:                                            "
-"                                    \nName the part with the desired EPICS ch"
-"annel name.                                    "
+"                                             \nCreate an EPICS binary (0 or 1"
+") input channel to the FE realtime controls.          \n                     "
+"                                                               \nOperation:  "
+"                                                                        \nOut"
+"puts value from an EPICS ai record. Value is binary input (bi Epics record ty"
+"pe).\n                                                                       "
+"             \nUsage:                                                        "
+"                      \nName the part with the desired EPICS channel name.   "
+"                               "
 	      Ports		      [1, 1]
-	      Position		      [75, 354, 125, 376]
-	      BackgroundColor	      "green"
-	      DropShadow	      on
+	      Position		      [75, 353, 130, 377]
+	      BackgroundColor	      "darkGreen"
 	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsEpicsIn/Subsystem"
+	      SourceBlock	      "cdsEpicsBinIn/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12115,9 +12091,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12133,9 +12109,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12151,9 +12127,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -12169,9 +12145,9 @@ Model {
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsBitwise/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "on"
+	      ShowPortLabels	      on
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
+	      FunctionWithSeparateData off
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
