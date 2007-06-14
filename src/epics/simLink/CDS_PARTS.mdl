@@ -1377,7 +1377,7 @@ Library {
     }
     Block {
       BlockType		      Reference
-      Name		      "site=M1\nrate=32K\ndcuid=10"
+      Name		      "site=M1\nrate=32K\ndcuid=10\ngds_node_id=1"
       Tag		      "cdsParameters"
       Description	      "Purpose:                                       "
 "                                                                             "
