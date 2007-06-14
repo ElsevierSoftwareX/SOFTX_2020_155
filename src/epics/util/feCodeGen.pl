@@ -9,7 +9,7 @@ $site = "M1"; # Default value for the site name
 $location = "mit"; # Default value for the location name
 $rate = "60"; # In microseconds (default setting)
 $dcuId = 10; # Default dcu Id
-$gdsNodeId = 0;
+$gdsNodeId = 1;
 $ifoid = 0; # Default ifoid for the DAQ
 $nodeid = 0; # Default GDS node id for awgtpman
 
@@ -2218,7 +2218,7 @@ if ($not_found) {
 mkpath $epicsScreensDir, 0, 0755;
 my $usite = uc $site;
 my $sysname = uc($skeleton);
-$sed_arg =  "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;";
+$sed_arg =  "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;s/GDS_NODE_ID/" . ($gdsNodeId - 1) . "/g;";
 system("cat GDS_TP.adl | sed '$sed_arg' > $epicsScreensDir/$usite$sysname" . "_GDS_TP.adl");
 my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
