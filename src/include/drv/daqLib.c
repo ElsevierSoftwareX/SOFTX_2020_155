@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.26 2007/04/12 23:16:45 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.27 2007/06/19 23:38:00 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -670,7 +670,18 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		tpx = 2;
 		tpAdd = sysRate / 4;
 	}
-	for(ii=0; ii<DCU_MAX_CHANNELS && validTp < GM_DAQ_MAX_TPS; ii++)
+
+	/* See how many testpoints we've got in the table (with the gaps) */
+	/* I.e. find the last non-zero testpoint number */
+	unsigned tplimit;
+	for(tplimit = GM_DAQ_MAX_TPS; tplimit; tplimit--) {
+	  // See if find the last test point number
+	  if (gdsPtr->tp[tpx][0][tplimit - 1]) break;
+	  // Clear tp monitoring slot 
+	  if ((tplimit - 1) < 24) gdsMonitor[tplimit - 1] = 0;
+	}
+
+	for(ii=0; ii<DCU_MAX_CHANNELS && validTp < tplimit; ii++)
 	{
 		/* Get TP number from shared memory */
 		testVal = gdsPtr->tp[tpx][0][ii];
@@ -678,10 +689,11 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		/* Check if the TP selection is valid for this front end's filter module TP
 		   If it is, load the local table with the proper lookup values to find the
 		   signal and clear the TP status in shared mem.                           */
-        	if((testVal >= daqRange.filtTpMin) &&
-           	   (testVal < daqRange.filtTpMax))
+        	if(((testVal >= daqRange.filtTpMin) &&
+           	    (testVal < daqRange.filtTpMax)) || testVal == 0)
         	{
-		  jj = testVal - daqRange.filtTpMin;
+		  if (testVal == 0) jj = 0;
+		  else jj = testVal - daqRange.filtTpMin;
 		  localTable[totalChans].type = 0;
           	  localTable[totalChans].sysNum = jj / daqRange.filtTpSize;
 		  jj -= localTable[ii].sysNum * daqRange.filtTpSize;
@@ -723,7 +735,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		  totalChans ++;
 		  totalSize += tpAdd;
 		}
-
 		/* If this TP select is not valid for this front end, deselect it in the local
 		   lookup table.                                                                */
 		else
