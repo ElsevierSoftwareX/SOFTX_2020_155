@@ -48,8 +48,11 @@ install-% :: src/epics/simLink/%.mdl
 	echo Installing system=$$system site=$$site ifo=$$ifo,$$lower_ifo;\
 	echo Installing /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt;\
 	/bin/mkdir -p /cvs/cds/$$site/chans/filter_archive/$$lower_ifo/$$system;\
-	if test -e /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt; then /bin/mv -f  /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt /cvs/cds/$$site/chans/filter_archive/$$lower_ifo/$$system/$${ifo}$${upper_system}_$${cur_date}.txt || exit 1; fi;\
-	/bin/cp build/$${system}epics/config/$${ifo}$${upper_system}.txt /cvs/cds/$$site/chans;\
+	if test -e /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt; then /bin/mv -f  /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt /cvs/cds/$$site/chans/filter_archive/$$lower_ifo/$$system/$${ifo}$${upper_system}_$${cur_date}.txt || exit 1; \
+	head -4 build/$${system}epics/config/$${ifo}$${upper_system}.txt > /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt;\
+	/bin/grep '^# MODULES' build/$${system}epics/config/$${ifo}$${upper_system}.txt >> /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt;\
+	tail -n +4 /cvs/cds/$$site/chans/filter_archive/$$lower_ifo/$$system/$${ifo}$${upper_system}_$${cur_date}.txt | grep -v '^# MODULES' >> /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt;\
+	fi;\
 	echo Installing /cvs/cds/$$site/target/$${system}epics;\
 	/bin/mkdir -p /cvs/cds/$$site/target_archive;\
 	if test -e /cvs/cds/$$site/target/$${system}epics; then /bin/mv -f /cvs/cds/$$site/target/$${system}epics /cvs/cds/$$site/target_archive/$${system}epics_$$cur_date || exit 2; fi;\
