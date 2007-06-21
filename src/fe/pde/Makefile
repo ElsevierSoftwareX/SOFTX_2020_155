@@ -3,14 +3,18 @@ include /opt/rtldk-2.2/rtlinuxpro/rtl.mk
 
 
 TARGET_RTL := pdefe.rtl
-LIBRARY_OBJS := map.o
-LDFLAGS_$(TARGET_RTL) := $(LIBRARY_OBJS)
+LIBRARY_OBJS := map.o myri.o fb.o
+LDFLAGS_$(TARGET_RTL) := -g $(LIBRARY_OBJS)
 
 $(TARGET_RTL): $(LIBRARY_OBJS)
 
 pdefe.o: ../controller.c
 	$(CC) $(CFLAGS) -c $< -o $@
 map.o: ../map.c
+	$(CC) $(CFLAGS) -D__KERNEL__ -c $<
+myri.o: ../myri.c
+	$(CC) $(CFLAGS) -D__KERNEL__ -c $<
+fb.o: ../fb.c
 	$(CC) $(CFLAGS) -D__KERNEL__ -c $<
 fm10Gen.o: fm10Gen.c
 	$(CC) $(CFLAGS) -D__KERNEL__ -DSERVO32K -c $<
