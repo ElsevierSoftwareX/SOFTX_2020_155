@@ -102,7 +102,7 @@ sub frontEndCode {
 
         $calcExp .= "if((\L$::xpartName[$i]_freq \!= ";
         $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_FREQ) \&\& ";
-        $calcExp .= "((cycle + 1) == \UFE_RATE))\n";
+        $calcExp .= "((clock16K + 1) == \UFE_RATE))\n";
         $calcExp .= "{\n";
         $calcExp .= "\t\L$::xpartName[$i]_freq = ";
         $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_FREQ;\n";
