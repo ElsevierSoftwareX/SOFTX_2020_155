@@ -255,6 +255,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 	   {
 		if($partInput[$ii][$jj] eq $xpartName[$kk])
 		{
+			#print "Part Input Number $xpartName[$ii] $jj eq $kk\n";
 			$partInNum[$ii][$jj] = $kk;
 			$partInputType[$ii][$jj] = $partType[$kk];
                        	$partSysFromx[$ii][$jj] = -1;
@@ -267,6 +268,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 for($ii=0;$ii<$partCnt;$ii++)
 {
 $foundCon = 0;
+$foundSysCon = 0;
 	if($partType[$ii] eq "OUTPUT")
 	{
 	for($jj=0;$jj<$partOutCnt[$ii];$jj++)
@@ -283,12 +285,12 @@ $foundCon = 0;
 			#$partOutput[$ii][$jj] = $xpartName[$kk];
 			#$partOutNum[$ii][$jj] = $kk;
 			$partSysFrom[$kk] = $partSubNum[$ii];
-			# print "Connection from $xpartName[$ii] $fromNum $fromPort to $xpartName[$kk] $toNum $toPort\n";
-			#print"\t$xpartName[$fromNum] $fromPort to $xpartName[$toNum] $toPort\n";
-                       $fromNum = $partInNum[$ii][$jj];
-                       $fromPort = $partInputPort[$ii][$jj];
+                       $fromNum = $partInNum[$ii][0];
+                       $fromPort = $partInputPort[$ii][0];
                        $toNum = $partOutNum[$kk][$ll];
                        $toPort = $partOutputPort[$kk][$ll];
+			#print "Connection from $xpartName[$ii] $jj $fromNum $fromPort to $xpartName[$kk] $toNum $toPort\n";
+			#print"\t$xpartName[$fromNum] $fromPort to $xpartName[$toNum] $toPort\n";
 			for($vv=0;$vv<$partOutCnt[$fromNum];$vv++)
 			{
 				if($partOutput[$fromNum][$vv] eq $xpartName[$ii])
@@ -308,7 +310,7 @@ $foundCon = 0;
                        $partInputType[$kk][0] = "SUBSYS";
                        $partInNum[$kk][0] = $partSubNum[$ii];
 
-			$foundCon = 1;
+			$foundSysCon = 1;
 		}
 		}
 		}
@@ -360,7 +362,7 @@ $foundCon = 0;
 	}
 
 	# Did not find any connections to subsystem OUTPUT, so print error.
-	if($foundCon == 0){
+	if($foundCon == 0 && $foundSysCon == 0){
 	print "No connect for $xpartName[$ii]\n";
 	}
 	}
@@ -458,7 +460,7 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 					$toNum = $partOutNum[$kk][$ll];
 					$toPort = $partOutputPort[$kk][$ll];
 					$toPort1 = $partOutputPortUsed[$kk][$ll];
-				#print "Found nonADC connect from $xpartName[$xx] port $mm to $xpartName[$toNum] $partInputPort[$xx][$jj]\n";
+				#print "Found nonADC connect from $xpartName[$xx] port $mm to $xpartName[$toNum] $partInputPort[$xx][$jj] $partOutput[$xx][$jj]\n";
 					$partInNum[$toNum][$toPort] = $xx;
 					$partInput[$toNum][$toPort] = $xpartName[$xx];
 					$partInputPort[$toNum][$toPort] = $toPort1;
