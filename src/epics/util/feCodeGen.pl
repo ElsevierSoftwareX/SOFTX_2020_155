@@ -28,6 +28,8 @@ if (@ARGV > 3) {
 		$location = "llo";
 	} elsif ($site =~ /^C/) {
 		$location = "caltech";
+	} elsif ($site =~ /^S/) {
+		$location = "stanford";
 	}
 }
 if (@ARGV > 4) {
