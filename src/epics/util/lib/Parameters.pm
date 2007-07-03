@@ -30,6 +30,8 @@ sub printHeaderStruct {
                 			$::location = "llo";
         			} elsif ($::site =~ /^C/) {
                 			$::location = "caltech";
+        			} elsif ($::site =~ /^S/) {
+                			$::location = "stanford";
         			}
 			} elsif ($spp[0] eq "rate") {
 				print "Rate set to $spp[1]\n";
