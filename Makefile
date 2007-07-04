@@ -71,6 +71,8 @@ install-% :: src/epics/simLink/%.mdl
 	/bin/chmod +x /cvs/cds/$$site/scripts/start$${system};\
 	echo '#!/bin/bash' > /cvs/cds/$$site/scripts/kill$${system};\
 	/bin/chmod +x /cvs/cds/$$site/scripts/kill$${system};\
+	echo 'cur_date=`date +%y%m%d_%H%M%S`' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'burtrb -f /cvs/cds/'$${site}'/target/'$${system}'epics/autoBurt.req -o /tmp/'$${system}'_burt_'$${cur_date}'.snap -l /tmp/'$${system}'_burt_'$${cur_date}'.log -v' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo /cvs/cds/$$site/scripts/kill$${system} >> /cvs/cds/$$site/scripts/start$${system};\
 	echo sleep 5 >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'sudo killall ' $${system}epics $${system}fe.rtl awgtpman >> /cvs/cds/$$site/scripts/kill$${system};\
@@ -78,6 +80,7 @@ install-% :: src/epics/simLink/%.mdl
 	echo /cvs/cds/$$site/target/$${system}/startup.cmd >> /cvs/cds/$$site/scripts/start$${system};\
 	echo '(cd /cvs/cds/'$$site'/target/gds && ./startup_'$${system}'.cmd)' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'sleep 5; sudo killall daqd' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'burtwb -f /tmp/'$${system}'_burt_'$${cur_date}'.snap -l /tmp/'$${system}'_restore_'$${cur_date}'.log -v' >> /cvs/cds/$$site/scripts/start$${system};\
 	
 
 install-daq-% :: src/epics/simLink/%.mdl
@@ -97,6 +100,8 @@ install-daq-% :: src/epics/simLink/%.mdl
 	/bin/mkdir -p  /cvs/cds/$${site}/target/gds/param/archive ;\
 	if test -e /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par; then /bin/mv -f /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par /cvs/cds/$${site}/target/gds/param/archive/tpchn_M$${gds_file_node}_$${cur_date}.par || exit 1; fi;\
 	/bin/cp -p build/$${system}epics/$${system}.par /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par ;\
+	echo '#!/bin/bash' > /cvs/cds/$${site}/target/gds/startup_$${system}.cmd ;\
+	echo 'cd /cvs/cds/'$${site}'/target/gds; sudo /cvs/cds/'$${site}'/target/gds/bin/awgtpman -s '$${system}' > '$${system}'.log 2>& 1 &' >> /cvs/cds/$${site}/target/gds/startup_$${system}.cmd ;\
 	echo Updating DAQ configuration file ;\
 	echo /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ;\
 	/bin/mkdir -p  /cvs/cds/$${site}/chans/daq ;\
