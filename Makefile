@@ -72,7 +72,7 @@ install-% :: src/epics/simLink/%.mdl
 	echo '#!/bin/bash' > /cvs/cds/$$site/scripts/kill$${system};\
 	/bin/chmod +x /cvs/cds/$$site/scripts/kill$${system};\
 	echo 'cur_date=`date +%y%m%d_%H%M%S`' >> /cvs/cds/$$site/scripts/start$${system};\
-	echo 'burtrb -f /cvs/cds/'$${site}'/target/'$${system}'epics/autoBurt.req -o /tmp/'$${system}'_burt_'$${cur_date}'.snap -l /tmp/'$${system}'_burt_'$${cur_date}'.log -v' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'burtrb -f /cvs/cds/'$${site}'/target/'$${system}'epics/autoBurt.req -o /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_burt_$${cur_date}.log -v' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo /cvs/cds/$$site/scripts/kill$${system} >> /cvs/cds/$$site/scripts/start$${system};\
 	echo sleep 5 >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'sudo killall ' $${system}epics $${system}fe.rtl awgtpman >> /cvs/cds/$$site/scripts/kill$${system};\
@@ -80,7 +80,7 @@ install-% :: src/epics/simLink/%.mdl
 	echo /cvs/cds/$$site/target/$${system}/startup.cmd >> /cvs/cds/$$site/scripts/start$${system};\
 	echo '(cd /cvs/cds/'$$site'/target/gds && ./startup_'$${system}'.cmd)' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'sleep 5; sudo killall daqd' >> /cvs/cds/$$site/scripts/start$${system};\
-	echo 'burtwb -f /tmp/'$${system}'_burt_'$${cur_date}'.snap -l /tmp/'$${system}'_restore_'$${cur_date}'.log -v' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'burtwb -f /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_restore_$${cur_date}.log -v' >> /cvs/cds/$$site/scripts/start$${system};\
 	
 
 install-daq-% :: src/epics/simLink/%.mdl
