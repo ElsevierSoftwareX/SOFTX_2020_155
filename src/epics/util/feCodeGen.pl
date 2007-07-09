@@ -1452,7 +1452,7 @@ for($ii=0;$ii<32;$ii++)
 }
 print EPICS "OUTVARIABLE USR_TIME epicsOutput.diags[0] int ai 0\n";
 print EPICS "OUTVARIABLE RESYNC_COUNT epicsOutput.diags[1] int ai 0\n";
-print EPICS "OUTVARIABLE NET_ERR_COUNT epicsOutput.diags[2] int ai 0\n";
+print EPICS "OUTVARIABLE FB_NET_STATUS epicsOutput.diags[2] int ai 0\n";
 print EPICS "OUTVARIABLE DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0\n";
 print EPICS "\n\n";
 #Load EPICS I/O Parts
