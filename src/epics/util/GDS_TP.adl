@@ -1,12 +1,12 @@
 
 file {
-	name="/home/aivanov/cds/advLigo/src/epics/util/GDS_TP.adl"
+	name="/usr1/rolf/cds/advLigo/src/epics/util/GDS_TP.adl"
 	version=030003
 }
 display {
 	object {
 		x=180
-		y=396
+		y=471
 		width=920
 		height=530
 	}
@@ -176,22 +176,6 @@ rectangle {
 	}
 	label="Diag Reset"
 	release_msg="1"
-}
-"text update" {
-	object {
-		x=175
-		y=79
-		width=25
-		height=18
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-NET_ERR_COUNT"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
 }
 "message button" {
 	object {
@@ -1711,21 +1695,6 @@ text {
 	}
 	textix="DAQ Net"
 }
-byte {
-	object {
-		x=140
-		y=80
-		width=30
-		height=14
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DIAG_WORD"
-		clr=20
-		bclr=60
-	}
-	sbit=2
-	ebit=2
-}
 "text update" {
 	object {
 		x=563
@@ -2965,4 +2934,58 @@ text {
 	}
 	clr=14
 	bclr=24
+}
+byte {
+	object {
+		x=141
+		y=71
+		width=55
+		height=10
+	}
+	monitor {
+		chan="C2:OMS-FB_NET_STATUS"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+	ebit=1
+}
+byte {
+	object {
+		x=141
+		y=86
+		width=55
+		height=10
+	}
+	monitor {
+		chan="C2:OMS-FB_NET_STATUS"
+		clr=60
+		bclr=20
+	}
+	sbit=2
+	ebit=3
+}
+text {
+	object {
+		x=110
+		y=72
+		width=20
+		height=12
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="FB0"
+}
+text {
+	object {
+		x=110
+		y=86
+		width=20
+		height=12
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="FB1"
 }
