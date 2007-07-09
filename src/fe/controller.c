@@ -124,6 +124,8 @@ extern unsigned int cpu_khz;
 
 #ifndef NO_DAQ
 DAQ_RANGE daq;			/* Range settings for daqLib.c		*/
+int numFb = 0;
+extern int fbStat[2];
 #endif
 
 rtl_pthread_t wthread;
@@ -184,6 +186,17 @@ int run_on_timer = 0;
 // Initial diag reset flag
 int initialDiagReset = 1;
 
+// DIAGNOSTIC_RETURNS_FROM_FE 
+#define FE_NO_ERROR		0x0
+#define FE_SYNC_ERR		0x1
+#define FE_ADC_HOLD_ERR		0x2
+#define FE_FB0_NOT_ONLINE	0x4
+#define FE_PROC_TIME_ERR	0x8
+#define FE_ADC_SYNC_ERR		0xf0
+#define FE_FB_AVAIL		0x1
+#define FE_FB_ONLINE		0x2
+#define FE_MAX_FB_QUE		0x10
+
 #if 0
 // **************************************************************************
 // Interrupt handler if using interrupts for ADC module
@@ -239,7 +252,6 @@ void *fe_start(void *arg)
   int timeHoldMax = 0;
   int myGmError2 = 0;
   int attemptingReconnect = 0;
-  int netRestored = 0;
   int status;
   float onePps;
   int onePpsHi = 0;
@@ -251,7 +263,6 @@ void *fe_start(void *arg)
   int netRetry;
   float xExc[10];
   static int skipCycle = 0;
-  static int dropSends = 0;
   int diagWord = 0;
   int epicsCycle = 0;
   int system = 0;
@@ -289,6 +300,9 @@ void *fe_start(void *arg)
   // Need this FE dcuId to make connection to FB
   dcuId = pLocalEpics->epicsInput.dcuId;
 
+  pLocalEpics->epicsOutput.diagWord = 0;
+
+
 #ifdef PNM
   dcuId = 9;
 #endif
@@ -297,26 +311,16 @@ void *fe_start(void *arg)
   printf("Waiting for Network connect to FB - %d\n",dcuId);
   netRetry = 0;
   status = cdsDaqNetReconnect(dcuId);
+  printf("Reconn status = %d %d\n",status,numFb);
   do{
 	usleep(10000);
 	status = cdsDaqNetCheckReconnect();
 	netRetry ++;
-  }while((status != 0) && (netRetry < 10));
+  }while((status < numFb) && (netRetry < 10));
+  printf("Reconn Check = %d %d\n",status,numFb);
 
-  // If there is no answer from FB for connection request, continue,
-  // but mark net as bad and needs retry later.
-  if(netRetry >= 10)
-  {
-  	printf("Net Connect to FB FAILED!!! - %d\n",dcuId);
-	// Set error flag, which will cause daqLib to quit sending
-	// data to FB until problem is fixed.
-	myGmError2 = 1;
-	attemptingReconnect = 2;
-	rdtscl(cpuClock[8]);
-	netRestored = 0;
-	printf("Net fail - recon try\n");
-	pLocalEpics->epicsOutput.diagWord |= 4;
-  }
+  if(fbStat[0] & 1) fbStat[0] = 3;
+  if(fbStat[1] & 1) fbStat[1] = 3;
 #endif
 
   /* Initialize filter banks */
@@ -369,7 +373,6 @@ void *fe_start(void *arg)
   // Set an xtra TP to read out one pps signal
   testpoint[0] = (float *)&onePps;
 #endif
-  pLocalEpics->epicsOutput.diagWord = 0;
   pLocalEpics->epicsOutput.diags[1] = 0;
   pLocalEpics->epicsOutput.diags[2] = 0;
 
@@ -437,17 +440,6 @@ void *fe_start(void *arg)
     // Trigger the ADC to start running
     gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
   } else {
-#if 0
-    // Pause until this second ends
-    struct timespec next;
-    clock_gettime(CLOCK_REALTIME, &next);
-    printf("Start time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
-    next.tv_nsec = 0;
-    next.tv_sec += 1;
-    clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
-    clock_gettime(CLOCK_REALTIME, &next);
-    printf("Running time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
-#endif
     printf("*******************************\n");
     printf("* Running with RTLinux timer! *\n");
     printf("*******************************\n");
@@ -531,8 +523,8 @@ void *fe_start(void *arg)
 	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
           timeHold = 0;
 	  pLocalEpics->epicsOutput.adcWaitTime = adcHoldTime;
-	  if(adcHoldTime > CYCLE_TIME_ALRM) diagWord |= 2;
-	  if(timeHoldMax > CYCLE_TIME_ALRM) diagWord |= 8;
+	  if(adcHoldTime > CYCLE_TIME_ALRM) diagWord |= FE_ADC_HOLD_ERR;
+	  if(timeHoldMax > CYCLE_TIME_ALRM) diagWord |= FE_PROC_TIME_ERR;
   	  if(pLocalEpics->epicsInput.diagReset || initialDiagReset)
 	  {
 		initialDiagReset = 0;
@@ -642,7 +634,7 @@ void *fe_start(void *arg)
 	if(onePps < 4000) onePpsHi = 0;  
 	// Check if front end continues to be in sync with 1pps
 	// If not, set sync error flag
-	if(pLocalEpics->epicsOutput.onePps > 4) diagWord |= 1;
+	if(pLocalEpics->epicsOutput.onePps > 4) diagWord |= FE_SYNC_ERR;
 
 	if(!skipCycle)
  	{
@@ -706,60 +698,61 @@ void *fe_start(void *arg)
 		// Call daqLib
 		pLocalEpics->epicsOutput.diags[3] = 
 			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
-		if(!attemptingReconnect)
+		// Check if any messages received and get xmit que count.
+		status = cdsDaqNetCheckCallback();
+		// If callbacks pending count is high, FB must not be responding.
+		// Check FB0
+		if(((status & 0xff) > FE_MAX_FB_QUE) && (fbStat[0] & FE_FB_ONLINE))
 		{
-			// Check and clear network callbacks.
-			status = cdsDaqNetCheckCallback();
-			dropSends = 0;
-			// If callbacks pending count is high, try to fix net connection.
-			if(status > 4)
+			printf("Net fail to fb0 \n");
+			// Set error flag
+			attemptingReconnect = 1;
+			// Send FB status to on net, but not online.
+			fbStat[0] = 0x1;
+		}
+		// Check FB1
+		if((((status >> 8) & 0xff) > FE_MAX_FB_QUE) && (fbStat[1] & FE_FB_ONLINE))
+		{
+			printf("Net fail to fb1 - recon try\n");
+			// Set error flag
+			attemptingReconnect = 1;
+			// Send FB status to on net, but not online.
+			fbStat[1] = 0x1;
+		}
+
+		// Check if any FB have returned to net as indicated by reduced send que count
+		if((attemptingReconnect) && (clock16K == 1000)) 
+		{
+			// Check FB0
+			if(((status & 0xff) < FE_MAX_FB_QUE) && (fbStat[0] == FE_FB_AVAIL))
 			{
-				// Set error flag, which will cause daqLib to quit sending
-				// data to FB until problem is fixed.
-				myGmError2 = 1;
-				attemptingReconnect = 2;
-				// Send a reconnect request to FB.
+				// Set fbStat to include recon bit needed by myri.c code
+				fbStat[0] = 5;
+				// Send recon message to FB
 				status = cdsDaqNetReconnect(dcuId);
-				netRestored = 0;
-				printf("Net fail - recon try\n");
-				diagWord |= 4;
-        			rdtscl(cpuClock[8]);
+				// printf("Send recon command fb0\n");
+			}
+			// Check FB1
+			if((((status >> 8) & 0xff) < FE_MAX_FB_QUE) && (fbStat[1] == FE_FB_AVAIL))
+			{
+				// Set fbStat to include recon bit needed by myri.c code
+				fbStat[1] = 5;
+				// Send recon message to FB
+				status = cdsDaqNetReconnect(dcuId);
+				// printf("Send recon command fb1\n");
 			}
 		}
-		// If net reconnect requested, check for receipt of return message from FB
-		if(attemptingReconnect == 2) 
+		// Once per second, check if FB are back on line
+		if((attemptingReconnect) && (clock16K == 0)) 
 		{
-			diagWord |= 4;
-			status = cdsDaqNetCheckReconnect();
-			if(status == 0)
-			{
-				netRestored = NET_SEND_WAIT;
+			// Clear error flag
+			attemptingReconnect = 0;
+			if((fbStat[0] & FE_FB_AVAIL) && ((fbStat[0] & FE_FB_ONLINE) == 0))
+				// Set error flag
 				attemptingReconnect = 1;
-				printf("Net recon established\n");
-				dropSends = 0;
-			}
-			if((status != 0) && (!clock1Min))
-			{
-					dropSends = 1;
-			}
-		}
-		// If net successfully reconnected, wait 4-5sec before restoring xmission of DAQ data.
-		// This is done to make sure that the callback counter is cleared below the
-		// error set point.
-		if(attemptingReconnect == 1) 
-		{
-			netRestored --;
-			// Reduce the callback counter.
-			status = cdsDaqNetCheckCallback();
-			// Go back to sending DAQ data.
-			if(netRestored <= 0)
-			{
-				netRestored = 0;
-				attemptingReconnect = 0;		
-				myGmError2 = 0;
-				printf("Continue sending DAQ data\n");
-				pLocalEpics->epicsOutput.diags[2] = 0;
-			}
+			if((fbStat[1] & FE_FB_AVAIL) && ((fbStat[1] & FE_FB_ONLINE) == 0))
+				// Set error flag
+				attemptingReconnect = 1;
 		}
 	}
 #endif
@@ -794,16 +787,9 @@ void *fe_start(void *arg)
         if((subcycle == 0) && (daqCycle == 14))
         {
 	  pLocalEpics->epicsOutput.diags[0] = usrHoldTime;
+	  // Create FB status word for return to EPICS
+  	  pLocalEpics->epicsOutput.diags[2] = (fbStat[1] & 3) * 4 + (fbStat[0] & 3);
 	  usrHoldTime = 0;
-#ifndef NO_DAQ
-	  if(attemptingReconnect && ((cdsNetStatus != 0) || (dropSends != 0)))
-	  {
-		status = cdsDaqNetReconnect(dcuId);
-		cdsNetStatus = 0;
-		pLocalEpics->epicsOutput.diags[2] ++;
-		dropSends = 0;
-	  }
-#endif
   	  if(pLocalEpics->epicsInput.syncReset)
 	  {
 		pLocalEpics->epicsInput.syncReset = 0;
@@ -998,11 +984,12 @@ int main(int argc, char **argv)
  
 #ifndef NO_DAQ
 	printf("Initializing Network\n");
-	status = cdsDaqNetInit(2);
-	if (status <= 0) {
+	numFb = cdsDaqNetInit(2);
+	if (numFb <= 0) {
 		printf("Couldn't initialize Myrinet network connection\n");
 		return 0;
 	}
+	printf("Found %d frameBuilders on network\n",numFb);
 #endif
 #if 0
         /* initialize the semaphore */
