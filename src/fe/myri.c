@@ -13,25 +13,39 @@
 static void *netOutBuffer;			/* Buffer for outbound myrinet messages */
 static void *netInBuffer;			/* Buffer for incoming myrinet messages */
 static void *netDmaBuffer;			/* Buffer for outbound myrinet DMA messages */
-gm_remote_ptr_t directed_send_addr;		/* Pointer to FB memory block */
-gm_remote_ptr_t directed_send_subaddr[16];	/* Pointers to FB 1/16 sec memory blocks */
+gm_remote_ptr_t directed_send_addr[2];		/* Pointer to FB memory block */
+gm_remote_ptr_t directed_send_subaddr[2][16];	/* Pointers to FB 1/16 sec memory blocks */
 gm_recv_event_t *event;
+gm_remote_ptr_t test_send_addr;		/* Pointer to FB memory block */
 
 int my_board_num = 0;                 		/* Default board_num is 0 */
-gm_u32_t receiver_node_id;
+gm_u32_t receiver_node_id[4];
 gm_u32_t receiver_global_id;
 gm_status_t main_status;
 void *recv_buffer;
 unsigned int size;
 gm_s_e_id_message_t *id_message;
 gm_u32_t recv_length;
-static int expected_callbacks = 0;
+static int expected_callbacks[2] = {0,0};
 static struct gm_port *netPort = 0;
 daqMessage *daqSendMessage;
 daqData *daqSendData;
 
 /* Local GM port we are using to send DAQ data */
 int local_gm_port = 0;
+
+int fbStat[2] = {0,0};
+enum FB_STATS {
+	FB_NOT_ON_NET = 0,
+	FB_ON_NET,
+	FB_CONNECTED,
+	FB_ONLINE,
+	FB_NEEDS_RECON,
+	FB_INIT,
+	FB_NOOP1,
+	FB_NOOP2,
+	FB_PENDING
+};
 
 // *****************************************************************
 // Called by gm_unknown().
@@ -48,33 +62,37 @@ my_send_callback (struct gm_port *port, void *the_context,
   switch (the_status)
     {                                
     case GM_SUCCESS:
+       // printk ("**** SUCC \n");
+
       break;
         
     case GM_SEND_DROPPED:
-      // cdsNetStatus = (int)the_status;
-      // printk ("**** Send dropped!\n");
+       // cdsNetStatus = (int)the_status;
+       printk ("**** Send dropped in callaback!\n");
       break;
           
     default:
 	cdsNetStatus = (int)the_status;
   	gm_drop_sends 	(netPort,
                          GM_DAQ_PRIORITY,
-                         receiver_node_id,
+                         receiver_node_id[0],
                          GM_PORT_NUM_RECV,
                          my_send_callback,
-                         &expected_callbacks);
-      // gm_perror ("Send completed with error", the_status);
+                         &expected_callbacks[0]);
+       printk ("**** Send error! %d\n",the_status);
+       gm_perror ("Send completed with error", the_status);
     }
 }
+
 
 int myriNetDrop()
 {
 gm_drop_sends   (netPort,
                          GM_DAQ_PRIORITY,
-                         receiver_node_id,
+                         receiver_node_id[0],
                          GM_PORT_NUM_RECV,
                          my_send_callback,
-                         &expected_callbacks);
+                         &expected_callbacks[0]);
 return(0);
 }
 
@@ -84,30 +102,14 @@ return(0);
 int myriNetInit(int fbId)
 {
   int i;
-  char receiver_nodename[64];
+  char receiver_nodename[4][64];
+  int status;
 
   // Initialize interface
   gm_init();
 
-#if 0
-  /* Open a port on our local interface. */
-  switch(fbId)
-  {
-	case GWAVE111:
-		gm_strncpy (receiver_nodename, "fb", sizeof (receiver_nodename) - 1);
-	  	break;
-	case GWAVE83:
-		gm_strncpy (receiver_nodename, "gwave-83", sizeof (receiver_nodename) - 1);
-	  	break;
-	case GWAVE122:
-		gm_strncpy (receiver_nodename, "gwave-211", sizeof (receiver_nodename) - 1);
-	  	break;
-	default:
-		return(-1);
-		break;
-  }
-#endif
-  gm_strncpy (receiver_nodename, "fb", sizeof (receiver_nodename) - 1);
+  gm_strncpy (receiver_nodename[0], "fb", sizeof (receiver_nodename[0]) - 1);
+  gm_strncpy (receiver_nodename[1], "fb1", sizeof (receiver_nodename[1]) - 1);
 
   /* Try upto four GM ports */
   for (i = 0; i < 4; i++) {
@@ -159,32 +161,26 @@ int myriNetInit(int fbId)
   gm_provide_receive_buffer (netPort, netInBuffer, GM_RCV_MESSAGE_SIZE,
                              GM_DAQ_PRIORITY);
 
-
-  main_status = gm_host_name_to_node_id_ex
-    (netPort, 10000000, receiver_nodename, &receiver_node_id);
-  if (main_status == GM_SUCCESS)
-    {
-      printk ("[send] receiver node ID is %d\n", receiver_node_id);
+  status = 0;
+  for (i = 0; i < 2; i++) {
+	  fbStat[i] = FB_NOT_ON_NET;
+	  main_status = gm_host_name_to_node_id_ex
+	    (netPort, 1000000, receiver_nodename[i], &receiver_node_id[i]);
+	  if (main_status == GM_SUCCESS)
+	    {
+		status |= (1 << i);
+		fbStat[i] = FB_INIT;
+	      	printk ("receiver node ID is %d %d\n", receiver_node_id[i],fbStat[i]);
+	    }
+	  else
+	    {
+	      printk ("[send] Conversion of nodename %s to node id failed\n",
+			 receiver_nodename[i]);
+	      gm_perror ("[send]", main_status);
+		fbStat[i] = 0;
+	    }
     }
-  else
-    {
-      printk ("[send] Conversion of nodename %s to node id failed\n",
-                 receiver_nodename);
-      gm_perror ("[send]", main_status);
-    }
-
-#if 0
-  // Send message to FB requesting DMA memory location for DAQ data.
-  status = myriNetReconnect();
-  // Wait for return message from FB.
-  do{
-    status = myriNetCheckReconnect();
-  }while(status != 0);
-#endif
-
-return(1);
-
-
+    return(status);
 }
 
 // *****************************************************************
@@ -213,31 +209,54 @@ int myriNetClose()
 // *****************************************************************
 int myriNetCheckCallback()
 {
-  if (expected_callbacks)
-    {
+int ii,jj;
+int status;
+int rnid;
+
       event = gm_receive (netPort);
 
       switch (GM_RECV_EVENT_TYPE(event))
-        {
-        case GM_RECV_EVENT:
-        case GM_PEER_RECV_EVENT:
-        case GM_FAST_PEER_RECV_EVENT:
-          // printk ("[send] Receive Event (UNEXPECTED)\n");
+	{
+	case GM_RECV_EVENT:
+	case GM_PEER_RECV_EVENT:
+	case GM_FAST_PEER_RECV_EVENT:
 
-          recv_buffer = gm_ntohp (event->recv.buffer);
-          size = (unsigned int)gm_ntoh_u8 (event->recv.size);
-          gm_provide_receive_buffer (netPort, recv_buffer, size,
-                                     GM_DAQ_PRIORITY);
-          main_status = GM_FAILURE; /* Unexpected incoming message */
+	  recv_buffer = gm_ntohp (event->recv.buffer);
+	  size = (unsigned int)gm_ntoh_u8 (event->recv.size);
+	  gm_provide_receive_buffer (netPort, recv_buffer, size,
+				     GM_DAQ_PRIORITY);
+          id_message = gm_ntohp (event->recv.message);
+          receiver_global_id = gm_ntoh_u32(id_message->global_id);
+          main_status = gm_global_id_to_node_id(netPort,
+                                                receiver_global_id,
+                                                &rnid);
+          if (main_status != GM_SUCCESS)
+            {
+              gm_perror ("[send] Couldn't convert global ID to node ID",
+                         main_status);
+		break;
+            }
+	  jj=0;
+	  for(ii=0;ii<2;ii++)
+	  {
+		if(receiver_node_id[ii] == rnid) 
+		{
+			jj=ii;
+			fbStat[ii] = FB_ONLINE;
+		}
+	  }
+          directed_send_addr[jj] =
+            gm_ntoh_u64(id_message->directed_recv_buffer_addr);
+          for(ii=0;ii<16;ii++) directed_send_subaddr[jj][ii] = directed_send_addr[jj] + GM_DAQ_XFER_BYTE * ii;
 
-        case GM_NO_RECV_EVENT:
-          break;
+		case GM_NO_RECV_EVENT:
+		  break;
 
-        default:
-          gm_unknown (netPort, event);  /* gm_unknown calls the callback */
-	}
-   }
-  return(expected_callbacks);
+		default:
+		  gm_unknown (netPort, event);  /* gm_unknown calls the callback */
+		}
+  status = (expected_callbacks[1] << 8) + expected_callbacks[0];
+  return(status);
 
 }
 
@@ -248,7 +267,8 @@ int myriNetCheckCallback()
 int myriNetReconnect(int dcuId)
 {
   unsigned long send_length;
-
+  int ii,status;
+  
   daqSendMessage = (daqMessage *)netOutBuffer;
   sprintf (daqSendMessage->message, "STT");
   daqSendMessage->dcuId = htonl(dcuId);
@@ -258,17 +278,26 @@ int myriNetReconnect(int dcuId)
   daqSendMessage->dataBlockSize = htonl(GM_DAQ_XFER_BYTE);
 
   send_length = (unsigned long) sizeof(*daqSendMessage);
-  gm_send_with_callback (netPort,
+  status = 0;
+  for(ii=0;ii<2;ii++)
+  {
+	if(fbStat[ii] & FB_NEEDS_RECON)
+	{
+	  gm_send_with_callback (netPort,
                          netOutBuffer,
                          GM_RCV_MESSAGE_SIZE,
                          send_length,
                          GM_DAQ_PRIORITY,
-                         receiver_node_id,
+                         receiver_node_id[ii],
                          GM_PORT_NUM_RECV,
                          my_send_callback,
-                         &expected_callbacks);
-  expected_callbacks ++;
-  return(expected_callbacks);
+                         &expected_callbacks[ii]);
+	  expected_callbacks[ii] ++;
+	  fbStat[ii] &= ~(FB_NEEDS_RECON);
+	  status ++;
+	}
+  }
+  return(status);
 }
 
 // *****************************************************************
@@ -281,10 +310,13 @@ int myriNetCheckReconnect()
 int eMessage;
 
   eMessage = -1;
-  int ii;
+  int ii,jj;
+  int rnid;
 
+      jj = 1;
       event = gm_receive (netPort);
       recv_length = gm_ntoh_u32 (event->recv.length);
+// printk("rcv leng in calback = %d\n",recv_length);
 
       switch (GM_RECV_EVENT_TYPE(event))
         {
@@ -302,17 +334,28 @@ int eMessage;
 
           id_message = gm_ntohp (event->recv.message);
           receiver_global_id = gm_ntoh_u32(id_message->global_id);
-          directed_send_addr =
-            gm_ntoh_u64(id_message->directed_recv_buffer_addr);
-          for(ii=0;ii<16;ii++) directed_send_subaddr[ii] = directed_send_addr + GM_DAQ_XFER_BYTE * ii;
           main_status = gm_global_id_to_node_id(netPort,
                                                 receiver_global_id,
-                                                &receiver_node_id);
+                                                &rnid);
           if (main_status != GM_SUCCESS)
             {
               gm_perror ("[send] Couldn't convert global ID to node ID",
                          main_status);
+		return(0);
             }
+	  for(ii=0;ii<2;ii++)
+	  {
+		if(receiver_node_id[ii] == rnid) 
+		{
+			jj=ii;
+			fbStat[ii] = FB_ONLINE;
+		}
+	  }
+printk("rcvd reply from fb %d %d %d %d\n",rnid,jj,fbStat[0],fbStat[1]);
+          directed_send_addr[jj] =
+            gm_ntoh_u64(id_message->directed_recv_buffer_addr);
+printk("rcvd reply from fb  %d 0x%x\n",jj,directed_send_addr[jj]);
+          for(ii=0;ii<16;ii++) directed_send_subaddr[jj][ii] = directed_send_addr[jj] + GM_DAQ_XFER_BYTE * ii;
 
           eMessage = 0;
 
@@ -330,6 +373,9 @@ int eMessage;
         default:
           gm_unknown (netPort, event);  /* gm_unknown calls the callback */
         }
+  eMessage = 0;
+  if(fbStat[0] == FB_ONLINE) eMessage ++;
+  if(fbStat[1] == FB_ONLINE) eMessage +=2;
   return(eMessage);
 }
 
@@ -351,7 +397,7 @@ int myriNetDaqSend(	int dcuId,
 
   unsigned int *daqDataBuffer;
   int send_length;
-  int kk;
+  int ii,kk;
   int xferWords;
 
   // Load data into xmit buffer from daqLib buffer.
@@ -364,20 +410,27 @@ int myriNetDaqSend(	int dcuId,
 	daqSendData->data[kk] = *daqDataBuffer;
 	daqDataBuffer ++;
   }
-  directed_send_subaddr[0] = directed_send_addr + xferSize * subCycle;
+  for(ii=0;ii<2;ii++)
+  {
+      if(fbStat[ii] == FB_ONLINE)
+      {
+// printk("Sending data to %d %d\n",ii,fbStat[ii]);
+	  directed_send_subaddr[ii][0] = directed_send_addr[ii] + xferSize * subCycle;
 
-  // Send data directly to designated memory space in Framebuilder.
-  gm_directed_send_with_callback (netPort,
+	  // Send data directly to designated memory space in Framebuilder.
+	  gm_directed_send_with_callback (netPort,
                                   netDmaBuffer,
-                                  (gm_remote_ptr_t) (directed_send_subaddr[0] + GM_DAQ_BLOCK_SIZE * cycle),
+                                  (gm_remote_ptr_t) (directed_send_subaddr[ii][0] + GM_DAQ_BLOCK_SIZE * cycle),
                                   (unsigned long)
                                   xferSize,
                                   GM_DAQ_PRIORITY,
-                                  receiver_node_id,
+                                  receiver_node_id[ii],
                                   GM_PORT_NUM_RECV,
                                   my_send_callback,
-                                  &expected_callbacks);
-  expected_callbacks++;
+                                  &expected_callbacks[ii]);
+	  expected_callbacks[ii]++;
+      }
+  }
 
 
 // Once every 1/16 second, send a message to signal FB that data is ready.
@@ -397,17 +450,23 @@ if(subCycle == 15) {
   daqSendMessage->tpCount = htonl(tpCount);
   for(kk=0;kk<GM_DAQ_MAX_TPS;kk++) daqSendMessage->tpNum[kk] = htonl(tpNum[kk]);
   send_length = (unsigned long) sizeof(*daqSendMessage);
-  gm_send_with_callback (netPort,
+  for(ii=0;ii<2;ii++)
+  {
+      if(fbStat[ii] == FB_ONLINE)
+      {
+	  gm_send_with_callback (netPort,
                          netOutBuffer,
                          GM_RCV_MESSAGE_SIZE,
                          send_length,
                          GM_DAQ_PRIORITY,
-                         receiver_node_id,
+                         receiver_node_id[ii],
                          GM_PORT_NUM_RECV,
                          my_send_callback,
-                         &expected_callbacks);
-  expected_callbacks++;
-}
+                         &expected_callbacks[ii]);
+	  expected_callbacks[ii]++;
+      }
+  }
+  }
   return(0);
 }
 #endif
