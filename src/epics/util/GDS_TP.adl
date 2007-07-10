@@ -90,7 +90,7 @@ display {
 rectangle {
 	object {
 		x=111
-		y=211
+		y=236
 		width=20
 		height=12
 	}
@@ -129,7 +129,7 @@ rectangle {
 		x=20
 		y=37
 		width=190
-		height=190
+		height=266
 	}
 	"basic attribute" {
 		clr=2
@@ -138,7 +138,7 @@ rectangle {
 rectangle {
 	object {
 		x=20
-		y=248
+		y=324
 		width=190
 		height=180
 	}
@@ -180,7 +180,7 @@ rectangle {
 "message button" {
 	object {
 		x=116
-		y=254
+		y=331
 		width=90
 		height=24
 	}
@@ -195,7 +195,7 @@ rectangle {
 "message button" {
 	object {
 		x=25
-		y=42
+		y=157
 		width=180
 		height=24
 	}
@@ -210,7 +210,7 @@ rectangle {
 "text update" {
 	object {
 		x=140
-		y=93
+		y=64
 		width=60
 		height=20
 	}
@@ -226,7 +226,7 @@ rectangle {
 text {
 	object {
 		x=30
-		y=94
+		y=65
 		width=50
 		height=18
 	}
@@ -238,7 +238,7 @@ text {
 "text update" {
 	object {
 		x=140
-		y=113
+		y=84
 		width=60
 		height=20
 	}
@@ -254,7 +254,7 @@ text {
 text {
 	object {
 		x=30
-		y=114
+		y=85
 		width=50
 		height=18
 	}
@@ -266,7 +266,7 @@ text {
 "text update" {
 	object {
 		x=140
-		y=152
+		y=123
 		width=60
 		height=20
 	}
@@ -283,7 +283,7 @@ text {
 text {
 	object {
 		x=30
-		y=153
+		y=124
 		width=50
 		height=18
 	}
@@ -295,7 +295,7 @@ text {
 "text update" {
 	object {
 		x=140
-		y=73
+		y=44
 		width=60
 		height=20
 	}
@@ -311,7 +311,7 @@ text {
 text {
 	object {
 		x=30
-		y=74
+		y=45
 		width=50
 		height=18
 	}
@@ -323,7 +323,7 @@ text {
 "text update" {
 	object {
 		x=140
-		y=132
+		y=103
 		width=60
 		height=20
 	}
@@ -339,7 +339,7 @@ text {
 text {
 	object {
 		x=29
-		y=133
+		y=104
 		width=50
 		height=18
 	}
@@ -350,9 +350,9 @@ text {
 }
 "message button" {
 	object {
-		x=62
-		y=452
-		width=100
+		x=802
+		y=426
+		width=70
 		height=30
 	}
 	control {
@@ -363,21 +363,10 @@ text {
 	label="FE Reset"
 	release_msg="1"
 }
-rectangle {
-	object {
-		x=19
-		y=429
-		width=190
-		height=80
-	}
-	"basic attribute" {
-		clr=23
-	}
-}
 "text entry" {
 	object {
 		x=152
-		y=400
+		y=477
 		width=30
 		height=22
 	}
@@ -392,7 +381,7 @@ rectangle {
 text {
 	object {
 		x=27
-		y=402
+		y=479
 		width=98
 		height=16
 	}
@@ -404,7 +393,7 @@ text {
 text {
 	object {
 		x=25
-		y=309
+		y=386
 		width=69
 		height=18
 	}
@@ -416,7 +405,7 @@ text {
 byte {
 	object {
 		x=116
-		y=311
+		y=388
 		width=30
 		height=14
 	}
@@ -431,7 +420,7 @@ byte {
 "text update" {
 	object {
 		x=153
-		y=332
+		y=409
 		width=50
 		height=18
 	}
@@ -447,7 +436,7 @@ byte {
 text {
 	object {
 		x=25
-		y=332
+		y=409
 		width=69
 		height=18
 	}
@@ -459,7 +448,7 @@ text {
 byte {
 	object {
 		x=116
-		y=334
+		y=411
 		width=30
 		height=14
 	}
@@ -474,7 +463,7 @@ byte {
 "text update" {
 	object {
 		x=153
-		y=355
+		y=432
 		width=50
 		height=18
 	}
@@ -490,7 +479,7 @@ byte {
 "text update" {
 	object {
 		x=153
-		y=376
+		y=453
 		width=50
 		height=18
 	}
@@ -506,7 +495,7 @@ byte {
 text {
 	object {
 		x=26
-		y=377
+		y=454
 		width=69
 		height=18
 	}
@@ -518,7 +507,7 @@ text {
 text {
 	object {
 		x=26
-		y=355
+		y=432
 		width=69
 		height=18
 	}
@@ -530,7 +519,7 @@ text {
 byte {
 	object {
 		x=116
-		y=357
+		y=434
 		width=30
 		height=14
 	}
@@ -545,7 +534,7 @@ byte {
 "text update" {
 	object {
 		x=153
-		y=286
+		y=363
 		width=25
 		height=18
 	}
@@ -561,7 +550,7 @@ byte {
 text {
 	object {
 		x=25
-		y=286
+		y=363
 		width=69
 		height=18
 	}
@@ -573,7 +562,7 @@ text {
 byte {
 	object {
 		x=116
-		y=288
+		y=365
 		width=30
 		height=14
 	}
@@ -587,7 +576,7 @@ byte {
 "message button" {
 	object {
 		x=179
-		y=284
+		y=361
 		width=30
 		height=22
 	}
@@ -1685,7 +1674,7 @@ composite {
 "text update" {
 	object {
 		x=153
-		y=310
+		y=387
 		width=50
 		height=18
 	}
@@ -1701,7 +1690,7 @@ composite {
 text {
 	object {
 		x=26
-		y=179
+		y=197
 		width=180
 		height=12
 	}
@@ -2669,10 +2658,10 @@ text {
 }
 meter {
 	object {
-		x=659
-		y=398
-		width=140
-		height=100
+		x=668
+		y=404
+		width=100
+		height=80
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-CPU_METER"
@@ -2863,7 +2852,7 @@ text {
 "message button" {
 	object {
 		x=24
-		y=254
+		y=331
 		width=90
 		height=24
 	}
@@ -2877,8 +2866,8 @@ text {
 }
 "text update" {
 	object {
-		x=19
-		y=227
+		x=20
+		y=303
 		width=190
 		height=20
 	}
@@ -2953,7 +2942,7 @@ text {
 byte {
 	object {
 		x=46
-		y=196
+		y=218
 		width=25
 		height=10
 	}
@@ -2968,7 +2957,7 @@ byte {
 byte {
 	object {
 		x=46
-		y=210
+		y=235
 		width=25
 		height=10
 	}
@@ -2983,7 +2972,7 @@ byte {
 text {
 	object {
 		x=25
-		y=195
+		y=217
 		width=20
 		height=12
 	}
@@ -2995,7 +2984,7 @@ text {
 text {
 	object {
 		x=25
-		y=209
+		y=234
 		width=20
 		height=12
 	}
@@ -3007,7 +2996,7 @@ text {
 "text update" {
 	object {
 		x=133
-		y=194
+		y=216
 		width=35
 		height=14
 	}
@@ -3023,7 +3012,7 @@ text {
 "text update" {
 	object {
 		x=133
-		y=209
+		y=234
 		width=35
 		height=14
 	}
@@ -3039,7 +3028,7 @@ text {
 "text update" {
 	object {
 		x=169
-		y=209
+		y=234
 		width=35
 		height=14
 	}
@@ -3055,7 +3044,7 @@ text {
 "text update" {
 	object {
 		x=169
-		y=194
+		y=216
 		width=35
 		height=14
 	}
@@ -3071,7 +3060,7 @@ text {
 rectangle {
 	object {
 		x=111
-		y=196
+		y=218
 		width=20
 		height=12
 	}
@@ -3086,7 +3075,7 @@ rectangle {
 "text update" {
 	object {
 		x=75
-		y=195
+		y=217
 		width=35
 		height=14
 	}
@@ -3096,13 +3085,14 @@ rectangle {
 		bclr=42
 	}
 	align="horiz. centered"
+	format="hexadecimal"
 	limits {
 	}
 }
 rectangle {
 	object {
 		x=111
-		y=196
+		y=218
 		width=20
 		height=12
 	}
@@ -3117,7 +3107,7 @@ rectangle {
 rectangle {
 	object {
 		x=111
-		y=211
+		y=236
 		width=20
 		height=12
 	}
@@ -3132,7 +3122,7 @@ rectangle {
 "text update" {
 	object {
 		x=75
-		y=210
+		y=235
 		width=35
 		height=14
 	}
@@ -3142,6 +3132,57 @@ rectangle {
 		bclr=42
 	}
 	align="horiz. centered"
+	format="hexadecimal"
 	limits {
 	}
+}
+rectangle {
+	object {
+		x=786
+		y=404
+		width=100
+		height=80
+	}
+	"basic attribute" {
+		clr=23
+	}
+	"dynamic attribute" {
+		chan="SITE_NAME:SYSTEM_NAME-VME_RESET"
+	}
+}
+text {
+	object {
+		x=25
+		y=256
+		width=179
+		height=12
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="0x2000 - FB/FE config mismatch"
+}
+text {
+	object {
+		x=25
+		y=270
+		width=179
+		height=12
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="0x1000 - Transmission error"
+}
+text {
+	object {
+		x=25
+		y=284
+		width=179
+		height=12
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="0x1 - Stopped or out of sync"
 }
