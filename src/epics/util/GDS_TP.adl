@@ -2924,7 +2924,7 @@ text {
 "shell command" {
 	object {
 		x=822
-		y=313
+		y=312
 		width=60
 		height=59
 	}
@@ -2935,6 +2935,14 @@ text {
 	command[1] {
 		label="Clear all SYSTEM_NAME AWG waveforms"
 		name="echo 'awg clear GDS_NODE_ID *' | diag -l"
+	}
+	command[2] {
+		label="Clear FB0 CRC SUM"
+		name="expect -c 'spawn telnet fb0 8087; expect daqd>\ ; send clear\ crc\;\n ; expect daqd> '"
+	}
+	command[3] {
+		label="Clear FB1 CRC SUM"
+		name="expect -c 'spawn telnet fb1 8087; expect daqd>\ ; send clear\ crc\;\n ; expect daqd> '"
 	}
 	clr=14
 	bclr=24
