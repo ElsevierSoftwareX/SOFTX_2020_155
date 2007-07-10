@@ -89,6 +89,21 @@ display {
 }
 rectangle {
 	object {
+		x=111
+		y=211
+		width=20
+		height=12
+	}
+	"basic attribute" {
+		clr=20
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_STATUS"
+	}
+}
+rectangle {
+	object {
 		x=232
 		y=37
 		width=410
@@ -3111,22 +3126,7 @@ rectangle {
 	}
 	"dynamic attribute" {
 		vis="if zero"
-		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_STATUS"
-	}
-}
-rectangle {
-	object {
-		x=111
-		y=211
-		width=20
-		height=12
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_STATUS"
+		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_STATUS"
 	}
 }
 "text update" {
@@ -3137,7 +3137,7 @@ rectangle {
 		height=14
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_STATUS"
+		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_STATUS"
 		clr=50
 		bclr=42
 	}
