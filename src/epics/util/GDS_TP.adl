@@ -1,6 +1,6 @@
 
 file {
-	name="/usr1/rolf/cds/advLigo/src/epics/util/GDS_TP.adl"
+	name="/home/aivanov/cds/advLigo/src/epics/util/GDS_TP.adl"
 	version=030003
 }
 display {
@@ -2943,7 +2943,7 @@ byte {
 		height=10
 	}
 	monitor {
-		chan="C2:OMS-FB_NET_STATUS"
+		chan="SITE_NAME:SYSTEM_NAME-FB_NET_STATUS"
 		clr=60
 		bclr=20
 	}
@@ -2958,7 +2958,7 @@ byte {
 		height=10
 	}
 	monitor {
-		chan="C2:OMS-FB_NET_STATUS"
+		chan="SITE_NAME:SYSTEM_NAME-FB_NET_STATUS"
 		clr=60
 		bclr=20
 	}
