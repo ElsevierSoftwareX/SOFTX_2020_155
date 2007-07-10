@@ -424,17 +424,17 @@ void *fe_start(void *arg)
   for(jj=0;jj<cdsPciModules.dacCount;jj++)
 		status = gsaDacDma1(jj,cdsPciModules.dacType[jj]);
 
-#ifdef NO_SYNC
-  // Pause until this second ends
-  struct timespec next;
-  clock_gettime(CLOCK_REALTIME, &next);
-  printf("Start time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
-  next.tv_nsec = 0;
-  next.tv_sec += 1;
-  clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
-  clock_gettime(CLOCK_REALTIME, &next);
-  printf("Running time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
-#endif
+  if (run_on_timer) {
+    // Pause until this second ends
+    struct timespec next;
+    clock_gettime(CLOCK_REALTIME, &next);
+    printf("Start time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
+    next.tv_nsec = 0;
+    next.tv_sec += 1;
+    clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
+    clock_gettime(CLOCK_REALTIME, &next);
+    printf("Running time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
+  }
 
   if (!run_on_timer) {
     // Trigger the ADC to start running
