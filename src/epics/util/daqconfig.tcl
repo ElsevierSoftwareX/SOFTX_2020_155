@@ -31,7 +31,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.5 $
+# $Revision: 1.6 $
 #
 option add *highlightThickness 0
 
@@ -321,7 +321,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version 1.0
+set daqconfig_version "$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.6 2007/07/13 20:06:52 aivanov Exp $"
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
@@ -340,7 +340,7 @@ proc menu_clicked { no opt } {
 proc save_ini_files {} {
     global sections
     global section_names;
-    if {[regexp {/(\S+)} $::current_tree_node foo fname] == 0} { return }
+    if {[regexp {^/([^/]+)(/\S+)*$} $::current_tree_node foo fname] == 0} { return }
     #puts "Saving $fname"
     set answer [tk_messageBox -message "Really save $::dir/$fname?" -type yesno -icon question]
     switch -- $answer {
