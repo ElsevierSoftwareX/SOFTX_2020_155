@@ -31,7 +31,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.3 $
+# $Revision: 1.4 $
 #
 option add *highlightThickness 0
 
@@ -336,6 +336,26 @@ proc menu_clicked { no opt } {
         "You have clicked $opt.\nThis function is not implanted yet."
 }
 
+;# Save new configuration files
+proc save_ini_files {} {
+    global sections
+    global section_names;
+    if {[regexp {/(\S+)} $::current_tree_node foo fname] == 0} { return }
+    puts "Saving $fname"
+    #foreach key [array names sections] {
+      #if {[regexp "^$fname,(\[^,\]+),(\[^,\]+)" $key foo chname param]} {
+        #puts  "$fname, $chname, $param $sections($key) key=$key"
+      #}
+    #}
+    foreach i $section_names($fname) {
+	puts sections($fname,$i,onoff)
+	puts $sections($fname,$i,onoff)
+  	if {[string compare  $sections($fname,$i,onoff) off] == 0} {
+		puts "Section $i is off";
+	}
+    }
+}
+
 ;# Declare that there is a menu
 menu .mb
 . config -menu .mb
@@ -346,7 +366,7 @@ menu .mb
 
 ;# File Menu
 set m .mb.file
-$m add command -label "Save" -underline 0 -command { menu_clicked 1 "Save" }
+$m add command -label "Save" -underline 0 -command { save_ini_files }
 $m add separator
 $m add command -label "Exit" -underline 1 -command exit
 
@@ -437,9 +457,10 @@ proc parse_ini_file file {
     #foreach key [lsort [array names sections]] {
       #puts  "$key $sections($key)"
     #}
-    foreach key [array names section_names] {
-	puts  "$key $section_names($key)"
-    }
+#    foreach key [array names section_names] {
+	#puts  "$key $section_names($key)"
+    #}
+    ;# Duplicate sections so we can check later whether need to save or not
 }
 
 ;# Add selected channels to the list of active channels
@@ -544,7 +565,7 @@ proc display_params file {
     pack $w.op5 -side top
     label $w.spacer2 -text " "
     pack $w.spacer2 -side top
-    button $w.b -text "Remove" -command "remove_channel"
+    button $w.b -text "Deactivate" -command "remove_channel"
     pack $w.b -side bottom
   }
 }
@@ -563,7 +584,7 @@ proc display_channels file {
   ;# Create scrollable list of channels
   scrollbar $w.s -command "$w.l yview"
   listbox $w.l -yscroll "$w.s set" -bg white -selectmode extended
-  button $w.b -text "Add" -command "add_channel"
+  button $w.b -text "Activate" -command "add_channel"
   label $w.lbl -text "Inactive Channels"
   pack $w.b -side bottom
   pack $w.lbl -side top
