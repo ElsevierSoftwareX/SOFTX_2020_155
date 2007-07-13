@@ -31,7 +31,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.8 $
+# $Revision: 1.9 $
 #
 option add *highlightThickness 0
 
@@ -321,7 +321,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.8 2007/07/13 20:07:42 aivanov Exp $}
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.9 2007/07/13 20:19:20 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
@@ -336,13 +336,22 @@ proc menu_clicked { no opt } {
         "You have clicked $opt.\nThis function is not implanted yet."
 }
 
+;# Quit
+proc quit_app {} {
+    set answer [tk_messageBox -message "Really exit?" -type yesno -icon question]
+    switch -- $answer {
+       no { return }
+    }
+    exit
+}
+
 ;# Save new configuration files
 proc save_ini_files {} {
     global sections
     global section_names;
     if {[regexp {^/([^/]+)(/\S+)*$} $::current_tree_node foo fname] == 0} { return }
     #puts "Saving $fname"
-    set answer [tk_messageBox -message "Really save $::dir/$fname?" -type yesno -icon question]
+    set answer [tk_messageBox -message "Really save $::dir/$fname?\n(backup archive file will be created)" -type yesno -icon question]
     switch -- $answer {
        no { return }
     }
@@ -417,7 +426,7 @@ menu .mb
 set m .mb.file
 $m add command -label "Save" -underline 0 -command { save_ini_files }
 $m add separator
-$m add command -label "Exit" -underline 1 -command exit
+$m add command -label "Exit" -underline 1 -command { quit_app }
 
 ;# Help
 set m .mb.help
@@ -536,15 +545,15 @@ proc add_channel {} {
 ;# Remove current channel from the list of active channels
 proc remove_channel {} {
 	global sections
-	puts $::current_tree_node
+	$puts $::current_tree_node
 	;# Remove from the tree
 	Tree:delitem .f.tf.w $::current_tree_node
 	;# Split info file name and channel name
   	if {[regexp {/(\S+)/(\S+)} $::current_tree_node foo fname chname] == 0} { return }
 	;# deactivate in 'sections'
 	set sections($fname,$chname,onoff) "off"
-	puts sections($fname,$chname,onoff)
-        puts $sections($fname,$chname,onoff)
+	#puts sections($fname,$chname,onoff)
+        #puts $sections($fname,$chname,onoff)
 
 }
 
@@ -650,8 +659,8 @@ proc display_channels file {
   ;# remove leading slash
   set f [string range $file 1 end]
   foreach i $section_names($f) {
-	puts sections($f,$i,onoff)
-	puts $sections($f,$i,onoff)
+	#puts sections($f,$i,onoff)
+	#puts $sections($f,$i,onoff)
   	if {[string compare  $sections($f,$i,onoff) off] == 0} {
 		lappend names_off $i
 	}
@@ -686,7 +695,7 @@ if {[llength $files] == 0 } {
   exit
 }
 
-puts $files;
+#puts $files;
 ;#set oopt [lindex $files 0]
 
 
@@ -694,7 +703,7 @@ foreach z $files {
   Tree:newitem .f.tf.w /$z -image idir
   parse_ini_file $z
   foreach x $section_names($z) {
-    puts "Section name is $x"
+    #puts "Section name is $x"
     if {[string compare  $sections($z,$x,onoff) on] == 0} {
       Tree:newitem .f.tf.w /$z/$x -image ifile
     }
@@ -705,7 +714,7 @@ foreach z $files {
   set lbl [Tree:labelat %W %x %y]
   Tree:setselection %W $lbl
   #.f.c.l config -text $lbl
-  puts $lbl
+  #puts $lbl
   ;# If clicked on file name, then display turned off channel list
   set current_tree_node $lbl
   if { [string last / $lbl] == 0} {
