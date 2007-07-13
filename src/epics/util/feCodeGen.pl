@@ -2105,21 +2105,64 @@ mkpath $configFilesDir, 0, 0755;
 my $daqFile = $configFilesDir . "/$site" . uc($skeleton) . "\.ini";
 open(OUTG,">".$daqFile) || die "cannot open $daqFile file for writing";
 print OUTG 	"[default]\n".
-		"dcuid=$dcuId\n".
-		"datarate=" . get_freq() . "\n".
 		"gain=1.00\n".
 		"acquire=0\n".
+		"dcuid=$dcuId\n".
 		"ifoid=$ifoid\n".
-		"datatype=1\n".
-		"units=V\n".
-		"slope=6.1028e-05\n".
+		"datatype=4\n".
+		"datarate=" . get_freq() . "\n".
 		"offset=0\n".
+		"slope=6.1028e-05\n".
+		"units=V\n".
 		"\n";
-for ( 0 .. 2 ) {
-	print OUTG "[$site:" . uc($skeleton) . "-CHAN_" . $_ ."]\n";
-	print OUTG "chnnum=" . ($gdsTstart + 3*$_) . "\n";
-	print OUTG "#acquire=1\n";
+
+#for ( 0 .. 2 ) {
+	#print OUTG "[$site:" . uc($skeleton) . "-CHAN_" . $_ ."]\n";
+	#print OUTG "chnnum=" . ($gdsTstart + 3*$_) . "\n";
+	#print OUTG "#acquire=1\n";
+#}
+
+# Open testpoints file
+my $parFile = "../../../build/" . $ARGV[1] . "epics/" . $skeleton . "\.par";
+open(INTP,"<".$parFile) || die "cannot open $parFile file for reading";
+# Read all lines into the array
+@tp_data=<INTP>;
+close INTP;
+
+my %sections;
+my @section_names;
+my $section_name;
+my $def_datarate;
+foreach (@tp_data) {
+ s/\s+//g;
+ if (@a = m/\[(.+)\]/) { $section_name = $a[0]; push @section_names, $a[0]; }
+ elsif (@a = m/(.+)=(.+)/) {
+	$sections{$section_name}{$a[0]} = $a[1];
+	if ($a[0] eq "datarate") { $def_datarate = $a[1]; }
+ }
 }
+my $cnt = 0;
+# Print chnnum, datarate, 
+foreach (sort @section_names) {
+	if ($cnt < 2 && m/_OUT$/) {
+		$comment = "";
+		$cnt++;
+	} else {
+		$comment = "#";
+	}
+	print OUTG "${comment}[${_}_${def_datarate}]\n"; 
+	print OUTG  "${comment}acquire=0\n";
+	foreach $sec (keys %{$sections{$_}}) {
+	  if ($sec eq "chnnum" || $sec eq "datarate" || $sec eq "datatype") { 
+		print OUTG  "${comment}$sec=${$sections{$_}}{$sec}\n";
+	  }
+	}
+}
+
+#print %sections;
+
+# sort them by name, enable first two OUT channels
+# in the ini file
 close OUTG;
 
 # Create Foton filter file (with header)
