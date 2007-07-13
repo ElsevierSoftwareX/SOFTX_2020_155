@@ -31,7 +31,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.4 $
+# $Revision: 1.5 $
 #
 option add *highlightThickness 0
 
@@ -341,19 +341,68 @@ proc save_ini_files {} {
     global sections
     global section_names;
     if {[regexp {/(\S+)} $::current_tree_node foo fname] == 0} { return }
-    puts "Saving $fname"
+    #puts "Saving $fname"
+    set answer [tk_messageBox -message "Really save $::dir/$fname?" -type yesno -icon question]
+    switch -- $answer {
+       no { return }
+    }
+
     #foreach key [array names sections] {
       #if {[regexp "^$fname,(\[^,\]+),(\[^,\]+)" $key foo chname param]} {
         #puts  "$fname, $chname, $param $sections($key) key=$key"
       #}
     #}
+    set infile [open "/tmp/$fname" w]
+
+    ;# Write out default section first
+    set default_written 0
+
     foreach i $section_names($fname) {
-	puts sections($fname,$i,onoff)
-	puts $sections($fname,$i,onoff)
-  	if {[string compare  $sections($fname,$i,onoff) off] == 0} {
-		puts "Section $i is off";
+	if { $default_written == 1 } {
+	   ;# Spacer after default section
+    	   puts $infile ""
+	   set defualt_written 2
 	}
+	set comment ""
+  	if {[string compare  $sections($fname,$i,onoff) off] == 0} {
+	  set comment "#"
+ 	}
+	if {[string compare $i "default"] == 0} {
+	  ;# Default section is always enabled
+	  set comment ""
+	  set default_written 1
+        }
+	puts $infile "$comment\[$i\]"
+        foreach key [array names sections] {
+           if {[regexp "^$fname,$i,(\[^,\]+)$" $key foo param]} {
+	     set val $sections($key);
+	     if {[string compare $param "onoff"] == 0} { continue }
+	     if {[string compare $param "datatype"] == 0} { 
+	  	     switch $val {
+  		       "short" {
+                   	set val 1
+  		       }
+ 		       "float" {
+                   	set val 4
+		       }
+		       default {
+                   	set val 4
+		       }
+                     }
+	     }
+             puts $infile "$comment$param=$val"
+           }
+        }
     }
+    close $infile
+    ;# Create backup file
+    #set infile [open "$::dir/$fname" r]
+    set tm [clock format [clock seconds] -format %y%m%d_%H%M%S]
+    set newfname "[file root $::dir/archive/$fname]_$tm.ini"
+    #puts "mv $::dir/$fname $newfname"
+    file rename -force -- $::dir/$fname $newfname
+    file rename -force -- /tmp/$fname $::dir/$fname 
+    tk_messageBox -message "$::dir/$fname saved. Backup is $newfname" -type ok
 }
 
 ;# Declare that there is a menu
@@ -446,7 +495,7 @@ proc parse_ini_file file {
                    	set sections($file,$lws,$left)  "float"
 		       }
 		       default {
-                   	set sections($file,$lws,$left)  "ivalid"
+                   	set sections($file,$lws,$left)  "invalid"
 		       }
                      }
                    }
