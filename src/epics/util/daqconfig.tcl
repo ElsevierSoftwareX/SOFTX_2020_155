@@ -31,7 +31,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.9 $
+# $Revision: 1.10 $
 #
 option add *highlightThickness 0
 
@@ -321,12 +321,37 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.9 2007/07/13 20:19:20 aivanov Exp $}
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.10 2007/07/13 23:30:41 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
     default { set answer [tk_messageBox -message "Windows, etc. unsupported!" -type ok ]; exit }
     unix {;}
+}
+
+;# Site name
+set site_name "caltech"
+if { $argc > 0 } { set site_name [lindex $argv 0] }
+
+;# See what configuration directories exist
+set dir "/cvs/cds/${site_name}/chans/daq"
+set files {};
+set ro_files {};
+
+;# Do not show read-only files
+foreach file [glob -nocomplain -tails -directory $dir "*.ini"] {
+    #if {[file writable $file]} {
+        lappend files $file
+    #} else {
+        #lappend ro_files $file;
+    #}
+}
+
+
+;# Nothing to do if there are no config files
+if {[llength $files] == 0 } {
+  tk_messageBox -message "No config files found!" -type ok -icon info
+  exit
 }
 
 ;# Create menu
@@ -338,10 +363,10 @@ proc menu_clicked { no opt } {
 
 ;# Quit
 proc quit_app {} {
-    set answer [tk_messageBox -message "Really exit?" -type yesno -icon question]
-    switch -- $answer {
-       no { return }
-    }
+    #set answer [tk_messageBox -message "Really quit?" -type yesno -icon question]
+    #switch -- $answer {
+       #no { return }
+    #}
     exit
 }
 
@@ -377,11 +402,12 @@ proc save_ini_files {} {
 	  set comment "#"
  	}
 	if {[string compare $i "default"] == 0} {
-	  ;# Default section is always enabled
-	  set comment ""
 	  set default_written 1
+	  ;# Default section is always enabled
+	  puts $infile "\[$i\]"
+        } else {
+	  puts $infile "$comment\[${i}_$sections($fname,$i,datarate)\]"
         }
-	puts $infile "$comment\[$i\]"
         foreach key [array names sections] {
            if {[regexp "^$fname,$i,(\[^,\]+)$" $key foo param]} {
 	     set val $sections($key);
@@ -437,7 +463,8 @@ $m add command -label "About" -command {
 frame .f.tf 
 ;#-height 400 -width 300
 label .f.tf.lbl1 -text "Files, Active Channels"
-Tree:create .f.tf.w -width 300 -height 400 -yscrollcommand {.f.tf.sb set}
+Tree:create .f.tf.w -yscrollcommand {.f.tf.sb set}
+;# -width 300 -height 400 
 scrollbar .f.tf.sb -orient vertical -command {.f.tf.w yview}
 pack .f.tf.lbl1 -side top
 pack .f.tf.w -side left -fill both -expand 1 -padx 5 -pady 5
@@ -480,6 +507,9 @@ proc parse_ini_file file {
                   #continue;
                 #}
                 #puts "Section $lws"
+                if {[regexp {^(\S+)_(\d+)$} $section junk channame chanrate]} {
+			set lws $channame;
+		}
                 set sections($file,$lws,onoff) on
                 if {[string compare $comment "#"] == 0} {
                   set sections($file,$lws,onoff) off
@@ -643,7 +673,7 @@ proc display_channels file {
   scrollbar $w.s -command "$w.l yview"
   listbox $w.l -yscroll "$w.s set" -bg white -selectmode extended
   button $w.b -text "Activate" -command "add_channel"
-  label $w.lbl -text "Inactive Channels"
+  label $w.lbl -text "Inactive Channels" -width 50
   pack $w.b -side bottom
   pack $w.lbl -side top
   pack $w.l -side left -fill both -expand 1
@@ -668,31 +698,6 @@ proc display_channels file {
   eval "$w.l insert 0 $names_off"
   #$w.l activate 0
   #bind $w.l <B1-ButtonRelease> {puts [.f.c.l get active]}
-}
-
-
-;# Site name
-set site_name "caltech"
-
-;# See what configuration directories exist
-set dir "/cvs/cds/${site_name}/chans/daq"
-set files {};
-set ro_files {};
-
-;# Do not show read-only files
-foreach file [glob -nocomplain -tails -directory $dir "*.ini"] {
-    #if {[file writable $file]} {
-        lappend files $file
-    #} else {
-        #lappend ro_files $file;
-    #}
-}
-
-
-;# Nothing to do if there are no config files
-if {[llength $files] == 0 } {
-  tk_messageBox -message "No config files found!" -type ok -icon info
-  exit
 }
 
 #puts $files;
