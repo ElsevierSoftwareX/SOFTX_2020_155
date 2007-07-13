@@ -31,7 +31,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.7 $
+# $Revision: 1.8 $
 #
 option add *highlightThickness 0
 
@@ -321,7 +321,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.7 2007/07/13 20:07:08 aivanov Exp $}
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.8 2007/07/13 20:07:42 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
@@ -422,7 +422,7 @@ $m add command -label "Exit" -underline 1 -command exit
 ;# Help
 set m .mb.help
 $m add command -label "About" -command { 
-    tk_messageBox -default ok -icon info -message "DAQ configuration file editor\nversion $daqconfig_version" -title About -type ok;
+    tk_messageBox -default ok -icon info -message "DAQ configuration file editor\n$daqconfig_version" -title About -type ok;
 }
 
 frame .f.tf 
