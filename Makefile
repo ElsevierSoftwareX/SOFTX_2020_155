@@ -81,6 +81,8 @@ install-% :: src/epics/simLink/%.mdl
 	echo '(cd /cvs/cds/'$$site'/target/gds && ./startup_'$${system}'.cmd)' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'sleep 5; sudo killall daqd' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'burtwb -f /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_restore_$${cur_date}.log -v' >> /cvs/cds/$$site/scripts/start$${system};\
+	/bin/sed 's/caltech/'$$site'/' src/epics/util/daqconfig.tcl > build/$${system}epics/config/daqconfig;\
+	/usr/bin/install   build/$${system}epics/config/daqconfig  /cvs/cds/$$site/scripts
 	
 
 install-daq-% :: src/epics/simLink/%.mdl
