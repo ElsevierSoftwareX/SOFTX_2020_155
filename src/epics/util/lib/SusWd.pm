@@ -83,6 +83,7 @@ sub frontEndCode {
         $calcExp .= "if((cycle \% 16) == 0) {\n";
         $calcExp .= "\L$::xpartName[$mm] = 16384;\n";
         $calcExp .= "   for\(ii=0;ii<20;ii++\) {\n";
+        $calcExp .= "\tint jj;\n";
         $calcExp .= "\tif\(ii\<16\) jj = ii;\n";
         $calcExp .= "\telse jj = ii+2;\n";
         $calcExp .= "\t\L$::xpartName[$mm]\_avg\[ii\]";
