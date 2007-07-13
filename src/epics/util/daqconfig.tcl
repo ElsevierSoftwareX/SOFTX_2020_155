@@ -31,7 +31,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.6 $
+# $Revision: 1.7 $
 #
 option add *highlightThickness 0
 
@@ -321,7 +321,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version "$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.6 2007/07/13 20:06:52 aivanov Exp $"
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.7 2007/07/13 20:07:08 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
