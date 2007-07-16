@@ -114,7 +114,7 @@ install-daq-% :: src/epics/simLink/%.mdl
 	  echo src/epics/util/updateDaqConfig.pl -daq=/cvs/cds/$${site}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini -old=/cvs/cds/$${site}/target/gds/param/archive/tpchn_M$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par ;\
 	  src/epics/util/updateDaqConfig.pl -daq=/cvs/cds/$${site}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini -old=/cvs/cds/$${site}/target/gds/param/archive/tpchn_M$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par > /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ; \
 	else \
-	  /bin/cp -p build/$${system}epics/config/$${ifo}$${upper_system}.ini /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ;\
+	  /bin/cp -p build/$${system}epics/$${system}.ini /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ;\
 	fi
 
 install-screens-% :: src/epics/simLink/%.mdl
