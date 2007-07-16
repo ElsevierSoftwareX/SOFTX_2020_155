@@ -31,7 +31,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.10 $
+# $Revision: 1.11 $
 #
 option add *highlightThickness 0
 
@@ -321,7 +321,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.10 2007/07/13 23:30:41 aivanov Exp $}
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.11 2007/07/16 19:04:16 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
@@ -395,7 +395,6 @@ proc save_ini_files {} {
 	if { $default_written == 1 } {
 	   ;# Spacer after default section
     	   puts $infile ""
-	   set defualt_written 2
 	}
 	set comment ""
   	if {[string compare  $sections($fname,$i,onoff) off] == 0} {
@@ -408,7 +407,7 @@ proc save_ini_files {} {
         } else {
 	  puts $infile "$comment\[${i}_$sections($fname,$i,datarate)\]"
         }
-        foreach key [array names sections] {
+        foreach key [array names sections -regexp "^$fname,$i," ] {
            if {[regexp "^$fname,$i,(\[^,\]+)$" $key foo param]} {
 	     set val $sections($key);
 	     if {[string compare $param "onoff"] == 0} { continue }
