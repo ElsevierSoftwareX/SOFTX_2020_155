@@ -64,10 +64,16 @@ while (<IN>) {
     } elsif (substr($_,0,10) eq "gds_config") {
 	$gds_rmid = 0;
 	$site = "";
-	($junk, $gds_excnum_base, $gds_tpnum_base, $gds_exc_sys_inc, $gds_tp_sys_inc, $gds_rmid, $site, $gds_datarate) = split(/\s+/, $_);
+	($junk, $gds_excnum_base, $gds_tpnum_base, $gds_exc_sys_inc, $gds_tp_sys_inc, $gds_rmid, $site, $gds_datarate, $dcuId, $ifoid) = split(/\s+/, $_);
 	$gds_specified = 1;
 	if ($gds_datarate eq undef) {
 	  $gds_datarate = $gds_excnum_base < 10000? 16384: 2048;
+	}
+	if ($dcuId eq undef) {
+	  $dcuId = 10;
+	}
+	if ($ifoid eq undef) {
+	  $ifoid = 0;
 	}
 	$gds_ifo = 1;
 	if ($gds_rmid > 0) {
@@ -468,5 +474,63 @@ if ($gds_specified) {
     $gds_tpnum_base += $gds_tp_sys_inc;
   }
     close (OUT);
+
+# Create DAQ config file (default section and a few ADC input channels)
+my $daqFile = "$ARGV[0].ini";
+open(OUTG,">".$daqFile) || die "cannot open $daqFile file for writing";
+print OUTG      "[default]\n".
+                "gain=1.00\n".
+                "acquire=0\n".
+                "dcuid=$dcuId\n".
+                "ifoid=$ifoid\n".
+                "datatype=4\n".
+                "datarate=" . $gds_datarate . "\n".
+                "offset=0\n".
+                "slope=6.1028e-05\n".
+                "units=V\n".
+                "\n";
+
+
+# Open testpoints file
+my $parFile = "$ARGV[0].par";
+open(INTP,"<".$parFile) || die "cannot open $parFile file for reading";
+# Read all lines into the array
+@tp_data=<INTP>;
+close INTP;
+
+my %sections;
+my @section_names;
+my $section_name;
+my $def_datarate;
+foreach (@tp_data) {
+ s/\s+//g;
+ if (@a = m/\[(.+)\]/) { $section_name = $a[0]; push @section_names, $a[0]; }
+ elsif (@a = m/(.+)=(.+)/) {
+        $sections{$section_name}{$a[0]} = $a[1];
+        if ($a[0] eq "datarate") { $def_datarate = $a[1]; }
+ }
 }
+my $cnt = 0;
+# Print chnnum, datarate, 
+foreach (sort @section_names) {
+        if ($cnt < 2 && m/_OUT$/) {
+                $comment = "";
+                $cnt++;
+        } else {
+                $comment = "#";
+        }
+        print OUTG "${comment}[${_}_${def_datarate}]\n";
+        print OUTG  "${comment}acquire=0\n";
+        foreach $sec (keys %{$sections{$_}}) {
+          if ($sec eq "chnnum" || $sec eq "datarate" || $sec eq "datatype") {
+                print OUTG  "${comment}$sec=${$sections{$_}}{$sec}\n";
+          }
+        }
+}
+close OUTG;
+
+
+}
+
+
 exit(0);
