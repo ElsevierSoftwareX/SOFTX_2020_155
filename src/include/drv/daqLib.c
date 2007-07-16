@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.27 2007/06/19 23:38:00 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.28 2007/07/16 20:29:13 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -320,6 +320,15 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	localTable[ii].fmNum = jj / 3;
 	/* Mark which of three testpoints to store */
 	localTable[ii].sigNum = jj % 3;
+      }
+      else if((dataInfo.tp[ii].tpnum >= daqRange.filtExMin) &&
+	 (dataInfo.tp[ii].tpnum < daqRange.filtExMax))
+      /* This is a filter module excitation input */
+      {
+	/* Mark as coming from a filter module excitation input */
+	localTable[ii].type = 2;
+	/* Mark filter module number */
+	localTable[ii].fmNum =  dataInfo.tp[ii].tpnum - daqRange.filtExMin;
       }
       else if((dataInfo.tp[ii].tpnum >= daqRange.xTpMin) &&
 	 (dataInfo.tp[ii].tpnum < daqRange.xTpMax))
