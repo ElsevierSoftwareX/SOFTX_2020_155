@@ -31,7 +31,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.12 $
+# $Revision: 1.13 $
 #
 option add *highlightThickness 0
 
@@ -321,7 +321,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.12 2007/07/16 21:18:42 aivanov Exp $}
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.13 2007/07/16 21:33:29 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
@@ -590,7 +590,7 @@ proc remove_channel {} {
 ;# Calculate avilable DAQ channels rates based on maximum rate
 proc get_rates maxrate {
 	set rates {}
-	while {$maxrate >= 16 } {
+	while {$maxrate >= 32 } {
 		lappend rates $maxrate
 		set maxrate [expr $maxrate / 2]
 	}
