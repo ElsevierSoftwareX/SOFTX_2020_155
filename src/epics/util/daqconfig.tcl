@@ -31,7 +31,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.11 $
+# $Revision: 1.12 $
 #
 option add *highlightThickness 0
 
@@ -321,7 +321,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.11 2007/07/16 19:04:16 aivanov Exp $}
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.12 2007/07/16 21:18:42 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
@@ -574,7 +574,7 @@ proc add_channel {} {
 ;# Remove current channel from the list of active channels
 proc remove_channel {} {
 	global sections
-	$puts $::current_tree_node
+	#puts $::current_tree_node
 	;# Remove from the tree
 	Tree:delitem .f.tf.w $::current_tree_node
 	;# Split info file name and channel name
