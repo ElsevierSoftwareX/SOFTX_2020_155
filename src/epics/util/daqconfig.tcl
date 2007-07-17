@@ -1,5 +1,10 @@
 #!/usr/bin/wish
 #
+# daqconfig accepts one optional argument, the site name,
+# "caltech" or "mit" for instance.
+#
+# The following is the "Tree" widget authour's comments
+#
 # I am D. Richard Hipp, the author of this code.  I hereby
 # disavow all claims to copyright on this program and release
 # it into the public domain. 
@@ -31,7 +36,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.13 $
+# $Revision: 1.14 $
 #
 option add *highlightThickness 0
 
@@ -321,7 +326,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.13 2007/07/16 21:33:29 aivanov Exp $}
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.14 2007/07/17 23:23:57 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
