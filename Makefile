@@ -104,6 +104,7 @@ install-daq-% :: src/epics/simLink/%.mdl
 	/bin/cp -p build/$${system}epics/$${system}.par /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par ;\
 	echo '#!/bin/bash' > /cvs/cds/$${site}/target/gds/startup_$${system}.cmd ;\
 	echo 'cd /cvs/cds/'$${site}'/target/gds; sudo /cvs/cds/'$${site}'/target/gds/bin/awgtpman -s '$${system}' > '$${system}'.log 2>& 1 &' >> /cvs/cds/$${site}/target/gds/startup_$${system}.cmd ;\
+	/bin/chmod +x /cvs/cds/$${site}/target/gds/startup_$${system}.cmd ;\
 	echo Updating DAQ configuration file ;\
 	echo /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ;\
 	/bin/mkdir -p  /cvs/cds/$${site}/chans/daq ;\
