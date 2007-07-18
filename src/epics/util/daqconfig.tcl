@@ -36,7 +36,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.14 $
+# $Revision: 1.15 $
 #
 option add *highlightThickness 0
 
@@ -326,7 +326,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.14 2007/07/17 23:23:57 aivanov Exp $}
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.15 2007/07/18 00:16:59 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
@@ -375,8 +375,79 @@ proc quit_app {} {
     exit
 }
 
-;# Save new configuration files
 proc save_ini_files {} {
+    global sections
+    global section_names;
+    if {[regexp {^/([^/]+)(/\S+)*$} $::current_tree_node foo fname] == 0} { return }
+
+    #puts "Saving $fname"
+    set answer [tk_messageBox -message "Really save $::dir/$fname?\n(backup archive file will be created)" -type yesno -icon question]
+    switch -- $answer {
+       no { return }
+    }
+
+
+    set infile [open "/tmp/$fname" w]
+    set a [lsort [array names sections -regexp "^$fname,default" ]]
+
+    puts $infile "\[default\]"
+    foreach key $a {
+        if {[regexp "^$fname,default,(\[^,\]+)$" $key foo param]} {
+	 puts $infile "$param=$sections($key)"
+	}
+    }
+
+    set a [lsort [array names sections -regexp "^$fname" ]]
+    set cur_sect ""
+    foreach key $a {
+        if {[regexp "^$fname,(\[^,\]+),(\[^,\]+)$" $key foo sectname param]} {
+	  if {[string compare $cur_sect $sectname]} {
+	 	if {[string compare $sectname "default"] == 0} {
+			continue;
+		}
+		set comment ""
+  		if {[string compare  $sections($fname,$sectname,onoff) off] == 0} {
+	  	  set comment "#"
+ 		}
+		puts $infile ""
+	  	puts $infile "$comment\[${sectname}_$sections($fname,$sectname,datarate)\]"
+		set cur_sect $sectname
+	  } 
+	  # Print section param
+	     set val $sections($key);
+	     if {[string compare $param "onoff"] == 0} { continue }
+	     if {[string compare $param "datatype"] == 0} { 
+	  	     switch $val {
+  		       "short" {
+                   	set val 1
+  		       }
+ 		       "float" {
+                   	set val 4
+		       }
+		       default {
+                   	set val 4
+		       }
+                     }
+	     }
+		puts $infile "$comment$param=$val"
+	}
+    }
+    close $infile
+    ;# Create backup file
+    #set infile [open "$::dir/$fname" r]
+    set tm [clock format [clock seconds] -format %y%m%d_%H%M%S]
+    set newfname "[file root $::dir/archive/$fname]_$tm.ini"
+    #puts "mv $::dir/$fname $newfname"
+    file rename -force -- $::dir/$fname $newfname
+    file rename -force -- /tmp/$fname $::dir/$fname 
+    tk_messageBox -message "$::dir/$fname saved. Backup is $newfname" -type ok
+}
+
+;# Save new configuration files
+;# Sucks!  This function is deadly inefficient, takes many seconds 
+;# if not minutes to run (depending on data size).
+;#
+proc sluggish_save_ini_files {} {
     global sections
     global section_names;
     if {[regexp {^/([^/]+)(/\S+)*$} $::current_tree_node foo fname] == 0} { return }
