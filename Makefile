@@ -93,7 +93,9 @@ install-daq-% :: src/epics/simLink/%.mdl
 	upper_site=`echo $$site | tr a-z A-Z`;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
+	datarate=`grep datarate build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	gds_file_node=`expr $${gds_node} + 1`; \
+	datarate_mult=`expr $${datarate} / 16384 `; \
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	echo Installing GDS node $${gds_file_node} configuration file ;\
@@ -102,8 +104,14 @@ install-daq-% :: src/epics/simLink/%.mdl
 	/bin/mkdir -p  /cvs/cds/$${site}/target/gds/param/archive ;\
 	if test -e /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par; then /bin/mv -f /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par /cvs/cds/$${site}/target/gds/param/archive/tpchn_M$${gds_file_node}_$${cur_date}.par || exit 1; fi;\
 	/bin/cp -p build/$${system}epics/$${system}.par /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par ;\
+	if test $${datarate_mult} -gt 1;\
+	then \
+	  datarate_mult_flag=-$${datarate_mult}; \
+	else \
+	  datarate_mult_flag=; \
+	fi; \
 	echo '#!/bin/bash' > /cvs/cds/$${site}/target/gds/startup_$${system}.cmd ;\
-	echo 'cd /cvs/cds/'$${site}'/target/gds; sudo /cvs/cds/'$${site}'/target/gds/bin/awgtpman -s '$${system}' > '$${system}'.log 2>& 1 &' >> /cvs/cds/$${site}/target/gds/startup_$${system}.cmd ;\
+	echo 'cd /cvs/cds/'$${site}'/target/gds; sudo /cvs/cds/'$${site}'/target/gds/bin/awgtpman -s '$${system}' '$${datarate_mult_flag}' > '$${system}'.log 2>& 1 &' >> /cvs/cds/$${site}/target/gds/startup_$${system}.cmd ;\
 	/bin/chmod +x /cvs/cds/$${site}/target/gds/startup_$${system}.cmd ;\
 	echo Updating DAQ configuration file ;\
 	echo /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ;\
