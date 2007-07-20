@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.28 2007/07/16 20:29:13 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.29 2007/07/20 17:52:04 rolf Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -147,10 +147,13 @@ static volatile GDS_CNTRL_BLOCK *gdsPtr;  /* Ptr to GDS table in shmem.	*/
 static volatile char *exciteDataPtr;	  /* Ptr to EXC data in shmem.	*/
 int testVal;			/* Temp TP value for valid check.	*/
 static int validTp;		/* Number of valid GDS sigs selected.	*/
+static int validTpNet;		/* Number of valid GDS sigs selected.	*/
 static int validEx;		/* Local chan number of 1st EXC signal.	*/
 static int tpNum[GM_DAQ_MAX_TPS]; /* TP/EXC selects to send to FB.	*/
+static int tpNumNet[GM_DAQ_MAX_TPS]; /* TP/EXC selects to send to FB.	*/
 static int totalChans;		/* DAQ + TP + EXC chans selected.	*/
 static int totalSize;		/* DAQ + TP + EXC chans size in bytes.	*/
+static int totalSizeNet;	/* DAQ + TP + EXC chans size in bytes.	*/
 int *statusPtr;
 volatile float *dataPtr;	/* Ptr to excitation chan data.		*/
 int exChanOffset;		/* shmem offset to next EXC value.	*/
@@ -264,6 +267,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     xferSize1 = crcLength/sysRate;
     mnDaqSize = crcLength/16;
     totalSize = mnDaqSize;
+    totalSizeNet = mnDaqSize;
     
     if (xferSize1 == 0) {
 	printf("DAQ size too small\n");
@@ -392,7 +396,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
     // Initialize network variables.
     daqWaitCycle = -1;
-    daqWriteCycle = -1;
+    daqWriteCycle = 0;
     daqWriteTime = sysRate / 16;
 
   } /* End DAQ CONNECT */
@@ -531,7 +535,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
   if(!daqWaitCycle)
   {
 	if(!netStatus) status = cdsDaqNetDaqSend(dcuId,daqBlockNum, daqWriteCycle, fileCrc, 
-						crcSend,crcLength,validTp,tpNum,totalSize,pReadBuffer);
+						crcSend,crcLength,validTpNet,tpNumNet,totalSizeNet,pReadBuffer);
 	daqWriteCycle = (daqWriteCycle + 1) % 16;
   }
 
@@ -663,7 +667,8 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	    }
 	}
       // Check for new TP
-      if(daqBlockNum == 0)
+      // This will cause new TP to be written to local memory at start of 1 sec block.
+      if(daqBlockNum == 15)
       {
  	totalChans = dataInfo.numChans;
 	totalSize = mnDaqSize;
@@ -837,6 +842,15 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
 	 }  /* End for loop */
       } /* End normal check for new TP numbers */
+
+      // Network write is one cycle behind memory write, so now update tp nums for FB xmission
+      if(daqBlockNum == 0)
+      {
+	for(ii=0;ii<validTp;ii++)
+		tpNumNet[ii] = tpNum[ii];
+	validTpNet = validTp;
+	totalSizeNet = totalSize;
+      }
 
     } /* End done 16Hz Cycle */
 
