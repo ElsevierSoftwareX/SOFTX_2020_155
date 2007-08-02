@@ -28,7 +28,14 @@ int cdsDaqNetDaqSend(   int dcuId,
                         int xferSize,
                         char *dataBuffer);
 
+/* Offset in the shared memory to the beginning of data buffer */
+#define CDS_DAQ_NET_DATA_OFFSET 0x2000
+/* Offset to GDS test point table (struct cdsDaqNetGdsTpNum, defined in daqmap.h) */
+#define CDS_DAQ_NET_GDS_TP_TABLE_OFFSET 0x1000
+/* Offset to the IPC structure (struct rmIpcStr, defined in daqmap.h) */
+#define CDS_DAQ_NET_IPC_OFFSET 0x0
 #endif
+
 extern int cdsNetStatus;
 
 #endif
