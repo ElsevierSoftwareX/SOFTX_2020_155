@@ -44,9 +44,17 @@ int main(int argc, char **argv)
 			strcpy(sys_info[i].name, argv[i+1]);
 			sys_info[i].adcs = 1;
 			sys_info[i].dacs = 0;
+			sys_info[argc-1+i] = sys_info[i];
+			strcat(sys_info[argc-1+i].name, "_daq");
 		}
 		sys_count = argc - 1;
+		sys_count *= 2;
 	}
+	/* Add IPC area */
+	strcpy(sys_info[sys_count].name, "ipc");
+        sys_info[sys_count].adcs = 1;
+        sys_info[sys_count].dacs = 0;
+	sys_count += 1;
 #if 0
 	for (i = 0; i < sys_count; i++) {
 		printf("%s: adcs=%d, dacs=%d\n", sys_info[i].name, sys_info[i].adcs, sys_info[i].dacs);
