@@ -302,6 +302,12 @@ typedef union GDS_CNTRL_BLOCK {
   } tpe;
 } GDS_CNTRL_BLOCK;
 
+/* GDS test point table structure for FE to frame builder communication */
+typedef struct cdsDaqNetGdsTpNum {
+   int count; /* test points count */
+   int tpNum[DAQ_GDS_MAX_TP_NUM];
+} cdsDaqNetGdsTpNum;
+
 #define GDS_TP_MAX_FE	1250
 
 #endif
