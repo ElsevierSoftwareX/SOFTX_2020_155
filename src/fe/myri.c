@@ -34,7 +34,7 @@ daqData *daqSendData;
 /* Local GM port we are using to send DAQ data */
 int local_gm_port = 0;
 
-int fbStat[2] = {0,0};
+extern int fbStat[2];
 enum FB_STATS {
 	FB_NOT_ON_NET = 0,
 	FB_ON_NET,

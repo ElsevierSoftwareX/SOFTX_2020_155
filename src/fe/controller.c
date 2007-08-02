@@ -42,6 +42,11 @@
 #define MMAP_SIZE (64*1024*1024 - 5000)
 char *_epics_shm;		/* Ptr to computer shared memory		*/
 char *_ipc_shm;			/* Ptr to inter-process communication area */
+#if defined(SHMEM_DAQ)
+char *_daq_shm;			/* Ptr to frame builder comm shared mem area */
+int daq_fd;			/* File descriptor to share memory file */
+#endif
+
 long daqBuffer;			/* Address for daq dual buffers in daqLib.c	*/
 sem_t irqsem;			/* Semaphore if in IRQ mode.			*/
 CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
@@ -125,7 +130,7 @@ extern unsigned int cpu_khz;
 #ifndef NO_DAQ
 DAQ_RANGE daq;			/* Range settings for daqLib.c		*/
 int numFb = 0;
-extern int fbStat[2];
+int fbStat[2] = {0,0};
 #endif
 
 rtl_pthread_t wthread;
@@ -788,7 +793,13 @@ void *fe_start(void *arg)
         {
 	  pLocalEpics->epicsOutput.diags[0] = usrHoldTime;
 	  // Create FB status word for return to EPICS
+#ifdef USE_GM
   	  pLocalEpics->epicsOutput.diags[2] = (fbStat[1] & 3) * 4 + (fbStat[0] & 3);
+#else
+	  // There is no frame builder to front-end feedback at the moment when
+	  // not using GM (using shmem), perhaps it needs to be added
+  	  pLocalEpics->epicsOutput.diags[2] = 3;
+#endif
 	  usrHoldTime = 0;
   	  if(pLocalEpics->epicsInput.syncReset)
 	  {
@@ -879,6 +890,23 @@ int main(int argc, char **argv)
                 return -1;
 	  }
         }
+
+#if defined(SHMEM_DAQ)
+	// See if frame builder DAQ comm area available
+	sprintf(fname, "/rtl_mem_%s_daq", SYSTEM_NAME_STRING_LOWER);
+        daq_fd = shm_open(fname, RTL_O_RDWR, 0666);
+	if (daq_fd == -1) {
+          printf("Error: couldn't open `%s' read/write (errno=%d)\n", fname, errno);
+	  return -1;
+	} else {
+          _daq_shm = (unsigned char *)rtl_mmap(NULL,MMAP_SIZE,PROT_READ|PROT_WRITE,MAP_SHARED,daq_fd,0);
+          if (_daq_shm == MAP_FAILED) {
+                printf("mmap failed for DAQ shared memory area\n");
+                rtl_perror("mmap()");
+                return -1;
+	  }
+        }
+#endif
 
 	{
 	  int cards = sizeof(cards_used)/sizeof(cards_used[0]);
