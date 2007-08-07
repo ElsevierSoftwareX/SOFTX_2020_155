@@ -30,6 +30,7 @@
 #define MAX_DAC_MODULES		4
 #define MAX_DIO_MODULES		4
 #define MAX_RFM_MODULES		2
+#define MAX_VME_BRIDGES		4
 
 #define GSC_16AI64SSA		0
 #define GSC_16AISS8AO4		1
@@ -59,6 +60,10 @@ typedef struct CDS_HARDWARE{
 	int rfmCount;			/* Number of RFM modules found		*/
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
 	int rfmConfig[MAX_RFM_MODULES];
+	int vmeBridgeCount;		/* The number of SBS VME bridges attached */
+	volatile unsigned int *vme[MAX_VME_BRIDGES]; /* VME memory */
+	volatile unsigned char *vme_reg[MAX_VME_BRIDGES]; /* PCI to VME bridge registers */
+	unsigned char *buf;
 
 	/* Variables controlling cards usage */
 	int cards;			/* Sizeof array below */
@@ -328,3 +333,32 @@ typedef struct GSA_AD18_REG{
         unsigned int RGD;       /* 0x004C 	Rate Generator D */
         unsigned int AOC;       /* 0x0050 	Analog Output Configuration */
 }GSA_AD18_REG;
+
+/* SBS Technologies VME Bridge Model 618 */
+#define SBS_618_VID		0x108a
+#define SBS_618_TID		0x0010
+
+/* The I/O space offsets to various interesting registers */
+#define SBS_618_LOCAL_COMMAND_REGISTER	0x00
+#define SBS_618_LOCAL_STATUS_REGISTER	0x02
+#define SBS_618_REMOTE_STATUS_REGISTER	0x08
+#define SBS_618_REMOTE_COMMAND_REGISTER	SBS_618_REMOTE_STATUS_REGISTER
+#define SBS_618_REMOTE_COMMAND_REGISTER2	0x09
+#define SBS_618_REMOTE_VME_ADDRES_MODIFIER	0x0d
+#define SBS_618_DMA_COMMAND		0x10
+#define SBS_618_DMA_REMAINDER_COUNT	0x11
+#define SBS_618_DMA_PACKET_COUNT0	0x12
+#define SBS_618_DMA_PACKET_COUNT1	0x13
+#define SBS_618_DMA_PCI_ADDRESS0	0x14
+#define SBS_618_DMA_PCI_ADDRESS1	0x15
+#define SBS_618_DMA_PCI_ADDRESS2	0x16
+#define SBS_618_DMA_REMOTE_REMAINDER_COUNT	0x18
+#define SBS_618_DMA_VME_ADDRESS2	0x1a
+#define SBS_618_DMA_VME_ADDRESS3	0x1b
+#define SBS_618_DMA_VME_ADDRESS0	0x1c
+#define SBS_618_DMA_VME_ADDRESS1	0x1d
+
+/* The BASE address 2 memory space offsets */
+#define SBS_618_MAPPING_REGS_PCI_VME	0x0000
+#define SBS_618_MAPPING_REGS_VME_PCI	0x8000
+#define SBS_618_MAPPING_REGS_DMA_PCI	0xC000
