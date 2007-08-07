@@ -551,6 +551,23 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		status = mapRfm(pCds,dacdev);
 		modCount ++;
   }
+
+  dacdev = NULL;
+  status = 0;
+  pCds->vmeBridgeCount = 0;
+  pCds->vme[0] = 0;
+  // Look for SBS Technologies VME Bridges
+  while((dacdev = pci_find_device(SBS_618_VID, SBS_618_TID, dacdev))) {
+		printk("SBS 618 VME Bridge card on bus %x; device %x\n",
+			dacdev->bus->number,
+			PCI_SLOT(dacdev->devfn));
+		status = mapSbsVmeBridge(pCds,dacdev);
+		if (status == 0) {
+		  // VME link initialized and mapped
+		  modCount ++;
+		}
+  }
+
   return(modCount);
 }
 
@@ -700,3 +717,119 @@ else {
 }
 }
 #endif
+
+// *****************************************************************************
+// Initialize SBS Technologies VME Bridge Model 618
+// *****************************************************************************
+int mapSbsVmeBridge(CDS_HARDWARE *pHardware, struct pci_dev *sbsdev)
+{
+  static unsigned int pci_io_addr, pci_io_addr1, pci_io_addr2, pci_io_addr3;
+  int devNum;
+  static char *csrAddr;
+  static unsigned int csrAddress;
+
+	//devNum = pHardware->vmeBridgeCount;
+  	pci_enable_device(sbsdev);
+  	pci_read_config_dword(sbsdev, PCI_BASE_ADDRESS_0, &pci_io_addr);
+	pci_io_addr &= 0xfffffff0;
+	printk("VME bridge PCI BASE 0 address = %x\n", pci_io_addr);
+	//unsigned char *addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 64*1024);
+	// Local status register
+	unsigned char lsr = inb(pci_io_addr + SBS_618_LOCAL_STATUS_REGISTER);
+	printk("Local status register = 0x%x\n", lsr);
+	if (lsr & 1) {
+	  printk("Remote power is off or the fiber cable is disconnected\n");
+	  return 1;
+	}
+	printk("Remote power is on and the fiber cable is connected\n");
+	// Read the Remote Status Register and discard the results
+	inb(pci_io_addr + SBS_618_REMOTE_STATUS_REGISTER);
+
+	// Set bit 7 of the Local Command Register
+	unsigned char lcr = inb(pci_io_addr + SBS_618_LOCAL_COMMAND_REGISTER);
+	outb(lcr & 0x80, pci_io_addr + SBS_618_LOCAL_COMMAND_REGISTER);
+	  
+	lsr = inb(pci_io_addr + SBS_618_LOCAL_STATUS_REGISTER);
+	printk("Local status register = 0x%x\n", lsr);
+	// make sure no error bits are set
+	if (lsr & 128) {
+	  printk("Fiber-Optic Interface Data Error\n");
+	  return 1;
+	}
+	if (lsr & 64) {
+	  printk("Remote Bus Error\n");
+	  return 1;
+	}
+
+	// Map VME window memory (32 megs, base address 3)
+	pci_read_config_dword(sbsdev, PCI_BASE_ADDRESS_1, &pci_io_addr1);
+	pci_io_addr1 &= 0xfffffff0;
+	pci_read_config_dword(sbsdev, PCI_BASE_ADDRESS_2, &pci_io_addr2);
+	pci_io_addr2 &= 0xfffffff0;
+	pci_read_config_dword(sbsdev, PCI_BASE_ADDRESS_3, &pci_io_addr3);
+	pci_io_addr3 &= 0xfffffff0;
+ 	volatile unsigned int *vme_mapping_reg = (unsigned int *)ioremap_nocache((unsigned long)pci_io_addr2, 64*1024);
+ 	volatile unsigned int *pci_reg = (unsigned int *)ioremap_nocache((unsigned long)pci_io_addr1, 64*1024);
+ 	volatile unsigned int *vme_mem = (unsigned int *)ioremap_nocache((unsigned long)pci_io_addr3, 32*1024*1024);
+ 	printk("VME mapping registers =(0x%x, 0x%x), VME memory =(0x%x, 0x%x)\n", pci_io_addr2, vme_mapping_reg, pci_io_addr3, vme_mem);
+
+	// Program first regsiter to point us to VME 5588 card (at 0x50000000)
+	*vme_mapping_reg = 0x50000360;
+
+	// Program DMA mapping regs to our buffer
+	volatile unsigned int *pci_dma_mapping_reg = vme_mapping_reg + SBS_618_MAPPING_REGS_DMA_PCI/sizeof(int);
+	pHardware->buf = kmalloc(40*1024, GFP_KERNEL);
+	memset(pHardware->buf,0,40*1024);
+	*pci_dma_mapping_reg = virt_to_phys(pHardware->buf);
+	printk("DMA buffer address (kmalloc) 0x%x, physical 0x%x\n", pHardware->buf, *pci_dma_mapping_reg);
+
+ 	// Load Local DMA command register; do long word transfers
+	outb(0x10, pci_io_addr + SBS_618_DMA_COMMAND);
+	// Load PCI addresses
+	outb(0, pci_io_addr + SBS_618_DMA_PCI_ADDRESS0);
+	outb(0, pci_io_addr + SBS_618_DMA_PCI_ADDRESS1);
+	outb(0, pci_io_addr + SBS_618_DMA_PCI_ADDRESS2);
+	// Load remote DMA address with starting VME address
+	outb(0x10, pci_io_addr + SBS_618_DMA_VME_ADDRESS0);
+	outb(0, pci_io_addr + SBS_618_DMA_VME_ADDRESS1);
+	outb(0, pci_io_addr + SBS_618_DMA_VME_ADDRESS2);
+	outb(0x50, pci_io_addr + SBS_618_DMA_VME_ADDRESS3);
+	// Load remainder count (size of the last chunk, DMA goes in chunks of 256 bytes)
+	outb(32, pci_io_addr + SBS_618_DMA_REMAINDER_COUNT);
+	outb(32, pci_io_addr + SBS_618_DMA_REMOTE_REMAINDER_COUNT);
+	// Load load DMA packet count (256 bytes per packet)
+	outb(0, pci_io_addr + SBS_618_DMA_PACKET_COUNT0);
+	outb(0, pci_io_addr + SBS_618_DMA_PACKET_COUNT1);
+	// Disable VME interrupt in remote command register 2
+	// Set for block mode operation as well
+	outb(0x30, pci_io_addr + SBS_618_REMOTE_COMMAND_REGISTER2);
+	// Program VME address modifier
+	outb(0xf, pci_io_addr + SBS_618_REMOTE_VME_ADDRES_MODIFIER);
+	
+	vme_mem[0x10] = 0xbeef0000;
+#if 0
+	printk("0x%x 0x%x\n", vme_mem[0], vme_mem[1]);
+	printk("0x%x 0x%x\n", vme_mem[2], vme_mem[3]);
+	printk("0x%x 0x%x\n", vme_mem[4], vme_mem[5]);
+	printk("0x%x 0x%x\n", vme_mem[6], vme_mem[7]);
+	vme_mem[0x10] = 0xbeef0000;
+	printk("0x%x\n", vme_mem[0x10]);
+
+	iounmap ((void *)vme_mapping_reg);
+	iounmap ((void *)vme_mem);
+#endif
+
+  	//pci_read_config_dword(rfmdev, PCI_BASE_ADDRESS_2, &csrAddress);
+  	//printk("CSR address is 0x%x\n", csrAddress);
+  	//csrAddr = ioremap_nocache((unsigned long)csrAddress, 0x40);
+
+	//p5565Csr = (VMIC5565_CSR *)csrAddr;
+	//p5565Csr->LCSR1 &= ~TURN_OFF_5565_FAIL;
+	//printk("Board id = 0x%x\n",p5565Csr->BID);
+  	//pHardware->rfmConfig[devNum] = p5565Csr->NID;
+
+	pHardware->vme[pHardware->vmeBridgeCount] = vme_mem;
+	pHardware->vme_reg[pHardware->vmeBridgeCount] = pci_reg;
+	pHardware->vmeBridgeCount++;
+	return(0);
+}

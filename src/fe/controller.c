@@ -645,6 +645,80 @@ void *fe_start(void *arg)
  	{
 	// Call the front end specific software
         rdtscl(cpuClock[4]);
+
+  // VME input (for testing its speed only!!!)
+  if (cdsPciModules.vmeBridgeCount > 0) {
+    cdsPciModules.vme[0][0x10] = clock16K;
+    //cdsPciModules.vme_reg[0][SBS_618_DMA_COMMAND] = 0x10; // Load command register
+
+#if 0
+    cdsPciModules.vme_reg[0][SBS_618_DMA_PCI_ADDRESS0] = 0;
+    cdsPciModules.vme_reg[0][SBS_618_DMA_PCI_ADDRESS1] = 0;
+    cdsPciModules.vme_reg[0][SBS_618_DMA_PCI_ADDRESS2] = 0;
+#endif
+
+    *((volatile unsigned int *)&(cdsPciModules.vme_reg[0][SBS_618_DMA_PCI_ADDRESS0])) = 0;
+#if 0
+    cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS3] = 0x50;
+    cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS2] = 0x0;
+    cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS1] = 0x0;
+    cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS0] = 0x0;
+#endif
+
+    *((volatile unsigned int *)&(cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS2])) =  0x00405000;
+#if 0
+    *((unsigned short *)&(cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS2])) =  0x0050;
+    *((unsigned short *)&(cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS0])) =  0x0000;
+#endif
+
+    cdsPciModules.vme_reg[0][SBS_618_DMA_REMAINDER_COUNT] = 32;
+    cdsPciModules.vme_reg[0][SBS_618_DMA_REMOTE_REMAINDER_COUNT] = 32;
+
+#if 0
+    cdsPciModules.vme_reg[0][SBS_618_DMA_PACKET_COUNT0] = 0;
+    cdsPciModules.vme_reg[0][SBS_618_DMA_PACKET_COUNT1] = 0;
+#endif
+
+    cdsPciModules.vme_reg[0][SBS_618_DMA_COMMAND] = 0x90; // start DMA
+
+    // poll for DMA done
+    unsigned char lsr = 0;
+    unsigned int cntr = 0;
+#if 1
+    do {
+	//if (cntr > 1000000) {
+	//	printk ("DMA timeout; lsr=0x%x\n", lsr);
+	//	vmeDone = 1;
+	//}
+	usleep(1);
+        lsr = cdsPciModules.vme_reg[0][SBS_618_DMA_COMMAND]; // Poll for DMA done bit
+	cntr ++;
+     } while ( (lsr & 0x2) == 0 );
+#endif
+
+    dWord[0][6] = (double)(((unsigned int *)cdsPciModules.buf)[0x0]);
+    //cdsPciModules.vme[0][0x10] = clock16K;
+    //dWord[0][1] = (double)cdsPciModules.vme[0][0x10];
+#if 0
+    dWord[0][1] = (double)cdsPciModules.vme[0][0x11];
+    dWord[0][2] = (double)cdsPciModules.vme[0][0x12];
+    dWord[0][3] = (double)cdsPciModules.vme[0][0x13];
+    dWord[0][4] = (double)cdsPciModules.vme[0][0x14];
+    dWord[0][5] = (double)cdsPciModules.vme[0][0x15];
+    dWord[0][6] = (double)cdsPciModules.vme[0][0x16];
+    dWord[0][7] = (double)cdsPciModules.vme[0][0x17];
+
+    dWord[0][8] = (double)cdsPciModules.vme[0][0x18];
+    dWord[0][9] = (double)cdsPciModules.vme[0][0x19];
+    dWord[0][10] = (double)cdsPciModules.vme[0][0x1a];
+    dWord[0][11] = (double)cdsPciModules.vme[0][0x1b];
+    dWord[0][12] = (double)cdsPciModules.vme[0][0x1c];
+    dWord[0][13] = (double)cdsPciModules.vme[0][0x1d];
+    dWord[0][14] = (double)cdsPciModules.vme[0][0x1e];
+    dWord[0][15] = (double)cdsPciModules.vme[0][0x1f];
+#endif
+  }
+
 #if (NUM_SYSTEMS > 1) && !defined(PNM)
   	for (system = 0; system < 1; system++)
 	  feCode(clock16K,dWord,dacOut,dspPtr[system],dspCoeff + system,pLocalEpics, system);
