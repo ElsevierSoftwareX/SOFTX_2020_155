@@ -1,4 +1,4 @@
-#include <linux/config.h>
+//#include <linux/config.h>
 #include <linux/version.h>
 #include <linux/init.h>
 #include <linux/module.h>
@@ -230,7 +230,8 @@ unsigned long mapcard(struct pci_dev *pcidev, int memsize) {
   struct VMIC5579_MEM_REGISTER *p5579Csr;
   
 
-  pci_enable_device(pcidev);
+  int res = pci_enable_device(pcidev);
+  res = 0;
   pci_set_master(pcidev);
 
   pci_read_config_dword(pcidev,
@@ -278,6 +279,8 @@ unsigned long mapcard(struct pci_dev *pcidev, int memsize) {
 static int __init mmap_init(void)
 {
         int ret = 0;
+	struct pci_dev *rfmdev = NULL;
+	static unsigned int VMIC_ID = 0x114a;
 
         /* get the major number of the character device */
         if ((ret = alloc_chrdev_region(&mmap_dev, 0, 1, "mmap")) < 0) {
@@ -293,8 +296,6 @@ static int __init mmap_init(void)
         }
 
 	/* Find reflective memory devices */
-	struct pci_dev *rfmdev = NULL;
-	static unsigned int VMIC_ID = 0x114a;
 	rfm_cnt = 0;
 	while((rfmdev = pci_find_device(VMIC_ID, PCI_ANY_ID, rfmdev))) {
 		if (rfm_cnt < 8) {
