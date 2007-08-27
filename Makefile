@@ -52,6 +52,7 @@ install-% :: src/epics/simLink/%.mdl
 	head -4 build/$${system}epics/config/$${ifo}$${upper_system}.txt > /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt;\
 	/bin/grep '^# MODULES' build/$${system}epics/config/$${ifo}$${upper_system}.txt >> /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt;\
 	tail -n +4 /cvs/cds/$$site/chans/filter_archive/$$lower_ifo/$$system/$${ifo}$${upper_system}_$${cur_date}.txt | grep -v '^# MODULES' >> /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt;\
+	else /bin/cp -p build/$${system}epics/config/$${ifo}$${upper_system}.txt  /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt;\
 	fi;\
 	echo Installing /cvs/cds/$$site/target/$${system}epics;\
 	/bin/mkdir -p /cvs/cds/$$site/target_archive;\
