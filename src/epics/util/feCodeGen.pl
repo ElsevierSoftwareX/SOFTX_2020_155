@@ -230,6 +230,8 @@ close(IN);
 #  $partInCnt[$dacPartNum[$ii]] = 16;
 #}
 
+$plantName = $systemName; # Default plant name is the model name
+
 # Take all of the part outputs and find connections.
 # Fill in connected part numbers and types.
 for($ii=0;$ii<$partCnt;$ii++)
@@ -1481,6 +1483,9 @@ for($ii=0;$ii<$dacCnt;$ii++)
 print EPICS "OUTVARIABLE ACCUM_OVERFLOW epicsOutput.ovAccum int ai 0\n";
 print EPICS "\n\n";
 print EPICS "systems \U$systemName\-\n";
+if ($plantName ne $systemName) {
+	print EPICS "plant \U$plantName\n";
+}
 $gdsXstart = ($dcuId - 5) * 1250;
 $gdsTstart = $gdsXstart + 10000;
 print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site " . get_freq() . " $dcuId $ifoid\n";

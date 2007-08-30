@@ -52,6 +52,9 @@ sub printHeaderStruct {
 			} elsif ($spp[0] eq "gds_node_id") {
 				print "GDS node id is set to $spp[1]\n";
 				$::gdsNodeId = $spp[1];
+			} elsif ($spp[0] eq "plant_name") {
+				print "Plant name is set to $spp[1]\n";
+				$::plantName = $spp[1];
 			}
 		}
 	}
