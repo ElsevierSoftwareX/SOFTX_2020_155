@@ -243,6 +243,45 @@ int mapIiroDio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 }
 
 // *****************************************************************************
+// Routine to read ACCESS IIRO-16 Isolated DIO modules
+// *****************************************************************************
+unsigned int readIiroDio1(CDS_HARDWARE *pHardware, int modNum)
+{
+  unsigned int v, v1;
+  v = inb(pHardware->pci_iiro_dio1[modNum] + IIRO_DIO_INPUT);
+  v1 = inb(pHardware->pci_iiro_dio1[modNum] + 4 + IIRO_DIO_INPUT);
+  return v | (v1 << 8);
+}
+
+// *****************************************************************************
+// Routine to write ACCESS IIRO-16 Isolated DIO modules
+// *****************************************************************************
+void writeIiroDio1(CDS_HARDWARE *pHardware, int modNum, int data)
+{
+	outb(data & 0xff, pHardware->pci_iiro_dio1[modNum] + IIRO_DIO_OUTPUT);
+	outb((data >> 8) & 0xff, pHardware->pci_iiro_dio1[modNum] + 4 + IIRO_DIO_OUTPUT);
+}
+
+// *****************************************************************************
+// Routine to initialize ACCESS IIRO-16 Isolated DIO modules
+// *****************************************************************************
+int mapIiroDio1(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
+{
+  static unsigned int pci_io_addr;
+  int devNum;
+
+	  devNum = pHardware->iiroDio1Count;
+	  pci_enable_device(diodev);
+	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_2,&pci_io_addr);
+	  printk("iiro-16 dio pci2 = 0x%x\n",pci_io_addr);
+	  pHardware->pci_iiro_dio[devNum] = pci_io_addr-1;
+	  printk("iiro-16 diospace = 0x%x\n",pHardware->pci_iiro_dio[devNum]);
+
+	  pHardware->iiroDio1Count ++;
+	  return(0);
+}
+
+// *****************************************************************************
 // Routine to initialize DAC modules
 // *****************************************************************************
 int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
@@ -539,6 +578,16 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		modCount ++;
   }
 		
+  dacdev = NULL;
+  status = 0;
+  // Search for ACCESS PCI-IIRO-16 isolated I/O modules
+  while((dacdev = pci_find_device(ACC_VID, ACC_IIRO_TID1, dacdev))) {
+		printk("ACCESS IIRO-16 isolated dio card on bus %x; device %x\n",
+			dacdev->bus->number,
+			PCI_SLOT(dacdev->devfn));
+		status = mapIiroDio1(pCds,dacdev);
+		modCount ++;
+  }
 
   dacdev = NULL;
   status = 0;
