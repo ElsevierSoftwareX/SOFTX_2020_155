@@ -165,6 +165,8 @@ int dioInput[MAX_DIO_MODULES];
 int dioOutput[MAX_DIO_MODULES];
 int rioInput[MAX_DIO_MODULES];
 int rioOutput[MAX_DIO_MODULES];
+int rioInput1[MAX_DIO_MODULES];
+int rioOutput1[MAX_DIO_MODULES];
 int clock16K = 0;
 
 #include "./feSelectCode.c"
@@ -611,6 +613,9 @@ void *fe_start(void *arg)
   	for(kk=0;kk<cdsPciModules.iiroDioCount;kk++) {
   		rioInput[kk] = readIiroDio(&cdsPciModules, kk) & 0xff;
 	}
+  	for(kk=0;kk<cdsPciModules.iiroDio1Count;kk++) {
+  		rioInput1[kk] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
+	}
 
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
@@ -649,6 +654,8 @@ void *fe_start(void *arg)
   // VME input (for testing its speed only!!!)
   if (cdsPciModules.vmeBridgeCount > 0) {
     cdsPciModules.vme[0][0x10] = clock16K;
+//    cdsPciModules.vme_reg[0][SBS_618_DMA_COMMAND] = 0x10;
+
     //cdsPciModules.vme_reg[0][SBS_618_DMA_COMMAND] = 0x10; // Load command register
 
 #if 0
@@ -679,6 +686,7 @@ void *fe_start(void *arg)
     cdsPciModules.vme_reg[0][SBS_618_DMA_PACKET_COUNT1] = 0;
 #endif
 
+    //cdsPciModules.vme_reg[0][SBS_618_REMOTE_COMMAND_REGISTER2] = 0x30;
     cdsPciModules.vme_reg[0][SBS_618_DMA_COMMAND] = 0x90; // start DMA
 
     // poll for DMA done
@@ -717,6 +725,7 @@ void *fe_start(void *arg)
     dWord[0][14] = (double)cdsPciModules.vme[0][0x1e];
     dWord[0][15] = (double)cdsPciModules.vme[0][0x1f];
 #endif
+    cdsPciModules.vme[0][0x10] = clock16K;
   }
 
 #if (NUM_SYSTEMS > 1) && !defined(PNM)
@@ -768,6 +777,9 @@ void *fe_start(void *arg)
 	}
   	for(kk=0;kk<cdsPciModules.iiroDioCount;kk++) {
   		writeIiroDio(&cdsPciModules, kk, rioOutput[kk]);
+	}
+  	for(kk=0;kk<cdsPciModules.iiroDio1Count;kk++) {
+  		writeIiroDio(&cdsPciModules, kk, rioOutput1[kk]);
 	}
 
 #ifndef NO_DAQ
@@ -985,7 +997,7 @@ int main(int argc, char **argv)
 	{
 	  int cards = sizeof(cards_used)/sizeof(cards_used[0]);
 
-	  //printf("configured to use %d cards\n", cards);
+	  printf("configured to use %d cards\n", cards);
 	  cdsPciModules.cards = cards;
 	  cdsPciModules.cards_used = cards_used;
           //return -1;
@@ -1063,12 +1075,17 @@ int main(int argc, char **argv)
         printf("***************************************************************************\n");
 	printf("%d IIRO-8 Isolated DIO cards found\n",cdsPciModules.iiroDioCount);
         printf("***************************************************************************\n");
+	printf("%d IIRO-16 Isolated DIO cards found\n",cdsPciModules.iiroDio1Count);
+        printf("***************************************************************************\n");
 	printf("%d RFM cards found\n",cdsPciModules.rfmCount);
 	for(ii=0;ii<cdsPciModules.rfmCount;ii++)
         {
                  printf("\tRFM %d is a VMIC_5565 module with Node ID %d\n",cdsPciModules.rfmConfig[ii]);
 	}
         printf("***************************************************************************\n");
+
+//	cdsPciModules.adcCount = 0;
+	//cdsPciModules.dacCount = 0;
 
 	if (cdsPciModules.adcCount == 0 && cdsPciModules.dacCount == 0) {
 		printf("No ADC and no DAC modules found, running on timer\n");
