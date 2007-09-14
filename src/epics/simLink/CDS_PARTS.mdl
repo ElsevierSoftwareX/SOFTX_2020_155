@@ -857,6 +857,27 @@ Library {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "RelayIO"
+	  Tag			  "cdsRio1"
+	  Ports			  [1, 1]
+	  Position		  [400, 270, 440, 330]
+	  ForegroundColor	  "blue"
+	  BackgroundColor	  "cyan"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsRio1/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  on
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "sas:0x2000"
 	  Tag			  "cdsIPC"
 	  Description		  "Inter-process communication through /rtl_ep"
