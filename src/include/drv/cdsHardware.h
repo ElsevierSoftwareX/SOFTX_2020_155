@@ -57,6 +57,8 @@ typedef struct CDS_HARDWARE{
 	unsigned short pci_dio[MAX_DIO_MODULES];	/* io registers of DIO	*/
 	int iiroDioCount;	 	/* Number of IIRO-8 isolated DIO modules found */
 	unsigned short pci_iiro_dio[MAX_DIO_MODULES];	/* io regs of IIRO mods */
+	int iiroDio1Count;	 	/* Number of IIRO-16 isolated DIO modules found */
+	unsigned short pci_iiro_dio1[MAX_DIO_MODULES];	/* io regs of IIRO-16 mods */
 	int rfmCount;			/* Number of RFM modules found		*/
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
 	int rfmConfig[MAX_RFM_MODULES];
@@ -73,7 +75,7 @@ typedef struct CDS_HARDWARE{
 /* ACCESS DIO Module Definitions ********************************************** */
 #define ACC_VID	0x494F
 #define ACC_TID	0x0C51
-#define DIO_ALL_INPUT	0x9B
+
 #define DIO_A_OUTPUT	0x8B
 #define DIO_C_OUTPUT	0x92
 #define DIO_A_REG	0x0
@@ -83,6 +85,8 @@ typedef struct CDS_HARDWARE{
 
 /* ACCESS PCI-IIRO-8 isolated digital input and output */
 #define ACC_IIRO_TID 0x0f00
+/* ACCESS PCI-IIRO-16 isolated digital input and output (16 channels) */
+#define ACC_IIRO_TID1 0x0f08
 #define IIRO_DIO_INPUT	0x1
 #define IIRO_DIO_OUTPUT 0x0
 
