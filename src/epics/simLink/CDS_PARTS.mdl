@@ -32,10 +32,10 @@ Library {
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "controls"
+  LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Jun 13 18:38:15 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:93>"
+  LastModifiedDate	  "Mon Sep 17 14:09:58 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:94>"
   ConfigurationManager	  "None"
   LinearizationMsg	  "none"
   Profile		  off
@@ -272,7 +272,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [607, 541, 1276, 862]
+    Location		    [607, 540, 1276, 861]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -705,8 +705,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[779, 275, 1219, 939]
-	Open			off
+	Location		[144, 235, 767, 914]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -838,8 +838,10 @@ Library {
 	  BlockType		  Reference
 	  Name			  "RelayIO"
 	  Tag			  "cdsRio"
+	  Description		  "PCI IIRO 8 relay output and isolated input "
+"module"
 	  Ports			  [1, 1]
-	  Position		  [350, 270, 390, 330]
+	  Position		  [345, 245, 385, 305]
 	  ForegroundColor	  "blue"
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
@@ -857,10 +859,12 @@ Library {
 	}
 	Block {
 	  BlockType		  Reference
-	  Name			  "RelayIO"
+	  Name			  "RelayIO1"
 	  Tag			  "cdsRio1"
+	  Description		  "PCI IIRO 16 channel relay ourput and isolat"
+"ed input module"
 	  Ports			  [1, 1]
-	  Position		  [400, 270, 440, 330]
+	  Position		  [360, 355, 400, 415]
 	  ForegroundColor	  "blue"
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
