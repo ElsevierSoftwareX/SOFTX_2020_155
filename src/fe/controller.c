@@ -779,7 +779,7 @@ void *fe_start(void *arg)
   		writeIiroDio(&cdsPciModules, kk, rioOutput[kk]);
 	}
   	for(kk=0;kk<cdsPciModules.iiroDio1Count;kk++) {
-  		writeIiroDio(&cdsPciModules, kk, rioOutput1[kk]);
+  		writeIiroDio1(&cdsPciModules, kk, rioOutput1[kk]);
 	}
 
 #ifndef NO_DAQ

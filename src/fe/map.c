@@ -274,8 +274,8 @@ int mapIiroDio1(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 	  pci_enable_device(diodev);
 	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_2,&pci_io_addr);
 	  printk("iiro-16 dio pci2 = 0x%x\n",pci_io_addr);
-	  pHardware->pci_iiro_dio[devNum] = pci_io_addr-1;
-	  printk("iiro-16 diospace = 0x%x\n",pHardware->pci_iiro_dio[devNum]);
+	  pHardware->pci_iiro_dio1[devNum] = pci_io_addr-1;
+	  printk("iiro-16 diospace = 0x%x\n",pHardware->pci_iiro_dio1[devNum]);
 
 	  pHardware->iiroDio1Count ++;
 	  return(0);
@@ -373,6 +373,11 @@ int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
 
   // Set ADC to 64 channel = 32 differential channels
   adcPtr[devNum]->BCR |= (GSAI_FULL_DIFFERENTIAL);
+#if 0
+  // Do not do that, it makes noise worse, not better!
+  // Clear range bits to select lowest range 2.5V
+  adcPtr[devNum]->BCR &= ~(GSAI_IN_RANGE_BITS);
+#endif
   adcPtr[devNum]->BCR &= ~(GSAI_SET_2S_COMP);
 
   // Set sample rate close to 16384Hz
