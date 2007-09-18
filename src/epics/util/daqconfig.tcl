@@ -36,7 +36,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.15 $
+# $Revision: 1.16 $
 #
 option add *highlightThickness 0
 
@@ -326,7 +326,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.15 2007/07/18 00:16:59 aivanov Exp $}
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.16 2007/09/18 22:35:36 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
@@ -393,7 +393,23 @@ proc save_ini_files {} {
     puts $infile "\[default\]"
     foreach key $a {
         if {[regexp "^$fname,default,(\[^,\]+)$" $key foo param]} {
-	 puts $infile "$param=$sections($key)"
+	  #puts $infile "$param=$sections($key)"
+	  set val $sections($key);
+	  if {[string compare $param "onoff"] == 0} { continue }
+	  if {[string compare $param "datatype"] == 0} { 
+	  	     switch $val {
+  		       "short" {
+                   	set val 1
+  		       }
+ 		       "float" {
+                   	set val 4
+		       }
+		       default {
+                   	set val 4
+		       }
+                     }
+	  }
+	  puts $infile "$param=$val"
 	}
     }
 
