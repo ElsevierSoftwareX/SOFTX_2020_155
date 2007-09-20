@@ -136,6 +136,7 @@ sub transform_block_type {
         elsif ($blockType eq "Product") { return "MULTIPLY"; }
         elsif ($blockType eq "Ground")	{ return "GROUND"; }
         elsif ($blockType eq "Constant")	{ return "CONSTANT"; }
+        elsif ($blockType eq "Saturate")	{ return "SATURATE"; }
         elsif ($blockType eq "Terminator") { return "TERM"; }
         elsif ($blockType eq "BusCreator") { return "BUSC"; }
         elsif ($blockType eq "BusSelector") { return "BUSS"; }
@@ -351,8 +352,20 @@ sub node_processing {
 			die "Output ports are only supported in subsystems\n";
 		}
 	}
-	if ($block_type eq "CONSTANT") {
+	if ($block_type eq "SATURATE") {
+		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{UpperLimit};
+		if ($::partInputs[$::partCnt] eq undef) {
+			$::partInputs[$::partCnt] = 0.5;
+		}
+		$::partInputs1[$::partCnt] = ${$node->{FIELDS}}{LowerLimit};
+		if ($::partInputs1[$::partCnt] eq undef) {
+			$::partInputs1[$::partCnt] = -0.5;
+		}
+	} elsif ($block_type eq "CONSTANT") {
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Value};
+		if ($::partInputs[$::partCnt] eq undef) {
+			$::partInputs[$::partCnt] = 1;
+		}
 	} elsif ($block_type eq "SUM") {
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
 		$::partInputs[$::partCnt] =~ tr/+-//cd; # delete other characters
