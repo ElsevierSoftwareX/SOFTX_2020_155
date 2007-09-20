@@ -34,8 +34,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Sep 20 14:20:55 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:100>"
+  LastModifiedDate	  "Thu Sep 20 15:03:13 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:101>"
   ConfigurationManager	  "None"
   SimulationMode	  "normal"
   LinearizationMsg	  "none"
@@ -597,7 +597,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Filters"
-	Location		[1297, 463, 1675, 722]
+	Location		[1282, 525, 1660, 784]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1410,7 +1410,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[990, 430, 1210, 843]
+	Location		[1381, 523, 1601, 936]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1512,7 +1512,7 @@ Library {
 	}
 	Block {
 	  BlockType		  UnitDelay
-	  Name			  "Unit Delay"
+	  Name			  "UnitDelay"
 	  Position		  [135, 93, 170, 127]
 	}
 	Block {
