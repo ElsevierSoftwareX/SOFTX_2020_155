@@ -488,7 +488,7 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 $ftotal = $partCnt;
    for($kk=0;$kk<$partCnt;$kk++)
    {
-	if(($partType[$kk] eq "INPUT") || ($partType[$kk] eq "OUTPUT") || ($partType[$kk] eq "BUSC") || ($partType[$kk] eq "BUSS") || ($partType[$kk] eq "EpicsIn") || ($partType[$kk] eq "TERM") || ($partType[$kk] eq "GROUND"))
+	if(($partType[$kk] eq "INPUT") || ($partType[$kk] eq "OUTPUT") || ($partType[$kk] eq "BUSC") || ($partType[$kk] eq "BUSS") || ($partType[$kk] eq "EpicsIn") || ($partType[$kk] eq "TERM") || ($partType[$kk] eq "GROUND") || ($partType[$kk] eq "CONSTANT"))
 	{
 		$ftotal --;
 	}
@@ -568,7 +568,7 @@ for($ii=0;$ii<$subSys;$ii++)
 	$ssCnt = 0;
 	for($jj=$subSysPartStart[$ii];$jj<$subSysPartStop[$ii];$jj++)
 	{
-		if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "EpicsIn"))
+		if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "EpicsIn") || ($partType[$jj] eq "CONSTANT"))
 		{
 			$partsRemaining --;
 			$partUsed[$jj] = 1;
@@ -769,9 +769,9 @@ foreach $i (0 .. $subSys-1) {
 		}
 	}
 
-	# Insert all ground inputs into the root
+	# Insert all ground and const inputs into the root
 	for ($subSysPartStart[$i] .. $subSysPartStop[$i]) {
-		if ($partType[$_] eq "GROUND") {
+		if (($partType[$_] eq "GROUND") || ($partType[$_] eq "CONSTANT")) {
 			$node = {
 				NAME => $xpartName[$_],
 				TYPE => $partType[$_],
@@ -1347,7 +1347,7 @@ for($ii=0;$ii<$seqCnt;$ii++)
 	{
 		$xx = $seqList[$ii];
 		$processName[$processCnt] = $xpartName[$xx];
-if(($partType[$xx] eq "TERM") || ($partType[$xx] eq "GROUND") || ($partType[$xx] eq "EpicsIn")) 
+if(($partType[$xx] eq "TERM") || ($partType[$xx] eq "GROUND") || ($partType[$xx] eq "EpicsIn") || ($partType[$xx] eq "CONSTANT")) 
 {$ftotal ++;}
 		$processSeqType{$xpartName[$xx]} = $seqType[$ii];
 		$processPartNum[$processCnt] = $xx;
@@ -1553,8 +1553,11 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "DELAY") {
 		print OUT "static double \L$xpartName[$ii];\n";
 	}
-	if($partType[$ii] eq "GROUND") {
+	if($partType[$ii] eq "GROUND")  {
 		print OUT "static float \L$xpartName[$ii];\n";
+	}
+	if($partType[$ii] eq "CONSTANT")  {
+		print OUT "static double \L$xpartName[$ii];\n";
 	}
 	if($partType[$ii] eq "AND") {
 		$port = $partInCnt[$ii];
@@ -1643,6 +1646,9 @@ for($ii=0;$ii<$partCnt;$ii++)
 
 	if($partType[$ii] eq "GROUND") {
 		print OUT "\L$xpartName[$ii] = 0\.0;\n";
+	}
+	if($partType[$ii] eq "CONSTANT") {
+		print OUT "\L$xpartName[$ii] = (double)$partInputs[$ii];\n";
 	}
 }
 print OUT "\} else \{\n";
@@ -2293,7 +2299,7 @@ for(0 .. $partCnt-1) {
 		#print "Matrix $basename $incnt X $outcnt\n";
 		system("./mkmatrix.pl --cols=$incnt --rows=$outcnt --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
 	}
-	if ($partType[$_] eq "Filt") {
+	if ($partType[$_] =~ /^Filt/) {
 		my $filt_name = $partName[$_];
 		if ($partSubName[$_] ne "") {
 			$filt_name = $partSubName[$_] . "_" . $filt_name;
