@@ -143,7 +143,8 @@ $partInput[0][0] = "";	# $partInput[0 .. $partCnt][0 .. $partInCnt[0]]
 # Source port number
 # This shows which source parts' port is connected to each input
 $partInputPort[0][0] = 0;	# $partInputPort[0 .. $partCnt][0 .. $partInCnt[$_]]
-$partInputs[0] = 0;		# Stores 'Inputs' field of the part declaration in SUM part, 'Operator' in RelationaOperator part
+$partInputs[0] = 0;		# Stores 'Inputs' field of the part declaration in SUM part, 'Operator' in RelationaOperator part, 'Value' Constant part, etc
+$partInputs1[0] = 0;		# Same as $partInputs, i.e. extra part parameter, used with Saturation part
 
 # Total number of outputs for each part
 # i.e. how many parts are connected with lines (branches) to it
@@ -1538,7 +1539,8 @@ for($ii=0;$ii<$partCnt;$ii++)
 	if($partType[$ii] eq "SUM"
 	   || $partType[$ii] eq "Switch"
 	   || $partType[$ii] eq "Gain"
-	   || $partType[$ii] eq "RelationalOperator") {
+	   || $partType[$ii] eq "RelationalOperator"
+	   || $partType[$ii] eq "SATURATE") {
 		$port = $partInCnt[$ii];
 		print OUT "double \L$xpartName[$ii];\n";
 	}
@@ -1927,6 +1929,23 @@ for($xx=0;$xx<$processCnt;$xx++)
 		print OUT "$calcExp";
 	}
 
+	if($partType[$mm] eq "SATURATE")
+	{
+	   print OUT "// SATURATE\n";
+		my $part_name = "\L$xpartName[$mm]";
+		my $upper_limit = "$partInputs[$mm]";
+		my $lower_limit = "$partInputs1[$mm]";
+		$calcExp = $part_name;
+		$calcExp .= " = ";
+		$calcExp .= $fromExp[0];
+		$calcExp .= ";\n";
+		$calcExp .= "if ($part_name > $upper_limit) {\n";
+		$calcExp .= "  $part_name  = $upper_limit;\n";
+		$calcExp .= "} else if ($part_name < $lower_limit) {\n";
+		$calcExp .= "  $part_name  = $lower_limit;\n";
+		$calcExp .= "};\n";
+		print OUT "$calcExp";
+	}
 print OUT "\n";
 }
 }
