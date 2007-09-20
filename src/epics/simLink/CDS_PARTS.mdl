@@ -1,6 +1,6 @@
 Library {
   Name			  "CDS_PARTS"
-  Version		  6.5
+  Version		  6.6
   MdlSubVersion		  0
   SavedCharacterEncoding  "UTF-8"
   LibraryType		  "BlockLibrary"
@@ -34,12 +34,14 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Mon Sep 17 14:09:58 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:94>"
+  LastModifiedDate	  "Thu Sep 20 12:38:53 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:99>"
   ConfigurationManager	  "None"
+  SimulationMode	  "normal"
   LinearizationMsg	  "none"
   Profile		  off
   ParamWorkspaceSource	  "MATLABWorkspace"
+  AccelVerboseBuild	  off
   CovSaveName		  "covdata"
   CovMetricSettings	  "dw"
   CovNameIncrementing	  off
@@ -96,6 +98,18 @@ Library {
     Block {
       BlockType		      BusSelector
       OutputAsBus	      off
+    }
+    Block {
+      BlockType		      Constant
+      Value		      "1"
+      VectorParams1D	      on
+      SamplingMode	      "Sample based"
+      OutDataTypeMode	      "Inherit from 'Constant value'"
+      OutDataType	      "sfix(16)"
+      ConRadixGroup	      "Use specified scaling"
+      OutScaling	      "2^0"
+      SampleTime	      "inf"
+      FramePeriod	      "inf"
     }
     Block {
       BlockType		      Demux
@@ -178,6 +192,8 @@ Library {
       BlockType		      Product
       Inputs		      "2"
       Multiplication	      "Element-wise(.*)"
+      CollapseMode	      "All dimensions"
+      CollapseDim	      "1"
       InputSameDT	      on
       OutDataTypeMode	      "Same as first input"
       OutDataType	      "sfix(16)"
@@ -201,8 +217,14 @@ Library {
       SampleTime	      "-1"
     }
     Block {
+      BlockType		      "S-Function"
+      FunctionName	      "system"
+      SFunctionModules	      "''"
+      PortCounts	      "[]"
+    }
+    Block {
       BlockType		      SubSystem
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       Permissions	      "ReadWrite"
       PermitHierarchicalResolution "All"
       TreatAsAtomicUnit	      off
@@ -222,6 +244,8 @@ Library {
       BlockType		      Sum
       IconShape		      "rectangular"
       Inputs		      "++"
+      CollapseMode	      "All dimensions"
+      CollapseDim	      "1"
       InputSameDT	      on
       OutDataTypeMode	      "Same as first input"
       OutDataType	      "sfix(16)"
@@ -263,6 +287,7 @@ Library {
     FontSize		    10
     FontWeight		    "normal"
     FontAngle		    "normal"
+    UseDisplayTextAsClickCallback off
   }
   LineDefaults {
     FontName		    "Courier"
@@ -272,7 +297,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [607, 540, 1276, 861]
+    Location		    [620, 107, 1289, 428]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -308,7 +333,7 @@ Library {
       UserData		      "DataTag0"
       SourceBlock	      "simulink/Model-Wide\nUtilities/DocBlock"
       SourceType	      "DocBlock"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -330,7 +355,7 @@ Library {
       UserData		      "DataTag1"
       SourceBlock	      "simulink/Model-Wide\nUtilities/DocBlock"
       SourceType	      "DocBlock"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -353,7 +378,7 @@ Library {
       System {
 	Name			"EpicsParts"
 	Location		[798, 256, 1031, 669]
-	Open			on
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -385,9 +410,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsEpicsBinIn/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -415,9 +440,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsEpicsIn/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -441,9 +466,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -487,9 +512,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsRemoteIntlk/Name"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -514,9 +539,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsEzCaRead/cdsEzCaRead"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -539,9 +564,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsEzCaWrite/cdsEzCaWrite"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -564,8 +589,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Filters"
-	Location		[778, 196, 1013, 475]
-	Open			off
+	Location		[531, 289, 909, 548]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -577,6 +602,95 @@ Library {
 	TiledPageScale		1
 	ShowPageBoundaries	off
 	ZoomFactor		"100"
+	Block {
+	  BlockType		  Reference
+	  Name			  "IIR FM with control"
+	  Tag			  "cdsFiltCtrl"
+	  Description		  "cdsFiltCntrl is the standard IIR filter mod"
+"ule (exactly the same as cdsFilt) but with added control data output 'Ctrl'. "
+"Filter module digital signal output appears on the first output, which is cal"
+"led 'Val'. 'Ctrl' output has a bit pattern encoding the state of filter's on/"
+"off switches (FM1 through FM10). The bit values are:\n                       "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                                                                        \nmod"
+"ule 	bit                                                              "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                      \n--------------                                       "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                                          \nFM1	0x20                  "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                                                                     \nFM2"
+"	0x80                                                                 "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                      \nFM3	0x200                                     "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                                                 \nFM4	0x800          "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                                                                            "
+"\nFM5	0x2000                                                          "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                           \nFM6	0x8000                               "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                                                      \nFM7	0x20000   "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"    \nFM8	0x80000                                                     "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                               \nFM9	0x200000                         "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                                                          \nFM10	0x800"
+"000                                                                          "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"        \n                                                                   "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                            \nThis bit data can be used to drive some other s"
+"witches or it can be output using a binary I/O module.                       "
+"                                                                             "
+"                                                                             "
+"                                                "
+	  Ports			  [1, 2]
+	  Position		  [215, 40, 275, 75]
+	  BackgroundColor	  "darkGreen"
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsFiltCtrl/IIR FM with control"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "IIR Filter Module"
@@ -607,15 +721,15 @@ Library {
 "                                                                             "
 "                                                                        "
 	  Ports			  [1, 1]
-	  Position		  [80, 28, 150, 52]
+	  Position		  [65, 38, 135, 62]
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -631,15 +745,15 @@ Library {
 "Polyphase FIR filter algorithm. This part is typically only used in HEPI or o"
 "ther seismic systems."
 	  Ports			  [1, 1]
-	  Position		  [80, 89, 155, 121]
+	  Position		  [65, 144, 140, 176]
 	  BackgroundColor	  "orange"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsPPFIR/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -653,15 +767,15 @@ Library {
 	  Description		  "Purpose:                                   "
 "\nCalculate an RMS based on the input signal."
 	  Ports			  [1, 1]
-	  Position		  [100, 165, 140, 225]
+	  Position		  [215, 135, 255, 195]
 	  BackgroundColor	  "[0.741176, 0.800000, 0.215686]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsRms/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -684,7 +798,7 @@ Library {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsFunctionCall/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -705,8 +819,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[144, 235, 767, 914]
-	Open			on
+	Location		[101, 315, 724, 994]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -730,9 +844,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsRfmIO/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -803,9 +917,9 @@ Library {
 	  AttributesFormatString  "%<Description>"
 	  SourceBlock		  "dac/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -825,9 +939,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsDio/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -848,9 +962,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsRio/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -871,9 +985,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsRio1/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -893,9 +1007,9 @@ Library {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsIPC/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1288,7 +1402,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[987, 91, 1221, 523]
+	Location		[1368, 322, 1602, 754]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1309,11 +1423,17 @@ Library {
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
+	  BlockType		  Constant
+	  Name			  "Constant"
+	  Position		  [50, 370, 80, 400]
+	}
+	Block {
 	  BlockType		  Product
 	  Name			  "Divide"
 	  Ports			  [2, 1]
 	  Position		  [35, 77, 65, 108]
 	  Inputs		  "*/"
+	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  OutScaling		  "2^-10"
@@ -1354,6 +1474,7 @@ Library {
 	  Name			  "Product"
 	  Ports			  [2, 1]
 	  Position		  [35, 22, 65, 53]
+	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
@@ -1366,6 +1487,7 @@ Library {
 	  ShowName		  off
 	  IconShape		  "round"
 	  Inputs		  "|++"
+	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
@@ -1385,13 +1507,13 @@ Library {
 	  Name			  "and"
 	  Tag			  "cdsBitwise"
 	  Ports			  [2, 1]
-	  Position		  [40, 310, 85, 345]
+	  Position		  [40, 285, 85, 320]
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsBitwise/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1457,7 +1579,7 @@ Library {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsParameters/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
