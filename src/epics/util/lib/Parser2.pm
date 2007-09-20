@@ -135,6 +135,7 @@ sub transform_block_type {
         elsif ($blockType eq "Sum")	{ return "SUM"; }
         elsif ($blockType eq "Product") { return "MULTIPLY"; }
         elsif ($blockType eq "Ground")	{ return "GROUND"; }
+        elsif ($blockType eq "Constant")	{ return "CONSTANT"; }
         elsif ($blockType eq "Terminator") { return "TERM"; }
         elsif ($blockType eq "BusCreator") { return "BUSC"; }
         elsif ($blockType eq "BusSelector") { return "BUSS"; }
@@ -350,7 +351,9 @@ sub node_processing {
 			die "Output ports are only supported in subsystems\n";
 		}
 	}
-	if ($block_type eq "SUM") {
+	if ($block_type eq "CONSTANT") {
+		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Value};
+	} elsif ($block_type eq "SUM") {
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
 		$::partInputs[$::partCnt] =~ tr/+-//cd; # delete other characters
 	} elsif ($block_type eq "MULTIPLY" &&
