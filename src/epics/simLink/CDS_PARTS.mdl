@@ -34,8 +34,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Sep 20 12:38:53 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:99>"
+  LastModifiedDate	  "Thu Sep 20 14:20:55 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:100>"
   ConfigurationManager	  "None"
   SimulationMode	  "normal"
   LinearizationMsg	  "none"
@@ -217,6 +217,14 @@ Library {
       SampleTime	      "-1"
     }
     Block {
+      BlockType		      Saturate
+      UpperLimit	      "0.5"
+      LowerLimit	      "-0.5"
+      LinearizeAsGain	      on
+      ZeroCross		      on
+      SampleTime	      "-1"
+    }
+    Block {
       BlockType		      "S-Function"
       FunctionName	      "system"
       SFunctionModules	      "''"
@@ -297,7 +305,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [620, 107, 1289, 428]
+    Location		    [997, 85, 1666, 406]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -589,7 +597,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Filters"
-	Location		[531, 289, 909, 548]
+	Location		[1297, 463, 1675, 722]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -615,67 +623,67 @@ Library {
 "                                                                             "
 "                                                                             "
 "                                                                        \nmod"
-"ule 	bit                                                              "
+"ule 	hex	dec                                                   "
 "                                                                             "
 "                                                                             "
 "                                                                             "
-"                      \n--------------                                       "
+"                             \n-----------------------                       "
 "                                                                             "
 "                                                                             "
 "                                                                             "
-"                                          \nFM1	0x20                  "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                                                                     \nFM2"
-"	0x80                                                                 "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                      \nFM3	0x200                                     "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                                                 \nFM4	0x800          "
-"                                                                             "
+"                                                 \nFM1	0x20           "
+"         32                                                                  "
 "                                                                             "
 "                                                                             "
 "                                                                            "
-"\nFM5	0x2000                                                          "
+"\nFM2	0x80                     128                                    "
 "                                                                             "
 "                                                                             "
 "                                                                             "
-"                           \nFM6	0x8000                               "
+"                           \nFM3	0x200                   512          "
 "                                                                             "
 "                                                                             "
 "                                                                             "
-"                                                      \nFM7	0x20000   "
+"                                                      \nFM4	0x800     "
+"              2048                                                           "
 "                                                                             "
 "                                                                             "
 "                                                                             "
-"                                                                             "
-"    \nFM8	0x80000                                                     "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                               \nFM9	0x200000                         "
+"    \nFM5	0x2000                 8192                                 "
 "                                                                             "
 "                                                                             "
 "                                                                             "
-"                                                          \nFM10	0x800"
-"000                                                                          "
+"                               \nFM6	0x8000                 32768     "
 "                                                                             "
 "                                                                             "
 "                                                                             "
-"        \n                                                                   "
+"                                                          \nFM7	0x2000"
+"0                131072                                                      "
 "                                                                             "
 "                                                                             "
 "                                                                             "
-"                            \nThis bit data can be used to drive some other s"
-"witches or it can be output using a binary I/O module.                       "
+"        \nFM8	0x80000                 524288                          "
 "                                                                             "
 "                                                                             "
-"                                                "
+"                                                                             "
+"                                   \nFM9	0x200000               209715"
+"2                                                                            "
+"                                                                             "
+"                                                                             "
+"                                                              \nFM10	0"
+"x800000               8388608                                                "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"            \n                                                               "
+"                                                                             "
+"                                                                             "
+"                                                                             "
+"                                \nThis bit data can be used to drive some oth"
+"er switches or it can be output using a binary I/O module.                   "
+"                                                                             "
+"                                                                             "
+"                                                    "
 	  Ports			  [1, 2]
 	  Position		  [215, 40, 275, 75]
 	  BackgroundColor	  "darkGreen"
@@ -1402,8 +1410,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[1368, 322, 1602, 754]
-	Open			off
+	Location		[990, 430, 1210, 843]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1418,14 +1426,14 @@ Library {
 	Block {
 	  BlockType		  Switch
 	  Name			  "Choice"
-	  Position		  [140, 180, 170, 210]
+	  Position		  [140, 160, 170, 190]
 	  InputSameDT		  off
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
 	  BlockType		  Constant
 	  Name			  "Constant"
-	  Position		  [50, 370, 80, 400]
+	  Position		  [35, 335, 65, 365]
 	}
 	Block {
 	  BlockType		  Product
@@ -1443,7 +1451,7 @@ Library {
 	Block {
 	  BlockType		  Gain
 	  Name			  "Gain"
-	  Position		  [150, 330, 180, 360]
+	  Position		  [140, 285, 170, 315]
 	  ParameterDataTypeMode	  "Inherit via internal rule"
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
@@ -1451,7 +1459,7 @@ Library {
 	Block {
 	  BlockType		  Ground
 	  Name			  "Ground"
-	  Position		  [40, 180, 60, 200]
+	  Position		  [40, 170, 60, 190]
 	}
 	Block {
 	  BlockType		  Logic
@@ -1464,7 +1472,7 @@ Library {
 	Block {
 	  BlockType		  RelationalOperator
 	  Name			  "Operator"
-	  Position		  [140, 252, 170, 283]
+	  Position		  [140, 222, 170, 253]
 	  Operator		  "<="
 	  InputSameDT		  off
 	  LogicOutDataTypeMode	  "Boolean"
@@ -1480,10 +1488,15 @@ Library {
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
+	  BlockType		  Saturate
+	  Name			  "Saturation"
+	  Position		  [135, 345, 165, 375]
+	}
+	Block {
 	  BlockType		  Sum
 	  Name			  "Sum"
 	  Ports			  [2, 1]
-	  Position		  [40, 140, 60, 160]
+	  Position		  [40, 130, 60, 150]
 	  ShowName		  off
 	  IconShape		  "round"
 	  Inputs		  "|++"
@@ -1495,7 +1508,7 @@ Library {
 	Block {
 	  BlockType		  Terminator
 	  Name			  "Terminator"
-	  Position		  [40, 225, 60, 245]
+	  Position		  [40, 215, 60, 235]
 	}
 	Block {
 	  BlockType		  UnitDelay
@@ -1507,7 +1520,7 @@ Library {
 	  Name			  "and"
 	  Tag			  "cdsBitwise"
 	  Ports			  [2, 1]
-	  Position		  [40, 285, 85, 320]
+	  Position		  [30, 265, 75, 300]
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsBitwise/Subsystem"
 	  SourceType		  "SubSystem"
