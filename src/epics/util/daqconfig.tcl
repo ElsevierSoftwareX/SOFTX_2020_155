@@ -36,7 +36,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.18 $
+# $Revision: 1.19 $
 #
 option add *highlightThickness 0
 
@@ -330,7 +330,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.18 2007/09/27 17:56:56 aivanov Exp $}
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.19 2007/09/27 17:58:44 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
@@ -621,13 +621,13 @@ proc parse_ini_file file {
 			     $chanrate != 16384 && $chanrate != 32768 &&
 			     $chanrate != 65536 } {
 					set ini_section_error 1
-					puts "Syntax error in $file"
+					#puts "Syntax error in $file"
 					break
 			     }
 		} else {
 			if {[string compare $section "default"] != 0} {
 				set ini_section_error 1
-				puts "Syntax error in $file"
+				#puts "Syntax error in $file"
 				break
 			}
 		}
