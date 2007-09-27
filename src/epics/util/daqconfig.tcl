@@ -36,7 +36,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.16 $
+# $Revision: 1.17 $
 #
 option add *highlightThickness 0
 
@@ -88,6 +88,8 @@ proc Tree:config {w args} {
 #
 proc Tree:newitem {w v args} {
   global Tree
+  global Tree_error
+  set Tree_error 0
   set dir [file dirname $v]
   set n [file tail $v]
   if {![info exists Tree($w:$dir:open)]} {
@@ -95,7 +97,9 @@ proc Tree:newitem {w v args} {
   }
   set i [lsearch -exact $Tree($w:$dir:children) $n]
   if {$i>=0} {
-    error "item \"$v\" already exists"
+    #error "item \"$v\" already exists"
+    set Tree_error 1;
+    return;
   }
   lappend Tree($w:$dir:children) $n
   set Tree($w:$dir:children) [lsort $Tree($w:$dir:children)]
@@ -326,7 +330,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.16 2007/09/18 22:35:36 aivanov Exp $}
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.17 2007/09/27 14:39:14 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
@@ -345,6 +349,10 @@ set ro_files {};
 
 ;# Do not show read-only files
 foreach file [glob -nocomplain -tails -directory $dir "*.ini"] {
+    #exclude EDCU ini file
+    #if {[regexp {EDCU.ini$} $file]} { continue }
+    #if {[regexp {GDS.ini$} $file]} { continue }
+    #if {[regexp {SUS.ini$} $file] == 0 } { continue }
     #if {[file writable $file]} {
         lappend files $file
     #} else {
@@ -796,13 +804,21 @@ proc display_channels file {
 
 
 foreach z $files {
+  global Tree_error
   Tree:newitem .f.tf.w /$z -image idir
   parse_ini_file $z
   foreach x $section_names($z) {
     #puts "Section name is $x"
     if {[string compare  $sections($z,$x,onoff) on] == 0} {
       Tree:newitem .f.tf.w /$z/$x -image ifile
+      if {$Tree_error > 0} {
+	break
+      }
     }
+  }
+  if {$Tree_error > 0} {
+    puts "Error in $z"
+    Tree:delitem  .f.tf.w /$z
   }
 }
 
