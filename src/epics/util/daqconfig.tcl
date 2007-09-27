@@ -36,7 +36,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.17 $
+# $Revision: 1.18 $
 #
 option add *highlightThickness 0
 
@@ -330,7 +330,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.17 2007/09/27 14:39:14 aivanov Exp $}
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.18 2007/09/27 17:56:56 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
@@ -588,6 +588,8 @@ proc killChildren {parent} {
 
 ;# Parser ini file
 proc parse_ini_file file {
+    global ini_section_error
+    set ini_section_error 0
     set infile [open "$::dir/$file" r]
     set number 0
     global sections
@@ -608,7 +610,28 @@ proc parse_ini_file file {
                 #puts "Section $lws"
                 if {[regexp {^(\S+)_(\d+)$} $section junk channame chanrate]} {
 			set lws $channame;
+			# Check valid channel rate
+			#puts "channel $channame rate $chanrate"
+    			if {[string length $chanrate] > 0 &&
+			     $chanrate != 16 && $chanrate != 32 &&
+			     $chanrate  != 64 && $chanrate != 132 &&
+			     $chanrate != 256 && $chanrate != 512 &&
+			     $chanrate != 1024 && $chanrate != 2048 &&
+			     $chanrate != 4096 && $chanrate != 8192 &&
+			     $chanrate != 16384 && $chanrate != 32768 &&
+			     $chanrate != 65536 } {
+					set ini_section_error 1
+					puts "Syntax error in $file"
+					break
+			     }
+		} else {
+			if {[string compare $section "default"] != 0} {
+				set ini_section_error 1
+				puts "Syntax error in $file"
+				break
+			}
 		}
+		
                 set sections($file,$lws,onoff) on
                 if {[string compare $comment "#"] == 0} {
                   set sections($file,$lws,onoff) off
@@ -805,8 +828,13 @@ proc display_channels file {
 
 foreach z $files {
   global Tree_error
-  Tree:newitem .f.tf.w /$z -image idir
+  global ini_section_error
   parse_ini_file $z
+  if {$ini_section_error  > 0} {
+	puts "Syntax error in $z"
+	continue;
+  }
+  Tree:newitem .f.tf.w /$z -image idir
   foreach x $section_names($z) {
     #puts "Section name is $x"
     if {[string compare  $sections($z,$x,onoff) on] == 0} {
