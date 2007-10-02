@@ -173,19 +173,53 @@ int clock16K = 0;
 
 char daqArea[2*DAQ_DCU_SIZE];		/* Space allocation for daqLib buffers	*/
 
+
 #ifdef OVERSAMPLE
-#define ADC_SAMPLE_COUNT	0x80
-#define ADC_DMA_BYTES		0x200
-double feCoeff4x[13] =
+
+/* Oversamping base rate is 64K */
+/* Coeffs for the 2x downsampling (32K system) filter */
+static double feCoeff2x[13] =
+        {0.014605318489015,
+        -1.00613305346332,    0.31290490560439,   -0.00000330106714,    0.99667220785946,
+        -0.85833656728801,    0.58019077541120,    0.30560272900767,    0.98043281669062,
+        -0.77769970124012,    0.87790692599199,    1.65459644813269,    1.00000000000000};
+
+/* Coeffs for the 4x downsampling (16K system) filter */
+static double feCoeff4x[13] =
         {0.0032897561126272,
         -1.52626060254343,    0.60240176412244,   -1.41321371411946,    0.99858678588255,
         -1.57309308067347,    0.75430004092087,   -1.11957678237524,    0.98454170534006,
         -1.65602262774366,    0.92929745639579,    0.26582650057056,    0.99777026734589};
+
+/* Coeffs for the 32x downsampling filter (2K system) */
+static double feCoeff32x[13] =
+        {0.00099066651652901,
+        -1.94077236718909,    0.94207456685786,   -1.99036946487329,    1.00000000000000,
+        -1.96299410148309,    0.96594271100631,   -1.98391795425616,    1.00000000000000,
+        -1.98564991068275,    0.98982555984543,   -1.89550394774336,    1.00000000000000};
+
 double dHistory[96][40];
+
+#ifdef SERVO2K
+#define OVERSAMPLE_TIMES	32
+#define FE_OVERSAMPLE_COEFF	feCoeff32x
+#elif SERVO16K
+#define OVERSAMPLE_TIMES	4
+#define FE_OVERSAMPLE_COEFF	feCoeff4x
+#elif SERVO32K
+#define OVERSAMPLE_TIMES	2
+#define FE_OVERSAMPLE_COEFF	feCoeff2x
 #else
-#define ADC_SAMPLE_COUNT	0x20
-#define ADC_DMA_BYTES		0x80
+#error Unsupported system rate when in oversampling mode: only 2K, 16K and 32K are supported
 #endif
+
+#else
+
+#define OVERSAMPLE_TIMES 1
+#endif
+
+#define ADC_SAMPLE_COUNT	(0x20 * OVERSAMPLE_TIMES)
+#define ADC_DMA_BYTES		(0x80 * OVERSAMPLE_TIMES)
 
 // Whether run on internal timer (when no I/O cards found)
 int run_on_timer = 0;
@@ -567,12 +601,12 @@ void *fe_start(void *arg)
 		jj = kk + 1;
 		diagWord |= status * jj;
 #ifdef OVERSAMPLE
-		for(jj=0;jj<4;jj++)
+		for (jj=0; jj < OVERSAMPLE_TIMES; jj++)
 		{
 			for(ii=0;ii<32;ii++)
 			{
 				adcData[kk][ii] = (*packedData & 0xffff);
-				dWord[kk][ii] = iir_filter((double)adcData[kk][ii],&feCoeff4x[0],3,&dHistory[ii+kk*32][0]);
+				dWord[kk][ii] = iir_filter((double)adcData[kk][ii],FE_OVERSAMPLE_COEFF,3,&dHistory[ii+kk*32][0]);
 				packedData ++;
 			}
 		}
