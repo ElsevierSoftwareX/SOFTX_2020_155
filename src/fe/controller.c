@@ -676,7 +676,11 @@ void *fe_start(void *arg)
 
 	if((onePps > 4000) && (onePpsHi == 0))  
 	{
+#ifdef NO_SYNC
+		pLocalEpics->epicsOutput.onePps = 0;
+#else
 		pLocalEpics->epicsOutput.onePps = clock16K;
+#endif
 		onePpsHi = 1;
 	}
 	if(onePps < 4000) onePpsHi = 0;  
@@ -1122,7 +1126,7 @@ int main(int argc, char **argv)
 	}
         printf("***************************************************************************\n");
 
-//	cdsPciModules.adcCount = 0;
+	//cdsPciModules.adcCount = 0;
 	//cdsPciModules.dacCount = 0;
 
 	if (cdsPciModules.adcCount == 0 && cdsPciModules.dacCount == 0) {
