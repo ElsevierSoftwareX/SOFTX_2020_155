@@ -465,7 +465,9 @@ void *fe_start(void *arg)
   for(jj=0;jj<cdsPciModules.dacCount;jj++)
 		status = gsaDacDma1(jj,cdsPciModules.dacType[jj]);
 
+#ifndef NO_SYNC
   if (run_on_timer) {
+#endif
     // Pause until this second ends
     struct timespec next;
     clock_gettime(CLOCK_REALTIME, &next);
@@ -475,7 +477,9 @@ void *fe_start(void *arg)
     clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
     clock_gettime(CLOCK_REALTIME, &next);
     printf("Running time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
+#ifndef NO_SYNC
   }
+#endif
 
   if (!run_on_timer) {
     // Trigger the ADC to start running
