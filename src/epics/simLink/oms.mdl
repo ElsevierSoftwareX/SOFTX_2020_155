@@ -1,12 +1,12 @@
 Model {
-  Name			  "oms"
-  Version		  6.5
+  Name			  "omc"
+  Version		  6.6
   MdlSubVersion		  0
   GraphicalInterface {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.9"
+    ComputedModelVersion    "1.12"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -42,17 +42,19 @@ Model {
   Creator		  "jay"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "jay"
+  LastModifiedBy	  "Jay"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Apr 25 14:34:28 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:9>"
+  LastModifiedDate	  "Thu Oct 04 09:43:33 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:12>"
   ConfigurationManager	  "None"
+  SimulationMode	  "normal"
   LinearizationMsg	  "none"
   Profile		  off
   ParamWorkspaceSource	  "MATLABWorkspace"
   AccelSystemTargetFile	  "accel.tlc"
   AccelTemplateMakefile	  "accel_default_tmf"
   AccelMakeCommand	  "make_rtw"
+  AccelVerboseBuild	  off
   TryForcingSFcnDF	  off
   RecordCoverage	  off
   CovPath		  "/"
@@ -176,9 +178,9 @@ Model {
 	  BufferReuse		  on
 	  EnforceIntegerDowncast  on
 	  ExpressionFolding	  on
+	  ExpressionDepthLimit	  2147483647
 	  FoldNonRolledExpr	  on
 	  LocalBlockOutputs	  on
-	  ParameterPooling	  on
 	  RollThreshold		  5
 	  SystemCodeInlineAuto	  off
 	  StateBitsets		  off
@@ -229,6 +231,7 @@ Model {
 	  ParameterOverflowMsg	  "error"
 	  ParameterUnderflowMsg	  "none"
 	  ParameterPrecisionLossMsg "warning"
+	  ParameterTunabilityLossMsg "warning"
 	  UnderSpecifiedDataTypeMsg "none"
 	  UnnecessaryDatatypeConvMsg "none"
 	  VectorMatrixConversionMsg "none"
@@ -253,6 +256,7 @@ Model {
 	  ModelReferenceDataLoggingMessage "warning"
 	  ModelReferenceSymbolNameMessage "warning"
 	  ModelReferenceExtraNoncontSigs "error"
+	  StateNameClashWarn	  "warning"
 	  StrictBusMsg		  "Warning"
 	}
 	Simulink.HardwareCC {
@@ -427,6 +431,8 @@ Model {
 	      SupportNonInlinedSFcns  on
 	      EnableShiftOperators    on
 	      ParenthesesLevel	      "Nominal"
+	      PortableWordSizes	      off
+	      ModelStepFunctionPrototypeControlCompliant off
 	      ExtMode		      off
 	      ExtModeStaticAlloc      off
 	      ExtModeTesting	      off
@@ -444,7 +450,6 @@ Model {
 	PropName		"Components"
       }
       Name		      "Configuration"
-      SimulationMode	      "normal"
       CurrentDlgPage	      "Solver"
     }
     PropName		    "ConfigurationSets"
@@ -534,6 +539,8 @@ Model {
       BlockType		      Product
       Inputs		      "2"
       Multiplication	      "Element-wise(.*)"
+      CollapseMode	      "All dimensions"
+      CollapseDim	      "1"
       InputSameDT	      on
       OutDataTypeMode	      "Same as first input"
       OutDataType	      "sfix(16)"
@@ -548,7 +555,7 @@ Model {
     }
     Block {
       BlockType		      SubSystem
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       Permissions	      "ReadWrite"
       PermitHierarchicalResolution "All"
       TreatAsAtomicUnit	      off
@@ -568,6 +575,8 @@ Model {
       BlockType		      Sum
       IconShape		      "rectangular"
       Inputs		      "++"
+      CollapseMode	      "All dimensions"
+      CollapseDim	      "1"
       InputSameDT	      on
       OutDataTypeMode	      "Same as first input"
       OutDataType	      "sfix(16)"
@@ -602,6 +611,7 @@ Model {
     FontSize		    10
     FontWeight		    "normal"
     FontAngle		    "normal"
+    UseDisplayTextAsClickCallback off
   }
   LineDefaults {
     FontName		    "Arial"
@@ -610,8 +620,8 @@ Model {
     FontAngle		    "normal"
   }
   System {
-    Name		    "oms"
-    Location		    [1069, 97, 1891, 1069]
+    Name		    "omc"
+    Location		    [1069, 97, 1880, 1132]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -718,41 +728,41 @@ Model {
       Position		      [245, 750, 260, 870]
       ShowName		      off
       AttributesFormatString  "%<Description>"
-      OutputSignals	      "adc_0_16,adc_0_17,adc_0_18,adc_0_19,adc_0_20,ad"
-"c_0_21"
+      OutputSignals	      "adc_0_24,adc_0_25,adc_0_26,adc_0_27,adc_0_28,ad"
+"c_0_29"
       Port {
 	PortNumber		1
-	Name			"<adc_0_16>"
+	Name			"<adc_0_24>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
       }
       Port {
 	PortNumber		2
-	Name			"<adc_0_17>"
+	Name			"<adc_0_25>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
       }
       Port {
 	PortNumber		3
-	Name			"<adc_0_18>"
+	Name			"<adc_0_26>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
       }
       Port {
 	PortNumber		4
-	Name			"<adc_0_19>"
+	Name			"<adc_0_27>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
       }
       Port {
 	PortNumber		5
-	Name			"<adc_0_20>"
+	Name			"<adc_0_28>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
       }
       Port {
 	PortNumber		6
-	Name			"<adc_0_21>"
+	Name			"<adc_0_29>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
       }
@@ -804,6 +814,53 @@ Model {
       }
     }
     Block {
+      BlockType		      BusSelector
+      Name		      "Bus\nSelector5"
+      Description	      "ADC Selector"
+      Ports		      [1, 6]
+      Position		      [245, 940, 260, 1060]
+      ShowName		      off
+      AttributesFormatString  "%<Description>"
+      OutputSignals	      "adc_0_24,adc_0_25,adc_0_26,adc_0_27,adc_0_28,ad"
+"c_0_29"
+      Port {
+	PortNumber		1
+	Name			"<adc_0_24>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		2
+	Name			"<adc_0_25>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		3
+	Name			"<adc_0_26>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		4
+	Name			"<adc_0_27>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		5
+	Name			"<adc_0_28>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		6
+	Name			"<adc_0_29>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+    }
+    Block {
       BlockType		      Reference
       Name		      "DAC_0"
       Tag		      "dac_0"
@@ -816,7 +873,7 @@ Model {
       AttributesFormatString  "%<Description>"
       SourceBlock	      "dac/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -838,7 +895,7 @@ Model {
       UserData		      "DataTag0"
       SourceBlock	      "simulink/Model-Wide\nUtilities/DocBlock"
       SourceType	      "DocBlock"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -865,7 +922,7 @@ Model {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsEpicsOut/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -891,7 +948,7 @@ Model {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsEpicsOut/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -917,7 +974,7 @@ Model {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsEpicsOut/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -943,7 +1000,7 @@ Model {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsEpicsOut/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -969,7 +1026,7 @@ Model {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsEpicsOut/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -1071,9 +1128,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1116,9 +1173,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1161,9 +1218,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1206,9 +1263,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1251,9 +1308,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1296,9 +1353,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1341,9 +1398,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1401,9 +1458,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1656,9 +1713,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1701,9 +1758,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1746,9 +1803,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1791,9 +1848,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1836,9 +1893,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1881,9 +1938,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1926,9 +1983,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1986,9 +2043,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "on"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2162,7 +2219,7 @@ Model {
       System {
 	Name			"SUS"
 	Location		[111, 165, 1584, 940]
-	Open			off
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -2251,7 +2308,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2296,7 +2353,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2341,7 +2398,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2386,7 +2443,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2431,7 +2488,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2476,7 +2533,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2499,7 +2556,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2544,7 +2601,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2589,7 +2646,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2605,7 +2662,7 @@ Model {
 	  Position		  [1320, 191, 1360, 314]
 	  SourceBlock		  "cdsSwitch/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2628,7 +2685,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2727,7 +2784,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2772,7 +2829,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2817,7 +2874,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2862,7 +2919,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2907,7 +2964,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2952,7 +3009,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -2997,7 +3054,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -3042,7 +3099,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -3087,7 +3144,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -3132,7 +3189,7 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -3148,7 +3205,7 @@ Model {
 	  Position		  [280, 539, 320, 601]
 	  SourceBlock		  "cdsWD/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  on
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
@@ -3627,6 +3684,32 @@ Model {
     }
     Block {
       BlockType		      Reference
+      Name		      "SUS_LEFT_COILV"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [515, 1024, 560, 1046]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
       Name		      "SUS_LEFT_LED"
       Tag		      "cdsEpicsOutput"
       Description	      "Purpose:                                       "
@@ -3642,7 +3725,33 @@ Model {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsEpicsOut/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SUS_RIGHT_COILV"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [515, 1079, 560, 1101]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -3668,7 +3777,33 @@ Model {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsEpicsOut/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SUS_SIDE_COILV"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [515, 1134, 560, 1156]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -3694,7 +3829,33 @@ Model {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsEpicsOut/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SUS_TOP1_COILV"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [415, 949, 460, 971]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -3720,7 +3881,33 @@ Model {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsEpicsOut/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SUS_TOP2_COILV"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [415, 1004, 460, 1026]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -3746,7 +3933,33 @@ Model {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsEpicsOut/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "SUS_TOP3_COILV"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [415, 1059, 460, 1081]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -3772,7 +3985,7 @@ Model {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsEpicsOut/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -3791,7 +4004,7 @@ Model {
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsParameters/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
       FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
@@ -3870,8 +4083,15 @@ Model {
 	  }
 	  Branch {
 	    Points		    [0, 195]
-	    DstBlock		    "Bus\nSelector3"
-	    DstPort		    1
+	    Branch {
+	      DstBlock		      "Bus\nSelector3"
+	      DstPort		      1
+	    }
+	    Branch {
+	      Points		      [0, 190]
+	      DstBlock		      "Bus\nSelector5"
+	      DstPort		      1
+	    }
 	  }
 	}
       }
@@ -4012,7 +4232,7 @@ Model {
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_16>"
+      Name		      "<adc_0_24>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      1
@@ -4021,7 +4241,7 @@ Model {
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_17>"
+      Name		      "<adc_0_25>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      2
@@ -4030,7 +4250,7 @@ Model {
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_18>"
+      Name		      "<adc_0_26>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      3
@@ -4039,7 +4259,7 @@ Model {
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_19>"
+      Name		      "<adc_0_27>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      4
@@ -4048,7 +4268,7 @@ Model {
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_20>"
+      Name		      "<adc_0_28>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      5
@@ -4057,12 +4277,66 @@ Model {
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_21>"
+      Name		      "<adc_0_29>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      6
       Points		      [50, 0; 0, 55]
       DstBlock		      "SUS_SIDE_LED"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_24>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector5"
+      SrcPort		      1
+      Points		      [65, 0; 0, 10]
+      DstBlock		      "SUS_TOP1_COILV"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_25>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector5"
+      SrcPort		      2
+      Points		      [65, 0; 0, 45]
+      DstBlock		      "SUS_TOP2_COILV"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_26>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector5"
+      SrcPort		      3
+      Points		      [55, 0; 0, 80]
+      DstBlock		      "SUS_TOP3_COILV"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_27>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector5"
+      SrcPort		      4
+      Points		      [130, 0; 0, -10; 105, 0]
+      DstBlock		      "SUS_LEFT_COILV"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_28>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector5"
+      SrcPort		      5
+      Points		      [120, 0; 0, 25; 100, 0; 0, 25; 15, 0]
+      DstBlock		      "SUS_RIGHT_COILV"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_29>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector5"
+      SrcPort		      6
+      Points		      [45, 0; 0, 95]
+      DstBlock		      "SUS_SIDE_COILV"
       DstPort		      1
     }
   }
