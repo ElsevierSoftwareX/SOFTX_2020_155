@@ -86,6 +86,27 @@ install-% :: src/epics/simLink/%.mdl
 	/usr/bin/install   build/$${system}epics/config/daqconfig  /cvs/cds/$$site/scripts
 	
 
+uninstall-daq-% :: src/epics/simLink/%.mdl
+	@system=$(subst uninstall-daq-,,$@); \
+	upper_system=`echo $$system | tr a-z A-Z`;\
+	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
+	if test $${site}no == no; then echo Please make $$system first; exit 1; fi;\
+	upper_site=`echo $$site | tr a-z A-Z`;\
+	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
+	datarate=`grep datarate build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
+	gds_file_node=`expr $${gds_node} + 1`; \
+	datarate_mult=`expr $${datarate} / 16384 `; \
+	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
+	cur_date=`date +%y%m%d_%H%M%S`;\
+	echo Removing GDS node $${gds_file_node} configuration file ;\
+	echo /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par ;\
+	/bin/rm -f  /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par;\
+	echo Removing DAQ configuration file;\
+	echo /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini;\
+	/bin/rm -f  /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini
+
+
 install-daq-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-daq-,,$@); \
 	upper_system=`echo $$system | tr a-z A-Z`;\

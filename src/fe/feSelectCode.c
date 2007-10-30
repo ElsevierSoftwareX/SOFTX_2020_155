@@ -32,6 +32,10 @@
 	#include "tpt/tpt.c"
 #elif defined(OMS_CODE)
 	#include "oms/oms.c"
+#elif defined(SH1_CODE)
+	#include "sh1/sh1.c"
+#elif defined(ISI_CODE)
+	#include "isi/isi.c"
 #else
 	#error
 #endif

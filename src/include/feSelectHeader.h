@@ -30,6 +30,10 @@
 	#include "tpt.h"
 #elif defined(OMS_CODE)
 	#include "oms.h"
+#elif defined(SH1_CODE)
+	#include "sh1.h"
+#elif defined(ISI_CODE)
+	#include "isi.h"
 #else
 	#error
 #endif

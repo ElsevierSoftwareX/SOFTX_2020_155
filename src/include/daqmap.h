@@ -257,7 +257,7 @@ static unsigned int const dcuNet40m[DCU_COUNT] = {2,2,2,2,0,
 #define DAQ_GDS_DCU_NUM       4
 
 /* Total number of channels allowed per DCU */
-#define DCU_MAX_CHANNELS	128
+#define DCU_MAX_CHANNELS	512
 
 /* RFM offset of DCU DAQ configuration area; used for communicating
    configuration from Epics processor to a front-end processor */

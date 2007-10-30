@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.29 2007/07/20 17:52:04 rolf Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.30 2007/10/30 17:18:14 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -161,7 +161,7 @@ int tpx;
 int tpAdd;
 
 #if DCU_MAX_CHANNELS > DAQ_GDS_MAX_TP_NUM
-#error
+#warning DCU_MAX_CHANNELS greater than DAQ_GDS_MAX_TP_NUM
 #endif
 
 // Decimation filter coefficient definitions.		

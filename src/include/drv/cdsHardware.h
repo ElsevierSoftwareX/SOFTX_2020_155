@@ -272,11 +272,13 @@ typedef struct GSA_FAD_REG{
         unsigned int AO_00;     /* 0x8 */
         unsigned int AO_01;     /* 0xc */
         unsigned int AO_02;     /* 0x10 */
-        unsigned int AO_03;     /* 0x14 */
+        //unsigned int AO_03;     /* 0x14 */
+        unsigned int IN_CONF;      /* 0x24 */
         unsigned int IN_BUFF;  /* 0x18 */
         unsigned int RAG;      /* 0x1c */
         unsigned int RBG;       /* 0x20 */
-        unsigned int IN_CONF;      /* 0x24 */
+        //unsigned int IN_CONF;      /* 0x24 */
+        unsigned int AO_03;     /* 0x14 */
         unsigned int IN_BUF_SIZE;     /* 0x28 */
         unsigned int IN_BUF_TH;    /* 0x2c */
         unsigned int INTRC;   /* 0x30 */
@@ -287,6 +289,8 @@ typedef struct GSA_FAD_REG{
         unsigned int DAC_BUF_SIZE;      /* 0x44 */
         unsigned int DAC_BUFF;      /* 0x48 */
         unsigned int RGENC;      /* 0x4C */
+        unsigned int RGEND;      /* 0x50 */
+        unsigned int OUT_CONF;      /* 0x54 */
 }GSA_FAD_REG;
 
 #define GSAF_FULL_DIFFERENTIAL  0x0
@@ -302,7 +306,7 @@ typedef struct GSA_FAD_REG{
 #define GSAF_DAC_4CHAN     	0xF
 #define GSAF_DAC_CLK_INIT     	0x10
 #define GSAF_DAC_ENABLE_CLK     0x20
-#define GSAF_DAC_ENABLE_RGC     0x400000
+#define GSAF_DAC_ENABLE_RGC     0x200000
 #define GSAF_DAC_SIMULT     	0x60000
 #define GSAF_ENABLE_BUFF_OUT    0x80000
 #define GSAF_DAC_CLR_BUFFER     0x800
