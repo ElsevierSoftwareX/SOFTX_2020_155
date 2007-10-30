@@ -14,4 +14,20 @@ void gsaDacDma2(int,int);	/* Send GO bit to DAC DMA registers.*/
 unsigned int readDio(CDS_HARDWARE *,int);
 /*int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev);*/
 void writeDio(CDS_HARDWARE *pHardware, int modNum, int data);
+
+#ifdef OVERSAMPLE
+#ifdef SERVO2K
+#define OVERSAMPLE_TIMES        32
+#define FE_OVERSAMPLE_COEFF     feCoeff32x
+#elif SERVO16K
+#define OVERSAMPLE_TIMES        4
+#define FE_OVERSAMPLE_COEFF     feCoeff4x
+#elif SERVO32K
+#define OVERSAMPLE_TIMES        2
+#define FE_OVERSAMPLE_COEFF     feCoeff2x
+#else
+#error Unsupported system rate when in oversampling mode: only 2K, 16K and 32K are supported
+#endif
+#endif
+
 #endif
