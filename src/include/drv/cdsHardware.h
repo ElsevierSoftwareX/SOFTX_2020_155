@@ -273,6 +273,8 @@ typedef struct GSA_FAD_REG{
         unsigned int AO_01;     /* 0xc */
         unsigned int AO_02;     /* 0x10 */
         unsigned int AO_03;     /* 0x14 */
+	// 18-bit ADC/DAC card has IN_CONF at 0x14 (taken care in map.c)
+        //unsigned int IN_CONF;      /* 0x14 */
         unsigned int IN_BUFF;  /* 0x18 */
         unsigned int RAG;      /* 0x1c */
         unsigned int RBG;       /* 0x20 */
@@ -287,6 +289,10 @@ typedef struct GSA_FAD_REG{
         unsigned int DAC_BUF_SIZE;      /* 0x44 */
         unsigned int DAC_BUFF;      /* 0x48 */
         unsigned int RGENC;      /* 0x4C */
+
+// These are for the 18-bit ADC/DAC board only
+        unsigned int RGEND;      /* 0x50 */
+        unsigned int OUT_CONF;      /* 0x54 */
 }GSA_FAD_REG;
 
 #define GSAF_FULL_DIFFERENTIAL  0x0
