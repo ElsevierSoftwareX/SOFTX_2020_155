@@ -160,7 +160,7 @@ FILT_MOD *pDsp[NUM_SYSTEMS];			/* Ptr to SFM in shmem.		*/
 COEF dspCoeff[NUM_SYSTEMS];	/* Local mem for SFM coeffs.	*/
 VME_COEF *pCoeff[NUM_SYSTEMS];		/* Ptr to SFM coeffs in shmem		*/
 double dWord[MAX_ADC_MODULES][32];
-double dacOut[MAX_DAC_MODULES][16];
+int dacOut[MAX_DAC_MODULES][16];
 int dioInput[MAX_DIO_MODULES];
 int dioOutput[MAX_DIO_MODULES];
 int rioInput[MAX_DIO_MODULES];
@@ -198,13 +198,7 @@ static double feCoeff32x[13] =
         -1.96299410148309,    0.96594271100631,   -1.98391795425616,    1.00000000000000,
         -1.98564991068275,    0.98982555984543,   -1.89550394774336,    1.00000000000000};
 
-static double butter15k[] = 
-	{ 0.071231695349787,
-         -0.13811795932684,     0.04397301280246,     2.00000000000000,     1.00000000000000,
-         -0.19183418162933,     0.44999035266764,     2.00000000000000,     1.00000000000000};
-
 double dHistory[96][40];
-double dDacHistory[96][40];
 
 #ifdef SERVO2K
 #define OVERSAMPLE_TIMES	32
@@ -224,7 +218,7 @@ double dDacHistory[96][40];
 #define OVERSAMPLE_TIMES 1
 #endif
 
-#define ADC_SAMPLE_COUNT	(32 * OVERSAMPLE_TIMES)
+#define ADC_SAMPLE_COUNT	(0x20 * OVERSAMPLE_TIMES)
 #define ADC_DMA_BYTES		(0x80 * OVERSAMPLE_TIMES)
 
 // Whether run on internal timer (when no I/O cards found)
@@ -290,7 +284,7 @@ void *fe_start(void *arg)
   int ii,jj,kk;
   static int clock1Min = 0;
   static int cpuClock[10];
-  int adcData[MAX_ADC_MODULES][32];
+  short adcData[MAX_ADC_MODULES][32];
   volatile int *packedData;
   volatile unsigned int *pDacData;
   RFM_FE_COMMS *pEpicsComms;
@@ -496,7 +490,6 @@ void *fe_start(void *arg)
     printf("*******************************\n");
   }
 
-  printf("Triggered the ADC\n");
   // Enter the coninuous FE control loop  **********************************************************
   while(!vmeDone){
 
@@ -517,10 +510,6 @@ void *fe_start(void *arg)
 	  if(cdsPciModules.adcType[0] == GSC_16AISS8AO4)
 	  {
 		status = checkAdcRdy(ADC_SAMPLE_COUNT,0);
-		if (status == -1) {
-			stop_working_threads = 1;
-			printf("timeout 0\n");
-		}
 	  } else {
 		// ADC is running in DEMAND DMA MODE
 		packedData = (int *)cdsPciModules.pci_adc[0];
@@ -528,10 +517,6 @@ void *fe_start(void *arg)
 		do {
 			kk ++;
 		}while((*packedData == 0) && (kk < 10000000));
-		if (kk == 10000000) {
-			stop_working_threads = 1;
-			printf("timeout 0\n");
-		}
 	  }
 
 	  usleep(0);
@@ -554,11 +539,7 @@ void *fe_start(void *arg)
 		kk = 0;
 		do {
 			kk ++;
-		}while(((*packedData & 0x040000) > 0) && (kk < 10000000));
-		if (kk == 10000000) {
-			stop_working_threads = 1;
-			printf("timeout 1\n");
-		}
+		}while(((*packedData & 0x110000) > 0) && (kk < 10000000));
 	  }
 	}
 
@@ -626,10 +607,9 @@ void *fe_start(void *arg)
 #ifdef OVERSAMPLE
 		for (jj=0; jj < OVERSAMPLE_TIMES; jj++)
 		{
-			for(ii=0;ii<4;ii++)
+			for(ii=0;ii<32;ii++)
 			{
-				adcData[kk][ii] = (*packedData & 0x3ffff);
-			adcData[kk][ii]  -=  0x20000;
+				adcData[kk][ii] = (*packedData & 0xffff);
 				dWord[kk][ii] = iir_filter((double)adcData[kk][ii],FE_OVERSAMPLE_COEFF,3,&dHistory[ii+kk*32][0]);
 				packedData ++;
 			}
@@ -637,15 +617,14 @@ void *fe_start(void *arg)
 #else
 		for(ii=0;ii<32;ii++)
 		{
-			adcData[kk][ii] = (*packedData & 0x3ffff);
-			adcData[kk][ii]  -=  0x20000;
+			adcData[kk][ii] = (*packedData & 0xffff);
                         packedData ++;
 			dWord[kk][ii] = adcData[kk][ii];
 		}
 #endif
 		for(ii=0;ii<32;ii++)
 		{
-			if((adcData[kk][ii] > 32000*4) || (adcData[kk][ii] < -32000*4))
+			if((adcData[kk][ii] > 32000) || (adcData[kk][ii] < -32000))
 			  {
 				overflowAdc[kk][ii] ++;
 				pLocalEpics->epicsOutput.ovAccum ++;
@@ -811,39 +790,25 @@ void *fe_start(void *arg)
 	{
 		// Check Dac output overflow and write to DMA buffer
 		pDacData = (unsigned int *)cdsPciModules.pci_dac[jj];
-#ifdef OVERSAMPLE_DAC
-			for (kk=0; kk < OVERSAMPLE_TIMES; kk++) {
-#endif
-		for(ii=0;ii<4;ii++)
+		for(ii=0;ii<16;ii++)
 		{
-#ifdef OVERSAMPLE_DAC
-			//if (ii == 0) printf("%d\n", dacOut[jj][ii]);
-			  double dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
-		 	  dacOut[jj][ii] = iir_filter(dac_in,feCoeff32x,3,&dDacHistory[ii+jj*16][0]);
-			  dacOut[jj][ii] *= 32;
-#endif
-			if(dacOut[jj][ii] > 32000*4) 
+			if(dacOut[jj][ii] > 32000) 
 			{
-				dacOut[jj][ii] = 32000*4;
+				dacOut[jj][ii] = 32000;
 				overflowDac[jj][ii] ++;
 				pLocalEpics->epicsOutput.ovAccum ++;
 				diagWord |= 0x1000 *  (jj+1);
 			}
-			if(dacOut[jj][ii] < -32000*4) 
+			if(dacOut[jj][ii] < -32000) 
 			{
-				dacOut[jj][ii] = -32000*4;
+				dacOut[jj][ii] = -32000;
 				overflowDac[jj][ii] ++;
 				pLocalEpics->epicsOutput.ovAccum ++;
 				diagWord |= 0x1000 *  (jj+1);
 			}
-			  int dac_out  = dacOut[jj][ii]; // + kk*slope[ii];
-			  dac_out += 0x20000;
-			  *pDacData =  (unsigned int)(dac_out & 0x3ffff);
-			  pDacData ++;
+			*pDacData = (unsigned int)(dacOut[jj][ii] & 0xffff);
+			pDacData ++;
 		}
-#ifdef OVERSAMPLE_DAC
-			}
-#endif
 		// DMA out dac values
 		gsaDacDma2(jj,cdsPciModules.dacType[jj]);
 	}
