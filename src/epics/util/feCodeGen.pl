@@ -1630,7 +1630,7 @@ print OUT "/* CPU 1 code */\n";
 }
 
 print OUT "void feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
-print OUT "\t\tdouble dacOut[][16],\t\/* DAC outputs *\/\n";
+print OUT "\t\tint dacOut[][16],\t\/* DAC outputs *\/\n";
 print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
 print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
 print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
