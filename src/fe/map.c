@@ -95,15 +95,9 @@ int checkAdcRdy(int count,int numAdc)
 
   // This is for the 2MS adc module
   {
-	  int i = 0;
           do {
                 dataCount = fadcPtr[0]->IN_BUF_SIZE;
-		if (i == 1000000) {
-			break;
-		}
-		i++;
           }while(dataCount < (count / 8));
-	  if (i == 1000000) return -1;
   }
   return(dataCount);
 
@@ -136,24 +130,6 @@ void gsaAdcDma2(int modNum)
   adcDma[modNum]->DMA_CSR = GSAI_DMA_START;
 }
 
-/* TODO: Thsi is common with controller.c, needs to got in a header file */
-#ifndef OVERSAMPLE
-#define OVERSAMPLE_TIMES 1
-#else
-#ifdef SERVO2K
-#define OVERSAMPLE_TIMES        32
-#define FE_OVERSAMPLE_COEFF     feCoeff32x
-#elif SERVO16K
-#define OVERSAMPLE_TIMES        4
-#define FE_OVERSAMPLE_COEFF     feCoeff4x
-#elif SERVO32K
-#define OVERSAMPLE_TIMES        2
-#define FE_OVERSAMPLE_COEFF     feCoeff2x
-#else
-#error Unsupported system rate when in oversampling mode: only 2K, 16K and 32K are supported
-#endif
-#endif
-
 // *****************************************************************************
 // This routine sets up the DAC DMA registers once on code initialization.
 // *****************************************************************************
@@ -164,11 +140,7 @@ int gsaDacDma1(int modNum, int dacType)
           dacDma[modNum]->DMA1_MODE = GSAI_DMA_MODE_NO_INTR;
           dacDma[modNum]->DMA1_PCI_ADD = (int)dac_dma_handle[modNum];
           dacDma[modNum]->DMA1_LOC_ADD = GSAF_DAC_DMA_LOCAL_ADDR;
-#ifdef OVERSAMPLE_DAC
-          dacDma[modNum]->DMA1_BTC = 0x10*OVERSAMPLE_TIMES;
-#else
           dacDma[modNum]->DMA1_BTC = 0x10;
-#endif
           dacDma[modNum]->DMA1_DESC = 0x0;
   } else {
 	  dacDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
@@ -464,20 +436,16 @@ int mapFadc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
   do{
   }while((fadcPtr[devNum]->BCR & GSAF_RESET) != 0);
 
-  //fadcPtr[devNum]->BCR &= ~(GSAF_SET_2S_COMP);
+  fadcPtr[devNum]->BCR &= ~(GSAF_SET_2S_COMP);
   fadcPtr[devNum]->RAG = GSAF_RATEA_32K;
-  fadcPtr[devNum]->IN_CONF = 0x00002a0f;
+  fadcPtr[devNum]->IN_CONF = 0x4f000400;
   fadcPtr[devNum]->RGENC = GSAF_RATEC_1MHZ;
-  fadcPtr[devNum]->RGEND = GSAF_RATEC_1MHZ;
   fadcPtr[devNum]->BCR |= GSAF_ENABLE_BUFF_OUT;
   fadcPtr[devNum]->BCR |= GSAF_DAC_SIMULT;
-  fadcPtr[devNum]->OUT_CONF = 0x00002a0f; // external
   fadcPtr[devNum]->DAC_BUFF_OPS |= (GSAF_DAC_CLK_INIT | GSAF_DAC_4CHAN);
   fadcPtr[devNum]->DAC_BUFF_OPS |= GSAF_DAC_ENABLE_CLK;
   fadcPtr[devNum]->DAC_BUFF_OPS |= GSAF_DAC_CLR_BUFFER;
-  //fadcPtr[devNum]->BCR |= GSAF_DAC_ENABLE_RGC;
-
-  //fadcPtr[devNum]->OUT_CONF = 0x00010a0f; // gen C clocking
+  fadcPtr[devNum]->BCR |= GSAF_DAC_ENABLE_RGC;
 
   printk("RAG = 0x%x\n",fadcPtr[devNum]->RAG);
   printk("BCR = 0x%x\n",fadcPtr[devNum]->BCR);
