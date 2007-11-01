@@ -16,6 +16,8 @@ $gdsNodeId = 1;
 $ifoid = 0; # Default ifoid for the DAQ
 $nodeid = 0; # Default GDS node id for awgtpman
 $dac_internal_clocking = 0; # Default is DAC external clocking
+$no_oversampling = 0; # Default is to iversample
+$no_dac_interpolation = 0; # Default is to interpolate D/A outputs
 
 if (@ARGV > 2) {
 	$dcuId = $ARGV[2];
@@ -77,12 +79,13 @@ if (@ARGV == 2) { $skeleton = $ARGV[1]; }
 open(EPICS,">../fmseq/".$ARGV[1]) || die "cannot open output file for writing";
 mkdir $cFileDirectory, 0755;
 open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
-# Do not modify existing front-end Makefile
+# Save existing frnot-end Makefile
 if (-s $mFile) {
+  time
+  system("/bin/mv $File
   open(OUTM, "/dev/null") || die "cannot open /dev/null for writing";
-} else {
-  open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 }
+open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
 open(OUTH,">./".$hFile) || die "cannot open header file for writing";
 
@@ -2066,10 +2069,20 @@ if ($shmem_daq) {
 }
 # Use oversampling code if not 64K system
 if($rate != 15) {
-  print OUTM "#Comment out to stop A/D oversampling\n";
-  print OUTM "CFLAGS += -DOVERSAMPLE\n";
-  print OUTM "#Comment out to stop oversampling D/A converter board\n";
-  print OUTM "CFLAGS += -DOVERSAMPLE_DAC\n";
+  if ($no_oversampling) {
+    print OUTM "#Uncomment to oversample A/D inputs\n";
+    print OUTM "#CFLAGS += -DOVERSAMPLE\n";
+    print OUTM "#Uncomment to interpolate D/A outputs\n";
+    print OUTM "#CFLAGS += -DOVERSAMPLE_DAC\n";
+  } else {
+    print OUTM "#Comment out to stop A/D oversampling\n";
+    print OUTM "CFLAGS += -DOVERSAMPLE\n";
+    if ($no_dac_interpolation) {
+    } else {
+      print OUTM "#Comment out to stop interpolating D/A outputs\n";
+      print OUTM "CFLAGS += -DOVERSAMPLE_DAC\n";
+    }
+  }
 }
 if ($dac_internal_clocking) {
   print OUTM "#Comment out to enable external D/A converter clocking\n";
