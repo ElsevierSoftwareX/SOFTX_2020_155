@@ -67,6 +67,12 @@ sub printHeaderStruct {
 			} elsif ($spp[0] eq "dac_internal_clocking") {
 				print "Will clock D/A converter internally\n";
 				$::dac_internal_clocking = 1;
+			} elsif ($spp[0] eq "no_oversampling") {
+				print "Will not oversample\n";
+				$::no_oversampling = 1;
+			} elsif ($spp[0] eq "no_dac_interpolation") {
+				print "Will not interpolate DAC\n";
+				$::no_dac_interpolation = 1;
 			}
 		}
 	}
