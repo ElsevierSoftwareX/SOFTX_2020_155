@@ -160,7 +160,7 @@ FILT_MOD *pDsp[NUM_SYSTEMS];			/* Ptr to SFM in shmem.		*/
 COEF dspCoeff[NUM_SYSTEMS];	/* Local mem for SFM coeffs.	*/
 VME_COEF *pCoeff[NUM_SYSTEMS];		/* Ptr to SFM coeffs in shmem		*/
 double dWord[MAX_ADC_MODULES][32];
-int dacOut[MAX_DAC_MODULES][16];
+double dacOut[MAX_DAC_MODULES][16];
 int dioInput[MAX_DIO_MODULES];
 int dioOutput[MAX_DIO_MODULES];
 int rioInput[MAX_DIO_MODULES];
@@ -199,7 +199,9 @@ static double feCoeff32x[13] =
         -1.98564991068275,    0.98982555984543,   -1.89550394774336,    1.00000000000000};
 
 double dHistory[96][40];
+double dDacHistory[96][40];
 
+#if 0
 #ifdef SERVO2K
 #define OVERSAMPLE_TIMES	32
 #define FE_OVERSAMPLE_COEFF	feCoeff32x
@@ -211,6 +213,7 @@ double dHistory[96][40];
 #define FE_OVERSAMPLE_COEFF	feCoeff2x
 #else
 #error Unsupported system rate when in oversampling mode: only 2K, 16K and 32K are supported
+#endif
 #endif
 
 #else
@@ -284,7 +287,7 @@ void *fe_start(void *arg)
   int ii,jj,kk;
   static int clock1Min = 0;
   static int cpuClock[10];
-  short adcData[MAX_ADC_MODULES][32];
+  int adcData[MAX_ADC_MODULES][32];
   volatile int *packedData;
   volatile unsigned int *pDacData;
   RFM_FE_COMMS *pEpicsComms;
@@ -458,8 +461,10 @@ void *fe_start(void *arg)
 	  status = gsaAdcDma1(jj,cdsPciModules.adcType[jj],ADC_DMA_BYTES);
 	  packedData = (int *)cdsPciModules.pci_adc[jj];
 	  *packedData = 0x0;
-	  if(cdsPciModules.adcType[jj] == GSC_16AISS8AO4) packedData += 3;
-	  else packedData += 31;
+	  if (cdsPciModules.adcType[jj] == GSC_16AISS8AO4
+	      || cdsPciModules.adcType[jj] == GSC_18AISS8AO8) { 
+		 packedData += 3;
+	  } else packedData += 31;
 	  *packedData = 0x110000;
   }
   for(jj=0;jj<cdsPciModules.dacCount;jj++)
@@ -490,6 +495,7 @@ void *fe_start(void *arg)
     printf("*******************************\n");
   }
 
+  printf("Triggered the ADC\n");
   // Enter the coninuous FE control loop  **********************************************************
   while(!vmeDone){
 
@@ -507,9 +513,14 @@ void *fe_start(void *arg)
           clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
 	} else {
 	  // Wait for data ready from first ADC module.
-	  if(cdsPciModules.adcType[0] == GSC_16AISS8AO4)
+	  if (cdsPciModules.adcType[0] == GSC_16AISS8AO4
+	      || cdsPciModules.adcType[0] == GSC_18AISS8AO8)
 	  {
 		status = checkAdcRdy(ADC_SAMPLE_COUNT,0);
+		if (status == -1) {
+			stop_working_threads = 1;
+			printf("timeout 0\n");
+		}
 	  } else {
 		// ADC is running in DEMAND DMA MODE
 		packedData = (int *)cdsPciModules.pci_adc[0];
@@ -517,6 +528,10 @@ void *fe_start(void *arg)
 		do {
 			kk ++;
 		}while((*packedData == 0) && (kk < 10000000));
+		if (kk == 10000000) {
+			stop_working_threads = 1;
+			printf("timeout 0\n");
+		}
 	  }
 
 	  usleep(0);
@@ -526,7 +541,8 @@ void *fe_start(void *arg)
 
   	if (!run_on_timer) {
   	  for(jj=0;jj<cdsPciModules.adcCount;jj++) {
-		if(cdsPciModules.adcType[jj] == GSC_16AISS8AO4)
+		if(cdsPciModules.adcType[jj] == GSC_16AISS8AO4
+		   || cdsPciModules.adcType[jj] == GSC_18AISS8AO8)
 		{
 			gsaAdcDma2(jj);
 		}
@@ -535,11 +551,24 @@ void *fe_start(void *arg)
   	  for(jj=0;jj<cdsPciModules.adcCount;jj++) {
 		packedData = (int *)cdsPciModules.pci_adc[jj];
 		if(cdsPciModules.adcType[jj] == GSC_16AISS8AO4) packedData += 3;
+		else if(cdsPciModules.adcType[jj] == GSC_18AISS8AO8) packedData += 3;
 		else packedData += 31;
 		kk = 0;
-		do {
+		// This seems to work for 18-bit board, not sure this is
+		// completely correct
+		if (cdsPciModules.adcType[jj] == GSC_18AISS8AO8) {
+		   do {
 			kk ++;
-		}while(((*packedData & 0x110000) > 0) && (kk < 10000000));
+		   }while(((*packedData & 0x040000) > 0) && (kk < 10000000));
+		} else {
+		   do {
+			kk ++;
+		   }while(((*packedData & 0x110000) > 0) && (kk < 10000000));
+		}
+		if (kk == 10000000) {
+			stop_working_threads = 1;
+			printf("timeout 1\n");
+		}
 	  }
 	}
 
@@ -604,12 +633,22 @@ void *fe_start(void *arg)
 		else status = 16;
 		jj = kk + 1;
 		diagWord |= status * jj;
+
+		int limit = 32000;
+		int offset = 0x8000;
+		int mask = 0xffff;
+		if (cdsPciModules.adcType[kk] == GSC_18AISS8AO8) {
+			limit *= 4; // 18 bit limit
+			offset = 0x20000; // Data coding offset in 18-bit DAC
+			mask = 0x3ffff;
+		}
 #ifdef OVERSAMPLE
 		for (jj=0; jj < OVERSAMPLE_TIMES; jj++)
 		{
-			for(ii=0;ii<32;ii++)
+			for(ii=0;ii<4;ii++)
 			{
-				adcData[kk][ii] = (*packedData & 0xffff);
+				adcData[kk][ii] = (*packedData & mask);
+				adcData[kk][ii]  -= offset;
 				dWord[kk][ii] = iir_filter((double)adcData[kk][ii],FE_OVERSAMPLE_COEFF,3,&dHistory[ii+kk*32][0]);
 				packedData ++;
 			}
@@ -617,14 +656,15 @@ void *fe_start(void *arg)
 #else
 		for(ii=0;ii<32;ii++)
 		{
-			adcData[kk][ii] = (*packedData & 0xffff);
+			adcData[kk][ii] = (*packedData & mask);
+			adcData[kk][ii] -= offset;
                         packedData ++;
 			dWord[kk][ii] = adcData[kk][ii];
 		}
 #endif
 		for(ii=0;ii<32;ii++)
 		{
-			if((adcData[kk][ii] > 32000) || (adcData[kk][ii] < -32000))
+			if((adcData[kk][ii] > limit) || (adcData[kk][ii] < -limit))
 			  {
 				overflowAdc[kk][ii] ++;
 				pLocalEpics->epicsOutput.ovAccum ++;
@@ -635,6 +675,7 @@ void *fe_start(void *arg)
         	packedData = (int *)cdsPciModules.pci_adc[kk];
   		*packedData = 0x0;
 		if(cdsPciModules.adcType[kk] == GSC_16AISS8AO4) packedData += 3;
+		else if(cdsPciModules.adcType[kk] == GSC_18AISS8AO8) packedData += 3;
   		else packedData += 31;
   		*packedData = 0x110000;
 	  }
@@ -788,29 +829,56 @@ void *fe_start(void *arg)
 	// Write out data to DAC modules
 	for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	{
-		// Check Dac output overflow and write to DMA buffer
-		pDacData = (unsigned int *)cdsPciModules.pci_dac[jj];
-		for(ii=0;ii<16;ii++)
-		{
-			if(dacOut[jj][ii] > 32000) 
-			{
-				dacOut[jj][ii] = 32000;
-				overflowDac[jj][ii] ++;
-				pLocalEpics->epicsOutput.ovAccum ++;
-				diagWord |= 0x1000 *  (jj+1);
-			}
-			if(dacOut[jj][ii] < -32000) 
-			{
-				dacOut[jj][ii] = -32000;
-				overflowDac[jj][ii] ++;
-				pLocalEpics->epicsOutput.ovAccum ++;
-				diagWord |= 0x1000 *  (jj+1);
-			}
-			*pDacData = (unsigned int)(dacOut[jj][ii] & 0xffff);
-			pDacData ++;
+	   // Check Dac output overflow and write to DMA buffer
+	   pDacData = (unsigned int *)cdsPciModules.pci_dac[jj];
+#ifdef OVERSAMPLE_DAC
+	   for (kk=0; kk < OVERSAMPLE_TIMES; kk++) {
+#endif
+		int limit = 32000;
+		int offset = 0; //0x8000;
+		int mask = 0xffff;
+		int num_outs = 16;
+		if (cdsPciModules.dacType[jj] == GSC_18AISS8AO8) {
+			limit *= 4; // 18 bit limit
+			offset = 0x20000; // Data coding offset in 18-bit DAC
+			mask = 0x3ffff;
+			num_outs = 8;
 		}
-		// DMA out dac values
-		gsaDacDma2(jj,cdsPciModules.dacType[jj]);
+		if (cdsPciModules.dacType[jj] == GSC_16AISS8AO4) {
+		  	num_outs = 4;
+		}
+		for (ii=0; ii < num_outs; ii++)
+		{
+#ifdef OVERSAMPLE_DAC
+			  double dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
+		 	  dacOut[jj][ii] = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,3,&dDacHistory[ii+jj*16][0]);
+			  dacOut[jj][ii] *= OVERSAMPLE_TIMES;
+#endif
+			if(dacOut[jj][ii] > limit) 
+			{
+				dacOut[jj][ii] = limit;
+				overflowDac[jj][ii] ++;
+				pLocalEpics->epicsOutput.ovAccum ++;
+				diagWord |= 0x1000 *  (jj+1);
+			}
+			if(dacOut[jj][ii] < -limit) 
+			{
+				dacOut[jj][ii] = -limit;
+				overflowDac[jj][ii] ++;
+				pLocalEpics->epicsOutput.ovAccum ++;
+				diagWord |= 0x1000 *  (jj+1);
+			}
+			  int dac_out = dacOut[jj][ii];
+			  dac_out += offset;
+			//if (ii == 0) printf("%d\n", dac_out);
+			  *pDacData =  (unsigned int)(dac_out & mask);
+			  pDacData ++;
+		}
+#ifdef OVERSAMPLE_DAC
+  	   }
+#endif
+  	   // DMA out dac values
+	   gsaDacDma2(jj,cdsPciModules.dacType[jj]);
 	}
 
 	// Write Dio cards
@@ -1057,6 +1125,14 @@ int main(int argc, char **argv)
 	printf("%d ADC cards found\n",cdsPciModules.adcCount);
 	for(ii=0;ii<cdsPciModules.adcCount;ii++)
         {
+                if(cdsPciModules.adcType[ii] == GSC_18AISS8AO8)
+                {
+                        printf("\tADC %d is a GSC_18AISS8AO8 module\n",ii);
+                        if((cdsPciModules.adcConfig[ii] & 0x10000) > 0) jj = 4;
+                        else jj = 8;
+                        printf("\t\tChannels = %d \n",jj);
+                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.adcConfig[ii] & 0xfff));
+                }
                 if(cdsPciModules.adcType[ii] == GSC_16AISS8AO4)
                 {
                         printf("\tADC %d is a GSC_16AISS8AO4 module\n",ii);
@@ -1078,6 +1154,14 @@ int main(int argc, char **argv)
 	printf("%d DAC cards found\n",cdsPciModules.dacCount);
 	for(ii=0;ii<cdsPciModules.dacCount;ii++)
         {
+                if(cdsPciModules.dacType[ii] == GSC_18AISS8AO8)
+                {
+                        printf("\tDAC %d is a GSC_18AISS8AO8 module\n",ii);
+                        if((cdsPciModules.dacConfig[ii] & 0x20000) > 0) jj = 0;
+                        else jj = 4;
+                        printf("\t\tChannels = %d \n",jj);
+                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.dacConfig[ii] & 0xfff));
+                }
                 if(cdsPciModules.dacType[ii] == GSC_16AISS8AO4)
                 {
                         printf("\tDAC %d is a GSC_16AISS8AO4 module\n",ii);
