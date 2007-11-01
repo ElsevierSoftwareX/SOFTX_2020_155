@@ -64,6 +64,9 @@ sub printHeaderStruct {
 			} elsif ($spp[0] eq "no_daq") {
 				print "Will not connect to DAQ\n";
 				$::no_daq = 1;
+			} elsif ($spp[0] eq "dac_internal_clocking") {
+				print "Will clock D/A converter internally\n";
+				$::dac_internal_clocking = 1;
 			}
 		}
 	}
