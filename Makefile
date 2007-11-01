@@ -6,6 +6,12 @@ clean:
 realclean:
 	/bin/rm -rf build target
 
+real-clean-% :: src/epics/simLink/%.mdl
+	@system=$(subst real-clean-,,$@); \
+	/bin/rm -rf target/$${system}epics build/$${system}epics; \
+	(cd src/fe/$${system}; make clean); \
+	/bin/rm -f src/fe/$${system}/Makefile
+
 # Clean system, jsut say something like 'make clean-pde'
 clean-% :: src/epics/simLink/%.mdl
 	@system=$(subst clean-,,$@); \
