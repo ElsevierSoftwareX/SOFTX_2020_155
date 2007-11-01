@@ -79,11 +79,15 @@ if (@ARGV == 2) { $skeleton = $ARGV[1]; }
 open(EPICS,">../fmseq/".$ARGV[1]) || die "cannot open output file for writing";
 mkdir $cFileDirectory, 0755;
 open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
-# Save existing frnot-end Makefile
+# Save existing front-end Makefile
+@months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 if (-s $mFile) {
-  time
-  system("/bin/mv $File
-  open(OUTM, "/dev/null") || die "cannot open /dev/null for writing";
+  my ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
+  my $year = 1900 + $yearOffset;
+  #my $theTime = $year . "_$months[$month]" . "_$dayOfMonth" . "_$hour:$minute:$second";
+  $theTime = sprintf("%d_%s_%02d_%02d:%02d:%02d", $year, $months[$month], $dayOfMonth, $hour, $minute, $second);
+  system ("/bin/mv $mFile $mFile" . "_$theTime");
+  #open(OUTM, "/dev/null") || die "cannot open /dev/null for writing";
 }
 open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
