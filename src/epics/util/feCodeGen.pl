@@ -9,6 +9,9 @@ $site = "M1"; # Default value for the site name
 $location = "mit"; # Default value for the location name
 $rate = "60"; # In microseconds (default setting)
 $dcuId = 10; # Default dcu Id
+$shmem_daq = 0; # Do not use shared memory DAQ connection
+$no_sync = 0; # Sync up to 1PPS by default
+$no_daq = 0; # Enable DAQ by default
 $gdsNodeId = 1;
 $ifoid = 0; # Default ifoid for the DAQ
 $nodeid = 0; # Default GDS node id for awgtpman
@@ -2036,10 +2039,37 @@ if ($cpus > 3) {
 print OUTM "CFLAGS += -DRESERVE_CPU3\n";
 }
 print OUTM "CFLAGS += -D_ADVANCED_LIGO=1\n";
-print OUTM "CFLAGS += -DUSE_GM=1\n";
 print OUTM "CFLAGS += -g\n";
-print OUTM "#CFLAGS += -DNO_SYNC\n";
-print OUTM "#CFLAGS += -DNO_DAQ\n";
+if ($no_sync) {
+  print OUTM "#Comment out to enable 1PPS synchronization\n";
+  print OUTM "CFLAGS += -DNO_SYNC\n";
+} else {
+  print OUTM "#Uncomment to disable 1PPS signal sinchronization (channel 31 (last), ADC 0)\n";
+  print OUTM "#CFLAGS += -DNO_SYNC\n";
+}
+if ($no_daq) {
+  print OUTM "#Comment out to enable DAQ\n";
+  print OUTM "CFLAGS += -DNO_DAQ\n";
+} else {
+  print OUTM "#Uncomment to disable DAQ and testpoints\n";
+  print OUTM "#CFLAGS += -DNO_DAQ\n";
+}
+if ($shmem_daq) {
+  print OUTM "#Comment out to disable local frame builder connection; uncomment USE_GM setting too\n";
+  print OUTM "CFLAGS += -DSHMEM_DAQ\n";
+  print OUTM "#CFLAGS += -DUSE_GM=1\n";
+} else {
+  print OUTM "#Uncomment to enable local frame builder; comment out USE_GM setting too\n";
+  print OUTM "#CFLAGS += -DSHMEM_DAQ\n";
+  print OUTM "CFLAGS += -DUSE_GM=1\n";
+}
+# Use oversampling code if not 64K system
+if($rate != 15) {
+  print OUTM "#Comment out to stop A/D oversampling\n";
+  print OUTM "CFLAGS += -DOVERSAMPLE\n";
+  print OUTM "#Comment out to stop oversampling D/A converter board\n";
+  print OUTM "CFLAGS += -DOVERSAMPLE_DAC\n";
+}
 print OUTM "\n";
 print OUTM "all: \$(ALL)\n";
 print OUTM "\n";
