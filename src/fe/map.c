@@ -337,12 +337,16 @@ int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 	  printk("DAC CSR = 0x%x\n",dacPtr[devNum]->CSR);
 
 #ifdef OVERSAMPLE_DAC
+	  // Larger buffer required when in oversampling mode 
 	  dacPtr[devNum]->BOR = GSAO_FIFO_512;
 #else
 	  dacPtr[devNum]->BOR = GSAO_FIFO_16;
 #endif
+#ifdef DAC_INTERNAL_CLOCKING
+	  dacPtr[devNum]->BOR |= (GSAO_ENABLE_CLK);
+#else
 	  dacPtr[devNum]->BOR |= (GSAO_ENABLE_CLK | GSAO_EXTERN_CLK);
-	  //dacPtr[devNum]->BOR |= (GSAO_ENABLE_CLK);
+#endif
 	  printk("DAC BOR = 0x%x\n",dacPtr[devNum]->BOR);
 	  pHardware->pci_dac[devNum] = 
 		(long) pci_alloc_consistent(dacdev,0x200,&dac_dma_handle[devNum]);

@@ -15,6 +15,7 @@ $no_daq = 0; # Enable DAQ by default
 $gdsNodeId = 1;
 $ifoid = 0; # Default ifoid for the DAQ
 $nodeid = 0; # Default GDS node id for awgtpman
+$dac_internal_clocking = 0; # Default is DAC external clocking
 
 if (@ARGV > 2) {
 	$dcuId = $ARGV[2];
@@ -2070,6 +2071,11 @@ if($rate != 15) {
   print OUTM "#Comment out to stop oversampling D/A converter board\n";
   print OUTM "CFLAGS += -DOVERSAMPLE_DAC\n";
 }
+if ($dac_internal_clocking) {
+  print OUTM "#Comment out to enable external D/A converter clocking\n";
+  print OUTM "CFLAGS += -DDAC_INTERNAL_CLOCKING\n";
+}
+
 print OUTM "\n";
 print OUTM "all: \$(ALL)\n";
 print OUTM "\n";
