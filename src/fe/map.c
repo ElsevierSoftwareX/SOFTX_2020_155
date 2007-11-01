@@ -95,9 +95,15 @@ int checkAdcRdy(int count,int numAdc)
 
   // This is for the 2MS adc module
   {
+	  int i = 0;
           do {
                 dataCount = fadcPtr[0]->IN_BUF_SIZE;
+		if (i == 1000000) {
+			break;
+		}
+		i++;
           }while(dataCount < (count / 8));
+	  if (i == 1000000) return -1;
   }
   return(dataCount);
 
@@ -135,18 +141,26 @@ void gsaAdcDma2(int modNum)
 // *****************************************************************************
 int gsaDacDma1(int modNum, int dacType)
 {
-  if(dacType == GSC_16AISS8AO4)
+  if(dacType == GSC_16AISS8AO4 || dacType == GSC_18AISS8AO8)
   {
           dacDma[modNum]->DMA1_MODE = GSAI_DMA_MODE_NO_INTR;
           dacDma[modNum]->DMA1_PCI_ADD = (int)dac_dma_handle[modNum];
           dacDma[modNum]->DMA1_LOC_ADD = GSAF_DAC_DMA_LOCAL_ADDR;
+#ifdef OVERSAMPLE_DAC
+          dacDma[modNum]->DMA1_BTC = 0x10*OVERSAMPLE_TIMES;
+#else
           dacDma[modNum]->DMA1_BTC = 0x10;
+#endif
           dacDma[modNum]->DMA1_DESC = 0x0;
   } else {
 	  dacDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
 	  dacDma[modNum]->DMA0_PCI_ADD = (int)dac_dma_handle[modNum];
 	  dacDma[modNum]->DMA0_LOC_ADD = 0x18;
+#ifdef OVERSAMPLE_DAC
+          dacDma[modNum]->DMA0_BTC = 0x40*OVERSAMPLE_TIMES;
+#else
 	  dacDma[modNum]->DMA0_BTC = 0x40;
+#endif
 	  dacDma[modNum]->DMA0_DESC = 0x0;
   }
   return(1);
@@ -158,7 +172,7 @@ int gsaDacDma1(int modNum, int dacType)
 // *****************************************************************************
 void gsaDacDma2(int modNum, int dacType)
 {
-  if(dacType == GSC_16AISS8AO4)
+  if(dacType == GSC_16AISS8AO4 || dacType == GSC_18AISS8AO8)
   {
         dacDma[modNum]->DMA_CSR = GSAI_DMA1_START;
   } else {
@@ -322,9 +336,13 @@ int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 	  printk("DAC BCR after init = 0x%x\n",dacPtr[devNum]->BCR);
 	  printk("DAC CSR = 0x%x\n",dacPtr[devNum]->CSR);
 
+#ifdef OVERSAMPLE_DAC
+	  dacPtr[devNum]->BOR = GSAO_FIFO_512;
+#else
 	  dacPtr[devNum]->BOR = GSAO_FIFO_16;
+#endif
 	  dacPtr[devNum]->BOR |= (GSAO_ENABLE_CLK | GSAO_EXTERN_CLK);
-	  // dacPtr[devNum]->BOR |= (GSAO_ENABLE_CLK);
+	  //dacPtr[devNum]->BOR |= (GSAO_ENABLE_CLK);
 	  printk("DAC BOR = 0x%x\n",dacPtr[devNum]->BOR);
 	  pHardware->pci_dac[devNum] = 
 		(long) pci_alloc_consistent(dacdev,0x200,&dac_dma_handle[devNum]);
@@ -378,7 +396,8 @@ int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
   // Clear range bits to select lowest range 2.5V
   adcPtr[devNum]->BCR &= ~(GSAI_IN_RANGE_BITS);
 #endif
-  adcPtr[devNum]->BCR &= ~(GSAI_SET_2S_COMP);
+  // Do not enable 2S compliment coding
+  //adcPtr[devNum]->BCR &= ~(GSAI_SET_2S_COMP);
 
   // Set sample rate close to 16384Hz
   // Unit runs with external clock, so this probably not necessary
@@ -403,9 +422,12 @@ int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
 
 }
 // *****************************************************************************
-// Routine to initialize GSA 2MS ADC modules
+// Routine to initialize GSA 2MS ADC modules and also 18-bit GSA modules
+// The difference is indicated with the last argument
 // *****************************************************************************
-int mapFadc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
+int mapFadc(CDS_HARDWARE *pHardware,
+            struct pci_dev *adcdev,
+            unsigned int board_type)
 {
   static unsigned int pci_io_addr;
   int devNum;
@@ -436,16 +458,33 @@ int mapFadc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
   do{
   }while((fadcPtr[devNum]->BCR & GSAF_RESET) != 0);
 
-  fadcPtr[devNum]->BCR &= ~(GSAF_SET_2S_COMP);
+  // Only enable two's compliment for the 16-bit board
+  // DO NOT
+  //if (board_type == GSC_16AISS8AO4) {
+    //fadcPtr[devNum]->BCR &= ~(GSAF_SET_2S_COMP);
+  //}
+
   fadcPtr[devNum]->RAG = GSAF_RATEA_32K;
-  fadcPtr[devNum]->IN_CONF = 0x4f000400;
+  if (board_type == GSC_16AISS8AO4) {
+    fadcPtr[devNum]->IN_CONF = 0x4f000400;
+  } else {
+    fadcPtr[devNum]->AO_03 = 0x00002a0f;
+  }
   fadcPtr[devNum]->RGENC = GSAF_RATEC_1MHZ;
+  //fadcPtr[devNum]->RGEND = GSAF_RATEC_1MHZ;
   fadcPtr[devNum]->BCR |= GSAF_ENABLE_BUFF_OUT;
   fadcPtr[devNum]->BCR |= GSAF_DAC_SIMULT;
+  if (board_type == GSC_18AISS8AO8) {
+    // External triggering
+    // Eanble all 8 output channels
+    fadcPtr[devNum]->OUT_CONF = 0x00002aff;
+  }
   fadcPtr[devNum]->DAC_BUFF_OPS |= (GSAF_DAC_CLK_INIT | GSAF_DAC_4CHAN);
   fadcPtr[devNum]->DAC_BUFF_OPS |= GSAF_DAC_ENABLE_CLK;
   fadcPtr[devNum]->DAC_BUFF_OPS |= GSAF_DAC_CLR_BUFFER;
-  fadcPtr[devNum]->BCR |= GSAF_DAC_ENABLE_RGC;
+  if (board_type == GSC_16AISS8AO4) {
+    fadcPtr[devNum]->BCR |= GSAF_DAC_ENABLE_RGC;
+  }
 
   printk("RAG = 0x%x\n",fadcPtr[devNum]->RAG);
   printk("BCR = 0x%x\n",fadcPtr[devNum]->BCR);
@@ -459,8 +498,8 @@ int mapFadc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
                 (long)pci_alloc_consistent(adcdev,0x2000,&adc_dma_handle[devNum]);
   pHardware->pci_dac[pHardware->dacCount] =
                 (long)pci_alloc_consistent(adcdev,0x2000,&dac_dma_handle[devNum]);
-  pHardware->adcType[devNum] = GSC_16AISS8AO4;
-  pHardware->dacType[pHardware->dacCount] = GSC_16AISS8AO4;
+  pHardware->adcType[devNum] = board_type;
+  pHardware->dacType[pHardware->dacCount] = board_type;
   pHardware->adcCount ++;
   pHardware->dacCount ++;
   return(0);
@@ -535,17 +574,21 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		adc_cnt++;
 	}
         // if found, check if it is a Fast ADC module
+    	// TODO: for the time of testing of the 18-bit board, it returned same PCI device number as the 16-bit fast GS board
+	// This number will most likely change in the future.
         if((dacdev->subsystem_device == FADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
         {
 		int use_it = 1;
+		unsigned int board_type = -1;
 		if (pCds->cards) {
 			use_it = 0;
 			/* See if ought to use this one or not */
 			int i;
 			for (i = 0; i < pCds->cards; i++) {
-				if (pCds->cards_used[i].type == GSC_16AISS8AO4
+				if ((pCds->cards_used[i].type == GSC_16AISS8AO4 || pCds->cards_used[i].type == GSC_18AISS8AO8)
 				    && pCds->cards_used[i].instance == fast_adc_cnt) {
 					use_it = 1;
+					board_type = pCds->cards_used[i].type;
 					break;
 				}
 			}
@@ -554,7 +597,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
                    printk("fast adc card on bus %x; device %x\n",
                         dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
-                   status = mapFadc(pCds,dacdev);
+                   status = mapFadc(pCds, dacdev, board_type);
                    modCount ++;
 		}
 		fast_adc_cnt++;
