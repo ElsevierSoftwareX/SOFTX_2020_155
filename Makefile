@@ -10,7 +10,7 @@ realclean:
 clean-% :: src/epics/simLink/%.mdl
 	@system=$(subst clean-,,$@); \
 	/bin/rm -rf target/$${system}epics build/$${system}epics; \
-	(cd src/fe/$${system}; make clean); \
+	(cd src/fe/$${system}; make -i clean || true); \
 
 clean-% :: config/Makefile.%epics
 	@system=$(subst clean-,,$@); \
