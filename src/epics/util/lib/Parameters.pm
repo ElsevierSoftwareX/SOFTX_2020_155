@@ -55,22 +55,22 @@ sub printHeaderStruct {
 			} elsif ($spp[0] eq "plant_name") {
 				print "Plant name is set to $spp[1]\n";
 				$::plantName = $spp[1];
-			} elsif ($spp[0] eq "shmem_daq") {
+			} elsif ($spp[0] eq "shmem_daq" && $spp[1] == 1) {
 				print "Shared memory DAQ connection (No Myrinet)\n";
 				$::shmem_daq = 1;
-			} elsif ($spp[0] eq "no_sync") {
+			} elsif ($spp[0] eq "no_sync" && $spp[1] == 1) {
 				print "Will not sync up to 1PPS\n";
 				$::no_sync = 1;
-			} elsif ($spp[0] eq "no_daq") {
+			} elsif ($spp[0] eq "no_daq" && $spp[1] == 1) {
 				print "Will not connect to DAQ\n";
 				$::no_daq = 1;
-			} elsif ($spp[0] eq "dac_internal_clocking") {
+			} elsif ($spp[0] eq "dac_internal_clocking" && $spp[1] == 1) {
 				print "Will clock D/A converter internally\n";
 				$::dac_internal_clocking = 1;
-			} elsif ($spp[0] eq "no_oversampling") {
+			} elsif ($spp[0] eq "no_oversampling" && $spp[1] == 1) {
 				print "Will not oversample\n";
 				$::no_oversampling = 1;
-			} elsif ($spp[0] eq "no_dac_interpolation") {
+			} elsif ($spp[0] eq "no_dac_interpolation" && $spp[1] == 1) {
 				print "Will not interpolate DAC\n";
 				$::no_dac_interpolation = 1;
 			}
