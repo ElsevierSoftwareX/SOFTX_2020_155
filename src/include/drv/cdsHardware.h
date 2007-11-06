@@ -66,6 +66,7 @@ typedef struct CDS_HARDWARE{
 	volatile unsigned int *vme[MAX_VME_BRIDGES]; /* VME memory */
 	volatile unsigned char *vme_reg[MAX_VME_BRIDGES]; /* PCI to VME bridge registers */
 	unsigned char *buf;
+	volatile unsigned int *gps;	/* GPS card */
 
 	/* Variables controlling cards usage */
 	int cards;			/* Sizeof array below */
@@ -373,3 +374,15 @@ typedef struct GSA_AD18_REG{
 #define SBS_618_MAPPING_REGS_PCI_VME	0x0000
 #define SBS_618_MAPPING_REGS_VME_PCI	0x8000
 #define SBS_618_MAPPING_REGS_DMA_PCI	0xC000
+
+
+// Symmertricom GPS input card
+// model BC635PCI-U
+
+#define SYMCOM_VID		0x12e2
+#define SYMCOM_BC635_TID	0x4013
+#define SYMCOM_BC635_TIMEREQ	0
+#define SYMCOM_BC635_TIME0	0x30
+#define SYMCOM_BC635_TIME1	0x34
+#define SYMCOM_BC635_EVENT0	0x38
+#define SYMCOM_BC635_EVENT1	0x3C
