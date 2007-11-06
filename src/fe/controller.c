@@ -567,7 +567,7 @@ void *fe_start(void *arg)
 		}
 		if (kk == 10000000) {
 			stop_working_threads = 1;
-			printf("timeout 1\n");
+			printf("Adc %d timeout 1\n", jj);
 		}
 	  }
 	}
@@ -637,15 +637,20 @@ void *fe_start(void *arg)
 		int limit = 32000;
 		int offset = 0x8000;
 		int mask = 0xffff;
+		int num_outs = 32;
 		if (cdsPciModules.adcType[kk] == GSC_18AISS8AO8) {
 			limit *= 4; // 18 bit limit
 			offset = 0x20000; // Data coding offset in 18-bit DAC
 			mask = 0x3ffff;
+			num_outs = 8;
+		}
+		if (cdsPciModules.adcType[kk] == GSC_16AISS8AO4) {
+			num_outs = 4;
 		}
 #ifdef OVERSAMPLE
 		for (jj=0; jj < OVERSAMPLE_TIMES; jj++)
 		{
-			for(ii=0;ii<4;ii++)
+			for(ii=0;ii<num_outs;ii++)
 			{
 				adcData[kk][ii] = (*packedData & mask);
 				adcData[kk][ii]  -= offset;
@@ -654,7 +659,7 @@ void *fe_start(void *arg)
 			}
 		}
 #else
-		for(ii=0;ii<32;ii++)
+		for(ii=0;ii<num_outs;ii++)
 		{
 			adcData[kk][ii] = (*packedData & mask);
 			adcData[kk][ii] -= offset;
