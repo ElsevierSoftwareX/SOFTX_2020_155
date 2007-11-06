@@ -4,7 +4,9 @@ use Exporter;
 
 # DAC cards we support
 %board_types = (
-	"GSC_16AO16" => 1, # General Standards board
+	GSC_16AO16 => 1, # General Standards board
+        GSC_16AISS8AO4 => 1, # Fast General Standards board
+        GSC_18AISS8AO8 => 1 # 18-bit General Standards board
 );
 $default_board_type = "GSC_16AO16";
 
