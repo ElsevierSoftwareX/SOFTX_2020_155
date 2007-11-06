@@ -669,6 +669,21 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		}
   }
 
+  dacdev = NULL;
+  status = 0;
+  pCds->gps = 0;
+  // Look for Symmetricom GPS board
+  if ((dacdev = pci_find_device(SYMCOM_VID, SYMCOM_BC635_TID, dacdev))) {
+            	printk("Symmetricom GPS card on bus %x; device %x\n",
+                   	dacdev->bus->number,
+		   	PCI_SLOT(dacdev->devfn));
+		status = mapSymComGps(pCds,dacdev);
+		if (status == 0) {
+		  // GPS board initialized and mapped
+		  modCount ++;
+		}
+  }
+
   return(modCount);
 }
 
@@ -933,4 +948,34 @@ int mapSbsVmeBridge(CDS_HARDWARE *pHardware, struct pci_dev *sbsdev)
 	pHardware->vme_reg[pHardware->vmeBridgeCount] = pci_reg;
 	pHardware->vmeBridgeCount++;
 	return(0);
+}
+
+
+
+// *****************************************************************************
+// Initialize Symmetricom GPS card (model BC635PCI-U)
+// *****************************************************************************
+int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
+{
+  int i;
+  static unsigned int pci_io_addr;
+
+  pci_enable_device(gpsdev);
+  pci_read_config_dword(gpsdev, PCI_BASE_ADDRESS_0, &pci_io_addr);
+  pci_io_addr &= 0xfffffff0;
+  printk("PIC BASE 0 address = %x\n", pci_io_addr);
+
+  unsigned char *addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x40);
+  printk("Remapped 0x%x\n", addr1);
+  pHardware->gps = addr1;
+
+  for (i = 0; i < 10; i++) {
+    pHardware->gps[0] = 1;
+    printk("Current time %d %dms %dns s\n", pHardware->gps[0x34/4], 0xfffff & pHardware->gps[0x30/4], 100 * ((pHardware->gps[0x30/4] >> 20) & 0xf) );
+  }
+  pHardware->gps[0] = 1;
+  unsigned int time0 = pHardware->gps[0x30/4];
+  if (time0 & (1<<24)) printk("Flywheeling, unlocked...\n");
+  else printk ("Locked!\n");
+  return(0);
 }

@@ -277,6 +277,26 @@ unsigned int intr_handler(unsigned int irq, struct rtl_frame *regs)
 #endif
 
 
+// Get current GPS time off the card
+double getGpsTime(unsigned int *ns) {
+  double the_time = 0.0;
+
+  if (cdsPciModules.gps) {
+    // Sample time
+    cdsPciModules.gps[0] = 1;
+    // Read seconds, microseconds, nanoseconds
+    unsigned int time0 = cdsPciModules.gps[SYMCOM_BC635_TIME0/4];
+    unsigned int time1 = cdsPciModules.gps[SYMCOM_BC635_TIME1/4];
+    unsigned  int msecs = 0xfffff & time0; // nanoseconds * 100
+    unsigned  int nsecs = 0xf & (time0 >> 20); // microseconds
+    the_time = ((double) time1) + .000001 * (double) msecs  + .0000001 * (double) nsecs;
+    if (ns) {
+	*ns = 100 * nsecs; // Store nanoseconds
+    }
+  }
+  return the_time;
+}
+
 /************************************************************************/
 /* TASK: fe_start()							*/
 /* This routine is the skeleton for all front end code			*/
@@ -336,7 +356,9 @@ void *fe_start(void *arg)
   pLocalEpics->epicsInput.vmeReset = 0;
 
   // Do not proceed until EPICS has had a BURT restore
-  printf("Waiting for EPICS BURT\n");
+  unsigned int ns;
+  double time = getGpsTime(&ns);
+  printf("Waiting for EPICS BURT at %f and %d ns\n", time, ns);
   do{
 	usleep(1000000);
   }while(!pLocalEpics->epicsInput.burtRestore);
@@ -1324,5 +1346,4 @@ out:
 
         return 0;
 }
-
 
