@@ -169,6 +169,7 @@ int rioInput1[MAX_DIO_MODULES];
 int rioOutput1[MAX_DIO_MODULES];
 int clock16K = 0;
 
+double getGpsTime(unsigned int *);
 #include "./feSelectCode.c"
 
 char daqArea[2*DAQ_DCU_SIZE];		/* Space allocation for daqLib buffers	*/
