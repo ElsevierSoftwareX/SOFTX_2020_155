@@ -971,7 +971,7 @@ int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
 
   for (i = 0; i < 10; i++) {
     pHardware->gps[0] = 1;
-    printk("Current time %d %dms %dns s\n", pHardware->gps[0x34/4], 0xfffff & pHardware->gps[0x30/4], 100 * ((pHardware->gps[0x30/4] >> 20) & 0xf) );
+    printk("Current time %ds %dus %dns \n", pHardware->gps[0x34/4], 0xfffff & pHardware->gps[0x30/4], 100 * ((pHardware->gps[0x30/4] >> 20) & 0xf) );
   }
   pHardware->gps[0] = 1;
   unsigned int time0 = pHardware->gps[0x30/4];
