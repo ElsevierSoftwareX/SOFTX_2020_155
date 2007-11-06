@@ -4,8 +4,9 @@ use Exporter;
 
 # ADC cards we support
 %board_types = (
-	"GSC_16AI64SSA" => 1, # Slow General Standards board
-	"GSC_16AISS8AO4" => 1 # Fast General Standards board
+	GSC_16AI64SSA => 1, # Slow General Standards board
+	GSC_16AISS8AO4 => 1, # Fast General Standards board
+	GSC_18AISS8AO8 => 1 # 18-bit General Standards board
 );
 
 # default board type (if none specified with type=<type> in block Description)
@@ -24,7 +25,8 @@ sub initAdc {
 	if ($num eq undef) {
 		$num = $::adcCnt;
 	}
-	print "ADC $::adcCnt; type=$type; num=$num\n";
+	print "ADC $::adcCnt; type='$type'; num=$num\n";
+        print "foo=$board_types{$type}\n";
 	
 	# Check if this is a supported board type
 	if ($board_types{$type} != 1) {
