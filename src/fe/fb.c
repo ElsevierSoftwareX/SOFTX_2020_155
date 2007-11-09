@@ -88,6 +88,8 @@ int cdsDaqNetDaqSend(	int dcuId,
 	ipc->bp[mycycle].cycle = mycycle;
 	ipc->bp[mycycle].crc = blockCrc;
 	//ipc->bp[mycycle].status = 0;
+  	ipc->bp[mycycle].timeSec = (unsigned int) cycle_gps_time;
+  	ipc->bp[mycycle].timeNSec = (unsigned int) cycle_gps_ns + (unsigned int) (1000000000. * (cycle_gps_time - (unsigned int) cycle_gps_time));
 	
 	// Assign the test points table
 	tp->count = tpCount;
