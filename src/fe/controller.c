@@ -59,7 +59,7 @@ volatile int stop_working_threads = 0;
 #include "daqmap.h"		/* DAQ network layout			*/
 extern unsigned int cpu_khz;
 #define CPURATE	(cpu_khz/1000)
-
+#define ONE_PPS_THRESH 2000
 
 // #include "fpvalidate.h"		/* Valid FP number ck			*/
 #ifndef NO_DAQ
@@ -168,6 +168,10 @@ int rioOutput[MAX_DIO_MODULES];
 int rioInput1[MAX_DIO_MODULES];
 int rioOutput1[MAX_DIO_MODULES];
 int clock16K = 0;
+double cycle_gps_time = 0.; // Time at which ADCs triggered
+double cycle_gps_event_time = 0.; // Time at which ADCs triggered
+unsigned int   cycle_gps_ns = 0;
+unsigned int   cycle_gps_event_ns = 0;
 
 double getGpsTime(unsigned int *);
 #include "./feSelectCode.c"
@@ -278,24 +282,61 @@ unsigned int intr_handler(unsigned int irq, struct rtl_frame *regs)
 #endif
 
 
-// Get current GPS time off the card
-double getGpsTime(unsigned int *ns) {
+static double getGpsTime1(unsigned int *ns, int event_flag) {
   double the_time = 0.0;
 
   if (cdsPciModules.gps) {
     // Sample time
-    cdsPciModules.gps[0] = 1;
+    if (event_flag) {
+      //cdsPciModules.gps[1] = 1;
+    } else {
+      cdsPciModules.gps[0] = 1;
+    }
     // Read seconds, microseconds, nanoseconds
-    unsigned int time0 = cdsPciModules.gps[SYMCOM_BC635_TIME0/4];
-    unsigned int time1 = cdsPciModules.gps[SYMCOM_BC635_TIME1/4];
-    unsigned  int msecs = 0xfffff & time0; // nanoseconds * 100
-    unsigned  int nsecs = 0xf & (time0 >> 20); // microseconds
-    the_time = ((double) time1) + .000001 * (double) msecs  + .0000001 * (double) nsecs;
+    unsigned int time0;
+    unsigned int time1;
+    if (event_flag) {
+      time0 = cdsPciModules.gps[SYMCOM_BC635_EVENT0/4];
+      time1 = cdsPciModules.gps[SYMCOM_BC635_EVENT1/4];
+    } else {
+      time0 = cdsPciModules.gps[SYMCOM_BC635_TIME0/4];
+      time1 = cdsPciModules.gps[SYMCOM_BC635_TIME1/4];
+    }
+    unsigned  int msecs = 0xfffff & time0; // microseconds
+    unsigned  int nsecs = 0xf & (time0 >> 20); // nsecs * 100
+    the_time = ((double) time1) + .000001 * (double) msecs  /* + .0000001 * (double) nsecs*/;
     if (ns) {
 	*ns = 100 * nsecs; // Store nanoseconds
     }
   }
+  //printf("%f\n", the_time);
   return the_time;
+}
+
+// Get current GPS time off the card
+// Nanoseconds (hundreds at most) are available as an optional ns parameter
+double getGpsTime(unsigned int *ns) {
+	return getGpsTime1(ns, 0);
+}
+
+// Get current EVENT time off the card
+// Nanoseconds (hundreds at most) are available as an optional ns parameter
+double getGpsEventTime(unsigned int *ns) {
+	return getGpsTime1(ns, 1);
+}
+
+// Get Gps card microseconds
+unsigned int getGpsUsec() {
+
+  if (cdsPciModules.gps) {
+    // Sample time
+    cdsPciModules.gps[0] = 1;
+    // Read microseconds, nanoseconds
+    unsigned int time0 = cdsPciModules.gps[SYMCOM_BC635_TIME0/4];
+    unsigned int time1 = cdsPciModules.gps[SYMCOM_BC635_TIME1/4];
+    return 0xfffff & time0; // microseconds
+  }
+  return 0;
 }
 
 /************************************************************************/
@@ -339,6 +380,12 @@ void *fe_start(void *arg)
   pEpicsComms = (RFM_FE_COMMS *)_epics_shm;
   pLocalEpics = (CDS_EPICS *)&pEpicsComms->epicsSpace;
 
+#ifdef OVERSAMPLE
+  // Zero out filter histories
+  memset(dHistory, 0, sizeof(dHistory));
+  memset(dDacHistory, 0, sizeof(dDacHistory));
+  //printf("Coeff history sizes are %d %d\n", sizeof(dHistory), sizeof(dDacHistory));
+#endif
 
   // Set pointers to SFM data buffers
 #if NUM_SYSTEMS > 1
@@ -496,6 +543,15 @@ void *fe_start(void *arg)
 #ifndef NO_SYNC
   if (run_on_timer) {
 #endif
+   // See if GPS card present
+   cycle_gps_time = getGpsTime(&cycle_gps_ns);
+   if (cycle_gps_time != 0.0) {
+   	unsigned int usec;
+	// Enable external event GPS time capture
+        cdsPciModules.gps[SYMCOM_BC635_CONTROL/4] = 8;
+	while ((usec = getGpsUsec()) < 999980);// Wait until 20us before sec
+        printf("Running time %d us\n", usec);
+    } else {
     // Pause until this second ends
     struct timespec next;
     clock_gettime(CLOCK_REALTIME, &next);
@@ -505,6 +561,7 @@ void *fe_start(void *arg)
     clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
     clock_gettime(CLOCK_REALTIME, &next);
     printf("Running time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
+    }
 #ifndef NO_SYNC
   }
 #endif
@@ -561,6 +618,11 @@ void *fe_start(void *arg)
 	}
 	// Read CPU clock for timing info
         rdtscl(cpuClock[0]);
+
+        // Get the time from the GPS board
+        cycle_gps_time = getGpsTime(&cycle_gps_ns);
+        cycle_gps_event_time = getGpsEventTime(&cycle_gps_event_ns);
+//   	printf("%f\n", cycle_gps_time - cycle_gps_event_time);
 
   	if (!run_on_timer) {
   	  for(jj=0;jj<cdsPciModules.adcCount;jj++) {
@@ -677,10 +739,16 @@ void *fe_start(void *arg)
 			{
 				adcData[kk][ii] = (*packedData & mask);
 				adcData[kk][ii]  -= offset;
-				dWord[kk][ii] = iir_filter((double)adcData[kk][ii],FE_OVERSAMPLE_COEFF,3,&dHistory[ii+kk*32][0]);
+				if (ii == 31) {
+				   if (jj == 0 || dWord[kk][31] < adcData[kk][31])
+					dWord[kk][31] = adcData[kk][31];
+				} else {
+				  dWord[kk][ii] = iir_filter((double)adcData[kk][ii],FE_OVERSAMPLE_COEFF,3,&dHistory[ii+kk*32][0]);
+				}
 				packedData ++;
 			}
 		}
+		//dWord[kk][31] = adcData[kk][31];
 #else
 		for(ii=0;ii<num_outs;ii++)
 		{
@@ -727,7 +795,7 @@ void *fe_start(void *arg)
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
 	{
-		if(onePps > 4000) 
+		if(onePps > ONE_PPS_THRESH) 
 		 {
 			firstTime += 100;
 			onePpsHi = 0;
@@ -743,16 +811,16 @@ void *fe_start(void *arg)
 		}
 	}
 
-	if((onePps > 4000) && (onePpsHi == 0))  
+	if((onePps > ONE_PPS_THRESH) && (onePpsHi == 0))  
 	{
 #ifdef NO_SYNC
-		pLocalEpics->epicsOutput.onePps = 0;
+		pLocalEpics->epicsOutput.onePps = 1000000 * (cycle_gps_event_time - (unsigned int) cycle_gps_event_time);
 #else
 		pLocalEpics->epicsOutput.onePps = clock16K;
 #endif
 		onePpsHi = 1;
 	}
-	if(onePps < 4000) onePpsHi = 0;  
+	if(onePps < ONE_PPS_THRESH) onePpsHi = 0;  
 	// Check if front end continues to be in sync with 1pps
 	// If not, set sync error flag
 	if(pLocalEpics->epicsOutput.onePps > 4) diagWord |= FE_SYNC_ERR;
@@ -837,7 +905,8 @@ void *fe_start(void *arg)
     dWord[0][15] = (double)cdsPciModules.vme[0][0x1f];
 #endif
     cdsPciModules.vme[0][0x10] = clock16K;
-  }
+  } 
+
 
 #if (NUM_SYSTEMS > 1) && !defined(PNM)
   	for (system = 0; system < 1; system++)
