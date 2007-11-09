@@ -821,9 +821,13 @@ void *fe_start(void *arg)
 		onePpsHi = 1;
 	}
 	if(onePps < ONE_PPS_THRESH) onePpsHi = 0;  
+
+	// Display sample 0 GPS microseconds
+	if (clock16K == 0) pLocalEpics->epicsOutput.timeErr = 1000000000.0 * (cycle_gps_time - (unsigned int) cycle_gps_time);
+
 	// Check if front end continues to be in sync with 1pps
 	// If not, set sync error flag
-	if(pLocalEpics->epicsOutput.onePps > 4) diagWord |= FE_SYNC_ERR;
+	if(pLocalEpics->epicsOutput.onePps > 20) diagWord |= FE_SYNC_ERR;
 
 	if(!skipCycle)
  	{
