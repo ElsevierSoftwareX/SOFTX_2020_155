@@ -1,12 +1,12 @@
 Model {
-  Name			  "omc"
+  Name			  "oms"
   Version		  6.6
   MdlSubVersion		  0
   GraphicalInterface {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.12"
+    ComputedModelVersion    "1.41"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -42,10 +42,10 @@ Model {
   Creator		  "jay"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "Jay"
+  LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Oct 04 09:43:33 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:12>"
+  LastModifiedDate	  "Wed Oct 31 14:57:10 2007"
+  ModelVersionFormat	  "1.%<AutoIncrement:41>"
   ConfigurationManager	  "None"
   SimulationMode	  "normal"
   LinearizationMsg	  "none"
@@ -87,7 +87,7 @@ Model {
   ExtModeArmWhenConnect	  on
   ExtModeSkipDownloadWhenConnect off
   ExtModeLogAll		  on
-  ExtModeAutoUpdateStatusClock on
+  ExtModeAutoUpdateStatusClock off
   BufferReuse		  on
   ProdHWDeviceType	  "32-bit Generic"
   ShowModelReferenceBlockVersion off
@@ -500,9 +500,6 @@ Model {
       SampleTime	      "-1"
     }
     Block {
-      BlockType		      Ground
-    }
-    Block {
       BlockType		      Inport
       Port		      "1"
       UseBusObject	      off
@@ -587,17 +584,6 @@ Model {
       SampleTime	      "-1"
     }
     Block {
-      BlockType		      Switch
-      Criteria		      "u2 >= Threshold"
-      Threshold		      "0"
-      InputSameDT	      on
-      OutDataTypeMode	      "Inherit via internal rule"
-      RndMeth		      "Floor"
-      SaturateOnIntegerOverflow	on
-      ZeroCross		      on
-      SampleTime	      "-1"
-    }
-    Block {
       BlockType		      Terminator
     }
   }
@@ -620,8 +606,8 @@ Model {
     FontAngle		    "normal"
   }
   System {
-    Name		    "omc"
-    Location		    [1069, 97, 1880, 1132]
+    Name		    "oms"
+    Location		    [1509, 51, 2540, 1002]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -657,7 +643,7 @@ Model {
       Name		      "Bus\nSelector1"
       Description	      "ADC Selector"
       Ports		      [1, 4]
-      Position		      [245, 555, 260, 675]
+      Position		      [255, 625, 270, 745]
       ShowName		      off
       AttributesFormatString  "%<Description>"
       OutputSignals	      "adc_0_12,adc_0_13,adc_0_14,adc_0_15"
@@ -725,7 +711,7 @@ Model {
       Name		      "Bus\nSelector3"
       Description	      "ADC Selector"
       Ports		      [1, 6]
-      Position		      [245, 750, 260, 870]
+      Position		      [245, 840, 260, 960]
       ShowName		      off
       AttributesFormatString  "%<Description>"
       OutputSignals	      "adc_0_24,adc_0_25,adc_0_26,adc_0_27,adc_0_28,ad"
@@ -817,45 +803,51 @@ Model {
       BlockType		      BusSelector
       Name		      "Bus\nSelector5"
       Description	      "ADC Selector"
-      Ports		      [1, 6]
-      Position		      [245, 940, 260, 1060]
+      Ports		      [1, 7]
+      Position		      [220, 1045, 235, 1165]
       ShowName		      off
       AttributesFormatString  "%<Description>"
-      OutputSignals	      "adc_0_24,adc_0_25,adc_0_26,adc_0_27,adc_0_28,ad"
-"c_0_29"
+      OutputSignals	      "adc_0_16,adc_0_17,adc_0_18,adc_0_19,adc_0_20,ad"
+"c_0_21,adc_0_31"
       Port {
 	PortNumber		1
-	Name			"<adc_0_24>"
+	Name			"<adc_0_16>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
       }
       Port {
 	PortNumber		2
-	Name			"<adc_0_25>"
+	Name			"<adc_0_17>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
       }
       Port {
 	PortNumber		3
-	Name			"<adc_0_26>"
+	Name			"<adc_0_18>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
       }
       Port {
 	PortNumber		4
-	Name			"<adc_0_27>"
+	Name			"<adc_0_19>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
       }
       Port {
 	PortNumber		5
-	Name			"<adc_0_28>"
+	Name			"<adc_0_20>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
       }
       Port {
 	PortNumber		6
-	Name			"<adc_0_29>"
+	Name			"<adc_0_21>"
+	RTWStorageClass		"Auto"
+	DataLoggingNameMode	"SignalName"
+      }
+      Port {
+	PortNumber		7
+	Name			"<adc_0_31>"
 	RTWStorageClass		"Auto"
 	DataLoggingNameMode	"SignalName"
       }
@@ -867,7 +859,7 @@ Model {
       Description	      "PCI66-16AO16               \n20Vp-p, 16-bit, 30"
 "5uV/count"
       Ports		      [16, 16]
-      Position		      [620, 114, 675, 446]
+      Position		      [905, 111, 990, 449]
       BackgroundColor	      "cyan"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -916,7 +908,33 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [665, 579, 710, 601]
+      Position		      [645, 389, 690, 411]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "OMC_QPD1_SUM"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [645, 504, 690, 526]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -942,7 +960,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [665, 639, 710, 661]
+      Position		      [645, 449, 690, 471]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -968,7 +986,33 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [665, 694, 710, 716]
+      Position		      [645, 634, 690, 656]
+      BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEpicsOut/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "OMC_QPD2_SUM"
+      Tag		      "cdsEpicsOutput"
+      Description	      "Purpose:                                       "
+"   \nOutput a FE signal to an EPICS channel.           \n                    "
+"                              \nOperation:                                   "
+"     \nTakes input value and passes it to EPICS record.  \n                  "
+"                                \nUsage:                                     "
+"       \nName the part with the desired EPICS rrecord name."
+      Ports		      [1, 1]
+      Position		      [650, 754, 695, 776]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -994,7 +1038,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [665, 754, 710, 776]
+      Position		      [645, 694, 690, 716]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -1020,7 +1064,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [665, 519, 710, 541]
+      Position		      [450, 269, 495, 291]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -1036,10 +1080,55 @@ Model {
       RTWMemSecDataParameters "Inherit from model"
     }
     Block {
+      BlockType		      Reference
+      Name		      "ONE_PPS"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                       "
+"                                                                             "
+"                                                                             "
+"                                 \nStandard CDS IIR filter module.           "
+"                                                                             "
+"                                                                             "
+"                                      \n                                     "
+"                                                                             "
+"                                                                             "
+"                                           \nOperation:                      "
+"                                                                             "
+"                                                                             "
+"                                                \nConsists of 10 second order"
+" section IIR filters, plus a ramped gain stage. In FE code, also provides pre"
+"-defined test points and excitation channel inputs. The filter coefficients a"
+"re defined in the LIGO system using the 'foton' tool.\n                      "
+"                                                                             "
+"                                                                             "
+"                                                          \nUsage:           "
+"                                                                             "
+"                                                                             "
+"                                                               \nName the par"
+"t with the desired filter module name.                                       "
+"                                                                             "
+"                                                                    "
+      Ports		      [1, 1]
+      Position		      [310, 1213, 380, 1237]
+      BackgroundColor	      "darkGreen"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
       BlockType		      SubSystem
       Name		      "QPD1"
       Description	      "QPD Monitors of Table-- SUM, PIT, YAW"
-      Ports		      [4, 2]
+      Ports		      [4, 3]
       Position		      [335, 376, 420, 504]
       BackgroundColor	      "cyan"
       DropShadow	      on
@@ -1050,8 +1139,8 @@ Model {
       MaskHideContents	      off
       System {
 	Name			"QPD1"
-	Location		[339, 727, 1227, 1141]
-	Open			off
+	Location		[378, 302, 1266, 716]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1096,6 +1185,7 @@ Model {
 	  Ports			  [2, 1]
 	  Position		  [660, 132, 690, 163]
 	  Inputs		  "*/"
+	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  OutScaling		  "2^-10"
@@ -1108,6 +1198,7 @@ Model {
 	  Ports			  [2, 1]
 	  Position		  [655, 212, 685, 243]
 	  Inputs		  "*/"
+	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  OutScaling		  "2^-10"
@@ -1128,9 +1219,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1173,9 +1264,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1218,9 +1309,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1263,9 +1354,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1308,9 +1399,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1353,9 +1444,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1398,9 +1489,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1458,9 +1549,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1479,6 +1570,14 @@ Model {
 	  Name			  "YAWNOut"
 	  Position		  [760, 223, 790, 237]
 	  Port			  "2"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "SUMOut"
+	  Position		  [760, 288, 790, 302]
+	  Port			  "3"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
 	}
@@ -1552,8 +1651,16 @@ Model {
 	    }
 	    Branch {
 	      Points		      [0, 80]
-	      DstBlock		      "Divide1"
-	      DstPort		      2
+	      Branch {
+		Points			[0, 0]
+		DstBlock		"Divide1"
+		DstPort			2
+	      }
+	      Branch {
+		Points			[0, 60]
+		DstBlock		"SUMOut"
+		DstPort			1
+	      }
 	    }
 	  }
 	}
@@ -1624,8 +1731,8 @@ Model {
       BlockType		      SubSystem
       Name		      "QPD2"
       Description	      "QPD Monitors of Table-- SUM, PIT, YAW"
-      Ports		      [4, 2]
-      Position		      [330, 551, 415, 679]
+      Ports		      [4, 3]
+      Position		      [340, 621, 425, 749]
       BackgroundColor	      "cyan"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -1635,7 +1742,7 @@ Model {
       MaskHideContents	      off
       System {
 	Name			"QPD2"
-	Location		[339, 727, 1227, 1141]
+	Location		[378, 302, 1266, 716]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1681,6 +1788,7 @@ Model {
 	  Ports			  [2, 1]
 	  Position		  [660, 132, 690, 163]
 	  Inputs		  "*/"
+	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  OutScaling		  "2^-10"
@@ -1693,6 +1801,7 @@ Model {
 	  Ports			  [2, 1]
 	  Position		  [655, 212, 685, 243]
 	  Inputs		  "*/"
+	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  OutScaling		  "2^-10"
@@ -1713,9 +1822,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1758,9 +1867,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1803,9 +1912,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1848,9 +1957,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1893,9 +2002,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1938,9 +2047,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1983,9 +2092,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2043,9 +2152,9 @@ Model {
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "on"
+	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2064,6 +2173,14 @@ Model {
 	  Name			  "YAWNOut"
 	  Position		  [760, 223, 790, 237]
 	  Port			  "2"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "SUMOut"
+	  Position		  [760, 288, 790, 302]
+	  Port			  "3"
 	  IconDisplay		  "Port number"
 	  BusOutputAsStruct	  off
 	}
@@ -2137,8 +2254,16 @@ Model {
 	    }
 	    Branch {
 	      Points		      [0, 80]
-	      DstBlock		      "Divide1"
-	      DstPort		      2
+	      Branch {
+		Points			[0, 0]
+		DstBlock		"Divide1"
+		DstPort			2
+	      }
+	      Branch {
+		Points			[0, 60]
+		DstBlock		"SUMOut"
+		DstPort			1
+	      }
 	    }
 	  }
 	}
@@ -2218,8 +2343,8 @@ Model {
       MaskHideContents	      off
       System {
 	Name			"SUS"
-	Location		[111, 165, 1584, 940]
-	Open			on
+	Location		[5, 165, 1275, 940]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -2310,7 +2435,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2355,7 +2480,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2400,7 +2525,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2445,7 +2570,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2490,7 +2615,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2535,7 +2660,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2558,7 +2683,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2603,7 +2728,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2648,7 +2773,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2664,7 +2789,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2687,7 +2812,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2699,6 +2824,7 @@ Model {
 	  Name			  "Product1"
 	  Ports			  [2, 1]
 	  Position		  [1140, 62, 1170, 93]
+	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
@@ -2708,6 +2834,7 @@ Model {
 	  Name			  "Product2"
 	  Ports			  [2, 1]
 	  Position		  [1140, 137, 1170, 168]
+	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
@@ -2717,6 +2844,7 @@ Model {
 	  Name			  "Product3"
 	  Ports			  [2, 1]
 	  Position		  [1140, 212, 1170, 243]
+	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
@@ -2726,6 +2854,7 @@ Model {
 	  Name			  "Product4"
 	  Ports			  [2, 1]
 	  Position		  [1140, 287, 1170, 318]
+	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
@@ -2735,6 +2864,7 @@ Model {
 	  Name			  "Product5"
 	  Ports			  [2, 1]
 	  Position		  [1140, 362, 1170, 393]
+	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
@@ -2744,6 +2874,7 @@ Model {
 	  Name			  "Product6"
 	  Ports			  [2, 1]
 	  Position		  [1140, 432, 1170, 463]
+	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
@@ -2786,7 +2917,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2831,7 +2962,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2876,7 +3007,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2921,7 +3052,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2966,7 +3097,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -3011,7 +3142,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -3056,7 +3187,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -3101,7 +3232,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -3146,7 +3277,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -3191,7 +3322,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -3207,7 +3338,7 @@ Model {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -3683,6 +3814,464 @@ Model {
       }
     }
     Block {
+      BlockType		      SubSystem
+      Name		      "SUSCOIL"
+      Ports		      [6, 6]
+      Position		      [330, 1034, 415, 1181]
+      BackgroundColor	      "lightBlue"
+      DropShadow	      on
+      MinAlgLoopOccurrences   off
+      RTWSystemCode	      "Auto"
+      FunctionWithSeparateData off
+      MaskHideContents	      off
+      System {
+	Name			"SUSCOIL"
+	Location		[422, 279, 926, 897]
+	Open			off
+	ModelBrowserVisibility	off
+	ModelBrowserWidth	200
+	ScreenColor		"white"
+	PaperOrientation	"landscape"
+	PaperPositionMode	"auto"
+	PaperType		"usletter"
+	PaperUnits		"inches"
+	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
+	TiledPageScale		1
+	ShowPageBoundaries	off
+	ZoomFactor		"100"
+	Block {
+	  BlockType		  Inport
+	  Name			  "In1"
+	  Position		  [25, 48, 55, 62]
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In2"
+	  Position		  [25, 133, 55, 147]
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In3"
+	  Position		  [25, 213, 55, 227]
+	  Port			  "3"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In4"
+	  Position		  [25, 288, 55, 302]
+	  Port			  "4"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In5"
+	  Position		  [25, 363, 55, 377]
+	  Port			  "5"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "In6"
+	  Position		  [25, 433, 55, 447]
+	  Port			  "6"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "LEFT"
+	  Tag			  "cdsFilt"
+	  Description		  "Purpose:                                   "
+"                                                                             "
+"                                                                             "
+"                                     \nStandard CDS IIR filter module.       "
+"                                                                             "
+"                                                                             "
+"                                          \n                                 "
+"                                                                             "
+"                                                                             "
+"                                               \nOperation:                  "
+"                                                                             "
+"                                                                             "
+"                                                    \nConsists of 10 second o"
+"rder section IIR filters, plus a ramped gain stage. In FE code, also provides"
+" pre-defined test points and excitation channel inputs. The filter coefficien"
+"ts are defined in the LIGO system using the 'foton' tool.\n                  "
+"                                                                             "
+"                                                                             "
+"                                                              \nUsage:       "
+"                                                                             "
+"                                                                             "
+"                                                                   \nName the"
+" part with the desired filter module name.                                   "
+"                                                                             "
+"                                                                        "
+	  Ports			  [1, 1]
+	  Position		  [175, 283, 245, 307]
+	  BackgroundColor	  "darkGreen"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsFilt/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "RIGHT"
+	  Tag			  "cdsFilt"
+	  Description		  "Purpose:                                   "
+"                                                                             "
+"                                                                             "
+"                                     \nStandard CDS IIR filter module.       "
+"                                                                             "
+"                                                                             "
+"                                          \n                                 "
+"                                                                             "
+"                                                                             "
+"                                               \nOperation:                  "
+"                                                                             "
+"                                                                             "
+"                                                    \nConsists of 10 second o"
+"rder section IIR filters, plus a ramped gain stage. In FE code, also provides"
+" pre-defined test points and excitation channel inputs. The filter coefficien"
+"ts are defined in the LIGO system using the 'foton' tool.\n                  "
+"                                                                             "
+"                                                                             "
+"                                                              \nUsage:       "
+"                                                                             "
+"                                                                             "
+"                                                                   \nName the"
+" part with the desired filter module name.                                   "
+"                                                                             "
+"                                                                        "
+	  Ports			  [1, 1]
+	  Position		  [175, 358, 245, 382]
+	  BackgroundColor	  "darkGreen"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsFilt/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "SIDE"
+	  Tag			  "cdsFilt"
+	  Description		  "Purpose:                                   "
+"                                                                             "
+"                                                                             "
+"                                     \nStandard CDS IIR filter module.       "
+"                                                                             "
+"                                                                             "
+"                                          \n                                 "
+"                                                                             "
+"                                                                             "
+"                                               \nOperation:                  "
+"                                                                             "
+"                                                                             "
+"                                                    \nConsists of 10 second o"
+"rder section IIR filters, plus a ramped gain stage. In FE code, also provides"
+" pre-defined test points and excitation channel inputs. The filter coefficien"
+"ts are defined in the LIGO system using the 'foton' tool.\n                  "
+"                                                                             "
+"                                                                             "
+"                                                              \nUsage:       "
+"                                                                             "
+"                                                                             "
+"                                                                   \nName the"
+" part with the desired filter module name.                                   "
+"                                                                             "
+"                                                                        "
+	  Ports			  [1, 1]
+	  Position		  [180, 428, 250, 452]
+	  BackgroundColor	  "darkGreen"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsFilt/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "TOP1"
+	  Tag			  "cdsFilt"
+	  Description		  "Purpose:                                   "
+"                                                                             "
+"                                                                             "
+"                                     \nStandard CDS IIR filter module.       "
+"                                                                             "
+"                                                                             "
+"                                          \n                                 "
+"                                                                             "
+"                                                                             "
+"                                               \nOperation:                  "
+"                                                                             "
+"                                                                             "
+"                                                    \nConsists of 10 second o"
+"rder section IIR filters, plus a ramped gain stage. In FE code, also provides"
+" pre-defined test points and excitation channel inputs. The filter coefficien"
+"ts are defined in the LIGO system using the 'foton' tool.\n                  "
+"                                                                             "
+"                                                                             "
+"                                                              \nUsage:       "
+"                                                                             "
+"                                                                             "
+"                                                                   \nName the"
+" part with the desired filter module name.                                   "
+"                                                                             "
+"                                                                        "
+	  Ports			  [1, 1]
+	  Position		  [175, 43, 245, 67]
+	  BackgroundColor	  "darkGreen"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsFilt/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "TOP2"
+	  Tag			  "cdsFilt"
+	  Description		  "Purpose:                                   "
+"                                                                             "
+"                                                                             "
+"                                     \nStandard CDS IIR filter module.       "
+"                                                                             "
+"                                                                             "
+"                                          \n                                 "
+"                                                                             "
+"                                                                             "
+"                                               \nOperation:                  "
+"                                                                             "
+"                                                                             "
+"                                                    \nConsists of 10 second o"
+"rder section IIR filters, plus a ramped gain stage. In FE code, also provides"
+" pre-defined test points and excitation channel inputs. The filter coefficien"
+"ts are defined in the LIGO system using the 'foton' tool.\n                  "
+"                                                                             "
+"                                                                             "
+"                                                              \nUsage:       "
+"                                                                             "
+"                                                                             "
+"                                                                   \nName the"
+" part with the desired filter module name.                                   "
+"                                                                             "
+"                                                                        "
+	  Ports			  [1, 1]
+	  Position		  [180, 128, 250, 152]
+	  BackgroundColor	  "darkGreen"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsFilt/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "TOP3"
+	  Tag			  "cdsFilt"
+	  Description		  "Purpose:                                   "
+"                                                                             "
+"                                                                             "
+"                                     \nStandard CDS IIR filter module.       "
+"                                                                             "
+"                                                                             "
+"                                          \n                                 "
+"                                                                             "
+"                                                                             "
+"                                               \nOperation:                  "
+"                                                                             "
+"                                                                             "
+"                                                    \nConsists of 10 second o"
+"rder section IIR filters, plus a ramped gain stage. In FE code, also provides"
+" pre-defined test points and excitation channel inputs. The filter coefficien"
+"ts are defined in the LIGO system using the 'foton' tool.\n                  "
+"                                                                             "
+"                                                                             "
+"                                                              \nUsage:       "
+"                                                                             "
+"                                                                             "
+"                                                                   \nName the"
+" part with the desired filter module name.                                   "
+"                                                                             "
+"                                                                        "
+	  Ports			  [1, 1]
+	  Position		  [175, 208, 245, 232]
+	  BackgroundColor	  "darkGreen"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsFilt/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Top1Out"
+	  Position		  [365, 48, 395, 62]
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Top2Out"
+	  Position		  [365, 133, 395, 147]
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Top3Out"
+	  Position		  [365, 213, 395, 227]
+	  Port			  "3"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "LeftOut"
+	  Position		  [365, 288, 395, 302]
+	  Port			  "4"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "RightOut"
+	  Position		  [365, 363, 395, 377]
+	  Port			  "5"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "SideOut"
+	  Position		  [365, 433, 395, 447]
+	  Port			  "6"
+	  IconDisplay		  "Port number"
+	  BusOutputAsStruct	  off
+	}
+	Line {
+	  SrcBlock		  "In1"
+	  SrcPort		  1
+	  DstBlock		  "TOP1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In2"
+	  SrcPort		  1
+	  DstBlock		  "TOP2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In3"
+	  SrcPort		  1
+	  DstBlock		  "TOP3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In4"
+	  SrcPort		  1
+	  DstBlock		  "LEFT"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In5"
+	  SrcPort		  1
+	  DstBlock		  "RIGHT"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "In6"
+	  SrcPort		  1
+	  DstBlock		  "SIDE"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "TOP1"
+	  SrcPort		  1
+	  DstBlock		  "Top1Out"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "TOP2"
+	  SrcPort		  1
+	  DstBlock		  "Top2Out"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "TOP3"
+	  SrcPort		  1
+	  DstBlock		  "Top3Out"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "LEFT"
+	  SrcPort		  1
+	  DstBlock		  "LeftOut"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "RIGHT"
+	  SrcPort		  1
+	  DstBlock		  "RightOut"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "SIDE"
+	  SrcPort		  1
+	  DstBlock		  "SideOut"
+	  DstPort		  1
+	}
+      }
+    }
+    Block {
       BlockType		      Reference
       Name		      "SUS_LEFT_COILV"
       Tag		      "cdsEpicsOutput"
@@ -3693,7 +4282,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [515, 1024, 560, 1046]
+      Position		      [750, 1064, 795, 1086]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -3719,7 +4308,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [515, 794, 560, 816]
+      Position		      [515, 884, 560, 906]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -3745,7 +4334,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [515, 1079, 560, 1101]
+      Position		      [750, 1119, 795, 1141]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -3771,7 +4360,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [515, 849, 560, 871]
+      Position		      [515, 939, 560, 961]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -3797,7 +4386,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [515, 1134, 560, 1156]
+      Position		      [750, 1174, 795, 1196]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -3823,7 +4412,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [515, 904, 560, 926]
+      Position		      [515, 994, 560, 1016]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -3849,7 +4438,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [415, 949, 460, 971]
+      Position		      [650, 989, 695, 1011]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -3875,7 +4464,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [415, 719, 460, 741]
+      Position		      [415, 809, 460, 831]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -3901,7 +4490,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [415, 1004, 460, 1026]
+      Position		      [650, 1044, 695, 1066]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -3927,7 +4516,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [415, 774, 460, 796]
+      Position		      [415, 864, 460, 886]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -3953,7 +4542,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [415, 1059, 460, 1081]
+      Position		      [650, 1099, 695, 1121]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -3979,7 +4568,7 @@ Model {
 "                                \nUsage:                                     "
 "       \nName the part with the desired EPICS rrecord name."
       Ports		      [1, 1]
-      Position		      [415, 829, 460, 851]
+      Position		      [415, 919, 460, 941]
       BackgroundColor	      "[0.686275, 0.372549, 0.313725]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -3995,11 +4584,16 @@ Model {
       RTWMemSecDataParameters "Inherit from model"
     }
     Block {
+      BlockType		      Terminator
+      Name		      "Terminator"
+      Position		      [415, 1215, 435, 1235]
+    }
+    Block {
       BlockType		      Reference
       Name		      "site=C2\nrate=2K\ndcuid=22"
       Tag		      "cdsParameters"
       Ports		      [1, 1]
-      Position		      [30, 15, 70, 75]
+      Position		      [30, 15, 90, 75]
       BackgroundColor	      "lightBlue"
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsParameters/Subsystem"
@@ -4012,14 +4606,6 @@ Model {
       RTWMemSecDataConstants  "Inherit from model"
       RTWMemSecDataInternal   "Inherit from model"
       RTWMemSecDataParameters "Inherit from model"
-    }
-    Line {
-      Name		      "<adc_0_0>"
-      Labels		      [0, 0]
-      SrcBlock		      "Bus\nSelector4"
-      SrcPort		      1
-      DstBlock		      "SUS"
-      DstPort		      1
     }
     Line {
       Name		      "<adc_0_1>"
@@ -4076,19 +4662,19 @@ Model {
 	  DstPort		  1
 	}
 	Branch {
-	  Points		  [0, 175]
+	  Points		  [0, 245]
 	  Branch {
 	    DstBlock		    "Bus\nSelector1"
 	    DstPort		    1
 	  }
 	  Branch {
-	    Points		    [0, 195]
+	    Points		    [0, 215]
 	    Branch {
 	      DstBlock		      "Bus\nSelector3"
 	      DstPort		      1
 	    }
 	    Branch {
-	      Points		      [0, 190]
+	      Points		      [0, 205]
 	      DstBlock		      "Bus\nSelector5"
 	      DstPort		      1
 	    }
@@ -4127,6 +4713,7 @@ Model {
       DstPort		      5
     }
     Line {
+      Labels		      [0, 0]
       SrcBlock		      "SUS"
       SrcPort		      6
       DstBlock		      "DAC_0"
@@ -4135,7 +4722,7 @@ Model {
     Line {
       SrcBlock		      "SUS"
       SrcPort		      7
-      Points		      [125, 0; 0, 280]
+      Points		      [20, 0; 0, 30]
       DstBlock		      "OMC_SUS_WATCHDOG"
       DstPort		      1
     }
@@ -4206,29 +4793,20 @@ Model {
     Line {
       SrcBlock		      "QPD1"
       SrcPort		      1
-      Points		      [100, 0; 0, 180]
       DstBlock		      "OMC_QPD1_PITN"
       DstPort		      1
     }
     Line {
       SrcBlock		      "QPD1"
       SrcPort		      2
-      Points		      [90, 0; 0, 175]
+      Points		      [90, 0; 0, 20]
       DstBlock		      "OMC_QPD1_YAWN"
       DstPort		      1
     }
     Line {
       SrcBlock		      "QPD2"
       SrcPort		      1
-      Points		      [85, 0; 0, 120]
       DstBlock		      "OMC_QPD2_PITN"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "QPD2"
-      SrcPort		      2
-      Points		      [75, 0; 0, 115]
-      DstBlock		      "OMC_QPD2_YAWN"
       DstPort		      1
     }
     Line {
@@ -4286,58 +4864,148 @@ Model {
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_24>"
-      Labels		      [0, 0]
-      SrcBlock		      "Bus\nSelector5"
+      SrcBlock		      "SUSCOIL"
       SrcPort		      1
-      Points		      [65, 0; 0, 10]
+      Points		      [210, 0; 0, -45]
       DstBlock		      "SUS_TOP1_COILV"
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_25>"
-      Labels		      [0, 0]
-      SrcBlock		      "Bus\nSelector5"
+      SrcBlock		      "SUSCOIL"
       SrcPort		      2
-      Points		      [65, 0; 0, 45]
+      Points		      [105, 0; 0, -15]
       DstBlock		      "SUS_TOP2_COILV"
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_26>"
-      Labels		      [0, 0]
-      SrcBlock		      "Bus\nSelector5"
+      SrcBlock		      "SUSCOIL"
       SrcPort		      3
-      Points		      [55, 0; 0, 80]
+      Points		      [105, 0; 0, 15]
       DstBlock		      "SUS_TOP3_COILV"
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_27>"
-      Labels		      [0, 0]
-      SrcBlock		      "Bus\nSelector5"
+      Labels		      [4, 0]
+      SrcBlock		      "SUSCOIL"
       SrcPort		      4
-      Points		      [130, 0; 0, -10; 105, 0]
+      Points		      [210, 0; 0, 25; 95, 0; 0, -70]
       DstBlock		      "SUS_LEFT_COILV"
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_28>"
-      Labels		      [0, 0]
-      SrcBlock		      "Bus\nSelector5"
+      SrcBlock		      "SUSCOIL"
       SrcPort		      5
-      Points		      [120, 0; 0, 25; 100, 0; 0, 25; 15, 0]
+      Points		      [20, 0; 0, 10; 290, 0; 0, -25]
       DstBlock		      "SUS_RIGHT_COILV"
       DstPort		      1
     }
     Line {
-      Name		      "<adc_0_29>"
+      SrcBlock		      "SUSCOIL"
+      SrcPort		      6
+      Points		      [155, 0; 0, 15]
+      DstBlock		      "SUS_SIDE_COILV"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "ONE_PPS"
+      SrcPort		      1
+      DstBlock		      "Terminator"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_16>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector5"
+      SrcPort		      1
+      Points		      [0, -15]
+      DstBlock		      "SUSCOIL"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_17>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector5"
+      SrcPort		      2
+      Points		      [50, 0; 0, -5]
+      DstBlock		      "SUSCOIL"
+      DstPort		      2
+    }
+    Line {
+      Name		      "<adc_0_18>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector5"
+      SrcPort		      3
+      Points		      [45, 0; 0, 5]
+      DstBlock		      "SUSCOIL"
+      DstPort		      3
+    }
+    Line {
+      Name		      "<adc_0_19>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector5"
+      SrcPort		      4
+      Points		      [40, 0; 0, 15]
+      DstBlock		      "SUSCOIL"
+      DstPort		      4
+    }
+    Line {
+      Name		      "<adc_0_20>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector5"
+      SrcPort		      5
+      Points		      [35, 0; 0, 25]
+      DstBlock		      "SUSCOIL"
+      DstPort		      5
+    }
+    Line {
+      Name		      "<adc_0_21>"
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector5"
       SrcPort		      6
-      Points		      [45, 0; 0, 95]
-      DstBlock		      "SUS_SIDE_COILV"
+      Points		      [30, 0; 0, 35]
+      DstBlock		      "SUSCOIL"
+      DstPort		      6
+    }
+    Line {
+      Name		      "<adc_0_31>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector5"
+      SrcPort		      7
+      Points		      [20, 0; 0, 75]
+      DstBlock		      "ONE_PPS"
       DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_0>"
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector4"
+      SrcPort		      1
+      DstBlock		      "SUS"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "QPD2"
+      SrcPort		      2
+      Points		      [55, 0; 0, 20]
+      DstBlock		      "OMC_QPD2_YAWN"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "QPD1"
+      SrcPort		      3
+      Points		      [80, 0; 0, 35]
+      DstBlock		      "OMC_QPD1_SUM"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "QPD2"
+      SrcPort		      3
+      Points		      [100, 0; 0, 40]
+      DstBlock		      "OMC_QPD2_SUM"
+      DstPort		      1
+    }
+    Annotation {
+      Position		      [676, 1132]
     }
   }
 }
