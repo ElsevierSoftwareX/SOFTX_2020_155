@@ -1413,6 +1413,7 @@ print OUTH "\tint onePps;\n";
 print OUTH "\tint timeErr;\n";
 print OUTH "\tint adcWaitTime;\n";
 print OUTH "\tint diagWord;\n";
+print OUTH "\tint timeDiag;\n";
 print OUTH "\tint cpuMeter;\n";
 print OUTH "\tint cpuMeterMax;\n";
 print OUTH "\tint gdsMon[32];\n";
@@ -1460,6 +1461,7 @@ print EPICS "OUTVARIABLE CPU_METER_MAX epicsOutput.cpuMeterMax int ai 0 field(HO
 print EPICS "OUTVARIABLE ADC_WAIT epicsOutput.adcWaitTime int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
 print EPICS "OUTVARIABLE ONE_PPS epicsOutput.onePps int ai 0\n";
 print EPICS "OUTVARIABLE TIME_ERR epicsOutput.timeErr int ai 0\n";
+print EPICS "OUTVARIABLE TIME_DIAG epicsOutput.timeDiag int ai 0\n";
 print EPICS "OUTVARIABLE DIAG_WORD epicsOutput.diagWord int ai 0\n";
 print EPICS "INVARIABLE BURT_RESTORE epicsInput.burtRestore int ai 0\n";
 for($ii=0;$ii<32;$ii++)
