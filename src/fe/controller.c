@@ -172,6 +172,7 @@ double cycle_gps_time = 0.; // Time at which ADCs triggered
 double cycle_gps_event_time = 0.; // Time at which ADCs triggered
 unsigned int   cycle_gps_ns = 0;
 unsigned int   cycle_gps_event_ns = 0;
+unsigned int   gps_receiver_unlocked = 1; // Lock/unlock flag for GPS time card
 
 double getGpsTime(unsigned int *);
 #include "./feSelectCode.c"
@@ -302,6 +303,7 @@ static double getGpsTime1(unsigned int *ns, int event_flag) {
       time0 = cdsPciModules.gps[SYMCOM_BC635_TIME0/4];
       time1 = cdsPciModules.gps[SYMCOM_BC635_TIME1/4];
     }
+    gps_receiver_unlocked = !!(time0 & (1<<24));
     unsigned  int msecs = 0xfffff & time0; // microseconds
     unsigned  int nsecs = 0xf & (time0 >> 20); // nsecs * 100
     the_time = ((double) time1) + .000001 * (double) msecs  /* + .0000001 * (double) nsecs*/;
@@ -370,6 +372,7 @@ void *fe_start(void *arg)
   float xExc[10];
   static int skipCycle = 0;
   int diagWord = 0;
+  int timeDiag = 0;
   int epicsCycle = 0;
   int system = 0;
 
@@ -415,6 +418,7 @@ void *fe_start(void *arg)
   dcuId = pLocalEpics->epicsInput.dcuId;
 
   pLocalEpics->epicsOutput.diagWord = 0;
+  pLocalEpics->epicsOutput.timeDiag = 0;
 
 
 #ifdef PNM
@@ -623,7 +627,8 @@ void *fe_start(void *arg)
         cycle_gps_time = getGpsTime(&cycle_gps_ns);
         cycle_gps_event_time = getGpsEventTime(&cycle_gps_event_ns);
 //   	printf("%f\n", cycle_gps_time - cycle_gps_event_time);
-
+	timeDiag |= gps_receiver_unlocked;
+	
   	if (!run_on_timer) {
   	  for(jj=0;jj<cdsPciModules.adcCount;jj++) {
 		if(cdsPciModules.adcType[jj] == GSC_16AISS8AO4
@@ -694,6 +699,8 @@ void *fe_start(void *arg)
 	  }
 	  pLocalEpics->epicsOutput.diagWord = diagWord;
 	  diagWord = 0;
+	  pLocalEpics->epicsOutput.timeDiag = timeDiag;
+	  timeDiag = 0;
         }
 
 	/* Update Epics variables */
@@ -814,7 +821,9 @@ void *fe_start(void *arg)
 	if((onePps > ONE_PPS_THRESH) && (onePpsHi == 0))  
 	{
 #ifdef NO_SYNC
-		pLocalEpics->epicsOutput.onePps = 1000000 * (cycle_gps_event_time - (unsigned int) cycle_gps_event_time);
+	        unsigned int usec = 1000000 * (cycle_gps_event_time - (unsigned int) cycle_gps_event_time);
+		if (usec > 500000) usec -= 1000000;
+		pLocalEpics->epicsOutput.onePps = usec;
 #else
 		pLocalEpics->epicsOutput.onePps = clock16K;
 #endif
@@ -823,7 +832,11 @@ void *fe_start(void *arg)
 	if(onePps < ONE_PPS_THRESH) onePpsHi = 0;  
 
 	// Display sample 0 GPS microseconds
-	if (clock16K == 0) pLocalEpics->epicsOutput.timeErr = 1000000000.0 * (cycle_gps_time - (unsigned int) cycle_gps_time);
+	if (clock16K == 0) {
+		unsigned int nsec = 1000000000.0 * (cycle_gps_time - (unsigned int) cycle_gps_time);
+		if (nsec > 500000000) nsec -= 1000000000;
+		pLocalEpics->epicsOutput.timeErr = nsec;
+	}
 
 	// Check if front end continues to be in sync with 1pps
 	// If not, set sync error flag
