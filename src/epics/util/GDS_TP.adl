@@ -557,7 +557,7 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="FE Sync"
+	textix="1PPS trig"
 }
 byte {
 	object {
@@ -3197,7 +3197,7 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="Time Error"
+	textix="IRIGB Error"
 }
 "text update" {
 	object {
