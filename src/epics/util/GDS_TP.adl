@@ -557,7 +557,7 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="1PPS trig"
+	textix="1PPS Trig"
 }
 byte {
 	object {
@@ -3197,7 +3197,7 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="IRIGB Error"
+	textix="IRIGB Diff"
 }
 "text update" {
 	object {
