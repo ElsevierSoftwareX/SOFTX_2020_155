@@ -553,7 +553,7 @@ void *fe_start(void *arg)
    	unsigned int usec;
 	// Enable external event GPS time capture
         cdsPciModules.gps[SYMCOM_BC635_CONTROL/4] = 8;
-	while ((usec = getGpsUsec()) < 999980);// Wait until 20us before sec
+	while ((usec = getGpsUsec()) < 999978);// Wait until 22us before sec
         printf("Running time %d us\n", usec);
     } else {
     // Pause until this second ends
