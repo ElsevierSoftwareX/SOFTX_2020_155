@@ -10,7 +10,11 @@
 #define DAQ_DATA_BASE_ADD	(DAQ_BASE_ADDRESS + 0x100000)
 
 /* Redefine this to change DAQ transmission size */
+#if defined(COMPAT_INITIAL_LIGO)
+#define DAQ_DCU_SIZE		0x100000
+#else
 #define DAQ_DCU_SIZE		0x200000
+#endif
 
 #define DAQ_EDCU_SIZE		0x400000
 #define DAQ_EDCU_BLOCK_SIZE	0x20000
@@ -118,11 +122,9 @@ struct rmIpcStr {       /* IPC area structure                   */
 #endif
 #define IS_EXC_DCU(dcuid) ((dcuid) == DCU_ID_EX_16K || (dcuid) == DCU_ID_EX_2K)
 
-/* define IS_MYRINET_DCU(dcuid) (((dcuid) >= DCU_ID_SUS_1 && (dcuid) <= DCU_ID_SUS_4) || ((dcuid) >= DCU_ID_SUS_SOS && (dcuid) <= DCU_ID_HEPI_EY) )
- */
 
-/* DCU 11 is the sole 40m Myrinet DCU */
-#define IS_MYRINET_DCU(dcuid) (daqd.cit_40m? dcuid == 11  : (((dcuid) >= DCU_ID_SUS_1 && (dcuid) <= DCU_ID_SUS_4) || ((dcuid) >= DCU_ID_SUS_SOS && (dcuid) <= DCU_ID_HEPI_EY)) )
+/* DCU 11 and 22 are the 40m Myrinet DCUs */
+#define IS_MYRINET_DCU(dcuid) (daqd.cit_40m? ((dcuid) == 11 || (dcuid) == DCU_ID_HEPI_1)  : (((dcuid) >= DCU_ID_SUS_1 && (dcuid) <= DCU_ID_SUS_4) || ((dcuid) >= DCU_ID_SUS_SOS && (dcuid) <= DCU_ID_HEPI_EY)) )
 
 static const char * const dcuName[DCU_COUNT] = {"DAQSC",
 					 "FB0", "FB1", "FB2",
@@ -304,6 +306,18 @@ static const int daqGdsTpNum[4] = { DAQ_GDS_TP_LSC_EX_NUM, DAQ_GDS_TP_ASC_EX_NUM
    GDS_CNTRL_BLOCK.excNum16K[1] has the channel status words
 */
 
+#if defined(COMPAT_INITIAL_LIGO)
+typedef union GDS_CNTRL_BLOCK {
+  unsigned short tp [4][2][DAQ_GDS_MAX_TP_NUM];
+  struct {
+    unsigned short excNum16k[2][DAQ_GDS_MAX_TP_NUM];
+    unsigned short excNum2k[2][DAQ_GDS_MAX_TP_NUM];
+    unsigned short tpNum16k[2][DAQ_GDS_MAX_TP_NUM];
+    unsigned short tpNum2k[2][DAQ_GDS_MAX_TP_NUM];
+  } tpe;
+} GDS_CNTRL_BLOCK;
+
+#else
 typedef union GDS_CNTRL_BLOCK {
   unsigned int tp [4][2][DAQ_GDS_MAX_TP_NUM];
   struct {
@@ -319,6 +333,7 @@ typedef struct cdsDaqNetGdsTpNum {
    int count; /* test points count */
    int tpNum[DAQ_GDS_MAX_TP_NUM];
 } cdsDaqNetGdsTpNum;
+#endif
 
 #define GDS_TP_MAX_FE	1250
 
