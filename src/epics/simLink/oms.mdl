@@ -4590,7 +4590,7 @@ Model {
     }
     Block {
       BlockType		      Reference
-      Name		      "site=C2\nrate=2K\ndcuid=22"
+      Name		      "site=H1\nrate=2K\ndcuid=22\ngds_node_id=3\nno_oversampling=0\nno_dac_interpolation=0\nno_sync=1\ncompat_initial_ligo=1"
       Tag		      "cdsParameters"
       Ports		      [1, 1]
       Position		      [30, 15, 90, 75]

@@ -18,6 +18,7 @@ $nodeid = 0; # Default GDS node id for awgtpman
 $dac_internal_clocking = 0; # Default is DAC external clocking
 $no_oversampling = 0; # Default is to iversample
 $no_dac_interpolation = 0; # Default is to interpolate D/A outputs
+$compat_initial_ligo = 0; # Default is not to build for initial LIGO compatibility
 
 if (@ARGV > 2) {
 	$dcuId = $ARGV[2];
@@ -2096,7 +2097,13 @@ if ($dac_internal_clocking) {
   print OUTM "#Comment out to enable external D/A converter clocking\n";
   print OUTM "CFLAGS += -DDAC_INTERNAL_CLOCKING\n";
 }
-
+if ($compat_initial_ligo) {
+  print OUTM "#Comment out to disable initial LIGO compatibility\n";
+  print OUTM "CFLAGS += -DCOMPAT_INITIAL_LIGO\n";
+} else {
+  print OUTM "#Uncomment to enable initial LIGO compatibility\n";
+  print OUTM "#CFLAGS += -DCOMPAT_INITIAL_LIGO\n";
+}
 print OUTM "\n";
 print OUTM "all: \$(ALL)\n";
 print OUTM "\n";

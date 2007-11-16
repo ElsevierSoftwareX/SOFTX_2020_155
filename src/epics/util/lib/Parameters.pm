@@ -73,6 +73,9 @@ sub printHeaderStruct {
 			} elsif ($spp[0] eq "no_dac_interpolation" && $spp[1] == 1) {
 				print "Will not interpolate DAC\n";
 				$::no_dac_interpolation = 1;
+			} elsif ($spp[0] eq "compat_initial_ligo" && $spp[1] == 1) {
+				print "Will build front-end for initial LIGO compatibility\n";
+				$::compat_initial_ligo = 1;
 			}
 		}
 	}
