@@ -207,21 +207,6 @@ static double feCoeff32x[13] =
 double dHistory[96][40];
 double dDacHistory[96][40];
 
-#if 0
-#ifdef SERVO2K
-#define OVERSAMPLE_TIMES	32
-#define FE_OVERSAMPLE_COEFF	feCoeff32x
-#elif SERVO16K
-#define OVERSAMPLE_TIMES	4
-#define FE_OVERSAMPLE_COEFF	feCoeff4x
-#elif SERVO32K
-#define OVERSAMPLE_TIMES	2
-#define FE_OVERSAMPLE_COEFF	feCoeff2x
-#else
-#error Unsupported system rate when in oversampling mode: only 2K, 16K and 32K are supported
-#endif
-#endif
-
 #else
 
 #define OVERSAMPLE_TIMES 1
