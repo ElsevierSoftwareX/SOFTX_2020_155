@@ -106,6 +106,7 @@ extern unsigned int cpu_khz;
 	#define DAQ_RATE	(DAQ_16K_SAMPLE_SIZE*2)
 	#define NET_SEND_WAIT		(2*81920)
 	#define CYCLE_TIME_ALRM		30
+	#define DAC_START_DELAY		10
 #endif
 
 #ifdef SERVO16K
@@ -116,6 +117,7 @@ extern unsigned int cpu_khz;
 	#define DAQ_RATE	DAQ_16K_SAMPLE_SIZE
 	#define NET_SEND_WAIT		81920
 	#define CYCLE_TIME_ALRM		60
+	#define DAC_START_DELAY		40
 #endif
 #ifdef SERVO2K
 	#define CYCLE_PER_SECOND	2048
@@ -125,6 +127,7 @@ extern unsigned int cpu_khz;
 	#define DAQ_RATE	DAQ_2K_SAMPLE_SIZE
 	#define NET_SEND_WAIT		10240
 	#define CYCLE_TIME_ALRM		487
+	#define DAC_START_DELAY		468
 #endif
 
 #ifndef NO_DAQ
@@ -206,6 +209,21 @@ static double feCoeff32x[13] =
 
 double dHistory[96][40];
 double dDacHistory[96][40];
+
+#if 0
+#ifdef SERVO2K
+#define OVERSAMPLE_TIMES	32
+#define FE_OVERSAMPLE_COEFF	feCoeff32x
+#elif SERVO16K
+#define OVERSAMPLE_TIMES	4
+#define FE_OVERSAMPLE_COEFF	feCoeff4x
+#elif SERVO32K
+#define OVERSAMPLE_TIMES	2
+#define FE_OVERSAMPLE_COEFF	feCoeff2x
+#else
+#error Unsupported system rate when in oversampling mode: only 2K, 16K and 32K are supported
+#endif
+#endif
 
 #else
 
@@ -398,6 +416,14 @@ void *fe_start(void *arg)
   do{
 	usleep(1000000);
   }while(!pLocalEpics->epicsInput.burtRestore);
+  for (system = 0; system < NUM_SYSTEMS; system++)
+  {
+    for(ii=0;ii<END_OF_DAQ_BLOCK;ii++)
+    {
+	updateEpics(ii, dspPtr[system], pDsp[system],
+		    &dspCoeff[system], pCoeff[system]);
+    }
+  }
 
   // Need this FE dcuId to make connection to FB
   dcuId = pLocalEpics->epicsInput.dcuId;
@@ -526,8 +552,20 @@ void *fe_start(void *arg)
 	  } else packedData += 31;
 	  *packedData = 0x110000;
   }
-  for(jj=0;jj<cdsPciModules.dacCount;jj++)
-		status = gsaDacDma1(jj,cdsPciModules.dacType[jj]);
+
+  for(jj = 0; jj < cdsPciModules.dacCount; jj++) {
+	status = gsaDacDma1(jj, cdsPciModules.dacType[jj]);
+
+        pDacData = (unsigned int *) cdsPciModules.pci_dac[jj];
+
+ 	// Preload DAC values
+        for (ii = 0; ii < (OVERSAMPLE_TIMES * 16); ii++) {
+ 	    *pDacData = 0; // (unsigned int) 10000; // for testing with the scope
+	    pDacData ++;
+        }
+
+        gsaDacDma2(jj, cdsPciModules.dacType[jj]);
+  }
 
 #ifndef NO_SYNC
   if (run_on_timer) {
@@ -538,18 +576,37 @@ void *fe_start(void *arg)
    	unsigned int usec;
 	// Enable external event GPS time capture
         cdsPciModules.gps[SYMCOM_BC635_CONTROL/4] = 8;
-	while ((usec = getGpsUsec()) < 999978);// Wait until 22us before sec
+
+	// Sleep a second and a half
+	usleep(1500000);
+	
+	// Get the 1PPS time stamp
+        cycle_gps_event_time = getGpsEventTime(&cycle_gps_event_ns);
+        printf("Initial 1PPS time stamp is %d\n", cycle_gps_event_time);
+
+        usec = 1000000 * (cycle_gps_event_time - (unsigned int) cycle_gps_event_time);
+	if (usec > 500000) usec -= 1000000;
+	//pLocalEpics->epicsOutput.onePps = usec;
+
+	//while ((usec = getGpsUsec()) < 999978);// Wait until 22us before sec
+ 	printf("1PPS usec delay is %d\n", usec);
+	int delay = 10 + usec;
+	int wt = 1000000 - delay;
+        if (wt > 1000000) wt = 2000000 - wt;
+	printf("Waiting until usec = %d to start the ADCs\n", wt);
+	while ((usec = getGpsUsec()) < wt);
+
         printf("Running time %d us\n", usec);
     } else {
-    // Pause until this second ends
-    struct timespec next;
-    clock_gettime(CLOCK_REALTIME, &next);
-    printf("Start time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
-    next.tv_nsec = 0;
-    next.tv_sec += 1;
-    clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
-    clock_gettime(CLOCK_REALTIME, &next);
-    printf("Running time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
+        // Pause until this second ends
+        struct timespec next;
+        clock_gettime(CLOCK_REALTIME, &next);
+        printf("Start time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
+        next.tv_nsec = 0;
+        next.tv_sec += 1;
+        clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
+        clock_gettime(CLOCK_REALTIME, &next);
+        printf("Running time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
     }
 #ifndef NO_SYNC
   }
@@ -605,6 +662,16 @@ void *fe_start(void *arg)
 
 	  usleep(0);
 	}
+
+#ifdef  SERVO32K
+	if ((firstTime == 100) && (clock16K == (CYCLE_PER_SECOND - 3)))
+	{
+	    //printf("firstTime=%d clock16K = %d\n", firstTime, clock16K);
+
+	    gsaDacTrigger(cdsPciModules.dacCount);
+	    firstTime = 200;
+	}
+#endif
 	// Read CPU clock for timing info
         rdtscl(cpuClock[0]);
 
@@ -789,16 +856,16 @@ void *fe_start(void *arg)
 	{
 		if(onePps > ONE_PPS_THRESH) 
 		 {
-			firstTime += 100;
+			firstTime = 100;
 			onePpsHi = 0;
 		 }
 #ifdef NO_SYNC
-		firstTime += 100;
+		firstTime = 100;
 			onePpsHi = 0;
 #endif
 		/* Do not do 1PPS sync when running on timer */
 		if (run_on_timer) {
-			firstTime += 100;
+			firstTime = 100;
 			onePpsHi = 0;
 		}
 	}
@@ -926,6 +993,8 @@ void *fe_start(void *arg)
 #endif
 
 	// Write out data to DAC modules
+	if((firstTime >= 200))
+	{
 	for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	{
 	   // Check Dac output overflow and write to DMA buffer
@@ -951,7 +1020,7 @@ void *fe_start(void *arg)
 #ifdef OVERSAMPLE_DAC
 			  double dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
 		 	  dacOut[jj][ii] = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,3,&dDacHistory[ii+jj*16][0]);
-			  dacOut[jj][ii] *= OVERSAMPLE_TIMES;
+			   dacOut[jj][ii] *= OVERSAMPLE_TIMES;
 #endif
 			if(dacOut[jj][ii] > limit) 
 			{
@@ -978,6 +1047,7 @@ void *fe_start(void *arg)
 #endif
   	   // DMA out dac values
 	   gsaDacDma2(jj,cdsPciModules.dacType[jj]);
+	}
 	}
 
 	// Write Dio cards
@@ -1074,6 +1144,16 @@ void *fe_start(void *arg)
 
 	// Compute max time of one cycle.
 	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
+#ifndef SERVO32K
+	if ((firstTime == 100) && (clock16K == (CYCLE_PER_SECOND - 2)))
+	{
+	    //printf("firstTime=%d clock16K = %d\n", firstTime, clock16K);
+	    if((DAC_START_DELAY-cycleTime) > 0)
+	    	usleep((DAC_START_DELAY-cycleTime));
+	    gsaDacTrigger(cdsPciModules.dacCount);
+	    firstTime = 200;
+	}
+#endif
 	// Hold the max cycle time over the last 1 second
 	if(cycleTime > timeHold) timeHold = cycleTime;
 	// Hold the max cycle time since last diag reset
