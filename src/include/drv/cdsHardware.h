@@ -191,8 +191,8 @@ typedef struct GSA_DAC_REG{
 #define GSAO_ENABLE_CLK         0x20
 #define GSAO_SFT_TRIG           0x80
 #define GSAO_FIFO_16            0x1
-#define GSAO_FIFO_32            0xA
 #define GSAO_FIFO_512           6
+#define GSAO_FIFO_1024          7
 
 #define VMIC_VID		0x114a
 #define VMIC_TID		0x5565
