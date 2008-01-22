@@ -26,7 +26,7 @@ sub printHeaderStruct {
                 			$::location = "geo";
         			} elsif ($::site =~ /^H/) {
                 			$::location = "lho";
-        			} elsif ($site =~ /^L/) {
+        			} elsif ($::site =~ /^L/) {
                 			$::location = "llo";
         			} elsif ($::site =~ /^C/) {
                 			$::location = "caltech";
