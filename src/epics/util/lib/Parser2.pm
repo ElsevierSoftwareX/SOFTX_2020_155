@@ -707,6 +707,9 @@ if (1) {
    foreach (@{$node->{NEXT}}) {
      if ($_->{NAME} eq "Block" && ${$_->{FIELDS}}{BlockType} eq "SubSystem") {
 	print "Top-level subsystem ", ${$_->{FIELDS}}{Name}, "\n";
+	if (${$_->{FIELDS}}{Tag} eq "top_names") {
+		push @::top_names, ${$_->{FIELDS}}{Name};
+	}
 	# Flatten all second-level subsystems
 	my $system = $_->{NEXT}[0];
 	foreach $ssub (@{$system->{NEXT}}) {
@@ -717,6 +720,13 @@ if (1) {
 	  }
 	}
      }
+   }
+   if (@::top_names) {
+   	print ::EPICS "top_names";
+   	foreach $item (@::top_names) {
+		print ::EPICS " ", $item ;
+	}
+	print ::EPICS "\n";
    }
 }
 

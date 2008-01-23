@@ -118,7 +118,7 @@ text {
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-TIME_STRING"
+		chan="SITE_NAME:CONTROL_SYSTEM_SYSTEM_NAME-TIME_STRING"
 		clr=2
 		bclr=54
 	}
@@ -135,7 +135,7 @@ text {
 	"basic attribute" {
 		clr=2
 	}
-	textix="SITE_NAMESYSTEM_NAME_FILTERNAME"
+	textix="SITE_NAMEFILTERNAME"
 	align="horiz. centered"
 }
 composite {
@@ -298,7 +298,7 @@ text {
 		height=24
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_INMON"
+		chan="SITE_NAME:FILTERNAME_INMON"
 		clr=50
 		bclr=42
 	}
@@ -314,7 +314,7 @@ text {
 		height=20
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW1"
+		chan="SITE_NAME:FILTERNAME_SW1"
 		clr=14
 		bclr=4
 	}
@@ -329,7 +329,7 @@ byte {
 		height=7
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW1R"
+		chan="SITE_NAME:FILTERNAME_SW1R"
 		clr=60
 		bclr=20
 	}
@@ -344,7 +344,7 @@ byte {
 		height=20
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW1"
+		chan="SITE_NAME:FILTERNAME_SW1"
 		clr=14
 		bclr=4
 	}
@@ -359,7 +359,7 @@ byte {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_OFFSET"
+		chan="SITE_NAME:FILTERNAME_OFFSET"
 		clr=14
 		bclr=3
 	}
@@ -374,7 +374,7 @@ byte {
 		height=7
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW1R"
+		chan="SITE_NAME:FILTERNAME_SW1R"
 		clr=60
 		bclr=20
 	}
@@ -389,7 +389,7 @@ byte {
 		height=25
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_RSET"
+		chan="SITE_NAME:FILTERNAME_RSET"
 		clr=14
 		bclr=4
 	}
@@ -404,7 +404,7 @@ byte {
 		height=25
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_RSET"
+		chan="SITE_NAME:FILTERNAME_RSET"
 		clr=14
 		bclr=4
 	}
@@ -437,7 +437,7 @@ polygon {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_GAIN"
+		chan="SITE_NAME:FILTERNAME_GAIN"
 		clr=14
 		bclr=3
 	}
@@ -452,7 +452,7 @@ polygon {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_LIMIT"
+		chan="SITE_NAME:FILTERNAME_LIMIT"
 		clr=14
 		bclr=3
 	}
@@ -467,7 +467,7 @@ byte {
 		height=7
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2R"
+		chan="SITE_NAME:FILTERNAME_SW2R"
 		clr=60
 		bclr=20
 	}
@@ -482,7 +482,7 @@ byte {
 		height=20
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2"
+		chan="SITE_NAME:FILTERNAME_SW2"
 		clr=14
 		bclr=4
 	}
@@ -497,7 +497,7 @@ byte {
 		height=11
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW1R"
+		chan="SITE_NAME:FILTERNAME_SW1R"
 		clr=60
 		bclr=20
 	}
@@ -512,7 +512,7 @@ byte {
 		height=11
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2R"
+		chan="SITE_NAME:FILTERNAME_SW2R"
 		clr=60
 		bclr=20
 	}
@@ -527,7 +527,7 @@ byte {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW1"
+		chan="SITE_NAME:FILTERNAME_SW1"
 		clr=14
 		bclr=4
 	}
@@ -542,7 +542,7 @@ byte {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2"
+		chan="SITE_NAME:FILTERNAME_SW2"
 		clr=14
 		bclr=4
 	}
@@ -557,7 +557,7 @@ byte {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2"
+		chan="SITE_NAME:FILTERNAME_SW2"
 		clr=14
 		bclr=4
 	}
@@ -572,7 +572,7 @@ byte {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2"
+		chan="SITE_NAME:FILTERNAME_SW2"
 		clr=14
 		bclr=4
 	}
@@ -587,7 +587,7 @@ byte {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2"
+		chan="SITE_NAME:FILTERNAME_SW2"
 		clr=14
 		bclr=4
 	}
@@ -602,7 +602,7 @@ byte {
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_Name05"
+		chan="SITE_NAME:FILTERNAME_Name05"
 		clr=14
 		bclr=4
 	}
@@ -619,7 +619,7 @@ byte {
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_Name06"
+		chan="SITE_NAME:FILTERNAME_Name06"
 		clr=14
 		bclr=4
 	}
@@ -636,7 +636,7 @@ byte {
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_Name07"
+		chan="SITE_NAME:FILTERNAME_Name07"
 		clr=14
 		bclr=4
 	}
@@ -653,7 +653,7 @@ byte {
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_Name08"
+		chan="SITE_NAME:FILTERNAME_Name08"
 		clr=14
 		bclr=4
 	}
@@ -670,7 +670,7 @@ byte {
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_Name09"
+		chan="SITE_NAME:FILTERNAME_Name09"
 		clr=14
 		bclr=4
 	}
@@ -687,7 +687,7 @@ byte {
 		height=11
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW1R"
+		chan="SITE_NAME:FILTERNAME_SW1R"
 		clr=60
 		bclr=20
 	}
@@ -702,7 +702,7 @@ byte {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW1"
+		chan="SITE_NAME:FILTERNAME_SW1"
 		clr=14
 		bclr=4
 	}
@@ -717,7 +717,7 @@ byte {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW1"
+		chan="SITE_NAME:FILTERNAME_SW1"
 		clr=14
 		bclr=4
 	}
@@ -732,7 +732,7 @@ byte {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW1"
+		chan="SITE_NAME:FILTERNAME_SW1"
 		clr=14
 		bclr=4
 	}
@@ -747,7 +747,7 @@ byte {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW1"
+		chan="SITE_NAME:FILTERNAME_SW1"
 		clr=14
 		bclr=4
 	}
@@ -762,7 +762,7 @@ byte {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW1"
+		chan="SITE_NAME:FILTERNAME_SW1"
 		clr=14
 		bclr=4
 	}
@@ -777,7 +777,7 @@ byte {
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_Name00"
+		chan="SITE_NAME:FILTERNAME_Name00"
 		clr=14
 		bclr=4
 	}
@@ -794,7 +794,7 @@ byte {
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_Name01"
+		chan="SITE_NAME:FILTERNAME_Name01"
 		clr=14
 		bclr=4
 	}
@@ -811,7 +811,7 @@ byte {
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_Name02"
+		chan="SITE_NAME:FILTERNAME_Name02"
 		clr=14
 		bclr=4
 	}
@@ -828,7 +828,7 @@ byte {
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_Name03"
+		chan="SITE_NAME:FILTERNAME_Name03"
 		clr=14
 		bclr=4
 	}
@@ -845,7 +845,7 @@ byte {
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_Name04"
+		chan="SITE_NAME:FILTERNAME_Name04"
 		clr=14
 		bclr=4
 	}
@@ -878,7 +878,7 @@ polyline {
 		height=24
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_OUT16"
+		chan="SITE_NAME:FILTERNAME_OUT16"
 		clr=50
 		bclr=42
 	}
@@ -894,7 +894,7 @@ polyline {
 		height=24
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_OUTPUT"
+		chan="SITE_NAME:FILTERNAME_OUTPUT"
 		clr=50
 		bclr=42
 	}
@@ -910,7 +910,7 @@ polyline {
 		height=24
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_OUTMON"
+		chan="SITE_NAME:FILTERNAME_OUTMON"
 		clr=50
 		bclr=42
 	}
@@ -926,7 +926,7 @@ polyline {
 		height=20
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2"
+		chan="SITE_NAME:FILTERNAME_SW2"
 		clr=14
 		bclr=4
 	}
@@ -941,7 +941,7 @@ byte {
 		height=7
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2R"
+		chan="SITE_NAME:FILTERNAME_SW2R"
 		clr=60
 		bclr=20
 	}
@@ -956,7 +956,7 @@ byte {
 		height=24
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_EXCMON"
+		chan="SITE_NAME:FILTERNAME_EXCMON"
 		clr=50
 		bclr=42
 	}
@@ -1071,7 +1071,7 @@ polygon {
 		height=20
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2"
+		chan="SITE_NAME:FILTERNAME_SW2"
 		clr=14
 		bclr=4
 	}
@@ -1086,7 +1086,7 @@ byte {
 		height=7
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2R"
+		chan="SITE_NAME:FILTERNAME_SW2R"
 		clr=60
 		bclr=20
 	}
@@ -1101,7 +1101,7 @@ byte {
 		height=7
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2R"
+		chan="SITE_NAME:FILTERNAME_SW2R"
 		clr=60
 		bclr=20
 	}
@@ -1116,7 +1116,7 @@ byte {
 		height=20
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2"
+		chan="SITE_NAME:FILTERNAME_SW2"
 		clr=14
 		bclr=4
 	}
@@ -1311,7 +1311,7 @@ polygon {
 	"dynamic attribute" {
 		vis="calc"
 		calc="A&4096"
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_SW2R"
+		chan="SITE_NAME:FILTERNAME_SW2R"
 	}
 	points {
 		(556,95)
@@ -1340,7 +1340,7 @@ text {
 		height=25
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-FILTERNAME_TRAMP"
+		chan="SITE_NAME:FILTERNAME_TRAMP"
 		clr=14
 		bclr=3
 	}
