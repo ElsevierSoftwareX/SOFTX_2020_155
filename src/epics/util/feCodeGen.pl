@@ -129,6 +129,7 @@ sub debug {
 
 sub init_vars {
 # Global variables set by parser
+@top_names; 	# array of top-level subsytem names marked with "top_names" tag
 $systemName = "";	# model name
 $adcCnt = 0;	# Total A/D converter boards
 $adcType[0] = 0;	# A/D board types
@@ -2357,10 +2358,39 @@ if ($not_found) {
 mkpath $epicsScreensDir, 0, 0755;
 my $usite = uc $site;
 my $sysname = uc($skeleton);
-$sed_arg =  "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;s/GDS_NODE_ID/" . ($gdsNodeId - 1) . "/g;";
+$sed_arg =  "s/SITE_NAME/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;s/GDS_NODE_ID/" . ($gdsNodeId - 1) . "/g;";
 system("cat GDS_TP.adl | sed '$sed_arg' > $epicsScreensDir/$usite$sysname" . "_GDS_TP.adl");
 my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
+
+# Determine whether passed name need to become a top name
+# i.e. whether the system/subsystem parts need to excluded 
+sub is_top_name {
+   ($_) =  @_;
+   @d = split(/_/);
+   $d = shift @d;
+   #print "$d @top_names\n";
+   foreach $item (@top_names) {
+        #print  "   $item $d\n";
+        if ($item eq $d) { return 1; }
+   }
+   return 0;
+};
+
+# Transform record name for exculsion of sys/subsystem parts
+# This function replaces first underscode with the hyphen
+sub top_name_transform {
+   ($name) =  @_;
+   $name =~ s/_/-/;
+   return $name;
+};
+
+# Get the system name (the part before the hyphen)
+sub system_name_part {
+   ($name) =  @_;
+   $name =~ s/([^_]+)-\w+/$1/;
+   return $name;
+}
 
 for(0 .. $partCnt-1) {
 	if ($_ >= $subSysPartStop[$cur_subsys_num]) {
@@ -2378,17 +2408,34 @@ for(0 .. $partCnt-1) {
 		if ($partSubName[$_] ne "") {
 			$basename = $partSubName[$_] . "_" . $basename;
 		}
-		my $basename1 = $usite . ":" .$sysname ."-" . $basename . "_";
-		#print "Matrix $basename $incnt X $outcnt\n";
-		system("./mkmatrix.pl --cols=$incnt --rows=$outcnt --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
+		if (is_top_name($basename)) {
+		  my $tn = top_name_transform($basename);
+		  my $basename1 = $usite . ":" . $tn . "_";
+		  system("./mkmatrix.pl --cols=$incnt --rows=$outcnt --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
+		} else {
+		  my $basename1 = $usite . ":" .$sysname ."-" . $basename . "_";
+		  #print "Matrix $basename $incnt X $outcnt\n";
+		  system("./mkmatrix.pl --cols=$incnt --rows=$outcnt --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
+		}
 	}
 	if ($partType[$_] =~ /^Filt/) {
 		my $filt_name = $partName[$_];
 		if ($partSubName[$_] ne "") {
 			$filt_name = $partSubName[$_] . "_" . $filt_name;
 		}
-		my $sargs = $sed_arg . "s/FILTERNAME/$filt_name/g";
-		system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$usite$sysname" . "_" . $filt_name . ".adl");
+		my $sys_name = uc($skeleton);
+		my $sargs;
+		if (is_top_name($filt_name)) {
+			my $tfn = top_name_transform($filt_name);
+			my $nsys = system_name_part($tfn);
+			$sargs = "s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;";
+			$sargs .= "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . $nsys . "/g;";
+			$sargs .= "s/FILTERNAME/$tfn/g";
+			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$usite" . $filt_name . ".adl");
+		} else {
+			$sargs = $sed_arg . "s/FILTERNAME/$sys_name-$filt_name/g";
+			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$usite$sysname" . "_" . $filt_name . ".adl");
+		}
 	}
 	if ($partInputType[$_][0] eq "Adc") {
 		my $part_name = $partName[$_];

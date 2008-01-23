@@ -49,6 +49,28 @@ $names2 = "%%static  fmSubSysMap  fmmap0 [MAX_MODULES] = { \n%%";
 
 $do_epics_input = 0;
 
+# Determine whether passed name need to become a top name
+# i.e. whether the system/subsystem parts need to excluded 
+sub is_top_name {
+   ($_) =  @_;
+   @d = split(/_/);
+   $d = shift @d;
+   #print "$d @top_names\n";
+   foreach $item (@top_names) {
+	#print  "   $item $d\n";
+	if ($item eq $d) { return 1; }
+   }
+   return 0;
+};
+
+# Transform record name for exculsion of sys/subsystem parts
+# This function replaces first underscode with the hyphen
+sub top_name_transform {
+   ($name) =  @_;
+   $name =~ s/_/-/;
+   return $name;
+};
+
 while (<IN>) {
     s/^\s//g;
     s/\s$//g;
@@ -61,6 +83,10 @@ while (<IN>) {
 	@systems = split(/\s+/, $_);	
 	shift @systems;
 	print "systems are @systems\n";
+    } elsif (/^top_names/) {
+	@top_names = split(/\s+/, $_);	
+	shift @top_names;
+	print "top_names are @top_names\n";
     } elsif (substr($_,0,10) eq "gds_config") {
 	$gds_rmid = 0;
 	$site = "";
@@ -92,7 +118,14 @@ while (<IN>) {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
 	$vdecl .= "$v_type evar_$v_name;\n";
-	$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
+        my $top_name = is_top_name($v_name);
+   	my $tv_name;
+        if ($top_name) {
+	  $tv_name = top_name_transform($v_name);
+	  $vdecl .= "assign evar_$v_name to \"{ifo}:${tv_name}\";\n";
+ 	} else {
+	  $vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
+	}
 
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
 	$vinit .= "pvPut(evar_$v_name);\n";
@@ -101,7 +134,11 @@ while (<IN>) {
 	$vupdate .= "pvGet(evar_$v_name);\n";
 	$vupdate .= "rfm_assign(pEpics->${v_var}, evar_$v_name);\n";
 
-	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
+        if ($top_name) {
+		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}\")\n";
+	} else {
+		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
+	}
 	$vardb .= "{\n";
 #	$vardb .= "    field(PREC,\"3\")\n";
 	$vardb .= "    $v_efield1\n";
@@ -114,8 +151,16 @@ while (<IN>) {
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
 	$vdecl .= "$v_type evar_${v_name}_d;\n";
 	$vdecl .= "$v_type evar_${v_name}_r;\n";
-	$vdecl .= "assign evar_${v_name}_d to \"{ifo}:{sys}-{subsys}${v_name}_D\";\n";
-	$vdecl .= "assign evar_${v_name}_r to \"{ifo}:{sys}-{subsys}${v_name}_R\";\n";
+        my $top_name = is_top_name($v_name);
+   	my $tv_name;
+        if ($top_name) {
+	  	$tv_name = top_name_transform($v_name);
+		$vdecl .= "assign evar_${v_name}_d to \"{ifo}:${tv_name}_D\";\n";
+		$vdecl .= "assign evar_${v_name}_r to \"{ifo}:${tv_name}_R\";\n";
+	} else {
+		$vdecl .= "assign evar_${v_name}_d to \"{ifo}:{sys}-{subsys}${v_name}_D\";\n";
+		$vdecl .= "assign evar_${v_name}_r to \"{ifo}:{sys}-{subsys}${v_name}_R\";\n";
+	}
 
 	$vinit .= "%% evar_${v_name}_d  = $v_init;\n";
 	$vinit .= "%% evar_${v_name}_r  = $v_init;\n";
@@ -136,7 +181,11 @@ while (<IN>) {
 	$vupdate .= "pEpics->${v_var}[1][0] = sin(evar_${v_name}_r)/sin(evar_${v_name}_d);\n";
 	$vupdate .= "pEpics->${v_var}[1][1] = cos(evar_${v_name}_r)/sin(evar_${v_name}_d);\n";
 
-	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}_D\")\n";
+	if ($top_name) {
+		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}_D\")\n";
+	} eles {
+		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}_D\")\n";
+	}
 	$vardb .= "{\n";
 #	$vardb .= "    field(PREC,\"3\")\n";
 	$vardb .= "    $v_efield1\n";
@@ -144,7 +193,11 @@ while (<IN>) {
 	$vardb .= "    $v_efield3\n";
 	$vardb .= "    $v_efield4\n";
 	$vardb .= "}\n";
-	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}_R\")\n";
+	if ($top_name) {
+		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}_R\")\n";
+	} else {
+		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}_R\")\n";
+	}
 	$vardb .= "{\n";
 #	$vardb .= "    field(PREC,\"3\")\n";
 	$vardb .= "    $v_efield1\n";
@@ -156,7 +209,14 @@ while (<IN>) {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
 	$vdecl .= "$v_type evar_$v_name;\n";
-	$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
+        my $top_name = is_top_name($v_name);
+   	my $tv_name;
+        if ($top_name) {
+	  	$tv_name = top_name_transform($v_name);
+		$vdecl .= "assign evar_$v_name to \"{ifo}:${tv_name}\";\n";
+	} else {
+		$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
+	}
 
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
 	$vinit .= "pvPut(evar_$v_name);\n";
@@ -167,7 +227,11 @@ while (<IN>) {
 	$vupdate .= "rfm_assign(pEpics->${v_var}[0], sin(evar_$v_name));\n";
 	$vupdate .= "rfm_assign(pEpics->${v_var}[1], cos(evar_$v_name));\n";
 
-	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
+	if ($top_name) {
+		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}\")\n";
+	} else {
+		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
+	}
 	$vardb .= "{\n";
 #	$vardb .= "    field(PREC,\"3\")\n";
 	$vardb .= "    $v_efield1\n";
@@ -179,7 +243,14 @@ while (<IN>) {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
 	$vdecl .= "$v_type evar_$v_name;\n";
-	$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
+        my $top_name = is_top_name($v_name);
+   	my $tv_name;
+        if ($top_name) {
+	  	$tv_name = top_name_transform($v_name);
+		$vdecl .= "assign evar_$v_name to \"{ifo}:${tv_name}\";\n";
+	} else {
+		$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
+	}
 
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
 	$vinit .= "pvPut(evar_$v_name);\n";
@@ -192,7 +263,11 @@ while (<IN>) {
 	$vupdate .= "%% evar_$v_name  = $v_init;\n";
 	$vupdate .= "pvPut(evar_$v_name);\n";
 
-	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
+        if ($top_name) {
+		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}\")\n";
+	} else {
+		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
+	}
 	$vardb .= "{\n";
 #	$vardb .= "    field(PREC,\"3\")\n";
 	$vardb .= "    $v_efield1\n";
@@ -204,7 +279,14 @@ while (<IN>) {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
 	$vdecl .= "$v_type evar_$v_name;\n";
-	$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
+        my $top_name = is_top_name($v_name);
+   	my $tv_name;
+        if ($top_name) {
+	  	$tv_name = top_name_transform($v_name);
+		$vdecl .= "assign evar_$v_name to \"{ifo}:${tv_name}\";\n";
+	} else {
+		$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
+	}
 
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
 	$vinit .= "pvPut(evar_$v_name);\n";
@@ -217,7 +299,11 @@ while (<IN>) {
 	}
 	$vupdate .= "pvPut(evar_$v_name);\n";
 
-	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
+	if ($top_name) {
+		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}\")\n";
+	} else {
+		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
+	}
 	$vardb .= "{\n";
 	if ($v_type eq "float") {
 		$vardb .= "    field(PREC,\"3\")\n";
@@ -233,7 +319,15 @@ while (<IN>) {
 	$temp = $v_name;
 	$temp =~ s/\-/\_/g;
 	$vdecl .= "$v_type evar_$temp;\n";
-	$vdecl .= "assign evar_$temp to \"{ifo}:{sys}-${temp}\";\n";
+
+        my $top_name = is_top_name($temp);
+   	my $tv_name;
+        if ($top_name) {
+	  	$tv_name = top_name_transform($temp);
+		$vdecl .= "assign evar_$temp to \"{ifo}:${tv_name}\";\n";
+	} else {
+		$vdecl .= "assign evar_$temp to \"{ifo}:{sys}-${temp}\";\n";
+	}
 #	$vdecl .= "$v_type evar_$temp\_RI;\n";
 #	$vdecl .= "assign evar_$temp\_RI to \"{ifo}:${v_name}\";\n";
 
@@ -250,7 +344,11 @@ while (<IN>) {
 	$vupdate .= "%%\tezcaPut(\"$site:$v_name\", ezcaShort,1,s);\n";
 	$vupdate .= "}\n";
 
-	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${temp}\")\n";
+	if ($top_name) {
+		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}\")\n";
+	} else {
+		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${temp}\")\n";
+	}
 	$vardb .= "{\n";
 	$vardb .= "}\n";
     } elsif (substr($_,0,11) eq "EZ_CA_WRITE") {
@@ -263,11 +361,23 @@ while (<IN>) {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
 
-	$vardb .= "grecord(${ve_type},\"%IFO%:DAQ-%SYS%_%SUBSYS%${v_name}\")\n";
+	# Do not patch in the hyphen, it already there
+        if (is_top_name($v_name)) {
+		$vardb .= "grecord(${ve_type},\"%IFO%:DAQ-${v_name}\")\n";
+	} else {
+		$vardb .= "grecord(${ve_type},\"%IFO%:DAQ-%SYS%_%SUBSYS%${v_name}\")\n";
+	}
     } elsif (substr($_,0,5) eq "DUMMY") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
-	$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
+        my $top_name = is_top_name($v_name);
+   	my $tv_name;
+        if ($top_name) {
+	  	$tv_name = top_name_transform($v_name);
+		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}\")\n";
+	} else {
+		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
+	}
 
     } elsif (substr($_,0,6) eq "MATRIX") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
@@ -291,13 +401,27 @@ while (<IN>) {
 	$mupdate .= "%%     rfm_assign(pEpics->${m_var}[ii][jj], matrix${m_name}[ii * ${y} + jj]);\n";
 	$mupdate .= "%%    }\n";
 
+        my $top_name = is_top_name($m_name);
+   	my $tv_name;
+        if ($top_name) {
+	  	$tv_name = top_name_transform($m_name);
+	}
+
 	for ($i = 1; $i < $x+1; $i++) {
 	    for ($j = 1; $j < $y+1; $j++) {
-		$mdecl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x\"", $i, $j);
+        	if ($top_name) {
+			$mdecl .= sprintf("\"{ifo}:${tv_name}%x%x\"", $i, $j);
+		} else {
+			$mdecl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x\"", $i, $j);
+		}
 		if ($i != ($x) || $j != ($y)) {
 		    $mdecl .= ", ";
 		}
-		$matdb .= "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%${m_name}" . sprintf("%x%x\")\n", $i, $j);
+        	if ($top_name) {
+			$matdb .= "grecord(ai,\"%IFO%:${tv_name}" . sprintf("%x%x\")\n", $i, $j);
+		} else {
+			$matdb .= "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%${m_name}" . sprintf("%x%x\")\n", $i, $j);
+		}
 		$matdb .= "{\n";
 		$matdb .= "    field(PREC,\"3\")\n";
 		$matdb .= "}\n";
@@ -316,7 +440,13 @@ while (<IN>) {
 		$names1 .= " ,";
 		$names2 .= " ,";
 	    }
-	    $names1 .= '"{ifo}:{sys}-{subsys}' . $_ . '_%PAR%" ';
+            my $top_name = is_top_name($_);
+            if ($top_name) {
+                my $tv_name = top_name_transform($_);
+	    	$names1 .= '"{ifo}:' . $tv_name . '_%PAR%" ';
+            } else {
+	    	$names1 .= '"{ifo}:{sys}-{subsys}' . $_ . '_%PAR%" ';
+ 	    }
 #	    $names2 .= '{"'. $_ . '", FLT_' . $_ . ' } ';
 	    $names2 .= '{"'. $_ . '", ' . $cnt . ' } ';
 	    if ($cnt % 3 == 2) {
@@ -393,15 +523,29 @@ foreach $i ( @names ) {
     close IN;
     open(IN,"<../util/skeleton.db") || die "cannot open skeleton.db file";
 
+    my $top_name = is_top_name($i);
+    my $tv_name;
+    if ($top_name) {
+	 $tv_name = top_name_transform($i);
+    }
     while (<IN>) { 
-	s/%FILTER%/$i/g;
+        if ($top_name) {
+		s/%FILTER%/$tv_name/g;
+	} else {
+		s/%FILTER%/%SYS%-%SUBSYS%$i/g;
+	}
 	if ($hepi) { s/%PREC1%/0/g; }
 	else { s/%PREC1%/3/g; }
 	print;
     }
     if ($do_epics_input) {
-	print "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%" . $i . "_INPUT\")\n";
-	print "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%"  . $i . "_EXC\")\n";
+        if ($top_name) {
+		print "grecord(ai,\"%IFO%:" . $tv_name . "_INPUT\")\n";
+		print "grecord(ai,\"%IFO%:"  . $tv_name . "_EXC\")\n";
+	} else {
+		print "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%" . $i . "_INPUT\")\n";
+		print "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%"  . $i . "_EXC\")\n";
+	}
     }
 }
     
