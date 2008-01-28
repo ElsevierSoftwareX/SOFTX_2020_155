@@ -19,8 +19,7 @@ EPICS_HOST_ARCH=linux-x86
 SRC += src/drv/sync.c
 
 # Do not delete these intermediate files
-.SECONDARY: build/$(TARGET)/%.i
-.SECONDARY: build/$(TARGET)/%.st
+.SECONDARY: build/$(TARGET)/*.i
 
 # Preprocessor is used on .st file to get .i which is later fed to SNC
 PREPROCESS = /usr/bin/gcc -x c -E -P
@@ -190,6 +189,7 @@ build/$(TARGET)/%.i: src/epics/seq/quad/%.st
 
 # Preprocess generated sequencer file
 # Preprocess generated sequencer file
+.PRECIOUS: build/$(TARGET)/%.st
 build/$(TARGET)/%.i: build/$(TARGET)/%.st
 	$(PREPROCESS) $(CFLAGS) $< > $@
 
