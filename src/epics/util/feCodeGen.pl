@@ -1504,8 +1504,15 @@ print EPICS "systems \U$systemName\-\n";
 if ($plantName ne $systemName) {
 	print EPICS "plant \U$plantName\n";
 }
-$gdsXstart = ($dcuId - 5) * 1250;
-$gdsTstart = $gdsXstart + 10000;
+#$gdsXstart = ($dcuId - 5) * 1250;
+#$gdsTstart = $gdsXstart + 10000;
+if($rate == 480) {
+  $gdsXstart = 20001;
+  $gdsTstart = 30001;
+} else {
+  $gdsXstart = 1;
+  $gdsTstart = 10001;
+}
 print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site " . get_freq() . " $dcuId $ifoid\n";
 print EPICS "\n\n";
 

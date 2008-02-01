@@ -484,12 +484,17 @@ void *fe_start(void *arg)
 
 #ifndef NO_DAQ
   /* Set data range limits for daqLib routine */
-  daq.filtExMin = (dcuId-5) * GDS_TP_MAX_FE;
+#ifdef SERVO2K
+  daq.filtExMin = 20001;
+  daq.filtTpMin = 30001;
+#else
+  daq.filtExMin = 1;
+  daq.filtTpMin = 10001;
+#endif
   daq.filtExMax = daq.filtExMin + MAX_MODULES;
   daq.filtExSize = MAX_MODULES;
   daq.xExMin = -1;
   daq.xExMax = -1;
-  daq.filtTpMin = daq.filtExMin + 10000;
   daq.filtTpMax = daq.filtTpMin + MAX_MODULES * 3;
   daq.filtTpSize = MAX_MODULES * 3;
   daq.xTpMin = daq.filtTpMax;
@@ -505,7 +510,7 @@ void *fe_start(void *arg)
   pLocalEpics->epicsOutput.diags[1] = 0;
   pLocalEpics->epicsOutput.diags[2] = 0;
 
-#ifdef OMC_CODE
+#if defined(OMC_CODE) && !defined(COMPAT_INITIAL_LIGO)
   if (cdsPciModules.pci_rfm[0] != 0) {
 	lscRfmPtr = (float *)(cdsPciModules.pci_rfm[0] + 0x3000);
   } else {
@@ -986,7 +991,7 @@ void *fe_start(void *arg)
         rdtscl(cpuClock[5]);
   	// pLocalEpics->epicsOutput.diags[1]  = readDio(&cdsPciModules,0);
 
-#ifdef OMC_CODE
+#if defined(OMC_CODE) && !defined(COMPAT_INITIAL_LIGO)
 	if (lscRfmPtr != 0) {
 		*lscRfmPtr = dspPtr[0]->data[LSC_DRIVE].output;
 	}
