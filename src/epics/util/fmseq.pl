@@ -571,7 +571,14 @@ if ($gds_specified) {
 	;
     } else {
       foreach $i ( @names ) {
-	print "[$site:${systm}${i}_EXC]\n";
+    	my $top_name = is_top_name($i);
+    	my $tv_name;
+    	if ($top_name) {
+	 $tv_name = top_name_transform($i);
+	 print "[$site:${tv_name}_EXC]\n";
+	} else {
+	 print "[$site:${systm}${i}_EXC]\n";
+	}
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
 	print "dcuid = $gds_exc_dcu_id\n";
@@ -589,7 +596,14 @@ if ($gds_specified) {
 	;
     } else {
       foreach $i ( @names ) {
-	print "[$site:${systm}${i}_IN1]\n";
+    	my $top_name = is_top_name($i);
+    	my $tv_name;
+    	if ($top_name) {
+	 $tv_name = top_name_transform($i);
+	 print "[$site:${tv_name}_IN1]\n";
+	} else {
+	 print "[$site:${systm}${i}_IN1]\n";
+	}
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
 	print "dcuid = $gds_tp_dcu_id\n";
@@ -597,7 +611,11 @@ if ($gds_specified) {
 	print "datatype = 4\n";	
 	print "datarate = $gds_datarate\n\n";
 	$tpnum++;
-	print "[$site:${systm}${i}_IN2]\n";
+    	if ($top_name) {
+	 print "[$site:${tv_name}_IN2]\n";
+	} else {
+	 print "[$site:${systm}${i}_IN2]\n";
+	}
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
 	print "dcuid = $gds_tp_dcu_id\n";
@@ -605,7 +623,11 @@ if ($gds_specified) {
 	print "datatype = 4\n";	
 	print "datarate = $gds_datarate\n\n";
 	$tpnum++;
-	print "[$site:${systm}${i}_OUT]\n";
+    	if ($top_name) {
+	 print "[$site:${tv_name}_OUT]\n";
+	} else {
+	 print "[$site:${systm}${i}_OUT]\n";
+ 	}
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
 	print "dcuid = $gds_tp_dcu_id\n";
