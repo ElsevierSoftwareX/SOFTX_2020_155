@@ -54,18 +54,18 @@ install-% :: src/epics/simLink/%.mdl
 	tail -n +4 /cvs/cds/$$site/chans/filter_archive/$$lower_ifo/$$system/$${ifo}$${upper_system}_$${cur_date}.txt | grep -v '^# MODULES' >> /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt;\
 	else /bin/cp -p build/$${system}epics/config/$${ifo}$${upper_system}.txt  /cvs/cds/$$site/chans/$${ifo}$${upper_system}.txt;\
 	fi;\
-	echo Installing /cvs/cds/$$site/target/$${system}epics;\
+	echo Installing /cvs/cds/$$site/target/$${lower_ifo}$${system}epics;\
 	/bin/mkdir -p /cvs/cds/$$site/target_archive;\
-	if test -e /cvs/cds/$$site/target/$${system}epics; then /bin/mv -f /cvs/cds/$$site/target/$${system}epics /cvs/cds/$$site/target_archive/$${system}epics_$$cur_date || exit 2; fi;\
+	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}epics; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}epics /cvs/cds/$$site/target_archive/$${lower_ifo}$${system}epics_$$cur_date || exit 2; fi;\
 	/bin/mkdir -p /cvs/cds/$$site/target;\
-	/bin/cp -pr target/$${system}epics /cvs/cds/$$site/target;\
-	if test -e /cvs/cds/$$site/target/$${system}epics/db/*/autoBurt.req; then /bin/mv -f /cvs/cds/$$site/target/$${system}epics/db/*/autoBurt.req /cvs/cds/$$site/target/$${system}epics || exit 3; fi;\
-	echo Installing /cvs/cds/$$site/target/$${system};\
-	/bin/mkdir -p /cvs/cds/$$site/target/$${system};\
-	if test -e /cvs/cds/$$site/target/$${system}/$${system}fe.rtl; then /bin/mv -f /cvs/cds/$$site/target/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system}/$${system}fe_$${cur_date}.rtl || exit 4; fi;\
-	/bin/cp -p src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system};\
-	echo 'sudo ' /cvs/cds/$$site/target/$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${system}/startup.cmd;\
-	/bin/chmod +x /cvs/cds/$$site/target/$${system}/startup.cmd;\
+	/bin/cp -pr target/$${system}epics /cvs/cds/$$site/target/$${lower_ifo}$${system}epics;\
+	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}epics/db/*/autoBurt.req; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}epics/db/*/autoBurt.req /cvs/cds/$$site/target/$${lower_ifo}$${system}epics || exit 3; fi;\
+	echo Installing /cvs/cds/$$site/target/$${lower_ifo}$${system};\
+	/bin/mkdir -p /cvs/cds/$$site/target/$${lower_ifo}$${system};\
+	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe_$${cur_date}.rtl || exit 4; fi;\
+	/bin/cp -p src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system};\
+	echo 'sudo ' /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${lower_ifo}$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd;\
+	/bin/chmod +x /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd;\
 	echo Installing start and stop scripts;\
 	/bin/mkdir -p /cvs/cds/$$site/scripts;\
 	echo '#!/bin/bash' > /cvs/cds/$$site/scripts/start$${system};\
@@ -73,18 +73,18 @@ install-% :: src/epics/simLink/%.mdl
 	echo '#!/bin/bash' > /cvs/cds/$$site/scripts/kill$${system};\
 	/bin/chmod +x /cvs/cds/$$site/scripts/kill$${system};\
 	echo 'cur_date=`date +%y%m%d_%H%M%S`' >> /cvs/cds/$$site/scripts/start$${system};\
-	echo 'burtrb -f /cvs/cds/'$${site}'/target/'$${system}'epics/autoBurt.req -o /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_burt_$${cur_date}.log -v' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'burtrb -f /cvs/cds/'$${site}'/target/'$${lower_ifo}$${system}'epics/autoBurt.req -o /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_burt_$${cur_date}.log -v' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo /cvs/cds/$$site/scripts/kill$${system} >> /cvs/cds/$$site/scripts/start$${system};\
 	echo sleep 5 >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'sudo killall ' $${system}epics $${system}fe.rtl awgtpman >> /cvs/cds/$$site/scripts/kill$${system};\
-	echo '(cd /cvs/cds/'$$site'/target/'$${system}epics' && ./startup'$${ifo}')' >> /cvs/cds/$$site/scripts/start$${system};\
-	echo /cvs/cds/$$site/target/$${system}/startup.cmd >> /cvs/cds/$$site/scripts/start$${system};\
+	echo '(cd /cvs/cds/'$$site'/target/'$${lower_ifo}$${system}epics' && ./startup'$${ifo}')' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd >> /cvs/cds/$$site/scripts/start$${system};\
 	echo '(cd /cvs/cds/'$$site'/target/gds && ./startup_'$${system}'.cmd)' >> /cvs/cds/$$site/scripts/start$${system};\
-	echo 'sleep 5; sudo killall daqd' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'sleep 5; sudo killall -q daqd' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'burtwb -f /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_restore_$${cur_date}.log -v' >> /cvs/cds/$$site/scripts/start$${system};\
 	/bin/sed 's/caltech/'$$site'/' src/epics/util/daqconfig.tcl > build/$${system}epics/config/daqconfig;\
 	/usr/bin/install   build/$${system}epics/config/daqconfig  /cvs/cds/$$site/scripts
-	
+
 
 uninstall-daq-% :: src/epics/simLink/%.mdl
 	@system=$(subst uninstall-daq-,,$@); \
@@ -183,18 +183,18 @@ reinstall-% :: src/epics/simLink/%.mdl
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	/bin/mkdir -p /cvs/cds/$$site/chans;\
 	echo Installing Code Only system=$$system site=$$site ifo=$$ifo,$$lower_ifo;\
-	echo Installing /cvs/cds/$$site/target/$${system}epics;\
+	echo Installing /cvs/cds/$$site/target/$${lower_ifo}$${system}epics;\
 	/bin/mkdir -p /cvs/cds/$$site/target_archive;\
-	if test -e /cvs/cds/$$site/target/$${system}epics; then /bin/mv -f /cvs/cds/$$site/target/$${system}epics /cvs/cds/$$site/target_archive/$${system}epics_$$cur_date || exit 1; fi;\
+	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}epics; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}epics /cvs/cds/$$site/target_archive/$${lower_ifo}$${system}epics_$$cur_date || exit 1; fi;\
 	/bin/mkdir -p /cvs/cds/$$site/target;\
-	/bin/cp -pr target/$${system}epics /cvs/cds/$$site/target;\
-	if test -e /cvs/cds/$$site/target/$${system}epics/db/*/autoBurt.req; then /bin/mv -f /cvs/cds/$$site/target/$${system}epics/db/*/autoBurt.req /cvs/cds/$$site/target/$${system}epics || exit 2; fi;\
-	echo Installing /cvs/cds/$$site/target/$${system};\
-	/bin/mkdir -p /cvs/cds/$$site/target/$${system};\
-	if test -e /cvs/cds/$$site/target/$${system}/$${system}fe.rtl; then /bin/mv -f /cvs/cds/$$site/target/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system}/$${system}fe_$${cur_date}.rtl || exit 3; fi;\
-	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system};\
-	echo 'sudo ' /cvs/cds/$$site/target/$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${system}/startup.cmd;\
-	/bin/chmod +x /cvs/cds/$$site/target/$${system}/startup.cmd
+	/bin/cp -pr target/$${system}epics /cvs/cds/$$site/target/$${lower_ifo}$${system}epics;\
+	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}epics/db/*/autoBurt.req; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}epics/db/*/autoBurt.req /cvs/cds/$$site/target/$${lower_ifo}$${system}epics || exit 2; fi;\
+	echo Installing /cvs/cds/$$site/target/$${lower_ifo}$${system};\
+	/bin/mkdir -p /cvs/cds/$$site/target/$${lower_ifo}$${system};\
+	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe_$${cur_date}.rtl || exit 3; fi;\
+	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system};\
+	echo 'sudo ' /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${lower_ifo}$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd;\
+	/bin/chmod +x /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd
 
 reinstall-fe-% :: src/epics/simLink/%.mdl
 	@system=$(subst reinstall-fe-,,$@); \
@@ -206,11 +206,11 @@ reinstall-fe-% :: src/epics/simLink/%.mdl
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	/bin/mkdir -p /cvs/cds/$$site/chans;\
 	echo Installing Front-end Code Only system=$$system site=$$site ifo=$$ifo,$$lower_ifo;\
-	/bin/mkdir -p /cvs/cds/$$site/target/$${system};\
-	if test -e /cvs/cds/$$site/target/$${system}/$${system}fe.rtl; then /bin/mv -f /cvs/cds/$$site/target/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system}/$${system}fe_$${cur_date}.rtl || exit 3; fi;\
-	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${system};\
-	echo 'sudo ' /cvs/cds/$$site/target/$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${system}/startup.cmd;\
-	/bin/chmod +x /cvs/cds/$$site/target/$${system}/startup.cmd
+	/bin/mkdir -p /cvs/cds/$$site/target/$${lower_ifo}$${system};\
+	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe_$${cur_date}.rtl || exit 3; fi;\
+	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system};\
+	echo 'sudo ' /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${lower_ifo}$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd;\
+	/bin/chmod +x /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd
 
 # This rule is for epics-only systems, ie. no front-end
 install-% :: config/Makefile.%epics
@@ -220,12 +220,12 @@ install-% :: config/Makefile.%epics
 	if test $${ifo}no == no; then echo Please make $$system first; exit 1; fi;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
-	echo Installing /cvs/cds/$$site/target/$${system}epics;\
+	echo Installing /cvs/cds/$$site/target/$${lower_ifo}$${system}epics;\
 	/bin/mkdir -p /cvs/cds/$$site/target_archive;\
-	if test -e /cvs/cds/$$site/target/$${system}epics; then /bin/mv -f /cvs/cds/$$site/target/$${system}epics /cvs/cds/$$site/target_archive/$${system}epics_$$cur_date || exit 1; fi;\
+	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}epics; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}epics /cvs/cds/$$site/target_archive/$${lower_ifo}$${system}epics_$$cur_date || exit 1; fi;\
 	/bin/mkdir -p /cvs/cds/$$site/target;\
-	/bin/cp -pr target/$${system}epics /cvs/cds/$$site/target;\
-	if test -e /cvs/cds/$$site/target/$${system}epics/db/*/autoBurt.req; then /bin/mv -f /cvs/cds/$$site/target/$${system}epics/db/*/autoBurt.req /cvs/cds/$$site/target/$${system}epics || exit 2; fi;\
+	/bin/cp -pr target/$${system}epics /cvs/cds/$$site/target/$${lower_ifo}$${system}epics;\
+	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}epics/db/*/autoBurt.req; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}epics/db/*/autoBurt.req /cvs/cds/$$site/target/$${lower_ifo}$${system}epics || exit 2; fi;\
 
 #dbbepics: config/Makefile.dbbepics
 #	@echo Making dbbepics...
