@@ -2923,19 +2923,19 @@ text {
 	}
 	command[2] {
 		label="Restart framebuilder FB0"
-		name="expect -c 'spawn telnet fb0 8087; expect daqd>\ ; send shutdown\;\n ; expect daqd> '"
+		name="env LD_PRELOAD= expect -c 'spawn telnet fb0 8087; expect daqd>\ ; send shutdown\;\n ; expect daqd> '"
 	}
 	command[3] {
 		label="Clear FB0 CRC SUM"
-		name="expect -c 'spawn telnet fb0 8087; expect daqd>\ ; send clear\ crc\;\n ; expect daqd> '"
+		name="env LD_PRELOAD= expect -c 'spawn telnet fb0 8087; expect daqd>\ ; send clear\ crc\;\n ; expect daqd> '"
 	}
 	command[4] {
 		label="Restart framebuilder FB1"
-		name="expect -c 'spawn telnet fb1 8087; expect daqd>\ ; send shutdown\;\n ; expect daqd> '"
+		name="env LD_PRELOAD= expect -c 'spawn telnet fb1 8087; expect daqd>\ ; send shutdown\;\n ; expect daqd> '"
 	}
 	command[5] {
 		label="Clear FB1 CRC SUM"
-		name="expect -c 'spawn telnet fb1 8087; expect daqd>\ ; send clear\ crc\;\n ; expect daqd> '"
+		name="env LD_PRELOAD= expect -c 'spawn telnet fb1 8087; expect daqd>\ ; send clear\ crc\;\n ; expect daqd> '"
 	}
 	clr=14
 	bclr=24
