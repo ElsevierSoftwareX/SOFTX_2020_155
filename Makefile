@@ -92,6 +92,9 @@ uninstall-daq-% :: src/epics/simLink/%.mdl
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
 	if test $${site}no == no; then echo Please make $$system first; exit 1; fi;\
 	upper_site=`echo $$site | tr a-z A-Z`;\
+	site_letter=M;\
+	if test $${site} == llo; then site_letter=L; fi;\
+	if test $${site} == lho; then site_letter=H; fi;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	datarate=`grep datarate build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
@@ -100,8 +103,8 @@ uninstall-daq-% :: src/epics/simLink/%.mdl
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	echo Removing GDS node $${gds_file_node} configuration file ;\
-	echo /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par ;\
-	/bin/rm -f  /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par;\
+	echo /cvs/cds/$${site}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
+	/bin/rm -f  /cvs/cds/$${site}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par;\
 	echo Removing DAQ configuration file;\
 	echo /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini;\
 	/bin/rm -f  /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini
@@ -113,6 +116,9 @@ install-daq-% :: src/epics/simLink/%.mdl
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
 	if test $${site}no == no; then echo Please make $$system first; exit 1; fi;\
 	upper_site=`echo $$site | tr a-z A-Z`;\
+	site_letter=M;\
+	if test $${site} == llo; then site_letter=L; fi;\
+	if test $${site} == lho; then site_letter=H; fi;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	datarate=`grep datarate build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
@@ -121,11 +127,11 @@ install-daq-% :: src/epics/simLink/%.mdl
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	echo Installing GDS node $${gds_file_node} configuration file ;\
-	echo /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par ;\
+	echo /cvs/cds/$${site}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
 	/bin/mkdir -p  /cvs/cds/$${site}/target/gds/param/ ;\
 	/bin/mkdir -p  /cvs/cds/$${site}/target/gds/param/archive ;\
-	if test -e /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par; then /bin/mv -f /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par /cvs/cds/$${site}/target/gds/param/archive/tpchn_M$${gds_file_node}_$${cur_date}.par || exit 1; fi;\
-	/bin/cp -p build/$${system}epics/$${system}.par /cvs/cds/$${site}/target/gds/param/tpchn_M$${gds_file_node}.par ;\
+	if test -e /cvs/cds/$${site}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par; then /bin/mv -f /cvs/cds/$${site}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par /cvs/cds/$${site}/target/gds/param/archive/tpchn_$${site_letter}$${gds_file_node}_$${cur_date}.par || exit 1; fi;\
+	/bin/cp -p build/$${system}epics/$${system}.par /cvs/cds/$${site}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
 	if test $${datarate_mult} -gt 1;\
 	then \
 	  datarate_mult_flag=-$${datarate_mult}; \
@@ -142,8 +148,8 @@ install-daq-% :: src/epics/simLink/%.mdl
 	if test -e /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini;\
 	then \
 	  /bin/mv -f /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini /cvs/cds/$${site}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini || exit 2 ;\
-	  echo src/epics/util/updateDaqConfig.pl -daq=/cvs/cds/$${site}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini -old=/cvs/cds/$${site}/target/gds/param/archive/tpchn_M$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par ;\
-	  src/epics/util/updateDaqConfig.pl -daq=/cvs/cds/$${site}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini -old=/cvs/cds/$${site}/target/gds/param/archive/tpchn_M$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par > /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ; \
+	  echo src/epics/util/updateDaqConfig.pl -daq=/cvs/cds/$${site}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini -old=/cvs/cds/$${site}/target/gds/param/archive/tpchn_$${site_letter}$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par ;\
+	  src/epics/util/updateDaqConfig.pl -daq=/cvs/cds/$${site}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini -old=/cvs/cds/$${site}/target/gds/param/archive/tpchn_$${site_letter}$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par > /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ; \
 	else \
 	  /bin/cp -p build/$${system}epics/$${system}.ini /cvs/cds/$${site}/chans/daq/$${ifo}$${upper_system}.ini ;\
 	fi
