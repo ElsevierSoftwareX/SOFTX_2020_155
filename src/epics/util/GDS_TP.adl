@@ -1,7 +1,7 @@
 
 file {
 	name="/home/controls/cds/advLigo/src/epics/util/GDS_TP.adl"
-	version=030102
+	version=030003
 }
 display {
 	object {
@@ -3185,7 +3185,7 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="0x1 - Stopped or out of sync"
+	textix="0xbad - Stopped or out of sync"
 }
 text {
 	object {
