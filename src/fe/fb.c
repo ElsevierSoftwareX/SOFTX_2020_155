@@ -66,7 +66,7 @@ int cdsDaqNetDaqSend(	int dcuId,
   // Data buffers (DAQ) to the frame builder
   // "buf" point to the first buffer
   char *buf = _daq_shm + CDS_DAQ_NET_DATA_OFFSET;
-  static const buf_size = DAQ_DCU_BLOCK_SIZE*2;
+  static const int buf_size = DAQ_DCU_BLOCK_SIZE*2;
   // GDS test point table in the shared memory 
   struct cdsDaqNetGdsTpNum *tp = (struct cdsDaqNetGdsTpNum *)(_daq_shm + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
 
