@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.31 2007/11/16 21:39:28 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.32 2008/02/21 00:13:27 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -504,19 +504,21 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       	  pFloat += decSlot;
       	}
 #if defined(COMPAT_INITIAL_LIGO)
-	#define byteswap(a) ((char *)&a)[0] = ((char *)&a)[3]; ((char *)&a)[1] = ((char *)&a)[2];((char *)&a)[2] = ((char *)&a)[1];((char *)&a)[3] = ((char *)&a)[0];
+	#define byteswap(a,b) ((char *)&a)[0] = ((char *)&b)[3]; ((char *)&a)[1] = ((char *)&b)[2];((char *)&a)[2] = ((char *)&b)[1];((char *)&a)[3] = ((char *)&b)[0];
 #else	
-	#define byteswap(a) a
+	#define byteswap(a,b) a
 #endif
 
 	/* Write the data into the local swing buffer */
       	if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
       		/* Write data as short into swing buffer */
 	  	*pShort = (short)dWord;
-      	else
+      	else {
       		/* Write data as float into swing buffer */
-		byteswap(dWord);
+		float t = dWord;
+		byteswap(dWord, t);
 		*pFloat = dWord;
+	}
       }
     } /* end swing buffer write loop */
 
