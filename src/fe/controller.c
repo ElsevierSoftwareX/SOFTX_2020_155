@@ -393,6 +393,11 @@ void *fe_start(void *arg)
   //printf("Coeff history sizes are %d %d\n", sizeof(dHistory), sizeof(dDacHistory));
 #endif
 
+  // Zero out DAC outputs
+  for (ii = 0; ii < MAX_DAC_MODULES; ii++)
+    for (jj = 0; jj < 16; jj++)
+ 	dacOut[ii][jj] = 0.0;
+
   // Set pointers to SFM data buffers
 #if NUM_SYSTEMS > 1
   for (system = 0; system < NUM_SYSTEMS; system++) {
