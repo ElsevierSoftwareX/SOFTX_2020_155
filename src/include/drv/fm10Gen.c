@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.14 2007/04/12 21:03:17 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.15 2008/03/04 23:49:03 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -120,7 +120,7 @@ inline double iir_filter(double input,double *coef,int n,double *history){
     output = new_hist + history1 * (*coef_ptr++);
     output = output + history2 * (*coef_ptr++);      /* zeros */
 
-    if((new_hist < 1e-20) && (new_hist > -1e-20)) new_hist = new_hist<0 ? -1e-20: 1e-20;
+    //if((new_hist < 1e-20) && (new_hist > -1e-20)) new_hist = new_hist<0 ? -1e-20: 1e-20;
     
     *hist2_ptr++ = *hist1_ptr;
     *hist1_ptr++ = new_hist;
