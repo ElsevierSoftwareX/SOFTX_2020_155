@@ -26,7 +26,7 @@ sub initAdc {
 		$num = $::adcCnt;
 	}
 	print "ADC $::adcCnt; type='$type'; num=$num\n";
-        print "foo=$board_types{$type}\n";
+        #print "foo=$board_types{$type}\n";
 	
 	# Check if this is a supported board type
 	if ($board_types{$type} != 1) {
@@ -42,6 +42,11 @@ sub initAdc {
         $::adcNum[$::adcCnt] = $num;
         $::adcCnt++;
         $::partUsed[$::partCnt] = 1;
+        foreach (0 .. $::partCnt) {
+          if ("Adc" eq $::partInputType[$_][0]) {
+	  	print $_," ", $::xpartName[$_], "\n";
+	  }
+	}
 }
 
 sub partType {
@@ -50,7 +55,7 @@ sub partType {
 
 # Print Epics communication structure into a header file
 # Current part number is passed as first argument
-sub erintHeaderStruct {
+sub printHeaderStruct {
         my ($i) = @_;
         ;
 }
@@ -73,8 +78,28 @@ sub printFrontEndVars  {
 # Argument 1 is the part number
 # Returns calculated code string
 sub frontEndInitCode {
-	my ($i) = @_;
-        return "";
+        my ($i) = @_;
+        my $calcExp = "// ADC $i\n";
+	#print $calcExp, "\n";
+	%seen = ();
+        foreach (0 .. $::partCnt) {
+	  foreach  $inp (0 .. $::partInCnt[$_]) {
+            if ("Adc" eq $::partInputType[$_][$inp] && $i == $::partInNum[$_][$inp]) {
+	  	#print $_," ", $::xpartName[$_], " ", $::partInputPort[$_][$inp], "\n";
+		$seen{$::partInputPort[$_][$inp]}=1;
+	    }
+	  }
+	}
+	foreach (sort { $a <=> $b }  keys %seen) {
+	#	print $_, ",";
+        	$calcExp .= "dWordUsed\[";
+        	$calcExp .= $i;
+        	$calcExp .= "\]\[";
+        	$calcExp .= $_;
+        	$calcExp .= "\] =  1;\n";
+	}
+	#print "\n";
+        return $calcExp;
 }
 
 # Figure out part input code

@@ -1,5 +1,5 @@
 
-.PHONY: dbb
-dbb:
-	./feCodeGen.pl ../simLink/dbb.mdl dbb
+.PHONY: isi
+isi:
+	./feCodeGen.pl ../simLink/isi.mdl isi
 

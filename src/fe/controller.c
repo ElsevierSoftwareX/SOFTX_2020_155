@@ -97,6 +97,7 @@ extern unsigned int cpu_khz;
 	#define DAQ_RATE	(DAQ_16K_SAMPLE_SIZE*4)
 	#define NET_SEND_WAIT		(2*81920)
 	#define CYCLE_TIME_ALRM		15
+	#define DAC_START_DELAY		5
 #endif
 #ifdef SERVO32K
 	#define CYCLE_PER_SECOND	32768
@@ -163,7 +164,9 @@ FILT_MOD *pDsp[NUM_SYSTEMS];			/* Ptr to SFM in shmem.		*/
 COEF dspCoeff[NUM_SYSTEMS];	/* Local mem for SFM coeffs.	*/
 VME_COEF *pCoeff[NUM_SYSTEMS];		/* Ptr to SFM coeffs in shmem		*/
 double dWord[MAX_ADC_MODULES][32];
+unsigned int dWordUsed[MAX_ADC_MODULES][32];
 double dacOut[MAX_DAC_MODULES][16];
+unsigned int dacOutUsed[MAX_DAC_MODULES][16];
 int dioInput[MAX_DIO_MODULES];
 int dioOutput[MAX_DIO_MODULES];
 int rioInput[MAX_DIO_MODULES];
@@ -395,8 +398,10 @@ void *fe_start(void *arg)
 
   // Zero out DAC outputs
   for (ii = 0; ii < MAX_DAC_MODULES; ii++)
-    for (jj = 0; jj < 16; jj++)
+    for (jj = 0; jj < 16; jj++) {
  	dacOut[ii][jj] = 0.0;
+ 	dacOutUsed[ii][jj] = 0;
+    }
 
   // Set pointers to SFM data buffers
 #if NUM_SYSTEMS > 1
@@ -812,7 +817,9 @@ void *fe_start(void *arg)
 				   if (jj == 0 || dWord[kk][31] < adcData[kk][31])
 					dWord[kk][31] = adcData[kk][31];
 				} else {
-				  dWord[kk][ii] = iir_filter((double)adcData[kk][ii],FE_OVERSAMPLE_COEFF,3,&dHistory[ii+kk*32][0]);
+				  if (dWordUsed[kk][ii]) {
+				  	dWord[kk][ii] = iir_filter((double)adcData[kk][ii],FE_OVERSAMPLE_COEFF,3,&dHistory[ii+kk*32][0]);
+				  }
 				}
 				packedData ++;
 			}
@@ -1028,9 +1035,11 @@ void *fe_start(void *arg)
 		for (ii=0; ii < num_outs; ii++)
 		{
 #ifdef OVERSAMPLE_DAC
+			if (dacOutUsed[jj][ii]) {
 			  double dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
 		 	  dacOut[jj][ii] = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,3,&dDacHistory[ii+jj*16][0]);
 			   dacOut[jj][ii] *= OVERSAMPLE_TIMES;
+			}
 #endif
 			if(dacOut[jj][ii] > limit) 
 			{
