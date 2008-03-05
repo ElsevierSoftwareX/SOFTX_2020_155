@@ -75,7 +75,20 @@ sub printFrontEndVars  {
 # Argument 1 is the part number
 # Returns calculated code string
 sub frontEndInitCode {
-        my ($i) = @_;
+	my ($i) = @_;
+        my $dacNum = substr($::xpartName[$i], 4, 1);
+        my $calcExp = "// DAC number is $dacNum\n";
+        for (0 .. 15) {
+          my $fromType = $::partInputType[$i][$_];
+          if (($fromType ne "GROUND") && ($::partInput[$i][$_] ne "NC")) {
+                $calcExp .= "dacOutUsed\[";
+                $calcExp .= $dacNum;
+                $calcExp .= "\]\[";
+                $calcExp .= $_;
+                $calcExp .= "\] =  1;\n";
+          }
+        }
+	return $calcExp;
         return "";
 }
 

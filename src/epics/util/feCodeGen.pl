@@ -1664,6 +1664,11 @@ if ($cpus < 3) {
   printVariables();
 }
 print OUT "if(feInit)\n\{\n";
+
+for($ii=0;$ii<$adcCnt;$ii++) {
+   print OUT ("CDS::Adc::frontEndInitCode") -> ($ii);
+}
+
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if ( -e "lib/$partType[$ii].pm" ) {
