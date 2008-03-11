@@ -15,7 +15,7 @@
 #include <drv/cdsHardware.h>
 #include <drv/map.h>
 
-int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev);
+int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int);
 
 // PCI Device variables
 volatile PLX_9056_DMA *adcDma[MAX_ADC_MODULES];	/* DMA struct for GSA ADC */
@@ -664,12 +664,25 @@ int mapPciModules(CDS_HARDWARE *pCds)
   dacdev = NULL;
   status = 0;
   pCds->pci_rfm[0] = 0;
-  // Search system for VMIC RFM modules
+  // Search system for 5565 VMIC RFM modules
   while((dacdev = pci_find_device(VMIC_VID, VMIC_TID, dacdev))) {
-		printk("RFM card on bus %x; device %x\n",
+		printk("5565 RFM card on bus %x; device %x\n",
 			dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
-		status = mapRfm(pCds,dacdev);
+		status = mapRfm(pCds,dacdev,0x5565);
+		modCount ++;
+  }
+
+  dacdev = NULL;
+  status = 0;
+  pCds->pci_rfm[0] = 0;
+
+  // Search system for 5579 VMIC RFM modules
+  while((dacdev = pci_find_device(VMIC_VID, VMIC_TID_5579, dacdev))) {
+		printk("5579 RFM card on bus %x; device %x\n",
+			dacdev->bus->number,
+			PCI_SLOT(dacdev->devfn));
+		status = mapRfm(pCds,dacdev,0x5579);
 		modCount ++;
   }
 
@@ -710,32 +723,51 @@ int mapPciModules(CDS_HARDWARE *pCds)
 // *****************************************************************************
 // Routine to initialize VMIC RFM modules
 // *****************************************************************************
-int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev)
+int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int kind)
 {
   static unsigned int pci_io_addr;
   int devNum;
   static char *csrAddr;
   static unsigned int csrAddress;
 
-	devNum = pHardware->rfmCount;
-  	pci_enable_device(rfmdev);
+  devNum = pHardware->rfmCount;
+  pci_enable_device(rfmdev);
 
-  	pci_read_config_dword(rfmdev, 
-        		PCI_BASE_ADDRESS_3,
-                 	&pci_io_addr);
-  	pHardware->pci_rfm[devNum] = (long)ioremap_nocache((unsigned long)pci_io_addr, 64*1024*1024);
+  if (kind == 0x5565) {
+    pci_read_config_dword(rfmdev, 
+        		  PCI_BASE_ADDRESS_3,
+                 	  &pci_io_addr);
+    pHardware->pci_rfm[devNum] = (long)ioremap_nocache((unsigned long)pci_io_addr, 64*1024*1024);
 
-  	pci_read_config_dword(rfmdev, PCI_BASE_ADDRESS_2, &csrAddress);
-  	printk("CSR address is 0x%x\n", csrAddress);
-  	csrAddr = ioremap_nocache((unsigned long)csrAddress, 0x40);
+    pci_read_config_dword(rfmdev, PCI_BASE_ADDRESS_2, &csrAddress);
+    printk("CSR address is 0x%x\n", csrAddress);
+    csrAddr = ioremap_nocache((unsigned long)csrAddress, 0x40);
 
-	p5565Csr = (VMIC5565_CSR *)csrAddr;
-	p5565Csr->LCSR1 &= ~TURN_OFF_5565_FAIL;
-	printk("Board id = 0x%x\n",p5565Csr->BID);
-  	pHardware->rfmConfig[devNum] = p5565Csr->NID;
+    p5565Csr = (VMIC5565_CSR *)csrAddr;
+    p5565Csr->LCSR1 &= ~TURN_OFF_5565_FAIL;
+    printk("Board id = 0x%x\n",p5565Csr->BID);
+    pHardware->rfmConfig[devNum] = p5565Csr->NID;
+  } else if (kind == 0x5579) {
+    struct VMIC5579_MEM_REGISTER *pciRegPtr;
+    int nodeId;
 
-	pHardware->rfmCount ++;
-	return(0);
+    pci_read_config_dword(rfmdev, 
+        		  PCI_BASE_ADDRESS_1,
+                 	  &pci_io_addr);
+    pHardware->pci_rfm[devNum] = (long)ioremap_nocache((unsigned long)pci_io_addr, 64*1024*1024);
+
+
+    pciRegPtr = (struct VMIC5579_MEM_REGISTER *)pHardware->pci_rfm[devNum];
+    pciRegPtr->CSR2 = TURN_OFF_5579_FAIL;
+
+    nodeId = pciRegPtr->NID;
+    printk("Board id = 0x%x\n", nodeId);
+    pHardware->rfmConfig[devNum] = nodeId;
+  }
+
+  pHardware->rfmType[devNum] = kind;
+  pHardware->rfmCount ++;
+  return(0);
 }
 
 #ifdef USE_VMIC_RFM

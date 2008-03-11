@@ -1404,7 +1404,7 @@ int main(int argc, char **argv)
 	printf("%d RFM cards found\n",cdsPciModules.rfmCount);
 	for(ii=0;ii<cdsPciModules.rfmCount;ii++)
         {
-                 printf("\tRFM %d is a VMIC_5565 module with Node ID %d\n",cdsPciModules.rfmConfig[ii]);
+                 printf("\tRFM %d is a VMIC_%x module with Node ID %d\n", ii, cdsPciModules.rfmType[ii], cdsPciModules.rfmConfig[ii]);
 	}
         printf("***************************************************************************\n");
 

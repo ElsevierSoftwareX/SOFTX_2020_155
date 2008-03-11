@@ -62,6 +62,7 @@ typedef struct CDS_HARDWARE{
 	int rfmCount;			/* Number of RFM modules found		*/
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
 	int rfmConfig[MAX_RFM_MODULES];
+	int rfmType[MAX_RFM_MODULES];
 	int vmeBridgeCount;		/* The number of SBS VME bridges attached */
 	volatile unsigned int *vme[MAX_VME_BRIDGES]; /* VME memory */
 	volatile unsigned char *vme_reg[MAX_VME_BRIDGES]; /* PCI to VME bridge registers */
@@ -196,8 +197,10 @@ typedef struct GSA_DAC_REG{
 
 #define VMIC_VID		0x114a
 #define VMIC_TID		0x5565
+#define VMIC_TID_5579		0x5579
 
 #define TURN_OFF_5565_FAIL      0x80000000
+#define TURN_OFF_5579_FAIL	0x80
 typedef struct VMIC5565_CSR{
         unsigned char BRV;      /* 0x0 */
         unsigned char BID;      /* 0x1 */
@@ -263,6 +266,50 @@ typedef struct VMIC5565RTR{
         unsigned int INTCSR;
 }VMIC5565RTR;
 
+struct VMIC5579_MEM_REGISTER {
+	unsigned char rsv0;	/* 0x0 */
+	unsigned char BID;	/* 0x1 */
+	unsigned char rsv2;	/* 0x2 */
+	unsigned char rsv3;	/* 0x3 */
+	unsigned char NID;	/* 0x4 */
+	unsigned char rsv5;	/* 0x5 */
+	unsigned char rsv6;	/* 0x6 */
+	unsigned char rsv7;	/* 0x7 */
+	unsigned char IRS;	/* 0x8 */
+	unsigned char CSR1;	/* 0x9 */
+	unsigned char rsvA;	/* 0xa */
+	unsigned char rsvB;	/* 0xb */
+	unsigned char CSR2;	/* 0xc */
+	unsigned char CSR3;	/* 0xd */
+	unsigned char rsvE;	/* 0xe */
+	unsigned char rsvF;	/* 0xf */
+	unsigned char CMDND;	/* 0x10 */
+	unsigned char CMD;	/* 0x11 */
+	unsigned char CDR1;	/* 0x12 */
+	unsigned char CDR2;	/* 0x13 */
+	unsigned char ICSR;	/* 0x14 */
+	unsigned char rsv15;	/* 0x15 */
+	unsigned char rsv16;	/* 0x16 */
+	unsigned char rsv17;	/* 0x17 */
+	unsigned char SID1;	/* 0x18 */
+	unsigned char IFR1;	/* 0x19 */
+	unsigned short IDR1;	/* 0x1a & 0x1b */
+	unsigned char SID2;	/* 0x1c */
+	unsigned char IFR2;	/* 0x1d */
+	unsigned short IDR2;	/* 0x1e & 0x1f */
+	unsigned char SID3;	/* 0x20 */
+	unsigned char IFR3;	/* 0x21 */
+	unsigned short IDR3;	/* 0x22 & 0x23 */
+	unsigned long DADD;	/* 0x24 to 0x27 */
+	unsigned char EIS;	/* 0x28 */
+	unsigned char ECSR3;	/* 0x29 */
+	unsigned char rsv2A;	/* 0x2a */
+	unsigned char rsv2B;	/* 0x2b */
+	unsigned char rsv2C;	/* 0x2c */
+	unsigned char MACR;	/* 0x2d */
+	unsigned char rsv2E;	/* 0x2e */
+	unsigned char rsv2F;	/* 0x2f */
+};
 
 /* GSA 2MS ADC Module Definitions ***************************************************** */
 #define FADC_SS_ID       0x3172	/* Subsystem ID to locate module on PCI bus	*/
