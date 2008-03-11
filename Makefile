@@ -39,6 +39,7 @@ clean-% :: config/Makefile.%epics
 install-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-,,$@); \
 	upper_system=`echo $$system | tr a-z A-Z`;\
+	hostname=`hostname`;\
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
 	if test $${site}no == no; then echo Please make $$system first; exit 1; fi;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
@@ -72,6 +73,10 @@ install-% :: src/epics/simLink/%.mdl
 	/bin/chmod +x /cvs/cds/$$site/scripts/start$${system};\
 	echo '#!/bin/bash' > /cvs/cds/$$site/scripts/kill$${system};\
 	/bin/chmod +x /cvs/cds/$$site/scripts/kill$${system};\
+	echo 'if [ `hostname` != '$${hostname}' ]; then' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'echo Cannot run `basename $$0` on `hostname` computer' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'exit 1' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'fi' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'cur_date=`date +%y%m%d_%H%M%S`' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'burtrb -f /cvs/cds/'$${site}'/target/'$${lower_ifo}$${system}'epics/autoBurt.req -o /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_burt_$${cur_date}.log -v' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo /cvs/cds/$$site/scripts/kill$${system} >> /cvs/cds/$$site/scripts/start$${system};\
