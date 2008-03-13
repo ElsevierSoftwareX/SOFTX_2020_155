@@ -2420,14 +2420,26 @@ for(0 .. $partCnt-1) {
 		if ($partSubName[$_] ne "") {
 			$basename = $partSubName[$_] . "_" . $basename;
 		}
+
+# Create comma separated string from the lements of an array
+sub commify_series {
+    my $sepchar = grep(/,/ => @_) ? ";" : ",";
+    (@_ == 0) ? ''                                      :
+    (@_ == 1) ?  $_[0]                                   :
+                join("$sepchar", @_[0 .. $#_]);
+}
+		$collabels = commify_series(@{$partInput[$_]});
+		$rowlabels = commify_series(@{$partOutput[$_]});
+
 		if (is_top_name($basename)) {
+
 		  my $tn = top_name_transform($basename);
 		  my $basename1 = $usite . ":" . $tn . "_";
-		  system("./mkmatrix.pl --cols=$incnt --rows=$outcnt --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
+		  system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
 		} else {
 		  my $basename1 = $usite . ":" .$sysname ."-" . $basename . "_";
 		  #print "Matrix $basename $incnt X $outcnt\n";
-		  system("./mkmatrix.pl --cols=$incnt --rows=$outcnt --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
+		  system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
 		}
 	}
 	if ($partType[$_] =~ /^Filt/) {
