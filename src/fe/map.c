@@ -537,6 +537,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 {
   static struct pci_dev *dacdev;
   int status;
+  int i;
   int modCount = 0;
   int adc_cnt = 0;
   int fast_adc_cnt = 0;
@@ -663,7 +664,10 @@ int mapPciModules(CDS_HARDWARE *pCds)
 
   dacdev = NULL;
   status = 0;
-  pCds->pci_rfm[0] = 0;
+  for (i = 0; i < MAX_RFM_MODULES; i++) {
+  	pCds->pci_rfm[i] = 0;
+  }
+
   // Search system for 5565 VMIC RFM modules
   while((dacdev = pci_find_device(VMIC_VID, VMIC_TID, dacdev))) {
 		printk("5565 RFM card on bus %x; device %x\n",
@@ -675,7 +679,6 @@ int mapPciModules(CDS_HARDWARE *pCds)
 
   dacdev = NULL;
   status = 0;
-  pCds->pci_rfm[0] = 0;
 
   // Search system for 5579 VMIC RFM modules
   while((dacdev = pci_find_device(VMIC_VID, VMIC_TID_5579, dacdev))) {
