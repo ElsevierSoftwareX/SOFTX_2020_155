@@ -21,9 +21,9 @@ sub printHeaderStruct {
 		die "Part $::xpartName[$i] needs a single output\n";
 	}
 	if ($::partOutputType[$i][0] ne "DEMUX") {
-		die "Part $::xpartName[$i] needs a single MUX input, detected $::partOutputType[$i][0]\n";
+		die "Part $::xpartName[$i] needs a single DEMUX output, detected $::partOutputType[$i][0]\n";
 	}
-	my $matOuts = $::partOutCnt[$::partOutNum[$i][0]];
+	my $matOuts = $::partOutputs[$::partOutNum[$i][0]];
 	my $matIns = $::partInCnt[$::partInNum[$i][0]];
         print ::EPICS "MATRIX $::xpartName[$i]_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]\n";
         print ::OUTH "\tfloat $::xpartName[$i]\[$matOuts\]\[$matIns\];\n";
@@ -37,7 +37,7 @@ sub printEpics {}
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
-	my $matOuts = $::partOutCnt[$::partOutNum[$i][0]];
+	my $matOuts = $::partOutputs[$::partOutNum[$i][0]];
 	#my $matIns = $::partInCnt[$::partInNum[$i][0]];
         #print ::OUT "double \L$::xpartName[$i]\[$matOuts\]\[$matIns\];\n";
         print ::OUT "double \L$::xpartName[$i]\[$matOuts\];\n";
@@ -69,7 +69,7 @@ sub fromExp {
 
 sub frontEndCode {
 	my ($i) = @_;
-	my $matOuts = $::partOutCnt[$::partOutNum[$i][0]];
+	my $matOuts = $::partOutputs[$::partOutNum[$i][0]];
 	my $matIns = $::partInCnt[$::partInNum[$i][0]];
 	my $muxName = "\L$::xpartName[$::partInNum[$i][0]]";
 	my $calcExp = "// MuxMatrix\n";

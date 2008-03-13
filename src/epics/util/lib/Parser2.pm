@@ -275,6 +275,8 @@ sub node_processing {
 		return 0;
 	}
 
+	$::partOutputs[$::partCnt] = ${$node->{FIELDS}}{Outputs};
+
 	# Bus creator part is the ADC board
 	if ($block_type eq "BUSC") {
         	require "lib/Adc.pm";

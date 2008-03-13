@@ -159,6 +159,7 @@ $partInputPort[0][0] = 0;	# $partInputPort[0 .. $partCnt][0 .. $partInCnt[$_]]
 $partInputs[0] = 0;		# Stores 'Inputs' field of the part declaration in SUM part, 'Operator' in RelationaOperator part, 'Value' Constant part, etc
 $partInputs1[0] = 0;		# Same as $partInputs, i.e. extra part parameter, used with Saturation part
 
+$partOutputs[0] = 0; 	# Stores 'Outputs' field value for some parts
 # Total number of outputs for each part
 # i.e. how many parts are connected with lines (branches) to it
 $partOutCnt[0] = 0;	# $partOutCnt[0 .. $partCnt]
@@ -1557,7 +1558,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUT "double \L$xpartName[$ii]\[$port\];\n";
 	}
 	if($partType[$ii] eq "DEMUX") {
-		$port = $partOutCnt[$ii];
+		$port = $partOutputs[$ii];
 		print OUT "double \L$xpartName[$ii]\[$port\];\n";
 	}
 	if($partType[$ii] eq "SUM"
@@ -1832,7 +1833,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 	if ($partType[$mm] eq "DEMUX" && $::partInputType[$mm][0] ne "FunctionCall") {
 		print OUT "// DEMUX\n";
 		my $calcExp;
-		for (0 .. $partOutCnt[$mm]  - 1) {
+		for (0 .. $partOutputs[$mm]  - 1) {
 		  $calcExp .= "\L$xpartName[$mm]\[$_\]" . "= $fromExp[0]\[". $_ . "\];\n";
 		}
 		print OUT $calcExp;
@@ -2413,7 +2414,7 @@ for(0 .. $partCnt-1) {
 		my $incnt = $partInCnt[$_];
 		if ($partType[$_] eq "MuxMatrix") {
 			# MuxMatrix uses mux and demux parts 
-			$outcnt = $partOutCnt[$partOutNum[$_][0]];
+			$outcnt = $partOutputs[$partOutNum[$_][0]];
 			$incnt = $partInCnt[$partInNum[$_][0]];
 		}
 		my $basename = $partName[$_];
