@@ -415,6 +415,12 @@ int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
 
   // Set ADC to 64 channel = 32 differential channels
   adcPtr[devNum]->BCR |= (GSAI_FULL_DIFFERENTIAL);
+
+#ifdef ADC_EXTERNAL_SYNC
+  adcPtr[devNum]->BCR |= (GSAI_ENABLE_X_SYNC);
+  adcPtr[devNum]->AUX_SIO |= 0x80;
+#endif
+
 #if 0
   // Do not do that, it makes noise worse, not better!
   // Clear range bits to select lowest range 2.5V
