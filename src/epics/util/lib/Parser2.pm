@@ -413,7 +413,9 @@ sub node_processing {
 # annotate names
 sub flatten_do_branches {
    ($_, $ant) = @_;
-   if (${$_->{FIELDS}}{Parent} == 1) { return; } # Stop annotating if discovered parent's block
+   #if (${$_->{FIELDS}}{Parent} == 1) { return; } # Stop annotating if discovered parent's block
+   if ("${$_->{FIELDS}}{nname}_" eq $ant) { return; }
+
    foreach (@{$_->{NEXT}}) {
      if (${$_->{FIELDS}}{DstBlock} ne undef) {
        ${$_->{FIELDS}}{DstBlock} = $ant . ${$_->{FIELDS}}{DstBlock};
@@ -635,7 +637,8 @@ sub flatten {
 	  ${$branch->{FIELDS}}{DstBlock} = undef;
 	  ${$branch->{FIELDS}}{DstPort} = undef;
 	  # Mark it here to stop annotating names in flatten_do_branches() later
-	  ${$branch->{FIELDS}}{Parent} = 1;
+	  #${$branch->{FIELDS}}{Parent} = 1;
+     	  ${$branch->{FIELDS}}{nname} = ${$node->{FIELDS}}{Name};
 	  # Insert parent's line into the branch
 	  push @{$branch->{NEXT}}, $line;
 	}
