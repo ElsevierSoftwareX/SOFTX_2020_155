@@ -34,8 +34,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Nov  6 15:02:03 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:103>"
+  LastModifiedDate	  "Fri Mar 21 14:47:21 2008"
+  ModelVersionFormat	  "1.%<AutoIncrement:106>"
   ConfigurationManager	  "None"
   SimulationMode	  "normal"
   LinearizationMsg	  "none"
@@ -87,6 +87,12 @@ Library {
     ShowName		    on
   }
   BlockParameterDefaults {
+    Block {
+      BlockType		      Abs
+      SaturateOnIntegerOverflow	on
+      ZeroCross		      on
+      SampleTime	      "-1"
+    }
     Block {
       BlockType		      BusCreator
       Inputs		      "4"
@@ -299,7 +305,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [997, 85, 1666, 406]
+    Location		    [993, 120, 1662, 441]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -686,7 +692,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -731,7 +737,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -755,7 +761,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -777,7 +783,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -821,7 +827,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[629, 275, 1252, 954]
+	Location		[262, 202, 885, 881]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -955,9 +961,14 @@ Library {
 	  Name			  "GPS"
 	  Tag			  "cdsGps"
 	  Description		  "Symmetricom BC635PCI-U GPS card input      "
-"              \nThis block outputs current time as sampled using the card"
+"                           \nThis block outputs current time as sampled using"
+" the card.            \nfull -- complete UNIX seconds, and fractional part co"
+"rrect up to 100ns\ns    -- integer UNIX seconds (no fraction)                "
+"            \nus  -- fractional part                                         "
+"       \nns  -- nanoseconds part                                             "
+"  "
 	  Ports			  [0, 4]
-	  Position		  [425, 65, 470, 130]
+	  Position		  [450, 72, 490, 133]
 	  BackgroundColor	  "[0.870444, 0.852273, 1.000000]"
 	  DropShadow		  on
 	  SourceBlock		  "cdsGps/Subsystem"
@@ -1044,11 +1055,6 @@ Library {
 	  SrcPort		  1
 	  DstBlock		  "Bus\nSelector6"
 	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Bus\nCreator1"
-	  SrcPort		  1
-	  Points		  [0, -5]
 	}
       }
     }
@@ -1430,8 +1436,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[1381, 523, 1601, 936]
-	Open			off
+	Location		[1266, 269, 1486, 717]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1443,6 +1449,12 @@ Library {
 	TiledPageScale		1
 	ShowPageBoundaries	off
 	ZoomFactor		"100"
+	Block {
+	  BlockType		  Abs
+	  Name			  "Abs"
+	  Position		  [35, 400, 65, 430]
+	  SaturateOnIntegerOverflow off
+	}
 	Block {
 	  BlockType		  Switch
 	  Name			  "Choice"
