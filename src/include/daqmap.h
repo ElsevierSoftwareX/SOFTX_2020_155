@@ -255,6 +255,9 @@ static unsigned int const dcuNet40m[DCU_COUNT] = {2,2,2,2,0,
 /* The maximum possibile size (allocated space) of the test point table */
 #define DAQ_GDS_MAX_TP_NUM           0x100
 
+/* We only allow this many TPs to be set */
+#define DAQ_GDS_MAX_TP_ALLOWED	64
+
 /* The total number of test point DCUs */
 #define DAQ_GDS_DCU_NUM       4
 
