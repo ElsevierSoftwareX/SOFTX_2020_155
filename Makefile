@@ -77,8 +77,11 @@ install-% :: src/epics/simLink/%.mdl
 	echo 'echo Cannot run `basename $$0` on `hostname` computer' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'exit 1' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'fi' >> /cvs/cds/$$site/scripts/start$${system};\
-	echo 'cur_date=`date +%y%m%d_%H%M%S`' >> /cvs/cds/$$site/scripts/start$${system};\
-	echo 'burtrb -f /cvs/cds/'$${site}'/target/'$${lower_ifo}$${system}'epics/autoBurt.req -o /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_burt_$${cur_date}.log -v' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'if [ "x`ps h -C ' $${system}epics '`" != x ]; then' >> /cvs/cds/$$site/scripts/kill$${system};\
+	echo 'cur_date=`date +%y%m%d_%H%M%S`' >> /cvs/cds/$$site/scripts/kill$${system};\
+	echo 'burtrb -f /cvs/cds/'$${site}'/target/'$${lower_ifo}$${system}'epics/autoBurt.req -o /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_burt_$${cur_date}.log -v' >> /cvs/cds/$$site/scripts/kill$${system};\
+	echo 'sleep 1' >> /cvs/cds/$$site/scripts/kill$${system};\
+	echo 'fi' >> /cvs/cds/$$site/scripts/kill$${system};\
 	echo /cvs/cds/$$site/scripts/kill$${system} >> /cvs/cds/$$site/scripts/start$${system};\
 	echo sleep 5 >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'sudo killall ' $${system}epics $${system}fe.rtl awgtpman >> /cvs/cds/$$site/scripts/kill$${system};\
@@ -86,7 +89,11 @@ install-% :: src/epics/simLink/%.mdl
 	echo /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd >> /cvs/cds/$$site/scripts/start$${system};\
 	echo '(cd /cvs/cds/'$$site'/target/gds && ./startup_'$${system}'.cmd)' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'sleep 5; sudo killall -q daqd' >> /cvs/cds/$$site/scripts/start$${system};\
-	echo 'burtwb -f /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_restore_$${cur_date}.log -v' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'fname=`ls -t /tmp/'$${system}'_burt_*.snap  2>/dev/null | head -1`' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'if [ "x$$fname" != x ]; then' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'log_fname=$${fname%.*}.log' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'burtwb -f $${fname} -l $${log_fname} -v' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo 'fi' >> /cvs/cds/$$site/scripts/start$${system};\
 	/bin/sed 's/caltech/'$$site'/' src/epics/util/daqconfig.tcl > build/$${system}epics/config/daqconfig;\
 	/usr/bin/install   build/$${system}epics/config/daqconfig  /cvs/cds/$$site/scripts
 
