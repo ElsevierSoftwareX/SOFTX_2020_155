@@ -637,6 +637,14 @@ void *fe_start(void *arg)
   }
 
   printf("Triggered the ADC\n");
+
+  // Total number of various binary I/O modules
+  unsigned int total_bio_boards = cdsPciModules.dioCount
+			+ cdsPciModules.iiroDioCount
+			+ cdsPciModules.iiroDio1Count;
+  // 0 to total_bio_boards*2 counter
+  int cur_bio_card = 0; // Current binary I/O module we read or write
+
   // Enter the coninuous FE control loop  **********************************************************
   while(!vmeDone){
 
@@ -859,13 +867,19 @@ void *fe_start(void *arg)
 
 	// Read Dio cards
   	for(kk=0;kk<cdsPciModules.dioCount;kk++) {
-  		dioInput[kk] = readDio(&cdsPciModules, kk) & 0xff;
+		if (kk == cur_bio_card) {
+  		  dioInput[kk] = readDio(&cdsPciModules, kk) & 0xff;
+		}
 	}
   	for(kk=0;kk<cdsPciModules.iiroDioCount;kk++) {
-  		rioInput[kk] = readIiroDio(&cdsPciModules, kk) & 0xff;
+		if ((cdsPciModules.dioCount + kk) == cur_bio_card) {
+  		  rioInput[kk] = readIiroDio(&cdsPciModules, kk) & 0xff;
+		}
 	}
   	for(kk=0;kk<cdsPciModules.iiroDio1Count;kk++) {
-  		rioInput1[kk] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
+		if ((cdsPciModules.dioCount + cdsPciModules.iiroDioCount + kk) == cur_bio_card) {
+  		  rioInput1[kk] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
+		}
 	}
 
 	// For startup sync to 1pps, loop here
@@ -1071,14 +1085,22 @@ void *fe_start(void *arg)
 
 	// Write Dio cards
   	for(kk=0;kk<cdsPciModules.dioCount;kk++) {
-  		writeDio(&cdsPciModules, kk, dioOutput[kk]);
+		if (total_bio_boards + kk == cur_bio_card) {
+  		  writeDio(&cdsPciModules, kk, dioOutput[kk]);
+		}
 	}
   	for(kk=0;kk<cdsPciModules.iiroDioCount;kk++) {
-  		writeIiroDio(&cdsPciModules, kk, rioOutput[kk]);
+		if (total_bio_boards + cdsPciModules.dioCount + kk == cur_bio_card) {
+  		  writeIiroDio(&cdsPciModules, kk, rioOutput[kk]);
+ 		}
 	}
   	for(kk=0;kk<cdsPciModules.iiroDio1Count;kk++) {
-  		writeIiroDio1(&cdsPciModules, kk, rioOutput1[kk]);
+		if (total_bio_boards + cdsPciModules.dioCount + cdsPciModules.iiroDioCount + kk == cur_bio_card) {
+  		  writeIiroDio1(&cdsPciModules, kk, rioOutput1[kk]);
+		}
 	}
+	cur_bio_card++;
+	cur_bio_card %= total_bio_boards * 2;
 
 #ifndef NO_DAQ
 	// Write DAQ and GDS values once we are synched to 1pps
