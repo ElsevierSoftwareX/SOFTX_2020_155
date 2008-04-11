@@ -277,6 +277,11 @@ sub node_processing {
 
 	$::partOutputs[$::partCnt] = ${$node->{FIELDS}}{Outputs};
 
+	# Account for default Demux 4 outputs (missing # outs number)
+	if ($block_type eq "DEMUX" && ${$node->{FIELDS}}{Outputs} eq undef) {
+		$::partOutputs[$::partCnt] = 4;
+	}
+
 	# Bus creator part is the ADC board
 	if ($block_type eq "BUSC") {
         	require "lib/Adc.pm";
