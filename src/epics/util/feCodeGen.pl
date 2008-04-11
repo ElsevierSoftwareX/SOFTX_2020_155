@@ -603,7 +603,7 @@ for($ii=0;$ii<$subSys;$ii++)
 	#print "Found $counter Inputs for subsystem $ii *********************************\n";
 	$xx = 0;
 	$ts = 1;
-	until(($partsRemaining < 1) || ($xx > 20))
+	until(($partsRemaining < 1) || ($xx > 200))
 	{
 		$xx ++;
 		$loop = $counter ++;
