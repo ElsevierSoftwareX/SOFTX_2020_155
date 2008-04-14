@@ -11640,7 +11640,7 @@ Model {
     }
     Block {
       BlockType		      Reference
-      Name		      "site=site=H1\nrate=2K\ndcuid=27\ngds_node_id=3\nno_sync=1\ncompat_initial_ligo=1"
+      Name		      "site=H1\nrate=2K\ndcuid=27\ngds_node_id=3\nno_sync=1\ncompat_initial_ligo=1"
       Tag		      "cdsParameters"
       Ports		      [1, 1]
       Position		      [85, 15, 125, 75]
