@@ -2412,21 +2412,21 @@ sub system_name_part {
    return $name;
 }
 
-for(0 .. $partCnt-1) {
-	if ($_ >= $subSysPartStop[$cur_subsys_num]) {
+foreach $cur_part_num (0 .. $partCnt-1) {
+	if ($cur_part_num >= $subSysPartStop[$cur_subsys_num]) {
 		$cur_subsys_num += 1;
 	}
-	if ($partType[$_] =~ /Matrix$/) {
-		my $outcnt = $partOutCnt[$_];
-		my $incnt = $partInCnt[$_];
-		if ($partType[$_] eq "MuxMatrix") {
+	if ($partType[$cur_part_num] =~ /Matrix$/) {
+		my $outcnt = $partOutCnt[$cur_part_num];
+		my $incnt = $partInCnt[$cur_part_num];
+		if ($partType[$cur_part_num] eq "MuxMatrix") {
 			# MuxMatrix uses mux and demux parts 
-			$outcnt = $partOutputs[$partOutNum[$_][0]];
-			$incnt = $partInCnt[$partInNum[$_][0]];
+			$outcnt = $partOutputs[$partOutNum[$cur_part_num][0]];
+			$incnt = $partInCnt[$partInNum[$cur_part_num][0]];
 		}
-		my $basename = $partName[$_];
-		if ($partSubName[$_] ne "") {
-			$basename = $partSubName[$_] . "_" . $basename;
+		my $basename = $partName[$cur_part_num];
+		if ($partSubName[$cur_part_num] ne "") {
+			$basename = $partSubName[$cur_part_num] . "_" . $basename;
 		}
 
 # Create comma separated string from the lements of an array
@@ -2436,8 +2436,8 @@ sub commify_series {
     (@_ == 1) ?  $_[0]                                   :
                 join("$sepchar", @_[0 .. $#_]);
 }
-		$collabels = commify_series(@{$partInput[$_]});
-		$rowlabels = commify_series(@{$partOutput[$_]});
+		$collabels = commify_series(@{$partInput[$cur_part_num]});
+		$rowlabels = commify_series(@{$partOutput[$cur_part_num]});
 
 		if (is_top_name($basename)) {
 
@@ -2450,10 +2450,14 @@ sub commify_series {
 		  system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
 		}
 	}
-	if ($partType[$_] =~ /^Filt/) {
-		my $filt_name = $partName[$_];
-		if ($partSubName[$_] ne "") {
-			$filt_name = $partSubName[$_] . "_" . $filt_name;
+	if ($partType[$cur_part_num] =~ /^Filt/) {
+		#print "FILTER No=$cur_part_num Part $partName[$cur_part_num] $partType[$cur_part_num] input partInput=$partInput[$cur_part_num][0] type='$partInputType[$cur_part_num][0]' \n";
+		my $filt_name = $partName[$cur_part_num];
+	if ($partInputType[$cur_part_num][0] eq "Adc") {
+		#exit(1);
+	}
+		if ($partSubName[$cur_part_num] ne "") {
+			$filt_name = $partSubName[$cur_part_num] . "_" . $filt_name;
 		}
 		my $sys_name = uc($skeleton);
 		my $sargs;
@@ -2469,15 +2473,16 @@ sub commify_series {
 			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$usite$sysname" . "_" . $filt_name . ".adl");
 		}
 	}
-	if ($partInputType[$_][0] eq "Adc") {
-		my $part_name = $partName[$_];
-		#print "Part $part_name has Adc input $partInput[$_][0]\n";
-		if ($partType[$_] eq "Filt") {
-		  $monitor_args .= "s/\"$partInput[$_][0]\"/\"" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . "$part_name ($partInput[$_][0])\"/g;";
-		  $monitor_args .= "s/\"$partInput[$_][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "_INMON"  .  "\"/g;";
-		} elsif ($partType[$_] eq "EpicsOut") {
-		  $monitor_args .= "s/\"$partInput[$_][0]\"/\"$part_name ($partInput[$_][0])\"/g;";
-		  $monitor_args .= "s/\"$partInput[$_][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-$part_name" .  "\"/g;";
+	#print "No=$cur_part_num\n";
+	if ($partInputType[$cur_part_num][0] eq "Adc") {
+		my $part_name = $partName[$cur_part_num];
+		#print "ADC input Part $part_name $partType[$cur_part_num] has Adc input \'$partInput[$cur_part_num][0]\'\n";
+		if ($partType[$cur_part_num] eq "Filt") {
+		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
+		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "_INMON"  .  "\"/g;";
+		} elsif ($partType[$cur_part_num] eq "EpicsOut") {
+		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"$part_name ($partInput[$cur_part_num][0])\"/g;";
+		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-$part_name" .  "\"/g;";
 		}
 	}
 }
