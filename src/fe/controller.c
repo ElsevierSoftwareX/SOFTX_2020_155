@@ -1185,7 +1185,7 @@ void *fe_start(void *arg)
 
 	// Compute max time of one cycle.
 	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
-#ifndef SERVO32K
+#if defined(SERVO16K) || defined(SERVO2K)
 	if ((firstTime == 100) && (clock16K == (CYCLE_PER_SECOND - 2)))
 	{
 	    //printf("firstTime=%d clock16K = %d\n", firstTime, clock16K);
