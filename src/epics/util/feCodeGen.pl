@@ -9,6 +9,7 @@ $site = "M1"; # Default value for the site name
 $location = "mit"; # Default value for the location name
 $rate = "60"; # In microseconds (default setting)
 $dcuId = 10; # Default dcu Id
+$specificCpu = -1; # Defaults is to run the FE on the first available CPU
 $shmem_daq = 0; # Do not use shared memory DAQ connection
 $no_sync = 0; # Sync up to 1PPS by default
 $no_daq = 0; # Enable DAQ by default
@@ -94,8 +95,8 @@ open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
 open(OUTH,">./".$hFile) || die "cannot open header file for writing";
 
-#$diag = "./diags\.txt";
-$diag = "/dev/null";
+$diag = "./diags\.txt";
+#$diag = "/dev/null";
 open(OUTD,">".$diag) || die "cannot open diag file for writing";
 
 $mySeq = 0;
@@ -2124,6 +2125,13 @@ if ($compat_initial_ligo) {
 } else {
   print OUTM "#Uncomment to enable initial LIGO compatibility\n";
   print OUTM "#CFLAGS += -DCOMPAT_INITIAL_LIGO\n";
+}
+if ($specificCpu > -1) {
+  print OUTM "#Comment out to run on first available CPU\n";
+  print OUTM "CFLAGS += -DSPECIFIC_CPU=$specificCpu\n";
+} else {
+  print OUTM "#Uncomment to run on a specific CPU\n";
+  print OUTM "#CFLAGS += -DSPECIFIC_CPU=2\n";
 }
 print OUTM "\n";
 print OUTM "all: \$(ALL)\n";
