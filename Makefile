@@ -107,6 +107,7 @@ uninstall-daq-% :: src/epics/simLink/%.mdl
 	site_letter=M;\
 	if test $${site} == llo; then site_letter=L; fi;\
 	if test $${site} == lho; then site_letter=H; fi;\
+	if test $${site} == geo; then site_letter=G; fi;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	datarate=`grep datarate build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
@@ -131,6 +132,7 @@ install-daq-% :: src/epics/simLink/%.mdl
 	site_letter=M;\
 	if test $${site} == llo; then site_letter=L; fi;\
 	if test $${site} == lho; then site_letter=H; fi;\
+	if test $${site} == geo; then site_letter=G; fi;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	datarate=`grep datarate build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
