@@ -94,6 +94,8 @@ install-% :: src/epics/simLink/%.mdl
 	echo 'log_fname=$${fname%.*}.log' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'burtwb -f $${fname} -l $${log_fname} -v' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'fi' >> /cvs/cds/$$site/scripts/start$${system};\
+	echo touch /cvs/cds/$$site/target/$${lower_ifo}$${system}/reboot.log >> /cvs/cds/$$site/scripts/start$${system};\
+	echo chmod 777 /cvs/cds/$$site/target/$${lower_ifo}$${system}/reboot.log >> /cvs/cds/$$site/scripts/start$${system};\
 	/bin/sed 's/caltech/'$$site'/' src/epics/util/daqconfig.tcl > build/$${system}epics/config/daqconfig;\
 	/usr/bin/install   build/$${system}epics/config/daqconfig  /cvs/cds/$$site/scripts
 
