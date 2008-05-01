@@ -1100,7 +1100,8 @@ void *fe_start(void *arg)
 		}
 	}
 	cur_bio_card++;
-	cur_bio_card %= total_bio_boards * 2;
+	if (total_bio_boards) cur_bio_card %= total_bio_boards * 2;
+	else cur_bio_card = 0;
 
 #ifndef NO_DAQ
 	// Write DAQ and GDS values once we are synched to 1pps
@@ -1185,6 +1186,7 @@ void *fe_start(void *arg)
 
 	// Compute max time of one cycle.
 	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
+	//if (clock16K < 2) printf("cycle %d time %d\n", clock16K, cycleTime);
 #if defined(SERVO16K) || defined(SERVO2K)
 	if ((firstTime == 100) && (clock16K == (CYCLE_PER_SECOND - 2)))
 	{
