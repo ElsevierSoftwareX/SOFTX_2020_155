@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.32 2008/02/21 00:13:27 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.33 2008/05/01 17:53:51 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -703,7 +703,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	  if ((tplimit - 1) < 24) gdsMonitor[tplimit - 1] = 0;
 	}
 
-	for(ii=0; ii<DCU_MAX_CHANNELS && validTp < tplimit; ii++)
+	for(ii=0; validTp < GM_DAQ_MAX_TPS && ii < tplimit; ii++)
 	{
 		/* Get TP number from shared memory */
 		testVal = gdsPtr->tp[tpx][0][ii];
@@ -773,7 +773,15 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	if(sysRate == DAQ_2K_SAMPLE_SIZE)
 		tpx = 1;
 	else tpx = 0;
-	for(ii=0; ii<DCU_MAX_CHANNELS && validTp < GM_DAQ_MAX_TPS; ii++)
+
+        for(tplimit = GM_DAQ_MAX_TPS; tplimit; tplimit--) {
+          // See if find the last test point number
+          if (gdsPtr->tp[tpx][0][tplimit - 1]) break;
+          // Clear tp monitoring slot 
+          if ((tplimit - 1) < 8) gdsMonitor[24 + tplimit - 1] = 0;
+        }
+
+	for(ii=0; validTp < GM_DAQ_MAX_TPS && ii < tplimit; ii++)
 	{
 		/* Get EXC number from shared memory */
 		testVal = gdsPtr->tp[tpx][0][ii];
