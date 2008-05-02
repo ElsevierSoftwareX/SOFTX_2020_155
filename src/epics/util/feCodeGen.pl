@@ -1376,17 +1376,23 @@ if(($partType[$xx] eq "TERM") || ($partType[$xx] eq "GROUND") || ($partType[$xx]
 print "Counted $processCnt parts out of total $ftotal\n";
 if($processCnt != $ftotal)
 {
-	print "Fatal error - not all parts are in processing list!!!!!\n";
+	print "Fatal error - not all parts are in processing list!\n";
 	%seen = ();
 	@missing = ();
 	@seen{@processName} = ();
 	foreach $item (@xpartName) {
 		push (@missing, $item) unless exists $seen{$item};
 	}
-	print "List of part not counted (FIXME: this list is too long and useless???):\n";
+	print "List of parts not counted:\n";
 	foreach  (@missing) {
-		print $_, "\n";
+		my $pt = $partType[$CDS::Parser::parts{$_}];
+		if ($pt ne "INPUT" && $pt ne "OUTPUT" && $pt ne "GROUND" 
+			&& $pt ne "TERM" && $pt ne "BUSS" && $pt ne "BUSC"
+			&& $pt ne "EpicsIn") {
+			print $_, " ", $partType[$CDS::Parser::parts{$_}], "\n";
+		}
 	}
+	print "Please check the model for missing links around these parts.\n";
 	exit(1);
 }
 
