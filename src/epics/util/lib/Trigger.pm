@@ -53,6 +53,7 @@ sub printFrontEndVars  {
 # Returns calculated code string
 sub frontEndInitCode {
         my ($i) = @_;
+	return ""; 
 }
 
 # Figure out part input code
