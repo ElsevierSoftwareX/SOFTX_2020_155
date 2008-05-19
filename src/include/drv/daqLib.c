@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.34 2008/05/15 00:07:46 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.35 2008/05/19 17:47:31 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -503,8 +503,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       	  /* add this data offset to the data pointer */
       	  pFloat += decSlot;
       	}
-//#if defined(COMPAT_INITIAL_LIGO)
-#if defined(__linux__)
+#if defined(COMPAT_INITIAL_LIGO)
 	#define byteswap(a,b) ((char *)&a)[0] = ((char *)&b)[3]; ((char *)&a)[1] = ((char *)&b)[2];((char *)&a)[2] = ((char *)&b)[1];((char *)&a)[3] = ((char *)&b)[0];
 #else	
 	#define byteswap(a,b) a
