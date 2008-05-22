@@ -136,7 +136,7 @@ static const char * const dcuName[DCU_COUNT] = {"DAQSC",
 					 "TP16K", "TP2K",
 					 "LSC", "ASC",
                                          "SOS", "SUS_EX",
-#ifdef _ADVANCED_LIGO
+#if defined(_ADVANCED_LIGO) && !defined(COMPAT_INITIAL_LIGO)
 "SEI",
 #else
 "SUS_EY",
@@ -330,13 +330,13 @@ typedef union GDS_CNTRL_BLOCK {
     unsigned int tpNum2k[2][DAQ_GDS_MAX_TP_NUM];
   } tpe;
 } GDS_CNTRL_BLOCK;
+#endif
 
 /* GDS test point table structure for FE to frame builder communication */
 typedef struct cdsDaqNetGdsTpNum {
    int count; /* test points count */
    int tpNum[DAQ_GDS_MAX_TP_NUM];
 } cdsDaqNetGdsTpNum;
-#endif
 
 #define GDS_TP_MAX_FE	1250
 
