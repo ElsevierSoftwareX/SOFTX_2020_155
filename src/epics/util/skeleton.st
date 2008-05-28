@@ -399,7 +399,7 @@ state monScreen{
 %%             pFilt->inputs[ii].rset = 1;
 %%	       usleep(100);
 %%
-%%	       for (kk = 0; kk < 1000; kk++) {
+%%	       for (kk = 0; kk < 2000; kk++) {
 %%		 int vme_ack;
 %%		 vme_ack = pFilt->coef_load_error;
 %%		 if (vme_ack == -1) {
@@ -417,7 +417,7 @@ state monScreen{
 %%		 }
 %%		 usleep(100);
 %%	       }
-%%	       if (kk == 1000) {
+%%	       if (kk == 2000) {
 		 strcpy(msg, "Error: front-end timeout");
 		 pvPut(msg);
 %%		 break;
@@ -527,7 +527,7 @@ state monScreen{
 %%          /* Send new coeff flags to Pentium */
 %%          pFilt->inputs[ii].rset = 1;
 %%	    usleep(100);
-%%	    for (kk = 0; kk < 1000; kk++) {
+%%	    for (kk = 0; kk < 2000; kk++) {
 %%		int vme_ack;
 %%		vme_ack = pFilt->coef_load_error;
 %%		if (vme_ack == -1) {
@@ -543,7 +543,7 @@ state monScreen{
 %%		}
 %%		usleep(100);
 %%	    }
-%%	    if (kk == 1000) {
+%%	    if (kk == 2000) {
 		strcpy(msg, "Error: front-end timeout");
 %%	    }
 #endif
