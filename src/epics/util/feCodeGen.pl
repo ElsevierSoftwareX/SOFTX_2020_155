@@ -2102,7 +2102,11 @@ if ($shmem_daq) {
 } else {
   print OUTM "#Uncomment to enable local frame builder; comment out USE_GM setting too\n";
   print OUTM "#CFLAGS += -DSHMEM_DAQ\n";
+if ($no_daq) {
+  print OUTM "#CFLAGS += -DUSE_GM=1\n";
+} else {
   print OUTM "CFLAGS += -DUSE_GM=1\n";
+}
 }
 # Use oversampling code if not 64K system
 if($rate != 15) {
