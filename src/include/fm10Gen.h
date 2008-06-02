@@ -1,7 +1,7 @@
 #ifndef FM10GEN_H
 #define FM10GEN_H
 
-static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.3 2006/05/03 19:27:59 aivanov Exp $";
+static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.4 2008/06/02 19:57:16 aivanov Exp $";
 
 /*****************************************************************************/
 /*ORGANIZATION OF THE SWITCH CONTROL REGISTER*/
@@ -144,6 +144,7 @@ typedef struct COEF{
   double firFiltCoeff[MAX_FIR_MODULES][FILTERS][MAX_FIR_COEFFS];
   /* firHistory is huge, 5 megabytes. may need to get rid of FILTERS dimension */
   double firHistory[MAX_FIR_MODULES][FILTERS][FIR_POLYPHASE_SIZE][FIR_TAPS];
+  double prevFirOutput[MAX_FIR_MODULES];
 #endif
 
 }COEF;
