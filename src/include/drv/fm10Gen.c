@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.15 2008/03/04 23:49:03 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.16 2008/06/02 19:57:16 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -659,6 +659,7 @@ inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int
   double temp;
   static VME_FM_OP_COEF localCoeff;
 
+
 #ifdef FIR_FILTERS
 # define MAX_UPDATE_CYCLE (MAX_FIR_SO_SECTIONS+1)
   static double localFirFiltCoeff[FILTERS][MAX_FIR_COEFFS];
@@ -674,6 +675,8 @@ inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int
 	modNum1, filtNum, type);
   }
 #endif
+
+  printf("readCoefVme2: module=%d filter=%d filterType=%d\n", modNum1, filtNum, type);
 
   ii = 0;
   if (cycle == 0) {
@@ -892,6 +895,7 @@ inline void checkFiltResetId(int bankNum, FILT_MOD *pL, volatile FILT_MOD *dspVm
 
     /* Check if new coeffs */
     if (status & 1) {
+      printf("New coeff request; bank=%d \n", bankNum);
       filtResetId[id].fmResetCoeff = bankNum + 1;
       filtResetId[id].fmResetDsp = pL;
     } else filtResetId[id].fmResetCoeff = 0;
@@ -1273,21 +1277,28 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
 
 #ifdef FIR_FILTERS
     int filterType = pC->coeffs[modNum].filterType[ii];
-    extern int clock16K;
-    int firNum = (clock16K / 32) % 32;
     if (filterType) {
-	/* FIR filter */
-  	--filterType;
+      extern int clock16K;
+      int firNum = (clock16K / 32) % 32;
+      //int firNum = clock16K % 32;
+      //printf("clock16K=%d; firNum=%d\n", clock16K, firNum);
+
+      /* FIR filter */
+      --filterType;
+      if (clock16K % 32) filtData = pC->prevFirOutput[filterType];
+      else {
 	if (filterType >=0 && filterType < MAX_FIR_MODULES) {
 	  double input = fmInput * pC->firFiltCoeff[filterType][ii][0]; /* overall input scale factor */
 	  filtData = fir_filter(sw_in?input:0,
 			      &(pC->firFiltCoeff[filterType][ii][1]),
 			      pC->coeffs[modNum].filtSections[ii]*4,
 			      &(pC->firHistory[filterType][ii][firNum][0]));
+	  pC->prevFirOutput[filterType] = filtData;
 	} else {
 	  filtData = filterType;
 	  printf("module %d; filter %d; filterType = %d\n", modNum, ii, filterType);
 	}
+      }
     } else
 #endif
     /* Calculate filter */
