@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.16 2008/06/02 19:57:16 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.17 2008/06/03 18:02:57 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -1474,20 +1474,6 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
     /* Set Output Test Point */
     pFilt->data[modNum].testpoint = output;
 
-#if defined(SERVO5HZ)
-    avg = output;
-#else
-    /* Do the Decimation regardless of whether it is enabled or disabled */
-    avg = iir_filter(output,
-#if defined(SERVOMIXED)
-		     rate==16384? sixteenKAvgCoeff: twoKAvgCoeff,
-#else
-		     avgCoeff,
-#endif
-		     2,
-		     pC->coeffs[modNum].decHist);
-#endif
-
     /* Test Output Switch and output hold on/off */
     if (opSwitchE & OPSWITCH_HOLD_ENABLE) {
 	/* Assign output to last held value. */
@@ -1499,7 +1485,10 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
 
 	/* Decimation */
 	if (opSwitchE & OPSWITCH_DECIMATE_ENABLE) 
+	{
+	    avg = iir_filter(output, avgCoeff, 2, pC->coeffs[modNum].decHist);
 	  pFilt->data[modNum].output16Hz = avg;
+	}
 	else
 	  pFilt->data[modNum].output16Hz = output;
       } else {
