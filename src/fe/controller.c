@@ -190,25 +190,22 @@ char daqArea[2*DAQ_DCU_SIZE];		/* Space allocation for daqLib buffers	*/
 
 /* Oversamping base rate is 64K */
 /* Coeffs for the 2x downsampling (32K system) filter */
-static double feCoeff2x[13] =
-        {0.014605318489015,
-        -1.00613305346332,    0.31290490560439,   -0.00000330106714,    0.99667220785946,
-        -0.85833656728801,    0.58019077541120,    0.30560272900767,    0.98043281669062,
-        -0.77769970124012,    0.87790692599199,    1.65459644813269,    1.00000000000000};
-
+static double feCoeff2x[9] =
+        {0.053628649721183,
+        -1.25687596603711,    0.57946661417301,    0.00000415782507,    1.00000000000000,
+        -0.79382359542546,    0.88797791037820,    1.29081406322442,    1.00000000000000};
 /* Coeffs for the 4x downsampling (16K system) filter */
-static double feCoeff4x[13] =
-        {0.0032897561126272,
-        -1.52626060254343,    0.60240176412244,   -1.41321371411946,    0.99858678588255,
-        -1.57309308067347,    0.75430004092087,   -1.11957678237524,    0.98454170534006,
-        -1.65602262774366,    0.92929745639579,    0.26582650057056,    0.99777026734589};
+static double feCoeff4x[9] =
+	{0.014805052402446,  
+	-1.71662585474518,    0.78495484219691,   -1.41346289716898,   0.99893884152400,
+	-1.68385964238855,    0.93734519457266,    0.00000127375260,   0.99819981588176};
 
 /* Coeffs for the 32x downsampling filter (2K system) */
-static double feCoeff32x[13] =
-        {0.00099066651652901,
-        -1.94077236718909,    0.94207456685786,   -1.99036946487329,    1.00000000000000,
-        -1.96299410148309,    0.96594271100631,   -1.98391795425616,    1.00000000000000,
-        -1.98564991068275,    0.98982555984543,   -1.89550394774336,    1.00000000000000};
+static double feCoeff32x[9] =
+        {0.0001104130574447,
+        -1.97018349613882,    0.97126719875540,   -1.99025960812101,    0.99988962634797,
+        -1.98715023886379,    0.99107485707332,    2.00000000000000,    1.00000000000000};
+
 
 double dHistory[96][40];
 double dDacHistory[96][40];
@@ -637,6 +634,9 @@ void *fe_start(void *arg)
   }
 
   printf("Triggered the ADC\n");
+#ifdef OMC_CODE
+  cdsPciModules.gps = 0;
+#endif
 
   // Total number of various binary I/O modules
   unsigned int total_bio_boards = cdsPciModules.dioCount
@@ -826,7 +826,7 @@ void *fe_start(void *arg)
 					dWord[kk][31] = adcData[kk][31];
 				} else {
 				  if (dWordUsed[kk][ii]) {
-				  	dWord[kk][ii] = iir_filter((double)adcData[kk][ii],FE_OVERSAMPLE_COEFF,3,&dHistory[ii+kk*32][0]);
+				  	dWord[kk][ii] = iir_filter((double)adcData[kk][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+kk*32][0]);
 				  }
 				}
 				packedData ++;
@@ -930,83 +930,6 @@ void *fe_start(void *arg)
 	// Call the front end specific software
         rdtscl(cpuClock[4]);
 
-  // VME input (for testing its speed only!!!)
-  if (cdsPciModules.vmeBridgeCount > 0) {
-    cdsPciModules.vme[0][0x10] = clock16K;
-//    cdsPciModules.vme_reg[0][SBS_618_DMA_COMMAND] = 0x10;
-
-    //cdsPciModules.vme_reg[0][SBS_618_DMA_COMMAND] = 0x10; // Load command register
-
-#if 0
-    cdsPciModules.vme_reg[0][SBS_618_DMA_PCI_ADDRESS0] = 0;
-    cdsPciModules.vme_reg[0][SBS_618_DMA_PCI_ADDRESS1] = 0;
-    cdsPciModules.vme_reg[0][SBS_618_DMA_PCI_ADDRESS2] = 0;
-#endif
-
-    *((volatile unsigned int *)&(cdsPciModules.vme_reg[0][SBS_618_DMA_PCI_ADDRESS0])) = 0;
-#if 0
-    cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS3] = 0x50;
-    cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS2] = 0x0;
-    cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS1] = 0x0;
-    cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS0] = 0x0;
-#endif
-
-    *((volatile unsigned int *)&(cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS2])) =  0x00405000;
-#if 0
-    *((unsigned short *)&(cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS2])) =  0x0050;
-    *((unsigned short *)&(cdsPciModules.vme_reg[0][SBS_618_DMA_VME_ADDRESS0])) =  0x0000;
-#endif
-
-    cdsPciModules.vme_reg[0][SBS_618_DMA_REMAINDER_COUNT] = 32;
-    cdsPciModules.vme_reg[0][SBS_618_DMA_REMOTE_REMAINDER_COUNT] = 32;
-
-#if 0
-    cdsPciModules.vme_reg[0][SBS_618_DMA_PACKET_COUNT0] = 0;
-    cdsPciModules.vme_reg[0][SBS_618_DMA_PACKET_COUNT1] = 0;
-#endif
-
-    //cdsPciModules.vme_reg[0][SBS_618_REMOTE_COMMAND_REGISTER2] = 0x30;
-    cdsPciModules.vme_reg[0][SBS_618_DMA_COMMAND] = 0x90; // start DMA
-
-    // poll for DMA done
-    unsigned char lsr = 0;
-    unsigned int cntr = 0;
-#if 1
-    do {
-	//if (cntr > 1000000) {
-	//	printk ("DMA timeout; lsr=0x%x\n", lsr);
-	//	vmeDone = 1;
-	//}
-	usleep(1);
-        lsr = cdsPciModules.vme_reg[0][SBS_618_DMA_COMMAND]; // Poll for DMA done bit
-	cntr ++;
-     } while ( (lsr & 0x2) == 0 );
-#endif
-
-    dWord[0][6] = (double)(((unsigned int *)cdsPciModules.buf)[0x0]);
-    //cdsPciModules.vme[0][0x10] = clock16K;
-    //dWord[0][1] = (double)cdsPciModules.vme[0][0x10];
-#if 0
-    dWord[0][1] = (double)cdsPciModules.vme[0][0x11];
-    dWord[0][2] = (double)cdsPciModules.vme[0][0x12];
-    dWord[0][3] = (double)cdsPciModules.vme[0][0x13];
-    dWord[0][4] = (double)cdsPciModules.vme[0][0x14];
-    dWord[0][5] = (double)cdsPciModules.vme[0][0x15];
-    dWord[0][6] = (double)cdsPciModules.vme[0][0x16];
-    dWord[0][7] = (double)cdsPciModules.vme[0][0x17];
-
-    dWord[0][8] = (double)cdsPciModules.vme[0][0x18];
-    dWord[0][9] = (double)cdsPciModules.vme[0][0x19];
-    dWord[0][10] = (double)cdsPciModules.vme[0][0x1a];
-    dWord[0][11] = (double)cdsPciModules.vme[0][0x1b];
-    dWord[0][12] = (double)cdsPciModules.vme[0][0x1c];
-    dWord[0][13] = (double)cdsPciModules.vme[0][0x1d];
-    dWord[0][14] = (double)cdsPciModules.vme[0][0x1e];
-    dWord[0][15] = (double)cdsPciModules.vme[0][0x1f];
-#endif
-    cdsPciModules.vme[0][0x10] = clock16K;
-  } 
-
 
 #if (NUM_SYSTEMS > 1) && !defined(PNM)
   	for (system = 0; system < 1; system++)
@@ -1051,7 +974,7 @@ void *fe_start(void *arg)
 #ifdef OVERSAMPLE_DAC
 			if (dacOutUsed[jj][ii]) {
 			  double dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
-		 	  dacOut[jj][ii] = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,3,&dDacHistory[ii+jj*16][0]);
+		 	  dacOut[jj][ii] = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
 			   dacOut[jj][ii] *= OVERSAMPLE_TIMES;
 			}
 #endif
