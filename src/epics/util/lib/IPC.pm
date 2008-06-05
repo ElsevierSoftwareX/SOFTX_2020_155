@@ -42,7 +42,7 @@ sub frontEndInitCode {
 sub fromExp {
         my ($i, $j) = @_;
 	my $partName = $::partInput[$i][$j];
-	#print "Reflective memory Input $partName\n";
+	#print "IPC $partName\n";
 	die "IPC Part $partName invalid: its name must be the hex address\n" unless
 		$partName =~ /^.*0x(\d|[abcdefABCDEF])+$/;
 	my $addressString = $partName;
@@ -61,7 +61,7 @@ sub fromExp {
 sub frontEndCode {
 	my ($i) = @_;
 	my $partName = $::xpartName[$i];
-	#print "Reflective Memory Address is $partName\n";
+	# print "IPC Address is $partName\n";
 	die "RfmIO Part $partName invalid: its name must be the hex address\n" unless
 		$partName =~ /^.*0x(\d|[abcdefABCDEF])+$/;
 	my $addressString = $partName;
@@ -71,11 +71,11 @@ sub frontEndCode {
 		die "RfmIO Part $::xpartName[$i] invalid: address must be 4-byte aligned\n";
 	}
         my $fromType = $::partInputType[$i][$_];
-        if (($fromType ne "GROUND") && ($::partInput[$i][0] ne "NC")) {
+        if (($fromType ne "GROUND") && ($::partInput[$i][0] ne "NC") && ($fromType ne "")) {
 		return "if (_ipc_shm != 0) {\n"
         		. "  // IPC output\n"
                 	. "  *((float *)(((char *)_ipc_shm) + $addressString)) = $::fromExp[0];\n"
 			. "}\n";
         }
-        return "";
+        return " ";
 }
