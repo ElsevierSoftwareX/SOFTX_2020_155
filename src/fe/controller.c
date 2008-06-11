@@ -888,15 +888,18 @@ void *fe_start(void *arg)
 		if(onePps > ONE_PPS_THRESH) 
 		 {
 			firstTime = 100;
+#ifdef SERVO_64K
+			firstTime = 200;
+#endif
 			onePpsHi = 0;
 		 }
 #ifdef NO_SYNC
-		firstTime = 100;
+		firstTime = 200;
 			onePpsHi = 0;
 #endif
 		/* Do not do 1PPS sync when running on timer */
 		if (run_on_timer) {
-			firstTime = 100;
+			firstTime = 200;
 			onePpsHi = 0;
 		}
 	}
