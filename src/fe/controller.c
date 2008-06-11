@@ -627,6 +627,9 @@ void *fe_start(void *arg)
   if (!run_on_timer) {
     // Trigger the ADC to start running
     gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
+#ifdef SERVO64K
+    gsaDacTrigger(cdsPciModules.dacCount);
+#endif
   } else {
     printf("*******************************\n");
     printf("* Running with RTLinux timer! *\n");
@@ -888,7 +891,7 @@ void *fe_start(void *arg)
 		if(onePps > ONE_PPS_THRESH) 
 		 {
 			firstTime = 100;
-#ifdef SERVO_64K
+#ifdef SERVO64K
 			firstTime = 200;
 #endif
 			onePpsHi = 0;
@@ -1156,7 +1159,7 @@ void *fe_start(void *arg)
 		pLocalEpics->epicsOutput.ovAccum = 0;
 	  }
         }
-        if((subcycle == 0) && (daqCycle == 13))
+        if(clock16K == 200)
         {
 	  for(jj=0;jj<cdsPciModules.adcCount;jj++)
 	  {
