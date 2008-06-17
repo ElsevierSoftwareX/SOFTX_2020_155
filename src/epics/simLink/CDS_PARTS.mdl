@@ -1,6 +1,6 @@
 Library {
   Name			  "CDS_PARTS"
-  Version		  6.6
+  Version		  7.0
   MdlSubVersion		  0
   SavedCharacterEncoding  "UTF-8"
   LibraryType		  "BlockLibrary"
@@ -32,16 +32,16 @@ Library {
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "aivanov"
+  LastModifiedBy	  "Rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Mar 21 14:47:21 2008"
-  ModelVersionFormat	  "1.%<AutoIncrement:106>"
+  LastModifiedDate	  "Thu Jun 12 11:35:24 2008"
+  RTWModifiedTimeStamp	  0
+  ModelVersionFormat	  "1.%<AutoIncrement:111>"
   ConfigurationManager	  "None"
   SimulationMode	  "normal"
   LinearizationMsg	  "none"
   Profile		  off
   ParamWorkspaceSource	  "MATLABWorkspace"
-  AccelVerboseBuild	  off
   CovSaveName		  "covdata"
   CovMetricSettings	  "dw"
   CovNameIncrementing	  off
@@ -71,7 +71,6 @@ Library {
   ExtModeSkipDownloadWhenConnect off
   ExtModeLogAll		  on
   ExtModeAutoUpdateStatusClock off
-  ProdHWDeviceType	  "32-bit Generic"
   ShowModelReferenceBlockVersion off
   ShowModelReferenceBlockIO off
   BlockDefaults {
@@ -88,12 +87,6 @@ Library {
   }
   BlockParameterDefaults {
     Block {
-      BlockType		      Abs
-      SaturateOnIntegerOverflow	on
-      ZeroCross		      on
-      SampleTime	      "-1"
-    }
-    Block {
       BlockType		      BusCreator
       Inputs		      "4"
       DisplayOption	      "none"
@@ -106,18 +99,6 @@ Library {
       OutputAsBus	      off
     }
     Block {
-      BlockType		      Constant
-      Value		      "1"
-      VectorParams1D	      on
-      SamplingMode	      "Sample based"
-      OutDataTypeMode	      "Inherit from 'Constant value'"
-      OutDataType	      "sfix(16)"
-      ConRadixGroup	      "Use specified scaling"
-      OutScaling	      "2^0"
-      SampleTime	      "inf"
-      FramePeriod	      "inf"
-    }
-    Block {
       BlockType		      Demux
       Outputs		      "4"
       DisplayOption	      "none"
@@ -127,13 +108,17 @@ Library {
       BlockType		      Gain
       Gain		      "1"
       Multiplication	      "Element-wise(K.*u)"
+      ParamMin		      "[]"
+      ParamMax		      "[]"
       ParameterDataTypeMode   "Same as input"
-      ParameterDataType	      "sfix(16)"
+      ParameterDataType	      "fixdt(1,16,0)"
       ParameterScalingMode    "Best Precision: Matrix-wise"
-      ParameterScaling	      "2^0"
+      ParameterScaling	      "[]"
+      OutMin		      "[]"
+      OutMax		      "[]"
       OutDataTypeMode	      "Same as input"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
       LockScale		      off
       RndMeth		      "Floor"
       SaturateOnIntegerOverflow	on
@@ -150,9 +135,11 @@ Library {
       BusOutputAsStruct	      off
       PortDimensions	      "-1"
       SampleTime	      "-1"
+      OutMin		      "[]"
+      OutMax		      "[]"
       DataType		      "auto"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
       SignalType	      "auto"
       SamplingMode	      "auto"
       LatchByDelayingOutsideSignal off
@@ -165,8 +152,7 @@ Library {
       Inputs		      "2"
       IconShape		      "rectangular"
       AllPortsSameDT	      on
-      OutDataTypeMode	      "Logical (see Configuration Parameters: Optimiza"
-"tion)"
+      OutDataTypeMode	      "Logical (see Configuration Parameters: Optimization)"
       LogicDataType	      "uint(8)"
       SampleTime	      "-1"
     }
@@ -186,9 +172,11 @@ Library {
       BusOutputAsStruct	      off
       PortDimensions	      "-1"
       SampleTime	      "-1"
+      OutMin		      "[]"
+      OutMax		      "[]"
       DataType		      "auto"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
       SignalType	      "auto"
       SamplingMode	      "auto"
       OutputWhenDisabled      "held"
@@ -201,9 +189,11 @@ Library {
       CollapseMode	      "All dimensions"
       CollapseDim	      "1"
       InputSameDT	      on
+      OutMin		      "[]"
+      OutMax		      "[]"
       OutDataTypeMode	      "Same as first input"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
       LockScale		      off
       RndMeth		      "Zero"
       SaturateOnIntegerOverflow	on
@@ -211,24 +201,6 @@ Library {
     }
     Block {
       BlockType		      Reference
-    }
-    Block {
-      BlockType		      RelationalOperator
-      Operator		      ">="
-      InputSameDT	      on
-      LogicOutDataTypeMode    "Logical (see Configuration Parameters: Optimiza"
-"tion)"
-      LogicDataType	      "uint(8)"
-      ZeroCross		      on
-      SampleTime	      "-1"
-    }
-    Block {
-      BlockType		      Saturate
-      UpperLimit	      "0.5"
-      LowerLimit	      "-0.5"
-      LinearizeAsGain	      on
-      ZeroCross		      on
-      SampleTime	      "-1"
     }
     Block {
       BlockType		      SubSystem
@@ -255,9 +227,11 @@ Library {
       CollapseMode	      "All dimensions"
       CollapseDim	      "1"
       InputSameDT	      on
+      OutMin		      "[]"
+      OutMax		      "[]"
       OutDataTypeMode	      "Same as first input"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
       LockScale		      off
       RndMeth		      "Floor"
       SaturateOnIntegerOverflow	on
@@ -268,7 +242,12 @@ Library {
       Criteria		      "u2 >= Threshold"
       Threshold		      "0"
       InputSameDT	      on
+      OutMin		      "[]"
+      OutMax		      "[]"
       OutDataTypeMode	      "Inherit via internal rule"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
+      LockScale		      off
       RndMeth		      "Floor"
       SaturateOnIntegerOverflow	on
       ZeroCross		      on
@@ -283,6 +262,56 @@ Library {
       SampleTime	      "1"
       StateMustResolveToSignalObject off
       RTWStateStorageClass    "Auto"
+    }
+    Block {
+      BlockType		      Abs
+      ZeroCross		      on
+      SampleTime	      "-1"
+      OutMax		      "[]"
+      OutDataTypeMode	      "Same as input"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
+      LockScale		      off
+      RndMeth		      "Floor"
+      SaturateOnIntegerOverflow	on
+    }
+    Block {
+      BlockType		      Constant
+      Value		      "1"
+      VectorParams1D	      on
+      SamplingMode	      "Sample based"
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeMode	      "Inherit from 'Constant value'"
+      OutDataType	      "fixdt(1,16,0)"
+      ConRadixGroup	      "Use specified scaling"
+      OutScaling	      "[]"
+      SampleTime	      "inf"
+      FramePeriod	      "inf"
+    }
+    Block {
+      BlockType		      RelationalOperator
+      Operator		      ">="
+      InputSameDT	      on
+      LogicOutDataTypeMode    "Logical (see Configuration Parameters: Optimization)"
+      LogicDataType	      "uint(8)"
+      ZeroCross		      on
+      SampleTime	      "-1"
+    }
+    Block {
+      BlockType		      Saturate
+      UpperLimit	      "0.5"
+      LowerLimit	      "-0.5"
+      LinearizeAsGain	      on
+      ZeroCross		      on
+      SampleTime	      "-1"
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeMode	      "Same as input"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
+      LockScale		      off
+      RndMeth		      "Floor"
     }
   }
   AnnotationDefaults {
@@ -305,7 +334,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [993, 120, 1662, 441]
+    Location		    [892, 131, 1561, 452]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -382,7 +411,6 @@ Library {
       MinAlgLoopOccurrences   off
       RTWSystemCode	      "Auto"
       FunctionWithSeparateData off
-      MaskHideContents	      off
       System {
 	Name			"EpicsParts"
 	Location		[798, 256, 1031, 669]
@@ -402,16 +430,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "EpicsBinIn"
 	  Tag			  "cdsEpicsBinIn"
-	  Description		  "Purpose:                                   "
-"                                         \nCreate an EPICS binary (0 or 1) in"
-"put channel to the FE realtime controls.          \n                         "
-"                                                           \nOperation:      "
-"                                                                    \nOutputs"
-" value from an EPICS ai record. Value is binary input (bi Epics record type)."
-"\n                                                                           "
-"         \nUsage:                                                            "
-"                  \nName the part with the desired EPICS channel name.       "
-"                           "
+	  Description		  "Purpose:                                                                            \nCreate an EPICS binary (0 or 1) input channel to the FE realtime controls.          \n                                                                                    \nOperation:                                                                          \nOutputs value from an EPICS ai record. Value is binary input (bi Epics record type).\n                                                                                    \nUsage:                                                                              \nName the part with the desired EPICS channel name.                                  "
 	  Ports			  [1, 1]
 	  Position		  [125, 93, 180, 117]
 	  BackgroundColor	  "darkGreen"
@@ -431,16 +450,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "EpicsInput"
 	  Tag			  "cdsEpicsIn"
-	  Description		  "Purpose:                                   "
-"                                           \nCreate an EPICS input channel co"
-"nnection to the FE realtime controls.                 \n                     "
-"                                                                 \nOperation:"
-"                                                                            "
-"\nOutputs value from an EPICS ai record. Value is floating point with a preci"
-"sion of 3..\n                                                                "
-"                      \nUsage:                                               "
-"                                 \nName the part with the desired EPICS chann"
-"el name.                                    "
+	  Description		  "Purpose:                                                                              \nCreate an EPICS input channel connection to the FE realtime controls.                 \n                                                                                      \nOperation:                                                                            \nOutputs value from an EPICS ai record. Value is floating point with a precision of 3..\n                                                                                      \nUsage:                                                                                \nName the part with the desired EPICS channel name.                                    "
 	  Ports			  [1, 1]
 	  Position		  [40, 94, 90, 116]
 	  BackgroundColor	  "green"
@@ -461,12 +471,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "EpicsOutput"
 	  Tag			  "cdsEpicsOutput"
-	  Description		  "Purpose:                                   "
-"       \nOutput a FE signal to an EPICS channel.           \n                "
-"                                  \nOperation:                               "
-"         \nTakes input value and passes it to EPICS record.  \n              "
-"                                    \nUsage:                                 "
-"           \nName the part with the desired EPICS rrecord name."
+	  Description		  "Purpose:                                          \nOutput a FE signal to an EPICS channel.           \n                                                  \nOperation:                                        \nTakes input value and passes it to EPICS record.  \n                                                  \nUsage:                                            \nName the part with the desired EPICS rrecord name."
 	  Ports			  [1, 1]
 	  Position		  [80, 29, 125, 51]
 	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
@@ -487,32 +492,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "EpicsRemoteIntlk"
 	  Tag			  "cdsRemoteIntlk"
-	  Description		  "Purpose:                                   "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"  \nUsed to turn off a switch in another subsystem using EPICS channel access"
-". Typically, this is used as a remote interlock function.                    "
-"                                                                             "
-"                                                 \n                          "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                   \nOperation:                                              "
-"                                                                             "
-"                                                                             "
-"                                                                  \nIf input "
-"is zero, sends a zero to the specified EPICS channel name. Any other input va"
-"lue results in a NOOP. Input must be an integer.                             "
-"                                                                             "
-"                                    \n                                       "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"      \nUsage: Give the name of the EPICS channel to be written to, including"
-" the subsystem. For example: SEI-HMY_ACT_SW. This function will also produce "
-"a local EPICS variable for monitoring. For example, the above would result in"
-" a local EPICS variable of IFO:SUBSYS-SEI_HMY_ACT_SW."
+	  Description		  "Purpose:                                                                                                                                                                                                                                                                            \nUsed to turn off a switch in another subsystem using EPICS channel access. Typically, this is used as a remote interlock function.                                                                                                                                                  \n                                                                                                                                                                                                                                                                                    \nOperation:                                                                                                                                                                                                                                                                          \nIf input is zero, sends a zero to the specified EPICS channel name. Any other input value results in a NOOP. Input must be an integer.                                                                                                                                              \n                                                                                                                                                                                                                                                                                    \nUsage: Give the name of the EPICS channel to be written to, including the subsystem. For example: SEI-HMY_ACT_SW. This function will also produce a local EPICS variable for monitoring. For example, the above would result in a local EPICS variable of IFO:SUBSYS-SEI_HMY_ACT_SW."
 	  Ports			  [1]
 	  Position		  [80, 151, 130, 179]
 	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
@@ -533,14 +513,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "M1:SYS-FOO_BAR"
 	  Tag			  "cdsEzCaRead"
-	  Description		  "Purpose:                                   "
-"                    \nUsed to input an Epics signal.                         "
-"        \n                                                               \nOp"
-"eration:                                                     \nUsing ezcaread"
-"() function to get Epics input from a remote IOC.\n                          "
-"                                     \nUsage:                                "
-"                         \nGive the name of the EPICS channel to be read.    "
-"             "
+	  Description		  "Purpose:                                                       \nUsed to input an Epics signal.                                 \n                                                               \nOperation:                                                     \nUsing ezcaread() function to get Epics input from a remote IOC.\n                                                               \nUsage:                                                         \nGive the name of the EPICS channel to be read.                 "
 	  Ports			  [0, 1]
 	  Position		  [90, 225, 130, 285]
 	  BackgroundColor	  "[0.792741, 0.563703, 0.940000]"
@@ -560,12 +533,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "cdsEzCaWrite"
 	  Tag			  "cdsEzCaWrite"
-	  Description		  "Purpose:                                   "
-" \nOutput Epics channel.                       \n                            "
-"                \nOperation:                                  \nUsing ezcawri"
-"te() output an Epics channel.  \n                                            "
-"\nUsage:                                      \nGive the name of the EPICS ch"
-"annel to write."
+	  Description		  "Purpose:                                    \nOutput Epics channel.                       \n                                            \nOperation:                                  \nUsing ezcawrite() output an Epics channel.  \n                                            \nUsage:                                      \nGive the name of the EPICS channel to write."
 	  Ports			  [1]
 	  Position		  [90, 320, 130, 380]
 	  BackgroundColor	  "[0.698999, 0.245793, 1.000000]"
@@ -594,7 +562,6 @@ Library {
       MinAlgLoopOccurrences   off
       RTWSystemCode	      "Auto"
       FunctionWithSeparateData off
-      MaskHideContents	      off
       System {
 	Name			"Filters"
 	Location		[1282, 525, 1660, 784]
@@ -614,76 +581,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "IIR FM with control"
 	  Tag			  "cdsFiltCtrl"
-	  Description		  "cdsFiltCntrl is the standard IIR filter mod"
-"ule (exactly the same as cdsFilt) but with added control data output 'Ctrl'. "
-"Filter module digital signal output appears on the first output, which is cal"
-"led 'Val'. 'Ctrl' output has a bit pattern encoding the state of filter's on/"
-"off switches (FM1 through FM10). The bit values are:\n                       "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                                                                        \nmod"
-"ule 	hex	dec                                                   "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                             \n-----------------------                       "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                                                 \nFM1	0x20           "
-"         32                                                                  "
-"                                                                             "
-"                                                                             "
-"                                                                            "
-"\nFM2	0x80                     128                                    "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                           \nFM3	0x200                   512          "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                                                      \nFM4	0x800     "
-"              2048                                                           "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"    \nFM5	0x2000                 8192                                 "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                               \nFM6	0x8000                 32768     "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                                                          \nFM7	0x2000"
-"0                131072                                                      "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"        \nFM8	0x80000                 524288                          "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                                   \nFM9	0x200000               209715"
-"2                                                                            "
-"                                                                             "
-"                                                                             "
-"                                                              \nFM10	0"
-"x800000               8388608                                                "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"            \n                                                               "
-"                                                                             "
-"                                                                             "
-"                                                                             "
-"                                \nThis bit data can be used to drive some oth"
-"er switches or it can be output using a binary I/O module.                   "
-"                                                                             "
-"                                                                             "
-"                                                    "
+	  Description		  "cdsFiltCntrl is the standard IIR filter module (exactly the same as cdsFilt) but with added control data output 'Ctrl'. Filter module digital signal output appears on the first output, which is called 'Val'. 'Ctrl' output has a bit pattern encoding the state of filter's on/off switches (FM1 through FM10). The bit values are:\n                                                                                                                                                                                                                                                                                                                                      \nmodule 	hex	dec                                                                                                                                                                                                                                                                                                                       \n-----------------------                                                                                                                                                                                                                                                                                                               \nFM1	0x20                    32                                                                                                                                                                                                                                                                                                        \nFM2	0x80                     128                                                                                                                                                                                                                                                                                                      \nFM3	0x200                   512                                                                                                                                                                                                                                                                                                       \nFM4	0x800                   2048                                                                                                                                                                                                                                                                                                      \nFM5	0x2000                 8192                                                                                                                                                                                                                                                                                                       \nFM6	0x8000                 32768                                                                                                                                                                                                                                                                                                      \nFM7	0x20000                131072                                                                                                                                                                                                                                                                                                     \nFM8	0x80000                 524288                                                                                                                                                                                                                                                                                                    \nFM9	0x200000               2097152                                                                                                                                                                                                                                                                                                    \nFM10	0x800000               8388608                                                                                                                                                                                                                                                                                                   \n                                                                                                                                                                                                                                                                                                                                      \nThis bit data can be used to drive some other switches or it can be output using a binary I/O module.                                                                                                                                                                                                                                 "
 	  Ports			  [1, 2]
 	  Position		  [215, 40, 275, 75]
 	  BackgroundColor	  "darkGreen"
@@ -703,31 +601,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "IIR Filter Module"
 	  Tag			  "cdsFilt"
-	  Description		  "Purpose:                                   "
-"                                                                             "
-"                                                                             "
-"                                     \nStandard CDS IIR filter module.       "
-"                                                                             "
-"                                                                             "
-"                                          \n                                 "
-"                                                                             "
-"                                                                             "
-"                                               \nOperation:                  "
-"                                                                             "
-"                                                                             "
-"                                                    \nConsists of 10 second o"
-"rder section IIR filters, plus a ramped gain stage. In FE code, also provides"
-" pre-defined test points and excitation channel inputs. The filter coefficien"
-"ts are defined in the LIGO system using the 'foton' tool.\n                  "
-"                                                                             "
-"                                                                             "
-"                                                              \nUsage:       "
-"                                                                             "
-"                                                                             "
-"                                                                   \nName the"
-" part with the desired filter module name.                                   "
-"                                                                             "
-"                                                                        "
+	  Description		  "Purpose:                                                                                                                                                                                                                                  \nStandard CDS IIR filter module.                                                                                                                                                                                                           \n                                                                                                                                                                                                                                          \nOperation:                                                                                                                                                                                                                                \nConsists of 10 second order section IIR filters, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. The filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                                                                                                                                                                                                                          \nUsage:                                                                                                                                                                                                                                    \nName the part with the desired filter module name.                                                                                                                                                                                        "
 	  Ports			  [1, 1]
 	  Position		  [65, 38, 135, 62]
 	  BackgroundColor	  "darkGreen"
@@ -748,10 +622,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "PolyPhase FIR Filter"
 	  Tag			  "cdsPPFIR"
-	  Description		  "Purpose:                                   "
-"                                                                 \nProvide a "
-"Polyphase FIR filter algorithm. This part is typically only used in HEPI or o"
-"ther seismic systems."
+	  Description		  "Purpose:                                                                                                    \nProvide a Polyphase FIR filter algorithm. This part is typically only used in HEPI or other seismic systems."
 	  Ports			  [1, 1]
 	  Position		  [65, 144, 140, 176]
 	  BackgroundColor	  "orange"
@@ -772,8 +643,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "RMS"
 	  Tag			  "cdsRms"
-	  Description		  "Purpose:                                   "
-"\nCalculate an RMS based on the input signal."
+	  Description		  "Purpose:                                   \nCalculate an RMS based on the input signal."
 	  Ports			  [1, 1]
 	  Position		  [215, 135, 255, 195]
 	  BackgroundColor	  "[0.741176, 0.800000, 0.215686]"
@@ -796,11 +666,7 @@ Library {
       BlockType		      Reference
       Name		      "Function Name"
       Tag		      "cdsFunctionCall"
-      Description	      "Allows to make a call to external C function fr"
-"om the front-end code.                                            \nUser need"
-"s to use a Mux and a Demux to proved N number of inputs and M number of outpu"
-"ts to an external function.\nFunction \"Foo()\" code needs to be put in a fil"
-"e Foo.c in advLigo/src/fe/<model> directory.                       "
+      Description	      "Allows to make a call to external C function from the front-end code.                                            \nUser needs to use a Mux and a Demux to proved N number of inputs and M number of outputs to an external function.\nFunction \"Foo()\" code needs to be put in a file Foo.c in advLigo/src/fe/<model> directory.                       "
       Ports		      [1, 1]
       Position		      [85, 195, 125, 255]
       AttributesFormatString  "%<Tag>"
@@ -819,15 +685,14 @@ Library {
       BlockType		      SubSystem
       Name		      "IO_PARTS"
       Ports		      []
-      Position		      [265, 21, 311, 105]
+      Position		      [265, 23, 310, 107]
       DropShadow	      on
       MinAlgLoopOccurrences   off
       RTWSystemCode	      "Auto"
       FunctionWithSeparateData off
-      MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[262, 202, 885, 881]
+	Location		[554, 194, 1177, 873]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -862,6 +727,25 @@ Library {
 	  RTWMemSecDataParameters "Inherit from model"
 	}
 	Block {
+	  BlockType		  Reference
+	  Name			  "0x3000"
+	  Tag			  "cdsIPCS"
+	  Ports			  [1, 1]
+	  Position		  [240, 514, 295, 536]
+	  BackgroundColor	  "[0.501961, 1.000000, 0.501961]"
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsIPCS/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
 	  BlockType		  BusCreator
 	  Name			  "Bus\nCreator"
 	  Tag			  "adc_0"
@@ -870,11 +754,7 @@ Library {
 	  Position		  [60, 30, 65, 185]
 	  ShowName		  off
 	  AttributesFormatString  "%<Tag>"
-	  Inputs		  "'adc_0_0','adc_0_1','adc_0_2','adc_0_3','ad"
-"c_0_4','adc_0_5','adc_0_6','adc_0_7','adc_0_8','adc_0_9','adc_0_10','adc_0_11"
-"','adc_0_12','adc_0_13','adc_0_14','adc_0_15','adc_0_16','adc_0_17','adc_0_18"
-"','adc_0_19','adc_0_20','adc_0_21','adc_0_22','adc_0_23','adc_0_24','adc_0_25"
-"','adc_0_26','adc_0_27','adc_0_28','adc_0_29','adc_0_30','adc_0_31'"
+	  Inputs		  "'adc_0_0','adc_0_1','adc_0_2','adc_0_3','adc_0_4','adc_0_5','adc_0_6','adc_0_7','adc_0_8','adc_0_9','adc_0_10','adc_0_11','adc_0_12','adc_0_13','adc_0_14','adc_0_15','adc_0_16','adc_0_17','adc_0_18','adc_0_19','adc_0_20','adc_0_21','adc_0_22','adc_0_23','adc_0_24','adc_0_25','adc_0_26','adc_0_27','adc_0_28','adc_0_29','adc_0_30','adc_0_31'"
 	  DisplayOption		  "bar"
 	}
 	Block {
@@ -885,11 +765,7 @@ Library {
 	  Position		  [250, 30, 255, 185]
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  Inputs		  "'adc_1_0','adc_1_1','adc_1_2','adc_1_3','ad"
-"c_1_4','adc_1_5','adc_1_6','adc_1_7','adc_1_8','adc_1_9','adc_1_10','adc_1_11"
-"','adc_1_12','adc_1_13','adc_1_14','adc_1_15','adc_1_16','adc_1_17','adc_1_18"
-"','adc_1_19','adc_1_20','adc_1_21','adc_1_22','adc_1_23','adc_1_24','adc_1_25"
-"','adc_1_26','adc_1_27','adc_1_28','adc_1_29','adc_1_30','adc_1_31'"
+	  Inputs		  "'adc_1_0','adc_1_1','adc_1_2','adc_1_3','adc_1_4','adc_1_5','adc_1_6','adc_1_7','adc_1_8','adc_1_9','adc_1_10','adc_1_11','adc_1_12','adc_1_13','adc_1_14','adc_1_15','adc_1_16','adc_1_17','adc_1_18','adc_1_19','adc_1_20','adc_1_21','adc_1_22','adc_1_23','adc_1_24','adc_1_25','adc_1_26','adc_1_27','adc_1_28','adc_1_29','adc_1_30','adc_1_31'"
 	  DisplayOption		  "bar"
 	}
 	Block {
@@ -938,8 +814,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "DigitalIO"
 	  Tag			  "cdsDio"
-	  Description		  "support for 8 bit input 8 bit output DIO PC"
-"I card\nACCESS I/O Products model DIO-24D                "
+	  Description		  "support for 8 bit input 8 bit output DIO PCI card\nACCESS I/O Products model DIO-24D                "
 	  Ports			  [1, 1]
 	  Position		  [325, 85, 365, 145]
 	  BackgroundColor	  "lightBlue"
@@ -960,13 +835,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "GPS"
 	  Tag			  "cdsGps"
-	  Description		  "Symmetricom BC635PCI-U GPS card input      "
-"                           \nThis block outputs current time as sampled using"
-" the card.            \nfull -- complete UNIX seconds, and fractional part co"
-"rrect up to 100ns\ns    -- integer UNIX seconds (no fraction)                "
-"            \nus  -- fractional part                                         "
-"       \nns  -- nanoseconds part                                             "
-"  "
+	  Description		  "Symmetricom BC635PCI-U GPS card input                                 \nThis block outputs current time as sampled using the card.            \nfull -- complete UNIX seconds, and fractional part correct up to 100ns\ns    -- integer UNIX seconds (no fraction)                            \nus  -- fractional part                                                \nns  -- nanoseconds part                                               "
 	  Ports			  [0, 4]
 	  Position		  [450, 72, 490, 133]
 	  BackgroundColor	  "[0.870444, 0.852273, 1.000000]"
@@ -986,8 +855,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "RelayIO"
 	  Tag			  "cdsRio"
-	  Description		  "PCI IIRO 8 relay output and isolated input "
-"module"
+	  Description		  "PCI IIRO 8 relay output and isolated input module"
 	  Ports			  [1, 1]
 	  Position		  [345, 245, 385, 305]
 	  ForegroundColor	  "blue"
@@ -1009,8 +877,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "RelayIO1"
 	  Tag			  "cdsRio1"
-	  Description		  "PCI IIRO 16 channel relay ourput and isolat"
-"ed input module"
+	  Description		  "PCI IIRO 16 channel relay ourput and isolated input module"
 	  Ports			  [1, 1]
 	  Position		  [360, 355, 400, 415]
 	  ForegroundColor	  "blue"
@@ -1032,10 +899,9 @@ Library {
 	  BlockType		  Reference
 	  Name			  "sas:0x2000"
 	  Tag			  "cdsIPC"
-	  Description		  "Inter-process communication through /rtl_ep"
-"ics_ipc shared memory"
+	  Description		  "Inter-process communication through /rtl_epics_ipc shared memory"
 	  Ports			  [1, 1]
-	  Position		  [235, 375, 275, 435]
+	  Position		  [235, 439, 300, 461]
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -1067,7 +933,6 @@ Library {
       MinAlgLoopOccurrences   off
       RTWSystemCode	      "Auto"
       FunctionWithSeparateData off
-      MaskHideContents	      off
       System {
 	Name			"MatrixParts"
 	Location		[319, 248, 1031, 700]
@@ -1097,9 +962,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "Matrix"
 	  Tag			  "Matrix"
-	  Description		  "Purpose:                                   "
-"                              \nProvide a matrix multiplication function for "
-"up to 8 input and 8 outputs."
+	  Description		  "Purpose:                                                                 \nProvide a matrix multiplication function for up to 8 input and 8 outputs."
 	  Ports			  [8, 8]
 	  Position		  [190, 32, 260, 253]
 	  BackgroundColor	  "yellow"
@@ -1120,18 +983,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "MultiProduct"
 	  Tag			  "cdsProduct"
-	  Description		  "Purpose:                                   "
-"                                                                             "
-"                                                      \nMultiply 8 inputs by "
-"a common gain factor.                                                        "
-"                                                                            "
-"\n                                                                           "
-"                                                                             "
-"                      \nOperation:                                           "
-"                                                                             "
-"                                            \nGenerates two epics records: pa"
-"rtName and partName_TRAMP. All eight inputs are multiplied by the EPICS partN"
-"ame input, ramped over a duration (in seconds) of the TRAMP input."
+	  Description		  "Purpose:                                                                                                                                                                      \nMultiply 8 inputs by a common gain factor.                                                                                                                                    \n                                                                                                                                                                              \nOperation:                                                                                                                                                                    \nGenerates two epics records: partName and partName_TRAMP. All eight inputs are multiplied by the EPICS partName input, ramped over a duration (in seconds) of the TRAMP input."
 	  Ports			  [9, 8]
 	  Position		  [420, 30, 475, 250]
 	  BackgroundColor	  "[0.932779, 1.000000, 0.419564]"
@@ -1152,8 +1004,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "MultiSubtract"
 	  Tag			  "cdsSubtract8"
-	  Description		  "Purpose:                    \nSubtract pair"
-"s of 16 inputs."
+	  Description		  "Purpose:                    \nSubtract pairs of 16 inputs."
 	  Ports			  [16, 8]
 	  Position		  [80, 28, 150, 267]
 	  BackgroundColor	  "[1.000000, 0.769068, 0.736422]"
@@ -1225,8 +1076,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "cdsMuxMatrix"
 	  Tag			  "cdsMuxMatrix"
-	  Description		  "Any size matrix. Inputs and outputs must be"
-" connected using Mux and Demux parts."
+	  Description		  "Any size matrix. Inputs and outputs must be connected using Mux and Demux parts."
 	  Ports			  [1, 1]
 	  Position		  [150, 330, 190, 390]
 	  BackgroundColor	  "green"
@@ -1275,7 +1125,6 @@ Library {
       MinAlgLoopOccurrences   off
       RTWSystemCode	      "Auto"
       FunctionWithSeparateData off
-      MaskHideContents	      off
       System {
 	Name			"Osc/Phase"
 	Location		[398, 256, 748, 494]
@@ -1365,7 +1214,6 @@ Library {
       MinAlgLoopOccurrences   off
       RTWSystemCode	      "Auto"
       FunctionWithSeparateData off
-      MaskHideContents	      off
       System {
 	Name			"WatchDogs"
 	Location		[1045, 388, 1275, 678]
@@ -1433,11 +1281,10 @@ Library {
       MinAlgLoopOccurrences   off
       RTWSystemCode	      "Auto"
       FunctionWithSeparateData off
-      MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[1266, 269, 1486, 717]
-	Open			on
+	Location		[814, 281, 1050, 745]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1466,6 +1313,8 @@ Library {
 	  BlockType		  Constant
 	  Name			  "Constant"
 	  Position		  [35, 335, 65, 365]
+	  OutDataType		  "sfix(16)"
+	  OutScaling		  "2^0"
 	}
 	Block {
 	  BlockType		  Product
@@ -1476,6 +1325,7 @@ Library {
 	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
+	  OutDataType		  "sfix(16)"
 	  OutScaling		  "2^-10"
 	  RndMeth		  "Floor"
 	  SaturateOnIntegerOverflow off
@@ -1485,7 +1335,11 @@ Library {
 	  Name			  "Gain"
 	  Position		  [140, 285, 170, 315]
 	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  ParameterDataType	  "sfix(16)"
+	  ParameterScaling	  "2^0"
 	  OutDataTypeMode	  "Inherit via internal rule"
+	  OutDataType		  "sfix(16)"
+	  OutScaling		  "2^0"
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
@@ -1499,7 +1353,7 @@ Library {
 	  Ports			  [2, 1]
 	  Position		  [135, 22, 165, 53]
 	  AllPortsSameDT	  off
-	  OutDataTypeMode	  "Boolean"
+	  OutDataTypeMode	  "boolean"
 	}
 	Block {
 	  BlockType		  RelationalOperator
@@ -1507,7 +1361,7 @@ Library {
 	  Position		  [140, 222, 170, 253]
 	  Operator		  "<="
 	  InputSameDT		  off
-	  LogicOutDataTypeMode	  "Boolean"
+	  LogicOutDataTypeMode	  "boolean"
 	}
 	Block {
 	  BlockType		  Product
@@ -1517,6 +1371,8 @@ Library {
 	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
+	  OutDataType		  "sfix(16)"
+	  OutScaling		  "2^0"
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
@@ -1535,6 +1391,8 @@ Library {
 	  CollapseMode		  "All dimensions"
 	  InputSameDT		  off
 	  OutDataTypeMode	  "Inherit via internal rule"
+	  OutDataType		  "sfix(16)"
+	  OutScaling		  "2^0"
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
@@ -1571,52 +1429,7 @@ Library {
       BlockType		      Reference
       Name		      "site=M1\nrate=32K\ndcuid=10\ngds_node_id=1"
       Tag		      "cdsParameters"
-      Description	      "Purpose:                                       "
-"                                                                             "
-"                                                                             "
-"                               \nProvide system parameters to the FE code gen"
-"erator to properly configure the generated EPICS names, rep rate of the FE co"
-"ntroller, and the Data Acquisition node ID for proper storage of data from th"
-"is FE controller.                 \n                                         "
-"                                                                             "
-"                                                                             "
-"                                     \nUseage:                               "
-"                                                                             "
-"                                                                             "
-"                                        \nThe part NAME field is used to iden"
-"tify the FE parameters. It must be of the form:                              "
-"                                                                             "
-"                                           \nsite=                           "
-"                                                                             "
-"                                                                             "
-"                                              \nrate=                        "
-"                                                                             "
-"                                                                             "
-"                                                 \ndcuid=                    "
-"                                                                             "
-"                                                                             "
-"                                                    \n                       "
-"                                                                             "
-"                                                                             "
-"                                                       \nWhere:              "
-"                                                                             "
-"                                                                             "
-"                                                          \nsite= argument ma"
-"y be H1, H2, L1, M1, G1, either as a single argument or multiple, for example"
-" site=H1,H2. These are the only names allowed. These will become the first tw"
-"o characters of all EPICS and signal names (for example G1:).\n              "
-"                                                                             "
-"                                                                             "
-"                                                                \nrate= may b"
-"e 2K, 16K, 32K, or 64K                                                       "
-"                                                                             "
-"                                                                   \n        "
-"                                                                             "
-"                                                                             "
-"                                                                      \ndcuid"
-"= is site specific ie it must be unique at each site.                        "
-"                                                                             "
-"                                                                         "
+      Description	      "Purpose:                                                                                                                                                                                                                                \nProvide system parameters to the FE code generator to properly configure the generated EPICS names, rep rate of the FE controller, and the Data Acquisition node ID for proper storage of data from this FE controller.                 \n                                                                                                                                                                                                                                        \nUseage:                                                                                                                                                                                                                                 \nThe part NAME field is used to identify the FE parameters. It must be of the form:                                                                                                                                                      \nsite=                                                                                                                                                                                                                                   \nrate=                                                                                                                                                                                                                                   \ndcuid=                                                                                                                                                                                                                                  \n                                                                                                                                                                                                                                        \nWhere:                                                                                                                                                                                                                                  \nsite= argument may be H1, H2, L1, M1, G1, either as a single argument or multiple, for example site=H1,H2. These are the only names allowed. These will become the first two characters of all EPICS and signal names (for example G1:).\n                                                                                                                                                                                                                                        \nrate= may be 2K, 16K, 32K, or 64K                                                                                                                                                                                                       \n                                                                                                                                                                                                                                        \ndcuid= is site specific ie it must be unique at each site.                                                                                                                                                                              "
       Ports		      [1, 1]
       Position		      [265, 165, 305, 225]
       BackgroundColor	      "orange"
@@ -1651,148 +1464,10 @@ MatData {
   NumRecords		  2
   DataRecord {
     Tag			    DataTag1
-    Data		    "  %)30     .    ^ D   8    (    !          %    "
-"\"     $   #!\"0   0         0    P0D  \"HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*B"
-"HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BH-\"E-O9G1W87)E(&EN<W1A;&QA=&EO;B!O;B!N97"
-"<@8V]M<'5T97(-\"BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*B"
-"HJ*BHJ*BHJ*BH-\"@T*,2X@26YS=&%L;\"!N971W;W)K(&%N9\"!00TEE(&-A<F1S+@T*(\" @(\""
-"T@4F5M;W9E('1O<\"!C;W9E<B!A;F0@22]/(&-A9V4N#0H@(\" @+2!);G-T86QL($Y)0R!I;B!00"
-"TDM6\"!S;&]T+@T*(\" @(\"T@26YS=&%L;\"!00TEE(&-A<F0@9F]R($DO3R!C:&%S<VES(&EN(%"
-"!#264@<VQO=\"X-\"B @(\" M(%)E:6YS=&%L;\"!)+T\\@8V%G92X-\"B @(\" M($-L;W-E(&-O"
-"=F5R+@T*,BX@0V]N;F5C=\"!);F9I;FEB86YD(&-A8FQE<R!T;R!)+T\\@8VAA<W-I<R!A;F0@<&]"
-"W97(@=7 @22]/(&-H87-S:7,N#0HS+B!0;W=E<B!U<\"!C;VUP=71E<BX-\"C0N($-H86YG92!R;V"
-"]T('!A<W-W;W)D+@T*-2X@36]D:69Y(&YE='=O<FL@<W1A<G1U<\"X-\"B @(\" M(&5D:70@+V5T"
-"8R]S>7-C;VYF:6<O;F5T=V]R:RUS8W)I<'1S(\"AC86X@<F5M;W9E(&%L;\"!E>&-E<'0@971H,\""
-"D-\"B @(\" M($-H86YG92!H;W-T;F%M92!I;B O971C+W-Y<V-O;F9I9R]N971W;W)K(&9I;&4-"
-"\"B @(\" M($UO9&EF>2 O971C+VAO<W1S#0HV+B!!9&0@=7-E<G,-\"C<N($UA:V4@<G1,:6YU> "
-"T*(\" @(\"T@8V0@=&\\@:V5R;F5L(&1I<F5C=&]R>0T*(\" @(\"T@5'EP92 G;6%K92!M;V1U;&"
-"5S+6EN<W1A;&P@:6YS=&%L; T*(\" @(\"T@161I=\" O971C+V=R=6)?8V]N9B!A;F0@8VAA;F=E"
-"(&1E9F%U;'0@=&\\@,\"!T;R!B;V]T(')T3&EN=7@@;VX@<&]W97)U<\"X-\"C@N($=E=\"!R:60@"
-";V8@=6YN96-E<W-A<GD@=&%S:W,N#0H@(\" @+2!C<'5S<&5E9 T*(\" @(\"T@8FQU971O;W1H#0"
-"H@(\" @+2!A=F%H:2!D865M;VX-\"B @(\" M(&-U<',-\"B @(\" M(&-U<',@8V]N9FEG#0H@("
-"\" @+2!H='1P9 T*(\" @(\"T@:&%L9&%E;6]N#0H@(\" @+2!H:61D#0H@(\" @+2!I<'1A8FQE<"
-"PT*(\" @(\"T@:7-D;@T*(\" @(\"T@:W5D<W4-\"B @(\" M('-E;F1M86EL#0H@(\" @+2!S;6%"
-"R=&0-\"B @(\" M('AF<PT*.2X@<F5B;V]T#0HQ,\"X@57-E(&1E;\"!K97D@=&\\@8G)I;F<@=7 "
-"@8F]O=\"!C;VYF:6=U<F%T:6]N(&%N9\"!G970@<FED(&]F(&%L;\"!U;FYE8V5S<V%R>2!S=7!P;"
-"W)T+\"!S=6-H(&%S.@T*(\" @(\"T@<&%R86QL96PL('-E<FEA;\"!P;W)T<PT*(\" @(\"T@55-"
-"\"#0HQ,2X@26YS=&%L;\"!#1%,@15!)0U,@9FEL97,-\"B @(\" M(&-D('1O(\"]O<'0-\"B @("
-"\" M(&QO860@0T13($-$(\"AM;W5N=\" O9&5V+V-D<F]M(\"]M;G0I#0H@(\" @+2!2=6X@)W1A<"
-"B!Z>&8@+VUN=\"]E<&EC<RYT87(N9WHG#0HQ,BX@161I=\" O971C+W)C+FQO8V%L(&9I;&4@86YD"
-"(&%D9#H-\"B @(\" M(\"]O<'0O<G1L:6YU>%]D:7(O<G1L:6YU>'!R;R]M9&]U;&5S+W)T8V]R92"
-"8-\"B @(\" M(\"]O<'0O97!I8W,M,RXQ-\"XW+6QI;G5X+V)A<V4O8FEN+VQI;G5X+7@X-B]C85)"
-"E<&5A=&5R)@T*(\" @(\"T@<VQE97 @-0T*(\" @(\"T@+V5T8R]S971U<%]S:&UE;2YR=&PF#0HQ"
-",RX@061D($5024-3(&QI8G)A<FEE<R!T;R!A;&P@<&%T:',-\"B @(\" M(&-D('1O(\"]E=&,O;&"
-"0N<V\\N8V]N9BYD#0H@(\" @+2!E9&ET(&5P:6-S+F-O;F8-\"B @(\" M($%D9\"!T:&4@9F]L;&"
-"]W:6YG(&QI;F5S('1O('1H:7,@9FEL93H-\"B @(\" @(\" @+2 O;W!T+V5P:6-S+3,N,30N-RUL"
-":6YU>\"]B87-E+VQI8B]L:6YU>\"UX.#8-\"B @(\" @(\" @+2 O;W!T+V5P:6-S+3,N,30N-RUL"
-":6YU>\"]S97$O;&EB+VQI;G5X+7@X-@T*,30N($%D9\"!#1%,@<V]U<F-E(&-O9&4N#0H@(\" @+2"
-"!C9\"!T;R O:&]M92]U<V5R#0H@(\" @+2!T87(@>GAF(\"]M;G0O8V1S+G1A<BYG>@T*,34N($)U"
-":6QD('1H92!S:&UE;2!M;V1U;&4N#0H@(\" @+2!C9\"!T;R O:&]M92]U<V5R+V-D<R]A9'9,:6="
-"O+W-R8R]F92]S:&UE;0T*(\" @(\"T@5'EP92 G;6%K92<-\"B @(\" M(&-P('-H;65M+G)T;\"!"
-"F:6QE('1O(\"]E=&,-\"C$V+B!2=6X@=&AE(')C(&QO8V%L(&9I;&4N#0H@(\" @+2 O971C+W)C+"
-"FQO8V%L#0HQ-RX@0W)E871E('1H92!G;2!F:6QE<RX-\"B @(\" M('5N=&%R(&=M(&9I;&5S(&EN"
-"(')O;W0@:&]M92!D:7)E8W1O<GDN#0H@(\" @+2!4>7!E(&UA:V4N#0H@(\" @+2!';R!T;R!G;2!"
-"B:6YA<GD@9&ER96-T;W)Y+@T*(\" @(\"T@;6MD:7(@+V]P=\"]G;0T*(\" @(\"T@+B]'35])3E-"
-"404Q,#0H@(\" @+2!C:&MC;VYF:6<@+2UA9&0@9VT-\"B @(\" M(&-H:V-O;F9I9R!G;2!O;@T*("
-"\" @(\"T@<V5R=FEC92!G;2!S=&%R= T*,3@N($YE960@=&\\@9V5T(')I9\"!O9B!P;W-S:6)L92"
-"!E<G)O<G,@:6X@<G5N;FEN9R!S97%U96YC97,@;&]O:VEN9R!F;W(@8V%297!E871E<BX-\"B @("
-"\" M(&QN(\"US(\"]B:6XO=')U92 O8FEN+V-A4F5P96%T97(-\"C$Y+B!296)O;W0-\"@T**BHJ*"
-"BHJ*B!3:&]U;&0@;F]W(&)E(&%B;&4@=&\\@8G5I;&0@1D4@8V]D92!A;F0@15!)0U,N#0H      "
-"   "
+    Data		    "  %)30     .    ^ D   8    (    !          %    \"     $   #!\"0   0         0    P0D  \"HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BH-\"E-O9G1W87)E(&EN<W1A;&QA=&EO;B!O;B!N97<@8V]M<'5T97(-\"BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BH-\"@T*,2X@26YS=&%L;\"!N971W;W)K(&%N9\"!00TEE(&-A<F1S+@T*(\" @(\"T@4F5M;W9E('1O<\"!C;W9E<B!A;F0@22]/(&-A9V4N#0H@(\" @+2!);G-T86QL($Y)0R!I;B!00TDM6\"!S;&]T+@T*(\" @(\"T@26YS=&%L;\"!00TEE(&-A<F0@9F]R($DO3R!C:&%S<VES(&EN(%!#264@<VQO=\"X-\"B @(\" M(%)E:6YS=&%L;\"!)+T\\@8V%G92X-\"B @(\" M($-L;W-E(&-O=F5R+@T*,BX@0V]N;F5C=\"!);F9I;FEB86YD(&-A8FQE<R!T;R!)+T\\@8VAA<W-I<R!A;F0@<&]W97(@=7 @22]/(&-H87-S:7,N#0HS+B!0;W=E<B!U<\"!C;VUP=71E<BX-\"C0N($-H86YG92!R;V]T('!A<W-W;W)D+@T*-2X@36]D:69Y(&YE='=O<FL@<W1A<G1U<\"X-\"B @(\" M(&5D:70@+V5T8R]S>7-C;VYF:6<O;F5T=V]R:RUS8W)I<'1S(\"AC86X@<F5M;W9E(&%L;\"!E>&-E<'0@971H,\"D-\"B @(\" M($-H86YG92!H;W-T;F%M92!I;B O971C+W-Y<V-O;F9I9R]N971W;W)K(&9I;&4-\"B @(\" M($UO9&EF>2 O971C+VAO<W1S#0HV+B!!9&0@=7-E<G,-\"C<N($UA:V4@<G1,:6YU> T*(\" @(\"T@8V0@=&\\@:V5R;F5L(&1I<F5C=&]R>0T*(\" @(\"T@5'EP92 G;6%K92!M;V1U;&5S+6EN<W1A;&P@:6YS=&%L; T*(\" @(\"T@161I=\" O971C+V=R=6)?8V]N9B!A;F0@8VAA;F=E(&1E9F%U;'0@=&\\@,\"!T;R!B;V]T(')T3&EN=7@@;VX@<&]W97)U<\"X-\"C@N($=E=\"!R:60@;V8@=6YN96-E<W-A<GD@=&%S:W,N#0H@(\" @+2!C<'5S<&5E9 T*(\" @(\"T@8FQU971O;W1H#0H@(\" @+2!A=F%H:2!D865M;VX-\"B @(\" M(&-U<',-\"B @(\" M(&-U<',@8V]N9FEG#0H@(\" @+2!H='1P9 T*(\" @(\"T@:&%L9&%E;6]N#0H@(\" @+2!H:61D#0H@(\" @+2!I<'1A8FQE<PT*(\" @(\"T@:7-D;@T*(\" @(\"T@:W5D<W4-\"B @(\" M('-E;F1M86EL#0H@(\" @+2!S;6%R=&0-\"B @(\" M('AF<PT*.2X@<F5B;V]T#0HQ,\"X@57-E(&1E;\"!K97D@=&\\@8G)I;F<@=7 @8F]O=\"!C;VYF:6=U<F%T:6]N(&%N9\"!G970@<FED(&]F(&%L;\"!U;FYE8V5S<V%R>2!S=7!P;W)T+\"!S=6-H(&%S.@T*(\" @(\"T@<&%R86QL96PL('-E<FEA;\"!P;W)T<PT*(\" @(\"T@55-\"#0HQ,2X@26YS=&%L;\"!#1%,@15!)0U,@9FEL97,-\"B @(\" M(&-D('1O(\"]O<'0-\"B @(\" M(&QO860@0T13($-$(\"AM;W5N=\" O9&5V+V-D<F]M(\"]M;G0I#0H@(\" @+2!2=6X@)W1A<B!Z>&8@+VUN=\"]E<&EC<RYT87(N9WHG#0HQ,BX@161I=\" O971C+W)C+FQO8V%L(&9I;&4@86YD(&%D9#H-\"B @(\" M(\"]O<'0O<G1L:6YU>%]D:7(O<G1L:6YU>'!R;R]M9&]U;&5S+W)T8V]R928-\"B @(\" M(\"]O<'0O97!I8W,M,RXQ-\"XW+6QI;G5X+V)A<V4O8FEN+VQI;G5X+7@X-B]C85)E<&5A=&5R)@T*(\" @(\"T@<VQE97 @-0T*(\" @(\"T@+V5T8R]S971U<%]S:&UE;2YR=&PF#0HQ,RX@061D($5024-3(&QI8G)A<FEE<R!T;R!A;&P@<&%T:',-\"B @(\" M(&-D('1O(\"]E=&,O;&0N<V\\N8V]N9BYD#0H@(\" @+2!E9&ET(&5P:6-S+F-O;F8-\"B @(\" M($%D9\"!T:&4@9F]L;&]W:6YG(&QI;F5S('1O('1H:7,@9FEL93H-\"B @(\" @(\" @+2 O;W!T+V5P:6-S+3,N,30N-RUL:6YU>\"]B87-E+VQI8B]L:6YU>\"UX.#8-\"B @(\" @(\" @+2 O;W!T+V5P:6-S+3,N,30N-RUL:6YU>\"]S97$O;&EB+VQI;G5X+7@X-@T*,30N($%D9\"!#1%,@<V]U<F-E(&-O9&4N#0H@(\" @+2!C9\"!T;R O:&]M92]U<V5R#0H@(\" @+2!T87(@>GAF(\"]M;G0O8V1S+G1A<BYG>@T*,34N($)U:6QD('1H92!S:&UE;2!M;V1U;&4N#0H@(\" @+2!C9\"!T;R O:&]M92]U<V5R+V-D<R]A9'9,:6=O+W-R8R]F92]S:&UE;0T*(\" @(\"T@5'EP92 G;6%K92<-\"B @(\" M(&-P('-H;65M+G)T;\"!F:6QE('1O(\"]E=&,-\"C$V+B!2=6X@=&AE(')C(&QO8V%L(&9I;&4N#0H@(\" @+2 O971C+W)C+FQO8V%L#0HQ-RX@0W)E871E('1H92!G;2!F:6QE<RX-\"B @(\" M('5N=&%R(&=M(&9I;&5S(&EN(')O;W0@:&]M92!D:7)E8W1O<GDN#0H@(\" @+2!4>7!E(&UA:V4N#0H@(\" @+2!';R!T;R!G;2!B:6YA<GD@9&ER96-T;W)Y+@T*(\" @(\"T@;6MD:7(@+V]P=\"]G;0T*(\" @(\"T@+B]'35])3E-404Q,#0H@(\" @+2!C:&MC;VYF:6<@+2UA9&0@9VT-\"B @(\" M(&-H:V-O;F9I9R!G;2!O;@T*(\" @(\"T@<V5R=FEC92!G;2!S=&%R= T*,3@N($YE960@=&\\@9V5T(')I9\"!O9B!P;W-S:6)L92!E<G)O<G,@:6X@<G5N;FEN9R!S97%U96YC97,@;&]O:VEN9R!F;W(@8V%297!E871E<BX-\"B @(\" M(&QN(\"US(\"]B:6XO=')U92 O8FEN+V-A4F5P96%T97(-\"C$Y+B!296)O;W0-\"@T**BHJ*BHJ*B!3:&]U;&0@;F]W(&)E(&%B;&4@=&\\@8G5I;&0@1D4@8V]D92!A;F0@15!)0U,N#0H         "
   }
   DataRecord {
     Tag			    DataTag0
-    Data		    "  %)30     .    *!0   8    (    !          %    "
-"\"     $   #S$P   0         0    \\Q,  \"HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*B"
-"HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BH-\"E!U<G!O<V"
-"4Z( T*5&AI<R!L:6)R87)Y(&-O;G1A:6YS('1H92!-871L86(@<&%R=',@<F5C;V=N:7IE9\"!B>2"
-"!T:&4@0T13(&9R;VYT(&5N9\"!S;V9T=V%R92!G96YE<F%T;W(N#0I/;FQY('!A<G1S(&-O;G1A:6"
-"YE9\"!I;B!T:&ES(&QI8G)A<GD@87)E('-U<'!O<G1E9\"X-\"@T**BHJ*BHJ*BHJ*BHJ*BHJ*BHJ"
-"*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*"
-"BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*@T*4F5L96%S92!.;W1E<R @(\" J*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*"
-"BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*B"
-"HJ#0HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BH"
-"J*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ#0I!=\"!T:&ES('1I;64L('1"
-"H92!C;V1E(&ES(&EN($)E=&$@<F5L96%S92X@3F]T(&%L;\"!D;V-U;65N=&%T:6]N+\"!S=6-H(&"
-"%S(&)L;V-K(&1E<V-R:7!T:6]N<RP@87)E('EE=\"!C;VUP;&5T92X-\"D%L<V\\L('1H92!#1%,@"
-"<&%R=',@;6%Y(&]R(&UA>2!N;W0@9G5N8W1I;VX@87,@97AP96-T960@=VAE;B!R=6X@:6X@36%T;"
-"&%B+B!3;VUE+\"!I;B!F86-T+\"!M87D@;F]T('=O<FL-\"F%T(&%L;\"!I;B!-871L86(@:71S96"
-"QF+B!4:&4@=V]R:R!T;R!M86ME('1H92!P87)T<R!R=6X@:6X@36%T;&%B(&ES(&EN('!R;V=R97-"
-"S+B!4:&4@=7-E<B!S:&]U;&0@8VAE8VL-\"G1H92!I;F1I=FED=6%L(&)L;V-K('!R;W!E<G1I97,"
-"@=&\\@9&5T97)M:6YE('1H96ER($UA=&QA8B!O<&5R871I;VXN#0H-\"BHJ*BHJ*BHJ*BHJ*BHJ*B"
-"HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BH"
-"J*BHJ#0I2969E<F5N8V5S.@T*#0HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ"
-"*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*@T*3W9E<"
-"G9I97<Z#0HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*B"
-"HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*@T*5&AE('!A<G1S(&EN('1H:7,"
-"@;&EB<F%R>2!A<F4@=&AO<V4@<W5P<&]R=&5D(&)Y($-$4R!S;V9T=V%R92!T;R!C<F5A=&4@1G)O"
-";G0@16YD(\"A&12D@8V]N=')O;&QE<G,N#0I087)T<R!A<F4@9W)O=7!E9\"!I;G1O('-U8F-A=&5"
-"G;W)I97,@=VET:&EN('1H92!S:6U,:6YK('-U8G-Y<W1E;7,@<VAO=VXN(%1H97-E('-U8G!A<G0@"
-";&EB<F%R:65S(&%R93H-\"B @(\" M($E/7U!!4E13.B!!1$,L($1!0R!A;F0@1&EG:71A;\"!)+T"
-"\\@4$-)(&UO9'5L97,@<W5P<&]R=&5D(&)Y('1H:7,@0T13('-O9G1W87)E+@T*(\" @(\"T@<VEM"
-"3&EN:U!A<G1S.B!3=&%N9&%R9\"!S:6UU;&EN:R!P87)T<R!S=7!P;W)T960N#0H@(\" @+2!%<&E"
-"C<U!A<G1S.B!087)T<R!W:&EC:\"!M86ME(&QI;FMS(&)E='=E96X@15!)0U,@86YD('1H92!&12!"
-"S;V9T=V%R92X-\"B @(\" M($9I;'1E<G,Z(%-T86YD87)D($-$4R!F:6QT97(@;6]D=6QE<RX-\""
-"B @(\" M($]S8R]0:&%S93H@3W-C:6QL871O<G,@86YD('!H87-E(')O=&%T:6]N('!A<G1S+@T*("
-"\" @(\"T@5V%T8VAD;V=S.B!7871C:&1O9R!R;W5T:6YE<R!F;W(@97%U:7!M96YT('!R;W1E8W1I"
-";VXN#0H@(\" @+2!-871R:7@@<&%R=',Z($-$4R!S=&%N9&%R9\"!M871R:7@@96QE;65N=\"P@<&"
-"QU<R!S=VET8VAE<RP@971C+B!T:&%T(&]P97)A=&4@=VET:\"!M=6QT:7!L92!I;G!U=',O#0H@("
-"\" @(\" @(\" @(\" @(\" @(\" @(\" @(\" @(\" @;75L=&EP;&4@;W5T<'5T<RX-\"@T*5&AE"
-"<F4@87)E(&%L<V\\@82!F97<@97AA;7!L92!M;V1E;',@879A:6QA8FQE(&%T('1H92!#1%,@5VEK"
-":2X-\"@T*07,@<W5P<&]R=\"!F;W(@;6]R92!P87)T<R!I<R!D979E;&]P960L('1H92!N97<@<&%"
-"R=',@=VEL;\"!S:&]W('5P(&EN('1H:7,@;&EB<F%R>2X@0VAE8VMI;F<@=&AE(\"=\";&]C:PT*4"
-"')O<&5R=&EE<R<@;V8@96%C:\"!P87)T('=I;&P@9VEV92!A(&1E<V-R:7!T:6]N+\"!I;F-L=61I"
-";F<@=&AE('!A<G1S('!U<G!O<V4L(&1E<V-R:7!T:6]N(&]F('=H870@=&AE('!A<G0-\"F1O97,L"
-"(&%N9\"!H;W<@=&\\@=7-E('1H92!P87)T+B -\"@T**BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*B"
-"HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BH"
-"J*BHJ*BHJ*BHJ*@T*0G5I;&1I;F<@82!M;V1E;\"!F:6QE#0HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BH"
-"J*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ"
-"*BHJ*BHJ*BHJ*BHJ*BHJ#0I&12!S<&5C:69I8R!C;V1E(&ES(&1E=F5L;W!E9\"!B>2!C<F5A=&EN"
-"9R!A(&YE=R N;61L(&UO9&5L(&9I;&4N(%1H92!F:6QE(&YA;64@;75S=\"!B92 S(&-H87)A8W1E"
-"<G,@:6X@;&5N9W1H+ T*;F\\@;6]R92P@;F\\@;&5S<RX@06QL('1H<F5E(&-H87)A8W1E<G,@;75"
-"S=\"!B92!L;W=E<B!C87-E+B!4:&4@;F%M92!O9B!T:&4@9FEL92!W:6QL(&QA=&5R(&)E('5S960"
-"@8GD@=&AE($9%#0IC;V1E(&=E;F5R871O<B!T;R!D979E;&]P('1H92!S>7-T96T@;F%M92!F;W(@"
-"86QL(&]F('1H92!P87)T<R!A;F0@15!)0U,@8VAA;FYE;',N($9O<B!E>&%M<&QE+\"!I9B!T:&4@"
-"9FEL96YA;64-\"FES('-U<RYM9&PL(&%L;\"!P87)T<R!I;B!T:&4@9FEL92!W:6QL(&QA=&5R(&)"
-"E('!R97!E;F1E9\"!W:71H($E&3SI355,M+@T*#0I087)T<R!A<F4@;F]W(&%D9&5D('1O('1H92!"
-"N97<@+FUD;\"!F:6QE(&)Y(&-O<'DO<&%S=&EN9R!O<B!D<F%G+V1R;W!P:6YG('!A<G1S(&9R;VT"
-"@=&AE($-$4U]005)44R!L:6)R87)Y#0IF:6QE+B @#0H-\"DU)3DE-54T@4D5154E214U%3E13#0I"
-"4:&4@=&]P(&QE=F5L(&]F('1H92!N97<@+FUD;\"!F:6QE(&UU<W0@8V]N=&%I;CH-\"B @(\" M("
-"$$@8V1S4&%R86UE=&5R<R!P87)T.B!4:&4@8V1S4&%R86UE=&5R<R!P87)T(&ES(')E<75I<F5D(&"
-"EN(&%L;\"!S:6UL:6YK(&1R87=I;F=S(&%T('1H92!T;W @;&5V96PN(%1H:7,@<&%R=\" -\"FES"
-"(&%N;F]T871E9\"!W:71H(&=E;F5R86P@:6YF;W)M871I;VX@86)O=70@=&AE('-Y<W1E;2!W:&EC"
-":\"!T:&4@0T13(&-O9&4@9V5N97)A=&]R(')E<75I<F5S('1O('!R;W!E<FQY(&)U:6QD( T*=&AE"
-"(&-O9&4@36%K969I;&4@86YD($5024-3(&1A=&%B87-E<RX-\"B @(\" M($%T(&QE87-T(&]N92!"
-"!1$,@<&%R=\"X-\"B @(\" M($%T(&QE87-T(&]N92!$04,@<&%R=\"X-\"@T*4TE'3D%,($Y!34E"
-".1R!#3TY3241%4D%424].4PT*5VAE;B!B=6EL9&EN9R!T:&4@1D4@+FUD;\"!F:6QE+\"!I=\"!I<"
-"R!I;7!O<G1A;G0@=&\\@<')O<&5R;'D@;F%M92!A;&P@;V8@=&AE('!A<G1S+B!!;&P@<&%R=',@;"
-"75S=\"!H879E(&$@=6YI<75E(&YA;64-\"G=I=&AI;B!A($9%(&9I;&4@86YD(&%L;\"!&12!F:6Q"
-"E<R!T;R!B92!R=6X@870@82!S:71E(&UU<W0@:&%V92!U;FEQ=64@;F%M97,N($%L;\"!&12!C;V1"
-"E(&UU<W0@9F]L;&]W('1H90T*<W1A;F1A<F0@3$E'3R!N86UI;F<@8V]N=F5N=&EO;B!O9B!)1D\\"
-"Z4UE3+5-50E-94U]005)47U-50E!!4E0N(%1H92!E;G1I<F4@;F%M92!M87D@;F]T#0IB92!M;W)E"
-"('1H86X@,C@@8VAA<F%C=&5R<R!I;B!L96YG=&@N#0H-\"E1H92!F:7)S=\"!P87)T(&]F('-I9VY"
-"A;\"!N86UE<R!F;W(@82!&12 N;61L(&9I;&4@87)E('1A:V5N(&9R;VT@=&AE(&9I;&5N86UE(&%"
-"N9\"!T:&4@<VET93T@<&%R86UE=&5R(&]F('1H92 -\"F-D<U!A<F%M971E<G,@<&%R=\"X@5&AI<"
-"R!W:6QL(&)E(&]F('1H92!F;W)M('-I=&4Z9FEL96YA;64N($9O<B!E>&%M<&QE+\"!I9B!T:&4@9"
-"FEL96YA;64@:7,@<W5S+FUD;\"!A;F0@=&AE#0IS:71E/4@Q+\"!A;&P@<&%R=\"!N86UE<R!W:6Q"
-"L(&)E('!R97!E;F1E9\"!A<R!(,3I355,M+B -\"@T*0GD@8V]N=F5N=&EO;BP@86QL('!A<G1S(&"
-"%R92!T;R!B92!N86UE9\"!U<VEN9R!U<'!E<B!C87-E(&%N9\"!C;VYT86EN(&$@<VEN9VQE('-T<"
-"FEN9RP@=7-I;F<@=6YD97)S8V]R97,L(&%S#0IN96-E<W-A<GDL('1O(&-O;7!L971E('1H92!D97"
-"-I<F5D(&1E<V-R:7!T:6]N+@T*#0I!('!A<G0@870@=&AE('1O<\"!L979E;\"!O9B!T:&4@1D4@;"
-"6]D96P@=VEL;\"!S:6UP;'D@:&%V92!T:&4@:69O(&%N9\"!F92!N86UE('-T<FEN9R!P<F5P96YD"
-"960N($9O<B!E>&%M<&QE+\"!I9B!A('!A<G0@870@=&AE('1O< T*;&5V96P@:7,@;F%M960@45!$"
-"7T1#+\"!I=',@9FEN86P@;F%M92!W:6QL(&)E($@Q.E-54RU14$1?4U53+B!)9B!T:&4@=7-E<B!C"
-"<F5A=&5S(&$@36%T;&%B('-U8G-Y<W1E;2!P87)T+\"!T:&4-\"FYA;64@;V8@=&AE('-U8G-Y<W1"
-"E;2!W:6QL(&)E('!R97!E;F1E9\"!T;R!T:&4@;F%M92!O9B!A;&P@<&%R=',@=VET:&EN('1H92!"
-"S=6)S>7-T96TN($9O<B!E>&%M<&QE+ T*:68@82!S=6)S>7-T96T@:7,@8W)E871E9\"P@=VET:\""
-"!T:&4@<W5B<WES=&5M(&YA;64@05-#+\"!A;F0@82!P87)T(&ES(&EN('1H92!S=6)S>7-T96T@=V"
-"ET:\"!A(&YA;64@;V8-\"D1#7U)%041/550L('1H92!E;G1I<F4@<&%R=\"!N86UE(&EN('1H92!&"
-"12!W:6QL(&)E($@Q.E-54RU!4T-?1$-?4D5!1$]55\"X-\"@T*4U5\"4UE35$5-($-/3E-)1$5205"
-"1)3TY3#0I-871L86(@86QL;W=S('!A<G1S('1O(&)E(&=R;W5P960@86YD(&)U:6QT(&EN=&\\@<W"
-"5B<WES=&5M<RX@070@=&AE('!R97-E;G0@=&EM92P@=&AE($-$4R!&12!C;V1E(&=E;F5R871O<@T"
-"*;VYL>2!A;&QO=W,@<W5B<WES=&5M<R!T;R!B92!C<F5A=&5D(&%T('1H92!T;W @;&5V96P@;V8@"
-"=&AE(&UO9&5L+B!4:&%T(&ES('1O('-A>2P@82!S=6)S>7-T96T@<&%R=\"!M87D@;F]T#0IC;VYT"
-"86EN(&$@<W5B<WES=&5M('!A<G0N(%1H97)E('=I;&P@8F4@<W5P<&]R=\"!F;W(@9G5R=&AE<B!N"
-"97-T:6YG(&]F('-U8G-Y<W1E;7,@:6X@=&AE(&9U='5R92X-\"@T*#0H       "
+    Data		    "  %)30     .    *!0   8    (    !          %    \"     $   #S$P   0         0    \\Q,  \"HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BH-\"E!U<G!O<V4Z( T*5&AI<R!L:6)R87)Y(&-O;G1A:6YS('1H92!-871L86(@<&%R=',@<F5C;V=N:7IE9\"!B>2!T:&4@0T13(&9R;VYT(&5N9\"!S;V9T=V%R92!G96YE<F%T;W(N#0I/;FQY('!A<G1S(&-O;G1A:6YE9\"!I;B!T:&ES(&QI8G)A<GD@87)E('-U<'!O<G1E9\"X-\"@T**BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*@T*4F5L96%S92!.;W1E<R @(\" J*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ#0HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ#0I!=\"!T:&ES('1I;64L('1H92!C;V1E(&ES(&EN($)E=&$@<F5L96%S92X@3F]T(&%L;\"!D;V-U;65N=&%T:6]N+\"!S=6-H(&%S(&)L;V-K(&1E<V-R:7!T:6]N<RP@87)E('EE=\"!C;VUP;&5T92X-\"D%L<V\\L('1H92!#1%,@<&%R=',@;6%Y(&]R(&UA>2!N;W0@9G5N8W1I;VX@87,@97AP96-T960@=VAE;B!R=6X@:6X@36%T;&%B+B!3;VUE+\"!I;B!F86-T+\"!M87D@;F]T('=O<FL-\"F%T(&%L;\"!I;B!-871L86(@:71S96QF+B!4:&4@=V]R:R!T;R!M86ME('1H92!P87)T<R!R=6X@:6X@36%T;&%B(&ES(&EN('!R;V=R97-S+B!4:&4@=7-E<B!S:&]U;&0@8VAE8VL-\"G1H92!I;F1I=FED=6%L(&)L;V-K('!R;W!E<G1I97,@=&\\@9&5T97)M:6YE('1H96ER($UA=&QA8B!O<&5R871I;VXN#0H-\"BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ#0I2969E<F5N8V5S.@T*#0HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*@T*3W9E<G9I97<Z#0HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*@T*5&AE('!A<G1S(&EN('1H:7,@;&EB<F%R>2!A<F4@=&AO<V4@<W5P<&]R=&5D(&)Y($-$4R!S;V9T=V%R92!T;R!C<F5A=&4@1G)O;G0@16YD(\"A&12D@8V]N=')O;&QE<G,N#0I087)T<R!A<F4@9W)O=7!E9\"!I;G1O('-U8F-A=&5G;W)I97,@=VET:&EN('1H92!S:6U,:6YK('-U8G-Y<W1E;7,@<VAO=VXN(%1H97-E('-U8G!A<G0@;&EB<F%R:65S(&%R93H-\"B @(\" M($E/7U!!4E13.B!!1$,L($1!0R!A;F0@1&EG:71A;\"!)+T\\@4$-)(&UO9'5L97,@<W5P<&]R=&5D(&)Y('1H:7,@0T13('-O9G1W87)E+@T*(\" @(\"T@<VEM3&EN:U!A<G1S.B!3=&%N9&%R9\"!S:6UU;&EN:R!P87)T<R!S=7!P;W)T960N#0H@(\" @+2!%<&EC<U!A<G1S.B!087)T<R!W:&EC:\"!M86ME(&QI;FMS(&)E='=E96X@15!)0U,@86YD('1H92!&12!S;V9T=V%R92X-\"B @(\" M($9I;'1E<G,Z(%-T86YD87)D($-$4R!F:6QT97(@;6]D=6QE<RX-\"B @(\" M($]S8R]0:&%S93H@3W-C:6QL871O<G,@86YD('!H87-E(')O=&%T:6]N('!A<G1S+@T*(\" @(\"T@5V%T8VAD;V=S.B!7871C:&1O9R!R;W5T:6YE<R!F;W(@97%U:7!M96YT('!R;W1E8W1I;VXN#0H@(\" @+2!-871R:7@@<&%R=',Z($-$4R!S=&%N9&%R9\"!M871R:7@@96QE;65N=\"P@<&QU<R!S=VET8VAE<RP@971C+B!T:&%T(&]P97)A=&4@=VET:\"!M=6QT:7!L92!I;G!U=',O#0H@(\" @(\" @(\" @(\" @(\" @(\" @(\" @(\" @(\" @;75L=&EP;&4@;W5T<'5T<RX-\"@T*5&AE<F4@87)E(&%L<V\\@82!F97<@97AA;7!L92!M;V1E;',@879A:6QA8FQE(&%T('1H92!#1%,@5VEK:2X-\"@T*07,@<W5P<&]R=\"!F;W(@;6]R92!P87)T<R!I<R!D979E;&]P960L('1H92!N97<@<&%R=',@=VEL;\"!S:&]W('5P(&EN('1H:7,@;&EB<F%R>2X@0VAE8VMI;F<@=&AE(\"=\";&]C:PT*4')O<&5R=&EE<R<@;V8@96%C:\"!P87)T('=I;&P@9VEV92!A(&1E<V-R:7!T:6]N+\"!I;F-L=61I;F<@=&AE('!A<G1S('!U<G!O<V4L(&1E<V-R:7!T:6]N(&]F('=H870@=&AE('!A<G0-\"F1O97,L(&%N9\"!H;W<@=&\\@=7-E('1H92!P87)T+B -\"@T**BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*@T*0G5I;&1I;F<@82!M;V1E;\"!F:6QE#0HJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ*BHJ#0I&12!S<&5C:69I8R!C;V1E(&ES(&1E=F5L;W!E9\"!B>2!C<F5A=&EN9R!A(&YE=R N;61L(&UO9&5L(&9I;&4N(%1H92!F:6QE(&YA;64@;75S=\"!B92 S(&-H87)A8W1E<G,@:6X@;&5N9W1H+ T*;F\\@;6]R92P@;F\\@;&5S<RX@06QL('1H<F5E(&-H87)A8W1E<G,@;75S=\"!B92!L;W=E<B!C87-E+B!4:&4@;F%M92!O9B!T:&4@9FEL92!W:6QL(&QA=&5R(&)E('5S960@8GD@=&AE($9%#0IC;V1E(&=E;F5R871O<B!T;R!D979E;&]P('1H92!S>7-T96T@;F%M92!F;W(@86QL(&]F('1H92!P87)T<R!A;F0@15!)0U,@8VAA;FYE;',N($9O<B!E>&%M<&QE+\"!I9B!T:&4@9FEL96YA;64-\"FES('-U<RYM9&PL(&%L;\"!P87)T<R!I;B!T:&4@9FEL92!W:6QL(&QA=&5R(&)E('!R97!E;F1E9\"!W:71H($E&3SI355,M+@T*#0I087)T<R!A<F4@;F]W(&%D9&5D('1O('1H92!N97<@+FUD;\"!F:6QE(&)Y(&-O<'DO<&%S=&EN9R!O<B!D<F%G+V1R;W!P:6YG('!A<G1S(&9R;VT@=&AE($-$4U]005)44R!L:6)R87)Y#0IF:6QE+B @#0H-\"DU)3DE-54T@4D5154E214U%3E13#0I4:&4@=&]P(&QE=F5L(&]F('1H92!N97<@+FUD;\"!F:6QE(&UU<W0@8V]N=&%I;CH-\"B @(\" M($$@8V1S4&%R86UE=&5R<R!P87)T.B!4:&4@8V1S4&%R86UE=&5R<R!P87)T(&ES(')E<75I<F5D(&EN(&%L;\"!S:6UL:6YK(&1R87=I;F=S(&%T('1H92!T;W @;&5V96PN(%1H:7,@<&%R=\" -\"FES(&%N;F]T871E9\"!W:71H(&=E;F5R86P@:6YF;W)M871I;VX@86)O=70@=&AE('-Y<W1E;2!W:&EC:\"!T:&4@0T13(&-O9&4@9V5N97)A=&]R(')E<75I<F5S('1O('!R;W!E<FQY(&)U:6QD( T*=&AE(&-O9&4@36%K969I;&4@86YD($5024-3(&1A=&%B87-E<RX-\"B @(\" M($%T(&QE87-T(&]N92!!1$,@<&%R=\"X-\"B @(\" M($%T(&QE87-T(&]N92!$04,@<&%R=\"X-\"@T*4TE'3D%,($Y!34E.1R!#3TY3241%4D%424].4PT*5VAE;B!B=6EL9&EN9R!T:&4@1D4@+FUD;\"!F:6QE+\"!I=\"!I<R!I;7!O<G1A;G0@=&\\@<')O<&5R;'D@;F%M92!A;&P@;V8@=&AE('!A<G1S+B!!;&P@<&%R=',@;75S=\"!H879E(&$@=6YI<75E(&YA;64-\"G=I=&AI;B!A($9%(&9I;&4@86YD(&%L;\"!&12!F:6QE<R!T;R!B92!R=6X@870@82!S:71E(&UU<W0@:&%V92!U;FEQ=64@;F%M97,N($%L;\"!&12!C;V1E(&UU<W0@9F]L;&]W('1H90T*<W1A;F1A<F0@3$E'3R!N86UI;F<@8V]N=F5N=&EO;B!O9B!)1D\\Z4UE3+5-50E-94U]005)47U-50E!!4E0N(%1H92!E;G1I<F4@;F%M92!M87D@;F]T#0IB92!M;W)E('1H86X@,C@@8VAA<F%C=&5R<R!I;B!L96YG=&@N#0H-\"E1H92!F:7)S=\"!P87)T(&]F('-I9VYA;\"!N86UE<R!F;W(@82!&12 N;61L(&9I;&4@87)E('1A:V5N(&9R;VT@=&AE(&9I;&5N86UE(&%N9\"!T:&4@<VET93T@<&%R86UE=&5R(&]F('1H92 -\"F-D<U!A<F%M971E<G,@<&%R=\"X@5&AI<R!W:6QL(&)E(&]F('1H92!F;W)M('-I=&4Z9FEL96YA;64N($9O<B!E>&%M<&QE+\"!I9B!T:&4@9FEL96YA;64@:7,@<W5S+FUD;\"!A;F0@=&AE#0IS:71E/4@Q+\"!A;&P@<&%R=\"!N86UE<R!W:6QL(&)E('!R97!E;F1E9\"!A<R!(,3I355,M+B -\"@T*0GD@8V]N=F5N=&EO;BP@86QL('!A<G1S(&%R92!T;R!B92!N86UE9\"!U<VEN9R!U<'!E<B!C87-E(&%N9\"!C;VYT86EN(&$@<VEN9VQE('-T<FEN9RP@=7-I;F<@=6YD97)S8V]R97,L(&%S#0IN96-E<W-A<GDL('1O(&-O;7!L971E('1H92!D97-I<F5D(&1E<V-R:7!T:6]N+@T*#0I!('!A<G0@870@=&AE('1O<\"!L979E;\"!O9B!T:&4@1D4@;6]D96P@=VEL;\"!S:6UP;'D@:&%V92!T:&4@:69O(&%N9\"!F92!N86UE('-T<FEN9R!P<F5P96YD960N($9O<B!E>&%M<&QE+\"!I9B!A('!A<G0@870@=&AE('1O< T*;&5V96P@:7,@;F%M960@45!$7T1#+\"!I=',@9FEN86P@;F%M92!W:6QL(&)E($@Q.E-54RU14$1?4U53+B!)9B!T:&4@=7-E<B!C<F5A=&5S(&$@36%T;&%B('-U8G-Y<W1E;2!P87)T+\"!T:&4-\"FYA;64@;V8@=&AE('-U8G-Y<W1E;2!W:6QL(&)E('!R97!E;F1E9\"!T;R!T:&4@;F%M92!O9B!A;&P@<&%R=',@=VET:&EN('1H92!S=6)S>7-T96TN($9O<B!E>&%M<&QE+ T*:68@82!S=6)S>7-T96T@:7,@8W)E871E9\"P@=VET:\"!T:&4@<W5B<WES=&5M(&YA;64@05-#+\"!A;F0@82!P87)T(&ES(&EN('1H92!S=6)S>7-T96T@=VET:\"!A(&YA;64@;V8-\"D1#7U)%041/550L('1H92!E;G1I<F4@<&%R=\"!N86UE(&EN('1H92!&12!W:6QL(&)E($@Q.E-54RU!4T-?1$-?4D5!1$]55\"X-\"@T*4U5\"4UE35$5-($-/3E-)1$52051)3TY3#0I-871L86(@86QL;W=S('!A<G1S('1O(&)E(&=R;W5P960@86YD(&)U:6QT(&EN=&\\@<W5B<WES=&5M<RX@070@=&AE('!R97-E;G0@=&EM92P@=&AE($-$4R!&12!C;V1E(&=E;F5R871O<@T*;VYL>2!A;&QO=W,@<W5B<WES=&5M<R!T;R!B92!C<F5A=&5D(&%T('1H92!T;W @;&5V96P@;V8@=&AE(&UO9&5L+B!4:&%T(&ES('1O('-A>2P@82!S=6)S>7-T96T@<&%R=\"!M87D@;F]T#0IC;VYT86EN(&$@<W5B<WES=&5M('!A<G0N(%1H97)E('=I;&P@8F4@<W5P<&]R=\"!F;W(@9G5R=&AE<B!N97-T:6YG(&]F('-U8G-Y<W1E;7,@:6X@=&AE(&9U='5R92X-\"@T*#0H       "
   }
 }
