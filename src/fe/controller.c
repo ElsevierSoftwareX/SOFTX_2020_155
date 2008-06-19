@@ -145,6 +145,7 @@ int wfd, ipc_fd;
 /* ADC/DAC overflow variables */
 int overflowAdc[4][32];;
 int overflowDac[4][16];;
+int overflowAcc = 0;
 
 float *testpoint[20];
 
@@ -640,6 +641,7 @@ void *fe_start(void *arg)
 #ifdef OMC_CODE
   cdsPciModules.gps = 0;
 #endif
+  cdsPciModules.gps = 0;
 
   // Total number of various binary I/O modules
   unsigned int total_bio_boards = cdsPciModules.dioCount
@@ -850,7 +852,8 @@ void *fe_start(void *arg)
 			if((adcData[kk][ii] > limit) || (adcData[kk][ii] < -limit))
 			  {
 				overflowAdc[kk][ii] ++;
-				pLocalEpics->epicsOutput.ovAccum ++;
+				// pLocalEpics->epicsOutput.ovAccum ++;
+				overflowAcc ++;
 				diagWord |= 0x100 *  jj;
 			  }
 		}
@@ -988,14 +991,16 @@ void *fe_start(void *arg)
 			{
 				dacOut[jj][ii] = limit;
 				overflowDac[jj][ii] ++;
-				pLocalEpics->epicsOutput.ovAccum ++;
+				// pLocalEpics->epicsOutput.ovAccum ++;
+				overflowAcc ++;
 				diagWord |= 0x1000 *  (jj+1);
 			}
 			if(dacOut[jj][ii] < -limit) 
 			{
 				dacOut[jj][ii] = -limit;
 				overflowDac[jj][ii] ++;
-				pLocalEpics->epicsOutput.ovAccum ++;
+				// pLocalEpics->epicsOutput.ovAccum ++;
+				overflowAcc ++;
 				diagWord |= 0x1000 *  (jj+1);
 			}
 			  int dac_out = dacOut[jj][ii];
@@ -1153,14 +1158,16 @@ void *fe_start(void *arg)
 		pLocalEpics->epicsInput.syncReset = 0;
 		skipCycle = 1;
 	  }
-  	  if((pLocalEpics->epicsInput.overflowReset) || (pLocalEpics->epicsOutput.ovAccum > 0x1000000))
+  	  if((pLocalEpics->epicsInput.overflowReset) || (overflowAcc > 0x1000000))
 	  {
 		pLocalEpics->epicsInput.overflowReset = 0;
 		pLocalEpics->epicsOutput.ovAccum = 0;
+		overflowAcc = 0;
 	  }
         }
         if(clock16K == 200)
         {
+		pLocalEpics->epicsOutput.ovAccum = overflowAcc;
 	  for(jj=0;jj<cdsPciModules.adcCount;jj++)
 	  {
 	    for(ii=0;ii<32;ii++)
