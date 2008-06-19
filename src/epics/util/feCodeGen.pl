@@ -2396,7 +2396,7 @@ if ($not_found) {
 mkpath $epicsScreensDir, 0, 0755;
 my $usite = uc $site;
 my $sysname = uc($skeleton);
-$sed_arg =  "s/SITE_NAME/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;s/GDS_NODE_ID/" . $gdsNodeId . "/g;";
+$sed_arg =  "s/SITE_NAME/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;s/GDS_NODE_ID/" . ($gdsNodeId - 1) . "/g;";
 system("cat GDS_TP.adl | sed '$sed_arg' > $epicsScreensDir/$usite$sysname" . "_GDS_TP.adl");
 my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
