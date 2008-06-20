@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.44"
+    ComputedModelVersion    "1.47"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -44,9 +44,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Jun 18 17:20:04 2008"
+  LastModifiedDate	  "Thu Jun 19 17:43:02 2008"
   RTWModifiedTimeStamp	  0
-  ModelVersionFormat	  "1.%<AutoIncrement:44>"
+  ModelVersionFormat	  "1.%<AutoIncrement:47>"
   ConfigurationManager	  "None"
   SimulationMode	  "normal"
   LinearizationMsg	  "none"
@@ -672,7 +672,7 @@ Model {
   }
   System {
     Name		    "om2"
-    Location		    [266, 103, 1260, 1146]
+    Location		    [272, 77, 1266, 1120]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -961,6 +961,69 @@ Model {
     }
     Block {
       BlockType		      Reference
+      Name		      "0x2038"
+      Tag		      "cdsIPC"
+      Description	      "Inter-process communication through /rtl_epics_ipc shared memory"
+      Ports		      [1, 1]
+      Position		      [660, 936, 715, 954]
+      BackgroundColor	      "green"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsIPC/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "0x203C"
+      Tag		      "cdsIPC"
+      Description	      "Inter-process communication through /rtl_epics_ipc shared memory"
+      Ports		      [1, 1]
+      Position		      [170, 937, 210, 963]
+      BackgroundColor	      "green"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsIPC/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "0x2040"
+      Tag		      "cdsIPC"
+      Description	      "Inter-process communication through /rtl_epics_ipc shared memory"
+      Ports		      [1, 1]
+      Position		      [170, 1002, 210, 1028]
+      BackgroundColor	      "green"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsIPC/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
       Name		      "0x3000"
       Tag		      "cdsIPCS"
       Ports		      [1, 1]
@@ -1152,6 +1215,28 @@ Model {
     }
     Block {
       BlockType		      Reference
+      Name		      "DIO_0"
+      Tag		      "cdsRio"
+      Description	      "PCI IIRO 8 relay output and isolated input module"
+      Ports		      [1, 1]
+      Position		      [765, 928, 840, 962]
+      ForegroundColor	      "blue"
+      BackgroundColor	      "cyan"
+      DropShadow	      on
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsRio/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
       Name		      "DocBlock1"
       Tag		      "SW Install"
       Ports		      []
@@ -1177,8 +1262,8 @@ Model {
       BlockType		      SubSystem
       Name		      "OMC"
       Tag		      "top_names"
-      Ports		      [30, 8]
-      Position		      [470, 15, 610, 925]
+      Ports		      [32, 8]
+      Position		      [470, 17, 610, 1013]
       BackgroundColor	      "yellow"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -1187,7 +1272,7 @@ Model {
       FunctionWithSeparateData off
       System {
 	Name			"OMC"
-	Location		[299, 152, 1239, 949]
+	Location		[300, 150, 1557, 1122]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1398,7 +1483,7 @@ Model {
 	Block {
 	  BlockType		  Inport
 	  Name			  "trigger"
-	  Position		  [495, 358, 525, 372]
+	  Position		  [490, 338, 520, 352]
 	  Port			  "29"
 	  IconDisplay		  "Port number"
 	}
@@ -1407,6 +1492,20 @@ Model {
 	  Name			  "sync_in"
 	  Position		  [60, 713, 90, 727]
 	  Port			  "30"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "HWSTATE_IN"
+	  Position		  [180, 833, 210, 847]
+	  Port			  "31"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "HWSETPT_IN"
+	  Position		  [175, 898, 205, 912]
+	  Port			  "32"
 	  IconDisplay		  "Port number"
 	}
 	Block {
@@ -1422,8 +1521,8 @@ Model {
 	Block {
 	  BlockType		  SubSystem
 	  Name			  "SHUTTER"
-	  Ports			  [5, 5]
-	  Position		  [550, 23, 785, 407]
+	  Ports			  [7, 5]
+	  Position		  [660, 31, 885, 529]
 	  ForegroundColor	  "cyan"
 	  BackgroundColor	  "darkGreen"
 	  MinAlgLoopOccurrences	  off
@@ -1431,7 +1530,7 @@ Model {
 	  FunctionWithSeparateData off
 	  System {
 	    Name		    "SHUTTER"
-	    Location		    [980, 235, 2041, 826]
+	    Location		    [534, 235, 1595, 1020]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -1481,6 +1580,22 @@ Model {
 	      Position		      [115, 373, 145, 387]
 	      BackgroundColor	      "cyan"
 	      Port		      "5"
+	      IconDisplay	      "Port number"
+	    }
+	    Block {
+	      BlockType		      Inport
+	      Name		      "HWSTATE_IN"
+	      Position		      [125, 613, 155, 627]
+	      BackgroundColor	      "cyan"
+	      Port		      "6"
+	      IconDisplay	      "Port number"
+	    }
+	    Block {
+	      BlockType		      Inport
+	      Name		      "HWSETPT_IN"
+	      Position		      [125, 688, 155, 702]
+	      BackgroundColor	      "cyan"
+	      Port		      "7"
 	      IconDisplay	      "Port number"
 	    }
 	    Block {
@@ -1586,9 +1701,46 @@ Model {
 	      DocumentType	      "Text"
 	    }
 	    Block {
-	      BlockType		      Ground
-	      Name		      "Ground1"
-	      Position		      [720, 455, 740, 475]
+	      BlockType		      Reference
+	      Name		      "HWSETPT"
+	      Tag		      "cdsFilt"
+	      Description	      "Purpose:                                                                                                                                                                                                                                  \nStandard CDS IIR filter module.                                                                                                                                                                                                           \n                                                                                                                                                                                                                                          \nOperation:                                                                                                                                                                                                                                \nConsists of 10 second order section IIR filters, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. The filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                                                                                                                                                                                                                          \nUsage:                                                                                                                                                                                                                                    \nName the part with the desired filter module name.                                                                                                                                                                                        "
+	      Ports		      [1, 1]
+	      Position		      [250, 683, 320, 707]
+	      BackgroundColor	      "darkGreen"
+	      DropShadow	      on
+	      AttributesFormatString  "%<Tag>"
+	      SourceBlock	      "cdsFilt/Subsystem"
+	      SourceType	      "SubSystem"
+	      ShowPortLabels	      "FromPortIcon"
+	      SystemSampleTime	      "-1"
+	      FunctionWithSeparateData off
+	      RTWMemSecFuncInitTerm   "Inherit from model"
+	      RTWMemSecFuncExecute    "Inherit from model"
+	      RTWMemSecDataConstants  "Inherit from model"
+	      RTWMemSecDataInternal   "Inherit from model"
+	      RTWMemSecDataParameters "Inherit from model"
+	    }
+	    Block {
+	      BlockType		      Reference
+	      Name		      "HWSTATE"
+	      Tag		      "cdsFilt"
+	      Description	      "Purpose:                                                                                                                                                                                                                                  \nStandard CDS IIR filter module.                                                                                                                                                                                                           \n                                                                                                                                                                                                                                          \nOperation:                                                                                                                                                                                                                                \nConsists of 10 second order section IIR filters, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. The filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                                                                                                                                                                                                                          \nUsage:                                                                                                                                                                                                                                    \nName the part with the desired filter module name.                                                                                                                                                                                        "
+	      Ports		      [1, 1]
+	      Position		      [250, 608, 320, 632]
+	      BackgroundColor	      "darkGreen"
+	      DropShadow	      on
+	      AttributesFormatString  "%<Tag>"
+	      SourceBlock	      "cdsFilt/Subsystem"
+	      SourceType	      "SubSystem"
+	      ShowPortLabels	      "FromPortIcon"
+	      SystemSampleTime	      "-1"
+	      FunctionWithSeparateData off
+	      RTWMemSecFuncInitTerm   "Inherit from model"
+	      RTWMemSecFuncExecute    "Inherit from model"
+	      RTWMemSecDataConstants  "Inherit from model"
+	      RTWMemSecDataInternal   "Inherit from model"
+	      RTWMemSecDataParameters "Inherit from model"
 	    }
 	    Block {
 	      BlockType		      RelationalOperator
@@ -1610,27 +1762,6 @@ Model {
 	      DropShadow	      on
 	      AttributesFormatString  "%<Tag>"
 	      SourceBlock	      "cdsEpicsOut/Subsystem"
-	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	    }
-	    Block {
-	      BlockType		      Reference
-	      Name		      "STEPSHAPE"
-	      Tag		      "cdsFilt"
-	      Description	      "Purpose:                                                                                                                                                                                                                                  \nStandard CDS IIR filter module.                                                                                                                                                                                                           \n                                                                                                                                                                                                                                          \nOperation:                                                                                                                                                                                                                                \nConsists of 10 second order section IIR filters, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. The filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                                                                                                                                                                                                                          \nUsage:                                                                                                                                                                                                                                    \nName the part with the desired filter module name.                                                                                                                                                                                        "
-	      Ports		      [1, 1]
-	      Position		      [765, 448, 835, 472]
-	      BackgroundColor	      "darkGreen"
-	      DropShadow	      on
-	      AttributesFormatString  "%<Tag>"
-	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
@@ -1689,12 +1820,17 @@ Model {
 	    Block {
 	      BlockType		      Terminator
 	      Name		      "Terminator1"
-	      Position		      [865, 450, 885, 470]
+	      Position		      [415, 610, 435, 630]
 	    }
 	    Block {
 	      BlockType		      Terminator
 	      Name		      "Terminator2"
 	      Position		      [470, 445, 490, 465]
+	    }
+	    Block {
+	      BlockType		      Terminator
+	      Name		      "Terminator3"
+	      Position		      [415, 685, 435, 705]
 	    }
 	    Block {
 	      BlockType		      Outport
@@ -1753,13 +1889,6 @@ Model {
 	      SrcBlock		      "TRIGGERMON"
 	      SrcPort		      1
 	      DstBlock		      "Terminator"
-	      DstPort		      1
-	    }
-	    Line {
-	      SrcBlock		      "Ground1"
-	      SrcPort		      1
-	      Points		      [5, 0]
-	      DstBlock		      "STEPSHAPE"
 	      DstPort		      1
 	    }
 	    Line {
@@ -1852,12 +1981,6 @@ Model {
 	      DstPort		      3
 	    }
 	    Line {
-	      SrcBlock		      "STEPSHAPE"
-	      SrcPort		      1
-	      DstBlock		      "Terminator1"
-	      DstPort		      1
-	    }
-	    Line {
 	      SrcBlock		      "Constant2"
 	      SrcPort		      1
 	      DstBlock		      "Choice2"
@@ -1902,6 +2025,30 @@ Model {
 	      SrcBlock		      "Constant"
 	      SrcPort		      1
 	      DstBlock		      "Operator"
+	      DstPort		      1
+	    }
+	    Line {
+	      SrcBlock		      "HWSTATE_IN"
+	      SrcPort		      1
+	      DstBlock		      "HWSTATE"
+	      DstPort		      1
+	    }
+	    Line {
+	      SrcBlock		      "HWSETPT_IN"
+	      SrcPort		      1
+	      DstBlock		      "HWSETPT"
+	      DstPort		      1
+	    }
+	    Line {
+	      SrcBlock		      "HWSTATE"
+	      SrcPort		      1
+	      DstBlock		      "Terminator1"
+	      DstPort		      1
+	    }
+	    Line {
+	      SrcBlock		      "HWSETPT"
+	      SrcPort		      1
+	      DstBlock		      "Terminator3"
 	      DstPort		      1
 	    }
 	  }
@@ -2101,7 +2248,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2168,7 +2315,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2189,7 +2336,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2210,7 +2357,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2231,7 +2378,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2252,7 +2399,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2273,7 +2420,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2294,7 +2441,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2315,7 +2462,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2336,7 +2483,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2357,7 +2504,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2378,7 +2525,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2399,7 +2546,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2420,7 +2567,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2441,7 +2588,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2462,7 +2609,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2483,7 +2630,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2504,7 +2651,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2525,7 +2672,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2642,7 +2789,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2663,7 +2810,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2684,7 +2831,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2705,7 +2852,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2726,7 +2873,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2747,7 +2894,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2768,7 +2915,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2874,7 +3021,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2895,7 +3042,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2916,7 +3063,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2937,7 +3084,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2958,7 +3105,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -2979,7 +3126,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3000,7 +3147,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3021,7 +3168,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3042,7 +3189,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3063,7 +3210,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3084,7 +3231,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3105,7 +3252,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3125,7 +3272,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3146,7 +3293,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3167,7 +3314,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -3188,7 +3335,7 @@ Model {
 	      SourceType	      "SubSystem"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData off
+	      FunctionWithSeparateData "off"
 	      RTWMemSecFuncInitTerm   "Inherit from model"
 	      RTWMemSecFuncExecute    "Inherit from model"
 	      RTWMemSecDataConstants  "Inherit from model"
@@ -5712,12 +5859,12 @@ Model {
 	Block {
 	  BlockType		  Terminator
 	  Name			  "Terminator8"
-	  Position		  [885, 355, 905, 375]
+	  Position		  [1025, 465, 1045, 485]
 	}
 	Block {
 	  BlockType		  Outport
 	  Name			  "TT1ULCOIL"
-	  Position		  [815, 58, 845, 72]
+	  Position		  [1020, 58, 1050, 72]
 	  IconDisplay		  "Port number"
 	  OutDataType		  "sfix(16)"
 	  OutScaling		  "2^0"
@@ -5725,7 +5872,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "TT1LLCOIL"
-	  Position		  [815, 133, 845, 147]
+	  Position		  [1020, 133, 1050, 147]
 	  Port			  "2"
 	  IconDisplay		  "Port number"
 	  OutDataType		  "sfix(16)"
@@ -5734,7 +5881,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "TT1URCOIL"
-	  Position		  [815, 208, 845, 222]
+	  Position		  [1020, 208, 1050, 222]
 	  Port			  "3"
 	  IconDisplay		  "Port number"
 	  OutDataType		  "sfix(16)"
@@ -5743,7 +5890,7 @@ Model {
 	Block {
 	  BlockType		  Outport
 	  Name			  "TT1LRCOIL"
-	  Position		  [815, 283, 845, 297]
+	  Position		  [1020, 283, 1050, 297]
 	  Port			  "4"
 	  IconDisplay		  "Port number"
 	  OutDataType		  "sfix(16)"
@@ -5794,6 +5941,7 @@ Model {
 	Line {
 	  SrcBlock		  "TT1"
 	  SrcPort		  1
+	  Points		  [190, 0]
 	  DstBlock		  "SHUTTER"
 	  DstPort		  1
 	}
@@ -5806,18 +5954,21 @@ Model {
 	Line {
 	  SrcBlock		  "TT1"
 	  SrcPort		  3
+	  Points		  [190, 0]
 	  DstBlock		  "SHUTTER"
 	  DstPort		  3
 	}
 	Line {
 	  SrcBlock		  "TT1"
 	  SrcPort		  4
+	  Points		  [190, 0]
 	  DstBlock		  "SHUTTER"
 	  DstPort		  4
 	}
 	Line {
 	  SrcBlock		  "SHUTTER"
 	  SrcPort		  5
+	  Points		  [0, -5]
 	  DstBlock		  "Terminator8"
 	  DstPort		  1
 	}
@@ -5830,24 +5981,28 @@ Model {
 	Line {
 	  SrcBlock		  "SHUTTER"
 	  SrcPort		  1
+	  Points		  [95, 0; 0, -15]
 	  DstBlock		  "TT1ULCOIL"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "SHUTTER"
 	  SrcPort		  2
+	  Points		  [95, 0; 0, -40]
 	  DstBlock		  "TT1LLCOIL"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "SHUTTER"
 	  SrcPort		  3
+	  Points		  [95, 0; 0, -65]
 	  DstBlock		  "TT1URCOIL"
 	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "SHUTTER"
 	  SrcPort		  4
+	  Points		  [95, 0; 0, -90]
 	  DstBlock		  "TT1LRCOIL"
 	  DstPort		  1
 	}
@@ -6047,6 +6202,7 @@ Model {
 	Line {
 	  SrcBlock		  "trigger"
 	  SrcPort		  1
+	  Points		  [120, 0]
 	  DstBlock		  "SHUTTER"
 	  DstPort		  5
 	}
@@ -6062,7 +6218,26 @@ Model {
 	  DstBlock		  "SYNC_TEST"
 	  DstPort		  1
 	}
+	Line {
+	  SrcBlock		  "HWSTATE_IN"
+	  SrcPort		  1
+	  Points		  [355, 0; 0, -420]
+	  DstBlock		  "SHUTTER"
+	  DstPort		  6
+	}
+	Line {
+	  SrcBlock		  "HWSETPT_IN"
+	  SrcPort		  1
+	  Points		  [410, 0; 0, -415]
+	  DstBlock		  "SHUTTER"
+	  DstPort		  7
+	}
       }
+    }
+    Block {
+      BlockType		      Terminator
+      Name		      "Terminator"
+      Position		      [915, 935, 935, 955]
     }
     Block {
       BlockType		      Reference
@@ -6103,6 +6278,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      1
+      Points		      [175, 0]
       DstBlock		      "OMC"
       DstPort		      1
     }
@@ -6111,6 +6287,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      2
+      Points		      [175, 0]
       DstBlock		      "OMC"
       DstPort		      2
     }
@@ -6119,6 +6296,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      3
+      Points		      [175, 0]
       DstBlock		      "OMC"
       DstPort		      3
     }
@@ -6127,6 +6305,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      4
+      Points		      [175, 0]
       DstBlock		      "OMC"
       DstPort		      4
     }
@@ -6135,6 +6314,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      5
+      Points		      [175, 0]
       DstBlock		      "OMC"
       DstPort		      5
     }
@@ -6143,6 +6323,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      6
+      Points		      [175, 0]
       DstBlock		      "OMC"
       DstPort		      6
     }
@@ -6151,6 +6332,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      7
+      Points		      [175, 0]
       DstBlock		      "OMC"
       DstPort		      7
     }
@@ -6159,6 +6341,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      8
+      Points		      [175, 0]
       DstBlock		      "OMC"
       DstPort		      8
     }
@@ -6167,6 +6350,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      9
+      Points		      [175, 0]
       DstBlock		      "OMC"
       DstPort		      9
     }
@@ -6175,6 +6359,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      10
+      Points		      [175, 0]
       DstBlock		      "OMC"
       DstPort		      10
     }
@@ -6183,6 +6368,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      11
+      Points		      [175, 0]
       DstBlock		      "OMC"
       DstPort		      11
     }
@@ -6191,6 +6377,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector4"
       SrcPort		      12
+      Points		      [175, 0]
       DstBlock		      "OMC"
       DstPort		      12
     }
@@ -6199,6 +6386,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      1
+      Points		      [170, 0]
       DstBlock		      "OMC"
       DstPort		      13
     }
@@ -6207,6 +6395,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      2
+      Points		      [170, 0]
       DstBlock		      "OMC"
       DstPort		      14
     }
@@ -6215,6 +6404,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      3
+      Points		      [170, 0]
       DstBlock		      "OMC"
       DstPort		      15
     }
@@ -6223,6 +6413,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      4
+      Points		      [170, 0]
       DstBlock		      "OMC"
       DstPort		      16
     }
@@ -6231,6 +6422,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      5
+      Points		      [170, 0]
       DstBlock		      "OMC"
       DstPort		      17
     }
@@ -6239,6 +6431,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      6
+      Points		      [170, 0]
       DstBlock		      "OMC"
       DstPort		      18
     }
@@ -6247,6 +6440,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      7
+      Points		      [170, 0]
       DstBlock		      "OMC"
       DstPort		      19
     }
@@ -6255,6 +6449,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      8
+      Points		      [170, 0]
       DstBlock		      "OMC"
       DstPort		      20
     }
@@ -6263,6 +6458,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      9
+      Points		      [170, 0]
       DstBlock		      "OMC"
       DstPort		      21
     }
@@ -6271,6 +6467,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      10
+      Points		      [170, 0]
       DstBlock		      "OMC"
       DstPort		      22
     }
@@ -6279,6 +6476,7 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      11
+      Points		      [170, 0]
       DstBlock		      "OMC"
       DstPort		      23
     }
@@ -6287,97 +6485,132 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector3"
       SrcPort		      12
+      Points		      [170, 0]
       DstBlock		      "OMC"
       DstPort		      24
     }
     Line {
       SrcBlock		      "0x2000"
       SrcPort		      1
-      Points		      [30, 0; 0, 100]
+      Points		      [30, 0; 0, 115]
       DstBlock		      "OMC"
       DstPort		      25
     }
     Line {
       SrcBlock		      "0x2004"
       SrcPort		      1
-      Points		      [20, 0; 0, 70]
+      Points		      [20, 0; 0, 85]
       DstBlock		      "OMC"
       DstPort		      26
     }
     Line {
       SrcBlock		      "0x2008"
       SrcPort		      1
-      Points		      [15, 0; 0, 40]
+      Points		      [15, 0; 0, 55]
       DstBlock		      "OMC"
       DstPort		      27
     }
     Line {
       SrcBlock		      "0x200C"
       SrcPort		      1
-      Points		      [85, 0; 0, 15]
+      Points		      [240, 0]
       DstBlock		      "OMC"
       DstPort		      28
     }
     Line {
       SrcBlock		      "OMC"
       SrcPort		      1
+      Points		      [0, -10]
       DstBlock		      "0x2014"
       DstPort		      1
     }
     Line {
       SrcBlock		      "OMC"
       SrcPort		      2
+      Points		      [0, -20]
       DstBlock		      "0x2018"
       DstPort		      1
     }
     Line {
       SrcBlock		      "OMC"
       SrcPort		      3
+      Points		      [0, -30]
       DstBlock		      "0x201C"
       DstPort		      1
     }
     Line {
       SrcBlock		      "OMC"
       SrcPort		      4
+      Points		      [0, -40]
       DstBlock		      "0x2020"
       DstPort		      1
     }
     Line {
       SrcBlock		      "OMC"
       SrcPort		      5
+      Points		      [0, -50]
       DstBlock		      "0x2024"
       DstPort		      1
     }
     Line {
       SrcBlock		      "OMC"
       SrcPort		      6
+      Points		      [0, -60]
       DstBlock		      "0x2028"
       DstPort		      1
     }
     Line {
       SrcBlock		      "OMC"
       SrcPort		      7
+      Points		      [0, -70]
       DstBlock		      "0x202C"
       DstPort		      1
     }
     Line {
       SrcBlock		      "OMC"
       SrcPort		      8
+      Points		      [0, -80]
       DstBlock		      "0x2030"
       DstPort		      1
     }
     Line {
       SrcBlock		      "0x2010"
       SrcPort		      1
-      Points		      [120, 0; 0, -10]
+      Points		      [120, 0; 0, 5]
       DstBlock		      "OMC"
       DstPort		      29
     }
     Line {
       SrcBlock		      "0x3000"
       SrcPort		      1
+      Points		      [130, 0]
       DstBlock		      "OMC"
       DstPort		      30
+    }
+    Line {
+      SrcBlock		      "DIO_0"
+      SrcPort		      1
+      DstBlock		      "Terminator"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "0x2038"
+      SrcPort		      1
+      DstBlock		      "DIO_0"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "0x203C"
+      SrcPort		      1
+      DstBlock		      "OMC"
+      DstPort		      31
+    }
+    Line {
+      SrcBlock		      "0x2040"
+      SrcPort		      1
+      Points		      [195, 0; 0, -35]
+      DstBlock		      "OMC"
+      DstPort		      32
     }
     Annotation {
       Name		      "IPC Outputs to model om1"
