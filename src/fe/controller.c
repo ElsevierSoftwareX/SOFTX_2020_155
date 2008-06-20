@@ -631,6 +631,9 @@ void *fe_start(void *arg)
 #ifdef SERVO64K
     gsaDacTrigger(cdsPciModules.dacCount);
 #endif
+#ifdef SERVO32K
+    gsaDacTrigger(cdsPciModules.dacCount);
+#endif
   } else {
     printf("*******************************\n");
     printf("* Running with RTLinux timer! *\n");
@@ -691,13 +694,13 @@ void *fe_start(void *arg)
 	  usleep(0);
 	}
 
-#ifdef  SERVO32K
-	if ((firstTime == 100) && (clock16K == (CYCLE_PER_SECOND - 3)))
+#if 0
+	if ((firstTime == 200) && (clock16K == (CYCLE_PER_SECOND - 3)))
 	{
-	    //printf("firstTime=%d clock16K = %d\n", firstTime, clock16K);
+	    printf("firstTime=%d clock16K = %d\n", firstTime, clock16K);
 
 	    gsaDacTrigger(cdsPciModules.dacCount);
-	    firstTime = 200;
+	    firstTime = 300;
 	}
 #endif
 	// Read CPU clock for timing info
@@ -871,6 +874,7 @@ void *fe_start(void *arg)
 	// Assign chan 32 to onePps 
 	onePps = dWord[0][31];
 
+#ifndef OM1_CODE
 	// Read Dio cards
   	for(kk=0;kk<cdsPciModules.dioCount;kk++) {
 		if (kk == cur_bio_card) {
@@ -887,6 +891,7 @@ void *fe_start(void *arg)
   		  rioInput1[kk] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
 		}
 	}
+#endif
 
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
@@ -1018,6 +1023,7 @@ void *fe_start(void *arg)
 	}
 
 	// Write Dio cards
+#ifndef OM1_CODE
   	for(kk=0;kk<cdsPciModules.dioCount;kk++) {
 		if (total_bio_boards + kk == cur_bio_card) {
   		  writeDio(&cdsPciModules, kk, dioOutput[kk]);
@@ -1036,6 +1042,7 @@ void *fe_start(void *arg)
 	cur_bio_card++;
 	if (total_bio_boards) cur_bio_card %= total_bio_boards * 2;
 	else cur_bio_card = 0;
+#endif
 
 #ifndef NO_DAQ
 	// Write DAQ and GDS values once we are synched to 1pps
