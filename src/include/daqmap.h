@@ -122,9 +122,13 @@ struct rmIpcStr {       /* IPC area structure                   */
 #endif
 #define IS_EXC_DCU(dcuid) ((dcuid) == DCU_ID_EX_16K || (dcuid) == DCU_ID_EX_2K)
 
-
+#ifdef COMPAT_INITIAL_LIGO
+/* DCU 27; ISI and DCU6; TPT */
+#define IS_MYRINET_DCU(dcuid) (dcuid == 27 || dcuid == 30 || dcuid == 31)
+#else
 /* DCU 11 and 22 are the 40m Myrinet DCUs */
 #define IS_MYRINET_DCU(dcuid) (daqd.cit_40m? ((dcuid) == 11 || (dcuid) == DCU_ID_HEPI_1)  : (((dcuid) >= DCU_ID_SUS_1 && (dcuid) <= DCU_ID_SUS_4) || ((dcuid) >= DCU_ID_SUS_SOS && (dcuid) <= DCU_ID_HEPI_EY)) )
+#endif
 
 static const char * const dcuName[DCU_COUNT] = {"DAQSC",
 					 "FB0", "FB1", "FB2",
