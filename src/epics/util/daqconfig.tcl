@@ -36,7 +36,7 @@
 #   drh@acm.org
 #   http://www.hwaci.com/drh/
 #
-# $Revision: 1.19 $
+# $Revision: 1.20 $
 #
 option add *highlightThickness 0
 
@@ -330,7 +330,7 @@ image create photo ifile -data {
 }
 
 ;# This is code version; displayed in the About dialog box, Help menu
-set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.19 2007/09/27 17:58:44 aivanov Exp $}
+set daqconfig_version {$Header: /var/svn/ldas-cvs/repository_cds/cds/advLigo/src/epics/util/daqconfig.tcl,v 1.20 2008/07/15 19:58:21 aivanov Exp $}
 
 ;# Only support UNIX
 switch $::tcl_platform(platform) {
@@ -434,7 +434,7 @@ proc save_ini_files {} {
 	  	  set comment "#"
  		}
 		puts $infile ""
-	  	puts $infile "$comment\[${sectname}_$sections($fname,$sectname,datarate)\]"
+	  	puts $infile "$comment\[${sectname}_DAQ\]"
 		set cur_sect $sectname
 	  } 
 	  # Print section param
@@ -608,22 +608,8 @@ proc parse_ini_file file {
                   #continue;
                 #}
                 #puts "Section $lws"
-                if {[regexp {^(\S+)_(\d+)$} $section junk channame chanrate]} {
+                if {[regexp {^(\S+)_DAQ$} $section junk channame]} {
 			set lws $channame;
-			# Check valid channel rate
-			#puts "channel $channame rate $chanrate"
-    			if {[string length $chanrate] > 0 &&
-			     $chanrate != 16 && $chanrate != 32 &&
-			     $chanrate  != 64 && $chanrate != 132 &&
-			     $chanrate != 256 && $chanrate != 512 &&
-			     $chanrate != 1024 && $chanrate != 2048 &&
-			     $chanrate != 4096 && $chanrate != 8192 &&
-			     $chanrate != 16384 && $chanrate != 32768 &&
-			     $chanrate != 65536 } {
-					set ini_section_error 1
-					#puts "Syntax error in $file"
-					break
-			     }
 		} else {
 			if {[string compare $section "default"] != 0} {
 				set ini_section_error 1
