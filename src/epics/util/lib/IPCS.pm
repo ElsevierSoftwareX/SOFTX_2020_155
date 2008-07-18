@@ -51,7 +51,7 @@ sub fromExp {
 	if ($address % 4 != 0) {
 		die "IPCS Part $::xpartName[$i] invalid: address must be 4-byte aligned\n";
 	}
-        return "_ipc_shm? *((float *)(((void *)_ipc_shm) + $addressString))- cycle : 0.0";
+        return "_ipc_shm? *((float *)(((void *)_ipc_shm) + $addressString)) - cycle : 0.0";
 }
 
 # Return front end code
@@ -74,7 +74,7 @@ sub frontEndCode {
         if (($fromType ne "GROUND") && ($::partInput[$i][0] ne "NC") && ($fromType ne "")) {
 		return "if (_ipc_shm != 0) {\n"
         		. "  // IPCS output\n"
-                	. "  *((float *)(((char *)_ipc_shm) + $addressString)) = cycle;\n"
+                	. "  *((float *)(((char *)_ipc_shm) + $addressString)) = (cycle + 1)%FE_RATE;\n"
 			. "}\n";
         }
         return " ";
