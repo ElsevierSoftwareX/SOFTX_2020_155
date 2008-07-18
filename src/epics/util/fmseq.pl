@@ -21,6 +21,37 @@
     "saveSwitch2" => "SW2S",
 	 );
 
+%iparAlarmSev = (
+    "limitHihiSev" => "LIMIT.HHSV",
+    "limitHighSev" => "LIMIT.HSV",
+    "limitLowSev" => "LIMIT.LSV",
+    "limitLoloSev" => "LIMIT.LLSV",
+    "offsetHihiSev" => "OFFSET.HHSV",
+    "offsetHighSev" => "OFFSET.HSV",
+    "offsetLowSev" => "OFFSET.LSV",
+    "offsetLoloSev" => "OFFSET.LLSV",
+    "outgainHihiSev" => "GAIN.HHSV",
+    "outgainHighSev" => "GAIN.HSV",
+    "outgainLowSev" => "GAIN.LSV",
+    "outgainLoloSev" => "GAIN.LLSV",
+    "saveSwitch1HihiSev" => "SW1S.HHSV",
+    "saveSwitch1HighSev" => "SW1S.HSV",
+    "saveSwitch1LowSev" => "SW1S.LSV",
+    "saveSwitch1LoloSev" => "SW1S.LLSV",
+    "saveSwitch2HihiSev" => "SW2S.HHSV",
+    "saveSwitch2HighSev" => "SW2S.HSV",
+    "saveSwitch2LowSev" => "SW2S.LSV",
+    "saveSwitch2LoloSev" => "SW2S.LLSV",
+	 );
+
+%iparAlarmStat = (
+    "limitStat" => "LIMIT.STAT",
+    "offsetStat" => "OFFSET.STAT",
+    "outgainStat" => "GAIN.STAT",
+    "saveSwitch1Stat" => "SW1S.STAT",
+    "saveSwitch2Stat" => "SW2S.STAT",
+	 );
+
 %spar = (
     "labels0" => "Name00",
     "labels1" => "Name01",
@@ -43,6 +74,7 @@ open(IN,"<-") || die "cannot open standard input\n";
 
 $cnt = 0;
 $mcnt = 0;
+$phase = 0;
 
 $names1 = "%TYPE% %NAME%[MAX_MODULES];\nassign %NAME% to\n{\n";
 $names2 = "%%static  fmSubSysMap  fmmap0 [MAX_MODULES] = { \n%%";
@@ -118,21 +150,90 @@ while (<IN>) {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
 	$vdecl .= "$v_type evar_$v_name;\n";
+        if ($v_name ne "BURT_RESTORE") {
+          $vstat_decl .= "int evar_${v_name}_Stat;\n";
+          if ($ve_type ne "bi") {
+            $vhihi_decl .= "int evar_${v_name}_HihiSev;\n";
+            $vhigh_decl .= "int evar_${v_name}_HighSev;\n";
+            $vlow_decl  .= "int evar_${v_name}_LowSev;\n";
+            $vlolo_decl .= "int evar_${v_name}_LoloSev;\n";
+          }
+        }
         my $top_name = is_top_name($v_name);
    	my $tv_name;
         if ($top_name) {
 	  $tv_name = top_name_transform($v_name);
 	  $vdecl .= "assign evar_$v_name to \"{ifo}:${tv_name}\";\n";
+          if ($v_name ne "BURT_RESTORE") {
+            $vstat_decl .="assign evar_${v_name}_Stat to \"{ifo}:${tv_name}.STAT\";\n";
+            if ($ve_type ne "bi") {
+              $vhihi_decl .="assign evar_${v_name}_HihiSev to \"{ifo}:${tv_name}.HHSV\";\n";
+              $vhigh_decl .="assign evar_${v_name}_HighSev to \"{ifo}:${tv_name}.HSV\";\n";
+              $vlow_decl  .="assign evar_${v_name}_LowSev to \"{ifo}:${tv_name}.LSV\";\n";
+              $vlolo_decl .="assign evar_${v_name}_LoloSev to \"{ifo}:${tv_name}.LLSV\";\n";
+            }
+          }
  	} else {
 	  $vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
+          if ($v_name ne "BURT_RESTORE") {
+            $vstat_decl .="assign evar_${v_name}_Stat to \"{ifo}:{sys}-{subsys}${v_name}.STAT\";\n";
+            if ($ve_type ne "bi") {
+              $vhihi_decl .="assign evar_${v_name}_HihiSev to \"{ifo}:{sys}-{subsys}${v_name}.HHSV\";\n";
+              $vhigh_decl .="assign evar_${v_name}_HighSev to \"{ifo}:{sys}-{subsys}${v_name}.HSV\";\n";
+              $vlow_decl  .="assign evar_${v_name}_LowSev to \"{ifo}:{sys}-{subsys}${v_name}.LSV\";\n";
+              $vlolo_decl .="assign evar_${v_name}_LoloSev to \"{ifo}:{sys}-{subsys}${v_name}.LLSV\";\n";
+            }
+          }
 	}
 
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
 	$vinit .= "pvPut(evar_$v_name);\n";
 	$vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
 
+        if ($v_name ne "BURT_RESTORE") {
+          if ($ve_type ne "bi") {
+            $vinit .= "%% evar_${v_name}_HihiSev = NO_ALARM;\n";
+            $vinit .= "pvPut(evar_${v_name}_HihiSev);\n";
+#             $vinit .= "%%       pEpics->${v_var}_HihiSev = evar_${v_name}_HihiSev;\n";   # ????????
+            $vinit .= "%% evar_${v_name}_HighSev = NO_ALARM;\n";
+            $vinit .= "pvPut(evar_${v_name}_HighSev);\n";
+#             $vinit .= "%%       pEpics->${v_var}_HighSev = evar_${v_name}_HighSev;\n";   # ????????
+            $vinit .= "%% evar_${v_name}_LowSev = NO_ALARM;\n";
+            $vinit .= "pvPut(evar_${v_name}_LowSev);\n";
+#             $vinit .= "%%       pEpics->${v_var}_LowSev = evar_${v_name}_LowSev;\n";     # ????????
+            $vinit .= "%% evar_${v_name}_LoloSev = NO_ALARM;\n";
+            $vinit .= "pvPut(evar_${v_name}_LoloSev);\n";
+#             $vinit .= "%%       pEpics->${v_var}_LoloSev = evar_${v_name}_LoloSev;\n";   # ????????
+          }
+        }
+
 	$vupdate .= "pvGet(evar_$v_name);\n";
 	$vupdate .= "rfm_assign(pEpics->${v_var}, evar_$v_name);\n";
+
+        if ($v_name ne "BURT_RESTORE") {
+          $vupdate .= "pvGet(evar_${v_name}_Stat);\n";
+#             $vupdate .= "rfm_assign(pEpics->${v_var}_Stat, evar_${v_name}_Stat);\n";     # ????????
+          $vupdate .= "%%  if ( (evar_${v_name}_Stat == HIHI_ALARM) ||\n";
+          $vupdate .= "%%       (evar_${v_name}_Stat == LOLO_ALARM) ) {\n";
+          $vupdate .= "%%    setpointStatusCount++;\n";
+          $vupdate .= "%%    if (setpointDisplayCount < 10) {\n";
+          $vupdate .= "%%      strcpy(setpointErrId[setpointDisplayCount], \"$v_name\");\n";
+          $vupdate .= "%%      strcpy(setpointMajorCount[setpointDisplayCount], \"1\");\n";
+          $vupdate .= "%%      strcpy(setpointMinorCount[setpointDisplayCount], \"-\");\n";
+          $vupdate .= "%%      setpointDisplayCount++;\n";
+          $vupdate .= "%%    }\n";
+          $vupdate .= "%%  }\n";
+          $vupdate .= "%%  else if ( (evar_${v_name}_Stat == HIGH_ALARM) ||\n";
+          $vupdate .= "%%            (evar_${v_name}_Stat == LOW_ALARM) ) {\n";
+          $vupdate .= "%%    setpointStatusCount++;\n";
+          $vupdate .= "%%    if (setpointDisplayCount < 10) {\n";
+          $vupdate .= "%%      strcpy(setpointErrId[setpointDisplayCount], \"$v_name\");\n";
+          $vupdate .= "%%      strcpy(setpointMajorCount[setpointDisplayCount], \"-\");\n";
+          $vupdate .= "%%      strcpy(setpointMinorCount[setpointDisplayCount], \"1\");\n";
+          $vupdate .= "%%      setpointDisplayCount++;\n";
+          $vupdate .= "%%    }\n";
+          $vupdate .= "%%  }\n";
+        }
 
         if ($top_name) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}\")\n";
@@ -146,6 +247,23 @@ while (<IN>) {
 	$vardb .= "    $v_efield3\n";
 	$vardb .= "    $v_efield4\n";
 	$vardb .= "}\n";
+
+        if ($v_name ne "BURT_RESTORE") {
+          if ($ve_type ne "bi") {
+            if ($top_name) {
+              $vardb .= "grecord(ai, \"%IFO%:${tv_name}.HHSV\")\n";                   # ???
+              $vardb .= "grecord(ai, \"%IFO%:${tv_name}.HSV\")\n";                    # ???
+              $vardb .= "grecord(ai, \"%IFO%:${tv_name}.LSV\")\n";                    # ???
+              $vardb .= "grecord(ai, \"%IFO%:${tv_name}.LLSV\")\n";                   # ???
+            }
+            else {
+              $vardb .= "grecord(ai, \"%IFO%:%SYS%-%SUBSYS%${v_name}.HHSV\")\n";      # ???
+              $vardb .= "grecord(ai, \"%IFO%:%SYS%-%SUBSYS%${v_name}.HSV\")\n";       # ???
+              $vardb .= "grecord(ai, \"%IFO%:%SYS%-%SUBSYS%${v_name}.LSV\")\n";       # ???
+              $vardb .= "grecord(ai, \"%IFO%:%SYS%-%SUBSYS%${v_name}.LLSV\")\n";      # ???
+            }
+          }
+        }
     } elsif (substr($_,0,9) eq "WFS_PHASE") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
@@ -183,7 +301,7 @@ while (<IN>) {
 
 	if ($top_name) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}_D\")\n";
-	} eles {
+	} else {
 		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}_D\")\n";
 	}
 	$vardb .= "{\n";
@@ -207,6 +325,7 @@ while (<IN>) {
 	$vardb .= "}\n";
     } elsif (substr($_,0,5) eq "PHASE") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
+        $phase++;
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
 	$vdecl .= "$v_type evar_$v_name;\n";
         my $top_name = is_top_name($v_name);
@@ -220,12 +339,14 @@ while (<IN>) {
 
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
 	$vinit .= "pvPut(evar_$v_name);\n";
-	$vinit .= "%%       pEpics->${v_var}[0] = sin(evar_$v_name);\n";
-	$vinit .= "%%       pEpics->${v_var}[1] = cos(evar_$v_name);\n";
+        $vinit .= "%%       rad_angle = (double)((evar_$v_name * M_PI)/180.);\n";
+	$vinit .= "%%       pEpics->${v_var}[0] = sin(rad_angle);\n";
+	$vinit .= "%%       pEpics->${v_var}[1] = cos(rad_angle);\n";
 
 	$vupdate .= "pvGet(evar_$v_name);\n";
-	$vupdate .= "rfm_assign(pEpics->${v_var}[0], sin(evar_$v_name));\n";
-	$vupdate .= "rfm_assign(pEpics->${v_var}[1], cos(evar_$v_name));\n";
+        $vupdate .= "%%  rad_angle = (double)((evar_$v_name * M_PI)/180.);\n";
+	$vupdate .= "rfm_assign(pEpics->${v_var}[0], sin(rad_angle));\n";
+	$vupdate .= "rfm_assign(pEpics->${v_var}[1], cos(rad_angle));\n";
 
 	if ($top_name) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}\")\n";
@@ -386,20 +507,116 @@ while (<IN>) {
 	($x, $y) = split (/x/, $m_dims);
 #	print "$x $y\n";
 	$xXy = $x * $y;
+
+#       $mdecl .= "float matrix${m_name}LOW_[$xXy];\n";
+#       $mdecl .= "float matrix${m_name}HI_[$xXy];\n";
 	$mdecl .= "float matrix${m_name}[$xXy];\n";
 	$mdecl .= "assign matrix${m_name} to { \n";
+
+        $mstat_decl .= "int matrix${m_name}Stat_[$xXy];\n";
+        $mstat_decl .= "assign matrix${m_name}Stat_ to {\n";
+        $mhihi_decl .= "int matrix${m_name}HihiSev_[$xXy];\n";
+        $mhihi_decl .= "assign matrix${m_name}HihiSev_ to {\n";
+        $mhigh_decl .= "int matrix${m_name}HighSev_[$xXy];\n";
+        $mhigh_decl .= "assign matrix${m_name}HighSev_ to {\n";
+        $mlow_decl  .= "int matrix${m_name}LowSev_[$xXy];\n";
+        $mlow_decl  .= "assign matrix${m_name}LowSev_ to {\n";
+        $mlolo_decl .= "int matrix${m_name}LoloSev_[$xXy];\n";
+        $mlolo_decl .= "assign matrix${m_name}LoloSev_ to {\n";
+
 	$minit .= "%%  for (ii = 0; ii < ${x}; ii++)\n";
 	$minit .= "%%    for (jj = 0; jj < ${y}; jj++) {\n";
-	$minit .= "         matrix${m_name}[ii * ${y} + jj] = 0.;\n";
-	$minit .= "         pvPut(matrix${m_name}[ii * ${y} + jj]);\n";
+        $minit .= "%%       ij = ii * ${y} + jj;\n";
+	$minit .= "         matrix${m_name}[ij] = 0.;\n";
+	$minit .= "         pvPut(matrix${m_name}[ij]);\n";
 	$minit .= "%%       pEpics->${m_var}[ii][jj] = 0.;\n";
+
+        $minit .= "         matrix${m_name}HihiSev_[ij] = NO_ALARM;\n";
+        $minit .= "         pvPut(matrix${m_name}HihiSev_[ij]);\n";
+#          $minit .= "%%       pEpics->${m_var}_HihiSev[ii][jj] = NO_ALARM;\n";  # ??????
+        $minit .= "         matrix${m_name}HighSev_[ij] = NO_ALARM;\n";
+        $minit .= "         pvPut(matrix${m_name}HighSev_[ij]);\n";
+#          $minit .= "%%       pEpics->${m_var}_HighSev[ii][jj] = NO_ALARM;\n";  # ??????
+        $minit .= "         matrix${m_name}LowSev_[ij] = NO_ALARM;\n";
+        $minit .= "         pvPut(matrix${m_name}LowSev_[ij]);\n";
+#          $minit .= "%%       pEpics->${m_var}_LowSev[ii][jj] = NO_ALARM;\n";   # ??????
+        $minit .= "         matrix${m_name}LoloSev_[ij] = NO_ALARM;\n";
+        $minit .= "         pvPut(matrix${m_name}LoloSev_[ij]);\n";
+#          $minit .= "%%       pEpics->${m_var}_LoloSev[ii][jj] = NO_ALARM;\n";  # ??????
+
 	$minit .= "%%    }\n";
+
+#       $mread .= "%%  strcpy(matrixID, \"${m_name}\");\n";
+#       $mread .= "%%  rcode = readMatrixThreshFile(&fmc,\n";
+#       $mread .= "%%                               matrixID,\n";
+#       $mread .= "%%                               &matrix${m_name}LOW_[0],\n";
+#       $mread .= "%%                               &matrix${m_name}HI_[0],\n";
+#       $mread .= "%%                               ${x},\n";
+#       $mread .= "%%                               ${y},\n";
+#       $mread .= "%%                               0);\n";
+#       $mread .= "%%  if (rcode) {\n";
+#       $mread .= "%%    strcpy(msg, thresholdErrMsg[rcode + 2]);\n";
+#       $mread .= "      pvPut(msg);\n";
+#       $mread .= "%%    if (rcode != TF_PARSE_ERROR) {\n";
+#       $mread .= "%%      strcat(msg, \"\\n\");\n";
+#       $mread .= "%%      fprintf(stderr, \"%s\", msg);\n";
+#       $mread .= "%%      matrixStatusFlag = 1 - rcode;\n";
+#       $mread .= "%%    }\n";
+#       $mread .= "%%  }\n";
 
 	$mupdate .= "%%  for (ii = 0; ii < ${x}; ii++)\n";
 	$mupdate .= "%%    for (jj = 0; jj < ${y}; jj++) {\n";
-	$mupdate .= "       pvGet(matrix${m_name}[ii * ${y} + jj]);\n";
-	$mupdate .= "%%     rfm_assign(pEpics->${m_var}[ii][jj], matrix${m_name}[ii * ${y} + jj]);\n";
+        $mupdate .= "%%      ij = ii * ${y} + jj;\n";
+	$mupdate .= "        pvGet(matrix${m_name}[ij]);\n";
+#       $mupdate .= "%%      if ( (matrix${m_name}[ij] < matrix${m_name}LOW_[ij]) ||\n";
+#       $mupdate .= "%%           (matrix${m_name}[ij] > matrix${m_name}HI_[ij]) ) {\n";
+#       $mupdate .= "%%        matrixThreshCount++;\n";
+#       $mupdate .= "%%        if (matrixStatusFlag && (matrixDisplayCount < 10) ) {\n";
+#       $mupdate .= "%%           sprintf(matrixErr[matrixDisplayCount], \"%s%1d%1d\",\n";
+#       $mupdate .= "%%                   \"${m_name}\", (ii + 1), (jj + 1));\n";
+#       $mupdate .= "%%           matrixDisplayCount++;\n";
+#       $mupdate .= "%%        }\n";
+
+#       $mupdate .= "%%      }\n";
+	$mupdate .= "%%      rfm_assign(pEpics->${m_var}[ii][jj], matrix${m_name}[ij]);\n";
+
+        $mupdate .= "        pvGet(matrix${m_name}Stat_[ij]);\n";
+#          $mupdate .= "%%      rfm_assign(pEpics->${m_var}_Stat_[ii][jj],     # ??????
+#                                          matrix${m_name}Stat_[ij]);\n";      # ??????
+        $mupdate .= "%%      if ( (matrix${m_name}Stat_[ij] == HIHI_ALARM) ||\n";
+        $mupdate .= "%%           (matrix${m_name}Stat_[ij] == LOLO_ALARM) ) {\n";
+        $mupdate .= "%%        matrixStatusMajCount++;\n";
+        $mupdate .= "%%      }\n";
+        $mupdate .= "%%      else if ( (matrix${m_name}Stat_[ij] == HIGH_ALARM) ||\n";
+        $mupdate .= "%%                (matrix${m_name}Stat_[ij] == LOW_ALARM) ) {\n";
+        $mupdate .= "%%        matrixStatusMinCount++;\n";
+        $mupdate .= "%%      }\n";
+
 	$mupdate .= "%%    }\n";
+
+        $mupdate .= "%%    if (matrixStatusMajCount || matrixStatusMinCount) {\n";
+        $mupdate .= "%%      setpointStatusCount++;\n";
+        $mupdate .= "%%      if (setpointDisplayCount < 10) {\n";
+        $mupdate .= "%%        strcpy(setpointErrId[setpointDisplayCount], \"${m_name}\");\n";
+        $mupdate .= "%%        if (matrixStatusMajCount) {\n";
+        $mupdate .= "%%          sprintf(setpointMajorCount[setpointDisplayCount], \"%d\",\n";
+        $mupdate .= "%%                  matrixStatusMajCount);\n";
+        $mupdate .= "%%        }\n";
+        $mupdate .= "%%        else {\n";
+        $mupdate .= "%%          strcpy(setpointMajorCount[setpointDisplayCount], \"-\");\n";
+        $mupdate .= "%%        }\n";
+        $mupdate .= "%%        if (matrixStatusMinCount) {\n";
+        $mupdate .= "%%          sprintf(setpointMinorCount[setpointDisplayCount], \"%d\",\n";
+        $mupdate .= "%%                  matrixStatusMinCount);\n";
+        $mupdate .= "%%        }\n";
+        $mupdate .= "%%        else {\n";
+        $mupdate .= "%%          strcpy(setpointMinorCount[setpointDisplayCount], \"-\");\n";
+        $mupdate .= "%%        }\n";
+        $mupdate .= "%%        setpointDisplayCount++;\n";
+        $mupdate .= "%%      }\n";
+        $mupdate .= "%%      matrixStatusMajCount = 0;\n";
+        $mupdate .= "%%      matrixStatusMinCount = 0;\n";
+        $mupdate .= "%%    }\n";
 
         my $top_name = is_top_name($m_name);
    	my $tv_name;
@@ -411,11 +628,29 @@ while (<IN>) {
 	    for ($j = 1; $j < $y+1; $j++) {
         	if ($top_name) {
 			$mdecl .= sprintf("\"{ifo}:${tv_name}%x%x\"", $i, $j);
+
+                        $mstat_decl .= sprintf("\"{ifo}:${tv_name}%x%x.STAT\"", $i, $j);
+                        $mhihi_decl .= sprintf("\"{ifo}:${tv_name}%x%x.HHSV\"", $i, $j);
+                        $mhigh_decl .= sprintf("\"{ifo}:${tv_name}%x%x.HSV\"", $i, $j);
+                        $mlow_decl  .= sprintf("\"{ifo}:${tv_name}%x%x.LSV\"", $i, $j);
+                        $mlolo_decl .= sprintf("\"{ifo}:${tv_name}%x%x.LLSV\"", $i, $j);
 		} else {
 			$mdecl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x\"", $i, $j);
+
+                        $mstat_decl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x.STAT\"", $i, $j);
+                        $mhihi_decl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x.HHSV\"", $i, $j);
+                        $mhigh_decl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x.HSV\"", $i, $j);
+                        $mlow_decl  .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x.LSV\"", $i, $j);
+                        $mlolo_decl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x.LLSV\"", $i, $j);
 		}
 		if ($i != ($x) || $j != ($y)) {
 		    $mdecl .= ", ";
+
+                    $mstat_decl .= ", ";
+                    $mhihi_decl .= ", ";
+                    $mhigh_decl .= ", ";
+                    $mlow_decl  .= ", ";
+                    $mlolo_decl .= ", ";
 		}
         	if ($top_name) {
 			$matdb .= "grecord(ai,\"%IFO%:${tv_name}" . sprintf("%x%x\")\n", $i, $j);
@@ -427,8 +662,20 @@ while (<IN>) {
 		$matdb .= "}\n";
 	    }
 	    $mdecl .= "\n";
+
+            $mstat_decl .= "\n";
+            $mhihi_decl .= "\n";
+            $mhigh_decl .= "\n";
+            $mlow_decl  .= "\n";
+            $mlolo_decl .= "\n";
 	}
 	$mdecl .= "};\n";
+
+        $mstat_decl .= "};\n";
+        $mhihi_decl .= "};\n";
+        $mhigh_decl .= "};\n";
+        $mlow_decl  .= "};\n";
+        $mlolo_decl .= "};\n";
 
 #	print "$mdecl\n";
 	$mcnt++;
@@ -476,10 +723,22 @@ $cnt2 = $cnt*2;
 $cnt10 = $cnt*10;
 
 $fpar{"gain_ramp_time"} = "TRAMP";
+$iparAlarmSev{"gain_ramp_time_hihi_Sev"} = "TRAMP.HHSV";
+$iparAlarmSev{"gain_ramp_time_high_Sev"} = "TRAMP.HSV";
+$iparAlarmSev{"gain_ramp_time_low_Sev"} = "TRAMP.LSV";
+$iparAlarmSev{"gain_ramp_time_lolo_Sev"} = "TRAMP.LLSV";
+$iparAlarmStat{"gain_ramp_time_Stat"} = "TRAMP.STAT";
 
-@a = ( \%fpar, "float", \%ipar, "int", \%spar, "string" );
+@a = ( \%fpar, "float", \%ipar, "int", \%iparAlarmSev, "int", \%iparAlarmStat, "int", \%spar, "string" );
 
-$decl1 .= $vdecl . "\n" . $mdecl;
+if ($phase > 0) {
+   $decl1 .= "%% double rad_angle;\n\n";
+}
+
+$decl1 .= $vdecl . "\n" . $vstat_decl . "\n" . $vhihi_decl;
+$decl1 .= "\n" . $vhigh_decl . "\n" . $vlow_decl . "\n" . $vlolo_decl;
+$decl1 .= "\n" . $mdecl . "\n" . $mstat_decl . "\n" . $mhihi_decl;
+$decl1 .= "\n" . $mhigh_decl . "\n" . $mlow_decl . "\n" . $mlolo_decl;
 $decl1 .= "\n";
 
 if ($cnt > 0) {
@@ -492,10 +751,95 @@ while ( ($n1, $n2) = each %$h ) {
 	$decl1 =~ s/%PAR%/$n2/g;
 	}
 }
+#}
+
+$ainit .= "\n";
+$ainit .= "%%  for (ii = 0; ii < MAX_MODULES; ii++) {\n";
+ 
+while ( ($n1, $n2) = each %iparAlarmSev) {
+   ($junk, $severity) = split(/\./, $n2);
+ 
+   if ( (substr($severity, 0, 2) eq "HH") ||
+        (substr($severity, 0, 2) eq "LL") ) {
+#     $ainit .= "       ${n1}[ii] = MAJOR_ALARM;\n";
+      $ainit .= "       ${n1}[ii] = NO_ALARM;\n";
+   }
+   else {
+#     $ainit .= "       ${n1}[ii] = MINOR_ALARM;\n";
+      $ainit .= "       ${n1}[ii] = NO_ALARM;\n";
+   }
+ 
+   $ainit .= "       pvPut(${n1}[ii]);\n";
 }
+ 
+$ainit .= "%%  }\n";
+}
+
+$aupdate .= "\n";
+
+while ( ($n1, $n2) = each %iparAlarmStat) {
+   ($param, $junk) = split(/\./, $n2);
+
+   $aupdate .= "       pvGet(${n1}[ii]);\n";
+
+   $aupdate .= "%%     if (${n1}[ii]) {\n";
+#  $aupdate .= "%%        filterStatusCount++;\n";
+   $aupdate .= "%%        thisFilterStatusCount++;\n";
+
+   $aupdate .= "%%        if (filterDisplayCount < 10) {\n";
+#  $aupdate .= "%%           strcpy(filterErrId[filterDisplayCount], ";
+#  $aupdate .= "fmmap0[ii].name);\n";
+#  $aupdate .= "%%           strcpy(filterParam[filterDisplayCount], ";
+
+   if (substr($param, 0, 5) eq "TRAMP") {
+#     $aupdate .= "\"Ramp Time\");\n";
+      $index = 3;
+      $aupdate .= "%%           fltrParamHelp[3] = \'R\';\n";
+   }
+   elsif (substr($param, 0, 2) eq "SW") {
+#     $help = substr($param, 0, 3);
+#     $aupdate .= "\"$help\");\n";
+      $help = substr($param, 2, 1);
+      $index = $help + 3;
+      $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
+   }
+   else {
+#     $aupdate .= "\"$param\");\n";
+      $paramStrLength = length($param);
+      $index = $paramStrLength - 4;
+      $help = substr($param, 0, 1);
+      $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
+   }
+
+   $aupdate .= "%%           if ( (${n1}[ii] == HIHI_ALARM) ||\n";
+   $aupdate .= "%%                (${n1}[ii] == LOLO_ALARM) ) {\n";
+#  $aupdate .= "%%              strcpy(filterSeverity[filterDisplayCount], ";
+#  $aupdate .= "\"MAJOR\");\n";
+   $aupdate .= "%%              fltrSevHelp[$index] = \'M\';\n";
+   $aupdate .= "%%           }\n";
+   $aupdate .= "%%           else if ( (${n1}[ii] == HIGH_ALARM) ||\n";
+   $aupdate .= "%%                     (${n1}[ii] == LOW_ALARM) ) {\n";
+#  $aupdate .= "%%              strcpy(filterSeverity[filterDisplayCount], ";
+#  $aupdate .= "\"MINOR\");\n";
+   $aupdate .= "%%              fltrSevHelp[$index] = \'m\';\n";
+   $aupdate .= "%%           }\n";
+   $aupdate .= "%%           else {\n";
+#  $aupdate .= "%%              strcpy(filterSeverity[filterDisplayCount], ";
+#  $aupdate .= " \"OTHER\");\n";
+   $aupdate .= "%%              fltrSevHelp[$index] = \'O\';\n";
+   $aupdate .= "%%           }\n";
+
+#  $aupdate .= "%%           filterDisplayCount++;\n";
+   $aupdate .= "%%        }\n";
+   $aupdate .= "%%     }\n";
+}
+
 select(OUT);
 
 $minit .= $vinit;
+if ($cnt > 0) {
+   $minit .= $ainit;
+}
 $mupdate .= $vupdate;
 
 while (<IN>) {
@@ -510,6 +854,8 @@ while (<IN>) {
     s/%EPICS_COEFF_VAR%/$epics_coeff_var/g;
     s/%EPICS_EPICS_VAR%/$epics_epics_var/g;
     s/%DECL3%/$minit/g;
+#   s/%DECL3_5%/$mread/g;
+    s/%AUPDT%/$aupdate/g;
     s/%DECL4%/$mupdate/g;
     print;
 }
@@ -552,6 +898,86 @@ foreach $i ( @names ) {
 # add msg and load coeff records
 print "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%LOAD_NEW_COEFF\")\n";
 print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%MSG\")\n";
+print "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%STAT_ERR_CNT\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FESTAT_1\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FESTAT_2\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FESTAT_3\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FESTAT_4\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FESTAT_5\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FESTAT_6\")\n";
+print "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%MTRX_STAT_ERR_CNT\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%MTRXSTAT_1\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%MTRXSTAT_2\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%MTRXSTAT_3\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%MTRXSTAT_4\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%MTRXSTAT_5\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%MTRXSTAT_6\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%MTRXSTAT_7\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%MTRXSTAT_8\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%MTRXSTAT_9\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%MTRXSTAT_10\")\n";
+print "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%FILTER_STATUS_COUNT\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_ID_1\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_ID_2\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_ID_3\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_ID_4\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_ID_5\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_ID_6\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_ID_7\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_ID_8\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_ID_9\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_ID_10\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_PARAM_1\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_PARAM_2\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_PARAM_3\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_PARAM_4\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_PARAM_5\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_PARAM_6\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_PARAM_7\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_PARAM_8\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_PARAM_9\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_PARAM_10\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_SEVERITY_1\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_SEVERITY_2\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_SEVERITY_3\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_SEVERITY_4\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_SEVERITY_5\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_SEVERITY_6\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_SEVERITY_7\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_SEVERITY_8\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_SEVERITY_9\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FILTER_SEVERITY_10\")\n";
+print "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_STATUS_COUNT\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_ID_1\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_ID_2\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_ID_3\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_ID_4\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_ID_5\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_ID_6\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_ID_7\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_ID_8\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_ID_9\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_ID_10\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MAJOR_COUNT_1\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MAJOR_COUNT_2\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MAJOR_COUNT_3\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MAJOR_COUNT_4\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MAJOR_COUNT_5\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MAJOR_COUNT_6\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MAJOR_COUNT_7\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MAJOR_COUNT_8\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MAJOR_COUNT_9\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MAJOR_COUNT_10\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MINOR_COUNT_1\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MINOR_COUNT_2\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MINOR_COUNT_3\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MINOR_COUNT_4\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MINOR_COUNT_5\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MINOR_COUNT_6\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MINOR_COUNT_7\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MINOR_COUNT_8\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MINOR_COUNT_9\")\n";
+print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%SETPOINT_MINOR_COUNT_10\")\n";
 
 #add matrix records
 print $matdb;
