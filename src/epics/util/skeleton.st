@@ -15,6 +15,9 @@ program %SEQUENCER_NAME%
 %% #include <tsDefs.h>
 %% #include <cadef.h>
 %% #include <ezca.h>
+%% #include <alarm.h>                                                    /* MA */
+%% #include <sys/types.h>                                                /* MA */
+%% #include <sys/stat.h>                                                 /* MA */
 
 %% #define INLINE
 #if defined(RFM_EPICS)
@@ -28,10 +31,27 @@ program %SEQUENCER_NAME%
 #define MAX_MODULES_TIMES_TWO %FMNUMx2%
 #define MAX_MODULES_TIMES_TEN %FMNUMx10%
 
+
 %% #include "fm10Gen.h"
 %% #define FM_SUBSYS_NUM  1
 %% #include "fmReadCoeff.h"
 %% #include "feComms.h"
+
+/* Cat string and make upper case */                                     /* MA */
+%% static char *strcat_upper(char *dest, char *src) {                    /* MA */
+%%   char *d = dest;                                                     /* MA */
+%%   for( ; *d; d++);                                                    /* MA */
+%%   for( ; (*d++ = toupper(*src)); src++);                              /* MA */
+%%   return dest;                                                        /* MA */
+%% }                                                                     /* MA */
+                                                                         /* MA */
+/* Cat string and make lower case */                                     /* MA */
+%% static char *strcat_lower(char *dest, char *src) {                    /* MA */
+%%   char *d = dest;                                                     /* MA */
+%%   for( ; *d; d++);                                                    /* MA */
+%%   for( ; (*d++ = tolower(*src)); src++);                              /* MA */
+%%   return dest;                                                        /* MA */
+%% }                                                                     /* MA */
 
 #if defined(RFM_EPICS)
 %% #define rfm_assign(a,b) if ((a) != (b)) { a = (b); }
@@ -47,6 +67,106 @@ program %SEQUENCER_NAME%
 
 string msg;
 assign msg to "{ifo}:{sys}-{subsys}MSG";
+
+int statErrCnt;
+assign statErrCnt to "{ifo}:{sys}-{subsys}STAT_ERR_CNT";
+
+string staterr[6];
+assign staterr to {
+"{ifo}:{sys}-{subsys}FESTAT_1","{ifo}:{sys}-{subsys}FESTAT_2",
+"{ifo}:{sys}-{subsys}FESTAT_3","{ifo}:{sys}-{subsys}FESTAT_4",
+"{ifo}:{sys}-{subsys}FESTAT_5","{ifo}:{sys}-{subsys}FESTAT_6"};
+
+int matrixThreshCount;                                                   /* MA */
+assign matrixThreshCount to "{ifo}:{sys}-{subsys}MTRX_STAT_ERR_CNT";     /* MA */
+
+string matrixErr[10];                                                    /* MA */
+assign matrixErr to {                                                    /* MA */
+"{ifo}:{sys}-{subsys}MTRXSTAT_1","{ifo}:{sys}-{subsys}MTRXSTAT_2",       /* MA */
+"{ifo}:{sys}-{subsys}MTRXSTAT_3","{ifo}:{sys}-{subsys}MTRXSTAT_4",       /* MA */
+"{ifo}:{sys}-{subsys}MTRXSTAT_5","{ifo}:{sys}-{subsys}MTRXSTAT_6",       /* MA */
+"{ifo}:{sys}-{subsys}MTRXSTAT_7","{ifo}:{sys}-{subsys}MTRXSTAT_8",       /* MA */
+"{ifo}:{sys}-{subsys}MTRXSTAT_9","{ifo}:{sys}-{subsys}MTRXSTAT_10"};     /* MA */
+
+int filterStatusCount;                                                   /* MA */
+assign filterStatusCount to  "{ifo}:{sys}-{subsys}FILTER_STATUS_COUNT";  /* MA */
+
+string filterErrId[10];                                                  /* MA */
+assign filterErrId to {                                                  /* MA */
+"{ifo}:{sys}-{subsys}FILTER_ID_1","{ifo}:{sys}-{subsys}FILTER_ID_2",     /* MA */
+"{ifo}:{sys}-{subsys}FILTER_ID_3","{ifo}:{sys}-{subsys}FILTER_ID_4",     /* MA */
+"{ifo}:{sys}-{subsys}FILTER_ID_5","{ifo}:{sys}-{subsys}FILTER_ID_6",     /* MA */
+"{ifo}:{sys}-{subsys}FILTER_ID_7","{ifo}:{sys}-{subsys}FILTER_ID_8",     /* MA */
+"{ifo}:{sys}-{subsys}FILTER_ID_9","{ifo}:{sys}-{subsys}FILTER_ID_10"};   /* MA */
+
+string filterParam[10];                                                  /* MA */
+assign filterParam to {                                                  /* MA */
+"{ifo}:{sys}-{subsys}FILTER_PARAM_1",                                    /* MA */
+"{ifo}:{sys}-{subsys}FILTER_PARAM_2",                                    /* MA */
+"{ifo}:{sys}-{subsys}FILTER_PARAM_3",                                    /* MA */
+"{ifo}:{sys}-{subsys}FILTER_PARAM_4",                                    /* MA */
+"{ifo}:{sys}-{subsys}FILTER_PARAM_5",                                    /* MA */
+"{ifo}:{sys}-{subsys}FILTER_PARAM_6",                                    /* MA */
+"{ifo}:{sys}-{subsys}FILTER_PARAM_7",                                    /* MA */
+"{ifo}:{sys}-{subsys}FILTER_PARAM_8",                                    /* MA */
+"{ifo}:{sys}-{subsys}FILTER_PARAM_9",                                    /* MA */
+"{ifo}:{sys}-{subsys}FILTER_PARAM_10"};                                  /* MA */
+
+string filterSeverity[10];                                               /* MA */
+assign filterSeverity to {                                               /* MA */
+"{ifo}:{sys}-{subsys}FILTER_SEVERITY_1",                                 /* MA */
+"{ifo}:{sys}-{subsys}FILTER_SEVERITY_2",                                 /* MA */
+"{ifo}:{sys}-{subsys}FILTER_SEVERITY_3",                                 /* MA */
+"{ifo}:{sys}-{subsys}FILTER_SEVERITY_4",                                 /* MA */
+"{ifo}:{sys}-{subsys}FILTER_SEVERITY_5",                                 /* MA */
+"{ifo}:{sys}-{subsys}FILTER_SEVERITY_6",                                 /* MA */
+"{ifo}:{sys}-{subsys}FILTER_SEVERITY_7",                                 /* MA */
+"{ifo}:{sys}-{subsys}FILTER_SEVERITY_8",                                 /* MA */
+"{ifo}:{sys}-{subsys}FILTER_SEVERITY_9",                                 /* MA */
+"{ifo}:{sys}-{subsys}FILTER_SEVERITY_10"};                               /* MA */
+
+int setpointStatusCount;                                                 /* MA */
+assign setpointStatusCount to                                            /* MA */
+    "{ifo}:{sys}-{subsys}SETPOINT_STATUS_COUNT";                         /* MA */
+
+string setpointErrId[10];                                                /* MA */
+assign setpointErrId to {                                                /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_ID_1",                                  /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_ID_2",                                  /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_ID_3",                                  /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_ID_4",                                  /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_ID_5",                                  /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_ID_6",                                  /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_ID_7",                                  /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_ID_8",                                  /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_ID_9",                                  /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_ID_10"};                                /* MA */
+
+string setpointMajorCount[10];                                           /* MA */
+assign setpointMajorCount to {                                           /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_1",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_2",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_3",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_4",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_5",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_6",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_7",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_8",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_9",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_10"};                       /* MA */
+
+string setpointMinorCount[10];                                           /* MA */
+assign setpointMinorCount to {                                           /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_1",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_2",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_3",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_4",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_5",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_6",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_7",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_8",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_9",                         /* MA */
+   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_10"};                       /* MA */
 
 int allNewCoeff;
 assign allNewCoeff to "{ifo}:{sys}-{subsys}LOAD_NEW_COEFF";
@@ -197,6 +317,28 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 %% static char ifo[160];
 %% static char daqsys[160];
 
+%% char buffer[264];                                                     /* MA */
+%% char fName[2][256];                                                   /* MA */
+%% char fType[3][10] = {"IIR", "FIR", "IIR & FIR"};                      /* MA */
+
+%% FILE *pipePtr;                                                        /* MA */
+
+#ifdef FIR_FILTERS                                                       /* MA */
+%% int fltrTypes = 2;                                                    /* MA */
+#else                                                                    /* MA */
+%% int fltrTypes = 1;                                                    /* MA */
+#endif                                                                   /* MA */
+
+%% long chkSum[2] = {-99999, -99999};                                    /* MA */
+%% long crc;                                                             /* MA */
+
+%% struct stat statBuf;                                                  /* MA */
+
+%% int statusFlag = 0;                                                   /* MA */
+%% int matrixStatusFlag = 0;                                             /* MA */
+
+/* %% struct filterThresh thresholds[MAX_MODULES];                          MA */
+
 
 %% static void copy_info() {
 %%   int i;
@@ -218,6 +360,7 @@ state init
   when() {
 %% {
 %% int ii, jj;
+%% int ij;                                                               /* MA */
 
 #if defined(RFM_EPICS)
     sysnum = atoi(macValueGet("sysnum"));
@@ -272,6 +415,20 @@ state init
 %%  printf("%s pEpics is at 0x%x\n", fmc.subSys[0].name, ((int)pEpics-(int)pRfm));
 #endif
 
+%% strcpy(fName[0], "/cvs/cds/");                                        /* MA */
+%% strcat_lower(fName[0], fmc.site);                                     /* MA */
+%% strcat(fName[0], "/chans/");                                          /* MA */
+%% strcat_upper(fName[0], fmc.ifo);                                      /* MA */
+%% strcat_upper(fName[0], fmc.system);                                   /* MA */
+%% if (strlen(fmc.subSys[0].name) > 0) {                                 /* MA */
+%%    strcat(fName[0], "_");                                             /* MA */
+%%    strcat_upper(fName[0], fmc.subSys[0].name);                        /* MA */
+%% }                                                                     /* MA */
+%% strcat(fName[0], ".");                                                /* MA */
+%% strcpy(fName[1], fName[0]);                                           /* MA */
+%% strcat(fName[0], "txt");                                              /* MA */
+%% strcat(fName[1], "fir");                                              /* MA */
+
 %DECL3%
 
 %%  fmc.pVmeCoeff = (VME_COEF *)pVmeCoeff; /* Initialize pointer for fmReadCoeffFile() */
@@ -285,6 +442,15 @@ state init
 %%  printf("About to read file \n");
     strcpy(msg, "Reading coeff file...");
     pvPut(msg);
+%%  for(ii=0;ii<6;ii++) {
+%%    strcpy(staterr[ii], "Clr");
+      pvPut(staterr[ii]);
+%%  }
+%%  for (ii = 0; ii < 10; ii++) {                                        /* MA */
+%%     strcpy(matrixErr[ii], "Clr");                                     /* MA */
+       pvPut(matrixErr[ii]);                                             /* MA */
+%%  }                                                                    /* MA */
+
 %%  if (fmReadCoeffFile(&fmc, 0) != 0) {
 %%  	fprintf(stderr, "Error: %s\n", fmReadErrMsg());
 	strncpy(msg, fmReadShortErrMsg(), MAX_STRING_SIZE-1);
@@ -296,6 +462,18 @@ state init
 #endif
 %%  }
     pvPut(msg);
+
+%%  for (ii = 0; ii < fltrTypes; ii++) {                                 /* MA */
+%%     strcpy(buffer, "cksum ");                                         /* MA */
+%%     strcat(buffer, fName[ii]);                                        /* MA */
+%%     if (!stat(fName[ii], &statBuf)) {                                 /* MA */
+%%        if ((pipePtr = popen(buffer, "r")) != NULL) {                  /* MA */
+%%           fgets(buffer, 256, pipePtr);                                /* MA */
+%%           pclose(pipePtr);                                            /* MA */
+%%           sscanf(buffer, "%ld", &chkSum[ii]);                         /* MA */
+%%        }                                                              /* MA */
+%%     }                                                                 /* MA */
+%%  }                                                                    /* MA */
 
 %%  for(ii=0;ii<MAX_MODULES;ii++) {
 	update_labels(ii);
@@ -365,13 +543,79 @@ state monScreen{
 
   when(delay(.2)){
 %% int ii, jj;	
+%% int ij;                                                               /* MA */
+%% int mod;                                                              /* MA */
+%% int rcode = 0;                                                        /* MA */
+%% int size;                                                             /* MA */
+%% char matrixID[32];                                                    /* MA */
+/* %% char thresholdErrMsg[6][32];                                          MA */
+
+/* %% strcpy(thresholdErrMsg[0], "Threshold file open failed");             MA */
+/* %% strcpy(thresholdErrMsg[1], "Thresholds not found");                   MA */
+/* %% strcpy(thresholdErrMsg[2], "Thresh. parse err. - cf. stderr");        MA */
+/* %% strcpy(thresholdErrMsg[3], "Matrix thresh. file open failed");        MA */
+/* %% strcpy(thresholdErrMsg[4], "Matrix thresholds not found");            MA */
+/* %% strcpy(thresholdErrMsg[5], "MThresh. parse err - cf. stderr");        MA */
+
+%% int thisFilterStatusCount;                                            /* MA */
+%% char fltrParamHelp[10];                                               /* MA */
+%% char fltrSevHelp[10];                                                 /* MA */
 
 %% pthread_mutex_lock (&seq_lock);
+
+%%  mod = 0;                                                             /* MA */
+%%  for (ii = 0; ii < fltrTypes; ii++) {                                 /* MA */
+%%     strcpy(buffer, "cksum ");                                         /* MA */
+%%     strcat(buffer, fName[ii]);                                        /* MA */
+%%     if (!stat(fName[ii], &statBuf)) {                                 /* MA */
+%%        if ((pipePtr = popen(buffer, "r")) != NULL) {                  /* MA */
+%%           fgets(buffer, 256, pipePtr);                                /* MA */
+%%           pclose(pipePtr);                                            /* MA */
+%%           sscanf(buffer, "%d", &crc);                                 /* MA */
+%%           if (crc != chkSum[ii]) {                                    /* MA */
+%%              chkSum[ii] = crc;                                        /* MA */
+%%              mod += ii + 1;                                           /* MA */
+%%           }                                                           /* MA */
+%%        }                                                              /* MA */
+%%     }                                                                 /* MA */
+%%  }                                                                    /* MA */
+%%  if (mod) {                                                           /* MA */
+       strcpy(msg, "Modified ");                                         /* MA */
+       strcat(msg, fType[mod - 1]);                                      /* MA */
+       strcat(msg, " file");                                             /* MA */
+%%     if (mod == 3) {                                                   /* MA */
+          strcat(msg, "s");                                              /* MA */
+%%     }                                                                 /* MA */
+       pvPut(msg);                                                       /* MA */
+%%  }                                                                    /* MA */
 
    /* Coefficient update request */	
     pvGet(allNewCoeff);
     if(allNewCoeff)
 %%    {
+
+/* %%        rcode = readThresholdsFile(&fmc,                               MA */
+/* %%                                   &fmmap0,                            MA */
+/* %%                                   &thresholds,                        MA */
+/* %%                                   MAX_MODULES,                        MA */
+/* %%                                   0);                                 MA */
+
+%%        statusFlag = 1;                                                /* MA */
+/* %%        if (rcode) {                                                   MA */
+/* %%           strcpy(msg, thresholdErrMsg[rcode - 1]);                    MA */
+/*              pvPut(msg);                                                 MA */
+
+/* %%           if (rcode != TF_PARSE_ERROR) {                              MA */
+/* %%              strcat(msg, "\n");                                       MA */
+/* %%              fprintf(stderr, "%s", msg);                              MA */
+/* %%              statusFlag = 0;                                          MA */
+/* %%           }                                                           MA */
+/* %%        }                                                              MA */
+
+%%        matrixStatusFlag = 1;                                          /* MA */
+
+/* %DECL3_5%                                                                MA */
+
 	  strcpy(msg, "Reading coeff file...");
 	  pvPut(msg);
 
@@ -499,6 +743,38 @@ state monScreen{
 
 #endif
 
+%%  statErrCnt = 0;                                                      /* MA */
+%%  int displayCount;                                                    /* MA */
+%%  displayCount = /* 0; */ 1;                                                    /* MA */
+%%  int matrixDisplayCount;                                              /* MA */
+%%  matrixDisplayCount = 0;                                              /* MA */
+%%  int thresholdFlag;                                                   /* MA */
+%%  filterStatusCount = 0;                                               /* MA */
+%%  int filterDisplayCount = 0;                                          /* MA */
+
+%%  setpointStatusCount = 0;                                             /* MA */
+%%  int setpointDisplayCount = 0;                                        /* MA */
+%%  int matrixStatusMajCount = 0;                                        /* MA */
+%%  int matrixStatusMinCount = 0;                                        /* MA */
+
+%%  for(ii = 0; ii < 6; ii++) {                                          /* MA */
+%%     strcpy(staterr[ii], "CLR");                                       /* MA */
+%%  }                                                                    /* MA */
+
+%%  for (ii = 0; ii < 10; ii++) {                                        /* MA */
+%%     strcpy(matrixErr[ii], "CLR");                                     /* MA */
+%%  }                                                                    /* MA */
+
+%%  for (ii = 0; ii < 10; ii++) {                                        /* MA */
+%%     strcpy(filterErrId[ii], "CLR");                                   /* MA */
+%%     strcpy(filterParam[ii], "CLR");                                   /* MA */
+%%     strcpy(filterSeverity[ii], "CLR");                                /* MA */
+%%                                                                       /* MA */
+%%     strcpy(setpointErrId[ii], "CLR");                                 /* MA */
+%%     strcpy(setpointMajorCount[ii], "CLR");                            /* MA */
+%%     strcpy(setpointMinorCount[ii], "CLR");                            /* MA */
+%%  }                                                                    /* MA */
+
 %%  for(ii=0;ii<MAX_MODULES;ii++){
 %%    float t;
       pvGet(swRset[ii]);
@@ -544,7 +820,7 @@ state monScreen{
 %%		usleep(100);
 %%	    }
 %%	    if (kk == 2000) {
-		strcpy(msg, "Error: front-end timeout");
+		strcpy(msg, "Error: Front-end timeout");
 %%	    }
 #endif
 %%  	  }
@@ -565,9 +841,13 @@ state monScreen{
 	  pvPut(swRset[ii]);
 %%      }
 
+%%    thresholdFlag = 0;                                                 /* MA */
+%%    matrixThreshCount = 0;                                             /* MA */
+
       /* Get filter switch selections */
       pvGet(sw1[ii]);
       pvGet(sw2[ii]);	
+
       /* Get saved switch settings, used for burt purposes */
       pvGet(saveSwitch1[ii]);  
       pvGet(saveSwitch2[ii]);  
@@ -584,6 +864,13 @@ state monScreen{
       	pvPut(sw2[ii]);  
       	pvPut(saveSwitch2[ii]);  
 %%    }
+
+/* %%    if (saveSwitch1[ii] != thresholds[ii].switch1) {                   MA */
+/* %%       thresholdFlag += 1;                                             MA */
+/* %%    }                                                                  MA */
+/* %%    if (saveSwitch2[ii] != thresholds[ii].switch2) {                   MA */
+/* %%       thresholdFlag += 2;                                             MA */
+/* %%    }                                                                  MA */
 
 #if defined(SEQUENCER_NAME_ascmc) || defined(SEQUENCER_NAME_asc) || defined(SEQUENCER_NAME_asc40m)
       /* check for WFS input group change selections */
@@ -632,12 +919,35 @@ state monScreen{
 	pvPut(excite[ii]);
 	pvGet(offset[ii]);
 
+/* %%    if ( (offset[ii] < thresholds[ii].offset[LOW]) ||                  MA */
+/* %%         (offset[ii] > thresholds[ii].offset[HI]) ) {                  MA */
+/* %%       thresholdFlag += 4;                                             MA */
+/* %%    }                                                                  MA */
+
 %%	rfm_assign(pFilt->inputs[ii].offset, offset[ii]);
 	pvGet(outgain[ii]);
+
+/* %%    if ( (outgain[ii] < thresholds[ii].gain[LOW]) ||                   MA */
+/* %%         (outgain[ii] > thresholds[ii].gain[HI]) ) {                   MA */
+/* %%       thresholdFlag += 8;                                             MA */
+/* %%    }                                                                  MA */
+
 %%	rfm_assign(pFilt->inputs[ii].outgain, outgain[ii]);
 	pvGet(gain_ramp_time[ii]);
+
+/* %%    if ( (gain_ramp_time[ii] < thresholds[ii].rampTime[LOW]) ||        MA */
+/* %%         (gain_ramp_time[ii] > thresholds[ii].rampTime[HI]) ) {        MA */
+/* %%       thresholdFlag += 16;                                            MA */
+/* %%    }                                                                  MA */
+
 %%	rfm_assign(pFilt->inputs[ii].gain_ramp_time, gain_ramp_time[ii]);
 	pvGet(limit[ii]);
+
+/* %%    if ( (limit[ii] < thresholds[ii].limit[LOW]) ||                    MA */
+/* %%         (limit[ii] > thresholds[ii].limit[HI]) ) {                    MA */
+/* %%       thresholdFlag += 32;                                            MA */
+/* %%    }                                                                  MA */
+
 %%	rfm_assign(pFilt->inputs[ii].limiter, limit[ii]);
 %%	t = fpvalidate(pFilt->data[ii].testpoint);
 	tp[ii] = t;
@@ -649,6 +959,32 @@ state monScreen{
 	pvPut(tp[ii]);
 	pvPut(out16Hz[ii]);
 	pvPut(output[ii]);
+
+%%      if (thresholdFlag) {                                             /* MA */
+%%         statErrCnt++;                                                 /* MA */
+%%         if (displayCount < 6) {                                       /* MA */
+%%            sprintf(staterr[displayCount], "%2d: ", thresholdFlag);    /* MA */
+%%            strcat(staterr[displayCount], fmmap0[ii].name);            /* MA */
+%%            displayCount++;                                            /* MA */
+%%         }                                                             /* MA */
+%%      }                                                                /* MA */
+
+%%      thisFilterStatusCount = 0;                                       /* MA */
+%%      strcpy(fltrParamHelp, "------");                                 /* MA */
+%%      strcpy(fltrSevHelp, "------");                                   /* MA */
+
+%AUPDT%                                                                  /* MA */
+
+%%      if (thisFilterStatusCount) {                                     /* MA */
+%%         filterStatusCount++;                                          /* MA */
+ 
+%%         if (filterDisplayCount < 10) {                                /* MA */
+%%            strcpy(filterErrId[filterDisplayCount], fmmap0[ii].name);  /* MA */
+%%            strcpy(filterParam[filterDisplayCount], fltrParamHelp);    /* MA */
+%%            strcpy(filterSeverity[filterDisplayCount], fltrSevHelp);   /* MA */
+%%            filterDisplayCount++;                                      /* MA */
+%%         }                                                             /* MA */
+%%      }                                                                /* MA */
 
 #if !defined(RFM_EPICS)
     	pvGet(epics_exc[ii]);
@@ -700,7 +1036,35 @@ state monScreen{
 
 %% }
 
+%% if (statusFlag) {                                                     /* MA */
+      pvPut(statErrCnt);                                                 /* MA */
+      for (ii = 0; ii < 6; ii++) {                                       /* MA */
+         pvPut(staterr[ii]);                                             /* MA */
+      }                                                                  /* MA */
+%% }                                                                     /* MA */
+
 %DECL4%
+
+      if (matrixStatusFlag) {                                            /* MA */
+         pvPut(matrixThreshCount);                                       /* MA */
+      }                                                                  /* MA */
+      for (ii = 0; ii < 10; ii++) {                                      /* MA */
+         pvPut(matrixErr[ii]);                                           /* MA */
+      }                                                                  /* MA */
+
+      pvPut(filterStatusCount);                                          /* MA */
+      for (ii = 0; ii < 10; ii++) {                                      /* MA */
+         pvPut(filterErrId[ii]);                                         /* MA */
+         pvPut(filterParam[ii]);                                         /* MA */
+         pvPut(filterSeverity[ii]);                                      /* MA */
+      }                                                                  /* MA */
+
+      pvPut(setpointStatusCount);                                        /* MA */
+      for (ii = 0; ii < 10; ii++) {                                      /* MA */
+         pvPut(setpointErrId[ii]);                                       /* MA */
+         pvPut(setpointMajorCount[ii]);                                  /* MA */
+         pvPut(setpointMinorCount[ii]);                                  /* MA */
+      }                                                                  /* MA */
 
 %% pthread_mutex_unlock (&seq_lock);
 #ifndef NO_DAQ_IN_SKELETON
