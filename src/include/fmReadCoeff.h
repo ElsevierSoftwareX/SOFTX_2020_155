@@ -3,7 +3,7 @@
 
 #define NO_FM10GEN_C_CODE
 
-static const char *readSusCoeff_h_cvsid = "$Id: fmReadCoeff.h,v 1.2 2006/05/02 21:25:12 aivanov Exp $";
+static const char *readSusCoeff_h_cvsid = "$Id: fmReadCoeff.h,v 1.3 2008/07/18 21:44:25 aivanov Exp $";
 
 /* char vars' length */
 #define CVL  20
@@ -82,6 +82,41 @@ typedef struct fmReadCoeff {
   /* !!! KEEP subSys sub-structure last in this struct !!! */
 
 } fmReadCoeff;
+
+#define BIG_NUMBER                9.999e+03                              /* MA */
+#define HI                        1                                      /* MA */
+#define LOW                       0                                      /* MA */
+#define MAX_FNAME_LEN             256                                    /* MA */
+#define MAX_LINE_LEN              80                                     /* MA */
+#define TF_FILE_OPEN_ERROR        1                                      /* MA */
+#define TF_THRESHOLDS_NOT_FOUND   2                                      /* MA */
+#define TF_PARSE_ERROR            3                                      /* MA */
+
+typedef struct filterThresh {                                            /* MA */
+   char filterName[MAX_LINE_LEN];                                        /* MA */
+
+   float gain[2];                                                        /* MA */
+   float limit[2];                                                       /* MA */
+   float offset[2];                                                      /* MA */
+   float rampTime[2];                                                    /* MA */
+
+   int switch1;                                                          /* MA */
+   int switch2;                                                          /* MA */
+};                                                                       /* MA */
+
+int readThresholdsFile(fmReadCoeff*,                                     /* MA */
+                       fmSubSysMap*,                                     /* MA */
+                       struct filterThresh*,                             /* MA */
+                       int,                                              /* MA */
+                       int);                                             /* MA */
+
+int readMatrixThreshFile(fmReadCoeff*,                                   /* MA */
+                         char*,                                          /* MA */
+                         float*,                                         /* MA */
+                         float*,                                         /* MA */
+                         int,                                            /* MA */
+                         int,                                            /* MA */
+                         int);                                           /* MA */
 
 int fmReadCoeffFile(fmReadCoeff *, int);
 char* fmReadErrMsg();
