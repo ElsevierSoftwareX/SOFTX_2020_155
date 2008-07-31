@@ -634,6 +634,10 @@ void *fe_start(void *arg)
 #ifdef SERVO32K
     gsaDacTrigger(cdsPciModules.dacCount);
 #endif
+#ifdef NO_SYNC
+    gsaDacTrigger(cdsPciModules.dacCount);
+  printf("Triggered the DAC\n");
+#endif
   } else {
     printf("*******************************\n");
     printf("* Running with RTLinux timer! *\n");
@@ -1131,7 +1135,7 @@ void *fe_start(void *arg)
 #if defined(SERVO16K) || defined(SERVO2K)
 	if ((firstTime == 100) && (clock16K == (CYCLE_PER_SECOND - 2)))
 	{
-	    //printf("firstTime=%d clock16K = %d\n", firstTime, clock16K);
+	    printf("DT firstTime=%d clock16K = %d\n", firstTime, clock16K);
 	    if((DAC_START_DELAY-cycleTime) > 0)
 	    	usleep((DAC_START_DELAY-cycleTime));
 	    gsaDacTrigger(cdsPciModules.dacCount);
