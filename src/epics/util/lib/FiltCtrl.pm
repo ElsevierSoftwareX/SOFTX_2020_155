@@ -84,6 +84,8 @@ sub frontEndCode {
         $calcExp .= $::xpartName[$i];
         $calcExp .= ",";
         $calcExp .= $::fromExp[0];
-        $calcExp .= ",0);\n";
+        $calcExp .= ",";
+        $calcExp .= $::fromExp[1];
+        $calcExp .= ");\n";
         return $calcExp;
 }
