@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.19 2008/08/07 21:02:45 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.20 2008/08/08 21:05:38 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -44,6 +44,9 @@ static const UINT32 pow2_in[10] = {0x10,0x40,0x100,0x400,0x1000,0x4000,0x10000,
 				   0x40000,0x100000,0x400000};
 static const UINT32 pow2_out[10] = {0x20,0x80,0x200,0x800,0x2000,0x8000,0x20000,
 				    0x80000,0x200000,0x800000};
+
+static const UINT32 fltrConst[10] = {16, 64, 256, 1024, 4096, 16384,
+                                     65536, 262144, 1048576, 4194304};
 
 #if defined(SERVO16K) || defined(SERVOMIXED) || defined(SERVO32K) || defined(SERVO64K) || defined(SERVO128K) || defined(SERVO256K)
 static double sixteenKAvgCoeff[9] = {1.9084759e-12,
@@ -1222,12 +1225,31 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
 	       COEF *pC,            /* Filter coefficients */
 	       int modNum,          /* Filter module number */
 	       double filterInput,  /* Input data sample (output from funtcion inputModule()) */
-	       int id)		    /* System number (HEPI) */
+	       int fltrCtrlVal)	    /* Filter control value */
 	     
 
 {
+  int ix;
+  UINT32 opSwitchE;
+  UINT32 fltrSwitch;
   /* decode arrays for operator switches */
-  UINT32 opSwitchE = pFilt->inputs[modNum].opSwitchE;
+  if ( (fltrCtrlVal >= 0) && (fltrCtrlVal < 1024) ) {
+    fltrSwitch = 0;
+    if (fltrCtrlVal > 0) {
+      for (ix = 0; ix < 10; ix++) {
+        if (fltrCtrlVal%2 == 1) {
+          fltrSwitch += fltrConst[ix];
+        }
+        fltrCtrlVal = fltrCtrlVal>>1;
+      }
+    }
+
+    opSwitchE = pFilt->inputs[modNum].opSwitchE | fltrSwitch;
+    pFilt->inputs[modNum].opSwitchE = opSwitchE;
+  }
+  else {
+    opSwitchE = pFilt->inputs[modNum].opSwitchE;
+  }
   /* Do the shift to match the bits in the the opSwitchE variable so I can do "==" comparisons */
   UINT32 opSwitchP = pFilt->inputs[modNum].opSwitchP >> 1;
   int ii, jj, kk, ramp, timeout;
@@ -1236,6 +1258,7 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
   float avg, compare;
   double output;
   double fmInput;
+  int id = 0;                  /* System number (HEPI) */
 
   /* Set the input to a very small number. If input is zero, code timing becomes a problem. */
   /* This is not fully understood, but it may be due to floating point underflow when the   */
