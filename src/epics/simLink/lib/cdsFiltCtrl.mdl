@@ -1,6 +1,6 @@
 Library {
   Name			  "cdsFiltCtrl"
-  Version		  6.6
+  Version		  7.0
   MdlSubVersion		  0
   SavedCharacterEncoding  "UTF-8"
   LibraryType		  "BlockLibrary"
@@ -32,16 +32,16 @@ Library {
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "aivanov"
+  LastModifiedBy	  "Rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Sep 19 15:27:34 2007"
-  ModelVersionFormat	  "1.%<AutoIncrement:5>"
+  LastModifiedDate	  "Fri Aug 08 13:25:58 2008"
+  RTWModifiedTimeStamp	  0
+  ModelVersionFormat	  "1.%<AutoIncrement:6>"
   ConfigurationManager	  "None"
   SimulationMode	  "normal"
   LinearizationMsg	  "none"
   Profile		  off
   ParamWorkspaceSource	  "MATLABWorkspace"
-  AccelVerboseBuild	  off
   CovSaveName		  "covdata"
   CovMetricSettings	  "dw"
   CovNameIncrementing	  off
@@ -71,7 +71,6 @@ Library {
   ExtModeSkipDownloadWhenConnect off
   ExtModeLogAll		  on
   ExtModeAutoUpdateStatusClock off
-  ProdHWDeviceType	  "32-bit Generic"
   ShowModelReferenceBlockVersion off
   ShowModelReferenceBlockIO off
   BlockDefaults {
@@ -91,13 +90,17 @@ Library {
       BlockType		      Gain
       Gain		      "1"
       Multiplication	      "Element-wise(K.*u)"
+      ParamMin		      "[]"
+      ParamMax		      "[]"
       ParameterDataTypeMode   "Same as input"
-      ParameterDataType	      "sfix(16)"
+      ParameterDataType	      "fixdt(1,16,0)"
       ParameterScalingMode    "Best Precision: Matrix-wise"
-      ParameterScaling	      "2^0"
+      ParameterScaling	      "[]"
+      OutMin		      "[]"
+      OutMax		      "[]"
       OutDataTypeMode	      "Same as input"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
       LockScale		      off
       RndMeth		      "Floor"
       SaturateOnIntegerOverflow	on
@@ -114,9 +117,11 @@ Library {
       BusOutputAsStruct	      off
       PortDimensions	      "-1"
       SampleTime	      "-1"
+      OutMin		      "[]"
+      OutMax		      "[]"
       DataType		      "auto"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
       SignalType	      "auto"
       SamplingMode	      "auto"
       LatchByDelayingOutsideSignal off
@@ -131,16 +136,21 @@ Library {
       BusOutputAsStruct	      off
       PortDimensions	      "-1"
       SampleTime	      "-1"
+      OutMin		      "[]"
+      OutMax		      "[]"
       DataType		      "auto"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
       SignalType	      "auto"
       SamplingMode	      "auto"
       OutputWhenDisabled      "held"
       InitialOutput	      "[]"
     }
     Block {
-      BlockType		      Reference
+      BlockType		      "S-Function"
+      FunctionName	      "system"
+      SFunctionModules	      "''"
+      PortCounts	      "[]"
     }
     Block {
       BlockType		      SubSystem
@@ -159,6 +169,9 @@ Library {
       SimViewingDevice	      off
       DataTypeOverride	      "UseLocalSettings"
       MinMaxOverflowLogging   "UseLocalSettings"
+    }
+    Block {
+      BlockType		      Terminator
     }
   }
   AnnotationDefaults {
@@ -198,18 +211,18 @@ Library {
     Block {
       BlockType		      SubSystem
       Name		      "IIR FM with control"
-      Description	      "cdsFiltCntrl"
-      Ports		      [1, 2]
+      Tag		      "cdsFiltCtrl"
+      Description	      "cdsFiltCntrl is the standard IIR filter module (exactly the same as cdsFilt) but with added control data output 'Ctrl'. Filter module digital signal output appears on the first output, which is called 'Val'. 'Ctrl' output has a bit pattern encoding the state of filter's on/off switches (FM1 through FM10). The bit values are:\n                                                                                                                                                                                                                                                                                                                                      \nmodule 	hex	dec                                                                                                                                                                                                                                                                                                                       \n-----------------------                                                                                                                                                                                                                                                                                                               \nFM1	0x20                    32                                                                                                                                                                                                                                                                                                        \nFM2	0x80                     128                                                                                                                                                                                                                                                                                                      \nFM3	0x200                   512                                                                                                                                                                                                                                                                                                       \nFM4	0x800                   2048                                                                                                                                                                                                                                                                                                      \nFM5	0x2000                 8192                                                                                                                                                                                                                                                                                                       \nFM6	0x8000                 32768                                                                                                                                                                                                                                                                                                      \nFM7	0x20000                131072                                                                                                                                                                                                                                                                                                     \nFM8	0x80000                 524288                                                                                                                                                                                                                                                                                                    \nFM9	0x200000               2097152                                                                                                                                                                                                                                                                                                    \nFM10	0x800000               8388608                                                                                                                                                                                                                                                                                                   \n                                                                                                                                                                                                                                                                                                                                      \nThis bit data can be used to drive some other switches or it can be output using a binary I/O module.                                                                                                                                                                                                                                 "
+      Ports		      [2, 2]
       Position		      [125, 65, 185, 100]
       BackgroundColor	      "darkGreen"
-      AttributesFormatString  "%<Description>"
+      AttributesFormatString  "%<Tag>"
       MinAlgLoopOccurrences   off
       RTWSystemCode	      "Auto"
       FunctionWithSeparateData off
-      MaskHideContents	      off
       System {
 	Name			"IIR FM with control"
-	Location		[292, 79, 895, 348]
+	Location		[292, 79, 990, 479]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -227,6 +240,17 @@ Library {
 	  Name			  "In1"
 	  Position		  [25, 43, 55, 57]
 	  IconDisplay		  "Port number"
+	  OutDataType		  "sfix(16)"
+	  OutScaling		  "2^0"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "Cin"
+	  Position		  [50, 278, 80, 292]
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	  OutDataType		  "sfix(16)"
+	  OutScaling		  "2^0"
 	}
 	Block {
 	  BlockType		  Reference
@@ -246,14 +270,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -263,24 +287,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -290,7 +314,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -315,14 +339,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -332,24 +356,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -359,7 +383,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -384,14 +408,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -401,24 +425,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -428,7 +452,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -453,14 +477,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -470,24 +494,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -497,7 +521,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -522,14 +546,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -539,24 +563,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -566,7 +590,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -577,7 +601,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "Digital Filter5"
 	  Ports			  [1, 1]
-	  Position		  [85, 118, 170, 172]
+	  Position		  [80, 123, 165, 177]
 	  DialogController	  "dspdialog.DigitalFilter"
 	  DialogControllerArgs	  "DataTag5"
 	  SourceBlock		  "dsparch4/Digital Filter"
@@ -591,14 +615,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -608,24 +632,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -635,7 +659,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -660,14 +684,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -677,24 +701,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -704,7 +728,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -729,14 +753,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -746,24 +770,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -773,7 +797,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -798,14 +822,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -815,24 +839,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -842,7 +866,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -867,14 +891,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -884,24 +908,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -911,7 +935,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -923,7 +947,11 @@ Library {
 	  Name			  "Gain"
 	  Position		  [300, 210, 330, 240]
 	  ParameterDataTypeMode	  "Inherit via internal rule"
+	  ParameterDataType	  "sfix(16)"
+	  ParameterScaling	  "2^0"
 	  OutDataTypeMode	  "Inherit via internal rule"
+	  OutDataType		  "sfix(16)"
+	  OutScaling		  "2^0"
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
@@ -932,11 +960,17 @@ Library {
 	  Position		  [115, 220, 135, 240]
 	}
 	Block {
+	  BlockType		  Terminator
+	  Name			  "Terminator"
+	  Position		  [125, 280, 145, 300]
+	}
+	Block {
 	  BlockType		  Outport
 	  Name			  "Val"
 	  Position		  [445, 218, 475, 232]
 	  IconDisplay		  "Port number"
-	  BusOutputAsStruct	  off
+	  OutDataType		  "sfix(16)"
+	  OutScaling		  "2^0"
 	}
 	Block {
 	  BlockType		  Outport
@@ -944,7 +978,15 @@ Library {
 	  Position		  [170, 223, 200, 237]
 	  Port			  "2"
 	  IconDisplay		  "Port number"
-	  BusOutputAsStruct	  off
+	  OutDataType		  "sfix(16)"
+	  OutScaling		  "2^0"
+	}
+	Line {
+	  SrcBlock		  "Cin"
+	  SrcPort		  1
+	  Points		  [10, 0; 0, 5]
+	  DstBlock		  "Terminator"
+	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "Gain"
@@ -992,7 +1034,7 @@ Library {
 	Line {
 	  SrcBlock		  "Digital Filter4"
 	  SrcPort		  1
-	  Points		  [0, 60; -500, 0]
+	  Points		  [0, 60; -505, 0]
 	  DstBlock		  "Digital Filter5"
 	  DstPort		  1
 	}
@@ -1034,52 +1076,42 @@ MatData {
   NumRecords		  10
   DataRecord {
     Tag			    DataTag9
-    Data		    "  %)30     .    ,     8    (    !          %    "
-"\"     $    \"     0         0  ( 6UT   "
+    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag8
-    Data		    "  %)30     .    ,     8    (    !          %    "
-"\"     $    \"     0         0  ( 6UT   "
+    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag7
-    Data		    "  %)30     .    ,     8    (    !          %    "
-"\"     $    \"     0         0  ( 6UT   "
+    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag6
-    Data		    "  %)30     .    ,     8    (    !          %    "
-"\"     $    \"     0         0  ( 6UT   "
+    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag5
-    Data		    "  %)30     .    ,     8    (    !          %    "
-"\"     $    \"     0         0  ( 6UT   "
+    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag4
-    Data		    "  %)30     .    ,     8    (    !          %    "
-"\"     $    \"     0         0  ( 6UT   "
+    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag3
-    Data		    "  %)30     .    ,     8    (    !          %    "
-"\"     $    \"     0         0  ( 6UT   "
+    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag2
-    Data		    "  %)30     .    ,     8    (    !          %    "
-"\"     $    \"     0         0  ( 6UT   "
+    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag1
-    Data		    "  %)30     .    ,     8    (    !          %    "
-"\"     $    \"     0         0  ( 6UT   "
+    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
   }
   DataRecord {
     Tag			    DataTag0
-    Data		    "  %)30     .    ,     8    (    !          %    "
-"\"     $    \"     0         0  ( 6UT   "
+    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
   }
 }
