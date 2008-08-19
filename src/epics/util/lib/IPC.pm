@@ -51,7 +51,7 @@ sub fromExp {
 	if ($address % 4 != 0) {
 		die "IPC Part $::xpartName[$i] invalid: address must be 4-byte aligned\n";
 	}
-        return "_ipc_shm? *((float *)(((void *)_ipc_shm) + $addressString)) : 0.0";
+        return "*((float *)(((void *)_ipc_shm) + $addressString))";
 }
 
 # Return front end code
