@@ -177,7 +177,11 @@ int gsaDacDma1(int modNum, int dacType)
 	  dacDma[modNum]->DMA0_PCI_ADD = (int)dac_dma_handle[modNum];
 	  dacDma[modNum]->DMA0_LOC_ADD = 0x18;
 #ifdef OVERSAMPLE_DAC
-          dacDma[modNum]->DMA0_BTC = 0x40*OVERSAMPLE_TIMES;
+#ifdef DAC_OVER2
+         dacDma[modNum]->DMA0_BTC = 0x40*OVERSAMPLE_TIMES*2;
+#else
+         dacDma[modNum]->DMA0_BTC = 0x40*OVERSAMPLE_TIMES;
+#endif
 #else
 	  dacDma[modNum]->DMA0_BTC = 0x40;
 #endif
@@ -245,7 +249,7 @@ int mapDio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 unsigned int readIiroDio(CDS_HARDWARE *pHardware, int modNum)
 {
   unsigned int status;
-	status = inb(pHardware->pci_iiro_dio[modNum] + IIRO_DIO_INPUT);
+	status = inb(pHardware->pci_do[modNum] + IIRO_DIO_INPUT);
 	return(status);
 }
 
@@ -254,7 +258,7 @@ unsigned int readIiroDio(CDS_HARDWARE *pHardware, int modNum)
 // *****************************************************************************
 void writeIiroDio(CDS_HARDWARE *pHardware, int modNum, int data)
 {
-	outb(data & 0xff, pHardware->pci_iiro_dio[modNum] + IIRO_DIO_OUTPUT);
+	outb(data & 0xff, pHardware->pci_do[modNum] + IIRO_DIO_OUTPUT);
 }
 
 // *****************************************************************************
@@ -264,15 +268,18 @@ int mapIiroDio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 {
   static unsigned int pci_io_addr;
   int devNum;
-
-	  devNum = pHardware->iiroDioCount;
+	  devNum = pHardware->doCount;
 	  pci_enable_device(diodev);
 	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_2,&pci_io_addr);
 	  printk("iiro-8 dio pci2 = 0x%x\n",pci_io_addr);
-	  pHardware->pci_iiro_dio[devNum] = pci_io_addr-1;
-	  printk("iiro-8 diospace = 0x%x\n",pHardware->pci_iiro_dio[devNum]);
-
+	  pHardware->pci_do[devNum] = pci_io_addr-1;
+	  pHardware->doType[devNum] = ACS_8DIO;
+	  pHardware->doInstance[devNum]  = pHardware->iiroDioCount;
 	  pHardware->iiroDioCount ++;
+	  printk("iiro-8 diospace = 0x%x\n",pHardware->pci_do[devNum]);
+
+	  pHardware->doCount ++;
+
 	  return(0);
 }
 
@@ -282,9 +289,10 @@ int mapIiroDio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 unsigned int readIiroDio1(CDS_HARDWARE *pHardware, int modNum)
 {
   unsigned int v, v1;
-  v = inb(pHardware->pci_iiro_dio1[modNum] + IIRO_DIO_INPUT);
-  v1 = inb(pHardware->pci_iiro_dio1[modNum] + 4 + IIRO_DIO_INPUT);
-  return v | (v1 << 8);
+  v = inb(pHardware->pci_do[modNum] + IIRO_DIO_OUTPUT);
+  //v1 = inb(pHardware->pci_iiro_dio1[modNum] + 4 + IIRO_DIO_OUTPUT);
+  //return v | (v1 << 8);
+return (v);
 }
 
 // *****************************************************************************
@@ -292,8 +300,8 @@ unsigned int readIiroDio1(CDS_HARDWARE *pHardware, int modNum)
 // *****************************************************************************
 void writeIiroDio1(CDS_HARDWARE *pHardware, int modNum, int data)
 {
-	outb(data & 0xff, pHardware->pci_iiro_dio1[modNum] + IIRO_DIO_OUTPUT);
-	outb((data >> 8) & 0xff, pHardware->pci_iiro_dio1[modNum] + 4 + IIRO_DIO_OUTPUT);
+	outb(data & 0xff, pHardware->pci_do[modNum] + IIRO_DIO_OUTPUT);
+	outb((data >> 8) & 0xff, pHardware->pci_do[modNum] + 4 + IIRO_DIO_OUTPUT);
 }
 
 // *****************************************************************************
@@ -304,16 +312,62 @@ int mapIiroDio1(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
   static unsigned int pci_io_addr;
   int devNum;
 
-	  devNum = pHardware->iiroDio1Count;
+	  devNum = pHardware->doCount;
 	  pci_enable_device(diodev);
 	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_2,&pci_io_addr);
 	  printk("iiro-16 dio pci2 = 0x%x\n",pci_io_addr);
-	  pHardware->pci_iiro_dio1[devNum] = pci_io_addr-1;
-	  printk("iiro-16 diospace = 0x%x\n",pHardware->pci_iiro_dio1[devNum]);
-
+	  pHardware->pci_do[devNum] = pci_io_addr-1;
+	  pHardware->doType[devNum] = ACS_16DIO;
+	  pHardware->doInstance[devNum]  = pHardware->iiroDio1Count;
 	  pHardware->iiroDio1Count ++;
+	  printk("iiro-16 diospace = 0x%x\n",pHardware->pci_do[devNum]);
+
+	  pHardware->doCount ++;
 	  return(0);
 }
+
+
+// *****************************************************************************
+// Routine to Initialize CONTEC PCIe-32 Isolated DO modules
+// *****************************************************************************
+int mapContec32out(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
+{
+  static unsigned int pci_io_addr;
+  int devNum;
+  int id;
+
+	  devNum = pHardware->doCount;
+	  pci_enable_device(diodev);
+	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_0,&pci_io_addr);
+	  printk("contec dio pci2 = 0x%x\n",pci_io_addr);
+	  pHardware->pci_do[devNum] = pci_io_addr-1;
+	  printk("contec32L diospace = 0x%x\n",pHardware->pci_do[devNum]);
+	  pci_read_config_dword(diodev,PCI_REVISION_ID,&id);
+	  printk("contec dio pci2 card number= 0x%x\n",(id & 0xf));
+	  pHardware->doType[devNum] = CON_32DO;
+	  pHardware->doCount ++;
+	  pHardware->doInstance[devNum]  = pHardware->cDo32lCount;
+	  pHardware->cDo32lCount ++;
+	  return(0);
+}
+
+// *****************************************************************************
+// Routine to write CONTEC PCIe-32 Isolated DO modules
+// *****************************************************************************
+unsigned int writeCDO32l(CDS_HARDWARE *pHardware, int modNum, unsigned int data)
+{
+	outl(data,pHardware->pci_do[modNum]);
+	return(inl(pHardware->pci_do[modNum]));
+}
+
+// *****************************************************************************
+// Routine to read CONTEC PCIe-32 Isolated DO modules
+// *****************************************************************************
+unsigned int readCDO32l(CDS_HARDWARE *pHardware, int modNum)
+{
+	return(inl(pHardware->pci_do[modNum]));
+}
+
 
 // *****************************************************************************
 // Routine to initialize DAC modules
@@ -548,6 +602,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
   int adc_cnt = 0;
   int fast_adc_cnt = 0;
   int dac_cnt = 0;
+  int bo_cnt = 0;
 
   dacdev = NULL;
   status = 0;
@@ -648,28 +703,92 @@ int mapPciModules(CDS_HARDWARE *pCds)
 
   dacdev = NULL;
   status = 0;
+  bo_cnt = 0;
   // Search for ACCESS PCI-IIRO-8 isolated I/O modules
   while((dacdev = pci_find_device(ACC_VID, ACC_IIRO_TID, dacdev))) {
-		printk("ACCESS IIRO-8 isolated dio card on bus %x; device %x\n",
-			dacdev->bus->number,
+		int use_it = 0;
+		if (pCds->cards) {
+			use_it = 0;
+			/* See if ought to use this one or not */
+			int i;
+			for (i = 0; i < pCds->cards; i++) {
+				if (pCds->cards_used[i].type == ACS_8DIO
+				    && pCds->cards_used[i].instance == bo_cnt) {
+					use_it = 1;
+					break;
+				}
+			}
+		}
+		if (use_it) {
+                  printk("Access BIO card on bus %x; device %x\n",
+                        dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
-		status = mapIiroDio(pCds,dacdev);
-		modCount ++;
+		  status = mapIiroDio(pCds,dacdev);
+		  modCount ++;
+		}
+		bo_cnt ++;
   }
 		
   dacdev = NULL;
   status = 0;
+  bo_cnt = 0;
   // Search for ACCESS PCI-IIRO-16 isolated I/O modules
   while((dacdev = pci_find_device(ACC_VID, ACC_IIRO_TID1, dacdev))) {
-		printk("ACCESS IIRO-16 isolated dio card on bus %x; device %x\n",
-			dacdev->bus->number,
+		int use_it = 0;
+		if (pCds->cards) {
+			use_it = 0;
+			/* See if ought to use this one or not */
+			int i;
+			for (i = 0; i < pCds->cards; i++) {
+				if (pCds->cards_used[i].type == ACS_16DIO
+				    && pCds->cards_used[i].instance == bo_cnt) {
+					use_it = 1;
+					break;
+				}
+			}
+		}
+		if (use_it) {
+                  printk("Access BIO-16 card on bus %x; device %x\n",
+                        dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
-		status = mapIiroDio1(pCds,dacdev);
-		modCount ++;
+		  status = mapIiroDio1(pCds,dacdev);
+		  modCount ++;
+		}
+		bo_cnt ++;
   }
 
   dacdev = NULL;
   status = 0;
+  bo_cnt = 0;
+
+  // Search for Contec C_DO_32L_PE isolated I/O modules
+  while((dacdev = pci_find_device(CONTEC_VID, C_DO_32L_PE, dacdev))) {
+		int use_it = 0;
+		if (pCds->cards) {
+			use_it = 0;
+			/* See if ought to use this one or not */
+			int i;
+			for (i = 0; i < pCds->cards; i++) {
+				if (pCds->cards_used[i].type == CON_32DO
+				    && pCds->cards_used[i].instance == bo_cnt) {
+					use_it = 1;
+					break;
+				}
+			}
+		}
+		if (use_it) {
+                  printk("Contec BO card on bus %x; device %x\n",
+                        dacdev->bus->number,
+			PCI_SLOT(dacdev->devfn));
+		  status = mapContec32out(pCds,dacdev);
+		  modCount ++;
+		}
+		bo_cnt ++;
+  }
+
+  dacdev = NULL;
+  status = 0;
+
   for (i = 0; i < MAX_RFM_MODULES; i++) {
   	pCds->pci_rfm[i] = 0;
   }
