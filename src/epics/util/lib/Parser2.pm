@@ -337,6 +337,15 @@ sub node_processing {
 		if ($part_name eq "Dac") {
         	  $::partType[$::partCnt] = CDS::Dac::initDac($node);
 		}
+		if ($part_name eq "CDO32") {
+        	  $::partType[$::partCnt] = CDS::CDO32::initCDO32($node);
+		}
+		if ($part_name eq "Rio") {
+        	  $::partType[$::partCnt] = CDS::Rio::initRio($node);
+		}
+		if ($part_name eq "Rio1") {
+        	  $::partType[$::partCnt] = CDS::Rio1::initRio1($node);
+		}
         	$::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ();
 	}
 	# For easy access
