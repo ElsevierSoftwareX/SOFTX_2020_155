@@ -36,6 +36,9 @@
 #define GSC_16AISS8AO4		1
 #define GSC_16AO16		2
 #define GSC_18AISS8AO8		3
+#define CON_32DO		4
+#define ACS_16DIO		5
+#define ACS_8DIO		6
 
 /* Cards configuration */
 typedef struct CDS_CARDS {
@@ -53,12 +56,18 @@ typedef struct CDS_HARDWARE{
 	long pci_adc[MAX_ADC_MODULES];	/* Remapped addresses of ADC modules	*/
 	int adcType[MAX_ADC_MODULES];
 	int adcConfig[MAX_ADC_MODULES];
+	int doCount;			/* Number of DIO modules found		*/
+	unsigned short pci_do[MAX_DIO_MODULES];	/* io registers of DIO	*/
+	int doType[MAX_DIO_MODULES];
+	int doInstance[MAX_DIO_MODULES];
 	int dioCount;			/* Number of DIO modules found		*/
 	unsigned short pci_dio[MAX_DIO_MODULES];	/* io registers of DIO	*/
 	int iiroDioCount;	 	/* Number of IIRO-8 isolated DIO modules found */
 	unsigned short pci_iiro_dio[MAX_DIO_MODULES];	/* io regs of IIRO mods */
 	int iiroDio1Count;	 	/* Number of IIRO-16 isolated DIO modules found */
 	unsigned short pci_iiro_dio1[MAX_DIO_MODULES];	/* io regs of IIRO-16 mods */
+	int cDo32lCount;	 	/* Number of Contec isolated DO modules found */
+	unsigned short pci_cdo_dio1[MAX_DIO_MODULES];	/* io regs of Contec 32BO mods */
 	int rfmCount;			/* Number of RFM modules found		*/
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
 	int rfmConfig[MAX_RFM_MODULES];
@@ -91,6 +100,9 @@ typedef struct CDS_HARDWARE{
 #define ACC_IIRO_TID1 0x0f08
 #define IIRO_DIO_INPUT	0x1
 #define IIRO_DIO_OUTPUT 0x0
+
+#define CONTEC_VID	0x1221
+#define C_DO_32L_PE	0x86E2
 
 /* PLX Chip Definitions for GSA ADC/DAC Modules ******************************* */
 /* Common DMA register definition		*/
