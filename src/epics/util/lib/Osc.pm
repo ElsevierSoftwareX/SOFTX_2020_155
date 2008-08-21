@@ -64,7 +64,6 @@ sub frontEndInitCode {
 	my ($i) = @_;
         my $calcExp =  "\L$::xpartName[$i]_freq = ";
         $calcExp .=  "pLocalEpics->$::systemName\.$::xpartName[$i]\_FREQ;\n";
-        $calcExp .=  "printf(\"OSC Freq = \%f\\n\",\L$::xpartName[$i]_freq\);\n";
         $calcExp .= "\L$::xpartName[$i]\_delta = 2.0 * 3.1415926535897932384626 * ";
         $calcExp .=  "\L$::xpartName[$i]_freq / \UFE_RATE;\n";
         $calcExp .= "valx = \L$::xpartName[$i]\_delta \/ 2.0;\n";
@@ -106,7 +105,6 @@ sub frontEndCode {
         $calcExp .= "{\n";
         $calcExp .= "\t\L$::xpartName[$i]_freq = ";
         $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_FREQ;\n";
-        $calcExp .= "\tprintf(\"OSC Freq = \%f\\n\",\L$::xpartName[$i]_freq\);\n";
         $calcExp .= "\t\L$::xpartName[$i]\_delta = 2.0 * 3.1415926535897932384626 * ";
         $calcExp .= "\L$::xpartName[$i]_freq / \UFE_RATE;\n";
         $calcExp .= "\tvalx = \L$::xpartName[$i]\_delta \/ 2.0;\n";
