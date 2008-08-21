@@ -14,6 +14,7 @@ $shmem_daq = 0; # Do not use shared memory DAQ connection
 $no_sync = 0; # Sync up to 1PPS by default
 $no_daq = 0; # Enable DAQ by default
 $gdsNodeId = 1;
+$dacOver = 0;
 $ifoid = 0; # Default ifoid for the DAQ
 $nodeid = 0; # Default GDS node id for awgtpman
 $dac_internal_clocking = 0; # Default is DAC external clocking
@@ -107,6 +108,7 @@ $inBranch = 0;
 $endBranch = 0;
 $adcCnt = 0;
 $dacCnt = 0;
+$boCnt = 0;
 $filtCnt = 0;
 $firCnt = 0;
 $useWd = 0;
@@ -138,6 +140,9 @@ $adcNum[0] = 0;	# A/D board numbers, sequential
 $dacCnt = 0;	# Total D/A converter boards
 $dacType[0] = 0;	# D/A board types
 $dacNum[0] = 0;	# D/A board numbers, sequential
+$boCnt = 0;	# Total binary output boards
+$boType[0] = 0;	# Binary output board types
+$boNum[0] = 0;	# Binary output board numbers, sequential
 $nonSubCnt = 0; # Total of non-sybsystem parts found in the model
 
 # Keeps non-subsystem part numbers
@@ -576,6 +581,7 @@ close(OUTD);
 
 print "Found $adcCnt ADC modules part is $adcPartNum[0]\n";
 print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
+print "Found $boCnt Binary modules part is $boPartNum[0]\n";
 
 for($ii=0;$ii<$subSys;$ii++)
 {
@@ -1551,6 +1557,9 @@ for (0 .. $adcCnt-1) {
 for (0 .. $dacCnt-1) {
 	print OUT "\t{", $dacType[$_], ",", $dacNum[$_], "},\n";
 }
+for (0 .. $boCnt-1) {
+	print OUT "\t{", $boType[$_], ",", $boNum[$_], "},\n";
+}
 print OUT "};\n\n";
 
 sub printVariables {
@@ -2081,6 +2090,9 @@ print OUTM "CFLAGS += -DRESERVE_CPU3\n";
 }
 print OUTM "CFLAGS += -D_ADVANCED_LIGO=1\n";
 print OUTM "CFLAGS += -g\n";
+if ($dacOver) {
+  print OUTM "CFLAGS += -DDAC_OVER2\n";
+}
 if ($no_sync) {
   print OUTM "#Comment out to enable 1PPS synchronization\n";
   print OUTM "CFLAGS += -DNO_SYNC\n";
