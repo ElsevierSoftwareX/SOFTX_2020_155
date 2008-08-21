@@ -2,6 +2,18 @@ package CDS::Rio1;
 use Exporter;
 @ISA = ('Exporter');
 
+
+sub initRio1 {
+	my ($node) = @_;
+	$::boPartNum[$::boCnt] = $::partCnt;
+	my $desc = ${$node->{FIELDS}}{"Name"};
+	my $l = length($desc);
+        my $num = substr($desc, ($l-1), 1);
+	$::boType[$::boCnt] = "ACS_16DIO";
+	$::boNum[$::boCnt] = $num;
+	$::boCnt ++;
+}
+
 sub partType {
 	return Rio1;
 }
@@ -41,7 +53,8 @@ sub frontEndInitCode {
 # Returns calculated input code
 sub fromExp {
         my ($i, $j) = @_;
-        my $card =  substr($::partInput[$i][$j], 4, 1);
+	my $l = length($::partInput[$i][$j]);
+        my $card =  substr($::partInput[$i][$j], ($l-1), 1);
         return "rioInput1\[" . $card . "\]";
 }
 
@@ -51,7 +64,8 @@ sub fromExp {
 
 sub frontEndCode {
 	my ($i) = @_;
-        my $rioNum = substr($::partName[$i], 4, 1);
+	my $l = length($::partName[$i]);
+        my $rioNum = substr($::partName[$i], ($l-1), 1);
         my $calcExp = "// Rio1 (IIRO-16) number is $rioNum name $::partName[$i]\n";
         my $fromType = $::partInputType[$i][$_];
         if (($fromType ne "GROUND") && ($::partInput[$i][0] ne "NC")) {
