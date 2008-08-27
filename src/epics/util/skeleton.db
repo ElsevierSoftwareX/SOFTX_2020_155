@@ -10,98 +10,18 @@ grecord(ai,"%IFO%:%FILTER%_OFFSET")
 {
 	field(PREC,"1")
 }
-grecord(ai,"%IFO%:%FILTER%_OFFSET.HIHI")
-{
-        field(PREC,"1")
-}
-grecord(ai,"%IFO%:%FILTER%_OFFSET.HIGH")
-{
-        field(PREC,"1")
-}
-grecord(ai,"%IFO%:%FILTER%_OFFSET.LOW")
-{
-        field(PREC,"1")
-}
-grecord(ai,"%IFO%:%FILTER%_OFFSET.LOLO")
-{
-        field(PREC,"1")
-}
-grecord(ai,"%IFO%:%FILTER%_OFFSET.HHSV")
-grecord(ai,"%IFO%:%FILTER%_OFFSET.HSV")
-grecord(ai,"%IFO%:%FILTER%_OFFSET.LSV")
-grecord(ai,"%IFO%:%FILTER%_OFFSET.LLSV")
 grecord(ai,"%IFO%:%FILTER%_GAIN")
 {
 	field(PREC,"3")
 }
-grecord(ai,"%IFO%:%FILTER%_GAIN.HIHI")
-{
-        field(PREC,"1")
-}
-grecord(ai,"%IFO%:%FILTER%_GAIN.HIGH")
-{
-        field(PREC,"1")
-}
-grecord(ai,"%IFO%:%FILTER%_GAIN.LOW")
-{
-        field(PREC,"1")
-}
-grecord(ai,"%IFO%:%FILTER%_GAIN.LOLO")
-{ 
-        field(PREC,"1")
-} 
-grecord(ai,"%IFO%:%FILTER%_GAIN.HHSV")
-grecord(ai,"%IFO%:%FILTER%_GAIN.HSV")
-grecord(ai,"%IFO%:%FILTER%_GAIN.LSV")
-grecord(ai,"%IFO%:%FILTER%_GAIN.LLSV")
 grecord(ai,"%IFO%:%FILTER%_TRAMP")
 {
 	field(PREC,"3")
 }
-grecord(ai,"%IFO%:%FILTER%_TRAMP.HIHI")
-{ 
-        field(PREC,"1")
-} 
-grecord(ai,"%IFO%:%FILTER%_TRAMP.HIGH")
-{ 
-        field(PREC,"1")
-} 
-grecord(ai,"%IFO%:%FILTER%_TRAMP.LOW")
-{ 
-        field(PREC,"1")
-} 
-grecord(ai,"%IFO%:%FILTER%_TRAMP.LOLO")
-{ 
-        field(PREC,"1")
-} 
-grecord(ai,"%IFO%:%FILTER%_TRAMP.HHSV")
-grecord(ai,"%IFO%:%FILTER%_TRAMP.HSV")
-grecord(ai,"%IFO%:%FILTER%_TRAMP.LSV")
-grecord(ai,"%IFO%:%FILTER%_TRAMP.LLSV")
 grecord(ai,"%IFO%:%FILTER%_LIMIT")
 {
 	field(PREC,"1")
 }
-grecord(ai,"%IFO%:%FILTER%_LIMIT.HIHI")
-{ 
-        field(PREC,"1")
-} 
-grecord(ai,"%IFO%:%FILTER%_LIMIT.HIGH")
-{ 
-        field(PREC,"1")
-} 
-grecord(ai,"%IFO%:%FILTER%_LIMIT.LOW")
-{ 
-        field(PREC,"1")
-} 
-grecord(ai,"%IFO%:%FILTER%_LIMIT.LOLO")
-{ 
-        field(PREC,"1")
-} 
-grecord(ai,"%IFO%:%FILTER%_LIMIT.HHSV")
-grecord(ai,"%IFO%:%FILTER%_LIMIT.HSV")
-grecord(ai,"%IFO%:%FILTER%_LIMIT.LSV")
-grecord(ai,"%IFO%:%FILTER%_LIMIT.LLSV")
 grecord(ai,"%IFO%:%FILTER%_OUTMON")
 {
 	field(PREC,"1")
@@ -120,23 +40,7 @@ grecord(ai,"%IFO%:%FILTER%_RSET")
 grecord(ai,"%IFO%:%FILTER%_SW1R")
 grecord(ai,"%IFO%:%FILTER%_SW2R")
 grecord(ai,"%IFO%:%FILTER%_SW1S")
-grecord(ai,"%IFO%:%FILTER%_SW1S.HIHI")
-grecord(ai,"%IFO%:%FILTER%_SW1S.HIGH")
-grecord(ai,"%IFO%:%FILTER%_SW1S.LOW")
-grecord(ai,"%IFO%:%FILTER%_SW1S.LOLO")
-grecord(ai,"%IFO%:%FILTER%_SW1S.HHSV")
-grecord(ai,"%IFO%:%FILTER%_SW1S.HSV")
-grecord(ai,"%IFO%:%FILTER%_SW1S.LSV")
-grecord(ai,"%IFO%:%FILTER%_SW1S.LLSV")
 grecord(ai,"%IFO%:%FILTER%_SW2S")
-grecord(ai,"%IFO%:%FILTER%_SW2S.HIHI")
-grecord(ai,"%IFO%:%FILTER%_SW2S.HIGH")
-grecord(ai,"%IFO%:%FILTER%_SW2S.LOW")
-grecord(ai,"%IFO%:%FILTER%_SW2S.LOLO")
-grecord(ai,"%IFO%:%FILTER%_SW2S.HHSV")
-grecord(ai,"%IFO%:%FILTER%_SW2S.HSV")
-grecord(ai,"%IFO%:%FILTER%_SW2S.LSV")
-grecord(ai,"%IFO%:%FILTER%_SW2S.LLSV")
 grecord(stringin,"%IFO%:%FILTER%_Name00")
 grecord(stringin,"%IFO%:%FILTER%_Name01")
 grecord(stringin,"%IFO%:%FILTER%_Name02")
