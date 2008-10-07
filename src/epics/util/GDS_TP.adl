@@ -8,7 +8,7 @@ display {
 		x=652
 		y=452
 		width=920
-		height=530
+		height=555
 	}
 	clr=14
 	bclr=52
@@ -3307,3 +3307,58 @@ byte {
 	}
 	sbit=0
 }
+rectangle {
+        object {
+                x=0
+                y=530
+                width=920
+                height=25
+        }
+        "basic attribute" {
+                clr=5
+        }
+}
+image {
+        object {
+                x=895
+                y=530
+                width=25
+                height=25
+        }
+        type="gif"
+        "image name"="/cvs/cds/LOCATION_NAME/scripts/utilities/nova_logo.gif"
+        "dynamic attribute" {
+                chan="SITE_NAME:CONTROL_SYSTEM_SYSTEM_NAME-TIME_STRING"
+        }
+}
+"shell command" {
+        object {
+                x=0
+                y=530
+                width=150
+                height=25
+        }
+        command[0] {
+                label="Documentation"
+                name="xterm -e view"
+                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/docs/SITE_NAMESYSTEM_NAME-GDS_TP.txt"
+        }
+        command[1] {
+                label="View Last Snapshot"
+                name="xwud -in"
+                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMESYSTEM_NAME-GDS_TP_0.xwd"
+        }
+        command[2] {
+                label="View Previous Snapshot"
+                name="xwud -in"
+                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMESYSTEM_NAME-GDS_TP_1.xwd"
+        }
+        command[3] {
+                label="Update Snapshot"
+                name="/cvs/cds/LOCATION_NAME/scripts/utilities/xupdatesnap"
+                args="SITE_NAMESYSTEM_NAME-GDS_TP"
+        }
+        clr=14
+        bclr=30
+}
+

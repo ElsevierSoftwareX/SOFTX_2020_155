@@ -8,7 +8,7 @@ display {
 		x=17
 		y=64
 		width=979
-		height=191
+		height=221
 	}
 	clr=14
 	bclr=52
@@ -1347,3 +1347,58 @@ text {
 	limits {
 	}
 }
+rectangle {
+        object {
+                x=0
+                y=196
+                width=979
+                height=25
+        }
+        "basic attribute" {
+                clr=5
+        }
+}
+image {
+        object {
+                x=954
+                y=196
+                width=25
+                height=25
+        }
+        type="gif"
+        "image name"="/cvs/cds/LOCATION_NAME/scripts/utilities/nova_logo.gif"
+        "dynamic attribute" {
+                chan="SITE_NAME:CONTROL_SYSTEM_SYSTEM_NAME-TIME_STRING"
+        }
+}
+"shell command" {
+        object {
+                x=0
+                y=196
+                width=150
+                height=25
+        }
+        command[0] {
+                label="Documentation"
+                name="xterm -e view"
+                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/docs/SITE_NAMEFILTERNAME.txt"
+        }
+        command[1] {
+                label="View Last Snapshot"
+                name="xwud -in"
+                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTERNAME_0.xwd"
+        }
+        command[2] {
+                label="View Previous Snapshot"
+                name="xwud -in"
+                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTERNAME_1.xwd"
+        }
+        command[3] {
+                label="Update Snapshot"
+                name="/cvs/cds/LOCATION_NAME/scripts/utilities/xupdatesnap"
+                args="SITE_NAMEFILTERNAME"
+        }
+        clr=14
+        bclr=30
+}
+
