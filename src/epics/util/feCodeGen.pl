@@ -116,6 +116,9 @@ $gainCnt = 0;
 $busPort = -1;
 $oscUsed = 0;
 $useFIRs = 0;
+# ***  DEBUG  ***
+# $useFIRs = 1;
+# ***  DEBUG  ***
 
 # set debug level (0 - no debug messages)
 $dbg_level = 2;
@@ -1817,6 +1820,8 @@ for($xx=0;$xx<$processCnt;$xx++)
 		if ( -e "lib/$partInputType[$mm][$qq].pm" ) {
 		  require "lib/$partInputType[$mm][$qq].pm";
 	  	  $fromExp[$qq] = ("CDS::" . $partInputType[$mm][$qq] . "::fromExp") -> ($mm, $qq);
+#print "%%%%%  index-1 = $qq\n";
+#print "%%%%%  fromExp = $fromExp[$qq]\n";
 	    	  $indone = $fromExp[$qq] ne "";
 		}
 
@@ -1828,6 +1833,8 @@ for($xx=0;$xx<$processCnt;$xx++)
 			} else {
 				$fromExp[$qq] = "\L$xpartName[$from]";
 			}
+#print "%%%%%  index-2 = $qq\n";
+#print "%%%%%  fromExp = $fromExp[$qq]\n";
 			#print "$xpartName[$mm]  $fromExp[$qq] $partInputType[$mm][$qq]\n";
 		}
 	}
@@ -1835,7 +1842,8 @@ for($xx=0;$xx<$processCnt;$xx++)
 
 
 
-	if ( -e "lib/$partType[$mm].pm" ) {
+	#print "@@@  partType = $partType[$mm]\n";
+        if ( -e "lib/$partType[$mm].pm" ) {
 	  	  print OUT ("CDS::" . $partType[$mm] . "::frontEndCode") -> ($mm);
 	}	
 
@@ -2408,7 +2416,8 @@ if ($not_found) {
 mkpath $epicsScreensDir, 0, 0755;
 my $usite = uc $site;
 my $sysname = uc($skeleton);
-$sed_arg =  "s/SITE_NAME/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;s/GDS_NODE_ID/" . ($gdsNodeId - 1) . "/g;";
+$sed_arg = "s/SITE_NAME/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;s/GDS_NODE_ID/" . ($gdsNodeId - 1) . "/g;";
+$sed_arg .= "s/LOCATION_NAME/$location/g;";
 system("cat GDS_TP.adl | sed '$sed_arg' > $epicsScreensDir/$usite$sysname" . "_GDS_TP.adl");
 my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
@@ -2496,6 +2505,7 @@ sub commify_series {
 			my $nsys = system_name_part($tfn);
 			$sargs = "s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;";
 			$sargs .= "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . $nsys . "/g;";
+                        $sargs .= "s/LOCATION_NAME/$location/g;";
 			$sargs .= "s/FILTERNAME/$tfn/g";
 			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$usite" . $filt_name . ".adl");
 		} else {
@@ -2518,5 +2528,8 @@ sub commify_series {
 }
 #print $monitor_args;
 for (0 .. $adcCnt - 1) {
-   system("cat MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$monitor_args' > $epicsScreensDir/$usite$sysname" . "_MONITOR_ADC$_.adl");
+   my $adc_monitor_args = $monitor_args;
+   $adc_monitor_args .= "s/MONITOR_ADC/MONITOR_ADC$_/g;";
+#print $adc_monitor_args;
+   system("cat MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$adc_monitor_args' > $epicsScreensDir/$usite$sysname" . "_MONITOR_ADC$_.adl");
 }
