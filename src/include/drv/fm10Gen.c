@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.20 2008/08/08 21:05:38 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.21 2008/10/10 22:23:49 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -97,6 +97,8 @@ Returns double value giving the current output.
 
 *************************************************************************/
 
+double junk;
+
 inline double iir_filter(double input,double *coef,int n,double *history){
 
   int i;
@@ -109,6 +111,10 @@ inline double iir_filter(double input,double *coef,int n,double *history){
   hist1_ptr = history;            /* first history */
   hist2_ptr = hist1_ptr + 1;      /* next history */
   
+  input += 1e-16;
+  junk = input;
+  input -= 1e-16;
+
   output = input * (*coef_ptr++); /* overall input scale factor */
   
   for(i = 0 ; i < n ; i++) {
@@ -123,8 +129,12 @@ inline double iir_filter(double input,double *coef,int n,double *history){
     output = new_hist + history1 * (*coef_ptr++);
     output = output + history2 * (*coef_ptr++);      /* zeros */
 
-    if((new_hist < 1e-20) && (new_hist > -1e-20)) new_hist = new_hist<0 ? -1e-20: 1e-20;
+    //if((new_hist < 1e-20) && (new_hist > -1e-20)) new_hist = new_hist<0 ? -1e-20: 1e-20;
     
+    new_hist += 1e-16;
+    junk = new_hist;
+    new_hist -= 1e-16;
+
     *hist2_ptr++ = *hist1_ptr;
     *hist1_ptr++ = new_hist;
     hist1_ptr++;
