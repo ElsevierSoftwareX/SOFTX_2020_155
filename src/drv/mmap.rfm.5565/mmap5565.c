@@ -284,7 +284,7 @@ static int __init mmap_init(void)
 	static unsigned int VMIC_ID = 0x114a;
 
         /* get the major number of the character device */
-        if ((ret = alloc_chrdev_region(&mmap_dev, 0, 1, "mmap")) < 0) {
+        if ((ret = alloc_chrdev_region(&mmap_dev, 0, 1, "mmap5565")) < 0) {
                 printk(KERN_ERR "could not allocate major number for mmap\n");
                 goto out;
         }
@@ -298,7 +298,7 @@ static int __init mmap_init(void)
 
 	/* Find reflective memory devices */
 	rfm_cnt = 0;
-	while((rfmdev = pci_find_device(VMIC_ID, PCI_ANY_ID, rfmdev))) {
+	while((rfmdev = pci_find_device(VMIC_ID, 0x5565, rfmdev))) {
 		if (rfm_cnt < 8) {
                   printk("rfm card on bus %x; device %x\n", rfmdev->bus->number, PCI_SLOT(rfmdev->devfn));
 		  rfm_ptr[rfm_cnt] = (void *) mapcard(rfmdev, 64*1024*1024);
@@ -324,7 +324,7 @@ static void __exit mmap_exit(void)
 	struct pci_dev *rfmdev = NULL;
 	static unsigned int VMIC_ID = 0x114a;
 	rfm_cnt = 0;
-	while((rfmdev = pci_find_device(VMIC_ID, PCI_ANY_ID, rfmdev))) {
+	while((rfmdev = pci_find_device(VMIC_ID, 0x5565, rfmdev))) {
 		if (rfm_cnt < 8) {
                   printk("rfm card on bus %x; device %x\n", rfmdev->bus->number, PCI_SLOT(rfmdev->devfn));
         	  iounmap ((void *)rfm_ptr[rfm_cnt]);
