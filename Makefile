@@ -62,8 +62,8 @@ install-% :: src/epics/simLink/%.mdl
 	/bin/cp -pr target/$${system}epics /cvs/cds/$$site/target/$${lower_ifo}$${system}epics;\
 	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}epics/db/*/autoBurt.req; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}epics/db/*/autoBurt.req /cvs/cds/$$site/target/$${lower_ifo}$${system}epics || exit 3; fi;\
 	echo Installing /cvs/cds/$$site/target/$${lower_ifo}$${system};\
-	/bin/mkdir -p /cvs/cds/$$site/target/$${lower_ifo}$${system};\
-	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe_$${cur_date}.rtl || exit 4; fi;\
+	/bin/mkdir -p /cvs/cds/$$site/target/$${lower_ifo}$${system}/archive;\
+	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system}/archive/$${system}fe_$${cur_date}.rtl || exit 4; fi;\
 	/bin/cp -p src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system};\
 	echo 'sudo ' /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${lower_ifo}$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd;\
 	/bin/chmod +x /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd;\
@@ -179,11 +179,11 @@ install-screens-% :: src/epics/simLink/%.mdl
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	echo Installing Epics screens;\
-	if test -e /cvs/cds/$$site/medm/$${lower_ifo}/$${system}; then /bin/mv -f /cvs/cds/$$site/medm/$${lower_ifo}/$${system} /cvs/cds/$$site/medm/$${lower_ifo}/$${system}_$${cur_date} || exit 1; fi;\
-	/bin/mkdir -p /cvs/cds/$$site/medm/$${lower_ifo};\
+	/bin/mkdir -p /cvs/cds/$$site/medm/$${lower_ifo}/archive;\
+	if test -e /cvs/cds/$$site/medm/$${lower_ifo}/$${system}; then /bin/mv -f /cvs/cds/$$site/medm/$${lower_ifo}/$${system} /cvs/cds/$$site/medm/$${lower_ifo}/archive/$${system}_$${cur_date} || exit 1; fi;\
 	/bin/cp -pr build/$${system}epics/medm /cvs/cds/$$site/medm/$${lower_ifo}/$${system};\
-	for i in `ls /cvs/cds/$$site/medm/$${lower_ifo}/$${system}_$${cur_date}`; do \
-          if test ! -s /cvs/cds/$$site/medm/$${lower_ifo}/$${system}/$$i; then  cp /cvs/cds/$$site/medm/$${lower_ifo}/$${system}_$${cur_date}/$$i  /cvs/cds/$$site/medm/$${lower_ifo}/$${system};  fi;\
+	for i in `ls /cvs/cds/$$site/medm/$${lower_ifo}/archive/$${system}_$${cur_date}`; do \
+          if test ! -s /cvs/cds/$$site/medm/$${lower_ifo}/$${system}/$$i; then  cp /cvs/cds/$$site/medm/$${lower_ifo}/archive/$${system}_$${cur_date}/$$i  /cvs/cds/$$site/medm/$${lower_ifo}/$${system};  fi;\
         done
 
 
@@ -206,8 +206,8 @@ reinstall-% :: src/epics/simLink/%.mdl
 	/bin/cp -pr target/$${system}epics /cvs/cds/$$site/target/$${lower_ifo}$${system}epics;\
 	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}epics/db/*/autoBurt.req; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}epics/db/*/autoBurt.req /cvs/cds/$$site/target/$${lower_ifo}$${system}epics || exit 2; fi;\
 	echo Installing /cvs/cds/$$site/target/$${lower_ifo}$${system};\
-	/bin/mkdir -p /cvs/cds/$$site/target/$${lower_ifo}$${system};\
-	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe_$${cur_date}.rtl || exit 3; fi;\
+	/bin/mkdir -p /cvs/cds/$$site/target/$${lower_ifo}$${system}/archive;\
+	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system}/archive/$${system}fe_$${cur_date}.rtl || exit 3; fi;\
 	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system};\
 	echo 'sudo ' /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${lower_ifo}$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd;\
 	/bin/chmod +x /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd
@@ -222,8 +222,8 @@ reinstall-fe-% :: src/epics/simLink/%.mdl
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	/bin/mkdir -p /cvs/cds/$$site/chans;\
 	echo Installing Front-end Code Only system=$$system site=$$site ifo=$$ifo,$$lower_ifo;\
-	/bin/mkdir -p /cvs/cds/$$site/target/$${lower_ifo}$${system};\
-	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe_$${cur_date}.rtl || exit 3; fi;\
+	/bin/mkdir -p /cvs/cds/$$site/target/$${lower_ifo}$${system}/archive;\
+	if test -e /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl; then /bin/mv -f /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system}/archive/$${system}fe_$${cur_date}.rtl || exit 3; fi;\
 	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /cvs/cds/$$site/target/$${lower_ifo}$${system};\
 	echo 'sudo ' /cvs/cds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl ' >  '/cvs/cds/$$site/target/$${lower_ifo}$${system}/log.txt ' 2>& 1 &' > /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd;\
 	/bin/chmod +x /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd
