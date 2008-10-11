@@ -174,6 +174,8 @@ int rioInput[MAX_DIO_MODULES];
 int rioOutput[MAX_DIO_MODULES];
 int rioInput1[MAX_DIO_MODULES];
 int rioOutput1[MAX_DIO_MODULES];
+unsigned int CDO32Input[MAX_DIO_MODULES];
+unsigned int CDO32Output[MAX_DIO_MODULES];
 int clock16K = 0;
 double cycle_gps_time = 0.; // Time at which ADCs triggered
 double cycle_gps_event_time = 0.; // Time at which ADCs triggered
@@ -438,7 +440,6 @@ void *fe_start(void *arg)
 
   pLocalEpics->epicsOutput.diagWord = 0;
   pLocalEpics->epicsOutput.timeDiag = 0;
-  printf("Waiting for EPICS DONE\n");
 
 
 #ifdef PNM
@@ -540,6 +541,23 @@ void *fe_start(void *arg)
     return(0);
   }
 #endif
+	//Read Dio card initial values
+     for(kk=0;kk<cdsPciModules.doCount;kk++)
+     {
+	ii = cdsPciModules.doInstance[kk];
+	if(cdsPciModules.doType[kk] == ACS_8DIO)
+	{
+  	  rioInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xffff;
+	}
+	if(cdsPciModules.doType[kk] == ACS_16DIO)
+	{
+  	  rioInput1[ii] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
+	}
+	if(cdsPciModules.doType[kk] == CON_32DO)
+	{
+  	  CDO32Input[ii] = readCDO32l(&cdsPciModules, kk);
+	}
+     }
 
   // Clear the startup sync counter
   firstTime = 0;
@@ -573,7 +591,11 @@ void *fe_start(void *arg)
         pDacData = (unsigned int *) cdsPciModules.pci_dac[jj];
 
  	// Preload DAC values
-        for (ii = 0; ii < (OVERSAMPLE_TIMES * 16); ii++) {
+#ifdef DAC_OVER2
+        for(ii = 0; ii < (OVERSAMPLE_TIMES * 32); ii++) {
+#else
+        for(ii = 0; ii < (OVERSAMPLE_TIMES * 16); ii++) {
+#endif
  	    *pDacData = 0; // (unsigned int) 10000; // for testing with the scope
 	    pDacData ++;
         }
@@ -586,7 +608,6 @@ void *fe_start(void *arg)
 #endif
    // See if GPS card present
    cycle_gps_time = getGpsTime(&cycle_gps_ns);
-   // cycle_gps_time = 0.0;
    if (cycle_gps_time != 0.0) {
    	unsigned int usec;
 	// Enable external event GPS time capture
@@ -630,6 +651,9 @@ void *fe_start(void *arg)
   if (!run_on_timer) {
     // Trigger the ADC to start running
     gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
+#ifdef SERVO128K
+    gsaDacTrigger(cdsPciModules.dacCount);
+#endif
 #ifdef SERVO64K
     gsaDacTrigger(cdsPciModules.dacCount);
 #endif
@@ -647,14 +671,16 @@ void *fe_start(void *arg)
   }
 
   printf("Triggered the ADC\n");
-#ifndef ISI_CODE
+#ifdef OMC_CODE
   cdsPciModules.gps = 0;
 #endif
+  cdsPciModules.gps = 0;
 
   // Total number of various binary I/O modules
   unsigned int total_bio_boards = cdsPciModules.dioCount
 			+ cdsPciModules.iiroDioCount
-			+ cdsPciModules.iiroDio1Count;
+			+ cdsPciModules.iiroDio1Count
+			+ cdsPciModules.cDo32lCount;
   // 0 to total_bio_boards*2 counter
   int cur_bio_card = 0; // Current binary I/O module we read or write
 
@@ -875,28 +901,8 @@ void *fe_start(void *arg)
 	  }
 	}
 
-
 	// Assign chan 32 to onePps 
 	onePps = dWord[0][31];
-
-#ifndef OM1_CODE
-	// Read Dio cards
-  	for(kk=0;kk<cdsPciModules.dioCount;kk++) {
-		if (kk == cur_bio_card) {
-  		  dioInput[kk] = readDio(&cdsPciModules, kk) & 0xff;
-		}
-	}
-  	for(kk=0;kk<cdsPciModules.iiroDioCount;kk++) {
-		if ((cdsPciModules.dioCount + kk) == cur_bio_card) {
-  		  rioInput[kk] = readIiroDio(&cdsPciModules, kk) & 0xff;
-		}
-	}
-  	for(kk=0;kk<cdsPciModules.iiroDio1Count;kk++) {
-		if ((cdsPciModules.dioCount + cdsPciModules.iiroDioCount + kk) == cur_bio_card) {
-  		  rioInput1[kk] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
-		}
-	}
-#endif
 
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
@@ -973,7 +979,11 @@ void *fe_start(void *arg)
 	   // Check Dac output overflow and write to DMA buffer
 	   pDacData = (unsigned int *)cdsPciModules.pci_dac[jj];
 #ifdef OVERSAMPLE_DAC
+#ifdef DAC_OVER2
+	   for (kk=0; kk < (OVERSAMPLE_TIMES*2); kk++) {
+#else
 	   for (kk=0; kk < OVERSAMPLE_TIMES; kk++) {
+#endif
 #endif
 		int limit = 32000;
 		int offset = 0; //0x8000;
@@ -993,8 +1003,13 @@ void *fe_start(void *arg)
 #ifdef OVERSAMPLE_DAC
 			if (dacOutUsed[jj][ii]) {
 			  double dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
+#ifdef DAC_OVER2
+		 	  dacOut[jj][ii] = iir_filter(dac_in,&feCoeff4x,2,&dDacHistory[ii+jj*16][0]);
+			  dacOut[jj][ii] *= (OVERSAMPLE_TIMES * 2);
+#else
 		 	  dacOut[jj][ii] = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
-			   dacOut[jj][ii] *= OVERSAMPLE_TIMES;
+			  dacOut[jj][ii] *= OVERSAMPLE_TIMES;
+#endif
 			}
 #endif
 			if(dacOut[jj][ii] > limit) 
@@ -1027,27 +1042,31 @@ void *fe_start(void *arg)
 	}
 	}
 
-	// Write Dio cards
-#ifndef OM1_CODE
-  	for(kk=0;kk<cdsPciModules.dioCount;kk++) {
-		if (total_bio_boards + kk == cur_bio_card) {
-  		  writeDio(&cdsPciModules, kk, dioOutput[kk]);
+	// Write/Read Dio cards
+	for(kk=0;kk<cdsPciModules.doCount;kk++)
+	{
+		ii = cdsPciModules.doInstance[kk];
+		if(cdsPciModules.doType[kk] == ACS_8DIO)
+		{
+			if (rioInput[ii] != rioOutput[ii]) {
+			  writeIiroDio(&cdsPciModules, kk, rioOutput[ii]);
+			  rioInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
+			}
+		}
+		if(cdsPciModules.doType[kk] == ACS_16DIO)
+		{
+			if (rioInput1[ii] != rioOutput1[ii]) {
+			  writeIiroDio1(&cdsPciModules, kk, rioOutput1[ii]);
+			  rioInput1[ii] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
+			}
+		}
+		if(cdsPciModules.doType[kk] == CON_32DO)
+		{
+			if (CDO32Input[ii] != CDO32Output[ii]) {
+			  CDO32Input[ii] = writeCDO32l(&cdsPciModules, kk, CDO32Output[ii]);
+			}
 		}
 	}
-  	for(kk=0;kk<cdsPciModules.iiroDioCount;kk++) {
-		if (total_bio_boards + cdsPciModules.dioCount + kk == cur_bio_card) {
-  		  writeIiroDio(&cdsPciModules, kk, rioOutput[kk]);
- 		}
-	}
-  	for(kk=0;kk<cdsPciModules.iiroDio1Count;kk++) {
-		if (total_bio_boards + cdsPciModules.dioCount + cdsPciModules.iiroDioCount + kk == cur_bio_card) {
-  		  writeIiroDio1(&cdsPciModules, kk, rioOutput1[kk]);
-		}
-	}
-	cur_bio_card++;
-	if (total_bio_boards) cur_bio_card %= total_bio_boards * 2;
-	else cur_bio_card = 0;
-#endif
 
 #ifndef NO_DAQ
 	// Write DAQ and GDS values once we are synched to 1pps
@@ -1172,6 +1191,22 @@ void *fe_start(void *arg)
 	  }
   	  if((pLocalEpics->epicsInput.overflowReset) || (overflowAcc > 0x1000000))
 	  {
+
+#ifdef ROLLING_OVERFLOWS
+                if (pLocalEpics->epicsInput.overflowReset) {
+                   for (ii = 0; ii < 16; ii++) {
+                      for (jj = 0; jj < cdsPciModules.adcCount; jj++) {
+                         overflowAdc[jj][ii] = 0;
+                         overflowAdc[jj][ii + 16] = 0;
+                      }
+
+                      for (jj = 0; jj < cdsPciModules.dacCount; jj++) {
+                         overflowDac[jj][ii] = 0;
+                      }
+                   }
+                }
+#endif
+
 		pLocalEpics->epicsInput.overflowReset = 0;
 		pLocalEpics->epicsOutput.ovAccum = 0;
 		overflowAcc = 0;
@@ -1185,7 +1220,15 @@ void *fe_start(void *arg)
 	    for(ii=0;ii<32;ii++)
 	    {
 		pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
+
+#ifdef ROLLING_OVERFLOWS
+                if (overflowAdc[jj][ii] > 0x1000000) {
+		   overflowAdc[jj][ii] = 0;
+                }
+#else
 		overflowAdc[jj][ii] = 0;
+#endif
+
 	    }
 	  }
 	  for(jj=0;jj<cdsPciModules.dacCount;jj++)
@@ -1193,7 +1236,15 @@ void *fe_start(void *arg)
 	    for(ii=0;ii<16;ii++)
 	    {
 		pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
+
+#ifdef ROLLING_OVERFLOWS
+                if (overflowDac[jj][ii] > 0x1000000) {
+		   overflowDac[jj][ii] = 0;
+                }
+#else
 		overflowDac[jj][ii] = 0;
+#endif
+
 	    }
 	  }
         }
@@ -1372,6 +1423,9 @@ int main(int argc, char **argv)
 	printf("%d IIRO-8 Isolated DIO cards found\n",cdsPciModules.iiroDioCount);
         printf("***************************************************************************\n");
 	printf("%d IIRO-16 Isolated DIO cards found\n",cdsPciModules.iiroDio1Count);
+        printf("***************************************************************************\n");
+	printf("%d Contec 32ch PCIe DO cards found\n",cdsPciModules.cDo32lCount);
+	printf("%d DO cards found\n",cdsPciModules.doCount);
         printf("***************************************************************************\n");
 	printf("%d RFM cards found\n",cdsPciModules.rfmCount);
 	for(ii=0;ii<cdsPciModules.rfmCount;ii++)
