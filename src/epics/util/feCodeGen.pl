@@ -2099,7 +2099,7 @@ print OUTM "CFLAGS += -DRESERVE_CPU3\n";
 print OUTM "CFLAGS += -D_ADVANCED_LIGO=1\n";
 print OUTM "CFLAGS += -g\n";
 if ($adcOver) {
-  print OUTM "CFLAGS += -DROLLING_OVERFLOW\n";
+  print OUTM "CFLAGS += -DROLLING_OVERFLOWS\n";
 }
 if ($no_sync) {
   print OUTM "#Comment out to enable 1PPS synchronization\n";
