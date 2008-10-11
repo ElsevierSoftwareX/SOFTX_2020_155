@@ -14,7 +14,7 @@ $shmem_daq = 0; # Do not use shared memory DAQ connection
 $no_sync = 0; # Sync up to 1PPS by default
 $no_daq = 0; # Enable DAQ by default
 $gdsNodeId = 1;
-$dacOver = 0;
+$adcOver = 0;
 $ifoid = 0; # Default ifoid for the DAQ
 $nodeid = 0; # Default GDS node id for awgtpman
 $dac_internal_clocking = 0; # Default is DAC external clocking
@@ -2098,8 +2098,8 @@ print OUTM "CFLAGS += -DRESERVE_CPU3\n";
 }
 print OUTM "CFLAGS += -D_ADVANCED_LIGO=1\n";
 print OUTM "CFLAGS += -g\n";
-if ($dacOver) {
-  print OUTM "CFLAGS += -DDAC_OVER2\n";
+if ($adcOver) {
+  print OUTM "CFLAGS += -DROLLING_OVERFLOW\n";
 }
 if ($no_sync) {
   print OUTM "#Comment out to enable 1PPS synchronization\n";
