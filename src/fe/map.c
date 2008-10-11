@@ -290,8 +290,8 @@ unsigned int readIiroDio1(CDS_HARDWARE *pHardware, int modNum)
 {
   unsigned int v, v1;
   v = inb(pHardware->pci_do[modNum] + IIRO_DIO_OUTPUT);
-  //v1 = inb(pHardware->pci_iiro_dio1[modNum] + 4 + IIRO_DIO_OUTPUT);
-  //return v | (v1 << 8);
+  v1 = inb(pHardware->pci_do[modNum] + 4 + IIRO_DIO_OUTPUT);
+  return v | (v1 << 8);
 return (v);
 }
 
