@@ -182,8 +182,8 @@ install-screens-% :: src/epics/simLink/%.mdl
 	/bin/mkdir -p /cvs/cds/$$site/medm/$${lower_ifo}/archive;\
 	if test -e /cvs/cds/$$site/medm/$${lower_ifo}/$${system}; then /bin/mv -f /cvs/cds/$$site/medm/$${lower_ifo}/$${system} /cvs/cds/$$site/medm/$${lower_ifo}/archive/$${system}_$${cur_date} || exit 1; fi;\
 	/bin/cp -pr build/$${system}epics/medm /cvs/cds/$$site/medm/$${lower_ifo}/$${system};\
-	for i in `ls /cvs/cds/$$site/medm/$${lower_ifo}/archive/$${system}_$${cur_date}`; do \
-          if test ! -s /cvs/cds/$$site/medm/$${lower_ifo}/$${system}/$$i; then  cp /cvs/cds/$$site/medm/$${lower_ifo}/archive/$${system}_$${cur_date}/$$i  /cvs/cds/$$site/medm/$${lower_ifo}/$${system};  fi;\
+	for i in `ls -A /cvs/cds/$$site/medm/$${lower_ifo}/archive/$${system}_$${cur_date}`; do \
+          if test ! -s /cvs/cds/$$site/medm/$${lower_ifo}/$${system}/$$i; then  cp -a /cvs/cds/$$site/medm/$${lower_ifo}/archive/$${system}_$${cur_date}/$$i  /cvs/cds/$$site/medm/$${lower_ifo}/$${system};  fi;\
         done
 
 
