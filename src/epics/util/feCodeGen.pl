@@ -2456,7 +2456,7 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 		$cur_subsys_num += 1;
 	}
 	if ($partType[$cur_part_num] =~ /Matrix$/) {
-		my $outcnt = $partOutCnt[$cur_part_num];
+		my $outcnt = $::matOuts[$cur_part_num]; #$partOutCnt[$cur_part_num];
 		my $incnt = $partInCnt[$cur_part_num];
 		if ($partType[$cur_part_num] eq "MuxMatrix") {
 			# MuxMatrix uses mux and demux parts 
@@ -2476,7 +2476,24 @@ sub commify_series {
                 join("$sepchar", @_[0 .. $#_]);
 }
 		$collabels = commify_series(@{$partInput[$cur_part_num]});
-		$rowlabels = commify_series(@{$partOutput[$cur_part_num]});
+
+		# This doesn't work so well if output has branches
+		#$rowlabels = commify_series(@{$partOutput[$cur_part_num]});
+		$rowlabels = "";
+
+        	for (0 .. $::partOutCnt[$cur_part_num]-1) {
+           	  $::portUsed[$_] = 0;
+        	}
+        
+        	for (0 .. $::partOutCnt[$cur_part_num]-1) {
+          	  my $fromPort = $::partOutputPortUsed[$cur_part_num][$_];
+          	  if ($::portUsed[$fromPort] == 0) {
+            	    $::portUsed[$fromPort] = 1; 
+		    if ($rowlabels) { $rowlabels .= ",";}
+		    $rowlabels .= $partOutput[$cur_part_num][$_];
+          	  }
+        	}
+
 
 		if (is_top_name($basename)) {
 
