@@ -180,11 +180,8 @@ install-screens-% :: src/epics/simLink/%.mdl
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	echo Installing Epics screens;\
 	/bin/mkdir -p /cvs/cds/$$site/medm/$${lower_ifo}/archive;\
-	if test -e /cvs/cds/$$site/medm/$${lower_ifo}/$${system}; then /bin/mv -f /cvs/cds/$$site/medm/$${lower_ifo}/$${system} /cvs/cds/$$site/medm/$${lower_ifo}/archive/$${system}_$${cur_date} || exit 1; fi;\
-	/bin/cp -pr build/$${system}epics/medm /cvs/cds/$$site/medm/$${lower_ifo}/$${system};\
-	for i in `ls -A /cvs/cds/$$site/medm/$${lower_ifo}/archive/$${system}_$${cur_date}`; do \
-          if test ! -s /cvs/cds/$$site/medm/$${lower_ifo}/$${system}/$$i; then  cp -a /cvs/cds/$$site/medm/$${lower_ifo}/archive/$${system}_$${cur_date}/$$i  /cvs/cds/$$site/medm/$${lower_ifo}/$${system};  fi;\
-        done
+	if test -e /cvs/cds/$$site/medm/$${lower_ifo}/$${system}; then /bin/cp -a /cvs/cds/$$site/medm/$${lower_ifo}/$${system} /cvs/cds/$$site/medm/$${lower_ifo}/archive/$${system}_$${cur_date} || exit 1; fi;\
+	(cd build/$${system}epics/medm; ls | xargs cp -r -t /cvs/cds/$$site/medm/$${lower_ifo}/$${system};)
 
 
 # Lighter installation rule, do not reinstall screens and config files
