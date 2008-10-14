@@ -3,8 +3,8 @@ use Exporter;
 @ISA = ('Exporter');
 
 sub partType {
-	if (length $::xpartName[$::partCnt] > 21) {
-		die "Filter name \"", $::xpartName[$::partCnt], "\" too long (max 21 charachters)";
+	if (length $::xpartName[$::partCnt] > 24) {
+		die "Filter name \"", $::xpartName[$::partCnt], "\" too long (max 24 charachters)";
 	}
         print ::OUTH "#define $::xpartName[$::partCnt] \t $::filtCnt\n";
         print ::EPICS "$::xpartName[$::partCnt]\n";
