@@ -1103,6 +1103,7 @@ foreach (@tp_data) {
  }
 }
 my $cnt = 0;
+my $daq_name = "DAQ";
 # Print chnnum, datarate, 
 foreach (sort @section_names) {
         if ($cnt < 2 && m/_OUT$/) {
@@ -1111,7 +1112,8 @@ foreach (sort @section_names) {
         } else {
                 $comment = "#";
         }
-        print OUTG "${comment}[${_}_${def_datarate}]\n";
+#        print OUTG "${comment}[${_}_${def_datarate}]\n";
+        print OUTG "${comment}[${_}_${daq_name}]\n";
         print OUTG  "${comment}acquire=0\n";
         foreach $sec (keys %{$sections{$_}}) {
           if ($sec eq "chnnum" || $sec eq "datarate" || $sec eq "datatype") {
