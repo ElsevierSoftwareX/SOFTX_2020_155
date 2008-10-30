@@ -204,6 +204,9 @@ $subSysName[0] = "";	# Subsystem names
 $subSysPartStart[0] = 0;
 $subSysPartStop[0] = 0;
 
+# IPC output code
+$ipcOutputCode = "";
+
 # Remove leading subsystems name
 sub remove_subsystem {
         my ($s) = @_;
@@ -2011,6 +2014,10 @@ print OUT "\n";
 }
 }
 
+print OUT "    // All IPC outputs\n";
+print OUT "    if (_ipc_shm != 0) {\n";
+print OUT "$ipcOutputCode";
+print OUT "    }\n";
 print OUT "  }\n";
 print OUT "}\n\n";
 print OUTH "typedef struct CDS_EPICS {\n";
