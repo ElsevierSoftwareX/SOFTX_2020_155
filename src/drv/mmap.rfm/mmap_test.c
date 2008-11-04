@@ -18,7 +18,7 @@
    - load the driver
      'insmod mmap_mod.o'
    - find the major number assigned to the driver
-     'grep mmapdrv /proc/devices'
+     'grep mmap /proc/devices'
    - and create the special file (assuming major number 254)
      'mknod node c 254 0'
 */
@@ -46,9 +46,12 @@ int main(void)
           exit(-1);
   }
 
-  printf("0x%x 0x%x\n", vadr[0x10], vadr[0x11]);
-  vadr[0x11] = 0xdeadbeef;
-  printf("0x%x 0x%x\n", vadr[0x10], vadr[0x11]);
+  unsigned char *a = (unsigned char *)vadr + 0x12200cc;
+  float f = ((float *)a)[0];
+  printf("%f\n", f);
+  //printf("0x%x 0x%x\n", vadr[0x10], vadr[0x11]);
+  //vadr[0x11] = 0xdeadbeef;
+  //printf("0x%x 0x%x\n", vadr[0x10], vadr[0x11]);
 #if 0
   if ((vadr[0]!=0xaffe0000) || (vadr[1]!=0xbeef0000)
       || (vadr[len/sizeof(int)-2]!=(0xaffe0000+len/sizeof(int)-2))
