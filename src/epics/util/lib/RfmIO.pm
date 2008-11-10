@@ -54,7 +54,7 @@ sub fromExp {
 	my $card_num = ($rfmAddress - $rfmAddress % 0x4000000) / 0x4000000;
 	$rfmAddress = $rfmAddress % 0x4000000;
 	my $rfmAddressString = sprintf("0x%x", $rfmAddress);
-        return "cdsPciModules.pci_rfm[0]? *((float *)(((void *)cdsPciModules.pci_rfm[$card_num]) + $rfmAddressString)) : 0.0";
+        return "cdsPciModules.pci_rfm[0]? *((double *)(((void *)cdsPciModules.pci_rfm[$card_num]) + $rfmAddressString)) : 0.0";
 }
 
 # Return front end code
@@ -81,7 +81,7 @@ sub frontEndCode {
         if (($fromType ne "GROUND") && ($::partInput[$i][0] ne "NC")) {
 		return "if (cdsPciModules.pci_rfm[$card_num] != 0) {\n"
         		. "  // RFM output\n"
-                	. "  *((float *)(((char *)cdsPciModules.pci_rfm[$card_num]) + $rfmAddressString)) = $::fromExp[0];\n"
+                	. "  *((double *)(((char *)cdsPciModules.pci_rfm[$card_num]) + $rfmAddressString)) = $::fromExp[0];\n"
 			. "}\n";
         }
         return "";
