@@ -29,7 +29,7 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
-        print ::OUT "double \L$::xpartName[$i]\[$::partOutCnt[$i]\];\n";
+        print ::OUT "double \L$::xpartName[$i]\[9\];\n";
         print ::OUT "float $::xpartName[$i]\_CALC;\n";
 }
 
