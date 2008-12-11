@@ -249,7 +249,7 @@ int mapDio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 unsigned int readIiroDio(CDS_HARDWARE *pHardware, int modNum)
 {
   unsigned int status;
-	status = inb(pHardware->pci_do[modNum] + IIRO_DIO_INPUT);
+	status = inb(pHardware->pci_do[modNum] + IIRO_DIO_OUTPUT);
 	return(status);
 }
 
