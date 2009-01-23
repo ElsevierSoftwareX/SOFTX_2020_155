@@ -108,7 +108,7 @@ int myriNetInit(int fbId)
   // Initialize interface
   gm_init();
 
-  gm_strncpy (receiver_nodename[0], "fb", sizeof (receiver_nodename[0]) - 1);
+  gm_strncpy (receiver_nodename[0], "fb0", sizeof (receiver_nodename[0]) - 1);
   gm_strncpy (receiver_nodename[1], "fb1", sizeof (receiver_nodename[1]) - 1);
 
   /* Try upto four GM ports */
