@@ -1055,10 +1055,10 @@ void *fe_start(void *arg)
 		}
 		if(cdsPciModules.doType[kk] == ACS_16DIO)
 		{
-			if (rioInput1[ii] != rioOutput1[ii]) {
+//			if (rioInput1[ii] != rioOutput1[ii]) {
 			  writeIiroDio1(&cdsPciModules, kk, rioOutput1[ii]);
 			  rioInput1[ii] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
-			}
+//			}
 		}
 		if(cdsPciModules.doType[kk] == CON_32DO)
 		{
