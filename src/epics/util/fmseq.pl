@@ -81,10 +81,11 @@ $names2 = "%%static  fmSubSysMap  fmmap0 [MAX_MODULES] = { \n%%";
 
 $do_epics_input = 0;
 
-# Determine whether passed name need to become a top name
+# Determine whether passed name needs to become a top name
 # i.e. whether the system/subsystem parts need to excluded 
 sub is_top_name {
    ($_) =  @_;
+   if (/^GDS_MON/) { return 0; } # Do not count testpoint channels
    @d = split(/_/);
    $d = shift @d;
    #print "$d @top_names\n";
