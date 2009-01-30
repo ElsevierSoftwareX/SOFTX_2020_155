@@ -85,20 +85,11 @@ install-% :: src/epics/simLink/%.mdl
 	echo /cvs/cds/$$site/scripts/kill$${system} >> /cvs/cds/$$site/scripts/start$${system};\
 	echo sleep 5 >> /cvs/cds/$$site/scripts/start$${system};\
 	echo 'sudo killall ' $${system}epics $${system}fe.rtl >> /cvs/cds/$$site/scripts/kill$${system};\
-	echo 'res=$$(ps h -C awgtpman)' >> /cvs/cds/$$site/scripts/kill$${system};\
-	echo 'index1=1' >> /cvs/cds/$$site/scripts/kill$${system};\
-	echo 'index7=7' >> /cvs/cds/$$site/scripts/kill$${system};\
-	echo 'more=xxx' >> /cvs/cds/$$site/scripts/kill$${system};\
-	echo 'while [ "$$more" != "" ]; do' >> /cvs/cds/$$site/scripts/kill$${system};\
-	echo 'num=$$(echo $${res} | awk '"'"'{print $$'"'"'$$index1'"'"'}'"'"')' >> /cvs/cds/$$site/scripts/kill$${system};\
-	echo 'id=$$(echo $${res} | awk '"'"'{print $$'"'"'$$index7'"'"'}'"'"')' >> /cvs/cds/$$site/scripts/kill$${system};\
-	echo 'if [ "$$id" = "'$${system}'" ]; then' >> /cvs/cds/$$site/scripts/kill$${system};\
+	echo 'res=`ps h -C awgtpman | grep ' $${system} '`' >> /cvs/cds/$$site/scripts/kill$${system};\
+	echo 'if [ "x$${res}" != x ]; then' >> /cvs/cds/$$site/scripts/kill$${system};\
+	echo 'num=$$(echo $${res} | awk '"'"'{print $$1}'"'"')' >> /cvs/cds/$$site/scripts/kill$${system};\
 	echo 'sudo kill $$num' >> /cvs/cds/$$site/scripts/kill$${system};\
 	echo 'fi' >> /cvs/cds/$$site/scripts/kill$${system};\
-	echo 'index1=$$(( $$index1 + 7 ))' >> /cvs/cds/$$site/scripts/kill$${system};\
-	echo 'index7=$$(( $$index7 + 7 ))' >> /cvs/cds/$$site/scripts/kill$${system};\
-	echo 'more=$$(echo $${res} | awk '"'"'{print $$'"'"'$$index1'"'"'}'"'"')' >> /cvs/cds/$$site/scripts/kill$${system};\
-	echo 'done' >> /cvs/cds/$$site/scripts/kill$${system};\
 	echo '(cd /cvs/cds/'$$site'/target/'$${lower_ifo}$${system}epics' && ./startup'$${ifo}')' >> /cvs/cds/$$site/scripts/start$${system};\
 	echo /cvs/cds/$$site/target/$${lower_ifo}$${system}/startup.cmd >> /cvs/cds/$$site/scripts/start$${system};\
 	echo '(cd /cvs/cds/'$$site'/target/gds && ./startup_'$${system}'.cmd)' >> /cvs/cds/$$site/scripts/start$${system};\
