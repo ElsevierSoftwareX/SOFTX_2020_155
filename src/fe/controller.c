@@ -172,8 +172,10 @@ int dioInput[MAX_DIO_MODULES];
 int dioOutput[MAX_DIO_MODULES];
 int rioInput[MAX_DIO_MODULES];
 int rioOutput[MAX_DIO_MODULES];
+int rioOutputHold[MAX_DIO_MODULES];
 int rioInput1[MAX_DIO_MODULES];
 int rioOutput1[MAX_DIO_MODULES];
+int rioOutputHold1[MAX_DIO_MODULES];
 unsigned int CDO32Input[MAX_DIO_MODULES];
 unsigned int CDO32Output[MAX_DIO_MODULES];
 int clock16K = 0;
@@ -547,7 +549,7 @@ void *fe_start(void *arg)
 	ii = cdsPciModules.doInstance[kk];
 	if(cdsPciModules.doType[kk] == ACS_8DIO)
 	{
-  	  rioInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xffff;
+  	  rioInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
 	}
 	if(cdsPciModules.doType[kk] == ACS_16DIO)
 	{
@@ -771,7 +773,8 @@ void *fe_start(void *arg)
 		}
 		if (kk == 10000000) {
 			stop_working_threads = 1;
-			printf("Adc %d timeout 1\n", jj);
+        rdtscl(cpuClock[5]);
+			printf("Adc %d timeout 1 %d\n", jj,((cpuClock[5] - cpuClock[2])/CPURATE));
 		}
 	  }
 	}
@@ -1042,31 +1045,46 @@ void *fe_start(void *arg)
 	}
 	}
 
-	// Write/Read Dio cards
-	for(kk=0;kk<cdsPciModules.doCount;kk++)
+ // Read Dio cards once per second
+	if((firstTime >= 200))
 	{
-		ii = cdsPciModules.doInstance[kk];
-		if(cdsPciModules.doType[kk] == ACS_8DIO)
-		{
-			if (rioInput[ii] != rioOutput[ii]) {
-			  writeIiroDio(&cdsPciModules, kk, rioOutput[ii]);
-			  rioInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
-			}
-		}
-		if(cdsPciModules.doType[kk] == ACS_16DIO)
-		{
-//			if (rioInput1[ii] != rioOutput1[ii]) {
-			  writeIiroDio1(&cdsPciModules, kk, rioOutput1[ii]);
-			  rioInput1[ii] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
-//			}
-		}
-		if(cdsPciModules.doType[kk] == CON_32DO)
-		{
-			if (CDO32Input[ii] != CDO32Output[ii]) {
-			  CDO32Input[ii] = writeCDO32l(&cdsPciModules, kk, CDO32Output[ii]);
-			}
-		}
+        if(clock16K < cdsPciModules.doCount)
+        {
+                kk = clock16K;
+                ii = cdsPciModules.doInstance[kk];
+                if(cdsPciModules.doType[kk] == ACS_8DIO)
+                {
+                        rioInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
+                }
+                if(cdsPciModules.doType[kk] == ACS_16DIO)
+                {
+                        rioInput1[ii] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
+                }
+        }
+        // Write Dio cards on change
+        for(kk=0;kk < cdsPciModules.doCount;kk++)
+        {
+                ii = cdsPciModules.doInstance[kk];
+                if((cdsPciModules.doType[kk] == ACS_8DIO) && (rioOutput[ii] != rioOutputHold[ii]))
+                {
+                        writeIiroDio(&cdsPciModules, kk, rioOutput[ii]);
+                        rioOutputHold[ii] = rioOutput[ii];
+                }
+                if((cdsPciModules.doType[kk] == ACS_16DIO) && (rioOutput1[ii] != rioOutputHold1[ii]))
+                {
+                        writeIiroDio(&cdsPciModules, kk, rioOutput[ii]);
+                        rioOutputHold1[ii] = rioOutput1[ii];
+                        // printf("write relay mod\n");
+                }
+                if(cdsPciModules.doType[kk] == CON_32DO)
+                {
+                        if (CDO32Input[ii] != CDO32Output[ii]) {
+                          CDO32Input[ii] = writeCDO32l(&cdsPciModules, kk, CDO32Output[ii]);
+                        }
+                }
+        }
 	}
+
 
 #ifndef NO_DAQ
 	// Write DAQ and GDS values once we are synched to 1pps
