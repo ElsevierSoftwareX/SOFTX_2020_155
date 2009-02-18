@@ -1059,6 +1059,7 @@ void *fe_start(void *arg)
                 if(cdsPciModules.doType[kk] == ACS_16DIO)
                 {
                         rioInput1[ii] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
+// printf("read 16bit dio %d %d\n",kk,rioInput1[ii]);
                 }
         }
         // Write Dio cards on change
@@ -1072,9 +1073,9 @@ void *fe_start(void *arg)
                 }
                 if((cdsPciModules.doType[kk] == ACS_16DIO) && (rioOutput1[ii] != rioOutputHold1[ii]))
                 {
-                        writeIiroDio(&cdsPciModules, kk, rioOutput[ii]);
+                        writeIiroDio1(&cdsPciModules, kk, rioOutput1[ii]);
                         rioOutputHold1[ii] = rioOutput1[ii];
-                        // printf("write relay mod\n");
+                        // printf("write relay mod %d = %d\n",kk,rioOutput1[ii]);
                 }
                 if(cdsPciModules.doType[kk] == CON_32DO)
                 {
