@@ -56,7 +56,7 @@ sub frontEndCode {
         $calcExp .= $::fromExp[0];
         $calcExp .= ";\n";
         $calcExp .= "if(\L$::xpartName[$i]\ \> 2000\) \L$::xpartName[$i] = 2000;\n";
-        $calcExp .= "if(\L$::xpartName[$i]\ \< -2000\) \L$::xpartName[$i] = 2000;\n";
+        $calcExp .= "if(\L$::xpartName[$i]\ \< -2000\) \L$::xpartName[$i] = -2000;\n";
         $calcExp .= "\L$::xpartName[$i] = \L$::xpartName[$i] * \L$::xpartName[$i];\n";
         $calcExp .= "\L$::xpartName[$i]\_avg = \L$::xpartName[$i] * \.00005 + ";
         $calcExp .= "\L$::xpartName[$i]\_avg * 0\.99995;\n";
