@@ -383,6 +383,8 @@ void *fe_start(void *arg)
   int timeDiag = 0;
   int epicsCycle = 0;
   int system = 0;
+  double dac_in =  0.0;
+  int dac_out = 0;
 
 
 // Do all of the initalization
@@ -982,11 +984,7 @@ void *fe_start(void *arg)
 	   // Check Dac output overflow and write to DMA buffer
 	   pDacData = (unsigned int *)cdsPciModules.pci_dac[jj];
 #ifdef OVERSAMPLE_DAC
-#ifdef DAC_OVER2
-	   for (kk=0; kk < (OVERSAMPLE_TIMES*2); kk++) {
-#else
 	   for (kk=0; kk < OVERSAMPLE_TIMES; kk++) {
-#endif
 #endif
 		int limit = 32000;
 		int offset = 0; //0x8000;
@@ -1005,37 +1003,40 @@ void *fe_start(void *arg)
 		{
 #ifdef OVERSAMPLE_DAC
 			if (dacOutUsed[jj][ii]) {
-			  double dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
-#ifdef DAC_OVER2
-		 	  dacOut[jj][ii] = iir_filter(dac_in,&feCoeff4x,2,&dDacHistory[ii+jj*16][0]);
-			  dacOut[jj][ii] *= (OVERSAMPLE_TIMES * 2);
+#ifdef NO_ZERO_PAD
+			  dac_in =  (double)dacOut[jj][ii];
+		 	  dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
 #else
-		 	  dacOut[jj][ii] = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
-			  dacOut[jj][ii] *= OVERSAMPLE_TIMES;
+			  dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
+		 	  dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
+			  dac_in *= OVERSAMPLE_TIMES;
 #endif
 			}
+			else dac_in = 0.0;
+			dac_out = (dac_in + 0.5);
+#else
+			dac_out = dacOut[jj][ii];
 #endif
-			if(dacOut[jj][ii] > limit) 
+			if(dac_out > limit) 
 			{
-				dacOut[jj][ii] = limit;
+				dac_out = limit;
 				overflowDac[jj][ii] ++;
 				// pLocalEpics->epicsOutput.ovAccum ++;
 				overflowAcc ++;
 				diagWord |= 0x1000 *  (jj+1);
 			}
-			if(dacOut[jj][ii] < -limit) 
+			if(dac_out < -limit) 
 			{
-				dacOut[jj][ii] = -limit;
+				dac_out = -limit;
 				overflowDac[jj][ii] ++;
 				// pLocalEpics->epicsOutput.ovAccum ++;
 				overflowAcc ++;
 				diagWord |= 0x1000 *  (jj+1);
 			}
-			  int dac_out = dacOut[jj][ii];
-			  dac_out += offset;
+			dac_out += offset;
 			//if (ii == 0) printf("%d\n", dac_out);
-			  *pDacData =  (unsigned int)(dac_out & mask);
-			  pDacData ++;
+			*pDacData =  (unsigned int)(dac_out & mask);
+			pDacData ++;
 		}
 #ifdef OVERSAMPLE_DAC
   	   }
