@@ -39,8 +39,16 @@ CFLAGS += -DNO_RFM_EPICS_RECORD_SUPPORT
 endif
 CFLAGS += -D_POSIX_C_SOURCE=199506L -D_POSIX_THREADS  
 CFLAGS += -DOSITHREAD_USE_DEFAULT_STACK  -D_X86_  -DUNIX  -D_BSD_SOURCE -Dlinux
-CFLAGS += -D_REENTRANT -g  -fPIC 
+CFLAGS += -D_REENTRANT -g -fPIC 
 CFLAGS += -DINLINE=inline
+
+rtai_prefix := $(shell rtai-config --prefix)
+ifneq ($(rtai_prefix),)
+CFLAGS += -DRTAI_BUILD -O2
+CFLAGS += -I/usr/realtime/include
+CFLAGS += -I/usr/src/linux/include
+endif
+
 CXXFLAGS = $(CFLAGS)
 SNCFLAGS += +a
 #SNCFLAGS += -e
