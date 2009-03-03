@@ -8,6 +8,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
+#include <signal.h>
+
+#ifdef RTAI_BUILD
+#include <rtai_shm.h>
+#include <rtai_nam2num.h>
+#endif
+
 
 #ifdef SOLARIS
 #include <rfmApi.h>
@@ -151,6 +159,15 @@ findSharedMemory(char *sys_name)
 	char fname[128];
 	strcpy(sys, sys_name);
 	for(s = sys; *s; s++) *s=tolower(*s);
+
+#ifdef RTAI_BUILD
+    	addr = (unsigned char *)rtai_malloc(nam2num(sys), 0);
+	if (addr == NULL) {
+		printf("rtai_malloc() failed (maybe /dev/rtai_shm is missing)!\n");
+		return 0;
+    	}
+
+#else
 	sprintf(fname, "/rtl_mem_%s", sys);
 
         if ((fd=open(fname, O_RDWR))<0) {
@@ -165,6 +182,7 @@ findSharedMemory(char *sys_name)
                 _exit(-1);
         }
 	printf("mmapped address is 0x%lx\n", (long)addr);
+#endif
         return addr;
 }
 
