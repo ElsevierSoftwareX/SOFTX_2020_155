@@ -8,7 +8,7 @@
 
 MODULE_DESCRIPTION("Create OM1 shared memory");
 MODULE_AUTHOR("Alex Ivanov<aivanov@ligo.caltech.edu>");
-MODULE_LICENSE("Postmodern");
+MODULE_LICENSE("GPL");
 
 #define MMAP_SIZE 1024*1024*64-5000
 int init_modules() { (void)rtai_kmalloc(nam2num("om1"), MMAP_SIZE); return 0; }
