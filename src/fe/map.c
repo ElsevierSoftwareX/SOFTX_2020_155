@@ -593,6 +593,7 @@ int mapFadc(CDS_HARDWARE *pHardware,
 // *****************************************************************************
 // Routine to find and map PCI adc/dac modules
 // *****************************************************************************
+int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev);
 int mapPciModules(CDS_HARDWARE *pCds)
 {
   static struct pci_dev *dacdev;
@@ -818,6 +819,8 @@ int mapPciModules(CDS_HARDWARE *pCds)
   status = 0;
   pCds->vmeBridgeCount = 0;
   pCds->vme[0] = 0;
+
+#ifndef RTAI_BUILD
   // Look for SBS Technologies VME Bridges
   while((dacdev = pci_find_device(SBS_618_VID, SBS_618_TID, dacdev))) {
 		printk("SBS 618 VME Bridge card on bus %x; device %x\n",
@@ -829,6 +832,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		  modCount ++;
 		}
   }
+#endif
 
   dacdev = NULL;
   status = 0;
@@ -1014,6 +1018,7 @@ else {
 }
 #endif
 
+#ifndef RTAI_BUILD
 // *****************************************************************************
 // Initialize SBS Technologies VME Bridge Model 618
 // *****************************************************************************
@@ -1129,6 +1134,7 @@ int mapSbsVmeBridge(CDS_HARDWARE *pHardware, struct pci_dev *sbsdev)
 	pHardware->vmeBridgeCount++;
 	return(0);
 }
+#endif
 
 
 

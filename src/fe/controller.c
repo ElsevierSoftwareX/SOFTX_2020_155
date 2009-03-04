@@ -20,6 +20,12 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
+#ifdef RTAI_BUILD
+#include <rtai.h>
+#include <rtai_sched.h>
+#include <rtai_shm.h>
+#include <rtai_nam2num.h>
+#else
 #include <rtl_time.h>
 #include <fcntl.h>
 #include <pthread.h>
@@ -28,11 +34,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <semaphore.h>
+#include <string.h>
+#endif
 #include <linux/slab.h>
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
 #include "feSelectHeader.h"
-#include <string.h>
 
 #ifndef NUM_SYSTEMS
 #define NUM_SYSTEMS 1
@@ -48,12 +55,23 @@ int daq_fd;			/* File descriptor to share memory file */
 #endif
 
 long daqBuffer;			/* Address for daq dual buffers in daqLib.c	*/
+#ifndef RTAI_BUILD
 sem_t irqsem;			/* Semaphore if in IRQ mode.			*/
+#endif
 CDS_HARDWARE cdsPciModules;	/* Structure of hardware addresses		*/
 volatile int vmeDone = 0;
 volatile int stop_working_threads = 0;
 
+#ifdef RTAI_BUILD
+#define printf printk
+#define STACK_SIZE    40000
+#define TICK_PERIOD   100000
+#define PERIOD_COUNT  1
+
+#else
 #include "msr.h"
+#endif
+
 #include "fm10Gen.h"		/* CDS filter module defs and C code	*/
 #include "feComms.h"		/* Lvea control RFM network defs.	*/
 #include "daqmap.h"		/* DAQ network layout			*/
@@ -137,9 +155,16 @@ int numFb = 0;
 int fbStat[2] = {0,0};
 #endif
 
+#ifdef RTAI_BUILD
+RT_TASK wthread;
+RT_TASK wthread1;
+RT_TASK wthread2;
+
+#else
 rtl_pthread_t wthread;
 rtl_pthread_t wthread1;
 rtl_pthread_t wthread2;
+#endif
 int wfd, ipc_fd;
 
 /* ADC/DAC overflow variables */
@@ -187,6 +212,7 @@ unsigned int   gps_receiver_unlocked = 1; // Lock/unlock flag for GPS time card
 
 double getGpsTime(unsigned int *);
 #include "./feSelectCode.c"
+#include "map.c"
 
 char daqArea[2*DAQ_DCU_SIZE];		/* Space allocation for daqLib buffers	*/
 
@@ -290,6 +316,13 @@ unsigned int intr_handler(unsigned int irq, struct rtl_frame *regs)
 }
 #endif
 
+void writeIiroDio(CDS_HARDWARE *pHardware, int modNum, int data);
+void writeIiroDio1(CDS_HARDWARE *pHardware, int modNum, int data);
+unsigned int writeCDO32l(CDS_HARDWARE *pHardware, int modNum, unsigned int data);
+unsigned int readIiroDio1(CDS_HARDWARE *pHardware, int modNum);
+unsigned int readIiroDio(CDS_HARDWARE *pHardware, int modNum);
+unsigned int readCDO32l(CDS_HARDWARE *pHardware, int modNum);
+int gsaDacTrigger(int dacCount);
 
 static double getGpsTime1(unsigned int *ns, int event_flag) {
   double the_time = 0.0;
@@ -424,11 +457,19 @@ void *fe_start(void *arg)
   pLocalEpics->epicsInput.vmeReset = 0;
 
   // Do not proceed until EPICS has had a BURT restore
+#ifdef RTAI_BUILD
+  printf("Waiting for EPICS BURT");
+#else
   unsigned int ns;
   double time = getGpsTime(&ns);
   printf("Waiting for EPICS BURT at %f and %d ns\n", time, ns);
+#endif
   do{
+#ifdef RTAI_BUILD
+	rt_sleep(nano2count(1000000000));
+#else
 	usleep(1000000);
+#endif
   }while(!pLocalEpics->epicsInput.burtRestore);
   for (system = 0; system < NUM_SYSTEMS; system++)
   {
@@ -492,8 +533,6 @@ void *fe_start(void *arg)
     }
 
   printf("Initialized servo control parameters.\n");
-
-
 
 
 #ifndef NO_DAQ
@@ -618,7 +657,11 @@ void *fe_start(void *arg)
         cdsPciModules.gps[SYMCOM_BC635_CONTROL/4] = 8;
 
 	// Sleep a second and a half
+#ifdef RTAI_BUILD
+	rt_sleep(nano2count(1500000000));
+#else
 	usleep(1500000);
+#endif
 	
 	// Get the 1PPS time stamp
         cycle_gps_event_time = getGpsEventTime(&cycle_gps_event_ns);
@@ -639,6 +682,19 @@ void *fe_start(void *arg)
         printf("Running time %d us\n", usec);
     } else {
         // Pause until this second ends
+#ifdef RTAI_BUILD
+/*
+	:TODO:
+        wait_delay = nano2count(WAIT_DELAY);
+        period     = nano2count(PERIOD);
+        for(msg = 0; msg < MAXDIM; msg++) {
+                a[msg] = b[msg] = 3.141592;
+        }
+        rtai_cli();
+        aim_time  = rt_get_time();
+        sync_time = aim_time + wait_delay;
+*/
+#else
         struct timespec next;
         clock_gettime(CLOCK_REALTIME, &next);
         printf("Start time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
@@ -647,6 +703,7 @@ void *fe_start(void *arg)
         clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
         clock_gettime(CLOCK_REALTIME, &next);
         printf("Running time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
+#endif
     }
 #ifndef NO_SYNC
   }
@@ -694,6 +751,10 @@ void *fe_start(void *arg)
         rdtscl(cpuClock[2]);
   	if (run_on_timer) {
 	  // Pause until next cycle begins
+#ifdef RTAI_BUILD
+	  RTIME now = rt_get_time_ns();
+	  rt_sleep_until(now + 1000000000 / CYCLE_PER_SECOND * clock16K);
+#else
     	  struct timespec next;
     	  clock_gettime(CLOCK_REALTIME, &next);
 	  if (clock16K == 0) {
@@ -703,6 +764,7 @@ void *fe_start(void *arg)
     	    next.tv_nsec = 1000000000 / CYCLE_PER_SECOND * clock16K;
 	  }
           clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
+#endif
 	} else {
 	  // Wait for data ready from first ADC module.
 	  if (cdsPciModules.adcType[0] == GSC_16AISS8AO4
@@ -725,8 +787,9 @@ void *fe_start(void *arg)
 			printf("timeout 0\n");
 		}
 	  }
-
+#ifndef RTAI_BUILD
 	  usleep(0);
+#endif
 	}
 
 #if 0
@@ -1156,7 +1219,9 @@ void *fe_start(void *arg)
 	}
 
 	skipCycle = 0;
+#ifndef RTAI_BUILD
 	usleep(1);
+#endif
 	// Reset all ADC DMA GO bits
   	for(jj=0;jj<cdsPciModules.adcCount;jj++)
   	{
@@ -1279,9 +1344,15 @@ void *fe_start(void *arg)
   return (void *)-1;
 }
 
+#ifdef RTAI_BUILD
+int init_module (void)
+#else
 int main(int argc, char **argv)
+#endif
 {
+#ifndef RTAI_BUILD
         pthread_attr_t attr;
+#endif
  	int status;
 	int ii,jj;
 	char fname[128];
@@ -1289,6 +1360,13 @@ int main(int argc, char **argv)
 	jj = 0;
 	printf("cpu clock %ld\n",cpu_khz);
 
+#ifdef RTAI_BUILD
+	_epics_shm = (unsigned char *)rtai_kmalloc(nam2num(SYSTEM_NAME_STRING_LOWER), 0);
+	if (_epics_shm == 0 ) {
+		printf("mmap failed for epics shared memory area\n");
+                return -1;
+	}
+#else
         /*
          * Create the shared memory area.  By passing a non-zero value
          * for the mode, this means we also create a node in the GPOS.
@@ -1343,6 +1421,7 @@ int main(int argc, char **argv)
                 return -1;
 	  }
         }
+#endif
 #endif
 
 	{
@@ -1486,6 +1565,16 @@ int main(int argc, char **argv)
 #endif
 
 
+#ifdef RTAI_BUILD
+        RTIME tick_period;
+        RTIME now;
+
+	rt_task_init(&wthread, fe_start, 0, STACK_SIZE, 0, 0, 0);
+        tick_period = start_rt_timer(nano2count(TICK_PERIOD));
+        now = rt_get_time();
+        rt_task_make_periodic(&wthread, now + tick_period, tick_period*PERIOD_COUNT);
+
+#else
 
         rtl_pthread_attr_init(&attr);
 #ifdef RESERVE_CPU2
@@ -1561,6 +1650,16 @@ out:
          */
         close(wfd);
 
+#endif
+
         return 0;
 }
 
+#ifdef RTAI_BUILD
+void cleanup_module (void) {
+        stop_rt_timer();
+        rt_busy_sleep(10000000);
+        rt_task_delete(&wthread);
+        rtai_kfree(nam2num(SYSTEM_NAME_STRING_LOWER));
+}
+#endif
