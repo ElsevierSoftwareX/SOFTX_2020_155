@@ -748,6 +748,14 @@ void *fe_start(void *arg)
 			+ cdsPciModules.cDo32lCount;
   // 0 to total_bio_boards*2 counter
   int cur_bio_card = 0; // Current binary I/O module we read or write
+  
+#ifdef RTAI_BUILD
+  //rcu_offline_cpu(1); unknown call...
+  //local_irq_disable();
+//int cpu_down(unsigned int cpu);
+
+  //cpu_down(1); unknown
+#endif
 
   // Enter the coninuous FE control loop  **********************************************************
   while(!vmeDone){
@@ -901,6 +909,8 @@ void *fe_start(void *arg)
 
         vmeDone = stop_working_threads | checkEpicsReset(epicsCycle, pLocalEpics);
 	// usleep(1);
+
+
   	if (!run_on_timer) {
 	  // Wait for completion of DMA of Adc data
   	  for(kk=0;kk<cdsPciModules.adcCount;kk++) {
@@ -1223,7 +1233,9 @@ void *fe_start(void *arg)
 	}
 
 	skipCycle = 0;
-#ifndef RTAI_BUILD
+#ifdef RTAI_BUILD
+	//rt_sleep(nano2count(2000));
+#else
 	usleep(1);
 #endif
 	// Reset all ADC DMA GO bits
@@ -1675,5 +1687,6 @@ void cleanup_module (void) {
         rt_busy_sleep(10000000);
         rt_task_delete(&wthread);
         rtai_kfree(nam2num(SYSTEM_NAME_STRING_LOWER));
+        rtai_kfree(nam2num("ipc"));
 }
 #endif
