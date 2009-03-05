@@ -458,7 +458,8 @@ void *fe_start(void *arg)
 
   // Do not proceed until EPICS has had a BURT restore
 #ifdef RTAI_BUILD
-  printf("Waiting for EPICS BURT");
+  printf("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRestore);
+  //int cnt = 0;
 #else
   unsigned int ns;
   double time = getGpsTime(&ns);
@@ -467,10 +468,12 @@ void *fe_start(void *arg)
   do{
 #ifdef RTAI_BUILD
 	rt_sleep(nano2count(1000000000));
+  	//printf("Waiting for EPICS BURT %d", cnt++);
 #else
 	usleep(1000000);
 #endif
   }while(!pLocalEpics->epicsInput.burtRestore);
+  printf("BURT Restore = %d\n", pLocalEpics->epicsInput.burtRestore);
   for (system = 0; system < NUM_SYSTEMS; system++)
   {
     for(ii=0;ii<END_OF_DAQ_BLOCK;ii++)
@@ -607,7 +610,8 @@ void *fe_start(void *arg)
 
   // Clear the code exit flag
   vmeDone = 0;
-	feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,1);
+  printf("Calling feCode() to initialize\n");
+  feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,1);
 
   printf("entering the loop\n");
 
@@ -1361,9 +1365,14 @@ int main(int argc, char **argv)
 	printf("cpu clock %ld\n",cpu_khz);
 
 #ifdef RTAI_BUILD
-	_epics_shm = (unsigned char *)rtai_kmalloc(nam2num(SYSTEM_NAME_STRING_LOWER), 0);
+	_epics_shm = (unsigned char *)rtai_kmalloc(nam2num(SYSTEM_NAME_STRING_LOWER), 64*1024*1024);
 	if (_epics_shm == 0 ) {
 		printf("mmap failed for epics shared memory area\n");
+                return -1;
+	}
+	_ipc_shm = (unsigned char *)rtai_kmalloc(nam2num("ipc"), 64*1024*1024);
+	if (_ipc_shm == 0 ) {
+		printf("mmap failed for IPC shared memory area\n");
                 return -1;
 	}
 #else
@@ -1569,10 +1578,15 @@ int main(int argc, char **argv)
         RTIME tick_period;
         RTIME now;
 
-	rt_task_init(&wthread, fe_start, 0, STACK_SIZE, 0, 0, 0);
-        tick_period = start_rt_timer(nano2count(TICK_PERIOD));
-        now = rt_get_time();
-        rt_task_make_periodic(&wthread, now + tick_period, tick_period*PERIOD_COUNT);
+	start_rt_timer(0);
+        int ret = rt_task_init_cpuid(&wthread, fe_start, 0, STACK_SIZE, 0, 1, 0, 1);
+	if (ret != 0) {
+		printf("Failed to do rt_task_init_cpuid() returned %d\n", ret);
+		return 1;
+	}
+        rt_set_runnable_on_cpuid(&wthread, 1);
+        rt_task_use_fpu(&wthread, 1);
+        rt_task_resume(&wthread);
 
 #else
 
