@@ -161,7 +161,8 @@ findSharedMemory(char *sys_name)
 	for(s = sys; *s; s++) *s=tolower(*s);
 
 #ifdef RTAI_BUILD
-    	addr = (unsigned char *)rtai_malloc(nam2num(sys), 0);
+	printf("nam2num(%s) returned %d\n", sys, nam2num(sys));
+    	addr = (unsigned char *)rtai_malloc(nam2num(sys), 64*1024*1024);
 	if (addr == NULL) {
 		printf("rtai_malloc() failed (maybe /dev/rtai_shm is missing)!\n");
 		return 0;
