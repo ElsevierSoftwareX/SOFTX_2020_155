@@ -1,3 +1,5 @@
+#ifndef CDS_HARDWARE_H
+#define CDS_HARDWARE_H
 /*----------------------------------------------------------------------------- */
 /*                                                                      	*/
 /*                      -------------------                             	*/
@@ -447,3 +449,4 @@ typedef struct GSA_AD18_REG{
 #define SYMCOM_BC635_TIME1	0x34
 #define SYMCOM_BC635_EVENT0	0x38
 #define SYMCOM_BC635_EVENT1	0x3C
+#endif

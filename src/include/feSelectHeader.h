@@ -34,6 +34,8 @@
 	#include "sh1.h"
 #elif defined(ISI_CODE)
 	#include "isi.h"
+#elif defined(OM1_CODE)
+	#include "om1.h"
 #else
 	#error
 #endif
