@@ -40,6 +40,7 @@
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
 #include "feSelectHeader.h"
+#include <linux/cpu.h>
 
 #ifndef NUM_SYSTEMS
 #define NUM_SYSTEMS 1
@@ -750,11 +751,8 @@ void *fe_start(void *arg)
   int cur_bio_card = 0; // Current binary I/O module we read or write
   
 #ifdef RTAI_BUILD
-  //rcu_offline_cpu(1); unknown call...
-  //local_irq_disable();
-//int cpu_down(unsigned int cpu);
-
-  //cpu_down(1); unknown
+  // Take the CPU away from Linux
+  __cpu_disable(); 
 #endif
 
   // Enter the coninuous FE control loop  **********************************************************
@@ -1683,10 +1681,17 @@ out:
 
 #ifdef RTAI_BUILD
 void cleanup_module (void) {
+	printf("Killing work threads\n");
+	stop_working_threads = 1;
+        rt_busy_sleep(10000000);
         stop_rt_timer();
         rt_busy_sleep(10000000);
         rt_task_delete(&wthread);
         rtai_kfree(nam2num(SYSTEM_NAME_STRING_LOWER));
         rtai_kfree(nam2num("ipc"));
+
+	// Reboot the cpu, brinnging back to Linux
+	extern int my_cpu_init(unsigned int);
+	my_cpu_init(1);
 }
 #endif
