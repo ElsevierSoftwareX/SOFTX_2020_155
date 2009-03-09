@@ -1,6 +1,20 @@
 --- linux-2.6.23-old/arch/x86_64/kernel/smpboot.c	2007-10-09 13:31:38.000000000 -0700
-+++ linux-2.6.23/arch/x86_64/kernel/smpboot.c	2009-03-06 10:47:26.000000000 -0800
-@@ -1045,6 +1045,7 @@
++++ linux-2.6.23/arch/x86_64/kernel/smpboot.c	2009-03-09 10:23:09.000000000 -0700
+@@ -961,6 +961,13 @@
+ 	return err;
+ }
+ 
++int my_cpu_init(unsigned int cpu)
++{
++	return __cpu_up(cpu);
++}
++
++EXPORT_SYMBOL(my_cpu_init);
++
+ /*
+  * Finish the SMP boot.
+  */
+@@ -1045,6 +1052,7 @@
  	fixup_irqs(cpu_online_map);
  	return 0;
  }
