@@ -25,6 +25,7 @@
 #include <rtai_sched.h>
 #include <rtai_shm.h>
 #include <rtai_nam2num.h>
+#include <linux/cpu.h>
 #else
 #include <rtl_time.h>
 #include <fcntl.h>
@@ -40,7 +41,6 @@
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
 #include "feSelectHeader.h"
-#include <linux/cpu.h>
 
 #ifndef NUM_SYSTEMS
 #define NUM_SYSTEMS 1
@@ -213,7 +213,9 @@ unsigned int   gps_receiver_unlocked = 1; // Lock/unlock flag for GPS time card
 
 double getGpsTime(unsigned int *);
 #include "./feSelectCode.c"
+#ifdef RTAI_BUILD
 #include "map.c"
+#endif
 
 char daqArea[2*DAQ_DCU_SIZE];		/* Space allocation for daqLib buffers	*/
 
