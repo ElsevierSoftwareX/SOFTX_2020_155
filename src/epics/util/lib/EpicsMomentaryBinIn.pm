@@ -42,6 +42,7 @@ sub frontEndInitCode {
 sub fromExp {
         my ($i, $j) = @_;
         my $from = $::partInNum[$i][$j];
+	$::feTailCode .= "pLocalEpics->" . $::systemName . "\." . $::xpartName[$from] . " =  0\n";
         return "pLocalEpics->" . $::systemName . "\." . $::xpartName[$from];
 }
 
