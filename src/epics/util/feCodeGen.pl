@@ -207,6 +207,9 @@ $subSysPartStop[0] = 0;
 # IPC output code
 $ipcOutputCode = "";
 
+# Front-end tailing code
+$feTailCode = "";
+
 # Remove leading subsystems name
 sub remove_subsystem {
         my ($s) = @_;
@@ -2018,6 +2021,7 @@ print OUT "    // All IPC outputs\n";
 print OUT "    if (_ipc_shm != 0) {\n";
 print OUT "$ipcOutputCode";
 print OUT "    }\n";
+print OUT "$feTailCode";
 print OUT "  }\n";
 print OUT "}\n\n";
 print OUTH "typedef struct CDS_EPICS {\n";
