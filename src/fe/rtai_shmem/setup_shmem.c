@@ -22,7 +22,7 @@ int init_module() {
   addr = rtai_kmalloc(nam2num(sysname_daq), MMAP_SIZE);
   printk("nam2num(%s)=%d; returned addr = 0x%x\n", sysname_daq, nam2num(sysname), addr);
   // Allocate IPC area
-  //rtai_kmalloc(nam2num("ipc"), MMAP_SIZE);
+  rtai_kmalloc(nam2num("ipc"), MMAP_SIZE);
   return 0;
 }
 void cleanup_module (void) {
