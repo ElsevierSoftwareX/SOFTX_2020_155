@@ -462,7 +462,7 @@ void *fe_start(void *arg)
   // Do not proceed until EPICS has had a BURT restore
 #ifdef RTAI_BUILD
   printf("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRestore);
-  //int cnt = 0;
+  int cnt = 0;
 #else
   unsigned int ns;
   double time = getGpsTime(&ns);
@@ -471,7 +471,8 @@ void *fe_start(void *arg)
   do{
 #ifdef RTAI_BUILD
 	rt_sleep(nano2count(1000000000));
-  	//printf("Waiting for EPICS BURT %d", cnt++);
+	//msleep(1000);
+  	printf("Waiting for EPICS BURT %d\n", cnt++);
 #else
 	usleep(1000000);
 #endif
@@ -653,6 +654,14 @@ void *fe_start(void *arg)
         gsaDacDma2(jj, cdsPciModules.dacType[jj]);
   }
 
+  
+#ifdef RTAI_BUILD
+  //msleep(1000);
+  rt_sleep(nano2count(1500000000));
+  // Take the CPU away from Linux
+  __cpu_disable(); 
+#endif
+
 #ifndef NO_SYNC
   if (run_on_timer) {
 #endif
@@ -666,27 +675,36 @@ void *fe_start(void *arg)
 	// Sleep a second and a half
 #ifdef RTAI_BUILD
 	rt_sleep(nano2count(1500000000));
+	//msleep(1500);
 #else
 	usleep(1500000);
 #endif
 	
 	// Get the 1PPS time stamp
         cycle_gps_event_time = getGpsEventTime(&cycle_gps_event_ns);
+#ifndef RTAI_BUILD
         printf("Initial 1PPS time stamp is %d\n", cycle_gps_event_time);
+#endif
 
         usec = 1000000 * (cycle_gps_event_time - (unsigned int) cycle_gps_event_time);
 	if (usec > 500000) usec -= 1000000;
 	//pLocalEpics->epicsOutput.onePps = usec;
 
 	//while ((usec = getGpsUsec()) < 999978);// Wait until 22us before sec
+#ifndef RTAI_BUILD
  	printf("1PPS usec delay is %d\n", usec);
+#endif
 	int delay = 10 + usec;
 	int wt = 1000000 - delay;
         if (wt > 1000000) wt = 2000000 - wt;
+#ifndef RTAI_BUILD
 	printf("Waiting until usec = %d to start the ADCs\n", wt);
+#endif
 	while ((usec = getGpsUsec()) < wt);
 
+#ifndef RTAI_BUILD
         printf("Running time %d us\n", usec);
+#endif
     } else {
         // Pause until this second ends
 #ifdef RTAI_BUILD
@@ -730,15 +748,21 @@ void *fe_start(void *arg)
 #endif
 #ifdef NO_SYNC
     gsaDacTrigger(cdsPciModules.dacCount);
+#ifndef RTAI_BUILD
   printf("Triggered the DAC\n");
 #endif
+#endif
   } else {
+#ifndef RTAI_BUILD
     printf("*******************************\n");
     printf("* Running with RTLinux timer! *\n");
     printf("*******************************\n");
+#endif
   }
 
+#ifndef RTAI_BUILD
   printf("Triggered the ADC\n");
+#endif
 #ifdef OMC_CODE
   cdsPciModules.gps = 0;
 #endif
@@ -751,11 +775,6 @@ void *fe_start(void *arg)
 			+ cdsPciModules.cDo32lCount;
   // 0 to total_bio_boards*2 counter
   int cur_bio_card = 0; // Current binary I/O module we read or write
-  
-#ifdef RTAI_BUILD
-  // Take the CPU away from Linux
-  __cpu_disable(); 
-#endif
 
   // Enter the coninuous FE control loop  **********************************************************
   while(!vmeDone){
@@ -889,7 +908,9 @@ void *fe_start(void *arg)
 		pLocalEpics->epicsInput.diagReset = 0;
 		adcHoldTime = 0;
 		timeHoldMax = 0;
+#ifndef RTAI_BUILD
 		printf("DIAG RESET\n");
+#endif
 	  }
 	  pLocalEpics->epicsOutput.diagWord = diagWord;
 	  diagWord = 0;
@@ -1235,6 +1256,7 @@ void *fe_start(void *arg)
 	skipCycle = 0;
 #ifdef RTAI_BUILD
 	//rt_sleep(nano2count(2000));
+	//msleep(1);
 #else
 	usleep(1);
 #endif
@@ -1591,13 +1613,37 @@ int main(int argc, char **argv)
         RTIME now;
 
 	start_rt_timer(0);
-        int ret = rt_task_init_cpuid(&wthread, fe_start, 0, STACK_SIZE, 0, 1, 0, 1);
+  	//printf("Started real time timer\n");
+	//rt_sleep(nano2count(1000000000));
+
+#ifdef SPECIFIC_CPU
+#define CPUID SPECIFIC_CPU
+#else
+#define CPUID 1
+#endif
+
+#if 0
+	// using the standard smp_call_function() appears to work allright also
+	// however it needs replacement of rt_sleep() calls with msleep()
+	// only problem is that msleep() are not very good time-wise
+
+	//smp_call_function (void (*func) (void *info), void *info, int nonatomic,
+                        //int wait)
+        void cpu_start(void *foo) {
+		if (smp_processor_id() == CPUID) {
+			printf("I am on the right CPU, id = %d\n", CPUID);
+			fe_start(foo);
+		}
+	}
+	
+        smp_call_function(cpu_start, 0,0,0);
+#endif
+
+        int ret = rt_task_init_cpuid(&wthread, fe_start, 0, STACK_SIZE, 0, 1, 0, CPUID);
 	if (ret != 0) {
 		printf("Failed to do rt_task_init_cpuid() returned %d\n", ret);
 		return 1;
 	}
-        rt_set_runnable_on_cpuid(&wthread, 1);
-        rt_task_use_fpu(&wthread, 1);
         rt_task_resume(&wthread);
 
 #else
@@ -1686,14 +1732,14 @@ void cleanup_module (void) {
 	printf("Killing work threads\n");
 	stop_working_threads = 1;
         rt_busy_sleep(10000000);
-        stop_rt_timer();
+//        stop_rt_timer();
         rt_busy_sleep(10000000);
         rt_task_delete(&wthread);
         rtai_kfree(nam2num(SYSTEM_NAME_STRING_LOWER));
         rtai_kfree(nam2num("ipc"));
 
-	// Reboot the cpu, brinnging back to Linux
+	// Reboot the cpu, brinnging it back to Linux
 	extern int my_cpu_init(unsigned int);
-	my_cpu_init(1);
+	my_cpu_init(CPUID);
 }
 #endif
