@@ -1,5 +1,5 @@
 
-.PHONY: isi
-isi:
-	./feCodeGen.pl ../simLink/isi.mdl isi
+.PHONY:om1
+om1:
+	./feCodeGen.pl ../simLink/om1.mdl om1
 
