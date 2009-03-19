@@ -215,6 +215,7 @@ double getGpsTime(unsigned int *);
 #include "./feSelectCode.c"
 #ifdef RTAI_BUILD
 #include "map.c"
+#include "fb.c"
 #endif
 
 char daqArea[2*DAQ_DCU_SIZE];		/* Space allocation for daqLib buffers	*/
@@ -504,7 +505,11 @@ void *fe_start(void *arg)
   status = cdsDaqNetReconnect(dcuId);
   printf("Reconn status = %d %d\n",status,numFb);
   do{
+#ifdef RTAI_BUILD
+	rt_sleep(nano2count(10000000));
+#else
 	usleep(10000);
+#endif
 	status = cdsDaqNetCheckReconnect();
 	netRetry ++;
   }while((status < numFb) && (netRetry < 10));
@@ -658,8 +663,10 @@ void *fe_start(void *arg)
 #ifdef RTAI_BUILD
   //msleep(1000);
   rt_sleep(nano2count(1500000000));
+#ifndef NO_CPU_DISABLE
   // Take the CPU away from Linux
   __cpu_disable(); 
+#endif
 #endif
 
 #ifndef NO_SYNC
@@ -1450,6 +1457,14 @@ int main(int argc, char **argv)
         }
 
 #if defined(SHMEM_DAQ)
+#ifdef RTAI_BUILD
+	sprintf(fname, "%s_daq", SYSTEM_NAME_STRING_LOWER);
+	_daq_shm = rtai_kmalloc(nam2num(fname),  64*1024*1024);
+	if (_daq_shm == 0) {
+		printf("rtai_kmalloc(%s) failed; returned zero\n", fname);
+		return -1;
+	}
+#else
 	// See if frame builder DAQ comm area available
 	sprintf(fname, "/rtl_mem_%s_daq", SYSTEM_NAME_STRING_LOWER);
         daq_fd = shm_open(fname, RTL_O_RDWR, 0666);
@@ -1464,6 +1479,7 @@ int main(int argc, char **argv)
                 return -1;
 	  }
         }
+#endif
 #endif
 #endif
 
@@ -1738,8 +1754,10 @@ void cleanup_module (void) {
         rtai_kfree(nam2num(SYSTEM_NAME_STRING_LOWER));
         rtai_kfree(nam2num("ipc"));
 
+#ifndef NO_CPU_DISABLE
 	// Reboot the cpu, brinnging it back to Linux
 	extern int my_cpu_init(unsigned int);
 	my_cpu_init(CPUID);
+#endif
 }
 #endif
