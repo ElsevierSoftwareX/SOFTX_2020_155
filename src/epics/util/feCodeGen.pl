@@ -5,6 +5,12 @@ use File::Path;
 die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>] [<speed>]\n\t" . "site is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
         if (@ARGV != 2 && @ARGV != 3 && @ARGV != 4 && @ARGV != 5);
 
+# See if we are running RTAI
+$rtai = 0 == system("rtai-config --prefix");
+if ($rtai) {
+	print "Generating RTAI code\n";
+}
+
 $site = "M1"; # Default value for the site name
 $location = "mit"; # Default value for the location name
 $rate = "60"; # In microseconds (default setting)
@@ -2048,6 +2054,14 @@ close OUT;
 close OUTH;
 close OUTD;
 close EPICS;
+if ($rtai) {
+	system ("/bin/cp GNUmakefile  ../../fe/$skeleton");
+	system ("echo '#include \"../controller.c\"' > ../../fe/$skeleton/$skeleton" . "fe.c");
+}
+
+if ($rtai) {
+print OUTM "# Real Time Application Interface\n";
+} else {
 print OUTM "# RTLinux makefile\n";
 print OUTM "include /opt/rtldk-2.2/rtlinuxpro/rtl.mk\n";
 print OUTM "\n";
@@ -2085,6 +2099,7 @@ if($rate == 480) {
 print OUTM "crc.o: crc.c\n";
 print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
 print OUTM "\n";
+}
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
 print OUTM "CFLAGS += -I../../include\n";
 print OUTM "CFLAGS += -I/opt/gm/include\n";
@@ -2180,7 +2195,17 @@ print OUTM "\n";
 print OUTM "clean:\n";
 print OUTM "\trm -f \$(ALL) *.o\n";
 print OUTM "\n";
+if ($rtai) {
+
+print OUTM "EXTRA_CFLAGS += \$(CFLAGS) -DRTAI_BUILD=1\n";
+print OUTM "EXTRA_CFLAGS += -I\$(SUBDIRS)/../../include\n";
+print OUTM "EXTRA_CFLAGS += \$(shell rtai-config --module-cflags) -ffast-math\n";
+
+print OUTM "obj-m += $skeleton" . "fe.o\n";
+
+} else {
 print OUTM "include /opt/rtldk-2.2/rtlinuxpro/Rules.make\n";
+}
 print OUTM "\n";
 close OUTM;
 
