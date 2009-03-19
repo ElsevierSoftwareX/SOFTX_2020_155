@@ -1456,6 +1456,7 @@ int main(int argc, char **argv)
 	  }
         }
 
+#endif
 #if defined(SHMEM_DAQ)
 #ifdef RTAI_BUILD
 	sprintf(fname, "%s_daq", SYSTEM_NAME_STRING_LOWER);
@@ -1464,6 +1465,7 @@ int main(int argc, char **argv)
 		printf("rtai_kmalloc(%s) failed; returned zero\n", fname);
 		return -1;
 	}
+	printf("Allocated daq shared memory 0x%x\n", _daq_shm);
 #else
 	// See if frame builder DAQ comm area available
 	sprintf(fname, "/rtl_mem_%s_daq", SYSTEM_NAME_STRING_LOWER);
@@ -1479,7 +1481,6 @@ int main(int argc, char **argv)
                 return -1;
 	  }
         }
-#endif
 #endif
 #endif
 
