@@ -1,4 +1,6 @@
+#ifndef RTAI_BUILD
 #include <stdio.h>
+#endif
 #include "daqmap.h"
 #include "drv/fb.h"
 
