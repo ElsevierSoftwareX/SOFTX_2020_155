@@ -461,7 +461,7 @@ main(int argc, char **argv)
 
         if (argc != optind + 1) {  usage(); exit(1); }
 	printf("System name: %s\n", argv[optind]);
-	sprintf(shmem_fname, shmem_fname_format, argv[1]);
+	sprintf(shmem_fname, shmem_fname_format, argv[optind]);
         //if (argc) { int i; for (i = 0; i < argc; i++) printf ("%s\n", argv[i]);}
 
 	if (rem_host != NULL)
