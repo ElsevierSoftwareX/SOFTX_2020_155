@@ -1,23 +1,10 @@
-/*************************************************************************
- * The contents of this file are subject to the MYRICOM MYRINET          *
- * EXPRESS (MX) NETWORKING SOFTWARE AND DOCUMENTATION LICENSE (the       *
- * "License"); User may not use this file except in compliance with the  *
- * License.  The full text of the License can found in LICENSE.TXT       *
- *                                                                       *
- * Software distributed under the License is distributed on an "AS IS"   *
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See  *
- * the License for the specific language governing rights and            *
- * limitations under the License.                                        *
- *                                                                       *
- * Copyright 2003 - 2004 by Myricom, Inc.  All rights reserved.          *
- *************************************************************************/
-
+//
+// Myrinet MX DQ data sender/receiver
+//
 // RECVR USAGE:./mx_stream -v -b 1
 // XMIT USAGE:./mx_stream -v -b 1 -d scipe12:1
 
 #include "myriexpress.h"
-
-#if !MX_OS_WINNT
 
 #include <unistd.h>
 #include <sys/time.h>
@@ -38,30 +25,6 @@
 #define MX_THREAD_CREATE(thread_, start_routine_, arg_) \
 pthread_create(thread_, 0, start_routine_, arg_)
 #define MX_THREAD_JOIN(thread_) pthread_join(thread, 0)
-
-#else
-
-#include <windows.h>
-#include <process.h>
-#include "getopt.h"
-
-#define MX_MUTEX_T HANDLE
-#define MX_MUTEX_INIT(mutex_) *mutex_=CreateMutex(0, FALSE, 0)
-#define MX_MUTEX_LOCK(mutex_) WaitForSingleObject(*mutex_, INFINITE)
-#define MX_MUTEX_UNLOCK(mutex_) ReleaseMutex(*mutex_)
-
-#define MX_THREAD_T HANDLE
-#define MX_THREAD_CREATE(thread_, start_routine_, arg_) \
-do { \
-  unsigned thrdaddr; \
-  *thread_=(HANDLE)_beginthreadex(0, 0, start_routine_, arg_, 0, &thrdaddr); \
-} while(0)
-#define MX_THREAD_JOIN(thread_) WaitForSingleObject(thread_, INFINITE)
-
-int mx_gettimeofday(struct timeval *tv, void *tz);
-#define gettimeofday(x,y) mx_gettimeofday(x,y)
-
-#endif
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -106,7 +69,8 @@ unsigned char *dcu_addr;
 void
 usage()
 {
-	fprintf(stderr, "Usage: mx_stream [args]\n");
+	fprintf(stderr, "Usage: mx_stream [args] sys_name \n");
+	fprintf(stderr, "sys_name - three letter name of a control system, e.g. tsa\n");
 	fprintf(stderr, "-n nic_id - local NIC ID [MX_ANY_NIC]\n");
 	fprintf(stderr, "-b board_id - local Board ID [MX_ANY_NIC]\n");
 	fprintf(stderr, "-e local_eid - local endpoint ID [%d]\n", DFLT_EID);
@@ -179,8 +143,9 @@ receiver(mx_endpoint_t ep, uint32_t match_val, uint32_t filter)
 	char *dataDest;
 	char *dataSource;
 	int copySize;
-	float *testData;
-printf("waiting for someone to connect\n");
+	//float *testData;
+
+	printf("waiting for someone to connect\n");
 	len = sizeof(struct daqMXdata);
 	buffer = malloc(len * NUM_RREQ);
 	if (buffer == NULL) {
@@ -301,12 +266,12 @@ sender(mx_endpoint_t ep,uint64_t his_nic_id,  uint16_t his_eid,int len, uint32_t
 	mx_return_t conStat;
 	uint32_t result;
 	struct daqMXdata mxDataBlock;
-	int ii;
-	int jj = 0;
+	//int ii;
+	//int jj = 0;
 	int myErrorSignal;
 	mx_endpoint_addr_t dest;
 	uint32_t filter = FILTER;
-	struct timeval start_time;
+	//struct timeval start_time;
 	int lastCycle = 0;
 	char *dataBuff;
 	int sendLength = 0;
@@ -413,10 +378,12 @@ main(int argc, char **argv)
 	extern char *optarg;
 	mx_return_t ret;
 	int fd;
-	char shmem1[64] = "/rtl_mem_tsa_daq";
-	char shmem2[64] = "/rtl_mem_tsb_daq";
-	char shmem3[64] = "/rtl_mem_tsc_daq";
-	int status;
+	//char shmem1[64] = "/rtl_mem_tsa_daq";
+	//char shmem2[64] = "/rtl_mem_tsb_daq";
+	//char shmem3[64] = "/rtl_mem_tsc_daq";
+	char *shmem_fname_format = "/rtl_mem_%s_daq";
+	char shmem_fname[256];
+	//int status;
 
 #if DEBUG
 	extern int mx_debug_mask;
@@ -437,7 +404,7 @@ main(int argc, char **argv)
 	do_bothways = 0;
 	num_threads = 1;
 
-printf("file = %s %s %s\n",shmem1,shmem2,shmem3);
+	//printf("file = %s %s %s\n",shmem1,shmem2,shmem3);
 
 	while ((c = getopt(argc, argv, "hd:e:f:n:b:r:l:N:Vvwx")) != EOF) switch(c) {
 	case 'd':
@@ -492,6 +459,11 @@ printf("file = %s %s %s\n",shmem1,shmem2,shmem3);
 		exit(1);
 	}
 
+        if (argc != optind + 1) {  usage(); exit(1); }
+	printf("System name: %s\n", argv[optind]);
+	sprintf(shmem_fname, shmem_fname_format, argv[1]);
+        //if (argc) { int i; for (i = 0; i < argc; i++) printf ("%s\n", argv[i]);}
+
 	if (rem_host != NULL)
 		num_threads += do_bothways;
 	ret = mx_open_endpoint(board_id, my_eid, filter, NULL, 0, &ep);
@@ -516,10 +488,10 @@ printf("file = %s %s %s\n",shmem1,shmem2,shmem3);
 	        }
 #endif
 
-		fd = open("/rtl_mem_tsc_daq",O_CREAT | O_RDWR ,0666);
+		fd = open(shmem_fname, O_CREAT | O_RDWR, 0666);
 		if(fd == -1)
 		{
-			printf("shmem open failed %s\n",shmem3);
+			printf("shmem open failed %s\n",shmem_fname);
 			exit(1);
 		}
 #if 0
@@ -539,7 +511,7 @@ printf("file = %s %s %s\n",shmem1,shmem2,shmem3);
 			fprintf(stderr, "Can't map shmem\n");
 			exit(1);
 		}
-		else printf("mapped at 0x%x\n",(int)dcu_addr);
+		else printf("mapped at 0x%lx\n",(unsigned long)dcu_addr);
 
 		shmIpcPtr = (struct rmIpcStr *)(dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
 		shmDataPtr = (char *)(dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
@@ -569,7 +541,7 @@ printf("file = %s %s %s\n",shmem1,shmem2,shmem3);
 			fprintf(stderr, "Can't map shmem\n");
 			exit(1);
 		}
-		else printf("mapped at 0x%x\n",(int)dcu_addr);
+		else printf("mapped at 0x%lx\n",(unsigned long)dcu_addr);
 
 		shmIpcPtr = (struct rmIpcStr *)(dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
 		shmDataPtr = (char *)(dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
