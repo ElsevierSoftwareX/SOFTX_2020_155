@@ -7,6 +7,7 @@
 #include "myriexpress.h"
 
 #include <unistd.h>
+#include <ctype.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -460,8 +461,14 @@ main(int argc, char **argv)
 	}
 
         if (argc != optind + 1) {  usage(); exit(1); }
-	printf("System name: %s\n", argv[optind]);
-	sprintf(shmem_fname, shmem_fname_format, argv[optind]);
+	if (strlen(argv[optind]) != 3) { usage(); exit(1); }
+	// Make it lower case;
+	char sysname[4]; sysname[3] = 0;
+	int i;
+	for (i = 0; i < 3; i++) sysname[i] = tolower(argv[optind][i]);
+
+	printf("System name: %s\n", sysname);
+	sprintf(shmem_fname, shmem_fname_format, sysname);
         //if (argc) { int i; for (i = 0; i < argc; i++) printf ("%s\n", argv[i]);}
 
 	if (rem_host != NULL)
