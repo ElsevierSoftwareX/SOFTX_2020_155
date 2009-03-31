@@ -22,7 +22,7 @@ TARGETS=$(SRC:.c=)
 all: $(SRC:.c=$(EXEEXT))
 
 CFLAGS = -I/opt/mx/include -I.
-CFLAGS += -Wall   -O3
+CFLAGS += -Wall -O3
 CFLAGS += $(OPTIM_CFLAGS)
 CPPFLAGS = -I../common -I$(top_srcdir)/common -I$(top_srcdir)/common/bsd
 #CPPFLAGS += -DMX_THREAD_SAFE=$(MX_THREAD_SAFE)
