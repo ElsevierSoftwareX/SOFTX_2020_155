@@ -254,6 +254,16 @@ unsigned int readIiroDio(CDS_HARDWARE *pHardware, int modNum)
 }
 
 // *****************************************************************************
+// Routine to read ACCESS IIRO-8 Isolated DIO modules outputs from register
+// *****************************************************************************
+unsigned int readIiroDioOutput(CDS_HARDWARE *pHardware, int modNum)
+{
+  unsigned int status;
+	status = inb(pHardware->pci_do[modNum] + IIRO_DIO_OUTPUT);
+	return(status);
+}
+
+// *****************************************************************************
 // Routine to write ACCESS IIRO-8 Isolated DIO modules
 // *****************************************************************************
 void writeIiroDio(CDS_HARDWARE *pHardware, int modNum, int data)
