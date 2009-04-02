@@ -44,7 +44,26 @@ sub printFrontEndVars  {
 # Returns calculated code string
 sub frontEndInitCode {
 	my ($i) = @_;
-        return "";
+
+	#print "partOutputPortUsed = ", $::partOutputPortUsed[$i][0], "\n";
+	#print "partOutputPortUsed = ", $::partOutputPortUsed[$i][1], "\n";
+	my $rioReadInitVal = 0;
+	# First output has  digital inputs
+	if ($::partOutputPortUsed[$i][0] != undef) {
+	  if ($::partOutputPortUsed[$i][0] == 0) { $rioReadInitVal |= 1; }
+	  if ($::partOutputPortUsed[$i][0] == 1) { $rioReadInitVal |= 2; }
+	}
+	# print "rioReadInitVal = ", $rioReadInitVal, "\n";
+	# Second output has digital outputs
+	if ($::partOutputPortUsed[$i][1] != undef) {
+	  if ($::partOutputPortUsed[$i][1] == 0) { $rioReadInitVal |= 1;}
+	  if ($::partOutputPortUsed[$i][1] == 1) { $rioReadInitVal |= 2; }
+	}
+
+	# print "rioReadInitVal = ", $rioReadInitVal, "\n";
+	# Initialize board read operations selector
+	my $bnum = $::boNum[$::boCnt - 1]; # This board number
+        return "rioReadOps\[$bnum\] = $rioReadInitVal;\n";
 }
 
 # Figure out part input code
@@ -55,7 +74,11 @@ sub fromExp {
         my ($i, $j) = @_;
 	my $l = length($::partInput[$i][$j]);
         my $card =  substr($::partInput[$i][$j], ($l-1), 1);
-        return "rioInput\[" . $card . "\]";
+	if ($::partInputPort[$i][$j] == 0) {
+        	return "rioInputInput\[" . $card . "\]";
+	} else {
+        	return "rioInputOutput\[" . $card . "\]";
+	}
 }
 
 # Return front end code
