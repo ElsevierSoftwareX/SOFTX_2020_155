@@ -196,7 +196,18 @@ double dacOut[MAX_DAC_MODULES][16];
 unsigned int dacOutUsed[MAX_DAC_MODULES][16];
 int dioInput[MAX_DIO_MODULES];
 int dioOutput[MAX_DIO_MODULES];
-int rioInput[MAX_DIO_MODULES];
+
+// Relay digital I/O cards read operations
+// 0 - do not read card registers
+// 1 - read digital inputs
+// 2 - read digital outputs
+// 3 - both
+int rioReadOps[MAX_DIO_MODULES] = 0;
+// Values read from relay digital I/O cards, current input values
+int rioInputInput[MAX_DIO_MODULES];
+// Values read from relay digital I/O cards, current output values
+int rioInputOutput[MAX_DIO_MODULES];
+
 int rioOutput[MAX_DIO_MODULES];
 int rioOutputHold[MAX_DIO_MODULES];
 int rioInput1[MAX_DIO_MODULES];
@@ -602,7 +613,8 @@ void *fe_start(void *arg)
 	ii = cdsPciModules.doInstance[kk];
 	if(cdsPciModules.doType[kk] == ACS_8DIO)
 	{
-  	  rioInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
+	  if (rioReadOps & 1) rioInputInputs[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
+	  if (rioReadOps & 2) rioInputOutputs[ii] = readIiroDioOutputs(&cdsPciModules, kk) & 0xff;
 	}
 	if(cdsPciModules.doType[kk] == ACS_16DIO)
 	{
@@ -1160,7 +1172,8 @@ void *fe_start(void *arg)
                 ii = cdsPciModules.doInstance[kk];
                 if(cdsPciModules.doType[kk] == ACS_8DIO)
                 {
-                        rioInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
+	  		if (rioReadOps & 1) rioInputInputs[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
+	  		if (rioReadOps & 2) rioInputOutputs[ii] = readIiroDioOutputs(&cdsPciModules, kk) & 0xff;
                 }
                 if(cdsPciModules.doType[kk] == ACS_16DIO)
                 {
