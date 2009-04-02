@@ -354,7 +354,7 @@ int eMessage;
 printk("rcvd reply from fb %d %d %d %d\n",rnid,jj,fbStat[0],fbStat[1]);
           directed_send_addr[jj] =
             gm_ntoh_u64(id_message->directed_recv_buffer_addr);
-printk("rcvd reply from fb  %d 0x%x\n",jj,directed_send_addr[jj]);
+printk("rcvd reply from fb  %d 0x%lx\n",jj,directed_send_addr[jj]);
           for(ii=0;ii<16;ii++) directed_send_subaddr[jj][ii] = directed_send_addr[jj] + GM_DAQ_XFER_BYTE * ii;
 
           eMessage = 0;
