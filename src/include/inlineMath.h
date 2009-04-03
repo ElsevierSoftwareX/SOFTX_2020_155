@@ -1,3 +1,5 @@
+/* CVS VERSION: $Id: inlineMath.h,v 1.2 2009/04/03 18:10:01 aivanov Exp $ */
+
 inline void sincos(double __x, double *__sinx, double *__cosx)
 {
   register long double __cosr;
@@ -25,4 +27,18 @@ inline void sincos(double __x, double *__sinx, double *__cosx)
 
 /* Fast Pentium FPU SQRT command */
 inline double lsqrt (double __x) { register double __result; __asm __volatile__ ("fsqrt" : "=t" (__result) : "0" (__x)); return __result; }
+
+
+/* Fast Pentium FPU 2^x command for -1<=x<=1*/
+inline double l2xr (double __x) { register double __result; __asm __volatile__ ("f2xm1\n\t fld1\n\t fadd\n\t" : "=t" (__result) : "0" (__x)); return __result; }
+
+/* Fast Pentium FPU round to nearest integer command */
+inline double lrndint (double __x) { register double __result; __asm __volatile__ ("frndint" : "=t" (__result) : "0" (__x)); return __result; }
+
+/* Fast Pentium FPU to multiply with log2(10) */
+inline double lmullog210 (double __x) { register double __result; __asm __volatile__ ("fldl2t\n\t  fmul" : "=t" (__result) : "0" (__x)); return __result; }
+
+
+/* Fast Pentium FPU log10(x) command */
+inline double llog10 (double __x) { register double __result; __asm __volatile__ ("fldlg2\n\t fxch %%st(1)\n\t fyl2x": "=t" (__result) : "0" (__x)); return __result; }
 
