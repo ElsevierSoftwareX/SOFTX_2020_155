@@ -346,7 +346,7 @@ sub node_processing {
 		if ($part_name eq "Rio1") {
         	  $::partType[$::partCnt] = CDS::Rio1::initRio1($node);
 		}
-        	$::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ();
+        	$::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ($node, $::partCnt);
 	}
 	# For easy access
 	#print "Part ". $::xpartName[$::partCnt] . "\n";

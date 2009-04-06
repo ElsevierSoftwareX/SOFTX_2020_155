@@ -2,7 +2,15 @@ package CDS::FunctionCall;
 use Exporter;
 @ISA = ('Exporter');
 
+# This one gets node pointer (with all parsed info) as the first arg
+# and as the second arguments this gets part number
 sub partType {
+        my ($node, $i) = @_;
+	my $desc = ${$node->{FIELDS}}{"Description"};
+	if ($desc =~ /^\/\/inline/) {
+		$::inlinedFunctionCall[$i] = $desc;
+	print $desc;
+	}
 	return FunctionCall;
 }
 
@@ -33,10 +41,10 @@ sub printEpics {}
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
-	# Figure out input/output dimensions
-	# declare data arrays
-	print ::OUT "#include \"$::xpartName[$i].c\"\n";
-        ;
+	# Only include code if not inlined
+	if ($::inlinedFunctionCall[$i] eq undef) {
+	  print ::OUT "#include \"$::xpartName[$i].c\"\n";
+        }
 }
 
 # Return front end initialization code
@@ -67,8 +75,24 @@ sub fromExp {
 sub frontEndCode {
 	my ($i) = @_;
         #print "Found Function call $::xpartName[$i] $::partInputType[$i][0]\n";
-        my $ret = "// Function Call\n";
+	my $ret;
+	# See if this function is inlined into Description
+	print $::inlinedFunctionCall[$i];
+	if ($::inlinedFunctionCall[$i] ne undef) {
+        	$ret = "// Inlined Function\n";
+		$ret .= "{\ninline\n";
+		my $s = $::inlinedFunctionCall[$i];
+		$s =~ s/\\n/\n/g; # Replace '\n' with newline character
+		$ret .= $s;
+		$ret .= "\n";
+	} else {
+        	$ret = "// Function Call\n";
+	}
+	
         $ret .= "$::xpartName[$i](";
         $ret .= "$::fromExp[0], $::partInCnt[$::partInNum[$i][0]], \L$::partOutput[$i][0], $::partOutCnt[$::partOutNum[$i][0]]);\n";
+	if ($::inlinedFunctionCall[$i] ne undef) {
+		$ret .= "\n}\n";
+	}
 	return $ret;
 }
