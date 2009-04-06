@@ -80,7 +80,7 @@ sub frontEndCode {
 	print $::inlinedFunctionCall[$i];
 	if ($::inlinedFunctionCall[$i] ne undef) {
         	$ret = "// Inlined Function\n";
-		$ret .= "{\ninline\n";
+		$ret .= "{\n";
 		my $s = $::inlinedFunctionCall[$i];
 		$s =~ s/\\n/\n/g; # Replace '\n' with newline character
 		$ret .= $s;
