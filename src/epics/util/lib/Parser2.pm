@@ -318,7 +318,12 @@ sub node_processing {
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name;
 	}
 	# Check names; pass ADC parts and Remote Interlinks
-	if ($::partName[$::partCnt] !~ /^Bus\\n/ && $source_block !~ /^cdsRemoteIntlk/ && $source_block !~ /^cdsParameters/ && $source_block !~ /^cdsEzCa/) {
+	# Allow IPC part through
+	if ($::partName[$::partCnt] !~ /^Bus\\n/
+	    && $source_block !~ /^cdsRemoteIntlk/
+	    && $source_block !~ /^cdsParameters/
+	    && $source_block !~ /^cdsIPC/
+	    && $source_block !~ /^cdsEzCa/) {
 	    if (!name_check($::partName[$::partCnt])) {
 		die "Invalid part name \"$::partName[$::partCnt]\"; source_block \"$source_block\"; block  type \"$block_type\"";
 	    }
