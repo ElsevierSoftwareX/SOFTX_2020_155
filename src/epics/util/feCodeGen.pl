@@ -11,6 +11,14 @@ if ($rtai) {
 	print "Generating RTAI code\n";
 }
 
+# See if this is the latest Wind River system
+$kernel_release = `uname -r`;
+chomp $kernel_release;
+if ($kernel_release eq '2.6.21.7') {
+	print "Running on WindRiver RTLinux release\n";
+	$wind_river_rtlinux = 1;
+}
+
 $site = "M1"; # Default value for the site name
 $location = "mit"; # Default value for the location name
 $rate = "60"; # In microseconds (default setting)
@@ -2079,7 +2087,11 @@ if ($rtai) {
 print OUTM "# Real Time Application Interface\n";
 } else {
 print OUTM "# RTLinux makefile\n";
-print OUTM "include /opt/rtldk-2.2/rtlinuxpro/rtl.mk\n";
+if ($wind_river_rtlinux) {
+  print OUTM "include /home/controls/common_pc_64_build/build/rtcore-base-5.1/rtl.mk\n";
+} else {
+  print OUTM "include /opt/rtldk-2.2/rtlinuxpro/rtl.mk\n";
+}
 print OUTM "\n";
 print OUTM "\n";
 print OUTM "TARGET_RTL := $skeleton";
@@ -2205,6 +2217,7 @@ if ($specificCpu > -1) {
   print OUTM "#Uncomment to run on a specific CPU\n";
   print OUTM "#CFLAGS += -DSPECIFIC_CPU=2\n";
 }
+print OUTM "CFLAGS += -DKBUILD_MODNAME=1";
 print OUTM "\n";
 print OUTM "all: \$(ALL)\n";
 print OUTM "\n";
@@ -2220,7 +2233,11 @@ print OUTM "EXTRA_CFLAGS += \$(shell rtai-config --module-cflags) -ffast-math\n"
 print OUTM "obj-m += $skeleton" . "fe.o\n";
 
 } else {
-print OUTM "include /opt/rtldk-2.2/rtlinuxpro/Rules.make\n";
+if ($wind_river_rtlinux) {
+  print OUTM "include /home/controls/common_pc_64_build/build/rtcore-base-5.1/Rules.make\n";
+} else {
+  print OUTM "include /opt/rtldk-2.2/rtlinuxpro/Rules.make\n";
+}
 }
 print OUTM "\n";
 close OUTM;
