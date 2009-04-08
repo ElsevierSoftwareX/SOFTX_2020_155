@@ -216,6 +216,15 @@ $ipcOutputCode = "";
 # Front-end tailing code
 $feTailCode = "";
 
+# Remote IPC hosts total number
+$remoteIPChosts = 0;
+
+# Can only connect to this many remote IPC hosts
+# and send this many variables
+$maxRemoteIPCHosts = 2;
+$maxRemoteIPCVars = 4;
+
+
 # Remove leading subsystems name
 sub remove_subsystem {
         my ($s) = @_;
@@ -1576,6 +1585,13 @@ for (0 .. $boCnt-1) {
 	print OUT "\t{", $boType[$_], ",", $boNum[$_], "},\n";
 }
 print OUT "};\n\n";
+
+# Define remote IPC stuff (if any)
+if ($remoteIPChosts) {
+	print OUT "// Remote IPC buffers\n";
+	print OUT "double remote_ipc_send[$remoteIPChosts][$maxRemoteIPCVars];\n";
+	print OUT "double remote_ipc_rcv[$remoteIPChosts][$maxRemoteIPCVars];\n\n";
+}
 
 sub printVariables {
 for($ii=0;$ii<$partCnt;$ii++)
