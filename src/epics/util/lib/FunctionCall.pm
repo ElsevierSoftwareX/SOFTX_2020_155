@@ -9,7 +9,7 @@ sub partType {
 	my $desc = ${$node->{FIELDS}}{"Description"};
 	if ($desc =~ /^\/\/inline/) {
 		$::inlinedFunctionCall[$i] = $desc;
-	print $desc;
+	#print $desc;
 	}
 	return FunctionCall;
 }
@@ -77,7 +77,7 @@ sub frontEndCode {
         #print "Found Function call $::xpartName[$i] $::partInputType[$i][0]\n";
 	my $ret;
 	# See if this function is inlined into Description
-	print $::inlinedFunctionCall[$i];
+	#print $::inlinedFunctionCall[$i];
 	if ($::inlinedFunctionCall[$i] ne undef) {
         	$ret = "// Inlined Function\n";
 		$ret .= "{\n";
