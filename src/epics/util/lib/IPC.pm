@@ -8,15 +8,16 @@ sub partType {
         my $desc = ${$node->{FIELDS}}{"Description"};
 	my $partName = $::xpartName[$i];
 	#print $partName, "\n";
-	if (@h = $partName =~ /^(\w+):(\d+)$/g) {
+	if (@h = $partName =~ /^(\w+:\d+):(\d+)$/g) {
 	  die "Maximum $::maxRemoteIPCVars remote IPC vars allowed; exceeded in $partName\n" unless $h[1] < $::maxRemoteIPCVars;
-	  #print "Host name ", $h[0], "; address ", $h[1], "\n";
+	  print "Host name ", $h[0], "; address ", $h[1], "\n";
 	  if (@{$::remoteIPC{$h[0]}} == 0) {
 		# A new host; save its index
 		$::remoteIPChostIdx{$h[0]} = $::remoteIPChosts;
+		push @::remoteIPCnodes, $h[0];
 		$::remoteIPChosts++;
-		die "Maximum $::maxRemoteIPCHosts remote IPC hosts allowed; exceeded in $partName\n" unless $::remoteIPChosts <= $::maxRemoteIPCHosts;
-		print "New remote IPC host $h[0] @ idx $::remoteIPChostIdx{$h[0]}\n";
+		die "Maximum $::maxRemoteIPCHosts remote IPC nodes allowed; exceeded in $partName\n" unless $::remoteIPChosts <= $::maxRemoteIPCHosts;
+		print "New remote IPC node $h[0] @ idx $::remoteIPChostIdx{$h[0]}\n";
 	  }
 	  # Save host and address information
 	  push @{$::remoteIPC{$h[0]}}, $h[1];
@@ -47,7 +48,7 @@ sub printFrontEndVars  {
 	# See if this is a remote IPC part
 	my $is_remote = 0;
 	my @h;
-	if (@h = $partName =~ /^(\w+):(\d+)$/g) {
+	if (@h = $partName =~ /^(\w+:\d+):(\d+)$/g) {
 		die "Maximum $::maxRemoteIPCVars remote IPC vars allowed; exceeded in $partName\n" unless $h[1] < $::maxRemoteIPCVars;
 		#print "Host name ", $h[0], "; address ", $h[1], "\n";
 		$is_remote = 1;
@@ -102,7 +103,7 @@ sub fromExp {
 	my $partName = $::partInput[$i][$j];
 	#print "IPC $partName\n";
 	# Check remote host IPC spec
-	if (@h = $partName =~ /^(\w+):(\d+)$/g) {
+	if (@h = $partName =~ /^(\w+:\d+):(\d+)$/g) {
 	  $n_host = $::remoteIPChostIdx{$h[0]};
 	  return "remote_ipc_rcv[$n_host][$h[1]]";
 	} else {
@@ -128,7 +129,7 @@ sub frontEndCode {
 	my $partName = $::xpartName[$i];
 	# print "IPC Address is $partName\n";
 	# Check remote host IPC spec
-	if (@h = $partName =~ /^(\w+):(\d+)$/g) {
+	if (@h = $partName =~ /^(\w+:\d+):(\d+)$/g) {
 	  $n_host = $::remoteIPChostIdx{$h[0]};
 	  return "remote_ipc_send[$n_host][$h[1]] = $::fromExp[0];\n";
 	} else {
