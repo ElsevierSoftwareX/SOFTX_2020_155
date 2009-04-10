@@ -53,7 +53,7 @@ sub printFrontEndVars  {
 		#print "Host name ", $h[0], "; address ", $h[1], "\n";
 		$is_remote = 1;
 	} else {
-		die "IPC Part $partName invalid: its name must be the hex address\n" unless
+		die "IPC Part $partName invalid: its name must be the hex address or host:port:addr for remote IPC\n" unless
 			$partName =~ /^.*0x(\d|[abcdefABCDEF])+$/;
 	}
 
@@ -107,7 +107,7 @@ sub fromExp {
 	  $n_host = $::remoteIPChostIdx{$h[0]};
 	  return "remote_ipc_rcv[$n_host][$h[1]]";
 	} else {
-	  die "IPC Part $partName invalid: its name must be the hex address\n"
+	  die "IPC Part $partName invalid: its name must be the hex address or host:port:addr for remote IPC\n"
 		unless $partName =~ /^.*0x(\d|[abcdefABCDEF])+$/;
 	  my $addressString = $partName;
 	  $addressString =~ s/^.*(0x(\d|[abcdefABCDEF])+)$/\1/g;
@@ -133,7 +133,7 @@ sub frontEndCode {
 	  $n_host = $::remoteIPChostIdx{$h[0]};
 	  return "remote_ipc_send[$n_host][$h[1]] = $::fromExp[0];\n";
 	} else {
-	  die "RfmIO Part $partName invalid: its name must be the hex address\n" unless
+	  die "IPC Part $partName invalid: its name must be the hex address or host:port:addr for remote IPC\n" unless
 		$partName =~ /^.*0x(\d|[abcdefABCDEF])+$/;
 	  my $addressString = $partName;
 	  $addressString =~ s/^.*(0x(\d|[abcdefABCDEF])+)$/\1/g;

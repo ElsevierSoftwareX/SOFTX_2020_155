@@ -1610,7 +1610,7 @@ if ($remoteIPChosts) {
 	print OUT "CDS_REMOTE_NODES remote_nodes[] = {\n";
 	foreach (@remoteIPCnodes) {
 		@f = /(\w+):(\d+)/g;
-		print OUT "\t{\"$f[0]\", $f[1]}\n";
+		print OUT "\t{\"$f[0]\", $f[1]},\n";
 	}
 	print OUT "};\n\n";
 }
