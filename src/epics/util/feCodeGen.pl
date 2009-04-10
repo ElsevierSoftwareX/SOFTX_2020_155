@@ -227,9 +227,15 @@ $feTailCode = "";
 # Remote IPC hosts total number
 $remoteIPChosts = 0;
 
+# Remote IPC nodes (host:port) mapped to index
+%remoteIPChostIdx;
+
+# Remote IPC nodes in a list
+@remoteIPCnodes;
+
 # Can only connect to this many remote IPC hosts
 # and send this many variables
-$maxRemoteIPCHosts = 2;
+$maxRemoteIPCHosts = 4;
 $maxRemoteIPCVars = 4;
 
 
@@ -1599,6 +1605,14 @@ if ($remoteIPChosts) {
 	print OUT "// Remote IPC buffers\n";
 	print OUT "double remote_ipc_send[$remoteIPChosts][$maxRemoteIPCVars];\n";
 	print OUT "double remote_ipc_rcv[$remoteIPChosts][$maxRemoteIPCVars];\n\n";
+
+	print OUT "// Remote IPC nodes\n";
+	print OUT "CDS_REMOTE_NODES remote_nodes[] = {\n";
+	foreach (@remoteIPCnodes) {
+		@f = /(\w+):(\d+)/g;
+		print OUT "\t{\"$f[0]\", $f[1]}\n";
+	}
+	print OUT "};\n\n";
 }
 
 sub printVariables {

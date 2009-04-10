@@ -48,6 +48,12 @@ typedef struct CDS_CARDS {
 	int instance;
 } CDS_CARDS;
 
+/* Remote IPC nodes configuration */
+typedef struct CDS_REMOTE_NODES {
+	char nodename[64]; /* Host name */
+	int port;	   /* port number; we can have multiple FEs on same host */
+} CDS_REMOTE_NODES;
+
 /* Standard structure to maintain PCI module information.			*/
 typedef struct CDS_HARDWARE{
 	int dacCount;			/* Number of DAC modules found 		*/
