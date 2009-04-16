@@ -82,6 +82,8 @@ sub printHeaderStruct {
 			} elsif ($spp[0] eq "specific_cpu") {
 				print "FE will run on CPU $spp[1]\n";
 				$::specificCpu = $spp[1];
+			} elsif ($spp[0] eq "remote_ipc_port") {
+				$::remoteIPCport = $spp[1];
 			}
 		}
 	}

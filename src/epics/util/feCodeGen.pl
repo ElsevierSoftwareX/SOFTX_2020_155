@@ -238,6 +238,8 @@ $remoteIPChosts = 0;
 $maxRemoteIPCHosts = 4;
 $maxRemoteIPCVars = 4;
 
+# My remote IPC MX port
+$remoteIPCport = 0;
 
 # Remove leading subsystems name
 sub remove_subsystem {
@@ -1606,6 +1608,9 @@ if ($remoteIPChosts) {
 	print OUT "double remote_ipc_send[$remoteIPChosts][$maxRemoteIPCVars];\n";
 	print OUT "double remote_ipc_rcv[$remoteIPChosts][$maxRemoteIPCVars];\n\n";
 
+	print OUT "// Remote IPC node number\n";
+	my $nodes = @remoteIPCnodes;
+	print OUT "unsigned int cds_remote_ipc_nodes = $nodes;\n\n";
 	print OUT "// Remote IPC nodes\n";
 	print OUT "CDS_REMOTE_NODES remote_nodes[] = {\n";
 	foreach (@remoteIPCnodes) {
@@ -1613,6 +1618,9 @@ if ($remoteIPChosts) {
 		print OUT "\t{\"$f[0]\", $f[1]},\n";
 	}
 	print OUT "};\n\n";
+	print OUT "// My remote IPC MX port\n";
+	print OUT "unsigned int remote_ipc_mx_port = $remoteIPCport;\n";
+	print OUT "\n";
 }
 
 sub printVariables {
@@ -2110,7 +2118,7 @@ print OUTM "\n";
 print OUTM "\n";
 print OUTM "TARGET_RTL := $skeleton";
 print OUTM "fe\.rtl\n";
-print OUTM "LIBRARY_OBJS := map.o myri.o fb.o\n";
+print OUTM "LIBRARY_OBJS := map.o myri.o myriexpress.o  fb.o\n";
 print OUTM "LDFLAGS_\$(TARGET_RTL) := -g \$(LIBRARY_OBJS)\n";
 print OUTM "\n";
 print OUTM "\$(TARGET_RTL): \$(LIBRARY_OBJS)\n";
@@ -2122,6 +2130,8 @@ print OUTM "map.o: ../map.c\n";
 print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
 print OUTM "myri.o: ../myri.c\n";
 print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
+print OUTM "myriexpress.o: ../myriexpress.c\n";
+print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DMX_KERNEL=1 -c \$<\n";
 print OUTM "fb.o: ../fb.c\n";
 print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
 print OUTM "fm10Gen.o: fm10Gen.c\n";
@@ -2145,6 +2155,7 @@ print OUTM "\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
 print OUTM "CFLAGS += -I../../include\n";
 print OUTM "CFLAGS += -I/opt/gm/include\n";
+print OUTM "CFLAGS += -I/opt/mx/include\n";
 
 if($rate == 480) { print OUTM "CFLAGS += -DSERVO2K\n"; }
 elsif($rate == 60) { print OUTM "CFLAGS += -DSERVO16K\n"; }
@@ -2182,6 +2193,13 @@ if ($no_daq) {
 } else {
   print OUTM "#Uncomment to disable DAQ and testpoints\n";
   print OUTM "#CFLAGS += -DNO_DAQ\n";
+}
+if ($remoteIPChosts) {
+  print OUTM "#Comment out to disable remote IPC over MX\n";
+  print OUTM "CFLAGS += -DUSE_MX=1\n";
+} else {
+  print OUTM "#Uncomment to enable remote IPC over MX\n";
+  print OUTM "#CFLAGS += -DUSE_MX=1\n";
 }
 if ($shmem_daq) {
   print OUTM "#Comment out to disable local frame builder connection; uncomment USE_GM setting too\n";
