@@ -1608,9 +1608,11 @@ if ($remoteIPChosts) {
 	print OUT "double remote_ipc_send[$remoteIPChosts][$maxRemoteIPCVars];\n";
 	print OUT "double remote_ipc_rcv[$remoteIPChosts][$maxRemoteIPCVars];\n\n";
 
-	print OUT "// Remote IPC node number\n";
+	print OUT "// The number of remote IPC nodes\n";
 	my $nodes = @remoteIPCnodes;
-	print OUT "unsigned int cds_remote_ipc_nodes = $nodes;\n\n";
+	print OUT "unsigned int cds_remote_ipc_nodes = $nodes;\n";
+	print OUT "// The size of remote IPC data buffer\n";
+	print OUT "unsigned int cds_remote_ipc_size = $maxRemoteIPCVars;\n\n";
 	print OUT "// Remote IPC nodes\n";
 	print OUT "CDS_REMOTE_NODES remote_nodes[] = {\n";
 	foreach (@remoteIPCnodes) {
