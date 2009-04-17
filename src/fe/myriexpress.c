@@ -26,6 +26,12 @@
 uint32_t board_id = MX_ANY_NIC;
 uint32_t filter = FILTER;
 
+// This is the default board rank
+static const uint32_t default_board_rank = 1;
+
+// How long to wait for connection is milliseconds
+static const uint32_t connection_wait_time = 1000;
+
 // This node's MX end-point handle
 // All MX communication is done using this handle
 mx_endpoint_t ep;
@@ -41,6 +47,8 @@ void cds_mx_rcv() {
 };
 
 int cds_mx_init () {
+  int i;
+
   mx_init();
   extern CDS_REMOTE_NODES remote_nodes[];
   extern unsigned int cds_remote_ipc_nodes;
@@ -59,6 +67,29 @@ int cds_mx_init () {
   printk("Opened MX endpoint\n");
 
   // Connect to all nodes
+  for (i = 0; i < cds_remote_ipc_nodes; i++) {
+    mx_endpoint_addr_t dest;
+    uint64_t his_nic_id;
+    uint16_t his_eid = remote_nodes[i].port;
+    mx_return_t ret;
+
+    char node[128];
+    sprintf(node,"%s:%d", remote_nodes[i].nodename, default_board_rank);
+    ret = mx_hostname_to_nic_id(node, &his_nic_id);
+    if (ret != MX_SUCCESS) {
+	printk("Mx host \"%s\" not found\n", remote_nodes[i].nodename);
+  	continue;
+    }
+    ret = mx_connect(ep, his_nic_id, his_eid, filter, connection_wait_time, &dest);
+    if (ret != MX_SUCCESS) {
+	printk("Mx connect failed to node \"%s\", %s\n", node, mx_strerror(ret));
+	continue;
+    } else {
+	printk("Sucessfully connected to node %s\n", node);
+    }
+  }
+
+  cds_mx_finalize();
 }
 
 void cds_mx_finalize() {
