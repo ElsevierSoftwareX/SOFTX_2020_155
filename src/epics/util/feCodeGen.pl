@@ -1503,6 +1503,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 }
 print EPICS "\n\n";
 print OUTH "} \U$systemName;\n\n";
+
 print EPICS "MOMENTARY VME_RESET epicsInput.vmeReset int ai 0\n";
 print EPICS "MOMENTARY DIAG_RESET epicsInput.diagReset int ai 0\n";
 print EPICS "MOMENTARY SYNC_RESET epicsInput.syncReset int ai 0\n";
@@ -1605,8 +1606,8 @@ print OUT "};\n\n";
 # Define remote IPC stuff (if any)
 if ($remoteIPChosts) {
 	print OUT "// Remote IPC buffers\n";
-	print OUT "double remote_ipc_send[$remoteIPChosts][$maxRemoteIPCVars];\n";
-	print OUT "double remote_ipc_rcv[$remoteIPChosts][$maxRemoteIPCVars];\n\n";
+	print OUT "double remote_ipc_send[$maxRemoteIPCHosts][$maxRemoteIPCVars];\n";
+	print OUT "double remote_ipc_rcv[$maxRemoteIPCHosts][$maxRemoteIPCVars];\n\n";
 
 	print OUT "// The number of remote IPC nodes\n";
 	my $nodes = @remoteIPCnodes;
@@ -2083,6 +2084,11 @@ print OUTH "\tCDS_EPICS_IN epicsInput;\n";
 print OUTH "\tCDS_EPICS_OUT epicsOutput;\n";
 print OUTH "\t\U$systemName \L$systemName;\n";
 print OUTH "} CDS_EPICS;\n";
+
+if ($remoteIPChosts) {
+	print OUTH "#define MAX_REMOTE_IPC_VARS $maxRemoteIPCVars\n";
+	print OUTH "#define MAX_REMOTE_IPC_HOSTS $maxRemoteIPCHosts\n";
+}
 
 
 if($partsRemaining != 0) {
