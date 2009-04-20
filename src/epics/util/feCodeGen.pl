@@ -270,7 +270,8 @@ init_vars();
 
 # Parser input file (Simulink model)
 require "lib/Parser1.pm";
-open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
+#open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
+open(IN,"<".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 die unless CDS::Parser::parse();
 close(IN);
 
@@ -280,7 +281,9 @@ CDS::ParsingDiagnostics::print_diagnostics("parser_diag_good.txt");
 
 init_vars();
 require "lib/Parser2.pm";
-open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
+#print "###################   mdl file is $ARGV[0] #############\n";
+#open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
+open(IN,"<".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 die unless CDS::Parser::parse();
 close(IN);
 
@@ -392,7 +395,10 @@ $foundSysCon = 0;
 			if($partOutput[$ii][$jj] eq $partName[$xx])
 			{
 				$fromNum = $partInNum[$ii][0]; # OUTPUT part has only one input!
-				$fromPort = $partInputPort[$ii][$jj];
+#  If OUTPUT part has only one input, then the line below can NOT be correct!
+#				$fromPort = $partInputPort[$ii][$jj];
+#  Replace with the following line:
+				$fromPort = $partInputPort[$ii][0];
 				for($xxx=0;$xxx<$partOutCnt[$fromNum];$xxx++)
 				{
 					if($xpartName[$ii] eq $partOutput[$fromNum][$xxx])
@@ -411,7 +417,10 @@ $foundSysCon = 0;
 #print "$xpartName[$fromNum] $fromPort\n\n";
                        		# $partSysFromx[$xx][$fromCnt[$xx]] = $partSubNum[$ii];
 				# Make input connection at destination part
-				$fromPort = $partInputPort[$ii][$jj];
+#  If OUTPUT part has only one input, then the line below can NOT be correct!
+#				$fromPort = $partInputPort[$ii][$jj];
+#  Replace with the following line:
+ 				$fromPort = $partInputPort[$ii][0];
 				$qq = $partOutputPort[$ii][$jj] - 1;
 				$partInput[$xx][$qq] = $xpartName[$fromNum];
 				$partInputType[$xx][$qq] = $partType[$fromNum];
@@ -2257,7 +2266,12 @@ if ($specificCpu > -1) {
   print OUTM "#Uncomment to run on a specific CPU\n";
   print OUTM "#CFLAGS += -DSPECIFIC_CPU=2\n";
 }
-print OUTM "CFLAGS += -DKBUILD_MODNAME=1";
+
+print OUTM "\n";
+print OUTM "ifneq (\$(CDIR),)\n";
+print OUTM "override CFLAGS += \$(patsubst %,-I../../../%,\$(CDIR))\n";
+print OUTM "endif\n";
+
 print OUTM "\n";
 print OUTM "all: \$(ALL)\n";
 print OUTM "\n";
