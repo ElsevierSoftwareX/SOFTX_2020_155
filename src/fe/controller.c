@@ -614,7 +614,7 @@ void *fe_start(void *arg)
 	if(cdsPciModules.doType[kk] == ACS_8DIO)
 	{
 	  if (rioReadOps[ii] & 1) rioInputInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
-	  if (rioReadOps[ii] & 2) rioInputOutput[ii] = readIiroDioOutputs(&cdsPciModules, kk) & 0xff;
+	  if (rioReadOps[ii] & 2) rioInputOutput[ii] = readIiroDioOutput(&cdsPciModules, kk) & 0xff;
 	}
 	if(cdsPciModules.doType[kk] == ACS_16DIO)
 	{
@@ -1173,7 +1173,7 @@ void *fe_start(void *arg)
                 if(cdsPciModules.doType[kk] == ACS_8DIO)
                 {
 	  		if (rioReadOps[ii] & 1) rioInputInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
-	  		if (rioReadOps[ii] & 2) rioInputOutput[ii] = readIiroDioOutputs(&cdsPciModules, kk) & 0xff;
+	  		if (rioReadOps[ii] & 2) rioInputOutput[ii] = readIiroDioOutput(&cdsPciModules, kk) & 0xff;
                 }
                 if(cdsPciModules.doType[kk] == ACS_16DIO)
                 {
@@ -1271,6 +1271,8 @@ void *fe_start(void *arg)
 		}
 	}
 #endif
+
+	//if (0 == (clock16K % 128)) cds_mx_send();
 	}
 
 	skipCycle = 0;
@@ -1417,6 +1419,7 @@ int main(int argc, char **argv)
 
 	jj = 0;
 	printf("cpu clock %ld\n",cpu_khz);
+
 
 #ifdef RTAI_BUILD
 	_epics_shm = (unsigned char *)rtai_kmalloc(nam2num(SYSTEM_NAME_STRING_LOWER), 64*1024*1024);
@@ -1637,6 +1640,7 @@ int main(int argc, char **argv)
         sem_init (&irqsem, 1, 0);
 #endif
 
+	//cds_mx_init();
 
 #ifdef RTAI_BUILD
         RTIME tick_period;
@@ -1728,6 +1732,8 @@ out:
 	status = cdsDaqNetClose();
 #endif
 
+	//cds_mx_finalize();
+
 	printf("Killing work threads\n");
 	stop_working_threads = 1;
 
@@ -1767,6 +1773,7 @@ void cleanup_module (void) {
         rt_task_delete(&wthread);
         rtai_kfree(nam2num(SYSTEM_NAME_STRING_LOWER));
         rtai_kfree(nam2num("ipc"));
+
 
 #ifndef NO_CPU_DISABLE
 	// Reboot the cpu, brinnging it back to Linux
