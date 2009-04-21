@@ -46,7 +46,7 @@ int ep_opened = 0;
 // In order to send we need to get an empty request object
 // There will be a thread to go through requests and call mx_test() on them
 // If mx_test() returns success, then the request slot is freed.
-#define MAX_MXR 128
+#define MAX_MXR 16
 mx_request_t mxr[MAX_MXR];
 unsigned int  mxr_free[MAX_MXR];
 
@@ -75,10 +75,13 @@ void cds_mx_send() {
 	mx_status_t   status;
 	uint32_t    result = 0;
  	mx_return_t rc = mx_test(ep, &mxr[cur_mxr], &status, &result);
+        //printk("called mx_test()\n");
 	if (result == 0) {
 		// Request is still not complete, cancel it
 		mx_cancel(ep, &mxr[cur_mxr], &result);
+        	//printk("called mx_cancel()\n");
 	}
+	mxr_free[cur_mxr] = 1;
     }
 
     unsigned int bsize = sizeof(double)*MAX_REMOTE_IPC_VARS; // Buffers size for single host
@@ -87,9 +90,10 @@ void cds_mx_send() {
     seg.segment_ptr = data;
     seg.segment_length =  bsize;
     mx_kisend(ep, &seg, 1, MX_PIN_KERNEL, dest[i], MATCH_VAL, NULL, &mxr[cur_mxr]);
-    printk("send MX stuff\n");
+    ////printk("send MX stuff\n");
     mxr_free[cur_mxr] = 0;
     cur_mxr++;
+    cur_mxr %= MAX_MXR;
   };
 }
 
