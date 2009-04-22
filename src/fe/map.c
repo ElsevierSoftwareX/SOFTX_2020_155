@@ -29,6 +29,11 @@ volatile GSA_DAC_REG *dacPtr[MAX_DAC_MODULES];	/* Ptr to DAC registers */
 volatile VMIC5565_CSR *p5565Csr;
 
 
+int checkAdcDmaDone(int module)
+{
+	if((adcDma[module]->DMA_CSR & GSAI_DMA_DONE) == 0) return(0);
+	else return(1);
+}
 // *****************************************************************************
 // Function checks if DMA from ADC module is complete
 // Note: This function not presently used.
@@ -62,9 +67,9 @@ int gsaAdcTrigger(int adcCount, int adcType[])
   {
      if(adcType[ii] == GSC_16AI64SSA)
      {
-	  adcPtr[ii]->BCR &= ~(GSAI_DMA_DEMAND_MODE);
-	  adcDma[ii]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR | 0x1000;
-	  gsaAdcDma2(ii);
+	  // adcPtr[ii]->BCR &= ~(GSAI_DMA_DEMAND_MODE);
+	  adcDma[ii]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
+	  // gsaAdcDma2(ii);
 	  adcPtr[ii]->IDBC = (GSAI_CLEAR_BUFFER | GSAI_THRESHOLD);
 	  adcPtr[ii]->BCR |= GSAI_ENABLE_X_SYNC;
     }else{
@@ -109,25 +114,49 @@ int gsaAdcStop()
 // Test if ADC has a sample ready
 // Only to be used with 2MS/sec ADC module.
 // *****************************************************************************
-int checkAdcRdy(int count,int numAdc)
+int checkAdcRdy(int count,int numAdc,int type)
 {
   int dataCount;
 
-  // This is for the 2MS adc module
-  {
-	  int i = 0;
-          do {
-                dataCount = fadcPtr[0]->IN_BUF_SIZE;
-		if (i == 1000000) {
-			break;
-		}
-		i++;
-          }while(dataCount < (count / 8));
-	  if (i == 1000000) return -1;
-  }
+          int i = 0;
+          switch(type)
+          {
+#if 0
+                case GSC_18AI32SSC1M:
+                  do {
+                        dataCount = adcPtr[0]->BUF_SIZE;
+                        if (i == 1000000) {
+                                break;
+                        }
+                        i++;
+                  }while(dataCount < count);
+                  break;
+#endif
+                case GSC_16AI64SSA:
+                  do {
+                        dataCount = adcPtr[0]->BUF_SIZE;
+                        if (i == 1000000) {
+                                break;
+                        }
+                        i++;
+                  }while(dataCount < count);
+                  break;
+                // Default is GSC 2MHz ADC
+                default:
+                  do {
+                        dataCount = fadcPtr[0]->IN_BUF_SIZE;
+                        if (i == 1000000) {
+                                break;
+                        }
+                        i++;
+                  }while(dataCount < (count / 8));
+                break;
+          }
+          // If timeout, return error
+          if (i == 1000000) return -1;
   return(dataCount);
-
 }
+
 // *****************************************************************************
 // This routine sets up the DMA registers once on code initialization.
 // *****************************************************************************
@@ -155,6 +184,22 @@ void gsaAdcDma2(int modNum)
 {
   adcDma[modNum]->DMA_CSR = GSAI_DMA_START;
 }
+
+// *****************************************************************************
+// This routine sets up the DAC DMA registers.
+// It is only called once to set up the number of bytes to be preloaded into
+// the DAC prior to fe code realtime loop.
+// *****************************************************************************
+int dacDmaPreload(int modNum, int samples)
+{
+          dacDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
+          dacDma[modNum]->DMA0_PCI_ADD = (int)dac_dma_handle[modNum];
+          dacDma[modNum]->DMA0_LOC_ADD = 0x18;
+          dacDma[modNum]->DMA0_BTC = 0x20 * samples;
+          dacDma[modNum]->DMA0_DESC = 0x0;
+  return(1);
+}
+
 
 // *****************************************************************************
 // This routine sets up the DAC DMA registers once on code initialization.
@@ -504,7 +549,8 @@ int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
   do {
   }while((adcPtr[devNum]->BCR & GSAI_AUTO_CAL) != 0);
   adcPtr[devNum]->RAG |= GSAI_SAMPLE_START;
-  adcPtr[devNum]->IDBC = (GSAI_CLEAR_BUFFER | GSAI_THRESHOLD);
+  adcPtr[devNum]->IDBC = (GSAI_CLEAR_BUFFER | 0xff);
+  // adcPtr[devNum]->IDBC = (GSAI_CLEAR_BUFFER | GSAI_THRESHOLD);
   adcPtr[devNum]->SSC = (GSAI_64_CHANNEL | GSAI_EXTERNAL_SYNC);
   printk("SSC = 0x%x\n",adcPtr[devNum]->SSC);
   printk("IDBC = 0x%x\n",adcPtr[devNum]->IDBC);
