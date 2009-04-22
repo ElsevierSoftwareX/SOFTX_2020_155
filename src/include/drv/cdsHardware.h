@@ -29,7 +29,7 @@
 
 /* Define maximum number of each PCI module supported.				*/
 #define MAX_ADC_MODULES		8
-#define MAX_DAC_MODULES		4
+#define MAX_DAC_MODULES		8
 #define MAX_DIO_MODULES		4
 #define MAX_RFM_MODULES		2
 #define MAX_VME_BRIDGES		4
@@ -41,6 +41,7 @@
 #define CON_32DO		4
 #define ACS_16DIO		5
 #define ACS_8DIO		6
+#define GSC_18AI32SSC1M		7
 
 /* Cards configuration */
 typedef struct CDS_CARDS {
@@ -90,6 +91,14 @@ typedef struct CDS_HARDWARE{
 	int cards;			/* Sizeof array below */
 	CDS_CARDS *cards_used;		/* Cards configuration */
 }CDS_HARDWARE;
+
+typedef struct IO_MEM_DATA{
+	int adcCycle[8][64];
+	int dacCycle[8][64];
+	int adcVal[8][64][32];
+	int dacVal[8][64][32];
+	int digOut[8];
+}IO_MEM_DATA;
 
 /* ACCESS DIO Module Definitions ********************************************** */
 #define ACC_VID	0x494F
@@ -151,9 +160,9 @@ typedef struct GSA_ADC_REG{
         unsigned int RAG;       /* 0x10 */
         unsigned int RBG;       /* 0x14 */
         unsigned int BUF_SIZE;  /* 0x18 */
-        unsigned int rsv1;      /* 0x1c */
+        unsigned int BRT_SIZE;      /* 0x1c */
         unsigned int SSC;       /* 0x20 */
-        unsigned int rsv2;      /* 0x24 */
+        unsigned int ACA;      /* 0x24 */
         unsigned int ASSC;     /* 0x28 */
         unsigned int AC_VAL;    /* 0x2c */
         unsigned int AUX_RWR;   /* 0x30 */
@@ -170,6 +179,7 @@ typedef struct GSA_ADC_REG{
 #define GSAI_RESET              0x8000
 #define GSAI_DATA_PACKING       0x40000
 #define GSAI_DMA_MODE_NO_INTR   0x10943
+#define GSAI_DMA_MODE_NO_INTR_DEMAND   0x20943
 #define GSAI_DMA_MODE_INTR      0x10D43
 #define GSAI_DMA_LOCAL_ADDR     0x8
 #define GSAI_DMA_TO_PCI         0xA
@@ -187,6 +197,7 @@ typedef struct GSA_ADC_REG{
 #define GSAI_THRESHOLD       	0x001f
 #define GSAI_AUTO_CAL           0x2000
 #define GSAI_DMA_DEMAND_MODE    0x80000
+#define GSAI_18BIT_DATA		0x100000
 
 /* GSA DAC Module Definitions ********************************************************* */
 /* Structure defining DAC module PCI register layout	*/
@@ -211,9 +222,11 @@ typedef struct GSA_DAC_REG{
 #define GSAO_EXTERN_CLK         0x10
 #define GSAO_ENABLE_CLK         0x20
 #define GSAO_SFT_TRIG           0x80
+#define GSAO_CLR_BUFFER         0x800
 #define GSAO_FIFO_16            0x1
 #define GSAO_FIFO_512           6
 #define GSAO_FIFO_1024          7
+#define GSAO_FIFO_2048          8
 
 #define VMIC_VID		0x114a
 #define VMIC_TID		0x5565
