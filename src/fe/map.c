@@ -68,7 +68,7 @@ int gsaAdcTrigger(int adcCount, int adcType[])
      if(adcType[ii] == GSC_16AI64SSA)
      {
 	  // adcPtr[ii]->BCR &= ~(GSAI_DMA_DEMAND_MODE);
-	  adcDma[ii]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
+	  adcDma[ii]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR_DEMAND;
 	  // gsaAdcDma2(ii);
 	  adcPtr[ii]->IDBC = (GSAI_CLEAR_BUFFER | GSAI_THRESHOLD);
 	  adcPtr[ii]->BCR |= GSAI_ENABLE_X_SYNC;
