@@ -1,3 +1,9 @@
+// Wed Apr 22 15:18:53 PDT 2009
+// We thought and decided to abondon the idea of using MX in real-time
+// in favour of good old reflective memory 
+// mx_kisend() call tested in various MX driver modes and it always
+// crashed the kernel
+
 #ifdef USE_MX
 #include <linux/types.h>
 #include <linux/pci.h>
@@ -71,29 +77,42 @@ void cds_mx_send() {
   for (i = 0; i < cds_remote_ipc_nodes; i++) {
     if (!dest_connected[i]) continue;
 
+#if 0
     if (!mxr_free[cur_mxr]) {
 	mx_status_t   status;
 	uint32_t    result = 0;
  	mx_return_t rc = mx_test(ep, &mxr[cur_mxr], &status, &result);
         //printk("called mx_test()\n");
-	if (result == 0) {
+        if (rc != MX_SUCCESS) {
+      	  printk("mx_test failed; %s\n", mx_strerror(rc));
+        } else if (result == 0) {
 		// Request is still not complete, cancel it
 		mx_cancel(ep, &mxr[cur_mxr], &result);
         	//printk("called mx_cancel()\n");
 	}
 	mxr_free[cur_mxr] = 1;
     }
+#endif
 
     unsigned int bsize = sizeof(double)*MAX_REMOTE_IPC_VARS; // Buffers size for single host
     void *data = (void *)&remote_ipc_send[i][0];
     mx_ksegment_t seg;
     seg.segment_ptr = data;
     seg.segment_length =  bsize;
-    mx_kisend(ep, &seg, 1, MX_PIN_KERNEL, dest[i], MATCH_VAL, NULL, &mxr[cur_mxr]);
-    ////printk("send MX stuff\n");
-    mxr_free[cur_mxr] = 0;
-    cur_mxr++;
-    cur_mxr %= MAX_MXR;
+    mx_request_t req;
+
+    //printk("send MX stuff\n");
+    mx_return_t ret = mx_kisend(ep, &seg, 1, MX_PIN_KERNEL, dest[i], MATCH_VAL, NULL, &req /*&mxr[cur_mxr]*/);
+    if (ret != MX_SUCCESS) {
+      printk("mx_kisend failed; %s\n", mx_strerror(ret));
+    } else {
+	mx_forget(ep, &req);
+/*
+        mxr_free[cur_mxr] = 0;
+        cur_mxr++;
+        cur_mxr %= MAX_MXR;
+*/
+    }
   };
 }
 
