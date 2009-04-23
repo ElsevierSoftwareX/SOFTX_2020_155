@@ -120,7 +120,7 @@ extern unsigned int cpu_khz;
 	#define DAQ_RATE	(DAQ_16K_SAMPLE_SIZE*4)
 	#define NET_SEND_WAIT		(2*81920)
 	#define CYCLE_TIME_ALRM		15
-	#define DAC_START_DELAY		5
+	#define DAC_PRELOAD_CNT		0
 #endif
 #ifdef SERVO32K
 	#define CYCLE_PER_SECOND	32768
@@ -130,7 +130,7 @@ extern unsigned int cpu_khz;
 	#define DAQ_RATE	(DAQ_16K_SAMPLE_SIZE*2)
 	#define NET_SEND_WAIT		(2*81920)
 	#define CYCLE_TIME_ALRM		30
-	#define DAC_START_DELAY		10
+	#define DAC_PRELOAD_CNT		0
 #endif
 
 #ifdef SERVO16K
@@ -141,7 +141,7 @@ extern unsigned int cpu_khz;
 	#define DAQ_RATE	DAQ_16K_SAMPLE_SIZE
 	#define NET_SEND_WAIT		81920
 	#define CYCLE_TIME_ALRM		70
-	#define DAC_START_DELAY		40
+	#define DAC_PRELOAD_CNT		3
 #endif
 #ifdef SERVO2K
 	#define CYCLE_PER_SECOND	2048
@@ -151,7 +151,7 @@ extern unsigned int cpu_khz;
 	#define DAQ_RATE	DAQ_2K_SAMPLE_SIZE
 	#define NET_SEND_WAIT		10240
 	#define CYCLE_TIME_ALRM		487
-	#define DAC_START_DELAY		468
+	#define DAC_PRELOAD_CNT		16
 #endif
 
 #ifndef NO_DAQ
@@ -300,49 +300,6 @@ int initialDiagReset = 1;
 #define FE_FB_ONLINE		0x2
 #define FE_MAX_FB_QUE		0x10
 
-#if 0
-// **************************************************************************
-// Interrupt handler if using interrupts for ADC module
-// **************************************************************************
-unsigned int intr_handler(unsigned int irq, struct rtl_frame *regs)
-{
-  unsigned int status;
-  unsigned char sid;
-        /* pend this IRQ so that the general purpose OS gets it, too */
-        rtl_global_pend_irq(irq);
-
-
-        /*
-         * Do any interrupt context handling that must be done right away.
-         * This code is not running in a RTLinux thread but in an
-         * "interrupt context".
-         */
-
-        adcPtr->INTCR = 0x3;
-
-
-
-        /*
-         * Wake up the thread so it can handle any processing for this irq
-         * that can be done in a RTLinux thread and doesn't need to be done in
-         * an "interrupt context".
-         */
-        sem_post( &irqsem );
-
-        /* Reenable the hardware IRQ. (Not the software IRQ the GPOS now has. */
-        rtl_hard_enable_irq(irq);
-        return 0;
-}
-#endif
-
-void writeIiroDio(CDS_HARDWARE *pHardware, int modNum, int data);
-void writeIiroDio1(CDS_HARDWARE *pHardware, int modNum, int data);
-unsigned int writeCDO32l(CDS_HARDWARE *pHardware, int modNum, unsigned int data);
-unsigned int readIiroDio1(CDS_HARDWARE *pHardware, int modNum);
-unsigned int readIiroDio(CDS_HARDWARE *pHardware, int modNum);
-unsigned int readCDO32l(CDS_HARDWARE *pHardware, int modNum);
-int gsaDacTrigger(int dacCount);
-
 static double getGpsTime1(unsigned int *ns, int event_flag) {
   double the_time = 0.0;
 
@@ -444,12 +401,6 @@ void *fe_start(void *arg)
   int mask = 0xffff;                    // Bit mask for ADC/DAC read/writes
   int num_outs = 16;                    // Number of DAC channels variable
 
-#ifdef IOP_TASK
-  volatile IO_MEM_DATA *ioMemData;
-  int ioMemCntr;
-
-#endif
-
 
 
 // Do all of the initalization
@@ -457,14 +408,6 @@ void *fe_start(void *arg)
   /* Init comms with EPICS processor */
   pEpicsComms = (RFM_FE_COMMS *)_epics_shm;
   pLocalEpics = (CDS_EPICS *)&pEpicsComms->epicsSpace;
-#ifdef IOP_TASK
-  ioMemData = (IO_MEM_DATA *)(_ipc_shm + 0x4000);
-  if(ioMemData <= 0) {
-	printf("memerror\n");
-  return(-1);
-  }
-
-#endif
 
 #ifdef OVERSAMPLE
   // Zero out filter histories
@@ -633,7 +576,6 @@ void *fe_start(void *arg)
   }
 #endif
 
-#ifndef IOP_TASK
 	//Read Dio card initial values
      for(kk=0;kk<cdsPciModules.doCount;kk++)
      {
@@ -652,7 +594,6 @@ void *fe_start(void *arg)
   	  CDO32Input[ii] = readCDO32l(&cdsPciModules, kk);
 	}
      }
-#endif
 
   // Clear the startup sync counter
   firstTime = 0;
@@ -690,14 +631,16 @@ void *fe_start(void *arg)
  	    *pDacData = 0; // (unsigned int) 10000; // for testing with the scope
 	    pDacData ++;
         }
-#ifndef IOP_TASK
-	// Arm DAC DMA for preload data size
-	status = dacDmaPreload(jj,8);
-	// DMA preload samples
-        gsaDacDma2(jj, cdsPciModules.dacType[jj]);
-	// Wait plenty of time for DMA to complete
-        usleep(1000);
-#endif
+	// Preload DAC values
+	if(DAC_PRELOAD_CNT)
+	{
+		// Arm DAC DMA for preload data size
+		status = dacDmaPreload(jj,DAC_PRELOAD_CNT);
+		// DMA preload samples
+		gsaDacDma2(jj, cdsPciModules.dacType[jj]);
+		// Wait plenty of time for DMA to complete
+		usleep(1000);
+	}
 
 	// Arm DAC DMA for full data size
 	status = gsaDacDma1(jj, cdsPciModules.dacType[jj]);
@@ -810,13 +753,6 @@ void *fe_start(void *arg)
 #endif
   cdsPciModules.gps = 0;
 
-  // Total number of various binary I/O modules
-  unsigned int total_bio_boards = cdsPciModules.dioCount
-			+ cdsPciModules.iiroDioCount
-			+ cdsPciModules.iiroDio1Count
-			+ cdsPciModules.cDo32lCount;
-  // 0 to total_bio_boards*2 counter
-  int cur_bio_card = 0; // Current binary I/O module we read or write
         rdtscl(adcTime);
 
   // Enter the coninuous FE control loop  **********************************************************
@@ -840,6 +776,7 @@ void *fe_start(void *arg)
           clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
 #endif
 	} else {
+	// NORMAL OPERATION -- Wait for first ADC data ready
         for(ll=0;ll<sampleCount;ll++)
             {
                 status = checkAdcRdy(ADC_SAMPLE_COUNT,0,cdsPciModules.adcType[0]);
@@ -851,38 +788,14 @@ void *fe_start(void *arg)
 		rdtscl(cpuClock[0]);
 
 		// Start ADC DMA reads
-                for(jj=0;jj<cdsPciModules.adcCount;jj++) gsaAdcDma2(jj);
-                // usleep(1);
-                for(jj=0;jj<cdsPciModules.adcCount;jj++) {
-                        packedData = (int *)cdsPciModules.pci_adc[jj];
-                        if(cdsPciModules.adcType[jj] == GSC_16AISS8AO4) packedData += 3;
-                        else if(cdsPciModules.adcType[jj] == GSC_18AISS8AO8) packedData += 3;
-                        else packedData += 31;
-                        kk = 0;
-                        // This seems to work for 18-bit board, not sure this is
-                        // completely correct
-                        if (cdsPciModules.adcType[jj] == GSC_18AISS8AO8) {
-                           do {
-                                kk ++;
-                           }while(((*packedData & 0x040000) > 0) && (kk < 10000000));
-                        } else {
-                           do {
-                                kk ++;
-                           }while(((*packedData & 0x110000) > 0) && (kk < 10000000));
-                        }
-                        if (kk == 10000000) {
-                                stop_working_threads = 1;
-                                printf("Adc %d timeout 1 %d\n", jj,status);
-                        }
-                }
+               for(jj=0;jj<cdsPciModules.adcCount;jj++) gsaAdcDma2(jj);
+	
                for(kk=0;kk<cdsPciModules.adcCount;kk++) {
-#if 0
+			// Wait for ADC DMA complete -- check DMA done bits
 			do{
-                usleep(1);
 			status = checkAdcDmaDone(kk);
 			}while(status == 0);
-		rdtscl(cpuClock[0]);
-#endif
+
                         // Read adc data into local variables
                         packedData = (int *)cdsPciModules.pci_adc[kk];
                         // Return 0x10 if first ADC channel does not have sync bit set
@@ -904,37 +817,22 @@ void *fe_start(void *arg)
                         if (cdsPciModules.adcType[kk] == GSC_16AISS8AO4) {
                                 num_outs = 4;
                         }
-#ifdef IOP_TASK
-			ioMemCntr = (clock16K % 64);
-#endif
-        #ifdef OVERSAMPLE
                         for(ii=0;ii<num_outs;ii++)
                         {
                                 adcData[kk][ii] = (*packedData & mask);
                                 adcData[kk][ii]  -= offset;
                                 dWord[kk][ii] = adcData[kk][ii];
+        #ifdef OVERSAMPLE
+				// Downsample filter only used channels
                                 if (dWordUsed[kk][ii]) {
                                         dWord[kk][ii] = iir_filter(dWord[kk][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+kk*32][0]);
 
                                 }
-                                packedData ++;
-                        }
-        #else
-                        for(ii=0;ii<num_outs;ii++)
-                        {
-                                adcData[kk][ii] = (*packedData & mask);
-                                adcData[kk][ii] -= offset;
-                                packedData ++;
-                                dWord[kk][ii] = adcData[kk][ii];
-#ifdef IOP_TASK
-				ioMemData->adcVal[kk][ioMemCntr][ii] = adcData[kk][ii];
-#endif
-                        }
-#ifdef IOP_TASK
-			ioMemData->adcCycle[kk][ioMemCntr] = clock16K;
-#endif
         #endif
-#ifndef IOP_TASK
+                                packedData ++;
+                        }
+
+			// Check for ADC overflows
                         for(ii=0;ii<num_outs;ii++)
                         {
                                 if((adcData[kk][ii] > limit) || (adcData[kk][ii] < -limit))
@@ -944,7 +842,6 @@ void *fe_start(void *arg)
                                         diagWord |= 0x100 *  jj;
                                   }
                         }
-#endif
                         // Clear out last ADC data read for test on next cycle
                         packedData = (int *)cdsPciModules.pci_adc[kk];
                         *packedData = 0x0;
@@ -1091,54 +988,6 @@ void *fe_start(void *arg)
 #endif
 
 	// Write out data to DAC modules
-#ifdef IOP_TASK
-        // Write out data to DAC modules
-                int limit = 32000;
-                int num_outs = 16;
-                ioMemCntr = (clock16K % 64);
-        for(jj=0;jj<cdsPciModules->dacCount;jj++)
-        {
-
-           nn = ioMemData->dacCycle[jj][ioMemCntr];
-           if(nn == clock16K) dacMult = 1.0;
-           else dacMult = 0.0;
-           if(jj==0)pLocalEpics->ts1.DACD_0_WD = dacMult;
-           if(jj==1)pLocalEpics->ts1.DACD_1_WD = dacMult;
-           if(jj==2)pLocalEpics->ts1.DACD_2_WD = dacMult;
-         // if((dacMult == 0.0) && (nn != -1)) printf("ex %d got %d\n",clock16K,nn);
-           ioMemData->dacCycle[jj][ioMemCntr]  = -1;
-           // Check Dac output overflow and write to DMA buffer
-           pDacData = (unsigned int *)cdsPciModules->pci_dac[jj];
-                for (ii=0; ii < num_outs; ii++)
-                {
-                        // ioMemData->dacVal[jj][ioMemCntr][ii] = clock16K;
-                        dacOut[jj][ii] = ioMemData->dacVal[jj][ioMemCntr][ii] * dacMult;
-                        if(dacOut[jj][ii] > limit)
-                        {
-                                dacOut[jj][ii] = limit;
-                                overflowDac[jj][ii] ++;
-                                // pLocalEpics->epicsOutput.ovAccum ++;
-                                overflowAcc ++;
-                                diagWord |= 0x1000 *  (jj+1);
-                        }
-                        if(dacOut[jj][ii] < -limit)
-                        {
-                                dacOut[jj][ii] = -limit;
-                                overflowDac[jj][ii] ++;
-                                // pLocalEpics->epicsOutput.ovAccum ++;
-                                overflowAcc ++;
-                                diagWord |= 0x1000 *  (jj+1);
-                        }
-                          int dac_out = dacOut[jj][ii];
-                        //if (ii == 0) printf("%d\n", dac_out);
-                          *pDacData =  (unsigned int)(dac_out);
-                          pDacData ++;
-                }
-           gsaDacDma2(jj,cdsPciModules->dacType[jj]);
-        }
-
-
-#else
 	for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	{
 	   // Check Dac output overflow and write to DMA buffer
@@ -1204,9 +1053,7 @@ void *fe_start(void *arg)
   	   // DMA out dac values
 	   gsaDacDma2(jj,cdsPciModules.dacType[jj]);
 	}
-#endif
 
-#ifndef IOP_TASK
  // Read Dio cards once per second
         if(clock16K < cdsPciModules.doCount)
         {
@@ -1245,7 +1092,6 @@ void *fe_start(void *arg)
                         }
                 }
         }
-#endif
 
 
 #ifndef NO_DAQ
@@ -1532,6 +1378,11 @@ int main(int argc, char **argv)
           //return -1;
 	}
 	printf("Initializing PCI Modules\n");
+	cdsPciModules.adcCount = 0;
+	cdsPciModules.dacCount = 0;
+	cdsPciModules.dioCount = 0;
+	cdsPciModules.doCount = 0;
+
 	status = mapPciModules(&cdsPciModules);
 	printf("%d PCI cards found\n",status);
 #ifdef ONE_ADC
