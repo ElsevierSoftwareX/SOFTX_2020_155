@@ -15,6 +15,7 @@ int gsaDacDma1(int,int);		/* Setup DAC DMA registers.	*/
 void gsaDacDma2(int,int);	/* Send GO bit to DAC DMA registers.*/
 unsigned int readDio(CDS_HARDWARE *,int);
 unsigned int readIiroDio(CDS_HARDWARE *,int);
+unsigned int readIiroDioOutput(CDS_HARDWARE *,int);
 unsigned int readIiroDio1(CDS_HARDWARE *,int);
 unsigned int readCDO32l(CDS_HARDWARE *,int);
 /*int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev);*/
@@ -22,6 +23,7 @@ void writeDio(CDS_HARDWARE *, int, int);
 void writeIiroDio(CDS_HARDWARE *, int, int);
 void writeIiroDio1(CDS_HARDWARE *, int, int);
 unsigned int writeCDO32l(CDS_HARDWARE *, int, unsigned int);
+int dacDmaPreload(int, int);
 
 #ifdef OVERSAMPLE
 #ifdef SERVO2K
