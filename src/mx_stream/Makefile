@@ -2,7 +2,7 @@ SHELL = /bin/sh
 
 bindir = ${exec_prefix}/bin
 exec_prefix = ${prefix}
-prefix = /opt/mx
+prefix = /opt/open-mx
 top_srcdir = ..
 srcdir = .
 VPATH = ./../common:./../common/bsd
@@ -21,13 +21,13 @@ TARGETS=$(SRC:.c=)
 # By using SRC instead of TARGETS, we pick up the Windows rules.
 all: $(SRC:.c=$(EXEEXT))
 
-CFLAGS = -I/opt/mx/include -I.
+CFLAGS = -I${prefix}/include -I.
 CFLAGS += -Wall -O3
 CFLAGS += $(OPTIM_CFLAGS)
 CPPFLAGS = -I../common -I$(top_srcdir)/common -I$(top_srcdir)/common/bsd
 #CPPFLAGS += -DMX_THREAD_SAFE=$(MX_THREAD_SAFE)
 
-LDFLAGS = -L/opt/mx/lib64 -lmyriexpress -lpthread 
+LDFLAGS = -L${prefix}/lib64 -lmyriexpress -lpthread 
 #M_OS_MACOSX#LDFLAGS += 
 
 # sem_post used by mx_wakeup_test.c requires the rt library on Solaris
