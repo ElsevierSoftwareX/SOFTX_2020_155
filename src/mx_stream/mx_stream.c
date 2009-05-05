@@ -166,7 +166,7 @@ receiver(mx_endpoint_t ep, uint32_t match_val, uint32_t filter)
 	}
 
 	/* start the test */
-mx_set_error_handler(MX_ERRORS_RETURN);
+//mx_set_error_handler(MX_ERRORS_RETURN);
 	gettimeofday(&start_time, NULL);
 		kk = 0;
 do{
@@ -185,6 +185,7 @@ do{
 		}
 		if (stat.code != MX_STATUS_SUCCESS) {
 			fprintf(stderr, "irecv failed with status %s\n", mx_strstatus(stat.code));
+			//fprintf(stderr, "irecv failed\n");
 			myErrorStat = 2;
 			// exit(1);
 		}
@@ -537,7 +538,7 @@ main(int argc, char **argv)
 		if (Verify) printf("Verifying results\n");
 
 		// Open shared memory to FE DAQ
-		if ((fd = open("/rtl_mem_tsc_daq", O_RDWR))<0) {
+		if ((fd = open(shmem_fname, O_RDWR))<0) {
 			fprintf(stderr, "Can't open shmem\n");
 			exit(1);
 	        }
