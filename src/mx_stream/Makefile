@@ -22,12 +22,12 @@ TARGETS=$(SRC:.c=)
 all: $(SRC:.c=$(EXEEXT))
 
 CFLAGS = -I${prefix}/include -I.
-CFLAGS += -Wall -O3
+CFLAGS += -Wall -g
 CFLAGS += $(OPTIM_CFLAGS)
 CPPFLAGS = -I../common -I$(top_srcdir)/common -I$(top_srcdir)/common/bsd
 #CPPFLAGS += -DMX_THREAD_SAFE=$(MX_THREAD_SAFE)
 
-LDFLAGS = -L${prefix}/lib64 -lmyriexpress -lpthread 
+LDFLAGS = -L${prefix}/lib64 -lmyriexpress -lpthread  -g
 #M_OS_MACOSX#LDFLAGS += 
 
 # sem_post used by mx_wakeup_test.c requires the rt library on Solaris
