@@ -141,7 +141,7 @@ extern unsigned int cpu_khz;
 	#define DAQ_RATE	DAQ_16K_SAMPLE_SIZE
 	#define NET_SEND_WAIT		81920
 	#define CYCLE_TIME_ALRM		70
-	#define DAC_PRELOAD_CNT		3
+	#define DAC_PRELOAD_CNT		2
 #endif
 #ifdef SERVO2K
 	#define CYCLE_PER_SECOND	2048
@@ -151,7 +151,7 @@ extern unsigned int cpu_khz;
 	#define DAQ_RATE	DAQ_2K_SAMPLE_SIZE
 	#define NET_SEND_WAIT		10240
 	#define CYCLE_TIME_ALRM		487
-	#define DAC_PRELOAD_CNT		16
+	#define DAC_PRELOAD_CNT		16	
 #endif
 
 #ifndef NO_DAQ
@@ -250,11 +250,20 @@ static double feCoeff4x[9] =
 	-1.71662585474518,    0.78495484219691,   -1.41346289716898,   0.99893884152400,
 	-1.68385964238855,    0.93734519457266,    0.00000127375260,   0.99819981588176};
 
+#if 0
 /* Coeffs for the 32x downsampling filter (2K system) */
+/* Original Rana coeffs from 40m lab elog */
 static double feCoeff32x[9] =
         {0.0001104130574447,
         -1.97018349613882,    0.97126719875540,   -1.99025960812101,    0.99988962634797,
         -1.98715023886379,    0.99107485707332,    2.00000000000000,    1.00000000000000};
+#endif
+
+/* Coeffs for the 32x downsampling filter (2K system) per Brian Lantz May 5, 2009 */
+static double feCoeff32x[9] =
+	{0.010581064947739,
+        -1.90444302586137,    0.91078434629894,   -1.96090276933603,    0.99931924465090,
+        -1.92390910024681,    0.93366146580083,   -1.84652529182276,    0.99866506867980};
 
 
 double dHistory[96][40];
@@ -636,6 +645,7 @@ void *fe_start(void *arg)
 	{
 		// Arm DAC DMA for preload data size
 		status = dacDmaPreload(jj,DAC_PRELOAD_CNT);
+printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		// DMA preload samples
 		gsaDacDma2(jj, cdsPciModules.dacType[jj]);
 		// Wait plenty of time for DMA to complete
@@ -826,7 +836,6 @@ void *fe_start(void *arg)
 				// Downsample filter only used channels
                                 if (dWordUsed[kk][ii]) {
                                         dWord[kk][ii] = iir_filter(dWord[kk][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+kk*32][0]);
-
                                 }
         #endif
                                 packedData ++;
@@ -1013,7 +1022,7 @@ void *fe_start(void *arg)
 #ifdef OVERSAMPLE_DAC
 			if (dacOutUsed[jj][ii]) {
 #ifdef NO_ZERO_PAD
-			  dac_in =  (double)dacOut[jj][ii];
+		 	  dac_in = dacOut[jj][ii];
 		 	  dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
 #else
 			  dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
