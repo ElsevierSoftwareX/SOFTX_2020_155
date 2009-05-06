@@ -184,7 +184,8 @@ do{
 			// exit(1);
 		}
 		if (stat.code != MX_STATUS_SUCCESS) {
-			fprintf(stderr, "irecv failed with status %s\n", mx_strstatus(stat.code));
+			// This line seems to fail on openmx
+			//fprintf(stderr, "irecv failed with status %s\n", mx_strstatus(stat.code));
 			//fprintf(stderr, "irecv failed\n");
 			myErrorStat = 2;
 			// exit(1);
