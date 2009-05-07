@@ -83,6 +83,9 @@ volatile int stop_working_threads = 0;
 extern unsigned int cpu_khz;
 #define CPURATE	(cpu_khz/1000)
 #define ONE_PPS_THRESH 2000
+#define SYNC_SRC_NONE		0
+#define SYNC_SRC_IRIG_B		1
+#define SYNC_SRC_1PPS		2
 
 // #include "fpvalidate.h"		/* Valid FP number ck			*/
 #ifndef NO_DAQ
@@ -129,7 +132,8 @@ extern unsigned int cpu_khz;
 	#define END_OF_DAQ_BLOCK	2047
 	#define DAQ_RATE	(DAQ_16K_SAMPLE_SIZE*2)
 	#define NET_SEND_WAIT		(2*81920)
-	#define CYCLE_TIME_ALRM		30
+	#define CYCLE_TIME_ALRM_HI	38
+	#define CYCLE_TIME_ALRM_LO	25
 	#define DAC_PRELOAD_CNT		0
 #endif
 
@@ -140,7 +144,8 @@ extern unsigned int cpu_khz;
 	#define END_OF_DAQ_BLOCK	1023
 	#define DAQ_RATE	DAQ_16K_SAMPLE_SIZE
 	#define NET_SEND_WAIT		81920
-	#define CYCLE_TIME_ALRM		70
+	#define CYCLE_TIME_ALRM_HI	70
+	#define CYCLE_TIME_ALRM_LO	50
 	#define DAC_PRELOAD_CNT		2
 #endif
 #ifdef SERVO2K
@@ -151,6 +156,8 @@ extern unsigned int cpu_khz;
 	#define DAQ_RATE	DAQ_2K_SAMPLE_SIZE
 	#define NET_SEND_WAIT		10240
 	#define CYCLE_TIME_ALRM		487
+	#define CYCLE_TIME_ALRM_HI	500
+	#define CYCLE_TIME_ALRM_LO	460
 	#define DAC_PRELOAD_CNT		16	
 #endif
 
@@ -268,21 +275,6 @@ static double feCoeff32x[9] =
 
 double dHistory[96][40];
 double dDacHistory[96][40];
-
-#if 0
-#ifdef SERVO2K
-#define OVERSAMPLE_TIMES	32
-#define FE_OVERSAMPLE_COEFF	feCoeff32x
-#elif SERVO16K
-#define OVERSAMPLE_TIMES	4
-#define FE_OVERSAMPLE_COEFF	feCoeff4x
-#elif SERVO32K
-#define OVERSAMPLE_TIMES	2
-#define FE_OVERSAMPLE_COEFF	feCoeff2x
-#else
-#error Unsupported system rate when in oversampling mode: only 2K, 16K and 32K are supported
-#endif
-#endif
 
 #else
 
@@ -405,10 +397,12 @@ void *fe_start(void *arg)
   int dac_out = 0;
   int sampleCount = 1;
   int sync21pps = 0;
+  int sync21ppsCycles = 0;
   int limit = 32000;                    // ADC/DAC overflow test value
   int offset = 0; //0x8000;
   int mask = 0xffff;                    // Bit mask for ADC/DAC read/writes
   int num_outs = 16;                    // Number of DAC channels variable
+  int syncSource = SYNC_SRC_NONE;
 
 
 
@@ -455,6 +449,9 @@ void *fe_start(void *arg)
 #else
   unsigned int ns;
   double time = getGpsTime(&ns);
+  if(time != 0.0) syncSource = SYNC_SRC_IRIG_B;
+  else syncSource = SYNC_SRC_1PPS;
+  pLocalEpics->epicsOutput.timeErr = syncSource;
   printf("Waiting for EPICS BURT at %f and %d ns\n", time, ns);
 #endif
   do{
@@ -622,6 +619,7 @@ void *fe_start(void *arg)
   for(jj=0;jj<cdsPciModules.adcCount;jj++)
   {
 	  status = gsaAdcDma1(jj,cdsPciModules.adcType[jj],ADC_DMA_BYTES);
+#if 0
 	  packedData = (int *)cdsPciModules.pci_adc[jj];
 	  *packedData = 0x0;
 	  if (cdsPciModules.adcType[jj] == GSC_16AISS8AO4
@@ -629,6 +627,7 @@ void *fe_start(void *arg)
 		 packedData += 3;
 	  } else packedData += 31;
 	  *packedData = 0x110000;
+#endif
   }
 
   for(jj = 0; jj < cdsPciModules.dacCount; jj++) {
@@ -666,9 +665,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 #endif
 #endif
 
-#ifndef NO_SYNC
   if (run_on_timer) {
-#endif
    // See if GPS card present
    cycle_gps_time = getGpsTime(&cycle_gps_ns);
    if (cycle_gps_time != 0.0) {
@@ -734,19 +731,19 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
         printf("Running time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
 #endif
     }
-#ifndef NO_SYNC
   }
-#endif
 
   if (!run_on_timer) {
     // Trigger the ADC to start running
     gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
-#ifndef SYNC21PPS
+    if(syncSource == SYNC_SRC_IRIG_B)
+    {
     	gsaDacTrigger(cdsPciModules.dacCount);
+	sync21pps = 1;
 #ifndef RTAI_BUILD
   printf("Triggered the DAC\n");
 #endif
-#endif
+    }
   } else {
 #ifndef RTAI_BUILD
     printf("*******************************\n");
@@ -762,6 +759,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
   cdsPciModules.gps = 0;
 #endif
   cdsPciModules.gps = 0;
+		pLocalEpics->epicsOutput.onePps = clock16K;
 
         rdtscl(adcTime);
 
@@ -784,12 +782,16 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
     	    next.tv_nsec = 1000000000 / CYCLE_PER_SECOND * clock16K;
 	  }
           clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
+		rdtscl(cpuClock[0]);
 #endif
 	} else {
 	// NORMAL OPERATION -- Wait for first ADC data ready
         for(ll=0;ll<sampleCount;ll++)
             {
-                status = checkAdcRdy(ADC_SAMPLE_COUNT,0,cdsPciModules.adcType[0]);
+               // for(jj=0;jj<cdsPciModules.adcCount;jj++)
+		// {
+                status = checkAdcRdy(ADC_SAMPLE_COUNT,0,cdsPciModules.adcType[jj]);
+		// }
                 if (status == -1) {
                         stop_working_threads = 1;
                         printf("timeout 0\n");
@@ -852,24 +854,35 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
                                   }
                         }
                         // Clear out last ADC data read for test on next cycle
+#if 0
                         packedData = (int *)cdsPciModules.pci_adc[kk];
                         *packedData = 0x0;
                         if(cdsPciModules.adcType[kk] == GSC_16AISS8AO4) packedData += 3;
                         else if(cdsPciModules.adcType[kk] == GSC_18AISS8AO8) packedData += 3;
                         else packedData += 31;
                         *packedData = 0x110000;
+#endif
                 }
-#ifdef SYNC21PPS
                 if(!sync21pps)
                 {
-                        if(adcData[0][31] < 4000) ll = -1;
-                        else {
+                        if((adcData[0][31] < 4000) && (sync21ppsCycles < (CYCLE_PER_SECOND*OVERSAMPLE_TIMES))) 
+			{
+				ll = -1;
+				sync21ppsCycles ++;
+                        }else {
 			        gsaDacTrigger(cdsPciModules.dacCount);
                                 sync21pps = 1;
-                                printf("GPS Trigg %d %d\n",adcData[0][31],sync21pps);
+				if(sync21ppsCycles >= (CYCLE_PER_SECOND*OVERSAMPLE_TIMES))
+				{
+					syncSource = SYNC_SRC_NONE;
+					printf("NO SYNC SOURCE FOUND %d\n",sync21ppsCycles);
+				} else {
+					printf("GPS Trigg %d %d\n",adcData[0][31],sync21pps);
+					syncSource = SYNC_SRC_1PPS;
+				}
+				pLocalEpics->epicsOutput.timeErr = syncSource;
                         }
                 }
-#endif
             }
 
         sampleCount = OVERSAMPLE_TIMES;
@@ -881,11 +894,13 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 #endif
 	}
 
+#if 0
         // Get the time from the GPS board
         cycle_gps_time = getGpsTime(&cycle_gps_ns);
         cycle_gps_event_time = getGpsEventTime(&cycle_gps_event_ns);
 //   	printf("%f\n", cycle_gps_time - cycle_gps_event_time);
 	timeDiag |= gps_receiver_unlocked;
+#endif
 	
         // Update internal cycle counters
         if((firstTime != 0) && (!skipCycle))
@@ -912,8 +927,8 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
           timeHold = 0;
 	  pLocalEpics->epicsOutput.adcWaitTime = adcHoldTime;
-	  if(adcHoldTime > CYCLE_TIME_ALRM) diagWord |= FE_ADC_HOLD_ERR;
-	  if(timeHoldMax > CYCLE_TIME_ALRM) diagWord |= FE_PROC_TIME_ERR;
+	  if((adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcHoldTime < CYCLE_TIME_ALRM_LO)) diagWord |= FE_ADC_HOLD_ERR;
+	  if(timeHoldMax > CYCLE_TIME_ALRM_HI) diagWord |= FE_PROC_TIME_ERR;
   	  if(pLocalEpics->epicsInput.diagReset || initialDiagReset)
 	  {
 		initialDiagReset = 0;
@@ -943,9 +958,6 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
         vmeDone = stop_working_threads | checkEpicsReset(epicsCycle, pLocalEpics);
 	// usleep(1);
 
-	// Assign chan 32 to onePps 
-	onePps = dWord[0][31];
-
 	// For startup sync to 1pps, loop here
 	if(firstTime == 0)
 	{
@@ -953,29 +965,22 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		onePpsHi = 0;
 	}
 
+  if(syncSource == SYNC_SRC_1PPS)
+  {
+
+	// Assign chan 32 to onePps 
+	onePps = dWord[0][31];
 	if((onePps > ONE_PPS_THRESH) && (onePpsHi == 0))  
 	{
-#ifdef NO_SYNC
-	        unsigned int usec = 1000000 * (cycle_gps_event_time - (unsigned int) cycle_gps_event_time);
-		if (usec > 500000) usec -= 1000000;
-		pLocalEpics->epicsOutput.onePps = usec;
-#else
 		pLocalEpics->epicsOutput.onePps = clock16K;
-#endif
 		onePpsHi = 1;
 	}
 	if(onePps < ONE_PPS_THRESH) onePpsHi = 0;  
 
-	// Display sample 0 GPS microseconds
-	if (clock16K == 0) {
-		unsigned int nsec = 1000000000.0 * (cycle_gps_time - (unsigned int) cycle_gps_time);
-		if (nsec > 500000000) nsec -= 1000000000;
-		pLocalEpics->epicsOutput.timeErr = nsec;
-	}
-
 	// Check if front end continues to be in sync with 1pps
 	// If not, set sync error flag
 	if(pLocalEpics->epicsOutput.onePps > 20) diagWord |= FE_SYNC_ERR;
+  }
 
 	// Call the front end specific software
         rdtscl(cpuClock[4]);
@@ -1491,12 +1496,16 @@ int main(int argc, char **argv)
                  printf("\tRFM %d is a VMIC_%x module with Node ID %d\n", ii, cdsPciModules.rfmType[ii], cdsPciModules.rfmConfig[ii]);
 	}
         printf("***************************************************************************\n");
+  	if (cdsPciModules.gps) {
+	printf("%d IRIG-B card found\n");
+        printf("***************************************************************************\n");
+  	}
 
 	//cdsPciModules.adcCount = 0;
 	//cdsPciModules.dacCount = 0;
 
-	if (cdsPciModules.adcCount == 0 && cdsPciModules.dacCount == 0) {
-		printf("No ADC and no DAC modules found, running on timer\n");
+	if (cdsPciModules.adcCount == 0) {
+		printf("No ADC modules found, running on timer\n");
 		run_on_timer = 1;
         	//munmap(_epics_shm, MMAP_SIZE);
         	//close(wfd);
