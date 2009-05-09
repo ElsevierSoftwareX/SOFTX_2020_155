@@ -1485,6 +1485,7 @@ print OUTH "\tint gdsMon[32];\n";
 print OUTH "\tint diags[4];\n";
 print OUTH "\tint overflowAdc[4][32];\n";
 print OUTH "\tint overflowDac[4][16];\n";
+print OUTH "\tint dacValue[4][16];\n";
 print OUTH "\tint ovAccum;\n";
 print OUTH "} CDS_EPICS_OUT;\n\n";
 if($useWd)
@@ -1560,6 +1561,7 @@ for($ii=0;$ii<$dacCnt;$ii++)
 	for($jj=0;$jj<16;$jj++)
 	{
 		print EPICS "OUTVARIABLE DAC_OVERFLOW_$ii\_$jj epicsOutput.overflowDac\[$ii\]\[$jj\] int ai 0\n";
+		print EPICS "OUTVARIABLE DAC_OUTPUT_$ii\_$jj epicsOutput.dacValue\[$ii\]\[$jj\] int ai 0\n";
 	}
 }
 print EPICS "OUTVARIABLE ACCUM_OVERFLOW epicsOutput.ovAccum int ai 0\n";
