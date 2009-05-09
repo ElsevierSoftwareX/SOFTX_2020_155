@@ -204,6 +204,7 @@ VME_COEF *pCoeff[NUM_SYSTEMS];		/* Ptr to SFM coeffs in shmem		*/
 double dWord[MAX_ADC_MODULES][32];
 unsigned int dWordUsed[MAX_ADC_MODULES][32];
 double dacOut[MAX_DAC_MODULES][16];
+int dacOutEpics[MAX_DAC_MODULES][16];
 unsigned int dacOutUsed[MAX_DAC_MODULES][16];
 int dioInput[MAX_DIO_MODULES];
 int dioOutput[MAX_DIO_MODULES];
@@ -322,6 +323,7 @@ static double getGpsTime1(unsigned int *ns, int event_flag) {
       time1 = cdsPciModules.gps[SYMCOM_BC635_TIME1/4];
     }
     gps_receiver_unlocked = !!(time0 & (1<<24));
+printf("gds = %d\n",gps_receiver_unlocked);
     unsigned  int msecs = 0xfffff & time0; // microseconds
     unsigned  int nsecs = 0xf & (time0 >> 20); // nsecs * 100
     the_time = ((double) time1) + .000001 * (double) msecs  /* + .0000001 * (double) nsecs*/;
@@ -665,7 +667,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 #endif
 #endif
 
-  if (run_on_timer) {
+  if (!run_on_timer) {
    // See if GPS card present
    cycle_gps_time = getGpsTime(&cycle_gps_ns);
    if (cycle_gps_time != 0.0) {
@@ -740,6 +742,8 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
     {
     	gsaDacTrigger(cdsPciModules.dacCount);
 	sync21pps = 1;
+	timeDiag |= gps_receiver_unlocked;
+  	if(timeDiag)pLocalEpics->epicsOutput.timeErr = 0;
 #ifndef RTAI_BUILD
   printf("Triggered the DAC\n");
 #endif
@@ -788,10 +792,10 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	// NORMAL OPERATION -- Wait for first ADC data ready
         for(ll=0;ll<sampleCount;ll++)
             {
-               // for(jj=0;jj<cdsPciModules.adcCount;jj++)
-		// {
-                status = checkAdcRdy(ADC_SAMPLE_COUNT,0,cdsPciModules.adcType[jj]);
-		// }
+               for(jj=0;jj<cdsPciModules.adcCount;jj++)
+		{
+                status = checkAdcRdy(ADC_SAMPLE_COUNT,jj,cdsPciModules.adcType[jj]);
+		}
                 if (status == -1) {
                         stop_working_threads = 1;
                         printf("timeout 0\n");
@@ -799,9 +803,6 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		// Read CPU clock for timing info
 		rdtscl(cpuClock[0]);
 
-		// Start ADC DMA reads
-               for(jj=0;jj<cdsPciModules.adcCount;jj++) gsaAdcDma2(jj);
-	
                for(kk=0;kk<cdsPciModules.adcCount;kk++) {
 			// Wait for ADC DMA complete -- check DMA done bits
 			do{
@@ -914,6 +915,13 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
             {
               /* Reset the data cycle counter */
               subcycle = 0;
+	      for(jj=0;jj<cdsPciModules.dacCount;jj++)
+	      {
+	    	for(ii=0;ii<16;ii++)
+	    	{
+			pLocalEpics->epicsOutput.dacValue[jj][ii] = dacOutEpics[jj][ii];
+		}
+	      }
   
             }
           else{
@@ -942,7 +950,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	  pLocalEpics->epicsOutput.diagWord = diagWord;
 	  diagWord = 0;
 	  pLocalEpics->epicsOutput.timeDiag = timeDiag;
-	  timeDiag = 0;
+	  // timeDiag = 0;
         }
 
 	/* Update Epics variables */
@@ -1056,6 +1064,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 				overflowAcc ++;
 				diagWord |= 0x1000 *  (jj+1);
 			}
+		 	dacOutEpics[jj][ii] = dac_out;
 			dac_out += offset;
 			//if (ii == 0) printf("%d\n", dac_out);
 			*pDacData =  (unsigned int)(dac_out & mask);
@@ -1264,6 +1273,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	    for(ii=0;ii<16;ii++)
 	    {
 		pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
+		pLocalEpics->epicsOutput.dacValue[jj][ii] = dacOutEpics[jj][ii];
 
 #ifdef ROLLING_OVERFLOWS
                 if (overflowDac[jj][ii] > 0x1000000) {
