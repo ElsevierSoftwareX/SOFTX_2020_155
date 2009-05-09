@@ -134,7 +134,7 @@ int checkAdcRdy(int count,int numAdc,int type)
 #endif
                 case GSC_16AI64SSA:
                   do {
-                        dataCount = adcPtr[0]->BUF_SIZE;
+                        dataCount = adcPtr[numAdc]->BUF_SIZE;
                         if (i == 1000000) {
                                 break;
                         }
@@ -153,7 +153,8 @@ int checkAdcRdy(int count,int numAdc,int type)
                 break;
           }
           // If timeout, return error
-          if (i == 1000000) return -1;
+          if (i >= 1000000) return -1;
+	  gsaAdcDma2(numAdc);
   return(dataCount);
 }
 
@@ -222,11 +223,7 @@ int gsaDacDma1(int modNum, int dacType)
 	  dacDma[modNum]->DMA0_PCI_ADD = (int)dac_dma_handle[modNum];
 	  dacDma[modNum]->DMA0_LOC_ADD = 0x18;
 #ifdef OVERSAMPLE_DAC
-#ifdef DAC_OVER2
-         dacDma[modNum]->DMA0_BTC = 0x40*OVERSAMPLE_TIMES*2;
-#else
          dacDma[modNum]->DMA0_BTC = 0x40*OVERSAMPLE_TIMES;
-#endif
 #else
 	  dacDma[modNum]->DMA0_BTC = 0x40;
 #endif
@@ -469,13 +466,10 @@ int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 	  // Larger buffer required when in oversampling mode 
 	  dacPtr[devNum]->BOR = GSAO_FIFO_1024;
 #else
-	  dacPtr[devNum]->BOR = GSAO_FIFO_16;
+	  // dacPtr[devNum]->BOR = GSAO_FIFO_16;
+	  dacPtr[devNum]->BOR = GSAO_FIFO_1024;
 #endif
-//ifdef DAC_INTERNAL_CLOCKING
-//	  dacPtr[devNum]->BOR |= (GSAO_ENABLE_CLK);
-//else
-//	  dacPtr[devNum]->BOR |= (GSAO_ENABLE_CLK | GSAO_EXTERN_CLK);
-//endif
+	  dacPtr[devNum]->BOR |=  GSAO_EXTERN_CLK;
 	  printk("DAC BOR = 0x%x\n",dacPtr[devNum]->BOR);
 	  pHardware->pci_dac[devNum] = 
 		(long) pci_alloc_consistent(dacdev,0x200,&dac_dma_handle[devNum]);
@@ -708,9 +702,10 @@ int mapPciModules(CDS_HARDWARE *pCds)
 			}
 		}
 		if (use_it) {
-		  printk("adc card on bus %x; device %x\n",
+		  printk("adc card on bus %x; device %x prim %x\n",
 			dacdev->bus->number,
-			PCI_SLOT(dacdev->devfn));
+			PCI_SLOT(dacdev->devfn),
+			dacdev->bus->secondary);
 		  status = mapAdc(pCds,dacdev);
 		  modCount ++;
 		}
