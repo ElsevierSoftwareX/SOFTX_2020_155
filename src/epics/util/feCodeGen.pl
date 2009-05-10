@@ -1483,9 +1483,9 @@ print OUTH "\tint cpuMeter;\n";
 print OUTH "\tint cpuMeterMax;\n";
 print OUTH "\tint gdsMon[32];\n";
 print OUTH "\tint diags[4];\n";
-print OUTH "\tint overflowAdc[4][32];\n";
-print OUTH "\tint overflowDac[4][16];\n";
-print OUTH "\tint dacValue[4][16];\n";
+print OUTH "\tint overflowAdc[8][32];\n";
+print OUTH "\tint overflowDac[8][16];\n";
+print OUTH "\tint dacValue[8][16];\n";
 print OUTH "\tint ovAccum;\n";
 print OUTH "} CDS_EPICS_OUT;\n\n";
 if($useWd)
