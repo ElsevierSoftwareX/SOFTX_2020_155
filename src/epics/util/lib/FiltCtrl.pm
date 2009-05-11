@@ -64,6 +64,15 @@ sub fromExp {
            }
 	   $calcExp = "$dsp_ptr->inputs[$modNum].opSwitchP";
 #	   $calcExp .= "| $dsp_ptr->inputs[$modNum].opSwitchE";
+# All on/off switching stuff was missing so I am adding this code
+# to get the bits from opSwitchE variable
+#define OPSWITCH_INPUT_ENABLE 0x4
+#define OPSWITCH_OFFSET_ENABLE 0x8
+#define OPSWITCH_LIMITER_ENABLE 0x1000000
+#define OPSWITCH_DECIMATE_ENABLE 0x2000000
+#define OPSWITCH_OUTPUT_ENABLE 0x4000000
+#define OPSWITCH_HOLD_ENABLE 0x8000000
+	   $calcExp .= "| ((0x4|0x8|0x1000000|0x2000000|0x4000000|0x8000000) & $dsp_ptr->inputs[$modNum].opSwitchE)";
 	}
 }
 
