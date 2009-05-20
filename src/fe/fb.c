@@ -61,6 +61,7 @@ int cdsDaqNetDaqSend(	int dcuId,
 			char *dataBuffer)
 {
 #if defined(SHMEM_DAQ)
+  static int dataBlockSize = 0;
   // Mapped shared memory pointer
   extern char *_daq_shm;
   // IPC area to the frame builder pointer
@@ -74,6 +75,8 @@ int cdsDaqNetDaqSend(	int dcuId,
 
   //printf("cdsDaqNetDaqSend cycle=%d subCycle=%d size=%d file_crc=%x\n", cycle, subCycle, xferSize, fileCrc);
   int mycycle = cycle? cycle-1 : 15;
+  if(subCycle == 0) dataBlockSize = 0;
+  dataBlockSize += xferSize;
 
   // Copy data into the buffer
   buf += buf_size *cycle + subCycle * xferSize;
@@ -83,8 +86,9 @@ int cdsDaqNetDaqSend(	int dcuId,
   // End of current cycle, all data filled in
   if (subCycle == 15) {
 	// Assign global parameters
-  	ipc->dcuId = fileCrc; // DCU id of this system
+  	ipc->dcuId = dcuId; // DCU id of this system
   	ipc->crc = fileCrc; // Checksum of the configuration file
+  	ipc->dataBlockSize = dataBlockSize; // actual data size
 
 	// Assign current block parameters
 	ipc->bp[mycycle].cycle = mycycle;
