@@ -230,6 +230,7 @@ int rioOutputHold1[MAX_DIO_MODULES];
 unsigned int CDO32Input[MAX_DIO_MODULES];
 unsigned int CDO32Output[MAX_DIO_MODULES];
 int clock16K = 0;
+int out_buf_size = 0; // test checking DAC buffer size
 double cycle_gps_time = 0.; // Time at which ADCs triggered
 double cycle_gps_event_time = 0.; // Time at which ADCs triggered
 unsigned int   cycle_gps_ns = 0;
@@ -752,7 +753,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
     if(syncSource == SYNC_SRC_IRIG_B)
     {
 	// Start clocking the DAC outputs
-    	gsaDacTrigger(cdsPciModules.dacCount);
+    	gsaDacTrigger(&cdsPciModules);
 	// Set synched flag so later code will not check for 1PPS
 	sync21pps = 1;
 	// Send IRIG-B locked/not locked diagnostic info
@@ -890,7 +891,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 				sync21ppsCycles ++;
                         }else {
 				// Need to start clocking the DAC outputs.
-			        gsaDacTrigger(cdsPciModules.dacCount);
+			        gsaDacTrigger(&cdsPciModules);
                                 sync21pps = 1;
 				// 1PPS never found, so indicate NO SYNC to user
 				if(sync21ppsCycles >= (CYCLE_PER_SECOND*OVERSAMPLE_TIMES))
@@ -957,7 +958,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	// Send timing info to EPICS at 1Hz
         if((subcycle == 0) && (daqCycle == 15))
         {
-	  pLocalEpics->epicsOutput.cpuMeter = timeHold;
+	  pLocalEpics->epicsOutput.cpuMeter = timeHold; // out_buf_size; 
 	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
           timeHold = 0;
 	  pLocalEpics->epicsOutput.adcWaitTime = adcHoldTime;
@@ -1054,6 +1055,18 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			offset = 0x20000; // Data coding offset in 18-bit DAC
 			mask = 0x3ffff;
 			num_outs = 8;
+		}
+		if (cdsPciModules.dacType[jj] == GSC_18AO8) {
+			limit *= 4; // 18 bit limit
+			//offset = 0x20000; // Data coding offset in 18-bit DAC
+			mask = 0x3ffff;
+			num_outs = 8;
+
+	// Uncomment to read 18-bit DAC buffer size
+	//extern volatile GSA_DAC_REG *dacPtr[MAX_DAC_MODULES];
+        //volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[0];
+        //out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
+
 		}
 		if (cdsPciModules.dacType[jj] == GSC_16AISS8AO4) {
 		  	num_outs = 4;
@@ -1484,6 +1497,10 @@ int main(int argc, char **argv)
                         printf("\t\tChannels = %d \n",jj);
                         printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.dacConfig[ii] & 0xfff));
                 }
+                if(cdsPciModules.dacType[ii] == GSC_18AO8)
+		{
+                        printf("\tDAC %d is a GSC_18AO8 module\n",ii);
+		}
                 if(cdsPciModules.dacType[ii] == GSC_16AO16)
                 {
                         printf("\tDAC %d is a GSC_16AO16 module\n",ii);
