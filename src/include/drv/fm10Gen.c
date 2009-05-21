@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.21 2008/10/10 22:23:49 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.22 2009/05/21 12:15:33 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -908,7 +908,7 @@ inline void checkFiltResetId(int bankNum, FILT_MOD *pL, volatile FILT_MOD *dspVm
 
     /* Check if new coeffs */
     if (status & 1) {
-      printf("New coeff request; bank=%d \n", bankNum);
+      // printf("New coeff request; bank=%d \n", bankNum);
       filtResetId[id].fmResetCoeff = bankNum + 1;
       filtResetId[id].fmResetDsp = pL;
     } else filtResetId[id].fmResetCoeff = 0;
