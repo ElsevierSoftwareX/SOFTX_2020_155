@@ -83,17 +83,32 @@ int gsaAdcTrigger(int adcCount, int adcType[])
 // *****************************************************************************
 // Function...
 // *****************************************************************************
-int gsaDacTrigger(int dacCount)
+int gsaDacTrigger(CDS_HARDWARE *pHardware)
 {
    int ii;
 
-   for (ii = 0; ii < dacCount; ii++)
+   for (ii = 0; ii < pHardware -> dacCount; ii++)
    {
 #ifdef DAC_INTERNAL_CLOCKING
 #error
       dacPtr[ii]->BOR |= (GSAO_ENABLE_CLK);
 #else
-      dacPtr[ii]->BOR |= (GSAO_ENABLE_CLK | GSAO_EXTERN_CLK);
+      if (pHardware->dacType[ii] == GSC_18AO8) {
+  	volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[ii];
+	dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_EXT_CLOCK_SRC;
+	//dac18bitPtr->OUTPUT_CONFIG &= ~GSAO_18BIT_EXT_TRIG_SRC;
+	//dac18bitPtr->BUF_OUTPUT_OPS |= (1<<11);
+	dac18bitPtr->BUF_OUTPUT_OPS |= GSAO_18BIT_ENABLE_CLOCK;
+
+	//dac18bitPtr->RATE_GEN_C = 40320000/(64*1024);
+	//dac18bitPtr->RATE_GEN_D = 40320000/(64*1024);
+	//dac18bitPtr->BCR |= (1 << 21);
+	//dac18bitPtr->BCR |= (1 << 22);
+	//dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_EXT_TRIG_SRC;
+	printk("Triggered 18-bit DAC\n");
+      } else {
+      	dacPtr[ii]->BOR |= (GSAO_ENABLE_CLK | GSAO_EXTERN_CLK);
+      }
 #endif
    }
 
@@ -218,6 +233,16 @@ int gsaDacDma1(int modNum, int dacType)
           dacDma[modNum]->DMA1_BTC = 0x10;
 #endif
           dacDma[modNum]->DMA1_DESC = 0x0;
+  } else if (dacType == GSC_18AO8) {
+          dacDma[modNum]->DMA1_MODE = GSAI_DMA_MODE_NO_INTR;
+          dacDma[modNum]->DMA1_PCI_ADD = (int)dac_dma_handle[modNum];
+          dacDma[modNum]->DMA1_LOC_ADD = GSAF_DAC_DMA_LOCAL_ADDR;
+#ifdef OVERSAMPLE_DAC
+          dacDma[modNum]->DMA1_BTC = 0x20*OVERSAMPLE_TIMES;
+#else
+          dacDma[modNum]->DMA1_BTC = 0x20;
+#endif
+          dacDma[modNum]->DMA1_DESC = 0x0;
   } else {
 	  dacDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
 	  dacDma[modNum]->DMA0_PCI_ADD = (int)dac_dma_handle[modNum];
@@ -238,9 +263,11 @@ int gsaDacDma1(int modNum, int dacType)
 // *****************************************************************************
 void gsaDacDma2(int modNum, int dacType)
 {
-  if(dacType == GSC_16AISS8AO4 || dacType == GSC_18AISS8AO8)
+  if(dacType == GSC_16AISS8AO4 || dacType == GSC_18AISS8AO8 || dacType == GSC_18AO8) 
   {
         dacDma[modNum]->DMA_CSR = GSAI_DMA1_START;
+  	//volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[0];
+	//dac18bitPtr->BCR |= (1 << 20);
   } else {
 	dacDma[modNum]->DMA_CSR = GSAI_DMA_START;
   }
@@ -479,6 +506,77 @@ int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 	  return(0);
 }
 
+int map18bitDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
+{
+  int devNum;
+  char *_dac_add;				/* DAC register address space */
+  static unsigned int pci_io_addr;
+
+	  devNum = pHardware->dacCount;
+          // Enable the device, PCI required
+          pci_enable_device(dacdev);
+          // Register module as Master capable, required for DMA
+          pci_set_master(dacdev);
+          // Get the PLX chip PCI address, it is advertised at address 0
+          pci_read_config_dword(dacdev,PCI_BASE_ADDRESS_0,&pci_io_addr);
+          printk("pci0 = 0x%x\n",pci_io_addr);
+          _dac_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
+          // Set up a pointer to DMA registers on PLX chip
+          dacDma[devNum] = (PLX_9056_DMA *)_dac_add;
+
+	  // Get the DAC register address
+	  pci_read_config_dword(dacdev,PCI_BASE_ADDRESS_2,&pci_io_addr);
+	  printk("dac pci2 = 0x%x\n",pci_io_addr);
+	  _dac_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
+	  printk("DAC I/O address=0x%x  0x%lx\n", pci_io_addr,(long)_dac_add);
+
+  	  volatile GSA_18BIT_DAC_REG *dac18bitPtr = (GSA_18BIT_DAC_REG *)_dac_add;
+	  dacPtr[devNum] = (GSA_DAC_REG *)_dac_add;
+
+	  printk("DAC BCR = 0x%x\n",dac18bitPtr->BCR);
+	  // Reset the DAC board and wait for it to finish (3msec)
+
+	  dac18bitPtr->BCR |= GSAO_18BIT_RESET;
+	
+	  do{
+	  }while((dac18bitPtr->BCR & GSAO_18BIT_RESET) != 0);
+
+	  // Following setting will also enable 2s complement by clearing offset binary bit
+	  dac18bitPtr->BCR &= ~GSAO_18BIT_OFFSET_BINARY;
+	  dac18bitPtr->BCR |= GSAO_18BIT_SIMULT_OUT;
+	  printk("DAC BCR after init = 0x%x\n",dac18bitPtr->BCR);
+	  printk("DAC OUTPUT CONFIG = 0x%x\n",dac18bitPtr->OUTPUT_CONFIG);
+
+	  // Enable 10 volt output range
+	  dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_10VOLT_RANGE;
+	  // Various bits setup
+	  //dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_ENABLE_EXT_CLOCK;
+	  //dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_EXT_CLOCK_SRC;
+	  //dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_EXT_TRIG_SRC;
+	  dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_DIFF_OUTS;
+
+	  printk("DAC OUTPUT CONFIG after init = 0x%x\n",dac18bitPtr->OUTPUT_CONFIG);
+#if 0
+#ifdef OVERSAMPLE_DAC
+	  // Larger buffer required when in oversampling mode 
+	  dacPtr[devNum]->BOR = GSAO_FIFO_1024;
+#else
+	  // dacPtr[devNum]->BOR = GSAO_FIFO_16;
+	  dacPtr[devNum]->BOR = GSAO_FIFO_1024;
+#endif
+	  dacPtr[devNum]->BOR |=  GSAO_EXTERN_CLK;
+	  printk("DAC BOR = 0x%x\n",dacPtr[devNum]->BOR);
+#endif
+
+	// TODO: maybe dac_dma_handle should be a separate variable for 18-bit board?
+	  pHardware->pci_dac[devNum] = 
+		(long) pci_alloc_consistent(dacdev,0x200,&dac_dma_handle[devNum]);
+  	  pHardware->dacConfig[devNum] = (int) (dac18bitPtr->ASY_CONFIG);
+  	  pHardware->dacType[devNum] = GSC_18AO8;
+	  pHardware->dacCount ++;
+	  return(0);
+}
+
 // *****************************************************************************
 // Routine to initialize GSA ADC modules
 // *****************************************************************************
@@ -653,6 +751,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
   int adc_cnt = 0;
   int fast_adc_cnt = 0;
   int dac_cnt = 0;
+  int dac_18bit_cnt = 0;
   int bo_cnt = 0;
 
   dacdev = NULL;
@@ -660,6 +759,31 @@ int mapPciModules(CDS_HARDWARE *pCds)
 
   // Search system for any module with PLX-9056 and PLX id
   while((dacdev = pci_find_device(PLX_VID, PLX_TID, dacdev))) {
+	// Check if this is an 18bit DAC from General Standards
+	if ((dacdev->subsystem_device == DAC_18BIT_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
+	{
+		int use_it = 1;
+		if (pCds->cards) {
+			use_it = 0;
+			/* See if ought to use this one or not */
+			int i;
+			for (i = 0; i < pCds->cards; i++) {
+				if (pCds->cards_used[i].type == GSC_18AO8
+				    && pCds->cards_used[i].instance == dac_18bit_cnt) {
+					use_it = 1;
+					break;
+				}
+			}
+		}
+		if (use_it) {
+                  printk("18-bit dac card on bus %x; device %x\n",
+                        dacdev->bus->number,
+			PCI_SLOT(dacdev->devfn));
+                  status = map18bitDac(pCds,dacdev);
+		  modCount ++;
+		}
+		dac_18bit_cnt++;
+	}
 	// if found, check if it is a DAC module
         if((dacdev->subsystem_device == DAC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
         {
