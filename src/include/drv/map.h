@@ -3,7 +3,7 @@
 
 int mapPciModules(CDS_HARDWARE *);/* Init routine to map adc/dac cards*/
 int gsaAdcTrigger(int,int[]);	/* Starts ADC acquisition.	*/
-int gsaDacTrigger(int);		/* Starts DACC acquisition.	*/
+int gsaDacTrigger(CDS_HARDWARE *);		/* Starts DACC acquisition.	*/
 int gsaAdcStop(void);		/* Stop acquistion		*/
 int adcDmaDone(int,int *);	/* Checks if ADC DMA complete.	*/
 int dacDmaDone(int);
