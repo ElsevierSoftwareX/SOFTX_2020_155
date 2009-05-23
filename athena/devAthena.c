@@ -16,6 +16,8 @@
 #include "aiRecord.h"
 #include "biRecord.h"
 #include "boRecord.h"
+#include "epicsExport.h"
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,6 +52,9 @@ struct {
 	NULL,
 	read_ai,
 	NULL};
+
+epicsExportAddress(dset,devAiAthena);
+
 
 #if 0
 struct {
@@ -88,12 +93,12 @@ struct {
 #endif
 
 
-static BYTE result;  // returned error code
-static ERRPARAMS errorParams;  // structure for returning error code and error         string
-static DSCB dscb;    // handle used to refer to the board
-static DSCCB dsccb;  // structure containing board settings
-static DSCADSETTINGS dscadsettings; // structure containing A/D conversion settings
-static DSCSAMPLE sample;       // sample reading
+static BYTE result;  /* returned error code */
+static ERRPARAMS errorParams;  /* structure for returning error code and error         string */
+static DSCB dscb;    /* handle used to refer to the board */
+static DSCCB dsccb;  /* structure containing board settings */
+static DSCADSETTINGS dscadsettings; /* structure containing A/D conversion settings */
+static DSCSAMPLE sample;       /* sample reading */
 
 
 static long init_record(pai)
@@ -109,7 +114,7 @@ static long read_ai(pai)
   struct vmeio *pvmeio;
   pvmeio = (struct vmeio *)&(pai->inp.value);
   if (pvmeio->signal >= 0 && pvmeio->signal < 16) {
-	  //sprintf(buf,DevName, pvmeio->signal);
+	  /*sprintf(buf,DevName, pvmeio->signal);*/
   } else {
 	  fprintf(stderr, "Athena: Invalid channel number %d in AI record\n", pvmeio->signal);
 	  exit(2);
@@ -143,16 +148,16 @@ static long read_ai(pai)
        exit(2);
     }
 
-  //printf ("0x%x\n", &dscb);
+  /*printf ("0x%x\n", &dscb);*/
   if ((result = dscADSample (dscb, &sample)) != DE_NONE)
   {
 	dscGetLastError(&errorParams);
 	fprintf( stderr, "dscADSample error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring ); 
 	exit(2);
   }
- //printf("%d\n", sample);
+ /*printf("%d\n", sample);*/
   pai->rval = sample;
- //printf("%d\n", sample);
+ /*printf("%d\n", sample);*/
   dscFreeBoard(dscb);
   dscFree();
   return 0;
