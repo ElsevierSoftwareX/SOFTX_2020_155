@@ -703,7 +703,7 @@ if (0) {
      print "List of parent blocks:\n";
      foreach (@{$parent->{NEXT}}) {
 	if ($_->{NAME} eq "Block") {
-	  print "Block ", $_->{NAME}, ", type=", ${$_->{FIELDS}}{BlockType}, ", name=",${$_->{FIELDS}}{Name}, "\n";
+;  print "Block ", $_->{NAME}, ", type=", ${$_->{FIELDS}}{BlockType}, ", name=",${$_->{FIELDS}}{Name}, "\n";
 	}
      }
 }
@@ -746,11 +746,13 @@ if (1) {
      }
    }
    if (@::top_names) {
-   	print ::EPICS "top_names";
+   	print ::EPICS "top_names FEC";
    	foreach $item (@::top_names) {
 		print ::EPICS " ", $item ;
 	}
 	print ::EPICS "\n";
+   } else {
+   	print ::EPICS "top_names FEC\n";
    }
 }
 

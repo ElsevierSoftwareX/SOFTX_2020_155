@@ -111,7 +111,7 @@ install: $(DB) $(DBH1) $(DBH2) $(DBL1)
 	done
 	/bin/rm -f target/$(TARGET)/db/*/autoBurt.req
 	for ifo in $(IFO) ; do \
-	  system=`echo $(subst epics,,$(TARGET)) | tr a-z A-Z`; \
+	  system=`echo $(subst epics,,$(TARGET)) | tr a-z A-Z | cut -c1-3`; \
 	  ifo0=`echo $$ifo | sed 's/[0-9]/0/g'`; \
 	  mkdir -p target/$(TARGET)/db/$$ifo; \
 	  echo "#!/bin/sh" > target/$(TARGET)/startup$$ifo; \

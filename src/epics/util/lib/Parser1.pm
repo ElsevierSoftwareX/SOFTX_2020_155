@@ -20,8 +20,8 @@ while (<::IN>) {
 	$mySeq = 1;
     }
     if(($mySeq == 1) && ($var1 eq "Name")){
-	$::systemName = $var2;
-	#print "System Name $::systemName on line $lcntr\n";
+	$::systemName = substr($var2,0,3);
+	print "System Name $::systemName on line $lcntr\n";
 	$mySeq = 2;
     }
 
