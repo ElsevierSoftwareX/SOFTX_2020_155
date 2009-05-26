@@ -970,12 +970,12 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		pLocalEpics->epicsInput.diagReset = 0;
 		adcHoldTime = 0;
 		timeHoldMax = 0;
+	  	diagWord = 0;
 #ifndef RTAI_BUILD
 		printf("DIAG RESET\n");
 #endif
 	  }
 	  pLocalEpics->epicsOutput.diagWord = diagWord;
-	  diagWord = 0;
 	  pLocalEpics->epicsOutput.timeDiag = timeDiag;
 	  // timeDiag = 0;
         }
