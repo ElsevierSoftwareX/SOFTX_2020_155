@@ -294,6 +294,7 @@ close(IN);
 #  $partInCnt[$dacPartNum[$ii]] = 16;
 #}
 
+$systemName = substr($systemName,0,3);
 $plantName = $systemName; # Default plant name is the model name
 
 # Take all of the part outputs and find connections.
@@ -1514,31 +1515,32 @@ for($ii=0;$ii<$partCnt;$ii++)
 print EPICS "\n\n";
 print OUTH "} \U$systemName;\n\n";
 
-print EPICS "MOMENTARY VME_RESET epicsInput.vmeReset int ai 0\n";
-print EPICS "MOMENTARY DIAG_RESET epicsInput.diagReset int ai 0\n";
-print EPICS "MOMENTARY SYNC_RESET epicsInput.syncReset int ai 0\n";
-print EPICS "MOMENTARY OVERFLOW_RESET epicsInput.overflowReset int ai 0\n";
-print EPICS "DAQVAR LOAD_CONFIG int ai 0\n";
-print EPICS "DAQVAR CHAN_CNT int ai 0\n";
-print EPICS "DAQVAR TOTAL int ai 0\n";
-print EPICS "DAQVAR MSG int ai 0\n";
-print EPICS "DAQVAR DCU_ID int ai 0\n";
-print EPICS "OUTVARIABLE CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
-print EPICS "OUTVARIABLE CPU_METER_MAX epicsOutput.cpuMeterMax int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
-print EPICS "OUTVARIABLE ADC_WAIT epicsOutput.adcWaitTime int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
-print EPICS "OUTVARIABLE ONE_PPS epicsOutput.onePps int ai 0\n";
-print EPICS "OUTVARIABLE TIME_ERR epicsOutput.timeErr int ai 0\n";
-print EPICS "OUTVARIABLE TIME_DIAG epicsOutput.timeDiag int ai 0\n";
-print EPICS "OUTVARIABLE DIAG_WORD epicsOutput.diagWord int ai 0\n";
-print EPICS "INVARIABLE BURT_RESTORE epicsInput.burtRestore int ai 0\n";
+my $gdsNode = $gdsNodeId - 1;
+print EPICS "MOMENTARY FEC\_$dcuId\_VME_RESET epicsInput.vmeReset int ai 0\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_DIAG_RESET epicsInput.diagReset int ai 0\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_SYNC_RESET epicsInput.syncReset int ai 0\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_OVERFLOW_RESET epicsInput.overflowReset int ai 0\n";
+print EPICS "DAQVAR $dcuId\_LOAD_CONFIG int ai 0\n";
+print EPICS "DAQVAR $dcuId\_CHAN_CNT int ai 0\n";
+print EPICS "DAQVAR $dcuId\_TOTAL int ai 0\n";
+print EPICS "DAQVAR $dcuId\_MSG int ai 0\n";
+print EPICS "DAQVAR  $dcuId\_DCU_ID int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER_MAX epicsOutput.cpuMeterMax int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT epicsOutput.adcWaitTime int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ONE_PPS epicsOutput.onePps int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_ERR epicsOutput.timeErr int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_DIAG epicsOutput.timeDiag int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG_WORD epicsOutput.diagWord int ai 0\n";
+print EPICS "INVARIABLE FEC\_$dcuId\_BURT_RESTORE epicsInput.burtRestore int ai 0\n";
 for($ii=0;$ii<32;$ii++)
 {
-	print EPICS "OUTVARIABLE GDS_MON_$ii epicsOutput.gdsMon\[$ii\] int ai 0\n";
+	print EPICS "OUTVARIABLE FEC\_$dcuId\_GDS_MON_$ii epicsOutput.gdsMon\[$ii\] int ai 0\n";
 }
-print EPICS "OUTVARIABLE USR_TIME epicsOutput.diags[0] int ai 0\n";
-print EPICS "OUTVARIABLE RESYNC_COUNT epicsOutput.diags[1] int ai 0\n";
-print EPICS "OUTVARIABLE FB_NET_STATUS epicsOutput.diags[2] int ai 0\n";
-print EPICS "OUTVARIABLE DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_USR_TIME epicsOutput.diags[0] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_RESYNC_COUNT epicsOutput.diags[1] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.diags[2] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0\n";
 print EPICS "\n\n";
 #Load EPICS I/O Parts
 for($ii=0;$ii<$partCnt;$ii++)
@@ -1552,7 +1554,7 @@ for($ii=0;$ii<$adcCnt;$ii++)
 {
 	for($jj=0;$jj<32;$jj++)
 	{
-		print EPICS "OUTVARIABLE ADC_OVERFLOW_$ii\_$jj epicsOutput.overflowAdc\[$ii\]\[$jj\] int ai 0\n";
+		print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_OVERFLOW_$ii\_$jj epicsOutput.overflowAdc\[$ii\]\[$jj\] int ai 0\n";
 	}
 }
 print EPICS "\n\n";
@@ -1560,11 +1562,11 @@ for($ii=0;$ii<$dacCnt;$ii++)
 {
 	for($jj=0;$jj<16;$jj++)
 	{
-		print EPICS "OUTVARIABLE DAC_OVERFLOW_$ii\_$jj epicsOutput.overflowDac\[$ii\]\[$jj\] int ai 0\n";
-		print EPICS "OUTVARIABLE DAC_OUTPUT_$ii\_$jj epicsOutput.dacValue\[$ii\]\[$jj\] int ai 0\n";
+		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OVERFLOW_$ii\_$jj epicsOutput.overflowDac\[$ii\]\[$jj\] int ai 0\n";
+		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OUTPUT_$ii\_$jj epicsOutput.dacValue\[$ii\]\[$jj\] int ai 0\n";
 	}
 }
-print EPICS "OUTVARIABLE ACCUM_OVERFLOW epicsOutput.ovAccum int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ACCUM_OVERFLOW epicsOutput.ovAccum int ai 0\n";
 print EPICS "\n\n";
 print EPICS "systems \U$systemName\-\n";
 if ($plantName ne $systemName) {
@@ -2311,7 +2313,7 @@ print OUTME "SRC += src/drv/rfm.c\n";
 print OUTME "SRC += src/drv/param.c\n";
 print OUTME "SRC += src/drv/crc.c\n";
 print OUTME "SRC += src/drv/fmReadCoeff.c\n";
-print OUTME "SRC += src/epics/seq/get_local_time.st\n";
+#print OUTME "SRC += src/epics/seq/get_local_time.st\n";
 for($ii=0;$ii<$useWd;$ii++)
 {
 	print OUTME "SRC += src/epics/seq/hepiWatchdog";
@@ -2319,7 +2321,7 @@ for($ii=0;$ii<$useWd;$ii++)
 	print OUTME "\L\.st\n";
 }
 print OUTME "\n";
-print OUTME "DB += src/epics/db/local_time.db\n";
+#print OUTME "DB += src/epics/db/local_time.db\n";
 print OUTME "DB += build/\$(TARGET)/";
 print OUTME "$skeleton";
 print OUTME "1\.db\n";
@@ -2329,8 +2331,8 @@ print OUTME "SITE = $location\n";
 print OUTME "\n";
 print OUTME "SEQ += \'";
 print OUTME "$skeleton";
-print OUTME ",(\"ifo=$site, site=$location, sys=\U$systemName\, \Lsysnum= $dcuId\")\'\n";
-print OUTME "SEQ += \'get_local_time,(\"ifo=$site, sys=\U$systemName\")\'\n";
+print OUTME ",(\"ifo=$site, site=$location, sys=\U$systemName\, \Lsysnum= $dcuId\, \Lsysfile=\U$skeleton \")\'\n";
+#print OUTME "SEQ += \'get_local_time,(\"ifo=$site, sys=\U$systemName\")\'\n";
 for($ii=0;$ii<$useWd;$ii++)
 {
 print OUTME "SEQ += \'";
@@ -2540,9 +2542,11 @@ if ($not_found) {
 # Take care of generating Epics screens
 mkpath $epicsScreensDir, 0, 0755;
 my $usite = uc $site;
-my $sysname = uc($skeleton);
-$sed_arg = "s/SITE_NAME/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($skeleton) . "/g;s/GDS_NODE_ID/" . ($gdsNodeId - 1) . "/g;";
+my $sysname = "FEC";
+$sed_arg = "s/SITE_NAME/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($sysname) . "/g;s/GDS_NODE_ID/" . ($gdsNodeId - 1) . "/g;";
 $sed_arg .= "s/LOCATION_NAME/$location/g;";
+$sed_arg .= "s/DCU_NODE_ID/$dcuId/g;";
+$sysname = uc($skeleton);
 system("cat GDS_TP.adl | sed '$sed_arg' > $epicsScreensDir/$usite$sysname" . "_GDS_TP.adl");
 my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
@@ -2626,7 +2630,9 @@ sub commify_series {
 		  my $basename1 = $usite . ":" . $tn . "_";
 		  system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
 		} else {
+		  $sysname = substr($sysname,0,3);
 		  my $basename1 = $usite . ":" .$sysname ."-" . $basename . "_";
+		  $sysname = uc($skeleton);
 		  #print "Matrix $basename $incnt X $outcnt\n";
 		  system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
 		}
@@ -2651,13 +2657,21 @@ sub commify_series {
 			$sargs .= "s/FILTERNAME/$tfn/g";
 			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$usite" . $filt_name . ".adl");
 		} else {
+		  $sys_name = substr($sys_name,0,3);
 			$sargs = $sed_arg . "s/FILTERNAME/$sys_name-$filt_name/g";
+		  $sysname = uc($skeleton);
 			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$usite$sysname" . "_" . $filt_name . ".adl");
 		}
 	}
 	#print "No=$cur_part_num\n";
 	if ($partInputType[$cur_part_num][0] eq "Adc") {
+		  $sysname = uc($skeleton);
+		  $sysname = substr($sysname,0,3);
 		my $part_name = $partName[$cur_part_num];
+		if (is_top_name($partSubName[$cur_part_num])) {
+		  $sysname = substr($partSubName[$cur_part_num],0,3);
+	print "ADC MONITOR IS TOP =$sysname\n";
+		}
 		#print "ADC input Part $part_name $partType[$cur_part_num] has Adc input \'$partInput[$cur_part_num][0]\'\n";
 		if ($partType[$cur_part_num] eq "Filt") {
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
@@ -2667,6 +2681,7 @@ sub commify_series {
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-$part_name" .  "\"/g;";
 		}
 	}
+		  $sysname = uc($skeleton);
 }
 #print $monitor_args;
 for (0 .. $adcCnt - 1) {

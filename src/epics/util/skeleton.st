@@ -66,7 +66,7 @@ program %SEQUENCER_NAME%
 %DECL1%
 
 string msg;
-assign msg to "{ifo}:{sys}-{subsys}MSG";
+assign msg to "{ifo}:FEC-{sysnum}_MSG";
 
 int statErrCnt;
 assign statErrCnt to "{ifo}:{sys}-{subsys}STAT_ERR_CNT";
@@ -169,24 +169,27 @@ assign setpointMinorCount to {                                           /* MA *
    "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_10"};                       /* MA */
 
 int allNewCoeff;
-assign allNewCoeff to "{ifo}:{sys}-{subsys}LOAD_NEW_COEFF";
+assign allNewCoeff to "{ifo}:FEC-{sysnum}_LOAD_NEW_COEFF";
+
+string localtimestring;
+assign localtimestring to "{ifo}:FEC-{sysnum}_TIME_STRING";
 
 #ifndef NO_DAQ_IN_SKELETON
 
 int reload;
-assign reload to "{ifo}:DAQ-{sys}_{subsys}LOAD_CONFIG";
+assign reload to "{ifo}:DAQ-FEC_{sysnum}_LOAD_CONFIG";
 
 int dcmsg;
-assign dcmsg to "{ifo}:DAQ-{sys}_{subsys}MSG";
+assign dcmsg to "{ifo}:DAQ-FEC_{sysnum}_MSG";
 
 int chnCnt;
-assign chnCnt to "{ifo}:DAQ-{sys}_{subsys}CHAN_CNT";
+assign chnCnt to "{ifo}:DAQ-FEC_{sysnum}_CHAN_CNT";
 
 int dataSize;
-assign dataSize to "{ifo}:DAQ-{sys}_{subsys}TOTAL";
+assign dataSize to "{ifo}:DAQ-FEC_{sysnum}_TOTAL";
 
 int dcuId;
-assign dcuId to "{ifo}:DAQ-{sys}_{subsys}DCU_ID";
+assign dcuId to "{ifo}:DAQ-FEC_{sysnum}_DCU_ID";
 #endif
 
 
@@ -370,6 +373,7 @@ state init
 %%  if(sysnum > 3) cpunum = 1;
 %%  if(sysnum == 7) cpunum = 2;
 %%  if(sysnum == 8) cpunum = 3;
+    strncpy(fmc.system, macValueGet("sys"), sizeof(fmc.system)-1);
 #endif
 #endif
 
@@ -379,9 +383,9 @@ state init
 
     strncpy(fmc.site, macValueGet("site"), sizeof(fmc.site)-1);
     strncpy(fmc.ifo, macValueGet("ifo"), sizeof(fmc.ifo)-1);
-    strncpy(fmc.system, macValueGet("sys"), sizeof(fmc.system)-1);
-    if (macValueGet("subsys") != 0) {
-      strncpy(fmc.subSys[0].name, macValueGet("subsys"), sizeof(fmc.subSys[0].name)-1);
+    strncpy(fmc.system, macValueGet("sysfile"), sizeof(fmc.system)-1);
+    if (macValueGet("sysfxxx") != 0) {
+      strncpy(fmc.subSys[0].name, macValueGet("sysfile"), sizeof(fmc.subSys[0].name)-1);
     } else {
       fmc.subSys[0].name[0] = 0;
     }
@@ -1065,6 +1069,11 @@ state monScreen{
          pvPut(setpointMajorCount[ii]);                                  /* MA */
          pvPut(setpointMinorCount[ii]);                                  /* MA */
       }                                                                  /* MA */
+%% time_t lt = time(0);
+%% strcpy(localtimestring, ctime(&lt));
+%% localtimestring[strlen(localtimestring) - 1] = 0; /* Delete newline character */
+   pvPut(localtimestring);
+
 
 %% pthread_mutex_unlock (&seq_lock);
 #ifndef NO_DAQ_IN_SKELETON
@@ -1086,8 +1095,7 @@ state daqInit
 %%      }
         strcpy(site, macValueGet("site"));
         strcpy(ifo, macValueGet("ifo"));
-	strcpy(daqsys, fmc.system);
-	if (fmc.subSys[0].name[0]) strcat(strcat(daqsys, "_"), fmc.subSys[0].name);
+	strcpy(daqsys, macValueGet("sysfile"));
 %%      info = ((DAQ_INFO_BLOCK *)((base = (volatile void *)findRfmCard(0)) + DAQ_INFO_ADDRESS)) + dcuId;
 	pvPut(dcuId);
 %%    rfm_assign(pEpics->epicsInput.dcuId, dcuId);
