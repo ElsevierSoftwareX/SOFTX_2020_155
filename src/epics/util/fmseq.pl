@@ -137,6 +137,7 @@ while (<IN>) {
 	$gds_ifo = 1;
 	if ($gds_rmid > 0) {
 	  $gds_rmid--;
+	print "GDS NODE  $gds_rmid\n";
 	}
 	if ($site eq undef || $site eq "") {
 	  $site = "M1";
@@ -209,7 +210,7 @@ while (<IN>) {
         }
 
 	$vupdate .= "pvGet(evar_$v_name);\n";
-	$vupdate .= "rfm_assign(pEpics->${v_var}, evar_$v_name);\n";
+	$vupdate .= "%%  rfm_assign(pEpics->${v_var}, evar_$v_name);\n";
 
         if ($v_name ne "BURT_RESTORE") {
           $vupdate .= "pvGet(evar_${v_name}_Stat);\n";
@@ -249,22 +250,6 @@ while (<IN>) {
 	$vardb .= "    $v_efield4\n";
 	$vardb .= "}\n";
 
-        if ($v_name ne "BURT_RESTORE") {
-          if ($ve_type ne "bi") {
-            if ($top_name) {
-              $vardb .= "grecord(ai, \"%IFO%:${tv_name}.HHSV\")\n";                   # ???
-              $vardb .= "grecord(ai, \"%IFO%:${tv_name}.HSV\")\n";                    # ???
-              $vardb .= "grecord(ai, \"%IFO%:${tv_name}.LSV\")\n";                    # ???
-              $vardb .= "grecord(ai, \"%IFO%:${tv_name}.LLSV\")\n";                   # ???
-            }
-            else {
-              $vardb .= "grecord(ai, \"%IFO%:%SYS%-%SUBSYS%${v_name}.HHSV\")\n";      # ???
-              $vardb .= "grecord(ai, \"%IFO%:%SYS%-%SUBSYS%${v_name}.HSV\")\n";       # ???
-              $vardb .= "grecord(ai, \"%IFO%:%SYS%-%SUBSYS%${v_name}.LSV\")\n";       # ???
-              $vardb .= "grecord(ai, \"%IFO%:%SYS%-%SUBSYS%${v_name}.LLSV\")\n";      # ???
-            }
-          }
-        }
     } elsif (substr($_,0,9) eq "WFS_PHASE") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
@@ -346,8 +331,8 @@ while (<IN>) {
 
 	$vupdate .= "pvGet(evar_$v_name);\n";
         $vupdate .= "%%  rad_angle = (double)((evar_$v_name * M_PI)/180.);\n";
-	$vupdate .= "rfm_assign(pEpics->${v_var}[0], sin(rad_angle));\n";
-	$vupdate .= "rfm_assign(pEpics->${v_var}[1], cos(rad_angle));\n";
+	$vupdate .= "%% rfm_assign(pEpics->${v_var}[0], sin(rad_angle));\n";
+	$vupdate .= "%% rfm_assign(pEpics->${v_var}[1], cos(rad_angle));\n";
 
 	if ($top_name) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}\")\n";
@@ -380,7 +365,7 @@ while (<IN>) {
 
 	$vupdate .= "pvGet(evar_$v_name);\n";
 	$vupdate .= "%% if(evar_$v_name != 0) {\n";
-	$vupdate .= "rfm_assign(pEpics->${v_var}, evar_$v_name);\n";
+	$vupdate .= "%%  rfm_assign(pEpics->${v_var}, evar_$v_name);\n";
 	$vupdate .= "%% }\n";
 	$vupdate .= "%% evar_$v_name  = $v_init;\n";
 	$vupdate .= "pvPut(evar_$v_name);\n";
@@ -487,7 +472,7 @@ while (<IN>) {
         if (is_top_name($v_name)) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:DAQ-${v_name}\")\n";
 	} else {
-		$vardb .= "grecord(${ve_type},\"%IFO%:DAQ-%SYS%_%SUBSYS%${v_name}\")\n";
+		$vardb .= "grecord(${ve_type},\"%IFO%:DAQ-FEC_%SUBSYS%${v_name}\")\n";
 	}
     } elsif (substr($_,0,5) eq "DUMMY") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
@@ -659,7 +644,7 @@ while (<IN>) {
 			$matdb .= "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%${m_name}" . sprintf("%x%x\")\n", $i, $j);
 		}
 		$matdb .= "{\n";
-		$matdb .= "    field(PREC,\"3\")\n";
+		$matdb .= "    field(PREC,\"5\")\n";
 		$matdb .= "}\n";
 	    }
 	    $mdecl .= "\n";
@@ -897,8 +882,9 @@ foreach $i ( @names ) {
 }
     
 # add msg and load coeff records
-print "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%LOAD_NEW_COEFF\")\n";
-print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%MSG\")\n";
+print "grecord(ai,\"%IFO%:FEC-${dcuId}_LOAD_NEW_COEFF\")\n";
+print "grecord(stringin,\"%IFO%:FEC-${dcuId}_MSG\")\n";
+print "grecord(stringin,\"%IFO%:FEC-${dcuId}_TIME_STRING\")\n";
 print "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%STAT_ERR_CNT\")\n";
 print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FESTAT_1\")\n";
 print "grecord(stringin,\"%IFO%:%SYS%-%SUBSYS%FESTAT_2\")\n";

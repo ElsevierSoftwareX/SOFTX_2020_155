@@ -1,13 +1,13 @@
 
 file {
-	name="/home/controls/cds/advLigo/src/epics/util/GDS_TP.adl"
-	version=030003
+	name="/home/controls/rcg1.1/advLigo/src/epics/util/GDS_TP.adl"
+	version=030102
 }
 display {
 	object {
-		x=652
-		y=452
-		width=920
+		x=146
+		y=112
+		width=917
 		height=555
 	}
 	clr=14
@@ -89,6 +89,149 @@ display {
 }
 rectangle {
 	object {
+		x=794
+		y=81
+		width=110
+		height=425
+	}
+	"basic attribute" {
+		clr=2
+	}
+}
+rectangle {
+	object {
+		x=681
+		y=81
+		width=110
+		height=425
+	}
+	"basic attribute" {
+		clr=2
+	}
+}
+rectangle {
+	object {
+		x=568
+		y=81
+		width=110
+		height=425
+	}
+	"basic attribute" {
+		clr=2
+	}
+}
+rectangle {
+	object {
+		x=455
+		y=81
+		width=110
+		height=425
+	}
+	"basic attribute" {
+		clr=2
+	}
+}
+rectangle {
+	object {
+		x=20
+		y=324
+		width=190
+		height=183
+	}
+	"basic attribute" {
+		clr=2
+	}
+}
+rectangle {
+	object {
+		x=127
+		y=351
+		width=65
+		height=20
+	}
+	"basic attribute" {
+		clr=60
+		fill="outline"
+		width=4
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
+	}
+}
+rectangle {
+	object {
+		x=127
+		y=351
+		width=65
+		height=20
+	}
+	"basic attribute" {
+		clr=20
+		fill="outline"
+		width=4
+	}
+	"dynamic attribute" {
+		vis="if zero"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
+	}
+}
+text {
+	object {
+		x=134
+		y=354
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A == 1"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
+	}
+	textix="IRIG-B"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=134
+		y=354
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	"dynamic attribute" {
+		clr="discrete"
+		vis="calc"
+		calc="A == 2"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
+	}
+	textix="1 PPS"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=134
+		y=354
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+	}
+	"dynamic attribute" {
+		vis="if zero"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
+	}
+	textix="NO SYNC"
+	align="horiz. centered"
+}
+rectangle {
+	object {
 		x=111
 		y=236
 		width=20
@@ -99,29 +242,7 @@ rectangle {
 	}
 	"dynamic attribute" {
 		vis="if not zero"
-		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_STATUS"
-	}
-}
-rectangle {
-	object {
-		x=232
-		y=37
-		width=410
-		height=472
-	}
-	"basic attribute" {
-		clr=2
-	}
-}
-rectangle {
-	object {
-		x=420
-		y=42
-		width=196
-		height=33
-	}
-	"basic attribute" {
-		clr=5
+		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_DCU_NODE_ID_STATUS"
 	}
 }
 rectangle {
@@ -135,48 +256,6 @@ rectangle {
 		clr=2
 	}
 }
-rectangle {
-	object {
-		x=20
-		y=324
-		width=190
-		height=180
-	}
-	"basic attribute" {
-		clr=2
-	}
-}
-"text update" {
-	object {
-		x=475
-		y=49
-		width=80
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ACCUM_OVERFLOW"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"message button" {
-	object {
-		x=558
-		y=47
-		width=50
-		height=24
-	}
-	control {
-		chan="SITE_NAME:SYSTEM_NAME-OVERFLOW_RESET"
-		clr=14
-		bclr=30
-	}
-	label="Reset"
-	release_msg="1"
-}
 "message button" {
 	object {
 		x=116
@@ -185,7 +264,7 @@ rectangle {
 		height=24
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-DIAG_RESET"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_RESET"
 		clr=14
 		bclr=30
 	}
@@ -200,7 +279,7 @@ rectangle {
 		height=24
 	}
 	control {
-		chan="SITE_NAME:DAQ-SYSTEM_NAME_LOAD_CONFIG"
+		chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_LOAD_CONFIG"
 		clr=14
 		bclr=30
 	}
@@ -215,7 +294,7 @@ rectangle {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-SYSTEM_NAME_CHAN_CNT"
+		chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_CHAN_CNT"
 		clr=50
 		bclr=42
 	}
@@ -243,7 +322,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-SYSTEM_NAME_TOTAL"
+		chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_TOTAL"
 		clr=50
 		bclr=42
 	}
@@ -271,7 +350,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-SYSTEM_NAME_MSG"
+		chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_MSG"
 		clr=50
 		bclr=42
 	}
@@ -300,7 +379,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_ID"
+		chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_DCU_ID"
 		clr=50
 		bclr=42
 	}
@@ -328,7 +407,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAQ_BYTE_COUNT"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAQ_BYTE_COUNT"
 		clr=50
 		bclr=42
 	}
@@ -348,30 +427,15 @@ text {
 	}
 	textix="DAQ+TP Rate"
 }
-"message button" {
-	object {
-		x=802
-		y=426
-		width=70
-		height=30
-	}
-	control {
-		chan="SITE_NAME:SYSTEM_NAME-VME_RESET"
-		clr=14
-		bclr=20
-	}
-	label="FE Reset"
-	release_msg="1"
-}
 "text entry" {
 	object {
-		x=133
+		x=143
 		y=480
 		width=30
 		height=22
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-BURT_RESTORE"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_BURT_RESTORE"
 		clr=50
 		bclr=42
 	}
@@ -390,42 +454,15 @@ text {
 	}
 	textix="BURT Restore"
 }
-text {
-	object {
-		x=27
-		y=394
-		width=69
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="ADC Sync"
-}
-byte {
-	object {
-		x=95
-		y=395
-		width=30
-		height=14
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DIAG_WORD"
-		clr=20
-		bclr=60
-	}
-	sbit=4
-	ebit=4
-}
 "text update" {
 	object {
 		x=134
-		y=417
+		y=393
 		width=50
 		height=18
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-USR_TIME"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_USR_TIME"
 		clr=50
 		bclr=42
 	}
@@ -435,8 +472,8 @@ byte {
 }
 text {
 	object {
-		x=26
-		y=419
+		x=27
+		y=395
 		width=69
 		height=18
 	}
@@ -445,30 +482,15 @@ text {
 	}
 	textix="USR Time"
 }
-byte {
-	object {
-		x=95
-		y=418
-		width=30
-		height=14
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DIAG_WORD"
-		clr=20
-		bclr=60
-	}
-	sbit=1
-	ebit=1
-}
 "text update" {
 	object {
 		x=134
-		y=439
+		y=414
 		width=50
 		height=18
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-CPU_METER_MAX"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER_MAX"
 		clr=50
 		bclr=42
 	}
@@ -478,13 +500,13 @@ byte {
 }
 "text update" {
 	object {
-		x=134
-		y=459
+		x=74
+		y=414
 		width=50
 		height=18
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-CPU_METER"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER"
 		clr=50
 		bclr=42
 	}
@@ -495,19 +517,7 @@ byte {
 text {
 	object {
 		x=27
-		y=461
-		width=69
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="CPU"
-}
-text {
-	object {
-		x=27
-		y=441
+		y=416
 		width=69
 		height=18
 	}
@@ -518,34 +528,18 @@ text {
 }
 byte {
 	object {
-		x=95
-		y=440
-		width=30
-		height=14
+		x=124
+		y=414
+		width=10
+		height=18
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DIAG_WORD"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
 		clr=20
 		bclr=60
 	}
 	sbit=3
 	ebit=3
-}
-"text update" {
-	object {
-		x=134
-		y=373
-		width=50
-		height=18
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ONE_PPS"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
 }
 text {
 	object {
@@ -557,1120 +551,7 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="1PPS Trig"
-}
-byte {
-	object {
-		x=95
-		y=374
-		width=30
-		height=14
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DIAG_WORD"
-		clr=20
-		bclr=60
-	}
-	sbit=0
-}
-text {
-	object {
-		x=379
-		y=78
-		width=105
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="ADC1"
-	align="horiz. centered"
-}
-"text update" {
-	object {
-		x=375
-		y=102
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_0"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=127
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_1"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=152
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_2"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=177
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_3"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=202
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_4"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=227
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_5"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=252
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_6"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=277
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_7"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=302
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_8"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=327
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_9"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=352
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_10"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=377
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_11"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=402
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_12"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=427
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_13"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=452
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_14"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=375
-		y=477
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_15"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=102
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_16"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=127
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_17"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=152
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_18"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=177
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_19"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=202
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_20"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=227
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_21"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=252
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_22"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=277
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_23"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=302
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_24"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=327
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_25"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=352
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_26"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=377
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_27"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=402
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_28"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=427
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_29"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=452
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_30"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=435
-		y=477
-		width=50
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_1_31"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-text {
-	object {
-		x=252
-		y=77
-		width=105
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="ADC0"
-	align="horiz. centered"
-}
-composite {
-	object {
-		x=250
-		y=101
-		width=50
-		height=395
-	}
-	"composite name"=""
-	children {
-		"text update" {
-			object {
-				x=250
-				y=101
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_0"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=126
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_1"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=151
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_2"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=176
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_3"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=201
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_4"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=226
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_5"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=251
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_6"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=276
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_7"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=301
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_8"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=326
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_9"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=351
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_10"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=376
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_11"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=401
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_12"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=426
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_13"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=451
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_14"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=250
-				y=476
-				width=50
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_15"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-	}
-}
-composite {
-	object {
-		x=310
-		y=101
-		width=50
-		height=395
-	}
-	"composite name"=""
-	children {
-		composite {
-			object {
-				x=310
-				y=101
-				width=50
-				height=395
-			}
-			"composite name"=""
-			children {
-				"text update" {
-					object {
-						x=310
-						y=101
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_16"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=126
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_17"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=151
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_18"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=176
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_19"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=201
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_20"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=226
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_21"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=251
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_22"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=276
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_23"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=301
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_24"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=326
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_25"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=351
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_26"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=376
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_27"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=401
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_28"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=426
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_29"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=451
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_30"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=310
-						y=476
-						width=50
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-ADC_OVERFLOW_0_31"
-						clr=50
-						bclr=42
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-			}
-		}
-	}
-}
-"text update" {
-	object {
-		x=134
-		y=396
-		width=50
-		height=18
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-ADC_WAIT"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
+	textix="Cycle Time"
 }
 text {
 	object {
@@ -1684,1125 +565,11 @@ text {
 	}
 	textix="DAQ       Status   CPS   SUM"
 }
-"text update" {
-	object {
-		x=563
-		y=102
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_0"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=127
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_1"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=152
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_2"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=177
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_3"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=202
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_4"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=227
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_5"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=252
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_6"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=277
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_7"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=302
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_8"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=327
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_9"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=352
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_10"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=377
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_11"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=402
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_12"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=427
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_13"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=452
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_14"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=563
-		y=477
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_1_15"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-text {
-	object {
-		x=563
-		y=80
-		width=60
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="DAC1"
-	align="horiz. centered"
-}
-"text update" {
-	object {
-		x=495
-		y=102
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_0"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=127
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_1"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=152
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_2"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=177
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_3"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=202
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_4"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=227
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_5"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=252
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_6"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=277
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_7"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=302
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_8"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=327
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_9"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=352
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_10"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=377
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_11"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=402
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_12"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=427
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_13"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=452
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_14"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=495
-		y=477
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DAC_OVERFLOW_0_15"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-text {
-	object {
-		x=495
-		y=79
-		width=60
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="DAC0"
-	align="horiz. centered"
-}
 rectangle {
 	object {
-		x=652
-		y=37
-		width=250
-		height=472
-	}
-	"basic attribute" {
-		clr=2
-	}
-}
-"text update" {
-	object {
-		x=663
-		y=81
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_0"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=663
-		y=106
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_1"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=663
-		y=131
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_2"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=663
-		y=156
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_3"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=663
-		y=181
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_4"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=663
-		y=206
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_5"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=663
-		y=231
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_6"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=663
-		y=256
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_7"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=663
-		y=281
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_8"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=663
-		y=306
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_9"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=663
-		y=331
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_10"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=663
-		y=357
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_11"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-composite {
-	object {
-		x=737
-		y=82
-		width=60
-		height=295
-	}
-	"composite name"=""
-	children {
-		"text update" {
-			object {
-				x=737
-				y=82
-				width=60
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-GDS_MON_12"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=737
-				y=107
-				width=60
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-GDS_MON_13"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=737
-				y=132
-				width=60
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-GDS_MON_14"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=737
-				y=157
-				width=60
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-GDS_MON_15"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=737
-				y=182
-				width=60
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-GDS_MON_16"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=737
-				y=207
-				width=60
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-GDS_MON_17"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=737
-				y=232
-				width=60
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-GDS_MON_18"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=737
-				y=257
-				width=60
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-GDS_MON_19"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=737
-				y=282
-				width=60
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-GDS_MON_20"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=737
-				y=307
-				width=60
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-GDS_MON_21"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=737
-				y=332
-				width=60
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-GDS_MON_22"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=737
-				y=357
-				width=60
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-GDS_MON_23"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-	}
-}
-text {
-	object {
-		x=668
-		y=51
-		width=122
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Test Points"
-	align="horiz. centered"
-}
-meter {
-	object {
-		x=668
-		y=404
-		width=100
-		height=80
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-CPU_METER"
-		clr=50
-		bclr=42
-	}
-	label="limits"
-	limits {
-	}
-}
-text {
-	object {
-		x=811
-		y=52
-		width=80
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="EXC Chans"
-	align="horiz. centered"
-}
-"text update" {
-	object {
-		x=821
-		y=83
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_24"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=821
-		y=108
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_25"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=821
-		y=133
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_26"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=821
-		y=158
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_27"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=821
-		y=183
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_28"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=821
-		y=208
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_29"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=821
-		y=233
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_30"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=821
-		y=258
-		width=60
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-GDS_MON_31"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-rectangle {
-	object {
-		x=-140
+		x=0
 		y=0
-		width=1059
+		width=915
 		height=22
 	}
 	"basic attribute" {
@@ -2831,7 +598,7 @@ text {
 	"basic attribute" {
 		clr=2
 	}
-	textix="SITE_NAMESYSTEM_NAME_GDS_TP"
+	textix="SITE_NAMESYSTEM_NAME_DCU_NODE_ID_GDS_TP"
 	align="horiz. centered"
 }
 "message button" {
@@ -2842,7 +609,7 @@ text {
 		height=24
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-LOAD_NEW_COEFF"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_LOAD_NEW_COEFF"
 		clr=14
 		bclr=30
 	}
@@ -2857,7 +624,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-MSG"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_MSG"
 		clr=50
 		bclr=42
 	}
@@ -2867,78 +634,18 @@ text {
 }
 "text update" {
 	object {
-		x=793
+		x=776
 		y=3
 		width=120
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-TIME_STRING"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_STRING"
 		clr=2
 		bclr=54
 	}
 	limits {
 	}
-}
-text {
-	object {
-		x=241
-		y=47
-		width=109
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="OVERFLOWS"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=427
-		y=50
-		width=40
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="Total"
-	align="horiz. right"
-}
-"shell command" {
-	object {
-		x=822
-		y=312
-		width=60
-		height=59
-	}
-	command[0] {
-		label="Clear all SYSTEM_NAME testpoits"
-		name="echo 'tp clear GDS_NODE_ID *' | diag -l"
-	}
-	command[1] {
-		label="Clear all SYSTEM_NAME AWG waveforms"
-		name="echo 'awg clear GDS_NODE_ID *' | diag -l"
-	}
-	command[2] {
-		label="Restart framebuilder FB0"
-		name="env LD_PRELOAD= expect -c 'spawn telnet fb0 8087; expect daqd>\ ; send shutdown\;\n ; expect daqd> '"
-	}
-	command[3] {
-		label="Clear FB0 CRC SUM"
-		name="env LD_PRELOAD= expect -c 'spawn telnet fb0 8087; expect daqd>\ ; send clear\ crc\;\n ; expect daqd> '"
-	}
-	command[4] {
-		label="Restart framebuilder FB1"
-		name="env LD_PRELOAD= expect -c 'spawn telnet fb1 8087; expect daqd>\ ; send shutdown\;\n ; expect daqd> '"
-	}
-	command[5] {
-		label="Clear FB1 CRC SUM"
-		name="env LD_PRELOAD= expect -c 'spawn telnet fb1 8087; expect daqd>\ ; send clear\ crc\;\n ; expect daqd> '"
-	}
-	clr=14
-	bclr=24
 }
 byte {
 	object {
@@ -2948,7 +655,7 @@ byte {
 		height=10
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FB_NET_STATUS"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FB_NET_STATUS"
 		clr=60
 		bclr=20
 	}
@@ -2963,7 +670,7 @@ byte {
 		height=10
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-FB_NET_STATUS"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FB_NET_STATUS"
 		clr=60
 		bclr=20
 	}
@@ -3002,7 +709,7 @@ text {
 		height=14
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_CRC_CPS"
+		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_DCU_NODE_ID_CRC_CPS"
 		clr=50
 		bclr=42
 	}
@@ -3018,7 +725,7 @@ text {
 		height=14
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_CRC_CPS"
+		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_DCU_NODE_ID_CRC_CPS"
 		clr=50
 		bclr=42
 	}
@@ -3034,7 +741,7 @@ text {
 		height=14
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_CRC_SUM"
+		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_DCU_NODE_ID_CRC_SUM"
 		clr=50
 		bclr=42
 	}
@@ -3050,7 +757,7 @@ text {
 		height=14
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_CRC_SUM"
+		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_DCU_NODE_ID_CRC_SUM"
 		clr=50
 		bclr=42
 	}
@@ -3070,7 +777,7 @@ rectangle {
 	}
 	"dynamic attribute" {
 		vis="if zero"
-		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_STATUS"
+		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_DCU_NODE_ID_STATUS"
 	}
 }
 "text update" {
@@ -3081,7 +788,7 @@ rectangle {
 		height=14
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_STATUS"
+		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_DCU_NODE_ID_STATUS"
 		clr=50
 		bclr=42
 	}
@@ -3102,7 +809,7 @@ rectangle {
 	}
 	"dynamic attribute" {
 		vis="if not zero"
-		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_STATUS"
+		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_DCU_NODE_ID_STATUS"
 	}
 }
 rectangle {
@@ -3117,7 +824,7 @@ rectangle {
 	}
 	"dynamic attribute" {
 		vis="if zero"
-		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_STATUS"
+		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_DCU_NODE_ID_STATUS"
 	}
 }
 "text update" {
@@ -3128,27 +835,13 @@ rectangle {
 		height=14
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_STATUS"
+		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_DCU_NODE_ID_STATUS"
 		clr=50
 		bclr=42
 	}
 	align="horiz. centered"
 	format="hexadecimal"
 	limits {
-	}
-}
-rectangle {
-	object {
-		x=786
-		y=404
-		width=100
-		height=80
-	}
-	"basic attribute" {
-		clr=23
-	}
-	"dynamic attribute" {
-		chan="SITE_NAME:SYSTEM_NAME-VME_RESET"
 	}
 }
 text {
@@ -3189,7 +882,7 @@ text {
 }
 text {
 	object {
-		x=25
+		x=27
 		y=354
 		width=69
 		height=18
@@ -3197,36 +890,7 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="IRIGB Diff"
-}
-"text update" {
-	object {
-		x=115
-		y=353
-		width=70
-		height=18
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-TIME_ERR"
-		clr=50
-		bclr=42
-	}
-	align="horiz. right"
-	limits {
-	}
-}
-text {
-	object {
-		x=185
-		y=354
-		width=23
-		height=14
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="ns"
-	align="horiz. centered"
+	textix="Sync Source"
 }
 text {
 	object {
@@ -3244,7 +908,7 @@ text {
 text {
 	object {
 		x=185
-		y=398
+		y=395
 		width=23
 		height=14
 	}
@@ -3257,7 +921,7 @@ text {
 text {
 	object {
 		x=185
-		y=419
+		y=415
 		width=23
 		height=14
 	}
@@ -3267,98 +931,3034 @@ text {
 	textix="us"
 	align="horiz. centered"
 }
-text {
+rectangle {
 	object {
-		x=185
-		y=440
-		width=23
-		height=14
+		x=0
+		y=530
+		width=920
+		height=25
 	}
 	"basic attribute" {
-		clr=14
+		clr=5
 	}
-	textix="us"
-	align="horiz. centered"
 }
-text {
+image {
 	object {
-		x=185
-		y=461
-		width=23
-		height=14
+		x=895
+		y=530
+		width=25
+		height=25
 	}
-	"basic attribute" {
-		clr=14
+	type="gif"
+	"image name"="/cvs/cds/LOCATION_NAME/scripts/utilities/nova_logo.gif"
+	"dynamic attribute" {
+		chan="SITE_NAME:CONTROL_SYSTEM_SYSTEM_NAME-DCU_NODE_ID_TIME_STRING"
 	}
-	textix="us"
-	align="horiz. centered"
+}
+"shell command" {
+	object {
+		x=0
+		y=530
+		width=150
+		height=25
+	}
+	command[0] {
+		label="Documentation"
+		name="xterm -e view"
+		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/docs/SITE_NAMESYSTEM_NAME-GDS_NODE_ID_GDS_TP.txt"
+	}
+	command[1] {
+		label="View Last Snapshot"
+		name="xwud -in"
+		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMESYSTEM_NAME-GDS_NODE_ID_GDS_TP_0.xwd"
+	}
+	command[2] {
+		label="View Previous Snapshot"
+		name="xwud -in"
+		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMESYSTEM_NAME-GDS_NODE_ID_GDS_TP_1.xwd"
+	}
+	command[3] {
+		label="Update Snapshot"
+		name="/cvs/cds/LOCATION_NAME/scripts/utilities/xupdatesnap"
+		args="SITE_NAMESYSTEM_NAME-GDS_NODE_ID_GDS_TP"
+	}
+	clr=14
+	bclr=30
 }
 byte {
 	object {
-		x=96
-		y=355
-		width=15
-		height=14
+		x=124
+		y=373
+		width=10
+		height=18
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-TIME_DIAG"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
 		clr=20
 		bclr=60
 	}
-	sbit=0
+	sbit=1
+	ebit=1
+}
+"text update" {
+	object {
+		x=134
+		y=373
+		width=50
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_WAIT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=27
+		y=438
+		width=69
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="ADC Status"
+}
+byte {
+	object {
+		x=134
+		y=439
+		width=50
+		height=14
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
+		clr=20
+		bclr=60
+	}
+	sbit=4
+	ebit=7
 }
 rectangle {
-        object {
-                x=0
-                y=530
-                width=920
-                height=25
-        }
-        "basic attribute" {
-                clr=5
-        }
+	object {
+		x=455
+		y=37
+		width=450
+		height=40
+	}
+	"basic attribute" {
+		clr=2
+	}
 }
-image {
-        object {
-                x=895
-                y=530
-                width=25
-                height=25
-        }
-        type="gif"
-        "image name"="/cvs/cds/LOCATION_NAME/scripts/utilities/nova_logo.gif"
-        "dynamic attribute" {
-                chan="SITE_NAME:CONTROL_SYSTEM_SYSTEM_NAME-TIME_STRING"
-        }
+rectangle {
+	object {
+		x=643
+		y=42
+		width=196
+		height=33
+	}
+	"basic attribute" {
+		clr=5
+	}
+}
+"text update" {
+	object {
+		x=698
+		y=49
+		width=80
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ACCUM_OVERFLOW"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"message button" {
+	object {
+		x=781
+		y=47
+		width=50
+		height=24
+	}
+	control {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OVERFLOW_RESET"
+		clr=14
+		bclr=30
+	}
+	label="Reset"
+	release_msg="1"
+}
+text {
+	object {
+		x=577
+		y=81
+		width=95
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="ADC1"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=467
+		y=81
+		width=95
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="ADC0"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=513
+		y=105
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_16"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=130
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_17"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=155
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_18"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=180
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_19"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=205
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_20"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=230
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_21"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=255
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_22"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=280
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_23"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=305
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_24"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=330
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_25"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=355
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_26"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=380
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_27"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=405
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_28"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=430
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_29"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=455
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_30"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=513
+		y=480
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_31"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=706
+		y=81
+		width=60
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="DAC0"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=464
+		y=47
+		width=109
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="OVERFLOWS"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=650
+		y=50
+		width=40
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Total"
+	align="horiz. right"
+}
+"message button" {
+	object {
+		x=353
+		y=426
+		width=70
+		height=30
+	}
+	control {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_VME_RESET"
+		clr=14
+		bclr=20
+	}
+	label="FE Reset"
+	release_msg="1"
+}
+rectangle {
+	object {
+		x=215
+		y=37
+		width=234
+		height=470
+	}
+	"basic attribute" {
+		clr=2
+	}
+}
+text {
+	object {
+		x=227
+		y=51
+		width=105
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Test Points"
+	align="horiz. centered"
+}
+meter {
+	object {
+		x=228
+		y=402
+		width=100
+		height=80
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER"
+		clr=50
+		bclr=42
+	}
+	label="limits"
+	limits {
+	}
+}
+text {
+	object {
+		x=363
+		y=52
+		width=80
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="EXC Chans"
+	align="horiz. centered"
 }
 "shell command" {
-        object {
-                x=0
-                y=530
-                width=150
-                height=25
-        }
-        command[0] {
-                label="Documentation"
-                name="xterm -e view"
-                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/docs/SITE_NAMESYSTEM_NAME-GDS_TP.txt"
-        }
-        command[1] {
-                label="View Last Snapshot"
-                name="xwud -in"
-                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMESYSTEM_NAME-GDS_TP_0.xwd"
-        }
-        command[2] {
-                label="View Previous Snapshot"
-                name="xwud -in"
-                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMESYSTEM_NAME-GDS_TP_1.xwd"
-        }
-        command[3] {
-                label="Update Snapshot"
-                name="/cvs/cds/LOCATION_NAME/scripts/utilities/xupdatesnap"
-                args="SITE_NAMESYSTEM_NAME-GDS_TP"
-        }
-        clr=14
-        bclr=30
+	object {
+		x=364
+		y=311
+		width=60
+		height=59
+	}
+	command[0] {
+		label="Clear all SYSTEM_NAME testpoits"
+		name="echo 'tp clear DCU_NODE_ID *' | diag -l"
+	}
+	command[1] {
+		label="Clear all SYSTEM_NAME AWG waveforms"
+		name="echo 'awg clear DCU_NODE_ID *' | diag -l"
+	}
+	command[2] {
+		label="Restart framebuilder FB0"
+		name="env LD_PRELOAD= expect -c 'spawn telnet fb0 8087; expect daqd>\ ; send shutdown\;\n ; expect daqd> '"
+	}
+	command[3] {
+		label="Clear FB0 CRC SUM"
+		name="env LD_PRELOAD= expect -c 'spawn telnet fb0 8087; expect daqd>\ ; send clear\ crc\;\n ; expect daqd> '"
+	}
+	command[4] {
+		label="Restart framebuilder FB1"
+		name="env LD_PRELOAD= expect -c 'spawn telnet fb1 8087; expect daqd>\ ; send shutdown\;\n ; expect daqd> '"
+	}
+	command[5] {
+		label="Clear FB1 CRC SUM"
+		name="env LD_PRELOAD= expect -c 'spawn telnet fb1 8087; expect daqd>\ ; send clear\ crc\;\n ; expect daqd> '"
+	}
+	clr=14
+	bclr=24
 }
-
+rectangle {
+	object {
+		x=338
+		y=402
+		width=100
+		height=80
+	}
+	"basic attribute" {
+		clr=23
+	}
+	"dynamic attribute" {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_VME_RESET"
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=105
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_0"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=130
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_1"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=155
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_2"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=180
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_3"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=205
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_4"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=230
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_5"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=255
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_6"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=280
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_7"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=305
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_8"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=330
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_9"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=355
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_10"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=380
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_11"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=405
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_12"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=430
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_13"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=455
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_14"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=851
+		y=480
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_1_15"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=827
+		y=81
+		width=45
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="DAC1"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=738
+		y=105
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_0"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=130
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_1"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=155
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_2"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=180
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_3"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=205
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_4"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=230
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_5"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=255
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_6"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=280
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_7"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=305
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_8"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=330
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_9"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=355
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_10"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=380
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_11"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=405
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_12"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=430
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_13"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=455
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_14"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=738
+		y=480
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OVERFLOW_0_15"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=105
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_0"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=130
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_1"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=155
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_2"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=180
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_3"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=205
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_4"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=230
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_5"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=255
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_6"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=280
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_7"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=305
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_8"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=330
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_9"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=355
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_10"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=380
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_11"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=405
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_12"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=430
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_13"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=455
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_14"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=688
+		y=480
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_15"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=105
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_0"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=130
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_1"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=155
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_2"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=180
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_3"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=205
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_1UTPUT_0_4"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=230
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_1UTPUT_0_5"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=255
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_1UTPUT_0_6"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=280
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_7"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=305
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_8"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=330
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_9"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=355
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_10"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=380
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_11"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=405
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_12"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=430
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_13"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=455
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_14"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=801
+		y=480
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_15"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=695
+		y=92
+		width=35
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="OUT"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=745
+		y=92
+		width=35
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="OFC"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=805
+		y=92
+		width=35
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="OUT"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=859
+		y=92
+		width=35
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="OFC"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=463
+		y=105
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_0"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=130
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_1"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=155
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_2"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=180
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_3"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=205
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_4"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=230
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_5"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=255
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_6"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=280
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_7"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=305
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_8"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=330
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_9"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=355
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_10"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=380
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_11"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=405
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_12"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=430
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_13"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=455
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_14"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=463
+		y=480
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_0_15"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=105
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_0"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=130
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_1"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=155
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_2"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=180
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_3"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=205
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_4"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=230
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_5"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=255
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_6"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=280
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_7"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=305
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_8"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=330
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_9"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=355
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_10"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=380
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_11"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=405
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_12"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=430
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_13"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=455
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_14"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=575
+		y=480
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_15"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=105
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_16"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=130
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_17"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=155
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_18"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=180
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_19"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=205
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_20"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=230
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_21"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=255
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_22"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=280
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_23"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=305
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_24"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=330
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_25"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=355
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_26"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=380
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_27"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=405
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_28"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=430
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_29"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=455
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_30"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=625
+		y=480
+		width=45
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_OVERFLOW_1_31"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+byte {
+	object {
+		x=502
+		y=94
+		width=20
+		height=12
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
+		clr=20
+		bclr=60
+	}
+	sbit=8
+	ebit=8
+}
+byte {
+	object {
+		x=613
+		y=94
+		width=20
+		height=12
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
+		clr=20
+		bclr=60
+	}
+	sbit=9
+	ebit=9
+}
+byte {
+	object {
+		x=726
+		y=94
+		width=20
+		height=12
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
+		clr=20
+		bclr=60
+	}
+	sbit=12
+	ebit=12
+}
+byte {
+	object {
+		x=838
+		y=93
+		width=20
+		height=12
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
+		clr=20
+		bclr=60
+	}
+	sbit=13
+	ebit=13
+}
+"text update" {
+	object {
+		x=226
+		y=81
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_0"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=226
+		y=106
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_1"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=226
+		y=131
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_2"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=226
+		y=155
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_3"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=226
+		y=180
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_4"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=226
+		y=205
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_5"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=226
+		y=230
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_6"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=226
+		y=255
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_7"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=226
+		y=280
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_8"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=226
+		y=305
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_9"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=226
+		y=330
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_10"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=226
+		y=356
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_11"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=284
+		y=82
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_12"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=284
+		y=107
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_13"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=284
+		y=132
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_14"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=284
+		y=156
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_15"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=284
+		y=181
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_16"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=284
+		y=206
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_17"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=284
+		y=231
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_18"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=284
+		y=256
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_19"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=284
+		y=281
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_20"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=284
+		y=306
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_21"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=284
+		y=331
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_22"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=284
+		y=356
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_23"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=373
+		y=83
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_24"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=373
+		y=108
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_25"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=373
+		y=133
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_26"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=373
+		y=157
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_27"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=373
+		y=182
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_28"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=373
+		y=207
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_29"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=373
+		y=232
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_30"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=373
+		y=257
+		width=50
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_31"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
