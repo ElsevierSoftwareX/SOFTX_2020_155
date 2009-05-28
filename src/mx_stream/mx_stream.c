@@ -392,6 +392,8 @@ main(int argc, char **argv)
 	extern int mx_debug_mask;
 	mx_debug_mask = 0xFFF;
 #endif
+	// So that openmx is not aborting on connection loss
+	putenv("OMX_FATAL_ERRORS=0");
 
 	mx_init();
 	MX_MUTEX_INIT(&stream_mutex);
