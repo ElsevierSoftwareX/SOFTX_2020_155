@@ -5,8 +5,8 @@ file {
 }
 display {
 	object {
-		x=146
-		y=112
+		x=598
+		y=44
 		width=917
 		height=555
 	}
@@ -85,6 +85,47 @@ display {
 		3cb420,
 		289315,
 		1a7309,
+	}
+}
+rectangle {
+	object {
+		x=20
+		y=37
+		width=190
+		height=266
+	}
+	"basic attribute" {
+		clr=2
+	}
+}
+rectangle {
+	object {
+		x=111
+		y=236
+		width=20
+		height=12
+	}
+	"basic attribute" {
+		clr=60
+	}
+	"dynamic attribute" {
+		vis="if zero"
+		chan="SITE_NAME:DAQ-FB1_FBID_STATUS"
+	}
+}
+rectangle {
+	object {
+		x=111
+		y=218
+		width=20
+		height=12
+	}
+	"basic attribute" {
+		clr=20
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="SITE_NAME:DAQ-FB0_FBID_STATUS"
 	}
 }
 rectangle {
@@ -242,18 +283,7 @@ rectangle {
 	}
 	"dynamic attribute" {
 		vis="if not zero"
-		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_DCU_NODE_ID_STATUS"
-	}
-}
-rectangle {
-	object {
-		x=20
-		y=37
-		width=190
-		height=266
-	}
-	"basic attribute" {
-		clr=2
+		chan="SITE_NAME:DAQ-FB1_FBID_STATUS"
 	}
 }
 "message button" {
@@ -709,7 +739,7 @@ text {
 		height=14
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_DCU_NODE_ID_CRC_CPS"
+		chan="SITE_NAME:DAQ-FB0_FBID_CRC_CPS"
 		clr=50
 		bclr=42
 	}
@@ -725,7 +755,7 @@ text {
 		height=14
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_DCU_NODE_ID_CRC_CPS"
+		chan="SITE_NAME:DAQ-FB1_FBID_CRC_CPS"
 		clr=50
 		bclr=42
 	}
@@ -741,7 +771,7 @@ text {
 		height=14
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_DCU_NODE_ID_CRC_SUM"
+		chan="SITE_NAME:DAQ-FB1_FBID_CRC_SUM"
 		clr=50
 		bclr=42
 	}
@@ -757,7 +787,7 @@ text {
 		height=14
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_DCU_NODE_ID_CRC_SUM"
+		chan="SITE_NAME:DAQ-FB0_FBID_CRC_SUM"
 		clr=50
 		bclr=42
 	}
@@ -777,7 +807,7 @@ rectangle {
 	}
 	"dynamic attribute" {
 		vis="if zero"
-		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_DCU_NODE_ID_STATUS"
+		chan="SITE_NAME:DAQ-FB0_FBID_STATUS"
 	}
 }
 "text update" {
@@ -788,43 +818,13 @@ rectangle {
 		height=14
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_DCU_NODE_ID_STATUS"
+		chan="SITE_NAME:DAQ-FB0_FBID_STATUS"
 		clr=50
 		bclr=42
 	}
 	align="horiz. centered"
 	format="hexadecimal"
 	limits {
-	}
-}
-rectangle {
-	object {
-		x=111
-		y=218
-		width=20
-		height=12
-	}
-	"basic attribute" {
-		clr=20
-	}
-	"dynamic attribute" {
-		vis="if not zero"
-		chan="SITE_NAME:DAQ-FB0_SYSTEM_NAME_DCU_NODE_ID_STATUS"
-	}
-}
-rectangle {
-	object {
-		x=111
-		y=236
-		width=20
-		height=12
-	}
-	"basic attribute" {
-		clr=60
-	}
-	"dynamic attribute" {
-		vis="if zero"
-		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_DCU_NODE_ID_STATUS"
 	}
 }
 "text update" {
@@ -835,7 +835,7 @@ rectangle {
 		height=14
 	}
 	monitor {
-		chan="SITE_NAME:DAQ-FB1_SYSTEM_NAME_DCU_NODE_ID_STATUS"
+		chan="SITE_NAME:DAQ-FB1_FBID_STATUS"
 		clr=50
 		bclr=42
 	}
@@ -1026,7 +1026,7 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="ADC Status"
+	textix="ADC Sync"
 }
 byte {
 	object {
@@ -2068,7 +2068,7 @@ text {
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_0"
 		clr=50
-		bclr=42
+		bclr=27
 	}
 	align="horiz. centered"
 	limits {
@@ -2084,7 +2084,7 @@ text {
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_1"
 		clr=50
-		bclr=42
+		bclr=27
 	}
 	align="horiz. centered"
 	limits {
@@ -2100,7 +2100,7 @@ text {
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_0_2"
 		clr=50
-		bclr=42
+		bclr=27
 	}
 	align="horiz. centered"
 	limits {
