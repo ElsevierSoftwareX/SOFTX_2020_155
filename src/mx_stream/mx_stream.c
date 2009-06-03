@@ -222,6 +222,7 @@ do{
 			shmIpcPtr->bp[ii].cycle = dataPtr->mxIpcData.bp[ii].cycle;
 			shmIpcPtr->dataBlockSize = dataPtr->mxIpcData.dataBlockSize;
 			shmIpcPtr->cycle = dataPtr->mxIpcData.cycle;
+			shmTpTable[0] = dataPtr->mxTpTable;
 			//  printf("crc = 0x%x\n  ",shmIpcPtr->bp[ii].crc);
 			
 
@@ -311,6 +312,8 @@ if(!myErrorSignal)
 		do{
 			usleep(1000);
 		}while(shmIpcPtr->cycle == lastCycle);
+
+		mxDataBlock.mxTpTable = shmTpTable[0];
 
 		// Copy values from shmmem to MX buffer
 		lastCycle = shmIpcPtr->cycle;
