@@ -454,13 +454,8 @@ void *fe_start(void *arg)
   int cnt = 0;
 #else
   unsigned int ns;
-  // Check if time available from an IRIG-B card
   double time = getGpsTime(&ns);
-  // If IRIG-B card present, code will use it for startup synchonization
-  if(time != 0.0) syncSource = SYNC_SRC_IRIG_B;
-  // If no IRIG-B card, will try 1PPS on ADC[0][31] later
-  else syncSource = SYNC_SRC_1PPS;
-  pLocalEpics->epicsOutput.timeErr = syncSource;
+  // Check if time available from an IRIG-B card
   printf("Waiting for EPICS BURT at %f and %d ns\n", time, ns);
 #endif
   do{
@@ -494,6 +489,11 @@ void *fe_start(void *arg)
   // Reset timing diagnostics
   pLocalEpics->epicsOutput.diagWord = 0;
   pLocalEpics->epicsOutput.timeDiag = 0;
+  // If IRIG-B card present, code will use it for startup synchonization
+  if(time != 0.0) syncSource = SYNC_SRC_IRIG_B;
+  // If no IRIG-B card, will try 1PPS on ADC[0][31] later
+  else syncSource = SYNC_SRC_1PPS;
+  pLocalEpics->epicsOutput.timeErr = syncSource;
 
 
 #ifdef PNM
