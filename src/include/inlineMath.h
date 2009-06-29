@@ -1,4 +1,14 @@
-/* CVS VERSION: $Id: inlineMath.h,v 1.2 2009/04/03 18:10:01 aivanov Exp $ */
+/* CVS VERSION: $Id: inlineMath.h,v 1.3 2009/06/29 22:18:31 aivanov Exp $ */
+
+#define __lrint_code \
+  long int __lrintres;                                                        \
+  __asm__ __volatile__                                                        \
+    ("fistpl %0"                                                              \
+     : "=m" (__lrintres) : "t" (__x) : "st");                                 \
+  return __lrintres
+
+inline int rintf (float __x) { __lrint_code; }
+inline int rint (double __x) { __lrint_code; }
 
 inline void sincos(double __x, double *__sinx, double *__cosx)
 {
