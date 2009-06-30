@@ -1,0 +1,43 @@
+##########################################################################
+# Copyright (c) 2003 The University of Chicago, as Operator of Argonne
+#     National Laboratory.
+# Copyright (c) 2003 The Regents of the University of California, as
+#     Operator of Los Alamos National Laboratory.
+# EPICS BASE Versions 3.13.7 and higher are distributed subject to the
+# Software License Agreement found in the file LICENSE that is included
+# with this distribution.
+##########################################################################
+
+TOP=../..
+
+include $(TOP)/configure/CONFIG
+
+PROD_IOC = softIoc
+
+USR_DBDFLAGS += -I/opt/synApps_5_4_1/support/std/2-7/dbd
+
+DBD += softIoc.dbd
+softIoc_DBD += base.dbd
+softIoc_DBD += system.dbd
+softIoc_DBD += epidRecord.dbd
+softIoc_DBD += shareBase.dbd
+softIoc_DBD += std.dbd
+softIoc_DBD += scalerRecord.dbd
+softIoc_DBD += stdSupport.dbd
+
+
+ABS_INSTALL_DIR = $(shell $(PERL) $(TOOLS)/fullPathName.pl $(INSTALL_LOCATION))
+USR_CXXFLAGS += -DEPICS_BASE=$(ABS_INSTALL_DIR)
+EPICS_DBDFLAGS += -I/home/controls/epid/synApps_5_4_1/support/std/2-7/dbd/
+
+softIoc_SRCS += softIoc_registerRecordDeviceDriver.cpp
+softIoc_SRCS += softMain.cpp
+
+softIoc_LIBS = $(EPICS_BASE_IOC_LIBS)
+LDFLAGS += -L/opt/synApps_5_4_1/support/std/2-7/lib/linux-x86 -lstd
+LDFLAGS += -L/opt/synApps_5_4_1/support/seq/2-0-12/lib/linux-x86 -lseq -lpv
+LDFLAGS += -L/opt/synApps_5_4_1/support/asyn/4-10/lib/linux-x86 -lasyn
+
+DB += softIocExit.db
+
+include $(TOP)/configure/RULES
