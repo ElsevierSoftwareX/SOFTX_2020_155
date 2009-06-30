@@ -239,7 +239,7 @@ static long read_ai(pai)
 	exit(2);
   }
  /*printf("%d\n", sample);*/
-  pai->rval = sample;
+  pai->rval = sample + 32768;
  /*printf("%d\n", sample);*/
   return 0;
 }
