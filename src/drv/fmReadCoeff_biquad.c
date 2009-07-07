@@ -1,0 +1,1523 @@
+#include <stdio.h>
+#include <stdlib.h>
+#ifdef SOLARIS
+#include <strings.h>
+#endif
+#include <string.h>
+#include <ctype.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+char *readSusCoeff_c_cvsid = "$Id: fmReadCoeff_biquad.c,v 1.1 2009/07/07 23:06:25 aivanov Exp $";
+
+#ifdef unix_test
+/* The number of subsystems (optics) */
+#define FM_SUBSYS_NUM  1
+#define MAX_MODULES    46
+#else
+#ifdef SOLARIS
+#define MAX_MODULES    1
+#else
+#define MAX_MODULES    0
+#endif
+#define FM_SUBSYS_NUM  1
+#endif
+
+#define NO_FM10GEN_C_CODE	1
+#include "fm10Gen.h"
+#include "fmReadCoeff.h"
+
+/* Cat string and make upper case */
+static char *strcat_upper(char *dest, char *src) {
+  char *d = dest;
+
+  for( ; *d; d++);
+  for( ; (*d++ = toupper(*src)); src++);
+
+  return dest;
+}
+
+/* Cat string and make lower case */
+static char *strcat_lower(char *dest, char *src) {
+  char *d = dest;
+
+  for( ; *d; d++);
+  for( ; (*d++ = tolower(*src)); src++);
+
+  return dest;
+}
+
+/* Determine whether string is not a comment or white space */
+static int info_line(char *c) {
+  /* Skip white spaces in front */
+  for( ; isspace(*c); c++);
+
+  return *c && *c != '#'; /* Not end of line or start of comment */
+}
+
+/* Max number of tokens allowed on a line */
+#define MAX_TOKENS 12
+
+/* Tokenize line */
+static int lineTok(char *s, char *tokPtr[]) {
+  int nToks;
+
+  for (nToks = 0;
+       nToks < MAX_TOKENS && 
+       (tokPtr[nToks] = strtok_r(0, " \t\n", &s));
+       nToks++);
+
+  return nToks;
+}
+
+/* Convert string to number */
+static int intToken(char *str, int *res) {
+  char *ptr;
+
+  *res = strtol(str, &ptr, 10);
+ 
+  return *ptr == 0;
+}
+
+/* Convert string to number */
+static int doubleToken(char *str, double *res) {
+  char *ptr;
+
+  *res = strtod(str, &ptr);
+ 
+  return *ptr == 0 || *ptr == '\n'; /* Trailing new line on last token */
+}
+
+/* Verbose error message text */
+static char fmErrMsgTxt[256] = "";
+
+/* Concise error message text */
+static char fmShortErrMsgTxt[40] = "";
+
+/* Return error message text to application */
+char* fmReadErrMsg() { return fmErrMsgTxt; }
+char* fmReadShortErrMsg() { return fmShortErrMsgTxt; }
+
+/* Copy 8 bytes from 'src' to 'dst' and byteswap words */
+void memcpy_swap_words(void *dest, void *src) {
+  ((char *)dest)[0] = ((char *)src)[4];
+  ((char *)dest)[1] = ((char *)src)[5];
+  ((char *)dest)[2] = ((char *)src)[6];
+  ((char *)dest)[3] = ((char *)src)[7];
+  ((char *)dest)[4] = ((char *)src)[0];
+  ((char *)dest)[5] = ((char *)src)[1];
+  ((char *)dest)[6] = ((char *)src)[2];
+  ((char *)dest)[7] = ((char *)src)[3];
+}
+
+#ifdef FIR_FILTERS
+  /* Temporary storage for FIR filter coefficients */
+  double firFiltCoeff[MAX_FIR_MODULES][FILTERS][1 + FIR_TAPS];
+#endif
+
+/* Read system 'fmc' coeffs for subsys 'n' */
+int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
+  int i, j, k;
+  int ix;
+
+  char fname[2][256];                 /* Input coeff file names */
+  char archiveFname[2][256];          /* Archive file names */
+
+  FILE *iFile[2];                     /* Input files */
+  FILE *aFile[2];                     /* Archive files */
+
+  char *p;                            /* Temporary variable */
+
+  unsigned int iFileLen[2] = {0, 0};  /* Input file lengths in bytes */
+  unsigned int totalLength;
+
+  unsigned long crc[2] = {0, 0};      /* Input file checksums */
+
+  int FIRFileExists = 0;
+  int inFileCount;
+
+  char fileExt[2][5] = {".txt", ".fir"};
+
+  /* Pointers to tokens assigned by lineTok() */
+  char *tokPtr[MAX_TOKENS];
+
+
+  /* Close files, delete archive file */
+#define fatal(ix) \
+  fclose(aFile[ix]); \
+  fclose(iFile[ix]); \
+  unlink(archiveFname[ix])
+
+  /* Clear filter coeff placeholder */
+  for (i = 0; i < fmc->subSys[n].numMap; i++) {
+    fmc->subSys[n].map[i].filters = 0;
+    memset(&fmc->subSys[n].map[i].fmd, 0, sizeof(fmc->subSys[n].map[i].fmd));
+  }
+
+#if 0
+/* ###  DEBUG  ### */
+#ifdef FIR_FILTERS
+  fprintf(stderr, "%s", "\n###  FIR_FILTERS is defined\n\n");
+#else
+  fprintf(stderr, "%s", "\n###  FIR_FILTERS is NOT defined\n\n");
+#endif
+/* ###  DEBUG  ### */
+#endif
+
+  /* Construct filenames */
+  strcat(strcat_lower(strcpy(fname[0], "/cvs/cds/"), fmc->site), "/chans/");
+  strcpy(archiveFname[0], fname[0]);
+
+  strcat_upper(strcat_upper(fname[0], fmc->ifo), fmc->system);
+  if (strlen(fmc->subSys[n].name) > 0) /* Only append non-empty subsystem name */
+    strcat_upper(strcat(fname[0], "_"), fmc->subSys[n].name);
+
+  strcpy(fname[1], fname[0]);
+
+  strcat(fname[0], ".txt");
+  printf("Input %s\n", fname[0]);
+
+  strcat(fname[1], ".fir");
+  printf("FIR input %s\n", fname[1]);
+
+  strcat(archiveFname[0], "filter_archive/");
+  strcat(strcat_lower(archiveFname[0], fmc->ifo), "/");
+
+  strcat(strcat_lower(archiveFname[0], fmc->system), "/");
+  if (strlen(fmc->subSys[n].name) > 0) /* Only append non-empty subsystem name */
+    strcat(strcat_lower(archiveFname[0], fmc->subSys[n].name), "/");
+
+  strcat_upper(strcat_upper(archiveFname[0], fmc->ifo), fmc->system);
+  if (strlen(fmc->subSys[n].name) > 0)
+    strcat_upper(strcat(archiveFname[0], "_"), fmc->subSys[n].name);
+  if (strlen(fmc->subSys[n].archiveNameModifier) > 0) {
+    strcat_upper(strcat(archiveFname[0], "_"),
+                 fmc->subSys[n].archiveNameModifier);
+  }
+
+  {
+#if 1
+    long a = time(0);
+    struct tm t;
+    char buf[100];
+
+    localtime_r(&a, &t);
+    sprintf(buf, "%02d%02d%02d_%02d%02d%02d", 
+	    (t.tm_year - 100), (t.tm_mon + 1), t.tm_mday,
+	    t.tm_hour, t.tm_min, t.tm_sec);
+#else
+#ifdef UNIX
+    char buf[100];
+
+    long t = time(0);
+    ctime_r(&t, buf);
+#else
+    size_t s = 27;
+    char buf[s];
+
+    long t = time(0);
+    ctime_r(&t, buf, &s);
+#endif
+    buf[24] = 0;
+#endif
+
+    strcat(strcat(archiveFname[0], "_"), buf);
+  }
+
+  /* Replace spaces with underscores */
+  for (p = archiveFname[0]; (p = strchr(p, ' ')); *p++ = '_');
+
+  strcpy(archiveFname[1], archiveFname[0]);
+
+  strcat(archiveFname[0], ".txt");
+  printf("Archive %s\n", archiveFname[0]);
+
+  strcat(archiveFname[1], ".fir");
+  printf("FIR archive %s\n", archiveFname[1]);
+
+  /* See if input file exists, not empty */
+  /* Check whether archive file exists, can be created */
+  {
+    struct stat buf;
+
+    if (stat(fname[0], &buf) < 0) {
+      sprintf(fmErrMsgTxt, "Can't stat input file `%s'\n", fname[0]);
+      strncpy(fmShortErrMsgTxt, "Can't stat input .txt file", 39);
+      return FM_CANNOT_STAT_INPUT_FILE;
+    }
+
+    iFileLen[0] = buf.st_size;
+
+    if (buf.st_size == 0) {
+      sprintf(fmErrMsgTxt, "Empty input file `%s'\n", fname[0]);
+      strncpy(fmShortErrMsgTxt, "Empty input .txt file", 39);
+      return FM_EMPTY_INPUT_FILE;
+    }
+
+    if (stat(archiveFname[0], &buf) == 0) {
+#if 0
+      sprintf(fmErrMsgTxt, "Archive file `%s' exists\n", archiveFname[0]);
+      strncpy(fmShortErrMsgTxt, "Archive .txt file exists", 39);
+      return FM_ARCHIVE_FILE_EXISTS;
+#else
+      printf("System time is not set? Archive file `%s' exists\n",
+             archiveFname[0]);
+#endif
+    }
+
+    /* Repeat for FIR files */
+    if (stat(fname[1], &buf) == 0) {
+      iFileLen[1] = buf.st_size;
+
+      if (iFileLen[1] > 0) {
+        FIRFileExists = 1;
+
+        if (stat(archiveFname[1], &buf) == 0) {
+          printf("FIR archive file '%s' exists\n", archiveFname[1]);
+        }
+      }
+    }
+
+  }
+
+  /* Open input (.txt) file for reading */
+  iFile[0] = fopen(fname[0], "r");
+
+  if (!iFile[0]) {
+    sprintf(fmErrMsgTxt, "Can't open for reading input file `%s'\n", fname[0]);
+    strncpy(fmShortErrMsgTxt, "Can't open input .txt file for reading", 39);
+    return FM_CANNOT_OPEN_ARCHIVE_FILE;
+  }
+
+  /* Open archive (.txt) file for writing */
+  aFile[0] = fopen(archiveFname[0], "w");
+
+  if (!aFile[0]) {
+    fclose(iFile[0]);
+    sprintf(fmErrMsgTxt, "Can't open for writing archive file `%s'\n",
+            archiveFname[0]);
+    strncpy(fmShortErrMsgTxt, "Can't open archive .txt file for writing", 39);
+    return FM_CANNOT_OPEN_ARCHIVE_FILE;
+  }
+
+  /* Repeat for FIR file - if it exists */
+  if (FIRFileExists) {
+    iFile[1] = fopen(fname[1], "r");
+
+    if (!iFile[1]) {
+      FIRFileExists = 0;
+    }
+    else {
+      aFile[1] = fopen(archiveFname[1], "w");
+
+      if (!aFile[1]) {
+        fclose(iFile[1]);
+        FIRFileExists = 0;
+      }
+    }
+  }
+
+  if (FIRFileExists) {
+    printf("FIR file found - opened\n");
+  }
+  else {
+    printf("FIR file not found or file open failed\n");
+  }
+
+  /* Read input file line by line, store lines in archive file */
+  /* Record new coefficient data in memory */
+  {
+    const unsigned int lineSize = 1024; /* Maximum length of input file line */
+    unsigned int lineNo;         /* Line number counter */
+    int inFilter = 0;            /* Set when reading continuation lines of multi-sos filter */
+    fmSubSysMap * curFilter = 0; /* Set to currently read filter bank */
+    int curFilterNum = 0;        /* Set to currently read filter number in the current bank */
+
+#ifdef SOLARIS
+    char lineBuf[1024];          /* Lines are put in here when they are read */
+#else
+    char lineBuf[lineSize];      /* Lines are put in here when they are read */
+#endif
+
+    int nFIRFilters = 0;         /* FIR filter count */
+
+    int index1;
+    int indexN;
+
+    /* Repeat twice if FIR input file exists */
+    for (inFileCount = 0; inFileCount < (FIRFileExists + 1); inFileCount++) {
+      for (lineNo = 1; fgets(lineBuf, lineSize, iFile[inFileCount]); lineNo++) {
+        /* Checksum the line */
+        crc[inFileCount] = crc_ptr(lineBuf, strlen(lineBuf), crc[inFileCount]);
+        /* Write line into archive file */
+        if (fputs(lineBuf, aFile[inFileCount]) == EOF) {
+          fatal(inFileCount);
+          if (inFileCount != FIRFileExists) {
+            fatal(1);
+          }
+          sprintf(fmErrMsgTxt, "Can't write archive file `%s'\n",
+                  archiveFname[inFileCount]);
+          sprintf(fmShortErrMsgTxt, "Can't write archive %s file",
+                  fileExt[inFileCount]);
+          return FM_CANNOT_WRITE_ARCHIVE_FILE;
+        }
+
+        /* Do not process comment or empty lines */
+        if (info_line(lineBuf)) {
+          /* Check invalid number of tokens on the line         */
+          /* There must be 12 tokens for the filter declaration */
+          /* line and 4 tokens in the continuation line         */
+          unsigned int nToks = lineTok(lineBuf, tokPtr);
+
+          if (nToks < (inFilter ? 4:MAX_TOKENS)) {
+            fatal(inFileCount);
+            if (inFileCount != FIRFileExists) {
+              fatal(1);
+            }
+            sprintf(fmErrMsgTxt, "Invalid line %d in `%s'\n",
+                    lineNo, fname[inFileCount]);
+            sprintf(fmShortErrMsgTxt, "Invalid %s line %d",
+                    fileExt[inFileCount], lineNo);
+            return FM_INVALID_INPUT_FILE;
+          }
+          else {
+            /* Take care of discovering multi-line SOS inputs */
+            if (inFilter) {
+              inFilter--; /* Decrement the number of continuation lines required */
+              if (curFilter) {
+                double filtCoeff[4];
+
+                /* If the current filter is ours */
+                /* printf("Cont for %s nToks = %d; %s %s %s %s\n", curFilter->name, */
+                /*        nToks, tokPtr[0], tokPtr[1], tokPtr[2], tokPtr[3]);       */
+
+                for (i = 0; i < 4; i++) {
+                  if (!doubleToken(tokPtr[i], filtCoeff + i)) {
+                    fatal(inFileCount);
+                    if (inFileCount != FIRFileExists) {
+                      fatal(1);
+                    }
+                    sprintf(fmErrMsgTxt, "Invalid cont coeff on line %d in `%s'\n",
+                            lineNo, fname[inFileCount]);
+                    sprintf(fmShortErrMsgTxt, "Invalid %s line %d",
+                            fileExt[inFileCount], lineNo);
+                    return FM_INVALID_INPUT_FILE;
+                  }
+                }
+
+                /* Put the data into placeholder */
+                if (curFilter->fmd.filterType[curFilterNum]) {
+#ifdef FIR_FILTERS
+                  /* FIR filter coeffs */
+                  for (j = 0; j < 4; j++) {
+                    index1 = curFilter->fmd.filterType[curFilterNum] - 1;
+                    indexN = curFilter->fmd.filtSections[curFilterNum];
+                    indexN = 5 + 4 * (indexN - inFilter - 2) + j;
+
+                    firFiltCoeff[index1][curFilterNum][indexN] = filtCoeff[j];
+                  }
+#endif
+                }
+                else {
+                  /* IIR filter coeffs */
+                  for (j = 0; j < 4; j++) {
+                    indexN = curFilter->fmd.filtSections[curFilterNum];
+                    indexN = 5 + 4 * (indexN - inFilter - 2) + j;
+
+                    curFilter->fmd.filtCoeff[curFilterNum][indexN] =
+                                                      filtCoeff[j];
+#if 0
+		    if (j > 1) {
+			// Calculate low-noise form coeffs
+			curFilter->fmd.filtCoeff[curFilterNum][indexN] -= filtCoeff[j - 2]; // d[n]=b[n] - a[n]
+		    }
+#endif
+		    // Calculate biquad form
+		    switch (j) {
+			case 0: // a11
+			  curFilter->fmd.filtCoeff[curFilterNum][indexN]
+				= - filtCoeff[j] - 1.0; // a11 = - a1 - 1
+			  break;
+			case 1: // a12
+			  curFilter->fmd.filtCoeff[curFilterNum][indexN]
+				= - filtCoeff[j] - filtCoeff[j - 1] - 1.0; // a12 = - a2 - a1 - 1
+			  break;
+			case 2: // c1
+			  curFilter->fmd.filtCoeff[curFilterNum][indexN]
+				= filtCoeff[j] - filtCoeff[j - 2]; // c1 = b1 - a1
+			  break;
+			case 3: // c2
+			  curFilter->fmd.filtCoeff[curFilterNum][indexN]
+				= filtCoeff[j] - filtCoeff[j - 2] + filtCoeff[j - 1] - filtCoeff[j - 3];
+			  break;
+		    }
+                  }
+                }
+              }
+            }
+            else {
+              int num;   /* Filter number in the bank 0-9 */
+              int sType; /* Switching type [12][1-4]*/
+              int filtSections;	    
+              int ramp;
+              int timeout;
+              char filtName[32];
+              double filtCoeff[5];
+              int filterType;
+
+              int maxSOS;
+
+              curFilter = 0;
+              curFilterNum = 0;
+
+              /* NUM */
+              if (!intToken(tokPtr[1], &num)) {
+                fatal(inFileCount);
+                if (inFileCount != FIRFileExists) {
+                  fatal(1);
+                }
+                sprintf(fmErrMsgTxt,
+                        "Invalid filter number (field 2) on line %d in `%s'\n",
+                        lineNo, fname[inFileCount]);
+                sprintf(fmShortErrMsgTxt, "Bad field 2 on %s line %d",
+                        fileExt[inFileCount], lineNo);
+                return FM_INVALID_INPUT_FILE;
+              }
+
+              if (num < 0 || num > 9) {
+                fatal(inFileCount);
+                if (inFileCount != FIRFileExists) {
+                  fatal(1);
+                }
+                sprintf(fmErrMsgTxt,
+                        "Filter number (field 2) out of range on line %d in `%s'\n",
+                        lineNo, fname[inFileCount]);
+                sprintf(fmShortErrMsgTxt, "Out of range field 2 on %s line %d",
+                        lineNo, fileExt[inFileCount]);
+                return FM_INVALID_INPUT_FILE;
+              }
+
+              /* STYPE */
+              if (!intToken(tokPtr[2], &sType)) {
+                fatal(inFileCount);
+                if (inFileCount != FIRFileExists) {
+                  fatal(1);
+                }
+                sprintf(fmErrMsgTxt,
+                        "Invalid switching type number on line %d in `%s'\n",
+                        lineNo, fname[inFileCount]);
+                sprintf(fmShortErrMsgTxt, "Bad field 3 on %s line %d",
+                        lineNo, fileExt[inFileCount]);
+                return FM_INVALID_INPUT_FILE;
+              }
+
+              {
+                int inType = sType/10;
+                int outType = sType%10;
+
+                if ((inType != 1 && inType != 2) ||
+                    (outType < 1 || outType > 4)) {
+                  fatal(inFileCount);
+                  if (inFileCount != FIRFileExists) {
+                    fatal(1);
+                  }
+                  sprintf(fmErrMsgTxt,
+                          "Switching type wrong on line %d in `%s'\n",
+                          lineNo, fname[inFileCount]);
+                  sprintf(fmShortErrMsgTxt, "Wrong field 3 on %s line %d",
+                          fileExt[inFileCount], lineNo);
+                  return FM_INVALID_INPUT_FILE;
+                }
+              }
+
+              /* SOS # */
+              if (!intToken(tokPtr[3], &filtSections)) {
+                fatal(inFileCount);
+                if (inFileCount != FIRFileExists) {
+                  fatal(1);
+                }
+                sprintf(fmErrMsgTxt, "Invalid SOS number on line %d in `%s'\n",
+                        lineNo, fname[inFileCount]);
+                sprintf(fmShortErrMsgTxt, "Bad field 4 on %s line %d",
+                        fileExt[inFileCount], lineNo);
+                return FM_INVALID_INPUT_FILE;
+              }
+
+#ifdef FIR_FILTERS
+              maxSOS = MAX_FIR_SO_SECTIONS;
+#else
+              maxSOS = MAX_SO_SECTIONS;
+#endif
+
+              if (filtSections > 0  && filtSections <= maxSOS) {
+	        /* Number of continuation lines there should be in the file next */
+                inFilter = filtSections - 1;
+
+#ifdef FIR_FILTERS
+                /* 0 - IIR; N - FIR */
+                if (filtSections > MAX_SO_SECTIONS) {
+                  /* This is FIR filter */
+                  if (nFIRFilters >= MAX_FIR_MODULES) {
+                    sprintf(fmErrMsgTxt,
+                            "Too many FIR filters in %s file; Maximum is %d\n",
+                            fileExt[inFileCount], MAX_FIR_MODULES);
+                    sprintf(fmShortErrMsgTxt, "Too many FIRs in %s file",
+                            fileExt[inFileCount]);
+                    return FM_INVALID_INPUT_FILE;
+                  }
+                  ++nFIRFilters;
+                  filterType = nFIRFilters;
+                }
+                else {
+                  filterType = 0;
+                }
+#else
+                filterType = 0;
+#endif
+              }
+              else {
+                fatal(inFileCount);
+                if (inFileCount != FIRFileExists) {
+                  fatal(1);
+                }
+                sprintf(fmErrMsgTxt,
+                        "Invalid number of SOS on line %d in `%s'\n",
+                        lineNo, fname[inFileCount]);
+                sprintf(fmShortErrMsgTxt, "Wrong field 4 on %s line %d",
+                        fileExt[inFileCount], lineNo);
+                return FM_INVALID_INPUT_FILE;
+              }
+
+              /* RAMP */
+              if (!intToken(tokPtr[4], &ramp)) {
+                fatal(inFileCount);
+                if (inFileCount != FIRFileExists) {
+                  fatal(1);
+                }
+                sprintf(fmErrMsgTxt,
+                        "Invalid ramp count number on line %d in `%s'\n",
+                        lineNo, fname[inFileCount]);
+                sprintf(fmShortErrMsgTxt, "Bad field 5 on %s line %d",
+                        fileExt[inFileCount], lineNo);
+                return FM_INVALID_INPUT_FILE;
+              }
+	    
+              if (ramp < 0) {
+                fatal(inFileCount);
+                if (inFileCount != FIRFileExists) {
+                  fatal(1);
+                }
+                sprintf(fmErrMsgTxt,
+                        "Invalid negative ramp count on line %d in `%s'\n",
+                        lineNo, fname[inFileCount]);
+                sprintf(fmShortErrMsgTxt, "Wrong field 5 on %s line %d",
+                        fileExt[inFileCount], lineNo);
+                return FM_INVALID_INPUT_FILE;
+              }
+
+              /* TIMEOUT */
+              if (!intToken(tokPtr[5], &timeout)) {
+                fatal(inFileCount);
+                if (inFileCount != FIRFileExists) {
+                  fatal(1);
+                }
+                sprintf(fmErrMsgTxt,
+                        "Invalid timeout number on line %d in `%s'\n",
+                        lineNo, fname[inFileCount]);
+                sprintf(fmShortErrMsgTxt, "Bad field 6 on %s line %d",
+                        fileExt[inFileCount], lineNo);
+                return FM_INVALID_INPUT_FILE;
+              }
+	    
+              if (timeout < 0) {
+                fatal(inFileCount);
+                if (inFileCount != FIRFileExists) {
+                  fatal(1);
+                }
+                sprintf(fmErrMsgTxt,
+                        "Invalid negative timeout on line %d in `%s'\n",
+                        lineNo, fname[inFileCount]);
+                sprintf(fmShortErrMsgTxt, "Wrong field 6 on %s line %d",
+                        fileExt[inFileCount], lineNo);
+                return FM_INVALID_INPUT_FILE;
+              }
+
+              /* NAME */
+              if (strlen(tokPtr[6]) > 31) {
+                fatal(inFileCount);
+                if (inFileCount != FIRFileExists) {
+                  fatal(1);
+                }
+                sprintf(fmErrMsgTxt,
+                        "Filter name too long on line %d in `%s'\n",
+                        lineNo, fname[inFileCount]);
+                sprintf(fmShortErrMsgTxt, "Bad field 7 on %s line %d",
+                        fileExt[inFileCount], lineNo);
+                return FM_INVALID_INPUT_FILE;
+              }
+
+              strcpy(filtName, tokPtr[6]);
+
+              /* COEFFS */
+              for (i = 0; i < 5; i++) {
+                if (!doubleToken(tokPtr[7 + i], filtCoeff + i)) {
+                  fatal(inFileCount);
+                  if (inFileCount != FIRFileExists) {
+                    fatal(1);
+                  }
+                  sprintf(fmErrMsgTxt, "Invalid coeff on line %d in `%s'\n",
+                          lineNo, fname[inFileCount]);
+                  sprintf(fmShortErrMsgTxt, "Bad coeffs on %s line %d",
+                          fileExt[inFileCount], lineNo);
+                  return FM_INVALID_INPUT_FILE;
+                }
+              }
+	    
+              /* Put the data into placeholder if this is my filter */
+              for (i = 0; i < fmc->subSys[n].numMap; i++) {
+                if (!strcmp(fmc->subSys[n].map[i].name, tokPtr[0])) {
+                  /* Found one of my filters */
+
+                  curFilter = fmc->subSys[n].map + i;
+                  curFilterNum = num;
+		
+                  /* printf("nToks = %d; %s %s %s %s\n", nToks,          */
+                  /*        tokPtr[0], tokPtr[1], tokPtr[2], tokPtr[3]); */
+
+                  curFilter->filters++;
+                  curFilter->fmd.bankNum = curFilter->fmModNum;
+                  curFilter->fmd.filtSections[num] = filtSections;
+                  curFilter->fmd.sType[num] = sType;
+                  curFilter->fmd.ramp[num] = ramp;
+                  curFilter->fmd.timout[num] = timeout;
+                  strcpy(curFilter->fmd.filtName[num], filtName);
+                  curFilter->fmd.filterType[num] = filterType;
+
+                  if (filterType > 0) {
+#ifdef FIR_FILTERS
+                    for (j = 0; j < 5; j++)
+                      firFiltCoeff[filterType - 1][num][j] = filtCoeff[j];
+#endif
+                  }
+                  else {
+                    for (j = 0; j < 5; j++) {
+                      curFilter->fmd.filtCoeff[num][j] = filtCoeff[j];
+#if 0
+		      if (j > 2) {
+			// Calculate low-noise form coeffs
+			curFilter->fmd.filtCoeff[num][j] -= filtCoeff[j - 2]; // d[n]=b[n] - a[n]
+		      }
+#endif
+		      // Calculate biquad form
+		      switch (j) {
+			case 1: // a11
+			  curFilter->fmd.filtCoeff[num][j]
+				 = - filtCoeff[j] - 1.0; // a11 = - a1 - 1
+			  break;
+			case 2: // a12
+			  curFilter->fmd.filtCoeff[num][j]
+				= - filtCoeff[j] - filtCoeff[j - 1] - 1.0; // a12 = - a2 - a1 - 1
+			  break;
+			case 3: // c1
+			  curFilter->fmd.filtCoeff[num][j]
+				= filtCoeff[j] - filtCoeff[j - 2]; // c1 = b1 - a1
+			  break;
+			case 4: // c2
+			  curFilter->fmd.filtCoeff[num][j]
+				= filtCoeff[j] - filtCoeff[j - 2] + filtCoeff[j - 1] - filtCoeff[j - 3];
+			  break;
+		      }
+		    }
+                  }
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (!inFileCount) {
+        crc[1] = crc[0];
+      }
+
+    }
+  }
+
+#if 0
+  /* File does not have to define all of the filters */
+  /* Verify completeness */
+  for (i = 0; i < fmc->subSys[n].numMap; i++) {
+    if (fmc->subSys[n].map[i].filters == 0) {
+      fatal(0);
+      fatal(1);
+      sprintf(fmErrMsgTxt, "Incomplete config in `%s'\n", fname[0]);
+      return FM_INVALID_INPUT_FILE;
+    }
+  }  
+#endif
+
+  if (fclose(iFile[0])) {
+    fclose(aFile[0]);
+    sprintf(fmErrMsgTxt, "Failed to fclose input file `%s'\n", fname[0]);
+    strcpy(fmShortErrMsgTxt, "Failed to fclose input .txt file");
+    if (FIRFileExists) {
+      fclose(iFile[1]);
+      fclose(aFile[1]);
+    }
+    return FM_FCLOSE_FAILED;
+  }
+
+  if (fclose(aFile[0])) {
+    sprintf(fmErrMsgTxt, "Failed to write (fclose) archive file `%s'\n",
+            archiveFname[0]);
+    strcpy(fmShortErrMsgTxt, "Failed to write (fclose) .txt archfile");
+    if (FIRFileExists) {
+      fclose(iFile[1]);
+      fclose(aFile[0]);
+    }
+    return FM_FCLOSE_FAILED;
+  }
+
+  if (FIRFileExists) {
+    if (fclose(iFile[1])) {
+      fclose(aFile[1]);
+      sprintf(fmErrMsgTxt, "Failed to fclose input file '%s'\n", fname[1]);
+      strcpy(fmShortErrMsgTxt, "Failed to fclose input .fir file");
+      return FM_FCLOSE_FAILED;
+    }
+
+    if (fclose(aFile[1])) {
+      sprintf(fmErrMsgTxt, "Failed to write (fclose) archive file '%s'\n",
+              archiveFname[1]);
+      strcpy(fmShortErrMsgTxt, "Failed to write (fclose) .fir archfile");
+      return FM_FCLOSE_FAILED;
+    }
+  }
+
+/* ###  DEBUG  ### */
+/*  fprintf(stderr, "\n###  New crc[%d] (pre) = %u\n\n", 0, crc[0]); */
+/*  fprintf(stderr, "\n###  New crc[%d] (pre) = %u\n\n", 1, crc[1]); */
+/*  fprintf(stderr, "\n###  Old crc = %u\n", fmc->subSys[n].crc);    */
+/* ###  DEBUG  ### */
+  if (FIRFileExists) {
+    totalLength = iFileLen[0] + iFileLen[1];
+
+    crc[1] = crc_len(totalLength, crc[1]);  /* Finish calculating input file checksum */
+/* ###  DEBUG  ### */
+/*    fprintf(stderr, "\n###  New crc[%d] (post) = %u\n\n", 1, crc[1]); */
+/* ###  DEBUG  ### */
+
+    if (crc[1] != fmc->subSys[n].crc) {
+      fmc->subSys[n].crc = crc[1];
+    }
+    else {
+      unlink(archiveFname[0]); /* Delete .txt archive file as it did not change */
+      unlink(archiveFname[1]); /* Delete .fir archive file as it did not change */
+    }
+  }
+  else {
+    crc[0] = crc_len(iFileLen[0], crc[0]); /* Finish calculating input file checksum */
+/* ###  DEBUG  ### */
+/*    fprintf(stderr, "\n###  New crc[%d] (post) = %u\n\n", 0, crc[0]); */
+/* ###  DEBUG  ### */
+
+    if (crc[0] != fmc->subSys[n].crc) {
+      fmc->subSys[n].crc = crc[0];
+    }
+    else {
+      unlink(archiveFname[0]); /* Delete archive file as it did not change */
+    }
+  }
+
+  /* Update VME coeffs for the subsystem */
+  /* Correct byte order on doubles for Pentium CPU */
+  for (i = 0; i < fmc->subSys[n].numMap; i++) {
+    unsigned int coefCrc = 0;
+    unsigned int coefCrcLen = 0;
+    for (j = 0; j < FILTERS; j++) {
+      unsigned int nSections = fmc->subSys[n].map[i].fmd.filtSections[j]; /* The number of coeffs defined in this filter */
+      unsigned int nCoefs = 1 + nSections * 4;
+
+      coefCrc = crc_ptr((char *)&nSections, sizeof(int), coefCrc);
+      coefCrcLen += sizeof(int);
+      if (nSections > 0) {
+        coefCrc = crc_ptr((char *)&(fmc->subSys[n].map[i].fmd.sType[j]),
+                           sizeof(int), coefCrc);
+	coefCrc = crc_ptr((char *)&(fmc->subSys[n].map[i].fmd.ramp[j]),
+                           sizeof(int), coefCrc);
+	coefCrc = crc_ptr((char *)&(fmc->subSys[n].map[i].fmd.timout[j]),
+                           sizeof(int), coefCrc);
+        coefCrcLen += 3 * sizeof(int);
+      }
+
+      unsigned int filterType = fmc->subSys[n].map[i].fmd.filterType[j];
+      fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].filterType[j] =
+                                                                filterType;
+      //printf("filter module %d; filter %d; type %d\n",
+      //       fmc->subSys[n].map[i].fmModNum, j, filterType);
+      //printf("nCoefs = %d; nSections = %d\n", nCoefs, nSections);
+#ifdef FIR_FILTERS
+      if (filterType) {
+        for (k = 0; k < nCoefs; k++) {
+#if defined(__i386__)  || defined(__amd64__)
+	 //printf("fmc->pVmeCoeff->firFiltCoeff[%d][%d][%d] = firFiltCoeff[%d][%d][%d];\n",
+         //       (filterType - 1), j, k, (filterType - 1), j, k);
+	  fmc->pVmeCoeff->firFiltCoeff[filterType - 1][j][k] =
+                          firFiltCoeff[filterType - 1][j][k];
+#else
+#error
+#endif
+	  if (nSections > 0) {
+            coefCrc = crc_ptr((char *)&(firFiltCoeff[filterType - 1][j][k]),
+                               sizeof(double), coefCrc);
+	    coefCrcLen += sizeof(double);
+	  }
+        }
+      } else
+#endif
+      for (k = 0; k < nCoefs; k++) {
+#if defined(__i386__)  || defined(__amd64__)
+	fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].filtCoeff[j][k] =
+                                        fmc->subSys[n].map[i].fmd.filtCoeff[j][k];
+#else
+#error
+	memcpy_swap_words(fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].filtCoeff[j] + k,
+			  fmc->subSys[n].map[i].fmd.filtCoeff[j] + k);
+#endif
+	if (nSections > 0) {
+          coefCrc = crc_ptr((char *)&(fmc->subSys[n].map[i].fmd.filtCoeff[j][k]),
+                             sizeof(double), coefCrc);
+	  coefCrcLen += sizeof(double);
+	}
+      }
+      strcpy(fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].filtName[j],
+                                             fmc->subSys[n].map[i].fmd.filtName[j]);
+      fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].filtSections[j] =
+                                                                   nSections;
+      fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].sType[j] =
+                                      fmc->subSys[n].map[i].fmd.sType[j];
+      fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].ramp[j] =
+                                      fmc->subSys[n].map[i].fmd.ramp[j];
+      fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].timout[j] =
+                                      fmc->subSys[n].map[i].fmd.timout[j];
+    }
+
+    fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].crc = coefCrc;
+
+    usleep(10000);
+
+    fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].bankNum =
+                                    fmc->subSys[n].map[i].fmd.bankNum;
+  }
+
+  return 0;
+}
+
+int readThresholdsFile(fmReadCoeff *fmc,                                 /* MA */
+                       fmSubSysMap *fmmap0,                              /* MA */
+                       struct filterThresh *thresholds,                  /* MA */
+                       int maxModules,                                   /* MA */
+                       int n)                                            /* MA */
+
+{                                                                        /* MA */
+   char line[MAX_LINE_LEN + 1];                                          /* MA */
+   char *linePart;                                                       /* MA */
+   char msg[MAX_LINE_LEN];                                               /* MA */
+   char thresholdFileName[MAX_FNAME_LEN];                                /* MA */
+ 
+   FILE *tFile;                                                          /* MA */
+
+   float nominal;                                                        /* MA */
+   float tolerance;                                                      /* MA */
+ 
+   int flag;                                                             /* MA */
+   int i;                                                                /* MA */
+   int returnValue = 0;                                                  /* MA */
+   int switch_1or2;                                                      /* MA */
+   int threshCounter = 0;                                                /* MA */
+
+/*                                                                        * MA */
+/* Initialize threshold parameters.                                       * MA */
+/*                                                                        * MA */
+   for (i = 0; i < maxModules; i++) {                                    /* MA */
+      strcpy(thresholds[i].filterName, "NONE");                          /* MA */
+
+      thresholds[i].gain[LOW] = -BIG_NUMBER;                             /* MA */
+      thresholds[i].gain[HI] = BIG_NUMBER;                               /* MA */
+
+      thresholds[i].limit[LOW] = -BIG_NUMBER;                            /* MA */
+      thresholds[i].limit[HI] = BIG_NUMBER;                              /* MA */
+
+      thresholds[i].offset[LOW] = -BIG_NUMBER;                           /* MA */
+      thresholds[i].offset[HI] = BIG_NUMBER;                             /* MA */
+
+      thresholds[i].rampTime[LOW] = -BIG_NUMBER;                         /* MA */
+      thresholds[i].rampTime[HI] = BIG_NUMBER;                           /* MA */
+
+      thresholds[i].switch1 = 0x4;                                       /* MA */
+      thresholds[i].switch2 = 0x600;                                     /* MA */
+   }                                                                     /* MA */
+
+/*                                                                        * MA */
+/* Construct path and filename.                                           * MA */
+/*                                                                        * MA */
+   strcpy(thresholdFileName, "/cvs/cds/");                               /* MA */
+   strcat_lower(thresholdFileName, fmc->site);                           /* MA */
+   strcat(thresholdFileName, "/status/");                                /* MA */
+   strcat_upper(thresholdFileName, fmc->ifo);                            /* MA */
+   strcat_upper(thresholdFileName, fmc->system);                         /* MA */
+
+   if (strlen(fmc->subSys[n].name) > 0) {                                /* MA */
+/*                                                                        * MA */
+/*    Only append non-empty subsystem name.                               * MA */
+/*                                                                        * MA */
+      strcat(thresholdFileName, "_");                                    /* MA */
+      strcat_upper(thresholdFileName, fmc->subSys[n].name);              /* MA */
+   }                                                                     /* MA */
+
+   strcat(thresholdFileName, ".txt");                                    /* MA */
+  
+/*                                                                        * MA */
+/* Open thresholds file.                                                  * MA */
+/*                                                                        * MA */
+   tFile = fopen(thresholdFileName, "r");                                /* MA */
+
+   if (tFile) {                                                          /* MA */
+/*                                                                        * MA */
+/*    Read one line at a time, looking for filter id.                     * MA */
+/*                                                                        * MA */
+      while (fgets(line, MAX_LINE_LEN, tFile) ) {                        /* MA */
+         flag = 0;                                                       /* MA */
+ 
+         if ( (strncasecmp(line, "[C1:OMC-", 8) == 0) ||                 /* MA */
+              (strncasecmp(line, "[M1:ISI-", 8) == 0) ||                 /* MA */
+              (strncasecmp(line, "[M1:SAS-", 8) == 0) ) {                /* MA */
+            flag = 1;                                                    /* MA */
+         }                                                               /* MA */
+         else if (strncasecmp(line, "[H1:", 4) == 0) {                   /* MA */
+            flag = -1;                                                   /* MA */
+         }                                                               /* MA */
+         else if (strncasecmp(line, "[H2:", 4) == 0) {                   /* MA */
+            flag = -2;                                                   /* MA */
+         }                                                               /* MA */
+         else if (strncasecmp(line, "[L1:", 4) == 0) {                   /* MA */
+            flag = -3;                                                   /* MA */
+         }                                                               /* MA */
+
+         if (flag < 0) {                                                 /* MA */
+            if ( (strncasecmp(&line[4], "ASC-", 4) == 0) ||              /* MA */
+                 (strncasecmp(&line[4], "LSC-", 4) == 0) ||              /* MA */
+                 (strncasecmp(&line[4], "SUS-", 4) == 0) ) {             /* MA */
+               flag = 1;                                                 /* MA */
+            }                                                            /* MA */
+            else if ( (flag != -2) &&                                    /* MA */
+                      (strncasecmp(&line[4], "SEI-", 4) == 0) ) {        /* MA */
+               flag = 1;                                                 /* MA */
+            }                                                            /* MA */
+            else if (flag != -3) {                                       /* MA */
+               if ( (strncasecmp(&line[4], "GDS-", 4) ==0) ||            /* MA */
+                    (strncasecmp(&line[4], "IOO-", 4) ==0) ||            /* MA */
+                    (strncasecmp(&line[4], "PSL-", 4) ==0) ) {           /* MA */
+                  flag = 1;                                              /* MA */
+               }                                                         /* MA */
+            }                                                            /* MA */
+         }                                                               /* MA */
+
+/*                                                                        * MA */
+/*       Filter id. string found - check if it matches any filter name.   * MA */
+/*                                                                        * MA */
+         if (flag > 0) {                                                 /* MA */
+            linePart = strtok(&line[8], "]");                            /* MA */
+
+            for (i = 0; i < maxModules; i++) {                           /* MA */
+               if (strcmp(linePart, fmmap0[i].name) == 0) {              /* MA */
+                  break;                                                 /* MA */
+               }                                                         /* MA */
+            }                                                            /* MA */
+
+            if (i < maxModules) {                                        /* MA */
+/*                                                                        * MA */
+/*             Filter match found.                                        * MA */
+/*                                                                        * MA */
+               strcpy(thresholds[i].filterName, linePart);               /* MA */
+ 
+/*                                                                        * MA */
+/*             Read one line at a time and parse thresholds.              * MA */
+/*                                                                        * MA */
+               while (fgets(line, MAX_LINE_LEN, tFile) ) {               /* MA */
+                  if (strncasecmp(line, "gain = ", 7) == 0) {            /* MA */
+                     if (sscanf(&line[7], "%f %f", &nominal,             /* MA */
+                         &tolerance) == 0) {                             /* MA */
+                        strcpy(msg, "Parsing of gain ");                 /* MA */
+                        strcat(msg, "threshold failed\n");               /* MA */
+                        fprintf(stderr, "%s", msg);                      /* MA */
+                        returnValue = TF_PARSE_ERROR;                    /* MA */
+                     }                                                   /* MA */
+                     else {                                              /* MA */
+                        thresholds[i].gain[LOW] = nominal - tolerance;   /* MA */
+                        thresholds[i].gain[HI] = nominal + tolerance;    /* MA */
+                        threshCounter++;                                 /* MA */
+                     }                                                   /* MA */
+                  }                                                      /* MA */
+                  else if (strncasecmp(line, "limit = ", 8) == 0) {      /* MA */
+                     if (sscanf(&line[8], "%f %f", &nominal,             /* MA */
+                         &tolerance) == 0) {                             /* MA */
+                        strcpy(msg, "Parsing of limit ");                /* MA */
+                        strcat(msg, "threshold failed\n");               /* MA */
+                        fprintf(stderr, "%s", msg);                      /* MA */
+                        returnValue = TF_PARSE_ERROR;                    /* MA */
+                     }                                                   /* MA */
+                     else {                                              /* MA */
+                        thresholds[i].limit[LOW] = nominal - tolerance;  /* MA */
+                        thresholds[i].limit[HI] = nominal + tolerance;   /* MA */
+                        threshCounter++;                                 /* MA */
+                     }                                                   /* MA */
+                  }                                                      /* MA */
+                  else if (strncasecmp(line, "offset = ", 9) == 0) {     /* MA */
+                     if (sscanf(&line[9], "%f %f", &nominal,             /* MA */
+                         &tolerance) == 0) {                             /* MA */
+                        strcpy(msg, "Parsing of offset ");               /* MA */
+                        strcat(msg, "threshold failed\n");               /* MA */
+                        fprintf(stderr, "%s", msg);                      /* MA */
+                        returnValue = TF_PARSE_ERROR;                    /* MA */
+                     }                                                   /* MA */
+                     else {                                              /* MA */
+                        thresholds[i].offset[LOW] = nominal - tolerance; /* MA */
+                        thresholds[i].offset[HI] = nominal + tolerance;  /* MA */
+                        threshCounter++;                                 /* MA */
+                     }                                                   /* MA */
+                  }                                                      /* MA */
+                  else if (strncasecmp(line, "ramptime = ", 11) == 0) {  /* MA */
+                     if (sscanf(&line[11], "%f %f", &nominal,            /* MA */
+                         &tolerance) == 0) {                             /* MA */
+                        strcpy(msg, "Parsing of ramp time ");            /* MA */
+                        strcat(msg, "threshold failed\n");               /* MA */
+                        fprintf(stderr, "%s", msg);                      /* MA */
+                        returnValue = TF_PARSE_ERROR;                    /* MA */
+                     }                                                   /* MA */
+                     else {                                              /* MA */
+                        thresholds[i].rampTime[LOW] = nominal -          /* MA */
+                                                       tolerance;        /* MA */
+                        thresholds[i].rampTime[HI] = nominal +           /* MA */
+                                                      tolerance;         /* MA */
+                        threshCounter++;                                 /* MA */
+                     }                                                   /* MA */
+                  }                                                      /* MA */
+                  else if (strncasecmp(line, "switch1 = ", 10) == 0) {   /* MA */
+                     if (sscanf(&line[10], "%x", &switch_1or2) == 0) {   /* MA */
+                        strcpy(msg, "Parsing of switch1 ");              /* MA */
+                        strcat(msg, "threshold failed\n");               /* MA */
+                        fprintf(stderr, "%s", msg);                      /* MA */
+                        returnValue = TF_PARSE_ERROR;                    /* MA */
+                     }                                                   /* MA */
+                     else {                                              /* MA */
+                        thresholds[i].switch1 = switch_1or2;             /* MA */
+                        threshCounter++;                                 /* MA */
+                     }                                                   /* MA */
+                  }                                                      /* MA */
+                  else if (strncasecmp(line, "switch2 = ", 10) == 0) {   /* MA */
+                     if (sscanf(&line[10], "%x", &switch_1or2) == 0) {   /* MA */
+                        strcpy(msg, "Parsing of switch2 ");              /* MA */
+                        strcat(msg, "threshold failed\n");               /* MA */
+                        fprintf(stderr, "%s", msg);                      /* MA */
+                        returnValue = TF_PARSE_ERROR;                    /* MA */
+                     }                                                   /* MA */
+                     else {                                              /* MA */
+                        thresholds[i].switch2 = switch_1or2;             /* MA */
+                        threshCounter++;                                 /* MA */
+                     }                                                   /* MA */
+                  }                                                      /* MA */
+/*                                                                        * MA */
+/*                New line or blank line signals end of this filter.      * MA */
+/*                                                                        * MA */
+                  else if ( (strncmp(line, "\n", 1) == 0) ||             /* MA */
+                            (strncmp(line, " ", 1) == 0) ) {             /* MA */
+                     break;                                              /* MA */
+                  }                                                      /* MA */
+                  else {                                                 /* MA */
+                     fprintf(stderr, "Unknown threshold: %s\n", line);   /* MA */
+                     returnValue = TF_PARSE_ERROR;                       /* MA */
+                     break;                                              /* MA */
+                  }                                                      /* MA */
+               }                                                         /* MA */
+            }                                                            /* MA */
+            else {                                                       /* MA */
+               fprintf(stderr, "Filter not found: %s\n", linePart);      /* MA */
+            }                                                            /* MA */
+         }                                                               /* MA */
+      }                                                                  /* MA */
+
+/*                                                                        * MA */
+/*    Close thresholds file.                                              * MA */
+/*                                                                        * MA */
+      fclose(tFile);                                                     /* MA */
+
+      if (!threshCounter) {                                              /* MA */
+         returnValue = TF_THRESHOLDS_NOT_FOUND;                          /* MA */
+      }                                                                  /* MA */
+   }                                                                     /* MA */
+   else {                                                                /* MA */
+      returnValue = TF_FILE_OPEN_ERROR;                                  /* MA */
+   }                                                                     /* MA */
+
+   return(returnValue);                                                  /* MA */
+}                                                                        /* MA */
+
+
+int readMatrixThreshFile(fmReadCoeff *fmc,                               /* MA */
+                         char *matrixID,                                 /* MA */
+                         float *matrix_LOW,                              /* MA */
+                         float *matrix_HI,                               /* MA */
+                         int iDim,                                       /* MA */
+                         int jDim,                                       /* MA */
+                         int n)                                          /* MA */
+
+{                                                                        /* MA */
+   char line[MAX_LINE_LEN + 1];                                          /* MA */
+   char *linePart;                                                       /* MA */
+   char matrixThreshFileName[MAX_FNAME_LEN];                             /* MA */
+   char msg[MAX_LINE_LEN];                                               /* MA */
+ 
+   FILE *mTFile;                                                         /* MA */
+
+   float nominal;                                                        /* MA */
+   float tolerance;                                                      /* MA */
+ 
+   int charCount;                                                        /* MA */
+   int flag;                                                             /* MA */
+   int i;                                                                /* MA */
+   int ix1;                                                              /* MA */
+   int ix2;                                                              /* MA */
+   int mIDCount;                                                         /* MA */
+   int mThreshCounter = 0;                                               /* MA */
+   int nomAndTol = 0;                                                    /* MA */
+   int returnValue = 0;                                                  /* MA */
+   int size;                                                             /* MA */
+
+   mIDCount = strlen(matrixID);                                          /* MA */
+   size = iDim * jDim;                                                   /* MA */
+
+/*                                                                        * MA */
+/* Initialize threshold parameters.                                       * MA */
+/*                                                                        * MA */
+   for (i = 0; i < size; i++) {                                          /* MA */
+      matrix_LOW[i] = -BIG_NUMBER;                                       /* MA */
+      matrix_HI[i] = BIG_NUMBER;                                         /* MA */
+   }                                                                     /* MA */
+
+/*                                                                        * MA */
+/* Construct path and filename.                                           * MA */
+/*                                                                        * MA */
+   strcpy(matrixThreshFileName, "/cvs/cds/");                            /* MA */
+   strcat_lower(matrixThreshFileName, fmc->site);                        /* MA */
+   strcat(matrixThreshFileName, "/status/");                             /* MA */
+   strcat_upper(matrixThreshFileName, fmc->ifo);                         /* MA */
+   strcat_upper(matrixThreshFileName, fmc->system);                      /* MA */
+
+   if (strlen(fmc->subSys[n].name) > 0) {                                /* MA */
+/*                                                                        * MA */
+/*    Only append non-empty subsystem name.                               * MA */
+/*                                                                        * MA */
+      strcat(matrixThreshFileName, "_");                                 /* MA */
+      strcat_upper(matrixThreshFileName, fmc->subSys[n].name);           /* MA */
+   }                                                                     /* MA */
+
+   strcat(matrixThreshFileName, "_MATRIX.txt");                          /* MA */
+  
+/*                                                                        * MA */
+/* Open matrix thresholds file.                                           * MA */
+/*                                                                        * MA */
+   mTFile = fopen(matrixThreshFileName, "r");                            /* MA */
+
+   if (mTFile) {                                                         /* MA */
+/*                                                                        * MA */
+/*    Read one line at a time, looking for filter id.                     * MA */
+/*                                                                        * MA */
+      while (fgets(line, MAX_LINE_LEN, mTFile) ) {                       /* MA */
+         flag = 0;                                                       /* MA */
+ 
+         if ( (strncasecmp(line, "[C1:OMC-", 8) == 0) ||                 /* MA */
+              (strncasecmp(line, "[M1:ISI-", 8) == 0) ||                 /* MA */
+              (strncasecmp(line, "[M1:SAS-", 8) == 0) ) {                /* MA */
+            flag = 1;                                                    /* MA */
+         }                                                               /* MA */
+         else if (strncasecmp(line, "[H1:", 4) == 0) {                   /* MA */
+            flag = -1;                                                   /* MA */
+         }                                                               /* MA */
+         else if (strncasecmp(line, "[H2:", 4) == 0) {                   /* MA */
+            flag = -2;                                                   /* MA */
+         }                                                               /* MA */
+         else if (strncasecmp(line, "[L1:", 4) == 0) {                   /* MA */
+            flag = -3;                                                   /* MA */
+         }                                                               /* MA */
+
+         if (flag < 0) {                                                 /* MA */
+            if ( (strncasecmp(&line[4], "ASC-", 4) == 0) ||              /* MA */
+                 (strncasecmp(&line[4], "LSC-", 4) == 0) ||              /* MA */
+                 (strncasecmp(&line[4], "SUS-", 4) == 0) ) {             /* MA */
+               flag = 1;                                                 /* MA */
+            }                                                            /* MA */
+            else if ( (flag != -2) &&                                    /* MA */
+                      (strncasecmp(&line[4], "SEI-", 4) == 0) ) {        /* MA */
+               flag = 1;                                                 /* MA */
+            }                                                            /* MA */
+            else if (flag != -3) {                                       /* MA */
+               if ( (strncasecmp(&line[4], "GDS-", 4) ==0) ||            /* MA */
+                    (strncasecmp(&line[4], "IOO-", 4) ==0) ||            /* MA */
+                    (strncasecmp(&line[4], "PSL-", 4) ==0) ) {           /* MA */
+                  flag = 1;                                              /* MA */
+               }                                                         /* MA */
+            }                                                            /* MA */
+         }                                                               /* MA */
+
+/*                                                                        * MA */
+/*       Matrix id. string found - check if it matches any matrix name.   * MA */
+/*                                                                        * MA */
+         if (flag > 0) {                                                 /* MA */
+            linePart = strtok(&line[8], "]");                            /* MA */
+
+            if (strcasestr(linePart, "MATRIX") ||                        /* MA */
+                strcasestr(linePart, "INMTRX") ) {                       /* MA */
+               charCount = strlen(linePart) - 2;                         /* MA */
+
+               if (sscanf(&linePart[charCount], "%1d%1d",                /* MA */
+                   &ix1, &ix2) == 0) {                                   /* MA */
+                  strcpy(msg, "Parsing of matrix index failed\n");       /* MA */
+                  fprintf(stderr, "%s", msg);                            /* MA */
+                  returnValue = TF_PARSE_ERROR;                          /* MA */
+               }                                                         /* MA */
+               else {                                                    /* MA */
+                  if (strncasecmp(linePart, matrixID, mIDCount) == 0) {  /* MA */
+                     while (fgets(line, MAX_LINE_LEN, mTFile) ) {        /* MA */
+
+                        if (strncasecmp(line, "nominal = ", 10) == 0) {  /* MA */
+                           if (sscanf(&line[10], "%f", &nominal) == 0) { /* MA */
+                              strcpy(msg, "Parsing of matrix ");         /* MA */
+                              strcat(msg, "nominal value failed\n");     /* MA */
+                              fprintf(stderr, "%s", msg);                /* MA */
+                              returnValue = TF_PARSE_ERROR;              /* MA */
+                           }                                             /* MA */
+                           else {                                        /* MA */
+                              nomAndTol += 1;                            /* MA */
+                           }                                             /* MA */
+                        }                                                /* MA */
+                        else if (strncasecmp(line, "tolerance = ",       /* MA */
+                                             12) == 0) {                 /* MA */
+                           if (sscanf(&line[12], "%f", &tolerance) ==    /* MA */
+                               0) {                                      /* MA */
+                              strcpy(msg, "Parsing of matrix ");         /* MA */
+                              strcat(msg, "tolerance value failed\n");   /* MA */
+                              fprintf(stderr, "%s", msg);                /* MA */
+                              returnValue = TF_PARSE_ERROR;              /* MA */
+                           }                                             /* MA */
+                           else {                                        /* MA */
+                              nomAndTol += 20;                           /* MA */
+                           }                                             /* MA */
+                        }                                                /* MA */
+                        else if ( (strncmp(line, "\n", 1) == 0) ||       /* MA */
+                                  (strncmp(line, " ", 1) == 0) ) {       /* MA */
+                           if (nomAndTol == 21) {                        /* MA */
+                              ix1--;                                     /* MA */
+                              ix2--;                                     /* MA */
+                              if ( (ix1 >= 0) && (ix1 < iDim) &&         /* MA */
+                                   (ix2 >= 0) && (ix2 < jDim) ) {        /* MA */
+                                 i = ix1 * jDim + ix2;                   /* MA */
+
+                                 matrix_LOW[i] = nominal - tolerance;    /* MA */
+                                 matrix_HI[i] = nominal + tolerance;     /* MA */
+
+                                 mThreshCounter++;                       /* MA */
+                              }                                          /* MA */
+                              else {                                     /* MA */
+                                 strcpy(msg, "Matrix index ");           /* MA */
+                                 strcat(msg, "out of bounds\n");         /* MA */
+                                 fprintf(stderr, "%s", msg);             /* MA */
+                                 returnValue = TF_PARSE_ERROR;           /* MA */
+                              }                                          /* MA */
+                           }                                             /* MA */
+                           else {                                        /* MA */
+                              strcpy(msg, "Bad nominal/tolerance ");     /* MA */
+                              strcat(msg, "value(s) found\n");           /* MA */
+                              fprintf(stderr, "%s", msg);                /* MA */
+                              returnValue = TF_PARSE_ERROR;              /* MA */
+                           }                                             /* MA */
+
+                           nomAndTol = 0;                                /* MA */
+                           break;                                        /* MA */
+                        }                                                /* MA */
+                        else {                                           /* MA */
+                           fprintf(stderr, "Unknown threshold: %s\n",    /* MA */
+                                   line);                                /* MA */
+                           returnValue = TF_PARSE_ERROR;                 /* MA */
+
+                           break;                                        /* MA */
+                        }                                                /* MA */
+                     }                                                   /* MA */
+                  }                                                      /* MA */
+               }                                                         /* MA */
+            }                                                            /* MA */
+            else {                                                       /* MA */
+               fprintf(stderr, "Matrix not found: %s\n", linePart);      /* MA */
+            }                                                            /* MA */
+         }                                                               /* MA */
+      }                                                                  /* MA */
+
+/*                                                                          MA */
+/*    Close matrix thresholds file.                                         MA */
+/*                                                                          MA */
+      fclose(mTFile);                                                    /* MA */
+
+      if (!mThreshCounter) {                                             /* MA */
+         returnValue = TF_THRESHOLDS_NOT_FOUND;                          /* MA */
+      }                                                                  /* MA */
+   }                                                                     /* MA */
+   else {                                                                /* MA */
+      returnValue = TF_FILE_OPEN_ERROR;                                  /* MA */
+   }                                                                     /* MA */
+
+   return(returnValue);                                                  /* MA */
+}                                                                        /* MA */
+
+
+void
+printCoefs(fmReadCoeff *fmc, int subsystems) {
+  int i, j, k, l;
+  for (i = 0; i < subsystems; i++){ 
+    printf ("%s has %d elements\n", fmc->subSys[i].name, fmc->subSys[i].numMap);
+    for (j = 0; j < fmc->subSys[i].numMap; j++) {
+      fmSubSysMap *f = fmc->subSys[i].map + j;
+      printf ("\t%s -> %d has %d filters\n", f->name, f->fmModNum, f->filters);
+      for (k = 0; k < FILTERS; k++) {
+	if (f->fmd.filtSections[k]) {
+	  printf("%d %d %d %d %d %s %e %e %e %e %e\n",
+		 k,
+		 f->fmd.sType[k],
+		 f->fmd.filtSections[k],
+		 f->fmd.ramp[k],
+		 f->fmd.timout[k],
+		 f->fmd.filtName[k],
+		 f->fmd.filtCoeff[k][0],
+		 f->fmd.filtCoeff[k][1],
+		 f->fmd.filtCoeff[k][2],
+		 f->fmd.filtCoeff[k][3],
+		 f->fmd.filtCoeff[k][4]);
+	  for (l = 0; l < f->fmd.filtSections[k] - 1; l++) {
+	    printf("\t%e %e %e %e\n",
+		   f->fmd.filtCoeff[k][5 + 4 * l + 0],
+		   f->fmd.filtCoeff[k][5 + 4 * l + 1],
+		   f->fmd.filtCoeff[k][5 + 4 * l + 2],
+		   f->fmd.filtCoeff[k][5 + 4 * l + 3]);
+	  }
+	}
+      }
+    }
+  }
+}
+
+#ifdef unix_test
+fmSubSysMap itmxMap[5] = { { "ULSEN", 0 }, { "LLSEN", 1 }, { "URSEN", 2 }, { "LRSEN", 3 }, { "SDSEN", 4 } };
+fmSubSysMap itmyMap[5] = { { "ULSEN", 5 }, { "LLSEN", 6 }, { "URSEN", 7 }, { "LRSEN", 8 }, { "SDSEN", 9 } };
+fmSubSysMap   rmMap[5] = { { "ULSEN", 10}, { "LLSEN", 11}, { "URSEN", 12}, { "LRSEN", 13}, { "SDSEN", 14} };
+fmSubSysMap   bsMap[5] = { { "ULSEN", 15}, { "LLSEN", 16}, { "URSEN", 17}, { "LRSEN", 18}, { "SDSEN", 19} };
+
+fmSubSysMap   mmt3Map[26] = {
+  {"ULSEN", 20}, {"LLSEN", 21}, {"URSEN", 22}, {"LRSEN", 23}, {"SDSEN", 24},
+
+  {"SUSPOS", 25}, {"SUSPIT", 26}, {"SUSYAW", 27},
+
+  {"ULPOS", 28}, {"ULPIT", 29}, {"ULYAW", 30},
+  {"LLPOS", 31}, {"LLPIT", 32}, {"LLYAW", 33},
+  {"URPOS", 34}, {"URPIT", 35}, {"URYAW", 36},
+  {"LRPOS", 37}, {"LRPIT", 38}, {"LRYAW", 39},
+
+  {"ULCOIL", 40}, {"LLCOIL", 41}, {"URCOIL", 42}, {"LRCOIL", 43},
+
+  {"OPLEVPIT", 44}, {"OPLEVYAW", 45}
+};
+
+
+VME_COEF vme_win;
+
+fmReadCoeff fmc = {
+  "test",  /* Site */
+  "h1",    /* Ifo  */
+  "sus",   /* System */
+  &vme_win,
+  /* Subsystems */
+  {
+    {"itmx", "input", 5, itmxMap},
+    {"itmy", "input", 5, itmyMap},
+    {"rm",   "input", 5,   rmMap},
+    {"bs",   "input", 5,   bsMap},
+    {"mmt3", "",     26, mmt3Map},
+  }
+};
+
+
+int main ()
+{
+  int i, j, k, l;
+
+  for (i = 0; i < FM_SUBSYS_NUM; i++) {
+    if (fmReadCoeffFile(&fmc, i) != 0) {
+      fprintf(stderr, "Error: %s\n", fmReadErrMsg());
+    }
+  }
+
+  for (i = 0; i < MAX_MODULES; i++) {
+    for (j = 0; j < FILTERS; j++) {
+      if (vme_win.vmeCoeffs[i].filterType[j] > 0) {
+	unsigned int fnum = vme_win.vmeCoeffs[i].filterType[j] - 1;
+	printf("Filter module %d; bank %d is FIR\n", i, j);
+	unsigned int nSect = vme_win.vmeCoeffs[i].filtSections[j];
+	unsigned int nCoef = nSect * 4 + 1;
+	printf("Sections = %d; nCoef = %d\n", nSect, nCoef);
+	printf("Gain = %f\n", vme_win.firFiltCoeff[fnum][j][0]);
+	for (k = 1; k < nCoef; k += 4) {
+	  printf("%f %f %f %f\n", vme_win.firFiltCoeff[fnum][j][k],
+				  vme_win.firFiltCoeff[fnum][j][k + 1],
+				  vme_win.firFiltCoeff[fnum][j][k + 2],
+				  vme_win.firFiltCoeff[fnum][j][k + 3]);
+	}
+      }
+    }
+  }
+#if 0
+  for (i = 0; i < FM_SUBSYS_NUM; i++) {
+    printf ("%s has %d elements\n", fmc.subSys[i].name, fmc.subSys[i].numMap);
+    for (j = 0; j < fmc.subSys[i].numMap; j++) {
+      fmSubSysMap *f = fmc.subSys[i].map + j;
+      printf ("\t%s -> %d has %d filters \n", f->name, f->fmModNum, f->filters);
+      for (k = 0; k < FILTERS; k++) {
+	if (f->fmd.filtSections[k]) {
+	  printf("%s %d %d %d %d %d %s %e %e %e %e %e\n",
+	         f->fmd.filterType[k] ? "FIR":"IIR",
+		 k,
+		 f->fmd.sType[k],
+		 f->fmd.filtSections[k],
+		 f->fmd.ramp[k],
+		 f->fmd.timout[k],
+		 f->fmd.filtName[k],
+		 f->fmd.filtCoeff[k][0],
+		 f->fmd.filtCoeff[k][1],
+		 f->fmd.filtCoeff[k][2],
+		 f->fmd.filtCoeff[k][3],
+		 f->fmd.filtCoeff[k][4]);
+	  for (l = 0; l < f->fmd.filtSections[k] - 1; l++) {
+	    printf("\t%e %e %e %e\n",
+		   f->fmd.filtCoeff[k][5 + 4 * l + 0],
+		   f->fmd.filtCoeff[k][5 + 4 * l + 1],
+		   f->fmd.filtCoeff[k][5 + 4 * l + 2],
+		   f->fmd.filtCoeff[k][5 + 4 * l + 3]);
+	  }
+	}
+      }
+    }
+  }
+#endif
+  return 0;
+}
+#endif
