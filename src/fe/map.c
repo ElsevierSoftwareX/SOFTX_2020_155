@@ -148,6 +148,8 @@ int checkAdcRdy(int count,int numAdc,int type)
                   break;
 #endif
                 case GSC_16AI64SSA:
+                        dataCount = adcPtr[numAdc]->BUF_SIZE;
+#if 0
                   do {
                         dataCount = adcPtr[numAdc]->BUF_SIZE;
                         if (i == 1000000) {
@@ -155,6 +157,7 @@ int checkAdcRdy(int count,int numAdc,int type)
                         }
                         i++;
                   }while(dataCount < count);
+#endif
                   break;
                 // Default is GSC 2MHz ADC
                 default:
@@ -169,7 +172,7 @@ int checkAdcRdy(int count,int numAdc,int type)
           }
           // If timeout, return error
           if (i >= 1000000) return -1;
-	  gsaAdcDma2(numAdc);
+	  // gsaAdcDma2(numAdc);
   return(dataCount);
 }
 
@@ -758,7 +761,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
   status = 0;
 
   // Search system for any module with PLX-9056 and PLX id
-  while((dacdev = pci_find_device(PLX_VID, PLX_TID, dacdev))) {
+  while((dacdev = pci_get_device(PLX_VID, PLX_TID, dacdev))) {
 	// Check if this is an 18bit DAC from General Standards
 	if ((dacdev->subsystem_device == DAC_18BIT_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
 	{
@@ -869,7 +872,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
   dacdev = NULL;
   status = 0;
   // Search system for Digital I/O modules
-  while((dacdev = pci_find_device(ACC_VID, ACC_TID, dacdev))) {
+  while((dacdev = pci_get_device(ACC_VID, ACC_TID, dacdev))) {
 		printk("dio card on bus %x; device %x\n",
 			dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
@@ -881,7 +884,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
   status = 0;
   bo_cnt = 0;
   // Search for ACCESS PCI-IIRO-8 isolated I/O modules
-  while((dacdev = pci_find_device(ACC_VID, ACC_IIRO_TID, dacdev))) {
+  while((dacdev = pci_get_device(ACC_VID, ACC_IIRO_TID, dacdev))) {
 		int use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
@@ -909,7 +912,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
   status = 0;
   bo_cnt = 0;
   // Search for ACCESS PCI-IIRO-16 isolated I/O modules
-  while((dacdev = pci_find_device(ACC_VID, ACC_IIRO_TID1, dacdev))) {
+  while((dacdev = pci_get_device(ACC_VID, ACC_IIRO_TID1, dacdev))) {
 		int use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
@@ -938,7 +941,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
   bo_cnt = 0;
 
   // Search for Contec C_DO_32L_PE isolated I/O modules
-  while((dacdev = pci_find_device(CONTEC_VID, C_DO_32L_PE, dacdev))) {
+  while((dacdev = pci_get_device(CONTEC_VID, C_DO_32L_PE, dacdev))) {
 		int use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
@@ -970,7 +973,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
   }
 
   // Search system for 5565 VMIC RFM modules
-  while((dacdev = pci_find_device(VMIC_VID, VMIC_TID, dacdev))) {
+  while((dacdev = pci_get_device(VMIC_VID, VMIC_TID, dacdev))) {
 		printk("5565 RFM card on bus %x; device %x\n",
 			dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
@@ -978,23 +981,25 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		modCount ++;
   }
 
+#if 0
   dacdev = NULL;
   status = 0;
 
   // Search system for 5579 VMIC RFM modules
-  while((dacdev = pci_find_device(VMIC_VID, VMIC_TID_5579, dacdev))) {
+  while((dacdev = pci_get_device(VMIC_VID, VMIC_TID_5579, dacdev))) {
 		printk("5579 RFM card on bus %x; device %x\n",
 			dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
 		status = mapRfm(pCds,dacdev,0x5579);
 		modCount ++;
   }
+#endif
 
   dacdev = NULL;
   status = 0;
   pCds->gps = 0;
   // Look for Symmetricom GPS board
-  if ((dacdev = pci_find_device(SYMCOM_VID, SYMCOM_BC635_TID, dacdev))) {
+  if ((dacdev = pci_get_device(SYMCOM_VID, SYMCOM_BC635_TID, dacdev))) {
             	printk("Symmetricom GPS card on bus %x; device %x\n",
                    	dacdev->bus->number,
 		   	PCI_SLOT(dacdev->devfn));
@@ -1078,7 +1083,7 @@ long mapcard(int state, int memsize) {
   if(state == 1)
   {
   pcidev = 0;
-  if ((pcidev = pci_find_device(0x114a, PCI_ANY_ID, 0))) {
+  if ((pcidev = pci_get_device(0x114a, PCI_ANY_ID, 0))) {
 	pci_bus = pcidev->bus->number;
 	pci_device_fn = pcidev->devfn;
 	printk("Found RFM CARD\n");
