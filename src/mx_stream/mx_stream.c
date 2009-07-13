@@ -70,7 +70,7 @@ unsigned char *dcu_addr;
 void
 usage()
 {
-	fprintf(stderr, "Usage: mx_stream [args] sys_name \n");
+	fprintf(stderr, "Usage: mx_stream [args] -s sys_name \n");
 	fprintf(stderr, "sys_name - three letter name of a control system, e.g. tsa\n");
 	fprintf(stderr, "-n nic_id - local NIC ID [MX_ANY_NIC]\n");
 	fprintf(stderr, "-b board_id - local Board ID [MX_ANY_NIC]\n");
@@ -82,6 +82,7 @@ usage()
 	fprintf(stderr, "-N iter - iterations, default %d\n", DFLT_ITER);
 	fprintf(stderr, "-v - verbose\n");
 	fprintf(stderr, "-x - bothways\n");
+	fprintf(stderr, "-s - sys_name\n");
 	fprintf(stderr, "-w - wait\n");
 	fprintf(stderr, "-V - verify msg content [OFF]\n");
 	fprintf(stderr, "-h - help\n");
@@ -376,6 +377,7 @@ main(int argc, char **argv)
 	uint32_t filter;
 	uint16_t his_eid;
 	char *rem_host;
+	char *sysname;
 	int len;
 	int iter;
 	int c;
@@ -402,6 +404,7 @@ main(int argc, char **argv)
 	MX_MUTEX_INIT(&stream_mutex);
 	/* set up defaults */
 	rem_host = NULL;
+	sysname = NULL;
 	filter = FILTER;
 	my_eid = DFLT_EID;
 	his_eid = DFLT_EID;
@@ -414,9 +417,13 @@ main(int argc, char **argv)
 
 	//printf("file = %s %s %s\n",shmem1,shmem2,shmem3);
 
-	while ((c = getopt(argc, argv, "hd:e:f:n:b:r:l:N:Vvwx")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "hd:e:f:n:b:r:s:l:N:Vvwx")) != EOF) switch(c) {
 	case 'd':
 		rem_host = optarg;
+		break;
+	case 's':
+		sysname = optarg;
+		printf ("sysname = %s\n",sysname);
 		break;
 	case 'e':
 		my_eid = atoi(optarg);
@@ -467,12 +474,10 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-        if (argc != optind + 1) {  usage(); exit(1); }
-	if (strlen(argv[optind]) != 3) { usage(); exit(1); }
+        // if (argc != optind + 1) {  usage(); exit(1); }
+	if (sysname == NULL) { usage(); exit(1); }
 	// Make it lower case;
-	char sysname[4]; sysname[3] = 0;
 	int i;
-	for (i = 0; i < 3; i++) sysname[i] = tolower(argv[optind][i]);
 
 	printf("System name: %s\n", sysname);
 	sprintf(shmem_fname, shmem_fname_format, sysname);
