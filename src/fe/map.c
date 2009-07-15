@@ -67,9 +67,10 @@ int gsaAdcTrigger(int adcCount, int adcType[])
   {
      if(adcType[ii] == GSC_16AI64SSA)
      {
-	  // adcPtr[ii]->BCR &= ~(GSAI_DMA_DEMAND_MODE);
-	  adcDma[ii]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR_DEMAND;
-	  // gsaAdcDma2(ii);
+	  adcPtr[ii]->BCR &= ~(GSAI_DMA_DEMAND_MODE);
+	  // adcDma[ii]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR_DEMAND;
+	  adcDma[ii]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR | 0x1000;
+	  gsaAdcDma2(ii);
 	  adcPtr[ii]->IDBC = (GSAI_CLEAR_BUFFER | GSAI_THRESHOLD);
 	  adcPtr[ii]->BCR |= GSAI_ENABLE_X_SYNC;
     }else{
@@ -175,6 +176,19 @@ int checkAdcRdy(int count,int numAdc,int type)
 	  // gsaAdcDma2(numAdc);
   return(dataCount);
 }
+
+// *****************************************************************************
+// Check number of samples in ADC FIFO.
+// *****************************************************************************
+int checkAdcBuffer(int numAdc)
+{
+  int dataCount;
+
+                dataCount = adcPtr[numAdc]->BUF_SIZE;
+  return(dataCount);
+
+}
+
 
 // *****************************************************************************
 // This routine sets up the DMA registers once on code initialization.
@@ -644,8 +658,8 @@ int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
   do {
   }while((adcPtr[devNum]->BCR & GSAI_AUTO_CAL) != 0);
   adcPtr[devNum]->RAG |= GSAI_SAMPLE_START;
-  adcPtr[devNum]->IDBC = (GSAI_CLEAR_BUFFER | 0xff);
-  // adcPtr[devNum]->IDBC = (GSAI_CLEAR_BUFFER | GSAI_THRESHOLD);
+  // adcPtr[devNum]->IDBC = (GSAI_CLEAR_BUFFER | 0xff);
+  adcPtr[devNum]->IDBC = (GSAI_CLEAR_BUFFER | GSAI_THRESHOLD);
   adcPtr[devNum]->SSC = (GSAI_64_CHANNEL | GSAI_EXTERNAL_SYNC);
   printk("SSC = 0x%x\n",adcPtr[devNum]->SSC);
   printk("IDBC = 0x%x\n",adcPtr[devNum]->IDBC);
