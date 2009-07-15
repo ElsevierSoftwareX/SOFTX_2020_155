@@ -641,7 +641,13 @@ void *fe_start(void *arg)
   for(jj=0;jj<cdsPciModules.adcCount;jj++)
   {
 	  status = gsaAdcDma1(jj,cdsPciModules.adcType[jj],ADC_DMA_BYTES);
-
+	  packedData = (int *)cdsPciModules.pci_adc[jj];
+          *packedData = 0x0;
+          if (cdsPciModules.adcType[jj] == GSC_16AISS8AO4
+              || cdsPciModules.adcType[jj] == GSC_18AISS8AO8) {
+                 packedData += 3;
+          } else packedData += 31;
+          *packedData = 0x110000;
   }
 
   // Initialize the DAC module variables
@@ -813,92 +819,101 @@ cdsPciModules.gps = 0;
 	// code rate eg 32 samples each time thru before proceeding to match 2048 system.
 	// **********************************************************************************************************
         for(ll=0;ll<sampleCount;ll++)
-            {
+        {
                for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		{
-		    // Check ADC has data and start DMA (map.c code)
-		    do{
-                    status = checkAdcRdy(ADC_SAMPLE_COUNT,jj,cdsPciModules.adcType[jj]);
-		    if(!status) usleep(1);
-		    }while(status < 32);
-		    // Check if too many values in ADC FIFO
-		    // indicates a cycle was missed.
-		    if(status > (32*OVERSAMPLE_TIMES))
+		    // Check ADC DMA has completed
+		    packedData = (int *)cdsPciModules.pci_adc[jj];
+               	    packedData += 31;
+                    kk = 0;
+                    do {
+                        kk ++;
+			if(*packedData == 0x110000) usleep(1);
+                    }while((*packedData == 0x110000) && (kk < 10000000));
+		    if (kk == 10000000) {
+                        stop_working_threads = 1;
+                        printf("timeout 0\n");
+                    }
+
+		    if(jj == 0)
 		    {
-			missedCycle ++;
-  			pLocalEpics->epicsOutput.diags[1] ++;
+			// Read CPU clock for timing info for overall cycle time
+		    	rdtscl(cpuClock[0]);
+			// Check number of samples remaining in ADC FIFO
+                    	status = checkAdcBuffer(0);
+			if(status > (ADC_SAMPLE_COUNT * OVERSAMPLE_TIMES))
+			{
+				missedCycle ++;
+				pLocalEpics->epicsOutput.diags[1] ++;
+			}
 		    }
 		    // If data not ready in time, abort
                     if (status == -1) {
                         stop_working_threads = 1;
                         printf("timeout 0\n");
                     }
-		    if(jj==0) rdtscl(cpuClock[0]);
-	  	    gsaAdcDma2(jj);
-		}
-		// Read CPU clock for timing info for overall cycle time
-usleep(3);
 
-		// Read in ADC data from memory
-               for(kk=0;kk<cdsPciModules.adcCount;kk++) {
-			// Wait for ADC DMA complete -- check DMA done bits
-			do{
-			status = checkAdcDmaDone(kk);
-			 if(!status) usleep(1);
-// PUT IN AN EXIT
-			}while(status == 0);
+                    // Read adc data into local variables
+                    packedData = (int *)cdsPciModules.pci_adc[jj];
+                    // Return 0x10 if first ADC channel does not have sync bit set
+                    if(*packedData & 0xf0000) status = 0;
+                    else status = 16;
+                    kk = jj + 1;
+                    diagWord |= status * kk;
 
-                        // Read adc data into local variables
-                        packedData = (int *)cdsPciModules.pci_adc[kk];
-                        // Return 0x10 if first ADC channel does not have sync bit set
-                        if(*packedData & 0xf0000) status = 0;
-                        else status = 16;
-                        jj = kk + 1;
-                        diagWord |= status * jj;
+                    limit = 32700;
+                    offset = 0x8000;
+                    mask = 0xffff;
+                    num_outs = 32;
+                    if (cdsPciModules.adcType[jj] == GSC_18AISS8AO8) {
+			limit *= 4; // 18 bit limit
+			offset = 0x20000; // Data coding offset in 18-bit DAC
+			mask = 0x3ffff;
+			num_outs = 8;
+                    }
+                    if (cdsPciModules.adcType[jj] == GSC_16AISS8AO4) {
+			num_outs = 4;
+                    }
+                    for(ii=0;ii<num_outs;ii++)
+                    {
+			adcData[jj][ii] = (*packedData & mask);
+			adcData[jj][ii]  -= offset;
+			dWord[jj][ii] = adcData[jj][ii];
+#ifdef OVERSAMPLE
+			// Downsample filter only used channels
+			// This is defined in user C code
+			if (dWordUsed[jj][ii]) {
+				dWord[jj][ii] = iir_filter(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
+			}
+#endif
+			packedData ++;
+                    }
 
-                        limit = 32700;
-                        offset = 0x8000;
-                        mask = 0xffff;
-                        num_outs = 32;
-                        if (cdsPciModules.adcType[kk] == GSC_18AISS8AO8) {
-                                limit *= 4; // 18 bit limit
-                                offset = 0x20000; // Data coding offset in 18-bit DAC
-                                mask = 0x3ffff;
-                                num_outs = 8;
-                        }
-                        if (cdsPciModules.adcType[kk] == GSC_16AISS8AO4) {
-                                num_outs = 4;
-                        }
-                        for(ii=0;ii<num_outs;ii++)
-                        {
-                                adcData[kk][ii] = (*packedData & mask);
-                                adcData[kk][ii]  -= offset;
-                                dWord[kk][ii] = adcData[kk][ii];
-        #ifdef OVERSAMPLE
-				// Downsample filter only used channels
-				// This is defined in user C code
-                                if (dWordUsed[kk][ii]) {
-                                        dWord[kk][ii] = iir_filter(dWord[kk][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+kk*32][0]);
-                                }
-        #endif
-                                packedData ++;
-                        }
+		    // Check for ADC overflows
+                    for(ii=0;ii<num_outs;ii++)
+                    {
+			if((adcData[jj][ii] > limit) || (adcData[jj][ii] < -limit))
+			  {
+				overflowAdc[jj][ii] ++;
+				overflowAcc ++;
+				diagWord |= 0x100 *  jj;
+			  }
+                    }
 
-			// Check for ADC overflows
-                        for(ii=0;ii<num_outs;ii++)
-                        {
-                                if((adcData[kk][ii] > limit) || (adcData[kk][ii] < -limit))
-                                  {
-                                        overflowAdc[kk][ii] ++;
-                                        overflowAcc ++;
-                                        diagWord |= 0x100 *  jj;
-                                  }
-                        }
-                }
-		// Try synching to 1PPS on ADC[0][31] if not using IRIG-B
-		// Only try for 1 sec.
-                if(!sync21pps)
-                {
+		   // Clear out last ADC data read for test on next cycle
+                   packedData = (int *)cdsPciModules.pci_adc[jj];
+                   *packedData = 0x0;
+                   if(cdsPciModules.adcType[jj] == GSC_16AISS8AO4) packedData += 3;
+                   else if(cdsPciModules.adcType[jj] == GSC_18AISS8AO8) packedData += 3;
+                   else packedData += 31;
+                   *packedData = 0x110000;
+		   // Reset DMA Start Flag
+		   gsaAdcDma2(jj);
+
+		  // Try synching to 1PPS on ADC[0][31] if not using IRIG-B
+		  // Only try for 1 sec.
+                  if(!sync21pps)
+                  {
 			// 1PPS signal should rise above 4000 ADC counts if present.
                         if((adcData[0][31] < ONE_PPS_THRESH) && (sync21ppsCycles < (CYCLE_PER_SECOND*OVERSAMPLE_TIMES))) 
 			{
@@ -922,15 +937,10 @@ usleep(3);
                         }
                 }
             }
+	}
 
 	// After first synced ADC read, must set to code to read number samples/cycle
         sampleCount = OVERSAMPLE_TIMES;
-
-
-
-#ifndef RTAI_BUILD
-	  // usleep(0);
-#endif
 	}
 
 #if 0
