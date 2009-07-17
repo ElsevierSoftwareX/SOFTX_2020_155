@@ -71,7 +71,7 @@ void
 usage()
 {
 	fprintf(stderr, "Usage: mx_stream [args] -s sys_name \n");
-	fprintf(stderr, "sys_name - three letter name of a control system, e.g. tsa\n");
+	fprintf(stderr, "sys_name - name of a control system model, e.g. isiham6\n");
 	fprintf(stderr, "-n nic_id - local NIC ID [MX_ANY_NIC]\n");
 	fprintf(stderr, "-b board_id - local Board ID [MX_ANY_NIC]\n");
 	fprintf(stderr, "-e local_eid - local endpoint ID [%d]\n", DFLT_EID);
@@ -80,9 +80,9 @@ usage()
 	fprintf(stderr, "-f filter - endpoint filter, default %x\n", FILTER);
 	fprintf(stderr, "-l length - message length, default %d\n", DFLT_LEN);
 	fprintf(stderr, "-N iter - iterations, default %d\n", DFLT_ITER);
+	fprintf(stderr, "-s - system name\n");
 	fprintf(stderr, "-v - verbose\n");
 	fprintf(stderr, "-x - bothways\n");
-	fprintf(stderr, "-s - sys_name\n");
 	fprintf(stderr, "-w - wait\n");
 	fprintf(stderr, "-V - verify msg content [OFF]\n");
 	fprintf(stderr, "-h - help\n");
@@ -167,7 +167,7 @@ receiver(mx_endpoint_t ep, uint32_t match_val, uint32_t filter)
 	}
 
 	/* start the test */
-//mx_set_error_handler(MX_ERRORS_RETURN);
+mx_set_error_handler(MX_ERRORS_RETURN);
 	gettimeofday(&start_time, NULL);
 		kk = 0;
 do{
@@ -289,25 +289,28 @@ do{
 	myErrorSignal = 0;
 	do {
 		conStat = mx_connect(ep, his_nic_id, his_eid, filter, 
-			   MX_INFINITE, &dest);
+			   1000, &dest);
+			   // MX_INFINITE, &dest);
 		if (conStat != MX_SUCCESS) {
-			fprintf(stderr, "mx_connect failed\n");
+			// fprintf(stderr, "mx_connect failed\n");
 			myErrorSignal = 1;
-			usleep(1000000);
+			// usleep(1000000);
+			shmIpcPtr->status ^= 1;
 			// exit(1);
 		}
 		else {
 			myErrorSignal = 0;
-		fprintf(stderr, "Connection Made\n");
+			shmIpcPtr->status ^= 2;
+		// fprintf(stderr, "Connection Made\n");
 		}
 	}while(myErrorSignal);
 
 // Have a connection
 	myErrorSignal = 0;
+	cur_req = 0;
 usleep(1000);
 if(!myErrorSignal)
 {
-	cur_req = 0;
 	do {
 		// Wait for cycle count update from FE
 		do{
@@ -318,6 +321,8 @@ if(!myErrorSignal)
 
 		// Copy values from shmmem to MX buffer
 		lastCycle = shmIpcPtr->cycle;
+		if (lastCycle == 0) shmIpcPtr->status ^= 1;
+		cur_req = (cur_req + 1) % 8;
 		mxDataBlock.mxIpcData.cycle = lastCycle;
 		mxDataBlock.mxIpcData.crc = shmIpcPtr->crc;
 		mxDataBlock.mxIpcData.dcuId = shmIpcPtr->dcuId;
@@ -345,6 +350,7 @@ struct daqMXdata {
 		// seg.segment_length = len;
 		seg.segment_length = sendLength;
 		mx_isend(ep, &seg, 1, dest, match_val, NULL, &req[cur_req]);
+		// mx_isend(ep, &seg, 1, dest, 1, NULL, &req[cur_req]);
 
 		/* wait for the send to complete */
 		mx_wait(ep, &req[cur_req], 100, &stat, &result);
@@ -358,10 +364,11 @@ struct daqMXdata {
 			// exit(1);
 			myErrorSignal = 1;
 		}
+		if(lastCycle == 15) myErrorSignal = 1;
 
 	}while(!myErrorSignal);
 }
-printf("test loop error\n");
+// printf("test loop error\n");
 }while(1);
 	
 }
