@@ -236,6 +236,7 @@ double cycle_gps_event_time = 0.; // Time at which ADCs triggered
 unsigned int   cycle_gps_ns = 0;
 unsigned int   cycle_gps_event_ns = 0;
 unsigned int   gps_receiver_unlocked = 1; // Lock/unlock flag for GPS time card
+struct rmIpcStr *daqPtr;
 
 double getGpsTime(unsigned int *);
 #include "./feSelectCode.c"
@@ -411,6 +412,9 @@ void *fe_start(void *arg)
   int mask = 0xffff;                    // Bit mask for ADC/DAC read/writes
   int num_outs = 16;                    // Number of DAC channels variable
   int syncSource = SYNC_SRC_NONE;	// Code startup synchronization source
+  int mxStat = 0;
+  int mxDiag = 0;
+  int mxDiagR = 0;
 
 
 
@@ -841,7 +845,7 @@ cdsPciModules.gps = 0;
 		    	rdtscl(cpuClock[0]);
 			// Check number of samples remaining in ADC FIFO
                     	status = checkAdcBuffer(0);
-			if(status > (ADC_SAMPLE_COUNT * OVERSAMPLE_TIMES))
+			if(status > (ADC_SAMPLE_COUNT * (OVERSAMPLE_TIMES-1)))
 			{
 				missedCycle ++;
 				pLocalEpics->epicsOutput.diags[1] ++;
@@ -1278,7 +1282,12 @@ printf("reading dio\n");
 #else
 	  // There is no frame builder to front-end feedback at the moment when
 	  // not using GM (using shmem), perhaps it needs to be added
-  	  pLocalEpics->epicsOutput.diags[2] = 3;
+	  mxStat = 0;
+	  mxDiagR = daqPtr->status;
+	  if((mxDiag & 1) != (mxDiagR & 1)) mxStat = 1;
+	  if((mxDiag & 2) != (mxDiagR & 2)) mxStat += 2;
+	  pLocalEpics->epicsOutput.diags[2] = mxStat;
+  	  mxDiag = mxDiagR;
 #endif
 	  usrHoldTime = 0;
   	  if((pLocalEpics->epicsInput.overflowReset) || (overflowAcc > 0x1000000))
@@ -1458,6 +1467,7 @@ int main(int argc, char **argv)
                 rtl_perror("mmap()");
                 return -1;
 	  }
+ 	  daqPtr = (struct rmIpcStr *) _daq_shm;
         }
 #endif
 #endif
