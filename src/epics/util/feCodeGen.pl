@@ -2292,6 +2292,7 @@ print OUTM "obj-m += $skeleton" . "fe.o\n";
 
 } else {
 if ($wind_river_rtlinux) {
+  print OUTM "CFLAGS += -DKBUILD_MODNAME=1\n";
   print OUTM "include /home/controls/common_pc_64_build/build/rtcore-base-5.1/Rules.make\n";
 } else {
   print OUTM "include /opt/rtldk-2.2/rtlinuxpro/Rules.make\n";
