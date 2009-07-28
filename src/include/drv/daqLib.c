@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.39 2009/07/28 21:42:52 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.40 2009/07/28 22:38:58 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -617,7 +617,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 // Assign global parameters
         dipc->dcuId = dcuId; // DCU id of this system
         dipc->crc = fileCrc; // Checksum of the configuration file
-        dipc->dataBlockSize = crcLength; // actual data size
+        dipc->dataBlockSize = totalSizeNet * 16; // actual data size
         // Assign current block parameters
         dipc->bp[daqBlockNum].cycle = daqBlockNum;
         dipc->bp[daqBlockNum].crc = crcSend;
