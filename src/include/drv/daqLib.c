@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.37 2009/05/09 20:07:02 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.38 2009/07/28 21:23:54 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -94,6 +94,16 @@ volatile DAQ_INFO_BLOCK *pInfo;		/* Ptr to DAQ config in shmem.	*/
 
 extern char *_epics_shm;		/* Ptr to EPICS shmem block		*/
 extern long daqBuffer;			/* Address of daqLib swing buffers.	*/
+#ifdef SHMEM_DAQ
+extern char *_daq_shm;
+struct rmIpcStr *dipc;
+extern double cycle_gps_time;
+extern unsigned int cycle_gps_ns;
+struct cdsDaqNetGdsTpNum *tpPtr;
+char *mcPtr;
+char *lmPtr;
+    char *daqShmPtr;
+#endif
 
 
 /* ******************************************************************** */
@@ -159,6 +169,7 @@ volatile float *dataPtr;	/* Ptr to excitation chan data.		*/
 int exChanOffset;		/* shmem offset to next EXC value.	*/
 int tpx;
 int tpAdd;
+    static const int buf_size;
 
 #if DCU_MAX_CHANNELS > DAQ_GDS_MAX_TP_NUM
 #warning DCU_MAX_CHANNELS greater than DAQ_GDS_MAX_TP_NUM
@@ -227,6 +238,14 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     daqSlot = -1;
     excSlot = 0;
 
+#ifdef SHMEM_DAQ
+    daqShmPtr = _daq_shm + CDS_DAQ_NET_DATA_OFFSET;
+    buf_size = DAQ_DCU_BLOCK_SIZE*2;
+    dipc = (struct rmIpcStr *)(_daq_shm + CDS_DAQ_NET_IPC_OFFSET);
+    tpPtr = (struct cdsDaqNetGdsTpNum *)(_daq_shm + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
+    mcPtr = daqShmPtr;
+    lmPtr = pReadBuffer;
+#endif
 
 
     crcLength = 0;
@@ -523,6 +542,12 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       }
     } /* end swing buffer write loop */
 
+#ifdef SHMEM_DAQ
+    memcpy(mcPtr,lmPtr,64);
+    mcPtr += 64;
+    lmPtr += 64;
+#endif
+
 
   if(!xferDone)
   {
@@ -540,6 +565,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       crcSend = crcTest;
   }
 
+#ifndef SHMEM_DAQ
   /* Write DAQ data to the Framebuilder 256 times per second */
   if(!daqWaitCycle)
   {
@@ -547,6 +573,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 						crcSend,crcLength,validTpNet,tpNumNet,totalSizeNet,pReadBuffer);
 	daqWriteCycle = (daqWriteCycle + 1) % 16;
   }
+#endif
 
   // Read in any selected EXC signals.
   excSlot = (excSlot + 1) % sysRate;
@@ -583,8 +610,37 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       pReadBuffer = (char *)pDaqBuffer[phase];
       pWriteBuffer = (char *)pDaqBuffer[(phase^1)];
 
+#ifdef SHMEM_DAQ
+// Assign global parameters
+        dipc->dcuId = dcuId; // DCU id of this system
+        dipc->crc = fileCrc; // Checksum of the configuration file
+        dipc->dataBlockSize = crcLength; // actual data size
+        // Assign current block parameters
+        dipc->bp[daqBlockNum].cycle = daqBlockNum;
+        dipc->bp[daqBlockNum].crc = crcSend;
+        //ipc->bp[daqBlockNum].status = 0;
+        dipc->bp[daqBlockNum].timeSec = (unsigned int) cycle_gps_time;
+        dipc->bp[daqBlockNum].timeNSec = (unsigned int) cycle_gps_ns + (unsigned int) (1000000000. * (cycle_gps_time - (unsigned int
+) cycle_gps_time));
+
+        // Assign the test points table
+        tpPtr->count = validTpNet;
+        memcpy(tpPtr->tpNum, tpNumNet, sizeof(tpNumNet[0]) * validTp);
+
+        // As the last step set the cycle counter
+        // Frame builder is looking for cycle change
+        dipc->cycle =daqBlockNum; // Ready cycle (16 Hz)
+#endif
+
+
       /* Increment the 1/16 sec block counter */
       daqBlockNum = (daqBlockNum + 1) % 16;
+
+#ifdef SHMEM_DAQ
+      mcPtr = daqShmPtr;
+      mcPtr += buf_size * daqBlockNum;
+      lmPtr = pReadBuffer;
+#endif
 
       // Check for reconfig request at start of each second
       if((pInfo->reconfig == 1) && (daqBlockNum == 0))
