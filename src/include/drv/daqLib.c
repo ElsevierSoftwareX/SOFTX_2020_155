@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.38 2009/07/28 21:23:54 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.39 2009/07/28 21:42:52 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -103,6 +103,7 @@ struct cdsDaqNetGdsTpNum *tpPtr;
 char *mcPtr;
 char *lmPtr;
     char *daqShmPtr;
+int fillSize;
 #endif
 
 
@@ -245,6 +246,8 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     tpPtr = (struct cdsDaqNetGdsTpNum *)(_daq_shm + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
     mcPtr = daqShmPtr;
     lmPtr = pReadBuffer;
+    fillSize = 131072 / sysRate;
+    printf("DIRECT MEMORY MODE of size %d\n",fillSize);
 #endif
 
 
@@ -543,9 +546,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     } /* end swing buffer write loop */
 
 #ifdef SHMEM_DAQ
-    memcpy(mcPtr,lmPtr,64);
-    mcPtr += 64;
-    lmPtr += 64;
+    memcpy(mcPtr,lmPtr,fillSize);
+    mcPtr += fillSize;
+    lmPtr += fillSize;
 #endif
 
 
