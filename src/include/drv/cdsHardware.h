@@ -43,6 +43,7 @@
 #define ACS_8DIO		6
 #define GSC_18AI32SSC1M		7
 #define GSC_18AO8		8
+#define ACS_24DIO		9
 
 /* Cards configuration */
 typedef struct CDS_CARDS {
@@ -102,8 +103,9 @@ typedef struct IO_MEM_DATA{
 }IO_MEM_DATA;
 
 /* ACCESS DIO Module Definitions ********************************************** */
-#define ACC_VID	0x494F
-#define ACC_TID	0x0C51
+#define ACC_VID		0x494F
+#define ACC_TID		0x0C51
+#define ACC_TID1	0x0C50
 
 #define DIO_A_OUTPUT	0x8B
 #define DIO_C_OUTPUT	0x92
@@ -261,6 +263,9 @@ typedef struct GSA_DAC_REG{
 #define GSAO_SFT_TRIG           0x80
 #define GSAO_CLR_BUFFER         0x800
 #define GSAO_FIFO_16            0x1
+#define GSAO_FIFO_32            0x2
+#define GSAO_FIFO_64            0x3
+#define GSAO_FIFO_128           0x4
 #define GSAO_FIFO_512           6
 #define GSAO_FIFO_1024          7
 #define GSAO_FIFO_2048          8
