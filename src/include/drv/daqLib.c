@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.40 2009/07/28 22:38:58 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.41 2009/07/29 20:31:45 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -170,7 +170,7 @@ volatile float *dataPtr;	/* Ptr to excitation chan data.		*/
 int exChanOffset;		/* shmem offset to next EXC value.	*/
 int tpx;
 int tpAdd;
-    static const int buf_size;
+static int buf_size;
 
 #if DCU_MAX_CHANNELS > DAQ_GDS_MAX_TP_NUM
 #warning DCU_MAX_CHANNELS greater than DAQ_GDS_MAX_TP_NUM
