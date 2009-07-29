@@ -2,6 +2,17 @@ package CDS::Dio;
 use Exporter;
 @ISA = ('Exporter');
 
+sub initDio {
+	my ($node) = @_;
+	$::boPartNum[$::boCnt] = $::partCnt;
+	my $desc = ${$node->{FIELDS}}{"Name"};
+	my $l = length($desc);
+        my $num = substr($desc, ($l-1), 1);
+	$::boType[$::boCnt] = "ACS_24DIO";
+	$::boNum[$::boCnt] = $num;
+	$::boCnt ++;
+}
+
 sub partType {
 	return Dio;
 }
