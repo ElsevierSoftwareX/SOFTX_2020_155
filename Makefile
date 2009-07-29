@@ -179,13 +179,14 @@ install-screens-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-screens-,,$@); \
 	upper_system=`echo $$system | tr a-z A-Z`;\
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
-	if test $${site}no == no; then echo Please make $$system first; exit 1; fi;\
+	if test $${site}no = no; then echo Please make $$system first; exit 1; fi;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	echo Installing Epics screens;\
 	/bin/mkdir -p /cvs/cds/$$site/medm/$${lower_ifo}/archive;\
 	if test -e /cvs/cds/$$site/medm/$${lower_ifo}/$${system}; then /bin/cp -a /cvs/cds/$$site/medm/$${lower_ifo}/$${system} /cvs/cds/$$site/medm/$${lower_ifo}/archive/$${system}_$${cur_date} || exit 1; fi;\
+	/bin/mkdir -p /cvs/cds/$$site/medm/$${lower_ifo}/$${system};\
 	(cd build/$${system}epics/medm; ls | xargs cp -r -t /cvs/cds/$$site/medm/$${lower_ifo}/$${system};)
 
 
