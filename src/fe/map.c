@@ -895,24 +895,30 @@ int mapPciModules(CDS_HARDWARE *pCds)
 
   dacdev = NULL;
   status = 0;
-  // Search system for Digital I/O modules
+  bo_cnt = 0;
+  // Search for ACCESS PCI-DIO  modules
   while((dacdev = pci_get_device(ACC_VID, ACC_TID, dacdev))) {
-		printk("dio card on bus %x; device %x\n",
-			dacdev->bus->number,
+		int use_it = 0;
+		if (pCds->cards) {
+			use_it = 0;
+			/* See if ought to use this one or not */
+			int i;
+			for (i = 0; i < pCds->cards; i++) {
+				if (pCds->cards_used[i].type == ACS_24DIO
+				    && pCds->cards_used[i].instance == bo_cnt) {
+					use_it = 1;
+					break;
+				}
+			}
+		}
+		if (use_it) {
+                  printk("Access 24 BIO card on bus %x; device %x\n",
+                        dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
-		status = mapDio(pCds,dacdev);
-		modCount ++;
-  }
-
-  dacdev = NULL;
-  status = 0;
-  // Search system for Digital I/O modules
-  while((dacdev = pci_get_device(ACC_VID, ACC_TID1, dacdev))) {
-		printk("dio card on bus %x; device %x\n",
-			dacdev->bus->number,
-			PCI_SLOT(dacdev->devfn));
-		status = mapDio(pCds,dacdev);
-		modCount ++;
+		  status = mapDio(pCds,dacdev);
+		  modCount ++;
+		}
+		bo_cnt ++;
   }
 
   dacdev = NULL;
