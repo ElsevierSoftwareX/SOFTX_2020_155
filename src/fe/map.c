@@ -296,7 +296,7 @@ void gsaDacDma2(int modNum, int dacType)
 unsigned int readDio(CDS_HARDWARE *pHardware, int modNum)
 {
   unsigned int status;
-	status = inb(pHardware->pci_dio[modNum]);
+	status = inb(pHardware->pci_do[modNum]);
 	return(status);
 }
 
@@ -305,7 +305,7 @@ unsigned int readDio(CDS_HARDWARE *pHardware, int modNum)
 // *****************************************************************************
 void writeDio(CDS_HARDWARE *pHardware, int modNum, int data)
 {
-	outb(data & 0xff,pHardware->pci_dio[modNum]+DIO_C_REG);
+	outb(data & 0xff,pHardware->pci_do[modNum]+DIO_C_REG);
 }
 
 // *****************************************************************************
@@ -320,12 +320,14 @@ int mapDio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 	  pci_enable_device(diodev);
 	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_2,&pci_io_addr);
 	  printk("dio pci2 = 0x%x\n",pci_io_addr);
-	  pHardware->pci_dio[devNum] = (pci_io_addr - 1);
-	  printk("diospace = 0x%x\n",pHardware->pci_dio[devNum]);
-	  outb_p(DIO_C_OUTPUT,pHardware->pci_dio[devNum]+DIO_CTRL_REG);
-	  outb(0x00,pHardware->pci_dio[devNum]+DIO_C_REG);
-
-	  pHardware->dioCount ++;
+	  pHardware->pci_do[devNum] = (pci_io_addr - 1);
+	  printk("diospace = 0x%x\n",pHardware->pci_do[devNum]);
+	  outb_p(DIO_C_OUTPUT,pHardware->pci_do[devNum]+DIO_CTRL_REG);
+	  outb(0x00,pHardware->pci_do[devNum]+DIO_C_REG);
+          pHardware->doType[devNum] = ACS_24DIO;
+          pHardware->doInstance[devNum]  = pHardware->dioCount;
+          pHardware->dioCount ++;
+	  pHardware->doCount ++;
 	  return(0);
 }
 
@@ -508,10 +510,18 @@ int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 
 #ifdef OVERSAMPLE_DAC
 	  // Larger buffer required when in oversampling mode 
+#ifdef SERVO32K
+	  dacPtr[devNum]->BOR = GSAO_FIFO_64;
+#endif
+#ifdef SERVO16K
+	  dacPtr[devNum]->BOR = GSAO_FIFO_128;
+#endif
+#ifdef SERVO2K
 	  dacPtr[devNum]->BOR = GSAO_FIFO_1024;
+#endif
 #else
-	  // dacPtr[devNum]->BOR = GSAO_FIFO_16;
-	  dacPtr[devNum]->BOR = GSAO_FIFO_1024;
+	  dacPtr[devNum]->BOR = GSAO_FIFO_16;
+	  // dacPtr[devNum]->BOR = GSAO_FIFO_1024;
 #endif
 	  dacPtr[devNum]->BOR |=  GSAO_EXTERN_CLK;
 	  printk("DAC BOR = 0x%x\n",dacPtr[devNum]->BOR);
@@ -887,6 +897,17 @@ int mapPciModules(CDS_HARDWARE *pCds)
   status = 0;
   // Search system for Digital I/O modules
   while((dacdev = pci_get_device(ACC_VID, ACC_TID, dacdev))) {
+		printk("dio card on bus %x; device %x\n",
+			dacdev->bus->number,
+			PCI_SLOT(dacdev->devfn));
+		status = mapDio(pCds,dacdev);
+		modCount ++;
+  }
+
+  dacdev = NULL;
+  status = 0;
+  // Search system for Digital I/O modules
+  while((dacdev = pci_get_device(ACC_VID, ACC_TID1, dacdev))) {
 		printk("dio card on bus %x; device %x\n",
 			dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
