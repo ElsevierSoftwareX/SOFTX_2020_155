@@ -345,6 +345,9 @@ sub node_processing {
 		if ($part_name eq "CDO32") {
         	  $::partType[$::partCnt] = CDS::CDO32::initCDO32($node);
 		}
+		if ($part_name eq "Dio") {
+        	  $::partType[$::partCnt] = CDS::Dio::initDio($node);
+		}
 		if ($part_name eq "Rio") {
         	  $::partType[$::partCnt] = CDS::Rio::initRio($node);
 		}
