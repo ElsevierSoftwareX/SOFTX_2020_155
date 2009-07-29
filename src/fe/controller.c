@@ -210,6 +210,7 @@ int dacOutEpics[MAX_DAC_MODULES][16];		// DAC outputs reported back to EPICS
 unsigned int dacOutUsed[MAX_DAC_MODULES][16];	// DAC chans used by app code
 int dioInput[MAX_DIO_MODULES];			// BIO card inputs
 int dioOutput[MAX_DIO_MODULES];			// BIO card outputs
+int dioOutputHold[MAX_DIO_MODULES];			// BIO card outputs
 
 // Relay digital I/O cards read operations
 // 0 - do not read card registers
@@ -623,6 +624,10 @@ void *fe_start(void *arg)
 	{
   	  CDO32Input[ii] = readCDO32l(&cdsPciModules, kk);
 	}
+	if(cdsPciModules.doType[kk] == ACS_24DIO)
+	{
+  	  dioInput[ii] = readDio(&cdsPciModules, kk);
+	}
      }
 
   // Clear the startup sync counter
@@ -975,6 +980,9 @@ cdsPciModules.gps = 0;
           }
         }
 
+#ifdef TEST_SYSTEM
+        dWord[0][0] = cycleTime;
+#endif
 
 	// Call the front end specific software ***********************************************
         rdtscl(cpuClock[4]);
@@ -1145,7 +1153,6 @@ cdsPciModules.gps = 0;
  // Read Dio cards once per second
         if(clock16K < cdsPciModules.doCount)
         {
-printf("reading dio\n");
                 kk = clock16K;
                 ii = cdsPciModules.doInstance[kk];
                 if(cdsPciModules.doType[kk] == ACS_8DIO)
@@ -1156,8 +1163,11 @@ printf("reading dio\n");
                 if(cdsPciModules.doType[kk] == ACS_16DIO)
                 {
                         rioInput1[ii] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
-// printf("read 16bit dio %d %d\n",kk,rioInput1[ii]);
                 }
+		if(cdsPciModules.doType[kk] == ACS_24DIO)
+		{
+		  dioInput[ii] = readDio(&cdsPciModules, kk);
+		}
         }
         // Write Dio cards on change
         for(kk=0;kk < cdsPciModules.doCount;kk++)
@@ -1180,6 +1190,11 @@ printf("reading dio\n");
                           CDO32Input[ii] = writeCDO32l(&cdsPciModules, kk, CDO32Output[ii]);
                         }
                 }
+                if((cdsPciModules.doType[kk] == ACS_24DIO) && (dioOutputHold[ii] != dioOutput[ii]))
+		{
+                        writeDio(&cdsPciModules, kk, dioOutput[ii]);
+			dioOutputHold[ii] = dioOutput[ii];
+		}
         }
 
 
