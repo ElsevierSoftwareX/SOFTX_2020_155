@@ -789,7 +789,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 	// Check if this is an 18bit DAC from General Standards
 	if ((dacdev->subsystem_device == DAC_18BIT_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
 	{
-		int use_it = 1;
+		int use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
 			/* See if ought to use this one or not */
@@ -814,7 +814,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 	// if found, check if it is a DAC module
         if((dacdev->subsystem_device == DAC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
         {
-		int use_it = 1;
+		int use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
 			/* See if ought to use this one or not */
@@ -839,7 +839,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 	// if found, check if it is an ADC module
 	if((dacdev->subsystem_device == ADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
 	{
-		int use_it = 1;
+		int use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
 			/* See if ought to use this one or not */
@@ -867,7 +867,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 	// This number will most likely change in the future.
         if((dacdev->subsystem_device == FADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
         {
-		int use_it = 1;
+		int use_it = 0;
 		unsigned int board_type = -1;
 		if (pCds->cards) {
 			use_it = 0;
