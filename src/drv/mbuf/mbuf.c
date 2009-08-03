@@ -66,35 +66,70 @@ static int mbuf_open(struct inode *inode, struct file *filp)
 }
 
 
-static release_area(char *name, struct file *file) {
+int mbuf_release_area(char *name, struct file *file) {
 	int i;
 
 	// See if allocated
 	for (i = 0; i < MAX_AREAS; i++) {
 		if (0 == strcmp (mtag[i], name)) {
-		unsigned int s = kmalloc_area_size[i];
 		// Found the area
 		usage_cnt[i]--;
 		if (usage_cnt[i] <= 0 ){
 				mtag[i][0] = 0;
 				kmalloc_area_size[i] = 0;
 				usage_cnt[i] = 0;
-				file->private_data = 0;
-				kfree(kmalloc_area[i]);	
+				if (file) file->private_data = 0;
+				kfree((void *)(kmalloc_area[i]));
 				kmalloc_area[i] = 0;
 			}
-			return s;
+			return 0;
 		}
 	}
-        return -EINVAL;
+        return -1;
 }
+
+EXPORT_SYMBOL(mbuf_release_area);
+
+// Returns index of allocated area
+// -1 if no slots
+int mbuf_allocate_area(char *name, int size, struct file *file) {
+	int i;
+	// See if already allocated
+	for (i = 0; i < MAX_AREAS; i++) {
+		if (0 == strcmp (mtag[i], name)) {
+			// Found the area
+			usage_cnt[i]++;
+               		if (file) file -> private_data = mtag [i];
+			return i;
+		}
+	}
+	
+	// Find first free slot
+	for (i = 0; i < MAX_AREAS; i++) {
+		if (kmalloc_area[i] == 0) break;
+	}
+	
+	// Out of slots
+	if (i >= MAX_AREAS) return -1;
+
+	kmalloc_area[i] = kmalloc (size, GFP_KERNEL);
+	kmalloc_area_size[i] = size;
+	strncpy(mtag[i], name, MBUF_NAME_LEN);
+	mtag[i][MBUF_NAME_LEN] = 0;
+	usage_cnt[i] = 1;
+        if (file) file -> private_data = mtag [i];
+        return i;
+}
+
+EXPORT_SYMBOL(mbuf_allocate_area);
 
 /* character device last close method */
 static int mbuf_release(struct inode *inode, struct file *filp)
 {
+	char *name;
         if (filp -> private_data == 0) return 0;
-	char *name = (char *) filp -> private_data;
-	release_area(name, filp);
+	name = (char *) filp -> private_data;
+	mbuf_release_area(name, filp);
         return 0;
 }
 
@@ -146,35 +181,18 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
 
         switch(cmd){
         case IOCTL_MBUF_ALLOCATE:
-		// See if already allocated
-		for (i = 0; i < MAX_AREAS; i++) {
-			if (0 == strcmp (mtag[i], req.name)) {
-				// Found the area
-				usage_cnt[i]++;
-                		file -> private_data = mtag [i];
-				return kmalloc_area_size[i];
-			}
+		{
+		  int res = mbuf_allocate_area(req.name, req.size, file);
+		  if (res >= 0) return kmalloc_area_size[res];
+		  else return -EINVAL;
 		}
-		
-		// Find first free slot
-		for (i = 0; i < MAX_AREAS; i++) {
-			if (kmalloc_area[i] == 0) break;
-		}
-		
-		// Out of slots
-		if (i >= MAX_AREAS) return -EINVAL;
-
-		kmalloc_area[i] = kmalloc (req.size, GFP_KERNEL);
-		kmalloc_area_size[i] = req.size;
-		strncpy(mtag[i], req.name, MBUF_NAME_LEN);
-		mtag[i][MBUF_NAME_LEN] = 0;
-		usage_cnt[i] = 1;
-                file -> private_data = mtag [i];
-                return req.size;
 		break;
-
         case IOCTL_MBUF_DEALLOCATE:
-		return release_area(req.name, file);
+		{
+		  int res = mbuf_release_area(req.name, file);
+		  if (res >= 0) return  0;
+		  else return -EINVAL;
+		} 
                 break;
 
         case IOCTL_MBUF_INFO:
