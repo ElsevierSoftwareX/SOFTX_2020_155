@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdlib.h>
-
-#define NPAGES 16
+#include "mbuf.h"
 
 /* this is a test program that opens the mbuf_drv.
    It reads out values of the kmalloc() and vmalloc()
@@ -23,29 +23,31 @@
      'mknod node c 254 0'
 */
 
-int main(void)
+int main (void)
 {
   int fd;
   unsigned int *vadr;
   unsigned int *kadr;
 
-  int len = 64*1024*1024;
+  int len = 64 * 1024 * 1024;
 
-  if ((fd=open("node", O_RDWR|O_SYNC))<0)
-  {
-      perror("open");
-      exit(-1);
+  if ((fd = open ("node", O_RDWR | O_SYNC)) < 0) {
+      perror ("open");
+      exit (-1);
   }
 
-  vadr = mmap(0, len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0*getpagesize());
-  
+  struct mbuf_request_struct req = {len, "alx"};
+  ioctl (fd, IOCTL_MBUF_INFO, &req);
+  ioctl (fd, IOCTL_MBUF_ALLOCATE, &req);
+
+  vadr = mmap(0, len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0*getpagesize());
   printf("mmap() returned addr=%lx\n", vadr);
-  if (vadr == MAP_FAILED)
-  {
-          perror("mmap");
-          exit(-1);
+  if (vadr == MAP_FAILED) {
+          perror ("mmap");
+          exit (-1);
   }
 
+  ioctl (fd, IOCTL_MBUF_INFO, &req);
   unsigned char *a = (unsigned char *)vadr + 0x12200cc;
   float f = ((float *)a)[0];
   printf("%f\n", f);
