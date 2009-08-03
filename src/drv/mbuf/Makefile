@@ -27,6 +27,10 @@ endif
 $(MODULENAME)_test: $(MODULENAME)_test.c
 	$(CC) -g -o $(MODULENAME)_test $(MODULENAME)_test.c
 
+$(MODULENAME)_stat: $(MODULENAME)_stat.c
+	$(CC) -g -o $(MODULENAME)_stat $(MODULENAME)_stat.c
+
+
 
 load:
 	sudo /sbin/insmod ./$(MODULENAME).ko

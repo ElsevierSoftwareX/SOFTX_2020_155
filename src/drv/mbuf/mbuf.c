@@ -8,10 +8,20 @@
 #include <linux/vmalloc.h>
 #include <linux/mm.h>
 #include <linux/pci.h>
+
+#include <linux/types.h>
+#include <linux/errno.h>
+#include <linux/fcntl.h>
+#include <linux/mm.h>
+#include <linux/miscdevice.h>
+#include <linux/proc_fs.h>
+#include <asm/uaccess.h>
+
 #ifdef MODVERSIONS
 #  include <linux/modversions.h>
 #endif
 #include <asm/io.h>
+#include "mbuf.h"
 
 /* character device structures */
 static dev_t mbuf_dev;
@@ -21,22 +31,33 @@ static struct cdev mbuf_cdev;
 static int mbuf_open(struct inode *inode, struct file *filp);
 static int mbuf_release(struct inode *inode, struct file *filp);
 static int mbuf_mmap(struct file *filp, struct vm_area_struct *vma);
+static int mbuf_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg);
 
 /* the file operations, i.e. all character device methods */
 static struct file_operations mbuf_fops = {
         .open = mbuf_open,
         .release = mbuf_release,
         .mmap = mbuf_mmap,
+        .ioctl = mbuf_ioctl,
         .owner = THIS_MODULE,
 };
 
 // internal data
-// pointer to the kmalloc'd area, rounded up to a page boundary
-unsigned int kmalloc_area[8];
+// How many memory areas we will support
+#define MAX_AREAS 16
 
-// reflective memory pointers
-static int rfm_cnt;
-static void *rfm_ptr[8];
+// pointer to the kmalloc'd area, rounded up to a page boundary
+unsigned int kmalloc_area[MAX_AREAS];
+
+// Memory area tags (OM1, OM2, etc)
+char mtag[MAX_AREAS][MBUF_NAME_LEN + 1];
+
+// Memory usage counters
+unsigned int usage_cnt[MAX_AREAS];
+
+// Memory area sizes
+unsigned int kmalloc_area_size[MAX_AREAS];
+
 
 /* character device open method */
 static int mbuf_open(struct inode *inode, struct file *filp)
@@ -44,14 +65,41 @@ static int mbuf_open(struct inode *inode, struct file *filp)
         return 0;
 }
 
+
+static release_area(char *name, struct file *file) {
+	int i;
+
+	// See if allocated
+	for (i = 0; i < MAX_AREAS; i++) {
+		if (0 == strcmp (mtag[i], name)) {
+		unsigned int s = kmalloc_area_size[i];
+		// Found the area
+		usage_cnt[i]--;
+		if (usage_cnt[i] <= 0 ){
+				mtag[i][0] = 0;
+				kmalloc_area_size[i] = 0;
+				usage_cnt[i] = 0;
+				file->private_data = 0;
+				kfree(kmalloc_area[i]);	
+				kmalloc_area[i] = 0;
+			}
+			return s;
+		}
+	}
+        return -EINVAL;
+}
+
 /* character device last close method */
 static int mbuf_release(struct inode *inode, struct file *filp)
 {
+        if (filp -> private_data == 0) return 0;
+	char *name = (char *) filp -> private_data;
+	release_area(name, filp);
         return 0;
 }
 
 // helper function, mmap's the kmalloc'd area which is physically contiguous
-int mmap_kmem(struct file *filp, struct vm_area_struct *vma, int card)
+int mmap_kmem(unsigned int i, struct vm_area_struct *vma)
 {
         int ret;
         long length = vma->vm_end - vma->vm_start;
@@ -61,7 +109,7 @@ int mmap_kmem(struct file *filp, struct vm_area_struct *vma, int card)
         /* map the whole physically contiguous area in one piece */
         if ((ret = remap_pfn_range(vma,
                                    vma->vm_start,
-                                   kmalloc_area[card] >> PAGE_SHIFT,
+                                   kmalloc_area[i] >> PAGE_SHIFT,
                                    length,
                                    vma->vm_page_prot)) < 0) {
                 return ret;
@@ -71,19 +119,83 @@ int mmap_kmem(struct file *filp, struct vm_area_struct *vma, int card)
 }
 
 /* character device mmap method */
-static int mbuf_mmap(struct file *filp, struct vm_area_struct *vma)
+static int mbuf_mmap(struct file *file, struct vm_area_struct *vma)
 {
-#if 0
-	int offs  = vma->vm_pgoff >> PAGE_SHIFT;
-	if (offs < rfm_cnt) return mmap_kmem(filp, vma, offs);
-	else return -EIO;
-#endif
-	return -EIO;
+	int i;
+	char *name;
+
+        if (file -> private_data == 0) return -EINVAL;
+	name = (char *) file -> private_data;
+	// Find our memory area
+        for (i = 0; i < MAX_AREAS; i++) {
+             if (0 == strcmp (mtag[i], name)) {
+		return mmap_kmem (i, vma);
+	     }
+	}
+	return -EINVAL;
+}
+
+static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
+{
+	int i;
+	struct mbuf_request_struct req;
+        if (copy_from_user (&req, (void *) arg, sizeof (req))) return -EFAULT;
+
+        printk("mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n",
+		req.name, req.size, cmd, file);
+
+        switch(cmd){
+        case IOCTL_MBUF_ALLOCATE:
+		// See if already allocated
+		for (i = 0; i < MAX_AREAS; i++) {
+			if (0 == strcmp (mtag[i], req.name)) {
+				// Found the area
+				usage_cnt[i]++;
+                		file -> private_data = mtag [i];
+				return kmalloc_area_size[i];
+			}
+		}
+		
+		// Find first free slot
+		for (i = 0; i < MAX_AREAS; i++) {
+			if (kmalloc_area[i] == 0) break;
+		}
+		
+		// Out of slots
+		if (i >= MAX_AREAS) return -EINVAL;
+
+		kmalloc_area[i] = kmalloc (req.size, GFP_KERNEL);
+		kmalloc_area_size[i] = req.size;
+		strncpy(mtag[i], req.name, MBUF_NAME_LEN);
+		mtag[i][MBUF_NAME_LEN] = 0;
+		usage_cnt[i] = 1;
+                file -> private_data = mtag [i];
+                return req.size;
+		break;
+
+        case IOCTL_MBUF_DEALLOCATE:
+		return release_area(req.name, file);
+                break;
+
+        case IOCTL_MBUF_INFO:
+		for (i = 0; i < MAX_AREAS; i++) {
+			//if (kmalloc_area[i]) {
+        		  printk("mbuf %d: name:%.32s, size:%d, usage:%d\n",
+				 i, mtag[i], kmalloc_area_size[i], usage_cnt[i]);
+		//	}
+		}
+                return 1;
+		break;
+        default:
+                return -EINVAL;
+        }
+        return -EINVAL;
 }
 
 /* module initialization - called at module load time */
 static int __init mbuf_init(void)
 {
+	int i;
         int ret = 0;
 
         /* get the major number of the character device */
@@ -99,6 +211,12 @@ static int __init mbuf_init(void)
                 goto out_unalloc_region;
         }
 
+	// Init local data structs
+	for ( i = 0; i < MAX_AREAS; i++) {
+		kmalloc_area[i] = 0;
+		mtag[i][0] = 0;
+		usage_cnt[i] = 0;
+	}
         return ret;
         
   out_unalloc_region:
