@@ -86,6 +86,10 @@ extern unsigned int cpu_khz;
 #define SYNC_SRC_NONE		0
 #define SYNC_SRC_IRIG_B		1
 #define SYNC_SRC_1PPS		2
+#define SYNC_SRC_TDS		4
+#define TIME_ERR_IRIGB		0x10
+#define TIME_ERR_1PPS		0x20
+#define TIME_ERR_TDS		0x40
 
 #ifndef NO_DAQ
 #include "drv/gmnet.h"
@@ -390,6 +394,7 @@ void *fe_start(void *arg)
   int status;				// Typical function return value
   float onePps;				// Value of 1PPS signal, if used, for diagnostics
   int onePpsHi = 0;			// One PPS diagnostic check
+  int onePpsTime = 0;			// One PPS diagnostic check
   int dcuId;				// DAQ ID number for this process
   static int adcTime;			// Used in code cycle timing
   static int adcHoldTime;		// Stores time between code cycles
@@ -776,7 +781,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	sync21pps = 1;
 	// Send IRIG-B locked/not locked diagnostic info
 	timeDiag |= gps_receiver_unlocked;
-  	if(timeDiag)pLocalEpics->epicsOutput.timeErr = 0;
+  	if(timeDiag)pLocalEpics->epicsOutput.timeErr |= TIME_ERR_IRIGB;
 #ifndef RTAI_BUILD
   // printf("Triggered the DAC\n");
 #endif
@@ -793,7 +798,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
   // printf("Triggered the ADC\n");
 #endif
 cdsPciModules.gps = 0;
-		pLocalEpics->epicsOutput.onePps = clock16K;
+		onePpsTime = clock16K;
 
         rdtscl(adcTime);
 
@@ -838,9 +843,10 @@ cdsPciModules.gps = 0;
                     do {
                         kk ++;
 			if(*packedData == 0x110000) usleep(1);
-                    }while((*packedData == 0x110000) && (kk < 10000000));
+                    }while((*packedData == 0x110000) && (kk < 1000));
 		    if (kk == 10000000) {
                         stop_working_threads = 1;
+	  		pLocalEpics->epicsOutput.diagWord |= 0x1;
                         printf("timeout 0\n");
                     }
 
@@ -859,6 +865,7 @@ cdsPciModules.gps = 0;
 		    // If data not ready in time, abort
                     if (status == -1) {
                         stop_working_threads = 1;
+	  		pLocalEpics->epicsOutput.diagWord |= 0x1;
                         printf("timeout 0\n");
                     }
 
@@ -982,6 +989,8 @@ cdsPciModules.gps = 0;
 
 #ifdef TEST_SYSTEM
         dWord[0][0] = cycleTime;
+	dWord[0][1] = usrTime;
+	dWord[0][2] = adcHoldTime;
 #endif
 
 	// Call the front end specific software ***********************************************
@@ -1101,7 +1110,7 @@ cdsPciModules.gps = 0;
 		printf("DIAG RESET\n");
 #endif
 	  }
-	  diagWord ^= 4;
+	  pLocalEpics->epicsOutput.onePps ^= 1;
 	  pLocalEpics->epicsOutput.diagWord = diagWord;
 	  pLocalEpics->epicsOutput.timeDiag = timeDiag;
 	  // timeDiag = 0;
@@ -1140,14 +1149,14 @@ cdsPciModules.gps = 0;
 		onePps = adcData[0][31];
 		if((onePps > ONE_PPS_THRESH) && (onePpsHi == 0))  
 		{
-			pLocalEpics->epicsOutput.onePps = clock16K;
+			onePpsTime = clock16K;
 			onePpsHi = 1;
 		}
 		if(onePps < ONE_PPS_THRESH) onePpsHi = 0;  
 
 		// Check if front end continues to be in sync with 1pps
 		// If not, set sync error flag
-		if(pLocalEpics->epicsOutput.onePps > 20) diagWord |= FE_SYNC_ERR;
+		if(onePpsTime > 1) pLocalEpics->epicsOutput.timeErr |= TIME_ERR_1PPS;
 	}
 
  // Read Dio cards once per second
@@ -1271,22 +1280,6 @@ cdsPciModules.gps = 0;
 	// usleep(1);
 #endif
 
-	// Measure time to complete 1 cycle
-        rdtscl(cpuClock[1]);
-
-	// Compute max time of one cycle.
-	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
-	//if (clock16K < 2) printf("cycle %d time %d\n", clock16K, cycleTime);
-	// Hold the max cycle time over the last 1 second
-	if(cycleTime > timeHold) timeHold = cycleTime;
-	// Hold the max cycle time since last diag reset
-	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
-	adcHoldTime = (cpuClock[0] - adcTime)/CPURATE;
-	if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
-	adcTime = cpuClock[0];
-	// Calc the max time of one cycle of the user code
-	usrTime = (cpuClock[5] - cpuClock[4])/CPURATE;
-	if(usrTime > usrHoldTime) usrHoldTime = usrTime;
 
         if((subcycle == 0) && (daqCycle == 14))
         {
@@ -1378,6 +1371,23 @@ cdsPciModules.gps = 0;
 	    }
 	  }
         }
+	// Measure time to complete 1 cycle
+        rdtscl(cpuClock[1]);
+
+	// Compute max time of one cycle.
+	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
+	//if (clock16K < 2) printf("cycle %d time %d\n", clock16K, cycleTime);
+	// Hold the max cycle time over the last 1 second
+	if(cycleTime > timeHold) timeHold = cycleTime;
+	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
+	// Hold the max cycle time since last diag reset
+	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
+	adcHoldTime = (cpuClock[0] - adcTime)/CPURATE;
+	if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
+	adcTime = cpuClock[0];
+	// Calc the max time of one cycle of the user code
+	usrTime = (cpuClock[5] - cpuClock[4])/CPURATE;
+	if(usrTime > usrHoldTime) usrHoldTime = usrTime;
 
   }
 
