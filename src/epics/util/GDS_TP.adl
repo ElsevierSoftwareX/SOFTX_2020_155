@@ -1,6 +1,6 @@
 
 file {
-	name="/home/controls/rcg1.1/advLigo/src/epics/util/GDS_TP.adl"
+	name="/cvs/rcgRelease/rcg1.2/advLigo/src/epics/util/GDS_TP.adl"
 	version=030102
 }
 display {
@@ -489,7 +489,7 @@ text {
 		x=134
 		y=393
 		width=50
-		height=18
+		height=15
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_USR_TIME"
@@ -517,7 +517,7 @@ text {
 		x=134
 		y=414
 		width=50
-		height=18
+		height=15
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER_MAX"
@@ -530,10 +530,10 @@ text {
 }
 "text update" {
 	object {
-		x=74
+		x=84
 		y=414
-		width=50
-		height=18
+		width=40
+		height=15
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER"
@@ -561,7 +561,7 @@ byte {
 		x=124
 		y=414
 		width=10
-		height=18
+		height=15
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
@@ -990,7 +990,7 @@ byte {
 		x=124
 		y=373
 		width=10
-		height=18
+		height=15
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
@@ -1005,7 +1005,7 @@ byte {
 		x=134
 		y=373
 		width=50
-		height=18
+		height=15
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_WAIT"
@@ -1030,9 +1030,9 @@ text {
 }
 byte {
 	object {
-		x=134
+		x=152
 		y=439
-		width=50
+		width=32
 		height=14
 	}
 	monitor {
@@ -2386,7 +2386,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_1UTPUT_0_4"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_4"
 		clr=50
 		bclr=42
 	}
@@ -2402,7 +2402,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_1UTPUT_0_5"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_5"
 		clr=50
 		bclr=42
 	}
@@ -2418,7 +2418,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_1UTPUT_0_6"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_OUTPUT_1_6"
 		clr=50
 		bclr=42
 	}
@@ -3961,4 +3961,50 @@ byte {
 	align="horiz. centered"
 	limits {
 	}
+}
+byte {
+	object {
+		x=108
+		y=354
+		width=15
+		height=14
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
+		clr=54
+		bclr=50
+	}
+	sbit=2
+	ebit=2
+}
+"text update" {
+	object {
+		x=84
+		y=439
+		width=40
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_RESYNC_COUNT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+byte {
+	object {
+		x=135
+		y=439
+		width=16
+		height=14
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
+		clr=20
+		bclr=60
+	}
+	sbit=0
+	ebit=1
 }
