@@ -925,6 +925,7 @@ cdsPciModules.gps = 0;
                    *packedData = 0x110000;
 		   // Reset DMA Start Flag
 		   gsaAdcDma2(jj);
+            }
 
 		  // Try synching to 1PPS on ADC[0][31] if not using IRIG-B
 		  // Only try for 1 sec.
@@ -943,7 +944,7 @@ cdsPciModules.gps = 0;
 				if(sync21ppsCycles >= (CYCLE_PER_SECOND*OVERSAMPLE_TIMES))
 				{
 					syncSource = SYNC_SRC_NONE;
-					printf("NO SYNC SOURCE FOUND %d\n",sync21ppsCycles);
+					printf("NO SYNC SOURCE FOUND %d %d\n",sync21ppsCycles,adcData[0][31]);
 				} else {
 				// 1PPS found and synched to
 					printf("GPS Trigg %d %d\n",adcData[0][31],sync21pps);
@@ -952,7 +953,6 @@ cdsPciModules.gps = 0;
 				pLocalEpics->epicsOutput.timeErr = syncSource;
                         }
                 }
-            }
 	}
 
 	// After first synced ADC read, must set to code to read number samples/cycle
