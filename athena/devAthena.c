@@ -197,8 +197,9 @@ BYTE DSCUDAPICALL dscDAConvert(DSCB board, BYTE channel, DSCDACODE output_code);
   /* -5 to +5 volts; 2047 is zero  */
   DSCDACODE oval = 0;
   if (pai->oval < -2047) oval = 0;
-  else if (pai->oval > 2048) oval = 4096;
+  else if (pai->oval > 2048) oval = 4095;
   else oval = (DSCDACODE)pai->oval + 2047;
+/*  printf("dac %d; value%f %d\n", pvmeio->signal, pai->oval, oval);*/
   result = dscDAConvert(dscb, (BYTE)pvmeio->signal, (DSCDACODE)oval);
 
   return(0);
@@ -231,7 +232,6 @@ static long read_ai(pai)
        fprintf( stderr, "dscADSetSettings error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );    
        exit(2);
     }
-
   if ((result = dscADSample (dscb, &sample)) != DE_NONE)
   {
 	dscGetLastError(&errorParams);
@@ -239,7 +239,7 @@ static long read_ai(pai)
 	exit(2);
   }
  /*printf("%d\n", sample);*/
-  pai->rval = sample + 32768;
+ pai->rval = sample;
  /*printf("%d\n", sample);*/
   return 0;
 }
