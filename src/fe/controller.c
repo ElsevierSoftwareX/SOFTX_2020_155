@@ -1051,9 +1051,9 @@ cdsPciModules.gps = 0;
 #endif
 			}
 			else dac_in = 0.0;
-			if(dac_in >= 0) dac_in += 0.5;
+			if(dac_in > 0.0) dac_in += 0.5;
 			else dac_in -= 0.5;
-			dac_out = (dac_in + 0.5);
+			dac_out = dac_in;
 #else
 			dac_out = dacOut[jj][ii];
 #endif
@@ -1324,7 +1324,7 @@ cdsPciModules.gps = 0;
 
         if(clock16K == 220)
 	{
-	      // Send DAC output values at 16Hz
+	      // Send DAC output values at 16Hzfb
 	      for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	      {
 	    	for(ii=0;ii<16;ii++)
@@ -1358,7 +1358,6 @@ cdsPciModules.gps = 0;
 	    for(ii=0;ii<16;ii++)
 	    {
 		pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
-		pLocalEpics->epicsOutput.dacValue[jj][ii] = dacOutEpics[jj][ii];
 
 #ifdef ROLLING_OVERFLOWS
                 if (overflowDac[jj][ii] > 0x1000000) {
