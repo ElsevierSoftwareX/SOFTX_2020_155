@@ -241,7 +241,9 @@ double cycle_gps_event_time = 0.; // Time at which ADCs triggered
 unsigned int   cycle_gps_ns = 0;
 unsigned int   cycle_gps_event_ns = 0;
 unsigned int   gps_receiver_unlocked = 1; // Lock/unlock flag for GPS time card
+#if defined(SHMEM_DAQ)
 struct rmIpcStr *daqPtr;
+#endif
 
 double getGpsTime(unsigned int *);
 #include "./feSelectCode.c"
@@ -844,7 +846,8 @@ cdsPciModules.gps = 0;
                         kk ++;
 			if(*packedData == 0x110000) usleep(1);
                     }while((*packedData == 0x110000) && (kk < 1000));
-		    if (kk == 10000000) {
+		    // If data not ready in time, abort
+		    if (kk == 1000) {
                         stop_working_threads = 1;
 	  		pLocalEpics->epicsOutput.diagWord |= 0x1;
                         printf("timeout 0\n");
@@ -862,12 +865,6 @@ cdsPciModules.gps = 0;
 				pLocalEpics->epicsOutput.diags[1] ++;
 			}
 		    }
-		    // If data not ready in time, abort
-                    if (status == -1) {
-                        stop_working_threads = 1;
-	  		pLocalEpics->epicsOutput.diagWord |= 0x1;
-                        printf("timeout 0\n");
-                    }
 
                     // Read adc data into local variables
                     packedData = (int *)cdsPciModules.pci_adc[jj];
@@ -1287,7 +1284,8 @@ cdsPciModules.gps = 0;
 	  // Create FB status word for return to EPICS
 #ifdef USE_GM
   	  pLocalEpics->epicsOutput.diags[2] = (fbStat[1] & 3) * 4 + (fbStat[0] & 3);
-#else
+#endif
+#if defined(SHMEM_DAQ)
 	  // There is no frame builder to front-end feedback at the moment when
 	  // not using GM (using shmem), perhaps it needs to be added
 	  mxStat = 0;
