@@ -1,4 +1,4 @@
-/* CVS VERSION: $Id: inlineMath.h,v 1.3 2009/06/29 22:18:31 aivanov Exp $ */
+/* CVS VERSION: $Id: inlineMath.h,v 1.4 2009/08/18 16:25:21 aivanov Exp $ */
 
 #define __lrint_code \
   long int __lrintres;                                                        \
@@ -51,4 +51,7 @@ inline double lmullog210 (double __x) { register double __result; __asm __volati
 
 /* Fast Pentium FPU log10(x) command */
 inline double llog10 (double __x) { register double __result; __asm __volatile__ ("fldlg2\n\t fxch %%st(1)\n\t fyl2x": "=t" (__result) : "0" (__x)); return __result; }
+
+/* Fast Pentium absolute value */
+inline double lfabs (double __x) { register double __result; __asm __volatile__ ("fabs" : "=t" (__result) : "0" (__x)); return __result; }
 
