@@ -25,7 +25,7 @@
 
 int main (void)
 {
-  int fd;
+  int fd, i;
   unsigned int *vadr;
   unsigned int *kadr;
 
@@ -47,10 +47,16 @@ int main (void)
           exit (-1);
   }
 
-  ioctl (fd, IOCTL_MBUF_INFO, &req);
-  unsigned char *a = (unsigned char *)vadr + 0x12200cc;
-  float f = ((float *)a)[0];
-  printf("%f\n", f);
+#if 1
+  //ioctl (fd, IOCTL_MBUF_INFO, &req);
+  //unsigned char *a = (unsigned char *)vadr + 0x12200cc;
+  //float f = ((float *)a)[0];
+  //printf("%f\n", f);
+
+  for (i = 0; i < len; i++)
+	  *((unsigned char *)vadr  + i) = i;
+#endif
+
   //printf("0x%x 0x%x\n", vadr[0x10], vadr[0x11]);
   //vadr[0x11] = 0xdeadbeef;
   //printf("0x%x 0x%x\n", vadr[0x10], vadr[0x11]);
@@ -85,4 +91,3 @@ int main (void)
   close(fd);
   return(0);
 }
-
