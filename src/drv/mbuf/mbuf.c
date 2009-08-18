@@ -16,12 +16,15 @@
 #include <linux/miscdevice.h>
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
+#include <linux/vmalloc.h>
 
 #ifdef MODVERSIONS
 #  include <linux/modversions.h>
 #endif
 #include <asm/io.h>
 #include "mbuf.h"
+
+#include "kvmem.c"
 
 /* character device structures */
 static dev_t mbuf_dev;
@@ -47,7 +50,7 @@ static struct file_operations mbuf_fops = {
 #define MAX_AREAS 16
 
 // pointer to the kmalloc'd area, rounded up to a page boundary
-unsigned int kmalloc_area[MAX_AREAS];
+void *kmalloc_area[MAX_AREAS];
 
 // Memory area tags (OM1, OM2, etc)
 char mtag[MAX_AREAS][MBUF_NAME_LEN + 1];
@@ -76,11 +79,11 @@ int mbuf_release_area(char *name, struct file *file) {
 		usage_cnt[i]--;
 		if (usage_cnt[i] <= 0 ){
 				mtag[i][0] = 0;
-				kmalloc_area_size[i] = 0;
 				usage_cnt[i] = 0;
 				if (file) file->private_data = 0;
-				kfree((void *)(kmalloc_area[i]));
+				rvfree(kmalloc_area[i], kmalloc_area_size[i]);
 				kmalloc_area[i] = 0;
+				kmalloc_area_size[i] = 0;
 			}
 			return 0;
 		}
@@ -112,7 +115,18 @@ int mbuf_allocate_area(char *name, int size, struct file *file) {
 	// Out of slots
 	if (i >= MAX_AREAS) return -1;
 
-	kmalloc_area[i] = kmalloc (size, GFP_KERNEL);
+	int s = size;
+	kmalloc_area[i] = 0;
+	kmalloc_area[i] = rvmalloc (size); //rkmalloc (&s, GFP_KERNEL);
+	printk("rvmalloc() returned %p\n", kmalloc_area[i]);
+	//printk("rkmalloc() returned %p %d\n", kmalloc_area[i], s);
+	//rkfree(kmalloc_area[i], s);
+	//kmalloc_area[i] = 0;
+	if (kmalloc_area[i] == 0) {
+		printk("malloc() failed\n");
+	       	return -1;
+	}
+
 	kmalloc_area_size[i] = size;
 	strncpy(mtag[i], name, MBUF_NAME_LEN);
 	mtag[i][MBUF_NAME_LEN] = 0;
@@ -126,10 +140,12 @@ EXPORT_SYMBOL(mbuf_allocate_area);
 /* character device last close method */
 static int mbuf_release(struct inode *inode, struct file *filp)
 {
+#if 0
 	char *name;
         if (filp -> private_data == 0) return 0;
 	name = (char *) filp -> private_data;
 	mbuf_release_area(name, filp);
+#endif
         return 0;
 }
 
@@ -144,7 +160,7 @@ int mmap_kmem(unsigned int i, struct vm_area_struct *vma)
         /* map the whole physically contiguous area in one piece */
         if ((ret = remap_pfn_range(vma,
                                    vma->vm_start,
-                                   kmalloc_area[i] >> PAGE_SHIFT,
+                                   ((unsigned int )(kmalloc_area[i])) >> PAGE_SHIFT,
                                    length,
                                    vma->vm_page_prot)) < 0) {
                 return ret;
@@ -256,3 +272,4 @@ module_exit(mbuf_exit);
 MODULE_DESCRIPTION("Kernel memory buffer driver");
 MODULE_AUTHOR("Alex Ivanov aivanov@ligo.caltech.edu");
 MODULE_LICENSE("Dual BSD/GPL");
+
