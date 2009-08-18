@@ -140,12 +140,10 @@ EXPORT_SYMBOL(mbuf_allocate_area);
 /* character device last close method */
 static int mbuf_release(struct inode *inode, struct file *filp)
 {
-#if 0
 	char *name;
         if (filp -> private_data == 0) return 0;
 	name = (char *) filp -> private_data;
 	mbuf_release_area(name, filp);
-#endif
         return 0;
 }
 
@@ -157,6 +155,9 @@ int mmap_kmem(unsigned int i, struct vm_area_struct *vma)
 
 	printk("mbuf mmap() length is 0x%lx\n", length);
 
+	return rvmmap(kmalloc_area[i], length, vma);
+
+#if 0
         /* map the whole physically contiguous area in one piece */
         if ((ret = remap_pfn_range(vma,
                                    vma->vm_start,
@@ -167,6 +168,7 @@ int mmap_kmem(unsigned int i, struct vm_area_struct *vma)
         }
         
         return 0;
+#endif
 }
 
 /* character device mmap method */

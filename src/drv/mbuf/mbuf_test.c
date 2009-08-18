@@ -56,6 +56,7 @@ int main (void)
   for (i = 0; i < len; i++)
 	  *((unsigned char *)vadr  + i) = i;
 #endif
+   sleep(100);
 
   //printf("0x%x 0x%x\n", vadr[0x10], vadr[0x11]);
   //vadr[0x11] = 0xdeadbeef;
