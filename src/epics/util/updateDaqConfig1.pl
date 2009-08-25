@@ -164,51 +164,6 @@ foreach $item (sort { $a <=> $b } keys %$daq) {
 
 exit (0);
 
-my $section = undef; # The whole section
-my $chnname = undef; # Current section channel name
-my $pf = 1;	     # Print flag
-
-open(IN,"<" . $daq_file) || die "Couldn't open $daq_file for reading";
-while (<IN>) {
-    my $l = $_;
-    chomp;
-    #s/#.*//;	# no comments
-    s/^\s+//;
-    s/\s+$//;
-    #next unless length;
-    my ($var, $value) = split(/\s*=\s*/, $_, 2); 
-    if ($var =~ /^#?\[/) {
-	# end of section
-	if ($chnname ne undef) {
-	  print_section($section, $pf);
-	  $section = undef;
-	  $pf = 1;
-	}
-	$chnname = $var;
-	$chnname =~ tr/\[\]#//d;
-	#print $chnname;
-    }
-    if ($chnname eq undef) {
-	# Not in section, just print
-	print $l;
-    } else {
-     if ($var eq "chnnum" || $var eq "#chnnum") {
-#	print "$chnname $value ", $old->{$value}, " ", $new->{$old->{$value}}, "\n";
-	my $newval = $new->{$old->{$value}};
-	if ($newval ne undef) {
-	  $l =~ s/$value/$newval/g;
-	} else {
-	  $pf = 0;
-	}
-     }
-     $section .= $l;
-    }
-}
-#print_section($section, $pf);
-
-close(IN);
-exit 0;
-
 # Read testpoint config file and map names and numbers
 sub readf {
   # $ignore -- ignore comments 
