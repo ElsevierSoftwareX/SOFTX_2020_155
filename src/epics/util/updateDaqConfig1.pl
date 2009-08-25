@@ -39,55 +39,28 @@ if ($daq_file eq undef || $old_daq_file eq undef) {
 #exit 0;
 #}
 #close(IN);
-my $daq = readf($daq_file, 0, 1);
-my $daq_old = readf($old_daq_file, 0, 1);
-#print %$daq;
 
-sub print_r {
-  my($daq, $all ) = @_;
-  if ($all) {
-     foreach $item (sort keys %$daq) {
-	  my $name = $daq->{$item};
-	  printf "%s -> %s\n", $item, $name;
-     }
-  } else {
-     foreach $item (sort { $a <=> $b } keys %$daq) {
-	# Numeric keys are channel numbers to name
-	if ($item =~ /^(\d+\.?\d*|\.\d+)$/) {
-	  my $name = $daq->{$item};
-	  printf "%s -> %s\n", $item, $name;
-	  foreach $field (keys %$daq) {
-		  if ($field =~ /^$name/) {
-			  	printf "\t%s -> %s\n", $field, $daq->{$field};
-	          }
-	  }
-        }
-      }
-  }
-}
+# Read the old DAQ file and store all fields for all sections
+# Also need to input the new file and store all sections marked commented out.
 
+my $daq = readf($daq_file, 0, 1, 1);
+my $daq_old = readf($old_daq_file, 0, 1, 0);
+#print_r($daq_old);
 
 # Read the test point config files in
 # Create numbers -> names map
 my $old = readf($old_tp_file, 0, 0);
 #print %$old;
+
 # Create names to numbers map
 my $new = readf($new_tp_file, 1, 0);
-#print %$new;
 
+#print %$new;
 #print_r $daq;
 
 
-my $section = undef; # The whole section
-my $chnname = undef; # Current section channel name
-my $pf = 1;	     # Print flag
 
-
-# Read the old DAQ file and store all fields for all sections
-# Need to write a function that inputs an .ini file and stores everything
-# for every section.
-# Also need to input the new file and store all sections marked commented out.
-# Next step: go through the list of uncommented sections in the old
+# Go through the list of uncommented sections in the old
 # DAQ ini file and try finding each section in the new DAQ ini file.
 # Print a message to the user if such a section is found.
 # If such section is found, need to mark it uncommented and then patch in
@@ -95,9 +68,105 @@ my $pf = 1;	     # Print flag
 # Check that no old "datarate" field is greater then the new "datarate"
 # in "default" section and if it is greater use the new datarate instead
 # and print a message to the user.
-# At the end check how many active channels are there in the new DAQ ini file
+
+my $myrate = $daq->{"default:datarate"};
+print STDERR "New default DAQ rate is $myrate\n";
+
+foreach $item (sort { $a <=> $b } keys %$daq_old) {
+	# Numeric keys are channel numbers to name
+	if ($item =~ /^(\d+\.?\d*|\.\d+)$/) {
+	  my $name = $daq_old->{$item};
+ 	  if ($name eq "default") { next; }
+	  if ($daq_old->{$name . ":commented_out"} == 0) { # Uncommented only
+	    #printf "%s -> %s\n", $item, $name;
+	    #foreach $field (keys %$daq_old) {
+		  #if ($field =~ /^$name/) {
+		#	  	printf "\t%s -> %s\n", $field, $daq_old->{$field};
+	          #}
+	    #}
+	    # TRy finding this section in the new DAQ init file
+	    if (length $daq->{$name . ":acquire"}) {
+		# Found the old channel name in the DAQ ini file
+		$daq->{$name . ":commented_out"} = 0;	# Uncomment this chan
+		# PAtch in all the fields excluding the channel number
+		# The channel number will be the new one
+	        foreach $field (keys %$daq_old) {
+		  if ($field =~ /^$name/) {
+		    # Skip chnnum
+		    if ($field eq "$name:chnnum") { next; }
+		    $daq->{$field} = $daq_old->{$field};
+		    #printf STDERR "%s -> %s\n", $field, $daq->{$field};
+		    # Make sure the old datarate is not greater
+		    # than the new default datarate (new maximum)
+		    if ($field eq "$name:datarate") {
+			if ($myrate < $daq_old->{$field}) {
+			   printf STDERR "Warning: adjusting $name darate to $myrate; it was %d before\n", $daq_old->{$field};
+			   $daq->{$field} = $myrate;
+			}
+		    }
+	          }
+	        }
+	    }
+	  }
+        }
+}
+
+# Check how many active channels are there in the new DAQ ini file
 # and uncomment the first two OUT_DAQ channels in there is none printing a
 # message to the user.
+
+my $n_active_chans = 0;
+
+foreach $item (sort { $a <=> $b } keys %$daq) {
+	# Numeric keys are channel numbers to name
+	if ($item =~ /^(\d+\.?\d*|\.\d+)$/) {
+	  my $name = $daq->{$item};
+ 	  if ($name eq "default") { next; }
+	  if ($daq->{$name . ":commented_out"} == 0) { # Uncommented only
+		$n_active_chans++;
+	  }
+        }
+}
+
+print STDERR "There are $n_active_chans active channels in the new DAQ ini file\n";
+
+# TODO: uncomment one or two _OUT channels to make no less than 2 active chans
+
+# Print out the new ini file
+print "[default]\n";
+# Print default section first
+foreach $field (keys %$daq) {
+	  if ($field =~ /^default/) {
+	   	my ($fv) = $field =~ m/default:([^:]+)/g;
+	  	printf "%s=%s\n", $fv, $daq->{$field};
+          }
+}
+print "\n";
+
+# Print all the rest of sections later
+foreach $item (sort { $a <=> $b } keys %$daq) {
+	# Numeric keys are channel numbers to name
+	if ($item =~ /^(\d+\.?\d*|\.\d+)$/) {
+	  if ($item == 0) { next; } # Skip default section
+	  my $name = $daq->{$item};
+	  my $cmnt = $daq->{$name . ":commented_out"};
+	  if ($cmnt) { $cmnt = "#"; } else { $cmnt = ""; };
+	  printf "%s[%s]\n", $cmnt, $name;
+	  foreach $field (keys %$daq) {
+	    if ($field =~ /^$name/) {
+	   	my ($fv) = $field =~ m/$name:([^:]+)/g;
+		if ($fv eq "commented_out") { next; };
+	  	printf "%s%s=%s\n", $cmnt, $fv, $daq->{$field};
+	    }
+          }
+	}
+}
+
+exit (0);
+
+my $section = undef; # The whole section
+my $chnname = undef; # Current section channel name
+my $pf = 1;	     # Print flag
 
 open(IN,"<" . $daq_file) || die "Couldn't open $daq_file for reading";
 while (<IN>) {
@@ -143,7 +212,7 @@ exit 0;
 # Read testpoint config file and map names and numbers
 sub readf {
   # $ignore -- ignore comments 
-  my($fname, $dir, $ignore) = @_;
+  my($fname, $dir, $ignore, $all_commented_out) = @_;
   my $tpnames = {};
 
   open(IN,"<" . $fname) || die "Couldn't open $fname for reading";
@@ -175,12 +244,11 @@ sub readf {
 	} else { 
     	  $tpnames->{$value} = $chnname;
 	}
-	if ($commented_out) {
+	if ($commented_out || $all_commented_out) {
 	  $tpnames->{$chnname . ":commented_out"} = 1;
 	}
-    } else {
-	$tpnames->{$chnname . ":" . $var} = $value;
     }
+    $tpnames->{$chnname . ":" . $var} = $value;
     }
   }
   close(IN);
@@ -199,3 +267,28 @@ sub print_section() {
     }
   }
 }
+
+# Recursive print 
+sub print_r {
+  my($daq, $all ) = @_;
+  if ($all) {
+     foreach $item (sort keys %$daq) {
+	  my $name = $daq->{$item};
+	  printf "%s -> %s\n", $item, $name;
+     }
+  } else {
+     foreach $item (sort { $a <=> $b } keys %$daq) {
+	# Numeric keys are channel numbers to name
+	if ($item =~ /^(\d+\.?\d*|\.\d+)$/) {
+	  my $name = $daq->{$item};
+	  printf "%s -> %s\n", $item, $name;
+	  foreach $field (keys %$daq) {
+		  if ($field =~ /^$name/) {
+			  	printf "\t%s -> %s\n", $field, $daq->{$field};
+	          }
+	  }
+        }
+      }
+  }
+}
+
