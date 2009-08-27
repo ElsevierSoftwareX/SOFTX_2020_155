@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.41 2009/07/29 20:31:45 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.42 2009/08/27 15:19:16 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -143,6 +143,7 @@ static int excSlot;		/* 0-sysRate, slot to read exc data	*/
 static int daqWaitCycle;	/* If 0, write to FB (256Hz)		*/
 static int daqWriteTime;	/* Num daq cycles between writes.	*/
 static int daqWriteCycle;	/* Cycle count to xmit to FB.		*/
+static int daqWriteCycleSend;	/* Cycle count to xmit to FB.		*/
 float *pFloat = 0;		/* Temp ptr to write float data.	*/
 short *pShort = 0;		/* Temp ptr to write short data.	*/
 char *pData;			/* Ptr to start of data set in swing	*/
@@ -572,10 +573,20 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
   /* Write DAQ data to the Framebuilder 256 times per second */
   if(!daqWaitCycle)
   {
+#ifndef SPECIFIC_CPU
 	if(!netStatus) status = cdsDaqNetDaqSend(dcuId,daqBlockNum, daqWriteCycle, fileCrc, 
 						crcSend,crcLength,validTpNet,tpNumNet,totalSizeNet,pReadBuffer);
+#endif
+	daqWriteCycleSend = daqWriteCycle;
 	daqWriteCycle = (daqWriteCycle + 1) % 16;
   }
+#ifdef SPECIFIC_CPU
+  if(daqWaitCycle == 2)
+  {
+	if(!netStatus) status = cdsDaqNetDaqSend(dcuId,daqBlockNum, daqWriteCycleSend, fileCrc, 
+						crcSend,crcLength,validTpNet,tpNumNet,totalSizeNet,pReadBuffer);
+  }
+#endif
 #endif
 
   // Read in any selected EXC signals.
