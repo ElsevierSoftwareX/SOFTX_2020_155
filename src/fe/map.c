@@ -1039,12 +1039,27 @@ int mapPciModules(CDS_HARDWARE *pCds)
   dacdev = NULL;
   status = 0;
   pCds->gps = 0;
+  pCds->gpsType = 0;
   // Look for Symmetricom GPS board
   if ((dacdev = pci_get_device(SYMCOM_VID, SYMCOM_BC635_TID, dacdev))) {
             	printk("Symmetricom GPS card on bus %x; device %x\n",
                    	dacdev->bus->number,
 		   	PCI_SLOT(dacdev->devfn));
 		status = mapSymComGps(pCds,dacdev);
+		if (status == 0) {
+		  // GPS board initialized and mapped
+		  modCount ++;
+		}
+  }
+
+  dacdev = NULL;
+  status = 0;
+  // Look for TSYNC GPS board
+  if ((dacdev = pci_get_device(TSYNC_VID, TSYNC_TID, dacdev))) {
+            	printk("TSYNC GPS card on bus %x; device %x\n",
+                   	dacdev->bus->number,
+		   	PCI_SLOT(dacdev->devfn));
+		status = mapTsyncGps(pCds,dacdev);
 		if (status == 0) {
 		  // GPS board initialized and mapped
 		  modCount ++;
@@ -1236,6 +1251,7 @@ int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
   unsigned char *addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x40);
   printk("Remapped 0x%x\n", addr1);
   pHardware->gps = addr1;
+  pHardware->gpsType = SYMCOM_RCVR;
 
   for (i = 0; i < 10; i++) {
     pHardware->gps[0] = 1;
@@ -1245,5 +1261,54 @@ int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
   unsigned int time0 = pHardware->gps[0x30/4];
   if (time0 & (1<<24)) printk("Flywheeling, unlocked...\n");
   else printk ("Locked!\n");
+  return(0);
+}
+
+// *****************************************************************************
+// Initialize TSYNC GPS card (model BC635PCI-U)
+// *****************************************************************************
+int mapTsyncGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
+{
+  unsigned int i,ii;
+  static unsigned int pci_io_addr;
+  unsigned int days,hours,min,sec,msec,usec,nanosec,tsync;
+  TSYNC_REGISTER *myTime;
+
+  pci_enable_device(gpsdev);
+  pci_read_config_dword(gpsdev, PCI_BASE_ADDRESS_0, &pci_io_addr);
+  pci_io_addr &= 0xfffffff0;
+  printk("TSYNC PIC BASE 0 address = %x\n", pci_io_addr);
+
+  unsigned char *addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x30);
+  printk("Remapped 0x%x\n", addr1);
+  pHardware->gps = addr1;
+  pHardware->gpsType = TSYNC_RCVR;
+
+  myTime = (TSYNC_REGISTER *)addr1;
+for(ii=0;ii<2;ii++)
+{
+  i = myTime->SUPER_SEC_LOW;
+  sec = (i&0xf) + ((i>>4)&0xf) * 10;
+  min = ((i>>8)&0xf) + ((i>>12)&0xf)*10;
+  hours = ((i>>16)&0xf) + ((i>>20)&0xf)*10;
+  days = ((i>>24)&0xf) + ((i>>28)&0xf)*10;
+
+  i = myTime->SUPER_SEC_HIGH;
+  days += (i&0xf)*100;
+
+  i = myTime->SUB_SEC;
+  // nanosec = ((i & 0xffff)*5) + (i&0xfff0000);
+  nanosec = ((i & 0xfffffff)*5);
+  tsync = (i>>31) & 1;
+
+  i = myTime->BCD_SEC;
+  sec = i - 315964819;
+  i = myTime->BCD_SUB_SEC;
+  printk("date = %d days %2d:%2d:%2d\n",days,hours,min,sec);
+  usec = (i&0xf) + ((i>>4)&0xf) *10 + ((i>>8)&0xf) * 100;
+  msec = ((i>>16)&0xf) + ((i>>20)&0xf) *10 + ((i>>24)&0xf) * 100;
+  printk("bcd time = %d sec  %d milliseconds %d microseconds  %d nanosec\n",sec,msec,usec,nanosec);
+  printk("Board sync = %d\n",tsync);
+}
   return(0);
 }
