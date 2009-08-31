@@ -180,7 +180,7 @@ sub readf {
     s/\s+$//;
     if (/^#/) { $commented_out = 1; }
     if ($ignore) {
-	s/^#//; 	# ignore comment sign
+	s/^#\s*//; 	# ignore comment sign
     } else {
     	s/#.*//;	# no comments
     }
