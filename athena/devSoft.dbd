@@ -44,4 +44,5 @@ device(stringout,INST_IO,devSoStdio,"stdio")
 
 device(ai,VME_IO,devAiAthena,"ATHENA")
 device(ao,VME_IO,devAoAthena,"ATHENA")
+device(bo,VME_IO,devBoAthena,"ATHENA")
 
