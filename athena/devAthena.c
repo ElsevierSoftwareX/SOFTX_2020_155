@@ -94,6 +94,7 @@ struct {
 	NULL,
 	read_bi,
 	NULL};
+#endif
 
 struct {
 	long		number;
@@ -111,7 +112,7 @@ struct {
 	NULL,
 	write_bo,
 	NULL};
-#endif
+epicsExportAddress(dset,devBoAthena);
 
 
 static BYTE result;  /* returned error code */
@@ -144,6 +145,23 @@ static long init_record(pai)
 	fprintf( stderr, "dscInit error: %s %s\n", dscGetErrorString(errorParams.ErrCode), errorParams.errstring );
 	return 1;
     }
+
+    /* configure DIO ports all for output */
+    BYTE config_bytes[4]; 
+ 
+    /* Set all ports to output */
+    config_bytes[0] = 0x0;
+    config_bytes[1] = 0x0;
+    config_bytes[2] = 0x0;
+    config_bytes[3] = 0x0;
+ 
+    if ((result = dscDIOSetConfig(dscb, config_bytes)) != DE_NONE) 
+    { 
+        dscGetLastError(&errorParams); 
+        fprintf(stderr, "dscDIOSetConfig failed: %s (%s)\n",  
+                dscGetErrorString(result), errorParams.errstring); 
+        return 1;
+    } 
 
 #if 0
 
@@ -243,44 +261,24 @@ static long read_ai(pai)
  /*printf("%d\n", sample);*/
   return 0;
 }
-		
+
 static long write_bo(pai)
     struct boRecord	*pai;
 {
-#if 0
-  char *DevName = "/dev/pci-das08_adc00";
-  int fdADC;                   /* A/D file descriptors */
   struct vmeio *pvmeio;
 
   pvmeio = (struct vmeio *)&(pai->out.value);
-  if (pvmeio->signal >= 0 && pvmeio->signal < 4) {
+  if (pvmeio->signal >= 0 && pvmeio->signal < 24) {
 		;
   } else {
-	  fprintf(stderr, "DAS08: Invalid bit number %d in BO record\n", pvmeio->signal);
+	  fprintf(stderr, "debAthena: Invalid DIO output number %d in BO record\n", pvmeio->signal);
 	  exit(2);
   }
 
-#ifdef DAS_LOCKING
-  lockf (lock_fd, F_LOCK, 0);
-#endif
-  if (( fdADC = open(DevName, ADC_SOFT_TRIGGER)) < 0 ) {
-    printf("error opening device %s\n", DevName);
-    exit(2);
-  }
+  /* printf("D/O %d; value %d\n", pvmeio->signal, pai->rval); */
 
-  if (pai->rval & 1) val |=  1 << (pvmeio->signal);
-  else val &= ~(1 << (pvmeio->signal));
+  result = dscDIOSetBit(dscb, (BYTE)pvmeio->signal, (BYTE)pai->rval);
 
-  ioctl(fdADC, ADC_SET_DIO, val);
-
-  printf("%d\n", val);
-
-  close(fdADC);
-#ifdef DAS_LOCKING
-  lockf (lock_fd, F_ULOCK, 0);
-#endif
-
-#endif
   return(0);
 }
 

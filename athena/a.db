@@ -21,3 +21,8 @@ grecord(ao,"dac1")
         field(DTYP,"ATHENA")
         field(OUT,"#C0 S1")
 }
+grecord(bo,"bo0")
+{
+	field(DTYP,"ATHENA")
+	field(OUT,"#C0 S0")
+}
