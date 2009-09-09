@@ -123,7 +123,7 @@ extern unsigned int cpu_khz;
 	#define CYCLE_PER_SECOND	(2*32768)
 	#define CYCLE_PER_MINUTE	(2*1966080)
 	#define DAQ_CYCLE_CHANGE	(2*1540)
-	#define END_OF_DAQ_BLOCK	(2*2047)
+	#define END_OF_DAQ_BLOCK	4095
 	#define DAQ_RATE	(DAQ_16K_SAMPLE_SIZE*4)
 	#define NET_SEND_WAIT		(2*81920)
 	#define CYCLE_TIME_ALRM		15
@@ -453,6 +453,7 @@ void *fe_start(void *arg)
   double time;	
   unsigned int timeSec,usec;
   int wtmin,wtmax;			// Time window for startup on IRIG-B
+  static int dacWriteEnable = 0;
 
 
 
@@ -756,7 +757,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
    if(cdsPciModules.gpsType)
    {
 	wtmax = 7;
-	wtmin = 1;
+	wtmin = 0;
 #ifndef RTAI_BUILD
 	printf("Waiting until usec = %d to start the ADCs\n", wtmin);
 #endif
@@ -1126,8 +1127,9 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
   	   // DMA out dac values
 	   // If ADC read was late, don't write DAC ie probably missed a clock
 	   // if(missedCycle) missedCycle --;
-	   gsaDacDma2(jj,cdsPciModules.dacType[jj]);
+	   if(dacWriteEnable > 4) gsaDacDma2(jj,cdsPciModules.dacType[jj]);
 	}
+	if(dacWriteEnable < 10) dacWriteEnable ++;
 // END OF DAC WRITE ***********************************************************************************
 
 	// Send timing info to EPICS at 1Hz
