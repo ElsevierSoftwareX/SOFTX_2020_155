@@ -134,6 +134,8 @@ sub transform_block_type {
         elsif ($blockType eq "Outport") { return "OUTPUT"; }
         elsif ($blockType eq "Sum")	{ return "SUM"; }
         elsif ($blockType eq "Product") { return "MULTIPLY"; }
+        elsif ($blockType eq "Math")	{ return "MATH"; }                 # ===  MA  ===
+        elsif ($blockType eq "Fcn")	{ return "FCN"; }                  # ===  MA  ===
         elsif ($blockType eq "Ground")	{ return "GROUND"; }
         elsif ($blockType eq "Constant")	{ return "CONSTANT"; }
         elsif ($blockType eq "Saturate")	{ return "SATURATE"; }
@@ -274,6 +276,55 @@ sub node_processing {
  	if ($source_type eq "DocBlock") {
 		return 0;
 	}
+        # Process Math Function blocks  ========================================  MA  ===
+        if ($block_type eq "MATH") {                                       # ===  MA  ===
+           my $math_op = ${$node->{FIELDS}}{"Operator"};                   # ===  MA  ===
+           if ($math_op eq "square") {                                     # ===  MA  ===
+              $block_type = "M_SQR";                                       # ===  MA  ===
+           }                                                               # ===  MA  ===
+           elsif ($math_op eq "sqrt") {                                    # ===  MA  ===
+              $block_type = "M_SQT";                                       # ===  MA  ===
+           }                                                               # ===  MA  ===
+           elsif ($math_op eq "reciprocal") {                              # ===  MA  ===
+              $block_type = "M_REC";                                       # ===  MA  ===
+           }                                                               # ===  MA  ===
+           elsif ($math_op eq "mod") {                                     # ===  MA  ===
+              $block_type = "M_MOD";                                       # ===  MA  ===
+           }                                                               # ===  MA  ===
+           else {                                                          # ===  MA  ===
+              die "*** ERROR: Math operator not supported: $math_op \n";   # ===  MA  ===
+           }                                                               # ===  MA  ===
+        }                                                                  # ===  MA  ===
+        # Process User-defined Inline Function block  ==========================  MA  ===
+        if ($block_type eq "FCN") {                                        # ===  MA  ===
+           my $expr = ${$node->{FIELDS}}{"Expr"};                          # ===  MA  ===
+           if ($expr =~ /acos|asin|cosh|sinh/) {                           # ===  MA  ===
+              my $errmsg = "Inverse trig/Hyperbolic math function";        # ===  MA  ===
+              die "*** ERROR: $errmsg not suppported:\n\t   $expr \n";     # ===  MA  ===
+           }                                                               # ===  MA  ===
+           elsif ($expr =~ /tan/) {                                        # ===  MA  ===
+              my $errmsg = "Tangent math function";                        # ===  MA  ===
+              die "*** ERROR: $errmsg not suppported:\n\t   $expr \n";     # ===  MA  ===
+           }                                                               # ===  MA  ===
+           elsif ($expr =~ /ceil|floor/) {                                 # ===  MA  ===
+              my $errmsg = "Ceiling/Floor math function";                  # ===  MA  ===
+              die "*** ERROR: $errmsg not suppported:\n\t   $expr \n";     # ===  MA  ===
+           }                                                               # ===  MA  ===
+           elsif ($expr =~ /hypot|pow|rem|sgn/) {                          # ===  MA  ===
+              my $errmsg = "Hypotenuse/Power/Remainder/Signum";            # ===  MA  ===
+              $errmsg .= " math function";                                 # ===  MA  ===
+              die "*** ERROR: $errmsg not suppported:\n\t   $expr \n";     # ===  MA  ===
+           }                                                               # ===  MA  ===
+           elsif ($expr =~ /exp|ln|log\s*\(/) {                            # ===  MA  ===
+              my $errmsg = "Exponent/Natural log math function";           # ===  MA  ===
+              die "*** ERROR: $errmsg not suppported:\n\t   $expr \n";     # ===  MA  ===
+           }                                                               # ===  MA  ===
+           elsif ($expr =~ /[^f]{1}abs/) {                                 # ===  MA  ===
+              my $errmsg = "Integer abs math function";                    # ===  MA  ===
+              die "*** ERROR: $errmsg not suppported:\n\t   $expr \n";     # ===  MA  ===
+           }                                                               # ===  MA  ===
+           $::functionExpr = $expr;                                        # ===  MA  ===
+        }                                                                  # ===  MA  ===
 
 	$::partOutputs[$::partCnt] = ${$node->{FIELDS}}{Outputs};
 
@@ -311,6 +362,9 @@ sub node_processing {
         	$::cdsPart[$::partCnt] = 1;
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name;
 		#print "CDS part $block_name type $source_block\n";
+        } elsif ($block_type eq "FCN") {                                   # ===  MA  ===
+        	$::cdsPart[$::partCnt] = 1;                                # ===  MA  ===
+		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name; #= MA =
 	} else {
 		# Not a CDS part
 		$::partType[$::partCnt] = $block_type;
@@ -338,6 +392,9 @@ sub node_processing {
 	}
 	if ($::cdsPart[$::partCnt]) {
 		my $part_name = transform_part_name(${$node->{FIELDS}}{"SourceBlock"});
+                if ($block_type eq "FCN") {                                # ===  MA  ===
+                   $part_name = "Fcn";                                     # ===  MA  ===
+                }                                                          # ===  MA  ===
         	require "lib/$part_name.pm";
 		if ($part_name eq "Dac") {
         	  $::partType[$::partCnt] = CDS::Dac::initDac($node);
