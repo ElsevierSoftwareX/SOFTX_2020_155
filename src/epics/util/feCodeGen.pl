@@ -128,6 +128,9 @@ $firCnt = 0;
 $useWd = 0;
 $gainCnt = 0;
 $busPort = -1;
+$trigCnt = 0;                                                              # ===  MA  ===
+$trigOut = 0;                                                              # ===  MA  ===
+$convDeg2Rad = 0;                                                          # ===  MA  ===
 $oscUsed = 0;
 $useFIRs = 0;
 # ***  DEBUG  ***
@@ -1642,6 +1645,7 @@ if ($remoteIPChosts) {
 sub printVariables {
 for($ii=0;$ii<$partCnt;$ii++)
 {
+#       print "DBG: cdsPart = $cdsPart[$ii]   partType = $partType[$ii]\n";          # DBG
 	if ($cdsPart[$ii]) {
 	  ("CDS::" . $partType[$ii] . "::printFrontEndVars") -> ($ii);
 	}
@@ -1671,6 +1675,22 @@ for($ii=0;$ii<$partCnt;$ii++)
 		$port = $partInCnt[$ii];
 		print OUT "double \L$xpartName[$ii];\n";
 	}
+	if($partType[$ii] eq "M_SQR") {                                    # ===  MA  ===
+		$port = $partInCnt[$ii];                                   # ===  MA  ===
+		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
+	}                                                                  # ===  MA  ===
+	if($partType[$ii] eq "M_SQT") {                                    # ===  MA  ===
+		$port = $partInCnt[$ii];                                   # ===  MA  ===
+		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
+	}                                                                  # ===  MA  ===
+	if($partType[$ii] eq "M_REC") {                                    # ===  MA  ===
+		$port = $partInCnt[$ii];                                   # ===  MA  ===
+		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
+	}                                                                  # ===  MA  ===
+	if($partType[$ii] eq "M_MOD") {                                    # ===  MA  ===
+		$port = $partInCnt[$ii];                                   # ===  MA  ===
+		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
+	}                                                                  # ===  MA  ===
 	if($partType[$ii] eq "DELAY") {
 		print OUT "static double \L$xpartName[$ii];\n";
 	}
@@ -2046,6 +2066,63 @@ for($xx=0;$xx<$processCnt;$xx++)
 		print OUT "$calcExp";
 		print OUT "\}\n";
 	}
+        # Process Math Function blocks  ========================================  MA  ===
+	if ($partType[$mm] eq "M_SQR") {                                   # ===  MA  ===
+	   print OUT "// MATH FUNCTION - SQUARE\n";                        # ===  MA  ===
+		$calcExp = "\L$xpartName[$mm]";                            # ===  MA  ===
+		$calcExp .= " = ";                                         # ===  MA  ===
+		$calcExp .= $fromExp[0];                                   # ===  MA  ===
+		$calcExp .= " \* ";                                        # ===  MA  ===
+		$calcExp .= $fromExp[0];                                   # ===  MA  ===
+		$calcExp .= ";\n";                                         # ===  MA  ===
+		print OUT "$calcExp";                                      # ===  MA  ===
+	}                                                                  # ===  MA  ===
+	if ($partType[$mm] eq "M_SQT") {                                   # ===  MA  ===
+	   print OUT "// MATH FUNCTION - SQUARE ROOT\n";                   # ===  MA  ===
+		$calcExp = "if \(";                                        # ===  MA  ===
+		$calcExp .= "$fromExp[0] \> 0.0) \{\n";                    # ===  MA  ===
+		print OUT "$calcExp";                                      # ===  MA  ===
+		$calcExp = "\t\L$xpartName[$mm]";                          # ===  MA  ===
+		$calcExp .= " = ";                                         # ===  MA  ===
+		$calcExp .= "lsqrt\($fromExp[0]\);\n";                     # ===  MA  ===
+		print OUT "$calcExp";                                      # ===  MA  ===
+		print OUT "\}\n";                                          # ===  MA  ===
+		print OUT "else \{\n";                                     # ===  MA  ===
+		$calcExp = "\t\L$xpartName[$mm] = 0.0;\n";                 # ===  MA  ===
+		print OUT "$calcExp";                                      # ===  MA  ===
+		print OUT "\}\n";                                          # ===  MA  ===
+	}                                                                  # ===  MA  ===
+	if ($partType[$mm] eq "M_REC") {                                   # ===  MA  ===
+	   print OUT "// MATH FUNCTION - RECIPROCAL\n";                    # ===  MA  ===
+		$calcExp = "if \(";                                        # ===  MA  ===
+		$calcExp .= "$fromExp[0] \!= 0.0) \{\n";                   # ===  MA  ===
+		print OUT "$calcExp";                                      # ===  MA  ===
+		$calcExp = "\t\L$xpartName[$mm]";                          # ===  MA  ===
+		$calcExp .= " = ";                                         # ===  MA  ===
+		$calcExp .= "1.0/$fromExp[0];\n";                          # ===  MA  ===
+		print OUT "$calcExp";                                      # ===  MA  ===
+		print OUT "\}\n";                                          # ===  MA  ===
+		print OUT "else \{\n";                                     # ===  MA  ===
+		$calcExp = "\t\L$xpartName[$mm] = 0.0;\n";                 # ===  MA  ===
+		print OUT "$calcExp";                                      # ===  MA  ===
+		print OUT "\}\n";                                          # ===  MA  ===
+	}                                                                  # ===  MA  ===
+	if ($partType[$mm] eq "M_MOD") {                                   # ===  MA  ===
+	   print OUT "// MATH FUNCTION - MODULO\n";                        # ===  MA  ===
+		$calcExp = "if \(";                                        # ===  MA  ===
+		$calcExp .= "(int) $fromExp[1] \!= 0) \{\n";               # ===  MA  ===
+		print OUT "$calcExp";                                      # ===  MA  ===
+		$calcExp = "\t\L$xpartName[$mm]";                          # ===  MA  ===
+		$calcExp .= " = ";                                         # ===  MA  ===
+		$calcExp .= "(double) ((int) $fromExp[0]\%";               # ===  MA  ===
+                $calcExp .= "(int) $fromExp[1]);\n";                       # ===  MA  ===
+		print OUT "$calcExp";                                      # ===  MA  ===
+		print OUT "\}\n";                                          # ===  MA  ===
+		print OUT "else\ {\n";                                     # ===  MA  ===
+		$calcExp = "\t\L$xpartName[$mm] = 0.0;\n";                 # ===  MA  ===
+		print OUT "$calcExp";                                      # ===  MA  ===
+		print OUT "\}\n";                                          # ===  MA  ===
+	}                                                                  # ===  MA  ===
 
 	# ******** GROUND INPUT ********************************************************************
 	if(($partType[$mm] eq "GROUND") && ($partUsed[$mm] == 0))
