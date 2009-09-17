@@ -1,7 +1,7 @@
 #ifndef FM10GEN_H
 #define FM10GEN_H
 
-static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.4 2008/06/02 19:57:16 aivanov Exp $";
+static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.5 2009/09/17 18:59:01 aivanov Exp $";
 
 /*****************************************************************************/
 /*ORGANIZATION OF THE SWITCH CONTROL REGISTER*/
@@ -69,7 +69,12 @@ static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.4 2008/06/02 19:57:16 a
 #include "fmFir.h"
 #define MAX_FIR_SO_SECTIONS (FIR_TAPS/4)	/* Maximum SOS supported for FIR filters */
 #define MAX_FIR_COEFFS	(FIR_TAPS+1)
+#ifdef SERVO2K
 #define FIR_POLYPHASE_SIZE	32		/* The number of parallel polyphase filters */
+#endif
+#ifdef SERVO4K
+#define FIR_POLYPHASE_SIZE	64		/* The number of parallel polyphase filters */
+#endif
 #endif
 
 /*masks*/
