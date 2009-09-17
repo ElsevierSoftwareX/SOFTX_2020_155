@@ -417,6 +417,7 @@ state init
 %%  printf("%s pVmeCoeff is at 0x%x\n", fmc.subSys[0].name, ((int)pVmeCoeff-(int)pRfm));
 %%  printf("%s pVmeCoeff size is 0x%x\n", fmc.subSys[0].name, sizeof(*pVmeCoeff));
 %%  printf("%s pEpics is at 0x%x\n", fmc.subSys[0].name, ((int)pEpics-(int)pRfm));
+%%  printf("%s pEpics is at 0x%x\n", fmc.subSys[0].name, ((int)pRfm));
 #endif
 
 %% strcpy(fName[0], "/cvs/cds/");                                        /* MA */
