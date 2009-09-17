@@ -401,15 +401,27 @@ sub node_processing {
 		}
 		if ($part_name eq "CDO32") {
         	  $::partType[$::partCnt] = CDS::CDO32::initCDO32($node);
+                  if ($::boCnt > $::maxDioMod) {
+                     die "Too many Digital I/O modules \(max is $::maxDioMod\)\n";
+                  }
 		}
 		if ($part_name eq "Dio") {
         	  $::partType[$::partCnt] = CDS::Dio::initDio($node);
+                  if ($::boCnt > $::maxDioMod) {
+                     die "Too many Digital I/O modules \(max is $::maxDioMod\)\n";
+                  }
 		}
 		if ($part_name eq "Rio") {
         	  $::partType[$::partCnt] = CDS::Rio::initRio($node);
+                  if ($::boCnt > $::maxDioMod) {
+                     die "Too many Digital I/O modules \(max is $::maxDioMod\)\n";
+                  }
 		}
 		if ($part_name eq "Rio1") {
         	  $::partType[$::partCnt] = CDS::Rio1::initRio1($node);
+                  if ($::boCnt > $::maxDioMod) {
+                     die "Too many Digital I/O modules \(max is $::maxDioMod\)\n";
+                  }
 		}
         	$::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ($node, $::partCnt);
 	}
