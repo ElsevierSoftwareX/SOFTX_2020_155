@@ -50,7 +50,7 @@
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
 
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.42 2009/08/27 15:19:16 aivanov Exp $";
+char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.43 2009/09/17 18:55:29 aivanov Exp $";
 
 #define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
 #define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
@@ -381,10 +381,10 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     gdsPtr = (GDS_CNTRL_BLOCK *)(_epics_shm + DAQ_GDS_BLOCK_ADD);
     printf("gdsCntrl block is at 0x%lx\n",(long)gdsPtr);
     // Clear out the GDS TP selections.
-    if(sysRate == DAQ_2K_SAMPLE_SIZE) tpx = 3;
+    if(sysRate < DAQ_16K_SAMPLE_SIZE) tpx = 3;
     else tpx = 2;
     for(ii=0;ii<24;ii++) gdsPtr->tp[tpx][0][ii] = 0;
-    if(sysRate == DAQ_2K_SAMPLE_SIZE) tpx = 1;
+    if(sysRate < DAQ_16K_SAMPLE_SIZE) tpx = 1;
     else tpx = 0;
     for(ii=0;ii<8;ii++) gdsPtr->tp[tpx][0][ii] = 0;
     // Following can be uncommented for testing.
@@ -393,7 +393,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     // gdsPtr->tp[0][0][0] = 5000;
 
     // Set pointer to EXC data in shmem.
-    if(sysRate == DAQ_2K_SAMPLE_SIZE)
+    if(sysRate < DAQ_16K_SAMPLE_SIZE)
 	{
     	exciteDataPtr = (char *)(_epics_shm + DATA_OFFSET_DCU(DCU_ID_EX_2K));
 	excDataSize = 0x204;
@@ -762,10 +762,11 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	totalSize = mnDaqSize;
 	offsetAccum = tpStart;
 	validTp = 0;
-	if(sysRate == DAQ_2K_SAMPLE_SIZE)
+	if(sysRate < DAQ_16K_SAMPLE_SIZE)
 	{
 		tpx = 3;
-		tpAdd = 32;
+		// tpAdd = 32;
+		tpAdd = sysRate / 4;
 	}
 	else 
 	{
@@ -850,7 +851,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
 	// Check list of EXC channels
 	validEx = 0;
-	if(sysRate == DAQ_2K_SAMPLE_SIZE)
+	if(sysRate < DAQ_16K_SAMPLE_SIZE)
 		tpx = 1;
 	else tpx = 0;
 
