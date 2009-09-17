@@ -26,7 +26,7 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.22 2009/05/21 12:15:33 aivanov Exp $";
+static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.23 2009/09/17 18:56:23 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -54,7 +54,7 @@ static double sixteenKAvgCoeff[9] = {1.9084759e-12,
 				     -1.99878510620232, 0.99879373895648, 1.99999994169253, 0.99999999260419};
 #endif
 
-#if defined(SERVO2K) || defined(SERVOMIXED)
+#if defined(SERVO2K) || defined(SERVOMIXED) || defined(SERVO4K)
 static double twoKAvgCoeff[9] = {7.705446e-9,
 				 -1.97673337437048, 0.97695747524900,  2.00000006227141,  1.00000000659235,
 				 -1.98984125831661,  0.99039139954634,  1.99999993772859,  0.99999999340765};
@@ -65,6 +65,8 @@ static double twoKAvgCoeff[9] = {7.705446e-9,
 #elif defined(SERVO32K) || defined(SERVO64K) || defined(SERVO128K) || defined(SERVO256K)
 #define avgCoeff sixteenKAvgCoeff
 #elif defined(SERVO2K)
+#define avgCoeff twoKAvgCoeff
+#elif defined(SERVO4K)
 #define avgCoeff twoKAvgCoeff
 #elif defined(SERVOMIXED)
 #define filterModule(a,b,c,d) filterModuleRate(a,b,c,d,16384)
@@ -211,6 +213,8 @@ static const int rate = 16384;
 static const int rate = 5;
 #elif defined(SERVO2K)
 static const int rate = 2048;
+#elif defined(SERVO4K)
+static const int rate = 4096;
 #elif defined(SERVO32K)
 static const int rate = 32768;
 #elif defined(SERVO64K)
@@ -1312,7 +1316,12 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
     int filterType = pC->coeffs[modNum].filterType[ii];
     if (filterType) {
       extern int clock16K;
+#ifdef SERVO2K
       int firNum = (clock16K / 32) % 32;
+#endif
+#ifdef SERVO4K
+      int firNum = (clock16K / 32) % 64;
+#endif
       //int firNum = clock16K % 32;
       //printf("clock16K=%d; firNum=%d\n", clock16K, firNum);
 
