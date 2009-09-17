@@ -38,6 +38,8 @@ sub printHeaderStruct {
         			my $param_speed = $spp[1];
         			if ($param_speed eq "2K") {
                 			$::rate = 480;
+        			} elsif ($param_speed eq "4K") {
+                			$::rate = 240;
         			} elsif ($param_speed eq "16K") {
                 			$::rate = 60;
         			} elsif ($param_speed eq "32K") {
