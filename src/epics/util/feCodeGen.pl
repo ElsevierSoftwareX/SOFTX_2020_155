@@ -11,6 +11,10 @@ if ($rtai) {
 	print "Generating RTAI code\n";
 }
 
+my $mdmStr = `grep "define MAX_DIO_MODULES" ../../include/drv/cdsHardware.h`;
+my @mdmNum = ($mdmStr =~ m/(\d+)/);
+$maxDioMod = pop(@mdmNum);
+
 # See if this is the latest Wind River system
 $kernel_release = `uname -r`;
 chomp $kernel_release;
@@ -59,6 +63,8 @@ if (@ARGV > 4) {
 	my $param_speed = $ARGV[4];
 	if ($param_speed eq "2K") {
 		$rate = 480;
+	} elsif ($param_speed eq "4K") {
+		$rate = 240;
 	} elsif ($param_speed eq "16K") {
 		$rate = 60;
 	} elsif ($param_speed eq "32K") {
@@ -1577,7 +1583,7 @@ if ($plantName ne $systemName) {
 }
 #$gdsXstart = ($dcuId - 5) * 1250;
 #$gdsTstart = $gdsXstart + 10000;
-if($rate == 480) {
+if($rate == 480 || $rate == 240) {
   $gdsXstart = 20001;
   $gdsTstart = 30001;
 } else {
@@ -1599,6 +1605,9 @@ print OUT "\t\#define FE_RATE\t32768\n";
 print OUT "\#endif\n";
 print OUT "\#ifdef SERVO16K\n";
 print OUT "\t\#define FE_RATE\t16382\n";
+print OUT "\#endif\n";
+print OUT "\#ifdef SERVO4K\n";
+print OUT "\t\#define FE_RATE\t4096\n";
 print OUT "\#endif\n";
 print OUT "\#ifdef SERVO2K\n";
 print OUT "\t\#define FE_RATE\t2048\n";
@@ -2236,6 +2245,9 @@ print OUTM "fm10Gen.o: fm10Gen.c\n";
 if($rate == 480) {
 	print "SERVO IS 2K\n";
 	print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO2K -c \$<\n";
+} elsif ($rate == 240) {
+	print "SERVO IS 4K\n";
+	print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO4K -c \$<\n";
 } elsif ($rate == 60) {
 	print "SERVO IS 16K\n";
 	print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO16K -c \$<\n";
@@ -2256,6 +2268,7 @@ print OUTM "CFLAGS += -I/opt/gm/include\n";
 print OUTM "CFLAGS += -I/opt/mx/include\n";
 
 if($rate == 480) { print OUTM "CFLAGS += -DSERVO2K\n"; }
+elsif($rate == 240) { print OUTM "CFLAGS += -DSERVO4K\n"; }
 elsif($rate == 60) { print OUTM "CFLAGS += -DSERVO16K\n"; }
 elsif($rate == 30) { print OUTM "CFLAGS += -DSERVO32K\n"; }
 elsif($rate == 15) { print OUTM "CFLAGS += -DSERVO64K\n"; }
@@ -2448,6 +2461,8 @@ close OUTME;
 sub get_freq {
 if($rate == 480) {
 	return 2*1024;
+} elsif ($rate == 240) {
+	return 4*1024;
 } elsif ($rate == 60) {
 	return 16*1024;
 } elsif ($rate == 30) {
