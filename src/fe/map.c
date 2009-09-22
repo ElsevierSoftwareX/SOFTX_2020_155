@@ -837,6 +837,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		dac_cnt++;
         }
 	// if found, check if it is an ADC module
+#ifndef ADC_SLAVE
 	if((dacdev->subsystem_device == ADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
 	{
 		int use_it = 0;
@@ -862,6 +863,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		}
 		adc_cnt++;
 	}
+#endif
         // if found, check if it is a Fast ADC module
     	// TODO: for the time of testing of the 18-bit board, it returned same PCI device number as the 16-bit fast GS board
 	// This number will most likely change in the future.
