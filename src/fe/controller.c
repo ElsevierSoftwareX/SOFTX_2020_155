@@ -154,6 +154,18 @@ extern unsigned int cpu_khz;
 	#define CYCLE_TIME_ALRM_LO	50
 	#define DAC_PRELOAD_CNT		2
 #endif
+#ifdef SERVO4K
+        #define CYCLE_PER_SECOND        4096
+        #define CYCLE_PER_MINUTE        2*122880
+        #define DAQ_CYCLE_CHANGE        240
+        #define END_OF_DAQ_BLOCK        255
+        #define DAQ_RATE        2*DAQ_2K_SAMPLE_SIZE
+        #define NET_SEND_WAIT           2*10240
+        #define CYCLE_TIME_ALRM         487/2
+        #define CYCLE_TIME_ALRM_HI      500/2
+        #define CYCLE_TIME_ALRM_LO      460/2
+        #define DAC_PRELOAD_CNT         8       
+#endif
 #ifdef SERVO2K
 	#define CYCLE_PER_SECOND	2048
 	#define CYCLE_PER_MINUTE	122880
@@ -399,6 +411,59 @@ unsigned int getGpsUsec() {
   }
   return 0;
 }
+//***********************************************************************
+// Get Gps card microseconds from SYMCOM IRIG-B Rcvr
+#ifdef DUOTONE_TIMING
+float duotime(int count, float meanVal, float data[])
+{
+  float x,y,sumX,sumY,sumXX,sumXY,msumX;
+  int ii;
+  float xInc;
+  float offset,slope,answer;
+  float den;
+
+  x = 0;
+  sumX = 0;
+  sumY = 0;
+  sumXX = 0;
+  sumXY= 0;
+  xInc = 1000000/CYCLE_PER_SECOND;
+
+
+  for(ii=0;ii<count;ii++)
+  {
+        y = data[ii];
+        sumX += x;
+        sumY += y;
+        sumXX += x * x;
+        sumXY += x * y;
+        x += xInc;
+
+  }
+        msumX = sumX * -1;
+        den = (count*sumXX-sumX*sumX);
+        if(den == 0.0)
+        {
+                // printf("den error\n");
+                return(-1000);
+        }
+        offset = (msumX*sumXY+sumXX*sumY)/den;
+        slope = (msumX*sumY+count*sumXY)/den;
+        if(slope == 0.0)
+        {
+                // printf("slope error\n");
+                 return(-1000);
+        }
+        meanVal -= offset;
+        answer = meanVal/slope - 19.7;
+#ifdef DUOTONE_DAC
+        answer-= 42.5;
+#endif
+        return(answer);
+
+}
+#endif
+
 
 //***********************************************************************
 // TASK: fe_start()	
@@ -453,7 +518,21 @@ void *fe_start(void *arg)
   double time;	
   unsigned int timeSec,usec;
   int wtmin,wtmax;			// Time window for startup on IRIG-B
+// ****** Share data
+  int ioClock = 0;
+  int ioMemCntr = 0;
+  int ioMemCntrDac = 0;
+  volatile IO_MEM_DATA *ioMemData;
+  ioMemData = (IO_MEM_DATA *)(_ipc_shm+ 0x4000);
+
   static int dacWriteEnable = 0;
+
+#ifdef DUOTONE_TIMING
+  static float duotone[65536];
+  float duotoneTime;
+  static float duotoneTotal = 0.0;
+  static float duotoneMean = 0.0;
+#endif
 
 
 
@@ -606,7 +685,7 @@ void *fe_start(void *arg)
 // Initialize DAQ variable/software **************************************************
 #if !defined(NO_DAQ) && !defined(IOP_TASK)
   /* Set data range limits for daqLib routine */
-#ifdef SERVO2K
+#if defined(SERVO2K) || defined(SERVO4K)
   daq.filtExMin = 20001;
   daq.filtTpMin = 30001;
 #else
@@ -696,6 +775,7 @@ void *fe_start(void *arg)
   missedCycle = 0;
 
   // Initialize the ADC 
+#ifndef ADC_SLAVE
   for(jj=0;jj<cdsPciModules.adcCount;jj++)
   {
 	  // Setup the DMA registers
@@ -715,6 +795,7 @@ void *fe_start(void *arg)
           *packedData = 0x110000;
   }
   printf("ADC setup complete \n");
+#endif
 
   // Initialize the DAC module variables
   for(jj = 0; jj < cdsPciModules.dacCount; jj++) {
@@ -751,13 +832,14 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 #endif
 #endif
 
+#ifndef ADC_SLAVE
   if (!run_on_timer) {
    // See if GPS card present
    // If IRIG-B card present, use it for startup synchronization
    if(cdsPciModules.gpsType)
    {
-	wtmax = 7;
-	wtmin = 0;
+	wtmax = 999999;
+	wtmin = 999970;
 #ifndef RTAI_BUILD
 	printf("Waiting until usec = %d to start the ADCs\n", wtmin);
 #endif
@@ -817,11 +899,26 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
     printf("*******************************\n");
     printf("* Running with RTLinux timer! *\n");
     printf("*******************************\n");
+
 #endif
   }
 
 #ifndef RTAI_BUILD
   // printf("Triggered the ADC\n");
+#endif
+#endif
+#ifdef ADC_SLAVE
+        printf("waiting to sync %d\n",ioMemData->adcCycle[0][0]);
+        rdtscl(cpuClock[0]);
+        do{
+                usleep(1);
+        }while(ioMemData->adcCycle[0][0] != 0);
+        rdtscl(cpuClock[1]);
+        cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
+        printf("Synched %d\n",cycleTime);
+	sync21pps=1;
+        // return(1);
+
 #endif
   onePpsTime = clock16K;
   if(cdsPciModules.gpsType == SYMCOM_RCVR)
@@ -832,9 +929,8 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
   if(cdsPciModules.gpsType == TSYNC_RCVR) 
   {
 	gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
-	timeSec -= 252806386;
+	timeSec += 284083219;
   }
-  printf("Done waiting %d:%d\n",timeSec,usec);
 
   rdtscl(adcTime);
 
@@ -869,6 +965,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	// **********************************************************************************************************
         for(ll=0;ll<sampleCount;ll++)
         {
+#ifndef ADC_SLAVE
                for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		{
 		    // Check ADC DMA has completed
@@ -937,6 +1034,9 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			num_outs = 4;
                     }
 #endif
+#ifdef ADC_MASTER
+		    ioMemCntr = (clock16K % 64);
+#endif
                     // Read adc data from PCI mapped memory into local variables
                     for(ii=0;ii<num_outs;ii++)
                     {
@@ -946,6 +1046,9 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			// dWord is the double representation of the ADC data
 			// This is the value used by the rest of the code calculations.
 			dWord[jj][ii] = adcData[jj][ii];
+#ifdef ADC_MASTER
+			ioMemData->adcVal[jj][ioMemCntr][ii] = adcData[jj][ii];
+#endif
 #ifdef OVERSAMPLE
 			// Downsample filter only used channels to save time
 			// This is defined in user C code
@@ -955,6 +1058,9 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 #endif
 			packedData ++;
                     }
+#ifdef ADC_MASTER
+		    ioMemData->adcCycle[jj][ioMemCntr] = clock16K;
+#endif
 
 		    // Check for ADC overflows
                     for(ii=0;ii<num_outs;ii++)
@@ -981,6 +1087,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		   // Reset DMA Start Flag
 		   gsaAdcDma2(jj);
             }
+#endif
 
 		  // Try synching to 1PPS on ADC[0][31] if not using IRIG-B
 		  // Only try for 1 sec.
@@ -1008,6 +1115,37 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 				pLocalEpics->epicsOutput.timeErr = syncSource;
                         }
                 }
+#ifdef ADC_SLAVE
+               for(jj=0;jj<cdsPciModules.adcCount;jj++)
+		{
+                        kk = 0;
+                        do{
+                                usleep(1);
+                                kk++;
+                        }while((ioMemData->adcCycle[jj][ioMemCntr] != ioClock) && (kk < 1000));
+                        if(kk >= 1000)
+                        {
+                                printf ("ADC TIMEOUT %d %d %d %d\n",jj,ioMemData->adcCycle[kk][ioMemCntr], ioMemCntr,ioClock);
+printf("got here %d %d\n",clock16K,ioClock);
+                                return(-1);
+                        }
+                        for(ii=0;ii<32;ii++)
+                        {
+                                adcData[jj][ii] = ioMemData->adcVal[jj][ioMemCntr][ii];
+                                dWord[jj][ii] = adcData[jj][ii];
+#ifdef OVERSAMPLE
+				if (dWordUsed[jj][ii]) {
+					dWord[jj][ii] = iir_filter(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
+				}
+#endif
+                                // No filter  dWord[kk][ll] = adcData[kk][ll];
+                        }
+                }
+                ioClock = (ioClock + 1) % 65536;
+                ioMemCntr = (ioMemCntr + 1) % 64;
+        rdtscl(cpuClock[0]);
+
+#endif
 	}
 
 	// After first synced ADC read, must set to code to read number samples/cycle
@@ -1132,6 +1270,32 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	if(dacWriteEnable < 10) dacWriteEnable ++;
 // END OF DAC WRITE ***********************************************************************************
 
+#ifdef DUOTONE_TIMING
+        if(clock16K == 0)
+        {
+                duotoneMean = duotoneTotal/CYCLE_PER_SECOND;
+                duotoneTotal = 0.0;
+        }
+#ifdef DUOTONE_DAC
+        duotone[clock16K] = dWord[0][0];
+        duotoneTotal += dWord[0][0];
+#else
+        duotone[clock16K] = dWord[0][31];
+        duotoneTotal += dWord[0][31];
+#endif
+        if(clock16K == 16)
+        {
+                duotoneTime = duotime(7, duotoneMean, duotone);
+                pLocalEpics->epicsOutput.diags[0] = duotoneTime;
+        }
+#endif
+
+       if(clock16K == 2)
+        {
+          timeSec ++;
+          pLocalEpics->epicsOutput.timeDiag = timeSec;
+        }
+
 	// Send timing info to EPICS at 1Hz
         if((subcycle == 0) && (daqCycle == 15))
         {
@@ -1150,14 +1314,12 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		timeHoldMax = 0;
 	  	diagWord = 0;
 #ifndef RTAI_BUILD
-		printf("DIAG RESET\n");
+		// printf("DIAG RESET\n");
 #endif
 	  }
 	  // Flip the onePPS various once/sec as a watchdog monitor.
 	  // pLocalEpics->epicsOutput.onePps ^= 1;
 	  pLocalEpics->epicsOutput.diagWord = diagWord;
-	  timeSec ++;
-	  pLocalEpics->epicsOutput.timeDiag = timeSec;
         }
 
 	/* Update User code Epics variables */
@@ -1572,6 +1734,10 @@ int main(int argc, char **argv)
 
 	// Print out all the I/O information
         printf("***************************************************************************\n");
+#ifdef ADC_SLAVE
+	cdsPciModules.adcCount = 1;
+        cdsPciModules.adcType[0] = GSC_16AI64SSA;
+#endif
 	printf("%d ADC cards found\n",cdsPciModules.adcCount);
 	for(ii=0;ii<cdsPciModules.adcCount;ii++)
         {
