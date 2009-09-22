@@ -1,0 +1,61 @@
+--- linux-2.6.23/kernel/cpu.c	2007-10-09 13:31:38.000000000 -0700
++++ linux-2.6.23-realtime/kernel/cpu.c	2009-09-11 14:46:54.000000000 -0700
+@@ -185,6 +185,7 @@
+ 	while (!idle_cpu(cpu))
+ 		yield();
+ 
++
+ 	/* This actually kills the CPU. */
+ 	__cpu_die(cpu);
+ 
+@@ -217,6 +218,8 @@
+ 	mutex_unlock(&cpu_add_remove_lock);
+ 	return err;
+ }
++EXPORT_SYMBOL(cpu_down);
++
+ #endif /*CONFIG_HOTPLUG_CPU*/
+ 
+ /* Requires cpu_add_remove_lock to be held */
+@@ -272,6 +275,7 @@
+ 	mutex_unlock(&cpu_add_remove_lock);
+ 	return err;
+ }
++EXPORT_SYMBOL(cpu_up);
+ 
+ #ifdef CONFIG_PM_SLEEP_SMP
+ static cpumask_t frozen_cpus;
+--- linux-2.6.23/arch/x86_64/kernel/process.c	2007-10-09 13:31:38.000000000 -0700
++++ linux-2.6.23-realtime/arch/x86_64/kernel/process.c	2009-09-11 16:07:05.000000000 -0700
+@@ -191,6 +191,14 @@
+ }
+ #endif /* CONFIG_HOTPLUG_CPU */
+ 
++static DEFINE_PER_CPU(void (*)(void), fe_code);
++
++void set_fe_code_idle(void (*ptr)(void), unsigned int cpu) {
++	per_cpu(fe_code, cpu) = ptr;
++}
++
++EXPORT_SYMBOL(set_fe_code_idle);
++
+ /*
+  * The idle thread. There's no useful work to be
+  * done, so just try to conserve power and have a
+@@ -212,8 +220,14 @@
+ 			idle = pm_idle;
+ 			if (!idle)
+ 				idle = default_idle;
+-			if (cpu_is_offline(smp_processor_id()))
+-				play_dead();
++			if (cpu_is_offline(smp_processor_id())) {
++				if (per_cpu(fe_code, smp_processor_id())) {
++				  // Execute front-end code
++				  (*per_cpu(fe_code, smp_processor_id()))();
++				} else {
++					play_dead();
++				}
++			}
+ 			/*
+ 			 * Idle routines should keep interrupts disabled
+ 			 * from here on, until they go to idle.

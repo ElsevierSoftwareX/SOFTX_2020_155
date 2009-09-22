@@ -1,3 +1,6 @@
+linux-2.6.23-realtime.patch registers front-end code callbacks and exposes
+cpu_up() and cpu_down() calls
+
 
 rtai-linux-2.6.23-x86_64.patch is the patch to expose _cpu_disable() call.
 Prerequisite: hal-linux-2.6.23-x86_64-1.4-03.patch from RTAI vulcano
