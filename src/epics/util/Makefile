@@ -1,5 +1,5 @@
 
-.PHONY:om2
-om2:
-	./feCodeGen.pl ../simLink/om2.mdl om2
+.PHONY:om1
+om1:
+	./feCodeGen.pl ../simLink/om1.mdl om1
 
