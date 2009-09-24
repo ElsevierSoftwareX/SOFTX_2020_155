@@ -42,6 +42,8 @@ install:
 	find $(INSTALL_MOD_PATH)/lib/modules/$(KVER) -name $(TARGET).gz -exec rm -f {} \; || true
 	install -D -m 644 $(TARGET) $(INSTALL_MOD_PATH)$(INSTDIR)/$(TARGET)
 	/sbin/depmod -a || true
+	/sbin/modprobe $(MODULENAME)
+	mknod /dev/$(MODULENAME) c `grep $(MODULENAME) /proc/devices|awk '{print $$1}'` 0
 
 uninstall:
 	/sbin/rmmod $(MODULENAME) || true
@@ -50,7 +52,7 @@ uninstall:
 	  rmdir $(INSTDIR); \
 	fi
 	/sbin/depmod -a
-
+	/bin/rm -f /dev/$(MODULENAME) || true
 
 load:
 	sudo /sbin/insmod ./$(MODULENAME).ko
