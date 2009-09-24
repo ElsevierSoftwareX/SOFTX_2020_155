@@ -62,5 +62,5 @@ test: all
 	./$(MODULENAME)_test.sh
 
 clean:
-	rm -f *.o *.ko Modules.symvers *.mod.c .*.cmd $(MODULENAME)_test
+	rm -f *.o *.ko Module.symvers *.mod.c .*.cmd $(MODULENAME)_test
 
