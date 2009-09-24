@@ -5,10 +5,17 @@ use File::Path;
 die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>] [<speed>]\n\t" . "site is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
         if (@ARGV != 2 && @ARGV != 3 && @ARGV != 4 && @ARGV != 5);
 
-# See if we are running RTAI
-$rtai = 0 == system("rtai-config --prefix");
-if ($rtai) {
-	print "Generating RTAI code\n";
+# See if we are not running RTLinux
+$no_rtl = system("/sbin/lsmod | grep rtl");
+#ifeq ($(rtl_module),)
+#CFLAGS += -DNO_RTL=1
+#endif
+
+if ($no_rtl) {
+	print "Generating CPU Shutdown Real-time code\n";
+} else {
+print $s;
+exit;
 }
 
 my $mdmStr = `grep "define MAX_DIO_MODULES" ../../include/drv/cdsHardware.h`;
@@ -2207,13 +2214,13 @@ close OUT;
 close OUTH;
 close OUTD;
 close EPICS;
-if ($rtai) {
+if ($no_rtl) {
 	system ("/bin/cp GNUmakefile  ../../fe/$skeleton");
 	system ("echo '#include \"../controller.c\"' > ../../fe/$skeleton/$skeleton" . "fe.c");
 }
 
-if ($rtai) {
-print OUTM "# Real Time Application Interface\n";
+if ($no_rtl) {
+print OUTM "# CPU Shutdown Real Time Linux\n";
 } else {
 print OUTM "# RTLinux makefile\n";
 if ($wind_river_rtlinux) {
@@ -2372,11 +2379,10 @@ print OUTM "\n";
 print OUTM "clean:\n";
 print OUTM "\trm -f \$(ALL) *.o\n";
 print OUTM "\n";
-if ($rtai) {
+if ($no_rtl) {
 
-print OUTM "EXTRA_CFLAGS += \$(CFLAGS) -DRTAI_BUILD=1\n";
+print OUTM "EXTRA_CFLAGS += \$(CFLAGS) -DNO_RTL=1\n";
 print OUTM "EXTRA_CFLAGS += -I\$(SUBDIRS)/../../include\n";
-print OUTM "EXTRA_CFLAGS += \$(shell rtai-config --module-cflags) -ffast-math\n";
 
 print OUTM "obj-m += $skeleton" . "fe.o\n";
 
