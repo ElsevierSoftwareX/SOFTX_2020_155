@@ -7,14 +7,20 @@
 # MODULENAME_test.sh	the driver test script
 #
 MODULENAME 	:= mbuf
+
+
 ### should not need to change stuff below ######################
 
 
 KDIR		:= /lib/modules/$(shell uname -r)/build
 #KDIR		:= /exports/linux-2.6.12.2/
+KVER		:= $(shell uname -r)
 PWD		:= $(shell pwd)
 
 CC		:= gcc -Wall
+
+TARGET		:= mbuf.ko
+INSTDIR		:= /lib/modules/$(KVER)/kernel/drivers/$(MODULENAME)
 
 ifeq ($(KERNELRELEASE),)
 #all:	$(MODULENAME)_test
@@ -30,6 +36,20 @@ $(MODULENAME)_test: $(MODULENAME)_test.c
 $(MODULENAME)_stat: $(MODULENAME)_stat.c
 	$(CC) -g -o $(MODULENAME)_stat $(MODULENAME)_stat.c
 
+install: 
+	#remove all old versions of the driver
+	find $(INSTALL_MOD_PATH)/lib/modules/$(KVER) -name $(TARGET) -exec rm -f {} \; || true
+	find $(INSTALL_MOD_PATH)/lib/modules/$(KVER) -name $(TARGET).gz -exec rm -f {} \; || true
+	install -D -m 644 $(TARGET) $(INSTALL_MOD_PATH)$(INSTDIR)/$(TARGET)
+	/sbin/depmod -a || true
+
+uninstall:
+	/sbin/rmmod $(MODULENAME) || true
+	if [ -e $(INSTDIR)/$(TARGET) ] ; then \
+	  rm -f $(INSTDIR)/$(TARGET) ; \
+	  rmdir $(INSTDIR); \
+	fi
+	/sbin/depmod -a
 
 
 load:
