@@ -11,16 +11,8 @@
 /* this is a test program that opens the mbuf_drv.
    It reads out values of the kmalloc() and vmalloc()
    allocated areas and checks for correctness.
-   You need a device special file to access the driver.
-   The device special file is called 'node' and searched
-   in the current directory.
-   To create it
-   - load the driver
-     'insmod mbuf.o'
-   - find the major number assigned to the driver
-     'grep mbuf /proc/devices'
-   - and create the special file (assuming major number 254)
-     'mknod node c 254 0'
+
+   Please install driver with "sudo make install" first.
 */
 
 int main (void)
