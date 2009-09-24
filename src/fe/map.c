@@ -769,6 +769,7 @@ int mapFadc(CDS_HARDWARE *pHardware,
 // Routine to find and map PCI adc/dac modules
 // *****************************************************************************
 int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev);
+int mapTsyncGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev);
 int mapPciModules(CDS_HARDWARE *pCds)
 {
   static struct pci_dev *dacdev;
