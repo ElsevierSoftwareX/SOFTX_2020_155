@@ -44,6 +44,7 @@ install:
 	/sbin/depmod -a || true
 	/sbin/modprobe $(MODULENAME)
 	mknod /dev/$(MODULENAME) c `grep $(MODULENAME) /proc/devices|awk '{print $$1}'` 0
+	chown controls /dev/$(MODULENAME) 
 
 uninstall:
 	/sbin/rmmod $(MODULENAME) || true

@@ -31,7 +31,7 @@ int main (void)
 
   int len = 64 * 1024 * 1024;
 
-  if ((fd = open ("node", O_RDWR | O_SYNC)) < 0) {
+  if ((fd = open ("/dev/mbuf", O_RDWR | O_SYNC)) < 0) {
       perror ("open");
       exit (-1);
   }
