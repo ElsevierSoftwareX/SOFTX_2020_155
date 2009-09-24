@@ -52,6 +52,8 @@ static struct file_operations mbuf_fops = {
 // pointer to the kmalloc'd area, rounded up to a page boundary
 void *kmalloc_area[MAX_AREAS];
 
+EXPORT_SYMBOL(kmalloc_area);
+
 // Memory area tags (OM1, OM2, etc)
 char mtag[MAX_AREAS][MBUF_NAME_LEN + 1];
 
