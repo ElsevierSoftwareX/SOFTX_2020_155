@@ -533,6 +533,10 @@ void *fe_start(void *arg)
 
 
 
+#ifdef NO_RTL
+  void printf(){}
+#endif
+
 // Do all of the initalization
 
   /* Init comms with EPICS processor */
@@ -1891,7 +1895,19 @@ int main(int argc, char **argv)
         pLocalEpics = (CDS_EPICS *)&((RFM_FE_COMMS *)_epics_shm)->epicsSpace;
         printf("Epics burt restore is %d\n", pLocalEpics->epicsInput.burtRestore);
 
+#ifdef NO_CPU_SHUTDOWN
+        struct task_struct *p;
+        p = kthread_create(fe_start, 0, "fe_start/%d", CPUID);
+        if (IS_ERR(p)){
+                printf("Failed to kthread_create()\n");
+                return 1;
+        }
+        kthread_bind(p, CPUID);
+        wake_up_process(p);
+#endif
 
+
+#ifndef NO_CPU_SHUTDOWN
 	// TODO: add a check to see whether there is already another
 	// front-end running on the same CPU. Return an error in that case.
 	// 
@@ -1903,22 +1919,28 @@ int main(int argc, char **argv)
 	cpu_down(CPUID);
 
 	// The code runs on the disabled CPU
+#endif
 
 	// Waiting for FE reset
         while(pLocalEpics->epicsInput.vmeReset == 0) {
                 msleep(1000);
         }
 
+#ifndef NO_CPU_SHUTDOWN
 	// Unset the code callback
         set_fe_code_idle(0, CPUID);
+#endif
 
 	// Stop the code and wait
         stop_working_threads = 1;
         msleep(1000);
 
+#ifndef NO_CPU_SHUTDOWN
 	// Bring the CPU back up
 	extern int __cpuinit cpu_up(unsigned int cpu);
         cpu_up(CPUID);
+
+#endif
         msleep(1000);
         return 0;
 #else
