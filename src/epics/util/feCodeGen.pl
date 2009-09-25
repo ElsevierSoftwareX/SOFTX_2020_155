@@ -2383,6 +2383,7 @@ if ($no_rtl) {
 
 print OUTM "EXTRA_CFLAGS += \$(CFLAGS) -DNO_RTL=1\n";
 print OUTM "EXTRA_CFLAGS += -I\$(SUBDIRS)/../../include\n";
+print OUTM "EXTRA_CFLAGS += -ffast-math -msse2\n";
 
 print OUTM "obj-m += $skeleton" . "fe.o\n";
 
