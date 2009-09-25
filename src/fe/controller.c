@@ -1709,6 +1709,7 @@ int main(int argc, char **argv)
         }
         _daq_shm = (unsigned char *)(kmalloc_area[ret]);
         printf("Allocated daq shmem; set at 0x%p\n", _daq_shm);
+ 	daqPtr = (struct rmIpcStr *) _daq_shm;
 #else
 	// See if frame builder DAQ comm area available
 	sprintf(fname, "/rtl_mem_%s_daq", SYSTEM_NAME_STRING_LOWER);
