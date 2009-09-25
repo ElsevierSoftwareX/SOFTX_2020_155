@@ -1,4 +1,4 @@
-#ifndef RTAI_BUILD
+#ifndef NO_RTL
 #include <stdio.h>
 #endif
 #include "daqmap.h"

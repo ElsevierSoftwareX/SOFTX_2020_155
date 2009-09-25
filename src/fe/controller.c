@@ -20,12 +20,12 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-#ifdef RTAI_BUILD
-#include <rtai.h>
-#include <rtai_sched.h>
-#include <rtai_shm.h>
-#include <rtai_nam2num.h>
-#include <linux/cpu.h>
+#ifdef NO_RTL
+#include <linux/version.h>
+#include <linux/init.h>
+#include <linux/module.h>
+#include <linux/kthread.h>
+#include <asm/delay.h>
 #else
 #include <rtl_time.h>
 #include <fcntl.h>
@@ -60,14 +60,14 @@ int daq_fd;			// File descriptor to share memory file
 #endif
 
 long daqBuffer;			// Address for daq dual buffers in daqLib.c
-#ifndef RTAI_BUILD
+#ifndef NO_RTL
 sem_t irqsem;			// Semaphore if in IRQ mode.
 #endif
 CDS_HARDWARE cdsPciModules;	// Structure of PCI hardware addresses
 volatile int vmeDone = 0;	// Code kill command
 volatile int stop_working_threads = 0;
 
-#ifdef RTAI_BUILD
+#ifdef NO_RTL
 #define printf printk
 #define STACK_SIZE    40000
 #define TICK_PERIOD   100000
@@ -185,11 +185,8 @@ int numFb = 0;
 int fbStat[2] = {0,0};		// Status of DAQ backend computer
 #endif
 
-#ifdef RTAI_BUILD
-RT_TASK wthread;
-RT_TASK wthread1;
-RT_TASK wthread2;
-
+#ifdef NO_RTL
+;
 #else
 rtl_pthread_t wthread;
 rtl_pthread_t wthread1;
@@ -259,7 +256,7 @@ struct rmIpcStr *daqPtr;
 
 double getGpsTime(unsigned int *);
 #include "./feSelectCode.c"
-#ifdef RTAI_BUILD
+#ifdef NO_RTL
 #include "map.c"
 #include "fb.c"
 #endif
@@ -580,7 +577,7 @@ void *fe_start(void *arg)
 
 
   // Do not proceed until EPICS has had a BURT restore *******************************
-#ifdef RTAI_BUILD
+#ifdef NO_RTL
   printf("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRestore);
   int cnt = 0;
 #else
@@ -597,9 +594,10 @@ void *fe_start(void *arg)
   printf("Waiting for EPICS BURT \n");
 #endif
   do{
-#ifdef RTAI_BUILD
-	rt_sleep(nano2count(1000000000));
-	//msleep(1000);
+#ifdef NO_RTL
+	udelay(20000);
+        udelay(20000);
+        udelay(20000);
   	printf("Waiting for EPICS BURT %d\n", cnt++);
 #else
 	usleep(1000000);
@@ -640,8 +638,8 @@ void *fe_start(void *arg)
   status = cdsDaqNetReconnect(dcuId);
   printf("Reconn status = %d %d\n",status,numFb);
   do{
-#ifdef RTAI_BUILD
-	rt_sleep(nano2count(10000000));
+#ifdef NO_RTL
+	udelay(10);
 #else
 	usleep(10000);
 #endif
@@ -814,7 +812,11 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		// DMA preload samples
 		gsaDacDma2(jj, cdsPciModules.dacType[jj]);
 		// Wait plenty of time for DMA to complete
+#ifdef NO_RTL
+		udelay(1000);
+#else
 		usleep(1000);
+#endif
 	}
 
 	// Arm DAC DMA for full data size
@@ -823,12 +825,11 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
   printf("DAC setup complete \n");
 
   
-#ifdef RTAI_BUILD
-  //msleep(1000);
-  rt_sleep(nano2count(1500000000));
+#ifdef NO_RTL
+
 #ifndef NO_CPU_DISABLE
   // Take the CPU away from Linux
-  __cpu_disable(); 
+  //__cpu_disable(); 
 #endif
 #endif
 
@@ -840,7 +841,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
    {
 	wtmax = 999999;
 	wtmin = 999970;
-#ifndef RTAI_BUILD
+#ifndef NO_RTL
 	printf("Waiting until usec = %d to start the ADCs\n", wtmin);
 #endif
 	do{
@@ -848,13 +849,13 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
      		if(cdsPciModules.gpsType == TSYNC_RCVR) gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
 	}while ((usec < wtmin) || (usec > wtmax));
 
-#ifndef RTAI_BUILD
+#ifndef NO_RTL
         printf("Running time %d us\n", usec);
 #endif
     } else {
     // IRIG-B card not found, so use CPU time to get close to 1PPS on startup
         // Pause until this second ends
-#ifdef RTAI_BUILD
+#ifdef NO_RTL
 /*
 	:TODO:
         wait_delay = nano2count(WAIT_DELAY);
@@ -890,12 +891,12 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	sync21pps = 1;
 	// Send IRIG-B locked/not locked diagnostic info
   	if(!gps_receiver_locked)pLocalEpics->epicsOutput.timeErr |= TIME_ERR_IRIGB;
-#ifndef RTAI_BUILD
+#ifndef NO_RTL
   // printf("Triggered the DAC\n");
 #endif
     }
   } else {
-#ifndef RTAI_BUILD
+#ifndef NO_RTL
     printf("*******************************\n");
     printf("* Running with RTLinux timer! *\n");
     printf("*******************************\n");
@@ -903,7 +904,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 #endif
   }
 
-#ifndef RTAI_BUILD
+#ifndef NO_RTL
   // printf("Triggered the ADC\n");
 #endif
 #endif
@@ -941,9 +942,8 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 
   	if (run_on_timer) {  // NO ADC present, so run on CPU realtime clock
 	  // Pause until next cycle begins
-#ifdef RTAI_BUILD
-	  RTIME now = rt_get_time_ns();
-	  rt_sleep_until(now + 1000000000 / CYCLE_PER_SECOND * clock16K);
+#ifdef NO_RTL
+	  udelay(1000);
 #else
     	  struct timespec next;
     	  clock_gettime(CLOCK_REALTIME, &next);
@@ -978,7 +978,13 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
                         kk ++;
 			// Need to delay if not ready as constant banging of the input register
 			// will slow down the ADC DMA.
-			if(*packedData == 0x110000) usleep(1);
+			if(*packedData == 0x110000) {
+#ifdef NO_RTL
+				udelay(1);
+#else
+				usleep(1);
+#endif
+			}
 			// Allow 1msec for data to be ready (should never take that long).
                     }while((*packedData == 0x110000) && (kk < 1000));
 
@@ -1313,7 +1319,7 @@ printf("got here %d %d\n",clock16K,ioClock);
   		pLocalEpics->epicsOutput.diags[1] = 0;
 		timeHoldMax = 0;
 	  	diagWord = 0;
-#ifndef RTAI_BUILD
+#ifndef NO_RTL
 		// printf("DIAG RESET\n");
 #endif
 	  }
@@ -1479,7 +1485,7 @@ printf("got here %d %d\n",clock16K,ioClock);
 	}
 #endif
 
-#ifdef RTAI_BUILD
+#ifdef NO_RTL
 	//rt_sleep(nano2count(2000));
 	//msleep(1);
 #else
@@ -1603,13 +1609,18 @@ printf("got here %d %d\n",clock16K,ioClock);
 }
 
 // MAIN routine: Code starting point ****************************************************************
-#ifdef RTAI_BUILD
+#ifdef NO_RTL
+
+// These externs and "16" need to go to a header file (mbuf.h)
+extern void *kmalloc_area[16];
+extern int mbuf_allocate_area(char *name, int size, struct file *file);
+
 int init_module (void)
 #else
 int main(int argc, char **argv)
 #endif
 {
-#ifndef RTAI_BUILD
+#ifndef NO_RTL
         pthread_attr_t attr;
 #endif
  	int status;
@@ -1620,17 +1631,22 @@ int main(int argc, char **argv)
 	printf("cpu clock %ld\n",cpu_khz);
 
 
-#ifdef RTAI_BUILD
-	_epics_shm = (unsigned char *)rtai_kmalloc(nam2num(SYSTEM_NAME_STRING_LOWER), 64*1024*1024);
-	if (_epics_shm == 0 ) {
-		printf("mmap failed for epics shared memory area\n");
+#ifdef NO_RTL
+
+        int ret =  mbuf_allocate_area(SYSTEM_NAME_STRING_LOWER, 64*1024*1024, 0);
+        if (ret < 0) {
+                printf("mbuf_allocate_area() failed; ret = %d\n", ret);
                 return -1;
-	}
-	_ipc_shm = (unsigned char *)rtai_kmalloc(nam2num("ipc"), 64*1024*1024);
-	if (_ipc_shm == 0 ) {
-		printf("mmap failed for IPC shared memory area\n");
+        }
+        _epics_shm = (unsigned char *)(kmalloc_area[ret]);
+        printf("Epics shmem set at 0x%p\n", _epics_shm);
+        ret =  mbuf_allocate_area("ipc", 4*1024*1024, 0);
+        if (ret < 0) {
+                printf("mbuf_allocate_area(ipc) failed; ret = %d\n", ret);
                 return -1;
-	}
+        }
+        _ipc_shm = (unsigned char *)(kmalloc_area[ret]);
+
 #else
         /*
          * Create the shared memory area.  By passing a non-zero value
@@ -1680,14 +1696,15 @@ int main(int argc, char **argv)
 // If DAQ is via shared memory (Framebuilder code running on same machine or MX networking is used)
 // attach DAQ shared memory location.
 #if defined(SHMEM_DAQ)
-#ifdef RTAI_BUILD
-	sprintf(fname, "%s_daq", SYSTEM_NAME_STRING_LOWER);
-	_daq_shm = rtai_kmalloc(nam2num(fname),  64*1024*1024);
-	if (_daq_shm == 0) {
-		printf("rtai_kmalloc(%s) failed; returned zero\n", fname);
-		return -1;
-	}
-	printf("Allocated daq shared memory 0x%x\n", _daq_shm);
+#ifdef NO_RTL
+        sprintf(fname, "%s_daq", SYSTEM_NAME_STRING_LOWER);
+        ret =  mbuf_allocate_area(fname, 64*1024*1024, 0);
+        if (ret < 0) {
+                printf("mbuf_allocate_area() failed; ret = %d\n", ret);
+                return -1;
+        }
+        _daq_shm = (unsigned char *)(kmalloc_area[ret]);
+        printf("Allocated daq shmem; set at 0x%p\n", _daq_shm);
 #else
 	// See if frame builder DAQ comm area available
 	sprintf(fname, "/rtl_mem_%s_daq", SYSTEM_NAME_STRING_LOWER);
@@ -1863,47 +1880,47 @@ int main(int argc, char **argv)
 	printf("Found %d frameBuilders on network\n",numFb);
 #endif
 
-#ifdef RTAI_BUILD
-        RTIME tick_period;
-        RTIME now;
+#ifdef NO_RTL
 
-	start_rt_timer(0);
-  	//printf("Started real time timer\n");
-	//rt_sleep(nano2count(1000000000));
-
-
-// Start the software on the user specified core **************************************** 
 #ifdef SPECIFIC_CPU
 #define CPUID SPECIFIC_CPU
-#else
+#else 
 #define CPUID 1
 #endif
 
-cpuId = CPUID;
-#if 0
-	// using the standard smp_call_function() appears to work allright also
-	// however it needs replacement of rt_sleep() calls with msleep()
-	// only problem is that msleep() are not very good time-wise
+        pLocalEpics = (CDS_EPICS *)&((RFM_FE_COMMS *)_epics_shm)->epicsSpace;
+        printf("Epics burt restore is %d\n", pLocalEpics->epicsInput.burtRestore);
 
-	//smp_call_function (void (*func) (void *info), void *info, int nonatomic,
-                        //int wait)
-        void cpu_start(void *foo) {
-		if (smp_processor_id() == CPUID) {
-			printf("I am on the right CPU, id = %d\n", CPUID);
-			fe_start(foo);
-		}
-	}
-	
-        smp_call_function(cpu_start, 0,0,0);
-#endif
 
-        int ret = rt_task_init_cpuid(&wthread, fe_start, 0, STACK_SIZE, 0, 1, 0, CPUID);
-	if (ret != 0) {
-		printf("Failed to do rt_task_init_cpuid() returned %d\n", ret);
-		return 1;
-	}
-        rt_task_resume(&wthread);
+	// TODO: add a check to see whether there is already another
+	// front-end running on the same CPU. Return an error in that case.
+	// 
+	extern void set_fe_code_idle(void (*ptr)(void), unsigned int cpu);
+        set_fe_code_idle(fe_start, CPUID);
+        msleep(100);
 
+	extern int cpu_down(unsigned int);
+	cpu_down(CPUID);
+
+	// The code runs on the disabled CPU
+
+	// Waiting for FE reset
+        while(pLocalEpics->epicsInput.vmeReset == 0) {
+                msleep(1000);
+        }
+
+	// Unset the code callback
+        set_fe_code_idle(0, CPUID);
+
+	// Stop the code and wait
+        stop_working_threads = 1;
+        msleep(1000);
+
+	// Bring the CPU back up
+	extern int __cpuinit cpu_up(unsigned int cpu);
+        cpu_up(CPUID);
+        msleep(1000);
+        return 0;
 #else
 
         rtl_pthread_attr_init(&attr);
@@ -1973,22 +1990,7 @@ cpuId = CPUID;
         return 0;
 }
 
-#ifdef RTAI_BUILD
+#ifdef NO_RTL
 void cleanup_module (void) {
-	printf("Killing work threads\n");
-	stop_working_threads = 1;
-        rt_busy_sleep(10000000);
-//        stop_rt_timer();
-        rt_busy_sleep(10000000);
-        rt_task_delete(&wthread);
-        rtai_kfree(nam2num(SYSTEM_NAME_STRING_LOWER));
-        rtai_kfree(nam2num("ipc"));
-
-
-#ifndef NO_CPU_DISABLE
-	// Reboot the cpu, brinnging it back to Linux
-	extern int my_cpu_init(unsigned int);
-	my_cpu_init(CPUID);
-#endif
 }
 #endif
