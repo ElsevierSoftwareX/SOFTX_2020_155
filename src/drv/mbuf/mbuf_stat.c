@@ -15,7 +15,7 @@ int main (void)
   unsigned int *kadr;
 
 
-  if ((fd = open ("node", O_RDWR | O_SYNC)) < 0) {
+  if ((fd = open ("/dev/mbuf", O_RDWR | O_SYNC)) < 0) {
       perror ("open");
       exit (-1);
   }
