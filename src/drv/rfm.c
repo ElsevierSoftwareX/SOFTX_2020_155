@@ -11,9 +11,8 @@
 #include <unistd.h>
 #include <signal.h>
 
-#ifdef RTAI_BUILD
-#include <rtai_shm.h>
-#include <rtai_nam2num.h>
+#ifdef NO_RTL
+#include "mbuf/mbuf.h"
 #endif
 
 
@@ -160,30 +159,50 @@ findSharedMemory(char *sys_name)
 	strcpy(sys, sys_name);
 	for(s = sys; *s; s++) *s=tolower(*s);
 
-#ifdef RTAI_BUILD
-	printf("nam2num(%s) returned %d\n", sys, nam2num(sys));
-    	addr = (unsigned char *)rtai_malloc(nam2num(sys), 64*1024*1024);
-	if (addr == NULL) {
-		printf("rtai_malloc() failed (maybe /dev/rtai_shm is missing)!\n");
-		return 0;
-    	}
-
-#else
 	sprintf(fname, "/rtl_mem_%s", sys);
 
+
+#ifdef NO_RTL
+const int ss = 64*1024*1024;
+#if 0
+       #include <sys/mman.h>
+       #include <sys/stat.h>        /* For mode constants */
+       #include <fcntl.h>           /* For O_* constants */
+       //int shm_open(const char *name, int oflag, mode_t mode);
+       if ((fd=shm_open(fname, O_RDWR | O_CREAT, 0777)) < 0) {
+                fprintf(stderr, "Couldn't shm_open `%s' read/write\n", fname);
+                return 0;
+
+       }
+       ftruncate(fd, ss);
+#endif
+
+       if ((fd = open ("/dev/mbuf", O_RDWR | O_SYNC)) < 0) {
+		fprintf(stderr, "Couldn't open /dev/mbuf read/write\n");
+                return 0;
+       }
+       struct mbuf_request_struct req;
+       req.size = ss;
+       strcpy(req.name, sys);
+       ioctl (fd, IOCTL_MBUF_ALLOCATE, &req);
+       ioctl (fd, IOCTL_MBUF_INFO, &req);
+#else
+const int ss = 64*1024*1024-5000;
         if ((fd=open(fname, O_RDWR))<0) {
 		fprintf(stderr, "Couldn't open `%s' read/write\n", fname);
                 return 0;
         }
+#endif
 
-        addr = mmap(0, 64*1024*1024-5000, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	
+        addr = mmap(0, ss, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         if (addr == MAP_FAILED) {
                 printf("return was %d\n",errno);
                 perror("mmap");
                 _exit(-1);
         }
 	printf("mmapped address is 0x%lx\n", (long)addr);
-#endif
+	memset(addr, 0, ss);
         return addr;
 }
 
