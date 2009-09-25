@@ -42,11 +42,9 @@ CFLAGS += -DOSITHREAD_USE_DEFAULT_STACK  -D_X86_  -DUNIX  -D_BSD_SOURCE -Dlinux
 CFLAGS += -D_REENTRANT -g -fPIC 
 CFLAGS += -DINLINE=inline
 
-rtai_prefix := $(shell rtai-config --prefix)
-ifneq ($(rtai_prefix),)
-CFLAGS += -DRTAI_BUILD -O2
-CFLAGS += -I/usr/realtime/include
-CFLAGS += -I/usr/src/linux/include
+rtl_module := $(shell /sbin/lsmod | grep rtl)
+ifeq ($(rtl_module),)
+CFLAGS += -DNO_RTL=1
 endif
 
 CXXFLAGS = $(CFLAGS)
