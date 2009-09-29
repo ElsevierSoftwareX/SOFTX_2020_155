@@ -7,15 +7,13 @@ die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>
 
 # See if we are not running RTLinux
 $no_rtl = system("/sbin/lsmod | grep rtl");
+
 #ifeq ($(rtl_module),)
 #CFLAGS += -DNO_RTL=1
 #endif
 
 if ($no_rtl) {
 	print "Generating CPU Shutdown Real-time code\n";
-} else {
-print $s;
-exit;
 }
 
 my $mdmStr = `grep "define MAX_DIO_MODULES" ../../include/drv/cdsHardware.h`;
