@@ -110,13 +110,20 @@ sci_create_segment(sci_binding_t binding,
                    sci_l_segment_handle_t OUT *local_segment_handle);
 
 */
+	signed32 func(void IN *arg,
+                       sci_r_segment_handle_t IN remote_segment_handle,
+                       unsigned32 IN reason,
+                       unsigned32 IN status) {
+			printk("Connect callback %d\n", reason);
+			return 0;
+	}
 	scierror_t err = 
 	sci_create_segment(NO_BINDING,
 				0,
 				1,
 				0,
 				16,
-				0,
+				func,
 				0,
 				&segment);
 	printk("DIS segment alloc status %d\n", err);
