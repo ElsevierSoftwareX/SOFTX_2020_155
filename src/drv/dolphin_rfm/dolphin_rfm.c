@@ -109,17 +109,17 @@ vkaddr_t DLL
 sci_kernel_virtual_address_of_mapping (sci_map_handle_t IN map_handle);
 
 */
-	int *addr = sci_kernel_virtual_address_of_mapping(client_map_handle);
+	double *addr = sci_kernel_virtual_address_of_mapping(client_map_handle);
 	if (addr == 0) {
 		printk ("Got zero pointer from sci_kernel_virtual_address_of_mapping\n");
 		return -1;
 	} else {
 		/* Write RFM data */
-		*addr = 123456789;
+		*addr = 123456789.123456789;
 		int i;
 		for (i = 0; i < 30; i++) {
 			msleep(1000);
-			printk ("data = %d\n", *addr);
+			printk ("data = %f\n", *addr);
 		}
 	}
 	} else {
@@ -185,7 +185,7 @@ sci_set_local_segment_available (sci_l_segment_handle_t IN local_segment_handle,
 vkaddr_t DLL
 sci_local_kernel_virtual_address (sci_l_segment_handle_t IN local_segment_handle);
 */
-	int *addr = sci_local_kernel_virtual_address(segment);
+	double *addr = sci_local_kernel_virtual_address(segment);
 	if (addr == 0) {
 		printk("DIS sci_local_kernel_virtual_address returnes 0 \n");
                 sci_remove_segment(&segment, 0);
@@ -194,9 +194,9 @@ sci_local_kernel_virtual_address (sci_l_segment_handle_t IN local_segment_handle
 		int i;
 		for (i = 0; i < 30; i++) {
 			msleep(1000);
-			printk ("data = %d\n", *addr);
+			printk ("data = %f\n", *addr);
 		}
-		*addr = 987654321;
+		*addr = 987654321.987654321;
 	}
 	}
         return 0;
