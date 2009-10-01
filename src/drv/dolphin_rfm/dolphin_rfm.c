@@ -119,7 +119,10 @@ sci_kernel_virtual_address_of_mapping (sci_map_handle_t IN map_handle);
 		int i;
 		for (i = 0; i < 30; i++) {
 			msleep(1000);
-			printk ("data = %f\n", *addr);
+			double d = *addr;
+			int i = (int)d;
+			int f = (d - i) * 1000;
+			printk ("data = %d.%d\n", i, f);
 		}
 	}
 	} else {
@@ -194,7 +197,10 @@ sci_local_kernel_virtual_address (sci_l_segment_handle_t IN local_segment_handle
 		int i;
 		for (i = 0; i < 30; i++) {
 			msleep(1000);
-			printk ("data = %f\n", *addr);
+			double d = *addr;
+			int i = (int)d;
+			int f = (d - i) * 1000;
+			printk ("data = %d.%d\n", i, f);
 		}
 		*addr = 987654321.987654321;
 	}
