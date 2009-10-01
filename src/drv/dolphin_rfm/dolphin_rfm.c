@@ -16,7 +16,7 @@
 #include <linux/miscdevice.h>
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
-#include <asm/delay.h>
+#include <linux/delay.h>
 #include <linux/vmalloc.h>
 
 #ifdef MODVERSIONS
@@ -211,7 +211,8 @@ sci_local_kernel_virtual_address (sci_l_segment_handle_t IN local_segment_handle
                 sci_remove_segment(&segment, 0);
                 return -1;
 	} else {
-		while (1) {
+		int i;
+		for (i = 0; i < 30; i++) {
 			msleep(1000);
 			printk ("data = %d\n", *addr);
 		}
