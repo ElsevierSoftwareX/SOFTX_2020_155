@@ -24,12 +24,50 @@
 #include <asm/io.h>
 #include <genif.h>
 
+static int client = 0;
+module_param (client, int, 0);
+MODULE_PARM_DESC (client, "Be a client, not server");
+
+static int target_node = 0;
+module_param (target_node, int, 0);
+MODULE_PARM_DESC (client, "Target node ID");
+
+
 sci_l_segment_handle_t segment;
 
 /* module initialization - called at module load time */
+
 static int __init drfm_init(void)
 {
 	segment = 0;
+	
+	if (client) {
+			printk ("Dolphin Client");
+
+/*
+scierror_t DLL
+sci_connect_segment(sci_binding_t binding,
+                    unsigned32 IN target_node,
+                    unsigned32 IN local_adapter_number,
+                    unsigned32 IN module_id,
+                    unsigned32 IN segment_id,
+                    unsigned32 IN flags,
+                    sci_remote_segment_cb_t IN callback_func,
+                    void IN *callback_arg,
+                    sci_r_segment_handle_t IN_OUT *remote_segment_handle);
+
+*/
+		sci_r_segment_handle_t  remote_segment_handle;
+		scierror_t err = 
+		sci_connect_segment(NO_BINDING,
+				target_node,
+				0,
+				0,
+				1,
+				0, /* FLAGS */
+				0,0, /*funs, args */
+				&remote_segment_handle);
+	} else {
 /*
 scierror_t DLL
 sci_create_segment(sci_binding_t binding,
@@ -105,7 +143,7 @@ sci_set_local_segment_available (sci_l_segment_handle_t IN local_segment_handle,
                 return -1;
         }
 
-
+	}
         return 0;
 }
 
