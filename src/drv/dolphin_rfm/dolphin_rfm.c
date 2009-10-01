@@ -111,11 +111,12 @@ sci_create_segment(sci_binding_t binding,
 
 */
 	signed32 func(void IN *arg,
-                       sci_r_segment_handle_t IN remote_segment_handle,
+                       sci_l_segment_handle_t IN local_segment_handle,
                        unsigned32 IN reason,
-                       unsigned32 IN status) {
-			printk("Connect callback %d\n", reason);
-			return 0;
+                       unsigned32 IN source_node,
+                       unsigned32 IN local_adapter_number)  {
+				printk("Connect callback %d\n", reason);
+				return 0;
 	}
 	scierror_t err = 
 	sci_create_segment(NO_BINDING,
