@@ -201,6 +201,21 @@ sci_set_local_segment_available (sci_l_segment_handle_t IN local_segment_handle,
                 return -1;
         }
 
+/*
+vkaddr_t DLL
+sci_local_kernel_virtual_address (sci_l_segment_handle_t IN local_segment_handle);
+*/
+	int *addr = sci_local_kernel_virtual_address(segment);
+	if (addr == 0) {
+		printk("DIS sci_local_kernel_virtual_address returnes 0 \n");
+                sci_remove_segment(&segment, 0);
+                return -1;
+	} else {
+		while (1) {
+			msleep(1000);
+			printk ("data = %d\n", *addr);
+		}
+	}
 	}
         return 0;
 }
