@@ -102,6 +102,21 @@ sci_map_segment(sci_r_segment_handle_t IN_OUT remote_segment_handle,
 		sci_disconnect_segment(&remote_segment_handle, 0);
 		return -1;
 	}
+
+	
+/*
+vkaddr_t DLL
+sci_kernel_virtual_address_of_mapping (sci_map_handle_t IN map_handle);
+
+*/
+	int *addr = sci_kernel_virtual_address_of_mapping(map_handle);
+	if (addr == 0) {
+		printk ("Got zero pointer from sci_kernel_virtual_address_of_mapping\n");
+		return -1;
+	} else {
+		/* Write RFM data */
+		*addr = 123456789;
+	}
 	} else {
 /*
 scierror_t DLL
