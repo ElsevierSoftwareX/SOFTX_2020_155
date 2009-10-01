@@ -16,6 +16,7 @@
 #include <linux/miscdevice.h>
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
+#include <asm/delay.h>
 #include <linux/vmalloc.h>
 
 #ifdef MODVERSIONS
@@ -86,9 +87,13 @@ sci_map_segment(sci_r_segment_handle_t IN_OUT remote_segment_handle,
                 unsigned32 IN size,
                 sci_map_handle_t IN_OUT *map_handle);
 */
+
+	/* TODO: has to wait here for the connection to happen, i.e.
+	   the callback gets called */
+	udelay(20000);
 	sci_map_handle_t map_handle;
 	err = sci_map_segment(remote_segment_handle,
-				0,
+				PHYS_MAP_ATTR_STRICT_IO,
 				0,
 				16,
 				&map_handle);
