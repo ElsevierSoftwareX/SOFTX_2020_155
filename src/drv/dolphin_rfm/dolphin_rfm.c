@@ -35,6 +35,7 @@ MODULE_PARM_DESC (target_node, "Target node ID");
 
 
 sci_l_segment_handle_t segment;
+sci_map_handle_t client_map_handle;
 sci_r_segment_handle_t  remote_segment_handle;
 
 /* module initialization - called at module load time */
@@ -91,12 +92,11 @@ sci_map_segment(sci_r_segment_handle_t IN_OUT remote_segment_handle,
 	/* TODO: has to wait here for the connection to happen, i.e.
 	   the callback gets called */
 	udelay(20000);
-	sci_map_handle_t map_handle;
 	err = sci_map_segment(remote_segment_handle,
 				PHYS_MAP_ATTR_STRICT_IO,
 				0,
 				16,
-				&map_handle);
+				&client_map_handle);
 	printk("DIS segment mapping status %d\n", err);
 	if (err) {
 		sci_disconnect_segment(&remote_segment_handle, 0);
@@ -109,7 +109,7 @@ vkaddr_t DLL
 sci_kernel_virtual_address_of_mapping (sci_map_handle_t IN map_handle);
 
 */
-	int *addr = sci_kernel_virtual_address_of_mapping(map_handle);
+	int *addr = sci_kernel_virtual_address_of_mapping(client_map_handle);
 	if (addr == 0) {
 		printk ("Got zero pointer from sci_kernel_virtual_address_of_mapping\n");
 		return -1;
@@ -168,31 +168,6 @@ sci_export_segment(sci_l_segment_handle_t local_segment_handle,
 		return -1;
 	}
 	
-#if 0
-
-Incompatible first argument error
-
-/*
-scierror_t DLL
-sci_map_segment(sci_r_segment_handle_t IN_OUT remote_segment_handle,
-                unsigned32 IN flags,
-                unsigned32 IN offset,
-                unsigned32 IN size,
-                sci_map_handle_t IN_OUT *map_handle);
-*/
-	sci_map_handle_t map_handle;
-	err = sci_map_segment(segment,
-				0,
-				0,
-				16,
-				&map_handle);
-	printk("DIS segment mapping status %d\n", err);
-	if (err) {
-		sci_remove_segment(&segment, 0);
-		return -1;
-	}
-#endif
-
 /*
 scierror_t DLL
 sci_set_local_segment_available (sci_l_segment_handle_t IN local_segment_handle,
@@ -231,8 +206,23 @@ sci_local_kernel_virtual_address (sci_l_segment_handle_t IN local_segment_handle
 static void __exit drfm_exit(void)
 {
 	if (client) {
+		sci_unmap_segment(&client_map_handle, 0);
 		sci_disconnect_segment(&remote_segment_handle, 0);
 	} else {
+/*
+scierror_t DLL
+sci_set_local_segment_unavailable (sci_l_segment_handle_t IN local_segment_handle,
+                                   unsigned32 uLocalAdapter);
+*/
+		sci_set_local_segment_unavailable(segment, 0);
+/*
+scierror_t DLL
+sci_unexport_segment(sci_l_segment_handle_t local_segment_handle,
+                     unsigned32 IN local_adapter_number,
+                     unsigned32 IN flags);
+
+*/
+		sci_unexport_segment(segment, 0, 0);
 		sci_remove_segment(&segment, 0);
 	}
 }
