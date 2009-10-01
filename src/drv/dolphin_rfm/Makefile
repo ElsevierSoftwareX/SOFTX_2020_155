@@ -18,6 +18,8 @@ KVER		:= $(shell uname -r)
 PWD		:= $(shell pwd)
 
 CC		:= gcc -Wall
+DISDIR		:= /home/controls/DIS
+EXTRA_CFLAGS	:= -DOS_IS_LINUX=1 -D_KERNEL=1 -D__KERNEL__=1 -I$(DISDIR)/src/IRM/drv/src -I$(DISDIR)/src/IRM/drv/src/LINUX -I$(DISDIR)/src/include
 
 TARGET		:= dolphin_rfm.ko
 INSTDIR		:= /lib/modules/$(KVER)/kernel/drivers/$(MODULENAME)
