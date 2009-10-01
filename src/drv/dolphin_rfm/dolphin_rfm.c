@@ -34,6 +34,7 @@ MODULE_PARM_DESC (client, "Target node ID");
 
 
 sci_l_segment_handle_t segment;
+sci_r_segment_handle_t  remote_segment_handle;
 
 /* module initialization - called at module load time */
 
@@ -57,7 +58,14 @@ sci_connect_segment(sci_binding_t binding,
                     sci_r_segment_handle_t IN_OUT *remote_segment_handle);
 
 */
-		sci_r_segment_handle_t  remote_segment_handle;
+		signed32 func(void IN *arg,
+                        sci_r_segment_handle_t IN remote_segment_handle,
+                        unsigned32 IN reason,
+                        unsigned32 IN status) {
+				printk("Connect callback %d\n", reason);
+				return 0;
+		}
+
 		scierror_t err = 
 		sci_connect_segment(NO_BINDING,
 				target_node,
@@ -65,8 +73,30 @@ sci_connect_segment(sci_binding_t binding,
 				0,
 				1,
 				0, /* FLAGS */
-				0,0, /*funs, args */
+				func, 0,
 				&remote_segment_handle);
+		printk("DIS connect segment status %d\n", err);
+		if (err) return -1;
+		
+/*
+scierror_t DLL
+sci_map_segment(sci_r_segment_handle_t IN_OUT remote_segment_handle,
+                unsigned32 IN flags,
+                unsigned32 IN offset,
+                unsigned32 IN size,
+                sci_map_handle_t IN_OUT *map_handle);
+*/
+	sci_map_handle_t map_handle;
+	err = sci_map_segment(remote_segment_handle,
+				0,
+				0,
+				16,
+				&map_handle);
+	printk("DIS segment mapping status %d\n", err);
+	if (err) {
+		sci_disconnect_segment(&remote_segment_handle, 0);
+		return -1;
+	}
 	} else {
 /*
 scierror_t DLL
@@ -150,7 +180,11 @@ sci_set_local_segment_available (sci_l_segment_handle_t IN local_segment_handle,
 /* module unload */
 static void __exit drfm_exit(void)
 {
-	sci_remove_segment(&segment, 0);
+	if (client) {
+		sci_disconnect_segment(&remote_segment_handle, 0);
+	} else {
+		sci_remove_segment(&segment, 0);
+	}
 }
 
 module_init(drfm_init);
