@@ -116,6 +116,11 @@ sci_kernel_virtual_address_of_mapping (sci_map_handle_t IN map_handle);
 	} else {
 		/* Write RFM data */
 		*addr = 123456789;
+		int i;
+		for (i = 0; i < 30; i++) {
+			msleep(1000);
+			printk ("data = %d\n", *addr);
+		}
 	}
 	} else {
 /*
@@ -216,6 +221,7 @@ sci_local_kernel_virtual_address (sci_l_segment_handle_t IN local_segment_handle
 			msleep(1000);
 			printk ("data = %d\n", *addr);
 		}
+		*addr = 987654321;
 	}
 	}
         return 0;
