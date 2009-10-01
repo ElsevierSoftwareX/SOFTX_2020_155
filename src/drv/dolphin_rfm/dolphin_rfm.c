@@ -31,7 +31,7 @@ MODULE_PARM_DESC (client, "Be a client, not server");
 
 static int target_node = 0;
 module_param (target_node, int, 0);
-MODULE_PARM_DESC (client, "Target node ID");
+MODULE_PARM_DESC (target_node, "Target node ID");
 
 
 sci_l_segment_handle_t segment;
