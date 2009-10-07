@@ -1193,7 +1193,7 @@ printf("got here %d %d\n",clock16K,ioClock);
 	}
 
 #ifdef DOLPHIN_TEST
-	if (*dolphin_memory) {
+	if (dolphin_memory) {
 	  if (client == 0) *dolphin_memory = clock16K;
 	}
 	
@@ -1703,7 +1703,7 @@ int main(int argc, char **argv)
                 	printk ("Got zero pointer from sci_kernel_virtual_address_of_mapping\n");
                 	return -1;
         	} else {
-			printk ("Dolphin memory at 0x%x\n", addr);
+			printk ("Dolphin memory at 0x%p\n", addr);
 			dolphin_memory = addr;
 		}
 	} else {
@@ -2125,6 +2125,17 @@ int main(int argc, char **argv)
          */
         close(wfd);
 
+#endif
+
+#ifdef DOLPHIN_TEST
+	if (client) {
+                sci_unmap_segment(&client_map_handle, 0);
+                sci_disconnect_segment(&remote_segment_handle, 0);
+	} else {
+		sci_set_local_segment_unavailable(segment, 0);
+                sci_unexport_segment(segment, 0, 0);
+                sci_remove_segment(&segment, 0);
+	}
 #endif
 
         return 0;
