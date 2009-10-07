@@ -1703,7 +1703,7 @@ int main(int argc, char **argv)
                 	printk ("Got zero pointer from sci_kernel_virtual_address_of_mapping\n");
                 	return -1;
         	} else {
-			printf ("Dolphin memory at 0x%p\n", addr);
+			printk ("Dolphin memory at 0x%x\n", addr);
 			dolphin_memory = addr;
 		}
 	} else {
