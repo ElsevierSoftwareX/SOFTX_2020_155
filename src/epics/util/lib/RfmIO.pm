@@ -48,8 +48,8 @@ sub fromExp {
 	#my $rfmAddressString = $partName;
 	#$rfmAddressString =~ s/^.*(0x(\d|[abcdefABCDEF])+)$/\1/g;
         my $rfmAddress =  hex $partName;
-	if ($rfmAddress % 4 != 0) {
-		die "RfmIO Part $::xpartName[$i] invalid: address must be 4-byte aligned\n";
+	if ($rfmAddress % 8 != 0) {
+		die "RfmIO Part $::xpartName[$i] invalid: address must be 8-byte aligned\n";
 	}
 	my $card_num = ($rfmAddress - $rfmAddress % 0x4000000) / 0x4000000;
 	$rfmAddress = $rfmAddress % 0x4000000;
@@ -70,8 +70,8 @@ sub frontEndCode {
 	#my $rfmAddressString = $partName;
 	#$rfmAddressString =~ s/^.*(0x(\d|[abcdefABCDEF])+)$/\1/g;
 	my $rfmAddress = hex $partName;
-	if ($rfmAddress % 4 != 0) {
-		die "RfmIO Part $::xpartName[$i] invalid: address must be 4-byte aligned\n";
+	if ($rfmAddress % 8 != 0) {
+		die "RfmIO Part $::xpartName[$i] invalid: address must be 8-byte aligned\n";
 	}
 	my $card_num = $rfmAddress / 0x4000000;
 	my $card_num = ($rfmAddress - $rfmAddress % 0x4000000) / 0x4000000;
