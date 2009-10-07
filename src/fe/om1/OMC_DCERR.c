@@ -20,7 +20,9 @@
 * 
 * datOut[0] = output signal (dx + C2 * dx^2)
 * datOut[1] = state flag (0 = ok, 1 = need load, 2 = ramping, 3 = 1 & 2)
-* datOut[2] = test-point output
+* datOut[2] = DC to DARM slope
+* datOut[3] = DC to DARM offset
+* datOut[4] = test-point output
 *
 * Test-Point Selection Table:
 * 0-5: post-ramp values for Pref, Pdfct, x0, xf, C2
@@ -48,9 +50,13 @@
 
 //#define abs fabs            /* whatever the FE likes for absolute-value */
 
-inline double fabs(double x) {
+#ifndef __FABS__
+#define __FABS__
+static inline double fabs(double x) {
   return (x>0 ? x : -x);
 }
+#endif
+
 
 #define OMC_DCERR_OMC_DCERR OMC_DCERR
 
@@ -92,7 +98,7 @@ typedef struct OMC_DCERR_ParamState
 * Ramping Functions
 * (static so they are only visible in to OMC_DCERR)
 */
-void ParamInit(OMC_DCERR_ParamState* state, double xInit)
+static void ParamInit(OMC_DCERR_ParamState* state, double xInit)
 {
   state->isRamping = 0;
   state->val = xInit;
@@ -107,7 +113,7 @@ void ParamInit(OMC_DCERR_ParamState* state, double xInit)
   state->minAccCycles = 0.05 * OMC_DCERR_FS;
 }
 
-void ParamLoad(OMC_DCERR_ParamState* state, double req, double tRamp)
+static void ParamLoad(OMC_DCERR_ParamState* state, double req, double tRamp)
 {
   double inv_nRamp; // 1 / number of ramp cycles
 
@@ -141,7 +147,7 @@ void ParamLoad(OMC_DCERR_ParamState* state, double req, double tRamp)
 
 // call only if state->isRamping
 // return is new parameter value
-double ParamUpdate(OMC_DCERR_ParamState* state)
+static double ParamUpdate(OMC_DCERR_ParamState* state)
 {
   double dxReq;  // distance to requested value
   double dxNow;  // current step size
@@ -216,13 +222,15 @@ void OMC_DCERR(double* datIn, int nIn, double* datOut, int nOut)
 
   double* param = datIn + OMC_DCERR_N_SIG;  // short-cut
 
-  int i;           // counter
-  int flag = 0;    // state flag
+  int i;            // counter
+  int flag = 0;     // state flag
 
-  double xf2;      // OMC_DCERR_X_F^2
-  double x0;       // OMC_DCERR_X_0
-  double pGain;    // linear gain for Pas, not including contrast defect
-  double dx;       // the DC error signal
+  double xf2;       // OMC_DCERR_X_F^2
+  double x0;        // OMC_DCERR_X_0
+  double pGain;     // linear gain for Pas, not including contrast defect
+  double fringeGain;// gain applied to power-like signals
+  double pOffset;   // total offset (defect + x0)
+  double dx;        // the DC error signal
 
   // ================ Initialize
   if( isFirst )
@@ -262,14 +270,23 @@ void OMC_DCERR(double* datIn, int nIn, double* datOut, int nOut)
   pGain = paramState[OMC_DCERR_P_REF].val;
   if( datIn[1] > 1.0 )
     pGain /= datIn[1];
-  pGain -= paramState[OMC_DCERR_P_DFCT].val;
+  //pGain -= paramState[OMC_DCERR_P_DFCT].val;
 
   // error signal
-  if( x0 == 0.0 )
-    dx = 0.0;
-  else
+  if( x0 == 0.0 ) {
+    //dx = 0.0;
+    //pGain = 0.0;
+    fringeGain = 0.0;
+  }
+  else {
     //    dx = 0.5 * (pNorm * xf2 / x0 - x0); // Modified 
-    dx = pGain * datIn[0] - 0.5 * x0;
+    //pGain = 0.5 * xf2 / x0  *  pGain;
+    fringeGain = 0.5 * xf2 / x0;
+  }
+  
+  pGain *= fringeGain;
+  pOffset = -0.5 * x0 - fringeGain * paramState[OMC_DCERR_P_DFCT].val;
+  dx = pGain * datIn[0] + pOffset;
 
   // non-linear correction
   dx += paramState[OMC_DCERR_C2].val * dx * dx;
@@ -289,7 +306,7 @@ void OMC_DCERR(double* datIn, int nIn, double* datOut, int nOut)
 
   // offset 
   if( nOut > 3)
-    datOut[3] = 0.5 * x0;
+    datOut[3] = pOffset;
  
   // test-point 1
   if( nOut > 4 )
@@ -303,12 +320,12 @@ void OMC_DCERR(double* datIn, int nIn, double* datOut, int nOut)
       case OMC_DCERR_X_0:
       case OMC_DCERR_X_F:
       case OMC_DCERR_C2:
-      datOut[2] = paramState[i].val;
+      datOut[4] = paramState[i].val;
       break;
 
       // input signals
       case 8:
-      datOut[2] = datIn[0];
+      datOut[4] = datIn[0];
       break;
       case 9:
       datOut[2] = datIn[1];
@@ -316,24 +333,24 @@ void OMC_DCERR(double* datIn, int nIn, double* datOut, int nOut)
 
       // normalized Pas
       case 10:
-	datOut[2] = pGain *datIn[0];
+	datOut[4] = pGain *datIn[0];
       break;
 
       // x^2 = (x0 + dx)^2
       case 11:
-      datOut[2] = pGain * datIn[0] * xf2;
+      datOut[4] = pGain * datIn[0] * xf2;
       break;
 
       // x^2 - x0^2 = dx * (2 * x0 + dx)
       // when locked on RF with an offset
       // this should be zero (since dx ~ 0)
       case 12:
-      datOut[2] = pGain * datIn[0] * xf2 - x0 * x0;
+      datOut[4] = pGain * datIn[0] * xf2 - x0 * x0;
       break;
       
       // set output to invalid request value
       default:
-      datOut[2] = i;
+      datOut[4] = i;
     }
   }
 }

@@ -36,6 +36,8 @@
 	#include "isi.h"
 #elif defined(OM1_CODE)
 	#include "om1.h"
+#elif defined(OM2_CODE)
+	#include "om2.h"
 #else
 	#error
 #endif
