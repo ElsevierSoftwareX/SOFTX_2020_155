@@ -46,6 +46,19 @@
 #include <myriexpress.h>
 #endif
 
+#ifdef DOLPHIN_TEST
+#include <asm/io.h>
+#include <genif.h>
+
+sci_l_segment_handle_t segment;
+sci_map_handle_t client_map_handle;
+sci_r_segment_handle_t  remote_segment_handle;
+
+static int client = 0;
+static int target_node = 0;
+double *dolphin_memory = 0;
+#endif
+
 #ifndef NUM_SYSTEMS
 #define NUM_SYSTEMS 1
 #endif
@@ -1162,6 +1175,13 @@ printf("got here %d %d\n",clock16K,ioClock);
         sampleCount = OVERSAMPLE_TIMES;
 	}
 
+#ifdef DOLPHIN_TEST
+	if (*dolphin_memory) {
+	  if (client == 0) *dolphin_memory = clock16K;
+	}
+	
+#endif
+
         // Update internal cycle counters
         if(firstTime != 0)
         {
@@ -1631,6 +1651,102 @@ int main(int argc, char **argv)
 	int ii,jj;
 	char fname[128];
 
+#ifdef DOLPHIN_TEST
+	if (argc > 1) {
+		client = 1;
+		target_node = atoi(argv[1]);
+		printf("Running Dolphin client, server at target %d\n", target_node);
+
+                signed32 func(void IN *arg,
+                        sci_r_segment_handle_t IN remote_segment_handle,
+                        unsigned32 IN reason,
+                        unsigned32 IN status) {
+                                printk("Connect callback %d\n", reason);
+                                return 0;
+                }
+
+                scierror_t err =
+                sci_connect_segment(NO_BINDING,
+                                target_node,
+                                0,
+                                0,
+                                1,
+                                0, /* FLAGS */
+                                func, 0,
+                                &remote_segment_handle);
+                printk("DIS connect segment status %d\n", err);
+                if (err) return -1;
+
+	        usleep(20000);
+        	err = sci_map_segment(remote_segment_handle,
+                                PHYS_MAP_ATTR_STRICT_IO,
+                                0,
+                                16,
+                                &client_map_handle);
+        	printk("DIS segment mapping status %d\n", err);
+        	if (err) {
+                	sci_disconnect_segment(&remote_segment_handle, 0);
+                	return -1;
+	        }
+
+		double *addr = sci_kernel_virtual_address_of_mapping(client_map_handle);
+        	if (addr == 0) {
+                	printk ("Got zero pointer from sci_kernel_virtual_address_of_mapping\n");
+                	return -1;
+        	} else {
+			printf ("Dolphin memory at 0x%x\n", addr);
+			dolphin_memory = addr;
+		}
+	} else {
+		printf("Running Dolphin server\n");
+
+        	signed32 func(void IN *arg,
+                       sci_l_segment_handle_t IN local_segment_handle,
+                       unsigned32 IN reason,
+                       unsigned32 IN source_node,
+                       unsigned32 IN local_adapter_number)  {
+                                printk("Connect callback %d\n", reason);
+                                return 0;
+        	}
+        	scierror_t err =
+        	sci_create_segment(NO_BINDING,
+                                0,
+                                1,
+                                0,
+                                16,
+                                func,
+                                0,
+                                &segment);
+        	printk("DIS segment alloc status %d\n", err);
+        	if (err) return -1;
+
+        	err = sci_export_segment(segment, 0, 0);
+        	printk("DIS segment export status %d\n", err);
+        	if (err) {
+                	sci_remove_segment(&segment, 0);
+                	return -1;
+        	}
+
+	        err = sci_set_local_segment_available(segment, 0);
+       	 	printk("DIS segment making available status %d\n", err);
+        	if (err) {
+                	sci_remove_segment(&segment, 0);
+                	return -1;
+        	}
+
+	        double *addr = sci_local_kernel_virtual_address(segment);
+       		if (addr == 0) {
+                	printk("DIS sci_local_kernel_virtual_address returned 0\n");
+                	sci_remove_segment(&segment, 0);
+                	return -1;
+        	} else {
+			printk("Dolphin memory at 0x%x\n", addr);
+			dolphin_memory = addr;
+		}
+	}
+
+	if (dolphin_memory) *dolphin_memory = 0;
+#endif
 	jj = 0;
 	printf("cpu clock %ld\n",cpu_khz);
 
