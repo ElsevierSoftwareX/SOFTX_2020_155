@@ -1703,7 +1703,7 @@ int main(int argc, char **argv)
                 	printk ("Got zero pointer from sci_kernel_virtual_address_of_mapping\n");
                 	return -1;
         	} else {
-			printf ("Dolphin memory at 0x%x\n", addr);
+			printf ("Dolphin memory at 0x%p\n", addr);
 			dolphin_memory = addr;
 		}
 	} else {
@@ -1741,7 +1741,7 @@ int main(int argc, char **argv)
                 	sci_remove_segment(&segment, 0);
                 	return -1;
         	} else {
-			printk("Dolphin memory at 0x%x\n", addr);
+			printk("Dolphin memory at 0x%p\n", addr);
 			dolphin_memory = addr;
 		}
 	}
