@@ -57,6 +57,23 @@ sci_r_segment_handle_t  remote_segment_handle;
 static int client = 0;
 static int target_node = 0;
 double *dolphin_memory = 0;
+
+                signed32 func(void IN *arg,
+                        sci_r_segment_handle_t IN remote_segment_handle,
+                        unsigned32 IN reason,
+                        unsigned32 IN status) {
+                                printk("Connect callback %d\n", reason);
+                                return 0;
+                }
+
+        	signed32 server_func(void IN *arg,
+                       sci_l_segment_handle_t IN local_segment_handle,
+                       unsigned32 IN reason,
+                       unsigned32 IN source_node,
+                       unsigned32 IN local_adapter_number)  {
+                                printk("Connect callback %d\n", reason);
+                                return 0;
+        	}
 #endif
 
 #ifndef NUM_SYSTEMS
@@ -1657,14 +1674,6 @@ int main(int argc, char **argv)
 		target_node = atoi(argv[1]);
 		printf("Running Dolphin client, server at target %d\n", target_node);
 
-                signed32 func(void IN *arg,
-                        sci_r_segment_handle_t IN remote_segment_handle,
-                        unsigned32 IN reason,
-                        unsigned32 IN status) {
-                                printk("Connect callback %d\n", reason);
-                                return 0;
-                }
-
                 scierror_t err =
                 sci_connect_segment(NO_BINDING,
                                 target_node,
@@ -1700,21 +1709,13 @@ int main(int argc, char **argv)
 	} else {
 		printf("Running Dolphin server\n");
 
-        	signed32 func(void IN *arg,
-                       sci_l_segment_handle_t IN local_segment_handle,
-                       unsigned32 IN reason,
-                       unsigned32 IN source_node,
-                       unsigned32 IN local_adapter_number)  {
-                                printk("Connect callback %d\n", reason);
-                                return 0;
-        	}
         	scierror_t err =
         	sci_create_segment(NO_BINDING,
                                 0,
                                 1,
                                 0,
                                 16,
-                                func,
+                                server_func,
                                 0,
                                 &segment);
         	printk("DIS segment alloc status %d\n", err);
