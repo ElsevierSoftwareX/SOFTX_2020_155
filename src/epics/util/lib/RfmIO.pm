@@ -54,7 +54,7 @@ sub fromExp {
 	my $card_num = ($rfmAddress - $rfmAddress % 0x4000000) / 0x4000000;
 	$rfmAddress = $rfmAddress % 0x4000000;
 	my $rfmAddressString = sprintf("0x%x", $rfmAddress);
-        return "cdsPciModules.pci_rfm[0]? *((double *)(((void *)cdsPciModules.pci_rfm[$card_num]) + $rfmAddressString)) : 0.0";
+        return "cdsPciModules.pci_rfm[$card_num]? *((double *)(((void *)cdsPciModules.pci_rfm[$card_num]) + $rfmAddressString)) : 0.0";
 }
 
 # Return front end code
