@@ -36,6 +36,10 @@
 	#include "sh1/sh1.c"
 #elif defined(ISI_CODE)
 	#include "isi/isi.c"
+#elif defined(OM1_CODE)
+	#include "om1/om1.c"
+#elif defined(OM2_CODE)
+	#include "om2/om2.c"
 #else
 	#error
 #endif
