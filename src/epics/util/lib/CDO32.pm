@@ -8,6 +8,9 @@ sub initCDO32 {
 	my $desc = ${$node->{FIELDS}}{"Name"};
 	my $l = length($desc);
         my $CDO32Num = substr($desc, ($l-1), 1);
+        if ($CDO32Num =~ m/\D/) {
+           die "Last character of module name must be digit\: $desc\n";
+        } 
 	$::boType[$::boCnt] = "CON_32DO";
 	$::boNum[$::boCnt] = $CDO32Num;
 	$::boCnt ++;
@@ -78,7 +81,7 @@ sub frontEndCode {
                 $calcExp .= "\] = ((int)";
                 $calcExp .= $::fromExp[0];
                 $calcExp .= " << 16) + ((int)";
-                $calcExp .= $::fromExp[1];
+                $calcExp .= $::fromExp[0];
 		$calcExp .= " & 0xffff);\n";
         }
         return $calcExp;
