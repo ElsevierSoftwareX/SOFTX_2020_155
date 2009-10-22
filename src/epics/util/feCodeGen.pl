@@ -1366,13 +1366,13 @@ $numTries ++;
 				{
 					
 					$zz = $partInNum[$xx][$jj];
-					if(!$partUsed[$zz])
+					if((!$partUsed[$zz]) && ($partInputType[$xx][$jj] ne "DELAY"))
 					{
 						$allADC = 0;
 					}
 				}
 				else {
-				if(($subUsed[$yy] != 1) && ($partInputType[$xx][$jj] ne "Adc"))
+				if(($subUsed[$yy] != 1) && ($partInputType[$xx][$jj] ne "Adc") && ($partInputType[$xx][$jj] ne "DELAY"))
 				{
 						$allADC = 0;
 				}
@@ -1611,7 +1611,7 @@ print OUT "\#ifdef SERVO32K\n";
 print OUT "\t\#define FE_RATE\t32768\n";
 print OUT "\#endif\n";
 print OUT "\#ifdef SERVO16K\n";
-print OUT "\t\#define FE_RATE\t16382\n";
+print OUT "\t\#define FE_RATE\t16384\n";
 print OUT "\#endif\n";
 print OUT "\#ifdef SERVO4K\n";
 print OUT "\t\#define FE_RATE\t4096\n";
