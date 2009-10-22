@@ -9,6 +9,9 @@ sub initRio1 {
 	my $desc = ${$node->{FIELDS}}{"Name"};
 	my $l = length($desc);
         my $num = substr($desc, ($l-1), 1);
+        if ($num =~ m/\D/) {
+           die "Last character of module name must be digit\: $desc\n";
+        } 
 	$::boType[$::boCnt] = "ACS_16DIO";
 	$::boNum[$::boCnt] = $num;
 	$::boCnt ++;

@@ -9,6 +9,9 @@ sub initRio {
 	my $desc = ${$node->{FIELDS}}{"Name"};
 	my $l = length($desc);
         my $num = substr($desc, ($l-1), 1);
+        if ($num =~ m/\D/) {
+           die "Last character of module name must be digit\: $desc\n";
+        }
 	$::boType[$::boCnt] = "ACS_8DIO";
 	$::boNum[$::boCnt] = $num;
 	$::boCnt ++;
@@ -47,6 +50,8 @@ sub frontEndInitCode {
 
 	#print "partOutputPortUsed = ", $::partOutputPortUsed[$i][0], "\n";
 	#print "partOutputPortUsed = ", $::partOutputPortUsed[$i][1], "\n";
+	print "DBG: partOutputPortUsed = ", $::partOutputPortUsed[$i][0], "\n";
+	print "DBG: partOutputPortUsed = ", $::partOutputPortUsed[$i][1], "\n";
 	my $rioReadInitVal = 0;
 	# First output has  digital inputs
 	if ($::partOutputPortUsed[$i][0] != undef) {
@@ -62,7 +67,17 @@ sub frontEndInitCode {
 
 	# print "rioReadInitVal = ", $rioReadInitVal, "\n";
 	# Initialize board read operations selector
-	my $bnum = $::boNum[$::boCnt - 1]; # This board number
+	# my $bnum = $::boNum[$::boCnt - 1]; # This board number
+        # my $bnum = $::boNum[$i] - 1;
+        my $bnum = -1;
+        for (0 .. $::maxDioMod-1) {
+           if ($::boPartNum[$_] == $i) {
+              $bnum = $_;
+           }
+        }
+        if ($bnum == -1) {
+           die "ERROR: Rio index not found\n";
+        }
         return "rioReadOps\[$bnum\] = $rioReadInitVal;\n";
 }
 
