@@ -1171,11 +1171,11 @@ text {
 	}
 	command[0] {
 		label="Clear all SYSTEM_NAME testpoits"
-		name="echo 'tp clear DCU_NODE_ID *' | diag -l"
+		name="echo 'tp clear GDS_NODE_ID *' | diag -l"
 	}
 	command[1] {
 		label="Clear all SYSTEM_NAME AWG waveforms"
-		name="echo 'awg clear DCU_NODE_ID *' | diag -l"
+		name="echo 'awg clear GDS_NODE_ID *' | diag -l"
 	}
 	command[2] {
 		label="Restart framebuilder FB0"
