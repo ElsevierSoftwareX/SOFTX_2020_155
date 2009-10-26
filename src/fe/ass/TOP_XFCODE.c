@@ -201,10 +201,12 @@ void TOP_XFCODE(double* datIn, int nIn, double* datOut, int nOut)
 
     for (i = 0; i < state.nAux; i++ ) {
       adaptive_filter_aux* thisAux = state.aux + i;
+      pCoefFIR = thisAux->coefFIR;
       for (j = 0; j < state.nFIR; j++ ) {
 	// Store
-        pCoefFIR = thisAux->coefFIR;
 	cstor[2 + i * state.nFIR + j] = *pCoefFIR;
+	if (j % 100 == 0)
+       		printf("\tcoeff #%d = %f\n", j, *pCoefFIR);
 	pCoefFIR++;
       }
     }
