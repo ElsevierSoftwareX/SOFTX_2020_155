@@ -76,7 +76,8 @@ double *cstor = (double *)(((char *)pLocalEpics) + 0x3f00000);
 
 void TOP_XFCODE(double* datIn, int nIn, double* datOut, int nOut)
 {
-  static int pst = 0;
+  static int save_coeffs_state = 0;
+  static int restore_coeffs_state = 0;
   static int isFirst = 1;
   static adaptive_filter_state state;
 
@@ -101,8 +102,8 @@ void TOP_XFCODE(double* datIn, int nIn, double* datOut, int nOut)
   double* pBufAdapt;
   double* pCoefFIR;
 
-  // Servo enable flag
-  volatile int st = pLocalEpics->ass.TOP_SUS_ENABLE;
+  volatile int save_coeffs = pLocalEpics->ass.COEFF_SAVE;
+  volatile int restore_coeffs = pLocalEpics->ass.COEFF_RESTORE;
 
   // make sure there are enough signals
   if( nIn < 12 )
@@ -167,10 +168,8 @@ void TOP_XFCODE(double* datIn, int nIn, double* datOut, int nOut)
   }
 
   // Load coeffs from storage
-  // Only reload when pLocalEpics->ass.TOP_SUS_ENABLE goes from 0 to 1
-  if (pst == 0 && st == 1) {
+  if (restore_coeffs_state == 0 && restore_coeffs == 1) {
     // Only if the number of coeffs didn't change
-    printf("Servo turned on\n");
     if (cstor[0] == (double) state.nFIR 
         && cstor[1] == (double) state.nAux) {
       		printf("Restoring %d coefficients for %d Aux inputs\n", state.nFIR, state.nAux);
@@ -187,12 +186,30 @@ void TOP_XFCODE(double* datIn, int nIn, double* datOut, int nOut)
       		printf("Not restoring the coeffs nAux=%d; nFIR=%d; (old %d %d)\n",  state.nFIR, state.nAux, (int)cstor[0], (int)cstor[1]);
       }
   }
-  if (pst == 1 && st == 0) {
-	printf("Servo off\n");
+  restore_coeffs_state = restore_coeffs;
+
+  // Save coefficients
+  if (save_coeffs_state == 0 && save_coeffs == 1) {
+    int i, j;
+    
+    printf("Saving coeffs; nAux=%d nFIR=%d\n", state.nAux, state.nFIR);
+    // Save the number of coeffs
+    cstor[0] = (double)state.nFIR;
+
+    // Save the number of Aux inputs
+    cstor[1] = (double)state.nAux; 
+
+    for (i = 0; i < state.nAux; i++ ) {
+      adaptive_filter_aux* thisAux = state.aux + i;
+      for (j = 0; j < state.nFIR; j++ ) {
+	// Store
+        pCoefFIR = thisAux->coefFIR;
+	cstor[2 + i * state.nFIR + j] = *pCoefFIR;
+	pCoefFIR++;
+      }
+    }
   }
- 
-  // Save servo enable flag
-  pst = st;
+  save_coeffs_state = save_coeffs;
 
   // update reset flag, nDelay, etc.
   state.resetFlag = datIn[0];
@@ -249,12 +266,11 @@ void TOP_XFCODE(double* datIn, int nIn, double* datOut, int nOut)
   else
     corr = state.prevCorr;
 
-
   // Save the number of coeffs
-  if (st) cstor[0] = (double)state.nFIR;
+  //if (st) cstor[0] = (double)state.nFIR;
 
   // Save the number of Aux inputs
-  if (st) cstor[1] = (double)state.nAux; 
+  //if (st) cstor[1] = (double)state.nAux; 
 
   for( i = 0; i < state.nAux; i++ )
   {
@@ -307,7 +323,7 @@ void TOP_XFCODE(double* datIn, int nIn, double* datOut, int nOut)
 	norm += (*pBufAdapt) * (*pBufAdapt);	// add to the norm
 
 	// Store
-	if (st) cstor[2 + i * state.nFIR + j] = *pCoefFIR;
+//	if (st) cstor[2 + i * state.nFIR + j] = *pCoefFIR;
 
 	// move pointers
 	pBufFIR++;
