@@ -65,12 +65,18 @@ typedef struct adaptive_filter_state
   adaptive_filter_aux aux[XF_MAX_AUX];	// auxiliary channel state
 } adaptive_filter_state;
 
+// Coefficient storage
+double *cstor = (double *)(((char *)pLocalEpics) + 0x3f00000);
+
+
 /*
 * FE Function
+* Save the coefficients to (((char *)pLocalEpics) + 0x3f00000)
 */
 
 void TOP_XFCODE(double* datIn, int nIn, double* datOut, int nOut)
 {
+  static int pst = 0;
   static int isFirst = 1;
   static adaptive_filter_state state;
 
@@ -94,6 +100,9 @@ void TOP_XFCODE(double* datIn, int nIn, double* datOut, int nOut)
   double* pBufFIR;
   double* pBufAdapt;
   double* pCoefFIR;
+
+  // Servo enable flag
+  volatile int st = pLocalEpics->ass.TOP_SUS_ENABLE;
 
   // make sure there are enough signals
   if( nIn < 12 )
@@ -157,6 +166,34 @@ void TOP_XFCODE(double* datIn, int nIn, double* datOut, int nOut)
 
   }
 
+  // Load coeffs from storage
+  // Only reload when pLocalEpics->ass.TOP_SUS_ENABLE goes from 0 to 1
+  if (pst == 0 && st == 1) {
+    // Only if the number of coeffs didn't change
+    printf("Servo turned on\n");
+    if (cstor[0] == (double) state.nFIR 
+        && cstor[1] == (double) state.nAux) {
+      		printf("Restoring %d coefficients for %d Aux inputs\n", state.nFIR, state.nAux);
+      		for (i = 0; i < state.nAux; i++) {
+			printf("Aux input %d\n", i);
+      			for (j = 0; j < state.nFIR; j++) {
+    				thisAux = state.aux + i;
+        			thisAux->coefFIR[j] = cstor[2 + i * state.nFIR + j];
+				if (j % 100 == 0)
+        				printf("\tcoeff #%d = %f\n", j, thisAux->coefFIR[j]);
+			}
+		}
+      } else {
+      		printf("Not restoring the coeffs nAux=%d; nFIR=%d; (old %d %d)\n",  state.nFIR, state.nAux, (int)cstor[0], (int)cstor[1]);
+      }
+  }
+  if (pst == 1 && st == 0) {
+	printf("Servo off\n");
+  }
+ 
+  // Save servo enable flag
+  pst = st;
+
   // update reset flag, nDelay, etc.
   state.resetFlag = datIn[0];
   state.nDelay = (int) datIn[3];	// extra aux delay
@@ -212,6 +249,13 @@ void TOP_XFCODE(double* datIn, int nIn, double* datOut, int nOut)
   else
     corr = state.prevCorr;
 
+
+  // Save the number of coeffs
+  if (st) cstor[0] = (double)state.nFIR;
+
+  // Save the number of Aux inputs
+  if (st) cstor[1] = (double)state.nAux; 
+
   for( i = 0; i < state.nAux; i++ )
   {
     // pointer for easy access
@@ -248,6 +292,8 @@ void TOP_XFCODE(double* datIn, int nIn, double* datOut, int nOut)
 
       // computer FIR output and perform adaptation
       norm = 0.0;
+
+
       for( j = 0; j < state.nFIR; j++ )
       {
 	// FIR
@@ -259,6 +305,9 @@ void TOP_XFCODE(double* datIn, int nIn, double* datOut, int nOut)
 	*pCoefFIR *= (1.0 - decayRate);		// decay FIR coef
 	*pCoefFIR += delta * (*pBufAdapt);	// update FIR coef
 	norm += (*pBufAdapt) * (*pBufAdapt);	// add to the norm
+
+	// Store
+	if (st) cstor[2 + i * state.nFIR + j] = *pCoefFIR;
 
 	// move pointers
 	pBufFIR++;
