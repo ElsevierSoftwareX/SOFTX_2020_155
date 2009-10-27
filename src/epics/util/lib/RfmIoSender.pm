@@ -1,4 +1,4 @@
-package CDS::RfmIoSynchronizedSender;
+package CDS::RfmIoSender;
 use Exporter;
 @ISA = ('Exporter');
 
@@ -21,7 +21,7 @@ use Exporter;
 # ::EPICS  --> advLigo/src/epics/fmseq/om1  - Some kind of list of EPICS channels?
 
 sub partType {
-	return RfmIoSynchronizedSender;
+	return RfmIoSender;
 }
 
 # Print Epics communication structure into a header file
