@@ -1777,7 +1777,6 @@ int main(int argc, char **argv)
 	/* See if we can open new-style shared memory file */
 	sprintf(fname, "/rtl_mem_%s", SYSTEM_NAME_STRING_LOWER);
         wfd = shm_open(fname, RTL_O_RDWR, 0666);
-          printf("Warning, could open `%s' read/write (errno=%d)\n", fname, errno);
 	if (wfd == -1) {
           printf("Warning, couldn't open `%s' read/write (errno=%d)\n", fname, errno);
           wfd = shm_open("/rtl_epics", RTL_O_RDWR, 0666);
