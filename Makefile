@@ -42,7 +42,7 @@ install-% :: src/epics/simLink/%.mdl
 	hostname=`hostname`;\
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
 	if test $${site}no = no; then echo Please make $$system first; exit 1; fi;\
-	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	/bin/mkdir -p /cvs/cds/$$site/chans;\
@@ -116,7 +116,7 @@ uninstall-daq-% :: src/epics/simLink/%.mdl
 	if test $${site} = lho; then site_letter=H; fi;\
 	if test $${site} = geo; then site_letter=G; fi;\
 	if test $${site} = caltech; then site_letter=C; fi;\
-	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`;\
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	datarate=`grep datarate build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	gds_file_node=`expr $${gds_node} + 1`; \
@@ -142,7 +142,7 @@ install-daq-% :: src/epics/simLink/%.mdl
 	if test $${site} = lho; then site_letter=H; fi;\
 	if test $${site} = geo; then site_letter=G; fi;\
 	if test $${site} = caltech; then site_letter=C; fi;\
-	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`;\
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	datarate=`grep datarate build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	gds_file_node=`expr $${gds_node} + 1`; \
@@ -182,7 +182,7 @@ install-screens-% :: src/epics/simLink/%.mdl
 	upper_system=`echo $$system | tr a-z A-Z`;\
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
 	if test $${site}no = no; then echo Please make $$system first; exit 1; fi;\
-	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	echo Installing Epics screens;\
@@ -199,7 +199,7 @@ reinstall-% :: src/epics/simLink/%.mdl
 	upper_system=`echo $$system | tr a-z A-Z`;\
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
 	if test $${site}no = no; then echo Please make $$system first; exit 1; fi;\
-	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	/bin/mkdir -p /cvs/cds/$$site/chans;\
@@ -222,7 +222,7 @@ reinstall-fe-% :: src/epics/simLink/%.mdl
 	upper_system=`echo $$system | tr a-z A-Z`;\
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
 	if test $${site}no = no; then echo Please make $$system first; exit 1; fi;\
-	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	/bin/mkdir -p /cvs/cds/$$site/chans;\
@@ -237,7 +237,7 @@ reinstall-fe-% :: src/epics/simLink/%.mdl
 install-% :: config/Makefile.%epics
 	@system=$(subst install-,,$@); \
 	site=`grep SITE $< | sed 's/.*SITE\s*=\s*\([a-z]*\).*/\1/g'`; \
-	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-Z0-9]*\).*/\1/g'`;\
+	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`;\
 	if test $${ifo}no = no; then echo Please make $$system first; exit 1; fi;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
