@@ -2217,6 +2217,8 @@ close EPICS;
 if ($no_rtl) {
 	system ("/bin/cp GNUmakefile  ../../fe/$skeleton");
 	system ("echo '#include \"../controller.c\"' > ../../fe/$skeleton/$skeleton" . "fe.c");
+} else {
+	system ("/bin/rm -f ../../fe/$skeleton/GNUmakefile");
 }
 
 if ($no_rtl) {
