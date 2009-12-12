@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.171"
+    ComputedModelVersion    "1.173"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -24,9 +24,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Jul 29 13:02:24 2009"
+  LastModifiedDate	  "Fri Dec 11 16:37:59 2009"
   RTWModifiedTimeStamp	  0
-  ModelVersionFormat	  "1.%<AutoIncrement:171>"
+  ModelVersionFormat	  "1.%<AutoIncrement:173>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -553,7 +553,7 @@ Model {
   }
   System {
     Name		    "alx"
-    Location		    [232, 77, 1231, 717]
+    Location		    [138, 213, 1177, 920]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -590,7 +590,7 @@ Model {
       "                                                                                                                "
       " "
       Ports		      [1, 1]
-      Position		      [400, 58, 470, 82]
+      Position		      [350, 58, 420, 82]
       BackgroundColor	      "darkGreen"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -628,7 +628,7 @@ Model {
       "                                                                                                                "
       " "
       Ports		      [1, 1]
-      Position		      [445, 188, 515, 212]
+      Position		      [575, 233, 645, 257]
       BackgroundColor	      "darkGreen"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
@@ -680,6 +680,25 @@ Model {
     }
     Block {
       BlockType		      Reference
+      Name		      "Contec1616dio"
+      Tag		      "cdsCDIO1616"
+      Ports		      [1, 1]
+      Position		      [510, 225, 550, 285]
+      BackgroundColor	      "gray"
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsContect1616DIO/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+    }
+    Block {
+      BlockType		      Reference
       Name		      "DAC_0"
       Description	      "PCI66-16AO16               \n20Vp-p, 16-bit, 305uV/count"
       Ports		      [16, 16]
@@ -728,30 +747,29 @@ Model {
       Labels		      [0, 0]
       SrcBlock		      "Bus\nSelector1"
       SrcPort		      1
-      Points		      [135, 0]
+      Points		      [85, 0]
       DstBlock		      "A"
-      DstPort		      1
-    }
-    Line {
-      Name		      "<adc_0_1>"
-      Labels		      [0, 0]
-      SrcBlock		      "Bus\nSelector1"
-      SrcPort		      2
-      Points		      [130, 0; 0, -80; 50, 0]
-      DstBlock		      "B"
       DstPort		      1
     }
     Line {
       SrcBlock		      "A"
       SrcPort		      1
-      Points		      [195, 0]
-      DstBlock		      "DAC_0"
-      DstPort		      1
+      Points		      [35, 0]
+      Branch {
+	Points			[210, 0]
+	DstBlock		"DAC_0"
+	DstPort			1
+      }
+      Branch {
+	Points			[0, 185]
+	DstBlock		"Contec1616dio"
+	DstPort			1
+      }
     }
     Line {
       SrcBlock		      "B"
       SrcPort		      1
-      Points		      [145, 0]
+      Points		      [0, -45; 15, 0]
       Branch {
 	Points			[5, 0; 0, -10]
 	Branch {
@@ -854,6 +872,13 @@ Model {
 	  }
 	}
       }
+    }
+    Line {
+      SrcBlock		      "Contec1616dio"
+      SrcPort		      1
+      Points		      [0, -10]
+      DstBlock		      "B"
+      DstPort		      1
     }
   }
 }
