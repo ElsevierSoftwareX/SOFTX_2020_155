@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.173"
+    ComputedModelVersion    "1.174"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -24,9 +24,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Dec 11 16:37:59 2009"
+  LastModifiedDate	  "Mon Dec 14 10:49:29 2009"
   RTWModifiedTimeStamp	  0
-  ModelVersionFormat	  "1.%<AutoIncrement:173>"
+  ModelVersionFormat	  "1.%<AutoIncrement:174>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -680,7 +680,7 @@ Model {
     }
     Block {
       BlockType		      Reference
-      Name		      "Contec1616dio"
+      Name		      "Contec1616dio0"
       Tag		      "cdsCDIO1616"
       Ports		      [1, 1]
       Position		      [510, 225, 550, 285]
@@ -762,7 +762,7 @@ Model {
       }
       Branch {
 	Points			[0, 185]
-	DstBlock		"Contec1616dio"
+	DstBlock		"Contec1616dio0"
 	DstPort			1
       }
     }
@@ -874,7 +874,7 @@ Model {
       }
     }
     Line {
-      SrcBlock		      "Contec1616dio"
+      SrcBlock		      "Contec1616dio0"
       SrcPort		      1
       Points		      [0, -10]
       DstBlock		      "B"
