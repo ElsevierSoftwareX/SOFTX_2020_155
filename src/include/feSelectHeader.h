@@ -38,6 +38,8 @@
 	#include "om1.h"
 #elif defined(OM2_CODE)
 	#include "om2.h"
+#elif defined(ALX_CODE)
+	#include "alx.h"
 #else
 	#error
 #endif

@@ -1321,7 +1321,7 @@ Library {
 	  Position		  [140, 330, 180, 390]
 	  BackgroundColor	  "gray"
 	  AttributesFormatString  "%<Tag>"
-	  SourceBlock		  "cdsContect1616DIO/Subsystem"
+	  SourceBlock		  "cdsContec1616DIO/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"

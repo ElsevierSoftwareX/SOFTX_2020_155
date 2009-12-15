@@ -399,6 +399,12 @@ sub node_processing {
 		if ($part_name eq "Dac") {
         	  $::partType[$::partCnt] = CDS::Dac::initDac($node);
 		}
+		if ($part_name eq "Contec1616DIO") {
+        	  $::partType[$::partCnt] = CDS::Contec1616DIO::initCDIO1616($node);
+                  if ($::boCnt > $::maxDioMod) {
+                     die "Too many Digital I/O modules \(max is $::maxDioMod\)\n";
+                  }
+		}
 		if ($part_name eq "CDO32") {
         	  $::partType[$::partCnt] = CDS::CDO32::initCDO32($node);
                   if ($::boCnt > $::maxDioMod) {
