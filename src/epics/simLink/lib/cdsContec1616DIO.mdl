@@ -1,5 +1,5 @@
 Library {
-  Name			  "cdsContect1616dio"
+  Name			  "cdsContec1616dio"
   Version		  6.5
   MdlSubVersion		  0
   SavedCharacterEncoding  "UTF-8"
@@ -155,7 +155,7 @@ Library {
     FontAngle		    "normal"
   }
   System {
-    Name		    "cdsContect16161dio"
+    Name		    "cdsContec16161dio"
     Location		    [212, 405, 792, 665]
     Open		    on
     ModelBrowserVisibility  off

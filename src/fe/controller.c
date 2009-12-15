@@ -273,6 +273,8 @@ int rioOutput1[MAX_DIO_MODULES];
 int rioOutputHold1[MAX_DIO_MODULES];
 unsigned int CDO32Input[MAX_DIO_MODULES];
 unsigned int CDO32Output[MAX_DIO_MODULES];
+unsigned int CDIO1616Input[MAX_DIO_MODULES];
+unsigned int CDIO1616Output[MAX_DIO_MODULES];
 int clock16K = 0;
 int out_buf_size = 0; // test checking DAC buffer size
 double cycle_gps_time = 0.; // Time at which ADCs triggered
@@ -773,17 +775,13 @@ void *fe_start(void *arg)
 	{
 	  if (rioReadOps[ii] & 1) rioInputInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
 	  if (rioReadOps[ii] & 2) rioInputOutput[ii] = readIiroDioOutput(&cdsPciModules, kk) & 0xff;
-	}
-	if(cdsPciModules.doType[kk] == ACS_16DIO)
-	{
+	} else if(cdsPciModules.doType[kk] == ACS_16DIO) {
   	  rioInput1[ii] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
-	}
-	if(cdsPciModules.doType[kk] == CON_32DO)
-	{
+	} else if (cdsPciModules.doType[kk] == CON_32DO) {
   	  CDO32Input[ii] = readCDO32l(&cdsPciModules, kk);
-	}
-	if(cdsPciModules.doType[kk] == ACS_24DIO)
-	{
+	} else if (cdsPciModules.doType[kk] == CON_1616DIO) {
+  	  CDIO1616Input[ii] = readCDIO1616l(&cdsPciModules, kk);
+	} else if(cdsPciModules.doType[kk] == ACS_24DIO) {
   	  dioInput[ii] = readDio(&cdsPciModules, kk);
 	}
      }
@@ -1439,19 +1437,23 @@ printf("got here %d %d\n",clock16K,ioClock);
                 {
                         writeIiroDio(&cdsPciModules, kk, rioOutput[ii]);
                         rioOutputHold[ii] = rioOutput[ii];
-                }
+                } else 
                 if((cdsPciModules.doType[kk] == ACS_16DIO) && (rioOutput1[ii] != rioOutputHold1[ii]))
                 {
                         writeIiroDio1(&cdsPciModules, kk, rioOutput1[ii]);
                         rioOutputHold1[ii] = rioOutput1[ii];
                         // printf("write relay mod %d = %d\n",kk,rioOutput1[ii]);
-                }
+                } else 
                 if(cdsPciModules.doType[kk] == CON_32DO)
                 {
                         if (CDO32Input[ii] != CDO32Output[ii]) {
                           CDO32Input[ii] = writeCDO32l(&cdsPciModules, kk, CDO32Output[ii]);
                         }
-                }
+		} else if (cdsPciModules.doType[kk] == CON_1616DIO) {
+			if (CDIO1616Input[ii] != CDIO1616Output[ii]) {
+			  CDIO1616Input[ii] = writeCDIO1616l(&cdsPciModules, kk, CDIO1616Output[ii]);
+			}
+                } else
                 if((cdsPciModules.doType[kk] == ACS_24DIO) && (dioOutputHold[ii] != dioOutput[ii]))
 		{
                         writeDio(&cdsPciModules, kk, dioOutput[ii]);
@@ -1962,6 +1964,7 @@ int main(int argc, char **argv)
 	printf("%d IIRO-16 Isolated DIO cards found\n",cdsPciModules.iiroDio1Count);
         printf("***************************************************************************\n");
 	printf("%d Contec 32ch PCIe DO cards found\n",cdsPciModules.cDo32lCount);
+	printf("%d Contec PCIe DIO1616 cards found\n",cdsPciModules.cDio1616lCount);
 	printf("%d DO cards found\n",cdsPciModules.doCount);
         printf("***************************************************************************\n");
 	printf("%d RFM cards found\n",cdsPciModules.rfmCount);

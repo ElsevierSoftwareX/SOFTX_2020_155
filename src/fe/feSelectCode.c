@@ -40,6 +40,8 @@
 	#include "om1/om1.c"
 #elif defined(OM2_CODE)
 	#include "om2/om2.c"
+#elif defined(ALX_CODE)
+	#include "alx/alx.c"
 #else
 	#error
 #endif

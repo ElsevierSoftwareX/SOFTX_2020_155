@@ -686,7 +686,7 @@ Model {
       Position		      [510, 225, 550, 285]
       BackgroundColor	      "gray"
       AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsContect1616DIO/Subsystem"
+      SourceBlock	      "cdsContec1616DIO/Subsystem"
       SourceType	      "SubSystem"
       ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
@@ -719,7 +719,7 @@ Model {
     }
     Block {
       BlockType		      Reference
-      Name		      "site=H1\nrate=2K\ndcuid=9\ngds_node_id=1\nno_sync=1\nno_daq=0\nshmem_daq=1\nremote_ipc_port=0"
+      Name		      "site=H1\nrate=2K\ndcuid=9\ngds_node_id=1\nno_sync=1\nno_daq=1\nshmem_daq=1"
       Tag		      "cdsParameters"
       Ports		      [1, 1]
       Position		      [400, 340, 440, 400]
