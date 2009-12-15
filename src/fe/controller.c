@@ -273,8 +273,9 @@ int rioOutput1[MAX_DIO_MODULES];
 int rioOutputHold1[MAX_DIO_MODULES];
 unsigned int CDO32Input[MAX_DIO_MODULES];
 unsigned int CDO32Output[MAX_DIO_MODULES];
-unsigned int CDIO1616Input[MAX_DIO_MODULES];
-unsigned int CDIO1616Output[MAX_DIO_MODULES];
+unsigned int CDIO1616InputInput[MAX_DIO_MODULES]; // Binary input bits
+unsigned int CDIO1616Input[MAX_DIO_MODULES]; // Current value of the BO bits
+unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
 int clock16K = 0;
 int out_buf_size = 0; // test checking DAC buffer size
 double cycle_gps_time = 0.; // Time at which ADCs triggered
@@ -1453,6 +1454,7 @@ printf("got here %d %d\n",clock16K,ioClock);
 			if (CDIO1616Input[ii] != CDIO1616Output[ii]) {
 			  CDIO1616Input[ii] = writeCDIO1616l(&cdsPciModules, kk, CDIO1616Output[ii]);
 			}
+			CDIO1616InputInput[ii] = readInputCDIO1616l(&cdsPciModules, kk);
                 } else
                 if((cdsPciModules.doType[kk] == ACS_24DIO) && (dioOutputHold[ii] != dioOutput[ii]))
 		{
