@@ -493,11 +493,19 @@ unsigned int readCDO32l(CDS_HARDWARE *pHardware, int modNum)
 unsigned int writeCDIO1616l(CDS_HARDWARE *pHardware, int modNum, unsigned int data)
 {
         outl(data,pHardware->pci_do[modNum]);
-        return(inl(pHardware->pci_do[modNum]));
+	// The binary output state bits register is at +2
+        return(inl(pHardware->pci_do[modNum] + 2));
 }
 
 unsigned int readCDIO1616l(CDS_HARDWARE *pHardware, int modNum)
 {
+	// The binary output state bits register is at +2
+        return(inl(pHardware->pci_do[modNum] + 2));
+}
+
+unsigned int readInputCDIO1616l(CDS_HARDWARE *pHardware, int modNum)
+{
+	// Reading at +0 gives the input bits
         return(inl(pHardware->pci_do[modNum]));
 }
 
