@@ -14,9 +14,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Dec 11 16:36:17 2009"
+  LastModifiedDate	  "Tue Dec 15 15:34:57 2009"
   RTWModifiedTimeStamp	  0
-  ModelVersionFormat	  "1.%<AutoIncrement:131>"
+  ModelVersionFormat	  "1.%<AutoIncrement:132>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -1209,7 +1209,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[864, 77, 1298, 627]
+	Location		[937, 154, 1392, 729]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1318,7 +1318,7 @@ Library {
 	  Name			  "Contec1616dio"
 	  Tag			  "cdsCDIO1616"
 	  Ports			  [1, 1]
-	  Position		  [140, 330, 180, 390]
+	  Position		  [145, 310, 185, 370]
 	  BackgroundColor	  "gray"
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsContec1616DIO/Subsystem"
@@ -1338,7 +1338,7 @@ Library {
 	  Tag			  "cdsCBO32"
 	  Description		  "Contec32 bit binary output module driver"
 	  Ports			  [1, 1]
-	  Position		  [120, 437, 185, 473]
+	  Position		  [160, 497, 225, 533]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -1355,10 +1355,29 @@ Library {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "Contec6464dio"
+	  Tag			  "cdsDIO6464"
+	  Ports			  [1, 1]
+	  Position		  [135, 405, 175, 465]
+	  BackgroundColor	  "gray"
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsContec6464DIO/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "DAC_0"
 	  Description		  "DAC"
 	  Ports			  [16, 16]
-	  Position		  [305, 27, 355, 493]
+	  Position		  [330, 32, 380, 498]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>"
@@ -1753,7 +1772,7 @@ Library {
       System {
 	Name			"Osc/Phase"
 	Location		[843, 656, 1240, 1020]
-	Open			on
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
