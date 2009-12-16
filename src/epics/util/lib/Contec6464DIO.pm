@@ -1,23 +1,23 @@
-package CDS::Contec1616DIO;
+package CDS::Contec6464DIO;
 use Exporter;
 @ISA = ('Exporter');
 
-sub initCDIO1616 {
+sub initCDIO6464 {
 	my ($node) = @_;
 	$::boPartNum[$::boCnt] = $::partCnt;
 	my $desc = ${$node->{FIELDS}}{"Name"};
 	my $l = length($desc);
-        my $CDIO1616num = substr($desc, ($l-1), 1);
-        if ($CDIO1616num =~ m/\D/) {
+        my $CDIO6464num = substr($desc, ($l-1), 1);
+        if ($CDIO6464num =~ m/\D/) {
            die "Last character of module name must be digit\: $desc\n";
         } 
-	$::boType[$::boCnt] = "CON_1616DIO";
-	$::boNum[$::boCnt] = $CDIO1616num;
+	$::boType[$::boCnt] = "CON_6464DIO";
+	$::boNum[$::boCnt] = $CDIO6464num;
 	$::boCnt ++;
 }
 
 sub partType {
-	return Contec1616DIO;
+	return Contec6464DIO;
 }
 
 # Print Epics communication structure into a header file
@@ -57,7 +57,7 @@ sub fromExp {
         my ($i, $j) = @_;
 	my $l = length($::partInput[$i][$j]);
         my $card =  substr($::partInput[$i][$j], ($l-1), 1);
-       	return "(CDIO1616InputInput\[" . $card . "\] & 0xffff)";
+       	return "(CDIO6464InputInput\[" . $card . "\] & 0xffff)";
 }
 
 # Return front end code
@@ -67,12 +67,12 @@ sub fromExp {
 sub frontEndCode {
 	my ($i) = @_;
 	my $l = length($::partName[$i]);
-        my $CDIO1616Num = substr($::partName[$i], ($l-1), 1);
-        my $calcExp = "// CDIO1616 number is $CDIO1616Num name $::partName[$i]\n";
+        my $CDIO6464Num = substr($::partName[$i], ($l-1), 1);
+        my $calcExp = "// CDIO6464 number is $CDIO6464Num name $::partName[$i]\n";
         my $fromType = $::partInputType[$i][$_];
         if (($fromType ne "GROUND") && ($::partInput[$i][0] ne "NC")) {
-                $calcExp .= "CDIO1616Output\[";
-                $calcExp .= $CDIO1616Num;
+                $calcExp .= "CDIO6464Output\[";
+                $calcExp .= $CDIO6464Num;
                 $calcExp .= "\] = ((int)";
                 $calcExp .= $::fromExp[0];
                 $calcExp .= " << 16) + ((int)";
