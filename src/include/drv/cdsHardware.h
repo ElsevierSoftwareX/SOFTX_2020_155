@@ -45,7 +45,7 @@
 #define GSC_18AO8		8
 #define ACS_24DIO		9
 #define CON_1616DIO		10
-#define CON_3232DIO		11
+#define CON_6464DIO		11
 
 /* Cards configuration */
 typedef struct CDS_CARDS {
@@ -81,7 +81,7 @@ typedef struct CDS_HARDWARE{
 	unsigned short pci_iiro_dio1[MAX_DIO_MODULES];	/* io regs of IIRO-16 mods */
 	int cDo32lCount;	 	/* Number of Contec isolated DO modules found */
 	int cDio1616lCount;	 	/* Number of Contec isolated 16 channel DIO modules found */
-	int cDio3232lCount;	 	/* Number of Contec isolated 32 channel DIO modules found */
+	int cDio6464lCount;	 	/* Number of Contec isolated 32 channel DIO modules found */
 	unsigned short pci_cdo_dio1[MAX_DIO_MODULES];	/* io regs of Contec 32BO mods */
 	int rfmCount;			/* Number of RFM modules found		*/
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
@@ -130,7 +130,7 @@ typedef struct IO_MEM_DATA{
 /* 	Isolated Digital Output board for PCI Express */
 #define C_DO_32L_PE	0x86E2
 #define C_DIO_1616L_PE	0x8632
-#define C_DIO_3232L_PE	0x8682
+#define C_DIO_6464L_PE	0x8682
 
 /* PLX Chip Definitions for GSA ADC/DAC Modules ******************************* */
 /* Common DMA register definition		*/

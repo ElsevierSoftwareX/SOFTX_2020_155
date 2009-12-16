@@ -405,6 +405,12 @@ sub node_processing {
                      die "Too many Digital I/O modules \(max is $::maxDioMod\)\n";
                   }
 		}
+		if ($part_name eq "Contec6464DIO") {
+        	  $::partType[$::partCnt] = CDS::Contec6464DIO::initCDIO6464($node);
+                  if ($::boCnt > $::maxDioMod) {
+                     die "Too many Digital I/O modules \(max is $::maxDioMod\)\n";
+                  }
+		}
 		if ($part_name eq "CDO32") {
         	  $::partType[$::partCnt] = CDS::CDO32::initCDO32($node);
                   if ($::boCnt > $::maxDioMod) {

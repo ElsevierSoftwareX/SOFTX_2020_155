@@ -276,6 +276,9 @@ unsigned int CDO32Output[MAX_DIO_MODULES];
 unsigned int CDIO1616InputInput[MAX_DIO_MODULES]; // Binary input bits
 unsigned int CDIO1616Input[MAX_DIO_MODULES]; // Current value of the BO bits
 unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
+unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
+unsigned int CDIO6464Input[MAX_DIO_MODULES]; // Current value of the BO bits
+unsigned int CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
 int clock16K = 0;
 int out_buf_size = 0; // test checking DAC buffer size
 double cycle_gps_time = 0.; // Time at which ADCs triggered
@@ -782,6 +785,8 @@ void *fe_start(void *arg)
   	  CDO32Input[ii] = readCDO32l(&cdsPciModules, kk);
 	} else if (cdsPciModules.doType[kk] == CON_1616DIO) {
   	  CDIO1616Input[ii] = readCDIO1616l(&cdsPciModules, kk);
+	} else if (cdsPciModules.doType[kk] == CON_6464DIO) {
+  	  CDIO6464Input[ii] = readCDIO6464l(&cdsPciModules, kk);
 	} else if(cdsPciModules.doType[kk] == ACS_24DIO) {
   	  dioInput[ii] = readDio(&cdsPciModules, kk);
 	}
@@ -1455,6 +1460,11 @@ printf("got here %d %d\n",clock16K,ioClock);
 			  CDIO1616Input[ii] = writeCDIO1616l(&cdsPciModules, kk, CDIO1616Output[ii]);
 			}
 			CDIO1616InputInput[ii] = readInputCDIO1616l(&cdsPciModules, kk);
+		} else if (cdsPciModules.doType[kk] == CON_6464DIO) {
+			if (CDIO6464Input[ii] != CDIO6464Output[ii]) {
+			  CDIO6464Input[ii] = writeCDIO6464l(&cdsPciModules, kk, CDIO6464Output[ii]);
+			}
+			CDIO6464InputInput[ii] = readInputCDIO6464l(&cdsPciModules, kk);
                 } else
                 if((cdsPciModules.doType[kk] == ACS_24DIO) && (dioOutputHold[ii] != dioOutput[ii]))
 		{
@@ -1967,6 +1977,7 @@ int main(int argc, char **argv)
         printf("***************************************************************************\n");
 	printf("%d Contec 32ch PCIe DO cards found\n",cdsPciModules.cDo32lCount);
 	printf("%d Contec PCIe DIO1616 cards found\n",cdsPciModules.cDio1616lCount);
+	printf("%d Contec PCIe DIO6464 cards found\n",cdsPciModules.cDio6464lCount);
 	printf("%d DO cards found\n",cdsPciModules.doCount);
         printf("***************************************************************************\n");
 	printf("%d RFM cards found\n",cdsPciModules.rfmCount);

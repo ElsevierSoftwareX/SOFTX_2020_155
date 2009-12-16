@@ -425,6 +425,30 @@ int mapIiroDio1(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 }
 
 // *****************************************************************************
+// Initialize CONTEC PCIe 6464 DIO module
+// *****************************************************************************
+int mapContec6464dio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
+{
+  static unsigned int pci_io_addr;
+  int devNum;
+  int id;
+
+	  devNum = pHardware->doCount;
+	  pci_enable_device(diodev);
+	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_0,&pci_io_addr);
+	  printk("contec 6464 dio pci2 = 0x%x\n",pci_io_addr);
+	  pHardware->pci_do[devNum] = pci_io_addr-1;
+	  printk("contec32L diospace = 0x%x\n",pHardware->pci_do[devNum]);
+	  pci_read_config_dword(diodev,PCI_REVISION_ID,&id);
+	  printk("contec dio pci2 card number= 0x%x\n",(id & 0xf));
+	  pHardware->doType[devNum] = CON_6464DIO;
+	  pHardware->doCount ++;
+	  pHardware->doInstance[devNum]  = pHardware->cDio6464lCount;
+	  pHardware->cDio6464lCount ++;
+	  return(0);
+}
+
+// *****************************************************************************
 // Initialize CONTEC PCIe 1616 DIO module
 // *****************************************************************************
 int mapContec1616dio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
@@ -509,6 +533,24 @@ unsigned int readInputCDIO1616l(CDS_HARDWARE *pHardware, int modNum)
         return(inl(pHardware->pci_do[modNum]));
 }
 
+unsigned int writeCDIO6464l(CDS_HARDWARE *pHardware, int modNum, unsigned int data)
+{
+        outl(data,pHardware->pci_do[modNum]);
+	//
+        return(inl(pHardware->pci_do[modNum] + 4));
+}
+
+unsigned int readCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
+{
+	//
+        return(inl(pHardware->pci_do[modNum] + 4));
+}
+
+unsigned int readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
+{
+	//
+        return(inl(pHardware->pci_do[modNum]));
+}
 
 // *****************************************************************************
 // Routine to initialize DAC modules
