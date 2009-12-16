@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.175"
+    ComputedModelVersion    "1.176"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -24,9 +24,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Dec 15 16:04:13 2009"
+  LastModifiedDate	  "Tue Dec 15 16:30:42 2009"
   RTWModifiedTimeStamp	  0
-  ModelVersionFormat	  "1.%<AutoIncrement:175>"
+  ModelVersionFormat	  "1.%<AutoIncrement:176>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -553,7 +553,7 @@ Model {
   }
   System {
     Name		    "alx"
-    Location		    [138, 213, 1177, 920]
+    Location		    [138, 213, 1176, 922]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -680,13 +680,13 @@ Model {
     }
     Block {
       BlockType		      Reference
-      Name		      "Contec646dio0"
-      Tag		      "cdsCDIO1616"
+      Name		      "Contec6464dio0"
+      Tag		      "cdsDIO6464"
       Ports		      [1, 1]
-      Position		      [510, 225, 550, 285]
+      Position		      [510, 230, 550, 290]
       BackgroundColor	      "gray"
       AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsContec1616DIO/Subsystem"
+      SourceBlock	      "cdsContec6464DIO/Subsystem"
       SourceType	      "SubSystem"
       ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
@@ -761,8 +761,8 @@ Model {
 	DstPort			1
       }
       Branch {
-	Points			[0, 185]
-	DstBlock		"Contec646dio0"
+	Points			[0, 190]
+	DstBlock		"Contec6464dio0"
 	DstPort			1
       }
     }
@@ -874,9 +874,9 @@ Model {
       }
     }
     Line {
-      SrcBlock		      "Contec646dio0"
+      SrcBlock		      "Contec6464dio0"
       SrcPort		      1
-      Points		      [0, -10]
+      Points		      [0, -15]
       DstBlock		      "B"
       DstPort		      1
     }
