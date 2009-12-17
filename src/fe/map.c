@@ -533,23 +533,29 @@ unsigned int readInputCDIO1616l(CDS_HARDWARE *pHardware, int modNum)
         return(inl(pHardware->pci_do[modNum]));
 }
 
-unsigned int writeCDIO6464l(CDS_HARDWARE *pHardware, int modNum, unsigned int data)
+unsigned long writeCDIO6464l(CDS_HARDWARE *pHardware, int modNum, unsigned long data)
 {
-        outl(data,pHardware->pci_do[modNum]);
+        outl(data&0xffffffff,pHardware->pci_do[modNum] + 8);
+        outl(data>>32,pHardware->pci_do[modNum] + 8 + 4);
 	//
-        return(inl(pHardware->pci_do[modNum] + 4));
+        unsigned long out = inl(pHardware->pci_do[modNum] + 8);
+        unsigned long out1 = inl(pHardware->pci_do[modNum] + 12);
+	return out | (out1 << 32);
 }
 
-unsigned int readCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
+unsigned long readCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
 {
 	//
-        return(inl(pHardware->pci_do[modNum] + 4));
+        unsigned long out = inl(pHardware->pci_do[modNum] + 8);
+        unsigned long out1 = inl(pHardware->pci_do[modNum] + 12);
+	return out | (out1 << 32);
 }
 
-unsigned int readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
+unsigned long readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
 {
-	//
-        return(inl(pHardware->pci_do[modNum]));
+        unsigned long out = inl(pHardware->pci_do[modNum]);
+        unsigned long out1 = inl(pHardware->pci_do[modNum] + 4);
+	return out | (out1 << 32);
 }
 
 // *****************************************************************************
@@ -1064,6 +1070,36 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		}
 		bo_cnt ++;
   }
+
+  dacdev = NULL;
+  status = 0;
+  bo_cnt = 0;
+
+  // Search for Contec C_DIO_6464L_PE isolated I/O modules
+  while((dacdev = pci_get_device(CONTEC_VID, C_DIO_6464L_PE, dacdev))) {
+		int use_it = 0;
+		if (pCds->cards) {
+			use_it = 0;
+			/* See if ought to use this one or not */
+			int i;
+			for (i = 0; i < pCds->cards; i++) {
+				if (pCds->cards_used[i].type == CON_6464DIO
+				    && pCds->cards_used[i].instance == bo_cnt) {
+					use_it = 1;
+					break;
+				}
+			}
+		}
+		if (use_it) {
+                  printk("Contec 6464 DIO card on bus %x; device %x\n",
+                        dacdev->bus->number,
+			PCI_SLOT(dacdev->devfn));
+		  status = mapContec6464dio(pCds,dacdev);
+		  modCount ++;
+		}
+		bo_cnt ++;
+  }
+
 
   dacdev = NULL;
   status = 0;
