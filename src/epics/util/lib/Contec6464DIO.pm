@@ -57,7 +57,7 @@ sub fromExp {
         my ($i, $j) = @_;
 	my $l = length($::partInput[$i][$j]);
         my $card =  substr($::partInput[$i][$j], ($l-1), 1);
-       	return "(CDIO6464InputInput\[" . $card . "\] & 0xffff)";
+       	return "CDIO6464InputInput\[" . $card . "\]";
 }
 
 # Return front end code
@@ -73,11 +73,9 @@ sub frontEndCode {
         if (($fromType ne "GROUND") && ($::partInput[$i][0] ne "NC")) {
                 $calcExp .= "CDIO6464Output\[";
                 $calcExp .= $CDIO6464Num;
-                $calcExp .= "\] = ((int)";
+                $calcExp .= "\] = ";
                 $calcExp .= $::fromExp[0];
-                $calcExp .= " << 16) + ((int)";
-                $calcExp .= $::fromExp[0];
-		$calcExp .= " & 0xffff);\n";
+		$calcExp .= ";\n";
         }
         return $calcExp;
 

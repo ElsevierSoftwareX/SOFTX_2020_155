@@ -276,9 +276,9 @@ unsigned int CDO32Output[MAX_DIO_MODULES];
 unsigned int CDIO1616InputInput[MAX_DIO_MODULES]; // Binary input bits
 unsigned int CDIO1616Input[MAX_DIO_MODULES]; // Current value of the BO bits
 unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
-unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
-unsigned int CDIO6464Input[MAX_DIO_MODULES]; // Current value of the BO bits
-unsigned int CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
+unsigned long CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
+unsigned long CDIO6464Input[MAX_DIO_MODULES]; // Current value of the BO bits
+unsigned long CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
 int clock16K = 0;
 int out_buf_size = 0; // test checking DAC buffer size
 double cycle_gps_time = 0.; // Time at which ADCs triggered
