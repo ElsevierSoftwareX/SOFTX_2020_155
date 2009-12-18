@@ -279,6 +279,9 @@ unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
 unsigned long CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
 unsigned long CDIO6464Input[MAX_DIO_MODULES]; // Current value of the BO bits
 unsigned long CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
+unsigned long writeCDIO6464l(CDS_HARDWARE *pHardware, int modNum, unsigned long data);
+unsigned long readCDIO6464l(CDS_HARDWARE *pHardware, int modNum);
+unsigned long readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum);
 int clock16K = 0;
 int out_buf_size = 0; // test checking DAC buffer size
 double cycle_gps_time = 0.; // Time at which ADCs triggered
