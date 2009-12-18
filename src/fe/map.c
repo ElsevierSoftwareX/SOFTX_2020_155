@@ -555,7 +555,8 @@ unsigned long readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
 {
         unsigned long out = inl(pHardware->pci_do[modNum]);
         unsigned long out1 = inl(pHardware->pci_do[modNum] + 4);
-	return out | (out1 << 32);
+	out |= (out1 << 32);
+	return out;
 }
 
 // *****************************************************************************
