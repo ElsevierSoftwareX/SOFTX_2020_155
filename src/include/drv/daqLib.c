@@ -160,7 +160,7 @@ static volatile char *exciteDataPtr;	  /* Ptr to EXC data in shmem.	*/
 int testVal;			/* Temp TP value for valid check.	*/
 static int validTp;		/* Number of valid GDS sigs selected.	*/
 static int validTpNet;		/* Number of valid GDS sigs selected.	*/
-static int validEx;		/* Local chan number of 1st EXC signal.	*/
+//static int validEx;		/* Local chan number of 1st EXC signal.	*/
 static int tpNum[GM_DAQ_MAX_TPS]; /* TP/EXC selects to send to FB.	*/
 static int tpNumNet[GM_DAQ_MAX_TPS]; /* TP/EXC selects to send to FB.	*/
 static int totalChans;		/* DAQ + TP + EXC chans selected.	*/
@@ -422,6 +422,13 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     daqWriteCycle = 0;
     daqWriteTime = sysRate / 16;
 
+
+    int i;
+    for (i = 0; i < GM_DAQ_MAX_TPS; i++) {
+	tpNum[i] = 0;
+	tpNumNet[i] = 0;
+    }
+
   } /* End DAQ CONNECT */
 
 /* ******************************************************************************** */
@@ -591,10 +598,14 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
   // Read in any selected EXC signals.
   excSlot = (excSlot + 1) % sysRate;
-  if(validEx)
+  //if(validEx)
   {
-  	for(ii=validEx;ii<totalChans;ii++)
+	// Go through all test points
+  	for(ii=dataInfo.numChans;ii<totalChans;ii++)
   	{
+		// Do not pickup any testpoints (type 0 or 1)
+		if (localTable[ii].type < 2) continue;
+
 		exChanOffset = localTable[ii].sigNum * excDataSize;
 		statusPtr = (int *)(exciteDataPtr + excBlockNum * DAQ_DCU_BLOCK_SIZE + exChanOffset);
 		if(*statusPtr == 0)
@@ -756,8 +767,220 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	}
       // Check for new TP
       // This will cause new TP to be written to local memory at start of 1 sec block.
+
       if(daqBlockNum == 15)
       {
+	unsigned int tpnum[DAQ_GDS_MAX_TP_NUM];		// Current TP nums
+	unsigned int excnum[DAQ_GDS_MAX_TP_NUM];	// Current EXC nums
+	// Offset by one into the TP/EXC tables for the 2K systems
+	unsigned int _2k_sys_offs = sysRate < DAQ_16K_SAMPLE_SIZE;
+	
+	// Copy TP/EXC tables into my local memory
+	memcpy(excnum, gdsPtr->tp[_2k_sys_offs][0], sizeof(excnum));
+	memcpy(tpnum, gdsPtr->tp[2 + _2k_sys_offs][0], sizeof(excnum));
+
+	// Helper function to search the lists
+	// Clears the found number from the lists
+	// tpnum and excnum lists of numbers do not intersect
+	inline int in_the_lists(unsigned int tp) {
+		int i;
+		for (i = 0; i < DAQ_GDS_MAX_TP_NUM; i++){
+			if (tpnum[i] == tp) return (tpnum[i] = 0, 1);
+			if (excnum[i] == tp) return (excnum[i] = 0, 1);
+		}
+		return 0;
+	}
+
+	// Search and clear deselected test points
+	int i;
+	for (i = 0; i < GM_DAQ_MAX_TPS; i++) {
+		if (tpNum[i] == 0) continue;
+		if (!in_the_lists(tpNum[i])) {
+		  tpNum[i] = 0; // Removed test point is cleared now
+		  int ltSlot = dataInfo.numChans + i;
+
+		  // If we are clearing an EXC signal, reset filter module input
+		  if (localTable[ltSlot].type == 2) {
+		    dspPtr->data[excTable[i].fmNum].exciteInput = 0.0;
+		    excTable[i].sigNum = 0;
+		  }
+
+		  localTable[ltSlot].type = 0;
+          	  localTable[ltSlot].sysNum = 0;
+          	  localTable[ltSlot].fmNum = 0;
+          	  localTable[ltSlot].sigNum = 0;
+	  	  localTable[ltSlot].decFactor = 1;
+      		  dataInfo.tp[ltSlot].dataType = 4;
+		}
+	}
+	
+	// Helper function to find an empty slot in the localTable
+	inline unsigned int empty_slot() {
+		int i;
+		for (i = 0; i < GM_DAQ_MAX_TPS; i++) {
+			if (tpNum[i] == 0) return i;	
+		}
+		return -1;
+	}
+
+	// tpnum and excnum lists now have only the new test points
+	// Insert these new numbers into empty localTable slots
+	for (i = 0; i < (2 * DAQ_GDS_MAX_TP_NUM); i++) {
+		unsigned int exc = 0;
+		unsigned int tpn;
+		// Do test points first
+		if (i < DAQ_GDS_MAX_TP_NUM) {
+			if (tpnum[i] == 0) continue;
+			tpn = tpnum[i];
+		} else {
+			if (excnum[i - DAQ_GDS_MAX_TP_NUM] == 0) continue;
+			tpn = excnum[i - DAQ_GDS_MAX_TP_NUM];
+			exc = 1;
+		}
+		int slot = empty_slot();
+		if (slot < 0) {
+			// No more slots left, table's full
+			break;
+		}
+
+		// localTable slot (shifted by the number of DAQ channels)
+		int ltSlot = dataInfo.numChans + slot;
+
+		// Populate the slot with the information
+		if (!exc) {
+       		  if (tpn >= daqRange.filtTpMin && tpn < daqRange.filtTpMax) {
+		    jj = tpn - daqRange.filtTpMin;
+		    localTable[ltSlot].type = 0;
+          	    localTable[ltSlot].sysNum = jj / daqRange.filtTpSize;
+		    jj -= localTable[ltSlot].sysNum * daqRange.filtTpSize;
+          	    localTable[ltSlot].fmNum = jj / 3;
+          	    localTable[ltSlot].sigNum = jj % 3; 
+	  	    localTable[ltSlot].decFactor = 1;
+      		    dataInfo.tp[ltSlot].dataType = 4;
+
+		    // Need to recalculate offsets later
+		    //offsetAccum += sysRate * 4;
+		    //localTable[totalChans+1].offset = offsetAccum;
+
+		    //if (slot < 24) gdsMonitor[slot] = tpn;
+          	    gdsPtr->tp[2 + _2k_sys_offs][1][slot] = 0;
+		    tpNum[slot] = tpn;
+
+		    //validTp ++;
+		    //totalChans ++;
+		    //totalSize += tpAdd;
+        	  } else if (tpn >= daqRange.xTpMin && tpn < daqRange.xTpMax) {
+	 	    jj = tpn - daqRange.xTpMin;
+		    localTable[ltSlot].type = 1;
+		    localTable[ltSlot].sigNum = jj;
+		    //offsetAccum += sysRate * 4;
+		    //localTable[totalChans+1].offset = offsetAccum;
+	  	    localTable[ltSlot].decFactor = 1;
+      		    dataInfo.tp[ltSlot].dataType = 4;
+		    //if (slot < 24) gdsMonitor[slot] = testVal;
+		    gdsPtr->tp[2 + _2k_sys_offs][1][slot] = 0;
+		    tpNum[slot] = tpn;
+		  
+		    //validTp ++;
+		    //totalChans ++;
+		    //totalSize += tpAdd;
+		  //} else {
+		    //if (tpn < 24) gdsMonitor[tpn] = 0;
+		  }
+	        } else {
+
+#if 0
+		// This needs to be moved out from here
+		// to the place where the exc is cleared
+
+		  // Have to clear an exc if it goes away
+		  if((tpn != excTable[slot].sigNum) && (excTable[slot].sigNum != 0)) {
+		    dspPtr->data[excTable[slot].fmNum].exciteInput = 0.0;
+		    excTable[slot].sigNum = 0;
+		  }
+#endif
+
+        	  if (tpn >= daqRange.filtExMin && tpn < daqRange.filtExMax) {
+		    jj = tpn - daqRange.filtExMin;
+		    localTable[ltSlot].type = 2;
+          	    localTable[ltSlot].sysNum = jj / daqRange.filtExSize;
+          	    localTable[ltSlot].fmNum = jj % daqRange.filtExSize;
+          	    localTable[ltSlot].sigNum = slot;
+	  	    localTable[ltSlot].decFactor = 1;
+		    excTable[slot].sigNum = tpn;
+		    excTable[slot].sysNum = localTable[ltSlot].sysNum;
+		    excTable[slot].fmNum = localTable[ltSlot].fmNum;
+      		    dataInfo.tp[ltSlot].dataType = 4;
+
+		    //offsetAccum += sysRate * 4;
+		    //localTable[totalChans+1].offset = offsetAccum;
+		    //if (slot < 8) gdsMonitor[slot + 24] = tpn;
+          	    gdsPtr->tp[_2k_sys_offs][1][slot] = 0;
+		    tpNum[slot] = tpn;
+
+		    //validTp ++;
+		    //if(!validEx) validEx = totalChans;
+		    //totalChans ++;
+		    //totalSize += tpAdd;
+        	  } else if (tpn >= daqRange.xExMin && tpn < daqRange.xExMax) {
+	 	    jj = tpn - daqRange.xExMin;
+		    localTable[ltSlot].type = 3;
+          	    localTable[ltSlot].fmNum = jj;
+		    localTable[ltSlot].sigNum = ii;
+		    //offsetAccum += sysRate * 4;
+		    //localTable[totalChans+1].offset = offsetAccum;
+	  	    localTable[ltSlot].decFactor = 1;
+      		    dataInfo.tp[ltSlot].dataType = 4;
+		   // if (slot < 8) gdsMonitor[slot + 24] = tpn;
+          	    gdsPtr->tp[_2k_sys_offs][1][slot] = 0;
+		    tpNum[slot] = tpn;
+		    //validTp ++;
+		    //if(!validEx) validEx = totalChans;
+		    //totalChans ++;
+		    //totalSize += tpAdd;
+	//	  } else {
+		    //if (slot < 8) gdsMonitor[slot + 24] = 0;
+		  }
+		}
+	}
+
+	// Calculate total number of test points to transmit
+	totalChans = dataInfo.numChans; // Set to the DAQ channels number
+	validTp = 0;
+	totalSize = mnDaqSize;
+	int num_tps = 0;
+
+	// Skip empty slots at the end
+	for (i = GM_DAQ_MAX_TPS-1; i >= 0; i--) {
+		if (tpNum[i]) {
+			num_tps = i + 1;
+#if 0
+			int j;
+			for (j = 0; j < i+1; j++)
+				printf("%d ", tpNum[j]);
+			printf("\n");
+#endif
+			break;
+		}
+	}
+	totalChans += num_tps;
+	validTp = num_tps;
+	
+	// Calculate the total transmission size
+	totalSize = mnDaqSize + validTp * (sysRate / 4);
+
+	//printf("totalSize=%d; totalChans=%d; validTp=%d\n", totalSize, totalChans, validTp);
+
+	// Assign offsets into the localTable
+	offsetAccum = tpStart;
+	for (i = 0; i < validTp; i++) {
+	    localTable[dataInfo.numChans + i].offset = offsetAccum;
+	    offsetAccum += sysRate * 4;
+	    if (i < 32) gdsMonitor[i] = tpNum[i];
+	}
+
+	for (i = validTp; i < 32; i++) gdsMonitor[i] = 0;
+#if 0
  	totalChans = dataInfo.numChans;
 	totalSize = mnDaqSize;
 	offsetAccum = tpStart;
@@ -938,6 +1161,8 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		}
 
 	 }  /* End for loop */
+#endif // 0
+
       } /* End normal check for new TP numbers */
 
       // Network write is one cycle behind memory write, so now update tp nums for FB xmission
