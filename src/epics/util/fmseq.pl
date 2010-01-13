@@ -17,8 +17,8 @@
     "swRset" => "RSET", 
     "switchR1" => "SW1R",
     "switchR2" => "SW2R",
-    "saveSwitch1" => "SW1S",
-    "saveSwitch2" => "SW2S",
+    "saveSwitch1" => "SW1R",
+    "saveSwitch2" => "SW2R",
 	 );
 
 %iparAlarmSev = (
@@ -34,22 +34,22 @@
     "outgainHighSev" => "GAIN.HSV",
     "outgainLowSev" => "GAIN.LSV",
     "outgainLoloSev" => "GAIN.LLSV",
-    "saveSwitch1HihiSev" => "SW1S.HHSV",
-    "saveSwitch1HighSev" => "SW1S.HSV",
-    "saveSwitch1LowSev" => "SW1S.LSV",
-    "saveSwitch1LoloSev" => "SW1S.LLSV",
-    "saveSwitch2HihiSev" => "SW2S.HHSV",
-    "saveSwitch2HighSev" => "SW2S.HSV",
-    "saveSwitch2LowSev" => "SW2S.LSV",
-    "saveSwitch2LoloSev" => "SW2S.LLSV",
+    "saveSwitch1HihiSev" => "SW1R.HHSV",
+    "saveSwitch1HighSev" => "SW1R.HSV",
+    "saveSwitch1LowSev" => "SW1R.LSV",
+    "saveSwitch1LoloSev" => "SW1R.LLSV",
+    "saveSwitch2HihiSev" => "SW2R.HHSV",
+    "saveSwitch2HighSev" => "SW2R.HSV",
+    "saveSwitch2LowSev" => "SW2R.LSV",
+    "saveSwitch2LoloSev" => "SW2R.LLSV",
 	 );
 
 %iparAlarmStat = (
     "limitStat" => "LIMIT.STAT",
     "offsetStat" => "OFFSET.STAT",
     "outgainStat" => "GAIN.STAT",
-    "saveSwitch1Stat" => "SW1S.STAT",
-    "saveSwitch2Stat" => "SW2S.STAT",
+    "saveSwitch1Stat" => "SW1R.STAT",
+    "saveSwitch2Stat" => "SW2R.STAT",
 	 );
 
 %spar = (
