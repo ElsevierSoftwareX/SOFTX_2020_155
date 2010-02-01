@@ -65,7 +65,6 @@ double calc10powX(double x)
 void OMC_UGF_DB2MAG(double* datIn, int nIn, double* datOut, int nOut)
 {
   double dB;
-  double dBn;
   double mag;
   double limLowSW;
   double limHighSW;
