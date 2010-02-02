@@ -829,6 +829,7 @@ if (1) {
 	}
      }
    }
+   #print ::EPICS "test_points ONE_PPS $::extraTestPoints\n";
    if (@::top_names) {
    	print ::EPICS "top_names FEC";
    	foreach $item (@::top_names) {
