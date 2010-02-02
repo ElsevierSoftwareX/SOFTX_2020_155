@@ -28,7 +28,7 @@
 
 
 /* Define maximum number of each PCI module supported.				*/
-#define MAX_ADC_MODULES		8
+#define MAX_ADC_MODULES		12	
 #define MAX_DAC_MODULES		8
 #define MAX_DIO_MODULES		4
 #define MAX_RFM_MODULES		2
@@ -99,12 +99,22 @@ typedef struct CDS_HARDWARE{
 	CDS_CARDS *cards_used;		/* Cards configuration */
 }CDS_HARDWARE;
 
+#define IO_MEMORY_SLOTS		64
+#define MAX_IO_MODULES		16
+
+typedef struct MEM_DATA_BLOCK{
+	int cycle;
+	int data[32];
+}MEM_DATA_BLOCK;
+
 typedef struct IO_MEM_DATA{
-	int adcCycle[8][64];
-	int dacCycle[8][64];
-	int adcVal[8][64][32];
-	int dacVal[8][64][32];
-	int digOut[8];
+	int gpsSecond;
+	int totalCards;
+	int adcCount;
+	int dacCount;
+	int bioCount;
+	int model[MAX_IO_MODULES];
+	MEM_DATA_BLOCK iodata[MAX_IO_MODULES][IO_MEMORY_SLOTS];
 }IO_MEM_DATA;
 
 /* ACCESS DIO Module Definitions ********************************************** */
