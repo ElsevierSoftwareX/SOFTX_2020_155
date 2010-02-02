@@ -229,7 +229,7 @@ int overflowAdc[4][32];;
 int overflowDac[4][16];;
 int overflowAcc = 0;
 
-float *testpoint[20];	// Testpoints which are not part of filter modules
+float *testpoint[50];	// Testpoints which are not part of filter modules
 
 
 CDS_EPICS *pLocalEpics;   	// Local mem ptr to EPICS control data
@@ -532,7 +532,7 @@ void *fe_start(void *arg)
   static int usrHoldTime;		// Max time spent in user app code
   static int missedCycle = 0;		// Incremented error counter when too many values in ADC FIFO
   int netRetry;				// Myrinet reconnect variable
-  float xExc[10];			// GDS EXC not associated with filter modules
+  float xExc[50];			// GDS EXC not associated with filter modules
   int diagWord = 0;			// Code diagnostic bit pattern returned to EPICS
   int timeDiag = 0;			// GPS seconds, passed to EPICS
   int epicsCycle = 0;

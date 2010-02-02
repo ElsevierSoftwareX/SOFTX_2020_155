@@ -120,6 +120,10 @@ while (<IN>) {
 	@top_names = split(/\s+/, $_);	
 	shift @top_names;
 	print "top_names are @top_names\n";
+    } elsif (/^test_points/) {
+	@testpoints = split(/\s+/, $_);	
+	shift @testpoints;
+	print "testpoints are @testpoints\n";
     } elsif (substr($_,0,10) eq "gds_config") {
 	$gds_rmid = 0;
 	$site = "";
@@ -1041,6 +1045,24 @@ if ($gds_specified) {
 	} else {
 	 print "[$site:${systm}${i}_OUT]\n";
  	}
+	print "ifoid = $gds_ifo\n";
+	print "rmid = $gds_rmid\n";
+	print "dcuid = $gds_tp_dcu_id\n";
+	print "chnnum = $tpnum\n";
+	print "datatype = 4\n";	
+	print "datarate = $gds_datarate\n\n";
+	$tpnum++;
+      }
+      # Print extra test points
+      foreach $i ( @testpoints ) {
+    	my $top_name = is_top_name($i);
+    	my $tv_name;
+    	if ($top_name) {
+	 $tv_name = top_name_transform($i);
+	 print "[$site:${tv_name}]\n";
+	} else {
+	 print "[$site:${systm}${i}]\n";
+	}
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
 	print "dcuid = $gds_tp_dcu_id\n";

@@ -165,6 +165,8 @@ sub debug {
 
 sub init_vars {
 # Global variables set by parser
+$extraTestPoints;	# a list of test point names not related to filters
+$extraTpcount = 0;		# How many extra TPs we have
 @top_names; 	# array of top-level subsytem names marked with "top_names" tag
 $systemName = "";	# model name
 $adcCnt = 0;	# Total A/D converter boards
@@ -1597,6 +1599,7 @@ if($rate == 480 || $rate == 240) {
   $gdsXstart = 1;
   $gdsTstart = 10001;
 }
+print EPICS "test_points ONE_PPS $::extraTestPoints\n";
 print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site " . get_freq() . " $dcuId $ifoid\n";
 print EPICS "\n\n";
 
