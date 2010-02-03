@@ -58,7 +58,7 @@ sub fromExp {
 
 sub frontEndCode {
         my ($i) = @_;
-        my $ret = "// EzCaWrite\n";
+        my $ret = "// EzCaWrite:  $::xpartName[$i]\n";
 	my $temp = $::xpartName[$i];
 	$temp =~ s/\-/\_/g;
 	$temp =~ s/\:/\_/g;
