@@ -79,14 +79,14 @@ sub frontEndCode {
 	# See if this function is inlined into Description
 	#print $::inlinedFunctionCall[$i];
 	if ($::inlinedFunctionCall[$i] ne undef) {
-        	$ret = "// Inlined Function\n";
+                $ret = "// Inlined Function:  $::xpartName[$i]\n";
 		$ret .= "{\n";
 		my $s = $::inlinedFunctionCall[$i];
 		$s =~ s/\\n/\n/g; # Replace '\n' with newline character
 		$ret .= $s;
 		$ret .= "\n";
 	} else {
-        	$ret = "// Function Call\n";
+                $ret = "// Function Call:  $::xpartName[$i]\n";
 	}
 	
         $ret .= "$::xpartName[$i](";
