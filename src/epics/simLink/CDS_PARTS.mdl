@@ -14,9 +14,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Feb  2 14:08:04 2010"
+  LastModifiedDate	  "Tue Feb  2 15:49:29 2010"
   RTWModifiedTimeStamp	  0
-  ModelVersionFormat	  "1.%<AutoIncrement:135>"
+  ModelVersionFormat	  "1.%<AutoIncrement:136>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -725,7 +725,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [998, 89, 1675, 483]
+    Location		    [1021, 161, 1708, 551]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -792,6 +792,24 @@ Library {
       RTWMemSecDataInternal   "Inherit from model"
       RTWMemSecDataParameters "Inherit from model"
       DocumentType	      "Text"
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "EXC_NAME"
+      Tag		      "Excitation"
+      Ports		      [0, 1]
+      Position		      [335, 300, 375, 360]
+      AttributesFormatString  "%<Tag>"
+      SourceBlock	      "cdsEXC/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
     }
     Block {
       BlockType		      SubSystem
@@ -1003,7 +1021,7 @@ Library {
       System {
 	Name			"Filters"
 	Location		[467, 437, 845, 696]
-	Open			on
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1209,7 +1227,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[937, 154, 1392, 729]
+	Location		[1057, 445, 1512, 1020]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1893,16 +1911,14 @@ Library {
     }
     Block {
       BlockType		      Reference
-      Name		      "TPNAME"
+      Name		      "TP_NAME"
       Tag		      "Test Point"
       Ports		      [1]
       Position		      [255, 300, 295, 360]
       AttributesFormatString  "%<Tag>"
       SourceBlock	      "cdsTP/Subsystem"
       SourceType	      "SubSystem"
-      ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"

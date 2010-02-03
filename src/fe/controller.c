@@ -747,14 +747,15 @@ printf("Sync source = %d\n",syncSource);
 #endif
   daq.filtExMax = daq.filtExMin + MAX_MODULES;
   daq.filtExSize = MAX_MODULES;
-  daq.xExMin = -1;
-  daq.xExMax = -1;
+  daq.xExMin = daq.filtExMax;
+  daq.xExMax = daq.xExMin + 50;
   daq.filtTpMax = daq.filtTpMin + MAX_MODULES * 3;
   daq.filtTpSize = MAX_MODULES * 3;
   daq.xTpMin = daq.filtTpMax;
   daq.xTpMax = daq.xTpMin + 50;
 
   printf("DAQ Ex Min/Max = %d %d\n",daq.filtExMin,daq.filtExMax);
+  printf("DAQ XEx Min/Max = %d %d\n",daq.xExMin,daq.xExMax);
   printf("DAQ Tp Min/Max = %d %d\n",daq.filtTpMin,daq.filtTpMax);
   printf("DAQ XTp Min/Max = %d %d\n",daq.xTpMin,daq.xTpMax);
 
