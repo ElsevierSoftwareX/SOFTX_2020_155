@@ -1,32 +1,22 @@
-Model {
-  Name			  "alx"
+Library {
+  Name			  "cdsEXC"
   Version		  7.2
   MdlSubVersion		  0
-  GraphicalInterface {
-    NumRootInports	    0
-    NumRootOutports	    0
-    ParameterArgumentNames  ""
-    ComputedModelVersion    "1.183"
-    NumModelReferences	    0
-    NumTestPointedSignals   0
-  }
-  SavedCharacterEncoding  "windows-1252"
+  SavedCharacterEncoding  "UTF-8"
+  LibraryType		  "BlockLibrary"
   SaveDefaultBlockParams  on
   ScopeRefreshTime	  0.035000
   OverrideScopeRefreshTime on
   DisableAllScopes	  off
-  DataTypeOverride	  "UseLocalSettings"
-  MinMaxOverflowLogging	  "UseLocalSettings"
-  MinMaxOverflowArchiveMode "Overwrite"
-  Created		  "Tue Jun 03 15:15:36 2008"
-  Creator		  "Rolf"
+  Created		  "Thu Oct 26 16:52:37 2006"
+  Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Feb  3 11:39:19 2010"
+  LastModifiedDate	  "Tue Feb  2 15:48:32 2010"
   RTWModifiedTimeStamp	  0
-  ModelVersionFormat	  "1.%<AutoIncrement:183>"
+  ModelVersionFormat	  "1.%<AutoIncrement:7>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -48,25 +38,18 @@ Model {
   BlockDescriptionStringDataTip	off
   ToolBar		  on
   StatusBar		  on
-  BrowserShowLibraryLinks off
-  BrowserLookUnderMasks	  off
+  BrowserShowLibraryLinks on
+  BrowserLookUnderMasks	  on
   SimulationMode	  "normal"
   LinearizationMsg	  "none"
   Profile		  off
   ParamWorkspaceSource	  "MATLABWorkspace"
-  AccelSystemTargetFile	  "accel.tlc"
-  AccelTemplateMakefile	  "accel_default_tmf"
-  AccelMakeCommand	  "make_rtw"
-  TryForcingSFcnDF	  off
-  RecordCoverage	  off
-  CovPath		  "/"
   CovSaveName		  "covdata"
   CovMetricSettings	  "dw"
   CovNameIncrementing	  off
   CovHtmlReporting	  on
   covSaveCumulativeToWorkspaceVar on
   CovSaveSingleToWorkspaceVar on
-  CovCumulativeVarName	  "covCumulativeData"
   CovCumulativeReport	  off
   CovReportOnPause	  on
   CovModelRefEnable	  "Off"
@@ -91,7 +74,6 @@ Model {
   ExtModeSkipDownloadWhenConnect off
   ExtModeLogAll		  on
   ExtModeAutoUpdateStatusClock off
-  BufferReuse		  on
   ShowModelReferenceBlockVersion off
   ShowModelReferenceBlockIO off
   Array {
@@ -122,7 +104,7 @@ Model {
 	  MinStep		  "auto"
 	  MaxConsecutiveMinStep	  "1"
 	  RelTol		  "1e-3"
-	  SolverMode		  "Auto"
+	  SolverMode		  "SingleTasking"
 	  Solver		  "ode45"
 	  SolverName		  "ode45"
 	  ShapePreserveControl	  "DisableAll"
@@ -170,12 +152,12 @@ Model {
 	    Dimension		    4
 	    Cell		    "ZeroExternalMemoryAtStartup"
 	    Cell		    "ZeroInternalMemoryAtStartup"
-	    Cell		    "NoFixptDivByZeroProtection"
 	    Cell		    "OptimizeModelRefInitCode"
+	    Cell		    "NoFixptDivByZeroProtection"
 	    PropName		    "DisabledProps"
 	  }
-	  BlockReduction	  on
-	  BooleanDataType	  on
+	  BlockReduction	  off
+	  BooleanDataType	  off
 	  ConditionallyExecuteInputs on
 	  InlineParams		  off
 	  InlineInvariantSignals  off
@@ -196,7 +178,7 @@ Model {
 	  UseTempVars		  off
 	  ZeroExternalMemoryAtStartup on
 	  ZeroInternalMemoryAtStartup on
-	  InitFltsAndDblsToZero	  on
+	  InitFltsAndDblsToZero	  off
 	  NoFixptDivByZeroProtection off
 	  EfficientFloat2IntCast  off
 	  EfficientMapNaN2IntZero on
@@ -220,18 +202,18 @@ Model {
 	  AlgebraicLoopMsg	  "warning"
 	  ArtificialAlgebraicLoopMsg "warning"
 	  SaveWithDisabledLinksMsg "warning"
-	  SaveWithParameterizedLinksMsg	"warning"
+	  SaveWithParameterizedLinksMsg	"none"
 	  CheckSSInitialOutputMsg on
 	  UnderspecifiedInitializationDetection	"Classic"
 	  MergeDetectMultiDrivingBlocksExec "none"
 	  CheckExecutionContextPreStartOutputMsg off
 	  CheckExecutionContextRuntimeOutputMsg	off
-	  SignalResolutionControl "UseLocalSettings"
+	  SignalResolutionControl "TryResolveAllWithWarning"
 	  BlockPriorityViolationMsg "warning"
 	  MinStepSizeMsg	  "warning"
 	  TimeAdjustmentMsg	  "none"
 	  MaxConsecutiveZCsMsg	  "error"
-	  SolverPrmCheckMsg	  "warning"
+	  SolverPrmCheckMsg	  "none"
 	  InheritedTsInSrcMsg	  "warning"
 	  DiscreteInheritContinuousMsg "warning"
 	  MultiTaskDSMMsg	  "error"
@@ -300,7 +282,7 @@ Model {
 	  TargetPreprocMaxBitsSint 32
 	  TargetPreprocMaxBitsUint 32
 	  TargetHWDeviceType	  "Specified"
-	  TargetUnknown		  off
+	  TargetUnknown		  on
 	  ProdEqTarget		  on
 	}
 	Simulink.ModelReferenceCC {
@@ -327,9 +309,13 @@ Model {
 	  Version		  "1.5.1"
 	  Array {
 	    Type		    "Cell"
-	    Dimension		    2
+	    Dimension		    6
 	    Cell		    "IncludeHyperlinkInReport"
 	    Cell		    "GenerateTraceInfo"
+	    Cell		    "GenerateTraceReport"
+	    Cell		    "GenerateTraceReportSl"
+	    Cell		    "GenerateTraceReportSf"
+	    Cell		    "GenerateTraceReportEml"
 	    PropName		    "DisabledProps"
 	  }
 	  SystemTargetFile	  "grt.tlc"
@@ -370,8 +356,9 @@ Model {
 	      Version		      "1.5.1"
 	      Array {
 		Type			"Cell"
-		Dimension		16
+		Dimension		17
 		Cell			"IgnoreCustomStorageClasses"
+		Cell			"IgnoreTestpoints"
 		Cell			"InsertBlockDesc"
 		Cell			"SFDataObjDesc"
 		Cell			"SimulinkDataObjDesc"
@@ -426,7 +413,7 @@ Model {
 	      Version		      "1.5.1"
 	      Array {
 		Type			"Cell"
-		Dimension		15
+		Dimension		16
 		Cell			"IncludeMdlTerminateFcn"
 		Cell			"CombineOutputUpdateFcns"
 		Cell			"SuppressErrorStatus"
@@ -434,6 +421,7 @@ Model {
 		Cell			"GenerateSampleERTMain"
 		Cell			"GenerateTestInterfaces"
 		Cell			"ModelStepFunctionPrototypeControlCompliant"
+		Cell			"CPPClassGenCompliant"
 		Cell			"MultiInstanceERTCode"
 		Cell			"PurelyIntegerCode"
 		Cell			"SupportNonFinite"
@@ -503,17 +491,13 @@ Model {
     }
     PropName		    "ConfigurationSets"
   }
-  Simulink.ConfigSet {
-    $PropName		    "ActiveConfigurationSet"
-    $ObjectID		    1
-  }
   BlockDefaults {
     Orientation		    "right"
     ForegroundColor	    "black"
     BackgroundColor	    "white"
     DropShadow		    off
     NamePlacement	    "normal"
-    FontName		    "Arial"
+    FontName		    "Courier"
     FontSize		    10
     FontWeight		    "normal"
     FontAngle		    "normal"
@@ -525,35 +509,63 @@ Model {
     ForegroundColor	    "black"
     BackgroundColor	    "white"
     DropShadow		    off
-    FontName		    "Arial"
+    FontName		    "Courier"
     FontSize		    10
     FontWeight		    "normal"
     FontAngle		    "normal"
     UseDisplayTextAsClickCallback off
   }
   LineDefaults {
-    FontName		    "Arial"
+    FontName		    "Courier"
     FontSize		    9
     FontWeight		    "normal"
     FontAngle		    "normal"
   }
   BlockParameterDefaults {
     Block {
-      BlockType		      BusCreator
-      Inputs		      "4"
-      DisplayOption	      "none"
+      BlockType		      Outport
+      Port		      "1"
       UseBusObject	      off
       BusObject		      "BusObject"
-      NonVirtualBus	      off
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      SampleTime	      "-1"
+      OutMin		      "[]"
+      OutMax		      "[]"
+      DataType		      "auto"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
+      OutDataTypeStr	      "Inherit: auto"
+      LockScale		      off
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      SourceOfInitialOutputValue "Dialog"
+      OutputWhenDisabled      "held"
+      InitialOutput	      "[]"
     }
     Block {
-      BlockType		      BusSelector
-      OutputAsBus	      off
+      BlockType		      SubSystem
+      ShowPortLabels	      "FromPortIcon"
+      Permissions	      "ReadWrite"
+      PermitHierarchicalResolution "All"
+      TreatAsAtomicUnit	      off
+      CheckFcnCallInpInsideContextMsg off
+      SystemSampleTime	      "-1"
+      RTWFcnNameOpts	      "Auto"
+      RTWFileNameOpts	      "Auto"
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      SimViewingDevice	      off
+      DataTypeOverride	      "UseLocalSettings"
+      MinMaxOverflowLogging   "UseLocalSettings"
     }
   }
   System {
-    Name		    "alx"
-    Location		    [70, 137, 1096, 818]
+    Name		    "cdsEXC"
+    Location		    [697, 455, 1284, 725]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -565,388 +577,59 @@ Model {
     TiledPaperMargins	    [0.500000, 0.500000, 0.500000, 0.500000]
     TiledPageScale	    1
     ShowPageBoundaries	    off
-    ZoomFactor		    "123"
+    ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
     Block {
-      BlockType		      Reference
-      Name		      "A"
-      Tag		      "cdsFilt"
-      Description	      "Purpose:                                                                                     "
-      "                                                                                                                "
-      "                             \nStandard CDS IIR filter module.                                                  "
-      "                                                                                                                "
-      "                                         \n                                                                     "
-      "                                                                                                                "
-      "                                                     \nOperation:                                               "
-      "                                                                                                                "
-      "                                                                 \nConsists of 10 second order section IIR filte"
-      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
-      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
-      "                                                                                                                "
-      "                                                                                         \nUsage:               "
-      "                                                                                                                "
-      "                                                                                                     \nName the "
-      "part with the desired filter module name.                                                                       "
-      "                                                                                                                "
-      " "
-      Ports		      [1, 1]
-      Position		      [350, 58, 420, 82]
-      BackgroundColor	      "darkGreen"
-      DropShadow	      on
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsFilt/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      "FromPortIcon"
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
-      BlockType		      Reference
-      Name		      "ADC0"
-      Tag		      "Test Point"
-      Ports		      [1]
-      Position		      [360, 255, 400, 315]
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsTP/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      "FromPortIcon"
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
-      BlockType		      Reference
-      Name		      "ADC1"
-      Tag		      "Test Point"
-      Ports		      [1]
-      Position		      [325, 400, 365, 460]
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsTP/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      "FromPortIcon"
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
-      BlockType		      Reference
-      Name		      "B"
-      Tag		      "cdsFilt"
-      Description	      "Purpose:                                                                                     "
-      "                                                                                                                "
-      "                             \nStandard CDS IIR filter module.                                                  "
-      "                                                                                                                "
-      "                                         \n                                                                     "
-      "                                                                                                                "
-      "                                                     \nOperation:                                               "
-      "                                                                                                                "
-      "                                                                 \nConsists of 10 second order section IIR filte"
-      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
-      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
-      "                                                                                                                "
-      "                                                                                         \nUsage:               "
-      "                                                                                                                "
-      "                                                                                                     \nName the "
-      "part with the desired filter module name.                                                                       "
-      "                                                                                                                "
-      " "
-      Ports		      [1, 1]
-      Position		      [575, 233, 645, 257]
-      BackgroundColor	      "darkGreen"
-      DropShadow	      on
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsFilt/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      "FromPortIcon"
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
-      BlockType		      BusCreator
-      Name		      "Bus\nCreator"
-      Tag		      "adc_0"
-      Description	      "PCI66-16AI64SSA            \n40Vp-p, 16-bit, 610uV/count\ncard_num=1                 "
-      Ports		      [32, 1]
-      Position		      [80, 150, 85, 305]
-      ShowName		      off
-      AttributesFormatString  "%<Description>\\n%<Tag>"
-      Inputs		      "'adc_0_0','adc_0_1','adc_0_2','adc_0_3','adc_0_4','adc_0_5','adc_0_6','adc_0_7','adc_0_8','adc_0_"
-      "9','adc_0_10','adc_0_11','adc_0_12','adc_0_13','adc_0_14','adc_0_15','adc_0_16','adc_0_17','adc_0_18','adc_0_19'"
-      ",'adc_0_20','adc_0_21','adc_0_22','adc_0_23','adc_0_24','adc_0_25','adc_0_26','adc_0_27','adc_0_28','adc_0_29','"
-      "adc_0_30','adc_0_31'"
-      DisplayOption	      "bar"
-    }
-    Block {
-      BlockType		      BusSelector
-      Name		      "Bus\nSelector1"
-      Ports		      [1, 2]
-      Position		      [225, 61, 245, 399]
-      ShowName		      off
-      OutputSignals	      "adc_0_0,adc_0_1"
-      Port {
-	PortNumber		1
-	Name			"<adc_0_0>"
-	RTWStorageClass		"Auto"
-	DataLoggingNameMode	"SignalName"
-      }
-      Port {
-	PortNumber		2
-	Name			"<adc_0_1>"
-	RTWStorageClass		"Auto"
-	DataLoggingNameMode	"SignalName"
-      }
-    }
-    Block {
-      BlockType		      Reference
-      Name		      "DAC_0"
-      Description	      "PCI66-16AO16               \n20Vp-p, 16-bit, 305uV/count"
-      Ports		      [16, 16]
-      Position		      [685, 66, 775, 479]
-      BackgroundColor	      "cyan"
-      DropShadow	      on
-      AttributesFormatString  "%<Description>"
-      SourceBlock	      "dac/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      "FromPortIcon"
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
-      BlockType		      Reference
-      Name		      "EXC_1"
-      Tag		      "Excitation"
+      BlockType		      SubSystem
+      Name		      "Subsystem"
       Ports		      [0, 1]
-      Position		      [510, 340, 550, 400]
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsEXC/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      "FromPortIcon"
-      SystemSampleTime	      "-1"
+      Position		      [205, 60, 245, 120]
+      MinAlgLoopOccurrences   off
+      PropExecContextOutsideSubsystem off
+      RTWSystemCode	      "Auto"
       FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
+      Opaque		      off
+      RequestExecContextInheritance off
+      MaskHideContents	      off
+      System {
+	Name			"Subsystem"
+	Location		[288, 578, 498, 676]
+	Open			off
+	ModelBrowserVisibility	off
+	ModelBrowserWidth	200
+	ScreenColor		"white"
+	PaperOrientation	"landscape"
+	PaperPositionMode	"auto"
+	PaperType		"usletter"
+	PaperUnits		"inches"
+	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
+	TiledPageScale		1
+	ShowPageBoundaries	off
+	ZoomFactor		"100"
+	Block {
+	  BlockType		  Outport
+	  Name			  "Out1"
+	  Position		  [140, 28, 170, 42]
+	  IconDisplay		  "Port number"
+	}
+	Line {
+	  Points		  [60, 35]
+	  DstBlock		  "Out1"
+	  DstPort		  1
+	}
+      }
     }
     Block {
-      BlockType		      Reference
-      Name		      "site=H1\nrate=2K\ndcuid=9\ngds_node_id=1\nno_sync=1\nno_daq=1\nshmem_daq=1"
-      Tag		      "cdsParameters"
-      Ports		      [1, 1]
-      Position		      [400, 340, 440, 400]
-      BackgroundColor	      "green"
-      AttributesFormatString  "%<Tag>"
-      SourceBlock	      "cdsParameters/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      "FromPortIcon"
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
+      BlockType		      Outport
+      Name		      "Out1"
+      Position		      [270, 83, 300, 97]
+      IconDisplay	      "Port number"
     }
     Line {
-      SrcBlock		      "Bus\nCreator"
+      SrcBlock		      "Subsystem"
       SrcPort		      1
-      DstBlock		      "Bus\nSelector1"
+      DstBlock		      "Out1"
       DstPort		      1
     }
-    Line {
-      Name		      "<adc_0_0>"
-      Labels		      [0, 0]
-      SrcBlock		      "Bus\nSelector1"
-      SrcPort		      1
-      Points		      [55, 0]
-      Branch {
-	Points			[30, 0]
-	DstBlock		"A"
-	DstPort			1
-      }
-      Branch {
-	Points			[0, 140]
-	DstBlock		"ADC0"
-	DstPort			1
-      }
-    }
-    Line {
-      SrcBlock		      "A"
-      SrcPort		      1
-      Points		      [245, 0]
-      DstBlock		      "DAC_0"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "B"
-      SrcPort		      1
-      Points		      [0, -45; 15, 0]
-      Branch {
-	Points			[5, 0; 0, -10]
-	Branch {
-	  DstBlock		  "DAC_0"
-	  DstPort		  5
-	}
-	Branch {
-	  Points		  [0, -20]
-	  Branch {
-	    Points		    [0, -35]
-	    Branch {
-	      DstBlock		      "DAC_0"
-	      DstPort		      2
-	    }
-	    Branch {
-	      DstBlock		      "DAC_0"
-	      DstPort		      3
-	    }
-	  }
-	  Branch {
-	    Points		    [5, 0; 0, -10]
-	    DstBlock		    "DAC_0"
-	    DstPort		    4
-	  }
-	}
-      }
-      Branch {
-	Points			[0, 10]
-	Branch {
-	  DstBlock		  "DAC_0"
-	  DstPort		  6
-	}
-	Branch {
-	  Points		  [0, 25]
-	  Branch {
-	    DstBlock		    "DAC_0"
-	    DstPort		    7
-	  }
-	  Branch {
-	    Points		    [0, 25]
-	    Branch {
-	      DstBlock		      "DAC_0"
-	      DstPort		      8
-	    }
-	    Branch {
-	      Points		      [0, 25]
-	      Branch {
-		DstBlock		"DAC_0"
-		DstPort			9
-	      }
-	      Branch {
-		Points			[0, 25]
-		Branch {
-		  DstBlock		  "DAC_0"
-		  DstPort		  10
-		}
-		Branch {
-		  Points		  [0, 20]
-		  Branch {
-		    Points		    [0, 5]
-		    DstBlock		    "DAC_0"
-		    DstPort		    11
-		  }
-		  Branch {
-		    Points		    [0, 30]
-		    Branch {
-		    DstBlock		    "DAC_0"
-		    DstPort		    12
-		    }
-		    Branch {
-		    Points		    [0, 25]
-		    Branch {
-		    DstBlock		    "DAC_0"
-		    DstPort		    13
-		    }
-		    Branch {
-		    Points		    [0, 25]
-		    Branch {
-		    DstBlock		    "DAC_0"
-		    DstPort		    14
-		    }
-		    Branch {
-		    Points		    [0, 25]
-		    Branch {
-		    DstBlock		    "DAC_0"
-		    DstPort		    15
-		    }
-		    Branch {
-		    Points		    [0, 25]
-		    DstBlock		    "DAC_0"
-		    DstPort		    16
-		    }
-		    }
-		    }
-		    }
-		  }
-		}
-	      }
-	    }
-	  }
-	}
-      }
-    }
-    Line {
-      Name		      "<adc_0_1>"
-      Labels		      [0, 0]
-      SrcBlock		      "Bus\nSelector1"
-      SrcPort		      2
-      Points		      [30, 0; 0, 115]
-      DstBlock		      "ADC1"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "EXC_1"
-      SrcPort		      1
-      Points		      [0, -125]
-      DstBlock		      "B"
-      DstPort		      1
-    }
-  }
-}
-# Finite State Machines
-#
-#    Stateflow Version 7.1 (R2008a) dated Sep  2 2008, 23:45:40
-#
-#
-
-
-Stateflow {
-  machine {
-    id			    1
-    name		    "alx"
-    created		    "06-Apr-2009 14:30:45"
-    isLibrary		    0
-    firstTarget		    2
-    sfVersion		    71014000.000007
-  }
-  target {
-    id			    2
-    name		    "sfun"
-    description		    "Default Simulink S-Function Target."
-    machine		    1
-    linkNode		    [1 0 0]
   }
 }

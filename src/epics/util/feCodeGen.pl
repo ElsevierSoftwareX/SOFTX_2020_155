@@ -1600,6 +1600,9 @@ if($rate == 480 || $rate == 240) {
   $gdsTstart = 10001;
 }
 print EPICS "test_points ONE_PPS $::extraTestPoints\n";
+if ($::extraExcitations) {
+	print EPICS "excitations $::extraExcitations\n";
+}
 print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site " . get_freq() . " $dcuId $ifoid\n";
 print EPICS "\n\n";
 

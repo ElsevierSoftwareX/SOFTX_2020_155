@@ -120,6 +120,10 @@ while (<IN>) {
 	@top_names = split(/\s+/, $_);	
 	shift @top_names;
 	print "top_names are @top_names\n";
+    } elsif (/^excitations/) {
+	@excitations = split(/\s+/, $_);	
+	shift @excitations;
+	print "excitations are @excitations\n";
     } elsif (/^test_points/) {
 	@testpoints = split(/\s+/, $_);	
 	shift @testpoints;
@@ -999,6 +1003,24 @@ if ($gds_specified) {
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
 	print "dcuid = $gds_exc_dcu_id\n";
+	print "chnnum = $excnum\n";
+	print "datatype = 4\n";	
+	print "datarate = $gds_datarate\n\n";
+	$excnum++;
+      }
+      # Print extra excitations
+      foreach $i ( @excitations ) {
+    	my $top_name = is_top_name($i);
+    	my $tv_name;
+    	if ($top_name) {
+	 $tv_name = top_name_transform($i);
+	 print "[$site:${tv_name}]\n";
+	} else {
+	 print "[$site:${systm}${i}]\n";
+	}
+	print "ifoid = $gds_ifo\n";
+	print "rmid = $gds_rmid\n";
+	print "dcuid = $gds_tp_dcu_id\n";
 	print "chnnum = $excnum\n";
 	print "datatype = 4\n";	
 	print "datarate = $gds_datarate\n\n";

@@ -491,6 +491,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       /* Data is from filter module excitation */
       {
 	    dWord = dspPtr->data[localTable[ii].fmNum].exciteInput;
+      } else if (localTable[ii].type == 3) {
+	      // Extra excitation
+	      dWord = xExc[localTable[ii].fmNum];
       }
 
       // Perform decimation filtering, if required.
@@ -618,6 +621,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 #if 0
 				if((excSlot == 0) && (ii == validEx)) printf("%ld %f\n",(int)dataPtr,*dataPtr);
 #endif
+			} else if (localTable[ii].type == 3) {
+				// extra excitation
+				xExc[localTable[ii].fmNum] = *dataPtr;
 			}
 		}
 		else dspPtr->data[localTable[ii].fmNum].exciteInput = 0.0;
@@ -802,6 +808,10 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		  // If we are clearing an EXC signal, reset filter module input
 		  if (localTable[ltSlot].type == 2) {
 		    dspPtr->data[excTable[i].fmNum].exciteInput = 0.0;
+		    excTable[i].sigNum = 0;
+		  } else if (localTable[ltSlot].type == 3) {
+		    // Extra excitation
+		    xExc[excTable[i].fmNum] = 0.0;
 		    excTable[i].sigNum = 0;
 		  }
 
