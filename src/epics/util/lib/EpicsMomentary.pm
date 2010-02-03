@@ -51,7 +51,7 @@ sub fromExp {
 # Returns calculated code string
 sub frontEndCode {
         my ($i) = @_;
-        my $calcExp = "// EpicsMomentary\n";
+        my $calcExp = "// EpicsMomentary:  $::xpartName[$i]\n";
         $calcExp .= "if (pLocalEpics->$::systemName\.$::xpartName[$i] != 0) {\n";
         $calcExp .= "\t\L$::xpartName[$i] = \L$::xpartName[$i] ^ ";
         $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i];\n";
