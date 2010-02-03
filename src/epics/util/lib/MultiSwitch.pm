@@ -53,7 +53,7 @@ sub fromExp {
 
 sub frontEndCode {
 	my ($i) = @_;
-        my $calcExp = "// MultiSwitch\n";
+        my $calcExp = "// MultiSwitch:  $::xpartName[$i]\n";
         for (0 .. $::inCnt - 1) {
           $calcExp .= "\L$::xpartName[$i]";
           $calcExp .= "\[";
