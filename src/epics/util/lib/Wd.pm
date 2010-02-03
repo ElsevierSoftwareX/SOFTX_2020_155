@@ -69,7 +69,7 @@ sub fromExp {
 
 sub frontEndCode {
 	my ($i) = @_;
-        my $calcExp = "// Wd (Watchdog) MODULE\n";
+        my $calcExp = "// Wd (Watchdog) MODULE:  $::xpartName[$i]\n";
         $calcExp .= "if((clock16K \% (FE_RATE/1024)) == 0) {\n";
         $calcExp .= "if (pLocalEpics->$::systemName\.";
         $calcExp .= $::xpartName[$i];
