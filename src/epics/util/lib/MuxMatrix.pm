@@ -72,7 +72,7 @@ sub frontEndCode {
 	my $matOuts = $::partOutputs[$::partOutNum[$i][0]];
 	my $matIns = $::partInCnt[$::partInNum[$i][0]];
 	my $muxName = "\L$::xpartName[$::partInNum[$i][0]]";
-	my $calcExp = "// MuxMatrix\n";
+        my $calcExp = "// MuxMatrix:  $::xpartName[$i]\n";
         $calcExp .= "for(ii=0;ii<$matOuts;ii++)\n{\n";
         $calcExp .= "\L$::xpartName[$i]\[ii\] = \n";
 
