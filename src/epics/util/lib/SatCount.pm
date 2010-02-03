@@ -61,7 +61,7 @@ sub fromExp {
 # Returns calculated code string
 sub frontEndCode {
         my ($i) = @_;
-        my $calcExp ="// SatCount\n";
+        my $calcExp ="// SatCount:  $::xpartName[$i]\n";
         $calcExp .= "if (pLocalEpics->$::systemName\.$::xpartName[$i]\_RESET == 1) {\n";
         $calcExp .= "   \L$::xpartName[$i]_total_counter = 0;\n";
         $calcExp .= "   pLocalEpics->$::systemName\.$::xpartName[$i]\_RESET = 0;\n";
