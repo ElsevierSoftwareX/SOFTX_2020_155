@@ -68,7 +68,7 @@ sub fromExp {
 sub frontEndCode {
 	my ($i) = @_;
 	my $muxName = "\L$::xpartName[$::partInNum[$i][0]]";
-	my $calcExp = "// Inline Function\n";
+        my $calcExp = "// Inline Function:  $::xpartName[$i]\n";
         my $expr = $::functionExpr[$i];
         $deg2rad = "";
         $trigExp = "";
