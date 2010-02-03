@@ -2,9 +2,12 @@ package CDS::TP;
 use Exporter;
 @ISA = ('Exporter');
 
+
 sub partType {
+	$::feInitCodeTP = "";
 	return TP;
 }
+
 
 # Print Epics communication structure into a header file
 # Current part number is passed as first argument
@@ -14,6 +17,9 @@ sub printHeaderStruct {
 	die "Too many extra test points (max 49)\n" unless $::extraTPcount < 49;
 	$::extraTPcount ++;
 	$::extraTestPoints .= " $::xpartName[$i]";
+	my $tpn = $::extraTPcount;
+	$::feInitCodeTP .= "testpoint[$tpn] = &\L$::xpartName[$i];\n";
+	$::feInitCodeTP .= "\L$::xpartName[$i] = .0;\n";
 }
 
 # Print Epics variable definitions
@@ -27,18 +33,15 @@ sub printEpics {
 sub printFrontEndVars  {
         my ($i) = @_;
 	print ::OUT "static float \L$::xpartName[$i];\n";
-        ;
 }
 
 # Return front end initialization code
 # Argument 1 is the part number
 # Returns calculated code string
 sub frontEndInitCode {
-        my ($i) = @_;
-	my $tpn = $::extraTPcount;
-	$ret = "testpoint[$tpn] = &\L$::xpartName[$i];\n";
-	$ret .= "\L$::xpartName[$i] = .0;\n";
-        return $ret;
+	my $a = $::feInitCodeTP;
+	$::feInitCodeTP = false;
+	return $a
 }
 
 # Figure out part input code
@@ -46,9 +49,7 @@ sub frontEndInitCode {
 # Argument 2 is the input number
 # Returns calculated input code
 sub fromExp {
-        my ($i, $j) = @_;
-        my $from = $::partInNum[$i][$j];
-	return ""; #\L$::xpartName[$i];
+	return ""; 
 }
 
 # Return front end code
