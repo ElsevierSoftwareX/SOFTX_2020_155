@@ -50,7 +50,7 @@ sub frontEndInitCode {
 # Returns calculated code string
 sub frontEndCode {
 	my ($i) = @_;
-        my $calcExp = "// Word2Bit\n{\n";
+        my $calcExp = "// Word2Bit:  $::xpartName[$i]\n{\n";
         $calcExp .= "unsigned int in = (int) $::fromExp[0];\n";
         $calcExp .= "for (ii = 0; ii < 16; ii++)\n{\n";
         $calcExp .= "if (in%2) {\n";
