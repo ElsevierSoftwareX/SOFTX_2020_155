@@ -53,7 +53,7 @@ sub frontEndInitCode {
 # Returns calculated code string
 sub frontEndCode {
 	my ($i) = @_;
-	my $calcExp = "// PHASEDEG\n";
+        my $calcExp = "// PHASEDEG:  $::xpartName[$i]\n";
         $calcExp .= "\L$::xpartName[$i]\[0\] = \(";
         $calcExp .=  "$::fromExp[0]";
         $calcExp .=  " * ";
