@@ -82,7 +82,7 @@ sub fromExp {
 
 sub frontEndCode {
 	my ($i) = @_;
-        my $calcExp = "// FILTER MODULE\n";
+        my $calcExp = "// FILTER MODULE with CONTROL:  $::xpartName[$i]\n";
         $calcExp .= "\L$::xpartName[$i]";
         $calcExp .= " = ";
         if ($::cpus > 2) {
