@@ -13,8 +13,8 @@ sub partType {
 # Current part number is passed as first argument
 sub printHeaderStruct {
         my ($i) = @_;
-	# there is 50 "testpoint" array in controller.c
-	die "Too many extra test points (max 49)\n" unless $::extraTPcount < 49;
+	# there is 500 "testpoint" array in controller.c
+	die "Too many extra test points (max 499)\n" unless $::extraTPcount < 499;
 	$::extraTPcount ++;
 	$::extraTestPoints .= " $::xpartName[$i]";
 	my $tpn = $::extraTPcount;
