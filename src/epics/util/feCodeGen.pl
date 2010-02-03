@@ -2786,8 +2786,8 @@ sub commify_series {
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "_INMON"  .  "\"/g;";
 		} elsif ($partType[$cur_part_num] eq "EpicsOut") {
-		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"$part_name ($partInput[$cur_part_num][0])\"/g;";
-		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-$part_name" .  "\"/g;";
+		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
+		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "\"/g;";
 		}
 	}
 		  $sysname = uc($skeleton);
