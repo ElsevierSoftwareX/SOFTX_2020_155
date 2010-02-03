@@ -67,7 +67,7 @@ sub fromExp {
 
 sub frontEndCode {
 	my ($i) = @_;
-	my $calcExp = "// Matrix\n";
+        my $calcExp = "// Matrix:  $::xpartName[$i]\n";
         $calcExp .= "for(ii=0;ii<$::matOuts[$i];ii++)\n{\n";
         $calcExp .= "\L$::xpartName[$i]\[1\]\[ii\] = \n";
 
