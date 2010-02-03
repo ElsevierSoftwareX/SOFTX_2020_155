@@ -40,7 +40,7 @@ sub printFrontEndVars  {
 # Returns calculated code string
 sub frontEndInitCode {
 	my $a = $::feInitCodeTP;
-	$::feInitCodeTP = false;
+	$::feInitCodeTP = undef;
 	return $a
 }
 
