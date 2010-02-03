@@ -47,7 +47,7 @@ sub frontEndInitCode {
 # Returns calculated code string
 sub frontEndCode {
 	my ($i) = @_;
-        my $calcExp = "// SquareRoot\n";
+        my $calcExp = "// SquareRoot:  $::xpartName[$i]\n";
         $calcExp .= "if ($::fromExp[0] > 0.0) {\n";
         $calcExp .= "   \L$::xpartName[$i] = ";
         $calcExp .= "lsqrt($::fromExp[0]);\n";
