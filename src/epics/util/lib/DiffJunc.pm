@@ -51,7 +51,7 @@ sub frontEndInitCode {
 # Returns calculated code string
 sub frontEndCode {
 	my ($i) = @_;
-        my $calcExp = "// DiffJunc\n";
+        my $calcExp = "// DiffJunc (MultiSubtract):  $::xpartName[$i]\n";
         my $zz = 0;
         for (my $qq = 0; $qq < 16; $qq += 2) {
           my $yy = $qq + 1;
