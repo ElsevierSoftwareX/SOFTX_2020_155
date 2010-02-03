@@ -83,7 +83,7 @@ sub frontEndInitCode {
 # Returns calculated code string
 sub frontEndCode {
 	my ($i) = @_;
-        my $calcExp = "// Osc\n";
+        my $calcExp = "// Osc:  $::xpartName[$i]\n";
         $calcExp .= "\L$::xpartName[$i]\_cos_new = \(1.0 - ";
         $calcExp .= "\L$::xpartName[$i]\_alpha\) * \L$::xpartName[$i]\_cos_prev - ";
         $calcExp .= "\L$::xpartName[$i]\_beta * \L$::xpartName[$i]\_sin_prev;\n";
