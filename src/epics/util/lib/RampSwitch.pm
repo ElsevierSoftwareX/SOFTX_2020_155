@@ -53,7 +53,7 @@ sub frontEndInitCode {
 # Returns calculated code string
 sub frontEndCode {
 	my ($i) = @_;
-        my $calcExp = "// RampSwitch\n";
+        my $calcExp = "// RampSwitch:  $::xpartName[$i]\n";
         #$calcExp .= "\L$::xpartName[$i]";
         #$calcExp .= " = ";
         #$calcExp .= $::fromExp[0];
