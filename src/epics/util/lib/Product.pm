@@ -58,7 +58,7 @@ sub frontEndInitCode {
 # Returns calculated code string
 sub frontEndCode {
 	my ($i) = @_;
-        my $calcExp = "// PRODUCT\n";
+        my $calcExp = "// PRODUCT:  $::xpartName[$i]\n";
         $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]";
         $calcExp .= "_RMON = \n\tgainRamp(pLocalEpics->$::systemName\.$::xpartName[$i],";
         $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]";
