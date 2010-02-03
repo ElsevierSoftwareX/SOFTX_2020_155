@@ -50,7 +50,7 @@ sub frontEndInitCode {
 # Returns calculated code string
 sub frontEndCode {
 	my ($i) = @_;
-        my $calcExp = "// RMS\n";
+        my $calcExp = "// RMS:  $::xpartName[$i]\n";
         $calcExp .= "\L$::xpartName[$i]";
         $calcExp .= " = ";
         $calcExp .= $::fromExp[0];
