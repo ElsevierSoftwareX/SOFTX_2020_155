@@ -52,7 +52,7 @@ sub fromExp {
 
 sub frontEndCode {
 	my ($i) = @_;
-        my $calcExp = "// WFS PHASE\n";
+        my $calcExp = "// WFS PHASE:  $::xpartName[$i]\n";
         $calcExp .= "\L$::xpartName[$i]\[0\] = \(";
         $calcExp .=  "$::fromExp[0]";
         $calcExp .=  " * ";
