@@ -52,7 +52,7 @@ sub fromExp {
 sub frontEndCode {
 	my ($i) = @_;
         #print "Found EPICS OUTPUT $::xpartName[$i] $::partInputType[$i][0] in loop\n";
-        my $ret = "// EpicsOut\n";
+        my $ret = "// EpicsOut:  $::xpartName[$i]\n";
         $ret .= "pLocalEpics->$::systemName\.$::xpartName[$i] = ";
         $ret .= "$::fromExp[0];\n";
 	return $ret;
