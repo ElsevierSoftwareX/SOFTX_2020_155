@@ -59,7 +59,7 @@ sub frontEndCode {
         # print "Found EPICS REMOTE INTLK $::xpartName[$i] $::partInputType[$i][0] in loop\n";
 	$temp = $::xpartName[$i];
 	$temp =~ s/\-/\_/g;
-        my $ret = "// RemoteIntlk\n";
+        my $ret = "// RemoteIntlk:  $::xpartName[$i]\n";
         $ret .= "pLocalEpics->$::systemName\.$temp = ";
         $ret .= "$::fromExp[0];\n";
 	return $ret;
