@@ -52,7 +52,7 @@ sub frontEndInitCode {
 # Returns calculated code string
 sub frontEndCode {
 	my ($i) = @_;
-        my $calcExp = "// Bit2Word\n{\n";
+        my $calcExp = "// Bit2Word:  $::xpartName[$i]\n{\n";
         $calcExp .= "double ins[$::partInCnt[$i]] = {\n";
         for (0 .. $::partInCnt[$i]-2) {
            $calcExp .= "\t$::fromExp[$_],\n";
