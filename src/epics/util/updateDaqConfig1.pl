@@ -152,7 +152,7 @@ foreach $item (sort { $a <=> $b } keys %$daq) {
 	  my $cmnt = $daq->{$name . ":commented_out"};
 	  if ($cmnt) { $cmnt = "#"; } else { $cmnt = ""; };
 	  printf "%s[%s]\n", $cmnt, $name;
-	  foreach $field (keys %$daq) {
+	  foreach $field (sort keys %$daq) {
 	    if ($field =~ /^$name/) {
 	   	my ($fv) = $field =~ m/$name:([^:]+)/g;
 		if ($fv eq "commented_out") { next; };
