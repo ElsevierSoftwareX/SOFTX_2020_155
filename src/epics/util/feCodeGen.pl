@@ -144,6 +144,8 @@ $busPort = -1;
 $trigCnt = 0;                                                              # ===  MA  ===
 $trigOut = 0;                                                              # ===  MA  ===
 $convDeg2Rad = 0;                                                          # ===  MA  ===
+$groundDecl = 0;                                                           # =+=  MA  =+=
+$groundInit = 0;                                                           # =+=  MA  =+=
 $oscUsed = 0;
 $useFIRs = 0;
 # ***  DEBUG  ***
@@ -187,6 +189,8 @@ $partCnt = 0;	# Total parts found in the simulink model
 
 # Element is set to one for each CDS parts
 $cdsPart[0] = 0;	# $cdsPart[0 .. $partCnt]
+
+$ppFIR[0] = 0;          # Set to one for PPFIR filters
 
 # Total number of inputs for each part
 # i.e. how many parts are connected to it with lines (branches)
@@ -1641,6 +1645,15 @@ for (0 .. $boCnt-1) {
 }
 print OUT "};\n\n";
 
+# Group includes for function calls at beginning
+for ($ii = 0; $ii < $partCnt; $ii++) {
+   if ($cdsPart[$ii]) {
+      if ($partType[$ii] eq "FunctionCall") {
+         ("CDS::" . $partType[$ii] . "::printFrontEndVars") -> ($ii);
+      }
+   }
+}
+
 # Define remote IPC stuff (if any)
 if ($remoteIPChosts) {
 	print OUT "// Remote IPC buffers\n";
@@ -1669,7 +1682,9 @@ for($ii=0;$ii<$partCnt;$ii++)
 {
 #       print "DBG: cdsPart = $cdsPart[$ii]   partType = $partType[$ii]\n";          # DBG
 	if ($cdsPart[$ii]) {
-	  ("CDS::" . $partType[$ii] . "::printFrontEndVars") -> ($ii);
+           if ($partType[$ii] ne "FunctionCall") {
+              ("CDS::" . $partType[$ii] . "::printFrontEndVars") -> ($ii);
+           }
 	}
 
 	if($partType[$ii] eq "MUX") {
@@ -1717,7 +1732,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUT "static double \L$xpartName[$ii];\n";
 	}
 	if($partType[$ii] eq "GROUND")  {
-		print OUT "static float \L$xpartName[$ii];\n";
+            if ($groundDecl == 0)  {                                       # =+=  MA  =+=
+                print OUT "static float ground;\n";                        # =+=  MA  =+=
+                $groundDecl++;                                             # =+=  MA  =+=
+            }                                                              # =+=  MA  =+=
 	}
 	if($partType[$ii] eq "CONSTANT")  {
 		print OUT "static double \L$xpartName[$ii];\n";
@@ -1790,7 +1808,7 @@ sub printCluster {
 print OUT "/* CPU 1 code */\n";
 }
 
-print OUT "void feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
+print OUT "\nvoid feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
 print OUT "\t\tdouble dacOut[][16],\t\/* DAC outputs *\/\n";
 print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
 print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
@@ -1813,7 +1831,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}	
 
 	if($partType[$ii] eq "GROUND") {
-		print OUT "\L$xpartName[$ii] = 0\.0;\n";
+            if ($groundInit == 0)  {                                       # =+=  MA  =+=
+                print OUT "ground = 0\.0;\n";                              # =+=  MA  =+=
+                $groundInit++;                                             # =+=  MA  =+=
+            }                                                              # =+=  MA  =+=
 	}
 	if($partType[$ii] eq "CONSTANT") {
 		print OUT "\L$xpartName[$ii] = (double)$partInputs[$ii];\n";
@@ -1953,6 +1974,11 @@ for($xx=0;$xx<$processCnt;$xx++)
 #print "%%%%%  fromExp = $fromExp[$qq]\n";
 			#print "$xpartName[$mm]  $fromExp[$qq] $partInputType[$mm][$qq]\n";
 		}
+
+                if ($fromExp[$qq] =~ /ground/)  {
+#                   print "%%%%%  GROUND\n";
+                   $fromExp[$qq] = "ground";
+                }
 	}
 	# ******** FILTER *************************************************************************
 
