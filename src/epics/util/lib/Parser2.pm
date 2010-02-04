@@ -103,6 +103,7 @@ sub parse() {
 
 # Change Reference source name (CDS part)
 sub transform_part_name {
+        $::ppFIR[$::partCnt] = 0;         # Set to zero initially; change to 1 below for PPFIR
 	($r) = @_;
 	$r =~ s/\/.*$//; # Delete everything after the slash
 
@@ -114,7 +115,7 @@ sub transform_part_name {
         elsif ($r eq "cdsWD" ) { $r = "Wd"; }
         elsif ($r eq "cdsSusWd" ) { $r = "SusWd"; }
         elsif ($r eq "cdsSWD1" ) { $r = "SeiWd"; }
-        elsif ($r eq "cdsPPFIR" ) { $r = "Filt"; $::useFIRs = 1; }
+        elsif ($r eq "cdsPPFIR" ) { $r = "Filt"; $::useFIRs = 1; $::ppFIR[$::partCnt] = 1; }
         elsif ($r eq "cdsFirFilt" ) { $r = "Filt"; $::useFIRs = 1; }
         elsif ($r =~ /^cds/) {
                 # Getting rid of the leading "cds"
