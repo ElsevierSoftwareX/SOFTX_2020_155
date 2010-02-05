@@ -32,6 +32,7 @@ pthread_create(thread_, 0, start_routine_, arg_)
 #include <string.h>
 //#include "mx_byteswap.h"
 #include "test_common.h"
+#include "../drv/crc.c"
 
 MX_MUTEX_T stream_mutex;
 
@@ -45,7 +46,7 @@ MX_MUTEX_T stream_mutex;
 #define NUM_RREQ   16  /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
 #define NUM_SREQ   4  /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
 
-#define DO_HANDSHAKE 1
+#define DO_HANDSHAKE 0
 #define MATCH_VAL_MAIN (1 << 31)
 #define MATCH_VAL_THREAD 1
 
@@ -145,6 +146,7 @@ receiver(mx_endpoint_t ep, uint32_t match_val, uint32_t filter)
 	char *dataDest;
 	char *dataSource;
 	int copySize;
+	int myCrc = 0;
 	//float *testData;
 
 	printf("waiting for someone to connect\n");
@@ -224,6 +226,9 @@ do{
 			shmIpcPtr->dataBlockSize = dataPtr->mxIpcData.dataBlockSize;
 			shmIpcPtr->cycle = dataPtr->mxIpcData.cycle;
 			shmTpTable[0] = dataPtr->mxTpTable;
+			myCrc = crc_ptr((char *)dataDest,jj,0);
+			myCrc = crc_len(jj,myCrc);
+			// if(myCrc != dataPtr->mxIpcData.bp[ii].crc) printf("CRC error in receiver\n");
 			//  printf("crc = 0x%x\n  ",shmIpcPtr->bp[ii].crc);
 			
 
@@ -280,6 +285,7 @@ sender(mx_endpoint_t ep,uint64_t his_nic_id,  uint16_t his_eid,int len, uint32_t
 	int lastCycle = 0;
 	char *dataBuff;
 	int sendLength = 0;
+	int myCrc = 0;
 
 	
 
@@ -318,6 +324,7 @@ if(!myErrorSignal)
 		}while(shmIpcPtr->cycle == lastCycle);
 
 		mxDataBlock.mxTpTable = shmTpTable[0];
+// printf("data copy\n");
 
 		// Copy values from shmmem to MX buffer
 		lastCycle = shmIpcPtr->cycle;
@@ -334,6 +341,9 @@ if(!myErrorSignal)
 
 		dataBuff = (char *)(shmDataPtr + lastCycle * buf_size);
 		memcpy((void *)&mxDataBlock.mxDataBlock[0],dataBuff,mxDataBlock.mxIpcData.dataBlockSize);
+		myCrc = crc_ptr((char *)&mxDataBlock.mxDataBlock[0],mxDataBlock.mxIpcData.dataBlockSize,0);
+		myCrc = crc_len(mxDataBlock.mxIpcData.dataBlockSize,myCrc);
+		// if(myCrc != mxDataBlock.mxIpcData.bp[lastCycle].crc) printf("CRC error in sender\n");
 		sendLength = header_size + mxDataBlock.mxIpcData.dataBlockSize;
 // printf("send length = %d  total length = %ld\n",sendLength,sizeof(struct daqMXdata));
 #if 0
@@ -353,7 +363,7 @@ struct daqMXdata {
 		// mx_isend(ep, &seg, 1, dest, 1, NULL, &req[cur_req]);
 
 		/* wait for the send to complete */
-		mx_wait(ep, &req[cur_req], 100, &stat, &result);
+		mx_wait(ep, &req[cur_req], 1000, &stat, &result);
 		if (!result) {
 			fprintf(stderr, "mxWait failed with status %s\n", mx_strstatus(stat.code));
 			// exit(1);
@@ -364,7 +374,9 @@ struct daqMXdata {
 			// exit(1);
 			myErrorSignal = 1;
 		}
-		if(lastCycle == 15) myErrorSignal = 1;
+		// if(lastCycle == 15) myErrorSignal = 1;
+		if(lastCycle == 15) 
+			shmIpcPtr->status ^= 2;
 
 	}while(!myErrorSignal);
 }

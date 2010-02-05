@@ -2,7 +2,7 @@ SHELL = /bin/sh
 
 bindir = ${exec_prefix}/bin
 exec_prefix = ${prefix}
-prefix = /opt/open-mx
+prefix = /cvs/apps/omx1.2
 top_srcdir = ..
 srcdir = .
 VPATH = ./../common:./../common/bsd
