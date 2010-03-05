@@ -1,16 +1,5 @@
 /*----------------------------------------------------------------------
-   File: commData.h
-   Date: October 2009
-   Author: Matthew Evans & Tobin Fricke
- 
-   These functions are used to communicated between real-time front-end
-   machines.  A cycle counter, maintained externally, is used to move
-   between 2 entries in a double buffer.  A checksum based on the 
-   cycle counter and on the data is included to verify that the data
-   block is intact and is from the correct cycle.
-
-   No attempt is made to deal with endianness issues, nor to correct
-   any errors which are detected.
+   File: commData2.h
 ----------------------------------------------------------------------*/
 
 #ifndef __COMMDATA_H__
@@ -22,7 +11,7 @@ typedef struct CDS_IPC_COMMS {
 } CDS_IPC_COMMS;
 typedef struct CDS_IPC_INFO {
         double data;
-        int sendComputerNum;
+        int sendNode;
         int netType;
         int sendCycle;
         int sendRate;
@@ -32,6 +21,7 @@ typedef struct CDS_IPC_INFO {
         int mode;
         int errFlag;
 	int errTotal;
+	CDS_IPC_COMMS *pIpcData;
 } CDS_IPC_INFO;
 typedef struct CDS_IPC_KEY_LIST {
 	char name[32];
@@ -40,7 +30,7 @@ typedef struct CDS_IPC_KEY_LIST {
 
 #define IPC_SEND	1	
 #define IPC_RCV		0
-#define IPC_LOCAL	0
+#define IPC_SHMEM	0
 #define IPC_RFM		1
 #define IPC_PCIE	2
 
@@ -53,8 +43,8 @@ typedef struct CDS_IPC_KEY_LIST {
   //   the cycle counter is included in the checksum,
   //   and is used to index the ring buffer
 #endif
-void commData2Init(int connects, CDS_IPC_KEY_LIST keylist[], int rate, CDS_IPC_INFO ipcInfo[], CDS_IPC_COMMS *pIpcData[],long rfmAddress);
-void commData2Send(int connects, CDS_IPC_INFO ipcInfo[], CDS_IPC_COMMS *pIpcData[], int timeSec, int cycle);
-void commData2Receive(int connects, CDS_IPC_INFO ipcInfo[], CDS_IPC_COMMS *pIpcData[], int timeSec, int cycle);
+void commData2Init(int connects, int rate, CDS_IPC_INFO ipcInfo[], long rfmAddress);
+void commData2Send(int connects, CDS_IPC_INFO ipcInfo[], int timeSec, int cycle);
+void commData2Receive(int connects, CDS_IPC_INFO ipcInfo[], int timeSec, int cycle);
 
 #endif // __COMMDATA_H__
