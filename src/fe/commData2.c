@@ -10,7 +10,7 @@
 // =================================================
 // initialize the commData state structure
 //
-INLINE void commData2Init(int connects, int rate, CDS_IPC_INFO ipcInfo[], long rfmAddress)
+INLINE void commData2Init(int connects, int rate, CDS_IPC_INFO ipcInfo[], long rfmAddress[])
 {
 int ipcTemp;
 int ii;
@@ -41,12 +41,19 @@ int localKey;
 // ipcNum=1
 // ipcSender=0
 
+// IPC 3:
+// [G1:DBB-INPUT_1_IPC]
+// ipcType=SHMEM
+// ipcRate=65536
+// ipcNum=1
+// ipcSender=0
+
 // ***************************************************************************************
 
   for(ii=0;ii<connects;ii++)
   {
 	ipcInfo[ii].sendCycle = 65536 / rate;
-        if(!ipcInfo[ii].mode) // RCVR
+        if(ipcInfo[ii].mode == IRCV) // RCVR
 	{
 		if(ipcInfo[ii].sendRate >= rate)
 		{
@@ -62,13 +69,20 @@ int localKey;
         printf("IPC DATA for IPC %d ******************\n",ii);
         if(ipcInfo[ii].mode) printf("Mode = SENDER w Cycle = %d\n",ipcInfo[ii].sendCycle);
         else printf("Mode = RECEIVER w rcvRate and cycle = %d %d\n",ipcInfo[ii].rcvRate,ipcInfo[ii].rcvCycle);
-        if(ipcInfo[ii].netType)
+        if(ipcInfo[ii].netType == IRFM)
         {
-                ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[0] + 0x12200d8+ 0x400 * ipcInfo[ii].ipcNum);
+                ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(rfmAddress[0] + 0x12200d8+ 0x400 * ipcInfo[ii].ipcNum);
                 printf("Net Type = RFM at 0x%x\n",(int)ipcInfo[ii].pIpcData);
-        } else {
+        } 
+        if(ipcInfo[ii].netType == ISHM)
+	{
                 ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(_ipc_shm + 0x40000 + 0x400 * ipcInfo[ii].ipcNum);
                 printf("Net Type = LOCAL IPC at 0x%x\n",(int)ipcInfo[ii].pIpcData);
+        }
+        if(ipcInfo[ii].netType == IPCI)
+	{
+                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(rfmAddress[1] + 0x400 * ipcInfo[ii].ipcNum);
+                printf("Net Type = PCIE IPC at 0x%x  *********************************\n",(int)ipcInfo[ii].pIpcData);
         }
         printf("IPC Number = %d\n",ipcInfo[ii].ipcNum);
         printf("RCV Rate  = %d\n",ipcInfo[ii].rcvRate);
@@ -86,7 +100,7 @@ int ii;
 
 for(ii=0;ii<connects;ii++)
 {
-        if(ipcInfo[ii].mode == IPC_SEND) // Zero = Rcv and One = Send
+        if(ipcInfo[ii].mode == ISND) // Zero = Rcv and One = Send
         {
                 dataCycle = ((cycle + 1) * ipcInfo[ii].sendCycle) % 65536;
 		if(dataCycle == 0) timeSec ++;
@@ -111,7 +125,7 @@ int ii;
 
 for(ii=0;ii<connects;ii++)
 {
-        if(ipcInfo[ii].mode == IPC_RCV) // Zero = Rcv and One = Send
+        if(ipcInfo[ii].mode == IRCV) // Zero = Rcv and One = Send
         {
 	   if(!(cycle % ipcInfo[ii].rcvCycle)) // Time to rcv
 	   {
@@ -157,3 +171,5 @@ for(ii=0;ii<connects;ii++)
         }
 }
 }
+
+
