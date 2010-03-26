@@ -2,8 +2,8 @@
    File: commData2.h
 ----------------------------------------------------------------------*/
 
-#ifndef __COMMDATA_H__
-#define __COMMDATA_H__
+#ifndef __COMMDATA2_H__
+#define __COMMDATA2_H__
 
 typedef struct CDS_IPC_COMMS {
         double data[64];
@@ -28,11 +28,11 @@ typedef struct CDS_IPC_KEY_LIST {
 	unsigned int masterKey;
 } CDS_IPC_KEY_LIST;
 
-#define IPC_SEND	1	
-#define IPC_RCV		0
-#define IPC_SHMEM	0
-#define IPC_RFM		1
-#define IPC_PCIE	2
+#define ISND		1	
+#define IRCV		0
+#define ISHM		0
+#define IRFM		1
+#define IPCI		2
 
 // decide between inline or not for commData functions
 #ifdef COMMDATA_INLINE
@@ -43,8 +43,9 @@ typedef struct CDS_IPC_KEY_LIST {
   //   the cycle counter is included in the checksum,
   //   and is used to index the ring buffer
 #endif
-void commData2Init(int connects, int rate, CDS_IPC_INFO ipcInfo[], long rfmAddress);
+
+void commData2Init(int connects, int rate, CDS_IPC_INFO ipcInfo[], long rfmAddress[]);
 void commData2Send(int connects, CDS_IPC_INFO ipcInfo[], int timeSec, int cycle);
 void commData2Receive(int connects, CDS_IPC_INFO ipcInfo[], int timeSec, int cycle);
 
-#endif // __COMMDATA_H__
+#endif // __COMMDATA2_H__
