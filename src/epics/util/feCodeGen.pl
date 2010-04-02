@@ -146,6 +146,9 @@ $trigOut = 0;                                                              # ===
 $convDeg2Rad = 0;                                                          # ===  MA  ===
 $groundDecl = 0;                                                           # =+=  MA  =+=
 $groundInit = 0;                                                           # =+=  MA  =+=
+$ipcxCnt = 0;                                                              # ===  IPCx  ===
+$ipcDeclDone = 0;                                                          # ===  IPCx  ===
+$ipcInitDone = 0;                                                          # ===  IPCx  ===
 $oscUsed = 0;
 $useFIRs = 0;
 # ***  DEBUG  ***
@@ -263,6 +266,14 @@ $maxRemoteIPCVars = 4;
 # My remote IPC MX port
 $remoteIPCport = 0;
 
+#
+# IPCx parameter names
+#
+$ipcMissing[0] = "Signal Name";
+$ipcMissing[1] = "ipcType";
+$ipcMissing[2] = "ipcRate";
+$ipcMissing[3] = "ipcNum";
+
 # Remove leading subsystems name
 sub remove_subsystem {
         my ($s) = @_;
@@ -318,6 +329,171 @@ close(IN);
 
 $systemName = substr($systemName,0,3);
 $plantName = $systemName; # Default plant name is the model name
+
+#
+# Find all IPCx parts and start building IPCx parts matrix
+#
+for ($ii = 0; $ii < $partCnt; $ii++) {
+   if ($partType[$ii] eq "IPCx") {
+      $ipcxParts[$ipcxCnt][0] = $xpartName[$ii];
+      $ipcxParts[$ipcxCnt][1] = undef;
+      $ipcxParts[$ipcxCnt][2] = undef;
+      $ipcxParts[$ipcxCnt][3] = undef;
+      $ipcxParts[$ipcxCnt][4] = $ii;
+      $ipcxCnt++;
+   }
+   #
+   # We will need the location and site parameters from
+   # cdsParameters, so keep track of this part as well
+   #
+   elsif ($partType[$ii] eq "Parameters") {
+      $oo = $ii;
+   }
+}
+
+if ($ipcxCnt > 0) {
+   #
+   # This model does include IPCx parts, so extract location and
+   # site from cdsParameters and read the IPC parameter file
+   #
+   ("CDS::Parameters::printHeaderStruct") -> ($oo);
+
+   $iFile = "/cvs/cds/";
+   $iFile .= $location;
+   $iFile .= "/chans/ipc/";
+   $iFile .= $site;
+   $iFile .= "\.ipc";
+
+   open(IN, "<$iFile") || die "***ERROR: IPC parameter file $iFile not found\n";
+   chomp(@inData=<IN>);
+   close IN;
+
+   #
+   # Process one line at a time from the IPC parameter file
+   #
+   $ipcParamCnt = -1;
+   $skip = 0;
+
+   foreach $value (@inData) {
+      #
+      # Skip lines that begin with '#' or 'desc='
+      # Also, skip blank lines and default lines
+      #
+      if ( ($value =~ /^#/) || ($value =~ /^desc=/) ) {
+         next;
+      }
+      elsif ( (length($value) == 0) || ($value =~ /\s/) ) {
+         next;
+      }
+
+      if ($value =~ /^\[default\]/) {
+         $skip = 1;
+         next;
+      }
+
+      #
+      # Find the Signal Name line and copy the
+      # value to the IPCx parts matrix
+      #
+      if ($value =~ /^\[([\w\:\-\_]+)\]/) {
+         $skip = 0;
+         $ipcParamCnt++;
+
+         $ipcData[$ipcParamCnt][0] = $1;
+         $ipcData[$ipcParamCnt][1] = undef;
+         $ipcData[$ipcParamCnt][2] = undef;
+         $ipcData[$ipcParamCnt][3] = undef;
+
+         next;
+      }
+
+      #
+      # Copy  the IPC Communication Mechanism, the
+      # Sender Data Rate, and the IPC Number
+      # to the IPCx parts matrix as well
+      #
+      if ($skip == 0)  {
+         if ($value =~ /^ipcType=(\w+)/) {
+            my $typeString = $1;
+            $ipcData[$ipcParamCnt][1] = "I" . substr($typeString, 0, 3);
+         }
+         elsif ($value =~ /^ipcRate=(\d+)/) {
+            $ipcData[$ipcParamCnt][2] = $1;
+         }
+         elsif ($value =~ /^ipcNum=(\d+)/) {
+            $ipcData[$ipcParamCnt][3] = $1;
+         }
+      }
+   }
+
+   $ipcParamCnt++;
+
+   #
+   # Locate each IPCx module in the IPC parts matrix
+   #
+   for ($ii = 0; $ii < $ipcxCnt; $ii++) {
+      $found = 0;
+
+      for ($jj = 0; $jj < $ipcParamCnt; $jj++) {
+         if ($ipcxParts[$ii][0] eq $ipcData[$jj][0]) {
+            #
+            # Make sure no IPC parameters are missing
+            #
+            for ($kk = 1; $kk < 4; $kk++) {
+               if (defined($ipcData[$jj][$kk]) ) {
+                  $ipcxParts[$ii][$kk] = $ipcData[$jj][$kk];
+               }
+               else {
+                  die "***ERROR: Data missing for IPC componet $ipcxParts[$ii][0] - $ipcMissing[$kk]\n";
+               }
+            }
+
+            $kk = $ipcxParts[$ii][4];
+            $ipcxParts[$ii][5] = $partInput[$kk][0];
+            $found = 1;
+
+            #
+            # Make sure each IPCx part has exactly one input
+            #
+            if ($partInCnt[$kk] != 1) {
+               die "***ERROR: IPC SENDER/RECEIVER component $ipcxParts[$ii][0] has $partInCnt[$kk] input(s)\n";
+            }
+
+            #
+            # If the input to an IPCx part is 'Ground',
+            # then this part is a RECEIVER of data,
+            # which means there should be either one
+            # or two outputs
+            #
+            if ($partInput[$kk][0] =~ /^Ground/) {
+               if ( ($partOutCnt[$kk] < 1) || ($partOutCnt[$kk] > 2) ) {
+                  die "***ERROR: IPC RECEIVER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
+               }
+            }
+            #
+            # If the input to an IPCx part is NOT 'Ground',
+            # then this part is a SENDER of data, which
+            # means there should be no outputs
+            #
+            else {
+               if ($partOutCnt[$kk] != 0) {
+                  die "***ERROR: IPC SENDER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
+               }
+            }
+
+            last;
+         }
+      }
+
+      #
+      # Halt the processing if the IPCx module
+      # wasn't found in the IPC parts matrix
+      #
+      if ($found == 0) {
+         die "***ERROR: IPC component ($ii) $ipcxParts[$ii][0] not found in IPC parameter file $iFile\n";
+      }
+   }
+}
 
 # Take all of the part outputs and find connections.
 # Fill in connected part numbers and types.
@@ -1842,6 +2018,14 @@ for($ii=0;$ii<$partCnt;$ii++)
 }
 print OUT "\} else \{\n";
 
+#
+# All IPC data receives are to occur
+# first in the processing loop
+#
+if ($ipcxCnt > 0) {
+   print OUT "\ncommData2Receive(myIpcCount, ipcInfo, pLocalEpics->epicsOutput\.timeDiag, cycle);\n\n";
+}
+
 #print "*****************************************************\n";
 
 # Print subsystems processing step by step
@@ -2215,6 +2399,15 @@ print OUT "    if (_ipc_shm != 0) {\n";
 print OUT "$ipcOutputCode";
 print OUT "    }\n";
 print OUT "$feTailCode";
+
+#
+# The actual sending of IPC data is to occur
+# as the last step of the processing loop
+#
+if ($ipcxCnt > 0) {
+   print OUT "\n    commData2Send(myIpcCount, ipcInfo, pLocalEpics->epicsOutput\.timeDiag, cycle);\n\n";
+}
+
 print OUT "  }\n";
 print OUT "}\n\n";
 print OUTH "typedef struct CDS_EPICS {\n";
