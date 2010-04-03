@@ -1,58 +1,43 @@
+// *************************************************************************************************
+// This is the generic software for communicating realtime data between CDS applications.
+// This software supports data communication via:
+//	1) Shared memory, between two processes on the same computer
+//	2) GE Fanuc 5565 Reflected Memory PCIe hardware
+//	3) Dolphonics Reflected Memory over a PCIe network.
+//
+
 #include "commData2.h"
 
-// make these inline?
 #ifdef COMMDATA_INLINE
 #  define INLINE inline
 #else
 #  define INLINE
 #endif
 
-// =================================================
+// *************************************************************************************************
 // initialize the commData state structure
 //
-INLINE void commData2Init(int connects, int rate, CDS_IPC_INFO ipcInfo[], long rfmAddress[])
+INLINE void commData2Init(
+			  int connects, 		// total number of IPC connections in the application
+			  int rate, 			// Sample rate of the calling application eg 2048, 16384, etc.
+			  CDS_IPC_INFO ipcInfo[], 	// IPC information structure
+			  long rfmAddress[]		// Address of reflected memory networks
+							//	0 = GE 5565 module 1
+							//	1 = GE 5565 module 2
+							//	2 = PCIe Network receive address
+							//	3 = PCIe Network write address
+			  )
 {
-int ipcTemp;
 int ii;
-int localKey;
 
-// MASTER KEYS **************************************************************************
-// Presently hardcoded.
-// Should be moved to a header file or sent as EPICS channels
-
-// IPC 0: 
-// [G1:SUS-Q1_M0_FACE1_IPC]
-// ipcType=SHMEM
-// ipcRate=16384
-// ipcNum=0;
-// ipcSender=0
-
-// IPC 1:
-// [G1:OM1-OMC_READOUT_IPC]
-// ipcType=RFM
-// ipcRate=32768
-// ipcNum=0
-// ipcSender=0
-
-// IPC 2:
-// [G1:DBB-INPUT_1_IPC]
-// ipcType=SHMEM
-// ipcRate=65536
-// ipcNum=1
-// ipcSender=0
-
-// IPC 3:
-// [G1:DBB-INPUT_1_IPC]
-// ipcType=SHMEM
-// ipcRate=65536
-// ipcNum=1
-// ipcSender=0
-
-// ***************************************************************************************
 
   for(ii=0;ii<connects;ii++)
   {
-	ipcInfo[ii].sendCycle = 65536 / rate;
+	// All cycle counts sent as part of data sync word are based on max supported rate of 
+	// 65536 cycles/sec, regardless of sender/receiver native cycle rate.
+	ipcInfo[ii].sendCycle = 65536 / rate;	
+	// Sender always sends data at his native rate. It is the responsiblity of the reciever
+	// to sync to this rate, regardless of the rate of the receiver application.
         if(ipcInfo[ii].mode == IRCV) // RCVR
 	{
 		if(ipcInfo[ii].sendRate >= rate)
@@ -69,20 +54,28 @@ int localKey;
         printf("IPC DATA for IPC %d ******************\n",ii);
         if(ipcInfo[ii].mode) printf("Mode = SENDER w Cycle = %d\n",ipcInfo[ii].sendCycle);
         else printf("Mode = RECEIVER w rcvRate and cycle = %d %d\n",ipcInfo[ii].rcvRate,ipcInfo[ii].rcvCycle);
-        if(ipcInfo[ii].netType == IRFM)
+
+	// Save pointers to the IPC communications memory locations.
+        if(ipcInfo[ii].netType == IRFM)		// VMIC Reflected Memory *******************************
         {
-                ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(rfmAddress[0] + 0x12200d8+ 0x400 * ipcInfo[ii].ipcNum);
+                ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(rfmAddress[0] + IPC_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
                 printf("Net Type = RFM at 0x%x\n",(int)ipcInfo[ii].pIpcData);
         } 
-        if(ipcInfo[ii].netType == ISHM)
+        if(ipcInfo[ii].netType == ISHM)		// Computer shared memory ******************************
 	{
-                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(_ipc_shm + 0x40000 + 0x400 * ipcInfo[ii].ipcNum);
+                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(_ipc_shm + IPC_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
                 printf("Net Type = LOCAL IPC at 0x%x\n",(int)ipcInfo[ii].pIpcData);
         }
-        if(ipcInfo[ii].netType == IPCI)
+	// PCIe communications requires one pointer for sending data and a second one for receiving data.
+        if((ipcInfo[ii].netType == IPCI) && (ipcInfo[ii].mode == IRCV))
 	{
-                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(rfmAddress[1] + 0x400 * ipcInfo[ii].ipcNum);
-                printf("Net Type = PCIE IPC at 0x%x  *********************************\n",(int)ipcInfo[ii].pIpcData);
+                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(rfmAddress[IPC_PCIE_READ] + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
+                printf("Net Type = PCIE RCV IPC at 0x%lx  *********************************\n",(long)ipcInfo[ii].pIpcData);
+        }
+        if((ipcInfo[ii].netType == IPCI) && (ipcInfo[ii].mode == ISND))
+	{
+                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(rfmAddress[IPC_PCIE_WRITE] + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
+                printf("Net Type = PCIE SEND IPC at 0x%lx  *********************************\n",(long)ipcInfo[ii].pIpcData);
         }
         printf("IPC Number = %d\n",ipcInfo[ii].ipcNum);
         printf("RCV Rate  = %d\n",ipcInfo[ii].rcvRate);
@@ -91,35 +84,55 @@ int localKey;
     }
 }
 
-INLINE void commData2Send(int connects, CDS_IPC_INFO ipcInfo[], int timeSec, int cycle)
+// *************************************************************************************************
+INLINE void commData2Send(int connects,  	 	// Total number of IPC connections in the application
+			  CDS_IPC_INFO ipcInfo[], 	// IPC information structure
+			  int timeSec, 			// Present GPS Second
+			  int cycle)			// Application cycle count (0 to FE_CODE_RATE)
+
+// This routine sends out all IPC data marked as a send (SND) channel in the IPC INFO list.
+// Data is sent at the native rate of the calling application.
+// Data sent is of type double, with timestamp and 65536 cycle count combined into long.
 {
-unsigned long syncWord;
-int ipcIndex;
-int dataCycle;
+unsigned long syncWord;	// Combined GPS timestamp and cycle counter
+int ipcIndex;		// Pointer to next IPC data buffer
+int dataCycle;		// Cycle counter 0-65535
 int ii;
 
 for(ii=0;ii<connects;ii++)
 {
-        if(ipcInfo[ii].mode == ISND) // Zero = Rcv and One = Send
+        if(ipcInfo[ii].mode == ISND)
         {
+		// Determine the cycle count to be sent with the data
                 dataCycle = ((cycle + 1) * ipcInfo[ii].sendCycle) % 65536;
-		if(dataCycle == 0) timeSec ++;
-		syncWord = timeSec;
+		// Since this is write ahead, need to increment the GPS second if
+		// writing to the first block of a new second.
+		if(dataCycle == 0) syncWord = timeSec + 1;
+		else syncWord = timeSec;
+		// Combine GPS seconds and cycle counter into long word.
 		syncWord = (syncWord << 32) + dataCycle;
+		// Determine next block to write in 64 block buffer
 		ipcIndex = (cycle+1) % 64;
+		// Write Data
                 ipcInfo[ii].pIpcData->data[ipcIndex] = ipcInfo[ii].data;
+		// Write timestamp/cycle counter word
                 ipcInfo[ii].pIpcData->timestamp[ipcIndex] = syncWord;
         }
 }
 
 }
 
-INLINE void commData2Receive(int connects, CDS_IPC_INFO ipcInfo[], int timeSec, int cycle)
+// *************************************************************************************************
+INLINE void commData2Receive(int connects,  	 	// Total number of IPC connections in the application
+			     CDS_IPC_INFO ipcInfo[], 	// IPC information structure
+			     int timeSec, 		// Present GPS Second
+			     int cycle)			// Application cycle count (0 to FE_CODE_RATE)
+
+// This routine receives all IPC data marked as a read (RCV) channel in the IPC INFO list.
 {
-unsigned long syncWord;
-unsigned long mySyncWord;
-int ipcIndex;
-unsigned long rcvTime;
+unsigned long syncWord;		// Combined GPS timestamp and cycle counter word received with data
+unsigned long mySyncWord;	// Local version of syncWord for comparison and error detection
+int ipcIndex;			// Pointer to next IPC data buffer
 int cycle65k;
 int ii;
 
@@ -129,44 +142,33 @@ for(ii=0;ii<connects;ii++)
         {
 	   if(!(cycle % ipcInfo[ii].rcvCycle)) // Time to rcv
 	   {
-		if(ipcInfo[ii].rcvCycle > 1)
+		// Determine which data block to read when RCVR runs faster than sender
+		if(ipcInfo[ii].rcvCycle > 1) ipcIndex = (cycle / ipcInfo[ii].rcvCycle) % 64;
+
+		// Data block to read if RCVR runs same speed or slower than sender
+		else ipcIndex = (cycle * ipcInfo[ii].rcvRate) % 64;
+		
+		// Read GPS time/cycle count 
+		syncWord = ipcInfo[ii].pIpcData->timestamp[ipcIndex];
+		// Create local 65K cycle count
+		cycle65k = ((cycle * ipcInfo[ii].sendCycle));
+		mySyncWord = timeSec;
+		// Create local GPS time/cycle word for comparison to ipc
+		mySyncWord = (mySyncWord << 32) + cycle65k;
+		// If IPC syncword = local syncword, data is good
+		if(syncWord == mySyncWord) 
 		{
-			ipcIndex = (cycle / ipcInfo[ii].rcvCycle) % 64;
-			syncWord = ipcInfo[ii].pIpcData->timestamp[ipcIndex];
-			cycle65k = cycle;
-			mySyncWord = timeSec;
-			mySyncWord = (mySyncWord << 32) + cycle65k;
-			if(syncWord == mySyncWord) 
-			{
-				ipcInfo[ii].data = ipcInfo[ii].pIpcData->data[ipcIndex];
-				// ipcInfo[ii].errFlag = 0;
-			} else {
-				ipcInfo[ii].errTotal ++;
-				ipcInfo[ii].data = 0;
-			}
-		}else {
-			ipcIndex = (cycle * ipcInfo[ii].rcvRate) % 64;
-			syncWord = ipcInfo[ii].pIpcData->timestamp[ipcIndex];
-			cycle65k = ((cycle * ipcInfo[ii].sendCycle));
-			mySyncWord = timeSec;
-			mySyncWord = (mySyncWord << 32) + cycle65k;
-			if(syncWord == mySyncWord) 
-			{
-				ipcInfo[ii].data = ipcInfo[ii].pIpcData->data[ipcIndex];
-				// ipcInfo[ii].errFlag = 0;
-			} else {
-				// ipcInfo[ii].errTotal ++;
-				ipcInfo[ii].errTotal ++;
-// printf("Rcv error %ld %ld\n",(syncWord & 0xffffffff),(mySyncWord & 0xffffffff));
-				// ipcInfo[ii].data = 0;
-			}
+			ipcInfo[ii].data = ipcInfo[ii].pIpcData->data[ipcIndex];
+		// If IPC syncword != local syncword, data is BAD
+		} else {
+			ipcInfo[ii].errFlag ++;
 		}
-                if(ipcInfo[ii].errFlag > 20000000) ipcInfo[ii].errFlag = 0;
 	   }
+	   // Send error per second output
 	   if(cycle == 0)
 	   {
-			ipcInfo[ii].errFlag = ipcInfo[ii].errTotal;
-				ipcInfo[ii].errTotal = 0;
+			ipcInfo[ii].errTotal = ipcInfo[ii].errFlag;
+				ipcInfo[ii].errFlag = 0;
 	   }
         }
 }
