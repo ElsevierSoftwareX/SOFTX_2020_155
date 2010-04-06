@@ -31,7 +31,7 @@
 #define MAX_ADC_MODULES		12	
 #define MAX_DAC_MODULES		8
 #define MAX_DIO_MODULES		4
-#define MAX_RFM_MODULES		2
+#define MAX_RFM_MODULES		4
 #define MAX_VME_BRIDGES		4
 
 #define GSC_16AI64SSA		0
@@ -87,9 +87,6 @@ typedef struct CDS_HARDWARE{
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
 	int rfmConfig[MAX_RFM_MODULES];
 	int rfmType[MAX_RFM_MODULES];
-	int vmeBridgeCount;		/* The number of SBS VME bridges attached */
-	volatile unsigned int *vme[MAX_VME_BRIDGES]; /* VME memory */
-	volatile unsigned char *vme_reg[MAX_VME_BRIDGES]; /* PCI to VME bridge registers */
 	unsigned char *buf;
 	volatile unsigned int *gps;	/* GPS card */
 	unsigned int gpsType;
@@ -114,6 +111,9 @@ typedef struct IO_MEM_DATA{
 	int dacCount;
 	int bioCount;
 	int model[MAX_IO_MODULES];
+	int ipc[MAX_IO_MODULES];
+	int rfmCount;
+	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
 	MEM_DATA_BLOCK iodata[MAX_IO_MODULES][IO_MEMORY_SLOTS];
 }IO_MEM_DATA;
 
