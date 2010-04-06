@@ -33,6 +33,10 @@ typedef struct CDS_IPC_KEY_LIST {
 #define ISHM		0
 #define IRFM		1
 #define IPCI		2
+#define IPC_BUFFER_SIZE		sizeof(struct CDS_IPC_COMMS)
+#define IPC_BASE_OFFSET		0x40000
+#define IPC_PCIE_READ	2
+#define IPC_PCIE_WRITE	3
 
 // decide between inline or not for commData functions
 #ifdef COMMDATA_INLINE
