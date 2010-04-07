@@ -86,6 +86,12 @@ sub printHeaderStruct {
 			} elsif ($spp[0] eq "specific_cpu") {
 				print "FE will run on CPU $spp[1]\n";
 				$::specificCpu = $spp[1];
+			} elsif ($spp[0] eq "adcMaster") {
+				print "FE will run as IOP\n";
+				$::adcMaster = $spp[1];
+			} elsif ($spp[0] eq "adcSlave") {
+				print "FE will run as SLAVE to IOP\n";
+				$::adcSlave = $spp[1];
 			} elsif ($spp[0] eq "remote_ipc_port") {
 				$::remoteIPCport = $spp[1];
         			die "Invalid remote_ipc_port specified in cdsParamters\n" unless $::remoteIPCport >= 0;
