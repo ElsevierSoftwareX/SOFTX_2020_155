@@ -35,6 +35,7 @@ $dcuId = 10; # Default dcu Id
 $specificCpu = -1; # Defaults is to run the FE on the first available CPU
 $adcMaster = -1;
 $adcSlave = -1;
+$pciNet = -1;
 $shmem_daq = 0; # Do not use shared memory DAQ connection
 $no_sync = 0; # Sync up to 1PPS by default
 $no_daq = 0; # Enable DAQ by default
@@ -1683,7 +1684,7 @@ print OUTH "\tint timeDiag;\n";
 print OUTH "\tint cpuMeter;\n";
 print OUTH "\tint cpuMeterMax;\n";
 print OUTH "\tint gdsMon[32];\n";
-print OUTH "\tint diags[4];\n";
+print OUTH "\tint diags[10];\n";
 print OUTH "\tint overflowAdc[8][32];\n";
 print OUTH "\tint overflowDac[8][16];\n";
 print OUTH "\tint dacValue[8][16];\n";
@@ -1741,6 +1742,11 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_USR_TIME epicsOutput.diags[0] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_RESYNC_COUNT epicsOutput.diags[1] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.diags[2] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT epicsOutput.diags[7] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_MASTER_STAT epicsOutput.diags[8] int ai 0\n";
 print EPICS "\n\n";
 #Load EPICS I/O Parts
 for($ii=0;$ii<$partCnt;$ii++)
@@ -2600,6 +2606,15 @@ if ($adcSlave > -1) {
 } else {
   print OUTM "#Uncomment to run on an I/O slave process\n";
   print OUTM "#CFLAGS += -DADC_SLAVE\n";
+}
+if ($pciNet > -1) {
+  print OUTM "#Enable use of PCIe RFM Network\n";
+  print OUTM "DISDIR = /home/controls/DIS\n";
+  print OUTM "CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
+} else {
+  print OUTM "#Uncomment to use PCIe RFM Network\n";
+  print OUTM "#DISDIR = /home/controls/DIS\n";
+  print OUTM "#CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
 }
 if ($specificCpu > -1) {
   print OUTM "#Comment out to run on first available CPU\n";
