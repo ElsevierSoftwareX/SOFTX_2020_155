@@ -33,6 +33,8 @@ $location = "mit"; # Default value for the location name
 $rate = "60"; # In microseconds (default setting)
 $dcuId = 10; # Default dcu Id
 $specificCpu = -1; # Defaults is to run the FE on the first available CPU
+$adcMaster = -1;
+$adcSlave = -1;
 $shmem_daq = 0; # Do not use shared memory DAQ connection
 $no_sync = 0; # Sync up to 1PPS by default
 $no_daq = 0; # Enable DAQ by default
@@ -2586,6 +2588,18 @@ if ($compat_initial_ligo) {
 } else {
   print OUTM "#Uncomment to enable initial LIGO compatibility\n";
   print OUTM "#CFLAGS += -DCOMPAT_INITIAL_LIGO\n";
+}
+if ($adcMaster > -1) {
+  print OUTM "CFLAGS += -DADC_MASTER\n";
+} else {
+  print OUTM "#Uncomment to run on an I/O Master \n";
+  print OUTM "#CFLAGS += -DADC_MASTER\n";
+}
+if ($adcSlave > -1) {
+  print OUTM "CFLAGS += -DADC_SLAVE\n";
+} else {
+  print OUTM "#Uncomment to run on an I/O slave process\n";
+  print OUTM "#CFLAGS += -DADC_SLAVE\n";
 }
 if ($specificCpu > -1) {
   print OUTM "#Comment out to run on first available CPU\n";
