@@ -593,6 +593,7 @@ void *fe_start(void *arg)
   double dac_in =  0.0;			// DAC value after upsample filtering
 
   static int dacWriteEnable = 0;
+  int adcWait;
 
 #ifdef DUOTONE_TIMING
   static float duotone[65536];
@@ -1058,6 +1059,8 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		    packedData = (int *)cdsPciModules.pci_adc[jj];
                	    packedData += 31;
                     kk = 0;
+		
+		    rdtscl(cpuClock[8]);
                     do {
                         kk ++;
 			// Need to delay if not ready as constant banging of the input register
@@ -1066,11 +1069,13 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 #ifdef NO_RTL
 				udelay(1);
 #else
-				if(jj==0) usleep(1);
+				// if(jj==0) usleep(0);
+		    		rdtscl(cpuClock[9]);
+				adcWait = (cpuClock[9] - cpuClock[8])/CPURATE;
 #endif
 			}
 			// Allow 1msec for data to be ready (should never take that long).
-                    }while((*packedData == 0x110000) && (kk < 1000000));
+                    }while((*packedData == 0x110000) && (adcWait < 1000000));
 
 		    // If data not ready in time, abort
 		    // Either the clock is missing or code is running too slow and ADC FIFO
@@ -1219,11 +1224,17 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		{
         		mm = cdsPciModules.adcConfig[jj];
                         kk = 0;
+		    		rdtscl(cpuClock[8]);
                         do{
-                                usleep(1);
-                                kk++;
-                        }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (kk < 1000));
-                        if(kk >= 1000)
+                                // usleep(1);
+		    		rdtscl(cpuClock[9]);
+				adcWait = (cpuClock[9] - cpuClock[8])/CPURATE;
+                                // kk++;
+                        }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (adcWait < 1000));
+                        // }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (kk < 1000));
+
+                        if(adcWait >= 1000)
+                        // if(kk >= 1000)
                         {
                                 printf ("ADC TIMEOUT %d %d %d %d\n",mm,ioMemData->iodata[mm][ioMemCntr].cycle, ioMemCntr,ioClock);
 printf("got here %d %d\n",clock16K,ioClock);
