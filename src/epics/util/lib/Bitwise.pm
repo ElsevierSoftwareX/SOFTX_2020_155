@@ -57,6 +57,10 @@ sub frontEndCode {
 	  $op = "|";
 	} elsif ($pname =~ /^xor/) {
 	  $op = "^";
+	} elsif ($pname =~ /^lshift/) {
+	  $op = "<<";
+	} elsif ($pname =~ /^rshift/) {
+	  $op = ">>";
 	}
 	#print "Operator is $op; part name is $::partName[$i]\n";
         my $calcExp = "// Bitwise $op\n";
