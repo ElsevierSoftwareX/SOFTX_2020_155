@@ -62,7 +62,7 @@ char *dolphin_memory_read = 0;
                         sci_r_segment_handle_t IN remote_segment_handle,
                         unsigned32 IN reason,
                         unsigned32 IN status) {
-                                printk("Connect callback %d\n", reason);
+                                // printk("Connect callback %d\n", reason);
                                 return 0;
                 }
 
@@ -71,7 +71,7 @@ char *dolphin_memory_read = 0;
                        unsigned32 IN reason,
                        unsigned32 IN source_node,
                        unsigned32 IN local_adapter_number)  {
-                                printk("Connect callback %d\n", reason);
+                                // printk("Connect callback %d\n", reason);
                                 return 0;
         	}
 #endif
@@ -597,9 +597,13 @@ void *fe_start(void *arg)
 
 #ifdef DUOTONE_TIMING
   static float duotone[65536];
+  static float duotoneDac[65536];
+  float duotoneTimeDac;
   float duotoneTime;
   static float duotoneTotal = 0.0;
   static float duotoneMean = 0.0;
+  static float duotoneTotalDac = 0.0;
+  static float duotoneMeanDac = 0.0;
 #endif
 
 
@@ -1420,18 +1424,19 @@ printf("got here %d %d\n",clock16K,ioClock);
         {
                 duotoneMean = duotoneTotal/CYCLE_PER_SECOND;
                 duotoneTotal = 0.0;
+                duotoneMeanDac = duotoneTotalDac/CYCLE_PER_SECOND;
+                duotoneTotalDac = 0.0;
         }
-#ifdef DUOTONE_DAC
-        duotone[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][30];
-        duotoneTotal += dWord[0][30];
-#else
+        duotoneDac[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][30];
+        duotoneTotalDac += dWord[0][30];
         duotone[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][31];
         duotoneTotal += dWord[0][31];
-#endif
         if(clock16K == 16)
         {
                 duotoneTime = duotime(12, duotoneMean, duotone);
                 pLocalEpics->epicsOutput.diags[4] = duotoneTime;
+                duotoneTimeDac = duotime(12, duotoneMeanDac, duotoneDac);
+                pLocalEpics->epicsOutput.diags[5] = duotoneTimeDac;
 		// printf("du = %f %f %f %f %f\n",duotone[5], duotone[6], duotone[7],duotone[8],duotone[9]);
         }
 #endif
@@ -1743,7 +1748,7 @@ int main(int argc, char **argv)
                                 0,
                                 1,
                                 DIS_BROADCAST,
-                                0x4000,
+                                0x6000,
                                 server_func,
                                 0,
                                 &segment);
@@ -1781,7 +1786,8 @@ int main(int argc, char **argv)
                                 0,
                                 1, 
                                 DIS_BROADCAST,
-                                func, 0,
+                                func, 
+				0,
                                 &remote_segment_handle);
                 printk("DIS connect segment status %d\n", err);
                 if (err) return -1;
@@ -1790,7 +1796,7 @@ int main(int argc, char **argv)
         	err = sci_map_segment(remote_segment_handle,
                                 DIS_BROADCAST,
                                 0,
-                                0x4000,
+                                0x6000,
                                 &client_map_handle);
         	printk("DIS segment mapping status %d\n", err);
         	if (err) {
