@@ -437,8 +437,20 @@ if ($ipcxCnt > 0) {
    for ($ii = 0; $ii < $ipcxCnt; $ii++) {
       $found = 0;
 
+      if ($ipcxParts[$ii][0] =~ /^[A-Z]\d\:/) {
+         $ipcxPartComp = $ipcxParts[$ii][0];
+      }
+      else {
+         if ($ipcxParts[$ii][0] =~ /^\w+([A-Z]\d\:.+)/) {
+            $ipcxPartComp = $1;
+         }
+         else {
+            $ipcxPartComp = "";
+         }
+      }
+
       for ($jj = 0; $jj < $ipcParamCnt; $jj++) {
-         if ($ipcxParts[$ii][0] eq $ipcData[$jj][0]) {
+         if ($ipcxPartComp eq $ipcData[$jj][0]) {
             #
             # Make sure no IPC parameters are missing
             #
@@ -468,7 +480,7 @@ if ($ipcxCnt > 0) {
             # which means there should be either one
             # or two outputs
             #
-            if ($partInput[$kk][0] =~ /^Ground/) {
+            if ( ($partInput[$kk][0] =~ /^Ground/) || ($partInput[$kk][0] =~ /\_Ground/) ) {
                if ( ($partOutCnt[$kk] < 1) || ($partOutCnt[$kk] > 2) ) {
                   die "***ERROR: IPC RECEIVER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
                }
