@@ -20,7 +20,7 @@ sub printEpics {
         ;
 }
 
-# Print variable declarations int front-end file
+# Print variable declarations into front-end file
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
@@ -55,7 +55,7 @@ sub frontEndInitCode {
            if ($::ipcxParts[$l][4] == $i) {
               $found = 1;
  
-              if ($::ipcxParts[$l][5] =~ /^Ground/) {
+              if ( ($::ipcxParts[$l][5] =~ /^Ground/) || ($::ipcxParts[$l][5] =~ /\_Ground/) ) {
                  $calcExp .= "ipcInfo[$::ipcInitDone]\.mode = IRCV;\n";
               }
               else {
