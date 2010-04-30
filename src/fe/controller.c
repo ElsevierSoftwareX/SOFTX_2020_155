@@ -551,6 +551,7 @@ void *fe_start(void *arg)
   int wtmin,wtmax;			// Time window for startup on IRIG-B
   int dacEnable = 0;
   struct timespec next;
+  int pBits[8] = {1,2,4,8,16,32,64,128,256};
 #endif
   RFM_FE_COMMS *pEpicsComms;		// Pointer to EPICS shared memory space
   int cycleTime;			// Max code cycle time within 1 sec period
@@ -1297,16 +1298,10 @@ printf("got here %d %d\n",clock16K,ioClock);
 	// {
 			if(ioMemData->iodata[mm][ioMemCntrDac].cycle == ioClockDac)
 			{
-				dacEnable |= (jj+1);
-                		// pLocalEpics->epicsOutput.diags[1] |= (jj+1);
+				dacEnable |= pBits[jj];
 			}else {
-				dacEnable &= ~(jj+1);
-                		// pLocalEpics->epicsOutput.diags[1] &= ~(jj+1);
-                		// pLocalEpics->epicsOutput.diags[1] = ioClockDac;
+				dacEnable &= ~(pBits[jj]);
 			}
-                		// if(ioClockDac == 15) // pLocalEpics->epicsOutput.diags[1] = ioMemData->iodata[mm][ioMemCntrDac].cycle;
-			// 	printf("ioclock 8 = %d %d %d\n",mm, ioClockDac,ioMemData->iodata[mm][ioMemCntrDac].cycle);
-                		// pLocalEpics->epicsOutput.diags[1] = mm;
 	// }
 #endif
 #ifdef OVERSAMPLE_DAC
