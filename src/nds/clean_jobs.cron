@@ -1,0 +1,2 @@
+# remove one day old job spec files at 2:22 am
+22 2 * * 1-5 find /export/home/controls/core2.d/jobs -atime +1 2>/dev/null |  xargs rm -f

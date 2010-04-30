@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cd /cvs/cds/caltech/target/fb
+exec su controls -c 'env LD_BIND_NOW=true  /cvs/cds/caltech/target/fb/nds /cvs/cds/caltech/target/fb/pipe' > /cvs/cds/caltech/target/fb/nds.log 2>&1
+echo "nds_start "`date` >> /cvs/cds/caltech/target/fb/restart.log
+

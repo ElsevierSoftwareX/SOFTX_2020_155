@@ -1,0 +1,113 @@
+
+# Network Data Server makefile
+
+SHELL = /bin/sh
+top_srcdir=@top_srcdir@
+srcdir=@srcdir@
+VPATH=@srcdir@
+
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
+bindir      = @bindir@
+infodir     = @infodir@
+mandir      = @mandir@
+infodir     = @infodir@
+libdir      = @libdir@
+
+CXX=@CXX@
+LIBS=@LIBS@
+DEBUGFLAGS=-g
+PERFORMANCEFLAGS=-g -DNDEBUG -O5
+RELEASEFLAGS=-g -DNDEBUG -DNPROBE -O5
+
+DEVFLAGS=@DEVFLAGS@
+
+LDAS_DIR=@LDAS_DIR@
+LDASFLAGS=-I$(LDAS_DIR)/include
+LDASLIBFLAGS=-L$(LDAS_DIR)/lib -R$(LDAS_DIR)/lib -lgeneral -lframecpp -lz -lbz2
+
+VARIOUS_DEFINES=-DSERVER_VERSION=\"1.5\" "-DPRODUCTION_DATE=\"`date`\"" "-DPRODUCTION_MACHINE=\"`uname -a`\"" ${EPICSFLAGS} ${SCRAMFLAGS} ${VMICRFMFLAGS} ${GDSFLAGS} ${LDASFLAGS}
+INCLUDEFLAGS=-I. -I@srcdir@ -I@srcdir@/client -I@srcdir@/framelib/src -I@srcdir@/framelib/src/zlib -I/opt/apps/Linux/gds/include -I/usr/local/include
+#CFLAGS=${VARIOUS_DEFINES} ${DEVFLAGS} -c ${INCLUDEFLAGS} -D_POSIX_C_SOURCE=199506L
+CFLAGS=${VARIOUS_DEFINES} ${DEVFLAGS} -c ${INCLUDEFLAGS} -D_REENTRANT
+CCFLAGS=${CFLAGS}
+LEX=flex++
+YACC=bison -o y.tab.c
+YFLAGS=-d
+FRAMELIB=-lframe
+
+SRCS= datastreamcombiner.cc mmstream.cc daqd_net.cc nds.cc readtocframefilearchive.cc rawminutetrend.cc main.cc spec.cc scanarchivedir.cc
+OBJ= ${SRCS:.cc=.o}
+
+FRAMEDIRSRCS= framedir/FrameF.cc framedir/Time.cc framedir/TimeStr.cc framedir/framedir.cc framedir/Interval.cc
+FRAMEDIROBJ=  FrameF.o Time.o TimeStr.o framedir.o Interval.o
+
+all: nds
+
+combiner: combiner.o $(FRAMEDIROBJ)
+	$(CXX) $(DEBUGFLAGS) -o combiner combiner.o $(FRAMEDIROBJ) $(LDASLIBFLAGS) $(LIBS)
+
+daqd: daqd.o
+	$(CXX) $(DEBUGFLAGS) -o daqd daqd.o  $(LIBS)
+
+nds: nds.out
+	/bin/mv nds.out nds
+
+fracfg: fracfg.o mmstream.o
+	$(CXX) $(DEBUGFLAGS) -o fracfg fracfg.o mmstream.o -R/usr/local/lib ${LDASLIBFLAGS}
+
+frcrc: frcrc.o mmstream.o
+	$(CXX) $(DEBUGFLAGS) -o frcrc frcrc.o mmstream.o -R/usr/local/lib ${LDASLIBFLAGS}
+
+frvtoc: frvtoc.o mmstream.o
+	$(CXX) $(DEBUGFLAGS) -o frvtoc frvtoc.o mmstream.o -R/usr/local/lib ${LDASLIBFLAGS}
+
+fririgb: fririgb.o mmstream.o
+	$(CXX) $(DEBUGFLAGS) -o fririgb fririgb.o mmstream.o -R/usr/local/lib ${LDASLIBFLAGS}
+
+frdiff: frdiff.o mmstream.o
+	$(CXX) $(DEBUGFLAGS) -o frdiff frdiff.o mmstream.o -R/usr/local/lib ${LDASLIBFLAGS}
+
+clean:
+	-/bin/rm  *.o nds combiner
+
+realclean: clean
+	-/bin/rm daqd *.out core config.status config.cache
+	cd framelib; make realclean
+	cd scope; make realclean
+
+.cc.o:
+	$(CXX) $(CCFLAGS) $<
+
+nds.out: $(OBJ)
+	$(CXX) $(DEBUGFLAGS) -o nds.out datastreamcombiner.o mmstream.o main.o daqd_net.o nds.o spec.o readtocframefilearchive.o rawminutetrend.o scanarchivedir.o  $(LDASLIBFLAGS) $(LIBS)
+
+test: test.o
+	$(CXX) $(DEBUGFLAGS) -o test test.o $(LDASLIBFLAGS) $(LIBS)	
+
+nds.o: nds.cc
+spec.o: spec.cc
+main.o: main.cc
+combiner.o: combiner.cc
+
+FrameF.o: framedir/FrameF.cc
+	$(CXX) $(CCFLAGS) $<
+
+Time.o: framedir/Time.cc
+	$(CXX) $(CCFLAGS) $<
+
+TimeStr.o: framedir/TimeStr.cc
+	$(CXX) $(CCFLAGS) $<
+
+framedir.o: framedir/framedir.cc
+	$(CXX) $(CCFLAGS) $<
+
+Interval.o: framedir/Interval.cc
+	$(CXX) $(CCFLAGS) $<
+
+#---
+
+depend:
+	objdir=`pwd`; cd $(srcdir); /usr/bin/makedepend -f $$objdir/Makefile  -- -I$$objdir $(CFLAGS) -I/usr/local/lib/g++-include -- $(SRCS)
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

@@ -1,0 +1,73 @@
+
+1. Create configure script
+
+./autoconf
+
+2. Create biuld directory
+
+cd /home/controls; mkdir fb; cd fb
+
+3. Required software
+
+Epics in /opt/epics-3.14.9/base
+FrameCPP in /usr/local
+GDS in /home/controls/gds (required is just 64-bit libtestpoint.so and headers)
+
+4. Build Configuration
+
+4.1. Shared memory data input
+
+/home/controls/cds/project/daq/fb2/configure   --disable-broadcast --without-myrinet --enable-debug --with-shmem --with-gds=/home/controls/gds --with-epics=/opt/epics-3.14.9-linux/base --with-framecpp=/usr/local
+
+4.2. Data concentrator at LHO and LLO sites
+This cone combines data from multiple sources and broadcasts it out into an Infiniband
+interface.
+
+/home/controls/cds/project/daq/fb2/configure '--enable-debug' '--with-concentrator' '--with-gds=/opt/apps/Linux/gds' '--with-epics=/opt/epics-3.14.10-RC2-x86_64/base' '--with-vmic-rfm=5565' '--enable-compat-initial-ligo' '--enable-aux-5579-rfm' '--with-myrinet' --with-gds=/home/controls/gds '--enable-broadcast' --with-framecpp=/usr/local
+
+4.3. NDS Infiniband broadcast receiver at the sites
+
+/home/controls/cds/project/daq/fb2/configure '--disable-broadcast' '--without-myrinet' '--enable-debug' '--with-broadcast' '--with-gds=/home/controls/gds' '--with-epics=/opt/epics-3.14.9-x86_64/base' '--enable-compat-initial-ligo' '--with-framecpp=/usr/local'
+
+4.4 GM data input
+
+
+/home/controls/cds/project/daq/fb2/configure   --disable-broadcast --with-myrinet --enable-debug --with-gds=/home/controls/gds --with-epics=/opt/epics-3.14.9-linux/base --with-framecpp=/usr/local
+
+4.5 Broadcaster
+
+This needs to be done on a 32-bit machine with 2.95.3 GCC compiler and version 6 framecpp.
+I usually install all this stuff into /usr/local-2.95.3/bin.
+Makefile.in needs to be patched with "/usr/local-2.95.3/bin" explicitly added in front of c++ and gcc lines.
+config.h.in needs to be patched, where USE_FRAMECPP=1 needs to be uncommented.
+
+Index: Makefile.in
+===================================================================
+RCS file: /ldcg_server/common/repository_cds/cds/project/daq/fb2/Makefile.in,v
+retrieving revision 1.44
+diff -r1.44 Makefile.in
+17,18c17,18
+< CXX=@CXX@
+< CC=@CC@
+---
+> CXX=/usr/local-2.95.3/bin/@CXX@
+> CC=/usr/local-2.95.3/bin/@CC@
+
+[controls@fb1gds fb2]$ cvs diff config.h.in 
+Index: config.h.in
+===================================================================
+RCS file: /ldcg_server/common/repository_cds/cds/project/daq/fb2/config.h.in,v
+retrieving revision 1.17
+diff -r1.17 config.h.in
+19c19
+< //#define USE_FRAMECPP 1
+---
+> #define USE_FRAMECPP 1
+
+
+../cds/project/daq/fb2/configure '--without-gds' '--with-epics=/opt/epics-3.14.7-i386/base' '--with-broadcast' '--without-myrinet' '--with-framecpp=/usr/local-2.95.3' '--enable-debug' '--enable-compat-initial-ligo'
+
+5. Compilation
+
+
+make
