@@ -1,0 +1,68 @@
+#
+#		Makefile for the scope
+#
+# ==============================================================================
+
+SHELL = /bin/sh
+
+top_srcdir=@top_srcdir@
+srcdir=@srcdir@
+VPATH=@srcdir@
+
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
+bindir      = @bindir@
+infodir     = @infodir@
+mandir      = @mandir@
+infodir     = @infodir@
+libdir      = @libdir@
+
+CXX=@CXX@
+CC=@CC@
+RANLIB=@RANLIB@
+DEBUGFLAGS=-g
+PERFORMANCEFLAGS=-DNDEBUG -O5
+RELEASEFLAGS=-DNDEBUG -DNPROBE -O5
+DEVFLAGS=@DEVFLAGS@
+VARIOUS_DEFINES=-DSERVER_VERSION=\"1.5\" "-DPRODUCTION_DATE=\"`date`\"" "-DPRODUCTION_MACHINE=\"`uname -a`\"" -DSCOPE_PROGRAM
+INCLUDEFLAGS= -I. -I.. -I$(srcdir) -I$(srcdir)/..
+CFLAGS=${VARIOUS_DEFINES} ${DEVFLAGS} -c ${INCLUDEFLAGS} -D_REENTRANT @X_CFLAGS@
+CCFLAGS=${CFLAGS}
+
+LIBS= @X_LIBS@ -lX11 -lpthread @LIBS@
+SRC= scope.c xyplot.c
+OBJ= ../daqc_access.o ../circ-scope.o 
+LEX=flex
+YACC=bison -o y.tab.c
+YFLAGS=-d
+
+all: scope xyplot-1
+
+scope:  scope.o ${OBJ}
+	$(CXX) -o $@ $^ ${LIBS} -Wl,-Bstatic
+
+xyplot-1:  xyplot.o ${OBJ}
+	$(CXX) -o $@ $^ ${LIBS} -Wl,-Bstatic
+
+clean:
+	-/bin/rm  *.o *.a
+
+realclean: clean
+	-/bin/rm *.out core scope
+
+.c.o:
+	$(CXX) $(CFLAGS) $<
+
+../daqc_access.o:  ../daqc_access.c
+	cd ..; make daqc_access.o
+
+../circ-scope.o:  ../circ.cc
+	cd ..; make LDASFLAGS=-DSCOPE_PROGRAM circ-scope.o
+
+#---
+
+depend:
+	objdir=`pwd`; cd $(srcdir); makedepend -f $$objdir/Makefile  -- -I$$objdir -Iclient $(CFLAGS)  -I/usr/local/lib/g++-include -- $(SRC)
+
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

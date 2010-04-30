@@ -1,0 +1,42 @@
+
+
+Data broadcasting is done using two separate streams. One stream holds the
+DAQ data and the other one has the test points data only. The receiver can
+receive one or both of them.
+
+DAQ broadcast is sent on port 7096.
+
+DAQ Broadcast structure is as follows:
+Header begins the transmission:
+uint32 ndcu; // The total number of DCUs present
+foreach DCU {
+	uint32 dcu_number; // +32 for H2
+	uint32 dcu_size; // Data size for this DCU
+	uint32 config_crc; // Configuration file CRC
+	uint32 crc; // Data CRC
+	uint32 status; // DCU status word bits (0-ok, 0xbad-out of sync, 0x1000-trasm error
+			// 0x2000 - configuration mismatch).
+	uint32 cycle; 	// DCU cycle
+}
+Header size is fixed at 2048 bytes.
+Following the header is the data for each DCU.
+TODO: need to add EDCU channel status on per-channel basis?
+
+
+Testpoint broadcast is sent on port 7097.
+
+uint32 ndcu;	// Total number of DCUs with testpoints
+
+foreach DCU {
+	uint32	dcu_number;	// +32 for H2
+	uint32	tp_count;	// How many testpoints this DCU has
+	uint32  dcu_rate;	// Single testpoint data size in 4 byte floats
+	// Test point table
+	foreach tp_count {
+		uint32 tp_number;	// Test point number
+	}
+	// Test point data
+	foreach tp_count {
+		float32bit data[dcu_rate];	// Data samples
+	}
+}

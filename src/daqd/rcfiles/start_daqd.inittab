@@ -1,0 +1,10 @@
+#!/bin/sh
+
+cd /cvs/cds/caltech/target/fb
+/bin/mv -f  /cvs/cds/caltech/target/fb/logs/*.log.* /cvs/cds/caltech/target/fb/logs/old
+
+# EPICS_CAS_INTF_ADDR_LIST=10.1.0.28  ???
+exec su controls -c 'env LD_BIND_NOW=true /cvs/cds/caltech/target/fb/daqd -c /cvs/cds/caltech/target/fb/daqdrc' > /cvs/cds/caltech/target/fb/logs/daqd.log.$$ 2>& 1
+
+echo "daqd_start "`date` >> /cvs/cds/caltech/target/fb/restart.log
+
