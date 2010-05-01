@@ -192,7 +192,7 @@ extern unsigned int cpu_khz;
 	#define NET_SEND_WAIT		81920
 	#define CYCLE_TIME_ALRM_HI	70
 	#define CYCLE_TIME_ALRM_LO	50
-	#define DAC_PRELOAD_CNT		3
+	#define DAC_PRELOAD_CNT		4
 #endif
 #ifdef SERVO4K
         #define CYCLE_PER_SECOND        4096
@@ -204,7 +204,7 @@ extern unsigned int cpu_khz;
         #define CYCLE_TIME_ALRM         487/2
         #define CYCLE_TIME_ALRM_HI      500/2
         #define CYCLE_TIME_ALRM_LO      460/2
-        #define DAC_PRELOAD_CNT         8       
+        #define DAC_PRELOAD_CNT         16      
 #endif
 #ifdef SERVO2K
 	#define CYCLE_PER_SECOND	2048
@@ -216,7 +216,7 @@ extern unsigned int cpu_khz;
 	#define CYCLE_TIME_ALRM		487
 	#define CYCLE_TIME_ALRM_HI	500
 	#define CYCLE_TIME_ALRM_LO	460
-	#define DAC_PRELOAD_CNT		16	
+	#define DAC_PRELOAD_CNT		8	
 #endif
 
 #ifndef NO_DAQ
@@ -540,6 +540,10 @@ void *fe_start(void *arg)
   static int clock1Min = 0;		// Minute counter (Not Used??)
   static int cpuClock[10];		// Code timing diag variables
   int adcData[MAX_ADC_MODULES][32];	// ADC raw data
+  int adcChanErr[16];
+  int dacChanErr[16];
+  int adcOF[16];
+  int dacOF[16];
 #ifndef ADC_SLAVE
   volatile int *packedData;		// Pointer to ADC PCI data space
   volatile unsigned int *pDacData;	// Pointer to DAC PCI data space
@@ -837,6 +841,7 @@ printf("Sync source = %d\n",syncSource);
 	  // Write a number into the last channel which the ADC should never write ie no
 	  // upper bits should be set in channel 31.
           *packedData = 0x110000;
+  	  pLocalEpics->epicsOutput.statAdc[jj] = 1;
   }
   printf("ADC setup complete \n");
 #endif
@@ -844,6 +849,7 @@ printf("Sync source = %d\n",syncSource);
 #ifndef ADC_SLAVE
   // Initialize the DAC module variables
   for(jj = 0; jj < cdsPciModules.dacCount; jj++) {
+  	  pLocalEpics->epicsOutput.statDac[jj] = 1;
         pDacData = (unsigned int *) cdsPciModules.pci_dac[jj];
  	// Reset DAC values to zero
         for(ii = 0; ii < (OVERSAMPLE_TIMES * 16); ii++) {
@@ -1114,8 +1120,13 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
                     packedData = (int *)cdsPciModules.pci_adc[jj];
 		    // FIrst, and only first, channel should have upper bit marker set.
                     // Return 0x10 if first ADC channel does not have sync bit set
-                    if(*packedData & 0xf0000) status = 0;
-                    else status = 16;
+                    if(*packedData & 0xf0000) 
+		    {
+			status = 0;
+                    } else {
+			 status = 16;
+  			 adcChanErr[jj] = 1;
+	 	    }	
                     kk = jj + 1;
                     diagWord |= status * kk;
 
@@ -1177,6 +1188,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 				overflowAdc[jj][ii] ++;
 				overflowAcc ++;
 				diagWord |= 0x100 *  (jj+1);
+				adcOF[jj] = 1;
 			  }
                     }
 
@@ -1301,6 +1313,7 @@ printf("got here %d %d\n",clock16K,ioClock);
 				dacEnable |= pBits[jj];
 			}else {
 				dacEnable &= ~(pBits[jj]);
+				dacChanErr[jj] += 1;
 			}
 	// }
 #endif
@@ -1367,6 +1380,7 @@ printf("got here %d %d\n",clock16K,ioClock);
 				overflowDac[jj][ii] ++;
 				overflowAcc ++;
 				diagWord |= 0x1000 *  (jj+1);
+				dacOF[jj] = 1;
 			}
 			if(dac_out < -limit) 
 			{
@@ -1374,6 +1388,7 @@ printf("got here %d %d\n",clock16K,ioClock);
 				overflowDac[jj][ii] ++;
 				overflowAcc ++;
 				diagWord |= 0x1000 *  (jj+1);
+				dacOF[jj] = 1;
 			}
 			// Load last values to EPICS channels for monitoring on GDS_TP screen.
 		 	dacOutEpics[jj][ii] = dac_out;
@@ -1389,7 +1404,7 @@ printf("got here %d %d\n",clock16K,ioClock);
 		}
 #ifdef ADC_SLAVE
 		// Write cycle count to make DAC data complete
-		ioMemData->iodata[mm][memCtr].cycle = ioClockDac + kk;
+		ioMemData->iodata[mm][memCtr].cycle = (ioClockDac + kk) % 65536;
 #endif
 #ifdef OVERSAMPLE_DAC
   	   }
@@ -1634,6 +1649,12 @@ printf("got here %d %d\n",clock16K,ioClock);
 		pLocalEpics->epicsOutput.ovAccum = overflowAcc;
 	  for(jj=0;jj<cdsPciModules.adcCount;jj++)
 	  {
+	    if(adcChanErr[jj]) pLocalEpics->epicsOutput.statAdc[jj] &= ~(2);
+ 	    else pLocalEpics->epicsOutput.statAdc[jj] |= 2;
+	    adcChanErr[jj] = 0;
+	    if(adcOF[jj]) pLocalEpics->epicsOutput.statAdc[jj] &= ~(4);
+ 	    else pLocalEpics->epicsOutput.statAdc[jj] |= 4;
+	    adcOF[jj] = 0;
 	    for(ii=0;ii<32;ii++)
 	    {
 		pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
@@ -1650,6 +1671,12 @@ printf("got here %d %d\n",clock16K,ioClock);
 	  }
 	  for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	  {
+	    if(dacOF[jj]) pLocalEpics->epicsOutput.statDac[jj] &= ~(4);
+ 	    else pLocalEpics->epicsOutput.statDac[jj] |= 4;
+	    dacOF[jj] = 0;
+	    if(dacChanErr[jj]) pLocalEpics->epicsOutput.statDac[jj] &= ~(2);
+ 	    else pLocalEpics->epicsOutput.statDac[jj] |= 2;
+	    dacChanErr[jj] = 0;
 	    for(ii=0;ii<16;ii++)
 	    {
 		pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
@@ -1673,14 +1700,17 @@ printf("got here %d %d\n",clock16K,ioClock);
 	//if (clock16K < 2) printf("cycle %d time %d\n", clock16K, cycleTime);
 	// Hold the max cycle time over the last 1 second
 	if(cycleTime > timeHold) timeHold = cycleTime;
-	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
 	// Hold the max cycle time since last diag reset
 	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
 	adcHoldTime = (cpuClock[0] - adcTime)/CPURATE;
 	if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
 	adcTime = cpuClock[0];
 	// Calc the max time of one cycle of the user code
+#ifdef ADC_MASTER
+	usrTime = (cpuClock[4] - cpuClock[0])/CPURATE;
+#else
 	usrTime = (cpuClock[5] - cpuClock[4])/CPURATE;
+#endif
 	if(usrTime > usrHoldTime) usrHoldTime = usrTime;
 
         // Update internal cycle counters
