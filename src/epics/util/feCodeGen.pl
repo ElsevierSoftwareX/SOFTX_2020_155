@@ -1701,6 +1701,8 @@ print OUTH "\tint overflowAdc[8][32];\n";
 print OUTH "\tint overflowDac[8][16];\n";
 print OUTH "\tint dacValue[8][16];\n";
 print OUTH "\tint ovAccum;\n";
+print OUTH "\tint statAdc[16];\n";
+print OUTH "\tint statDac[16];\n";
 print OUTH "} CDS_EPICS_OUT;\n\n";
 if($useWd)
 {
@@ -1770,6 +1772,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 print EPICS "\n\n";
 for($ii=0;$ii<$adcCnt;$ii++)
 {
+	print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT_$ii epicsOutput.statAdc\[$ii\] int ai 0\n";
 	for($jj=0;$jj<32;$jj++)
 	{
 		print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_OVERFLOW_$ii\_$jj epicsOutput.overflowAdc\[$ii\]\[$jj\] int ai 0\n";
@@ -1778,6 +1781,7 @@ for($ii=0;$ii<$adcCnt;$ii++)
 print EPICS "\n\n";
 for($ii=0;$ii<$dacCnt;$ii++)
 {
+	print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT_$ii epicsOutput.statDac\[$ii\] int ai 0\n";
 	for($jj=0;$jj<16;$jj++)
 	{
 		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OVERFLOW_$ii\_$jj epicsOutput.overflowDac\[$ii\]\[$jj\] int ai 0\n";
