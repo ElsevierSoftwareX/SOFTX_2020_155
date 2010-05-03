@@ -1091,10 +1091,10 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		    // If data not ready in time, abort
 		    // Either the clock is missing or code is running too slow and ADC FIFO
 		    // is overflowing.
-		    if (kk == 1000000) {
+		    if (adcWait >= 1000000) {
                         stop_working_threads = 1;
 	  		pLocalEpics->epicsOutput.diagWord |= 0x1;
-                        printf("timeout %d\n",jj);
+                        printf("timeout %d %d \n",jj,adcWait);
                     }
 		    if(jj == 0) 
 		    {
