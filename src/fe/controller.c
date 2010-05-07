@@ -1367,7 +1367,7 @@ printf("got here %d %d\n",clock16K,ioClock);
 			dac_out = dac_in;
 #else
 #ifdef ADC_MASTER
-			if(dacEnable & (jj+1))
+			if(!dacChanErr[jj])
 			dac_out = ioMemData->iodata[mm][ioMemCntrDac].data[ii];
 			else dac_out = 0;
 #else
