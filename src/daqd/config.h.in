@@ -240,4 +240,10 @@
 /* Define if using Symmetricom GPS card */
 #undef USE_SYMMETRICOM
 
+/* Define if building with MX */
+#undef USE_MX
+
+/* Define if building with UDP receiver */
+#undef USE_UDP
+
 #endif

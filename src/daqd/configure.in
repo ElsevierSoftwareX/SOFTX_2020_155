@@ -104,20 +104,36 @@ AC_ARG_WITH(myrinet,
    MYRINET_LDFLAGS=\$\{MYRINET_LDFLAGS\}
    AC_DEFINE(USE_GM)
  fi
-],
-[ MYRINET_OBJS=\$\{MYRINET_OBJS\}
- MYRINET_SRCS=\$\{MYRINET_SRCS\}
- MYRINET_FLAGS=\$\{MYRINET_FLAGS\}
- MYRINET_LDFLAGS=\$\{MYRINET_LDFLAGS\}
- if test x$withval != xno; then
-   AC_DEFINE(USE_GM)
- fi
 ])
 AC_SUBST(USE_MYRINET)
 AC_SUBST(MYRINET_OBJS)
 AC_SUBST(MYRINET_SRCS)
 AC_SUBST(MYRINET_FLAGS)
 AC_SUBST(MYRINET_LDFLAGS)
+
+AC_ARG_WITH(mx,
+[  --with-mx             Get data from MX],
+[ if test x$withval != xno; then
+   MX_OBJS=\$\{MX_OBJS\}
+   MX_SRCS=\$\{MX_SRCS\}
+   MX_FLAGS=\$\{MX_FLAGS\}
+   MX_LDFLAGS=\$\{MX_LDFLAGS\}
+   AC_DEFINE(USE_MX)
+ fi
+])
+AC_SUBST(USE_MX)
+AC_SUBST(MX_OBJS)
+AC_SUBST(MX_SRCS)
+AC_SUBST(MX_FLAGS)
+AC_SUBST(MX_LDFLAGS)
+
+AC_ARG_WITH(udp,
+[  --with-udp             Get data using UDP receive],
+[ if test x$withval != xno; then
+   AC_DEFINE(USE_UDP)
+ fi
+])
+AC_SUBST(USE_UDP)
 
 AC_ARG_WITH(epics,
 [  --with-epics=EPICS_BASE    Specify location of Epics base and enable EDCU and IOC server],

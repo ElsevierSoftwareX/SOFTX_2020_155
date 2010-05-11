@@ -522,13 +522,14 @@ label1:
 	int dcu_to = DAQ_GDS_DCU_NUM + DCU_ID_FIRST_GDS; // last GDS dcu + 1
 #if defined(COMPAT_INITIAL_LIGO)
 	// Myrinet nodes: figure out the exact dcu id
-        if (ac[i]->tp_node > 1) {
+        if (ac[i]->tp_node > 1)
+#endif
+	{
 		if (ac[i]->tp_node < max_gds_servers) {
 			dcu_from = dcu_to = dcuid[ac[i]->tp_node];
 			dcu_to++;
 		} else break; // Invalid GDS node id
 	}
-#endif
        for (dcuId = dcu_from; dcuId < dcu_to; dcuId++)
 #else
        for (dcuId = DCU_ID_SUS_1; dcuId < DCU_COUNT; dcuId++)
@@ -905,14 +906,14 @@ gds_c::update_tp_data (unsigned int *d, char *dest)
     }
     unsigned int ntp = ntohl(*d++);
     unsigned int rate = ntohl(*d++);
-    //printf("ifo %d DCU %d rate %d ntp %d gdsTpNum=0x%x\n", ifo, dcuid, rate, ntp, gdsTpNum[ifo][dcuid]);
+    DEBUG1(printf("ifo %d DCU %d rate %d ntp %d gdsTpNum=0x%x\n", ifo, dcuid, rate, ntp, gdsTpNum[ifo][dcuid]));
     if (ntp > DAQ_GDS_MAX_TP_ALLOWED) ntp = DAQ_GDS_MAX_TP_ALLOWED;
     if (gdsTpNum[ifo][dcuid]) gdsTpNum[ifo][dcuid] -> count  = ntp;
 
     // Table of testpoints goes next
     for (int j = 0; j < ntp; j++) {
 	unsigned int tpnum = ntohl(*d++);
-	//printf("%d\n", tpnum);
+	DEBUG1(printf("%d\n", tpnum));
 	if (gdsTpNum[ifo][dcuid]) gdsTpNum[ifo][dcuid] -> tpNum[j] = tpnum;
     }
 

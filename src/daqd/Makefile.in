@@ -56,7 +56,7 @@ LDAS_DIR=@LDAS_DIR@
 LDASFLAGS=-I$(LDAS_DIR)/include
 LDASLIBFLAGS=-L$(LDAS_DIR)/lib -R$(LDAS_DIR)/lib -lgeneral -lframecpp -lz -lbz2
 
-VARIOUS_DEFINES=-DSERVER_VERSION=\"2.0\" "-DPRODUCTION_DATE=\"`date`\"" "-DPRODUCTION_MACHINE=\"`uname -a`\"" ${VMICRFMFLAGS} ${GDSFLAGS} ${LDASFLAGS} ${EPICSFLAGS} ${MYRINET_FLAGS} @SYMMETRICOM_CFLAGS@
+VARIOUS_DEFINES=-DSERVER_VERSION=\"2.0\" "-DPRODUCTION_DATE=\"`date`\"" "-DPRODUCTION_MACHINE=\"`uname -a`\"" ${VMICRFMFLAGS} ${GDSFLAGS} ${LDASFLAGS} ${EPICSFLAGS} ${MYRINET_FLAGS} ${MX_FLAGS} @SYMMETRICOM_CFLAGS@
 INCLUDEFLAGS=-I. -I@srcdir@ -I$(srcdir)/../../../rts/src/include -I$(srcdir)/../../../advLigo/src/include -I/usr/sfw/include
 CFLAGS=${VARIOUS_DEFINES} ${DEVFLAGS} -c ${INCLUDEFLAGS} -D_REENTRANT 
 CCFLAGS=${CFLAGS} @CPPFLAGS@  @CXXFLAGS@
@@ -64,7 +64,7 @@ LEX=flex++
 YACC=@YACC@ -o y.tab.c
 YFLAGS=-d
 
-SRCS= archive.cc md5.c profiler.cc gds.cc filesys.cc producer.cc trend.cc  net_writer.cc daqd.cc circ.cc comm.y comm-lex.l framesend.cc gdstask.cc gdsmutex.cc edcu.cc @EPICS_SRCS@ @MYRINET_SRCS@ framerecv.cc listener.cc
+SRCS= archive.cc md5.c profiler.cc gds.cc filesys.cc producer.cc trend.cc  net_writer.cc daqd.cc circ.cc comm.y comm-lex.l framesend.cc gdstask.cc gdsmutex.cc edcu.cc @EPICS_SRCS@ @MYRINET_SRCS@ @MX_SRCS@ framerecv.cc listener.cc
 
 EPICS_SRCS=epicsServer.cc exServer.cc exPV.cc exScalarPV.cc exVectorPV.cc exChannel.cc
 EPICS_OBJS=epicsServer.o exServer.o exPV.o exScalarPV.o exVectorPV.o exChannel.o
@@ -72,6 +72,11 @@ MYRINET_SRCS=gm_rcvr.cc
 MYRINET_OBJS=gm_rcvr.o
 MYRINET_FLAGS=-I/opt/gm/include
 MYRINET_LDFLAGS=-L/opt/gm/lib -L/opt/gm/lib64 -lgm
+
+MX_SRCS=mx_rcvr.cc
+MX_OBJS=mx_rcvr.o
+MX_FLAGS=-I/opt/mx/include
+MX_LDFLAGS=-L/opt/mx/lib -L/opt/mx/lib64 -lmyriexpress
 
 all: 
 	make -j `grep processor /proc/cpuinfo  | wc -l` daqd-all
@@ -83,6 +88,15 @@ daqd.o: comm.o
 
 daqd: daqd.out
 	/bin/mv daqd.out daqd
+
+daniel_stream:	daniel_stream.o framesend.o gdstask.o gdsmutex.o
+	$(CXX) $(DEBUGFLAGS)  -o daniel_stream daniel_stream.o framesend.o gdstask.o gdsmutex.o $(LIBS) -lpthread
+
+mx_rcvr1.o: mx_rcvr.cc
+	$(CXX) $(CCFLAGS) -DUSE_MAIN=1 $< -o mx_rcvr1.o
+
+mxrecv: mx_rcvr1.o
+	$(CXX) $(DEBUGFLAGS) -o mxrecv mx_rcvr1.o  $(LIBS) $(MX_LDFLAGS)
 
 framerecv1.o: framerecv.cc
 	$(CXX) $(CCFLAGS) -DUSE_MAIN=1 $< -o framerecv1.o
@@ -118,9 +132,9 @@ exScalarPV.o: exScalarPV.cc
 exVectorPV.o: exVectorPV.cc
 	$(CXX) -c ${CCFLAGS} ${EPICSFLAGS}  -D_REENTRANT $<
 
-daqd.out: archive.o md5.o $(GDSOBJECTS) profiler.o filesys.o producer.o trend.o net_writer.o comm.o daqd.o circ.o $(BROADCASTOBJECTS) edcu.o @EPICS_OBJS@ @MYRINET_OBJS@ framerecv.o comm-lex.o listener.o
+daqd.out: archive.o md5.o $(GDSOBJECTS) profiler.o filesys.o producer.o trend.o net_writer.o comm.o daqd.o circ.o $(BROADCASTOBJECTS) edcu.o @EPICS_OBJS@ @MYRINET_OBJS@ @MX_OBJS@ framerecv.o comm-lex.o listener.o
 
-	$(CXX) $(DEBUGFLAGS) -o daqd.out archive.o md5.o $(GDSOBJECTS) profiler.o filesys.o producer.o trend.o net_writer.o daqd.o circ.o ./comm.o  $(BROADCASTOBJECTS) edcu.o framerecv.o comm-lex.o listener.o  @EPICS_OBJS@ @MYRINET_OBJS@ $(EPICSLIBFLAGS) $(SCRAMLIBFLAGS) $(VMICRFMLIBFLAGS) $(GDSLIBFLAGS) $(EPICSLIBFLAGS) @LDAS_LDFLAGS@ @MYRINET_LDFLAGS@ @SYMMETRICOM_LDFLAGS@ -lpthread $(LIBS) @LDFLAGS@
+	$(CXX) $(DEBUGFLAGS) -o daqd.out archive.o md5.o $(GDSOBJECTS) profiler.o filesys.o producer.o trend.o net_writer.o daqd.o circ.o ./comm.o  $(BROADCASTOBJECTS) edcu.o framerecv.o comm-lex.o listener.o  @EPICS_OBJS@ @MYRINET_OBJS@ @MX_OBJS@ $(EPICSLIBFLAGS) $(SCRAMLIBFLAGS) $(VMICRFMLIBFLAGS) $(GDSLIBFLAGS) $(EPICSLIBFLAGS) @LDAS_LDFLAGS@ @MYRINET_LDFLAGS@ @MX_LDFLAGS@ @SYMMETRICOM_LDFLAGS@ -lpthread $(LIBS) @LDFLAGS@
 
 daqcn: daqcn.o daqc_access.o
 	$(CC) $(DEBUGFLAGS) -o daqcn daqcn.o daqc_access.o -lpthread $(LIBS)

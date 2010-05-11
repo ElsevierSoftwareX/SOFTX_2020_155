@@ -78,7 +78,7 @@ extern long int altzone;
 struct ToLower { char operator() (char c) const  { return std::tolower(c); }};
 
 /* GM and shared memory communication area */
-#ifdef USE_GM
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
 struct rmIpcStr gmDaqIpc[DCU_COUNT];
 // DMA memory area pointers
 void *directed_receive_buffer[DCU_COUNT];
@@ -228,7 +228,7 @@ producer::grabIfoData(int ifo, int cblk, unsigned char *read_dest) {
         continue; // Move ot the next DCU in the loop
       } else
 #endif
-#if defined(USE_GM)
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
       if (IS_MYRINET_DCU(j)) {
 #if defined(COMPAT_INITIAL_LIGO)
 	//dcu_cycle = gmDaqIpc[j].cycle - 1;
@@ -309,7 +309,7 @@ producer::grabIfoData(int ifo, int cblk, unsigned char *read_dest) {
       int cblk1 = (cblk + 1)%PRIVATE_BUFFERS;
       // Calculate DCU status, if needed
       // Assign this status into the RFM
-#if defined(USE_GM)
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
       if (IS_MYRINET_DCU(j)) {
         ipc = &gmDaqIpc[j];
       }
@@ -376,7 +376,7 @@ producer::grabIfoData(int ifo, int cblk, unsigned char *read_dest) {
       // Update DCU status
       int newStatus = ipc -> status != DAQ_STATE_RUN? 0xbad: 0;
       int newCrc = ipc -> crc;
-#if defined(USE_GM)
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
       if (IS_MYRINET_DCU(j)) {
         newCrc = gmDaqIpc[j].crc;
 	//newStatus = 0;
@@ -456,7 +456,7 @@ producer::grabIfoData(int ifo, int cblk, unsigned char *read_dest) {
       if (j >= DCU_ID_ADCU_1 && (!IS_TP_DCU(j)) && daqd.dcuStatus[ifo][j] == 0) {
 	unsigned int rfm_crc = ipc -> bp[cblk].crc;
 
-#if defined(USE_GM)
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
       if (IS_MYRINET_DCU(j)) rfm_crc = gmDaqIpc[j].bp[cblk].crc;
 #endif
 
@@ -487,10 +487,11 @@ producer::grabIfoData(int ifo, int cblk, unsigned char *read_dest) {
   // Pointer to GDS TP tables
   struct cdsDaqNetGdsTpNum *gdsTpNum[2][DCU_COUNT];
 
+
 void*
 gm_receiver_thread(void *)
 {
-#if defined(USE_GM) || defined(USE_BROADCAST)
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_BROADCAST) || defined(USE_UDP)
   // Allocate local test point tables
   static struct cdsDaqNetGdsTpNum gds_tp_table[2][DCU_COUNT];
 
@@ -512,6 +513,11 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 
 #ifdef USE_GM
 	gm_recv();
+#elif defined(USE_MX)
+  void receiver_mx(int);
+	receiver_mx(1);
+#elif defined(USE_UDP)
+  receiver_udp();
 #endif
 }
 
@@ -548,7 +554,7 @@ producer::frame_writer ()
   //  pthread_mutex_lock (&framelib_lock);
 
  if (!daqd.no_myrinet) {
-#if !defined(sun) && defined(USE_GM)
+#if !defined(sun) && (defined(USE_GM) || defined(USE_MX))
     int res = gm_setup();
     if (res != 0) {
       system_log(1, "couldn't setup Myrinet\n");
@@ -571,7 +577,7 @@ producer::frame_writer ()
 	exit(1);
      }
      pthread_attr_destroy (&attr);
-     system_log(1, "Myrinet receiver thread started");
+     system_log(1, "Network receiver thread started");
     }
     sleep(1);
  }
@@ -1136,7 +1142,7 @@ if (cycle_input == 8) {
                 if (daqd.dcuSize[ifo][j] == 0) continue; // Skip unconfigured DCUs
   		prop.dcu_data[j + ifo*DCU_COUNT].cycle = daqd.dcuCycle[ifo][j];
 		volatile struct rmIpcStr *ipc = daqd.dcuIpc[ifo][j];
-#if defined(USE_GM)
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
 		// Do not support Myrinet DCUs on H2
       		if (IS_MYRINET_DCU(j) && ifo == 0) {
 		  prop.dcu_data[j].crc = gmDaqIpc[j].bp[cblk].crc;
@@ -1749,7 +1755,7 @@ producer::frame_writer ()
 #else /* ! defined(VMICRFM_PRODUCER) */
 #if defined(_ADVANCED_LIGO)
 
-#ifndef USE_GM
+#if !defined(USE_GM) && !defined(USE_MX) && !defined(USE_UDP)
 #define SHMEM_DAQ 1
 #include "../../../advLigo/src/include/daqmap.h"
 #include "../../../advLigo/src/include/drv/fb.h"
@@ -1764,30 +1770,137 @@ producer::frame_writer ()
   // Pointer to GDS TP tables
   struct cdsDaqNetGdsTpNum *gdsTpNum[2][DCU_COUNT];
 
+#if 0
+#ifdef USE_MX
 void*
-gm_receiver_thread(void *)
+gm_receiver_thread1(void *)
 {
-#if defined(USE_GM) || defined(USE_BROADCAST)
-  // Allocate local test point tables
-  static struct cdsDaqNetGdsTpNum gds_tp_table[2][DCU_COUNT];
-
-for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
-  for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
-    if (daqd.dcuSize[ifo][j] == 0) continue; // skip unconfigured DCU nodes
-    if (IS_MYRINET_DCU(j)) {
-      gdsTpNum[ifo][j] = gds_tp_table[ifo] + j;
-#if defined(USE_BROADCAST)
-    } else if (IS_TP_DCU(j)) {
-      gdsTpNum[ifo][j] = gds_tp_table[ifo] + j;
+  void receiver_mx(int);
+  receiver_mx(1);
+}
 #endif
-    } else {
-      gdsTpNum[ifo][j] = 0;
-    }
-  }
+#endif
+
+#ifdef USE_UDP
+static void
+diep(char *s) {
+  perror(s);
+  exit(1);
 }
 
+struct daqMXdata {
+        struct rmIpcStr mxIpcData;
+        cdsDaqNetGdsTpNum mxTpTable;
+        char mxDataBlock[DAQ_DCU_BLOCK_SIZE];
+};
+
+static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
+
+void
+receiver_udp(int my_dcu_id) {
+
+      #define BUFLEN 512
+      #define PORT 9930
+    
+     struct sockaddr_in si_me, si_other;
+     int s, i;
+     char buf[buf_size];
+#if 0
+     socklen_t slen = sizeof(si_other);
+    
+     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1) diep("socket");
+    
+     memset((char *) &si_me, 0, sizeof(si_me));
+     si_me.sin_family = AF_INET;
+     si_me.sin_port = htons(PORT);
+     si_me.sin_addr.s_addr = htonl(INADDR_ANY);
+     if (bind(s, (struct sockaddr *)&si_me, sizeof(si_me))==-1) diep("bind");
+#endif
+
+     // Open radio receiver on port 7090
+     diag::frameRecv* NDS = new diag::frameRecv(0);
+     //NDS->logging(false);
+     //if (!NDS->open("225.0.0.1", "192.168.1.0", 7090)) {
+     if (!NDS->open("225.0.0.1", "10.12.0.0", 7000 + my_dcu_id)) {
+        perror("Multicast receiver open failed.");
+        exit(1);
+     }
+     printf("Multicast receiver opened on port %d\n", 7000 + my_dcu_id);
+
+     for (i=0;;i++) {
+	int br;
+
+#if 0
+        if ((br = recvfrom(s, buf, buf_size, 0, (struct sockaddr *)&si_other, &slen)) == -1) diep("recvfrom()");
+#endif
+
+	unsigned int seq, gps, gps_n;
+	char *bufptr = buf;
+    	int length = NDS->receive(bufptr, buf_size, &seq, &gps, &gps_n);
+    	if (length < 0) {
+        	printf("Allocated buffer too small; required %d, size %d\n", -length, buf_size);
+        	exit(1);
+    	}
+    	//printf("%d %d %d %d\n", length, seq, gps, gps_n);
+
+
+         struct daqMXdata *dataPtr = (struct daqMXdata *) buf;
+         int dcu_id = dataPtr->mxIpcData.dcuId;
+	 if (dcu_id != my_dcu_id) {
+
+         	printf("Received packet from th foreign dcu_id %d %s:%d bytes=%d, dcu_id=%d\n\n", dcu_id, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), br, dcu_id);
+		continue;
+	 }
+#if 0
+         printf("Received packet from %s:%d bytes=%d, dcu_id=%d\n\n", 
+			inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), br, dcu_id);
+	
+	continue;
+#endif
+
+         int cycle = dataPtr->mxIpcData.cycle;
+         int len = dataPtr->mxIpcData.dataBlockSize;
+
+         char *dataSource = (char *)dataPtr->mxDataBlock;
+         char *dataDest = (char *)((char *)(directed_receive_buffer[dcu_id]) + buf_size * cycle);
+
+         // Move the block data into the buffer
+         memcpy (dataDest, dataSource, len);
+
+         // Assign IPC data
+         gmDaqIpc[dcu_id].crc = dataPtr->mxIpcData.crc;
+         gmDaqIpc[dcu_id].dcuId = dataPtr->mxIpcData.dcuId;
+         gmDaqIpc[dcu_id].bp[cycle].timeSec = dataPtr->mxIpcData.bp[cycle].timeSec;
+         gmDaqIpc[dcu_id].bp[cycle].crc = dataPtr->mxIpcData.bp[cycle].crc;
+         gmDaqIpc[dcu_id].bp[cycle].cycle = dataPtr->mxIpcData.bp[cycle].cycle;
+         gmDaqIpc[dcu_id].dataBlockSize = dataPtr->mxIpcData.dataBlockSize;
+
+         // Assign test points table
+         *gdsTpNum[0][dcu_id] = dataPtr->mxTpTable;
+
+         gmDaqIpc[dcu_id].cycle = cycle;
+         if (daqd.controller_dcu == dcu_id)  {
+              controller_cycle = cycle;
+              DEBUG(6, printf("Timing dcu=%d cycle=%d\n", dcu_id, controller_cycle));
+         }
+    }
+    close(s);
+}
+#endif
+
+void*
+gm_receiver_thread(void *p)
+{
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_BROADCAST) || defined(USE_UDP)
+  long dcu_id = (long)p;
 #ifdef USE_GM
   gm_recv();
+#elif defined(USE_MX)
+  void receiver_mx(int);
+  receiver_mx(0);
+#elif defined(USE_UDP)
+  void receiver_udp(int);
+  receiver_udp(dcu_id);
 #endif
 
 #else
@@ -1835,14 +1948,77 @@ producer::frame_writer ()
 
  if (!daqd.no_myrinet) {
 
-#if !defined(sun) && defined(_ADVANCED_LIGO) && defined(USE_GM)
+#if !defined(sun) && defined(_ADVANCED_LIGO) 
+#if defined(USE_GM)
    int res = gm_setup();
    if (res != 0) {
      system_log(1, "couldn't setup Myrinet\n");
      exit (1);
    }
+#elif defined(USE_MX)
+   void open_mx(void);
+   open_mx();
+#endif
 #endif
 
+#if defined(USE_MX) || defined(USE_UDP)
+        // Allocate receive buffers for each configured DCU
+        for (int i = 9; i < DCU_COUNT; i++) {
+                if (0 == daqd.dcuSize[0][i]) continue;
+
+                directed_receive_buffer[i] = malloc(2*DAQ_DCU_BLOCK_SIZE*DAQ_NUM_DATA_BLOCKS);
+                if (directed_receive_buffer[i] == 0) {
+                        system_log (1, "[MX recv] Couldn't allocate recv buffer\n");
+                        exit(1);
+                }
+        }
+#endif
+
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_BROADCAST) || defined(USE_UDP)
+  // Allocate local test point tables
+  static struct cdsDaqNetGdsTpNum gds_tp_table[2][DCU_COUNT];
+
+for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
+  for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
+    if (daqd.dcuSize[ifo][j] == 0) continue; // skip unconfigured DCU nodes
+    if (IS_MYRINET_DCU(j)) {
+      gdsTpNum[ifo][j] = gds_tp_table[ifo] + j;
+#if defined(USE_BROADCAST)
+    } else if (IS_TP_DCU(j)) {
+      gdsTpNum[ifo][j] = gds_tp_table[ifo] + j;
+#endif
+    } else {
+      gdsTpNum[ifo][j] = 0;
+    }
+  }
+}
+#endif
+
+#ifdef USE_UDP
+   {
+     pthread_attr_t attr;
+     pthread_attr_init (&attr);
+     pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
+     pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
+     //  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+     int err_no;
+  
+     for (int dcu_id = DCU_ID_EDCU; dcu_id < DCU_COUNT; dcu_id++) {
+       int ifo = 0;
+       if (daqd.dcuSize[ifo][dcu_id] == 0) continue; // skip unconfigured DCU nodes
+       if (!IS_MYRINET_DCU(dcu_id)) continue;
+
+       if (err_no = pthread_create (&gm_tid, &attr,
+				  gm_receiver_thread, (void *)dcu_id)) {
+     	  pthread_attr_destroy (&attr);
+     	  system_log(1, "pthread_create() err=%d", err_no);
+	  exit(1);
+       }
+       system_log(1, "UDP receiver thread started for dcu %d", dcu_id);
+     }
+     pthread_attr_destroy (&attr);
+   }
+#else
    {
      pthread_attr_t attr;
      pthread_attr_init (&attr);
@@ -1860,8 +2036,36 @@ producer::frame_writer ()
      pthread_attr_destroy (&attr);
 #ifdef USE_GM
      system_log(1, "Myrinet receiver thread started");
+#elif defined(USE_MX)
+     system_log(1, "MX receiver thread started");
+#elif defined(USE_UDP)
+     system_log(1, "UDP receiver thread started");
 #endif
    }
+#endif
+
+#if 0
+#ifdef USE_MX
+   {
+     pthread_attr_t attr;
+     pthread_attr_init (&attr);
+     pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
+     pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
+     //  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+     int err_no;
+
+     if (err_no = pthread_create (&gm_tid, &attr,
+                                  gm_receiver_thread1, 0)) {
+        pthread_attr_destroy (&attr);
+        system_log(1, "pthread_create() err=%d", err_no);
+        exit(1);
+     }
+     pthread_attr_destroy (&attr);
+     system_log(1, "second MX receiver thread started");
+   }
+#endif
+#endif
+
    sleep(1);
 
   }
@@ -1931,6 +2135,7 @@ producer::frame_writer ()
 		//exit(10);
 	}
 	unsigned long f;
+	// Wait for the beginning of a second
 	for(;;) {
 		prev_gps = daqd.symm_gps(&f);
 	 	//prev_frac = 1000000000 - 1000000000/16;
@@ -1940,13 +2145,23 @@ producer::frame_writer ()
 		frac = 0;
 		if (f > 999493000) break;
  	}
+#if 0
+	// Wait until 2 cycles elapse
+	for (;;) {
+		gps = daqd.symm_gps(&f);
+		if (f >= 1000000000/8) break;
+	}
+#endif
+
         //printf("Starting at gps %d prev_gps %d frac %d f %d\n", gps, prev_gps, frac, f);
         controller_cycle = 1;
 #else
       system_log(1, "Waiting for DCU %d to show Up", daqd.controller_dcu);
-#ifdef USE_GM
-      gmDaqIpc[daqd.controller_dcu].cycle = 1;
-      for (int i = 0; 2 != (gmDaqIpc[daqd.controller_dcu].cycle % 16); i++)
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
+      //gmDaqIpc[daqd.controller_dcu].cycle = 0;
+      controller_cycle = 0;
+      //for (int i = 0; 2 != (gmDaqIpc[daqd.controller_dcu].cycle % 16); i++)
+      for (int i = 0; 1 != (controller_cycle % 16); i++)
 #else
       shmemDaqIpc[daqd.controller_dcu]->cycle = 1;
       for (int i = 0; 1 != (shmemDaqIpc[daqd.controller_dcu]->cycle % 16); i++)
@@ -1961,7 +2176,7 @@ producer::frame_writer ()
 		break;
 	 }
       }
-      controller_cycle = 1;
+      //controller_cycle = 1;
       system_log(1, "Detected controller DCU %d\n", daqd.controller_dcu);
 #endif
       }
@@ -1997,7 +2212,7 @@ producer::frame_writer ()
         read_dest += read_size;
       } else if (IS_MYRINET_DCU(j)) {
 	dcu_cycle = i%DAQ_NUM_DATA_BLOCKS;
-#ifdef USE_GM
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
    	//dcu_cycle = gmDaqIpc[j].cycle;
 	//printf("cycl=%d ctrl=%d dcu=%d\n", gmDaqIpc[j].cycle, controller_cycle, j);
 	// Get the data from myrinet
@@ -2027,7 +2242,7 @@ producer::frame_writer ()
 #endif
 
       volatile struct rmIpcStr *ipc;
-#ifdef USE_GM
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
       ipc = &gmDaqIpc[j];
 #else
       ipc = shmemDaqIpc[j];
@@ -2100,7 +2315,7 @@ producer::frame_writer ()
 		newStatus = 1;
 	}
 #endif
-#ifdef USE_GM
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
         int newCrc = gmDaqIpc[j].crc;
 #else
 	int newCrc = shmemDaqIpc[j]->crc;
@@ -2116,7 +2331,7 @@ producer::frame_writer ()
 	  }
         }
         daqd.dcuStatus[0][j] = newStatus;
-#ifdef USE_GM
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
         daqd.dcuCycle[0][j] = gmDaqIpc[j].cycle;
 #else
         daqd.dcuCycle[0][j] = shmemDaqIpc[j]-> cycle;
@@ -2144,10 +2359,11 @@ producer::frame_writer ()
 
         if (j >= DCU_ID_ADCU_1 && (!IS_TP_DCU(j)) && daqd.dcuStatus[0][j] == 0)
 	{
-#ifdef USE_GM
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
 	  unsigned int rfm_crc = gmDaqIpc[j].bp[cblk].crc;
 #else
 	  unsigned int rfm_crc = shmemDaqIpc[j]->bp[cblk].crc;
+	  shmemDaqIpc[j]->bp[cblk].crc = 0;
 #endif
 
 	  if (rfm_crc != crc) {
@@ -2182,7 +2398,7 @@ producer::frame_writer ()
 
 		// Do not support Myrinet DCUs on H2
       		if (IS_MYRINET_DCU(j) && ifo == 0) {
-#ifdef USE_GM
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
 		  prop.dcu_data[j].crc = gmDaqIpc[j].bp[cblk].crc;
 #else
 		  prop.dcu_data[j].crc = shmemDaqIpc[j]->bp[cblk].crc;
@@ -2380,6 +2596,14 @@ for(;;) {
 		if (gps == prev_gps + 1) {
 		  frac = 0;
 		  break;
+		} else {
+		   if (gps > prev_gps + 1) {
+			fprintf(stderr, "GPS card time jumped from %d to %d\n", prev_gps, gps);
+			exit(1);
+		   } else if (gps < prev_gps) {
+			fprintf(stderr, "GPS card time moved back from %d to %d\n", prev_gps, gps);
+			exit(1);
+		   }
 		}
 	 } else if (frac >= prev_frac + 62500000) {
 		frac = prev_frac + 62500000;

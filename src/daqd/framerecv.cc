@@ -12,6 +12,7 @@
 #define DEBUG 2
 #undef DEBUG
 
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -56,7 +57,8 @@ typedef u_int32_t in_addr_t;
 main() {
   diag::frameRecv* NDS = new diag::frameRecv();
 // DMT broadcast port needs to be different from IB ports !
-  if (!NDS->open("225.0.0.1", "10.4.0.0", diag::frameXmitPort + 1)) {
+  //if (!NDS->open("225.0.0.1", "192.168.1.0", 7090 /*diag::frameXmitPort + 1*/)) {
+  if (!NDS->open("225.0.0.1", "10.11.0.0", 7090 /*diag::frameXmitPort + 1*/)) {
         perror("Multicast receiver open failed.");
         exit(1);
   }
@@ -252,6 +254,7 @@ namespace diag {
    
       // bind socket
       name.sin_family = AF_INET;
+      this->port = port;
       name.sin_port = htons (port);
       name.sin_addr.s_addr = htonl (INADDR_ANY);
       if (bind (sock, (struct sockaddr*) &name, sizeof (name))) {
@@ -524,7 +527,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
 			}
 		   }
 		}
-		printf("DIFF=%d and len==0; missed the first packet\n", diff);
+		//printf("DIFF=%d and len==0; missed the first packet\n", diff);
 		// Looks like we missed the packet (or packets)!
 		// Request its retransmission and wait
 	//	abort();
@@ -580,8 +583,11 @@ int drop_seq = 0; // sequence to drop (for debugging)
 	       if (diff != 0) 
                   cout << "have to skip (" << (int)diff << ")" << endl;
             #endif
+#ifndef USE_UDP
 	       //abort();
 		exit(1);
+#error
+#endif
                continue;
             }
          
@@ -806,9 +812,8 @@ int drop_seq = 0; // sequence to drop (for debugging)
             }
             if (logison) {
                char buf[256];
-               sprintf (buf, "Ask for retransmission of %i packets\n"
-                       "New retransmission rate is %g",
-                       n, newRetransmissionRate);
+               sprintf (buf, "Ask for retransmission of %i packets; port %d", n, port);
+		
                addLog (buf);
             }
          #ifdef DEBUG

@@ -2769,7 +2769,7 @@ usage (int status)
 #if defined(VMICRFM_PRODUCER)
   cerr << "Data feed:\n\tVMIC reflected memory" << endl;
 #else
-  cerr << "Data feed:\n\tframe file passed with `-f' flag" << endl;
+  //cerr << "Data feed:\n\tframe file passed with `-f' flag" << endl;
 #endif
 
   cerr << endl << "This executable compiled on:" << endl;
@@ -3057,7 +3057,10 @@ main (int argc, char *argv [])
   daqd.init_vmicrfm ();
 #endif
 
-#ifdef USE_GM
+#ifdef USE_MX
+void open_mx(void);
+open_mx();
+#elif defined(USE_GM)
 #if defined(sun) && defined(_ADVANCED_LIGO)
     if (!daqd.no_myrinet) {
       int res = gm_setup();

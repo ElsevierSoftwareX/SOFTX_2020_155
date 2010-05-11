@@ -92,14 +92,16 @@ using namespace std;
 
 #ifdef FILE_CHANNEL_CONFIG
 #if defined(_ADVANCED_LIGO)
-#ifndef USE_GM
+#if !defined(USE_GM) && !defined(USE_MX) && !defined(USE_UDP)
 #define SHMEM_DAQ 1
 #endif
 #include "../../../advLigo/src/include/daqmap.h"
+#ifdef USE_GM
 #include "../../../advLigo/src/include/drv/gmnet.h"
 #include "gm_rcvr.hh"
+#endif
 #else
-#ifndef USE_GM
+#if !defined(USE_GM) && !defined(USE_MX) && !defined(USE_UDP)
 #define SHMEM_DAQ 1
 #endif
 #include "../../../rts/src/include/daqmap.h"

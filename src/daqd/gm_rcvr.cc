@@ -226,7 +226,7 @@ for(;;) {
 #ifdef _ADVANCED_LIGO
 		if (daqd.controller_dcu == dcuId) {
          	   controller_cycle = gmDaqIpc[daqd.controller_dcu].cycle;
-		   DEBUG(3, printf("Timing dcu=%d cycle=%d\n", dcuId, controller_cycle));
+		   DEBUG(6, printf("Timing dcu=%d cycle=%d\n", dcuId, controller_cycle));
 		}
 #endif
 
@@ -341,6 +341,8 @@ gm_setup(void)
 
 for(ii=9;ii<DCU_COUNT;ii++)
 {
+//  if (0 == daqd.dcuSize[0][ii]) continue;
+
   /* Allocate DMAable message buffers. */
   alloc_length = sizeof(*id_message[0]);
   id_message[ii] = (gm_s_e_id_message_t *)gm_dma_calloc (my_port, 1, alloc_length);
