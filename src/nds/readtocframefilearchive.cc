@@ -92,7 +92,9 @@ Nds::readTocFrameFileArchive()
   const vector<string> &names = mSpec.getSignalNames(); // ADC signal names
   unsigned long num_signals = names.size();
   unsigned int nfiles_read = 0; // number of files read
+  unsigned int nfiles_updated = 0; // number of files updated
   unsigned int nfiles_open_failed = 0; // number of files that were missing
+  unsigned int nfiles_failed = 0; // number of times read failed
   unsigned int nbad_failures = 0; // tracks the number of expensive failures
 
   // Buffer for the actual Adc data.
@@ -110,14 +112,7 @@ Nds::readTocFrameFileArchive()
 
     if (archiveDirScanned) {
       // directory number is based on GPS timestamp: all digits but the last 6
-      int seconds_per_dir = 100000; //
-
-// rawminutetrend
-      if (mSpec.getDataType() == Spec::MinuteTrendData
-      	|| mSpec.getDataType() == Spec::RawMinuteTrendData) {
-	seconds_per_dir = 1000000; // DMT
-      }
-      dir_num = gps[i].first / seconds_per_dir;
+      dir_num = gps[i].first / 1000000;
     } else {
       dir_num =  distance(archive_gps.begin(),
 			  find_first_of(archive_gps.begin(),
@@ -257,7 +252,6 @@ Nds::readTocFrameFileArchive()
       t = time(0) - t;
       DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
       ibuf->close();
-      nfiles_read++;
 
       // decimate and send the data, taking care of DAQD network protocol
       if (!daqd_net.send_data(new_frame, file_name, 0, &seq_num))
@@ -266,8 +260,8 @@ Nds::readTocFrameFileArchive()
   } // data directories
   if (!daqd_net.finish())
     return false;
-  system_log(1, "time=%d read=%d missing=%d",
-	     time(0)-t_start, nfiles_read, nfiles_open_failed);
+  system_log(1, "time=%d read=%d updated=%d missing=%d failed=%d",
+	     time(0)-t_start, nfiles_read, nfiles_updated, nfiles_open_failed, nfiles_failed);
 
   return true;
 }

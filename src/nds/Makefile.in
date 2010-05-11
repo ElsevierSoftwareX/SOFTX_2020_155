@@ -108,6 +108,6 @@ Interval.o: framedir/Interval.cc
 #---
 
 depend:
-	objdir=`pwd`; cd $(srcdir); /usr/bin/makedepend -f $$objdir/Makefile  -- -I$$objdir $(CFLAGS) -I/usr/local/lib/g++-include -- $(SRCS)
+	objdir=`pwd`; cd $(srcdir); /usr/openwin/bin/makedepend -f $$objdir/Makefile  -- -I$$objdir $(CFLAGS) -I/usr/local/lib/g++-include -- $(SRCS)
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

@@ -10,7 +10,7 @@
 
 #ifndef __CINT__
 
-#define PIDCVSHDR "$Header: /var/svn/ldas-cvs/repository_cds/cds/project/daq/nds/IRIG-B.cc,v 1.1 2001/11/13 16:21:47 aivanov Exp $"
+#define PIDCVSHDR "$Header: /ldcg_server/common/repository_cds/cds/project/daq/nds/IRIG-B.cc,v 1.1 2001/11/13 16:21:47 aivanov Exp $"
 #define PIDTITLE  "IRIG-B Timing Signal Check"
 #include "ProcIdent.hh"
 #include <iostream.h>

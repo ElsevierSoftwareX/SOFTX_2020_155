@@ -67,13 +67,8 @@ Nds::scanArchiveDir(vector<ulong_pair> *tstamps)
       int scanned =  sscanf (cfile, "%d", &times);
       switch (scanned) {
       case 1:
-	if (times > 999) {  // 100000 seconds per directory
-	  tstamps->push_back(ulong_pair(times * 100000, (times + 1) * 100000));
-	  DEBUG(5, std::cerr << "scanned file:" << "\t" << times*100000 << std::endl);
-	} else {
-	  tstamps->push_back(ulong_pair(times * 1000000, (times + 1) * 1000000));
-	  DEBUG(5, std::cerr << "scanned file:" << "\t" << times*1000000 << std::endl);
-	}
+	tstamps->push_back(ulong_pair(times * 1000000, (times + 1) * 1000000));
+	DEBUG(5, std::cerr << "scanned file:" << "\t" << times*1000000 << std::endl);
 	break;
       default:
 	system_log(5, "scan(): `%s/%s' is invalid filename: skipped", dirname, direntp -> d_name);
