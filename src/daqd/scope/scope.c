@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <iostream.h>
+#include <iostream>
 #include "circ.hh"
 #include "debug.h"
 extern "C" {
@@ -49,7 +49,7 @@ char *progname;
 char *daqd_host = "fb0";
 
 /* TCP port where the DAQD server is listening */
-int daqd_port = 8088;
+int daqd_port = 31200;
 
 #define PLOT_WIDTH (channel.rate/16)
 #define WINDOW_WIDTH 1024
@@ -58,7 +58,7 @@ int daqd_port = 8088;
 
 int listener_port = LISTENER_PORT;
 
-void *interpreter (daq_t *);
+void *interpreter (void *);
 
 circ_buffer *cb;
 
@@ -339,8 +339,9 @@ main(int argc, char *argv [])
 // Data receiving thread
 
 void *
-interpreter (daq_t *daq)
+interpreter (void *daq_v)
 {
+  daq_t *daq = (daq_t *)daq_v;
   daq_recv_block_num (daq);
   int oread = 0;
   int seq_num = ~0;

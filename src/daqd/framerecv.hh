@@ -219,6 +219,7 @@ namespace diag {
       unsigned int 		oldseq;
       /// send back address
       struct sockaddr_in 	name;
+      int port;
       /// packet list type
       typedef std::deque<auto_pkt_ptr> packetlist;
       /// packet buffers
