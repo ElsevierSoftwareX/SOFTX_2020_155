@@ -464,12 +464,7 @@ DEBUG1(cerr << "find_offs() returned " << offs << endl);
   // Get channel numbers from `fname_channel_map'
   // copy the data  into the transmission image.
   for (DSMI p = data_span_map.begin (); p != data_span_map.end (); p++) {
-    DEBUG1(cerr << p->first << endl);
-    DEBUG1(cerr << path << endl);
-    string s = path+"/"+p->first;
-    //char *fname = (path + "/" + p -> first).c_str ();
-    const char *fname = s.c_str ();
-    DEBUG1(printf("fname=%s\n", fname));
+    const char *fname = (path + "/" + p -> first).c_str ();
     int fd = open (fname, O_RDONLY);
     if (fd < 0) {
       system_log(1, "Couldn't open raw minute trend file `%s' for reading {2}; errno %d", fname, errno);

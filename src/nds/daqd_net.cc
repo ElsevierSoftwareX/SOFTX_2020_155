@@ -150,19 +150,6 @@ daqd_net::send_reconfig_block()
   return true;
 }
 
-#ifdef __linux__
-	void byteswap(char *image_ptr) {
-          	char a[4];
-                a[0] = image_ptr[0];
-                a[1] = image_ptr[1];
-                a[2] = image_ptr[2];
-                a[3] = image_ptr[3];
-                image_ptr[0] = a[3];
-                image_ptr[1] = a[2];
-                image_ptr[2] = a[1];
-                image_ptr[3] = a[0];
-	}
-#endif
 
 bool
 daqd_net::combine_send_data()
@@ -229,20 +216,10 @@ daqd_net::combine_send_data()
 	  system_log(1, "bad block length %d; fd=%d", block_len, p -> first);
 	  return false;
 	}
-	unsigned int dt, gps, gpsn;
+	unsigned long dt, gps, gpsn;
 	memcpy(&dt, data, sizeof(dt));
 	memcpy(&gps, data + 4, sizeof(gps));
 	memcpy(&gpsn, data + 8, sizeof(gpsn));
-#ifdef __linux__
-{
- 	byteswap((char *)&dt);
-	byteswap((char *)&gps);
-	byteswap((char *)&gpsn);
-}
-#endif
-	
-
-        DEBUG1(cerr << "idt=" << dt << "; gps=" << gps << "; gpsn=" << gpsn << endl);
 	if (gpsn) {
 	  system_log(1, "gpsn!=0 is not supported by the merger");
 	  return false;
@@ -284,13 +261,9 @@ daqd_net::combine_send_data()
 	unsigned long block_len = block->length;
 	char *data = block->data;
 	unsigned long o_dt = block->dt; // Data output offset ('block->dt' worth of data was sent out already)
-	unsigned int dt, gps;
+	unsigned long dt, gps;
 	memcpy(&dt, data, sizeof(dt));
 	memcpy(&gps, data + 4, sizeof(gps));
-#ifdef __linux__
-	byteswap((char *)&dt);
-	byteswap((char *)&gps);
-#endif
 	data += 4 * sizeof(unsigned int); // Skip the header vars to the start of data
 	unsigned long i_end_t = gps + dt; // Input block's end time
 
@@ -315,16 +288,15 @@ daqd_net::combine_send_data()
 	    unsigned long soffs = (gps + o_dt - start_t)/60*signal_bps;      // offset in the output block's signal memory
 	    unsigned long boffs = (end_t - start_t)/60*signal_offset; // offset in the output block' to the start of this signal's memory
 
-	    DEBUG1(cerr << "memcpy(boffs=" << boffs << ";soffs=" << soffs << ", inb_offs=" << inb_offs << ";ins_offs=" << ins_offs << "," << davail << ";data=" << (unsigned long)data << ");" << endl);
+	    DEBUG1(cerr << "memcpy(boffs=" << boffs << ";soffs=" << soffs << ", inb_offs=" << inb_offs << ";ins_offs=" << ins_offs << "," << davail <<");" << endl);
 	    memcpy(iptr + boffs + soffs, data + inb_offs + ins_offs, davail);
 	    inb_offs += (i_end_t - gps)/60*signal_bps; // Move to the next signal in the subjob block (input block)
 	  }
 
 	  if (i_end_t <= end_t) { // All of this block's data fits into the output
 	    // Delete the block from the queue (list).
-	    SubjobReadState::BT block = p -> second.block_list.front();
-	    free(block.data);
 	    p -> second.block_list.pop_front();
+	    free(data);
 	  }
 	}
       }
