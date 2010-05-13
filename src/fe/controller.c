@@ -241,6 +241,7 @@ int overflowAcc = 0;
 
 float *testpoint[500];	// Testpoints which are not part of filter modules
 float xExc[50];	// GDS EXC not associated with filter modules
+float floatDacOut[160]; // DAC outputs stored as floats, to be picked up as test points
 
 CDS_EPICS *pLocalEpics;   	// Local mem ptr to EPICS control data
 
@@ -765,6 +766,15 @@ printf("Sync source = %d\n",syncSource);
 
   // Set an xtra TP to read out one pps signal
   testpoint[0] = (float *)&onePps;
+
+  // Assign DAC testpoint pointers
+  for (ii = 0; ii <  cdsPciModules.dacCount; ii++)
+	for (jj = 0; jj < 16; jj++) // 16 per DAC regardless of the actual
+		testpoint[1 + 16 * ii + jj] = floatDacOut + 16 * ii + jj;
+
+  // Zero out storage
+  memset(floatDacOut, 0, sizeof(floatDacOut));
+
 #endif
   pLocalEpics->epicsOutput.diags[1] = 0;
   pLocalEpics->epicsOutput.diags[2] = 0;
@@ -1392,6 +1402,9 @@ printf("got here %d %d\n",clock16K,ioClock);
 			}
 			// Load last values to EPICS channels for monitoring on GDS_TP screen.
 		 	dacOutEpics[jj][ii] = dac_out;
+
+			// Load DAC testpoints
+			floatDacOut[16*jj + ii] = dac_out;
 #ifdef ADC_SLAVE
 			memCtr = (ioMemCntrDac + kk) % IO_MEMORY_SLOTS;
 	   		ioMemData->iodata[mm][memCtr].data[ii] = dac_out;
