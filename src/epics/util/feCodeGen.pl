@@ -1803,7 +1803,15 @@ if($rate == 480 || $rate == 240) {
   $gdsXstart = 1;
   $gdsTstart = 10001;
 }
-print EPICS "test_points ONE_PPS $::extraTestPoints\n";
+
+$dac_testpoint_names = "";
+for($ii = 0; $ii < $dacCnt; $ii++) {
+   for($jj = 0; $jj < 16; $jj++) {
+	$dac_testpoint_names .= "MDAC". $ii . "_TP_CH" . $jj . " ";
+   }
+}
+
+print EPICS "test_points ONE_PPS $dac_testpoint_names $::extraTestPoints\n";
 if ($::extraExcitations) {
 	print EPICS "excitations $::extraExcitations\n";
 }
