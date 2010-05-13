@@ -16,6 +16,10 @@ sub printHeaderStruct {
 	# there is 500 "testpoint" array in controller.c
 	die "Too many extra test points (max 499)\n" unless $::extraTPcount < 499;
 	$::extraTPcount ++;
+	if ($::extraTPcount == 1) {
+		# Add 16 per DAC
+		$::extraTPcount += 16 * $::dacCnt;
+	}
 	$::extraTestPoints .= " $::xpartName[$i]";
 	my $tpn = $::extraTPcount;
 	$::feInitCodeTP .= "testpoint[$tpn] = &\L$::xpartName[$i];\n";
