@@ -69,12 +69,13 @@ static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.5 2009/09/17 18:59:01 a
 #include "fmFir.h"
 #define MAX_FIR_SO_SECTIONS (FIR_TAPS/4)	/* Maximum SOS supported for FIR filters */
 #define MAX_FIR_COEFFS	(FIR_TAPS+1)
-#ifdef SERVO2K
+// #ifdef SERVO2K
 #define FIR_POLYPHASE_SIZE	32		/* The number of parallel polyphase filters */
-#endif
-#ifdef SERVO4K
-#define FIR_POLYPHASE_SIZE	64		/* The number of parallel polyphase filters */
-#endif
+// #endif
+
+// #ifdef SERVO4K
+// #define FIR_POLYPHASE_SIZE	64		/* The number of parallel polyphase filters */
+// #endif
 #endif
 
 /*masks*/
@@ -146,10 +147,12 @@ typedef struct COEF{
   FM_OP_COEF coeffs[MAX_MODULES];
 
 #ifdef FIR_FILTERS
+#if defined(FIR_POLYPHASE_SIZE)
   double firFiltCoeff[MAX_FIR_MODULES][FILTERS][MAX_FIR_COEFFS];
   /* firHistory is huge, 5 megabytes. may need to get rid of FILTERS dimension */
   double firHistory[MAX_FIR_MODULES][FILTERS][FIR_POLYPHASE_SIZE][FIR_TAPS];
   double prevFirOutput[MAX_FIR_MODULES];
+#endif
 #endif
 
 }COEF;
