@@ -546,13 +546,14 @@ state init
 
 state monScreen{
 
-  when(delay(.2)){
+  when(1){
 %% int ii, jj;	
 %% int ij;                                                               /* MA */
 %% int mod;                                                              /* MA */
 %% int rcode = 0;                                                        /* MA */
 %% int size;                                                             /* MA */
 %% char matrixID[32];                                                    /* MA */
+%% usleep(200000);
 /* %% char thresholdErrMsg[6][32];                                          MA */
 
 /* %% strcpy(thresholdErrMsg[0], "Threshold file open failed");             MA */
