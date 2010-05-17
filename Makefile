@@ -6,7 +6,7 @@ clean:
 realclean:
 	/bin/rm -rf build target
 
-# Clean system, jsut say something like 'make clean-pde'
+# Clean system, just say something like 'make clean-pde'
 clean-% :: src/epics/simLink/%.mdl
 	@system=$(subst clean-,,$@); \
 	/bin/rm -rf target/$${system}epics build/$${system}epics; \
@@ -257,3 +257,24 @@ install-% :: config/Makefile.%epics
 dump_predefines:
 	gcc -E -dM -x c /dev/null
 
+
+# Build NDS program
+nds:
+	(cd src/nds; test -e configure || autoconf)
+	/bin/rm -rf build/nds
+	/bin/mkdir -p build/nds
+	(cd build/nds; ../../src/nds/configure && make)
+
+# Build frame builder data concentrator program
+dc:
+	(cd src/daqd; test -e configure || autoconf)
+	/bin/rm -rf build/dc
+	/bin/mkdir -p build/dc
+	(cd build/dc; ../../src/daqd/configure '--enable-symmetricom' '--with-mx' '--enable-debug' '--with-gds=/apps/Linux/gds' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' '--with-concentrator' && make)
+
+# Build frame builder NDS or frame writer (broadcast receiver)
+rcv:
+	(cd src/daqd; test -e configure || autoconf)
+	/bin/rm -rf build/rcv
+	/bin/mkdir -p build/rcv
+	(cd build/rcv; ../../src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-gds=/apps/Linux/gds' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' && make)
