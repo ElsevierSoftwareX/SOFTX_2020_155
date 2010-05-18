@@ -586,7 +586,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
 #ifndef USE_UDP
 	       //abort();
 		exit(1);
-#error
+//#error
 #endif
                continue;
             }

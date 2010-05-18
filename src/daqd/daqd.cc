@@ -85,8 +85,9 @@ using namespace std;
 #include "md5.h"
 
 #ifdef _ADVANCED_LIGO
-#include "../../../advLigo/src/drv/crc.c"
+#include "../..//src/drv/crc.c"
 #else
+#error
 #include "../../../rts/src/drv/crc.c"
 #endif
 
@@ -331,7 +332,7 @@ daqd_c::fr_cksum(string cksum_file, char *tmpf, unsigned char* data, int image_s
 
 
 #ifdef _ADVANCED_LIGO
-#include "../../../advLigo/src/drv/param.c"
+#include "../../src/drv/param.c"
 #else
 #include "../../../rts/src/drv/param.c"
 #endif

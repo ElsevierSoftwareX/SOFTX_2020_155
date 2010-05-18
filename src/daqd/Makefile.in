@@ -43,7 +43,7 @@ GDS_INCLUDES=-I$(GDS_ARCHIVE)/include/dtt
 #GDS_INCLUDES=-I$(GDS_ARCHIVE)/src/util -I$(GDS_ARCHIVE)/src/err -I$(GDS_ARCHIVE)/src/sched -I$(GDS_ARCHIVE)/src/gpstime -I$(GDS_ARCHIVE)/src/drv -I$(GDS_ARCHIVE)/src/daq -I$(GDS_ARCHIVE)/src/rmem 
 GDS_DEFINES=-DLIGO_GDS -D_TP_DAQD -DARCHIVE=\"$(GDS_ARCHIVE)\" $(GDS_INCLUDES)
 CDS_GDSFLAGS=-DGDS_TESTPOINT_SUPPORT
-CDS_GDSLIBFLAGS=-L$(GDS_ARCHIVE)/lib -ltestpoint
+CDS_GDSLIBFLAGS=-L$(GDS_ARCHIVE)/lib -L$(GDS_ARCHIVE)/lib64 -ltestpoint
 CDS_GDSOBJECTS=gds.o
 GDSFLAGS=@GDSFLAGS@
 GDSLIBFLAGS=@GDSLIBFLAGS@
@@ -57,7 +57,7 @@ LDASFLAGS=-I$(LDAS_DIR)/include
 LDASLIBFLAGS=-L$(LDAS_DIR)/lib -R$(LDAS_DIR)/lib -lgeneral -lframecpp -lz -lbz2
 
 VARIOUS_DEFINES=-DSERVER_VERSION=\"2.0\" "-DPRODUCTION_DATE=\"`date`\"" "-DPRODUCTION_MACHINE=\"`uname -a`\"" ${VMICRFMFLAGS} ${GDSFLAGS} ${LDASFLAGS} ${EPICSFLAGS} ${MYRINET_FLAGS} ${MX_FLAGS} @SYMMETRICOM_CFLAGS@
-INCLUDEFLAGS=-I. -I@srcdir@ -I$(srcdir)/../../../rts/src/include -I$(srcdir)/../../../advLigo/src/include -I/usr/sfw/include
+INCLUDEFLAGS=-I. -I@srcdir@ -I$(srcdir)/../../../rts/src/include -I$(srcdir)/../include -I/usr/sfw/include
 CFLAGS=${VARIOUS_DEFINES} ${DEVFLAGS} -c ${INCLUDEFLAGS} -D_REENTRANT 
 CCFLAGS=${CFLAGS} @CPPFLAGS@  @CXXFLAGS@
 LEX=flex++
