@@ -910,6 +910,10 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		int use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
+		  printk("DAC card on bus %x; device %x prim %x\n",
+			dacdev->bus->number,
+			PCI_SLOT(dacdev->devfn),
+			dacdev->bus->secondary);
 			/* See if ought to use this one or not */
 			int i;
 			for (i = 0; i < pCds->cards; i++) {
@@ -936,6 +940,10 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		int use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
+		  printk("ADC card on bus %x; device %x prim %x\n",
+			dacdev->bus->number,
+			PCI_SLOT(dacdev->devfn),
+			dacdev->bus->secondary);
 			/* See if ought to use this one or not */
 			int i;
 			for (i = 0; i < pCds->cards; i++) {
