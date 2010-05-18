@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.111"
+    ComputedModelVersion    "1.110"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -24,9 +24,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Apr 30 11:01:45 2010"
+  LastModifiedDate	  "Fri Apr 30 10:49:34 2010"
   RTWModifiedTimeStamp	  0
-  ModelVersionFormat	  "1.%<AutoIncrement:111>"
+  ModelVersionFormat	  "1.%<AutoIncrement:110>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -614,7 +614,7 @@ Model {
   }
   System {
     Name		    "x00"
-    Location		    [1463, 163, 3085, 988]
+    Location		    [1620, 133, 3242, 958]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -2749,7 +2749,7 @@ Model {
       Name		      "DAC_3"
       Description	      "card_num=3"
       Ports		      [16]
-      Position		      [175, 298, 200, 547]
+      Position		      [215, 303, 240, 552]
       BackgroundColor	      "cyan"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -2769,7 +2769,7 @@ Model {
       Name		      "DAC_4"
       Description	      "card_num=4"
       Ports		      [16]
-      Position		      [225, 298, 250, 547]
+      Position		      [280, 308, 305, 557]
       BackgroundColor	      "cyan"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -2789,27 +2789,7 @@ Model {
       Name		      "DAC_5"
       Description	      "card_num=5"
       Ports		      [16]
-      Position		      [270, 298, 295, 547]
-      BackgroundColor	      "cyan"
-      DropShadow	      on
-      AttributesFormatString  "%<Description>"
-      SourceBlock	      "dac/Subsystem"
-      SourceType	      "SubSystem"
-      ShowPortLabels	      "FromPortIcon"
-      SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
-      RTWMemSecFuncInitTerm   "Inherit from model"
-      RTWMemSecFuncExecute    "Inherit from model"
-      RTWMemSecDataConstants  "Inherit from model"
-      RTWMemSecDataInternal   "Inherit from model"
-      RTWMemSecDataParameters "Inherit from model"
-    }
-    Block {
-      BlockType		      Reference
-      Name		      "DAC_6"
-      Description	      "card_num=6"
-      Ports		      [16]
-      Position		      [325, 298, 350, 547]
+      Position		      [330, 308, 355, 557]
       BackgroundColor	      "cyan"
       DropShadow	      on
       AttributesFormatString  "%<Description>"
@@ -2852,6 +2832,12 @@ Model {
       BlockType		      Ground
       Name		      "Ground13"
       Position		      [910, 690, 930, 710]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground14"
+      Position		      [50, 308, 70, 322]
       ShowName		      off
     }
     Block {
@@ -2904,6 +2890,12 @@ Model {
     }
     Block {
       BlockType		      Ground
+      Name		      "Ground22"
+      Position		      [50, 323, 70, 337]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
       Name		      "Ground23"
       Position		      [1540, 610, 1560, 630]
       ShowName		      off
@@ -2922,8 +2914,92 @@ Model {
     }
     Block {
       BlockType		      Ground
+      Name		      "Ground26"
+      Position		      [50, 338, 70, 352]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground27"
+      Position		      [50, 353, 70, 367]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground28"
+      Position		      [50, 368, 70, 382]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground29"
+      Position		      [50, 383, 70, 397]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
       Name		      "Ground3"
       Position		      [1540, 815, 1560, 835]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground30"
+      Position		      [50, 398, 70, 412]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground31"
+      Position		      [50, 413, 70, 427]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground32"
+      Position		      [50, 428, 70, 442]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground33"
+      Position		      [50, 443, 70, 457]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground34"
+      Position		      [50, 458, 70, 472]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground35"
+      Position		      [50, 473, 70, 487]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground36"
+      Position		      [50, 488, 70, 502]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground37"
+      Position		      [50, 503, 70, 517]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground38"
+      Position		      [50, 518, 70, 532]
+      ShowName		      off
+    }
+    Block {
+      BlockType		      Ground
+      Name		      "Ground39"
+      Position		      [50, 533, 70, 547]
       ShowName		      off
     }
     Block {
@@ -24128,6 +24204,118 @@ Model {
       SrcPort		      32
       DstBlock		      "MADC8"
       DstPort		      32
+    }
+    Line {
+      SrcBlock		      "Ground14"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Ground22"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      2
+    }
+    Line {
+      SrcBlock		      "Ground26"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      3
+    }
+    Line {
+      SrcBlock		      "Ground27"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      4
+    }
+    Line {
+      SrcBlock		      "Ground28"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      5
+    }
+    Line {
+      SrcBlock		      "Ground29"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      6
+    }
+    Line {
+      SrcBlock		      "Ground30"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      7
+    }
+    Line {
+      SrcBlock		      "Ground31"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      8
+    }
+    Line {
+      SrcBlock		      "Ground32"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      9
+    }
+    Line {
+      SrcBlock		      "Ground33"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      10
+    }
+    Line {
+      SrcBlock		      "Ground34"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      11
+    }
+    Line {
+      SrcBlock		      "Ground35"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      12
+    }
+    Line {
+      SrcBlock		      "Ground36"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      13
+    }
+    Line {
+      SrcBlock		      "Ground37"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      14
+    }
+    Line {
+      SrcBlock		      "Ground38"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      15
+    }
+    Line {
+      SrcBlock		      "Ground39"
+      SrcPort		      1
+      Points		      [25, 0; 0, -5]
+      DstBlock		      "DAC_2"
+      DstPort		      16
     }
   }
 }
