@@ -95,9 +95,9 @@ using namespace std;
 #if !defined(USE_GM) && !defined(USE_MX) && !defined(USE_UDP)
 #define SHMEM_DAQ 1
 #endif
-#include "../../../advLigo/src/include/daqmap.h"
+#include "../../src/include/daqmap.h"
 #ifdef USE_GM
-#include "../../../advLigo/src/include/drv/gmnet.h"
+#include "../../src/include/drv/gmnet.h"
 #include "gm_rcvr.hh"
 #endif
 #else
@@ -106,7 +106,7 @@ using namespace std;
 #endif
 #include "../../../rts/src/include/daqmap.h"
 #ifdef USE_GM
-#include "../../../advLigo/src/include/drv/gmnet.h"
+#include "../../src/include/drv/gmnet.h"
 #include "gm_rcvr.hh"
 #endif
 #endif
@@ -134,7 +134,7 @@ using namespace std;
 #include "net_listener.hh"
 #include "producer.hh"
 #ifdef _ADVANCED_LIGO
-#include "../../../advLigo/src/include/param.h"
+#include "../../src/include/param.h"
 #else
 #include "param.h"
 #endif

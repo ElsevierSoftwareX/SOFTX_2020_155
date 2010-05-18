@@ -18,7 +18,7 @@
 #include "exServer.h"
 #include "config.h"
 #if defined(_ADVANCED_LIGO)
-#include "../../../advLigo/src/include/daqmap.h"
+#include "../../src/include/daqmap.h"
 #else
 #include "../../../rts/src/include/daqmap.h"
 #endif

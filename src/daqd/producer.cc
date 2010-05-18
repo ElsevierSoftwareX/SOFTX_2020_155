@@ -1757,8 +1757,8 @@ producer::frame_writer ()
 
 #if !defined(USE_GM) && !defined(USE_MX) && !defined(USE_UDP)
 #define SHMEM_DAQ 1
-#include "../../../advLigo/src/include/daqmap.h"
-#include "../../../advLigo/src/include/drv/fb.h"
+#include "../../src/include/daqmap.h"
+#include "../../src/include/drv/fb.h"
 
   // Memory mapped addresses for the DCUs
   unsigned char *dcu_addr[DCU_COUNT];
