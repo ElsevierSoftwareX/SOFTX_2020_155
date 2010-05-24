@@ -278,3 +278,10 @@ rcv:
 	/bin/rm -rf build/rcv
 	/bin/mkdir -p build/rcv
 	(cd build/rcv; ../../src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-gds=/apps/Linux/gds' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' && make)
+
+# build standalone frame builder
+stand:
+	(cd src/daqd; test -e configure || autoconf)
+	/bin/rm -rf build/stand
+	/bin/mkdir -p build/stand
+	(cdir=`pwd`; cd build/stand; $$cdir/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-gds=/apps/Linux/gds' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' && make)
