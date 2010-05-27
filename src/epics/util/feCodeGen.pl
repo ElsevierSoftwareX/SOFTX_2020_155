@@ -361,7 +361,8 @@ if ($ipcxCnt > 0) {
    #
    ("CDS::Parameters::printHeaderStruct") -> ($oo);
 
-   $iFile = "/cvs/cds/";
+   #$iFile = "/cvs/cds/";
+   $iFile = "/opt/rtcds/";
    $iFile .= $location;
    $iFile .= "/chans/ipc/";
    $iFile .= $site;
