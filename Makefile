@@ -84,7 +84,7 @@ install-% :: src/epics/simLink/%.mdl
 	echo 'fi' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo 'if [ "x`ps h -C ' $${system}epics '`" != x ]; then' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'cur_date=`date +%y%m%d_%H%M%S`' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
-	echo 'burtrb -f /opt/rtcds/'$${site}'/'$${lower_ifo}'/target/'$${lower_ifo}$${system}'epics/autoBurt.req -o /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_burt_$${cur_date}.log -v' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
+	echo 'burtrb -f /opt/rtcds/'$${site}'/'$${lower_ifo}'/target/'$${lower_ifo}$${system}'/'$${system}epics'/autoBurt.req -o /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_burt_$${cur_date}.log -v' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'sleep 1' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'fi' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system} >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
