@@ -420,7 +420,7 @@ state init
 %%  printf("%s pEpics is at 0x%x\n", fmc.subSys[0].name, ((int)pRfm));
 #endif
 
-%% strcpy(fName[0], "/cvs/cds/");                                        /* MA */
+%% strcpy(fName[0], "/opt/rtcds/");                                        /* MA */
 %% strcat_lower(fName[0], fmc.site);                                     /* MA */
 %% strcat(fName[0], "/chans/");                                          /* MA */
 %% strcat_upper(fName[0], fmc.ifo);                                      /* MA */
