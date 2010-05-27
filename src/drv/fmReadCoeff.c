@@ -10,7 +10,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-char *readSusCoeff_c_cvsid = "$Id: fmReadCoeff.c,v 1.5 2008/07/18 21:42:05 aivanov Exp $";
 
 #ifdef unix_test
 /* The number of subsystems (optics) */
@@ -167,7 +166,9 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
 #endif
 
   /* Construct filenames */
-  strcat(strcat_lower(strcpy(fname[0], "/cvs/cds/"), fmc->site), "/chans/");
+  strcat(strcat_lower(strcpy(fname[0], "/opt/rtcds/"), fmc->site), "/");
+  strcat(strcat_lower(fname[0], fmc->ifo),"/");
+  strcat(fname[0], "chans/");
   strcpy(archiveFname[0], fname[0]);
 
   strcat_upper(strcat_upper(fname[0], fmc->ifo), fmc->system);
@@ -913,7 +914,7 @@ int readThresholdsFile(fmReadCoeff *fmc,                                 /* MA *
 /*                                                                        * MA */
 /* Construct path and filename.                                           * MA */
 /*                                                                        * MA */
-   strcpy(thresholdFileName, "/cvs/cds/");                               /* MA */
+   strcpy(thresholdFileName, "/opt/rtcds/");                               /* MA */
    strcat_lower(thresholdFileName, fmc->site);                           /* MA */
    strcat(thresholdFileName, "/status/");                                /* MA */
    strcat_upper(thresholdFileName, fmc->ifo);                            /* MA */
@@ -1160,7 +1161,7 @@ int readMatrixThreshFile(fmReadCoeff *fmc,                               /* MA *
 /*                                                                        * MA */
 /* Construct path and filename.                                           * MA */
 /*                                                                        * MA */
-   strcpy(matrixThreshFileName, "/cvs/cds/");                            /* MA */
+   strcpy(matrixThreshFileName, "/opt/rtcds/");                            /* MA */
    strcat_lower(matrixThreshFileName, fmc->site);                        /* MA */
    strcat(matrixThreshFileName, "/status/");                             /* MA */
    strcat_upper(matrixThreshFileName, fmc->ifo);                         /* MA */
