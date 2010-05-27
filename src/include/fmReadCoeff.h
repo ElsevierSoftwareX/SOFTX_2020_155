@@ -3,7 +3,6 @@
 
 #define NO_FM10GEN_C_CODE
 
-static const char *readSusCoeff_h_cvsid = "$Id: fmReadCoeff.h,v 1.3 2008/07/18 21:44:25 aivanov Exp $";
 
 /* char vars' length */
 #define CVL  20
@@ -31,11 +30,9 @@ typedef struct fmReadCoeff {
     how about this for a naming standard.
 
     all 4k sus filter coef files called
-    /cvs/cds/lho/chans/H1SUS_<opticname>.txt
 
     When any front end opens a coef file, it makes an archive of this file
     under the directory
-    /cvs/cds/lho/chans/filter_archive/h1/sus/bs/H1SUS_BS.txt.datetime
 
     under filter_archive/h1 there are sus, asc, lsc subdirs. Under sus, one
     directory per optic.
@@ -54,10 +51,8 @@ typedef struct fmReadCoeff {
        upper($ifo) + upper($system) + "_" + upper($subSystem) + ".txt." + time("DDMMYY_hh:mm:ss")
 
     Config file directory:
-       "/cvs/cds/" + $site + "/chans/"
 
     Archive file directory:
-    "/cvs/cds/" + $site + "/chans/filter_archive/"
        + lower($ifo) + "/" + lower($system) + "/" + lower($subSystem) + "/"
 
    */
