@@ -25,8 +25,6 @@ program daqConfig
 %% #include <param.h>
 
 
-%% static char *daqConfig_st_cvsid = "$Id: daqConfig.st,v 1.3 2006/04/25 16:34:46 rolf Exp $";
-
 int reload;
 assign reload to "{ifo}:DAQ-{sys}_LOAD_CONFIG";
 
