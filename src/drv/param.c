@@ -35,6 +35,16 @@ int testCallback(char *channel_name, struct CHAN_PARAM *params, void *user) {
   return 1; 
 }
 
+/* Cat string and make lower case */                                     /* MA */
+static char *strcat_lower(char *dest, char *src) {                    /* MA */
+  char *d = dest;                                                     /* MA */
+  for( ; *d; d++);                                                    /* MA */
+  for( ; (*d++ = tolower(*src)); src++);                              /* MA */
+  return dest;                                                        /* MA */
+}                                                                     /* MA */
+
+
+
 #ifndef system_log
 # define system_log(foo,str,one,two) fprintf(stderr, str, one, two)
 #endif
@@ -44,7 +54,6 @@ int testCallback(char *channel_name, struct CHAN_PARAM *params, void *user) {
  * for each data channel configured. Config files's CRC will be saved in
  * `*crc'. Parameter `testpoint' is here for frame builder use.
  * `arch_file' is a base name of archive file, ie. it is a full path
- * with partial file name at the end (/cvs/cds/lho/chans/daq_archive/H1LSC).
  * Archive file name will be a base name with added date and time at the end.
  * `user' is a user defined pointer passed to callback.
  */
@@ -448,7 +457,9 @@ loadDaqConfigFile(DAQ_INFO_BLOCK *info, char *site, char *ifo, char *sys)
   char fname[256];         /* Input file name */
   char archive_fname[256]; /* Archive file name */
 
-  strcat(strcat(strcpy(fname, "/cvs/cds/"), site), "/chans/daq/");
+  strcat(strcat(strcpy(fname, "/opt/rtcds/"), site), "/");
+  strcat_lower(fname, ifo);
+  strcat(fname, "/chans/daq/");
   strcpy(archive_fname, fname);
   strcat(strcat(strcat(fname, ifo), sys), ".ini");
   strcat(strcat(strcat(archive_fname, "archive/"), ifo), sys);
