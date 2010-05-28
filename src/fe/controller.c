@@ -545,11 +545,11 @@ void *fe_start(void *arg)
   int dacChanErr[16];
   int adcOF[16];
   int dacOF[16];
+  int limit = 32000;                    // ADC/DAC overflow test value
 #ifndef ADC_SLAVE
   volatile int *packedData;		// Pointer to ADC PCI data space
   volatile unsigned int *pDacData;	// Pointer to DAC PCI data space
   int timeDiag = 0;			// GPS seconds, passed to EPICS
-  int limit = 32000;                    // ADC/DAC overflow test value
   int offset = 0; //0x8000;
   int mask = 0xffff;                    // Bit mask for ADC/DAC read/writes
   int num_outs = 16;                    // Number of DAC channels variable
@@ -1275,6 +1275,13 @@ printf("got here %d %d\n",clock16K,ioClock);
 				if (dWordUsed[jj][ii]) {
 					dWord[jj][ii] = iir_filter(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
 				}
+			if((adcData[jj][ii] > limit) || (adcData[jj][ii] < -limit))
+			  {
+				overflowAdc[jj][ii] ++;
+				overflowAcc ++;
+				diagWord |= 0x100 *  (jj+1);
+				adcOF[jj] = 1;
+			  }
 #endif
                                 // No filter  dWord[kk][ll] = adcData[kk][ll];
                         }
