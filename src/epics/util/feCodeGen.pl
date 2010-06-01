@@ -84,7 +84,14 @@ if (@ARGV > 4) {
 	} else  { die "Invalid speed $param_speed specified\n"; }
 }
 $skeleton = $ARGV[1];
+
+if ($skeleton !~ m/^[cghklms]\d.*/) {
+   die "***ERROR: Model name must begin with <ifo><subsystem>: $skeleton\n";
+}
+
+$ifo = substr($skeleton, 0, 2);
 print "file out is $skeleton\n";
+
 $cFile = "../../fe/";
 $cFile .= $ARGV[1];
 $cFileDirectory = $cFile;
@@ -330,7 +337,7 @@ close(IN);
 #  $partInCnt[$dacPartNum[$ii]] = 16;
 #}
 
-$systemName = substr($systemName,0,3);
+$systemName = substr($systemName, 2, 3);
 $plantName = $systemName; # Default plant name is the model name
 
 #
@@ -3012,7 +3019,7 @@ sub commify_series {
 		  my $basename1 = $usite . ":" . $tn . "_";
 		  system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
 		} else {
-		  $sysname = substr($sysname,0,3);
+		  $sysname = substr($sysname, 2, 3);
 		  my $basename1 = $usite . ":" .$sysname ."-" . $basename . "_";
 		  $sysname = uc($skeleton);
 		  #print "Matrix $basename $incnt X $outcnt\n";
@@ -3039,7 +3046,7 @@ sub commify_series {
 			$sargs .= "s/FILTERNAME/$tfn/g";
 			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$usite" . $filt_name . ".adl");
 		} else {
-		  $sys_name = substr($sys_name,0,3);
+		  $sys_name = substr($sys_name, 2, 3);
 			$sargs = $sed_arg . "s/FILTERNAME/$sys_name-$filt_name/g";
 		  $sysname = uc($skeleton);
 			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$usite$sysname" . "_" . $filt_name . ".adl");
@@ -3048,10 +3055,10 @@ sub commify_series {
 	#print "No=$cur_part_num\n";
 	if ($partInputType[$cur_part_num][0] eq "Adc") {
 		  $sysname = uc($skeleton);
-		  $sysname = substr($sysname,0,3);
+		  $sysname = substr($sysname, 2, 3);
 		my $part_name = $partName[$cur_part_num];
 		if (is_top_name($partSubName[$cur_part_num])) {
-		  $sysname = substr($partSubName[$cur_part_num],0,3);
+		  $sysname = substr($partSubName[$cur_part_num], 2, 3);
 	print "ADC MONITOR IS TOP =$sysname\n";
 		}
 		#print "ADC input Part $part_name $partType[$cur_part_num] has Adc input \'$partInput[$cur_part_num][0]\'\n";

@@ -18,6 +18,14 @@ sub printHeaderStruct {
 		if (@spp == 2) {
 			if ($spp[0] eq "site") {
 				$spp[1] =~ s/,/ /g;
+
+                                if (lc($spp[1]) ne $::ifo) {
+                                   $errmsg = "***ERROR: Model <ifo> name part does not match cdsParameters: ";
+                                   $errmsg .= $::ifo . ", " . $spp[1] . "\n";
+
+                                   die $errmsg;
+                                }
+
 				print "Site is set to $spp[1]\n";
 				$::site = $spp[1];
 			        if ($::site =~ /^M/) {
