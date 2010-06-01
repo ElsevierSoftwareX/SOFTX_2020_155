@@ -12,11 +12,11 @@ Library {
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "rolf"
+  LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Apr 30 11:00:45 2010"
+  LastModifiedDate	  "Tue Jun  1 10:31:07 2010"
   RTWModifiedTimeStamp	  0
-  ModelVersionFormat	  "1.%<AutoIncrement:152>"
+  ModelVersionFormat	  "1.%<AutoIncrement:153>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -745,7 +745,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [604, 226, 1286, 643]
+    Location		    [248, 375, 930, 792]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -825,7 +825,7 @@ Library {
       SourceType	      "SubSystem"
       ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
+      FunctionWithSeparateData "off"
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"
@@ -1268,8 +1268,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[1782, 66, 2432, 689]
-	Open			on
+	Location		[515, 213, 1165, 836]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1503,7 +1503,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1543,7 +1543,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1554,7 +1554,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "DAC_0"
 	  Description		  "card_num=0"
-	  Ports			  [16]
+	  Ports			  [16, 16]
 	  Position		  [35, 205, 60, 460]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
@@ -1574,7 +1574,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "DAC_1"
 	  Description		  "card_num=1"
-	  Ports			  [16]
+	  Ports			  [16, 16]
 	  Position		  [80, 205, 105, 460]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
@@ -1594,7 +1594,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "DAC_2"
 	  Description		  "card_num=2"
-	  Ports			  [16]
+	  Ports			  [16, 16]
 	  Position		  [125, 208, 150, 457]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
@@ -1614,7 +1614,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "DAC_3"
 	  Description		  "card_num=3"
-	  Ports			  [16]
+	  Ports			  [16, 16]
 	  Position		  [165, 208, 190, 457]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
@@ -1634,7 +1634,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "DAC_4"
 	  Description		  "card_num=4"
-	  Ports			  [16]
+	  Ports			  [16, 16]
 	  Position		  [210, 208, 235, 457]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
@@ -1654,7 +1654,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "DAC_5"
 	  Description		  "card_num=5"
-	  Ports			  [16]
+	  Ports			  [16, 16]
 	  Position		  [255, 208, 280, 457]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
@@ -1674,7 +1674,7 @@ Library {
 	  BlockType		  Reference
 	  Name			  "DAC_6"
 	  Description		  "card_num=6"
-	  Ports			  [16]
+	  Ports			  [16, 16]
 	  Position		  [300, 208, 325, 457]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
@@ -1749,7 +1749,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2063,8 +2063,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Osc/Phase"
-	Location		[2140, 536, 2553, 907]
-	Open			off
+	Location		[633, 339, 1045, 702]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -2078,10 +2078,30 @@ Library {
 	ZoomFactor		"100"
 	Block {
 	  BlockType		  Reference
+	  Name			  "Noise Generator Name"
+	  Tag			  "cdsNoise"
+	  Description		  "White Noise Generator"
+	  Ports			  [0, 1]
+	  Position		  [85, 240, 125, 300]
+	  BackgroundColor	  "[1.000000, 0.577622, 0.434895]"
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsNoise/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "Oscillator Name"
 	  Tag			  "cdsOsc"
 	  Description		  "Oscillator"
-	  Ports			  [0, 3]
+	  Ports			  [1, 3]
 	  Position		  [80, 119, 135, 181]
 	  BackgroundColor	  "magenta"
 	  DropShadow		  on
@@ -2090,7 +2110,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2111,7 +2131,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2132,7 +2152,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -2174,7 +2194,7 @@ Library {
       SourceType	      "SubSystem"
       ShowPortLabels	      "FromPortIcon"
       SystemSampleTime	      "-1"
-      FunctionWithSeparateData off
+      FunctionWithSeparateData "off"
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"
