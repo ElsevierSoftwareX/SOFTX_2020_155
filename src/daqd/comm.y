@@ -877,7 +877,7 @@ CommandLine: /* Nothing */
 		} else
 		  *yyout << gps << endl;
 	}
-	| SET GDS_SERVER '=' OptionalIntnum TextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalIntnum {
+	| SET GDS_SERVER '=' OptionalIntnum TextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalTextExpression OptionalIntnum OptionalIntnum {
 #ifdef GDS_TESTPOINTS
 		AUTH_CHECK(((my_lexer *)lexer));
 		daqd.gds.set_gds_server ($4, $5,
@@ -886,7 +886,12 @@ CommandLine: /* Nothing */
 					 $10, $11,
 					 $12, $13,
 					 $14, $15,
-					 $16, $17); /* RPC program numers (optional) */
+					 $16, $17,
+					 $18, $19,
+					 $20, $21,
+					 $22, $23,
+					 $24, $25,
+					 $26, $27); /* RPC program numers (optional) */
 		if (daqd.gds.gds_initialize ()) {
 			sleep(2);
 			exit(-1);
