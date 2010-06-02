@@ -47,31 +47,31 @@ install-% :: src/epics/simLink/%.mdl
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/chans;\
 	echo Installing system=$$system site=$$site ifo=$$ifo,$$lower_ifo;\
-	echo Installing /opt/rtcds/$$site/$${lower_ifo}/chans/$${ifo}$${upper_system}.txt;\
-	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/chans/filter_archive/$$lower_ifo/$$system;\
-	if test -e /opt/rtcds/$$site/$${lower_ifo}/chans/$${ifo}$${upper_system}.txt; then /bin/mv -f  /opt/rtcds/$$site/$${lower_ifo}/chans/$${ifo}$${upper_system}.txt /opt/rtcds/$$site/$${lower_ifo}/chans/filter_archive/$$lower_ifo/$$system/$${ifo}$${upper_system}_$${cur_date}.txt || exit 1; \
-	head -4 build/$${system}epics/config/$${ifo}$${upper_system}.txt > /opt/rtcds/$$site/$${lower_ifo}/chans/$${ifo}$${upper_system}.txt;\
-	/bin/grep '^# MODULES' build/$${system}epics/config/$${ifo}$${upper_system}.txt >> /opt/rtcds/$$site/$${lower_ifo}/chans/$${ifo}$${upper_system}.txt;\
-	tail -n +4 /opt/rtcds/$$site/$${lower_ifo}/chans/filter_archive/$$lower_ifo/$$system/$${ifo}$${upper_system}_$${cur_date}.txt | grep -v '^# MODULES' >> /opt/rtcds/$$site/$${lower_ifo}/chans/$${ifo}$${upper_system}.txt;\
-	else /bin/cp -p build/$${system}epics/config/$${ifo}$${upper_system}.txt  /opt/rtcds/$$site/$${lower_ifo}/chans/$${ifo}$${upper_system}.txt;\
+	echo Installing /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt;\
+	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/chans/filter_archive/$$system;\
+	if test -e /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt; then /bin/mv -f  /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt /opt/rtcds/$$site/$${lower_ifo}/chans/filter_archive/$$system/$${upper_system}_$${cur_date}.txt || exit 1; \
+	head -4 build/$${system}epics/config/$${ifo}$${upper_system}.txt > /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt;\
+	/bin/grep '^# MODULES' build/$${system}epics/config/$${ifo}$${upper_system}.txt >> /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt;\
+	tail -n +4 /opt/rtcds/$$site/$${lower_ifo}/chans/filter_archive/$$system/$${upper_system}_$${cur_date}.txt | grep -v '^# MODULES' >> /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt;\
+	else /bin/cp -p build/$${system}epics/config/$${ifo}$${upper_system}.txt  /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt;\
 	fi;\
-	echo Installing /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}epics;\
-	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system} /opt/rtcds/$$site/$${lower_ifo}/target_archive/$${lower_ifo}$${system}/$${lower_ifo}$${system}_$$cur_date || exit 2; fi;\
-	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system};\
-	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/bin;\
-	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/logs;\
-	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/scripts;\
-	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/simLink;\
-	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target_archive/$${lower_ifo}$${system};\
+	echo Installing /opt/rtcds/$$site/$${lower_ifo}/target/$${system}epics;\
+	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system} /opt/rtcds/$$site/$${lower_ifo}/target_archive/$${system}/$${system}_$$cur_date || exit 2; fi;\
+	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${system};\
+	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin;\
+	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs;\
+	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts;\
+	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/simLink;\
+	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target_archive/$${system};\
 	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target;\
-	/bin/cp -pr target/$${system}epics /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system};\
-	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/$${system}epics/db/*/autoBurt.req; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/$${system}epics/db/*/autoBurt.req /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/$${system}epics || exit 3; fi;\
-	echo Installing /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system};\
-	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/$${system}fe.rtl; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/$${system}fe.rtl /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/archive/$${system}fe_$${cur_date}.rtl || exit 4; fi;\
-	/bin/cp -p src/fe/$${system}/$${system}fe.rtl /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/bin/;\
-	/bin/cp -p src/epics/simLink/$${system}.mdl /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/simLink/;\
-	echo 'sudo ' /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/bin/$${system}fe.rtl ' >  '/opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/scripts/startup$${ifo}rt;\
-	/bin/chmod +x /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/scripts/startup$${ifo}rt;\
+	/bin/cp -pr target/$${system}epics /opt/rtcds/$$site/$${lower_ifo}/target/$${system};\
+	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}epics/db/*/autoBurt.req; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}epics/db/*/autoBurt.req /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}epics || exit 3; fi;\
+	echo Installing /opt/rtcds/$$site/$${lower_ifo}/target/$${system};\
+	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}fe.rtl; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}fe.rtl /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/archive/$${system}fe_$${cur_date}.rtl || exit 4; fi;\
+	/bin/cp -p src/fe/$${system}/$${system}fe.rtl /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/;\
+	/bin/cp -p src/epics/simLink/$${system}.mdl /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/simLink/;\
+	echo 'sudo ' /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.rtl ' >  '/opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts/startup$${ifo}rt;\
+	/bin/chmod +x /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts/startup$${ifo}rt;\
 	echo Installing start and stop scripts;\
 	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/scripts;\
 	echo '#!/bin/bash' > /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
@@ -84,7 +84,7 @@ install-% :: src/epics/simLink/%.mdl
 	echo 'fi' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo 'if [ "x`ps h -C ' $${system}epics '`" != x ]; then' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'cur_date=`date +%y%m%d_%H%M%S`' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
-	echo 'burtrb -f /opt/rtcds/'$${site}'/'$${lower_ifo}'/target/'$${lower_ifo}$${system}'/'$${system}epics'/autoBurt.req -o /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_burt_$${cur_date}.log -v' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
+	echo 'burtrb -f /opt/rtcds/'$${site}'/'$${lower_ifo}'/target/'$${system}'/'$${system}epics'/autoBurt.req -o /tmp/'$${system}'_burt_$${cur_date}.snap -l /tmp/'$${system}'_burt_$${cur_date}.log -v' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'sleep 1' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'fi' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system} >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
@@ -97,7 +97,7 @@ install-% :: src/epics/simLink/%.mdl
 	echo 'fi' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo '(cd /opt/rtcds/'$$site'/'$${lower_ifo}'/target/'$${lower_ifo}$${system}'/'$${system}epics' && ./startup'$${ifo}')' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo sleep 5 >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
-	echo /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/scripts/startup$${ifo}rt >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
+	echo /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts/startup$${ifo}rt >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo '(cd /opt/rtcds/'$$site'/'$${lower_ifo}'/target/gds && ./startup_'$${system}'.cmd)' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo 'sleep 5; sudo killall -q daqd' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo 'fname=`ls -t /tmp/'$${system}'_burt_*.snap  2>/dev/null | head -1`' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
@@ -105,8 +105,8 @@ install-% :: src/epics/simLink/%.mdl
 	echo 'log_fname=$${fname%.*}.log' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo 'burtwb -f $${fname} -l $${log_fname} -v' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo 'fi' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
-	echo touch /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/logs/reboot.log >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
-	echo chmod 777 /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/logs/reboot.log >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
+	echo touch /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs/reboot.log >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
+	echo chmod 777 /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs/reboot.log >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	/bin/sed 's/caltech/'$$site'/' src/epics/util/daqconfig.tcl > build/$${system}epics/config/daqconfig;\
 	/usr/bin/install   build/$${system}epics/config/daqconfig  /opt/rtcds/$$site/$${lower_ifo}/scripts
 
@@ -158,12 +158,13 @@ install-daq-% :: src/epics/simLink/%.mdl
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	echo Installing GDS node $${gds_file_node} configuration file ;\
 	echo /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
+	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/ ;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/ ;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive ;\
 	if test -e /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par; then /bin/mv -f /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${site_letter}$${gds_file_node}_$${cur_date}.par || exit 1; fi;\
 	/bin/cp -p build/$${system}epics/$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
-	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${lower_ifo}$${system}/param;\
-	/bin/cp -p build/$${system}epics/$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/$${lower_ifo}$${system}/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
+	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/param;\
+	/bin/cp -p build/$${system}epics/$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/$${system}/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
 	/bin/cp -p build/$${system}epics/$${system}.par /cvs/cds/$${site}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
 	if test $${datarate_mult} -gt 1;\
 	then \
@@ -175,23 +176,18 @@ install-daq-% :: src/epics/simLink/%.mdl
 	echo 'cd /opt/rtcds/'$${site}'/'$${lower_ifo}'/target/gds; sudo /opt/rtcds/'$${site}'/'$${lower_ifo}'/target/gds/bin/awgtpman -s '$${system}' '$${datarate_mult_flag}' > '$${system}'.log 2>& 1 &' >> /opt/rtcds/$${site}/$${lower_ifo}/target/gds/startup_$${system}.cmd ;\
 	/bin/chmod +x /opt/rtcds/$${site}/$${lower_ifo}/target/gds/startup_$${system}.cmd ;\
 	echo Updating DAQ configuration file ;\
-	echo /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${ifo}$${upper_system}.ini ;\
+	echo /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini ;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/chans/daq ;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive ;\
-	if test -e /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${ifo}$${upper_system}.ini;\
+	if test -e /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini;\
 	then \
-	  /bin/mv -f /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${ifo}$${upper_system}.ini /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini || exit 2 ;\
-	  echo src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini -old=/opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${site_letter}$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par -daq=build/$${system}epics/$${system}.ini ;\
-	  src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive/$${ifo}$${upper_system}_$${cur_date}.ini -old=/opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${site_letter}$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par -daq=build/$${system}epics/$${system}.ini > /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${ifo}$${upper_system}.ini ; \
+	  /bin/mv -f /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive/$${upper_system}_$${cur_date}.ini || exit 2 ;\
+	  echo src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive/$${upper_system}_$${cur_date}.ini -old=/opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${site_letter}$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par -daq=build/$${system}epics/$${system}.ini ;\
+	  src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive/$${upper_system}_$${cur_date}.ini -old=/opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${site_letter}$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par -daq=build/$${system}epics/$${system}.ini > /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini ; \
 	else \
-	  /bin/cp -p build/$${system}epics/$${system}.ini /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${ifo}$${upper_system}.ini ;\
+	  /bin/cp -p build/$${system}epics/$${system}.ini /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini ;\
 	fi;\
-	if test -e /opt/rtcds/$${site}/$${lower_ifo}/target/$${lower_ifo}$${system}/param/$${ifo}$${upper_system}.ini;\
-	then \
-echo file exists;\
-	else \
-	/bin/ln -s /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${ifo}$${upper_system}.ini /opt/rtcds/$${site}/$${lower_ifo}/target/$${lower_ifo}$${system}/param/;\
-	fi;\
+	/bin/cp /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini /opt/rtcds/$${site}/$${lower_ifo}/target/$${system}/param/$${upper_system}.ini;\
 
 install-screens-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-screens-,,$@); \
