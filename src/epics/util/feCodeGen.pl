@@ -2936,7 +2936,7 @@ $sed_arg .= "s/LOCATION_NAME/$location/g;";
 $sed_arg .= "s/DCU_NODE_ID/$dcuId/g;";
 $sysname = uc($skeleton);
 $sed_arg .= "s/FBID/$sysname/g;";
-system("cat GDS_TP.adl | sed '$sed_arg' > $epicsScreensDir/$usite$sysname" . "_GDS_TP.adl");
+system("cat GDS_TP.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
 my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
 
@@ -3017,13 +3017,13 @@ sub commify_series {
 
 		  my $tn = top_name_transform($basename);
 		  my $basename1 = $usite . ":" . $tn . "_";
-		  system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
+		  system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/" . $basename . ".adl");
 		} else {
 		  $sysname = substr($sysname, 2, 3);
 		  my $basename1 = $usite . ":" .$sysname ."-" . $basename . "_";
 		  $sysname = uc($skeleton);
 		  #print "Matrix $basename $incnt X $outcnt\n";
-		  system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
+		  system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$sysname" . "_" . $basename . ".adl");
 		}
 	}
 	if ($partType[$cur_part_num] =~ /^Filt/) {
@@ -3044,12 +3044,12 @@ sub commify_series {
 			$sargs .= "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . $nsys . "/g;";
                         $sargs .= "s/LOCATION_NAME/$location/g;";
 			$sargs .= "s/FILTERNAME/$tfn/g";
-			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$usite" . $filt_name . ".adl");
+			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/" . $filt_name . ".adl");
 		} else {
 		  $sys_name = substr($sys_name, 2, 3);
 			$sargs = $sed_arg . "s/FILTERNAME/$sys_name-$filt_name/g";
 		  $sysname = uc($skeleton);
-			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$usite$sysname" . "_" . $filt_name . ".adl");
+			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 		}
 	}
 	#print "No=$cur_part_num\n";
@@ -3077,5 +3077,5 @@ for (0 .. $adcCnt - 1) {
    my $adc_monitor_args = $monitor_args;
    $adc_monitor_args .= "s/MONITOR_ADC/MONITOR_ADC$_/g;";
 #print $adc_monitor_args;
-   system("cat MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$adc_monitor_args' > $epicsScreensDir/$usite$sysname" . "_MONITOR_ADC$_.adl");
+   system("cat MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$adc_monitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.adl");
 }
