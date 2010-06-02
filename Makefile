@@ -95,7 +95,7 @@ install-% :: src/epics/simLink/%.mdl
 	echo 'num=$$(echo $${res} | awk '"'"'{print $$1}'"'"')' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'sudo kill $$num' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'fi' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
-	echo '(cd /opt/rtcds/'$$site'/'$${lower_ifo}'/target/'$${lower_ifo}$${system}'/'$${system}epics' && ./startup'$${ifo}')' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
+	echo '(cd /opt/rtcds/'$$site'/'$${lower_ifo}'/target/'$${system}'/'$${system}epics' && ./startup'$${ifo}')' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo sleep 5 >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts/startup$${ifo}rt >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo '(cd /opt/rtcds/'$$site'/'$${lower_ifo}'/target/gds && ./startup_'$${system}'.cmd)' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
