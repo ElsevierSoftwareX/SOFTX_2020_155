@@ -461,8 +461,10 @@ loadDaqConfigFile(DAQ_INFO_BLOCK *info, char *site, char *ifo, char *sys)
   strcat_lower(fname, ifo);
   strcat(fname, "/chans/daq/");
   strcpy(archive_fname, fname);
-  strcat(strcat(strcat(fname, ifo), sys), ".ini");
-  strcat(strcat(strcat(archive_fname, "archive/"), ifo), sys);
+  strcat(fname, sys);
+  strcat(fname, ".ini");
+  strcat(archive_fname, "archive/");
+  strcat(archive_fname, sys);
   printf("%s\n%s\n", fname, archive_fname);
 
   info->numChans = 0;
