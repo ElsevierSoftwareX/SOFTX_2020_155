@@ -171,7 +171,7 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
   strcat(fname[0], "chans/");
   strcpy(archiveFname[0], fname[0]);
 
-  strcat_upper(strcat_upper(fname[0], fmc->ifo), fmc->system);
+  strcat_upper(fname[0], fmc->system);
   if (strlen(fmc->subSys[n].name) > 0) /* Only append non-empty subsystem name */
     strcat_upper(strcat(fname[0], "_"), fmc->subSys[n].name);
 
@@ -184,13 +184,12 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
   printf("FIR input %s\n", fname[1]);
 
   strcat(archiveFname[0], "filter_archive/");
-  strcat(strcat_lower(archiveFname[0], fmc->ifo), "/");
 
   strcat(strcat_lower(archiveFname[0], fmc->system), "/");
   if (strlen(fmc->subSys[n].name) > 0) /* Only append non-empty subsystem name */
     strcat(strcat_lower(archiveFname[0], fmc->subSys[n].name), "/");
 
-  strcat_upper(strcat_upper(archiveFname[0], fmc->ifo), fmc->system);
+  strcat_upper(archiveFname[0], fmc->system);
   if (strlen(fmc->subSys[n].name) > 0)
     strcat_upper(strcat(archiveFname[0], "_"), fmc->subSys[n].name);
   if (strlen(fmc->subSys[n].archiveNameModifier) > 0) {
