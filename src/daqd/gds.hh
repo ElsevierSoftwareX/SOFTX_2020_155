@@ -37,11 +37,16 @@ class gds_c {
   char *gds_server3;
   char *gds_server4;
   char *gds_server5;
+  char *gds_server6;
+  char *gds_server7;
+  char *gds_server8;
+  char *gds_server9;
+  char *gds_server10;
   int gds_server_rpc_program;
   int gds_server_rpc_version;
   int n_gds_servers; // How many servers we have got
 
-  static const int max_gds_servers = 6;
+  static const int max_gds_servers = 11;
 
   // DCU id for each GDS server
   int dcuid[max_gds_servers];
@@ -63,6 +68,8 @@ public:
  public:
   gds_c () : signal_p (0), gds_server (0), gds_server1 (0), gds_server2 (0),
 	gds_server3 (0), gds_server4 (0), gds_server5 (0),
+	gds_server6 (0), gds_server7 (0), gds_server8 (0),
+	gds_server9 (0), gds_server10 (0),
 	gds_server_rpc_program (0), gds_server_rpc_version (0), n_gds_servers(0) {
     pthread_mutex_init (&bm, NULL);
     pthread_mutex_init (&signal_mtx, NULL);
@@ -119,6 +126,11 @@ public:
 		  int dcu3, char *server3,
 		  int dcu4, char *server4,
 		  int dcu5, char *server5,
+		  int dcu6, char *server6,
+		  int dcu7, char *server7,
+		  int dcu8, char *server8,
+		  int dcu9, char *server9,
+		  int dcu10, char *server10,
 	          int program, int version) {
     if (server) {
       free (this -> gds_server);
@@ -155,6 +167,36 @@ public:
       this -> gds_server5 = server5;
       this -> dcuid[5] = dcu5;
       this -> n_gds_servers = 6;
+    }
+    if (server6) {
+      free (this -> gds_server6);
+      this -> gds_server6 = server6;
+      this -> dcuid[6] = dcu6;
+      this -> n_gds_servers = 7;
+    }
+    if (server7) {
+      free (this -> gds_server7);
+      this -> gds_server7 = server7;
+      this -> dcuid[7] = dcu7;
+      this -> n_gds_servers = 8;
+    }
+    if (server8) {
+      free (this -> gds_server8);
+      this -> gds_server8 = server8;
+      this -> dcuid[8] = dcu8;
+      this -> n_gds_servers = 9;
+    }
+    if (server9) {
+      free (this -> gds_server9);
+      this -> gds_server9 = server9;
+      this -> dcuid[9] = dcu9;
+      this -> n_gds_servers = 10;
+    }
+    if (server10) {
+      free (this -> gds_server10);
+      this -> gds_server10 = server10;
+      this -> dcuid[10] = dcu10;
+      this -> n_gds_servers = 11;
     }
 
     if (program >= 0)
