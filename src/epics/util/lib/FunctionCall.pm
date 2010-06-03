@@ -1,5 +1,6 @@
 package CDS::FunctionCall;
 use Exporter;
+use Env;
 @ISA = ('Exporter');
 
 # This one gets node pointer (with all parsed info) as the first arg
@@ -7,9 +8,13 @@ use Exporter;
 sub partType {
         my ($node, $i) = @_;
 	my $desc = ${$node->{FIELDS}}{"Description"};
-	if ($desc =~ /^\/\/inline/) {
+	if ($desc =~ /^inline/) {
+		# Assure we have two field, the name and the path
+		if (3 != split(/\s/, $desc)) {
+			$a = split(/\s/, $desc);
+			die "Part $::xpartName[$i] needs three fields in Description: inline funcName \$ENV_VAR/path/to/file/filename.c $a\n";
+		}
 		$::inlinedFunctionCall[$i] = $desc;
-	#print $desc;
 	}
 	return FunctionCall;
 }
@@ -81,18 +86,24 @@ sub frontEndCode {
 	if ($::inlinedFunctionCall[$i] ne undef) {
                 $ret = "// Inlined Function:  $::xpartName[$i]\n";
 		$ret .= "{\n";
-		my $s = $::inlinedFunctionCall[$i];
-		$s =~ s/\\n/\n/g; # Replace '\n' with newline character
-		$ret .= $s;
-		$ret .= "\n";
+		my ($inline_keyword, $func_name, $pathed_name)
+			= split(/\s/, $::inlinedFunctionCall[$i]);
+		# Expand variables in $pathed_name
+		# Note the usage of Env, all environment variables were
+		# turned into Perl variables
+		$pathed_name =~ s/(\$\w+)/$1/eeg;
+		$ret .= "#define CURRENT_SUBSYS $::subSysName[$::partSubNum[$i]]\n";
+		$ret .= "#include \"$pathed_name\"\n";
+		$ret .= "$func_name(";
 	} else {
                 $ret = "// Function Call:  $::xpartName[$i]\n";
+        	$ret .= "$::xpartName[$i](";
 	}
 	
-        $ret .= "$::xpartName[$i](";
         $ret .= "$::fromExp[0], $::partInCnt[$::partInNum[$i][0]], \L$::partOutput[$i][0], $::partOutCnt[$::partOutNum[$i][0]]);\n";
 	if ($::inlinedFunctionCall[$i] ne undef) {
-		$ret .= "\n}\n";
+		$ret .= "#undef CURRENT_SUBSYS\n";
+		$ret .= "}\n";
 	}
 	return $ret;
 }
