@@ -1910,7 +1910,7 @@ gm_receiver_thread(void *p)
     if (daqd.dcuSize[0][j] == 0) continue; // skip unconfigured DCU nodes
     if (IS_MYRINET_DCU(j)) {
       int fd;
-      std::string s(daqd.dcuName[j]);
+      std::string s(daqd.fullDcuName[j]);
       std::transform (s.begin(),s.end(), s.begin(), ToLower()); 
       s = "/rtl_mem_" + s + "_daq";
       if ((fd = open(s.c_str(), O_RDWR))<0) {

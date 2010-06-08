@@ -415,6 +415,7 @@ daqd_c::configure_channels_files ()
 	  slp += 3;
 	  buf[strlen(buf) - 4] = 0;
           sprintf(daqd.dcuName[ini_file_dcu_id], "%.10s", slp);
+          sprintf(daqd.fullDcuName[ini_file_dcu_id], "%.10s", slp-2);
 #ifdef EPICS_EDCU
 	  extern char epicsDcuName[DCU_COUNT][32];
           sprintf(epicsDcuName[ini_file_dcu_id], "%.10s", slp);

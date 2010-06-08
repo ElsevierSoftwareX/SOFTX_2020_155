@@ -310,6 +310,7 @@ class daqd_c {
   	  dcuRate[i][j] = (IS_2K_DCU(j) || j == DCU_ID_EX_2K || j == DCU_ID_TP_2K )? 2048:16384;
 
 	  strcpy(dcuName[j], ::dcuName[j]);
+	  strcpy(fullDcuName[j], ::dcuName[j]);
 #ifdef EPICS_EDCU
           extern char epicsDcuName[DCU_COUNT][32];
           strcpy(epicsDcuName[j], ::dcuName[j]);
@@ -862,6 +863,7 @@ class daqd_c {
 
   // DCU names assigned from configuration files (file names)
   char dcuName[DCU_COUNT][32];
+  char fullDcuName[DCU_COUNT][32];
 #endif
 
   // bitmask of IP addresses allowed to select testpoints
