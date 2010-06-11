@@ -1808,7 +1808,7 @@
             awg_clnt[i][j] = NULL;
          #if !defined (_AWG_LIB) && !defined (_CONFIG_DYNAMIC)
             /* construct section heading */
-            sprintf (prms, "%s%i-%s%i", SITE_PREFIX, i + 1, PRM_SECTION, j);
+            //sprintf (prms, "%s%i-%s%i", SITE_PREFIX, i + 1, PRM_SECTION, j);
             /* get remote host from parameter file */
             strcpy (remotehost, "");
             loadStringParam (PRM_FILE, prms, PRM_ENTRY1, remotehost);
@@ -1879,7 +1879,7 @@
          for (i = 0; i < NUM_DS340; i++) {
             /* if file exists, read in parameters */
             /* construct section heading */
-            sprintf (prms, "%s-%s%i", SITE_PREFIX, PRM_SECTION2, i);
+            //sprintf (prms, "%s-%s%i", SITE_PREFIX, PRM_SECTION2, i);
             /* get remote host from parameter file */
             strcpy (remotehost, "");
             loadStringParam (PRM_FILE, prms, PRM_ENTRY1, remotehost);
