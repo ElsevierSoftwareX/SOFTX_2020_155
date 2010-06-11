@@ -30,7 +30,7 @@ xdr_channelinfo_r (XDR *xdrs, channelinfo_r *objp)
 				 return FALSE;
 			 if (!xdr_short (xdrs, &objp->dataType))
 				 return FALSE;
-			 if (!xdr_short (xdrs, &objp->dataRate))
+			 if (!xdr_int (xdrs, &objp->dataRate))
 				 return FALSE;
 			 if (!xdr_short (xdrs, &objp->chGroup))
 				 return FALSE;
@@ -43,7 +43,7 @@ xdr_channelinfo_r (XDR *xdrs, channelinfo_r *objp)
 		IXDR_PUT_SHORT(buf, objp->dcuId);
 		IXDR_PUT_SHORT(buf, objp->chNum);
 		IXDR_PUT_SHORT(buf, objp->dataType);
-		IXDR_PUT_SHORT(buf, objp->dataRate);
+		IXDR_PUT_LONG(buf, objp->dataRate);
 		IXDR_PUT_SHORT(buf, objp->chGroup);
 		IXDR_PUT_SHORT(buf, objp->bps);
 		}
@@ -77,7 +77,7 @@ xdr_channelinfo_r (XDR *xdrs, channelinfo_r *objp)
 				 return FALSE;
 			 if (!xdr_short (xdrs, &objp->dataType))
 				 return FALSE;
-			 if (!xdr_short (xdrs, &objp->dataRate))
+			 if (!xdr_int (xdrs, &objp->dataRate))
 				 return FALSE;
 			 if (!xdr_short (xdrs, &objp->chGroup))
 				 return FALSE;
@@ -90,7 +90,7 @@ xdr_channelinfo_r (XDR *xdrs, channelinfo_r *objp)
 		objp->dcuId = IXDR_GET_SHORT(buf);
 		objp->chNum = IXDR_GET_SHORT(buf);
 		objp->dataType = IXDR_GET_SHORT(buf);
-		objp->dataRate = IXDR_GET_SHORT(buf);
+		objp->dataRate = IXDR_GET_LONG(buf);
 		objp->chGroup = IXDR_GET_SHORT(buf);
 		objp->bps = IXDR_GET_SHORT(buf);
 		}
@@ -123,7 +123,7 @@ xdr_channelinfo_r (XDR *xdrs, channelinfo_r *objp)
 		 return FALSE;
 	 if (!xdr_short (xdrs, &objp->dataType))
 		 return FALSE;
-	 if (!xdr_short (xdrs, &objp->dataRate))
+	 if (!xdr_int (xdrs, &objp->dataRate))
 		 return FALSE;
 	 if (!xdr_short (xdrs, &objp->chGroup))
 		 return FALSE;

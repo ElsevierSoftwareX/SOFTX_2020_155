@@ -107,7 +107,7 @@ extern "C" {
     @author DS, June 98
     @see Test point API
 ************************************************************************/
-#define _CONFIG_DYNAMIC
+#undef _CONFIG_DYNAMIC
 #endif
 
 /** Installs an awg client interface. This function might be called 

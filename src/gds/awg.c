@@ -1063,10 +1063,9 @@ Organization of generating waveforms:
       #endif
       #else
          {int i; 
-printf("to be fixed\n");
-            //for (i = 0; i < 5; ++i) 
-               //rmWrite (_RM_ID, (void*) &p->status, (int) p->optr, 
-                       //(p->pagelen + 1) * sizeof (float), 0);
+            for (i = 0; i < 5; ++i) 
+               rmWrite (_RM_ID, (void*) &p->status, (int) p->optr, 
+                       (p->pagelen + 1) * sizeof (float), 0);
 	  }
       #endif
          /*{
@@ -1413,8 +1412,7 @@ printf("to be fixed\n");
          /*	    for (k = 0; k < awgVmeReadDelay; k++)
          *((int *) 0x50201000) = 0;*/
          #else	
-printf("to be fixed\n");
-            //rmWrite (_RM_ID, (char*) &status, tpptr, TP_DATUM_LEN, 0);
+            rmWrite (_RM_ID, (char*) &status, tpptr, TP_DATUM_LEN, 0);
          #endif
             /* Don't forget status word at beginning of channel data! */
             tpptr += TP_DATUM_LEN * (tpChnLen + 1);
@@ -1819,6 +1817,10 @@ printf("to be fixed\n");
             }
          case awgMem:
             {
+
+	printf("unsupported\n");
+	abort();
+#if 0
                /* id = channel address */
                optr = (void*) id;
                /* argument 1 = block size; stored as ID */
@@ -1827,6 +1829,7 @@ printf("to be fixed\n");
                pagesize = arg2;
                delay = 0;
                break;
+#endif
             }
          case awgFile:
          case awgNone:
@@ -2019,12 +2022,16 @@ printf("to be fixed\n");
             }
          case awgMem:
             {
+	printf("unsupported\n");
+	abort();
+#if 0
                /* complete buffer information */
                pbuf->otype = awgMem;
                pbuf->onum = 0;
                pbuf->pagelen = AWG[ID].pagesize;
                pbuf->optr = (float*) CHN_ADDR ((int) AWG[ID].optr, 
                                               AWG[ID].ID, epoch);
+#endif
                break;
             }
          case awgNone:

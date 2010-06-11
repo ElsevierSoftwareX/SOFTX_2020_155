@@ -3,6 +3,7 @@
  * It was generated using rpcgen.
  */
 
+#include <memory.h> /* for memset */
 #include "rleap.h"
 #define _RPC_CLNT
 #include "dtt/rpcinc.h"

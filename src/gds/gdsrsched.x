@@ -48,7 +48,7 @@ struct schedulertask_r {
       int	repeatrate;
       int	repeatsynctype;
       int	repeatsyncval;
-      int 	func;
+      long 	func;
       int	arg_sizeof;
       tainsec_r	timeout;
       tainsec_r	waitval;
@@ -75,17 +75,17 @@ struct remotesched_r {
 program GDSSCHEDULER {
    version SCHEDVER {
 
-      int CLOSESCHEDULER (scheduler_r* sd, tainsec_r timeout) = 1;
-      int SCHEDULETASK (scheduler_r* sd, 
-      		schedulertask_r* newtask) = 2;
-      resultGetScheduledTask_r GETSCHEDULEDTASK (scheduler_r* sd, int id) = 3;
-      int REMOVESCHEDULEDTASK (scheduler_r* sd, int id, 
+      int CLOSESCHEDULER (scheduler_r sd, tainsec_r timeout) = 1;
+      int SCHEDULETASK (scheduler_r sd, 
+      		schedulertask_r newtask) = 2;
+      resultGetScheduledTask_r GETSCHEDULEDTASK (scheduler_r sd, int id) = 3;
+      int REMOVESCHEDULEDTASK (scheduler_r sd, int id, 
 		int terminate) = 4;
-      int WAITFORSCHEDULERTOFINISH (scheduler_r* sd, 
+      int WAITFORSCHEDULERTOFINISH (scheduler_r sd, 
 		tainsec_r timeout) = 5;
-      int SETTAGNOTIFY (scheduler_r* sd, string tag<RTIMETAG_LENGTH>, 
+      int SETTAGNOTIFY (scheduler_r sd, string tag<RTIMETAG_LENGTH>, 
  		tainsec_r time) = 6;
-      remotesched_r CONNECTSCHEDULER (scheduler_r* callbacksd, 
+      remotesched_r CONNECTSCHEDULER (scheduler_r callbacksd, 
 		unsigned int callbackprogram, 
 		unsigned int callbackversion) = 7;
 
@@ -97,7 +97,7 @@ program GDSSCHEDULER {
 program GDSSCHEDULERCALLBACK {
    version SCHEDVERCALLBACK {
 
-      int SETTAGCALLBACK (scheduler_r* sd, scheduler_r* bsd, 
+      int SETTAGCALLBACK (scheduler_r sd, scheduler_r bsd, 
                 string tag<RTIMETAG_LENGTH>, tainsec_r time) = 1;
 
    } = 1;

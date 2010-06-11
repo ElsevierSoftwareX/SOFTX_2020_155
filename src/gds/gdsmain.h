@@ -86,6 +86,7 @@
 #define SITE GDS_SITE_NONE
 #endif
 
+#if 0
 #if SITE == GDS_SITE_LLO
 #define SITE_PREFIX 	"L"
 #elif SITE == GDS_SITE_LHO
@@ -99,7 +100,7 @@
 #else
 #define SITE_PREFIX "."
 #endif
-
+#endif
 
 
 /* possible interferometer flag values */
@@ -112,6 +113,7 @@
 #define IFO GDS_IFO_NONE
 #endif
 
+#if 0
 #if IFO == GDS_IFO1
 #define IFO_PREFIX "1"
 #elif IFO == GDS_IFO2
@@ -120,6 +122,7 @@
 #define IFO_PREFIX "0"
 #else
 #define IFO_PREFIX ""
+#endif
 #endif
 
 /* define gds archive path: */

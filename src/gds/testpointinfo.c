@@ -10,6 +10,7 @@
 #define DEBUG
 #endif
 */
+#if 0
 #ifndef _TESTPOINT_DIRECT
 #ifdef OS_VXWORKS
 #if (IFO == GDS_IFO1)
@@ -25,7 +26,7 @@
 #define _TESTPOINT_DIRECT	0
 #endif
 #endif
-
+#endif
 
 /*----------------------------------------------------------------------*/
 /*                                                         		*/

@@ -583,7 +583,7 @@
       }
    
       /* make the callback */
-      (void) settagcallback_1 (&arg->rd, &arg->lsd, arg->tag, arg->time,
+      (void) settagcallback_1 (arg->rd, arg->lsd, arg->tag, arg->time,
                            &result, clnt);
    
       /* destroy client handle */
@@ -735,7 +735,7 @@
 /* Procedure Returns: 0 + sched. descr. if successful, <0 if failed	*/
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
-   bool_t connectscheduler_1_svc (scheduler_r* callbacksd, 
+   bool_t connectscheduler_1_svc (scheduler_r callbacksd, 
                      u_int callbackprogram , u_int callbackversion, 
                      remotesched_r* result, struct svc_req* rqstp)
    {
@@ -758,7 +758,7 @@
       info->progver = rqstp->rq_vers;
       info->callbacknum = callbackprogram;
       info->callbackver = callbackversion;
-      info->rd = *callbacksd;
+      info->rd = callbacksd;
       if (rpcGetClientaddress (rqstp->rq_xprt, &info->clienthost) != 0) {
          free (info);
          return TRUE;
@@ -795,7 +795,7 @@
 /* Procedure Returns: 0 if successful, <0 if failed			*/
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
-   bool_t closescheduler_1_svc (scheduler_r* sd, tainsec_r timeout, 
+   bool_t closescheduler_1_svc (scheduler_r sd, tainsec_r timeout, 
                      int* result, struct svc_req* rqstp)
    {
       scheduler_t*	lsd;	/* local scheduler descriptor */
@@ -804,7 +804,7 @@
       gdsDebug ("rpc call: close");
    
       /* reconstruct local scheduler descriptor */
-      memcpy (&lsd, sd, sizeof (scheduler_t*));
+      memcpy (&lsd, &sd, sizeof (scheduler_t*));
       if (lsd == NULL) {
          *result = 0;
          return TRUE;
@@ -836,7 +836,7 @@
 /* Procedure Returns: id if successful, <0 if failed			*/
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
-   bool_t scheduletask_1_svc (scheduler_r* sd, schedulertask_r* newtask, 
+   bool_t scheduletask_1_svc (scheduler_r sd, schedulertask_r newtask, 
                      int* result, struct svc_req* rqstp)
    {
       scheduler_t*	 lsd;	/* local scheduler descriptor */
@@ -848,7 +848,7 @@
       gdsDebug ("rpc call: schedule");
    
       /* reconstruct local scheduler descriptor */
-      memcpy (&lsd, sd, sizeof (scheduler_t*));
+      memcpy (&lsd, &sd, sizeof (scheduler_t*));
       if (lsd == NULL) {
          *result = -1;
          return TRUE;
@@ -857,31 +857,31 @@
       _dataUsage (info, INCREASE);
    
       /* copy data */
-      task.flag = newtask->flag;
-      task.priority = newtask->priority;
-      task.timeout = newtask->timeout;
-      task.tagtype = newtask->tagtype;
-      task.synctype = newtask->synctype;
-      task.syncval = newtask->syncval;
-      task.waittype = newtask->waittype;
-      task.waitval = newtask->waitval;
-      task.repeattype = newtask->repeattype;
-      task.repeatval = newtask->repeatval;
-      task.repeatratetype = newtask->repeatratetype;
-      task.repeatval = newtask->repeatval;
-      task.repeatratetype = newtask->repeatratetype;
-      task.repeatrate = newtask->repeatrate;
-      task.repeatsynctype = newtask->repeatsynctype;
-      task.repeatsyncval = newtask->repeatsyncval;
-      strncpy (task.timetag, newtask->timetag, TIMETAG_LENGTH);
+      task.flag = newtask.flag;
+      task.priority = newtask.priority;
+      task.timeout = newtask.timeout;
+      task.tagtype = newtask.tagtype;
+      task.synctype = newtask.synctype;
+      task.syncval = newtask.syncval;
+      task.waittype = newtask.waittype;
+      task.waitval = newtask.waitval;
+      task.repeattype = newtask.repeattype;
+      task.repeatval = newtask.repeatval;
+      task.repeatratetype = newtask.repeatratetype;
+      task.repeatval = newtask.repeatval;
+      task.repeatratetype = newtask.repeatratetype;
+      task.repeatrate = newtask.repeatrate;
+      task.repeatsynctype = newtask.repeatsynctype;
+      task.repeatsyncval = newtask.repeatsyncval;
+      strncpy (task.timetag, newtask.timetag, TIMETAG_LENGTH);
       task.timetag[TIMETAG_LENGTH-1] = 0;
-      strncpy (task.waittag, newtask->waittag, TIMETAG_LENGTH);
+      strncpy (task.waittag, newtask.waittag, TIMETAG_LENGTH);
       task.waittag[TIMETAG_LENGTH-1] = 0;
-      task.arg_sizeof = newtask->arg_sizeof;
+      task.arg_sizeof = newtask.arg_sizeof;
       /* look up dispatch table */
       dt = info->dispatch->dt;
       for (indx = 0; indx < info->dispatch->numentries; indx++) {
-         if ((int) newtask->func == dt->id) {
+         if ((int) newtask.func == dt->id) {
             break; 
          }
          dt++;
@@ -899,7 +899,7 @@
    
       *result = 
          xdr_decodeArgument ((char**) &task.arg, task.arg_sizeof, 
-                           newtask->arg.arg_val, newtask->arg.arg_len, 
+                           newtask.arg.arg_val, newtask.arg.arg_len, 
                            task.xdr_arg);
       if (*result != 0) {
          _dataUsage (info, DECREASE);  
@@ -926,7 +926,7 @@
 /* Procedure Returns: id + task info, if successful, <0 if failed	*/
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
-   bool_t getscheduledtask_1_svc (scheduler_r* sd, int id, 
+   bool_t getscheduledtask_1_svc (scheduler_r sd, int id, 
                      resultGetScheduledTask_r* result, 
                      struct svc_req* rqstp)
    {
@@ -939,7 +939,7 @@
       gdsDebug ("rpc call: get");
    
       /* reconstruct local scheduler descriptor */
-      memcpy (&lsd, sd, sizeof (scheduler_t*));
+      memcpy (&lsd, &sd, sizeof (scheduler_t*));
       if (lsd == NULL) {
          result->status = -1;
          return TRUE;
@@ -1012,7 +1012,7 @@
 /* Procedure Returns: 0 if successful, <0 if failed			*/
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
-   bool_t removescheduledtask_1_svc (scheduler_r* sd, int id, 
+   bool_t removescheduledtask_1_svc (scheduler_r sd, int id, 
                      int terminate, int* result, struct svc_req* rqstp)
    {
       scheduler_t*	lsd;	/* local scheduler descriptor */
@@ -1021,7 +1021,7 @@
       gdsDebug ("rpc call: remove");
    
       /* reconstruct local scheduler descriptor */
-      memcpy (&lsd, sd, sizeof (scheduler_t*));
+      memcpy (&lsd, &sd, sizeof (scheduler_t*));
       if (lsd == NULL) {
          *result = -1;
          return TRUE;
@@ -1049,7 +1049,7 @@
 /* Procedure Returns: 0 if terminated, <0 if not			*/
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
-   bool_t waitforschedulertofinish_1_svc (scheduler_r* sd, 
+   bool_t waitforschedulertofinish_1_svc (scheduler_r sd, 
                      tainsec_r timeout, int* result, 
                      struct svc_req* rqstp)
    {
@@ -1059,7 +1059,7 @@
       gdsDebug ("rpc call: wait");
    
       /* reconstruct local scheduler descriptor */
-      memcpy (&lsd, sd, sizeof (scheduler_t*));
+      memcpy (&lsd, &sd, sizeof (scheduler_t*));
       if (lsd == NULL) {
          *result = 0;
          return TRUE;
@@ -1087,7 +1087,7 @@
 /* Procedure Returns: 0 if successful, <0 if not			*/
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
-   bool_t settagnotify_1_svc (scheduler_r* sd, char* tag, 
+   bool_t settagnotify_1_svc (scheduler_r sd, char* tag, 
                      tainsec_r time, int* result, struct svc_req* rqstp)
    {
       scheduler_t*	 lsd;	/* local scheduler descriptor */
@@ -1096,7 +1096,7 @@
       gdsDebug ("rpc call: set tag");
    
       /* reconstruct local scheduler descriptor */
-      memcpy (&lsd, sd, sizeof (scheduler_t*));
+      memcpy (&lsd, &sd, sizeof (scheduler_t*));
       if (lsd == NULL) {
          *result = -1;
          return TRUE;
