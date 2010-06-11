@@ -22,7 +22,7 @@
 
 /* make sure _CHANNEL_DB is set */
 #if !defined(_CHANNEL_DB)
-#define _CHANNEL_DB		_CHN_DB_DEFAULT
+#define _CHANNEL_DB		_CHN_DB_PARAM
 #endif
 
 /* set default behaviour here */

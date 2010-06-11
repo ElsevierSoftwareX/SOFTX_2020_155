@@ -122,7 +122,7 @@ extern "C" {
     @author DS, June 98
     @see Test point API
 ************************************************************************/
-#define _CONFIG_DYNAMIC
+#undef _CONFIG_DYNAMIC
 
 /** Compiler flag for disabling test points. If defined the test point
     interface (both client and server) are disabled and all test point

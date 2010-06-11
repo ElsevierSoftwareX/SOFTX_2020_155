@@ -107,7 +107,7 @@ namespace diag {
     @author DS, June 98
     @see Test point API
 ************************************************************************/
-#define _CONFIG_DYNAMIC
+#undef _CONFIG_DYNAMIC
 #endif
 
 //@}

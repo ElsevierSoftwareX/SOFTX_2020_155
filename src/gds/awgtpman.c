@@ -114,6 +114,9 @@ char system_name[PARAM_ENTRY_LEN];
       }
 
       if (run_tpman) {
+
+	if (!run_awg) return testpoint_server();
+
         /* Start TP Manager */
         printf ("Spawn testpoint manager\n");
    #ifdef OS_VXWORKS

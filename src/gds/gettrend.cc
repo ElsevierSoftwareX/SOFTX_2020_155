@@ -5,7 +5,7 @@
 /* Module Description: implements the MathLink interface for NDS	*/
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
-#define _CONFIG_DYNAMIC
+#undef _CONFIG_DYNAMIC
 
 #include <math.h>
 #include <time.h>

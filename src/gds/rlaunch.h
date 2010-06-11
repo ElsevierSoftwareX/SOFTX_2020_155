@@ -6,7 +6,9 @@
 #ifndef _RLAUNCH_H_RPCGEN
 #define _RLAUNCH_H_RPCGEN
 
+#include <rpc/rpc.h>
 
+#include <pthread.h>
 
 #ifdef __cplusplus
 extern "C" {

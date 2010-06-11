@@ -237,7 +237,7 @@
          memcpy (&cbd, &data->parent, sizeof (scheduler_t*));
       
          retval = 
-            connectscheduler_1 (&cbd, callbackProgNum, 
+            connectscheduler_1 (cbd, callbackProgNum, 
                               callbackVersNum, &rsched, data->clnt);
          if ((retval != RPC_SUCCESS) || (rsched.status != 0)) {
             closeScheduler (sd, 0);
@@ -369,7 +369,7 @@
       if ((data->clnt != NULL) && ((sd->scheduler_flags & SCHED_LOCAL_BOUND) == 
          SCHED_REMOTE_BOUND)) {
          /* call remote scheduler close function */
-         if (closescheduler_1 (&data->rd, timeout, &result, data->clnt) !=
+         if (closescheduler_1 (data->rd, timeout, &result, data->clnt) !=
             RPC_SUCCESS) {
             gdsError (GDS_ERR_PROG, "unable to close remote scheduler");
             result = -52;
@@ -507,7 +507,7 @@
       rtask.repeatrate = newtask->repeatrate;
       rtask.repeatsynctype = newtask->repeatsynctype;
       rtask.repeatsyncval = newtask->repeatsyncval;
-      rtask.func = (int) newtask->func;
+      rtask.func = newtask->func;
       rtask.timeout = newtask->timeout;
       rtask.waitval = newtask->waitval;
       strncpy (rtask.timetag, newtask->timetag, RTIMETAG_LENGTH);
@@ -522,7 +522,7 @@
    
       /* use rpc to call schedule function on remote system */
       if (result == 0) {
-         retval = scheduletask_1 (&data->rd, &rtask, &result, data->clnt);
+         retval = scheduletask_1 (data->rd, rtask, &result, data->clnt);
          if (retval != RPC_SUCCESS) {
             result = -55;
          }
@@ -584,7 +584,7 @@
       _dataUsage (data, INCREASE);
    
       /* rpc: call scheduler on remote machine */
-      retval = getscheduledtask_1 (&data->rd, id, &result, data->clnt);
+      retval = getscheduledtask_1 (data->rd, id, &result, data->clnt);
       if (retval != RPC_SUCCESS) {
          _dataUsage (data, DECREASE);
          return -56;
@@ -702,7 +702,7 @@
       _dataUsage (data, INCREASE);
    
       /* use rpc to call remove function on remote system */
-      retval = removescheduledtask_1 (&data->rd, id, terminate, 
+      retval = removescheduledtask_1 (data->rd, id, terminate, 
                                  &result, data->clnt);
    
       /* decrease the usage count */
@@ -812,7 +812,7 @@
       _dataUsage (data, INCREASE);
    
       /* use rpc to call wait function on remote system */
-      retval = waitforschedulertofinish_1 (&data->rd, timeout, 
+      retval = waitforschedulertofinish_1 (data->rd, timeout, 
                                  &result, data->clnt);
    
       /* decrease the usage count */
@@ -934,7 +934,7 @@
       }
    
       /* use rpc to call wait function on remote system */
-      retval = settagnotify_1 (&data->rd, (char*) arg->tag, arg->time, 
+      retval = settagnotify_1 (data->rd, (char*) arg->tag, arg->time, 
                               &result, clnt);
    
       /* destroy client handle, decrease the usage count */
@@ -1049,8 +1049,8 @@
 /* Procedure Returns: TRUE if successful, FALSE if failed		*/
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
-   bool_t settagcallback_1_svc (scheduler_r* rsd, scheduler_r* rbsd,
-                     char* tag, longlong_t time, int* result, 
+   bool_t settagcallback_1_svc (scheduler_r rsd, scheduler_r rbsd,
+                     char* tag, tainsec_r time, int* result, 
                      struct svc_req* rqstp)
    {
       rscheduler_info_t*	data;	/* rsched info */
@@ -1062,8 +1062,8 @@
    #endif
    
       /* obtain scheduler descriptors */
-      memcpy (&sd, rsd, sizeof (scheduler_t*));
-      memcpy (&bsd, rbsd, sizeof (scheduler_t*));
+      memcpy (&sd, &rsd, sizeof (scheduler_t*));
+      memcpy (&bsd, &rbsd, sizeof (scheduler_t*));
    
       if (sd == NULL) {
          return TRUE;

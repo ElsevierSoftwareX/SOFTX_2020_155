@@ -6,7 +6,9 @@
 #ifndef _RCHANNEL_H_RPCGEN
 #define _RCHANNEL_H_RPCGEN
 
+#include <rpc/rpc.h>
 
+#include <pthread.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,7 +24,7 @@ struct channelinfo_r {
 	short dcuId;
 	short chNum;
 	short dataType;
-	short dataRate;
+	int dataRate;
 	short chGroup;
 	short bps;
 	float gain;

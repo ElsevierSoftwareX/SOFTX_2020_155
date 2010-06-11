@@ -11,8 +11,10 @@
 #endif
 #define RPC_SVC_FG
 
+#if 0
 #ifndef _TESTPOINT_DIRECT
 #define _TESTPOINT_DIRECT 0
+#endif
 #endif
 
 /* Header File List: */
@@ -62,7 +64,7 @@
 #include "dtt/rmapi.h"
 #include "dtt/confserver.h"
 #endif
-
+#include "PConfig.h"
 
 /*----------------------------------------------------------------------*/
 /*                                                         		*/
@@ -1142,13 +1144,10 @@
          #endif
          #else
 
-printf("to be fixed\n");
-#if 0
             if (rmWrite (TP_NODE_ID_TO_RFM_ID (node), (char*) tp, addr, 
                len * sizeof (testpoint_t), 0) != 0) {
                gdsError (GDS_ERR_PROG, "RM write failure");
             }
-#endif
          #endif
          
            /* write channel information into reflective memory 
@@ -1252,8 +1251,7 @@ printf("to be fixed\n");
             base = UNIT_ID_TO_RFM_OFFSET (unitID);
             size = UNIT_ID_TO_RFM_SIZE (unitID);
 
-printf("to be fixed\n");
-            //rfmid = TP_NODE_ID_TO_RFM_ID (node);
+            rfmid = TP_NODE_ID_TO_RFM_ID (node);
 	    rfmid = 0;
 
 
@@ -1436,8 +1434,7 @@ printf("to be fixed\n");
          /* test whether node is available */
          tplist[node].valid = 0;
 
-printf("to be fixed\n");
-         //rmNode = TP_NODE_ID_TO_RFM_ID (node);
+         rmNode = TP_NODE_ID_TO_RFM_ID (node);
 	 rmNode = 0;
          if (rmBaseAddress (rmNode) == NULL) {
 	    printf("reflective memory pointer not set\n"); 
@@ -1467,8 +1464,10 @@ printf("to be fixed\n");
          if ((rpcGetLocaladdress (&laddr) < 0) ||
             (addr.s_addr != laddr.s_addr) ||
 	    strcmp(sysname, system_name)) {
+	    printf ("this is not my node %x %x %s\n", addr.s_addr, laddr.s_addr, system_name);
             continue;
          }
+	 printf ("this is my node\n");
 #else
 	 /* Determine if this is my node */
          if ((rpcGetLocaladdress (&laddr) < 0) ||
@@ -1560,9 +1559,6 @@ printf("to be fixed\n");
          /* loop through interfaces */
          for (j = 0; j < TP_MAX_INTERFACE; j++) {
 
-printf("to be fixed\n");
-
-#if 0
             char* a = rmBaseAddress (TP_NODE_ID_TO_RFM_ID(node)) + 
                       TP_NODE_INTERFACE_TO_DATA_OFFSET(node, j);
 #ifdef OS_SOLARIS
@@ -1575,7 +1571,6 @@ printf("to be fixed\n");
 #else
             memset (a, 0, DATA_BLOCKS *
                    TP_NODE_INTERFACE_TO_DATA_BLOCKSIZE(node, j));
-#endif
 #endif
          }
       }

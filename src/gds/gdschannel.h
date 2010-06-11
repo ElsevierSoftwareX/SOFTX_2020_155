@@ -92,7 +92,7 @@ extern "C" {
     @author DS, June 98
     @see Test point API
 ************************************************************************/
-#define _CONFIG_DYNAMIC
+#undef _CONFIG_DYNAMIC
 
 /** Compiler flag specifying the source for the channel database.
     This define can be specified during compilation to choose the 

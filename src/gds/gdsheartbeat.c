@@ -620,7 +620,7 @@
    {
 
       struct timespec wait = {1 / NUMBER_OF_EPOCHS, (1000000000UL / NUMBER_OF_EPOCHS) % 1000000000UL};
-      if (!(int)noreturn) {
+      if (0 == noreturn) {
          return NULL;
       }
       signalHandlerStatus = 1;
