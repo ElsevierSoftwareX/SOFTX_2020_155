@@ -374,7 +374,7 @@ Organization of generating waveforms:
    static mutexID_t		statmux;
    static awgStat_t		awgstat;
 #endif
-   int				awgdebug = 0;
+   int				awgdebug = 1;
 
 
 /*----------------------------------------------------------------------*/

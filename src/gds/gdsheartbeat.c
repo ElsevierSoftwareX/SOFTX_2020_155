@@ -634,7 +634,9 @@
          /* wait a heartbeat */
          nanosleep (&wait, NULL);
       
-	 /* printf("nanosleeping...\n"); */
+	 printf("nanosleeping...\n"); 
+
+// TODO: take a cycle counter from X00 instead of sleeping
 
          /* check if finished */
          if (signalHandlerStatus == 2) {
