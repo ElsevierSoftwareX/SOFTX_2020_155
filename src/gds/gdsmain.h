@@ -69,6 +69,7 @@
 #ifdef HAVE_CONFIG
 #include "config.h"
 #endif
+#include <stdio.h>
 
 /* possible site flag values */
 #define GDS_SITE_NONE	0
@@ -315,8 +316,17 @@ setenv GDS_IFO
     @author DS, March 98
     @see Main and GDS_ARCHIVE
 ************************************************************************/
-#define gdsPathFile(subdir, filename) \
-    ARCHIVE subdir "/" filename
+static inline char* gdsPathFile(char *subdir, char *filename)  {
+	static char s[1024];
+	sprintf(s, "%s%s/%s", archive, subdir, filename);
+	return s;
+}
+
+static inline char* gdsPathFile2(char *subdir, char *filename, char *c1, char *c2)  {
+	static char s[1024];
+	sprintf(s, "%s%s/%s%s%s", archive, subdir, filename, c1, c2);
+	return s;
+}
 
 #ifndef __GNUC__
 /* Solaris/Sparc works: use pargams for init/cleanup functions */

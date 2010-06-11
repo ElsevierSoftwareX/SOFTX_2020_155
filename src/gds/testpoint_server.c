@@ -1442,12 +1442,10 @@
          }
       
          /* make section header */
-         sprintf (section, PRM_SECTION, node);
+         sprintf (section, "%s-node%i", site_prefix, node);
       
          /* get remote host from parameter file */
          strcpy (remotehost, "");
-	 printf("%s\n", PRM_FILE);
-	 printf("%s\n", PRM_SECTION);
          loadStringParam (PRM_FILE, section, PRM_ENTRY1, 
                          remotehost);
 	 printf ("remotehost = %s; section= %s\n", remotehost, section);

@@ -114,8 +114,7 @@
 /*----------------------------------------------------------------------*/
 #define _CHNLIST_SIZE		200
 #if !defined (_CONFIG_DYNAMIC)
-#define PRM_FILE		gdsPathFile("/param", \
-					     "chn" SITE_PREFIX ".par")
+#define PRM_FILE		gdsPathFile2("/param", "chn", SITE_PREFIX, ".par")
 #define PRM_FILE2		gdsPathFile("/param", "nds.par")
 #define PRM_IFOID		"ifoid"
 #define PRM_RMID		"rmid"
@@ -132,8 +131,7 @@
 #define SEC_SERVER		gdsSectionSite ("nds")
 #define PRM_SERVERNAME		"hostname"
 #define PRM_SERVERPORT		"port"
-#define TP_FILE			gdsPathFile("/param", \
-					     "tpchn_" SITE_PREFIX "%i.par")
+#define TP_FILE			gdsPathFile2("/param", "tpchn_", SITE_PREFIX, "%i.par")
 #ifdef GDS_UNIX_TARGET
 #define TP_MAXIFO		16
 #else

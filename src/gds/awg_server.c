@@ -988,7 +988,7 @@ extern  bool_t awgaddwaveform_1_svc(int , awgcomponent_list_r , int *, struct sv
 
 #ifdef _ADVANCED_LIGO
       /* make section header */
-      sprintf (section, PRM_SECTION, testpoint_manager_node);
+      sprintf (section, "%s-awg%i", ifo_prefix,  testpoint_manager_node);
       
       loadNumParam (PRM_FILE, section, PRM_ENTRY2, &prognum);
       loadNumParam (PRM_FILE, section, PRM_ENTRY3, &progver);

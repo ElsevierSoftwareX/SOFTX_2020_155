@@ -21,6 +21,10 @@
 #define _TPMAN_NAME		"tTPmgr"
 #define _AWG_NAME		"tAWGmgr"
 
+char *ifo_prefix="G1";
+char *site_prefix="G";
+char *archive ="/cvs/cds/geo/target/gds/";
+
 /* How many times over 16 kHz is the front-end system? */
 int sys_freq_mult = 1;
 

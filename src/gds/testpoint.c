@@ -1496,7 +1496,7 @@
          if ((_TESTPOINT_DIRECT & (1 << node)) != 0) {
             tpNode[node].valid = 1;*/
       #if !defined (_TP_DAQD) && !defined (_CONFIG_DYNAMIC)
-         sprintf (section, PRM_SECTION, node);
+         sprintf (section, "%s-node%i", site_prefix, node);
       
          /* get remote host from parameter file */
          strcpy (remotehost, "");
