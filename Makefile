@@ -56,7 +56,7 @@ install-% :: src/epics/simLink/%.mdl
 	else /bin/cp -p build/$${system}epics/config/$${ifo}$${upper_system}.txt  /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt;\
 	fi;\
 	echo Installing /opt/rtcds/$$site/$${lower_ifo}/target/$${system}epics;\
-	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system} /opt/rtcds/$$site/$${lower_ifo}/target_archive/$${system}/$${system}_$$cur_date || exit 2; fi;\
+	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}; then /bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target_archive/$${system}; /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system} /opt/rtcds/$$site/$${lower_ifo}/target_archive/$${system}/$${system}_$$cur_date || exit 2; fi;\
 	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${system};\
 	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin;\
 	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs;\
