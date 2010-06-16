@@ -699,4 +699,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+#if RMEM_LAYOUT != 2
+#error
+#endif
 #endif /* _GDS_HARDWARE_H */

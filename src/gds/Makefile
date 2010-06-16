@@ -1,24 +1,23 @@
 
 RPC           = rpcgen
-RPCFLAGS      = -C -N -M -D_ADVANCED_LIGO
-RPCX = gdsrsched rawgapi rtestpoint 
-CFLAGS = -I. -g
+RPCFLAGS      = -C -N -M -D_ADVANCED_LIGO -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS
 
+RPCX	      = gdsrsched rawgapi rtestpoint
+CFLAGS	      = -std=gnu99 -I. -I../include -g -D_ADVANCED_LIGO -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS
 
+SrcPath	      = 
 
-SrcPath = 
+#-DLIGO_GDS -D_CONFIG_DYNAMIC -D_ADVANCED_LIGO -DCOMPAT_INITIAL_LIGO=1 -DPORTMAP -DGDS_NO_EPICS
 
 
 RPCOBJS=$(RPCX:%=%_xdr.o) $(RPCX:%=%_svc.o) $(RPCX:%=%_clnt.o)
 RPCSRC=$(RPCOBJS:%.o=%.c) $(RPCX:%=%.h) 
-
 
 OBJS = $(RPCOBJS)\
 awgapi.o\
 awgfunc.o\
 awg.o\
 awg_server.o\
-awgtpman.o\
 caldate_mjd.o\
 cobox.o\
 confserver.o\
@@ -50,15 +49,15 @@ timingcard.o\
 gdssched_client.o\
 gdssched.o\
 gdssched_server.o\
-gdssched_util.o
+gdssched_util.o\
 
-awgtpman: $(RPCX:%=$(SrcPath)%.h) ${OBJS}
-	c++ ${OBJS} -lpthread -o awgtpman
+awgtpman: $(RPCX:%=$(SrcPath)%.h) awgtpman.o ${OBJS} 
+	c++ ${OBJS} awgtpman.o -lpthread -o awgtpman
 
 ${RPCOBJS}:	 ${RPCSRC}
 
 clean:
-	/bin/rm -f  awgtpman ${OBJS} ${RPCSRC}
+	/bin/rm -f  awgtpman awgtpman.o ${OBJS} ${RPCSRC} 
 
 $(RPCX:%=$(SrcPath)%.h) : $(SrcPath)%.h: $(SrcPath)%.x
 	/bin/rm -f $@

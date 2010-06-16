@@ -6,8 +6,8 @@
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
 
-/*#define DEBUG*/
-/*#define DEBUG_INIT*/
+#define DEBUG
+//#define DEBUG_INIT
 
 /*----------------------------------------------------------------------*/
 /*                                                         		*/
@@ -374,7 +374,7 @@ Organization of generating waveforms:
    static mutexID_t		statmux;
    static awgStat_t		awgstat;
 #endif
-   int				awgdebug = 1;
+   int				awgdebug = 0;
 
 
 /*----------------------------------------------------------------------*/
@@ -1114,6 +1114,8 @@ Organization of generating waveforms:
       double 		dt;		/* time difference */
    #endif
    
+      printf("tAWGcopy started\n");
+
       /* start a copy whenever the ready semaphore is available */
       while (sem_wait (&awgbuf.ready) == 0) {
       
@@ -2754,8 +2756,12 @@ Organization of generating waveforms:
       t = awg->tproc + _EPOCH;
       MUTEX_RELEASE (awg->mux);
    
+
       /* test whether valid waveforms were provided */
       for (cid = 0, cp = comp; cid < numComp; ++cid, ++cp) {
+
+	 printf("component %d; start=%d\n", cid, cp->start);
+
          /* start now if start <= 0 */
          if (cp->start <= 0) {
             cp->start = t + _EPOCH;
@@ -2768,7 +2774,8 @@ Organization of generating waveforms:
          }
          /* test validity of component */
          if (!awgIsValidComponent (cp)) {
-            cp->wtype = (AWG_WaveType) awgNone;
+           cp->wtype = (AWG_WaveType) awgNone;
+	   printf("invalid\n");
          }
          /* fix start value if necessary */
          if (cp->wtype == awgNone) {
@@ -3094,7 +3101,7 @@ Organization of generating waveforms:
    
       /* verify valid ID */
       if ((ID < 0) || (ID >= MAX_NUM_AWG)) {
-         gdsDebug ("addWaveformAWG() ID out of range"); 
+         gdsDebug ("queryWaveformAWG() ID out of range"); 
          return -1;
       }
    

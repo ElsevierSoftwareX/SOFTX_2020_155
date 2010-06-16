@@ -21,15 +21,19 @@
 #define _TPMAN_NAME		"tTPmgr"
 #define _AWG_NAME		"tAWGmgr"
 
-char *ifo_prefix="G1";
-char *site_prefix="G";
-char *archive ="/cvs/cds/geo/target/gds/";
+char *ifo_prefix = "G1";
+char *site_prefix ="G";
+char *archive = "/cvs/cds/geo/target/gds/";
+char myParFile[128];
 
 /* How many times over 16 kHz is the front-end system? */
 int sys_freq_mult = 1;
 
 /* Control system name */
 char system_name[PARAM_ENTRY_LEN];
+
+// Set to one when we are in sync with master (x00)
+int inSyncMaster = 0;
 
    int main (int argc, char* argv[])
    {
@@ -117,6 +121,7 @@ char system_name[PARAM_ENTRY_LEN];
         }
       }
 
+      sprintf(myParFile, "%s/param/tpchn_%s.par", archive, system_name);
       if (run_tpman) {
 
 	if (!run_awg) return testpoint_server();
@@ -133,7 +138,7 @@ char system_name[PARAM_ENTRY_LEN];
 	   printf ("Error: Unable to spawn testpoint manager\n");
            return 1;
         }
-        sleep (10);
+        sleep (1);
      
 	{
           extern int testpoint_manager_node;

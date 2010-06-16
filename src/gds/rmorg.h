@@ -130,6 +130,7 @@ extern "C" {
 #define TP_MAX_NODE             16
 #else
 #define TP_MAX_NODE		2
+#error
 #endif
 
 /** Maximum number of test point interfaces. This number is currently 4

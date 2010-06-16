@@ -73,6 +73,7 @@
          if (tp != NULL) {
             *tp = chn->chNum;
          }
+	 printf("tpIsValid node=%d tp=%d\n", chn->rmId, chn->chNum);
          return 1;
       }
       else {

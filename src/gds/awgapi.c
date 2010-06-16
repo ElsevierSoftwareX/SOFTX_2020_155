@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 3; -*- */
 /*----------------------------------------------------------------------*/
 /*                                                         		*/
 /* Module Name: awgapi							*/
@@ -723,7 +724,7 @@
       }
    
       /* add waveforms */
-      if (awgaddwaveform_1 (sl, wforms, &ret, awg_clnt[i][j]) != 
+      if (awgaddwaveform_1 (sl, &wforms, &ret, awg_clnt[i][j]) != 
          RPC_SUCCESS) {
          free (wforms.awgcomponent_list_r_val);
          return -2;
@@ -1808,7 +1809,7 @@
             awg_clnt[i][j] = NULL;
          #if !defined (_AWG_LIB) && !defined (_CONFIG_DYNAMIC)
             /* construct section heading */
-            //sprintf (prms, "%s%i-%s%i", SITE_PREFIX, i + 1, PRM_SECTION, j);
+            sprintf (prms, "%s%i-%s%i", SITE_PREFIX, i + 1, PRM_SECTION, j);
             /* get remote host from parameter file */
             strcpy (remotehost, "");
             loadStringParam (PRM_FILE, prms, PRM_ENTRY1, remotehost);
@@ -1879,7 +1880,7 @@
          for (i = 0; i < NUM_DS340; i++) {
             /* if file exists, read in parameters */
             /* construct section heading */
-            //sprintf (prms, "%s-%s%i", SITE_PREFIX, PRM_SECTION2, i);
+            sprintf (prms, "%s-%s%i", SITE_PREFIX, PRM_SECTION2, i);
             /* get remote host from parameter file */
             strcpy (remotehost, "");
             loadStringParam (PRM_FILE, prms, PRM_ENTRY1, remotehost);
@@ -2467,6 +2468,23 @@
 
 /*----------------------------------------------------------------------*/
 /*                                                         		*/
+/* External Procedure Name: awgFree					*/
+/*                                                         		*/
+/* Procedure Description: Free allocated memory 			*/
+/*                                                         		*/
+/* Procedure Arguments: pointer to be freed    				*/
+/*                                                         		*/
+/* Procedure Returns: void      					*/
+/*                                                         		*/
+/*----------------------------------------------------------------------*/
+   void
+   awgFree(void* p) {
+      free(p);
+   }
+
+
+/*----------------------------------------------------------------------*/
+/*                                                         		*/
 /* External Procedure Name: awgCommand					*/
 /*                                                         		*/
 /* Procedure Description: command line interface			*/
@@ -2475,7 +2493,8 @@
 /*                                                         		*/
 /* Procedure Returns: reply string					*/
 /*                                                         		*/
-/*----------------------------------------------------------------------*/           
+/*----------------------------------------------------------------------*/
+
    char* awgCommand (const char* cmd)
    {
       char*		p;
@@ -2522,6 +2541,7 @@
             p = (char*) readSlot (cmd + 4, &sl);
             if (p == NULL) {
                sprintf (buf, "error: illegale slot name");
+               return cmdreply (buf);
             }
             return awgShow (-sl);
          }
