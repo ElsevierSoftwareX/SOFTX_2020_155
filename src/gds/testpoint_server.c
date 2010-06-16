@@ -7,7 +7,7 @@
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
 #ifndef DEBUG
-#define DEBUG 3
+//#define DEBUG 3
 #endif
 #define RPC_SVC_FG
 
@@ -462,7 +462,9 @@
          if (!tplist[node].valid) {
             continue;
          }
-         /* printf ("tp name (node %i) = %s\n", node, tpNames);*/
+#ifdef DEBUG
+         printf ("tp name (node %i) = %s\n", node, tpNames);
+#endif
       
          /* translate names into test points */
          if (tpName2Index (node, tpNames, &tp) < 0) {
@@ -888,14 +890,16 @@
       /* go through name list */
       p = strtok_r (buf, " ,\t\n", &saveptr);
       while ((p != NULL) && (tp->TP_r_len < _MAX_TPNAMES)) {
+	 printf("tpName2Index checking %s\n", p);
          if ((gdsChannelInfo (p, &chn) == 0) &&
             (tpIsValid (&chn, &tpNode, tp->TP_r_val + tp->TP_r_len)) &&
             (node == tpNode)) {
-            /* printf ("%s is tp %i (node %i)\n", p, 
+            printf ("%s is tp %i (node %i)\n", p, 
                    tp->TP_r_val[tp->TP_r_len], 
-                   tpNode);*/
+                   tpNode);
             tp->TP_r_len++;
          }
+	 printf("node=%d; tpNode=%d\n", node, tpNode);
          p = strtok_r (NULL, " \t\n", &saveptr);
       } 
    
@@ -1041,8 +1045,8 @@
       tainsec_t		t;		/* current time */
       int		addr;		/* RM address of tp index */
    
-   #ifdef DEBUG
-      /*printf ("update %li/%i\n", time, epoch);*/
+   #if 0
+      printf ("update %li/%i\n", time, epoch);
    #endif
       t = (tainsec_t) time * _ONESEC + (tainsec_t) epoch * _EPOCH;
    
@@ -1073,32 +1077,37 @@
                   tp[size] = 0;
                   strcpy (tpchn[size], "");
                }
+#if 0
+	       // print first four test point numbers and channel names
+	       if (size < 4) printf (" %d tp = %s; tpnum = %d\n", size, tpchn[size], tp[size]);
+#endif
                size++;
             }
          
             /* release server mutex */
             MUTEX_RELEASE (servermux);
-         
-            /* if ((j == 0)) {
+#if 0
+            if ((j == 0)) {
                printf ("node = %i, interface = %i  - ", node, j);
                printf ("tp = %i %i %i %i %i\n", tp[0],tp[1],tp[2],tp[3],tp[4]);
-               if (size > 1) {
-                  printf ("tp = %s\n", tpchn[0]);
-               }
-            }*/
+            }
+#endif
          
+#if 0
+	// TODO: this seems to clobber my test point numbers
             /* disable excitation test points if awg not running */
          #ifndef _NO_AWG_CHECK
             if (!tpwriter[node][j].alive) {
             #ifdef DEBUG
-               if ((node == 1) && (j == 0)) 
-            	  printf ("AWG not alive: clear all TPs\n");
+               printf ("AWG not alive: clear all TPs\n");
             #endif
                memset (tp, 0, len * sizeof (testpoint_t));
             }
          #endif
+#endif
          
 #ifndef __linux__
+#error
             /* swap on little-endian machines */
 	    i = 0;
             *(char*)&i = 1;
@@ -1120,22 +1129,19 @@
                continue;
             }
             /* debug */
-         #ifdef DEBUG
-            if ((node == 1) && (j == 0)) {
-               static int counttpw = 0;
-               if (++counttpw % 10 == 0) {
-                  printf ("write tps %i %i %i from node %i to 0x%x\n",
-                         tp[0], tp[1], tp[2], 
-                         TP_NODE_ID_TO_RFM_ID (node), addr);
-               }
-            }
+         #if 0
+            printf ("write tps %i %i %i from node %i to 0x%x\n",
+                    tp[0], tp[1], tp[2], 
+                    TP_NODE_ID_TO_RFM_ID (node), addr);
          #endif
          #if RMEM_LAYOUT > 0
             if (rmWrite (TP_NODE_ID_TO_RFM_ID (node), (char*) tp, addr, 
                len * sizeof (testpoint_t), 0) != 0) {
                gdsError (GDS_ERR_PROG, "RM1 write failure");
             }
-	    /*printf("rmWrite(0, %x %x %d )\n", tp, addr, len * sizeof (testpoint_t)); */
+         #if 0
+	    printf("rmWrite(0, %x %x %d )\n", tp, addr, len * sizeof (testpoint_t)); 
+	 #endif
          #if TARGET !=  (TARGET_L1_GDS_AWG1 + 20) && TARGET !=  (TARGET_L1_GDS_AWG1 + 21)
             if (rmWrite (1 + TP_NODE_ID_TO_RFM_ID (node), (char*) tp, addr, 
                len * sizeof (testpoint_t), 0) != 0) {

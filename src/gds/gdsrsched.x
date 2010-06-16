@@ -17,7 +17,7 @@
 %#include "dtt/rpcinc.h"
 
 /* tai nsec */
-typedef hyper tainsec_r;
+typedef hyper tainsec_r; 
 
 /* number of bytes reserved for an address on the remote machine */
 const ADDRLEN = 8;

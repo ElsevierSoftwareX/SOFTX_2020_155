@@ -94,6 +94,8 @@ struct awgstat_r {
       int 		status;
 };
 
+/*  pointer type to get aound linus rpcgen bug */
+typedef awgcomponent_list_r* awgcompl_ptr;
 
 /* rpc interface */
 program RAWGPROG {
@@ -101,7 +103,7 @@ program RAWGPROG {
 
       int AWGNEWCHANNEL (int chntype, int id, int arg1, int arg2) = 1;
       int AWGREMOVECHANNEL (int slot) = 2;
-      int AWGADDWAVEFORM (int slot, awgcomponent_list_r comps) = 3;
+      int AWGADDWAVEFORM (int slot, awgcompl_ptr comps) = 3;
       int AWGSETWAVEFORM (int slot, awgwaveform_r wave) = 4;
       int AWGSENDWAVEFORM (int slot, unsigned int time, int epoch, 
                            awgwaveform_r wave) = 11;

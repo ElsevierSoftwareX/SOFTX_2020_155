@@ -239,6 +239,7 @@
    
       /* not found */
       if (pinfo == NULL) {
+	 printf("channel not found\n");
          return -1;
       }
       /* copy info if found */
@@ -628,8 +629,7 @@
       int		chninfoprev;	/* # of already loaded channels */
       gdsChnInfo_t*	chnptr;     	/* pointer to chn info */
    
-      sprintf (section, "read %s", filename);
-      gdsDebug (section);
+      printf(section, "read %s", filename);
 
       /* open parameter file */
       if ((fp = fopen (filename, "r")) == NULL) {
@@ -676,7 +676,7 @@
          loadParamSectionEntry (PRM_RMID, sec, nentry, &cursor, 
                               5, &chninfo[chninfonum].rmId);
 
-	 //printf("%s rmid %d\n", chninfo[chninfonum].chName, chninfo[chninfonum].rmId);
+	 printf("%s rmid %d\n", chninfo[chninfonum].chName, chninfo[chninfonum].rmId);
 #if !defined(_ADVANCED_LIGO)
 	 /* We want to use rmId to set node id for advLIGO */
          chninfo[chninfonum].rmId = (chninfo[chninfonum].ifoId - 1) % 2;
@@ -1171,6 +1171,15 @@
    
       /* read from file */
    #else 
+
+      // Read only the correct file
+      extern char myParFile[128];
+      if (readChnFile (myParFile) <= -10) {
+               MUTEX_RELEASE (chnmux);
+               return -1;
+      }
+
+#if 0
       {
          int		ifo;
          char		filename[1024];
@@ -1182,6 +1191,8 @@
             }
          }
       }
+#endif
+
    #endif
       /* sort entries */
       qsort ((void*) chninfo, chninfonum, sizeof (gdsChnInfo_t), 

@@ -163,9 +163,7 @@ extern int testpoint_manager_rpc;
 #define _SVC_FG		0
 #endif
 #if !defined (OS_VXWORKS) && !defined (PORTMAP)
-// TODO: THIS NEEDS VERIFICATION
-//#define _SVC_MODE	RPC_SVC_MT_AUTO
-#define _SVC_MODE	0
+#define _SVC_MODE	RPC_SVC_MT_AUTO
 #else
 #define _SVC_MODE	0
 #endif
@@ -261,11 +259,8 @@ extern int testpoint_manager_rpc;
 /*                                                         		*/
 /* Procedure Returns: 0 if successful, <0 if not			*/
 /*                                                         		*/
-/*
-extern  bool_t awgaddwaveform_1_svc(int , awgcomponent_list_r , int *, struct svc_req *);
-*/
 /*----------------------------------------------------------------------*/
-   bool_t awgaddwaveform_1_svc (int slot, awgcomponent_list_r comps, 
+   bool_t awgaddwaveform_1_svc (int slot, awgcomponent_list_r* comps, 
                      int* result, struct svc_req* rqstp)
    {
       AWG_Component* 	comp;		/* awg components */
@@ -277,10 +272,10 @@ extern  bool_t awgaddwaveform_1_svc(int , awgcomponent_list_r , int *, struct sv
    
       /* allocate memory */
       comp = NULL;
-      //if (comps != NULL) {
-         numComp = comps.awgcomponent_list_r_len;
+      if (comps != NULL) {
+         numComp = comps->awgcomponent_list_r_len;
          comp = calloc (numComp, sizeof (AWG_Component));
-      //}
+      }
       if (comp == NULL) {
          *result = -1;
          return TRUE;
@@ -289,26 +284,26 @@ extern  bool_t awgaddwaveform_1_svc(int , awgcomponent_list_r , int *, struct sv
       /* copy result */
       for (i = 0; i < numComp; i++) {
          comp[i].wtype = 
-            comps.awgcomponent_list_r_val[i].wtype;
+            comps->awgcomponent_list_r_val[i].wtype;
          for (j = 0; j < 4; j++) {
             comp[i].par[j] = 
-               comps.awgcomponent_list_r_val[i].par[j];
+               comps->awgcomponent_list_r_val[i].par[j];
          }
          comp[i].start = 
-            comps.awgcomponent_list_r_val[i].start;
+            comps->awgcomponent_list_r_val[i].start;
          comp[i].duration = 
-            comps.awgcomponent_list_r_val[i].duration;
+            comps->awgcomponent_list_r_val[i].duration;
          comp[i].restart = 
-            comps.awgcomponent_list_r_val[i].restart;
+            comps->awgcomponent_list_r_val[i].restart;
          for (j = 0; j < 2; j++) {
             comp[i].ramptime[j] = 
-               comps.awgcomponent_list_r_val[i].ramptime[j];
+               comps->awgcomponent_list_r_val[i].ramptime[j];
          }
          comp[i].ramptype = 
-            comps.awgcomponent_list_r_val[i].ramptype;
+            comps->awgcomponent_list_r_val[i].ramptype;
          for (j = 0; j < 4; j++) {
             comp[i].ramppar[j] = 
-               comps.awgcomponent_list_r_val[i].ramppar[j];
+               comps->awgcomponent_list_r_val[i].ramppar[j];
          }
       }
    
@@ -988,6 +983,7 @@ extern  bool_t awgaddwaveform_1_svc(int , awgcomponent_list_r , int *, struct sv
 
 #ifdef _ADVANCED_LIGO
       /* make section header */
+      //sprintf (section, PRM_SECTION, testpoint_manager_node);
       sprintf (section, "%s-awg%i", ifo_prefix,  testpoint_manager_node);
       
       loadNumParam (PRM_FILE, section, PRM_ENTRY2, &prognum);

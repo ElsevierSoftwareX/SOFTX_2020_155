@@ -327,7 +327,9 @@
 #else
    int rmInit (short ID)
    {
-      if (ID == 0) {
+      // 0 -- our shared memory
+      // 2 -- IPC shared memory
+      if (ID == 0 || ID == 2) {
 	 int fd;
 	 void *addr;
          char fname[128];
@@ -337,17 +339,20 @@
          /*rmboard[ID] = rm[ID] = malloc (rmsize[ID]);*/
          rmmaster[ID] = 0;
 
-         sprintf(fname, "/rtl_mem_%s", system_name);
+	 if (ID == 0) sprintf(fname, "/rtl_mem_%s", system_name);
+	 else strcpy(fname, "/rtl_mem_ipc");
 
          if ((fd = open(fname, O_RDWR)) < 0) {
            fprintf(stderr, "Couldn't open `%s' read/write\n", fname);
-
+           _exit(-1);
+#if 0
 	   /* rtl_epics is shared memory partition used for 
 	     communication between epics, front end, awg and tpman */
            if ((fd=open("/rtl_epics", O_RDWR))<0) {
                 perror("open(\"rtl_epics\")");
                 _exit(-1);
            }
+#endif
 	 }
 
          addr = mmap(0, 64*1024*1024-5000, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -356,7 +361,7 @@
                 perror("mmap");
                 _exit(-1);
          }
-         printf("mmapped address is 0x%lx\n", (long)addr);
+         printf("%s mmapped address is 0x%lx\n", fname, (long)addr);
          rmboard[ID] = rm[ID] = addr;
       }
       else if (ID == 1) {
@@ -685,6 +690,9 @@ struct VMIC5579_MEM_REGISTER {
       rmInit (1);
 #endif
 #endif
+
+      // Open the IPC memory space
+      rmInit (2);
 
 #ifdef OS_SOLARIS
       /* See if we have two more RFM cards installed (LHO) */

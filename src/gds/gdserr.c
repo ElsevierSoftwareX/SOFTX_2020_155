@@ -412,6 +412,8 @@
       gdsDebugMessage (buf);
       /*printf ("%s\n", buf);*/
       free (buf);
+   #else
+	printf("%s:%i %s\n", file, line, msg);
    #endif
    }
 
