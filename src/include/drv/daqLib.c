@@ -917,7 +917,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
           	    localTable[ltSlot].sysNum = jj / daqRange.filtExSize;
           	    localTable[ltSlot].fmNum = jj % daqRange.filtExSize;
           	    localTable[ltSlot].sigNum = ii;
-printf("exc at %d\n",localTable[ltSlot].sigNum);
 	  	    localTable[ltSlot].decFactor = 1;
 		    excTable[slot].sigNum = tpn;
 		    excTable[slot].sysNum = localTable[ltSlot].sysNum;
