@@ -788,11 +788,15 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	// Helper function to search the lists
 	// Clears the found number from the lists
 	// tpnum and excnum lists of numbers do not intersect
-	inline int in_the_lists(unsigned int tp) {
+	inline int in_the_lists(unsigned int tp, unsigned int slot) {
 		int i;
 		for (i = 0; i < DAQ_GDS_MAX_TP_NUM; i++){
 			if (tpnum[i] == tp) return (tpnum[i] = 0, 1);
-			if (excnum[i] == tp) return (excnum[i] = 0, 1);
+                        if (excnum[i] == tp) {
+                                // Check if the excitation is still in the same slot
+                                if (i != excTable[slot].offset) return 0;
+                                return (excnum[i] = 0, 1);
+                        }
 		}
 		return 0;
 	}
@@ -801,7 +805,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	int i;
 	for (i = 0; i < GM_DAQ_MAX_TPS; i++) {
 		if (tpNum[i] == 0) continue;
-		if (!in_the_lists(tpNum[i])) {
+		if (!in_the_lists(tpNum[i], i)) {
 		  tpNum[i] = 0; // Removed test point is cleared now
 		  int ltSlot = dataInfo.numChans + i;
 
@@ -921,6 +925,8 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		    excTable[slot].sigNum = tpn;
 		    excTable[slot].sysNum = localTable[ltSlot].sysNum;
 		    excTable[slot].fmNum = localTable[ltSlot].fmNum;
+                    // Save the index into the TPman table
+                    excTable[slot].offset = i - DAQ_GDS_MAX_TP_NUM;
       		    dataInfo.tp[ltSlot].dataType = 4;
 
 		    //offsetAccum += sysRate * 4;
