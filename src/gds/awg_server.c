@@ -986,17 +986,21 @@ extern int testpoint_manager_rpc;
       //sprintf (section, PRM_SECTION, testpoint_manager_node);
       sprintf (section, "%s-awg%i", ifo_prefix,  testpoint_manager_node);
       
+#if 0
       loadNumParam (PRM_FILE, section, PRM_ENTRY2, &prognum);
       loadNumParam (PRM_FILE, section, PRM_ENTRY3, &progver);
+#endif
 #else
+#error
       loadNumParam (PRM_FILE, PRM_SECTION, PRM_ENTRY2, &prognum);
       loadNumParam (PRM_FILE, PRM_SECTION, PRM_ENTRY3, &progver);
 #endif
       if ((prognum == 0) || (progver == 0)) {
          return -5;
       }
+
 #ifdef _ADVANCED_LIGO
-      //prognum = testpoint_manager_rpc + 1;
+      prognum += testpoint_manager_node;
 #endif
    
    #if defined(_AWG_RM)
