@@ -7,7 +7,7 @@
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
 #ifndef DEBUG
-//#define DEBUG 3
+#define DEBUG 3
 #endif
 #define RPC_SVC_FG
 
