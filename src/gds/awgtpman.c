@@ -23,10 +23,15 @@
 #define _TPMAN_NAME		"tTPmgr"
 #define _AWG_NAME		"tAWGmgr"
 
-char *ifo_prefix = "G1";
-char *site_prefix ="G";
-char *archive = "/opt/rtcds/geo/g1/target/gds/";
-char myParFile[128];
+char ifo_prefix_storage[3];
+char site_prefix_storage[2];
+char archive_storage[256];
+char *ifo_prefix = ifo_prefix_storage; // G1
+char *site_prefix = site_prefix_storage; // G
+char *archive = archive_storage; // /opt/rtcds/geo/g1/target/gds/
+char site_name_lower[16]; // geo
+char ifo_prefix_lower[3];  // g1
+char myParFile[256];
 
 /* How many times over 16 kHz is the front-end system? */
 int sys_freq_mult = 1;
@@ -131,8 +136,71 @@ CDS_HARDWARE cdsPciModules;
 	  nice(-20);
         }
       }
+/*
+                                if ($::site =~ /^M/) {
+                                        $::location = "mit";
+                                } elsif ($::site =~ /^G/) {
+                                        $::location = "geo";
+                                } elsif ($::site =~ /^H/) {
+                                        $::location = "lho";
+                                } elsif ($::site =~ /^L/) {
+                                        $::location = "llo";
+                                } elsif ($::site =~ /^C/) {
+                                        $::location = "caltech";
+                                } elsif ($::site =~ /^S/) {
+                                        $::location = "stanford";
+                                } elsif ($::site =~ /^K/) {
+                                        $::location = "kamioka";
+                                } elsif ($::site =~ /^X/) {
+                                        $::location = "tst";
+                                }
 
+*/
+      char st[3]; st[0] = system_name[0]; st[1] = system_name[1]; st[2] = 0;
+      switch(st[0]) {
+	case 'm':
+		strcpy(site_prefix_storage, "M");
+		strcpy(site_name_lower, "mit");
+		break;
+	case 'g':
+		strcpy(site_prefix_storage, "G");
+		strcpy(site_name_lower, "geo");
+		break;
+	case 'h':
+		strcpy(site_prefix_storage, "H");
+		strcpy(site_name_lower, "lho");
+		break;
+	case 'l':
+		strcpy(site_prefix_storage, "G");
+		strcpy(site_name_lower, "geo");
+		break;
+	case 'c':
+		strcpy(site_prefix_storage, "C");
+		strcpy(site_name_lower, "caltech");
+		break;
+	case 's':
+		strcpy(site_prefix_storage, "S");
+		strcpy(site_name_lower, "stanford");
+		break;
+	case 'k':
+		strcpy(site_prefix_storage, "K");
+		strcpy(site_name_lower, "kamioka");
+		break;
+	case 'x':
+		strcpy(site_prefix_storage, "X");
+		strcpy(site_name_lower, "tst");
+		break;
+	default:
+		fprintf(stderr, "Unknown location: %s\n",  st);
+		exit(1);
+		break;
+      }
+      strcpy(ifo_prefix_lower, st);
+      strcpy(ifo_prefix_storage, st);
+      ifo_prefix_storage[0] = toupper(ifo_prefix_storage[0]);
+      sprintf(archive_storage, "/opt/rtcds/%s/%s/target/gds", site_name_lower, ifo_prefix_lower);
       sprintf(myParFile, "%s/param/tpchn_%s.par", archive, system_name);
+      printf("My config file is %s\n", myParFile);
 
       printf("IPC at 0x%x\n", rmBoardAddress(2));
       ioMemData = (IO_MEM_DATA *)(rmBoardAddress(2) + 0x4000);
