@@ -225,7 +225,7 @@ typedef unsigned long long u_longlong_t;
     @author DS, August 98
     @see Remote Procedure Call Interface
 ************************************************************************/
-#define RPC_PROGNUM_TESTPOINT	0x31001001
+#define RPC_PROGNUM_TESTPOINT	0x31002000
 
 /** Default version number for the test point server. The default 
     version number is 1.
@@ -241,7 +241,7 @@ typedef unsigned long long u_longlong_t;
     @author DS, August 98
     @see Remote Procedure Call Interface
 ************************************************************************/
-#define RPC_PROGNUM_AWG		0x31001002
+#define RPC_PROGNUM_AWG		0x31003000
 
 /** Default version number for the arbitrary waveform generator. The 
     default version number is 1.

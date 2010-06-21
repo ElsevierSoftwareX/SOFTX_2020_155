@@ -1484,8 +1484,16 @@
          /* get rpc parameters from parameter file */
          prognum = RPC_PROGNUM_TESTPOINT;
          progver = RPC_PROGVER_TESTPOINT;
+
+#if 0
+	 // Do not load from the config file
          loadNumParam (PRM_FILE, section, PRM_ENTRY2, &prognum);
          loadNumParam (PRM_FILE, section, PRM_ENTRY3, &progver);
+#endif
+
+	 // Use GDS node to generate a unique RPC number
+	 prognum += node;
+
          if ((prognum != 0) && (progver != 0)) {
             tplist[node].prognum = prognum;
             tplist[node].progver = progver;
