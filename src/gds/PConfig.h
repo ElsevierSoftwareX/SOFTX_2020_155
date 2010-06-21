@@ -7,4 +7,6 @@ extern char *site_prefix;
 #define SITE_PREFIX site_prefix
 extern char *ifo_prefix;
 #define IFO_PREFIX ifo_prefix
+#ifndef _TESTPOINT_DIRECT
 #define _TESTPOINT_DIRECT 65535
+#endif

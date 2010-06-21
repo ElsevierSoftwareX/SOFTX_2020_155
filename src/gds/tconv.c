@@ -428,6 +428,19 @@ typedef int confinfo_t;
 /*----------------------------------------------------------------------*/
    tainsec_t TAInow (void)
    {
+
+#ifndef _TP_DAQD
+	// These are pointers into the shared memory
+	extern volatile int *ioMemDataGPS;
+	extern volatile int *ioMemDataCycle;
+
+
+	// Cycle is at 64Khz
+	tainsec_t t =  ((tainsec_t)(*ioMemDataGPS)) * 1000000000
+		+ ((tainsec_t)*ioMemDataCycle) * (1000000000/(64*1024));
+	//printf("%ld\n", t);
+	return t;
+#else
       /* can be implementation dependent */
    
       /* use current time returned by time.h, uses POSIX */
@@ -497,6 +510,7 @@ typedef int confinfo_t;
       tai.tai = UTCtoTAI (&utc);
       tai.nsec = now.tv_nsec;
       return TAInsec (&tai);
+#endif
    }
 
 

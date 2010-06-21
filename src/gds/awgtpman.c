@@ -10,6 +10,8 @@
 #include "dtt/awg.h"
 #include "dtt/awg_server.h"
 #include "dtt/gdsprm.h"
+#include "rmapi.h"
+#include "drv/cdsHardware.h"
 
 #ifdef OS_VXWORKS
 #define _PRIORITY_TPMAN		40
@@ -23,7 +25,7 @@
 
 char *ifo_prefix = "G1";
 char *site_prefix ="G";
-char *archive = "/cvs/cds/geo/target/gds/";
+char *archive = "/opt/rtcds/geo/g1/target/gds/";
 char myParFile[128];
 
 /* How many times over 16 kHz is the front-end system? */
@@ -34,6 +36,15 @@ char system_name[PARAM_ENTRY_LEN];
 
 // Set to one when we are in sync with master (x00)
 int inSyncMaster = 0;
+
+// Pointers into the shared memory for the cycle and time (coming from the IOP (e.g. x00))
+volatile unsigned int *ioMemDataCycle;
+volatile unsigned int *ioMemDataGPS;
+volatile IO_MEM_DATA *ioMemData;
+
+CDS_HARDWARE cdsPciModules;
+
+
 
    int main (int argc, char* argv[])
    {
@@ -122,6 +133,33 @@ int inSyncMaster = 0;
       }
 
       sprintf(myParFile, "%s/param/tpchn_%s.par", archive, system_name);
+
+      printf("IPC at 0x%x\n", rmBoardAddress(2));
+      ioMemData = (IO_MEM_DATA *)(rmBoardAddress(2) + 0x4000);
+
+      // Find the first ADC card
+      // Master will map ADC cards first, then DAC and finally DIO
+      printf("Total PCI cards from the master: %d\n", ioMemData -> totalCards);
+      for (int ii = 0; ii < ioMemData -> totalCards; ii++) {
+          printf("Model %d = %d\n",ii,ioMemData->model[ii]);
+          switch (ioMemData -> model [ii]) {
+            case GSC_16AI64SSA:
+              printf("Found ADC at %d\n", ioMemData -> ipc[ii]);
+              cdsPciModules.adcType[0] = GSC_16AI64SSA;
+              cdsPciModules.adcConfig[0] = ioMemData->ipc[ii];
+              cdsPciModules.adcCount = 1;
+               break;
+          }
+      }
+      if (!cdsPciModules.adcCount) {
+                printf("No ADC cards found - exiting\n");
+                _exit(1);
+      }
+
+      int ll = cdsPciModules.adcConfig[0];
+      ioMemDataCycle = &ioMemData->iodata[ll][0].cycle;
+      ioMemDataGPS = &ioMemData->gpsSecond;
+
       if (run_tpman) {
 
 	if (!run_awg) return testpoint_server();

@@ -61,7 +61,6 @@
 #include "dtt/gdsheartbeat.h"
 
 #include "rmapi.h"
-#include "drv/cdsHardware.h"
 
 /*----------------------------------------------------------------------*/
 /*                                                         		*/
@@ -362,6 +361,7 @@
    }
 #endif
 
+#ifndef _TP_DAQD
    int installHeartbeat (void ISR (void))
    {
       void (*hbISR) (void);
@@ -407,6 +407,7 @@
       return connectHeartbeatISR (hbISR);
    #endif
    }
+#endif
 
 
 /*----------------------------------------------------------------------*/
@@ -618,6 +619,8 @@
       return NULL;
    }
 #else
+
+#ifndef _TP_DAQD
    void* installSignal (void* noreturn)
    {
 
@@ -629,48 +632,22 @@
       pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
    #endif
 
-      extern int inSyncMaster;
-      inSyncMaster = 0;
-      volatile IO_MEM_DATA *ioMemData;
-      CDS_HARDWARE cdsPciModules;
-
-      printf("IPC at 0x%x\n", rmBoardAddress(2));
-      ioMemData = (IO_MEM_DATA *)(rmBoardAddress(2) + 0x4000);
-
-      // Find the first ADC card
-      // Master will map ADC cards first, then DAC and finally DIO
-      printf("Total PCI cards from the master: %d\n", ioMemData -> totalCards);
-      for (int ii = 0; ii < ioMemData -> totalCards; ii++) {
-          printf("Model %d = %d\n",ii,ioMemData->model[ii]);
-          switch (ioMemData -> model [ii]) {
-            case GSC_16AI64SSA:
-              printf("Found ADC at %d\n", ioMemData -> ipc[ii]);
-              cdsPciModules.adcType[0] = GSC_16AI64SSA;
-              cdsPciModules.adcConfig[0] = ioMemData->ipc[ii];
-              cdsPciModules.adcCount = 1;
-               break;
-	  }
-      }
-      if (!cdsPciModules.adcCount) {
-                printf("No ADC cards found - exiting\n");
-                _exit(1);
-      }
+      extern volatile unsigned int *ioMemDataCycle;
+      extern volatile unsigned int *ioMemDataGPS;
 
       // Sync up to the master clock
       // Find memory buffer of first ADC to be used in SLAVE application.
-      int ll = cdsPciModules.adcConfig[0];
-      printf("waiting to sync %d\n",ioMemData->iodata[ll][0].cycle);
+      printf("waiting to sync %d\n", *ioMemDataCycle);
       //rdtscl(cpuClock[0]);
       // Spin until cycle 0 detected in first ADC buffer location.
-      do {/* usleep(1);*/ }while(ioMemData->iodata[ll][0].cycle != 0);
+      do {/* usleep(1);*/ } while (*ioMemDataCycle != 0);
       //rdtscl(cpuClock[1]);
       //cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
       //printf("Synched %d\n",cycleTime);
       // Get GPS seconds from MASTER
-      int timeSec = ioMemData->gpsSecond;
+      int timeSec = *ioMemDataGPS;
       int timeCycle = 0;
-      printf("TimeSec=%d;  cycle=%d\n", timeSec, ioMemData->iodata[ll][0].cycle);
-
+      printf("TimeSec=%d;  cycle=%d\n", timeSec, *ioMemDataCycle);
 
       while (1) {
 
@@ -690,16 +667,18 @@
          nanosleep (&wait, NULL);
 	 //printf("nanosleeping...\n"); 
       } while(timeCycle?
-		ioMemData->iodata[ll][0].cycle < timeCycle:
-		ioMemData->iodata[ll][0].cycle > (65536 - 4096));
+		*ioMemDataCycle < timeCycle:
+		*ioMemDataCycle > (65536 - 4096));
 
-      int timeSec = ioMemData->gpsSecond;
+      //int timeSec = ioMemData->gpsSecond;
       //printf("TimeSec=%d; timeCycle=%d,  cycle=%d\n", timeSec, timeCycle, ioMemData->iodata[ll][0].cycle);
 
       }
    }
 #endif
+#endif
 
+#ifndef _TP_DAQD
    static int connectHeartbeatISR (void ISR (void))
    {
       /* for Bajas make sure the realtime clock is intialized.
@@ -781,6 +760,7 @@
       return signalHandlerStatus;
    #endif
    }
+#endif
 
 #endif
 

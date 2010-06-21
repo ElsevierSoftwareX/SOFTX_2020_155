@@ -635,6 +635,7 @@
    #endif
    }
 
+#ifndef _TP_DAQD
 
 /*----------------------------------------------------------------------*/
 /*                                                         		*/
@@ -699,6 +700,8 @@
       return -2;
    #endif
    }
+
+#endif
 
 
 /*----------------------------------------------------------------------*/
@@ -1132,6 +1135,7 @@
 #endif
 
 
+#ifndef _TP_DAQD
 #if (_TESTPOINT_DIRECT != 0) && !defined (_NO_TESTPOINTS)
 /*----------------------------------------------------------------------*/
 /*                                                         		*/
@@ -1211,6 +1215,7 @@
       MUTEX_RELEASE (tpmux);
       return 0;
    }
+#endif
 #endif
 
 
@@ -1312,6 +1317,7 @@
       #endif
       }
    
+#if (_TESTPOINT_DIRECT != 0) || !defined (_NO_KEEP_ALIVE)
       /* initialize keep alive for all test point interfaces
          which are not accessible directly */
       for (node = 0; node < TP_MAX_NODE; node++) {
@@ -1341,6 +1347,7 @@
       #else
          tpNode[node].id = -1;
       #endif
+
          /* call remote procedure */
          status = keepalive_1 (tpNode[node].id, &tpNode[node].id, clnt);
          if ((status != RPC_SUCCESS) || (tpNode[node].id < 0)) {
@@ -1353,6 +1360,7 @@
          }
          clnt_destroy (clnt);
       }
+#endif
    
       /* start keep alive task */
    #if !defined(_NO_KEEP_ALIVE)
@@ -1477,7 +1485,9 @@
       if (tp_init != 0) {
          return;
       }
+   #if (_TESTPOINT_DIRECT != 0) || !defined (_NO_KEEP_ALIVE)
       tpsched = NULL;
+   #endif
    
       tpNum = 0;
    #if (_TESTPOINT_DIRECT != 0)
