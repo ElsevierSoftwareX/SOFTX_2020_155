@@ -246,4 +246,7 @@
 /* Define if building with UDP receiver */
 #undef USE_UDP
 
+/* Define if building with the IOP for timing */
+#undef USE_IOP
+
 #endif

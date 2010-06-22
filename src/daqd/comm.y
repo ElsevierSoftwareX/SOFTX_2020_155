@@ -854,9 +854,9 @@ CommandLine: /* Nothing */
 		  gps_n = ((my_lexer *)lexer) -> cb -> block [bnum].prop16th [bnum16th].gps_n;
 		}
 		// If the producer is not running get the time from the system
-		if (gps == 0)  {
-		  gps = time(0) - 315964819 + 32;
-		}
+		//if (gps == 0)  {
+		  //gps = time(0) - 315964819 + 32;
+		//}
 
 		if (((my_lexer *)lexer) -> strict) {
 		    // send one comm block

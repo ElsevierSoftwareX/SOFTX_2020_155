@@ -48,7 +48,9 @@
 #include <cctype>      // old <ctype.h>
 
 #ifdef USE_SYMMETRICOM
+#ifndef USE_IOP
 #include <bcuser.h>
+#endif
 #endif
 
 
@@ -63,9 +65,11 @@ using namespace std;
 #include "circ.hh"
 #include "daqd.hh"
 #include "sing_list.hh"
+#include "drv/cdsHardware.h"
 #include "gm_rcvr.hh"
 #include <netdb.h>
 #include "net_writer.hh"
+#include "drv/cdsHardware.h"
 
 extern daqd_c daqd;
 extern int shutdown_server ();
@@ -1765,6 +1769,12 @@ producer::frame_writer ()
 
   // Pointers to IPC areas for each DCU
   struct rmIpcStr *shmemDaqIpc[DCU_COUNT];
+
+  // Pointers into the shared memory for the cycle and time (coming from the IOP (e.g. x00))
+  volatile int *ioMemDataCycle;
+  volatile int *ioMemDataGPS;
+  volatile IO_MEM_DATA *ioMemData;
+
 #endif
 
   // Pointer to GDS TP tables
@@ -1905,11 +1915,12 @@ gm_receiver_thread(void *p)
 
 #else
 
+  int fd;
+
   // Open and map all "Myrinet" DCUs
   for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
     if (daqd.dcuSize[0][j] == 0) continue; // skip unconfigured DCU nodes
     if (IS_MYRINET_DCU(j)) {
-      int fd;
       std::string s(daqd.fullDcuName[j]);
       std::transform (s.begin(),s.end(), s.begin(), ToLower()); 
       s = "/rtl_mem_" + s + "_daq";
@@ -1931,6 +1942,43 @@ gm_receiver_thread(void *p)
     }
   }
 
+  // Open the IPC shared memory
+  if ((fd = open("/rtl_mem_ipc", O_RDWR)) < 0) {
+        system_log(1, "Couldn't open /rtl_mem_ipc read/write\n");
+        exit(1);
+  }
+  void *ptr = mmap(0, 64*1024*1024-5000, PROT_READ | PROT_WRITE, MAP_SHARED, fd , 0);
+  if (ptr == MAP_FAILED) {
+     system_log(1, "Couldn't mmap /rtl_mem_ipc; errno=%d\n", errno);
+     exit(1);
+  }
+  system_log(1, "Opened /rtl_mem_ipc\n");
+  ioMemData = (IO_MEM_DATA *)(((char *)ptr) + 0x4000);
+
+  CDS_HARDWARE cdsPciModules;
+
+  // Find the first ADC card
+  // Master will map ADC cards first, then DAC and finally DIO
+  printf("Total PCI cards from the master: %d\n", ioMemData -> totalCards);
+  for (int ii = 0; ii < ioMemData -> totalCards; ii++) {
+    printf("Model %d = %d\n",ii,ioMemData->model[ii]);
+    switch (ioMemData -> model [ii]) {
+      case GSC_16AI64SSA:
+         printf("Found ADC at %d\n", ioMemData -> ipc[ii]);
+         cdsPciModules.adcType[0] = GSC_16AI64SSA;
+         cdsPciModules.adcConfig[0] = ioMemData->ipc[ii];
+         cdsPciModules.adcCount = 1;
+         break;
+      }
+    }
+   if (!cdsPciModules.adcCount) {
+     printf("No ADC cards found - exiting\n");
+     exit(1);
+   }
+
+   int ll = cdsPciModules.adcConfig[0];
+   ioMemDataCycle = &ioMemData->iodata[ll][0].cycle;
+   ioMemDataGPS = &ioMemData->gpsSecond;
 #endif
 }
 
@@ -2143,7 +2191,15 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 		// Starting at this time
 		gps = prev_gps + 1;
 		frac = 0;
+#ifdef USE_IOP
+		if (f > 990000000) break;
+#else
 		if (f > 999493000) break;
+#endif
+
+	        struct timespec wait = {0, 10000000UL }; // 10 milliseconds
+         	nanosleep (&wait, NULL);
+
  	}
 #if 0
 	// Wait until 2 cycles elapse
@@ -2587,8 +2643,9 @@ for(;;) {
 #else
 #ifdef USE_SYMMETRICOM
 	//printf("gps=%d  prev_gps=%d bfrac=%d prev_frac=%d\n", gps, prev_gps, frac, prev_frac);
-       for (;;) {
-         struct timespec tspec = {0,1000000000/16/100}; // seconds, nanoseconds
+       const int polls_per_sec = 1600;
+       for (int ntries = 0;; ntries++) {
+         struct timespec tspec = {0,1000000000/polls_per_sec}; // seconds, nanoseconds
          nanosleep (&tspec, NULL);
 
 	 gps = daqd.symm_gps(&frac);
@@ -2608,6 +2665,16 @@ for(;;) {
 	 } else if (frac >= prev_frac + 62500000) {
 		frac = prev_frac + 62500000;
 		break;
+	 }
+
+	 if (ntries >= polls_per_sec) {
+#ifdef USE_IOP
+		fprintf(stderr, "IOP timeout\n");
+#else
+		fprintf(stderr, "Symmetricom GPS timeout\n");
+#endif
+
+	 	exit(1);
 	 }
        }
 	//printf("gps=%d prev_gps=%d ifrac=%d prev_frac=%d\n", gps,  prev_gps, frac, prev_frac);
