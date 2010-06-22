@@ -1,18 +1,7 @@
+awgtpman needs to timeout on the IOP cycle loss
+
+
 Verify that we run OK without multithreaded RPC
 Just in case; multi-threaded Linux RPC library:
 http://sourceforge.net/projects/mtrpc/
 
-
-gdsheartbeat.c needs to have nanosleep() replaced with X00
-cycle reading code in installSignal()
-
-
-build daqd with testpoint.o, do not link with libtestpoint
-
-
-Need to find a good way to set parameters (archive, site, ifo) in awgtpman.c
-
-
-
-testpoint_server.c need to pick up next available RPC number 
-(rpcRegisterService) instead of relying on testpoint.par setting. Same for awg.
