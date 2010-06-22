@@ -38,13 +38,13 @@ VMICRFMLIBFLAGS=@VMICRFMLIBFLAGS@
 EPICSFLAGS=@EPICSFLAGS@
 EPICSLIBFLAGS=@EPICSLIBFLAGS@
 
-GDS_ARCHIVE=@GDS_ARCHIVE@
-GDS_INCLUDES=-I$(GDS_ARCHIVE)/include/dtt 
+GDS_ARCHIVE=@srcdir@/../gds
+GDS_INCLUDES=-I$(GDS_ARCHIVE)
 #GDS_INCLUDES=-I$(GDS_ARCHIVE)/src/util -I$(GDS_ARCHIVE)/src/err -I$(GDS_ARCHIVE)/src/sched -I$(GDS_ARCHIVE)/src/gpstime -I$(GDS_ARCHIVE)/src/drv -I$(GDS_ARCHIVE)/src/daq -I$(GDS_ARCHIVE)/src/rmem 
 GDS_DEFINES=-DLIGO_GDS -D_TP_DAQD -DARCHIVE=\"$(GDS_ARCHIVE)\" $(GDS_INCLUDES)
 CDS_GDSFLAGS=-DGDS_TESTPOINT_SUPPORT
-CDS_GDSLIBFLAGS=-L$(GDS_ARCHIVE)/lib -L$(GDS_ARCHIVE)/lib64 -ltestpoint
-CDS_GDSOBJECTS=gds.o
+CDS_GDSLIBFLAGS=-L$(GDS_ARCHIVE)/lib -L$(GDS_ARCHIVE)/lib64 
+CDS_GDSOBJECTS=gds.o testpoint.o gdsstring.o gdserr.o rtestpoint_clnt.o rtestpoint_xdr.o gdsheartbeat.o rpcinc.o gdssched.o tconv.o gdstask.o gdsxdr_util.o sockutil.o
 GDSFLAGS=@GDSFLAGS@
 GDSLIBFLAGS=@GDSLIBFLAGS@
 GDSOBJECTS=@GDSOBJECTS@
@@ -124,6 +124,48 @@ realclean: clean
 
 gds.o: gds.cc
 	$(CXX) $(CCFLAGS) $(GDS_DEFINES) $<
+
+
+
+testpoint.o:	${GDS_ARCHIVE}/testpoint.c
+	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 -D_NO_KEEP_ALIVE $<
+
+gdsstring.o:    ${GDS_ARCHIVE}/gdsstring.c
+	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 $<
+
+gdserr.o:    ${GDS_ARCHIVE}/gdserr.c
+	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 $<
+
+rtestpoint_clnt.o: ${GDS_ARCHIVE}/rtestpoint_clnt.c
+	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 $<
+
+rtestpoint_xdr.o: ${GDS_ARCHIVE}/rtestpoint_xdr.c
+	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 $<
+
+rmapi.o:	${GDS_ARCHIVE}/rmapi.c
+	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 $<
+
+gdsheartbeat.o:	${GDS_ARCHIVE}/gdsheartbeat.c
+	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 $<
+
+rpcinc.o:	${GDS_ARCHIVE}/rpcinc.c
+	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 $<
+
+gdssched.o:	${GDS_ARCHIVE}/gdssched.c
+	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 $<
+
+tconv.o:	${GDS_ARCHIVE}/tconv.c
+	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 $<
+
+gdstask.o:	${GDS_ARCHIVE}/gdstask.c
+	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 $<
+
+gdsxdr_util.o:	${GDS_ARCHIVE}/gdsxdr_util.c
+	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 $<
+
+sockutil.o:	${GDS_ARCHIVE}/sockutil.c
+	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 $<
+
 
 # -DNDEBUG is killing Channel Access server code (Epics R3.14.4)
 # Need to build without -DNDEBUG

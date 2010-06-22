@@ -97,7 +97,9 @@ using namespace std;
 #include <string.h>
 
 #ifdef USE_SYMMETRICOM
+#ifndef USE_IOP
 #include <bcuser.h>
+#endif
 #endif
 
 int printf(const char * s,...)
@@ -2855,6 +2857,8 @@ namespace FrameCPP
 
 
 #ifdef USE_SYMMETRICOM
+
+#ifndef USE_IOP
   BC_PCI_HANDLE hBC_PCI;
 
 // Get current GPS time from the symmetricom IRIG-B card
@@ -2891,6 +2895,21 @@ daqd_c::symm_ok() {
 	printf("Symmetricom status %d\n", stat);
 	return stat < 5;
 }
+#else // ifdef USE_IOP
+
+// Get current GPS time from the IOP
+unsigned long
+daqd_c::symm_gps(unsigned long *frac, int *stt) {
+	 if (stt) *stt = 0;
+	 extern volatile unsigned int *ioMemDataCycle;
+	 extern volatile unsigned int *ioMemDataGPS;
+	 unsigned long l = *ioMemDataCycle;
+	 if (frac) *frac = l * (1000000000 / (64*1024));
+	 //printf("%d %d %d\n", *ioMemDataGPS, *frac, l );
+	 return  *ioMemDataGPS;
+}
+bool daqd_c::symm_ok() { return 1; }
+#endif
 #endif
 
 main (int argc, char *argv [])
@@ -2902,7 +2921,7 @@ main (int argc, char *argv [])
   char startup_fname [filesys_c::filename_max];
 
 #ifdef USE_SYMMETRICOM
-
+#ifndef USE_IOP
   // Start the device
   hBC_PCI = bcStartPci();
   if (!hBC_PCI){
@@ -2931,6 +2950,7 @@ main (int argc, char *argv [])
      printf ("Error Setting Year Auto Incr Flag on the Symmetricom card.\n");
      exit(1);
   }
+#endif
 #endif
 
 #ifdef USE_FRAMECPP
