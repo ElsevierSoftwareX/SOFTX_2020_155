@@ -640,7 +640,16 @@
       printf("waiting to sync %d\n", *ioMemDataCycle);
       //rdtscl(cpuClock[0]);
       // Spin until cycle 0 detected in first ADC buffer location.
-      do {/* usleep(1);*/ } while (*ioMemDataCycle != 0);
+      int spin_cnt = 0;
+      do {
+	spin_cnt++;
+#if 0
+	if (spin_cnt >= 1000000000) {
+	  fprintf(stderr, "Timed out waiting for the IOP cycle\n");
+	  _exit(1);
+	}
+#endif
+      } while (*ioMemDataCycle != 0);
       //rdtscl(cpuClock[1]);
       //cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
       //printf("Synched %d\n",cycleTime);
@@ -662,11 +671,18 @@
 
 	timeCycle += 4096; // Master cycle is at 65536 Hz
 	timeCycle %= 65536;
-      do {
-         struct timespec wait = {0, 10000000UL }; // 10 milliseconds
-         nanosleep (&wait, NULL);
-	 //printf("nanosleeping...\n"); 
-      } while(timeCycle?
+	
+	int sleep_cnt = 0;
+        do {
+           struct timespec wait = {0, 10000000UL }; // 10 milliseconds
+           nanosleep (&wait, NULL);
+	   //printf("nanosleeping...\n"); 
+	   sleep_cnt++;
+	   if (sleep_cnt >= 100) {
+		fprintf(stderr, "IOP cycle timeout\n");
+		_exit(1);
+	   }
+        } while(timeCycle?
 		*ioMemDataCycle < timeCycle:
 		*ioMemDataCycle > (65536 - 4096));
 
