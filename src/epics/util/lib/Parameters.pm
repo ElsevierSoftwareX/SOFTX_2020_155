@@ -63,6 +63,9 @@ sub printHeaderStruct {
 			} elsif ($spp[0] eq "dcuid") {
 				print "Dcu Id is set to $spp[1]\n";
 				$::dcuId = $spp[1];
+			} elsif ($spp[0] eq "host") {
+				print "Target host name is set to $spp[1]\n";
+				$::targetHost = $spp[1];
 			} elsif ($spp[0] eq "gds_node_id") {
 				print "GDS node id is set to $spp[1]\n";
 				$::gdsNodeId = $spp[1];

@@ -32,6 +32,7 @@ $site = "M1"; # Default value for the site name
 $location = "mit"; # Default value for the location name
 $rate = "60"; # In microseconds (default setting)
 $dcuId = 10; # Default dcu Id
+$targetHost = "localhost"; # Default target host name
 $specificCpu = -1; # Defaults is to run the FE on the first available CPU
 $adcMaster = -1;
 $adcSlave = -1;
