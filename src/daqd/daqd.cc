@@ -586,6 +586,10 @@ chanConfigCallback(char *channel_name, struct CHAN_PARAM *params, void *user)
   strncpy (ccd -> signal_units, params->units, channel_t::channel_name_max_len - 1);
   ccd -> signal_units [channel_t::channel_name_max_len - 1] = 0;
 
+  // set DCU rate
+  extern int default_dcu_rate;
+  daqd.dcuRate[ccd -> ifoid][ccd -> dcu_id] = default_dcu_rate;
+  //printf("dcu %d rate %d\n", ccd -> dcu_id, default_dcu_rate);
   return 1;
 }
 

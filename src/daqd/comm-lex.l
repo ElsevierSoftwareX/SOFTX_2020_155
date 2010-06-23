@@ -50,7 +50,6 @@ yywrap ()
 "periodic_main_filesys_scan" { return PERIODIC_MAIN_FILESYS_SCAN; }
 "periodic_trend_filesys_scan" { return PERIODIC_TREND_FILESYS_SCAN; }
 "avoid_reconnect" { return AVOID_RECONNECT; }
-"dcu_rate" { return DCU_RATE; }
 "tp_allow" { return TP_ALLOW; }
 "controller_dcu" { return CONTROLLER_DCU; }
 "do_directio" { return DO_DIRECTIO; }
