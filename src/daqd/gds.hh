@@ -30,23 +30,17 @@ class gds_c {
     ~locker () {dp -> unlock ();}
   };
 
-  // GDS server name, rpc program number and version
-  char *gds_server;
-  char *gds_server1;
-  char *gds_server2;
-  char *gds_server3;
-  char *gds_server4;
-  char *gds_server5;
-  char *gds_server6;
-  char *gds_server7;
-  char *gds_server8;
-  char *gds_server9;
-  char *gds_server10;
-  int gds_server_rpc_program;
-  int gds_server_rpc_version;
-  int n_gds_servers; // How many servers we have got
 
-  static const int max_gds_servers = 11;
+public:
+  static const int max_gds_servers = 256;
+
+  // GDS server host names
+  char gds_servers[max_gds_servers][32];
+
+  // The names of the control systems associated with the gds_servers and gds_nodes
+  char gds_server_systems[max_gds_servers][32];
+  unsigned int gds_nodes[max_gds_servers];
+  int n_gds_servers; // How many servers we have got
 
   // DCU id for each GDS server
   int dcuid[max_gds_servers];
@@ -66,11 +60,7 @@ public:
   void update_tp_data(unsigned int *d, char *dest);
 
  public:
-  gds_c () : signal_p (0), gds_server (0), gds_server1 (0), gds_server2 (0),
-	gds_server3 (0), gds_server4 (0), gds_server5 (0),
-	gds_server6 (0), gds_server7 (0), gds_server8 (0),
-	gds_server9 (0), gds_server10 (0),
-	gds_server_rpc_program (0), gds_server_rpc_version (0), n_gds_servers(0) {
+  gds_c () : signal_p (0), n_gds_servers(0) {
     pthread_mutex_init (&bm, NULL);
     pthread_mutex_init (&signal_mtx, NULL);
     pthread_cond_init (&signal_cv, NULL);
@@ -84,7 +74,12 @@ public:
     //}
 //#endif
 #endif
-    for (int i = 0; i < max_gds_servers; i++) dcuid[i] = 0;
+    for (int i = 0; i < max_gds_servers; i++) {
+	dcuid[i] = 0;
+	gds_servers[i][0] = 0;
+	gds_server_systems[i][0] = 0;
+	gds_nodes[i] = 0;
+    }
   }
   ~gds_c () {
     pthread_mutex_destroy (&bm);
@@ -119,91 +114,7 @@ public:
   int clear_tps (long_channel_t *ac[], int nptr);
 
   // Set GDS server RPC connection attributes
-  void
-  set_gds_server (int dcu, char *server,
-		  int dcu1, char *server1,
-		  int dcu2, char *server2,
-		  int dcu3, char *server3,
-		  int dcu4, char *server4,
-		  int dcu5, char *server5,
-		  int dcu6, char *server6,
-		  int dcu7, char *server7,
-		  int dcu8, char *server8,
-		  int dcu9, char *server9,
-		  int dcu10, char *server10,
-	          int program, int version) {
-    if (server) {
-      free (this -> gds_server);
-      this -> gds_server = server;
-      this -> dcuid[0] = dcu;
-      this -> n_gds_servers = 1;
-    }
-    if (server1) {
-      free (this -> gds_server1);
-      this -> gds_server1 = server1;
-      this -> dcuid[1] = dcu1;
-      this -> n_gds_servers = 2;
-    }
-    if (server2) {
-      free (this -> gds_server2);
-      this -> gds_server2 = server2;
-      this -> dcuid[2] = dcu2;
-      this -> n_gds_servers = 3;
-    }
-    if (server3) {
-      free (this -> gds_server3);
-      this -> gds_server3 = server3;
-      this -> dcuid[3] = dcu3;
-      this -> n_gds_servers = 4;
-    }
-    if (server4) {
-      free (this -> gds_server4);
-      this -> gds_server4 = server4;
-      this -> dcuid[4] = dcu4;
-      this -> n_gds_servers = 5;
-    }
-    if (server5) {
-      free (this -> gds_server5);
-      this -> gds_server5 = server5;
-      this -> dcuid[5] = dcu5;
-      this -> n_gds_servers = 6;
-    }
-    if (server6) {
-      free (this -> gds_server6);
-      this -> gds_server6 = server6;
-      this -> dcuid[6] = dcu6;
-      this -> n_gds_servers = 7;
-    }
-    if (server7) {
-      free (this -> gds_server7);
-      this -> gds_server7 = server7;
-      this -> dcuid[7] = dcu7;
-      this -> n_gds_servers = 8;
-    }
-    if (server8) {
-      free (this -> gds_server8);
-      this -> gds_server8 = server8;
-      this -> dcuid[8] = dcu8;
-      this -> n_gds_servers = 9;
-    }
-    if (server9) {
-      free (this -> gds_server9);
-      this -> gds_server9 = server9;
-      this -> dcuid[9] = dcu9;
-      this -> n_gds_servers = 10;
-    }
-    if (server10) {
-      free (this -> gds_server10);
-      this -> gds_server10 = server10;
-      this -> dcuid[10] = dcu10;
-      this -> n_gds_servers = 11;
-    }
-
-    if (program >= 0)
-      this -> gds_server_rpc_program = program;
-    if (version >= 0)
-      this -> gds_server_rpc_version = version;
-  }
+  void set_gds_server (char *cfg_file_name) ;
 
   // Initialize GDS testpoint library
   int gds_initialize ();
