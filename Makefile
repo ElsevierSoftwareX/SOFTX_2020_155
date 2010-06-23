@@ -134,8 +134,8 @@ uninstall-daq-% :: src/epics/simLink/%.mdl
 	echo /opt/rtcds/$${site}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
 	/bin/rm -f  /opt/rtcds/$${site}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par;\
 	echo Removing DAQ configuration file;\
-	echo /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${ifo}$${upper_system}.ini;\
-	/bin/rm -f  /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${ifo}$${upper_system}.ini
+	echo /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini;\
+	/bin/rm -f  /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini
 
 install-daq-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-daq-,,$@); \
@@ -291,9 +291,9 @@ rcv:
 	/bin/mkdir -p build/rcv
 	(cd build/rcv; ../../src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-gds=/apps/Linux/gds' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' && make)
 
-# build standalone frame builder
+# build standalone frame builder with IOP timing
 stand:
 	(cd src/daqd; test -e configure || autoconf)
 	/bin/rm -rf build/stand
 	/bin/mkdir -p build/stand
-	(cdir=`pwd`; cd build/stand; $$cdir/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-gds=/apps/Linux/gds' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' && make)
+	(cdir=`pwd`; cd build/stand; $$cdir/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' --enable-symmetricom --enable-iop && make)
