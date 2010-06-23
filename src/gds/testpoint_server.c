@@ -1481,12 +1481,12 @@
 #endif
          inet_ntoa_b (addr, tplist[node].hostname);
       
-         /* get rpc parameters from parameter file */
          prognum = RPC_PROGNUM_TESTPOINT;
          progver = RPC_PROGVER_TESTPOINT;
 
 #if 0
 	 // Do not load from the config file
+         /* get rpc parameters from parameter file */
          loadNumParam (PRM_FILE, section, PRM_ENTRY2, &prognum);
          loadNumParam (PRM_FILE, section, PRM_ENTRY3, &progver);
 #endif
