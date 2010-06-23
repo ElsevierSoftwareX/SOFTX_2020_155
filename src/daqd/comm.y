@@ -96,7 +96,6 @@ static int prompt_lineno;
 %token <y_void>  PERIODIC_MAIN_FILESYS_SCAN
 %token <y_void>  PERIODIC_TREND_FILESYS_SCAN
 %token <y_void>  AVOID_RECONNECT
-%token <y_void>  DCU_RATE
 %token <y_void>  TP_ALLOW
 %token <y_void>  CONTROLLER_DCU
 %token <y_void>  DO_DIRECTIO
@@ -301,13 +300,6 @@ CommandLine: /* Nothing */
 	| SET AVOID_RECONNECT {
 #ifdef _ADVANCED_LIGO
 	  	daqd.avoid_reconnect = 1;
-#endif
-	}
-	| SET DCU_RATE INTNUM '=' INTNUM {
-#ifdef _ADVANCED_LIGO
-	   if ($3 > 0 && $3 < DCU_COUNT && daqd_c::power_of ($5, 2)) {
-		daqd.dcuRate[0][$3] = $5;
-	   }
 #endif
 	}
 	| SET TP_ALLOW '=' TextExpression {
