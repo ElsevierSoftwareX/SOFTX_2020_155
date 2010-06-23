@@ -131,8 +131,8 @@ uninstall-daq-% :: src/epics/simLink/%.mdl
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	echo Removing GDS node $${gds_file_node} configuration file ;\
-	echo /opt/rtcds/$${site}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
-	/bin/rm -f  /opt/rtcds/$${site}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par;\
+	echo /opt/rtcds/$${site}/target/gds/param/tpchn_$${system}.par ;\
+	/bin/rm -f  /opt/rtcds/$${site}/target/gds/param/tpchn_$${system}.par;\
 	echo Removing DAQ configuration file;\
 	echo /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini;\
 	/bin/rm -f  /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini
@@ -157,15 +157,15 @@ install-daq-% :: src/epics/simLink/%.mdl
 	datarate_mult=`expr $${datarate} / 16384 `; \
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	echo Installing GDS node $${gds_file_node} configuration file ;\
-	echo /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
+	echo /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par ;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/ ;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/ ;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive ;\
-	if test -e /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par; then /bin/mv -f /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${site_letter}$${gds_file_node}_$${cur_date}.par || exit 1; fi;\
-	/bin/cp -p build/$${system}epics/$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
+	if test -e /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par; then /bin/mv -f /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${site_letter}$${system}.par || exit 1; fi;\
+	/bin/cp -p build/$${system}epics/$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par ;\
 	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/param;\
-	/bin/cp -p build/$${system}epics/$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/$${system}/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
-	/bin/cp -p build/$${system}epics/$${system}.par /cvs/cds/$${site}/target/gds/param/tpchn_$${site_letter}$${gds_file_node}.par ;\
+	/bin/cp -p build/$${system}epics/$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/$${system}/param/tpchn_$${system}.par ;\
+	/bin/cp -p build/$${system}epics/$${system}.par /cvs/cds/$${site}/target/gds/param/tpchn_$${system}.par ;\
 	if test $${datarate_mult} -gt 1;\
 	then \
 	  datarate_mult_flag=-$${datarate_mult}; \
@@ -182,8 +182,8 @@ install-daq-% :: src/epics/simLink/%.mdl
 	if test -e /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini;\
 	then \
 	  /bin/mv -f /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive/$${upper_system}_$${cur_date}.ini || exit 2 ;\
-	  echo src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive/$${upper_system}_$${cur_date}.ini -old=/opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${site_letter}$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par -daq=build/$${system}epics/$${system}.ini ;\
-	  src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive/$${upper_system}_$${cur_date}.ini -old=/opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${site_letter}$${gds_file_node}_$${cur_date}.par -new=build/$${system}epics/$${system}.par -daq=build/$${system}epics/$${system}.ini > /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini ; \
+	  echo src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive/$${upper_system}_$${cur_date}.ini -old=/opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${system}.par -new=build/$${system}epics/$${system}.par -daq=build/$${system}epics/$${system}.ini ;\
+	  src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive/$${upper_system}_$${cur_date}.ini -old=/opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${system}_$${cur_date}.par -new=build/$${system}epics/$${system}.par -daq=build/$${system}epics/$${system}.ini > /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini ; \
 	else \
 	  /bin/cp -p build/$${system}epics/$${system}.ini /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini ;\
 	fi;\
