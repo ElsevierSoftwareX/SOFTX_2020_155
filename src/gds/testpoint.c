@@ -217,6 +217,7 @@
       }
       /* check validity */
       if (!tpNode[node].valid) {
+	 printf("tp node %d invalid\n", node);
          return NULL;
       }
    
@@ -224,6 +225,7 @@
       clnt = clnt_create (tpNode[node].hostname, tpNode[node].prognum, 
                          tpNode[node].progver, _NETID);
       if (clnt == NULL) {
+	 printf("couldn't create test point handle");
          gdsError (GDS_ERR_MEM, 
                   "couldn't create test point handle");
       }
@@ -1311,8 +1313,14 @@
             tpNum++;
          }
          else {
+
+#ifdef _TP_DAQD
+		// Do not fail this one if we are in the frame builder
+		tpNum++;
+#else
             tpNode[node].valid = 0;
 	    /* printf("failed to find testpoint manager on node %d\n", node); */
+#endif
          }
       #endif
       }
