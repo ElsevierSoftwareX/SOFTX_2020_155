@@ -5,7 +5,7 @@
  * DAQ system inter-processor communication definitions.
  */
 
-#define DCU_COUNT 32
+#define DCU_COUNT 128
 #define DAQ_BASE_ADDRESS	0x2000000
 #define DAQ_DATA_BASE_ADD	(DAQ_BASE_ADDRESS + 0x100000)
 
@@ -130,6 +130,8 @@ struct rmIpcStr {       /* IPC area structure                   */
 #define IS_MYRINET_DCU(dcuid) (daqd.cit_40m? ((dcuid) == 11 || (dcuid) == DCU_ID_HEPI_1)  : (((dcuid) >= 5 && (dcuid) <= 12) || ((dcuid) >= 17 && (dcuid) <= (DCU_COUNT-1))) )
 #endif
 
+#ifdef COMPAT_INITIAL_LIGO
+
 static const char * const dcuName[DCU_COUNT] = {"DAQSC",
 					 "FB0", "FB1", "FB2",
 					 "EDCU",
@@ -173,6 +175,7 @@ static unsigned int const dcuNet40m[DCU_COUNT] = {2,2,2,2,0,
 					2,2,
 					2,2,1,
 			/* FAST ADCU */	2,2,2,2,2};
+#endif
 
 #define IPC_OFFSET_DCU(dcuid)   ((dcuid) * IPC_BLOCK_SIZE + DAQ_BASE_ADDRESS)
 #define DATA_OFFSET_DCU(dcuid)  (DAQ_DATA_BASE_ADD + DAQ_DCU_SIZE*((dcuid) - 5))
