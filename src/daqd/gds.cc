@@ -241,71 +241,20 @@ gds_c::clear_names (char *alias[], int nptr)
 
 int
 gds_c::gds_initialize () {
-  int nodes = 1;
-  char *gds_servers[10];
 
-  /* set test point manager address for node 0 */
-  if (tpSetHostAddress (0, gds_server, gds_server_rpc_program,
-                                       gds_server_rpc_version) != 0) {
-     printf ("unable to initialize test point interface\n");
-     return 1;
+  for (int i = 0; i < n_gds_servers; i++) {
+     if (tpSetHostAddress (0, gds_servers[i], 0, 0) != 0) {
+       printf ("unable to initialize test point interface\n");
+       return 1;
+    }
   }
-  gds_servers[0] = gds_server;
 
-  /* set test point manager address for node 1; LHO only */
-  if (gds_server1) {
-    if (strlen(gds_server1) > 0) {
-      nodes |= 2;
-      if (tpSetHostAddress (1, gds_server1, gds_server_rpc_program,
-                                       gds_server_rpc_version) != 0) {
-         printf ("unable to initialize test point interface 1\n");
-         return 1;
-      }
-    }
-    gds_servers[1] = gds_server1;
-  }
-  if (gds_server2) {
-    nodes |= 4;
-    if (tpSetHostAddress (2, gds_server2, gds_server_rpc_program,
-                                       gds_server_rpc_version) != 0) {
-       printf ("unable to initialize test point interface 2\n");
-       return 1;
-    }
-    gds_servers[2] = gds_server2;
-  }
-  if (gds_server3) {
-    nodes |= 8;
-    if (tpSetHostAddress (3, gds_server3, gds_server_rpc_program,
-                                       gds_server_rpc_version) != 0) {
-       printf ("unable to initialize test point interface 3\n");
-       return 1;
-    }
-    gds_servers[3] = gds_server3;
-  }
-  if (gds_server4) {
-    nodes |= 16;
-    if (tpSetHostAddress (4, gds_server4, gds_server_rpc_program,
-                                       gds_server_rpc_version) != 0) {
-       printf ("unable to initialize test point interface 4\n");
-       return 1;
-    }
-    gds_servers[4] = gds_server4;
-  }
-  if (gds_server5) {
-    nodes |= 32;
-    if (tpSetHostAddress (5, gds_server5, gds_server_rpc_program,
-                                       gds_server_rpc_version) != 0) {
-       printf ("unable to initialize test point interface 5\n");
-       return 1;
-    }
-    gds_servers[5] = gds_server5;
-  }
 //  testpoint_cleanup ();
   testpoint_client ();
 
+#if 0
   // Check that we connected to all testpoint managers
   for (int i = 0; i < 7; i++) {
-	if (nodes & (1 << i)) { // Node configured
 	  testpoint_t tp[1] = {-1};
 	  int ret = tpRequest(i, tp, 1, -1, 0, 0);
 	  if (ret < 0) {
@@ -316,10 +265,58 @@ gds_c::gds_initialize () {
 			return 1;
 		else printf("Error ignored because \"allow_tpman_connect_failure\" is set in daqdrc file\n");
 	  }
-	}
   }
+#endif
   return 0;
 }
+
+//Callback function
+int testpoint_par_callback(char *channel_name, struct CHAN_PARAM *params, void *user) {
+	gds_c *gds = (gds_c *)user;
+	//printf ("%s hostname=%s system=%s dcuid=%d\n", channel_name, params->units, params->system, params->dcuid);
+	// Get the GDS node id from the "hostname" ([G-node0])
+	int node;
+	int res = sscanf(channel_name, "%*[^0123456789]%d", &node);
+	if (res == 0) {
+		fprintf(stderr, "Failed to load GDS node id number in \"%s\" from testpoint.par\n", channel_name);
+		exit(1);
+	}
+	if (node < 0 || node > gds_c::max_gds_servers) {
+		fprintf(stderr, "Too many GDS servers configured in testpoint.par\n");
+		exit(1);
+	}
+        strcpy(gds -> gds_servers[gds -> n_gds_servers], params->units);
+
+	// Find the DCU ID, search through daqd.fullDcuName[] configured from the INI files
+	int i;
+	for (i = 0; i < DCU_COUNT; i++) {
+		if (!strcasecmp(daqd.fullDcuName[i], params->system)) break;
+	}
+	if (i == DCU_COUNT) {
+		fprintf(stderr, "Unable to find GDS node %d system %s in INI files\n", node, params->system);
+		exit(1);
+	}
+
+        gds -> dcuid[gds -> n_gds_servers] = i;
+        gds -> gds_nodes[gds -> n_gds_servers] = node;
+	printf("GDS server NODE=%d HOST=%s DCUID=%d\n", node, gds -> gds_servers[gds -> n_gds_servers], gds -> dcuid[gds -> n_gds_servers]);
+        gds -> n_gds_servers++;
+	return 1;
+};
+
+// Set GDS server RPC connection attributes
+void
+gds_c::set_gds_server (char *cfg_file_name) {
+    //printf("Open %s, read and get TP manager names and dcu ids\n", cfg_file_name);
+    unsigned long crc;
+
+    if (0 == parseConfigFile(cfg_file_name, &crc, testpoint_par_callback, 2, 0, (void *)this)) {
+        printf("Failed to parse config file %s\n", cfg_file_name);
+        exit(1);
+    }
+
+}
+
 
 int
 gds_c::clear_tps (long_channel_t *ac[], int nptr)
@@ -344,40 +341,6 @@ gds_c::clear_tps (long_channel_t *ac[], int nptr)
     }
     if (ntps) rtn = tpClear(s, tps, ntps);
   }
-#if 0
-  if (gds_server) {
-    /* Clear all 4k IFO test points */
-    for (int i = 0; i < nptr; i++) {
-#ifdef _ADVANCED_LIGO
-      if (ac[i]->tp_node == 0) 
-#else
-      if (ac[i]->ifoid == 0) 
-#endif
-      {
-  	system_log(1,"About to clear `%s' %d on node 0", ac[i]->name, ac[i]->chNum);
-	tps[ntps++] = ac[i]->chNum;
-      }
-    }
-    if (ntps) rtn = tpClear(0, tps, ntps);
-  }
-  
-  if (gds_server1) {
-    ntps = 0;
-    /* Request all 2k IFO test points */
-    for (int i = 0; i < nptr; i++) {
-#ifdef _ADVANCED_LIGO
-      if (ac[i]->tp_node == 1) 
-#else
-      if (ac[i]->ifoid == 1)
-#endif
-      {
-  	system_log(1,"About to clear `%s' %d on node 1", ac[i]->name, ac[i]->chNum);
-	tps[ntps++] = ac[i]->chNum;
-      }
-    }
-    if (ntps) rtn |= tpClear(1, tps, ntps);
-  }
-#endif
   return rtn;
 }
 
@@ -427,52 +390,6 @@ gds_c::req_tps (long_channel_t *ac[], channel_t *gds[], int nptr)
       }
     }
   }
-#if 0
-  if (gds_server) {
-    /* Request all 4k IFO test points */
-    for (int i = 0; i < nptr; i++) {
-#ifdef _ADVANCED_LIGO
-      if (ac[i]->tp_node == 0) 
-#else
-      if (ac[i]->ifoid == 0) 
-#endif
-      {
-  	system_log(1,"About to request `%s' %d on node 0", ac[i]->name, ac[i]->chNum);
-	tps[ntps++] = ac[i]->chNum;
-      }
-    }
-    if (ntps) {
-      int rtn = tpRequest(0, tps, ntps, -1, 0, 0);
-      if (rtn) {
-	system_log(1, "tpRequest(0) failed; returned %d\n", rtn);
-      	return rtn;
-      }
-    }
-  }
-  
-  if (gds_server1) {
-    ntps = 0;
-    /* Request all 2k IFO test points */
-    for (int i = 0; i < nptr; i++) {
-#ifdef _ADVANCED_LIGO
-      if (ac[i]->tp_node == 1) 
-#else
-      if (ac[i]->ifoid == 1)
-#endif
-      {
-  	system_log(1,"About to request `%s' %d on node 1", ac[i]->name, ac[i]->chNum);
-	tps[ntps++] = ac[i]->chNum;
-      }
-    }
-    if (ntps) {
-      int rtn = tpRequest(1, tps, ntps, -1, 0, 0);
-      if (rtn) {
-      	system_log(1, "tpRequest(1) failed; returned %d\n", rtn);
-	return rtn;
-      }
-    }
-  }
-#endif
 
 #if defined(_ADVANCED_LIGO)
   //int gds_cnt = 0;
