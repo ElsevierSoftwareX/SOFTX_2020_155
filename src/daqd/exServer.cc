@@ -108,9 +108,10 @@ exServer::exServer ( const char * const pvPrefix,
     for (i = 0; i < DCU_COUNT; i++) {
       for (j = 0; j < 3; j++) {
 #if defined( _ADVANCED_LIGO)
+	if (epicsDcuName[i][0] == 0) continue;
         sprintf(pvAlias, pDcuNameFmtStr[j], pvPrefix1, epicsDcuName[i]);
 #else
-        sprintf(pvAlias, pDcuNameFmtStr[j], pvPrefix1, dcuName[i]);
+        sprintf(pvAlias, pDcuNameFmtStr[j], pvPrefix1, fullDcuName[i]);
 #endif
         pvInfo *pPVI = new pvInfo (1, pvAlias, 0xffffffff, 0, excasIoSync, 1, epicsDcuStatus[j][0] + i);
         pPV = pPVI->createPV (*this, true, scanOnIn);
@@ -120,6 +121,7 @@ exServer::exServer ( const char * const pvPrefix,
 	    continue;
         }
 	this->installAliasName(*pPVI, pvAlias);
+	printf("Creating %s\n", pvAlias);
       }
     }
     
@@ -127,9 +129,10 @@ exServer::exServer ( const char * const pvPrefix,
       for (i = 0; i < DCU_COUNT; i++) {
 	for (j = 0; j < 3; j++) {
 #if defined( _ADVANCED_LIGO)
+	  if (epicsDcuName[i][0] == 0) continue;
 	  sprintf(pvAlias, pDcuNameFmtStr[j], pvPrefix2, epicsDcuName[i]);
 #else
-	  sprintf(pvAlias, pDcuNameFmtStr[j], pvPrefix2, dcuName[i]);
+	  sprintf(pvAlias, pDcuNameFmtStr[j], pvPrefix2, fullDcuName[i]);
 #endif
 	  pvInfo *pPVI = new pvInfo (1, pvAlias, 0xffffffff, 0, excasIoSync, 1, epicsDcuStatus[j][1] + i);
 	  pPV = pPVI->createPV (*this, true, scanOnIn);

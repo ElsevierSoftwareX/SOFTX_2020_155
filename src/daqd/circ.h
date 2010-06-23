@@ -57,7 +57,7 @@ typedef struct {
     unsigned int crc;	// Data block CRC sum
     unsigned int status;	// DCU status 
     unsigned int cycle;
-  } dcu_data[/*DCU_COUNT*/ 32 * 2]; // To support the H2
+  } dcu_data[/*DCU_COUNT*/ 128 * 2]; // To support the H2
 #endif
 } circ_buffer_block_prop_t;
 
