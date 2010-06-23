@@ -309,11 +309,11 @@ class daqd_c {
 	  // Default dcu rate settings
   	  dcuRate[i][j] = (IS_2K_DCU(j) || j == DCU_ID_EX_2K || j == DCU_ID_TP_2K )? 2048:16384;
 
-	  strcpy(dcuName[j], ::dcuName[j]);
-	  strcpy(fullDcuName[j], ::dcuName[j]);
+	  dcuName[j][0] = 0;
+	  fullDcuName[j][0] = 0;
 #ifdef EPICS_EDCU
           extern char epicsDcuName[DCU_COUNT][32];
-          strcpy(epicsDcuName[j], ::dcuName[j]);
+          epicsDcuName[j][0] = 0;
 #endif
 #endif
 	}

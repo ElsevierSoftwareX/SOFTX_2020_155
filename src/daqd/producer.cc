@@ -2337,7 +2337,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 	  if (/* (lastStatus == DAQ_STATE_RUN) && */ (dcuStatus[ifo][j] != DAQ_STATE_RUN)) {
 #ifndef NDEBUG
 	    	  if (_debug > 0)
-	    	    printf("Lost %s (ifo %d; dcu %d); status %d %d\n", dcuName[j], ifo, j, dcuCycleStatus[ifo][j], dcuStatCycle[ifo][j]);
+	    	    printf("Lost %s (ifo %d; dcu %d); status %d %d\n", daqd.dcuName[j], ifo, j, dcuCycleStatus[ifo][j], dcuStatCycle[ifo][j]);
 #endif
 	    ipc->status = DAQ_STATE_FAULT;
 	  }
@@ -2345,7 +2345,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 	  if ((dcuStatus[ifo][j] == DAQ_STATE_RUN) /* && (lastStatus != DAQ_STATE_RUN) */) {
 #ifndef NDEBUG
 	    	  if (_debug > 0)
-	    	    printf("New %s (dcu %d)\n", dcuName[j], j);
+	    	    printf("New %s (dcu %d)\n", daqd.dcuName[j], j);
 #endif
 	    ipc->status = DAQ_STATE_RUN;
 	  }
@@ -2381,7 +2381,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 	  if (newCrc != daqd.dcuConfigCRC[0][j]) newStatus |= 0x2000;
         }
 	if (newStatus != daqd.dcuStatus[0][j]) {
-	  //system_log(1, "DCU %d IFO %d (%s) %s", j, 0, dcuName[j], newStatus? "fault": "running");
+	  //system_log(1, "DCU %d IFO %d (%s) %s", j, 0, daqd.dcuName[j], newStatus? "fault": "running");
 	  if (newStatus & 0x2000) {
 	    //system_log(1, "DCU %d IFO %d (%s) reconfigured (crc 0x%x rfm 0x%x)", j, 0, daqd.dcuName[j], daqd.dcuConfigCRC[0][j], newCrc);
 	  }
@@ -2424,7 +2424,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 
 	  if (rfm_crc != crc) {
 	    system_log(5, "MISS dcu %d (%s); crc[%d]=%x; computed crc=%x\n",
-		       j, dcuName[j], cblk, rfm_crc, crc);
+		       j, daqd.dcuName[j], cblk, rfm_crc, crc);
 
 	    /* Set DCU status to BAD, all data will be marked as BAD 
 	       because of the CRC mismatch */
@@ -2433,7 +2433,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 	    daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
 	  } else {
 	    system_log(6, " MATCH dcu %d (%s); crc[%d]=%x; computed crc=%x\n",
-		       j, dcuName[j], cblk, rfm_crc, crc);
+		       j, daqd.dcuName[j], cblk, rfm_crc, crc);
 	  }
         }
 
