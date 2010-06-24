@@ -153,15 +153,24 @@ install-daq-% :: src/epics/simLink/%.mdl
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	datarate=`grep datarate build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
+	targethost=`grep TARGET_HOST_NAME src/include/$${system}.h | head -1 | awk '{print $$3}'`; \
 	gds_file_node=`expr $${gds_node} + 1`; \
 	datarate_mult=`expr $${datarate} / 16384 `; \
 	cur_date=`date +%y%m%d_%H%M%S`;\
-	echo Installing GDS node $${gds_file_node} configuration file ;\
-	echo /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par ;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/ ;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/ ;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive ;\
-	if test -e /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par; then /bin/mv -f /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${site_letter}$${system}.par || exit 1; fi;\
+	echo Updating testpoint.par config file ;\
+	echo /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/testpoint.par ;\
+	if test -e /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/testpoint.par; then /bin/mv -f /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/testpoint.par /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/testpoint_$${cur_date}.par || exit 1; \
+	  testpoint_par_infname=/opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/testpoint_$${cur_date}.par; \
+	else testpoint_par_infname=/dev/null;\
+	fi;\
+	echo src/epics/util/updateTestpointPar.pl -par_file=$${testpoint_par_infname}  -gds_node=$${gds_node} -site_letter=$${site_letter} -system=$${system} -host=$${targethost}; \
+	src/epics/util/updateTestpointPar.pl -par_file=$${testpoint_par_infname}  -gds_node=$${gds_node} -site_letter=$${site_letter} -system=$${system} -host=$${targethost} > /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/testpoint.par || exit 1; \
+	echo Installing GDS node $${gds_file_node} configuration file ;\
+	echo /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par ;\
+	if test -e /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par; then /bin/mv -f /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${site_letter}$${system}_$${cur_date}.par || exit 1; fi;\
 	/bin/cp -p build/$${system}epics/$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par ;\
 	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/param;\
 	/bin/cp -p build/$${system}epics/$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/$${system}/param/tpchn_$${system}.par ;\
