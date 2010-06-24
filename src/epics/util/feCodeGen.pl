@@ -331,6 +331,7 @@ open(IN,"<".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 die unless CDS::Parser::parse();
 close(IN);
 
+
 #CDS::ParsingDiagnostics::print_diagnostics("parser_diag.txt");
 
 # By default, set DAC input counts to 16
@@ -2476,7 +2477,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 
 close IN;
 close OUT;
-	print OUTH "\#endif\n";
+
+
+print OUTH "\#define TARGET_HOST_NAME $targetHost\n";
+print OUTH "\#endif\n";
 close OUTH;
 close OUTD;
 close EPICS;
