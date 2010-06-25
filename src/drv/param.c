@@ -13,7 +13,7 @@
 #endif
 
 static const CHAN_PARAM uninit = {
-  -1,-1,-1,-1,-1,-1,0,0,-99999000.0,-99999999.0,-9999999.0,"none"
+  -1,-1,-1,-1,-1,-1,0,0,-99999000.0,-99999999.0,-9999999.0,"none","none",
 };
 
 /*
@@ -32,6 +32,7 @@ int testCallback(char *channel_name, struct CHAN_PARAM *params, void *user) {
   printf("slope=%f\n", params->slope);
   printf("offset=%f\n", params->offset);
   printf("units=%s\n", params->units);
+  printf("system=%s\n", params->system);
   return 1; 
 }
 
@@ -48,6 +49,8 @@ static char *strcat_lower(char *dest, char *src) {                    /* MA */
 #ifndef system_log
 # define system_log(foo,str,one,two) fprintf(stderr, str, one, two)
 #endif
+
+int default_dcu_rate; 
 
 /*
  * Parse DAQ system config file `fname' and call `callback' function
@@ -361,8 +364,12 @@ parseConfigFile(char *fname, unsigned long *crc,
 	  return 0;
 	}
       }
-      else if (!strcasecmp(id, "units")) {
+      else if (!strcasecmp(id, "units")
+		|| (testpoint == 2 && !strcasecmp(id, "hostname"))) {
 	strncpy(current.units, val, 32);
+      }
+      else if (!strcasecmp(id, "system")) {
+	strncpy(current.system, val, 32);
       }
 #undef convert_int
 #undef convert_float
@@ -385,6 +392,7 @@ parseConfigFile(char *fname, unsigned long *crc,
     }
     if (!strcasecmp(channel_name, "default")) {
       deflt = current;
+      default_dcu_rate = deflt.datarate;
     } else {
 #define setdefault(varname) if (current.varname == uninit.varname) current.varname = deflt.varname;
       setdefault(dcuid);
@@ -398,6 +406,7 @@ parseConfigFile(char *fname, unsigned long *crc,
       setdefault(offset);
 #undef setdefault
       if (!strcmp(current.units, uninit.units)) strcpy(current.units, deflt.units);
+      if (!strcmp(current.system, uninit.system)) strcpy(current.system, deflt.system);
 
       current.testpoint = testpoint;
       /* Allow for missing conversion data in testpoint config files */
