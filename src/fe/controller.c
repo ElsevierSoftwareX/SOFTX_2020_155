@@ -1049,7 +1049,14 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
     	    next.tv_nsec = 1000000000 / CYCLE_PER_SECOND * clock16K;
 	  }
           clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
-		rdtscl(cpuClock[0]);
+	  rdtscl(cpuClock[0]);
+
+#endif
+#ifndef ADC_SLAVE
+	  // Write GPS time and cycle count as indicator to slave that adc data is ready
+	  ioMemData->gpsSecond = timeSec;
+	  ioMemData->iodata[0][0].cycle = clock16K;
+          if(clock16K == 0) timeSec++;
 #endif
 	} else {
 	// NORMAL OPERATION -- Wait for ADC data ready
