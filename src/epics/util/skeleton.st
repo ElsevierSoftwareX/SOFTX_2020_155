@@ -252,7 +252,7 @@ assign filt to
  "{ifo}:{sys}-WFS2_Q_QUAD"};
 #endif
 
-#ifdef SEQUENCER_NAME_lsc
+#ifdef SEQUENCER_NAME_lsc_removed
 int lscModeSwitch;
 assign lscModeSwitch to "{ifo}:LSC-FE_MODE";
 
@@ -690,7 +690,7 @@ state monScreen{
 %%  }
 #endif
 
-#ifdef SEQUENCER_NAME_lsc
+#ifdef SEQUENCER_NAME_lsc_removed
     pvGet(lscModeSwitch);
 %%  if(lscModeSwitch != lastLscModeSwitch)
 %%  {
