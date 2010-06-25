@@ -155,7 +155,7 @@ static int prompt_lineno;
 %token <y_void>  IPC_OFFSET
 %token <y_void>  WORD_STRING
 %token <y_void>  WORD_GPS
-%token <y_void>  GDS_SERVER
+%token <y_void>  TPCONFIG
 %token <y_void>  TRANSMISSION
 %token <y_void>  UPLWP
 %token <y_void>  FILESYS_CB_BLOCKS
@@ -869,10 +869,10 @@ CommandLine: /* Nothing */
 		} else
 		  *yyout << gps << endl;
 	}
-	| SET GDS_SERVER '=' TextExpression {
+	| TPCONFIG TextExpression {
 #ifdef GDS_TESTPOINTS
 		AUTH_CHECK(((my_lexer *)lexer));
-		daqd.gds.set_gds_server ($4);
+		daqd.gds.set_gds_server ($2);
 		if (daqd.gds.gds_initialize ()) {
 			sleep(2);
 			exit(-1);

@@ -236,8 +236,7 @@ yywrap ()
 "stat" { return STATUS; }
 "quit" { return QUIT; }
 "exit" { return QUIT; }
-"gds_server" { return GDS_SERVER; }
-"gds-server" { return GDS_SERVER; }
+"tpconfig" { return TPCONFIG; }
 
 -?[0-9]+ { 
          lvalp -> y_int = atoi (yytext);
