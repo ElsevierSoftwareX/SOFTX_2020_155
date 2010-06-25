@@ -14,6 +14,7 @@ typedef struct CHAN_PARAM {
   float slope;
   float offset;
   char units[40];
+  char system[40];
 } CHAN_PARAM;
 
 int parseConfigFile(char *, unsigned long *, int (*callback)(char *, struct CHAN_PARAM *, void *), int, char *, void *);
