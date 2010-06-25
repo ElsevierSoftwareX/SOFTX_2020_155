@@ -281,28 +281,28 @@ dump_predefines:
 
 # Build NDS program
 nds:
-	(cd src/nds; test -e configure || autoconf)
+	(cd src/nds; autoconf)
 	/bin/rm -rf build/nds
 	/bin/mkdir -p build/nds
 	(cd build/nds; ../../src/nds/configure && make)
 
 # Build frame builder data concentrator program
 dc:
-	(cd src/daqd; test -e configure || autoconf)
+	(cd src/daqd; autoconf)
 	/bin/rm -rf build/dc
 	/bin/mkdir -p build/dc
 	(cd build/dc; ../../src/daqd/configure '--enable-symmetricom' '--with-mx' '--enable-debug' '--with-gds=/apps/Linux/gds' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' '--with-concentrator' && make)
 
 # Build frame builder NDS or frame writer (broadcast receiver)
 rcv:
-	(cd src/daqd; test -e configure || autoconf)
+	(cd src/daqd; autoconf)
 	/bin/rm -rf build/rcv
 	/bin/mkdir -p build/rcv
 	(cd build/rcv; ../../src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-gds=/apps/Linux/gds' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' && make)
 
 # build standalone frame builder with IOP timing
 stand:
-	(cd src/daqd; test -e configure || autoconf)
+	(cd src/daqd; autoconf)
 	/bin/rm -rf build/stand
 	/bin/mkdir -p build/stand
 	(cdir=`pwd`; cd build/stand; $$cdir/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' --enable-symmetricom --enable-iop && make)
