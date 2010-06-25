@@ -39,7 +39,7 @@ clean-% :: config/Makefile.%epics
 install-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-,,$@); \
 	upper_system=`echo $$system | tr a-z A-Z`;\
-	hostname=`hostname`;\
+	hostname=`grep TARGET_HOST_NAME src/include/$${system}.h | head -1 | awk '{print $$3}'`; \
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
 	if test $${site}no = no; then echo Please make $$system first; exit 1; fi;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`;\
