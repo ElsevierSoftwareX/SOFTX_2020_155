@@ -370,8 +370,8 @@ if ($ipcxCnt > 0) {
    #
    ("CDS::Parameters::printHeaderStruct") -> ($oo);
 
-   #$iFile = "/cvs/cds/";
-   $iFile = "/opt/rtcds/";
+   $iFile = "/cvs/cds/";
+   #$iFile = "/opt/rtcds/";
    $iFile .= $location;
    $iFile .= "/chans/ipc/";
    $iFile .= $site;
@@ -1684,9 +1684,6 @@ $fpartCnt = 0;
 $inCnt = 0;
 
 # Write Epics structs common to all CDS front ends to the .h file.
-print OUTH "\n\n#define MAX_MODULES \t $filtCnt\n";
-$filtCnt *= 10;
-print OUTH "#define MAX_FILTERS \t $filtCnt\n\n";
 print OUTH "#define MAX_FIR \t $firCnt\n";
 print OUTH "#define MAX_FIR_POLY \t $firCnt\n\n";
 print OUTH "typedef struct CDS_EPICS_IN {\n";
@@ -1739,6 +1736,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 }
 print EPICS "\n\n";
 print OUTH "} \U$systemName;\n\n";
+
+print OUTH "\n\n#define MAX_MODULES \t $filtCnt\n";
+$filtCnt *= 10;
+print OUTH "#define MAX_FILTERS \t $filtCnt\n\n";
 
 my $gdsNode = $gdsNodeId - 1;
 print EPICS "MOMENTARY FEC\_$dcuId\_VME_RESET epicsInput.vmeReset int ai 0\n";
@@ -2986,6 +2987,11 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 			$outcnt = $partOutputs[$partOutNum[$cur_part_num][0]];
 			$incnt = $partInCnt[$partInNum[$cur_part_num][0]];
 		}
+		if ($partType[$cur_part_num] eq "FiltMuxMatrix") {
+			# FiltMuxMatrix uses mux and demux parts
+			$outcnt = $partOutputs[$partOutNum[$cur_part_num][0]];
+			$incnt = $partInCnt[$partInNum[$cur_part_num][0]];
+		}
 		my $basename = $partName[$cur_part_num];
 		if ($partSubName[$cur_part_num] ne "") {
 			$basename = $partSubName[$cur_part_num] . "_" . $basename;
@@ -3022,17 +3028,71 @@ sub commify_series {
 
 		  my $tn = top_name_transform($basename);
 		  my $basename1 = $usite . ":" . $tn . "_";
-		  system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/" . $basename . ".adl");
+		  my $filtername1 = $usite . $tn;
+		  if ($partType[$cur_part_num] eq "FiltMuxMatrix") {
+		    my $subDirName = "$epicsScreensDir/$usite" . "$basename";
+		    mkdir $subDirName;
+		    system("./mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite" . $basename . "     .adl");
+		    for ($row = 0; $row < $outcnt; $row ++) {
+		      for ($col = 0; $col < $incnt; $col ++) {
+			my $filt_name = "$partName[$cur_part_num]" . "_" . "$col" . "_" . "$row";
+			print "FILTER Part $filt_name $partType[$cur_part_num] input partInput=$partInput[$cur_part_num][0] type='$partInputType[$cur_part_num][0]' \n";
+		       	if ($partSubName[$cur_part_num] ne "") {
+			    $filt_name = $partSubName[$cur_part_num] . "_" . $filt_name;
+			}
+			my $sys_name = uc($skeleton);
+			my $sargs;
+			
+			my $tfn = top_name_transform($filt_name);
+			my $nsys = system_name_part($tfn);
+			$sargs = "s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;";
+			$sargs .= "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . $nsys . "/g;";
+                        $sargs .= "s/LOCATION_NAME/$location/g;";
+			$sargs .= "s/FILTERNAME/$tfn/g;";
+			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
+			system("cat FILTER.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . ".adl");
+		      
+		      }
+		    }
+		  } else {
+		    system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
+		  }
+
+	  
 		} else {
 		  $sysname = substr($sysname, 2, 3);
 		  my $basename1 = $usite . ":" .$sysname ."-" . $basename . "_";
+		  my $filtername1 = $usite . $sysname . "_" . $basename;
 		  $sysname = uc($skeleton);
 		  #print "Matrix $basename $incnt X $outcnt\n";
-		  system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$sysname" . "_" . $basename . ".adl");
+		  if ($partType[$cur_part_num] eq "FiltMuxMatrix") {
+		    my $subDirName = "$epicsScreensDir/$usite" . "$sysname" . "_" . "$basename";
+		    mkdir $subDirName;
+		    system("./mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite$sysname" . "_" .      $basename . ".adl");
+                    for ($row = 0; $row < $outcnt; $row ++) {
+		      for ($col = 0; $col < $incnt; $col ++) {
+			my $filt_name = "$partName[$cur_part_num]" . "_" . "$col" . "_" . "$row";
+			print "FILTER Part $filt_name $partName[$cur_part_num] $partType[$cur_part_num] input partInput=$partInput[$cur_part_num][0] type='$partInputType[$cur_part_num][0]' \n";
+			if ($partSubName[$cur_part_num] ne "") {
+			    $filt_name = $partSubName[$cur_part_num] . "_" . $filt_name;
+			}
+			my $sys_name = uc($skeleton);
+			my $sargs;
+
+			$sys_name = substr($sys_name,0,3);
+			$sargs = $sed_arg . "s/FILTERNAME/$sys_name-$filt_name/g;";
+			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
+			$sysname = uc($skeleton);
+			system("cat FILTER.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".adl");
+		      }
+		    }
+		  } else {
+		    system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
+		  }
 		}
 	}
-	if ($partType[$cur_part_num] =~ /^Filt/) {
-		#print "FILTER No=$cur_part_num Part $partName[$cur_part_num] $partType[$cur_part_num] input partInput=$partInput[$cur_part_num][0] type='$partInputType[$cur_part_num][0]' \n";
+	if (($partType[$cur_part_num] =~ /^Filt/) && (not ($partType[$cur_part_num] eq "FiltMuxMatrix"))) {
+		print "FILTER No=$cur_part_num Part $partName[$cur_part_num] $partType[$cur_part_num] input partInput=$partInput[$cur_part_num][0] type='$partInputType[$cur_part_num][0]' \n";
 		my $filt_name = $partName[$cur_part_num];
 	if ($partInputType[$cur_part_num][0] eq "Adc") {
 		#exit(1);
@@ -3048,11 +3108,13 @@ sub commify_series {
 			$sargs = "s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;";
 			$sargs .= "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . $nsys . "/g;";
                         $sargs .= "s/LOCATION_NAME/$location/g;";
-			$sargs .= "s/FILTERNAME/$tfn/g";
+			$sargs .= "s/FILTERNAME/$tfn/g;";
+			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/" . $filt_name . ".adl");
 		} else {
 		  $sys_name = substr($sys_name, 2, 3);
-			$sargs = $sed_arg . "s/FILTERNAME/$sys_name-$filt_name/g";
+			$sargs = $sed_arg . "s/FILTERNAME/$sys_name-$filt_name/g;";
+			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 		  $sysname = uc($skeleton);
 			system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 		}
@@ -3074,7 +3136,7 @@ sub commify_series {
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "\"/g;";
 		}
-	}
+        }
 		  $sysname = uc($skeleton);
 }
 #print $monitor_args;
