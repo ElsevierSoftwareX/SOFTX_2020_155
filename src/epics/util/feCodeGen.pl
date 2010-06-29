@@ -331,7 +331,6 @@ open(IN,"<".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 die unless CDS::Parser::parse();
 close(IN);
 
-die "Unspecified \"host\" parameter in cdsParameters block\n" if ($targetHost eq "localhost");
 
 #CDS::ParsingDiagnostics::print_diagnostics("parser_diag.txt");
 
@@ -1735,6 +1734,9 @@ for($ii=0;$ii<$partCnt;$ii++)
 	  ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
 	}
 }
+
+die "Unspecified \"host\" parameter in cdsParameters block\n" if ($targetHost eq "localhost");
+
 print EPICS "\n\n";
 print OUTH "} \U$systemName;\n\n";
 
