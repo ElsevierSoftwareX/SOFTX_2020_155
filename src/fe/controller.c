@@ -28,6 +28,7 @@
 #include <asm/delay.h>
 #else
 #include <rtl_time.h>
+#include <time.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <unistd.h>
@@ -1013,6 +1014,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 
 #endif
   onePpsTime = clock16K;
+  timeSec = current_time();
   if(cdsPciModules.gpsType == SYMCOM_RCVR)
   {
   	time = getGpsTime(&ns);
@@ -1764,6 +1766,15 @@ printf("got here %d %d\n",clock16K,ioClock);
   return (void *)-1;
 }
 
+// Get current kernel time (in GPS)
+inline unsigned long current_time() {
+	struct timespec t;
+	extern struct timespec current_kernel_time(void);
+	t = current_kernel_time();
+	t.tv_sec += - 315964819 + 33;
+	return t.tv_sec;
+}
+
 // MAIN routine: Code starting point ****************************************************************
 #ifdef NO_RTL
 
@@ -1788,6 +1799,7 @@ int main(int argc, char **argv)
 	int doCnt;
 	int target_node;
 
+	printf("startup time is %d\n", current_time());
 #ifdef DOLPHIN_TEST
         if (argc > 1) target_node = atoi(argv[1]);
 	else {
