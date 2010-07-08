@@ -3,6 +3,12 @@ use Exporter;
 @ISA = ('Exporter');
 
 sub partType {
+        my ($node, $i) = @_;
+	$desc = ${$node->{FIELDS}}{"Description"};
+	# Pull out all Epics fields from the description
+	$desc =~ s/\s//g;
+	my @l = $desc =~ m/(field\([^\)]*\))/g;
+	$::epics_fields[$i] = [@l];
 	return EpicsOut;
 }
 
@@ -17,7 +23,12 @@ sub printHeaderStruct {
 # Current part number is passed as first argument
 sub printEpics {
         my ($i) = @_;
-        print ::EPICS "OUTVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] float ai 0 field(PREC,\"3\")\n";
+
+        print ::EPICS "OUTVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] float ai 0 field(PREC,\"3\")";
+	foreach $ef (@{$::epics_fields[$i]}) {
+		print ::EPICS  " " . $ef;
+        }
+	print ::EPICS "\n";
 }
 
 # Print variable declarations int front-end file

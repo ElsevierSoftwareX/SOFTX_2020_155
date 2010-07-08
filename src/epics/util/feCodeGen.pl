@@ -181,6 +181,7 @@ sub debug {
 
 sub init_vars {
 # Global variables set by parser
+$epics_fields[0] = undef; # list of lists; for each part number, epics fields
 $extraTestPoints;	# a list of test point names not related to filters
 $extraTpcount = 0;		# How many extra TPs we have
 @top_names; 	# array of top-level subsytem names marked with "top_names" tag
