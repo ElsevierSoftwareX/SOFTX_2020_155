@@ -1,0 +1,41 @@
+diff -uNr linux-2.6.34-gentoo-r1/arch/x86/kernel/smpboot.c linux-2.6.34-gentoo-r1-cs/arch/x86/kernel/smpboot.c
+--- linux-2.6.34-gentoo-r1/arch/x86/kernel/smpboot.c	2010-05-16 23:17:36.000000000 +0200
++++ linux-2.6.34-gentoo-r1-cs/arch/x86/kernel/smpboot.c	2010-07-21 13:31:00.000000000 +0200
+@@ -1330,6 +1330,15 @@
+ 	pr_err("CPU %u didn't die...\n", cpu);
+ }
+ 
++static DEFINE_PER_CPU(void (*)(void), fe_code);
++
++void set_fe_code_idle(void (*ptr)(void), unsigned int cpu) {
++       per_cpu(fe_code, cpu) = ptr;
++}
++
++EXPORT_SYMBOL(set_fe_code_idle);
++
++
+ void play_dead_common(void)
+ {
+ 	idle_task_exit();
+@@ -1345,6 +1354,10 @@
+ 	 * With physical CPU hotplug, we should halt the cpu
+ 	 */
+ 	local_irq_disable();
++        if (per_cpu(fe_code, smp_processor_id())) {
++	       // Execute front-end code
++	       (*per_cpu(fe_code, smp_processor_id()))();
++	}
+ }
+ 
+ void native_play_dead(void)
+diff -uNr linux-2.6.34-gentoo-r1/kernel/cpu.c linux-2.6.34-gentoo-r1-cs/kernel/cpu.c
+--- linux-2.6.34-gentoo-r1/kernel/cpu.c	2010-05-16 23:17:36.000000000 +0200
++++ linux-2.6.34-gentoo-r1-cs/kernel/cpu.c	2010-07-19 15:46:58.000000000 +0200
+@@ -359,6 +359,8 @@
+ 	cpu_maps_update_done();
+ 	return err;
+ }
++EXPORT_SYMBOL(cpu_up);
+ 
+ #ifdef CONFIG_PM_SLEEP_SMP
+ static cpumask_var_t frozen_cpus;
