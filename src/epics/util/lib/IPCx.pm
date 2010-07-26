@@ -25,8 +25,8 @@ sub printEpics {
 sub printFrontEndVars  {
         my ($i) = @_;
 
-        if ($::ipcDeclDone == 0) {
-           $::ipcDeclDone = 1;
+        if ($::ipcxDeclDone == 0) {
+           $::ipcxDeclDone = 1;
 
            print ::OUT "#define COMMDATA_INLINE\n";
            print ::OUT "#include \"commData2.h\"\n";
@@ -42,41 +42,41 @@ sub frontEndInitCode {
         my ($i) = @_;
         my $found = 0;
  
-        if ($::ipcInitDone == 0) {
+        if ($::ipcxInitDone == 0) {
            $calcExp = "\nmyIpcCount = $::ipcxCnt;\n\n";
         }
         else {
            $calcExp = "";
         }
 
-        $::ipcxRef[$::ipcInitDone] = $i;
+        $::ipcxRef[$::ipcxInitDone] = $i;
  
         for ($l = 0; $l < $::ipcxCnt; $l++) {
            if ($::ipcxParts[$l][4] == $i) {
               $found = 1;
  
               if ( ($::ipcxParts[$l][5] =~ /^Ground/) || ($::ipcxParts[$l][5] =~ /\_Ground/) ) {
-                 $calcExp .= "ipcInfo[$::ipcInitDone]\.mode = IRCV;\n";
+                 $calcExp .= "ipcInfo[$::ipcxInitDone]\.mode = IRCV;\n";
               }
               else {
-                 $calcExp .= "ipcInfo[$::ipcInitDone]\.mode = ISND;\n";
+                 $calcExp .= "ipcInfo[$::ipcxInitDone]\.mode = ISND;\n";
               }
  
-              $calcExp .= "ipcInfo[$::ipcInitDone]\.netType = $::ipcxParts[$l][1];\n";
-              $calcExp .= "ipcInfo[$::ipcInitDone]\.sendRate = $::ipcxParts[$l][2];\n";
-              $calcExp .= "ipcInfo[$::ipcInitDone]\.ipcNum = $::ipcxParts[$l][3];\n";
+              $calcExp .= "ipcInfo[$::ipcxInitDone]\.netType = $::ipcxParts[$l][1];\n";
+              $calcExp .= "ipcInfo[$::ipcxInitDone]\.sendRate = $::ipcxParts[$l][2];\n";
+              $calcExp .= "ipcInfo[$::ipcxInitDone]\.ipcNum = $::ipcxParts[$l][3];\n";
 
               last;
            }
         }
  
-        $::ipcInitDone++;
+        $::ipcxInitDone++;
  
         if ($found == 0) {
-           die "***ERROR: Did not find IPC part $i\n";
+           die "***ERROR: Did not find IPCx part $i\n";
         }
 
-        if ($::ipcInitDone eq $::ipcxCnt) {
+        if ($::ipcxInitDone eq $::ipcxCnt) {
            $calcExp .= "\ncommData2Init(myIpcCount, FE_RATE, ipcInfo, cdsPciModules\.pci_rfm);\n\n";
         }
 
@@ -111,7 +111,7 @@ sub fromExp {
            return "ipcInfo[$index]\.errTotal";
         }
         else {
-           die "***ERROR: IPC component with incorrect partInputPort = $from2\n";
+           die "***ERROR: IPCx component with incorrect partInputPort = $from2\n";
         }
 }
 
