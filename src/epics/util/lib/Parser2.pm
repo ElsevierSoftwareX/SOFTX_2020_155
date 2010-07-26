@@ -36,6 +36,8 @@ sub parse() {
   my @nodes;
   push @nodes, $root;
 
+  $tagcntr = 0;
+
   while (<::IN>) {
     # Strip out quotes and blank spaces
     #tr/\"/ /;
@@ -44,6 +46,7 @@ sub parse() {
     s/^\s+//;
     s/\s+$//;
     $lcntr ++;
+
     ($var1,$var2) = split(/\s+/,$_, 2);
     if ($var2 eq "{") { # This is new block
 	$node = {
@@ -86,6 +89,15 @@ sub parse() {
 		${$cur_node->{FIELDS}}{$var1} = $var2;
 		${$cur_node->{LAST_FIELD_KEY}} = $var1;
 		#print "Block ", $cur_node->{NAME}, " fields are $var1 $var2\n";
+
+                if ($var2 =~ /^cdsIPCx_/) {
+                   $::blockTag[$tagcntr] = $var2;
+                   $tagcntr++;
+                }
+                else {
+                   $::blockTag[$tagcntr] = undef;
+                   $tagcntr++;
+                }
 	}
     }
   }
@@ -131,6 +143,7 @@ sub transform_part_name {
 # Change Block type name
 sub transform_block_type {
 	my ($blockType) = @_;
+
         if ($blockType eq "Inport")	{ return "INPUT"; }
         elsif ($blockType eq "Outport") { return "OUTPUT"; }
         elsif ($blockType eq "Sum")	{ return "SUM"; }
@@ -272,6 +285,12 @@ sub node_processing {
 	my $source_type = transform_block_type(${$node->{FIELDS}}{"SourceType"});
 	my $source_block = transform_block_type(${$node->{FIELDS}}{"SourceBlock"});
 	my $block_name = ${$node->{FIELDS}}{"Name"};
+
+        if ($block_type ne "SubSystem") {
+           my $block_tag = transform_block_type(${$node->{FIELDS}}{"Tag"});
+           $::ipcxBlockTags[$::ipcxTagCount++] = $block_tag;
+        }
+
 	#print "Part $block_name $block_type $in_sub \n";
 	# Skip certain blocks
  	if ($source_type eq "DocBlock") {
@@ -436,6 +455,7 @@ sub node_processing {
                      die "Too many Digital I/O modules \(max is $::maxDioMod\)\n";
                   }
 		}
+
         	$::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ($node, $::partCnt);
 	}
 	# For easy access
