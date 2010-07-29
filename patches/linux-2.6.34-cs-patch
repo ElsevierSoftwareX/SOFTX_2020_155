@@ -35,6 +35,7 @@ diff -uNr linux-2.6.34-gentoo-r1/kernel/cpu.c linux-2.6.34-gentoo-r1-cs/kernel/c
  	cpu_maps_update_done();
  	return err;
  }
++
 +EXPORT_SYMBOL(cpu_up);
  
  #ifdef CONFIG_PM_SLEEP_SMP
