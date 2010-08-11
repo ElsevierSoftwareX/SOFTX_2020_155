@@ -511,7 +511,7 @@ if ($ipcxCnt > 0) {
             $typeComp = $ipcxParts[$ii][1];
 
             if ($ipcxData[$jj][1] ne $typeComp) {
-               die "***ERROR: IPCx type mis-match: $typeComp vs\. $ipcxData[$jj][1]\n";
+               die "***ERROR: IPCx type mis-match for IPCx component $ipcxParts[$ii][0]: $typeComp vs\. $ipcxData[$jj][1]\n";
             }
 
             #
