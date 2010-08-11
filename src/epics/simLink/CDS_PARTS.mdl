@@ -15,9 +15,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Jun  8 11:23:34 2010"
-  RTWModifiedTimeStamp	  197897013
-  ModelVersionFormat	  "1.%<AutoIncrement:156>"
+  LastModifiedDate	  "Wed Aug 11 14:57:42 2010"
+  RTWModifiedTimeStamp	  203439456
+  ModelVersionFormat	  "1.%<AutoIncrement:157>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -788,7 +788,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [37, 233, 719, 650]
+    Location		    [5, 233, 687, 650]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -802,7 +802,7 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    106
+    SIDHighWatermark	    109
     Block {
       BlockType		      Demux
       Name		      "Demux"
@@ -1335,8 +1335,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[515, 213, 1165, 836]
-	Open			off
+	Location		[2410, 353, 3060, 976]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1359,11 +1359,12 @@ Library {
 	  BackgroundColor	  "[0.917826, 0.413368, 1.000000]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsRfmIO/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1381,11 +1382,12 @@ Library {
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsIPC/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1401,11 +1403,12 @@ Library {
 	  Position		  [495, 449, 550, 471]
 	  BackgroundColor	  "[0.501961, 1.000000, 0.501961]"
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsIPCS/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1580,11 +1583,12 @@ Library {
 	  Position		  [425, 505, 465, 565]
 	  BackgroundColor	  "gray"
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsContec1616DIO/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1622,11 +1626,12 @@ Library {
 	  Position		  [510, 505, 550, 565]
 	  BackgroundColor	  "gray"
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsContec6464DIO/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1638,16 +1643,17 @@ Library {
 	  Name			  "DAC_0"
 	  SID			  36
 	  Description		  "card_num=0"
-	  Ports			  [16, 16]
+	  Ports			  [16]
 	  Position		  [35, 205, 60, 460]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "dac/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1659,16 +1665,17 @@ Library {
 	  Name			  "DAC_1"
 	  SID			  37
 	  Description		  "card_num=1"
-	  Ports			  [16, 16]
+	  Ports			  [16]
 	  Position		  [80, 205, 105, 460]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "dac/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1680,16 +1687,17 @@ Library {
 	  Name			  "DAC_2"
 	  SID			  38
 	  Description		  "card_num=2"
-	  Ports			  [16, 16]
+	  Ports			  [16]
 	  Position		  [125, 208, 150, 457]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "dac/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1701,16 +1709,17 @@ Library {
 	  Name			  "DAC_3"
 	  SID			  39
 	  Description		  "card_num=3"
-	  Ports			  [16, 16]
+	  Ports			  [16]
 	  Position		  [165, 208, 190, 457]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "dac/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1722,16 +1731,17 @@ Library {
 	  Name			  "DAC_4"
 	  SID			  40
 	  Description		  "card_num=4"
-	  Ports			  [16, 16]
+	  Ports			  [16]
 	  Position		  [210, 208, 235, 457]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "dac/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1743,16 +1753,17 @@ Library {
 	  Name			  "DAC_5"
 	  SID			  41
 	  Description		  "card_num=5"
-	  Ports			  [16, 16]
+	  Ports			  [16]
 	  Position		  [255, 208, 280, 457]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "dac/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1764,16 +1775,17 @@ Library {
 	  Name			  "DAC_6"
 	  SID			  42
 	  Description		  "card_num=6"
-	  Ports			  [16, 16]
+	  Ports			  [16]
 	  Position		  [300, 208, 325, 457]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "dac/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1792,11 +1804,12 @@ Library {
 	  BackgroundColor	  "lightBlue"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsDio/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1816,11 +1829,12 @@ Library {
 	  Position		  [230, 502, 270, 563]
 	  BackgroundColor	  "[0.870444, 0.852273, 1.000000]"
 	  DropShadow		  on
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsGps/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1851,6 +1865,52 @@ Library {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "PCIE_SignalName"
+	  SID			  108
+	  Tag			  "cdsIPCx_PCIE"
+	  Description		  "Inter-Process Communication via PCI Express network."
+	  Ports			  [1, 2]
+	  Position		  [540, 224, 605, 246]
+	  BackgroundColor	  "[0.721569, 0.862745, 0.772549]"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
+	  SourceBlock		  "cdsIPCx/SignalName"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "RFM_SignalName"
+	  SID			  109
+	  Tag			  "cdsIPCx_RFM"
+	  Description		  "Inter-Process Communication via Reflected Memory network."
+	  Ports			  [1, 2]
+	  Position		  [540, 294, 605, 316]
+	  BackgroundColor	  "[0.607843, 0.807843, 0.678431]"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
+	  SourceBlock		  "cdsIPCx/SignalName"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "RelayIO"
 	  SID			  46
 	  Tag			  "cdsRio"
@@ -1861,11 +1921,12 @@ Library {
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsRio/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1884,11 +1945,35 @@ Library {
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsRio1/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "SHMEM_SignalName"
+	  SID			  107
+	  Tag			  "cdsIPCx_SHMEM"
+	  Description		  "Inter-Process Communication via Shared memory."
+	  Ports			  [1, 2]
+	  Position		  [420, 229, 485, 251]
+	  BackgroundColor	  "[0.462745, 0.745098, 0.560784]"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
+	  SourceBlock		  "cdsIPCx/SignalName"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1913,7 +1998,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"MatrixParts"
-	Location		[891, 207, 1545, 950]
+	Location		[694, 207, 1348, 950]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -2234,7 +2319,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Osc/Phase"
-	Location		[633, 339, 1045, 702]
+	Location		[436, 339, 848, 702]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
