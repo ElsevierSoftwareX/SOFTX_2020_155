@@ -15,9 +15,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Aug 11 14:57:42 2010"
-  RTWModifiedTimeStamp	  203439456
-  ModelVersionFormat	  "1.%<AutoIncrement:157>"
+  LastModifiedDate	  "Thu Aug 12 15:48:27 2010"
+  RTWModifiedTimeStamp	  203528886
+  ModelVersionFormat	  "1.%<AutoIncrement:159>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -788,7 +788,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [5, 233, 687, 650]
+    Location		    [780, 424, 1462, 841]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -802,7 +802,7 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    109
+    SIDHighWatermark	    110
     Block {
       BlockType		      Demux
       Name		      "Demux"
@@ -1335,8 +1335,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[2410, 353, 3060, 976]
-	Open			on
+	Location		[2016, 353, 2666, 976]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1597,20 +1597,19 @@ Library {
 	}
 	Block {
 	  BlockType		  Reference
-	  Name			  "Contec32LO"
-	  SID			  34
+	  Name			  "Contec32BO"
+	  SID			  110
 	  Tag			  "cdsCDO32"
-	  Description		  "Contec32 bit binary output module driver"
-	  Ports			  [1, 1]
-	  Position		  [320, 512, 385, 548]
-	  BackgroundColor	  "cyan"
-	  DropShadow		  on
+	  Ports			  [2]
+	  Position		  [350, 505, 390, 565]
+	  BackgroundColor	  "gray"
 	  AttributesFormatString  "%<Tag>"
-	  SourceBlock		  "cdsCDO32/Contec32LO"
+	  LibraryVersion	  "1.3"
+	  SourceBlock		  "cdsCDO32/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1998,7 +1997,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"MatrixParts"
-	Location		[694, 207, 1348, 950]
+	Location		[300, 207, 954, 950]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -2319,8 +2318,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Osc/Phase"
-	Location		[436, 339, 848, 702]
-	Open			on
+	Location		[42, 339, 454, 702]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
