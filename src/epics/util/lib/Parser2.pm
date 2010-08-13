@@ -160,6 +160,8 @@ sub transform_block_type {
         elsif ($blockType eq "Logic")	{ return "AND"; }
         elsif ($blockType eq "Mux")	{ return "MUX"; }
         elsif ($blockType eq "Demux")	{ return "DEMUX"; }
+        elsif ($blockType eq "From")	{ return "FROM"; }
+        elsif ($blockType eq "Goto")	{ return "GOTO"; }
 	else { return $blockType; }
 }
 
@@ -354,11 +356,11 @@ sub node_processing {
 	}
 
 	# Bus creator part is the ADC board
-	if ($block_type eq "BUSC") {
-        	require "lib/Adc.pm";
-        	CDS::Adc::initAdc($node);
-        	$::partType[$::partCnt] = CDS::Adc::partType($node);
-	} 
+	#if ($block_type eq "BUSC") {
+        #	require "lib/Adc.pm";
+        #	CDS::Adc::initAdc($node);
+        #	$::partType[$::partCnt] = CDS::Adc::partType($node);
+	#} 
 	if ($block_type eq "SubSystem") {
                 die "Cannot handle nested subsystems\n" if $in_sub;
                 $::subSysPartStart[$::subSys] = $::partCnt;
@@ -390,6 +392,18 @@ sub node_processing {
 		$::partType[$::partCnt] = $block_type;
         	$::cdsPart[$::partCnt] = 0;
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name;
+		# If a GOTO tag, have to put its tag name in the output location for later connection of parts.
+		if ($block_type eq "GOTO") {
+		     $::partOutput[$::partCnt][3] = ${$node->{FIELDS}}{GotoTag};
+          		$::partOutCnt[$::partCnt] = 0;
+			#print "PROCESSED GOTO $::partCnt $::xpartName[$::partCnt] $::partOutput[$::partCnt][0]***************\n";
+		}
+		# If a FROM tag, need to get the tag name and put it into input parameters for later connection of parts.
+		if ($block_type eq "FROM") {
+		     $::partInput[$::partCnt][3] = ${$node->{FIELDS}}{GotoTag};
+		     $::partInCnt[$::partCnt] = 0;
+			#print "PROCESSED FROM $::partCnt $::partInput[$::partCnt][0] ***************\n";
+		}
 	}
 	# Check names; pass ADC parts and Remote Interlinks
 	# Allow IPC part through
@@ -455,8 +469,64 @@ sub node_processing {
                      die "Too many Digital I/O modules \(max is $::maxDioMod\)\n";
                   }
 		}
+# Added for ADC PART CHANGE *****************
+		if ($part_name eq "Adcx0") {
+			require "lib/Adc.pm";
+			#CDS::Adc::initAdc($node);
+			CDS::Adcx0::initAdc($node);
+			$::partType[$::partCnt] = CDS::Adcx0::partType($node);
+		} 
+		if ($part_name eq "Adcx1") {
+			require "lib/Adc.pm";
+			#CDS::Adcx1::initAdc($node);
+			CDS::Adcx1::initAdc($node);
+			$::partType[$::partCnt] = CDS::Adcx1::partType($node);
+		} 
+		if ($part_name eq "Adcx2") {
+			require "lib/Adc.pm";
+			#CDS::Adcx1::initAdc($node);
+			CDS::Adcx2::initAdc($node);
+			$::partType[$::partCnt] = CDS::Adcx2::partType($node);
+		} 
+		if ($part_name eq "Adcx3") {
+			require "lib/Adc.pm";
+			#CDS::Adcx1::initAdc($node);
+			CDS::Adcx3::initAdc($node);
+			$::partType[$::partCnt] = CDS::Adcx3::partType($node);
+		} 
+		if ($part_name eq "Adcx4") {
+			require "lib/Adc.pm";
+			#CDS::Adcx1::initAdc($node);
+			CDS::Adcx4::initAdc($node);
+			$::partType[$::partCnt] = CDS::Adcx4::partType($node);
+		} 
+		if ($part_name eq "Adcx5") {
+			require "lib/Adc.pm";
+			#CDS::Adcx1::initAdc($node);
+			CDS::Adcx5::initAdc($node);
+			$::partType[$::partCnt] = CDS::Adcx5::partType($node);
+		} 
+		if ($part_name eq "Adcx6") {
+			require "lib/Adc.pm";
+			#CDS::Adcx1::initAdc($node);
+			CDS::Adcx6::initAdc($node);
+			$::partType[$::partCnt] = CDS::Adcx6::partType($node);
+		} 
+		if ($part_name eq "Adcx7") {
+			require "lib/Adc.pm";
+			#CDS::Adcx1::initAdc($node);
+			CDS::Adcx7::initAdc($node);
+			$::partType[$::partCnt] = CDS::Adcx7::partType($node);
+		} 
+		if ($part_name eq "Adcx8") {
+			require "lib/Adc.pm";
+			#CDS::Adcx1::initAdc($node);
+			CDS::Adcx8::initAdc($node);
+			$::partType[$::partCnt] = CDS::Adcx8::partType($node);
+		} 
+# End of ADC PART CHANGE **********************************
 
-        	$::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ($node, $::partCnt);
+        	 $::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ($node, $::partCnt);
 	}
 	# For easy access
 	#print "Part ". $::xpartName[$::partCnt] . "\n";
@@ -890,7 +960,8 @@ sub process {
   # This is needed because the main script can't handle ADCs in the subsystems
   # :TODO: fix main script to handle ADC parts in subsystems
   foreach (0 ... $::partCnt) {
-    if ($::partType[$_] eq "BUSS" || $::partType[$_] eq "BUSC" || $::partType[$_] eq "Dac") {
+    #if ($::partType[$_] eq "BUSS" || $::partType[$_] eq "BUSC" || $::partType[$_] eq "Dac") {
+    if ($::partType[$_] eq "Dac") {
       if ($::partSubName[$_] ne "") {
 	die "All ADCs and DACs must be on the top level in the model";
       }
