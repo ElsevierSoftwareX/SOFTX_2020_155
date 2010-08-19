@@ -2913,159 +2913,159 @@ print OUTM "\$(TARGET_RTL): \$(LIBRARY_OBJS)\n";
 print OUTM "\n";
 print OUTM "$skeleton";
 print OUTM "fe\.o: ../controller.c\n";
-print OUTM "\t\$(CC) \$(CFLAGS) -c \$< -o \$\@\n";
+print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -c \$< -o \$\@\n";
 print OUTM "map.o: ../map.c\n";
-print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
+print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
 print OUTM "myri.o: ../myri.c\n";
-print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
+print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
 print OUTM "myriexpress.o: ../myriexpress.c\n";
-print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DMX_KERNEL=1 -c \$<\n";
+print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DMX_KERNEL=1 -c \$<\n";
 print OUTM "fb.o: ../fb.c\n";
-print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
+print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
 print OUTM "fm10Gen.o: fm10Gen.c\n";
 if($rate == 480) {
 	print "SERVO IS 2K\n";
-	print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO2K -c \$<\n";
+	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO2K -c \$<\n";
 } elsif ($rate == 240) {
 	print "SERVO IS 4K\n";
-	print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO4K -c \$<\n";
+	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO4K -c \$<\n";
 } elsif ($rate == 60) {
 	print "SERVO IS 16K\n";
-	print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO16K -c \$<\n";
+	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO16K -c \$<\n";
 } elsif ($rate == 30) {
 	print "SERVO IS 32K\n";
-	print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO32K -c \$<\n";
+	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO32K -c \$<\n";
 } elsif ($rate == 15) {
 	print "SERVO IS 64K\n";
-	print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -DSERVO64K -c \$<\n";
+	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO64K -c \$<\n";
 }
 print OUTM "crc.o: crc.c\n";
-print OUTM "\t\$(CC) \$(CFLAGS) -D__KERNEL__ -c \$<\n";
+print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
 print OUTM "\n";
 }
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
-print OUTM "CFLAGS += -I../../include\n";
-print OUTM "CFLAGS += -I/opt/gm/include\n";
-print OUTM "CFLAGS += -I/opt/mx/include\n";
+print OUTM "EXTRA_CFLAGS += -I../../include\n";
+print OUTM "EXTRA_CFLAGS += -I/opt/gm/include\n";
+print OUTM "EXTRA_CFLAGS += -I/opt/mx/include\n";
 
-if($rate == 480) { print OUTM "CFLAGS += -DSERVO2K\n"; }
-elsif($rate == 240) { print OUTM "CFLAGS += -DSERVO4K\n"; }
-elsif($rate == 60) { print OUTM "CFLAGS += -DSERVO16K\n"; }
-elsif($rate == 30) { print OUTM "CFLAGS += -DSERVO32K\n"; }
-elsif($rate == 15) { print OUTM "CFLAGS += -DSERVO64K\n"; }
+if($rate == 480) { print OUTM "EXTRA_CFLAGS += -DSERVO2K\n"; }
+elsif($rate == 240) { print OUTM "EXTRA_CFLAGS += -DSERVO4K\n"; }
+elsif($rate == 60) { print OUTM "EXTRA_CFLAGS += -DSERVO16K\n"; }
+elsif($rate == 30) { print OUTM "EXTRA_CFLAGS += -DSERVO32K\n"; }
+elsif($rate == 15) { print OUTM "EXTRA_CFLAGS += -DSERVO64K\n"; }
 
-print OUTM "CFLAGS += -D";
+print OUTM "EXTRA_CFLAGS += -D";
 print OUTM "\U$skeleton";
 print OUTM "_CODE\n";
 if($systemName eq "sei" || $useFIRs)
 {
-print OUTM "CFLAGS += -DFIR_FILTERS\n";
+print OUTM "EXTRA_CFLAGS += -DFIR_FILTERS\n";
 }
 if ($cpus > 2) {
-print OUTM "CFLAGS += -DRESERVE_CPU2\n";
+print OUTM "EXTRA_CFLAGS += -DRESERVE_CPU2\n";
 }
 if ($cpus > 3) {
-print OUTM "CFLAGS += -DRESERVE_CPU3\n";
+print OUTM "EXTRA_CFLAGS += -DRESERVE_CPU3\n";
 }
-print OUTM "CFLAGS += -D_ADVANCED_LIGO=1\n";
-print OUTM "CFLAGS += -g\n";
+print OUTM "EXTRA_CFLAGS += -D_ADVANCED_LIGO=1\n";
+print OUTM "EXTRA_CFLAGS += -g\n";
 if ($adcOver) {
-  print OUTM "CFLAGS += -DROLLING_OVERFLOWS\n";
+  print OUTM "EXTRA_CFLAGS += -DROLLING_OVERFLOWS\n";
 }
 if ($no_sync) {
   print OUTM "#Comment out to enable 1PPS synchronization\n";
-  print OUTM "CFLAGS += -DNO_SYNC\n";
+  print OUTM "EXTRA_CFLAGS += -DNO_SYNC\n";
 } else {
   print OUTM "#Uncomment to disable 1PPS signal sinchronization (channel 31 (last), ADC 0)\n";
-  print OUTM "#CFLAGS += -DNO_SYNC\n";
+  print OUTM "#EXTRA_CFLAGS += -DNO_SYNC\n";
 }
 if ($no_daq) {
   print OUTM "#Comment out to enable DAQ\n";
-  print OUTM "CFLAGS += -DNO_DAQ\n";
+  print OUTM "EXTRA_CFLAGS += -DNO_DAQ\n";
 } else {
   print OUTM "#Uncomment to disable DAQ and testpoints\n";
-  print OUTM "#CFLAGS += -DNO_DAQ\n";
+  print OUTM "#EXTRA_CFLAGS += -DNO_DAQ\n";
 }
 if ($remoteIPChosts) {
   print OUTM "#Comment out to disable remote IPC over MX\n";
-  print OUTM "CFLAGS += -DUSE_MX=1\n";
+  print OUTM "EXTRA_CFLAGS += -DUSE_MX=1\n";
 } else {
   print OUTM "#Uncomment to enable remote IPC over MX\n";
-  print OUTM "#CFLAGS += -DUSE_MX=1\n";
+  print OUTM "#EXTRA_CFLAGS += -DUSE_MX=1\n";
 }
 if ($shmem_daq) {
   print OUTM "#Comment out to disable local frame builder connection; uncomment USE_GM setting too\n";
-  print OUTM "CFLAGS += -DSHMEM_DAQ\n";
-  print OUTM "#CFLAGS += -DUSE_GM=1\n";
+  print OUTM "EXTRA_CFLAGS += -DSHMEM_DAQ\n";
+  print OUTM "#EXTRA_CFLAGS += -DUSE_GM=1\n";
 } else {
   print OUTM "#Uncomment to enable local frame builder; comment out USE_GM setting too\n";
-  print OUTM "#CFLAGS += -DSHMEM_DAQ\n";
+  print OUTM "#EXTRA_CFLAGS += -DSHMEM_DAQ\n";
 if ($no_daq) {
-  print OUTM "#CFLAGS += -DUSE_GM=1\n";
+  print OUTM "#EXTRA_CFLAGS += -DUSE_GM=1\n";
 } else {
-  print OUTM "CFLAGS += -DUSE_GM=1\n";
+  print OUTM "EXTRA_CFLAGS += -DUSE_GM=1\n";
 }
 }
 # Use oversampling code if not 64K system
 if($rate != 15) {
   if ($no_oversampling) {
     print OUTM "#Uncomment to oversample A/D inputs\n";
-    print OUTM "#CFLAGS += -DOVERSAMPLE\n";
+    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE\n";
     print OUTM "#Uncomment to interpolate D/A outputs\n";
-    print OUTM "#CFLAGS += -DOVERSAMPLE_DAC\n";
+    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
   } else {
     print OUTM "#Comment out to stop A/D oversampling\n";
-    print OUTM "CFLAGS += -DOVERSAMPLE\n";
+    print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE\n";
     if ($no_dac_interpolation) {
     } else {
       print OUTM "#Comment out to stop interpolating D/A outputs\n";
-      print OUTM "CFLAGS += -DOVERSAMPLE_DAC\n";
+      print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
     }
   }
 }
 if ($dac_internal_clocking) {
   print OUTM "#Comment out to enable external D/A converter clocking\n";
-  print OUTM "CFLAGS += -DDAC_INTERNAL_CLOCKING\n";
+  print OUTM "EXTRA_CFLAGS += -DDAC_INTERNAL_CLOCKING\n";
 }
 if ($compat_initial_ligo) {
   print OUTM "#Comment out to disable initial LIGO compatibility\n";
-  print OUTM "CFLAGS += -DCOMPAT_INITIAL_LIGO\n";
+  print OUTM "EXTRA_CFLAGS += -DCOMPAT_INITIAL_LIGO\n";
 } else {
   print OUTM "#Uncomment to enable initial LIGO compatibility\n";
-  print OUTM "#CFLAGS += -DCOMPAT_INITIAL_LIGO\n";
+  print OUTM "#EXTRA_CFLAGS += -DCOMPAT_INITIAL_LIGO\n";
 }
 if ($adcMaster > -1) {
-  print OUTM "CFLAGS += -DADC_MASTER\n";
+  print OUTM "EXTRA_CFLAGS += -DADC_MASTER\n";
 } else {
   print OUTM "#Uncomment to run on an I/O Master \n";
-  print OUTM "#CFLAGS += -DADC_MASTER\n";
+  print OUTM "#EXTRA_CFLAGS += -DADC_MASTER\n";
 }
 if ($adcSlave > -1) {
-  print OUTM "CFLAGS += -DADC_SLAVE\n";
+  print OUTM "EXTRA_CFLAGS += -DADC_SLAVE\n";
 } else {
   print OUTM "#Uncomment to run on an I/O slave process\n";
-  print OUTM "#CFLAGS += -DADC_SLAVE\n";
+  print OUTM "#EXTRA_CFLAGS += -DADC_SLAVE\n";
 }
 if ($pciNet > -1) {
   print OUTM "#Enable use of PCIe RFM Network\n";
   print OUTM "DISDIR = /home/controls/DIS\n";
-  print OUTM "CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
+  print OUTM "EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
 } else {
   print OUTM "#Uncomment to use PCIe RFM Network\n";
   print OUTM "#DISDIR = /home/controls/DIS\n";
-  print OUTM "#CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
+  print OUTM "#EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
 }
 if ($specificCpu > -1) {
   print OUTM "#Comment out to run on first available CPU\n";
-  print OUTM "CFLAGS += -DSPECIFIC_CPU=$specificCpu\n";
+  print OUTM "EXTRA_CFLAGS += -DSPECIFIC_CPU=$specificCpu\n";
 } else {
   print OUTM "#Uncomment to run on a specific CPU\n";
-  print OUTM "#CFLAGS += -DSPECIFIC_CPU=2\n";
+  print OUTM "#EXTRA_CFLAGS += -DSPECIFIC_CPU=2\n";
 }
 
 print OUTM "\n";
 print OUTM "ifneq (\$(CDIR),)\n";
-print OUTM "override CFLAGS += \$(patsubst %,-I../../../%,\$(CDIR))\n";
+print OUTM "override EXTRA_CFLAGS += \$(patsubst %,-I../../../%,\$(CDIR))\n";
 print OUTM "endif\n";
 
 print OUTM "\n";
@@ -3076,7 +3076,7 @@ print OUTM "\trm -f \$(ALL) *.o\n";
 print OUTM "\n";
 if ($no_rtl) {
 
-print OUTM "EXTRA_CFLAGS += \$(CFLAGS) -DNO_RTL=1\n";
+print OUTM "EXTRA_CFLAGS += -DNO_RTL=1\n";
 print OUTM "EXTRA_CFLAGS += -I\$(SUBDIRS)/../../include\n";
 print OUTM "EXTRA_CFLAGS += -ffast-math -msse2\n";
 
@@ -3084,7 +3084,7 @@ print OUTM "obj-m += $skeleton" . "fe.o\n";
 
 } else {
 if ($wind_river_rtlinux) {
-  print OUTM "CFLAGS += -DKBUILD_MODNAME=1\n";
+  print OUTM "EXTRA_CFLAGS += -DKBUILD_MODNAME=1\n";
   print OUTM "include /home/controls/common_pc_64_build/build/rtcore-base-5.1/Rules.make\n";
 } else {
   print OUTM "include /opt/rtldk-2.2/rtlinuxpro/Rules.make\n";
@@ -3134,14 +3134,14 @@ print OUTME "\U$useWdName[$ii]";
 print OUTME ",(\"ifo=$site, sys=\U$systemName\,\Lsubsys=\U$useWdName[$ii]\")\'\n";
 }
 print OUTME "\n";
-print OUTME "CFLAGS += -D";
+print OUTME "EXTRA_CFLAGS += -D";
 print OUTME "\U$skeleton";
 print OUTME "_CODE\n";
 print OUTME "\n";
 print OUTME "LIBFLAGS += -lezca\n";
 if($systemName eq "sei" || $useFIRs)
 {
-print OUTME "CFLAGS += -DFIR_FILTERS\n";
+print OUTME "EXTRA_CFLAGS += -DFIR_FILTERS\n";
 }
 print OUTME "include config/Makefile.linux\n";
 print OUTME "\n";

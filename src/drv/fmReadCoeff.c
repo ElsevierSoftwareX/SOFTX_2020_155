@@ -276,7 +276,9 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
 
         if (stat(archiveFname[1], &buf) == 0) {
           printf("FIR archive file '%s' exists\n", archiveFname[1]);
-        }
+        } else {
+	  printf("Couldn't find FIR archive file %s\n", archiveFname[1]);
+	}
       }
     }
 

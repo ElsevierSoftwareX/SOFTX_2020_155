@@ -204,9 +204,9 @@ assign dcuId to "{ifo}:DAQ-FEC_{sysnum}_DCU_ID";
 %% extern pthread_mutex_t seq_lock;
 
 #if defined(RFM_EPICS)
-%% static RFM_FE_COMMS *pRfm;
-%% static VME_COEF *pVmeCoeff;
-%% static FILT_MOD *pFilt;
+%% static volatile RFM_FE_COMMS *pRfm;
+%% static volatile VME_COEF *pVmeCoeff;
+%% static volatile FILT_MOD *pFilt;
 %% static %EPICS_TYPE% *pEpics;
 %% static unsigned int sysnum;
 %% extern void *findRfmCard(int);

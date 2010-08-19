@@ -92,7 +92,7 @@ volatile DAQ_INFO_BLOCK *pInfo;		/* Ptr to DAQ config in shmem.	*/
 /* Fast Pentium FPU SQRT command */
 // inline double lsqrt (double __x) { register double __result; __asm __volatile__ ("fsqrt" : "=t" (__result) : "0" (__x)); return __result; }
 
-extern char *_epics_shm;		/* Ptr to EPICS shmem block		*/
+extern volatile char *_epics_shm;		/* Ptr to EPICS shmem block		*/
 extern long daqBuffer;			/* Address of daqLib swing buffers.	*/
 #ifdef SHMEM_DAQ
 extern char *_daq_shm;
@@ -306,10 +306,12 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	xferSize1 = ((xferSize1/8) + 1) * 8;
 
 
+#ifndef NO_RTL
     printf("Daq chan count = %d\nBlockSize = 0x%x\n",dataInfo.numChans,crcLength);
     printf("Daq XferSize = %d\n",xferSize1);
     printf("Daq xfer should complete in %d cycles\n",(crcLength/xferSize1));
     printf("Daq xmit Size = %d\n",mnDaqSize);
+#endif
 
 
     // Fill in the local lookup table for finding data.
@@ -379,7 +381,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     totalChans = dataInfo.numChans;
     // Set pointer to GDS table in shmem
     gdsPtr = (GDS_CNTRL_BLOCK *)(_epics_shm + DAQ_GDS_BLOCK_ADD);
+#ifndef NO_RTL
     printf("gdsCntrl block is at 0x%lx\n",(long)gdsPtr);
+#endif
     // Clear out the GDS TP selections.
     if(sysRate < DAQ_16K_SAMPLE_SIZE) tpx = 3;
     else tpx = 2;

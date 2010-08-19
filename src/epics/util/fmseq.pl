@@ -468,10 +468,10 @@ while (<IN>) {
 	$vardb .= "}\n";
     } elsif (substr($_,0,11) eq "EZ_CA_WRITE") {
 	($junk, $v_name, $v_var) = split(/\s+/, $_);
-	$vupdate .= "%% ezcaPut(\"$v_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
+	#$vupdate .= "%% ezcaPut(\"$v_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
     } elsif (substr($_,0,10) eq "EZ_CA_READ") {
 	($junk, $v_name, $v_var) = split(/\s+/, $_);
-	$vupdate .= "%%ezcaGet(\"$v_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
+	#$vupdate .= "%%ezcaGet(\"$v_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
     } elsif (substr($_,0,6) eq "DAQVAR") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);

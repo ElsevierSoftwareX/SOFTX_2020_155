@@ -39,8 +39,12 @@ inline int checkEpicsReset(int subcycle, CDS_EPICS *plocalEpics){
   ii = subcycle;
 
   if ((ii==MAX_MODULES) && (plocalEpics->epicsInput.vmeReset)) {
-        printf("VME_RESET PUSHED !!! \n");
-        gsaAdcStop();
+#ifndef NO_RTL
+        //printf("VME_RESET PUSHED !!! \n");
+#endif
+#ifdef ADC_MASTER
+	if (cdsPciModules.adcCount > 0) gsaAdcStop();
+#endif
         return(1);
   }
 

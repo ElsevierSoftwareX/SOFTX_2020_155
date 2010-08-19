@@ -140,7 +140,7 @@ unsigned int findRfmCard(unsigned int bn)
 }
 #else
 
-unsigned char *addr = 0;
+volatile unsigned char *addr = 0;
 
 
 
@@ -149,7 +149,7 @@ unsigned char *addr = 0;
   These are like /rtl_mem_das for DAS system,
   /rtl_mem_pde for PDE system.
 */
-void *
+volatile void *
 findSharedMemory(char *sys_name)
 {
 	char *s;

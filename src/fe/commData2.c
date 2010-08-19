@@ -51,9 +51,11 @@ int ii;
 	}
 	// Clear the data point
         ipcInfo[ii].data = 0.0;
+#if 0
         printf("IPC DATA for IPC %d ******************\n",ii);
         if(ipcInfo[ii].mode) printf("Mode = SENDER w Cycle = %d\n",ipcInfo[ii].sendCycle);
         else printf("Mode = RECEIVER w rcvRate and cycle = %d %d\n",ipcInfo[ii].rcvRate,ipcInfo[ii].rcvCycle);
+#endif
 
 	// Save pointers to the IPC communications memory locations.
         if(ipcInfo[ii].netType == IRFM)		// VMIC Reflected Memory *******************************
@@ -70,16 +72,18 @@ int ii;
         if((ipcInfo[ii].netType == IPCI) && (ipcInfo[ii].mode == IRCV))
 	{
                 ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(rfmAddress[IPC_PCIE_READ] + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
-                printf("Net Type = PCIE RCV IPC at 0x%lx  *********************************\n",(long)ipcInfo[ii].pIpcData);
+                printf("Net Type = PCIE RCV IPC %d at 0x%lx  *********************************\n",ipcInfo[ii].sendRate,(long)ipcInfo[ii].pIpcData);
         }
         if((ipcInfo[ii].netType == IPCI) && (ipcInfo[ii].mode == ISND))
 	{
                 ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(rfmAddress[IPC_PCIE_WRITE] + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
                 printf("Net Type = PCIE SEND IPC at 0x%lx  *********************************\n",(long)ipcInfo[ii].pIpcData);
         }
+#if 0
         printf("IPC Number = %d\n",ipcInfo[ii].ipcNum);
         printf("RCV Rate  = %d\n",ipcInfo[ii].rcvRate);
         printf("Send Computer Number  = %d\n",ipcInfo[ii].sendNode);
+#endif
 
     }
 }
