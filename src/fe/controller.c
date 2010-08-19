@@ -20,12 +20,16 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
+
+#include "feSelectHeader.h"
+
 #ifdef NO_RTL
 #include <linux/version.h>
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kthread.h>
 #include <asm/delay.h>
+
 #else
 #include <rtl_time.h>
 #include <time.h>
@@ -41,12 +45,12 @@
 #include <linux/slab.h>
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
-#include "feSelectHeader.h"
 
 #if MX_KERNEL == 1
 #include <myriexpress.h>
 #endif
-
+#include </usr/src/linux/arch/x86/include/asm/processor.h>
+#include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
 
 #ifdef DOLPHIN_TEST
 //#include <asm/io.h>
@@ -56,23 +60,37 @@ sci_l_segment_handle_t segment;
 sci_map_handle_t client_map_handle;
 sci_r_segment_handle_t  remote_segment_handle;
 
-char *dolphin_memory = 0;
-char *dolphin_memory_read = 0;
+volatile unsigned long *dolphin_memory = 0;
+volatile unsigned long *dolphin_memory_read = 0;
 
-                signed32 func(void IN *arg,
+int memory_valid = 0;
+
+		signed32 session_callback(session_cb_arg_t IN arg,
+                                session_cb_reason_t IN reason,
+                                session_cb_status_t IN status,
+                                unsigned32 IN target_node,
+                                unsigned32 IN local_adapter_number) {
+			printkl("Session callback reason=%d status=%d target_node=%d\n", reason, status, target_node);
+			return 0;
+		}
+
+                signed32 connect_callback(void IN *arg,
                         sci_r_segment_handle_t IN remote_segment_handle,
                         unsigned32 IN reason,
                         unsigned32 IN status) {
-                                // printk("Connect callback %d\n", reason);
+                                printkl("Connect callback reason=%d status=%d\n", reason, status);
+				if (reason == 1) memory_valid = 1;
+				if (reason == 3) memory_valid = 0;
+				if (reason == 5) memory_valid = 1;
                                 return 0;
                 }
 
-        	signed32 server_func(void IN *arg,
+        	signed32 create_segment_callback(void IN *arg,
                        sci_l_segment_handle_t IN local_segment_handle,
                        unsigned32 IN reason,
                        unsigned32 IN source_node,
                        unsigned32 IN local_adapter_number)  {
-                                // printk("Connect callback %d\n", reason);
+                                printkl("Create segment callback reason=%d source_node=%d\n", reason, source_node);
                                 return 0;
         	}
 #endif
@@ -83,7 +101,7 @@ char *dolphin_memory_read = 0;
 
 #define INLINE  inline
 #define MMAP_SIZE (64*1024*1024 - 5000)
-char *_epics_shm;		// Ptr to EPICS shared memory
+volatile char *_epics_shm;		// Ptr to EPICS shared memory
 char *_ipc_shm;			// Ptr to inter-process communication area 
 #if defined(SHMEM_DAQ)
 char *_daq_shm;			// Ptr to frame builder comm shared mem area 
@@ -100,13 +118,31 @@ volatile int vmeDone = 0;	// Code kill command
 volatile int stop_working_threads = 0;
 
 #ifdef NO_RTL
-#define printf printk
 #define STACK_SIZE    40000
 #define TICK_PERIOD   100000
 #define PERIOD_COUNT  1
 
 #else
 #include "msr.h"
+#endif
+
+#ifdef NO_RTL
+#undef NO_CPU_SHUTDOWN 1
+#ifndef NO_CPU_SHUTDOWN
+char fmt1[512];
+int printk(const char *fmt, ...) {
+    va_list args;
+    int r;
+
+    strcat(strcpy(fmt1, SYSTEM_NAME_STRING_LOWER), ": ");
+    strcat(fmt1, fmt);
+    va_start(args, fmt1);
+    r = vprintkl(fmt1, args);
+    va_end(args);
+    return r;
+}
+#endif
+#define printf printk
 #endif
 
 #include "fm10Gen.h"		// CDS filter module defs and C code
@@ -244,7 +280,7 @@ float *testpoint[500];	// Testpoints which are not part of filter modules
 float xExc[50];	// GDS EXC not associated with filter modules
 float floatDacOut[160]; // DAC outputs stored as floats, to be picked up as test points
 
-CDS_EPICS *pLocalEpics;   	// Local mem ptr to EPICS control data
+volatile CDS_EPICS *pLocalEpics;   	// Local mem ptr to EPICS control data
 
 
 // 1/16 sec cycle counters for DAQS and ISC RFM IPC
@@ -530,6 +566,19 @@ float duotime(int count, float meanVal, float data[])
 }
 #endif
 
+// Cache flushing mumbo jumbo suggested by Thomas Gleixner, it is probably useless
+// Did not see any effect
+  char fp [64*1024];
+
+
+// Get current kernel time (in GPS)
+inline unsigned long current_time() {
+	struct timespec t;
+	extern struct timespec current_kernel_time(void);
+	t = current_kernel_time();
+	t.tv_sec += - 315964819 + 33;
+	return t.tv_sec;
+}
 
 //***********************************************************************
 // TASK: fe_start()	
@@ -573,6 +622,8 @@ void *fe_start(void *arg)
   static int adcTime;			// Used in code cycle timing
   static int adcHoldTime;		// Stores time between code cycles
   static int adcHoldTimeMax;		// Stores time between code cycles
+  static int adcHoldTimeMin;
+  static int adcHoldTimeAvg;
   static int usrTime;			// Time spent in user app code
   static int usrHoldTime;		// Max time spent in user app code
   static int missedCycle = 0;		// Incremented error counter when too many values in ADC FIFO
@@ -614,9 +665,10 @@ void *fe_start(void *arg)
 #endif
 
 
-#ifdef NO_RTL
-  void printf(){}
-#endif
+  // Flush L1 cache
+  memset (fp, 0, 64*1024);
+  memset (fp, 1, 64*1024);
+  clflush_cache_range ((void *)fp, 64*1024);
 
 // Do all of the initalization ***********************************************************************
 
@@ -689,6 +741,7 @@ printf("Sync source = %d\n",syncSource);
 #else
 	usleep(1000000);
 #endif
+	cpu_relax();
   }while(!pLocalEpics->epicsInput.burtRestore);
 
   printf("BURT Restore Complete\n");
@@ -830,6 +883,8 @@ printf("Sync source = %d\n",syncSource);
   // Clear a couple of timing diags.
   adcHoldTime = 0;
   adcHoldTimeMax = 0;
+  adcHoldTimeMin = 0xffff;
+  adcHoldTimeAvg = 0;
   usrHoldTime = 0;
   missedCycle = 0;
 
@@ -907,14 +962,24 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		CDIO1616Output[tdsControl] = 0x3300000;
 		CDIO1616Input[tdsControl] = writeCDIO1616l(&cdsPciModules, tdsControl, CDIO1616Output[tdsControl]);
 		printf("writing BIO\n");
+#ifdef NO_RTL
+		udelay(20000);
+		udelay(20000);
+#else
 		usleep(40000);
+#endif
 		// Arm ADC modules
     		gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
 		// Arm DAC outputs
 		gsaDacTrigger(&cdsPciModules);
 		// Set synched flag so later code will not check for 1PPS
 		sync21pps = 1;
+#ifdef NO_RTL
+		udelay(20000);
+		udelay(20000);
+#else
 		usleep(40000);
+#endif
 		// Start ADC/DAC clocks
 		CDIO1616Output[tdsControl] = 0x7B00000;
 		CDIO1616Input[tdsControl] = writeCDIO1616l(&cdsPciModules, tdsControl, CDIO1616Output[tdsControl]);
@@ -923,9 +988,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		 // If IRIG-B card present, use it for startup synchronization
 		wtmax = 20;
 		wtmin = 5;
-		#ifndef NO_RTL
-			printf("Waiting until usec = %d to start the ADCs\n", wtmin);
-		#endif
+		printf("Waiting until usec = %d to start the ADCs\n", wtmin);
 		do{
 			if(cdsPciModules.gpsType == SYMCOM_RCVR) usec = getGpsUsec();
 			if(cdsPciModules.gpsType == TSYNC_RCVR) gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
@@ -938,10 +1001,8 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		sync21pps = 1;
 		// Send IRIG-B locked/not locked diagnostic info
 		if(!gps_receiver_locked)pLocalEpics->epicsOutput.timeErr |= TIME_ERR_IRIGB;
-		#ifndef NO_RTL
-			printf("Running time %d us\n", usec);
-		  	printf("Triggered the DAC\n");
-		#endif
+		printf("Running time %d us\n", usec);
+	  	printf("Triggered the DAC\n");
 		break;
 	case SYNC_SRC_1PPS:
 		// Arm ADC modules
@@ -949,7 +1010,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		// Start clocking the DAC outputs
 		gsaDacTrigger(&cdsPciModules);
 		break;
-	default:
+	default: {
 		    // IRIG-B card not found, so use CPU time to get close to 1PPS on startup
 			// Pause until this second ends
 		#ifdef NO_RTL
@@ -964,6 +1025,17 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			aim_time  = rt_get_time();
 			sync_time = aim_time + wait_delay;
 		*/
+#ifdef TIME_SLAVE
+// sync up with the time master on its gps time
+	  unsigned long d = dolphin_memory_read[0];
+	  for (;;) {
+		         if (dolphin_memory_read[1] != d) break;
+			 __monitor((void *)&dolphin_memory_read[1], 0, 0);
+		         if (dolphin_memory_read[1] != d) break;
+			 __mwait(0, 0);
+	  }
+
+#endif
 		#else
 			clock_gettime(CLOCK_REALTIME, &next);
 			// printf("Start time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
@@ -974,22 +1046,17 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			// printf("Running time without IRIGb%ld s %ld ns\n", next.tv_sec, next.tv_nsec);
 		#endif
 		break;
+	}
   }
   }
 
 
   if (run_on_timer) {
-#ifndef NO_RTL
     printf("*******************************\n");
-    printf("* Running with RTLinux timer! *\n");
+    printf("*     Running on timer!       *\n");
     printf("*******************************\n");
-
-#endif
   }
-
-#ifndef NO_RTL
-  // printf("Triggered the ADC\n");
-#endif
+  printf("Triggered the ADC\n");
 #endif
 #ifdef ADC_SLAVE
 	// SLAVE needs to sync with MASTER by looking for cycle 0 count in ipc memory
@@ -997,10 +1064,37 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
         ll = cdsPciModules.adcConfig[0];
         printf("waiting to sync %d\n",ioMemData->iodata[ll][0].cycle);
         rdtscl(cpuClock[0]);
+
+#if 0
 	// Spin until cycle 0 detected in first ADC buffer location.
         do{
+#ifdef NO_RTL
+		udelay(1);
+#else
                 usleep(1);
+#endif
         }while(ioMemData->iodata[ll][0].cycle != 0);
+	#endif
+
+#if 1
+	for(;;) {
+	  if (ioMemData->iodata[ll][0].cycle == 0) break;
+	  __monitor((void *)&(ioMemData->iodata[ll][0].cycle), 0, 0);
+	  if (ioMemData->iodata[ll][0].cycle == 0) break;
+	  __mwait(0, 0);
+	}
+#endif
+
+#if 0
+static inline void __monitor(const void *eax, unsigned long ecx,
+                             unsigned long edx)
+			     {
+			             /* "monitor %eax, %ecx, %edx;" */
+				             asm volatile(".byte 0x0f, 0x01, 0xc8;"
+					                          :: "a" (eax), "c" (ecx), "d"(edx));
+								  }
+	  #endif
+
         rdtscl(cpuClock[1]);
         cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
         printf("Synched %d\n",cycleTime);
@@ -1035,12 +1129,40 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
   // **********************************************************************************************
   // Enter the infinite FE control loop  **********************************************************
   // **********************************************************************************************
+#ifdef NO_RTL
+  // Calculate how many CPU cycles per code cycle
+  unsigned long cpc = cpu_khz * 1000;
+  cpc /= CYCLE_PER_SECOND;
+#endif
+
   while(!vmeDone){ 	// Run forever until user hits reset
 
   	if (run_on_timer) {  // NO ADC present, so run on CPU realtime clock
 	  // Pause until next cycle begins
 #ifdef NO_RTL
-	  udelay(1000);
+#if 0
+	  // advance to the next cycle polling CPU cycles and microsleeping
+  	  int clk, clk1;
+	  rdtscl(clk);
+	  clk += cpc;
+	  for(;;) {
+	  	rdtscl(clk1);
+		if (clk1 >= clk) break;
+		udelay(1);
+	  }
+#else
+	  unsigned long d = dolphin_memory_read[1];
+	  for(;dolphin_memory_read[1] == d;) udelay(1);
+#if 0
+	  for (;;) {
+		         if (dolphin_memory_read[1] != d) break;
+			 __monitor((void *)&dolphin_memory_read[1], 0, 0);
+		         if (dolphin_memory_read[1] != d) break;
+			 __mwait(0, 0);
+	  }
+#endif
+	//if (dolphin_memory_read[1] != d+1) printk("dolphin cycle jump from %d to %d\n", d, dolphin_memory_read[1]);
+#endif
 #else
     	  struct timespec next;
     	  clock_gettime(CLOCK_REALTIME, &next);
@@ -1051,15 +1173,25 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
     	    next.tv_nsec = 1000000000 / CYCLE_PER_SECOND * clock16K;
 	  }
           clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
-	  rdtscl(cpuClock[0]);
-
 #endif
+	  rdtscl(cpuClock[0]);
 #ifndef ADC_SLAVE
 	  // Write GPS time and cycle count as indicator to slave that adc data is ready
 	  ioMemData->gpsSecond = timeSec;
 	  ioMemData->iodata[0][0].cycle = clock16K;
           if(clock16K == 0) timeSec++;
 #endif
+         if(clock16K == 0)
+          {
+#ifdef TIME_SLAVE
+	  if (memory_valid) timeSec = *rfmTime;
+	//*((volatile unsigned int *)dolphin_memory) = timeSec ++;
+#else
+	  // Increment GPS second on cycle 0
+          timeSec ++;
+#endif
+          pLocalEpics->epicsOutput.timeDiag = timeSec;
+	  }
 	} else {
 	// NORMAL OPERATION -- Wait for ADC data ready
 	// On startup, only want to read one sample such that first cycle
@@ -1069,14 +1201,23 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	// **********************************************************************************************************
        if(clock16K == 0)
         {
+#ifdef TIME_SLAVE
+	  if (memory_valid) timeSec = *rfmTime;
+	  *rfmTime = timeSec ++;
+#else
 	  // Increment GPS second on cycle 0
           timeSec ++;
+#endif
           pLocalEpics->epicsOutput.timeDiag = timeSec;
 #ifdef TIME_MASTER
 	  // Update time on RFM if this is GPS time master
 	  *rfmTime = timeSec;
 #endif
         }
+#ifdef TIME_MASTER
+	// Update cycle
+	dolphin_memory[1] = clock16K;
+#endif
         for(ll=0;ll<sampleCount;ll++)
         {
 #ifndef ADC_SLAVE
@@ -1091,18 +1232,32 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
                     kk = 0;
 		
 		    rdtscl(cpuClock[8]);
+
+#if 0
+		    // Monitor the first ADC
+		    if (jj == 0) {
+		       for (;;) {
+		         if (*packedData != 0x110000) break;
+			 __monitor((void *)packedData, 0, 0);
+		         if (*packedData != 0x110000) break;
+			 __mwait(0, 0);
+		       }
+		       rdtscl(cpuClock[9]);
+		       adcWait = (cpuClock[9] - cpuClock[8])/CPURATE;
+		    } else 
+#endif
                     do {
                         kk ++;
 			// Need to delay if not ready as constant banging of the input register
 			// will slow down the ADC DMA.
 			if(*packedData == 0x110000) {
-#ifdef NO_RTL
-				udelay(1);
-#else
+//#ifdef NO_RTL
+				//udelay(1);
+//#else
 				// if(jj==0) usleep(0);
 		    		rdtscl(cpuClock[9]);
 				adcWait = (cpuClock[9] - cpuClock[8])/CPURATE;
-#endif
+//#endif
 			}
 			// Allow 1msec for data to be ready (should never take that long).
                     }while((*packedData == 0x110000) && (adcWait < 1000000));
@@ -1490,8 +1645,14 @@ printf("got here %d %d\n",clock16K,ioClock);
   	  pLocalEpics->epicsOutput.diags[8] = dacEnable;
 #endif
           timeHold = 0;
-	  pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeMax;
+	  if (timeSec % 4 == 0) pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeMin;
+	  else if (timeSec % 4 == 1)
+		pLocalEpics->epicsOutput.adcWaitTime =  adcHoldTimeMax;
+	  else
+	  	pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeAvg/CYCLE_PER_SECOND;
 		adcHoldTimeMax = 0;
+		adcHoldTimeMin = 0xffff;
+		adcHoldTimeAvg = 0;
 	  if((adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcHoldTime < CYCLE_TIME_ALRM_LO)) diagWord |= FE_ADC_HOLD_ERR;
 	  if(timeHoldMax > CYCLE_TIME_ALRM_HI) diagWord |= FE_PROC_TIME_ERR;
   	  if(pLocalEpics->epicsInput.diagReset || initialDiagReset)
@@ -1733,6 +1894,8 @@ printf("got here %d %d\n",clock16K,ioClock);
 	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
 	adcHoldTime = (cpuClock[0] - adcTime)/CPURATE;
 	if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
+	if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
+	adcHoldTimeAvg += adcHoldTime;
 	adcTime = cpuClock[0];
 	// Calc the max time of one cycle of the user code
 #ifdef ADC_MASTER
@@ -1765,16 +1928,6 @@ printf("got here %d %d\n",clock16K,ioClock);
   /* System reset command received */
   return (void *)-1;
 }
-
-// Get current kernel time (in GPS)
-inline unsigned long current_time() {
-	struct timespec t;
-	extern struct timespec current_kernel_time(void);
-	t = current_kernel_time();
-	t.tv_sec += - 315964819 + 33;
-	return t.tv_sec;
-}
-
 // MAIN routine: Code starting point ****************************************************************
 #ifdef NO_RTL
 
@@ -1801,11 +1954,12 @@ int main(int argc, char **argv)
 
 	printf("startup time is %d\n", current_time());
 #ifdef DOLPHIN_TEST
-        if (argc > 1) target_node = atoi(argv[1]);
-	else {
-		printf("Need target node id number argument -- EXITING!! \n");
-		return 1;
-	}
+        //if (argc > 1) target_node = atoi(argv[1]);
+	//else {
+		//printf("Need target node id number argument -- EXITING!! \n");
+		//return 1;
+	//}
+	target_node = DIS_TARGET_NODE;
 
         	scierror_t err =
         	sci_create_segment(NO_BINDING,
@@ -1813,7 +1967,7 @@ int main(int argc, char **argv)
                                 1,
                                 DIS_BROADCAST,
                                 0x6000,
-                                server_func,
+                                create_segment_callback,
                                 0,
                                 &segment);
         	printk("DIS segment alloc status %d\n", err);
@@ -1842,6 +1996,8 @@ int main(int argc, char **argv)
 			printk("Dolphin memory read at 0x%p\n", read_addr);
 			dolphin_memory_read = read_addr;
 		}
+		udelay(20000);
+		udelay(20000);
 
         	err =
                 sci_connect_segment(NO_BINDING,
@@ -1850,13 +2006,18 @@ int main(int argc, char **argv)
                                 0,
                                 1, 
                                 DIS_BROADCAST,
-                                func, 
+                                connect_callback, 
 				0,
                                 &remote_segment_handle);
                 printk("DIS connect segment status %d\n", err);
-                if (err) return -1;
+                if (err) {
+                	sci_remove_segment(&segment, 0);
+			return -1;
+		}
 
-	        usleep(20000);
+	       // usleep(20000);
+		udelay(20000);
+		udelay(20000);
         	err = sci_map_segment(remote_segment_handle,
                                 DIS_BROADCAST,
                                 0,
@@ -1865,17 +2026,22 @@ int main(int argc, char **argv)
         	printk("DIS segment mapping status %d\n", err);
         	if (err) {
                 	sci_disconnect_segment(&remote_segment_handle, 0);
+                	sci_remove_segment(&segment, 0);
                 	return -1;
 	        }
 
 		char *addr = sci_kernel_virtual_address_of_mapping(client_map_handle);
         	if (addr == 0) {
                 	printk ("Got zero pointer from sci_kernel_virtual_address_of_mapping\n");
+                	sci_disconnect_segment(&remote_segment_handle, 0);
+                	sci_remove_segment(&segment, 0);
                 	return -1;
         	} else {
 			printk ("Dolphin memory at 0x%p\n", addr);
 			dolphin_memory = addr;
 		}
+
+		sci_register_session_cb(0,0,session_callback,0);
 
 #endif
 
@@ -1940,10 +2106,10 @@ int main(int argc, char **argv)
                 return -1;
 	  }
         }
+#endif
 	printf("IPC at 0x%x\n",(int)_ipc_shm);
   	ioMemData = (IO_MEM_DATA *)(_ipc_shm+ 0x4000);
 
-#endif
 
 // If DAQ is via shared memory (Framebuilder code running on same machine or MX networking is used)
 // attach DAQ shared memory location.
@@ -2208,6 +2374,9 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	cdsPciModules.rfmCount = ioMemData->rfmCount;
 #endif
 	printf("%d RFM cards found\n",cdsPciModules.rfmCount);
+#ifdef ADC_MASTER
+	ioMemData->rfmCount = cdsPciModules.rfmCount;
+#endif
 	for(ii=0;ii<cdsPciModules.rfmCount;ii++)
         {
                  printf("\tRFM %d is a VMIC_%x module with Node ID %d\n", ii, cdsPciModules.rfmType[ii], cdsPciModules.rfmConfig[ii]);
@@ -2218,7 +2387,6 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 #ifdef ADC_MASTER
 		// Master sends RFM memory pointers to SLAVES
 		ioMemData->pci_rfm[ii] = cdsPciModules.pci_rfm[ii];
-		ioMemData->rfmCount = cdsPciModules.rfmCount;
 #endif
 	}
 #ifdef DOLPHIN_TEST
@@ -2231,12 +2399,13 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 // slaves may be defined to send/receive GPS time seconds via PCIe RFM. This is only
 // for use by ADC_MASTER applications.
 #ifdef TIME_MASTER
-	rfmTime = (unsigned int *)dolphin_memory;
+	rfmTime = (volatile unsigned int *)dolphin_memory;
 	printf("TIME MASTER AT 0x%x\n",(int)rfmTime);
 #endif
 #ifdef TIME_SLAVE
-	rfmTime = (unsigned int *)dolphin_memory_read;
+	rfmTime = (volatile unsigned int *)dolphin_memory_read;
 	printf("TIME SLAVE AT 0x%x\n",(int)rfmTime);
+	printf("rfmTime = %d\n", *rfmTime);
 #endif
 #endif
         printf("***************************************************************************\n");
@@ -2277,7 +2446,12 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 #endif
 
         pLocalEpics = (CDS_EPICS *)&((RFM_FE_COMMS *)_epics_shm)->epicsSpace;
-        printf("Epics burt restore is %d\n", pLocalEpics->epicsInput.burtRestore);
+	int cnt;
+	for (cnt = 0;  cnt < 10 && pLocalEpics->epicsInput.burtRestore == 0; cnt++) {
+        	printf("Epics burt restore is %d\n", pLocalEpics->epicsInput.burtRestore);
+        	msleep(1000);
+	}
+	if (cnt == 10) return -1;
 
 #ifdef NO_CPU_SHUTDOWN
         struct task_struct *p;
@@ -2308,6 +2482,8 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	// Waiting for FE reset
         while(pLocalEpics->epicsInput.vmeReset == 0) {
                 msleep(1000);
+	//	cpu_relax();
+		//printf("vmeReset wait\n");
         }
 
 #ifndef NO_CPU_SHUTDOWN
@@ -2325,8 +2501,8 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
         cpu_up(CPUID);
 
 #endif
-        msleep(1000);
-        return 0;
+        //msleep(1000);
+	printkl("Brought the CPU back up\n");
 #else
 
         rtl_pthread_attr_init(&attr);
@@ -2394,12 +2570,15 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 #endif
 
 #ifdef DOLPHIN_TEST
-sci_set_local_segment_unavailable(segment, 0);
-      sci_unexport_segment(segment, 0, 0);
+	sci_set_local_segment_unavailable(segment, 0);
+      	sci_unexport_segment(segment, 0, 0);
         sci_remove_segment(&segment, 0);
-
+	sci_cancel_session_cb(0, 0);
 #endif
 
+#ifdef NO_RTL
+        return -1;
+#endif
         return 0;
 }
 
@@ -2407,3 +2586,5 @@ sci_set_local_segment_unavailable(segment, 0);
 void cleanup_module (void) {
 }
 #endif
+
+MODULE_LICENSE("GPL");

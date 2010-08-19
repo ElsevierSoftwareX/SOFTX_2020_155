@@ -47,7 +47,7 @@ static struct file_operations mbuf_fops = {
 
 // internal data
 // How many memory areas we will support
-#define MAX_AREAS 16
+#define MAX_AREAS 64
 
 // pointer to the kmalloc'd area, rounded up to a page boundary
 void *kmalloc_area[MAX_AREAS];
