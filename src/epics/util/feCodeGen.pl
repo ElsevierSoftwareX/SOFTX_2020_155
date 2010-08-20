@@ -473,6 +473,12 @@ if ($ipcxCnt > 0) {
    $ipcxNotFound = 0;
    $ipcxRcvrCnt = 0;
 
+   for ($ii = 0; $ii < 3; $ii++) {
+      if ($ipcxMaxNum[$ii] == -999) {
+         $ipcxMaxNum[$ii] = -1;
+      }
+   }
+
    #
    # Locate each IPCx module in the IPCx parts matrix
    #
@@ -612,6 +618,11 @@ if ($ipcxCnt > 0) {
             #
             if (++$ipcxMaxNum[$ipcxTypeIndex] > 999) {
                die "***ERROR: IPCx number > 999 for ipcType = $ipcxType[$ipcxTypeIndex]\n";
+            }
+
+            $signalName = $ipcxParts[$ipcxAdd[$jj][0]][0];
+            if ($signalName =~ /^\w+([A-Z]\d\:.+)/) {
+               $signalName = $1;
             }
 
             print IPCOUT "\[$signalName\]\n";
