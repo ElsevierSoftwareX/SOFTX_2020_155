@@ -68,6 +68,8 @@ if (@ARGV > 3) {
 		$location = "stanford";
 	} elsif ($site =~ /^K/) {
 		$location = "kamioka";
+	} elsif ($site =~ /^X/) {
+		$location = "tst";
 	}
 }
 if (@ARGV > 4) {
@@ -86,7 +88,7 @@ if (@ARGV > 4) {
 }
 $skeleton = $ARGV[1];
 
-if ($skeleton !~ m/^[cghklms]\d.*/) {
+if ($skeleton !~ m/^[cghklmsx]\d.*/) {
    die "***ERROR: Model name must begin with <ifo><subsystem>: $skeleton\n";
 }
 
@@ -122,11 +124,11 @@ mkdir $cFileDirectory, 0755;
 open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
 # Save existing front-end Makefile
 @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
-if (-s $mFile) {
   my ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
   my $year = 1900 + $yearOffset;
   #my $theTime = $year . "_$months[$month]" . "_$dayOfMonth" . "_$hour:$minute:$second";
   $theTime = sprintf("%d_%s_%02d_%02d:%02d:%02d", $year, $months[$month], $dayOfMonth, $hour, $minute, $second);
+if (-s $mFile) {
   system ("/bin/mv $mFile $mFile" . "_$theTime");
   #open(OUTM, "/dev/null") || die "cannot open /dev/null for writing";
 }
@@ -382,9 +384,11 @@ if ($ipcxCnt > 0) {
    #
    ("CDS::Parameters::printHeaderStruct") -> ($oo);
 
-   $iFile = "/cvs/cds/";
-   #$iFile = "/opt/rtcds/";
+   #$iFile = "/cvs/cds/";
+   $iFile = "/opt/rtcds/";
    $iFile .= $location;
+   $iFile .= "/";
+   $iFile .= lc $site;
    $iFile .= "/chans/ipc/";
    $iFile .= $site;
    $iFile .= "\.ipc";
