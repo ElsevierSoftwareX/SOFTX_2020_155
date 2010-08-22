@@ -22,6 +22,7 @@ typedef struct CDS_IPC_INFO {
         int errFlag;
 	int errTotal;
 	CDS_IPC_COMMS *pIpcData;
+	CDS_IPC_COMMS *pIpcData2;
 } CDS_IPC_INFO;
 typedef struct CDS_IPC_KEY_LIST {
 	char name[32];
@@ -48,8 +49,8 @@ typedef struct CDS_IPC_KEY_LIST {
   //   and is used to index the ring buffer
 #endif
 
-void commData2Init(int connects, int rate, CDS_IPC_INFO ipcInfo[], long rfmAddress[]);
-void commData2Send(int connects, CDS_IPC_INFO ipcInfo[], int timeSec, int cycle);
-void commData2Receive(int connects, CDS_IPC_INFO ipcInfo[], int timeSec, int cycle);
+//void commData2Init(int connects, int rate, CDS_IPC_INFO ipcInfo[], long rfmAddress[]);
+//void commData2Send(int connects, CDS_IPC_INFO ipcInfo[], int timeSec, int cycle);
+//void commData2Receive(int connects, CDS_IPC_INFO ipcInfo[], int timeSec, int cycle);
 
 #endif // __COMMDATA2_H__
