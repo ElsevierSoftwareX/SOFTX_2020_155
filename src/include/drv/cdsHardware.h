@@ -100,6 +100,7 @@ typedef struct CDS_HARDWARE{
 #define MAX_IO_MODULES		16
 
 typedef struct MEM_DATA_BLOCK{
+	int timeSec;
 	int cycle;
 	int data[32];
 }MEM_DATA_BLOCK;
