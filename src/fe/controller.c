@@ -52,6 +52,8 @@
 #include </usr/src/linux/arch/x86/include/asm/processor.h>
 #include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
 
+extern int iop_rfm_valid;
+
 #ifdef DOLPHIN_TEST
 //#include <asm/io.h>
 #include <genif.h>
@@ -62,8 +64,6 @@ sci_r_segment_handle_t  remote_segment_handle;
 
 volatile unsigned long *dolphin_memory = 0;
 volatile unsigned long *dolphin_memory_read = 0;
-
-int memory_valid = 0;
 
 		signed32 session_callback(session_cb_arg_t IN arg,
                                 session_cb_reason_t IN reason,
@@ -79,9 +79,9 @@ int memory_valid = 0;
                         unsigned32 IN reason,
                         unsigned32 IN status) {
                                 printkl("Connect callback reason=%d status=%d\n", reason, status);
-				if (reason == 1) memory_valid = 1;
-				if (reason == 3) memory_valid = 0;
-				if (reason == 5) memory_valid = 1;
+				if (reason == 1) iop_rfm_valid = 1;
+				if (reason == 3) iop_rfm_valid = 0;
+				if (reason == 5) iop_rfm_valid = 1;
                                 return 0;
                 }
 
@@ -513,7 +513,6 @@ unsigned int getGpsUsec() {
 }
 //***********************************************************************
 // Get Gps card microseconds from SYMCOM IRIG-B Rcvr
-#define DUOTONE_TIMING 1
 #ifdef DUOTONE_TIMING
 float duotime(int count, float meanVal, float data[])
 {
@@ -557,6 +556,7 @@ float duotime(int count, float meanVal, float data[])
         }
         meanVal -= offset;
         // answer = meanVal/slope - 19.7;
+        // answer = meanVal/slope;
         answer = meanVal/slope - 91.552;
 #ifdef DUOTONE_DAC
         // answer-= 42.5;
@@ -1036,6 +1036,11 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	  }
 
 #endif
+	  #ifdef RFM_TIME_SLAVE
+	  for(;((volatile long *)(cdsPciModules.pci_rfm[0]))[0] != 0;) udelay(1);
+	  timeSec = ((volatile long *)(cdsPciModules.pci_rfm[0]))[1];
+	  timeSec --;
+	  #endif
 		#else
 			clock_gettime(CLOCK_REALTIME, &next);
 			// printf("Start time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
@@ -1084,6 +1089,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	  __mwait(0, 0);
 	}
 #endif
+        timeSec = ioMemData->iodata[ll][0].timeSec;
 
 #if 0
 static inline void __monitor(const void *eax, unsigned long ecx,
@@ -1151,8 +1157,20 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 		udelay(1);
 	  }
 #else
-	  unsigned long d = dolphin_memory_read[1];
-	  for(;dolphin_memory_read[1] == d;) udelay(1);
+	  #ifdef RFM_TIME_SLAVE
+	  unsigned long d = ((volatile long *)(cdsPciModules.pci_rfm[0]))[0];
+	  for(;((volatile long *)(cdsPciModules.pci_rfm[0]))[0] == d;) udelay(1);
+	  timeSec = ((volatile long *)(cdsPciModules.pci_rfm[0]))[1];
+	  #endif
+#ifdef TIME_SLAVE
+// sync up with the time master on its gps time
+//
+		unsigned long d = 0;
+          if (iop_rfm_valid) d = dolphin_memory_read[1];
+	            for(;iop_rfm_valid? dolphin_memory_read[1] == d: 0;) udelay(1);
+
+
+#endif
 #if 0
 	  for (;;) {
 		         if (dolphin_memory_read[1] != d) break;
@@ -1179,12 +1197,14 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 	  // Write GPS time and cycle count as indicator to slave that adc data is ready
 	  ioMemData->gpsSecond = timeSec;
 	  ioMemData->iodata[0][0].cycle = clock16K;
+	  #ifndef RFM_TIME_SLAVE
           if(clock16K == 0) timeSec++;
+	  #endif
 #endif
          if(clock16K == 0)
           {
 #ifdef TIME_SLAVE
-	  if (memory_valid) timeSec = *rfmTime;
+	  if (iop_rfm_valid) timeSec = *rfmTime;
 	//*((volatile unsigned int *)dolphin_memory) = timeSec ++;
 #else
 	  // Increment GPS second on cycle 0
@@ -1201,22 +1221,18 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 	// **********************************************************************************************************
        if(clock16K == 0)
         {
-#ifdef TIME_SLAVE
-	  if (memory_valid) timeSec = *rfmTime;
-	  *rfmTime = timeSec ++;
-#else
 	  // Increment GPS second on cycle 0
+#ifndef ADC_SLAVE
           timeSec ++;
-#endif
           pLocalEpics->epicsOutput.timeDiag = timeSec;
+#endif
 #ifdef TIME_MASTER
 	  // Update time on RFM if this is GPS time master
 	  *rfmTime = timeSec;
 #endif
         }
 #ifdef TIME_MASTER
-	// Update cycle
-	dolphin_memory[1] = clock16K;
+  		// clflush_cache_range (dolphin_memory + 1, 8);
 #endif
         for(ll=0;ll<sampleCount;ll++)
         {
@@ -1261,6 +1277,23 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 			}
 			// Allow 1msec for data to be ready (should never take that long).
                     }while((*packedData == 0x110000) && (adcWait < 1000000));
+
+
+#ifdef TIME_MASTER
+		if (iop_rfm_valid) {
+			// *rfmTime = timeSec;
+			dolphin_memory[1] = clock16K;
+  		// clflush_cache_range (dolphin_memory + 1, 8);
+		}
+		    if (cdsPciModules.pci_rfm[0]) {
+		    	((volatile long *)(cdsPciModules.pci_rfm[0]))[0] = clock16K;
+		    	((volatile long *)(cdsPciModules.pci_rfm[0]))[1] = timeSec;
+		    }
+		    if (cdsPciModules.pci_rfm[1]) {
+		    	((volatile long *)(cdsPciModules.pci_rfm[1]))[0] = clock16K;
+		    	((volatile long *)(cdsPciModules.pci_rfm[1]))[1] = timeSec;
+		    }
+#endif
 
 		    // If data not ready in time, abort
 		    // Either the clock is missing or code is running too slow and ADC FIFO
@@ -1352,6 +1385,7 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 		    // Write GPS time and cycle count as indicator to slave that adc data is ready
 	  	    ioMemData->gpsSecond = timeSec;;
 		    ioMemData->iodata[jj][ioMemCntr].cycle = clock16K;
+		    ioMemData->iodata[jj][ioMemCntr].timeSec = timeSec;;
 #endif
 
 		    // Check for ADC overflows
@@ -1422,6 +1456,8 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 				adcWait = (cpuClock[9] - cpuClock[8])/CPURATE;
                                 // kk++;
                         }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (adcWait < 1000));
+			// timeSec = ioMemData->gpsSecond;
+			timeSec = ioMemData->iodata[mm][ioMemCntr].timeSec;
                         // }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (kk < 1000));
 
                         if(adcWait >= 1000)
@@ -1624,13 +1660,14 @@ printf("got here %d %d\n",clock16K,ioClock);
         duotoneDac[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][30];
         duotoneTotalDac += dWord[0][30];
         duotone[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][31];
+        // duotone[(clock16K) % CYCLE_PER_SECOND] = dWord[0][31];
         duotoneTotal += dWord[0][31];
         if(clock16K == 16)
         {
                 duotoneTime = duotime(12, duotoneMean, duotone);
                 pLocalEpics->epicsOutput.diags[4] = duotoneTime;
                 duotoneTimeDac = duotime(12, duotoneMeanDac, duotoneDac);
-                pLocalEpics->epicsOutput.diags[5] = duotoneTimeDac;
+                // pLocalEpics->epicsOutput.diags[5] = duotoneTimeDac;
 		// printf("du = %f %f %f %f %f\n",duotone[5], duotone[6], duotone[7],duotone[8],duotone[9]);
         }
 #endif
@@ -1822,6 +1859,12 @@ printf("got here %d %d\n",clock16K,ioClock);
 	  }
         }
 
+#ifdef ADC_SLAVE
+        if(clock16K == 1)
+	{
+          pLocalEpics->epicsOutput.timeDiag = timeSec;
+	}
+#endif
         if(clock16K == 220)
 	{
 	      // Send DAC output values at 16Hzfb
@@ -1959,7 +2002,12 @@ int main(int argc, char **argv)
 		//printf("Need target node id number argument -- EXITING!! \n");
 		//return 1;
 	//}
-	target_node = DIS_TARGET_NODE;
+	//
+	#ifdef X1X12_CODE
+	target_node = 8; //DIS_TARGET_NODE;
+	#else
+	target_node = 4; //DIS_TARGET_NODE;
+	#endif
 
         	scierror_t err =
         	sci_create_segment(NO_BINDING,
@@ -2503,6 +2551,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 #endif
         //msleep(1000);
 	printkl("Brought the CPU back up\n");
+
 #else
 
         rtl_pthread_attr_init(&attr);
@@ -2584,7 +2633,41 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 
 #ifdef NO_RTL
 void cleanup_module (void) {
+	#if 0
+	pLocalEpics->epicsInput.vmeReset = 1;
+
+#ifndef NO_CPU_SHUTDOWN
+	extern void set_fe_code_idle(void (*ptr)(void), unsigned int cpu);
+	// Unset the code callback
+        set_fe_code_idle(0, CPUID);
+#endif
+
+	// Stop the code and wait
+        stop_working_threads = 1;
+        msleep(1000);
+
+#ifdef DOLPHIN_TEST
+	sci_set_local_segment_unavailable(segment, 0);
+      	sci_unexport_segment(segment, 0, 0);
+        sci_remove_segment(&segment, 0);
+	sci_cancel_session_cb(0, 0);
+#endif
+
+	printkl("Will bring back CPU %d\n", CPUID);
+        msleep(1000);
+#ifndef NO_CPU_SHUTDOWN
+	// Bring the CPU back up
+	extern int __cpuinit cpu_up(unsigned int cpu);
+        cpu_up(CPUID);
+#endif
+        //msleep(1000);
+	printkl("Brought the CPU back up\n");
+	#endif
+
 }
 #endif
 
-MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("Control system");
+MODULE_AUTHOR("LIGO");
+MODULE_LICENSE("Dual BSD/GPL");
+
