@@ -17,7 +17,7 @@ KDIR		:= /lib/modules/$(shell uname -r)/build
 KVER		:= $(shell uname -r)
 PWD		:= $(shell pwd)
 
-CC		:= gcc -Wall
+CC		:= gcc -Wall -g
 
 TARGET		:= mbuf.ko
 INSTDIR		:= /lib/modules/$(KVER)/kernel/drivers/$(MODULENAME)

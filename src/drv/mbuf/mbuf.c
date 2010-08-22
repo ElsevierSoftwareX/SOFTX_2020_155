@@ -54,6 +54,10 @@ void *kmalloc_area[MAX_AREAS];
 
 EXPORT_SYMBOL(kmalloc_area);
 
+// To be used by the IOP to store Dolphin memory state
+int iop_rfm_valid;
+EXPORT_SYMBOL(iop_rfm_valid);
+
 // Memory area tags (OM1, OM2, etc)
 char mtag[MAX_AREAS][MBUF_NAME_LEN + 1];
 
@@ -155,6 +159,10 @@ int mmap_kmem(unsigned int i, struct vm_area_struct *vma)
         int ret;
         long length = vma->vm_end - vma->vm_start;
 
+	if (kmalloc_area_size[i] < length) {
+		printk("mbuf mmap() request to map 0x%lx bytes; allocated 0x%lx\n", length, kmalloc_area_size[i]);
+		return -EINVAL;
+	}
 	printk("mbuf mmap() length is 0x%lx\n", length);
 
 	return rvmmap(kmalloc_area[i], length, vma);

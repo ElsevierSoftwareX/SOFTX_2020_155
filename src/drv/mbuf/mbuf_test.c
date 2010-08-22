@@ -28,10 +28,20 @@ int main (void)
       exit (-1);
   }
 
-  struct mbuf_request_struct req = {len, "alx"};
-  ioctl (fd, IOCTL_MBUF_INFO, &req);
+  struct mbuf_request_struct req = {len, "x1x22"};
+  struct mbuf_request_struct req1 = {len, "ipc"};
+  //ioctl (fd, IOCTL_MBUF_INFO, &req);
   ioctl (fd, IOCTL_MBUF_ALLOCATE, &req);
 
+  vadr = mmap(0, len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0*getpagesize());
+  printf("mmap() returned addr=%lx\n", vadr);
+  if (vadr == MAP_FAILED) {
+          perror ("mmap");
+          exit (-1);
+  }
+
+  len = 64 * 1024 * 1024;
+  ioctl (fd, IOCTL_MBUF_ALLOCATE, &req1);
   vadr = mmap(0, len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0*getpagesize());
   printf("mmap() returned addr=%lx\n", vadr);
   if (vadr == MAP_FAILED) {
@@ -48,7 +58,7 @@ int main (void)
   for (i = 0; i < len; i++)
 	  *((unsigned char *)vadr  + i) = i;
 #endif
-   sleep(100);
+  // sleep(100);
 
   //printf("0x%x 0x%x\n", vadr[0x10], vadr[0x11]);
   //vadr[0x11] = 0xdeadbeef;
