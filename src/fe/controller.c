@@ -365,6 +365,9 @@ volatile unsigned int *rfmTime;
 #ifdef TIME_SLAVE
 volatile unsigned int *rfmTime;
 #endif
+#ifdef TIME_SLAVE_IOP
+volatile unsigned int *rfmTime;
+#endif
 
 
 #ifdef OVERSAMPLE
@@ -1114,7 +1117,7 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 
 #endif
   onePpsTime = clock16K;
-  timeSec = current_time();
+  timeSec = current_time() -1;
   if(cdsPciModules.gpsType == SYMCOM_RCVR)
   {
   	time = getGpsTime(&ns);
@@ -1166,8 +1169,21 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 // sync up with the time master on its gps time
 //
 		unsigned long d = 0;
-          if (iop_rfm_valid) d = dolphin_memory_read[1];
-	            for(;iop_rfm_valid? dolphin_memory_read[1] == d: 0;) udelay(1);
+          // if (iop_rfm_valid) d = dolphin_memory_read[1];
+	  	d = clock16K;
+	            for(;iop_rfm_valid? dolphin_memory_read[1] != d: 0;) udelay(1);
+		    ioMemCntr = (clock16K % 64);
+		    for(ii=0;ii<32;ii++)
+		    {
+			ioMemData->iodata[0][ioMemCntr].data[ii] = clock16K;;
+			ioMemData->iodata[1][ioMemCntr].data[ii] = clock16K;;
+		    }
+		    // Write GPS time and cycle count as indicator to slave that adc data is ready
+	  	    ioMemData->gpsSecond = timeSec;;
+		    ioMemData->iodata[0][ioMemCntr].timeSec = timeSec;;
+		    ioMemData->iodata[1][ioMemCntr].timeSec = timeSec;;
+		    ioMemData->iodata[0][ioMemCntr].cycle = clock16K;
+		    ioMemData->iodata[1][ioMemCntr].cycle = clock16K;
 
 
 #endif
@@ -1279,6 +1295,37 @@ static inline void __monitor(const void *eax, unsigned long ecx,
                     }while((*packedData == 0x110000) && (adcWait < 1000000));
 
 
+
+		    // If data not ready in time, abort
+		    // Either the clock is missing or code is running too slow and ADC FIFO
+		    // is overflowing.
+		    if (adcWait >= 1000000) {
+                        stop_working_threads = 1;
+	  		pLocalEpics->epicsOutput.diagWord |= 0x1;
+                        printf("timeout %d %d \n",jj,adcWait);
+                    }
+		    if(jj == 0) 
+		    {
+			// Capture cpu clock for cpu meter diagnostics
+			rdtscl(cpuClock[0]);
+#ifdef ADC_MASTER
+			// Write data to DAC modules
+			// This is done here after 1st ADC ready to allow max time to
+			// load DAC values prior to next 65K clock
+			for(mm=0;mm<cdsPciModules.dacCount;mm++)
+	   		   if(dacWriteEnable > 4) gsaDacDma2(mm,cdsPciModules.dacType[mm]);
+#ifndef DUOTONE_TIMING
+			if(clock16K == 65535) 
+			{
+				gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
+                		pLocalEpics->epicsOutput.diags[5] = usec;
+			}
+#endif
+#ifdef TIME_SLAVE_IOP
+	  		if (iop_rfm_valid) timeSec = *rfmTime;
+#endif
+#endif
+		    }
 #ifdef TIME_MASTER
 		if (iop_rfm_valid) {
 			// *rfmTime = timeSec;
@@ -1294,34 +1341,6 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 		    	((volatile long *)(cdsPciModules.pci_rfm[1]))[1] = timeSec;
 		    }
 #endif
-
-		    // If data not ready in time, abort
-		    // Either the clock is missing or code is running too slow and ADC FIFO
-		    // is overflowing.
-		    if (adcWait >= 1000000) {
-                        stop_working_threads = 1;
-	  		pLocalEpics->epicsOutput.diagWord |= 0x1;
-                        printf("timeout %d %d \n",jj,adcWait);
-                    }
-		    if(jj == 0) 
-		    {
-			// Capture cpu clock for cpu meter diagnostics
-			rdtscl(cpuClock[0]);
-#ifdef ADC_MASTER
-#ifndef DUOTONE_TIMING
-			if(clock16K == 65535) 
-			{
-				gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
-                		pLocalEpics->epicsOutput.diags[5] = usec;
-			}
-#endif
-			// Write data to DAC modules
-			// This is done here after 1st ADC ready to allow max time to
-			// load DAC values prior to next 65K clock
-			for(mm=0;mm<cdsPciModules.dacCount;mm++)
-	   		   if(dacWriteEnable > 4) gsaDacDma2(mm,cdsPciModules.dacType[mm]);
-#endif
-		    }
 
                     // Read adc data
                     packedData = (int *)cdsPciModules.pci_adc[jj];
@@ -1993,16 +2012,10 @@ int main(int argc, char **argv)
 	int adcCnt;
 	int dacCnt;
 	int doCnt;
-	int target_node;
 
 	printf("startup time is %d\n", current_time());
 #ifdef DOLPHIN_TEST
-        //if (argc > 1) target_node = atoi(argv[1]);
-	//else {
-		//printf("Need target node id number argument -- EXITING!! \n");
-		//return 1;
-	//}
-	//
+	int target_node;
 	#ifdef X1X12_CODE
 	target_node = 8; //DIS_TARGET_NODE;
 	#else
@@ -2287,6 +2300,16 @@ int main(int argc, char **argv)
 		ioMemData->bioCount = cdsPciModules.doCount;
 		// kk will act as ioMem location counter for mapping modules
 		kk = cdsPciModules.adcCount;
+#ifdef TIME_SLAVE
+		ioMemData->totalCards = 2;
+		ioMemData->adcCount = 2;
+		ioMemData->dacCount = 0;
+		ioMemData->bioCount = 0;
+		ioMemData->model[0] = GSC_16AI64SSA;
+		ioMemData->ipc[0] = 0;	// ioData memory buffer location for SLAVE to use
+		ioMemData->model[1] = GSC_16AI64SSA;
+		ioMemData->ipc[1] = 1;	// ioData memory buffer location for SLAVE to use
+#endif
 #endif
 	printf("%d ADC cards found\n",cdsPciModules.adcCount);
 	for(ii=0;ii<cdsPciModules.adcCount;ii++)
@@ -2453,6 +2476,11 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 #ifdef TIME_SLAVE
 	rfmTime = (volatile unsigned int *)dolphin_memory_read;
 	printf("TIME SLAVE AT 0x%x\n",(int)rfmTime);
+	printf("rfmTime = %d\n", *rfmTime);
+#endif
+#ifdef TIME_SLAVE_IOP
+	rfmTime = (volatile unsigned int *)dolphin_memory_read;
+	printf("TIME SLAVE IOP AT 0x%x\n",(int)rfmTime);
 	printf("rfmTime = %d\n", *rfmTime);
 #endif
 #endif
