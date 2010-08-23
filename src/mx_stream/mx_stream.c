@@ -68,6 +68,8 @@ volatile int threads_running;
 unsigned char *dcu_addr;
 
 
+extern void *findSharedMemory(char *);
+
 void
 usage()
 {
@@ -203,8 +205,8 @@ do{
 			dataPtr = (struct daqMXdata *) seg.segment_ptr;
 			ii = dataPtr->mxIpcData.cycle;
 			jj = dataPtr->mxIpcData.dataBlockSize;
-			// printf("data from dcuid %d %d %d %d %d\n",dataPtr->mxIpcData.dcuId,dataPtr->mxIpcData.bp[ii].timeSec,
-			// 	dataPtr->mxIpcData.bp[ii].timeNSec,ii,jj);
+			 printf("data from dcuid %d %d %d %d %d\n",dataPtr->mxIpcData.dcuId,dataPtr->mxIpcData.bp[ii].timeSec,
+			 	dataPtr->mxIpcData.bp[ii].timeNSec,ii,jj);
 			dataSource = (char *)dataPtr->mxDataBlock;
 			dataDest = (char *)(shmDataPtr + buf_size * ii);
 			memcpy(dataDest,dataSource,jj);
@@ -307,7 +309,7 @@ do{
 		else {
 			myErrorSignal = 0;
 			shmIpcPtr->status ^= 2;
-		// fprintf(stderr, "Connection Made\n");
+		fprintf(stderr, "Connection Made\n");
 		}
 	}while(myErrorSignal);
 
@@ -321,6 +323,7 @@ if(!myErrorSignal)
 		// Wait for cycle count update from FE
 		do{
 			usleep(1000);
+//printf("%d\n", shmIpcPtr->cycle);
 		}while(shmIpcPtr->cycle == lastCycle);
 
 		mxDataBlock.mxTpTable = shmTpTable[0];
@@ -345,7 +348,7 @@ if(!myErrorSignal)
 		myCrc = crc_len(mxDataBlock.mxIpcData.dataBlockSize,myCrc);
 		// if(myCrc != mxDataBlock.mxIpcData.bp[lastCycle].crc) printf("CRC error in sender\n");
 		sendLength = header_size + mxDataBlock.mxIpcData.dataBlockSize;
-// printf("send length = %d  total length = %ld\n",sendLength,sizeof(struct daqMXdata));
+ //printf("send length = %d  total length = %ld\n",sendLength,sizeof(struct daqMXdata));
 #if 0
 	char *dataBuff;
 struct daqMXdata {
@@ -499,7 +502,8 @@ main(int argc, char **argv)
 	int i;
 
 	printf("System name: %s\n", sysname);
-	sprintf(shmem_fname, shmem_fname_format, sysname);
+//	sprintf(shmem_fname, shmem_fname_format, sysname);
+	sprintf(shmem_fname, "%s_daq", sysname);
         //if (argc) { int i; for (i = 0; i < argc; i++) printf ("%s\n", argv[i]);}
 
 	if (rem_host != NULL)
@@ -526,6 +530,7 @@ main(int argc, char **argv)
 	        }
 #endif
 
+#if 0
 		fd = open(shmem_fname, O_CREAT | O_RDWR, 0666);
 		if(fd == -1)
 		{
@@ -545,6 +550,8 @@ main(int argc, char **argv)
 
 		// Map shared memory
 		dcu_addr = (unsigned char *)mmap(0, MMAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd , 0);
+#endif
+		dcu_addr = findSharedMemory(shmem_fname);
 		if (dcu_addr <= 0) {
 			fprintf(stderr, "Can't map shmem\n");
 			exit(1);
@@ -567,6 +574,7 @@ main(int argc, char **argv)
 			       rem_host);
 		if (Verify) printf("Verifying results\n");
 
+#if 0
 		// Open shared memory to FE DAQ
 		if ((fd = open(shmem_fname, O_RDWR))<0) {
 			fprintf(stderr, "Can't open shmem\n");
@@ -575,6 +583,9 @@ main(int argc, char **argv)
 
 		// Map shared memory
 		dcu_addr = (unsigned char *)mmap(0, 64*1024*1024-5000, PROT_READ | PROT_WRITE, MAP_SHARED, fd , 0);
+#endif
+		dcu_addr = findSharedMemory(shmem_fname);
+
 		if (dcu_addr <= 0) {
 			fprintf(stderr, "Can't map shmem\n");
 			exit(1);
