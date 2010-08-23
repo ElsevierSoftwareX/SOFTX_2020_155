@@ -54,18 +54,38 @@ static int symmetricom_release(struct inode *inode, struct file *filp)
         return 0;
 }
 
+static volatile unsigned int *gps;
+
 static int symmetricom_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
 {
-        int i;
-        int req;
 
         switch(cmd){
         case IOCTL_SYMMETRICOM_STATUS:
                 {
-		  req = 0x123;
+        	  unsigned long req;
+		  unsigned int time0 = gps[0x30/4];
+		  if (time0 & (1<<24)) {
+		  		printk("Symmetricom unlocked\n");
+				req = 0;
+		  } else  {
+		  		printk ("Symmetricom locked!\n");
+				req = 1;
+		  }
+		
                   if (copy_to_user ((void *) arg, &req,  sizeof (req))) return -EFAULT;
                 }
                 break;
+        case IOCTL_SYMMETRICOM_TIME:
+		{
+        	  unsigned long req[3];
+	      	  gps[0] = 1;
+	      	  //printk("Current time %ds %dus %dns \n", gps[0x34/4], 0xfffff & gps[0x30/4], 100 * ((gps[0x30/4] >> 20) & 0xf));
+		  req[0] = gps[0x34/4];
+		  req[1] = 0xfffff & gps[0x30/4];
+		  req[2] =  100 * ((gps[0x30/4] >> 20) & 0xf);
+                  if (copy_to_user ((void *) arg, req,  sizeof (req))) return -EFAULT;
+		}
+		break;
         default:
                 return -EINVAL;
         }
@@ -73,11 +93,25 @@ static int symmetricom_ioctl(struct inode *inode, struct file *file, unsigned in
 }
 
 
+#define SYMCOM_VID		0x12e2
+#define SYMCOM_BC635_TID	0x4013
+#define SYMCOM_BC635_TIMEREQ	0
+#define SYMCOM_BC635_EVENTREQ	4
+#define SYMCOM_BC635_CONTROL	0x10
+#define SYMCOM_BC635_TIME0	0x30
+#define SYMCOM_BC635_TIME1	0x34
+#define SYMCOM_BC635_EVENT0	0x38
+#define SYMCOM_BC635_EVENT1	0x3C
+#define SYMCOM_RCVR		0x1
+
+
 /* module initialization - called at module load time */
 static int __init symmetricom_init(void)
 {
 	int i;
         int ret = 0;
+	static unsigned int pci_io_addr;
+
 
         /* get the major number of the character device */
         if ((ret = alloc_chrdev_region(&symmetricom_dev, 0, 1, "symmetricom")) < 0) {
@@ -91,6 +125,33 @@ static int __init symmetricom_init(void)
                 printk(KERN_ERR "could not allocate chrdev for buf\n");
                 goto out_unalloc_region;
         }
+
+	/* find the Symmetricom device */
+	struct pci_dev *symdev = pci_get_device (SYMCOM_VID, SYMCOM_BC635_TID, 0);
+	if (symdev) printk("Symmetricom GPS card on bus %x; device %x\n", symdev->bus->number, PCI_SLOT(symdev->devfn));
+	else {
+		ret = -1;
+                printk(KERN_ERR "Symmetricom GPS card not found\n");
+                goto out_unalloc_region;
+	}
+	
+	pci_enable_device(symdev);
+	pci_read_config_dword(symdev, PCI_BASE_ADDRESS_2, &pci_io_addr);
+	pci_io_addr &= 0xfffffff0;
+	printk("PIC BASE 2 address = %x\n", pci_io_addr);
+
+	unsigned char *addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x40);
+	printk("Remapped 0x%x\n", addr1);
+	gps = addr1;
+
+	for (i = 0; i < 10; i++) {
+	      gps[0] = 1;
+	      printk("Current time %ds %dus %dns \n", gps[0x34/4], 0xfffff & gps[0x30/4], 100 * ((gps[0x30/4] >> 20) & 0xf));
+	}
+	gps[0] = 1;
+	unsigned int time0 = gps[0x30/4];
+	if (time0 & (1<<24)) printk("Flywheeling, unlocked...\n");
+	else printk ("Locked!\n");
 
         return ret;
         
