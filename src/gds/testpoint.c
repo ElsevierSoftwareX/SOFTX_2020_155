@@ -1607,9 +1607,9 @@
       if (tpNode[node].duplicate) {
          tpNode[node].id = k;
       }
-      /*printf ("TP: node = %i, host = %s, dup = %i, prog = 0x%x, vers = %i\n",
-              node, tpNode[node].hostname, tpNode[node].duplicate, 
-              tpNode[node].prognum, tpNode[node].progver);*/
+      printf ("TP: node = %i, host = %s, dup = %i, prog = 0x%x, vers = %i\n",
+              node, tpNode[node].hostname, tpNode[node].duplicate,
+              tpNode[node].prognum, tpNode[node].progver);
       return 0;
    }
 #endif

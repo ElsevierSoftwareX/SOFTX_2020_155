@@ -203,11 +203,12 @@ CDS_HARDWARE cdsPciModules;
       printf("My config file is %s\n", myParFile);
 
       printf("IPC at 0x%x\n", rmBoardAddress(2));
-      ioMemData = (IO_MEM_DATA *)(rmBoardAddress(2) + 0x4000);
+      ioMemData = (IO_MEM_DATA *)(rmBoardAddress(2) + IO_MEM_DATA_OFFSET);
 
       // Find the first ADC card
       // Master will map ADC cards first, then DAC and finally DIO
       printf("Total PCI cards from the master: %d\n", ioMemData -> totalCards);
+      sleep(2);
       for (int ii = 0; ii < ioMemData -> totalCards; ii++) {
           printf("Model %d = %d\n",ii,ioMemData->model[ii]);
           switch (ioMemData -> model [ii]) {

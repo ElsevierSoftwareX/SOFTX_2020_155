@@ -52,6 +52,9 @@
 #include <unistd.h>
 #endif
 
+#include "../drv/mbuf/mbuf.h"
+
+
 /* VxWorks BSP functions not prototyped */
 #if defined(OS_VXWORKS) && defined (PROCESSOR_BAJA)
    extern STATUS sysVicBlkCopy (char *,char *, int, BOOL, BOOL);
@@ -325,6 +328,10 @@
        return 0;
    }
 #else
+
+int mbuf_opened = 0;
+int mbuf_fd = 0;
+
    int rmInit (short ID)
    {
       // 0 -- our shared memory
@@ -335,10 +342,31 @@
          char fname[128];
 	 extern char system_name[PARAM_ENTRY_LEN];
 
-         rmsize[ID] =  64 * 1024 *1024;
          /*rmboard[ID] = rm[ID] = malloc (rmsize[ID]);*/
          rmmaster[ID] = 0;
 
+	 strcpy(fname, "/dev/mbuf");
+	 if (!mbuf_opened) {
+	   if ((fd = open (fname, O_RDWR | O_SYNC)) < 0) {
+	       fprintf(stderr, "Couldn't open /dev/mbuf read/write\n");
+	       _exit(-1);
+	   }
+	   mbuf_opened = 1;
+ 	   mbuf_fd = fd;
+	 } else fd = mbuf_fd;
+	 struct mbuf_request_struct req;
+	 if (ID == 0) {
+		strcpy(req.name, system_name);
+		rmsize[ID] =  64 * 1024 * 1024;
+	 } else {
+		strcpy(req.name, "ipc");
+		rmsize[ID] =  4 * 1024 * 1024;
+	 }
+	 req.size = rmsize[ID];
+         ioctl (fd, IOCTL_MBUF_ALLOCATE, &req);
+         //ioctl (fd, IOCTL_MBUF_INFO, &req);
+
+#if 0
 	 if (ID == 0) sprintf(fname, "/rtl_mem_%s", system_name);
 	 else strcpy(fname, "/rtl_mem_ipc");
 
@@ -354,8 +382,9 @@
            }
 #endif
 	 }
+#endif
 
-         addr = mmap(0, 64*1024*1024-5000, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+         addr = mmap(0, rmsize[ID], PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
          if (addr == MAP_FAILED) {
                 printf("return was %d\n",errno);
                 perror("mmap");
