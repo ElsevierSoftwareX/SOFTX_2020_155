@@ -65,10 +65,10 @@ static int symmetricom_ioctl(struct inode *inode, struct file *file, unsigned in
         	  unsigned long req;
 		  unsigned int time0 = gps[0x30/4];
 		  if (time0 & (1<<24)) {
-		  		printk("Symmetricom unlocked\n");
+		  		//printk("Symmetricom unlocked\n");
 				req = 0;
 		  } else  {
-		  		printk ("Symmetricom locked!\n");
+		  		//printk ("Symmetricom locked!\n");
 				req = 1;
 		  }
 		
