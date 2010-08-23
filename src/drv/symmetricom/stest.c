@@ -17,17 +17,18 @@
 
 int main (void)
 {
-  int fd, i;
-  unsigned int *vadr;
-  unsigned int *kadr;
+  int fd;
 
   if ((fd = open ("/dev/symmetricom", O_RDWR | O_SYNC)) < 0) {
       perror ("open");
       exit (-1);
   }
 
-  int req = 0;
+  unsigned long req = 0;
+  unsigned long t[3];
   ioctl (fd, IOCTL_SYMMETRICOM_STATUS, &req);
-  printf("%d\n", req);
+  printf("%ld\n", req);
+  ioctl (fd, IOCTL_SYMMETRICOM_TIME, &t);
+  printf("%lds %ldu %ldn\n", t[0], t[1], t[2]);
   return(0);
 }
