@@ -127,7 +127,7 @@ extern "C" {
     @see Testpoint Definition
 ************************************************************************/
 #ifdef _ADVANCED_LIGO
-#define TP_MAX_NODE             16
+#define TP_MAX_NODE             64
 #else
 #define TP_MAX_NODE		2
 #error
