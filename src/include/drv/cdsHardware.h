@@ -118,6 +118,9 @@ typedef struct IO_MEM_DATA{
 	MEM_DATA_BLOCK iodata[MAX_IO_MODULES][IO_MEMORY_SLOTS];
 }IO_MEM_DATA;
 
+/* Offset of the IO_MEM_DATA structure in the IPC shared memory */
+#define IO_MEM_DATA_OFFSET 0x4000
+
 /* ACCESS DIO Module Definitions ********************************************** */
 #define ACC_VID		0x494F
 #define ACC_TID		0x0C51
