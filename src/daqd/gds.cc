@@ -36,7 +36,9 @@
 #include "daqd.hh"
 
 extern "C" {
-#include "testpoint.h"
+#include "../gds/testpoint.h"
+#define _RPC_HDR
+#include "../gds/rpcinc.h"
 }
 
 #include "gds.hh"
@@ -243,10 +245,11 @@ int
 gds_c::gds_initialize () {
 
   for (int i = 0; i < n_gds_servers; i++) {
-     if (tpSetHostAddress (0, gds_servers[i], 0, 0) != 0) {
-       printf ("unable to initialize test point interface\n");
+     if (tpSetHostAddress (gds_nodes[i], gds_servers[i], RPC_PROGNUM_TESTPOINT + gds_nodes[i], 1) != 0) {
+       printf ("Unable to initialize test point node %d\n", gds_nodes[i]);
        return 1;
-    }
+     }
+     printf("Initialized TP interface node=%d, host=%s\n", gds_nodes[i], gds_servers[i]);
   }
 
 //  testpoint_cleanup ();
@@ -294,7 +297,8 @@ int testpoint_par_callback(char *channel_name, struct CHAN_PARAM *params, void *
 	}
 	if (i == DCU_COUNT) {
 		fprintf(stderr, "Unable to find GDS node %d system %s in INI files\n", node, params->system);
-		exit(1);
+		//exit(1);
+		return 1;
 	}
 
         gds -> dcuid[gds -> n_gds_servers] = i;
@@ -362,17 +366,17 @@ gds_c::req_tps (long_channel_t *ac[], channel_t *gds[], int nptr)
   testpoint_t tps[nptr];
   int ntps = 0;
 
-  printf("req_tps; n_gds_servers=%d\n", n_gds_servers);
+  printf("req_tp n_gds_servers=%d; node[0]=%d tpnum[0]=%d\n", n_gds_servers, ac[0]->tp_node, ac[0]->chNum);
   for (int s = 0; s < n_gds_servers; s++) {
     ntps = 0;
     for (int i = 0; i < nptr; i++) {
 #ifdef _ADVANCED_LIGO
-      if (ac[i]->tp_node == s) 
+      if (ac[i]->tp_node == gds_nodes[s]) 
 #else
       if (ac[i]->ifoid == s) 
 #endif
       {
-  	system_log(1,"About to request `%s' %d on node %d", ac[i]->name, ac[i]->chNum, s);
+  	system_log(1,"About to request `%s' %d on node %d", ac[i]->name, ac[i]->chNum, gds_nodes[s]);
 	tps[ntps] = ac[i]->chNum;
 	ntps++;
       }
@@ -380,9 +384,9 @@ gds_c::req_tps (long_channel_t *ac[], channel_t *gds[], int nptr)
     if (ntps) {
       system_log(1,"Requesting %d testpoints; tp[0]=%d; tp[1]=%d\n",
 			ntps, tps[0], tps[1]);
-      int rtn = tpRequest(s, tps, ntps, -1, 0, 0);
+      int rtn = tpRequest(gds_nodes[s], tps, ntps, -1, 0, 0);
       if (rtn) {
-	system_log(1, "tpRequest(%d) failed; returned %d\n", s, rtn);
+	system_log(1, "tpRequest(%d) failed; returned %d\n", gds_nodes[s], rtn);
 #ifdef _ADVANCED_LIGO
 	if (daqd.avoid_reconnect)  _exit(1);
 #endif
