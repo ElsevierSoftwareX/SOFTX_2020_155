@@ -100,7 +100,7 @@ do {								\
 
 typedef int int32_t;
 
-int myisnan(long double x) {
+int isnan(long double x) {
 	int32_t se,hx,lx;
 	GET_LDOUBLE_WORDS(se,hx,lx,x);
 	se = (se & 0x7fff) << 1;
