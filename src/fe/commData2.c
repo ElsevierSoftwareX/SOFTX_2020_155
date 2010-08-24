@@ -7,6 +7,7 @@
 //
 
 #include "commData2.h"
+#include "isnan.h"
 
 #ifdef COMMDATA_INLINE
 #  define INLINE inline
@@ -182,11 +183,13 @@ for(ii=0;ii<connects;ii++)
 		if(syncWord == mySyncWord) 
 		//if(cycle65k == testCycle) 
 		{
-			ipcInfo[ii].data = ipcInfo[ii].pIpcData->data[ipcIndex];
+			double tmp = ipcInfo[ii].pIpcData->data[ipcIndex];
+			if (isnan(tmp)) ipcInfo[ii].errFlag ++;
+			else ipcInfo[ii].data = tmp;
 		// If IPC syncword != local syncword, data is BAD
 		} else {
 			//printf("sync error my=0x%lx remote=0x%lx\n", mySyncWord, syncWord);
-			ipcInfo[ii].data = ipcInfo[ii].pIpcData->data[ipcIndex];
+			//ipcInfo[ii].data = ipcInfo[ii].pIpcData->data[ipcIndex];
 			ipcInfo[ii].errFlag ++;
 		}
 	   }
