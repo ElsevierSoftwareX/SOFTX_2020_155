@@ -155,6 +155,7 @@ unsigned long syncWord;		// Combined GPS timestamp and cycle counter word receiv
 unsigned long mySyncWord;	// Local version of syncWord for comparison and error detection
 int ipcIndex;			// Pointer to next IPC data buffer
 int cycle65k;
+//int testCycle;
 int ii;
 
 for(ii=0;ii<connects;ii++)
@@ -171,6 +172,7 @@ for(ii=0;ii<connects;ii++)
 		
 		// Read GPS time/cycle count 
 		syncWord = ipcInfo[ii].pIpcData->timestamp[ipcIndex];
+		//testCycle = syncWord & 0xffffffff;
 		// Create local 65K cycle count
 		cycle65k = ((cycle * ipcInfo[ii].sendCycle));
 		mySyncWord = timeSec;
@@ -178,10 +180,12 @@ for(ii=0;ii<connects;ii++)
 		mySyncWord = (mySyncWord << 32) + cycle65k;
 		// If IPC syncword = local syncword, data is good
 		if(syncWord == mySyncWord) 
+		//if(cycle65k == testCycle) 
 		{
 			ipcInfo[ii].data = ipcInfo[ii].pIpcData->data[ipcIndex];
 		// If IPC syncword != local syncword, data is BAD
 		} else {
+			//printf("sync error my=0x%lx remote=0x%lx\n", mySyncWord, syncWord);
 			ipcInfo[ii].data = ipcInfo[ii].pIpcData->data[ipcIndex];
 			ipcInfo[ii].errFlag ++;
 		}
