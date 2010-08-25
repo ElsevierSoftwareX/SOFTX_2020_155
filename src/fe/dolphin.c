@@ -1,0 +1,129 @@
+#include <genif.h>
+
+sci_l_segment_handle_t segment;
+sci_map_handle_t client_map_handle;
+sci_r_segment_handle_t  remote_segment_handle;
+
+signed32 session_callback(session_cb_arg_t IN arg,
+			  session_cb_reason_t IN reason,
+			  session_cb_status_t IN status,
+			  unsigned32 IN target_node,
+			  unsigned32 IN local_adapter_number) {
+  printkl("Session callback reason=%d status=%d target_node=%d\n", reason, status, target_node);
+  return 0;
+}
+
+signed32 connect_callback(void IN *arg,
+			  sci_r_segment_handle_t IN remote_segment_handle,
+			  unsigned32 IN reason, unsigned32 IN status) {
+  printkl("Connect callback reason=%d status=%d\n", reason, status);
+  if (reason == 1) iop_rfm_valid = 1;
+  if (reason == 3) iop_rfm_valid = 0;
+  if (reason == 5) iop_rfm_valid = 1;
+  return 0;
+}
+
+signed32 create_segment_callback(void IN *arg,
+				 sci_l_segment_handle_t IN local_segment_handle,
+				 unsigned32 IN reason,
+				 unsigned32 IN source_node,
+				 unsigned32 IN local_adapter_number)  {
+  printkl("Create segment callback reason=%d source_node=%d\n", reason, source_node);
+  return 0;
+}
+
+int
+init_dolphin(int target_node) {
+  cdsPciModules.dolphinCount = 0;
+  scierror_t err =
+    sci_create_segment(NO_BINDING,
+		       0,
+		       1,
+		       DIS_BROADCAST,
+		       0x6000,
+		       create_segment_callback,
+		       0,
+		       &segment);
+  printk("DIS segment alloc status %d\n", err);
+  if (err) return -1;
+
+  err = sci_set_local_segment_available(segment, 0);
+  printk("DIS segment making available status %d\n", err);
+  if (err) {
+    sci_remove_segment(&segment, 0);
+    return -1;
+  }
+  
+  err = sci_export_segment(segment, 0, DIS_BROADCAST);
+  printk("DIS segment export status %d\n", err);
+  if (err) {
+    sci_remove_segment(&segment, 0);
+    return -1;
+  }
+  
+  char *read_addr = sci_local_kernel_virtual_address(segment);
+  if (read_addr == 0) {
+    printk("DIS sci_local_kernel_virtual_address returned 0\n");
+    sci_remove_segment(&segment, 0);
+    return -1;
+  } else {
+    printk("Dolphin memory read at 0x%p\n", read_addr);
+    cdsPciModules.dolphin[0] = read_addr;
+  }
+  udelay(20000);
+  udelay(20000);
+  
+  err = sci_connect_segment(NO_BINDING,
+			    target_node,
+			    0,
+			    0,
+			    1, 
+			    DIS_BROADCAST,
+			    connect_callback, 
+			    0,
+			    &remote_segment_handle);
+  printk("DIS connect segment status %d\n", err);
+  if (err) {
+    sci_remove_segment(&segment, 0);
+    return -1;
+  }
+
+  // usleep(20000);
+  udelay(20000);
+  udelay(20000);
+  err = sci_map_segment(remote_segment_handle,
+			DIS_BROADCAST,
+			0,
+			0x6000,
+			&client_map_handle);
+  printk("DIS segment mapping status %d\n", err);
+  if (err) {
+    sci_disconnect_segment(&remote_segment_handle, 0);
+    sci_remove_segment(&segment, 0);
+    return -1;
+  }
+  
+  char *addr = sci_kernel_virtual_address_of_mapping(client_map_handle);
+  if (addr == 0) {
+    printk ("Got zero pointer from sci_kernel_virtual_address_of_mapping\n");
+    sci_disconnect_segment(&remote_segment_handle, 0);
+    sci_remove_segment(&segment, 0);
+    return -1;
+  } else {
+    printk ("Dolphin memory at 0x%p\n", addr);
+    cdsPciModules.dolphin[1] = addr;
+  }
+
+  sci_register_session_cb(0,0,session_callback,0);
+  cdsPciModules.dolphinCount = 1;
+  return 0;
+}
+
+void 
+finish_dolphin() {
+  sci_set_local_segment_unavailable(segment, 0);
+  sci_unexport_segment(segment, 0, 0);
+  sci_remove_segment(&segment, 0);
+  sci_cancel_session_cb(0, 0);
+}
+
