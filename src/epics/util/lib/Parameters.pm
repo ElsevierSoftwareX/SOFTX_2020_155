@@ -63,12 +63,14 @@ sub printHeaderStruct {
 			} elsif ($spp[0] eq "dcuid") {
 				print "Dcu Id is set to $spp[1]\n";
 				$::dcuId = $spp[1];
+				print "GDS node id is set to $::dcuId \n";
+				$::gdsNodeId = $::dcuId;
 			} elsif ($spp[0] eq "host") {
 				print "Target host name is set to $spp[1]\n";
 				$::targetHost = $spp[1];
-			} elsif ($spp[0] eq "gds_node_id") {
-				print "GDS node id is set to $spp[1]\n";
-				$::gdsNodeId = $spp[1];
+			#} elsif ($spp[0] eq "gds_node_id") {
+				#print "GDS node id is set to $spp[1]\n";
+				#$::gdsNodeId = $spp[1];
 			} elsif ($spp[0] eq "accum_overflow") {
 				print "ADC overflow accumulator is set to $spp[1]\n";
 				$::adcOver = $spp[1];
@@ -105,6 +107,14 @@ sub printHeaderStruct {
 			} elsif ($spp[0] eq "adcSlave") {
 				print "FE will run as SLAVE to IOP\n";
 				$::adcSlave = $spp[1];
+			} elsif ($spp[0] eq "time_master") {
+				$::timeMaster = $spp[1];
+			} elsif ($spp[0] eq "time_slave") {
+				$::timeSlave = $spp[1];
+			} elsif ($spp[0] eq "iop_time_slave") {
+				$::iopTimeSlave = $spp[1];
+			} elsif ($spp[0] eq "rfm_time_slave") {
+				$::rfmTimeSlave = $spp[1];
 			} elsif ($spp[0] eq "pciRfm") {
 				print "FE will run with PCIE RFM Network\n";
 				$::pciNet = $spp[1];
