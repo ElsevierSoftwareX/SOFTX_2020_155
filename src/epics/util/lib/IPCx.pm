@@ -77,7 +77,7 @@ sub frontEndInitCode {
         }
 
         if ($::ipcxInitDone eq $::ipcxCnt) {
-           $calcExp .= "\ncommData2Init(myIpcCount, FE_RATE, ipcInfo, cdsPciModules\.pci_rfm);\n\n";
+           $calcExp .= "\ncommData2Init(myIpcCount, FE_RATE, ipcInfo);\n\n";
         }
 
         return $calcExp;
