@@ -290,7 +290,9 @@ sub node_processing {
 
         if ($block_type ne "SubSystem") {
            my $block_tag = transform_block_type(${$node->{FIELDS}}{"Tag"});
-           $::ipcxBlockTags[$::ipcxTagCount++] = $block_tag;
+           #$::ipcxBlockTags[$::ipcxTagCount++] = $block_tag;
+           $::ipcxBlockTags[$::partCnt] = $block_tag;
+	   #print "IPC block tag $::partCnt is $block_tag \n";
         }
 
 	#print "Part $block_name $block_type $in_sub \n";
