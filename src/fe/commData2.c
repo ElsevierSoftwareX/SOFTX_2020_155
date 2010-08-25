@@ -128,16 +128,24 @@ for(ii=0;ii<connects;ii++)
 		{
 		// Write Data
                 ipcInfo[ii].pIpcData->data[ipcIndex] = ipcInfo[ii].data;
+		clflush_cache_range (ipcInfo[ii].pIpcData->data+ipcIndex,
+				     sizeof(ipcInfo[ii].pIpcData->data[0]));
 		// Write timestamp/cycle counter word
                 ipcInfo[ii].pIpcData->timestamp[ipcIndex] = syncWord;
+		clflush_cache_range (ipcInfo[ii].pIpcData->timestamp+ipcIndex,
+				     sizeof(ipcInfo[ii].pIpcData->timestamp[0]));
 		}
 		// If 2 RFM cards, send data to both networks
 		if((ipcInfo[ii].netType == IRFM) && (ipcInfo[ii].pIpcData2 != NULL))	
 		{
 			// Write Data
 			ipcInfo[ii].pIpcData2->data[ipcIndex] = ipcInfo[ii].data;
+			clflush_cache_range (ipcInfo[ii].pIpcData2->data+ipcIndex,
+				     	     sizeof(ipcInfo[ii].pIpcData2->data[0]));
 			// Write timestamp/cycle counter word
 			ipcInfo[ii].pIpcData2->timestamp[ipcIndex] = syncWord;
+			clflush_cache_range (ipcInfo[ii].pIpcData2->timestamp+ipcIndex,
+				     	     sizeof(ipcInfo[ii].pIpcData2->timestamp[0]));
 		}
         }
 }
