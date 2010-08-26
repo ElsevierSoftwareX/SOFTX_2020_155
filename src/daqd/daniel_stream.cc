@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <sys/mman.h>
@@ -14,8 +15,10 @@
 #include <errno.h>
 
 #ifdef NO_RTL
-#include "mbuf/mbuf.h"
+#include "../drv/mbuf/mbuf.h"
 #endif
+
+#define SHMEM_DAQ 1
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -147,7 +150,7 @@ sender(char *hostname)
 	dataBuff = (char *)(shmDataPtr + lastCycle * buf_size);
 	memcpy((void *)&mxDataBlock.mxDataBlock[0],dataBuff,mxDataBlock.mxIpcData.dataBlockSize);
 	sendLength = header_size + mxDataBlock.mxIpcData.dataBlockSize;
- //printf("send length = %d  total length = %ld\n",sendLength,sizeof(struct daqMXdata));
+ ///printf("send length = %d  total length = %ld\n",sendLength,sizeof(struct daqMXdata));
 #if 0
 	char *dataBuff;
 struct daqMXdata {

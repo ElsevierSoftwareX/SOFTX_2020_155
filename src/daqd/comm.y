@@ -187,7 +187,7 @@ static int prompt_lineno;
 %token <y_void>  LOG_T
 %token <y_void>  DEBUG_T
 %token <y_void>  INPUT
-%token <y_void>  ECHO
+%token <y_void>  ECHO_ECHO
 %token <y_void>  SLEEP
 %token <y_void>  PRODUCER
 
@@ -1127,7 +1127,7 @@ CommandLine: /* Nothing */
 	  system_log(1, "No debugging compiled in.");
 #endif
 	}
-	| ECHO TextExpression {
+	| ECHO_ECHO TextExpression {
 		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
 
 	//	*yyout << $2 << endl;
@@ -1428,7 +1428,11 @@ CommandLine: /* Nothing */
 	 	    } else {
 		      *yyout << setw (4) << setfill ('0') << hex << c[i].chNum;
 		    }
-		    *yyout << setw (4) << setfill ('0') << hex << c[i].group_num;
+		    if (IS_GDS_ALIAS(c[i])) {
+		    	*yyout << setw (4) << setfill ('0') << hex << c[i].tp_node;
+		    } else {
+		    	*yyout << setw (4) << setfill ('0') << hex << c[i].group_num;
+		    }
 		    if ($3 < 2) {
 		      *yyout << setw (4) << setfill ('0') << hex << (c[i].bps > 0xffff? 0:  c[i].bps);
 		    }

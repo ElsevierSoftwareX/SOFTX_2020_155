@@ -49,7 +49,8 @@
 
 #ifdef USE_SYMMETRICOM
 #ifndef USE_IOP
-#include <bcuser.h>
+//#include <bcuser.h>
+#include <../drv/symmetricom/symmetricom.h>
 #endif
 #endif
 
@@ -2317,7 +2318,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 	  dcuStatus[ifo][j] = DAQ_STATE_FAULT;
 	
 	  /* Check if DCU running at all */
-          if (dcm & (1 << j)) {
+          if ( 1 /*dcm & (1 << j)*/) {
 	    if (dcuStatCycle[ifo][j] == 0) dcuStatus[ifo][j] = DAQ_STATE_SYNC_ERR;
 	    else dcuStatus[ifo][j] = DAQ_STATE_RUN;
 	  }

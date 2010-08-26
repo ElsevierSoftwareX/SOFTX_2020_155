@@ -41,6 +41,7 @@
 #include <limits.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/ioctl.h>
 #ifdef sun
 #include <sys/priocntl.h>
 #include <sys/rtpriocntl.h>
@@ -98,10 +99,12 @@ using namespace std;
 
 #ifdef USE_SYMMETRICOM
 #ifndef USE_IOP
-#include <bcuser.h>
+//#include <bcuser.h>
+#include <../drv/symmetricom/symmetricom.h>
 #endif
 #endif
 
+#if 0
 int printf(const char * s,...)
 {
         int i;
@@ -120,6 +123,7 @@ int printf(const char * s,...)
 	fflush(stdout);
         return i;
 }
+#endif
 
 int
 daqd_c::configure_archive_channels(char *archive_name, char *file_name, char *f1) {
@@ -1072,7 +1076,7 @@ INT_2U *aux_data_valid_ptr [MAX_CHANNELS];
 FrameCPP::Version::FrameH*
 daqd_c::full_frame(channel_t* frame_channels, long num_frame_channels, int frame_length_seconds)
   throw() {
-  FrameCPP::Version::FrAdcData adc [num_channels];
+  FrameCPP::Version::FrAdcData *adc  = new FrameCPP::Version::FrAdcData[num_channels];
   FrameCPP::Version::FrRawData raw_data ("");
   FrameCPP::Version::FrameH *frame = 0;
   FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-" + string(LDAS_VERSION));
@@ -2863,6 +2867,7 @@ namespace FrameCPP
 #ifdef USE_SYMMETRICOM
 
 #ifndef USE_IOP
+#if 0
   BC_PCI_HANDLE hBC_PCI;
 
 // Get current GPS time from the symmetricom IRIG-B card
@@ -2899,6 +2904,33 @@ daqd_c::symm_ok() {
 	printf("Symmetricom status %d\n", stat);
 	return stat < 5;
 }
+#endif
+
+int symmetricom_fd = -1;
+
+// Get current GPS time from the symmetricom IRIG-B card
+unsigned long
+daqd_c::symm_gps(unsigned long *frac, int *stt) {
+    unsigned long t[3];
+    ioctl (symmetricom_fd, IOCTL_SYMMETRICOM_TIME, &t);
+    //printf("%lds %ldu %ldn\n", t[0], t[1], t[2]);
+    //t[0] -= 315964819 - 19;
+    t[0] -= 345586;
+    t[1] *= 1000;
+    t[1] += t[2];
+    if (frac) *frac = t[1];
+    if (stt) *stt = 0;
+    return  t[0] + daqd.symm_gps_offset;
+}
+
+bool
+daqd_c::symm_ok() {
+  unsigned long req = 0;
+  ioctl (symmetricom_fd, IOCTL_SYMMETRICOM_STATUS, &req);
+  printf("Symmetricom status: %s\n", req? "LOCKED": "UNCLOCKED");
+  return req;
+}
+
 #else // ifdef USE_IOP
 
 // Get current GPS time from the IOP
@@ -2926,6 +2958,13 @@ main (int argc, char *argv [])
 
 #ifdef USE_SYMMETRICOM
 #ifndef USE_IOP
+  symmetricom_fd =  open ("/dev/symmetricom", O_RDWR | O_SYNC);
+  if (symmetricom_fd < 0) {
+	perror("/dev/symmetricom");
+	exit(1);
+  }
+
+#if 0
   // Start the device
   hBC_PCI = bcStartPci();
   if (!hBC_PCI){
@@ -2954,6 +2993,7 @@ main (int argc, char *argv [])
      printf ("Error Setting Year Auto Incr Flag on the Symmetricom card.\n");
      exit(1);
   }
+#endif
 #endif
 #endif
 

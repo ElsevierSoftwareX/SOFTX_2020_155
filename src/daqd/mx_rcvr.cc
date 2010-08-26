@@ -14,7 +14,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "../../../advLigo/src/include/daqmap.h"
+#define SHMEM_DAQ 1
+#include "../include/daqmap.h"
 #include "debug.h"
 #include "daqd.hh"
 
@@ -31,7 +32,7 @@ extern void *directed_receive_buffer[DCU_COUNT];
 #define DFLT_END   128
 #define MAX_LEN    (1024*1024*1024) 
 #define DFLT_ITER  1000
-#define NUM_RREQ   16  /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
+#define NUM_RREQ   1024
 #define NUM_SREQ   4  /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
 
 #define MATCH_VAL_MAIN (1 << 31)
@@ -99,7 +100,7 @@ receiver_mx(int neid)
 	do {
 	  for (int count = 0; count < NUM_RREQ; count++) {
 		/* Wait for the receive to complete */
-		int cur_req = count & (16 - 1);
+		int cur_req = count & (NUM_RREQ - 1);
 		
 // 	mx_test_or_wait(blocking, ep, &sreq, MX_INFINITE, &stat, &result);
 
@@ -113,7 +114,7 @@ receiver_mx(int neid)
 		} else if (stat.code != MX_STATUS_SUCCESS) {
 			// This line seems to fail on openmx
 			fprintf(stderr, "irecv failed with status %s\n", mx_strstatus(stat.code));
-			//fprintf(stderr, "irecv failed\n");
+			fprintf(stderr, "irecv failed\n");
 			myErrorStat = 2;
 			// exit(1);
 		}
@@ -131,10 +132,11 @@ receiver_mx(int neid)
 		  int len = dataPtr->mxIpcData.dataBlockSize;
 
 #if 0
-		  if (dcu_id == 9)
-		    printf("data dcuid=%d sec=%d nsec=%d cycle=%d dlen=%d\n",
+		  //if (dcu_id == 9)
+		    printf("data dcuid=%d sec=%d nsec=%d cycle=%d dlen=%d filecrc=0x%x crc=0x%x\n",
 			dcu_id, dataPtr->mxIpcData.bp[cycle].timeSec,
-		 	dataPtr->mxIpcData.bp[cycle].timeNSec, cycle, len);
+		 	dataPtr->mxIpcData.bp[cycle].timeNSec, cycle, len,
+			dataPtr->mxIpcData.crc, dataPtr->mxIpcData.bp[cycle].crc);
 #endif
 
 		  char *dataSource = (char *)dataPtr->mxDataBlock;
@@ -232,6 +234,6 @@ void close_mx() {
 #ifdef USE_MAIN
 main() {
 	open_mx();
-	receiver_mx();
+	receiver_mx(1);
 }
 #endif

@@ -1241,7 +1241,7 @@ net_writer_c::consumer ()
 		ndcu++;
 // broadcast protocol dependency
 #if DCU_COUNT != 32
-#error
+//#error
 #endif
 		// DCU number
 		hptr[tidx++] = htonl(i + ifo*DCU_COUNT);
