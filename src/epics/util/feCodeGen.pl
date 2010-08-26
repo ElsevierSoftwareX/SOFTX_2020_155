@@ -36,11 +36,15 @@ $targetHost = "localhost"; # Default target host name
 $specificCpu = -1; # Defaults is to run the FE on the first available CPU
 $adcMaster = -1;
 $adcSlave = -1;
+$timeMaster = -1;
+$timeSlave = -1;
+$iopTimeSlave = -1;
+$rfmTimeSlave = -1;
 $pciNet = -1;
 $shmem_daq = 0; # Do not use shared memory DAQ connection
 $no_sync = 0; # Sync up to 1PPS by default
 $no_daq = 0; # Enable DAQ by default
-$gdsNodeId = 1;
+$gdsNodeId = 0;
 $adcOver = 0;
 $ifoid = 0; # Default ifoid for the DAQ
 $nodeid = 0; # Default GDS node id for awgtpman
@@ -362,7 +366,9 @@ $plantName = $systemName; # Default plant name is the model name
 for ($ii = 0; $ii < $partCnt; $ii++) {
    if ($partType[$ii] =~ /^IPCx/) {
       $ipcxParts[$ipcxCnt][0] = $xpartName[$ii];
+      print "IPC $ii $ipcxCnt is $ipcxParts[$ipcxCnt][0] \n";
       $ipcxParts[$ipcxCnt][1] = "I" . substr($ipcxBlockTags[$ii], 8, 3);
+      print "IPC $ii $ipcxCnt is $ipcxParts[$ipcxCnt][1] \n";
       $ipcxParts[$ipcxCnt][2] = undef;
       $ipcxParts[$ipcxCnt][3] = undef;
       $ipcxParts[$ipcxCnt][4] = $ii;
@@ -521,7 +527,7 @@ if ($ipcxCnt > 0) {
             $typeComp = $ipcxParts[$ii][1];
 
             if ($ipcxData[$jj][1] ne $typeComp) {
-               die "***ERROR: IPCx type mis-match for IPCx component $ipcxParts[$ii][0]: $typeComp vs\. $ipcxData[$jj][1]\n";
+               die "***ERROR: IPCx type mis-match for IPCx component $ipcxParts[$ii][0] $ipcxParts[$ii][1] : $typeComp vs\. $ipcxData[$jj][1]\n";
             }
 
             #
@@ -539,7 +545,7 @@ if ($ipcxCnt > 0) {
             #
             if ( ($partInput[$kk][0] =~ /^Ground/) || ($partInput[$kk][0] =~ /\_Ground/) ) {
                if ( ($partOutCnt[$kk] < 1) || ($partOutCnt[$kk] > 2) ) {
-                  die "***ERROR: IPCx RECEIVER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
+                  #die "***ERROR: IPCx RECEIVER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
                }
             }
             #
@@ -1338,7 +1344,7 @@ for($ii=0;$ii<$subSys;$ii++)
 				$searchPart[$partsRemaining] = $xx;
 				$searchCnt ++;
 				$partsRemaining ++;
-				print "Part num $xx $partName[$xx] is remaining\n";
+				#print "Part num $xx $partName[$xx] is remaining\n";
 			}
 		}
 		$subRemaining = $subSys;
@@ -1885,7 +1891,7 @@ $allADC = 1;
 		$seqList[$seqCnt] = $ii;
 		$seqType[$seqCnt] = "SUBSYS";
 		$seqCnt ++;
-		 print "Subsys $ii $subSysName[$ii] has all ADC inputs and can go $seqCnt\n";
+		 #print "Subsys $ii $subSysName[$ii] has all ADC inputs and can go $seqCnt\n";
 		$subRemaining --;
 		if ($cur_step_cpus == 1) { $cur_step_cpus = $cpus; }
 		$sys_cpu_step{$subSysName[$ii]} = --$cur_step_cpus;
@@ -1989,7 +1995,7 @@ $numTries ++;
 				}
 			}
 			if($allADC == 1) {
-				print "Part $xx $xpartName[$xx] can go next\n";
+				#print "Part $xx $xpartName[$xx] can go next\n";
 				$partUsed[$xx] = 1;
 				$partsRemaining --;
 				$seqList[$seqCnt] = $xx;
@@ -2155,7 +2161,6 @@ print OUTH "\n\n#define MAX_MODULES \t $filtCnt\n";
 $filtCnt *= 10;
 print OUTH "#define MAX_FILTERS \t $filtCnt\n\n";
 
-my $gdsNode = $gdsNodeId - 1;
 print EPICS "MOMENTARY FEC\_$dcuId\_VME_RESET epicsInput.vmeReset int ai 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_DIAG_RESET epicsInput.diagReset int ai 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_SYNC_RESET epicsInput.syncReset int ai 0\n";
@@ -2168,7 +2173,7 @@ print EPICS "DAQVAR  $dcuId\_DCU_ID int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER_MAX epicsOutput.cpuMeterMax int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT epicsOutput.adcWaitTime int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_ONE_PPS epicsOutput.onePps int ai 0\n";
+#print EPICS "OUTVARIABLE FEC\_$dcuId\_ONE_PPS epicsOutput.onePps int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_ERR epicsOutput.timeErr int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_DIAG epicsOutput.timeDiag int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG_WORD epicsOutput.diagWord int ai 0\n";
@@ -2178,7 +2183,7 @@ for($ii=0;$ii<32;$ii++)
 	print EPICS "OUTVARIABLE FEC\_$dcuId\_GDS_MON_$ii epicsOutput.gdsMon\[$ii\] int ai 0\n";
 }
 print EPICS "OUTVARIABLE FEC\_$dcuId\_USR_TIME epicsOutput.diags[0] int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_RESYNC_COUNT epicsOutput.diags[1] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG1 epicsOutput.diags[1] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.diags[2] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ai 0\n";
@@ -2236,7 +2241,7 @@ for($ii = 0; $ii < $dacCnt; $ii++) {
    }
 }
 
-print EPICS "test_points ONE_PPS $dac_testpoint_names $::extraTestPoints\n";
+#print EPICS "test_points ONE_PPS $dac_testpoint_names $::extraTestPoints\n";
 if ($::extraExcitations) {
 	print EPICS "excitations $::extraExcitations\n";
 }
@@ -2481,7 +2486,8 @@ print OUT "\} else \{\n";
 # first in the processing loop
 #
 if ($ipcxCnt > 0) {
-   print OUT "\ncommData2Receive(myIpcCount, ipcInfo, pLocalEpics->epicsOutput\.timeDiag, cycle);\n\n";
+   print OUT "\ncommData2Receive(myIpcCount, ipcInfo, timeSec , cycle);\n\n";
+
 }
 
 #print "*****************************************************\n";
@@ -2864,7 +2870,7 @@ print OUT "$feTailCode";
 # as the last step of the processing loop
 #
 if ($ipcxCnt > 0) {
-   print OUT "\n    commData2Send(myIpcCount, ipcInfo, pLocalEpics->epicsOutput\.timeDiag, cycle);\n\n";
+   print OUT "\n    commData2Send(myIpcCount, ipcInfo, timeSec, cycle);\n\n";
 }
 
 print OUT "  }\n";
@@ -3060,6 +3066,30 @@ if ($adcSlave > -1) {
 } else {
   print OUTM "#Uncomment to run on an I/O slave process\n";
   print OUTM "#EXTRA_CFLAGS += -DADC_SLAVE\n";
+}
+if ($timeMaster > -1) {
+  print OUTM "EXTRA_CFLAGS += -DTIME_MASTER=1\n";
+} else {
+  print OUTM "#Uncomment to build a time master\n";
+  print OUTM "#EXTRA_CFLAGS += -DTIME_MASTER=1\n";
+}
+if ($timeSlave > -1) {
+  print OUTM "EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
+} else {
+  print OUTM "#Uncomment to build a time slave\n";
+  print OUTM "#EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
+}
+if ($iopTimeSlave > -1) {
+  print OUTM "EXTRA_CFLAGS += -DIOP_TIME_SLAVE=1\n";
+} else {
+  print OUTM "#Uncomment to build an IOP time slave\n";
+  print OUTM "#EXTRA_CFLAGS += -DIOP_TIME_SLAVE=1\n";
+}
+if ($rfmTimeSlave > -1) {
+  print OUTM "EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
+} else {
+  print OUTM "#Uncomment to build an RFM time slave\n";
+  print OUTM "#EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
 }
 if ($pciNet > -1) {
   print OUTM "#Enable use of PCIe RFM Network\n";
@@ -3353,7 +3383,7 @@ if ($not_found) {
 mkpath $epicsScreensDir, 0, 0755;
 my $usite = uc $site;
 my $sysname = "FEC";
-$sed_arg = "s/SITE_NAME/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($sysname) . "/g;s/GDS_NODE_ID/" . ($gdsNodeId - 1) . "/g;";
+$sed_arg = "s/SITE_NAME/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($sysname) . "/g;s/GDS_NODE_ID/" . $gdsNodeId . "/g;";
 $sed_arg .= "s/LOCATION_NAME/$location/g;";
 $sed_arg .= "s/DCU_NODE_ID/$dcuId/g;";
 $sysname = uc($skeleton);
@@ -3542,7 +3572,7 @@ sub commify_series {
 		my $part_name = $partName[$cur_part_num];
 		if (is_top_name($partSubName[$cur_part_num])) {
 		  $sysname = substr($partSubName[$cur_part_num], 2, 3);
-	print "ADC MONITOR IS TOP =$sysname\n";
+	#print "ADC MONITOR IS TOP =$sysname\n";
 		}
 		#print "ADC input Part $part_name $partType[$cur_part_num] has Adc input \'$partInput[$cur_part_num][0]\'\n";
 		if ($partType[$cur_part_num] eq "Filt") {
