@@ -3,7 +3,7 @@
 // This software supports data communication via:
 //	1) Shared memory, between two processes on the same computer
 //	2) GE Fanuc 5565 Reflected Memory PCIe hardware
-//	3) Dolphonics Reflected Memory over a PCIe network.
+//	3) Dolphinics Reflected Memory over a PCIe network.
 //
 
 #include "commData2.h"
@@ -21,12 +21,7 @@
 INLINE void commData2Init(
 			  int connects, 		// total number of IPC connections in the application
 			  int rate, 			// Sample rate of the calling application eg 2048, 16384, etc.
-			  CDS_IPC_INFO ipcInfo[], 	// IPC information structure
-			  long rfmAddress[]		// Address of reflected memory networks
-							//	0 = GE 5565 module 1
-							//	1 = GE 5565 module 2
-							//	2 = PCIe Network receive address
-							//	3 = PCIe Network write address
+			  CDS_IPC_INFO ipcInfo[] 	// IPC information structure
 			  )
 {
 int ii;
@@ -59,18 +54,16 @@ int ii;
 	// Save pointers to the IPC communications memory locations.
         if(ipcInfo[ii].netType == IRFM)		// VMIC Reflected Memory *******************************
         {
-		if(rfmAddress[0]) 
-		{
-                ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(rfmAddress[0] + IPC_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
-                printf("Net Type = RFM 1 at 0x%x\n",(int)ipcInfo[ii].pIpcData);
-		}
-		ipcInfo[ii].pIpcData2 = NULL;
-		if(rfmAddress[1]) 
-		{
-                ipcInfo[ii].pIpcData2  = (CDS_IPC_COMMS *)(rfmAddress[1] + IPC_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
-                printf("Net Type = RFM 2 at 0x%x\n",(int)ipcInfo[ii].pIpcData2);
-		}
-        } 
+	  if(cdsPciModules.rfmCount > 0) {
+	    ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[0] + IPC_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
+	    printf("Net Type = RFM 0 at 0x%x\n",(int)ipcInfo[ii].pIpcData);
+	  }
+	  ipcInfo[ii].pIpcData2 = NULL;
+	  if(cdsPciModules.rfmCount > 1) {
+	    ipcInfo[ii].pIpcData2  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[1] + IPC_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
+	    printf("Net Type = RFM 1 at 0x%x\n",(int)ipcInfo[ii].pIpcData2);
+	  }
+	}
         if(ipcInfo[ii].netType == ISHM)		// Computer shared memory ******************************
 	{
                 ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(_ipc_shm + IPC_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
@@ -79,12 +72,12 @@ int ii;
 	// PCIe communications requires one pointer for sending data and a second one for receiving data.
         if((ipcInfo[ii].netType == IPCI) && (ipcInfo[ii].mode == IRCV))
 	{
-                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(rfmAddress[IPC_PCIE_READ] + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
+                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphin[0]) + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
                 printf("Net Type = PCIE RCV IPC %d at 0x%lx  *********************************\n",ipcInfo[ii].sendRate,(long)ipcInfo[ii].pIpcData);
         }
         if((ipcInfo[ii].netType == IPCI) && (ipcInfo[ii].mode == ISND))
 	{
-                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(rfmAddress[IPC_PCIE_WRITE] + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
+                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphin[1]) + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
                 printf("Net Type = PCIE SEND IPC at 0x%lx  *********************************\n",(long)ipcInfo[ii].pIpcData);
         }
         printf("IPC Number = %d\n",ipcInfo[ii].ipcNum);
@@ -126,30 +119,30 @@ for(ii=0;ii<connects;ii++)
 		// Don't write to PCI RFM if network error detected by IOP
         	if((ipcInfo[ii].netType != IPCI) || (iop_rfm_valid))
 		{
-		// Write Data
-                ipcInfo[ii].pIpcData->data[ipcIndex] = ipcInfo[ii].data;
-		clflush_cache_range (ipcInfo[ii].pIpcData->data+ipcIndex,
-				     sizeof(ipcInfo[ii].pIpcData->data[0]));
-		// Write timestamp/cycle counter word
-                ipcInfo[ii].pIpcData->timestamp[ipcIndex] = syncWord;
-		clflush_cache_range (ipcInfo[ii].pIpcData->timestamp+ipcIndex,
-				     sizeof(ipcInfo[ii].pIpcData->timestamp[0]));
+			// Leaving clflush_cache_range() out on dts x1lsc 
+			// improves
+			//if (ipcInfo[ii].netType == IPCI) break;
+			// Write Data
+			//printk("%d 0x%lx\n", ii, ipcInfo[ii].pIpcData->data);
+                	ipcInfo[ii].pIpcData->data[ipcIndex] = ipcInfo[ii].data;
+			//clflush_cache_range (ipcInfo[ii].pIpcData->data+ipcIndex, 8);
+			// Write timestamp/cycle counter word
+                	ipcInfo[ii].pIpcData->timestamp[ipcIndex] = syncWord;
+			//clflush_cache_range (ipcInfo[ii].pIpcData->timestamp+ipcIndex, 8);
 		}
 		// If 2 RFM cards, send data to both networks
 		if((ipcInfo[ii].netType == IRFM) && (ipcInfo[ii].pIpcData2 != NULL))	
 		{
 			// Write Data
 			ipcInfo[ii].pIpcData2->data[ipcIndex] = ipcInfo[ii].data;
-			clflush_cache_range (ipcInfo[ii].pIpcData2->data+ipcIndex,
-				     	     sizeof(ipcInfo[ii].pIpcData2->data[0]));
+			//clflush_cache_range (ipcInfo[ii].pIpcData2->data+ipcIndex, 8);
 			// Write timestamp/cycle counter word
 			ipcInfo[ii].pIpcData2->timestamp[ipcIndex] = syncWord;
-			clflush_cache_range (ipcInfo[ii].pIpcData2->timestamp+ipcIndex,
-				     	     sizeof(ipcInfo[ii].pIpcData2->timestamp[0]));
+			//clflush_cache_range (ipcInfo[ii].pIpcData2->timestamp+ipcIndex, 8);
 		}
         }
 }
-
+//clflush_cache_range (cdsPciModules.dolphin[1], 16*20);
 }
 
 // *************************************************************************************************
@@ -204,8 +197,9 @@ for(ii=0;ii<connects;ii++)
 	   // Send error per second output
 	   if(cycle == 0)
 	   {
-			ipcInfo[ii].errTotal = ipcInfo[ii].errFlag;
-				ipcInfo[ii].errFlag = 0;
+		ipcInfo[ii].errTotal = ipcInfo[ii].errFlag;
+		if (ipcInfo[ii].errFlag) ipcErrBits |= 1 << (ipcInfo[ii].netType);
+		ipcInfo[ii].errFlag = 0;
 	   }
         }
 }
