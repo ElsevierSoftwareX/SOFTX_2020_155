@@ -1255,7 +1255,10 @@ int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int kind)
     csrAddr = ioremap_nocache((unsigned long)csrAddress, 0x40);
 
     p5565Csr = (VMIC5565_CSR *)csrAddr;
+    pHardware->rfm_reg[devNum] = p5565Csr;
     p5565Csr->LCSR1 &= ~TURN_OFF_5565_FAIL;
+    p5565Csr->LCSR1 &= !1; // Turn off own data light
+
     printk("Board id = 0x%x\n",p5565Csr->BID);
     pHardware->rfmConfig[devNum] = p5565Csr->NID;
   } else if (kind == 0x5579) {
