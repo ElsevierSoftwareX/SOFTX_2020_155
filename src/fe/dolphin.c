@@ -4,12 +4,26 @@ sci_l_segment_handle_t segment;
 sci_map_handle_t client_map_handle;
 sci_r_segment_handle_t  remote_segment_handle;
 
+/*
+
+R_OK,
+       SR_DISABLED,
+       SR_WAITING,
+       SR_CHECKING,
+       SR_CHECK_TIMEOUT,
+       SR_LOST,
+       SR_OPEN_TIMEOUT,
+       SR_HEARTBEAT_RECEIVED
+      } session_cb_reason_t;
+*/
 signed32 session_callback(session_cb_arg_t IN arg,
 			  session_cb_reason_t IN reason,
 			  session_cb_status_t IN status,
 			  unsigned32 IN target_node,
 			  unsigned32 IN local_adapter_number) {
   printkl("Session callback reason=%d status=%d target_node=%d\n", reason, status, target_node);
+  if (reason == SR_OK) iop_rfm_valid = 1;
+  if (reason == SR_DISABLED || reason == SR_LOST) iop_rfm_valid = 0;
   return 0;
 }
 
