@@ -129,6 +129,12 @@
       *((long*) message) = htonl (id);
       size = strlen (answer);
       len = 0;
+
+      int lfd = open("/var/log/awglock", O_RDWR | O_CREAT);
+      if (lfd < 0) {
+	perror("Unable to open/create lock file /var/log/awglock");
+	return;
+      }
       while (len < size) {
          nbytes = size - len;
          if (nbytes <= 1024) {
@@ -143,18 +149,23 @@
             }
             if (nbytes == 0) {
                /*close (sock);*/
+	       close(lfd);
                return;
             }
          }
-         nbytes = sendto (sock, message, nbytes + 4, 0, 
-                         (struct sockaddr*) name, 
-                         sizeof (struct sockaddr_in));
-         if (nbytes < 0) {
-            /*close (sock);*/
-            return;
-         }
+   	 //printf("Sending '%s' in reply\n", message);
+	 nbytes += 4;
+	 int nsent;
+ 	 flock(lfd, LOCK_EX);
+	 for(;;) {
+           nsent = sendto (sock, message, nbytes, 0, (struct sockaddr*) name, sizeof (struct sockaddr_in));
+	   if (nsent < 0) perror("sendto");
+	   if (nsent == nbytes) break;
+	 }
          len += nbytes;
+ 	 flock(lfd, LOCK_UN);
       }
+      close(lfd);
    }
 
 
@@ -286,8 +297,8 @@
                   cb->name = name;
                   strncpy (cb->arg, arg, 2047);
                   cb->arg [2047] = 0;
-                  /*printf ("CONF SERVICE: %s (%x)\n", cb->service->user, 
-                         (int)cb->service->user);*/
+                  printf ("CONF SERVICE: %s (%x)\n", cb->service->user, 
+                         (int)cb->service->user);
                #ifdef OS_VXWORKS
                   serviceCallback (cb);
                #else
