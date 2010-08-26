@@ -143,10 +143,7 @@ while (<IN>) {
 	  $ifoid = 0;
 	}
 	$gds_ifo = 1;
-	if ($gds_rmid > 0) {
-	  $gds_rmid--;
 	print "GDS NODE  $gds_rmid\n";
-	}
 	if ($site eq undef || $site eq "") {
 	  $site = "M1";
 	}
