@@ -67,10 +67,10 @@ install-% :: src/epics/simLink/%.mdl
 	/bin/cp -pr target/$${system}epics /opt/rtcds/$$site/$${lower_ifo}/target/$${system};\
 	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}epics/db/*/autoBurt.req; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}epics/db/*/autoBurt.req /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}epics || exit 3; fi;\
 	echo Installing /opt/rtcds/$$site/$${lower_ifo}/target/$${system};\
-	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}fe.rtl; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}fe.rtl /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/archive/$${system}fe_$${cur_date}.rtl || exit 4; fi;\
-	/bin/cp -p src/fe/$${system}/$${system}fe.rtl /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/;\
+	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}fe.ko; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}fe.ko /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/archive/$${system}fe_$${cur_date}.ko || exit 4; fi;\
+	/bin/cp -p src/fe/$${system}/$${system}fe.ko /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/;\
 	/bin/cp -p src/epics/simLink/$${system}.mdl /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/simLink/;\
-	echo 'sudo ' /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.rtl ' >  '/opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts/startup$${ifo}rt;\
+	echo 'sudo /sbin/insmod' /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko ' >  '/opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts/startup$${ifo}rt;\
 	/bin/chmod +x /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts/startup$${ifo}rt;\
 	echo Installing start and stop scripts;\
 	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/scripts;\
@@ -89,7 +89,7 @@ install-% :: src/epics/simLink/%.mdl
 	echo 'fi' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system} >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo sleep 5 >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
-	echo 'sudo killall ' $${system}epics $${system}fe.rtl >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
+	echo 'sudo killall ' $${system}epics $${system}fe.ko >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'res=`ps h -C awgtpman | grep ' $${system} '`' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'if [ "x$${res}" != x ]; then' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'num=$$(echo $${res} | awk '"'"'{print $$1}'"'"')' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
@@ -126,11 +126,10 @@ uninstall-daq-% :: src/epics/simLink/%.mdl
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`;\
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	datarate=`grep datarate build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
-	gds_file_node=`expr $${gds_node} + 1`; \
 	datarate_mult=`expr $${datarate} / 16384 `; \
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	cur_date=`date +%y%m%d_%H%M%S`;\
-	echo Removing GDS node $${gds_file_node} configuration file ;\
+	echo Removing GDS node $${gds_node} configuration file ;\
 	echo /opt/rtcds/$${site}/target/gds/param/tpchn_$${system}.par ;\
 	/bin/rm -f  /opt/rtcds/$${site}/target/gds/param/tpchn_$${system}.par;\
 	echo Removing DAQ configuration file;\
@@ -154,7 +153,6 @@ install-daq-% :: src/epics/simLink/%.mdl
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	datarate=`grep datarate build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	targethost=`grep TARGET_HOST_NAME src/include/$${system}.h | head -1 | awk '{print $$3}'`; \
-	gds_file_node=`expr $${gds_node} + 1`; \
 	datarate_mult=`expr $${datarate} / 16384 `; \
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/ ;\
@@ -168,13 +166,12 @@ install-daq-% :: src/epics/simLink/%.mdl
 	fi;\
 	echo src/epics/util/updateTestpointPar.pl -par_file=$${testpoint_par_infname}  -gds_node=$${gds_node} -site_letter=$${site_letter} -system=$${system} -host=$${targethost}; \
 	src/epics/util/updateTestpointPar.pl -par_file=$${testpoint_par_infname}  -gds_node=$${gds_node} -site_letter=$${site_letter} -system=$${system} -host=$${targethost} > /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/testpoint.par || exit 1; \
-	echo Installing GDS node $${gds_file_node} configuration file ;\
+	echo Installing GDS node $${gds_node} configuration file ;\
 	echo /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par ;\
 	if test -e /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par; then /bin/mv -f /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive/tpchn_$${system}_$${cur_date}.par || exit 1; fi;\
 	/bin/cp -p build/$${system}epics/$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/tpchn_$${system}.par ;\
 	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/param;\
 	/bin/cp -p build/$${system}epics/$${system}.par /opt/rtcds/$${site}/$${lower_ifo}/target/$${system}/param/tpchn_$${system}.par ;\
-	/bin/cp -p build/$${system}epics/$${system}.par /cvs/cds/$${site}/target/gds/param/tpchn_$${system}.par ;\
 	if test $${datarate_mult} -gt 1;\
 	then \
 	  datarate_mult_flag=-$${datarate_mult}; \
@@ -233,9 +230,9 @@ reinstall-% :: src/epics/simLink/%.mdl
 	if test -e /opt/rtcds/$$site/target/$${lower_ifo}$${system}epics/db/*/autoBurt.req; then /bin/mv -f /opt/rtcds/$$site/target/$${lower_ifo}$${system}epics/db/*/autoBurt.req /opt/rtcds/$$site/target/$${lower_ifo}$${system}epics || exit 2; fi;\
 	echo Installing /opt/rtcds/$$site/target/$${lower_ifo}$${system};\
 	/bin/mkdir -p /opt/rtcds/$$site/target/$${lower_ifo}$${system}/archive;\
-	if test -e /opt/rtcds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl; then /bin/mv -f /opt/rtcds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl /opt/rtcds/$$site/target/$${lower_ifo}$${system}/archive/$${system}fe_$${cur_date}.rtl || exit 3; fi;\
-	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /opt/rtcds/$$site/target/$${lower_ifo}$${system};\
-	echo 'sudo ' /opt/rtcds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl ' >  '/opt/rtcds/$$site/target/$${lower_ifo}$${system}/log.txt ' 2>& 1 &' > /opt/rtcds/$$site/target/$${lower_ifo}$${system}/startup.cmd;\
+	if test -e /opt/rtcds/$$site/target/$${lower_ifo}$${system}/$${system}fe.ko; then /bin/mv -f /opt/rtcds/$$site/target/$${lower_ifo}$${system}/$${system}fe.ko /opt/rtcds/$$site/target/$${lower_ifo}$${system}/archive/$${system}fe_$${cur_date}.ko || exit 3; fi;\
+	/bin/cp -pr src/fe/$${system}/$${system}fe.ko /opt/rtcds/$$site/target/$${lower_ifo}$${system};\
+	echo 'sudo ' /opt/rtcds/$$site/target/$${lower_ifo}$${system}/$${system}fe.ko ' >  '/opt/rtcds/$$site/target/$${lower_ifo}$${system}/log.txt ' 2>& 1 &' > /opt/rtcds/$$site/target/$${lower_ifo}$${system}/startup.cmd;\
 	/bin/chmod +x /opt/rtcds/$$site/target/$${lower_ifo}$${system}/startup.cmd
 
 reinstall-fe-% :: src/epics/simLink/%.mdl
@@ -249,9 +246,9 @@ reinstall-fe-% :: src/epics/simLink/%.mdl
 	/bin/mkdir -p /opt/rtcds/$$site/chans;\
 	echo Installing Front-end Code Only system=$$system site=$$site ifo=$$ifo,$$lower_ifo;\
 	/bin/mkdir -p /opt/rtcds/$$site/target/$${lower_ifo}$${system}/archive;\
-	if test -e /opt/rtcds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl; then /bin/mv -f /opt/rtcds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl /opt/rtcds/$$site/target/$${lower_ifo}$${system}/archive/$${system}fe_$${cur_date}.rtl || exit 3; fi;\
-	/bin/cp -pr src/fe/$${system}/$${system}fe.rtl /opt/rtcds/$$site/target/$${lower_ifo}$${system};\
-	echo 'sudo ' /opt/rtcds/$$site/target/$${lower_ifo}$${system}/$${system}fe.rtl ' >  '/opt/rtcds/$$site/target/$${lower_ifo}$${system}/log.txt ' 2>& 1 &' > /opt/rtcds/$$site/target/$${lower_ifo}$${system}/startup.cmd;\
+	if test -e /opt/rtcds/$$site/target/$${lower_ifo}$${system}/$${system}fe.ko; then /bin/mv -f /opt/rtcds/$$site/target/$${lower_ifo}$${system}/$${system}fe.ko /opt/rtcds/$$site/target/$${lower_ifo}$${system}/archive/$${system}fe_$${cur_date}.ko || exit 3; fi;\
+	/bin/cp -pr src/fe/$${system}/$${system}fe.ko /opt/rtcds/$$site/target/$${lower_ifo}$${system};\
+	echo 'sudo /sbin/insmod' /opt/rtcds/$$site/target/$${lower_ifo}$${system}/$${system}fe.ko ' >  '/opt/rtcds/$$site/target/$${lower_ifo}$${system}/log.txt ' 2>& 1 &' > /opt/rtcds/$$site/target/$${lower_ifo}$${system}/startup.cmd;\
 	/bin/chmod +x /opt/rtcds/$$site/target/$${lower_ifo}$${system}/startup.cmd
 
 # This rule is for epics-only systems, ie. no front-end
@@ -291,7 +288,7 @@ dc:
 	(cd src/daqd; autoconf)
 	/bin/rm -rf build/dc
 	/bin/mkdir -p build/dc
-	(cd build/dc; ../../src/daqd/configure '--enable-symmetricom' '--with-mx' '--enable-debug' '--with-gds=/apps/Linux/gds' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' '--with-concentrator' && make)
+	(cd build/dc; ../../src/daqd/configure '--enable-symmetricom' '--with-mx' '--without-myrinet' '--enable-debug' '--with-framecpp=/usr/local' '--with-concentrator' && make)
 
 # Build frame builder NDS or frame writer (broadcast receiver)
 rcv:
@@ -306,3 +303,14 @@ stand:
 	/bin/rm -rf build/stand
 	/bin/mkdir -p build/stand
 	(cdir=`pwd`; cd build/stand; $$cdir/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' --enable-symmetricom --enable-iop && make)
+
+
+
+MDL_MODELS = x1cdst1 x1isiham x1isiitmx x1iss x1lsc x1omc1 x1psl x1susetmx x1susetmy x1susitmx x1susitmy x1susquad1 x1susquad2 x1susquad3 x1susquad4 x1x12 x1x13 x1x14 x1x15 x1x16 x1x20 x1x21 x1x22 x1x23
+
+World: $(MDL_MODELS)
+
+cleanWorld: $(patsubst %,clean-%,$(MDL_MODELS))
+
+installWorld: $(patsubst %,install-%,$(MDL_MODELS))  $(patsubst %,install-daq-%,$(MDL_MODELS))  $(patsubst %,install-screens-%,$(MDL_MODELS))  
+
