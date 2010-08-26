@@ -295,7 +295,7 @@ rcv:
 	(cd src/daqd; autoconf)
 	/bin/rm -rf build/rcv
 	/bin/mkdir -p build/rcv
-	(cd build/rcv; ../../src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-gds=/apps/Linux/gds' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' && make)
+	(cd build/rcv; ../../src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-framecpp=/usr/local' && make)
 
 # build standalone frame builder with IOP timing
 stand:
