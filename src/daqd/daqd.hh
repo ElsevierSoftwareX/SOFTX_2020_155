@@ -90,9 +90,11 @@ using namespace std;
 #endif
 #endif
 
+#define SHMEM_DAQ 1
+
 #ifdef FILE_CHANNEL_CONFIG
 #if defined(_ADVANCED_LIGO)
-#if !defined(USE_GM) && !defined(USE_MX) && !defined(USE_UDP)
+#if !defined(USE_GM) && !defined(USE_MX) 
 #define SHMEM_DAQ 1
 #endif
 #include "../../src/include/daqmap.h"

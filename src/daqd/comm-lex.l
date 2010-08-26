@@ -26,6 +26,7 @@ using namespace std;
 #include "daqd.hh"
 #include "MyLexer.hh"
 
+#if 0
 #undef yywrap
 
 extern "C" {
@@ -37,9 +38,14 @@ yywrap ()
 }
 }
 
+#endif
 %}
 
 %option yylineno
+%option noyywrap
+
+
+
 
 %%
 "symm_gps_offset" { return SYMM_GPS_OFFSET; }
@@ -172,7 +178,7 @@ yywrap ()
 "log" { return LOG_T; }
 "debug" { return DEBUG_T; }
 "input" { return INPUT; }
-"echo" { return ECHO; }
+"echo" { return ECHO_ECHO; }
 "sleep" { return SLEEP; }
 "trend_ascii_output" { return TREND_ASCII_OUTPUT; }
 "trend-ascii-output" { return TREND_ASCII_OUTPUT; }

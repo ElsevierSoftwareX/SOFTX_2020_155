@@ -6,13 +6,13 @@
 /* Allowed maximum length for DMT channels */
 #define MAX_LONG_CHANNEL_NAME_LENGTH 255
 /* Allowed maximum length for DAQ channels */
-#define MAX_CHANNEL_NAME_LENGTH 40
+#define MAX_CHANNEL_NAME_LENGTH 60
 /* Groups are absolete and need to be removed from the source code */
 #define MAX_CHANNEL_GROUPS 150
 /* Hard limit on the number of channel names supported:
    it needs to be eliminated, dynamically allocated arrays should be used */
-#define MAX_CHANNELS 30000
-#define MAX_TREND_CHANNELS  30000
+#define MAX_CHANNELS 60000
+#define MAX_TREND_CHANNELS  60000
 
 /* numbering must be contiguous */
 typedef enum {

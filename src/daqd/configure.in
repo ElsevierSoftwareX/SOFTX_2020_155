@@ -232,8 +232,8 @@ AC_ARG_ENABLE(symmetricom,
 [  --enable-symmetricom		Use Symmetricom GPS card as timing source],
 [if test x$enableval != xno; then
   AC_DEFINE(USE_SYMMETRICOM)
-  SYMMETRICOM_CFLAGS=-DUNIX
-  SYMMETRICOM_LDFLAGS=-lbcsdk
+dnl  SYMMETRICOM_CFLAGS=-DUNIX
+dnl  SYMMETRICOM_LDFLAGS=-lbcsdk
 fi;
 ],)
 AC_SUBST(USE_SYMMETRICOM)

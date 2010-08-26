@@ -437,6 +437,7 @@ label1:
 	 }
        }
 
+#if 0
 #ifdef USE_BROADCAST
 	// Include checking for the legacy GDS TP DCUs if build as broadcast receiver
 	int dcu_from = DCU_ID_FIRST_GDS;
@@ -453,8 +454,11 @@ label1:
 	}
        for (dcuId = dcu_from; dcuId < dcu_to; dcuId++)
 #else
+
        for (dcuId = DCU_ID_SUS_1; dcuId < DCU_COUNT; dcuId++)
 #endif
+#endif
+	dcuId = ac[i]->tp_node; // From now on the DCU id is the same as GDS node id
         {
          out = 0;
 //#ifdef USE_GM
@@ -478,7 +482,7 @@ label1:
            }
 	 }
 //#endif
-         if (out) break;
+         //if (out) break;
        }
        if (index  > -1) break;
      }
