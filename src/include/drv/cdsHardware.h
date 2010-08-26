@@ -31,7 +31,7 @@
 #define MAX_ADC_MODULES		12	
 #define MAX_DAC_MODULES		8
 #define MAX_DIO_MODULES		4
-#define MAX_RFM_MODULES		4
+#define MAX_RFM_MODULES		2
 #define MAX_VME_BRIDGES		4
 
 #define GSC_16AI64SSA		0
@@ -59,42 +59,6 @@ typedef struct CDS_REMOTE_NODES {
 	int port;	   /* port number; we can have multiple FEs on same host */
 } CDS_REMOTE_NODES;
 
-/* Standard structure to maintain PCI module information.			*/
-typedef struct CDS_HARDWARE{
-	int dacCount;			/* Number of DAC modules found 		*/
-	long pci_dac[MAX_DAC_MODULES];	/* Remapped addresses of DAC modules	*/
-	int dacType[MAX_DAC_MODULES];
-	int dacConfig[MAX_DAC_MODULES];
-	int adcCount;			/* Number of ADC modules found		*/
-	long pci_adc[MAX_ADC_MODULES];	/* Remapped addresses of ADC modules	*/
-	int adcType[MAX_ADC_MODULES];
-	int adcConfig[MAX_ADC_MODULES];
-	int doCount;			/* Number of DIO modules found		*/
-	unsigned short pci_do[MAX_DIO_MODULES];	/* io registers of DIO	*/
-	int doType[MAX_DIO_MODULES];
-	int doInstance[MAX_DIO_MODULES];
-	int dioCount;			/* Number of DIO modules found		*/
-	unsigned short pci_dio[MAX_DIO_MODULES];	/* io registers of DIO	*/
-	int iiroDioCount;	 	/* Number of IIRO-8 isolated DIO modules found */
-	unsigned short pci_iiro_dio[MAX_DIO_MODULES];	/* io regs of IIRO mods */
-	int iiroDio1Count;	 	/* Number of IIRO-16 isolated DIO modules found */
-	unsigned short pci_iiro_dio1[MAX_DIO_MODULES];	/* io regs of IIRO-16 mods */
-	int cDo32lCount;	 	/* Number of Contec isolated DO modules found */
-	int cDio1616lCount;	 	/* Number of Contec isolated 16 channel DIO modules found */
-	int cDio6464lCount;	 	/* Number of Contec isolated 32 channel DIO modules found */
-	unsigned short pci_cdo_dio1[MAX_DIO_MODULES];	/* io regs of Contec 32BO mods */
-	int rfmCount;			/* Number of RFM modules found		*/
-	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
-	int rfmConfig[MAX_RFM_MODULES];
-	int rfmType[MAX_RFM_MODULES];
-	unsigned char *buf;
-	volatile unsigned int *gps;	/* GPS card */
-	unsigned int gpsType;
-
-	/* Variables controlling cards usage */
-	int cards;			/* Sizeof array below */
-	CDS_CARDS *cards_used;		/* Cards configuration */
-}CDS_HARDWARE;
 
 #define IO_MEMORY_SLOTS		64
 #define MAX_IO_MODULES		16
@@ -115,6 +79,8 @@ typedef struct IO_MEM_DATA{
 	int ipc[MAX_IO_MODULES];
 	int rfmCount;
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
+        int dolphinCount;
+        volatile unsigned long *dolphin[2]; /* Read and write addresses to the Dolphin memory */
 	MEM_DATA_BLOCK iodata[MAX_IO_MODULES][IO_MEMORY_SLOTS];
 }IO_MEM_DATA;
 
@@ -549,4 +515,45 @@ typedef struct TSYNC_REGISTER{
 	unsigned int BCD_SEC;
 	unsigned int BCD_SUB_SEC;
 }TSYNC_REGISTER;
+
+/* Standard structure to maintain PCI module information.			*/
+typedef struct CDS_HARDWARE{
+	int dacCount;			/* Number of DAC modules found 		*/
+	long pci_dac[MAX_DAC_MODULES];	/* Remapped addresses of DAC modules	*/
+	int dacType[MAX_DAC_MODULES];
+	int dacConfig[MAX_DAC_MODULES];
+	int adcCount;			/* Number of ADC modules found		*/
+	long pci_adc[MAX_ADC_MODULES];	/* Remapped addresses of ADC modules	*/
+	int adcType[MAX_ADC_MODULES];
+	int adcConfig[MAX_ADC_MODULES];
+	int doCount;			/* Number of DIO modules found		*/
+	unsigned short pci_do[MAX_DIO_MODULES];	/* io registers of DIO	*/
+	int doType[MAX_DIO_MODULES];
+	int doInstance[MAX_DIO_MODULES];
+	int dioCount;			/* Number of DIO modules found		*/
+	unsigned short pci_dio[MAX_DIO_MODULES];	/* io registers of DIO	*/
+	int iiroDioCount;	 	/* Number of IIRO-8 isolated DIO modules found */
+	unsigned short pci_iiro_dio[MAX_DIO_MODULES];	/* io regs of IIRO mods */
+	int iiroDio1Count;	 	/* Number of IIRO-16 isolated DIO modules found */
+	unsigned short pci_iiro_dio1[MAX_DIO_MODULES];	/* io regs of IIRO-16 mods */
+	int cDo32lCount;	 	/* Number of Contec isolated DO modules found */
+	int cDio1616lCount;	 	/* Number of Contec isolated 16 channel DIO modules found */
+	int cDio6464lCount;	 	/* Number of Contec isolated 32 channel DIO modules found */
+	unsigned short pci_cdo_dio1[MAX_DIO_MODULES];	/* io regs of Contec 32BO mods */
+	int rfmCount;			/* Number of RFM modules found		*/
+	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
+	int rfmConfig[MAX_RFM_MODULES];
+	int rfmType[MAX_RFM_MODULES];
+	volatile VMIC5565_CSR *rfm_reg[MAX_RFM_MODULES]; /* Remapped address of the registers */
+	unsigned char *buf;
+	volatile unsigned int *gps;	/* GPS card */
+	unsigned int gpsType;
+	int dolphinCount;		/* the number of Dolphin cards we have  on the system */
+	volatile unsigned long *dolphin[2]; /* read and write Dolphin memory */
+
+	/* Variables controlling cards usage */
+	int cards;			/* Sizeof array below */
+	CDS_CARDS *cards_used;		/* Cards configuration */
+}CDS_HARDWARE;
+
 #endif
