@@ -2200,6 +2200,17 @@ int main(int argc, char **argv)
 					cdsPciModules.cDio6464lCount ++;
 				}
 				break;
+                        case CON_32DO:
+		                if((cdsPciModules.cards_used[jj].type == CON_32DO) &&
+		                        (cdsPciModules.cards_used[jj].instance == doCnt))
+		                {
+               			      printf("Found 32 DO CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
+		                      cdsPciModules.doType[doCnt] = ioMemData->model[ii];
+                                      cdsPciModules.pci_do[doCnt] = ioMemData->ipc[ii];
+                                      cdsPciModules.doCount ++; 
+                                      cdsPciModules.cDo32lCount ++; 
+				 }
+				 break;
 			default:
 				break;
 		   }
