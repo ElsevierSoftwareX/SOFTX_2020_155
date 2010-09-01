@@ -49,8 +49,10 @@
 #if MX_KERNEL == 1
 #include <myriexpress.h>
 #endif
+#ifdef NO_RTL
 #include </usr/src/linux/arch/x86/include/asm/processor.h>
 #include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
+#endif
 
 extern int iop_rfm_valid;
 
@@ -635,10 +637,12 @@ void *fe_start(void *arg)
 #endif
 
 
+#ifdef NO_RTL
   // Flush L1 cache
   memset (fp, 0, 64*1024);
   memset (fp, 1, 64*1024);
   clflush_cache_range ((void *)fp, 64*1024);
+#endif
 
 // Do all of the initalization ***********************************************************************
 
@@ -708,19 +712,14 @@ printf("Sync source = %d\n",syncSource);
         udelay(20000);
         udelay(20000);
   	printf("Waiting for EPICS BURT %d\n", cnt++);
+	cpu_relax();
 #else
 	usleep(1000000);
 #endif
-	cpu_relax();
   }while(!pLocalEpics->epicsInput.burtRestore);
 
   printf("BURT Restore Complete\n");
 // BURT has completed *******************************************************************
-
-
-	udelay(20000);
-        udelay(20000);
-        udelay(20000);
 
 // Read in all Filter Module EPICS settings
   for (system = 0; system < NUM_SYSTEMS; system++)
@@ -767,7 +766,9 @@ printf("Sync source = %d\n",syncSource);
 
   printf("Initialized servo control parameters.\n");
 
+#ifdef NO_RTL
 udelay(1000);
+#endif
 
 // Initialize DAQ variable/software **************************************************
 #if !defined(NO_DAQ) && !defined(IOP_TASK)
@@ -2631,7 +2632,8 @@ void cleanup_module (void) {
 }
 #endif
 
+#ifdef NO_RTL
 MODULE_DESCRIPTION("Control system");
 MODULE_AUTHOR("LIGO");
 MODULE_LICENSE("Dual BSD/GPL");
-
+#endif
