@@ -1979,6 +1979,7 @@ gm_receiver_thread(void *p)
 
    int ll = cdsPciModules.adcConfig[0];
    ioMemDataCycle = &ioMemData->iodata[ll][0].cycle;
+   printf("ioMem Cycle from %d\n", ll);
    ioMemDataGPS = &ioMemData->gpsSecond;
 #endif
 }

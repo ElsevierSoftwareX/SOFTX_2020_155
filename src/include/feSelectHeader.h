@@ -40,6 +40,60 @@
 	#include "om2.h"
 #elif defined(ALX_CODE)
 	#include "alx.h"
+#elif defined(X00_CODE)
+	#include "x00.h"
+#elif defined(LSC_CODE)
+	#include "lsc.h"
+#elif defined(LSP_CODE)
+	#include "lsp.h"
+#elif defined(SUP_CODE)
+	#include "sup.h"
+#elif defined(SCX_CODE)
+	#include "scx.h"
+#elif defined(SCY_CODE)
+	#include "scy.h"
+#elif defined(SPY_CODE)
+	#include "spy.h"
+#elif defined(SVC_CODE)
+	#include "svc.h"
+#elif defined(SPX_CODE)
+	#include "spx.h"
+#elif defined(TST_CODE)
+	#include "tst.h"
+#elif defined(C1SPX_CODE)
+	#include "c1spx.h"
+#elif defined(C1X00_CODE)
+	#include "c1x00.h"
+#elif defined(C1LSC_CODE)
+	#include "c1lsc.h"
+#elif defined(C1LSP_CODE)
+	#include "c1lsp.h"
+#elif defined(C1SUP_CODE)
+	#include "c1sup.h"
+#elif defined(C1SVC_CODE)
+	#include "c1svc.h"
+#elif defined(C1SCX_CODE)
+	#include "c1scx.h"
+#elif defined(C1SPY_CODE)
+	#include "c1spy.h"
+#elif defined(C1SCY_CODE)
+	#include "c1scy.h"
+#elif defined(C1VGL_CODE)
+	#include "c1vgl.h"
+#elif defined(C1X01_CODE)
+	#include "c1x01.h"
+#elif defined(C1VGA_CODE)
+	#include "c1vga.h"
+#elif defined(C1RF1_CODE)
+	#include "c1rf1.h"
+#elif defined(C1RF0_CODE)
+	#include "c1rf0.h"
+#elif defined(C1SUS_CODE)
+	#include "c1sus.h"
+#elif defined(C1X02_CODE)
+	#include "c1x02.h"
+#elif defined(C1TST_CODE)
+	#include "c1tst.h"
 #else
 	#error
 #endif

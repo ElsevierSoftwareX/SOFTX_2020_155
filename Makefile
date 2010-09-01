@@ -67,10 +67,13 @@ install-% :: src/epics/simLink/%.mdl
 	/bin/cp -pr target/$${system}epics /opt/rtcds/$$site/$${lower_ifo}/target/$${system};\
 	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}epics/db/*/autoBurt.req; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}epics/db/*/autoBurt.req /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}epics || exit 3; fi;\
 	echo Installing /opt/rtcds/$$site/$${lower_ifo}/target/$${system};\
-	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}fe.ko; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/$${system}fe.ko /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/archive/$${system}fe_$${cur_date}.ko || exit 4; fi;\
-	/bin/cp -p src/fe/$${system}/$${system}fe.ko /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/;\
+	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/archive/$${system}fe_$${cur_date}.ko || exit 4; fi;\
+	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.rtl; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/archive/$${system}fe_$${cur_date}.rtl || exit 4; fi;\
+	/bin/cp -fp src/fe/$${system}/$${system}fe.ko /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/;\
+	/bin/cp -fp src/fe/$${system}/$${system}fe.rtl /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/;\
 	/bin/cp -p src/epics/simLink/$${system}.mdl /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/simLink/;\
-	echo 'sudo /sbin/insmod' /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko ' >  '/opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts/startup$${ifo}rt;\
+	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko; then echo 'sudo /sbin/insmod' /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko ' >  '/opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts/startup$${ifo}rt; fi;\
+	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.rtl; then echo sudo /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.rtl ' >  '/opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts/startup$${ifo}rt; fi;\
 	/bin/chmod +x /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts/startup$${ifo}rt;\
 	echo Installing start and stop scripts;\
 	/bin/mkdir -p /opt/rtcds/$$site/$${lower_ifo}/scripts;\
