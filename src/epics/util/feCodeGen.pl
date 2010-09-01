@@ -2932,6 +2932,7 @@ print OUTM "LDFLAGS_\$(TARGET_RTL) := -g \$(LIBRARY_OBJS)\n";
 print OUTM "\n";
 print OUTM "\$(TARGET_RTL): \$(LIBRARY_OBJS)\n";
 print OUTM "\n";
+print OUTM "EXTRA_CFLAGS+=\$(CFLAGS)\n";
 print OUTM "$skeleton";
 print OUTM "fe\.o: ../controller.c\n";
 print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -c \$< -o \$\@\n";
