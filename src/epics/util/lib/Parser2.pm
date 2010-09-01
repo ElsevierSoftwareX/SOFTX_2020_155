@@ -385,7 +385,7 @@ sub node_processing {
 
         	$::cdsPart[$::partCnt] = 1;
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name;
-		#print "CDS part $block_name type $source_block\n";
+		print "CDS part $block_name type $source_block\n";
         } elsif ($block_type eq "FCN") {                                   # ===  MA  ===
         	$::cdsPart[$::partCnt] = 1;                                # ===  MA  ===
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name; #= MA =
