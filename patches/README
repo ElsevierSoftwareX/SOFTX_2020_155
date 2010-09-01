@@ -1,4 +1,12 @@
+Wed Sep  1 09:03:34 PDT 2010
+linux-2.6.34.1-cs.patch produced at LHO in August 2010.
+We ran it on the diskless nodes, which had sysfs not configured in the kernel.
+This fixed a problem with notifiers (see cpu.c where the call is commented out).
+Also see ././linux-2.6.34.1-cs.config, out kernel .config file.
+
+
 linux-2.6.34-cs-patch produced at Hannover in July 2010
+
 
 linux-2.6.23-realtime.patch registers front-end code callbacks and exposes
 cpu_up() and cpu_down() calls
