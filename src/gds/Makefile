@@ -5,6 +5,9 @@ RPCFLAGS      = -C -N -M -D_ADVANCED_LIGO -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS
 RPCX	      = gdsrsched rawgapi rtestpoint
 CFLAGS	      = -std=gnu99 -I. -I../include -g -D_ADVANCED_LIGO -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS
 
+# Add this to build on RTLInux
+#CFLAGS += -DRTLINUX=1
+
 SrcPath	      = 
 
 #-DLIGO_GDS -D_CONFIG_DYNAMIC -D_ADVANCED_LIGO -DCOMPAT_INITIAL_LIGO=1 -DPORTMAP -DGDS_NO_EPICS

@@ -52,7 +52,9 @@
 #include <unistd.h>
 #endif
 
+#ifndef RTLINUX
 #include "../drv/mbuf/mbuf.h"
+#endif
 
 
 /* VxWorks BSP functions not prototyped */
@@ -345,6 +347,7 @@ int mbuf_fd = 0;
          /*rmboard[ID] = rm[ID] = malloc (rmsize[ID]);*/
          rmmaster[ID] = 0;
 
+#ifndef RTLINUX
 	 strcpy(fname, "/dev/mbuf");
 	 if (!mbuf_opened) {
 	   if ((fd = open (fname, O_RDWR | O_SYNC)) < 0) {
@@ -366,7 +369,8 @@ int mbuf_fd = 0;
          ioctl (fd, IOCTL_MBUF_ALLOCATE, &req);
          //ioctl (fd, IOCTL_MBUF_INFO, &req);
 
-#if 0
+#else
+	 rmsize[ID] =  64 * 1024 * 1024 - 5000;
 	 if (ID == 0) sprintf(fname, "/rtl_mem_%s", system_name);
 	 else strcpy(fname, "/rtl_mem_ipc");
 
