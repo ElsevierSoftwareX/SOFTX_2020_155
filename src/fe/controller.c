@@ -1046,7 +1046,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
         printf("waiting to sync %d\n",ioMemData->iodata[ll][0].cycle);
         rdtscl(cpuClock[0]);
 
-#if 0
+#ifndef NO_RTL
 	// Spin until cycle 0 detected in first ADC buffer location.
         do{
 #ifdef NO_RTL
@@ -1055,9 +1055,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
                 usleep(1);
 #endif
         }while(ioMemData->iodata[ll][0].cycle != 0);
-	#endif
-
-#if 1
+#else
 	for(;;) {
 	  if (ioMemData->iodata[ll][0].cycle == 0) break;
 	  __monitor((void *)&(ioMemData->iodata[ll][0].cycle), 0, 0);
