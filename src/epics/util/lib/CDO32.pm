@@ -81,7 +81,7 @@ sub frontEndCode {
                 $calcExp .= "\] = ((int)";
                 $calcExp .= $::fromExp[0];
                 $calcExp .= " << 16) + ((int)";
-                $calcExp .= $::fromExp[0];
+                $calcExp .= $::fromExp[1];
 		$calcExp .= " & 0xffff);\n";
         }
         return $calcExp;
