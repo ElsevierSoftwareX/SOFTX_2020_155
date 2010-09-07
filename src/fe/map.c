@@ -14,7 +14,6 @@
 #endif
 #include <drv/cdsHardware.h>
 #include <drv/map.h>
-
 int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int);
 
 // PCI Device variables
@@ -462,7 +461,7 @@ int mapContec1616dio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_0,&pci_io_addr);
 	  printk("contec 1616 dio pci2 = 0x%x\n",pci_io_addr);
 	  pHardware->pci_do[devNum] = pci_io_addr-1;
-	  printk("contec32L diospace = 0x%x\n",pHardware->pci_do[devNum]);
+	  printk("contec 1616 diospace = 0x%x\n",pHardware->pci_do[devNum]);
 	  pci_read_config_dword(diodev,PCI_REVISION_ID,&id);
 	  printk("contec dio pci2 card number= 0x%x\n",(id & 0xf));
 	  pHardware->doType[devNum] = CON_1616DIO;
@@ -493,6 +492,8 @@ int mapContec32out(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 	  pHardware->doType[devNum] = CON_32DO;
 	  pHardware->doCount ++;
 	  pHardware->doInstance[devNum]  = pHardware->cDo32lCount;
+	  //printk("pHardware count is at %d\n",pHardware->doCount);
+	  //printk("pHardware cDo32lCount is at %d\n", pHardware->cDo32lCount);
 	  pHardware->cDo32lCount ++;
 	  return(0);
 }
@@ -502,6 +503,8 @@ int mapContec32out(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 // *****************************************************************************
 unsigned int writeCDO32l(CDS_HARDWARE *pHardware, int modNum, unsigned int data)
 {
+	//printk("writeCDO32l modNum = %d\n",modNum);
+	//printk("writeCDO32l data = %d\n",data);
 	outl(data,pHardware->pci_do[modNum]);
 	return(inl(pHardware->pci_do[modNum]));
 }
