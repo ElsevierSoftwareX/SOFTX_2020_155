@@ -2023,6 +2023,7 @@ int main(int argc, char **argv)
 	int adcCnt;
 	int dacCnt;
 	int doCnt;
+	int do32Cnt;
 
 	printf("startup time is %d\n", current_time());
 #ifdef DOLPHIN_TEST
@@ -2154,6 +2155,8 @@ int main(int argc, char **argv)
 	adcCnt = 0;
 	dacCnt = 0;
 	doCnt = 0;
+	do32Cnt = 0;
+
 	// Have to search thru all cards and find desired instance for application
 	// Master will map ADC cards first, then DAC and finally DIO
 	for(ii=0;ii<ioMemData->totalCards;ii++)
@@ -2192,22 +2195,27 @@ int main(int argc, char **argv)
 				if((cdsPciModules.cards_used[jj].type == CON_6464DIO) && 
 					(cdsPciModules.cards_used[jj].instance == doCnt))
 				{
-					printf("Found CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
-					cdsPciModules.doType[doCnt] = ioMemData->model[ii];
-					cdsPciModules.pci_do[doCnt] = ioMemData->ipc[ii];
+					kk = cdsPciModules.doCount;
+					printf("Found 6464 DIO CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
+					cdsPciModules.doType[kk] = ioMemData->model[ii];
+					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
 					cdsPciModules.doCount ++;
 					cdsPciModules.cDio6464lCount ++;
+					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
+					cdsPciModules.doInstance[kk] = doCnt;
 				}
 				break;
                         case CON_32DO:
 		                if((cdsPciModules.cards_used[jj].type == CON_32DO) &&
-		                        (cdsPciModules.cards_used[jj].instance == doCnt))
+		                        (cdsPciModules.cards_used[jj].instance == do32Cnt))
 		                {
-               			      printf("Found 32 DO CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
-		                      cdsPciModules.doType[doCnt] = ioMemData->model[ii];
-                                      cdsPciModules.pci_do[doCnt] = ioMemData->ipc[ii];
-                                      cdsPciModules.doCount ++; 
-                                      cdsPciModules.cDo32lCount ++; 
+					kk = cdsPciModules.doCount;
+               			      	printf("Found 32 DO CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
+		                      	cdsPciModules.doType[kk] = ioMemData->model[ii];
+                                      	cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
+                                      	cdsPciModules.doCount ++; 
+                                      	cdsPciModules.cDo32lCount ++; 
+					cdsPciModules.doInstance[kk] = do32Cnt;
 				 }
 				 break;
 			default:
@@ -2217,6 +2225,7 @@ int main(int argc, char **argv)
 		if(ioMemData->model[ii] == GSC_16AI64SSA) adcCnt ++;
 		if(ioMemData->model[ii] == GSC_16AO16) dacCnt ++;
 		if(ioMemData->model[ii] == CON_6464DIO) doCnt ++;
+		if(ioMemData->model[ii] == CON_32DO) do32Cnt ++;
 	}
 	// If no ADC cards were found, then SLAVE cannot run
 	if(!cdsPciModules.adcCount)
