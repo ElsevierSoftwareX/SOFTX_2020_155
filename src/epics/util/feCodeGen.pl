@@ -3510,12 +3510,11 @@ sub commify_series {
 		  $sysname = substr($sysname, 2, 3);
 		  my $basename1 = $usite . ":" .$sysname ."-" . $basename . "_";
 		  my $filtername1 = $usite . $sysname . "_" . $basename;
-		  $sysname = uc($skeleton);
 		  #print "Matrix $basename $incnt X $outcnt\n";
 		  if ($partType[$cur_part_num] eq "FiltMuxMatrix") {
 		    my $subDirName = "$epicsScreensDir/$usite" . "$sysname" . "_" . "$basename";
 		    mkdir $subDirName;
-		    system("./mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite$sysname" . "_" .      $basename . ".adl");
+		    system("./mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
                     for ($row = 0; $row < $outcnt; $row ++) {
 		      for ($col = 0; $col < $incnt; $col ++) {
 			my $filt_name = "$partName[$cur_part_num]" . "_" . "$col" . "_" . "$row";
@@ -3523,13 +3522,10 @@ sub commify_series {
 			if ($partSubName[$cur_part_num] ne "") {
 			    $filt_name = $partSubName[$cur_part_num] . "_" . $filt_name;
 			}
-			my $sys_name = uc($skeleton);
 			my $sargs;
 
-			$sys_name = substr($sys_name,0,3);
 			$sargs = $sed_arg . "s/FILTERNAME/$sys_name-$filt_name/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
-			$sysname = uc($skeleton);
 			system("cat FILTER.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".adl");
 		      }
 		    }
