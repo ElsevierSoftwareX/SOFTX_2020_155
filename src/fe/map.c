@@ -314,9 +314,10 @@ int mapDio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 {
   static unsigned int pci_io_addr;
   int devNum;
+  int pedStatus;;
 
 	  devNum = pHardware->dioCount;
-	  pci_enable_device(diodev);
+	  pedStatus = pci_enable_device(diodev);
 	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_2,&pci_io_addr);
 	  printk("dio pci2 = 0x%x\n",pci_io_addr);
 	  pHardware->pci_do[devNum] = (pci_io_addr - 1);
@@ -365,8 +366,10 @@ int mapIiroDio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 {
   static unsigned int pci_io_addr;
   int devNum;
+  int pedStatus;
+
 	  devNum = pHardware->doCount;
-	  pci_enable_device(diodev);
+	  pedStatus = pci_enable_device(diodev);
 	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_2,&pci_io_addr);
 	  printk("iiro-8 dio pci2 = 0x%x\n",pci_io_addr);
 	  pHardware->pci_do[devNum] = pci_io_addr-1;
@@ -408,9 +411,10 @@ int mapIiroDio1(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 {
   static unsigned int pci_io_addr;
   int devNum;
+  int pedStatus;
 
 	  devNum = pHardware->doCount;
-	  pci_enable_device(diodev);
+	  pedStatus = pci_enable_device(diodev);
 	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_2,&pci_io_addr);
 	  printk("iiro-16 dio pci2 = 0x%x\n",pci_io_addr);
 	  pHardware->pci_do[devNum] = pci_io_addr-1;
@@ -431,9 +435,10 @@ int mapContec6464dio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
   static unsigned int pci_io_addr;
   int devNum;
   int id;
+  int pedStatus;
 
 	  devNum = pHardware->doCount;
-	  pci_enable_device(diodev);
+	  pedStatus = pci_enable_device(diodev);
 	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_0,&pci_io_addr);
 	  printk("contec 6464 dio pci2 = 0x%x\n",pci_io_addr);
 	  pHardware->pci_do[devNum] = pci_io_addr-1;
@@ -455,9 +460,10 @@ int mapContec1616dio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
   static unsigned int pci_io_addr;
   int devNum;
   int id;
+  int pedStatus;
 
 	  devNum = pHardware->doCount;
-	  pci_enable_device(diodev);
+	  pedStatus = pci_enable_device(diodev);
 	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_0,&pci_io_addr);
 	  printk("contec 1616 dio pci2 = 0x%x\n",pci_io_addr);
 	  pHardware->pci_do[devNum] = pci_io_addr-1;
@@ -480,9 +486,10 @@ int mapContec32out(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
   static unsigned int pci_io_addr;
   int devNum;
   int id;
+  int pedStatus;
 
 	  devNum = pHardware->doCount;
-	  pci_enable_device(diodev);
+	  pedStatus = pci_enable_device(diodev);
 	  pci_read_config_dword(diodev,PCI_BASE_ADDRESS_0,&pci_io_addr);
 	  printk("contec dio pci2 = 0x%x\n",pci_io_addr);
 	  pHardware->pci_do[devNum] = pci_io_addr-1;
@@ -538,26 +545,33 @@ unsigned int readInputCDIO1616l(CDS_HARDWARE *pHardware, int modNum)
 
 unsigned long writeCDIO6464l(CDS_HARDWARE *pHardware, int modNum, unsigned long data)
 {
+  unsigned long out;
+  unsigned long out1;
+
         outl(data&0xffffffff,pHardware->pci_do[modNum] + 8);
         outl(data>>32,pHardware->pci_do[modNum] + 8 + 4);
 	//
-        unsigned long out = inl(pHardware->pci_do[modNum] + 8);
-        unsigned long out1 = inl(pHardware->pci_do[modNum] + 12);
+        out = inl(pHardware->pci_do[modNum] + 8);
+        out1 = inl(pHardware->pci_do[modNum] + 12);
 	return out | (out1 << 32);
 }
 
 unsigned long readCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
 {
+  unsigned long out;
+  unsigned long out1;
 	//
-        unsigned long out = inl(pHardware->pci_do[modNum] + 8);
-        unsigned long out1 = inl(pHardware->pci_do[modNum] + 12);
+        out = inl(pHardware->pci_do[modNum] + 8);
+        out1 = inl(pHardware->pci_do[modNum] + 12);
 	return out | (out1 << 32);
 }
 
 unsigned long readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
 {
-        unsigned long out = inl(pHardware->pci_do[modNum]);
-        unsigned long out1 = inl(pHardware->pci_do[modNum] + 4);
+  unsigned long out;
+  unsigned long out1;
+        out = inl(pHardware->pci_do[modNum]);
+        out1 = inl(pHardware->pci_do[modNum] + 4);
 	out |= (out1 << 32);
 	return out;
 }
@@ -570,10 +584,11 @@ int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
   int devNum;
   char *_dac_add;				/* DAC register address space */
   static unsigned int pci_io_addr;
+  int pedStatus;
 
 	  devNum = pHardware->dacCount;
           // Enable the device, PCI required
-          pci_enable_device(dacdev);
+          pedStatus = pci_enable_device(dacdev);
           // Register module as Master capable, required for DMA
           pci_set_master(dacdev);
           // Get the PLX chip PCI address, it is advertised at address 0
@@ -633,10 +648,12 @@ int map18bitDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
   int devNum;
   char *_dac_add;				/* DAC register address space */
   static unsigned int pci_io_addr;
+  int pedStatus;
+  volatile GSA_18BIT_DAC_REG *dac18bitPtr;
 
 	  devNum = pHardware->dacCount;
           // Enable the device, PCI required
-          pci_enable_device(dacdev);
+          pedStatus = pci_enable_device(dacdev);
           // Register module as Master capable, required for DMA
           pci_set_master(dacdev);
           // Get the PLX chip PCI address, it is advertised at address 0
@@ -652,7 +669,7 @@ int map18bitDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 	  _dac_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
 	  printk("DAC I/O address=0x%x  0x%lx\n", pci_io_addr,(long)_dac_add);
 
-  	  volatile GSA_18BIT_DAC_REG *dac18bitPtr = (GSA_18BIT_DAC_REG *)_dac_add;
+  	  dac18bitPtr = (GSA_18BIT_DAC_REG *)_dac_add;
 	  dacPtr[devNum] = (GSA_DAC_REG *)_dac_add;
 
 	  printk("DAC BCR = 0x%x\n",dac18bitPtr->BCR);
@@ -707,10 +724,11 @@ int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
   static unsigned int pci_io_addr;
   int devNum;
   char *_adc_add;				/* ADC register address space */
+  int pedStatus;
 
 
   devNum = pHardware->adcCount;
-  pci_enable_device(adcdev);
+  pedStatus = pci_enable_device(adcdev);
   pci_set_master(adcdev);
  // Get the PLX chip address
   pci_read_config_dword(adcdev,PCI_BASE_ADDRESS_0,&pci_io_addr);
@@ -786,9 +804,10 @@ int mapFadc(CDS_HARDWARE *pHardware,
   static unsigned int pci_io_addr;
   int devNum;
   char *_adc_add;                               /* ADC register address space */
+  int pedStatus;
 
   devNum = pHardware->adcCount;
-  pci_enable_device(adcdev);
+  pedStatus = pci_enable_device(adcdev);
   pci_set_master(adcdev);
  // Get the PLX chip address
   pci_read_config_dword(adcdev,PCI_BASE_ADDRESS_0,&pci_io_addr);
@@ -876,6 +895,8 @@ int mapPciModules(CDS_HARDWARE *pCds)
   int dac_cnt = 0;
   int dac_18bit_cnt = 0;
   int bo_cnt = 0;
+  int use_it;
+  unsigned int board_type;
 
   dacdev = NULL;
   status = 0;
@@ -885,11 +906,10 @@ int mapPciModules(CDS_HARDWARE *pCds)
 	// Check if this is an 18bit DAC from General Standards
 	if ((dacdev->subsystem_device == DAC_18BIT_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
 	{
-		int use_it = 0;
+		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
 			/* See if ought to use this one or not */
-			int i;
 			for (i = 0; i < pCds->cards; i++) {
 				if (pCds->cards_used[i].type == GSC_18AO8
 				    && pCds->cards_used[i].instance == dac_18bit_cnt) {
@@ -910,7 +930,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 	// if found, check if it is a DAC module
         if((dacdev->subsystem_device == DAC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
         {
-		int use_it = 0;
+		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
 		  printk("DAC card on bus %x; device %x prim %x\n",
@@ -918,7 +938,6 @@ int mapPciModules(CDS_HARDWARE *pCds)
 			PCI_SLOT(dacdev->devfn),
 			dacdev->bus->secondary);
 			/* See if ought to use this one or not */
-			int i;
 			for (i = 0; i < pCds->cards; i++) {
 				if (pCds->cards_used[i].type == GSC_16AO16
 				    && pCds->cards_used[i].instance == dac_cnt) {
@@ -940,7 +959,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 #ifndef ADC_SLAVE
 	if((dacdev->subsystem_device == ADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
 	{
-		int use_it = 0;
+		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
 		  printk("ADC card on bus %x; device %x prim %x\n",
@@ -948,7 +967,6 @@ int mapPciModules(CDS_HARDWARE *pCds)
 			PCI_SLOT(dacdev->devfn),
 			dacdev->bus->secondary);
 			/* See if ought to use this one or not */
-			int i;
 			for (i = 0; i < pCds->cards; i++) {
 				if (pCds->cards_used[i].type == GSC_16AI64SSA
 				    && pCds->cards_used[i].instance == adc_cnt) {
@@ -973,12 +991,11 @@ int mapPciModules(CDS_HARDWARE *pCds)
 	// This number will most likely change in the future.
         if((dacdev->subsystem_device == FADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
         {
-		int use_it = 0;
-		unsigned int board_type = -1;
+		use_it = 0;
+		board_type = -1;
 		if (pCds->cards) {
 			use_it = 0;
 			/* See if ought to use this one or not */
-			int i;
 			for (i = 0; i < pCds->cards; i++) {
 				if ((pCds->cards_used[i].type == GSC_16AISS8AO4 || pCds->cards_used[i].type == GSC_18AISS8AO8)
 				    && pCds->cards_used[i].instance == fast_adc_cnt) {
@@ -1004,11 +1021,10 @@ int mapPciModules(CDS_HARDWARE *pCds)
   bo_cnt = 0;
   // Search for ACCESS PCI-DIO  modules
   while((dacdev = pci_get_device(ACC_VID, ACC_TID, dacdev))) {
-		int use_it = 0;
+		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
 			/* See if ought to use this one or not */
-			int i;
 			for (i = 0; i < pCds->cards; i++) {
 				if (pCds->cards_used[i].type == ACS_24DIO
 				    && pCds->cards_used[i].instance == bo_cnt) {
@@ -1032,11 +1048,10 @@ int mapPciModules(CDS_HARDWARE *pCds)
   bo_cnt = 0;
   // Search for ACCESS PCI-IIRO-8 isolated I/O modules
   while((dacdev = pci_get_device(ACC_VID, ACC_IIRO_TID, dacdev))) {
-		int use_it = 0;
+		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
 			/* See if ought to use this one or not */
-			int i;
 			for (i = 0; i < pCds->cards; i++) {
 				if (pCds->cards_used[i].type == ACS_8DIO
 				    && pCds->cards_used[i].instance == bo_cnt) {
@@ -1060,11 +1075,10 @@ int mapPciModules(CDS_HARDWARE *pCds)
   bo_cnt = 0;
   // Search for ACCESS PCI-IIRO-16 isolated I/O modules
   while((dacdev = pci_get_device(ACC_VID, ACC_IIRO_TID1, dacdev))) {
-		int use_it = 0;
+		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
 			/* See if ought to use this one or not */
-			int i;
 			for (i = 0; i < pCds->cards; i++) {
 				if (pCds->cards_used[i].type == ACS_16DIO
 				    && pCds->cards_used[i].instance == bo_cnt) {
@@ -1089,11 +1103,10 @@ int mapPciModules(CDS_HARDWARE *pCds)
 
   // Search for Contec C_DIO_6464L_PE isolated I/O modules
   while((dacdev = pci_get_device(CONTEC_VID, C_DIO_6464L_PE, dacdev))) {
-		int use_it = 0;
+		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
 			/* See if ought to use this one or not */
-			int i;
 			for (i = 0; i < pCds->cards; i++) {
 				if (pCds->cards_used[i].type == CON_6464DIO
 				    && pCds->cards_used[i].instance == bo_cnt) {
@@ -1119,11 +1132,10 @@ int mapPciModules(CDS_HARDWARE *pCds)
 
   // Search for Contec C_DIO_1616L_PE isolated I/O modules
   while((dacdev = pci_get_device(CONTEC_VID, C_DIO_1616L_PE, dacdev))) {
-		int use_it = 0;
+		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
 			/* See if ought to use this one or not */
-			int i;
 			for (i = 0; i < pCds->cards; i++) {
 				if (pCds->cards_used[i].type == CON_1616DIO
 				    && pCds->cards_used[i].instance == bo_cnt) {
@@ -1148,11 +1160,10 @@ int mapPciModules(CDS_HARDWARE *pCds)
 
   // Search for Contec C_DO_32L_PE isolated I/O modules
   while((dacdev = pci_get_device(CONTEC_VID, C_DO_32L_PE, dacdev))) {
-		int use_it = 0;
+		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
 			/* See if ought to use this one or not */
-			int i;
 			for (i = 0; i < pCds->cards; i++) {
 				if (pCds->cards_used[i].type == CON_32DO
 				    && pCds->cards_used[i].instance == bo_cnt) {
@@ -1243,9 +1254,10 @@ int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int kind)
   int devNum;
   static char *csrAddr;
   static unsigned int csrAddress;
+  int pedStatus;
 
   devNum = pHardware->rfmCount;
-  pci_enable_device(rfmdev);
+  pedStatus = pci_enable_device(rfmdev);
 
   if (kind == 0x5565) {
     pci_read_config_dword(rfmdev, 
@@ -1303,6 +1315,7 @@ long mapcard(int state, int memsize) {
   static long cpu_addr;
   static unsigned int dmaAddress;
   static unsigned int csrAddress;
+  int pedStatus;
 
   if(state == 1)
   {
@@ -1323,7 +1336,7 @@ long mapcard(int state, int memsize) {
 
 
 
-  pci_enable_device(pcidev);
+  pedStatus = pci_enable_device(pcidev);
   pci_set_master(pcidev);
 
   pci_read_config_dword(pcidev, 
@@ -1410,14 +1423,17 @@ int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
 {
   int i;
   static unsigned int pci_io_addr;
+  int pedStatus;
+  unsigned char *addr1;
+  unsigned int time0;
 
-  pci_enable_device(gpsdev);
+  pedStatus = pci_enable_device(gpsdev);
   pci_read_config_dword(gpsdev, PCI_BASE_ADDRESS_0, &pci_io_addr);
   pci_io_addr &= 0xfffffff0;
   printk("PIC BASE 0 address = %x\n", pci_io_addr);
 
-  unsigned char *addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x40);
-  printk("Remapped 0x%x\n", addr1);
+  addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x40);
+  printk("Remapped 0x%p\n", addr1);
   pHardware->gps = addr1;
   pHardware->gpsType = SYMCOM_RCVR;
 
@@ -1426,7 +1442,7 @@ int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
     printk("Current time %ds %dus %dns \n", pHardware->gps[0x34/4], 0xfffff & pHardware->gps[0x30/4], 100 * ((pHardware->gps[0x30/4] >> 20) & 0xf));
   }
   pHardware->gps[0] = 1;
-  unsigned int time0 = pHardware->gps[0x30/4];
+  time0 = pHardware->gps[0x30/4];
   if (time0 & (1<<24)) printk("Flywheeling, unlocked...\n");
   else printk ("Locked!\n");
   return(0);
@@ -1439,16 +1455,18 @@ int mapTsyncGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
 {
   unsigned int i,ii;
   static unsigned int pci_io_addr;
+  int pedStatus;
   unsigned int days,hours,min,sec,msec,usec,nanosec,tsync;
+  unsigned char *addr1;
   TSYNC_REGISTER *myTime;
 
-  pci_enable_device(gpsdev);
+  pedStatus = pci_enable_device(gpsdev);
   pci_read_config_dword(gpsdev, PCI_BASE_ADDRESS_0, &pci_io_addr);
   pci_io_addr &= 0xfffffff0;
   printk("TSYNC PIC BASE 0 address = %x\n", pci_io_addr);
 
-  unsigned char *addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x30);
-  printk("Remapped 0x%x\n", addr1);
+  addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x30);
+  printk("Remapped 0x%p\n", addr1);
   pHardware->gps = addr1;
   pHardware->gpsType = TSYNC_RCVR;
 
