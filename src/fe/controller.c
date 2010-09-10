@@ -1542,10 +1542,10 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 #else
 		kk = 0;
 #endif
-		int limit = 32000;
-		int offset = 0; //0x8000;
-		int mask = 0xffff;
-		int num_outs = 16;
+		limit = 32000;
+		offset = 0; //0x8000;
+		mask = 0xffff;
+		num_outs = 16;
 		if (cdsPciModules.dacType[jj] == GSC_18AISS8AO8) {
 			limit *= 4; // 18 bit limit
 			offset = 0x20000; // Data coding offset in 18-bit DAC
