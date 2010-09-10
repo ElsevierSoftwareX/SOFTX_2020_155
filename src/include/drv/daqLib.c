@@ -157,7 +157,6 @@ int offsetAccum;		/* Used to set localTable.offset	*/
 static int tpStart;		/* Marks address of first TP data	*/
 static volatile GDS_CNTRL_BLOCK *gdsPtr;  /* Ptr to GDS table in shmem.	*/
 static volatile char *exciteDataPtr;	  /* Ptr to EXC data in shmem.	*/
-int testVal;			/* Temp TP value for valid check.	*/
 static int validTp;		/* Number of valid GDS sigs selected.	*/
 static int validTpNet;		/* Number of valid GDS sigs selected.	*/
 //static int validEx;		/* Local chan number of 1st EXC signal.	*/
@@ -170,8 +169,13 @@ int *statusPtr;
 volatile float *dataPtr;	/* Ptr to excitation chan data.		*/
 int exChanOffset;		/* shmem offset to next EXC value.	*/
 int tpx;
-int tpAdd;
 static int buf_size;
+int i;
+int ltSlot;
+unsigned int exc;
+unsigned int tpn;
+int slot;
+int num_tps;
 
 #if DCU_MAX_CHANNELS > DAQ_GDS_MAX_TP_NUM
 #warning DCU_MAX_CHANNELS greater than DAQ_GDS_MAX_TP_NUM
@@ -226,7 +230,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     {
       pDaqBuffer[ii] = (char *)daqBuffer;
       pDaqBuffer[ii] += DAQ_DCU_SIZE * ii;
-      printf("DAQ buffer %ld is at 0x%x\n",ii,(long long)pDaqBuffer[ii]);
+      // printf("DAQ buffer %d is at 0x%x\n",ii,(long long)pDaqBuffer[ii]);
     }
 
     // Clear the decimation filter histories
@@ -257,7 +261,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
     /* Set up pointer to DAQ configuration information in shmem */
     pInfo = (DAQ_INFO_BLOCK *)(_epics_shm + DAQ_INFO_ADDRESS + (dcuId * sizeof(DAQ_INFO_BLOCK)));
-    printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
+    // printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
 
     /* Get the .INI file crc checksum to pass to DAQ Framebuilders for config checking */
     fileCrc = pInfo->configFileCRC;
@@ -427,7 +431,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     daqWriteTime = sysRate / 16;
 
 
-    int i;
     for (i = 0; i < GM_DAQ_MAX_TPS; i++) {
 	tpNum[i] = 0;
 	tpNumNet[i] = 0;
@@ -622,9 +625,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 			if(localTable[ii].type == 2)
 			{
 				dspPtr->data[localTable[ii].fmNum].exciteInput = *dataPtr;
-#if 0
-				if((excSlot == 0) && (ii == validEx)) printf("%ld %f\n",(int)dataPtr,*dataPtr);
-#endif
 			} else if (localTable[ii].type == 3) {
 				// extra excitation
 				excSignal[localTable[ii].fmNum] = *dataPtr;
@@ -793,7 +793,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	// Clears the found number from the lists
 	// tpnum and excnum lists of numbers do not intersect
 	inline int in_the_lists(unsigned int tp, unsigned int slot) {
-		int i;
 		for (i = 0; i < DAQ_GDS_MAX_TP_NUM; i++){
 			if (tpnum[i] == tp) return (tpnum[i] = 0, 1);
                         if (excnum[i] == tp) {
@@ -806,12 +805,11 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	}
 
 	// Search and clear deselected test points
-	int i;
 	for (i = 0; i < GM_DAQ_MAX_TPS; i++) {
 		if (tpNum[i] == 0) continue;
 		if (!in_the_lists(tpNum[i], i)) {
 		  tpNum[i] = 0; // Removed test point is cleared now
-		  int ltSlot = dataInfo.numChans + i;
+		  ltSlot = dataInfo.numChans + i;
 
 		  // If we are clearing an EXC signal, reset filter module input
 		  if (localTable[ltSlot].type == 2) {
@@ -844,8 +842,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	// tpnum and excnum lists now have only the new test points
 	// Insert these new numbers into empty localTable slots
 	for (i = 0; i < (2 * DAQ_GDS_MAX_TP_NUM); i++) {
-		unsigned int exc = 0;
-		unsigned int tpn;
+		exc = 0;
 		// Do test points first
 		if (i < DAQ_GDS_MAX_TP_NUM) {
 			if (tpnum[i] == 0) continue;
@@ -856,14 +853,14 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 			exc = 1;
 			ii = i - DAQ_GDS_MAX_TP_NUM;
 		}
-		int slot = empty_slot();
+		slot = empty_slot();
 		if (slot < 0) {
 			// No more slots left, table's full
 			break;
 		}
 
 		// localTable slot (shifted by the number of DAQ channels)
-		int ltSlot = dataInfo.numChans + slot;
+		ltSlot = dataInfo.numChans + slot;
 
 		// Populate the slot with the information
 		if (!exc) {
@@ -885,39 +882,17 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
           	    gdsPtr->tp[2 + _2k_sys_offs][1][slot] = 0;
 		    tpNum[slot] = tpn;
 
-		    //validTp ++;
-		    //totalChans ++;
-		    //totalSize += tpAdd;
         	  } else if (tpn >= daqRange.xTpMin && tpn < daqRange.xTpMax) {
 	 	    jj = tpn - daqRange.xTpMin;
 		    localTable[ltSlot].type = 1;
 		    localTable[ltSlot].sigNum = jj;
-		    //offsetAccum += sysRate * 4;
-		    //localTable[totalChans+1].offset = offsetAccum;
 	  	    localTable[ltSlot].decFactor = 1;
       		    dataInfo.tp[ltSlot].dataType = 4;
-		    //if (slot < 24) gdsMonitor[slot] = testVal;
 		    gdsPtr->tp[2 + _2k_sys_offs][1][slot] = 0;
 		    tpNum[slot] = tpn;
 		  
-		    //validTp ++;
-		    //totalChans ++;
-		    //totalSize += tpAdd;
-		  //} else {
-		    //if (tpn < 24) gdsMonitor[tpn] = 0;
 		  }
 	        } else {
-
-#if 0
-		// This needs to be moved out from here
-		// to the place where the exc is cleared
-
-		  // Have to clear an exc if it goes away
-		  if((tpn != excTable[slot].sigNum) && (excTable[slot].sigNum != 0)) {
-		    dspPtr->data[excTable[slot].fmNum].exciteInput = 0.0;
-		    excTable[slot].sigNum = 0;
-		  }
-#endif
 
         	  if (tpn >= daqRange.filtExMin && tpn < daqRange.filtExMax) {
 		    jj = tpn - daqRange.filtExMin;
@@ -933,16 +908,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
                     excTable[slot].offset = i - DAQ_GDS_MAX_TP_NUM;
       		    dataInfo.tp[ltSlot].dataType = 4;
 
-		    //offsetAccum += sysRate * 4;
-		    //localTable[totalChans+1].offset = offsetAccum;
-		    //if (slot < 8) gdsMonitor[slot + 24] = tpn;
           	    gdsPtr->tp[_2k_sys_offs][1][slot] = 0;
 		    tpNum[slot] = tpn;
 
-		    //validTp ++;
-		    //if(!validEx) validEx = totalChans;
-		    //totalChans ++;
-		    //totalSize += tpAdd;
         	  } else if (tpn >= daqRange.xExMin && tpn < daqRange.xExMax) {
 	 	    jj = tpn - daqRange.xExMin;
 		    localTable[ltSlot].type = 3;
@@ -958,12 +926,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		   // if (slot < 8) gdsMonitor[slot + 24] = tpn;
           	    gdsPtr->tp[_2k_sys_offs][1][slot] = 0;
 		    tpNum[slot] = tpn;
-		    //validTp ++;
-		    //if(!validEx) validEx = totalChans;
-		    //totalChans ++;
-		    //totalSize += tpAdd;
-	//	  } else {
-		    //if (slot < 8) gdsMonitor[slot + 24] = 0;
 		  }
 		}
 	}
@@ -972,18 +934,12 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	totalChans = dataInfo.numChans; // Set to the DAQ channels number
 	validTp = 0;
 	totalSize = mnDaqSize;
-	int num_tps = 0;
+	num_tps = 0;
 
 	// Skip empty slots at the end
 	for (i = GM_DAQ_MAX_TPS-1; i >= 0; i--) {
 		if (tpNum[i]) {
 			num_tps = i + 1;
-#if 0
-			int j;
-			for (j = 0; j < i+1; j++)
-				printf("%d ", tpNum[j]);
-			printf("\n");
-#endif
 			break;
 		}
 	}
@@ -1004,188 +960,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	}
 
 	for (i = validTp; i < 32; i++) gdsMonitor[i] = 0;
-#if 0
- 	totalChans = dataInfo.numChans;
-	totalSize = mnDaqSize;
-	offsetAccum = tpStart;
-	validTp = 0;
-	if(sysRate < DAQ_16K_SAMPLE_SIZE)
-	{
-		tpx = 3;
-		// tpAdd = 32;
-		tpAdd = sysRate / 4;
-	}
-	else 
-	{
-		tpx = 2;
-		tpAdd = sysRate / 4;
-	}
-
-	/* See how many testpoints we've got in the table (with the gaps) */
-	/* I.e. find the last non-zero testpoint number */
-	unsigned tplimit;
-	for(tplimit = GM_DAQ_MAX_TPS; tplimit; tplimit--) {
-	  // See if find the last test point number
-	  if (gdsPtr->tp[tpx][0][tplimit - 1]) break;
-	  // Clear tp monitoring slot 
-	  if ((tplimit - 1) < 24) gdsMonitor[tplimit - 1] = 0;
-	}
-
-	for(ii=0; validTp < GM_DAQ_MAX_TPS && ii < tplimit; ii++)
-	{
-		/* Get TP number from shared memory */
-		testVal = gdsPtr->tp[tpx][0][ii];
-
-		/* Check if the TP selection is valid for this front end's filter module TP
-		   If it is, load the local table with the proper lookup values to find the
-		   signal and clear the TP status in shared mem.                           */
-        	if(((testVal >= daqRange.filtTpMin) &&
-           	    (testVal < daqRange.filtTpMax)) || testVal == 0)
-        	{
-		  if (testVal == 0) jj = 0;
-		  else jj = testVal - daqRange.filtTpMin;
-		  localTable[totalChans].type = 0;
-          	  localTable[totalChans].sysNum = jj / daqRange.filtTpSize;
-		  jj -= localTable[ii].sysNum * daqRange.filtTpSize;
-          	  localTable[totalChans].fmNum = jj / 3;
-          	  localTable[totalChans].sigNum = jj % 3; 
-	  	  localTable[totalChans].decFactor = 1;
-      		  dataInfo.tp[totalChans].dataType = 4;
-		  offsetAccum += sysRate * 4;
-		  localTable[totalChans+1].offset = offsetAccum;
-		  if (ii < 24) {
-          	    gdsMonitor[ii] = testVal;
-		  }
-          	  gdsPtr->tp[tpx][1][ii] = 0;
-		  tpNum[validTp] = testVal;
-		  validTp ++;
-		  totalChans ++;
-		  totalSize += tpAdd;
-        	}
-
-		/* Check if the TP selection is valid for other front end TP signals.
-		   If it is, load the local table with the proper lookup values to find the
-		   signal and clear the TP status in RFM.                                       */
-		else if( (testVal >= daqRange.xTpMin) &&
-			 (testVal < daqRange.xTpMax))
-		{
-	 	  jj = testVal - daqRange.xTpMin;
-		  localTable[totalChans].type = 1;
-		  localTable[totalChans].sigNum = jj;
-		  offsetAccum += sysRate * 4;
-		  localTable[totalChans+1].offset = offsetAccum;
-	  	  localTable[totalChans].decFactor = 1;
-      		  dataInfo.tp[totalChans].dataType = 4;
-		  if (ii < 24) {
-		    gdsMonitor[ii] = testVal;
-		  }
-		  gdsPtr->tp[tpx][1][ii] = 0;
-		  tpNum[validTp] = testVal;
-		  validTp ++;
-		  totalChans ++;
-		  totalSize += tpAdd;
-		}
-		/* If this TP select is not valid for this front end, deselect it in the local
-		   lookup table.                                                                */
-		else
-		{
-		  if (ii < 24) {
-		    gdsMonitor[ii] = 0;
-		  }
-		}
-
-	}  /* End for loop */
-
-	// Check list of EXC channels
-	validEx = 0;
-	if(sysRate < DAQ_16K_SAMPLE_SIZE)
-		tpx = 1;
-	else tpx = 0;
-
-        for(tplimit = GM_DAQ_MAX_TPS; tplimit; tplimit--) {
-          // See if find the last test point number
-          if (gdsPtr->tp[tpx][0][tplimit - 1]) break;
-          // Clear tp monitoring slot 
-          if ((tplimit - 1) < 8) gdsMonitor[24 + tplimit - 1] = 0;
-        }
-
-	for(ii=0; validTp < GM_DAQ_MAX_TPS && ii < tplimit; ii++)
-	{
-		/* Get EXC number from shared memory */
-		testVal = gdsPtr->tp[tpx][0][ii];
-
-		// Have to clear an exc if it goes away
-		if((testVal != excTable[ii].sigNum) && (excTable[ii].sigNum != 0))
-		{
-		  dspPtr->data[excTable[ii].fmNum].exciteInput = 0.0;
-		  excTable[ii].sigNum = 0;
-		}
-
-		/* Check if the EXC selection is valid for this front end's filter module EXC 
-		   If it is, load the local table with the proper lookup values to find the
-		   signal and clear the EXC status in shared mem.                           */
-        	if((testVal >= daqRange.filtExMin) &&
-           	   (testVal < daqRange.filtExMax))
-        	{
-		  jj = testVal - daqRange.filtExMin;
-		  localTable[totalChans].type = 2;
-          	  localTable[totalChans].sysNum = jj / daqRange.filtExSize;
-          	  localTable[totalChans].fmNum = jj % daqRange.filtExSize;
-          	  localTable[totalChans].sigNum = ii; 
-	  	  localTable[totalChans].decFactor = 1;
-		  excTable[ii].sigNum = testVal;
-		  excTable[ii].sysNum = localTable[totalChans].sysNum;
-		  excTable[ii].fmNum = localTable[totalChans].fmNum;
-      		  dataInfo.tp[totalChans].dataType = 4;
-		  offsetAccum += sysRate * 4;
-		  localTable[totalChans+1].offset = offsetAccum;
-		  if (ii < 8) {
-          	    gdsMonitor[ii+24] = testVal;
-		  }
-          	  gdsPtr->tp[tpx][1][ii] = 0;
-		  tpNum[validTp] = testVal;
-		  validTp ++;
-		  if(!validEx) validEx = totalChans;
-		  totalChans ++;
-		  totalSize += tpAdd;
-        	}
-
-		/* Check if the EXC selection is valid for other front end EXC signals.
-		   If it is, load the local table with the proper lookup values to find the
-		   signal and clear the EXC status in shmem.                               */
-		else if( (testVal >= daqRange.xExMin) &&
-			 (testVal < daqRange.xExMax))
-		{
-	 	  jj = testVal - daqRange.xExMin;
-		  localTable[totalChans].type = 3;
-          	  localTable[totalChans].fmNum = jj;
-		  localTable[totalChans].sigNum = ii;
-		  offsetAccum += sysRate * 4;
-		  localTable[totalChans+1].offset = offsetAccum;
-	  	  localTable[totalChans].decFactor = 1;
-      		  dataInfo.tp[totalChans].dataType = 4;
-		  if (ii < 8) {
-		    gdsMonitor[ii+24] = testVal;
-		  }
-		  gdsPtr->tp[tpx][1][ii] = 0;
-		  tpNum[validTp] = testVal;
-		  validTp ++;
-		  if(!validEx) validEx = totalChans;
-		  totalChans ++;
-		  totalSize += tpAdd;
-		}
-
-		/* If this EXC select is not valid for this front end, deselect it in the local
-		   lookup table.                                                                */
-		else
-		{
-		  if (ii < 8) {
-		    gdsMonitor[ii+24] = 0;
-		  }
-		}
-
-	 }  /* End for loop */
-#endif // 0
 
       } /* End normal check for new TP numbers */
 
