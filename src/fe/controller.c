@@ -403,6 +403,7 @@ int tdsControl = 0;
 // Function to read time from Symmetricom IRIG-B Module ***********************
 static double getGpsTime1(unsigned int *ns, int event_flag) {
   double the_time = 0.0;
+  unsigned int time0,time1,msecs,nsecs;
 
   if (cdsPciModules.gps) {
     // Sample time
@@ -412,8 +413,6 @@ static double getGpsTime1(unsigned int *ns, int event_flag) {
       cdsPciModules.gps[0] = 1;
     }
     // Read seconds, microseconds, nanoseconds
-    unsigned int time0;
-    unsigned int time1;
     if (event_flag) {
       time0 = cdsPciModules.gps[SYMCOM_BC635_EVENT0/4];
       time1 = cdsPciModules.gps[SYMCOM_BC635_EVENT1/4];
@@ -422,8 +421,8 @@ static double getGpsTime1(unsigned int *ns, int event_flag) {
       time1 = cdsPciModules.gps[SYMCOM_BC635_TIME1/4];
     }
     gps_receiver_locked = !(time0 & (1<<24));
-    unsigned  int msecs = 0xfffff & time0; // microseconds
-    unsigned  int nsecs = 0xf & (time0 >> 20); // nsecs * 100
+    msecs = 0xfffff & time0; // microseconds
+    nsecs = 0xf & (time0 >> 20); // nsecs * 100
     the_time = ((double) time1) + .000001 * (double) msecs  /* + .0000001 * (double) nsecs*/;
     if (ns) {
 	*ns = 100 * nsecs; // Store nanoseconds
@@ -472,13 +471,14 @@ double getGpsEventTime(unsigned int *ns) {
 //***********************************************************************
 // Get Gps card microseconds from SYMCOM IRIG-B Rcvr
 unsigned int getGpsUsec() {
+unsigned int time0,time1;
 
   if (cdsPciModules.gps) {
     // Sample time
     cdsPciModules.gps[0] = 1;
     // Read microseconds, nanoseconds
-    unsigned int time0 = cdsPciModules.gps[SYMCOM_BC635_TIME0/4];
-    unsigned int time1 = cdsPciModules.gps[SYMCOM_BC635_TIME1/4];
+    time0 = cdsPciModules.gps[SYMCOM_BC635_TIME0/4];
+    time1 = cdsPciModules.gps[SYMCOM_BC635_TIME1/4];
     return 0xfffff & time0; // microseconds
   }
   return 0;
@@ -578,14 +578,14 @@ void *fe_start(void *arg)
   int wtmin,wtmax;			// Time window for startup on IRIG-B
   int dacEnable = 0;
   struct timespec next;
-  int pBits[8] = {1,2,4,8,16,32,64,128,256};
+  int pBits[9] = {1,2,4,8,16,32,64,128,256};
 #endif
   RFM_FE_COMMS *pEpicsComms;		// Pointer to EPICS shared memory space
   int cycleTime;			// Max code cycle time within 1 sec period
   int timeHold = 0;
   int timeHoldMax = 0;			// Max code cycle time since last diag reset
   int myGmError2 = 0;			// Myrinet error variable
-  int attemptingReconnect = 0;		// Myrinet reconnect status
+  // int attemptingReconnect = 0;		// Myrinet reconnect status
   int status;				// Typical function return value
   float onePps;				// Value of 1PPS signal, if used, for diagnostics
   int onePpsHi = 0;			// One PPS diagnostic check
@@ -599,7 +599,7 @@ void *fe_start(void *arg)
   static int usrTime;			// Time spent in user app code
   static int usrHoldTime;		// Max time spent in user app code
   static int missedCycle = 0;		// Incremented error counter when too many values in ADC FIFO
-  int netRetry;				// Myrinet reconnect variable
+  // int netRetry;				// Myrinet reconnect variable
   int diagWord = 0;			// Code diagnostic bit pattern returned to EPICS
   int epicsCycle = 0;
   int system = 0;
@@ -638,6 +638,8 @@ void *fe_start(void *arg)
 
 
 #ifdef NO_RTL
+  int cnt = 0;
+  unsigned long cpc;
   // Flush L1 cache
   memset (fp, 0, 64*1024);
   memset (fp, 1, 64*1024);
@@ -692,7 +694,7 @@ printf("Sync source = %d\n",syncSource);
   // Do not proceed until EPICS has had a BURT restore *******************************
 #ifdef NO_RTL
   printf("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRestore);
-  int cnt = 0;
+  cnt = 0;
 #else
   if(cdsPciModules.gpsType == SYMCOM_RCVR) 
   {
@@ -1111,7 +1113,7 @@ static inline void __monitor(const void *eax, unsigned long ecx,
   // **********************************************************************************************
 #ifdef NO_RTL
   // Calculate how many CPU cycles per code cycle
-  unsigned long cpc = cpu_khz * 1000;
+  cpc = cpu_khz * 1000;
   cpc /= CYCLE_PER_SECOND;
 #endif
 
@@ -1149,8 +1151,8 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 		    ioMemCntr = (clock16K % 64);
 		    for(ii=0;ii<32;ii++)
 		    {
-			ioMemData->iodata[0][ioMemCntr].data[ii] = clock16K;;
-			ioMemData->iodata[1][ioMemCntr].data[ii] = clock16K;;
+			ioMemData->iodata[0][ioMemCntr].data[ii] = clock16K/4;
+			ioMemData->iodata[1][ioMemCntr].data[ii] = clock16K/4;
 		    }
 		    // Write GPS time and cycle count as indicator to slave that adc data is ready
 	  	    ioMemData->gpsSecond = timeSec;
@@ -1222,7 +1224,8 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 #ifdef TIME_MASTER
 	  // Update time on RFM if this is GPS time master
 	  *rfmTime = timeSec;
-  	  //clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
+	  sci_flush(&sci_dev_info, 0);
+  	  clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
 #endif
 	}
         for(ll=0;ll<sampleCount;ll++)
@@ -1289,7 +1292,7 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 			// load DAC values prior to next 65K clock
 			for(mm=0;mm<cdsPciModules.dacCount;mm++)
 	   		   if(dacWriteEnable > 4) gsaDacDma2(mm,cdsPciModules.dacType[mm]);
-#ifndef DUOTONE_TIMING
+#ifdef DUOTONE_TIMING
 			if(clock16K == 65535) 
 			{
 				gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
@@ -1306,7 +1309,8 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 		if (iop_rfm_valid) {
 			//*rfmTime = timeSec;
 			cdsPciModules.dolphin[1][1] = clock16K;
-  			//clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
+	  		sci_flush(&sci_dev_info, 0);
+  			clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
 		}
 		if (cdsPciModules.pci_rfm[0]) {
 		    	((volatile long *)(cdsPciModules.pci_rfm[0]))[1] = timeSec;
@@ -1464,8 +1468,7 @@ static inline void __monitor(const void *eax, unsigned long ecx,
                         // if(kk >= 1000)
                         {
                                 printf ("ADC TIMEOUT %d %d %d %d\n",mm,ioMemData->iodata[mm][ioMemCntr].cycle, ioMemCntr,ioClock);
-printf("got here %d %d\n",clock16K,ioClock);
-                                return(-1);
+  				return (void *)-1;
                         }
                         for(ii=0;ii<32;ii++)
                         {
@@ -2025,17 +2028,17 @@ int main(int argc, char **argv)
 	int doCnt;
 	int do32Cnt;
 
-	printf("startup time is %d\n", current_time());
+	printf("startup time is %ld\n", current_time());
 #ifdef DOLPHIN_TEST
-#ifdef X1X12_CODE
-	static const target_node = 8; //DIS_TARGET_NODE;
+#ifdef X1X15_CODE
+	static const target_node = 20; //DIS_TARGET_NODE;
 #else
-	static const target_node = 4; //DIS_TARGET_NODE;
+	static const target_node = 16; //DIS_TARGET_NODE;
 #endif
 	status = init_dolphin(target_node);
 #endif
 	jj = 0;
-	printf("cpu clock %ld\n",cpu_khz);
+	printf("cpu clock %u\n",cpu_khz);
 
 #ifdef NO_RTL
 
