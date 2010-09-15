@@ -3122,7 +3122,7 @@ print OUTM "\trm -f \$(ALL) *.o\n";
 print OUTM "\n";
 if ($no_rtl) {
 
-print OUTM "EXTRA_CFLAGS += -DNO_RTL=1\n";
+print OUTM "EXTRA_CFLAGS += -DMODULE -DNO_RTL=1\n";
 print OUTM "EXTRA_CFLAGS += -I\$(SUBDIRS)/../../include\n";
 print OUTM "EXTRA_CFLAGS += -ffast-math -msse2\n";
 
