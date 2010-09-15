@@ -721,6 +721,7 @@ printf("Sync source = %d\n",syncSource);
   }while(!pLocalEpics->epicsInput.burtRestore);
 
   printf("BURT Restore Complete\n");
+
 // BURT has completed *******************************************************************
 
 // Read in all Filter Module EPICS settings
@@ -1224,7 +1225,7 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 #ifdef TIME_MASTER
 	  // Update time on RFM if this is GPS time master
 	  *rfmTime = timeSec;
-	  sci_flush(&sci_dev_info, 0);
+	  //sci_flush(&sci_dev_info, 0);
   	  clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
 #endif
 	}
@@ -1309,7 +1310,7 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 		if (iop_rfm_valid) {
 			//*rfmTime = timeSec;
 			cdsPciModules.dolphin[1][1] = clock16K;
-	  		sci_flush(&sci_dev_info, 0);
+	  		//sci_flush(&sci_dev_info, 0);
   			clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
 		}
 		if (cdsPciModules.pci_rfm[0]) {
@@ -2000,6 +2001,7 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 
   }
 
+  printf("exiting from fe_code()\n");
 
   /* System reset command received */
   return (void *)-1;
@@ -2030,10 +2032,10 @@ int main(int argc, char **argv)
 
 	printf("startup time is %ld\n", current_time());
 #ifdef DOLPHIN_TEST
-#ifdef X1X15_CODE
-	static const target_node = 20; //DIS_TARGET_NODE;
+#ifdef X1X14_CODE
+	static const target_node = 4; //DIS_TARGET_NODE;
 #else
-	static const target_node = 16; //DIS_TARGET_NODE;
+	static const target_node = 8; //DIS_TARGET_NODE;
 #endif
 	status = init_dolphin(target_node);
 #endif
@@ -2482,6 +2484,8 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	}
 	if (cnt == 10) return -1;
 
+        pLocalEpics->epicsInput.vmeReset = 0;
+
 #ifdef NO_CPU_SHUTDOWN
         struct task_struct *p;
         p = kthread_create(fe_start, 0, "fe_start/%d", CPUID);
@@ -2508,6 +2512,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	// The code runs on the disabled CPU
 #endif
 
+#if 0
 	// Waiting for FE reset
         while(pLocalEpics->epicsInput.vmeReset == 0) {
                 msleep(1000);
@@ -2531,7 +2536,8 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 
 #endif
         //msleep(1000);
-	printkl("Brought the CPU back up\n");
+	//printkl("Brought the CPU back up\n");
+#endif // 0
 
 #else
 
@@ -2600,19 +2606,20 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 #endif
 
 #ifdef DOLPHIN_TEST
-	finish_dolphin();
+	//finish_dolphin();
 #endif
 
 #ifdef NO_RTL
-        return -1;
+        return 0;
 #endif
         return 0;
 }
 
 #ifdef NO_RTL
 void cleanup_module (void) {
-	#if 0
-	pLocalEpics->epicsInput.vmeReset = 1;
+//	printk("Setting vmeReset flag to 1\n");
+	//pLocalEpics->epicsInput.vmeReset = 1;
+        //msleep(1000);
 
 #ifndef NO_CPU_SHUTDOWN
 	extern void set_fe_code_idle(void (*ptr)(void), unsigned int cpu);
@@ -2620,6 +2627,7 @@ void cleanup_module (void) {
         set_fe_code_idle(0, CPUID);
 #endif
 
+	printk("Setting stop_working_threads to 1\n");
 	// Stop the code and wait
         stop_working_threads = 1;
         msleep(1000);
@@ -2628,16 +2636,19 @@ void cleanup_module (void) {
 	finish_dolphin();
 #endif
 
+#ifndef NO_CPU_SHUTDOWN
+
+	// Unset the code callback
+        set_fe_code_idle(0, CPUID);
 	printkl("Will bring back CPU %d\n", CPUID);
         msleep(1000);
-#ifndef NO_CPU_SHUTDOWN
 	// Bring the CPU back up
 	extern int __cpuinit cpu_up(unsigned int cpu);
         cpu_up(CPUID);
-#endif
         //msleep(1000);
 	printkl("Brought the CPU back up\n");
-	#endif
+#endif
+	printk("Just before returning from cleanup_module for " SYSTEM_NAME_STRING_LOWER "\n");
 
 }
 #endif
