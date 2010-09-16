@@ -60,6 +60,8 @@ static float inc[40];
 static float gainFinal[40];
 static float gainOut[40];
 
+	if (rampTime <= 0) return 0;
+
         if(gainFinal[id] != gainReq)
         {
                 inc[id] = rampTime * 2048;
