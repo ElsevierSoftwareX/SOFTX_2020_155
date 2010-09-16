@@ -207,6 +207,13 @@ CDS_HARDWARE cdsPciModules;
 
       // Find the first ADC card
       // Master will map ADC cards first, then DAC and finally DIO
+      if (ioMemData -> totalCards == 0) {
+	// Wait for the master to come up
+	printf("Waiting for the IOP to start\n");
+	while (ioMemData -> totalCards == 0) {
+		sleep(2);
+	}
+      }
       printf("Total PCI cards from the master: %d\n", ioMemData -> totalCards);
       sleep(2);
       for (int ii = 0; ii < ioMemData -> totalCards; ii++) {
