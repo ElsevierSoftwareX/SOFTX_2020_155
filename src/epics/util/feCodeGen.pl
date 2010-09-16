@@ -2446,6 +2446,9 @@ sub printCluster {
 print OUT "/* CPU 1 code */\n";
 }
 
+if ($cpus < 3) {
+  printVariables();
+}
 print OUT "\nvoid feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
 print OUT "\t\tdouble dacOut[][16],\t\/* DAC outputs *\/\n";
 print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
@@ -2453,9 +2456,6 @@ print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
 print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
 print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
 print OUT "{\n\nint ii;\n\n";
-if ($cpus < 3) {
-  printVariables();
-}
 print OUT "if(feInit)\n\{\n";
 
 # removed for ADC PART CHANGE
