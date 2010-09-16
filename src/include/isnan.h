@@ -1,7 +1,10 @@
+#ifndef ISNAN_H
+#define ISNAN_H 1
 
 /* A union which permits us to convert between a long double and
    three 32 bit ints.  */
-typedef unsigned int u_int32_t;
+//typedef unsigned int u_int32_t;
+//typedef int int32_t;
 
 typedef union
 {
@@ -98,7 +101,6 @@ do {								\
  * no branching!
  */
 
-typedef int int32_t;
 
 int isnan(long double x) {
 	int32_t se,hx,lx;
@@ -112,3 +114,4 @@ int isnan(long double x) {
 	se = 0xfffe - se;
 	return (int)((u_int32_t)(se))>>16;
 }
+#endif
