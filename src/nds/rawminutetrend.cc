@@ -495,7 +495,7 @@ DEBUG1(cerr << "find_offs() returned " << offs << endl);
 	  DEBUG1(cerr << "Channel order:" << endl);
 	  for (FCMI q = lb; q != ub; ++q, i++) {
 	    ch_bytes [i] = mSpec.getSignalBps()[q -> second];
-	    char *sfx = strrchr (mSpec.getSignalNames()[q -> second].c_str(), '.');
+	    const char *sfx = strrchr (mSpec.getSignalNames()[q -> second].c_str(), '.');
 	    if (sfx == NULL)
 	      abort ();
 	    sfx++;

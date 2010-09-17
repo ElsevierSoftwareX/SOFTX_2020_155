@@ -52,7 +52,7 @@
 #endif
 #define basic_streambuf streambuf
 #endif
-#include "memmap/mmap_ptr.hh"
+#include "mmap_ptr.hh"
 
 
 namespace std {

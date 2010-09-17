@@ -1,6 +1,7 @@
 // Scan archive directory to figure out GPS time ranges for data directories
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
