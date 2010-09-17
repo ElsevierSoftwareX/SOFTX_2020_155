@@ -128,6 +128,10 @@ receiver_mx(int neid)
 		  //printf("received one\n");
 		  struct daqMXdata *dataPtr = (struct daqMXdata *) seg.segment_ptr;
 		  int dcu_id = dataPtr->mxIpcData.dcuId;
+		  if (daqd.dcuSize[0][dcu_id] == 0) {
+			mx_irecv(ep[neid], &seg, 1, match_val, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
+		  	continue; // Unconfigured DCU
+	  	  }
 		  int cycle = dataPtr->mxIpcData.cycle;
 		  int len = dataPtr->mxIpcData.dataBlockSize;
 
