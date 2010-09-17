@@ -558,7 +558,8 @@ inline unsigned long current_time() {
 //***********************************************************************
 void *fe_start(void *arg)
 {
-
+  int longestWrite2 = 0;
+  int tempClock[4];
   int ii,jj,kk,ll,mm;			// Dummy loop counter variables
   static int clock1Min = 0;		// Minute counter (Not Used??)
   static int cpuClock[10];		// Code timing diag variables
@@ -1039,8 +1040,9 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
     printf("*******************************\n");
     printf("*     Running on timer!       *\n");
     printf("*******************************\n");
+  } else {
+    printf("Triggered the ADC\n");
   }
-  printf("Triggered the ADC\n");
 #endif
 #ifdef ADC_SLAVE
 	// SLAVE needs to sync with MASTER by looking for cycle 0 count in ipc memory
@@ -1123,7 +1125,8 @@ static inline void __monitor(const void *eax, unsigned long ecx,
   	if (run_on_timer) {  // NO ADC present, so run on CPU realtime clock
 	  // Pause until next cycle begins
 #ifdef NO_RTL
-#if 0
+#if !defined (TIME_SLAVE) && !defined (RFM_TIME_SLAVE)
+	  // This is local CPU timer (no ADCs)
 	  // advance to the next cycle polling CPU cycles and microsleeping
   	  int clk, clk1;
 	  rdtscl(clk);
@@ -1134,36 +1137,31 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 		udelay(1);
 	  }
 #else
-	  #ifdef RFM_TIME_SLAVE
+#ifdef RFM_TIME_SLAVE
 	  unsigned long d = ((volatile long *)(cdsPciModules.pci_rfm[0]))[0];
 	  d=clock16K;
 	  for(;((volatile long *)(cdsPciModules.pci_rfm[0]))[0] != d;) udelay(1);
 	  timeSec = ((volatile long *)(cdsPciModules.pci_rfm[0]))[1];
-	  #endif
-#ifdef TIME_SLAVE
-// sync up with the time master on its gps time
-//
-		unsigned long d = 0;
+#elif defined(TIME_SLAVE)
+	  // sync up with the time master on its gps time
+	  //
+	  unsigned long d = 0;
           // if (iop_rfm_valid) d = dolphin_memory_read[1];
-	  	d = clock16K;
-	            for(;iop_rfm_valid? cdsPciModules.dolphin[0][1] != d: 0;) udelay(1);
+	  d = clock16K;
+	  for(;iop_rfm_valid? cdsPciModules.dolphin[0][1] != d: 0;) udelay(1);
 #endif
-#if defined (TIME_SLAVE) || defined (RFM_TIME_SLAVE)
-		    ioMemCntr = (clock16K % 64);
-		    for(ii=0;ii<32;ii++)
-		    {
-			ioMemData->iodata[0][ioMemCntr].data[ii] = clock16K/4;
-			ioMemData->iodata[1][ioMemCntr].data[ii] = clock16K/4;
-		    }
-		    // Write GPS time and cycle count as indicator to slave that adc data is ready
-	  	    ioMemData->gpsSecond = timeSec;
-		    ioMemData->iodata[0][ioMemCntr].timeSec = timeSec;;
-		    ioMemData->iodata[1][ioMemCntr].timeSec = timeSec;;
-		    ioMemData->iodata[0][ioMemCntr].cycle = clock16K;
-		    ioMemData->iodata[1][ioMemCntr].cycle = clock16K;
-
-
-#endif
+	    ioMemCntr = (clock16K % 64);
+	    for(ii=0;ii<32;ii++)
+	    {
+		ioMemData->iodata[0][ioMemCntr].data[ii] = clock16K/4;
+		ioMemData->iodata[1][ioMemCntr].data[ii] = clock16K/4;
+	    }
+	    // Write GPS time and cycle count as indicator to slave that adc data is ready
+	    ioMemData->gpsSecond = timeSec;
+	    ioMemData->iodata[0][ioMemCntr].timeSec = timeSec;;
+	    ioMemData->iodata[1][ioMemCntr].timeSec = timeSec;;
+	    ioMemData->iodata[0][ioMemCntr].cycle = clock16K;
+	    ioMemData->iodata[1][ioMemCntr].cycle = clock16K;
 #if 0
 	  for (;;) {
 		         if (cdsPciModules.dolphin[0][1] != d) break;
@@ -1224,9 +1222,11 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 #endif
 #ifdef TIME_MASTER
 	  // Update time on RFM if this is GPS time master
+          rdtscl(tempClock[0]);
 	  *rfmTime = timeSec;
-	  //sci_flush(&sci_dev_info, 0);
-  	  clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
+	  sci_flush(&sci_dev_info, 0);
+          rdtscl(tempClock[1]);
+  	  //clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
 #endif
 	}
         for(ll=0;ll<sampleCount;ll++)
@@ -1309,9 +1309,11 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 #ifdef TIME_MASTER
 		if (iop_rfm_valid) {
 			//*rfmTime = timeSec;
+          		rdtscl(tempClock[2]);
 			cdsPciModules.dolphin[1][1] = clock16K;
-	  		//sci_flush(&sci_dev_info, 0);
-  			clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
+	  		sci_flush(&sci_dev_info, 0);
+          		rdtscl(tempClock[3]);
+  			//clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
 		}
 		if (cdsPciModules.pci_rfm[0]) {
 		    	((volatile long *)(cdsPciModules.pci_rfm[0]))[1] = timeSec;
@@ -1513,6 +1515,7 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 	feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,0);
         rdtscl(cpuClock[5]);
 
+
 // START OF DAC WRITE ***********************************************************************************
 	// Write out data to DAC modules
 	for(jj=0;jj<cdsPciModules.dacCount;jj++)
@@ -1639,6 +1642,8 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 		ioMemData->iodata[mm][ioMemCntrDac].cycle = -1;
 #endif
 	}
+
+
 #ifdef ADC_SLAVE
 		// Increment DAC memory block pointers for next cycle
 		ioClockDac = (ioClockDac + OVERSAMPLE_TIMES) % 65536;
@@ -1964,7 +1969,10 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 
 	// Compute max time of one cycle.
 	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
-	if (cycleTime > (1000000/CYCLE_PER_SECOND)) printf("cycle %d time %d\n", clock16K, cycleTime);
+	if (longestWrite2 < ((tempClock[3]-tempClock[2])/CPURATE)) longestWrite2 = (tempClock[3]-tempClock[2])/CPURATE;
+	if (cycleTime > (1000000/CYCLE_PER_SECOND))  {
+		printf("cycle %d time %d; adcWait %d; write1 %d; write2 %d; longest write2 %d\n", clock16K, cycleTime, adcWait, (tempClock[1]-tempClock[0])/CPURATE, (tempClock[3]-tempClock[2])/CPURATE, longestWrite2);
+	}
 	// Hold the max cycle time over the last 1 second
 	if(cycleTime > timeHold) timeHold = cycleTime;
 	// Hold the max cycle time since last diag reset
@@ -2444,6 +2452,8 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	printf("IRIG-B card found %d\n",cdsPciModules.gpsType);
         printf("***************************************************************************\n");
   	}
+
+ 	//cdsPciModules.adcCount = 2;
 
 	// Code will run on internal timer if no ADC modules are found
 	if (cdsPciModules.adcCount == 0) {
