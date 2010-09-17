@@ -1,3 +1,7 @@
+Friday, September 17 2010
+I have enable SYSFS back, disabled MICROCODE. There is new .config file
+and an updated patch.
+
 Wed Sep  1 09:03:34 PDT 2010
 linux-2.6.34.1-cs.patch produced at LHO in August 2010.
 We ran it on the diskless nodes, which had sysfs not configured in the kernel.
