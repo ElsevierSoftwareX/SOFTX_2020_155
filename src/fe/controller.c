@@ -296,12 +296,13 @@ unsigned long readCDIO6464l(CDS_HARDWARE *pHardware, int modNum);
 unsigned long readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum);
 int clock16K = 0;
 int out_buf_size = 0; // test checking DAC buffer size
-double cycle_gps_time = 0.; // Time at which ADCs triggered
-double cycle_gps_event_time = 0.; // Time at which ADCs triggered
+unsigned int cycle_gps_time = 0; // Time at which ADCs triggered
+unsigned int cycle_gps_event_time = 0; // Time at which ADCs triggered
 unsigned int   cycle_gps_ns = 0;
 unsigned int   cycle_gps_event_ns = 0;
 unsigned int   gps_receiver_locked = 0; // Lock/unlock flag for GPS time card
 unsigned int timeSec = 0;
+unsigned int timeSecDiag = 0;
 /* 1 - error occured on shmem; 2 - RFM; 3 - Dolphin */
 unsigned int ipcErrBits = 0;
 
@@ -441,7 +442,7 @@ int  getGpsTimeTsync(unsigned int *tsyncSec, unsigned int *tsyncUsec) {
   if (cdsPciModules.gps) {
 	timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
 	timeSec = timeRead->BCD_SEC;
-	timeSec -= 345586;
+	timeSec -= 345585;
 	*tsyncSec = timeSec;
 	timeNsec = timeRead->SUB_SEC;
 	*tsyncUsec = ((timeNsec & 0xfffffff) * 5) / 1000; 
@@ -1294,8 +1295,10 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 			for(mm=0;mm<cdsPciModules.dacCount;mm++)
 	   		   if(dacWriteEnable > 4) gsaDacDma2(mm,cdsPciModules.dacType[mm]);
 #ifdef DUOTONE_TIMING
-			if(clock16K == 65535) 
+			// if(clock16K == 65535) 
+			if(clock16K == 0) 
 			{
+				// gps_receiver_locked = getGpsTimeTsync(&timeSecDiag,&usec);
 				gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
                 		pLocalEpics->epicsOutput.diags[5] = usec;
 			}
@@ -1817,7 +1820,9 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 #endif
 
 #ifndef NO_DAQ
+		
 		// Call daqLib
+		cycle_gps_time = timeSec; // Time at which ADCs triggered
 		pLocalEpics->epicsOutput.diags[3] = 
 			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
 #endif
@@ -2042,9 +2047,9 @@ int main(int argc, char **argv)
 	printf("startup time is %ld\n", current_time());
 #ifdef DOLPHIN_TEST
 #ifdef X1X14_CODE
-	static const target_node = 4; //DIS_TARGET_NODE;
-#else
 	static const target_node = 8; //DIS_TARGET_NODE;
+#else
+	static const target_node = 12; //DIS_TARGET_NODE;
 #endif
 	status = init_dolphin(target_node);
 #endif
