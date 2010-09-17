@@ -97,8 +97,6 @@ extern long daqBuffer;			/* Address of daqLib swing buffers.	*/
 #ifdef SHMEM_DAQ
 extern char *_daq_shm;
 struct rmIpcStr *dipc;
-extern double cycle_gps_time;
-extern unsigned int cycle_gps_ns;
 struct cdsDaqNetGdsTpNum *tpPtr;
 char *mcPtr;
 char *lmPtr;
@@ -655,8 +653,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
         dipc->bp[daqBlockNum].crc = crcSend;
         //ipc->bp[daqBlockNum].status = 0;
         dipc->bp[daqBlockNum].timeSec = (unsigned int) cycle_gps_time;
-        dipc->bp[daqBlockNum].timeNSec = (unsigned int) cycle_gps_ns + (unsigned int) (1000000000. * (cycle_gps_time - (unsigned int
-) cycle_gps_time));
+        dipc->bp[daqBlockNum].timeNSec = (unsigned int)daqBlockNum;
 
         // Assign the test points table
         tpPtr->count = validTpNet;

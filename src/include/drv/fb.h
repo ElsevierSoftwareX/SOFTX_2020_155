@@ -37,7 +37,7 @@ int cdsDaqNetDaqSend(   int dcuId,
 #endif
 
 extern int cdsNetStatus;
-extern double cycle_gps_time;
+extern unsigned int cycle_gps_time;
 extern unsigned int cycle_gps_ns;
 
 #endif
