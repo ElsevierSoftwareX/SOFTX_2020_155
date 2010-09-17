@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <sys/mman.h>
 #include <arpa/inet.h>
@@ -16,6 +17,7 @@
 #include <set>
 #include <map>
 #include <string>
+#include <algorithm>
 
 #include "nds.hh"
 #include "io.h"

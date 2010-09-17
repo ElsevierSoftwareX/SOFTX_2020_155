@@ -27,7 +27,7 @@ LDASFLAGS=-I$(LDAS_DIR)/include
 LDASLIBFLAGS=-L$(LDAS_DIR)/lib -R$(LDAS_DIR)/lib -lgeneral -lframecpp -lz -lbz2
 
 VARIOUS_DEFINES=-DSERVER_VERSION=\"1.5\" "-DPRODUCTION_DATE=\"`date`\"" "-DPRODUCTION_MACHINE=\"`uname -a`\"" ${EPICSFLAGS} ${SCRAMFLAGS} ${VMICRFMFLAGS} ${GDSFLAGS} ${LDASFLAGS}
-INCLUDEFLAGS=-I. -I@srcdir@ -I@srcdir@/client -I@srcdir@/framelib/src -I@srcdir@/framelib/src/zlib -I/opt/apps/Linux/gds/include -I/usr/local/include
+INCLUDEFLAGS=-I. -I@srcdir@ -I@srcdir@/client -I@srcdir@/framelib/src -I@srcdir@/framelib/src/zlib -I@srcdir@/../gds -I/usr/local/include
 #CFLAGS=${VARIOUS_DEFINES} ${DEVFLAGS} -c ${INCLUDEFLAGS} -D_POSIX_C_SOURCE=199506L
 CFLAGS=${VARIOUS_DEFINES} ${DEVFLAGS} -c ${INCLUDEFLAGS} -D_REENTRANT
 CCFLAGS=${CFLAGS}

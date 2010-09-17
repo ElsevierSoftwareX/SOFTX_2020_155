@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <fstream>
 #include "spec.hh"
 
