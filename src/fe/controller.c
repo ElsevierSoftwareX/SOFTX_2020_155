@@ -2037,6 +2037,7 @@ int main(int argc, char **argv)
 	int dacCnt;
 	int doCnt;
 	int do32Cnt;
+	int doIIRO16Cnt;
 
 	printf("startup time is %ld\n", current_time());
 #ifdef DOLPHIN_TEST
@@ -2169,6 +2170,7 @@ int main(int argc, char **argv)
 	dacCnt = 0;
 	doCnt = 0;
 	do32Cnt = 0;
+	doIIRO16Cnt = 0;
 
 	// Have to search thru all cards and find desired instance for application
 	// Master will map ADC cards first, then DAC and finally DIO
@@ -2231,6 +2233,18 @@ int main(int argc, char **argv)
 					cdsPciModules.doInstance[kk] = do32Cnt;
 				 }
 				 break;
+			case ACS_16DIO:
+				if((cdsPciModules.cards_used[jj].type == ACS_16DIO) && 
+					(cdsPciModules.cards_used[jj].instance == doIIRO16Cnt))
+				{
+					printf("Found Access IIRO-16 at %d 0x%x\n",jj,ioMemData->ipc[ii]);
+					cdsPciModules.doType[doCnt] = ioMemData->model[ii];
+					cdsPciModules.pci_do[doCnt] = ioMemData->ipc[ii];
+					cdsPciModules.doCount ++;
+					cdsPciModules.iiroDio1Count ++;
+					cdsPciModules.doInstance[kk] = doIIRO16Cnt;
+				}
+				break;
 			default:
 				break;
 		   }
@@ -2239,6 +2253,7 @@ int main(int argc, char **argv)
 		if(ioMemData->model[ii] == GSC_16AO16) dacCnt ++;
 		if(ioMemData->model[ii] == CON_6464DIO) doCnt ++;
 		if(ioMemData->model[ii] == CON_32DO) do32Cnt ++;
+		if(ioMemData->model[ii] == ACS_16DIO) doIIRO16Cnt ++;
 	}
 	// If no ADC cards were found, then SLAVE cannot run
 	if(!cdsPciModules.adcCount)
