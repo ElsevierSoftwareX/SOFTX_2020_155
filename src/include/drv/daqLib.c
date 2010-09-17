@@ -780,8 +780,8 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
       if(daqBlockNum == 15)
       {
-	unsigned int tpnum[DAQ_GDS_MAX_TP_NUM];		// Current TP nums
-	unsigned int excnum[DAQ_GDS_MAX_TP_NUM];	// Current EXC nums
+	static unsigned int tpnum[DAQ_GDS_MAX_TP_NUM];		// Current TP nums
+	static unsigned int excnum[DAQ_GDS_MAX_TP_NUM];	// Current EXC nums
 	// Offset by one into the TP/EXC tables for the 2K systems
 	unsigned int _2k_sys_offs = sysRate < DAQ_16K_SAMPLE_SIZE;
 	
