@@ -318,7 +318,7 @@ struct rmIpcStr *daqPtr;
 #include "commData2.h"
 #endif
 
-double getGpsTime(unsigned int *);
+int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
 #include "./feSelectCode.c"
 #ifdef NO_RTL
 #include "map.c"
@@ -402,35 +402,32 @@ int tdsControl = 0;
 
 
 // Function to read time from Symmetricom IRIG-B Module ***********************
-static double getGpsTime1(unsigned int *ns, int event_flag) {
-  double the_time = 0.0;
-  unsigned int time0,time1,msecs,nsecs;
+void lockGpsTime()
+{
+  SYMCOM_REGISTER *timeRead;
+	timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
+	timeRead->TIMEREQ = 1;	// Trigger module to capture time
+}
+int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec) 
+{
+  SYMCOM_REGISTER *timeRead;
+  unsigned int timeSec,timeNsec,sync;
 
   if (cdsPciModules.gps) {
-    // Sample time
-    if (event_flag) {
-      //cdsPciModules.gps[1] = 1;
-    } else {
-      cdsPciModules.gps[0] = 1;
-    }
+	timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
+	timeRead->TIMEREQ = 1;	// Trigger module to capture time
+	timeSec = timeRead->TIME1;
+	timeNsec = timeRead->TIME0;
+	*tsyncSec = timeSec - 252806388;
+	*tsyncUsec = (timeNsec & 0xfffff); 
     // Read seconds, microseconds, nanoseconds
-    if (event_flag) {
-      time0 = cdsPciModules.gps[SYMCOM_BC635_EVENT0/4];
-      time1 = cdsPciModules.gps[SYMCOM_BC635_EVENT1/4];
-    } else {
-      time0 = cdsPciModules.gps[SYMCOM_BC635_TIME0/4];
-      time1 = cdsPciModules.gps[SYMCOM_BC635_TIME1/4];
-    }
-    gps_receiver_locked = !(time0 & (1<<24));
-    msecs = 0xfffff & time0; // microseconds
-    nsecs = 0xf & (time0 >> 20); // nsecs * 100
-    the_time = ((double) time1) + .000001 * (double) msecs  /* + .0000001 * (double) nsecs*/;
-    if (ns) {
-	*ns = 100 * nsecs; // Store nanoseconds
-    }
+    sync = !(timeNsec & (1<<24));
+  return sync;
+  //  nsecs = 0xf & (time0 >> 20); // nsecs * 100
+   // the_time = ((double) time1) + .000001 * (double) msecs  /* + .0000001 * (double) nsecs*/;
   }
-  printf("%f\n", the_time);
-  return the_time;
+  // printf("%f\n", the_time);
+  return (0);
 }
 
 //***********************************************************************
@@ -452,6 +449,7 @@ int  getGpsTimeTsync(unsigned int *tsyncSec, unsigned int *tsyncUsec) {
   return(0);
 }
 
+#if 0
 //***********************************************************************
 // Get current GPS time from SYMCOM IRIG-B Rcvr
 // Nanoseconds (hundreds at most) are available as an optional ns parameter
@@ -486,6 +484,7 @@ unsigned int time0,time1;
 }
 //***********************************************************************
 // Get Gps card microseconds from SYMCOM IRIG-B Rcvr
+#endif
 #ifdef DUOTONE_TIMING
 float duotime(int count, float meanVal, float data[])
 {
@@ -700,7 +699,12 @@ printf("Sync source = %d\n",syncSource);
 #else
   if(cdsPciModules.gpsType == SYMCOM_RCVR) 
   {
-  	time = getGpsTime(&ns);
+  	gps_receiver_locked = getGpsTime(&timeSec,&usec);
+        printf("Found SYMCOM IRIG-B - Time is %d and %d us \n", time, usec);
+  }
+  if(cdsPciModules.gpsType == SYMCOM_RCVR) 
+  {
+  	gps_receiver_locked = getGpsTime(&timeSec,&usec);
         printf("Found SYMCOM IRIG-B - Time is %f and %d ns 0x%x\n", time, ns);
   }
   if(cdsPciModules.gpsType == TSYNC_RCVR) 
@@ -971,7 +975,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		wtmin = 5;
 		printf("Waiting until usec = %d to start the ADCs\n", wtmin);
 		do{
-			if(cdsPciModules.gpsType == SYMCOM_RCVR) usec = getGpsUsec();
+			if(cdsPciModules.gpsType == SYMCOM_RCVR) gps_receiver_locked = getGpsTime(&timeSec,&usec);
 			if(cdsPciModules.gpsType == TSYNC_RCVR) gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
 		}while ((usec < wtmin) || (usec > wtmax));
 		// Arm ADC modules
@@ -1097,8 +1101,8 @@ static inline void __monitor(const void *eax, unsigned long ecx,
   timeSec = current_time() -1;
   if(cdsPciModules.gpsType == SYMCOM_RCVR)
   {
-  	time = getGpsTime(&ns);
-	timeSec = time - 252806386;
+  	// time = getGpsTime(&ns);
+	// timeSec = time - 252806386;
   }
   if(cdsPciModules.gpsType == TSYNC_RCVR) 
   {
@@ -1298,9 +1302,14 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 			// if(clock16K == 65535) 
 			if(clock16K == 0) 
 			{
-				// gps_receiver_locked = getGpsTimeTsync(&timeSecDiag,&usec);
-				gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
-                		pLocalEpics->epicsOutput.diags[5] = usec;
+				// if SymCom type, just do write to lock current time and read later
+				// This save a couple three microseconds here
+				if(cdsPciModules.gpsType == SYMCOM_RCVR) lockGpsTime();
+				if(cdsPciModules.gpsType == TSYNC_RCVR) 
+				{
+					gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
+					pLocalEpics->epicsOutput.diags[5] = usec;
+				}
 			}
 #endif
 			
@@ -1664,6 +1673,11 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 #ifdef DUOTONE_TIMING
         if(clock16K == 0)
         {
+		if(cdsPciModules.gpsType == SYMCOM_RCVR) 
+		{
+			gps_receiver_locked = getGpsTime(&timeSec,&usec);
+			pLocalEpics->epicsOutput.diags[5] = usec;
+		}
                 duotoneMean = duotoneTotal/CYCLE_PER_SECOND;
                 duotoneTotal = 0.0;
                 duotoneMeanDac = duotoneTotalDac/CYCLE_PER_SECOND;
@@ -2166,6 +2180,7 @@ int main(int argc, char **argv)
 #ifndef ADC_SLAVE
 	// Call PCI initialization routine in map.c file.
 	status = mapPciModules(&cdsPciModules);
+	// return 0;
 #endif
 #ifdef ADC_SLAVE
 // If running as a slave process, I/O card information is via ipc shared memory
