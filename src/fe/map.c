@@ -1428,7 +1428,7 @@ int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
   unsigned int time0;
 
   pedStatus = pci_enable_device(gpsdev);
-  pci_read_config_dword(gpsdev, PCI_BASE_ADDRESS_0, &pci_io_addr);
+  pci_read_config_dword(gpsdev, PCI_BASE_ADDRESS_2, &pci_io_addr);
   pci_io_addr &= 0xfffffff0;
   printk("PIC BASE 0 address = %x\n", pci_io_addr);
 
@@ -1439,7 +1439,7 @@ int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
 
   for (i = 0; i < 10; i++) {
     pHardware->gps[0] = 1;
-    printk("Current time %ds %dus %dns \n", pHardware->gps[0x34/4], 0xfffff & pHardware->gps[0x30/4], 100 * ((pHardware->gps[0x30/4] >> 20) & 0xf));
+    printk("Current time %ds %dus %dns \n", (pHardware->gps[0x34/4]-252806386), 0xfffff & pHardware->gps[0x30/4], 100 * ((pHardware->gps[0x30/4] >> 20) & 0xf));
   }
   pHardware->gps[0] = 1;
   time0 = pHardware->gps[0x30/4];
