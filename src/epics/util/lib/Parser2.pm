@@ -377,6 +377,15 @@ sub node_processing {
                 $::subSys++;
 		return 1; # Do not call this function on leaves, we already did that
 	} elsif ($block_type eq "Reference") {
+                if ($source_block =~ /cdsIPCx/) {
+                   if ($block_name !~ /[CGHKLMSX]\d\:/) {
+                      die "***ERROR: Signal name of IPCx module must include IFO: $block_name\n";
+                   }
+                }
+
+                $descr=(${$node->{FIELDS}}{"Description"});
+                #  print "DESCR=$descr\n";
+                $::blockDescr[$::partCnt] = $descr;
 		# Skip Parameters block
 		#if ($source_block =~ /^cdsParameters/) {
 		  #return 0;
