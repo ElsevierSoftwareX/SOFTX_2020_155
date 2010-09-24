@@ -52,19 +52,20 @@ sub frontEndInitCode {
         $::ipcxRef[$::ipcxInitDone] = $i;
  
         for ($l = 0; $l < $::ipcxCnt; $l++) {
-           if ($::ipcxParts[$l][4] == $i) {
+           if ($::ipcxParts[$l][5] == $i) {
               $found = 1;
  
-              if ( ($::ipcxParts[$l][5] =~ /^Ground/) || ($::ipcxParts[$l][5] =~ /\_Ground/) ) {
+              if ( ($::ipcxParts[$l][6] =~ /^Ground/) || ($::ipcxParts[$l][6] =~ /\_Ground/) ) {
                  $calcExp .= "ipcInfo[$::ipcxInitDone]\.mode = IRCV;\n";
               }
               else {
                  $calcExp .= "ipcInfo[$::ipcxInitDone]\.mode = ISND;\n";
               }
  
-              $calcExp .= "ipcInfo[$::ipcxInitDone]\.netType = $::ipcxParts[$l][1];\n";
+              my $subPart = substr($::ipcxParts[$l][1], 0, 4);
+              $calcExp .= "ipcInfo[$::ipcxInitDone]\.netType = $subPart;\n";
               $calcExp .= "ipcInfo[$::ipcxInitDone]\.sendRate = $::ipcxParts[$l][2];\n";
-              $calcExp .= "ipcInfo[$::ipcxInitDone]\.ipcNum = $::ipcxParts[$l][3];\n";
+              $calcExp .= "ipcInfo[$::ipcxInitDone]\.ipcNum = $::ipcxParts[$l][4];\n";
 
               last;
            }
