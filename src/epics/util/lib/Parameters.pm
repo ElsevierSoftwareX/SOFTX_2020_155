@@ -24,6 +24,7 @@ sub printHeaderStruct {
                                    $errmsg .= $::ifo . ", " . $spp[1] . "\n";
 
                                 #   die $errmsg;
+                                    die $errmsg;
                                 }
 
 				print "Site is set to $spp[1]\n";
