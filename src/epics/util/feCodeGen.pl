@@ -202,6 +202,7 @@ $boCnt = 0;	# Total binary output boards
 $boType[0] = 0;	# Binary output board types
 $boNum[0] = 0;	# Binary output board numbers, sequential
 $nonSubCnt = 0; # Total of non-sybsystem parts found in the model
+$blockDescr[0] = undef;
 
 # Keeps non-subsystem part numbers
 $nonSubPart[0] = 0;	# $nonSubPart[0 .. $nonSubCnt]
@@ -290,13 +291,15 @@ $remoteIPCport = 0;
 $ipcxMissing[0] = "Signal Name";
 $ipcxMissing[1] = "ipcType";
 $ipcxMissing[2] = "ipcRate";
-$ipcxMissing[3] = "ipcNum";
+$ipcxMissing[3] = "ipcHost";
+$ipcxMissing[4] = "ipcNum";
 
 $ipcxType[0] = "SHMEM";
-$ipcxType[1] = "RFM";
-$ipcxType[2] = "PCIE";
+$ipcxType[1] = "RFM0";
+$ipcxType[2] = "RFM1";
+$ipcxType[3] = "PCIE";
 
-for ($ii = 0; $ii < 3; $ii++) {
+for ($ii = 0; $ii < 4; $ii++) {
    $ipcxMaxNum[$ii] = -999;
 }
 
@@ -367,11 +370,27 @@ for ($ii = 0; $ii < $partCnt; $ii++) {
    if ($partType[$ii] =~ /^IPCx/) {
       $ipcxParts[$ipcxCnt][0] = $xpartName[$ii];
       print "IPC $ii $ipcxCnt is $ipcxParts[$ipcxCnt][0] \n";
-      $ipcxParts[$ipcxCnt][1] = "I" . substr($ipcxBlockTags[$ii], 8, 3);
+
+#     $ipcxParts[$ipcxCnt][1] = "I" . substr($ipcxBlockTags[$ii], 8, 3);
+      $ipcxCommMech = substr($ipcxBlockTags[$ii], 8, 4);
+      $ipcxParts[$ipcxCnt][1] = "I" . $ipcxCommMech;
+      if ($ipcxCommMech eq "RFM") {
+         print "\n+++  TEST:  Found an RFM\n";
+         print "\n+++  DESCR=$blockDescr[$ii]\n";
+         if ($blockDescr[$ii] =~ /^card=(\d)/) {
+            print "\nVALUE=$1\n";
+            $ipcxParts[$ipcxCnt][1] .= $1;
+         }
+         else {
+            die "\n***ERROR: IPCx part of type RFM with NO card number\n";
+         }
+      }
       print "IPC $ii $ipcxCnt is $ipcxParts[$ipcxCnt][1] \n";
+
       $ipcxParts[$ipcxCnt][2] = undef;
-      $ipcxParts[$ipcxCnt][3] = undef;
-      $ipcxParts[$ipcxCnt][4] = $ii;
+      $ipcxParts[$ipcxCnt][3] = $targetHost;
+      $ipcxParts[$ipcxCnt][4] = undef;
+      $ipcxParts[$ipcxCnt][5] = $ii;
       $ipcxCnt++;
    }
    #
@@ -438,6 +457,7 @@ if ($ipcxCnt > 0) {
          $ipcxData[$ipcxParamCnt][1] = undef;
          $ipcxData[$ipcxParamCnt][2] = undef;
          $ipcxData[$ipcxParamCnt][3] = undef;
+         $ipcxData[$ipcxParamCnt][4] = undef;
 
          next;
       }
@@ -450,16 +470,19 @@ if ($ipcxCnt > 0) {
       if ($skip == 0)  {
          if ($value =~ /^ipcType=(\w+)/) {
             my $typeString = $1;
-            $ipcxData[$ipcxParamCnt][1] = "I" . substr($typeString, 0, 3);
+            $ipcxData[$ipcxParamCnt][1] = "I" . substr($typeString, 0, 4);
 
-            if ($typeString =~ /^SHM/) {
+            if ($typeString =~ /^SHME/) {
                $typeIndex = 0;
             }
-            elsif ($typeString =~ /^RFM/) {
+            elsif ($typeString =~ /^RFM0/) {
                $typeIndex = 1;
             }
-            elsif ($typeString =~ /^PCI/) {
+            elsif ($typeString =~ /^RFM1/) {
                $typeIndex = 2;
+            }
+            elsif ($typeString =~ /^PCIE/) {
+               $typeIndex = 3;
             }
             else {
                die "***ERROR: IPCx Communication Mechanism not recognized: $typeString\n";
@@ -468,11 +491,16 @@ if ($ipcxCnt > 0) {
          elsif ($value =~ /^ipcRate=(\d+)/) {
             $ipcxData[$ipcxParamCnt][2] = $1;
          }
-         elsif ($value =~ /^ipcNum=(\d+)/) {
+         elsif ($value =~ /^ipcHost=(\w+)/) {
             $ipcxData[$ipcxParamCnt][3] = $1;
+         }
+         elsif ($value =~ /^ipcNum=(\d+)/) {
+            $ipcxData[$ipcxParamCnt][4] = $1;
 
             if ($1 > $ipcxMaxNum[$typeIndex]) {
-               $ipcxMaxNum[$typeIndex] = $1;
+               if ( ($typeIndex > 0) || ($targetHost eq $ipcxData[$ipcxParamCnt][3]) ) {
+                  $ipcxMaxNum[$typeIndex] = $1;
+               }
             }
          }
       }
@@ -483,7 +511,7 @@ if ($ipcxCnt > 0) {
    $ipcxNotFound = 0;
    $ipcxRcvrCnt = 0;
 
-   for ($ii = 0; $ii < 3; $ii++) {
+   for ($ii = 0; $ii < 4; $ii++) {
       if ($ipcxMaxNum[$ii] == -999) {
          $ipcxMaxNum[$ii] = -1;
       }
@@ -510,9 +538,17 @@ if ($ipcxCnt > 0) {
       for ($jj = 0; $jj < $ipcxParamCnt; $jj++) {
          if ($ipcxPartComp eq $ipcxData[$jj][0]) {
             #
+            # If IPCx type is SHMEM, then make sure we're only
+            # considering entries for this host
+            #
+            if ( ($ipcxParts[$ii][1] eq "ISHME") && ($targetHost ne $ipcxData[$jj][3]) ) {
+               next;
+            }
+
+            #
             # Make sure no IPCx parameters are missing
             #
-            for ($kk = 2; $kk < 4; $kk++) {
+            for ($kk = 2; $kk < 5; $kk++) {
                if (defined($ipcxData[$jj][$kk]) ) {
                   $ipcxParts[$ii][$kk] = $ipcxData[$jj][$kk];
                }
@@ -521,8 +557,8 @@ if ($ipcxCnt > 0) {
                }
             }
 
-            $kk = $ipcxParts[$ii][4];
-            $ipcxParts[$ii][5] = $partInput[$kk][0];
+            $kk = $ipcxParts[$ii][5];
+            $ipcxParts[$ii][6] = $partInput[$kk][0];
             $found = 1;
             $typeComp = $ipcxParts[$ii][1];
 
@@ -546,6 +582,7 @@ if ($ipcxCnt > 0) {
             if ( ($partInput[$kk][0] =~ /^Ground/) || ($partInput[$kk][0] =~ /\_Ground/) ) {
                if ( ($partOutCnt[$kk] < 1) || ($partOutCnt[$kk] > 2) ) {
                   #die "***ERROR: IPCx RECEIVER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
+                  die "***ERROR: IPCx RECEIVER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
                }
             }
             #
@@ -571,7 +608,7 @@ if ($ipcxCnt > 0) {
 
          $ipcxAdd[$ipcxNotFound][0] = $ii;
 
-         $kk = $ipcxParts[$ii][4];
+         $kk = $ipcxParts[$ii][5];
 
          if ( ($partInput[$kk][0] =~ /^Ground/) || ($partInput[$kk][0] =~ /\_Ground/) ) {
             if ( ($partOutCnt[$kk] < 1) || ($partOutCnt[$kk] > 2) ) {
@@ -611,10 +648,10 @@ if ($ipcxCnt > 0) {
             #
             $ipcxTypeIndex = -999;
 
-            $ipcxCommMech = substr($ipcxParts[$ipcxAdd[$jj][0]][1], 1, 3);
+            $ipcxCommMech = substr($ipcxParts[$ipcxAdd[$jj][0]][1], 1, 4);
 
-            for ($kk = 0; $kk < 3; $kk++) {
-               if ($ipcxCommMech eq substr($ipcxType[$kk], 0,3) ) {
+            for ($kk = 0; $kk < 4; $kk++) {
+               if ($ipcxCommMech eq substr($ipcxType[$kk], 0, 4) ) {
                   $ipcxTypeIndex = $kk;
                }
             }
@@ -638,16 +675,19 @@ if ($ipcxCnt > 0) {
             print IPCOUT "\[$signalName\]\n";
             print IPCOUT "ipcType=$ipcxType[$ipcxTypeIndex]\n";
             print IPCOUT "ipcRate=$ipcxRate\n";
+            print IPCOUT "ipcHost=$targetHost\n";
             print IPCOUT "ipcNum=$ipcxMaxNum[$ipcxTypeIndex]\n";
             print IPCOUT "desc=Automatically generated by feCodeGen\.pl on $theTime\n\n";
 
             $ipcxDataAdded[$ipcxNew][0] = $ipcxParts[$ipcxAdd[$jj][0]];
-            $ipcxDataAdded[$ipcxNew][1] = "I" . substr($ipcxType[$ipcxTypeIndex], 0, 3);
+            $ipcxDataAdded[$ipcxNew][1] = "I" . substr($ipcxType[$ipcxTypeIndex], 0, 4);
             $ipcxDataAdded[$ipcxNew][2] = $ipcxRate;
-            $ipcxDataAdded[$ipcxNew][3] = $ipcxMaxNum[$ipcxTypeIndex];
+            $ipcxDataAdded[$ipcxNew][3] = $targetHost;
+            $ipcxDataAdded[$ipcxNew][4] = $ipcxMaxNum[$ipcxTypeIndex];
 
             $ipcxParts[$ipcxAdd[$jj][0]][2] = $ipcxRate;
-            $ipcxParts[$ipcxAdd[$jj][0]][3] = $ipcxMaxNum[$ipcxTypeIndex];
+            $ipcxParts[$ipcxAdd[$jj][0]][3] = $targetHost;
+            $ipcxParts[$ipcxAdd[$jj][0]][4] = $ipcxMaxNum[$ipcxTypeIndex];
 
             $ipcxNew++;
          }
@@ -659,7 +699,7 @@ if ($ipcxCnt > 0) {
       # This code can only automatically add IPCx SENDER modules
       #
       if ($ipcxRcvrCnt > 0) {
-         print "\n\n***ERROR: The following IPCx RECEIVER modules not found in the file $iFile:\n\n";
+         print "\n\n***ERROR: The following IPCx RECEIVER module(s) not found in the file $iFile:\n\n";
 
          for ($jj = 0; $jj < $ipcxNotFound; $jj++) {
             if ($ipcxAdd[$jj][1] == 2) {
@@ -667,7 +707,7 @@ if ($ipcxCnt > 0) {
             }
          }
 
-         die "\n***ERROR: Aborting\n\n";
+         die "\n***ERROR: Aborting (this code can only automatically add IPCx SENDER modules)\n\n";
       }
    }
 }
