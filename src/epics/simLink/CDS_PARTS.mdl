@@ -35,9 +35,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "maronsso"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Aug 19 17:36:07 2010"
-  RTWModifiedTimeStamp	  204140149
-  ModelVersionFormat	  "1.%<AutoIncrement:161>"
+  LastModifiedDate	  "Fri Sep 10 14:02:18 2010"
+  RTWModifiedTimeStamp	  206028129
+  ModelVersionFormat	  "1.%<AutoIncrement:163>"
   ConfigurationManager	  "None"
   SimulationMode	  "normal"
   LinearizationMsg	  "none"
@@ -379,7 +379,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [780, 424, 1462, 841]
+    Location		    [271, 420, 957, 871]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -481,7 +481,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"EpicsParts"
-	Location		[831, 339, 1088, 867]
+	Location		[829, 325, 1090, 887]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -656,7 +656,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Filters"
-	Location		[762, 444, 1157, 762]
+	Location		[760, 430, 1159, 782]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -788,7 +788,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[633, 274, 1436, 984]
+	Location		[1059, 284, 1862, 994]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1328,7 +1328,7 @@ Library {
 	  Tag			  "cdsIPCx_PCIE"
 	  Description		  "Inter-Process Communication via PCI Express network."
 	  Ports			  [1, 2]
-	  Position		  [665, 309, 730, 331]
+	  Position		  [670, 309, 735, 331]
 	  BackgroundColor	  "[0.721569, 0.862745, 0.772549]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -1347,12 +1347,12 @@ Library {
 	  BlockType		  Reference
 	  Name			  "RFM_SignalName"
 	  Tag			  "cdsIPCx_RFM"
-	  Description		  "Inter-Process Communication via Reflected Memory network."
+	  Description		  "card=0"
 	  Ports			  [1, 2]
 	  Position		  [670, 369, 735, 391]
 	  BackgroundColor	  "[0.607843, 0.807843, 0.678431]"
 	  DropShadow		  on
-	  AttributesFormatString  "%<Tag>"
+	  AttributesFormatString  "%<Description>\\n%<Tag>"
 	  SourceBlock		  "cdsIPCx/SignalName"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
@@ -1414,7 +1414,7 @@ Library {
 	  Tag			  "cdsIPCx_SHMEM"
 	  Description		  "Inter-Process Communication via Shared memory."
 	  Ports			  [1, 2]
-	  Position		  [675, 429, 740, 451]
+	  Position		  [670, 444, 735, 466]
 	  BackgroundColor	  "[0.462745, 0.745098, 0.560784]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -1467,7 +1467,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"MatrixParts"
-	Location		[41, 185, 703, 996]
+	Location		[37, 157, 707, 1036]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1756,7 +1756,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Osc/Phase"
-	Location		[38, 311, 458, 742]
+	Location		[34, 283, 462, 782]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1909,7 +1909,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"WatchDogs"
-	Location		[1424, 524, 1671, 838]
+	Location		[1420, 496, 1675, 878]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1980,7 +1980,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[1529, 471, 1789, 1102]
+	Location		[1525, 443, 1793, 1142]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -2156,7 +2156,7 @@ Library {
     }
     Block {
       BlockType		      Reference
-      Name		      "site=M1\nrate=32K\ndcuid=10\ngds_node_id=1"
+      Name		      "site=M1\nrate=32K\ndcuid=10\nhost=unknown\ngds_node_id=1"
       Tag		      "cdsParameters"
       Description	      "Purpose:                                                                                                                                                                                                                                \nProvide system parameters to the FE code generator to properly configure the generated EPICS names, rep rate of the FE controller, and the Data Acquisition node ID for proper storage of data from this FE controller.                 \n                                                                                                                                                                                                                                        \nUseage:                                                                                                                                                                                                                                 \nThe part NAME field is used to identify the FE parameters. It must be of the form:                                                                                                                                                      \nsite=                                                                                                                                                                                                                                   \nrate=                                                                                                                                                                                                                                   \ndcuid=                                                                                                                                                                                                                                  \n                                                                                                                                                                                                                                        \nWhere:                                                                                                                                                                                                                                  \nsite= argument may be H1, H2, L1, M1, G1, either as a single argument or multiple, for example site=H1,H2. These are the only names allowed. These will become the first two characters of all EPICS and signal names (for example G1:).\n                                                                                                                                                                                                                                        \nrate= may be 2K, 16K, 32K, or 64K                                                                                                                                                                                                       \n                                                                                                                                                                                                                                        \ndcuid= is site specific ie it must be unique at each site.                                                                                                                                                                              "
       Ports		      [1, 1]
