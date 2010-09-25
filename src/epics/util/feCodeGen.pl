@@ -375,10 +375,10 @@ for ($ii = 0; $ii < $partCnt; $ii++) {
       $ipcxCommMech = substr($ipcxBlockTags[$ii], 8, 4);
       $ipcxParts[$ipcxCnt][1] = "I" . $ipcxCommMech;
       if ($ipcxCommMech eq "RFM") {
-         print "\n+++  TEST:  Found an RFM\n";
-         print "\n+++  DESCR=$blockDescr[$ii]\n";
+#        print "\n+++  TEST:  Found an RFM\n";
+#        print "\n+++  DESCR=$blockDescr[$ii]\n";
          if ($blockDescr[$ii] =~ /^card=(\d)/) {
-            print "\nVALUE=$1\n";
+#           print "\nVALUE=$1\n";
             $ipcxParts[$ipcxCnt][1] .= $1;
          }
          else {
