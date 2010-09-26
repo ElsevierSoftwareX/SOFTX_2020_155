@@ -418,7 +418,8 @@ int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec)
 	timeRead->TIMEREQ = 1;	// Trigger module to capture time
 	timeSec = timeRead->TIME1;
 	timeNsec = timeRead->TIME0;
-	*tsyncSec = timeSec - 252806388;
+	// *tsyncSec = timeSec - 252806388;
+	*tsyncSec = timeSec - 315964800;
 	*tsyncUsec = (timeNsec & 0xfffff); 
     // Read seconds, microseconds, nanoseconds
     sync = !(timeNsec & (1<<24));
@@ -1675,24 +1676,24 @@ static inline void __monitor(const void *eax, unsigned long ecx,
         {
 		if(cdsPciModules.gpsType == SYMCOM_RCVR) 
 		{
+		// Retrieve time set in at adc read and report offset from 1PPS
 			gps_receiver_locked = getGpsTime(&timeSec,&usec);
 			pLocalEpics->epicsOutput.diags[5] = usec;
 		}
                 duotoneMean = duotoneTotal/CYCLE_PER_SECOND;
                 duotoneTotal = 0.0;
-                duotoneMeanDac = duotoneTotalDac/CYCLE_PER_SECOND;
-                duotoneTotalDac = 0.0;
+                // duotoneMeanDac = duotoneTotalDac/CYCLE_PER_SECOND;
+                // duotoneTotalDac = 0.0;
         }
-        duotoneDac[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][30];
-        duotoneTotalDac += dWord[0][30];
+        // duotoneDac[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][30];
+        // duotoneTotalDac += dWord[0][30];
         duotone[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][31];
-        // duotone[(clock16K) % CYCLE_PER_SECOND] = dWord[0][31];
         duotoneTotal += dWord[0][31];
         if(clock16K == 16)
         {
                 duotoneTime = duotime(12, duotoneMean, duotone);
                 pLocalEpics->epicsOutput.diags[4] = duotoneTime;
-                duotoneTimeDac = duotime(12, duotoneMeanDac, duotoneDac);
+		// duotoneTimeDac = duotime(12, duotoneMeanDac, duotoneDac);
                 // pLocalEpics->epicsOutput.diags[5] = duotoneTimeDac;
 		// printf("du = %f %f %f %f %f\n",duotone[5], duotone[6], duotone[7],duotone[8],duotone[9]);
         }
