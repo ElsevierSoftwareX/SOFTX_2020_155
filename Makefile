@@ -69,8 +69,8 @@ install-% :: src/epics/simLink/%.mdl
 	echo Installing /opt/rtcds/$$site/$${lower_ifo}/target/$${system};\
 	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/archive/$${system}fe_$${cur_date}.ko || exit 4; fi;\
 	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.rtl; then /bin/mv -f /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/archive/$${system}fe_$${cur_date}.rtl || exit 4; fi;\
-	/bin/cp -fp src/fe/$${system}/$${system}fe.ko /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/;\
-	/bin/cp -fp src/fe/$${system}/$${system}fe.rtl /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/;\
+	if test -e src/fe/$${system}/$${system}fe.ko; then /bin/cp -fp src/fe/$${system}/$${system}fe.ko /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/; fi;\
+	if test -e src/fe/$${system}/$${system}fe.rtl; then /bin/cp -fp src/fe/$${system}/$${system}fe.rtl /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/; fi;\
 	/bin/cp -p src/epics/simLink/$${system}.mdl /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/simLink/;\
 	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko; then echo 'sudo /sbin/insmod' /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko ' >  '/opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts/startup$${ifo}rt; fi;\
 	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.rtl; then echo sudo /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.rtl ' >  '/opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/scripts/startup$${ifo}rt; fi;\
@@ -92,7 +92,8 @@ install-% :: src/epics/simLink/%.mdl
 	echo 'fi' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system} >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo sleep 5 >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
-	echo 'sudo killall ' $${system}epics $${system}fe.ko >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
+	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko; then echo sudo killall $${system}epics $${system}fe.ko >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system}; fi;\
+	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.rtl; then echo sudo killall $${system}epics $${system}fe.rtl >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system}; fi;\
 	echo 'res=`ps h -C awgtpman | grep ' $${system} '`' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'if [ "x$${res}" != x ]; then' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'num=$$(echo $${res} | awk '"'"'{print $$1}'"'"')' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
