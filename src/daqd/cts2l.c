@@ -112,10 +112,10 @@ if (sizeof(s_40) != 40) { printf("This program needs to be 32-bit\n"); exit(1); 
 				exit(1);
 			    }
 			} else {
-			    //fprintf(stderr,"GPS time %u at 0x%x makes no sense\n", s40.gps, i);
-			    close(ofd);
-			    sync();
-			    exit(0);
+			    fprintf(stderr,"GPS time %u at 0x%x makes no sense\n", s40.gps, i);
+			    //close(ofd);
+			    //sync();
+			    //exit(0);
 			}
 		}
 		

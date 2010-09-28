@@ -110,8 +110,8 @@ rfmreader: rfmreader.o
 cpstriped: cpstriped.o
 	$(CC) $(DEBUGFLAGS) -o cpstriped cpstriped.o 
 
-cts2l: cts2l.o
-	$(CC) $(DEBUGFLAGS) -o cts2l cts2l.o 
+cts2l: cts2l.c
+	$(CC) -m32 $(DEBUGFLAGS) -o cts2l $(srcdir)/cts2l.c 
 
 clean:
 	-/bin/rm  *.o comm.cc comm-lex.cc y.tab.h
