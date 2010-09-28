@@ -1,6 +1,7 @@
 #ifndef DAQD_NET_HH
 #define DAQD_NET_HH
 
+#include <limits.h>
 #include <vector>
 #include <list>
 #include <map>

@@ -112,7 +112,7 @@ Nds::readTocFrameFileArchive()
 
     if (archiveDirScanned) {
       // directory number is based on GPS timestamp: all digits but the last 6
-      dir_num = gps[i].first / 1000000;
+      dir_num = gps[i].first / 100000;
     } else {
       dir_num =  distance(archive_gps.begin(),
 			  find_first_of(archive_gps.begin(),
@@ -325,7 +325,7 @@ Nds::readTocFrameFileArchive()
 
     if (archiveDirScanned) {
       // directory number is based on GPS timestamp: all digits but the last 6
-      dir_num = gps[i].first / 1000000;
+      dir_num = gps[i].first / 100000;
     } else {
       dir_num =  distance(archive_gps.begin(),
 			  find_first_of(archive_gps.begin(),
