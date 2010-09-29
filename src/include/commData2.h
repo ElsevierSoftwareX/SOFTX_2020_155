@@ -31,9 +31,10 @@ typedef struct CDS_IPC_KEY_LIST {
 
 #define ISND		1	
 #define IRCV		0
-#define ISHM		0
-#define IRFM		1
-#define IPCI		2
+#define ISHME		0
+#define IPCIE		1
+#define IRFM0		2
+#define IRFM1		3
 #define IPC_BUFFER_SIZE		sizeof(struct CDS_IPC_COMMS)
 #define IPC_BASE_OFFSET		0x80000
 #define IPC_PCIE_READ	2
