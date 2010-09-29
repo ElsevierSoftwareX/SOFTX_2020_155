@@ -62,7 +62,7 @@ sub frontEndInitCode {
                  $calcExp .= "ipcInfo[$::ipcxInitDone]\.mode = ISND;\n";
               }
  
-              my $subPart = substr($::ipcxParts[$l][1], 0, 4);
+              my $subPart = substr($::ipcxParts[$l][1], 0, 5);
               $calcExp .= "ipcInfo[$::ipcxInitDone]\.netType = $subPart;\n";
               $calcExp .= "ipcInfo[$::ipcxInitDone]\.sendRate = $::ipcxParts[$l][2];\n";
               $calcExp .= "ipcInfo[$::ipcxInitDone]\.ipcNum = $::ipcxParts[$l][4];\n";
