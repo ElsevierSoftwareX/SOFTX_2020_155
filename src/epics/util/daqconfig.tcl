@@ -340,10 +340,12 @@ switch $::tcl_platform(platform) {
 
 ;# Site name
 set site_name "caltech"
+;# ifo name
+set ifo_lower "ifolower"
 if { $argc > 0 } { set site_name [lindex $argv 0] }
 
 ;# See what configuration directories exist
-set dir "/cvs/cds/${site_name}/chans/daq"
+set dir "/opt/rtcds/${site_name}/${ifo_lower}/chans/daq"
 set files {};
 set ro_files {};
 

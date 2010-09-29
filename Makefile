@@ -112,6 +112,7 @@ install-% :: src/epics/simLink/%.mdl
 	echo touch /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs/reboot.log >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo chmod 777 /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/logs/reboot.log >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	/bin/sed 's/caltech/'$$site'/' src/epics/util/daqconfig.tcl > build/$${system}epics/config/daqconfig;\
+	/bin/sed -i 's/ifolower/'$${lower_ifo}'/' build/$${system}epics/config/daqconfig;\
 	/usr/bin/install   build/$${system}epics/config/daqconfig  /opt/rtcds/$$site/$${lower_ifo}/scripts
 
 
