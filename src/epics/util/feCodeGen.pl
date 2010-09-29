@@ -582,7 +582,7 @@ if ($ipcxCnt > 0) {
             if ( ($partInput[$kk][0] =~ /^Ground/) || ($partInput[$kk][0] =~ /\_Ground/) ) {
                if ( ($partOutCnt[$kk] < 1) || ($partOutCnt[$kk] > 2) ) {
                   #die "***ERROR: IPCx RECEIVER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
-                  die "***ERROR: IPCx RECEIVER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
+                  #die "***ERROR: IPCx RECEIVER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
                }
             }
             #
@@ -612,7 +612,7 @@ if ($ipcxCnt > 0) {
 
          if ( ($partInput[$kk][0] =~ /^Ground/) || ($partInput[$kk][0] =~ /\_Ground/) ) {
             if ( ($partOutCnt[$kk] < 1) || ($partOutCnt[$kk] > 2) ) {
-               die "***ERROR: IPCx RECEIVER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
+               #die "***ERROR: IPCx RECEIVER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
             }
             else {
                $ipcxAdd[$ipcxNotFound][1] = 2;
