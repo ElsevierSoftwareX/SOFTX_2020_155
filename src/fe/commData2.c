@@ -53,30 +53,32 @@ int ii;
         else printf("Mode = RECEIVER w rcvRate and cycle = %d %d\n",ipcInfo[ii].rcvRate,ipcInfo[ii].rcvCycle);
 
 	// Save pointers to the IPC communications memory locations.
-        if(ipcInfo[ii].netType == IRFM)		// VMIC Reflected Memory *******************************
+        if(ipcInfo[ii].netType == IRFM0)		// VMIC Reflected Memory *******************************
         {
 	  if(cdsPciModules.rfmCount > 0) {
 	    ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[0] + IPC_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
 	    printf("Net Type = RFM 0 at 0x%p\n",ipcInfo[ii].pIpcData);
 	  }
-	  ipcInfo[ii].pIpcData2 = NULL;
+	}
+        if(ipcInfo[ii].netType == IRFM1)		// VMIC Reflected Memory *******************************
+        {
 	  if(cdsPciModules.rfmCount > 1) {
-	    ipcInfo[ii].pIpcData2  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[1] + IPC_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
+	    ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[1] + IPC_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
 	    printf("Net Type = RFM 1 at 0x%p\n",ipcInfo[ii].pIpcData2);
 	  }
 	}
-        if(ipcInfo[ii].netType == ISHM)		// Computer shared memory ******************************
+        if(ipcInfo[ii].netType == ISHME)		// Computer shared memory ******************************
 	{
                 ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(_ipc_shm + IPC_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
                 printf("Net Type = LOCAL IPC at 0x%p\n",ipcInfo[ii].pIpcData);
         }
 	// PCIe communications requires one pointer for sending data and a second one for receiving data.
-        if((ipcInfo[ii].netType == IPCI) && (ipcInfo[ii].mode == IRCV) && (cdsPciModules.dolphin[0]))
+        if((ipcInfo[ii].netType == IPCIE) && (ipcInfo[ii].mode == IRCV) && (cdsPciModules.dolphin[0]))
 	{
                 ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphin[0]) + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
                 printf("Net Type = PCIE RCV IPC %d at 0x%p  *********************************\n",ipcInfo[ii].sendRate,ipcInfo[ii].pIpcData);
         }
-        if((ipcInfo[ii].netType == IPCI) && (ipcInfo[ii].mode == ISND) && (cdsPciModules.dolphin[1]))
+        if((ipcInfo[ii].netType == IPCIE) && (ipcInfo[ii].mode == ISND) && (cdsPciModules.dolphin[1]))
 	{
                 ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphin[1]) + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
                 printf("Net Type = PCIE SEND IPC at 0x%p  *********************************\n",ipcInfo[ii].pIpcData);
@@ -118,11 +120,11 @@ for(ii=0;ii<connects;ii++)
 		// Determine next block to write in 64 block buffer
 		ipcIndex = (cycle+1) % 64;
 		// Don't write to PCI RFM if network error detected by IOP
-        	if(((ipcInfo[ii].netType != IPCI) || (iop_rfm_valid)) && (ipcInfo[ii].pIpcData != NULL))
+        	if(((ipcInfo[ii].netType != IPCIE) || (iop_rfm_valid)) && (ipcInfo[ii].pIpcData != NULL))
 		{
 			// Leaving clflush_cache_range() out on dts x1lsc 
 			// improves
-			//if (ipcInfo[ii].netType == IPCI) break;
+			//if (ipcInfo[ii].netType == IPCIE) break;
 			// Write Data
 			//printk("%d 0x%lx\n", ii, ipcInfo[ii].pIpcData->data);
                 	ipcInfo[ii].pIpcData->data[ipcIndex] = ipcInfo[ii].data;
@@ -130,16 +132,6 @@ for(ii=0;ii<connects;ii++)
 			// Write timestamp/cycle counter word
                 	ipcInfo[ii].pIpcData->timestamp[ipcIndex] = syncWord;
 			//clflush_cache_range (ipcInfo[ii].pIpcData->timestamp+ipcIndex, 8);
-		}
-		// If 2 RFM cards, send data to both networks
-		if((ipcInfo[ii].netType == IRFM) && (ipcInfo[ii].pIpcData2 != NULL))	
-		{
-			// Write Data
-			ipcInfo[ii].pIpcData2->data[ipcIndex] = ipcInfo[ii].data;
-			//clflush_cache_range (ipcInfo[ii].pIpcData2->data+ipcIndex, 8);
-			// Write timestamp/cycle counter word
-			ipcInfo[ii].pIpcData2->timestamp[ipcIndex] = syncWord;
-			//clflush_cache_range (ipcInfo[ii].pIpcData2->timestamp+ipcIndex, 8);
 		}
         }
 }
@@ -176,6 +168,7 @@ for(ii=0;ii<connects;ii++)
 		if(ipcInfo[ii].pIpcData != NULL)
 		{
 			// Read GPS time/cycle count 
+				double tmp = ipcInfo[ii].pIpcData->data[ipcIndex];
 			syncWord = ipcInfo[ii].pIpcData->timestamp[ipcIndex];
 			//testCycle = syncWord & 0xffffffff;
 			// Create local 65K cycle count
@@ -186,13 +179,16 @@ for(ii=0;ii<connects;ii++)
 			// If IPC syncword = local syncword, data is good
 			if(syncWord == mySyncWord) 
 			{
+			#if 0
 				double tmp = ipcInfo[ii].pIpcData->data[ipcIndex];
 				if (isnan(tmp)) ipcInfo[ii].errFlag ++;
 				else ipcInfo[ii].data = tmp;
+			#endif
+				ipcInfo[ii].data = tmp;
 			// If IPC syncword != local syncword, data is BAD
 			} else {
 				//printf("sync error my=0x%lx remote=0x%lx\n", mySyncWord, syncWord);
-				//ipcInfo[ii].data = ipcInfo[ii].pIpcData->data[ipcIndex];
+				// ipcInfo[ii].data = ipcInfo[ii].pIpcData->data[ipcIndex];
 				ipcInfo[ii].errFlag ++;
 			}
 		} else {
