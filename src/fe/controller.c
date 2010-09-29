@@ -1979,7 +1979,7 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 			int mod = clock16K - own_data_base_cycle - cdsPciModules.rfmCount*2;
 			if (cdsPciModules.rfmType[mod] == 0x5565) {
 				// Write data out to the RFM to trigger the light
-	  			((volatile long *)(cdsPciModules.pci_rfm[0]))[2] = 0;
+	  			((volatile long *)(cdsPciModules.pci_rfm[mod]))[2] = 0;
 			}
 		}
 	}
