@@ -66,6 +66,11 @@ int ii;
 	    ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[1] + IPC_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
 	    printf("Net Type = RFM 1 at 0x%p\n",ipcInfo[ii].pIpcData2);
 	  }
+	  // If there isn't a second card (like in the end stations), default to first card
+	  if(cdsPciModules.rfmCount == 1) {
+	    ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[0] + IPC_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
+	    printf("DEFAULTING TO RFM0 - ONLY ONE CARD\nNet Type = RFM 1 at 0x%p\n",ipcInfo[ii].pIpcData2);
+	  }
 	}
         if(ipcInfo[ii].netType == ISHME)		// Computer shared memory ******************************
 	{
