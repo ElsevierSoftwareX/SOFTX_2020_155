@@ -790,6 +790,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	// Clears the found number from the lists
 	// tpnum and excnum lists of numbers do not intersect
 	inline int in_the_lists(unsigned int tp, unsigned int slot) {
+		int i;
 		for (i = 0; i < DAQ_GDS_MAX_TP_NUM; i++){
 			if (tpnum[i] == tp) return (tpnum[i] = 0, 1);
                         if (excnum[i] == tp) {
