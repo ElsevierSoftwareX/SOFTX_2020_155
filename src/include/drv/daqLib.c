@@ -652,7 +652,11 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
         dipc->bp[daqBlockNum].cycle = daqBlockNum;
         dipc->bp[daqBlockNum].crc = crcSend;
         //ipc->bp[daqBlockNum].status = 0;
-        dipc->bp[daqBlockNum].timeSec = (unsigned int) cycle_gps_time;
+	if (daqBlockNum == 15) {
+        	dipc->bp[daqBlockNum].timeSec = ((unsigned int) cycle_gps_time - 1);
+	} else {
+        	dipc->bp[daqBlockNum].timeSec = (unsigned int) cycle_gps_time;
+	}
         dipc->bp[daqBlockNum].timeNSec = (unsigned int)daqBlockNum;
 
         // Assign the test points table
