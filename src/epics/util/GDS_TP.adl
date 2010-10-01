@@ -945,19 +945,6 @@ rectangle {
 		clr=5
 	}
 }
-image {
-	object {
-		x=895
-		y=511
-		width=25
-		height=25
-	}
-	type="gif"
-	"image name"="/cvs/cds/LOCATION_NAME/scripts/utilities/nova_logo.gif"
-	"dynamic attribute" {
-		chan="SITE_NAME:CONTROL_SYSTEM_SYSTEM_NAME-DCU_NODE_ID_TIME_STRING"
-	}
-}
 byte {
 	object {
 		x=122
