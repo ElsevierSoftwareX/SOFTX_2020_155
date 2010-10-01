@@ -79,9 +79,9 @@ sub frontEndCode {
                 $calcExp .= "CDO32Output\[";
                 $calcExp .= $CDO32Num;
                 $calcExp .= "\] = ((int)";
-                $calcExp .= $::fromExp[0];
-                $calcExp .= " << 16) + ((int)";
                 $calcExp .= $::fromExp[1];
+                $calcExp .= " << 16) + ((int)";
+                $calcExp .= $::fromExp[0];
 		$calcExp .= " & 0xffff);\n";
         }
         return $calcExp;
