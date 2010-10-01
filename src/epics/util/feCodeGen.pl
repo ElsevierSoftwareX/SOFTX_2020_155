@@ -3564,7 +3564,7 @@ sub commify_series {
 			}
 			my $sargs;
 
-			$sargs = $sed_arg . "s/FILTERNAME/$sys_name-$filt_name/g;";
+			$sargs = $sed_arg . "s/FILTERNAME/$sysname-$filt_name/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			system("cat FILTER.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".adl");
 		      }
