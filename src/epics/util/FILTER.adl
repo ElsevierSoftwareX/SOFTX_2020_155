@@ -118,7 +118,7 @@ text {
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:CONTROL_SYSTEM_SYSTEM_NAME-TIME_STRING"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_TIME_STRING"
 		clr=2
 		bclr=54
 	}
@@ -1356,19 +1356,6 @@ rectangle {
         }
         "basic attribute" {
                 clr=5
-        }
-}
-image {
-        object {
-                x=954
-                y=196
-                width=25
-                height=25
-        }
-        type="gif"
-        "image name"="/cvs/cds/LOCATION_NAME/scripts/utilities/nova_logo.gif"
-        "dynamic attribute" {
-                chan="SITE_NAME:CONTROL_SYSTEM_SYSTEM_NAME-TIME_STRING"
         }
 }
 "shell command" {
