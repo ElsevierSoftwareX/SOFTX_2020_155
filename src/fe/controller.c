@@ -54,7 +54,11 @@
 #include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
 #endif
 
+#ifndef NO_RTL
+int iop_rfm_valid = 1;
+#else
 extern int iop_rfm_valid;
+#endif
 
 #ifndef NUM_SYSTEMS
 #define NUM_SYSTEMS 1
@@ -1604,9 +1608,12 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 			dac_out = dac_in;
 #else
 #ifdef ADC_MASTER
-			if(!dacChanErr[jj])
-			dac_out = ioMemData->iodata[mm][ioMemCntrDac].data[ii];
-			else dac_out = 0;
+			if(!dacChanErr[jj]) {
+				dac_out = ioMemData->iodata[mm][ioMemCntrDac].data[ii];
+				// Zero out data in case user app dies by next cycle
+				// when two or more apps share same DAC module.
+				ioMemData->iodata[mm][ioMemCntrDac].data[ii] = 0;
+			} else dac_out = 0;
 #else
 			dac_out = dacOut[jj][ii];
 #endif
@@ -1634,7 +1641,10 @@ static inline void __monitor(const void *eax, unsigned long ecx,
 			floatDacOut[16*jj + ii] = dac_out;
 #ifdef ADC_SLAVE
 			memCtr = (ioMemCntrDac + kk) % IO_MEMORY_SLOTS;
-	   		ioMemData->iodata[mm][memCtr].data[ii] = dac_out;
+			// Only write to DAC channels being used to allow two or more
+			// slaves to write to same DAC module.
+			if (dacOutUsed[jj][ii]) 
+	   			ioMemData->iodata[mm][memCtr].data[ii] = dac_out;
 #else
 			dac_out += offset;
 			// if (ii == 15) { dac_out = dWord[0][31]; }
@@ -2282,6 +2292,9 @@ int main(int argc, char **argv)
 		printf("No ADC cards found - exiting\n");
 		return 0;
 	}
+	// This did not quite work for some reason
+	// Need to find a way to handle skipped DAC cards in slaves
+	//cdsPciModules.dacCount = ioMemData->dacCount;
 #endif
 	printf("%d PCI cards found \n",status);
 
