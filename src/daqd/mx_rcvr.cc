@@ -20,7 +20,9 @@
 #include "daqd.hh"
 
 extern daqd_c daqd;
+#ifndef  USE_SYMMETRICOM
 extern int controller_cycle;
+#endif
 extern struct rmIpcStr gmDaqIpc[DCU_COUNT];
 extern struct cdsDaqNetGdsTpNum * gdsTpNum[2][DCU_COUNT];
 extern void *directed_receive_buffer[DCU_COUNT];
@@ -49,11 +51,12 @@ static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
 // MX endpoint
 mx_endpoint_t ep[2];
 
+mx_request_t req[NUM_RREQ];
+
 void
 receiver_mx(int neid)
 {
 	mx_status_t stat;	
-	mx_request_t req[NUM_RREQ];
 	mx_segment_t seg;
 	uint32_t result;
 	struct timeval start_time, end_time;
@@ -161,10 +164,12 @@ receiver_mx(int neid)
 		  *gdsTpNum[0][dcu_id] = dataPtr->mxTpTable;
 
 		  gmDaqIpc[dcu_id].cycle = cycle;
+#ifndef  USE_SYMMETRICOM
 		  if (daqd.controller_dcu == dcu_id)  {
 		  	   controller_cycle = cycle;
 	                   DEBUG(6, printf("Timing dcu=%d cycle=%d\n", dcu_id, controller_cycle));
 		  }
+#endif
 		}
 		mx_irecv(ep[neid], &seg, 1, match_val, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
 		if (kk != myErrorStat){
