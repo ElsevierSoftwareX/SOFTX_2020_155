@@ -2185,6 +2185,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 		//exit(10);
 	}
 	unsigned long f;
+	const unsigned int c = 1000000000/16;
 	// Wait for the beginning of a second
 	for(;;) {
 		prev_gps = daqd.symm_gps(&f);
@@ -2196,7 +2197,8 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 #ifdef USE_IOP
 		if (f > 990000000) break;
 #else
-		if (f > 999493000) break;
+		//if (f > 999493000) break;
+		if (f < (4 * c)  && f > (3 * c)) break; // Three cycles after a second
 #endif
 
 	        struct timespec wait = {0, 10000000UL }; // 10 milliseconds
@@ -2211,7 +2213,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 	}
 #endif
 
-        //printf("Starting at gps %d prev_gps %d frac %d f %d\n", gps, prev_gps, frac, f);
+        printf("Starting at gps %d prev_gps %d frac %d f %d\n", gps, prev_gps, frac, f);
         controller_cycle = 1;
 #else
       system_log(1, "Waiting for DCU %d to show Up", daqd.controller_dcu);
@@ -2419,9 +2421,21 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 	{
 #if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
 	  unsigned int rfm_crc = gmDaqIpc[j].bp[cblk].crc;
+	  unsigned int dcu_gps = gmDaqIpc[j].bp[cblk].timeSec;
 #else
 	  unsigned int rfm_crc = shmemDaqIpc[j]->bp[cblk].crc;
+	  unsigned int dcu_gps = shmemDaqIpc[j]->bp[cblk].timeSec;
 	  shmemDaqIpc[j]->bp[cblk].crc = 0;
+#endif
+
+#ifdef USE_SYMMETRICOM
+
+	  //printf("dcu %d block %d cycle %d  gps %d symm %d\n", j, cblk, gmDaqIpc[j].bp[cblk].cycle,  dcu_gps, gps);
+	  if (dcu_gps != gps) {
+	    daqd.dcuStatus[0][j] |= 0x4000;
+	    daqd.dcuCrcErrCnt[0][j]++;
+	    daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
+	  }
 #endif
 
 	  if (rfm_crc != crc) {
@@ -2430,7 +2444,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 
 	    /* Set DCU status to BAD, all data will be marked as BAD 
 	       because of the CRC mismatch */
-	    daqd.dcuStatus[0][j] = 0x1000;
+	    daqd.dcuStatus[0][j] |= 0x1000;
 	    daqd.dcuCrcErrCnt[0][j]++;
 	    daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
 	  } else {
