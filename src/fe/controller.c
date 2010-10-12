@@ -971,7 +971,8 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		usleep(40000);
 #endif
 		// Start ADC/DAC clocks
-		CDIO1616Output[tdsControl] = 0x7B00000;
+		// CDIO1616Output[tdsControl] = 0x7B00000;
+		CDIO1616Output[tdsControl] = 0x7b00000;
 		CDIO1616Input[tdsControl] = writeCDIO1616l(&cdsPciModules, tdsControl, CDIO1616Output[tdsControl]);
 		break;
 	case SYNC_SRC_IRIG_B:
@@ -1018,13 +1019,23 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 #ifdef TIME_SLAVE
 // sync up with the time master on its gps time
 	  unsigned long d = cdsPciModules.dolphin[0][0];
-	  for (;;) {
+
+ 	  if (boot_cpu_has(X86_FEATURE_MWAIT)) {
+	    for (;;) {
 		         if (cdsPciModules.dolphin[0][1] != d) break;
 			 __monitor((void *)&cdsPciModules.dolphin[0][1], 0, 0);
 		         if (cdsPciModules.dolphin[0][1] != d) break;
 			 __mwait(0, 0);
+	    }
+ 	  } else {
+            do {
+#ifdef NO_RTL
+		udelay(1);
+#else
+                usleep(1);
+#endif
+            } while(cdsPciModules.dolphin[0][1] != d);
 	  }
-
 #endif
 	  #ifdef RFM_TIME_SLAVE
 	  for(;((volatile long *)(cdsPciModules.pci_rfm[0]))[0] != 0;) udelay(1);
@@ -1061,34 +1072,24 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
         printf("waiting to sync %d\n",ioMemData->iodata[ll][0].cycle);
         rdtscl(cpuClock[0]);
 
-#ifndef NO_RTL
-	// Spin until cycle 0 detected in first ADC buffer location.
-        do{
+ 	if (boot_cpu_has(X86_FEATURE_MWAIT)) {
+	  for(;;) {
+	    if (ioMemData->iodata[ll][0].cycle == 0) break;
+	    __monitor((void *)&(ioMemData->iodata[ll][0].cycle), 0, 0);
+	    if (ioMemData->iodata[ll][0].cycle == 0) break;
+	    __mwait(0, 0);
+	  }
+ 	} else {
+	  // Spin until cycle 0 detected in first ADC buffer location.
+          do {
 #ifdef NO_RTL
 		udelay(1);
 #else
                 usleep(1);
 #endif
-        }while(ioMemData->iodata[ll][0].cycle != 0);
-#else
-	for(;;) {
-	  if (ioMemData->iodata[ll][0].cycle == 0) break;
-	  __monitor((void *)&(ioMemData->iodata[ll][0].cycle), 0, 0);
-	  if (ioMemData->iodata[ll][0].cycle == 0) break;
-	  __mwait(0, 0);
+          } while(ioMemData->iodata[ll][0].cycle != 0);
 	}
-#endif
         timeSec = ioMemData->iodata[ll][0].timeSec;
-
-#if 0
-static inline void __monitor(const void *eax, unsigned long ecx,
-                             unsigned long edx)
-			     {
-			             /* "monitor %eax, %ecx, %edx;" */
-				             asm volatile(".byte 0x0f, 0x01, 0xc8;"
-					                          :: "a" (eax), "c" (ecx), "d"(edx));
-								  }
-	  #endif
 
         rdtscl(cpuClock[1]);
         cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
@@ -1695,8 +1696,8 @@ static inline void __monitor(const void *eax, unsigned long ecx,
                 // duotoneMeanDac = duotoneTotalDac/CYCLE_PER_SECOND;
                 // duotoneTotalDac = 0.0;
         }
-        // duotoneDac[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][30];
-        // duotoneTotalDac += dWord[0][30];
+        duotoneDac[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][15];
+        duotoneTotalDac += dWord[0][15];
         duotone[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][31];
         duotoneTotal += dWord[0][31];
         if(clock16K == 16)
@@ -1704,7 +1705,7 @@ static inline void __monitor(const void *eax, unsigned long ecx,
                 duotoneTime = duotime(12, duotoneMean, duotone);
                 pLocalEpics->epicsOutput.diags[4] = duotoneTime;
 		// duotoneTimeDac = duotime(12, duotoneMeanDac, duotoneDac);
-                // pLocalEpics->epicsOutput.diags[5] = duotoneTimeDac;
+                pLocalEpics->epicsOutput.diags[5] = duotoneTimeDac;
 		// printf("du = %f %f %f %f %f\n",duotone[5], duotone[6], duotone[7],duotone[8],duotone[9]);
         }
 #endif
