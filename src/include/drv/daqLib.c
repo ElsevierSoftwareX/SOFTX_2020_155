@@ -402,12 +402,11 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     if(sysRate < DAQ_16K_SAMPLE_SIZE)
 	{
     	exciteDataPtr = (char *)(_epics_shm + DATA_OFFSET_DCU(DCU_ID_EX_2K));
-	excDataSize = 0x204;
 	}
     else {
     	exciteDataPtr = (char *)(_epics_shm + DATA_OFFSET_DCU(DCU_ID_EX_16K));
-	excDataSize = 4 + 4 * sysRate;
     }
+    excDataSize = 4 + 4 * sysRate;
 
     // Following just sets in some dummy data for testing.
     for(ii=0;ii<16;ii++)
