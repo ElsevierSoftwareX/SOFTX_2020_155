@@ -536,12 +536,17 @@ if ($ipcxCnt > 0) {
       }
 
       for ($jj = 0; $jj < $ipcxParamCnt; $jj++) {
+
          if ($ipcxPartComp eq $ipcxData[$jj][0]) {
+	 	print "Found " . $ipcxPartComp . "\n";
             #
             # If IPCx type is SHMEM, then make sure we're only
             # considering entries for this host
             #
             if ( ($ipcxParts[$ii][1] eq "ISHME") && ($targetHost ne $ipcxData[$jj][3]) ) {
+      	       print "Found `" . $ipcxPartComp . "' but not for our host!\n";
+	       print "Out host is " . $targetHost . "\n";
+	       print "Their host is " . $ipcxData[$jj][3] . "\n";
                next;
             }
 
