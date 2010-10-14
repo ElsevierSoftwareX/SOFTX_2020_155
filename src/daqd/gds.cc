@@ -330,7 +330,7 @@ gds_c::clear_tps (long_channel_t *ac[], int nptr)
   int ntps = 0;
   int rtn = 0;
 
-  for (int s = 0; s < n_gds_servers; s++) {
+  for (int s = 0; s < max_gds_servers; s++) {
     /* Clear all 4k IFO test points */
     for (int i = 0; i < nptr; i++) {
 #ifdef _ADVANCED_LIGO
