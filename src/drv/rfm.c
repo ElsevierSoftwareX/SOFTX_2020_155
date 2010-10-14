@@ -163,7 +163,8 @@ findSharedMemory(char *sys_name)
 
 
 #ifdef NO_RTL
-const int ss = 64*1024*1024;
+	int ss = 64*1024*1024;
+  	if (!strcmp(sys_name, "ipc")) ss = 4*1024*1024;
 #if 0
        #include <sys/mman.h>
        #include <sys/stat.h>        /* For mode constants */
@@ -195,14 +196,14 @@ const int ss = 64*1024*1024-5000;
 #endif
 
 	
-        addr = mmap(0, ss, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        addr = (volatile unsigned char *)mmap(0, ss, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         if (addr == MAP_FAILED) {
                 printf("return was %d\n",errno);
                 perror("mmap");
                 _exit(-1);
         }
 	printf("mmapped address is 0x%lx\n", (long)addr);
-	memset(addr, 0, ss);
+	memset((void *)addr, 0, ss);
         return addr;
 }
 
@@ -218,7 +219,7 @@ findRfmCard(unsigned int bn)
                 _exit(-1);
         }
 
-        addr = mmap(0, 64*1024*1024-5000, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        addr = (volatile unsigned char *)mmap(0, 64*1024*1024-5000, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         if (addr == MAP_FAILED) {
                 printf("return was %d\n",errno);
                 perror("mmap");
@@ -226,7 +227,7 @@ findRfmCard(unsigned int bn)
         }
 	printf("mmapped address is 0x%lx\n", (long)addr);
     }
-    return addr;
+    return (void *)addr;
 }
 #endif
 #endif

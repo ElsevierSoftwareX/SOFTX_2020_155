@@ -72,6 +72,9 @@ using namespace std;
 #include "net_writer.hh"
 #include "drv/cdsHardware.h"
 
+#include <sys/ioctl.h>
+#include "../drv/rfm.c"
+
 extern daqd_c daqd;
 extern int shutdown_server ();
 extern unsigned int crctab[256];
@@ -1766,7 +1769,7 @@ producer::frame_writer ()
 #include "../../src/include/drv/fb.h"
 
   // Memory mapped addresses for the DCUs
-  unsigned char *dcu_addr[DCU_COUNT];
+  volatile unsigned char *dcu_addr[DCU_COUNT];
 
   // Pointers to IPC areas for each DCU
   struct rmIpcStr *shmemDaqIpc[DCU_COUNT];
@@ -1924,6 +1927,7 @@ gm_receiver_thread(void *p)
     if (IS_MYRINET_DCU(j)) {
       std::string s(daqd.fullDcuName[j]);
       std::transform (s.begin(),s.end(), s.begin(), ToLower()); 
+ #if 0
       s = "/rtl_mem_" + s + "_daq";
       if ((fd = open(s.c_str(), O_RDWR))<0) {
         system_log(1, "Couldn't open `%s' read/write\n", s.c_str());
@@ -1935,6 +1939,13 @@ gm_receiver_thread(void *p)
         system_log(1, "Couldn't mmap `%s'; errno=%d\n", s.c_str(), errno);
         exit(1);
       }
+#endif
+      s = s + "_daq";
+      dcu_addr[j] = (volatile unsigned char *)findSharedMemory((char *)s.c_str());
+      if (dcu_addr[j] == 0) {
+              system_log(1, "Couldn't mmap `%s'; errno=%d\n", s.c_str(), errno);
+              exit(1);
+      }
       system_log(1, "Opened %s\n", s.c_str());
       shmemDaqIpc[j] = (struct rmIpcStr *)(dcu_addr[j] + CDS_DAQ_NET_IPC_OFFSET);
       gdsTpNum[0][j] = (struct cdsDaqNetGdsTpNum *)(dcu_addr[j] + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
@@ -1944,6 +1955,7 @@ gm_receiver_thread(void *p)
   }
 
   // Open the IPC shared memory
+#if 0
   if ((fd = open("/rtl_mem_ipc", O_RDWR)) < 0) {
         system_log(1, "Couldn't open /rtl_mem_ipc read/write\n");
         exit(1);
@@ -1953,7 +1965,14 @@ gm_receiver_thread(void *p)
      system_log(1, "Couldn't mmap /rtl_mem_ipc; errno=%d\n", errno);
      exit(1);
   }
-  system_log(1, "Opened /rtl_mem_ipc\n");
+#endif
+
+  volatile void *ptr = findSharedMemory("ipc");
+  if (ptr == 0) {
+     system_log(1, "Couldn't open shared memory IPC area");
+     exit(1);
+  }
+  system_log(1, "Opened shared memory ipc area\n");
   ioMemData = (IO_MEM_DATA *)(((char *)ptr) + 0x4000);
 
   CDS_HARDWARE cdsPciModules;
@@ -2282,7 +2301,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 #else
    	//dcu_cycle = shmemDaqIpc[j]->cycle;
 	// Get the data from myrinet
-	unsigned char *read_src = dcu_addr[j] + CDS_DAQ_NET_DATA_OFFSET;
+	unsigned char *read_src = (unsigned char *)(dcu_addr[j] + CDS_DAQ_NET_DATA_OFFSET);
 	memcpy((void *)read_dest,
 	        read_src + dcu_cycle*2*DAQ_DCU_BLOCK_SIZE,
 		2*DAQ_DCU_BLOCK_SIZE);
