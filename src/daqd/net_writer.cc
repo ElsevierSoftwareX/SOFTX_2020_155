@@ -2238,10 +2238,12 @@ net_writer_c::shutdown_net_writer () {
     //char *alias[daqd.max_channels];
     long_channel_t *tps[num_channels];
 
+    //system_log(1, "net-writer shutdown clearing test points");
     for (int i = 0; i < num_channels; i++)
       if (IS_GDS_ALIAS(channels [i])) {
         //alias [na++] = channels [i].name;
 	tps[na++] = channels + i;
+        //system_log(1, "%s", channels[i].name);
       }
 
     if (na) {
