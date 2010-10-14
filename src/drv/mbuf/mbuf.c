@@ -225,10 +225,10 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
 
         case IOCTL_MBUF_INFO:
 		for (i = 0; i < MAX_AREAS; i++) {
-			//if (kmalloc_area[i]) {
+			if (kmalloc_area[i]) {
         		  printk("mbuf %d: name:%.32s, size:%d, usage:%d\n",
 				 i, mtag[i], kmalloc_area_size[i], usage_cnt[i]);
-		//	}
+			}
 		}
                 return 1;
 		break;
