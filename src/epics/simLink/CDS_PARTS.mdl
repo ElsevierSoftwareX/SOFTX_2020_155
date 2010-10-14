@@ -35,8 +35,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "maronsso"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Sep 10 14:02:18 2010"
-  RTWModifiedTimeStamp	  206028129
+  LastModifiedDate	  "Thu Oct 07 11:46:39 2010"
+  RTWModifiedTimeStamp	  208352578
   ModelVersionFormat	  "1.%<AutoIncrement:163>"
   ConfigurationManager	  "None"
   SimulationMode	  "normal"
@@ -379,7 +379,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [271, 420, 957, 871]
+    Location		    [1206, 166, 1896, 651]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -481,7 +481,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"EpicsParts"
-	Location		[829, 325, 1090, 887]
+	Location		[1169, 319, 1438, 949]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -656,7 +656,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Filters"
-	Location		[760, 430, 1159, 782]
+	Location		[743, 643, 1150, 1063]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -788,7 +788,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[1059, 284, 1862, 994]
+	Location		[1055, 256, 1866, 1034]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1467,7 +1467,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"MatrixParts"
-	Location		[37, 157, 707, 1036]
+	Location		[391, 353, 1065, 883]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1526,8 +1526,8 @@ Library {
 	  Name			  "MultiProduct"
 	  Tag			  "cdsProduct"
 	  Description		  "Purpose:                                                                                                                                                                      \nMultiply 8 inputs by a common gain factor.                                                                                                                                    \n                                                                                                                                                                              \nOperation:                                                                                                                                                                    \nGenerates two epics records: partName and partName_TRAMP. All eight inputs are multiplied by the EPICS partName input, ramped over a duration (in seconds) of the TRAMP input."
-	  Ports			  [9, 8]
-	  Position		  [420, 34, 475, 256]
+	  Ports			  [8, 8]
+	  Position		  [420, 36, 475, 259]
 	  BackgroundColor	  "[0.932779, 1.000000, 0.419564]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
@@ -1756,7 +1756,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Osc/Phase"
-	Location		[34, 283, 462, 782]
+	Location		[1216, 464, 1611, 871]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1794,7 +1794,7 @@ Library {
 	  Name			  "Oscillator Name"
 	  Tag			  "cdsOsc"
 	  Description		  "Oscillator"
-	  Ports			  [1, 3]
+	  Ports			  [0, 3]
 	  Position		  [80, 119, 135, 181]
 	  BackgroundColor	  "magenta"
 	  DropShadow		  on
@@ -1909,7 +1909,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"WatchDogs"
-	Location		[1420, 496, 1675, 878]
+	Location		[1416, 468, 1679, 918]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1980,7 +1980,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[1525, 443, 1793, 1142]
+	Location		[1521, 415, 1797, 1182]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
