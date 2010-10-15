@@ -203,7 +203,7 @@ const int ss = 64*1024*1024-5000;
                 _exit(-1);
         }
 	printf("mmapped address is 0x%lx\n", (long)addr);
-	memset((void *)addr, 0, ss);
+//	memset((void *)addr, 0, ss);
         return addr;
 }
 
