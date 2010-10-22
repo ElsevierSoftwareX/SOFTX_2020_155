@@ -131,7 +131,7 @@ inline double iir_filter(double input,double *coef,int n,double *history){
     output = new_hist + history1 * (*coef_ptr++);
     output = output + history2 * (*coef_ptr++);      /* zeros */
 
-    //if((new_hist < 1e-20) && (new_hist > -1e-20)) new_hist = new_hist<0 ? -1e-20: 1e-20;
+    if((new_hist < 1e-20) && (new_hist > -1e-20)) new_hist = new_hist<0 ? -1e-20: 1e-20;
     
     new_hist += 1e-16;
     junk = new_hist;
