@@ -27,6 +27,7 @@
 #include <linux/version.h>
 #include <linux/init.h>
 #include <linux/module.h>
+#include <linux/proc_fs.h>
 #include <linux/kthread.h>
 #include <asm/delay.h>
 
@@ -309,6 +310,13 @@ unsigned int timeSec = 0;
 unsigned int timeSecDiag = 0;
 /* 1 - error occured on shmem; 2 - RFM; 3 - Dolphin */
 unsigned int ipcErrBits = 0;
+int adcTime;			// Used in code cycle timing
+int adcHoldTime;		// Stores time between code cycles
+int adcHoldTimeMax;		// Stores time between code cycles
+int adcHoldTimeMin;
+int adcHoldTimeAvg;
+int usrTime;			// Time spent in user app code
+int usrHoldTime;		// Max time spent in user app code
 
 #if defined(SHMEM_DAQ)
 struct rmIpcStr *daqPtr;
@@ -490,7 +498,7 @@ unsigned int time0,time1;
 //***********************************************************************
 // Get Gps card microseconds from SYMCOM IRIG-B Rcvr
 #endif
-#ifdef DUOTONE_TIMING
+#ifdef ADC_MASTER
 float duotime(int count, float meanVal, float data[])
 {
   float x,y,sumX,sumY,sumXX,sumXY,msumX;
@@ -535,7 +543,7 @@ float duotime(int count, float meanVal, float data[])
         // answer = meanVal/slope - 19.7;
         // answer = meanVal/slope;
         answer = meanVal/slope - 91.552;
-#ifdef DUOTONE_DAC
+#ifdef ADC_MASTER
         // answer-= 42.5;
 #endif
         return(answer);
@@ -597,13 +605,6 @@ void *fe_start(void *arg)
   int onePpsHi = 0;			// One PPS diagnostic check
   int onePpsTime = 0;			// One PPS diagnostic check
   int dcuId;				// DAQ ID number for this process
-  static int adcTime;			// Used in code cycle timing
-  static int adcHoldTime;		// Stores time between code cycles
-  static int adcHoldTimeMax;		// Stores time between code cycles
-  static int adcHoldTimeMin;
-  static int adcHoldTimeAvg;
-  static int usrTime;			// Time spent in user app code
-  static int usrHoldTime;		// Max time spent in user app code
   static int missedCycle = 0;		// Incremented error counter when too many values in ADC FIFO
   // int netRetry;				// Myrinet reconnect variable
   int diagWord = 0;			// Code diagnostic bit pattern returned to EPICS
@@ -631,7 +632,7 @@ void *fe_start(void *arg)
   static int dacWriteEnable = 0;
   int adcWait;
 
-#ifdef DUOTONE_TIMING
+#ifdef ADC_MASTER
   static float duotone[65536];
   static float duotoneDac[65536];
   float duotoneTimeDac;
@@ -1235,9 +1236,9 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	  // Update time on RFM if this is GPS time master
           rdtscl(tempClock[0]);
 	  *rfmTime = timeSec;
-	  sci_flush(&sci_dev_info, 0);
+	  //sci_flush(&sci_dev_info, 0);
           rdtscl(tempClock[1]);
-  	  //clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
+  	  clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
 #endif
 	}
         for(ll=0;ll<sampleCount;ll++)
@@ -1304,7 +1305,6 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			// load DAC values prior to next 65K clock
 			for(mm=0;mm<cdsPciModules.dacCount;mm++)
 	   		   if(dacWriteEnable > 4) gsaDacDma2(mm,cdsPciModules.dacType[mm]);
-#ifdef DUOTONE_TIMING
 			// if(clock16K == 65535) 
 			if(clock16K == 0) 
 			{
@@ -1317,7 +1317,6 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 					pLocalEpics->epicsOutput.diags[5] = usec;
 				}
 			}
-#endif
 			
 #ifdef IOP_TIME_SLAVE
 	  		if (iop_rfm_valid) timeSec = *rfmTime;
@@ -1329,9 +1328,9 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			//*rfmTime = timeSec;
           		rdtscl(tempClock[2]);
 			cdsPciModules.dolphin[1][1] = clock16K;
-	  		sci_flush(&sci_dev_info, 0);
+	  		//sci_flush(&sci_dev_info, 0);
           		rdtscl(tempClock[3]);
-  			//clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
+  			clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
 		}
 		if (cdsPciModules.pci_rfm[0]) {
 		    	((volatile long *)(cdsPciModules.pci_rfm[0]))[1] = timeSec;
@@ -1682,7 +1681,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 // END OF DAC WRITE ***********************************************************************************
 // BEGIN HOUSEKEEPING *********************************************************************************
 
-#ifdef DUOTONE_TIMING
+#ifdef ADC_MASTER
         if(clock16K == 0)
         {
 		if(cdsPciModules.gpsType == SYMCOM_RCVR) 
@@ -1705,7 +1704,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
                 duotoneTime = duotime(12, duotoneMean, duotone);
                 pLocalEpics->epicsOutput.diags[4] = duotoneTime;
 		// duotoneTimeDac = duotime(12, duotoneMeanDac, duotoneDac);
-                pLocalEpics->epicsOutput.diags[5] = duotoneTimeDac;
+                // pLocalEpics->epicsOutput.diags[5] = duotoneTimeDac;
 		// printf("du = %f %f %f %f %f\n",duotone[5], duotone[6], duotone[7],duotone[8],duotone[9]);
         }
 #endif
@@ -2052,6 +2051,56 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 extern void *kmalloc_area[16];
 extern int mbuf_allocate_area(char *name, int size, struct file *file);
 
+// /proc filesystem entry
+struct proc_dir_entry *proc_entry;
+
+int
+procfile_read(char *buffer,
+	      char **buffer_location,
+	      off_t offset, int buffer_length, int *eof, void *data)
+{
+	int ret;
+	
+	/* 
+	 * We give all of our information in one go, so if the
+	 * user asks us if we have more information the
+	 * answer should always be no.
+	 *
+	 * This is important because the standard read
+	 * function from the library would continue to issue
+	 * the read system call until the kernel replies
+	 * that it has no more information, or until its
+	 * buffer is filled.
+	 */
+	if (offset > 0) {
+		/* we have finished to read, return 0 */
+		ret  = 0;
+	} else {
+		/* fill the buffer, return the buffer size */
+		ret = sprintf(buffer,
+
+			"gps=%d\n"
+			"adcTime=%d\n"
+			"adcHoldTime=%d\n"
+			"adcHoldTimeMax=%d\n"
+			"adcHoldTimeMin=%d\n"
+			"adcHoldTimeAvg=%d\n"
+			"usrTime=%d\n"
+			"usrHoldTime=%d\n",
+
+			cycle_gps_time,
+			adcTime,
+			adcHoldTime,
+			adcHoldTimeMax,
+			adcHoldTimeMin,
+			adcHoldTimeAvg,
+			usrTime,
+			usrHoldTime);
+	}
+
+	return ret;
+}
+
 int init_module (void)
 #else
 int main(int argc, char **argv)
@@ -2069,6 +2118,22 @@ int main(int argc, char **argv)
 	int doCnt;
 	int do32Cnt;
 	int doIIRO16Cnt;
+
+	proc_entry = create_proc_entry(SYSTEM_NAME_STRING_LOWER, 0644, NULL);
+	
+	if (proc_entry == NULL) {
+		remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
+		printk(KERN_ALERT "Error: Could not initialize /proc/%s\n",
+		       SYSTEM_NAME_STRING_LOWER);
+		return -ENOMEM;
+	}
+	
+	proc_entry->read_proc = procfile_read;
+	//proc_entry->owner 	 = THIS_MODULE;
+	proc_entry->mode 	 = S_IFREG | S_IRUGO;
+	proc_entry->uid 	 = 0;
+	proc_entry->gid 	 = 0;
+	proc_entry->size 	 = 37;
 
 	printf("startup time is %ld\n", current_time());
 #ifdef DOLPHIN_TEST
@@ -2677,6 +2742,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 
 #ifdef NO_RTL
 void cleanup_module (void) {
+	remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
 //	printk("Setting vmeReset flag to 1\n");
 	//pLocalEpics->epicsInput.vmeReset = 1;
         //msleep(1000);
