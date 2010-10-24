@@ -315,6 +315,7 @@ int adcHoldTime;		// Stores time between code cycles
 int adcHoldTimeMax;		// Stores time between code cycles
 int adcHoldTimeMin;
 int adcHoldTimeAvg;
+int adcHoldTimeAvgPerSec;
 int usrTime;			// Time spent in user app code
 int usrHoldTime;		// Max time spent in user app code
 
@@ -1724,9 +1725,10 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		pLocalEpics->epicsOutput.adcWaitTime =  adcHoldTimeMax;
 	  else
 	  	pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeAvg/CYCLE_PER_SECOND;
-		adcHoldTimeMax = 0;
-		adcHoldTimeMin = 0xffff;
-		adcHoldTimeAvg = 0;
+	  adcHoldTimeAvgPerSec = adcHoldTimeAvg/CYCLE_PER_SECOND;
+	  adcHoldTimeMax = 0;
+	  adcHoldTimeMin = 0xffff;
+	  adcHoldTimeAvg = 0;
 	  if((adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcHoldTime < CYCLE_TIME_ALRM_LO)) diagWord |= FE_ADC_HOLD_ERR;
 	  if(timeHoldMax > CYCLE_TIME_ALRM_HI) diagWord |= FE_PROC_TIME_ERR;
   	  if(pLocalEpics->epicsInput.diagReset || initialDiagReset)
@@ -2079,23 +2081,23 @@ procfile_read(char *buffer,
 		/* fill the buffer, return the buffer size */
 		ret = sprintf(buffer,
 
-			"gps=%d\n"
-			"adcTime=%d\n"
 			"adcHoldTime=%d\n"
 			"adcHoldTimeMax=%d\n"
 			"adcHoldTimeMin=%d\n"
 			"adcHoldTimeAvg=%d\n"
 			"usrTime=%d\n"
-			"usrHoldTime=%d\n",
+			"usrHoldTime=%d\n"
+			"cycle=%d\n"
+			"gps=%d\n",
 
-			cycle_gps_time,
-			adcTime,
 			adcHoldTime,
 			adcHoldTimeMax,
 			adcHoldTimeMin,
-			adcHoldTimeAvg,
+			adcHoldTimeAvgPerSec,
 			usrTime,
-			usrHoldTime);
+			usrHoldTime,
+			clock16K,
+			cycle_gps_time);
 	}
 
 	return ret;
@@ -2133,7 +2135,7 @@ int main(int argc, char **argv)
 	proc_entry->mode 	 = S_IFREG | S_IRUGO;
 	proc_entry->uid 	 = 0;
 	proc_entry->gid 	 = 0;
-	proc_entry->size 	 = 37;
+	proc_entry->size 	 = 10240;
 
 	printf("startup time is %ld\n", current_time());
 #ifdef DOLPHIN_TEST
