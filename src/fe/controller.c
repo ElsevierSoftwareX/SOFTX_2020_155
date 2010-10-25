@@ -55,6 +55,8 @@
 #include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
 #endif
 
+char *build_date = __DATE__ " " __TIME__;
+
 #ifndef NO_RTL
 int iop_rfm_valid = 1;
 #else
@@ -2103,7 +2105,8 @@ procfile_read(char *buffer,
 			"usrTime=%d\n"
 			"usrHoldTime=%d\n"
 			"cycle=%d\n"
-			"gps=%d\n",
+			"gps=%d\n"
+			"buildDate=%s\n",
 
 			startGpsTime,
 			cycle_gps_time - startGpsTime,
@@ -2116,7 +2119,8 @@ procfile_read(char *buffer,
 			usrTime,
 			usrHoldTime,
 			clock16K,
-			cycle_gps_time);
+			cycle_gps_time,
+			build_date);
 	}
 
 	return ret;
