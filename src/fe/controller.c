@@ -313,6 +313,9 @@ unsigned int ipcErrBits = 0;
 int adcTime;			// Used in code cycle timing
 int adcHoldTime;		// Stores time between code cycles
 int adcHoldTimeMax;		// Stores time between code cycles
+int adcHoldTimeEverMax;		// Maximum cycle time recorded
+int adcHoldTimeEverMaxWhen;
+int startGpsTime;
 int adcHoldTimeMin;
 int adcHoldTimeAvg;
 int adcHoldTimeAvgPerSec;
@@ -875,6 +878,9 @@ udelay(1000);
   // Clear a couple of timing diags.
   adcHoldTime = 0;
   adcHoldTimeMax = 0;
+  adcHoldTimeEverMax = 0;
+  adcHoldTimeEverMaxWhen = 0;
+  startGpsTime = 0;
   adcHoldTimeMin = 0xffff;
   adcHoldTimeAvg = 0;
   usrHoldTime = 0;
@@ -1020,7 +1026,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		*/
 #ifdef TIME_SLAVE
 // sync up with the time master on its gps time
-	  unsigned long d = cdsPciModules.dolphin[0][0];
+	  unsigned long d = cdsPciModules.dolphin[0][1];
 
  	  if (boot_cpu_has(X86_FEATURE_MWAIT)) {
 	    for (;;) {
@@ -1159,7 +1165,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	  // sync up with the time master on its gps time
 	  //
 	  unsigned long d = 0;
-          // if (iop_rfm_valid) d = dolphin_memory_read[1];
+          //if (iop_rfm_valid) d = cdsPciModules.dolphin[0][1];
 	  d = clock16K;
 	  for(;iop_rfm_valid? cdsPciModules.dolphin[0][1] != d: 0;) udelay(1);
 #endif
@@ -1239,7 +1245,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	  *rfmTime = timeSec;
 	  //sci_flush(&sci_dev_info, 0);
           rdtscl(tempClock[1]);
-  	  clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
+  	  clflush_cache_range (cdsPciModules.dolphin[1], 8);
 #endif
 	}
         for(ll=0;ll<sampleCount;ll++)
@@ -1849,6 +1855,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 #ifndef NO_DAQ
 		
 		// Call daqLib
+		if (cycle_gps_time == 0) startGpsTime = timeSec;
 		cycle_gps_time = timeSec; // Time at which ADCs triggered
 		pLocalEpics->epicsOutput.diags[3] = 
 			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
@@ -2013,6 +2020,10 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
 	if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
 	adcHoldTimeAvg += adcHoldTime;
+	if (adcHoldTimeMax > adcHoldTimeEverMax)  {
+		adcHoldTimeEverMax = adcHoldTimeMax;
+		adcHoldTimeEverMaxWhen = cycle_gps_time;
+	}
 	adcTime = cpuClock[0];
 	// Calc the max time of one cycle of the user code
 #ifdef ADC_MASTER
@@ -2081,7 +2092,11 @@ procfile_read(char *buffer,
 		/* fill the buffer, return the buffer size */
 		ret = sprintf(buffer,
 
+			"startGpsTime=%d\n"
+			"uptime=%d\n"
 			"adcHoldTime=%d\n"
+			"adcHoldTimeEverMax=%d\n"
+			"adcHoldTimeEverMaxWhen=%d\n"
 			"adcHoldTimeMax=%d\n"
 			"adcHoldTimeMin=%d\n"
 			"adcHoldTimeAvg=%d\n"
@@ -2090,7 +2105,11 @@ procfile_read(char *buffer,
 			"cycle=%d\n"
 			"gps=%d\n",
 
+			startGpsTime,
+			cycle_gps_time - startGpsTime,
 			adcHoldTime,
+			adcHoldTimeEverMax,
+			adcHoldTimeEverMaxWhen,
 			adcHoldTimeMax,
 			adcHoldTimeMin,
 			adcHoldTimeAvgPerSec,
