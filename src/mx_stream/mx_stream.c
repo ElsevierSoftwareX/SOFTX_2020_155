@@ -30,8 +30,6 @@ pthread_create(thread_, 0, start_routine_, arg_)
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-//#include "mx_byteswap.h"
-#include "test_common.h"
 #include "../drv/crc.c"
 
 MX_MUTEX_T stream_mutex;
