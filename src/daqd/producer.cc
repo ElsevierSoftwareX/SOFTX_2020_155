@@ -2449,7 +2449,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 
 #ifdef USE_SYMMETRICOM
 
-	  //printf("dcu %d block %d cycle %d  gps %d symm %d\n", j, cblk, gmDaqIpc[j].bp[cblk].cycle,  dcu_gps, gps);
+	  system_log(5, "dcu %d block %d cycle %d  gps %d symm %d\n", j, cblk, gmDaqIpc[j].bp[cblk].cycle,  dcu_gps, gps);
 	  if (dcu_gps != gps) {
 	    daqd.dcuStatus[0][j] |= 0x4000;
 	    daqd.dcuCrcErrCnt[0][j]++;

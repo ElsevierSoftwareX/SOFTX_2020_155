@@ -3086,6 +3086,13 @@ ConfigureChannelsBody: BEGIN_BEGIN {
 	daqd.trender.num_trend_channels = 0;
 	// Assign trend output channels
 	for (i = 0, offs = 0; i < daqd.trender.num_channels; i++) {
+		int l = strlen(daqd.trender.channels[i].name);
+		if (l > 34) {
+			printf("Channel %s length %d over the limit of 34\n", 
+					daqd.trender.channels[i].name,
+					strlen(daqd.trender.channels[i].name));
+			exit(1);
+		}
 		for (int j = 0; j < trender_c::num_trend_suffixes; j++) {
 			daqd.trender.trend_channels [daqd.trender.num_trend_channels]
 				= daqd.trender.channels [i];

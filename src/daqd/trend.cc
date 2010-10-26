@@ -65,10 +65,13 @@ trender_c::raw_minute_saver ()
   long minute_put_cntr;
   unsigned int rmp = raw_minute_trend_saving_period;
 
+  circ_buffer_block_prop_t *cur_prop = new circ_buffer_block_prop_t[rmp];
+  trend_block_t *cur_blk[rmp];
+  for (int i = 0; i < rmp; i++)
+    cur_blk[i] = new trend_block_t[max_trend_output_channels];
+
   for (minute_put_cntr = 0;; minute_put_cntr++) {
     int eof_flag = 0;
-    circ_buffer_block_prop_t cur_prop[rmp];
-    trend_block_t cur_blk [rmp][max_trend_output_channels];
 
     int nb = mtb -> get (raw_msaver_cnum);
     DEBUG(3, cerr << "minute trender saver; block " << nb << endl);

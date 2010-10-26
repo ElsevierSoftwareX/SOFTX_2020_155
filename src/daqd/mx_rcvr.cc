@@ -160,6 +160,8 @@ receiver_mx(int neid)
 		  gmDaqIpc[dcu_id].bp[cycle].cycle = dataPtr->mxIpcData.bp[cycle].cycle;
 		  gmDaqIpc[dcu_id].dataBlockSize = dataPtr->mxIpcData.dataBlockSize;
 			
+		  //printf("dcu %d gps %d %d %d\n", dcu_id, dataPtr->mxIpcData.bp[cycle].timeSec, cycle, dataPtr->mxIpcData.bp[cycle].timeNSec);
+
 		  // Assign test points table
 		  *gdsTpNum[0][dcu_id] = dataPtr->mxTpTable;
 
