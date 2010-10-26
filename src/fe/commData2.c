@@ -80,12 +80,12 @@ int ii;
 	// PCIe communications requires one pointer for sending data and a second one for receiving data.
         if((ipcInfo[ii].netType == IPCIE) && (ipcInfo[ii].mode == IRCV) && (cdsPciModules.dolphin[0]))
 	{
-                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphin[0]) + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
+                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphin[0]) + IPC_PCIE_BASE_OFFSET +IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
                 printf("Net Type = PCIE RCV IPC %d at 0x%p  *********************************\n",ipcInfo[ii].sendRate,ipcInfo[ii].pIpcData);
         }
         if((ipcInfo[ii].netType == IPCIE) && (ipcInfo[ii].mode == ISND) && (cdsPciModules.dolphin[1]))
 	{
-                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphin[1]) + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
+                ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphin[1]) + IPC_PCIE_BASE_OFFSET + IPC_BUFFER_SIZE * ipcInfo[ii].ipcNum);
                 printf("Net Type = PCIE SEND IPC at 0x%p  *********************************\n",ipcInfo[ii].pIpcData);
         }
         printf("IPC Number = %d\n",ipcInfo[ii].ipcNum);
