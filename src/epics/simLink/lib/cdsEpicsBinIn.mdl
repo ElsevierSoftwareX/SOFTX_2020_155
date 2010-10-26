@@ -1,8 +1,9 @@
 Library {
   Name			  "cdsEpicsBinIn"
-  Version		  6.2
+  Version		  7.1
   MdlSubVersion		  0
   SavedCharacterEncoding  "ibm-5348_P100-1997"
+  LibraryType		  "BlockLibrary"
   SaveDefaultBlockParams  on
   SampleTimeColors	  off
   LibraryLinkDisplay	  "none"
@@ -13,18 +14,11 @@ Library {
   IgnoreBidirectionalLines off
   ShowStorageClass	  off
   ShowTestPointIcons	  on
+  ShowSignalResolutionIcons on
   ShowViewerIcons	  on
   SortedOrder		  off
   ExecutionContextIcon	  off
   ShowLinearizationAnnotations on
-  CovSaveName		  "covdata"
-  CovMetricSettings	  "dw"
-  CovNameIncrementing	  off
-  CovHtmlReporting	  on
-  covSaveCumulativeToWorkspaceVar on
-  CovSaveSingleToWorkspaceVar on
-  CovCumulativeReport	  off
-  CovReportOnPause	  on
   ScopeRefreshTime	  0.035000
   OverrideScopeRefreshTime on
   DisableAllScopes	  off
@@ -36,16 +30,28 @@ Library {
   BrowserShowLibraryLinks off
   BrowserLookUnderMasks	  off
   Created		  "Wed Apr 12 07:34:19 2006"
+  Creator		  "maronsso"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "rolf"
+  LastModifiedBy	  "maronsso"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Apr 12 07:35:21 2006"
-  ModelVersionFormat	  "1.%<AutoIncrement:1>"
+  LastModifiedDate	  "Fri Oct 22 10:22:41 2010"
+  RTWModifiedTimeStamp	  0
+  ModelVersionFormat	  "1.%<AutoIncrement:4>"
   ConfigurationManager	  "None"
+  SimulationMode	  "normal"
   LinearizationMsg	  "none"
   Profile		  off
   ParamWorkspaceSource	  "MATLABWorkspace"
+  CovSaveName		  "covdata"
+  CovMetricSettings	  "dw"
+  CovNameIncrementing	  off
+  CovHtmlReporting	  on
+  covSaveCumulativeToWorkspaceVar on
+  CovSaveSingleToWorkspaceVar on
+  CovCumulativeReport	  off
+  CovReportOnPause	  on
+  CovModelRefEnable	  "Off"
   ExtModeBatchMode	  off
   ExtModeEnableFloating	  on
   ExtModeTrigType	  "manual"
@@ -67,8 +73,6 @@ Library {
   ExtModeSkipDownloadWhenConnect off
   ExtModeLogAll		  on
   ExtModeAutoUpdateStatusClock on
-  StrictBusMsg		  "None"
-  ProdHWDeviceType	  "32-bit Generic"
   ShowModelReferenceBlockVersion off
   ShowModelReferenceBlockIO off
   BlockDefaults {
@@ -85,20 +89,6 @@ Library {
   }
   BlockParameterDefaults {
     Block {
-      BlockType		      Inport
-      UseBusObject	      off
-      BusObject		      "BusObject"
-      BusOutputAsStruct	      off
-      PortDimensions	      "-1"
-      SampleTime	      "-1"
-      DataType		      "auto"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
-      SignalType	      "auto"
-      SamplingMode	      "auto"
-      Interpolate	      on
-    }
-    Block {
       BlockType		      Outport
       Port		      "1"
       UseBusObject	      off
@@ -106,9 +96,12 @@ Library {
       BusOutputAsStruct	      off
       PortDimensions	      "-1"
       SampleTime	      "-1"
+      OutMin		      "[]"
+      OutMax		      "[]"
       DataType		      "auto"
-      OutDataType	      "sfix(16)"
-      OutScaling	      "2^0"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
+      OutDataTypeStr	      "Inherit: auto"
       SignalType	      "auto"
       SamplingMode	      "auto"
       OutputWhenDisabled      "held"
@@ -116,12 +109,19 @@ Library {
     }
     Block {
       BlockType		      SubSystem
-      ShowPortLabels	      on
+      ShowPortLabels	      "FromPortIcon"
       Permissions	      "ReadWrite"
       PermitHierarchicalResolution "All"
+      TreatAsAtomicUnit	      off
+      CheckFcnCallInpInsideContextMsg off
       SystemSampleTime	      "-1"
       RTWFcnNameOpts	      "Auto"
       RTWFileNameOpts	      "Auto"
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
       SimViewingDevice	      off
       DataTypeOverride	      "UseLocalSettings"
       MinMaxOverflowLogging   "UseLocalSettings"
@@ -137,6 +137,7 @@ Library {
     FontSize		    10
     FontWeight		    "normal"
     FontAngle		    "normal"
+    UseDisplayTextAsClickCallback off
   }
   LineDefaults {
     FontName		    "Helvetica"
@@ -155,28 +156,27 @@ Library {
     PaperPositionMode	    "auto"
     PaperType		    "usletter"
     PaperUnits		    "inches"
+    TiledPaperMargins	    [0.500000, 0.500000, 0.500000, 0.500000]
+    TiledPageScale	    1
+    ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
     Block {
-      BlockType		      Inport
-      Name		      "In1"
-      Position		      [80, 108, 110, 122]
-      Port		      "1"
-      IconDisplay	      "Port number"
-      LatchInput	      off
-    }
-    Block {
       BlockType		      SubSystem
       Name		      "Subsystem"
-      Ports		      [1, 1]
+      Ports		      [0, 1]
       Position		      [130, 85, 170, 145]
-      TreatAsAtomicUnit	      off
       MinAlgLoopOccurrences   off
+      PropExecContextOutsideSubsystem off
       RTWSystemCode	      "Auto"
+      FunctionWithSeparateData off
+      Opaque		      off
+      RequestExecContextInheritance off
+      MaskHideContents	      off
       System {
 	Name			"Subsystem"
 	Location		[690, 182, 895, 248]
-	Open			off
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -184,28 +184,17 @@ Library {
 	PaperPositionMode	"auto"
 	PaperType		"usletter"
 	PaperUnits		"inches"
+	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
+	TiledPageScale		1
+	ShowPageBoundaries	off
 	ZoomFactor		"100"
-	Block {
-	  BlockType		  Inport
-	  Name			  "In1"
-	  Position		  [25, 28, 55, 42]
-	  Port			  "1"
-	  IconDisplay		  "Port number"
-	  LatchInput		  off
-	}
 	Block {
 	  BlockType		  Outport
 	  Name			  "Out1"
 	  Position		  [150, 28, 180, 42]
 	  IconDisplay		  "Port number"
-	  BusOutputAsStruct	  off
-	}
-	Line {
-	  SrcBlock		  "In1"
-	  SrcPort		  1
-	  Points		  [0, 0]
-	  DstBlock		  "Out1"
-	  DstPort		  1
+	  OutDataType		  "sfix(16)"
+	  OutScaling		  "2^0"
 	}
       }
     }
@@ -214,18 +203,13 @@ Library {
       Name		      "Out1"
       Position		      [205, 108, 235, 122]
       IconDisplay	      "Port number"
-      BusOutputAsStruct	      off
+      OutDataType	      "sfix(16)"
+      OutScaling	      "2^0"
     }
     Line {
       SrcBlock		      "Subsystem"
       SrcPort		      1
       DstBlock		      "Out1"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "In1"
-      SrcPort		      1
-      DstBlock		      "Subsystem"
       DstPort		      1
     }
   }
