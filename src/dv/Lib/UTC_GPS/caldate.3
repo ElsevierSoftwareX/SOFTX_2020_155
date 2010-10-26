@@ -1,0 +1,128 @@
+.TH caldate 3
+.SH NAME
+caldate \- manipulate calendar dates
+.SH SYNTAX
+.B #include <caldate.h>
+
+void \fBcaldate_frommjd\fP(&\fIcd\fR,\fIday\fR,\fIweekday\fR,\fIyearday\fR);
+.br
+long \fBcaldate_mjd\fP(&\fIcd\fR);
+
+unsigned int \fBcaldate_fmt\fP(\fIs\fR,&\fIcd\fR);
+.br
+unsigned int \fBcaldate_scan\fP(\fIs\fR,&\fIcd\fR);
+
+struct caldate \fIcd\fR;
+.br
+long \fIday\fR;
+.br
+int *\fIweekday\fR;
+.br
+int *\fIyearday\fR;
+.br
+char *\fIs\fR;
+.SH DESCRIPTION
+A
+.B struct caldate
+value is a calendar date.
+It has three components:
+.BR year ,
+.B month
+(1...12),
+and
+.B day
+(1...31).
+.SH CONVERSIONS
+Every calendar date has a
+.I modified Julian day number\fR.
+The day number increases by 1 every day.
+Day number 0 is 17 November 1858.
+Day number 51604 is 1 March 2000.
+
+.B caldate_frommjd
+puts into
+.I cd
+the date corresponding to the modified Julian day number
+.IR day .
+
+.B caldate_frommjd
+also computes the day of the week (0 through 6)
+and the day of the year (0 through 365).
+It stores the day of the week in
+.B *\fIweekday
+if
+.I weekday
+is nonzero.
+It stores the day of the year in
+.B *\fIyearday
+if
+.I yearday
+is nonzero.
+
+.B caldate_mjd
+returns the modified Julian day number corresponding to the date in
+.IR cd .
+
+.B caldate_mjd
+accepts days outside the range 0 to 30,
+referring to days before the beginning or after the end of the month.
+It also accepts months outside the range 0 to 11,
+referring to months before the beginning or after the end of the year.
+
+.B caldate_mjd
+does not check for overflow.
+.SH FORMATTING
+.B caldate_fmt
+prints
+.I cd
+in ISO style (yyyy-mm-dd)
+into the character buffer
+.IR s ,
+without a terminating NUL.
+It returns the number of characters printed.
+.I s
+may be zero;
+then
+.B caldate_fmt
+returns the number of characters that would have been printed.
+
+.B caldate_scan
+reads a calendar date in ISO style
+from the beginning of the character buffer
+.I s
+and puts it into
+.IR cd .
+It returns the number of characters read.
+If
+.I s
+does not start with an ISO-style date,
+.B caldate_scan
+returns 0.
+.SH NOTES
+The
+.B caldate
+routines currently support the Gregorian calendar,
+which was defined in 1582 and adopted at different times
+in different countries.
+For earlier dates the
+.B caldate
+routines work with
+``virtual Gregorian,''
+defined mathematically by the 400-year Gregorian cycle
+for years before 1582.
+The Julian calendar is not supported.
+
+The Gregorian calendar will be replaced by a new calendar
+within a few thousand years.
+The
+.B caldate_frommjd
+and
+.B caldate_mjd
+routines will be upgraded accordingly.
+The current
+.B caldate_frommjd
+and
+.B caldate_mjd
+routines are not useful for dates far in the future.
+.SH "SEE ALSO"
+caltime(3)

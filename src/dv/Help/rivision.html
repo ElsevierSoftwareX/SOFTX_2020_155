@@ -1,0 +1,90 @@
+<HTML>
+
+<!--
+    Author:        Hongyu Jane Ding <hding@ligo.caltech.edu>
+-->
+
+<HEAD>
+<TITLE>DAQS DataViewer Rivision History</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFF7E0" TEXT="#000000" LINK="#0033CC" VLINK="#000066">
+<h2>Data Acquisition System</h2>
+<h1><FONT COLOR=#990000>DataViewer Rivision History</FONT></h1>
+<I>&nbsp Last updated at Feb. 4, 2004</I>
+<BR><BR>
+<DL><DD>
+<TABLE WIDTH=90% CELLPADDING="5" CELLSPACING="0" Border=1>
+<TR ALIGN=left><TH>Version</TH><TH>Date</TH><TH>Revision descriptions</TH></TR>
+<TR><TD>&nbsp G4.5</TD><TD>11/2003</TD><TD>added an option for the 
+operator stations that allows timeout feature to be turned off 
+</TD></TR>
+<TR><TD>&nbsp G4.4</TD><TD>11/2003</TD><TD>fixed a bug in global setting. 
+</TD></TR>
+<TR><TD>&nbsp G4.3</TD><TD>10/2003</TD><TD>switched to FRAME library 
+framecpp/Version6. This change only affects FRAME file reading features. 
+</TD></TR>
+<TR><TD>&nbsp G4.2</TD><TD>10/2003</TD><TD>increased max channel 
+allowance from 15000 to 30000.
+</TD></TR>
+<TR><TD>&nbsp G4.1</TD><TD>08/2003</TD><TD>fixed a bug in Playback 
+for those channels that don't have units recorded.
+</TD></TR>
+<TR><TD>&nbsp G4.0</TD><TD>08/2003</TD><TD>Obsolete channel filter 
+is added on the Signal Selection Panel.
+</TD></TR>
+<TR><TD>&nbsp G3.1</TD><TD>06/2003</TD><TD>dragging from any 
+applications other than Dataviewer is now allowed.
+</TD></TR>
+<TR><TD>&nbsp G3.0</TD><TD>06/2003</TD><TD>
+drag and drop function added on signal selection panel.</TD></TR>
+<TR><TD>&nbsp 9.6/G2.3</TD><TD>05/2003</TD><TD>
+fixed a bug on slope/offset in playback.</TD></TR>
+<TR><TD>&nbsp 9.5/G2.2</TD><TD>03/2003</TD><TD>
+fixed a bug on channel highlighting.</TD></TR>
+<TR><TD>&nbsp G2.1</TD><TD>02/2003</TD><TD>added the option "Equal to" 
+in trigger condition for full data triggered playback. </TD></TR>
+<TR><TD>&nbsp G2.0</TD><TD>01/2003</TD><TD>added a XML filter for 
+save/restore file selection. Triggered playback is implemented. </TD></TR>
+<TR><TD>&nbsp 9.4/G1.3</TD><TD>12/2002</TD><TD>fixed a bug in restoring 
+</TD></TR>
+<TR><TD>&nbsp G1.2</TD><TD>11/2002</TD><TD>adjusted the graphic display 
+positions and fixed the grace printing problem. Timeout (12 hours) 
+feature is added. </TD></TR>
+<TR><TD>&nbsp 9.3/G1.1</TD><TD>11/2002</TD><TD>signal names are allowed 
+to be hand typed in the Signal Selection field. (Make sure no additional 
+space typed before or after the actual signal name, or you will get 
+"can't find channel" error message.) </TD></TR>
+<TR><TD>&nbsp G1</TD><TD>11/2002</TD><TD>switched from Xmgr to Grace for data display </TD></TR>
+<TR><TD>&nbsp 9.2</TD><TD>11/2002</TD><TD>library changes on error report</TD></TR>
+<TR><TD>&nbsp 9.1</TD><TD>10/2002</TD><TD>fixed a bug in channel selection (vacuum channels)</TD></TR>
+<TR><TD>&nbsp 9.0</TD><TD>09/2002</TD><TD>the format of setting file 
+saved has been fixed in XML and is not planned to be changed anymore. 
+Files saved by older versions need to be converted to v8 by using 
+<BR>&nbsp&nbsp&nbsp&nbsp   saveV5toV8 &lt oldfile &gt &lt newfile &gt
+<BR>then convert v8 to v9 by
+<BR>&nbsp&nbsp&nbsp&nbsp   saveV8toV9 &lt oldfile &gt &lt newfile &gt
+</TD></TR>
+<TR><TD>&nbsp 8.2</TD><TD>08/2002</TD><TD>added feature: restore signal channel setups from the starting command line. Usage:
+<BR>&nbsp&nbsp $DVPATH/dataviewer -s &lt server IP &gt -r &lt restore file &gt
+</TD></TR>
+<TR><TD>&nbsp 8.1</TD><TD>08/2002</TD><TD>one more layer of group names are added at the Signal Selection window</TD></TR>
+<TR><TD>&nbsp 8.0</TD><TD>07/2002</TD><TD>some changes have been done on the front panel. Now multiple selection of channels is allowed </TD></TR>
+<TR><TD>&nbsp 7.0</TD><TD>06/2002</TD><TD>added DMT channel selection</TD></TR>
+<TR><TD>&nbsp 6.3</TD><TD>04/2002</TD><TD>in Playback: the choices for 
+    X Axis are now UTC and
+    GPS (instead of total time). Display will show the entire requested
+    interval (previously it showed only the portion which data is available)</TD></TR>
+<TR><TD>&nbsp 6.2</TD><TD>02/2002</TD><TD>increased the capacity (up to 15000 channels) and made some changes for a quicker channel selection</TD></TR>
+<TR><TD>&nbsp 6.1</TD><TD>02/2002</TD><TD>fixed a bug in full-data Playback</TD></TR>
+<TR><TD>&nbsp 6.0</TD><TD>01/2002</TD><TD>allow user to select multiple file names (rather than the directory name only) when loading Frame files or making a TOC file</TD></TR>
+<TR><TD>&nbsp 5.5</TD><TD>01/2002</TD><TD>fixed Frame file reading feature. Use Frame file naming convention published by LDAS</TD></TR>
+<TR><TD>&nbsp 5.4</TD><TD>10/2001</TD><TD>handles offline full frame data in blocks of multiple seconds</TD></TR>
+<TR><TD>&nbsp 5.3</TD><TD>10/2001</TD><TD>fixed a bug in filter</TD></TR>
+<TR><TD>&nbsp 5.2</TD><TD>09/2001</TD><TD>fixed bugs in restore feature</TD></TR>
+<TR><TD>&nbsp 5.1</TD><TD>07/2001</TD><TD>fixed bugs in filter and decimation</TD></TR>
+<TR><TD>&nbsp 5.0</TD><TD>05/2001</TD><TD>added filter</TD></TR>
+</TABLE>
+
+</DL>
+</BODY>
+</HTML>

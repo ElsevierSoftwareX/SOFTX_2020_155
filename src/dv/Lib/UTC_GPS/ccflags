@@ -1,0 +1,129 @@
+-#		Turn on verbose mode
+-###		Show components, but do not execute
+-A<name[(tokens)]>	Create preprocessor predicate assertion
+-B<[static|dynamic]>	Specify dynamic or static binding
+-C		Prevent preprocessor from removing comments
+-c		Suppress linking, produce .o files
+-D<name[=token]>	Associate name with token as if by #define
+-d[y|n]		dynamic [-dy] or static [-dn] option to linker
+-dalign		Assume double-type data is double aligned
+-E		Compile source through preprocessor only, output to stdout
+-erroff=<t>	Suppress error messages specified by tags t(%none, %all, <tag list>)
+-errtags=<a>	Display messages with tags a(no, yes)
+-fast		Specify common set of performance options
+-fd		Report old-style function definitions and declarations
+-flags		Print summary of compiler options
+-fnonstd	Cause nonstandard initialization of floating-point hardware
+-fns		Turn on non-standard floating point mode
+-fround=<r>	Set the IEEE 754 rounding mode r(nearest, tozero, negative, positive)
+-fsimple	Permit optimizer to use simplified model of floating point arithmetic
+-fsingle	Use single-precision arithmetic (-Xt and -Xs modes only)
+-ftrap=<t>	Set the IEEE 754 trapping mode
+-G		Pass to linker to produce shared object
+-g		Generate debugging information used by dbx
+-H		Print path name of each file included during compilation
+-h <name>	Pass to linker to name a dynamic library
+-I<dir>		Add <dir> to preprocessor #include file search path
+-i		Passed to linker to ignore any LD_LIBRARY_PATH setting
+-KPIC		Generate position-independent code
+-Kpic		Generate code like -KPIC, but using a smaller global offset table
+-keeptmp	Keep temporary files created during compilation
+-L<dir>		Pass to linker to add <dir> to the library search path
+-l<name>	Pass to linker to search a library, lib<name>.so or lib<name>.a
+-mc		Remove duplicate strings from .comment section of output files
+-misalign	Allow proper loads and stores of misaligned data
+-misalign2	Allow proper loads and stores of half word aligned data
+-mr		Remove all strings from .comment section of output files
+-mr,"string"	Remove all strings and append "string" to .comment section
+-mt		Specify options needed when compiling multi-threaded code
+-native		Ascertain available floating-point options, generate code accordingly
+-noqueue	Disable queuing of compiler license requests
+-O		Generate optimized code (equivalent to -xO2)
+-o <outputfile>	Set name of output file to <outputfile>
+-P		Compile source through preprocessor only, output to .i  file
+-p		Prepare object code to collect data for profiling (prof)
+-Q[y|n]		Emit/don't emit identification info to output file
+-qp		Collect data for prof
+-R<dir[:dir]>	Pass to linker to specify library search path to the dynamic linker
+-S		Product .s file only (do not assemble or link)
+-s		Pass to linker, strip symbolic information
+-U<name>	Undefine preprocessor symbol <name> as if by #undef
+-V		Show version number of each invoked component
+-v		Do stricter semantic checking
+-W<c>,<arg>	Pass <arg> to specified component <c> (a,c,l,m,p,0,2)
+-w		Suppress compiler warning messages
+-Xa		Compile assuming ANSI C conformance, allow K & R extensions (default mode)
+-Xc		Compile assuming strict ANSI C conformance
+-Xs		Compile assuming (pre-ANSI) K & R C style code
+-Xt		Compile assuming K & R conformance, allow ANSI C
+-xa		Collect data for tcov basic block profiling (old format)
+-xarch=<a>	Limit the set of instructions the compiler may use to a(generic,v7,v8,v8a,v8plus,v8plusa)
+-xautopar	Generate parallelized code (automatic only)
+-xCC		Accept C++ style comments
+-xcache=<c>	Define the cache properties for use by the optimizer
+-xcg89		Make instructions/scheduling for SPARC V7
+-xcg92		Make instructions/scheduling for SPARC V8
+-xchip=<c>	Define the cache properties for use by the optimizer
+-xdepend	Enable all dependence based transformations
+-xe		Perform only syntax/semantic checking, no code generation
+-xexplicitpar	Generate parallelized code (for explicit pragmas)
+-xF		Produce code for use with Analyzer and Debugger
+-xhelp=<f>	Display on-line help information f(flags, readme, errors)
+-xildoff	Force use of bundled Solaris ld
+-xildon		Force use of ild in incremental mode
+-xinline=[f1,...,fn]	Attempt to inline f1, ... fn
+-xlibmieee	Force IEEE 754 return values for math routines in exceptional cases
+-xlibmil	Use inline expansion templates for libm
+-xlicinfo	Return status of licensing system
+-xloopinfo	Show which loops are parallelized
+-xM		Generate makefile dependencies
+-xM1		Generate makefile dependencies, but exclude /usr/include
+-xMerge		Merge data segment into text segment
+-xnolib		Do not provide default libraries to linker
+-xnolibmil	Reset -fast so that it does not include inline templates
+-xO[1, 2, 3, 4, 5]	Generate optimized code (default is -xO2)
+-xP		Print prototypes for function definitions
+-xparallel	Generate parallelized code (automatic & explicit)
+-xpg		Prepare object code to collect data for profiling (gprof)
+-xprofile=Collect data for a profile or use a profile to optimize p(collect,use:<name>,tcov)
+-xprofile=tcov	Collect data for tcov basic block profiling (new format)
+-xprofile=use	Use data collected for profile feedback
+-xreduction	Perform reduction when generating parallelized code
+-xregs=<r>	Specify the usage of optional registers
+-xrestrict[=<f>]	Treat pointer valued function parameters as restricted f(%none,%all,<function-name list>)
+-xs		Place symbol tables for dbx in executable file
+-xsafe=mem	Assume that no memory based traps will occur
+-xsb		Generate Sourcebrowser information
+-xsbfast	Generate Sourcebrowser information, do not compile
+-xsfpconst	Represent unsuffixed floating point constants as single precision
+-xspace		Do not do optimizations that increase code size
+-xstrconst	Place string literals into read-only data segment
+-xtarget=<t>	Specify the target system for instruction set and optimization t(native, generic, <system-name>)
+-xtemp=<dir>	Set directory for temporary files to <dir>
+-xtime		Report the execution time for each component
+-xtransition	Emit warnings for differences between K&R C and ANSI C
+-xunroll=n	Suggest that optimizer unroll loops n times
+-xvpara		Issue warnings for loops that cannot be parallelized
+-Y<c>,<dir>	Specify <dir> for location of component <c> (a,c,l,m,p,0,2)
+-YA,<dir>	Change default directory searched for components
+-YI,<dir>	Change default directory searched for include files
+-YP,<dir>	Change default directory for finding libraries files
+-YS,<dir>	Change default directory for startup object files
+-Zll		Create lock_lint database files (.ll)
+-Zlp		Generate profile instrumentation for all loops
+-Ztha		Instrument program for use with Thread Analyzer
+
+For additional product information or the name of a SunSoft reseller,
+please call 1-800-SUNSOFT, or 1-512-434-1511 (outside the US),
+or fax your request to (+1) 512-218-3866.
+
+For technical support, contact your SunSoft reseller for the name of an
+Authorized Service Provider.
+
+To comment on any of our products, please use the template found in
+/apps/SUNWspro/READMEs/feedback.
+Email these comments to sunsoft-dp-comments@Sun.COM, or fax them to
+(+1) 512-218-3866.
+
+For more information, browse http: //www.sun.com/developer-products/
+

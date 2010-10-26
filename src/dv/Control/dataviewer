@@ -1,0 +1,12 @@
+#!/bin/sh
+mkdir /tmp/$$DC
+#ulimit -c 0
+DVPATH=`pwd`
+export DVPATH
+PATH=${GRACE_HOME}/bin:${PATH}:/usr1/lcldsk/Netscape:`pwd`
+export PATH
+export LD_LIBRARY_PATH=${GRACE_HOME}/lib
+#for i in `ipcs -q | grep $USER | awk '{ print $2 }'`; do ipcrm -q $i; done;
+$DVPATH/dc3  -a $$  -b $DVPATH $*
+/bin/rm -f -r /tmp/$$DC
+#for i in `ipcs -q | grep $USER | awk '{ print $2 }'`; do ipcrm -q $i; done;

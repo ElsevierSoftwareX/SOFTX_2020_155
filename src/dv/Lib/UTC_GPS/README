@@ -1,0 +1,67 @@
+Like any other piece of software (and information generally), libtai
+comes with NO WARRANTY.
+
+
+These are UNIX installation instructions; libtai has not yet been ported
+to non-UNIX systems.
+
+
+1- Compile the programs and format the man pages:
+
+   % make it man
+
+   The manual pages 
+   caldate.0    tai.0        tai_pack.0   taia_now.0
+   caltime.0    tai_now.0    taia.0       taia_pack.0
+   can be read as normal text. 	
+
+2- Create leapsecond data:
+   Please find the file called leapsecs.txt in the current directory.
+   This is the text file you will be modifying when leap second changes
+   are announced. After every modification you have to create the binary
+   file called leapsecs.dat which libtai library depends on. 
+   leapsecs.dat is read by the routine leapsecs_read.c; at the moment
+   leapsecs.dat is stored and read from the current directory, at some
+   point you may want to install it in /etc as root, then you have to 
+   change the appropriate line in routine leapsecs_read.c to tell it where
+   to find the data.
+   
+   Now create the file leapsecs.dat
+   % ./leapsecs < leapsecs.txt > leapsecs.dat
+   
+3- LIGO specifics:
+
+   There are two routines for LIGO purposes:
+   gps-to-utc.c   utc-to-gps.c
+   The program 'convert' shows how to use them. First have a look
+   at the program convert, enter any date of your choice, then
+   run 'make convert', then try running it
+   % ./convert
+
+4- Other programs:
+	
+   
+  easter prints the date of Easter in any given year.
+   % ./easter 1997 1998 1999 2000 2001
+
+
+  yearcal prints a year-long calendar.
+   % ./yearcal 1997 | ul
+
+  nowutc prints the current time in UTC. (uses a routine from Unix Time
+  (eg. The Olson Library) ) 
+   % env TZ=right/Etc/GMT date; ./nowutc
+
+
+
+The original code is by D. J. Bernstein, djb@pobox.com
+
+Modifications for LIGO are by S. Tilav, tilav@ligo.caltech.edu
+					tilav@physics.ox.ac.uk
+
+Please report any bugs to S. Tilav
+
+The libtai code is in the public domain, so you can use it in your own
+programs. 
+
+

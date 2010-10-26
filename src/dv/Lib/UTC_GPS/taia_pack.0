@@ -1,0 +1,66 @@
+
+
+
+C Library Functions                                  taia_pack(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     taia_pack - convert TAI64NA labels to external format
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee <<<<ttttaaaaiiiiaaaa....hhhh>>>>
+
+     void ttttaaaaiiiiaaaa____ppppaaaacccckkkk(_b_u_f,&_t);
+     void ttttaaaaiiiiaaaa____uuuunnnnppppaaaacccckkkk(_b_u_f,&_t);
+
+     char _b_u_f[TTTTAAAAIIIIAAAA____PPPPAAAACCCCKKKK];
+     struct taia _t;
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+     ttttaaaaiiiiaaaa____ppppaaaacccckkkk converts a TAI64NA label from internal format in _t
+     to TAI64NA format in _b_u_f.
+
+     ttttaaaaiiiiaaaa____uuuunnnnppppaaaacccckkkk converts a TAI64NA label from TAI64NA format  in
+     _b_u_f to internal format in _t.
+
+     TTTTAAAAIIIIAAAA____PPPPAAAACCCCKKKK is 16.
+
+     See hhhhttttttttpppp::::////////ppppoooobbbbooooxxxx....ccccoooommmm////~~~~ddddjjjjbbbb////pppprrrroooottttoooo////ttttaaaaiiii66664444....ttttxxxxtttt for more  informa-
+     tion about TAI64NA format.
+
+SSSSEEEEEEEE AAAALLLLSSSSOOOO
+     taia(3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+

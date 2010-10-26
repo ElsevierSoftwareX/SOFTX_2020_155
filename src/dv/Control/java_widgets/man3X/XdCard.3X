@@ -1,0 +1,101 @@
+'\" t
+.TH XdCard 3X
+.\"/*%tbl % | nroff -man
+.SH NAME
+.B XdCard 
+\- The Java Card Layout emulation widget class
+.SH SYNOPSIS
+.B #include "Card.h"
+.SH DESCRIPTION
+Card is a constraint widget which places its children in a stack of pages. Simple
+resource settings select from amongst the various pages to display. Each child is considered
+to form the basis of a single page; logical page numbers can be assigned to each. Only one child is
+displayed at any time. The Card widget sizes itself according to the size of the largest child. 
+.br
+
+The widget emulates the behaviour of the Java Card Layout class.
+.SS Classes
+Card inherits behaviour and resources from the 
+.B Core, Composite, Constraint, XmManager,
+and 
+.B XdLayout 
+classes. 
+.br
+
+.br
+The class pointer is 
+.B xdCardWidgetClass. 
+.br
+
+.br
+The class name is 
+.B XdCard.
+.SS Resources
+The following list defines a set of widget resources which can be used by the programmer to
+specify the behaviour of the Card widget. The programmer can also set the resource values
+for the inherited classes to set attributes for this widget. To reference a resource by name 
+or by class in a 
+.B .Xdefaults 
+file, remove the 
+.B XtN
+or 
+.B XtC
+prefix and use the remaining letters.
+.ft B
+.IP XtNxdHorizontalSpacing
+.ft P
+Specifies a margin (in pixels) between left and right edges of child widgets and the Card widget. 
+.ft B
+.IP XtNxdVerticalSpacing
+.ft P
+Specifies a margin (in pixels) between top and bottom edges of child widgets and the Card widget.
+.ft B
+.IP XtNxdCurrentPage
+.ft P
+Controls which of the child widgets to display. The child occupies the whole of the Card widget space.
+.IP 
+The following table summarises the resources of the Card widget:
+.br
+
+.TS
+box, tab(:) ;
+cb | cb | cb | cb | cb
+lp-2 | lp-2 | cp-2 | lp-2 | cp-2.
+Name:Class:Default:Type:Access
+=
+XtNxdHorizontalSpacing:XtCXdHorizontalSpacing:0:Dimension:CSG
+_
+XtNxdVerticalSpacing:XtCXdVerticalSpacing:0:Dimension:CSG
+_
+XtNxdCurrentPage:XtCXdCurrentPage:0:int:CSG
+.TE
+.br
+
+.SS Constraint Resources
+.B
+.IP XtNxdPageNumber
+This constraint resource assigns a logical page number to a child widget. The child
+is displayed if the Card widget 
+.B XtNxdCurrentPage 
+resource has the same value.
+.IP
+The following table summarises the constraint resources of the Card widget:
+.br
+
+.TS
+box, tab(:) ;
+cb | cb | cb | cb | cb
+lp-2 | lp-2 | cp-2 | lp-2 | cp-2.
+Name:Class:Default:Type:Access
+=
+XtNxdPageNumber:XtCXdPageNumber:0:short:CSG
+.TE
+.br
+
+.IP Translations
+Card inherits translations from the 
+.B XdLayout
+widget.
+.SH RELATED INFORMATION
+.B Core(3X), Composite(3X), Constraint(3X), XmManager(3X), XdLayout(3X), 
+.B XdCreateCardWidget(3X), XdCardShowPage(3X).

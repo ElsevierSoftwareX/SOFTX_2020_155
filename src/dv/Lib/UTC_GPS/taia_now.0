@@ -1,0 +1,66 @@
+
+
+
+C Library Functions                                   taia_now(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     taia_now - get current time, with 1-attosecond precision
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee <<<<ttttaaaaiiiiaaaa....hhhh>>>>
+
+     void ttttaaaaiiiiaaaa____nnnnoooowwww(&_t);
+
+     struct taia _t;
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+     ttttaaaaiiiiaaaa____nnnnoooowwww puts the current time into _t.
+
+     More precisely:  ttttaaaaiiiiaaaa____nnnnoooowwww puts into _t its best guess  as  to
+     the  TAI64NA  label  for the 1-attosecond interval that con-
+     tains the current time.
+
+NNNNOOOOTTTTEEEESSSS
+     This implementation  of  ttttaaaaiiii____nnnnoooowwww  assumes  that  the  ssssttttrrrruuuucccctttt
+     ttttiiiimmmmeeeevvvvaaaallll  returned from ggggeeeettttttttiiiimmmmeeeeooooffffddddaaaayyyy represents the number of
+     TAI seconds since 1970-01-01 00:00:10 TAI.
+
+SSSSEEEEEEEE AAAALLLLSSSSOOOO
+     gettimeofday(2), tai_now(3), taia(3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+

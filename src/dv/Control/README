@@ -1,0 +1,430 @@
+
+If you use Workshop Visual to re-generate the Dataviewer control panel
+code, you need to manually add the following lines into various files
+accordingly. 
+
+--------------------------------------------------
+dc3_stubs.c: 
+/*for linux drag/drop */ 
+#include <Xm/DropTrans.h> 
+
+--------------------------------------------------
+dc3.h:
+
+char *optarg;
+int  optind, opterr;
+char displayIP[80], serverIP[80];
+char origDir[1024], iniDir[80];
+int  serverPort, webPort, mmMode; /* 0-server, 1-tocfile, 2-frame dir */;
+
+char chName[16][80], chUnit[16][80], frameFileName[240], restoreFileName[240];
+int  restoreFile;
+int  chRate[16];
+
+char version_n[8];   /* version number */
+char version_m[8], version_y[8];  /* version date */
+int  zoomflag, /* -free indicator for grace  */ nolimit;
+
+Atom COMPOUND_TEXT;
+Atom import_list[1];
+
+
+--------------------------------------------------
+dc3.c:
+
+#include "Server/datasrv.h"
+
+
+
+extern void drop_v1(Widget, XtPointer, XtPointer) ;
+extern void drop_v2(Widget, XtPointer, XtPointer) ;
+extern void drop_v3(Widget, XtPointer, XtPointer) ;
+extern void drop_v4(Widget, XtPointer, XtPointer) ;
+extern void drop_v5(Widget, XtPointer, XtPointer) ;
+extern void drop_v6(Widget, XtPointer, XtPointer) ;
+extern void drop_v7(Widget, XtPointer, XtPointer) ;
+extern void drop_v8(Widget, XtPointer, XtPointer) ;
+extern void drop_v9(Widget, XtPointer, XtPointer) ;
+extern void drop_v10(Widget, XtPointer, XtPointer) ;
+extern void drop_v11(Widget, XtPointer, XtPointer) ;
+extern void drop_v12(Widget, XtPointer, XtPointer) ;
+extern void drop_v13(Widget, XtPointer, XtPointer) ;
+extern void drop_v14(Widget, XtPointer, XtPointer) ;
+extern void drop_v15(Widget, XtPointer, XtPointer) ;
+extern void drop_v16(Widget, XtPointer, XtPointer) ;
+
+
+
+/* insert after XtManageChildren(children, ac)  - 144 lines*/
+
+	if (v1) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v1 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v1); ac++;
+	XmDropSiteUpdate (v1, al, ac);
+	}
+	if (v2) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v2 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v2); ac++;
+	XmDropSiteUpdate (v2, al, ac);
+	}
+	if (v3) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v3 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v3); ac++;
+	XmDropSiteUpdate (v3, al, ac);
+	}
+	if (v4) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v4 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v4); ac++;
+	XmDropSiteUpdate (v4, al, ac);
+	}
+	if (v5) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v5 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v5); ac++;
+	XmDropSiteUpdate (v5, al, ac);
+	}
+	if (v6) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v6 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v6); ac++;
+	XmDropSiteUpdate (v6, al, ac);
+	}
+	if (v7) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v7 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v7); ac++;
+	XmDropSiteUpdate (v7, al, ac);
+	}
+	if (v8) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v8 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v8); ac++;
+	XmDropSiteUpdate (v8, al, ac);
+	}
+	if (v9) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v9 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v9); ac++;
+	XmDropSiteUpdate (v9, al, ac);
+	}
+	if (v10) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v10 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v10); ac++;
+	XmDropSiteUpdate (v10, al, ac);
+	}
+	if (v11) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v11 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v11); ac++;
+	XmDropSiteUpdate (v11, al, ac);
+	}
+	if (v12) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v12 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v12); ac++;
+	XmDropSiteUpdate (v12, al, ac);
+	}
+	if (v13) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v13 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v13); ac++;
+	XmDropSiteUpdate (v13, al, ac);
+	}
+	if (v14) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v14 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v14); ac++;
+	XmDropSiteUpdate (v14, al, ac);
+	}
+	if (v15) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v15 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v15); ac++;
+	XmDropSiteUpdate (v15, al, ac);
+	}
+	if (v16) {
+	ac = 0;
+	COMPOUND_TEXT = XmInternAtom( XtDisplay( v16 ), "COMPOUND_TEXT", False );
+	import_list[0] = COMPOUND_TEXT;
+	XtSetArg (al[ac], XmNimportTargets, import_list);  ac++;
+	XtSetArg (al[ac], XmNnumImportTargets, 1); ac++;
+	XtSetArg (al[ac], XmNdropProc, drop_v16); ac++;
+	XmDropSiteUpdate (v16, al, ac);
+	}
+
+
+/* add the following to main */
+
+int c, c1, c2, i, j;
+static char optstring[] = "a:b:x:s:p:w:r:f:hozF";
+struct DChList allChan[MAX_CHANNELS];
+char   tempname[80], lst[201], ch[2];
+int  lcount=0;
+FILE   *fp, *fp1, *fp2;
+
+
+
+
+
+
+/* begin customized code */
+
+        for ( i=1; i<argc; i++ ){
+           if ( (strcmp(argv[i], "h" ) == 0) || (strcmp(argv[i], "-h" ) == 0)){
+              printf("Usage: dataviewer \n        [-s server IP address (required unless using -F)] \n        [-x grace display IP address] \n        [-p server port] \n        [-r restore file] \n        [-F (frame file option)] \n        [-z (grace zoom option)] \n");        
+        
+	      /*[-w web server port(default 8080)] \n");*/
+              printf("Usage Example: dataviewer -s 131.215.114.15\n");
+              printf("           or: dataviewer -x 131.215.114.15:1.0 -s 131.215.114.15 -p 8088\n");
+              printf("           or: dataviewer -F\n");
+              exit(0);
+           }
+        }
+
+        opterr = 0;
+        serverPort = 0;
+        webPort = 8080;
+        strcpy(serverIP, "-1");
+        strcpy(displayIP, "0" );
+	strcpy(iniDir, "50");
+	strcpy(origDir, "");
+        strcpy(frameFileName, " ");
+	mmMode = 0;
+        restoreFile = 0;
+        zoomflag = 0;
+	nolimit = 0;
+        while (  (c = getopt(argc, argv, optstring)) != -1 ) {
+           /* options for starting dc3 */
+           switch ( c ) {
+             case 'x': 
+                 strcpy(displayIP, optarg);
+                 break;
+             case 's': 
+                 strcpy(serverIP, optarg);
+                 break;
+             case 'p': 
+                 serverPort = atoi(optarg);
+                 break;
+             case 'w': 
+                 webPort = atoi(optarg);
+                 break;
+             case 'r': /* restore from file */
+		 strcpy(restoreFileName, optarg);
+                 restoreFile = 1;
+                 break;
+             case 'F': /* file option with no file input */
+	         mmMode = 1;
+                 break;
+             case 'f': /* file option with frame file input */
+	         mmMode = 1;
+		 strcpy(frameFileName, optarg);
+                 break;
+             case 'a': /* for creating a unique dir in /tmp, may not be needed */
+                 strcpy(iniDir, optarg);
+                 break;
+             case 'b': /* to get the path variable */
+                 strcpy(origDir, optarg);
+		 printf ( "Program directory: %s\n", origDir );
+                 break;
+             case 'z': /* -free indicator for grace */
+	         zoomflag = 1;
+                 break;
+             case 'o': /* for operator stations - no time limit*/
+	         nolimit = 1;
+                 break;
+             case '?':
+                 printf ( "Invalid option found.\n" );
+           }
+           
+        }
+	if (strcmp(origDir, "") == 0) {
+	  fprintf ( stderr,"Error: the variable $DVPATH is undefined. Exit.\n" );
+	  exit(0);
+	}
+	strcat(origDir, "/");
+	/* check lockfile */
+	sprintf ( lst, "%schecklock", origDir );
+	if ( fork() == 0 ) {
+	  if ( fork() == 0 ) {
+	    execlp(lst,"checklock",(char*)NULL);
+	    perror("Can't check lockfile");
+	    exit(0);
+	  }
+	  else {
+	    exit(0);
+	  }
+	}
+	else {
+	  wait(0);
+	}
+	sleep(1);
+	fp = fopen("lockfile", "r");
+	if (fp != NULL) {
+	  while( fgets(lst, 200, fp) != NULL) {
+	    lcount++;
+	  }
+	}
+	fclose(fp);
+	if (lcount > 1) {
+	  if (lcount == 2)
+	    printf ( "Warning: There is another copy of Dataviewer running on this machine.\n");
+	  else
+	    printf ( "Warning: There are %d copies of Dataviewer running on this machine.\n",  lcount-1);
+	  printf ( "Continue? [y] or [n]\n" );
+	  scanf("%s",ch);
+	  switch ( ch[0] ) {
+	  case 'y': 
+	  case 'Y': 
+	    printf("Continue.\n");
+	    break;
+	  default: 
+	    printf("Exit.\n");
+	    exit(1);
+	    break;
+	  }
+	}
+
+	
+	if (mmMode == 0)
+	  printf ( "Start %s: <displayIP %s> <serverIP %s> <serverPort %d> <webPort %d>\n",argv[0],displayIP,serverIP,serverPort,webPort );
+	else 
+	  printf ( "Start %s: <displayIP %s> <frame file %s>\n",argv[0],displayIP, frameFileName);
+	/*
+        getcwd(origDir, sizeof(origDir));
+        if ( strcmp(origDir, "/") != 0 )
+           strcat(origDir, "/");
+	*/
+	strcat(iniDir, "DC/");
+
+	if ( mmMode == 0 ) {
+	/* get channel/group information from Data Server and write to a file */
+	sprintf ( tempname, "%s",  serverIP );
+	if ( DataSimpleConnect(tempname, serverPort) ) {
+	   fprintf ( stderr,"dc3: connection to Data Server failed\n" );
+	   exit (1);
+	}
+
+	sprintf ( tempname, "/tmp/%schannelset0",  iniDir );
+	printf ( "writing channel information to file: %s\n", tempname );
+	fp = fopen(tempname, "w");
+	if ( fp == NULL ) {
+	   printf ( "Cann't open writing file: %s\n", tempname );
+	   exit (1);
+	}
+	sprintf ( tempname, "/tmp/%schannelset_dmt",  iniDir );
+	printf ( "writing DMT channel information to file: %s\n", tempname );
+	fp1 = fopen(tempname, "w");
+	if ( fp1 == NULL ) {
+	   printf ( "Cann't open writing file: %s\n", tempname );
+	   exit (1);
+	}
+	sprintf ( tempname, "/tmp/%schannelset_obs",  iniDir );
+	printf ( "writing Obsolete channel information to file: %s\n", tempname );
+	fp2 = fopen(tempname, "w");
+	if ( fp2 == NULL ) {
+	   printf ( "Cann't open writing file: %s\n", tempname );
+	   exit (1);
+	}
+	c = DataChanList(allChan);
+	c1 = 0;
+	c2 = 0;
+	for ( j=0; j<c; j++ ) { /* count DMT & Obsolete channels */
+	  if (allChan[j].group_num == 1000) 
+	    c1++;
+	  else if (allChan[j].group_num == 1001) 
+	    c2++;
+	}
+	fprintf ( fp, "%d\n", c-c1-c2 );
+	fprintf ( fp1, "%d\n", c1 );
+	fprintf ( fp2, "%d\n", c2 );
+        printf ( "total %d DMT channels\n", c1);
+        printf ( "total %d Obsolete channels\n", c2);
+	for ( j=0; j<c; j++ ) {
+	   if (strcmp(allChan[j].units, " ")==0) 
+	      strcpy(allChan[j].units, "None");
+           if (allChan[j].group_num == 1000) /* DMT channel */
+              fprintf ( fp1, "%s %d %s\n", allChan[j].name, allChan[j].rate, allChan[j].units );
+           else if (allChan[j].group_num == 1001) /* Obsolete channel */
+              fprintf ( fp2, "%s %d %s\n", allChan[j].name, allChan[j].rate, allChan[j].units );
+           else
+              fprintf ( fp, "%s %d %s\n", allChan[j].name, allChan[j].rate, allChan[j].units );
+	}
+	fclose(fp);
+	fclose(fp1);
+	fclose(fp2);
+
+	DataQuit();
+	for ( j=0; j<16; j++ ) {
+           sprintf ( chName[j], allChan[j].name );
+	   chRate[j] = allChan[j].rate;
+           sprintf ( chUnit[j], allChan[j].units );
+        }
+	if ( c < 16 ) {
+	   for ( j=c; j<16; j++ ) {
+	      sprintf ( chName[j], "0" );
+	      chRate[j] = 0;
+	      sprintf ( chUnit[j], "0" );
+	   }
+	}
+	}
+	strcpy(version_n, "G4.5");
+	strcpy(version_m, "December");
+	strcpy(version_y, "2003");
+	printf ( "\n ********************************** \n" );
+	printf ( "   Dataviewer Version %s\n", version_n );
+	printf ( "   (C) The LIGO Project, %s %s\n", version_m, version_y );
+	printf ( " ********************************** \n\n" );
+
+/* end of customized code */
+
+
