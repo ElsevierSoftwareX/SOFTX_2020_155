@@ -35,9 +35,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "maronsso"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Oct 07 11:46:39 2010"
-  RTWModifiedTimeStamp	  208352578
-  ModelVersionFormat	  "1.%<AutoIncrement:163>"
+  LastModifiedDate	  "Mon Oct 25 13:29:29 2010"
+  RTWModifiedTimeStamp	  209914132
+  ModelVersionFormat	  "1.%<AutoIncrement:171>"
   ConfigurationManager	  "None"
   SimulationMode	  "normal"
   LinearizationMsg	  "none"
@@ -379,7 +379,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [1206, 166, 1896, 651]
+    Location		    [1192, 68, 1910, 791]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -481,7 +481,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"EpicsParts"
-	Location		[1169, 319, 1438, 949]
+	Location		[901, 132, 1170, 762]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -499,7 +499,7 @@ Library {
 	  Name			  "EpicsBinIn"
 	  Tag			  "cdsEpicsBinIn"
 	  Description		  "Purpose:                                                                            \nCreate an EPICS binary (0 or 1) input channel to the FE realtime controls.          \n                                                                                    \nOperation:                                                                          \nOutputs value from an EPICS ai record. Value is binary input (bi Epics record type).\n                                                                                    \nUsage:                                                                              \nName the part with the desired EPICS channel name.                                  "
-	  Ports			  [1, 1]
+	  Ports			  [0, 1]
 	  Position		  [155, 98, 210, 122]
 	  BackgroundColor	  "darkGreen"
 	  AttributesFormatString  "%<Tag>"
@@ -519,12 +519,33 @@ Library {
 	  Name			  "EpicsInput"
 	  Tag			  "cdsEpicsIn"
 	  Description		  "Purpose:                                                                              \nCreate an EPICS input channel connection to the FE realtime controls.                 \n                                                                                      \nOperation:                                                                            \nOutputs value from an EPICS ai record. Value is floating point with a precision of 3..\n                                                                                      \nUsage:                                                                                \nName the part with the desired EPICS channel name.                                    "
-	  Ports			  [1, 1]
+	  Ports			  [0, 1]
 	  Position		  [40, 94, 90, 116]
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
 	  SourceBlock		  "cdsEpicsIn/Subsystem"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "EpicsMbbi"
+	  Tag			  "cdsEpicsMbbi"
+	  Description		  "cdsEpicsMbbi"
+	  Ports			  [1]
+	  Position		  [150, 439, 250, 481]
+	  BackgroundColor	  "[0.000000, 0.501961, 0.501961]"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsEpicsMbbi/EpicsMbbi"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
@@ -599,6 +620,27 @@ Library {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "EpicsStringIn"
+	  Tag			  "cdsEpicsStringIn"
+	  Description		  "cdsEpicsStringIn"
+	  Ports			  [1]
+	  Position		  [25, 439, 125, 481]
+	  BackgroundColor	  "[0.000000, 0.501961, 0.250980]"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  SourceBlock		  "cdsEpicsStringIn/EpicsStringIn"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "M1:SYS-FOO_BAR"
 	  Tag			  "cdsEzCaRead"
 	  Description		  "Purpose:                                                       \nUsed to input an Epics signal.                                 \n                                                               \nOperation:                                                     \nUsing ezcaread() function to get Epics input from a remote IOC.\n                                                               \nUsage:                                                         \nGive the name of the EPICS channel to be read.                 "
@@ -656,7 +698,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Filters"
-	Location		[743, 643, 1150, 1063]
+	Location		[731, 559, 1162, 1183]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -788,7 +830,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[1055, 256, 1866, 1034]
+	Location		[1043, 172, 1878, 1154]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1467,7 +1509,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"MatrixParts"
-	Location		[391, 353, 1065, 883]
+	Location		[379, 269, 1077, 1003]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1756,7 +1798,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Osc/Phase"
-	Location		[1216, 464, 1611, 871]
+	Location		[1204, 380, 1623, 991]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1909,7 +1951,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"WatchDogs"
-	Location		[1416, 468, 1679, 918]
+	Location		[1404, 384, 1691, 1038]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1980,7 +2022,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[1521, 415, 1797, 1182]
+	Location		[1509, 237, 1809, 1208]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
