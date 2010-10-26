@@ -2915,7 +2915,7 @@ daqd_c::symm_gps(unsigned long *frac, int *stt) {
     ioctl (symmetricom_fd, IOCTL_SYMMETRICOM_TIME, &t);
     //printf("%lds %ldu %ldn\n", t[0], t[1], t[2]);
     //t[0] -= 315964819 - 19;
-    t[0] -= 345586;
+    t[0] -= 345585;
     t[1] *= 1000;
     t[1] += t[2];
     if (frac) *frac = t[1];
