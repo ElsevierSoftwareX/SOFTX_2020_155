@@ -3,8 +3,6 @@
 
 /* A union which permits us to convert between a long double and
    three 32 bit ints.  */
-//typedef unsigned int u_int32_t;
-//typedef int int32_t;
 
 typedef union
 {
@@ -100,7 +98,6 @@ do {								\
  * isnanl(x) returns 1 is x is nan, else 0;
  * no branching!
  */
-
 
 int isnan(long double x) {
 	int32_t se,hx,lx;
