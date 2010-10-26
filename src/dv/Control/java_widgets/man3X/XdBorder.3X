@@ -1,0 +1,120 @@
+'\" t
+.TH XdBorder 3X
+.\"/*%tbl % | nroff -man
+.SH NAME
+.B XdBorder 
+\- The Java Border Layout emulation widget class
+.SH SYNOPSIS
+.B #include "Border.h"
+.SH DESCRIPTION
+Border is a simple constraint widget which lays out its children based upon
+the primary points of the compass. It emulates the behaviour of the Java Border Layout class.
+.SS Classes
+Border inherits behaviour and resources from the 
+.B Core, Composite, Constraint, XmManager,
+and 
+.B XdLayout 
+classes. 
+.br
+
+.br
+The class pointer is 
+.B xdBorderWidgetClass. 
+.br
+
+.br
+The class name is 
+.B XdBorder.
+.SS Resources
+The following list defines a set of widget resources which can be used by the programmer to
+specify the behaviour of the Border widget. The programmer can also set the resource values
+for the inherited classes to set attributes for this widget. To reference a resource by name 
+or by class in a 
+.B .Xdefaults 
+file, remove the 
+.B XtN
+or 
+.B XtC
+prefix and use the remaining letters.
+.ft B
+.IP XtNxdHorizontalSpacing
+.ft P
+Specifies the spacing (in pixels) between the left and right edges of child widgets. The resource
+does not affect spacing between any child and the Border widget itself. 
+.ft B
+.IP XtNxdVerticalSpacing
+.ft P
+Specifies the spacing (in pixels) between the top and bottom edges of child widgets. The resource
+does not affect spacing between any child and the Border widget itself. 
+.IP 
+The following table summarises the resources of the Border widget:
+.br
+
+.TS
+box, tab(:) ;
+cb | cb | cb | cb | cb
+lp-2 | lp-2 | cp-2 | lp-2 | cp-2.
+Name:Class:Default:Type:Access
+=
+XtNxdHorizontalSpacing:XtCXdHorizontalSpacing:0:Dimension:CSG
+_
+XtNxdVerticalSpacing:XtCXdVerticalSpacing:0:Dimension:CSG
+.TE
+.br
+
+.SS Constraint Resources
+.B
+.IP XtNxdBorderAlignment
+This constraint resource controls the position of a child within the Border widget. 
+The resource can have the following values:
+.RS 1i
+.ft B
+.IP XdBorderAlignmentNorth
+.ft P
+the child straddles the Border widget across the top
+.ft B
+.IP XdBorderAlignmentCenter
+.ft P
+the child occupies the center of the Border widget
+.ft B
+.IP XdBorderAlignmentSouth
+.ft P
+the child straddles the Border widget across the bottom
+.ft B
+.IP XdBorderAlignmentEast
+.ft P
+the child occupies the right edge between North and South children
+.ft B
+.IP XdBorderAlignmentWest 
+.ft P
+the child occupies the left edge between North and South children
+.RE
+.IP
+In the absence of a child in any of the alignment locations of the Border widget,
+other children will extend to consume the space which would have been occupied at the
+given alignment. For example, in the absence of a North aligned child, any East, West,
+and Center aligned children will also extend to the top of the Border widget. 
+.IP
+North and South aligned children will grow in the horizontal direction with the Border widget.
+East and West aligned children will grow in the vertical direction. A Center aligned child will
+grow in both directions.
+.IP
+The following table summarises the constraint resources of the Border widget:
+.br
+
+.TS
+box, tab(:) ;
+cb | cb | cb | cb | cb
+lp-2 | lp-2 | cp-2 | lp-2 | cp-2.
+Name:Class:Default:Type:Access
+=
+XtNxdBorderAlignment:XtCXdBorderAlignment:XdBorderAlignmentNorth:short:CSG
+.TE
+.br
+
+.IP Translations
+Border inherits translations from the 
+.B XdLayout
+widget.
+.SH RELATED INFORMATION
+.B Core(3X), Composite(3X), Constraint(3X), XmManager(3X), XdLayout(3X), XdCreateBorderWidget(3X).

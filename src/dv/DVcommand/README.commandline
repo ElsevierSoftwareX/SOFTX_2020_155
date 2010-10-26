@@ -1,0 +1,63 @@
+
+Commandline version of Grace-Dataviewer for playback
+======================================================
+
+$DVPATH must be set as same as Dataviewer (Grace).
+
+dv_command takes six arguments:
+  Server IP, Server Port, Input File, Starting time (GPS), Duration (in seconds), Conversion (1-yes 0-no)
+
+E.g.,  dv_command 198.129.208.138 0 playset 741824155 300 1
+
+dv_command_file, which saves the Grace output as a postscript file 
+instead of showing it on screen, takes an additional argument:
+  Server IP, Server Port, Input File, Starting time (GPS), Duration (in seconds), Conversion (1-yes 0-no), Output (ps) file
+
+E.g.,  dv_command_file 198.129.208.138 0 playset 741824155 300 1 dv.ps 
+
+
+Input File Format (do not include the comments):
+
+Total channels N            // integer <= 16
+auto                        // 1 (auto setting) or 0 (non-auto)
+Ch.1 name
+Ch.1 unit
+Ch.1 y-min                  // float; only when auto = 0
+Ch.1 y-max                  // float; only when auto = 0
+...
+Ch.N name
+Ch.N unit
+Ch.N y-min                  // float; only when auto = 0
+Ch.N y-max                  // float; only when auto = 0
+X-axis format               // 1 (GPS) or 0 (UTC)
+decimation                  // 0 (full data), 1 (sec trend), 60 (min trend) or 10 (10 min trend)
+mean                        // 1 (display) or 0 (don't display)
+max                         // 1 (display) or 0 (don't display)
+min                         // 1 (display) or 0 (don't display)
+
+
+Example of Input File:
+
+8 
+1
+C1:PSL-FSS_MIXERM_F
+volts
+C1:PSL-FSS_PCDRIVE_F
+volts
+C1:PSL-FSS_SLOWDC_F
+volts
+C1:PSL-FSS_FAST_F
+volts
+C1:PSL-ISS_ISERR_F
+volts
+C1:PSL-ISS_ISS_ACTM_F
+volts
+C1:PSL-PMC_ERR_F
+volts
+C1:PSL-PMC_PZT_F
+volts
+1
+1
+1
+1
+1

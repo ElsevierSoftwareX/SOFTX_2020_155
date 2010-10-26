@@ -1,0 +1,234 @@
+'\" t
+.TH XdGridBag 3X
+.\"/*%tbl % | nroff -man
+.SH NAME
+.B XdGridBag 
+\- The Java GridBag Layout emulation widget class
+.SH SYNOPSIS
+.B #include "GridBag.h"
+.SH DESCRIPTION
+GridBag is a multi-purpose constraint widget which lays out its children in a grid format,
+where children are placed in cells laid out in rows and columns. Rows and columns
+of the GridBag may be different heights and widths to accomodate the different size of the various
+children. The height of a row is determined by the tallest child in the row, and the width of
+a column is determined by the widest child in that column.  Child widgets can be made to span
+any number of rows. Columns can be aligned geographically within the cells that they occupy.
+The GridBag provides control over the resize behaviour of child widgets as the GridBag is itself 
+resized.
+.br
+
+The widget emulates the behaviour of the Java GridBag Layout class.
+.SS Classes
+GridBag inherits behaviour and resources from the 
+.B Core, Composite, Constraint, XmManager,
+and 
+.B XdLayout 
+classes. 
+.br
+
+.br
+The class pointer is 
+.B xdGridBagWidgetClass. 
+.br
+
+.br
+The class name is 
+.B XdGridBag.
+.SS Resources
+The GridBag widget itself defines no new resources.  The programmer can set the resource values
+for the inherited classes to set attributes for this widget.
+.SS Constraint resources
+The following list defines a set of constraint resources which can be used by the programmer to
+specify the behaviour of children of the GridBag widget. To reference a resource by name
+or by class in a
+.B .Xdefaults
+file, remove the
+.B XtN
+or
+.B XtC
+prefix and use the remaining letters.
+.br
+
+.ft B
+.IP XtNxdCellAlignment
+.ft P
+Specifies where the child should be placed geographically within the group of cells
+which it occupies. The resource has the following values:
+.RS 1i
+.ft B
+.IP XdCellAlignmentCenter
+.ft P
+.ft B
+.IP XdCellAlignmentEast
+.ft P
+.ft B
+.IP XdCellAlignmentNorth
+.ft P
+.ft B
+.IP XdCellAlignmentNorthEast
+.ft P
+.ft B
+.IP XdCellAlignmentNorthWest
+.ft P
+.ft B
+.IP XdCellAlignmentSouth
+.ft P
+.ft B
+.IP XdCellAlignmentSouthEast
+.ft P
+.ft B
+.IP XdCellAlignmentSouthWest
+.ft P
+.ft B
+.IP XdCellAlignmentWest
+.ft P
+.RE
+.br
+
+.ft B
+.IP XtNxdCellFill
+.ft P
+This resource controls the way in which widgets span the cells which they occupy. The resource
+has the following values:
+.RS 1i
+.ft B
+.IP XdCellFillHorizontal
+.ft P
+The child is made to fill all the columns for the cells that it occupies. 
+.ft B
+.IP XdCellFillVertical
+.ft P
+The child is made to fill all the rows for the cells that it occupies. 
+.ft B
+.IP XdCellFillBoth
+.ft P
+The child is made to fill all the cells that it occupies, both horizontally and vertically.
+.ft B
+.IP XdCellFillNone
+.ft P
+The child is allowed to keep its natural size, and is placed at the geographical location specified by
+the 
+.B XtNxdCellAlignment
+resource.
+.RE
+.br
+
+.ft B
+.IP XtNxdRow
+.ft P
+Specifies which row of the GridBag a child will occupy. A special value of -1,
+.B XdRELATIVE,
+indicates that the widget should remain horizontally adjacent to the previous child.
+.ft B
+.IP XtNxdColumn
+.ft P
+Specifies which column of the GridBag a child will occupy. A special value of -1,
+.B XdRELATIVE,
+indicates that the widget should remain vertically adjacent to the previous child.
+.ft B
+.IP XtNxdRows
+.ft P
+Specifies how many rows of the GridBag a child will occupy. A special value of 0,
+.B XdREMAINDER,
+indicates that the child should occupy all remaining rows from its current position to the edge of the GridBag.
+.ft B
+.IP XtNxdColumns
+.ft P
+Specifies how many columns of the GridBag a child will occupy. A special value of 0,
+.B XdREMAINDER,
+indicates that the child should occupy all remaining columns from its current position to the edge of the GridBag.
+.ft B
+.IP XtNxdPadX
+.ft P
+Specifies an internal padding to add to each side of the child widget in the horizontal direction.
+.ft B
+.IP XtNxdPadY
+.ft P
+Specifies an internal padding to add to each side of the child widget in the vertical direction.
+.ft B
+.IP XtNxdInsetLeft
+.ft P
+Specifies a margin to appear on the left of a child widget.
+.ft B
+.IP XtNxdInsetRight
+.ft P
+Specifies a margin to appear on the right of a child widget.
+.ft B
+.IP XtNxdInsetTop
+.ft P
+Specifies a margin to appear on the top of a child widget.
+.ft B
+.IP XtNxdInsetBottom
+.ft P
+Specifies a margin to appear on the bottom of a child widget.
+.ft B
+.IP XtNxdRowWeight
+.ft P
+This resource controls the way the child will resize when the GridBag is itself resized. The row containing the child 
+is resized depending on the highest such row weight resource in the given row. 
+.br
+
+For example, suppose there are two rows of three children. The first row has child weights 1, 2, and 3.
+The second row has child row weights all set to 2. If the GridBag is resized vertically, then the first row
+receives 3/5ths of the available space, this being calculated by the highest weight in the row (3) as a proportion of
+the sum of the highest weights in all rows (2 + 3 = 5).
+.ft B
+.IP XtNxdColumnWeight
+.ft P
+Controls the resize behaviour of the column as the GridBag is itself resized. The column containing the child
+is resized depending on the highest such column weight in the given column.
+.br
+
+For example, suppose there are three columns of two children. The first column has child weights 1, 2.
+The second column has child column weights all set to 2, and the third column has column weights 3 and 2.
+If the GridBag is resized horizontally, then the first column receives 2/7ths of the available space,
+this being calculated by the highest weight in the column (2) as a proportion of the sum of the highest weights
+in all columns (2 + 2 + 3 = 7).
+.br
+
+.IP 
+The following table summarises the constraint resources of the GridBag widget:
+.br
+
+.TS
+box, tab(:) ;
+cb | cb | cb | cb | cb
+lp-2 | lp-2 | cp-2 | lp-2 | cp-2.
+Name:Class:Default:Type:Access
+=
+XtNxdCellAlignment:XtCXdCellAlignment:XdAlignmentCenter:unsigned char:CSG
+_
+XtNxdCellFill:XtCXdCellFill:XdCellFillBoth:unsigned char:CSG
+_
+XtNxdRow:XtCXdRow:0:int:CSG
+_
+XtNxdColumn:XtCXdColumn:XdRELATIVE:int:CSG
+_
+XtNxdRows:XtCXdRows:1:int:CSG
+_
+XtNxdColumns:XtCXdColumns:1:int:CSG
+_
+XtNxdPadX:XtCXdPadX:0:Dimension:CSG
+_
+XtNxdPadY:XtCXdPadY:0:Dimension:CSG
+_
+XtNxdInsetLeft:XtCXdInsetLeft:0:Dimension:CSG
+_
+XtNxdInsetRight:XtCXdInsetRight:0:Dimension:CSG
+_
+XtNxdInsetTop:XtCXdInsetTop:0:Dimension:CSG
+_
+XtNxdInsetBottom:XtCXdInsetBottom:0:Dimension:CSG
+_
+XtNxdRowWeight:XtCXdRowWeight:0:int:CSG
+_
+XtNxdColumnWeight:XtCXdColumnWeight:0:int:CSG
+.TE
+.br
+
+.IP Translations
+GridBag inherits translations from the 
+.B XdLayout
+widget.
+.SH RELATED INFORMATION
+.B Core(3X), Composite(3X), Constraint(3X), XmManager(3X), XdLayout(3X), XdCreateGridBagWidget(3X).

@@ -1,0 +1,80 @@
+'\" t
+.TH XdGrid 3X
+.\"/*%tbl % | nroff -man
+.SH NAME
+.B XdGrid 
+\- The Java Grid Layout emulation widget class
+.SH SYNOPSIS
+.B #include "Grid.h"
+.SH DESCRIPTION
+Grid is a manager widget which lays out its children in a rectangular matrix.
+All children will have the same width and height, calculated according to the number of children,
+the required number of matrix columns, and the current size of the Grid widget.
+.br
+
+The widget emulates the behaviour of the Java Grid Layout class.
+.SS Classes
+Grid inherits behaviour and resources from the 
+.B Core, Composite, Constraint, XmManager,
+and 
+.B XdLayout 
+classes. 
+.br
+
+.br
+The class pointer is 
+.B xdGridWidgetClass. 
+.br
+
+.br
+The class name is 
+.B XdGrid.
+.SS Resources
+The following list defines a set of widget resources which can be used by the programmer to
+specify the behaviour of the Grid widget. The programmer can also set the resource values
+for the inherited classes to set attributes for this widget. To reference a resource by name 
+or by class in a 
+.B .Xdefaults 
+file, remove the 
+.B XtN
+or 
+.B XtC
+prefix and use the remaining letters.
+.ft B
+.IP XtNxdHorizontalSpacing
+.ft P
+Specifies the horizontal spacing (in pixels) between widgets in each row. It does not affect
+the spacing between child widgets and the Grid widget itself.
+.ft B
+.IP XtNxdVerticalSpacing
+.ft P
+Specifies the vertical spacing (in pixels) between each row. It does not affect the spacing
+between child widgets and the Grid widget itself.
+.ft B
+.IP XtNxdNumColumns
+.ft P
+Specifies the number of columns required for the matrix.
+.IP 
+The following table summarises the resources of the Grid widget:
+.br
+
+.TS
+box, tab(:) ;
+cb | cb | cb | cb | cb
+lp-2 | lp-2 | cp-2 | lp-2 | cp-2.
+Name:Class:Default:Type:Access
+=
+XtNxdNumColumns:XtCXdNumColumns:1:short:CSG
+_
+XtNxdHorizontalSpacing:XtCXdHorizontalSpacing:0:Dimension:CSG
+_
+XtNxdVerticalSpacing:XtCXdVerticalSpacing:0:Dimension:CSG
+.TE
+.br
+
+.IP Translations
+Grid inherits translations from the 
+.B XdLayout
+widget.
+.SH RELATED INFORMATION
+.B Core(3X), Composite(3X), Constraint(3X), XmManager(3X), XdLayout(3X), XdCreateGridWidget(3X).

@@ -1,0 +1,40 @@
+'\" t
+.TH XdCardShowPage 3X
+.\"/*%tbl % | nroff -man
+.SH NAME
+.B XdCardShowPage 
+\- Causes the 
+.B XdCard 
+widget to display one of its constrained children.
+.SH SYNOPSIS
+.B
+#include <Card.h>
+.br
+
+.B
+void XdCardShowPage(\fIcard\fP, \fIpage\fP)
+.TS
+tab(:) ;
+lb li.
+Widget:card ;
+int:page ;
+.TE
+
+.SH DESCRIPTION
+.B XdCardShowPage
+will display the child whose 
+.B XtNxdPageNumber
+constraint resource matches the value specified by the logical page \fIpage\fP.
+.IP \fIcard\fP 1i
+Specifies the card widget ID
+.IP \fIpage\fP 1i
+Specifies the logical page to display
+.IP
+For a complete description of 
+.B XdCard
+and its associated resources, see 
+.B XdCard(3X).
+.SH RETURN VALUE
+None.
+.SH RELATED INFORMATION
+.B XdCard(3X)

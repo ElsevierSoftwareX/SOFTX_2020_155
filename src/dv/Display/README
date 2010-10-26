@@ -1,0 +1,10 @@
+To compile display source code for Dataviewer, you will need to link to
+two files
+  datasrv.o and daqc_access.o
+
+The latest version of them can be found at
+   /opt/CDS/f/cvs/cds/project/daq/dv/Lib/Th/
+
+The source code for datasrv.o can be obtained via CVS cds/project/daq/dv/Th/.
+
+The code for daqc_access.o is written by Alex Ivanov.

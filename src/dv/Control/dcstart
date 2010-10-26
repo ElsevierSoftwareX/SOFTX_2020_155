@@ -1,0 +1,2 @@
+#!/bin/sh
+$DVPATH/dc3 -s rana -a $$  -b $DVPATH $* || echo "***Press return to quit this window***"

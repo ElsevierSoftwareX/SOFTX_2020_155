@@ -1,0 +1,109 @@
+'\" t
+.TH XdFlow 3X
+.\"/*%tbl % | nroff -man
+.SH NAME
+.B XdFlow 
+\- The Java Flow Layout emulation widget class
+.SH SYNOPSIS
+.B #include "Flow.h"
+.SH DESCRIPTION
+Flow is a simple constraint widget which lays out its children in a row-column like manner,
+where the widget will display as many children as possible in a given row. All child
+widgets are allowed to find their natural size, each row having the height of the tallest child
+in the given row. Any child which cannot fit on the current row flows over into the next row.
+A row must contain at least one child, so that if any child is wider than the Flow widget itself,
+it will occupy a row to itself but be clipped in appearance.
+.br
+
+The resize behaviour of the Flow widget is that the layout will be recalculated with respect to
+the current given size - so that child widgets may change row as the available space in each row
+changes to take fewer or more children.
+.br
+
+The widget emulates the behaviour of the Java Flow Layout class.
+.SS Classes
+Flow inherits behaviour and resources from the 
+.B Core, Composite, Constraint, XmManager,
+and 
+.B XdLayout 
+classes. 
+.br
+
+.br
+The class pointer is 
+.B xdFlowWidgetClass. 
+.br
+
+.br
+The class name is 
+.B XdFlow.
+.SS Resources
+The following list defines a set of widget resources which can be used by the programmer to
+specify the behaviour of the Flow widget. The programmer can also set the resource values
+for the inherited classes to set attributes for this widget. To reference a resource by name 
+or by class in a 
+.B .Xdefaults 
+file, remove the 
+.B XtN
+or 
+.B XtC
+prefix and use the remaining letters.
+.ft B
+.IP XtNxdHorizontalAlignment
+.ft P
+This resource controls the justification of child widgets within each row. The resource can
+have the following values:
+.RS 1i
+.ft B
+.IP XdAlignmentBeginning
+.ft P
+Children are packed into the Flow widget starting at the left. Each subsequent child is placed
+to the right of the previous child, unless there is insufficient space, in which case
+the child is placed at the left of the next row, unless this is the only child in the row.
+.ft B
+.IP XdAlignmentCenter
+.ft P
+Children are laid out such that the space between the left edge of the leftmost child in any
+row and the Flow widget is equal to the space between the Flow widget and right edge of the rightmost child
+in the same row.
+.ft B
+.IP XdAlignmentEnd
+.ft P
+Children are packed into the Flow widget starting at the right. As each child is added to the row,
+previous children are moved to the left until such time as the row is full. A row must contain at
+least one child.
+.RE
+.ft B
+.IP XtNxdHorizontalSpacing
+.ft P
+Specifies the horizontal spacing (in pixels) between widgets in each row. It does not affect
+the spacing between child widgets and the Flow widget itself.
+.ft B
+.IP XtNxdVerticalSpacing
+.ft P
+Specifies the vertical spacing (in pixels) between each row. It does not affect the spacing
+between child widgets and the Flow widget itself.
+.IP 
+The following table summarises the resources of the Flow widget:
+.br
+
+.TS
+box, tab(:) ;
+cb | cb | cb | cb | cb
+lp-2 | lp-2 | cp-2 | lp-2 | cp-2.
+Name:Class:Default:Type:Access
+=
+XtNxdHorizontalAlignment:XtCXdHorizontalAlignment:XdAlignmentCenter:unsigned char:CSG
+_
+XtNxdHorizontalSpacing:XtCXdHorizontalSpacing:0:Dimension:CSG
+_
+XtNxdVerticalSpacing:XtCXdVerticalSpacing:0:Dimension:CSG
+.TE
+.br
+
+.IP Translations
+Flow inherits translations from the 
+.B XdLayout
+widget.
+.SH RELATED INFORMATION
+.B Core(3X), Composite(3X), Constraint(3X), XmManager(3X), XdLayout(3X), XdCreateFlowWidget(3X).

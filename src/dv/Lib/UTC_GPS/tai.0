@@ -1,0 +1,66 @@
+
+
+
+C Library Functions                                        tai(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     tai - manipulate times with 1-second precision
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee <<<<ttttaaaaiiii....hhhh>>>>
+
+     double ttttaaaaiiii____aaaapppppppprrrrooooxxxx(&_t);
+
+     int ttttaaaaiiii____lllleeeessssssss(&_a,&_b);
+     void ttttaaaaiiii____aaaadddddddd(&_t,&_a,&_b);
+     void ttttaaaaiiii____ssssuuuubbbb(&_t,&_a,&_b);
+
+     struct tai _t;
+     struct tai _a;
+     struct tai _b;
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+     A ssssttttrrrruuuucccctttt ttttaaaaiiii stores an integer between 0 inclusive and  2^64
+     exclusive.  The format of ssssttttrrrruuuucccctttt ttttaaaaiiii is designed to speed up
+     common  operations;  applications  should  not  look  inside
+     ssssttttrrrruuuucccctttt ttttaaaaiiii.
+
+     A ssssttttrrrruuuucccctttt ttttaaaaiiii variable is commonly  used  to  store  a  TAI64
+     label.   Each TAI64 label refers to one second of real time.
+     TAI64 labels span a period of hundreds of billions of years.
+     See  hhhhttttttttpppp::::////////ppppoooobbbbooooxxxx....ccccoooommmm////~~~~ddddjjjjbbbb////pppprrrroooottttoooo////ttttaaaaiiii66664444....ttttxxxxtttt for more informa-
+     tion.
+
+     A ssssttttrrrruuuucccctttt ttttaaaaiiii variable may also be used to store the  numeri-
+     cal difference between two TAI64 labels.
+
+AAAARRRRIIIITTTTHHHHMMMMEEEETTTTIIIICCCC
+     ttttaaaaiiii____aaaapppppppprrrrooooxxxx returns a double-precision  approximation  to  _t.
+     The result of ttttaaaaiiii____aaaapppppppprrrrooooxxxx is always nonnegative.
+
+     ttttaaaaiiii____lllleeeessssssss returns 1 if _a is smaller than _b, 0 otherwise.
+
+     ttttaaaaiiii____aaaadddddddd adds _a and _b modulo 2^64 and puts the result into _t.
+     The inputs and outputs may overlap.
+
+     ttttaaaaiiii____ssssuuuubbbb subtracts _b from _a modulo 2^64 and puts  the  result
+     into _t.  The inputs and outputs may overlap.
+
+SSSSEEEEEEEE AAAALLLLSSSSOOOO
+     tai_now(3), tai_pack(3), taia(3), utc(3)
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+

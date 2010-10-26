@@ -1,0 +1,137 @@
+DataViewer Version G4.5
+
+We've switched from Xmgr to Grace.
+
+Start from version 9.0, the setting files will be
+saved in XML format. Files which were saved by
+older versions (V5 - 7) need to be converted to 
+v8 by using 
+  saveV5toV8 <oldfile> <newfile>
+then convert v8 to v9 by
+  saveV8toV9 <oldfile> <newfile>.
+    
+Recent Revision History:
+G4.5 (11/2003): added an option for the operator stations that allows
+     timeout feature to be turned off
+G4.4 (11/2003): fixed a bug in global setting
+G4.3 (10/2003): switched to FRAME library framecpp/Version6. This change
+     only affects reading FRAME files
+G4.2 (10/2003): increased max channel allowance from 15000 to 30000
+G4.1 (08/2003): fixed a bug in Playback for those channels that don't 
+     have units recorded
+G4.0 (08/2003): Obsolete channel filter is added on the Signal
+     Selection Panel.
+G3.1 (06/2003): dragging from any applications other than Dataviewer
+     is now allowed.
+G3.0 (06/2003): drag and drop function added on signal selection panel.
+9.6/G2.3 (05/2003): fixed a bug on slope/offset in playback 
+9.5/G2.2 (03/2003): fixed a bug on channel highlighting
+G2.1 (02/2003): added the option "Equal to" in trigger condition 
+     for full data triggered playback.
+G2.0 (01/2003): added a XML filter for save/restore file selection.
+     Triggered playback is implemented.
+9.4/G1.3 (12/2002): fixed a bug in restoring
+G1.2 (11/2002): adjusted the graphic display positions and fixed the 
+     grace printing problem. Timeout (12 hours) feature is added.
+9.3/G1.1 (11/2002): signal names are allowed to be hand typed in
+     the Signal Selection field. Make sure no additional space typed 
+     before or after the actual signal name, or you will get 
+     "can't find channel" error message.
+G1   (11/2002): switched from Xmgr to Grace for data display 
+9.2  (11/2002): library changes on error report
+9.1  (10/2002): fixed a bug in channel selection (vacuum channels)
+9.0  (09/2002): setting file format has been fixed in XML and is not 
+     planned to be changed anymore. Files saved by older versions needed 
+     to be converted 
+8.2  (08/2002): added feature: restore signal channel setups from the 
+     starting command line. Usage:
+     $DVPATH/dataviewer -s <server IP> -r <restore file>
+8.1  (08/2002): one more layer of group names are added at the Signal
+     Selection window
+8.0  (07/2002): some changes have been done on the front panel. Now
+     multiple selection of channels is allowed  
+7.0  (06/2002): added DMT channel selection
+
+Dataviewer User Guide URL: 
+http://www.ligo.caltech.edu/~hding/Dataviewer/
+
+********************************************************************
+
+
+VIEW DATA FROM SERVER:
+
+Start the DataViewer with
+   $DVPATH/dataviewer0 -s <Server IP>
+or
+   $DVPATH/dataviewer -s <Server IP>
+which shows the messages on a new X term.
+
+Use ./dataviewer0 -h to see other options
+
+The following files are necessary to run the dataviewer using data server:
+
+    dataviewer (dataviewer0)
+    dc3
+    framer4
+    frameMemRead
+    leapsecs.dat - should be adjusted for new leap seconds
+    checklock
+    dcstart
+    xmgrace
+
+
+
+
+VIEW DATA FROM FRAME FILES:
+
+1. the DataViewer could be started without specifying a server:
+   $DVPATH/dataviewer0 -F
+   or
+   $DVPATH/dataviewer -F
+2. Go to Main menu. Main -> Frame Files:
+   Make TOC File: Point to the directory which contains ONLY Frame 
+       files. The generated TOC file (outtoc) will be placed in the
+       directory. (Note: TOC file could be generated without using
+       Dataviewer. Command: 
+       tocgenerate <Frame files directory> <output toc file name> )
+   Open TOC File: Point to the toc file which will be displayed
+   Open Frame File Directory: Point to the directory which contains 
+       ONLY Frame files. (Playing time period is not selectable for
+       trend data from Frame files)
+3. use Main -> Playback to display data.
+      
+
+The following files are necessary to run the dataviewer:
+
+    checklock
+    dataviewer (dataviewer0)
+    dc3
+    dcstart
+    frgenerate
+    frLongFile
+    leapsecs.dat - should be adjusted for new leap seconds
+    maketoc
+    readframe
+    readtoc
+    tocgenerate
+    tocLongFile
+    tocLongRead
+    xmgrace
+
+
+Older Revision History:
+6.3 (04/2002): in Playback - the choices for X Axis are now UTC and
+    GPS (instead of total time). Display will show the entire requested
+    interval (previously it shows only the portion which data is available).
+6.2 (02/2002): increased the capacity (up to 15000 channels) and made
+    some changes for a quicker channel selection.
+6.1 (02/2002): fixed a bug in full-data Playback 
+6.0 (01/2002): allow user to select multiple file names (rather than the
+    directory name only) when loading Frame files or making a TOC file
+5.5 (01/2002): fixed Frame file reading feature. Use Frame file naming
+    convention published by LDAS
+5.4 (10/2001): handles offline full frame data in blocks of multiple seconds
+5.3 (10/2001): fixed a bug in filter
+5.2 (09/2001): fixed bugs in restore feature
+5.1 (07/2001): fixed bugs in filter and decimation
+5.0 (05/2001): added filter 

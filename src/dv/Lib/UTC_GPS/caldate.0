@@ -1,0 +1,132 @@
+
+
+
+C Library Functions                                    caldate(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     caldate - manipulate calendar dates
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee <<<<ccccaaaallllddddaaaatttteeee....hhhh>>>>
+
+     void ccccaaaallllddddaaaatttteeee____ffffrrrroooommmmmmmmjjjjdddd(&_c_d,_d_a_y,_w_e_e_k_d_a_y,_y_e_a_r_d_a_y);
+     long ccccaaaallllddddaaaatttteeee____mmmmjjjjdddd(&_c_d);
+
+     unsigned int ccccaaaallllddddaaaatttteeee____ffffmmmmtttt(_s,&_c_d);
+     unsigned int ccccaaaallllddddaaaatttteeee____ssssccccaaaannnn(_s,&_c_d);
+
+     struct caldate _c_d;
+     long _d_a_y;
+     int *_w_e_e_k_d_a_y;
+     int *_y_e_a_r_d_a_y;
+     char *_s;
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+     A ssssttttrrrruuuucccctttt ccccaaaallllddddaaaatttteeee value is a calendar  date.   It  has  three
+     components:  yyyyeeeeaaaarrrr, mmmmoooonnnntttthhhh (1...12), and ddddaaaayyyy (1...31).
+
+CCCCOOOONNNNVVVVEEEERRRRSSSSIIIIOOOONNNNSSSS
+     Every calendar date has a _m_o_d_i_f_i_e_d _J_u_l_i_a_n  _d_a_y  _n_u_m_b_e_r.  The
+     day  number  increases  by  1 every day.  Day number 0 is 17
+     November 1858.  Day number 51604 is 1 March 2000.
+
+     ccccaaaallllddddaaaatttteeee____ffffrrrroooommmmmmmmjjjjdddd puts into _c_d the date corresponding  to  the
+     modified Julian day number _d_a_y.
+
+     ccccaaaallllddddaaaatttteeee____ffffrrrroooommmmmmmmjjjjdddd also computes the day of the week (0 through
+     6)  and  the day of the year (0 through 365).  It stores the
+     day of the week in  ****_w_e_e_k_d_a_y  if  _w_e_e_k_d_a_y  is  nonzero.   It
+     stores  the  day  of  the  year  in  ****_y_e_a_r_d_a_y  if _y_e_a_r_d_a_y is
+     nonzero.
+
+     ccccaaaallllddddaaaatttteeee____mmmmjjjjdddd  returns  the   modified   Julian   day   number
+     corresponding to the date in _c_d.
+
+     ccccaaaallllddddaaaatttteeee____mmmmjjjjdddd accepts days outside the range 0 to  30,  refer-
+     ring  to  days  before the beginning or after the end of the
+     month.  It also accepts months outside the range  0  to  11,
+     referring to months before the beginning or after the end of
+     the year.
+
+     ccccaaaallllddddaaaatttteeee____mmmmjjjjdddd does not check for overflow.
+
+FFFFOOOORRRRMMMMAAAATTTTTTTTIIIINNNNGGGG
+     ccccaaaallllddddaaaatttteeee____ffffmmmmtttt prints _c_d in ISO  style  (yyyy-mm-dd)  into  the
+     character  buffer  _s, without a terminating NUL.  It returns
+     the number of characters  printed.   _s  may  be  zero;  then
+     ccccaaaallllddddaaaatttteeee____ffffmmmmtttt returns the number of characters that would have
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+
+
+
+
+C Library Functions                                    caldate(3)
+
+
+
+     been printed.
+
+     ccccaaaallllddddaaaatttteeee____ssssccccaaaannnn reads a calendar date in  ISO  style  from  the
+     beginning of the character buffer _s and puts it into _c_d.  It
+     returns the number of characters read.  If _s does not  start
+     with an ISO-style date, ccccaaaallllddddaaaatttteeee____ssssccccaaaannnn returns 0.
+
+NNNNOOOOTTTTEEEESSSS
+     The ccccaaaallllddddaaaatttteeee routines currently support the Gregorian  calen-
+     dar,  which  was  defined  in  1582 and adopted at different
+     times in different countries.  For earlier dates the ccccaaaallllddddaaaatttteeee
+     routines work with ``virtual Gregorian,'' defined mathemati-
+     cally by the 400-year Gregorian cycle for years before 1582.
+     The Julian calendar is not supported.
+
+     The Gregorian calendar will be replaced by  a  new  calendar
+     within  a  few  thousand  years.   The  ccccaaaallllddddaaaatttteeee____ffffrrrroooommmmmmmmjjjjdddd  and
+     ccccaaaallllddddaaaatttteeee____mmmmjjjjdddd routines  will  be  upgraded  accordingly.   The
+     current  ccccaaaallllddddaaaatttteeee____ffffrrrroooommmmmmmmjjjjdddd  and  ccccaaaallllddddaaaatttteeee____mmmmjjjjdddd  routines are not
+     useful for dates far in the future.
+
+SSSSEEEEEEEE AAAALLLLSSSSOOOO
+     caltime(3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          2
+
+
+

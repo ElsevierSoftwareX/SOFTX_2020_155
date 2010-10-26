@@ -1,0 +1,66 @@
+
+
+
+C Library Functions                                    caltime(3)
+
+
+
+NNNNAAAAMMMMEEEE
+     caltime - manipulate calendar dates and times
+
+SSSSYYYYNNNNTTTTAAAAXXXX
+     ####iiiinnnncccclllluuuuddddeeee <<<<ccccaaaallllttttiiiimmmmeeee....hhhh>>>>
+
+     unsigned int ccccaaaallllttttiiiimmmmeeee____ffffmmmmtttt(_s,&_c_t);
+     unsigned int ccccaaaallllttttiiiimmmmeeee____ssssccccaaaannnn(_s,&_c_t);
+
+     struct caltime _c_t;
+     char *_s;
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+     A ssssttttrrrruuuucccctttt ccccaaaallllttttiiiimmmmeeee value is a calendar date and time  with  an
+     offset  in  minutes from UTC.  It has five components:  ddddaaaatttteeee
+     (a ssssttttrrrruuuucccctttt ccccaaaallllddddaaaatttteeee), hhhhoooouuuurrrr (0...23), mmmmiiiinnnnuuuutttteeee  (0...59),  sssseeeeccccoooonnnndddd
+     (0...60), and ooooffffffffsssseeeetttt (-5999...5999).
+
+     For example, a leap second  occurred  on  30  June  1997  at
+     23:59:60  UTC.   The local time in New York was 30 June 1997
+     19:59:60 -0400.  This local time  is  represented  inside  a
+     ssssttttrrrruuuucccctttt  ccccaaaallllttttiiiimmmmeeee  with  ddddaaaatttteeee containing 1997, 6, 30; hhhhoooouuuurrrr 19;
+     mmmmiiiinnnnuuuutttteeee 59; sssseeeeccccoooonnnndddd 60; and ooooffffffffsssseeeetttt -240 (4 hours).
+
+FFFFOOOORRRRMMMMAAAATTTTTTTTIIIINNNNGGGG
+     ccccaaaallllttttiiiimmmmeeee____ffffmmmmtttt prints _c_t  in  ISO  style  (yyyy-mm-dd  hh:mm:ss
+     +oooo)  into  the  character buffer _s, without a terminating
+     NUL.  It returns the number of characters printed.  _s may be
+     zero; then ccccaaaallllttttiiiimmmmeeee____ffffmmmmtttt returns the number of characters that
+     would have been printed.
+
+     ccccaaaallllttttiiiimmmmeeee____ssssccccaaaannnn reads a calendar date, time, and offset in  ISO
+     style  from the beginning of the character buffer _s and puts
+     them into _c_t.  It returns the number of characters read.  If
+     _s  does not start with an ISO-style date and time (including
+     offset), ccccaaaallllttttiiiimmmmeeee____ssssccccaaaannnn returns 0.
+
+SSSSEEEEEEEE AAAALLLLSSSSOOOO
+     caldate(3), tai(3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SunOS 5.6                 Last change:                          1
+
+
+

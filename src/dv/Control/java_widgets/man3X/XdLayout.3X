@@ -1,0 +1,63 @@
+'\" t
+.TH XdLayout 3X
+.\"/*%tbl % | nroff -man
+.SH NAME
+.B XdLayout 
+\- A general purpose Java Layout emulation widget class
+.SH SYNOPSIS
+.B #include "Layout.h"
+.SH DESCRIPTION
+Layout is a constraint widget which acts as a super class for the
+.B XdBorder, XdCard, XdGrid, XdGridBag, 
+and 
+.B XdFlow
+widgets. Its primary purpose is to act as a common emulation class for Java Layout 
+behaviour, and is not intended that programmers create instances of this class directly.
+.SS Classes
+Layout inherits behaviour and resources from the 
+.B Core, Composite, Constraint, 
+and
+.B XmManager
+classes. 
+.br
+
+.br
+The class pointer is 
+.B xdLayoutWidgetClass. 
+.br
+
+.br
+The class name is 
+.B XdLayout.
+.SS Resources
+The 
+.B
+XdLayout
+widget does not have any new resources specified. The programmer can set the resource values
+for the inherited classes to set attributes for this widget. 
+.IP Translations
+.B XdLayout
+includes the following translations from
+.B XmManager:
+.br
+
+.TS
+tab(\) ;
+lb lb.
+KHelp:\ManagerGadgetHelp()
+KSelect:\ManagerGadgetSelect()
+KActivate:\ManagerParentActivate()
+KCancel:\ManagerParentCancel()
+KAny:\ManagerGadgetKeyInput()
+Bany Motion:\ManagerGadgetButtonMotion()
+BSelect Press:\ManagerGadgetArm()
+BSelect Click:\ManagerGadgetActivate()
+BSelect Release:\ManagerGadgetActivate()
+BSelect Press 2+:\ManagerGadgetMultiArm()
+BSelect Release 2+:\ManagerGadgetMultiActivate()
+BTransfer Press:\ManagerGadgetMultiDrag()
+.TE
+.SH RELATED INFORMATION
+.B Core(3X), Composite(3X), Constraint(3X), XmManager(3X),
+.B XdBorder(3X), XdCard(3X), XdFlow(3X), XdGrid(3X),
+.B XdGridBag(3X)

@@ -1,0 +1,598 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<HTML>
+
+<!--
+    Author:        Hongyu Jane Ding <hding@ligo.caltech.edu>
+    Creation Date: June 15, 1998
+-->
+
+<HEAD>
+<TITLE>DAQS DataViewer Help</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFF7E0" TEXT="#000000" LINK="#0033CC" VLINK="#000066">
+<h2>Data Acquisition System</h2>
+<h1><FONT COLOR=#990000>DataViewer User Guide</FONT></h1>
+<h2>Version G4</h2>
+<A HREF="rivision.html"><B>Rivision History</B></A><BR>
+<A HREF="index.html"><B>DataViewer Main page</B></A>
+<BR><BR><hr size=5>
+
+<ul>
+  <li><a href="#start"><b>Getting Started</b></a>
+  <li><a href="#signal"><b>Selecting and Changing Signals</b></a>
+  <li><a href="#adjust"><b>Adjusting and Saving Settings</b></a>
+      <ul>
+	<li>X Axis
+	<li>Y Axis
+	<li>Auto
+	<li>Global Setting
+      </ul>
+  <li><a href="#displayaction"><b>Display Action</b></a>
+      <ul>
+	<li><a href="#stop">Stop</a>
+	<li><a href="#realtime">Play</a>
+	<li><a href="#pause">Pause</a>
+      </ul>
+  <li><a href="#long"><b>Playback</b></a>
+      <ul>
+	<li><a href="#timeset">Time Settings</a>
+	<li><a href="#longopt">Playback Options</a>
+	<li><a href="#longtr">Trigger</a>
+	<li><a href="#longfr">Play Frame Files</a>
+      </ul>
+  <li><a href="#graphtype"><b>Display Type</b></a>
+      <ul>
+	<li><a href="#time">Full Data</a>
+	<li><a href="#trend">Trend Data</a>
+      </ul>
+  <li><a href="#graphmode"><b>Display Mode</b></a>
+      <ul>
+	<li>Standard
+	<li>Multiple
+      </ul>
+  <li><a href="#display"><b>Other Display Options</b></a>
+      <ul>
+	<li><a href="#resolution">Resolution</a>
+	<li><a href="#refresh">Refresh Rate</a>
+	<li><a href="#filter">Filter</a>
+	<li><a href="#yscaletype">Y Scale Type</a>
+	<li><a href="#off">Highlighted Signal On/Off</a>
+	<li><a href="#color">Color Selection</a>
+      </ul>
+  <li><a href="#trigger"><b>Trigger</b></a>
+  <li><a href="#main"><b>Other Main Menu Items</b></a>
+      <ul>
+        <li><a href="#frame">Frame File</a>
+        <li><a href="#print">Printing</a>
+        <li><a href="#conn">New Connection</a>
+        <li><a href="#conf">New Configuration</a>
+        <li><a href="#quit">Exit</a>
+      </ul>
+  <li><a href="#tip"><b>Other Tips</b></a>
+      <ul>
+	<li><a href="#xmgr">Some useful Grace Tips</a>
+	<li><a href="#debug">Status Report/Debugging Information</a>
+	<li><a href="#trouble">Troubleshooting</a>
+      </ul>
+
+
+</ul>
+<hr>
+<h2> <a NAME="start">Getting Started</a></h2>
+<p>
+Directory: this version of the DataViewer is at<br>
+<DD>/opt/CDS/f/cvs/cds/project/daq/dv/G4.3/<br><br>
+Before starting the DataViewer, $DVPATH has to be set to the path where 
+the DataViewer is installed.<br><br>
+To start the DataViewer,  type <br>
+<DD>$DVPATH/dataviewer -s &nbsp&lt;Data Server IP Address&gt;<br>
+<i>e.g.</i>&nbsp &nbsp  $DVPATH/dataviewer -s&nbsp 131.215.113.11 <br><br>
+This will start the <A HREF="Images/control.gif">DataViewer Control</A>:
+<br><br><center><A HREF="Images/control.gif"><IMG src="Images/control_s.gif"
+width=417 height=195 border=0></A></center>
+<br><br>
+Clicking 
+<IMG ALIGN=middle WIDTH=32 HEIGHT=28 SRC="Images/play.gif"> (<B>Play</B>) 
+button at the upper left part of the control panel
+will start the <A HREF="Images/timebase.gif">Grace display window</A>.
+By default, the first channel in the Server configuration will be 
+displayed in realtime mode.
+<i>Note</i>: The graph may look blank if the data values of the signal
+fall outside the default Y-range. In this case the
+Y-Axis setting needs to be adjusted (see the topic
+<a href="#adjust">Adjusting and Saving Settings</a> below).
+<br><br>
+Other options: (type &nbsp dataviewer -h to see all options)<br>
+<DD> -s &nbsp&lt;Server IP Address&gt
+<DD> -x &nbsp&lt;Grace Display IP Address&gt
+<DD> -p &nbsp&lt;Server Port&gt
+<DD> -r &nbsp&lt;Restore File&gt
+<br><br>
+DataViewer can also be started by
+<DD>$DVPATH/dataviewer -F<br> or
+<DD>$DVPATH/dataviewer -f &nbsp&lt;Frame File&gt<br>
+if frame files are going to be used as a data source instead of a server. See 
+<a href="#frame">Frame File</a> for the usage.
+<br><br><hr>
+
+<h2> <a NAME="signal">Selecting and Changing Signals</a></h2>
+<p>DataViewer can load up to 16 channels. When DataViewer is connected 
+to a server, the first 16 signals from the Server configuration
+are automatically loaded into the 16 channels respectively. By default, 
+only the first channel will be displayed. You may select the channels 
+to be displayed from
+the <A HREF="Images/chansel.gif">channel select panel</A> which is 
+located at the right side of the control panel. Multiple
+selection is enabled since version 8.0.
+<p>In order to change the signal for a particular channel, first open the
+<A HREF="Images/sigsel.gif">Signal Selection window</A> by selecting
+the  pull-down menu <b>Main->Signal Select</b> (located on the 
+<A HREF="Images/top.gif">top panel</A>). The left side shows the
+current signal names in the (up to 16) channels.
+<BR><BR>
+Version G3.0 and above allow a signal name to be dragged (from
+DataViewer or other applications) and dropped
+in a particular channel. A signal could also be selected from the
+Signal Selection Window as following:
+The area under <b>Group Names</b> shows all of the current 
+available groups. Clicking on a group name, the area under
+<b>Signal Names</b> will show the list of signal names inside the group. 
+When <B>Fast</B> (or <B>Slow</B>, <B>DMT.</B>, <B>OBSLT.</B>) 
+is selected, only fast (or slow, DMT, Obsolete) 
+channels are shown. Select the desired signal. Then
+select the channel number by entering the number at the <B>New signal
+selected for Ch.</B> field or using the increasing/decreasing arrow buttons. 
+Click <b>Select</b> to make the change.<br><br>
+All channels can also be changed at once by using <b>Main->Restore</b> 
+if there is a pre-saved file.
+<br><br><hr>
+
+<h2> <a NAME="adjust">Adjusting and Saving Settings</a></h2>
+<IMG WIDTH=108 HEIGHT=37 ALIGN=right SRC="Images/middle_ch.gif">
+<p>The <A HREF="Images/middle.gif">middle portion</A> of the control panel 
+shows the settings of the highlighted channel. To change the highlighted 
+channel, use the channel pull down menu as shown in the picture.
+<p>To adjust X or Y Axis settings for a channel: first make this channel
+as the highlighted channel. Notes: (1) The highlighted channel will
+automatically become selected on the <A HREF="Images/chansel.gif">channel 
+select panel</A>. (2) It's not necessary to mark the <B>Highlight</B>
+checkbox, which gives an option to turn on/off the large graph at the 
+upper left corner of the display (see <a href="#off">Highlighted 
+Signal On/Off</a>).
+<p><b>X Axis</b>:
+X-Axis is measured in seconds. The selection can be made from the 
+pull-down menu
+<b>X Axis</b>. The maximum is 16 seconds and the default
+is set to 8. A <b>Delay</b> can be set in 1/16 second of increment.
+<p><b>Y Axis</b>: To adjust Y scales, hand type the range in the 
+<b>Y-Min</b> and <b>Y-Max</b> text fields.
+Different types of Y Scales are also available. See <a href="#yscaletype">Y
+Scale Type</a> for details.
+<p><b>Auto</b>:By checking <b>Auto</b> checkbox, Grace will
+automatically set the proper display Y-range for the highlighted channel.
+However it is not recommended to use auto setting for the general 
+display - especially not for displaying too many channels, since it may 
+slow down the display. <b>Auto</b> is designed to be used  
+for locating the curve and then the Y-Axis scale should be set manually. 
+<p><b>Global Setting</b>: If <B>Global</B> (located at the bottom of
+the middle portion) is checked, any adjustment will
+affect all channels rather than the highlighted channel only.
+
+<br><br>
+Once all settings are adjusted, you may save them to a file for later
+recalls. To save, use <b>Main->Save</b>; to restore, use
+<b>Main->Restore</b> from the <A HREF="Images/top.gif">top
+panel</A>.
+<br><br><hr>
+
+<IMG WIDTH=127 HEIGHT=37 ALIGN=right SRC="Images/mode.gif">
+<h2> <a NAME="displayaction">Display Action</a></h2>
+<p><a NAME="stop"><b>Stop</b></a>: While in 
+<IMG WIDTH=32 HEIGHT=27 SRC="Images/stop.gif"> (<B>Stop</B>), the Grace
+display is in an interactive mode. You may use any Grace menu or buttons.
+For the usage of Grace, see
+<a href="http://plasma-gate.weizmann.ac.il/Grace/doc/UsersGuide.html">Grace User's
+Guide</a>.
+<p><a NAME="realtime"><b>Play</b></a>: 
+If <IMG WIDTH=32 HEIGHT=28 SRC="Images/play.gif"> (<B>Play</B>)
+is selected, data is displayed in a realtime mode, with possibly a
+1-2 second delay from the time it is actually acquired. The display
+is in general updated once per second. For certain cases it could
+be updated up to 16 times per second (see later topic
+<a href="#refresh">Refresh Rate</a> for more details). 
+<p><a NAME="pause"><b>Pause</b></a>: 
+The <IMG WIDTH=32 HEIGHT=28 SRC="Images/pause.gif"> (<B>Pause</B>)
+feature is designed for trend
+data display only. Pressing this button will stop the display while
+the realtime trend data being recorded. To resume, select Play
+again. For non-trend display it works as same as Stop.
+<br><br><hr>
+
+<h2> <a NAME="long">Playback</a></h2>
+
+<p>Along with realtime data display, data stored by the Data Server may
+also be recalled for presentation in Grace. Playback produces one or
+more new Grace window(s)
+and displays all information for the given display period at once.
+<I>Note</I>: It will not start the display until all of the data information
+has been read. Thus more data requested, longer loading time will be needed.
+<p>
+To use Playback, select the <b>Playback</b> from the <b>Main</b>
+menu. This will bring up
+the <A HREF="Images/long.gif">Playback control panel</A>. Up to 16
+channels can be chosen from the upper left corner of the Playback control.
+
+<DL>
+<DD><a NAME="timeset"><b>Time Settings for Playback</b></a>:
+<br><br>
+<DL>
+<DD><b><i>reference time</i>:</b> the first line of the time seting is
+the time for starting or ending the display, depending on the choice
+of the toggled menu <b>Stop Time/Start Time</b>.
+To set it, enter
+the year, month, day, hour, minute, and second into the fields at the
+first row of Time Setting. To quickly set all fields to the current
+time, simply click <b>Quick Set</b>.<br><br>
+<b><i>duration</i>:</b> the second line of the time setting is the 
+length of time period for playback. Enter the days, hours, minutes,
+and seconds into the fields at the second row.
+ <br><br>
+There is also a choice of using GPS time instead of UTC time for the setting.
+ <br><br>
+<DD><i>example</i>:<br><br>
+<DD><IMG WIDTH=498 HEIGHT=162 SRC="Images/timeset.gif">
+<DD><br>reference time: 00:09:08:18:58:38<br> 
+<DD>duration: 0:5:10:15
+<DD>in <b>Start Time</b></a>: The Grace will display data 
+starting from the reference
+time. It will last for the length of the  display period, with refreshing
+for each second increment. <i>e.g.</i> in the above setting, it will
+display from 18:58:38 until 00:08:52 the next day. 
+<DD>in <b>Stop Time</b></a>: The Grace will display data of
+the display
+period and end by the reference time. Therefore in the above example, it
+will start from 13:48:23 and play until 18:58:37, refreshing for each
+second increment.
+
+</DL></DL>
+</DD></DL>    
+
+<DL>
+  <DD><a NAME="longopt"><b>Playback Options</b></a>:
+  <DD><i>Decimation</i>:
+      Data decimation can be chosen as full data, second trend, minute trend,
+      10-minute trend, or hour trend. The default is set as the following:
+    <DL><DD><Table border=0>
+      <TR><TH>Decimation &nbsp &nbsp</TH><TH>Display Period</TH></TR>
+      <TR><TD>full data</TD><TD> &nbsp &nbsp less than or equal to 10 seconds</TD></TR>
+      <TR><TD>second trend</TD><TD> &nbsp &nbsp between 10 seconds and 1 hour</TD></TR>
+      <TR><TD>minute trend</TD><TD> &nbsp &nbsp between 1 and 60 hours</TD></TR>
+      <TR><TD>10-minute trend</TD><TD> &nbsp &nbsp 60 hours to 30 days</TD></TR>
+      <TR><TD>hour trend</TD><TD> &nbsp &nbsp more than 30 days</TD></TR>
+    </Table></DL>
+    <br>
+  <DD><i>X-Axis Format</i>:
+      There are two types of X-Axis format can be chosen for trend data
+      display: The
+      <b>UTC Time</b> choice shows X-Axis in the format of yy-mm-dd hh:mm:ss.
+      The <b>GPS Time</b> shows the X-Axis in GPS seconds.
+      <br><br>
+  <DD><i>Graph Mode</i>: <b>Standard</b> displays selected
+      channels in one Grace window, with each channel in a separated graph.
+      <b>Multiple</b> display all selected channels in the same graph.
+      <b>Multiple Grace</b> opens a new Grace window for each selected
+      channel.
+      <br><br>
+  <DD><i>More Options</i>: You may choose to show the maximum, minimum,
+      or/and mean values. It will display Mean if none of them is chosen or if
+      more than one is chosen for the multiple case. You may choose
+      to show or hide the X and Y Grid. You may also connect to a different
+      server rather than the server which is used at the starting of the
+      main control panel by typing the server IP and port number into
+      the corresponding fields.
+</DL>    
+
+<DL>
+  <DD><a NAME="longtr"><b>Trigger</b></a>:
+  <DD><BR>Trigger for playback is a new feature added in version G2.0.
+Trigger conditions for playback can be selected at the bottom of the
+playback control panel:
+  <DD><BR><IMG WIDTH=499 HEIGHT=124 SRC="Images/longtrig.gif">
+<DD>By hitting "Trigger Execute", only those data in the period when trigger
+condition(s) are satisfied will be displayed.
+<!--This would be used to give data only when, for example, the interferometer
+is in lock, or in physics mode, or seismic activity is low, etc..-->
+In current version, up to two trigger conditions can be selected.
+If a condition is not needed, leave the text field for trigger value
+blank.
+</DL>
+
+<DL>
+  <DD><a NAME="longfr"><b>Play Frame Files</b></a>:
+  <DD><BR><IMG WIDTH=481 HEIGHT=74 SRC="Images/longsf.gif">
+  <DD><BR>Playback can also display data from frame files. See
+  <A HREF="#frame">Other Main Menu Items: Frame Files</A> for how to open
+    frame files. <b>Quick Set</b> button will set the maximum time
+    range for the available data in the frame files.
+</DL>
+<br><br><hr>
+
+<h2> <a NAME="graphtype">Display Type</a></h2>
+Two display types can be chosen from the pull-down menu <B>Display Type</B>.
+The selected display type is indicated on the display type field
+as shown in the figure below.
+
+<p> <a NAME="time"><b>Full Data</b></a>: It displays full data in time domain.
+The X-Axis shows time in seconds and Y-Axis is in ADC counts. Up to 16
+seconds of data are plotted in each graph. The larger graph at the 
+left upper corner (which is optional. See <a href="#off">Highlighted 
+Signal On/Off</a> for details) will show the plots of highlighted channel.
+<BR><BR>
+<p> <a NAME="trend"><b>Trend Data</b></a>: Trend data (maximum, minimum,
+and mean values) can be viewed in realtime.
+<br><br>
+<DL>
+<DD><i>Settings</i>: The X-Axis shows the length of the time period (in seconds) of
+trend being displayed. It resets itself to zero every 12 hours
+(43200 seconds). While resetting, all Grace sets will be saved
+automatically to a .save file with the time stamp as its name.
+</DL>
+<i>Note</i>:<BR>
+&nbsp <i>1.</i> The realtime trend display can be paused by clicking 
+<b>Pause</b> button. Use <B>Play</B> to resume. Some data
+may get lost if being paused for long time.<BR>
+&nbsp <i>2.</i> Off-line data playback should be viewed by <a href="#long">Playback</a>.<BR>
+<IMG WIDTH=279 HEIGHT=86 ALIGN=right SRC="Images/type.gif">
+
+
+<br><br><hr>
+
+<h2> <a NAME="graphmode">Display Mode</a></h2>
+</i>
+<p><A HREF="Images/timebase.gif"><b>Standard</b></A> displays up to
+17 graphs. The larger graph at the upper left corner shows the plot
+for the highlighted channel. Other graphs can show up to 16 channels, 
+with channel number 1 at the lower left and increasing to the upper right.
+<BR>
+<BR>
+<IMG Align=left WIDTH=114 HEIGHT=32 HSPACE=10 SRC="Images/onoff.gif">
+<I>Note</I>: the larger graph at the upper left corner
+can be turned on/off by checking/unchecking the <B>Highlight</B> box.
+
+<p><A HREF="Images/multiple.gif"><b>Multiple</b></A> displays up to
+16 channels in the same graph. 
+<br><br><hr>
+
+<h2> <a NAME="display">Other Display Options</a></h2>
+<p><a NAME="resolution"><b>Resolution</b></a>: The resolution of
+full data display is adjustable.
+Each channel will be displayed at the chosen resolution or the data sampling
+rate of the signal, whatever is smaller. The default is 128 Hertz and the
+maximum is 16384.<br><br>
+<DL><DD><i>Note</i>: In order to keep up the display speed, an limit is set
+    for the number of points appeared in a graph. Thus choosing higher
+    resolution may result in
+    reducing the total display time (X-Axis range). Here is the chart:
+    <DL><DD><Table border=0>
+      <TR><TH>Resolution &nbsp &nbsp</TH><TH>Maximum Time</TH></TR>
+      <TR><TD>128</TD><TD> &nbsp &nbsp 16 sec</TD></TR>
+      <TR><TD>256</TD><TD> &nbsp &nbsp 8 sec</TD></TR>
+      <TR><TD>512</TD><TD> &nbsp &nbsp 4 sec</TD></TR>
+      <TR><TD>1024</TD><TD> &nbsp &nbsp 2 sec</TD></TR>
+      <TR><TD>2048 above</TD><TD> &nbsp &nbsp 1 sec</TD></TR>
+    </Table></DL>
+</DL>
+To see the sampling rate of a channel/signal, open the <A
+HREF="Images/sigsel.gif">signal selection window</A> by selecting the 
+<B>Signal Select</B> from the <B>Mian</B> menu on the top panel. The 
+sampling rates are shown next to the signal names.
+<p><a NAME="refresh"><b>Refresh Rate</b></a>: In general, the refresh rate for graphing is
+once per second. It is adjustable up to 16 times per second
+by using the pull down menu <b>Refresh Rate</b>.
+<p><a NAME="filter"><b>Filter</b></a>: Moving Average Filter can be
+applied to the signals by selecting the <b>Filter</b> check box.  
+Average is computed over 9 point intervals.
+<p><a NAME="yscaletype"><b>Y Scale Type</b></a>: Four types of Y-Axis scale for
+each channel are available: <b>Linear</b>,
+<b>Exp</b>, <b>Log</b>, or <b>Ln</b>. The default is Linear.
+To change Y scale type for a particular channel, first highlight the 
+channel, then use the pull down menu <b>Scale</b> to select the scale type.
+<p><a NAME="off"><IMG ALIGN=right  WIDTH=114 HEIGHT=32 HSPACE=10 SRC="Images/onoff.gif">
+<b>Highlighted Signal On/Off</b></a>:
+There is a check box next to <b>Highlight</b> (shown in the picture).
+This gives an option to turn on/off the large graph at the upper left corner
+of Grace which shows the highlighted channel in standard display.
+<p><a NAME="color"><b>Color Selection</b></a>: There are 14 choices
+under the <b>Color</b> selection - 13 single colors and <b>default</b>.
+<br><br><hr>
+
+<h2> <a NAME="trigger">Trigger</a></h2>
+<p> Trigger Control is located at the lower left corner
+of the main control panel: <br>
+<P ALIGN=center>&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp<IMG WIDTH=370 HEIGHT=91 SRC="Images/trigger.gif"></P>
+It is used for triggering (<i>i.e.</i>, freezing the
+Grace ploting) when certain conditions are satisfied. To use the trigger,
+first choose the trigger signal by selecting the channel number.
+Then set the condition you want for the trigger. 
+For example: Any value is <i>above</i> (or <i>below</i>) the Trigger Level
+<i>1000.0</i> (enter a number in the text field and type Enter) ADC Units.
+Check or uncheck the <b>Trigger Enable</b> box to enable or disable the trigger.
+To resume the graph ploting after it is triggered, simply click 
+<B>Play</B> again.
+<br><br><hr>
+
+<h2> <a NAME="main">Other Main Menu Items</a></h2>
+<p><b><a NAME="frame">Frame File</a></b>
+<br>One of the features added since Version 4 is to view data from Frame
+files or Toc files. Under the menu <b>Main->Frame Files</b> there
+are three options:<BR><BR>
+&nbsp&nbsp <B>Make TOC File</B>: Selecting this option will bring up
+a file selection window. Select the Frame files from the
+selection window then click <B>Apply</B>. The generated Toc file 
+will be placed in the same directory under the name "outtoc".<BR>
+&nbsp&nbsp <I>Note</I>: Toc file could be generated without using
+  DataViewer. Run 
+<DD> $DVPATH/tocgenerate &nbsp&lt the Frame file directory &gt
+&nbsp&lt output TOC file name &gt<BR>
+&nbsp&nbsp <B>Load TOC File</B>: In the file selection window, select 
+the Toc file which will be displayed, then click <B>Apply</B>.<BR>
+&nbsp&nbsp <B>Load Frame Files</B>: In the file selection window, 
+select the Frame files then click <B>Apply</B>.<BR><BR>
+After loading a Toc file or Frame files, use 
+<a href="#long">Playback</a> to display the data. 
+
+<p><b><a NAME="print">Printing</a></b>
+<br><i>Print to printer</i>: You may use the Print feature from Grace.
+First stop the display. Then click on <b>File</b> located at
+upper left corner of the Grace window. Choose <b>Print</b> from the pull-down
+menu and the picture will be sent to the default printer.
+<p><i>Print to ps file</i>: Select <b>Main->Print to File</b>. 
+The current display will be
+saved as a .ps file with the time stamp as the file name, <i>i.e.</i>,
+<i>99-9-15-18-24-19.ps</i>&nbsp. Note that you do not have to stop the
+display to use this feature.
+<p><b><a NAME="conn">New Connection</a></b>
+<br>This will set the existing (if any)
+Grace window free from the DataViewer Control. The Grace may be closed
+in the same manner of closing a X-term. The basic settings are
+preserved and will be restored automatically and another new Grace window
+will be opened.
+<p><b><a NAME="conf">New Configuration</a></b>
+<br>This feature is used when there is any change in the
+configuration file or when data server is re-started.
+<p><b><a NAME="quit">Exit</a></b>
+<br> Choosing <b>Main->Exit</b> will exit the DataViewer program. If you
+need to save the current settings, use <b>Main->Save</b> before
+exiting.
+<br><br><hr>
+
+<h2> <a NAME="tip">Other Tips</a></h2>
+<p> <a NAME="xmgr"><b>Some useful Grace Tips</b></a>:
+<p> <i>Note</i>: Make sure the Grace is in an interactive mode (Stopped) before
+applying any of the followings.
+<ul>
+  <li><i>view data set properties</i>: Grace allows user to view data information
+      for each graph. Click on the graph you want to look at. Then select
+      <b>Edit->Data set</b> from the pull-down menu of the Grace window. A
+      "Data set properties" window will pop up and for each graph set 
+      the information
+      such as X and Y maximum/minimum can be displayed. This is a 
+      convenient way to find out the
+      the proper display range. Then Y-axis range can be set accordingly.
+  <li><i>save Grace file</i>: the current plots can be saved as a Grace
+      file and reopened by Grace. Use the pull-down menu
+      <b>File->Save as</b> and type in a file name. To reopen, use
+      <b>File->Open</b>.
+  <li><i>adjust scales</i>: X and Y scales are adjustable from Grace
+      directly. Use <b>Plot->Axis Properties</b>.
+</ul>
+For more usage of Grace, see
+<a href="http://plasma-gate.weizmann.ac.il/Grace/doc/UsersGuide.html">Grace User's
+Guide</a>.
+</p>
+
+<br>
+<p> <a NAME="debug"><b>Status Report/Debugging Information</b></a>:
+Status report and debugging information are shown at the special
+status report window if using $DVPATH/dataviewer, or at the terminal window
+where the DataViewer Control is started if using $DVPATH/dataviewer0. 
+It shows the general display
+information, user's selections, warnings and error messages. While data
+being displayed, it shows the time stamp of the displayed data and 
+indicates any block drop as well. It is advised to check the message 
+window whenever you experience something 'weird'.</p>
+<br>
+<p> <a NAME="trouble"><b>Troubleshooting</b></a>:
+<p> <i>Note</i>: Always check the <a href="#debug">status messages</a>
+first. It may help to target the problem(s) sooner.
+<ul>
+<li><b>problem:</b> <i>can not start the DataViewer Control</i>.<br>
+    <b>possible causes:</b><br>
+     1. the variable $DVPATH is not set.<br> 
+     2. no data server is available.<br> 
+    <b>suggestions:</b><br> 
+     1. set the variable $DVPATH to the directory where DataViewer is
+        installed.<br>
+     2. make sure the server IP address is typed
+        correctly and the server is running.<br>
+    <br>
+<li><b>problem:</b> <i>DataViewer hangs</i>.<br>
+    <b>possible cause:</b> too many message queues are running on the
+       current machine.<br> 
+    <b>suggestion:</b> check the list of message queue (ipcs -b) and
+       kill the ones which are not in use  
+       (ipcrm -q &nbsp&lt Queue ID &gt)<br> 
+    <br>
+<!--<li><b>problem:</b> <i>can not start the Grace display</i>.<br>
+    <b>possible cause:</b> lisener port number conflicts. Note that
+    any port number can only be used by one user on the same machine.<br> 
+    <b>suggestion:</b> exit the program and restart it with different
+    lisener port number (use -l option). The default lisener port number
+    is 7000. <br>
+    <br>-->
+<li><b>problem:</b> <i>realtime Grace display doesn't keep up the speed</i>.<br>
+    <b>suggestions:</b> <br>
+    1. set smaller X-Axis range.<br>
+    2. do not use Auto setting for display.<br>
+    3. display less channels, especially when higher refresh rate is
+    used.<br>
+    4. reduce the resolution.<br>
+    5. reduce the refresh rate.<br>
+    <br>
+<li><b>problem:</b> <i>unexpected Grace display interuption</i>.<br>
+    <b>possible causes:</b><br>
+    1. the display is triggered.<br>
+    2. data server interruption.<br>
+    <b>suggestions:</b> <br>
+    1. check if the <b>Trigger Enable</b> box is marked and check the status
+    report.<br>
+    2. re-connect to the server by using 
+       <b>Main</b>-><b>New Connection</b>.<br>
+    <br>
+<li><b>problem:</b> <i>no action being taken after a selection</i>.<br>
+    <b>possible cause:</b> the connection between control and display
+    is not established; this
+    could be caused by a network error.<br>
+    <b>suggestion:</b> check the status messages on the message
+    window. The line
+    <P ALIGN=center>messg received *************************</P>
+    should appear after each selection. If not, select <b>Main->New 
+    Connection</b> to quit the current Grace display and
+    start a new one.<br>
+    <br>
+<li><b>problem:</b> <i>graphs flash in Grace display</i>.<br>
+    <b>possible cause:</b> Auto settings are being used for two or
+    more channels.<br>
+    <b>suggestion:</b> uncheck <b>Auto</b> and manually set Y Axis
+    ranges for all channels.
+    see the Usage of Auto Setting under the topic
+    <a href="#adjust"><b>Adjusting and Saving Settings</b>.</a><br>
+    <br>
+<li><b>problem:</b> <i>Playback doesn't show all the data requested</i>.<br>
+    <b>possible cause:</b> there is no enough data stored by the Data Server.<br>
+    <br>
+<!--
+<li><b>problem:</b> <i></i>.<br>
+    <b>possible cause:</b> <br>
+    <b>suggestion:</b> <br>
+    <br>
+-->
+</ul>
+<br><br>
+
+<a href="index.html">Back to Main Page</a><BR><BR>
+<HR size=2>
+<HR size=2>
+<BR>
+<FONT size=-1>
+DataViewer User Guide: &nbsp <a href="http://www.ligo.caltech.edu/~hding/Dataviewer/help.html"><i>http://www.ligo.caltech.edu/~hding/Dataviewer/index.html</i></a><br>
+Contact: &nbsp Hongyu Jane Ding
+<I>
+&lt;<a href="mailto:hding@ligo.caltech.edu">hding@ligo.caltech.edu</a>&gt;
+</I><BR>
+Last modified:&nbsp Wed. Nov. 24, 2003
+
+<BR><BR>
+</FONT>
+</BODY>
+</HTML>

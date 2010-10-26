@@ -1,0 +1,6330 @@
+module 'DataViewer'
+version = 47;
+prelude = '#include "../Th/datasrv.h"
+
+#include <Xm/Text.h>
+
+extern void drop_v1(Widget, XtPointer, XtPointer) ;
+extern void drop_v2(Widget, XtPointer, XtPointer) ;
+extern void drop_v3(Widget, XtPointer, XtPointer) ;
+extern void drop_v4(Widget, XtPointer, XtPointer) ;
+extern void drop_v5(Widget, XtPointer, XtPointer) ;
+extern void drop_v6(Widget, XtPointer, XtPointer) ;
+extern void drop_v7(Widget, XtPointer, XtPointer) ;
+extern void drop_v8(Widget, XtPointer, XtPointer) ;
+extern void drop_v9(Widget, XtPointer, XtPointer) ;
+extern void drop_v10(Widget, XtPointer, XtPointer) ;
+extern void drop_v11(Widget, XtPointer, XtPointer) ;
+extern void drop_v12(Widget, XtPointer, XtPointer) ;
+extern void drop_v13(Widget, XtPointer, XtPointer) ;
+extern void drop_v14(Widget, XtPointer, XtPointer) ;
+extern void drop_v15(Widget, XtPointer, XtPointer) ;
+extern void drop_v16(Widget, XtPointer, XtPointer) ;
+
+';
+xdesigned = 1;
+applicationName = 'DataViewer';
+sourceDirectory = '/opt/CDS/e/avi/cds/project/daq/dv/Control/';
+generateNameC = * 'dc3.c';
+generateNameCMainProgram = 'dc3.c';
+generateNameStubs = * 'dc3_stubs.c';
+generateNameExterns = * 'dc3.h';
+generateNameResDB = 'dc3.res';
+generateNameCPixmaps = 'dc3_pixmaps.h';
+generateCHeaderFile = 'globs.h';
+generateNameMakefile = 'Makefile';
+generateGlobalFunctions = 100;
+generateMask = 65548;
+useMask = 1;
+ansiC = 1;
+generateNewMakefile = 1;
+generateMakeTemplate = 1;
+useCPixmaps = 0;
+useUILPixmaps = 0;
+useCHeaders = 1;
+useCUILHeaders = 0;
+CPPFlavour = 0;
+useCPPHeaders = 0;
+useCPPHeadersMFCWindows = 0;
+useCPPHeadersMFCMotif = 0;
+/* group data */
+groupIndex 1;
+groups {
+	group0(0) {
+		public chincr;
+		public chdecr;
+		public sigselect;
+		public selchan;
+		public fastslowch;
+		public sfast;
+		public sslow;
+		public sdmt;
+		public sobsole;
+	};
+};
+/* end group data */
+value
+	'white' : color ( 'white' );
+	'blue' : color ( 'blue' );
+object 'errorDialog' : XmDialogShell {
+	arguments {
+	lastGenName = 'errorDialog';
+	createPreludeStatus = 1;
+	preInstantiation = 'void create_errorDialog (Widget parent)
+';
+	XmNallowShellResize = true;
+	XmNtitle =  * 'DataViewer Error';
+	};
+object '2' : XmMessageBox {
+	arguments {
+	lastGenName = 'messageBox2';
+	XmNdialogType = 1;
+	};
+abstract object '160' : XmPushButton GADGET {
+	arguments {
+	name = 'Cancel';
+	lastGenName = 'button160';
+	};
+	callbacks {
+	xDHide = 'errorDialog';
+	};
+};
+abstract object '161' : XmPushButton GADGET {
+	arguments {
+	name = 'Help';
+	lastGenName = 'button161';
+	};
+	callbacks {
+	XmNactivateCallback = '
+SelHelpMenu()
+';
+	};
+};
+abstract object 'errorDialogMessage' : XmLabel GADGET {
+	arguments {
+	name = 'MessageLabel';
+	lastGenName = 'errorDialogMessage';
+	XmNlabelString =  * ' ';
+	};
+};
+abstract object '162' : XmPushButton GADGET {
+	arguments {
+	name = 'OK';
+	lastGenName = 'button162';
+	};
+};
+abstract object '1' : XmSeparator GADGET {
+	arguments {
+	name = 'Separator';
+	lastGenName = 'separator1';
+	};
+};
+abstract object '51' : XmLabel GADGET {
+	arguments {
+	name = 'Symbol';
+	lastGenName = 'label51';
+	};
+};
+};
+};
+object 'helpWin' : XmDialogShell {
+	arguments {
+	name = 'helpWin';
+	lastGenName = 'helpWin';
+	createPreludeStatus = 1;
+	preInstantiation = 'void create_helpWin (Widget parent)
+';
+	XmNallowShellResize = true;
+	XmNtitle =  * 'About DataViewer';
+	};
+object '1' : XmMessageBox {
+	arguments {
+	lastGenName = 'messageBox1';
+	XmNmessageString =  * 'LIGO DataViewer 5.0
+November 9th, 2004';
+	};
+abstract object '175' : XmPushButton GADGET {
+	arguments {
+	name = 'Cancel';
+	lastGenName = 'button175';
+	};
+};
+abstract object '176' : XmPushButton GADGET {
+	arguments {
+	name = 'Help';
+	lastGenName = 'button176';
+	};
+	callbacks {
+	XmNactivateCallback = '
+SelHelpMenu()
+';
+	};
+};
+abstract object '44' : XmLabel GADGET {
+	arguments {
+	name = 'MessageLabel';
+	lastGenName = 'label44';
+	XmNlabelString = 'LIGO DataViewer 5.0
+November 9th, 2004';
+	};
+};
+abstract object '177' : XmPushButton GADGET {
+	arguments {
+	name = 'OK';
+	lastGenName = 'button177';
+	};
+};
+abstract object '7' : XmSeparator GADGET {
+	arguments {
+	name = 'Separator';
+	lastGenName = 'separator7';
+	};
+};
+abstract object '45' : XmLabel GADGET {
+	arguments {
+	name = 'Symbol';
+	lastGenName = 'label45';
+	};
+};
+};
+};
+object 'restoreWin' : XmDialogShell {
+	arguments {
+	name = 'restoreWin';
+	lastGenName = 'restoreWin';
+	createPreludeStatus = 1;
+	preInstantiation = 'void create_restoreWin (Widget parent)
+';
+	XmNallowShellResize = true;
+	XmNtitle =  * 'Restore Settings';
+	};
+object '2' : XmNewFileSelectionBox {
+	arguments {
+	lastGenName = 'fileSelect2';
+	XmNpattern =  * '*.xml';
+	};
+abstract object '167' : XmPushButton GADGET {
+	arguments {
+	name = 'Apply';
+	lastGenName = 'button167';
+	};
+};
+abstract object '168' : XmPushButton GADGET {
+	arguments {
+	name = 'Cancel';
+	lastGenName = 'button168';
+	};
+	callbacks {
+	xDHide = 'restoreWin';
+	};
+};
+abstract object '173' : XmPushButton GADGET {
+	arguments {
+	name = 'Help';
+	lastGenName = 'button173';
+	};
+	callbacks {
+	XmNactivateCallback = '
+SelHelpMenu()
+';
+	};
+};
+abstract object '9' : XmScrolledList {
+	arguments {
+	lastGenName = 'scrolledList9';
+	};
+abstract object '11' : XmScrollBar {
+	arguments {
+	name = 'HorScrollBar';
+	lastGenName = 'scrollbar11';
+	};
+};
+abstract object '12' : XmScrollBar {
+	arguments {
+	name = 'VertScrollBar';
+	lastGenName = 'scrollbar12';
+	};
+};
+abstract object '7' : XmList {
+	arguments {
+	name = 'ItemsList';
+	lastGenName = 'list7';
+	};
+};
+};
+abstract object '40' : XmLabel GADGET {
+	arguments {
+	name = 'Items';
+	lastGenName = 'label40';
+	};
+};
+abstract object '174' : XmPushButton GADGET {
+	arguments {
+	name = 'OK';
+	lastGenName = 'button174';
+	XmNlabelString = 'OK';
+	};
+	callbacks {
+	XmNactivateCallback = '
+restoreSettings()
+';
+	xDHide = 'restoreWin';
+	};
+};
+abstract object '41' : XmLabel GADGET {
+	arguments {
+	name = 'Selection';
+	lastGenName = 'label41';
+	};
+};
+abstract object '6' : XmSeparator GADGET {
+	arguments {
+	name = 'Separator';
+	lastGenName = 'separator6';
+	};
+};
+abstract object 'restorefile' : XmTextField {
+	arguments {
+	name = 'Text';
+	lastGenName = 'restorefile';
+	};
+};
+abstract object '42' : XmLabel GADGET {
+	arguments {
+	name = 'FilterLabel';
+	lastGenName = 'label42';
+	};
+};
+abstract object '59' : XmTextField {
+	arguments {
+	name = 'FilterText';
+	lastGenName = 'text59';
+	};
+};
+abstract object '43' : XmLabel GADGET {
+	arguments {
+	name = 'Dir';
+	lastGenName = 'label43';
+	};
+};
+abstract object '10' : XmScrolledList {
+	arguments {
+	lastGenName = 'scrolledList10';
+	};
+abstract object '19' : XmScrollBar {
+	arguments {
+	name = 'HorScrollBar';
+	lastGenName = 'scrollbar19';
+	};
+};
+abstract object '20' : XmScrollBar {
+	arguments {
+	name = 'VertScrollBar';
+	lastGenName = 'scrollbar20';
+	};
+};
+abstract object '8' : XmList {
+	arguments {
+	name = 'DirList';
+	lastGenName = 'list8';
+	};
+};
+};
+};
+};
+object 'saveWin' : XmDialogShell {
+	arguments {
+	name = 'saveWin';
+	lastGenName = 'saveWin';
+	createPreludeStatus = 1;
+	preInstantiation = 'void create_saveWin (Widget parent)
+';
+	XmNallowShellResize = true;
+	XmNtitle =  * 'Save Settings';
+	};
+object '1' : XmNewFileSelectionBox {
+	arguments {
+	lastGenName = 'fileSelect1';
+	XmNpattern =  * '*.xml';
+	};
+abstract object '169' : XmPushButton GADGET {
+	arguments {
+	name = 'Apply';
+	lastGenName = 'button169';
+	};
+};
+abstract object '170' : XmPushButton GADGET {
+	arguments {
+	name = 'Cancel';
+	lastGenName = 'button170';
+	};
+	callbacks {
+	xDHide = 'saveWin';
+	};
+};
+abstract object '171' : XmPushButton GADGET {
+	arguments {
+	name = 'Help';
+	lastGenName = 'button171';
+	};
+	callbacks {
+	XmNactivateCallback = '
+SelHelpMenu()
+';
+	};
+};
+abstract object '7' : XmScrolledList {
+	arguments {
+	lastGenName = 'scrolledList7';
+	};
+abstract object '13' : XmScrollBar {
+	arguments {
+	name = 'HorScrollBar';
+	lastGenName = 'scrollbar13';
+	};
+};
+abstract object '14' : XmScrollBar {
+	arguments {
+	name = 'VertScrollBar';
+	lastGenName = 'scrollbar14';
+	};
+};
+abstract object '19' : XmList {
+	arguments {
+	name = 'ItemsList';
+	lastGenName = 'list19';
+	};
+};
+};
+abstract object '35' : XmLabel GADGET {
+	arguments {
+	name = 'Items';
+	lastGenName = 'label35';
+	};
+};
+abstract object '172' : XmPushButton GADGET {
+	arguments {
+	name = 'OK';
+	lastGenName = 'button172';
+	XmNlabelString = 'OK';
+	};
+	callbacks {
+	XmNactivateCallback = '
+saveOKSel()
+';
+	xDHide = 'saveWin';
+	};
+};
+abstract object '36' : XmLabel GADGET {
+	arguments {
+	name = 'Selection';
+	lastGenName = 'label36';
+	};
+};
+abstract object '9' : XmSeparator GADGET {
+	arguments {
+	name = 'Separator';
+	lastGenName = 'separator9';
+	};
+};
+abstract object 'savefile' : XmTextField {
+	arguments {
+	name = 'Text';
+	lastGenName = 'savefile';
+	};
+};
+abstract object '37' : XmLabel GADGET {
+	arguments {
+	name = 'FilterLabel';
+	lastGenName = 'label37';
+	};
+};
+abstract object '58' : XmTextField {
+	arguments {
+	name = 'FilterText';
+	lastGenName = 'text58';
+	};
+};
+abstract object '39' : XmLabel GADGET {
+	arguments {
+	name = 'Dir';
+	lastGenName = 'label39';
+	};
+};
+abstract object '8' : XmScrolledList {
+	arguments {
+	lastGenName = 'scrolledList8';
+	};
+abstract object '15' : XmScrollBar {
+	arguments {
+	name = 'HorScrollBar';
+	lastGenName = 'scrollbar15';
+	};
+};
+abstract object '16' : XmScrollBar {
+	arguments {
+	name = 'VertScrollBar';
+	lastGenName = 'scrollbar16';
+	};
+};
+abstract object '20' : XmList {
+	arguments {
+	name = 'DirList';
+	lastGenName = 'list20';
+	};
+};
+};
+};
+};
+object 'shell1' : XmDialogShell {
+	arguments {
+	name = 'shell1';
+	was_selected = true;
+	lastGenName = 'shell1';
+	createPreludeStatus = 2;
+	preInstantiation = 'void create_shell1 (Display *display, char *app_name, int app_argc, char **app_argv)
+';
+	XmNwidth = 780;
+	XmNallowShellResize = true;
+	XmNtitle =  * 'Data Viewer';
+	XmNmwmMenu = '
+';
+	XmNinputMethod = '()';
+	XmNprimary = 1;
+	XmNiconName = 'dataviewer';
+	};
+object '1' : XmForm {
+	arguments {
+	lastGenName = 'form1';
+	XmNautoUnmanage = false;
+	XmNdefaultButton = 'stopbtn';
+	};
+object 'menuTop' : XmMenuBar {
+	arguments {
+	lastGenName = 'menuTop';
+	folded = true;
+	XmNtraversalOn = false;
+	XmNspacing = 0;
+	XmNmarginWidth = 5;
+	XmNmarginHeight = 5;
+	XmNmenuHelpWidget = 'helpTop';
+	};
+object 'mainTop' : XmCascadeButton {
+	arguments {
+	name = 'mainTop';
+	lastGenName = 'mainTop';
+	XmNx = 7;
+	XmNy = 7;
+	XmNlabelString =  * 'File';
+	XmNmarginLeft = 5;
+	XmNmarginRight = 5;
+	XmNmarginWidth = 0;
+	XmNmarginHeight = 2;
+	XmNmnemonic =  * 'F';
+	};
+object 'MainMenu' : XmPulldownMenu {
+	arguments {
+	lastGenName = 'MainMenu';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelectMainMenu()
+';
+	};
+object 'saveSets' : XmPushButton {
+	arguments {
+	lastGenName = 'saveSets';
+	XmNlabelString =  * 'Save Settings...';
+	XmNmnemonic =  * 'S';
+	XmNaccelerator =  * 'Ctrl<Key>S';
+	XmNacceleratorText =  * 'Ctrl+S';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select2()
+';
+	xDShow = 'saveWin';
+	};
+};
+object 'restoreSets' : XmPushButton {
+	arguments {
+	lastGenName = 'restoreSets';
+	XmNlabelString =  * 'Restore Settings...';
+	XmNmnemonic =  * 'R';
+	XmNaccelerator =  * 'Ctrl<Key>R';
+	XmNacceleratorText =  * 'Ctrl+R';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select3()
+';
+	xDShow = 'restoreWin';
+	};
+};
+object '13' : XmSeparator {
+	arguments {
+	lastGenName = 'separator13';
+	};
+};
+object 'exitall' : XmPushButton {
+	arguments {
+	name = 'exitall';
+	lastGenName = 'exitall';
+	XmNlabelString =  * 'Exit';
+	XmNmnemonic =  * 'Q';
+	XmNaccelerator =  * 'Ctrl<Key>Q';
+	XmNacceleratorText =  * 'Ctrl+Q';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select0()
+';
+	};
+};
+};
+};
+object 'framesTop' : XmCascadeButton {
+	arguments {
+	name = 'framesTop';
+	lastGenName = 'framesTop';
+	XmNx = 47;
+	XmNy = 7;
+	XmNlabelString =  * 'Frames';
+	XmNmarginLeft = 5;
+	XmNmarginRight = 5;
+	XmNmarginWidth = 0;
+	XmNmarginHeight = 2;
+	XmNmnemonic =  * 'r';
+	};
+object '16' : XmPulldownMenu {
+	arguments {
+	name = 'yScaleMenu';
+	lastGenName = 'menu16';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelFrameMenu()
+';
+	};
+object 'maketoc' : XmPushButton {
+	arguments {
+	lastGenName = 'maketoc';
+	XmNlabelString =  * 'Make TOC File...';
+	XmNmnemonic =  * 'M';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select10()
+';
+	xDShow = 'frame_win';
+	};
+};
+object 'opentoc' : XmPushButton {
+	arguments {
+	lastGenName = 'opentoc';
+	XmNlabelString =  * 'Load TOC File...';
+	XmNmnemonic =  * 'T';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select9()
+';
+	xDShow = 'frame_win';
+	};
+};
+object 'frameFile' : XmPushButton {
+	arguments {
+	lastGenName = 'frameFile';
+	XmNlabelString =  * 'Load Frame Files...';
+	XmNmnemonic =  * 'F';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select8()
+';
+	xDShow = 'frame_win';
+	};
+};
+};
+};
+object 'helpTop' : XmCascadeButton {
+	arguments {
+	name = 'helpTop';
+	lastGenName = 'helpTop';
+	XmNx = 1009;
+	XmNy = 7;
+	XmNlabelString =  * 'Help';
+	XmNmarginLeft = 5;
+	XmNmarginRight = 5;
+	XmNmarginWidth = 0;
+	XmNmarginHeight = 2;
+	XmNmnemonic =  * 'H';
+	};
+object 'helpMenu' : XmPulldownMenu {
+	arguments {
+	name = 'helpMenu';
+	lastGenName = 'helpMenu';
+	};
+object 'helpItem1' : XmPushButton {
+	arguments {
+	name = 'helpItem1';
+	lastGenName = 'helpItem1';
+	XmNlabelString =  * 'Web Users\' Guide...';
+	XmNmarginRight = 35;
+	XmNmarginWidth = 2;
+	XmNmarginHeight = 0;
+	XmNmnemonic =  * 'W';
+	XmNaccelerator =  * '<Key>F1';
+	XmNacceleratorText =  * 'F1';
+	};
+	callbacks {
+	XmNactivateCallback = '
+SelHelpMenu()
+';
+	};
+};
+object '8' : XmCascadeButton {
+	arguments {
+	lastGenName = 'cascade8';
+	XmNlabelString =  * 'About...';
+	XmNmnemonic =  * 'A';
+	};
+	callbacks {
+	xDShow = 'helpWin';
+	};
+};
+};
+};
+};
+object 'StatusForm' : XmForm {
+	arguments {
+	lastGenName = 'StatusForm';
+	folded = true;
+	};
+object 'statusField' : XmLabel {
+	arguments {
+	lastGenName = 'statusField';
+	generateResName = true;
+	XmNlabelString =  * ' ';
+	XmNmarginWidth = 2;
+	XmNmarginHeight = 0;
+	XmNalignment = 0;
+	};
+};
+object 'actionText' : XmLabel {
+	arguments {
+	lastGenName = 'actionText';
+	generateResName = true;
+	XmNlabelString =  * 'DataViewer';
+	XmNmarginWidth = 2;
+	XmNalignment = 0;
+	};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 3 2;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 0 0 0;
+	XmNbottomAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    };
+};
+object 'tabBook' : xwidget TabBook {
+	arguments {
+	lastGenName = 'tabBook';
+	xwidget XmNautoManage =  * true;
+	};
+abstract object '2' : XmBulletinBoard {
+	arguments {
+	name = 'TabBookClip';
+	lastGenName = 'bulletin2';
+	XmNx = 4;
+	XmNy = 31;
+	xwidget constraint XmNresizeChild = 3;
+	xwidget constraint XmNanchorChild = 4;
+	};
+};
+object '165' : XmPushButton {
+	arguments {
+	lastGenName = 'button165';
+	XmNlabelString =  * 'Input';
+	};
+	callbacks {
+	XmNactivateCallback = '
+showPage(1)
+';
+	};
+};
+object '166' : XmPushButton {
+	arguments {
+	lastGenName = 'button166';
+	XmNlabelString =  * 'Display';
+	};
+	callbacks {
+	XmNactivateCallback = '
+showPage(2)
+';
+	};
+};
+object '178' : XmPushButton {
+	arguments {
+	lastGenName = 'button178';
+	XmNlabelString =  * 'Signal';
+	};
+	callbacks {
+	XmNactivateCallback = '
+showPage(3)
+';
+	};
+};
+object '179' : XmPushButton {
+	arguments {
+	lastGenName = 'button179';
+	XmNlabelString =  * 'Realtime';
+	};
+	callbacks {
+	XmNactivateCallback = '
+showPage(4)
+';
+	};
+};
+object '180' : XmPushButton {
+	arguments {
+	lastGenName = 'button180';
+	XmNx = 291;
+	XmNy = 2;
+	XmNlabelString =  * 'Playback';
+	};
+	callbacks {
+	XmNactivateCallback = '
+showPage(5)
+';
+	};
+};
+object 'inputForm' : XmForm {
+	arguments {
+	lastGenName = 'inputForm';
+	folded = true;
+	XmNx = 219;
+	XmNy = 0;
+	XmNwidth = 300;
+	XmNheight = 186;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 0;
+	xwidget constraint XmNresizeChild = 0;
+	xwidget constraint XmNanchorChild =  * 0;
+	XmNdefaultButton = 'connectButton';
+	};
+object 'connectButton' : XmPushButton {
+	arguments {
+	lastGenName = 'connectButton';
+	generateResName = true;
+	XmNlabelString =  * 'Connect';
+	XmNmarginWidth = 10;
+	XmNmarginHeight = 4;
+	};
+	callbacks {
+	XmNactivateCallback = '
+connectToServer()
+';
+	};
+};
+object '79' : XmFrame {
+	arguments {
+	lastGenName = 'frame79';
+	};
+object '63' : XmLabel {
+	arguments {
+	lastGenName = 'label63';
+	XmNchildType = 2;
+	XmNlabelString =  * 'NDS Server';
+	};
+};
+object '118' : XmForm {
+	arguments {
+	lastGenName = 'form118';
+	};
+object 'serverIpText' : XmTextField {
+	arguments {
+	lastGenName = 'serverIpText';
+	generateResName = true;
+	XmNcolumns =  * 40;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyNoSpaces()
+';
+	XmNvalueChangedCallback = '
+newNdsServer()
+';
+	};
+};
+object 'serverPortText' : XmTextField {
+	arguments {
+	lastGenName = 'serverPortText';
+	XmNvalue =  * '8088';
+	XmNcolumns = 4;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyInt()
+';
+	XmNvalueChangedCallback = '
+newNdsPortNumber()
+';
+	};
+};
+object '31' : XmLabel {
+	arguments {
+	lastGenName = 'label31';
+	XmNlabelString =  * 'Port';
+	XmNalignment = 0;
+	};
+};
+object '18' : XmLabel {
+	arguments {
+	lastGenName = 'label18';
+	XmNlabelString =  * 'Host';
+	XmNalignment = 0;
+	};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 3 2 2;
+	XmNleftAttachment = 1 0 2;
+	XmNbottomAttachment = 1 0 2;
+	XmNtopAttachment = 3 4 2;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 2;
+	XmNleftAttachment = 0 0 0;
+	XmNbottomAttachment = 1 0 2;
+	XmNtopAttachment = 0 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 4 2 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 2;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 2;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 2;
+    };
+    };
+};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 20;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 2 20;
+    };
+    attachment {
+	XmNrightAttachment = 5 0 55;
+	XmNleftAttachment = 1 0 20;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 20;
+    };
+    };
+};
+object 'displayForm' : XmForm {
+	arguments {
+	lastGenName = 'displayForm';
+	folded = true;
+	XmNx = 130;
+	XmNy = 0;
+	xwidget constraint XmNresizeChild = 0;
+	xwidget constraint XmNanchorChild = 0;
+	XmNdefaultButton = 'newDisplayButton';
+	};
+object '11' : XmFrame {
+	arguments {
+	lastGenName = 'frame11';
+	};
+object '20' : XmLabel {
+	arguments {
+	lastGenName = 'label20';
+	XmNchildType = 2;
+	XmNlabelString =  * 'Plot\'s XWindow Display';
+	};
+};
+object '27' : XmForm {
+	arguments {
+	lastGenName = 'form27';
+	XmNdefaultButton = 'connectButton';
+	};
+object 'plotDisplay' : XmTextField {
+	arguments {
+	lastGenName = 'plotDisplay';
+	generateResName = true;
+	XmNcolumns =  * 20;
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+newPlotDisplay()
+';
+	XmNmodifyVerifyCallback = '
+verifyNoSpaces()
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 1 0 5;
+	XmNleftAttachment = 1 0 5;
+	XmNbottomAttachment = 1 0 5;
+	XmNtopAttachment = 1 0 5;
+    };
+    };
+};
+};
+object 'newDisplayButton' : XmPushButton {
+	arguments {
+	lastGenName = 'newDisplayButton';
+	generateResName = true;
+	XmNlabelString =  * 'Restart Plotter';
+	XmNmarginWidth = 10;
+	};
+	callbacks {
+	XmNactivateCallback = '
+restartXmgr()
+';
+	};
+};
+object '13' : XmFrame {
+	arguments {
+	lastGenName = 'frame13';
+	};
+object '25' : XmForm {
+	arguments {
+	lastGenName = 'form25';
+	};
+object '5' : XmRadioBox {
+	arguments {
+	lastGenName = 'radioBox5';
+	XmNpacking = 1;
+	};
+object 'xmgraceToggle' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'xmgraceToggle';
+	XmNlabelString =  * 'Grace';
+	XmNindicatorType =  * 2;
+	XmNset = true;
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+setPlotter()
+';
+	};
+};
+object 'xmgrToggle' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'xmgrToggle';
+	XmNlabelString =  * 'XMGR';
+	XmNindicatorType =  * 2;
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+setPlotter()
+';
+	};
+};
+};
+    attachments {
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    };
+};
+object '64' : XmLabel {
+	arguments {
+	lastGenName = 'label64';
+	XmNchildType = 2;
+	XmNlabelString =  * 'Plotter';
+	};
+};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 5 0 50;
+	XmNleftAttachment = 1 0 20;
+	XmNtopAttachment = 1 0 20;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 20;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 3 20;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 20;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 1 20;
+    };
+    };
+};
+object 'sig_form' : XmForm {
+	arguments {
+	name = 'sig_form';
+	lastGenName = 'sig_form';
+	folded = true;
+	XmNx = 90;
+	XmNy = 0;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 0;
+	xwidget constraint XmNresizeChild = 0;
+	xwidget constraint XmNanchorChild = 0;
+	XmNresizePolicy = 0;
+	XmNautoUnmanage = false;
+	XmNcancelButton = 'sigcancel';
+	XmNdefaultButton = 'sigselect';
+	};
+object 'junk' : XmForm {
+	arguments {
+	name = 'junk';
+	lastGenName = 'junk';
+	XmNwidth = 1;
+	XmNheight = 1;
+	XmNmarginWidth = 10;
+	XmNmarginHeight = 10;
+	XmNresizePolicy = 1;
+	XmNdefaultButton = 'sigselect';
+	};
+object 'chincr' : XmArrowButton {
+	arguments {
+	lastGenName = 'chincr';
+	XmNarrowDirection = 3;
+	};
+	callbacks {
+	XmNarmCallback = '
+SelChIncr()
+';
+	};
+};
+object 'chdecr' : XmArrowButton {
+	arguments {
+	lastGenName = 'chdecr';
+	XmNarrowDirection = 2;
+	};
+	callbacks {
+	XmNarmCallback = '
+SelChDecr()
+';
+	};
+};
+object 'sigselect' : XmPushButton {
+	arguments {
+	name = 'sigselect';
+	lastGenName = 'sigselect';
+	XmNlabelString =  * 'Select';
+	};
+	callbacks {
+	XmNactivateCallback = '
+signalSelect()
+';
+	};
+};
+object 'selchan' : XmTextField {
+	arguments {
+	name = 'selchan';
+	lastGenName = 'selchan';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+sigNumModifyVerify()
+';
+	XmNactivateCallback = '
+TextFieldPress()
+';
+	};
+};
+object 'sigcancel' : XmPushButton {
+	arguments {
+	name = 'sigcancel';
+	lastGenName = 'sigcancel';
+	};
+	callbacks {
+	xDHide = 'signal_Sel';
+	};
+};
+    attachments {
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 1;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 2;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 3;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 4;
+    };
+    };
+};
+object 'fastslowch' : XmRadioBox {
+	arguments {
+	lastGenName = 'fastslowch';
+	XmNspacing = 0;
+	XmNmarginWidth = 0;
+	XmNmarginHeight = 0;
+	XmNorientation = 2;
+	XmNentryAlignment =  * 1;
+	};
+object 'sfast' : XmToggleButton GADGET {
+	arguments {
+	name = 'sfast';
+	lastGenName = 'sfast';
+	XmNlabelString =  * 'Fast';
+	XmNmarginLeft = 23;
+	XmNset = true;
+	};
+	callbacks {
+	XmNarmCallback = '
+fastSel()
+';
+	};
+};
+object 'sslow' : XmToggleButton GADGET {
+	arguments {
+	name = 'sslow';
+	lastGenName = 'sslow';
+	XmNx = 70;
+	XmNy = 0;
+	XmNlabelString =  * 'Slow';
+	};
+	callbacks {
+	XmNarmCallback = '
+slowSel()
+';
+	};
+};
+object 'sdmt' : XmToggleButton GADGET {
+	arguments {
+	name = 'sdmt';
+	lastGenName = 'sdmt';
+	XmNx = 140;
+	XmNy = 0;
+	XmNlabelString =  * 'DMT';
+	};
+	callbacks {
+	XmNarmCallback = '
+dmtSel()
+';
+	};
+};
+object 'sobsole' : XmToggleButton GADGET {
+	arguments {
+	name = 'sobsole';
+	lastGenName = 'sobsole';
+	XmNx = 210;
+	XmNy = 0;
+	XmNlabelString =  * 'Old';
+	};
+	callbacks {
+	XmNarmCallback = '
+obsoleSel()
+';
+	};
+};
+};
+object '9' : XmForm {
+	arguments {
+	lastGenName = 'form9';
+	};
+object '2' : XmScrolledList {
+	arguments {
+	lastGenName = 'scrolledList2';
+	XmNscrollBarPlacement =  * 0;
+	};
+abstract object '3' : XmScrollBar {
+	arguments {
+	name = 'HorScrollBar';
+	lastGenName = 'scrollbar3';
+	};
+};
+abstract object '4' : XmScrollBar {
+	arguments {
+	name = 'VertScrollBar';
+	lastGenName = 'scrollbar4';
+	};
+};
+abstract object 'grouplist' : XmList {
+	arguments {
+	name = 'grouplist';
+	lastGenName = 'grouplist';
+	XmNfontList = font('-adobe-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*');
+	XmNselectionPolicy = 0;
+	XmNlistSizePolicy = 1;
+	XmNscrollBarDisplayPolicy = 0;
+	XmNitemCount = 1;
+	XmNitems = '';
+	XmNselectedItemCount = 0;
+	XmNselectedItems = '';
+	};
+	callbacks {
+	XmNsingleSelectionCallback = '
+grouplistSel()
+';
+	};
+};
+};
+object '3' : XmScrolledList {
+	arguments {
+	lastGenName = 'scrolledList3';
+	};
+abstract object '5' : XmScrollBar {
+	arguments {
+	name = 'HorScrollBar';
+	lastGenName = 'scrollbar5';
+	};
+};
+abstract object '6' : XmScrollBar {
+	arguments {
+	name = 'VertScrollBar';
+	lastGenName = 'scrollbar6';
+	};
+};
+abstract object 'siglist' : XmList {
+	arguments {
+	name = 'siglist';
+	lastGenName = 'siglist';
+	generateResName = true;
+	XmNfontList = font('-adobe-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*');
+	XmNselectionPolicy = 2;
+	XmNlistSizePolicy = 1;
+	XmNscrollBarDisplayPolicy = 0;
+	};
+	callbacks {
+	XmNsingleSelectionCallback = '
+siglistSel()
+';
+	XmNdefaultActionCallback = '
+siglistSel()
+signalSelect()
+';
+	};
+};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 5 0 50;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 1 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 5 0 50;
+	XmNbottomAttachment = 1 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    };
+};
+object '50' : XmLabel {
+	arguments {
+	lastGenName = 'label50';
+	XmNlabelString =  * 'Selection';
+	};
+};
+object 'selsig' : XmTextField {
+	arguments {
+	lastGenName = 'selsig';
+	XmNcolumns = 20;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyNoSpaces()
+';
+	XmNvalueChangedCallback = '
+TextfieldValue4()
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 14;
+	XmNbottomAttachment = 1 0;
+	XmNtopAttachment = 0 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 1 0 2;
+	XmNtopAttachment = 0 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 3 5 2;
+	XmNtopAttachment = 1 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 2 2;
+	XmNbottomAttachment = 4 2 2;
+	XmNtopAttachment = 4 2 2;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 2;
+	XmNleftAttachment = 3 4 2;
+	XmNbottomAttachment = 1 0 2;
+	XmNtopAttachment = 0 0 0;
+    };
+    };
+};
+object 'realTimeForm' : XmForm {
+	arguments {
+	lastGenName = 'realTimeForm';
+	XmNx = 0;
+	XmNy = 0;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 0;
+	XmNtraversalOn = true;
+	XmNnavigationType = 1;
+	XmNcancelButton = 'stopbtn';
+	XmNdefaultButton = 'playbtn';
+	};
+object 'trigFrame' : XmFrame {
+	arguments {
+	lastGenName = 'trigFrame';
+	};
+object 'trigForm' : XmForm {
+	arguments {
+	name = 'trigForm';
+	lastGenName = 'trigForm';
+	};
+object 'trigOn' : XmToggleButton {
+	arguments {
+	name = 'trigOn';
+	lastGenName = 'trigOn';
+	XmNlabelString =  * 'On';
+	};
+	callbacks {
+	XmNarmCallback = '
+trigonSel()
+';
+	};
+};
+object 'trChMenu' : XmOptionMenu {
+	arguments {
+	lastGenName = 'trChMenu';
+	folded = true;
+	XmNentryAlignment = 1;
+	};
+abstract object '74' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label74';
+	XmNlabelString =  * 'Ch';
+	};
+};
+abstract object '36' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'cascade36';
+	};
+object 'trigMenu' : XmPulldownMenu {
+	arguments {
+	name = 'trigMenu';
+	lastGenName = 'trigMenu';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelTrigMenu()
+';
+	};
+object 'trig1' : XmPushButton {
+	arguments {
+	name = 'trig1';
+	lastGenName = 'trig1';
+	XmNlabelString =  * '1';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+object 'trig2' : XmPushButton {
+	arguments {
+	name = 'trig2';
+	lastGenName = 'trig2';
+	XmNlabelString =  * '2';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select2()
+';
+	};
+};
+object 'trig3' : XmPushButton {
+	arguments {
+	name = 'trig3';
+	lastGenName = 'trig3';
+	XmNlabelString =  * '3';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select3()
+';
+	};
+};
+object 'trig4' : XmPushButton {
+	arguments {
+	name = 'trig4';
+	lastGenName = 'trig4';
+	XmNlabelString =  * '4';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select4()
+';
+	};
+};
+object 'trig5' : XmPushButton {
+	arguments {
+	name = 'trig5';
+	lastGenName = 'trig5';
+	XmNlabelString =  * '5';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select5()
+';
+	};
+};
+object 'trig6' : XmPushButton {
+	arguments {
+	name = 'trig6';
+	lastGenName = 'trig6';
+	XmNlabelString =  * '6';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select6()
+';
+	};
+};
+object 'trig7' : XmPushButton {
+	arguments {
+	name = 'trig7';
+	lastGenName = 'trig7';
+	XmNlabelString =  * '7';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select7()
+';
+	};
+};
+object 'trig8' : XmPushButton {
+	arguments {
+	name = 'trig8';
+	lastGenName = 'trig8';
+	XmNlabelString =  * '8';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select8()
+';
+	};
+};
+object 'trig9' : XmPushButton {
+	arguments {
+	name = 'trig9';
+	lastGenName = 'trig9';
+	XmNlabelString =  * '9';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select9()
+';
+	};
+};
+object 'trig10' : XmPushButton {
+	arguments {
+	name = 'trig10';
+	lastGenName = 'trig10';
+	XmNlabelString =  * '10';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select10()
+';
+	};
+};
+object 'trig11' : XmPushButton {
+	arguments {
+	name = 'trig11';
+	lastGenName = 'trig11';
+	XmNlabelString =  * '11';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select11()
+';
+	};
+};
+object 'trig12' : XmPushButton {
+	arguments {
+	name = 'trig12';
+	lastGenName = 'trig12';
+	XmNlabelString =  * '12';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select12()
+';
+	};
+};
+object 'trig13' : XmPushButton {
+	arguments {
+	name = 'trig13';
+	lastGenName = 'trig13';
+	XmNlabelString =  * '13';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select13()
+';
+	};
+};
+object 'trig14' : XmPushButton {
+	arguments {
+	name = 'trig14';
+	lastGenName = 'trig14';
+	XmNlabelString =  * '14';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select14()
+';
+	};
+};
+object 'trig15' : XmPushButton {
+	arguments {
+	name = 'trig15';
+	lastGenName = 'trig15';
+	XmNlabelString =  * '15';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select15()
+';
+	};
+};
+object 'trig16' : XmPushButton {
+	arguments {
+	name = 'trig16';
+	lastGenName = 'trig16';
+	XmNlabelString =  * '16';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select16()
+';
+	};
+};
+};
+};
+};
+object '62' : XmForm {
+	arguments {
+	lastGenName = 'form62';
+	};
+object 'trigLevelText' : XmTextField {
+	arguments {
+	name = 'trigLevelText';
+	lastGenName = 'trigLevelText';
+	generateResName = true;
+	XmNcolumns = 4;
+	XmNmarginHeight = 4;
+	XmNmarginWidth = 4;
+	};
+	callbacks {
+	XmNactivateCallback = '
+TextFieldPress()
+';
+	XmNvalueChangedCallback = '
+TextfieldValue3()
+';
+	XmNlosingFocusCallback = '
+TextFieldPress()
+';
+	XmNmodifyVerifyCallback = '
+verifyNoSpaces()
+';
+	};
+};
+object 'aboveMenu' : XmOptionMenu {
+	arguments {
+	lastGenName = 'aboveMenu';
+	XmNspacing = 0;
+	XmNmarginWidth = 0;
+	XmNmarginHeight = 0;
+	XmNorientation = 2;
+	};
+abstract object '12' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label12';
+	generateResName = true;
+	};
+};
+abstract object '6' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'cascade6';
+	};
+object 'trigaboveMenu' : XmPulldownMenu {
+	arguments {
+	name = 'trigaboveMenu';
+	lastGenName = 'trigaboveMenu';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelTrigAboveMenu()
+';
+	};
+object 'above' : XmPushButton {
+	arguments {
+	name = 'above';
+	lastGenName = 'above';
+	XmNlabelString =  * 'Above';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select0()
+';
+	};
+};
+object 'below' : XmPushButton {
+	arguments {
+	name = 'below';
+	lastGenName = 'below';
+	XmNlabelString =  * 'Below';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+};
+};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 3 2;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    };
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 2;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 2;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 1 0 2;
+	XmNtopAttachment = 3 2;
+    };
+    };
+};
+object '53' : XmLabel {
+	arguments {
+	lastGenName = 'label53';
+	XmNchildType = 2;
+	XmNchildHorizontalAlignment = 2;
+	XmNlabelString =  * 'Trigger';
+	};
+};
+};
+object 'midFrame' : XmFrame {
+	arguments {
+	lastGenName = 'midFrame';
+	};
+object 'midForm' : XmForm {
+	arguments {
+	name = 'midForm';
+	lastGenName = 'midForm';
+	};
+object 'menuColor' : XmOptionMenu {
+	arguments {
+	name = 'menuColor';
+	lastGenName = 'menuColor';
+	folded = true;
+	XmNorientation = 1;
+	};
+abstract object '46' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label46';
+	XmNlabelString =  * 'Trace Color';
+	};
+};
+abstract object 'menuColorText' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'menuColorText';
+	};
+object 'colormenu' : XmPulldownMenu {
+	arguments {
+	name = 'colormenu';
+	lastGenName = 'colormenu';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelColorMenu()
+';
+	};
+object 'red' : XmPushButton {
+	arguments {
+	lastGenName = 'red';
+	generateResName = true;
+	XmNforeground = color('red');
+	XmNlabelString =  * 'Red';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select2()
+';
+	};
+};
+object 'green' : XmPushButton {
+	arguments {
+	lastGenName = 'green';
+	generateResName = true;
+	XmNforeground = color('green');
+	XmNlabelString =  * 'Green';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select3()
+';
+	};
+};
+object 'blue' : XmPushButton {
+	arguments {
+	lastGenName = 'blue';
+	generateResName = true;
+	XmNforeground = color('blue');
+	XmNlabelString =  * 'Blue';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select4()
+';
+	};
+};
+object 'yellow' : XmPushButton {
+	arguments {
+	lastGenName = 'yellow';
+	generateResName = true;
+	XmNforeground = color('yellow');
+	XmNlabelString =  * 'Yellow';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select5()
+';
+	};
+};
+object 'brown' : XmPushButton {
+	arguments {
+	lastGenName = 'brown';
+	generateResName = true;
+	XmNforeground = color('brown');
+	XmNlabelString =  * 'Brown';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select6()
+';
+	};
+};
+object 'violet' : XmPushButton {
+	arguments {
+	lastGenName = 'violet';
+	generateResName = true;
+	XmNforeground = color('violet');
+	XmNlabelString =  * 'Violet';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select8()
+';
+	};
+};
+object 'cyan' : XmPushButton {
+	arguments {
+	lastGenName = 'cyan';
+	generateResName = true;
+	XmNforeground = color('cyan');
+	XmNlabelString =  * 'Cyan';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select9()
+';
+	};
+};
+object 'magenta' : XmPushButton {
+	arguments {
+	lastGenName = 'magenta';
+	generateResName = true;
+	XmNforeground = color('magenta');
+	XmNlabelString =  * 'Magenta';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select10()
+';
+	};
+};
+object 'orange' : XmPushButton {
+	arguments {
+	lastGenName = 'orange';
+	generateResName = true;
+	XmNforeground = color('orange');
+	XmNlabelString =  * 'Orange';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select11()
+';
+	};
+};
+object 'indigo' : XmPushButton {
+	arguments {
+	lastGenName = 'indigo';
+	generateResName = true;
+	XmNforeground = color('darkviolet');
+	XmNlabelString =  * 'Indigo';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select12()
+';
+	};
+};
+object 'maroon' : XmPushButton {
+	arguments {
+	lastGenName = 'maroon';
+	generateResName = true;
+	XmNforeground = color('maroon');
+	XmNlabelString =  * 'Maroon';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select13()
+';
+	};
+};
+object 'turqse' : XmPushButton {
+	arguments {
+	lastGenName = 'turqse';
+	generateResName = true;
+	XmNforeground = color('turquoise');
+	XmNlabelString =  * 'Turquoise';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select14()
+';
+	};
+};
+object 'green4' : XmPushButton {
+	arguments {
+	lastGenName = 'green4';
+	generateResName = true;
+	XmNforeground = color('green4');
+	XmNlabelString =  * 'Darkgreen';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select15()
+';
+	};
+};
+object 'alldef' : XmPushButton {
+	arguments {
+	lastGenName = 'alldef';
+	XmNlabelString =  * 'Default';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select16()
+';
+	};
+};
+};
+};
+};
+object 'xAxisFrame' : XmFrame {
+	arguments {
+	lastGenName = 'xAxisFrame';
+	folded = true;
+	};
+object '57' : XmLabel {
+	arguments {
+	lastGenName = 'label57';
+	XmNchildType = 2;
+	XmNchildHorizontalAlignment = 2;
+	XmNlabelString =  * 'X Axis';
+	};
+};
+object '41' : XmForm {
+	arguments {
+	lastGenName = 'form41';
+	};
+object 'menuDelay' : XmOptionMenu {
+	arguments {
+	name = 'menuDelay';
+	lastGenName = 'menuDelay';
+	folded = true;
+	};
+abstract object '47' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label47';
+	XmNlabelString =  * 'Delay';
+	};
+};
+abstract object 'menuDelayText' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'menuDelayText';
+	};
+object 'delayMenu' : XmPulldownMenu {
+	arguments {
+	lastGenName = 'delayMenu';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelDelayMenu()
+';
+	};
+object 'a0' : XmPushButton {
+	arguments {
+	name = 'a0';
+	lastGenName = 'a0';
+	XmNlabelString =  * '0';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select0()
+';
+	};
+};
+object 'a1' : XmPushButton {
+	arguments {
+	name = 'a1';
+	lastGenName = 'a1';
+	XmNlabelString =  * '1';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+object 'a2' : XmPushButton {
+	arguments {
+	name = 'a2';
+	lastGenName = 'a2';
+	XmNlabelString =  * '2';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select2()
+';
+	};
+};
+object 'a3' : XmPushButton {
+	arguments {
+	name = 'a3';
+	lastGenName = 'a3';
+	XmNlabelString =  * '3';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select3()
+';
+	};
+};
+object 'a4' : XmPushButton {
+	arguments {
+	name = 'a4';
+	lastGenName = 'a4';
+	XmNlabelString =  * '4';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select4()
+';
+	};
+};
+object 'a5' : XmPushButton {
+	arguments {
+	name = 'a5';
+	lastGenName = 'a5';
+	XmNlabelString =  * '5';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select5()
+';
+	};
+};
+object 'a6' : XmPushButton {
+	arguments {
+	name = 'a6';
+	lastGenName = 'a6';
+	XmNlabelString =  * '6';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select6()
+';
+	};
+};
+object 'a7' : XmPushButton {
+	arguments {
+	name = 'a7';
+	lastGenName = 'a7';
+	XmNlabelString =  * '7';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select7()
+';
+	};
+};
+object 'a8' : XmPushButton {
+	arguments {
+	name = 'a8';
+	lastGenName = 'a8';
+	XmNlabelString =  * '8';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select8()
+';
+	};
+};
+object 'a9' : XmPushButton {
+	arguments {
+	name = 'a9';
+	lastGenName = 'a9';
+	XmNlabelString =  * '9';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select9()
+';
+	};
+};
+object 'a10' : XmPushButton {
+	arguments {
+	name = 'a10';
+	lastGenName = 'a10';
+	XmNlabelString =  * '10';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select10()
+';
+	};
+};
+object 'a11' : XmPushButton {
+	arguments {
+	name = 'a11';
+	lastGenName = 'a11';
+	XmNlabelString =  * '11';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select11()
+';
+	};
+};
+object 'a12' : XmPushButton {
+	arguments {
+	name = 'a12';
+	lastGenName = 'a12';
+	XmNlabelString =  * '12';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select12()
+';
+	};
+};
+object 'a13' : XmPushButton {
+	arguments {
+	name = 'a13';
+	lastGenName = 'a13';
+	XmNlabelString =  * '13';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select13()
+';
+	};
+};
+object 'a14' : XmPushButton {
+	arguments {
+	name = 'a14';
+	lastGenName = 'a14';
+	XmNlabelString =  * '14';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select14()
+';
+	};
+};
+object 'a15' : XmPushButton {
+	arguments {
+	name = 'a15';
+	lastGenName = 'a15';
+	XmNlabelString =  * '15';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select15()
+';
+	};
+};
+};
+};
+};
+object 'menuXScale' : XmOptionMenu {
+	arguments {
+	name = 'menuXScale';
+	lastGenName = 'menuXScale';
+	folded = true;
+	};
+abstract object '48' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label48';
+	XmNlabelString =  * 'Sec';
+	};
+};
+abstract object 'menuXScaleText' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'menuXScaleText';
+	};
+object 'xAxisMenu' : XmPulldownMenu {
+	arguments {
+	lastGenName = 'xAxisMenu';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelectXAxisMenu()
+';
+	};
+object 'xAxisN16' : XmPushButton {
+	arguments {
+	lastGenName = 'xAxisN16';
+	XmNlabelString =  * '1/16';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelectN16()
+';
+	};
+};
+object 'xAxisN8' : XmPushButton {
+	arguments {
+	lastGenName = 'xAxisN8';
+	XmNlabelString =  * '1/8';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelectN8()
+';
+	};
+};
+object 'xAxisN4' : XmPushButton {
+	arguments {
+	lastGenName = 'xAxisN4';
+	XmNlabelString =  * '1/4';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelectN4()
+';
+	};
+};
+object 'xAxisN2' : XmPushButton {
+	arguments {
+	lastGenName = 'xAxisN2';
+	XmNlabelString =  * '1/2';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelectN2()
+';
+	};
+};
+object 'xAxis1' : XmPushButton {
+	arguments {
+	lastGenName = 'xAxis1';
+	XmNlabelString =  * '1';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+object 'xAxis2' : XmPushButton {
+	arguments {
+	lastGenName = 'xAxis2';
+	XmNlabelString =  * '2';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select2()
+';
+	};
+};
+object 'xAxis4' : XmPushButton {
+	arguments {
+	lastGenName = 'xAxis4';
+	XmNlabelString =  * '4';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select4()
+';
+	};
+};
+object 'xAxis8' : XmPushButton {
+	arguments {
+	lastGenName = 'xAxis8';
+	XmNlabelString =  * '8';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select8()
+';
+	};
+};
+object 'xAxis16' : XmPushButton {
+	arguments {
+	lastGenName = 'xAxis16';
+	XmNlabelString =  * '16';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select16()
+';
+	};
+};
+};
+};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 2;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 1 0 2;
+	XmNtopAttachment = 3 1 2;
+    };
+    };
+};
+};
+object 'yAxisFrame' : XmFrame {
+	arguments {
+	lastGenName = 'yAxisFrame';
+	folded = true;
+	};
+object '58' : XmLabel {
+	arguments {
+	lastGenName = 'label58';
+	XmNchildType = 2;
+	XmNchildHorizontalAlignment = 2;
+	XmNlabelString =  * 'Y Axis';
+	};
+};
+object '42' : XmForm {
+	arguments {
+	lastGenName = 'form42';
+	};
+object 'yscaleForm' : XmForm {
+	arguments {
+	name = 'yscaleForm';
+	lastGenName = 'yscaleForm';
+	};
+object '45' : XmForm {
+	arguments {
+	lastGenName = 'form45';
+	};
+object 'ymaxLabel' : XmLabel {
+	arguments {
+	lastGenName = 'ymaxLabel';
+	generateResName = true;
+	XmNlabelString =  * 'Max';
+	XmNalignment =  * 2;
+	};
+};
+object 'yminLabel' : XmLabel {
+	arguments {
+	lastGenName = 'yminLabel';
+	generateResName = true;
+	XmNlabelString =  * 'Min';
+	XmNalignment =  * 2;
+	};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 5 0 50;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 1 0;
+	XmNtopAttachment = 5 0 50;
+    };
+    };
+};
+object '44' : XmForm {
+	arguments {
+	lastGenName = 'form44';
+	};
+object 'yMaxText' : XmTextField {
+	arguments {
+	lastGenName = 'yMaxText';
+	generateResName = true;
+	XmNx = 0;
+	XmNy = 0;
+	XmNcolumns = 4;
+	XmNmarginHeight = 4;
+	XmNmarginWidth = 4;
+	};
+	callbacks {
+	XmNactivateCallback = '
+TextFieldPress()
+';
+	XmNlosingFocusCallback = '
+TextFieldPress()
+';
+	XmNvalueChangedCallback = '
+TextfieldValue2()
+';
+	XmNmodifyVerifyCallback = '
+verifyNoSpaces()
+';
+	};
+};
+object 'yMinText' : XmTextField {
+	arguments {
+	lastGenName = 'yMinText';
+	generateResName = true;
+	XmNcolumns = 4;
+	XmNmarginHeight = 4;
+	XmNmarginWidth = 4;
+	};
+	callbacks {
+	XmNactivateCallback = '
+TextFieldPress()
+';
+	XmNlosingFocusCallback = '
+TextFieldPress()
+';
+	XmNvalueChangedCallback = '
+TextfieldValue1()
+';
+	XmNmodifyVerifyCallback = '
+verifyNoSpaces()
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 5 0 50;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 1 0;
+	XmNtopAttachment = 5 0 50;
+    };
+    };
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 3 1;
+	XmNbottomAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    };
+};
+object '23' : XmForm {
+	arguments {
+	lastGenName = 'form23';
+	};
+object 'unitOn' : XmToggleButton GADGET {
+	arguments {
+	name = 'unitOn';
+	lastGenName = 'unitOn';
+	XmNlabelString =  * 'Unit';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+unitonSel()
+';
+	};
+};
+object 'autoOn' : XmToggleButton GADGET {
+	arguments {
+	name = 'autoOn';
+	lastGenName = 'autoOn';
+	XmNlabelString =  * 'Auto';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+autoYSel()
+';
+	};
+};
+object 'menuYScale' : XmOptionMenu {
+	arguments {
+	name = 'menuYScale';
+	lastGenName = 'menuYScale';
+	folded = true;
+	};
+abstract object '49' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label49';
+	XmNlabelString =  * 'Scale';
+	};
+};
+abstract object 'menuYScaleText' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'menuYScaleText';
+	};
+object 'yScaleMenu' : XmPulldownMenu {
+	arguments {
+	name = 'yScaleMenu';
+	lastGenName = 'yScaleMenu';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelYTypelMenu()
+';
+	};
+object 'linearsel' : XmPushButton {
+	arguments {
+	name = 'linearsel';
+	lastGenName = 'linearsel';
+	XmNlabelString =  * 'Lin';
+	};
+	callbacks {
+	XmNarmCallback = '
+linearSel()
+';
+	};
+};
+object 'expsel' : XmPushButton {
+	arguments {
+	name = 'expsel';
+	lastGenName = 'expsel';
+	XmNlabelString =  * 'Exp  ';
+	};
+	callbacks {
+	XmNarmCallback = '
+expSel()
+';
+	};
+};
+object 'logsel' : XmPushButton {
+	arguments {
+	name = 'logsel';
+	lastGenName = 'logsel';
+	XmNlabelString =  * 'Log ';
+	};
+	callbacks {
+	XmNarmCallback = '
+logSel()
+';
+	};
+};
+object 'lnsel' : XmPushButton {
+	arguments {
+	name = 'lnsel';
+	lastGenName = 'lnsel';
+	XmNlabelString =  * 'Ln  ';
+	};
+	callbacks {
+	XmNarmCallback = '
+lnSel()
+';
+	};
+};
+};
+};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 3;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 1;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 3;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    };
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 3 2;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 0 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    };
+};
+};
+object 'menuChan' : XmOptionMenu {
+	arguments {
+	name = 'menuChan';
+	lastGenName = 'menuChan';
+	folded = true;
+	};
+abstract object '52' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label52';
+	XmNlabelString =  * 'Ch';
+	};
+};
+abstract object 'menuChanText' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'menuChanText';
+	};
+object 'chMenu' : XmPulldownMenu {
+	arguments {
+	lastGenName = 'chMenu';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelWinNumberMenu()
+';
+	};
+object 'win1' : XmPushButton {
+	arguments {
+	name = 'win1';
+	lastGenName = 'win1';
+	XmNlabelString =  * '1';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin1()
+';
+	};
+};
+object 'win2' : XmPushButton {
+	arguments {
+	name = 'win2';
+	lastGenName = 'win2';
+	XmNlabelString =  * '2';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin2()
+';
+	};
+};
+object 'win3' : XmPushButton {
+	arguments {
+	name = 'win3';
+	lastGenName = 'win3';
+	XmNlabelString =  * '3';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin3()
+';
+	};
+};
+object 'win4' : XmPushButton {
+	arguments {
+	name = 'win4';
+	lastGenName = 'win4';
+	XmNlabelString =  * '4';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin4()
+';
+	};
+};
+object 'win5' : XmPushButton {
+	arguments {
+	name = 'win5';
+	lastGenName = 'win5';
+	XmNlabelString =  * '5';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin5()
+';
+	};
+};
+object 'win6' : XmPushButton {
+	arguments {
+	name = 'win6';
+	lastGenName = 'win6';
+	XmNlabelString =  * '6';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin6()
+';
+	};
+};
+object 'win7' : XmPushButton {
+	arguments {
+	name = 'win7';
+	lastGenName = 'win7';
+	XmNlabelString =  * '7';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin7()
+';
+	};
+};
+object 'win8' : XmPushButton {
+	arguments {
+	name = 'win8';
+	lastGenName = 'win8';
+	XmNlabelString =  * '8';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin8()
+';
+	};
+};
+object 'win9' : XmPushButton {
+	arguments {
+	name = 'win9';
+	lastGenName = 'win9';
+	XmNlabelString =  * '9';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin9()
+';
+	};
+};
+object 'win10' : XmPushButton {
+	arguments {
+	name = 'win10';
+	lastGenName = 'win10';
+	XmNlabelString =  * '10';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin10()
+';
+	};
+};
+object 'win11' : XmPushButton {
+	arguments {
+	name = 'win11';
+	lastGenName = 'win11';
+	XmNlabelString =  * '11';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin11()
+';
+	};
+};
+object 'win12' : XmPushButton {
+	arguments {
+	name = 'win12';
+	lastGenName = 'win12';
+	XmNlabelString =  * '12';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin12()
+';
+	};
+};
+object 'win13' : XmPushButton {
+	arguments {
+	name = 'win13';
+	lastGenName = 'win13';
+	XmNlabelString =  * '13';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin13()
+';
+	};
+};
+object 'win14' : XmPushButton {
+	arguments {
+	name = 'win14';
+	lastGenName = 'win14';
+	XmNlabelString =  * '14';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin14()
+';
+	};
+};
+object 'win15' : XmPushButton {
+	arguments {
+	name = 'win15';
+	lastGenName = 'win15';
+	XmNlabelString =  * '15';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin15()
+';
+	};
+};
+object 'win16' : XmPushButton {
+	arguments {
+	name = 'win16';
+	lastGenName = 'win16';
+	XmNlabelString =  * '16';
+	};
+	callbacks {
+	XmNarmCallback = '
+SelWin16()
+';
+	};
+};
+};
+};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 4;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 1 2;
+	XmNbottomAttachment = 1 0;
+	XmNtopAttachment = 1 0 -2;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 3 2 2;
+	XmNbottomAttachment = 1 0;
+	XmNtopAttachment = 1 0 -2;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    };
+};
+object 'sigNamText' : XmLabel {
+	arguments {
+	lastGenName = 'sigNamText';
+	generateResName = true;
+	XmNchildType = 2;
+	XmNchildHorizontalAlignment = 2;
+	XmNlabelString =  * ' ';
+	XmNrecomputeSize =  * false;
+	};
+};
+};
+object 'slotsFrame' : XmFrame {
+	arguments {
+	lastGenName = 'slotsFrame';
+	folded = true;
+	};
+object '54' : XmLabel {
+	arguments {
+	lastGenName = 'label54';
+	XmNchildType = 2;
+	XmNchildHorizontalAlignment = 1;
+	XmNchildVerticalAlignment = 1;
+	XmNlabelString =  * 'Signal';
+	};
+};
+object '4' : XmRowColumn {
+	arguments {
+	lastGenName = 'rowcol4';
+	XmNnumColumns = 2;
+	XmNspacing = 0;
+	XmNmarginWidth = 0;
+	XmNmarginHeight = 0;
+	XmNpacking = 2;
+	};
+object 'ch1Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch1Select';
+	generateResName = true;
+	XmNx = 0;
+	XmNy = 0;
+	XmNlabelString =  * '1';
+	XmNindicatorOn = true;
+	XmNindicatorType =  * 1;
+	XmNset =  * false;
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(0)
+';
+	};
+};
+object 'ch2Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch2Select';
+	generateResName = true;
+	XmNlabelString =  * '2';
+	XmNindicatorType =  * 1;
+	XmNset =  * false;
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(1)
+';
+	};
+};
+object 'ch3Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch3Select';
+	generateResName = true;
+	XmNx = 0;
+	XmNy = 54;
+	XmNlabelString =  * '3';
+	XmNindicatorType =  * 1;
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(2)
+';
+	};
+};
+object 'ch4Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch4Select';
+	generateResName = true;
+	XmNlabelString =  * '4';
+	XmNindicatorType =  * 1;
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(3)
+';
+	};
+};
+object 'ch5Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch5Select';
+	generateResName = true;
+	XmNx = 0;
+	XmNy = 108;
+	XmNlabelString =  * '5';
+	XmNindicatorType =  * 1;
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(4)
+';
+	};
+};
+object 'ch6Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch6Select';
+	generateResName = true;
+	XmNx = 0;
+	XmNy = 135;
+	XmNlabelString =  * '6';
+	XmNindicatorType =  * 1;
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(5)
+';
+	};
+};
+object 'ch7Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch7Select';
+	generateResName = true;
+	XmNx = 0;
+	XmNy = 162;
+	XmNlabelString =  * '7';
+	XmNindicatorType =  * 1;
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(6)
+';
+	};
+};
+object 'ch8Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch8Select';
+	generateResName = true;
+	XmNx = 0;
+	XmNy = 189;
+	XmNlabelString =  * '8';
+	XmNindicatorType =  * 1;
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(7)
+';
+	};
+};
+object 'ch9Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch9Select';
+	generateResName = true;
+	XmNx = 53;
+	XmNy = 0;
+	XmNlabelString =  * '9';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(8)
+';
+	};
+};
+object 'ch10Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch10Select';
+	generateResName = true;
+	XmNlabelString =  * '10';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(9)
+';
+	};
+};
+object 'ch11Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch11Select';
+	generateResName = true;
+	XmNlabelString =  * '11';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(10)
+';
+	};
+};
+object 'ch12Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch12Select';
+	generateResName = true;
+	XmNlabelString =  * '12';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(11)
+';
+	};
+};
+object 'ch13Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch13Select';
+	generateResName = true;
+	XmNlabelString =  * '13';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(12)
+';
+	};
+};
+object 'ch14Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch14Select';
+	generateResName = true;
+	XmNlabelString =  * '14';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(13)
+';
+	};
+};
+object 'ch15Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch15Select';
+	generateResName = true;
+	XmNlabelString =  * '15';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(14)
+';
+	};
+};
+object 'ch16Select' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'ch16Select';
+	generateResName = true;
+	XmNlabelString =  * '16';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+multiSel(15)
+';
+	};
+};
+};
+};
+object 'modeForm' : XmForm {
+	arguments {
+	name = 'modeForm';
+	lastGenName = 'modeForm';
+	};
+object 'displayType' : XmOptionMenu {
+	arguments {
+	name = 'displayType';
+	lastGenName = 'displayType';
+	folded = true;
+	};
+abstract object '19' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label19';
+	XmNlabelString =  * 'Type';
+	};
+};
+abstract object 'displayTypeText' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'displayTypeText';
+	};
+object 'opMenu' : XmPulldownMenu {
+	arguments {
+	lastGenName = 'opMenu';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelectTypeMenu()
+';
+	};
+object 'timebase' : XmPushButton {
+	arguments {
+	lastGenName = 'timebase';
+	XmNlabelString =  * 'Full Data';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select0()
+';
+	};
+};
+object 'trmean' : XmPushButton {
+	arguments {
+	lastGenName = 'trmean';
+	XmNlabelString =  * 'Trend';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+};
+};
+};
+object 'menuMode' : XmOptionMenu {
+	arguments {
+	name = 'menuMode';
+	lastGenName = 'menuMode';
+	folded = true;
+	};
+abstract object '21' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label21';
+	XmNlabelString =  * 'Mode';
+	};
+};
+abstract object 'menuModeText' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'menuModeText';
+	};
+object 'modeMenu' : XmPulldownMenu {
+	arguments {
+	lastGenName = 'modeMenu';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelectModeMenu()
+';
+	};
+object 'stand' : XmPushButton {
+	arguments {
+	lastGenName = 'stand';
+	XmNlabelString =  * 'Standard';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select0()
+';
+	};
+};
+object 'multi' : XmPushButton {
+	arguments {
+	lastGenName = 'multi';
+	XmNlabelString =  * 'Multiple';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+};
+};
+};
+object 'menuRes' : XmOptionMenu {
+	arguments {
+	name = 'menuRes';
+	lastGenName = 'menuRes';
+	folded = true;
+	};
+abstract object '22' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label22';
+	XmNlabelString =  * 'Resolution';
+	};
+};
+abstract object 'menuResText' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'menuResText';
+	};
+object 'reMenu' : XmPulldownMenu {
+	arguments {
+	lastGenName = 'reMenu';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelResolutionMenu()
+';
+	};
+object 'dr1' : XmPushButton {
+	arguments {
+	name = 'dr1';
+	lastGenName = 'dr1';
+	XmNlabelString =  * '128';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+object 'dr2' : XmPushButton {
+	arguments {
+	name = 'dr2';
+	lastGenName = 'dr2';
+	XmNlabelString =  * '256';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select2()
+';
+	};
+};
+object 'dr4' : XmPushButton {
+	arguments {
+	name = 'dr4';
+	lastGenName = 'dr4';
+	XmNlabelString =  * '512';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select4()
+';
+	};
+};
+object 'dr8' : XmPushButton {
+	arguments {
+	name = 'dr8';
+	lastGenName = 'dr8';
+	XmNlabelString =  * '1024';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select8()
+';
+	};
+};
+object 'dr16' : XmPushButton {
+	arguments {
+	name = 'dr16';
+	lastGenName = 'dr16';
+	XmNlabelString =  * '2048';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select16()
+';
+	};
+};
+object 'dr32' : XmPushButton {
+	arguments {
+	name = 'dr32';
+	lastGenName = 'dr32';
+	XmNlabelString =  * '4086';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select32()
+';
+	};
+};
+object 'dr64' : XmPushButton {
+	arguments {
+	name = 'dr64';
+	lastGenName = 'dr64';
+	XmNlabelString =  * '8192';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select64()
+';
+	};
+};
+object 'dr128' : XmPushButton {
+	arguments {
+	name = 'dr128';
+	lastGenName = 'dr128';
+	XmNlabelString =  * '16384';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select128()
+';
+	};
+};
+};
+};
+};
+object 'menuRate' : XmOptionMenu {
+	arguments {
+	name = 'menuRate';
+	lastGenName = 'menuRate';
+	};
+abstract object '23' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label23';
+	XmNlabelString =  * 'Refresh';
+	};
+};
+abstract object 'menuRateText' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'menuRateText';
+	};
+object 'rateMenu' : XmPulldownMenu {
+	arguments {
+	lastGenName = 'rateMenu';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelectRateMenu()
+';
+	};
+object 'freq1' : XmPushButton {
+	arguments {
+	name = 'freq1';
+	lastGenName = 'freq1';
+	XmNlabelString =  * '1';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+object 'freq2' : XmPushButton {
+	arguments {
+	name = 'freq2';
+	lastGenName = 'freq2';
+	XmNlabelString =  * '2';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select2()
+';
+	};
+};
+object 'freq4' : XmPushButton {
+	arguments {
+	name = 'freq4';
+	lastGenName = 'freq4';
+	XmNlabelString =  * '4';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select4()
+';
+	};
+};
+object 'freq8' : XmPushButton {
+	arguments {
+	name = 'freq8';
+	lastGenName = 'freq8';
+	XmNlabelString =  * '8';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select8()
+';
+	};
+};
+object 'freq16' : XmPushButton {
+	arguments {
+	name = 'freq16';
+	lastGenName = 'freq16';
+	XmNlabelString =  * '16';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select16()
+';
+	};
+};
+};
+};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0 10;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 1;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 10;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 1 10;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 3 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 2 10;
+    };
+    };
+};
+object 'sigOn' : XmToggleButton GADGET {
+	arguments {
+	name = 'sigOn';
+	lastGenName = 'sigOn';
+	XmNlabelString =  * 'Highlight ';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+sigonSel()
+';
+	};
+};
+object 'filterOn' : XmToggleButton GADGET {
+	arguments {
+	name = 'filterOn';
+	lastGenName = 'filterOn';
+	XmNlabelString =  * 'Filter';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+filteronSel()
+';
+	};
+};
+object 'globalOn' : XmToggleButton GADGET {
+	arguments {
+	name = 'globalOn';
+	lastGenName = 'globalOn';
+	XmNlabelString =  * 'Global ';
+	};
+	callbacks {
+	XmNvalueChangedCallback = '
+globalonSel()
+';
+	};
+};
+object 'buttonForm' : XmForm {
+	arguments {
+	name = 'buttonForm';
+	lastGenName = 'buttonForm';
+	XmNcancelButton = 'stopbtn';
+	XmNdefaultButton = 'playbtn';
+	};
+object 'stopbtn' : XmPushButton {
+	arguments {
+	name = 'stopbtn';
+	lastGenName = 'stopbtn';
+	generateResName = true;
+	XmNforeground = color('darkred');
+	XmNlabelString =  * 'Stop';
+	XmNmarginWidth = 10;
+	XmNdefaultButtonShadowThickness = 1;
+	};
+	callbacks {
+	XmNactivateCallback = '
+stopButton()
+';
+	};
+};
+object 'playbtn' : XmPushButton {
+	arguments {
+	lastGenName = 'playbtn';
+	generateResName = true;
+	XmNforeground = color('green4');
+	XmNlabelString =  * 'Start';
+	XmNmarginWidth = 10;
+	XmNdefaultButtonShadowThickness = 1;
+	};
+	callbacks {
+	XmNactivateCallback = '
+playButton()
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 2 10;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 10;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    };
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 3 3;
+	XmNleftAttachment = 3 4;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 3 3;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 1;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 0 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 2;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 5 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 2;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 6 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 2;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 1 0;
+	XmNtopAttachment = 3 5;
+    };
+    };
+};
+object 'Longf' : XmForm {
+	arguments {
+	name = 'Longf';
+	lastGenName = 'Longf';
+	folded = true;
+	XmNx = 76;
+	XmNy = 0;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 0;
+	XmNautoUnmanage = false;
+	};
+object 'lchann' : XmFrame {
+	arguments {
+	lastGenName = 'lchann';
+	folded = true;
+	};
+object 'longch' : XmRowColumn {
+	arguments {
+	lastGenName = 'longch';
+	XmNnumColumns = 2;
+	XmNspacing = 0;
+	XmNmarginWidth = 0;
+	XmNmarginHeight = 0;
+	XmNpacking = 2;
+	};
+object 'lch1' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch1';
+	XmNx = 0;
+	XmNy = 0;
+	XmNlabelString =  * '1';
+	XmNindicatorType =  * 1;
+	XmNset =  * true;
+	};
+};
+object 'lch2' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch2';
+	XmNlabelString =  * '2';
+	XmNindicatorType =  * 1;
+	XmNset =  * true;
+	};
+};
+object 'lch3' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch3';
+	XmNx = 0;
+	XmNy = 54;
+	XmNlabelString =  * '3';
+	XmNindicatorType =  * 1;
+	XmNset =  * false;
+	};
+};
+object 'lch4' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch4';
+	XmNlabelString =  * '4';
+	XmNindicatorType =  * 1;
+	};
+};
+object 'lch5' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch5';
+	XmNx = 0;
+	XmNy = 108;
+	XmNlabelString =  * '5';
+	XmNindicatorType =  * 1;
+	};
+};
+object 'lch6' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch6';
+	XmNx = 0;
+	XmNy = 135;
+	XmNlabelString =  * '6';
+	XmNindicatorType =  * 1;
+	};
+};
+object 'lch7' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch7';
+	XmNx = 0;
+	XmNy = 162;
+	XmNlabelString =  * '7';
+	XmNindicatorType =  * 1;
+	};
+};
+object 'lch8' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch8';
+	XmNx = 0;
+	XmNy = 189;
+	XmNlabelString =  * '8';
+	XmNindicatorType =  * 1;
+	};
+};
+object 'lch9' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch9';
+	XmNx = 53;
+	XmNy = 0;
+	XmNlabelString =  * '9';
+	};
+};
+object 'lch10' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch10';
+	XmNlabelString =  * '10';
+	};
+};
+object 'lch11' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch11';
+	XmNlabelString =  * '11';
+	};
+};
+object 'lch12' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch12';
+	XmNlabelString =  * '12';
+	};
+};
+object 'lch13' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch13';
+	XmNlabelString =  * '13';
+	};
+};
+object 'lch14' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch14';
+	XmNlabelString =  * '14';
+	};
+};
+object 'lch15' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch15';
+	XmNlabelString =  * '15';
+	};
+};
+object 'lch16' : XmToggleButton GADGET {
+	arguments {
+	lastGenName = 'lch16';
+	XmNlabelString =  * '16';
+	};
+};
+};
+object '38' : XmLabel {
+	arguments {
+	lastGenName = 'label38';
+	XmNchildType = 2;
+	XmNchildHorizontalAlignment = 1;
+	XmNlabelString =  * 'Signal';
+	};
+};
+};
+object 'lmode' : XmFrame {
+	arguments {
+	lastGenName = 'lmode';
+	folded = true;
+	};
+object '6' : XmRadioBox {
+	arguments {
+	lastGenName = 'radioBox6';
+	XmNspacing = 0;
+	XmNmarginWidth = 0;
+	XmNmarginHeight = 0;
+	};
+object 'lstand' : XmToggleButton GADGET {
+	arguments {
+	name = 'lstand';
+	lastGenName = 'lstand';
+	XmNlabelString =  * 'Standard';
+	XmNset =  * false;
+	};
+	callbacks {
+	XmNarmCallback = '
+longModeStand()
+';
+	};
+};
+object 'lmult' : XmToggleButton GADGET {
+	arguments {
+	name = 'lmult';
+	lastGenName = 'lmult';
+	XmNlabelString =  * 'Multiple';
+	};
+	callbacks {
+	XmNarmCallback = '
+longModeMulti()
+';
+	};
+};
+object 'multixmgr' : XmToggleButton GADGET {
+	arguments {
+	name = 'multixmgr';
+	lastGenName = 'multixmgr';
+	XmNlabelString =  * 'Multi Xmgr';
+	};
+	callbacks {
+	XmNarmCallback = '
+longModeCopies()
+';
+	};
+};
+};
+object '55' : XmLabel {
+	arguments {
+	lastGenName = 'label55';
+	XmNchildType = 2;
+	XmNlabelString =  * 'Graph Mode';
+	};
+};
+};
+object 'autoset' : XmToggleButton {
+	arguments {
+	lastGenName = 'autoset';
+	XmNlabelString =  * 'Auto Setting';
+	};
+};
+object 'styleMenu' : XmOptionMenu {
+	arguments {
+	lastGenName = 'styleMenu';
+	folded = true;
+	};
+abstract object '26' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label26';
+	XmNlabelString =  * ' ';
+	XmNalignment = 0;
+	};
+};
+abstract object '5' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'cascade5';
+	};
+object 'style' : XmPulldownMenu {
+	arguments {
+	name = 'style';
+	lastGenName = 'style';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelStyleMenu()
+';
+	};
+object 'stdefault' : XmPushButton {
+	arguments {
+	name = 'stdefault';
+	lastGenName = 'stdefault';
+	XmNlabelString =  * 'Default';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select0()
+';
+	};
+};
+object 'stline' : XmPushButton {
+	arguments {
+	name = 'stline';
+	lastGenName = 'stline';
+	XmNlabelString =  * 'Line';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+object 'stpoint' : XmPushButton {
+	arguments {
+	name = 'stpoint';
+	lastGenName = 'stpoint';
+	XmNlabelString =  * 'Points';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select2()
+';
+	};
+};
+};
+};
+};
+object 'bogus' : XmForm {
+	arguments {
+	lastGenName = 'bogus';
+	folded = true;
+	XmNwidth = 1;
+	XmNheight = 1;
+	};
+object '19' : XmFrame {
+	arguments {
+	lastGenName = 'frame19';
+	};
+object '62' : XmLabel {
+	arguments {
+	lastGenName = 'label62';
+	XmNchildType = 2;
+	XmNlabelString = 'Stop';
+	};
+};
+object '21' : XmForm {
+	arguments {
+	lastGenName = 'form21';
+	folded = true;
+	};
+object 'lidtext' : XmTextField {
+	arguments {
+	name = 'lidtext';
+	lastGenName = 'lidtext';
+	};
+};
+object 'stopid' : XmPushButton {
+	arguments {
+	lastGenName = 'stopid';
+	XmNlabelString =  * 'Stop  #';
+	};
+	callbacks {
+	XmNarmCallback = '
+stopLong()
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 1;
+    };
+    };
+};
+};
+object '18' : XmFrame {
+	arguments {
+	lastGenName = 'frame18';
+	};
+object '61' : XmLabel {
+	arguments {
+	lastGenName = 'label61';
+	XmNchildType = 2;
+	XmNlabelString =  * 'Trigger';
+	};
+};
+object '20' : XmForm {
+	arguments {
+	lastGenName = 'form20';
+	folded = true;
+	};
+object 'menu_operation' : XmOptionMenu {
+	arguments {
+	lastGenName = 'menu_operation';
+	folded = true;
+	};
+abstract object '34' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label34';
+	};
+};
+abstract object '18' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'cascade18';
+	};
+object 'trigandor' : XmPulldownMenu {
+	arguments {
+	name = 'trigandor';
+	lastGenName = 'trigandor';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelTrigAndOrLongMenu()
+';
+	};
+object 'and' : XmPushButton {
+	arguments {
+	name = 'and';
+	lastGenName = 'and';
+	XmNlabelString =  * '&';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select0()
+';
+	};
+};
+object 'or' : XmPushButton {
+	arguments {
+	name = 'or';
+	lastGenName = 'or';
+	XmNlabelString =  * '||';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+};
+};
+};
+object 'trigLevelText2' : XmTextField {
+	arguments {
+	name = 'trigLevelText2';
+	lastGenName = 'trigLevelText2';
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyNoSpaces()
+';
+	XmNactivateCallback = '
+TextFieldPress()
+';
+	XmNvalueChangedCallback = '
+TextfieldValue6()
+';
+	XmNlosingFocusCallback = '
+TextFieldPress()
+';
+	};
+};
+object 'menuAbove2' : XmOptionMenu {
+	arguments {
+	lastGenName = 'menuAbove2';
+	folded = true;
+	};
+abstract object '33' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label33';
+	};
+};
+abstract object '17' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'cascade17';
+	};
+object 'trigAboveLong2' : XmPulldownMenu {
+	arguments {
+	name = 'trigaboveLong2';
+	lastGenName = 'trigAboveLong2';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelTrigAboveLongMenu2()
+';
+	};
+object 'above2' : XmPushButton {
+	arguments {
+	name = 'above2';
+	lastGenName = 'above2';
+	XmNlabelString =  * 'Above';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select0()
+';
+	};
+};
+object 'below2' : XmPushButton {
+	arguments {
+	name = 'below2';
+	lastGenName = 'below2';
+	XmNlabelString =  * 'Below';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+object 'eqa2' : XmPushButton {
+	arguments {
+	name = 'equ2';
+	lastGenName = 'eqa2';
+	XmNlabelString =  * 'Equal to';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select2()
+';
+	};
+};
+};
+};
+};
+object 'manuChtrig2' : XmOptionMenu {
+	arguments {
+	lastGenName = 'manuChtrig2';
+	folded = true;
+	};
+abstract object '30' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label30';
+	};
+};
+abstract object '15' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'cascade15';
+	};
+object 'trigMenu2' : XmPulldownMenu {
+	arguments {
+	name = 'trigMenu2';
+	lastGenName = 'trigMenu2';
+	folded = true;
+	};
+	callbacks {
+	XmNentryCallback = '
+SelTrigLongMenu2()
+';
+	};
+object '144' : XmPushButton {
+	arguments {
+	name = 'trig1';
+	lastGenName = 'button144';
+	XmNlabelString =  * 'Ch. 01';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+object '145' : XmPushButton {
+	arguments {
+	name = 'trig2';
+	lastGenName = 'button145';
+	XmNlabelString =  * 'Ch. 02';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select2()
+';
+	};
+};
+object '146' : XmPushButton {
+	arguments {
+	name = 'trig3';
+	lastGenName = 'button146';
+	XmNlabelString =  * 'Ch. 03';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select3()
+';
+	};
+};
+object '147' : XmPushButton {
+	arguments {
+	name = 'trig4';
+	lastGenName = 'button147';
+	XmNlabelString =  * 'Ch. 04';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select4()
+';
+	};
+};
+object '148' : XmPushButton {
+	arguments {
+	name = 'trig5';
+	lastGenName = 'button148';
+	XmNlabelString =  * 'Ch. 05';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select5()
+';
+	};
+};
+object '149' : XmPushButton {
+	arguments {
+	name = 'trig6';
+	lastGenName = 'button149';
+	XmNlabelString =  * 'Ch. 06';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select6()
+';
+	};
+};
+object '150' : XmPushButton {
+	arguments {
+	name = 'trig7';
+	lastGenName = 'button150';
+	XmNlabelString =  * 'Ch. 07';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select7()
+';
+	};
+};
+object '151' : XmPushButton {
+	arguments {
+	name = 'trig8';
+	lastGenName = 'button151';
+	XmNlabelString =  * 'Ch. 08';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select8()
+';
+	};
+};
+object '152' : XmPushButton {
+	arguments {
+	name = 'trig9';
+	lastGenName = 'button152';
+	XmNlabelString =  * 'Ch. 09';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select9()
+';
+	};
+};
+object '153' : XmPushButton {
+	arguments {
+	name = 'trig10';
+	lastGenName = 'button153';
+	XmNlabelString =  * 'Ch. 10';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select10()
+';
+	};
+};
+object '154' : XmPushButton {
+	arguments {
+	name = 'trig11';
+	lastGenName = 'button154';
+	XmNlabelString =  * 'Ch. 11';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select11()
+';
+	};
+};
+object '155' : XmPushButton {
+	arguments {
+	name = 'trig12';
+	lastGenName = 'button155';
+	XmNlabelString =  * 'Ch. 12';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select12()
+';
+	};
+};
+object '156' : XmPushButton {
+	arguments {
+	name = 'trig13';
+	lastGenName = 'button156';
+	XmNlabelString =  * 'Ch. 13';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select13()
+';
+	};
+};
+object '157' : XmPushButton {
+	arguments {
+	name = 'trig14';
+	lastGenName = 'button157';
+	XmNlabelString =  * 'Ch. 14';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select14()
+';
+	};
+};
+object '158' : XmPushButton {
+	arguments {
+	name = 'trig15';
+	lastGenName = 'button158';
+	XmNlabelString =  * 'Ch. 15';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select15()
+';
+	};
+};
+object '159' : XmPushButton {
+	arguments {
+	name = 'trig16';
+	lastGenName = 'button159';
+	XmNlabelString =  * 'Ch. 16';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select16()
+';
+	};
+};
+};
+};
+};
+object 'trigLevelText1' : XmTextField {
+	arguments {
+	name = 'trigLevelText1';
+	lastGenName = 'trigLevelText1';
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyNoSpaces()
+';
+	XmNactivateCallback = '
+TextFieldPress()
+';
+	XmNvalueChangedCallback = '
+TextfieldValue5()
+';
+	XmNlosingFocusCallback = '
+TextFieldPress()
+';
+	};
+};
+object 'menuAbove1' : XmOptionMenu {
+	arguments {
+	lastGenName = 'menuAbove1';
+	folded = true;
+	};
+abstract object '32' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label32';
+	};
+};
+abstract object '16' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'cascade16';
+	};
+object 'trigAboveLong1' : XmPulldownMenu {
+	arguments {
+	name = 'trigaboveLong1';
+	lastGenName = 'trigAboveLong1';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelTrigAboveLongMenu1()
+';
+	};
+object 'above1' : XmPushButton {
+	arguments {
+	name = 'above1';
+	lastGenName = 'above1';
+	XmNlabelString =  * 'Above';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select0()
+';
+	};
+};
+object 'below1' : XmPushButton {
+	arguments {
+	name = 'below1';
+	lastGenName = 'below1';
+	XmNlabelString =  * 'Below';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+object 'equ1' : XmPushButton {
+	arguments {
+	name = 'equ1';
+	lastGenName = 'equ1';
+	XmNlabelString =  * 'Equal to';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select2()
+';
+	};
+};
+};
+};
+};
+object 'menuChtrig1' : XmOptionMenu {
+	arguments {
+	lastGenName = 'menuChtrig1';
+	folded = true;
+	};
+abstract object '27' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label27';
+	};
+};
+abstract object '14' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'cascade14';
+	};
+object 'trigMenu1' : XmPulldownMenu {
+	arguments {
+	name = 'trigMenu1';
+	lastGenName = 'trigMenu1';
+	folded = true;
+	};
+	callbacks {
+	XmNentryCallback = '
+SelTrigLongMenu1()
+';
+	};
+object '128' : XmPushButton {
+	arguments {
+	name = 'trig1';
+	lastGenName = 'button128';
+	XmNlabelString =  * 'Ch. 01';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+object '129' : XmPushButton {
+	arguments {
+	name = 'trig2';
+	lastGenName = 'button129';
+	XmNlabelString =  * 'Ch. 02';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select2()
+';
+	};
+};
+object '130' : XmPushButton {
+	arguments {
+	name = 'trig3';
+	lastGenName = 'button130';
+	XmNlabelString =  * 'Ch. 03';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select3()
+';
+	};
+};
+object '131' : XmPushButton {
+	arguments {
+	name = 'trig4';
+	lastGenName = 'button131';
+	XmNlabelString =  * 'Ch. 04';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select4()
+';
+	};
+};
+object '132' : XmPushButton {
+	arguments {
+	name = 'trig5';
+	lastGenName = 'button132';
+	XmNlabelString =  * 'Ch. 05';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select5()
+';
+	};
+};
+object '133' : XmPushButton {
+	arguments {
+	name = 'trig6';
+	lastGenName = 'button133';
+	XmNlabelString =  * 'Ch. 06';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select6()
+';
+	};
+};
+object '134' : XmPushButton {
+	arguments {
+	name = 'trig7';
+	lastGenName = 'button134';
+	XmNlabelString =  * 'Ch. 07';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select7()
+';
+	};
+};
+object '135' : XmPushButton {
+	arguments {
+	name = 'trig8';
+	lastGenName = 'button135';
+	XmNlabelString =  * 'Ch. 08';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select8()
+';
+	};
+};
+object '136' : XmPushButton {
+	arguments {
+	name = 'trig9';
+	lastGenName = 'button136';
+	XmNlabelString =  * 'Ch. 09';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select9()
+';
+	};
+};
+object '137' : XmPushButton {
+	arguments {
+	name = 'trig10';
+	lastGenName = 'button137';
+	XmNlabelString =  * 'Ch. 10';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select10()
+';
+	};
+};
+object '138' : XmPushButton {
+	arguments {
+	name = 'trig11';
+	lastGenName = 'button138';
+	XmNlabelString =  * 'Ch. 11';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select11()
+';
+	};
+};
+object '139' : XmPushButton {
+	arguments {
+	name = 'trig12';
+	lastGenName = 'button139';
+	XmNlabelString =  * 'Ch. 12';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select12()
+';
+	};
+};
+object '140' : XmPushButton {
+	arguments {
+	name = 'trig13';
+	lastGenName = 'button140';
+	XmNlabelString =  * 'Ch. 13';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select13()
+';
+	};
+};
+object '141' : XmPushButton {
+	arguments {
+	name = 'trig14';
+	lastGenName = 'button141';
+	XmNlabelString =  * 'Ch. 14';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select14()
+';
+	};
+};
+object '142' : XmPushButton {
+	arguments {
+	name = 'trig15';
+	lastGenName = 'button142';
+	XmNlabelString =  * 'Ch. 15';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select15()
+';
+	};
+};
+object '143' : XmPushButton {
+	arguments {
+	name = 'trig16';
+	lastGenName = 'button143';
+	XmNlabelString =  * 'Ch. 16';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select16()
+';
+	};
+};
+};
+};
+};
+object 'longTrigExe' : XmPushButton {
+	arguments {
+	lastGenName = 'longTrigExe';
+	XmNlabelString =  * 'Trigger Execute';
+	};
+	callbacks {
+	XmNarmCallback = '
+longTrig()
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 1;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 2;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 3;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 4;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 5;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 6;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 7;
+    };
+    };
+};
+};
+object '24' : XmForm {
+	arguments {
+	lastGenName = 'form24';
+	};
+object 'serverset' : XmFrame {
+	arguments {
+	lastGenName = 'serverset';
+	};
+object '4' : XmRadioBox {
+	arguments {
+	lastGenName = 'radioBox4';
+	};
+object 'lserver' : XmToggleButton GADGET {
+	arguments {
+	name = 'lserver';
+	lastGenName = 'lserver';
+	XmNlabelString =  * 'Server';
+	XmNset =  * true;
+	};
+	callbacks {
+	XmNarmCallback = '
+longFormatDate()
+';
+	};
+};
+object 'lframe' : XmToggleButton GADGET {
+	arguments {
+	name = 'lframe';
+	lastGenName = 'lframe';
+	XmNlabelString =  * 'Frame File';
+	};
+	callbacks {
+	XmNarmCallback = '
+longFormatTotal()
+';
+	};
+};
+};
+object '59' : XmLabel {
+	arguments {
+	lastGenName = 'label59';
+	XmNchildType = 2;
+	XmNlabelString =  * 'Input';
+	};
+};
+};
+object 'lIPtext' : XmTextField {
+	arguments {
+	name = 'lIPtext';
+	lastGenName = 'lIPtext';
+	};
+};
+object 'lPorttext' : XmTextField {
+	arguments {
+	name = 'lPorttext';
+	lastGenName = 'lPorttext';
+	};
+};
+    attachments {
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 131;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 11;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 322;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 10;
+    };
+    };
+};
+    attachments {
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 1;
+    };
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 2;
+    };
+    };
+};
+object 'startLong' : XmPushButton {
+	arguments {
+	lastGenName = 'startLong';
+	generateResName = true;
+	XmNforeground = color('green4');
+	XmNlabelString =  * 'Start';
+	XmNmarginWidth = 10;
+	XmNdefaultButtonShadowThickness = 1;
+	};
+	callbacks {
+	XmNactivateCallback = '
+longExe()
+';
+	};
+};
+object 'stopPlaybackButton' : XmPushButton {
+	arguments {
+	lastGenName = 'stopPlaybackButton';
+	generateResName = true;
+	XmNforeground = color('darkred');
+	XmNlabelString =  * 'Stop';
+	XmNmarginWidth = 10;
+	XmNdefaultButtonShadowThickness = 1;
+	};
+	callbacks {
+	XmNactivateCallback = '
+stopPlayback()
+';
+	};
+};
+object '12' : XmFrame {
+	arguments {
+	lastGenName = 'frame12';
+	folded = true;
+	};
+object '7' : XmLabel {
+	arguments {
+	lastGenName = 'label7';
+	XmNchildType = 2;
+	XmNlabelString =  * 'Show';
+	};
+};
+object '22' : XmForm {
+	arguments {
+	lastGenName = 'form22';
+	};
+object 'lmin' : XmToggleButton {
+	arguments {
+	lastGenName = 'lmin';
+	XmNlabelString =  * 'Min';
+	XmNset =  * true;
+	};
+};
+object 'lmax' : XmToggleButton {
+	arguments {
+	lastGenName = 'lmax';
+	XmNlabelString =  * 'Max';
+	XmNset =  * true;
+	};
+};
+object 'lrms' : XmToggleButton {
+	arguments {
+	lastGenName = 'lrms';
+	XmNlabelString =  * 'Mean';
+	XmNset =  * true;
+	};
+};
+object 'ygrid' : XmToggleButton {
+	arguments {
+	lastGenName = 'ygrid';
+	XmNlabelString =  * 'Y Grid';
+	XmNset =  * true;
+	};
+};
+object 'xgrid' : XmToggleButton {
+	arguments {
+	lastGenName = 'xgrid';
+	XmNlabelString =  * 'X Grid';
+	XmNset =  * true;
+	};
+};
+object '19' : XmOptionMenu {
+	arguments {
+	lastGenName = 'optionMenu19';
+	};
+abstract object '8' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label8';
+	XmNlabelString =  * 'X Axis Time';
+	};
+};
+abstract object '19' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'cascade19';
+	};
+object '21' : XmPulldownMenu {
+	arguments {
+	lastGenName = 'menu21';
+	};
+object '125' : XmPushButton {
+	arguments {
+	lastGenName = 'button125';
+	XmNlabelString =  * 'UTC';
+	};
+	callbacks {
+	XmNactivateCallback = '
+longFormatDate()
+';
+	};
+};
+object '126' : XmPushButton {
+	arguments {
+	lastGenName = 'button126';
+	XmNlabelString =  * 'GPS';
+	};
+	callbacks {
+	XmNactivateCallback = '
+longFormatTotal()
+';
+	};
+};
+};
+};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 5 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 5 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 2;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 4 2;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 5 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 6 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 6 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    };
+};
+};
+object '76' : XmForm {
+	arguments {
+	lastGenName = 'form76';
+	};
+object '21' : XmFrame {
+	arguments {
+	lastGenName = 'frame21';
+	};
+object '26' : XmForm {
+	arguments {
+	lastGenName = 'form26';
+	};
+object 'timeNow' : XmPushButton {
+	arguments {
+	lastGenName = 'timeNow';
+	generateResName = true;
+	XmNlabelString =  * 'Time Now';
+	XmNmarginLeft = 2;
+	XmNmarginRight = 2;
+	XmNalignment = 0;
+	XmNarmColor =  * color('MidnightBlue');
+	};
+	callbacks {
+	XmNactivateCallback = '
+SelTimeNow()
+';
+	};
+};
+object 'timeForm1' : XmForm {
+	arguments {
+	lastGenName = 'timeForm1';
+	};
+object '67' : XmForm {
+	arguments {
+	lastGenName = 'form67';
+	};
+object '15' : XmLabel {
+	arguments {
+	lastGenName = 'label15';
+	XmNlabelString =  * 'SS';
+	};
+};
+object 'playSc' : XmTextField {
+	arguments {
+	lastGenName = 'playSc';
+	XmNcolumns = 2;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyInt()
+';
+	};
+};
+object 'refTimeSec' : XmTextField {
+	arguments {
+	lastGenName = 'refTimeSec';
+	XmNcolumns = 2;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyInt()
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 1;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 2;
+    };
+    };
+};
+object '68' : XmForm {
+	arguments {
+	lastGenName = 'form68';
+	};
+object '16' : XmLabel {
+	arguments {
+	lastGenName = 'label16';
+	XmNlabelString =  * 'GPS';
+	};
+};
+object 'gpstime' : XmTextField {
+	arguments {
+	lastGenName = 'gpstime';
+	XmNcolumns = 10;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyInt()
+';
+	};
+};
+object 'gpsref' : XmTextField {
+	arguments {
+	lastGenName = 'gpsref';
+	XmNcolumns = 10;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyInt()
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 1;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 2;
+    };
+    };
+};
+object '69' : XmForm {
+	arguments {
+	lastGenName = 'form69';
+	};
+object '14' : XmLabel {
+	arguments {
+	lastGenName = 'label14';
+	XmNlabelString =  * 'MM';
+	};
+};
+object 'playMn' : XmTextField {
+	arguments {
+	lastGenName = 'playMn';
+	XmNcolumns = 2;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyInt()
+';
+	};
+};
+object 'refTimeMin' : XmTextField {
+	arguments {
+	lastGenName = 'refTimeMin';
+	XmNcolumns = 2;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyInt()
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 1;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 2;
+    };
+    };
+};
+object '70' : XmForm {
+	arguments {
+	lastGenName = 'form70';
+	};
+object '13' : XmLabel {
+	arguments {
+	lastGenName = 'label13';
+	XmNlabelString =  * 'HH';
+	};
+};
+object 'playHr' : XmTextField {
+	arguments {
+	lastGenName = 'playHr';
+	XmNcolumns = 2;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyInt()
+';
+	};
+};
+object 'refTimeHr' : XmTextField {
+	arguments {
+	lastGenName = 'refTimeHr';
+	XmNcolumns = 2;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyInt()
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 1;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 2;
+    };
+    };
+};
+object '71' : XmForm {
+	arguments {
+	lastGenName = 'form71';
+	};
+object '11' : XmLabel {
+	arguments {
+	lastGenName = 'label11';
+	XmNlabelString =  * 'DD';
+	};
+};
+object 'playDa' : XmTextField {
+	arguments {
+	lastGenName = 'playDa';
+	XmNcolumns = 2;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyInt()
+';
+	};
+};
+object 'refTimeDay' : XmTextField {
+	arguments {
+	lastGenName = 'refTimeDay';
+	XmNcolumns = 2;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyInt()
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 1;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 2;
+    };
+    };
+};
+object '72' : XmForm {
+	arguments {
+	lastGenName = 'form72';
+	};
+object '10' : XmLabel {
+	arguments {
+	lastGenName = 'label10';
+	XmNlabelString =  * 'MM';
+	};
+};
+object 'playMo' : XmTextField {
+	arguments {
+	lastGenName = 'playMo';
+	XmNcolumns = 2;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyInt()
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 1;
+    };
+    };
+};
+object '73' : XmForm {
+	arguments {
+	lastGenName = 'form73';
+	};
+object '9' : XmLabel {
+	arguments {
+	lastGenName = 'label9';
+	XmNlabelString =  * 'YY';
+	};
+};
+object 'playYr' : XmTextField {
+	arguments {
+	lastGenName = 'playYr';
+	XmNcolumns = 2;
+	};
+	callbacks {
+	XmNmodifyVerifyCallback = '
+verifyInt()
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 1;
+    };
+    };
+};
+object '17' : XmLabel {
+	arguments {
+	lastGenName = 'label17';
+	XmNlabelString =  * 'Length';
+	XmNalignment = 2;
+	};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 5 0 66;
+	XmNleftAttachment = 5 0 55;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 5 0 66;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 5 0 55;
+	XmNleftAttachment = 5 0 44;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 5 0 44;
+	XmNleftAttachment = 5 0 33;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 5 0 33;
+	XmNleftAttachment = 5 0 22;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 5 0 22;
+	XmNleftAttachment = 5 0 11;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 5 0 11;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 3 5 0;
+	XmNleftAttachment = 0 0 0;
+	XmNbottomAttachment = 4 5 0;
+	XmNtopAttachment = 0 0 0;
+    };
+    };
+};
+object 'timeset' : XmFrame {
+	arguments {
+	name = 'timeset';
+	lastGenName = 'timeset';
+	};
+object 'radiotime' : XmRadioBox {
+	arguments {
+	lastGenName = 'radiotime';
+	XmNnumColumns = 2;
+	XmNspacing = 0;
+	XmNmarginWidth = 0;
+	XmNmarginHeight = 0;
+	};
+object 'lutc' : XmToggleButton GADGET {
+	arguments {
+	name = 'lutc';
+	lastGenName = 'lutc';
+	XmNlabelString =  * 'UTC';
+	XmNset = true;
+	};
+};
+object 'lgps' : XmToggleButton GADGET {
+	arguments {
+	name = 'lgps';
+	lastGenName = 'lgps';
+	XmNx = 66;
+	XmNy = 0;
+	XmNlabelString =  * 'GPS';
+	};
+};
+};
+object '60' : XmLabel {
+	arguments {
+	lastGenName = 'label60';
+	XmNchildType = 2;
+	XmNlabelString =  * 'Use';
+	};
+};
+};
+object 'fbMenu' : XmOptionMenu {
+	arguments {
+	lastGenName = 'fbMenu';
+	XmNspacing = 0;
+	XmNmarginWidth = 0;
+	XmNmarginHeight = 0;
+	XmNorientation = 1;
+	XmNentryAlignment = 2;
+	};
+abstract object '93' : XmLabel GADGET {
+	arguments {
+	name = 'OptionLabel';
+	lastGenName = 'label93';
+	XmNlabelString =  * 'Time';
+	};
+};
+abstract object '7' : XmCascadeButton GADGET {
+	arguments {
+	name = 'OptionButton';
+	lastGenName = 'cascade7';
+	};
+object '23' : XmPulldownMenu {
+	arguments {
+	name = 'trigaboveMenu';
+	lastGenName = 'menu23';
+	};
+	callbacks {
+	XmNentryCallback = '
+SelLongSSMenu()
+';
+	};
+object 'stoptime' : XmPushButton {
+	arguments {
+	name = 'stoptime';
+	lastGenName = 'stoptime';
+	XmNlabelString =  * 'Stop';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select1()
+';
+	};
+};
+object 'starttime' : XmPushButton {
+	arguments {
+	name = 'starttime';
+	lastGenName = 'starttime';
+	XmNlabelString =  * 'Start';
+	};
+	callbacks {
+	XmNarmCallback = '
+Select0()
+';
+	};
+};
+};
+};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 3 10;
+	XmNbottomAttachment = 1 0 10;
+	XmNtopAttachment = 0 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 1 0 0;
+	XmNtopAttachment = 3 2 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 1 10;
+	XmNbottomAttachment = 1 0 0;
+	XmNtopAttachment = 3 2 0;
+    };
+    };
+};
+object '6' : XmLabel {
+	arguments {
+	lastGenName = 'label6';
+	XmNchildType = 2;
+	XmNlabelString =  * 'Playback';
+	};
+};
+};
+object 'ldec' : XmFrame {
+	arguments {
+	name = 'ldec';
+	lastGenName = 'ldec';
+	folded = true;
+	};
+object '3' : XmRadioBox {
+	arguments {
+	lastGenName = 'radioBox3';
+	XmNspacing = 0;
+	XmNmarginWidth = 0;
+	XmNmarginHeight = 0;
+	};
+object 'lfull' : XmToggleButton GADGET {
+	arguments {
+	name = 'lfull';
+	lastGenName = 'lfull';
+	XmNlabelString =  * 'Full Data';
+	XmNmarginHeight = 2;
+	XmNset =  * false;
+	XmNspacing = 4;
+	};
+	callbacks {
+	XmNarmCallback = '
+longDeciFull()
+';
+	};
+};
+object 'lsec' : XmToggleButton GADGET {
+	arguments {
+	name = 'lsec';
+	lastGenName = 'lsec';
+	XmNlabelString =  * 'Second Trend';
+	XmNmarginHeight = 2;
+	XmNspacing = 4;
+	};
+	callbacks {
+	XmNarmCallback = '
+longDeciSec()
+';
+	};
+};
+object 'lmin1' : XmToggleButton GADGET {
+	arguments {
+	name = 'lmin1';
+	lastGenName = 'lmin1';
+	XmNlabelString =  * 'Minute Trend';
+	XmNmarginHeight = 2;
+	XmNspacing = 4;
+	};
+	callbacks {
+	XmNarmCallback = '
+longDeciMin()
+';
+	};
+};
+object 'lmin10' : XmToggleButton GADGET {
+	arguments {
+	name = 'lmin10';
+	lastGenName = 'lmin10';
+	XmNlabelString =  * '10min Trend';
+	XmNmarginHeight = 2;
+	XmNspacing = 4;
+	};
+	callbacks {
+	XmNarmCallback = '
+longDeciMin10()
+';
+	};
+};
+object 'lhr' : XmToggleButton GADGET {
+	arguments {
+	name = 'lhr';
+	lastGenName = 'lhr';
+	XmNlabelString =  * 'Hour Trend';
+	XmNmarginHeight = 2;
+	XmNspacing = 4;
+	};
+	callbacks {
+	XmNarmCallback = '
+longDeciHour()
+';
+	};
+};
+};
+object '56' : XmLabel {
+	arguments {
+	lastGenName = 'label56';
+	XmNchildType = 2;
+	XmNchildHorizontalSpacing = 10;
+	XmNlabelString =  * 'Data';
+	};
+};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 3 2 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 1 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0 0;
+	XmNleftAttachment = 0 0 0;
+	XmNbottomAttachment = 1 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    };
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 0 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 3 8;
+	XmNleftAttachment = 0 0 0;
+	XmNbottomAttachment = 4 8;
+	XmNtopAttachment = 3 9;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 4;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 9;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 2 0 -231;
+	XmNtopAttachment = 1 0 221;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 1 0 10;
+	XmNtopAttachment = 0 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 3 6 0;
+	XmNbottomAttachment = 1 0 10;
+	XmNtopAttachment = 0 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 3 1;
+	XmNleftAttachment = 0 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 9;
+    };
+    attachment {
+	XmNrightAttachment = 3 1;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0;
+    };
+    };
+};
+};
+object '134' : XmForm {
+	arguments {
+	lastGenName = 'form134';
+	folded = true;
+	};
+object 'v1' : XmTextField {
+	arguments {
+	name = 'v1';
+	lastGenName = 'v1';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(1)
+';
+	};
+};
+object 'v2' : XmTextField {
+	arguments {
+	name = 'v2';
+	lastGenName = 'v2';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(2)
+';
+	};
+};
+object 'v3' : XmTextField {
+	arguments {
+	name = 'v3';
+	lastGenName = 'v3';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(3)
+';
+	};
+};
+object 'v4' : XmTextField {
+	arguments {
+	name = 'v4';
+	lastGenName = 'v4';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(4)
+';
+	};
+};
+object 'v5' : XmTextField {
+	arguments {
+	name = 'v5';
+	lastGenName = 'v5';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(5)
+';
+	};
+};
+object 'v6' : XmTextField {
+	arguments {
+	name = 'v6';
+	lastGenName = 'v6';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(6)
+';
+	};
+};
+object 'v7' : XmTextField {
+	arguments {
+	name = 'v7';
+	lastGenName = 'v7';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(7)
+';
+	};
+};
+object 'v8' : XmTextField {
+	arguments {
+	name = 'v8';
+	lastGenName = 'v8';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(8)
+';
+	};
+};
+object 'v9' : XmTextField {
+	arguments {
+	name = 'v9';
+	lastGenName = 'v9';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(9)
+';
+	};
+};
+object 'v10' : XmTextField {
+	arguments {
+	name = 'v10';
+	lastGenName = 'v10';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(10)
+';
+	};
+};
+object 'v11' : XmTextField {
+	arguments {
+	name = 'v11';
+	lastGenName = 'v11';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(11)
+';
+	};
+};
+object 'v12' : XmTextField {
+	arguments {
+	name = 'v12';
+	lastGenName = 'v12';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(12)
+';
+	};
+};
+object 'v13' : XmTextField {
+	arguments {
+	name = 'v13';
+	lastGenName = 'v13';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(13)
+';
+	};
+};
+object 'v14' : XmTextField {
+	arguments {
+	name = 'v14';
+	lastGenName = 'v14';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(14)
+';
+	};
+};
+object 'v15' : XmTextField {
+	arguments {
+	name = 'v15';
+	lastGenName = 'v15';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(15)
+';
+	};
+};
+object 'v16' : XmTextField {
+	arguments {
+	name = 'v16';
+	lastGenName = 'v16';
+	generateResName = true;
+	XmNhighlightThickness = 1;
+	XmNshadowThickness = 0;
+	XmNborderWidth = 2;
+	XmNcolumns = 28;
+	XmNmarginHeight = 0;
+	XmNmarginWidth = 0;
+	XmNeditable = false;
+	XmNcursorPositionVisible = false;
+	};
+	callbacks {
+	XmNfocusCallback = '
+sigSet(16)
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 1 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 2 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 3;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 4;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNtopAttachment = 3 5;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 6;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 7 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 8 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 9 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 10 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 11 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 12;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 13 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 14 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 3 15 0;
+    };
+    };
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0 0;
+	XmNtopAttachment = 1 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 1 0;
+	XmNtopAttachment = 0 0 0;
+    };
+    attachment {
+	XmNrightAttachment = 3 4;
+	XmNleftAttachment = 1 0;
+	XmNbottomAttachment = 3 2;
+	XmNtopAttachment = 3 1;
+    };
+    attachment {
+	XmNrightAttachment = 1 0;
+	XmNleftAttachment = 5 0 70;
+	XmNbottomAttachment = 3 2;
+	XmNtopAttachment = 3 1;
+    };
+    };
+};
+};
+object 'frame_win' : XmDialogShell {
+	arguments {
+	name = 'frame_win';
+	lastGenName = 'frame_win';
+	createPreludeStatus = 1;
+	preInstantiation = 'void create_frame_win (Widget parent)
+';
+	XmNallowShellResize = true;
+	XmNtitle =  * 'Frame File Selection';
+	};
+object 'framefile_form' : XmForm {
+	arguments {
+	name = 'framefile_form';
+	lastGenName = 'framefile_form';
+	XmNautoUnmanage = false;
+	};
+object '24' : XmLabel {
+	arguments {
+	lastGenName = 'label24';
+	XmNlabelString =  * 'Directories';
+	};
+};
+object '25' : XmLabel {
+	arguments {
+	lastGenName = 'label25';
+	XmNlabelString =  * 'Files';
+	};
+};
+object '4' : XmScrolledList {
+	arguments {
+	lastGenName = 'scrolledList4';
+	};
+abstract object '7' : XmScrollBar {
+	arguments {
+	name = 'HorScrollBar';
+	lastGenName = 'scrollbar7';
+	};
+};
+abstract object '8' : XmScrollBar {
+	arguments {
+	name = 'VertScrollBar';
+	lastGenName = 'scrollbar8';
+	};
+};
+abstract object 'dirlist1' : XmList {
+	arguments {
+	name = 'dirlist1';
+	lastGenName = 'dirlist1';
+	XmNselectionPolicy = 0;
+	XmNlistSizePolicy = 1;
+	XmNitemCount = 1;
+	XmNitems = '';
+	XmNselectedItemCount = 0;
+	XmNselectedItems = '';
+	};
+	callbacks {
+	XmNsingleSelectionCallback = '
+dirlistSel1()
+';
+	};
+};
+};
+object '5' : XmScrolledList {
+	arguments {
+	lastGenName = 'scrolledList5';
+	};
+abstract object '9' : XmScrollBar {
+	arguments {
+	name = 'HorScrollBar';
+	lastGenName = 'scrollbar9';
+	};
+};
+abstract object '10' : XmScrollBar {
+	arguments {
+	name = 'VertScrollBar';
+	lastGenName = 'scrollbar10';
+	};
+};
+abstract object 'filelist1' : XmList {
+	arguments {
+	name = 'filelist1';
+	lastGenName = 'filelist1';
+	XmNselectionPolicy = 2;
+	XmNlistSizePolicy = 1;
+	};
+	callbacks {
+	XmNextendedSelectionCallback = '
+filelistSel1()
+';
+	};
+};
+};
+object '29' : XmLabel {
+	arguments {
+	lastGenName = 'label29';
+	XmNlabelString =  * 'Current Directory:';
+	};
+};
+object 'savefile1' : XmTextField {
+	arguments {
+	name = 'savefile1';
+	lastGenName = 'savefile1';
+	XmNeditable = false;
+	};
+};
+object 'saveok_fr' : XmPushButton {
+	arguments {
+	name = 'saveok_fr';
+	lastGenName = 'saveok_fr';
+	XmNlabelString =  * 'Apply';
+	};
+	callbacks {
+	XmNactivateCallback = '
+saveOKSel1()
+';
+	xDHide = 'frame_win';
+	};
+};
+object 'savecancel_fr' : XmPushButton {
+	arguments {
+	name = 'savecancel_fr';
+	lastGenName = 'savecancel_fr';
+	XmNlabelString =  * 'Cancel';
+	};
+	callbacks {
+	xDHide = 'frame_win';
+	};
+};
+object '28' : XmLabel {
+	arguments {
+	lastGenName = 'label28';
+	XmNlabelString =  * '
+';
+	};
+};
+    attachments {
+    attachment {
+	XmNrightAttachment = 2 0 -173;
+	XmNleftAttachment = 1 0 4;
+	XmNbottomAttachment = 2 0 -16;
+	XmNtopAttachment = 1 0 1;
+    };
+    attachment {
+	XmNrightAttachment = 2 0 -339;
+	XmNleftAttachment = 1 0 177;
+	XmNbottomAttachment = 2 0 -15;
+	XmNtopAttachment = 1 0 1;
+    };
+    attachment {
+	XmNrightAttachment = 2 0 -175;
+	XmNleftAttachment = 1 0 5;
+	XmNbottomAttachment = 2 0 -236;
+	XmNtopAttachment = 1 0 18;
+    };
+    attachment {
+	XmNrightAttachment = 2 0 -348;
+	XmNleftAttachment = 1 0 181;
+	XmNbottomAttachment = 2 0 -236;
+	XmNtopAttachment = 1 0 18;
+    };
+    attachment {
+	XmNrightAttachment = 0 0 0;
+	XmNleftAttachment = 1 0 95;
+	XmNbottomAttachment = 0 0 0;
+	XmNtopAttachment = 1 0 241;
+    };
+    attachment {
+	XmNrightAttachment = 2 0 -341;
+	XmNleftAttachment = 1 0 7;
+	XmNbottomAttachment = 2 0 -302;
+	XmNtopAttachment = 1 0 267;
+    };
+    attachment {
+	XmNrightAttachment = 2 0 -165;
+	XmNleftAttachment = 1 0 88;
+	XmNbottomAttachment = 2 0 -338;
+	XmNtopAttachment = 1 0 310;
+    };
+    attachment {
+	XmNrightAttachment = 2 0 -262;
+	XmNleftAttachment = 1 0 189;
+	XmNbottomAttachment = 2 0 -338;
+	XmNtopAttachment = 1 0 309;
+    };
+    attachment {
+	XmNrightAttachment = 2 0 -343;
+	XmNleftAttachment = 1 0 9;
+	XmNbottomAttachment = 2 0 -353;
+	XmNtopAttachment = 1 0 338;
+    };
+    };
+};
+};
+end module;

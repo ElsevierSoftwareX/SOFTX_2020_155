@@ -1,0 +1,17 @@
+This subdirectory contains a set of widgets which implement the layout
+behaviour of Java's LayoutManager classes.  You can see them on the
+widget palette in the 'Java Widgets' section.
+
+This directory contains this file, and two directories:
+
+lib/	This directory contains the source files for the widgets themselves,
+	a makefile so that you can build them, and a static library which 
+	contains a build of the widgets for your system.  When
+	building generated code which used the Java widgets, you need
+	to ensure that this library is linked in (the default makefile
+	does this for you).
+
+h/	This directory contains the header files for the widgets;
+	these should be included in any files which use them.  The
+	generated code contains appropriate #include statements, of
+	course.
