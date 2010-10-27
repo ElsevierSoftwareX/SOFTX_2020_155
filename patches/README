@@ -1,5 +1,5 @@
 Friday, September 17 2010
-I have enable SYSFS back, disabled MICROCODE. There is new .config file
+I have enabled SYSFS back, disabled MICROCODE. There is new .config file
 and an updated patch.
 
 Wed Sep  1 09:03:34 PDT 2010
