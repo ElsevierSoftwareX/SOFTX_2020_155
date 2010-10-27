@@ -11,6 +11,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/file.h>
 #include <stdio.h>
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -42,7 +43,7 @@ MX_MUTEX_T stream_mutex;
 #define MAX_LEN    (1024*1024*1024) 
 #define DFLT_ITER  1000
 #define NUM_RREQ   16  /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
-#define NUM_SREQ   4  /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
+#define NUM_SREQ   256  /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
 
 #define DO_HANDSHAKE 0
 #define MATCH_VAL_MAIN (1 << 31)
@@ -130,6 +131,9 @@ static struct cdsDaqNetGdsTpNum *shmTpTable;
 static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
 static const int header_size = sizeof(struct rmIpcStr) + sizeof(struct cdsDaqNetGdsTpNum);
 
+
+// The receiver is not used when mx_stream is sending
+// data directly to daqd
 static inline void
 receiver(mx_endpoint_t ep, uint32_t match_val, uint32_t filter)
 {
@@ -267,34 +271,40 @@ struct daqMXdata {
 }
 
 static inline void
-sender(mx_endpoint_t ep,uint64_t his_nic_id,  uint16_t his_eid,int len, uint32_t match_val, uint16_t my_dcu)
+sender(	mx_endpoint_t ep,
+	int64_t his_nic_id,
+	uint16_t his_eid,
+	int len,
+	uint32_t match_val, uint16_t my_dcu)
 {
-	int cur_req;
-	mx_status_t stat;	
-	mx_request_t req[NUM_SREQ];
-	mx_segment_t seg;
-	mx_return_t conStat;
-	uint32_t result;
-	struct daqMXdata mxDataBlock;
-	//int ii;
-	//int jj = 0;
-	int myErrorSignal;
-	mx_endpoint_addr_t dest;
-	uint32_t filter = FILTER;
-	//struct timeval start_time;
-	int lastCycle = 0;
-	char *dataBuff;
-	int sendLength = 0;
-	int myCrc = 0;
+
+int cur_req;
+mx_status_t stat;	
+mx_request_t req[NUM_SREQ];
+mx_segment_t seg;
+uint32_t result;
+struct daqMXdata mxDataBlock;
+int myErrorSignal;
+mx_endpoint_addr_t dest;
+uint32_t filter = FILTER;
+//struct timeval start_time;
+char *dataBuff;
+int sendLength = 0;
+int myCrc = 0;
 
 	
 
 mx_set_error_handler(MX_ERRORS_RETURN);
 
-do{
+do {
+	int lastCycle = 0;
+
+	int fd = open ("/tmp/mx_lock", O_CREAT, 0666);
+	flock(fd, LOCK_EX);
 	myErrorSignal = 0;
 	do {
-		conStat = mx_connect(ep, his_nic_id, his_eid, filter, 
+
+		mx_return_t conStat = mx_connect(ep, his_nic_id, his_eid, filter, 
 			   1000, &dest);
 			   // MX_INFINITE, &dest);
 		if (conStat != MX_SUCCESS) {
@@ -314,31 +324,36 @@ do{
 // Have a connection
 	myErrorSignal = 0;
 	cur_req = 0;
-usleep(1000);
-if(!myErrorSignal)
-{
+	usleep(1000000);
+
+	// Waity for cycle 0
+	for (;shmIpcPtr->cycle;) usleep(1000);
+	lastCycle = 0;
+	flock(fd, LOCK_UN);
+
+	if (!myErrorSignal) {
 	do {
 		// Wait for cycle count update from FE
 		do{
 			usleep(1000);
-//printf("%d\n", shmIpcPtr->cycle);
+			//printf("%d\n", shmIpcPtr->cycle);
 		}while(shmIpcPtr->cycle == lastCycle);
 
 		mxDataBlock.mxTpTable = shmTpTable[0];
-// printf("data copy\n");
+		// printf("data copy\n");
 
 		// Copy values from shmmem to MX buffer
 		lastCycle = shmIpcPtr->cycle;
 		if (lastCycle == 0) shmIpcPtr->status ^= 1;
-		cur_req = (cur_req + 1) % 8;
+		cur_req = (cur_req + 1) % NUM_SREQ;
 		mxDataBlock.mxIpcData.cycle = lastCycle;
 		mxDataBlock.mxIpcData.crc = shmIpcPtr->crc;
 		mxDataBlock.mxIpcData.dcuId = shmIpcPtr->dcuId;
 		mxDataBlock.mxIpcData.dataBlockSize = shmIpcPtr->dataBlockSize;
-		mxDataBlock.mxIpcData.bp[lastCycle].timeSec = shmIpcPtr->bp[lastCycle].timeSec;;
-		mxDataBlock.mxIpcData.bp[lastCycle].timeNSec = shmIpcPtr->bp[lastCycle].timeNSec;;
-		mxDataBlock.mxIpcData.bp[lastCycle].cycle = shmIpcPtr->bp[lastCycle].cycle;;
-		mxDataBlock.mxIpcData.bp[lastCycle].crc = shmIpcPtr->bp[lastCycle].crc;;
+		mxDataBlock.mxIpcData.bp[lastCycle].timeSec = shmIpcPtr->bp[lastCycle].timeSec;
+		mxDataBlock.mxIpcData.bp[lastCycle].timeNSec = shmIpcPtr->bp[lastCycle].timeNSec;
+		mxDataBlock.mxIpcData.bp[lastCycle].cycle = shmIpcPtr->bp[lastCycle].cycle;
+		mxDataBlock.mxIpcData.bp[lastCycle].crc = shmIpcPtr->bp[lastCycle].crc;
 
 		dataBuff = (char *)(shmDataPtr + lastCycle * buf_size);
 		memcpy((void *)&mxDataBlock.mxDataBlock[0],dataBuff,mxDataBlock.mxIpcData.dataBlockSize);
@@ -360,29 +375,37 @@ struct daqMXdata {
 		seg.segment_ptr = &mxDataBlock;
 		// seg.segment_length = len;
 		seg.segment_length = sendLength;
-		mx_isend(ep, &seg, 1, dest, match_val, NULL, &req[cur_req]);
+		//printf("isend req %d\n", cur_req);
+		mx_return_t res = mx_isend(ep, &seg, 1, dest, match_val, NULL, &req[cur_req]);
+		if (res != MX_SUCCESS) {
+			fprintf(stderr, "mx_isend failed ret=%d\n", res);
+			//exit(1);
+			myErrorSignal = 1;
+			break;
+		}
 		// mx_isend(ep, &seg, 1, dest, 1, NULL, &req[cur_req]);
 
 		/* wait for the send to complete */
-		mx_wait(ep, &req[cur_req], 1000, &stat, &result);
+		mx_wait(ep, &req[cur_req], 150, &stat, &result);
 		if (!result) {
 			fprintf(stderr, "mxWait failed with status %s\n", mx_strstatus(stat.code));
-			// exit(1);
+			//exit(1);
 			myErrorSignal = 1;
 		}
 		if (stat.code != MX_STATUS_SUCCESS) {
 			fprintf(stderr, "isendxxx failed with status %s\n", mx_strstatus(stat.code));
-			// exit(1);
+			//exit(1);
 			myErrorSignal = 1;
 		}
 		// if(lastCycle == 15) myErrorSignal = 1;
 		if(lastCycle == 15) 
 			shmIpcPtr->status ^= 2;
 
-	}while(!myErrorSignal);
-}
+	} while(!myErrorSignal);
+	//mx_disconnect(ep, dest);
+	}
 // printf("test loop error\n");
-}while(1);
+} while(1);
 	
 }
 
@@ -405,13 +428,7 @@ main(int argc, char **argv)
 	int do_bothways;
 	extern char *optarg;
 	mx_return_t ret;
-	int fd;
-	//char shmem1[64] = "/rtl_mem_tsa_daq";
-	//char shmem2[64] = "/rtl_mem_tsb_daq";
-	//char shmem3[64] = "/rtl_mem_tsc_daq";
-	char *shmem_fname_format = "/rtl_mem_%s_daq";
 	char shmem_fname[256];
-	//int status;
 
 #if DEBUG
 	extern int mx_debug_mask;
@@ -435,7 +452,6 @@ main(int argc, char **argv)
 	do_bothways = 0;
 	num_threads = 1;
 
-	//printf("file = %s %s %s\n",shmem1,shmem2,shmem3);
 
 	while ((c = getopt(argc, argv, "hd:e:f:n:b:r:s:l:N:Vvwx")) != EOF) switch(c) {
 	case 'd':
@@ -494,15 +510,10 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-        // if (argc != optind + 1) {  usage(); exit(1); }
 	if (sysname == NULL) { usage(); exit(1); }
-	// Make it lower case;
-	int i;
 
 	printf("System name: %s\n", sysname);
-//	sprintf(shmem_fname, shmem_fname_format, sysname);
 	sprintf(shmem_fname, "%s_daq", sysname);
-        //if (argc) { int i; for (i = 0; i < argc; i++) printf ("%s\n", argv[i]);}
 
 	if (rem_host != NULL)
 		num_threads += do_bothways;
@@ -520,35 +531,6 @@ main(int argc, char **argv)
 			fprintf(stderr, "-V ignored.  Verify must be set by sender\n");
 			Verify = 0;
 		}
-#if 0
-		// Open shared memory to FE DAQ
-		if ((fd = open("/rtl_mem_tsc_daq", O_RDWR))<0) {
-			fprintf(stderr, "Can't open shmem\n");
-			exit(1);
-	        }
-#endif
-
-#if 0
-		fd = open(shmem_fname, O_CREAT | O_RDWR, 0666);
-		if(fd == -1)
-		{
-			printf("shmem open failed %s\n",shmem_fname);
-			exit(1);
-		}
-#if 0
-		/* Set the shared area to the right size */
-		status = ftruncate(fd,MMAP_SIZE) ;
-		if(status != 0){
-			printf("shmem trunc failed %s %d\n",shmem3,MMAP_SIZE);
-			perror("ftruncate failed");
-			exit(1);
-		}
-			printf("WORKED\n");
-#endif
-
-		// Map shared memory
-		dcu_addr = (unsigned char *)mmap(0, MMAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd , 0);
-#endif
 		dcu_addr = findSharedMemory(shmem_fname);
 		if (dcu_addr <= 0) {
 			fprintf(stderr, "Can't map shmem\n");
@@ -572,16 +554,6 @@ main(int argc, char **argv)
 			       rem_host);
 		if (Verify) printf("Verifying results\n");
 
-#if 0
-		// Open shared memory to FE DAQ
-		if ((fd = open(shmem_fname, O_RDWR))<0) {
-			fprintf(stderr, "Can't open shmem\n");
-			exit(1);
-	        }
-
-		// Map shared memory
-		dcu_addr = (unsigned char *)mmap(0, 64*1024*1024-5000, PROT_READ | PROT_WRITE, MAP_SHARED, fd , 0);
-#endif
 		dcu_addr = findSharedMemory(shmem_fname);
 
 		if (dcu_addr <= 0) {
@@ -594,11 +566,10 @@ main(int argc, char **argv)
 		shmDataPtr = (char *)(dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
 		shmTpTable = (struct cdsDaqNetGdsTpNum *)(dcu_addr + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
 
-len = sizeof(struct daqMXdata);
-printf("send len = %d\n",len);
-sender(ep,his_nic_id, his_eid, len,MATCH_VAL_MAIN,my_eid); 
-	}		
-
+		len = sizeof(struct daqMXdata);
+		printf("send len = %d\n",len);
+		sender(ep,his_nic_id, his_eid, len,MATCH_VAL_MAIN,my_eid); 
+	}
   
 	mx_close_endpoint(ep);
 	mx_finalize();
