@@ -1,4 +1,5 @@
 SHELL = /bin/sh
+CC = gcc
 
 bindir = ${exec_prefix}/bin
 exec_prefix = ${prefix}
@@ -21,7 +22,7 @@ rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 CFLAGS = -I${prefix}/include -I.
-CFLAGS += -Wall -g -O2
+CFLAGS += -Wall -g -O2 -std=c99
 CFLAGS += $(OPTIM_CFLAGS)
 CPPFLAGS = -I../common -I$(top_srcdir)/common -I$(top_srcdir)/common/bsd -DNO_RTL 
 #CPPFLAGS += -DMX_THREAD_SAFE=$(MX_THREAD_SAFE)
