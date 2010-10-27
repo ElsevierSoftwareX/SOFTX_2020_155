@@ -825,10 +825,12 @@ gds_c::update_tp_data (unsigned int *d, char *dest)
     // Received data per DCU header contains these variables
     unsigned int dcuid = ntohl(*d++);
     unsigned int ifo = 0;
+#if defined(COMPAT_INITIAL_LIGO)
     if (dcuid > 32) { // This is LHO H2 data
 	dcuid -= 32;
 	ifo = 1;
     }
+#endif
     unsigned int ntp = ntohl(*d++);
     unsigned int rate = ntohl(*d++);
     DEBUG1(printf("ifo %d DCU %d rate %d ntp %d gdsTpNum=0x%x\n", ifo, dcuid, rate, ntp, gdsTpNum[ifo][dcuid]));
