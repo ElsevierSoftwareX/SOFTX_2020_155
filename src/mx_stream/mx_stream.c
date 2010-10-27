@@ -197,6 +197,8 @@ do {
 		  mxDataBlock.mxIpcData.crc = shmIpcPtr[i]->crc;
 		  mxDataBlock.mxIpcData.dcuId = shmIpcPtr[i]->dcuId;
 		  mxDataBlock.mxIpcData.dataBlockSize = shmIpcPtr[i]->dataBlockSize;
+		  if (mxDataBlock.mxIpcData.dataBlockSize > DAQ_DCU_BLOCK_SIZE)
+		  	mxDataBlock.mxIpcData.dataBlockSize = DAQ_DCU_BLOCK_SIZE;
 		  mxDataBlock.mxIpcData.bp[lastCycle].timeSec = shmIpcPtr[i]->bp[lastCycle].timeSec;
 		  mxDataBlock.mxIpcData.bp[lastCycle].timeNSec = shmIpcPtr[i]->bp[lastCycle].timeNSec;
 		  mxDataBlock.mxIpcData.bp[lastCycle].cycle = shmIpcPtr[i]->bp[lastCycle].cycle;
