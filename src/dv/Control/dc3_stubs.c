@@ -1884,16 +1884,16 @@ dataType(int dt)
 /*
 ** WorkShop Visual Stub grouplistSel
 */
+char thrGroupTemp[100000][MAX_LONG_CHANNEL_NAME_LENGTH+1];
+char linetemp[MAX_LONG_CHANNEL_NAME_LENGTH+80], chtemp[MAX_LONG_CHANNEL_NAME_LENGTH+80],     unittemp[MAX_LONG_CHANNEL_NAME_LENGTH+1], gpname[MAX_LONG_CHANNEL_NAME_LENGTH+10];
+char tempname[MAX_LONG_CHANNEL_NAME_LENGTH+1], tempname1[MAX_LONG_CHANNEL_NAME_LENGTH+1], tempname2[MAX_LONG_CHANNEL_NAME_LENGTH+1], tempname3[MAX_LONG_CHANNEL_NAME_LENGTH+1],
+tempArray[MAX_LONG_CHANNEL_NAME_LENGTH+1];
 
 void grouplistSel(Widget w, XtPointer client_data, XtPointer xt_call_data)
 {
 int  *position, pcount;
-char linetemp[MAX_LONG_CHANNEL_NAME_LENGTH+80], chtemp[MAX_LONG_CHANNEL_NAME_LENGTH+80],     unittemp[MAX_LONG_CHANNEL_NAME_LENGTH+1], gpname[MAX_LONG_CHANNEL_NAME_LENGTH+10];
 int  group, rate, counter, top=0; /* 1-top level, 2 -sec level */
 FILE *fp;
-char tempname[MAX_LONG_CHANNEL_NAME_LENGTH+1], tempname1[MAX_LONG_CHANNEL_NAME_LENGTH+1], tempname2[MAX_LONG_CHANNEL_NAME_LENGTH+1], tempname3[MAX_LONG_CHANNEL_NAME_LENGTH+1],
-     tempArray[MAX_LONG_CHANNEL_NAME_LENGTH+1];
-char thrGroupTemp[5000][MAX_LONG_CHANNEL_NAME_LENGTH+1];
 int  j, k, l, thrGpCnt;
 
 	XmListCallbackStruct *call_data = (XmListCallbackStruct *) xt_call_data ;
