@@ -21,7 +21,7 @@ rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 CFLAGS = -I${prefix}/include -I.
-CFLAGS += -Wall -g
+CFLAGS += -Wall -g -O2
 CFLAGS += $(OPTIM_CFLAGS)
 CPPFLAGS = -I../common -I$(top_srcdir)/common -I$(top_srcdir)/common/bsd -DNO_RTL 
 #CPPFLAGS += -DMX_THREAD_SAFE=$(MX_THREAD_SAFE)
