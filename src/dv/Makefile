@@ -5,10 +5,10 @@ all:
 	cd Control; make dc3
 
 install:
-	install Control/dc3 /usr/local/bin
-	install Control/dataviewer /usr/local/bin
-	install Display/framer4 /usr/local/bin
-	install Display/frameMemRead /usr/local/bin
+	install Control/dc3 /opt/apps/dataviewer
+	install Control/dataviewer /opt/apps/dataviewer
+	install Display/framer4 /opt/apps/dataviewer
+	install Display/frameMemRead /opt/apps/dataviewer
 	
 clean:
 	cd Lib/UTC_GPS; make clean
