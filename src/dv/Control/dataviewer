@@ -2,6 +2,7 @@
 mkdir /tmp/$$DC
 #ulimit -c 0
 DVPATH=`pwd`
+#DVPATH=/opt/apps/dataviewer
 export DVPATH
 PATH=${GRACE_HOME}/bin:${PATH}:/usr1/lcldsk/Netscape:`pwd`
 export PATH
