@@ -68,6 +68,15 @@ extern int iop_rfm_valid;
 #endif
 
 #define INLINE  inline
+#define FE_DIAGS_USER_TIME	0
+#define FE_DIAGS_IPC_STAT	1
+#define FE_DIAGS_FB_NET_STAT	2
+#define FE_DIAGS_DAQ_BYTE_CNT	3
+#define FE_DIAGS_DUOTONE_TIME	4
+#define FE_DIAGS_IRIGB_TIME	5
+#define FE_DIAGS_ADC_STAT	6
+#define FE_DIAGS_DAC_STAT	7
+#define FE_DIAGS_DAC_MASTER_STAT	8
 #define MMAP_SIZE (64*1024*1024 - 5000)
 volatile char *_epics_shm;		// Ptr to EPICS shared memory
 char *_ipc_shm;			// Ptr to inter-process communication area 
@@ -827,8 +836,8 @@ udelay(1000);
   memset(floatDacOut, 0, sizeof(floatDacOut));
 
 #endif
-  pLocalEpics->epicsOutput.diags[1] = 0;
-  pLocalEpics->epicsOutput.diags[2] = 0;
+  pLocalEpics->epicsOutput.diags[FE_DIAGS_IPC_STAT] = 0;
+  pLocalEpics->epicsOutput.diags[FE_DIAGS_FB_NET_STAT] = 0;
 
 
 #if !defined(NO_DAQ) && !defined(IOP_TASK)
@@ -959,7 +968,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
   {
 	case SYNC_SRC_TDS:
 		// Turn off the ADC/DAC clocks
-		CDIO1616Output[tdsControl] = 0x3300000;
+		CDIO1616Output[tdsControl] = TDS_STOP_CLOCKS;
 		CDIO1616Input[tdsControl] = writeCDIO1616l(&cdsPciModules, tdsControl, CDIO1616Output[tdsControl]);
 		printf("writing BIO\n");
 #ifdef NO_RTL
@@ -982,7 +991,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 #endif
 		// Start ADC/DAC clocks
 		// CDIO1616Output[tdsControl] = 0x7B00000;
-		CDIO1616Output[tdsControl] = 0x7b00000;
+		CDIO1616Output[tdsControl] = TDS_START_ADC_NEG_DAC_POS;
 		CDIO1616Input[tdsControl] = writeCDIO1616l(&cdsPciModules, tdsControl, CDIO1616Output[tdsControl]);
 		break;
 	case SYNC_SRC_IRIG_B:
@@ -1323,7 +1332,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 				if(cdsPciModules.gpsType == TSYNC_RCVR) 
 				{
 					gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
-					pLocalEpics->epicsOutput.diags[5] = usec;
+					pLocalEpics->epicsOutput.diags[FE_DIAGS_IRIGB_TIME] = usec;
 				}
 			}
 			
@@ -1697,7 +1706,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		{
 		// Retrieve time set in at adc read and report offset from 1PPS
 			gps_receiver_locked = getGpsTime(&timeSec,&usec);
-			pLocalEpics->epicsOutput.diags[5] = usec;
+			pLocalEpics->epicsOutput.diags[FE_DIAGS_IRIGB_TIME] = usec;
 		}
                 duotoneMean = duotoneTotal/CYCLE_PER_SECOND;
                 duotoneTotal = 0.0;
@@ -1711,7 +1720,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
         if(clock16K == 16)
         {
                 duotoneTime = duotime(12, duotoneMean, duotone);
-                pLocalEpics->epicsOutput.diags[4] = duotoneTime;
+                pLocalEpics->epicsOutput.diags[FE_DIAGS_DUOTONE_TIME] = duotoneTime;
 		// duotoneTimeDac = duotime(12, duotoneMeanDac, duotoneDac);
                 // pLocalEpics->epicsOutput.diags[5] = duotoneTimeDac;
 		// printf("du = %f %f %f %f %f\n",duotone[5], duotone[6], duotone[7],duotone[8],duotone[9]);
@@ -1725,7 +1734,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	  pLocalEpics->epicsOutput.cpuMeter = timeHold;
 	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
 #ifdef ADC_MASTER
-  	  pLocalEpics->epicsOutput.diags[8] = dacEnable;
+  	  pLocalEpics->epicsOutput.diags[FE_DIAGS_DAC_MASTER_STAT] = dacEnable;
 #endif
           timeHold = 0;
 	  if (timeSec % 4 == 0) pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeMin;
@@ -1859,7 +1868,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		// Call daqLib
 		if (cycle_gps_time == 0) startGpsTime = timeSec;
 		cycle_gps_time = timeSec; // Time at which ADCs triggered
-		pLocalEpics->epicsOutput.diags[3] = 
+		pLocalEpics->epicsOutput.diags[FE_DIAGS_DAQ_BYTE_CNT] = 
 			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
 #endif
 
@@ -1872,18 +1881,18 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 
         if((subcycle == 0) && (daqCycle == 14))
         {
-	  pLocalEpics->epicsOutput.diags[0] = usrHoldTime;
-	  pLocalEpics->epicsOutput.diags[1] = ipcErrBits;
+	  pLocalEpics->epicsOutput.diags[FE_DIAGS_USER_TIME] = usrHoldTime;
+	  pLocalEpics->epicsOutput.diags[FE_DIAGS_IPC_STAT] = ipcErrBits;
 	  // Create FB status word for return to EPICS
 #ifdef USE_GM
-  	  pLocalEpics->epicsOutput.diags[2] = (fbStat[1] & 3) * 4 + (fbStat[0] & 3);
+  	  pLocalEpics->epicsOutput.diags[FE_DIAGS_FB_NET_STAT] = (fbStat[1] & 3) * 4 + (fbStat[0] & 3);
 #endif
 #if defined(SHMEM_DAQ)
 	  mxStat = 0;
 	  mxDiagR = daqPtr->status;
 	  if((mxDiag & 1) != (mxDiagR & 1)) mxStat = 1;
 	  if((mxDiag & 2) != (mxDiagR & 2)) mxStat += 2;
-	  pLocalEpics->epicsOutput.diags[2] = mxStat;
+	  pLocalEpics->epicsOutput.diags[FE_DIAGS_FB_NET_STAT] = mxStat;
   	  mxDiag = mxDiagR;
 #endif
 	  usrHoldTime = 0;
