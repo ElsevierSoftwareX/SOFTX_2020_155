@@ -45,7 +45,7 @@ int adcDmaDone(int module, int *data)
 	if (*data == 0) return 0; else return 16;
 }
 // *****************************************************************************
-// Function checks if DMA from ADC module is complete
+// Function checks if DMA from DAC module is complete
 // Note: This function not presently used.
 // *****************************************************************************
 int dacDmaDone(int module)
@@ -186,6 +186,24 @@ int checkAdcBuffer(int numAdc)
                 dataCount = adcPtr[numAdc]->BUF_SIZE;
   return(dataCount);
 
+}
+//
+// *****************************************************************************
+// Check number of samples in DAC FIFO.
+// *****************************************************************************
+int checkDacBuffer(int numDac)
+{
+  int dataCount;
+     dataCount = (dacPtr[numDac]->BOR >> 12) & 0xf;
+     return(dataCount);
+}
+
+// *****************************************************************************
+// Clear DAC FIFO.
+// *****************************************************************************
+int clearDacBuffer(int numDac)
+{
+	 dacPtr[numDac]->BOR |=  GSAO_CLR_BUFFER;
 }
 
 
@@ -1263,7 +1281,8 @@ int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int kind)
     pci_read_config_dword(rfmdev, 
         		  PCI_BASE_ADDRESS_3,
                  	  &pci_io_addr);
-    pHardware->pci_rfm[devNum] = (long)ioremap_nocache((unsigned long)pci_io_addr, 64*1024*1024);
+    pHardware->pci_rfm[devNum] = (long)ioremap_nocache((unsigned long)pci_io_addr, 128*1024*1024);
+    // pHardware->pci_rfm[devNum] = (long)ioremap_nocache((unsigned long)pci_io_addr, 64*1024*1024);
 
     pci_read_config_dword(rfmdev, PCI_BASE_ADDRESS_2, &csrAddress);
     printk("CSR address is 0x%x\n", csrAddress);
