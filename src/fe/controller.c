@@ -423,7 +423,7 @@ int tdsControl = 0;
 void lockGpsTime()
 {
   SYMCOM_REGISTER *timeRead;
-	timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
+	timeRead = (SYMCOM_REGISTER *)cdsPciModules.gps;
 	timeRead->TIMEREQ = 1;	// Trigger module to capture time
 }
 int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec) 
@@ -432,8 +432,8 @@ int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec)
   unsigned int timeSec,timeNsec,sync;
 
   if (cdsPciModules.gps) {
-	timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
-	timeRead->TIMEREQ = 1;	// Trigger module to capture time
+	timeRead = (SYMCOM_REGISTER *)cdsPciModules.gps;
+	// timeRead->TIMEREQ = 1;	// Trigger module to capture time
 	timeSec = timeRead->TIME1;
 	timeNsec = timeRead->TIME0;
 	// *tsyncSec = timeSec - 252806388;
