@@ -84,6 +84,13 @@ typedef struct IO_MEM_DATA{
 	MEM_DATA_BLOCK iodata[MAX_IO_MODULES][IO_MEMORY_SLOTS];
 }IO_MEM_DATA;
 
+
+// Timing control register definitions for use with Contec1616 control of timing slave.
+
+#define TDS_STOP_CLOCKS			0x3700000
+#define TDS_START_ADC_NEG_DAC_POS	0x7700000
+#define TDS_START_ADC_NEG_DAC_NEG	0x7f00000
+
 /* Offset of the IO_MEM_DATA structure in the IPC shared memory */
 #define IO_MEM_DATA_OFFSET 0x4000
 
