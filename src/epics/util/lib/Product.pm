@@ -63,7 +63,7 @@ sub frontEndCode {
         $calcExp .= "_RMON = \n\tgainRamp(pLocalEpics->$::systemName\.$::xpartName[$i],";
         $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]";
         $calcExp .= "_TRAMP,";
-        $calcExp .= "$::gainCnt\,\&$::xpartName[$i]\_CALC);";
+        $calcExp .= "$::gainCnt\,\&$::xpartName[$i]\_CALC, FE_RATE);";
         $calcExp .= "\n\n";
         for (0 .. $::inCnt-1) {
           $calcExp .= "\L$::xpartName[$i]";
