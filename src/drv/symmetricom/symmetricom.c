@@ -23,6 +23,7 @@
 #endif
 #include <asm/io.h>
 #include "symmetricom.h"
+#include "../../include/drv/cdsHardware.h"
 
 /* character device structures */
 static dev_t symmetricom_dev;
@@ -143,6 +144,88 @@ static int __init symmetricom_init(void)
 	unsigned char *addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x40);
 	printk("Remapped 0x%x\n", addr1);
 	gps = addr1;
+	SYMCOM_REGISTER *timeReg = (TSYNC_REGISTER *) addr1;;
+
+
+	pci_read_config_dword(symdev, PCI_BASE_ADDRESS_3, &pci_io_addr);
+	pci_io_addr &= 0xfffffff0;
+	unsigned char *addr3 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x200);
+	printk("PIC BASE 3 address = 0x%x\n", pci_io_addr);
+	printk("PIC BASE 3 address = 0x%p\n", addr3);
+
+  	unsigned int *dramRead = (unsigned int *)(addr3 + 0x82);
+    	unsigned int *cmd = (unsigned int *)(addr3 + 0x102);
+
+	// Enable DC level shift input timecode signal
+  // Set write and wait *****************************
+  *cmd = 0xf6; // Request model ID
+        i=0;
+        timeReg->ACK = 0x1;  // Trigger module to capture time
+        udelay(1000);
+        timeReg->ACK = 0x80;  // Trigger module to capture time
+        do{
+        udelay(1000);
+        i++;
+        }while((timeReg->ACK == 0) &&(i<20));
+        if(timeReg->ACK) printk("SysCom ack received ID %d !!! 0x%x\n",timeReg->ACK,i);
+        printk("Model = 0x%x\n",*dramRead);
+// End Wait ****************************************
+  //
+  // Set write and wait *****************************
+        *cmd = 0x4915; // Request model ID
+        i=0;
+        timeReg->ACK = 0x1;  // Trigger module to capture time
+        udelay(1000);
+        timeReg->ACK = 0x80;  // Trigger module to capture time
+        do{
+        udelay(1000);
+        i++;
+        }while((timeReg->ACK == 0) &&(i<20));
+        if(timeReg->ACK) printk("SysCom ack received ID %d !!! 0x%x\n",timeReg->ACK,i);
+        printk("Model = 0x%x\n",*dramRead);
+// End Wait ****************************************
+  //
+  // Set write and wait *****************************
+        *cmd = 0x4416; // Request model ID
+        i=0;
+        timeReg->ACK = 0x1;  // Trigger module to capture time
+        udelay(1000);
+        timeReg->ACK = 0x80;  // Trigger module to capture time
+        do{
+        udelay(1000);
+        i++;
+        }while((timeReg->ACK == 0) &&(i<20));
+        if(timeReg->ACK) printk("SysCom ack received ID %d !!! 0x%x\n",timeReg->ACK,i);
+        printk("Model = 0x%x\n",*dramRead);
+// End Wait ****************************************
+  //
+  // Set write and wait *****************************
+        *cmd = 0x1519; // Request model ID
+        i=0;
+        timeReg->ACK = 0x1;  // Trigger module to capture time
+        udelay(1000);
+        timeReg->ACK = 0x80;  // Trigger module to capture time
+        do{
+        udelay(1000);
+        i++;
+        }while((timeReg->ACK == 0) &&(i<20));
+        if(timeReg->ACK) printk("SysCom ack received ID %d !!! 0x%x\n",timeReg->ACK,i);
+        printk("New Time COde Format = 0x%x\n",*dramRead);
+// End Wait ****************************************
+  //
+  // Set write and wait *****************************
+        *cmd = 0x1619; // Request model ID
+        i=0;
+        timeReg->ACK = 0x1;  // Trigger module to capture time
+        udelay(1000);
+        timeReg->ACK = 0x80;  // Trigger module to capture time
+        do{
+        udelay(1000);
+        i++;
+        }while((timeReg->ACK == 0) &&(i<20));
+        if(timeReg->ACK) printk("SysCom ack received ID %d !!! 0x%x\n",timeReg->ACK,i);
+        printk("New TC Modulation = 0x%x\n",*dramRead);
+// End Wait ****************************************
 
 	for (i = 0; i < 10; i++) {
 	      gps[0] = 1;
