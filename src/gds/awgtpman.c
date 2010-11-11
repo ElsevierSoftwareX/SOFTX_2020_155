@@ -216,7 +216,7 @@ CDS_HARDWARE cdsPciModules;
       }
       printf("Total PCI cards from the master: %d\n", ioMemData -> totalCards);
       sleep(2);
-      for (int ii = 0; ii < ioMemData -> totalCards; ii++) {
+      for (int ii = 0; ii < 1; ii++) {
           printf("Model %d = %d\n",ii,ioMemData->model[ii]);
           switch (ioMemData -> model [ii]) {
             case GSC_16AI64SSA:
