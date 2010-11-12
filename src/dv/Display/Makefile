@@ -3,7 +3,7 @@ ifeq ($(shell uname), SunOS)
 LIBS = -I../../daqd -I../Th -L../Lib -L../Lib/UTC_GPS -ltai -lm -lnsl -lpthread -lsocket
 all: framer3 framer4 frameMemRead frameMemReadXMGR tocLongRead frameMemTrig
 else
-LIBS = -I../../daqd -I../Th -L/opt/apps/grace/lib -L../Lib/UTC_GPS -ltai -lm -lnsl -lpthread 
+LIBS = -I../../daqd -I../Th -L../Lib/UTC_GPS -ltai -lm -lnsl -lpthread 
 all: framer4 frameMemRead 
 endif
 

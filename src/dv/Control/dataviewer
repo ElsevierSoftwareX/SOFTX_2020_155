@@ -1,13 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 mkdir /tmp/$$DC
-#ulimit -c 0
-#DVPATH=`pwd`
-DVPATH=/opt/apps/dataviewer
+DVPATH=/opt/rtapps/dv
 export DVPATH
-PATH=${GRACE_HOME}/bin:${PATH}:/usr1/lcldsk/Netscape:`pwd`
-export PATH
-export LD_LIBRARY_PATH=${GRACE_HOME}/lib
-#for i in `ipcs -q | grep $USER | awk '{ print $2 }'`; do ipcrm -q $i; done;
-$DVPATH/dc3  -a $$  -b $DVPATH $*
+if [ -d /usr/share/grace ]; then
+    GRACE_HOME=/usr/share/grace
+else
+    GRACE_HOME=/opt/rtapps/grace
+    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GRACE_HOME}/lib
+    export LD_LIBRARY_PATH
+fi
+export GRACE_HOME
+PATH=${PATH}:${GRACE_HOME}/bin:`pwd`
+$DVPATH/dc3 -s ${NDSSERVER} -a $$ -b $DVPATH $*
 /bin/rm -f -r /tmp/$$DC
-#for i in `ipcs -q | grep $USER | awk '{ print $2 }'`; do ipcrm -q $i; done;
