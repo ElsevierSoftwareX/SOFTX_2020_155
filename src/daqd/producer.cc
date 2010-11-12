@@ -2187,6 +2187,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 
 // No waiting here if compiled as broadcasts receiver
 #ifndef USE_BROADCAST
+static const int cycle_delay = 4;
    // Wait until a second boundary
    {
 #if 0
@@ -2208,16 +2209,17 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 	// Wait for the beginning of a second
 	for(;;) {
 		prev_gps = daqd.symm_gps(&f);
+#ifdef USE_IOP
 	 	//prev_frac = 1000000000 - 1000000000/16;
 		prev_frac = 0;
 		// Starting at this time
 		gps = prev_gps + 1;
 		frac = 0;
-#ifdef USE_IOP
 		if (f > 990000000) break;
 #else
+		gps = prev_gps;
 		//if (f > 999493000) break;
-		if (f < (4 * c)  && f > (3 * c)) break; // Three cycles after a second
+		if (f < ((cycle_delay+2) * c)  && f > ((cycle_delay+1) * c)) break; // Three cycles after a second
 #endif
 
 	        struct timespec wait = {0, 10000000UL }; // 10 milliseconds
@@ -2231,7 +2233,9 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 		if (f >= 1000000000/8) break;
 	}
 #endif
-
+	prev_gps = gps - 1;
+	prev_frac = c * cycle_delay;
+	frac = c * (cycle_delay+1);
         printf("Starting at gps %d prev_gps %d frac %d f %d\n", gps, prev_gps, frac, f);
         controller_cycle = 1;
 #else
@@ -2277,6 +2281,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
    if (daqd.dcu_status_check & 4) resync = 1;
 
    for (unsigned long i = 0;;i++) { // timing
+     DEBUG(6, printf("Timing %d gps=%d frac=%d\n", i, gps, frac));
 #ifndef USE_BROADCAST
      read_dest = daqd.move_buf;
      for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
@@ -2450,7 +2455,9 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 #ifdef USE_SYMMETRICOM
 
 	  system_log(5, "dcu %d block %d cycle %d  gps %d symm %d\n", j, cblk, gmDaqIpc[j].bp[cblk].cycle,  dcu_gps, gps);
-	  if (dcu_gps != gps) {
+	  unsigned long mygps = gps;
+	  if (cblk > (15 - cycle_delay)) mygps--;
+	  if (dcu_gps != mygps) {
 	    daqd.dcuStatus[0][j] |= 0x4000;
 	    daqd.dcuCrcErrCnt[0][j]++;
 	    daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
@@ -2530,6 +2537,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
      //prop.gps = time(0) - 315964819 + 33;
 #ifdef USE_SYMMETRICOM
      prop.gps = gps;
+     if (cblk > (15 - cycle_delay)) prop.gps--;
 #else
      prop.gps = i/16 + zero_time - 315964819 + 33;
 #endif
