@@ -98,7 +98,7 @@ AC_ARG_WITH(framecpp,
 [  --with-framecpp=DIRECTORY           Specify LDAS software directory ],
 [ LDAS_DIR=$withval
 ],
-[ LDAS_DIR=/usr/local
+[ LDAS_DIR=/opt/rtapps/framecpp
 ])
 AC_SUBST(LDAS_DIR)
 AC_SUBST(LDASFLAGS)
