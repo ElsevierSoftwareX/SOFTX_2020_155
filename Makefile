@@ -293,14 +293,14 @@ dc:
 	(cd src/daqd; autoconf)
 	/bin/rm -rf build/dc
 	/bin/mkdir -p build/dc
-	(cd build/dc; ../../src/daqd/configure '--enable-symmetricom' '--with-mx' '--without-myrinet' '--enable-debug' '--with-framecpp=/usr/local' '--with-concentrator' && make)
+	(cd build/dc; ../../src/daqd/configure '--enable-symmetricom' '--with-mx' '--without-myrinet' '--enable-debug' --with-epics=/opt/rtapps/epics/base '--with-framecpp=/opt/rtapps/framecpp' '--with-concentrator' && make)
 
 # Build frame builder NDS or frame writer (broadcast receiver)
 rcv:
 	(cd src/daqd; autoconf)
 	/bin/rm -rf build/rcv
 	/bin/mkdir -p build/rcv
-	(cd build/rcv; ../../src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-framecpp=/usr/local' && make)
+	(cd build/rcv; ../../src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-framecpp=/opt/rtapps/framecpp' --with-epics=/opt/rtapps/epics/base  && make)
 
 # build standalone frame builder
 stand:
