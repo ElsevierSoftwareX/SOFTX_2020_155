@@ -1,7 +1,6 @@
 # Linux Epics IOC system build rules
 
-EPICS_ROOT=/opt/epics-3.14.9-linux
-#EPICS_ROOT=/cvs/cds/epics/release/r3.14.linux
+EPICS_ROOT=/opt/rtapps/epics
 
 # Switching to 3.14.6 Epics; 28 Oct 2004
 # EPICS_ROOT=/opt/CDS/h/alex/epics/base-3.14.6
@@ -12,8 +11,8 @@ EPICS_ROOT=/opt/epics-3.14.9-linux
 
 ###
 EPICS_BASE=$(EPICS_ROOT)/base
-EPICS_SEQ_BASE=$(EPICS_ROOT)/seq
-EPICS_HOST_ARCH=linux-x86
+EPICS_SEQ_BASE=$(EPICS_ROOT)/modules/sncseq
+EPICS_HOST_ARCH=linux-x86_64
 
 # Sequencer synchronization; to fix broken seq package
 SRC += src/drv/sync.c
@@ -28,6 +27,7 @@ PREPROCESS = /usr/bin/gcc -x c -E -P
 CFLAGS += $(EXTRA_CFLAGS)
 CFLAGS += -I$(EPICS_BASE)/include/os/Linux -I$(EPICS_BASE)/include 
 CFLAGS += -I$(EPICS_SEQ_BASE)/include
+CFLAGS += -I$(EPICS_ROOT)/extensions/include
 CFLAGS += -I/usr/lib/rmnet -I/usr/lib/rfm2g
 CFLAGS += -Isrc/include -Isrc/include/drv
 CFLAGS += -I/usr/lib64
@@ -52,7 +52,7 @@ SNCFLAGS += +a
 #SNCFLAGS += -e
 
 # Sequencer file (.st) compiler
-SNC = $(EPICS_SEQ_BASE)/bin/linux-x86/snc $(SNCFLAGS)
+SNC = $(EPICS_SEQ_BASE)/bin/linux-x86_64/snc $(SNCFLAGS)
 
 # registration code generator
 REGGEN = $(EPICS_BASE)/bin/linux-x86/registerRecordDeviceDriver.pl
@@ -62,15 +62,16 @@ FMSEQFILES = src/epics/util/fmseq.pl src/epics/util/skeleton.db src/epics/util/s
 
 # Standard Epics IOC server library flags
 LIBFLAGS += -g
-LIBFLAGS += -L$(EPICS_BASE)/lib/linux-x86
-LIBFLAGS += -L$(EPICS_SEQ_BASE)/lib/linux-x86
+LIBFLAGS += -L$(EPICS_BASE)/lib/linux-x86_64
+LIBFLAGS += -L$(EPICS_SEQ_BASE)/lib/linux-x86_64
+LIBFLAGS += -L$(EPICS_ROOT)/extensions/lib/linux-x86_64
 #LIBFLAGS += $(EPICS_SEQ_BASE)/bin/linux-x86/devSequencer.o
 LIBFLAGS += -lseq -lseqDev -lpv -lsoftDevIoc -lrecIoc
 ifeq (,$(findstring tcsepics, $(TARGET)))
 LIBFLAGS += -ltestDevIoc 
 endif
 LIBFLAGS += -lrecIoc
-LIBFLAGS += -liocsh -lmiscIoc -lrsrvIoc -ldbtoolsIoc
+LIBFLAGS += -lmiscIoc -lrsrvIoc -ldbtoolsIoc
 LIBFLAGS += -lasIoc -ldbIoc -lregistryIoc -ldbStaticIoc -lca -lCom
 LIBFLAGS += -lpthread  -lreadline -lcurses -lrt
 
