@@ -1,9 +1,9 @@
-package CDS::EpicsMbbi;
+package CDS::EpicsMbbo;
 use Exporter;
 @ISA = ('Exporter');
 
 sub partType {
-	return EpicsMbbi;
+	return EpicsMbbo;
 }
 
 # Print Epics communication structure into a header file
@@ -17,7 +17,7 @@ sub printHeaderStruct {
 # Current part number is passed as first argument
 sub printEpics {
         my ($i) = @_;
-        print ::EPICS "DUMMY $::xpartName[$i] int mbbi 0 \n";
+        print ::EPICS "DUMMY $::xpartName[$i] int mbbo 0 \n";
 }
 
 # Print variable declarations int front-end file
