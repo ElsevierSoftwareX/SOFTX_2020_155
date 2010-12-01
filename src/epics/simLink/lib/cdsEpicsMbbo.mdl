@@ -1,5 +1,5 @@
 Library {
-  Name			  "cdsEpicsMbbi"
+  Name			  "cdsEpicsMbbo"
   Version		  7.1
   MdlSubVersion		  0
   SavedCharacterEncoding  "windows-1252"
@@ -29,15 +29,15 @@ Library {
   StatusBar		  on
   BrowserShowLibraryLinks off
   BrowserLookUnderMasks	  off
-  Created		  "Wed Nov 24 12:01:07 2010"
+  Created		  "Wed Nov 24 12:10:45 2010"
   Creator		  "maronsso"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "maronsso"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Nov 24 12:09:44 2010"
+  LastModifiedDate	  "Wed Nov 24 12:14:33 2010"
   RTWModifiedTimeStamp	  0
-  ModelVersionFormat	  "1.%<AutoIncrement:5>"
+  ModelVersionFormat	  "1.%<AutoIncrement:3>"
   ConfigurationManager	  "None"
   SimulationMode	  "normal"
   LinearizationMsg	  "none"
@@ -88,6 +88,26 @@ Library {
     ShowName		    on
   }
   BlockParameterDefaults {
+    Block {
+      BlockType		      Inport
+      Port		      "1"
+      UseBusObject	      off
+      BusObject		      "BusObject"
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      SampleTime	      "-1"
+      OutMin		      "[]"
+      OutMax		      "[]"
+      DataType		      "auto"
+      OutDataType	      "fixdt(1,16,0)"
+      OutScaling	      "[]"
+      OutDataTypeStr	      "Inherit: auto"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      LatchByDelayingOutsideSignal off
+      LatchByCopyingInsideSignal off
+      Interpolate	      on
+    }
     Block {
       BlockType		      Outport
       Port		      "1"
@@ -146,8 +166,8 @@ Library {
     FontAngle		    "normal"
   }
   System {
-    Name		    "cdsEpicsMbbi"
-    Location		    [480, 85, 741, 293]
+    Name		    "cdsEpicsMbbo"
+    Location		    [480, 85, 744, 255]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -163,12 +183,12 @@ Library {
     ReportName		    "simulink-default.rpt"
     Block {
       BlockType		      SubSystem
-      Name		      "EpicsMbbi"
-      Tag		      "cdsEpicsMbbi"
-      Description	      "cdsEpicsMbbi"
-      Ports		      [0, 1]
-      Position		      [85, 63, 145, 97]
-      BackgroundColor	      "[0.000000, 0.501961, 0.501961]"
+      Name		      "EpicsMbbo"
+      Tag		      "cdsEpicsMbbo"
+      Description	      "cdsEpicsMbbo"
+      Ports		      [1, 1]
+      Position		      [75, 47, 140, 83]
+      BackgroundColor	      "[0.250980, 0.501961, 0.501961]"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
       MinAlgLoopOccurrences   off
@@ -179,8 +199,8 @@ Library {
       RequestExecContextInheritance off
       MaskHideContents	      off
       System {
-	Name			"EpicsMbbi"
-	Location		[614, 333, 922, 544]
+	Name			"EpicsMbbo"
+	Location		[433, 403, 732, 588]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -194,9 +214,17 @@ Library {
 	ShowPageBoundaries	off
 	ZoomFactor		"100"
 	Block {
+	  BlockType		  Inport
+	  Name			  "In1"
+	  Position		  [55, 83, 85, 97]
+	  IconDisplay		  "Port number"
+	  OutDataType		  "sfix(16)"
+	  OutScaling		  "2^0"
+	}
+	Block {
 	  BlockType		  Outport
 	  Name			  "Out1"
-	  Position		  [220, 103, 250, 117]
+	  Position		  [215, 83, 245, 97]
 	  IconDisplay		  "Port number"
 	  OutDataType		  "sfix(16)"
 	  OutScaling		  "2^0"
