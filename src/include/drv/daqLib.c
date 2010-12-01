@@ -304,15 +304,17 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
         when DMA xfers are used on 5565 RFM modules. Note that this usually results
 	in data not being written on every 2048/16384 cycle and last data xfer
 	in a 1/16 sec block well may be shorter than the rest.			*/
-    if(((crcLength/xferSize1) > sysRate) || ((xferSize1 % 8) > 0)) 
-	xferSize1 = ((xferSize1/8) + 1) * 8;
+    // if(((crcLength/xferSize1) > sysRate) || ((xferSize1 % 8) > 0)) 
+ 	xferSize1 = ((xferSize1/8) + 1) * 8;
+	// printf("DAQ resized %d\n", xferSize1);
+
 
 
 #ifndef NO_RTL
     printf("Daq chan count = %d\nBlockSize = 0x%x\n",dataInfo.numChans,crcLength);
     printf("Daq XferSize = %d\n",xferSize1);
     printf("Daq xfer should complete in %d cycles\n",(crcLength/xferSize1));
-    printf("Daq xmit Size = %d\n",mnDaqSize);
+    printf("Daq xmit Size = %d %d\n",mnDaqSize,sysRate);
 #endif
 
 
