@@ -100,7 +100,7 @@ sub frontEndCode {
         	$ret .= "$::xpartName[$i](";
 	}
 	
-        $ret .= "$::fromExp[0], $::partInCnt[$::partInNum[$i][0]], \L$::partOutput[$i][0], $::partOutCnt[$::partOutNum[$i][0]]);\n";
+        $ret .= "$::fromExp[0], $::partInCnt[$::partInNum[$i][0]], \L$::partOutput[$i][0], $::partOutputs[$::partOutNum[$i][0]]);\n";
 	if ($::inlinedFunctionCall[$i] ne undef) {
 		$ret .= "#undef CURRENT_SUBSYS\n";
 		$ret .= "}\n";
