@@ -68,6 +68,24 @@ main() {
   while (1) {
     int length = NDS->receive(bufptr, buflen, &seq, &gps, &gps_n);
     printf("%d %d %d %d %d\n", length, seq, gps, gps_n, ntohl(*((unsigned int *)bufptr)));
+
+    // Print the header
+    unsigned int *bufp = (unsigned int *)bufptr;
+    unsigned int num_dcu = ntohl(*bufp);bufp++;
+    printf("num_dcu=%d\n", num_dcu);
+    while(num_dcu--) {
+    	printf("dcu=%d size=%d config_crc=0x%x crc=0x%x status=0x%x cycle=%d\n",
+		ntohl(bufp[0]), 
+		ntohl(bufp[1]), 
+		ntohl(bufp[2]), 
+		ntohl(bufp[3]), 
+		ntohl(bufp[4]), 
+		ntohl(bufp[5]));
+    	bufp += 6;
+    }
+
+    // The data starts at bufptr +2048
+    //
 #if 0
     char fname[1024];
     sprintf(fname, "%d", gps);
