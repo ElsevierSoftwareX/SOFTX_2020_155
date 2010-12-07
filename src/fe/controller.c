@@ -1242,6 +1242,10 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	// increased to appropriate number of 65536 s/sec to match desired
 	// code rate eg 32 samples each time thru before proceeding to match 2048 system.
 	// **********************************************************************************************************
+#ifdef ADC_MASTER
+		if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(clock16K % 64));
+		if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(clock16K % 64));
+#endif
        if(clock16K == 0)
         {
 	  // Increment GPS second on cycle 0
@@ -1423,6 +1427,12 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			packedData ++;
                     }
 #ifdef ADC_MASTER
+#if 0
+			if(jj==0) {
+				if(cdsPciModules.pci_rfm_dma[0]) status = rfm55DMAdone(0);
+				if(cdsPciModules.pci_rfm_dma[1]) status = rfm55DMAdone(1);
+			}
+			#endif
 		    // Write GPS time and cycle count as indicator to slave that adc data is ready
 	  	    ioMemData->gpsSecond = timeSec;;
 		    ioMemData->iodata[jj][ioMemCntr].timeSec = timeSec;;
@@ -1547,7 +1557,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	// Call the front end specific software ***********************************************
         rdtscl(cpuClock[4]);
 
-	feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,0);
+ 	feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,0);
         rdtscl(cpuClock[5]);
 
 
@@ -2564,11 +2574,13 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
                  printf("\tRFM %d is a VMIC_%x module with Node ID %d\n", ii, cdsPciModules.rfmType[ii], cdsPciModules.rfmConfig[ii]);
 #ifdef ADC_SLAVE
 		cdsPciModules.pci_rfm[ii] = ioMemData->pci_rfm[ii];
+		cdsPciModules.pci_rfm_dma[ii] = ioMemData->pci_rfm_dma[ii];
 #endif
 		printf("address is 0x%x\n",cdsPciModules.pci_rfm[ii]);
 #ifdef ADC_MASTER
 		// Master sends RFM memory pointers to SLAVES
 		ioMemData->pci_rfm[ii] = cdsPciModules.pci_rfm[ii];
+		ioMemData->pci_rfm_dma[ii] = cdsPciModules.pci_rfm_dma[ii];
 #endif
 	}
 	ioMemData->dolphinCount = 0;
