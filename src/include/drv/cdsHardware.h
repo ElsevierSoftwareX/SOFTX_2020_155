@@ -79,6 +79,7 @@ typedef struct IO_MEM_DATA{
 	int ipc[MAX_IO_MODULES];
 	int rfmCount;
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
+	long pci_rfm_dma[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
         int dolphinCount;
         volatile unsigned long *dolphin[2]; /* Read and write addresses to the Dolphin memory */
 	MEM_DATA_BLOCK iodata[MAX_IO_MODULES][IO_MEMORY_SLOTS];
@@ -268,6 +269,11 @@ typedef struct GSA_DAC_REG{
 #define VMIC_VID		0x114a
 #define VMIC_TID		0x5565
 #define VMIC_TID_5579		0x5579
+#define VMIC_DMA_WRITE       	0x0
+#define VMIC_DMA_READ        	0x8
+#define VMIC_DMA_START        	0x3
+#define VMIC_DMA_CLR        	0x8
+
 
 #define TURN_OFF_5565_FAIL      0x80000000
 #define TURN_OFF_5579_FAIL	0x80
@@ -303,13 +309,19 @@ typedef struct VMIC5565_CSR{
 }VMIC5565_CSR;
 
 typedef struct VMIC5565DMA{
-        unsigned int pad[32];
+        unsigned int pad[26];
+	unsigned int INTCSR;		/* 0x68 */
+	unsigned int INTCSR2;		/* 0x6C */
+	unsigned int RES1;		/* 0x70 */
+	unsigned int PCI_H_REV;		/* 0x74 */
+	unsigned int RES2;		/* 0x78 */
+	unsigned int RES3;		/* 0x7C */
         unsigned int DMA0_MODE;         /* 0x80 */
         unsigned int DMA0_PCI_ADD;      /* 0x84 */
         unsigned int DMA0_LOC_ADD;      /* 0x88 */
         unsigned int DMA0_BTC;          /* 0x8C */
         unsigned int DMA0_DESC;         /* 0x90 */
-        unsigned int DMA1_MODE;         /* 0x94 */
+        unsigned int DMA1_MODE;         /* 0x94 NOTE DMA1 Not supported on latest GEFANUC BOARDS*/
         unsigned int DMA1_PCI_ADD;      /* 0x98 */
         unsigned int DMA1_LOC_ADD;      /* 0x9C */
         unsigned int DMA1_BTC;          /* 0xA0 */
@@ -571,9 +583,11 @@ typedef struct CDS_HARDWARE{
 	unsigned short pci_cdo_dio1[MAX_DIO_MODULES];	/* io regs of Contec 32BO mods */
 	int rfmCount;			/* Number of RFM modules found		*/
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
+	long pci_rfm_dma[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
 	int rfmConfig[MAX_RFM_MODULES];
 	int rfmType[MAX_RFM_MODULES];
 	volatile VMIC5565_CSR *rfm_reg[MAX_RFM_MODULES]; /* Remapped address of the registers */
+	volatile VMIC5565DMA *rfm_dma[MAX_RFM_MODULES]; /* Remapped address of the registers */
 	unsigned char *buf;
 	volatile unsigned int *gps;	/* GPS card */
 	unsigned int gpsType;
