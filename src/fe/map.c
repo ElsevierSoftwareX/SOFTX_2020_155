@@ -3,29 +3,30 @@
 #include <asm/io.h>
 #include <asm/uaccess.h>
 
-#ifdef USE_VMIC_RFM
-#include <drv/vmic5579.h>
-#include <drv/vmic5565.h>
-#define RFM_WRITE	0x0
-#define RFM_READ	0x8
-#endif
+#if 0
 #ifndef NO_DAQ
 #include <drv/gmnet.h>
 #endif
+#endif
 #include <drv/cdsHardware.h>
 #include <drv/map.h>
+#include <commData2.h>
+
 int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int);
+void rfm55DMA(CDS_HARDWARE *pHardware, int card, int offset);
 
 // PCI Device variables
 volatile PLX_9056_DMA *adcDma[MAX_ADC_MODULES];	/* DMA struct for GSA ADC */
 volatile PLX_9056_DMA *dacDma[MAX_DAC_MODULES];	/* DMA struct for GSA DAC */
 volatile PLX_9056_INTCTRL *plxIcr;		/* Ptr to interrupt cntrl reg on PLX chip */
 dma_addr_t adc_dma_handle[MAX_ADC_MODULES];	/* PCI add of ADC DMA memory */
-dma_addr_t dac_dma_handle[MAX_DAC_MODULES];	/* PCI add of ADC DMA memory */
+dma_addr_t dac_dma_handle[MAX_DAC_MODULES];	/* PCI add of DAC DMA memory */
+dma_addr_t rfm_dma_handle[MAX_DAC_MODULES];	/* PCI add of RFM DMA memory */
 volatile GSA_ADC_REG *adcPtr[MAX_ADC_MODULES];	/* Ptr to ADC registers */
 volatile GSA_FAD_REG *fadcPtr[MAX_ADC_MODULES]; /* Ptr to 2MS/sec ADC registers */
 volatile GSA_DAC_REG *dacPtr[MAX_DAC_MODULES];	/* Ptr to DAC registers */
-volatile VMIC5565_CSR *p5565Csr;
+volatile VMIC5565_CSR *p5565Csr;		// VMIC5565 Control/Status Registers
+volatile VMIC5565DMA *p5565Dma[2];		// VMIC5565 DMA Engine
 
 
 int checkAdcDmaDone(int module)
@@ -1265,25 +1266,36 @@ int mapPciModules(CDS_HARDWARE *pCds)
 
 // *****************************************************************************
 // Routine to initialize VMIC RFM modules
+// Support provided is only for use of RFM with RCG IPC components
 // *****************************************************************************
 int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int kind)
 {
   static unsigned int pci_io_addr;
   int devNum;
   static char *csrAddr;
+  static char *dmaAddr;
   static unsigned int csrAddress;
+  static unsigned int dmaAddress;
   int pedStatus;
+  int status;
 
   devNum = pHardware->rfmCount;
   pedStatus = pci_enable_device(rfmdev);
+  // Register module as Master capable, required for DMA
+  pci_set_master(rfmdev);
 
   if (kind == 0x5565) {
+    // Find the reflected memory base address
     pci_read_config_dword(rfmdev, 
         		  PCI_BASE_ADDRESS_3,
                  	  &pci_io_addr);
+    // Map full 128 MByte new cards only
     pHardware->pci_rfm[devNum] = (long)ioremap_nocache((unsigned long)pci_io_addr, 128*1024*1024);
-    // pHardware->pci_rfm[devNum] = (long)ioremap_nocache((unsigned long)pci_io_addr, 64*1024*1024);
+    // Allocate local memory for IPC DMA xfers from RFM module
+    pHardware->pci_rfm_dma[devNum] = (long) pci_alloc_consistent(rfmdev,IPC_BUFFER_SIZE,&rfm_dma_handle[devNum]);
+    printk("RFM address is 0x%lx\n",pci_io_addr);
 
+    // Find the RFM control/status register
     pci_read_config_dword(rfmdev, PCI_BASE_ADDRESS_2, &csrAddress);
     printk("CSR address is 0x%x\n", csrAddress);
     csrAddr = ioremap_nocache((unsigned long)csrAddress, 0x40);
@@ -1295,6 +1307,30 @@ int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int kind)
 
     printk("Board id = 0x%x\n",p5565Csr->BID);
     pHardware->rfmConfig[devNum] = p5565Csr->NID;
+    //
+    // Find DMA Engine controls in RFM Local Configuration Table 
+    pci_read_config_dword(rfmdev,
+		 PCI_BASE_ADDRESS_0,
+		 &dmaAddress);
+    printk("DMA address is 0x%lx\n",dmaAddress);
+    dmaAddr = ioremap_nocache(dmaAddress,0x200);
+    p5565Dma[devNum] = (VMIC5565DMA *)dmaAddr;
+    pHardware->rfm_dma[devNum] = p5565Dma[devNum];
+    printk("5565DMA at 0x%lx\n",(int)p5565Dma[devNum]);
+    printk("5565 INTCR = 0x%lx\n",p5565Dma[devNum]->INTCSR);
+    p5565Dma[devNum]->INTCSR = 0;	// Disable interrupts from this card
+    printk("5565 INTCR = 0x%lx\n",p5565Dma[devNum]->INTCSR);
+    printk("5565 MODE = 0x%lx\n",p5565Dma[devNum]->DMA0_MODE);
+    printk("5565 DESC = 0x%lx\n",p5565Dma[devNum]->DMA0_DESC);
+    // Preload some DMA settings
+    // Only important items here are BTC and DESC fields, which are used 
+    // later by DMA routine.
+    p5565Dma[devNum]->DMA0_PCI_ADD = pHardware->pci_rfm_dma[0];
+    p5565Dma[devNum]->DMA0_LOC_ADD = IPC_BASE_OFFSET;	// Start at RFM + 0x100 offset
+    p5565Dma[devNum]->DMA0_BTC = IPC_RFM_XFER_SIZE;	// Set byte xfer to 256 bytes
+    p5565Dma[devNum]->DMA0_DESC = VMIC_DMA_READ;	// Set RFM to local memory
+
+// Legacy VMIC 5579 code, which is not fully functional and should be deleted soon.
   } else if (kind == 0x5579) {
     struct VMIC5579_MEM_REGISTER *pciRegPtr;
     int nodeId;
@@ -1317,123 +1353,42 @@ int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int kind)
   pHardware->rfmCount ++;
   return(0);
 }
-
-#ifdef USE_VMIC_RFM
 // *****************************************************************************
-// Routine to find and map VMIC RFM modules
+// RFM DMA Read in support of commData
 // *****************************************************************************
-long mapcard(int state, int memsize) {
-
-  static struct pci_dev *pcidev;
-  static unsigned int pci_bus;
-  static unsigned int pci_device_fn;
-  static unsigned int pci_io_addr;
-  static char *dmaAdd;
-  static char *csrAddr;
-  static int using_dac;
-  static long cpu_addr;
-  static unsigned int dmaAddress;
-  static unsigned int csrAddress;
-  int pedStatus;
-
-  if(state == 1)
-  {
-  pcidev = 0;
-  if ((pcidev = pci_get_device(0x114a, PCI_ANY_ID, 0))) {
-	pci_bus = pcidev->bus->number;
-	pci_device_fn = pcidev->devfn;
-	printk("Found RFM CARD\n");
-	rfmType = pcidev->device;
-	printk("\tCard Type = 0x%x\n",rfmType);
-        printk("0x%x card on bus %d; device %d\n", rfmType,
-		pci_bus,
-		pci_device_fn);
-  } else {
-        printk("VMIC RFM is not found.\n");
-        return 0;
-  }
-
-
-
-  pedStatus = pci_enable_device(pcidev);
-  pci_set_master(pcidev);
-
-  pci_read_config_dword(pcidev, 
-                 rfmType == 0x5565? PCI_BASE_ADDRESS_3:PCI_BASE_ADDRESS_1,
-                 &pci_io_addr);
-  printk("VMIC%x PCI bus address=0x%x\n", rfmType, pci_io_addr);
-
-        if (!pci_set_dma_mask(pcidev, DMA_64BIT_MASK)) {
-                using_dac = 1;
-		pci_set_consistent_dma_mask(pcidev, DMA_64BIT_MASK);
-		printk("RFM is 64 bit capable\n");
-        } else if (!pci_set_dma_mask(pcidev, DMA_32BIT_MASK)) {
-                using_dac = 0;
-		pci_set_consistent_dma_mask(pcidev, DMA_32BIT_MASK);
-		printk("RFM is 32 bit capable\n");
-        } else {
-                printk(
-                       "mydev: No suitable DMA available.\n");
-        }
-
-
-  pRfmMem = ioremap_nocache((unsigned long)pci_io_addr, memsize);
-  printk("VMIC%x protected address=0x%x\n", rfmType, (int)pRfmMem);
-
-  if(rfmType == 0x5565)
-  {
-	  pci_read_config_dword(pcidev,
-			 rfmType == 0x5565? PCI_BASE_ADDRESS_0:PCI_BASE_ADDRESS_1,
-			 &dmaAddress);
-
-	  printk("DMA address is 0x%lx\n",dmaAddress);
-
-	  dmaAdd = ioremap_nocache(dmaAddress,0x200);
-	  p5565Dma = (VMIC5565DMA *)dmaAdd;
-	  p5565Rtr = (VMIC5565RTR *)dmaAdd;
-	  printk("5565DMA at 0x%x\n",(int)p5565Dma);
-  }
-
-
-  pci_read_config_dword(pcidev,
-                 rfmType == 0x5565? PCI_BASE_ADDRESS_2:PCI_BASE_ADDRESS_1,
-                 &csrAddress);
-  printk("CSR address is 0x%lx\n",csrAddress);
-  csrAddr = ioremap_nocache((unsigned long)csrAddress, 0x40);
-
-  if(rfmType == 0x5565)
-  {
-	  p5565Csr = (VMIC5565_CSR *)csrAddr;
-	  p5565Csr->LCSR1 &= ~TURN_OFF_5565_FAIL;
-	  printk("Board id = 0x%x\n",p5565Csr->BID);
-	  printk("Node id = 0x%x\n",p5565Csr->NID);
-  }
-  else
-  {
-	  p5579Csr = (struct VMIC5579_MEM_REGISTER *)pRfmMem;
-	  p5579Csr->CSR2 = TURN_OFF_FAIL_LITE;
-	  printk("Node id = 0x%x\n",p5579Csr->NID);
-  }
-
-  if(rfmType == 0x5565)
+void rfm55DMA(CDS_HARDWARE *pHardware, int card, int offset)
 {
-  cpu_addr = pci_alloc_consistent(pcidev,0x2000,&rfmDmaHandle);
-  printk("cpu addr = 0x%lx  dma addr = 0x%lx\n",cpu_addr,rfmDmaHandle);
-  return cpu_addr;
-}
-else return(0);
+int stats;
+int myAddress;
+int rfmAddress;
 
+    rfmAddress = IPC_BASE_OFFSET + (offset * IPC_RFM_XFER_SIZE);
+    myAddress = (pHardware->pci_rfm_dma[card] + (offset * IPC_RFM_XFER_SIZE));
 
+    p5565Dma[card]->DMA_CSR = VMIC_DMA_CLR;	// Clear DMA DONE
+    p5565Dma[card]->DMA0_PCI_ADD = myAddress;	// Computer address space
+    p5565Dma[card]->DMA0_LOC_ADD = rfmAddress;	// RFM card offset from base
+    // These were set during initialization, so don't need them again (save time)
+    // p5565Dma[card]->DMA0_BTC = 0x400;	// Set byte xfer to 1024 bytes
+    // p5565Dma[card]->DMA0_DESC = 0x8;	// Set RFM to local memory
+    p5565Dma[card]->DMA_CSR = VMIC_DMA_START;	// Start DMA
 }
-else {
-	iounmap ((void *)pRfmMem);
-	iounmap ((void *)dmaAdd);
-	iounmap ((void *)csrAddr);
-  pci_free_consistent(pcidev,0x2000,cpu_addr,rfmDmaHandle);
-  return(0);
+// *****************************************************************************
+// Routine to check RFM done bit and clear for next DMA
+// *****************************************************************************
+int rfm55DMAdone(int card)
+{
+int status;
+int ii;
+    ii = 0;
+    do{
+    status = p5565Dma[card]->DMA_CSR;	// Check DMA DONE bit (4)
+    if((status & 0x10) == 0) udelay(1);
+    ii ++;
+    }while(((status & 0x10) == 0) && (ii < 10));
+    p5565Dma[card]->DMA_CSR = 0x8;	// Clear DMA DONE
+    return (ii);
 }
-}
-#endif
 
 // *****************************************************************************
 // Initialize Symmetricom GPS card (model BC635PCI-U)
