@@ -2347,6 +2347,19 @@ int main(int argc, char **argv)
 					status ++;
 				}
 				break;
+			case GSC_18AO8:
+				if((cdsPciModules.cards_used[jj].type == GSC_18AO8) && 
+					(cdsPciModules.cards_used[jj].instance == dacCnt))
+				{
+					printf("Found DAC at %d %d\n",jj,ioMemData->ipc[ii]);
+					kk = cdsPciModules.dacCount;
+					cdsPciModules.dacType[kk] = GSC_18AO8;
+					cdsPciModules.dacConfig[kk] = ioMemData->ipc[ii];
+	   				cdsPciModules.pci_dac[kk] = (long)(ioMemData->iodata[ii]);
+					cdsPciModules.dacCount ++;
+					status ++;
+				}
+				break;
 			case CON_6464DIO:
 				if((cdsPciModules.cards_used[jj].type == CON_6464DIO) && 
 					(cdsPciModules.cards_used[jj].instance == doCnt))
