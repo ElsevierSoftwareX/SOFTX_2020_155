@@ -127,7 +127,7 @@ extern "C" {
     @see Testpoint Definition
 ************************************************************************/
 #ifdef _ADVANCED_LIGO
-#define TP_MAX_NODE             64
+#define TP_MAX_NODE             128
 #else
 #define TP_MAX_NODE		2
 #error
@@ -147,7 +147,7 @@ extern "C" {
     @author DS, September 98
     @see Testpoint Definition
 ************************************************************************/
-#define TP_MAX_INDEX		64
+#define TP_MAX_INDEX		128
 
 /** Highest test point index number.
 
