@@ -2249,7 +2249,7 @@ int main(int argc, char **argv)
 	  }
         }
 #endif
-	printf("IPC at 0x%x\n",(int)_ipc_shm);
+	printf("IPC at 0x%p\n",_ipc_shm);
   	ioMemData = (IO_MEM_DATA *)(_ipc_shm+ 0x4000);
 
 
