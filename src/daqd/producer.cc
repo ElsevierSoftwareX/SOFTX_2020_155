@@ -2281,7 +2281,9 @@ static const int cycle_delay = 4;
    if (daqd.dcu_status_check & 4) resync = 1;
 
    for (unsigned long i = 0;;i++) { // timing
+#ifdef USE_SYMMETRICON
      DEBUG(6, printf("Timing %d gps=%d frac=%d\n", i, gps, frac));
+#endif
 #ifndef USE_BROADCAST
      read_dest = daqd.move_buf;
      for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
