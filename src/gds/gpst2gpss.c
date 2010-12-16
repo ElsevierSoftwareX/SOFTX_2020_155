@@ -1,3 +1,4 @@
+static char *versionId = "Version $Id$" ;
 #include "gpstime.h"
 
    void gpstime_to_gpssec (const gpstime_t* gt, tais_t* t)

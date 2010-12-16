@@ -1,3 +1,4 @@
+static char *versionId = "Version $Id$" ;
 /*----------------------------------------------------------------------*/
 /*                                                         		*/
 /* Module Name: channel_server						*/

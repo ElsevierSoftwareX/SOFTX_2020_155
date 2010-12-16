@@ -1,4 +1,4 @@
-
+/* Version $Id$ */
 /* GDS remote scheduler rpc interface */
 
 /* fix include problems with VxWorks */

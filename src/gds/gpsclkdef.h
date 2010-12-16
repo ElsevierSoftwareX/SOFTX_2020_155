@@ -1,3 +1,4 @@
+/* Version: $Id$ */
 
 #ifndef _GDS_GPSCLKDEF_H
 #define _GDS_GPSCLKDEF_H

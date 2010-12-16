@@ -1,3 +1,4 @@
+static char *versionId = "Version $Id$" ;
 #ifdef OS_VXWORKS
 #include <vxWorks.h>    /* Generic VxWorks header file */
 #include <vme.h>        /* VME access defines */

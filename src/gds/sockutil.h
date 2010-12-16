@@ -1,3 +1,4 @@
+/* Version: $Id$ */
 #ifndef _LIGO_SOCKUTIL_H
 #define _LIGO_SOCKUTIL_H
 

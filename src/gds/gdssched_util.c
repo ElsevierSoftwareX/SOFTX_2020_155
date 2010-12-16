@@ -1,3 +1,4 @@
+static char *versionId = "Version $Id$" ;
 /* #define PORTMAP */
 #ifndef __EXTENSIONS__
 #define __EXTENSIONS__

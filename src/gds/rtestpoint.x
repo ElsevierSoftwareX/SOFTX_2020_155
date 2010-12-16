@@ -1,3 +1,4 @@
+/* Version $Id$ */
 
 /* GDS test point rpc interface */
 

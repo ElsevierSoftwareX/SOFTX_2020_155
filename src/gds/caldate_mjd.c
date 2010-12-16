@@ -1,3 +1,4 @@
+static char *versionId = "Version $Id$" ;
 #include "gpstime.h"
 
    static unsigned long times365[4] = { 0, 365, 730, 1095 } ;

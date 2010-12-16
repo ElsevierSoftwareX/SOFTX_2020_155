@@ -1,3 +1,4 @@
+static char *versionId = "Version $Id$" ;
 /* -*- mode: c++; c-basic-offset: 4; -*- */
 //
 //    Implementation of the C++ DAQ client interface (DAQSocket) class
