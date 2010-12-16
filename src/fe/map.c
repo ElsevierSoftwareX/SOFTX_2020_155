@@ -2,6 +2,7 @@
 #include <linux/pci.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
+#include <asm/delay.h>
 
 #if 0
 #ifndef NO_DAQ
