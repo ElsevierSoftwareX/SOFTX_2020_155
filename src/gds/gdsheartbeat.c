@@ -1,3 +1,4 @@
+static char *versionId = "Version $Id$" ;
 #if !defined(OS_VXWORKS) && !defined(GDS_ONLINE)
 #ifndef AVOID_SIGNALS
 #define AVOID_SIGNALS

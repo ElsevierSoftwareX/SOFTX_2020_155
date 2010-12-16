@@ -1,3 +1,4 @@
+/* Version: $Id$ */
 #include "hardware.h"
 #if defined(_ADVANCED_LIGO)
 #include "map_v3.h"

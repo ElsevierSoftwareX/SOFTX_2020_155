@@ -1,3 +1,4 @@
+/* Version $Id$ */
 /* GDS arbitrary waveform generator rpc interface */
 
 /* fix include problems with VxWorks */

@@ -1,3 +1,4 @@
+/* Version: $Id$ */
 /* -*- mode: c++; c-basic-offset: 4; -*- */
 #ifndef DAQC_API_HH
 #define DAQC_API_HH

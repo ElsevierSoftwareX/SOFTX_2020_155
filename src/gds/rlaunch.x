@@ -1,3 +1,4 @@
+/* Version $Id$ */
 
 /* Launch server rpc interface */
 

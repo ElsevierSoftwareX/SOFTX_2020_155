@@ -1,3 +1,4 @@
+/* Version: $Id$ */
 #ifndef DAQSOCKET_HH
 #define DAQSOCKET_HH
 //

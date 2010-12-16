@@ -1,3 +1,4 @@
+/* Version $Id$ */
 
 /* GDS channel database rpc interface */
 

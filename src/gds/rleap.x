@@ -1,3 +1,4 @@
+/* Version $Id$ */
 
 /* GDS leap second information rpc interface */
 

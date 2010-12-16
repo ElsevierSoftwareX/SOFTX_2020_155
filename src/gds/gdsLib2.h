@@ -1,3 +1,4 @@
+/* Version: $Id$ */
 #ifndef  GDSLIB2_H
 #define GDSLIB2_H
 
