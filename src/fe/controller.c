@@ -127,6 +127,7 @@ int printk(const char *fmt, ...) {
 #endif
 
 #include "fm10Gen.h"		// CDS filter module defs and C code
+#include "drv/inputFilterModule.h"		
 #include "feComms.h"		// Lvea control RFM network defs.
 #include "daqmap.h"		// DAQ network layout
 extern unsigned int cpu_khz;
@@ -656,6 +657,7 @@ void *fe_start(void *arg)
   static float duotoneMean = 0.0;
   static float duotoneTotalDac = 0.0;
   static float duotoneMeanDac = 0.0;
+  static rfmDone = 0;
 #endif
 
 
@@ -1242,7 +1244,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	// increased to appropriate number of 65536 s/sec to match desired
 	// code rate eg 32 samples each time thru before proceeding to match 2048 system.
 	// **********************************************************************************************************
-#ifdef ADC_MASTER
+#if 0
 		if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(clock16K % 64));
 		if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(clock16K % 64));
 #endif
@@ -1302,12 +1304,18 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 				// if(jj==0) usleep(0);
 		    		rdtscl(cpuClock[9]);
 				adcWait = (cpuClock[9] - cpuClock[8])/CPURATE;
+				if(((cpuClock[9] - cpuClock[0])/CPURATE > 10) && (!rfmDone))
+				{
+					if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(clock16K % 64));
+					if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(clock16K % 64));
+					rfmDone = 1;
+				}
 //#endif
 			}
 			// Allow 1msec for data to be ready (should never take that long).
                     }while((*packedData == 0x110000) && (adcWait < 1000000));
 
-
+rfmDone = 0;
 
 		    // If data not ready in time, abort
 		    // Either the clock is missing or code is running too slow and ADC FIFO
@@ -1427,12 +1435,10 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			packedData ++;
                     }
 #ifdef ADC_MASTER
-#if 0
 			if(jj==0) {
 				if(cdsPciModules.pci_rfm_dma[0]) status = rfm55DMAdone(0);
 				if(cdsPciModules.pci_rfm_dma[1]) status = rfm55DMAdone(1);
 			}
-			#endif
 		    // Write GPS time and cycle count as indicator to slave that adc data is ready
 	  	    ioMemData->gpsSecond = timeSec;;
 		    ioMemData->iodata[jj][ioMemCntr].timeSec = timeSec;;
