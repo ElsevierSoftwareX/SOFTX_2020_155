@@ -59,22 +59,34 @@ printf("size of data block = %d\n", sizeof(CDS_IPC_COMMS));
 	  if(cdsPciModules.rfmCount > 0) {
 	    // Send side will perform direct, individual writes to RFM
 	    // Rcv side will use DMA, provided by IOP (Performance reasons ie without DMA, each read takes >2usec)
+#ifdef RFM_DIRECT_READ
+	    ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[0] + IPC_BASE_OFFSET);
+#else	    
 	    if(ipcInfo[ii].mode == ISND) ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[0] + IPC_BASE_OFFSET);
 	    			    else ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm_dma[0]);
+#endif
 	    printf("Net Type = RFM 0 at 0x%p\n",ipcInfo[ii].pIpcData);
 	  }
 	}
         if(ipcInfo[ii].netType == IRFM1)		// VMIC Reflected Memory *******************************
         {
 	  if(cdsPciModules.rfmCount > 1) {
+#ifdef RFM_DIRECT_READ
+	    ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[1] + IPC_BASE_OFFSET);
+#else	    
 	    if(ipcInfo[ii].mode == ISND) ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[1] + IPC_BASE_OFFSET);
 	    			    else ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm_dma[1]);
+#endif
 	    printf("Net Type = RFM 1 at 0x%p\n",ipcInfo[ii].pIpcData);
 	  }
 	  // If there isn't a second card (like in the end stations), default to first card
 	  if(cdsPciModules.rfmCount == 1) {
+#ifdef RFM_DIRECT_READ
+	    ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[0] + IPC_BASE_OFFSET);
+#else	    
 	    if(ipcInfo[ii].mode == ISND) ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[0] + IPC_BASE_OFFSET);
 	    			    else ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm_dma[0]);
+#endif
 	    printf("DEFAULTING TO RFM0 - ONLY ONE CARD\nNet Type = RFM 1 at 0x%p\n",ipcInfo[ii].pIpcData);
 	  }
 	}
