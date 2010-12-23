@@ -35,9 +35,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "maronsso"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Nov 24 13:45:11 2010"
-  RTWModifiedTimeStamp	  212506969
-  ModelVersionFormat	  "1.%<AutoIncrement:278>"
+  LastModifiedDate	  "Thu Dec 23 13:09:46 2010"
+  RTWModifiedTimeStamp	  215010581
+  ModelVersionFormat	  "1.%<AutoIncrement:279>"
   ConfigurationManager	  "None"
   SimulationMode	  "normal"
   LinearizationMsg	  "none"
@@ -379,7 +379,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [468, 118, 1151, 675]
+    Location		    [466, 104, 1153, 695]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -409,7 +409,7 @@ Library {
       System {
 	Name			"C Code"
 	Location		[955, 779, 1363, 1103]
-	Open			on
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -534,8 +534,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"EpicsParts"
-	Location		[1218, 413, 1794, 1011]
-	Open			on
+	Location		[1216, 399, 1796, 1031]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1057,8 +1057,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Filters/\nGDS"
-	Location		[55, 517, 486, 1141]
-	Open			on
+	Location		[53, 503, 488, 1161]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1329,7 +1329,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[494, 56, 1377, 1168]
+	Location		[494, 74, 1377, 1176]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1703,24 +1703,108 @@ Library {
 	  RTWMemSecDataParameters "Inherit from model"
 	}
 	Block {
-	  BlockType		  Reference
+	  BlockType		  SubSystem
 	  Name			  "DAC_1"
 	  Description		  "type=GSC_18AO8,\ncard_num=0     "
-	  Ports			  [16]
-	  Position		  [190, 349, 225, 606]
+	  Ports			  [8]
+	  Position		  [190, 359, 225, 621]
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>"
-	  SourceBlock		  "dac/Subsystem"
-	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
+	  MinAlgLoopOccurrences	  off
+	  PropExecContextOutsideSubsystem off
+	  RTWSystemCode		  "Auto"
 	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
+	  Opaque		  off
+	  RequestExecContextInheritance	off
+	  MaskHideContents	  off
+	  System {
+	    Name		    "DAC_1"
+	    Location		    [1439, 152, 1734, 748]
+	    Open		    on
+	    ModelBrowserVisibility  off
+	    ModelBrowserWidth	    200
+	    ScreenColor		    "white"
+	    PaperOrientation	    "landscape"
+	    PaperPositionMode	    "auto"
+	    PaperType		    "usletter"
+	    PaperUnits		    "inches"
+	    TiledPaperMargins	    [0.500000, 0.500000, 0.500000, 0.500000]
+	    TiledPageScale	    1
+	    ShowPageBoundaries	    off
+	    ZoomFactor		    "100"
+	    Block {
+	      BlockType		      Inport
+	      Name		      "In1"
+	      Position		      [25, 28, 55, 42]
+	      IconDisplay	      "Port number"
+	      OutDataType	      "sfix(16)"
+	      OutScaling	      "2^0"
+	    }
+	    Block {
+	      BlockType		      Inport
+	      Name		      "In2"
+	      Position		      [25, 63, 55, 77]
+	      Port		      "2"
+	      IconDisplay	      "Port number"
+	      OutDataType	      "sfix(16)"
+	      OutScaling	      "2^0"
+	    }
+	    Block {
+	      BlockType		      Inport
+	      Name		      "In3"
+	      Position		      [25, 98, 55, 112]
+	      Port		      "3"
+	      IconDisplay	      "Port number"
+	      OutDataType	      "sfix(16)"
+	      OutScaling	      "2^0"
+	    }
+	    Block {
+	      BlockType		      Inport
+	      Name		      "In4"
+	      Position		      [25, 133, 55, 147]
+	      Port		      "4"
+	      IconDisplay	      "Port number"
+	      OutDataType	      "sfix(16)"
+	      OutScaling	      "2^0"
+	    }
+	    Block {
+	      BlockType		      Inport
+	      Name		      "In5"
+	      Position		      [25, 163, 55, 177]
+	      Port		      "5"
+	      IconDisplay	      "Port number"
+	      OutDataType	      "sfix(16)"
+	      OutScaling	      "2^0"
+	    }
+	    Block {
+	      BlockType		      Inport
+	      Name		      "In6"
+	      Position		      [25, 198, 55, 212]
+	      Port		      "6"
+	      IconDisplay	      "Port number"
+	      OutDataType	      "sfix(16)"
+	      OutScaling	      "2^0"
+	    }
+	    Block {
+	      BlockType		      Inport
+	      Name		      "In7"
+	      Position		      [25, 233, 55, 247]
+	      Port		      "7"
+	      IconDisplay	      "Port number"
+	      OutDataType	      "sfix(16)"
+	      OutScaling	      "2^0"
+	    }
+	    Block {
+	      BlockType		      Inport
+	      Name		      "In8"
+	      Position		      [25, 268, 55, 282]
+	      Port		      "8"
+	      IconDisplay	      "Port number"
+	      OutDataType	      "sfix(16)"
+	      OutScaling	      "2^0"
+	    }
+	  }
 	}
 	Block {
 	  BlockType		  Reference
@@ -2266,8 +2350,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"MatrixParts"
-	Location		[1157, 121, 1855, 855]
-	Open			on
+	Location		[1155, 107, 1857, 875]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -2742,8 +2826,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Osc/Phase"
-	Location		[60, 90, 479, 701]
-	Open			on
+	Location		[58, 76, 481, 721]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -3008,8 +3092,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"WatchDogs"
-	Location		[597, 473, 884, 1127]
-	Open			on
+	Location		[595, 459, 886, 1147]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -3125,8 +3209,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[1499, 138, 1874, 1161]
-	Open			on
+	Location		[1497, 124, 1876, 1181]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
