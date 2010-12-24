@@ -1,4 +1,4 @@
-static char *versionId = "Version $Id$" ;
+static const char *versionId = "Version $Id$" ;
 /* -*- mode: c++; c-basic-offset: 3; -*- */
 #include <stdio.h>
 #include <unistd.h>

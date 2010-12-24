@@ -1,4 +1,4 @@
-static char *versionId = "Version $Id$" ;
+static const char *versionId = "Version $Id$" ;
 #ifndef __EXTENSIONS__
 #define __EXTENSIONS__
 #endif 
