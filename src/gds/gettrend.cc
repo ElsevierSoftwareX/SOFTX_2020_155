@@ -1,4 +1,4 @@
-static char *versionId = "Version $Id$" ;
+static const char *versionId = "Version $Id$" ;
 /*----------------------------------------------------------------------*/
 /*                                                         		*/
 /* Module Name: gettrend						*/
