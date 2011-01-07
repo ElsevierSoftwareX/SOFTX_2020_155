@@ -2295,7 +2295,7 @@ for($ii = 0; $ii < $dacCnt; $ii++) {
    }
 }
 
-#print EPICS "test_points ONE_PPS $dac_testpoint_names $::extraTestPoints\n";
+print EPICS "test_points ONE_PPS $dac_testpoint_names $::extraTestPoints\n";
 if ($::extraExcitations) {
 	print EPICS "excitations $::extraExcitations\n";
 }
