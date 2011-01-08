@@ -70,6 +70,22 @@ CDS_HARDWARE cdsPciModules;
 #if defined(OS_SOLARIS)
       run_awg = 0;
 #endif
+      {
+	 int i ;
+	 char   hostname[128] ;
+
+	 for(i = 0; i < argc; i++)
+	 {
+	    fprintf(stderr, "%s ", argv[i]) ;
+	 }
+	 fprintf(stderr, "started ") ;
+	 if (gethostname(hostname, sizeof(hostname)) == 0)
+	 {
+	    fprintf(stderr, "on host %s ", hostname) ;
+	 }
+	 fprintf(stderr, "hostid %lx ", gethostid()) ;
+	 fprintf(stderr, "\nawgtpman %s\n", versionId) ;
+      }
    
       system_name[0] = 0;
       while ((c = getopt (argc, argv, "h?ta248s:")) != EOF) {

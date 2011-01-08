@@ -1470,6 +1470,9 @@ Organization of generating waveforms:
       if (awginit != 0) {
          return 0;
       }
+      /* First call, log version ID */
+      printf("awg_server %s\n", versionId) ;
+
    #ifndef _NO_TESTPOINTS
       if (testpoint_client() < 0) {
          gdsError (GDS_ERR_MISSING, 

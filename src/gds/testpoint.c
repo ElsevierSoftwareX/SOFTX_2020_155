@@ -1267,6 +1267,8 @@ static char *versionId = "Version $Id$" ;
             gdsError (GDS_ERR_MEM, "failed to initialze test points");
             return -1;
          }
+	 /* Log the version ID */
+	 printf("testpoint_client %s\n", versionId) ;
       }
    
       /* dynamic configuration */
