@@ -1077,6 +1077,8 @@ extern int testpoint_manager_rpc;
       if (initServer != 0) {
          return;
       }
+      /* First time, log the version info. */
+      printf("awg_server %s\n", versionId) ;
    
       /* set initServer and return */
       shutdownflag = 1;
