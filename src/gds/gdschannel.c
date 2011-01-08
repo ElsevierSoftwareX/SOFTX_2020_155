@@ -477,7 +477,7 @@ static char *versionId = "Version $Id$" ;
       if (chn_init >= 2) {
          return 0;
       }
-   
+
       /* intialize interface first */
       if (chn_init == 0) {
          initChnInfo ();
@@ -521,7 +521,6 @@ static char *versionId = "Version $Id$" ;
                   "unable to read channel database");
          return -2;
       }
-   
       /* return */
       chn_init = 2;
       return 0;
@@ -544,6 +543,9 @@ static char *versionId = "Version $Id$" ;
       if (chn_init > 0) {
          return;
       }
+      /* First time, log version ID. */
+      printf("channel_client %s\n", versionId) ;
+
       if (chninfo == NULL) {
          if (MUTEX_CREATE (chnmux) != 0) {
             gdsError (GDS_ERR_MEM, 
@@ -630,7 +632,7 @@ static char *versionId = "Version $Id$" ;
       int		chninfoprev;	/* # of already loaded channels */
       gdsChnInfo_t*	chnptr;     	/* pointer to chn info */
    
-      printf(section, "read %s", filename);
+      printf("read %s\n", filename);
 
       /* open parameter file */
       if ((fp = fopen (filename, "r")) == NULL) {
@@ -1001,7 +1003,7 @@ static char *versionId = "Version $Id$" ;
       int 		ret = 0;	/* return value */
    #endif
       int 		tpLoaded = 0;	/* true if TP were loaded */
-   
+
       /* shrink size if necessary */
       MUTEX_GET (chnmux);
       if (chninfosize > _CHNLIST_SIZE) {
