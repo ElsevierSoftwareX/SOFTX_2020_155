@@ -17,8 +17,8 @@
     "swRset" => "RSET", 
     "switchR1" => "SW1R",
     "switchR2" => "SW2R",
-    "saveSwitch1" => "SW1R",
-    "saveSwitch2" => "SW2R",
+    "saveSwitch1" => "SW1S",
+    "saveSwitch2" => "SW2S",
 	 );
 
 %iparAlarmSev = (
