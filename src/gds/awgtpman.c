@@ -300,6 +300,9 @@ CDS_HARDWARE cdsPciModules;
       }
       
 
+      fflush(stdout) ;
+      fflush(stderr) ;
+
       /* go to sleep */
       for (;;) {
          sleep (1000);
