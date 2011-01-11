@@ -89,6 +89,9 @@ static char *versionId = "Version $Id$" ;
 #endif
    static taskID_t 	confTID = 0;
    static taskID_t 	respTID = 0;
+#if 1
+   static struct timespec	delay_time ;
+#endif
 
 /*----------------------------------------------------------------------*/
 /*                                                         		*/
@@ -131,11 +134,14 @@ static char *versionId = "Version $Id$" ;
       size = strlen (answer);
       len = 0;
 
+#if 1
+#else
       int lfd = open("/var/log/awglock", O_RDWR | O_CREAT);
       if (lfd < 0) {
 	perror("Unable to open/create lock file /var/log/awglock");
 	return;
       }
+#endif
       while (len < size) {
          nbytes = size - len;
          if (nbytes <= 1024) {
@@ -150,23 +156,36 @@ static char *versionId = "Version $Id$" ;
             }
             if (nbytes == 0) {
                /*close (sock);*/
+#if 1
+#else
 	       close(lfd);
+#endif
                return;
             }
          }
    	 //printf("Sending '%s' in reply\n", message);
 	 nbytes += 4;
 	 int nsent;
+#if 1
+	 nanosleep(&delay_time, (struct timespec *) NULL) ;
+#else
  	 flock(lfd, LOCK_EX);
+#endif
 	 for(;;) {
            nsent = sendto (sock, message, nbytes, 0, (struct sockaddr*) name, sizeof (struct sockaddr_in));
 	   if (nsent < 0) perror("sendto");
 	   if (nsent == nbytes) break;
 	 }
          len += nbytes;
+#if 1
+#else
  	 flock(lfd, LOCK_UN);
+#endif
       }
+#if 1
+#else
       close(lfd);
+#endif
    }
 
 
@@ -416,6 +435,35 @@ static char *versionId = "Version $Id$" ;
          }
       }
       confserver_init = 1;
+
+   /* Print version ID to log. */
+   printf("conf_server %s\n", versionId) ;
+#if 1
+   /* This may look a bit ugly.  The answer should be a string of the form
+    * "awg a b hostname prognum progver...." where a is a unique value
+    * which is 0 <= a < TP_MAX_NODE (128 in advanced ligo).
+    * Attempt to get this value to use as a delay to keep all of the 
+    * servers from responding at the same time. 
+    */
+      int 		delay = -1 ;
+
+      sscanf(confs[0].user, "%*s%d", &delay) ;
+      if (!(delay >= 0 && delay < 128))
+      {
+	 /* Assign some other number to delay */
+	 delay = (getpid() % 100) + 128 ;
+	printf("Delay based on PID = %d\n", delay) ;
+      }
+      else
+      {
+	 delay *= 2 ;
+	 delay += 10 ;
+	 printf("Delay based on DCUID * 2 + 10 = %d\n", delay) ;
+      }
+
+      delay_time.tv_sec = 0 ;
+      delay_time.tv_nsec = delay * 1000000 ;
+#endif
    
       if (flag == 1) {
       #ifdef OS_VXWORKS
