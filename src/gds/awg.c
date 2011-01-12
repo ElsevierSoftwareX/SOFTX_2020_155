@@ -132,7 +132,7 @@ static char *versionId = "Version $Id$" ;
 /*            _RM_ID		  reflective memory ID			*/
 /*            								*/
 /*----------------------------------------------------------------------*/
-#define _SHOWBUF_SIZE		(64 * 1024)
+#define _SHOWBUF_SIZE		(128 * 1024)
 #ifdef OS_VXWORKS
 #define _AWG_PRIORITY		30
 #define _AWGCOPY_PRIORITY	20
