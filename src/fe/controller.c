@@ -415,7 +415,8 @@ int run_on_timer = 0;
 
 // Initial diag reset flag
 int initialDiagReset = 1;
-int tdsControl = 0;
+int tdsControl[3];
+int tdsCount = 0;
 
 // DIAGNOSTIC_RETURNS_FROM_FE 
 #define FE_NO_ERROR		0x0
@@ -970,9 +971,12 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
   {
 	case SYNC_SRC_TDS:
 		// Turn off the ADC/DAC clocks
-		CDIO1616Output[tdsControl] = TDS_STOP_CLOCKS;
-		CDIO1616Input[tdsControl] = writeCDIO1616l(&cdsPciModules, tdsControl, CDIO1616Output[tdsControl]);
-		printf("writing BIO\n");
+		for(ii=0;ii<tdsCount;ii++)
+		{
+		CDIO1616Output[ii] = TDS_STOP_CLOCKS;
+		CDIO1616Input[ii] = writeCDIO1616l(&cdsPciModules, tdsControl[ii], CDIO1616Output[ii]);
+		printf("writing BIO %d\n",tdsControl[ii]);
+		}
 #ifdef NO_RTL
 		udelay(20000);
 		udelay(20000);
@@ -993,8 +997,11 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 #endif
 		// Start ADC/DAC clocks
 		// CDIO1616Output[tdsControl] = 0x7B00000;
-		CDIO1616Output[tdsControl] = TDS_START_ADC_NEG_DAC_POS;
-		CDIO1616Input[tdsControl] = writeCDIO1616l(&cdsPciModules, tdsControl, CDIO1616Output[tdsControl]);
+		for(ii=0;ii<tdsCount;ii++)
+		{
+		CDIO1616Output[ii] = TDS_START_ADC_NEG_DAC_POS;
+		CDIO1616Input[ii] = writeCDIO1616l(&cdsPciModules, tdsControl[ii], CDIO1616Output[ii]);
+		}
 		break;
 	case SYNC_SRC_IRIG_B:
 		 // If IRIG-B card present, use it for startup synchronization
@@ -2411,6 +2418,7 @@ int main(int argc, char **argv)
 		}
 		if(ioMemData->model[ii] == GSC_16AI64SSA) adcCnt ++;
 		if(ioMemData->model[ii] == GSC_16AO16) dacCnt ++;
+		if(ioMemData->model[ii] == GSC_18AO8) dacCnt ++;
 		if(ioMemData->model[ii] == CON_6464DIO) doCnt ++;
 		if(ioMemData->model[ii] == CON_32DO) do32Cnt ++;
 		if(ioMemData->model[ii] == ACS_16DIO) doIIRO16Cnt ++;
@@ -2561,8 +2569,9 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 		// MASTER needs to find Contec 1616 I/O card to control timing slave.
 		if(cdsPciModules.doType[ii] == CON_1616DIO)
 		{
-			tdsControl = ii;
-			printf("TDS controller is at %d\n",ii);
+			tdsControl[tdsCount] = ii;
+			printf("TDS controller %d is at %d\n",tdsCount,ii);
+			tdsCount ++;
 		}
 		ioMemData->model[kk] = cdsPciModules.doType[ii];
 		// Unlike ADC and DAC, where a memory buffer number is passed, a PCIe address is passed
