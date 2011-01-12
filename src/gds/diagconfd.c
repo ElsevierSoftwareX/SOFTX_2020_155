@@ -380,7 +380,7 @@
          /* error */
          default: 
             {
-               printf ("illegale socket\n");
+               printf ("illegal socket\n");
                return 1;
             }
       }

@@ -147,7 +147,7 @@ extern "C" {
    void awgLock (unsigned int lock);
 
 /** Releases an arbitrary waveform generator. The arbitrary waveform
-    generator is marked as unused after it has been reseted. If an 
+    generator is marked as unused after it has been reset. If an 
     index of -1 is specified the whole bank is released.
 
     @param ID index number of AWG
@@ -293,7 +293,7 @@ extern "C" {
 
     Reset will immediately stop any waveforms and reset the slot.
     Freeze will continue to output the waveform in its current state
-    foreever. Phase-out takes an additional argument which specifes 
+    forever. Phase-out takes an additional argument which specifes 
     a ramp down time.
 
     There are several restrictions: (1) freeze will only work with
@@ -437,9 +437,9 @@ extern "C" {
 *********************************************************************/
    void enableAllAWG (void);
 
-/** Gets the runtime statics of the arbitrary waveform generator.
+/** Gets the runtime statistics of the arbitrary waveform generator.
     Passing a NULL pointer resets all statistical parameters. 
-    Gathering runtime statitsics is only enable if the AWG_STATISTICS
+    Gathering runtime statistics is only enable if the AWG_STATISTICS
     is defined during compilation.
 
     @return 0 if successful, <0 otherwise

@@ -137,7 +137,7 @@ extern "C" {
 /** Compiler flag for disabling keep alive messages. Keep alive 
     messages are sent to the test point manager once every 15 sec. The
     test point manager will automatiocally free all test points
-    acossiated with the current client if no keep alive message is
+    associated with the current client if no keep alive message is
     received for more than 60 sec.
 
     @author DS, June 98
@@ -243,12 +243,12 @@ extern "C" {
    void testpoint_cleanup (void);
 
 #ifdef _TP_DAQD
-/** Sets the test point manager address. This funciton is only 
+/** Sets the test point manager address. This function is only 
     available when compiling with the _TP_DAQD flag. It will disable
     the default parameter file and set the host address and rpc program
     and version number directly. If a program number of zero is
     specified, the default will be used. If a program version of 
-    zero is specified, the default will be used. This funciton must
+    zero is specified, the default will be used. This function must
     be called before any other function (including testpoint_client).
 
     @param node test point node
@@ -291,7 +291,7 @@ extern "C" {
 
 /** Request test points by name. This routine is similar to 
     tpRequest but accepts channel names of test points. The tpNames
-    argumet can contain a list of space separated channel names.
+    argument can contain a list of space separated channel names.
     Limitation: Sends the test point names to the test point
     manager of node 0 only.
 
@@ -323,7 +323,7 @@ extern "C" {
 
 /** Clear test points by names. This routine is similar to tpClear but
     accepts channel names of test points. The tpNames
-    argumet can contain a list of space separated channel names.
+    argument can contain a list of space separated channel names.
     Limitation: Sends the test point names to the test point
     manager of node 0 only.
 
@@ -341,14 +341,14 @@ extern "C" {
     corresponds to the slot number. A zero indicates an unused slot.
     To avoid ambiguities around the time when the test point list
     changes, the routine takes the requested time and epoch as
-    additonal arguments. If the time is too far in the future, the
+    additional arguments. If the time is too far in the future, the
     routine will return the most recent test point information, rather
     than wait. If the time is too far in the past, it will return an 
     error. If both time and epoch are zero, the current test point
     information is returned. However, this may already be out-dated
     when the function returns.
 
-    If running on a front-end CPU this routine will retreive the 
+    If running on a front-end CPU this routine will retrieve the 
     information directly from the reflective memory (assuming
     the node is accessible and the _TESTPOINT_DIRECT flag was
     specified during compilation). The number of read test point is 
@@ -358,7 +358,7 @@ extern "C" {
     test point server if the test points aren't accessible locally.
 
     @param node test point node
-    @param tpinterface tetspoint interface id
+    @param tpinterface testpoint interface id
     @param tp list of test point ID numbers
     @param tplen length of test point list
     @param time time of query request
@@ -370,11 +370,11 @@ extern "C" {
    taisec_t time, int epoch);
 
 /** Gets the test point index directly. This routine is similar to
-    tpQuery, however, it will only try to read the tets point index 
+    tpQuery, however, it will only try to read the test point index 
     locally; and return with an error if the index is not accessible.
 
     @param node test point node
-    @param tpinterface tetspoint interface id
+    @param tpinterface testpoint interface id
     @param tp list of test point ID numbers
     @param tplen length of test point list
     @param time time of query request

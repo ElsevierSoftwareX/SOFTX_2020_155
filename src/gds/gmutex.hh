@@ -92,7 +92,7 @@ namespace thread {
    class abstractsemaphore { 
    public:
       /// type of lock
-      typedef enum locktype {
+      enum locktype {
       /// read lock
       rdlock = 0,
       /// write lock
@@ -476,7 +476,7 @@ namespace thread {
    class semlock {
    public:
       /// type of lock
-      typedef enum locktype {
+      enum locktype {
       /// read lock
       rdlock = 0,
       /// write lock

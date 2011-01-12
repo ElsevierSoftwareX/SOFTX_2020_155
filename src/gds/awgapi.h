@@ -132,12 +132,12 @@ extern "C" {
    void awg_cleanup (void);
 
 #ifdef _AWG_LIB
-/** Sets the excitation engine host address. This funciton is only 
+/** Sets the excitation engine host address. This function is only 
     available when compiling with the _AWG_LIB flag. It disables
     the default parameter file and set the host address and rpc program
     and version number directly. If a program number of zero is
     specified, the default will be used. If a program version of 
-    zero is specified, the default will be used. This funciton must
+    zero is specified, the default will be used. This function must
     be called before any other function (including awg_client).
 
     @param ifo interferometer id (4K - 0, 2K - 1)
@@ -151,10 +151,10 @@ extern "C" {
    int awgSetHostAddress (int ifo, int awg, const char* hostname, 
                      unsigned long prognum, unsigned long progver);
 
-/** Sets the DS340 host address. This funciton is only 
+/** Sets the DS340 host address. This function is only 
     available when compiling with the _AWG_LIB flag. It will disable
     the default parameter file and set the host address and port 
-    number of the cobox directly. This funciton must
+    number of the cobox directly. This function must
     be called before any other function (including awg_client).
 
     @param ds340 ds340 id
@@ -188,7 +188,7 @@ extern "C" {
     which is long enough to hold all excitation channel names
     (space separated list). The function will return the number
     of characters written into the names buffer. If the names buffer
-    is NULL, the funciton will simply return the necessaty length 
+    is NULL, the function will simply return the necessary length 
     for the result (not including the terminating 0).
  
 
@@ -265,7 +265,7 @@ extern "C" {
 
     Reset will immediately stop any waveforms and reset the slot.
     Freeze will continue to output the waveform in its current state
-    foreever. Phase-out takes an additional argument which specifes 
+    forever. Phase-out takes an additional argument which specifes 
     a ramp down time.
 
     There are several restrictions: (1) freeze will only work with
@@ -317,7 +317,7 @@ extern "C" {
    int awgClearWaveforms (int slot);
 
 
-/** Returns the waveforms of an arbitary waveform generator.
+/** Returns the waveforms of an arbitrary waveform generator.
 
     @param slot slot number
     @param comp pointer to a list of awg components to store the result
@@ -379,7 +379,7 @@ extern "C" {
 /** ASCII command for an arbitrary waveform generator. This function 
     interprets the specified waveform string and returns the 
     corresponding awg components and awg points (arbitary waveforms
-    only). On errer the function returns a negative value and an
+    only). On error the function returns a negative value and an
     error message if a string pointer is specified. The caller is 
     responsible to free the memory returned by points or errmsg.
     (In no case both are returned!) For arbitrary waveforms the caller 

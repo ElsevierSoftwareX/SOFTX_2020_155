@@ -166,7 +166,7 @@ static const char *versionId = "Version $Id$" ;
          /* error */
          default: 
             {
-               cout << "illegale socket" << endl;
+               cout << "illegal socket" << endl;
                return -1;
             }
       }

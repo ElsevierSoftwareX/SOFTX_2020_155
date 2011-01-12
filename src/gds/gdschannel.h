@@ -123,7 +123,7 @@ extern "C" {
 
 #endif
 
-/** Channel information structure. Containes all the relevant information 
+/** Channel information structure. Contains all the relevant information 
     associated with a specific channel.
   
     @author DS, June 98
@@ -189,7 +189,7 @@ extern "C" {
 ************************************************************************/
    void channel_cleanup (void);
 
-/** Sets the network data server address. This funciton must
+/** Sets the network data server address. This function must
     be called before any other function (including channel_client).
     If a non-positive port number is specified, the default is used.
 
