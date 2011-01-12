@@ -102,7 +102,7 @@ static char *versionId = "Version $Id$" ;
 /*----------------------------------------------------------------------*/
 #define _NETID			"tcp"
 #ifdef _ADVANCED_LIGO
-#define _MAX_IFO		16
+#define _MAX_IFO		128
 #else
 #define _MAX_IFO		2
 #endif
@@ -2541,7 +2541,7 @@ static char *versionId = "Version $Id$" ;
          else {
             p = (char*) readSlot (cmd + 4, &sl);
             if (p == NULL) {
-               sprintf (buf, "error: illegale slot name");
+               sprintf (buf, "error: illegal slot name");
                return cmdreply (buf);
             }
             return awgShow (-sl);
@@ -2656,7 +2656,7 @@ static char *versionId = "Version $Id$" ;
       
          /* set phase in */
          if (awgSetPhaseIn (comp, cnum) < 0) {
-            return cmdreply ("error: illegale phase in");
+            return cmdreply ("error: illegal phase in");
          }
       
          /* check if anything set */
