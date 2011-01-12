@@ -44,13 +44,14 @@ static char *versionId = "Version $Id$" ;
 #include "dtt/pci.h"
 #endif
 #include "dtt/rmapi.h"
+#include <unistd.h>
+#include <sys/ioctl.h>
 
 #ifdef OS_SOLARIS
 #include <rfm2g_api.h>
 #include <rfm_io.h>
 #include <rfmApi.h>
 #include <rfmErrno.h>
-#include <unistd.h>
 #endif
 
 #ifndef RTLINUX
