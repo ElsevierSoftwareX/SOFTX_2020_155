@@ -29,7 +29,7 @@
 
 /* Define maximum number of each PCI module supported.				*/
 #define MAX_ADC_MODULES		12	
-#define MAX_DAC_MODULES		8
+#define MAX_DAC_MODULES		12
 #define MAX_DIO_MODULES		8
 #define MAX_RFM_MODULES		2
 #define MAX_VME_BRIDGES		4
