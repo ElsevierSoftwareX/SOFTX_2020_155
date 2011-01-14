@@ -61,7 +61,7 @@ typedef struct CDS_REMOTE_NODES {
 
 
 #define IO_MEMORY_SLOTS		64
-#define MAX_IO_MODULES		16
+#define MAX_IO_MODULES		24
 
 typedef struct MEM_DATA_BLOCK{
 	int timeSec;
