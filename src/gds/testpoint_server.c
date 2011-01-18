@@ -164,6 +164,8 @@ static char *versionId = "Version $Id$" ;
    struct tpNode_t {
       /* true if node is valid */
       int		valid;
+      /* Node number of the node. */
+      int		node ;
       /* rpc hostname */
       char		hostname[80];
       /* rpc prog num */
@@ -217,11 +219,11 @@ static char *versionId = "Version $Id$" ;
    static mutexID_t		servermux;
    static int			initServer = 0;
    static int			shutdownflag = 0;
-   static tpNode_t		tplist[TP_MAX_NODE];
+   static tpNode_t		tpNode ;
    static tpClient_t		tpclnts[_TP_MAX_USER];
    static int			tpclntID = _TP_MAX_USER + 1;
 #ifndef _NO_AWG_CHECK
-   static tpwriter_t		tpwriter[TP_MAX_NODE][TP_MAX_INTERFACE];
+   static tpwriter_t		tpwriter[TP_MAX_INTERFACE];
 #endif
 #endif
    /* Global. Test point manager's node id */
@@ -289,12 +291,17 @@ static char *versionId = "Version $Id$" ;
    
       #ifdef DEBUG
       printf ("Request tp id=%d; node=%d; node_valid=%d\n",
-    	       id, node, tplist[node].valid);
+    	       id, node, tpNode.valid);
       #endif
    
+      /* JCB */
+      printf("Request %d testpoint(s)\n", tp.TP_r_len) ;
+      for (i = 0; i < tp.TP_r_len; i++)
+	 printf("request tp %d\n", tp.TP_r_val[i]) ;
+
       /* test node ID */
       if ((id < 0) || (node < 0) || (node >= TP_MAX_NODE) ||
-         !tplist[node].valid) {
+         !tpNode.valid || tpNode.node != node) {
          result->status = -2;
          return TRUE;
       }
@@ -315,7 +322,7 @@ static char *versionId = "Version $Id$" ;
          /* check if ID in list */
          if ((tp.TP_r_val[i] <= 0) || 
             (tp.TP_r_val[i] >= TP_HIGHEST_INDEX) ||
-            (tplist[node].tplookup[tp.TP_r_val[i]] == NULL)) {
+            (tpNode.tplookup[tp.TP_r_val[i]] == NULL)) {
       #ifdef DEBUG
             printf ("TP %i not in list\n", tp.TP_r_val[i]);
       #endif
@@ -329,6 +336,7 @@ static char *versionId = "Version $Id$" ;
             tpinterface = TP_LSC_EX_INTERFACE;
          }
          len = TP_INTERFACE_TO_INDEX_LEN (tpinterface);
+	 printf("Max tp index is %d, tp interface is %d\n", len, tpinterface) ;
       #ifdef DEBUG
          printf ("TP %i has interface %d\n", tp.TP_r_val[i], tpinterface);
       #endif
@@ -341,7 +349,7 @@ static char *versionId = "Version $Id$" ;
       
          /* test whether already in list */
          for (j = 0, k = -1; j < len; j++) {
-            tpp = &tplist[node].indx[tpinterface][j];
+            tpp = &tpNode.indx[tpinterface][j];
             /* check for duplicate */
             if (tpp->id == tp.TP_r_val[i]) {
                /* already in list; check in use */
@@ -377,10 +385,10 @@ static char *versionId = "Version $Id$" ;
             printf ("allocate new TP node/interface/slot %i/%i/%i\n", 
                    node, tpinterface, k);
          #endif
-            tpp = &tplist[node].indx[tpinterface][k];
+            tpp = &tpNode.indx[tpinterface][k];
             tpp->id = tp.TP_r_val[i];
             strncpy (tpp->name, 
-                    tplist[node].tplookup[tp.TP_r_val[i]]->chName,
+                    tpNode.tplookup[tp.TP_r_val[i]]->chName,
                     _CHNNAME_SIZE);
             tpp->name[_CHNNAME_SIZE-1] = 0;
             tpp->inUse = 0;
@@ -425,7 +433,7 @@ static char *versionId = "Version $Id$" ;
       result->epoch = 0;
    
       #ifdef DEBUG
-      printf ("activation time %ld; time now %lld\n", result->time, time);
+      printf ("activation time %ld; time now %lld\n", result->time, (long long int) time);
       #endif
       return TRUE;
    #endif
@@ -456,32 +464,23 @@ static char *versionId = "Version $Id$" ;
       TP_r		tp;		/* list of test points */
    
       gdsDebug ("request test point by name");
+      printf("Request tp by name %s\n", tpNames) ; /* JCB */
    
-      /* loop over all nodes */
-      for (node = 0; node < TP_MAX_NODE; node++) {
-         /* test node */
-         if (!tplist[node].valid) {
-            continue;
-         }
+      if (tpNode.valid) 
+      {
 #ifdef DEBUG
-         printf ("tp name (node %i) = %s\n", node, tpNames);
+         printf ("tp name (node %i) = %s\n", tpNode.node, tpNames);
 #endif
       
          /* translate names into test points */
-         if (tpName2Index (node, tpNames, &tp) < 0) {
+         if (tpName2Index (tpNode.node, tpNames, &tp) < 0) {
             result->status = -1;
             return TRUE;
          }
          /* request test points */
-         requesttp_1_svc (id, node, tp, timeout, result, rqstp);
+         requesttp_1_svc (id, tpNode.node, tp, timeout, result, rqstp);
          free (tp.TP_r_val);
          if (result->status < 0) {
-            /* cleanup */
-            for (node = node - 1; node >= 0; node--) {
-               tpName2Index (node, tpNames, &tp);
-               cleartp_1_svc (id, node, tp, &result->status, rqstp);
-               free (tp.TP_r_val);
-            }
             result->status = -2;
             return TRUE;
          }
@@ -519,10 +518,13 @@ static char *versionId = "Version $Id$" ;
       int		clearall;	/* clear all */
    
       gdsDebug ("clear test point");
+      printf("Clear test points: len = %d\n", tp.TP_r_len) ;
+      for (i = 0; i < tp.TP_r_len; i++)
+	 printf("clear tp %d\n", tp.TP_r_val[i]) ; /* JCB */
    
       /* test node ID */
       if ((id < 0) || (node < 0) || (node >= TP_MAX_NODE) ||
-         !tplist[node].valid) {
+         !tpNode.valid || tpNode.node != node) {
          *result = -2;
          return TRUE;
       }
@@ -539,7 +541,7 @@ static char *versionId = "Version $Id$" ;
       #endif
          if (tp.TP_r_val[i] == _TP_CLEAR_ALL) {
             /* clear all test points of this node */
-            memset (tplist[node].indx, 0, 
+            memset (tpNode.indx, 0, 
                    TP_MAX_INTERFACE * TP_MAX_INDEX * sizeof (tpEntry_t));
             clearall = 1;
             break;
@@ -557,7 +559,7 @@ static char *versionId = "Version $Id$" ;
       
          /* search through list */
          for (j = 0; j < len; j++) {
-            tpp = &tplist[node].indx[tpinterface][j];
+            tpp = &tpNode.indx[tpinterface][j];
             if (tpp->id == tp.TP_r_val[i]) {
                /* found test point */
                for (k = 0; k < tpp->inUse; k++) {
@@ -621,15 +623,13 @@ static char *versionId = "Version $Id$" ;
       TP_r		tp;		/* list of test points */
    
       gdsDebug ("clear test point by name");
+      printf("Clear test point by name %s\n", tpNames) ; /* JCB */
    
-      /* loop over all nodes */
-      for (node = 0; node < TP_MAX_NODE; node++) {
-         /* translate names into test points */
-         if (tpName2Index (node, tpNames, &tp) < 0) {
-            continue;
-         }
+      /* translate names into test points */
+      if (tpName2Index (tpNode.node, tpNames, &tp) >= 0) 
+      {
          /* clear test points */
-         cleartp_1_svc (id, node, tp, result, rqstp);
+         cleartp_1_svc (id, tpNode.node, tp, result, rqstp);
          free (tp.TP_r_val);
       }
    
@@ -667,10 +667,11 @@ static char *versionId = "Version $Id$" ;
    #ifdef DEBUG
       printf ("Query node %i interface %i\n", node, tpinterface);
    #endif
+      printf ("Query node %i interface %i\n", node, tpinterface); /* JCB */
    
       /* test node ID */
       if ((id < 0) || (node < 0) || (node >= TP_MAX_NODE) ||
-         !tplist[node].valid) {
+         !tpNode.valid || tpNode.node != node) {
          result->status = -2;
          return TRUE;
       }
@@ -844,10 +845,10 @@ static char *versionId = "Version $Id$" ;
       tp.TP_r_val = malloc (2 * TP_MAX_PRESELECT * sizeof (short));
       /* select TPs */
       for (k = 0; k < TP_MAX_PRESELECT; ++k) {
-         if (tplist[node].preselect[k] > 0) {
-            tp.TP_r_val[tp.TP_r_len++] = tplist[node].preselect[k];
+         if (tpNode.preselect[k] > 0) {
+            tp.TP_r_val[tp.TP_r_len++] = tpNode.preselect[k];
          #ifdef DEBUG
-         printf("Preselecting %d on node %d\n", tplist[node].preselect[k], node);
+         printf("Preselecting %d on node %d\n", tpNode.preselect[k], node);
          #endif
          }
       }
@@ -874,7 +875,7 @@ static char *versionId = "Version $Id$" ;
       char*		buf;		/* name buffer */
       char*		p;		/* cursor into buffer */
       gdsChnInfo_t	chn;		/* channel info structure */
-      int		tpNode;		/* node of test point name */
+      int		tp_node;	/* node of test point name */
       char *		saveptr;
    
       /* allocate memory */
@@ -893,14 +894,14 @@ static char *versionId = "Version $Id$" ;
       while ((p != NULL) && (tp->TP_r_len < _MAX_TPNAMES)) {
 	 printf("tpName2Index checking %s\n", p);
          if ((gdsChannelInfo (p, &chn) == 0) &&
-            (tpIsValid (&chn, &tpNode, tp->TP_r_val + tp->TP_r_len)) &&
-            (node == tpNode)) {
+            (tpIsValid (&chn, &tp_node, tp->TP_r_val + tp->TP_r_len)) &&
+            (node == tp_node)) {
             printf ("%s is tp %i (node %i)\n", p, 
                    tp->TP_r_val[tp->TP_r_len], 
-                   tpNode);
+                   tp_node);
             tp->TP_r_len++;
          }
-	 printf("node=%d; tpNode=%d\n", node, tpNode);
+	 printf("node=%d; tp_node=%d\n", node, tp_node);
          p = strtok_r (NULL, " \t\n", &saveptr);
       } 
    
@@ -923,7 +924,6 @@ static char *versionId = "Version $Id$" ;
    static int cleanupTestpoints (schedulertask_t* info, taisec_t time, 
                      int epoch, void* arg)
    {
-      int		node;		/* node ID */
       int		i;		/* index into test point list */
       int		j;		/* interface ID */
       int		k;		/* index into usage array */
@@ -934,13 +934,8 @@ static char *versionId = "Version $Id$" ;
    
       t = (tainsec_t) time * _ONESEC + (tainsec_t) epoch * _EPOCH;
    
-      /* loop over nodes */
-      for (node = 0; node < TP_MAX_NODE; node++) {
-         /* test node */
-         if (!tplist[node].valid) {
-            continue;
-         }
-      
+      if (tpNode.valid) 
+      {
          /* loop over interfaces */
          for (j = 0; j < TP_MAX_INTERFACE; j++) {
             /* get server mutex */
@@ -949,7 +944,7 @@ static char *versionId = "Version $Id$" ;
             /* loop over selected test points */
             len = TP_INTERFACE_TO_INDEX_LEN (j);
             for (i = 0; i < len; i++) {
-               tpp = &tplist[node].indx[j][i];
+               tpp = &tpNode.indx[j][i];
                if (tpp->id == 0) {
                   continue;
                }
@@ -961,7 +956,7 @@ static char *versionId = "Version $Id$" ;
                      (tpp->users[k].reqTime + tpp->users[k].timeout < t)) {
                      /* found old testpoint */
                      /* printf ("remove tp %i (node %i) because of timeout\n",
-                            tpp->id, node);*/
+                            tpp->id, tpNode.node);*/
                      remove = 1;
                   }
 #if !defined(_ADVANCED_LIGO)
@@ -973,7 +968,7 @@ static char *versionId = "Version $Id$" ;
                      (tpclnts[tpp->users[k].clntId].lastTime + 
                      _KEEPALIVE_TIMEOUT * _ONESEC < t))) {
                      /* printf ("remove tp %i (node %i) because of keep alive\n",
-                            tpp->id, node);
+                            tpp->id, tpNode.node);
                      printf ("client id = %i\n", tpp->users[k].clntId);
                      printf ("client is %svalid\n", 
                             (tpclnts[tpp->users[k].clntId].valid) ? "" : "not ");
@@ -1034,7 +1029,6 @@ static char *versionId = "Version $Id$" ;
    static int updateTestpoints (schedulertask_t* info, taisec_t time, 
                      int epoch, void* arg)
    {
-      int		node;		/* node ID */
       int		i;		/* index into test point list */
       int		j;		/* interface ID */
       int		size;		/* size of test point array */
@@ -1051,13 +1045,8 @@ static char *versionId = "Version $Id$" ;
    #endif
       t = (tainsec_t) time * _ONESEC + (tainsec_t) epoch * _EPOCH;
    
-      /* loop over nodes */
-      for (node = 0; node < TP_MAX_NODE; node++) {
-         /* test node */
-         if (!tplist[node].valid) {
-            continue;
-         }
-      
+      if (tpNode.valid) 
+      {
          /* loop over interfaces */
          for (j = 0; j < TP_MAX_INTERFACE; j++) {
             /* get server mutex */
@@ -1067,7 +1056,7 @@ static char *versionId = "Version $Id$" ;
             len = TP_INTERFACE_TO_INDEX_LEN (j);
             memset (tp, 0, len * sizeof (testpoint_t));
             for (i = 0, size = 0; i < len; i++) {
-               tpp = &tplist[node].indx[j][i];
+               tpp = &tpNode.indx[j][i];
                /* copy index entry */
                if (tpp->id != 0) {
                   tp[size] = tpp->id;
@@ -1089,7 +1078,7 @@ static char *versionId = "Version $Id$" ;
             MUTEX_RELEASE (servermux);
 #if 0
             if ((j == 0)) {
-               printf ("node = %i, interface = %i  - ", node, j);
+               printf ("node = %i, interface = %i  - ", tpNode.node, j);
                printf ("tp = %i %i %i %i %i\n", tp[0],tp[1],tp[2],tp[3],tp[4]);
             }
 #endif
@@ -1098,7 +1087,7 @@ static char *versionId = "Version $Id$" ;
 	// TODO: this seems to clobber my test point numbers
             /* disable excitation test points if awg not running */
          #ifndef _NO_AWG_CHECK
-            if (!tpwriter[node][j].alive) {
+            if (!tpwriter[tpNode.node][j].alive) {
             #ifdef DEBUG
                printf ("AWG not alive: clear all TPs\n");
             #endif
@@ -1125,7 +1114,7 @@ static char *versionId = "Version $Id$" ;
 #endif
          
             /* write index to reflective memory */
-            addr = TP_NODE_INTERFACE_TO_INDEX_OFFSET (node, j);
+            addr = TP_NODE_INTERFACE_TO_INDEX_OFFSET (tpNode.node, j);
             if ((len <= 0) || (addr <= 0)) {
                continue;
             }
@@ -1133,10 +1122,10 @@ static char *versionId = "Version $Id$" ;
          #if 0
             printf ("write tps %i %i %i from node %i to 0x%x\n",
                     tp[0], tp[1], tp[2], 
-                    TP_NODE_ID_TO_RFM_ID (node), addr);
+                    TP_NODE_ID_TO_RFM_ID (tpNode.node), addr);
          #endif
          #if RMEM_LAYOUT > 0
-            if (rmWrite (TP_NODE_ID_TO_RFM_ID (node), (char*) tp, addr, 
+            if (rmWrite (TP_NODE_ID_TO_RFM_ID (tpNode.node), (char*) tp, addr, 
                len * sizeof (testpoint_t), 0) != 0) {
                gdsError (GDS_ERR_PROG, "RM1 write failure");
             }
@@ -1144,14 +1133,14 @@ static char *versionId = "Version $Id$" ;
 	    printf("rmWrite(0, %x %x %d )\n", tp, addr, len * sizeof (testpoint_t)); 
 	 #endif
          #if TARGET !=  (TARGET_L1_GDS_AWG1 + 20) && TARGET !=  (TARGET_L1_GDS_AWG1 + 21)
-            if (rmWrite (1 + TP_NODE_ID_TO_RFM_ID (node), (char*) tp, addr, 
+            if (rmWrite (1 + TP_NODE_ID_TO_RFM_ID (tpNode.node), (char*) tp, addr, 
                len * sizeof (testpoint_t), 0) != 0) {
                gdsError (GDS_ERR_PROG, "RM2 write failure");
             }
          #endif
          #else
 
-            if (rmWrite (TP_NODE_ID_TO_RFM_ID (node), (char*) tp, addr, 
+            if (rmWrite (TP_NODE_ID_TO_RFM_ID (tpNode.node), (char*) tp, addr, 
                len * sizeof (testpoint_t), 0) != 0) {
                gdsError (GDS_ERR_PROG, "RM write failure");
             }
@@ -1159,10 +1148,10 @@ static char *versionId = "Version $Id$" ;
          
            /* write channel information into reflective memory 
             for (i = 0; i < size; i++) {
-               strncpy ((tplist[node].chninfo[j] + i)->chName, 
+               strncpy ((tpNode.chninfo[j] + i)->chName, 
                        tpchn[i], 32);
             }
-            tplist[node].ipc[j]->channelCount = size;*/
+            tpNode.ipc[j]->channelCount = size;*/
          }
       }
    
@@ -1185,21 +1174,19 @@ static char *versionId = "Version $Id$" ;
    static int awgAlive (schedulertask_t* info, taisec_t time, 
                      int epoch, void* arg)
    {
-      int		node;		/* node index */
       int		j;		/* tp interface index */
       int		cycleCount;	/* current cycle count */
    
-      for (node = 0; node < TP_MAX_NODE; node++) {
-         for (j = 0; j < TP_MAX_INTERFACE; j++) {
-            if (tpwriter[node][j].IPC == NULL) {
-               tpwriter[node][j].alive = 0;
-               continue;
-            }
-            cycleCount = tpwriter[node][j].IPC->cycle;
-            tpwriter[node][j].alive = 
-               (cycleCount != tpwriter[node][j].oldCycleCount);
-            tpwriter[node][j].oldCycleCount = cycleCount;
-         }
+
+      for (j = 0; j < TP_MAX_INTERFACE; j++) {
+	 if (tpwriter[j].IPC == NULL) {
+	    tpwriter[j].alive = 0;
+	    continue;
+	 }
+	 cycleCount = tpwriter[j].IPC->cycle;
+	 tpwriter[j].alive = 
+	    (cycleCount != tpwriter[j].oldCycleCount);
+	 tpwriter[j].oldCycleCount = cycleCount;
       }
       return 0;
    }
@@ -1243,37 +1230,34 @@ static char *versionId = "Version $Id$" ;
       /* fill in pointers of ddcu's which write to tp area */
    #ifndef _NO_AWG_CHECK
       memset (tpwriter, 0, sizeof (tpwriter));
-      for (node = 0; node < TP_MAX_NODE; node++) {
-         if (((_TESTPOINT_DIRECT & (1 << node)) == 0)) {
-            continue;
-         }
-         for (j = 0; j < TP_MAX_INTERFACE; j++) {
-            /* determine unit id of awg dcu */
-            int 	unitID;
-            int 	base;
-            int 	size;
-            int		rfmid;
-            /* determine base address and size of awg dcu */
-            unitID = TP_NODE_INTERFACE_TO_UNIT_ID (node, j);
-            base = UNIT_ID_TO_RFM_OFFSET (unitID);
-            size = UNIT_ID_TO_RFM_SIZE (unitID);
+      for (j = 0; j < TP_MAX_INTERFACE; j++) {
+	 /* determine unit id of awg dcu */
+	 int 	unitID;
+	 int 	base;
+	 int 	size;
+	 int		rfmid;
+	 /* determine base address and size of awg dcu */
+	 /* We don't know the node number, but it doesn't 
+	  * matter for advanced LIGO.  Pick a value no 0 or 1.
+	  */
+	 unitID = TP_NODE_INTERFACE_TO_UNIT_ID (20, j);
+	 base = UNIT_ID_TO_RFM_OFFSET (unitID);
+	 size = UNIT_ID_TO_RFM_SIZE (unitID);
 
-            rfmid = TP_NODE_ID_TO_RFM_ID (node);
-	    rfmid = 0;
+	 rfmid = 0;
 
+printf("interface %d: unitID = %d, base = %d, size = %d\n", j, unitID, base, size) ;
 
-
-            /* set IPC pointer if valid dcu */
-            if ((base >= 0) && (rmCheck (rfmid, base, size))) {
-               tpwriter[node][j].IPC = 
-                  (rmIpcStr*) (rmBaseAddress (rfmid) + base);
-            }
-            else {
-               tpwriter[node][j].IPC = NULL;
-            }
-            /* reset alive flag */
-            tpwriter[node][j].alive = 0;
-         }
+	 /* set IPC pointer if valid dcu */
+	 if ((base >= 0) && (rmCheck (rfmid, base, size))) {
+	    tpwriter[j].IPC = 
+	       (rmIpcStr*) (rmBaseAddress (rfmid) + base);
+	 }
+	 else {
+	    tpwriter[j].IPC = NULL;
+	 }
+	 /* reset alive flag */
+	 tpwriter[j].alive = 0;
       }
    #endif
    
@@ -1435,13 +1419,11 @@ static char *versionId = "Version $Id$" ;
          return -1;
       }
    
+      /* Mark the node as invalid until it's found in the parameter file. */
+      tpNode.valid = 0 ;
+
       for (node = 0; node < TP_MAX_NODE; node++) {
 	 /*printf("tpman checking node %d\n", node);*/
-
-         /* test whether node is available */
-         tplist[node].valid = 0;
-
-         rmNode = TP_NODE_ID_TO_RFM_ID (node);
 	 rmNode = 0;
          if (rmBaseAddress (rmNode) == NULL) {
 	    printf("reflective memory pointer not set\n"); 
@@ -1480,7 +1462,7 @@ static char *versionId = "Version $Id$" ;
             continue;
          }
 #endif
-         inet_ntoa_b (addr, tplist[node].hostname);
+         inet_ntoa_b (addr, tpNode.hostname);
       
          prognum = RPC_PROGNUM_TESTPOINT;
          progver = RPC_PROGVER_TESTPOINT;
@@ -1495,13 +1477,12 @@ static char *versionId = "Version $Id$" ;
 	 // Use GDS node to generate a unique RPC number
 	 prognum += node;
 
-         if ((prognum != 0) && (progver != 0)) {
-            tplist[node].prognum = prognum;
-            tplist[node].progver = progver;
-            memset (tplist[node].indx, 0, 
-                   TP_MAX_INTERFACE * TP_MAX_INDEX * sizeof (tpEntry_t));
-            tplist[node].valid = ((_TESTPOINT_DIRECT & (1 << node)) != 0);
-         }
+	 tpNode.prognum = prognum;
+	 tpNode.progver = progver;
+	 memset (tpNode.indx, 0, TP_MAX_INTERFACE * TP_MAX_INDEX * sizeof (tpEntry_t));
+	 /* Mark the node as valid and record the node number. */
+	 tpNode.valid = 1 ;
+	 tpNode.node = node ;
       
          /* get preselected testpoints */
          for (k = 0; k < TP_MAX_PRESELECT; ++k) {
@@ -1509,92 +1490,84 @@ static char *versionId = "Version $Id$" ;
             presel = 0;
             loadNumParam (PRM_FILE, section, param, &presel);
             if ((presel > 0) && (presel < TP_HIGHEST_INDEX)) {
-               tplist[node].preselect[k] = presel;
+               tpNode.preselect[k] = presel;
                printf("Preselecting testpoint %ld on node %d\n", presel, node);
             }
             else {
-               tplist[node].preselect[k] = 0;
+               tpNode.preselect[k] = 0;
             }
          }
+	 /* Since the node has been found, stop looking. */
+	 break ;
       }
    
       /* load channel information */
-      for (node = 0; node < TP_MAX_NODE; node++) {
-         if (!tplist[node].valid) {
-            continue;
-         }
+      if (tpNode.valid) 
+      {
          /* query length of channel info list of the specified node */
          MUTEX_GET (servermux);
          _query_node = node;
-         tplist[node].tplistlen = gdsChannelListLen (-1, isTestpoint);
-	 printf("Channel list length for node %d is %d\n", node, tplist[node].tplistlen);
-         if (tplist[node].tplistlen <= 0) {
-            tplist[node].tplistlen = 0;
+         tpNode.tplistlen = gdsChannelListLen (-1, isTestpoint);
+	 printf("Channel list length for node %d is %d\n", node, tpNode.tplistlen);
+         if (tpNode.tplistlen <= 0) {
+            tpNode.tplistlen = 0;
             MUTEX_RELEASE (servermux);
-            continue;
          }
-         /* allocate memory for list */
-         tplist[node].tplist = 
-            malloc (tplist[node].tplistlen * sizeof (gdsChnInfo_t));
-         if (tplist[node].tplist == NULL) {
-            tplist[node].tplistlen = 0;
-            MUTEX_RELEASE (servermux);
-            return -2;
-         }
-         /* load list */
-         tplist[node].tplistlen = 
-            gdsChannelList (-1, isTestpoint, tplist[node].tplist, 
-                           tplist[node].tplistlen);
-         MUTEX_RELEASE (servermux);
-         if (tplist[node].tplistlen <= 0) {
-            free (tplist[node].tplist);
-            tplist[node].tplistlen = 0;
-            tplist[node].tplist = NULL;
-            continue;
-         }
-         /* build lookup table */
-         memset (tplist[node].tplookup, 0, sizeof (tplist[node].tplookup));
-         for (j = 0; j < tplist[node].tplistlen; j++) {
-            tp = tplist[node].tplist[j].chNum;
-            if ((tp > 0) && (tp < TP_HIGHEST_INDEX)) {
-               tplist[node].tplookup[tp] = tplist[node].tplist + j;
-               /* printf ("node %i tp %i = %s\n", node, tp,
-                      tplist[node].tplookup[tp]->chName);*/
-            }
-         }
+	 else
+	 {
+	    /* allocate memory for list */
+	    tpNode.tplist = malloc (tpNode.tplistlen * sizeof (gdsChnInfo_t));
+	    if (tpNode.tplist == NULL) {
+	       tpNode.tplistlen = 0;
+	       MUTEX_RELEASE (servermux);
+	       return -2;
+	    }
+	    /* load list */
+	    tpNode.tplistlen = gdsChannelList (-1, isTestpoint, tpNode.tplist, tpNode.tplistlen);
+	    MUTEX_RELEASE (servermux);
+	    if (tpNode.tplistlen <= 0) {
+	       free (tpNode.tplist);
+	       tpNode.tplistlen = 0;
+	       tpNode.tplist = NULL;
+	    }
+	    else
+	    {
+	       /* build lookup table */
+	       memset (tpNode.tplookup, 0, sizeof (tpNode.tplookup));
+	       for (j = 0; j < tpNode.tplistlen; j++) {
+		  tp = tpNode.tplist[j].chNum;
+		  if ((tp > 0) && (tp < TP_HIGHEST_INDEX)) {
+		     tpNode.tplookup[tp] = tpNode.tplist + j;
+		     /* printf ("node %i tp %i = %s\n", node, tp,
+			    tpNode.tplookup[tp]->chName);*/
+		  }
+	       }
+	    }
+	 }
       }
    
       /* clear memory */
-      for (node = 0; node < TP_MAX_NODE; node++) {
-         if (!tplist[node].valid) {
-            continue;
-         }
-         /* loop through interfaces */
-         for (j = 0; j < TP_MAX_INTERFACE; j++) {
+      /* loop through interfaces */
+      for (j = 0; j < TP_MAX_INTERFACE; j++) {
 
-            char* a = rmBaseAddress (TP_NODE_ID_TO_RFM_ID(node)) + 
-                      TP_NODE_INTERFACE_TO_DATA_OFFSET(node, j);
+	 char* a = rmBaseAddress (TP_NODE_ID_TO_RFM_ID(tpNode.node)) + 
+		   TP_NODE_INTERFACE_TO_DATA_OFFSET(tpNode.node, j);
 #ifdef OS_SOLARIS
-	    /* Would get a system crash on Solaris with memset() */
-	    {
-		int k;
-		int l = DATA_BLOCKS * TP_NODE_INTERFACE_TO_DATA_BLOCKSIZE(node, j);
-		for (k = 0; k < l; k++) a[k] = 0;
-	    }
+	 /* Would get a system crash on Solaris with memset() */
+	 {
+	     int k;
+	     int l = DATA_BLOCKS * TP_NODE_INTERFACE_TO_DATA_BLOCKSIZE(tpNode.node, j);
+	     for (k = 0; k < l; k++) a[k] = 0;
+	 }
 #else
-            memset (a, 0, DATA_BLOCKS *
-                   TP_NODE_INTERFACE_TO_DATA_BLOCKSIZE(node, j));
+	 memset (a, 0, DATA_BLOCKS *
+		TP_NODE_INTERFACE_TO_DATA_BLOCKSIZE(tpNode.node, j));
 #endif
-         }
       }
    
-      /* set preselected testpoints */
-      for (node = 0; node < TP_MAX_NODE; node++) {
-         /* test if node is valid */
-         if (tplist[node].valid) {
-            setPreselect (node);
-         }
-      }   
+      if (tpNode.valid) {
+	 setPreselect (tpNode.node);
+      }
    
       /* get local address */
       confnum = 0;
@@ -1612,59 +1585,35 @@ static char *versionId = "Version $Id$" ;
    
 
       /* register with rpc service */
-      for (node = 0, reg = 0; node < TP_MAX_NODE; node++) {
-         if (!tplist[node].valid) {
-	    printf("node %d invalid\n", node);
-            continue;
-         }
-      	 /* look for duplicate */
-         duplicate = 0;
-         for (n = node - 1; n >= 0; n--) {
-            if ((tplist[n].valid) &&
-               (tplist[n].prognum == tplist[node].prognum) && 
-               (tplist[n].progver == tplist[node].progver)) {
-               duplicate = 1;
-            }
-         }
-         if (!duplicate) {
-            if (rpcRegisterService (rpcpmstart, transp, proto, 
-               tplist[node].prognum, tplist[node].progver, 
-               rtestpoint_1) != 0) {
-               gdsError (GDS_ERR_PROG, 
-                        "unable to register test point service");
-               return -6;
-            }
-            reg++;
-         }
-         printf ("Test point manager (%lx / %li): node %i%s\n", 
-                tplist[node].prognum, tplist[node].progver, node,
-                duplicate ? " (duplicate)" : "");
-	 testpoint_manager_node = node;
-	 testpoint_manager_rpc = tplist[node].prognum;
+      if (rpcRegisterService (rpcpmstart, transp, proto, 
+	 tpNode.prognum, tpNode.progver, rtestpoint_1) != 0) 
+      {
+	 gdsError (GDS_ERR_PROG, 
+		  "unable to register test point service");
+	 return -6;
+      }
+      printf ("Test point manager (%lx / %li): node %i\n", 
+	     tpNode.prognum, tpNode.progver, node) ;
 
-         /* add configuration info */
-         if (confnum == 0) {
-            pConf = confbuf;
-            conf[0].id = 0;
-            conf[0].answer = stdAnswer;
-            conf[0].user = confbuf;
-            confnum++;
-         }
-         else {
-            pConf = strend (confbuf);
-            strcpy (pConf, "\n");
-            pConf++;
-         }
-         sprintf (pConf, "tp %i 0 %s %ld %ld", node,
-                 inet_ntoa (host), tplist[node].prognum, 
-                 tplist[node].progver);
+      /* Set the global variable value for the testpoint_manager_node */
+      testpoint_manager_node = node;
+      testpoint_manager_rpc = tpNode.prognum;
+
+      /* add configuration info */
+      if (confnum == 0) {
+	 pConf = confbuf;
+	 conf[0].id = 0;
+	 conf[0].answer = stdAnswer;
+	 conf[0].user = confbuf;
+	 confnum++;
       }
-   
-      if (reg == 0) {
-         printf ("No test point service registered\n");
-         gdsWarningMessage ("no test point service registered");
-         return -7;
+      else {
+	 pConf = strend (confbuf);
+	 strcpy (pConf, "\n");
+	 pConf++;
       }
+      sprintf (pConf, "tp %i 0 %s %ld %ld", node,
+	      inet_ntoa (host), tpNode.prognum, tpNode.progver);
    
       /* announce service */
       if (conf_server (conf, confnum, 1) < 0) {
@@ -1698,12 +1647,15 @@ static char *versionId = "Version $Id$" ;
          return;
       }
    
+      /* First call, log version ID */
+      printf("testpoint_server %s\n", versionId) ;
+
       /* create server mutex */
       if (MUTEX_CREATE (servermux) != 0) {
          return;
       }
       /* reset test point data memory */
-      memset (tplist, 0, sizeof (tplist));
+      memset (&tpNode, 0, sizeof (tpNode));
       memset (tpclnts, 0, sizeof (tpclnts));
    
       /* set initServer and return */
@@ -1745,10 +1697,8 @@ static char *versionId = "Version $Id$" ;
       }
    
       /* free memory */
-      for (node = 0; node < TP_MAX_NODE; node++) { 
-         if (tplist[node].valid && (tplist[node].tplist != NULL)) {
-            free (tplist[node].tplist);
-         }
+      if (tpNode.valid && (tpNode.tplist != NULL)) {
+	 free (tpNode.tplist);
       }
    
       /* set initServer and return */
