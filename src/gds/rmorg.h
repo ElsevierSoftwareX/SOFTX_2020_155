@@ -148,7 +148,7 @@ extern "C" {
     @author DS, September 98
     @see Testpoint Definition
 ************************************************************************/
-#define TP_MAX_INDEX		128
+#define TP_MAX_INDEX		64
 
 /** Highest test point index number.
 
