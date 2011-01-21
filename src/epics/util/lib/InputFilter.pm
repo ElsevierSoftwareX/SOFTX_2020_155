@@ -38,9 +38,9 @@ sub printFrontEndVars  {
         print ::OUT "double \L$::xpartName[$i]_K;\n";
         print ::OUT "double \L$::xpartName[$i]_P;\n";
         print ::OUT "double \L$::xpartName[$i]_Z;\n";
-        #print ::OUT "double \L$::xpartName[$i]_K_tramp;\n";
-        #print ::OUT "double \L$::xpartName[$i]_P_tramp;\n";
-        #print ::OUT "double \L$::xpartName[$i]_Z_tramp;\n";
+        print ::OUT "unsigned long \L$::xpartName[$i]_KS;\n";
+        print ::OUT "unsigned long \L$::xpartName[$i]_PS;\n";
+        print ::OUT "unsigned long \L$::xpartName[$i]_ZS;\n";
         print ::OUT "double \L$::xpartName[$i];\n";
         print ::OUT "double \L$::xpartName[$i]_val;\n";
 }
@@ -52,9 +52,9 @@ sub frontEndInitCode {
         my $calcExp .= "\L$::xpartName[$i]_K " . " = pLocalEpics->lsc.$::xpartName[$i]_K;\n";
         $calcExp .= "\L$::xpartName[$i]_P " . " = pLocalEpics->lsc.$::xpartName[$i]_P;\n";
         $calcExp .= "\L$::xpartName[$i]_Z " . " = pLocalEpics->lsc.$::xpartName[$i]_Z;\n";
-        #$calcExp .= "\L$::xpartName[$i]_K_tramp " . " = pLocalEpics->lsc.$::xpartName[$i]_K_TRAMP;\n";
-        #$calcExp .= "\L$::xpartName[$i]_P_tramp " . " = pLocalEpics->lsc.$::xpartName[$i]_P_TRAMP;\n";
-        #$calcExp .= "\L$::xpartName[$i]_Z_tramp " . " = pLocalEpics->lsc.$::xpartName[$i]_Z_TRAMP;\n";
+        $calcExp .= "\L$::xpartName[$i]_KS = 0;\n";
+        $calcExp .= "\L$::xpartName[$i]_PS = 0;\n";
+        $calcExp .= "\L$::xpartName[$i]_ZS = 0;\n";
         $calcExp .= "\L$::xpartName[$i] = 0.0;\n";
         $calcExp .= "\L$::xpartName[$i]_val = 0.0;\n";
         return $calcExp;
@@ -88,12 +88,15 @@ sub frontEndCode {
 #
         $calcExp .= "inputFilterModule($input, &\L$::xpartName[$i], &\L$::xpartName[$i]_val, "
 		  . "pLocalEpics->lsc.$::xpartName[$i]_OFFSET, "
-		  . "\L$::xpartName[$i]_K, \L$::xpartName[$i]_P, \L$::xpartName[$i]_Z, "
+		  . "&\L$::xpartName[$i]_K, &\L$::xpartName[$i]_P, &\L$::xpartName[$i]_Z, "
 		  . "pLocalEpics->lsc.$::xpartName[$i]_K, "
 		  . "pLocalEpics->lsc.$::xpartName[$i]_P, "
 		  . "pLocalEpics->lsc.$::xpartName[$i]_Z, "
 		  . "pLocalEpics->lsc.$::xpartName[$i]_K_TRAMP, "
 		  . "pLocalEpics->lsc.$::xpartName[$i]_P_TRAMP, "
-		  . "pLocalEpics->lsc.$::xpartName[$i]_Z_TRAMP);";
+		  . "pLocalEpics->lsc.$::xpartName[$i]_Z_TRAMP, "
+		  . "&\L$::xpartName[$i]_KS, "
+		  . "&\L$::xpartName[$i]_PS, "
+		  . "&\L$::xpartName[$i]_ZS);";
         return $calcExp . "\n";
 }
