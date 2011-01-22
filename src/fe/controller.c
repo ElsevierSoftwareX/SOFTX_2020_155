@@ -1988,6 +1988,16 @@ rfmDone = 0;
 	  }
 	  for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	  {
+#ifdef ADC_MASTER
+		if(cdsPciModules.dacType[jj] == GSC_18AO8)
+		{
+			static int dacWatchDog = 0;
+			dacWatchDog ^= 1;
+			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
+			dac18bitPtr->digital_io_ports = (dacWatchDog | GSAO_18BIT_DIO_RW);
+
+		}
+#endif
 	    if(dacOF[jj]) pLocalEpics->epicsOutput.statDac[jj] &= ~(4);
  	    else pLocalEpics->epicsOutput.statDac[jj] |= 4;
 	    dacOF[jj] = 0;
