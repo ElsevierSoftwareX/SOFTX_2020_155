@@ -70,13 +70,14 @@ sub frontEndCode {
         my $CDIO1616Num = substr($::partName[$i], ($l-1), 1);
         my $calcExp = "// CDIO1616 number is $CDIO1616Num name $::partName[$i]\n";
         my $fromType = $::partInputType[$i][$_];
+	my $l = ($::fromExp[0] eq undef || $::fromExp[0] eq "") ? "0" : $::fromExp[0];
         if (($fromType ne "GROUND") && ($::partInput[$i][0] ne "NC")) {
                 $calcExp .= "CDIO1616Output\[";
                 $calcExp .= $CDIO1616Num;
                 $calcExp .= "\] = ((int)";
-                $calcExp .= $::fromExp[0];
+                $calcExp .= $l;
                 $calcExp .= " << 16) + ((int)";
-                $calcExp .= $::fromExp[0];
+                $calcExp .= $l;
 		$calcExp .= " & 0xffff);\n";
         }
         return $calcExp;
