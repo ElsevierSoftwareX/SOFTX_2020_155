@@ -127,7 +127,6 @@ int printk(const char *fmt, ...) {
 #endif
 
 #include "fm10Gen.h"		// CDS filter module defs and C code
-#include "drv/inputFilterModule.h"		
 #include "feComms.h"		// Lvea control RFM network defs.
 #include "daqmap.h"		// DAQ network layout
 extern unsigned int cpu_khz;
@@ -237,6 +236,7 @@ extern unsigned int cpu_khz;
 	#define CYCLE_TIME_ALRM_LO	460
 	#define DAC_PRELOAD_CNT		8	
 #endif
+#include "drv/inputFilterModule.h"		
 
 #ifndef NO_DAQ
 DAQ_RANGE daq;			// Range settings for daqLib.c
