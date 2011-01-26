@@ -55,7 +55,7 @@ SNCFLAGS += +a
 SNC = $(EPICS_SEQ_BASE)/bin/linux-x86_64/snc $(SNCFLAGS)
 
 # registration code generator
-REGGEN = $(EPICS_BASE)/bin/linux-x86/registerRecordDeviceDriver.pl
+REGGEN = $(EPICS_BASE)/bin/linux-x86_64/registerRecordDeviceDriver.pl
 
 # Sequencer generator files
 FMSEQFILES = src/epics/util/fmseq.pl src/epics/util/skeleton.db src/epics/util/skeleton.st
