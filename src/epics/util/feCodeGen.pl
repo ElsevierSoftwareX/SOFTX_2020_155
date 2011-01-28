@@ -3148,7 +3148,7 @@ if ($rfmTimeSlave > -1) {
 }
 if ($pciNet > -1) {
   print OUTM "#Enable use of PCIe RFM Network\n";
-  print OUTM "DISDIR = /home/controls/DIS\n";
+  print OUTM "DISDIR = /opt/srcdis\n";
   print OUTM "EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
 } else {
   print OUTM "#Uncomment to use PCIe RFM Network\n";
