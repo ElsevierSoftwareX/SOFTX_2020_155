@@ -2239,7 +2239,7 @@ for($ii=0;$ii<32;$ii++)
 print EPICS "OUTVARIABLE FEC\_$dcuId\_USR_TIME epicsOutput.diags[0] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG1 epicsOutput.diags[1] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.diags[2] int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0 field(HOPR,\"2000\") field(LOPR,\"0\") field(HIHI,\"1900\") field(HHSV,\"MAJOR\")\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ai 0\n";
@@ -3443,6 +3443,7 @@ $sed_arg .= "s/LOCATION_NAME/$location/g;";
 $sed_arg .= "s/DCU_NODE_ID/$dcuId/g;";
 $sysname = uc($skeleton);
 $sed_arg .= "s/FBID/$sysname/g;";
+$sed_arg .= "s/MEDMDIR/$skeleton/g;";
 system("cat GDS_TP.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
 my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
