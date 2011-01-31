@@ -57,7 +57,7 @@ typedef u_int32_t in_addr_t;
 main() {
   diag::frameRecv* NDS = new diag::frameRecv();
 // DMT broadcast port needs to be different from IB ports !
-  if (!NDS->open("225.0.0.1", "192.168.1.0", 7097 /*diag::frameXmitPort + 1*/)) {
+  if (!NDS->open("225.0.0.1", "10.110.144.0", 7097 /*diag::frameXmitPort + 1*/)) {
   //if (!NDS->open("225.0.0.1", "10.12.0.0", 7032 /*diag::frameXmitPort + 1*/)) {
         perror("Multicast receiver open failed.");
         exit(1);

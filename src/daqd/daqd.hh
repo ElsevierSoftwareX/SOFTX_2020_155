@@ -314,7 +314,7 @@ class daqd_c {
 	  dcuName[j][0] = 0;
 	  fullDcuName[j][0] = 0;
 #ifdef EPICS_EDCU
-          extern char epicsDcuName[DCU_COUNT][32];
+          extern char epicsDcuName[DCU_COUNT][40];
           epicsDcuName[j][0] = 0;
 #endif
 #endif

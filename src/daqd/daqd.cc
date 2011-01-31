@@ -423,8 +423,8 @@ daqd_c::configure_channels_files ()
           sprintf(daqd.dcuName[ini_file_dcu_id], "%.10s", slp);
           sprintf(daqd.fullDcuName[ini_file_dcu_id], "%.10s", slp-2);
 #ifdef EPICS_EDCU
-	  extern char epicsDcuName[DCU_COUNT][32];
-          sprintf(epicsDcuName[ini_file_dcu_id], "%.10s", slp-2);
+	  extern char epicsDcuName[DCU_COUNT][40];
+          sprintf(epicsDcuName[ini_file_dcu_id], "%.40s", slp-2);
 #endif
 	  buf[strlen(buf) - 4] = '.';
 	}
@@ -2798,9 +2798,9 @@ parse_args (int argc, char *argv [])
   extern int optind;
 
 #if !defined(VMICRFM_PRODUCER)
-  while ((c = getopt (argc, argv, "n2hHf:s:c:")) != -1)
+  while ((c = getopt (argc, argv, "n2hHf:s:c:l:")) != -1)
 #else
-  while ((c = getopt (argc, argv, "n2hHc:")) != -1)
+  while ((c = getopt (argc, argv, "n2hHc:l:")) != -1)
 #endif
     {
       switch (c) {
@@ -2808,6 +2808,10 @@ parse_args (int argc, char *argv [])
       case 'h':
 	usage (0);
 	break;
+      case 'l':
+        freopen(optarg, "w", stdout);
+        freopen(optarg, "w", stderr);
+        break;
 #if !defined(VMICRFM_PRODUCER)
       case 'f':
 	strcpy (daqd.frame_fname, optarg);
