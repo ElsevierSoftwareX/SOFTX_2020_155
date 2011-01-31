@@ -25,7 +25,7 @@
 //#include "daqd.hh"
 //extern daqd_c daqd;
 
-char epicsDcuName[DCU_COUNT][32];
+char epicsDcuName[DCU_COUNT][40];
 
 unsigned int pvValue[128] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
@@ -77,11 +77,11 @@ exServer::exServer ( const char * const pvPrefix,
     pvInfo *pPVI;
     pvInfo *pPVAfter = &exServer::pvList[pvListNElem];
     char pvAlias[256];
-    const char * const pNameFmtStr = "%.100s%.20s";
-    const char * const pDcuNameFmtStr[3] = { "%.100s%.20s_STATUS", 
-    					     "%.100s%.20s_CRC_CPS",
-    					     "%.100s%.20s_CRC_SUM" };
-    const char * const pAliasFmtStr = "%.100s%.20s%u";
+    const char * const pNameFmtStr = "%.100s%.40s";
+    const char * const pDcuNameFmtStr[3] = { "%.100s%.40s_STATUS", 
+    					     "%.100s%.40s_CRC_CPS",
+    					     "%.100s%.40s_CRC_SUM" };
+    const char * const pAliasFmtStr = "%.100s%.40s%u";
 
     exPV::initFT();
 

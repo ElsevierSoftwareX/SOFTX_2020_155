@@ -2032,7 +2032,7 @@ producer::frame_writer ()
 
 #if defined(USE_MX) || defined(USE_UDP)
         // Allocate receive buffers for each configured DCU
-        for (int i = 9; i < DCU_COUNT; i++) {
+        for (int i = 5; i < DCU_COUNT; i++) {
                 if (0 == daqd.dcuSize[0][i]) continue;
 
                 directed_receive_buffer[i] = malloc(2*DAQ_DCU_BLOCK_SIZE*DAQ_NUM_DATA_BLOCKS);
@@ -2141,13 +2141,13 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 
 #ifdef USE_BROADCAST
   diag::frameRecv* NDS = new diag::frameRecv(0);
-  if (!NDS->open("225.0.0.1", "192.168.0.0", net_writer_c::concentrator_broadcast_port)) {
+  if (!NDS->open("225.0.0.1", "10.110.144.0", net_writer_c::concentrator_broadcast_port)) {
         perror("Multicast receiver open failed.");
         exit(1);
   }
 #ifdef GDS_TESTPOINTS
   diag::frameRecv* NDS_TP = new diag::frameRecv(0);
-  if (!NDS_TP->open("225.0.0.1", "192.168.0.0", net_writer_c::concentrator_broadcast_port_tp)) {
+  if (!NDS_TP->open("225.0.0.1", "10.110.144.0", net_writer_c::concentrator_broadcast_port_tp)) {
         perror("Multicast receiver open failed 1.");
         exit(1);
   }
