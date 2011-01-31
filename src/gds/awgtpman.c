@@ -89,7 +89,7 @@ CDS_HARDWARE cdsPciModules;
       }
    
       system_name[0] = 0;
-      while ((c = getopt (argc, argv, "h?ta248s:l:")) != EOF) {
+      while ((c = getopt (argc, argv, "h?ta1248s:l:")) != EOF) {
          switch (c) {
 	    case 's':
 		if (strlen(optarg) > (PARAM_ENTRY_LEN-2)) {
