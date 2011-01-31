@@ -121,10 +121,8 @@ CDS_HARDWARE cdsPciModules;
 				perror("freopen");
 				exit(1);
 			}
-			if (0 == freopen(optarg, "w", stderr)) {
-				perror("freopen");
-				exit(1);
-			}
+			setvbuf(stdout, NULL, _IOLBF, 0);
+			stderr = stdout;
 			break;
 		}
 	    case '1':
