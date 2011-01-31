@@ -644,12 +644,12 @@ static char *versionId = "Version $Id$" ;
       int spin_cnt = 0;
       do {
 	spin_cnt++;
-#if 0
 	if (spin_cnt >= 1000000000) {
-	  fprintf(stderr, "Timed out waiting for the IOP cycle\n");
-	  _exit(1);
+	  //fprintf(stderr, "Timed out waiting for the IOP cycle\n");
+	  //_exit(1);
+	  sleep(10);
+	  spin_cnt = 0;
 	}
-#endif
       } while (*ioMemDataCycle != 0);
       //rdtscl(cpuClock[1]);
       //cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
