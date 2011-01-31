@@ -163,6 +163,7 @@ do {
 			myErrorSignal = 0;
 			for (int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= 2;
 		fprintf(stderr, "Connection Made\n");
+		fflush(stderr);
 		}
 	}while(myErrorSignal);
 
@@ -315,15 +316,12 @@ main(int argc, char **argv)
 		his_eid = atoi(optarg);
 		break;
 	case 'l':
-		/*
-		len = atoi(optarg);
-		if (len > MAX_LEN) {
-			fprintf(stderr, "len too large, max is %d\n", MAX_LEN);
-			exit(1);
+        	if (0 == freopen(optarg, "w", stdout)) {
+			perror ("freopen");
+			exit (1);
 		}
-		*/
-        	freopen(optarg, "w", stdout);
-	        freopen(optarg, "w", stderr);
+		setvbuf(stdout, NULL, _IOLBF, 0);
+		stderr = stdout;
 		break;
 	case 'N':
 		iter = atoi(optarg);
@@ -351,7 +349,7 @@ main(int argc, char **argv)
 	if (sysname == NULL) { usage(); exit(1); }
 	if (rem_host == NULL) { usage(); exit (1); }
 
-	printf("System names: %s\n", sysname);
+	//printf("System names: %s\n", sysname);
 
 	if (rem_host != NULL)
 		num_threads += do_bothways;
