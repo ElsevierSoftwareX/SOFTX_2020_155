@@ -282,7 +282,7 @@ CDS_HARDWARE cdsPciModules;
 	   printf ("Error: Unable to spawn testpoint manager\n");
            return 1;
         }
-        sleep (1);
+        sleep (5);
      
 	{
           extern int testpoint_manager_node;
