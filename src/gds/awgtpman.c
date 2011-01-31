@@ -117,10 +117,17 @@ CDS_HARDWARE cdsPciModules;
 	       }
 	    case 'l':
 	    	{
-			freopen(optarg, "w", stdout);
-			freopen(optarg, "w", stderr);
+			if (0 == freopen(optarg, "w", stdout)) {
+				perror("freopen");
+				exit(1);
+			}
+			if (0 == freopen(optarg, "w", stderr)) {
+				perror("freopen");
+				exit(1);
+			}
 			break;
 		}
+	    case '1':
 	    case '2':
 	    case '4':
 	    case '8':
