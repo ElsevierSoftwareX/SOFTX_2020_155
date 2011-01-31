@@ -59,17 +59,17 @@ void
 usage()
 {
 	fprintf(stderr, "Usage: mx_stream [args] -s sys_names -d rem_host:0\n");
+	fprintf(stderr, "-l filename - log file name\n"); 
 	fprintf(stderr, "-n nic_id - local NIC ID [MX_ANY_NIC]\n");
 	fprintf(stderr, "-b board_id - local Board ID [MX_ANY_NIC]\n");
 	fprintf(stderr, "-e local_eid - local endpoint ID [%d]\n", DFLT_EID);
 	fprintf(stderr, "-r remote_eid - remote endpoint ID [%d]\n", DFLT_EID);
 	fprintf(stderr, "-d hostname - destination hostname, required for sender\n");
-	fprintf(stderr, "-f filter - endpoint filter, default %x\n", FILTER);
-	fprintf(stderr, "-l length - message length, default %d\n", DFLT_LEN);
-	fprintf(stderr, "-N iter - iterations, default %d\n", DFLT_ITER);
+	//fprintf(stderr, "-f filter - endpoint filter, default %x\n", FILTER);
+	//fprintf(stderr, "-N iter - iterations, default %d\n", DFLT_ITER);
 	fprintf(stderr, "-s - system names: \"x1x12 x1lsc x1asc\"\n");
 	fprintf(stderr, "-v - verbose\n");
-	fprintf(stderr, "-x - bothways\n");
+	//fprintf(stderr, "-x - bothways\n");
 	fprintf(stderr, "-w - wait\n");
 	fprintf(stderr, "-h - help\n");
 }
@@ -315,11 +315,15 @@ main(int argc, char **argv)
 		his_eid = atoi(optarg);
 		break;
 	case 'l':
+		/*
 		len = atoi(optarg);
 		if (len > MAX_LEN) {
 			fprintf(stderr, "len too large, max is %d\n", MAX_LEN);
 			exit(1);
 		}
+		*/
+        	freopen(optarg, "w", stdout);
+	        freopen(optarg, "w", stderr);
 		break;
 	case 'N':
 		iter = atoi(optarg);
