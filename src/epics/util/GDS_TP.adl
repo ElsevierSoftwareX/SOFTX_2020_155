@@ -1,14 +1,14 @@
 
 file {
-	name="/opt/rtcds/LOCATION_NAME/l1/medm/tmp/test1.adl"
+	name="/opt/rtcds/llo/l1/core/trunk/src/epics/util/GDS_TP.adl"
 	version=030104
 }
 display {
 	object {
-		x=1009
-		y=234
+		x=59
+		y=260
 		width=850
-		height=150
+		height=170
 	}
 	clr=14
 	bclr=4
@@ -87,1532 +87,1591 @@ display {
 		1a7309,
 	}
 }
-composite {
+rectangle {
+	object {
+		x=0
+		y=0
+		width=850
+		height=22
+	}
+	"basic attribute" {
+		clr=54
+	}
+}
+rectangle {
 	object {
 		x=19
-		y=21
+		y=34
 		width=813
-		height=105
+		height=125
+	}
+	"basic attribute" {
+		clr=2
+	}
+}
+rectangle {
+	object {
+		x=295
+		y=90
+		width=187
+		height=18
+	}
+	"basic attribute" {
+		clr=28
+	}
+}
+"text update" {
+	object {
+		x=133
+		y=78
+		width=50
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_USR_TIME"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=26
+		y=78
+		width=69
+		height=17
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="CYC/USR"
+}
+"text update" {
+	object {
+		x=133
+		y=97
+		width=50
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER_MAX"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=83
+		y=97
+		width=40
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=26
+		y=97
+		width=69
+		height=17
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="CPU Max"
+}
+byte {
+	object {
+		x=123
+		y=97
+		width=10
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
+		clr=20
+		bclr=60
+	}
+	sbit=3
+	ebit=3
+}
+text {
+	object {
+		x=184
+		y=80
+		width=23
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="us"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=184
+		y=97
+		width=23
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="us"
+	align="horiz. centered"
+}
+byte {
+	object {
+		x=123
+		y=78
+		width=10
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
+		clr=20
+		bclr=60
+	}
+	sbit=1
+	ebit=1
+}
+"text update" {
+	object {
+		x=83
+		y=78
+		width=40
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_WAIT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=133
+		y=117
+		width=50
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IRIGB_TIME"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=19
+		y=34
+		width=410
+		height=18
+	}
+	"basic attribute" {
+		clr=28
+	}
+}
+composite {
+	object {
+		x=25
+		y=34
+		width=22
+		height=17
 	}
 	"composite name"=""
 	children {
-		rectangle {
-			object {
-				x=19
-				y=21
-				width=813
-				height=105
-			}
-			"basic attribute" {
-				clr=2
-			}
-		}
-		rectangle {
-			object {
-				x=369
-				y=84
-				width=100
-				height=18
-			}
-			"basic attribute" {
-				clr=28
-			}
-		}
-		"text update" {
-			object {
-				x=133
-				y=65
-				width=50
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_USR_TIME"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		text {
-			object {
-				x=26
-				y=65
-				width=69
-				height=17
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="CYC/USR"
-		}
-		"text update" {
-			object {
-				x=133
-				y=84
-				width=50
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER_MAX"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=83
-				y=84
-				width=40
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		text {
-			object {
-				x=26
-				y=84
-				width=69
-				height=17
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="CPU Max"
-		}
 		byte {
-			object {
-				x=123
-				y=84
-				width=10
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
-				clr=20
-				bclr=60
-			}
-			sbit=3
-			ebit=3
-		}
-		text {
-			object {
-				x=184
-				y=67
-				width=23
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="us"
-			align="horiz. centered"
-		}
-		text {
-			object {
-				x=184
-				y=84
-				width=23
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="us"
-			align="horiz. centered"
-		}
-		byte {
-			object {
-				x=123
-				y=65
-				width=10
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
-				clr=20
-				bclr=60
-			}
-			sbit=1
-			ebit=1
-		}
-		"text update" {
-			object {
-				x=83
-				y=65
-				width=40
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_WAIT"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=133
-				y=104
-				width=50
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IRIGB_TIME"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		rectangle {
-			object {
-				x=19
-				y=21
-				width=410
-				height=18
-			}
-			"basic attribute" {
-				clr=28
-			}
-		}
-		composite {
 			object {
 				x=25
-				y=21
-				width=22
+				y=34
+				width=12
 				height=17
-			}
-			"composite name"=""
-			children {
-				byte {
-					object {
-						x=25
-						y=21
-						width=12
-						height=17
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
-						clr=20
-						bclr=60
-					}
-					sbit=0
-				}
-				rectangle {
-					object {
-						x=37
-						y=22
-						width=10
-						height=15
-					}
-					"basic attribute" {
-						clr=50
-					}
-					"dynamic attribute" {
-						vis="calc"
-						calc="a&1"
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_DIAG"
-					}
-				}
-			}
-		}
-		"text update" {
-			object {
-				x=100
-				y=24
-				width=100
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_DIAG"
-				clr=0
-				bclr=54
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		text {
-			object {
-				x=67
-				y=24
-				width=25
-				height=16
-			}
-			"basic attribute" {
-				clr=0
-			}
-			textix="GPS"
-			align="horiz. centered"
-		}
-		"text update" {
-			object {
-				x=83
-				y=104
-				width=40
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DUOTONE_TIME"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		text {
-			object {
-				x=26
-				y=104
-				width=50
-				height=17
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="DT/IRIG"
-		}
-		rectangle {
-			object {
-				x=126
-				y=44
-				width=65
-				height=18
-			}
-			"basic attribute" {
-				clr=20
-				fill="outline"
-				width=4
-			}
-			"dynamic attribute" {
-				vis="calc"
-				calc="((A&15)==0) || (A>15)"
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
-			}
-		}
-		text {
-			object {
-				x=133
-				y=46
-				width=50
-				height=16
-			}
-			"basic attribute" {
-				clr=14
-			}
-			"dynamic attribute" {
-				clr="discrete"
-				vis="calc"
-				calc="(A&2) == 2"
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
-			}
-			textix="1 PPS"
-			align="horiz. centered"
-		}
-		text {
-			object {
-				x=133
-				y=46
-				width=50
-				height=16
-			}
-			"basic attribute" {
-				clr=20
-			}
-			"dynamic attribute" {
-				vis="calc"
-				calc="(A&255) == 0"
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
-			}
-			textix="NO SYNC"
-			align="horiz. centered"
-		}
-		rectangle {
-			object {
-				x=126
-				y=44
-				width=65
-				height=18
-			}
-			"basic attribute" {
-				clr=60
-				fill="outline"
-				width=4
-			}
-			"dynamic attribute" {
-				vis="calc"
-				calc="(A>0) && (A<16)"
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
-			}
-		}
-		text {
-			object {
-				x=133
-				y=46
-				width=50
-				height=16
-			}
-			"basic attribute" {
-				clr=14
-			}
-			"dynamic attribute" {
-				vis="calc"
-				calc="(A&255) == 1"
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
-			}
-			textix="IRIG-B"
-			align="horiz. centered"
-		}
-		text {
-			object {
-				x=26
-				y=46
-				width=69
-				height=17
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Sync Source"
-		}
-		text {
-			object {
-				x=134
-				y=46
-				width=50
-				height=16
-			}
-			"basic attribute" {
-				clr=14
-			}
-			"dynamic attribute" {
-				vis="calc"
-				calc="A&4"
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
-			}
-			textix="TDS"
-			align="horiz. centered"
-		}
-		text {
-			object {
-				x=184
-				y=104
-				width=23
-				height=15
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="us"
-			align="horiz. centered"
-		}
-		byte {
-			object {
-				x=123
-				y=104
-				width=10
-				height=15
 			}
 			monitor {
 				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
 				clr=20
 				bclr=60
 			}
-			sbit=3
-			ebit=3
+			sbit=0
 		}
 		rectangle {
 			object {
-				x=429
-				y=21
-				width=403
-				height=18
+				x=37
+				y=35
+				width=10
+				height=15
 			}
 			"basic attribute" {
-				clr=28
-			}
-		}
-		meter {
-			object {
-				x=207
-				y=56
-				width=85
-				height=65
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER"
 				clr=50
-				bclr=42
-			}
-			label="limits"
-			limits {
-			}
-		}
-		"related display" {
-			object {
-				x=601
-				y=39
-				width=30
-				height=20
-			}
-			display[0] {
-				label="ADC_0"
-				name="/opt/rtcds/llo/l1/medm/MEDMDIR/FBID_MONITOR_ADC0.adl"
-			}
-			clr=0
-			bclr=28
-			label="D0"
-		}
-		byte {
-			object {
-				x=633
-				y=40
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_0"
-				clr=60
-				bclr=20
-			}
-			sbit=0
-		}
-		byte {
-			object {
-				x=645
-				y=40
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_0"
-				clr=60
-				bclr=20
-			}
-			sbit=1
-			ebit=1
-		}
-		"related display" {
-			object {
-				x=601
-				y=61
-				width=30
-				height=20
-			}
-			display[0] {
-				label="ADC_0"
-				name="/opt/rtcds/tst/x1/medm/x1x02/FBID_MONITOR_ADC0.adl"
-			}
-			clr=0
-			bclr=28
-			label="D1"
-		}
-		byte {
-			object {
-				x=633
-				y=62
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_1"
-				clr=60
-				bclr=20
-			}
-			sbit=0
-		}
-		byte {
-			object {
-				x=645
-				y=62
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_1"
-				clr=60
-				bclr=20
-			}
-			sbit=1
-			ebit=1
-		}
-		"related display" {
-			object {
-				x=601
-				y=83
-				width=30
-				height=20
-			}
-			display[0] {
-				label="ADC_0"
-				name="/opt/rtcds/tst/x1/medm/x1x02/FB_ID_MONITOR_ADC0.adl"
-			}
-			clr=0
-			bclr=43
-			label="D2"
-		}
-		byte {
-			object {
-				x=633
-				y=84
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_2"
-				clr=60
-				bclr=20
-			}
-			sbit=0
-		}
-		byte {
-			object {
-				x=645
-				y=84
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_2"
-				clr=60
-				bclr=20
-			}
-			sbit=1
-			ebit=1
-		}
-		"related display" {
-			object {
-				x=601
-				y=105
-				width=30
-				height=20
-			}
-			display[0] {
-				label="ADC_0"
-				name="/opt/rtcds/tst/x1/medm/x1x02/FB_ID_MONITOR_ADC0.adl"
-			}
-			clr=0
-			bclr=43
-			label="D3"
-		}
-		byte {
-			object {
-				x=633
-				y=106
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_3"
-				clr=60
-				bclr=20
-			}
-			sbit=0
-		}
-		byte {
-			object {
-				x=645
-				y=106
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_3"
-				clr=60
-				bclr=20
-			}
-			sbit=1
-			ebit=1
-		}
-		"related display" {
-			object {
-				x=485
-				y=39
-				width=30
-				height=20
-			}
-			display[0] {
-				label="ADC_0"
-				name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC0.adl"
-			}
-			clr=0
-			bclr=34
-			label="A0"
-		}
-		byte {
-			object {
-				x=517
-				y=40
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_0"
-				clr=60
-				bclr=20
-			}
-			sbit=0
-		}
-		byte {
-			object {
-				x=529
-				y=40
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_0"
-				clr=60
-				bclr=20
-			}
-			sbit=1
-			ebit=1
-		}
-		"related display" {
-			object {
-				x=485
-				y=61
-				width=30
-				height=20
-			}
-			display[0] {
-				label="ADC_0"
-				name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC0.adl"
-			}
-			clr=0
-			bclr=34
-			label="A1"
-		}
-		byte {
-			object {
-				x=517
-				y=62
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_1"
-				clr=60
-				bclr=20
-			}
-			sbit=0
-		}
-		byte {
-			object {
-				x=529
-				y=62
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_1"
-				clr=60
-				bclr=20
-			}
-			sbit=1
-			ebit=1
-		}
-		"related display" {
-			object {
-				x=485
-				y=83
-				width=30
-				height=20
-			}
-			display[0] {
-				label="ADC_0"
-				name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC0.adl"
-			}
-			clr=0
-			bclr=34
-			label="A2"
-		}
-		byte {
-			object {
-				x=517
-				y=84
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_2"
-				clr=60
-				bclr=20
-			}
-			sbit=0
-		}
-		byte {
-			object {
-				x=529
-				y=84
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_2"
-				clr=60
-				bclr=20
-			}
-			sbit=1
-			ebit=1
-		}
-		"related display" {
-			object {
-				x=485
-				y=105
-				width=30
-				height=20
-			}
-			display[0] {
-				label="ADC_0"
-				name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC0.adl"
-			}
-			clr=0
-			bclr=34
-			label="A3"
-		}
-		byte {
-			object {
-				x=517
-				y=106
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_3"
-				clr=60
-				bclr=20
-			}
-			sbit=0
-		}
-		byte {
-			object {
-				x=529
-				y=106
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_3"
-				clr=60
-				bclr=20
-			}
-			sbit=1
-			ebit=1
-		}
-		"related display" {
-			object {
-				x=542
-				y=39
-				width=30
-				height=20
-			}
-			display[0] {
-				label="ADC_0"
-				name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC4.adl"
-			}
-			clr=0
-			bclr=34
-			label="A4"
-		}
-		byte {
-			object {
-				x=574
-				y=40
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_4"
-				clr=60
-				bclr=20
-			}
-			sbit=0
-		}
-		byte {
-			object {
-				x=586
-				y=40
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_4"
-				clr=60
-				bclr=20
-			}
-			sbit=1
-			ebit=1
-		}
-		"related display" {
-			object {
-				x=542
-				y=61
-				width=30
-				height=20
-			}
-			display[0] {
-				label="ADC_0"
-				name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC5.adl"
-			}
-			clr=0
-			bclr=34
-			label="A5"
-		}
-		byte {
-			object {
-				x=574
-				y=62
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_5"
-				clr=60
-				bclr=20
-			}
-			sbit=0
-		}
-		byte {
-			object {
-				x=586
-				y=62
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_5"
-				clr=60
-				bclr=20
-			}
-			sbit=1
-			ebit=1
-		}
-		"related display" {
-			object {
-				x=542
-				y=83
-				width=30
-				height=20
-			}
-			display[0] {
-				label="ADC_0"
-				name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC6.adl"
-			}
-			clr=0
-			bclr=34
-			label="A6"
-		}
-		byte {
-			object {
-				x=574
-				y=84
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_6"
-				clr=60
-				bclr=20
-			}
-			sbit=0
-		}
-		byte {
-			object {
-				x=586
-				y=84
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_6"
-				clr=60
-				bclr=20
-			}
-			sbit=1
-			ebit=1
-		}
-		"related display" {
-			object {
-				x=542
-				y=105
-				width=30
-				height=20
-			}
-			display[0] {
-				label="ADC_0"
-				name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC7.adl"
-			}
-			clr=0
-			bclr=34
-			label="A7"
-		}
-		byte {
-			object {
-				x=574
-				y=106
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_7"
-				clr=60
-				bclr=20
-			}
-			sbit=0
-		}
-		byte {
-			object {
-				x=586
-				y=106
-				width=10
-				height=18
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_7"
-				clr=60
-				bclr=20
-			}
-			sbit=1
-			ebit=1
-		}
-		byte {
-			object {
-				x=394
-				y=106
-				width=40
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG1"
-				clr=20
-				bclr=60
-			}
-			sbit=0
-			ebit=3
-		}
-		text {
-			object {
-				x=386
-				y=86
-				width=50
-				height=14
-			}
-			"basic attribute" {
-				clr=0
-			}
-			textix="RT NET STAT"
-		}
-		"text update" {
-			object {
-				x=310
-				y=43
-				width=25
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_CHAN_CNT"
-				clr=0
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		text {
-			object {
-				x=308
-				y=25
-				width=110
-				height=12
-			}
-			"basic attribute" {
-				clr=0
-			}
-			textix="DCUID    Status  CPS   SUM"
-		}
-		rectangle {
-			object {
-				x=347
-				y=43
-				width=14
-				height=12
-			}
-			"basic attribute" {
-				clr=20
 			}
 			"dynamic attribute" {
-				vis="if not zero"
-				chan="SITE_NAME:DAQ-DC0_FBID_STATUS"
+				vis="calc"
+				calc="a&1"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_DIAG"
 			}
 		}
-		rectangle {
-			object {
-				x=347
-				y=43
-				width=14
-				height=12
-			}
-			"basic attribute" {
-				clr=60
-			}
-			"dynamic attribute" {
-				vis="if zero"
-				chan="SITE_NAME:DAQ-DC0_FBID_STATUS"
-			}
-		}
-		"text update" {
-			object {
-				x=364
-				y=56
-				width=35
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_CHAN_CNT"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=404
-				y=56
-				width=35
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_TOTAL"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=444
-				y=56
-				width=35
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAQ_BYTE_COUNT"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		byte {
-			object {
-				x=347
-				y=56
-				width=14
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FB_NET_STATUS"
-				clr=60
-				bclr=20
-			}
-			direction="down"
-			sbit=0
-			ebit=1
-		}
-		"text update" {
-			object {
-				x=364
-				y=43
-				width=35
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:DAQ-DC0_FBID_STATUS"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			format="hexadecimal"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=404
-				y=43
-				width=35
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:DAQ-DC0_FBID_CRC_CPS"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=444
-				y=43
-				width=35
-				height=15
-			}
-			monitor {
-				chan="SITE_NAME:DAQ-DC0_FBID_CRC_SUM"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		byte {
-			object {
-				x=300
-				y=101
-				width=47
-				height=22
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_BURT_RESTORE"
-				clr=60
-				bclr=20
-			}
-			sbit=0
-		}
-		"message button" {
-			object {
-				x=306
-				y=102
-				width=35
-				height=20
-			}
-			control {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_BURT_RESTORE"
-				clr=0
-				bclr=44
-			}
-			label="BURT"
-			press_msg="1"
-		}
-		"related display" {
-			object {
-				x=206
-				y=38
-				width=90
-				height=18
-			}
-			display[0] {
-				label="ADC_0"
-				name="/opt/rtcds/LOCATION_NAME/l1/medm/L1_PSL0_MONITOR.adl"
-			}
-			clr=0
-			bclr=44
-			label="FBID"
-		}
-		"message button" {
-			object {
-				x=306
-				y=77
-				width=35
-				height=20
-			}
-			control {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_RESET"
-				clr=0
-				bclr=42
-			}
-			label="DiagR"
-			release_msg="1"
-		}
-		"text update" {
-			object {
-				x=666
-				y=40
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_0"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=666
-				y=57
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_1"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=666
-				y=74
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_2"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=666
-				y=91
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_3"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=666
-				y=108
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_4"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=721
-				y=40
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_5"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=721
-				y=57
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_6"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=721
-				y=74
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_7"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=721
-				y=91
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_8"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=721
-				y=108
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_9"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=778
-				y=40
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_10"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=778
-				y=57
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_11"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=778
-				y=74
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_12"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=778
-				y=91
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_13"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=778
-				y=108
-				width=50
-				height=16
-			}
-			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_14"
-				clr=50
-				bclr=42
-			}
-			align="horiz. centered"
-			limits {
-			}
-		}
-		text {
-			object {
-				x=691
-				y=24
-				width=105
-				height=12
-			}
-			"basic attribute" {
-				clr=0
-			}
-			textix="Test Points"
-			align="horiz. centered"
-		}
-		text {
-			object {
-				x=520
-				y=24
-				width=105
-				height=12
-			}
-			"basic attribute" {
-				clr=0
-			}
-			textix="I/O Status"
-			align="horiz. centered"
-		}
+	}
+}
+"text update" {
+	object {
+		x=100
+		y=37
+		width=100
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_DIAG"
+		clr=0
+		bclr=54
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=67
+		y=37
+		width=25
+		height=16
+	}
+	"basic attribute" {
+		clr=0
+	}
+	textix="GPS"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=83
+		y=117
+		width=40
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DUOTONE_TIME"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=26
+		y=117
+		width=50
+		height=17
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="DT/IRIG"
+}
+rectangle {
+	object {
+		x=126
+		y=57
+		width=65
+		height=18
+	}
+	"basic attribute" {
+		clr=20
+		fill="outline"
+		width=4
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="((A&15)==0) || (A>15)"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
+	}
+}
+text {
+	object {
+		x=133
+		y=59
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	"dynamic attribute" {
+		clr="discrete"
+		vis="calc"
+		calc="(A&2) == 2"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
+	}
+	textix="1 PPS"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=133
+		y=59
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(A&255) == 0"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
+	}
+	textix="NO SYNC"
+	align="horiz. centered"
+}
+rectangle {
+	object {
+		x=126
+		y=57
+		width=65
+		height=18
+	}
+	"basic attribute" {
+		clr=60
+		fill="outline"
+		width=4
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(A>0) && (A<16)"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
+	}
+}
+text {
+	object {
+		x=133
+		y=59
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(A&255) == 1"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
+	}
+	textix="IRIG-B"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=26
+		y=59
+		width=69
+		height=17
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Sync Source"
+}
+text {
+	object {
+		x=134
+		y=59
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A&4"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
+	}
+	textix="TDS"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=184
+		y=117
+		width=23
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="us"
+	align="horiz. centered"
+}
+byte {
+	object {
+		x=123
+		y=117
+		width=10
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
+		clr=20
+		bclr=60
+	}
+	sbit=3
+	ebit=3
+}
+rectangle {
+	object {
+		x=429
+		y=34
+		width=403
+		height=18
+	}
+	"basic attribute" {
+		clr=28
+	}
+}
+meter {
+	object {
+		x=207
+		y=69
+		width=85
+		height=65
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER"
+		clr=50
+		bclr=42
+	}
+	label="limits"
+	limits {
+	}
+}
+"related display" {
+	object {
+		x=601
+		y=52
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/llo/l1/medm/MEDMDIR/FBID_MONITOR_ADC0.adl"
+	}
+	clr=0
+	bclr=28
+	label="D0"
+}
+byte {
+	object {
+		x=633
+		y=53
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_0"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+}
+byte {
+	object {
+		x=645
+		y=53
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_0"
+		clr=60
+		bclr=20
+	}
+	sbit=1
+	ebit=1
+}
+"related display" {
+	object {
+		x=601
+		y=79
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/tst/x1/medm/x1x02/FBID_MONITOR_ADC0.adl"
+	}
+	clr=0
+	bclr=28
+	label="D1"
+}
+byte {
+	object {
+		x=633
+		y=80
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_1"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+}
+byte {
+	object {
+		x=645
+		y=80
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_1"
+		clr=60
+		bclr=20
+	}
+	sbit=1
+	ebit=1
+}
+"related display" {
+	object {
+		x=601
+		y=104
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/tst/x1/medm/x1x02/FB_ID_MONITOR_ADC0.adl"
+	}
+	clr=0
+	bclr=43
+	label="D2"
+}
+byte {
+	object {
+		x=633
+		y=105
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_2"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+}
+byte {
+	object {
+		x=645
+		y=105
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_2"
+		clr=60
+		bclr=20
+	}
+	sbit=1
+	ebit=1
+}
+"related display" {
+	object {
+		x=601
+		y=129
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/tst/x1/medm/x1x02/FB_ID_MONITOR_ADC0.adl"
+	}
+	clr=0
+	bclr=43
+	label="D3"
+}
+byte {
+	object {
+		x=633
+		y=130
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_3"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+}
+byte {
+	object {
+		x=645
+		y=130
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_3"
+		clr=60
+		bclr=20
+	}
+	sbit=1
+	ebit=1
+}
+"related display" {
+	object {
+		x=485
+		y=52
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC0.adl"
+	}
+	clr=0
+	bclr=34
+	label="A0"
+}
+byte {
+	object {
+		x=517
+		y=53
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_0"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+}
+byte {
+	object {
+		x=529
+		y=53
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_0"
+		clr=60
+		bclr=20
+	}
+	sbit=1
+	ebit=1
+}
+"related display" {
+	object {
+		x=485
+		y=78
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC0.adl"
+	}
+	clr=0
+	bclr=34
+	label="A1"
+}
+byte {
+	object {
+		x=517
+		y=80
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_1"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+}
+byte {
+	object {
+		x=529
+		y=80
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_1"
+		clr=60
+		bclr=20
+	}
+	sbit=1
+	ebit=1
+}
+"related display" {
+	object {
+		x=485
+		y=104
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC0.adl"
+	}
+	clr=0
+	bclr=34
+	label="A2"
+}
+byte {
+	object {
+		x=517
+		y=105
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_2"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+}
+byte {
+	object {
+		x=529
+		y=105
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_2"
+		clr=60
+		bclr=20
+	}
+	sbit=1
+	ebit=1
+}
+"related display" {
+	object {
+		x=485
+		y=129
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC0.adl"
+	}
+	clr=0
+	bclr=34
+	label="A3"
+}
+byte {
+	object {
+		x=517
+		y=130
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_3"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+}
+byte {
+	object {
+		x=529
+		y=130
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_3"
+		clr=60
+		bclr=20
+	}
+	sbit=1
+	ebit=1
+}
+"related display" {
+	object {
+		x=542
+		y=52
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC4.adl"
+	}
+	clr=0
+	bclr=34
+	label="A4"
+}
+byte {
+	object {
+		x=574
+		y=53
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_4"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+}
+byte {
+	object {
+		x=586
+		y=53
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_4"
+		clr=60
+		bclr=20
+	}
+	sbit=1
+	ebit=1
+}
+"related display" {
+	object {
+		x=542
+		y=78
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC5.adl"
+	}
+	clr=0
+	bclr=34
+	label="A5"
+}
+byte {
+	object {
+		x=574
+		y=80
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_5"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+}
+byte {
+	object {
+		x=586
+		y=80
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_5"
+		clr=60
+		bclr=20
+	}
+	sbit=1
+	ebit=1
+}
+"related display" {
+	object {
+		x=542
+		y=104
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC6.adl"
+	}
+	clr=0
+	bclr=34
+	label="A6"
+}
+byte {
+	object {
+		x=574
+		y=105
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_6"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+}
+byte {
+	object {
+		x=586
+		y=105
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_6"
+		clr=60
+		bclr=20
+	}
+	sbit=1
+	ebit=1
+}
+"related display" {
+	object {
+		x=542
+		y=129
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_MONITOR_ADC7.adl"
+	}
+	clr=0
+	bclr=34
+	label="A7"
+}
+byte {
+	object {
+		x=574
+		y=130
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_7"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+}
+byte {
+	object {
+		x=586
+		y=130
+		width=10
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_7"
+		clr=60
+		bclr=20
+	}
+	sbit=1
+	ebit=1
+}
+byte {
+	object {
+		x=434
+		y=91
+		width=40
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG1"
+		clr=20
+		bclr=60
+	}
+	sbit=0
+	ebit=3
+}
+text {
+	object {
+		x=320
+		y=92
+		width=50
+		height=14
+	}
+	"basic attribute" {
+		clr=0
+	}
+	textix="RT NET STAT"
+}
+"text update" {
+	object {
+		x=310
+		y=56
+		width=25
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_DCU_ID"
+		clr=0
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=308
+		y=38
+		width=110
+		height=12
+	}
+	"basic attribute" {
+		clr=0
+	}
+	textix="DCUID    Status  CPS   SUM"
+}
+rectangle {
+	object {
+		x=347
+		y=56
+		width=14
+		height=12
+	}
+	"basic attribute" {
+		clr=20
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="SITE_NAME:DAQ-DC0_FBID_STATUS"
+	}
+}
+rectangle {
+	object {
+		x=347
+		y=56
+		width=14
+		height=12
+	}
+	"basic attribute" {
+		clr=60
+	}
+	"dynamic attribute" {
+		vis="if zero"
+		chan="SITE_NAME:DAQ-DC0_FBID_STATUS"
+	}
+}
+"text update" {
+	object {
+		x=364
+		y=69
+		width=35
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_CHAN_CNT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=404
+		y=69
+		width=35
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_TOTAL"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=444
+		y=69
+		width=35
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAQ_BYTE_COUNT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+byte {
+	object {
+		x=347
+		y=69
+		width=14
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FB_NET_STATUS"
+		clr=60
+		bclr=20
+	}
+	direction="down"
+	sbit=0
+	ebit=1
+}
+"text update" {
+	object {
+		x=364
+		y=56
+		width=35
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:DAQ-DC0_FBID_STATUS"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	format="hexadecimal"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=404
+		y=56
+		width=35
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:DAQ-DC0_FBID_CRC_CPS"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=444
+		y=56
+		width=35
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:DAQ-DC0_FBID_CRC_SUM"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+byte {
+	object {
+		x=225
+		y=135
+		width=47
+		height=22
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_BURT_RESTORE"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+}
+"message button" {
+	object {
+		x=231
+		y=136
+		width=35
+		height=20
+	}
+	control {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_BURT_RESTORE"
+		clr=0
+		bclr=44
+	}
+	label="BURT"
+	press_msg="1"
+}
+"related display" {
+	object {
+		x=206
+		y=51
+		width=90
+		height=18
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/LOCATION_NAME/l1/medm/L1_PSL0_MONITOR.adl"
+	}
+	clr=0
+	bclr=44
+	label="FBID"
+}
+"message button" {
+	object {
+		x=87
+		y=136
+		width=90
+		height=20
+	}
+	control {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_RESET"
+		clr=0
+		bclr=44
+	}
+	label="Diag Reset"
+	release_msg="1"
+}
+"text update" {
+	object {
+		x=666
+		y=58
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_0"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=666
+		y=76
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_1"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=666
+		y=94
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_2"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=666
+		y=112
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_3"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=666
+		y=130
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_4"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=721
+		y=58
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_5"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=721
+		y=76
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_6"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=721
+		y=94
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_7"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=721
+		y=112
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_8"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=721
+		y=130
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_9"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=778
+		y=58
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_10"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=778
+		y=76
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_11"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=778
+		y=94
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_12"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=778
+		y=112
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_13"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=778
+		y=130
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_14"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=691
+		y=37
+		width=105
+		height=12
+	}
+	"basic attribute" {
+		clr=0
+	}
+	textix="Test Points"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=520
+		y=37
+		width=105
+		height=12
+	}
+	"basic attribute" {
+		clr=0
+	}
+	textix="I/O Status"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=337
+		y=4
+		width=200
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="FBID_GDS_TP"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=705
+		y=4
+		width=120
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_STRING"
+		clr=2
+		bclr=54
+	}
+	limits {
+	}
+}
+"message button" {
+	object {
+		x=343
+		y=136
+		width=90
+		height=20
+	}
+	control {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_LOAD_NEW_COEFF"
+		clr=0
+		bclr=44
+	}
+	label="Coeff Reload"
+	release_msg="1"
+}
+"text update" {
+	object {
+		x=295
+		y=116
+		width=187
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_MSG"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
 	}
 }
