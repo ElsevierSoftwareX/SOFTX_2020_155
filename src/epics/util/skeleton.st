@@ -665,7 +665,7 @@ state monScreen{
 		    update_labels(ii);
 %%		    break;
 %%		 }
-%%		 usleep(100);
+%%		 usleep(500);
 %%	       }
 %%	       if (kk == 2000) {
 		 strcpy(msg, "Error: front-end timeout");
