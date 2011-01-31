@@ -89,7 +89,7 @@ CDS_HARDWARE cdsPciModules;
       }
    
       system_name[0] = 0;
-      while ((c = getopt (argc, argv, "h?ta248s:")) != EOF) {
+      while ((c = getopt (argc, argv, "h?ta248s:l:")) != EOF) {
          switch (c) {
 	    case 's':
 		if (strlen(optarg) > (PARAM_ENTRY_LEN-2)) {
@@ -115,6 +115,12 @@ CDS_HARDWARE cdsPciModules;
 		 run_tpman = 0;
 		 break;
 	       }
+	    case 'l':
+	    	{
+			freopen(optarg, "w", stdout);
+			freopen(optarg, "w", stderr);
+			break;
+		}
 	    case '2':
 	    case '4':
 	    case '8':
@@ -131,6 +137,7 @@ CDS_HARDWARE cdsPciModules;
          printf ("Usage: awgtpman\n"
 	        "	Starts awg and tpman on a unix machine\n"
                 "	-h : help\n"
+                "	-l file_name : specify log file name\n"
 		"	-s system_name : specify control system name\n"
 		"	-t : run tpman, no awg\n"
 		"	-a : run awg, no tpman\n"
