@@ -864,6 +864,7 @@ inline void checkFiltResetId(int bankNum, FILT_MOD *pL, volatile FILT_MOD *dspVm
   if (filtResetId[id].fmResetCoeff) {
     /* Coeff reset in progress */
     if (filtResetId[id].fmResetDsp == pL) { /* Coeff reset is done for this subsystem */
+      /* printf("Coeff reset done\n"); */
       filtResetId[id].fmSubCounter = readCoefVme2(pC, pL, (filtResetId[id].fmResetCoeff - 1), filtResetId[id].fmResetCounter, filtResetId[id].fmSubCounter, pRfmCoeff, filtResetId[id].changed);
       if (filtResetId[id].fmSubCounter == -1) {
 	dspVme->coef_load_error = -1;
@@ -874,6 +875,7 @@ inline void checkFiltResetId(int bankNum, FILT_MOD *pL, volatile FILT_MOD *dspVm
 	if (filtResetId[id].fmResetCounter >= FILTERS) {
 	  filtResetId[id].fmResetCounter = 0;
 	  dspVme->coef_load_error = filtResetId[id].fmResetCoeff;
+	  /* printf("dspVme->coef_load_error = %d\n", dspVme->coef_load_error ); */
 	  filtResetId[id].fmResetCoeff = 0;
 	}
       }
@@ -912,7 +914,7 @@ inline void checkFiltResetId(int bankNum, FILT_MOD *pL, volatile FILT_MOD *dspVm
 
     /* Check if new coeffs */
     if (status & 1) {
-      // printf("New coeff request; bank=%d \n", bankNum);
+      /* printf("New coeff request; bank=%d \n", bankNum); */
       filtResetId[id].fmResetCoeff = bankNum + 1;
       filtResetId[id].fmResetDsp = pL;
     } else filtResetId[id].fmResetCoeff = 0;
