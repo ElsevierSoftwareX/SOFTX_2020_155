@@ -2181,6 +2181,7 @@ print OUTH "\tint dacValue[12][16];\n";
 print OUTH "\tint ovAccum;\n";
 print OUTH "\tint statAdc[16];\n";
 print OUTH "\tint statDac[16];\n";
+print OUTH "\tint awgtpmanGPS;\n";
 print OUTH "} CDS_EPICS_OUT;\n\n";
 if($useWd)
 {
@@ -2245,6 +2246,7 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ai 0\n
 print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT epicsOutput.diags[7] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_MASTER_STAT epicsOutput.diags[8] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_AWGTPMAN_STAT epicsOutput.diags[9] int ai 0\n";
 print EPICS "\n\n";
 #Load EPICS I/O Parts
 for($ii=0;$ii<$partCnt;$ii++)
@@ -3445,6 +3447,7 @@ $sysname = uc($skeleton);
 $sed_arg .= "s/FBID/$sysname/g;";
 $sed_arg .= "s/MEDMDIR/$skeleton/g;";
 system("cat GDS_TP.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
+system("cat DAC_MONITOR.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR.adl");
 my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
 
