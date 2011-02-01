@@ -40,7 +40,8 @@ parse_args (int argc, char *argv [])
         break;
       case 'l':
         freopen(optarg, "w", stdout);
-        freopen(optarg, "w", stderr);
+	setvbuf(stdout, NULL, _IOLBF, 0);
+	stderr = stdout;
 	break;
       default:
         usage (1);
