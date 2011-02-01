@@ -201,8 +201,8 @@ CDS_HARDWARE cdsPciModules;
 		strcpy(site_name_lower, "lho");
 		break;
 	case 'l':
-		strcpy(site_prefix_storage, "G");
-		strcpy(site_name_lower, "geo");
+		strcpy(site_prefix_storage, "L");
+		strcpy(site_name_lower, "llo");
 		break;
 	case 'c':
 		strcpy(site_prefix_storage, "C");
