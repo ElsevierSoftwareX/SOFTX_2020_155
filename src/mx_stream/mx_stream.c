@@ -153,11 +153,10 @@ do {
 			   1000, &dest);
 			   // MX_INFINITE, &dest);
 		if (conStat != MX_SUCCESS) {
-			// fprintf(stderr, "mx_connect failed\n");
+			fprintf(stderr, "mx_connect failed\n");
 			myErrorSignal = 1;
-			// usleep(1000000);
 			for (int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= 1;
-			// exit(1);
+			 exit(1);
 		}
 		else {
 			myErrorSignal = 0;
