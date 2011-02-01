@@ -552,11 +552,11 @@ typedef struct SYMCOM_REGISTER{
 #define TSYNC_USEC		0x2
 #define TSYNC_RCVR		0x2
 typedef struct TSYNC_REGISTER{
-	unsigned int SUPER_SEC_LOW;
-	unsigned int SUPER_SEC_HIGH;
-	unsigned int SUB_SEC;
-	unsigned int BCD_SEC;
-	unsigned int BCD_SUB_SEC;
+	unsigned int SUPER_SEC_LOW;	// Host Super-Sec Low + Mid Low
+	unsigned int SUPER_SEC_HIGH;	// Host Super-Sec Mid High + High
+	unsigned int SUB_SEC;		// Sub-Second Low + High
+	unsigned int BCD_SEC;		// Super Second binary time
+	unsigned int BCD_SUB_SEC;	// Sub Second binary time
 }TSYNC_REGISTER;
 
 /* Standard structure to maintain PCI module information.			*/
