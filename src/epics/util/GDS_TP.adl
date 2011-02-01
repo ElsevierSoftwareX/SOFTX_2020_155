@@ -5,8 +5,8 @@ file {
 }
 display {
 	object {
-		x=59
-		y=260
+		x=49
+		y=302
 		width=850
 		height=170
 	}
@@ -89,17 +89,6 @@ display {
 }
 rectangle {
 	object {
-		x=0
-		y=0
-		width=850
-		height=22
-	}
-	"basic attribute" {
-		clr=54
-	}
-}
-rectangle {
-	object {
 		x=19
 		y=34
 		width=813
@@ -107,6 +96,17 @@ rectangle {
 	}
 	"basic attribute" {
 		clr=2
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=0
+		width=850
+		height=22
+	}
+	"basic attribute" {
+		clr=54
 	}
 }
 rectangle {
@@ -565,21 +565,6 @@ meter {
 	limits {
 	}
 }
-"related display" {
-	object {
-		x=601
-		y=52
-		width=30
-		height=20
-	}
-	display[0] {
-		label="ADC_0"
-		name="/opt/rtcds/llo/l1/medm/MEDMDIR/FBID_MONITOR_ADC0.adl"
-	}
-	clr=0
-	bclr=28
-	label="D0"
-}
 byte {
 	object {
 		x=633
@@ -608,21 +593,6 @@ byte {
 	}
 	sbit=1
 	ebit=1
-}
-"related display" {
-	object {
-		x=601
-		y=79
-		width=30
-		height=20
-	}
-	display[0] {
-		label="ADC_0"
-		name="/opt/rtcds/tst/x1/medm/x1x02/FBID_MONITOR_ADC0.adl"
-	}
-	clr=0
-	bclr=28
-	label="D1"
 }
 byte {
 	object {
@@ -653,21 +623,6 @@ byte {
 	sbit=1
 	ebit=1
 }
-"related display" {
-	object {
-		x=601
-		y=104
-		width=30
-		height=20
-	}
-	display[0] {
-		label="ADC_0"
-		name="/opt/rtcds/tst/x1/medm/x1x02/FB_ID_MONITOR_ADC0.adl"
-	}
-	clr=0
-	bclr=43
-	label="D2"
-}
 byte {
 	object {
 		x=633
@@ -696,21 +651,6 @@ byte {
 	}
 	sbit=1
 	ebit=1
-}
-"related display" {
-	object {
-		x=601
-		y=129
-		width=30
-		height=20
-	}
-	display[0] {
-		label="ADC_0"
-		name="/opt/rtcds/tst/x1/medm/x1x02/FB_ID_MONITOR_ADC0.adl"
-	}
-	clr=0
-	bclr=43
-	label="D3"
 }
 byte {
 	object {
@@ -1110,7 +1050,7 @@ byte {
 }
 text {
 	object {
-		x=320
+		x=364
 		y=92
 		width=50
 		height=14
@@ -1293,8 +1233,8 @@ byte {
 }
 byte {
 	object {
-		x=225
-		y=135
+		x=429
+		y=136
 		width=47
 		height=22
 	}
@@ -1307,8 +1247,8 @@ byte {
 }
 "message button" {
 	object {
-		x=231
-		y=136
+		x=435
+		y=137
 		width=35
 		height=20
 	}
@@ -1337,9 +1277,9 @@ byte {
 }
 "message button" {
 	object {
-		x=87
-		y=136
-		width=90
+		x=340
+		y=137
+		width=70
 		height=20
 	}
 	control {
@@ -1646,9 +1586,9 @@ text {
 }
 "message button" {
 	object {
-		x=343
-		y=136
-		width=90
+		x=22
+		y=137
+		width=70
 		height=20
 	}
 	control {
@@ -1656,14 +1596,14 @@ text {
 		clr=0
 		bclr=44
 	}
-	label="Coeff Reload"
+	label="Coeff Load"
 	release_msg="1"
 }
 "text update" {
 	object {
-		x=295
-		y=116
-		width=187
+		x=95
+		y=139
+		width=195
 		height=18
 	}
 	monitor {
@@ -1674,4 +1614,151 @@ text {
 	align="horiz. centered"
 	limits {
 	}
+}
+text {
+	object {
+		x=134
+		y=59
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A&8"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR"
+	}
+	textix="IOP"
+	align="horiz. centered"
+}
+rectangle {
+	object {
+		x=294
+		y=113
+		width=187
+		height=18
+	}
+	"basic attribute" {
+		clr=28
+	}
+}
+"text update" {
+	object {
+		x=405
+		y=113
+		width=70
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ACCUM_OVERFLOW"
+		clr=50
+		bclr=28
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"message button" {
+	object {
+		x=294
+		y=112
+		width=110
+		height=18
+	}
+	control {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OVERFLOW_RESET"
+		clr=0
+		bclr=44
+	}
+	label="ADC/DAC OVERFLOWS"
+	release_msg="1"
+}
+"related display" {
+	object {
+		x=599
+		y=52
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_DAC_MONITOR.adl"
+	}
+	clr=0
+	bclr=44
+	label="D0"
+}
+"related display" {
+	object {
+		x=599
+		y=78
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_DAC_MONITOR.adl"
+	}
+	clr=0
+	bclr=44
+	label="D1"
+}
+"related display" {
+	object {
+		x=599
+		y=104
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_DAC_MONITOR.adl"
+	}
+	clr=0
+	bclr=44
+	label="D2"
+}
+"related display" {
+	object {
+		x=599
+		y=129
+		width=30
+		height=20
+	}
+	display[0] {
+		label="ADC_0"
+		name="/opt/rtcds/LOCATION_NAME/l1/medm/MEDMDIR/FBID_DAC_MONITOR.adl"
+	}
+	clr=0
+	bclr=44
+	label="D4"
+}
+text {
+	object {
+		x=298
+		y=92
+		width=20
+		height=14
+	}
+	"basic attribute" {
+		clr=0
+	}
+	textix="AWG"
+}
+byte {
+	object {
+		x=326
+		y=91
+		width=10
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_AWGTPMAN_STAT"
+		clr=20
+		bclr=60
+	}
+	sbit=3
+	ebit=3
 }
