@@ -24,7 +24,9 @@ signed32 session_callback(session_cb_arg_t IN arg,
 			  unsigned32 IN local_adapter_number) {
   printkl("Session callback reason=%d status=%d target_node=%d\n", reason, status, target_node);
   if (reason == SR_OK) iop_rfm_valid = 1;
-  if (reason == SR_DISABLED || reason == SR_LOST) iop_rfm_valid = 0;
+  // This is being called when the one of the other nodes is prepared for shutdown
+  // :TODO: may need to check target_node == <our local node>
+  //if (reason == SR_DISABLED || reason == SR_LOST) iop_rfm_valid = 0;
   return 0;
 }
 
@@ -89,7 +91,7 @@ init_dolphin(int target_node) {
   udelay(20000);
   
   err = sci_connect_segment(NO_BINDING,
-			    target_node,
+			    4, // DIS_BROADCAST_NODEID_GROUP_ALL
 			    0,
 			    0,
 			    1, 
