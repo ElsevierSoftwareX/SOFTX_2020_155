@@ -77,6 +77,8 @@ extern int iop_rfm_valid;
 #define FE_DIAGS_ADC_STAT	6
 #define FE_DIAGS_DAC_STAT	7
 #define FE_DIAGS_DAC_MASTER_STAT	8
+#define FE_DIAGS_AWGTPMAN	9
+
 #define MMAP_SIZE (64*1024*1024 - 5000)
 volatile char *_epics_shm;		// Ptr to EPICS shared memory
 char *_ipc_shm;			// Ptr to inter-process communication area 
@@ -469,11 +471,11 @@ int  getGpsTimeTsync(unsigned int *tsyncSec, unsigned int *tsyncUsec) {
   if (cdsPciModules.gps) {
 	timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
 	timeSec = timeRead->BCD_SEC;
-	timeSec -= 345585;
-	*tsyncSec = timeSec;
+	*tsyncSec = timeSec +    31190400;
 	timeNsec = timeRead->SUB_SEC;
 	*tsyncUsec = ((timeNsec & 0xfffffff) * 5) / 1000; 
 	sync = ((timeNsec >> 31) & 0x1) + 1;
+	// printf("time = %u %u %d\n",timeSec,(timeNsec & 0xffffff),((timeNsec & 0xffffff)/200));
   	return(sync);
   }
   return(0);
@@ -1257,6 +1259,9 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 #endif
        if(clock16K == 0)
         {
+	  //printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
+	  pLocalEpics->epicsOutput.diags[9] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
+
 	  // Increment GPS second on cycle 0
 #ifndef ADC_SLAVE
           timeSec ++;
@@ -1529,6 +1534,7 @@ rfmDone = 0;
                         // if(kk >= 1000)
                         {
                                 printf ("ADC TIMEOUT %d %d %d %d\n",mm,ioMemData->iodata[mm][ioMemCntr].cycle, ioMemCntr,ioClock);
+	  			pLocalEpics->epicsOutput.diagWord |= 0x1;
   				return (void *)-1;
                         }
                         for(ii=0;ii<32;ii++)
@@ -2097,6 +2103,7 @@ rfmDone = 0;
   }
 
   printf("exiting from fe_code()\n");
+  pLocalEpics->epicsOutput.cpuMeter = 0;
 
   /* System reset command received */
   return (void *)-1;
@@ -2168,6 +2175,16 @@ procfile_read(char *buffer,
 	return ret;
 }
 
+/* Track dependency between the IOP and the slaves */
+#ifdef ADC_MASTER
+int need_to_load_IOP_first;
+EXPORT_SYMBOL(need_to_load_IOP_first);
+#endif
+#ifdef ADC_SLAVE
+extern int need_to_load_IOP_first;
+#endif
+
+
 int init_module (void)
 #else
 int main(int argc, char **argv)
@@ -2186,6 +2203,22 @@ int main(int argc, char **argv)
 	int do32Cnt;
 	int doIIRO16Cnt;
 
+#ifdef ADC_SLAVE
+	need_to_load_IOP_first = 0;
+#endif
+
+#ifdef DOLPHIN_TEST
+#ifdef X1X14_CODE
+	static const target_node = 8; //DIS_TARGET_NODE;
+#else
+	static const target_node = 12; //DIS_TARGET_NODE;
+#endif
+	status = init_dolphin(target_node);
+	if (status != 0) {
+		return -1;
+	}
+#endif
+
 	proc_entry = create_proc_entry(SYSTEM_NAME_STRING_LOWER, 0644, NULL);
 	
 	if (proc_entry == NULL) {
@@ -2203,14 +2236,6 @@ int main(int argc, char **argv)
 	proc_entry->size 	 = 10240;
 
 	printf("startup time is %ld\n", current_time());
-#ifdef DOLPHIN_TEST
-#ifdef X1X14_CODE
-	static const target_node = 8; //DIS_TARGET_NODE;
-#else
-	static const target_node = 12; //DIS_TARGET_NODE;
-#endif
-	status = init_dolphin(target_node);
-#endif
 	jj = 0;
 	printf("cpu clock %u\n",cpu_khz);
 
@@ -2437,7 +2462,7 @@ int main(int argc, char **argv)
 	if(!cdsPciModules.adcCount)
 	{
 		printf("No ADC cards found - exiting\n");
-		return 0;
+		return -1;
 	}
 	// This did not quite work for some reason
 	// Need to find a way to handle skipped DAC cards in slaves
@@ -2672,7 +2697,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	numFb = cdsDaqNetInit(2);
 	if (numFb <= 0) {
 		printf("Couldn't initialize Myrinet network connection\n");
-		return 0;
+		return -1;
 	}
 	printf("Found %d frameBuilders on network\n",numFb);
 #endif
@@ -2691,7 +2716,14 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
         	printf("Epics burt restore is %d\n", pLocalEpics->epicsInput.burtRestore);
         	msleep(1000);
 	}
-	if (cnt == 10) return -1;
+	if (cnt == 10) {
+		// Cleanup
+		remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
+#ifdef DOLPHIN_TEST
+		finish_dolphin();
+#endif
+		return -1;
+	}
 
         pLocalEpics->epicsInput.vmeReset = 0;
 
@@ -2700,7 +2732,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
         p = kthread_create(fe_start, 0, "fe_start/%d", CPUID);
         if (IS_ERR(p)){
                 printf("Failed to kthread_create()\n");
-                return 1;
+                return -1;
         }
         kthread_bind(p, CPUID);
         wake_up_process(p);
