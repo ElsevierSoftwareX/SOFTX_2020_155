@@ -689,6 +689,9 @@ static char *versionId = "Version $Id$" ;
 
       //int timeSec = ioMemData->gpsSecond;
       //printf("TimeSec=%d; timeCycle=%d,  cycle=%d\n", timeSec, timeCycle, ioMemData->iodata[ll][0].cycle);
+       // Send gps seconds to the front-end
+       rmWrite (0, ioMemDataGPS, 0, 4, 0);
+
 
       }
    }
