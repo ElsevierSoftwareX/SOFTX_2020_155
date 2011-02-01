@@ -16,7 +16,10 @@ typedef struct FEFE_COMMS{
 #define FE2FE_OFFSET	0x10000
 
 typedef struct RFM_FE_COMMS {
-    char pad[0x1000];			/* Reserved for 5579 cntrl reg */
+    union {
+      char pad[0x1000];			/* Reserved for 5579 cntrl reg */
+      unsigned int awgtpman_gps;
+    } padSpace;
     union{				/* Starts at 	0x0000 0040 */
       char sysepics[0x100000];
       CDS_EPICS epicsShm;
