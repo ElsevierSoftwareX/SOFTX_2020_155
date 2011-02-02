@@ -2291,13 +2291,17 @@ if($rate == 480 || $rate == 240) {
 }
 
 $dac_testpoint_names = "";
+
+$pref = uc(substr($skeleton, 5, length $skeleton));
+
 for($ii = 0; $ii < $dacCnt; $ii++) {
    for($jj = 0; $jj < 16; $jj++) {
-	$dac_testpoint_names .= "MDAC". $ii . "_TP_CH" . $jj . " ";
+	$dac_testpoint_names .= "${pref}_MDAC". $ii . "_TP_CH" . $jj . " ";
    }
 }
 
-print EPICS "test_points ONE_PPS $dac_testpoint_names $::extraTestPoints\n";
+print EPICS "test_points $dac_testpoint_names $::extraTestPoints\n";
+#print EPICS "test_points $::extraTestPoints\n";
 if ($::extraExcitations) {
 	print EPICS "excitations $::extraExcitations\n";
 }
