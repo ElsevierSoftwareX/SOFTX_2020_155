@@ -89,7 +89,7 @@ CDS_HARDWARE cdsPciModules;
       }
    
       system_name[0] = 0;
-      while ((c = getopt (argc, argv, "h?ta1248s:l:")) != EOF) {
+      while ((c = getopt (argc, argv, "h?ta01248s:l:")) != EOF) {
          switch (c) {
 	    case 's':
 		if (strlen(optarg) > (PARAM_ENTRY_LEN-2)) {
@@ -133,6 +133,11 @@ CDS_HARDWARE cdsPciModules;
 		 sys_freq_mult *= c - '0';
 		 break;
 	       }
+	    case '0':
+	    	{
+			sys_freq_mult = 1;
+			break;
+	 	}
          }
       }
       printf("%d kHz system\n", 16 * sys_freq_mult);
