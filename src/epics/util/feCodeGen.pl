@@ -2296,7 +2296,10 @@ $pref = uc(substr($skeleton, 5, length $skeleton));
 
 for($ii = 0; $ii < $dacCnt; $ii++) {
    for($jj = 0; $jj < 16; $jj++) {
-	$dac_testpoint_names .= "${pref}_MDAC". $ii . "_TP_CH" . $jj . " ";
+	if ($pref) {
+	  $dac_testpoint_names .= "${pref}_";
+	}
+	$dac_testpoint_names .= "MDAC". $ii . "_TP_CH" . $jj . " ";
    }
 }
 
