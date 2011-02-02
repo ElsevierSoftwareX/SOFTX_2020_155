@@ -672,7 +672,7 @@ typedef struct cdsDaqNetGdsTpNum {
   unsigned int tidx = 1; // table index (integers)
   unsigned int data_size = 0; // test point data size
 for(int ifo = 0; ifo < daqd.data_feeds; ifo++) {
-  for (int i = DCU_ID_SUS_1; i < DCU_COUNT; i++) {
+  for (int i = DCU_ID_ADCU_1; i < DCU_COUNT; i++) {
     unsigned int tp_count = 0;
     unsigned int tp_table[DAQ_GDS_MAX_TP_ALLOWED]; // Legacy testpoint table
     unsigned int tp_table_len = 0;
