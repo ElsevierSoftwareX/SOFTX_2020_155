@@ -1502,8 +1502,10 @@ printf("interface %d: unitID = %d, base = %d, size = %d\n", j, unitID, base, siz
       }
    
       /* load channel information */
-      if (tpNode.valid) 
-      {
+      if (!tpNode.valid) {
+	 printf("Failed to find my node in %s\n", PRM_FILE);
+	 exit(1);
+      } else {
          /* query length of channel info list of the specified node */
          MUTEX_GET (servermux);
          _query_node = node;
