@@ -42,9 +42,9 @@ inline void inputFilterModule(
 	double k_tramp, double p_tramp, double z_tramp,		/* EPICS records, ramp times in seconds */
 	unsigned long *ks, unsigned long *ps, unsigned *zs)	/* ramping steps, in and out */
 {
-	double p = inputFilterModuleRamp(pp, epics_p, p_tramp, ps) * M_PI/CYCLE_PER_SECOND;
+	double p = inputFilterModuleRamp(pp, epics_p, p_tramp, ps) * (double)(M_PI/(double)CYCLE_PER_SECOND);
 	double a = (1.0 - p) / (1.0 + p);
-	double z = inputFilterModuleRamp(pz, epics_z, z_tramp, zs) * M_PI/CYCLE_PER_SECOND;
+	double z = inputFilterModuleRamp(pz, epics_z, z_tramp, zs) * (double)(M_PI/(double)CYCLE_PER_SECOND);
 	double b = (1.0 - z) / (1.0 + z);
 	double newval = inputFilterModuleRamp(pk, epics_k, k_tramp, ks) * (in + offset);
 	double out = newval - b * *old_val + a * *old_out;
