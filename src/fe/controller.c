@@ -829,13 +829,10 @@ udelay(1000);
   printf("DAQ Tp Min/Max = %d %d\n",daq.filtTpMin,daq.filtTpMax);
   printf("DAQ XTp Min/Max = %d %d\n",daq.xTpMin,daq.xTpMax);
 
-  // Set an xtra TP to read out one pps signal
-  testpoint[0] = (float *)&onePps;
-
   // Assign DAC testpoint pointers
   for (ii = 0; ii <  cdsPciModules.dacCount; ii++)
 	for (jj = 0; jj < 16; jj++) // 16 per DAC regardless of the actual
-		testpoint[1 + 16 * ii + jj] = floatDacOut + 16 * ii + jj;
+		testpoint[16 * ii + jj] = floatDacOut + 16 * ii + jj;
 
   // Zero out storage
   memset(floatDacOut, 0, sizeof(floatDacOut));
@@ -1165,6 +1162,10 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 
   	if (run_on_timer) {  // NO ADC present, so run on CPU realtime clock
 	  // Pause until next cycle begins
+	  if (clock16K == 0) {
+	    	printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
+	  	pLocalEpics->epicsOutput.diags[9] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
+	  }
 #ifdef NO_RTL
 #if !defined (TIME_SLAVE) && !defined (RFM_TIME_SLAVE)
 	  // This is local CPU timer (no ADCs)
@@ -1235,8 +1236,8 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	  #endif
 #endif
 #endif
-         if(clock16K == 0)
-          {
+         if(clock16K == 0) {
+
 #ifdef TIME_SLAVE
 	  if (iop_rfm_valid) timeSec = *rfmTime;
 	//*((volatile unsigned int *)dolphin_memory) = timeSec ++;
