@@ -68,7 +68,7 @@ sub fromExp {
         my ($i, $j) = @_;
         my $from = $::partInNum[$i][$j];
 
-        return "\L$::xpartName[$from]_val";
+        return "\L$::xpartName[$from]";
 }
 
 # Return front end code
