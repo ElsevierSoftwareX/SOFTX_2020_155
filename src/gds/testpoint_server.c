@@ -1437,9 +1437,11 @@ printf("interface %d: unitID = %d, base = %d, size = %d\n", j, unitID, base, siz
          strcpy (remotehost, "");
          loadStringParam (PRM_FILE, section, PRM_ENTRY1, 
                          remotehost);
+	 // Skip unconfigured section
+	 if (strcmp (remotehost, "") == 0) continue;
 	 printf ("remotehost = %s; section= %s\n", remotehost, section);
-         if ((strcmp (remotehost, "") == 0) ||
-            (rpcGetHostaddress (remotehost, &addr) != 0)) {
+         if (rpcGetHostaddress (remotehost, &addr) != 0) {
+	    printf("Cannot resolve hostname \"%s\"\n", remotehost);
             continue;
          }
 	
