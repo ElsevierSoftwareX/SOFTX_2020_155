@@ -206,6 +206,7 @@ int checkDacBuffer(int numDac)
 int clearDacBuffer(int numDac)
 {
 	 dacPtr[numDac]->BOR |=  GSAO_CLR_BUFFER;
+	 return(0);
 }
 
 
