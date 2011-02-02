@@ -1163,7 +1163,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
   	if (run_on_timer) {  // NO ADC present, so run on CPU realtime clock
 	  // Pause until next cycle begins
 	  if (clock16K == 0) {
-	    	printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
+	    	//printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
 	  	pLocalEpics->epicsOutput.diags[9] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
 	  }
 #ifdef NO_RTL
