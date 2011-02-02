@@ -206,7 +206,8 @@ void open_mx(void)
         printf("%d\n", sizeof(struct daqMXdata));
 
 	// So that openmx is not aborting on connection loss
-	putenv("OMX_FATAL_ERRORS=0");
+	putenv("OMX_ERRORS_ARE_FATAL=0");
+	putenv("MX_ERRORS_ARE_FATAL=0");
 
 	mx_init();
 
