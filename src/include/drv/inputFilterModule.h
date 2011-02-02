@@ -14,12 +14,19 @@ inline double inputFilterModuleRamp(
 			*step = 0;
 			*v = nv;
 		} else {
-			return nv - (((nv - *v) / (double)( CYCLE_PER_SECOND * tramp)) * *step--);
+			(*step)--;
+			if (!*step) *v = nv;
+			return nv - (((nv - *v) / (double)( CYCLE_PER_SECOND * tramp)) * (1 + *step));
 		}
 	} else { // not ramping
 		if (*v != nv) {
-			// Initiate ramping
-			*step = CYCLE_PER_SECOND * tramp;
+			// Ramp is not set or set incorrectly
+			if (tramp <= 0.)  {
+				*v = nv;
+			} else {
+				// Initiate ramping
+				*step = CYCLE_PER_SECOND * tramp;
+			}
 		}
 	}
 	return *v;
