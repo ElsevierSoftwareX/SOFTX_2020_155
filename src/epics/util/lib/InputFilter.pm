@@ -48,10 +48,10 @@ sub printFrontEndVars  {
 sub frontEndInitCode {
         my ($i) = @_;
 	# Initialize from the EPICS records
-#        my $calcExp = "\L$::xpartName[$i]_offset " . " = pLocalEpics->lsc.$::xpartName[$i]_OFFSET;\n";
-        my $calcExp .= "\L$::xpartName[$i]_K " . " = pLocalEpics->lsc.$::xpartName[$i]_K;\n";
-        $calcExp .= "\L$::xpartName[$i]_P " . " = pLocalEpics->lsc.$::xpartName[$i]_P;\n";
-        $calcExp .= "\L$::xpartName[$i]_Z " . " = pLocalEpics->lsc.$::xpartName[$i]_Z;\n";
+#        my $calcExp = "\L$::xpartName[$i]_offset " . " = pLocalEpics->$::systemName.$::xpartName[$i]_OFFSET;\n";
+        my $calcExp .= "\L$::xpartName[$i]_K " . " = pLocalEpics->$::systemName.$::xpartName[$i]_K;\n";
+        $calcExp .= "\L$::xpartName[$i]_P " . " = pLocalEpics->$::systemName.$::xpartName[$i]_P;\n";
+        $calcExp .= "\L$::xpartName[$i]_Z " . " = pLocalEpics->$::systemName.$::xpartName[$i]_Z;\n";
         $calcExp .= "\L$::xpartName[$i]_KS = 0;\n";
         $calcExp .= "\L$::xpartName[$i]_PS = 0;\n";
         $calcExp .= "\L$::xpartName[$i]_ZS = 0;\n";
@@ -65,7 +65,10 @@ sub frontEndInitCode {
 # Argument 2 is the input number
 # Returns calculated input code
 sub fromExp {
-        return "";
+        my ($i, $j) = @_;
+        my $from = $::partInNum[$i][$j];
+
+        return "\L$::xpartName[$from]_val";
 }
 
 # Return front end code
@@ -87,14 +90,14 @@ sub frontEndCode {
 #	       double k_tramp, double p_tramp, double z_tramp)
 #
         $calcExp .= "inputFilterModule($input, &\L$::xpartName[$i], &\L$::xpartName[$i]_val, "
-		  . "pLocalEpics->lsc.$::xpartName[$i]_OFFSET, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_OFFSET, "
 		  . "&\L$::xpartName[$i]_K, &\L$::xpartName[$i]_P, &\L$::xpartName[$i]_Z, "
-		  . "pLocalEpics->lsc.$::xpartName[$i]_K, "
-		  . "pLocalEpics->lsc.$::xpartName[$i]_P, "
-		  . "pLocalEpics->lsc.$::xpartName[$i]_Z, "
-		  . "pLocalEpics->lsc.$::xpartName[$i]_K_TRAMP, "
-		  . "pLocalEpics->lsc.$::xpartName[$i]_P_TRAMP, "
-		  . "pLocalEpics->lsc.$::xpartName[$i]_Z_TRAMP, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_K, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_P, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_Z, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_K_TRAMP, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_P_TRAMP, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_Z_TRAMP, "
 		  . "&\L$::xpartName[$i]_KS, "
 		  . "&\L$::xpartName[$i]_PS, "
 		  . "&\L$::xpartName[$i]_ZS);";
