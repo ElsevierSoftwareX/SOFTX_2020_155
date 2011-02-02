@@ -112,7 +112,7 @@ rectangle {
 rectangle {
 	object {
 		x=295
-		y=90
+		y=111
 		width=187
 		height=18
 	}
@@ -597,7 +597,7 @@ byte {
 byte {
 	object {
 		x=633
-		y=80
+		y=76
 		width=10
 		height=18
 	}
@@ -611,7 +611,7 @@ byte {
 byte {
 	object {
 		x=645
-		y=80
+		y=76
 		width=10
 		height=18
 	}
@@ -626,7 +626,7 @@ byte {
 byte {
 	object {
 		x=633
-		y=105
+		y=97
 		width=10
 		height=18
 	}
@@ -640,7 +640,7 @@ byte {
 byte {
 	object {
 		x=645
-		y=105
+		y=97
 		width=10
 		height=18
 	}
@@ -655,7 +655,7 @@ byte {
 byte {
 	object {
 		x=633
-		y=130
+		y=118
 		width=10
 		height=18
 	}
@@ -669,7 +669,7 @@ byte {
 byte {
 	object {
 		x=645
-		y=130
+		y=118
 		width=10
 		height=18
 	}
@@ -728,7 +728,7 @@ byte {
 "related display" {
 	object {
 		x=485
-		y=78
+		y=74
 		width=30
 		height=20
 	}
@@ -743,7 +743,7 @@ byte {
 byte {
 	object {
 		x=517
-		y=80
+		y=76
 		width=10
 		height=18
 	}
@@ -757,7 +757,7 @@ byte {
 byte {
 	object {
 		x=529
-		y=80
+		y=76
 		width=10
 		height=18
 	}
@@ -772,7 +772,7 @@ byte {
 "related display" {
 	object {
 		x=485
-		y=104
+		y=96
 		width=30
 		height=20
 	}
@@ -787,7 +787,7 @@ byte {
 byte {
 	object {
 		x=517
-		y=105
+		y=97
 		width=10
 		height=18
 	}
@@ -801,7 +801,7 @@ byte {
 byte {
 	object {
 		x=529
-		y=105
+		y=97
 		width=10
 		height=18
 	}
@@ -816,7 +816,7 @@ byte {
 "related display" {
 	object {
 		x=485
-		y=129
+		y=117
 		width=30
 		height=20
 	}
@@ -831,7 +831,7 @@ byte {
 byte {
 	object {
 		x=517
-		y=130
+		y=118
 		width=10
 		height=18
 	}
@@ -845,7 +845,7 @@ byte {
 byte {
 	object {
 		x=529
-		y=130
+		y=118
 		width=10
 		height=18
 	}
@@ -904,7 +904,7 @@ byte {
 "related display" {
 	object {
 		x=542
-		y=78
+		y=74
 		width=30
 		height=20
 	}
@@ -919,7 +919,7 @@ byte {
 byte {
 	object {
 		x=574
-		y=80
+		y=76
 		width=10
 		height=18
 	}
@@ -933,7 +933,7 @@ byte {
 byte {
 	object {
 		x=586
-		y=80
+		y=76
 		width=10
 		height=18
 	}
@@ -948,7 +948,7 @@ byte {
 "related display" {
 	object {
 		x=542
-		y=104
+		y=96
 		width=30
 		height=20
 	}
@@ -963,7 +963,7 @@ byte {
 byte {
 	object {
 		x=574
-		y=105
+		y=97
 		width=10
 		height=18
 	}
@@ -977,7 +977,7 @@ byte {
 byte {
 	object {
 		x=586
-		y=105
+		y=97
 		width=10
 		height=18
 	}
@@ -992,7 +992,7 @@ byte {
 "related display" {
 	object {
 		x=542
-		y=129
+		y=117
 		width=30
 		height=20
 	}
@@ -1007,7 +1007,7 @@ byte {
 byte {
 	object {
 		x=574
-		y=130
+		y=118
 		width=10
 		height=18
 	}
@@ -1021,7 +1021,7 @@ byte {
 byte {
 	object {
 		x=586
-		y=130
+		y=118
 		width=10
 		height=18
 	}
@@ -1036,7 +1036,7 @@ byte {
 byte {
 	object {
 		x=434
-		y=91
+		y=112
 		width=40
 		height=15
 	}
@@ -1051,7 +1051,7 @@ byte {
 text {
 	object {
 		x=364
-		y=92
+		y=113
 		width=50
 		height=14
 	}
@@ -1277,7 +1277,7 @@ byte {
 }
 "message button" {
 	object {
-		x=340
+		x=295
 		y=137
 		width=70
 		height=20
@@ -1635,9 +1635,9 @@ text {
 }
 rectangle {
 	object {
-		x=294
-		y=113
-		width=187
+		x=484
+		y=139
+		width=170
 		height=18
 	}
 	"basic attribute" {
@@ -1646,9 +1646,9 @@ rectangle {
 }
 "text update" {
 	object {
-		x=405
-		y=113
-		width=70
+		x=578
+		y=139
+		width=80
 		height=18
 	}
 	monitor {
@@ -1662,9 +1662,9 @@ rectangle {
 }
 "message button" {
 	object {
-		x=294
-		y=112
-		width=110
+		x=484
+		y=138
+		width=90
 		height=18
 	}
 	control {
@@ -1672,7 +1672,7 @@ rectangle {
 		clr=0
 		bclr=44
 	}
-	label="ADC/DAC OVERFLOWS"
+	label="OVERFLOWS"
 	release_msg="1"
 }
 "related display" {
@@ -1693,7 +1693,7 @@ rectangle {
 "related display" {
 	object {
 		x=599
-		y=78
+		y=74
 		width=30
 		height=20
 	}
@@ -1708,7 +1708,7 @@ rectangle {
 "related display" {
 	object {
 		x=599
-		y=104
+		y=96
 		width=30
 		height=20
 	}
@@ -1723,7 +1723,7 @@ rectangle {
 "related display" {
 	object {
 		x=599
-		y=129
+		y=117
 		width=30
 		height=20
 	}
@@ -1738,7 +1738,7 @@ rectangle {
 text {
 	object {
 		x=298
-		y=92
+		y=113
 		width=20
 		height=14
 	}
@@ -1750,7 +1750,7 @@ text {
 byte {
 	object {
 		x=326
-		y=91
+		y=112
 		width=10
 		height=15
 	}
@@ -1761,4 +1761,19 @@ byte {
 	}
 	sbit=3
 	ebit=3
+}
+"message button" {
+	object {
+		x=297
+		y=88
+		width=180
+		height=18
+	}
+	control {
+		chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_LOAD_CONFIG"
+		clr=14
+		bclr=30
+	}
+	label="DAQ Reload"
+	release_msg="1"
 }
