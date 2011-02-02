@@ -67,7 +67,7 @@ main() {
   printf("Opened broadcaster receiver\n");
   while (1) {
     int length = NDS->receive(bufptr, buflen, &seq, &gps, &gps_n);
-    printf("%d %d %d %d %d\n", length, seq, gps, gps_n, ntohl(*((unsigned int *)bufptr)));
+    printf("len=%d seq=%d gps=%d gps_n=%d data=%d\n", length, seq, gps, gps_n, ntohl(*((unsigned int *)bufptr)));
 
     // Print the header
     unsigned int *bufp = (unsigned int *)bufptr;
