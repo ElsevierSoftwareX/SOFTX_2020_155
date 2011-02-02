@@ -1,14 +1,14 @@
 
 file {
-	name="/export/home/controls/FILTER.adl"
-	version=030003
+	name="/opt/rtcds/llo/l1/core/trunk/src/epics/util/FILTER.adl"
+	version=030104
 }
 display {
 	object {
 		x=17
 		y=64
 		width=979
-		height=221
+		height=187
 	}
 	clr=14
 	bclr=52
@@ -299,9 +299,10 @@ text {
 	}
 	monitor {
 		chan="SITE_NAME:FILTERNAME_INMON"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -879,9 +880,10 @@ polyline {
 	}
 	monitor {
 		chan="SITE_NAME:FILTERNAME_OUT16"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -895,9 +897,10 @@ polyline {
 	}
 	monitor {
 		chan="SITE_NAME:FILTERNAME_OUTPUT"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -911,9 +914,10 @@ polyline {
 	}
 	monitor {
 		chan="SITE_NAME:FILTERNAME_OUTMON"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -957,9 +961,10 @@ byte {
 	}
 	monitor {
 		chan="SITE_NAME:FILTERNAME_EXCMON"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -1347,45 +1352,33 @@ text {
 	limits {
 	}
 }
-rectangle {
-        object {
-                x=0
-                y=196
-                width=979
-                height=25
-        }
-        "basic attribute" {
-                clr=5
-        }
-}
 "shell command" {
-        object {
-                x=0
-                y=196
-                width=150
-                height=25
-        }
-        command[0] {
-                label="Documentation"
-                name="xterm -e view"
-                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/docs/SITE_NAMEFILTERNAME.txt"
-        }
-        command[1] {
-                label="View Last Snapshot"
-                name="xwud -in"
-                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTERNAME_0.xwd"
-        }
-        command[2] {
-                label="View Previous Snapshot"
-                name="xwud -in"
-                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTERNAME_1.xwd"
-        }
-        command[3] {
-                label="Update Snapshot"
-                name="/cvs/cds/LOCATION_NAME/scripts/utilities/xupdatesnap"
-                args="SITE_NAMEFILTERNAME"
-        }
-        clr=14
-        bclr=30
+	object {
+		x=4
+		y=159
+		width=150
+		height=25
+	}
+	command[0] {
+		label="Documentation"
+		name="xterm -e view"
+		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/docs/SITE_NAMEFILTERNAME.txt"
+	}
+	command[1] {
+		label="View Last Snapshot"
+		name="xwud -in"
+		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTERNAME_0.xwd"
+	}
+	command[2] {
+		label="View Previous Snapshot"
+		name="xwud -in"
+		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTERNAME_1.xwd"
+	}
+	command[3] {
+		label="Update Snapshot"
+		name="/cvs/cds/LOCATION_NAME/scripts/utilities/xupdatesnap"
+		args="SITE_NAMEFILTERNAME"
+	}
+	clr=14
+	bclr=30
 }
-

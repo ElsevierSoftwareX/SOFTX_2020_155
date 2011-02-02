@@ -5,8 +5,8 @@ file {
 }
 display {
 	object {
-		x=49
-		y=302
+		x=943
+		y=601
 		width=850
 		height=170
 	}
@@ -1759,8 +1759,8 @@ byte {
 		clr=20
 		bclr=60
 	}
-	sbit=3
-	ebit=3
+	clrmod="discrete"
+	sbit=0
 }
 "message button" {
 	object {
