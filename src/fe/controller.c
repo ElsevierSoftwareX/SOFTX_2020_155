@@ -922,6 +922,12 @@ udelay(1000);
   }
   printf("ADC setup complete \n");
 #endif
+#ifdef ADC_SLAVE
+  for(jj=0;jj<cdsPciModules.adcCount;jj++)
+  {
+  	  pLocalEpics->epicsOutput.statAdc[jj] = 1;
+  }
+#endif
 
 #ifndef ADC_SLAVE
   // Initialize the DAC module variables
