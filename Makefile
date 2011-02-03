@@ -29,10 +29,8 @@ clean-% :: config/Makefile.%epics
 % :: config/Makefile.%epics
 	(/bin/rm -rf target/$@epics build/$@epics; make -f config/Makefile.$@epics)
 
-# With this rule one can install any system
-# By saying 'make install-pde', for example
-install-% :: src/epics/simLink/%.mdl
-	@system=$(subst install-,,$@); \
+install-target-% :: src/epics/simLink/%.mdl
+	@system=$(subst install-target-,,$@); \
 	upper_system=`echo $$system | tr a-z A-Z`;\
 	hostname=`grep TARGET_HOST_NAME src/include/$${system}.h | head -1 | awk '{print $$3}'`; \
 	site=`grep site target/$${system}epics/$${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`; \
@@ -217,6 +215,14 @@ install-screens-% :: src/epics/simLink/%.mdl
 	(cd build/$${system}epics/medm; ls | xargs cp -r -t /opt/rtcds/$$site/$${lower_ifo}/medm/$${system};)
 
 
+# With this rule one can install any system
+# By saying 'make install-pde', for example
+
+install-% :: src/epics/simLink/%.mdl
+	make install-target-$(subst install-,,$@)
+	make install-daq-$(subst install-,,$@)
+	make install-screens-$(subst install-,,$@)
+
 # Lighter installation rule, do not reinstall screens and config files
 # Install Epics and FE targets only
 reinstall-% :: src/epics/simLink/%.mdl
@@ -330,5 +336,5 @@ showWorld:
 
 cleanWorld: $(patsubst %,clean-%,$(MDL_MODELS))
 
-installWorld: $(patsubst %,install-%,$(MDL_MODELS))  $(patsubst %,install-daq-%,$(MDL_MODELS))  $(patsubst %,install-screens-%,$(MDL_MODELS))  
+installWorld: $(patsubst %,install-target-%,$(MDL_MODELS)) $(patsubst %,install-daq-%,$(MDL_MODELS))  $(patsubst %,install-screens-%,$(MDL_MODELS))  
 
