@@ -1323,18 +1323,22 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 				// if(jj==0) usleep(0);
 		    		rdtscl(cpuClock[9]);
 				adcWait = (cpuClock[9] - cpuClock[8])/CPURATE;
+#ifdef ADC_MASTER
 				if(((cpuClock[9] - cpuClock[0])/CPURATE > 10) && (!rfmDone))
 				{
 					if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(clock16K % 64));
 					if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(clock16K % 64));
 					rfmDone = 1;
 				}
+#endif
 //#endif
 			}
 			// Allow 1msec for data to be ready (should never take that long).
                     }while((*packedData == 0x110000) && (adcWait < 1000000));
 
-rfmDone = 0;
+#ifdef ADC_MASTER
+		rfmDone = 0;
+#endif
 
 		    // If data not ready in time, abort
 		    // Either the clock is missing or code is running too slow and ADC FIFO
