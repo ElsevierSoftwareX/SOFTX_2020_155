@@ -7,6 +7,8 @@ sub partType {
 	$desc = ${$node->{FIELDS}}{"Description"};
 	# Pull out all Epics fields from the description
 	$desc =~ s/\s//g;
+	# Get rid of backslashes inserted by Matlab in field name around quotes.
+	$desc =~ s/\\"/"/g;
 	my @l = $desc =~ m/(field\([^\)]*\))/g;
 	$::epics_fields[$i] = [@l];
 	return EpicsOut;
