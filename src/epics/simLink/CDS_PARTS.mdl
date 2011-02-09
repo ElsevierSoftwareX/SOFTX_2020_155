@@ -15,9 +15,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Mon Jan 31 13:58:30 2011"
-  RTWModifiedTimeStamp	  218383017
-  ModelVersionFormat	  "1.%<AutoIncrement:280>"
+  LastModifiedDate	  "Wed Feb  9 13:58:48 2011"
+  RTWModifiedTimeStamp	  219160665
+  ModelVersionFormat	  "1.%<AutoIncrement:282>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -806,7 +806,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [240, 104, 927, 695]
+    Location		    [240, 126, 927, 717]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -971,8 +971,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"EpicsParts"
-	Location		[1216, 399, 1796, 1031]
-	Open			off
+	Location		[1360, 340, 1940, 972]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -994,18 +994,20 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag2"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1018,18 +1020,20 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag3"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1042,18 +1046,20 @@ Library {
 	  BackgroundColor	  "magenta"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag4"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1066,18 +1072,20 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag5"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1090,18 +1098,20 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag6"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1114,18 +1124,20 @@ Library {
 	  BackgroundColor	  "magenta"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag7"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1138,18 +1150,20 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag8"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1162,18 +1176,20 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag9"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1186,18 +1202,20 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag10"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1210,18 +1228,20 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag11"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1241,16 +1261,18 @@ Library {
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.5"
 	  SourceBlock		  "cdsEpicsBinIn/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1262,44 +1284,42 @@ Library {
 	  BackgroundColor	  "[0.670588, 0.556863, 0.258824]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsEpicsCounter/EpicsCounter"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "EpicsInput"
 	  SID			  "20"
 	  Tag			  "cdsEpicsIn"
-	  Description		  "Purpose:                                                                              \nCreate an E"
-	  "PICS input channel connection to the FE realtime controls.                 \n                                      "
-	  "                                                \nOperation:                                                       "
-	  "                     \nOutputs value from an EPICS ai record. Value is floating point with a precision of 3..\n    "
-	  "                                                                                  \nUsage:                         "
-	  "                                                       \nName the part with the desired EPICS channel name.        "
-	  "                            "
+	  Description		  "field(PREC,\"3\")"
 	  Ports			  [0, 1]
 	  Position		  [85, 50, 150, 80]
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsEpicsIn/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1312,16 +1332,18 @@ Library {
 	  BackgroundColor	  "[0.000000, 0.501961, 0.501961]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.5"
 	  SourceBlock		  "cdsEpicsMbbi/EpicsMbbi"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1334,16 +1356,18 @@ Library {
 	  BackgroundColor	  "[0.250980, 0.501961, 0.501961]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsEpicsMbbo/EpicsMbbo"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1355,41 +1379,42 @@ Library {
 	  BackgroundColor	  "[0.501961, 1.000000, 0.501961]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.5"
 	  SourceBlock		  "cdsEpicsMomentary/EpicsMomentary"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "EpicsOutput"
 	  SID			  "24"
 	  Tag			  "cdsEpicsOutput"
-	  Description		  "Purpose:                                          \nOutput a FE signal to an EPICS channel.        "
-	  "   \n                                                  \nOperation:                                        \nTakes "
-	  "input value and passes it to EPICS record.  \n                                                  \nUsage:           "
-	  "                                 \nName the part with the desired EPICS rrecord name."
+	  Description		  "field(PREC,\"3\")"
 	  Ports			  [1, 1]
 	  Position		  [335, 65, 415, 95]
 	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1419,16 +1444,18 @@ Library {
 	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsRemoteIntlk/Name"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1441,16 +1468,18 @@ Library {
 	  BackgroundColor	  "[0.000000, 0.501961, 0.250980]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsEpicsStringIn/EpicsStringIn"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	}
 	Block {
 	  BlockType		  Ground
@@ -1478,16 +1507,18 @@ Library {
 	  Position		  [140, 320, 180, 380]
 	  BackgroundColor	  "[0.792741, 0.563703, 0.940000]"
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsEzCaRead/cdsEzCaRead"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1502,16 +1533,18 @@ Library {
 	  Position		  [260, 320, 300, 380]
 	  BackgroundColor	  "[0.698999, 0.245793, 1.000000]"
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsEzCaWrite/cdsEzCaWrite"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
 	}
 	Line {
 	  SrcBlock		  "Ground"
