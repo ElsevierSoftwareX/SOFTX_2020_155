@@ -52,11 +52,9 @@ sub fromExp {
 sub frontEndCode {
         my ($i) = @_;
         my $calcExp = "// EpicsMomentary:  $::xpartName[$i]\n";
-        $calcExp .= "if (pLocalEpics->$::systemName\.$::xpartName[$i] != 0) {\n";
-        $calcExp .= "\t\L$::xpartName[$i] = \L$::xpartName[$i] ^ ";
+        $calcExp .= "\t\L$::xpartName[$i] = ";
         $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i];\n";
         $calcExp .= "\tpLocalEpics->$::systemName\.$::xpartName[$i] = 0;\n";
-        $calcExp .= "};\n";
         return $calcExp;
 }
 
