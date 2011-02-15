@@ -3172,6 +3172,14 @@ if ($specificCpu > -1) {
   print OUTM "#EXTRA_CFLAGS += -DSPECIFIC_CPU=2\n";
 }
 
+if ($::noRfmDma) {
+  print OUTM "#Comment out to run with RFM DMA\n";
+  print OUTM "EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
+} else {
+  print OUTM "#Uncomment to run without RFM DMA\n";
+  print OUTM "#EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
+}
+
 print OUTM "\n";
 print OUTM "ifneq (\$(CDIR),)\n";
 print OUTM "override EXTRA_CFLAGS += \$(patsubst %,-I../../../%,\$(CDIR))\n";
