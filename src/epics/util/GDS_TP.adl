@@ -5,8 +5,8 @@ file {
 }
 display {
 	object {
-		x=943
-		y=601
+		x=60
+		y=90
 		width=850
 		height=170
 	}
@@ -129,9 +129,10 @@ rectangle {
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_USR_TIME"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -157,9 +158,10 @@ text {
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER_MAX"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -173,9 +175,10 @@ text {
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -257,9 +260,10 @@ byte {
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_WAIT"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -273,9 +277,10 @@ byte {
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IRIGB_TIME"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -370,9 +375,10 @@ text {
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DUOTONE_TIME"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -535,8 +541,8 @@ byte {
 		clr=20
 		bclr=60
 	}
-	sbit=3
-	ebit=3
+	sbit=4
+	ebit=4
 }
 rectangle {
 	object {
@@ -1127,9 +1133,10 @@ rectangle {
 	}
 	monitor {
 		chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_CHAN_CNT"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -1143,9 +1150,10 @@ rectangle {
 	}
 	monitor {
 		chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_TOTAL"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -1159,9 +1167,10 @@ rectangle {
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAQ_BYTE_COUNT"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -1191,9 +1200,10 @@ byte {
 	}
 	monitor {
 		chan="SITE_NAME:DAQ-DC0_FBID_STATUS"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	format="hexadecimal"
 	limits {
@@ -1208,9 +1218,10 @@ byte {
 	}
 	monitor {
 		chan="SITE_NAME:DAQ-DC0_FBID_CRC_CPS"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
@@ -1224,9 +1235,10 @@ byte {
 	}
 	monitor {
 		chan="SITE_NAME:DAQ-DC0_FBID_CRC_SUM"
-		clr=50
-		bclr=42
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	align="horiz. centered"
 	limits {
 	}
