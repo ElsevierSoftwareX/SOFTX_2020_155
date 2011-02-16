@@ -75,6 +75,7 @@ open(IN,"<-") || die "cannot open standard input\n";
 $cnt = 0;
 $mcnt = 0;
 $phase = 0;
+my @eFields;
 
 $names1 = "%TYPE% %NAME%[MAX_MODULES];\nassign %NAME% to\n{\n";
 $names2 = "%%static  fmSubSysMap  fmmap0 [MAX_MODULES] = { \n%%";
@@ -155,7 +156,7 @@ while (<IN>) {
 	$epics_specified = 1;
     } elsif (substr($_,0,10) eq "INVARIABLE") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
-	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
+	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init,@eFields ) = split(/\s+/, $_);
 	$vdecl .= "$v_type evar_$v_name;\n";
         if ($v_name ne "BURT_RESTORE") {
           $vstat_decl .= "int evar_${v_name}_Stat;\n";
@@ -248,11 +249,14 @@ while (<IN>) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
 	}
 	$vardb .= "{\n";
+	for($efC=0;$efC<12;$efC++)
+	{
+		if($eFields[$efC])
+		{
+			$vardb .= "    $eFields[$efC]\n";
+		}
+	}
 #	$vardb .= "    field(PREC,\"3\")\n";
-	$vardb .= "    $v_efield1\n";
-	$vardb .= "    $v_efield2\n";
-	$vardb .= "    $v_efield3\n";
-	$vardb .= "    $v_efield4\n";
 	$vardb .= "}\n";
 
     } elsif (substr($_,0,9) eq "WFS_PHASE") {
@@ -389,7 +393,8 @@ while (<IN>) {
 	$vardb .= "}\n";
     } elsif (substr($_,0,11) eq "OUTVARIABLE") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
-	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
+	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init,@eFields ) = split(/\s+/, $_);
+	#print "$v_name = efields $eFields[0] $eFields[1] $eFields[2] $eFields[3] $eFields[4] $eFields[5] $eFields[6]\n";
 	$vdecl .= "$v_type evar_$v_name;\n";
         my $top_name = is_top_name($v_name);
    	my $tv_name;
@@ -420,10 +425,13 @@ while (<IN>) {
 	if ($v_type eq "float") {
 		$vardb .= "    field(PREC,\"3\")\n";
 	}
-	$vardb .= "    $v_efield1\n";
-	$vardb .= "    $v_efield2\n";
-	$vardb .= "    $v_efield3\n";
-	$vardb .= "    $v_efield4\n";
+	for($efC=0;$efC<12;$efC++)
+	{
+		if($eFields[$efC])
+		{
+			$vardb .= "    $eFields[$efC]\n";
+		}
+	}
 	$vardb .= "}\n";
     } elsif (substr($_,0,12) eq "REMOTE_INTLK") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
