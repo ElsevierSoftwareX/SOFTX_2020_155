@@ -196,6 +196,7 @@ extern unsigned int cpu_khz;
 	#define NET_SEND_WAIT		(2*81920)
 	#define CYCLE_TIME_ALRM_HI	38
 	#define CYCLE_TIME_ALRM_LO	25
+        #define CYCLE_TIME_ALRM         31
 #ifdef ADC_SLAVE
 	#define DAC_PRELOAD_CNT		2
 #else
@@ -212,6 +213,7 @@ extern unsigned int cpu_khz;
 	#define NET_SEND_WAIT		81920
 	#define CYCLE_TIME_ALRM_HI	70
 	#define CYCLE_TIME_ALRM_LO	50
+        #define CYCLE_TIME_ALRM         62
 	#define DAC_PRELOAD_CNT		4
 #endif
 #ifdef SERVO4K
@@ -430,6 +432,7 @@ int tdsCount = 0;
 #define FE_FB_AVAIL		0x1
 #define FE_FB_ONLINE		0x2
 #define FE_MAX_FB_QUE		0x10
+#define ADC_TIMEOUT_ERR		0x1
 
 
 // Function to read time from Symmetricom IRIG-B Module ***********************
@@ -918,6 +921,7 @@ udelay(1000);
 	  // Write a number into the last channel which the ADC should never write ie no
 	  // upper bits should be set in channel 31.
           *packedData = 0x110000;
+	  // Set ADC Present Flag
   	  pLocalEpics->epicsOutput.statAdc[jj] = 1;
   }
   printf("ADC setup complete \n");
@@ -1345,7 +1349,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		    // is overflowing.
 		    if (adcWait >= 1000000) {
                         stop_working_threads = 1;
-	  		pLocalEpics->epicsOutput.diagWord |= 0x1;
+	  		pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
                         printf("timeout %d %d \n",jj,adcWait);
                     }
 		    if(jj == 0) 
@@ -1369,6 +1373,10 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 					gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
 					pLocalEpics->epicsOutput.diags[FE_DIAGS_IRIGB_TIME] = usec;
 				}
+#ifdef IOP_TIME_SLAVE_RFM
+	  timeSec = ((volatile long *)(cdsPciModules.pci_rfm[0]))[1];
+	  timeSec ++;
+#endif
 			}
 			
 #ifdef IOP_TIME_SLAVE
@@ -1410,8 +1418,6 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			 status = 16;
   			 adcChanErr[jj] = 1;
 	 	    }	
-                    kk = jj + 1;
-                    diagWord |= status * kk;
 
                     limit = 32700;
 		    // Various ADC models have different number of channels/data bits
@@ -1475,7 +1481,6 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			  {
 				overflowAdc[jj][ii] ++;
 				overflowAcc ++;
-				diagWord |= 0x100 *  (jj+1);
 				adcOF[jj] = 1;
 			  }
                     }
@@ -1560,7 +1565,6 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			  {
 				overflowAdc[jj][ii] ++;
 				overflowAcc ++;
-				diagWord |= 0x100 *  (jj+1);
 				adcOF[jj] = 1;
 			  }
 #endif
@@ -1681,7 +1685,6 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 				dac_out = limit;
 				overflowDac[jj][ii] ++;
 				overflowAcc ++;
-				diagWord |= 0x1000 *  (jj+1);
 				dacOF[jj] = 1;
 			}
 			if(dac_out < -limit) 
@@ -1689,7 +1692,6 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 				dac_out = -limit;
 				overflowDac[jj][ii] ++;
 				overflowAcc ++;
-				diagWord |= 0x1000 *  (jj+1);
 				dacOF[jj] = 1;
 			}
 			// Load last values to EPICS channels for monitoring on GDS_TP screen.
@@ -1761,6 +1763,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
         {
                 duotoneTime = duotime(12, duotoneMean, duotone);
                 pLocalEpics->epicsOutput.diags[FE_DIAGS_DUOTONE_TIME] = duotoneTime;
+		if((usec > 20) || (usec < 5)) diagWord |= 0x10;;
 		// duotoneTimeDac = duotime(12, duotoneMeanDac, duotoneDac);
                 // pLocalEpics->epicsOutput.diags[5] = duotoneTimeDac;
 		// printf("du = %f %f %f %f %f\n",duotone[5], duotone[6], duotone[7],duotone[8],duotone[9]);
@@ -1787,7 +1790,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	  adcHoldTimeMin = 0xffff;
 	  adcHoldTimeAvg = 0;
 	  if((adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcHoldTime < CYCLE_TIME_ALRM_LO)) diagWord |= FE_ADC_HOLD_ERR;
-	  if(timeHoldMax > CYCLE_TIME_ALRM_HI) diagWord |= FE_PROC_TIME_ERR;
+	  if(timeHoldMax > CYCLE_TIME_ALRM) diagWord |= FE_PROC_TIME_ERR;
   	  if(pLocalEpics->epicsInput.diagReset || initialDiagReset)
 	  {
 		initialDiagReset = 0;
@@ -1983,9 +1986,11 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		pLocalEpics->epicsOutput.ovAccum = overflowAcc;
 	  for(jj=0;jj<cdsPciModules.adcCount;jj++)
 	  {
+	    // SET/CLR Channel Hopping Error
 	    if(adcChanErr[jj]) pLocalEpics->epicsOutput.statAdc[jj] &= ~(2);
  	    else pLocalEpics->epicsOutput.statAdc[jj] |= 2;
 	    adcChanErr[jj] = 0;
+	    // SET/CLR Overflow Error
 	    if(adcOF[jj]) pLocalEpics->epicsOutput.statAdc[jj] &= ~(4);
  	    else pLocalEpics->epicsOutput.statAdc[jj] |= 4;
 	    adcOF[jj] = 0;
