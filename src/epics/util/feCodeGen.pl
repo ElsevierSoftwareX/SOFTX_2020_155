@@ -31,6 +31,7 @@ if ($kernel_release eq '2.6.21.7') {
 $site = "M1"; # Default value for the site name
 $location = "mit"; # Default value for the location name
 $rate = "60"; # In microseconds (default setting)
+$brate = "52";
 $dcuId = 10; # Default dcu Id
 $targetHost = "localhost"; # Default target host name
 $specificCpu = -1; # Defaults is to run the FE on the first available CPU
@@ -2225,8 +2226,17 @@ print EPICS "DAQVAR $dcuId\_CHAN_CNT int ai 0\n";
 print EPICS "DAQVAR $dcuId\_TOTAL int ai 0\n";
 print EPICS "DAQVAR $dcuId\_MSG int ai 0\n";
 print EPICS "DAQVAR  $dcuId\_DCU_ID int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER_MAX epicsOutput.cpuMeterMax int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
+$frate = $rate;
+if($frate == 15)
+{
+	$brate =  11;
+} else {
+	$frate =  $rate * .85;
+	$brate = $frate;
+}
+#print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER_MAX epicsOutput.cpuMeterMax int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\")\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT epicsOutput.adcWaitTime int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
 #print EPICS "OUTVARIABLE FEC\_$dcuId\_ONE_PPS epicsOutput.onePps int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_ERR epicsOutput.timeErr int ai 0\n";
@@ -2242,7 +2252,7 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG1 epicsOutput.diags[1] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.diags[2] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0 field(HOPR,\"2000\") field(LOPR,\"0\") field(HIHI,\"1900\") field(HHSV,\"MAJOR\")\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ai 0 field(HIHI,\"24\") field(HHSV,\"MAJOR\") field(HIGH,\"18\") field(HSV,\"MINOR\")\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT epicsOutput.diags[7] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_MASTER_STAT epicsOutput.diags[8] int ai 0\n";
