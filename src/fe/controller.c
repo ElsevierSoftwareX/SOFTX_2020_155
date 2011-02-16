@@ -1327,6 +1327,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 				// if(jj==0) usleep(0);
 		    		rdtscl(cpuClock[9]);
 				adcWait = (cpuClock[9] - cpuClock[8])/CPURATE;
+#ifndef RFM_DIRECT_READ
 #ifdef ADC_MASTER
 				if(((cpuClock[9] - cpuClock[0])/CPURATE > 10) && (!rfmDone))
 				{
@@ -1334,6 +1335,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 					if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(clock16K % 64));
 					rfmDone = 1;
 				}
+#endif
 #endif
 //#endif
 			}
