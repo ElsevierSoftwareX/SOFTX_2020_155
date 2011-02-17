@@ -3619,7 +3619,8 @@ sub commify_series {
 	}
 	if ((($partType[$cur_part_num] =~ /^Filt/)
 	     && (not ($partType[$cur_part_num] eq "FiltMuxMatrix")))
-	    || ($partType[$cur_part_num] =~ /^InputFilt/)) {
+	    || ($partType[$cur_part_num] =~ /^InputFilt/)
+	    || ($partType[$cur_part_num] =~ /^InputFilter1/)) {
 		#print "FILTER No=$cur_part_num Part $partName[$cur_part_num] $partType[$cur_part_num] input partInput=$partInput[$cur_part_num][0] type='$partInputType[$cur_part_num][0]' \n";
 		my $filt_name = $partName[$cur_part_num];
 	if ($partInputType[$cur_part_num][0] eq "Adc") {
@@ -3638,7 +3639,9 @@ sub commify_series {
                         $sargs .= "s/LOCATION_NAME/$location/g;";
 			$sargs .= "s/FILTERNAME/$tfn/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
-			if ($partType[$cur_part_num] =~ /^InputFilt/) {
+			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
+				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/" . $filt_name . ".adl");
+			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
 				system("cat INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/" . $filt_name . ".adl");
 			} else {
 				system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/" . $filt_name . ".adl");
@@ -3648,7 +3651,9 @@ sub commify_series {
 			$sargs = $sed_arg . "s/FILTERNAME/$sys_name-$filt_name/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 		  $sysname = uc($skeleton);
-			if ($partType[$cur_part_num] =~ /^InputFilt/) {
+			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
+				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
 				system("cat INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} else {
 				system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
