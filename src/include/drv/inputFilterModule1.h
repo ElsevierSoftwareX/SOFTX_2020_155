@@ -42,15 +42,17 @@ inline void inputFilterModule1(
 	double offset,						
 	double *pk, double *pp, double *pz,			/* input current value, output new values (after ramping was done */
 	double epics_k, double epics_p, double epics_z,		/* EPICS record values, their change initiates ramping */
-	double tramp, int doramp,				/* EPICS records, ramp time in seconds, rapm go flag*/
+	double tramp, int *doramp,				/* EPICS records, ramp time in seconds, rapm go flag*/
 	unsigned long *ks, unsigned long *ps, unsigned *zs)	/* ramping steps, in and out */
 {
-	double p = inputFilterModuleRamp1(pp, epics_p, tramp, ps, doramp) * (double)(M_PI/(double)CYCLE_PER_SECOND);
+	double p = inputFilterModuleRamp1(pp, epics_p, tramp, ps, *doramp) * (double)(M_PI/(double)CYCLE_PER_SECOND);
 	double a = (1.0 - p) / (1.0 + p);
-	double z = inputFilterModuleRamp1(pz, epics_z, tramp, zs, doramp) * (double)(M_PI/(double)CYCLE_PER_SECOND);
+	double z = inputFilterModuleRamp1(pz, epics_z, tramp, zs, *doramp) * (double)(M_PI/(double)CYCLE_PER_SECOND);
 	double b = (1.0 - z) / (1.0 + z);
-	double newval = inputFilterModuleRamp1(pk, epics_k, tramp, ks, doramp) * (in + offset);
+	double newval = inputFilterModuleRamp1(pk, epics_k, tramp, ks, *doramp) * (in + offset);
 	double out = newval - b * *old_val + a * *old_out;
 	*old_out = out;
 	*old_val = newval;
+	// See if we ough to reset RAMP GO variable
+	if (*doramp && !*ks && !*ps && !*zs) *doramp = 0;
 }

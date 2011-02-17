@@ -27,7 +27,7 @@ sub printEpics {
 	print ::EPICS "INVARIABLE $::xpartName[$i]\_P $::systemName\.$::xpartName[$i]\_P float ai 0 field(PREC,\"3\")\n";
 	print ::EPICS "INVARIABLE $::xpartName[$i]\_Z $::systemName\.$::xpartName[$i]\_Z float ai 0 field(PREC,\"3\")\n";
 	print ::EPICS "INVARIABLE $::xpartName[$i]\_TRAMP $::systemName\.$::xpartName[$i]\_TRAMP float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_DORAMP $::systemName\.$::xpartName[$i]\_DORAMP int ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "MOMENTARY $::xpartName[$i]\_DORAMP $::systemName\.$::xpartName[$i]\_DORAMP int ai 0 field(PREC,\"3\")\n";
 }
 
 sub printFrontEndVars  {
@@ -85,7 +85,7 @@ sub frontEndCode {
 		  . "pLocalEpics->$::systemName.$::xpartName[$i]_P, "
 		  . "pLocalEpics->$::systemName.$::xpartName[$i]_Z, "
 		  . "pLocalEpics->$::systemName.$::xpartName[$i]_TRAMP, "
-		  . "pLocalEpics->$::systemName.$::xpartName[$i]_DORAMP, "
+		  . "&(pLocalEpics->$::systemName.$::xpartName[$i]_DORAMP), "
 		  . "&\L$::xpartName[$i]_KS, "
 		  . "&\L$::xpartName[$i]_PS, "
 		  . "&\L$::xpartName[$i]_ZS);";

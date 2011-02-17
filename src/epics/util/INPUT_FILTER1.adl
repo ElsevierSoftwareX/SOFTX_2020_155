@@ -186,21 +186,6 @@ text {
 	limits {
 	}
 }
-"text entry" {
-	object {
-		x=107
-		y=194
-		width=50
-		height=22
-	}
-	control {
-		chan="SITE_NAME:FILTERNAME_DORAMP"
-		clr=14
-		bclr=4
-	}
-	limits {
-	}
-}
 polygon {
 	object {
 		x=114
@@ -310,15 +295,18 @@ text {
 	}
 	textix="RAMP"
 }
-text {
+"message button" {
 	object {
-		x=57
-		y=197
-		width=32
-		height=14
+		x=44
+		y=184
+		width=60
+		height=24
 	}
-	"basic attribute" {
+	control {
+		chan="SITE_NAME:FILTERNAME_DORAMP"
 		clr=14
+		bclr=4
 	}
-	textix="DO RAMP"
+	label="DO RAMP"
+	release_msg="1"
 }
