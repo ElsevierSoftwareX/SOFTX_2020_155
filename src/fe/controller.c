@@ -241,6 +241,7 @@ extern unsigned int cpu_khz;
 	#define DAC_PRELOAD_CNT		8	
 #endif
 #include "drv/inputFilterModule.h"		
+#include "drv/inputFilterModule1.h"		
 
 #ifndef NO_DAQ
 DAQ_RANGE daq;			// Range settings for daqLib.c

@@ -1,23 +1,22 @@
-package CDS::InputFilter;
+package CDS::InputFilter1;
 use Exporter;
 @ISA = ('Exporter');
 
 sub partType {
-	return InputFilter;
+	return InputFilter1;
 }
 
 sub printHeaderStruct {
 	my ($i) = @_;
         if (length $::xpartName[$i] > 24) {
-       		die "InputFilter name \"", $::xpartName[$i], "\" too long (max 24 charachters)";
+       		die "InputFilter1 name \"", $::xpartName[$i], "\" too long (max 24 charachters)";
    	}
 	print ::OUTH "\tfloat $::xpartName[$i]\_OFFSET;\n";
 	print ::OUTH "\tfloat $::xpartName[$i]\_K;\n";
 	print ::OUTH "\tfloat $::xpartName[$i]\_P;\n";
 	print ::OUTH "\tfloat $::xpartName[$i]\_Z;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_K_TRAMP;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_P_TRAMP;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_Z_TRAMP;\n";
+	print ::OUTH "\tfloat $::xpartName[$i]\_TRAMP;\n";
+	print ::OUTH "\tint $::xpartName[$i]\_DORAMP;\n";
 }
 
 sub printEpics {
@@ -27,9 +26,8 @@ sub printEpics {
 	print ::EPICS "INVARIABLE $::xpartName[$i]\_K $::systemName\.$::xpartName[$i]\_K float ai 0 field(PREC,\"3\")\n";
 	print ::EPICS "INVARIABLE $::xpartName[$i]\_P $::systemName\.$::xpartName[$i]\_P float ai 0 field(PREC,\"3\")\n";
 	print ::EPICS "INVARIABLE $::xpartName[$i]\_Z $::systemName\.$::xpartName[$i]\_Z float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_K_TRAMP $::systemName\.$::xpartName[$i]\_K_TRAMP float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_P_TRAMP $::systemName\.$::xpartName[$i]\_P_TRAMP float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_Z_TRAMP $::systemName\.$::xpartName[$i]\_Z_TRAMP float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_TRAMP $::systemName\.$::xpartName[$i]\_TRAMP float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_DORAMP $::systemName\.$::xpartName[$i]\_DORAMP int ai 0 field(PREC,\"3\")\n";
 }
 
 sub printFrontEndVars  {
@@ -80,15 +78,14 @@ sub frontEndCode {
         my $calcExp = "// Input Filter:  $::xpartName[$i]\n";
 	my $input = "$::fromExp[0]";
 
-        $calcExp .= "inputFilterModule($input, &\L$::xpartName[$i], &\L$::xpartName[$i]_val, "
+        $calcExp .= "inputFilterModule1($input, &\L$::xpartName[$i], &\L$::xpartName[$i]_val, "
 		  . "pLocalEpics->$::systemName.$::xpartName[$i]_OFFSET, "
 		  . "&\L$::xpartName[$i]_K, &\L$::xpartName[$i]_P, &\L$::xpartName[$i]_Z, "
 		  . "pLocalEpics->$::systemName.$::xpartName[$i]_K, "
 		  . "pLocalEpics->$::systemName.$::xpartName[$i]_P, "
 		  . "pLocalEpics->$::systemName.$::xpartName[$i]_Z, "
-		  . "pLocalEpics->$::systemName.$::xpartName[$i]_K_TRAMP, "
-		  . "pLocalEpics->$::systemName.$::xpartName[$i]_P_TRAMP, "
-		  . "pLocalEpics->$::systemName.$::xpartName[$i]_Z_TRAMP, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_TRAMP, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_DORAMP, "
 		  . "&\L$::xpartName[$i]_KS, "
 		  . "&\L$::xpartName[$i]_PS, "
 		  . "&\L$::xpartName[$i]_ZS);";
