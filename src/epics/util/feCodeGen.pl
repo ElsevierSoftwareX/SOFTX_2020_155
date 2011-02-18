@@ -2342,14 +2342,22 @@ print OUT "\t\#define FE_RATE\t2048\n";
 print OUT "\#endif\n";
 print OUT "\n\n";
 
+@adcCardNum;
+@dacCardNum;
+$adcCCtr=0;
+$dacCCtr=0;
 # Hardware configuration
 print OUT "/* Hardware configuration */\n";
 print OUT "CDS_CARDS cards_used[] = {\n";
 for (0 .. $adcCnt-1) {
 	print OUT "\t{", $adcType[$_], ",", $adcNum[$_], "},\n";
+	$adcCardNum[$adcCCtr] = substr($adcNum[$_],0,1);
+	$adcCCtr ++;
 }
 for (0 .. $dacCnt-1) {
 	print OUT "\t{", $dacType[$_], ",", $dacNum[$_], "},\n";
+	$dacCardNum[$dacCCtr] = substr($dacNum[$_],0,1);
+	$dacCCtr ++;
 }
 for (0 .. $boCnt-1) {
 	print OUT "\t{", $boType[$_], ",", $boNum[$_], "},\n";
@@ -3471,8 +3479,114 @@ $sed_arg .= "s/DCU_NODE_ID/$dcuId/g;";
 $sysname = uc($skeleton);
 $sed_arg .= "s/FBID/$sysname/g;";
 $sed_arg .= "s/MEDMDIR/$skeleton/g;";
-system("cat GDS_TP.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
+my @adcMedm;
+my @byteMedm;
+$sitelc = lc($site);
+$mxpt = 490;
+$mypt = 52;
+$mbxpt = 32 + $mxpt;
+$mbypt = $mypt + 1;
+$adcMedm[0] = "\"related display\" \{ \n";
+$adcMedm[1] = "\tobject  \{ \n";
+$adcMedm[2] = "\t\tx=";
+$adcMedm[3] = "$mxpt";
+$adcMedm[4] = " \n";
+$adcMedm[5] = "\t\ty=";
+$adcMedm[6] = "$mypt";
+$adcMedm[7] = " \n";
+$adcMedm[8] = "\t\twidth=30 \n";
+$adcMedm[9] = "\t\theight=20 \n";
+$adcMedm[10] = "\t\} \n";
+$adcMedm[11] = "\tdisplay\[0\]  \{ \n";
+$adcMedm[12] = "\t\tname=\"/opt/rtcds/LOCATION_NAME/";
+$adcMedm[13] = "$sitelc";
+$adcMedm[14] = "/medm/MEDMDIR/FBID_MONITOR_ADC";
+$adcMedm[15] = "$adcCnt";
+$adcMedm[16] = "\.adl\" \n";
+$adcMedm[17] = "\t\} \n";
+$adcMedm[18] = "\tclr=0 \n";
+$adcMedm[19] = "\tbclr=34 \n";
+$adcMedm[20] = "\tlabel=\"A";
+$adcMedm[21] = "$adcCnt\" \n";
+$adcMedm[22] = "\} \n";
+$byteMedm[0] = "byte \{ \n";
+$byteMedm[1] = "\tobject  \{ \n";
+$byteMedm[2] = "\t\tx=";
+$byteMedm[3] = "$mbxpt";
+$byteMedm[4] = " \n";
+$byteMedm[5] = "\t\ty=";
+$byteMedm[6] = "$mbypt";
+$byteMedm[7] = " \n";
+$byteMedm[8] = "\t\twidth=10 \n";
+$byteMedm[9] = "\t\theight=18 \n";
+$byteMedm[10] = "\t\} \n";
+$byteMedm[11] = "\tmonitor \{\n";
+$byteMedm[12] = "\t\tchan=\"SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_";
+$byteMedm[13] = "$adcCnt";
+$byteMedm[14] = "\" \n";
+$byteMedm[15] = "\t\tclr=60 \n";
+$byteMedm[16] = "\t\tbclr=20 \n";
+$byteMedm[17] = "\t\} \n";
+$byteMedm[18] = "\tsbit=0 \n";
+$byteMedm[19] = "\tebit=1 \n";
+$byteMedm[20] = "\} \n";
+$dacMedm = 0;
+$totalMedm = $adcCnt + $dacCnt;
+print "Found $adcCnt ADC modules part is $adcPartNum[0]\n";
+print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
+system("cp GDS_TP_CUSTOM.adl GDS_TP_TEST.adl");
+open(OUTGDSM,">>./"."GDS_TP_TEST.adl") || die "cannot open GDS_TP file for writing ";
+for($ii=0;$ii<$totalMedm;$ii++)
+{
+$adcMedm[3] = "$mxpt";
+$adcMedm[6] = "$mypt";
+$adcMedm[15] = "$ii";
+$adcMedm[21] = "$adcCardNum[$ii]\" \n";
+if($ii>=$adcCnt)
+{
+	$dacSnum=0;
+if($dacMedm > 3)
+{
+	$dacSnum=1;
+}
+	$adcMedm[14] = "/medm/MEDMDIR/FBID_DAC_MONITOR_";
+	$adcMedm[15] = "$dacSnum";
+	$adcMedm[19] = "\tbclr=44 \n";
+	$adcMedm[20] = "\tlabel=\"D";
+	$adcMedm[21] = "$dacCardNum[$dacMedm]\" \n";
+}
+print OUTGDSM @adcMedm;
+$mbxpt = 32 + $mxpt;
+$mbypt = $mypt + 1;
+$byteMedm[3] = "$mbxpt";
+$byteMedm[6] = "$mbypt";
+$byteMedm[13] = "$ii";
+$byteMedm[18] = "\tsbit=0 \n";
+$byteMedm[19] = "";
+if($ii>=$adcCnt)
+{
+	$byteMedm[12] = "\t\tchan=\"SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_";
+	$byteMedm[13] = "$dacMedm";
+	$dacMedm ++;
+}
+print OUTGDSM @byteMedm;
+$mbxpt = 12 + $mbxpt;
+$byteMedm[3] = "$mbxpt";
+$byteMedm[18] = "\tsbit=1 \n";
+$byteMedm[19] = "\tebit=1 \n";
+print OUTGDSM @byteMedm;
+$mypt += 22;
+if($ii == 4) {
+	$mxpt += 57; 
+	$mypt = 52;
+}
+}
+close(OUTGDSM);
+
+system("cat GDS_TP_TEST.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
 system("cat DAC_MONITOR.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR.adl");
+system("cat DAC_MONITOR_0.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_0.adl");
+system("cat DAC_MONITOR_1.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_1.adl");
 my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
 
