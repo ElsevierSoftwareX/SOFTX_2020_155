@@ -5,7 +5,7 @@
 
 
 /* char vars' length */
-#define CVL  20
+#define CVL  40
 
 typedef struct fmSubSysMap {
   char name[CVL]; /* Filter module name within this subsystem */
