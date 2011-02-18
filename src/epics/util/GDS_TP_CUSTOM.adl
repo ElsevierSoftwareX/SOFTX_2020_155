@@ -195,21 +195,6 @@ text {
 	}
 	textix="CPU Max"
 }
-byte {
-	object {
-		x=123
-		y=97
-		width=10
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
-		clr=20
-		bclr=60
-	}
-	sbit=3
-	ebit=3
-}
 text {
 	object {
 		x=184
@@ -235,21 +220,6 @@ text {
 	}
 	textix="us"
 	align="horiz. centered"
-}
-byte {
-	object {
-		x=123
-		y=78
-		width=10
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
-		clr=20
-		bclr=60
-	}
-	sbit=1
-	ebit=1
 }
 "text update" {
 	object {
@@ -528,21 +498,6 @@ text {
 	}
 	textix="us"
 	align="horiz. centered"
-}
-byte {
-	object {
-		x=123
-		y=117
-		width=10
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD"
-		clr=20
-		bclr=60
-	}
-	sbit=4
-	ebit=4
 }
 rectangle {
 	object {
@@ -973,8 +928,8 @@ byte {
 	}
 	control {
 		chan="SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_LOAD_CONFIG"
-		clr=14
-		bclr=30
+		clr=0
+		bclr=44
 	}
 	label="DAQ Reload"
 	release_msg="1"
@@ -1251,4 +1206,49 @@ byte {
 	}
 	label="OVERFLOWS"
 	release_msg="1"
+}
+rectangle {
+	object {
+		x=123
+		y=97
+		width=10
+		height=15
+	}
+	"basic attribute" {
+		clr=60
+	}
+	"dynamic attribute" {
+		clr="alarm"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER_MAX"
+	}
+}
+rectangle {
+	object {
+		x=123
+		y=78
+		width=10
+		height=15
+	}
+	"basic attribute" {
+		clr=60
+	}
+	"dynamic attribute" {
+		clr="alarm"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_USR_TIME"
+	}
+}
+rectangle {
+	object {
+		x=123
+		y=117
+		width=10
+		height=15
+	}
+	"basic attribute" {
+		clr=60
+	}
+	"dynamic attribute" {
+		clr="alarm"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IRIGB_TIME"
+	}
 }
