@@ -1,7 +1,7 @@
 
 file {
-	name="/home/aivanov/cds/advLigo/src/epics/util/MONITOR.adl"
-	version=030000
+	name="/opt/rtcds/llo/l1/core/trunk/src/epics/util/MONITOR.adl"
+	version=030104
 }
 display {
 	object {
@@ -1039,73 +1039,72 @@ text {
 	textix="adc_0_31"
 	align="horiz. right"
 }
+rectangle {
+	object {
+		x=-253
+		y=524
+		width=979
+		height=25
+	}
+	"basic attribute" {
+		clr=5
+	}
+}
+"shell command" {
+	object {
+		x=0
+		y=524
+		width=150
+		height=25
+	}
+	command[0] {
+		label="Documentation"
+		name="xterm -e view"
+		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/docs/SITE_NAMESYSTEM_NAME-MONITOR_ADC.txt"
+	}
+	command[1] {
+		label="View Last Snapshot"
+		name="xwud -in"
+		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMESYSTEM_NAME-MONITOR_ADC_0.xwd"
+	}
+	command[2] {
+		label="View Previous Snapshot"
+		name="xwud -in"
+		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMESYSTEM_NAME-MONITOR_ADC_1.xwd"
+	}
+	command[3] {
+		label="Update Snapshot"
+		name="/cvs/cds/LOCATION_NAME/scripts/utilities/xupdatesnap"
+		args="SITE_NAMESYSTEM_NAME-MONITOR_ADC"
+	}
+	clr=14
+	bclr=30
+}
+image {
+	object {
+		x=701
+		y=524
+		width=25
+		height=25
+	}
+	type="gif"
+	"image name"="/cvs/cds/LOCATION_NAME/scripts/utilities/nova_logo.gif"
+	"dynamic attribute" {
+		chan="SITE_NAME:CONTROL_SYSTEM_SYSTEM_NAME-TIME_STRING"
+	}
+}
 "text update" {
 	object {
-		x=600
-		y=5
+		x=586
+		y=3
 		width=120
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-TIME_STRING"
-		clr=2
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_STRING"
+		clr=0
 		bclr=14
 	}
 	limits {
 	}
 }
-rectangle {
-        object {
-                x=-253
-                y=524
-                width=979
-                height=25
-        }
-        "basic attribute" {
-                clr=5
-        }
-}
-image {
-        object {
-                x=701
-                y=524
-                width=25
-                height=25
-        }
-        type="gif"
-        "image name"="/cvs/cds/LOCATION_NAME/scripts/utilities/nova_logo.gif"
-        "dynamic attribute" {
-                chan="SITE_NAME:CONTROL_SYSTEM_SYSTEM_NAME-TIME_STRING"
-        }
-}
-"shell command" {
-        object {
-                x=0
-                y=524
-                width=150
-                height=25
-        }
-        command[0] {
-                label="Documentation"
-                name="xterm -e view"
-                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/docs/SITE_NAMESYSTEM_NAME-MONITOR_ADC.txt"
-        }
-        command[1] {
-                label="View Last Snapshot"
-                name="xwud -in"
-                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMESYSTEM_NAME-MONITOR_ADC_0.xwd"
-        }
-        command[2] {
-                label="View Previous Snapshot"
-                name="xwud -in"
-                args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMESYSTEM_NAME-MONITOR_ADC_1.xwd"
-        }
-        command[3] {
-                label="Update Snapshot"
-                name="/cvs/cds/LOCATION_NAME/scripts/utilities/xupdatesnap"
-                args="SITE_NAMESYSTEM_NAME-MONITOR_ADC"
-        }
-        clr=14
-        bclr=30
-}
-
