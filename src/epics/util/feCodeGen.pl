@@ -2252,7 +2252,7 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG1 epicsOutput.diags[1] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.diags[2] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0 field(HOPR,\"2000\") field(LOPR,\"0\") field(HIHI,\"1900\") field(HHSV,\"MAJOR\")\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ai 0 field(HIHI,\"24\") field(HHSV,\"MAJOR\") field(HIGH,\"18\") field(HSV,\"MINOR\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ai 0 field(HIHI,\"24\") field(HHSV,\"MAJOR\") field(HIGH,\"18\") field(HSV,\"MINOR\") field(LOW,\"5\") field(LSV,\"MAJOR\")\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT epicsOutput.diags[7] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_MASTER_STAT epicsOutput.diags[8] int ai 0\n";
@@ -3139,12 +3139,14 @@ if ($compat_initial_ligo) {
 }
 if ($adcMaster > -1) {
   print OUTM "EXTRA_CFLAGS += -DADC_MASTER\n";
+  $modelType = "MASTER";
 } else {
   print OUTM "#Uncomment to run on an I/O Master \n";
   print OUTM "#EXTRA_CFLAGS += -DADC_MASTER\n";
 }
 if ($adcSlave > -1) {
   print OUTM "EXTRA_CFLAGS += -DADC_SLAVE\n";
+  $modelType = "SLAVE";
 } else {
   print OUTM "#Uncomment to run on an I/O slave process\n";
   print OUTM "#EXTRA_CFLAGS += -DADC_SLAVE\n";
@@ -3534,7 +3536,12 @@ $dacMedm = 0;
 $totalMedm = $adcCnt + $dacCnt;
 print "Found $adcCnt ADC modules part is $adcPartNum[0]\n";
 print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
-system("cp GDS_TP_CUSTOM.adl GDS_TP_TEST.adl");
+if($modelType eq "MASTER")
+{
+	system("cp GDS_TP_CUSTOM.adl GDS_TP_TEST.adl");
+}else{
+	system("cp GDS_TP_CUSTOM_SLAVE.adl GDS_TP_TEST.adl");
+}
 open(OUTGDSM,">>./"."GDS_TP_TEST.adl") || die "cannot open GDS_TP file for writing ";
 for($ii=0;$ii<$totalMedm;$ii++)
 {
