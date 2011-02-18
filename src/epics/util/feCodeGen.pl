@@ -3679,11 +3679,11 @@ sub commify_series {
 
 		  my $tn = top_name_transform($basename);
 		  my $basename1 = $usite . ":" . $tn . "_";
-		  my $filtername1 = $usite . $tn;
+		  my $filtername1 = $usite . $basename;
 		  if ($partType[$cur_part_num] eq "FiltMuxMatrix") {
 		    my $subDirName = "$epicsScreensDir/$usite" . "$basename";
 		    mkdir $subDirName;
-		    system("./mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite" . $basename . "     .adl");
+		    system("./mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite" . $basename . ".adl");
 		    for ($row = 0; $row < $outcnt; $row ++) {
 		      for ($col = 0; $col < $incnt; $col ++) {
 			my $filt_name = "$partName[$cur_part_num]" . "_" . "$col" . "_" . "$row";
@@ -3752,6 +3752,7 @@ sub commify_series {
 		}
 		my $sys_name = uc($skeleton);
 		my $sargs;
+		$sysname = uc($skeleton);
 		if (is_top_name($filt_name)) {
 			my $tfn = top_name_transform($filt_name);
 			my $nsys = system_name_part($tfn);
@@ -3761,17 +3762,16 @@ sub commify_series {
 			$sargs .= "s/FILTERNAME/$tfn/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
-				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/" . $filt_name . ".adl");
+				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
-				system("cat INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/" . $filt_name . ".adl");
+				system("cat INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} else {
-				system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/" . $filt_name . ".adl");
+				system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			}
 		} else {
-		  $sys_name = substr($sys_name, 2, 3);
+		  	$sys_name = substr($sys_name, 2, 3);
 			$sargs = $sed_arg . "s/FILTERNAME/$sys_name-$filt_name/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
-		  $sysname = uc($skeleton);
 			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
 				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
