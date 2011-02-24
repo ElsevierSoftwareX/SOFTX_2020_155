@@ -6,7 +6,7 @@
 /* Allowed maximum length for DMT channels */
 #define MAX_LONG_CHANNEL_NAME_LENGTH 255
 /* Allowed maximum length for DAQ channels */
-#define MAX_CHANNEL_NAME_LENGTH 40
+#define MAX_CHANNEL_NAME_LENGTH 60
 /* Groups are absolete and need to be removed from the source code */
 #define MAX_CHANNEL_GROUPS 150
 /* Hard limit on the number of channel names supported:
