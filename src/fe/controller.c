@@ -310,12 +310,12 @@ unsigned int CDO32Output[MAX_DIO_MODULES];
 unsigned int CDIO1616InputInput[MAX_DIO_MODULES]; // Binary input bits
 unsigned int CDIO1616Input[MAX_DIO_MODULES]; // Current value of the BO bits
 unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
-unsigned long CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
-unsigned long CDIO6464Input[MAX_DIO_MODULES]; // Current value of the BO bits
-unsigned long CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
-unsigned long writeCDIO6464l(CDS_HARDWARE *pHardware, int modNum, unsigned long data);
-unsigned long readCDIO6464l(CDS_HARDWARE *pHardware, int modNum);
-unsigned long readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum);
+unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
+unsigned int CDIO6464Input[MAX_DIO_MODULES]; // Current value of the BO bits
+unsigned int CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
+unsigned int writeCDIO6464l(CDS_HARDWARE *pHardware, int modNum, unsigned int data);
+unsigned int readCDIO6464l(CDS_HARDWARE *pHardware, int modNum);
+unsigned int readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum);
 int clock16K = 0;
 int out_buf_size = 0; // test checking DAC buffer size
 unsigned int cycle_gps_time = 0; // Time at which ADCs triggered
@@ -1866,6 +1866,9 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 		{
 		  dioInput[ii] = readDio(&cdsPciModules, kk);
 		}
+		if (cdsPciModules.doType[kk] == CON_6464DIO) {
+	 		CDIO6464InputInput[ii] = readInputCDIO6464l(&cdsPciModules, kk);
+		}
         }
         // Write Dio cards on change
         for(kk=0;kk < cdsPciModules.doCount;kk++)
@@ -1898,7 +1901,6 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			if (CDIO6464Input[ii] != CDIO6464Output[ii]) {
 			  CDIO6464Input[ii] = writeCDIO6464l(&cdsPciModules, kk, CDIO6464Output[ii]);
 			}
-			CDIO6464InputInput[ii] = readInputCDIO6464l(&cdsPciModules, kk);
                 } else
                 if((cdsPciModules.doType[kk] == ACS_24DIO) && (dioOutputHold[ii] != dioOutput[ii]))
 		{
