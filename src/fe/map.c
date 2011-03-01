@@ -470,6 +470,13 @@ int mapContec6464dio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 	  pHardware->doCount ++;
 	  pHardware->doInstance[devNum]  = pHardware->cDio6464lCount;
 	  pHardware->cDio6464lCount ++;
+	  devNum ++;
+	  pHardware->pci_do[devNum] = (pci_io_addr-1) + 4;
+	  pHardware->doType[devNum] = CON_6464DIO;
+	  pHardware->doCount ++;
+	  pHardware->doInstance[devNum]  = pHardware->cDio6464lCount;
+	  pHardware->cDio6464lCount ++;
+	  printk("contec32H diospace = 0x%x\n",pHardware->pci_do[devNum]);
 	  return(0);
 }
 
@@ -545,6 +552,9 @@ unsigned int readCDO32l(CDS_HARDWARE *pHardware, int modNum)
 	return(inl(pHardware->pci_do[modNum]));
 }
 
+// *****************************************************************************
+// Routines to write to CONTEC PCIe-16 DIO modules
+// *****************************************************************************
 unsigned int writeCDIO1616l(CDS_HARDWARE *pHardware, int modNum, unsigned int data)
 {
         outl(data,pHardware->pci_do[modNum]);
@@ -564,36 +574,34 @@ unsigned int readInputCDIO1616l(CDS_HARDWARE *pHardware, int modNum)
         return(inl(pHardware->pci_do[modNum]));
 }
 
-unsigned long writeCDIO6464l(CDS_HARDWARE *pHardware, int modNum, unsigned long data)
+// *****************************************************************************
+// Routine to write to CONTEC PCIe-64 DIO modules
+// *****************************************************************************
+unsigned int writeCDIO6464l(CDS_HARDWARE *pHardware, int modNum, unsigned int data)
 {
-  unsigned long out;
-  unsigned long out1;
 
-        outl(data&0xffffffff,pHardware->pci_do[modNum] + 8);
-        outl(data>>32,pHardware->pci_do[modNum] + 8 + 4);
-	//
-        out = inl(pHardware->pci_do[modNum] + 8);
-        out1 = inl(pHardware->pci_do[modNum] + 12);
-	return out | (out1 << 32);
+        outl(data,pHardware->pci_do[modNum] + 8);
+	return data;
 }
 
-unsigned long readCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
+// *****************************************************************************
+// Routine to read CONTEC PCIe-64 DIO modules - the output register
+// *****************************************************************************
+unsigned int readCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
 {
-  unsigned long out;
-  unsigned long out1;
+  unsigned int out;
 	//
         out = inl(pHardware->pci_do[modNum] + 8);
-        out1 = inl(pHardware->pci_do[modNum] + 12);
-	return out | (out1 << 32);
+	return out;
 }
 
-unsigned long readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
+// *****************************************************************************
+// Routine to read CONTEC PCIe-64 DIO modules
+// *****************************************************************************
+unsigned int readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
 {
-  unsigned long out;
-  unsigned long out1;
+  unsigned int out;
         out = inl(pHardware->pci_do[modNum]);
-        out1 = inl(pHardware->pci_do[modNum] + 4);
-	out |= (out1 << 32);
 	return out;
 }
 
@@ -1130,7 +1138,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 			/* See if ought to use this one or not */
 			for (i = 0; i < pCds->cards; i++) {
 				if (pCds->cards_used[i].type == CON_6464DIO
-				    && pCds->cards_used[i].instance == bo_cnt) {
+				    && (pCds->cards_used[i].instance * 2) == bo_cnt) {
 					use_it = 1;
 					break;
 				}
@@ -1142,7 +1150,9 @@ int mapPciModules(CDS_HARDWARE *pCds)
 			PCI_SLOT(dacdev->devfn));
 		  status = mapContec6464dio(pCds,dacdev);
 		  modCount ++;
+		  modCount ++;
 		}
+		bo_cnt ++;
 		bo_cnt ++;
   }
 
