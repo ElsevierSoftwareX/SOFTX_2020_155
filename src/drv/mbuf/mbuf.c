@@ -198,11 +198,12 @@ static int mbuf_mmap(struct file *file, struct vm_area_struct *vma)
 	return -EINVAL;
 }
 
+
 static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
 {
 	int i;
 	struct mbuf_request_struct req;
-        if (copy_from_user (&req, (void *) arg, sizeof (req))) return -EFAULT;
+        void __user *argp = (void __user *)arg;
 
         printk("mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n",
 		req.name, req.size, cmd, file);
@@ -210,6 +211,7 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
         switch(cmd){
         case IOCTL_MBUF_ALLOCATE:
 		{
+        	  if (copy_from_user (&req, (void *) argp, sizeof (req))) return -EFAULT;
 		  int res = mbuf_allocate_area(req.name, req.size, file);
 		  if (res >= 0) return kmalloc_area_size[res];
 		  else return -EINVAL;
@@ -217,6 +219,7 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
 		break;
         case IOCTL_MBUF_DEALLOCATE:
 		{
+        	  if (copy_from_user (&req, (void *) argp, sizeof (req))) return -EFAULT;
 		  int res = mbuf_release_area(req.name, file);
 		  if (res >= 0) return  0;
 		  else return -EINVAL;
