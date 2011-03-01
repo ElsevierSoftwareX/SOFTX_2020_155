@@ -18,7 +18,7 @@ sub partType {
 # Current part number is passed as first argument
 sub printHeaderStruct {
         my ($i) = @_;
-        print ::OUTH "\tfloat $::xpartName[$i];\n";
+        print ::OUTH "\tdouble $::xpartName[$i];\n";
 }
 
 # Print Epics variable definitions
@@ -26,7 +26,7 @@ sub printHeaderStruct {
 sub printEpics {
         my ($i) = @_;
 
-        print ::EPICS "OUTVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] float ai 0 field(PREC,\"3\")";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] double ai 0 field(PREC,\"3\")";
 	foreach $ef (@{$::epics_fields[$i]}) {
 		print ::EPICS  " " . $ef;
         }

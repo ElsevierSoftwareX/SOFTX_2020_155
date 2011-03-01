@@ -199,7 +199,7 @@ assign dcuId to "{ifo}:DAQ-FEC_{sysnum}_DCU_ID";
 %%  "lho", "h1", "xxx", 0, {{"", "", MAX_MODULES, fmmap0, 0}},
 %% };
 
-%% static const float conv = 0.000152588;
+%% static const double conv = 0.000152588;
 %% static const int mask[2] = {0xAAA0,0x10AA};
 %% extern pthread_mutex_t seq_lock;
 
@@ -782,7 +782,7 @@ state monScreen{
 %%  }                                                                    /* MA */
 
 %%  for(ii=0;ii<MAX_MODULES;ii++){
-%%    float t;
+%%    double t;
       pvGet(swRset[ii]);
       if(swRset[ii]&1)
 %% 	{

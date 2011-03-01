@@ -728,7 +728,7 @@ $iparAlarmSev{"gain_ramp_time_low_Sev"} = "TRAMP.LSV";
 $iparAlarmSev{"gain_ramp_time_lolo_Sev"} = "TRAMP.LLSV";
 $iparAlarmStat{"gain_ramp_time_Stat"} = "TRAMP.STAT";
 
-@a = ( \%fpar, "float", \%ipar, "int", \%iparAlarmSev, "int", \%iparAlarmStat, "int", \%spar, "string" );
+@a = ( \%fpar, "double", \%ipar, "int", \%iparAlarmSev, "int", \%iparAlarmStat, "int", \%spar, "string" );
 
 if ($phase > 0) {
    $decl1 .= "%% double rad_angle;\n\n";
