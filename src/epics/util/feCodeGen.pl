@@ -2045,7 +2045,9 @@ $numTries ++;
 				else {
 				if(($subUsed[$yy] != 1) && ($partInputType[$xx][$jj] ne "Adc") && ($partInputType[$xx][$jj] ne "DELAY"))
 				{
+					if ($partInput[$xx][$jj] ne "NC")  {
 						$allADC = 0;
+					}
 				}
 				}
 			}
