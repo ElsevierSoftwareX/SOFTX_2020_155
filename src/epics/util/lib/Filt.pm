@@ -32,7 +32,7 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
-        print ::OUT "double \L$::xpartName[$i];\n";
+        print ::OUT "double \L$::xpartName[$i] = 0.0;\n";
 }
 
 # Return front end initialization code
