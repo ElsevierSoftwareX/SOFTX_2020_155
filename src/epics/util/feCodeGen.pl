@@ -777,10 +777,14 @@ for($ii=0;$ii<$partCnt;$ii++)
 							{
 								if($xpartName[$xx] eq $var1)
 								{
-									$partOutput[$xx][$ports] = $xpartName[$ii];
-									$partOutputPort[$xx][$ports] = $jj;
-									#print "\tMatched to $xpartName[$xx] port $ports\n";
-									#print "\t$partOutput[$xx][$ports] $partOutputPort[$xx][$jj]\n\n";
+									for($q1=0;$q1<$partOutCnt[$xx];$q1++)
+									{
+										if($partOutput[$xx][$q1] =~ m/Bus/)
+										{
+											$partOutput[$xx][$q1] = $xpartName[$ii];
+											$partOutputPort[$xx][$q1] = $jj;
+										}
+									}
 								}
 							}
 						}
@@ -1321,7 +1325,8 @@ for($ii=0;$ii<$subSys;$ii++)
 					for($kk=0;$kk<$partOutCnt[$jj];$kk++)
 					{
 						
-						if(($partType[$jj] eq "BUSS") && ($partInputType[$jj][0] eq "Adc"))
+						#if(($partType[$jj] eq "BUSS") && ($partInputType[$jj][0] eq "Adc"))
+						if(($partType[$jj] eq "BUSS"))
 						{
 							print "BUSS FOUND ****  $xpartName[$jj] $seqNum[0][$counter] $partInputType[$jj][0]\n";
 							$ll = $partOutNum[$jj][$kk];
@@ -2045,9 +2050,7 @@ $numTries ++;
 				else {
 				if(($subUsed[$yy] != 1) && ($partInputType[$xx][$jj] ne "Adc") && ($partInputType[$xx][$jj] ne "DELAY"))
 				{
-					if ($partInput[$xx][$jj] ne "NC")  {
 						$allADC = 0;
-					}
 				}
 				}
 			}
@@ -2423,7 +2426,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 	   || $partType[$ii] eq "RelationalOperator"
 	   || $partType[$ii] eq "SATURATE") {
 		$port = $partInCnt[$ii];
-		print OUT "double \L$xpartName[$ii];\n";
+		print OUT "double \L$xpartName[$ii] = 0.0;\n";
 	}
 	if($partType[$ii] eq "MULTIPLY") {
 		$port = $partInCnt[$ii];
@@ -2799,7 +2802,8 @@ for($xx=0;$xx<$processCnt;$xx++)
 	if($partType[$mm] eq "Abs")
 	{
 	   print OUT "// Abs\n";
-	   $calcExp = "\L$xpartName[$mm] = " . $fromExp[0] . " < 0.0? - " . $fromExp[0] . ": " . $fromExp[0] . ";\n";
+	   #$calcExp = "\L$xpartName[$mm] = " . $fromExp[0] . " < 0.0? - " . $fromExp[0] . ": " . $fromExp[0] . ";\n";
+	   $calcExp = "\L$xpartName[$mm] = " . "lfabs(" . $fromExp[0] . ");\n";
 	   print OUT "$calcExp";
 	}
 	# ******** AND ********************************************************************
