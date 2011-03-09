@@ -53,6 +53,7 @@ $dac_internal_clocking = 0; # Default is DAC external clocking
 $no_oversampling = 0; # Default is to iversample
 $no_dac_interpolation = 0; # Default is to interpolate D/A outputs
 $compat_initial_ligo = 0; # Default is not to build for initial LIGO compatibility
+$max_name_len = 39;	# Maximum part name length
 
 if (@ARGV > 2) {
 	$dcuId = $ARGV[2];
