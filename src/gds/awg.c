@@ -2764,7 +2764,9 @@ Organization of generating waveforms:
       /* test whether valid waveforms were provided */
       for (cid = 0, cp = comp; cid < numComp; ++cid, ++cp) {
 
-	 printf("component %d; start=%d\n", cid, cp->start);
+ 	//cp->start = TAInow();
+
+	 printf("component %d; start=%ld localtime now=%ld\n", cid, cp->start, TAInow());
 
          /* start now if start <= 0 */
          if (cp->start <= 0) {
