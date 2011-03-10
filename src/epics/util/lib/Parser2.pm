@@ -419,7 +419,11 @@ sub node_processing {
 	}
 	# Check names; pass ADC parts and Remote Interlinks
 	# Allow IPC part through
-	if ($::partName[$::partCnt] !~ /^Bus\\n/
+	if ($::partName[$::partCnt] !~ /^Bus\\n/)
+	{
+		print("BUS found $::partName[$::partCnt] $source_block\n");
+		}
+	if ($::partName[$::partCnt] !~ /Bus\\n/
 	    && $source_block !~ /^cdsRemoteIntlk/
 	    && $source_block !~ /^cdsParameters/
 	    && $source_block !~ /^cdsIPC/
