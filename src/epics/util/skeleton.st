@@ -69,104 +69,104 @@ string msg;
 assign msg to "{ifo}:FEC-{sysnum}_MSG";
 
 int statErrCnt;
-assign statErrCnt to "{ifo}:{sys}-{subsys}STAT_ERR_CNT";
+assign statErrCnt to "{ifo}:FEC-{sysnum}_STAT_ERR_CNT";
 
 string staterr[6];
 assign staterr to {
-"{ifo}:{sys}-{subsys}FESTAT_1","{ifo}:{sys}-{subsys}FESTAT_2",
-"{ifo}:{sys}-{subsys}FESTAT_3","{ifo}:{sys}-{subsys}FESTAT_4",
-"{ifo}:{sys}-{subsys}FESTAT_5","{ifo}:{sys}-{subsys}FESTAT_6"};
+"{ifo}:FEC-{sysnum}_FESTAT_1","{ifo}:FEC-{sysnum}_FESTAT_2",
+"{ifo}:FEC-{sysnum}_FESTAT_3","{ifo}:FEC-{sysnum}_FESTAT_4",
+"{ifo}:FEC-{sysnum}_FESTAT_5","{ifo}:FEC-{sysnum}_FESTAT_6"};
 
 int matrixThreshCount;                                                   /* MA */
-assign matrixThreshCount to "{ifo}:{sys}-{subsys}MTRX_STAT_ERR_CNT";     /* MA */
+assign matrixThreshCount to "{ifo}:FEC-{sysnum}_MTRX_STAT_ERR_CNT";      /* MA */
 
 string matrixErr[10];                                                    /* MA */
 assign matrixErr to {                                                    /* MA */
-"{ifo}:{sys}-{subsys}MTRXSTAT_1","{ifo}:{sys}-{subsys}MTRXSTAT_2",       /* MA */
-"{ifo}:{sys}-{subsys}MTRXSTAT_3","{ifo}:{sys}-{subsys}MTRXSTAT_4",       /* MA */
-"{ifo}:{sys}-{subsys}MTRXSTAT_5","{ifo}:{sys}-{subsys}MTRXSTAT_6",       /* MA */
-"{ifo}:{sys}-{subsys}MTRXSTAT_7","{ifo}:{sys}-{subsys}MTRXSTAT_8",       /* MA */
-"{ifo}:{sys}-{subsys}MTRXSTAT_9","{ifo}:{sys}-{subsys}MTRXSTAT_10"};     /* MA */
+"{ifo}:FEC-{sysnum}_MTRXSTAT_1","{ifo}:FEC-{sysnum}_MTRXSTAT_2",         /* MA */
+"{ifo}:FEC-{sysnum}_MTRXSTAT_3","{ifo}:FEC-{sysnum}_MTRXSTAT_4",         /* MA */
+"{ifo}:FEC-{sysnum}_MTRXSTAT_5","{ifo}:FEC-{sysnum}_MTRXSTAT_6",         /* MA */
+"{ifo}:FEC-{sysnum}_MTRXSTAT_7","{ifo}:FEC-{sysnum}_MTRXSTAT_8",         /* MA */
+"{ifo}:FEC-{sysnum}_MTRXSTAT_9","{ifo}:FEC-{sysnum}_MTRXSTAT_10"};       /* MA */
 
 int filterStatusCount;                                                   /* MA */
-assign filterStatusCount to  "{ifo}:{sys}-{subsys}FILTER_STATUS_COUNT";  /* MA */
+assign filterStatusCount to  "{ifo}:FEC-{sysnum}_FILTER_STATUS_COUNT";   /* MA */
 
 string filterErrId[10];                                                  /* MA */
 assign filterErrId to {                                                  /* MA */
-"{ifo}:{sys}-{subsys}FILTER_ID_1","{ifo}:{sys}-{subsys}FILTER_ID_2",     /* MA */
-"{ifo}:{sys}-{subsys}FILTER_ID_3","{ifo}:{sys}-{subsys}FILTER_ID_4",     /* MA */
-"{ifo}:{sys}-{subsys}FILTER_ID_5","{ifo}:{sys}-{subsys}FILTER_ID_6",     /* MA */
-"{ifo}:{sys}-{subsys}FILTER_ID_7","{ifo}:{sys}-{subsys}FILTER_ID_8",     /* MA */
-"{ifo}:{sys}-{subsys}FILTER_ID_9","{ifo}:{sys}-{subsys}FILTER_ID_10"};   /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_ID_1","{ifo}:FEC-{sysnum}_FILTER_ID_2",       /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_ID_3","{ifo}:FEC-{sysnum}_FILTER_ID_4",       /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_ID_5","{ifo}:FEC-{sysnum}_FILTER_ID_6",       /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_ID_7","{ifo}:FEC-{sysnum}_FILTER_ID_8",       /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_ID_9","{ifo}:FEC-{sysnum}_FILTER_ID_10"};     /* MA */
 
 string filterParam[10];                                                  /* MA */
 assign filterParam to {                                                  /* MA */
-"{ifo}:{sys}-{subsys}FILTER_PARAM_1",                                    /* MA */
-"{ifo}:{sys}-{subsys}FILTER_PARAM_2",                                    /* MA */
-"{ifo}:{sys}-{subsys}FILTER_PARAM_3",                                    /* MA */
-"{ifo}:{sys}-{subsys}FILTER_PARAM_4",                                    /* MA */
-"{ifo}:{sys}-{subsys}FILTER_PARAM_5",                                    /* MA */
-"{ifo}:{sys}-{subsys}FILTER_PARAM_6",                                    /* MA */
-"{ifo}:{sys}-{subsys}FILTER_PARAM_7",                                    /* MA */
-"{ifo}:{sys}-{subsys}FILTER_PARAM_8",                                    /* MA */
-"{ifo}:{sys}-{subsys}FILTER_PARAM_9",                                    /* MA */
-"{ifo}:{sys}-{subsys}FILTER_PARAM_10"};                                  /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_PARAM_1",                                     /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_PARAM_2",                                     /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_PARAM_3",                                     /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_PARAM_4",                                     /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_PARAM_5",                                     /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_PARAM_6",                                     /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_PARAM_7",                                     /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_PARAM_8",                                     /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_PARAM_9",                                     /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_PARAM_10"};                                   /* MA */
 
 string filterSeverity[10];                                               /* MA */
 assign filterSeverity to {                                               /* MA */
-"{ifo}:{sys}-{subsys}FILTER_SEVERITY_1",                                 /* MA */
-"{ifo}:{sys}-{subsys}FILTER_SEVERITY_2",                                 /* MA */
-"{ifo}:{sys}-{subsys}FILTER_SEVERITY_3",                                 /* MA */
-"{ifo}:{sys}-{subsys}FILTER_SEVERITY_4",                                 /* MA */
-"{ifo}:{sys}-{subsys}FILTER_SEVERITY_5",                                 /* MA */
-"{ifo}:{sys}-{subsys}FILTER_SEVERITY_6",                                 /* MA */
-"{ifo}:{sys}-{subsys}FILTER_SEVERITY_7",                                 /* MA */
-"{ifo}:{sys}-{subsys}FILTER_SEVERITY_8",                                 /* MA */
-"{ifo}:{sys}-{subsys}FILTER_SEVERITY_9",                                 /* MA */
-"{ifo}:{sys}-{subsys}FILTER_SEVERITY_10"};                               /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_1",                                  /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_2",                                  /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_3",                                  /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_4",                                  /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_5",                                  /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_6",                                  /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_7",                                  /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_8",                                  /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_9",                                  /* MA */
+"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_10"};                                /* MA */
 
 int setpointStatusCount;                                                 /* MA */
 assign setpointStatusCount to                                            /* MA */
-    "{ifo}:{sys}-{subsys}SETPOINT_STATUS_COUNT";                         /* MA */
+    "{ifo}:FEC-{sysnum}_SETPOINT_STATUS_COUNT";                          /* MA */
 
 string setpointErrId[10];                                                /* MA */
 assign setpointErrId to {                                                /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_ID_1",                                  /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_ID_2",                                  /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_ID_3",                                  /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_ID_4",                                  /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_ID_5",                                  /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_ID_6",                                  /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_ID_7",                                  /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_ID_8",                                  /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_ID_9",                                  /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_ID_10"};                                /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_ID_1",                                   /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_ID_2",                                   /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_ID_3",                                   /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_ID_4",                                   /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_ID_5",                                   /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_ID_6",                                   /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_ID_7",                                   /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_ID_8",                                   /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_ID_9",                                   /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_ID_10"};                                 /* MA */
 
 string setpointMajorCount[10];                                           /* MA */
 assign setpointMajorCount to {                                           /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_1",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_2",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_3",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_4",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_5",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_6",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_7",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_8",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_9",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MAJOR_COUNT_10"};                       /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_1",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_2",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_3",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_4",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_5",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_6",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_7",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_8",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_9",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_10"};                        /* MA */
 
 string setpointMinorCount[10];                                           /* MA */
 assign setpointMinorCount to {                                           /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_1",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_2",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_3",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_4",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_5",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_6",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_7",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_8",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_9",                         /* MA */
-   "{ifo}:{sys}-{subsys}SETPOINT_MINOR_COUNT_10"};                       /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_1",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_2",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_3",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_4",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_5",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_6",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_7",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_8",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_9",                          /* MA */
+   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_10"};                        /* MA */
 
 int allNewCoeff;
 assign allNewCoeff to "{ifo}:FEC-{sysnum}_LOAD_NEW_COEFF";
