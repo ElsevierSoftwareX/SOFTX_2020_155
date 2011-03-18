@@ -46,10 +46,11 @@ sub do_on_leaves {
 #	function reference
 #	function argument
 sub do_on_nodes {
-	my($tree, $f, $arg) = @_;
-	if (&$f($tree, $arg) == 0) {
+	my($tree, $f, $arg, $parent) = @_;
+	#print("do on nodes; node=$tree; parent=$parent\n");
+	if (&$f($tree, $arg, $parent) == 0) {
 	  for (@{$tree->{NEXT}}) {
-               	do_on_nodes($_, $f, $arg);
+               	do_on_nodes($_, $f, $arg, $tree);
 	  }
 	}
 }
@@ -57,10 +58,36 @@ sub do_on_nodes {
 # Find graph node by name
 #
 sub find_node {
-	my($tree, $name) = @_;
-	if ($tree->{NAME} eq $name) {
+	my($tree, $name, $field, $name1, $field1) = @_;
+	if ($field1 ne undef) {
+	  if (${$tree->{FIELDS}}{$field} eq $name 
+	  	&& ${$tree->{FIELDS}}{$field1} eq $name1) {
 		return $tree;
+	  } else {
+		for (@{$tree->{NEXT}}) {
+			#print ${$_->{FIELDS}}{$field}, "\n";
+                	$res = find_node($_, $name, $field, $name1, $field1);
+			if ($res) {
+				return $res;
+			}
+        	}
+	  }
+  } elsif ($field ne undef) {
+	  if (${$tree->{FIELDS}}{$field} eq $name) {
+		return $tree;
+	  } else {
+		for (@{$tree->{NEXT}}) {
+			#print ${$_->{FIELDS}}{$field}, "\n";
+                	$res = find_node($_, $name, $field);
+			if ($res) {
+				return $res;
+			}
+        	}
+	  }
 	} else {
+	  if ($tree->{NAME} eq $name) {
+		return $tree;
+	  } else {
 		for (@{$tree->{NEXT}}) {
 			#print $_->{NAME}, "\n";
                 	$res = find_node($_, $name);
@@ -68,6 +95,7 @@ sub find_node {
 				return $res;
 			}
         	}
+	  }
 	}
 	return undef;
 }
@@ -82,7 +110,7 @@ sub print_tree {
 	my($space);
 	if ($print_no_repeats && $tree->{PRINTED}) { return; }
 	for (0 .. $level) { $space .= ' '; }
-	debug 0, $space, "{", $tree->{NAME}, " nref=", scalar @{$tree->{NEXT}}, "}";
+	#debug 0, $space, "{", $tree->{NAME}, "; src=", ${$tree->{FIELDS}}{SrcBlock}, ";dst=", ${$tree->{FIELDS}}{DstBlock}, " nref=", scalar @{$tree->{NEXT}}, "}";
 	for (@{$tree->{NEXT}}) {
 		print_tree($_, $level + 1);
 	}
