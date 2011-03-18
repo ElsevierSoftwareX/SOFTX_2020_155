@@ -13,7 +13,7 @@ $no_rtl = system("/sbin/lsmod | grep rtl");
 #endif
 
 if ($no_rtl) {
-	print "Generating CPU Shutdown Real-time code\n";
+	print "Generating Firm Real-time code for patched vanilla Linux kernel\n";
 }
 
 my $mdmStr = `grep "define MAX_DIO_MODULES" ../../include/drv/cdsHardware.h`;
@@ -347,11 +347,12 @@ CDS::ParsingDiagnostics::print_diagnostics("parser_diag_good.txt");
 }
 
 init_vars();
-require "lib/Parser2.pm";
+require "lib/Parser3.pm";
 #print "###################   mdl file is $ARGV[0] #############\n";
 #open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 open(IN,"<".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 die unless CDS::Parser::parse();
+
 close(IN);
 
 
@@ -1461,10 +1462,10 @@ sub do_on_leaves {
 #	function reference
 #	function argument
 sub do_on_nodes {
-	my($tree, $f, $arg) = @_;
-	&$f($tree, $arg);
+	my($tree, $f, $arg, $parent) = @_;
+	&$f($tree, $arg, $parent);
 	for (@{$tree->{NEXT}}) {
-               	do_on_nodes($_, $f, $arg);
+               	do_on_nodes($_, $f, $arg, $tree);
 	}
 }
 
@@ -3003,7 +3004,7 @@ if ($no_rtl) {
 }
 
 if ($no_rtl) {
-print OUTM "# CPU Shutdown Real Time Linux\n";
+print OUTM "# CPU-Shutdown Real Time Linux\n";
 } else {
 print OUTM "# RTLinux makefile\n";
 if ($wind_river_rtlinux) {
