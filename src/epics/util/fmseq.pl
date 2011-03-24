@@ -895,6 +895,7 @@ foreach $i ( @names ) {
 }
     
 # add msg and load coeff records
+print "grecord(stringin,\"%IFO%:FEC-${dcuId}_BUILD_SVN\")\n";
 print "grecord(ai,\"%IFO%:FEC-${dcuId}_LOAD_NEW_COEFF\")\n";
 print "grecord(stringin,\"%IFO%:FEC-${dcuId}_MSG\")\n";
 print "grecord(stringin,\"%IFO%:FEC-${dcuId}_TIME_STRING\")\n";

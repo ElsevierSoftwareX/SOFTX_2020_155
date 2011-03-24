@@ -1789,3 +1789,31 @@ byte {
 	label="DAQ Reload"
 	release_msg="1"
 }
+text {
+	object {
+		x=4
+		y=2
+		width=45
+		height=15
+	}
+	"basic attribute" {
+		clr=0
+	}
+	textix="SVN #"
+}
+"text update" {
+	object {
+		x=55
+		y=2
+		width=120
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SUILD_SVN"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
