@@ -1320,10 +1320,13 @@ for($ii=0;$ii<$subSys;$ii++)
 	for($jj=$subSysPartStart[$ii];$jj<$subSysPartStop[$ii];$jj++)
 	{
 		#if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "BUSS") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "FROM") || ($partType[$jj] eq "GOTO") || ($partType[$jj] eq "EpicsIn") || ($partType[$jj] eq "CONSTANT"))
-		if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "BUSS") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "EpicsIn") || ($partType[$jj] eq "CONSTANT") || ($partType[$jj] eq "EzCaRead"))
+		if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "BUSS") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "EpicsIn") || ($partType[$jj] eq "CONSTANT") || ($partType[$jj] eq "EzCaRead") || ($partType[$jj] eq "DELAY"))
 				{
-					$partsRemaining --;
-					$partUsed[$jj] = 1;
+					if(($partType[$jj] ne "DELAY"))
+					{
+						$partsRemaining --;
+						$partUsed[$jj] = 1;
+					}
 					for($kk=0;$kk<$partOutCnt[$jj];$kk++)
 					{
 						
@@ -1395,7 +1398,6 @@ for($ii=0;$ii<$subSys;$ii++)
 			print " ********************* Parts remaining = $partsRemaining\n";
 			$seqParts[$ii] = $ssCnt;
 		}
-
 		$partsRemaining = 0;
 		$searchCnt = 0;
 		for($ii=0;$ii<$nonSubCnt;$ii++)
@@ -1968,7 +1970,7 @@ for($ii=0;$ii<$searchCnt;$ii++)
 	{
 		for($jj=0;$jj<$partInCnt[$xx];$jj++)
 		{
-			if(($partInputType[$xx][$jj] ne "Adc") && ($partInputType[$xx][$jj] ne "DELAY"))
+			if($partInputType[$xx][$jj] ne "Adc")
 
 			{
 					$allADC = 0;
@@ -2138,7 +2140,7 @@ if($processCnt != $ftotal)
 		my $pt = $partType[$CDS::Parser::parts{$_}];
 		if ($pt ne "INPUT" && $pt ne "OUTPUT" && $pt ne "GROUND" 
 			&& $pt ne "TERM" && $pt ne "BUSS" && $pt ne "BUSC"
-			&& $pt ne "EpicsIn") {
+			&& $pt ne "EpicsIn" && $pt ne "CONSTANT" && $pt ne "GOTO") {
 			print $_, " ", $partType[$CDS::Parser::parts{$_}], "\n";
 		}
 	}
