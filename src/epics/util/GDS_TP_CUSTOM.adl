@@ -1252,3 +1252,31 @@ rectangle {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IRIGB_TIME"
 	}
 }
+"text update" {
+	object {
+		x=58
+		y=5
+		width=120
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_BUILD_SVN"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=7
+		y=5
+		width=45
+		height=15
+	}
+	"basic attribute" {
+		clr=0
+	}
+	textix="SVN #"
+}

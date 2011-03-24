@@ -71,6 +71,9 @@ assign msg to "{ifo}:FEC-{sysnum}_MSG";
 int statErrCnt;
 assign statErrCnt to "{ifo}:FEC-{sysnum}_STAT_ERR_CNT";
 
+string svnString;
+assign svnString to "{ifo}:FEC-{sysnum}_BUILD_SVN";
+
 string staterr[6];
 assign staterr to {
 "{ifo}:FEC-{sysnum}_FESTAT_1","{ifo}:FEC-{sysnum}_FESTAT_2",
@@ -375,7 +378,11 @@ state init
 %%  if(sysnum == 8) cpunum = 3;
     strncpy(fmc.system, macValueGet("sys"), sizeof(fmc.system)-1);
 #endif
+
 #endif
+	strcpy(svnString,BUILD_SVN_VERSION_NO);
+	pvPut(svnString);
+%%  printf("svn is %s\n", svnString);
 
 #if defined(SEQUENCER_NAME_tcsh1) || defined(SEQUENCER_NAME_tcsh2)
     tcsEnable = 0;
