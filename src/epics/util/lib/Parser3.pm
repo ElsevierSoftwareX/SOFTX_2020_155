@@ -633,12 +633,17 @@ sub remove_tags {
    my $goto_line = find_branch($parent, $goto_name, 1, 1);
    #print_node($goto_line);
    my $src_name = ${$goto_line->{FIELDS}}{"SrcBlock"};
+   my $src_port = ${$goto_line->{FIELDS}}{"SrcPort"};
    #print "Source $src_name\n";
    # Find line originating at the "From"
    my $from_line = find_line($parent, $block_name, 1);
    #print_node($from_line);
    ${$from_line->{FIELDS}}{"SrcBlock"} = $src_name;
+   ${$from_line->{FIELDS}}{"SrcPort"} = $src_port;
    #print_node($from_line);
+   # Rename the tags so they are not picked up by the code upstream...
+   ${$node->{FIELDS}}{"Name"} .= "_Removed";
+   ${$goto->{FIELDS}}{"Name"} .= "_Removed";
    return 0;
 }
 
@@ -1119,10 +1124,10 @@ sub process {
   print "Flattening the model\n";
   flatten_nested_subsystems($root);
   print "Finished flattening the model\n";
-  #print "TREE\n";
-  #CDS::Tree::print_tree($root);
   CDS::Tree::do_on_nodes($root, \&remove_tags, 0, $root);
   print "Removed Tags\n";
+  #print "TREE\n";
+  #CDS::Tree::print_tree($root);
   CDS::Tree::do_on_nodes($root, \&remove_busses, 0, $root);
   print "Removed Busses\n";
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
