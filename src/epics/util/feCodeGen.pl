@@ -343,7 +343,7 @@ die unless CDS::Parser::parse();
 close(IN);
 
 # Print diagnostics
-CDS::ParsingDiagnostics::print_diagnostics("parser_diag_good.txt");
+#CDS::ParsingDiagnostics::print_diagnostics("parser_diag_good.txt");
 }
 
 init_vars();
@@ -2457,7 +2457,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
 	}                                                                  # ===  MA  ===
 	if($partType[$ii] eq "DELAY") {
-		print OUT "static double \L$xpartName[$ii];\n";
+		print OUT "static double \L$xpartName[$ii] = 0.0;\n";
 	}
 	if($partType[$ii] eq "GROUND")  {
             if ($groundDecl == 0)  {                                       # =+=  MA  =+=
@@ -2921,12 +2921,11 @@ for($xx=0;$xx<$processCnt;$xx++)
 	# ******** DELAY ************************************************************************
 	if($partType[$mm] eq "DELAY")
 	{
-	   print OUT "// DELAY\n";
 		$calcExp = "\L$xpartName[$mm]";
 		$calcExp .= " = ";
 		$calcExp .= $fromExp[0];
 		$calcExp .= ";\n";
-		print OUT "$calcExp";
+		$unitDelayCode .= "$calcExp";
 	}
 
 	if($partType[$mm] eq "SATURATE")
@@ -2950,6 +2949,8 @@ print OUT "\n";
 }
 }
 
+print OUT "    // Unit delays\n";
+print OUT "$unitDelayCode";
 print OUT "    // All IPC outputs\n";
 print OUT "    if (_ipc_shm != 0) {\n";
 print OUT "$ipcOutputCode";
