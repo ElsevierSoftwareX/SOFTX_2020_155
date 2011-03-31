@@ -19,11 +19,11 @@ sub printHeaderStruct {
 	for ($input = 0; $input < $matIns; $input++) {
 	  for ($output = 0; $output < $matOuts; $output++) {
 
-	    my $outhOut = "#define $::xpartName[$i]_$input" . "_$output " ."\t $::filtCnt\n"; 
+	    my $outhOut = "#define $::xpartName[$i]_$output" . "_$input " ."\t $::filtCnt\n"; 
 	    print ::OUTH $outhOut;
-	    my $epicsOut = "$::xpartName[$i]" . "_$input" . "_$output\n";
+	    my $epicsOut = "$::xpartName[$i]" . "_$output" . "_$input\n";
             print ::EPICS $epicsOut;
-            $::filterName[$::filtCnt] = "$::xpartName[$i]" . "_$input" . "_$output";
+            $::filterName[$::filtCnt] = "$::xpartName[$i]" . "_$output" . "_$input";
             $::filtCnt ++;
 	  }
 	}
@@ -67,7 +67,7 @@ sub printFrontEndVars  {
         #print ::OUT "double \L$::xpartName[$i]\[$matOuts\];\n";
 	for ($input = 0; $input < $matIns; $input++) {
 	  for ($output = 0; $output < $matOuts; $output++) {
-	    $filtName = "\L$::xpartName[$i]_$input" . "_$output";
+	    $filtName = "\L$::xpartName[$i]_$output" . "_$input";
 	    print ::OUT "double $filtName;\n";
 	  }
 	}
@@ -109,14 +109,14 @@ sub frontEndCode {
 	for ($input = 0; $input < $matIns; $input++) {
 	  for ($output = 0; $output < $matOuts; $output++) {
 	    $calcExp .= "\n// FILTER MODULE: $::xpartName[$i]";
-	    $calcExp .= "_$input" . "_$output\n";
-	    $calcExp .= "\L$::xpartName[$i]" . "_$input" . "_$output = ";
+	    $calcExp .= "_$output" . "_$input\n";
+	    $calcExp .= "\L$::xpartName[$i]" . "_$output" . "_$input = ";
 	    if ($::cpus > 2) {
 	      $calcExp .= "filterModuleD(dspPtr[0],dspCoeff,";
 	    } else {
 	      $calcExp .= "filterModuleD(dsp_ptr,dspCoeff,";
 	    }
-	    $calcExp .= "$::xpartName[$i]" . "_$input" . "_$output";
+	    $calcExp .= "$::xpartName[$i]" . "_$output" . "_$input";
 	    $calcExp .= ",";
 	    $calcExp .= $muxName . "\[$input\]";
 	    $calcExp .= ",0);\n";
@@ -128,7 +128,7 @@ sub frontEndCode {
 	for ($output = 0; $output < $matOuts; $output++) {
 	  $calcExp .= "\n\L$::xpartName[$i]\[$output\] = \n";
 	  for ($input = 0; $input < $matIns; $input++) {
-	    $calcExp .= "\t\L$::xpartName[$i]" . "_$input" . "_$output";
+	    $calcExp .= "\t\L$::xpartName[$i]" . "_$output" . "_$input";
             if ($input == ($matIns - 1)) { $calcExp .= ";\n";}
             else { $calcExp .= " +\n"; }
           }
