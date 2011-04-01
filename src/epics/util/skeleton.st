@@ -367,6 +367,10 @@ state init
 %% {
 %% int ii, jj;
 %% int ij;                                                               /* MA */
+%% time_t lt = time(0);
+%% strcpy(localtimestring, ctime(&lt));
+%% localtimestring[strlen(localtimestring) - 1] = 0; /* Delete newline character */
+   pvPut(localtimestring);
 
 #if defined(RFM_EPICS)
     sysnum = atoi(macValueGet("sysnum"));
@@ -429,8 +433,9 @@ state init
 
 %% strcpy(fName[0], "/opt/rtcds/");                                        /* MA */
 %% strcat_lower(fName[0], fmc.site);                                     /* MA */
+%% strcat(fName[0], "/");                                          /* MA */
+%% strcat_lower(fName[0], fmc.ifo);                                     /* MA */
 %% strcat(fName[0], "/chans/");                                          /* MA */
-%% strcat_upper(fName[0], fmc.ifo);                                      /* MA */
 %% strcat_upper(fName[0], fmc.system);                                   /* MA */
 %% if (strlen(fmc.subSys[0].name) > 0) {                                 /* MA */
 %%    strcat(fName[0], "_");                                             /* MA */
@@ -467,7 +472,7 @@ state init
 %%  	fprintf(stderr, "Error: %s\n", fmReadErrMsg());
 	strncpy(msg, fmReadShortErrMsg(), MAX_STRING_SIZE-1);
 %%  } else {
-	strcpy(msg, "Coeff file load complete");
+	strcpy(msg, localtimestring);
 #if !defined(RFM_EPICS)
 	/* Initialize variables for use in a filter module code */
 	initVars(pFilt, pFilt,&coeffSpace, MAX_MODULES, pVmeCoeff);
@@ -683,7 +688,7 @@ state monScreen{
 #endif
 %%	bailout1:
 %%	     if (ii == MAX_MODULES) {
-               strcpy(msg, "Coeff file load complete");
+		strcpy(msg, localtimestring);
                pvPut(msg);
 %%	     }
 %%	  }
