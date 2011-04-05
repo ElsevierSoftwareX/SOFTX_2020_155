@@ -2,13 +2,14 @@ package DAQ;
 use Exporter;
 @ISA = ('Exporter');
 
-# Get online data for one float (datatype 4) channel
 use IO::Socket;
 
 %channels = ();
 $host = "";
 $port = 8088;
 
+
+# get the channel list from the server, store in %channels
 sub connect {
 my ($host, $port) = @_;
 
@@ -83,12 +84,18 @@ sub gps {
 my $remote = IO::Socket::INET->new( Proto => "tcp", PeerAddr => $DAQ::host, PeerPort => $DAQ::port);
 unless ($remote) { die "cannot connect to daqd on $DAQ::host:$DAQ::port" }
 $remote->autoflush(1);
+my $gps = 0;
+
+# This loop here is to fix a frame builder bug
+# sometimes "gps" commands returns strange number (0 or a number much less than the current GPS time)
+# TODO: need to fix this in the frame builder
+do {
 print $remote "gps;\n";
 read($remote, $resp, 24);
-my $gps = 0;
 read($remote, $gps, 4);
 $gps = unpack( 'N', $gps );
-#print $gps;
+#print "gps=$gps\n";
+} while ($gps <= 986074331);
 close $remote;
 return $gps;
 }
