@@ -22,10 +22,7 @@ if (! defined $port) {
 $DAQ::host = $host;
 $DAQ::port = $port;
 
-$remote = IO::Socket::INET->new( Proto => "tcp",
- 				 PeerAddr => $host,
-    				 PeerPort => $port,
-       			);
+$remote = IO::Socket::INET->new( Proto => "tcp", PeerAddr => $host, PeerPort => $port);
 unless ($remote) { die "cannot connect to daqd on $host:$port" }
 $remote->autoflush(1);
 
@@ -62,6 +59,7 @@ close $remote;
 return 0;
 }
 
+# print the while channel list or just a single channel, given an argument (channel name)
 sub print_channel {
 my ($cn) = @_;
 
@@ -80,6 +78,7 @@ for my $chname (keys %channels) {
 }
 }
 
+# get current time
 sub gps {
 my $remote = IO::Socket::INET->new( Proto => "tcp", PeerAddr => $DAQ::host, PeerPort => $DAQ::port);
 unless ($remote) { die "cannot connect to daqd on $DAQ::host:$DAQ::port" }
@@ -100,6 +99,8 @@ close $remote;
 return $gps;
 }
 
+# get data starting at (optional) $gps for $req_seconds (default 1 second)
+# for the channel $chname
 sub acquire {
 my ($chname, $req_seconds, $gps) = @_;
 die "Need to connect first\n" unless defined $remote;
@@ -107,10 +108,7 @@ die "Unspecified channel name\n" unless defined $chname;
 die "Bad channel name\n" unless defined $channels{$chname};
 $req_seconds = 1 if ! defined $req_seconds;
 
-my $remote = IO::Socket::INET->new( Proto => "tcp",
- 				 PeerAddr => $DAQ::host,
-    				 PeerPort => $DAQ::port,
-       			);
+my $remote = IO::Socket::INET->new( Proto => "tcp", PeerAddr => $DAQ::host, PeerPort => $DAQ::port);
 unless ($remote) { die "cannot connect to daqd on $DAQ::host:$DAQ::port" }
 $remote->autoflush(1);
 
@@ -137,10 +135,11 @@ read($remote, $resp, 4);
 my $len = 0;
 read($remote, $len, 4);
 $len = unpack( 'N', $len );
-if ($len) { 
-	#print "Getting offline data\n";
-}
+#if ($len) { 
+#print "Getting offline data\n";
+#} else {
 #received 0 response (online data)
+#}
 
 my $accum_seconds = 0;
 
