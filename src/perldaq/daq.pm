@@ -33,7 +33,7 @@ $remote->autoflush(1);
 
 print $remote "status channels 3;\n";
 $len = 0 + <$remote>;
-print "$len channels configured\n";
+#print "$len channels configured\n";
 for my $i (1 .. $len) {
 	#print $i, "\n";
 	my $name = <$remote>;
@@ -153,7 +153,7 @@ while(read($remote, $len, 4)) {
   if ($gps == 0xffffffff) {
 	#reconfig block
   } else {
-  	print "gps=$gps; seconds=$seconds; gps_n=$gps_n; seq=$seq\n";
+  	#print "gps=$gps; seconds=$seconds; gps_n=$gps_n; seq=$seq\n";
   	#print "data length=$len\n";
 	@data_array = unpack( '(a4)*', $data );
 	my $as = @data_array;
