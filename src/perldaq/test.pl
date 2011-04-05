@@ -1,7 +1,10 @@
 #!/usr/bin/perl -w -I.
 
+# This script claculates an average of $mychan starting 5 seconds ago up till now
+
 require "daq.pm";
 
+$mychan = "C1:SUS-ETMY_OPLEV_SUM";
 # get the channel list
 DAQ::connect("fb", 8088);
 #DAQ::print_channel();
@@ -10,8 +13,10 @@ DAQ::connect("fb", 8088);
 # get current time
 $gps = DAQ::gps();
 
+$gps -= 5;
+
 # get three seconds of data starting 5 seconds ago
-@data = DAQ::acquire("C1:SUS-ETMY_OPLEV_SUM", 3, $gps - 5);
+@data = DAQ::acquire($mychan, 3, $gps);
 
 # calculate average on the data and print
 $avg = 0.0;
@@ -22,4 +27,4 @@ for (@data) {
 	$avg += $_;
 }
 $avg /= $cnt;
-print $avg, "\n";
+printf "at gps=$gps $mychan averaged %.1f for 5 seconds\n", $avg;
