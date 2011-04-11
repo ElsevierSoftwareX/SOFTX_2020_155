@@ -15,8 +15,7 @@ sub printHeaderStruct {
         my ($i) = @_;
 	# there is 500 "testpoint" array in controller.c
 	die "Too many extra test points (max 499)\n" unless $::extraTPcount < 499;
-	$::extraTPcount ++;
-	if ($::extraTPcount == 1) {
+	if ($::extraTPcount == 0) {
 		# Add 16 per DAC
 		$::extraTPcount += 16 * $::dacCnt;
 	}
@@ -24,6 +23,7 @@ sub printHeaderStruct {
 	my $tpn = $::extraTPcount;
 	$::feInitCodeTP .= "testpoint[$tpn] = &\L$::xpartName[$i];\n";
 	$::feInitCodeTP .= "\L$::xpartName[$i] = .0;\n";
+	$::extraTPcount ++;
 }
 
 # Print Epics variable definitions
