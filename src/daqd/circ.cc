@@ -141,7 +141,7 @@ circ_buffer::put16th_dpscattered_lost (struct put_dpvec *pv, int pvlen, circ_buf
 
 #ifndef NDEBUG
     if (!nbi16th)
-      assert (invariant (1));
+      assert (invariant ());
 #endif
 
     while (pbuffer -> block [nbi].busy)
@@ -207,7 +207,7 @@ circ_buffer::put16th_dpscattered (struct put_dpvec *pv, int pvlen, circ_buffer_b
 
 #ifndef NDEBUG
     if (!nbi16th)
-      assert (invariant (1));
+      assert (invariant ());
 #endif
 
     while (pbuffer -> block [nbi].busy)
@@ -343,7 +343,7 @@ circ_buffer::put (char* data, int dlen, circ_buffer_block_prop_t *prop)
   pthread_mutex_lock (&pbuffer -> block [pbuffer -> next_block_in].lock);
   {
     assert (dlen <= pbuffer -> block_size && dlen >= 0);
-    assert (invariant (1));
+    assert (invariant ());
 
     nbi = pbuffer -> next_block_in;
     while (pbuffer -> block [nbi].busy)
@@ -384,7 +384,7 @@ circ_buffer::put_pscattered (struct put_pvec *pv, int pvlen, circ_buffer_block_p
 
   pthread_mutex_lock (&pbuffer -> block [pbuffer -> next_block_in].lock);
   {
-    assert (invariant (1));
+    assert (invariant ());
 
     nbi = pbuffer -> next_block_in;
     while (pbuffer -> block [nbi].busy)
@@ -436,7 +436,7 @@ circ_buffer::put_nowait (char* data, int dlen, circ_buffer_block_prop_t *prop)
   pthread_mutex_lock (&pbuffer -> block [pbuffer -> next_block_in].lock);
 
   assert (dlen <= pbuffer -> block_size && dlen >= 0);
-  assert (invariant (1));
+  assert (invariant ());
   
   if (! pbuffer -> block [ret = nbi = pbuffer -> next_block_in].busy)
     {
@@ -489,7 +489,7 @@ circ_buffer::put_nowait_scattered (char* data, struct put_vec *pv, int pvlen, ci
   /* For multiple producers `next_block_in' access should be synchronized */
   pthread_mutex_lock (&pbuffer -> block [pbuffer -> next_block_in].lock);
 
-  assert (invariant (1));
+  assert (invariant ());
   
   if (! pbuffer -> block [ret = nbi = pbuffer -> next_block_in].busy)
     {
