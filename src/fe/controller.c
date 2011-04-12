@@ -1644,10 +1644,6 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			mask = 0x3ffff;
 			num_outs = 8;
 
-	// Uncomment to read 18-bit DAC buffer size
-	//extern volatile GSA_DAC_REG *dacPtr[MAX_DAC_MODULES];
-        //volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[0];
-        //out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
 
 		}
 		if (cdsPciModules.dacType[jj] == GSC_16AISS8AO4) {
@@ -2015,16 +2011,6 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	  }
 	  for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	  {
-#ifdef ADC_MASTER
-		if(cdsPciModules.dacType[jj] == GSC_18AO8)
-		{
-			static int dacWatchDog = 0;
-			dacWatchDog ^= 1;
-			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
-			dac18bitPtr->digital_io_ports = (dacWatchDog | GSAO_18BIT_DIO_RW);
-
-		}
-#endif
 	    if(dacOF[jj]) pLocalEpics->epicsOutput.statDac[jj] &= ~(4);
  	    else pLocalEpics->epicsOutput.statDac[jj] |= 4;
 	    dacOF[jj] = 0;
@@ -2073,6 +2059,61 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			}
 		}
 	}
+// DAC WD Write for 18 bit DAC modules
+// Check once per second on code cycle 400 to dac count
+// Only one write per code cycle to reduce time
+       	if (clock16K >= 400 && clock16K < (400 + cdsPciModules.dacCount)) 
+	{
+		jj = clock16K - 400;
+		if(cdsPciModules.dacType[jj] == GSC_18AO8)
+		{
+			static int dacWatchDog = 0;
+			if (clock16K == 400) dacWatchDog ^= 1;
+			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
+			dac18bitPtr->digital_io_ports = (dacWatchDog | GSAO_18BIT_DIO_RW);
+			//out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
+			//printf("Out buffg size %d = %d\n",jj,out_buf_size);
+
+		}
+	}
+// AI Chassis WD CHECK for 18 bit DAC modules
+// Check once per second on code cycle 500 to dac count
+// Only one read per code cycle to reduce time
+       	if (clock16K >= 500 && clock16K < (500 + cdsPciModules.dacCount)) 
+	{
+		jj = clock16K - 500;
+		if(cdsPciModules.dacType[jj] == GSC_18AO8)
+		{
+			static int dacWDread = 0;
+			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
+			dacWDread = dac18bitPtr->digital_io_ports;
+			if(((dacWDread >> 8) & 1) > 0)
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(8);
+			    else pLocalEpics->epicsOutput.statDac[jj] |= 8;
+
+		}
+	}
+
+// 18bit FIFO size check, once per second
+// Used to verify DAC is clocking correctly and code is transmitting data on time.
+	// Uncomment to read 18-bit DAC buffer size
+	//extern volatile GSA_DAC_REG *dacPtr[MAX_DAC_MODULES];
+        //volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[0];
+        //out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
+       	if (clock16K >= 600 && clock16K < (600 + cdsPciModules.dacCount)) 
+	{
+		jj = clock16K - 600;
+		if(cdsPciModules.dacType[jj] == GSC_18AO8)
+		{
+			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
+			out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
+			if(out_buf_size > 8)
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(16);
+			    else pLocalEpics->epicsOutput.statDac[jj] |= 16;
+
+		}
+	}
+
 #endif
 	// Measure time to complete 1 cycle
         rdtscl(cpuClock[1]);
