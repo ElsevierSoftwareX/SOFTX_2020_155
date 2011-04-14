@@ -113,9 +113,9 @@ unless ($remote) { die "cannot connect to daqd on $DAQ::host:$DAQ::port" }
 $remote->autoflush(1);
 
 if (defined $gps) {
-	print $remote "start net-writer $gps $req_seconds {\"C1:SUS-ETMY_OPLEV_SUM\"};\n";
+	print $remote "start net-writer $gps $req_seconds {\"$chname\"};\n";
 } else {
-	print $remote "start net-writer {\"C1:SUS-ETMY_OPLEV_SUM\"};\n";
+	print $remote "start net-writer {\"$chname\"};\n";
 }
 #while ( <$remote> ) { print }
 #close $remote;
