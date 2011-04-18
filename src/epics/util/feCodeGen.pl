@@ -3695,9 +3695,9 @@ sub commify_series {
 		    my $subDirName = "$epicsScreensDir/$usite" . "$basename";
 		    mkdir $subDirName;
 		    system("./mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite" . $basename . ".adl");
-		    for ($row = 0; $row < $outcnt; $row ++) {
-		      for ($col = 0; $col < $incnt; $col ++) {
-			my $filt_name = "$partName[$cur_part_num]" . "_" . "$col" . "_" . "$row";
+		    for ($row = 1; $row < $outcnt+1; $row ++) {
+		      for ($col = 1; $col < $incnt+1; $col ++) {
+			my $filt_name = "$partName[$cur_part_num]" . "_" . "$row" . "_" . "$col";
 			print "FILTER Part $filt_name $partType[$cur_part_num] input partInput=$partInput[$cur_part_num][0] type='$partInputType[$cur_part_num][0]' \n";
 		       	if ($partSubName[$cur_part_num] ne "") {
 			    $filt_name = $partSubName[$cur_part_num] . "_" . $filt_name;
@@ -3730,9 +3730,9 @@ sub commify_series {
 		    my $subDirName = "$epicsScreensDir/$usite" . "$sysname" . "_" . "$basename";
 		    mkdir $subDirName;
 		    system("./mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
-                    for ($row = 0; $row < $outcnt; $row ++) {
-		      for ($col = 0; $col < $incnt; $col ++) {
-			my $filt_name = "$partName[$cur_part_num]" . "_" . "$col" . "_" . "$row";
+                    for ($row = 1; $row < $outcnt+1; $row ++) {
+		      for ($col = 1; $col < $incnt+1; $col ++) {
+			my $filt_name = "$partName[$cur_part_num]" . "_" . "$row" . "_" . "$col";
 			print "FILTER Part $filt_name $partName[$cur_part_num] $partType[$cur_part_num] input partInput=$partInput[$cur_part_num][0] type='$partInputType[$cur_part_num][0]' \n";
 			if ($partSubName[$cur_part_num] ne "") {
 			    $filt_name = $partSubName[$cur_part_num] . "_" . $filt_name;

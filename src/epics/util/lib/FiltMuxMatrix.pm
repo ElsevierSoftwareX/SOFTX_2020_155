@@ -18,12 +18,14 @@ sub printHeaderStruct {
         print("$matOuts $matIns\n");
 	for ($input = 0; $input < $matIns; $input++) {
 	  for ($output = 0; $output < $matOuts; $output++) {
+	    my $input_plus_one = $input + 1;
+	    my $output_plus_one = $output + 1;
 
-	    my $outhOut = "#define $::xpartName[$i]_$output" . "_$input " ."\t $::filtCnt\n"; 
+	    my $outhOut = "#define $::xpartName[$i]_$output_plus_one" . "_$input_plus_one " ."\t $::filtCnt\n"; 
 	    print ::OUTH $outhOut;
-	    my $epicsOut = "$::xpartName[$i]" . "_$output" . "_$input\n";
+	    my $epicsOut = "$::xpartName[$i]" . "_$output_plus_one" . "_$input_plus_one\n";
             print ::EPICS $epicsOut;
-            $::filterName[$::filtCnt] = "$::xpartName[$i]" . "_$output" . "_$input";
+            $::filterName[$::filtCnt] = "$::xpartName[$i]" . "_$output_plus_one" . "_$input_plus_one";
             $::filtCnt ++;
 	  }
 	}
@@ -67,7 +69,10 @@ sub printFrontEndVars  {
         #print ::OUT "double \L$::xpartName[$i]\[$matOuts\];\n";
 	for ($input = 0; $input < $matIns; $input++) {
 	  for ($output = 0; $output < $matOuts; $output++) {
-	    $filtName = "\L$::xpartName[$i]_$output" . "_$input";
+	    my $input_plus_one = $input + 1;
+            my $output_plus_one = $output + 1;
+
+	    $filtName = "\L$::xpartName[$i]_$output_plus_one" . "_$input_plus_one";
 	    print ::OUT "double $filtName;\n";
 	  }
 	}
@@ -108,15 +113,18 @@ sub frontEndCode {
 	
 	for ($input = 0; $input < $matIns; $input++) {
 	  for ($output = 0; $output < $matOuts; $output++) {
+	    my $input_plus_one = $input + 1;
+	    my $output_plus_one = $output + 1;
+
 	    $calcExp .= "\n// FILTER MODULE: $::xpartName[$i]";
-	    $calcExp .= "_$output" . "_$input\n";
-	    $calcExp .= "\L$::xpartName[$i]" . "_$output" . "_$input = ";
+	    $calcExp .= "_$output_plus_one" . "_$input_plus_one\n";
+	    $calcExp .= "\L$::xpartName[$i]" . "_$output_plus_one" . "_$input_plus_one = ";
 	    if ($::cpus > 2) {
 	      $calcExp .= "filterModuleD(dspPtr[0],dspCoeff,";
 	    } else {
 	      $calcExp .= "filterModuleD(dsp_ptr,dspCoeff,";
 	    }
-	    $calcExp .= "$::xpartName[$i]" . "_$output" . "_$input";
+	    $calcExp .= "$::xpartName[$i]" . "_$output_plus_one" . "_$input_plus_one";
 	    $calcExp .= ",";
 	    $calcExp .= $muxName . "\[$input\]";
 	    $calcExp .= ",0);\n";
@@ -128,7 +136,10 @@ sub frontEndCode {
 	for ($output = 0; $output < $matOuts; $output++) {
 	  $calcExp .= "\n\L$::xpartName[$i]\[$output\] = \n";
 	  for ($input = 0; $input < $matIns; $input++) {
-	    $calcExp .= "\t\L$::xpartName[$i]" . "_$output" . "_$input";
+
+	    my $input_plus_one = $input + 1;
+	    my $output_plus_one = $output + 1;
+	    $calcExp .= "\t\L$::xpartName[$i]" . "_$output_plus_one" . "_$input_plus_one";
             if ($input == ($matIns - 1)) { $calcExp .= ";\n";}
             else { $calcExp .= " +\n"; }
           }
