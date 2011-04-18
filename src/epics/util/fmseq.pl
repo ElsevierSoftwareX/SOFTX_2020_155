@@ -474,20 +474,9 @@ while (<IN>) {
     } elsif (substr($_,0,11) eq "EZ_CA_WRITE") {
 	($junk, $v_name, $v_var) = split(/\s+/, $_);
 	#$vupdate .= "%% ezcaPut(\"$v_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
-	my $fv_name = $v_name;
-	$v_name =~ tr/:-/__/;
-	$vdecl .= "double evar_$v_name;\n";
-	$vdecl .= "assign evar_$v_name to \"${fv_name}\";\n";
-
-	$vinit .= "%% evar_$v_name  = 0.0;\n";
-	$vinit .= "pvPut(evar_$v_name);\n";
-	$vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
-	
-	$vupdate .= "evar_$v_name = fpvalidate(pEpics->${v_var});\n";
-	$vupdate .= "pvPut(evar_$v_name);\n";
     } elsif (substr($_,0,10) eq "EZ_CA_READ") {
 	($junk, $v_name, $v_var) = split(/\s+/, $_);
-	$vupdate .= "%%ezcaGet(\"$v_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
+	#$vupdate .= "%%ezcaGet(\"$v_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
     } elsif (substr($_,0,6) eq "DAQVAR") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
@@ -637,21 +626,21 @@ while (<IN>) {
 	for ($i = 1; $i < $x+1; $i++) {
 	    for ($j = 1; $j < $y+1; $j++) {
         	if ($top_name) {
-			$mdecl .= sprintf("\"{ifo}:${tv_name}%x%x\"", $i, $j);
+			$mdecl .= sprintf("\"{ifo}:${tv_name}%i_%i\"", $i, $j);
 
-                        $mstat_decl .= sprintf("\"{ifo}:${tv_name}%x%x.STAT\"", $i, $j);
-                        $mhihi_decl .= sprintf("\"{ifo}:${tv_name}%x%x.HHSV\"", $i, $j);
-                        $mhigh_decl .= sprintf("\"{ifo}:${tv_name}%x%x.HSV\"", $i, $j);
-                        $mlow_decl  .= sprintf("\"{ifo}:${tv_name}%x%x.LSV\"", $i, $j);
-                        $mlolo_decl .= sprintf("\"{ifo}:${tv_name}%x%x.LLSV\"", $i, $j);
+                        $mstat_decl .= sprintf("\"{ifo}:${tv_name}%i_%i.STAT\"", $i, $j);
+                        $mhihi_decl .= sprintf("\"{ifo}:${tv_name}%i_%i.HHSV\"", $i, $j);
+                        $mhigh_decl .= sprintf("\"{ifo}:${tv_name}%i_%i.HSV\"", $i, $j);
+                        $mlow_decl  .= sprintf("\"{ifo}:${tv_name}%i_%i.LSV\"", $i, $j);
+                        $mlolo_decl .= sprintf("\"{ifo}:${tv_name}%i_%i.LLSV\"", $i, $j);
 		} else {
-			$mdecl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x\"", $i, $j);
+			$mdecl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%i_%i\"", $i, $j);
 
-                        $mstat_decl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x.STAT\"", $i, $j);
-                        $mhihi_decl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x.HHSV\"", $i, $j);
-                        $mhigh_decl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x.HSV\"", $i, $j);
-                        $mlow_decl  .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x.LSV\"", $i, $j);
-                        $mlolo_decl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%x%x.LLSV\"", $i, $j);
+                        $mstat_decl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%i_%i.STAT\"", $i, $j);
+                        $mhihi_decl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%i_%i.HHSV\"", $i, $j);
+                        $mhigh_decl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%i_%i.HSV\"", $i, $j);
+                        $mlow_decl  .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%i_%i.LSV\"", $i, $j);
+                        $mlolo_decl .= sprintf("\"{ifo}:{sys}-{subsys}${m_name}%i_%i.LLSV\"", $i, $j);
 		}
 		if ($i != ($x) || $j != ($y)) {
 		    $mdecl .= ", ";
@@ -663,9 +652,9 @@ while (<IN>) {
                     $mlolo_decl .= ", ";
 		}
         	if ($top_name) {
-			$matdb .= "grecord(ai,\"%IFO%:${tv_name}" . sprintf("%x%x\")\n", $i, $j);
+			$matdb .= "grecord(ai,\"%IFO%:${tv_name}" . sprintf("%i_%i\")\n", $i, $j);
 		} else {
-			$matdb .= "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%${m_name}" . sprintf("%x%x\")\n", $i, $j);
+			$matdb .= "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%${m_name}" . sprintf("%i_%i\")\n", $i, $j);
 		}
 		$matdb .= "{\n";
 		$matdb .= "    field(PREC,\"5\")\n";
