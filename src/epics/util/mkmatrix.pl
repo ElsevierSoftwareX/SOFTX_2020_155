@@ -86,7 +86,7 @@ for ($row = 0; $row < $rows; $row ++) {
 
     $X = $x + ($W + $padx) * $col;
     $Y = $y + ($H + $pady) * $row;
-    $channel = $channelbase . sprintf('%x%x', $row+1,  $col+1);
+    $channel = $channelbase . sprintf('%i_%i', $row+1,  $col+1);
 
     # Make the primary text box (for nonzero values)
     make_text_entry($X, $Y, $W, $H, $channel, 14, 60, "if not zero");
