@@ -88,8 +88,8 @@ for ($row = 0; $row < $rows; $row ++) {
   for ($col = 0; $col < $cols; $col ++) {
 
     $X = $x + ($W + $padx) * $col;
-    $Y = $y + ($H + $pady) * $row + ($row * $H);
-    $channel = $channelbase . sprintf('%i_%i_GAIN', $row,  $col);
+    $Y = $y + (2 * $H + $pady) * $row;
+    $channel = $channelbase . sprintf('%i_%i_GAIN', $row+1,  $col+1);
 
     # Make the primary text box (for nonzero values)
     make_text_entry($X, $Y, $W, $H, $channel, 14, 60, "if not zero");
@@ -98,8 +98,8 @@ for ($row = 0; $row < $rows; $row ++) {
     make_text_entry($X, $Y, $W, $H, $channel, 10, 5, "if zero");
 
     # Make the button to the corresponding filter module below the text box
-    $filter = "$filterbase" . "/$filterbase" . sprintf('_%i_%i.adl', $row, $col);
-    $filter_label = sprintf('%i_%i', $row, $col);
+    $filter = "$filterbase" . "/$filterbase" . sprintf('_%i_%i.adl', $row+1, $col+1);
+    $filter_label = sprintf('%i_%i', $row+1, $col+1);
     $Y = $y + ($H + $pady) *  $row + (($row + 1) * $H);
     make_filter_button($X, $Y, $W, $H, $filter,$filter_label,14,25);
 
