@@ -326,6 +326,7 @@ sub merge_references {
    my $next = $mynode->{NEXT}[0];
    ${$next->{FIELDS}}{"Name"} = $name;
    $_ = $mynode; # replace the current node (do_on_nodes)
+   $n_merged++;
    return 0;
 }
 
@@ -1233,8 +1234,12 @@ sub process {
 
 #  CDS::Tree::do_on_nodes($root, \&remove_busses, 0, $root);
 #  print "Removed Busses\n";
-  CDS::Tree::do_on_nodes($root, \&merge_references, 0, $root);
-  CDS::Tree::print_tree($root);
+  do {
+  	$n_merged = 0;
+  	CDS::Tree::do_on_nodes($root, \&merge_references, 0, $root);
+	print "Merged $n_merged references\n";
+  } while ($n_merged != 0);
+  #CDS::Tree::print_tree($root);
   print "Merged library referenes\n";
 
   print "Flattening the model\n";
