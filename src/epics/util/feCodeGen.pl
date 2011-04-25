@@ -352,6 +352,7 @@ require "lib/Parser3.pm";
 #open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 open(IN,"<".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 die unless CDS::Parser::parse();
+die unless CDS::Parser::process();
 
 close(IN);
 

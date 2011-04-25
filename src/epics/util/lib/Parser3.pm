@@ -1,6 +1,7 @@
 
 package CDS::Parser;
 use Exporter;
+use Cwd;
 @ISA = ('Exporter');
 
 
@@ -32,24 +33,39 @@ sub print_node {
 };
 
 #:TODO: lexical analyzer should check MDL format syntax
-sub parse() {
+sub parse {
+  my ($myroot, $desc, $dbg) =  @_;
   my @nodes;
-  push @nodes, $root;
+  if (defined $myroot) {
+	push @nodes, $myroot;
+  } else {
+	push @nodes, $root;
+	$myroot = $root;
+  }
 
-  $tagcntr = 0;
+  my $tagcntr = 0;
 
-  while (<::IN>) {
+  my $top_level = 0;
+  if (!defined $desc) {
+	  $desc = ::IN;
+	  $top_level = 1;
+  }
+  while (my $_ = <$desc>) {
+    if ($dbg) {
+	    #print $_;
+    }
     # Strip out quotes and blank spaces
     #tr/\"/ /;
     #tr/\</ /;
     #tr/\>/ /;
     s/^\s+//;
     s/\s+$//;
+    my $lcntr = 0;
     $lcntr ++;
 
-    ($var1,$var2) = split(/\s+/,$_, 2);
+    my ($var1,$var2) = split(/\s+/,$_, 2);
     if ($var2 eq "{") { # This is new block
-	$node = {
+	my $node = {
 		NAME => $var1,
 		NEXT => [],
 		FIELDS => {},
@@ -77,7 +93,7 @@ sub parse() {
 	if ("\"" eq substr $var1, 0, 1) {
 		# Add the whole line to the last field
 		##print "$_\n";
-		$key = ${$cur_node->{LAST_FIELD_KEY}};
+		my $key = ${$cur_node->{LAST_FIELD_KEY}};
 		# Remove double quotes
 		s/^"//;s/"$//;
 		${$cur_node->{FIELDS}}{$key} .= $_;
@@ -102,12 +118,14 @@ sub parse() {
     }
   }
 
-  #CDS::Tree::print_tree($root);
-  #CDS::Tree::do_on_nodes($root, \&print_node);
+  #CDS::Tree::do_on_nodes($myroot, \&print_node);
   print "Lexically parsed the model file successfully\n";
 
   # Process parsed tree to fill in the required information
-  process();
+  #if ($top_level) {
+  #print "Starting node processing\n";
+  #process();
+  #}
 
   #exit (0);
   return 1;
@@ -255,6 +273,60 @@ sub do_branches {
 # Check name to contain only allowed characters
 sub name_check {
 	return @_[0] =~ /^[a-zA-Z0-9_]+$/;
+}
+
+# Bring library references into the tree
+sub merge_references {
+   my ($node, $in_sub, $parent) =  @_;
+   if ($node->{NAME} ne "Block") {
+	   return 0;
+   }
+   my $name =  ${$node->{FIELDS}}{"Name"};
+   my $src_block = ${$node->{FIELDS}}{"SourceBlock"};
+   if ($src_block =~ /^cdsParameters/ || $src_block eq undef) {
+	  return 0;
+   }
+   #print "name=", $name, "src=", $src_block, "\n";
+   my $part_name = transform_part_name(${$node->{FIELDS}}{"SourceBlock"});
+   if (-e "lib/$part_name.pm") {
+	   return 0; # Library part
+   }
+   my $ref = ${$node->{FIELDS}}{"SourceBlock"};
+   print "Found a library reference $ref\n";
+   #my $cwd = getcwd;
+   #print $cwd," ", $part_name, "\n";
+   my $fname = $ref;
+   $fname =~ s/\/.*$//; # Delete everything after the slash
+   my $system_name = $ref;
+   $system_name =~ s/^.*\///; # Strip everything before last slash
+   #print $system_name, "\n";
+   $fname = "../simLink/$fname.mdl";
+   die "Can't find $fname\n" unless -e $fname;
+   print "Found the library model $fname\n";
+   my $myroot = {
+	NAME => $Tree::tree_root_name,
+	NEXT => [], # array of references to leaves
+   };
+
+   #CDS::Tree::print_tree($parent);
+   # Parse the library file
+   open(in, "<$fname") || die "***ERROR: $fname not found\n";
+   parse($myroot, in, 1);
+   #print "After", "\n";
+   #CDS::Tree::print_tree($parent);
+   #exit(1);
+   #return 0;
+   close in;
+   my $mynode = CDS::Tree::find_node($myroot, $system_name, "Name");
+   die "Couldn't find $system_name in $fname\n" unless defined $mynode;
+   #CDS::Tree::print_tree($mynode);
+   #${$node->{FIELDS}}{"__merge_references__"} = $mynode;
+   # Replace subsystem name
+   ${$mynode->{FIELDS}}{"Name"} = $name;
+   my $next = $mynode->{NEXT}[0];
+   ${$next->{FIELDS}}{"Name"} = $name;
+   $_ = $mynode; # replace the current node (do_on_nodes)
+   return 0;
 }
 
 # Find parts and sybsystems
@@ -445,7 +517,39 @@ sub node_processing {
                 if ($block_type eq "FCN") {                                # ===  MA  ===
                    $part_name = "Fcn";                                     # ===  MA  ===
                 }                                                          # ===  MA  ===
-        	require "lib/$part_name.pm";
+		print ${$node->{FIELDS}}{"SourceBlock"}, "\n";
+		if (! -e "lib/$part_name.pm") {
+			die "Can't find part code in lib/$part_name.pm\n";
+			if (0) {
+			my $ref = ${$node->{FIELDS}}{"SourceBlock"};
+			print "Found a library reference $ref\n";
+			#my $cwd = getcwd;
+			#print $cwd," ", $part_name, "\n";
+			my $fname = $ref;
+			$fname =~ s/\/.*$//; # Delete everything after the slash
+			my $system_name = $ref;
+			$system_name =~ s/^.*\///; # Strip everything before last shash
+			#print $system_name, "\n";
+			$fname = "../simLink/$fname.mdl";
+			die "Can't find $fname\n" unless -e $fname;
+			print "Found the library model $fname\n";
+my $myroot = {
+	NAME => $Tree::tree_root_name,
+	NEXT => [], # array of references to leaves
+};
+
+			# Parse the library file
+   			open(in, "<$fname") || die "***ERROR: $fname not found\n";
+			parse($myroot, in, 1);
+			close in;
+			#CDS::Tree::print_tree($myroot);
+   			my $mynode = CDS::Tree::find_node($myroot, $system_name, "Name");
+			die "Couldn't find $system_name in $fname\n" unless defined $mynode;
+			CDS::Tree::print_tree($mynode);
+			exit(1);
+		}
+		} else {
+       		require "lib/$part_name.pm";
 		if ($part_name eq "Dac") {
         	  $::partType[$::partCnt] = CDS::Dac::initDac($node);
 		}
@@ -546,6 +650,7 @@ sub node_processing {
 # End of ADC PART CHANGE **********************************
 
         	 $::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ($node, $::partCnt);
+	 }
 	}
 	# For easy access
 	#print "Part ". $::xpartName[$::partCnt] . "\n";
@@ -1109,6 +1214,8 @@ if (1) {
 
 sub process {
 
+  print "Starting node processing\n";
+
   # Find first System node, this is the top level subsystem
   my $system_node = CDS::Tree::find_node($root, "System");
 
@@ -1121,15 +1228,21 @@ sub process {
   # There is really nothing needed below System node in the tree so set new root
   $root = $system_node;
 
+  #print "TREE\n";
+  #CDS::Tree::print_tree($root);
+
+#  CDS::Tree::do_on_nodes($root, \&remove_busses, 0, $root);
+#  print "Removed Busses\n";
+  CDS::Tree::do_on_nodes($root, \&merge_references, 0, $root);
+  CDS::Tree::print_tree($root);
+  print "Merged library referenes\n";
+
   print "Flattening the model\n";
   flatten_nested_subsystems($root);
   print "Finished flattening the model\n";
   CDS::Tree::do_on_nodes($root, \&remove_tags, 0, $root);
   print "Removed Tags\n";
-  #print "TREE\n";
-  #CDS::Tree::print_tree($root);
-  CDS::Tree::do_on_nodes($root, \&remove_busses, 0, $root);
-  print "Removed Busses\n";
+
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
   print "Found $::adcCnt ADCs $::partCnt parts $::subSys subsystems\n";
 

@@ -45,6 +45,9 @@ sub do_on_leaves {
 #	tree root reference
 #	function reference
 #	function argument
+#
+# :WARNING: the functionality of some code depends on $_ not declared local here
+#
 sub do_on_nodes {
 	my($tree, $f, $arg, $parent) = @_;
 	#print("do on nodes; node=$tree; parent=$parent\n");
@@ -110,7 +113,7 @@ sub print_tree {
 	my($space);
 	if ($print_no_repeats && $tree->{PRINTED}) { return; }
 	for (0 .. $level) { $space .= ' '; }
-	#debug 0, $space, "{", $tree->{NAME}, "; src=", ${$tree->{FIELDS}}{SrcBlock}, ";dst=", ${$tree->{FIELDS}}{DstBlock}, " nref=", scalar @{$tree->{NEXT}}, "}";
+	#debug 0, $space, "{", $tree->{NAME}, "; name=", ${$tree->{FIELDS}}{Name}, "; src=", ${$tree->{FIELDS}}{SrcBlock}, ";dst=", ${$tree->{FIELDS}}{DstBlock}, " nref=", scalar @{$tree->{NEXT}}, "}";
 	for (@{$tree->{NEXT}}) {
 		print_tree($_, $level + 1);
 	}
