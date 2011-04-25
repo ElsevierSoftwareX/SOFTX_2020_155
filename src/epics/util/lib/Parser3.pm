@@ -1245,8 +1245,6 @@ sub process {
   print "Flattening the model\n";
   flatten_nested_subsystems($root);
   print "Finished flattening the model\n";
-  CDS::Tree::do_on_nodes($root, \&remove_tags, 0, $root);
-  print "Removed Tags\n";
 
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
   print "Found $::adcCnt ADCs $::partCnt parts $::subSys subsystems\n";
