@@ -50,7 +50,7 @@ sub parse {
 	  $desc = ::IN;
 	  $top_level = 1;
   }
-  while (my $_ = <$desc>) {
+  while (<$desc>) {
     if ($dbg) {
 	    #print $_;
     }
