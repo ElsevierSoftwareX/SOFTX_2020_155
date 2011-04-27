@@ -518,37 +518,8 @@ sub node_processing {
                 if ($block_type eq "FCN") {                                # ===  MA  ===
                    $part_name = "Fcn";                                     # ===  MA  ===
                 }                                                          # ===  MA  ===
-		print ${$node->{FIELDS}}{"SourceBlock"}, "\n";
 		if (! -e "lib/$part_name.pm") {
 			die "Can't find part code in lib/$part_name.pm\n";
-			if (0) {
-			my $ref = ${$node->{FIELDS}}{"SourceBlock"};
-			print "Found a library reference $ref\n";
-			#my $cwd = getcwd;
-			#print $cwd," ", $part_name, "\n";
-			my $fname = $ref;
-			$fname =~ s/\/.*$//; # Delete everything after the slash
-			my $system_name = $ref;
-			$system_name =~ s/^.*\///; # Strip everything before last shash
-			#print $system_name, "\n";
-			$fname = "../simLink/$fname.mdl";
-			die "Can't find $fname\n" unless -e $fname;
-			print "Found the library model $fname\n";
-my $myroot = {
-	NAME => $Tree::tree_root_name,
-	NEXT => [], # array of references to leaves
-};
-
-			# Parse the library file
-   			open(in, "<$fname") || die "***ERROR: $fname not found\n";
-			parse($myroot, in, 1);
-			close in;
-			#CDS::Tree::print_tree($myroot);
-   			my $mynode = CDS::Tree::find_node($myroot, $system_name, "Name");
-			die "Couldn't find $system_name in $fname\n" unless defined $mynode;
-			CDS::Tree::print_tree($mynode);
-			exit(1);
-		}
 		} else {
        		require "lib/$part_name.pm";
 		if ($part_name eq "Dac") {
