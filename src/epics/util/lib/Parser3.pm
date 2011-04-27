@@ -1203,8 +1203,9 @@ sub process {
   #print "TREE\n";
   #CDS::Tree::print_tree($root);
 
-#  CDS::Tree::do_on_nodes($root, \&remove_busses, 0, $root);
-#  print "Removed Busses\n";
+  CDS::Tree::do_on_nodes($root, \&remove_busses, 0, $root);
+  print "Removed Busses\n";
+  #CDS::Tree::do_on_nodes($root, \&remove_tags, 0, $root);
   do {
   	$n_merged = 0;
   	CDS::Tree::do_on_nodes($root, \&merge_references, 0, $root);
