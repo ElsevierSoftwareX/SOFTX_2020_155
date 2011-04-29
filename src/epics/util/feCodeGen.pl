@@ -216,6 +216,8 @@ $cdsPart[0] = 0;	# $cdsPart[0 .. $partCnt]
 
 $ppFIR[0] = 0;          # Set to one for PPFIR filters
 
+$biQuad[0] = 0;          # Set to one for biquad IIR filters
+
 # Total number of inputs for each part
 # i.e. how many parts are connected to it with lines (branches)
 $partInCnt[0] = 0;	# $partInCnt[0 .. $partCnt]

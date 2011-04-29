@@ -10,6 +10,7 @@
 typedef struct fmSubSysMap {
   char name[CVL]; /* Filter module name within this subsystem */
   int  fmModNum;  /* Filter module number within this subsystem */
+  int  biquad;	  /* 0 -- IIR or FIR; 1 -- biquad form IIR */
 
   /* The rest of structure is filled by fmReadCoeffFile() */
   int filters;

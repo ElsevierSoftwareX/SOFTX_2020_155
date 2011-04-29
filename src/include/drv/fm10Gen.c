@@ -147,6 +147,58 @@ inline double iir_filter(double input,double *coef,int n,double *history){
   return(output);
 }
 
+/* Biquad form IIR */
+inline double iir_filter_biquad(double input,double *coef,int n,double *history){
+
+  int i;
+  double *coef_ptr;
+  double *hist1_ptr,*hist2_ptr;
+  double output,new_w, new_u, w, u, a11, a12, c1, c2;
+
+  coef_ptr = coef;                /* coefficient pointer */
+  
+  hist1_ptr = history;            /* first history */
+  hist2_ptr = hist1_ptr + 1;      /* next history */
+  
+  input += 1e-16;
+  junk = input;
+  input -= 1e-16;
+
+  output = input * (*coef_ptr++); /* overall input scale factor */
+  
+  for(i = 0 ; i < n ; i++) {
+    
+    w = *hist1_ptr; 
+    u = *hist2_ptr;
+    
+    a11 = *coef_ptr++;
+    a12 = *coef_ptr++;
+    c1  = *coef_ptr++;
+    c2  = *coef_ptr++;
+    
+    new_w = output + a11 * w + a12 * u;
+    output = output + w * c1 + u * c2;
+    new_u = w + u;   
+
+    //if((new_hist < 1e-20) && (new_hist > -1e-20)) new_hist = new_hist<0 ? -1e-20: 1e-20;
+    
+    new_w += 1e-16;
+    junk = new_w;
+    new_w -= 1e-16;
+    new_u += 1e-16;
+    junk = new_u;
+    new_u -= 1e-16;
+
+    *hist1_ptr++ = new_w;
+    *hist2_ptr++ = new_u;
+    hist1_ptr++;
+    hist2_ptr++;
+    
+  }
+  
+  return(output);
+}
+
 #ifdef FIR_FILTERS
 /**************************************************************************
 
@@ -600,6 +652,7 @@ inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_C
 #endif
   for(ii=bF;ii<sF;ii++)
   {
+    filtC->biquad = pRfmCoeff->vmeCoeffs[ii].biquad;
     for(jj=0;jj<FILTERS;jj++)
     {
       if(pRfmCoeff->vmeCoeffs[ii].filtSections[jj])
@@ -816,6 +869,7 @@ inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int
 	      filtC->firFiltCoeff[type-1][filtNum][kk] = localFirFiltCoeff[filtNum][kk];
 #endif
 	  } else {
+    	    filtC->biquad = localCoeff.biquad;
 	    for(kk=0;kk<filtC->coeffs[modNum1].filtSections[filtNum]*4+1;kk++)
 	      filtC->coeffs[modNum1].filtCoeff[filtNum][kk] = localCoeff.filtCoeff[filtNum][kk];
 	  }
@@ -1346,7 +1400,7 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
     } else
 #endif
     /* Calculate filter */
-    filtData = iir_filter(sw_in?fmInput:0,
+    filtData = (pC->biquad? iir_filter_biquad: iir_filter)(sw_in?fmInput:0,
 			  pC->coeffs[modNum].filtCoeff[ii],
 			  pC->coeffs[modNum].filtSections[ii],
 			  pC->coeffs[modNum].filtHist[ii]);

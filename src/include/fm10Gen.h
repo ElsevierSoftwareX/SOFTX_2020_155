@@ -145,6 +145,7 @@ typedef struct FM_OP_COEF{
 
 typedef struct COEF{
   FM_OP_COEF coeffs[MAX_MODULES];
+  int biquad; /* Set to one if the code needs to be in biquad form */
 
 #ifdef FIR_FILTERS
 #if defined(FIR_POLYPHASE_SIZE)
@@ -167,6 +168,7 @@ typedef struct VME_FM_OP_COEF{
   int timout[FILTERS];
   unsigned int crc;     /* Epics-calculated data checksum */
   int filterType[FILTERS];       /* 0 - IIR; N - FIR, where 0 > N < MAX_FIR_MODULES  */
+  int biquad;		/* Set to 1 if this filter needs to use a biquad form calculations */
 }VME_FM_OP_COEF;
 
 typedef struct VME_COEF{

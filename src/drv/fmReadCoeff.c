@@ -430,6 +430,27 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
 
                     curFilter->fmd.filtCoeff[curFilterNum][indexN] =
                                                       filtCoeff[j];
+		    if (curFilter->fmd.biquad) {
+		      // Calculate biquad form
+		      switch (j) {
+			case 0: // a11
+			  curFilter->fmd.filtCoeff[curFilterNum][indexN]
+				= - filtCoeff[j] - 1.0; // a11 = - a1 - 1
+			  break;
+			case 1: // a12
+			  curFilter->fmd.filtCoeff[curFilterNum][indexN]
+				= - filtCoeff[j] - filtCoeff[j - 1] - 1.0; // a12 = - a2 - a1 - 1
+			  break;
+			case 2: // c1
+			  curFilter->fmd.filtCoeff[curFilterNum][indexN]
+				= filtCoeff[j] - filtCoeff[j - 2]; // c1 = b1 - a1
+			  break;
+			case 3: // c2
+			  curFilter->fmd.filtCoeff[curFilterNum][indexN]
+				= filtCoeff[j] - filtCoeff[j - 2] + filtCoeff[j - 1] - filtCoeff[j - 3];
+			  break;
+		      }
+		    }
                   }
                 }
               }
@@ -679,8 +700,31 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
 #endif
                   }
                   else {
-                    for (j = 0; j < 5; j++)
+                    for (j = 0; j < 5; j++) {
                       curFilter->fmd.filtCoeff[num][j] = filtCoeff[j];
+
+		      if (curFilter->fmd.biquad) {
+		        // Calculate biquad form
+		        switch (j) {
+			  case 1: // a11
+			    curFilter->fmd.filtCoeff[num][j]
+				 = - filtCoeff[j] - 1.0; // a11 = - a1 - 1
+			    break;
+			  case 2: // a12
+			    curFilter->fmd.filtCoeff[num][j]
+				= - filtCoeff[j] - filtCoeff[j - 1] - 1.0; // a12 = - a2 - a1 - 1
+			    break;
+			  case 3: // c1
+			    curFilter->fmd.filtCoeff[num][j]
+				= filtCoeff[j] - filtCoeff[j - 2]; // c1 = b1 - a1
+			    break;
+			  case 4: // c2
+			    curFilter->fmd.filtCoeff[num][j]
+				= filtCoeff[j] - filtCoeff[j - 2] + filtCoeff[j - 1] - filtCoeff[j - 3];
+			    break;
+			}
+		      }
+		    }
                   }
                   break;
                 }
@@ -857,6 +901,8 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
     }
 
     fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].crc = coefCrc;
+    fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].biquad = 
+	    			fmc->subSys[n].map[i].fmd.biquad;
 
     usleep(10000);
 
