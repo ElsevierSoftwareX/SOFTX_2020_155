@@ -1,5 +1,5 @@
 
-.PHONY:l1omc1
+.PHONY:g1x11
 om1:
-	./feCodeGen.pl ../simLink/l1omc1.mdl l1omc1
+	./feCodeGen.pl ../simLink/g1x11.mdl g1x11
 

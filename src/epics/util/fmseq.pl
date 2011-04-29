@@ -681,6 +681,13 @@ while (<IN>) {
     } else {
 	s/\s//g;
 	if ($_ && !(substr($_,0,1) eq "#")) {
+	    my $biquad = 0;
+	    if ($_ =~ /biquad$/) {
+		$biquad = 1;
+		s/biquad$//g;
+		s/\s//g;
+	#	die $_;
+	    }
 	    $names[$cnt] = $_;
 	    if ($cnt) {
 		$names1 .= " ,";
@@ -694,7 +701,7 @@ while (<IN>) {
 	    	$names1 .= '"{ifo}:{sys}-{subsys}' . $_ . '_%PAR%" ';
  	    }
 #	    $names2 .= '{"'. $_ . '", FLT_' . $_ . ' } ';
-	    $names2 .= '{"'. $_ . '", ' . $cnt . ' } ';
+	    $names2 .= '{"'. $_ . '", ' . $cnt . ', ' . $biquad . ' } ';
 	    if ($cnt % 3 == 2) {
 		$names1 .= "\n";
 		$names2 .= "\n%%";
