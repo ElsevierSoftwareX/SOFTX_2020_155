@@ -109,6 +109,7 @@ install: $(DB) $(DBH1) $(DBH2) $(DBL1)
 	  cp $$i target/$(TARGET)/dbd/`basename $$i`; \
 	done
 	/bin/rm -f target/$(TARGET)/db/*/autoBurt.req
+	/bin/rm -f target/$(TARGET)/db/*/auto.ini
 	for ifo in $(IFO) ; do \
 	  system=`echo $(subst epics,,$(TARGET)) | tr a-z A-Z | cut -c1-3`; \
 	  ifo0=`echo $$ifo | sed 's/[0-9]/0/g'`; \
@@ -122,10 +123,22 @@ install: $(DB) $(DBH1) $(DBH2) $(DBL1)
 	    echo "dbLoadDatabase \"dbd/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 	  done ; \
 	  echo 'registerRecordDeviceDriver(pdbbase)' >> target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
+	  echo '[default]' >> target/$(TARGET)/db/$$ifo/auto.ini; \
+	  echo 'gain=1.00' >> target/$(TARGET)/db/$$ifo/auto.ini; \
+	  echo 'datatype=4' >> target/$(TARGET)/db/$$ifo/auto.ini; \
+	  echo 'ifoid=0' >> target/$(TARGET)/db/$$ifo/auto.ini; \
+	  echo 'slope=6.1028e-05' >> target/$(TARGET)/db/$$ifo/auto.ini; \
+	  echo 'acquire=1' >> target/$(TARGET)/db/$$ifo/auto.ini; \
+	  echo 'offset=0' >> target/$(TARGET)/db/$$ifo/auto.ini; \
+	  echo 'units=V' >> target/$(TARGET)/db/$$ifo/auto.ini; \
+	  echo 'dcuid=4' >> target/$(TARGET)/db/$$ifo/auto.ini; \
+	  echo 'datarate=16' >> target/$(TARGET)/db/$$ifo/auto.ini; \
+	  echo '' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 	  for i in $(DB) ; do \
 		cat $$i | sed s/%IFO%/$$ifo/g\;s/%IFO0%/$$ifo0/g\;s/%SYS%/$$system/g > target/$(TARGET)/db/$$ifo/`basename $$i`; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|TOTAL$$|Name|SVN|SW1R$$|SW2R$$' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|SEVERITY|MAJOR_COUNT|MINOR_COUNT|SETPOINT_ID|FILTER_PARAM|GDS_MON|FESTAT|STATUS_COUNT|FILTER_ID|MTRXSTAT|MTRX_STAT_ERR|_MSG|_TIME_STRING|_STAT_ERR_CNT|BURT|LOAD_CONFIG|VME_RES|LOAD_NEW_COEFF|DIAG_RESET|SYNC_RESET|TOTAL$$|Name' | awk '{ printf "[%s]\n", $$0 }' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 	  done ; \
 	done
