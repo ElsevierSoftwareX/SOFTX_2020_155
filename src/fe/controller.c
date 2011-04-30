@@ -1344,6 +1344,11 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
                     }while((*packedData == 0x110000) && (adcWait < 1000000));
 
 #ifdef ADC_MASTER
+				if(!rfmDone)
+				{
+					if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(clock16K % 64));
+					if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(clock16K % 64));
+				}
 		rfmDone = 0;
 #endif
 
