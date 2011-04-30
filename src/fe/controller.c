@@ -2093,8 +2093,8 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
 			dacWDread = dac18bitPtr->digital_io_ports;
 			if(((dacWDread >> 8) & 1) > 0)
-			    pLocalEpics->epicsOutput.statDac[jj] &= ~(8);
-			    else pLocalEpics->epicsOutput.statDac[jj] |= 8;
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(16);
+			    else pLocalEpics->epicsOutput.statDac[jj] |= 16;
 
 		}
 	}
@@ -2113,9 +2113,16 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
 			out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
 			if(out_buf_size > 8)
-			    pLocalEpics->epicsOutput.statDac[jj] &= ~(16);
-			    else pLocalEpics->epicsOutput.statDac[jj] |= 16;
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(8);
+			    else pLocalEpics->epicsOutput.statDac[jj] |= 8;
 
+		}
+		if(cdsPciModules.dacType[jj] == GSC_16AO16)
+		{
+			status = checkDacBuffer(jj);
+			if(status != 3)
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(8);
+			    else pLocalEpics->epicsOutput.statDac[jj] |= 8;
 		}
 	}
 
