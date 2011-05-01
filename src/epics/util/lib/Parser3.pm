@@ -1204,9 +1204,9 @@ sub process {
   #print "TREE\n";
   #CDS::Tree::print_tree($root);
 
-  CDS::Tree::do_on_nodes($root, \&remove_busses, 0, $root);
-  print "Removed Busses\n";
   #CDS::Tree::do_on_nodes($root, \&remove_tags, 0, $root);
+  #CDS::Tree::do_on_nodes($root, \&remove_busses, 0, $root);
+  #print "Removed Busses\n";
   do {
   	$n_merged = 0;
   	CDS::Tree::do_on_nodes($root, \&merge_references, 0, $root);
@@ -1218,6 +1218,10 @@ sub process {
   print "Flattening the model\n";
   flatten_nested_subsystems($root);
   print "Finished flattening the model\n";
+  CDS::Tree::do_on_nodes($root, \&remove_tags, 0, $root);
+  print "Removed Tags\n";
+  CDS::Tree::do_on_nodes($root, \&remove_busses, 0, $root);
+  print "Removed Busses\n";
 
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
   print "Found $::adcCnt ADCs $::partCnt parts $::subSys subsystems\n";
