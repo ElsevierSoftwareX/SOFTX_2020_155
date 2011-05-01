@@ -732,12 +732,21 @@ if ($ipcxCnt > 0) {
    }
 }
 
+$kk = 0;
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if($partType[$ii] eq "INPUT")
 	{
-		#print "INPUT $xpartName[$ii]  $partInput[$ii][0] $partInputPort[$ii][0] $partOutput[$ii][0] $partOutputPort[$ii][0]\n";
+		if($partInCnt[$ii] == 0)
+		{
+		print "\nINPUT $xpartName[$ii] is NOT connected \n";
+		$kk ++;
+	 	}
 	}
+}
+if($kk > 0)
+{
+         die "\n***ERROR: Found total of ** $kk ** INPUT parts not connected\n\n";
 }
 # Loop thru all parts
 for($ii=0;$ii<$partCnt;$ii++)
@@ -3533,7 +3542,7 @@ $byteMedm[4] = " \n";
 $byteMedm[5] = "\t\ty=";
 $byteMedm[6] = "$mbypt";
 $byteMedm[7] = " \n";
-$byteMedm[8] = "\t\twidth=10 \n";
+$byteMedm[8] = "\t\twidth=14 \n";
 $byteMedm[9] = "\t\theight=18 \n";
 $byteMedm[10] = "\t\} \n";
 $byteMedm[11] = "\tmonitor \{\n";
@@ -3583,11 +3592,20 @@ $byteMedm[3] = "$mbxpt";
 $byteMedm[6] = "$mbypt";
 $byteMedm[13] = "$ii";
 $byteMedm[18] = "\tsbit=0 \n";
-$byteMedm[19] = "";
+#$byteMedm[19] = "";
+$byteMedm[19] = "\tebit=1 \n";
 if($ii>=$adcCnt)
 {
 	$byteMedm[12] = "\t\tchan=\"SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_";
 	$byteMedm[13] = "$dacMedm";
+	$byteMedm[19] = "\tebit=3 \n";
+	$byteMedm[8] = "\t\twidth=28 \n";
+	if($modelType ne "MASTER")
+	{
+		$byteMedm[18] = "\tsbit=1 \n";
+		$byteMedm[19] = "\tebit=1 \n";
+		$byteMedm[8] = "\t\twidth=7 \n";
+	}
 	$dacMedm ++;
 }
 print OUTGDSM @byteMedm;
@@ -3595,10 +3613,10 @@ $mbxpt = 12 + $mbxpt;
 $byteMedm[3] = "$mbxpt";
 $byteMedm[18] = "\tsbit=1 \n";
 $byteMedm[19] = "\tebit=1 \n";
-print OUTGDSM @byteMedm;
+#print OUTGDSM @byteMedm;
 $mypt += 22;
 if($ii == 4) {
-	$mxpt += 57; 
+	$mxpt += 60; 
 	$mypt = 52;
 }
 }
