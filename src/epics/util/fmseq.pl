@@ -1147,7 +1147,7 @@ foreach (@tp_data) {
  }
 }
 my $cnt = 0;
-my $daq_name = "DAQ";
+my $daq_name = "DQ";
 # Print chnnum, datarate, 
 foreach (sort @section_names) {
         if ($cnt < 2 && m/_OUT$/) {
