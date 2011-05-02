@@ -207,6 +207,7 @@ install-daq-% :: src/epics/simLink/%.mdl
 	  /bin/mv -f /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${edcu_name}.ini /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive/$${edcu_name}_$${cur_date}.ini || exit 2 ;\
 	fi;\
 	/bin/cp -p target/$${system}epics/db/$${ifo}/auto.ini /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${edcu_name}.ini ;\
+	echo /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${edcu_name}.ini;\
 
 
 install-screens-% :: src/epics/simLink/%.mdl
