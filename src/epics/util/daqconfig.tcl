@@ -436,7 +436,7 @@ proc save_ini_files {} {
 	  	  set comment "#"
  		}
 		puts $infile ""
-	  	puts $infile "$comment\[${sectname}_DAQ\]"
+	  	puts $infile "$comment\[${sectname}_DQ\]"
 		set cur_sect $sectname
 	  } 
 	  # Print section param
@@ -610,7 +610,7 @@ proc parse_ini_file file {
                   #continue;
                 #}
                 #puts "Section $lws"
-                if {[regexp {^(\S+)_DAQ$} $section junk channame]} {
+                if {[regexp {^(\S+)_DQ$} $section junk channame]} {
 			set lws $channame;
 		} else {
 			if {[string compare $section "default"] != 0} {
