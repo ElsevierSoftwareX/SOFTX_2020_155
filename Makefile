@@ -154,6 +154,8 @@ install-daq-% :: src/epics/simLink/%.mdl
 	datarate_mult=`expr $${datarate} / 16384 `; \
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/ ;\
+	edcu_name=`echo $${upper_system} | sed s/^$${ifo}//g`;\
+	edcu_name=$${ifo}EDCU_$${edcu_name};\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/ ;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/param/archive ;\
 	echo Updating testpoint.par config file ;\
@@ -199,6 +201,13 @@ install-daq-% :: src/epics/simLink/%.mdl
 	  /bin/cp -p build/$${system}epics/$${system}.ini /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini ;\
 	fi;\
 	/bin/cp /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${upper_system}.ini /opt/rtcds/$${site}/$${lower_ifo}/target/$${system}/param/$${upper_system}.ini;\
+	echo Installing EDCU ini file;\
+	if test -e /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${edcu_name}.ini;\
+	then \
+	  /bin/mv -f /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${edcu_name}.ini /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/archive/$${edcu_name}_$${cur_date}.ini || exit 2 ;\
+	fi;\
+	/bin/cp -p target/$${system}epics/db/$${ifo}/auto.ini /opt/rtcds/$${site}/$${lower_ifo}/chans/daq/$${edcu_name}.ini ;\
+
 
 install-screens-% :: src/epics/simLink/%.mdl
 	@system=$(subst install-screens-,,$@); \
