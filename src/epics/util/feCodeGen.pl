@@ -3407,6 +3407,7 @@ open(OUTG, ">" . $filtFile) || die "cannot open  $filtFile file for writing";
 print OUTG "# FILTERS FOR ONLINE SYSTEM\n".
 	"#\n".
 	"# Computer generated file: DO NOT EDIT\n".
+	"# SAMPLING RATE " . get_freq() . "\n" .
 	"#\n";
 
 for($ii=0;$ii<$jj;$ii++)
