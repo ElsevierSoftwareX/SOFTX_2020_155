@@ -221,6 +221,7 @@ interpreter_no_prompt (void *a)
 
     // cerr << "out of lexer" << endl;
 #if __GNUC__ >= 3
+    ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (oldoutbuf);
     delete outbuf;
 #endif
     my_yyout.flush ();
@@ -308,6 +309,7 @@ interpreter (void *a)
 
   // cerr << "out of lexer" << endl;
 #if __GNUC__ >= 3
+    ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (oldoutbuf);
     delete outbuf;
 #endif
     my_yyout.flush ();
@@ -418,6 +420,7 @@ strict_interpreter (void *a)
 
     DEBUG(2, cerr << "out of lexer" << endl << flush);
 #if __GNUC__ >= 3
+    ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (oldoutbuf);
     delete outbuf;
 #endif
     my_yyout.flush ();
