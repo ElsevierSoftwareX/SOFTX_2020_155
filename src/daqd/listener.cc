@@ -220,6 +220,9 @@ interpreter_no_prompt (void *a)
     DEBUG(2, my_yyout << "lexer stopped at line " << lexer -> lineno () << endl);
 
     // cerr << "out of lexer" << endl;
+#if __GNUC__ >= 3
+    delete outbuf;
+#endif
     my_yyout.flush ();
   }
   close (ai1);
@@ -304,6 +307,9 @@ interpreter (void *a)
     system_log(1, "connection on fd %d closed", ai2);
 
   // cerr << "out of lexer" << endl;
+#if __GNUC__ >= 3
+    delete outbuf;
+#endif
     my_yyout.flush ();
   }
 
@@ -411,6 +417,9 @@ strict_interpreter (void *a)
     //  my_yyout << "lexer stopped at line " << lexer -> lineno () << endl << flush;
 
     DEBUG(2, cerr << "out of lexer" << endl << flush);
+#if __GNUC__ >= 3
+    delete outbuf;
+#endif
     my_yyout.flush ();
   }
 
