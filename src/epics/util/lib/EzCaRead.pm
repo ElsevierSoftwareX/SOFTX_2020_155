@@ -23,8 +23,8 @@ sub printEpics {
 	$temp = $::xpartName[$i];
 	$temp =~ s/\-/\_/g;
 	$temp =~ s/\:/\_/g;
-        #print ::EPICS "EZ_CA_READ $::xpartName[$i] $::systemName\.$temp int ai 0 field(PREC,\"3\")\n";
-        print ::EPICS "EZ_CA_READ $::xpartName[$i] $::systemName\.$temp\n";
+        #print ::EPICS "EZ_CA_READ $::xpartName[$i] $::partName[$i] $::systemName\.$temp int ai 0 field(PREC,\"3\")\n";
+        print ::EPICS "EZ_CA_READ $::xpartName[$i] $::partName[$i] $::systemName\.$temp\n";
 }
 
 # Print variable declarations int front-end file
