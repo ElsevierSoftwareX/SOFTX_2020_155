@@ -1461,6 +1461,10 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 #ifdef ADC_MASTER
 			// Load adc value into ipc memory buffer
 			ioMemData->iodata[jj][ioMemCntr].data[ii] = adcData[jj][ii];
+#if defined(L1IOPPSL0_CODE)
+			// Invert signals for the PSL
+			ioMemData->iodata[jj][ioMemCntr].data[ii] *= -1;
+#endif
 #endif
 #ifdef OVERSAMPLE
 			// Downsample filter only used channels to save time
