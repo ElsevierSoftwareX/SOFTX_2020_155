@@ -721,7 +721,7 @@ sub remove_tags {
    #print_node($from_line);
    # Rename the tags so they are not picked up by the code upstream...
    ${$node->{FIELDS}}{"Name"} .= "_Removed";
-   ${$goto->{FIELDS}}{"Name"} .= "_Removed";
+   #${$goto->{FIELDS}}{"Name"} .= "_Removed";
    return 0;
 }
 
