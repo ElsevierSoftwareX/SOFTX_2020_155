@@ -1,0 +1,23 @@
+Overview of changes from 2.0 to 2.1
+==================================
+New Branch, which includes:
+
+New Features:
+1) RCG provides default code rate in coeff.txt files for use by foton.
+2) New IIR filter part based on BiQuad filter algorithm as provided by M. Evans.
+3) Ability to include a user-defined library part in an RCG model.
+4) Support for connection of buses between multiple layers of the model, not just on save level.
+5) Auto-generated EPICS.ini files for each model.
+6) Check of 16bit DAC module FIFOs for proper clocking plus new error bit added to GDS_TP screens..
+7) Change of _DAQ to _DQ tag on filter modules in DAQ .ini files.
+
+Bug Fixes:
+1) Fix to EPICS EZCA part to:
+- compile correctly within subsystem parts.
+- Use pvPut instead of EZCA for performance reasons (plus EZCA not supported in latest EPICS).
+2) Removal of SVN tag from BURT file ie BURT restore would overwrite latest SVN tag).
+3) Fix to slave model DAC status info on GDS TP screens (false error indicator).
+4) Change in CDS_PARTS.mdl bus selector part to set use to "Require input signal names to match signals below", instead of "Inheri
+t bus signal names from input ports". This is required to make BUS parts work with new, multi-level BUS parser in RCG.
+
+
