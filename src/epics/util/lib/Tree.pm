@@ -113,7 +113,7 @@ sub print_tree {
 	my($space);
 	if ($print_no_repeats && $tree->{PRINTED}) { return; }
 	for (0 .. $level) { $space .= ' '; }
-	#debug 0, $space, "{", $tree->{NAME}, "; name=", ${$tree->{FIELDS}}{Name}, "; src=", ${$tree->{FIELDS}}{SrcBlock}, ";dst=", ${$tree->{FIELDS}}{DstBlock}, " nref=", scalar @{$tree->{NEXT}}, "}";
+	#debug 0, $space, "{", $tree->{NAME}, "; name=", ${$tree->{FIELDS}}{Name}, "; src=", ${$tree->{FIELDS}}{SrcBlock}, "; src_port=", ${$tree->{FIELDS}}{SrcPort}, ";dst=", ${$tree->{FIELDS}}{DstBlock}, ";dts_port=", ${$tree->{FIELDS}}{DstPort}, " nref=", scalar @{$tree->{NEXT}}, "}";
 	for (@{$tree->{NEXT}}) {
 		print_tree($_, $level + 1);
 	}
