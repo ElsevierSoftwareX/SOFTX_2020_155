@@ -48,7 +48,7 @@ CFLAGS += -DNO_RTL=1
 endif
 
 CXXFLAGS = $(CFLAGS)
-SNCFLAGS += +a
+SNCFLAGS += +a -c
 #SNCFLAGS += -e
 
 # Sequencer file (.st) compiler
