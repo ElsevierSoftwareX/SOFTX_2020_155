@@ -276,6 +276,20 @@ sub name_check {
 	return @_[0] =~ /^[a-zA-Z0-9_]+$/;
 }
 
+sub store_ezca_names {
+   my ($node, $in_sub, $parent) =  @_;
+   if ($node->{NAME} ne "Block") {
+	   return 0;
+   }
+   my $name =  ${$node->{FIELDS}}{"Name"};
+   my $src_block = ${$node->{FIELDS}}{"SourceBlock"};
+   if ($src_block !~ /^cdsEzCa/ || $src_block eq undef) {
+	  return 0;
+   }
+   #print "name=", $name, "src=", $src_block, "\n";
+   ${$node->{FIELDS}}{"Description"} = $name;
+   return 0;
+}
 # Bring library references into the tree
 sub merge_references {
    my ($node, $in_sub, $parent) =  @_;
@@ -800,6 +814,7 @@ sub remove_busses {
 				  # Now connect the bus selector output line to originate
 				  # at the found block
 				  ${$outline->{FIELDS}}{"SrcBlock"} = ${$sig_src->{FIELDS}}{"Name"};
+				  ${$outline->{FIELDS}}{"SrcPort"} = ${$in_line->{FIELDS}}{"SrcPort"};
 				  #print_node($outline);
 				  $found = 1;
 				  last;
@@ -1214,6 +1229,10 @@ sub process {
   } while ($n_merged != 0);
   #CDS::Tree::print_tree($root);
   print "Merged library referenes\n";
+
+  # Store ezca block names in description field, so that they are accessible later
+  # without the subsystems prefix
+  CDS::Tree::do_on_nodes($root, \&store_ezca_names, 0, $root);
 
   print "Flattening the model\n";
   flatten_nested_subsystems($root);
