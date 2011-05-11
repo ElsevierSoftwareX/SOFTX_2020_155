@@ -23,7 +23,8 @@ sub printEpics {
 	$temp = $::xpartName[$i];
 	$temp =~ s/\-/\_/g;
 	$temp =~ s/\:/\_/g;
-        print ::EPICS "EZ_CA_WRITE $::xpartName[$i] $::partName[$i] $::systemName\.$temp\n";
+	# Original part name is in the description
+        print ::EPICS "EZ_CA_WRITE $::xpartName[$i] $::blockDescr[$i] $::systemName\.$temp\n";
 }
 
 # Print variable declarations int front-end file
