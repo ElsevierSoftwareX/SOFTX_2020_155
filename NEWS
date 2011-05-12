@@ -1,0 +1,6 @@
+Overview of changes from 2.0 to 2.0.1
+=====================================
+
+Fixed a problem with incorrect bus hook-ups to the DAC.
+Fixed a bug when line branches were not handled properly at the output of a subsystem.
+
