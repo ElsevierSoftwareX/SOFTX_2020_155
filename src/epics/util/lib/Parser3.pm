@@ -820,7 +820,11 @@ sub remove_busses {
 				  last;
 				}
 			}
-			die "Couldn't find a signal $out_signals[$index] in Bus Creator" if !$found;
+			if (!$found) {
+				print "Couldn't find a signal $out_signals[$index] in the bus\n";
+				print "Available signals: $bus_creator_inputs\n";
+				$::time_to_die = 1;
+			}
 		}
 	} elsif ($block_type eq "BUSC") {
 		#print("BUSC found; name=$block_name\n");
@@ -1239,7 +1243,9 @@ sub process {
   print "Finished flattening the model\n";
   CDS::Tree::do_on_nodes($root, \&remove_tags, 0, $root);
   print "Removed Tags\n";
+  $::time_to_die = 0;
   CDS::Tree::do_on_nodes($root, \&remove_busses, 0, $root);
+  die if $::time_to_die;
   print "Removed Busses\n";
 
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
