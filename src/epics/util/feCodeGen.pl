@@ -1024,6 +1024,8 @@ $foundSysCon = 0;
 #  If OUTPUT part has only one input, then the line below can NOT be correct!
 #				$fromPort = $partInputPort[$ii][$jj];
 #  Replace with the following line:
+                                # Do not try to find the output by name
+                                if (0) {
 				$fromPort = $partInputPort[$ii][0];
 				for($xxx=0;$xxx<$partOutCnt[$fromNum];$xxx++)
 				{
@@ -1032,6 +1034,12 @@ $foundSysCon = 0;
 						$fromPort = $xxx;
 					}
 				}
+				} # 0
+
+                                # Add to the output count, do not try to find and replace
+                                $fromPort = $partOutCnt[$fromNum];
+                                $partOutCnt[$fromNum]++;
+
 			# print " OUTPUT TO $xpartName[$ii] $xpartName[$xx] $partType[$xx]\n";
 			# print "Maybe $xpartName[$xx] port $partOutputPort[$ii][$jj] $xpartName[$fromNum] $partType[$fromNum] port $fromPort\n";
 				# Make output connection at source part

@@ -722,6 +722,7 @@ sub remove_busses {
 				  # Now connect the bus selector output line to originate
 				  # at the found block
 				  ${$outline->{FIELDS}}{"SrcBlock"} = ${$sig_src->{FIELDS}}{"Name"};
+				  ${$outline->{FIELDS}}{"SrcPort"} = ${$in_line->{FIELDS}}{"SrcPort"};
 				  #print_node($outline);
 				  $found = 1;
 				  last;
