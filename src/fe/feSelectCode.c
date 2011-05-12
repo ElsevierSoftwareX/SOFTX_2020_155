@@ -96,6 +96,118 @@
 	#include "c1x02/c1x02.c"
 #elif defined(C1TST_CODE)
 	#include "c1tst/c1tst.c"
+#elif defined(L1IOPLSC0_CODE)
+	#include "l1ioplsc0/l1ioplsc0.c"
+#elif defined(L1OMC1_CODE)
+	#include "l1omc1/l1omc1.c"
+#elif defined(L1OMC2_CODE)
+	#include "l1omc2/l1omc2.c"
+#elif defined(L1PSLISS_CODE)
+	#include "l1psliss/l1psliss.c"
+#elif defined(L1IOPASC0_CODE)
+	#include "l1iopasc0/l1iopasc0.c"
+#elif defined(L1IOPSUSBSC123_CODE)
+	#include "l1iopsusbsc123/l1iopsusbsc123.c"
+#elif defined(L1SUSITMX_CODE)
+	#include "l1susitmx/l1susitmx.c"
+#elif defined(L1SUSITMY_CODE)
+	#include "l1susitmy/l1susitmy.c"
+#elif defined(L1SUSBS_CODE)
+	#include "l1susbs/l1susbs.c"
+#elif defined(L1IOPSEIB1_CODE)
+	#include "l1iopseib1/l1iopseib1.c"
+#elif defined(L1IOPSEIB2_CODE)
+	#include "l1iopseib2/l1iopseib2.c"
+#elif defined(L1IOPSEIB3_CODE)
+	#include "l1iopseib3/l1iopseib3.c"
+#elif defined(L1IOPSEIH16_CODE)
+	#include "l1iopseih16/l1iopseih16.c"
+#elif defined(L1IOPSEIH23_CODE)
+	#include "l1iopseih23/l1iopseih23.c"
+#elif defined(L1IOPSEIH45_CODE)
+	#include "l1iopseih45/l1iopseih45.c"
+#elif defined(L1ISIITMX_CODE)
+	#include "l1isiitmx/l1isiitmx.c"
+#elif defined(L1ISIITMY_CODE)
+	#include "l1isiitmy/l1isiitmy.c"
+#elif defined(L1ISIBS_CODE)
+	#include "l1isibs/l1isibs.c"
+#elif defined(L1SEIITMX_CODE)
+	#include "l1seiitmx/l1seiitmx.c"
+#elif defined(L1SEIITMY_CODE)
+	#include "l1seiitmy/l1seiitmy.c"
+#elif defined(L1SEIBS_CODE)
+	#include "l1seibs/l1seibs.c"
+#elif defined(L1SEIHAM1_CODE)
+	#include "l1seiham1/l1seiham1.c"
+#elif defined(L1SEIHAM2_CODE)
+	#include "l1seiham2/l1seiham2.c"
+#elif defined(L1SEIHAM3_CODE)
+	#include "l1seiham3/l1seiham3.c"
+#elif defined(L1SEIHAM4_CODE)
+	#include "l1seiham4/l1seiham4.c"
+#elif defined(L1SEIHAM5_CODE)
+	#include "l1seiham5/l1seiham5.c"
+#elif defined(L1SEIHAM6_CODE)
+	#include "l1seiham6/l1seiham6.c"
+#elif defined(L1SUSQUAD_CODE)
+	#include "l1susquad/l1susquad.c"
+#elif defined(L1SUSPRM3_CODE)
+	#include "l1susprm3/l1susprm3.c"
+#elif defined(L1IOPSUSH2A_CODE)
+	#include "l1iopsush2a/l1iopsush2a.c"
+#elif defined(L1IOPSUSH2B_CODE)
+	#include "l1iopsush2b/l1iopsush2b.c"
+#elif defined(L1IOPSUSH34_CODE)
+	#include "l1iopsush34/l1iopsush34.c"
+#elif defined(L1IOPSUSH56_CODE)
+	#include "l1iopsush56/l1iopsush56.c"
+#elif defined(L1SUSMC2_CODE)
+	#include "l1susmc2/l1susmc2.c"
+#elif defined(L1SUSPR2_CODE)
+	#include "l1suspr2/l1suspr2.c"
+#elif defined(L1SUSSR2_CODE)
+	#include "l1sussr2/l1sussr2.c"
+#elif defined(L1SUSSR3_CODE)
+	#include "l1sussr3/l1sussr3.c"
+#elif defined(L1SUSSRM_CODE)
+	#include "l1sussrm/l1sussrm.c"
+#elif defined(L1SUSAUXH34_CODE)
+	#include "l1susauxh34/l1susauxh34.c"
+#elif defined(L1IOPSUSAUXH34_CODE)
+	#include "l1iopsusauxh34/l1iopsusauxh34.c"
+#elif defined(L1IOPPEMEX_CODE)
+	#include "l1ioppemex/l1ioppemex.c"
+#elif defined(L1PEMEX_CODE)
+	#include "l1pemex/l1pemex.c"
+#elif defined(L1SUSETMX_CODE)
+	#include "l1susetmx/l1susetmx.c"
+#elif defined(L1IOPOAF0_CODE)
+	#include "l1iopoaf0/l1iopoaf0.c"
+#elif defined(L1PEMLVEA_CODE)
+	#include "l1pemlvea/l1pemlvea.c"
+#elif defined(L1RFMCORNER_CODE)
+	#include "l1rfmcorner/l1rfmcorner.c"
+#elif defined(L1LSC_CODE)
+	#include "l1lsc/l1lsc.c"
+#elif defined(H2ISIITMX_CODE)
+	#include "h2isiitmx/h2isiitmx.c"
+#elif defined(L1ISIITMX2_CODE)
+	#include "l1isiitmx2/l1isiitmx2.c"
+#elif defined(L1LSCTEST_CODE)
+	#include "l1lsctest/l1lsctest.c"
+#elif defined(L1ASCTEST_CODE)
+	#include "l1asctest/l1asctest.c"
+#elif defined(L1ASCWFS_CODE)
+	#include "l1ascwfs/l1ascwfs.c"
+#elif defined(X2SUSQUAD_CODE)
+	#include "x2susquad/x2susquad.c"
+#elif defined(X3SUSQUAD_CODE)
+	#include "x3susquad/x3susquad.c"
+#elif defined(X1SUSQUAD_CODE)
+	#include "x1susquad/x1susquad.c"
+#elif defined(H2SEIETMY_CODE)
+	#include "h2seietmy/h2seietmy.c"
 #else
 	#error
 #endif

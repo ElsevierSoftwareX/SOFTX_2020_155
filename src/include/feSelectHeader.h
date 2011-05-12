@@ -94,6 +94,118 @@
 	#include "c1x02.h"
 #elif defined(C1TST_CODE)
 	#include "c1tst.h"
+#elif defined(L1IOPLSC0_CODE)
+	#include "l1ioplsc0.h"
+#elif defined(L1OMC1_CODE)
+	#include "l1omc1.h"
+#elif defined(L1OMC2_CODE)
+	#include "l1omc2.h"
+#elif defined(L1PSLISS_CODE)
+	#include "l1psliss.h"
+#elif defined(L1IOPASC0_CODE)
+	#include "l1iopasc0.h"
+#elif defined(L1IOPSUSBSC123_CODE)
+	#include "l1iopsusbsc123.h"
+#elif defined(L1SUSITMX_CODE)
+	#include "l1susitmx.h"
+#elif defined(L1SUSITMY_CODE)
+	#include "l1susitmy.h"
+#elif defined(L1SUSBS_CODE)
+	#include "l1susbs.h"
+#elif defined(L1IOPSEIB1_CODE)
+	#include "l1iopseib1.h"
+#elif defined(L1IOPSEIB2_CODE)
+	#include "l1iopseib2.h"
+#elif defined(L1IOPSEIB3_CODE)
+	#include "l1iopseib3.h"
+#elif defined(L1IOPSEIH16_CODE)
+	#include "l1iopseih16.h"
+#elif defined(L1IOPSEIH23_CODE)
+	#include "l1iopseih23.h"
+#elif defined(L1IOPSEIH45_CODE)
+	#include "l1iopseih45.h"
+#elif defined(L1ISIITMX_CODE)
+	#include "l1isiitmx.h"
+#elif defined(L1ISIITMY_CODE)
+	#include "l1isiitmy.h"
+#elif defined(L1ISIBS_CODE)
+	#include "l1isibs.h"
+#elif defined(L1SEIITMX_CODE)
+	#include "l1seiitmx.h"
+#elif defined(L1SEIITMY_CODE)
+	#include "l1seiitmy.h"
+#elif defined(L1SEIBS_CODE)
+	#include "l1seibs.h"
+#elif defined(L1SEIHAM1_CODE)
+	#include "l1seiham1.h"
+#elif defined(L1SEIHAM2_CODE)
+	#include "l1seiham2.h"
+#elif defined(L1SEIHAM3_CODE)
+	#include "l1seiham3.h"
+#elif defined(L1SEIHAM4_CODE)
+	#include "l1seiham4.h"
+#elif defined(L1SEIHAM5_CODE)
+	#include "l1seiham5.h"
+#elif defined(L1SEIHAM6_CODE)
+	#include "l1seiham6.h"
+#elif defined(L1SUSQUAD_CODE)
+	#include "l1susquad.h"
+#elif defined(L1SUSPRM3_CODE)
+	#include "l1susprm3.h"
+#elif defined(L1IOPSUSH2A_CODE)
+	#include "l1iopsush2a.h"
+#elif defined(L1IOPSUSH2B_CODE)
+	#include "l1iopsush2b.h"
+#elif defined(L1IOPSUSH34_CODE)
+	#include "l1iopsush34.h"
+#elif defined(L1IOPSUSH56_CODE)
+	#include "l1iopsush56.h"
+#elif defined(L1SUSMC2_CODE)
+	#include "l1susmc2.h"
+#elif defined(L1SUSPR2_CODE)
+	#include "l1suspr2.h"
+#elif defined(L1SUSSR2_CODE)
+	#include "l1sussr2.h"
+#elif defined(L1SUSSR3_CODE)
+	#include "l1sussr3.h"
+#elif defined(L1SUSSRM_CODE)
+	#include "l1sussrm.h"
+#elif defined(L1SUSAUXH34_CODE)
+	#include "l1susauxh34.h"
+#elif defined(L1IOPSUSAUXH34_CODE)
+	#include "l1iopsusauxh34.h"
+#elif defined(L1IOPPEMEX_CODE)
+	#include "l1ioppemex.h"
+#elif defined(L1PEMEX_CODE)
+	#include "l1pemex.h"
+#elif defined(L1SUSETMX_CODE)
+	#include "l1susetmx.h"
+#elif defined(L1IOPOAF0_CODE)
+	#include "l1iopoaf0.h"
+#elif defined(L1PEMLVEA_CODE)
+	#include "l1pemlvea.h"
+#elif defined(L1RFMCORNER_CODE)
+	#include "l1rfmcorner.h"
+#elif defined(L1LSC_CODE)
+	#include "l1lsc.h"
+#elif defined(H2ISIITMX_CODE)
+	#include "h2isiitmx.h"
+#elif defined(L1ISIITMX2_CODE)
+	#include "l1isiitmx2.h"
+#elif defined(L1LSCTEST_CODE)
+	#include "l1lsctest.h"
+#elif defined(L1ASCTEST_CODE)
+	#include "l1asctest.h"
+#elif defined(L1ASCWFS_CODE)
+	#include "l1ascwfs.h"
+#elif defined(X2SUSQUAD_CODE)
+	#include "x2susquad.h"
+#elif defined(X3SUSQUAD_CODE)
+	#include "x3susquad.h"
+#elif defined(X1SUSQUAD_CODE)
+	#include "x1susquad.h"
+#elif defined(H2SEIETMY_CODE)
+	#include "h2seietmy.h"
 #else
 	#error
 #endif
