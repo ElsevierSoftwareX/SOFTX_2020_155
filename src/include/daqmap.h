@@ -257,7 +257,7 @@ static unsigned int const dcuNet40m[DCU_COUNT] = {2,2,2,2,0,
  */
 
 /* Gds control block starts at this offset */
-#define DAQ_GDS_BLOCK_ADD	(DAQ_BASE_ADDRESS + 0x40000)
+#define DAQ_GDS_BLOCK_ADD	(DAQ_BASE_ADDRESS + 0x400000)
 
 /* The maximum possibile size (allocated space) of the test point table */
 #define DAQ_GDS_MAX_TP_NUM           0x100
