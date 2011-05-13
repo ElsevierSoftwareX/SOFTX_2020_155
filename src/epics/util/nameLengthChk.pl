@@ -40,7 +40,7 @@ if (-e $fileName)  {
  
 #
 #  Extract the part name and check its length.  Increment counter
-#  if it is too long and print error message.
+#  if it is too long and print an error message.
 #
          if ($value =~ /\,\"([\w\:\-]+)\"\)/)  {
             $partName = $1;
