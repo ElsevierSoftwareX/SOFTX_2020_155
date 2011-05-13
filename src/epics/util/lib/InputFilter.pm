@@ -8,9 +8,9 @@ sub partType {
 
 sub printHeaderStruct {
 	my ($i) = @_;
-        if (length $::xpartName[$i] > 24) {
-       		die "InputFilter name \"", $::xpartName[$i], "\" too long (max 24 charachters)";
-   	}
+#       if (length $::xpartName[$i] > 24) {
+#      		die "InputFilter name \"", $::xpartName[$i], "\" too long (max 24 charachters)";
+#  	}
 	print ::OUTH "\tfloat $::xpartName[$i]\_OFFSET;\n";
 	print ::OUTH "\tfloat $::xpartName[$i]\_K;\n";
 	print ::OUTH "\tfloat $::xpartName[$i]\_P;\n";

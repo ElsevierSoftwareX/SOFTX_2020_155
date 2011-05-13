@@ -3,9 +3,9 @@ use Exporter;
 @ISA = ('Exporter');
 
 sub partType {
-	if (length $::xpartName[$::partCnt] > $::max_name_len) {
-		die "Filter name \"", $::xpartName[$::partCnt], "\" too long (max $::max_name_len charachters)";
-	}
+#	if (length $::xpartName[$::partCnt] > $::max_name_len) {
+#		die "Filter name \"", $::xpartName[$::partCnt], "\" too long (max $::max_name_len charachters)";
+#	}
         print ::OUTH "#define $::xpartName[$::partCnt] \t $::filtCnt\n";
 	if ($::biQuad[$::partCnt]) { 
         	print ::EPICS "$::xpartName[$::partCnt] biquad\n";

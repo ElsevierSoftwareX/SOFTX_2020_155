@@ -8,9 +8,9 @@ sub partType {
 
 sub printHeaderStruct {
         my ($i) = @_;
-	if (length $::xpartName[$i] > 18) {
-                die "FilterMuxMatrix name \"", $::xpartName[$i], "\" too long (max 18 charachters)";
-        }
+#	if (length $::xpartName[$i] > 18) {
+#               die "FilterMuxMatrix name \"", $::xpartName[$i], "\" too long (max 18 charachters)";
+#       }
 
 	my $matOuts = $::partOutputs[$::partOutNum[$i][0]];
 	#print("$::partOutNum[$artCnt][0]"); die;
