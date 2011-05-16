@@ -205,10 +205,22 @@ static double dCoeff32x[13] =
         -1.94077236718909,    0.94207456685786,   -1.99036946487329,    1.00000000000000,
         -1.96299410148309,    0.96594271100631,   -1.98391795425616,    1.00000000000000,
         -1.98564991068275,    0.98982555984543,   -1.89550394774336,    1.00000000000000};
-static double dCoeff64x[9] =
-        {0.0033803482406795,
-        -1.97723317288580,    0.97769671166054,   -1.99036945334439,    1.00000000000000,
-        -1.99094221621559,    0.99261635146438,   -1.97616224554465,    1.00000000000000};
+static double dCoeff64x[13] =
+        {9.117708813402705e-05,
+        -1.9884411147668981,  0.9887377424723078, -1.9981756949239626,  1.0000000000000000,
+        -1.9958880030565560,  0.9964854389877406, -1.9957606929166283,  1.0000000000000002,
+        -0.9920419803627476,  0.0000000000000000,  1.0000000000000000,  0.0000000000000000};
+static double dCoeff128x[13] =
+        {4.580254440937838e-05,
+        -1.9942785038368447,  0.9943528687022676, -1.9995438020236211,  0.9999999999999998,
+        -1.9980915472248755,  0.9982410430658426, -1.9989394099812350,  1.0000000000000000,
+        -0.9960132079520891,  0.0000000000000000,  1.0000000000000000,  0.0000000000000000};
+static double dCoeff256x[13] =
+        {2.296084727953743e-05,
+        -1.9971538121386385,  0.9971724295485971, -1.9998859428966878,  1.0000000000000002,
+        -1.9990827274780281,  0.9991201182251324, -1.9997348047494339,  0.9999999999999999,
+        -0.9980046339426777,  0.0000000000000000,  1.0000000000000000,  0.0000000000000000};
+
 static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
 
@@ -508,7 +520,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       if(localTable[ii].decFactor == 8) dWord = iir_filter(dWord,&dCoeff8x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 16) dWord = iir_filter(dWord,&dCoeff16x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 32) dWord = iir_filter(dWord,&dCoeff32x[0],DTAPS,&dHistory[ii][0]);
-      if(localTable[ii].decFactor == 64) dWord = iir_filter(dWord,&dCoeff64x[0],2,&dHistory[ii][0]);
+      if(localTable[ii].decFactor == 64) dWord = iir_filter(dWord,&dCoeff64x[0],DTAPS,&dHistory[ii][0]);
+      if(localTable[ii].decFactor == 128) dWord = iir_filter(dWord,&dCoeff128x[0],DTAPS,&dHistory[ii][0]);
+      if(localTable[ii].decFactor == 256) dWord = iir_filter(dWord,&dCoeff256x[0],DTAPS,&dHistory[ii][0]);
 
       // Write the data into the swing buffer.
       if((daqSlot % localTable[ii].decFactor) == 0)
