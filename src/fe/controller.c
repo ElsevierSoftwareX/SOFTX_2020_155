@@ -2134,7 +2134,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
 	if (longestWrite2 < ((tempClock[3]-tempClock[2])/CPURATE)) longestWrite2 = (tempClock[3]-tempClock[2])/CPURATE;
 	if (cycleTime > (1000000/CYCLE_PER_SECOND))  {
-		printf("cycle %d time %d; adcWait %d; write1 %d; write2 %d; longest write2 %d\n", clock16K, cycleTime, adcWait, (tempClock[1]-tempClock[0])/CPURATE, (tempClock[3]-tempClock[2])/CPURATE, longestWrite2);
+		// printf("cycle %d time %d; adcWait %d; write1 %d; write2 %d; longest write2 %d\n", clock16K, cycleTime, adcWait, (tempClock[1]-tempClock[0])/CPURATE, (tempClock[3]-tempClock[2])/CPURATE, longestWrite2);
 	}
 	// Hold the max cycle time over the last 1 second
 	if(cycleTime > timeHold) timeHold = cycleTime;
