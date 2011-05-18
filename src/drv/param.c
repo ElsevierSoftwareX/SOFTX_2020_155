@@ -138,13 +138,13 @@ parseConfigFile(char *fname, unsigned long *crc,
   deflt = uninit;
 
   for(;;) {
-    char channel_name[40];
+    char channel_name[60];
 	/* :TODO: there will be a problem if the closing square bracket is missing */
     for (cp = cbuf; *cp && *(cp+1) && *(cp+1) != ']'; cp++) *cp = *(cp+1);
     *cp = 0;
 
-    strncpy(channel_name, cbuf, 40);
-    channel_name[39] = 0;
+    strncpy(channel_name, cbuf, 60);
+    channel_name[59] = 0;
 
     current = uninit;
     while((cp = fgets(cbuf, 128, fp)) && cbuf[0] != '[') {
