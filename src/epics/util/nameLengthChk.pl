@@ -28,7 +28,7 @@ if (-e $fileName)  {
    close IN;
  
    $tooLong = 0;
-   $maxPartNameLength = 35;
+   $maxPartNameLength = 54;
    print "\n";
  
 #
