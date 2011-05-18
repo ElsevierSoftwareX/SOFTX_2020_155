@@ -13,8 +13,8 @@
 #include <netdb.h>
 #include <limits.h>
 
-#define DAQD_PROTOCOL_VERSION 11
-#define DAQD_PROTOCOL_REVISION 4
+#define DAQD_PROTOCOL_VERSION 12
+#define DAQD_PROTOCOL_REVISION 0
 
 #define DAQD_PORT 8088
 
