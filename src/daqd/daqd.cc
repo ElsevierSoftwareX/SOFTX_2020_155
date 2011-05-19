@@ -587,8 +587,8 @@ chanConfigCallback(char *channel_name, struct CHAN_PARAM *params, void *user)
   ccd -> signal_gain = params->gain;
   ccd -> signal_slope = params->slope;
   ccd -> signal_offset = params->offset;
-  strncpy (ccd -> signal_units, params->units, channel_t::channel_name_max_len - 1);
-  ccd -> signal_units [channel_t::channel_name_max_len - 1] = 0;
+  strncpy (ccd -> signal_units, params->units, channel_t::engr_unit_max_len - 1);
+  ccd -> signal_units [channel_t::engr_unit_max_len - 1] = 0;
 
   // set DCU rate
   extern int default_dcu_rate;
@@ -720,11 +720,11 @@ daqd_c::configure_channels_rfm ()
     rfmSetSwapping(rh,rfmSwapNone	); // Do not swap on string
 #endif
     strncpy (ccd -> signal_units, (const char *)dinfo -> engUnits,
-	     channel_t::channel_name_max_len - 1);
+	     channel_t::engr_unit_max_len - 1);
 #if 0
     rfmSetSwapping(rh,rfmSwapSize);
 #endif
-    ccd -> signal_units [channel_t::channel_name_max_len - 1] = 0;
+    ccd -> signal_units [channel_t::engr_unit_max_len - 1] = 0;
 
 #if 0
     DEBUG1(cerr << "rate for channel `" << ccd -> name << "' is " << bsw(dinfo -> rate) << "; block size=" << ccd -> rm_block_size << endl);
@@ -1043,8 +1043,8 @@ int daqd_c::configure_channels_reference_frame ()
     ccd -> signal_gain = 0;
     ccd -> signal_slope = adc.getSlope();
     ccd -> signal_offset = adc.getBias();
-    strncpy (ccd -> signal_units, adc.getUnits().c_str(), channel_t::channel_name_max_len - 1);
-    ccd -> signal_units [channel_t::channel_name_max_len - 1] = 0;
+    strncpy (ccd -> signal_units, adc.getUnits().c_str(), channel_t::engr_unit_max_len - 1);
+    ccd -> signal_units [channel_t::engr_unit_max_len - 1] = 0;
 
     active_channels[num_active_channels++] = *ccd;
   }
