@@ -41,7 +41,7 @@
   */
    struct DAQDChannel {
    ///                  The channel name
-      char mName[50];
+      char mName[MAX_CHNNAME_SIZE];
    ///                  The channel group number
       int  mGroup;
    ///                  The channel sample rate

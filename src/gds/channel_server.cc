@@ -41,7 +41,7 @@ static const char *versionId = "Version $Id$" ;
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
 #define _KEEPALIVE_TIMEOUT	60
-#define _CHNNAME_SIZE		32
+#define _CHNNAME_SIZE		MAX_CHNNAME_SIZE
 #define PRM_IFOID		"ifoid"
 #define PRM_RMID		"rmid"
 #define PRM_DCUID		"dcuid"

@@ -1,9 +1,11 @@
+max_chnname_size=-DMAX_CHNNAME_SIZE=60
 
 RPC           = rpcgen
-RPCFLAGS      = -C -N -M -D_ADVANCED_LIGO -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS
+RPCFLAGS      = -C -N -M -D_ADVANCED_LIGO -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS $(max_chnname_size)
 
 RPCX	      = gdsrsched rawgapi rtestpoint
-CFLAGS	      = -std=gnu99 -I. -I../include -g -D_ADVANCED_LIGO -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS
+CFLAGS	      = -std=gnu99 -I. -I../include -g -D_ADVANCED_LIGO -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS $(max_chnname_size)
+CXXFLAGS      = -g -D_ADVANCED_LIGO -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS $(max_chnname_size)
 
 # Add this to build on RTLInux
 #CFLAGS += -DRTLINUX=1

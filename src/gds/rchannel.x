@@ -21,7 +21,7 @@
 struct channelinfo_r {
       /* channel name. 32 characters maximum; always \0 terminated! 
          The name must be the first member of the structure.  */
-      char		chName[40];
+      char		chName[MAX_CHNNAME_SIZE];
       /* interferometer id:
          H0, L0 -> 0; H1, L1 -> 1; H2 -> 2 */
       short		ifoId;
