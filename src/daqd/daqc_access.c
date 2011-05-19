@@ -902,7 +902,7 @@ daq_recv_channels (daq_t *daq, daq_channel_t *channel,
 	// Read units
         READ_STRING;
 	s = strchr(buf, '\n'); if (s) *s = 0;
-	strncpy(channel [i].s.signal_units, buf, MAX_CHANNEL_NAME_LENGTH-1);
+	strncpy(channel [i].s.signal_units, buf, MAX_ENGR_UNIT_LENGTH-1);
 	// Read gain,slope and offset
         READ_STRING;
 	channel [i].s.signal_gain = atof(buf);
@@ -993,11 +993,11 @@ daq_recv_channels (daq_t *daq, daq_channel_t *channel,
       if ((*((unsigned long*)&channel [i].s.signal_offset) = daq_recv_id (daq)) < 0)
 	return DAQD_ERROR;
 
-      if (read_bytes (daq -> sockfd, channel [i].s.signal_units, MAX_CHANNEL_NAME_LENGTH) != MAX_CHANNEL_NAME_LENGTH)
+      if (read_bytes (daq -> sockfd, channel [i].s.signal_units, MAX_ENGR_UNIT_LENGTH) != MAX_ENGR_UNIT_LENGTH)
 	return DAQD_ERROR;
 
       /* null terminate units string; strip all trailing white space */
-      for (cptr = channel [i].s.signal_units + MAX_CHANNEL_NAME_LENGTH-1;
+      for (cptr = channel [i].s.signal_units + MAX_ENGR_UNIT_LENGTH-1;
 	   isspace (*cptr) && cptr > channel [i].s.signal_units; cptr--)
 	;
       *++cptr = '\000';      

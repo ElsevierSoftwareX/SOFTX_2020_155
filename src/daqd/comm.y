@@ -1268,7 +1268,7 @@ CommandLine: /* Nothing */
 		    yyout -> setf (ios::left, ios::adjustfield);
 		    *yyout << setw (channel_t::channel_name_max_len) << setfill (' ') 
 			   << daqd.channels [i].name << "\t";
-		    *yyout << setw (channel_t::channel_name_max_len) << setfill (' ') 
+		    *yyout << setw (channel_t::engr_unit_max_len) << setfill (' ') 
 			   << daqd.channels [i].signal_units << "\t";
 
 		    *yyout << daqd.channels [i].signal_gain << "\t"
@@ -1445,7 +1445,7 @@ CommandLine: /* Nothing */
 		    *yyout << setw (8) << setfill ('0') << hex
 			   << *((unsigned int*)&c[i].signal_offset);
 		    yyout -> setf (ios::left, ios::adjustfield);
-		    *yyout << setw (channel_t::channel_name_max_len) << setfill (' ')
+		    *yyout << setw (channel_t::engr_unit_max_len) << setfill (' ')
 			   << c[i].signal_units;
 		    yyout -> setf (ios::right, ios::adjustfield);
 		  }
@@ -1490,7 +1490,7 @@ CommandLine: /* Nothing */
 		    	*yyout << setw (8) << setfill ('0') << hex << 0;
 		    	*yyout << setw (8) << setfill ('0') << hex << 0;
 		    	yyout -> setf (ios::left, ios::adjustfield);
-		    	*yyout << setw (channel_t::channel_name_max_len) << setfill (' ') << "";
+		    	*yyout << setw (channel_t::engr_unit_max_len) << setfill (' ') << "";
 		    	yyout -> setf (ios::right, ios::adjustfield);
 		      }
 

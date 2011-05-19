@@ -28,7 +28,7 @@ typedef struct {
   // into the slow signal list
   const static int arc_rate = 16;
 
-  enum { channel_name_max_len = MAX_CHANNEL_NAME_LENGTH };
+  enum { channel_name_max_len = MAX_CHANNEL_NAME_LENGTH , engr_unit_max_len = MAX_ENGR_UNIT_LENGTH };
   int chNum; // channel hardware address
   int seq_num;
   void *id;
@@ -71,7 +71,7 @@ typedef struct {
   float signal_gain;
   float signal_slope;
   float signal_offset;
-  char signal_units [channel_name_max_len]; /* Engineering units  */  
+  char signal_units [engr_unit_max_len]; /* Engineering units  */  
 
 } channel_t;
 
