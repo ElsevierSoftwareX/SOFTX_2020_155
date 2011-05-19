@@ -11,5 +11,5 @@ else
 fi
 export GRACE_HOME
 PATH=${PATH}:${GRACE_HOME}/bin:`pwd`
-$DVPATH/dc3 -s ${NDSSERVER} -a $$ -b $DVPATH $*
+$DVPATH/dc3 -s ${LIGONDSIP} -a $$ -b $DVPATH $*
 /bin/rm -f -r /tmp/$$DC
