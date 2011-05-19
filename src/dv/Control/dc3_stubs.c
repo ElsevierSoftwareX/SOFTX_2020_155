@@ -3634,14 +3634,14 @@ char  displaystring[MAX_FILELEN], tempstring[100];
 	   if ( fproc1 == 0 ) {
 	     if ( fork() == 0 ) {
 	       //fprintf ( stderr, "Child executing shell\n" );
-	       args[0] = "csh";
+	       args[0] = "bash";
 	       sprintf ( tempstring, "/tmp/%sstartDisplay", iniDir );
 	       free(args[1]);
 	       args[1] =  (char *) malloc(500*sizeof(char));
 	       strcpy(args[1], tempstring);
 	       /*args[1] = "/spa1/code/v2.3/sun/bin/stestDisplay";*/ 
 	       args[2] = NULL;
-	       execv("/bin/csh",args);
+	       execv("/bin/bash",args);
 	       perror("Fork error");
 	       exit(0);
 	     }
@@ -4905,13 +4905,13 @@ int  trigchno, tr1=0, tr2=0;
 	  if ( fproc == 0 ) {
 	    if ( fork() == 0 ) {
 	      //fprintf ( stderr, "Child executing shell\n" );
-	      args[0] = "csh";
+	      args[0] = "bash";
 	      sprintf ( tempstring1, "/tmp/%sstartLong%d", iniDir, 0 );
 	      free(args[1]);
 	      args[1] = (char *) malloc(500*sizeof(char));
 	      strcpy(args[1], tempstring1);
 	      args[2] = NULL;
-	      execv( "/bin/csh", args );
+	      execv( "/bin/bash", args );
 	      perror("Fork error");
 	      exit(0);
 	    }
@@ -4949,13 +4949,13 @@ int  trigchno, tr1=0, tr2=0;
 	    //printf ( "Fproc = %d\n", fproc );
 	    if ( fproc == 0 ) {
 	      //fprintf ( stderr, "Child executing shell\n" );
-	      args[0] = "csh";
+	      args[0] = "bash";
 	      sprintf ( tempstring1, "/tmp/%sstartLong%d", iniDir, j );
 	      free(args[1]);
 	      args[1] = (char *) malloc(500*sizeof(char));
 	      strcpy(args[1], tempstring1);
 	      args[2] = NULL;
-	      execv( "/bin/csh", args );
+	      execv( "/bin/bash", args );
 	      perror("Fork error");
 	      exit(0);
 	    }
