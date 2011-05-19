@@ -771,6 +771,8 @@ static char *versionId = "Version $Id$" ;
       int		mRevision;	/* revision # of server */
       int	        tpnumInTrend;	/* tpNum stored in trend field */
       int		extendedList;	/* extended listing */
+      int		longNames;	/* channel name length == MAX_CHNNAME_SIZE */
+      int		nameOffset;	/* either 40 or MAX_CHNNAME_SIZE */
       char*		p;		/* temp pointer */
       struct timeval	timeout = 	
         {_TIMEOUT / 1000000, _TIMEOUT % 1000000}; 
@@ -812,6 +814,7 @@ static char *versionId = "Version $Id$" ;
                      ((mVersion == 11) && (mRevision >= 1)));
       extendedList =  ((mVersion > 11) || 
                       ((mVersion == 11) && (mRevision >= 3)));
+      longNames = (mVersion >= 12) ;
       /*printf ("Version: %i   Revision: %i\n", mVersion, mRevision);*/
    
       /* Request a list of channels. */
@@ -860,6 +863,9 @@ static char *versionId = "Version $Id$" ;
          if ((mVersion == 9) || (mVersion == 10)) recsz = 60;
          if (mVersion == 11) recsz = 124;
          if (extendedList) recsz = 128;
+	 /* if longNames, the size needs to be increased for longer
+	  * names.  Old name size is 40, new name size is MAX_CHNNAME_SIZE */
+	 if (longNames) recsz = 128 + (MAX_CHNNAME_SIZE - 40) ;
          rc = RecvRec (sock, buf, recsz, 1);
          if (rc < recsz) {
             free (chninfo);
@@ -870,24 +876,35 @@ static char *versionId = "Version $Id$" ;
             return -11;
          }
          j = 40;
+	 if (longNames) j = MAX_CHNNAME_SIZE ;
          while ((--j >= 0) && (buf[j] == ' ')) {
             buf[j] = '\0';
          }
-         memcpy (chninfo[chninfonum].chName, buf, 40);
-         for (p = chninfo[chninfonum].chName + 39; 
-             isspace ((int)*p) && (p > chninfo[chninfonum].chName); p--) {
+	 if (longNames)
+	    memcpy (chninfo[chninfonum].chName, buf, MAX_CHNNAME_SIZE);
+	 else
+	    memcpy (chninfo[chninfonum].chName, buf, 40);
+	 if (longNames)
+	    p = chninfo[chninfonum].chName + (MAX_CHNNAME_SIZE - 1) ;
+	 else
+	    p = chninfo[chninfonum].chName + 39;
+         for (; isspace ((int)*p) && (p > chninfo[chninfonum].chName); p--) {
          }
+	 if (longNames)
+	    nameOffset = MAX_CHNNAME_SIZE ;
+	 else
+	    nameOffset = 40 ;
          if (extendedList) {
-            chninfo[chninfonum].dataRate  = CVHex (buf + 40, 8);
-            chninfo[chninfonum].chNum = CVHex (buf + 48, 8);
+            chninfo[chninfonum].dataRate  = CVHex (buf + nameOffset, 8);
+            chninfo[chninfonum].chNum = CVHex (buf + nameOffset + 8, 8);
             chninfo[chninfonum].tpNum = chninfo[chninfonum].chNum;
-            chninfo[chninfonum].chGroup = CVHex (buf + 56, 4);
+            chninfo[chninfonum].chGroup = CVHex (buf + nameOffset + 16, 4);
             chninfo[chninfonum].bps = 0;
-            chninfo[chninfonum].dataType = CVHex (buf + 60, 4);
-            *((int*)(&chninfo[chninfonum].gain)) = CVHex(buf+64, 8);
-            *((int*)(&chninfo[chninfonum].slope)) = CVHex(buf+72, 8);
-            *((int*)(&chninfo[chninfonum].offset)) = CVHex(buf+80, 8);
-            memcpy(chninfo[chninfonum].unit, buf+88, 40);
+            chninfo[chninfonum].dataType = CVHex (buf + nameOffset + 20, 4);
+            *((int*)(&chninfo[chninfonum].gain)) = CVHex(buf + nameOffset + 24, 8);
+            *((int*)(&chninfo[chninfonum].slope)) = CVHex(buf + nameOffset + 32, 8);
+            *((int*)(&chninfo[chninfonum].offset)) = CVHex(buf + nameOffset + 40, 8);
+            memcpy(chninfo[chninfonum].unit, buf + nameOffset + 48, 40);
             for (p = chninfo[chninfonum].unit + 39; 
                 isspace ((int)*p) && (p > chninfo[chninfonum].unit); p--) {
             }

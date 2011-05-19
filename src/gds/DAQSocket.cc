@@ -650,6 +650,8 @@ static const char *versionId = "Version $Id$" ;
       char buf[1024];
       bool extendedList = ((mVersion > 11) || 
                           ((mVersion == 11) && (mRevision >= 3)));
+      bool longNames = (mVersion >= 12) ;	// longer names introduced in version 12.
+      int  nameOffset ;				// Either 40 or MAX_CHNNAME_SIZE
    
     //----------------------------------  Request a list of channels.
       int rc = 0;
@@ -668,6 +670,7 @@ static const char *versionId = "Version $Id$" ;
       if ((mVersion == 9) || (mVersion == 10)) recsz = 60;
       if (mVersion >= 11) recsz = 124;
       if (extendedList) recsz = 128;
+      if (longNames) recsz = 128 + (MAX_CHNNAME_SIZE - 40) ;
 
     //----------------------------------  Skip DAQ data rate.
       if (!extendedList) rc = RecvRec(buf, 4, true);
@@ -679,20 +682,21 @@ static const char *versionId = "Version $Id$" ;
          rc = RecvRec(buf, recsz, true);
          if (rc <recsz) 
             return -1;
-         memcpy(chn.mName, buf, 40);
-         for (int j=39 ; j>=0 && isspace(chn.mName[j]) ; j--) {
+         memcpy(chn.mName, buf, MAX_CHNNAME_SIZE);
+         for (int j=(MAX_CHNNAME_SIZE-1) ; j>=0 && isspace(chn.mName[j]) ; j--) {
             chn.mName[j] = 0;
          }
+	 nameOffset = MAX_CHNNAME_SIZE ;
          if (extendedList) {
-            chn.mRate  = CVHex (buf + 40, 8);
-            chn.mNum = CVHex (buf + 48, 8);
-            chn.mGroup = CVHex (buf + 56, 4);
+            chn.mRate  = CVHex (buf + nameOffset, 8);
+            chn.mNum = CVHex (buf + nameOffset + 8, 8);
+            chn.mGroup = CVHex (buf + nameOffset + 16, 4);
             /*chn.mBPS = CVHex (buf + 56, 4);*/
-            chn.mDatatype = CVHex (buf + 60, 4);
-            *((int*)(&chn.mGain)) = CVHex(buf+64, 8);
-            *((int*)(&chn.mSlope)) = CVHex(buf+72, 8);
-            *((int*)(&chn.mOffset)) = CVHex(buf+80, 8);
-            memcpy(chn.mUnit, buf+88, 40);     
+            chn.mDatatype = CVHex (buf + nameOffset + 20, 4);
+            *((int*)(&chn.mGain)) = CVHex(buf + nameOffset + 24, 8);
+            *((int*)(&chn.mSlope)) = CVHex(buf + nameOffset + 32, 8);
+            *((int*)(&chn.mOffset)) = CVHex(buf + nameOffset + 40, 8);
+            memcpy(chn.mUnit, buf + nameOffset + 48, 40);     
 	    for (int j=39; j>=0 && isspace(chn.mUnit[j]) ; j--) {
                chn.mUnit[j] = 0;
             }

@@ -88,7 +88,7 @@ static char *versionId = "Version $Id$" ;
 /*----------------------------------------------------------------------*/
 #define _KEEPALIVE_TIMEOUT	60
 #define _KEEP_AROUND		240
-#define _CHNNAME_SIZE		32
+#define _CHNNAME_SIZE		MAX_CHNNAME_SIZE
 #define _TP_MAX_USER		1000
 #define _MAX_TPNAMES		1000
 #define PRM_FILE		gdsPathFile ("/param", "testpoint.par")
