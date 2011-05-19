@@ -95,7 +95,7 @@ typedef struct {
   float signal_gain;
   float signal_slope;
   float signal_offset;
-  char signal_units [MAX_CHANNEL_NAME_LENGTH]; /* Engineering units  */  
+  char signal_units [MAX_ENGR_UNIT_LENGTH]; /* Engineering units  */  
 } signal_conv_t;
 
 
