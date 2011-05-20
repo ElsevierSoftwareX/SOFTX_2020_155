@@ -1,5 +1,17 @@
+Notes for 2.1.2
+===================
+- FiltCtrl.pm bug fix to provide all filter module switch setting bits at status output.
+- Bit2Word.pm bug fix.
+- Makefile: Changed epics and framecpp paths to look in /opt/rtapps
+
+Notes for 2.1.1
+=================
+- daqLib.c fixed to support up to 256x decimation for DAQ channels. Previous versions only
+provided proper decimation to 32x.
+
 Overview of changes from 2.0 to 2.1
 ==================================
+
 New Branch, which includes:
 
 New Features:
