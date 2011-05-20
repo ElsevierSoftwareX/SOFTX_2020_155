@@ -3,6 +3,7 @@ use Exporter;
 @ISA = ('Exporter');
 
 sub partType {
+	my $instance = 0;
 	return Bit2Word;
 }
 
@@ -24,8 +25,12 @@ sub printEpics {
 sub printFrontEndVars  {
         my ($i) = @_;
         print ::OUT "unsigned int \L$::xpartName[$i];\n";
+	if ($instance == 0)
+	{
         print ::OUT "unsigned int powers_of_2[16] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512,\n";
         print ::OUT "                                1024, 2048, 4096, 8192, 16384, 32768};\n";
+	}
+	$instance += 1;
 }
 
 # Figure out part input code
