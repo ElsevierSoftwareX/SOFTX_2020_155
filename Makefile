@@ -325,7 +325,7 @@ stand:
 	(cd src/daqd; autoconf)
 	/bin/rm -rf build/stand
 	/bin/mkdir -p build/stand
-	(cdir=`pwd`; cd build/stand; $$cdir/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' && make)
+	(cdir=`pwd`; cd build/stand; $$cdir/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics/base' '--with-framecpp=/opt/rtapps/framecpp' && make)
 
 # build  mx data receiving daqd
 #
@@ -333,13 +333,13 @@ mx:
 	(cd src/daqd; autoconf)
 	/bin/rm -rf build/mx
 	/bin/mkdir -p build/mx
-	(cdir=`pwd`; cd build/mx; $$cdir/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics-3.14.10/base' '--with-framecpp=/opt/rtapps/framecpp-1.18.2' --with-mx && make)
+	(cdir=`pwd`; cd build/mx; $$cdir/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics/base' '--with-framecpp=/opt/rtapps/framecpp' --with-mx && make)
 
 standiop:
 	(cd src/daqd; autoconf)
 	/bin/rm -rf build/standiop
 	/bin/mkdir -p build/standiop
-	(cdir=`pwd`; cd build/standiop; $$cdir/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' --enable-iop && make)
+	(cdir=`pwd`; cd build/standiop; $$cdir/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics/base' '--with-framecpp=/opt/rtapps/framecpp' --enable-iop && make)
 
 
 #MDL_MODELS = x1cdst1 x1isiham x1isiitmx x1iss x1lsc x1omc1 x1psl x1susetmx x1susetmy x1susitmx x1susitmy x1susquad1 x1susquad2 x1susquad3 x1susquad4 x1x12 x1x13 x1x14 x1x15 x1x16 x1x20 x1x21 x1x22 x1x23
