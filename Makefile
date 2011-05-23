@@ -151,7 +151,8 @@ install-daq-% :: src/epics/simLink/%.mdl
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	datarate=`grep datarate build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	targethost=`grep TARGET_HOST_NAME src/include/$${system}.h | head -1 | awk '{print $$3}'`; \
-	datarate_mult=`expr $${datarate} / 16384 `; \
+	if test $${datarate} -lt 16384; then datarate_mult=`expr $${datarate} / 2048`; \
+	else datarate_mult=`expr $${datarate} / 16384 `; fi; \
 	cur_date=`date +%y%m%d_%H%M%S`;\
 	/bin/mkdir -p  /opt/rtcds/$${site}/$${lower_ifo}/target/gds/ ;\
 	edcu_name=`echo $${upper_system} | sed s/^$${ifo}//g`;\
