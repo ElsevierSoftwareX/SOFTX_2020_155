@@ -80,8 +80,8 @@
 #define FILTER_SIZE	  9
 #define FILTER_WIDTH      4
 
-#define ADC_BUFF_SIZE	  2048
-#define NCF               8192
+#define ADC_BUFF_SIZE	  2048*4
+#define NCF               8192*4
 #define MSQSIZE	          64
 
 #define	STOPMODE	0

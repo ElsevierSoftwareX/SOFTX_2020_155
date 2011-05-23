@@ -147,6 +147,8 @@ extern void SelResolutionMenu(Widget, XtPointer, XtPointer) ;
 extern void Select32(Widget, XtPointer, XtPointer) ;
 extern void Select64(Widget, XtPointer, XtPointer) ;
 extern void Select128(Widget, XtPointer, XtPointer) ;
+extern void Select256(Widget, XtPointer, XtPointer) ;
+extern void Select512(Widget, XtPointer, XtPointer) ;
 extern void SelectRateMenu(Widget, XtPointer, XtPointer) ;
 extern void sigonSel(Widget, XtPointer, XtPointer) ;
 extern void filteronSel(Widget, XtPointer, XtPointer) ;
@@ -435,6 +437,8 @@ Widget dr16 = (Widget) NULL;
 Widget dr32 = (Widget) NULL;
 Widget dr64 = (Widget) NULL;
 Widget dr128 = (Widget) NULL;
+Widget dr256 = (Widget) NULL;
+Widget dr512 = (Widget) NULL;
 Widget menuRate = (Widget) NULL;
 Widget menuRateText = (Widget) NULL;
 Widget rateMenu = (Widget) NULL;
@@ -2257,6 +2261,20 @@ void create_shell1 (Display *display, char *app_name, int app_argc, char **app_a
 	dr128 = XmCreatePushButton ( reMenu, "dr128", al, ac );
 	ac = 0;
 	XmStringFree ( xmstrings [ 0 ] );
+
+	xmstrings[0] = XmStringCreateLtoR ( "32K", (XmStringCharSet)XmFONTLIST_DEFAULT_TAG );
+	XtSetArg(al[ac], XmNlabelString, xmstrings[0]); ac++;
+	dr256 = XmCreatePushButton ( reMenu, "dr256", al, ac );
+	ac = 0;
+	XmStringFree ( xmstrings [ 0 ] );
+
+	xmstrings[0] = XmStringCreateLtoR ( "64K", (XmStringCharSet)XmFONTLIST_DEFAULT_TAG );
+	XtSetArg(al[ac], XmNlabelString, xmstrings[0]); ac++;
+	dr512 = XmCreatePushButton ( reMenu, "dr512", al, ac );
+	ac = 0;
+	XmStringFree ( xmstrings [ 0 ] );
+
+
 	xmstrings[0] = XmStringCreateLtoR("Refresh", (XmStringCharSet)XmFONTLIST_DEFAULT_TAG);
 	XtSetArg(al[ac], XmNlabelString, xmstrings[0]); ac++;
 	menuRate = XmCreateOptionMenu ( modeForm, "menuRate", al, ac );
@@ -4427,6 +4445,10 @@ void create_shell1 (Display *display, char *app_name, int app_argc, char **app_a
 		XtAddCallback( dr64, XmNarmCallback, Select64, (XtPointer) 0 );
 	if (dr128)
 		XtAddCallback( dr128, XmNarmCallback, Select128, (XtPointer) 0 );
+	if (dr256)
+		XtAddCallback( dr256, XmNarmCallback, Select256, (XtPointer) 0 );
+	if (dr512)
+		XtAddCallback( dr512, XmNarmCallback, Select512, (XtPointer) 0 );
 	children[ac++] = dr1;
 	children[ac++] = dr2;
 	children[ac++] = dr4;
@@ -4435,6 +4457,8 @@ void create_shell1 (Display *display, char *app_name, int app_argc, char **app_a
 	children[ac++] = dr32;
 	children[ac++] = dr64;
 	children[ac++] = dr128;
+	children[ac++] = dr256;
+	children[ac++] = dr512;
 	XtManageChildren(children, ac);
 	ac = 0;
 	XtSetArg(al[ac], XmNsubMenuId, reMenu); ac++;
