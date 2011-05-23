@@ -416,6 +416,18 @@ void Select128(Widget w, XtPointer client_data, XtPointer xt_call_data)
 	strcpy ( mb.mtext, "128" );
 }
 
+void Select256(Widget w, XtPointer client_data, XtPointer xt_call_data)
+{
+	XmPushButtonCallbackStruct *call_data = (XmPushButtonCallbackStruct *) xt_call_data ;
+	strcpy ( mb.mtext, "256" );
+}
+
+void Select512(Widget w, XtPointer client_data, XtPointer xt_call_data)
+{
+	XmPushButtonCallbackStruct *call_data = (XmPushButtonCallbackStruct *) xt_call_data ;
+	strcpy ( mb.mtext, "512" );
+}
+
 /*
 ** WorkShop Visual Stub Select200
 */
