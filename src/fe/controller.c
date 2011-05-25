@@ -665,6 +665,8 @@ void *fe_start(void *arg)
   static float duotoneTotalDac = 0.0;
   static float duotoneMeanDac = 0.0;
   static rfmDone = 0;
+  static dacBufSelect = 0;
+  static dacBufOffset = 0;
 #endif
 
 
@@ -937,34 +939,13 @@ udelay(1000);
 #ifndef ADC_SLAVE
   // Initialize the DAC module variables
   for(jj = 0; jj < cdsPciModules.dacCount; jj++) {
-  	  pLocalEpics->epicsOutput.statDac[jj] = 1;
+  	pLocalEpics->epicsOutput.statDac[jj] = 1;
         pDacData = (unsigned int *) cdsPciModules.pci_dac[jj];
- 	// Reset DAC values to zero
-        for(ii = 0; ii < (OVERSAMPLE_TIMES * 16); ii++) {
- 	    *pDacData = 0; // (unsigned int) 10000; // for testing with the scope
-	    pDacData ++;
-        }
-	// Preload DAC values
-	if(DAC_PRELOAD_CNT)
-	{
-		// Arm DAC DMA for preload data size
-		status = dacDmaPreload(jj,DAC_PRELOAD_CNT);
-printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
-		// DMA preload samples
-		gsaDacDma2(jj, cdsPciModules.dacType[jj]);
-		// Wait plenty of time for DMA to complete
-#ifdef NO_RTL
-		udelay(1000);
-#else
-		usleep(1000);
-#endif
-	}
-
 	// Arm DAC DMA for full data size
 	status = gsaDacDma1(jj, cdsPciModules.dacType[jj]);
   }
-#endif
   printf("DAC setup complete \n");
+#endif
 
   
 #ifdef NO_RTL
@@ -1369,7 +1350,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 			// This is done here after 1st ADC ready to allow max time to
 			// load DAC values prior to next 65K clock
 			for(mm=0;mm<cdsPciModules.dacCount;mm++)
-	   		   if(dacWriteEnable > 4) gsaDacDma2(mm,cdsPciModules.dacType[mm]);
+	   		   if(dacWriteEnable > 4) gsaDacDma2(mm,cdsPciModules.dacType[mm],dacBufOffset);
 			// if(clock16K == 65535) 
 			if(clock16K == 0) 
 			{
@@ -1604,6 +1585,8 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 
 
 // START OF DAC WRITE ***********************************************************************************
+	   dacBufSelect = (dacBufSelect + 1) % 2;
+	   dacBufOffset = dacBufSelect * 0x100;
 	// Write out data to DAC modules
 	for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	{
@@ -1613,7 +1596,7 @@ printf("Preloading DAC with %d samples\n",DAC_PRELOAD_CNT);
 // printf("mm = %d\n",mm);
 #else
 	   // Check Dac output overflow and write to DMA buffer
-	   pDacData = (unsigned int *)cdsPciModules.pci_dac[jj];
+	   pDacData = (unsigned int *)(cdsPciModules.pci_dac[jj] + dacBufOffset);
 #endif
 #ifdef ADC_MASTER
 	mm = cdsPciModules.dacConfig[jj];
