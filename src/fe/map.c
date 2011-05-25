@@ -298,14 +298,16 @@ int gsaDacDma1(int modNum, int dacType)
 // This routine starts a DMA operation to a DAC module.
 // It must first be setup by the Dma1 call above.
 // *****************************************************************************
-void gsaDacDma2(int modNum, int dacType)
+void gsaDacDma2(int modNum, int dacType, int offset)
 {
   if(dacType == GSC_16AISS8AO4 || dacType == GSC_18AISS8AO8 || dacType == GSC_18AO8) 
   {
+        dacDma[modNum]->DMA1_PCI_ADD = ((int)dac_dma_handle[modNum] + offset);
         dacDma[modNum]->DMA_CSR = GSAI_DMA1_START;
   	//volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[0];
 	//dac18bitPtr->BCR |= (1 << 20);
   } else {
+  	dacDma[modNum]->DMA0_PCI_ADD = ((int)dac_dma_handle[modNum] + offset);
 	dacDma[modNum]->DMA_CSR = GSAI_DMA_START;
   }
 }

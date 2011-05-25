@@ -12,7 +12,7 @@ int gsaAdcDma1(int,int,int);	/* Setup ADC DMA registers	*/
 void gsaAdcDma2(int);		/* Send GO bit to ADC DMA registers*/
 int gsaAdcDma3(int, int[]);		/* Send GO bit to ADC DMA registers*/
 int gsaDacDma1(int,int);		/* Setup DAC DMA registers.	*/
-void gsaDacDma2(int,int);	/* Send GO bit to DAC DMA registers.*/
+void gsaDacDma2(int,int,int);	/* Send GO bit to DAC DMA registers.*/
 unsigned int readDio(CDS_HARDWARE *,int);
 unsigned int readIiroDio(CDS_HARDWARE *,int);
 unsigned int readIiroDioOutput(CDS_HARDWARE *,int);
