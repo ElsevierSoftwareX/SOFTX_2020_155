@@ -1,3 +1,17 @@
+Bug Fixes:
+- daqLib.c fixed to support up to 256x decimation for DAQ channels. Previous versions only
+provided proper decimation to 32x.
+- FiltCtrl.pm bug fix to provide all filter module switch setting bits at status output.
+- Bit2Word.pm bug fix.
+- controller.c, map.c and map.h changed to support double buffer for DAC outputs. This fixes a bug where
+a race condition could exist between the IOP loading new DAC data into the same buffer and at the same time
+as the DAC module was trying to DMA data out of that buffer.
+- Set the '-2' awgtpman flag for a 4K system in top level Makefile.
+
+New Additions:
+- Updated dataviewer with support for 32K and 64K resolution data viewing.
+- Various updates to support new longer signal names (Max size, with extensions, 60 chars).
+
 Overview of changes from 2.0 to 2.1
 ==================================
 New Branch, which includes:
