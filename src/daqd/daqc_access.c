@@ -847,15 +847,7 @@ daq_recv_channels (daq_t *daq, daq_channel_t *channel,
   int channels;
   char buf [MAX_LONG_CHANNEL_NAME_LENGTH+2];
 
-  if (daq -> rev < 3) {
-    if (resp = daq_send (daq, "status channels;"))
-      return resp;
-    channels = read_server_response (daq -> sockfd);
-  } else if (daq -> rev == 3) {
-    if (resp = daq_send (daq, "status channels 2;"))
-      return resp;
-    channels = daq_recv_id(daq);
-  } else if (daq -> rev == 4) {
+  {
     FILE *f;
 #define READ_STRING \
     if (0 == fgets(buf, MAX_LONG_CHANNEL_NAME_LENGTH+1, f)) { \
@@ -926,15 +918,6 @@ daq_recv_channels (daq_t *daq, daq_channel_t *channel,
   if (num_channels < channels)
     channels = num_channels;
 
-  if (daq -> rev < 3) {
-    /* Get DAQD clock rate */
-   if (read_server_response (daq -> sockfd) <= 0)
-     {
-       fprintf (stderr, "couldn't determine DAQD clock rate\n");
-       return DAQD_ERROR;
-     }
-  }
-
   for (i = 0; i < channels; i++) {
       char *cptr;
 
@@ -947,41 +930,22 @@ daq_recv_channels (daq_t *daq, daq_channel_t *channel,
       *++cptr = '\000';
 
 
-      if (daq -> rev < 3) {
-	if ((channel [i].rate = read_server_response (daq -> sockfd)) <= 0)
-	  return DAQD_ERROR;
-      } else {
-        if ((channel [i].rate = daq_recv_id (daq)) <= 0)
-	  return DAQD_ERROR;
-      }
+      if ((channel [i].rate = daq_recv_id (daq)) <= 0) return DAQD_ERROR;
 
 #if 0
       if (channel[i].rate > 16384)
 	printf("%s rate=%d\n", channel[i].name, channel[i].rate);
 #endif
 
-      if (daq -> rev < 3) {
-	if ((channel [i].tpnum = read_server_response (daq -> sockfd)) < 0)
-	  return DAQD_ERROR;
-      } else {
-	if ((channel [i].tpnum = daq_recv_id (daq)) < 0)
-	  return DAQD_ERROR;
-      }
+      if ((channel [i].tpnum = daq_recv_id (daq)) < 0) return DAQD_ERROR;
 
       if ((channel [i].group_num = read_server_response (daq -> sockfd)) < 0)
 	return DAQD_ERROR;
 
-      if (daq -> rev < 3) {
-        if ((channel [i].bps = read_server_response (daq -> sockfd)) < 0)
-	  return DAQD_ERROR;
-      }
-
       if ((channel [i].data_type = read_server_response (daq -> sockfd)) < 0)
 	return DAQD_ERROR;
 
-      if (daq -> rev >= 3) {
-        channel [i].bps = data_type_size(channel [i].data_type);
-      }
+      channel [i].bps = data_type_size(channel [i].data_type);
 
       /* signal conversion data */
       if ((*((unsigned long*)&channel [i].s.signal_gain) = daq_recv_id (daq)) < 0)
