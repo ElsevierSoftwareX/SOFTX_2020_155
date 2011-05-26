@@ -1585,8 +1585,10 @@ udelay(1000);
 
 
 // START OF DAC WRITE ***********************************************************************************
+#ifdef ADC_MASTER
 	   dacBufSelect = (dacBufSelect + 1) % 2;
 	   dacBufOffset = dacBufSelect * 0x100;
+	   #endif
 	// Write out data to DAC modules
 	for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	{
