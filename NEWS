@@ -1,3 +1,12 @@
+Notes for 2.1.3
+==================
+- Added new 4K decimation filters as per B. Lantz.
+- Added double buffer of DAC outputs to avoid race condition in IOP of writing memory while DAC was reading
+  same memory location.
+- daqLib.c fixed to support up to 256x decimation for DAQ channels. Previous versions only
+  provided proper decimation to 32x.
+- Makefile bug fix. Previously, sample rate line was added to coeffs file on every code build.
+
 Notes for 2.1.2
 ===================
 - FiltCtrl.pm bug fix to provide all filter module switch setting bits at status output.

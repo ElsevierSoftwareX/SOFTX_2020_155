@@ -208,6 +208,14 @@
 	#include "x1susquad/x1susquad.c"
 #elif defined(H2SEIETMY_CODE)
 	#include "h2seietmy/h2seietmy.c"
+#elif defined(X1IOPATS18_CODE)
+	#include "x1iopats18/x1iopats18.c"
+#elif defined(X1ATS18BIT_CODE)
+	#include "x1ats18bit/x1ats18bit.c"
+#elif defined(X1ATSB18_CODE)
+	#include "x1atsb18/x1atsb18.c"
+#elif defined(X1IOPATS16_CODE)
+	#include "x1iopats16/x1iopats16.c"
 #else
 	#error
 #endif

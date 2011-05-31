@@ -206,6 +206,14 @@
 	#include "x1susquad.h"
 #elif defined(H2SEIETMY_CODE)
 	#include "h2seietmy.h"
+#elif defined(X1IOPATS18_CODE)
+	#include "x1iopats18.h"
+#elif defined(X1ATS18BIT_CODE)
+	#include "x1ats18bit.h"
+#elif defined(X1ATSB18_CODE)
+	#include "x1atsb18.h"
+#elif defined(X1IOPATS16_CODE)
+	#include "x1iopats16.h"
 #else
 	#error
 #endif
