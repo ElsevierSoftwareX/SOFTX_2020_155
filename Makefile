@@ -45,7 +45,7 @@ install-target-% :: src/epics/simLink/%.mdl
 	if test -e /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt; then /bin/mv -f  /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt /opt/rtcds/$$site/$${lower_ifo}/chans/filter_archive/$$system/$${upper_system}_$${cur_date}.txt || exit 1; \
 	head -4 build/$${system}epics/config/$${ifo}$${upper_system}.txt > /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt;\
 	/bin/grep '^# MODULES' build/$${system}epics/config/$${ifo}$${upper_system}.txt >> /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt;\
-	tail -n +4 /opt/rtcds/$$site/$${lower_ifo}/chans/filter_archive/$$system/$${upper_system}_$${cur_date}.txt | grep -v '^# MODULES' >> /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt;\
+	tail -n +5 /opt/rtcds/$$site/$${lower_ifo}/chans/filter_archive/$$system/$${upper_system}_$${cur_date}.txt | grep -v '^# MODULES' >> /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt;\
 	else /bin/cp -p build/$${system}epics/config/$${ifo}$${upper_system}.txt  /opt/rtcds/$$site/$${lower_ifo}/chans/$${upper_system}.txt;\
 	fi;\
 	echo Installing /opt/rtcds/$$site/$${lower_ifo}/target/$${system}epics;\
