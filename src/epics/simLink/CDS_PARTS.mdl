@@ -13,11 +13,11 @@ Library {
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "jrollins"
+  LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed May 11 16:23:09 2011"
-  RTWModifiedTimeStamp	  227031770
-  ModelVersionFormat	  "1.%<AutoIncrement:293>"
+  LastModifiedDate	  "Thu Jun  2 13:26:27 2011"
+  RTWModifiedTimeStamp	  228921961
+  ModelVersionFormat	  "1.%<AutoIncrement:294>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -840,7 +840,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [961, 46, 1646, 620]
+    Location		    [399, 72, 1084, 646]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -854,7 +854,7 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "295"
+    SIDHighWatermark	    "297"
     Block {
       BlockType		      SubSystem
       Name		      "C Code"
@@ -2055,8 +2055,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[490, 97, 1375, 1136]
-	Open			off
+	Location		[1572, 140, 2457, 890]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -3164,6 +3164,30 @@ Library {
 	  GeneratePreprocessorConditionals off
 	}
 	Block {
+	  BlockType		  Reference
+	  Name			  "ADC9"
+	  SID			  "297"
+	  Tag			  "cdsAdc"
+	  Description		  "type-GSC_16AI64SSA\ncard_num=9        "
+	  Ports			  [0, 1]
+	  Position		  [665, 182, 730, 208]
+	  ForegroundColor	  "red"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Description>\\n%<Tag>"
+	  LibraryVersion	  "1.1"
+	  SourceBlock		  "cdsAdcx9/ADC9"
+	  SourceType		  "SubSystem"
+	  ShowPortLabels	  "FromPortIcon"
+	  SystemSampleTime	  "-1"
+	  FunctionWithSeparateData off
+	  RTWMemSecFuncInitTerm	  "Inherit from model"
+	  RTWMemSecFuncExecute	  "Inherit from model"
+	  RTWMemSecDataConstants  "Inherit from model"
+	  RTWMemSecDataInternal	  "Inherit from model"
+	  RTWMemSecDataParameters "Inherit from model"
+	  GeneratePreprocessorConditionals off
+	}
+	Block {
 	  BlockType		  BusSelector
 	  Name			  "Bus\nSelector6"
 	  SID			  "58"
@@ -3493,7 +3517,7 @@ Library {
 	  SID			  "73"
 	  Description		  "ADC"
 	  Ports			  []
-	  Position		  [677, 185, 717, 224]
+	  Position		  [677, 275, 717, 314]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
