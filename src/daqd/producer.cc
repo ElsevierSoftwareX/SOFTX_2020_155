@@ -2233,7 +2233,7 @@ static const int cycle_delay = 4;
 		if (f >= 1000000000/8) break;
 	}
 #endif
-	prev_gps = gps - 1;
+	prev_gps = gps;
 	prev_frac = c * cycle_delay;
 	frac = c * (cycle_delay+1);
         printf("Starting at gps %d prev_gps %d frac %d f %d\n", gps, prev_gps, frac, f);
@@ -2485,8 +2485,8 @@ static const int cycle_delay = 4;
       }
      }
 
-#ifdef DATA_CONCENTRATOR
 	int cblk = i % 16;
+#ifdef DATA_CONCENTRATOR
 	// Assign per-DCU data we need to broadcast out
 	//
 	for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
@@ -2709,6 +2709,11 @@ for(;;) {
 		}
 	 } else if (frac >= prev_frac + 62500000) {
 		frac = prev_frac + 62500000;
+		// Check if GPS seconds moved for some reason (because of delay)
+		if (gps != prev_gps) {
+		        fprintf(stderr, "GPS time jumped from %d to %d\n", prev_gps, gps);
+		        exit(1);
+		}
 		break;
 	 }
 
