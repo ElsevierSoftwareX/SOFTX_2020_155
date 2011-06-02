@@ -31,7 +31,7 @@ int dacDmaPreload(int, int);
 #define FE_OVERSAMPLE_COEFF     feCoeff32x
 #elif SERVO4K
 #define OVERSAMPLE_TIMES        16
-#define FE_OVERSAMPLE_COEFF     feCoeff32x
+#define FE_OVERSAMPLE_COEFF     feCoeff16x
 #elif SERVO16K
 #define OVERSAMPLE_TIMES        4
 #define FE_OVERSAMPLE_COEFF     feCoeff4x
