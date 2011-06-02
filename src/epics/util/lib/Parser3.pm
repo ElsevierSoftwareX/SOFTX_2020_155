@@ -376,6 +376,10 @@ sub node_processing {
 	my $source_block = transform_block_type(${$node->{FIELDS}}{"SourceBlock"});
 	my $block_name = ${$node->{FIELDS}}{"Name"};
 
+	# Save logical operator for Logic blocks
+	if ($block_type eq "AND") {
+                $::blockDescr[$::partCnt] = ${$node->{FIELDS}}{"Operator"};
+	}
         if ($block_type ne "SubSystem") {
            my $block_tag = transform_block_type(${$node->{FIELDS}}{"Tag"});
            #$::ipcxBlockTags[$::ipcxTagCount++] = $block_tag;
