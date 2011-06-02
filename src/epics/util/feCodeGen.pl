@@ -727,7 +727,7 @@ if ($ipcxCnt > 0) {
             }
          }
 
-         die "\n***ERROR: Aborting (this code can only automatically add IPCx SENDER modules)\n\n";
+	 #die "\n***ERROR: Aborting (this code can only automatically add IPCx SENDER modules)\n\n";
       }
    }
 }
@@ -2834,24 +2834,29 @@ for($xx=0;$xx<$processCnt;$xx++)
 	# ******** AND ********************************************************************
 	if($partType[$mm] eq "AND")
 	{
-	   print OUT "// Logical AND\n";
+		my $op = $blockDescr[$mm];
+	   	print OUT "// Logical $op\n";
 		# print "\tUsed AND $xpartName[$mm] $partOutCnt[$mm]\n";
-		$calcExp = "\L$xpartName[$mm]";
-		$calcExp .= " = ";
-		for($qq=0;$qq<$inCnt;$qq++)
-		{
-		    $zz = $qq+1;
-		    if(($zz - $inCnt) == 0)
-	 	    {
-			$calcExp .= $fromExp[$qq];
-			$calcExp .= ";\n";
-		    }
-		    else {
-			$calcExp .= $fromExp[$qq];
-			$calcExp .= " && ";
-		    }
+		my $calcExp1 = "\L$xpartName[$mm]";
+		my $calcExp = "";
+		my $cop = "";
+		my $cnv = "";
+		my $neg = 0;
+		if ($op eq "AND") { $cop = " && "; }
+		elsif ($op eq "OR") { $cop = " || "; }
+		elsif ($op eq "NAND") { $cop = " && "; $neg = 1; }
+		elsif ($op eq "NOR") { $cop = " || "; $neg = 1; }
+		elsif ($op eq "XOR") { $cop = " ^ "; $cnv = "!!"}
+		elsif ($op eq "NOT") { $cop = " error "; $neg = 1; }
+		for ($qq=0; $qq<$inCnt; $qq++) {
+		  $calcExp .= "$cnv(" . $fromExp[$qq] . ")";
+		  if(($qq + 1) < $inCnt) { $calcExp .= " $cop "; }
 		}
-		print OUT "$calcExp";
+		if ($neg) {
+		  print OUT "$calcExp1 = !($calcExp);\n";
+		} else {
+		  print OUT "$calcExp1 = $calcExp;\n";
+		}
 	}
 	# ******** DIVIDE ********************************************************************
 	if($partType[$mm] eq "DIVIDE")
