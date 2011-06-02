@@ -29,6 +29,7 @@ if (-e $fileName)  {
  
    $tooLong = 0;
    $maxPartNameLength = 34;
+   $maxLength = 0;
    print "\n";
  
 #
@@ -47,6 +48,10 @@ if (-e $fileName)  {
  
             if (length($partName) > $maxPartNameLength)  {
                $tooLong++;
+	       if(length($partName) > $maxLength)
+	       {
+	       		$maxLength = length($partName);
+		}
                print "\n***ERROR: Part name too long: $partName\n";
             }
          }
@@ -57,7 +62,7 @@ if (-e $fileName)  {
 #  Abort if any part names were found to be too long.
 #
    if ($tooLong)  {
-      die"\n***ERROR - Too long part name(s) - ABORTING\n";
+      die"\n***ERROR - Too long part name(s) total $tooLong errors with max name length of $maxLength- ABORTING\n";
    }
 }
 else  {
