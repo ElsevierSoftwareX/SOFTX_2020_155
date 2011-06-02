@@ -727,7 +727,7 @@ if ($ipcxCnt > 0) {
             }
          }
 
-	 #die "\n***ERROR: Aborting (this code can only automatically add IPCx SENDER modules)\n\n";
+	 die "\n***ERROR: Aborting (this code can only automatically add IPCx SENDER modules)\n\n";
       }
    }
 }
