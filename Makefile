@@ -21,6 +21,7 @@ clean-% :: config/Makefile.%epics
 	/bin/mv -f build/$@epics/medm build/$@epics-medm
 	/bin/mv -f build/$@epics/config build/$@epics-config
 	(/bin/rm -rf target/$@epics build/$@epics; make -f config/Makefile.$@epics)
+	(cd src/epics/util; ./nameLengthChk.pl $@)
 	/bin/mkdir -p build/$@epics
 	/bin/mv -f build/$@epics-medm build/$@epics/medm
 	/bin/mv -f build/$@epics-config build/$@epics/config
