@@ -52,15 +52,60 @@ if (-e $fileName)  {
          }
       }
    }
+}
+else  {
+   die "\n***ERROR: $fileName does NOT exist\n";
+}
+
+#
+#  Assemble file path & name of the .ini file.
+#
+$fileName = "../../../build/";
+$fileName .= $ARGV[0];
+$fileName .= "epics/";
+$fileName .= $ARGV[0];
+$fileName .= "\.ini";
  
 #
-#  Abort if any part names were found to be too long.
+#  Open the .ini file, read its contents, and close it.
 #
-   if ($tooLong)  {
-      die"\n***ERROR - Too long part name(s) - ABORTING\n";
+if (-e $fileName)  {
+   open(IN, "<" . $fileName) || die "***ERROR: Can NOT open $fileName\n";
+ 
+   chomp(@inData=<IN>);
+ 
+   close IN;
+ 
+#
+#  Loop through the lines in the .ini file, looking for lines that
+#  begin with '[' or '#['.
+#
+   foreach $value (@inData)  {
+      if ($value =~ /^\[|^\#\[/)  {
+ 
+#
+#  Extract the part name and check its length.  Increment counter
+#  if it is too long and print an error message.
+#
+         if ($value =~ /\[([\w\:\-]+)\]/)  {
+            $partName = $1;
+ 
+            if (length($partName) > $maxPartNameLength)  {
+               $tooLong++;
+               print "\n***ERROR: Part name too long: $partName\n";
+            }
+         }
+      }
    }
 }
 else  {
    die "\n***ERROR: $fileName does NOT exist\n";
 }
 
+
+#
+#  Abort if any part names were found to be too long.
+#
+if ($tooLong)  {
+   die"\n***ERROR - Too long part name(s) - ABORTING\n";
+}
