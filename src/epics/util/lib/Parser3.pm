@@ -333,6 +333,17 @@ sub merge_references {
    #return 0;
    close in;
    my $mynode = CDS::Tree::find_node($myroot, $system_name, "Name");
+   if ($mynode->{NAME} eq "Library") {
+	# file name is same as subsystem name, so need to skip Library and System
+        ${$mynode->{FIELDS}}{"Name"} .= "~";
+   	$mynode = CDS::Tree::find_node($myroot, $system_name, "Name");
+	#print "NAME=$mynode->{NAME}\n";
+        if ($mynode->{NAME} eq "System") {
+           ${$mynode->{FIELDS}}{"Name"} .= "~";
+   	   $mynode = CDS::Tree::find_node($myroot, $system_name, "Name");
+	   #print "NAME=$mynode->{NAME}\n";
+        }
+   }
    die "Couldn't find $system_name in $fname\n" unless defined $mynode;
    #CDS::Tree::print_tree($mynode);
    #${$node->{FIELDS}}{"__merge_references__"} = $mynode;
@@ -521,7 +532,7 @@ sub node_processing {
 	    && $source_block !~ /^cdsIPC/
 	    && $source_block !~ /^cdsEzCa/) {
 	    if (!name_check($::partName[$::partCnt])) {
-		die "Invalid part name \"$::partName[$::partCnt]\"; source_block \"$source_block\"; block  type \"$block_type\"";
+		    #die "Invalid part name \"$::partName[$::partCnt]\"; source_block \"$source_block\"; block  type \"$block_type\"" unless ("$::partName[$::partCnt]");
 	    }
 	}
 	if (!$in_sub) {
@@ -638,6 +649,12 @@ sub node_processing {
 			CDS::Adcx8::initAdc($node);
 			$::partType[$::partCnt] = CDS::Adcx8::partType($node);
 		} 
+		if ($part_name eq "Adcx9") {
+			require "lib/Adc.pm";
+			#CDS::Adcx1::initAdc($node);
+			CDS::Adcx9::initAdc($node);
+			$::partType[$::partCnt] = CDS::Adcx9::partType($node);
+		} 
 # End of ADC PART CHANGE **********************************
 
         	 $::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ($node, $::partCnt);
@@ -726,11 +743,13 @@ sub remove_tags {
    my $goto_name = ${$goto->{FIELDS}}{"Name"};
    #print "GotoName is $goto_name\n";
    # Find the line leading to the Goto
-   my $goto_line = find_branch($parent, $goto_name, 1, 1);
+   my $goto_line = find_branch($parent, $goto_name, 1, 1, $parent);
    #print_node($goto_line);
    my $src_name = ${$goto_line->{FIELDS}}{"SrcBlock"};
    my $src_port = ${$goto_line->{FIELDS}}{"SrcPort"};
    #print "Source $src_name\n";
+   #print "Couldn't find tag source on $goto_name\n" unless $src_name;
+   #die if ($goto_name eq "YARM_TRIG_From");
    # Find line originating at the "From"
    my $from_line = find_line($parent, $block_name, 1);
    #print_node($from_line);
@@ -877,7 +896,7 @@ sub find_line {
 # if $flag is 1, then it returns a reference to Line for a branch.
 # Line is a parent node for a branch.
 sub find_branch {
-   my ($node, $dst_name, $dst_port, $flag) = @_;
+   my ($node, $dst_name, $dst_port, $flag, $prnt) = @_;
    #print "find_branch: ". $_->{NAME} . "+++". ${$node->{FIELDS}}{Name} . ", $dst_name, $dst_port, $flag\n";
    foreach (@{$node->{NEXT}}) {
 	if ($_->{NAME} eq "Line" || $_->{NAME} eq "Branch") {
@@ -885,24 +904,39 @@ sub find_branch {
 	  if ($dprt == undef) { $dprt = 1; }
 	  #print "find_branch: ", ${$_->{FIELDS}}{DstBlock}, ":", $dprt, "\n";
 	  if (${$_->{FIELDS}}{DstBlock} eq $dst_name && $dprt == $dst_port) {
-	  	#print "found it; " . $_->{NAME} . "\n";
-		#print_node($_);
+		  #print "found it; " . $_->{NAME} . "\n";
+		  #print_node($_);
 		if ($flag && $_->{NAME} eq "Branch") {
-			#print "Returning:\n";
+			#print "Returning 1:\n";
 			#print_node($node);
+			#print_node($prnt);
 			# Do not return if the $node is not Line, keep searching
-			if ($node->{NAME} ne "Line" && $node->{NAME} ne "Branch") {
+			if ($node->{NAME} eq "Branch") {
+				# This code ignores broken off branches
+				# which somehow get introduced into the tree.
+				# There are branches without Line (no source).
+				if ($prnt->{NAME} eq "System") {
+					next;
+				} else {
+					return $prnt;
+				}
+			}
+			if ($node->{NAME} ne "Line") {
 				next;
 			}
 			return $node;
 		}
-		else { return $_; }
+		else {
+			#print "Returning 2:\n";
+			#print_node($_);
+		       	return $_; 
+		}
 	  }
-	  my $block = find_branch($_, $dst_name, $dst_port, $flag);
+	  my $block = find_branch($_, $dst_name, $dst_port, $flag, $node);
 	  if ($block ne undef) {
 		  # See if this is the line and return IT instead if $flag
 		  if ($flag && $node->{NAME} eq "Line") {
-		  	#print "return line " . ${node->{FIELDS}}{DstBlock} . "\n";
+			  #print "return line " . ${node->{FIELDS}}{DstBlock} . "\n";
 		  	return $node;
 		  } else { return $block; }
 	  }
@@ -1235,7 +1269,6 @@ sub process {
   	CDS::Tree::do_on_nodes($root, \&merge_references, 0, $root);
 	print "Merged $n_merged references\n";
   } while ($n_merged != 0);
-  #CDS::Tree::print_tree($root);
   print "Merged library referenes\n";
 
   # Store ezca block names in description field, so that they are accessible later
@@ -1245,6 +1278,8 @@ sub process {
   print "Flattening the model\n";
   flatten_nested_subsystems($root);
   print "Finished flattening the model\n";
+  #CDS::Tree::print_tree($root);
+  #die;
   CDS::Tree::do_on_nodes($root, \&remove_tags, 0, $root);
   print "Removed Tags\n";
   $::time_to_die = 0;
