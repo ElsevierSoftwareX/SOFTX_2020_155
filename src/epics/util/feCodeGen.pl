@@ -2835,6 +2835,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 	if($partType[$mm] eq "AND")
 	{
 		my $op = $blockDescr[$mm];
+		unless ($op) { $op = "AND"; } # The default operator is AND
 	   	print OUT "// Logical $op\n";
 		# print "\tUsed AND $xpartName[$mm] $partOutCnt[$mm]\n";
 		my $calcExp1 = "\L$xpartName[$mm]";
@@ -2848,6 +2849,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 		elsif ($op eq "NOR") { $cop = " || "; $neg = 1; }
 		elsif ($op eq "XOR") { $cop = " ^ "; $cnv = "!!"}
 		elsif ($op eq "NOT") { $cop = " error "; $neg = 1; }
+		else { $cop = " && "; }
 		for ($qq=0; $qq<$inCnt; $qq++) {
 		  $calcExp .= "$cnv(" . $fromExp[$qq] . ")";
 		  if(($qq + 1) < $inCnt) { $calcExp .= " $cop "; }
