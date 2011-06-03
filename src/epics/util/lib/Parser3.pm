@@ -638,6 +638,12 @@ sub node_processing {
 			CDS::Adcx8::initAdc($node);
 			$::partType[$::partCnt] = CDS::Adcx8::partType($node);
 		} 
+		if ($part_name eq "Adcx9") {
+			require "lib/Adc.pm";
+			#CDS::Adcx1::initAdc($node);
+			CDS::Adcx9::initAdc($node);
+			$::partType[$::partCnt] = CDS::Adcx9::partType($node);
+		} 
 # End of ADC PART CHANGE **********************************
 
         	 $::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ($node, $::partCnt);
