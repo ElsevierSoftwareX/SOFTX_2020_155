@@ -1332,11 +1332,13 @@ udelay(1000);
                     }while((*packedData == 0x110000) && (adcWait < 1000000));
 
 #ifdef ADC_MASTER
+#ifndef RFM_DIRECT_READ
 				if(!rfmDone)
 				{
 					if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(clock16K % 64));
 					if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(clock16K % 64));
 				}
+#endif
 		rfmDone = 0;
 #endif
 
