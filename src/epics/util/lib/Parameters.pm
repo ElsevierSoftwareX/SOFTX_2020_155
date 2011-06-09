@@ -40,7 +40,7 @@ sub printHeaderStruct {
         			} elsif ($::site =~ /^C/) {
                 			$::location = "caltech";
         			} elsif ($::site =~ /^S/) {
-                			$::location = "stanford";
+                			$::location = "stn";
         			} elsif ($::site =~ /^K/) {
                 			$::location = "kamioka";
         			} elsif ($::site =~ /^X/) {
