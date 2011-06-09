@@ -183,7 +183,7 @@ CDS_HARDWARE cdsPciModules;
                                 } elsif ($::site =~ /^C/) {
                                         $::location = "caltech";
                                 } elsif ($::site =~ /^S/) {
-                                        $::location = "stanford";
+                                        $::location = "stn";
                                 } elsif ($::site =~ /^K/) {
                                         $::location = "kamioka";
                                 } elsif ($::site =~ /^X/) {
@@ -215,7 +215,7 @@ CDS_HARDWARE cdsPciModules;
 		break;
 	case 's':
 		strcpy(site_prefix_storage, "S");
-		strcpy(site_name_lower, "stanford");
+		strcpy(site_name_lower, "stn");
 		break;
 	case 'k':
 		strcpy(site_prefix_storage, "K");
