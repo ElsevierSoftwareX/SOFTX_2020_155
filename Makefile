@@ -122,6 +122,7 @@ uninstall-daq-% :: src/epics/simLink/%.mdl
 	if test $${site} = geo; then site_letter=G; fi;\
 	if test $${site} = caltech; then site_letter=C; fi;\
 	if test $${site} = tst; then site_letter=X; fi;\
+	if test $${site} = stn; then site_letter=S; fi;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`;\
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
 	datarate=`grep datarate build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
@@ -146,6 +147,7 @@ install-daq-% :: src/epics/simLink/%.mdl
 	if test $${site} = geo; then site_letter=G; fi;\
 	if test $${site} = caltech; then site_letter=C; fi;\
 	if test $${site} = tst; then site_letter=X; fi;\
+	if test $${site} = stn; then site_letter=S; fi;\
 	ifo=`grep ifo target/$${system}epics/$${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`;\
 	lower_ifo=`echo $$ifo | tr A-Z a-z`;\
 	gds_node=`grep rmid build/$${system}epics/$${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`; \
@@ -340,7 +342,7 @@ standiop:
 	(cd src/daqd; autoconf)
 	/bin/rm -rf build/standiop
 	/bin/mkdir -p build/standiop
-	(cdir=`pwd`; cd build/standiop; $$cdir/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' --enable-iop && make)
+	(cdir=`pwd`; cd build/standiop; $$cdir/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics/base' '--with-framecpp=/opt/rtapps/framecpp' --enable-iop && make)
 
 
 #MDL_MODELS = x1cdst1 x1isiham x1isiitmx x1iss x1lsc x1omc1 x1psl x1susetmx x1susetmy x1susitmx x1susitmy x1susquad1 x1susquad2 x1susquad3 x1susquad4 x1x12 x1x13 x1x14 x1x15 x1x16 x1x20 x1x21 x1x22 x1x23
