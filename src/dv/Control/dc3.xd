@@ -140,8 +140,8 @@ object 'helpWin' : XmDialogShell {
 object '1' : XmMessageBox {
 	arguments {
 	lastGenName = 'messageBox1';
-	XmNmessageString =  * 'LIGO DataViewer 5.0
-November 9th, 2004';
+	XmNmessageString =  * 'aLIGO DataViewer 2.3
+June 13th, 2011';
 	};
 abstract object '175' : XmPushButton GADGET {
 	arguments {
@@ -164,8 +164,8 @@ abstract object '44' : XmLabel GADGET {
 	arguments {
 	name = 'MessageLabel';
 	lastGenName = 'label44';
-	XmNlabelString = 'LIGO DataViewer 5.0
-November 9th, 2004';
+	XmNlabelString = 'aLIGO DataViewer 2.3
+June 13th, 2011';
 	};
 };
 abstract object '177' : XmPushButton GADGET {

@@ -981,7 +981,7 @@ static short resetReadMode;
 	      printmessage(reset);
 	      quitdisplay(0);
 	   }
-	   sprintf ( msgout, "messg received %d ************************* \n", mb.mtype );
+	   sprintf ( msgout, "messg received %ld ************************* \n", mb.mtype );
 	   printmessage(reset);
 	   switch ( mb.mtype ) {
 	     case 1: /* New display mode */

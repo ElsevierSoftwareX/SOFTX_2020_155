@@ -1,3 +1,4 @@
+#include <stdio.h> /* Pick up declaration of printf() */
 #include "tai.h"
 #include "leapsecs.h"
 #include "caldate.h"

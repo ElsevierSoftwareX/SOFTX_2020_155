@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h> /* Pick up declaration of exit() */
 #include "caldate.h"
 
 int easter(cd)
@@ -48,7 +49,7 @@ char **argv;
     caldate_frommjd(&cd,day,&weekday,&yearday);
     if (caldate_fmt((char *) 0,&cd) + 1 >= sizeof out) exit(1);
     out[caldate_fmt(out,&cd)] = 0;
-    printf("%s %s  yearday %d  mjd %d\n",dayname[weekday],out,yearday,day);
+    printf("%s %s  yearday %d  mjd %ld\n",dayname[weekday],out,yearday,day);
   }
   exit(0);
 }

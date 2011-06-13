@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h> /* Pick up declaration of exit() */
 #include "leapsecs.h"
 #include "tai.h"
 #include "caltime.h"
