@@ -13,7 +13,7 @@
 ! messageBox1
 
 ! label44
-DataViewer*MessageLabel.labelString: LIGO DataViewer 5.0\nJuly 7th, 2004
+DataViewer*MessageLabel.labelString: aLIGO DataViewer 2.3\nJune 13th, 2011
 
 
 ! restoreWin

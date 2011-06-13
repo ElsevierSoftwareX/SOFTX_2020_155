@@ -280,7 +280,7 @@ FILE   *fd;
 	  if ( startstop == 1) {
 	     gpstimest -= duration;
 	  }
-	  sprintf ( starttime, "%d", gpstimest);
+	  sprintf ( starttime, "%ld", (long int) gpstimest);
 	}
 	
 	strcpy(serverIP, argv[1]);
@@ -337,7 +337,7 @@ FILE   *fd;
 		 else
 		   fprintf ( stderr, "LongPlayBack  Ch.%d time %s, duration %d\n",  chNum[0], starttime, duration );
 #endif
-	         fprintf ( stderr, "T0=%s; Length=%d (s)\n", starttime, duration);
+	         fprintf ( stderr, "T0=%s; Length=%ld (s)\n", starttime, (long int) duration);
 	      }
               break;
           case PLAYTREND: 
@@ -348,7 +348,7 @@ FILE   *fd;
 	      else
 		fprintf ( stderr, "Request second-trend Ch.%d: time %s, duration %d\n", chNum[0], starttime, duration );
 #endif
-	      fprintf ( stderr, "T0=%s; Length=%d (s)\n", starttime, duration);
+	      fprintf ( stderr, "T0=%s; Length=%ld (s)\n", starttime, (long int) duration);
               break;
           case PLAYTREND60: 
 	      processID = DataWriteTrend(starttime, duration, 60, isgps);
@@ -358,7 +358,7 @@ FILE   *fd;
 	      else
 		fprintf ( stderr, "Request minute-trend Ch.%d: time %s, duration %d\n", chNum[0], starttime, duration );
 #endif
-	      fprintf ( stderr, "T0=%s; Length=%d (s)\n", starttime, duration);
+	      fprintf ( stderr, "T0=%s; Length=%ld (s)\n", starttime, (long int) duration);
               break;
           default: 
               break;
@@ -658,19 +658,19 @@ int     i, j, l, bc, bytercv;
 		 }
 		 else { /* dcstep > 1 */
 		   if ( dmax ) {
-		     fprintf ( fdM[j], "%d %2f %le\n", skipstatus, xTick[0], offset[j]+slope[j]*trendsec[0].max );
+		     fprintf ( fdM[j], "%ld %2f %le\n", skipstatus, xTick[0], offset[j]+slope[j]*trendsec[0].max );
 		     for ( i=1; i<irate; i++ ) {
 		       fprintf ( fdM[j], "%d %2f %le\n", 0, xTick[i], offset[j]+slope[j]*trendsec[i].max );
 		     }
 		   }
 		   if ( dmean ) {
-		     fprintf ( fd[j], "%d %2f %le\n", skipstatus, xTick[0], offset[j]+slope[j]*trendsec[0].mean );
+		     fprintf ( fd[j], "%ld %2f %le\n", skipstatus, xTick[0], offset[j]+slope[j]*trendsec[0].mean );
 		     for ( i=1; i<irate; i++ ) {
 		       fprintf ( fd[j], "%d %2f %le\n", 0, xTick[i], offset[j]+slope[j]*trendsec[i].mean );
 		     }
 		   }
 		   if ( dmin ) {
-		     fprintf ( fdm[j], "%d %2f %le\n", skipstatus, xTick[0], offset[j]+slope[j]*trendsec[0].min );
+		     fprintf ( fdm[j], "%ld %2f %le\n", skipstatus, xTick[0], offset[j]+slope[j]*trendsec[0].min );
 		     for ( i=1; i<irate; i++ ) {
 		       fprintf ( fdm[j], "%d %2f %le\n", 0, xTick[i], offset[j]+slope[j]*trendsec[i].min );
 		     }
@@ -762,7 +762,7 @@ int     i, j, l, bc, bytercv;
 	       else
 	         fprintf ( stderr,"Ch.%d total data skipped: %d seconds\n", chNum[0], skip );
 #endif
-	      fprintf(stderr, "%d seconds worth of data was unavailable on this server\n", skip);
+	      fprintf(stderr, "%ld seconds worth of data was unavailable on this server\n", skip);
  	     }
 	   }
            if ( playMode == PLAYTREND60 ) {
@@ -782,7 +782,7 @@ int     i, j, l, bc, bytercv;
 	     else
 	       fprintf ( stderr, "LongPlayBack Ch.%d: total %d seconds of data displayed\n", chNum[0], totaldata );
 #endif
-	     fprintf(stderr, "%d seconds of data displayed\n\n", totaldata );
+	     fprintf(stderr, "%ld seconds of data displayed\n\n", totaldata );
 	     timeinstring( timestring, irate-1, lasttimestring );
 	   }
 	   if ( !multiple ) {

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "tai.h"
 #include "leapsecs.h"
 #include "caldate.h"

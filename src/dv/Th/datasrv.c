@@ -10,6 +10,7 @@
 #include "UTC_GPS/tai.h"
 #include "UTC_GPS/caltime.h"
 #include "math.h"
+#include <string.h> /* Pick up declarations of strcat, strcpy */
 
 struct caltime ctin;
 struct caltime ctout;
@@ -307,7 +308,7 @@ int    isend;
        Fast = 16;
 
        ID = daq_recv_id (&DataDaq);
-       fprintf ( stderr,"datasrv: DataWriteRealtimeFast ID=%d\n", ID );
+       fprintf ( stderr,"datasrv: DataWriteRealtimeFast ID=%lu\n", ID );
        return ID;
 }
 
@@ -340,13 +341,13 @@ int    isend;
 	 starttimeInsec = gps.sec;
        }
        else {
-	 sscanf (starttime, "%d", &starttimeInsec );
+	 sscanf (starttime, "%ld", &starttimeInsec );
        }
        if ( all < 0 ) {
           perror( "datasrv: DataChanSet failed: no channel selected" );
 	  return -1;
        }
-       sprintf ( configure, "start net-writer \"%d\" %d %d ", listenerPort, starttimeInsec, duration );
+       sprintf ( configure, "start net-writer \"%d\" %ld %d ", listenerPort, starttimeInsec, duration );
        if ( all == 1 ) {
 	  strcat( configure, "all ");
        }
@@ -475,14 +476,14 @@ int    isend=0;
 	    }
 	  }
 	  else 
-	    sscanf (starttime, "%d", &starttimeInsec );
+	    sscanf (starttime, "%ld", &starttimeInsec );
        }
        if ( strcmp(starttime, "0") != 0 ) {
 	  if ( trendlength == 60 ) {
-	     sprintf ( configure, "start trend %d net-writer \"%d\" %d %d ", trendlength, listenerPort, starttimeInsec, duration );
+	     sprintf ( configure, "start trend %d net-writer \"%d\" %ld %d ", trendlength, listenerPort, starttimeInsec, duration );
 	  }
 	  else
-	     sprintf ( configure, "start trend net-writer \"%d\" %d %d ", listenerPort, starttimeInsec, duration );
+	     sprintf ( configure, "start trend net-writer \"%d\" %ld %d ", listenerPort, starttimeInsec, duration );
        }
        else {
 	  starttimeInsec = 0;
@@ -528,7 +529,7 @@ void DataWriteStop(unsigned long processID)
 char  tempstring[COMMANDSIZE];
 int   isend;
 
-       sprintf( tempstring, "kill net-writer %d;", processID );
+       sprintf( tempstring, "kill net-writer %lu;", processID );
        dfprintf ( stderr,"kill net-writer %d;\n", processID );
        isend = daq_send(&DataDaq, tempstring);
 #if 0
@@ -1001,11 +1002,11 @@ char   temp[100];
        gpsTime.leap = 13;
        gps_to_utc(&gpsTime,&ctout);
        if ( ctout.date.year-2000 < 0 )
-	 sprintf ( timestamp, "%d-%02d-%02d-%02d-%02d-%02d", ctout.date.year-1900, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
+	 sprintf ( timestamp, "%ld-%02d-%02d-%02d-%02d-%02d", ctout.date.year-1900, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
        else if ( ctout.date.year-2000 < 10 )
-	 sprintf ( timestamp, "0%d-%02d-%02d-%02d-%02d-%02d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
+	 sprintf ( timestamp, "0%ld-%02d-%02d-%02d-%02d-%02d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
        else
-	 sprintf ( timestamp, "%d-%02d-%02d-%02d-%02d-%02d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
+	 sprintf ( timestamp, "%ld-%02d-%02d-%02d-%02d-%02d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
        /*fprintf ( stderr, "datasrv: DataTimestamp: %s (%d)\n", currentTime, DataDaq.tb->gps  );*/
        return;
 }
@@ -1028,11 +1029,11 @@ char   temp[100];
        gpsTime.leap = 13;
        gps_to_utc(&gpsTime,&ctout);
        if ( ctout.date.year-2000 < 0 )
-	 sprintf ( utcout, "%d-%d-%d-%d-%d-%d", ctout.date.year-1900, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
+	 sprintf ( utcout, "%ld-%d-%d-%d-%d-%d", ctout.date.year-1900, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
        else if ( ctout.date.year-2000 < 10 )
-	 sprintf ( utcout, "0%d-%d-%d-%d-%d-%d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
+	 sprintf ( utcout, "0%ld-%d-%d-%d-%d-%d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
        else
-	 sprintf ( utcout, "%d-%d-%d-%d-%d-%d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
+	 sprintf ( utcout, "%ld-%d-%d-%d-%d-%d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
        return;
 }
 

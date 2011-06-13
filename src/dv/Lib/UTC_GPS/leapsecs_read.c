@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h> /* Pick up declaration of strcpy() */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
