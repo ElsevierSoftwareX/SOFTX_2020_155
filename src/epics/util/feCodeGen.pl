@@ -3811,11 +3811,11 @@ sub commify_series {
 			$sargs .= "s/FILTERNAME/$tfn/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
-				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
-				system("cat INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+				system("cat INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			} else {
-				system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+				system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			}
 		} else {
 		  	$sys_name = substr($sys_name, 2, 3);
