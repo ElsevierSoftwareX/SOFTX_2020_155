@@ -1,3 +1,8 @@
+Notes for 2.1.5
+- Fixed biquad filter module operation.
+- Change inputFilter part to use extensions of GAIN,POLE, ZERO instead of K,P,Z.
+- RMS part to have limits of +/-200000 instead of +/-2000.
+
 Notes for 2.1.4
 =================
 - Bug fix to tags connected to line branches.
