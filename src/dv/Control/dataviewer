@@ -6,7 +6,7 @@ export DVPATH
 if [ -d /usr/share/grace ]; then
     GRACE_HOME=/usr/share/grace
 else
-    GRACE_HOME=/opt/rtapps/grace
+    GRACE_HOME=LOCAL_GRACE/grace
     LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GRACE_HOME}/lib
     export LD_LIBRARY_PATH
 fi
