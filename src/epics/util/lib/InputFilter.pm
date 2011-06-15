@@ -12,32 +12,32 @@ sub printHeaderStruct {
 #      		die "InputFilter name \"", $::xpartName[$i], "\" too long (max 24 charachters)";
 #  	}
 	print ::OUTH "\tfloat $::xpartName[$i]\_OFFSET;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_K;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_P;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_Z;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_K_TRAMP;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_P_TRAMP;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_Z_TRAMP;\n";
+	print ::OUTH "\tfloat $::xpartName[$i]\_GAIN;\n";
+	print ::OUTH "\tfloat $::xpartName[$i]\_POLE;\n";
+	print ::OUTH "\tfloat $::xpartName[$i]\_ZERO;\n";
+	print ::OUTH "\tfloat $::xpartName[$i]\_GAIN_TRAMP;\n";
+	print ::OUTH "\tfloat $::xpartName[$i]\_POLE_TRAMP;\n";
+	print ::OUTH "\tfloat $::xpartName[$i]\_ZERO_TRAMP;\n";
 }
 
 sub printEpics {
    	my ($i) = @_;
 
 	print ::EPICS "INVARIABLE $::xpartName[$i]\_OFFSET $::systemName\.$::xpartName[$i]\_OFFSET float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_K $::systemName\.$::xpartName[$i]\_K float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_P $::systemName\.$::xpartName[$i]\_P float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_Z $::systemName\.$::xpartName[$i]\_Z float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_K_TRAMP $::systemName\.$::xpartName[$i]\_K_TRAMP float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_P_TRAMP $::systemName\.$::xpartName[$i]\_P_TRAMP float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_Z_TRAMP $::systemName\.$::xpartName[$i]\_Z_TRAMP float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_GAIN $::systemName\.$::xpartName[$i]\_GAIN float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_POLE $::systemName\.$::xpartName[$i]\_POLE float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_ZERO $::systemName\.$::xpartName[$i]\_ZERO float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_GAIN_TRAMP $::systemName\.$::xpartName[$i]\_GAIN_TRAMP float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_POLE_TRAMP $::systemName\.$::xpartName[$i]\_POLE_TRAMP float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_ZERO_TRAMP $::systemName\.$::xpartName[$i]\_ZERO_TRAMP float ai 0 field(PREC,\"3\")\n";
 }
 
 sub printFrontEndVars  {
    	my ($i) = @_;
         #print ::OUT "double \L$::xpartName[$i]_offset;\n";
-        print ::OUT "double \L$::xpartName[$i]_K;\n";
-        print ::OUT "double \L$::xpartName[$i]_P;\n";
-        print ::OUT "double \L$::xpartName[$i]_Z;\n";
+        print ::OUT "double \L$::xpartName[$i]_GAIN;\n";
+        print ::OUT "double \L$::xpartName[$i]_POLE;\n";
+        print ::OUT "double \L$::xpartName[$i]_ZERO;\n";
         print ::OUT "unsigned long \L$::xpartName[$i]_KS;\n";
         print ::OUT "unsigned long \L$::xpartName[$i]_PS;\n";
         print ::OUT "unsigned long \L$::xpartName[$i]_ZS;\n";
@@ -49,9 +49,9 @@ sub frontEndInitCode {
         my ($i) = @_;
 	# Initialize from the EPICS records
 #        my $calcExp = "\L$::xpartName[$i]_offset " . " = pLocalEpics->$::systemName.$::xpartName[$i]_OFFSET;\n";
-        my $calcExp .= "\L$::xpartName[$i]_K " . " = pLocalEpics->$::systemName.$::xpartName[$i]_K;\n";
-        $calcExp .= "\L$::xpartName[$i]_P " . " = pLocalEpics->$::systemName.$::xpartName[$i]_P;\n";
-        $calcExp .= "\L$::xpartName[$i]_Z " . " = pLocalEpics->$::systemName.$::xpartName[$i]_Z;\n";
+        my $calcExp .= "\L$::xpartName[$i]_GAIN " . " = pLocalEpics->$::systemName.$::xpartName[$i]_GAIN;\n";
+        $calcExp .= "\L$::xpartName[$i]_POLE " . " = pLocalEpics->$::systemName.$::xpartName[$i]_POLE;\n";
+        $calcExp .= "\L$::xpartName[$i]_ZERO " . " = pLocalEpics->$::systemName.$::xpartName[$i]_ZERO;\n";
         $calcExp .= "\L$::xpartName[$i]_KS = 0;\n";
         $calcExp .= "\L$::xpartName[$i]_PS = 0;\n";
         $calcExp .= "\L$::xpartName[$i]_ZS = 0;\n";
@@ -82,13 +82,13 @@ sub frontEndCode {
 
         $calcExp .= "inputFilterModule($input, &\L$::xpartName[$i], &\L$::xpartName[$i]_val, "
 		  . "pLocalEpics->$::systemName.$::xpartName[$i]_OFFSET, "
-		  . "&\L$::xpartName[$i]_K, &\L$::xpartName[$i]_P, &\L$::xpartName[$i]_Z, "
-		  . "pLocalEpics->$::systemName.$::xpartName[$i]_K, "
-		  . "pLocalEpics->$::systemName.$::xpartName[$i]_P, "
-		  . "pLocalEpics->$::systemName.$::xpartName[$i]_Z, "
-		  . "pLocalEpics->$::systemName.$::xpartName[$i]_K_TRAMP, "
-		  . "pLocalEpics->$::systemName.$::xpartName[$i]_P_TRAMP, "
-		  . "pLocalEpics->$::systemName.$::xpartName[$i]_Z_TRAMP, "
+		  . "&\L$::xpartName[$i]_GAIN, &\L$::xpartName[$i]_POLE, &\L$::xpartName[$i]_ZERO, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_GAIN, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_POLE, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_ZERO, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_GAIN_TRAMP, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_POLE_TRAMP, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_ZERO_TRAMP, "
 		  . "&\L$::xpartName[$i]_KS, "
 		  . "&\L$::xpartName[$i]_PS, "
 		  . "&\L$::xpartName[$i]_ZS);";

@@ -1,6 +1,6 @@
 
 file {
-	name="/opt/rtcds/llo/l1/medm/L1ITMX_INFILT_TEST.adl"
+	name="/opt/rtcds/lho/h2/core/branches/branch-2.3/src/epics/util/INPUT_FILTER.adl"
 	version=030104
 }
 display {
@@ -119,7 +119,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_K"
+		chan="SITE_NAME:FILTERNAME_GAIN"
 		clr=14
 		bclr=4
 	}
@@ -134,7 +134,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_P"
+		chan="SITE_NAME:FILTERNAME_POLE"
 		clr=14
 		bclr=4
 	}
@@ -164,7 +164,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_Z"
+		chan="SITE_NAME:FILTERNAME_ZERO"
 		clr=14
 		bclr=4
 	}
@@ -179,7 +179,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_P_TRAMP"
+		chan="SITE_NAME:FILTERNAME_POLE_TRAMP"
 		clr=14
 		bclr=4
 	}
@@ -194,7 +194,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_K_TRAMP"
+		chan="SITE_NAME:FILTERNAME_GAIN_TRAMP"
 		clr=14
 		bclr=4
 	}
@@ -209,7 +209,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_Z_TRAMP"
+		chan="SITE_NAME:FILTERNAME_ZERO_TRAMP"
 		clr=14
 		bclr=4
 	}
