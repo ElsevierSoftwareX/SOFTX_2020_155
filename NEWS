@@ -7,6 +7,10 @@ provided proper decimation to 32x.
 a race condition could exist between the IOP loading new DAC data into the same buffer and at the same time
 as the DAC module was trying to DMA data out of that buffer.
 - Set the '-2' awgtpman flag for a 4K system in top level Makefile.
+- Fixed biquad filter module operation.
+- Change inputFilter part to use extensions of GAIN,POLE, ZERO instead of K,P,Z.
+- RMS part to have limits of +/-200000 instead of +/-2000.
+
 
 New Additions:
 - Updated dataviewer with support for 32K and 64K resolution data viewing.
