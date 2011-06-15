@@ -430,7 +430,7 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
 
                     curFilter->fmd.filtCoeff[curFilterNum][indexN] =
                                                       filtCoeff[j];
-		    if (curFilter->fmd.biquad) {
+		    if (curFilter->biquad) {
 		      // Calculate biquad form
 		      switch (j) {
 			case 0: // a11
@@ -450,6 +450,9 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
 				= filtCoeff[j] - filtCoeff[j - 2] + filtCoeff[j - 1] - filtCoeff[j - 3];
 			  break;
 		      }
+/*
+		      printf("first biquad filter %d coef #%d is %f\n", curFilterNum, indexN, curFilter->fmd.filtCoeff[curFilterNum][indexN]);
+*/
 		    }
                   }
                 }
@@ -703,7 +706,7 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
                     for (j = 0; j < 5; j++) {
                       curFilter->fmd.filtCoeff[num][j] = filtCoeff[j];
 
-		      if (curFilter->fmd.biquad) {
+		      if (curFilter->biquad) {
 		        // Calculate biquad form
 		        switch (j) {
 			  case 1: // a11
@@ -723,6 +726,9 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
 				= filtCoeff[j] - filtCoeff[j - 2] + filtCoeff[j - 1] - filtCoeff[j - 3];
 			    break;
 			}
+/*
+			printf("second biquad filter %d coef #%d is %f\n", num, j, curFilter->fmd.filtCoeff[num][j]);
+*/
 		      }
 		    }
                   }
@@ -902,7 +908,8 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
 
     fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].crc = coefCrc;
     fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].biquad = 
-	    			fmc->subSys[n].map[i].fmd.biquad;
+	    			fmc->subSys[n].map[i].biquad;
+printf("filt %d BIQUAD FLAG = %d\n", i,fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].biquad);
 
     usleep(10000);
 

@@ -140,12 +140,12 @@ typedef struct FM_OP_COEF{
   /* 0 - IIR; N - FIR, where 0 > N < MAX_FIR_MODULES */
   /* N-1 shows where coeffictients are. COEF.firFiltCoeff[N-1] */
   int filterType[FILTERS];
+  int biquad; /* Set to one if the code needs to be in biquad form */
 }FM_OP_COEF;
 
 
 typedef struct COEF{
   FM_OP_COEF coeffs[MAX_MODULES];
-  int biquad; /* Set to one if the code needs to be in biquad form */
 
 #ifdef FIR_FILTERS
 #if defined(FIR_POLYPHASE_SIZE)

@@ -652,7 +652,8 @@ inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_C
 #endif
   for(ii=bF;ii<sF;ii++)
   {
-    filtC->biquad = pRfmCoeff->vmeCoeffs[ii].biquad;
+    filtC->coeffs[ii].biquad = pRfmCoeff->vmeCoeffs[ii].biquad;
+    if(filtC->coeffs[ii].biquad) printf("Found a BQF filter %d\n",ii);
     for(jj=0;jj<FILTERS;jj++)
     {
       if(pRfmCoeff->vmeCoeffs[ii].filtSections[jj])
@@ -869,7 +870,7 @@ inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int
 	      filtC->firFiltCoeff[type-1][filtNum][kk] = localFirFiltCoeff[filtNum][kk];
 #endif
 	  } else {
-    	    filtC->biquad = localCoeff.biquad;
+    	    // filtC->biquad = localCoeff.biquad;
 	    for(kk=0;kk<filtC->coeffs[modNum1].filtSections[filtNum]*4+1;kk++)
 	      filtC->coeffs[modNum1].filtCoeff[filtNum][kk] = localCoeff.filtCoeff[filtNum][kk];
 	  }
@@ -1400,7 +1401,7 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
     } else
 #endif
     /* Calculate filter */
-    filtData = (pC->biquad? iir_filter_biquad: iir_filter)(sw_in?fmInput:0,
+    filtData = (pC->coeffs[modNum].biquad? iir_filter_biquad: iir_filter)(sw_in?fmInput:0,
 			  pC->coeffs[modNum].filtCoeff[ii],
 			  pC->coeffs[modNum].filtSections[ii],
 			  pC->coeffs[modNum].filtHist[ii]);
