@@ -1,4 +1,5 @@
 //#include <linux/config.h>
+#include <linux/delay.h>
 #include <linux/version.h>
 #include <linux/init.h>
 #include <linux/module.h>
@@ -28,6 +29,7 @@
 /* character device structures */
 static dev_t symmetricom_dev;
 static struct cdev symmetricom_cdev;
+static int card_present;
 
 /* methods of the character device */
 static int symmetricom_open(struct inode *inode, struct file *filp);
@@ -64,6 +66,7 @@ static int symmetricom_ioctl(struct inode *inode, struct file *file, unsigned in
         case IOCTL_SYMMETRICOM_STATUS:
                 {
         	  unsigned long req;
+		  if (card_present) {
 		  unsigned int time0 = gps[0x30/4];
 		  if (time0 & (1<<24)) {
 		  		//printk("Symmetricom unlocked\n");
@@ -72,18 +75,27 @@ static int symmetricom_ioctl(struct inode *inode, struct file *file, unsigned in
 		  		//printk ("Symmetricom locked!\n");
 				req = 1;
 		  }
-		
+		  } else req = 1;
                   if (copy_to_user ((void *) arg, &req,  sizeof (req))) return -EFAULT;
                 }
                 break;
         case IOCTL_SYMMETRICOM_TIME:
 		{
         	  unsigned long req[3];
+		  if (card_present) {
 	      	  gps[0] = 1;
 	      	  //printk("Current time %ds %dus %dns \n", gps[0x34/4], 0xfffff & gps[0x30/4], 100 * ((gps[0x30/4] >> 20) & 0xf));
 		  req[0] = gps[0x34/4];
 		  req[1] = 0xfffff & gps[0x30/4];
 		  req[2] =  100 * ((gps[0x30/4] >> 20) & 0xf);
+		  } else {
+		  // Get current kernel time (in GPS)
+		           struct timespec t;
+		           extern struct timespec current_kernel_time(void);
+		           t = current_kernel_time();
+		           t.tv_sec += - 315964819 + 33;
+		  	req[0] = t.tv_sec; req[1] = 0; req[2] = t.tv_nsec;
+		  }
                   if (copy_to_user ((void *) arg, req,  sizeof (req))) return -EFAULT;
 		}
 		break;
@@ -129,13 +141,18 @@ static int __init symmetricom_init(void)
 
 	/* find the Symmetricom device */
 	struct pci_dev *symdev = pci_get_device (SYMCOM_VID, SYMCOM_BC635_TID, 0);
-	if (symdev) printk("Symmetricom GPS card on bus %x; device %x\n", symdev->bus->number, PCI_SLOT(symdev->devfn));
-	else {
-		ret = -1;
-                printk(KERN_ERR "Symmetricom GPS card not found\n");
-                goto out_unalloc_region;
+	if (symdev) {
+		printk("Symmetricom GPS card on bus %x; device %x\n", symdev->bus->number, PCI_SLOT(symdev->devfn));
+		card_present = 1;
+	} else {
+		ret = 0;
+                printk("Symmetricom GPS card not found\n");
+                //goto out_unalloc_region;
+		card_present = 0;
+		gps = 0xdeadbeaf;
 	}
 	
+if (card_present) {
 	pci_enable_device(symdev);
 	pci_read_config_dword(symdev, PCI_BASE_ADDRESS_2, &pci_io_addr);
 	pci_io_addr &= 0xfffffff0;
@@ -161,10 +178,10 @@ static int __init symmetricom_init(void)
   *cmd = 0xf6; // Request model ID
         i=0;
         timeReg->ACK = 0x1;  // Trigger module to capture time
-        udelay(1000);
+        mdelay(1);
         timeReg->ACK = 0x80;  // Trigger module to capture time
         do{
-        udelay(1000);
+        mdelay(1);
         i++;
         }while((timeReg->ACK == 0) &&(i<20));
         if(timeReg->ACK) printk("SysCom ack received ID %d !!! 0x%x\n",timeReg->ACK,i);
@@ -175,10 +192,10 @@ static int __init symmetricom_init(void)
         *cmd = 0x4915; // Request model ID
         i=0;
         timeReg->ACK = 0x1;  // Trigger module to capture time
-        udelay(1000);
+        mdelay(1);
         timeReg->ACK = 0x80;  // Trigger module to capture time
         do{
-        udelay(1000);
+        mdelay(1);
         i++;
         }while((timeReg->ACK == 0) &&(i<20));
         if(timeReg->ACK) printk("SysCom ack received ID %d !!! 0x%x\n",timeReg->ACK,i);
@@ -189,10 +206,10 @@ static int __init symmetricom_init(void)
         *cmd = 0x4416; // Request model ID
         i=0;
         timeReg->ACK = 0x1;  // Trigger module to capture time
-        udelay(1000);
+        mdelay(1);
         timeReg->ACK = 0x80;  // Trigger module to capture time
         do{
-        udelay(1000);
+        mdelay(1);
         i++;
         }while((timeReg->ACK == 0) &&(i<20));
         if(timeReg->ACK) printk("SysCom ack received ID %d !!! 0x%x\n",timeReg->ACK,i);
@@ -203,10 +220,10 @@ static int __init symmetricom_init(void)
         *cmd = 0x1519; // Request model ID
         i=0;
         timeReg->ACK = 0x1;  // Trigger module to capture time
-        udelay(1000);
+        mdelay(1);
         timeReg->ACK = 0x80;  // Trigger module to capture time
         do{
-        udelay(1000);
+        mdelay(1);
         i++;
         }while((timeReg->ACK == 0) &&(i<20));
         if(timeReg->ACK) printk("SysCom ack received ID %d !!! 0x%x\n",timeReg->ACK,i);
@@ -217,10 +234,10 @@ static int __init symmetricom_init(void)
         *cmd = 0x1619; // Request model ID
         i=0;
         timeReg->ACK = 0x1;  // Trigger module to capture time
-        udelay(1000);
+        mdelay(1);
         timeReg->ACK = 0x80;  // Trigger module to capture time
         do{
-        udelay(1000);
+        mdelay(1);
         i++;
         }while((timeReg->ACK == 0) &&(i<20));
         if(timeReg->ACK) printk("SysCom ack received ID %d !!! 0x%x\n",timeReg->ACK,i);
@@ -235,6 +252,7 @@ static int __init symmetricom_init(void)
 	unsigned int time0 = gps[0x30/4];
 	if (time0 & (1<<24)) printk("Flywheeling, unlocked...\n");
 	else printk ("Locked!\n");
+}
 
         return ret;
         
