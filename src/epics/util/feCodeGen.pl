@@ -727,7 +727,7 @@ if ($ipcxCnt > 0) {
             }
          }
 
-	 die "\n***ERROR: Aborting (this code can only automatically add IPCx SENDER modules)\n\n";
+	 #die "\n***ERROR: Aborting (this code can only automatically add IPCx SENDER modules)\n\n";
       }
    }
 }
@@ -2864,23 +2864,17 @@ for($xx=0;$xx<$processCnt;$xx++)
 	if($partType[$mm] eq "DIVIDE")
 	{
 	   print OUT "// DIVIDE\n";
-		# print "\tUsed Divide $xpartName[$mm] $partOutCnt[$mm]\n";
-		$calcExp = "if\(";
-		$calcExp .= "$fromExp[1] \!= 0.0)\n";
-		print OUT "$calcExp";
-		print OUT "\{\n";
-		$calcExp = "\t\L$xpartName[$mm]";
-		$calcExp .= " = ";
-		$calcExp .= $fromExp[0];
-		$calcExp .= " \/ ";
-		$calcExp .= $fromExp[1];
-		$calcExp .= ";\n";
-		print OUT "$calcExp";
-		print OUT "\}\n";
-		print OUT "else\{\n";
-		$calcExp = "\t\L$xpartName[$mm] = 0.0;\n";
-		print OUT "$calcExp";
-		print OUT "\}\n";
+	   $ce =<<HERE
+$xpartName[$mm] = $fromExp[0] /
+	(($fromExp[1] < 0.0)
+		?
+		(($fromExp[1] > -1e-20)? -1e-20: $fromExp[1])
+		:
+		(($fromExp[1] < 1e-20)? 1e-20: $fromExp[1]));
+HERE
+	   ;
+	   # print "\tUsed Divide $xpartName[$mm] $partOutCnt[$mm]\n";
+	   print OUT $ce;
 	}
         # Process Math Function blocks  ========================================  MA  ===
 	if ($partType[$mm] eq "M_SQR") {                                   # ===  MA  ===
