@@ -124,7 +124,7 @@ int mbuf_allocate_area(char *name, int size, struct file *file) {
 	int s = size;
 	kmalloc_area[i] = 0;
 	kmalloc_area[i] = rvmalloc (size); //rkmalloc (&s, GFP_KERNEL);
-	printk("rvmalloc() returned %p\n", kmalloc_area[i]);
+	//printk("rvmalloc() returned %p\n", kmalloc_area[i]);
 	//printk("rkmalloc() returned %p %d\n", kmalloc_area[i], s);
 	//rkfree(kmalloc_area[i], s);
 	//kmalloc_area[i] = 0;
@@ -163,7 +163,7 @@ int mmap_kmem(unsigned int i, struct vm_area_struct *vma)
 		printk("mbuf mmap() request to map 0x%lx bytes; allocated 0x%lx\n", length, kmalloc_area_size[i]);
 		return -EINVAL;
 	}
-	printk("mbuf mmap() length is 0x%lx\n", length);
+	//printk("mbuf mmap() length is 0x%lx\n", length);
 
 	return rvmmap(kmalloc_area[i], length, vma);
 
@@ -210,7 +210,7 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
         case IOCTL_MBUF_ALLOCATE:
 		{
         	  if (copy_from_user (&req, (void *) argp, sizeof (req))) return -EFAULT;
-        	  printk("mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n", req.name, req.size, cmd, file);
+        	  //printk("mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n", req.name, req.size, cmd, file);
 		  int res = mbuf_allocate_area(req.name, req.size, file);
 		  if (res >= 0) return kmalloc_area_size[res];
 		  else return -EINVAL;
@@ -219,7 +219,7 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
         case IOCTL_MBUF_DEALLOCATE:
 		{
         	  if (copy_from_user (&req, (void *) argp, sizeof (req))) return -EFAULT;
-        	  printk("mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n", req.name, req.size, cmd, file);
+        	  //printk("mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n", req.name, req.size, cmd, file);
 		  int res = mbuf_release_area(req.name, file);
 		  if (res >= 0) return  0;
 		  else return -EINVAL;
@@ -227,12 +227,14 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
                 break;
 
         case IOCTL_MBUF_INFO:
+	#if 0
 		for (i = 0; i < MAX_AREAS; i++) {
 			if (kmalloc_area[i]) {
         		  printk("mbuf %d: name:%.32s, size:%d, usage:%d\n",
 				 i, mtag[i], kmalloc_area_size[i], usage_cnt[i]);
 			}
 		}
+	#endif
                 return 1;
 		break;
         default:
