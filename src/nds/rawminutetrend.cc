@@ -210,6 +210,9 @@ DEBUG1(cerr << "find_offs() returned " << offs << endl);
 		if (ss_ptr >= end_ptr) // end by file size
 		  eof = 1;
 		else {
+#if 0
+	// This check caused some grief at Hannover on the PSL system
+	//
 		  // Check for garbage data point
 		  // If this point is more than one month in the future,
 		  // skip it
@@ -223,6 +226,7 @@ DEBUG1(cerr << "find_offs() returned " << offs << endl);
 #endif
 		    continue;
 		  }
+#endif
 
 		  if (ss_ptr -> gps >= end_gps) // end by time
 		    eof = 1;
