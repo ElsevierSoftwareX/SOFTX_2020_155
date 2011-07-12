@@ -1149,7 +1149,7 @@ static char *versionId = "Version $Id$" ;
            /* write channel information into reflective memory 
             for (i = 0; i < size; i++) {
                strncpy ((tpNode.chninfo[j] + i)->chName, 
-                       tpchn[i], 32);
+                       tpchn[i], MAX_CHNNAME_SIZE - 1);
             }
             tpNode.ipc[j]->channelCount = size;*/
          }

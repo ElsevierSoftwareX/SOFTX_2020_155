@@ -664,8 +664,8 @@ static char *versionId = "Version $Id$" ;
             return -11;
          }
          memset (chninfo + chninfonum, 0, sizeof (gdsChnInfo_t));
-         strncpy (chninfo[chninfonum].chName, section, 32);
-         chninfo[chninfonum].chName[31] = 0;
+         strncpy (chninfo[chninfonum].chName, section, MAX_CHNNAME_SIZE - 1);
+         chninfo[chninfonum].chName[MAX_CHNNAME_SIZE - 1] = 0;
          p = chninfo[chninfonum].chName;
          while (*p != '\0') {
             *p = toupper (*p);
@@ -1124,7 +1124,7 @@ static char *versionId = "Version $Id$" ;
                      }
                   }
                   memset (chninfo + chninfonum, 0, sizeof (gdsChnInfo_t));
-                  strncpy (chninfo[chninfonum].chName, info->chName, 32);
+                  strncpy (chninfo[chninfonum].chName, info->chName, MAX_CHNNAME_SIZE - 1);
                   chninfo[chninfonum].chName[31] = 0;
                   p = chninfo[chninfonum].chName;
                   while (*p != '\0') {
@@ -1283,7 +1283,7 @@ static char *versionId = "Version $Id$" ;
                      }
                   }
                   memset (chninfo + chninfonum, 0, sizeof (gdsChnInfo_t));
-                  strncpy (chninfo[chninfonum].chName, info->chName, 32);
+                  strncpy (chninfo[chninfonum].chName, info->chName, MAX_CHNNAME_SIZE-1);
                   chninfo[chninfonum].chName[31] = 0;
                   p = chninfo[chninfonum].chName;
                   while (*p != '\0') {
