@@ -109,9 +109,11 @@ typedef struct IO_MEM_DATA{
 #define DIO_CTRL_REG	0x3
 
 /* ACCESS PCI-IIRO-8 isolated digital input and output */
-#define ACC_IIRO_TID 0x0f00
+#define ACC_IIRO_TID_OLD 0x0f00
+#define ACC_IIRO_TID 0x0f02
 /* ACCESS PCI-IIRO-16 isolated digital input and output (16 channels) */
-#define ACC_IIRO_TID1 0x0f08
+#define ACC_IIRO_TID1_OLD 0x0f08
+#define ACC_IIRO_TID1 0x0f09
 #define IIRO_DIO_INPUT	0x1
 #define IIRO_DIO_OUTPUT 0x0
 
