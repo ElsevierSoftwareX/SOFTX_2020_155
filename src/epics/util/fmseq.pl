@@ -1142,7 +1142,7 @@ print OUTG      "[default]\n".
                 "datatype=4\n".
                 "datarate=" . $gds_datarate . "\n".
                 "offset=0\n".
-                "slope=6.1028e-05\n".
+                "slope=6.1035e-04\n".
                 "units=V\n".
                 "\n";
 
