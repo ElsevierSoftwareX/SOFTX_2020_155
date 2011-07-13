@@ -1065,9 +1065,10 @@ int mapPciModules(CDS_HARDWARE *pCds)
 			}
 		}
 		if (use_it) {
-                  printk("Access 24 BIO card on bus %x; device %x\n",
+                  printk("Access 24 BIO card on bus %x; device %x vendor 0x%x\n",
                         dacdev->bus->number,
-			PCI_SLOT(dacdev->devfn));
+			PCI_SLOT(dacdev->devfn),
+			dacdev->device);
 		  status = mapDio(pCds,dacdev);
 		  modCount ++;
 		}
@@ -1078,7 +1079,9 @@ int mapPciModules(CDS_HARDWARE *pCds)
   status = 0;
   bo_cnt = 0;
   // Search for ACCESS PCI-IIRO-8 isolated I/O modules
-  while((dacdev = pci_get_device(ACC_VID, ACC_IIRO_TID, dacdev))) {
+  while((dacdev = pci_get_device(ACC_VID, PCI_ANY_ID, dacdev))) {
+		if (dacdev->device != ACC_IIRO_TID && dacdev->device != ACC_IIRO_TID_OLD)
+			continue;
 		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
@@ -1092,9 +1095,10 @@ int mapPciModules(CDS_HARDWARE *pCds)
 			}
 		}
 		if (use_it) {
-                  printk("Access BIO card on bus %x; device %x\n",
+                  printk("Access 8 BIO card on bus %x; device %x vendor 0x%x\n",
                         dacdev->bus->number,
-			PCI_SLOT(dacdev->devfn));
+			PCI_SLOT(dacdev->devfn),
+			dacdev->device);
 		  status = mapIiroDio(pCds,dacdev);
 		  modCount ++;
 		}
@@ -1105,7 +1109,9 @@ int mapPciModules(CDS_HARDWARE *pCds)
   status = 0;
   bo_cnt = 0;
   // Search for ACCESS PCI-IIRO-16 isolated I/O modules
-  while((dacdev = pci_get_device(ACC_VID, ACC_IIRO_TID1, dacdev))) {
+  while((dacdev = pci_get_device(ACC_VID, PCI_ANY_ID, dacdev))) {
+		if (dacdev->device != ACC_IIRO_TID1 && dacdev->device != ACC_IIRO_TID1_OLD)
+			continue;
 		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
