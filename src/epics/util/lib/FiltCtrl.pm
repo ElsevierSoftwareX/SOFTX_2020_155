@@ -62,7 +62,7 @@ sub fromExp {
            } else {
              $dsp_ptr = "dsp_ptr";
            }
-	   $calcExp = "$dsp_ptr->inputs[$modNum].opSwitchE";
+	   $calcExp = "$dsp_ptr->inputs[$modNum].opSwitchE | $dsp_ptr->inputs[$modNum].opSwitchP";
 	}
 }
 
