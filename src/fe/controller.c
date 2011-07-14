@@ -673,8 +673,8 @@ void *fe_start(void *arg)
   static float duotoneMeanDac = 0.0;
   static rfmDone = 0;
   static dacBufSelect = 0;
-  static dacBufOffset = 0;
 #endif
+  static dacBufOffset = 0;
 
 
 #ifdef NO_RTL
@@ -1242,7 +1242,7 @@ udelay(1000);
 	//*((volatile unsigned int *)dolphin_memory) = timeSec ++;
 #else
 	  // Increment GPS second on cycle 0
-          // timeSec ++;
+          timeSec ++;
 #endif
           pLocalEpics->epicsOutput.timeDiag = timeSec;
 	  }
@@ -1595,7 +1595,7 @@ udelay(1000);
 #ifdef ADC_MASTER
 	   dacBufSelect = (dacBufSelect + 1) % 2;
 	   dacBufOffset = dacBufSelect * 0x100;
-	   #endif
+#endif
 	// Write out data to DAC modules
 	for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	{
