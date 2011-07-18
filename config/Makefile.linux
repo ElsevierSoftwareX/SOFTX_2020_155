@@ -21,10 +21,10 @@ SRC += src/drv/sync.c
 .SECONDARY: build/$(TARGET)/*.i
 
 # Preprocessor is used on .st file to get .i which is later fed to SNC
-PREPROCESS = /usr/bin/gcc -x c -E -P
+PREPROCESS = /usr/bin/gcc -x c -E -P -w
 
 # Standard C and C++ compiler and C preprocessor flags
-CFLAGS += $(EXTRA_CFLAGS)
+CFLAGS += -w $(EXTRA_CFLAGS)
 CFLAGS += -I$(EPICS_BASE)/include/os/Linux -I$(EPICS_BASE)/include 
 CFLAGS += -I$(EPICS_SEQ_BASE)/include
 CFLAGS += -I$(EPICS_ROOT)/extensions/include
@@ -48,7 +48,7 @@ CFLAGS += -DNO_RTL=1
 endif
 
 CXXFLAGS = $(CFLAGS)
-SNCFLAGS += +a -c
+SNCFLAGS += +a -c -w
 #SNCFLAGS += -e
 
 # Sequencer file (.st) compiler
