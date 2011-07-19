@@ -2432,6 +2432,18 @@ for($ii=0;$ii<$partCnt;$ii++)
 #       print "DBG: cdsPart = $cdsPart[$ii]   partType = $partType[$ii]\n";          # DBG
 	if ($cdsPart[$ii]) {
            if ($partType[$ii] ne "FunctionCall") {
+              if ($partType[$ii] =~ /^TrueRMS/) {
+#                print "\n+++  TEST:  Found a TrueRMS\n";
+#                print "\n+++  DESCR=$blockDescr[$ii]\n";
+
+                 if ($blockDescr[$ii] =~ /^window_size=(\d+)/) {
+#                   print "\n+++  VALUE=$1\n";
+                    $windowSize = $1;
+                 }
+		 else {
+                    $windowSize = 1024;
+		 }
+	      }
               ("CDS::" . $partType[$ii] . "::printFrontEndVars") -> ($ii);
            }
 	}
