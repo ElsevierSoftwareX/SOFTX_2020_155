@@ -729,6 +729,23 @@ sub node_processing {
    return 0;
 }
 
+# Gather tag names
+sub check_tags {
+   my ($node, $in_sub, $parent) =  @_;
+   return 0 if ($node->{NAME} ne "Block");
+   my $block_type = transform_block_type(${$node->{FIELDS}}{"BlockType"});
+   my $block_name = ${$node->{FIELDS}}{"Name"};
+   return 0 if ($block_type ne "FROM" && $block_type ne "GOTO");
+   my $tag = ${$node->{FIELDS}}{"GotoTag"};
+   #print $tag . "\n";
+   if ($block_type eq "FROM") {
+   	$::from_tags{$tag}++;
+   } else {
+        $::goto_tags{$tag}++;
+   }
+   return 0;
+}
+
 # Remove tags, replace'm with lines
 sub remove_tags {
    my ($node, $in_sub, $parent) =  @_;
@@ -1280,6 +1297,13 @@ sub process {
   print "Finished flattening the model\n";
   #CDS::Tree::print_tree($root);
   #die;
+  CDS::Tree::do_on_nodes($root, \&check_tags, 0, $root);
+  foreach (keys %::goto_tags) {
+         # See if there is one or more corresponding FROM tags
+         die "*** ERROR: Goto tag ", $_, " has no coresponding From\n" if ($::from_tags{$_} < 1);
+         # See if there multiple Goto tags with the same name
+         die "*** ERROR: Goto tag ", $_, " specified " , $::goto_tags{$_}, " times\n" if ($::goto_tags{$_} > 1);
+  }
   CDS::Tree::do_on_nodes($root, \&remove_tags, 0, $root);
   print "Removed Tags\n";
   $::time_to_die = 0;
