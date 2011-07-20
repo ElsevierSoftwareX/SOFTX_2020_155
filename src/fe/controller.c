@@ -2265,6 +2265,7 @@ int main(int argc, char **argv)
 	int cards;
 	int adcCnt;
 	int dacCnt;
+        int dac18Cnt;
 	int doCnt;
 	int do32Cnt;
 	int doIIRO16Cnt;
@@ -2423,6 +2424,7 @@ int main(int argc, char **argv)
 	status = 0;
 	adcCnt = 0;
 	dacCnt = 0;
+	dac18Cnt = 0;
 	doCnt = 0;
 	do32Cnt = 0;
 	doIIRO16Cnt = 0;
@@ -2431,9 +2433,16 @@ int main(int argc, char **argv)
 	// Master will map ADC cards first, then DAC and finally DIO
 	for(ii=0;ii<ioMemData->totalCards;ii++)
 	{
-		printf("Model %d = %d\n",ii,ioMemData->model[ii]);
+				
 		for(jj=0;jj<cards;jj++)
 		{
+/*
+			printf("Model %d = %d, type = %d, instance = %d, dacCnt = %d \n",
+				ii,ioMemData->model[ii],
+				cdsPciModules.cards_used[jj].type,
+				cdsPciModules.cards_used[jj].instance,
+ 				dacCnt);
+*/
 		   switch(ioMemData->model[ii])
 		   {
 			case GSC_16AI64SSA:
@@ -2463,7 +2472,7 @@ int main(int argc, char **argv)
 				break;
 			case GSC_18AO8:
 				if((cdsPciModules.cards_used[jj].type == GSC_18AO8) && 
-					(cdsPciModules.cards_used[jj].instance == dacCnt))
+					(cdsPciModules.cards_used[jj].instance == dac18Cnt))
 				{
 					printf("Found DAC at %d %d\n",jj,ioMemData->ipc[ii]);
 					kk = cdsPciModules.dacCount;
@@ -2519,7 +2528,7 @@ int main(int argc, char **argv)
 		}
 		if(ioMemData->model[ii] == GSC_16AI64SSA) adcCnt ++;
 		if(ioMemData->model[ii] == GSC_16AO16) dacCnt ++;
-		if(ioMemData->model[ii] == GSC_18AO8) dacCnt ++;
+		if(ioMemData->model[ii] == GSC_18AO8) dac18Cnt ++;
 		if(ioMemData->model[ii] == CON_6464DIO) doCnt ++;
 		if(ioMemData->model[ii] == CON_32DO) do32Cnt ++;
 		if(ioMemData->model[ii] == ACS_16DIO) doIIRO16Cnt ++;
