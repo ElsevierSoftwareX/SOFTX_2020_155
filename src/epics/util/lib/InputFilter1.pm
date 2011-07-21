@@ -8,13 +8,13 @@ sub partType {
 
 sub printHeaderStruct {
 	my ($i) = @_;
-        if (length $::xpartName[$i] > 24) {
+        if (length $::xpartName[$i] > 53) {
        		die "InputFilter1 name \"", $::xpartName[$i], "\" too long (max 24 charachters)";
    	}
 	print ::OUTH "\tfloat $::xpartName[$i]\_OFFSET;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_K;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_P;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_Z;\n";
+	print ::OUTH "\tfloat $::xpartName[$i]\_GAIN;\n";
+	print ::OUTH "\tfloat $::xpartName[$i]\_POLE;\n";
+	print ::OUTH "\tfloat $::xpartName[$i]\_ZERO;\n";
 	print ::OUTH "\tfloat $::xpartName[$i]\_TRAMP;\n";
 	print ::OUTH "\tint $::xpartName[$i]\_DORAMP;\n";
 }
@@ -23,9 +23,9 @@ sub printEpics {
    	my ($i) = @_;
 
 	print ::EPICS "INVARIABLE $::xpartName[$i]\_OFFSET $::systemName\.$::xpartName[$i]\_OFFSET float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_K $::systemName\.$::xpartName[$i]\_K float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_P $::systemName\.$::xpartName[$i]\_P float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_Z $::systemName\.$::xpartName[$i]\_Z float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_GAIN $::systemName\.$::xpartName[$i]\_K float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_POLE $::systemName\.$::xpartName[$i]\_P float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_ZERO $::systemName\.$::xpartName[$i]\_Z float ai 0 field(PREC,\"3\")\n";
 	print ::EPICS "INVARIABLE $::xpartName[$i]\_TRAMP $::systemName\.$::xpartName[$i]\_TRAMP float ai 0 field(PREC,\"3\")\n";
 	print ::EPICS "MOMENTARY $::xpartName[$i]\_DORAMP $::systemName\.$::xpartName[$i]\_DORAMP int ai 0 field(PREC,\"3\")\n";
 }
@@ -80,10 +80,10 @@ sub frontEndCode {
 
         $calcExp .= "inputFilterModule1($input, &\L$::xpartName[$i], &\L$::xpartName[$i]_val, "
 		  . "pLocalEpics->$::systemName.$::xpartName[$i]_OFFSET, "
-		  . "&\L$::xpartName[$i]_K, &\L$::xpartName[$i]_P, &\L$::xpartName[$i]_Z, "
-		  . "pLocalEpics->$::systemName.$::xpartName[$i]_K, "
-		  . "pLocalEpics->$::systemName.$::xpartName[$i]_P, "
-		  . "pLocalEpics->$::systemName.$::xpartName[$i]_Z, "
+		  . "&\L$::xpartName[$i]_K, &\L$::xpartName[$i]_POLE, &\L$::xpartName[$i]_ZERO, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_GAIN, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_POLE, "
+		  . "pLocalEpics->$::systemName.$::xpartName[$i]_ZERO, "
 		  . "pLocalEpics->$::systemName.$::xpartName[$i]_TRAMP, "
 		  . "&(pLocalEpics->$::systemName.$::xpartName[$i]_DORAMP), "
 		  . "&\L$::xpartName[$i]_KS, "
