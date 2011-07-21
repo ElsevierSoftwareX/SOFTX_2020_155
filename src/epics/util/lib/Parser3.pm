@@ -758,6 +758,7 @@ sub remove_tags {
    my $goto = CDS::Tree::find_node($parent, $tag, "GotoTag", "Goto", "BlockType");
    #print_node($goto);
    my $goto_name = ${$goto->{FIELDS}}{"Name"};
+   die "*** ERROR: Can't find a Goto for a From $tag\n*** ERROR: The Goto must be in the same subsystem\n" if !defined $goto_name;
    #print "GotoName is $goto_name\n";
    # Find the line leading to the Goto
    my $goto_line = find_branch($parent, $goto_name, 1, 1, $parent);
@@ -765,7 +766,7 @@ sub remove_tags {
    my $src_name = ${$goto_line->{FIELDS}}{"SrcBlock"};
    my $src_port = ${$goto_line->{FIELDS}}{"SrcPort"};
    #print "Source $src_name\n";
-   #print "Couldn't find tag source on $goto_name\n" unless $src_name;
+   print "Couldn't find tag source on $goto_name\n" unless $src_name;
    #die if ($goto_name eq "YARM_TRIG_From");
    # Find line originating at the "From"
    my $from_line = find_line($parent, $block_name, 1);
