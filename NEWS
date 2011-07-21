@@ -1,3 +1,5 @@
+Branch closed for Release 7/21/11
+
 Bug Fixes:
 - daqLib.c fixed to support up to 256x decimation for DAQ channels. Previous versions only
 provided proper decimation to 32x.
@@ -10,10 +12,14 @@ as the DAC module was trying to DMA data out of that buffer.
 - Fixed biquad filter module operation.
 - Change inputFilter part to use extensions of GAIN,POLE, ZERO instead of K,P,Z.
 - RMS part to have limits of +/-200000 instead of +/-2000.
+- controller.c fixed to handle mix of 16 and 18bit DAC cards.
+- mbuff fixed to remove diagnostic prints which were filling up dmesg.
+- Makefile and feCodeGen modified to remove warning messages from compile output.
 
 New Additions:
 - Updated dataviewer with support for 32K and 64K resolution data viewing.
 - Various updates to support new longer signal names (Max size, with extensions, 60 chars).
+- map.c modified to handle new PCIe versions of AccessIO binary I/O cards (for MIT)
 
 Overview of changes from 2.0 to 2.1
 ==================================
