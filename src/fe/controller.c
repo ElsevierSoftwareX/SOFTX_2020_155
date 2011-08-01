@@ -20,7 +20,6 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-
 #include "feSelectHeader.h"
 
 #ifdef NO_RTL
@@ -1554,6 +1553,9 @@ udelay(1000);
                         for(ii=0;ii<32;ii++)
                         {
                                 adcData[jj][ii] = ioMemData->iodata[mm][ioMemCntr].data[ii];
+#ifdef FLIP_SIGNALS
+                                adcData[jj][ii] *= -1;
+#endif
                                 dWord[jj][ii] = adcData[jj][ii];
 #ifdef OVERSAMPLE
 				if (dWordUsed[jj][ii]) {
@@ -1650,6 +1652,9 @@ udelay(1000);
 		}
 		for (ii=0; ii < num_outs; ii++)
 		{
+#ifdef FLIP_SIGNALS
+			dacOut[jj][ii] *= -1;
+#endif
 #ifdef OVERSAMPLE_DAC
 			if (dacOutUsed[jj][ii]) {
 #ifdef NO_ZERO_PAD
@@ -2113,7 +2118,8 @@ udelay(1000);
 		}
 		if(cdsPciModules.dacType[jj] == GSC_16AO16)
 		{
-			status = checkDacBuffer(jj);
+			// status = checkDacBuffer(jj);
+			status = 3;
 			if(status != 3)
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(8);
 			    else pLocalEpics->epicsOutput.statDac[jj] |= 8;

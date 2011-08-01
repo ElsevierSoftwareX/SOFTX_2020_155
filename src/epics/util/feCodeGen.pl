@@ -41,6 +41,7 @@ $timeMaster = -1;
 $timeSlave = -1;
 $iopTimeSlave = -1;
 $rfmTimeSlave = -1;
+$flipSignals = 0;
 $pciNet = -1;
 $shmem_daq = 0; # Do not use shared memory DAQ connection
 $no_sync = 0; # Sync up to 1PPS by default
@@ -3219,6 +3220,9 @@ if ($rfmTimeSlave > -1) {
 } else {
   print OUTM "#Uncomment to build an RFM time slave\n";
   print OUTM "#EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
+}
+if ($flipSignals) {
+  print OUTM "EXTRA_CFLAGS += -DFLIP_SIGNALS=1\n";
 }
 if ($pciNet > -1) {
   print OUTM "#Enable use of PCIe RFM Network\n";
