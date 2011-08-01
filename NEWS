@@ -1,3 +1,7 @@
+New Feature:
+- added flip_signals parameter to make working with buffered and unbuffered
+  aa/ai filters easier
+
 Bug Fixes:
 - daqLib.c fixed to support up to 256x decimation for DAQ channels. Previous versions only
 provided proper decimation to 32x.
