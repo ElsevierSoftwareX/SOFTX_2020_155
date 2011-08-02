@@ -1,6 +1,14 @@
+Overview of changes from 2.3 
+============================
+Bug Fixes:
+- fixed rogue testpoints shown up at AEI/GEO and LLOLSC
+
 New Feature:
 - added flip_signals parameter to make working with buffered and unbuffered
   aa/ai filters easier
+
+Overview of changes from 2.1 to 2.3
+===================================
 
 Bug Fixes:
 - daqLib.c fixed to support up to 256x decimation for DAQ channels. Previous versions only
