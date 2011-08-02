@@ -271,7 +271,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     printf("daqLib DCU_ID = %d\n",dcuId);
 
     /* Set up pointer to DAQ configuration information in shmem */
-    pInfo = (DAQ_INFO_BLOCK *)(_epics_shm + DAQ_INFO_ADDRESS + (dcuId * sizeof(DAQ_INFO_BLOCK)));
+    pInfo = (DAQ_INFO_BLOCK *)(_epics_shm + DAQ_INFO_ADDRESS);
     // printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
 
     /* Get the .INI file crc checksum to pass to DAQ Framebuilders for config checking */

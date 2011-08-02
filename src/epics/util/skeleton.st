@@ -1110,7 +1110,7 @@ state daqInit
         strcpy(site, macValueGet("site"));
         strcpy(ifo, macValueGet("ifo"));
 	strcpy(daqsys, macValueGet("sysfile"));
-%%      info = ((DAQ_INFO_BLOCK *)((base = (volatile void *)findRfmCard(0)) + DAQ_INFO_ADDRESS)) + dcuId;
+%%      info = ((DAQ_INFO_BLOCK *)((base = (volatile void *)findRfmCard(0)) + DAQ_INFO_ADDRESS));
 	pvPut(dcuId);
 %%    rfm_assign(pEpics->epicsInput.dcuId, dcuId);
 %%      printf("daq info at 0x%lx\n",(long)info);
