@@ -1,3 +1,7 @@
+Tue Aug  2 00:12:26 CDT 2011
+Added epics-base-3.14.10_long.patch patch file to change max epics channel
+name from 40 to 60 chars.
+
 Friday, September 17 2010
 I have enabled SYSFS back, disabled MICROCODE. There is new .config file
 and an updated patch.

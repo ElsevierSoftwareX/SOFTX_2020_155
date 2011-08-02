@@ -1,0 +1,12 @@
+diff -uNr epics-base-3.14.10/src/libCom/misc/epicsTypes.h epics-base-3.14.10_long/src/libCom/misc/epicsTypes.h
+--- epics-base-3.14.10/src/libCom/misc/epicsTypes.h	2008-04-01 10:54:01.000000000 -0500
++++ epics-base-3.14.10_long/src/libCom/misc/epicsTypes.h	2011-08-02 00:00:34.000000000 -0500
+@@ -75,7 +75,7 @@
+  * db_access.h 
+  *
+  */
+-#define MAX_STRING_SIZE 40
++#define MAX_STRING_SIZE 60
+ typedef char            epicsOldString[MAX_STRING_SIZE]; 
+ 
+ /*
