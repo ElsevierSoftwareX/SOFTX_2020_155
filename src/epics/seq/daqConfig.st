@@ -73,7 +73,7 @@ state init
 	strcpy(site, macValueGet("site"));
 	strcpy(ifo, macValueGet("ifo"));
 	strcpy(sys, macValueGet("sys"));
-%%	info = ((DAQ_INFO_BLOCK *)((base = (volatile void *)findRfmCard(0)) + DAQ_INFO_ADDRESS)) + sysnum;
+%%	info = ((DAQ_INFO_BLOCK *)((base = (volatile void *)findRfmCard(0)) + DAQ_INFO_ADDRESS));
 %%	printf("daq info at 0x%lx\n",(long)info);
 %%	memset(&infoTmp, 0, sizeof(infoTmp));
 %%	info->reconfig = 0;
