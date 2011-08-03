@@ -1,3 +1,7 @@
+Wed Aug  3 13:47:06 CEST 2011
+Added linux-3.0-cs.patch latest Linux kernel patch, but only tested that it compiles
+with linux-2.6.34.1-cs.config, did not boot the kernel.
+
 Tue Aug  2 00:12:26 CDT 2011
 Added epics-base-3.14.10_long.patch patch file to change max epics channel
 name from 40 to 60 chars.
@@ -10,7 +14,7 @@ Wed Sep  1 09:03:34 PDT 2010
 linux-2.6.34.1-cs.patch produced at LHO in August 2010.
 We ran it on the diskless nodes, which had sysfs not configured in the kernel.
 This fixed a problem with notifiers (see cpu.c where the call is commented out).
-Also see ././linux-2.6.34.1-cs.config, out kernel .config file.
+Also see linux-2.6.34.1-cs.config, our kernel .config file.
 
 
 linux-2.6.34-cs-patch produced at Hannover in July 2010
