@@ -1973,7 +1973,7 @@ gm_receiver_thread(void *p)
      exit(1);
   }
   system_log(1, "Opened shared memory ipc area\n");
-  ioMemData = (IO_MEM_DATA *)(((char *)ptr) + 0x4000);
+  ioMemData = (volatile IO_MEM_DATA *)(((char *)ptr) + IO_MEM_DATA_OFFSET);
 
   CDS_HARDWARE cdsPciModules;
 
@@ -2456,7 +2456,7 @@ static const int cycle_delay = 4;
 
 #ifdef USE_SYMMETRICOM
 
-	  system_log(5, "dcu %d block %d cycle %d  gps %d symm %d\n", j, cblk, gmDaqIpc[j].bp[cblk].cycle,  dcu_gps, gps);
+	  //system_log(5, "dcu %d block %d cycle %d  gps %d symm %d\n", j, cblk, gmDaqIpc[j].bp[cblk].cycle,  dcu_gps, gps);
 	  unsigned long mygps = gps;
 	  if (cblk > (15 - cycle_delay)) mygps--;
 	  if (dcu_gps != mygps) {
