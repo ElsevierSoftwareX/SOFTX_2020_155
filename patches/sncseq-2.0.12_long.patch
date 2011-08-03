@@ -1,0 +1,11 @@
+--- sncseq-2.0.12/src/snc/phase2.c	2011-08-03 16:28:29.575232132 +0200
++++ sncseq-2.0.12/src/snc/phase2.c	2011-08-03 16:11:26.114507347 +0200
+@@ -148,7 +148,7 @@
+ 
+ 	/* The following definition should be consistant with db_access.h */
+ 	printf("\n");
+-	printf("#define MAX_STRING_SIZE 40\n");
++	printf("#define MAX_STRING_SIZE 60\n");
+ 
+ 	/* #define's for compiler options */
+ 	printf("\n");

@@ -1,3 +1,6 @@
+Wed Aug  3 16:41:41 CEST 2011
+Added sncseq-2.0.12_long.patch for 60 char stings
+
 Wed Aug  3 13:47:06 CEST 2011
 Added linux-3.0-cs.patch latest Linux kernel patch, but only tested that it compiles
 with linux-2.6.34.1-cs.config, did not boot the kernel.
