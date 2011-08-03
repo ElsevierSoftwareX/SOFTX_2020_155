@@ -591,7 +591,7 @@ inline unsigned long current_time() {
 	struct timespec t;
 	extern struct timespec current_kernel_time(void);
 	t = current_kernel_time();
-	t.tv_sec += - 315964819 + 33;
+	t.tv_sec += - 315964819 + 33 + 2;
 	return t.tv_sec;
 }
 
