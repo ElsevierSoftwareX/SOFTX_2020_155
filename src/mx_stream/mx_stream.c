@@ -274,6 +274,7 @@ main(int argc, char **argv)
 #endif
 	// So that openmx is not aborting on connection loss
 	putenv("OMX_FATAL_ERRORS=0");
+	putenv("MX_FATAL_ERRORS=0");
 
 	mx_init();
 	/* set up defaults */
