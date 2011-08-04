@@ -2187,7 +2187,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 
 // No waiting here if compiled as broadcasts receiver
 #ifndef USE_BROADCAST
-static const int cycle_delay = 4;
+int cycle_delay = daqd.cycle_delay;
    // Wait until a second boundary
    {
 #if 0
@@ -2463,6 +2463,7 @@ static const int cycle_delay = 4;
 	    daqd.dcuStatus[0][j] |= 0x4000;
 	    daqd.dcuCrcErrCnt[0][j]++;
 	    daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
+	    system_log(5, "GPS MISS dcu %d (%s); dcu_gps=%d gps=%d\n", j, daqd.dcuName[j], dcu_gps, gps);
 	  }
 #endif
 
