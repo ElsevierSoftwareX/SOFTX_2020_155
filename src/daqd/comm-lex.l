@@ -48,6 +48,7 @@ yywrap ()
 
 
 %%
+"cycle_delay" { return CYCLE_DELAY; }
 "symm_gps_offset" { return SYMM_GPS_OFFSET; }
 "no_compression" { return NO_COMPRESSION; }
 "allow_tpman_connect_fail" { return ALLOW_TPMAN_CONNECT_FAILURE; }

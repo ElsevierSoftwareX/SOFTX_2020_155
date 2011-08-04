@@ -256,7 +256,7 @@ class daqd_c {
     , controller_dcu(DCU_ID_SUS_1), avoid_reconnect(0)
 #endif
     , tp_allow(-1), no_myrinet(0), allow_tpman_connect_failure(0), no_compression(0)
-    , symm_gps_offset(0)
+    , symm_gps_offset(0), cycle_delay(4)
     {
       // Initialize frame saver startup synchronization semaphore
       sem_init (&frame_saver_sem, 0, 1);
@@ -898,6 +898,9 @@ class daqd_c {
   // This is introduced to fix a problem with IRIG-B signal lacking 
   // leap seconds information
   int symm_gps_offset;
+
+  // Delay data taking by this many 16 hz cycles (default is 4 set above(
+  int cycle_delay;
 
 }; // class daqd_c
 

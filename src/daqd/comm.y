@@ -88,6 +88,7 @@ static int prompt_lineno;
 
 %}
 
+%token <y_void>  CYCLE_DELAY
 %token <y_void>  SYMM_GPS_OFFSET
 %token <y_void>  NO_COMPRESSION
 %token <y_void>  ALLOW_TPMAN_CONNECT_FAILURE
@@ -277,6 +278,10 @@ CommandLines: /* Nothing */
 	;
 
 CommandLine: /* Nothing */
+	| SET CYCLE_DELAY '=' INTNUM {
+                AUTH_CHECK(((my_lexer *)lexer));
+		daqd.cycle_delay = $4;
+	}
 	| SET SYMM_GPS_OFFSET '=' INTNUM {
                 AUTH_CHECK(((my_lexer *)lexer));
 		daqd.symm_gps_offset = $4;
