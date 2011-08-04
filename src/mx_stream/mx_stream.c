@@ -177,13 +177,16 @@ do {
 
 	if (!myErrorSignal) {
 	do {
+		int new_cycle;
 		// Wait for cycle count update from FE
 		do{
 			usleep(1000);
 			//printf("%d\n", shmIpcPtr[0]->cycle);
-		}while(shmIpcPtr[0]->cycle == lastCycle);
-
-	  	lastCycle = shmIpcPtr[0]->cycle;
+			new_cycle = shmIpcPtr[0]->cycle;
+	        } while (new_cycle == lastCycle);
+		        
+		 lastCycle++;
+		 lastCycle %= 16;
 
 		// Send data for each system
 		for (int i = 0; i < nsys; i++) {
@@ -226,7 +229,7 @@ do {
 		  // mx_isend(ep, &seg, 1, dest, 1, NULL, &req[cur_req]);
 
 		  /* wait for the send to complete */
-		  mx_wait(ep, &req[cur_req], 150, &stat, &result);
+		  mx_wait(ep, &req[cur_req], MX_INFINITE, &stat, &result);
 		  if (!result) {
 			fprintf(stderr, "mxWait failed with status %s\n", mx_strstatus(stat.code));
 			//exit(1);
