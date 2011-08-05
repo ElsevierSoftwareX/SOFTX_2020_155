@@ -246,9 +246,9 @@ foreach $value (@inData)  {
          $acquireCount[0] = 0;
          $acquireCount[1] = 0;
 
-         if ($defaultAcquireValue != -1)  {
-            $acquireCount[$defaultAcquireValue]++;
-         }
+#        if ($defaultAcquireValue != -1)  {
+#           $acquireCount[$defaultAcquireValue]++;
+#        }
 
          for (my $i = 0; $i < 9; $i++)  {
             $rateCount[$i] = 0;
