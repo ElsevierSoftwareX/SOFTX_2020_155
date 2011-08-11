@@ -819,6 +819,9 @@ sub remove_busses {
 			# Do not continue processing this selector (for now)
 			# ADCs are represented as subsystems with bus
 			# selector coming out of it
+			# :TODO: we may want to fix this case (bus coming out
+			# of a top-level subsystem), but it may not be easy
+			#print "Failed to find BusCreator for $block_name\n";
 			return 0;
 		}
 		my $bus_creator_inputs = ${$bus_creator->{FIELDS}}{"Inputs"};

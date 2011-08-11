@@ -1085,7 +1085,7 @@ $foundSysCon = 0;
 
 	# Did not find any connections to subsystem OUTPUT, so print error.
 	if($foundCon == 0 && $foundSysCon == 0){
-	print "No connect for $xpartName[$ii] $partOutput[$ii][0] $partOutputPort[$ii][0]\n";
+		die "No connect for $xpartName[$ii] $partOutput[$ii][0] $partOutputPort[$ii][0]\n";
 	}
 	}
 }
