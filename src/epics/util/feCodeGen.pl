@@ -127,6 +127,7 @@ $configFilesDir = "../../../build/" . $ARGV[1] . "epics/config";
 #if($dcuId > 16) {$rate = 480;}
 if (@ARGV == 2) { $skeleton = $ARGV[1]; }
 open(EPICS,">../fmseq/".$ARGV[1]) || die "cannot open output file for writing";
+open(DAQ,">../fmseq/".$ARGV[1]."_daq") || die "cannot open DAQ output file for writing";
 mkdir $cFileDirectory, 0755;
 open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
 # Save existing front-end Makefile

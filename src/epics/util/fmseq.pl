@@ -742,6 +742,24 @@ if ($cnt == 0) {
 }
 
 close IN;
+
+# Read daq definition file
+#
+die "GDS data not specified, internal error, this is a bug" unless $gds_specified;
+open(IN,"<$ARGV[0]_daq");
+while (<IN>) {
+    s/^\s//g;
+    s/\s$//g;
+    my @nr = split /\s+/;
+    next unless length $nr[0];
+    $nr[1] = $gds_datarate unless defined $nr[1];
+    die "Invalid DAQ channel $nr[0] rate $nr[1]; system rate is $gds_datarate" if $nr[1] > $gds_datarate;
+    $nr[0] = "$site:$systems[0]$nr[0]";
+    $DAQ_Channels{$nr[0]} = $nr[1];
+    #print $nr[0], " ", $nr[1], "\n";
+}
+close IN;
+
 open(IN,"<" . $skeleton) || die "cannot open sequencer Skeleton file $skeleton";
 open(OUT,">./$ARGV[0].st") || die "cannot open $ARGV[0].st file for writing";
 
@@ -1136,7 +1154,7 @@ my $daqFile = "$ARGV[0].ini";
 open(OUTG,">".$daqFile) || die "cannot open $daqFile file for writing";
 print OUTG      "[default]\n".
                 "gain=1.00\n".
-                "acquire=0\n".
+                "acquire=1\n".
                 "dcuid=$dcuId\n".
                 "ifoid=$ifoid\n".
                 "datatype=4\n".
@@ -1168,25 +1186,48 @@ foreach (@tp_data) {
 }
 my $cnt = 0;
 my $daq_name = "DQ";
+
+my $have_daq_spec = 0;
+$have_daq_spec = 1 if defined %DAQ_Channels;
+
 # Print chnnum, datarate, 
 foreach (sort @section_names) {
-        if ($cnt < 2 && m/_OUT$/) {
-                $comment = "";
-                $cnt++;
-        } else {
-                $comment = "#";
-        }
+	my $comment;
+
+	if ($have_daq_spec) {
+	  if (defined $DAQ_Channels{$_}) {
+	    ${$sections{$_}}{"datarate"} = $DAQ_Channels{$_};
+	    undef $comment;
+	    delete $DAQ_Channels{$_};
+	  } else {
+	    $comment = "#";
+          }
+        } else  {
+	  if ($cnt < 2 && m/_OUT$/) {
+		$comment = "";
+		$cnt++;
+	  } else {
+		$comment = "#";
+	  }
+	}
 #        print OUTG "${comment}[${_}_${def_datarate}]\n";
         print OUTG "${comment}[${_}_${daq_name}]\n";
-        print OUTG  "${comment}acquire=0\n";
+        print OUTG  "${comment}acquire=$have_daq_spec\n";
         foreach $sec (keys %{$sections{$_}}) {
           if ($sec eq "chnnum" || $sec eq "datarate" || $sec eq "datatype") {
                 print OUTG  "${comment}$sec=${$sections{$_}}{$sec}\n";
           }
         }
 }
-close OUTG;
 
+if (keys %DAQ_Channels) {
+  print STDERR "Unknown DAQ channel(s) specified in the model:\n";
+  foreach $i (keys %DAQ_Channels) {
+	print STDERR "$i\n";
+  }
+  die;
+}
+close OUTG;
 
 }
 
