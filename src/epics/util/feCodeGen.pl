@@ -2878,7 +2878,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 	{
 	   print OUT "// DIVIDE\n";
 	   $ce =<<HERE
-$xpartName[$mm] = $fromExp[0] /
+\L$xpartName[$mm] = $fromExp[0] /
 	(($fromExp[1] < 0.0)
 		?
 		(($fromExp[1] > -1e-20)? -1e-20: $fromExp[1])
