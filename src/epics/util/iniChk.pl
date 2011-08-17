@@ -210,6 +210,7 @@ else  {
 $defaultCount = -1;
 $errorCount = 0;
 $lineCount = 0;
+$tooManyBytes = 0;
 
 $defaultAcquireValue = -1;
 $defaultSection = 1;
@@ -298,10 +299,13 @@ if ($totalByteCount <= 2097152)  {
 }
 else  {
    print "\* WARNING \*, this is bigger than 2M bytes!!\n";
+   $tooManyBytes++;
 }
 
 #
 #  Print a count of the total number of errors found.
 #
 print "\nTotal error count is $errorCount\n\n";
+
+exit($errorCount + $tooManyBytes);
 
