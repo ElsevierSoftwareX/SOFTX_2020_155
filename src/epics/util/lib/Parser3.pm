@@ -1292,6 +1292,44 @@ sub process {
   } while ($n_merged != 0);
   print "Merged library referenes\n";
 
+  #CDS::Tree::print_tree($root);
+  #die;
+  # Find all annotations starting with keyword "#DAQ Channels"
+  # They represent the list of DAQ channels the user want
+  #
+  my $annot, $prefix;
+  do {
+    ($annot, $prefix) = CDS::Tree::find_daq_annotation($root);
+    if ($annot ne undef) {
+      my @sp = split(/\\n/, ${$annot->{FIELDS}}{Name});
+      # See if the channel name and rate specified
+      foreach $i (@sp) {
+	      next if ($i =~ "^#");
+	      my @nr = split(/\s+/, $i);
+	      next unless length $nr[0];
+	      my $pn = $prefix . $nr[0];
+	      die "Bad DAQ channel name specified: $pn\n" unless name_check($pn);
+	      my $rate;
+	      if (defined $nr[1]) {
+		my @rates = qw(32 64 128 256 512 1024 2048 4096 8192 16384 32768 65536);
+		my @res = grep {$nr[1] == $_} @rates;
+		#print $nr[1], " ", @res, "\n";
+		die "Bad DAQ channel rate specified: $pn, $nr[1]\n" unless @res;
+		#print $pn," ", $nr[1], "\n";
+      	      } else {
+		#print $pn," default rate\n";
+	      }
+      	      # Add channel name and rate into the hash and print into the _daq file
+	      # fmseq.pl then will open and process the DAQ channel data
+	      die "Duplicated DAQ channel name $pn\n" if defined $::DAQ_Channels{$pn};
+	      $::DAQ_Channels{$pn} = $nr[1];
+	      print ::DAQ $pn, " ", $nr[1], "\n";
+      }
+      ${$annot->{FIELDS}}{Name} = "Removed";
+    }
+  } while($annot ne undef);
+  close ::DAQ;
+
   # Store ezca block names in description field, so that they are accessible later
   # without the subsystems prefix
   CDS::Tree::do_on_nodes($root, \&store_ezca_names, 0, $root);
@@ -1299,8 +1337,6 @@ sub process {
   print "Flattening the model\n";
   flatten_nested_subsystems($root);
   print "Finished flattening the model\n";
-  #CDS::Tree::print_tree($root);
-  #die;
   CDS::Tree::do_on_nodes($root, \&check_tags, 0, $root);
   foreach (keys %::goto_tags) {
          # See if there is one or more corresponding FROM tags

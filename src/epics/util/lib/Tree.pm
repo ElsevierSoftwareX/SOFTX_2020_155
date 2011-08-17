@@ -103,6 +103,28 @@ sub find_node {
 	return undef;
 }
 
+# Find all DAQ channel Annotations
+sub find_daq_annotation {
+	my($tree) = @_;
+	if ($tree->{NAME} eq "Annotation" && ${$tree->{FIELDS}}{Name} =~ /^#\s*[dD][aA][qQ]\s+[cC]hannels/) {
+		return ($tree, "");
+	} else {
+		for (@{$tree->{NEXT}}) {
+			#print "Recursing into ", $_->{NAME}, " ", ${$_->{FIELDS}}{"Name"}, "\n";
+                	($res, $prefix) = find_daq_annotation($_);
+			if ($res) {
+				#print $tree->{NAME}, " ", ${$tree->{FIELDS}}{"Name"}, " ", ${$tree->{FIELDS}}{"Type"}, "\n";
+				# Annotate the prefix if this is block
+				if ($tree->{NAME} eq "Block") {
+				  $prefix = ${$tree->{FIELDS}}{"Name"}. "_" .$prefix;
+				}
+				return ($res, $prefix);
+			}
+        	}
+	}
+	return undef;
+}
+
 # Print all terminator nodes
 #do_on_leaves($root, sub {if ($_->{PRINTED} != 1) {print $_->{NAME}, "\n"; $_->{PRINTED} = 1; }});
 
