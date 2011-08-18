@@ -1,4 +1,9 @@
 #!/usr/bin/perl
+use Cwd;
+
+$currWorkDir = &Cwd::cwd();
+$rcg_src_dir = $ENV{"RCG_SRC_DIR"};
+if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
 
 %fpar = (
     "input" => "INMON",
@@ -68,7 +73,7 @@
 
 die "Usage: $PROGRAM_NAME <system name> [ST skeleton file name] < <system definition file>" 
 	if (@ARGV != 1 && @ARGV != 2);
-$skeleton = "../util/skeleton.st";
+$skeleton = "$rcg_src_dir/src/epics/util/skeleton.st";
 if (@ARGV == 2) { $skeleton = $ARGV[1]; }
 open(IN,"<-") || die "cannot open standard input\n";
 
@@ -911,7 +916,7 @@ $hepi = substr($ARGV[0],0,4) eq "hepi";
 
 foreach $i ( @names ) {
     close IN;
-    open(IN,"<../util/skeleton.db") || die "cannot open skeleton.db file";
+    open(IN,"<$rcg_src_dir/src/epics/util/skeleton.db") || die "cannot open skeleton.db file";
 
     my $top_name = is_top_name($i);
     my $tv_name;
