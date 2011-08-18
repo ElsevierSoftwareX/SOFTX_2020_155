@@ -30,6 +30,7 @@ CFLAGS += -I$(EPICS_SEQ_BASE)/include
 CFLAGS += -I$(EPICS_ROOT)/extensions/include
 CFLAGS += -I/usr/lib/rmnet -I/usr/lib/rfm2g
 CFLAGS += -I$(RCG_SRC_DIR)/src/include -I$(RCG_SRC_DIR)/src/include/drv
+CFLAGS += -Isrc/include
 CFLAGS += -I/usr/lib64
 ifeq (,$(findstring tcsepics, $(TARGET)))
 CFLAGS += -DRFM_EPICS -DNO_FM10GEN_C_CODE
