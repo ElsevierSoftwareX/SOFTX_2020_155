@@ -20,7 +20,7 @@ clean-% :: config/Makefile.%epics
 	/bin/rm -rf build/$@epics-config
 	/bin/mv -f build/$@epics/medm build/$@epics-medm
 	/bin/mv -f build/$@epics/config build/$@epics-config
-	(/bin/rm -rf target/$@epics build/$@epics; make -f config/Makefile.$@epics)
+	(/bin/rm -rf target/$@epics build/$@epics; make -f config/Makefile.$@epics RCG_SRC_DIR=`pwd`)
 	(cd src/epics/util; ./nameLengthChk.pl $@)
 	/bin/mkdir -p build/$@epics
 	/bin/mv -f build/$@epics-medm build/$@epics/medm

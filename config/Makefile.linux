@@ -1,6 +1,7 @@
 # Linux Epics IOC system build rules
 
 EPICS_ROOT=/opt/rtapps/epics
+EPICS_ROOT=/opt/epics-3.14.9-linux
 
 # Switching to 3.14.6 Epics; 28 Oct 2004
 # EPICS_ROOT=/opt/CDS/h/alex/epics/base-3.14.6
@@ -15,7 +16,7 @@ EPICS_SEQ_BASE=$(EPICS_ROOT)/modules/sncseq
 EPICS_HOST_ARCH=linux-x86_64
 
 # Sequencer synchronization; to fix broken seq package
-SRC += src/drv/sync.c
+SRC += $(RCG_SRC_DIR)/src/drv/sync.c
 
 # Do not delete these intermediate files
 .SECONDARY: build/$(TARGET)/*.i
@@ -29,7 +30,7 @@ CFLAGS += -I$(EPICS_BASE)/include/os/Linux -I$(EPICS_BASE)/include
 CFLAGS += -I$(EPICS_SEQ_BASE)/include
 CFLAGS += -I$(EPICS_ROOT)/extensions/include
 CFLAGS += -I/usr/lib/rmnet -I/usr/lib/rfm2g
-CFLAGS += -Isrc/include -Isrc/include/drv
+CFLAGS += -I$(RCG_SRC_DIR)/src/include -I$(RCG_SRC_DIR)/src/include/drv
 CFLAGS += -I/usr/lib64
 ifeq (,$(findstring tcsepics, $(TARGET)))
 CFLAGS += -DRFM_EPICS -DNO_FM10GEN_C_CODE
@@ -58,7 +59,7 @@ SNC = $(EPICS_SEQ_BASE)/bin/linux-x86_64/snc $(SNCFLAGS)
 REGGEN = $(EPICS_BASE)/bin/linux-x86_64/registerRecordDeviceDriver.pl
 
 # Sequencer generator files
-FMSEQFILES = src/epics/util/fmseq.pl src/epics/util/skeleton.db src/epics/util/skeleton.st
+FMSEQFILES = $(RCG_SRC_DIR)/src/epics/util/fmseq.pl $(RCG_SRC_DIR)/src/epics/util/skeleton.db $(RCG_SRC_DIR)/src/epics/util/skeleton.st
 
 # Standard Epics IOC server library flags
 LIBFLAGS += -g
@@ -79,7 +80,7 @@ LIBFLAGS += -lpthread  -lreadline -lcurses -lrt
 # and all the rest, which should be C files
 SEQ_SRCS = $(filter %.st, $(SRC))
 CSRCS = $(filter-out %.st, $(SRC))
-CSRCS += src/epics/seq/main.c
+CSRCS += $(RCG_SRC_DIR)/src/epics/seq/main.c
 # Required Epics files
 CCSRCS += build/$(TARGET)/registerRecordDeviceDriver.cc
 
@@ -95,7 +96,7 @@ SEQ_OBJ += $(addprefix build/$(TARGET)/, $(notdir $(CSRCS:%.c=%.o)))
 SEQ_OBJ += $(addprefix build/$(TARGET)/, $(notdir $(CCSRCS:%.cc=%.o)))
 
 # Standard Epics IOC database definition file
-DBD += src/epics/dbd/a.dbd build/$(TARGET)/*.dbd
+DBD += $(RCG_SRC_DIR)/src/epics/dbd/a.dbd build/$(TARGET)/*.dbd
 
 # Main target to make an Epics IOC server
 all: target build/$(TARGET)/$(TARGET) install
@@ -216,7 +217,7 @@ build/$(TARGET)/%.i: build/$(TARGET)/%.st
 # Generate sequencer file using fmseq.pl
 build/$(TARGET)/%.st: src/epics/fmseq/% $(FMSEQFILES)
 	(cd src/epics/fmseq; \
-	 cat $(notdir $<) | cpp $(CFLAGS) -  | grep -v ^# | $(if $(FMSEQ), $(FMSEQ), ../util/fmseq.pl) $(notdir $<) &&\
+	 cat $(notdir $<) | cpp $(CFLAGS) -  | grep -v ^# | $(if $(FMSEQ), $(FMSEQ), $(RCG_SRC_DIR)/src/epics/util/fmseq.pl) $(notdir $<) &&\
 	 mv $(notdir $<).* ../../../build/$(TARGET))
 
 
@@ -244,25 +245,25 @@ build/$(TARGET)/%10.st: build/$(TARGET)/%.st
 	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\110/g > $@
 
 # Replicate sequncers
-build/$(TARGET)/%1.st: src/epics/seq/%.st
+build/$(TARGET)/%1.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
 	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\11/g > $@
-build/$(TARGET)/%2.st: src/epics/seq/%.st
+build/$(TARGET)/%2.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
 	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\12/g > $@
-build/$(TARGET)/%3.st: src/epics/seq/%.st
+build/$(TARGET)/%3.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
 	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\13/g > $@
-build/$(TARGET)/%4.st: src/epics/seq/%.st
+build/$(TARGET)/%4.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
 	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\14/g > $@
-build/$(TARGET)/%5.st: src/epics/seq/%.st
+build/$(TARGET)/%5.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
 	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\15/g > $@
-build/$(TARGET)/%6.st: src/epics/seq/%.st
+build/$(TARGET)/%6.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
 	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\16/g > $@
-build/$(TARGET)/%7.st: src/epics/seq/%.st
+build/$(TARGET)/%7.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
 	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\17/g > $@
-build/$(TARGET)/%8.st: src/epics/seq/%.st
+build/$(TARGET)/%8.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
 	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\18/g > $@
-build/$(TARGET)/%9.st: src/epics/seq/%.st
+build/$(TARGET)/%9.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
 	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\19/g > $@
-build/$(TARGET)/%10.st: src/epics/seq/%.st
+build/$(TARGET)/%10.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
 	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\110/g > $@
 
 # Build C++ version of sequencer code
@@ -274,15 +275,15 @@ build/$(TARGET)/%10.st: src/epics/seq/%.st
 	echo 'registrar('`basename $(@:%.c=%)`'Registrar)' > $(@:%c=%dbd) 
 
 # Compile sequencer-related C code
-build/$(TARGET)/%o: src/epics/seq/%c
+build/$(TARGET)/%o: $(RCG_SRC_DIR)/src/epics/seq/%c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 # Compile driver C code
-build/$(TARGET)/%o: src/drv/%c
+build/$(TARGET)/%o: $(RCG_SRC_DIR)/src/drv/%c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 # Compile sequencer-related C++ code
-build/$(TARGET)/%o: src/epics/seq/%cc
+build/$(TARGET)/%o: $(RCG_SRC_DIR)/src/epics/seq/%cc
 	$(CXX) -c $(CFLAGS) $< -o $@
 
 # Compile generate C++ code

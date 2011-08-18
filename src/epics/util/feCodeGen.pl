@@ -1,9 +1,15 @@
 #!/usr/bin/perl
 
 use File::Path;
+use Cwd;
+
+$currWorkDir = &Cwd::cwd();
+$rcg_src_dir = $ENV{"RCG_SRC_DIR"};
+if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
 
 die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>] [<speed>]\n\t" . "site is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
         if (@ARGV != 2 && @ARGV != 3 && @ARGV != 4 && @ARGV != 5);
+
 
 # See if we are not running RTLinux
 $no_rtl = system("/sbin/lsmod | grep rtl");
@@ -3037,7 +3043,7 @@ close OUTD;
 close EPICS;
 if ($no_rtl) {
 	system ("/bin/cp GNUmakefile  ../../fe/$skeleton");
-	system ("echo '#include \"../controller.c\"' > ../../fe/$skeleton/$skeleton" . "fe.c");
+	system ("echo '#include \"$rcg_src_dir/src/fe/controller.c\"' > ../../fe/$skeleton/$skeleton" . "fe.c");
 } else {
 	system ("/bin/rm -f ../../fe/$skeleton/GNUmakefile");
 }
@@ -3289,10 +3295,10 @@ print OUTME "SRC = build/\$(TARGET)/";
 print OUTME "$skeleton";
 print OUTME "\.st\n";
 print OUTME "\n";
-print OUTME "SRC += src/drv/rfm.c\n";
-print OUTME "SRC += src/drv/param.c\n";
-print OUTME "SRC += src/drv/crc.c\n";
-print OUTME "SRC += src/drv/fmReadCoeff.c\n";
+print OUTME "SRC += $rcg_src_dir/src/drv/rfm.c\n";
+print OUTME "SRC += $rcg_src_dir/src/drv/param.c\n";
+print OUTME "SRC += $rcg_src_dir/src/drv/crc.c\n";
+print OUTME "SRC += $rcg_src_dir/src/drv/fmReadCoeff.c\n";
 #print OUTME "SRC += src/epics/seq/get_local_time.st\n";
 for($ii=0;$ii<$useWd;$ii++)
 {
@@ -3330,7 +3336,7 @@ if($systemName eq "sei" || $useFIRs)
 {
 print OUTME "EXTRA_CFLAGS += -DFIR_FILTERS\n";
 }
-print OUTME "include config/Makefile.linux\n";
+print OUTME "include $rcg_src_dir/config/Makefile.linux\n";
 print OUTME "\n";
 print OUTME "build/\$(TARGET)/";
 print OUTME "$skeleton";
@@ -3589,9 +3595,9 @@ print "Found $adcCnt ADC modules part is $adcPartNum[0]\n";
 print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
 if($modelType eq "MASTER")
 {
-	system("cp GDS_TP_CUSTOM.adl GDS_TP_TEST.adl");
+	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM.adl GDS_TP_TEST.adl");
 }else{
-	system("cp GDS_TP_CUSTOM_SLAVE.adl GDS_TP_TEST.adl");
+	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM_SLAVE.adl GDS_TP_TEST.adl");
 }
 open(OUTGDSM,">>./"."GDS_TP_TEST.adl") || die "cannot open GDS_TP file for writing ";
 for($ii=0;$ii<$totalMedm;$ii++)
@@ -3650,10 +3656,10 @@ if($ii == 4) {
 }
 close(OUTGDSM);
 
-system("cat GDS_TP_TEST.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
-system("cat DAC_MONITOR.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR.adl");
-system("cat DAC_MONITOR_0.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_0.adl");
-system("cat DAC_MONITOR_1.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_1.adl");
+system("cat $rcg_src_dir/src/epics/util/GDS_TP_TEST.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
+system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR.adl");
+system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_0.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_0.adl");
+system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_1.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_1.adl");
 my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
 
@@ -3761,12 +3767,11 @@ sub commify_series {
                         $sargs .= "s/LOCATION_NAME/$location/g;";
 			$sargs .= "s/FILTERNAME/$tfn/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
-			system("cat FILTER.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . ".adl");
-		      
+			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . ".adl");
 		      }
 		    }
 		  } else {
-		    system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
+		    system("$rcg_src_dir/src/epics/util/mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
 		  }
 
 	  
@@ -3790,11 +3795,11 @@ sub commify_series {
 
 			$sargs = $sed_arg . "s/FILTERNAME/$sysname-$filt_name/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
-			system("cat FILTER.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".adl");
+			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".adl");
 		      }
 		    }
 		  } else {
-		    system("./mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
+		    system("$rcg_src_dir/src/epics/util/mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
 		  }
 		}
 	}
@@ -3824,9 +3829,9 @@ sub commify_series {
 			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
 				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
-				system("cat INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			} else {
-				system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			}
 		} else {
 		  	$sys_name = substr($sys_name, 2, 3);
@@ -3835,9 +3840,9 @@ sub commify_series {
 			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
 				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
-				system("cat INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} else {
-				system("cat FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			}
 		}
 	}
@@ -3866,5 +3871,5 @@ for (0 .. $adcCnt - 1) {
    my $adc_monitor_args = $monitor_args;
    $adc_monitor_args .= "s/MONITOR_ADC/MONITOR_ADC$_/g;";
 #print $adc_monitor_args;
-   system("cat MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$adc_monitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.adl");
+   system("cat $rcg_src_dir/src/epics/util/MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$adc_monitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.adl");
 }
