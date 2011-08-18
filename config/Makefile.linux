@@ -1,7 +1,6 @@
 # Linux Epics IOC system build rules
 
 EPICS_ROOT=/opt/rtapps/epics
-EPICS_ROOT=/opt/epics-3.14.9-linux
 
 # Switching to 3.14.6 Epics; 28 Oct 2004
 # EPICS_ROOT=/opt/CDS/h/alex/epics/base-3.14.6
