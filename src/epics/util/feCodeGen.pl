@@ -3270,7 +3270,7 @@ print OUTM "\n";
 if ($no_rtl) {
 
 print OUTM "EXTRA_CFLAGS += -DMODULE -DNO_RTL=1\n";
-print OUTM "EXTRA_CFLAGS += -I\$(SUBDIRS)/../../include\n";
+print OUTM "EXTRA_CFLAGS += -I\$(SUBDIRS)/../../include -I$rcg_src_dir/src/include\n";
 print OUTM "EXTRA_CFLAGS += -ffast-math -msse2\n";
 
 print OUTM "obj-m += $skeleton" . "fe.o\n";
@@ -3457,7 +3457,7 @@ for($ii=0;$ii<$jj;$ii++)
 close OUTG;
 
 # Append if statements into header and front-end code select files
-my $header_select_fname = "../../include/feSelectHeader.h";
+my $header_select_fname = "$rcg_src_dir/src/include/feSelectHeader.h";
 open(IN,"<$header_select_fname") || die "cannot open $header_select_fname for reading\n";
 my @lines = <IN>;
 close IN;
@@ -3476,7 +3476,7 @@ for (@lines) {
 if ($not_found) {
 	# Output all the lines up to #else line, then add our new lines
 	# then append the rest
-	my $new_header_select_fname = "../../include/feSelectHeader_new.h";
+	my $new_header_select_fname = "$rcg_src_dir/src/include/feSelectHeader_new.h";
 	open(OUT,">$new_header_select_fname") || die "cannot open $new_header_select_fname for writing\n";
 	for (@lines) {
 		if (/#else/) {
@@ -3492,7 +3492,7 @@ if ($not_found) {
 }
 
 # Append into front-end code selection file
-my $header_select_fname = "../../fe/feSelectCode.c";
+my $header_select_fname = "$rcg_src_dir/src/fe/feSelectCode.c";
 open(IN,"<$header_select_fname") || die "cannot open $header_select_fname for reading\n";
 my @lines = <IN>;
 close IN;
@@ -3511,7 +3511,7 @@ for (@lines) {
 if ($not_found) {
 	# Output all the lines up to #else line, then add our new lines
 	# then append the rest
-	my $new_header_select_fname = "../../fe/feSelectCode_new.c";
+	my $new_header_select_fname = "$rcg_src_dir/src/fe/feSelectCode_new.c";
 	open(OUT,">$new_header_select_fname") || die "cannot open $new_header_select_fname for writing\n";
 	for (@lines) {
 		if (/#else/) {
