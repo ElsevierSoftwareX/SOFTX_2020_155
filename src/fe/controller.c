@@ -20,8 +20,6 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-#include "feSelectHeader.h"
-
 #ifdef NO_RTL
 #include <linux/version.h>
 #include <linux/init.h>
@@ -351,7 +349,6 @@ struct rmIpcStr *daqPtr;
 #endif
 
 int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
-#include "./feSelectCode.c"
 #ifdef NO_RTL
 #include "map.c"
 #include "fb.c"

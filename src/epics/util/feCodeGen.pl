@@ -2362,6 +2362,7 @@ print EPICS "\n\n";
 # Start process of writing .c file.
 print OUT "// ******* This is a computer generated file *******\n";
 print OUT "// ******* DO NOT HAND EDIT ************************\n";
+print OUT "#include \"fe.h\"";
 print OUT "\n\n";
 print OUT "\#ifdef SERVO64K\n";
 print OUT "\t\#define FE_RATE\t65536\n";
@@ -3008,7 +3009,9 @@ if ($ipcxCnt > 0) {
 }
 
 print OUT "  }\n";
-print OUT "}\n\n";
+print OUT "}\n";
+print OUT "#include \"$rcg_src_dir/src/fe/controller.c\"\n";
+
 print OUTH "typedef struct CDS_EPICS {\n";
 print OUTH "\tCDS_EPICS_IN epicsInput;\n";
 print OUTH "\tCDS_EPICS_OUT epicsOutput;\n";
@@ -3043,7 +3046,7 @@ close OUTD;
 close EPICS;
 if ($no_rtl) {
 	system ("/bin/cp GNUmakefile  ../../fe/$skeleton");
-	system ("echo '#include \"$rcg_src_dir/src/fe/controller.c\"' > ../../fe/$skeleton/$skeleton" . "fe.c");
+	#system ("echo '#include \"$rcg_src_dir/src/fe/controller.c\"' > ../../fe/$skeleton/$skeleton" . "fe.c");
 } else {
 	system ("/bin/rm -f ../../fe/$skeleton/GNUmakefile");
 }
@@ -3113,6 +3116,9 @@ elsif($rate == 15) { print OUTM "EXTRA_CFLAGS += -DSERVO64K\n"; }
 print OUTM "EXTRA_CFLAGS += -D";
 print OUTM "\U$skeleton";
 print OUTM "_CODE\n";
+print OUTM "EXTRA_CFLAGS += -DFE_SRC=\\\"\L$skeleton/\L$skeleton.c\\\"\n";
+print OUTM "EXTRA_CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
+
 if($systemName eq "sei" || $useFIRs)
 {
 print OUTM "EXTRA_CFLAGS += -DFIR_FILTERS\n";
@@ -3273,7 +3279,7 @@ print OUTM "EXTRA_CFLAGS += -DMODULE -DNO_RTL=1\n";
 print OUTM "EXTRA_CFLAGS += -I\$(SUBDIRS)/../../include -I$rcg_src_dir/src/include\n";
 print OUTM "EXTRA_CFLAGS += -ffast-math -msse2\n";
 
-print OUTM "obj-m += $skeleton" . "fe.o\n";
+print OUTM "obj-m += $skeleton" . ".o\n";
 
 } else {
 if ($wind_river_rtlinux) {
@@ -3330,6 +3336,7 @@ print OUTME "\n";
 print OUTME "EXTRA_CFLAGS += -D";
 print OUTME "\U$skeleton";
 print OUTME "_CODE\n";
+print OUTME "EXTRA_CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
 print OUTME "\n";
 print OUTME "LIBFLAGS += -lezca\n";
 if($systemName eq "sei" || $useFIRs)
@@ -3455,78 +3462,6 @@ for($ii=0;$ii<$jj;$ii++)
 	print OUTG "$filterName[$kk]\n";
 }
 close OUTG;
-
-# Append if statements into header and front-end code select files
-my $header_select_fname = "$rcg_src_dir/src/include/feSelectHeader.h";
-open(IN,"<$header_select_fname") || die "cannot open $header_select_fname for reading\n";
-my @lines = <IN>;
-close IN;
-
-# Search for our line
-my $sname = uc $skeleton;
-$sname .= "_CODE";
-my $not_found = 1;
-for (@lines) {
-	if (/$sname/) {
-		print "Found $skeleton system in $header_select_fname\n";
-		$not_found = 0;
-	}
-}
-
-if ($not_found) {
-	# Output all the lines up to #else line, then add our new lines
-	# then append the rest
-	my $new_header_select_fname = "$rcg_src_dir/src/include/feSelectHeader_new.h";
-	open(OUT,">$new_header_select_fname") || die "cannot open $new_header_select_fname for writing\n";
-	for (@lines) {
-		if (/#else/) {
-			# Print out lines
-			print OUT "#elif defined($sname)\n";
-			print OUT "\t#include \"$skeleton.h\"\n";
-		}
-		print OUT $_;
-	}
-	close OUT;
-	rename($header_select_fname, $header_select_fname . "~");
-	rename($new_header_select_fname, $header_select_fname);
-}
-
-# Append into front-end code selection file
-my $header_select_fname = "$rcg_src_dir/src/fe/feSelectCode.c";
-open(IN,"<$header_select_fname") || die "cannot open $header_select_fname for reading\n";
-my @lines = <IN>;
-close IN;
-
-# Search for our line
-my $sname = uc $skeleton;
-$sname .= "_CODE";
-my $not_found = 1;
-for (@lines) {
-	if (/$sname/) {
-		print "Found $skeleton system in $header_select_fname\n";
-		$not_found = 0;
-	}
-}
-
-if ($not_found) {
-	# Output all the lines up to #else line, then add our new lines
-	# then append the rest
-	my $new_header_select_fname = "$rcg_src_dir/src/fe/feSelectCode_new.c";
-	open(OUT,">$new_header_select_fname") || die "cannot open $new_header_select_fname for writing\n";
-	for (@lines) {
-		if (/#else/) {
-			# Print out lines
-			print OUT "#elif defined($sname)\n";
-			print OUT "\t#include \"$skeleton/$skeleton.c\"\n";
-		}
-		print OUT $_;
-	}
-	close OUT;
-	rename($header_select_fname, $header_select_fname . "~");
-	rename($new_header_select_fname, $header_select_fname);
-}
-
-
 
 # Take care of generating Epics screens
 mkpath $epicsScreensDir, 0, 0755;
