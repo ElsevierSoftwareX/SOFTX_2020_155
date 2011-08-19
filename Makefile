@@ -2,14 +2,14 @@ all:
 	@echo Please build individual systems with 'make [system]' command
 
 # Clean system, just say something like 'make clean-pde'
-clean-% :: src/epics/simLink/%.mdl
+clean-%:
 	@system=$(subst clean-,,$@); \
 	/bin/rm -rf target/$${system}epics build/$${system}epics; \
-	(cd src/fe/$${system}; make -i clean || true); \
+	(cd src/fe/$${system}&&make -i clean);
 
 clean-% :: config/Makefile.%epics
 	@system=$(subst clean-,,$@); \
-	/bin/rm -rf target/$${system}epics build/$${system}epics; \
+	/bin/rm -rf target/$${system}epics build/$${system}epics;
 
 # With this rule one can make any system
 # Just say 'make pde', for instance, to make PDE system
@@ -153,7 +153,7 @@ standiop:
 #MDL_MODELS = x1cdst1 x1isiham x1isiitmx x1iss x1lsc x1omc1 x1psl x1susetmx x1susetmy x1susitmx x1susitmy x1susquad1 x1susquad2 x1susquad3 x1susquad4 x1x12 x1x13 x1x14 x1x15 x1x16 x1x20 x1x21 x1x22 x1x23
 
 #MDL_MODELS = $(wildcard src/epics/simLink/l1*.mdl)
-MDL_MODELS = $(shell cd src/epics/simLink; ls m1*.mdl | sed 's/.mdl//')
+#MDL_MODELS = $(shell cd src/epics/simLink; ls m1*.mdl | sed 's/.mdl//')
 
 World: $(MDL_MODELS)
 showWorld:
