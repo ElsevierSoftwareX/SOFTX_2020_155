@@ -10,6 +10,8 @@ $currWorkDir = &Cwd::cwd();
 $rcg_src_dir = $ENV{"RCG_SRC_DIR"};
 if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
 
+@sources = ();
+
 @rcg_lib_path = split(':', $ENV{"RCG_LIB_PATH"});
 push @rcg_lib_path, "$rcg_src_dir/src/epics/simLink";
 print join "\n", @rcg_lib_path, "\n";
@@ -23,6 +25,7 @@ foreach $i (@rcg_lib_path) {
 		print "RCG_LIB_PATH=". join(":", @rcg_lib_path)."\n";
 		$ARGV[0] = $fname;
 		$model_file_found = 1;
+		push @sources, $fname;
 		last;
 	}
 }
@@ -3826,3 +3829,9 @@ for (0 .. $adcCnt - 1) {
 #print $adc_monitor_args;
    system("cat $rcg_src_dir/src/epics/util/MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$adc_monitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.adl");
 }
+
+# Print source file names into a file
+#
+open(OUT,">sources") || die "cannot open \"sources\" file for writing ";
+print OUT join("\n", @sources), "\n";
+close OUT;

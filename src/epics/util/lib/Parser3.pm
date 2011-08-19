@@ -325,6 +325,7 @@ sub merge_references {
                    print "RCG_LIB_PATH=". join(":", @::rcg_lib_path)."\n";
                    $model_file_found = 1;
 		   $fname = $f;
+		   push @::sources, $fname;
    		   last;
 	   }
    }

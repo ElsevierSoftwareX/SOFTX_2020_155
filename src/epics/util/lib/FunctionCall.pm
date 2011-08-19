@@ -1,6 +1,8 @@
 package CDS::FunctionCall;
 use Exporter;
 use Env;
+use File::Basename;
+
 @ISA = ('Exporter');
 
 # This one gets node pointer (with all parsed info) as the first arg
@@ -49,6 +51,8 @@ sub printFrontEndVars  {
 	# Only include code if not inlined
 	if ($::inlinedFunctionCall[$i] eq undef) {
 	  print ::OUT "#include \"$::xpartName[$i].c\"\n";
+	  my $dirname  = dirname($::cFile);
+	  push @::sources, "$dirname/$::xpartName[$i].c";
         }
 }
 
@@ -94,6 +98,7 @@ sub frontEndCode {
 		$pathed_name =~ s/(\$\w+)/$1/eeg;
 		$ret .= "#define CURRENT_SUBSYS $::subSysName[$::partSubNum[$i]]\n";
 		$ret .= "#include \"$pathed_name\"\n";
+		push @::sources, $pathed_name;
 		$ret .= "$func_name(";
 	} else {
                 $ret = "// Function Call:  $::xpartName[$i]\n";
