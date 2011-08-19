@@ -25,7 +25,12 @@ clean-% :: config/Makefile.%epics
 	/bin/mkdir -p build/$@epics
 	/bin/mv -f build/$@epics-medm build/$@epics/medm
 	/bin/mv -f build/$@epics-config build/$@epics/config
-	(cd src/fe/$@; make clean; make)
+	#(cd src/fe/$@; make clean; make)
+	@echo
+	@echo The following files were used for this build:
+	@cat src/epics/util/sources
+	@echo
+	@echo Successfully compiled
 
 % :: config/Makefile.%epics
 	(/bin/rm -rf target/$@epics build/$@epics; make -f config/Makefile.$@epics)
