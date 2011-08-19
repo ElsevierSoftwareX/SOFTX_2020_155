@@ -315,8 +315,22 @@ sub merge_references {
    my $system_name = $ref;
    $system_name =~ s/^.*\///; # Strip everything before last slash
    #print $system_name, "\n";
-   $fname = "../simLink/$fname.mdl";
-   die "Can't find $fname\n" unless -e $fname;
+
+   my $model_file_found = 0;
+   $fname .= ".mdl";
+   foreach $i (@::rcg_lib_path) {
+	   my $f = $i ."/".$fname;
+           if (-r $f) {
+                   print "Library model file found $f", "\n";
+                   print "RCG_LIB_PATH=". join(":", @::rcg_lib_path)."\n";
+                   $model_file_found = 1;
+		   $fname = $f;
+   		   last;
+	   }
+   }
+
+   #$fname = "../simLink/$fname.mdl";
+   die "Can't find $fname; RCG_LIB_PATH=". join(":", @::rcg_lib_path). "\n" unless $model_file_found;
    print "Found the library model $fname\n";
    my $myroot = {
 	NAME => $Tree::tree_root_name,
