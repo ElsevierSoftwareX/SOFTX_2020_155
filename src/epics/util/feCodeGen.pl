@@ -3,13 +3,31 @@
 use File::Path;
 use Cwd;
 
+die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>] [<speed>]\n\t" . "site is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
+        if (@ARGV != 2 && @ARGV != 3 && @ARGV != 4 && @ARGV != 5);
+
 $currWorkDir = &Cwd::cwd();
 $rcg_src_dir = $ENV{"RCG_SRC_DIR"};
 if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
 
-die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>] [<speed>]\n\t" . "site is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
-        if (@ARGV != 2 && @ARGV != 3 && @ARGV != 4 && @ARGV != 5);
+@rcg_lib_path = split(':', $ENV{"RCG_LIB_PATH"});
+push @rcg_lib_path, "$rcg_src_dir/src/epics/simLink";
+print join "\n", @rcg_lib_path, "\n";
+my $model_file_found = 0;
+foreach $i (@rcg_lib_path) {
+	my $fname = $i;
+	$fname .= "/";
+	$fname .= $ARGV[0];
+	if (-r $fname) {
+		print "Model file found $fname", "\n";
+		print "RCG_LIB_PATH=". join(":", @rcg_lib_path)."\n";
+		$ARGV[0] = $fname;
+		$model_file_found = 1;
+		last;
+	}
+}
 
+die "Could't find model file $ARGV[0] on RCG_LIB_PATH " . join(":", @rcg_lib_path). "\n"  unless $model_file_found;
 
 # See if we are not running RTLinux
 $no_rtl = system("/sbin/lsmod | grep rtl");
