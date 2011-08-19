@@ -8,6 +8,7 @@ extern int printk(const char *fmt, ...);
 extern unsigned int dWordUsed[MAX_ADC_MODULES][32];
 extern unsigned int dacOutUsed[MAX_DAC_MODULES][16];
 extern unsigned int CDIO6464Output[MAX_DIO_MODULES];
+extern unsigned int CDIO1616Output[MAX_DIO_MODULES];
 extern unsigned int CDIO1616InputInput[MAX_DIO_MODULES];
 extern unsigned int CDIO6464InputInput[MAX_DIO_MODULES];
 extern float *testpoint[500];
