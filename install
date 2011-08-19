@@ -87,7 +87,8 @@ cat > /opt/rtcds/$site/${lower_ifo}/scripts/kill${system} << EOF
 #
 if [ "x\`ps h -C ${system}epics\`" != x ]; then
 	cur_date=\`date +%y%m%d_%H%M%S\`
-	burtrb -f /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/autoBurt.req -o /tmp/${system}_burt_\${cur_date}.snap -l /tmp/${system}_burt_\${cur_date}.log -v
+	mkdir -p /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/burt
+	burtrb -f /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/autoBurt.req -o /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/burt/${system}_burt_\${cur_date}.snap -l /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/burt/${system}_burt_\${cur_date}.log -v
 	sleep 1
 fi
 
@@ -122,10 +123,15 @@ sleep 5
 (cd /opt/rtcds/$site/${lower_ifo}/target/gds && ./awgtpman_startup/awgtpman_${system}.cmd)
 sleep 5
 sudo killall -q daqd
-fname=\`ls -t /tmp/${system}_burt_*.snap  2>/dev/null | head -1\`
+if [ -e /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/burt/safe.snap ]; then
+	fname=/opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/burt/safe.snap;
+else
+	fname=\`ls -t /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/burt/${system}_burt_*.snap  2>/dev/null | head -1\`
+fi
 if [ "x\$fname" != x ]; then
 	log_fname=\${fname%.*}.log
 	burtwb -f \${fname} -l \${log_fname} -v
+	echo Burt restored \$fname
 fi
 touch /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
 chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
