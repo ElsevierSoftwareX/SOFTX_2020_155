@@ -500,8 +500,8 @@ while (<IN>) {
         $vinit .= "pvGet(evar_$v_name);\n";
         $vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
 							       
-        $vupdate .= "evar_$v_name = fpvalidate(pEpics->${v_var});\n";
-        $vupdate .= "pvGet(evar_$v_name);\n";
+	$vupdate .= "pvGet(evar_$v_name);\n";
+	$vupdate .= "%%       pEpics->${v_var} = evar_$v_name;\n";
     } elsif (substr($_,0,6) eq "DAQVAR") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
