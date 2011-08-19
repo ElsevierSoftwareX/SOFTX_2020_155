@@ -29,12 +29,13 @@ DEVFLAGS=@DEVFLAGS@
 	@ln -fs $(srcdir)/src/include/drv src/include
 	@ln -fs $(srcdir)/src/epics/simLink src/epics
 	@ln -fs $(srcdir)/src/epics/util/GNUmakefile src/epics/util
-	(cd src/epics/util;env RCG_SRC_DIR=$(srcdir) PERL5LIB=$(srcdir)/src/epics/util $(srcdir)/src/epics/util/feCodeGen.pl $@.mdl $@)
+	(cd src/epics/util; make -f Makefile $@)
 	/bin/rm -rf build/$@epics-medm
 	/bin/rm -rf build/$@epics-config
 	/bin/mv -f build/$@epics/medm build/$@epics-medm
 	/bin/mv -f build/$@epics/config build/$@epics-config
-	(/bin/rm -rf target/$@epics build/$@epics; env RCG_SRC_DIR=$(srcdir) PERL5LIB=$(srcdir)/src/epics/util make -f config/Makefile.$@epics RCG_SRC_DIR=$(srcdir))
+	/bin/rm -rf target/$@epics build/$@epics;
+	env RCG_SRC_DIR=$(srcdir) PERL5LIB=$(srcdir)/src/epics/util make -f config/Makefile.$@epics RCG_SRC_DIR=$(srcdir)
 	(cd src/epics/util; $(srcdir)/src/epics/util/nameLengthChk.pl $@)
 	/bin/mkdir -p build/$@epics
 	/bin/mv -f build/$@epics-medm build/$@epics/medm
