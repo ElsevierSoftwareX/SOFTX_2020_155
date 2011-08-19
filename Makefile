@@ -15,7 +15,7 @@ clean-% :: config/Makefile.%epics
 # Just say 'make pde', for instance, to make PDE system
 # Epics and front-end parts
 %:
-	(cd src/epics/util; ./feCodeGen.pl ../simLink/$@.mdl $@)
+	(cd src/epics/util; ./feCodeGen.pl $@.mdl $@)
 	/bin/rm -rf build/$@epics-medm
 	/bin/rm -rf build/$@epics-config
 	/bin/mv -f build/$@epics/medm build/$@epics-medm
