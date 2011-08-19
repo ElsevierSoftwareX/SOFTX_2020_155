@@ -274,3 +274,4 @@ AC_ARG_ENABLE(mini-nds,
 ],)
 
 AC_OUTPUT( Makefile )
+AC_OUTPUT( src/epics/util/Makefile )
