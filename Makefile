@@ -91,7 +91,7 @@ install-target-% :: src/epics/simLink/%.mdl
 	echo 'fi' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system} >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
 	echo sleep 5 >> /opt/rtcds/$$site/$${lower_ifo}/scripts/start$${system};\
-	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko; then echo sudo killall $${system}epics\; sudo /sbin/rmmod $${system}fe >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system}; fi;\
+	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.ko; then echo sudo killall $${system}epics\; sudo /sbin/rmmod $${system} >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system}; fi;\
 	if test -e /opt/rtcds/$$site/$${lower_ifo}/target/$${system}/bin/$${system}fe.rtl; then echo sudo killall $${system}epics $${system}fe.rtl >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system}; fi;\
 	echo 'res=`ps h -C awgtpman | grep ' $${system} '`' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
 	echo 'if [ "x$${res}" != x ]; then' >> /opt/rtcds/$$site/$${lower_ifo}/scripts/kill$${system};\
