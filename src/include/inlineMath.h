@@ -1,5 +1,8 @@
 /* CVS VERSION: $Id: inlineMath.h,v 1.4 2009/08/18 16:25:21 aivanov Exp $ */
 
+#ifndef INLINE_MATH
+#define INLINE_MATH
+
 #define __lrint_code \
   long int __lrintres;                                                        \
   __asm__ __volatile__                                                        \
@@ -55,3 +58,5 @@ inline double llog10 (double __x) { register double __result; __asm __volatile__
 /* Fast Pentium absolute value */
 inline double lfabs (double __x) { register double __result; __asm __volatile__ ("fabs" : "=t" (__result) : "0" (__x)); return __result; }
 
+
+#endif

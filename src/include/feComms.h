@@ -1,4 +1,5 @@
-#include "feSelectHeader.h"
+//#include "feSelectHeader.h"
+#include FE_HEADER
 
 /* Vme bus reset */
 #define SYSVME_RESET_MAGIC_WORD 0x13571113
