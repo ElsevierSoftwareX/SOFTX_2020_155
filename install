@@ -77,44 +77,61 @@ if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.rtl; the
 fi
 echo Installing start and stop scripts
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/scripts
-echo '#!/bin/bash' > /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-/bin/chmod +x /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo '#!/bin/bash' > /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
+
+/bin/touch /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
 /bin/chmod +x /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-echo 'if [ `hostname` != '${hostname}' ]; then' >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo 'echo Cannot run `basename $0` on `hostname` computer' >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo 'exit 1' >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo 'fi' >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo 'if [ "x`ps h -C ' ${system}epics '`" != x ]; then' >> /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-echo 'cur_date=`date +%y%m%d_%H%M%S`' >> /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-echo 'burtrb -f /opt/rtcds/'${site}'/'${lower_ifo}'/target/'${system}'/'${system}epics'/autoBurt.req -o /tmp/'${system}'_burt_${cur_date}.snap -l /tmp/'${system}'_burt_${cur_date}.log -v' >> /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-echo 'sleep 1' >> /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-echo 'fi' >> /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-echo /opt/rtcds/$site/${lower_ifo}/scripts/kill${system} >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo sleep 5 >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko; then
-	echo sudo killall ${system}epics\; sudo /sbin/rmmod ${system} >> /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
+
+echo /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
+cat > /opt/rtcds/$site/${lower_ifo}/scripts/kill${system} << EOF
+#!/bin/bash
+#
+if [ "x\`ps h -C ${system}epics\`" != x ]; then
+	cur_date=\`date +%y%m%d_%H%M%S\`
+	burtrb -f /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/autoBurt.req -o /tmp/${system}_burt_\${cur_date}.snap -l /tmp/${system}_burt_\${cur_date}.log -v
+	sleep 1
 fi
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.rtl; then
-	echo sudo killall ${system}epics ${system}.rtl >> /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
+
+sudo killall ${system}epics
+sudo /sbin/rmmod ${system}
+
+res=\`ps h -C awgtpman | grep ${system}\`
+if [ "x\${res}" != x ]; then
+	num=\$(echo \${res} | awk '{print \$1}')
+	sudo kill \$num
 fi
-echo 'res=`ps h -C awgtpman | grep ' ${system} '`' >> /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-echo 'if [ "x${res}" != x ]; then' >> /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-echo 'num=$(echo ${res} | awk '"'"'{print $1}'"'"')' >> /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-echo 'sudo kill $num' >> /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-echo 'fi' >> /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-echo '(cd /opt/rtcds/'$site'/'${lower_ifo}'/target/'${system}'/'${system}epics' && ./startup'${ifo}')' >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo sleep 5 >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo '(cd /opt/rtcds/'$site'/'${lower_ifo}'/target/gds && ./awgtpman_startup/awgtpman_'${system}'.cmd)' >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo 'sleep 5; sudo killall -q daqd' >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo 'fname=`ls -t /tmp/'${system}'_burt_*.snap  2>/dev/null | head -1`' >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo 'if [ "x$fname" != x ]; then' >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo 'log_fname=${fname%.*}.log' >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo 'burtwb -f ${fname} -l ${log_fname} -v' >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo 'fi' >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo touch /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-echo chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log >> /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
+EOF
+
+/bin/touch /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
+/bin/chmod +x /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
+
+cat > /opt/rtcds/$site/${lower_ifo}/scripts/start${system} << EOF
+#!/bin/bash
+#
+
+if [ \`hostname\` != '${hostname}' ]; then
+	echo Cannot run \`basename $0\` on \`hostname\` computer
+	exit 1
+fi
+
+/opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
+
+sleep 5
+(cd /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics && ./startup${ifo})
+sleep 5
+/opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
+(cd /opt/rtcds/$site/${lower_ifo}/target/gds && ./awgtpman_startup/awgtpman_${system}.cmd)
+sleep 5
+sudo killall -q daqd
+fname=\`ls -t /tmp/${system}_burt_*.snap  2>/dev/null | head -1\`
+if [ "x\$fname" != x ]; then
+	log_fname=\${fname%.*}.log
+	burtwb -f \${fname} -l \${log_fname} -v
+fi
+touch /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
+chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
+
+EOF
+
 /bin/sed 's/caltech/'$site'/' $srcdir/src/epics/util/daqconfig.tcl > build/${system}epics/config/daqconfig
 /bin/sed -i 's/ifolower/'${lower_ifo}'/' build/${system}epics/config/daqconfig
 /usr/bin/install   build/${system}epics/config/daqconfig  /opt/rtcds/$site/${lower_ifo}/scripts
