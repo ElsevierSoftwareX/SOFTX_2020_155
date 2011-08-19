@@ -127,7 +127,7 @@ sub frontEndCode {
 	    $calcExp .= "$::xpartName[$i]" . "_$output_plus_one" . "_$input_plus_one";
 	    $calcExp .= ",";
 	    $calcExp .= $muxName . "\[$input\]";
-	    $calcExp .= ",0);\n";
+	    $calcExp .= ",0,0);\n";
 	    }
 	}
 

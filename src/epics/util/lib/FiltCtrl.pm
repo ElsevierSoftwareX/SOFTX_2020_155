@@ -85,9 +85,9 @@ sub frontEndCode {
         $calcExp .= $::fromExp[0];
         $calcExp .= ",";
 	if ($::partInCnt[$i] > 2) {
-        	$calcExp .= "$::fromExp[1] & $::fromExp[2]";
+        	$calcExp .= "$::fromExp[1], $::fromExp[2]";
 	} else {
-        	$calcExp .= $::fromExp[1];
+        	$calcExp .= "$::fromExp[1], 0";
 	}
         $calcExp .= ");\n";
         return $calcExp;

@@ -1291,26 +1291,54 @@ filterModule2(FILT_MOD *pFilt,     /* Filter module data  */
 	     
 /* This module added to hanle all input, calculations and outputs as doubles. This module also
    incorporates the input module, done separately above for older systems. */
+
+/* Mask logic table:
+ * M-mask; C-control input; S0-current bit state; S1-new bit state
+         [0]   M  C  S0 S1
+               -----------
+               0  0  0  0
+               0  1  0  0
+               1  0  0  0
+               1  1  0  1
+	       0  0  1  1
+	       0  1  1  1
+	       1  0  1  0
+	       1  1  1  1
+      */
+
 inline double
 filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
 	       COEF *pC,            /* Filter coefficients */
 	       int modNum,          /* Filter module number */
 	       double filterInput,  /* Input data sample (output from funtcion inputModule()) */
-	       int fltrCtrlVal)	    /* Filter control value */
+	       int fltrCtrlVal,	    /* Filter control value */
+	       int mask)	    /* Mask of bits to act upon */
 	     
 
 {
   int ix;
   UINT32 opSwitchE;
   UINT32 fltrSwitch;
+  /* Do the shift to match the bits in the the opSwitchE variable so I can do "==" comparisons */
+  UINT32 opSwitchP = pFilt->inputs[modNum].opSwitchP >> 1;
+
   /* decode arrays for operator switches */
-  if ( (fltrCtrlVal >= 0) && (fltrCtrlVal < 1024) ) {
+  if ( mask != 0 && (fltrCtrlVal >= 0) && (fltrCtrlVal < 1024) ) {
     fltrSwitch = 0;
     if (fltrCtrlVal > 0) {
       for (ix = 0; ix < 10; ix++) {
-        if (fltrCtrlVal%2 == 1) {
-          fltrSwitch += fltrConst[ix];
-        }
+	// Keep the current bit value
+	// 
+	if (opSwitchP & fltrConst[ix]) fltrSwitch |= fltrConst[ix];
+	// Change only if bit-mask is set
+	//
+	if (mask & fltrConst[ix]) {
+        	if (fltrCtrlVal%2 == 1) {
+          		fltrSwitch |= fltrConst[ix];
+        	} else {
+          		fltrSwitch &= ~fltrConst[ix];
+		}
+	}
         fltrCtrlVal = fltrCtrlVal>>1;
       }
     }
@@ -1321,8 +1349,6 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
   else {
     opSwitchE = pFilt->inputs[modNum].opSwitchE;
   }
-  /* Do the shift to match the bits in the the opSwitchE variable so I can do "==" comparisons */
-  UINT32 opSwitchP = pFilt->inputs[modNum].opSwitchP >> 1;
   int ii, jj, kk, ramp, timeout;
   int sw, sw_out, sType, sw_in;
   double filtData;
