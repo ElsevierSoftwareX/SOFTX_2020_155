@@ -120,17 +120,6 @@ echo chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log >>
 /usr/bin/install   build/${system}epics/config/daqconfig  /opt/rtcds/$site/${lower_ifo}/scripts
 
 
-#echo Performing uninstall-daq
-#uninstall-daq-% :: src/epics/simLink/%.mdl
-#gds_node=`grep rmid build/${system}epics/${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`
-#datarate=`grep datarate build/${system}epics/${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`
-#echo Removing GDS node ${gds_node} configuration file 
-#echo /opt/rtcds/${site}/target/gds/param/tpchn_${system}.par 
-#/bin/rm -f  /opt/rtcds/${site}/target/gds/param/tpchn_${system}.par
-#echo Removing DAQ configuration file
-#echo /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini
-#/bin/rm -f  /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini
-
 echo Performing install-daq
 
 gds_node=`grep rmid build/${system}epics/${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`

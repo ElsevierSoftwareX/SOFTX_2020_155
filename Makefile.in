@@ -55,3 +55,6 @@ clean-%:
 
 install-%:
 	@system=$(subst install-,,$@); $(srcdir)/install $${system} $(srcdir)
+
+uninstall-%:
+	@system=$(subst uninstall-,,$@); $(srcdir)/uninstall $${system} $(srcdir)
