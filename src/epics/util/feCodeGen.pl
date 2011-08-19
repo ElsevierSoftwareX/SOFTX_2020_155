@@ -3482,6 +3482,21 @@ for($ii=0;$ii<$jj;$ii++)
 	$kk ++;
 	print OUTG "$filterName[$kk]\n";
 }
+
+my $sampling_rate = get_freq();
+$jj  = $filtCnt / 10;
+
+for($ii=0;$ii<$jj;$ii++) {
+print OUTG <<EOF;
+################################################################################
+#### $filterName[$ii]
+#################################################################################
+## SAMPLING $filterName[$ii] $sampling_rate
+####                                                                          ###
+#
+
+EOF
+}
 close OUTG;
 
 # Take care of generating Epics screens
