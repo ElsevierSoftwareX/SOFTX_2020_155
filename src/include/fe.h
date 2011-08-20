@@ -11,7 +11,7 @@ extern unsigned int CDIO6464Output[MAX_DIO_MODULES];
 extern unsigned int CDIO1616Output[MAX_DIO_MODULES];
 extern unsigned int CDIO1616InputInput[MAX_DIO_MODULES];
 extern unsigned int CDIO6464InputInput[MAX_DIO_MODULES];
-extern float *testpoint[500];
+extern double *testpoint[500];
 extern char *_ipc_shm;
 extern int clock16K;
 extern CDS_HARDWARE cdsPciModules;

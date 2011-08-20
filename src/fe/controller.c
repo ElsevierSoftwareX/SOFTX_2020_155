@@ -260,9 +260,9 @@ int overflowAdc[MAX_ADC_MODULES][32];;
 int overflowDac[MAX_DAC_MODULES][16];;
 int overflowAcc = 0;
 
-float *testpoint[500];	// Testpoints which are not part of filter modules
-float xExc[50];	// GDS EXC not associated with filter modules
-float floatDacOut[160]; // DAC outputs stored as floats, to be picked up as test points
+double *testpoint[500];	// Testpoints which are not part of filter modules
+double xExc[50];	// GDS EXC not associated with filter modules
+double floatDacOut[160]; // DAC outputs stored as floats, to be picked up as test points
 
 volatile CDS_EPICS *pLocalEpics;   	// Local mem ptr to EPICS control data
 
