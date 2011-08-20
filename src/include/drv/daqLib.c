@@ -19,13 +19,13 @@
 		 DAQ_RANGE daqRange - struct defining front end valid
 				      test point and exc ranges.
 		 int sysRate - Data rate of front end CPU / 16.
-		 float *pFloatData[] - Pointer to TP data not associated
+		 double *pFloatData[] - Pointer to TP data not associated
 				       with filter modules.
 		 FILT_MOD *dspPtr - Point to array of FM data.
 		 int netStatus - Status of myrinet
 		 int gdsMonitor[] - Array to return values of GDS
 				    TP/EXC selections.
-		 float excSignal[] - Array to write EXC signals not
+		 double excSignal[] - Array to write EXC signals not
 				     associated with filter modules.
 										*/
 /*                                                                      	*/
@@ -112,11 +112,11 @@ int daqWrite(int flag,
 	     int dcuId,
 	     DAQ_RANGE daqRange,
 	     int sysRate,
-	     float *pFloatData[],
+	     double *pFloatData[],
 	     FILT_MOD *dspPtr,
 	     int netStatus,
 	     int gdsMonitor[],
-	     float excSignal[])
+	     double excSignal[])
 {
 int ii,jj;			/* Loop counters.			*/
 int status;			/* Return value from called routines.	*/
