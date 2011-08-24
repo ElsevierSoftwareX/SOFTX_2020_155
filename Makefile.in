@@ -45,13 +45,16 @@ DEVFLAGS=@DEVFLAGS@
 	@/bin/mv -f build/$@epics-medm build/$@epics/medm
 	@/bin/mv -f build/$@epics-config build/$@epics/config
 	@echo Building front-end Linux kernel module $@...
-	@make -C src/fe/$@ clean; make -C src/fe/$@ >> $@.log 2>&1 || (tail $@.log && /bin/false)
+	@make -sC src/fe/$@ clean
+	@make -C src/fe/$@ >> $@.log 2>&1 || (tail $@.log && /bin/false)
 	@echo Done
-	@echo
+	@echo RCG source code directory:
+	@echo $(srcdir)
 	@echo The following files were used for this build:
 	@cat src/epics/util/sources
 	@echo
-	@echo Successfully compiled
+	@echo  Successfully compiled
+	@echo '*********************'
 
 
 all: 
@@ -69,3 +72,85 @@ install-%:
 
 uninstall-%:
 	@system=$(subst uninstall-,,$@); $(srcdir)/uninstall $${system} $(srcdir)
+
+#MDL_MODELS = x1cdst1 x1isiham x1isiitmx x1iss x1lsc x1omc1 x1psl x1susetmx x1susetmy x1susitmx x1susitmy x1susquad1 x1susquad2 x1susquad3 x1susquad4 x1x12 x1x13 x1x14 x1x15 x1x16 x1x20 x1x21 x1x22 x1x23
+
+#MDL_MODELS = $(wildcard src/epics/simLink/l1*.mdl)
+#MDL_MODELS = $(shell cd src/epics/simLink; ls m1*.mdl | sed 's/.mdl//')
+MDL_MODELS=\
+l1ioplsc0 l1lsc l1omc1 l1omc2 l1lsctest\
+l1iopasc0 l1asctest l1ascwfs\
+l1iopoaf0 l1pemlvea\
+l1iopseib1 l1isiitmy l1seiitmy\
+l1iopseib2 l1isibs l1seibs\
+l1iopseib3 l1isiitmx l1seiitmx\
+l1iopseih16 l1seiham1 l1seiham6\
+l1iopseih23 l1isiham3 l1hpiham3 \
+l1iopseih45 l1seiham4 l1seiham5\
+l1iopsusbsc123 l1susbs l1susitmy l1susitmx\
+l1iopsush2a l1susquad l1susprm3\
+l1iopsush2b\
+l1iopsush34 l1susmc2 l1sussr2 l1suspr2\
+l1iopsusauxh34 l1susauxh34\
+l1iopsush56 l1sussr3 l1sussrm\
+l1ioppsl0 l1psldbb l1pslfss l1pslpmc l1psliss\
+l1ioppemex l1pemex l1susetmx l1isietmx\
+l1ioppemey l1pemey l1susetmy l1isietmy
+
+
+World: $(MDL_MODELS)
+showWorld:
+	@echo $(MDL_MODELS)
+
+cleanWorld: $(patsubst %,clean-%,$(MDL_MODELS))
+
+installWorld: $(patsubst %,install-target-%,$(MDL_MODELS)) $(patsubst %,install-daq-%,$(MDL_MODELS))  $(patsubst %,install-screens-%,$(MDL_MODELS))  
+
+
+# Show all predefined preprocessor definitions
+dump_predefines:
+	gcc -E -dM -x c /dev/null
+
+
+# Build NDS program
+nds:
+	(cd src/nds; autoconf)
+	/bin/rm -rf build/nds
+	/bin/mkdir -p build/nds
+	(cd build/nds; ../../src/nds/configure && make)
+
+# Build frame builder data concentrator program
+dc:
+	(cd $(srcdir)/src/daqd; autoconf)
+	/bin/rm -rf build/dc
+	/bin/mkdir -p build/dc
+	(cd build/dc; $(srcdir)/src/daqd/configure '--enable-symmetricom' '--with-mx' '--without-myrinet' '--enable-debug' --with-epics=/opt/rtapps/epics/base '--with-framecpp=/opt/rtapps/framecpp' '--with-concentrator' && make)
+
+# Build frame builder NDS or frame writer (broadcast receiver)
+rcv:
+	(cd $(srcdir)/src/daqd; autoconf)
+	/bin/rm -rf build/rcv
+	/bin/mkdir -p build/rcv
+	(cd build/rcv; $(srcdir)/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-framecpp=/opt/rtapps/framecpp' --with-epics=/opt/rtapps/epics/base  && make)
+
+# build standalone frame builder
+stand:
+	(cd $(srcdir)/src/daqd; autoconf)
+	/bin/rm -rf build/stand
+	/bin/mkdir -p build/stand
+	(cd build/stand; $(srcdir)/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' && make)
+
+# build  mx data receiving daqd
+#
+mx:
+	(cd $(srcdir)/src/daqd; autoconf)
+	/bin/rm -rf build/mx
+	/bin/mkdir -p build/mx
+	(cdir=`pwd`; cd build/mx; $(srcdir)/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics-3.14.10/base' '--with-framecpp=/opt/rtapps/framecpp-1.18.2' --with-mx && make)
+
+standiop:
+	(cd $(srcdir)/src/daqd; autoconf)
+	/bin/rm -rf build/standiop
+	/bin/mkdir -p build/standiop
+	(cdir=`pwd`; cd build/standiop; $(srcdir)/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics/base' '--with-framecpp=/opt/rtapps/framecpp' --enable-iop && make)
+

@@ -26,7 +26,6 @@ clean-% :: config/Makefile.%epics
 	/bin/mv -f build/$@epics-medm build/$@epics/medm
 	/bin/mv -f build/$@epics-config build/$@epics/config
 	(cd src/fe/$@; make clean; make)
-	@echo
 	@echo The following files were used for this build:
 	@cat src/epics/util/sources
 	@echo
@@ -154,6 +153,26 @@ standiop:
 
 #MDL_MODELS = $(wildcard src/epics/simLink/l1*.mdl)
 #MDL_MODELS = $(shell cd src/epics/simLink; ls m1*.mdl | sed 's/.mdl//')
+MDL_MODELS=\
+l1ioplsc0 l1lsc l1omc1 l1omc2 l1lsctest\
+l1iopasc0 l1asctest l1ascwfs\
+l1iopoaf0 l1pemlvea\
+l1iopseib1 l1isiitmy l1seiitmy\
+l1iopseib2 l1isibs l1seibs\
+l1iopseib3 l1isiitmx l1seiitmx\
+l1iopseih16 l1hpiham1 l1hpiham6\
+l1iopseih23 l1isiham3 l1hpiham3 \
+l1iopseih45 l1hpiham4 l1hpiham5\
+l1iopsusbsc123 l1susbs l1susitmy l1susitmx\
+l1iopsush2a l1susquad l1susprm3\
+l1iopsush2b\
+l1iopsush34 l1susmc2 l1sussr2 l1suspr2\
+l1iopsusauxh34 l1susauxh34\
+l1iopsush56 l1sussr3 l1sussrm\
+l1ioppsl0 l1psldbb l1pslfss l1pslpmc l1psliss\
+l1ioppemex l1pemex l1susetmx l1isietmx\
+l1ioppemey l1pemey l1susetmy l1isietmy
+
 
 World: $(MDL_MODELS)
 showWorld:
