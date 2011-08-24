@@ -10,20 +10,20 @@ sub partType {
 # Current part number is passed as first argument
 sub printHeaderStruct {
         my ($i) = @_;
-        print ::OUTH "\tfloat $::xpartName[$i]\_FREQ;\n";
-        print ::OUTH "\tfloat $::xpartName[$i]\_CLKGAIN;\n";
-        print ::OUTH "\tfloat $::xpartName[$i]\_SINGAIN;\n";
-        print ::OUTH "\tfloat $::xpartName[$i]\_COSGAIN;\n";
+        print ::OUTH "\tdouble $::xpartName[$i]\_FREQ;\n";
+        print ::OUTH "\tdouble $::xpartName[$i]\_CLKGAIN;\n";
+        print ::OUTH "\tdouble $::xpartName[$i]\_SINGAIN;\n";
+        print ::OUTH "\tdouble $::xpartName[$i]\_COSGAIN;\n";
 }
 
 # Print Epics variable definitions
 # Current part number is passed as first argument
 sub printEpics {
         my ($i) = @_;
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_FREQ $::systemName\.$::xpartName[$i]\_FREQ float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "INVARIABLE $::xpartName[$i]\_CLKGAIN $::systemName\.$::xpartName[$i]\_CLKGAIN float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "INVARIABLE $::xpartName[$i]\_SINGAIN $::systemName\.$::xpartName[$i]\_SINGAIN float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "INVARIABLE $::xpartName[$i]\_COSGAIN $::systemName\.$::xpartName[$i]\_COSGAIN float ai 0 field(PREC,\"1\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_FREQ $::systemName\.$::xpartName[$i]\_FREQ double ai 0 field(PREC,\"1\")\n";
+        print ::EPICS "INVARIABLE $::xpartName[$i]\_CLKGAIN $::systemName\.$::xpartName[$i]\_CLKGAIN double ai 0 field(PREC,\"1\")\n";
+        print ::EPICS "INVARIABLE $::xpartName[$i]\_SINGAIN $::systemName\.$::xpartName[$i]\_SINGAIN double ai 0 field(PREC,\"1\")\n";
+        print ::EPICS "INVARIABLE $::xpartName[$i]\_COSGAIN $::systemName\.$::xpartName[$i]\_COSGAIN double ai 0 field(PREC,\"1\")\n";
 }
 
 
