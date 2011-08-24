@@ -262,7 +262,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     tpPtr = (struct cdsDaqNetGdsTpNum *)(_daq_shm + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
     mcPtr = daqShmPtr;
     lmPtr = pReadBuffer;
-    fillSize = 131072 / sysRate;
+    fillSize = DAQ_DCU_BLOCK_SIZE / sysRate;
     printf("DIRECT MEMORY MODE of size %d\n",fillSize);
 #endif
 
