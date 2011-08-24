@@ -1113,7 +1113,7 @@ $foundSysCon = 0;
 
 	# Did not find any connections to subsystem OUTPUT, so print error.
 	if($foundCon == 0 && $foundSysCon == 0){
-		die "No connect for $xpartName[$ii] $partOutput[$ii][0] $partOutputPort[$ii][0]\n";
+		print "No connect for $xpartName[$ii] $partOutput[$ii][0] $partOutputPort[$ii][0]\n";
 	}
 	}
 }
@@ -2210,7 +2210,7 @@ $inCnt = 0;
 print OUTH "#define MAX_FIR \t $firCnt\n";
 print OUTH "#define MAX_FIR_POLY \t $firCnt\n\n";
 # ########    TEST    ############
-$svnVer = `svnversion`;
+$svnVer = `cd $rcg_src_dir; svnversion`;
 print "\nVersion = $svnVer\n";
 $size = length($svnVer);
 print "\nLength = $size\n";
@@ -2907,7 +2907,7 @@ for($xx=0;$xx<$processCnt;$xx++)
 	{
 	   print OUT "// DIVIDE\n";
 	   $ce =<<HERE
-\L$xpartName[$mm] = $fromExp[0] /
+\L$xpartName[$mm]\E = $fromExp[0] /
 	(($fromExp[1] < 0.0)
 		?
 		(($fromExp[1] > -1e-20)? -1e-20: $fromExp[1])
