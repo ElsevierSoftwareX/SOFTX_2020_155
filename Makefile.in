@@ -52,6 +52,7 @@ DEVFLAGS=@DEVFLAGS@
 	@echo $(srcdir) > target/$@epics/src/rcg_location.txt
 	@echo Build date `date` > target/$@epics/src/build.txt
 	@echo Compiled on `hostname` >> target/$@epics/src/build.txt
+	@echo RCG_LIB_PATH=${RCG_LIB_PATH} >> target/$@epics/src/build.txt
 	@tar Ccf $(srcdir) - . | gzip > target/$@epics/src/rcg.tar.gz
 	@cp src/epics/util/sources.$@ target/$@epics/src/src_locations.txt
 	@cat src/epics/util/sources.$@ | xargs cp -aft target/$@epics/src > /dev/null 2>&1
