@@ -11,9 +11,8 @@ sub partType {
         my ($node, $i) = @_;
 	my $desc = ${$node->{FIELDS}}{"Description"};
 	if ($desc =~ /^inline/) {
-		# Assure we have two field, the name and the path
-		if (3 != split(/\s/, $desc)) {
-			$a = split(/\s/, $desc);
+		if (3 != split(/\s+/, $desc)) {
+			$a = split(/\s+/, $desc);
 			die "Part $::xpartName[$i] needs three fields in Description: inline funcName \$ENV_VAR/path/to/file/filename.c $a\n";
 		}
 		$::inlinedFunctionCall[$i] = $desc;
