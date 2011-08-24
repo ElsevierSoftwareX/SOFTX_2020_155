@@ -37,7 +37,7 @@ if test -e /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt; then
 else
 	/bin/cp -p build/${system}epics/config/${ifo}${upper_system}.txt  /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt
 fi
-echo Installing /opt/rtcds/$site/${lower_ifo}/target/${system}epics
+echo Installing /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics
 if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}; then
 	/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target_archive/${system}; /bin/mv -f /opt/rtcds/$site/${lower_ifo}/target/${system} /opt/rtcds/$site/${lower_ifo}/target_archive/${system}/${system}_$cur_date || exit 2
 fi
@@ -51,6 +51,7 @@ fi
 /bin/cp -pr /opt/rtcds/$site/${lower_ifo}/target_archive/${system}/${system}_$cur_date/${system}epics/burt /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target
 /bin/cp -pr target/${system}epics /opt/rtcds/$site/${lower_ifo}/target/${system}
+/bin/mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/src /opt/rtcds/$site/${lower_ifo}/target/${system}
 if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/db/*/autoBurt.req; then
 	/bin/mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/db/*/autoBurt.req /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics || exit 3
 fi

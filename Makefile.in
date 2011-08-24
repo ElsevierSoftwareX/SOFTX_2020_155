@@ -48,10 +48,17 @@ DEVFLAGS=@DEVFLAGS@
 	@make -sC src/fe/$@ clean
 	@make -C src/fe/$@ >> $@.log 2>&1 || (tail $@.log && /bin/false)
 	@echo Done
+	@/bin/mkdir -p target/$@epics/src
+	@echo $(srcdir) > target/$@epics/src/rcg_location.txt
+	@echo Build date `date` > target/$@epics/src/build.txt
+	@echo Compiled on `hostname` >> target/$@epics/src/build.txt
+	@tar Ccf $(srcdir) - . | gzip > target/$@epics/src/rcg.tar.gz
+	@cp src/epics/util/sources.$@ target/$@epics/src/src_locations.txt
+	@cat src/epics/util/sources.$@ | xargs cp -aft target/$@epics/src > /dev/null 2>&1
 	@echo RCG source code directory:
 	@echo $(srcdir)
 	@echo The following files were used for this build:
-	@cat src/epics/util/sources
+	@cat src/epics/util/sources.$@
 	@echo
 	@echo  Successfully compiled
 	@echo '*********************'
