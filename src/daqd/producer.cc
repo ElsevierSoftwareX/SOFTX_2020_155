@@ -2565,7 +2565,8 @@ int cycle_delay = daqd.cycle_delay;
      unsigned int *header = (unsigned int *)(((char *)daqd.move_buf) - 2048);
      int ndcu = ntohl(*header++);
      //printf("ndcu = %d\n", ndcu);
-     if (ndcu > 0 && ndcu < 50) {
+     // :TODO: the header needs to be expanded from 2048 to 4096 to accommodate more than 85 DCUs
+     if (ndcu > 0 && ndcu < 85) {
      int data_offs = 0; // Offset to the current DCU data
      for (int j = 0; j < ndcu; j++) {
 	unsigned int dcu_number;
