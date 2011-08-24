@@ -65,7 +65,7 @@ sub frontEndCode {
         $calcExp .= "\t$::fromExp[$partInCnt[$i]-1]\n";
         $calcExp .= "};\n";
         $calcExp .= "\L$::xpartName[$i] = 0;\n";
-        $calcExp .= "for (ii = 0; ii < 16; ii++)\n{\n";
+        $calcExp .= "for (ii = 0; ii < $::partInCnt[$i]; ii++)\n{\n";
         $calcExp .= "if (ins[ii]) {\n";
         $calcExp .= "\L$::xpartName[$i] += powers_of_2\[ii\];\n";
         $calcExp .= "}\n";
