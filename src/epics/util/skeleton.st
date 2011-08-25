@@ -873,13 +873,14 @@ state monScreen{
 %%    thresholdFlag = 0;                                                 /* MA */
 %%    matrixThreshCount = 0;                                             /* MA */
 
+      /* Get saved switch settings, used for burt purposes */
+      pvGet(saveSwitch1[ii]);  
+      pvGet(saveSwitch2[ii]);  
+
       /* Get filter switch selections */
       pvGet(sw1[ii]);
       pvGet(sw2[ii]);	
 
-      /* Get saved switch settings, used for burt purposes */
-      pvGet(saveSwitch1[ii]);  
-      pvGet(saveSwitch2[ii]);  
       if(sw1[ii]) {
         saveSwitch1[ii] ^= sw1[ii];
       	sw1[ii] = 0;
