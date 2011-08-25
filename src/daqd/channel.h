@@ -13,7 +13,8 @@
 #define MAX_CHANNEL_GROUPS 150
 /* Hard limit on the number of channel names supported:
    it needs to be eliminated, dynamically allocated arrays should be used */
-#define MAX_CHANNELS 60000
+/* #define MAX_CHANNELS 60000 */
+#define MAX_CHANNELS 120000
 #define MAX_TREND_CHANNELS  300000
 
 /* numbering must be contiguous */
