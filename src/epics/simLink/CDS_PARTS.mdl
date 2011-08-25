@@ -1,6 +1,6 @@
 Library {
   Name			  "CDS_PARTS"
-  Version		  7.2
+  Version		  7.5
   MdlSubVersion		  0
   SavedCharacterEncoding  "UTF-8"
   LibraryType		  "BlockLibrary"
@@ -8,15 +8,16 @@ Library {
   ScopeRefreshTime	  0.035000
   OverrideScopeRefreshTime on
   DisableAllScopes	  off
+  MaxMDLFileLineLength	  120
   Created		  "Mon Oct 23 16:41:53 2006"
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "aivanov"
+  LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Aug 19 14:14:11 2011"
-  RTWModifiedTimeStamp	  235664042
-  ModelVersionFormat	  "1.%<AutoIncrement:300>"
+  LastModifiedDate	  "Wed Aug 24 20:25:16 2011"
+  RTWModifiedTimeStamp	  236118312
+  ModelVersionFormat	  "1.%<AutoIncrement:301>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -44,15 +45,18 @@ Library {
   LinearizationMsg	  "none"
   Profile		  off
   ParamWorkspaceSource	  "MATLABWorkspace"
+  RecordCoverage	  off
   CovSaveName		  "covdata"
   CovMetricSettings	  "dw"
   CovNameIncrementing	  off
   CovHtmlReporting	  on
+  CovForceBlockReductionOff on
   covSaveCumulativeToWorkspaceVar on
   CovSaveSingleToWorkspaceVar on
   CovCumulativeReport	  off
   CovReportOnPause	  on
   CovModelRefEnable	  "Off"
+  CovExternalEMLEnable	  off
   ExtModeBatchMode	  off
   ExtModeEnableFloating	  on
   ExtModeTrigType	  "manual"
@@ -81,13 +85,13 @@ Library {
     Dimension		    1
     Simulink.ConfigSet {
       $ObjectID		      1
-      Version		      "1.5.1"
+      Version		      "1.10.0"
       Array {
 	Type			"Handle"
 	Dimension		8
 	Simulink.SolverCC {
 	  $ObjectID		  2
-	  Version		  "1.5.1"
+	  Version		  "1.10.0"
 	  StartTime		  "0.0"
 	  StopTime		  "10.0"
 	  AbsTol		  "auto"
@@ -107,6 +111,7 @@ Library {
 	  SolverMode		  "SingleTasking"
 	  Solver		  "ode45"
 	  SolverName		  "ode45"
+	  SolverJacobianMethodControl "auto"
 	  ShapePreserveControl	  "DisableAll"
 	  ZeroCrossControl	  "UseLocalSettings"
 	  ZeroCrossAlgorithm	  "Nonadaptive"
@@ -116,11 +121,10 @@ Library {
 	  AutoInsertRateTranBlk	  off
 	  SampleTimeConstraint	  "Unconstrained"
 	  InsertRTBMode		  "Whenever possible"
-	  SignalSizeVariationType "Allow only fixed size"
 	}
 	Simulink.DataIOCC {
 	  $ObjectID		  3
-	  Version		  "1.5.1"
+	  Version		  "1.10.0"
 	  Decimation		  "1"
 	  ExternalInput		  "[t, u]"
 	  FinalStateName	  "xFinal"
@@ -130,23 +134,28 @@ Library {
 	  LoadExternalInput	  off
 	  LoadInitialState	  off
 	  SaveFinalState	  off
+	  SaveCompleteFinalSimState off
 	  SaveFormat		  "Array"
 	  SaveOutput		  on
 	  SaveState		  off
 	  SignalLogging		  on
+	  DSMLogging		  on
 	  InspectSignalLogs	  off
 	  SaveTime		  on
+	  ReturnWorkspaceOutputs  off
 	  StateSaveName		  "xout"
 	  TimeSaveName		  "tout"
 	  OutputSaveName	  "yout"
 	  SignalLoggingName	  "logsout"
+	  DSMLoggingName	  "dsmout"
 	  OutputOption		  "RefineOutputTimes"
 	  OutputTimes		  "[]"
+	  ReturnWorkspaceOutputsName "out"
 	  Refine		  "1"
 	}
 	Simulink.OptimizationCC {
 	  $ObjectID		  4
-	  Version		  "1.5.1"
+	  Version		  "1.10.0"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    4
@@ -160,14 +169,19 @@ Library {
 	  BooleanDataType	  off
 	  ConditionallyExecuteInputs on
 	  InlineParams		  off
+	  UseIntDivNetSlope	  off
 	  InlineInvariantSignals  off
 	  OptimizeBlockIOStorage  on
 	  BufferReuse		  on
 	  EnhancedBackFolding	  off
+	  StrengthReduction	  off
 	  EnforceIntegerDowncast  on
 	  ExpressionFolding	  on
+	  BooleansAsBitfields	  off
+	  BitfieldContainerType	  "uint_T"
 	  EnableMemcpy		  on
 	  MemcpyThreshold	  64
+	  PassReuseOutputArgsAs	  "Structure reference"
 	  ExpressionDepthLimit	  2147483647
 	  FoldNonRolledExpr	  on
 	  LocalBlockOutputs	  on
@@ -184,13 +198,14 @@ Library {
 	  EfficientMapNaN2IntZero on
 	  OptimizeModelRefInitCode off
 	  LifeSpan		  "inf"
+	  MaxStackSize		  "Inherit from target"
 	  BufferReusableBoundary  on
 	  SimCompilerOptimization "Off"
 	  AccelVerboseBuild	  off
 	}
 	Simulink.DebuggingCC {
 	  $ObjectID		  5
-	  Version		  "1.5.1"
+	  Version		  "1.10.0"
 	  RTPrefix		  "error"
 	  ConsistencyChecking	  "none"
 	  ArrayBoundsChecking	  "none"
@@ -230,6 +245,9 @@ Library {
 	  ParameterUnderflowMsg	  "none"
 	  ParameterPrecisionLossMsg "warning"
 	  ParameterTunabilityLossMsg "warning"
+	  FixptConstUnderflowMsg  "none"
+	  FixptConstOverflowMsg	  "none"
+	  FixptConstPrecisionLossMsg "none"
 	  UnderSpecifiedDataTypeMsg "none"
 	  UnnecessaryDatatypeConvMsg "none"
 	  VectorMatrixConversionMsg "none"
@@ -254,13 +272,16 @@ Library {
 	  ModelReferenceSymbolNameMessage "warning"
 	  ModelReferenceExtraNoncontSigs "error"
 	  StateNameClashWarn	  "warning"
+	  SimStateInterfaceChecksumMismatchMsg "warning"
 	  StrictBusMsg		  "Warning"
+	  BusNameAdapt		  "WarnAndRepair"
+	  NonBusSignalsTreatedAsBus "none"
 	  LoggingUnavailableSignals "error"
 	  BlockIODiagnostic	  "none"
 	}
 	Simulink.HardwareCC {
 	  $ObjectID		  6
-	  Version		  "1.5.1"
+	  Version		  "1.10.0"
 	  ProdBitPerChar	  8
 	  ProdBitPerShort	  16
 	  ProdBitPerInt		  32
@@ -287,26 +308,35 @@ Library {
 	}
 	Simulink.ModelReferenceCC {
 	  $ObjectID		  7
-	  Version		  "1.5.1"
+	  Version		  "1.10.0"
 	  UpdateModelReferenceTargets "IfOutOfDateOrStructuralChange"
 	  CheckModelReferenceTargetMessage "error"
+	  EnableParallelModelReferenceBuilds off
+	  ParallelModelReferenceMATLABWorkerInit "None"
 	  ModelReferenceNumInstancesAllowed "Multi"
+	  PropagateVarSize	  "Infer from blocks in model"
 	  ModelReferencePassRootInputsByReference on
 	  ModelReferenceMinAlgLoopOccurrences off
+	  PropagateSignalLabelsOutOfModel off
+	  SupportModelReferenceSimTargetCustomCode off
 	}
 	Simulink.SFSimCC {
 	  $ObjectID		  8
-	  Version		  "1.5.1"
+	  Version		  "1.10.0"
 	  SFSimEnableDebug	  on
 	  SFSimOverflowDetection  on
 	  SFSimEcho		  on
+	  SimBlas		  on
+	  SimCtrlC		  on
+	  SimExtrinsic		  on
+	  SimIntegrity		  on
 	  SimUseLocalCustomCode	  off
 	  SimBuildMode		  "sf_incremental_build"
 	}
 	Simulink.RTWCC {
 	  $BackupClass		  "Simulink.RTWCC"
 	  $ObjectID		  9
-	  Version		  "1.5.1"
+	  Version		  "1.10.0"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    6
@@ -348,12 +378,14 @@ Library {
 	  GenerateTraceReportEml  off
 	  GenerateCodeInfo	  off
 	  RTWCompilerOptimization "Off"
+	  CheckMdlBeforeBuild	  "Off"
+	  CustomRebuildMode	  "OnUpdate"
 	  Array {
 	    Type		    "Handle"
 	    Dimension		    2
 	    Simulink.CodeAppCC {
 	      $ObjectID		      10
-	      Version		      "1.5.1"
+	      Version		      "1.10.0"
 	      Array {
 		Type			"Cell"
 		Dimension		17
@@ -394,6 +426,7 @@ Library {
 	      CustomSymbolStrType     "$N$R$M"
 	      CustomSymbolStrField    "$N$M"
 	      CustomSymbolStrFcn      "$R$N$M$F"
+	      CustomSymbolStrFcnArg   "rt$I$N$M"
 	      CustomSymbolStrBlkIO    "rtb_$N$M"
 	      CustomSymbolStrTmpVar   "$N$M"
 	      CustomSymbolStrMacro    "$R$N$M"
@@ -410,7 +443,7 @@ Library {
 	    Simulink.GRTTargetCC {
 	      $BackupClass	      "Simulink.TargetCC"
 	      $ObjectID		      11
-	      Version		      "1.5.1"
+	      Version		      "1.10.0"
 	      Array {
 		Type			"Cell"
 		Dimension		16
@@ -438,6 +471,7 @@ Library {
 	      TargetFunctionLibrary   "ANSI_C"
 	      UtilityFuncGeneration   "Auto"
 	      ERTMultiwordTypeDef     "System defined"
+	      ERTCodeCoverageTool     "None"
 	      ERTMultiwordLength      256
 	      MultiwordLength	      2048
 	      GenerateFullHeader      on
@@ -445,8 +479,10 @@ Library {
 	      GenerateTestInterfaces  off
 	      IsPILTarget	      off
 	      ModelReferenceCompliant on
+	      ParMdlRefBuildCompliant on
 	      CompOptLevelCompliant   on
 	      IncludeMdlTerminateFcn  on
+	      GeneratePreprocessorConditionals "Disable all"
 	      CombineOutputUpdateFcns off
 	      SuppressErrorStatus     off
 	      ERTFirstTimeCompliant   off
@@ -461,6 +497,7 @@ Library {
 	      PurelyIntegerCode	      off
 	      SupportContinuousTime   on
 	      SupportNonInlinedSFcns  on
+	      SupportVariableSizeSignals off
 	      EnableShiftOperators    on
 	      ParenthesesLevel	      "Nominal"
 	      PortableWordSizes	      off
@@ -492,7 +529,6 @@ Library {
     PropName		    "ConfigurationSets"
   }
   BlockDefaults {
-    Orientation		    "right"
     ForegroundColor	    "black"
     BackgroundColor	    "white"
     DropShadow		    off
@@ -502,6 +538,8 @@ Library {
     FontWeight		    "normal"
     FontAngle		    "normal"
     ShowName		    on
+    BlockRotation	    0
+    BlockMirror		    off
   }
   AnnotationDefaults {
     HorizontalAlignment	    "center"
@@ -562,6 +600,7 @@ Library {
       LockScale		      off
       SampleTime	      "inf"
       FramePeriod	      "inf"
+      PreserveConstantTs      off
     }
     Block {
       BlockType		      Demux
@@ -615,6 +654,7 @@ Library {
       BusObject		      "BusObject"
       BusOutputAsStruct	      off
       PortDimensions	      "-1"
+      VarSizeSig	      "Inherit"
       SampleTime	      "-1"
       OutMin		      "[]"
       OutMax		      "[]"
@@ -626,7 +666,7 @@ Library {
       SignalType	      "auto"
       SamplingMode	      "auto"
       LatchByDelayingOutsideSignal off
-      LatchByCopyingInsideSignal off
+      LatchInputForFeedbackSignals off
       Interpolate	      on
     }
     Block {
@@ -654,6 +694,9 @@ Library {
       LockScale		      off
       RndMeth		      "Floor"
       SaturateOnIntegerOverflow	on
+      IntermediateResultsDataTypeStr "Inherit: Inherit via internal rule"
+      AlgorithmType	      "Newton-Raphson"
+      Iterations	      "3"
     }
     Block {
       BlockType		      Mux
@@ -670,6 +713,7 @@ Library {
       BusObject		      "BusObject"
       BusOutputAsStruct	      off
       PortDimensions	      "-1"
+      VarSizeSig	      "Inherit"
       SampleTime	      "-1"
       OutMin		      "[]"
       OutMax		      "[]"
@@ -782,6 +826,7 @@ Library {
       SaturateOnIntegerOverflow	on
       ZeroCross		      on
       SampleTime	      "-1"
+      AllowDiffInputSizes     off
     }
     Block {
       BlockType		      Terminator
@@ -796,7 +841,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [927, 186, 1577, 671]
+    Location		    [927, 208, 1577, 693]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -810,9 +855,11 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
+    SIDHighWatermark	    199
     Block {
       BlockType		      SubSystem
       Name		      "C Code"
+      SID		      1
       Ports		      []
       Position		      [441, 341, 486, 409]
       DropShadow	      on
@@ -841,6 +888,7 @@ Library {
 	Block {
 	  BlockType		  Demux
 	  Name			  "Demux"
+	  SID			  2
 	  Ports			  [1, 2]
 	  Position		  [180, 51, 185, 89]
 	  BackgroundColor	  "black"
@@ -851,6 +899,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock3"
+	  SID			  3
 	  Description		  "User C Function Call"
 	  Ports			  []
 	  Position		  [247, 55, 287, 94]
@@ -874,6 +923,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Function Name"
+	  SID			  4
 	  Tag			  "cdsFunctionCall"
 	  Description		  "inline FunctionName SourceFile"
 	  Ports			  [1, 1]
@@ -893,6 +943,7 @@ Library {
 	Block {
 	  BlockType		  Mux
 	  Name			  "Mux"
+	  SID			  5
 	  Ports			  [2, 1]
 	  Position		  [85, 51, 90, 89]
 	  ShowName		  off
@@ -916,6 +967,7 @@ Library {
     Block {
       BlockType		      SubSystem
       Name		      "DAQ Channels"
+      SID		      6
       Ports		      []
       Position		      [536, 341, 581, 409]
       DropShadow	      on
@@ -954,12 +1006,14 @@ Library {
     Block {
       BlockType		      Reference
       Name		      "DocBlock2"
+      SID		      7
       Description	      "cdsParameters"
       Ports		      []
       Position		      [162, 120, 202, 159]
       BackgroundColor	      "yellow"
       ShowName		      off
       AttributesFormatString  "%<Description>"
+      LibraryVersion	      "1.216"
       UserDataPersistent      on
       UserData		      "DataTag1"
       SourceBlock	      "simulink/Model-Wide\nUtilities/DocBlock"
@@ -977,6 +1031,7 @@ Library {
     Block {
       BlockType		      SubSystem
       Name		      "EpicsParts"
+      SID		      8
       Ports		      []
       Position		      [537, 118, 583, 187]
       DropShadow	      on
@@ -989,7 +1044,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"EpicsParts"
-	Location		[1302, 174, 1878, 772]
+	Location		[1302, 196, 1878, 794]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1005,266 +1060,257 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock"
+	  SID			  8
 	  Description		  "EzCa Read/Write"
 	  Ports			  []
 	  Position		  [357, 330, 397, 369]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.216"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag2"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "8"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	  DocumentType		  "Text"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock1"
+	  SID			  9
 	  Description		  "EpicsInput"
 	  Ports			  []
 	  Position		  [222, 50, 262, 89]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.216"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag3"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "9"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	  DocumentType		  "Text"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock2"
+	  SID			  10
 	  Description		  "EpicsMomentary"
 	  Ports			  []
 	  Position		  [222, 125, 262, 164]
 	  BackgroundColor	  "magenta"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.216"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag4"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "10"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	  DocumentType		  "Text"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock3"
+	  SID			  11
 	  Description		  "EpicsBinIn"
 	  Ports			  []
 	  Position		  [222, 195, 262, 234]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.216"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag5"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "11"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	  DocumentType		  "Text"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock4"
+	  SID			  12
 	  Description		  "EpicsOutput"
 	  Ports			  []
 	  Position		  [487, 65, 527, 104]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.216"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag6"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "12"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	  DocumentType		  "Text"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock5"
+	  SID			  13
 	  Description		  "EpicsRemoteIntlk"
 	  Ports			  []
 	  Position		  [487, 135, 527, 174]
 	  BackgroundColor	  "magenta"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.216"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag7"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "13"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	  DocumentType		  "Text"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock6"
+	  SID			  14
 	  Description		  "EpicsStringIn"
 	  Ports			  []
 	  Position		  [77, 450, 117, 489]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.216"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag8"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "14"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	  DocumentType		  "Text"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock7"
+	  SID			  15
 	  Description		  "EpicsMbbi"
 	  Ports			  []
 	  Position		  [197, 450, 237, 489]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.216"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag9"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "15"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	  DocumentType		  "Text"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock8"
+	  SID			  16
 	  Description		  "EpicsCounter"
 	  Ports			  []
 	  Position		  [432, 445, 472, 484]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.216"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag10"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "16"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	  DocumentType		  "Text"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock9"
+	  SID			  17
 	  Description		  "EpicsMbbo"
 	  Ports			  []
 	  Position		  [302, 450, 342, 489]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.216"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag11"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "17"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	  DocumentType		  "Text"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "EpicsBinIn"
+	  SID			  18
 	  Tag			  "cdsEpicsBinIn"
 	  Description		  "Purpose:                                                                            \nCreate an EPI"
 	  "CS binary (0 or 1) input channel to the FE realtime controls.          \n                                          "
@@ -1278,46 +1324,44 @@ Library {
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.5"
 	  SourceBlock		  "cdsEpicsBinIn/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "18"
-	  LibraryVersion	  "1.5"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "EpicsCounter"
+	  SID			  19
 	  Tag			  "cdsEpicsCounter"
 	  Ports			  [1]
 	  Position		  [425, 505, 480, 535]
 	  BackgroundColor	  "[0.670588, 0.556863, 0.258824]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsEpicsCounter/EpicsCounter"
 	  SourceType		  "SubSystem"
-	  SID			  "19"
-	  LibraryVersion	  "1.3"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "EpicsInput"
+	  SID			  20
 	  Tag			  "cdsEpicsIn"
 	  Description		  "Purpose:                                                                              \nCreate an E"
 	  "PICS input channel connection to the FE realtime controls.                 \n                                      "
@@ -1331,23 +1375,22 @@ Library {
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsEpicsIn/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "20"
-	  LibraryVersion	  "1.2"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "EpicsMbbi"
+	  SID			  21
 	  Tag			  "cdsEpicsMbbi"
 	  Description		  "cdsEpicsMbbi"
 	  Ports			  [0, 1]
@@ -1355,23 +1398,22 @@ Library {
 	  BackgroundColor	  "[0.000000, 0.501961, 0.501961]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.5"
 	  SourceBlock		  "cdsEpicsMbbi/EpicsMbbi"
 	  SourceType		  "SubSystem"
-	  SID			  "21"
-	  LibraryVersion	  "1.5"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "EpicsMbbo"
+	  SID			  22
 	  Tag			  "cdsEpicsMbbo"
 	  Description		  "cdsEpicsMbbo"
 	  Ports			  [1, 1]
@@ -1379,46 +1421,44 @@ Library {
 	  BackgroundColor	  "[0.250980, 0.501961, 0.501961]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsEpicsMbbo/EpicsMbbo"
 	  SourceType		  "SubSystem"
-	  SID			  "22"
-	  LibraryVersion	  "1.3"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "EpicsMomentary"
+	  SID			  23
 	  Tag			  "cdsEpicsMomentary"
 	  Ports			  [1, 1]
 	  Position		  [80, 125, 155, 155]
 	  BackgroundColor	  "[0.501961, 1.000000, 0.501961]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.5"
 	  SourceBlock		  "cdsEpicsMomentary/EpicsMomentary"
 	  SourceType		  "SubSystem"
-	  SID			  "23"
-	  LibraryVersion	  "1.5"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "EpicsOutput"
+	  SID			  24
 	  Tag			  "cdsEpicsOutput"
 	  Description		  "Purpose:                                          \nOutput a FE signal to an EPICS channel.        "
 	  "   \n                                                  \nOperation:                                        \nTakes "
@@ -1429,23 +1469,22 @@ Library {
 	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "24"
-	  LibraryVersion	  "1.1"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "EpicsRemoteIntlk"
+	  SID			  25
 	  Tag			  "cdsRemoteIntlk"
 	  Description		  "Purpose:                                                                                           "
 	  "                                                                                                                   "
@@ -1470,23 +1509,22 @@ Library {
 	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsRemoteIntlk/Name"
 	  SourceType		  "SubSystem"
-	  SID			  "25"
-	  LibraryVersion	  "1.2"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "EpicsStringIn"
+	  SID			  26
 	  Tag			  "cdsEpicsStringIn"
 	  Description		  "cdsEpicsStringIn"
 	  Ports			  [1]
@@ -1494,60 +1532,60 @@ Library {
 	  BackgroundColor	  "[0.000000, 0.501961, 0.250980]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsEpicsStringIn/EpicsStringIn"
 	  SourceType		  "SubSystem"
-	  SID			  "26"
-	  LibraryVersion	  "1.3"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	}
 	Block {
 	  BlockType		  Ground
 	  Name			  "Ground"
+	  SID			  28
 	  Position		  [25, 130, 45, 150]
 	}
 	Block {
 	  BlockType		  Ground
 	  Name			  "Ground1"
+	  SID			  29
 	  Position		  [25, 205, 45, 225]
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "M1:SYS-FOO_BAR"
+	  SID			  29
 	  Tag			  "cdsEzCaRead"
 	  Description		  "Purpose:                                                       \nUsed to input an Epics signal.    "
 	  "                             \n                                                               \nOperation:         "
 	  "                                            \nUsing ezcaread() function to get Epics input from a remote IOC.\n    "
 	  "                                                           \nUsage:                                                "
 	  "         \nGive the name of the EPICS channel to be read.                 "
-	  Ports			  [0, 1]
+	  Ports			  [0, 2]
 	  Position		  [140, 320, 180, 380]
 	  BackgroundColor	  "[0.792741, 0.563703, 0.940000]"
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsEzCaRead/cdsEzCaRead"
 	  SourceType		  "SubSystem"
-	  SID			  "29"
-	  LibraryVersion	  "1.1"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "cdsEzCaWrite"
+	  SID			  30
 	  Tag			  "cdsEzCaWrite"
 	  Description		  "Purpose:                                    \nOutput Epics channel.                       \n       "
 	  "                                     \nOperation:                                  \nUsing ezcawrite() output an Ep"
@@ -1557,19 +1595,17 @@ Library {
 	  Position		  [260, 320, 300, 380]
 	  BackgroundColor	  "[0.698999, 0.245793, 1.000000]"
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsEzCaWrite/cdsEzCaWrite"
 	  SourceType		  "SubSystem"
-	  SID			  "30"
-	  LibraryVersion	  "1.1"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
 	  RTWMemSecDataInternal	  "Inherit from model"
 	  RTWMemSecDataParameters "Inherit from model"
-	  GeneratePreprocessorConditionals "off"
 	}
 	Line {
 	  SrcBlock		  "Ground"
@@ -1600,6 +1636,7 @@ Library {
     Block {
       BlockType		      SubSystem
       Name		      "Filters/\nGDS"
+      SID		      32
       Ports		      []
       Position		      [346, 225, 393, 295]
       DropShadow	      on
@@ -1630,6 +1667,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "BiQuad IIR Filter Module"
+	  SID			  33
 	  Tag			  "cdsFiltBiQuad"
 	  Description		  "BiQuad IIR Filter Module"
 	  Ports			  [1, 1]
@@ -1650,6 +1688,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock"
+	  SID			  34
 	  Description		  "IIR Filter Module"
 	  Ports			  []
 	  Position		  [172, 60, 212, 99]
@@ -1662,7 +1701,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1673,6 +1712,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock1"
+	  SID			  35
 	  Description		  "IIR FM w/Ctrl"
 	  Ports			  []
 	  Position		  [177, 135, 217, 174]
@@ -1685,7 +1725,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1696,6 +1736,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock2"
+	  SID			  36
 	  Description		  "PolyPhase FIR Filter"
 	  Ports			  []
 	  Position		  [177, 230, 217, 269]
@@ -1708,7 +1749,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1719,6 +1760,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock3"
+	  SID			  37
 	  Description		  "RMS"
 	  Ports			  []
 	  Position		  [167, 420, 207, 459]
@@ -1731,7 +1773,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1742,6 +1784,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock4"
+	  SID			  38
 	  Description		  "TP/EXC"
 	  Ports			  []
 	  Position		  [337, 310, 377, 349]
@@ -1754,7 +1797,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1765,6 +1808,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock5"
+	  SID			  39
 	  Description		  "IIR Filter Module"
 	  Ports			  []
 	  Position		  [187, 535, 227, 574]
@@ -1777,7 +1821,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1788,6 +1832,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "EXC_NAME"
+	  SID			  40
 	  Tag			  "Excitation"
 	  Ports			  [0, 1]
 	  Position		  [265, 346, 305, 364]
@@ -1807,6 +1852,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "IIR FM with control"
+	  SID			  41
 	  Tag			  "cdsFiltCtrl"
 	  Description		  "cdsFiltCntrl is the standard IIR filter module (exactly the same as cdsFilt) but with added control"
 	  " data output 'Ctrl'. Filter module digital signal output appears on the first output, which is called 'Val'. 'Ctrl'"
@@ -1862,7 +1908,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1872,6 +1918,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "IIR Filter Module"
+	  SID			  42
 	  Tag			  "cdsFilt"
 	  Description		  "Purpose:                                                                                           "
 	  "                                                                                                                   "
@@ -1899,7 +1946,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1909,6 +1956,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "PolyPhase FIR Filter"
+	  SID			  43
 	  Tag			  "cdsPPFIR"
 	  Description		  "Purpose:                                                                                           "
 	  "         \nProvide a Polyphase FIR filter algorithm. This part is typically only used in HEPI or other seismic syst"
@@ -1922,7 +1970,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1932,6 +1980,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "RMS"
+	  SID			  44
 	  Tag			  "cdsRms"
 	  Description		  "Purpose:                                   \nCalculate an RMS based on the input signal."
 	  Ports			  [1, 1]
@@ -1943,7 +1992,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
+	  FunctionWithSeparateData "off"
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1953,6 +2002,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "TP_NAME"
+	  SID			  45
 	  Tag			  "Test Point"
 	  Ports			  [1]
 	  Position		  [265, 295, 305, 315]
@@ -1972,6 +2022,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "TrueRMS"
+	  SID			  46
 	  Tag			  "cdsTrueRMS"
 	  Description		  "window_size=1024"
 	  Ports			  [1, 1]
@@ -2001,6 +2052,7 @@ Library {
     Block {
       BlockType		      SubSystem
       Name		      "IO_PARTS"
+      SID		      47
       Ports		      []
       Position		      [346, 118, 392, 187]
       DropShadow	      on
@@ -2029,6 +2081,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "0x1000"
+	  SID			  48
 	  Tag			  "cdsRfmIO"
 	  Description		  "VMIC5565 Reflective Memory read/write"
 	  Ports			  [1, 1]
@@ -2050,6 +2103,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "0x2000"
+	  SID			  49
 	  Tag			  "cdsIPC"
 	  Description		  "Inter-process communication through /rtl_epics_ipc shared memory"
 	  Ports			  [1, 1]
@@ -2071,6 +2125,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "0x3000"
+	  SID			  50
 	  Tag			  "cdsIPCS"
 	  Ports			  [1, 1]
 	  Position		  [310, 1114, 365, 1136]
@@ -2090,6 +2145,7 @@ Library {
 	Block {
 	  BlockType		  SubSystem
 	  Name			  "16x16-bit DACs"
+	  SID			  51
 	  Ports			  []
 	  Position		  [345, 357, 528, 511]
 	  BackgroundColor	  "cyan"
@@ -2119,16 +2175,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_0"
+	      SID		      62
 	      Description	      "type=GSC_16AO16,\ncard_num=0      "
 	      Ports		      [16]
 	      Position		      [80, 29, 115, 286]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "62"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2142,16 +2198,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_1"
+	      SID		      165
 	      Description	      "type=GSC_16AO16,\ncard_num=1      "
 	      Ports		      [16]
 	      Position		      [170, 29, 205, 286]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "165"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2165,16 +2221,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_10"
+	      SID		      278
 	      Description	      "type=GSC_16AO16,\ncard_num=10     "
 	      Ports		      [16]
 	      Position		      [260, 349, 295, 606]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "278"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2188,16 +2244,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_11"
+	      SID		      279
 	      Description	      "type=GSC_16AO16,\ncard_num=11     "
 	      Ports		      [16]
 	      Position		      [350, 349, 385, 606]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "279"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2211,16 +2267,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_12"
+	      SID		      280
 	      Description	      "type=GSC_16AO16,\ncard_num=12     "
 	      Ports		      [16]
 	      Position		      [440, 349, 475, 606]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "280"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2234,16 +2290,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_13"
+	      SID		      281
 	      Description	      "type=GSC_16AO16,\ncard_num=13     "
 	      Ports		      [16]
 	      Position		      [530, 349, 565, 606]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "281"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2257,16 +2313,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_14"
+	      SID		      282
 	      Description	      "type=GSC_16AO16,\ncard_num=14     "
 	      Ports		      [16]
 	      Position		      [620, 349, 655, 606]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "282"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2280,16 +2336,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_15"
+	      SID		      283
 	      Description	      "type=GSC_16AO16,\ncard_num=15     "
 	      Ports		      [16]
 	      Position		      [710, 349, 745, 606]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "283"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2303,16 +2359,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_2"
+	      SID		      166
 	      Description	      "type=GSC_16AO16,\ncard_num=2      "
 	      Ports		      [16]
 	      Position		      [260, 29, 295, 286]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "166"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2326,16 +2382,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_3"
+	      SID		      167
 	      Description	      "type=GSC_16AO16,\ncard_num=3      "
 	      Ports		      [16]
 	      Position		      [350, 29, 385, 286]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "167"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2349,16 +2405,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_4"
+	      SID		      272
 	      Description	      "type=GSC_16AO16,\ncard_num=4      "
 	      Ports		      [16]
 	      Position		      [440, 29, 475, 286]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "272"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2372,16 +2428,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_5"
+	      SID		      273
 	      Description	      "type=GSC_16AO16,\ncard_num=5      "
 	      Ports		      [16]
 	      Position		      [530, 29, 565, 286]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "273"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2395,16 +2451,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_6"
+	      SID		      274
 	      Description	      "type=GSC_16AO16,\ncard_num=6      "
 	      Ports		      [16]
 	      Position		      [620, 29, 655, 286]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "274"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2418,16 +2474,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_7"
+	      SID		      275
 	      Description	      "type=GSC_16AO16,\ncard_num=7      "
 	      Ports		      [16]
 	      Position		      [710, 29, 745, 286]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "275"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2441,16 +2497,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_8"
+	      SID		      276
 	      Description	      "type=GSC_16AO16,\ncard_num=8      "
 	      Ports		      [16]
 	      Position		      [80, 349, 115, 606]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "276"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2464,16 +2520,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_9"
+	      SID		      277
 	      Description	      "type=GSC_16AO16,\ncard_num=9      "
 	      Ports		      [16]
 	      Position		      [170, 349, 205, 606]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "277"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2489,6 +2545,7 @@ Library {
 	Block {
 	  BlockType		  SubSystem
 	  Name			  "8x18-bit DACs"
+	  SID			  68
 	  Ports			  []
 	  Position		  [110, 357, 292, 510]
 	  BackgroundColor	  "cyan"
@@ -2518,16 +2575,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_0"
+	      SID		      63
 	      Description	      "type=GSC_18AO8,\ncard_num=0     "
 	      Ports		      [8]
 	      Position		      [80, 27, 115, 193]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "63"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2541,16 +2598,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_1"
+	      SID		      171
 	      Description	      "type=GSC_18AO8,\ncard_num=1     "
 	      Ports		      [8]
 	      Position		      [160, 27, 195, 193]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "171"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2564,16 +2621,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_10"
+	      SID		      290
 	      Description	      "type=GSC_18AO8,\ncard_num=10    "
 	      Ports		      [8]
 	      Position		      [240, 252, 275, 418]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "290"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2587,16 +2644,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_11"
+	      SID		      291
 	      Description	      "type=GSC_18AO8,\ncard_num=11    "
 	      Ports		      [8]
 	      Position		      [320, 252, 355, 418]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "291"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2610,16 +2667,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_12"
+	      SID		      292
 	      Description	      "type=GSC_18AO8,\ncard_num=12    "
 	      Ports		      [8]
 	      Position		      [400, 252, 435, 418]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "292"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2633,16 +2690,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_13"
+	      SID		      293
 	      Description	      "type=GSC_18AO8,\ncard_num=13    "
 	      Ports		      [8]
 	      Position		      [480, 252, 515, 418]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "293"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2656,16 +2713,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_14"
+	      SID		      294
 	      Description	      "type=GSC_18AO8,\ncard_num=14    "
 	      Ports		      [8]
 	      Position		      [560, 252, 595, 418]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "294"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2679,16 +2736,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_15"
+	      SID		      295
 	      Description	      "type=GSC_18AO8,\ncard_num=15    "
 	      Ports		      [8]
 	      Position		      [640, 252, 675, 418]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "295"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2702,16 +2759,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_2"
+	      SID		      172
 	      Description	      "type=GSC_18AO8,\ncard_num=2     "
 	      Ports		      [8]
 	      Position		      [240, 27, 275, 193]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "172"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2725,16 +2782,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_3"
+	      SID		      173
 	      Description	      "type=GSC_18AO8,\ncard_num=3     "
 	      Ports		      [8]
 	      Position		      [320, 27, 355, 193]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "173"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2748,16 +2805,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_4"
+	      SID		      284
 	      Description	      "type=GSC_18AO8,\ncard_num=4     "
 	      Ports		      [8]
 	      Position		      [400, 27, 435, 193]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "284"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2771,16 +2828,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_5"
+	      SID		      285
 	      Description	      "type=GSC_18AO8,\ncard_num=5     "
 	      Ports		      [8]
 	      Position		      [480, 27, 515, 193]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "285"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2794,16 +2851,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_6"
+	      SID		      286
 	      Description	      "type=GSC_18AO8,\ncard_num=6     "
 	      Ports		      [8]
 	      Position		      [560, 27, 595, 193]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "286"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2817,16 +2874,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_7"
+	      SID		      287
 	      Description	      "type=GSC_18AO8,\ncard_num=7     "
 	      Ports		      [8]
 	      Position		      [640, 27, 675, 193]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "287"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2840,16 +2897,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_8"
+	      SID		      288
 	      Description	      "type=GSC_18AO8,\ncard_num=8     "
 	      Ports		      [8]
 	      Position		      [80, 252, 115, 418]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "288"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2863,16 +2920,16 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DAC_9"
+	      SID		      289
 	      Description	      "type=GSC_18AO8,\ncard_num=9     "
 	      Ports		      [8]
 	      Position		      [160, 252, 195, 418]
 	      BackgroundColor	      "cyan"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "289"
-	      LibraryVersion	      "1.5"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -2888,6 +2945,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "ADC0"
+	  SID			  85
 	  Tag			  "cdsAdc"
 	  Description		  "type-GSC_16AI64SSA\ncard_num=0        "
 	  Ports			  [0, 1]
@@ -2910,6 +2968,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "ADC1"
+	  SID			  86
 	  Tag			  "cdsAdc"
 	  Description		  "type-GSC_16AI64SSA\ncard_num=1        "
 	  Ports			  [0, 1]
@@ -2932,6 +2991,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "ADC2"
+	  SID			  87
 	  Tag			  "cdsAdc"
 	  Description		  "type-GSC_16AI64SSA\ncard_num=2        "
 	  Ports			  [0, 1]
@@ -2954,6 +3014,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "ADC3"
+	  SID			  88
 	  Tag			  "cdsAdc"
 	  Description		  "type-GSC_16AI64SSA\ncard_num=3        "
 	  Ports			  [0, 1]
@@ -2976,6 +3037,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "ADC4"
+	  SID			  89
 	  Tag			  "cdsAdc"
 	  Description		  "type-GSC_16AI64SSA\ncard_num=4        "
 	  Ports			  [0, 1]
@@ -2998,6 +3060,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "ADC5"
+	  SID			  90
 	  Tag			  "cdsAdc"
 	  Description		  "type-GSC_16AI64SSA\ncard_num=5        "
 	  Ports			  [0, 1]
@@ -3020,6 +3083,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "ADC6"
+	  SID			  91
 	  Tag			  "cdsAdc"
 	  Description		  "type-GSC_16AI64SSA\ncard_num=6        "
 	  Ports			  [0, 1]
@@ -3042,6 +3106,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "ADC7"
+	  SID			  92
 	  Tag			  "cdsAdc"
 	  Description		  "type-GSC_16AI64SSA\ncard_num=7        "
 	  Ports			  [0, 1]
@@ -3064,6 +3129,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "ADC8"
+	  SID			  93
 	  Tag			  "cdsAdc"
 	  Description		  "type-GSC_16AI64SSA\ncard_num=8        "
 	  Ports			  [0, 1]
@@ -3086,6 +3152,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "ADC9"
+	  SID			  94
 	  Tag			  "cdsAdc"
 	  Description		  "type-GSC_16AI64SSA\ncard_num=9        "
 	  Ports			  [0, 1]
@@ -3107,6 +3174,7 @@ Library {
 	Block {
 	  BlockType		  BusSelector
 	  Name			  "Bus\nSelector6"
+	  SID			  95
 	  Description		  "ADC Selector"
 	  Ports			  [1, 2]
 	  Position		  [805, 110, 815, 230]
@@ -3129,6 +3197,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Contec1616dio"
+	  SID			  96
 	  Tag			  "cdsCDIO1616"
 	  Ports			  [1, 1]
 	  Position		  [570, 909, 640, 971]
@@ -3148,6 +3217,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Contec32BO"
+	  SID			  97
 	  Tag			  "cdsCDO32"
 	  Description		  "Contec32 bit binary output module driver"
 	  Ports			  [2]
@@ -3169,6 +3239,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Contec6464dio"
+	  SID			  98
 	  Tag			  "cdsDIO6464"
 	  Ports			  [1, 1]
 	  Position		  [685, 910, 750, 970]
@@ -3188,6 +3259,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DigitalIO"
+	  SID			  99
 	  Tag			  "cdsDio"
 	  Description		  "support for 8 bit input 8 bit output DIO PCI card\nACCESS I/O Products model DIO-24D               "
 	  " "
@@ -3210,6 +3282,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock"
+	  SID			  100
 	  Description		  "cdsCDO32"
 	  Ports			  []
 	  Position		  [367, 855, 407, 894]
@@ -3233,6 +3306,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock1"
+	  SID			  101
 	  Description		  "DAC"
 	  Ports			  []
 	  Position		  [27, 415, 67, 454]
@@ -3256,6 +3330,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock10"
+	  SID			  102
 	  Description		  "IPC"
 	  Ports			  []
 	  Position		  [237, 1055, 277, 1094]
@@ -3279,6 +3354,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock11"
+	  SID			  103
 	  Description		  "IPCx"
 	  Ports			  []
 	  Position		  [147, 1055, 187, 1094]
@@ -3302,6 +3378,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock12"
+	  SID			  104
 	  Description		  "IPCS"
 	  Ports			  []
 	  Position		  [317, 1055, 357, 1094]
@@ -3325,6 +3402,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock13"
+	  SID			  105
 	  Description		  "ADC Selector"
 	  Ports			  []
 	  Position		  [792, 50, 832, 89]
@@ -3348,6 +3426,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock2"
+	  SID			  106
 	  Description		  "IPCx_MemType"
 	  Ports			  []
 	  Position		  [207, 650, 247, 689]
@@ -3371,6 +3450,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock3"
+	  SID			  107
 	  Description		  "Contec1616"
 	  Ports			  []
 	  Position		  [582, 855, 622, 894]
@@ -3394,6 +3474,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock4"
+	  SID			  108
 	  Description		  "ADC"
 	  Ports			  []
 	  Position		  [677, 275, 717, 314]
@@ -3417,6 +3498,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock5"
+	  SID			  109
 	  Description		  "Contec6464"
 	  Ports			  []
 	  Position		  [697, 855, 737, 894]
@@ -3440,6 +3522,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock6"
+	  SID			  110
 	  Description		  "cdsDio"
 	  Ports			  []
 	  Position		  [62, 855, 102, 894]
@@ -3463,6 +3546,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock7"
+	  SID			  111
 	  Description		  "cdsRio/cdsRio1"
 	  Ports			  []
 	  Position		  [207, 855, 247, 894]
@@ -3486,6 +3570,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock8"
+	  SID			  112
 	  Description		  "RfmIO"
 	  Ports			  []
 	  Position		  [437, 1060, 477, 1099]
@@ -3509,6 +3594,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock9"
+	  SID			  113
 	  Description		  "GPS"
 	  Ports			  []
 	  Position		  [27, 1055, 67, 1094]
@@ -3532,6 +3618,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "GPS"
+	  SID			  114
 	  Tag			  "cdsGps"
 	  Description		  "Symmetricom BC635PCI-U GPS card input                                 \nThis block outputs current "
 	  "time as sampled using the card.            \nfull -- complete UNIX seconds, and fractional part correct up to 100ns"
@@ -3555,6 +3642,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "PCIE_SignalName"
+	  SID			  115
 	  Tag			  "cdsIPCx_PCIE"
 	  Description		  "Inter-Process Communication via PCI Express network."
 	  Ports			  [1, 2]
@@ -3576,6 +3664,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "RFM_SignalName"
+	  SID			  116
 	  Tag			  "cdsIPCx_RFM"
 	  Description		  "card=0"
 	  Ports			  [1, 2]
@@ -3597,6 +3686,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "RelayIO"
+	  SID			  117
 	  Tag			  "cdsRio"
 	  Description		  "PCI IIRO 8 relay output and isolated input module"
 	  Ports			  [1, 2]
@@ -3619,6 +3709,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "RelayIO1"
+	  SID			  118
 	  Tag			  "cdsRio1"
 	  Description		  "PCI IIRO 16 channel relay ourput and isolated input module"
 	  Ports			  [1, 1]
@@ -3641,6 +3732,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "SHMEM_SignalName"
+	  SID			  119
 	  Tag			  "cdsIPCx_SHMEM"
 	  Description		  "Inter-Process Communication via Shared memory."
 	  Ports			  [1, 2]
@@ -3662,6 +3754,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "SignalName"
+	  SID			  120
 	  Tag			  "cdsIPCx"
 	  Description		  "Inter-Process Communication via Shared memory, via Reflected\nMemory network, or via PCI Express ne"
 	  "twork.                 "
@@ -3722,6 +3815,7 @@ Library {
     Block {
       BlockType		      SubSystem
       Name		      "MatrixParts"
+      SID		      121
       Ports		      []
       Position		      [443, 225, 489, 294]
       DropShadow	      on
@@ -3750,6 +3844,7 @@ Library {
 	Block {
 	  BlockType		  Demux
 	  Name			  "Demux"
+	  SID			  122
 	  Ports			  [1, 2]
 	  Position		  [140, 76, 145, 114]
 	  BackgroundColor	  "black"
@@ -3760,6 +3855,7 @@ Library {
 	Block {
 	  BlockType		  Demux
 	  Name			  "Demux1"
+	  SID			  123
 	  Ports			  [1, 2]
 	  Position		  [140, 181, 145, 219]
 	  BackgroundColor	  "black"
@@ -3770,18 +3866,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock"
+	  SID			  87
 	  Description		  "FiltMuxMatrix"
 	  Ports			  []
 	  Position		  [177, 180, 217, 219]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag32"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "87"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -3796,18 +3892,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock1"
+	  SID			  88
 	  Description		  "MuxMatrix"
 	  Ports			  []
 	  Position		  [177, 75, 217, 114]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag33"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "88"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -3822,18 +3918,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock2"
+	  SID			  89
 	  Description		  "Bit2Word/Word2Bit"
 	  Ports			  []
 	  Position		  [537, 145, 577, 184]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag34"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "89"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -3848,18 +3944,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock3"
+	  SID			  90
 	  Description		  "MultiSwitch"
 	  Ports			  []
 	  Position		  [202, 375, 242, 414]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag35"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "90"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -3874,18 +3970,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock4"
+	  SID			  91
 	  Description		  "MultiProduct"
 	  Ports			  []
 	  Position		  [72, 375, 112, 414]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag36"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "91"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -3900,18 +3996,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock5"
+	  SID			  92
 	  Description		  "MultiSubtract"
 	  Ports			  []
 	  Position		  [322, 375, 362, 414]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag37"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "92"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -3926,18 +4022,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock6"
+	  SID			  93
 	  Description		  "Matrix"
 	  Ports			  []
 	  Position		  [437, 375, 477, 414]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag38"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "93"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -3952,18 +4048,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock7"
+	  SID			  94
 	  Description		  "RampSwitch"
 	  Ports			  []
 	  Position		  [542, 375, 582, 414]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag39"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "94"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -3978,6 +4074,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Matrix"
+	  SID			  95
 	  Tag			  "Matrix"
 	  Description		  "Purpose:                                                                 \nProvide a matrix multipl"
 	  "ication function for up to 8 input and 8 outputs."
@@ -3986,10 +4083,9 @@ Library {
 	  BackgroundColor	  "yellow"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "95"
-	  LibraryVersion	  "1.2"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4003,6 +4099,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "MultiProduct"
+	  SID			  96
 	  Tag			  "cdsProduct"
 	  Description		  "Purpose:                                                                                           "
 	  "                                                                           \nMultiply 8 inputs by a common gain fac"
@@ -4017,10 +4114,9 @@ Library {
 	  BackgroundColor	  "[0.932779, 1.000000, 0.419564]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsProduct/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "96"
-	  LibraryVersion	  "1.4"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4034,6 +4130,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "MultiSubtract"
+	  SID			  97
 	  Tag			  "cdsSubtract8"
 	  Description		  "Purpose:                    \nSubtract pairs of 16 inputs."
 	  Ports			  [16, 8]
@@ -4041,10 +4138,9 @@ Library {
 	  BackgroundColor	  "[1.000000, 0.769068, 0.736422]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsSubtract8/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "97"
-	  LibraryVersion	  "1.1"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4058,6 +4154,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "MultiSwitch"
+	  SID			  98
 	  Tag			  "cdsSwitch1"
 	  Description		  "Switch"
 	  Ports			  [8, 8]
@@ -4065,10 +4162,9 @@ Library {
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsSwitch1/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "98"
-	  LibraryVersion	  "1.1"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4082,6 +4178,7 @@ Library {
 	Block {
 	  BlockType		  Mux
 	  Name			  "Mux"
+	  SID			  136
 	  Ports			  [2, 1]
 	  Position		  [40, 76, 45, 114]
 	  ShowName		  off
@@ -4091,6 +4188,7 @@ Library {
 	Block {
 	  BlockType		  Mux
 	  Name			  "Mux1"
+	  SID			  137
 	  Ports			  [2, 1]
 	  Position		  [40, 181, 45, 219]
 	  ShowName		  off
@@ -4100,6 +4198,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "RampSwitch"
+	  SID			  101
 	  Tag			  "cdsRampSwitch"
 	  Description		  "Ramp Switch"
 	  Ports			  [4, 2]
@@ -4107,10 +4206,9 @@ Library {
 	  BackgroundColor	  "[0.790334, 0.900000, 0.363093]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsRampSwitch/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "101"
-	  LibraryVersion	  "1.2"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4124,6 +4222,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "cdsBit2Word"
+	  SID			  102
 	  Tag			  "cdsBit2Word"
 	  Description		  "Forms single 16 bit integer from 16 0/1 inputs."
 	  Ports			  [16, 1]
@@ -4131,10 +4230,9 @@ Library {
 	  BackgroundColor	  "lightBlue"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.5"
 	  SourceBlock		  "cdsBit2Word/cdsBit2Word"
 	  SourceType		  "SubSystem"
-	  SID			  "102"
-	  LibraryVersion	  "1.5"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4148,16 +4246,16 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "cdsFiltMuxMatrix"
+	  SID			  103
 	  Tag			  "cdsFiltMuxMatrix"
 	  Description		  "A matrix of filter banks similar to mux matrix."
 	  Ports			  [1, 1]
 	  Position		  [75, 170, 115, 230]
 	  BackgroundColor	  "[1.000000, 0.488510, 0.499362]"
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsFiltMuxMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "103"
-	  LibraryVersion	  "1.1"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4171,6 +4269,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "cdsMuxMatrix"
+	  SID			  104
 	  Tag			  "cdsMuxMatrix"
 	  Description		  "Any size matrix. Inputs and outputs must be connected using Mux and Demux parts."
 	  Ports			  [1, 1]
@@ -4178,10 +4277,9 @@ Library {
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsMuxMatrix/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "104"
-	  LibraryVersion	  "1.1"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4195,6 +4293,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "cdsWord2Bit"
+	  SID			  105
 	  Tag			  "cdsWord2Bit"
 	  Description		  "Generate 16 0/1 outputs from single 16-bit integer input"
 	  Ports			  [1, 16]
@@ -4202,10 +4301,9 @@ Library {
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "cdsWord2Bit"
+	  LibraryVersion	  "1.5"
 	  SourceBlock		  "cdsWord2Bit/cdsWord2Bit"
 	  SourceType		  "SubSystem"
-	  SID			  "105"
-	  LibraryVersion	  "1.5"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4257,6 +4355,7 @@ Library {
     Block {
       BlockType		      SubSystem
       Name		      "Osc/Phase"
+      SID		      143
       Ports		      []
       Position		      [536, 226, 582, 295]
       DropShadow	      on
@@ -4285,18 +4384,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock"
+	  SID			  109
 	  Description		  "Saturation Count"
 	  Ports			  []
 	  Position		  [222, 415, 262, 454]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag40"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "109"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4311,18 +4410,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock1"
+	  SID			  110
 	  Description		  "cdsWfsPhase"
 	  Ports			  []
 	  Position		  [312, 65, 352, 104]
 	  BackgroundColor	  "magenta"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag41"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "110"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4337,18 +4436,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock2"
+	  SID			  111
 	  Description		  "cdsPhase"
 	  Ports			  []
 	  Position		  [132, 65, 172, 104]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag42"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "111"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4363,18 +4462,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock3"
+	  SID			  112
 	  Description		  "NoiseGenerator"
 	  Ports			  []
 	  Position		  [247, 275, 287, 314]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag43"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "112"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4389,18 +4488,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock4"
+	  SID			  113
 	  Description		  "OSC"
 	  Ports			  []
 	  Position		  [252, 180, 292, 219]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag44"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "113"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4415,18 +4514,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock5"
+	  SID			  114
 	  Description		  "cdsLockin"
 	  Ports			  []
 	  Position		  [212, 545, 252, 584]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag45"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "114"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4441,16 +4540,19 @@ Library {
 	Block {
 	  BlockType		  Ground
 	  Name			  "Ground"
+	  SID			  150
 	  Position		  [95, 185, 115, 205]
 	}
 	Block {
 	  BlockType		  Ground
 	  Name			  "Ground1"
+	  SID			  151
 	  Position		  [65, 290, 85, 310]
 	}
 	Block {
 	  BlockType		  SubSystem
 	  Name			  "Lockin"
+	  SID			  152
 	  Tag			  "cdsLockin"
 	  Description		  "cdsLockin"
 	  Ports			  [1, 2]
@@ -4484,18 +4586,21 @@ Library {
 	    Block {
 	      BlockType		      Inport
 	      Name		      "SIG_INPUT"
+	      SID		      153
 	      Position		      [235, 58, 265, 72]
 	      IconDisplay	      "Port number"
 	    }
 	    Block {
 	      BlockType		      Ground
 	      Name		      "Ground2"
+	      SID		      154
 	      Position		      [20, 120, 40, 140]
 	      ForegroundColor	      "[0.000000, 0.025000, 0.250000]"
 	    }
 	    Block {
 	      BlockType		      Reference
 	      Name		      "I"
+	      SID		      151
 	      Tag		      "cdsFilt"
 	      Description	      "Purpose:                                                                                    "
 	      "                                                                                                               "
@@ -4520,10 +4625,9 @@ Library {
 	      BackgroundColor	      "darkGreen"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Tag>"
+	      LibraryVersion	      "1.2"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "151"
-	      LibraryVersion	      "1.2"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -4537,6 +4641,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "OSC"
+	      SID		      152
 	      Tag		      "cdsOsc"
 	      Description	      "Oscillator"
 	      Ports		      [1, 3]
@@ -4544,10 +4649,9 @@ Library {
 	      BackgroundColor	      "magenta"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Tag>"
+	      LibraryVersion	      "1.4"
 	      SourceBlock	      "cdsOsc/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "152"
-	      LibraryVersion	      "1.4"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -4561,6 +4665,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "PHASE"
+	      SID		      153
 	      Tag		      "cdsPhase"
 	      Description	      "Phase Rotator"
 	      Ports		      [2, 2]
@@ -4568,10 +4673,9 @@ Library {
 	      BackgroundColor	      "lightBlue"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Tag>"
+	      LibraryVersion	      "1.1"
 	      SourceBlock	      "cdsPhase/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "153"
-	      LibraryVersion	      "1.1"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -4585,6 +4689,7 @@ Library {
 	    Block {
 	      BlockType		      Product
 	      Name		      "Product1"
+	      SID		      158
 	      Ports		      [2, 1]
 	      Position		      [435, 87, 465, 118]
 	      InputSameDT	      off
@@ -4595,6 +4700,7 @@ Library {
 	    Block {
 	      BlockType		      Product
 	      Name		      "Product2"
+	      SID		      159
 	      Ports		      [2, 1]
 	      Position		      [435, 152, 465, 183]
 	      InputSameDT	      off
@@ -4605,6 +4711,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "Q"
+	      SID		      156
 	      Tag		      "cdsFilt"
 	      Description	      "Purpose:                                                                                    "
 	      "                                                                                                               "
@@ -4629,10 +4736,9 @@ Library {
 	      BackgroundColor	      "darkGreen"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Tag>"
+	      LibraryVersion	      "1.2"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "156"
-	      LibraryVersion	      "1.2"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -4646,6 +4752,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "SIG"
+	      SID		      157
 	      Tag		      "cdsFilt"
 	      Description	      "Purpose:                                                                                    "
 	      "                                                                                                               "
@@ -4670,10 +4777,9 @@ Library {
 	      BackgroundColor	      "darkGreen"
 	      DropShadow	      on
 	      AttributesFormatString  "%<Tag>"
+	      LibraryVersion	      "1.2"
 	      SourceBlock	      "cdsFilt/Subsystem"
 	      SourceType	      "SubSystem"
-	      SID		      "157"
-	      LibraryVersion	      "1.2"
 	      ShowPortLabels	      "FromPortIcon"
 	      SystemSampleTime	      "-1"
 	      FunctionWithSeparateData "off"
@@ -4687,17 +4793,20 @@ Library {
 	    Block {
 	      BlockType		      Terminator
 	      Name		      "Terminator4"
+	      SID		      162
 	      Position		      [715, 155, 735, 175]
 	    }
 	    Block {
 	      BlockType		      Outport
 	      Name		      "CLK"
+	      SID		      163
 	      Position		      [160, 98, 190, 112]
 	      IconDisplay	      "Port number"
 	    }
 	    Block {
 	      BlockType		      Outport
 	      Name		      "DMD"
+	      SID		      164
 	      Position		      [720, 98, 750, 112]
 	      Port		      "2"
 	      IconDisplay	      "Port number"
@@ -4794,16 +4903,16 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Noise Generator"
+	  SID			  130
 	  Tag			  "cdsNoise"
 	  Description		  "White Noise Generator"
 	  Ports			  [1, 1]
 	  Position		  [115, 278, 200, 322]
 	  BackgroundColor	  "[1.000000, 0.577622, 0.434895]"
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsNoise/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "130"
-	  LibraryVersion	  "1.4"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4817,6 +4926,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Oscillator Name"
+	  SID			  131
 	  Tag			  "cdsOsc"
 	  Description		  "Oscillator"
 	  Ports			  [1, 3]
@@ -4824,10 +4934,9 @@ Library {
 	  BackgroundColor	  "magenta"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsOsc/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "131"
-	  LibraryVersion	  "1.4"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4841,6 +4950,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Phase Rotator Name"
+	  SID			  132
 	  Tag			  "cdsPhase"
 	  Description		  "Phase Rotator"
 	  Ports			  [2, 2]
@@ -4848,10 +4958,9 @@ Library {
 	  BackgroundColor	  "lightBlue"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsPhase/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "132"
-	  LibraryVersion	  "1.1"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4865,6 +4974,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Rotator Name"
+	  SID			  133
 	  Tag			  "cdsWfsPhase"
 	  Description		  "WFS Phase Rotator"
 	  Ports			  [2, 2]
@@ -4872,10 +4982,9 @@ Library {
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsWfsPhase/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "133"
-	  LibraryVersion	  "1.1"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4889,6 +4998,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Saturation Count Name"
+	  SID			  134
 	  Tag			  "cdsSatCount"
 	  Description		  "Saturation count"
 	  Ports			  [1, 2]
@@ -4896,10 +5006,9 @@ Library {
 	  BackgroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.5"
 	  SourceBlock		  "cdsSatCount/Saturation Count Name"
 	  SourceType		  "SubSystem"
-	  SID			  "134"
-	  LibraryVersion	  "1.5"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4933,6 +5042,7 @@ Library {
     Block {
       BlockType		      SubSystem
       Name		      "WatchDogs"
+      SID		      170
       Ports		      []
       Position		      [345, 341, 390, 409]
       DropShadow	      on
@@ -4961,18 +5071,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock"
+	  SID			  119
 	  Description		  "cdsSusWd"
 	  Ports			  []
 	  Position		  [197, 85, 237, 124]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag46"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "119"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -4987,18 +5097,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock1"
+	  SID			  120
 	  Description		  "cdsWD"
 	  Ports			  []
 	  Position		  [197, 215, 237, 254]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag47"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "120"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -5013,6 +5123,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Seismic Watchdog"
+	  SID			  121
 	  Tag			  "cdsSusWd"
 	  Description		  "Sus Watchdog"
 	  Ports			  [1, 1]
@@ -5020,10 +5131,9 @@ Library {
 	  BackgroundColor	  "[0.611304, 0.662320, 1.000000]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsSusWd/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "121"
-	  LibraryVersion	  "1.1"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -5037,16 +5147,16 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Watchdog"
+	  SID			  122
 	  Description		  "cdsWD"
 	  Ports			  [5, 1]
 	  Position		  [85, 172, 145, 298]
 	  BackgroundColor	  "[1.000000, 0.964056, 0.268743]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsWD/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "122"
-	  LibraryVersion	  "1.3"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -5062,6 +5172,7 @@ Library {
     Block {
       BlockType		      SubSystem
       Name		      "simLinkParts"
+      SID		      175
       Ports		      []
       Position		      [441, 117, 488, 187]
       DropShadow	      on
@@ -5090,12 +5201,14 @@ Library {
 	Block {
 	  BlockType		  Abs
 	  Name			  "Abs"
+	  SID			  176
 	  Position		  [35, 400, 65, 430]
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
 	  BlockType		  BusCreator
 	  Name			  "Bus\nCreator1"
+	  SID			  177
 	  Ports			  [2, 1]
 	  Position		  [195, 481, 200, 519]
 	  ShowName		  off
@@ -5105,6 +5218,7 @@ Library {
 	Block {
 	  BlockType		  BusSelector
 	  Name			  "Bus\nSelector"
+	  SID			  178
 	  Ports			  [1, 2]
 	  Position		  [255, 481, 260, 519]
 	  ShowName		  off
@@ -5125,6 +5239,7 @@ Library {
 	Block {
 	  BlockType		  Switch
 	  Name			  "Choice"
+	  SID			  179
 	  Position		  [200, 160, 230, 190]
 	  InputSameDT		  off
 	  SaturateOnIntegerOverflow off
@@ -5132,11 +5247,13 @@ Library {
 	Block {
 	  BlockType		  Constant
 	  Name			  "Constant"
+	  SID			  180
 	  Position		  [35, 335, 65, 365]
 	}
 	Block {
 	  BlockType		  Product
 	  Name			  "Divide"
+	  SID			  181
 	  Ports			  [2, 1]
 	  Position		  [35, 77, 65, 108]
 	  Inputs		  "*/"
@@ -5149,18 +5266,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock"
+	  SID			  147
 	  Description		  "UnitDelay"
 	  Ports			  []
 	  Position		  [282, 90, 322, 129]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag48"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "147"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -5175,18 +5292,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock1"
+	  SID			  148
 	  Description		  "MathFunction"
 	  Ports			  []
 	  Position		  [287, 405, 327, 444]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag49"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "148"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -5201,18 +5318,18 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock2"
+	  SID			  149
 	  Description		  "Fcn"
 	  Ports			  []
 	  Position		  [102, 470, 142, 509]
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.225"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag50"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  SID			  "149"
-	  LibraryVersion	  "1.225"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -5227,12 +5344,14 @@ Library {
 	Block {
 	  BlockType		  Fcn
 	  Name			  "Fcn"
+	  SID			  185
 	  Position		  [25, 475, 85, 505]
 	  Expr			  "sin(u(1)*exp(2.3*(-u(2))))"
 	}
 	Block {
 	  BlockType		  From
 	  Name			  "From"
+	  SID			  186
 	  Position		  [40, 606, 80, 634]
 	  CloseFcn		  "tagdialog Close"
 	  GotoTag		  "A"
@@ -5240,6 +5359,7 @@ Library {
 	Block {
 	  BlockType		  Gain
 	  Name			  "Gain"
+	  SID			  187
 	  Position		  [200, 285, 230, 315]
 	  ParameterDataTypeMode	  "Inherit via internal rule"
 	  ParamDataTypeStr	  "Inherit: Inherit via internal rule"
@@ -5250,6 +5370,7 @@ Library {
 	Block {
 	  BlockType		  Goto
 	  Name			  "Goto"
+	  SID			  188
 	  Position		  [40, 540, 80, 570]
 	  GotoTag		  "A"
 	  TagVisibility		  "local"
@@ -5257,11 +5378,13 @@ Library {
 	Block {
 	  BlockType		  Ground
 	  Name			  "Ground"
+	  SID			  189
 	  Position		  [40, 170, 60, 190]
 	}
 	Block {
 	  BlockType		  Logic
 	  Name			  "LogicalOperator"
+	  SID			  190
 	  Ports			  [2, 1]
 	  Position		  [195, 22, 225, 53]
 	  AllPortsSameDT	  off
@@ -5271,12 +5394,15 @@ Library {
 	Block {
 	  BlockType		  Math
 	  Name			  "MathFunction"
+	  SID			  191
 	  Ports			  [1, 1]
 	  Position		  [195, 410, 225, 440]
 	}
 	Block {
 	  BlockType		  RelationalOperator
 	  Name			  "Operator"
+	  SID			  192
+	  Ports			  [2, 1]
 	  Position		  [200, 222, 230, 253]
 	  Operator		  "<="
 	  InputSameDT		  off
@@ -5286,6 +5412,7 @@ Library {
 	Block {
 	  BlockType		  Product
 	  Name			  "Product"
+	  SID			  193
 	  Ports			  [2, 1]
 	  Position		  [35, 22, 65, 53]
 	  InputSameDT		  off
@@ -5296,11 +5423,14 @@ Library {
 	Block {
 	  BlockType		  Saturate
 	  Name			  "Saturation"
+	  SID			  194
+	  Ports			  [1, 1]
 	  Position		  [195, 345, 225, 375]
 	}
 	Block {
 	  BlockType		  Sum
 	  Name			  "Sum"
+	  SID			  195
 	  Ports			  [2, 1]
 	  Position		  [40, 130, 60, 150]
 	  ShowName		  off
@@ -5314,24 +5444,26 @@ Library {
 	Block {
 	  BlockType		  Terminator
 	  Name			  "Terminator"
+	  SID			  196
 	  Position		  [40, 215, 60, 235]
 	}
 	Block {
 	  BlockType		  UnitDelay
 	  Name			  "UnitDelay"
+	  SID			  197
 	  Position		  [195, 93, 230, 127]
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "and"
+	  SID			  163
 	  Tag			  "cdsBitwise"
 	  Ports			  [2, 1]
 	  Position		  [30, 265, 75, 300]
 	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsBitwise/Subsystem"
 	  SourceType		  "SubSystem"
-	  SID			  "163"
-	  LibraryVersion	  "1.4"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
 	  FunctionWithSeparateData "off"
@@ -5347,6 +5479,7 @@ Library {
     Block {
       BlockType		      Reference
       Name		      "site=M1\nrate=32K\ndcuid=10\nhost=unknown\nspecific_cpu=2\nadcSlave=1\nshmem_daq=1"
+      SID		      199
       Tag		      "cdsParameters"
       Description	      "Purpose:                                                                                     "
       "                                                                                                                "
@@ -5385,6 +5518,7 @@ Library {
       BackgroundColor	      "orange"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.4"
       SourceBlock	      "cdsParameters/Subsystem"
       SourceType	      "SubSystem"
       ShowPortLabels	      "FromPortIcon"
@@ -5401,7 +5535,7 @@ Library {
       Position		      [152, 81]
     }
     Annotation {
-      Name		      "Matlab Parts Library for Use with aLIGO Real-time Code Generator - V2.0"
+      Name		      "Matlab Parts Library for Use with aLIGO Real-time Code Generator - V2.4"
       Position		      [330, 30]
       FontName		      "times"
       FontSize		      18
@@ -6280,18 +6414,22 @@ MatData {
   }
   DataRecord {
     Tag			    DataTag2
-    Data		    "  %)30     .    @ ,   8    (     @         %    \"     $    !     0         %  0 \"     $    0    =F5R<"
-    "VEO;@!C;VYT96YT  X    X    !@    @    &          4    (     0    $    !          D    (    FIF9F9F9\\3\\.    \\ ( "
-    "  8    (    !          %    \"     $   \"\\ @   0         0    O (  $5Z0V%296%D+T5Z0V%7<FET93H-\"CT]/3T]/3T]/3T]/3"
-    "T]/3T]/3T-\"@T*5&AE<V4@8FQO8VMS(&%R92!U<V5D('1O(&-O;6UU;FEC871E(&1A=&$L('9I82!%4$E#4R!C:&%N;F5L(&%C8V5S<RP-\"F)E='"
-    "=E96X@<F5A;\"UT:6UE(&-O9&4@<G5N;FEN9R!O;B!S97!A<F%T92!C;VUP=71E<G,N(\"!4:&4@15!)0U,@<V5Q=65N8V5R#0IW:&EC:\"!S=7!P;"
-    "W)T<R!T:&4@<F5A;\"UT:6UE(&-O9&4@=VEL;\"!H879E($5Z0V%296%D+T5Z0V%7<FET92!C;VUM86YD<PT*861D960@=&\\@;V)T86EN+W-E=\"!"
-    "T:&4@9&5S:7)E9\"!V86QU97,@=FEA('1H92!%=&AE<FYE=\"X@(%9A;'5E<R!A<F4@<&%S<V5D#0IO=70@;V8O:6YT;R!T:&4@<F5A;\"UT:6UE(&"
-    "-O9&4@=FEA('-H87)E9\"!M96UO<GDN(\"!%86-H(&]F('1H97-E('1W;PT*;6]D=6QE<R!W:6QL('!R;V1U8V4@82!D;W5B;&4@<')E8VES:6]N(&"
-    "9L;V%T:6YG+7!O:6YT($5024-3(&-H86YN96P@86-C97-S#0IR96-O<F0N#0H-\"E5S86=E.@T*26YS97)T('1H92!B;&]C:R!I;G1O('1H92!M;V1"
-    "E;\"!A;F0@;6]D:69Y('1H92!N86UE('1O(&)E('1H92!E>&%C=\"!N86UE(&]F#0IT:&4@<F5M;W1E($5024-3(&-H86YN96P@=&\\@8F4@86-C97"
-    "-S960N(\"!4:&ES(&UU<W0@8F4@=&AE(&9U;&P@;F%M92P@:6X-\"DQ)1T\\@<W1A;F1A<F0@9F]R;6%T+\"!I;F-L=61I;F<@249/.E-94RTN#0H "
-    "    "
+    Data		    "  %)30     .    ^ 0   8    (     @         %    \"     $    !     0         %  0 \"     $    8    =F5R<"
+    "VEO;@!C;VYT96YT &9O<FUA=   #@   #@    &    \"     8         !0    @    !     0    $         \"0    @    S,S,S,S/S/"
+    "PX    H!   !@    @    $          4    (     0   /$#   !         !    #Q P  17I#85)E860O17I#85=R:71E.@T*/3T]/3T]/3T"
+    "]/3T]/3T]/3T]/0T*#0I4:&5S92!B;&]C:W,@87)E('5S960@=&\\@8V]M;75N:6-A=&4@9&%T82P@=FEA($5024-3(&-H86YN96P@86-C97-S+ T*"
+    "8F5T=V5E;B!R96%L+71I;64@8V]D92!R=6YN:6YG(&]N('-E<&%R871E(&-O;7!U=&5R<RX@(%1H92!%4$E#4R!S97%U96YC97(-\"G=H:6-H('-U<"
+    "'!O<G1S('1H92!R96%L+71I;64@8V]D92!W:6QL(&AA=F4@<'9'970O<'90=70@8V]M;6%N9',-\"F%D9&5D('1O(&]B=&%I;B]S970@=&AE(&1E<V"
+    "ER960@=F%L=65S('9I82!T:&4@171H97)N970N(\"!686QU97,@87)E('!A<W-E9 T*;W5T(&]F+VEN=&\\@=&AE(')E86PM=&EM92!C;V1E('9I82"
+    "!S:&%R960@;65M;W)Y+B @16%C:\"!O9B!T:&5S92!T=V\\-\"FUO9'5L97,@=VEL;\"!P<F]D=6-E(&$@9&]U8FQE('!R96-I<VEO;B!F;&]A=&EN"
+    "9RUP;VEN=\"!%4$E#4R!C:&%N;F5L(&%C8V5S<PT*<F5C;W)D+@T*#0I5<V%G93H-\"DEN<V5R=\"!T:&4@8FQO8VL@:6YT;R!T:&4@;6]D96P@86Y"
+    "D(&UO9&EF>2!T:&4@;F%M92!T;R!B92!T:&4@97AA8W0@;F%M92!O9@T*=&AE(')E;6]T92!%4$E#4R!C:&%N;F5L('1O(&)E(&%C8V5S<V5D+B @5"
+    "&AI<R!M=7-T(&)E('1H92!F=6QL(&YA;64L(&EN#0I,24=/('-T86YD87)D(&9O<FUA=\"P@:6YC;'5D:6YG($E&3SI365,M+@T*#0I4:&4@15I#02"
+    "!296%D('!A<G0@;F]W(&AA<R!A('-E8V]N9\"!O=71P=70@*$524BDN(%1H92!V86QU92!A=\"!T:&ES('!O<G0-\"G=I;&P@8F4@>F5R;R H,\"D@"
+    ":68@=&AE(')E;6]T92!%4$E#4R!C:&%N;F5L(&ES($Y/5\"!C;VYN96-T960L(&]R(&$@;VYE(\"@Q*0T*:68@=&AE(')E;6]T92!C;VYN96-T(&ES"
+    "(&5S=&%B;&ES:&5D+B!4:&4@3U54('9A;'5E(&ES(&AE;&0@=&\\@=&AE(&QA<W0@#0IV86QI9\"!R96%D(&EF(&-O;FYE8W1I;VX@:7,@;&]S=\"P"
+    "@;W(@>F5R;R!I9B!C;VYN96-T:6]N(&AA<R!N;W0@>65T(&)E96X@#0IE<W1A8FQI<VAE9\"X-\"@         .    ,     8    (    !      "
+    "    %    \"     $    #     0         0  , 5%A4  "
   }
   DataRecord {
     Tag			    DataTag1
