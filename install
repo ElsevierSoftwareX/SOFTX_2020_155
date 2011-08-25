@@ -45,7 +45,6 @@ fi
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/bin
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/logs
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/simLink
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target_archive/${system}
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/burt
 /bin/cp -pr /opt/rtcds/$site/${lower_ifo}/target_archive/${system}/${system}_$cur_date/${system}epics/burt /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics
@@ -68,8 +67,6 @@ fi
 if test -e src/fe/${system}/${system}.rtl; then
 	/bin/cp -fp src/fe/${system}/${system}.rtl /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/
 fi
-# :TODO: do we need this? Do we need to save more than this?
-#/bin/cp -p src/epics/simLink/${system}.mdl /opt/rtcds/$site/${lower_ifo}/target/${system}/simLink/
 if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko; then
 	echo 'sudo /sbin/insmod' /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko ' >  '/opt/rtcds/$site/${lower_ifo}/target/${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
 	/bin/chmod +x /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
