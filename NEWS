@@ -1,10 +1,14 @@
+
+Branch released here as V2.3.1 on Aug. 25, 2011
 Bug Fixes:
 	- Bug found and fixed in both cdsWord2Bit and cdsBit2Word parts.
 	- Bug found and fixed with ezcaread part. 
+	- Osc.pm fixed to use doubles instead of floats for passing frequency and gains from EPICS to front end.
 
 Enhancements:
 	- Second, ERR, output added to ezcaread part. This provides the connection status. See new doc block by ezca parts in
 	  the CDS PARTS libary.
+	- daq/channel.h modified to increase max EPICS channels from 60K to 120K.
 
 Branch closed for Release V2.3 7/21/11
 
@@ -23,7 +27,6 @@ as the DAC module was trying to DMA data out of that buffer.
 - controller.c fixed to handle mix of 16 and 18bit DAC cards.
 - mbuff fixed to remove diagnostic prints which were filling up dmesg.
 - Makefile and feCodeGen modified to remove warning messages from compile output.
-- Osc.pm fixed to use doubles instead of floats for passing frequency and gains from EPICS to front end.
 
 New Additions:
 - Updated dataviewer with support for 32K and 64K resolution data viewing.
