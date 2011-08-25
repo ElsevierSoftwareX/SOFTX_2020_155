@@ -1324,26 +1324,28 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
 
   /* decode arrays for operator switches */
   if ( mask != 0 && (fltrCtrlVal >= 0) && (fltrCtrlVal < 1024) ) {
-    fltrSwitch = 0;
+    UINT32 fltrSwitch = 0;
+    UINT32 epicsExclude = 0;
     if (fltrCtrlVal > 0) {
       for (ix = 0; ix < 10; ix++) {
-	// Keep the current bit value
-	// 
-	if (opSwitchP & fltrConst[ix]) fltrSwitch |= fltrConst[ix];
-	// Change only if bit-mask is set
-	//
-	if (mask & fltrConst[ix]) {
+	if (mask & (1<<ix)) {
+		// Keep the current bit value
+		// 
+		if (opSwitchP & fltrConst[ix]) fltrSwitch |= fltrConst[ix];
+		// Change only if bit-mask is set
+		//
         	if (fltrCtrlVal%2 == 1) {
           		fltrSwitch |= fltrConst[ix];
         	} else {
           		fltrSwitch &= ~fltrConst[ix];
 		}
+		epicsExclude |= fltrConst[ix];
 	}
         fltrCtrlVal = fltrCtrlVal>>1;
       }
     }
 
-    opSwitchE = pFilt->inputs[modNum].opSwitchE | fltrSwitch;
+    opSwitchE = (pFilt->inputs[modNum].opSwitchE & ~epicsExclude) | fltrSwitch;
     pFilt->inputs[modNum].opSwitchE = opSwitchE;
   }
   else {
