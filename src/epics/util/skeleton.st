@@ -449,12 +449,14 @@ state init
 %DECL3%
 
 %%  fmc.pVmeCoeff = (VME_COEF *)pVmeCoeff; /* Initialize pointer for fmReadCoeffFile() */
+#if MAX_MODULES > 0
 %%  for(ii=0;ii<MAX_MODULES;ii++)
 %%    for(jj=0;jj<FILTERS;jj++) {
 %%        pVmeCoeff->vmeCoeffs[ii].filtSections[jj] = 0;
 %%        pVmeCoeff->vmeCoeffs[ii].filterType[jj] = 0;
 %%        strcpy((char *)(pVmeCoeff->vmeCoeffs[ii].filtName[jj]),"NA");
 %%    }
+#endif
 
 %%  printf("About to read file \n");
     strcpy(msg, "Reading coeff file...");
@@ -492,11 +494,14 @@ state init
 %%     }                                                                 /* MA */
 %%  }                                                                    /* MA */
 
+#if MAX_MODULES > 0
 %%  for(ii=0;ii<MAX_MODULES;ii++) {
 	update_labels(ii);
 %%  }
+#endif
 %%  printf("should have put the values on the screen by now. ;)\n");
 %%  printf("setting initial screen variables to zero.\n");
+#if MAX_MODULES > 0
 %%  for(ii=0;ii<MAX_MODULES;ii++){
       input[ii] = 0.0;
       pvPut(input[ii]);
@@ -532,6 +537,7 @@ state init
       pvPut(switchR2[ii]);
       pvPut(saveSwitch2[ii]);
 %%  }
+#endif
 
 #if 0
     swRset[0] = 0;
@@ -647,12 +653,15 @@ state monScreen{
 #if !defined(RFM_EPICS)
 %%	    /* Successful coeff reload */
 	    sprintf(msg, "Coeff load complete");
+#if MAX_MODULES > 0
             /* Load filter names to EPICS */
 %%          for (ii=0;ii<MAX_MODULES;ii++) {
             	update_labels(ii);
 %%	    }
+#endif
 	    initVars(pFilt, pFilt,&coeffSpace, MAX_MODULES, pVmeCoeff);
 #else
+#if MAX_MODULES > 0
 %%           for (ii=0;ii<MAX_MODULES;ii++) {
 %%	       int kk;
 %%	       pFilt->coef_load_error = 0;
@@ -685,6 +694,7 @@ state monScreen{
 %%		 break;
 %%	       }
 %%           }
+#endif
 #endif
 %%	bailout1:
 %%	     if (ii == MAX_MODULES) {
@@ -793,6 +803,7 @@ state monScreen{
 %%     strcpy(setpointMinorCount[ii], "CLR");                            /* MA */
 %%  }                                                                    /* MA */
 
+#if MAX_MODULES > 0
 %%  for(ii=0;ii<MAX_MODULES;ii++){
 %%    double t;
       pvGet(swRset[ii]);
@@ -972,10 +983,10 @@ state monScreen{
 	/*tp[ii] = pFilt->data[ii].testpoint;*/
 %%	t = fpvalidate(pFilt->data[ii].output16Hz)/* * conv*/;
 	out16Hz[ii] = t;
+	pvPut(out16Hz[ii]);
 %%	t = fpvalidate(pFilt->data[ii].output);
 	output[ii] = t;
 	pvPut(tp[ii]);
-	pvPut(out16Hz[ii]);
 	pvPut(output[ii]);
 
 %%      if (thresholdFlag) {                                             /* MA */
@@ -1053,6 +1064,7 @@ state monScreen{
 #endif
 
 %% }
+#endif
 
 %% if (statusFlag) {                                                     /* MA */
       pvPut(statErrCnt);                                                 /* MA */

@@ -3166,6 +3166,10 @@ if ($no_sync) {
   print OUTM "#Uncomment to disable 1PPS signal sinchronization (channel 31 (last), ADC 0)\n";
   print OUTM "#EXTRA_CFLAGS += -DNO_SYNC\n";
 }
+if (0 == $dac_testpoint_names && 0 == $::extraTestPoints && 0 == $filtCnt) {
+	print "Not compiling DAQ into the front-end\n";
+	$no_daq = 1;
+}
 if ($no_daq) {
   print OUTM "#Comment out to enable DAQ\n";
   print OUTM "EXTRA_CFLAGS += -DNO_DAQ\n";
