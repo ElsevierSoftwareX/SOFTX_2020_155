@@ -14,6 +14,8 @@ sub printHeaderStruct {
 	$temp =~ s/\-/\_/g;
 	$temp =~ s/\:/\_/g;
         print ::OUTH "\tdouble $temp;\n";
+	$temp .= "_ERR";
+        print ::OUTH "\tdouble $temp;\n";
 }
 
 # Print Epics variable definitions
@@ -48,10 +50,16 @@ sub frontEndInitCode {
 sub fromExp {
         my ($i, $j) = @_;
         my $from = $::partInNum[$i][$j];
+	my $fromPort = $::partInputPort[$i][$j];
 	my $temp = $::xpartName[$from];
 	$temp =~ s/\-/\_/g;
 	$temp =~ s/\:/\_/g;
-        return "pLocalEpics->" . $::systemName . "\." . $temp;
+	if ($fromPort == 0) {
+        	return "pLocalEpics->" . $::systemName . "\." . $temp;
+        } else {;
+		$temp .= "_ERR";
+        	return "pLocalEpics->" . $::systemName . "\." . $temp;
+        }
 }
 
 # Return front end code
