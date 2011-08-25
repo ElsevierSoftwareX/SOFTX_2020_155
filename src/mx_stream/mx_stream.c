@@ -42,7 +42,7 @@
 #define CDS_DAQ_NET_IPC_OFFSET 0x0
 #define CDS_DAQ_NET_GDS_TP_TABLE_OFFSET 0x1000
 #define CDS_DAQ_NET_DATA_OFFSET 0x2000
-#define DAQ_DCU_SIZE            0x200000
+#define DAQ_DCU_SIZE            0x400000
 #define DAQ_DCU_BLOCK_SIZE      (DAQ_DCU_SIZE/DAQ_NUM_DATA_BLOCKS)
 #define DAQ_GDS_MAX_TP_NUM           0x100
 #define MMAP_SIZE 1024*1024*64-5000
@@ -211,7 +211,7 @@ do {
 		  memcpy((void *)&mxDataBlock.mxDataBlock[0],dataBuff,mxDataBlock.mxIpcData.dataBlockSize);
 		  myCrc = crc_ptr((char *)&mxDataBlock.mxDataBlock[0],mxDataBlock.mxIpcData.dataBlockSize,0);
 		  myCrc = crc_len(mxDataBlock.mxIpcData.dataBlockSize,myCrc);
-		  // if(myCrc != mxDataBlock.mxIpcData.bp[lastCycle].crc) printf("CRC error in sender\n");
+		  //if(myCrc != mxDataBlock.mxIpcData.bp[lastCycle].crc) printf("CRC error in sender\n");
 		  sendLength = header_size + mxDataBlock.mxIpcData.dataBlockSize;
  //printf("send length = %d  total length = %ld\n",sendLength,sizeof(struct daqMXdata));
 
