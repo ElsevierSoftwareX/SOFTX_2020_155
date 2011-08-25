@@ -748,10 +748,6 @@ $names2 .= "};\n";
 printf "$cnt filters\n";
 printf "$mcnt matrices\n";
 
-if ($cnt == 0) {
-	$skeleton = "../util/skeleton_nofm.st";
-}
-
 close IN;
 
 # Read daq definition file
