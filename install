@@ -143,9 +143,10 @@ EOF
 /usr/bin/install   build/${system}epics/config/daqconfig  /opt/rtcds/$site/${lower_ifo}/scripts
 
 
-echo Performing install-daq
 
 gds_node=`grep rmid build/${system}epics/${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`
+if [ x$gds_node != "x" ]; then
+echo Performing install-daq
 datarate=`grep datarate build/${system}epics/${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`
 targethost=`grep TARGET_HOST_NAME src/include/${system}.h | head -1 | awk '{print $3}'`
 if test ${datarate} -lt 16384; then
@@ -212,6 +213,7 @@ then
 fi
 /bin/cp -p target/${system}epics/db/${ifo}/auto.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/${edcu_name}.ini
 echo /opt/rtcds/${site}/${lower_ifo}/chans/daq/${edcu_name}.ini
+fi
 
 echo Installing Epics screens
 
