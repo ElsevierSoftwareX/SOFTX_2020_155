@@ -169,6 +169,10 @@ if (-s $mFile) {
 }
 open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
+my $hfname = "$rcg_src_dir/src/include/$ARGV[1].h";
+if (-e $hfname) {
+	system("/bin/mv -f $hfname $hfname~");
+}
 open(OUTH,">./".$hFile) || die "cannot open header file for writing";
 
 $diag = "./diags\.txt";
@@ -3847,6 +3851,6 @@ for (0 .. $adcCnt - 1) {
 
 # Print source file names into a file
 #
-open(OUT,">sources") || die "cannot open \"sources\" file for writing ";
+open(OUT,">sources.\L$sysname\E") || die "cannot open \"sources.$sysname\" file for writing ";
 print OUT join("\n", @sources), "\n";
 close OUT;
