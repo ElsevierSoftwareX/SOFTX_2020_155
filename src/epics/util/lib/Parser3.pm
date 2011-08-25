@@ -854,7 +854,7 @@ sub remove_busses {
 				  # Found the signal; now find the output 
 				  # line in the bus selector
 		                  my $outline = find_line($parent, $block_name, 1+$index);
-				  die if $outline == undef;
+				  die "Failed to find line leading to bus selector $block_name"  if $outline == undef;
 				  #print_node($outline);
 
 				  # Find the line leading to the bus creator port
