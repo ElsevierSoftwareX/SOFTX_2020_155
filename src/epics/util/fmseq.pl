@@ -493,8 +493,10 @@ while (<IN>) {
 	($junk, $v_name, $var_name, $v_var) = split(/\s+/, $_);
 	#$vupdate .= "%%ezcaGet(\"$var_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
         $v_name =~ tr/:-/__/;
+	$v_name_err = $v_name . "_ERR";
         $vdecl .= "double evar_$v_name;\n";
         $vdecl .= "assign evar_$v_name to \"${var_name}\";\n";
+        $vdecl .= "double evar_$v_name_err;\n";
 
         $vinit .= "%% evar_$v_name  = 0.0;\n";
         $vinit .= "pvGet(evar_$v_name);\n";
@@ -502,6 +504,10 @@ while (<IN>) {
 							       
 	$vupdate .= "pvGet(evar_$v_name);\n";
 	$vupdate .= "%%       pEpics->${v_var} = evar_$v_name;\n";
+	$vupdate .= "evar_$v_name_err = pvConnected(evar_$v_name);\n";
+	$v_var .= "_ERR";
+        $vupdate .= "%%       pEpics->${v_var} = evar_$v_name_err;\n";
+	print "FOUND EZCA\n";
     } elsif (substr($_,0,6) eq "DAQVAR") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
