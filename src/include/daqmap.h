@@ -13,7 +13,7 @@
 #if defined(COMPAT_INITIAL_LIGO)
 #define DAQ_DCU_SIZE		0x100000
 #else
-#define DAQ_DCU_SIZE		0x200000
+#define DAQ_DCU_SIZE		0x400000
 #endif
 
 #define DAQ_EDCU_SIZE		0x400000
@@ -178,7 +178,7 @@ static unsigned int const dcuNet40m[DCU_COUNT] = {2,2,2,2,0,
 #endif
 
 #define IPC_OFFSET_DCU(dcuid)   ((dcuid) * IPC_BLOCK_SIZE + DAQ_BASE_ADDRESS)
-#define DATA_OFFSET_DCU(dcuid)  (DAQ_DATA_BASE_ADD + DAQ_DCU_SIZE*((dcuid) - 5))
+#define DATA_OFFSET_DCU(dcuid)  DAQ_DATA_BASE_ADD
 
 #define IS_TP_DCU(dcuid) ((dcuid) == DCU_ID_EX_16K || (dcuid) == DCU_ID_TP_16K || (dcuid) == DCU_ID_EX_2K || (dcuid) == DCU_ID_TP_2K)
 
@@ -257,7 +257,7 @@ static unsigned int const dcuNet40m[DCU_COUNT] = {2,2,2,2,0,
  */
 
 /* Gds control block starts at this offset */
-#define DAQ_GDS_BLOCK_ADD	(DAQ_BASE_ADDRESS + 0x400000)
+#define DAQ_GDS_BLOCK_ADD	(DAQ_BASE_ADDRESS + 0x600000)
 
 /* The maximum possibile size (allocated space) of the test point table */
 #define DAQ_GDS_MAX_TP_NUM           0x100
