@@ -8,7 +8,7 @@ $ifoName = uc(substr($ARGV[0], 0, 2) );
 #
 #  Assemble file path & name of the .db file.
 #
-$fileName = "../../../target/";
+$fileName = "target/";
 $fileName .= $ARGV[0];
 $fileName .= "epics/db/";
 $fileName .= $ifoName;
@@ -60,7 +60,7 @@ else  {
 #
 #  Assemble file path & name of the .ini file.
 #
-$fileName = "../../../build/";
+$fileName = "build/";
 $fileName .= $ARGV[0];
 $fileName .= "epics/";
 $fileName .= $ARGV[0];

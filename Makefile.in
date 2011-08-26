@@ -2,9 +2,9 @@
 
 SHELL = /bin/sh
 
-top_srcdir=@top_srcdir@
-srcdir=@srcdir@
-VPATH=@srcdir@
+top_srcdir=`readlink -m @top_srcdir@`
+srcdir=`readlink -m @srcdir@`
+VPATH=$(srcdir)
 
 prefix      = @prefix@
 exec_prefix = @exec_prefix@
@@ -25,10 +25,10 @@ DEVFLAGS=@DEVFLAGS@
 
 %:
 	@mkdir -p src/epics/util src/fe target build src/epics/fmseq config src/include
-	@ln -fs $(srcdir)/src/epics/util/lib src/epics/util
-	@ln -fs $(srcdir)/src/include/drv src/include
-	@ln -fs $(srcdir)/src/epics/simLink src/epics
-	@ln -fs $(srcdir)/src/epics/util/GNUmakefile src/epics/util
+	@ln -fs $(srcdir)/src/epics/util/lib src/epics/util || /bin/true
+	@ln -fs $(srcdir)/src/include/drv src/include || /bin/true
+	@ln -fs $(srcdir)/src/epics/simLink src/epics || /bin/true
+	@ln -fs $(srcdir)/src/epics/util/GNUmakefile src/epics/util || /bin/true
 	@echo Parsing the model $@...
 	@make -C src/epics/util -sf Makefile $@ > $@.log 2>&1 || (tail $@.log && /bin/false)
 	@echo Done
@@ -40,7 +40,7 @@ DEVFLAGS=@DEVFLAGS@
 	@echo Building EPICS sequencers...
 	@env RCG_SRC_DIR=$(srcdir) PERL5LIB=$(srcdir)/src/epics/util make -f config/Makefile.$@epics RCG_SRC_DIR=$(srcdir) >> $@.log 2>&1 || (tail $@.log && /bin/false)
 	@echo Done
-	@(cd src/epics/util; $(srcdir)/src/epics/util/nameLengthChk.pl $@) >> $@.log 2>&1 || (tail $@.log && /bin/false)
+	@($(srcdir)/src/epics/util/nameLengthChk.pl $@) >> $@.log 2>&1 || (tail $@.log && /bin/false)
 	@/bin/mkdir -p build/$@epics
 	@/bin/mv -f build/$@epics-medm build/$@epics/medm
 	@/bin/mv -f build/$@epics-config build/$@epics/config
@@ -53,7 +53,7 @@ DEVFLAGS=@DEVFLAGS@
 	@echo Build date `date` > target/$@epics/src/build.txt
 	@echo Compiled on `hostname` >> target/$@epics/src/build.txt
 	@echo RCG_LIB_PATH=${RCG_LIB_PATH} >> target/$@epics/src/build.txt
-	@tar Ccf $(srcdir) - . | gzip > target/$@epics/src/rcg.tar.gz
+	@tar Ccf $(srcdir) - --exclude rcg.tar.gz . | gzip > target/$@epics/src/rcg.tar.gz
 	@cp src/epics/util/sources.$@ target/$@epics/src/src_locations.txt
 	@cat src/epics/util/sources.$@ | xargs cp -aft target/$@epics/src > /dev/null 2>&1
 	@echo RCG source code directory:
