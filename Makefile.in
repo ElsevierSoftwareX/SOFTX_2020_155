@@ -25,10 +25,10 @@ DEVFLAGS=@DEVFLAGS@
 
 %:
 	@mkdir -p src/epics/util src/fe target build src/epics/fmseq config src/include
-	@ln -fs $(srcdir)/src/epics/util/lib src/epics/util || /bin/true
-	@ln -fs $(srcdir)/src/include/drv src/include || /bin/true
-	@ln -fs $(srcdir)/src/epics/simLink src/epics || /bin/true
-	@ln -fs $(srcdir)/src/epics/util/GNUmakefile src/epics/util || /bin/true
+	@ln -fs $(srcdir)/src/epics/util/lib src/epics/util > /dev/null 2>&1 || /bin/true
+	@ln -fs $(srcdir)/src/include/drv src/include > /dev/null 2>&1 || /bin/true
+	@ln -fs $(srcdir)/src/epics/simLink src/epics > /dev/null 2>&1 || /bin/true
+	@ln -fs $(srcdir)/src/epics/util/GNUmakefile src/epics/util > /dev/null 2>&1 || /bin/true
 	@echo Parsing the model $@...
 	@make -C src/epics/util -sf Makefile $@ > $@.log 2>&1 || (tail $@.log && /bin/false)
 	@echo Done
@@ -53,7 +53,7 @@ DEVFLAGS=@DEVFLAGS@
 	@echo Build date `date` > target/$@epics/src/build.txt
 	@echo Compiled on `hostname` >> target/$@epics/src/build.txt
 	@echo RCG_LIB_PATH=${RCG_LIB_PATH} >> target/$@epics/src/build.txt
-	@tar Ccf $(srcdir) - --exclude rcg.tar.gz . | gzip > target/$@epics/src/rcg.tar.gz
+	@tar Ccf $(srcdir) - --exclude rcg.tar.gz --exclude build --exclude target . | gzip > target/$@epics/src/rcg.tar.gz
 	@cp src/epics/util/sources.$@ target/$@epics/src/src_locations.txt
 	@cat src/epics/util/sources.$@ | xargs cp -aft target/$@epics/src > /dev/null 2>&1
 	@echo RCG source code directory:
