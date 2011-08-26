@@ -2,7 +2,7 @@
 
 SHELL = /bin/sh
 
-top_srcdir=@top_srcdir@
+top_srcdir=`readlink -m @top_srcdir@`
 srcdir=@srcdir@
 VPATH=@srcdir@
 
