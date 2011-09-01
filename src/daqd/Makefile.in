@@ -96,7 +96,7 @@ mx_rcvr1.o: mx_rcvr.cc
 	$(CXX) $(CCFLAGS) -DUSE_MAIN=1 $< -o mx_rcvr1.o
 
 mxrecv: mx_rcvr1.o
-	$(CXX) $(DEBUGFLAGS) -o mxrecv mx_rcvr1.o  $(LIBS) $(MX_LDFLAGS)
+	$(CXX) $(DEBUGFLAGS) -o mxrecv mx_rcvr1.o  $(LIBS) $(MX_LDFLAGS) $(LDASLIBFLAGS)
 
 framerecv1.o: framerecv.cc
 	$(CXX) $(CCFLAGS) -DUSE_MAIN=1 $< -o framerecv1.o

@@ -66,18 +66,6 @@ receiver_mx(int neid)
 	//float *testData;
 	uint32_t match_val=MATCH_VAL_MAIN;
 
-#if 0
-	// Allocate receive buffers for each configured DCU
-	for (int i = 9; i < DCU_COUNT; i++) {
-		if (0 == daqd.dcuSize[0][i]) continue;
-
-  		directed_receive_buffer[i] = malloc(2*DAQ_DCU_BLOCK_SIZE*DAQ_NUM_DATA_BLOCKS);
-  		if (directed_receive_buffer[i] == 0) {
-      			system_log (1, "[MX recv] Couldn't allocate recv buffer\n");
-      			exit(1);
-    		}
-	}
-#endif
 
 	// Allocate NUM_RREQ MX packet receive buffers
 	int len = sizeof(struct daqMXdata);
@@ -131,10 +119,12 @@ receiver_mx(int neid)
 		  //printf("received one\n");
 		  struct daqMXdata *dataPtr = (struct daqMXdata *) seg.segment_ptr;
 		  int dcu_id = dataPtr->mxIpcData.dcuId;
+		  #ifndef USE_MAIN
 		  if (daqd.dcuSize[0][dcu_id] == 0) {
 			mx_irecv(ep[neid], &seg, 1, match_val, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
 		  	continue; // Unconfigured DCU
 	  	  }
+		  #endif
 		  int cycle = dataPtr->mxIpcData.cycle;
 		  int len = dataPtr->mxIpcData.dataBlockSize;
 
@@ -149,8 +139,10 @@ receiver_mx(int neid)
 		  char *dataSource = (char *)dataPtr->mxDataBlock;
 		  char *dataDest = (char *)((char *)(directed_receive_buffer[dcu_id]) + buf_size * cycle);
 
+#ifndef USE_MAIN
 		  // Move the block data into the buffer
 		  memcpy (dataDest, dataSource, len);
+		  #endif
 
 		  // Assign IPC data
 		  gmDaqIpc[dcu_id].crc = dataPtr->mxIpcData.crc;
@@ -166,12 +158,14 @@ receiver_mx(int neid)
 		  *gdsTpNum[0][dcu_id] = dataPtr->mxTpTable;
 
 		  gmDaqIpc[dcu_id].cycle = cycle;
+		  #ifndef USE_MAIN
 #ifndef  USE_SYMMETRICOM
 		  if (daqd.controller_dcu == dcu_id)  {
 		  	   controller_cycle = cycle;
 	                   DEBUG(6, printf("Timing dcu=%d cycle=%d\n", dcu_id, controller_cycle));
 		  }
 #endif
+		  #endif
 		}
 		mx_irecv(ep[neid], &seg, 1, match_val, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
 		if (kk != myErrorStat){
@@ -244,8 +238,27 @@ void close_mx() {
 }
 
 #ifdef USE_MAIN
+struct rmIpcStr gmDaqIpc[DCU_COUNT];
+struct cdsDaqNetGdsTpNum gdsTpNumSpace[2][DCU_COUNT];
+struct cdsDaqNetGdsTpNum * gdsTpNum[2][DCU_COUNT];
+void *directed_receive_buffer[DCU_COUNT];
+int _log_level = 10;
 main() {
+	for (int i = 0; i < 2; i++)
+	  for (int j=0; j < DCU_COUNT; j++)
+	    gdsTpNum[i][j] = &gdsTpNumSpace[i][j];
+
+	// Allocate receive buffers for each configured DCU
+	for (int i = 9; i < DCU_COUNT; i++) {
+		//if (0 == daqd.dcuSize[0][i]) continue;
+
+  		directed_receive_buffer[i] = malloc(2*DAQ_DCU_BLOCK_SIZE*DAQ_NUM_DATA_BLOCKS);
+  		if (directed_receive_buffer[i] == 0) {
+      			system_log (1, "[MX recv] Couldn't allocate recv buffer\n");
+      			exit(1);
+    		}
+	}
 	open_mx();
-	receiver_mx(1);
+	receiver_mx(0);
 }
 #endif
