@@ -7,6 +7,7 @@ sub partType {
 	$desc = ${$node->{FIELDS}}{"Description"};
 	# Pull out all Epics fields from the description
 	$desc =~ s/\s//g;
+	$desc =~ s/\\"/"/g;
 	my @l = $desc =~ m/(field\([^\)]*\))/g;
 	$::epics_fields[$i] = [@l];
 	return EpicsBinIn;
