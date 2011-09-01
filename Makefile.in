@@ -2,8 +2,8 @@
 
 SHELL = /bin/sh
 
-top_srcdir=`readlink -m @top_srcdir@`
-srcdir=`readlink -m @srcdir@`
+top_srcdir := `readlink -m @top_srcdir@`
+srcdir := `readlink -m @srcdir@`
 VPATH=$(srcdir)
 
 prefix      = @prefix@
@@ -122,31 +122,31 @@ dump_predefines:
 
 # Build NDS program
 nds:
-	(cd src/nds; autoconf)
+	(cd $(srcdir)/src/nds; autoconf)
 	/bin/rm -rf build/nds
 	/bin/mkdir -p build/nds
-	(cd build/nds; ../../src/nds/configure && make)
+	(mysrc=$(srcdir); cd build/nds; $$mysrc/src/nds/configure && make)
 
 # Build frame builder data concentrator program
 dc:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/dc
 	/bin/mkdir -p build/dc
-	(cd build/dc; $(srcdir)/src/daqd/configure '--enable-symmetricom' '--with-mx' '--without-myrinet' '--enable-debug' --with-epics=/opt/rtapps/epics/base '--with-framecpp=/opt/rtapps/framecpp' '--with-concentrator' && make)
+	(mysrc=$(srcdir); cd build/dc; $$mysrc/src/daqd/configure '--enable-symmetricom' '--with-mx' '--without-myrinet' '--enable-debug' --with-epics=/opt/rtapps/epics/base '--with-framecpp=/opt/rtapps/framecpp' '--with-concentrator' && make)
 
 # Build frame builder NDS or frame writer (broadcast receiver)
 rcv:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/rcv
 	/bin/mkdir -p build/rcv
-	(cd build/rcv; $(srcdir)/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-framecpp=/opt/rtapps/framecpp' --with-epics=/opt/rtapps/epics/base  && make)
+	(mysrc=$(srcdir); cd build/rcv; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-framecpp=/opt/rtapps/framecpp' --with-epics=/opt/rtapps/epics/base  && make)
 
 # build standalone frame builder
 stand:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/stand
 	/bin/mkdir -p build/stand
-	(cd build/stand; $(srcdir)/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' && make)
+	(mysrc=$(srcdir); cd build/stand; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' && make)
 
 # build  mx data receiving daqd
 #
@@ -154,11 +154,11 @@ mx:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/mx
 	/bin/mkdir -p build/mx
-	(cdir=`pwd`; cd build/mx; $(srcdir)/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics-3.14.10/base' '--with-framecpp=/opt/rtapps/framecpp-1.18.2' --with-mx && make)
+	(mysrc=$(srcdir); cd build/mx; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics-3.14.10/base' '--with-framecpp=/opt/rtapps/framecpp-1.18.2' --with-mx && make)
 
 standiop:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/standiop
 	/bin/mkdir -p build/standiop
-	(cdir=`pwd`; cd build/standiop; $(srcdir)/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics/base' '--with-framecpp=/opt/rtapps/framecpp' --enable-iop && make)
+	(mysrc=$(srcdir); cd build/standiop; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics/base' '--with-framecpp=/opt/rtapps/framecpp' --enable-iop && make)
 
