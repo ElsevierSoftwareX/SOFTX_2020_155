@@ -35,9 +35,9 @@
 #define MAX_VME_BRIDGES		4
 
 #define GSC_16AI64SSA		0
-#define GSC_16AISS8AO4		1
+#define GSC_18AISS6C		1
 #define GSC_16AO16		2
-#define GSC_18AISS8AO8		3
+// vacant			3
 #define CON_32DO		4
 #define ACS_16DIO		5
 #define ACS_8DIO		6
@@ -149,9 +149,12 @@ typedef struct PLX_9056_INTCTRL{
 #define PLX_VID         0x10b5		/* PLX9056 Vendor Id	*/
 #define PLX_TID         0x9056		/* PLX9056 Type Id	*/
 
+/* GSA 18-bit ADC module 19AISS6C Definitions ***************************************** */
+#define ADC_18BIT_SS_ID		0x3467
 
 /* GSA ADC Module Definitions ********************************************************* */
 #define ADC_SS_ID       0x3101	/* Subsystem ID to locate module on PCI bus	*/
+
 
 /* Structure defining ADC module PCI register layout	*/
 typedef struct GSA_ADC_REG{
@@ -397,8 +400,8 @@ struct VMIC5579_MEM_REGISTER {
 	unsigned char rsv2F;	/* 0x2f */
 };
 
-/* GSA 2MS ADC Module Definitions ***************************************************** */
-#define FADC_SS_ID       0x3172	/* Subsystem ID to locate module on PCI bus	*/
+/* GSA 18-bit 6 channel ADC Module Definitions ************************************* */
+#define FADC_SS_ID       ADC_18BIT_SS_ID
 
 /* Structure defining ADC module PCI register layout	*/
 typedef struct GSA_FAD_REG{
@@ -407,13 +410,13 @@ typedef struct GSA_FAD_REG{
         unsigned int AO_00;     /* 0x8 */
         unsigned int AO_01;     /* 0xc */
         unsigned int AO_02;     /* 0x10 */
-        unsigned int AO_03;     /* 0x14 */
-	// 18-bit ADC/DAC card has IN_CONF at 0x14 (taken care in map.c)
-        //unsigned int IN_CONF;      /* 0x14 */
+        //unsigned int AO_03;     /* 0x14 */
+        unsigned int IN_CONF;      /* 0x14 */
         unsigned int IN_BUFF;  /* 0x18 */
         unsigned int RAG;      /* 0x1c */
         unsigned int RBG;       /* 0x20 */
-        unsigned int IN_CONF;      /* 0x24 */
+        //unsigned int IN_CONF;      /* 0x24 */
+        unsigned int IN_BURST_BLOCK_SIZE;      /* 0x24 */
         unsigned int IN_BUF_SIZE;     /* 0x28 */
         unsigned int IN_BUF_TH;    /* 0x2c */
         unsigned int INTRC;   /* 0x30 */

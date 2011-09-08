@@ -920,13 +920,11 @@ udelay(1000);
 	  // This location should never be zero when the ADC writes data as it should always
 	  // have an upper bit set indicating channel 0.
           *packedData = 0x0;
-          if (cdsPciModules.adcType[jj] == GSC_16AISS8AO4
-              || cdsPciModules.adcType[jj] == GSC_18AISS8AO8) {
-                 packedData += 3;
-          } else packedData += 31;
+          if (cdsPciModules.adcType[jj] == GSC_18AISS6C)  packedData += 5;
+          else packedData += 31;
 	  // Write a number into the last channel which the ADC should never write ie no
 	  // upper bits should be set in channel 31.
-          *packedData = 0x110000;
+          *packedData = 0xf000000;
 	  // Set ADC Present Flag
   	  pLocalEpics->epicsOutput.statAdc[jj] = 1;
   }
@@ -1154,7 +1152,6 @@ udelay(1000);
 #endif
 
   while(!vmeDone){ 	// Run forever until user hits reset
-
   	if (run_on_timer) {  // NO ADC present, so run on CPU realtime clock
 	  // Pause until next cycle begins
 	  if (clock16K == 0) {
@@ -1283,7 +1280,8 @@ udelay(1000);
 		    // This is detected when last channel in memory no longer contains the
 		    // dummy variable written during initialization and reset after the read.
 		    packedData = (int *)cdsPciModules.pci_adc[jj];
-               	    packedData += 31;
+                    if (cdsPciModules.adcType[jj] == GSC_18AISS6C) packedData += 5;
+               	    else packedData += 31;
                     kk = 0;
 		
 		    rdtscl(cpuClock[8]);
@@ -1292,9 +1290,9 @@ udelay(1000);
 		    // Monitor the first ADC
 		    if (jj == 0) {
 		       for (;;) {
-		         if (*packedData != 0x110000) break;
+		         if (*packedData != 0xf000000) break;
 			 __monitor((void *)packedData, 0, 0);
-		         if (*packedData != 0x110000) break;
+		         if (*packedData != 0xf000000) break;
 			 __mwait(0, 0);
 		       }
 		       rdtscl(cpuClock[9]);
@@ -1305,7 +1303,7 @@ udelay(1000);
                         kk ++;
 			// Need to delay if not ready as constant banging of the input register
 			// will slow down the ADC DMA.
-			if(*packedData == 0x110000) {
+			if(*packedData == 0xf000000) {
 //#ifdef NO_RTL
 				//udelay(1);
 //#else
@@ -1325,7 +1323,7 @@ udelay(1000);
 //#endif
 			}
 			// Allow 1msec for data to be ready (should never take that long).
-                    }while((*packedData == 0x110000) && (adcWait < 1000000));
+                    }while((*packedData == 0xf000000) && (adcWait < 1000000));
 
 #ifdef ADC_MASTER
 #ifndef RFM_DIRECT_READ
@@ -1343,9 +1341,14 @@ udelay(1000);
 		    // is overflowing.
 		    if (adcWait >= 1000000) {
                         stop_working_threads = 1;
+			vmeDone = 1;
 	  		pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
                         printf("timeout %d %d \n",jj,adcWait);
-                    }
+			printk("register BCR = 0x%x\n",fadcPtr[0]->BCR);
+			if (fadcPtr[0]->BCR & (1 << 15)) printk("input buffer overflow\n");
+			if (fadcPtr[0]->BCR & (1 << 16)) printk("input buffer underflow\n");
+			continue;
+		    }
 		    if(jj == 0) 
 		    {
 			// Capture cpu clock for cpu meter diagnostics
@@ -1414,23 +1417,17 @@ udelay(1000);
 	 	    }	
 
                     limit = 32700;
-		    // Various ADC models have different number of channels/data bits
-                    offset = 0x8000;
-                    mask = 0xffff;
-                    num_outs = 32;
-#if 0
-		// In this version, the following two ADC models are not fully supported.
-		// This bit of code is left behind in case there is a need to reintroduce it.
-                    if (cdsPciModules.adcType[jj] == GSC_18AISS8AO8) {
+                    if (cdsPciModules.adcType[jj] == GSC_18AISS6C) {
 			limit *= 4; // 18 bit limit
 			offset = 0x20000; // Data coding offset in 18-bit DAC
 			mask = 0x3ffff;
-			num_outs = 8;
-                    }
-                    if (cdsPciModules.adcType[jj] == GSC_16AISS8AO4) {
-			num_outs = 4;
-                    }
-#endif
+			num_outs = 6;
+                    } else {
+		    	// Various ADC models have different number of channels/data bits
+                    	offset = 0x8000;
+                    	mask = 0xffff;
+                    	num_outs = 32;
+		    }
 #ifdef ADC_MASTER
 		    // Determine next ipc memory location to load ADC data
 		    ioMemCntr = (clock16K % 64);
@@ -1482,20 +1479,19 @@ udelay(1000);
 		   // Clear out last ADC data read for test on next cycle
                    packedData = (int *)cdsPciModules.pci_adc[jj];
                    *packedData = 0x0;
-#if 0
-		   // Old support which may or may not come back
-                   if(cdsPciModules.adcType[jj] == GSC_16AISS8AO4) packedData += 3;
-                   else if(cdsPciModules.adcType[jj] == GSC_18AISS8AO8) packedData += 3;
+
+                   if (cdsPciModules.adcType[jj] == GSC_18AISS6C) packedData += 5;
                    else packedData += 31;
-#endif
-                   packedData += 31;
-                   *packedData = 0x110000;
+
+                   *packedData = 0xf000000;
+
 		   // Reset DMA Start Flag
 		   // This allows ADC to dump next data set whenever it is ready
 		   gsaAdcDma2(jj);
             }
 #endif
 
+#if 0
 		  // Try synching to 1PPS on ADC[0][31] if not using IRIG-B or TDS
 		  // Only try for 1 sec.
                   if(!sync21pps)
@@ -1522,6 +1518,7 @@ udelay(1000);
 				pLocalEpics->epicsOutput.timeErr = syncSource;
                         }
                 }
+#endif
 #ifdef ADC_SLAVE
 		// SLAVE gets its adc data from MASTER via ipc shared memory
                for(jj=0;jj<cdsPciModules.adcCount;jj++)
@@ -1630,12 +1627,6 @@ udelay(1000);
 		offset = 0; //0x8000;
 		mask = 0xffff;
 		num_outs = 16;
-		if (cdsPciModules.dacType[jj] == GSC_18AISS8AO8) {
-			limit *= 4; // 18 bit limit
-			offset = 0x20000; // Data coding offset in 18-bit DAC
-			mask = 0x3ffff;
-			num_outs = 8;
-		}
 		if (cdsPciModules.dacType[jj] == GSC_18AO8) {
 			limit *= 4; // 18 bit limit
 			//offset = 0x20000; // Data coding offset in 18-bit DAC
@@ -1643,9 +1634,6 @@ udelay(1000);
 			num_outs = 8;
 
 
-		}
-		if (cdsPciModules.dacType[jj] == GSC_16AISS8AO4) {
-		  	num_outs = 4;
 		}
 		for (ii=0; ii < num_outs; ii++)
 		{
@@ -2421,7 +2409,7 @@ int main(int argc, char **argv)
 #ifndef ADC_SLAVE
 	// Call PCI initialization routine in map.c file.
 	status = mapPciModules(&cdsPciModules);
-	// return 0;
+	 //return 0;
 #endif
 #ifdef ADC_SLAVE
 // If running as a slave process, I/O card information is via ipc shared memory
@@ -2581,20 +2569,10 @@ int main(int argc, char **argv)
 		ioMemData->model[ii] = cdsPciModules.adcType[ii];
 		ioMemData->ipc[ii] = ii;	// ioData memory buffer location for SLAVE to use
 #endif
-                if(cdsPciModules.adcType[ii] == GSC_18AISS8AO8)
+                if(cdsPciModules.adcType[ii] == GSC_18AISS6C)
                 {
-                        printf("\tADC %d is a GSC_18AISS8AO8 module\n",ii);
-                        if((cdsPciModules.adcConfig[ii] & 0x10000) > 0) jj = 4;
-                        else jj = 8;
-                        printf("\t\tChannels = %d \n",jj);
-                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.adcConfig[ii] & 0xfff));
-                }
-                if(cdsPciModules.adcType[ii] == GSC_16AISS8AO4)
-                {
-                        printf("\tADC %d is a GSC_16AISS8AO4 module\n",ii);
-                        if((cdsPciModules.adcConfig[ii] & 0x10000) > 0) jj = 4;
-                        else jj = 8;
-                        printf("\t\tChannels = %d \n",jj);
+                        printf("\tADC %d is a GSC_18AISS6C module\n",ii);
+                        printf("\t\tChannels = 6 \n",jj);
                         printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.adcConfig[ii] & 0xfff));
                 }
                 if(cdsPciModules.adcType[ii] == GSC_16AI64SSA)
@@ -2610,22 +2588,6 @@ int main(int argc, char **argv)
 	printf("%d DAC cards found\n",cdsPciModules.dacCount);
 	for(ii=0;ii<cdsPciModules.dacCount;ii++)
         {
-                if(cdsPciModules.dacType[ii] == GSC_18AISS8AO8)
-                {
-                        printf("\tDAC %d is a GSC_18AISS8AO8 module\n",ii);
-                        if((cdsPciModules.dacConfig[ii] & 0x20000) > 0) jj = 0;
-                        else jj = 4;
-                        printf("\t\tChannels = %d \n",jj);
-                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.dacConfig[ii] & 0xfff));
-                }
-                if(cdsPciModules.dacType[ii] == GSC_16AISS8AO4)
-                {
-                        printf("\tDAC %d is a GSC_16AISS8AO4 module\n",ii);
-                        if((cdsPciModules.dacConfig[ii] & 0x20000) > 0) jj = 0;
-                        else jj = 4;
-                        printf("\t\tChannels = %d \n",jj);
-                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.dacConfig[ii] & 0xfff));
-                }
                 if(cdsPciModules.dacType[ii] == GSC_18AO8)
 		{
                         printf("\tDAC %d is a GSC_18AO8 module\n",ii);
