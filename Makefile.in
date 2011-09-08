@@ -146,7 +146,7 @@ stand:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/stand
 	/bin/mkdir -p build/stand
-	(mysrc=$(srcdir); cd build/stand; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/epics-3.14.9-linux/base' '--with-framecpp=/usr/local' && make)
+	(mysrc=$(srcdir); cd build/stand; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics/base' '--with-framecpp=/opt/rtapps/framecpp' && make)
 
 # build  mx data receiving daqd
 #
