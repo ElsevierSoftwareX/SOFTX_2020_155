@@ -5,8 +5,7 @@ use Exporter;
 # ADC cards we support
 %board_types = (
 	GSC_16AI64SSA => 1, # Slow General Standards board
-	GSC_16AISS8AO4 => 1, # Fast General Standards board
-	GSC_18AISS8AO8 => 1 # 18-bit General Standards board
+        GSC_18AISS6C => 1 # 18-bit 6 channel General Standards board
 );
 
 # default board type (if none specified with type=<type> in block Description)
