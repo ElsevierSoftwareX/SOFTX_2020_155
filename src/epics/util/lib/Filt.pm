@@ -7,7 +7,7 @@ sub partType {
 #		die "Filter name \"", $::xpartName[$::partCnt], "\" too long (max $::max_name_len charachters)";
 #	}
         print ::OUTH "#define $::xpartName[$::partCnt] \t $::filtCnt\n";
-	if ($::biQuad[$::partCnt]) { 
+	if ($::allBiquad || $::biQuad[$::partCnt]) { 
         	print ::EPICS "$::xpartName[$::partCnt] biquad\n";
 	} else {
         	print ::EPICS "$::xpartName[$::partCnt]\n";

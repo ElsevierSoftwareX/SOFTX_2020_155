@@ -126,6 +126,8 @@ sub printHeaderStruct {
 				$::noRfmDma = 1;
 			} elsif ($spp[0] eq "flip_signals") { 
 				$::flipSignals = $spp[1];
+			} elsif ($spp[0] eq "biquad") { 
+				$::allBiquad = $spp[1];
 			}
 		}
 	}
