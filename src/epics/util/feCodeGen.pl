@@ -322,6 +322,9 @@ $maxRemoteIPCVars = 4;
 # My remote IPC MX port
 $remoteIPCport = 0;
 
+# Set if all filters are biquad
+$allBiquad = 0;
+
 #
 # IPCx parameter names
 #
