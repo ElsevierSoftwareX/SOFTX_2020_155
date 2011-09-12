@@ -14,6 +14,7 @@ sub printHeaderStruct {
         print ::OUTH "\tdouble $::xpartName[$i]\_CLKGAIN;\n";
         print ::OUTH "\tdouble $::xpartName[$i]\_SINGAIN;\n";
         print ::OUTH "\tdouble $::xpartName[$i]\_COSGAIN;\n";
+	print ::OUTH "\tdouble $::xpartName[$i]\_TRAMP;\n";
 }
 
 # Print Epics variable definitions
@@ -24,6 +25,7 @@ sub printEpics {
         print ::EPICS "INVARIABLE $::xpartName[$i]\_CLKGAIN $::systemName\.$::xpartName[$i]\_CLKGAIN double ai 0 field(PREC,\"1\")\n";
         print ::EPICS "INVARIABLE $::xpartName[$i]\_SINGAIN $::systemName\.$::xpartName[$i]\_SINGAIN double ai 0 field(PREC,\"1\")\n";
         print ::EPICS "INVARIABLE $::xpartName[$i]\_COSGAIN $::systemName\.$::xpartName[$i]\_COSGAIN double ai 0 field(PREC,\"1\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_TRAMP $::systemName\.$::xpartName[$i]\_TRAMP double ai 0 field(PREC,\"1\")\n";
 }
 
 
@@ -40,6 +42,9 @@ sub printFrontEndVars  {
         print ::OUT "static double \L$::xpartName[$i]\_sin_prev;\n";
         print ::OUT "static double \L$::xpartName[$i]\_cos_new;\n";
         print ::OUT "static double \L$::xpartName[$i]\_sin_new;\n";
+	print ::OUT "static RampParamState \L$::xpartName[$i]\_clkgain_state;\n";
+	print ::OUT "static RampParamState \L$::xpartName[$i]\_singain_state;\n";
+	print ::OUT "static RampParamState \L$::xpartName[$i]\_cosgain_state;\n";
         if ($::oscUsed == 0) {
           print ::OUT "double lsinx, lcosx, valx;\n";
           $::oscUsed = 1;
@@ -74,6 +79,12 @@ sub frontEndInitCode {
         $calcExp .= "\L$::xpartName[$i]\_beta = lsinx;\n";
         $calcExp .= "\L$::xpartName[$i]\_cos_prev = 1.0;\n";
         $calcExp .= "\L$::xpartName[$i]\_sin_prev = 0.0;\n";
+	$calcExp .= "RampParamInit(&\L$::xpartName[$i]\_clkgain_state,0, ";
+	$calcExp .= "FE_RATE);\n";
+	$calcExp .= "RampParamInit(&\L$::xpartName[$i]\_singain_state,0, ";
+	$calcExp .= "FE_RATE);\n";
+	$calcExp .= "RampParamInit(&\L$::xpartName[$i]\_cosgain_state,0, ";
+	$calcExp .= "FE_RATE);\n";
 	return $calcExp;
 }
 
@@ -92,12 +103,36 @@ sub frontEndCode {
         $calcExp .= "\L$::xpartName[$i]\_beta * \L$::xpartName[$i]\_cos_prev;\n";
         $calcExp .= "\L$::xpartName[$i]\_sin_prev = \L$::xpartName[$i]\_sin_new;\n";
         $calcExp .= "\L$::xpartName[$i]\_cos_prev = \L$::xpartName[$i]\_cos_new;\n";
+
+	$calcExp .= "if (\L$::xpartName[$i]\_clkgain_state.req != ";
+	$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_CLKGAIN)\n";
+	$calcExp .= "{\n";
+	$calcExp .= "   RampParamLoad(&\L$::xpartName[$i]\_clkgain_state, ";
+	$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_CLKGAIN, pLocalEpics->$::systemName\.$::xpartName[$i]\_TRAMP,FE_RATE);\n";
+	$calcExp .="}\n";
+
+	$calcExp .= "if (\L$::xpartName[$i]\_singain_state.req != ";
+	$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_SINGAIN)\n";
+        $calcExp .= "{\n";
+        $calcExp .= "   RampParamLoad(&\L$::xpartName[$i]\_singain_state, ";
+	$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_SINGAIN, pLocalEpics->$::systemName\.$::xpartName[$i]\_TRAMP,FE_RATE);\n";
+        $calcExp .="}\n";
+
+	$calcExp .= "if (\L$::xpartName[$i]\_cosgain_state.req != ";
+	$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_COSGAIN)\n";
+        $calcExp .= "{\n";
+        $calcExp .= "   RampParamLoad(&\L$::xpartName[$i]\_cosgain_state, ";
+	$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_COSGAIN, pLocalEpics->$::systemName\.$::xpartName[$i]\_TRAMP,FE_RATE);\n";
+        $calcExp .="}\n";
+
+
+
         $calcExp .= "\L$::xpartName[$i]\[0\] = \L$::xpartName[$i]\_sin_new * ";
-        $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_CLKGAIN;\n";
+        $calcExp .= "RampParamUpdate(&\L$::xpartName[$i]\_clkgain_state);\n";
         $calcExp .= "\L$::xpartName[$i]\[1\] = \L$::xpartName[$i]\_sin_new * ";
-        $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_SINGAIN;\n";
+        $calcExp .= "RampParamUpdate(&\L$::xpartName[$i]\_singain_state);\n";
         $calcExp .= "\L$::xpartName[$i]\[2\] = \L$::xpartName[$i]\_cos_new * ";
-        $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_COSGAIN;\n";
+        $calcExp .= "RampParamUpdate(&\L$::xpartName[$i]\_cosgain_state);\n";
 
         $calcExp .= "if((\L$::xpartName[$i]_freq \!= ";
         $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_FREQ) \&\& ";
