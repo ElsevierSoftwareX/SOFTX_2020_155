@@ -4,6 +4,7 @@ extern int printk(const char *fmt, ...);
 #include "inlineMath.h"
 #include "drv/cdsHardware.h"
 #include FE_HEADER
+#include "tRamp.h"
 #include "fm10Gen.h"
 extern unsigned int dWordUsed[MAX_ADC_MODULES][32];
 extern unsigned int dacOutUsed[MAX_DAC_MODULES][16];

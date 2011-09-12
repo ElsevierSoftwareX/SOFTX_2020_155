@@ -75,7 +75,26 @@ static double twoKAvgCoeff[9] = {7.705446e-9,
 #error need to define 2k or 16k or mixed
 #endif
 
-static FM_GAIN_RAMP gain_ramp[MAX_MODULES][10];
+#ifdef SERVO64K
+  #define FE_RATE 65536
+#endif
+#ifdef SERVO32K
+  #define FE_RATE 32768
+#endif
+#ifdef SERVO16K
+  #define FE_RATE 16384
+#endif
+#ifdef SERVO4K
+  #define FE_RATE 4096
+#endif
+#ifdef SERVO2K
+  #define FE_RATE 2048
+#endif
+
+
+//New tRamp.c gain ramping strcuture
+static RampParamState gain_ramp[MAX_MODULES][10];
+
 
 /**************************************************************************
 iir_filter - Perform IIR filtering sample by sample on doubles
@@ -401,79 +420,15 @@ filterModuleId(FILT_MOD *pFilt,     /* Filter module data  */
 
   /* Calculate output values */
   {
-    double cur_gain;
-
-
-    if (pFilt->inputs[modNum].outgain != gain_ramp[modNum][id].prev_outgain) {
-      /* Abort running ramping if user inputs 0.0 seconds ramp time */
-      if (pFilt->inputs[modNum].gain_ramp_time == 0.0) {
-	gain_ramp[modNum][id].ramp_cycles_left
-	  = gain_ramp[modNum][id].gain_ramp_cycles = 0;
-      }
-      
-      switch (gain_ramp[modNum][id].ramp_cycles_left) {
-	case 0: /* Initiate gain ramping now */
-	  {
-	    if (gain_ramp[modNum][id].gain_ramp_cycles == 0) {
-	      /* Calculate how many steps we will be doing */
-	      gain_ramp[modNum][id].ramp_cycles_left
-	    	= gain_ramp[modNum][id].gain_ramp_cycles 
-	    	= rate * pFilt->inputs[modNum].gain_ramp_time;
-
-	      /* Send ramp indication bit to Epics */
-	      pFilt->inputs[modNum].opSwitchP |= 0x10000000;
-	   
-	      if (gain_ramp[modNum][id].ramp_cycles_left < 1)  {
-		  gain_ramp[modNum][id].ramp_cycles_left
-		    = gain_ramp[modNum][id].gain_ramp_cycles
-		    = 1;
-	      }
-	    }
-  	    /* Fall through to default */
-	  }
-	default:/* Gain ramping is in progress */
-	  {
-	    --gain_ramp[modNum][id].ramp_cycles_left;
-
-	    cur_gain = ((double) gain_ramp[modNum][id].prev_outgain) +
-		((((double) pFilt->inputs[modNum].outgain)
-		  - ((double) gain_ramp[modNum][id].prev_outgain))
-		 * (1.0 - (((double) gain_ramp[modNum][id].ramp_cycles_left)
-			   / ((double) gain_ramp[modNum][id].gain_ramp_cycles)))
-		);
-
-	    if ((pFilt->inputs[modNum].outgain
-		 < gain_ramp[modNum][id].prev_outgain)
-		? cur_gain <= pFilt->inputs[modNum].outgain
-		: cur_gain >= pFilt->inputs[modNum].outgain) {
-
-		/* Stop ramping now, we are done */
-		cur_gain 
-		 = gain_ramp[modNum][id].prev_outgain
-		 = pFilt->inputs[modNum].outgain;
-	        gain_ramp[modNum][id].ramp_cycles_left
-	         = gain_ramp[modNum][id].gain_ramp_cycles
-		 = 0;
-
-	        /* Clear ramping flag bit for Epics */
-	        pFilt->inputs[modNum].opSwitchP &= ~0x10000000;
-	    }
-	    break;
-	  }
-      }
-    } else {
-	if (gain_ramp[modNum][id].ramp_cycles_left
-	    || gain_ramp[modNum][id].gain_ramp_cycles) {
-	  /* Correct for any floating point arithmetic mistakes */
-          gain_ramp[modNum][id].ramp_cycles_left
-            = gain_ramp[modNum][id].gain_ramp_cycles
-	    = 0;
-          /* Clear ramping flag bit for Epics */
-          pFilt->inputs[modNum].opSwitchP &= ~0x10000000;
-	}
-	cur_gain = pFilt->inputs[modNum].outgain;
+    if (pFilt->inputs[modNum].outgain != gain_ramp[modNum][id].req) {
+      RampParamLoad(&gain_ramp[modNum][id],pFilt->inputs[modNum].outgain,pFilt->inputs[modNum].gain_ramp_time,rate);
+      pFilt->inputs[modNum].opSwitchP |= 0x10000000;
     }
-    output = filterInput * cur_gain;
+    if (gain_ramp[modNum][id].isRamping == 0) {
+      pFilt->inputs[modNum].opSwitchP &= ~0x10000000;
+    }
+    
+    output = filterInput * RampParamUpdate(&gain_ramp[modNum][id]);
 
     /* Limiting */
     if (opSwitchE &  OPSWITCH_LIMITER_ENABLE) {
@@ -1025,11 +980,9 @@ initVarsId(FILT_MOD *pL,
     pL->inputs[ii].rset = 0;
     pL->inputs[ii].offset = pV->inputs[ii].offset;
     pL->inputs[ii].outgain = pV->inputs[ii].outgain;
-    gain_ramp[ii][id].prev_outgain = pL->inputs[ii].outgain;
     pL->inputs[ii].limiter =  pV->inputs[ii].limiter;
     pL->inputs[ii].gain_ramp_time = pV->inputs[ii].gain_ramp_time;
-    gain_ramp[ii][id].gain_ramp_cycles = 0;
-    gain_ramp[ii][id].ramp_cycles_left = 0;
+    RampParamInit(&gain_ramp[ii][id],pL->inputs[ii].outgain,FE_RATE);  
   }
 
   return readCoefVme(pC, pL, 0, totMod, pRfmCoeff);
@@ -1077,11 +1030,9 @@ initVars1Id(FILT_MOD *pL,
     pL->inputs[ii].rset = 0;
     pL->inputs[ii].offset = pV->inputs[ii].offset;
     pL->inputs[ii].outgain = pV->inputs[ii].outgain;
-    gain_ramp[ii][id].prev_outgain = pL->inputs[ii].outgain;
     pL->inputs[ii].limiter =  pV->inputs[ii].limiter;
     pL->inputs[ii].gain_ramp_time = pV->inputs[ii].gain_ramp_time;
-    gain_ramp[ii][id].gain_ramp_cycles = 0;
-    gain_ramp[ii][id].ramp_cycles_left = 0;
+    RampParamInit(&gain_ramp[ii][id],pL->inputs[ii].outgain,FE_RATE);
   }
 
   readCoefVme(pC + modStart, pL, modStart, totMod, pRfmCoeff + modStart);
@@ -1515,78 +1466,16 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
 
   /* Calculate output values */
   {
-    double cur_gain;
+    
+  if (pFilt->inputs[modNum].outgain != gain_ramp[modNum][id].req) {
+    RampParamLoad(&gain_ramp[modNum][id],pFilt->inputs[modNum].outgain,pFilt->inputs[modNum].gain_ramp_time,rate);
+    pFilt->inputs[modNum].opSwitchP |= 0x10000000;
+  }
+  if (gain_ramp[modNum][id].isRamping == 0) {
+    pFilt->inputs[modNum].opSwitchP &= ~0x10000000;
+  }
 
-    if (pFilt->inputs[modNum].outgain != gain_ramp[modNum][id].prev_outgain) {
-      /* Abort running ramping if user inputs 0.0 seconds ramp time */
-      if (pFilt->inputs[modNum].gain_ramp_time == 0.0) {
-	gain_ramp[modNum][id].ramp_cycles_left
-	  = gain_ramp[modNum][id].gain_ramp_cycles = 0;
-      }
-      
-      switch (gain_ramp[modNum][id].ramp_cycles_left) {
-	case 0: /* Initiate gain ramping now */
-	  {
-	    if (gain_ramp[modNum][id].gain_ramp_cycles == 0) {
-	      /* Calculate how many steps we will be doing */
-	      gain_ramp[modNum][id].ramp_cycles_left
-	    	= gain_ramp[modNum][id].gain_ramp_cycles 
-	    	= rate * pFilt->inputs[modNum].gain_ramp_time;
-
-	      /* Send ramp indication bit to Epics */
-	      pFilt->inputs[modNum].opSwitchP |= 0x10000000;
-	   
-	      if (gain_ramp[modNum][id].ramp_cycles_left < 1)  {
-		  gain_ramp[modNum][id].ramp_cycles_left
-		    = gain_ramp[modNum][id].gain_ramp_cycles
-		    = 1;
-	      }
-	    }
-  	    /* Fall through to default */
-	  }
-	default:/* Gain ramping is in progress */
-	  {
-	    --gain_ramp[modNum][id].ramp_cycles_left;
-
-	    cur_gain = ((double) gain_ramp[modNum][id].prev_outgain) +
-		((((double) pFilt->inputs[modNum].outgain)
-		  - ((double) gain_ramp[modNum][id].prev_outgain))
-		 * (1.0 - (((double) gain_ramp[modNum][id].ramp_cycles_left)
-			   / ((double) gain_ramp[modNum][id].gain_ramp_cycles)))
-		);
-
-	    if ((pFilt->inputs[modNum].outgain
-		 < gain_ramp[modNum][id].prev_outgain)
-		? cur_gain <= pFilt->inputs[modNum].outgain
-		: cur_gain >= pFilt->inputs[modNum].outgain) {
-
-		/* Stop ramping now, we are done */
-		cur_gain 
-		 = gain_ramp[modNum][id].prev_outgain
-		 = pFilt->inputs[modNum].outgain;
-	        gain_ramp[modNum][id].ramp_cycles_left
-	         = gain_ramp[modNum][id].gain_ramp_cycles
-		 = 0;
-
-	        /* Clear ramping flag bit for Epics */
-	        pFilt->inputs[modNum].opSwitchP &= ~0x10000000;
-	    }
-	    break;
-	  }
-      }
-    } else {
-	if (gain_ramp[modNum][id].ramp_cycles_left
-	    || gain_ramp[modNum][id].gain_ramp_cycles) {
-	  /* Correct for any floating point arithmetic mistakes */
-          gain_ramp[modNum][id].ramp_cycles_left
-            = gain_ramp[modNum][id].gain_ramp_cycles
-	    = 0;
-          /* Clear ramping flag bit for Epics */
-          pFilt->inputs[modNum].opSwitchP &= ~0x10000000;
-	}
-	cur_gain = pFilt->inputs[modNum].outgain;
-    }
-    output = fmInput * cur_gain;
+  output = fmInput * RampParamUpdate(&gain_ramp[modNum][id]);
   if(output > 1e20) output = 1e20;
 
     /* Limiting */
