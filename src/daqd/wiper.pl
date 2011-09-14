@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+use File::Basename;
 
 print "\n" .  `date` . "\n";
 # Dry run, do not delete anything
@@ -127,13 +128,19 @@ printf "$minute_trend_frames_dir size %dk keep %dk\n", $du{$minute_trend_frames_
 if ($du{$minute_trend_frames_dir} > $minute_frames_keep) { $do_min = 1; };
 
 # Delete frame files in $dir to free $ktofree Kbytes of space
-# This one reads file names in $dir/*/*.gwf sorts them by file names
+# This one reads file names in $dir/*/*.gwf sorts them by GPS time
 # and progressively deletes them up to $ktofree limit
 sub delete_frames {
 	($dir, $ktofree) = @_;
+
 	# Read file names; Could this be inefficient?
-	@a= <$dir/*/*.gwf>;
-	sort @a;
+        sub byGPSTime {
+                my $c = basename $a; $c =~ s/\D+(\d+)\D+(\d+)\D+/$1/g;
+                my $d = basename $b; $d = ~s/\D+(\d+)\D+(\d+)\D+/$1/g;
+                $c <=> $d;
+        }
+        @a = sort byGPSTime <$dir/*/*.gwf>;
+
 	$dacc = 0; # How many kilobytes we deleted
 	$fnum = @a;
 	$dnum = 0;
