@@ -136,7 +136,7 @@ sub delete_frames {
 	# Read file names; Could this be inefficient?
         sub byGPSTime {
                 my $c = basename $a; $c =~ s/\D+(\d+)\D+(\d+)\D+/$1/g;
-                my $d = basename $b; $d = ~s/\D+(\d+)\D+(\d+)\D+/$1/g;
+                my $d = basename $b; $d =~ s/\D+(\d+)\D+(\d+)\D+/$1/g;
                 $c <=> $d;
         }
         @a = sort byGPSTime <$dir/*/*.gwf>;
