@@ -2,7 +2,7 @@
 /* Time ramp function */
 /* Takes in a ramping state */
 
-void RampParamInit(RampParamState* state, double xInit, const int fe_rate)
+inline void RampParamInit(RampParamState* state, double xInit, const int fe_rate)
 {
   state->isRamping = 0;
   state->val = xInit;
@@ -17,7 +17,7 @@ void RampParamInit(RampParamState* state, double xInit, const int fe_rate)
   state->minAccCycles = 0.05 * fe_rate;
 }
 
-void RampParamLoad(RampParamState* state, double req, double tRamp, const int fe_rate)
+inline void RampParamLoad(RampParamState* state, double req, double tRamp, const int fe_rate)
 {
   double inv_nRamp; // 1 / number of ramp cycles
 
@@ -49,7 +49,7 @@ void RampParamLoad(RampParamState* state, double req, double tRamp, const int fe
   }
 }
 
-double RampParamUpdate(RampParamState* state)
+inline double RampParamUpdate(RampParamState* state)
 {
   double dxReq;  // distance to requested value
   double dxNow;  // current step size
