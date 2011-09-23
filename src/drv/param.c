@@ -465,16 +465,34 @@ loadDaqConfigFile(DAQ_INFO_BLOCK *info, char *site, char *ifo, char *sys)
   unsigned long crc = 0;
   char fname[256];         /* Input file name */
   char archive_fname[256]; /* Archive file name */
+  char perlCommand[256];   /* String that will contain the Perl command */
+  int returnValue = -999;
 
   strcat(strcat(strcpy(fname, "/opt/rtcds/"), site), "/");
   strcat_lower(fname, ifo);
+
+  strcpy(perlCommand, fname);
+  strcat(perlCommand, "/core/advLigoRTS/trunk");
+  strcat(perlCommand, "/src/epics/util/iniChk.pl ");
+
   strcat(fname, "/chans/daq/");
+
   strcpy(archive_fname, fname);
+
   strcat(fname, sys);
   strcat(fname, ".ini");
+
   strcat(archive_fname, "archive/");
   strcat(archive_fname, sys);
   printf("%s\n%s\n", fname, archive_fname);
+
+  strcat(perlCommand, fname);
+/*  fprintf(stderr, "pC=%s\n", perlCommand);  */
+  returnValue = system(perlCommand);
+  if (returnValue != 0)  {
+     fprintf(stderr, "Failed to load DAQ configuration file\n");
+     return 0;
+  }
 
   info->numChans = 0;
   if (0 == parseConfigFile(fname, &crc, infoCallback, 0, archive_fname, info)) return 0;
