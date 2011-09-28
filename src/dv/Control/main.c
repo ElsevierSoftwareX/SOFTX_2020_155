@@ -176,6 +176,7 @@ void initApp(int argc, char **argv)
   restoreFile = 0;
   zoomflag = 0;
   nolimit = 0;
+  extern char *optarg;
   while (  (c = getopt(argc, argv, optstring)) != -1 ) {
     /* options for starting dc3 */
     switch ( c ) {

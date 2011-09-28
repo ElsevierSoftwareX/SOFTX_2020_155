@@ -457,6 +457,9 @@ daq_connect (daq_t *daq, char *host, int port)
 #ifdef __linux__
   extern int h_errno;
   struct hostent *hentp;
+#elif __APPLE__
+  extern int h_errno;
+  struct hostent *hentp;
 #else
   struct hostent hent;
   char buf [2048];
@@ -484,7 +487,18 @@ daq_connect (daq_t *daq, char *host, int port)
   }
   (void) memcpy(&daq -> srvr_addr.sin_addr.s_addr,
 		*hentp -> h_addr_list, sizeof (daq -> srvr_addr.sin_addr.s_addr));
-
+#elif __APPLE__
+  hentp = gethostbyname (host);
+  if (!hentp) {
+    fprintf (stderr, "Can't find hostname `%s'\n", host);
+#ifdef DAQC_ACCESS_VERBOSE_ERRORS
+    fprintf (stderr, "Can't find hostname `%s'; gethostbyname(); error=%d\n", host, h_errno);
+#endif
+    close (daq -> sockfd);
+    return DAQD_ERROR;
+  }
+  (void) memcpy(&daq -> srvr_addr.sin_addr.s_addr,
+		*hentp -> h_addr_list, sizeof (daq -> srvr_addr.sin_addr.s_addr));
 #else
   if (! gethostbyname_r (host, &hent, buf, 2048, &gherr)) {
     fprintf (stderr, "Can't find hostname `%s'\n", host);
@@ -531,12 +545,19 @@ connect_again:
   {
   int fl = fcntl(daq -> sockfd, F_GETFL, 0);
   fcntl(daq -> sockfd, F_SETFL, O_NONBLOCK);
+#elif __APPLE__
+  {
+  int fl = fcntl(daq -> sockfd, F_GETFL, 0);
+  fcntl(daq -> sockfd, F_SETFL, O_NONBLOCK);
 #endif
   /* Do protocol version check */
   if (resp = daq_send (daq, "version;"))
     return resp;
 
 #ifdef __linux__
+  fcntl(daq -> sockfd, F_SETFL, fl);
+  }
+#elif __APPLE__
   fcntl(daq -> sockfd, F_SETFL, fl);
   }
 #endif
