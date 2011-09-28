@@ -2,6 +2,9 @@
 ifeq ($(shell uname), SunOS)
 LIBS = -I../../fb2 -I../Th -L../Lib -L../Lib/UTC_GPS -ltai -lm -lnsl -lpthread -lsocket  -lgrace_np
 all: dv_command dv_command_file
+else ifeq ($(shell uname), Darwin)
+LIBS = -I../../fb2 -I../Th -L/opt/local/lib -L../Lib/UTC_GPS -ltai -lm -lpthread -L/opt/local/lib
+all: framer4 frameMemRead 
 else
 LIBS = -I../../fb2 -I../Th -L/usr/local/grace/lib -L../Lib/UTC_GPS -ltai -lm -lnsl -lpthread 
 all: framer4 frameMemRead 

@@ -1,7 +1,9 @@
 #ifndef CHANNEL_H
 #define CHANNEL_H
 
-#include <values.h>
+/* Sept, 2011 - Updated to 21st-century includes */
+#include <limits.h>
+#include <float.h>
 
 /* Allowed maximum length for DMT channels */
 #define MAX_LONG_CHANNEL_NAME_LENGTH 255
@@ -13,7 +15,8 @@
 #define MAX_CHANNEL_GROUPS 150
 /* Hard limit on the number of channel names supported:
    it needs to be eliminated, dynamically allocated arrays should be used */
-#define MAX_CHANNELS 60000
+/* #define MAX_CHANNELS 60000 */
+#define MAX_CHANNELS 120000
 #define MAX_TREND_CHANNELS  300000
 
 /* numbering must be contiguous */
@@ -49,21 +52,22 @@ data_type_size (short dtype) {
   }
 }
 
+/* Sept, 2011 - Updated to 21st-century defs */
 inline static double
 data_type_max(short dtype) {
   switch (dtype) {
   case _16bit_integer: // 16 bit integer
-    return MAXSHORT;
+    return SHRT_MAX;
   case _32bit_integer: // 32 bit integer
-    return MAXINT;
+    return INT_MAX;
   case _32bit_float: // 32 bit float
-    return MAXFLOAT;
+    return FLT_MAX;
   case _64bit_integer: // 64 bit integer
-    return MAXLONG;
+    return LONG_MAX;
   case _64bit_double: // 64 bit double
-    return MAXDOUBLE;
+    return DBL_MAX;
   case _32bit_complex: // 32 bit complex
-    return MAXFLOAT;
+    return FLT_MAX;
   default:
     return _undefined;
   }

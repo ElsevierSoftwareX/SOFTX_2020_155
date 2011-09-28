@@ -1,5 +1,7 @@
 ifeq ($(shell uname), Linux)
 include Makefile.linux
+else ifeq ($(shell uname), Darwin)
+include Makefile.darwin
 else
 
 # Explicit setting of SHELL - beware since this gets inherited
