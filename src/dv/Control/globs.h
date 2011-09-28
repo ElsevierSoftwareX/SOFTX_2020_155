@@ -17,7 +17,6 @@ extern void drop_v14(Widget, XtPointer, XtPointer) ;
 extern void drop_v15(Widget, XtPointer, XtPointer) ;
 extern void drop_v16(Widget, XtPointer, XtPointer) ;
 
-char *optarg;
 int  optind, opterr;
 char displayIP[80], serverIP[80];
 char origDir[1024], iniDir[80];

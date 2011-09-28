@@ -1,8 +1,11 @@
 
 ifeq ($(shell uname), SunOS)
-LIBS = -I../../daqd -I../Th -L../Lib -L../Lib/UTC_GPS -ltai -lm -lnsl -lpthread -lsocket
+LIBS = -I../../daqd -I../Th -L../Lib -L../Lib/UTC_GPS -ltai -lm -lpthread -lsocket
 all: framer3 framer4 frameMemRead frameMemReadXMGR tocLongRead frameMemTrig
-else
+else ifeq ($(shell uname), Darwin)
+LIBS = -I/opt/local/include -I../../daqd -I../Th -L../Lib/UTC_GPS -ltai -lm -lpthread -L/opt/local/lib 
+all: framer4 frameMemRead
+else 
 LIBS = -I../../daqd -I../Th -L../Lib/UTC_GPS -ltai -lm -lnsl -lpthread 
 all: framer4 frameMemRead 
 endif
