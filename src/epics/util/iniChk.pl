@@ -291,14 +291,14 @@ $totalByteCount *= 4;
 print "\n\nTotal data rate is $totalByteCount bytes - ";
 
 #
-#  Check that the total datarate is 2M bytes or less.
+#  Check that the total datarate is 4M bytes or less.
 #  Print a warning message if it is not.
 #
-if ($totalByteCount <= 2097152)  {
+if ($totalByteCount <= 4194304)  {
    print "OK\n";
 }
 else  {
-   print "\* WARNING \*, this is bigger than 2M bytes!!\n";
+   print "\* WARNING \*, this is bigger than 4M bytes!!\n";
    $tooManyBytes++;
 }
 

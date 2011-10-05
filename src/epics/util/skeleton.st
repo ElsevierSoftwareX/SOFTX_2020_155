@@ -1164,6 +1164,8 @@ state daqProcess
         if (reload)
 %%        {
 %%          info -> reconfig = 0;
+            strcpy(msg, "Reading DAQ (.ini) file...");
+            pvPut(msg);
 %%          if (loadDaqConfigFile(&infoTmp, site, ifo, daqsys)) {
 %%            copy_info();
 %%            printf("%s%s daqConfig info is at rfm offset 0x%x\n", ifo, daqsys, ((char *)info) - ((char *)base))
@@ -1178,14 +1180,18 @@ state daqProcess
 %%              }
 %%            }
 %%            dataSize /= 1000;
+%%            sleep(1);
+              strcpy(msg, localtimestring);
 %%          } else {
 %%            dcmsg = 0xffffffff;
 %%            chnCnt = 0;
 %%            dataSize = 0;
+              strcpy(msg, "ERROR reading DAQ file!");
 %%          }
             pvPut(dcmsg);
             pvPut(chnCnt);
             pvPut(dataSize);
+            pvPut(msg);
 %%        }
         reload = 0;
         pvPut(reload);
