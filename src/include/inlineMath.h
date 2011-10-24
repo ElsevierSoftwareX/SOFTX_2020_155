@@ -58,5 +58,12 @@ inline double llog10 (double __x) { register double __result; __asm __volatile__
 /* Fast Pentium absolute value */
 inline double lfabs (double __x) { register double __result; __asm __volatile__ ("fabs" : "=t" (__result) : "0" (__x)); return __result; }
 
+/* Fast Pentium ATAN2 */
+inline double latan2(double __y, double __x)
+{
+register long double __atanr;
+__asm __volatile ("fpatan\n\t" : "=t" (__atanr) : "0" (__x), "u" (__y));
+return __atanr;
+}
 
 #endif
