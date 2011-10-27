@@ -55,6 +55,7 @@ DEVFLAGS=@DEVFLAGS@
 	@echo RCG_LIB_PATH=${RCG_LIB_PATH} >> target/$@epics/src/build.txt
 	@tar Ccf $(srcdir) - --exclude rcg.tar.gz --exclude build --exclude target . | gzip > target/$@epics/src/rcg.tar.gz
 	@cp src/epics/util/sources.$@ target/$@epics/src/src_locations.txt
+	@cp $@.log target/$@epics/src
 	@cat src/epics/util/sources.$@ | xargs cp -aft target/$@epics/src > /dev/null 2>&1
 	@echo RCG source code directory:
 	@echo $(srcdir)
