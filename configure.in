@@ -8,9 +8,6 @@ AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
-AC_PROG_RANLIB
-AC_PATH_XTRA
-AC_PATH_PROG([YACC],[bison],[bison],[/usr/local-2.95.3/bin:$PATH])
 
 dnl checks for libraries
 dnl ====================
@@ -24,11 +21,6 @@ dnl checks for header files
 dnl =======================
 
 AC_HEADER_STDC
-AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(FlexLexer.h arpa/inet.h assert.h ctype.h \
-	errno.h fcntl.h fstream.h iostream.h limits.h math.h \
-	netinet/in.h pthread.h signal.h stdio.h stdlib.h stream.h \
-	string.h sys/socket.h sys/types.h time.h unistd.h tnf/probe.h)
 AC_HEADER_TIME
 
 
@@ -38,240 +30,14 @@ dnl ===================
 AC_TYPE_SIZE_T
 AC_TYPE_OFF_T
 
-dnl checks for structures
-dnl =====================
-
-AC_STRUCT_TM
-
-dnl checks for compiler characteristics
-dnl ===================================
-
-AC_C_CONST
-AC_C_INLINE
-
-
-dnl recommended by the autoconf doc, for HEADER_STDC
-AC_CHECK_FUNCS(strchr memcpy fchdir)
-
-
 dnl Check for configuration options
 dnl ==========================
-
-AC_ARG_ENABLE(aux-5579-rfm,
-[  --enable-aux-5579-rfm  Dedicated connection to the controller on 5579 card],
-[if test x$enableval = xyes; then
-  AC_DEFINE(AUX_5579)
-fi],)
 
 AC_ARG_ENABLE(compat-initial-ligo,
 [  --enable-compat-initial-ligo    Build for Inital LIGO Compatibility],
 [if test x$enableval = xyes; then
   AC_DEFINE(COMPAT_INITIAL_LIGO)
 fi],)
-
-AC_ARG_ENABLE(advanced-ligo,
-[  --enable-advanced-ligo    Build for Advanced LIGO],
-[if test x$enableval = xyes; then
-  AC_DEFINE(_ADVANCED_LIGO)
-fi], [AC_DEFINE(_ADVANCED_LIGO)])
-
-AC_ARG_ENABLE(old-channel-config,
-[  --enable-old-channel-config	  Read channel configuration from the RFM],
-[if test x$enableval != xyes; then
-  AC_DEFINE(FILE_CHANNEL_CONFIG)
-fi], [AC_DEFINE(FILE_CHANNEL_CONFIG)])
-
-AC_ARG_WITH(broadcast,
-[ --with-broadcast            Get data receiving a broadcast],
-[ if test x$withval != xno; then
-   AC_DEFINE(USE_BROADCAST)
-  fi
-])
-
-AC_ARG_WITH(concentrator,
-[ --with-concentrator         Build data concentrator],
-[ if test x$withval != xno; then
-   AC_DEFINE(DATA_CONCENTRATOR)
-  fi
-])
-
-AC_ARG_WITH(myrinet,
-[  --with-myrinet             Get data from Myrinet],
-[ if test x$withval != xno; then
-   MYRINET_OBJS=\$\{MYRINET_OBJS\}
-   MYRINET_SRCS=\$\{MYRINET_SRCS\}
-   MYRINET_FLAGS=\$\{MYRINET_FLAGS\}
-   MYRINET_LDFLAGS=\$\{MYRINET_LDFLAGS\}
-   AC_DEFINE(USE_GM)
- fi
-])
-AC_SUBST(USE_MYRINET)
-AC_SUBST(MYRINET_OBJS)
-AC_SUBST(MYRINET_SRCS)
-AC_SUBST(MYRINET_FLAGS)
-AC_SUBST(MYRINET_LDFLAGS)
-
-AC_ARG_WITH(mx,
-[  --with-mx             Get data from MX],
-[ if test x$withval != xno; then
-   MX_OBJS=\$\{MX_OBJS\}
-   MX_SRCS=\$\{MX_SRCS\}
-   MX_FLAGS=\$\{MX_FLAGS\}
-   MX_LDFLAGS=\$\{MX_LDFLAGS\}
-   AC_DEFINE(USE_MX)
- fi
-])
-AC_SUBST(USE_MX)
-AC_SUBST(MX_OBJS)
-AC_SUBST(MX_SRCS)
-AC_SUBST(MX_FLAGS)
-AC_SUBST(MX_LDFLAGS)
-
-AC_ARG_WITH(udp,
-[  --with-udp             Get data using UDP receive],
-[ if test x$withval != xno; then
-   AC_DEFINE(USE_UDP)
- fi
-])
-AC_SUBST(USE_UDP)
-
-AC_ARG_WITH(epics,
-[  --with-epics=EPICS_BASE    Specify location of Epics base and enable EDCU and IOC server],
-[ if test x$withval != xno; then
-    EPICS_BASE=$withval
-    EPICSFLAGS=\$\{CDS_EPICS\}
-    EPICSLIBFLAGS=\$\{CDS_EPICS_LIBS\}
-    EPICS_OBJS=\$\{EPICS_OBJS\}
-    EPICS_SRCS=\$\{EPICS_SRCS\}
-    AC_DEFINE(EPICS_EDCU)
-  fi
-],
-[ EPICS_BASE=/opt/epics-3.14.9-linux/base
-  EPICSFLAGS=\$\{CDS_EPICS\}
-  EPICSLIBFLAGS=\$\{CDS_EPICS_LIBS\}
-  EPICS_OBJS=\$\{EPICS_OBJS\}
-  EPICS_SRCS=\$\{EPICS_SRCS\}
-  AC_DEFINE(EPICS_EDCU)
-])
-AC_SUBST(EPICS_BASE)
-AC_SUBST(EPICSFLAGS)
-AC_SUBST(EPICSLIBFLAGS)
-AC_SUBST(EPICS_OBJS)
-AC_SUBST(EPICS_SRCS)
-
-AC_ARG_WITH(vmic_rfm,
-[  --with-vmic-rfm=RFM_CARD_TYPE    Specify which VMIC RFM card to use],
-[ VMICRFMTYPE=$withval
-  VMICRFMFLAGS=\$\{CDS_VMICRFM\}
-  VMICRFMLIBFLAGS=\$\{CDS_VMICRFM_LIBS\}
-  AC_DEFINE(VMICRFM_PRODUCER)
-],)
-
-dnl AC_ARG_ENABLE(vmic_rfm,
-dnl [  --enable-vmic-rfm	  VMIC reflected memory interface],
-dnl [if test x$enableval = xyes; then
-dnl   VMICRFMFLAGS=\$\{CDS_VMICRFM\}
-dnl   VMICRFMLIBFLAGS=\$\{CDS_VMICRFM_LIBS\}
-dnl   AC_DEFINE(VMICRFM_PRODUCER)
-dnl fi],)
-
-AC_SUBST(VMICRFMTYPE)
-AC_SUBST(VMICRFMFLAGS)
-AC_SUBST(VMICRFMLIBFLAGS)
-
-AC_ARG_ENABLE(vmic_mmap,
-[  --enable-vmic-mmap	  Memory map VMIC 5588 reflective memory board],
-[if test x$enableval = xyes; then
-  AC_DEFINE(VMIC_MMAP)
-fi],)
-
-AC_ARG_ENABLE(daemon,
-[  --enable-daemon         Be a Daemon],
-[if test x$enableval = xyes; then
-  AC_DEFINE(DAEMONIC)
-fi],)
-
-DEVFLAGS=\$\{PERFORMANCEFLAGS\}
-
-AC_ARG_ENABLE(debug,
-[  --enable-debug          Use debugging compiler flags],
-[if test x$enableval = xyes; then
-  DEVFLAGS=\$\{DEBUGFLAGS\}
-fi],)
-
-AC_ARG_ENABLE(release,
-[  --enable-release        Use production compiler flags],
-[if test x$enableval = xyes; then
-  DEVFLAGS=\$\{RELEASEFLAGS\}
-fi],)
-AC_SUBST(DEVFLAGS)
-
-AC_DEFINE(GDS_TESTPOINTS)
-GDSOBJECTS=\$\{CDS_GDSOBJECTS\}
-GDSFLAGS=\$\{CDS_GDSFLAGS\}
-GDSLIBFLAGS=\$\{CDS_GDSLIBFLAGS\}
-AC_SUBST(GDS_ARCHIVE)
-AC_SUBST(GDSFLAGS)
-AC_SUBST(GDSLIBFLAGS)
-AC_SUBST(GDSOBJECTS)
-
-dnl Change default localtion of the FrameCPP
-AC_ARG_WITH(framecpp,
-[  --with-framecpp=DIRECTORY           Specify LDAS software directory ],
-[ if test x$withval != xno; then
-   LDAS_DIR=$withval
-   LDAS_LDFLAGS=\$\{LDASLIBFLAGS\}
-   AC_DEFINE(USE_FRAMECPP)
-  fi
-], [LDAS_DIR=/usr/local-2.95.3])
-AC_SUBST(LDAS_DIR)
-AC_SUBST(LDAS_LDFLAGS)
-
-dnl Use Symmetricom GPS card as the timing source
-AC_ARG_ENABLE(symmetricom,
-[  --enable-symmetricom		Use Symmetricom GPS card as timing source],
-[if test x$enableval != xno; then
-  AC_DEFINE(USE_SYMMETRICOM)
-dnl  SYMMETRICOM_CFLAGS=-DUNIX
-dnl  SYMMETRICOM_LDFLAGS=-lbcsdk
-fi;
-],)
-AC_SUBST(USE_SYMMETRICOM)
-AC_SUBST(SYMMETRICOM_CFLAGS)
-AC_SUBST(SYMMETRICOM_LDFLAGS)
-
-dnl Get the GPS and the cycle from the IOP
-AC_ARG_ENABLE(iop,
-[  --enable-iop		Get the GPS time and the timing from the IOP],
-[if test x$enableval != xno; then
-#  AC_DEFINE(USE_SYMMETRICOM)
-  AC_DEFINE(USE_IOP)
-  SYMMETRICOM_CFLAGS=
-  SYMMETRICOM_LDFLAGS=
-fi;
-],)
-AC_SUBST(USE_SYMMETRICOM)
-AC_SUBST(USE_IOP)
-AC_SUBST(SYMMETRICOM_CFLAGS)
-AC_SUBST(SYMMETRICOM_LDFLAGS)
-
-AC_SUBST(BROADCASTOBJECTS)
-
-BROADCASTOBJECTS=\$\{BROADCAST_OBJECTS\}
-
-AC_ARG_ENABLE(broadcast,
-[  --enable-broadcast    . (enabled by default)],
-[if test x$enableval = xno; then
-  AC_DEFINE(NO_BROADCAST)
-  BROADCASTOBJECTS=
-fi;
-],)
-AC_SUBST(BROADCASTOBJECTS)
-
-AC_ARG_ENABLE(mini-nds,
-[  --enable-mini-nds   configure to build mini-NDS],
-[AC_DEFINE(MINI_NDS)
-],)
 
 AC_OUTPUT( Makefile )
 AC_OUTPUT( src/epics/util/Makefile )
