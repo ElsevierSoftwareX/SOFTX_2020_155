@@ -51,6 +51,7 @@ fi
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target
 /bin/cp -pr target/${system}epics /opt/rtcds/$site/${lower_ifo}/target/${system}
 /bin/mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/src /opt/rtcds/$site/${lower_ifo}/target/${system}
+/bin/chmod -R -w /opt/rtcds/$site/${lower_ifo}/target/${system}/src
 if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/db/*/autoBurt.req; then
 	/bin/mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/db/*/autoBurt.req /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics || exit 3
 fi
