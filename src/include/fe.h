@@ -23,3 +23,20 @@ int rioOutput[MAX_DIO_MODULES];
 int rioInputInput[MAX_DIO_MODULES];
 int gainRamp(float gainReq, int rampTime, int id, float *gain, int gainRate);
 unsigned int CDO32Output[MAX_DIO_MODULES];
+
+#if defined(SERVO256K)
+#define CYCLE_PER_SECOND (256*1024)
+#elif defined(SERVO128K)
+#define CYCLE_PER_SECOND (128*1024)
+#elif defined(SERVO64K)
+#define CYCLE_PER_SECOND (64*1024)
+#elif defined(SERVO32K)
+#define CYCLE_PER_SECOND (32*1024)
+#elif defined(SERVO16K)
+#define CYCLE_PER_SECOND (16*1024)
+#elif defined(SERVO4K)
+#define CYCLE_PER_SECOND (4*1024)
+#elif defined(SERVO2K)
+#define CYCLE_PER_SECOND (2*1024)
+#endif
+
