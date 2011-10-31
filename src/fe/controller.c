@@ -151,7 +151,6 @@ extern unsigned int cpu_khz;
 
 // Define standard values based on code rep rate **************************************
 #ifdef SERVO256K
-        #define CYCLE_PER_SECOND        (2*131072)
         #define CYCLE_PER_MINUTE        (2*7864320)
         #define DAQ_CYCLE_CHANGE        (2*8000)
         #define END_OF_DAQ_BLOCK        (2*8191)
@@ -160,7 +159,6 @@ extern unsigned int cpu_khz;
         #define CYCLE_TIME_ALRM         4
 #endif
 #ifdef SERVO128K
-        #define CYCLE_PER_SECOND        131072
         #define CYCLE_PER_MINUTE        7864320
         #define DAQ_CYCLE_CHANGE        8000
         #define END_OF_DAQ_BLOCK        8191
@@ -169,7 +167,6 @@ extern unsigned int cpu_khz;
         #define CYCLE_TIME_ALRM         7
 #endif
 #ifdef SERVO64K
-	#define CYCLE_PER_SECOND	(2*32768)
 	#define CYCLE_PER_MINUTE	(2*1966080)
 	#define DAQ_CYCLE_CHANGE	(2*1540)
 	#define END_OF_DAQ_BLOCK	4095
@@ -185,7 +182,6 @@ extern unsigned int cpu_khz;
 #endif
 #endif
 #ifdef SERVO32K
-	#define CYCLE_PER_SECOND	32768
 	#define CYCLE_PER_MINUTE	1966080
 	#define DAQ_CYCLE_CHANGE	1540
 	#define END_OF_DAQ_BLOCK	2047
@@ -202,7 +198,6 @@ extern unsigned int cpu_khz;
 #endif
 
 #ifdef SERVO16K
-	#define CYCLE_PER_SECOND	16384
 	#define CYCLE_PER_MINUTE	983040
 	#define DAQ_CYCLE_CHANGE	770
 	#define END_OF_DAQ_BLOCK	1023
@@ -214,7 +209,6 @@ extern unsigned int cpu_khz;
 	#define DAC_PRELOAD_CNT		4
 #endif
 #ifdef SERVO4K
-        #define CYCLE_PER_SECOND        4096
         #define CYCLE_PER_MINUTE        2*122880
         #define DAQ_CYCLE_CHANGE        240
         #define END_OF_DAQ_BLOCK        255
@@ -226,7 +220,6 @@ extern unsigned int cpu_khz;
         #define DAC_PRELOAD_CNT         16      
 #endif
 #ifdef SERVO2K
-	#define CYCLE_PER_SECOND	2048
 	#define CYCLE_PER_MINUTE	122880
 	#define DAQ_CYCLE_CHANGE	120
 	#define END_OF_DAQ_BLOCK	127
