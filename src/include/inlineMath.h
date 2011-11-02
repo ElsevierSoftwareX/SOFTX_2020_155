@@ -3,6 +3,9 @@
 #ifndef INLINE_MATH
 #define INLINE_MATH
 
+#define M_PI     3.14159265358979323846
+#define M_TWO_PI 6.28318530717958647692
+
 #define __lrint_code \
   long int __lrintres;                                                        \
   __asm__ __volatile__                                                        \
