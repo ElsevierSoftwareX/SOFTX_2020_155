@@ -555,7 +555,8 @@ unsigned int writeCDIO1616l(CDS_HARDWARE *pHardware, int modNum, unsigned int da
 {
         outl(data,pHardware->pci_do[modNum]);
 	// The binary output state bits register is at +2
-        return(inl(pHardware->pci_do[modNum] + 2));
+        // return(inl(pHardware->pci_do[modNum] + 2));
+	return(data);
 }
 
 unsigned int readCDIO1616l(CDS_HARDWARE *pHardware, int modNum)
@@ -655,8 +656,8 @@ int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 	  dacPtr[devNum]->BOR = GSAO_FIFO_1024;
 #endif
 #else
-	  dacPtr[devNum]->BOR = GSAO_FIFO_16;
-	  // dacPtr[devNum]->BOR = GSAO_FIFO_1024;
+	  // dacPtr[devNum]->BOR = GSAO_FIFO_16;
+	  dacPtr[devNum]->BOR = GSAO_FIFO_1024;
 #endif
 	  dacPtr[devNum]->BOR |=  GSAO_EXTERN_CLK;
 	  printk("DAC BOR = 0x%x\n",dacPtr[devNum]->BOR);
