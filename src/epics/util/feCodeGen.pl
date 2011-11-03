@@ -163,10 +163,10 @@ open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
   my $year = 1900 + $yearOffset;
   #my $theTime = $year . "_$months[$month]" . "_$dayOfMonth" . "_$hour:$minute:$second";
   $theTime = sprintf("%d_%s_%02d_%02d:%02d:%02d", $year, $months[$month], $dayOfMonth, $hour, $minute, $second);
-if (-s $mFile) {
-  system ("/bin/mv $mFile $mFile" . "_$theTime");
-  #open(OUTM, "/dev/null") || die "cannot open /dev/null for writing";
-}
+#if (-s $mFile) {
+#  system ("/bin/mv $mFile $mFile" . "_$theTime");
+#  #open(OUTM, "/dev/null") || die "cannot open /dev/null for writing";
+#}
 open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
 my $hfname = "$rcg_src_dir/src/include/$ARGV[1].h";
@@ -2229,7 +2229,7 @@ print OUTH "\tfloat vmeReset;\n";
 print OUTH "\tint burtRestore;\n";
 print OUTH "\tint dcuId;\n";
 print OUTH "\tint diagReset;\n";
-print OUTH "\tint syncReset;\n";
+print OUTH "\tint dacDuoSet;\n";
 print OUTH "\tint overflowReset;\n";
 print OUTH "} CDS_EPICS_IN;\n\n";
 print OUTH "typedef struct CDS_EPICS_OUT {\n";
@@ -2241,7 +2241,7 @@ print OUTH "\tint timeDiag;\n";
 print OUTH "\tint cpuMeter;\n";
 print OUTH "\tint cpuMeterMax;\n";
 print OUTH "\tint gdsMon[32];\n";
-print OUTH "\tint diags[10];\n";
+print OUTH "\tint diags[15];\n";
 print OUTH "\tint overflowAdc[12][32];\n";
 print OUTH "\tint overflowDac[12][16];\n";
 print OUTH "\tint dacValue[12][16];\n";
@@ -2285,7 +2285,7 @@ print OUTH "#define MAX_FILTERS \t $filtCnt\n\n";
 
 print EPICS "MOMENTARY FEC\_$dcuId\_VME_RESET epicsInput.vmeReset int ai 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_DIAG_RESET epicsInput.diagReset int ai 0\n";
-print EPICS "MOMENTARY FEC\_$dcuId\_SYNC_RESET epicsInput.syncReset int ai 0\n";
+print EPICS "INVARIABLE FEC\_$dcuId\_SYNC_RESET epicsInput.dacDuoSet int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_OVERFLOW_RESET epicsInput.overflowReset int ai 0\n";
 print EPICS "DAQVAR $dcuId\_LOAD_CONFIG int ai 0\n";
 print EPICS "DAQVAR $dcuId\_CHAN_CNT int ai 0\n";
@@ -2318,6 +2318,7 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG1 epicsOutput.diags[1] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.diags[2] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0 field(HOPR,\"2000\") field(LOPR,\"0\") field(HIHI,\"1900\") field(HHSV,\"MAJOR\")\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME_DAC epicsOutput.diags[10] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ai 0 field(HIHI,\"24\") field(HHSV,\"MAJOR\") field(HIGH,\"18\") field(HSV,\"MINOR\") field(LOW,\"5\") field(LSV,\"MAJOR\")\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ai 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT epicsOutput.diags[7] int ai 0\n";
@@ -3523,8 +3524,8 @@ $sed_arg .= "s/MEDMDIR/$skeleton/g;";
 my @adcMedm;
 my @byteMedm;
 $sitelc = lc($site);
-$mxpt = 490;
-$mypt = 52;
+$mxpt = 225;
+$mypt = 158;
 $mbxpt = 32 + $mxpt;
 $mbypt = $mypt + 1;
 $adcMedm[0] = "\"related display\" \{ \n";
@@ -3633,7 +3634,7 @@ $byteMedm[19] = "\tebit=1 \n";
 $mypt += 22;
 if($ii == 4) {
 	$mxpt += 60; 
-	$mypt = 52;
+	$mypt = 158;
 }
 }
 close(OUTGDSM);
