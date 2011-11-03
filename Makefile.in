@@ -30,7 +30,7 @@ DEVFLAGS=@DEVFLAGS@
 	@ln -fs $(srcdir)/src/epics/simLink src/epics > /dev/null 2>&1 || /bin/true
 	@ln -fs $(srcdir)/src/epics/util/GNUmakefile src/epics/util > /dev/null 2>&1 || /bin/true
 	@echo Parsing the model $@...
-	@make -C src/epics/util -sf Makefile $@ > $@.log 2>&1 || (tail $@.log && /bin/false)
+	@make -C src/epics/util -sf Makefile $@ > $@.log 2>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@echo Done
 	@/bin/rm -rf build/$@epics-medm
 	@/bin/rm -rf build/$@epics-config
@@ -38,15 +38,15 @@ DEVFLAGS=@DEVFLAGS@
 	@/bin/mv -f build/$@epics/config build/$@epics-config
 	@/bin/rm -rf target/$@epics build/$@epics;
 	@echo Building EPICS sequencers...
-	@env RCG_SRC_DIR=$(srcdir) PERL5LIB=$(srcdir)/src/epics/util make -f config/Makefile.$@epics RCG_SRC_DIR=$(srcdir) >> $@.log 2>&1 || (tail $@.log && /bin/false)
+	@env RCG_SRC_DIR=$(srcdir) PERL5LIB=$(srcdir)/src/epics/util make -f config/Makefile.$@epics RCG_SRC_DIR=$(srcdir) >> $@.log 2>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@echo Done
-	@($(srcdir)/src/epics/util/nameLengthChk.pl $@) >> $@.log 2>&1 || (tail $@.log && /bin/false)
+	@($(srcdir)/src/epics/util/nameLengthChk.pl $@) >> $@.log 2>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@/bin/mkdir -p build/$@epics
 	@/bin/mv -f build/$@epics-medm build/$@epics/medm
 	@/bin/mv -f build/$@epics-config build/$@epics/config
 	@echo Building front-end Linux kernel module $@...
 	@make -sC src/fe/$@ clean
-	@make -C src/fe/$@ >> $@.log 2>&1 || (tail $@.log && /bin/false)
+	@make -C src/fe/$@ >> $@.log 2>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@echo Done
 	@/bin/mkdir -p target/$@epics/src
 	@echo $(srcdir) > target/$@epics/src/rcg_location.txt
@@ -56,6 +56,7 @@ DEVFLAGS=@DEVFLAGS@
 	@tar Ccf $(srcdir) - --exclude rcg.tar.gz --exclude build --exclude target . | gzip > target/$@epics/src/rcg.tar.gz
 	@cp src/epics/util/sources.$@ target/$@epics/src/src_locations.txt
 	@cp $@.log target/$@epics/src
+	@cp $@_error.log target/$@epics/src
 	@cat src/epics/util/sources.$@ | xargs cp -aft target/$@epics/src > /dev/null 2>&1
 	@echo RCG source code directory:
 	@echo $(srcdir)
