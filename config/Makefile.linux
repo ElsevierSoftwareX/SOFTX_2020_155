@@ -102,7 +102,7 @@ DBD += $(RCG_SRC_DIR)/src/epics/dbd/a.dbd build/$(TARGET)/*.dbd
 all: target build/$(TARGET)/$(TARGET) install
 
 # Install built epics IOC into target/$(TARGET)
-install: $(DB) $(DBH1) $(DBH2) $(DBL1)
+install: $(DB)
 	mkdir -p target/$(TARGET)/dbd
 	mkdir -p target/$(TARGET)/db
 	cp build/$(TARGET)/$(TARGET) target/$(TARGET)
@@ -137,29 +137,11 @@ install: $(DB) $(DBH1) $(DBH2) $(DBL1)
 	  echo '' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 	  for i in $(DB) ; do \
 		cat $$i | sed s/%IFO%/$$ifo/g\;s/%IFO0%/$$ifo0/g\;s/%SYS%/$$system/g > target/$(TARGET)/db/$$ifo/`basename $$i`; \
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|TOTAL$$|Name|SVN|SW1R$$|SW2R$$' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(ao|record\(stringout' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'record\(ao|record\(stringout'| sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|SEVERITY|MAJOR_COUNT|MINOR_COUNT|SETPOINT_ID|FILTER_PARAM|GDS_MON|FESTAT|STATUS_COUNT|FILTER_ID|MTRXSTAT|MTRX_STAT_ERR|_MSG|_TIME_STRING|_STAT_ERR_CNT|BURT|LOAD_CONFIG|VME_RES|LOAD_NEW_COEFF|DIAG_RESET|SYNC_RESET|TOTAL$$|Name' | awk '{ printf "[%s]\n", $$0 }' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 	  done ; \
-	done
-	for i in $(DBH1) ; do \
-		cat $$i | sed s/%IFO%/H1/g\;s/%IFO0%/H0/g > target/$(TARGET)/db/H1/`basename $$i`; \
-		grep record  target/$(TARGET)/db/H1/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/H1/autoBurt.req; \
-		grep record  target/$(TARGET)/db/H1/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' >> target/$(TARGET)/db/H1/autoBurt.req; \
-		echo "dbLoadRecords \"db/H1/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)H1.cmd; \
-	done
-	for i in $(DBH2) ; do \
-		cat $$i | sed s/%IFO%/H2/g\;s/%IFO0%/H0/g > target/$(TARGET)/db/H2/`basename $$i`; \
-		grep record  target/$(TARGET)/db/H2/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/H2/autoBurt.req; \
-		grep record  target/$(TARGET)/db/H2/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' >> target/$(TARGET)/db/H2/autoBurt.req; \
-		echo "dbLoadRecords \"db/H2/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)H2.cmd; \
-	done
-	for i in $(DBL1) ; do \
-		cat $$i | sed s/%IFO%/L1/g\;s/%IFO0%/L0/g > target/$(TARGET)/db/L1/`basename $$i`; \
-		grep record  target/$(TARGET)/db/L1/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/L1/autoBurt.req; \
-		grep record  target/$(TARGET)/db/L1/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|TOTAL$$|Name|SW1R$$|SW2R$$' >> target/$(TARGET)/db/L1/autoBurt.req; \
-		echo "dbLoadRecords \"db/L1/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)L1.cmd; \
 	done
 	for ifo in $(IFO) ; do \
 	  echo "iocInit" >> target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
