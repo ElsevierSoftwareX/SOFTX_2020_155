@@ -782,7 +782,7 @@ text {
 		height=18
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_MSG"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_MSGDAQ"
 		clr=50
 		bclr=42
 	}
