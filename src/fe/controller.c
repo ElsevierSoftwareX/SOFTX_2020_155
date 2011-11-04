@@ -365,6 +365,37 @@ volatile unsigned int *rfmTime;
 
 #ifdef OVERSAMPLE
 
+#if defined(ALL_BIQUAD)
+
+/* Recalculated filters in biquad form */
+
+/* Oversamping base rate is 64K */
+/* Coeffs for the 2x downsampling (32K system) filter */
+static double feCoeff2x[9] =
+        {0.053628649721183,
+	 0.2568759660371100, -0.3225906481359000, 1.2568801238621801, 1.6774135096891700,
+	-0.2061764045745400, -1.0941543149527400, 2.0846376586498803, 2.1966597482716801};
+
+/* Coeffs for the 4x downsampling (16K system) filter */
+static double feCoeff4x[9] =
+	{0.014805052402446,  
+	0.7166258547451800, -0.0683289874517300, 0.3031629575762000, 0.5171469569032900,
+	0.6838596423885499, -0.2534855521841101, 1.6838609161411500, 1.7447155374502499};
+//
+// New Brian Lantz 4k decimation filter
+static double feCoeff16x[9] =
+        {0.010203728365,
+	0.8052941009065100, -0.0241751519071000, 0.3920490703701900, 0.5612099784288400,
+	0.8339678987936501, -0.0376022631287799, -0.0131581721533700, 0.1145865116421301};
+
+/* Coeffs for the 32x downsampling filter (2K system) */
+/* Original Rana coeffs from 40m lab elog */
+static double feCoeff32x[9] =
+        {0.0001104130574447,
+	0.9701834961388200, -0.0010837026165800, -0.0200761119821899, 0.0085463156103800,
+	0.9871502388637901, -0.0039246182095299, 3.9871502388637898, 3.9960753817904697};
+#else
+
 /* Oversamping base rate is 64K */
 /* Coeffs for the 2x downsampling (32K system) filter */
 static double feCoeff2x[9] =
@@ -398,6 +429,7 @@ static double feCoeff32x[9] =
 	{0.010581064947739,
         -1.90444302586137,    0.91078434629894,   -1.96090276933603,    0.99931924465090,
         -1.92390910024681,    0.93366146580083,   -1.84652529182276,    0.99866506867980};
+#endif
 
 
 // History buffers for oversampling filters
@@ -1465,7 +1497,11 @@ udelay(1000);
 			// Downsample filter only used channels to save time
 			// This is defined in user C code
 			if (dWordUsed[jj][ii]) {
+#ifdef ALL_BIQUAD
+				dWord[jj][ii] = iir_filter_biquad(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
+#else
 				dWord[jj][ii] = iir_filter(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
+#endif
 			}
 #endif
 			packedData ++;
@@ -1569,7 +1605,11 @@ udelay(1000);
                                 dWord[jj][ii] = adcData[jj][ii];
 #ifdef OVERSAMPLE
 				if (dWordUsed[jj][ii]) {
+#ifdef ALL_BIQUAD
+					dWord[jj][ii] = iir_filter_biquad(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
+#else
 					dWord[jj][ii] = iir_filter(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
+#endif
 				}
 			if((adcData[jj][ii] > limit) || (adcData[jj][ii] < -limit))
 			  {
@@ -1667,10 +1707,18 @@ udelay(1000);
 			if (dacOutUsed[jj][ii]) {
 #ifdef NO_ZERO_PAD
 		 	  dac_in = dacOut[jj][ii];
+#ifdef ALL_BIQUAD
+		 	  dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
+#else
 		 	  dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
+#endif
 #else
 			  dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
+#ifdef ALL_BIQUAD
+		 	  dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
+#else
 		 	  dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
+#endif
 			  dac_in *= OVERSAMPLE_TIMES;
 #endif
 			}
