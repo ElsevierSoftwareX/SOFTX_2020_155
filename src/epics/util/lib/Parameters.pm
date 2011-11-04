@@ -128,6 +128,8 @@ sub printHeaderStruct {
 				$::flipSignals = $spp[1];
 			} elsif ($spp[0] eq "biquad") { 
 				$::allBiquad = $spp[1];
+			} elsif ($spp[0] eq "direct_dac_write") { 
+				$::directDacWrite = $spp[1];
 			}
 		}
 	}
