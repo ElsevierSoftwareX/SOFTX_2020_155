@@ -471,9 +471,7 @@ loadDaqConfigFile(DAQ_INFO_BLOCK *info, char *site, char *ifo, char *sys)
   strcat(strcat(strcpy(fname, "/opt/rtcds/"), site), "/");
   strcat_lower(fname, ifo);
 
-  strcpy(perlCommand, fname);
-  strcat(perlCommand, "/core/advLigoRTS/trunk");
-  strcat(perlCommand, "/src/epics/util/iniChk.pl ");
+  strcpy(perlCommand, "iniChk.pl ");
 
   strcat(fname, "/chans/daq/");
 
