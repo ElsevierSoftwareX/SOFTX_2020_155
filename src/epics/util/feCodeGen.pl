@@ -3286,6 +3286,14 @@ if ($specificCpu > -1) {
   print OUTM "#Uncomment to run on a specific CPU\n";
   print OUTM "#EXTRA_CFLAGS += -DSPECIFIC_CPU=2\n";
 }
+if ($::allBiquad) {
+  print OUTM "#Comment out to go back to old iir_filter calculation form\n";
+  print OUTM "EXTRA_CFLAGS += -DALL_BIQUAD=1\n";
+} else {
+  print OUTM "#Uncomment to run with biquad form iir_filters\n";
+  print OUTM "#EXTRA_CFLAGS += -DALL_BIQUAD=1\n";
+}
+
 
 if ($::noRfmDma) {
   print OUTM "#Comment out to run with RFM DMA\n";
@@ -3583,6 +3591,7 @@ if($modelType eq "MASTER")
 	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM_SLAVE.adl GDS_TP_TEST.adl");
 }
 open(OUTGDSM,">>./"."GDS_TP_TEST.adl") || die "cannot open GDS_TP file for writing ";
+$dacSnum=0;
 for($ii=0;$ii<$totalMedm;$ii++)
 {
 $adcMedm[3] = "$mxpt";
@@ -3591,16 +3600,19 @@ $adcMedm[15] = "$ii";
 $adcMedm[21] = "$adcCardNum[$ii]\" \n";
 if($ii>=$adcCnt)
 {
-	$dacSnum=0;
-if($dacMedm > 3)
-{
-	$dacSnum=1;
-}
+      if ($dacType[$dacSnum] eq "GSC_18AO8") {
+	$dsed_arg = $sed_arg;
+	$dsed_arg .= "s/CHNUM/$dacSnum/g;";
+	system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_8.adl | sed '$dsed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_" . $dacSnum . ".adl");
+	} else {
+	system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_16.adl | sed '$dsed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_" . $dacSnum . ".adl");
+	}
 	$adcMedm[14] = "/medm/MEDMDIR/FBID_DAC_MONITOR_";
 	$adcMedm[15] = "$dacSnum";
 	$adcMedm[19] = "\tbclr=44 \n";
 	$adcMedm[20] = "\tlabel=\"D";
 	$adcMedm[21] = "$dacCardNum[$dacMedm]\" \n";
+	$dacSnum+=1;
 }
 print OUTGDSM @adcMedm;
 $mbxpt = 32 + $mxpt;
@@ -3640,9 +3652,9 @@ if($ii == 4) {
 close(OUTGDSM);
 
 system("cat GDS_TP_TEST.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
-system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR.adl");
-system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_0.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_0.adl");
-system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_1.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_1.adl");
+#system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR.adl");
+#system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_0.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_0.adl");
+#system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_1.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_1.adl");
 my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
 
