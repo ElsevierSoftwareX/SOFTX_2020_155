@@ -819,6 +819,6 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="DAC CHNUM"
+	textix="DAC CNUM"
 	align="horiz. centered"
 }
