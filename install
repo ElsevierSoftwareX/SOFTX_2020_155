@@ -194,18 +194,22 @@ echo 'else' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtp
 echo ' sudo /opt/rtcds/'${site}'/'${lower_ifo}'/target/gds/bin/awgtpman -s '${system}' '${datarate_mult_flag}' -l /opt/rtcds/'${site}'/'${lower_ifo}'/target/gds/awgtpman_logs/'${system}'.log&' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd
 echo 'fi' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd 
 /bin/chmod +x /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-echo Updating DAQ configuration file
+echo Installing auto-generated DAQ configuration file
 echo /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini 
 /bin/mkdir -p  /opt/rtcds/${site}/${lower_ifo}/chans/daq 
 /bin/mkdir -p  /opt/rtcds/${site}/${lower_ifo}/chans/daq/archive
 if test -e /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini
 then 
   /bin/mv -f /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/archive/${upper_system}_${cur_date}.ini || exit 2 
-  echo $srcdir/src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/${site}/${lower_ifo}/chans/daq/archive/${upper_system}_${cur_date}.ini -old=/opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/tpchn_${system}.par -new=build/${system}epics/${system}.par -daq=build/${system}epics/${system}.ini 
-  $srcdir/src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/${site}/${lower_ifo}/chans/daq/archive/${upper_system}_${cur_date}.ini -old=/opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/tpchn_${system}_${cur_date}.par -new=build/${system}epics/${system}.par -daq=build/${system}epics/${system}.ini > /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini 
-else 
-  /bin/cp -p build/${system}epics/${system}.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini 
+#
+# Do not update anything now, file is generated from the model
+#echo $srcdir/src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/${site}/${lower_ifo}/chans/daq/archive/${upper_system}_${cur_date}.ini -old=/opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/tpchn_${system}.par -new=build/${system}epics/${system}.par -daq=build/${system}epics/${system}.ini 
+# $srcdir/src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/${site}/${lower_ifo}/chans/daq/archive/${upper_system}_${cur_date}.ini -old=/opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/tpchn_${system}_${cur_date}.par -new=build/${system}epics/${system}.par -daq=build/${system}epics/${system}.ini > /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini 
+#else 
+#  /bin/cp -p build/${system}epics/${system}.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini 
 fi
+/bin/cp -p build/${system}epics/${system}.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini 
+
 /bin/cp /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini /opt/rtcds/${site}/${lower_ifo}/target/${system}/param/${upper_system}.ini
 echo Installing EDCU ini file
 if test -e /opt/rtcds/${site}/${lower_ifo}/chans/daq/${edcu_name}.ini
