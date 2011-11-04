@@ -68,6 +68,9 @@ program %SEQUENCER_NAME%
 string msg;
 assign msg to "{ifo}:FEC-{sysnum}_MSG";
 
+string daqmsg;
+assign daqmsg to "{ifo}:FEC-{sysnum}_MSGDAQ";
+
 int statErrCnt;
 assign statErrCnt to "{ifo}:FEC-{sysnum}_STAT_ERR_CNT";
 
@@ -1115,6 +1118,8 @@ state daqInit
 {
   when()
     {
+            strcpy(daqmsg, "Reading DAQ (.ini) file...");
+            pvPut(daqmsg);
         dcuId = atoi(macValueGet("sysnum"));
 %%      if (dcuId < 0 || dcuId >= DCU_COUNT) {
 %%        fprintf(stderr, "Invalid system number %d\n", dcuId);
@@ -1133,7 +1138,6 @@ state daqInit
 %%         copy_info();
 %%         printf("%s%s daqConfig info is at rfm offset 0x%x\n", ifo, daqsys, ((char *)info) - ((char *)base));
 %%         info -> reconfig = 1;
-%%         dcmsg = infoTmp.configFileCRC;
 %%         chnCnt = infoTmp.numChans;
 %%         dataSize = 0;
 %%         { int i;
@@ -1142,14 +1146,15 @@ state daqInit
 %%              }
 %%         }
 %%         dataSize /= 1000;
+           strcpy(daqmsg, localtimestring);
 %%      } else {
-%%         dcmsg = 0xffffffff;
+           strcpy(daqmsg, "ERROR reading DAQ file!");
 %%         chnCnt = 0;
 %%         dataSize = 0;
 %%      }
-        pvPut(dcmsg);
         pvPut(chnCnt);
         pvPut(dataSize);
+        pvPut(daqmsg);
     } state monScreen
 }
 
@@ -1164,14 +1169,13 @@ state daqProcess
         if (reload)
 %%        {
 %%          info -> reconfig = 0;
-            strcpy(msg, "Reading DAQ (.ini) file...");
-            pvPut(msg);
+            strcpy(daqmsg, "Reading DAQ (.ini) file...");
+            pvPut(daqmsg);
 %%          if (loadDaqConfigFile(&infoTmp, site, ifo, daqsys)) {
 %%            copy_info();
 %%            printf("%s%s daqConfig info is at rfm offset 0x%x\n", ifo, daqsys, ((char *)info) - ((char *)base))
 ;
 %%            info -> reconfig = 1;
-%%            dcmsg = infoTmp.configFileCRC;
 %%            chnCnt = infoTmp.numChans;
 %%            dataSize = 0;
 %%            { int i;
@@ -1181,17 +1185,15 @@ state daqProcess
 %%            }
 %%            dataSize /= 1000;
 %%            sleep(1);
-              strcpy(msg, localtimestring);
+              strcpy(daqmsg, localtimestring);
 %%          } else {
-%%            dcmsg = 0xffffffff;
 %%            chnCnt = 0;
 %%            dataSize = 0;
-              strcpy(msg, "ERROR reading DAQ file!");
+              strcpy(daqmsg, "ERROR reading DAQ file!");
 %%          }
-            pvPut(dcmsg);
             pvPut(chnCnt);
             pvPut(dataSize);
-            pvPut(msg);
+            pvPut(daqmsg);
 %%        }
         reload = 0;
         pvPut(reload);
