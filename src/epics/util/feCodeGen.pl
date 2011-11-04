@@ -2252,6 +2252,7 @@ print OUTH "\tint ovAccum;\n";
 print OUTH "\tint statAdc[16];\n";
 print OUTH "\tint statDac[16];\n";
 print OUTH "\tint awgtpmanGPS;\n";
+print OUTH "\tint tpCnt;\n";
 print OUTH "} CDS_EPICS_OUT;\n\n";
 if($useWd)
 {
@@ -2286,15 +2287,15 @@ print OUTH "\n\n#define MAX_MODULES \t $filtCnt\n";
 $filtCnt *= 10;
 print OUTH "#define MAX_FILTERS \t $filtCnt\n\n";
 
-print EPICS "MOMENTARY FEC\_$dcuId\_VME_RESET epicsInput.vmeReset int ai 0\n";
-print EPICS "MOMENTARY FEC\_$dcuId\_DIAG_RESET epicsInput.diagReset int ai 0\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_VME_RESET epicsInput.vmeReset int ao 0\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_DIAG_RESET epicsInput.diagReset int ao 0\n";
 print EPICS "INVARIABLE FEC\_$dcuId\_SYNC_RESET epicsInput.dacDuoSet int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
-print EPICS "MOMENTARY FEC\_$dcuId\_OVERFLOW_RESET epicsInput.overflowReset int ai 0\n";
-print EPICS "DAQVAR $dcuId\_LOAD_CONFIG int ai 0\n";
-print EPICS "DAQVAR $dcuId\_CHAN_CNT int ai 0\n";
-print EPICS "DAQVAR $dcuId\_TOTAL int ai 0\n";
-print EPICS "DAQVAR $dcuId\_MSG int ai 0\n";
-print EPICS "DAQVAR  $dcuId\_DCU_ID int ai 0\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_OVERFLOW_RESET epicsInput.overflowReset int ao 0\n";
+print EPICS "DAQVAR $dcuId\_LOAD_CONFIG int ao 0\n";
+print EPICS "DAQVAR $dcuId\_CHAN_CNT int ao 0\n";
+print EPICS "DAQVAR $dcuId\_TOTAL int ao 0\n";
+print EPICS "DAQVAR $dcuId\_MSG int ao 0\n";
+print EPICS "DAQVAR  $dcuId\_DCU_ID int ao 0\n";
 $frate = $rate;
 if($frate == 15)
 {
@@ -2303,30 +2304,31 @@ if($frate == 15)
 	$frate =  $rate * .85;
 	$brate = $frate;
 }
-#print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\")\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER_MAX epicsOutput.cpuMeterMax int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\")\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT epicsOutput.adcWaitTime int ai 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
-#print EPICS "OUTVARIABLE FEC\_$dcuId\_ONE_PPS epicsOutput.onePps int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_ERR epicsOutput.timeErr int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_DIAG epicsOutput.timeDiag int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG_WORD epicsOutput.diagWord int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TP_CNT epicsOutput.tpCnt int ao 0\n";
+#print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER_MAX epicsOutput.cpuMeterMax int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT epicsOutput.adcWaitTime int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
+#print EPICS "OUTVARIABLE FEC\_$dcuId\_ONE_PPS epicsOutput.onePps int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_ERR epicsOutput.timeErr int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_DIAG epicsOutput.timeDiag int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG_WORD epicsOutput.diagWord int ao 0\n";
 print EPICS "INVARIABLE FEC\_$dcuId\_BURT_RESTORE epicsInput.burtRestore int ai 0\n";
 for($ii=0;$ii<32;$ii++)
 {
-	print EPICS "OUTVARIABLE FEC\_$dcuId\_GDS_MON_$ii epicsOutput.gdsMon\[$ii\] int ai 0\n";
+	print EPICS "OUTVARIABLE FEC\_$dcuId\_GDS_MON_$ii epicsOutput.gdsMon\[$ii\] int ao 0\n";
 }
-print EPICS "OUTVARIABLE FEC\_$dcuId\_USR_TIME epicsOutput.diags[0] int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG1 epicsOutput.diags[1] int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.diags[2] int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ai 0 field(HOPR,\"2000\") field(LOPR,\"0\") field(HIHI,\"1900\") field(HHSV,\"MAJOR\")\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME_DAC epicsOutput.diags[10] int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ai 0 field(HIHI,\"24\") field(HHSV,\"MAJOR\") field(HIGH,\"18\") field(HSV,\"MINOR\") field(LOW,\"5\") field(LSV,\"MAJOR\")\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT epicsOutput.diags[7] int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_MASTER_STAT epicsOutput.diags[8] int ai 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_AWGTPMAN_STAT epicsOutput.diags[9] int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_USR_TIME epicsOutput.diags[0] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG1 epicsOutput.diags[1] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.diags[2] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ao 0 field(HOPR,\"2000\") field(LOPR,\"0\") field(HIHI,\"1900\") field(HHSV,\"MAJOR\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME_DAC epicsOutput.diags[10] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ao 0 field(HIHI,\"24\") field(HHSV,\"MAJOR\") field(HIGH,\"18\") field(HSV,\"MINOR\") field(LOW,\"5\") field(LSV,\"MAJOR\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT epicsOutput.diags[7] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_MASTER_STAT epicsOutput.diags[8] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_AWGTPMAN_STAT epicsOutput.diags[9] int ao 0\n";
 print EPICS "\n\n";
 #Load EPICS I/O Parts
 for($ii=0;$ii<$partCnt;$ii++)
@@ -2338,23 +2340,23 @@ for($ii=0;$ii<$partCnt;$ii++)
 print EPICS "\n\n";
 for($ii=0;$ii<$adcCnt;$ii++)
 {
-	print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT_$ii epicsOutput.statAdc\[$ii\] int ai 0\n";
+	print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT_$ii epicsOutput.statAdc\[$ii\] int ao 0\n";
 	for($jj=0;$jj<32;$jj++)
 	{
-		print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_OVERFLOW_$ii\_$jj epicsOutput.overflowAdc\[$ii\]\[$jj\] int ai 0\n";
+		print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_OVERFLOW_$ii\_$jj epicsOutput.overflowAdc\[$ii\]\[$jj\] int ao 0\n";
 	}
 }
 print EPICS "\n\n";
 for($ii=0;$ii<$dacCnt;$ii++)
 {
-	print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT_$ii epicsOutput.statDac\[$ii\] int ai 0\n";
+	print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT_$ii epicsOutput.statDac\[$ii\] int ao 0\n";
 	for($jj=0;$jj<16;$jj++)
 	{
-		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OVERFLOW_$ii\_$jj epicsOutput.overflowDac\[$ii\]\[$jj\] int ai 0\n";
-		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OUTPUT_$ii\_$jj epicsOutput.dacValue\[$ii\]\[$jj\] int ai 0\n";
+		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OVERFLOW_$ii\_$jj epicsOutput.overflowDac\[$ii\]\[$jj\] int ao 0\n";
+		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OUTPUT_$ii\_$jj epicsOutput.dacValue\[$ii\]\[$jj\] int ao 0\n";
 	}
 }
-print EPICS "OUTVARIABLE FEC\_$dcuId\_ACCUM_OVERFLOW epicsOutput.ovAccum int ai 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ACCUM_OVERFLOW epicsOutput.ovAccum int ao 0\n";
 print EPICS "\n\n";
 print EPICS "systems \U$systemName\-\n";
 if ($plantName ne $systemName) {
@@ -3614,6 +3616,9 @@ if($ii>=$adcCnt)
 	$dsed_arg .= "s/CNUM/$dacCardNum[$dacMedm]/g;";
 	system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_8.adl | sed '$dsed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_" . $dacSnum . ".adl");
 	} else {
+	$dsed_arg = $sed_arg;
+	$dsed_arg .= "s/CHNUM/$dacSnum/g;";
+	$dsed_arg .= "s/CNUM/$dacCardNum[$dacMedm]/g;";
 	system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_16.adl | sed '$dsed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_" . $dacSnum . ".adl");
 	}
 	$adcMedm[14] = "/medm/MEDMDIR/FBID_DAC_MONITOR_";
