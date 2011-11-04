@@ -1,1 +1,1 @@
-grecord(stringin,"%IFO%:%SYS%-TIME_STRING")
+grecord(stringout,"%IFO%:%SYS%-TIME_STRING")

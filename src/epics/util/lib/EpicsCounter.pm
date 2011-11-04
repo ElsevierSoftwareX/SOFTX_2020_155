@@ -18,8 +18,8 @@ sub printHeaderStruct {
 # Current part number is passed as first argument
 sub printEpics {
 	my ($i) = @_;
-	print ::EPICS "MOMENTARY $::xpartName[$i]\_RESET $::systemName\.$::xpartName[$i]\_RESET int ai 0\n";
-	print ::EPICS "OUTVARIABLE $::xpartName[$i]\_COUNTEROUT $::systemName\.$::xpartName[$i]\_COUNTEROUT int ai 0\n";
+	print ::EPICS "MOMENTARY $::xpartName[$i]\_RESET $::systemName\.$::xpartName[$i]\_RESET int ao 0\n";
+	print ::EPICS "OUTVARIABLE $::xpartName[$i]\_COUNTEROUT $::systemName\.$::xpartName[$i]\_COUNTEROUT int ao 0\n";
 }
  
 # Print variable declarations int front-end file

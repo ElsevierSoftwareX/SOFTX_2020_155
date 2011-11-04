@@ -11,13 +11,13 @@ sub printHeaderStruct {
 #       if (length $::xpartName[$i] > 24) {
 #      		die "InputFilter name \"", $::xpartName[$i], "\" too long (max 24 charachters)";
 #  	}
-	print ::OUTH "\tfloat $::xpartName[$i]\_OFFSET;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_GAIN;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_POLE;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_ZERO;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_GAIN_TRAMP;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_POLE_TRAMP;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_ZERO_TRAMP;\n";
+	print ::OUTH "\tdouble $::xpartName[$i]\_OFFSET;\n";
+	print ::OUTH "\tdouble $::xpartName[$i]\_GAIN;\n";
+	print ::OUTH "\tdouble $::xpartName[$i]\_POLE;\n";
+	print ::OUTH "\tdouble $::xpartName[$i]\_ZERO;\n";
+	print ::OUTH "\tdouble $::xpartName[$i]\_GAIN_TRAMP;\n";
+	print ::OUTH "\tdouble $::xpartName[$i]\_POLE_TRAMP;\n";
+	print ::OUTH "\tdouble $::xpartName[$i]\_ZERO_TRAMP;\n";
 }
 
 sub printEpics {

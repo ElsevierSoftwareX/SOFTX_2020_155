@@ -11,11 +11,11 @@ sub printHeaderStruct {
         if (length $::xpartName[$i] > 24) {
        		die "InputFilter1 name \"", $::xpartName[$i], "\" too long (max 24 charachters)";
    	}
-	print ::OUTH "\tfloat $::xpartName[$i]\_OFFSET;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_K;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_P;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_Z;\n";
-	print ::OUTH "\tfloat $::xpartName[$i]\_TRAMP;\n";
+	print ::OUTH "\tdouble $::xpartName[$i]\_OFFSET;\n";
+	print ::OUTH "\tdouble $::xpartName[$i]\_K;\n";
+	print ::OUTH "\tdouble $::xpartName[$i]\_P;\n";
+	print ::OUTH "\tdouble $::xpartName[$i]\_Z;\n";
+	print ::OUTH "\tdouble $::xpartName[$i]\_TRAMP;\n";
 	print ::OUTH "\tint $::xpartName[$i]\_DORAMP;\n";
 }
 
@@ -27,7 +27,7 @@ sub printEpics {
 	print ::EPICS "INVARIABLE $::xpartName[$i]\_P $::systemName\.$::xpartName[$i]\_P float ai 0 field(PREC,\"3\")\n";
 	print ::EPICS "INVARIABLE $::xpartName[$i]\_Z $::systemName\.$::xpartName[$i]\_Z float ai 0 field(PREC,\"3\")\n";
 	print ::EPICS "INVARIABLE $::xpartName[$i]\_TRAMP $::systemName\.$::xpartName[$i]\_TRAMP float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "MOMENTARY $::xpartName[$i]\_DORAMP $::systemName\.$::xpartName[$i]\_DORAMP int ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "MOMENTARY $::xpartName[$i]\_DORAMP $::systemName\.$::xpartName[$i]\_DORAMP int ao 0 field(PREC,\"3\")\n";
 }
 
 sub printFrontEndVars  {

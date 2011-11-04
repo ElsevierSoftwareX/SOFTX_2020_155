@@ -51,7 +51,7 @@ sub commented_printHeaderStruct {
 	#my $matOuts = $::partOutputs[$::partOutNum[$i][0]];
 	#my $matIns = $::partInCnt[$::partInNum[$i][0]];
         #print ::EPICS "MATRIX $::xpartName[$i]_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]\n";
-        #print ::OUTH "\tfloat $::xpartName[$i]\[$matOuts\]\[$matIns\];\n";
+        #print ::OUTH "\tdouble $::xpartName[$i]\[$matOuts\]\[$matIns\];\n";
 }
 
 # Print Epics variable definitions

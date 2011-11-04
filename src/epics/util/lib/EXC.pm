@@ -29,7 +29,7 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
-	#print ::OUT "static float \L$::xpartName[$i];\n";
+	#print ::OUT "static double \L$::xpartName[$i];\n";
         ;
 }
 

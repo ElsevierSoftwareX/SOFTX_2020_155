@@ -26,7 +26,7 @@ sub printHeaderStruct {
 sub printEpics {
         my ($i) = @_;
 
-        print ::EPICS "OUTVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] double ai 0 field(PREC,\"3\")";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] double ao 0 field(PREC,\"3\")";
 	foreach $ef (@{$::epics_fields[$i]}) {
 		print ::EPICS  " " . $ef;
         }

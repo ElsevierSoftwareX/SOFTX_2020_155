@@ -2228,7 +2228,7 @@ $svnVerSub = substr($svnVer, 0, ($size - 1));
 print OUTH "#define BUILD_SVN_VERSION_NO \t \"$svnVerSub\"\n\n";
 # ########    TEST    ############
 print OUTH "typedef struct CDS_EPICS_IN {\n";
-print OUTH "\tfloat vmeReset;\n";
+print OUTH "\tint vmeReset;\n";
 print OUTH "\tint burtRestore;\n";
 print OUTH "\tint dcuId;\n";
 print OUTH "\tint diagReset;\n";
@@ -2537,7 +2537,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 	if($partType[$ii] eq "GROUND")  {
             if ($groundDecl == 0)  {                                       # =+=  MA  =+=
-                print OUT "static float ground;\n";                        # =+=  MA  =+=
+                print OUT "static double ground;\n";                       # =+=  MA  =+=
                 $groundDecl++;                                             # =+=  MA  =+=
             }                                                              # =+=  MA  =+=
 	}

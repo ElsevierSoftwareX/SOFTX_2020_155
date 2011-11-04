@@ -10,7 +10,7 @@ sub partType {
 # Current part number is passed as first argument
 sub printHeaderStruct {
         my ($i) = @_;
-        print ::OUTH "\tfloat $::xpartName[$i];\n";
+        print ::OUTH "\tdouble $::xpartName[$i];\n";
 }
 
 # Print Epics variable definitions
