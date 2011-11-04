@@ -96,6 +96,9 @@ static double twoKAvgCoeff[9] = {7.705446e-9,
 static RampParamState gain_ramp[MAX_MODULES][10];
 
 
+//New tRamp.c gain offset strcuture
+static RampParamState offset_ramp[MAX_MODULES][10];
+
 /**************************************************************************
 iir_filter - Perform IIR filtering sample by sample on doubles
 
@@ -982,6 +985,7 @@ initVarsId(FILT_MOD *pL,
     pL->inputs[ii].outgain = pV->inputs[ii].outgain;
     pL->inputs[ii].limiter =  pV->inputs[ii].limiter;
     pL->inputs[ii].gain_ramp_time = pV->inputs[ii].gain_ramp_time;
+    RampParamInit(&offset_ramp[ii][id],pL->inputs[ii].offset,FE_RATE);  
     RampParamInit(&gain_ramp[ii][id],pL->inputs[ii].outgain,FE_RATE);  
   }
 
@@ -1032,6 +1036,7 @@ initVars1Id(FILT_MOD *pL,
     pL->inputs[ii].outgain = pV->inputs[ii].outgain;
     pL->inputs[ii].limiter =  pV->inputs[ii].limiter;
     pL->inputs[ii].gain_ramp_time = pV->inputs[ii].gain_ramp_time;
+    RampParamInit(&offset_ramp[ii][id],pL->inputs[ii].offset,FE_RATE);  
     RampParamInit(&gain_ramp[ii][id],pL->inputs[ii].outgain,FE_RATE);
   }
 
@@ -1327,8 +1332,23 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
   pFilt->data[modNum].inputTestpoint = fmInput;
 
   /* If the offset is enabled, add the filter module offset value. */
-  if (pFilt->inputs[modNum].opSwitchE & OPSWITCH_OFFSET_ENABLE)
-    fmInput += pFilt->inputs[modNum].offset;
+  if (pFilt->inputs[modNum].opSwitchE & OPSWITCH_OFFSET_ENABLE) {
+    //fmInput += pFilt->inputs[modNum].offset;
+
+    if (pFilt->inputs[modNum].offset != offset_ramp[modNum][id].req) {
+    	RampParamLoad(&offset_ramp[modNum][id],pFilt->inputs[modNum].offset,pFilt->inputs[modNum].gain_ramp_time,rate);
+    	pFilt->inputs[modNum].opSwitchP |= 0x10000000;
+    }
+  } else {
+    if (0.0 != offset_ramp[modNum][id].req) {
+    	RampParamLoad(&offset_ramp[modNum][id], 0.0, pFilt->inputs[modNum].gain_ramp_time,rate);
+    	pFilt->inputs[modNum].opSwitchP |= 0x10000000;
+    }
+  }
+  if (offset_ramp[modNum][id].isRamping == 0) {
+  	pFilt->inputs[modNum].opSwitchP &= ~0x10000000;
+  }
+  fmInput += RampParamUpdate(&offset_ramp[modNum][id]);
 
   /* Apply Filtering */
 
