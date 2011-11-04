@@ -24,7 +24,7 @@ sub printHeaderStruct {
         }
         #print "$::xpartName[$i] has $::matOuts[$i] Outputs\n";
         print ::EPICS "MATRIX $::xpartName[$i]_ $::matOuts[$i]x$::partInCnt[$i] $::systemName\.$::xpartName[$i]\n";
-        print ::OUTH "\tfloat $::xpartName[$i]\[$::matOuts[$i]\]\[$::partInCnt[$i]\];\n";
+        print ::OUTH "\tdouble $::xpartName[$i]\[$::matOuts[$i]\]\[$::partInCnt[$i]\];\n";
 }
 
 # Print Epics variable definitions

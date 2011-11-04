@@ -1,2 +1,2 @@
-grecord(stringin,"L0:TIM-PACIFIC_STRING")
-grecord(stringin,"M0:TIM-EASTERN_STRING")
+grecord(stringout,"L0:TIM-PACIFIC_STRING")
+grecord(stringout,"M0:TIM-EASTERN_STRING")

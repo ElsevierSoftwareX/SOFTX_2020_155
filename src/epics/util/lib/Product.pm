@@ -10,7 +10,7 @@ sub partType {
 # Current part number is passed as first argument
 sub printHeaderStruct {
         my ($i) = @_;
-	print ::OUTH "\tfloat $::xpartName[$i];\n";
+	print ::OUTH "\tdouble $::xpartName[$i];\n";
         print ::OUTH "\tint $::xpartName[$i]\_TRAMP;\n";
         print ::OUTH "\tint $::xpartName[$i]\_RMON;\n";
 }
@@ -21,7 +21,7 @@ sub printEpics {
         my ($i) = @_;
 	print ::EPICS "INVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] float ai 0 field(PREC,\"3\")\n";
         print ::EPICS "INVARIABLE $::xpartName[$i]\_TRAMP $::systemName\.$::xpartName[$i]\_TRAMP int ai 0 field(PREC,\"0\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_RMON $::systemName\.$::xpartName[$i]\_RMON int ai 0 field(PREC,\"0\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_RMON $::systemName\.$::xpartName[$i]\_RMON int ao 0 field(PREC,\"0\")\n";
 }
 
 
@@ -30,7 +30,7 @@ sub printEpics {
 sub printFrontEndVars  {
         my ($i) = @_;
         print ::OUT "double \L$::xpartName[$i]\[8\];\n";
-        print ::OUT "float $::xpartName[$i]\_CALC;\n";
+        print ::OUT "double $::xpartName[$i]\_CALC;\n";
 }
 
 # Figure out part input code

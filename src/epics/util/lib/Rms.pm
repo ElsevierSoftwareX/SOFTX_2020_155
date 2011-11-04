@@ -23,8 +23,8 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
-        print ::OUT "float \L$::xpartName[$i];\n";
-        print ::OUT "static float \L$::xpartName[$i]\_avg;\n";
+        print ::OUT "double \L$::xpartName[$i];\n";
+        print ::OUT "static double \L$::xpartName[$i]\_avg;\n";
 }
 
 # Figure out part input code

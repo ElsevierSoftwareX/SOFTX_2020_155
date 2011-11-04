@@ -17,7 +17,7 @@ sub printHeaderStruct {
 # Current part number is passed as first argument
 sub printEpics {
         my ($i) = @_;
-	print ::EPICS "MOMENTARY $::xpartName[$i] $::systemName\.$::xpartName[$i] int ai 0\n";# field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
+	print ::EPICS "MOMENTARY $::xpartName[$i] $::systemName\.$::xpartName[$i] int ao 0\n";# field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 }
 
 # Print variable declarations int front-end file

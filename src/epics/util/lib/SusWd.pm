@@ -12,34 +12,34 @@ sub printHeaderStruct {
         my ($i) = @_;
         print ::OUTH "\tint $::xpartName[$i];\n";
         print ::OUTH "\tint $::xpartName[$i]\_MAX;\n";
-        print ::OUTH "\tfloat $::xpartName[$i]\_VAR\[20\];\n";
+        print ::OUTH "\tdouble $::xpartName[$i]\_VAR\[20\];\n";
 }
 
 # Print Epics variable definitions
 # Current part number is passed as first argument
 sub printEpics {
         my ($i) = @_;
-        print ::EPICS "OUTVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] int ai 0 \n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_M0_F1 $::systemName\.$::xpartName[$i]\_VAR\[0\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_M0_F2 $::systemName\.$::xpartName[$i]\_VAR\[1\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_M0_F3 $::systemName\.$::xpartName[$i]\_VAR\[2\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_M0_L $::systemName\.$::xpartName[$i]\_VAR\[3\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_M0_R $::systemName\.$::xpartName[$i]\_VAR\[4\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_M0_S $::systemName\.$::xpartName[$i]\_VAR\[5\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_R0_F1 $::systemName\.$::xpartName[$i]\_VAR\[6\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_R0_F2 $::systemName\.$::xpartName[$i]\_VAR\[7\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_R0_F3 $::systemName\.$::xpartName[$i]\_VAR\[8\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_R0_L $::systemName\.$::xpartName[$i]\_VAR\[9\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_R0_R $::systemName\.$::xpartName[$i]\_VAR\[10\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_R0_S $::systemName\.$::xpartName[$i]\_VAR\[11\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L1_UL $::systemName\.$::xpartName[$i]\_VAR\[12\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L1_LL $::systemName\.$::xpartName[$i]\_VAR\[13\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L1_UR $::systemName\.$::xpartName[$i]\_VAR\[14\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L1_LR $::systemName\.$::xpartName[$i]\_VAR\[15\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L2_UL $::systemName\.$::xpartName[$i]\_VAR\[16\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L2_LL $::systemName\.$::xpartName[$i]\_VAR\[17\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L2_UR $::systemName\.$::xpartName[$i]\_VAR\[18\] float ai 0 field(PREC,\"1\")\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L2_LR $::systemName\.$::xpartName[$i]\_VAR\[19\] float ai 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] int ao 0 \n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_M0_F1 $::systemName\.$::xpartName[$i]\_VAR\[0\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_M0_F2 $::systemName\.$::xpartName[$i]\_VAR\[1\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_M0_F3 $::systemName\.$::xpartName[$i]\_VAR\[2\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_M0_L $::systemName\.$::xpartName[$i]\_VAR\[3\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_M0_R $::systemName\.$::xpartName[$i]\_VAR\[4\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_M0_S $::systemName\.$::xpartName[$i]\_VAR\[5\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_R0_F1 $::systemName\.$::xpartName[$i]\_VAR\[6\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_R0_F2 $::systemName\.$::xpartName[$i]\_VAR\[7\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_R0_F3 $::systemName\.$::xpartName[$i]\_VAR\[8\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_R0_L $::systemName\.$::xpartName[$i]\_VAR\[9\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_R0_R $::systemName\.$::xpartName[$i]\_VAR\[10\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_R0_S $::systemName\.$::xpartName[$i]\_VAR\[11\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L1_UL $::systemName\.$::xpartName[$i]\_VAR\[12\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L1_LL $::systemName\.$::xpartName[$i]\_VAR\[13\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L1_UR $::systemName\.$::xpartName[$i]\_VAR\[14\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L1_LR $::systemName\.$::xpartName[$i]\_VAR\[15\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L2_UL $::systemName\.$::xpartName[$i]\_VAR\[16\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L2_LL $::systemName\.$::xpartName[$i]\_VAR\[17\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L2_UR $::systemName\.$::xpartName[$i]\_VAR\[18\] float ao 0 field(PREC,\"1\")\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_L2_LR $::systemName\.$::xpartName[$i]\_VAR\[19\] float ao 0 field(PREC,\"1\")\n";
         print ::EPICS "INVARIABLE $::xpartName[$i]\_MAX $::systemName\.$::xpartName[$i]\_MAX int ai 0 field(PREC,\"0\")\n";
 }
 
@@ -47,10 +47,10 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
-        print ::OUT "float \L$::xpartName[$i];\n";
-        print ::OUT "static float \L$::xpartName[$i]\_avg\[20\];\n";
-        print ::OUT "static float \L$::xpartName[$i]\_var\[20\];\n";
-        print ::OUT "float vabs;\n";
+        print ::OUT "double \L$::xpartName[$i];\n";
+        print ::OUT "static double \L$::xpartName[$i]\_avg\[20\];\n";
+        print ::OUT "static double \L$::xpartName[$i]\_var\[20\];\n";
+        print ::OUT "double vabs;\n";
 }
 
 # Return front end initialization code
