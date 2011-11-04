@@ -6,6 +6,13 @@
 #define M_PI     3.14159265358979323846
 #define M_TWO_PI 6.28318530717958647692
 
+
+#define rdtscl(low) \
+     __asm__ __volatile__("rdtsc" : "=a" (low) : : "edx")
+
+#define rdtscll(val) \
+     __asm__ __volatile__("rdtsc" : "=A" (val))
+
 #define __lrint_code \
   long int __lrintres;                                                        \
   __asm__ __volatile__                                                        \

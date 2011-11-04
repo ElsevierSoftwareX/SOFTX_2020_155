@@ -1,7 +1,5 @@
 
 
-#define M_PI 	3.14159265358979323846
-
 inline double inputFilterModuleRamp1(
 	double *v, 	/* current value in/out */
 	double nv,	/* new value from Epics */
