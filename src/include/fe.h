@@ -6,6 +6,7 @@ extern int printk(const char *fmt, ...);
 #include FE_HEADER
 #include "tRamp.h"
 #include "fm10Gen.h"
+#include "drv/dtoal.c"
 extern unsigned int dWordUsed[MAX_ADC_MODULES][32];
 extern unsigned int dacOutUsed[MAX_DAC_MODULES][16];
 extern unsigned int CDIO6464Output[MAX_DIO_MODULES];
