@@ -878,7 +878,7 @@ udelay(1000);
 #endif
   pLocalEpics->epicsOutput.diags[FE_DIAGS_IPC_STAT] = 0;
   pLocalEpics->epicsOutput.diags[FE_DIAGS_FB_NET_STAT] = 0;
-
+  pLocalEpics->epicsOutput.tpCnt = 0;
 
 #if !defined(NO_DAQ) && !defined(IOP_TASK)
   // Initialize DAQ function
@@ -2008,6 +2008,7 @@ if(clock16K == 17)
 		cycle_gps_time = timeSec; // Time at which ADCs triggered
 		pLocalEpics->epicsOutput.diags[FE_DIAGS_DAQ_BYTE_CNT] = 
 			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
+	  	pLocalEpics->epicsOutput.tpCnt = tpPtr->count;
 #endif
 
 #ifdef NO_RTL
