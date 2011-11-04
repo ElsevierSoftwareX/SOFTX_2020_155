@@ -325,6 +325,9 @@ $remoteIPCport = 0;
 # Set if all filters are biquad
 $allBiquad = 0;
 
+# Set if doing direct DAC writed (no DMA)
+$directDacWrite = 0;
+
 #
 # IPCx parameter names
 #
@@ -3292,6 +3295,11 @@ if ($::allBiquad) {
 } else {
   print OUTM "#Uncomment to run with biquad form iir_filters\n";
   print OUTM "#EXTRA_CFLAGS += -DALL_BIQUAD=1\n";
+}
+if ($::directDacWrite) {
+  print OUTM "EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
+} else {
+  print OUTM "#EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
 }
 
 
