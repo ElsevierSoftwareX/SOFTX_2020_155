@@ -89,9 +89,10 @@ typedef struct IO_MEM_DATA{
 // Timing control register definitions for use with Contec1616 control of timing slave.
 
 #define TDS_STOP_CLOCKS			0x3700000
-#define TDS_START_ADC_NEG_DAC_POS	0x7720000
+#define TDS_START_ADC_NEG_DAC_POS	0x7700000
 #define TDS_START_ADC_NEG_DAC_NEG	0x7f00000
 #define TDS_NO_ADC_DUOTONE		  0x10000
+#define TDS_NO_DAC_DUOTONE		  0x20000
 
 /* Offset of the IO_MEM_DATA structure in the IPC shared memory */
 #define IO_MEM_DATA_OFFSET 0x4000
@@ -250,7 +251,7 @@ typedef struct GSA_DAC_REG{
         unsigned int BOR;               /* 0x0C */
         unsigned int ASSC;         	/* 0x10 */
         unsigned int AC_VALS;           /* 0x14 */
-        short ODB[2];           /* 0x18 */
+        unsigned int ODB;           /* 0x18 */
         unsigned int ADJ_CLK;           /* 0x1C */
 }GSA_DAC_REG;
 
