@@ -3603,6 +3603,7 @@ if($ii>=$adcCnt)
       if ($dacType[$dacSnum] eq "GSC_18AO8") {
 	$dsed_arg = $sed_arg;
 	$dsed_arg .= "s/CHNUM/$dacSnum/g;";
+	$dsed_arg .= "s/CNUM/$dacCardNum[$dacMedm]/g;";
 	system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_8.adl | sed '$dsed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_" . $dacSnum . ".adl");
 	} else {
 	system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_16.adl | sed '$dsed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_" . $dacSnum . ".adl");
