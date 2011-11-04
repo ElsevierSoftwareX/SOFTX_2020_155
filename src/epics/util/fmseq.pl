@@ -950,6 +950,7 @@ foreach $i ( @names ) {
 print "grecord(stringin,\"%IFO%:FEC-${dcuId}_BUILD_SVN\")\n";
 print "grecord(ai,\"%IFO%:FEC-${dcuId}_LOAD_NEW_COEFF\")\n";
 print "grecord(stringin,\"%IFO%:FEC-${dcuId}_MSG\")\n";
+print "grecord(stringin,\"%IFO%:FEC-${dcuId}_MSGDAQ\")\n";
 print "grecord(stringin,\"%IFO%:FEC-${dcuId}_TIME_STRING\")\n";
 print "grecord(ai,\"%IFO%:FEC-${dcuId}_STAT_ERR_CNT\")\n";
 print "grecord(stringin,\"%IFO%:FEC-${dcuId}_FESTAT_1\")\n";
