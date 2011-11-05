@@ -806,6 +806,7 @@ printf("Sync source = %d\n",syncSource);
 
   // Need this FE dcuId to make connection to FB
   dcuId = pLocalEpics->epicsInput.dcuId;
+  pLocalEpics->epicsOutput.dcuId = dcuId;
 
   // Reset timing diagnostics
   pLocalEpics->epicsOutput.diagWord = 0;
