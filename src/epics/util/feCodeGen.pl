@@ -2253,6 +2253,8 @@ print OUTH "\tint statAdc[16];\n";
 print OUTH "\tint statDac[16];\n";
 print OUTH "\tint awgtpmanGPS;\n";
 print OUTH "\tint tpCnt;\n";
+print OUTH "\tint stateWord;\n";
+print OUTH "\tint dcuId;\n";
 print OUTH "} CDS_EPICS_OUT;\n\n";
 if($useWd)
 {
@@ -2296,6 +2298,9 @@ print EPICS "DAQVAR $dcuId\_CHAN_CNT int ao 0\n";
 print EPICS "DAQVAR $dcuId\_TOTAL int ao 0\n";
 print EPICS "DAQVAR $dcuId\_MSG int ao 0\n";
 print EPICS "DAQVAR  $dcuId\_DCU_ID int ao 0\n";
+my $subs = substr($skeleton,5);
+print EPICS "OUTVARIABLE  \U$subs\E_DCU_ID epicsOutput.dcuId int ao 0\n";
+
 $frate = $rate;
 if($frate == 15)
 {
@@ -2304,6 +2309,7 @@ if($frate == 15)
 	$frate =  $rate * .85;
 	$brate = $frate;
 }
+print EPICS "OUTVARIABLE FEC\_$dcuId\_STATE_WORD epicsOutput.stateWord int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TP_CNT epicsOutput.tpCnt int ao 0\n";
 #print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\")\n";
