@@ -1,3 +1,38 @@
+Overview of changes for 2.4
+===========================
+
+- Changed all remaining floats into doubles in Epics sequencers.
+- Improved generated autoburt arequest file, where all readbacks are
+  marked readonly now.
+- Do biquad form IIR filters in oversampling and DAQ decimation filtering.
+- Added new cdsParameters: biquad, direct_dac_write
+- Do not update DAQ configuration file (INI file) during installation,
+  move it away into archive and install new file, generated based on DAQ
+  chanenls list in the RCG model.
+- New DCU dcu Id Epics channel, e.g. L1:SUS-ITMX_DCU_ID
+- New FE overall state word Epics channel, named e.g. L1:FEC-28_STATE_WORD,
+  where the lower 7 bits are set as follows:
+  	FE stopped		-	bit 0
+	Code timing problem	-	bit 1
+	I/O problem		- 	bit 2
+	AWG dead		-	bit 3
+	DAQ dead		- 	bit 4
+	IPC errors detected	-	bit 5
+	A/D or D/A overflowed	-	bit 6
+- Source code has ./configure script now, which needs to be executed once
+  before cmopilation of RCG models can be done. Build can be done in a 
+  directory separate from the source now. RCG source can be made read-only now.
+- Do not create backup Makefiles in the FE build directory.
+- DAQ upgraded from 2MB/sec to 4MB/sec
+- DAQ channel list in the RCG models
+- DAQ file check performed at run time
+- Oscillator and filer module spline ramping
+- Filter module spline offset ramping
+- Spline ramping phase stability improvements
+- Mask input for a filter module with control
+- New FE code timing/daq/GDS monitor screens
+- FE code watchdog in EPICS sequencer (state word bit 0)
+
 Overview of changes from 2.3 
 ============================
 Bug Fixes:
