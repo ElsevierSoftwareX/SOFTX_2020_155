@@ -2,14 +2,14 @@ Overview of changes for 2.4
 ===========================
 
 - Changed all remaining floats into doubles in Epics sequencers.
-- Improved generated autoburt arequest file, where all readbacks are
+- Improved generated autoburt request file, where all readbacks are
   marked readonly now.
-- Do biquad form IIR filters in oversampling and DAQ decimation filtering.
 - Added new cdsParameters: biquad, direct_dac_write
+- DAQ decimation filtering and oversampling filter is done using biquad form IIR filters.
 - Do not update DAQ configuration file (INI file) during installation,
   move it away into archive and install new file, generated based on DAQ
   chanenls list in the RCG model.
-- New DCU dcu Id Epics channel, e.g. L1:SUS-ITMX_DCU_ID
+- New DCU Id Epics channel, e.g. L1:SUS-ITMX_DCU_ID
 - New FE overall state word Epics channel, named e.g. L1:FEC-28_STATE_WORD,
   where the lower 7 bits are set as follows:
   	FE stopped		-	bit 0
@@ -32,6 +32,9 @@ Overview of changes for 2.4
 - Mask input for a filter module with control
 - New FE code timing/daq/GDS monitor screens
 - FE code watchdog in EPICS sequencer (state word bit 0)
+- FPU SSE instructions underflows were turned off and floating point
+  denormals are forced to zero by setting FZ and DAZ bits in MXCSR register.
+  +-1e-20 limiting code removed from the filters.
 
 Overview of changes from 2.3 
 ============================
