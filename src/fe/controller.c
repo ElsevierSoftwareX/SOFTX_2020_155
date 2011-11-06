@@ -718,6 +718,8 @@ void *fe_start(void *arg)
   clflush_cache_range ((void *)fp, 64*1024);
 #endif
 
+  fz_daz(); // Kill the denorms!
+
 // Do all of the initalization ***********************************************************************
 
   /* Init comms with EPICS processor */
