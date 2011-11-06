@@ -179,7 +179,7 @@ int num_tps;
 #warning DCU_MAX_CHANNELS greater than DAQ_GDS_MAX_TP_NUM
 #endif
 
-#ifdef ALL_BIQUAD
+#ifdef CORE_BIQUAD
 // Decimation filter coefficient definitions.		
 static double dCoeff2x[13] =
 	{0.014605318489015,
@@ -559,7 +559,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       }
 
       // Perform decimation filtering, if required.
-#if ALL_BIQUAD
+#if CORE_BIQUAD
 #define iir_filter iir_filter_biquad
 #endif
       if(localTable[ii].decFactor == 2) dWord = iir_filter(dWord,&dCoeff2x[0],DTAPS,&dHistory[ii][0]);
@@ -570,7 +570,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       if(localTable[ii].decFactor == 64) dWord = iir_filter(dWord,&dCoeff64x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 128) dWord = iir_filter(dWord,&dCoeff128x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 256) dWord = iir_filter(dWord,&dCoeff256x[0],DTAPS,&dHistory[ii][0]);
-#if ALL_BIQUAD
+#if CORE_BIQUAD
 #undef iir_filter
 #endif
 
