@@ -135,9 +135,11 @@ inline double iir_filter(double input,double *coef,int n,double *history){
   hist1_ptr = history;            /* first history */
   hist2_ptr = hist1_ptr + 1;      /* next history */
   
+#if 0
   input += 1e-16;
   junk = input;
   input -= 1e-16;
+#endif
 
   output = input * (*coef_ptr++); /* overall input scale factor */
   
@@ -153,11 +155,13 @@ inline double iir_filter(double input,double *coef,int n,double *history){
     output = new_hist + history1 * (*coef_ptr++);
     output = output + history2 * (*coef_ptr++);      /* zeros */
 
+#if 0
     if((new_hist < 1e-20) && (new_hist > -1e-20)) new_hist = new_hist<0 ? -1e-20: 1e-20;
     
     new_hist += 1e-16;
     junk = new_hist;
     new_hist -= 1e-16;
+#endif
 
     *hist2_ptr++ = *hist1_ptr;
     *hist1_ptr++ = new_hist;
@@ -182,9 +186,11 @@ inline double iir_filter_biquad(double input,double *coef,int n,double *history)
   hist1_ptr = history;            /* first history */
   hist2_ptr = hist1_ptr + 1;      /* next history */
   
+  #if 0
   input += 1e-16;
   junk = input;
   input -= 1e-16;
+  #endif
 
   output = input * (*coef_ptr++); /* overall input scale factor */
   
@@ -202,14 +208,17 @@ inline double iir_filter_biquad(double input,double *coef,int n,double *history)
     output = output + w * c1 + u * c2;
     new_u = w + u;   
 
-    //if((new_hist < 1e-20) && (new_hist > -1e-20)) new_hist = new_hist<0 ? -1e-20: 1e-20;
+//    if((new_w < 1e-30) && (new_w > -1e-30)) new_w = 0.0;
+    //if((new_u < 1e-30) && (new_u > -1e-30)) new_u = 0.0;
     
+    #if 0
     new_w += 1e-16;
     junk = new_w;
     new_w -= 1e-16;
     new_u += 1e-16;
     junk = new_u;
     new_u -= 1e-16;
+    #endif
 
     *hist1_ptr++ = new_w;
     *hist2_ptr++ = new_u;
@@ -218,6 +227,7 @@ inline double iir_filter_biquad(double input,double *coef,int n,double *history)
     
   }
   
+  //if((output < 1e-28) && (output > -1e-28)) output = 0.0;
   return(output);
 }
 
