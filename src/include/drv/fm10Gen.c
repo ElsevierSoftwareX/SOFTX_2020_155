@@ -995,7 +995,9 @@ initVarsId(FILT_MOD *pL,
     pL->inputs[ii].outgain = pV->inputs[ii].outgain;
     pL->inputs[ii].limiter =  pV->inputs[ii].limiter;
     pL->inputs[ii].gain_ramp_time = pV->inputs[ii].gain_ramp_time;
-    RampParamInit(&offset_ramp[ii][id],pL->inputs[ii].offset,FE_RATE);  
+    RampParamInit(&offset_ramp[ii][id],
+                  (pL->inputs[ii].opSwitchE & OPSWITCH_OFFSET_ENABLE)?pL->inputs[ii].offset:0.0,
+                  FE_RATE);
     RampParamInit(&gain_ramp[ii][id],pL->inputs[ii].outgain,FE_RATE);  
   }
 
@@ -1046,7 +1048,9 @@ initVars1Id(FILT_MOD *pL,
     pL->inputs[ii].outgain = pV->inputs[ii].outgain;
     pL->inputs[ii].limiter =  pV->inputs[ii].limiter;
     pL->inputs[ii].gain_ramp_time = pV->inputs[ii].gain_ramp_time;
-    RampParamInit(&offset_ramp[ii][id],pL->inputs[ii].offset,FE_RATE);  
+    RampParamInit(&offset_ramp[ii][id],
+                  (pL->inputs[ii].opSwitchE & OPSWITCH_OFFSET_ENABLE)?pL->inputs[ii].offset: 0.0,
+                  FE_RATE);
     RampParamInit(&gain_ramp[ii][id],pL->inputs[ii].outgain,FE_RATE);
   }
 
@@ -1347,16 +1351,16 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
 
     if (pFilt->inputs[modNum].offset != offset_ramp[modNum][id].req) {
     	RampParamLoad(&offset_ramp[modNum][id],pFilt->inputs[modNum].offset,pFilt->inputs[modNum].gain_ramp_time,rate);
-    	pFilt->inputs[modNum].opSwitchP |= 0x10000000;
+    	pFilt->inputs[modNum].opSwitchP |= 0x20000000;
     }
   } else {
     if (0.0 != offset_ramp[modNum][id].req) {
     	RampParamLoad(&offset_ramp[modNum][id], 0.0, pFilt->inputs[modNum].gain_ramp_time,rate);
-    	pFilt->inputs[modNum].opSwitchP |= 0x10000000;
+    	pFilt->inputs[modNum].opSwitchP |= 0x20000000;
     }
   }
   if (offset_ramp[modNum][id].isRamping == 0) {
-  	pFilt->inputs[modNum].opSwitchP &= ~0x10000000;
+  	pFilt->inputs[modNum].opSwitchP &= ~0x20000000;
   }
   fmInput += RampParamUpdate(&offset_ramp[modNum][id]);
 
