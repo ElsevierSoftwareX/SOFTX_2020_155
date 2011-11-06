@@ -76,6 +76,12 @@ extern int iop_rfm_valid;
 #define FE_DIAGS_DAC_MASTER_STAT	8
 #define FE_DIAGS_AWGTPMAN	9
 #define FE_DIAGS_DAC_DUO	10	
+#define FE_ERROR_TIMING		0x2
+#define FE_ERROR_IO		0x4
+#define FE_ERROR_AWG		0x8
+#define FE_ERROR_DAQ		0x10
+#define FE_ERROR_IPC		0x20
+#define FE_ERROR_OVERFLOW	0x40
 
 #define MMAP_SIZE (64*1024*1024 - 5000)
 volatile char *_epics_shm;		// Ptr to EPICS shared memory
@@ -365,7 +371,7 @@ volatile unsigned int *rfmTime;
 
 #ifdef OVERSAMPLE
 
-#if defined(ALL_BIQUAD)
+#if defined(CORE_BIQUAD)
 
 /* Recalculated filters in biquad form */
 
@@ -683,6 +689,7 @@ void *fe_start(void *arg)
 
   static int dacWriteEnable = 0;
   int adcWait;
+  int feStatus = 0;
 
 #ifdef ADC_MASTER
   static float duotone[65536];
@@ -1301,6 +1308,8 @@ udelay(1000);
         {
 	  //printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
 	  pLocalEpics->epicsOutput.diags[9] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
+	  if(pLocalEpics->epicsOutput.diags[9]) feStatus |= FE_ERROR_AWG;
+	  else feStatus &= ~FE_ERROR_AWG;
 
 	  // Increment GPS second on cycle 0
 #ifndef ADC_SLAVE
@@ -1498,7 +1507,7 @@ udelay(1000);
 			// Downsample filter only used channels to save time
 			// This is defined in user C code
 			if (dWordUsed[jj][ii]) {
-#ifdef ALL_BIQUAD
+#ifdef CORE_BIQUAD
 				dWord[jj][ii] = iir_filter_biquad(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
 #else
 				dWord[jj][ii] = iir_filter(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
@@ -1594,7 +1603,7 @@ udelay(1000);
                         // if(kk >= 1000)
                         {
                                 printf ("ADC TIMEOUT %d %d %d %d\n",mm,ioMemData->iodata[mm][ioMemCntr].cycle, ioMemCntr,ioClock);
-	  			pLocalEpics->epicsOutput.diagWord |= 0x1;
+	  			pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
   				return (void *)-1;
                         }
                         for(ii=0;ii<32;ii++)
@@ -1606,7 +1615,7 @@ udelay(1000);
                                 dWord[jj][ii] = adcData[jj][ii];
 #ifdef OVERSAMPLE
 				if (dWordUsed[jj][ii]) {
-#ifdef ALL_BIQUAD
+#ifdef CORE_BIQUAD
 					dWord[jj][ii] = iir_filter_biquad(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
 #else
 					dWord[jj][ii] = iir_filter(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
@@ -1708,14 +1717,14 @@ udelay(1000);
 			if (dacOutUsed[jj][ii]) {
 #ifdef NO_ZERO_PAD
 		 	  dac_in = dacOut[jj][ii];
-#ifdef ALL_BIQUAD
+#ifdef CORE_BIQUAD
 		 	  dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
 #else
 		 	  dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
 #endif
 #else
 			  dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
-#ifdef ALL_BIQUAD
+#ifdef CORE_BIQUAD
 		 	  dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
 #else
 		 	  dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
@@ -1822,6 +1831,7 @@ dac16bitPtr->ODB = dac_out;;
 // END OF DAC WRITE ***********************************************************************************
 // BEGIN HOUSEKEEPING *********************************************************************************
 
+        pLocalEpics->epicsOutput.cycle = clock16K;
 #ifdef ADC_MASTER
         if(clock16K == 0)
         {
@@ -1883,8 +1893,17 @@ if(clock16K == 17)
 	  adcHoldTimeMax = 0;
 	  adcHoldTimeMin = 0xffff;
 	  adcHoldTimeAvg = 0;
-	  if((adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcHoldTime < CYCLE_TIME_ALRM_LO)) diagWord |= FE_ADC_HOLD_ERR;
-	  if(timeHoldMax > CYCLE_TIME_ALRM) diagWord |= FE_PROC_TIME_ERR;
+	  if((adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcHoldTime < CYCLE_TIME_ALRM_LO)) 
+	  {
+	  	diagWord |= FE_ADC_HOLD_ERR;
+		feStatus |= FE_ERROR_TIMING;;
+	  }
+	  if(timeHoldMax > CYCLE_TIME_ALRM) 
+	  {
+	  	diagWord |= FE_PROC_TIME_ERR;
+		feStatus |= FE_ERROR_TIMING;;
+	  }
+	  pLocalEpics->epicsOutput.stateWord = feStatus;
   	  if(pLocalEpics->epicsInput.diagReset || initialDiagReset)
 	  {
 		initialDiagReset = 0;
@@ -1893,6 +1912,7 @@ if(clock16K == 17)
 		timeHoldMax = 0;
 	  	diagWord = 0;
 		ipcErrBits = 0;
+		feStatus = 0;
 #ifndef NO_RTL
 		// printf("DIAG RESET\n");
 #endif
@@ -2010,6 +2030,8 @@ if(clock16K == 17)
 		pLocalEpics->epicsOutput.diags[FE_DIAGS_DAQ_BYTE_CNT] = 
 			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
 	  	pLocalEpics->epicsOutput.tpCnt = tpPtr->count;
+		if(pLocalEpics->epicsOutput.diags[FE_DIAGS_DAQ_BYTE_CNT] > 3500) 
+			feStatus |= FE_ERROR_DAQ;;
 #endif
 
 #ifdef NO_RTL
@@ -2023,6 +2045,7 @@ if(clock16K == 17)
         {
 	  pLocalEpics->epicsOutput.diags[FE_DIAGS_USER_TIME] = usrHoldTime;
 	  pLocalEpics->epicsOutput.diags[FE_DIAGS_IPC_STAT] = ipcErrBits;
+	  if(ipcErrBits) feStatus |= FE_ERROR_IPC;
 	  // Create FB status word for return to EPICS
 #ifdef USE_GM
   	  pLocalEpics->epicsOutput.diags[FE_DIAGS_FB_NET_STAT] = (fbStat[1] & 3) * 4 + (fbStat[0] & 3);
@@ -2034,6 +2057,8 @@ if(clock16K == 17)
 	  if((mxDiag & 2) != (mxDiagR & 2)) mxStat += 2;
 	  pLocalEpics->epicsOutput.diags[FE_DIAGS_FB_NET_STAT] = mxStat;
   	  mxDiag = mxDiagR;
+	  if(mxStat != 3)
+		feStatus |= FE_ERROR_DAQ;;
 #endif
 	  usrHoldTime = 0;
   	  if((pLocalEpics->epicsInput.overflowReset) || (overflowAcc > 0x1000000))
@@ -2084,11 +2109,19 @@ if(clock16K == 17)
 	  for(jj=0;jj<cdsPciModules.adcCount;jj++)
 	  {
 	    // SET/CLR Channel Hopping Error
-	    if(adcChanErr[jj]) pLocalEpics->epicsOutput.statAdc[jj] &= ~(2);
+	    if(adcChanErr[jj]) 
+	    {
+	    	pLocalEpics->epicsOutput.statAdc[jj] &= ~(2);
+		feStatus |= FE_ERROR_IO;;
+	    }
  	    else pLocalEpics->epicsOutput.statAdc[jj] |= 2;
 	    adcChanErr[jj] = 0;
 	    // SET/CLR Overflow Error
-	    if(adcOF[jj]) pLocalEpics->epicsOutput.statAdc[jj] &= ~(4);
+	    if(adcOF[jj]) 
+	    {
+	    	pLocalEpics->epicsOutput.statAdc[jj] &= ~(4);
+		feStatus |= FE_ERROR_OVERFLOW;;
+	    }
  	    else pLocalEpics->epicsOutput.statAdc[jj] |= 4;
 	    adcOF[jj] = 0;
 	    for(ii=0;ii<32;ii++)
@@ -2107,10 +2140,18 @@ if(clock16K == 17)
 	  }
 	  for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	  {
-	    if(dacOF[jj]) pLocalEpics->epicsOutput.statDac[jj] &= ~(4);
+	    if(dacOF[jj]) 
+	    {
+	    	pLocalEpics->epicsOutput.statDac[jj] &= ~(4);
+		feStatus |= FE_ERROR_OVERFLOW;;
+	    }
  	    else pLocalEpics->epicsOutput.statDac[jj] |= 4;
 	    dacOF[jj] = 0;
-	    if(dacChanErr[jj]) pLocalEpics->epicsOutput.statDac[jj] &= ~(2);
+	    if(dacChanErr[jj]) 
+	    {
+	    	pLocalEpics->epicsOutput.statDac[jj] &= ~(2);
+		feStatus |= FE_ERROR_IO;;
+	    }
  	    else pLocalEpics->epicsOutput.statDac[jj] |= 2;
 	    dacChanErr[jj] = 0;
 	    for(ii=0;ii<16;ii++)
@@ -2204,16 +2245,20 @@ if(clock16K == 17)
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
 			out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
 			if(out_buf_size < 8)
+			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(8);
-			    else pLocalEpics->epicsOutput.statDac[jj] |= 8;
+			    feStatus |= FE_ERROR_IO;
+			    } else pLocalEpics->epicsOutput.statDac[jj] |= 8;
 
 		}
 		if(cdsPciModules.dacType[jj] == GSC_16AO16)
 		{
 			status = checkDacBuffer(jj);
 			if(status != 2)
+			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(8);
-			    else pLocalEpics->epicsOutput.statDac[jj] |= 8;
+			    feStatus |= FE_ERROR_IO;
+			    } else pLocalEpics->epicsOutput.statDac[jj] |= 8;
 		}
 	}
 
