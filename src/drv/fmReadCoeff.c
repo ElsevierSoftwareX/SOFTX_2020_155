@@ -909,7 +909,7 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
     fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].crc = coefCrc;
     fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].biquad = 
 	    			fmc->subSys[n].map[i].biquad;
-printf("filt %d BIQUAD FLAG = %d\n", i,fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].biquad);
+    /*printf("filt %d BIQUAD FLAG = %d\n", i,fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].biquad);*/
 
     usleep(10000);
 

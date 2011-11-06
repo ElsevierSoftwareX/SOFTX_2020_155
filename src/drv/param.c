@@ -20,6 +20,7 @@ static const CHAN_PARAM uninit = {
  * Callback function should return 1 if OK and 0 if not.
  */
 int testCallback(char *channel_name, struct CHAN_PARAM *params, void *user) { 
+#if 0
   printf("channel_name=%s\n", channel_name);
   printf("dcuid=%d\n", params->dcuid);
   printf("datarate=%d\n", params->datarate);
@@ -33,6 +34,7 @@ int testCallback(char *channel_name, struct CHAN_PARAM *params, void *user) {
   printf("offset=%f\n", params->offset);
   printf("units=%s\n", params->units);
   printf("system=%s\n", params->system);
+#endif
   return 1; 
 }
 
@@ -448,7 +450,7 @@ infoCallback(char *channel_name, struct CHAN_PARAM *params, void *user) {
   info->tp[info->numChans].dataType = params->datatype;
   info->tp[info->numChans].dataRate = params->datarate;
   info->tp[info->numChans].dataGain = (int)params->gain;
-  if(params->gain != 0.0)printf("New gain channel %d = %f\n",params->chnnum,params->gain);
+  //if(params->gain != 0.0)printf("New gain channel %d = %f\n",params->chnnum,params->gain);
   info->numChans++;
   return 1;
 }
