@@ -35,6 +35,9 @@ Overview of changes for 2.4
 - FPU SSE instructions underflows were turned off and floating point
   denormals are forced to zero by setting FZ and DAZ bits in MXCSR register.
   +-1e-20 limiting code removed from the filters.
+- DAQ INI file checker script src/epics/util/iniChk.pl needs to be installed
+  in a location on PATH for a front-end system, before the Epics process is
+  restarted. A good location is /opt/rtcds/llo/l1/scripts/iniChk.pl.
 
 Overview of changes from 2.3 
 ============================
