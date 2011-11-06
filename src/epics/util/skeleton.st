@@ -174,6 +174,9 @@ assign setpointMinorCount to {                                           /* MA *
    "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_9",                          /* MA */
    "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_10"};                        /* MA */
 
+int stateWord;
+assign stateWord to "{ifo}:FEC-{sysnum}_STATE_WORD";
+
 int allNewCoeff;
 assign allNewCoeff to "{ifo}:FEC-{sysnum}_LOAD_NEW_COEFF";
 
@@ -199,6 +202,9 @@ assign dcuId to "{ifo}:DAQ-FEC_{sysnum}_DCU_ID";
 
 #endif
 
+
+unsigned int prev_gps = 0;
+unsigned int prev_cycle = 0;
 
 %DECL2%
 
@@ -462,7 +468,7 @@ state init
 %%    }
 #endif
 
-%%  printf("About to read file \n");
+%%  /* printf("About to read file \n"); */
     strcpy(msg, "Reading coeff file...");
     pvPut(msg);
 %%  for(ii=0;ii<6;ii++) {
@@ -503,8 +509,8 @@ state init
 	update_labels(ii);
 %%  }
 #endif
-%%  printf("should have put the values on the screen by now. ;)\n");
-%%  printf("setting initial screen variables to zero.\n");
+%%  printf("Should have put the values on the screen by now. ;)\n");
+%%  printf("Setting initial screen variables to zero.\n");
 #if MAX_MODULES > 0
 %%  for(ii=0;ii<MAX_MODULES;ii++){
       input[ii] = 0.0;
@@ -648,7 +654,7 @@ state monScreen{
 	  pvPut(msg);
 
 
-%%        printf("About to read file \n");
+%%        /* printf("About to read file \n"); */
 %%        if (fmReadCoeffFile(&fmc, 0) != 0) {
 %%              fprintf(stderr, "Error: %s\n", fmReadErrMsg());
                 strncpy(msg, fmReadShortErrMsg(), MAX_STRING_SIZE-1);
@@ -816,7 +822,7 @@ state monScreen{
 	  strcpy(msg, "Reading coeff file...");
 	  pvPut(msg);
 
-%%	  printf("About to read file \n");
+%%	  /* printf("About to read file \n"); */
 %%	  if (fmReadCoeffFile(&fmc, 0) != 0) {
 %%	     fprintf(stderr, "Error: %s\n", fmReadErrMsg());
 	     strncpy(msg, fmReadShortErrMsg(), MAX_STRING_SIZE-1);
@@ -1079,6 +1085,12 @@ state monScreen{
 %% }                                                                     /* MA */
 
 %DECL4%
+%%    stateWord = pEpics->epicsOutput.stateWord
+%%	| (prev_gps == pEpics->epicsOutput.timeDiag
+%%	   && prev_cycle == pEpics->epicsOutput.cycle);
+%%    prev_gps = pEpics->epicsOutput.timeDiag;
+%%    prev_cycle = pEpics->epicsOutput.cycle;
+      pvPut(stateWord);
 
       if (matrixStatusFlag) {                                            /* MA */
          pvPut(matrixThreshCount);                                       /* MA */
@@ -1150,8 +1162,8 @@ state daqInit
            strcpy(daqmsg, localtimestring);
 %%      } else {
            strcpy(daqmsg, "ERROR reading DAQ file!");
-%%         chnCnt = 0;
-%%         dataSize = 0;
+%%         /*chnCnt = 0;*/
+%%         /*dataSize = 0;*/
 %%      }
         pvPut(chnCnt);
         pvPut(dataSize);
