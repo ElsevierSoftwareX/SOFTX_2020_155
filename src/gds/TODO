@@ -1,5 +1,3 @@
-awgtpman needs to timeout on the IOP cycle loss
-
 
 Verify that we run OK without multithreaded RPC
 Just in case; multi-threaded Linux RPC library:
