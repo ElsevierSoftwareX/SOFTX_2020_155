@@ -75,7 +75,7 @@ reclean:
 clean-%:
 	@system=$(subst clean-,,$@); \
         /bin/rm -rf target/$${system}epics build/$${system}epics; \
-        (cd src/fe/$${system}&&make -i clean)
+        (cd src/fe/$${system}&&make -i clean) || /bin/true
 
 install-%:
 	@system=$(subst install-,,$@); $(srcdir)/install $${system} $(srcdir)
