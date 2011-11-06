@@ -213,7 +213,7 @@ unsigned int prev_cycle = 0;
 %% };
 
 %% static const double conv = 0.000152588;
-%% static const int mask[2] = {0xAAA0,0x10AA};
+%% static const int mask[2] = {0xAAA0,0x30AA};
 %% extern pthread_mutex_t seq_lock;
 
 #if defined(RFM_EPICS)
