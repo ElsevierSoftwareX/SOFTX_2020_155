@@ -3299,10 +3299,10 @@ if ($specificCpu > -1) {
 }
 if ($::allBiquad) {
   print OUTM "#Comment out to go back to old iir_filter calculation form\n";
-  print OUTM "EXTRA_CFLAGS += -DALL_BIQUAD=1\n";
+  print OUTM "EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
 } else {
   print OUTM "#Uncomment to run with biquad form iir_filters\n";
-  print OUTM "#EXTRA_CFLAGS += -DALL_BIQUAD=1\n";
+  print OUTM "#EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
 }
 if ($::directDacWrite) {
   print OUTM "EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
