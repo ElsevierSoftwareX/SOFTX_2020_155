@@ -1328,3 +1328,19 @@ text {
 	limits {
 	}
 }
+rectangle {
+	object {
+		x=15
+		y=51
+		width=182
+		height=74
+	}
+	"basic attribute" {
+		clr=20
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(a&1)==1"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_STATE_WORD"
+	}
+}
