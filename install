@@ -47,7 +47,9 @@ fi
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target_archive/${system}
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/burt
-/bin/cp -pr /opt/rtcds/$site/${lower_ifo}/target_archive/${system}/${system}_$cur_date/${system}epics/burt /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics
+if [ -e /opt/rtcds/$site/${lower_ifo}/target_archive/${system}/${system}_$cur_date/${system}epics/burt ]; then
+	/bin/cp -pr /opt/rtcds/$site/${lower_ifo}/target_archive/${system}/${system}_$cur_date/${system}epics/burt /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics 
+fi
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target
 /bin/cp -pr target/${system}epics /opt/rtcds/$site/${lower_ifo}/target/${system}
 /bin/mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/src /opt/rtcds/$site/${lower_ifo}/target/${system}
@@ -228,3 +230,7 @@ if test -e /opt/rtcds/$site/${lower_ifo}/medm/${system}; then
 fi
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/medm/${system}
 (cd build/${system}epics/medm; ls | xargs cp -r -t /opt/rtcds/$site/${lower_ifo}/medm/${system};)
+if [ -e /opt/rtcds/$site/${lower_ifo}/userapps/release/cds/common/scripts/post_build_script.py ]; then
+	echo Running post-build script
+	/opt/rtcds/$site/${lower_ifo}/userapps/release/cds/common/scripts/post_build_script.py -q ${system} 
+fi
