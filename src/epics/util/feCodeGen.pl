@@ -2292,7 +2292,7 @@ print OUTH "#define MAX_FILTERS \t $filtCnt\n\n";
 
 print EPICS "MOMENTARY FEC\_$dcuId\_VME_RESET epicsInput.vmeReset int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_DIAG_RESET epicsInput.diagReset int ao 0\n";
-print EPICS "INVARIABLE FEC\_$dcuId\_SYNC_RESET epicsInput.dacDuoSet int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
+print EPICS "INVARIABLE FEC\_$dcuId\_SYNC_RESET epicsInput.dacDuoSet int bo 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_OVERFLOW_RESET epicsInput.overflowReset int ao 0\n";
 print EPICS "DAQVAR $dcuId\_LOAD_CONFIG int ao 0\n";
 print EPICS "DAQVAR $dcuId\_CHAN_CNT int ao 0\n";
@@ -3764,7 +3764,7 @@ sub commify_series {
 		  if ($partType[$cur_part_num] eq "FiltMuxMatrix") {
 		    my $subDirName = "$epicsScreensDir/$usite" . "$basename";
 		    mkdir $subDirName;
-		    system("./mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite" . $basename . ".adl");
+		    system("$rcg_src_dir/src/epics/util/mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite" . $basename . ".adl");
 		    for ($row = 1; $row < $outcnt+1; $row ++) {
 		      for ($col = 1; $col < $incnt+1; $col ++) {
 			my $filt_name = "$partName[$cur_part_num]" . "_" . "$row" . "_" . "$col";
@@ -3798,7 +3798,7 @@ sub commify_series {
 		  if ($partType[$cur_part_num] eq "FiltMuxMatrix") {
 		    my $subDirName = "$epicsScreensDir/$usite" . "$sysname" . "_" . "$basename";
 		    mkdir $subDirName;
-		    system("./mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
+		    system("$rcg_src_dir/src/epics/util/mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
                     for ($row = 1; $row < $outcnt+1; $row ++) {
 		      for ($col = 1; $col < $incnt+1; $col ++) {
 			my $filt_name = "$partName[$cur_part_num]" . "_" . "$row" . "_" . "$col";
