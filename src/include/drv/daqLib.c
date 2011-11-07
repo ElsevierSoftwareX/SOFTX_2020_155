@@ -429,6 +429,18 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	/* Mark the offset into the local data buffer */
 	localTable[ii].sigNum = jj;
       }
+      // :TODO: this is broken, needs some work to make extra EXC work.
+      else if((dataInfo.tp[ii].tpnum >= daqRange.xExMin) &&
+	 (dataInfo.tp[ii].tpnum < daqRange.xExMax))
+      /* This exc testpoint is not part of a filter module */
+      {
+	jj = dataInfo.tp[ii].tpnum - daqRange.xExMin;
+	/* Mark as a non filter module testpoint */
+	localTable[ii].type = 3;
+	/* Mark the offset into the local data buffer */
+	localTable[ii].fmNum = jj;
+	localTable[ii].sigNum = jj;
+      }
       else
       {
 	printf("Invalid chan num found %d = %d\n",ii,dataInfo.tp[ii].tpnum);
