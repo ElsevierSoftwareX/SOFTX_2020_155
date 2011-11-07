@@ -94,15 +94,17 @@ receiver_mx(int neid)
 		int cur_req = count & (NUM_RREQ - 1);
 		
 // 	mx_test_or_wait(blocking, ep, &sreq, MX_INFINITE, &stat, &result);
-
-		mx_wait(ep[neid], &req[cur_req], MX_INFINITE, &stat, &result);
+again:
+		mx_wait(ep[neid], &req[cur_req], 25 /*MX_INFINITE*/, &stat, &result);
 		myErrorStat = 0;
 		if (!result) {
+			goto again;
 			fprintf(stderr, "mx_wait failed in rcvr %d\n",count);
 			myErrorStat = 1;
 			count --;
 			// exit(1);
 		} else if (stat.code != MX_STATUS_SUCCESS) {
+			goto again;
 			// This line seems to fail on openmx
 			fprintf(stderr, "irecv failed with status %s\n", mx_strstatus(stat.code));
 			fprintf(stderr, "irecv failed\n");
