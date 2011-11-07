@@ -38,6 +38,9 @@ Overview of changes for 2.4
 - DAQ INI file checker script src/epics/util/iniChk.pl needs to be installed
   in a location on PATH for a front-end system, before the Epics process is
   restarted. A good location is /opt/rtcds/llo/l1/scripts/iniChk.pl.
+- Extra EXC part is broken in this release, will be fixed in the next release.
+- Added post-build script execution at the end of install step.
+  T1100340-v1 https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=63485
 
 Overview of changes from 2.3 
 ============================
