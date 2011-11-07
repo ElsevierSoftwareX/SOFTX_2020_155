@@ -23,7 +23,7 @@ RELEASEFLAGS=-DNDEBUG -DNPROBE -g -O5
 #DEBUGFLAGS=-DNDEBUG -O5 -unroll=16
 DEVFLAGS=@DEVFLAGS@
 
-%:
+%: clean-%
 	@mkdir -p src/epics/util src/fe target build src/epics/fmseq config src/include
 	@ln -fs $(srcdir)/src/epics/util/lib src/epics/util > /dev/null 2>&1 || /bin/true
 	@ln -fs $(srcdir)/src/include/drv src/include > /dev/null 2>&1 || /bin/true
@@ -73,9 +73,9 @@ reclean:
 	-/bin/rm -rf build config src target
 
 clean-%:
-	@system=$(subst clean-,,$@); \
+	@system=$(subst clean-,,$@); echo Cleaning $${system}...; \
         /bin/rm -rf target/$${system}epics build/$${system}epics; \
-        (cd src/fe/$${system}&&make -i clean) || /bin/true
+        (make -siC src/fe/$${system}/Makefile clean 2>/dev/null); echo Done
 
 install-%:
 	@system=$(subst install-,,$@); $(srcdir)/install $${system} $(srcdir)
