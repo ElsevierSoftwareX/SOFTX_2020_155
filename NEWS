@@ -23,9 +23,9 @@ Overview of changes for 2.4
   before cmopilation of RCG models can be done. Build can be done in a 
   directory separate from the source now. RCG source can be made read-only now.
 - Do not create backup Makefiles in the FE build directory.
-- DAQ upgraded from 2MB/sec to 4MB/sec
-- DAQ channel list in the RCG models
-- DAQ file check performed at run time
+- DAQ upgraded from 2MB/sec to 4MB/sec.
+- DAQ channel list in the RCG models support.
+- DAQ file check performed at run time.
 - Oscillator and filer module spline ramping
 - Filter module spline offset ramping
 - Spline ramping phase stability improvements
@@ -33,14 +33,21 @@ Overview of changes for 2.4
 - New FE code timing/daq/GDS monitor screens
 - FE code watchdog in EPICS sequencer (state word bit 0)
 - FPU SSE instructions underflows were turned off and floating point
-  denormals are forced to zero by setting FZ and DAZ bits in MXCSR register.
-  +-1e-20 limiting code removed from the filters.
-- DAQ INI file checker script src/epics/util/iniChk.pl needs to be installed
+  denorms were forced to zero by setting FZ and DAZ bits in the CPU MXCSR register.
+  +-1e-20 limiting code was removed from the filter code.
+- NOTE: DAQ INI file checker script src/epics/util/iniChk.pl needs to be installed
   in a location on PATH for a front-end system, before the Epics process is
   restarted. A good location is /opt/rtcds/llo/l1/scripts/iniChk.pl.
-- Extra EXC part is broken in this release, will be fixed in the next release.
+- NOTE: Extra EXC part is broken in this release, will be fixed in the next release.
+  It was discovered that this part is not working correctly and needs debugging.
+  Filter module excitation works fine as before.
 - Added post-build script execution at the end of install step.
   T1100340-v1 https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=63485
+- When a brand new model is compiled and started for the first time there is no
+  existing burt snapshot for it to restore and it used to be that the operator needed
+  to press the BURT button on the GDS screen within 10 seconds in order for the FE kernel
+  module start running or else the FE execution failed. This was fixed by writing 1 into
+  BURT_RESTORE channel within the generated startup script.
 
 Overview of changes from 2.3 
 ============================
