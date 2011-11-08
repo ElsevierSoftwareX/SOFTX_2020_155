@@ -135,6 +135,10 @@ if [ "x\$fname" != x ]; then
 	log_fname=\${fname%.*}.log
 	burtwb -f \${fname} -l \${log_fname} -v
 	echo Burt restored \$fname
+else
+	# No burt file found, new model installation
+	# Write 1 into BURT_RESTORE record to
+	caput \`grep -m 1 BURT_RESTORE /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/autoBurt.req\` 1
 fi
 touch /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
 chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
