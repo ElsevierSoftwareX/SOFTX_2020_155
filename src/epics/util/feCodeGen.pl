@@ -3583,7 +3583,7 @@ $byteMedm[4] = " \n";
 $byteMedm[5] = "\t\ty=";
 $byteMedm[6] = "$mbypt";
 $byteMedm[7] = " \n";
-$byteMedm[8] = "\t\twidth=14 \n";
+$byteMedm[8] = "\t\twidth=21 \n";
 $byteMedm[9] = "\t\theight=18 \n";
 $byteMedm[10] = "\t\} \n";
 $byteMedm[11] = "\tmonitor \{\n";
@@ -3642,7 +3642,7 @@ $byteMedm[6] = "$mbypt";
 $byteMedm[13] = "$ii";
 $byteMedm[18] = "\tsbit=0 \n";
 #$byteMedm[19] = "";
-$byteMedm[19] = "\tebit=1 \n";
+$byteMedm[19] = "\tebit=2 \n";
 if($ii>=$adcCnt)
 {
 	$byteMedm[12] = "\t\tchan=\"SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_";
