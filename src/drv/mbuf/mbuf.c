@@ -41,7 +41,11 @@ static struct file_operations mbuf_fops = {
         .open = mbuf_open,
         .release = mbuf_release,
         .mmap = mbuf_mmap,
+#if KERNEL_VERSION(3,0,0) <= LINUX_VERSION_CODE
+	.unlocked_ioctl = mbuf_ioctl,
+#else
         .ioctl = mbuf_ioctl,
+#endif
         .owner = THIS_MODULE,
 };
 
