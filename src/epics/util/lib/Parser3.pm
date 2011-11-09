@@ -751,8 +751,8 @@ sub check_tags {
    my $block_type = transform_block_type(${$node->{FIELDS}}{"BlockType"});
    my $block_name = ${$node->{FIELDS}}{"Name"};
    return 0 if ($block_type ne "FROM" && $block_type ne "GOTO");
-   my $tag = ${$node->{FIELDS}}{"GotoTag"};
-   #print "TAG", ${$parent->{FIELDS}}{"Name"}, " ",  $tag . "\n";
+   my $tag = ${$parent->{FIELDS}}{"Name"} . ${$node->{FIELDS}}{"GotoTag"};
+   #print "TAG: ", ${$parent->{FIELDS}}{"Name"}, " ",  $tag , " counter=", $::goto_tags{$tag}, "\n";
    if ($block_type eq "FROM") {
    	$::from_tags{$tag}++;
    } else {
