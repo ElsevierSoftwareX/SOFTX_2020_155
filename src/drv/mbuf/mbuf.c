@@ -34,8 +34,8 @@ static struct cdev mbuf_cdev;
 static int mbuf_open(struct inode *inode, struct file *filp);
 static int mbuf_release(struct inode *inode, struct file *filp);
 static int mbuf_mmap(struct file *filp, struct vm_area_struct *vma);
-#if KERNEL_VERSION(3,0,0) <= LINUX_VERSION_CODE
-static int mbuf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
+#if HAVE_UNLOCKED_IOCTL
+static long mbuf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
 #else
 static int mbuf_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg);
 #endif
@@ -45,8 +45,7 @@ static struct file_operations mbuf_fops = {
         .open = mbuf_open,
         .release = mbuf_release,
         .mmap = mbuf_mmap,
-#if KERNEL_VERSION(3,0,0) <= LINUX_VERSION_CODE
-	.compat_ioctl = mbuf_ioctl,
+#if HAVE_UNLOCKED_IOCTL
 	.unlocked_ioctl = mbuf_ioctl,
 #else
         .ioctl = mbuf_ioctl,
@@ -208,8 +207,8 @@ static int mbuf_mmap(struct file *file, struct vm_area_struct *vma)
 }
 
 
-#if KERNEL_VERSION(3,0,0) <= LINUX_VERSION_CODE
-static int mbuf_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+#if HAVE_UNLOCKED_IOCTL
+static long mbuf_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 #else
 static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
 #endif
