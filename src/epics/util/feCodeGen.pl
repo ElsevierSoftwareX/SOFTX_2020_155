@@ -14,7 +14,7 @@ if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
 
 @rcg_lib_path = split(':', $ENV{"RCG_LIB_PATH"});
 push @rcg_lib_path, "$rcg_src_dir/src/epics/simLink";
-print join "\n", @rcg_lib_path, "\n";
+#print join "\n", @rcg_lib_path, "\n";
 my $model_file_found = 0;
 foreach $i (@rcg_lib_path) {
 	my $fname = $i;
