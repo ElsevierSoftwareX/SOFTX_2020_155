@@ -1313,7 +1313,6 @@ udelay(1000);
 	  //printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
 	  pLocalEpics->epicsOutput.diags[9] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
 	  if(pLocalEpics->epicsOutput.diags[9]) feStatus |= FE_ERROR_AWG;
-	  else feStatus &= ~FE_ERROR_AWG;
 
 	  // Increment GPS second on cycle 0
 #ifndef ADC_SLAVE
@@ -1910,6 +1909,7 @@ if(clock16K == 17)
 		feStatus |= FE_ERROR_TIMING;;
 	  }
 	  pLocalEpics->epicsOutput.stateWord = feStatus;
+  	  feStatus = 0;
   	  if(pLocalEpics->epicsInput.diagReset || initialDiagReset)
 	  {
 		initialDiagReset = 0;
@@ -1918,7 +1918,7 @@ if(clock16K == 17)
 		timeHoldMax = 0;
 	  	diagWord = 0;
 		ipcErrBits = 0;
-		feStatus = 0;
+		// feStatus = 0;
 #ifndef NO_RTL
 		// printf("DIAG RESET\n");
 #endif
@@ -2250,7 +2250,7 @@ if(clock16K == 17)
 		{
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
 			out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
-			if(out_buf_size < 8)
+			if((out_buf_size < 8) || (out_buf_size > 24))
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(8);
 			    feStatus |= FE_ERROR_IO;

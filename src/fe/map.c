@@ -657,7 +657,7 @@ int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 #endif
 #else
 	  // dacPtr[devNum]->BOR = GSAO_FIFO_16;
-	  dacPtr[devNum]->BOR = GSAO_FIFO_1024;
+	  dacPtr[devNum]->BOR = GSAO_FIFO_256;
 #endif
 	  dacPtr[devNum]->BOR |=  GSAO_EXTERN_CLK;
 	  printk("DAC BOR = 0x%x\n",dacPtr[devNum]->BOR);
