@@ -15,9 +15,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Aug 24 20:20:36 2011"
-  RTWModifiedTimeStamp	  236118028
-  ModelVersionFormat	  "1.%<AutoIncrement:2>"
+  LastModifiedDate	  "Wed Nov  9 14:47:27 2011"
+  RTWModifiedTimeStamp	  242750845
+  ModelVersionFormat	  "1.%<AutoIncrement:3>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -613,7 +613,7 @@ Library {
   }
   System {
     Name		    "cdsEzCaRead"
-    Location		    [32, 312, 612, 572]
+    Location		    [1, 312, 581, 572]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -643,8 +643,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"cdsEzCaRead"
-	Location		[282, 159, 482, 253]
-	Open			off
+	Location		[85, 159, 285, 253]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -673,7 +673,7 @@ Library {
 	}
 	Block {
 	  BlockType		  Outport
-	  Name			  "ERR"
+	  Name			  "CONNECTED"
 	  SID			  4
 	  Position		  [140, 58, 170, 72]
 	  Port			  "2"
@@ -692,7 +692,7 @@ Library {
 	  }
 	  Branch {
 	    Points		    [0, 5]
-	    DstBlock		    "ERR"
+	    DstBlock		    "CONNECTED"
 	    DstPort		    1
 	  }
 	}

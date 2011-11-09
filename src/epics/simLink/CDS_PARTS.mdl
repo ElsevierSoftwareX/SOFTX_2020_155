@@ -15,9 +15,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Mon Nov  7 13:38:12 2011"
-  RTWModifiedTimeStamp	  242573889
-  ModelVersionFormat	  "1.%<AutoIncrement:303>"
+  LastModifiedDate	  "Wed Nov  9 14:43:37 2011"
+  RTWModifiedTimeStamp	  242750614
+  ModelVersionFormat	  "1.%<AutoIncrement:304>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -797,7 +797,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [730, 208, 1380, 693]
+    Location		    [532, 181, 1182, 666]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -1001,7 +1001,7 @@ Library {
       System {
 	Name			"EpicsParts"
 	Location		[1302, 196, 1878, 794]
-	Open			off
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -1030,7 +1030,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1055,7 +1055,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1080,7 +1080,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1105,7 +1105,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1130,7 +1130,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1155,7 +1155,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1180,7 +1180,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1205,7 +1205,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1230,7 +1230,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1255,7 +1255,7 @@ Library {
 	  SourceType		  "DocBlock"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1285,7 +1285,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1307,7 +1307,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1336,7 +1336,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1359,7 +1359,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1382,7 +1382,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1404,7 +1404,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1430,7 +1430,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1470,7 +1470,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1493,7 +1493,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1523,15 +1523,15 @@ Library {
 	  "                                                           \nUsage:                                                "
 	  "         \nGive the name of the EPICS channel to be read.                 "
 	  Ports			  [0, 2]
-	  Position		  [140, 320, 180, 380]
+	  Position		  [120, 319, 180, 381]
 	  BackgroundColor	  "[0.792741, 0.563703, 0.940000]"
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.2"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsEzCaRead/cdsEzCaRead"
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -1556,7 +1556,7 @@ Library {
 	  SourceType		  "SubSystem"
 	  ShowPortLabels	  "FromPortIcon"
 	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData "off"
+	  FunctionWithSeparateData off
 	  RTWMemSecFuncInitTerm	  "Inherit from model"
 	  RTWMemSecFuncExecute	  "Inherit from model"
 	  RTWMemSecDataConstants  "Inherit from model"
@@ -4324,8 +4324,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Osc/Phase"
-	Location		[1, 79, 957, 1213]
-	Open			on
+	Location		[1, 79, 957, 1171]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -5931,7 +5931,7 @@ MatData {
     Tag			    DataTag2
     Data		    "  %)30     .    ^ 0   8    (     @         %    \"     $    !     0         %  0 \"     $    8    =F5R<"
     "VEO;@!C;VYT96YT &9O<FUA=   #@   #@    &    \"     8         !0    @    !     0    $         \"0    @    S,S,S,S/S/"
-    "PX    H!   !@    @    $          4    (     0   /$#   !         !    #Q P  17I#85)E860O17I#85=R:71E.@T*/3T]/3T]/3T"
+    "PX    H!   !@    @    $          4    (     0   /<#   !         !    #W P  17I#85)E860O17I#85=R:71E.@T*/3T]/3T]/3T"
     "]/3T]/3T]/3T]/0T*#0I4:&5S92!B;&]C:W,@87)E('5S960@=&\\@8V]M;75N:6-A=&4@9&%T82P@=FEA($5024-3(&-H86YN96P@86-C97-S+ T*"
     "8F5T=V5E;B!R96%L+71I;64@8V]D92!R=6YN:6YG(&]N('-E<&%R871E(&-O;7!U=&5R<RX@(%1H92!%4$E#4R!S97%U96YC97(-\"G=H:6-H('-U<"
     "'!O<G1S('1H92!R96%L+71I;64@8V]D92!W:6QL(&AA=F4@<'9'970O<'90=70@8V]M;6%N9',-\"F%D9&5D('1O(&]B=&%I;B]S970@=&AE(&1E<V"
@@ -5940,11 +5940,11 @@ MatData {
     "9RUP;VEN=\"!%4$E#4R!C:&%N;F5L(&%C8V5S<PT*<F5C;W)D+@T*#0I5<V%G93H-\"DEN<V5R=\"!T:&4@8FQO8VL@:6YT;R!T:&4@;6]D96P@86Y"
     "D(&UO9&EF>2!T:&4@;F%M92!T;R!B92!T:&4@97AA8W0@;F%M92!O9@T*=&AE(')E;6]T92!%4$E#4R!C:&%N;F5L('1O(&)E(&%C8V5S<V5D+B @5"
     "&AI<R!M=7-T(&)E('1H92!F=6QL(&YA;64L(&EN#0I,24=/('-T86YD87)D(&9O<FUA=\"P@:6YC;'5D:6YG($E&3SI365,M+@T*#0I4:&4@15I#02"
-    "!296%D('!A<G0@;F]W(&AA<R!A('-E8V]N9\"!O=71P=70@*$524BDN(%1H92!V86QU92!A=\"!T:&ES('!O<G0-\"G=I;&P@8F4@>F5R;R H,\"D@"
-    ":68@=&AE(')E;6]T92!%4$E#4R!C:&%N;F5L(&ES($Y/5\"!C;VYN96-T960L(&]R(&$@;VYE(\"@Q*0T*:68@=&AE(')E;6]T92!C;VYN96-T(&ES"
-    "(&5S=&%B;&ES:&5D+B!4:&4@3U54('9A;'5E(&ES(&AE;&0@=&\\@=&AE(&QA<W0@#0IV86QI9\"!R96%D(&EF(&-O;FYE8W1I;VX@:7,@;&]S=\"P"
-    "@;W(@>F5R;R!I9B!C;VYN96-T:6]N(&AA<R!N;W0@>65T(&)E96X@#0IE<W1A8FQI<VAE9\"X-\"@         .    ,     8    (    !      "
-    "    %    \"     $    #     0         0  , 5%A4  "
+    "!296%D('!A<G0@;F]W(&AA<R!A('-E8V]N9\"!O=71P=70@*$-/3DY%0U1%1\"DN(%1H92!V86QU92!A=\"!T:&ES('!O<G0-\"G=I;&P@8F4@>F5R"
+    ";R H,\"D@:68@=&AE(')E;6]T92!%4$E#4R!C:&%N;F5L(&ES($Y/5\"!C;VYN96-T960L(&]R(&$@;VYE(\"@Q*0T*:68@=&AE(')E;6]T92!C;VY"
+    "N96-T(&ES(&5S=&%B;&ES:&5D+B!4:&4@3U54('9A;'5E(&ES(&AE;&0@=&\\@=&AE(&QA<W0@#0IV86QI9\"!R96%D(&EF(&-O;FYE8W1I;VX@:7,"
+    "@;&]S=\"P@;W(@>F5R;R!I9B!C;VYN96-T:6]N(&AA<R!N;W0@>65T(&)E96X@#0IE<W1A8FQI<VAE9\"X-\"@ .    ,     8    (    !     "
+    "     %    \"     $    #     0         0  , 5%A4  "
   }
   DataRecord {
     Tag			    DataTag1
