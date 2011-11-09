@@ -335,6 +335,8 @@ int adcHoldTimeAvg;
 int adcHoldTimeAvgPerSec;
 int usrTime;			// Time spent in user app code
 int usrHoldTime;		// Max time spent in user app code
+unsigned int cycleHist[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
+unsigned int cycleHistMax[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 
 #if defined(SHMEM_DAQ)
 struct rmIpcStr *daqPtr;
@@ -1886,6 +1888,8 @@ if(clock16K == 17)
   	  pLocalEpics->epicsOutput.diags[FE_DIAGS_DAC_MASTER_STAT] = dacEnable;
 #endif
           timeHold = 0;
+	  memcpy(cycleHistMax, cycleHist, sizeof(cycleHist));
+	  memset(cycleHist, 0, sizeof(cycleHist));
 	  if (timeSec % 4 == 0) pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeMin;
 	  else if (timeSec % 4 == 1)
 		pLocalEpics->epicsOutput.adcWaitTime =  adcHoldTimeMax;
@@ -2278,6 +2282,7 @@ if(clock16K == 17)
 	if(cycleTime > timeHold) timeHold = cycleTime;
 	// Hold the max cycle time since last diag reset
 	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
+	cycleHist[cycleTime<15?cycleTime:15]++;
 	adcHoldTime = (cpuClock[0] - adcTime)/CPURATE;
 	if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
 	if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
@@ -2367,7 +2372,8 @@ procfile_read(char *buffer,
 			"usrHoldTime=%d\n"
 			"cycle=%d\n"
 			"gps=%d\n"
-			"buildDate=%s\n",
+			"buildDate=%s\n"
+			"cycleHist: 0=%d %d %d %d 4=%d %d %d %d 8=%d %d %d %d 12=%d %d %d %d\n",
 
 			startGpsTime,
 			cycle_gps_time - startGpsTime,
@@ -2381,7 +2387,23 @@ procfile_read(char *buffer,
 			usrHoldTime,
 			clock16K,
 			cycle_gps_time,
-			build_date);
+			build_date,
+			cycleHistMax[0],
+			cycleHistMax[1],
+			cycleHistMax[2],
+			cycleHistMax[3],
+			cycleHistMax[4],
+			cycleHistMax[5],
+			cycleHistMax[6],
+			cycleHistMax[7],
+			cycleHistMax[8],
+			cycleHistMax[9],
+			cycleHistMax[10],
+			cycleHistMax[11],
+			cycleHistMax[12],
+			cycleHistMax[13],
+			cycleHistMax[14],
+			cycleHistMax[15]);
 	}
 
 	return ret;
