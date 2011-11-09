@@ -752,7 +752,7 @@ sub check_tags {
    my $block_name = ${$node->{FIELDS}}{"Name"};
    return 0 if ($block_type ne "FROM" && $block_type ne "GOTO");
    my $tag = ${$node->{FIELDS}}{"GotoTag"};
-   #print $tag . "\n";
+   #print "TAG", ${$parent->{FIELDS}}{"Name"}, " ",  $tag . "\n";
    if ($block_type eq "FROM") {
    	$::from_tags{$tag}++;
    } else {
@@ -1352,6 +1352,7 @@ sub process {
   print "Flattening the model\n";
   flatten_nested_subsystems($root);
   print "Finished flattening the model\n";
+  $::goto_tags = undef;
   CDS::Tree::do_on_nodes($root, \&check_tags, 0, $root);
   foreach (keys %::goto_tags) {
          # See if there is one or more corresponding FROM tags
