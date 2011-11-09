@@ -34,7 +34,11 @@ static struct cdev mbuf_cdev;
 static int mbuf_open(struct inode *inode, struct file *filp);
 static int mbuf_release(struct inode *inode, struct file *filp);
 static int mbuf_mmap(struct file *filp, struct vm_area_struct *vma);
+#if KERNEL_VERSION(3,0,0) <= LINUX_VERSION_CODE
+static int mbuf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
+#else
 static int mbuf_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg);
+#endif
 
 /* the file operations, i.e. all character device methods */
 static struct file_operations mbuf_fops = {
@@ -42,6 +46,7 @@ static struct file_operations mbuf_fops = {
         .release = mbuf_release,
         .mmap = mbuf_mmap,
 #if KERNEL_VERSION(3,0,0) <= LINUX_VERSION_CODE
+	.compat_ioctl = mbuf_ioctl,
 	.unlocked_ioctl = mbuf_ioctl,
 #else
         .ioctl = mbuf_ioctl,
@@ -164,7 +169,7 @@ int mmap_kmem(unsigned int i, struct vm_area_struct *vma)
         long length = vma->vm_end - vma->vm_start;
 
 	if (kmalloc_area_size[i] < length) {
-		printk("mbuf mmap() request to map 0x%lx bytes; allocated 0x%lx\n", length, kmalloc_area_size[i]);
+		//printk("mbuf mmap() request to map 0x%lx bytes; allocated 0x%lx\n", length, kmalloc_area_size[i]);
 		return -EINVAL;
 	}
 	//printk("mbuf mmap() length is 0x%lx\n", length);
@@ -203,13 +208,18 @@ static int mbuf_mmap(struct file *file, struct vm_area_struct *vma)
 }
 
 
+#if KERNEL_VERSION(3,0,0) <= LINUX_VERSION_CODE
+static int mbuf_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+#else
 static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
+#endif
 {
 	int i;
 	struct mbuf_request_struct req;
         void __user *argp = (void __user *)arg;
 
 
+	//printk("mbuf_ioctl: command=%d\n", cmd);
         switch(cmd){
         case IOCTL_MBUF_ALLOCATE:
 		{
