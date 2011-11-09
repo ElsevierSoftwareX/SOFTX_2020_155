@@ -2284,12 +2284,17 @@ if(clock16K == 17)
 	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
 	cycleHist[cycleTime<15?cycleTime:15]++;
 	adcHoldTime = (cpuClock[0] - adcTime)/CPURATE;
-	if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
-	if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
-	adcHoldTimeAvg += adcHoldTime;
-	if (adcHoldTimeMax > adcHoldTimeEverMax)  {
-		adcHoldTimeEverMax = adcHoldTimeMax;
-		adcHoldTimeEverMaxWhen = cycle_gps_time;
+	// Avoid calculating the max hold time on the very first cycle
+	// since we can be holding for up to 1 second when we start running
+	if (clock16K == 0 && startGpsTime == cycle_gps_time) ; else {
+		if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
+		if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
+		adcHoldTimeAvg += adcHoldTime;
+		if (adcHoldTimeMax > adcHoldTimeEverMax)  {
+			adcHoldTimeEverMax = adcHoldTimeMax;
+			adcHoldTimeEverMaxWhen = cycle_gps_time;
+			//printf("Maximum adc hold time %d on cycle %d gps %d\n", adcHoldTimeMax, clock16K, cycle_gps_time);
+		}
 	}
 	adcTime = cpuClock[0];
 	// Calc the max time of one cycle of the user code
