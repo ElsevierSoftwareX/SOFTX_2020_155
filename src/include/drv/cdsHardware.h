@@ -270,6 +270,7 @@ typedef struct GSA_DAC_REG{
 #define GSAO_FIFO_32            0x2
 #define GSAO_FIFO_64            0x3
 #define GSAO_FIFO_128           0x4
+#define GSAO_FIFO_256           0x5
 #define GSAO_FIFO_512           6
 #define GSAO_FIFO_1024          7
 #define GSAO_FIFO_2048          8
