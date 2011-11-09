@@ -338,6 +338,7 @@ int usrHoldTime;		// Max time spent in user app code
 unsigned int cycleHist[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 unsigned int cycleHistMax[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 
+#define DIRECT_DAC_WRITE	1
 #if defined(SHMEM_DAQ)
 struct rmIpcStr *daqPtr;
 #endif
