@@ -2292,7 +2292,7 @@ print OUTH "#define MAX_FILTERS \t $filtCnt\n\n";
 
 print EPICS "MOMENTARY FEC\_$dcuId\_VME_RESET epicsInput.vmeReset int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_DIAG_RESET epicsInput.diagReset int ao 0\n";
-print EPICS "INVARIABLE FEC\_$dcuId\_SYNC_RESET epicsInput.dacDuoSet int bo 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
+print EPICS "INVARIABLE FEC\_$dcuId\_DACDT_ENABLE epicsInput.dacDuoSet int bo 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_OVERFLOW_RESET epicsInput.overflowReset int ao 0\n";
 print EPICS "DAQVAR $dcuId\_LOAD_CONFIG int ao 0\n";
 print EPICS "DAQVAR $dcuId\_CHAN_CNT int ao 0\n";

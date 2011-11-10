@@ -1,7 +1,7 @@
 
 file {
 	name="/opt/rtcds/llo/l1/core/trunk/src/epics/util/GDS_TP_CUSTOM.adl"
-	version=030105
+	version=030104
 }
 display {
 	object {
@@ -263,23 +263,6 @@ text {
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_WAIT"
-		clr=35
-		bclr=14
-	}
-	clrmod="alarm"
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=75
-		y=232
-		width=40
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DUOTONE_TIME_DAC"
 		clr=35
 		bclr=14
 	}
@@ -886,21 +869,6 @@ rectangle {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_USR_TIME"
 	}
 }
-rectangle {
-	object {
-		x=115
-		y=211
-		width=10
-		height=15
-	}
-	"basic attribute" {
-		clr=60
-	}
-	"dynamic attribute" {
-		clr="alarm"
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IRIGB_TIME"
-	}
-}
 "text update" {
 	object {
 		x=58
@@ -929,59 +897,18 @@ text {
 	}
 	textix="SVN #"
 }
-"text update" {
-	object {
-		x=75
-		y=252
-		width=40
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IRIGB_TIME"
-		clr=35
-		bclr=14
-	}
-	clrmod="alarm"
-	align="horiz. centered"
-	limits {
-	}
-}
-text {
-	object {
-		x=18
-		y=252
-		width=50
-		height=17
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="IRIG-B"
-}
 "choice button" {
 	object {
-		x=125
-		y=232
+		x=144
+		y=246
 		width=50
 		height=35
 	}
 	control {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SYNC_RESET"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DACDT_ENABLE"
 		clr=0
 		bclr=54
 	}
-}
-text {
-	object {
-		x=18
-		y=232
-		width=50
-		height=17
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="DT DAC"
 }
 text {
 	object {
@@ -1470,5 +1397,116 @@ rectangle {
 		vis="calc"
 		calc="(a&1)==1"
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_STATE_WORD"
+	}
+}
+composite {
+	object {
+		x=18
+		y=251
+		width=147
+		height=18
+	}
+	"composite name"=""
+	children {
+		"text update" {
+			object {
+				x=75
+				y=252
+				width=40
+				height=15
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DUOTONE_TIME_DAC"
+				clr=35
+				bclr=14
+			}
+			clrmod="alarm"
+			align="horiz. centered"
+			limits {
+			}
+		}
+		text {
+			object {
+				x=18
+				y=252
+				width=50
+				height=17
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="DT DAC"
+		}
+		text {
+			object {
+				x=115
+				y=251
+				width=50
+				height=17
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="---->"
+		}
+	}
+}
+rectangle {
+	object {
+		x=116
+		y=232
+		width=10
+		height=15
+	}
+	"basic attribute" {
+		clr=60
+	}
+	"dynamic attribute" {
+		clr="alarm"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IRIGB_TIME"
+	}
+}
+"text update" {
+	object {
+		x=75
+		y=232
+		width=40
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IRIGB_TIME"
+		clr=35
+		bclr=14
+	}
+	clrmod="alarm"
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=18
+		y=232
+		width=50
+		height=17
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="IRIG-B"
+}
+rectangle {
+	object {
+		x=116
+		y=212
+		width=10
+		height=15
+	}
+	"basic attribute" {
+		clr=60
+	}
+	"dynamic attribute" {
+		clr="alarm"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DUOTONE_TIME"
 	}
 }
