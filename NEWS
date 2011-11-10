@@ -48,6 +48,10 @@ Overview of changes for 2.4
   to press the BURT button on the GDS screen within 10 seconds in order for the FE kernel
   module start running or else the FE execution failed. This was fixed by writing 1 into
   BURT_RESTORE channel within the generated startup script.
+- Linux kernel 3.0.8 (patched with patches/linux-3.0-cs.patch and configured with
+  patches/linux-3.0.8-cs.config) was tested at LLO and wwas found working just as well as
+  the currently used 2.6.34.1 kernel. mbuf driver (src/drv/mbuf) was modified to
+  compile on 3.0.8 kernel.
 
 Overview of changes from 2.3 
 ============================
