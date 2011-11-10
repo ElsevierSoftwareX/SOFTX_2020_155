@@ -4,8 +4,13 @@ Overview of changes for 2.4
 - Changed all remaining floats into doubles in Epics sequencers.
 - Improved generated autoburt request file, where all readbacks are
   marked readonly now.
-- Added new cdsParameters: biquad, direct_dac_write
-- DAQ decimation filtering and oversampling filter is done using biquad form IIR filters.
+- Added new cdsParameters setting: biquad.
+  biquad=1 forces all filter modules as well as ADC/DAC up/down filters and
+  DAQ downsampling filters to be calculated using biquad form.
+- Until DMA issues with General Standards DAC modules are resolved the IOP code
+  has direct DAC write code enabled, DMA is not used to write to the DAC modules.
+- DAQ decimation filtering and oversampling filter is done using biquad form IIR filters,
+  if cdsParameters block has biquad=1.
 - Do not update DAQ configuration file (INI file) during installation,
   move it away into archive and install new file, generated based on DAQ
   chanenls list in the RCG model.
@@ -52,6 +57,12 @@ Overview of changes for 2.4
   patches/linux-3.0.8-cs.config) was tested at LLO and wwas found working just as well as
   the currently used 2.6.34.1 kernel. mbuf driver (src/drv/mbuf) was modified to
   compile on 3.0.8 kernel.
+- New Epics channel added to show the total number of testpoint selected L1:FEC-7_TP_CNT.
+- Added DAC Duotone  measurement feature along with the selection switch L1:FEC-7_DACDT_ENABLE.
+- The startup script now looks for an optional safe.snap file, e.g.
+  /opt/rtcds/llo/l1/target/l1lsctest/l1lsctestepics/burt/safe.snap
+  and burt restores this file instead of the latest burt snapshot.
+
 
 Overview of changes from 2.3 
 ============================
