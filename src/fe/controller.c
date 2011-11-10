@@ -1901,8 +1901,10 @@ if(clock16K == 17)
   	  pLocalEpics->epicsOutput.diags[FE_DIAGS_DAC_MASTER_STAT] = dacEnable;
 #endif
           timeHold = 0;
+#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
 	  memcpy(cycleHistMax, cycleHist, sizeof(cycleHist));
 	  memset(cycleHist, 0, sizeof(cycleHist));
+#endif
 	  if (timeSec % 4 == 0) pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeMin;
 	  else if (timeSec % 4 == 1)
 		pLocalEpics->epicsOutput.adcWaitTime =  adcHoldTimeMax;
