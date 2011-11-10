@@ -234,7 +234,7 @@ if test -e /opt/rtcds/$site/${lower_ifo}/medm/${system}; then
 fi
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/medm/${system}
 (cd build/${system}epics/medm; ls | xargs cp -r -t /opt/rtcds/$site/${lower_ifo}/medm/${system};)
-if [ -e /opt/rtcds/$site/${lower_ifo}/userapps/release/cds/common/scripts/post_build_script.py ]; then
+if [ -e $srcdir/src/epics/util/post_build_script.py ]; then
 	echo Running post-build script
-	/opt/rtcds/$site/${lower_ifo}/userapps/release/cds/common/scripts/post_build_script.py -q ${system} 
+	$srcdir/src/epics/util/post_build_script.py -q ${system} 
 fi
