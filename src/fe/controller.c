@@ -335,8 +335,17 @@ int adcHoldTimeAvg;
 int adcHoldTimeAvgPerSec;
 int usrTime;			// Time spent in user app code
 int usrHoldTime;		// Max time spent in user app code
-unsigned int cycleHist[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
-unsigned int cycleHistMax[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
+#if defined(SERVO64K)
+unsigned int cycleHist[16];
+unsigned int cycleHistMax[16];
+#elif defined(SERVO32K)
+unsigned int cycleHist[32];
+unsigned int cycleHistMax[32];
+#elif defined(SERVO16K)
+unsigned int cycleHist[64];
+unsigned int cycleHistMax[64];
+#endif
+
 
 #define DIRECT_DAC_WRITE	1
 #if defined(SHMEM_DAQ)
@@ -723,6 +732,10 @@ void *fe_start(void *arg)
 
   fz_daz(); // Kill the denorms!
 
+#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
+  memset(cycleHist, 0, sizeof(cycleHist));
+  memset(cycleHistMax, 0, sizeof(cycleHistMax));
+#endif
 // Do all of the initalization ***********************************************************************
 
   /* Init comms with EPICS processor */
@@ -2283,7 +2296,19 @@ if(clock16K == 17)
 	if(cycleTime > timeHold) timeHold = cycleTime;
 	// Hold the max cycle time since last diag reset
 	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
-	cycleHist[cycleTime<15?cycleTime:15]++;
+#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
+	{
+#if defined(SERVO64K)
+		static const nb = 15;
+#elif defined(SERVO32K)
+		static const nb = 31;
+#elif defined(SERVO16K)
+		static const nb = 63;
+#endif
+
+		cycleHist[cycleTime<nb?cycleTime:nb]++;
+	}
+#endif
 	adcHoldTime = (cpuClock[0] - adcTime)/CPURATE;
 	// Avoid calculating the max hold time on the very first cycle
 	// since we can be holding for up to 1 second when we start running
@@ -2346,7 +2371,7 @@ procfile_read(char *buffer,
 	      char **buffer_location,
 	      off_t offset, int buffer_length, int *eof, void *data)
 {
-	int ret;
+	int ret, i;
 	
 	/* 
 	 * We give all of our information in one go, so if the
@@ -2378,8 +2403,7 @@ procfile_read(char *buffer,
 			"usrHoldTime=%d\n"
 			"cycle=%d\n"
 			"gps=%d\n"
-			"buildDate=%s\n"
-			"cycleHist: 0=%d %d %d %d 4=%d %d %d %d 8=%d %d %d %d 12=%d %d %d %d\n",
+			"buildDate=%s\n",
 
 			startGpsTime,
 			cycle_gps_time - startGpsTime,
@@ -2393,23 +2417,27 @@ procfile_read(char *buffer,
 			usrHoldTime,
 			clock16K,
 			cycle_gps_time,
-			build_date,
-			cycleHistMax[0],
-			cycleHistMax[1],
-			cycleHistMax[2],
-			cycleHistMax[3],
-			cycleHistMax[4],
-			cycleHistMax[5],
-			cycleHistMax[6],
-			cycleHistMax[7],
-			cycleHistMax[8],
-			cycleHistMax[9],
-			cycleHistMax[10],
-			cycleHistMax[11],
-			cycleHistMax[12],
-			cycleHistMax[13],
-			cycleHistMax[14],
-			cycleHistMax[15]);
+			build_date);
+#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
+	{
+#if defined(SERVO64K)
+		static const nb = 16;
+#elif defined(SERVO32K)
+		static const nb = 32;
+#elif defined(SERVO16K)
+		static const nb = 64;
+#endif
+		strcat(buffer, "cycleHist: ");
+		for (i = 0; i < nb; i++) {
+			char b[32];
+			if (!cycleHistMax[i]) continue;
+			sprintf(b, "%d=%d ", i, cycleHistMax[i]);
+			strcat(buffer, b);
+		}
+		strcat(buffer, "\n");
+		ret = strlen(buffer);
+	}
+#endif
 	}
 
 	return ret;
