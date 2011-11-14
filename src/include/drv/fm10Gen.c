@@ -1296,7 +1296,7 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
   if ( mask != 0 && (fltrCtrlVal >= 0) && (fltrCtrlVal < 1024) ) {
     UINT32 fltrSwitch = 0;
     UINT32 epicsExclude = 0;
-    if (fltrCtrlVal > 0) {
+    if (mask > 0) {
       for (ix = 0; ix < 10; ix++) {
 	if (mask & (1<<ix)) {
 		// Keep the current bit value
