@@ -111,16 +111,23 @@ else
 
 #
 # ** add in RCG Simlink library
- echo ${MATLABPATH} | egrep -i "${simDir}" >&/dev/null
- if ($status != 0) then
-   setenv MATLABPATH ${simDir}:/${MATLABPATH}
- endif
-#
-# ** add in RCG library
  rcgLib=${simDir}/lib
  echo ${MATLABPATH} | egrep -i "${rcgLib}" >&/dev/null
  if ($status != 0) then
-   setenv MATLABPATH ${rcgLib}:/${MATLABPATH}
+   setenv MATLABPATH ${rcgLib}:${MATLABPATH}
  endif
+#
+# ** add in RCG Simlink
+ echo ${MATLABPATH} | egrep -i "${simDir}" >&/dev/null
+ if ($status != 0) then
+   setenv MATLABPATH ${simDir}:${MATLABPATH}
+ endif
+#
+# ** add in Userapps common library
+ echo ${MATLABPATH} | egrep -i "${USERAPPS_LIB_PATH}" >&/dev/null
+ if ($status != 0) then
+   setenv MATLABPATH ${USERAPPS_LIB_PATH}:${MATLABPATH}
+ endif
+#
 #
 endif
