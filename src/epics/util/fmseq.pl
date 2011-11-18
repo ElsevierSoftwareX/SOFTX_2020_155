@@ -103,7 +103,7 @@ sub is_top_name {
 };
 
 # Transform record name for exculsion of sys/subsystem parts
-# This function replaces first underscode with the hyphen
+# This function replaces first underscore with the hyphen
 sub top_name_transform {
    ($name) =  @_;
    $name =~ s/_/-/;
@@ -761,7 +761,12 @@ while (<IN>) {
     next unless length $nr[0];
     $nr[1] = $gds_datarate unless defined $nr[1];
     die "Invalid DAQ channel $nr[0] rate $nr[1]; system rate is $gds_datarate" if $nr[1] > $gds_datarate;
-    $nr[0] = "$site:$systems[0]$nr[0]";
+    if (is_top_name($nr[0])) {
+    	$nr[0] = "$site:" . top_name_transform($nr[0]);
+    } else {
+    	$nr[0] = "$site:$systems[0]$nr[0]";
+    }
+
     $DAQ_Channels{$nr[0]} = $nr[1];
     #print $nr[0], " ", $nr[1], "\n";
 }
