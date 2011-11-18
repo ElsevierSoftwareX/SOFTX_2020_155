@@ -107,26 +107,18 @@ sub find_node {
 sub find_daq_annotation {
 	my($tree) = @_;
 	if ($tree->{NAME} eq "Annotation" && ${$tree->{FIELDS}}{Name} =~ /^#\s*[dD][aA][qQ]\s+[cC]hannels/) {
-		return ($tree, "", 0);
+		return ($tree, "");
 	} else {
 		for (@{$tree->{NEXT}}) {
 			#print "Recursing into ", $_->{NAME}, " ", ${$_->{FIELDS}}{"Name"}, "\n";
-                	($res, $prefix, $tn) = find_daq_annotation($_);
+                	($res, $prefix) = find_daq_annotation($_);
 			if ($res) {
 				#print $tree->{NAME}, " ", ${$tree->{FIELDS}}{"Name"}, " ", ${$tree->{FIELDS}}{"Type"}, "\n";
 				# Annotate the prefix if this is block
-				if (!$tn) {
-				  if ($tree->{NAME} eq "Block") {
-				    # Stop annotating if top_names tag encountered
-				    if (${$tree->{FIELDS}}{Tag} eq "top_names") {
-				  	#print "top_names ", ${$tree->{FIELDS}}{"Name"}, "\n";
-					$tn = 1;
-				    } else {
-				  	$prefix = ${$tree->{FIELDS}}{"Name"}. "_" .$prefix;
-				    }
-				  }
+				if ($tree->{NAME} eq "Block") {
+				  $prefix = ${$tree->{FIELDS}}{"Name"}. "_" .$prefix;
 				}
-				return ($res, $prefix, $tn);
+				return ($res, $prefix);
 			}
         	}
 	}
