@@ -121,6 +121,7 @@ else
 }
  addmatlab ${simDir}/lib
  addmatlab ${simDir}
+ addmatlab ${USERAPPS_LIB_PATH}
 #
 #
 fi
