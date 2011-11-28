@@ -3614,6 +3614,7 @@ $adcMedm[3] = "$mxpt";
 $adcMedm[6] = "$mypt";
 $adcMedm[15] = "$ii";
 $adcMedm[21] = "$adcCardNum[$ii]\" \n";
+$byteMedm[19] = "\tebit=2 \n";
 if($ii>=$adcCnt)
 {
       if ($dacType[$dacSnum] eq "GSC_18AO8") {
@@ -3621,11 +3622,13 @@ if($ii>=$adcCnt)
 	$dsed_arg .= "s/CHNUM/$dacSnum/g;";
 	$dsed_arg .= "s/CNUM/$dacCardNum[$dacMedm]/g;";
 	system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_8.adl | sed '$dsed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_" . $dacSnum . ".adl");
+	$byteMedm[19] = "\tebit=4 \n";
 	} else {
 	$dsed_arg = $sed_arg;
 	$dsed_arg .= "s/CHNUM/$dacSnum/g;";
 	$dsed_arg .= "s/CNUM/$dacCardNum[$dacMedm]/g;";
 	system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_16.adl | sed '$dsed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_" . $dacSnum . ".adl");
+	$byteMedm[19] = "\tebit=3 \n";
 	}
 	$adcMedm[14] = "/medm/MEDMDIR/FBID_DAC_MONITOR_";
 	$adcMedm[15] = "$dacSnum";
@@ -3642,18 +3645,17 @@ $byteMedm[6] = "$mbypt";
 $byteMedm[13] = "$ii";
 $byteMedm[18] = "\tsbit=0 \n";
 #$byteMedm[19] = "";
-$byteMedm[19] = "\tebit=2 \n";
 if($ii>=$adcCnt)
 {
 	$byteMedm[12] = "\t\tchan=\"SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_";
 	$byteMedm[13] = "$dacMedm";
-	$byteMedm[19] = "\tebit=3 \n";
+	#$byteMedm[19] = "\tebit=3 \n";
 	$byteMedm[8] = "\t\twidth=28 \n";
 	if($modelType ne "MASTER")
 	{
 		$byteMedm[18] = "\tsbit=1 \n";
-		$byteMedm[19] = "\tebit=1 \n";
-		$byteMedm[8] = "\t\twidth=7 \n";
+		$byteMedm[19] = "\tebit=2 \n";
+		$byteMedm[8] = "\t\twidth=14 \n";
 	}
 	$dacMedm ++;
 }

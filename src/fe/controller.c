@@ -335,6 +335,7 @@ int adcHoldTimeAvg;
 int adcHoldTimeAvgPerSec;
 int usrTime;			// Time spent in user app code
 int usrHoldTime;		// Max time spent in user app code
+int cardCountErr = 0;
 #if defined(SERVO64K)
 unsigned int cycleHist[16];
 unsigned int cycleHistMax[16];
@@ -2127,6 +2128,7 @@ if(clock16K == 17)
 
         if(clock16K == 200)
         {
+	  if(cardCountErr) feStatus |= FE_ERROR_IO;
 		pLocalEpics->epicsOutput.ovAccum = overflowAcc;
 	  for(jj=0;jj<cdsPciModules.adcCount;jj++)
 	  {
@@ -2247,8 +2249,12 @@ if(clock16K == 17)
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
 			dacWDread = dac18bitPtr->digital_io_ports;
 			if(((dacWDread >> 8) & 1) > 0)
-			    pLocalEpics->epicsOutput.statDac[jj] &= ~(16);
-			    else pLocalEpics->epicsOutput.statDac[jj] |= 16;
+			    {
+			    	pLocalEpics->epicsOutput.statDac[jj] &= ~(16);
+			    	feStatus |= FE_ERROR_IO;
+			    }
+			    else 
+			    	pLocalEpics->epicsOutput.statDac[jj] |= 16;
 
 		}
 	}
@@ -2701,6 +2707,7 @@ int main(int argc, char **argv)
 					cdsPciModules.cDio6464lCount ++;
 					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
 					cdsPciModules.doInstance[kk] = doCnt;
+					status ++;
 				}
 				break;
                         case CON_32DO:
@@ -2750,6 +2757,11 @@ int main(int argc, char **argv)
 	//cdsPciModules.dacCount = ioMemData->dacCount;
 #endif
 	printf("%d PCI cards found \n",status);
+	if(cards != status)
+	{
+		printf(" ERROR **** Did not find correct number of cards! Expected %d and Found %d\n",cards,status);
+		cardCountErr = 1;
+	}
 
 	// Print out all the I/O information
         printf("***************************************************************************\n");
