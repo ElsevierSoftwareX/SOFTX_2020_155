@@ -108,7 +108,8 @@ uninstall-%:
 #l1ioppemey l1pemey l1susetmy l1isietmy
 #
 
-MDL_MODELS = $(shell /etc/rt.sh)
+MDL_MODELS = $(shell if [ -e /etc/rt.sh ]; then /etc/rt.sh; fi)
+
 
 World: $(MDL_MODELS)
 	@echo Successfully compiled $(MDL_MODELS)
