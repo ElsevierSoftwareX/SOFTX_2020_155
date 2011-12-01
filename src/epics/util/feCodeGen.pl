@@ -236,6 +236,9 @@ $dacNum[0] = 0;	# D/A board numbers, sequential
 $boCnt = 0;	# Total binary output boards
 $boType[0] = 0;	# Binary output board types
 $boNum[0] = 0;	# Binary output board numbers, sequential
+$card2array[0] = 0;
+$bo64Cnt = 0;
+$bi64Cnt = 0;
 $nonSubCnt = 0; # Total of non-sybsystem parts found in the model
 $blockDescr[0] = undef;
 

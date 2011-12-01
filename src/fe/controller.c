@@ -937,6 +937,8 @@ udelay(1000);
   	  CDIO1616Input[ii] = readCDIO1616l(&cdsPciModules, kk);
 	} else if (cdsPciModules.doType[kk] == CON_6464DIO) {
   	  CDIO6464Input[ii] = readCDIO6464l(&cdsPciModules, kk);
+	} else if (cdsPciModules.doType[kk] == CDI64) {
+  	  CDIO6464Input[ii] = readCDIO6464l(&cdsPciModules, kk);
 	} else if(cdsPciModules.doType[kk] == ACS_24DIO) {
   	  dioInput[ii] = readDio(&cdsPciModules, kk);
 	}
@@ -2003,6 +2005,9 @@ if(clock16K == 17)
 		if (cdsPciModules.doType[kk] == CON_6464DIO) {
 	 		CDIO6464InputInput[ii] = readInputCDIO6464l(&cdsPciModules, kk);
 		}
+		if (cdsPciModules.doType[kk] == CDI64) {
+	 		CDIO6464InputInput[ii] = readInputCDIO6464l(&cdsPciModules, kk);
+		}
         }
         // Write Dio cards on change
         for(kk=0;kk < cdsPciModules.doCount;kk++)
@@ -2032,6 +2037,10 @@ if(clock16K == 17)
 #endif
 			CDIO1616InputInput[ii] = readInputCDIO1616l(&cdsPciModules, kk);
 		} else if (cdsPciModules.doType[kk] == CON_6464DIO) {
+			if (CDIO6464Input[ii] != CDIO6464Output[ii]) {
+			  CDIO6464Input[ii] = writeCDIO6464l(&cdsPciModules, kk, CDIO6464Output[ii]);
+			}
+		} else if (cdsPciModules.doType[kk] == CDO64) {
 			if (CDIO6464Input[ii] != CDIO6464Output[ii]) {
 			  CDIO6464Input[ii] = writeCDIO6464l(&cdsPciModules, kk, CDIO6464Output[ii]);
 			}
@@ -2479,6 +2488,8 @@ int main(int argc, char **argv)
 	int doCnt;
 	int do32Cnt;
 	int doIIRO16Cnt;
+	int cdo64Cnt;
+	int cdi64Cnt;
 
 #ifdef ADC_SLAVE
 	need_to_load_IOP_first = 0;
@@ -2637,6 +2648,8 @@ int main(int argc, char **argv)
 	dac18Cnt = 0;
 	doCnt = 0;
 	do32Cnt = 0;
+	cdo64Cnt = 0;
+	cdi64Cnt = 0;
 	doIIRO16Cnt = 0;
 
 	// Have to search thru all cards and find desired instance for application
@@ -2648,13 +2661,13 @@ int main(int argc, char **argv)
 		*/
 		for(jj=0;jj<cards;jj++)
 		{
-/*
+			/*
 			printf("Model %d = %d, type = %d, instance = %d, dacCnt = %d \n",
 				ii,ioMemData->model[ii],
 				cdsPciModules.cards_used[jj].type,
 				cdsPciModules.cards_used[jj].instance,
  				dacCnt);
-*/
+				*/
 		   switch(ioMemData->model[ii])
 		   {
 			case GSC_16AI64SSA:
@@ -2707,6 +2720,32 @@ int main(int argc, char **argv)
 					cdsPciModules.cDio6464lCount ++;
 					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
 					cdsPciModules.doInstance[kk] = doCnt;
+					status ++;
+				}
+				if((cdsPciModules.cards_used[jj].type == CDO64) && 
+					(cdsPciModules.cards_used[jj].instance == doCnt))
+				{
+					kk = cdsPciModules.doCount;
+					printf("Found 6464 DOUT CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
+					cdsPciModules.doType[kk] = CDO64;
+					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
+					cdsPciModules.doCount ++;
+					cdsPciModules.cDio6464lCount ++;
+					cdsPciModules.doInstance[kk] = cdo64Cnt;
+					cdo64Cnt ++;
+					status ++;
+				}
+				if((cdsPciModules.cards_used[jj].type == CDI64) && 
+					(cdsPciModules.cards_used[jj].instance == doCnt))
+				{
+					kk = cdsPciModules.doCount;
+					printf("Found 6464 DIN CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
+					cdsPciModules.doType[kk] = CDI64;
+					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
+					cdsPciModules.doInstance[kk] = cdi64Cnt;
+					cdsPciModules.doCount ++;
+					cdsPciModules.cDio6464lCount ++;
+					cdi64Cnt ++;
 					status ++;
 				}
 				break;

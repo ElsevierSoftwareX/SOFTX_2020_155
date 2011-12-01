@@ -46,6 +46,8 @@
 #define ACS_24DIO		9
 #define CON_1616DIO		10
 #define CON_6464DIO		11
+#define CDO64			12
+#define CDI64			13
 
 /* Cards configuration */
 typedef struct CDS_CARDS {
