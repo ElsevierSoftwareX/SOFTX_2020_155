@@ -591,6 +591,18 @@ sub node_processing {
                      die "Too many Digital I/O modules \(max is $::maxDioMod\)\n";
                   }
 		}
+		if ($part_name eq "CDO64") {
+        	  $::partType[$::partCnt] = CDS::CDO64::initCDO64($node);
+                  if ($::boCnt > $::maxDioMod) {
+                     die "Too many Digital I/O modules \(max is $::maxDioMod\)\n";
+                  }
+		}
+		if ($part_name eq "CDI64") {
+        	  $::partType[$::partCnt] = CDS::CDI64::initCDI64($node);
+                  if ($::boCnt > $::maxDioMod) {
+                     die "Too many Digital I/O modules \(max is $::maxDioMod\)\n";
+                  }
+		}
 		if ($part_name eq "Dio") {
         	  $::partType[$::partCnt] = CDS::Dio::initDio($node);
                   if ($::boCnt > $::maxDioMod) {
