@@ -16,9 +16,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Dec 01 12:00:50 2011"
-  RTWModifiedTimeStamp	  244641526
-  ModelVersionFormat	  "1.%<AutoIncrement:313>"
+  LastModifiedDate	  "Thu Dec 01 16:16:29 2011"
+  RTWModifiedTimeStamp	  244656946
+  ModelVersionFormat	  "1.%<AutoIncrement:315>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -809,7 +809,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [315, 179, 965, 664]
+    Location		    [318, 118, 968, 603]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -1632,7 +1632,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Filters/\nGDS"
-	Location		[459, 411, 956, 1072]
+	Location		[108, 173, 605, 834]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1658,14 +1658,6 @@ Library {
 	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsFiltBiQuad/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	}
 	Block {
 	  BlockType		  Reference
@@ -1677,19 +1669,11 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.216"
+	  LibraryVersion	  "1.256"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag13"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1702,19 +1686,11 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.216"
+	  LibraryVersion	  "1.256"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag14"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1727,19 +1703,11 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.216"
+	  LibraryVersion	  "1.256"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag15"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1752,19 +1720,11 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.216"
+	  LibraryVersion	  "1.256"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag16"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1777,19 +1737,11 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.216"
+	  LibraryVersion	  "1.256"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag17"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1802,19 +1754,11 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.216"
+	  LibraryVersion	  "1.256"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag18"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1827,19 +1771,11 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.216"
+	  LibraryVersion	  "1.256"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag19"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -1854,14 +1790,6 @@ Library {
 	  LibraryVersion	  "1.7"
 	  SourceBlock		  "cdsEXC/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	}
 	Block {
 	  BlockType		  Reference
@@ -1921,14 +1849,6 @@ Library {
 	  LibraryVersion	  "1.8"
 	  SourceBlock		  "cdsFiltCtrl/IIR FM with control"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	}
 	Block {
 	  BlockType		  Reference
@@ -1960,14 +1880,6 @@ Library {
 	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	}
 	Block {
 	  BlockType		  Reference
@@ -1985,14 +1897,6 @@ Library {
 	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsPPFIR/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	}
 	Block {
 	  BlockType		  Reference
@@ -2008,14 +1912,6 @@ Library {
 	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsRms/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	}
 	Block {
 	  BlockType		  Reference
@@ -2029,14 +1925,6 @@ Library {
 	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsTP/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	}
 	Block {
 	  BlockType		  Reference
@@ -2052,14 +1940,6 @@ Library {
 	  LibraryVersion	  "1.7"
 	  SourceBlock		  "cdsTrueRMS/TrueRMS"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	}
 	Annotation {
 	  Name			  "aLIGO RCG - Filter Modules and GDS Parts"
@@ -2085,8 +1965,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[140, 72, 1045, 844]
-	Open			on
+	Location		[322, 86, 1227, 858]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -2558,7 +2438,7 @@ Library {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "8x18-bit DACs"
-	    Location		    [1, 46, 775, 570]
+	    Location		    [169, 82, 943, 606]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -2584,15 +2464,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2607,15 +2478,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2630,15 +2492,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2653,15 +2506,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2676,15 +2520,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2699,15 +2534,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2722,15 +2548,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2745,15 +2562,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2768,15 +2576,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2791,15 +2590,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2814,15 +2604,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2837,15 +2618,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2860,15 +2632,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2883,15 +2646,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2906,15 +2660,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -2929,15 +2674,6 @@ Library {
 	      LibraryVersion	      "1.5"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
-	      GeneratePreprocessorConditionals "off"
 	    }
 	  }
 	}
@@ -4991,19 +4727,11 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.216"
+	  LibraryVersion	  "1.256"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag50"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -5016,19 +4744,11 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.216"
+	  LibraryVersion	  "1.256"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag51"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -5041,19 +4761,11 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.216"
+	  LibraryVersion	  "1.256"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag52"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -5174,14 +4886,6 @@ Library {
 	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsBitwise/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
 	}
       }
     }
@@ -5236,7 +4940,7 @@ Library {
       Position		      [152, 81]
     }
     Annotation {
-      Name		      "Matlab Parts Library for Use with aLIGO Real-time Code Generator - V2.4"
+      Name		      "Matlab Parts Library for Use with aLIGO Real-time Code Generator - V2.5"
       Position		      [330, 30]
       FontName		      "times"
       FontSize		      18
@@ -5828,24 +5532,21 @@ MatData {
   }
   DataRecord {
     Tag			    DataTag23
-    Data		    "  %)30     .    H 4   8    (     @         %    \"     $    !     0         %  0 \"     $    8    =F5R<"
+    Data		    "  %)30     .    > 0   8    (     @         %    \"     $    !     0         %  0 \"     $    8    =F5R<"
     "VEO;@!C;VYT96YT &9O<FUA=   #@   #@    &    \"     8         !0    @    !     0    $         \"0    @    S,S,S,S/S/"
-    "PX   #0!   !@    @    $          4    (     0   )H$   !         !    \":!   1$%#.@H]/3T]\"@I4:&4@4D-'('-U<'!O<G1S("
+    "PX   \"H P  !@    @    $          4    (     0   '8#   !         !    !V P  1$%#.@H]/3T]\"@I4:&4@4D-'('-U<'!O<G1S("
     "'1W;R!T>7!E<R!O9B!$04,@36]D=6QE<SH*(\" @(#$I($=E;F5R86P@4W1A;F1A<F1S(#$V04\\Q-B H,38@8VAA;FYE;\"P@,38@8FET*0H@(\" "
     "@,BD@1V5N97)A;\"!3=&%N9&%R9',@,3A!3S@@(\"@@.\"!C:&%N;F5L+\" Q.\"!B:70I\"@I5<V%G93H*(\" @(#$I(%-E;&5C=\"!T:&4@9&5S:"
-    "7)E9\"!$04,@<&%R=\"!A;F0@;6]V92!T;R!A<'!L:6-A=&EO;B!M;V1E;\"X*(\" @(#(I($EN('1H92!U<V5R(&%P<&QI8V%T:6]N+\"!T:&4@1$"
-    "%#('!A<G0@;F%M97,@;75S=\"!S=&%R=\"!W:71H($1!0U\\P\"B @(\" @(\"!A;F0@8V]N=&EN=64@:6X@<V5Q=65N8V4@=7 @=&\\@1$%#7TXN("
-    "$YO(&=A<',@:6X@;F%M92!N=6UB97)I;F<@:7,*(\" @(\" @(&%L;&]W960N\"B @(\" S*2!5<V4@(D)L;V-K(%!R;W!E<G1I97,B('1O(&%D:G5"
-    "S=\"!T:&4@(F-A<F1?;G5M/2(@9FEE;&0L(&%S( H@(\" @(\" @;F5C97-S87)Y+B @5&AI<R!S971T:6YG(&1E=&5R;6EN97,@=VAI8V@@:6YS=&"
-    "%N8V4@;V8@=&AA=\"!T>7!E\"B @(\" @(\"!O9B!M;V1U;&4L('=I=&AI;B!T:&4@22]/(&-H87-S:7,L('=I;&P@8F4@=W)I='1E;B!T;R!B>2!T"
-    ":&4*(\" @(\" @(&=E;F5R871E9\"!S;V9T=V%R92X@($9O<B!E>&%M<&QE+\"!I9B!T:&4@9FER<W0@1$%#(&EN('1H92!U<V5R(&UO9&5L\"B @("
-    "\" @(\"!I<R!T;R!W<FET92!T;R!T:&4@<V5C;VYD($1!0R!M;V1U;&4@:6X@=&AE($DO3R!C:&%S<VES+\"!T:&5N.@H@(\" @(\" @(\" @(\"!A"
-    "*2!087)T(&YA;64@<VAO=6QD(&)E(\")$04-?,\"(N\"B @(\" @(\" @(\" @(&(I($)L;V-K(%!R;W!E<G1Y('-H;W5L9\"!S970@(F-A<F1?;G5"
-    "M/3$B+@H*3F]T93H@26X@=F5R<VEO;B R+C @86YD(&QA=&5R+\"!I=\"!I<R!A;&QO=V%B;&4@=&\\@:&%V92!T:&4@<V%M92!$04,*(\" @(\" @"
-    "<&%R=\"!I;B!T=V\\@;W(@;6]R92!M;V1E;',@=&AA=\"!A<F4@=&\\@<G5N(&]N('1H92!S86UE(&-O;7!U=&5R+ H@(\" @(\"!I+F4N+\"!C;V1"
-    "E(&UO9&5L<R!C86X@<VAA<F4@1$%#(&UO9'5L97,N(\"!(;W=E=F5R+\"!C87)E(&UU<W0@8F4@=&%K96X*(\" @(\" @=VAE;B!D97-I9VYI;F<@="
-    "&AE(&UO9&5L<R!T:&%T(&YO('1W;R!M;V1E;',@871T96UP=\"!T;R!U<V4@=&AE\"B @(\" @('-A;64@8VAA;FYE;\"!O;B!A('-I;F=L92!$04,"
-    "@;6]D=6QE+@H        .    ,     8    (    !          %    \"     $    #     0         0  , 5%A4  "
+    "7)E9\"!$04,@<&%R=\"P@8F%S960@;VX@8V%R9%]N=6TL(&%N9\"!M;W9E('1O( H@(\" @(\" @87!P;&EC871I;VX@;6]D96PN\"B @(\" R*2!#"
+    ";VYN96-T(&EN<'5T<RP@87,@87!P<F]P<FEA=&4N( I.;W1E.B!4:&4@1$%#(&YA;64@9FEE;&0@:7,@;F\\@;&]N9V5R('5S960@=&\\@:61E;G1I"
+    "9GD@8V%R9',@:64@9&\\@;F]T( IH879E('1O(&AA=F4@;F%M92!E;F1I;F<@:6X@1$%#(&YU;6)E<BP@971C+B!/;F4@8V%N(&YO=R!S:6UP;'D@<"
+    "V5L96-T('1H90ID97-I<F5D(&-A<F0@;G5M8F5R(&%N9\"!M;W9E('1O(&%P<&QI8V%T:6]N(&UO9&5L('=I=&AO=70@8VAA;F=I;F<@;F%M97,*86"
+    "YD(&-A<F1?;G5M(&EN(&)L;V-K('!R;W!E<G1I97,N\"@I.;W1E.B!);B!V97)S:6]N(#(N,\"!A;F0@;&%T97(L(&ET(&ES(&%L;&]W86)L92!T;R"
+    "!H879E('1H92!S86UE($1!0PH@(\" @(\"!P87)T(&EN('1W;R!O<B!M;W)E(&UO9&5L<R!T:&%T(&%R92!T;R!R=6X@;VX@=&AE('-A;64@8V]M<'"
+    "5T97(L\"B @(\" @(&DN92XL(&-O9&4@;6]D96QS(&-A;B!S:&%R92!$04,@;6]D=6QE<RX@($AO=V5V97(L(&-A<F4@;75S=\"!B92!T86ME;@H@("
+    "\" @(\"!W:&5N(&1E<VEG;FEN9R!T:&4@;6]D96QS('1H870@;F\\@='=O(&UO9&5L<R!A='1E;7!T('1O('5S92!T:&4*(\" @(\" @<V%M92!C:&"
+    "%N;F5L(&]N(&$@<VEN9VQE($1!0R!M;V1U;&4N\"@  #@   #     &    \"     0         !0    @    !     P    $         $  # %"
+    "185  "
   }
   DataRecord {
     Tag			    DataTag22
