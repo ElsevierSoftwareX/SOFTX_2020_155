@@ -41,6 +41,7 @@ sub initDac {
 
         $::dacType[$::dacCnt] = $type;
         $::dacNum[$::dacCnt] = $num;
+	$::card2array[$::partCnt] = $::dacCnt;
         $::dacCnt++;
 }
 
@@ -76,7 +77,7 @@ sub printFrontEndVars  {
 # Returns calculated code string
 sub frontEndInitCode {
 	my ($i) = @_;
-        my $dacNum = substr($::xpartName[$i], 4, 1);
+	my $dacNum = $::card2array[$i];
         my $calcExp = "// DAC number is $dacNum\n";
         for (0 .. 7) {
           my $fromType = $::partInputType[$i][$_];
@@ -107,7 +108,7 @@ sub fromExp {
 
 sub frontEndCode {
 	my ($i) = @_;
-        my $dacNum = substr($::xpartName[$i], 4, 1);
+	my $dacNum = $::card2array[$i];
         my $calcExp = "// DAC number is $dacNum\n";
         for (0 .. 7) {
           my $fromType = $::partInputType[$i][$_];
