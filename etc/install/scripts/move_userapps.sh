@@ -16,7 +16,14 @@ else
        mv /opt/rtcds/${site}/${ifo}/userapps/* ${newHome}
        cd ${newHome}
        rm release
-       ln -s trunk release
+       if [ -d trunk ]; then
+           ln -s trunk release
+       elif [ -d cds_user_apps/trunk ]; then
+           ln -s cds_user_apps/trunk release      
+       else
+           echo "OOPS - unable to create release - do it manually"
+           exit 1
+       fi
     else
        echo "No userapps found - check out a fresh one"
        appsSvn="https://redoubt.ligo-wa.caltech.edu/svn/cds_user_apps"
@@ -28,5 +35,6 @@ fi
 echo "Update userapps from cds_user_apps Subversion"
 cd ${newHome}
 svn update release
+exit 0
 
 

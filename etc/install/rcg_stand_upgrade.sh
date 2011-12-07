@@ -118,7 +118,11 @@ fi
 appMoveDone=`grep UserAppMove ${progFile}`
 if [ -z "$appMoveDone" ]; then
    ${scrDir}/move_userapps.sh 
+   retCode=#?
    echo "UserAppMove" `date` >> ${progFile}
+   if [ $retCode -ne 0 ]; then
+       exit 1
+   fi
 else
    echo "Move userapps to /opt/rtcds/userapps - ALREADY DONE"
 fi
