@@ -155,6 +155,19 @@ if [ -z "$cfgUpdateDone" ]; then
 else
     echo "Install new cdscfg - ALREADY DONE"
 fi
+#
+# install RCG scripts
+rcgScrDone=`grep RcgScripts ${progFile}`
+if [ -z "$rcgScrDone" ]; then
+    echo "Copy RCG scripts to scripts area"
+    cd ${rcgDir}/release
+    cp src/epics/util/iniChk.pl /opt/rtcds/${site}/${ifo}/scripts
+    cd ${thisDir}
+    echo "RcgScripts" `date` >> ${progFile}
+else
+    echo "Install RCG scripts - ALREADY DONE"
+fi
+
 #  install new mbuf
 #
 mbufUpdateDone=`grep MbufUpdate ${progFile}`
