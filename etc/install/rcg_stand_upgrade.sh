@@ -46,7 +46,7 @@ if [ -z "$downDone" ]; then
     if [ -z "$downCfg" ]; then
 	    echo "Download new environment configuration"
 	    rm -f ${tmpFold}/${cfgTar}
-	    curl --krb private ${webDir}/${cfgTar} > ${tmpFold}/${cfgTar} -u :
+	    curl -u : --negotiate ${webDir}/${cfgTar} > ${tmpFold}/${cfgTar}
 	    echo "DownloadCfg" `date` >> ${progFile}
     else
 	    echo "Download new environment configuration - ALREADY DONE"
@@ -120,7 +120,7 @@ if [ -z "$appMoveDone" ]; then
    ${scrDir}/move_userapps.sh 
    retCode=#?
    echo "UserAppMove" `date` >> ${progFile}
-   if [ $retCode -ne 0 ]; then
+   if [ "$retCode -ne 0" ]; then
        exit 1
    fi
 else
@@ -150,6 +150,8 @@ cfgUpdateDone=`grep CfgUpdate ${progFile}`
 if [ -z "$cfgUpdateDone" ]; then
     echo "Install new cdscfg"
     cd ${tmpFold}
+    echo " went to "${tmpFold}
+    echo "try to open" ${cfgTar}
     tar -xzf ${cfgTar}
     cd cdscfg/install
     ./cfg_fe.sh
@@ -176,12 +178,12 @@ fi
 #
 mbufUpdateDone=`grep MbufUpdate ${progFile}`
 if [ -z "$mbufUpdateDone" ]; then
-   ${scrDir}/new_mbuf.sh
+   ${scrDir}/new_mbuf.sh ${rcgTag}
    echo "MbufUpdate" `date` >> ${progFile}
 else
    echo "Update mbuf - ALREADY DONE"
 fi
-
+#
 # install new awgtpman
 awgTpUpdateDone=`grep AwgTpUpdate ${progFile}`
 if [ -z "$awgTpUpdateDone" ]; then
@@ -206,6 +208,7 @@ if [ -z "$cfgRtBuildDone" ]; then
    echo "Configure real-time build area"	
    cd ${RTCDSROOT}
    mkdir -p rtbuild
+   cd rtbuild
    ${RCG_DIR}/configure	
    echo "CfgRtBuild" `date` >> ${progFile}
 else
