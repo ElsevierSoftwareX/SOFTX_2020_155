@@ -4,16 +4,29 @@
 source /opt/cdscfg/rtsetup.sh
 #
 newHome=/opt/rtcds/userapps
-if [ -f ${newHome}]; then
+newPath=${newHome}/release
+if [ -d ${newHome} ]; then
     echo "Userapps already moved to /opt/rtcds/userapps"
+    cd ${newHome}    
 else
-    echo "Move userapps to /opt/rtcds/userapps"
-    mv /opt/rtcds/${site}/${ifo}/userapps ${newHome}
+    mkdir -p ${newHome}
+    oldHome=/opt/rtcds/${site}/${ifo}/userapps
+    if [ -d ${oldHome} ]; then
+       echo "Move userapps to /opt/rtcds/userapps"
+       mv /opt/rtcds/${site}/${ifo}/userapps/* ${newHome}
+       cd ${newHome}
+       rm release
+       ln -s trunk release
+    else
+       echo "No userapps found - check out a fresh one"
+       appsSvn="https://redoubt.ligo-wa.caltech.edu/svn/cds_user_apps"
+       cd ${newHome}
+       svn co ${appsSvn}
+       ln -s trunk release
+    fi
 fi
 echo "Update userapps from cds_user_apps Subversion"
 cd ${newHome}
-rm release
-ln -s trunk release
 svn update release
 
 

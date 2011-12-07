@@ -7,7 +7,7 @@ thisDir=`pwd`
 rcgTag="2.4.1"
 #
 echo "RCG "${rcgTag}" upgrade to stand-alone front-end"
-tmpFold=/var/tmp/RCG2_4
+tmpFold=/var/tmp/RCG_Update
 progFile=${tmpFold}/upgrade_progress.txt
 if [ -f ${progFile} ]; then
     echo "Resume upgrade"
@@ -29,48 +29,26 @@ fi
 # check if downloads complete
 # 
 downDone=`grep DownloadDone ${progFile}`
-scrTar=RCG-2.4-install-scripts.tar.gz
-cfgTar=rtcdscfg-2_4.tar.gz
-rcgTar=RCG_${rcgTag}.tar.gz
+cfgTar=cdscfg-2_4.tar.gz
 if [ -z "$downDone" ]; then
     echo "Downloading files using Kerberos login"
     kname=`klist | grep Default`
-    if [ -n "$kname" ]; then
+    if [ -z "$kname" ]; then
         echo "Kerberos login not set - restart after doing kinit <albert.einstein>@LIGO.ORG"
         exit
     else
         echo "kinit is good"
     fi 
 #
-    webDir="https://llocds.ligo-la.caltech.edu/daq/software/upgrades/RCG2_4"
-    downScript=`grep DownloadScripts ${progFile}`
-    if [ -z "$downScript" ]; then
-	echo "Download installation scripts"
-	rm -f ${tmpFold}/${scrTar}
-        curl -u : --negotiate ${webDir}/${scrTar} > ${tmpFold}/${scrTar}
-        echo "DownloadScripts" `date` >> ${progFile}
-    else
-	echo "Download installation scripts - ALREADY DONE"
-    fi
-#
+    webDir="https://llocds.ligo-la.caltech.edu/daq/software/upgrades"
     downCfg=`grep DownloadCfg ${progFile}`
     if [ -z "$downCfg" ]; then
 	echo "Download new environment configuration"
 	rm -f ${tmpFold}/${cfgTar}
-	curl -u : --negotiate ${webDir}/${cfgTar} > ${tmpFold}/${cfgTar}
+	curl --krb private ${webDir}/${cfgTar} > ${tmpFold}/${cfgTar} -u :
 	echo "DownloadCfg" `date` >> ${progFile}
     else
 	echo "Download new environment configuration - ALREADY DONE"
-    fi
-#
-    downRcg=`grep DownloadRcg ${progFile}`
-    if [ -z $downRcg ]; then
-        echo "Download new RCG"
-	rm -f ${tmpFold}/${rcgTar}
-        curl -u : --negotiate ${webDir}/${rcgTar} > ${tmpFold}/${rcgTar}
-        echo "DownloadRcg" `date` >> ${progFile}
-    else
-        echo "Download new RCG - ALREADY DONE"
     fi
 #  
     echo "DownloadDone" `date` >> ${progFile}
@@ -78,96 +56,101 @@ else
     echo "Downloading files using Kerberos login - ALREADY DONE"
 fi
 #
-#  expand scripts
-expScrDone=`grep ExpandScr ${progFile}`
-scrDir=${tmpFold}/update
-if [ -z "$expScrDone" ]; then
-    echo "Expand tar-ball of scripts"  
-    tar -C ${tmpFold} -xzf ${tmpFold}/${scrTar}
-    echo "ExpandScr" `date` >> ${progFile}
+#  copy scripts
+cpScrDone=`grep CopyScr ${progFile}`
+scrDir=${tmpFold}/scripts
+if [ -z "$cpScrDone" ]; then
+    echo "Copy install scripts to work area"
+    mkdir -p ${scrDir}
+    cp ${thisDir}/scripts/* ${scrDir}
+    echo "CopyScr" `date` >> ${progFile}
 else
-    echo "Expand tar-ball of scripts - ALREADY DONE"
+    echo "Copy install scripts to work area - ALREADY DONE"
 fi 
+echo "got here too"
 #
 # get list of models
-mdlListDone=`grep GenModelList ${progfile}`
+
+mdlListDone=`grep GenModelList ${progFile}`
 if [ -z "$mdlListDone" ]; then
    ${scrDir}/gen_model_list.sh ${scrDir}
-   echo "GenModelList" `date` >> ${progfile}
+   echo "GenModelList" `date` >> ${progFile}
 else
    echo "Get lists of models - ALREADY DONE"	
 fi
 #
 # Create EPICS snapshots
-epicsBkupDone=`grep EpicsBackup ${progfile}`
+epicsBkupDone=`grep EpicsBackup ${progFile}`
 if [ -z "epicsBkupDone" ]; then
    ${scrDir}/backup_epics.sh ${scrDir}
-   echo "EpicsBackup" `date` >> ${progfile}
+   echo "EpicsBackup" `date` >> ${progFile}
 else
    echo "Create EPICS shapshots - ALREADY DONE"	
 fi
 #
 # Kill DAQ processes
-daqKillDone=`grep DaqKilled ${progfile}`
+daqKillDone=`grep DaqKilled ${progFile}`
 if [ -z "daqKillDone" ]; then
    ${scrDir}/kill_daq.sh
-   echo "DaqKilled" `date` >> ${progfile}
+   echo "DaqKilled" `date` >> ${progFile}
 else
    echo "Kill DAQD,NDS - ALREADY DONE"	
 fi
 #
 # Stop sub-models
-subStopDone=`grep SubStop ${progfile}`
+subStopDone=`grep SubStop ${progFile}`
 if [ -z "subStopDone" ]; then
    ${scrDir}/stop_sub.sh ${scrDir}
-   echo "SubStop" `date` >> ${progfile}
+   echo "SubStop" `date` >> ${progFile}
 else
    echo "Stop sub-models - ALREADY DONE"	
 fi
 #
 # Stop IOP models
-iopStopDone=`grep IopStop ${progfile}`
+iopStopDone=`grep IopStop ${progFile}`
 if [ -z "iopStopDone" ]; then
    ${scrDir}/stop_iops.sh ${scrDir}
-   echo "IopStop" `date` >> ${progfile}
+   echo "IopStop" `date` >> ${progFile}
 else
    echo "Stop IOP models - ALREADY DONE"	
 fi
 # 
 # move and update userapps
 #
-appMoveDone=`grep UserAppMove ${progfile}`
+appMoveDone=`grep UserAppMove ${progFile}`
 if [ -z "appMoveDone" ]; then
-   ${scrDir}/move_userapps.sh
-   echo "UserAppMove" `date` >> ${progfile}
+   ${scrDir}/move_userapps.sh 
+   echo "UserAppMove" `date` >> ${progFile}
 else
    echo "Move userapps to /opt/rtcds/userapps - ALREADY DONE"
 fi
 # 
-# Expand RCG to /opt/rtcds/coreapps
-expRcgDone=`grep ExpandRcg ${progFile}`
-rcgDir=/opt/rtcds/coreapps
-if [ -z "$expRcgDone" ]; then
-    echo "Expand tar-ball of RCG in /opt/rtcds/coreapps" 
+# Copy RCG to /opt/rtcds/rtscore
+cpRcgDone=`grep CopyRcg ${progFile}`
+rcgDir=/opt/rtcds/rtscore
+if [ -z "$cpRcgDone" ]; then
+    echo "Copy this RCG in /opt/rtcds/rtscore" 
     mkdir -p ${rcgDir} 
-    tar -C ${rcgDir} -xzf ${tmpFold}/${rcgTar}
-    rcgPtr=`ls | grep "2.4"`
+    rcgPath = ${thisDir}%%'/etc/install'
+    cp -rp rcgPath ${rcgDir}   
+    rcgPtr=${rcgPath##/*/}
     cd ${rcgDir}
     rm -f release
     ln -s ${rcgPtr} release
     cd ${thisDir}
-    echo "ExpandRcg" `date` >> ${progFile}
+    echo "CopyRcg" `date` >> ${progFile}
 else
-    echo "Expand tar-ball of RCG in /opt/rtcds/coreapps - ALREADY DONE"
+    echo "Copy this RCG to /opt/rtcds/rtscore - ALREADY DONE"
 fi 
 #
 #  install new cfg
-cfgUpdateDone=`grep CfgUpdate ${progfile}`
+cfgUpdateDone=`grep CfgUpdate ${progFile}`
 if [ -z "cfgUpdateDone" ]; then
     echo "Install new cdscfg"
-    tar -C /opt/cdscfg -xzf ${tmpFold}/${cfgTar}
-    cd /opt/cdscfg
-    install/cfg_fe.sh
+    cd ${tmpFold}
+    tar -xzf ${cfgTar}
+    cd cdscfg/install
+    ./cfg_fe.sh
     cd ${thisDir}
     echo "CfgUpdate" `date` >> ${progFile}
     echo "Now log out and log back in, then rerun this script to continue"
@@ -177,85 +160,85 @@ fi
 
 #  install new mbuf
 #
-mbufUpdateDone=`grep MbufUpdate ${progfile}`
+mbufUpdateDone=`grep MbufUpdate ${progFile}`
 if [ -z "mbufUpdateDone" ]; then
    ${scrDir}/new_mbuf.sh
-   echo "MbufUpdate" `date` >> ${progfile}
+   echo "MbufUpdate" `date` >> ${progFile}
 else
    echo "Update mbuf - ALREADY DONE"
 fi
 
 # install new awgtpman
-awgTpUpdateDone=`grep AwgTpUpdate ${progfile}`
+awgTpUpdateDone=`grep AwgTpUpdate ${progFile}`
 if [ -z "awgTpUpdateDone" ]; then
    ${scrDir}/new_awgtpman.sh ${rcgTag}
-   echo "AwgTpUpdate" `date` >> ${progfile}
+   echo "AwgTpUpdate" `date` >> ${progFile}
 else
    echo "Update awgtpman - ALREADY DONE"
 fi
 
 # install new real-time dataviewer
-dvUpdateDone=`grep DvUpdate ${progfile}`
+dvUpdateDone=`grep DvUpdate ${progFile}`
 if [ -z "dvUpdateDone" ]; then
    ${scrDir}/new_dv.sh ${rcgTag}
-   echo "DvUpdate" `date` >> ${progfile}
+   echo "DvUpdate" `date` >> ${progFile}
 else
    echo "Update dataviewer - ALREADY DONE"
 fi
 
 # create new build area
-cfgRtBuildDone=`grep CfgRtBuild ${progfile}`
+cfgRtBuildDone=`grep CfgRtBuild ${progFile}`
 if [ -z "cfgRtBuildDone" ]; then
    echo "Configure real-time build area"	
    cd ${RTCDSROOT}
    mkdir -p rtbuild
    ${RCG_DIR}/configure	
-   echo "CfgRtBuild" `date` >> ${progfile}
+   echo "CfgRtBuild" `date` >> ${progFile}
 else
    echo "Configure real-time build area - ALREADY DONE"
 fi
 
 # Rebuild models
-mdlBuildDone=`grep ModelBuild ${progfile}`
+mdlBuildDone=`grep ModelBuild ${progFile}`
 if [ -z "$mdlBuildDone" ]; then
    ${scrDir}/remake_models.sh ${scrDir}
-   echo "ModelBuild" `date` >> ${progfile}
+   echo "ModelBuild" `date` >> ${progFile}
 else
    echo "Rebuild models with new RCG - ALREADY DONE"	
 fi
 
 # Rebuild stand-alone daqd
-daqdBuildDone=`grep DaqdBuild ${progfile}`
+daqdBuildDone=`grep DaqdBuild ${progFile}`
 if [ -z "$daqdBuildDone" ]; then
    ${scrDir}/new_daqd.sh ${rcgTag}
-   echo "DaqdBuild" `date` >> ${progfile}
+   echo "DaqdBuild" `date` >> ${progFile}
 else
    echo "Build new stand-alone daqd - ALREADY DONE"	
 fi
 
 # Rebuild nds
-ndsBuildDone=`grep NdsBuild ${progfile}`
+ndsBuildDone=`grep NdsBuild ${progFile}`
 if [ -z "$ndsBuildDone" ]; then
    ${scrDir}/new_nds.sh ${rcgTag}
-   echo "NdsBuild" `date` >> ${progfile}
+   echo "NdsBuild" `date` >> ${progFile}
 else
    echo "Build new nds - ALREADY DONE"	
 fi
 
 # Restart the models
-mdlRestartDone=`grep ModelRestart ${progfile}`
+mdlRestartDone=`grep ModelRestart ${progFile}`
 if [ -z "$mdlRestartDone" ]; then
    ${scrDir}/restart_models.sh ${scrDir}
-   echo "ModelRestart" `date` >> ${progfile}
+   echo "ModelRestart" `date` >> ${progFile}
 else
    echo "Restart models built with new RCG - ALREADY DONE"	
 fi
 
 # Restart DAQ, NDS
-daqRestartDone=`grep DaqRestart ${progfile}`
+daqRestartDone=`grep DaqRestart ${progFile}`
 if [ -z "$mdlRestartDone" ]; then
    ${scrDir}/restart_daq.sh
-   echo "DaqRestart" `date` >> ${progfile}
+   echo "DaqRestart" `date` >> ${progFile}
 else
    echo "Restart DAQ built with new RCG - ALREADY DONE"	
 fi
