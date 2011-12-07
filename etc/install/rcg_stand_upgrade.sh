@@ -30,6 +30,7 @@ fi
 # 
 downDone=`grep DownloadDone ${progFile}`
 cfgTar=cdscfg-2_4.tar.gz
+echo 'downDone' $downDone
 if [ -z "$downDone" ]; then
     echo "Downloading files using Kerberos login"
     kname=`klist | grep Default`
@@ -43,12 +44,12 @@ if [ -z "$downDone" ]; then
     webDir="https://llocds.ligo-la.caltech.edu/daq/software/upgrades"
     downCfg=`grep DownloadCfg ${progFile}`
     if [ -z "$downCfg" ]; then
-	echo "Download new environment configuration"
-	rm -f ${tmpFold}/${cfgTar}
-	curl --krb private ${webDir}/${cfgTar} > ${tmpFold}/${cfgTar} -u :
-	echo "DownloadCfg" `date` >> ${progFile}
+	    echo "Download new environment configuration"
+	    rm -f ${tmpFold}/${cfgTar}
+	    curl --krb private ${webDir}/${cfgTar} > ${tmpFold}/${cfgTar} -u :
+	    echo "DownloadCfg" `date` >> ${progFile}
     else
-	echo "Download new environment configuration - ALREADY DONE"
+	    echo "Download new environment configuration - ALREADY DONE"
     fi
 #  
     echo "DownloadDone" `date` >> ${progFile}
@@ -67,10 +68,8 @@ if [ -z "$cpScrDone" ]; then
 else
     echo "Copy install scripts to work area - ALREADY DONE"
 fi 
-echo "got here too"
 #
 # get list of models
-
 mdlListDone=`grep GenModelList ${progFile}`
 if [ -z "$mdlListDone" ]; then
    ${scrDir}/gen_model_list.sh ${scrDir}
@@ -81,7 +80,7 @@ fi
 #
 # Create EPICS snapshots
 epicsBkupDone=`grep EpicsBackup ${progFile}`
-if [ -z "epicsBkupDone" ]; then
+if [ -z "$epicsBkupDone" ]; then
    ${scrDir}/backup_epics.sh ${scrDir}
    echo "EpicsBackup" `date` >> ${progFile}
 else
@@ -90,7 +89,7 @@ fi
 #
 # Kill DAQ processes
 daqKillDone=`grep DaqKilled ${progFile}`
-if [ -z "daqKillDone" ]; then
+if [ -z "$daqKillDone" ]; then
    ${scrDir}/kill_daq.sh
    echo "DaqKilled" `date` >> ${progFile}
 else
@@ -99,7 +98,7 @@ fi
 #
 # Stop sub-models
 subStopDone=`grep SubStop ${progFile}`
-if [ -z "subStopDone" ]; then
+if [ -z "$subStopDone" ]; then
    ${scrDir}/stop_sub.sh ${scrDir}
    echo "SubStop" `date` >> ${progFile}
 else
@@ -108,7 +107,7 @@ fi
 #
 # Stop IOP models
 iopStopDone=`grep IopStop ${progFile}`
-if [ -z "iopStopDone" ]; then
+if [ -z "$iopStopDone" ]; then
    ${scrDir}/stop_iops.sh ${scrDir}
    echo "IopStop" `date` >> ${progFile}
 else
@@ -116,9 +115,8 @@ else
 fi
 # 
 # move and update userapps
-#
 appMoveDone=`grep UserAppMove ${progFile}`
-if [ -z "appMoveDone" ]; then
+if [ -z "$appMoveDone" ]; then
    ${scrDir}/move_userapps.sh 
    echo "UserAppMove" `date` >> ${progFile}
 else
@@ -131,8 +129,8 @@ rcgDir=/opt/rtcds/rtscore
 if [ -z "$cpRcgDone" ]; then
     echo "Copy this RCG in /opt/rtcds/rtscore" 
     mkdir -p ${rcgDir} 
-    rcgPath = ${thisDir}%%'/etc/install'
-    cp -rp rcgPath ${rcgDir}   
+    rcgPath=${thisDir%%/etc/install}
+    cp -Rp ${rcgPath} ${rcgDir}   
     rcgPtr=${rcgPath##/*/}
     cd ${rcgDir}
     rm -f release
@@ -145,7 +143,7 @@ fi
 #
 #  install new cfg
 cfgUpdateDone=`grep CfgUpdate ${progFile}`
-if [ -z "cfgUpdateDone" ]; then
+if [ -z "$cfgUpdateDone" ]; then
     echo "Install new cdscfg"
     cd ${tmpFold}
     tar -xzf ${cfgTar}
@@ -157,11 +155,10 @@ if [ -z "cfgUpdateDone" ]; then
 else
     echo "Install new cdscfg - ALREADY DONE"
 fi
-
 #  install new mbuf
 #
 mbufUpdateDone=`grep MbufUpdate ${progFile}`
-if [ -z "mbufUpdateDone" ]; then
+if [ -z "$mbufUpdateDone" ]; then
    ${scrDir}/new_mbuf.sh
    echo "MbufUpdate" `date` >> ${progFile}
 else
@@ -170,7 +167,7 @@ fi
 
 # install new awgtpman
 awgTpUpdateDone=`grep AwgTpUpdate ${progFile}`
-if [ -z "awgTpUpdateDone" ]; then
+if [ -z "$awgTpUpdateDone" ]; then
    ${scrDir}/new_awgtpman.sh ${rcgTag}
    echo "AwgTpUpdate" `date` >> ${progFile}
 else
@@ -179,7 +176,7 @@ fi
 
 # install new real-time dataviewer
 dvUpdateDone=`grep DvUpdate ${progFile}`
-if [ -z "dvUpdateDone" ]; then
+if [ -z "$dvUpdateDone" ]; then
    ${scrDir}/new_dv.sh ${rcgTag}
    echo "DvUpdate" `date` >> ${progFile}
 else
@@ -188,7 +185,7 @@ fi
 
 # create new build area
 cfgRtBuildDone=`grep CfgRtBuild ${progFile}`
-if [ -z "cfgRtBuildDone" ]; then
+if [ -z "$cfgRtBuildDone" ]; then
    echo "Configure real-time build area"	
    cd ${RTCDSROOT}
    mkdir -p rtbuild
@@ -242,4 +239,3 @@ if [ -z "$mdlRestartDone" ]; then
 else
    echo "Restart DAQ built with new RCG - ALREADY DONE"	
 fi
-

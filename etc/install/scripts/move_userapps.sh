@@ -22,7 +22,7 @@ else
        appsSvn="https://redoubt.ligo-wa.caltech.edu/svn/cds_user_apps"
        cd ${newHome}
        svn co ${appsSvn}
-       ln -s trunk release
+       ln -s cds_user_apps/trunk release
     fi
 fi
 echo "Update userapps from cds_user_apps Subversion"

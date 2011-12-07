@@ -4,7 +4,6 @@ echo "Get lists of models"
 # Were we passed UPDATE_DIR information on the command line?
 if [ $# -gt 0 ]; then
    UPDATE_DIR=$1
-   echo 'OR HERE'
 else
   if [ "$UPDATE_DIR" ]; then
      UPDATE_DIR=${UPDATE_DIR}
@@ -13,7 +12,6 @@ else
      mkdir -p $UPDATE_DIR
   fi   
 fi
-echo 'GOT HER'
 mdlDir=${UPDATE_DIR}/models
 mkdir -p ${mdlDir}
 #
