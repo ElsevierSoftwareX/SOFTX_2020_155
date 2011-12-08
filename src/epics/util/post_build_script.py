@@ -311,8 +311,10 @@ def read_tree(node,name_so_far):
     dict_of_params = {}
     list_of_params = model_params.split('\\n')
     for param in list_of_params:
-      param.split('=') 
-      dict_of_params[param.split('=')[0]] = param.split('=')[1]
+      try: 
+        dict_of_params[param.split('=')[0]] = param.split('=')[1]
+      except:
+        pass
 
     #Default substitions for screens and script inputs
     default_subs = []
