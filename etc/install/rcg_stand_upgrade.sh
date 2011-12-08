@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# script rcg_upgrade.sh - Upgrade RCG on front-end to 2.4
+# script rcg_stand_upgrade.sh - Upgrade RCG on stand-alone front-end to 2.4
 #
 # save current location
 thisDir=`pwd`
@@ -33,6 +33,12 @@ cfgTar=cdscfg-2_4.tar.gz
 echo 'downDone' $downDone
 if [ -z "$downDone" ]; then
     echo "Downloading files using Kerberos login"
+    klLoc=`which klist` 
+    if [ -z "$klLoc" ]; then
+        echo " Kerberos not installed, emerge krb5, curl"
+        sudo emerge krb5
+        sudo emerge curl
+    fi    
     kname=`klist | grep Default`
     if [ -z "$kname" ]; then
         echo "Kerberos login not set - restart after doing kinit <albert.einstein>@LIGO.ORG"
