@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# script rcg_upgrade.sh - Upgrade RCG on front-end to 2.4
+# script rcg_stand_upgrade.sh - Upgrade RCG on stand-alone front-end to 2.4
 #
 # save current location
 thisDir=`pwd`
@@ -33,6 +33,12 @@ cfgTar=cdscfg-2_4.tar.gz
 echo 'downDone' $downDone
 if [ -z "$downDone" ]; then
     echo "Downloading files using Kerberos login"
+    klLoc=`which klist` 
+    if [ -z "$klLoc" ]; then
+        echo " Kerberos not installed, emerge krb5, curl"
+        sudo emerge krb5
+        sudo emerge curl
+    fi    
     kname=`klist | grep Default`
     if [ -z "$kname" ]; then
         echo "Kerberos login not set - restart after doing kinit <albert.einstein>@LIGO.ORG"
@@ -46,7 +52,7 @@ if [ -z "$downDone" ]; then
     if [ -z "$downCfg" ]; then
 	    echo "Download new environment configuration"
 	    rm -f ${tmpFold}/${cfgTar}
-	    curl --krb private ${webDir}/${cfgTar} > ${tmpFold}/${cfgTar} -u :
+	    curl -u : --negotiate ${webDir}/${cfgTar} > ${tmpFold}/${cfgTar}
 	    echo "DownloadCfg" `date` >> ${progFile}
     else
 	    echo "Download new environment configuration - ALREADY DONE"
@@ -118,7 +124,11 @@ fi
 appMoveDone=`grep UserAppMove ${progFile}`
 if [ -z "$appMoveDone" ]; then
    ${scrDir}/move_userapps.sh 
+   retCode=#?
    echo "UserAppMove" `date` >> ${progFile}
+   if [ "$retCode -ne 0" ]; then
+       exit 1
+   fi
 else
    echo "Move userapps to /opt/rtcds/userapps - ALREADY DONE"
 fi
@@ -146,6 +156,8 @@ cfgUpdateDone=`grep CfgUpdate ${progFile}`
 if [ -z "$cfgUpdateDone" ]; then
     echo "Install new cdscfg"
     cd ${tmpFold}
+    echo " went to "${tmpFold}
+    echo "try to open" ${cfgTar}
     tar -xzf ${cfgTar}
     cd cdscfg/install
     ./cfg_fe.sh
@@ -155,16 +167,29 @@ if [ -z "$cfgUpdateDone" ]; then
 else
     echo "Install new cdscfg - ALREADY DONE"
 fi
+#
+# install RCG scripts
+rcgScrDone=`grep RcgScripts ${progFile}`
+if [ -z "$rcgScrDone" ]; then
+    echo "Copy RCG scripts to scripts area"
+    cd ${rcgDir}/release
+    cp src/epics/util/iniChk.pl /opt/rtcds/${site}/${ifo}/scripts
+    cd ${thisDir}
+    echo "RcgScripts" `date` >> ${progFile}
+else
+    echo "Install RCG scripts - ALREADY DONE"
+fi
+
 #  install new mbuf
 #
 mbufUpdateDone=`grep MbufUpdate ${progFile}`
 if [ -z "$mbufUpdateDone" ]; then
-   ${scrDir}/new_mbuf.sh
+   ${scrDir}/new_mbuf.sh ${rcgTag}
    echo "MbufUpdate" `date` >> ${progFile}
 else
    echo "Update mbuf - ALREADY DONE"
 fi
-
+#
 # install new awgtpman
 awgTpUpdateDone=`grep AwgTpUpdate ${progFile}`
 if [ -z "$awgTpUpdateDone" ]; then
@@ -189,6 +214,7 @@ if [ -z "$cfgRtBuildDone" ]; then
    echo "Configure real-time build area"	
    cd ${RTCDSROOT}
    mkdir -p rtbuild
+   cd rtbuild
    ${RCG_DIR}/configure	
    echo "CfgRtBuild" `date` >> ${progFile}
 else
@@ -233,7 +259,7 @@ fi
 
 # Restart DAQ, NDS
 daqRestartDone=`grep DaqRestart ${progFile}`
-if [ -z "$mdlRestartDone" ]; then
+if [ -z "$daqRestartDone" ]; then
    ${scrDir}/restart_daq.sh
    echo "DaqRestart" `date` >> ${progFile}
 else

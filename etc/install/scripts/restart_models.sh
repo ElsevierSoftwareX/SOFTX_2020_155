@@ -2,13 +2,14 @@
 #  restart models
 echo "Restart models built with new RCG"
 # Were we passed UPDATE_DIR information on the command line?
-if [ $# -gt 0 ]; then
+if [ "$# -gt 0" ]; then
    UPDATE_DIR=$1
 else
   if [ "$UPDATE_DIR" ]; then
      UPDATE_DIR=${UPDATE_DIR}
   else
      UPDATE_DIR=/var/update
+  fi
 fi
 #
 source /opt/cdscfg/rtsetup.sh

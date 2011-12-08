@@ -1,6 +1,6 @@
 #!/bin/bash
 # script to build new stand-alone NDS
-if [ $# -gt 0 ]; then
+if [ "$# -gt 0" ]; then
     RCGTAG=$1
     echo " Build new mbuf for RCG $RCGTAG"
 else
@@ -10,7 +10,8 @@ fi
 #
 source /opt/cdscfg/rtsetup.sh
 #
-cdsCode
+cd ${RTBUILD_DIR}
+#
 make nds
 cp -p build/nds/nds ${RTCDSROOT}/target/fb/nds-${RCGTAG}
 cd ${RTCDSROOT}/target/fb
