@@ -9,6 +9,7 @@ else
      UPDATE_DIR=${UPDATE_DIR}
   else
      UPDATE_DIR=/var/update
+  fi
 fi
 mdlDir=${UPDATE_DIR}/models
 #
