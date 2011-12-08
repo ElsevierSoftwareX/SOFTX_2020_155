@@ -2,7 +2,7 @@
 #  rebuild models with new RCG
 echo "Rebuild models with new RCG"
 # Were we passed UPDATE_DIR information on the command line?
-if [ $# -gt 0 ]; then
+if [ "$# -gt 0" ]; then
    UPDATE_DIR=$1
 else
   if [ "$UPDATE_DIR" ]; then
@@ -14,7 +14,7 @@ mdlDir=${UPDATE_DIR}/models
 #
 source /opt/cdscfg/rtsetup.sh
 #
-cdsCode
+cd ${RTBUILD_DIR}
 #
 for iopmodel in $(cat ${mdlDir}/iop_models.txt); do
   make ${iopmodel}

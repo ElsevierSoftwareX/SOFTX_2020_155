@@ -253,7 +253,7 @@ fi
 
 # Restart DAQ, NDS
 daqRestartDone=`grep DaqRestart ${progFile}`
-if [ -z "$mdlRestartDone" ]; then
+if [ -z "$daqRestartDone" ]; then
    ${scrDir}/restart_daq.sh
    echo "DaqRestart" `date` >> ${progFile}
 else
