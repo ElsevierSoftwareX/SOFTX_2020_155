@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #  script to build new daqd
-if [ $# -gt 0 ]; then
+if [ "$# -gt 0" ]; then
     RCGTAG=$1
     echo " Build new mbuf for RCG $RCGTAG"
 else
@@ -10,7 +10,8 @@ fi
 #   
 source /opt/cdscfg/rtsetup.sh
 
-cdsCode
+cd ${RTBUILD_DIR}
+#
 make standiop
 cp -p build/standiop/daqd ${RTCDSROOT}/target/fb/daqd-${RCGTAG}
 cd  ${RTCDSROOT}/target/fb
