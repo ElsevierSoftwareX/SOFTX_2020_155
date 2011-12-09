@@ -68,8 +68,8 @@ program %SEQUENCER_NAME%
 string msg;
 assign msg to "{ifo}:FEC-{sysnum}_MSG";
 
-string daqmsg;
-assign daqmsg to "{ifo}:FEC-{sysnum}_MSGDAQ";
+string msgDAQ;
+assign msgDAQ to "{ifo}:FEC-{sysnum}_MSGDAQ";
 
 int statErrCnt;
 assign statErrCnt to "{ifo}:FEC-{sysnum}_STAT_ERR_CNT";
@@ -336,8 +336,11 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 %% char buffer[264];                                                     /* MA */
 %% char fName[2][256];                                                   /* MA */
 %% char fType[3][10] = {"IIR", "FIR", "IIR & FIR"};                      /* MA */
+%% char bufferDAQ[264];                                                  /* ma */
+%% char fNameDAQ[256];                                                   /* ma */
 
 %% FILE *pipePtr;                                                        /* MA */
+%% FILE *pipePtrDAQ;                                                     /* ma */
 
 #ifdef FIR_FILTERS                                                       /* MA */
 %% int fltrTypes = 2;                                                    /* MA */
@@ -346,9 +349,12 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 #endif                                                                   /* MA */
 
 %% long chkSum[2] = {-99999, -99999};                                    /* MA */
+%% long chkSumDAQ = -99999;                                              /* ma */
 %% long crc;                                                             /* MA */
+%% long crcDAQ;                                                          /* ma */
 
 %% struct stat statBuf;                                                  /* MA */
+%% struct stat statBufDAQ;                                               /* ma */
 
 %% int statusFlag = 0;                                                   /* MA */
 %% int matrixStatusFlag = 0;                                             /* MA */
@@ -1131,8 +1137,18 @@ state daqInit
 {
   when()
     {
-            strcpy(daqmsg, "Reading DAQ (.ini) file...");
-            pvPut(daqmsg);
+%%      strcpy(fNameDAQ, "/opt/rtcds/");                                 /* ma */
+%%      strcat_lower(fNameDAQ, fmc.site);                                /* ma */
+%%      strcat(fNameDAQ, "/");                                           /* ma */
+%%      strcat_lower(fNameDAQ, fmc.ifo);                                 /* ma */
+%%      strcat(fNameDAQ, "/chans/daq/");                                 /* ma */
+%%      strcat_upper(fNameDAQ, fmc.system);                              /* ma */
+%%      if (strlen(fmc.subSys[0].name) > 0) {                            /* ma */
+%%         strcat(fNameDAQ, "_");                                        /* ma */
+%%         strcat_upper(fNameDAQ, fmc.subSys[0].name);                   /* ma */
+%%      }                                                                /* ma */
+%%      strcat(fNameDAQ, ".ini");                                        /* ma */
+
         dcuId = atoi(macValueGet("sysnum"));
 %%      if (dcuId < 0 || dcuId >= DCU_COUNT) {
 %%        fprintf(stderr, "Invalid system number %d\n", dcuId);
@@ -1148,6 +1164,7 @@ state daqInit
 %%      memset(&infoTmp, 0, sizeof(infoTmp));
 %%      info->reconfig = 0;
 %%      if (loadDaqConfigFile(&infoTmp, site, ifo, daqsys)) {
+           strcpy(msgDAQ, localtimestring);
 %%         copy_info();
 %%         printf("%s%s daqConfig info is at rfm offset 0x%x\n", ifo, daqsys, ((char *)info) - ((char *)base));
 %%         info -> reconfig = 1;
@@ -1159,15 +1176,27 @@ state daqInit
 %%              }
 %%         }
 %%         dataSize /= 1000;
-           strcpy(daqmsg, localtimestring);
+           strcpy(msgDAQ, localtimestring);
 %%      } else {
-           strcpy(daqmsg, "ERROR reading DAQ file!");
+           strcpy(msgDAQ, "ERROR reading DAQ file!");
 %%         /*chnCnt = 0;*/
 %%         /*dataSize = 0;*/
 %%      }
+
+%%      strcpy(bufferDAQ, "cksum ");                                     /* ma */
+%%      strcat(bufferDAQ, fNameDAQ);                                     /* ma */
+%%      if (!stat(fNameDAQ, &statBufDAQ) ) {                             /* ma */
+%%         if ((pipePtrDAQ = popen(bufferDAQ, "r")) != NULL) {           /* ma */
+%%            fgets(bufferDAQ, 256, pipePtrDAQ);                         /* ma */
+%%            pclose(pipePtrDAQ);                                        /* ma */
+%%            sscanf(bufferDAQ, "%ld", &chkSumDAQ);                      /* ma */
+%%         }                                                             /* ma */
+%%      }                                                                /* ma */
+
+        pvPut(dcmsg);
         pvPut(chnCnt);
         pvPut(dataSize);
-        pvPut(daqmsg);
+        pvPut(msgDAQ);
     } state monScreen
 }
 
@@ -1175,15 +1204,35 @@ state daqProcess
 {
   when()
     {
+%%      int modDAQ;                                                      /* ma */
 
 %% pthread_mutex_lock (&seq_lock);
+
+%%      modDAQ = 0;                                                      /* ma */
+%%      strcpy(bufferDAQ, "cksum ");                                     /* ma */
+%%      strcat(bufferDAQ, fNameDAQ);                                     /* ma */
+%%      if (!stat(fNameDAQ, &statBufDAQ) ) {                             /* ma */
+%%         if ((pipePtrDAQ = popen(bufferDAQ, "r")) != NULL) {           /* ma */
+%%            fgets(bufferDAQ, 256, pipePtrDAQ);                         /* ma */
+%%            pclose(pipePtrDAQ);                                        /* ma */
+%%            sscanf(bufferDAQ, "%d", &crcDAQ);                          /* ma */
+%%            if (crcDAQ != chkSumDAQ) {                                 /* ma */
+%%               chkSumDAQ = crcDAQ;                                     /* ma */
+%%               modDAQ = 1;                                             /* ma */
+%%            }                                                          /* ma */
+%%         }                                                             /* ma */
+%%      }                                                                /* ma */
+%%      if (modDAQ) {                                                    /* ma */
+           strcpy(msgDAQ, "Modified DAQ file detected");                 /* ma */
+	   pvPut(msgDAQ);                                                /* ma */
+%%      }                                                                /* ma */
 
         pvGet(reload);
         if (reload)
 %%        {
 %%          info -> reconfig = 0;
-            strcpy(daqmsg, "Reading DAQ (.ini) file...");
-            pvPut(daqmsg);
+            strcpy(msgDAQ, "Reading DAQ (.ini) file...");
+            pvPut(msgDAQ);
 %%          if (loadDaqConfigFile(&infoTmp, site, ifo, daqsys)) {
 %%            copy_info();
 %%            printf("%s%s daqConfig info is at rfm offset 0x%x\n", ifo, daqsys, ((char *)info) - ((char *)base))
@@ -1198,15 +1247,15 @@ state daqProcess
 %%            }
 %%            dataSize /= 1000;
 %%            sleep(1);
-              strcpy(daqmsg, localtimestring);
+              strcpy(msgDAQ, localtimestring);
 %%          } else {
 %%            chnCnt = 0;
 %%            dataSize = 0;
-              strcpy(daqmsg, "ERROR reading DAQ file!");
+              strcpy(msgDAQ, "ERROR reading DAQ file!");
 %%          }
             pvPut(chnCnt);
             pvPut(dataSize);
-            pvPut(daqmsg);
+            pvPut(msgDAQ);
 %%        }
         reload = 0;
         pvPut(reload);
