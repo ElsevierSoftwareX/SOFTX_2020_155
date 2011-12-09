@@ -1424,6 +1424,7 @@ udelay(1000);
 		    {
 			// Capture cpu clock for cpu meter diagnostics
 			rdtscl(cpuClock[0]);
+#ifdef ADC_MASTER
 			// if(clock16K == 65535) 
 			if(clock16K == 0) 
 			{
