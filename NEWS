@@ -1,3 +1,16 @@
+===========================
+Overview of changes for 2.5 - not yet branched or released
+===========================
+- map.c has fix added for DAC modules with PEX8111 interface chips ie
+  all those boards that are native PCIe and not PCM cards (older revs).
+- Reinstated DAC DMA as default mode after fix above. Since DAC buffer
+  now used as a buffer, of sorts, moved DMA code into DAC write area.
+- New parts for CONTEC6464 binary I/O modules for use in user application
+  models - NOTE part for use in IOP is not changed.
+- DAC names no longer matter ie code only check card_num=
+- skeleton.st updated to check if DAQ .ini has changed since
+  last changed since last file load to front end.
+===========================
 Overview of changes for 2.4
 ===========================
 
