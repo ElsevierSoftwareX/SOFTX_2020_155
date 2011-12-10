@@ -46,6 +46,8 @@
 #define ACS_24DIO		9
 #define CON_1616DIO		10
 #define CON_6464DIO		11
+#define CDO64			12
+#define CDI64			13
 
 /* Cards configuration */
 typedef struct CDS_CARDS {
@@ -241,6 +243,7 @@ typedef struct GSA_18BIT_DAC_REG {
 #define GSAO_18BIT_ENABLE_CLOCK (1 << 5)
 #define GSAO_18BIT_SIMULT_OUT	(1 << 18)
 #define GSAO_18BIT_DIO_RW	0x80	// Set first nibble write, second read for Watchdog
+#define GSAO_18BIT_PRELOAD	64	// Number of data points to preload DAC FIFO on startup (8 chan x 8 values)
 
 /* GSA DAC Module Definitions ********************************************************* */
 /* Structure defining DAC module PCI register layout	*/
@@ -274,6 +277,7 @@ typedef struct GSA_DAC_REG{
 #define GSAO_FIFO_512           6
 #define GSAO_FIFO_1024          7
 #define GSAO_FIFO_2048          8
+#define GSAO_16BIT_PRELOAD	144	// Number of data points to preload DAC FIFO on startup (16 chan x 9 values)
 
 #define VMIC_VID		0x114a
 #define VMIC_TID		0x5565
