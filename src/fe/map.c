@@ -602,6 +602,27 @@ unsigned int readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
 	return out;
 }
 
+void set_8111_prefetch(struct pci_dev *dacdev) {
+	struct pci_dev *dev = dacdev->bus->self;
+
+	printk("set_8111_prefetch: subsys=0x%x; vendor=0x%x\n", dev->device, dev->vendor);
+	if ((dev->device == 0x8111) && (dev->vendor == PLX_VID)) {
+		unsigned int reg;
+	  	// Handle PEX 8111 setup, enable prefetch, set pref size to 64
+	  	// These numbers come from reverse engineering the GSC pxe8111 driver
+	  	// and using their prefetch program to enable the prefetch and set pref size to 64
+	  	pci_write_config_dword(dev,132, 72);
+	  	pci_read_config_dword(dev,136, &reg);
+	  	pci_write_config_dword(dev,136, reg);
+	  	pci_write_config_dword(dev,132, 72);
+	  	pci_read_config_dword(dev,136, &reg);
+	  	pci_write_config_dword(dev,136, reg | 1);
+	  	pci_write_config_dword(dev,132, 12);
+	  	pci_read_config_dword(dev,136, &reg);
+	  	pci_write_config_dword(dev,136, reg | 0x8000000);
+	}
+}
+
 // *****************************************************************************
 // Routine to initialize DAC modules
 // *****************************************************************************
@@ -666,6 +687,8 @@ int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
   	  pHardware->dacConfig[devNum] = (int) (dacPtr[devNum]->ASSC);
   	  pHardware->dacType[devNum] = GSC_16AO16;
 	  pHardware->dacCount ++;
+
+	  set_8111_prefetch(dacdev);
 	  return(0);
 }
 
@@ -676,6 +699,7 @@ int map18bitDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
   static unsigned int pci_io_addr;
   int pedStatus;
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;
+  unsigned int reg;
 
 	  devNum = pHardware->dacCount;
           // Enable the device, PCI required
@@ -739,6 +763,8 @@ int map18bitDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
   	  pHardware->dacConfig[devNum] = (int) (dac18bitPtr->ASY_CONFIG);
   	  pHardware->dacType[devNum] = GSC_18AO8;
 	  pHardware->dacCount ++;
+
+	  set_8111_prefetch(dacdev);
 	  return(0);
 }
 
