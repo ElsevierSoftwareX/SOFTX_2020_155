@@ -1,3 +1,11 @@
+Overview of changes for 2.4.1
+===========================
+- map.c has fix added for DAC modules with PEX8111 interface chips ie
+  all those boards that are native PCIe and not PCM cards (older revs).
+- controller.c and cdsHardware.h - Reinstated DAC DMA as default mode after fix above. Since DAC FIFO
+  now used as a buffer, of sorts, moved DMA code into DAC write area.
+
+===========================
 Overview of changes for 2.4
 ===========================
 
