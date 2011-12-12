@@ -2746,7 +2746,7 @@ int main(int argc, char **argv)
 					cdsPciModules.cDio6464lCount ++;
 					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
 					cdsPciModules.doInstance[kk] = doCnt;
-					status ++;
+					status += 2;
 				}
 				if((cdsPciModules.cards_used[jj].type == CDO64) && 
 					(cdsPciModules.cards_used[jj].instance == doCnt))
@@ -2822,7 +2822,7 @@ int main(int argc, char **argv)
 	//cdsPciModules.dacCount = ioMemData->dacCount;
 #endif
 	printf("%d PCI cards found \n",status);
-	if(cards != status)
+	if(status < cards)
 	{
 		printf(" ERROR **** Did not find correct number of cards! Expected %d and Found %d\n",cards,status);
 		cardCountErr = 1;

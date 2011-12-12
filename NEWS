@@ -7,6 +7,7 @@ Overview of changes for 2.4.1
 - Broke up read of IRIG-B time across two code cycles (1 to read seconds and one to read usec) to reduce delay this causes on cycle 0 
 (GPS 1 second mark) between IOP receipt of ADC data and IOP move of this data for use by
 user application processes. 
+- Bug fix for I/O error bit in STATE_WORD.
 
 ===========================
 Overview of changes for 2.4
