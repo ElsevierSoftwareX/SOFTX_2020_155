@@ -4,6 +4,9 @@ Overview of changes for 2.4.1
   all those boards that are native PCIe and not PCM cards (older revs).
 - controller.c and cdsHardware.h - Reinstated DAC DMA as default mode after fix above. Since DAC FIFO
   now used as a buffer, of sorts, moved DMA code into DAC write area.
+- Broke up read of IRIG-B time across two code cycles (1 to read seconds and one to read usec) to reduce delay this causes on cycle 0 
+(GPS 1 second mark) between IOP receipt of ADC data and IOP move of this data for use by
+user application processes. 
 
 ===========================
 Overview of changes for 2.4
