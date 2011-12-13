@@ -66,7 +66,7 @@ sub frontEndCode {
         $calcExp .= "   \L$::xpartName[$i]_total_counter = 0;\n";
         $calcExp .= "   pLocalEpics->$::systemName\.$::xpartName[$i]\_RESET = 0;\n";
         $calcExp .= "}\n";
-        $calcExp .= "else if (abs($::fromExp[0]) >= pLocalEpics->$::systemName\.$::xpartName[$i]\_TRIGGER) {\n";
+        $calcExp .= "else if (lfabs($::fromExp[0]) >= pLocalEpics->$::systemName\.$::xpartName[$i]\_TRIGGER) {\n";
         $calcExp .= "   \L$::xpartName[$i]_total_counter++;\n";
         $calcExp .= "   \L$::xpartName[$i]_total_counter%=100000000;\n";
         $calcExp .= "   \L$::xpartName[$i]_running_counter++;\n";
