@@ -23,8 +23,14 @@ sub printHeaderStruct {
 
 	    my $outhOut = "#define $::xpartName[$i]_$output_plus_one" . "_$input_plus_one " ."\t $::filtCnt\n"; 
 	    print ::OUTH $outhOut;
-	    my $epicsOut = "$::xpartName[$i]" . "_$output_plus_one" . "_$input_plus_one\n";
-            print ::EPICS $epicsOut;
+	    my $epicsOut = "$::xpartName[$i]" . "_$output_plus_one" . "_$input_plus_one";
+
+            if ($::allBiquad || $::biQuad[$::partCnt]) {
+                print ::EPICS "$epicsOut biquad\n";
+            } else {
+                print ::EPICS "$epicsOut\n";
+            }
+
             $::filterName[$::filtCnt] = "$::xpartName[$i]" . "_$output_plus_one" . "_$input_plus_one";
             $::filtCnt ++;
 	  }
