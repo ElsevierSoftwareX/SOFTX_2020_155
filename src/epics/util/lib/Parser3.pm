@@ -278,11 +278,16 @@ sub name_check {
 
 sub store_ezca_names {
    my ($node, $in_sub, $parent) =  @_;
+   my $src_block = ${$node->{FIELDS}}{"SourceBlock"};
+   my $name =  ${$node->{FIELDS}}{"Name"};
+   if ($src_block =~ /^cdsParameters/) {
+	# Parse cdsParameters now
+       	require "lib/Parameters.pm";
+   	CDS::Parameters::parseParams($name);
+   }
    if ($node->{NAME} ne "Block") {
 	   return 0;
    }
-   my $name =  ${$node->{FIELDS}}{"Name"};
-   my $src_block = ${$node->{FIELDS}}{"SourceBlock"};
    if ($src_block !~ /^cdsEzCa/ || $src_block eq undef) {
 	  return 0;
    }
