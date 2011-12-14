@@ -1,6 +1,7 @@
 ===========================
 Overview of changes for 2.5 - not yet branched or released
 ===========================
+- fixed broken "biquad=1" flag handling code.
 - map.c has fix added for DAC modules with PEX8111 interface chips ie
   all those boards that are native PCIe and not PCM cards (older revs).
 - Reinstated DAC DMA as default mode after fix above. Since DAC buffer
