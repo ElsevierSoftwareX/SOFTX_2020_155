@@ -2,16 +2,17 @@ package CDS::Parameters;
 use Exporter;
 @ISA = ('Exporter');
 
+
+# Print Epics communication structure into a header file
+# Current part number is passed as first argument
 sub partType {
 	return Parameters;
 }
 
-# Print Epics communication structure into a header file
-# Current part number is passed as first argument
-sub printHeaderStruct {
+sub parseParams {
         my ($i) = @_;
-	my @sp = split(/\\n/, $::xpartName[$i]);
-	#print "Model Parameters are $::xpartName[$i];\n";
+	my @sp = split(/\\n/, $i);
+	#print "Model Parameters are $i;\n";
 	#print "Split array is @sp\n";
 	for (@sp) {
 		@spp = split(/=/);
@@ -128,11 +129,15 @@ sub printHeaderStruct {
 				$::flipSignals = $spp[1];
 			} elsif ($spp[0] eq "biquad") { 
 				$::allBiquad = $spp[1];
+				print "AllBiquad set\n";
 			} elsif ($spp[0] eq "direct_dac_write") { 
 				$::directDacWrite = $spp[1];
 			}
 		}
 	}
+}
+
+sub printHeaderStruct {
 }
 
 # Print Epics variable definitions
