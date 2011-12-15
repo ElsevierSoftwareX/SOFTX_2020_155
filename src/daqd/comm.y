@@ -845,7 +845,7 @@ CommandLine: /* Nothing */
 			bnum = ((my_lexer *)lexer) -> cb -> blocks - 1;
 		  int bnum16th = ((my_lexer *)lexer) -> cb -> next_block_in_16th - 1;
 		  if (bnum16th < 0)
-			bnum = 15;
+			bnum16th = 15;
 
 		  gps = ((my_lexer *)lexer) -> cb -> block [bnum].prop.gps;
 		  gps_n = ((my_lexer *)lexer) -> cb -> block [bnum].prop16th [bnum16th].gps_n;
