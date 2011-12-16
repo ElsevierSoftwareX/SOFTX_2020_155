@@ -29,6 +29,6 @@ int main (void)
   ioctl (fd, IOCTL_SYMMETRICOM_STATUS, &req);
   printf("%ld\n", req);
   ioctl (fd, IOCTL_SYMMETRICOM_TIME, &t);
-  printf("%lds %ldu %ldn\n", t[0], t[1], t[2]);
+  printf("%ds %du %dn\n", t[0], t[1], t[2]);
   return(0);
 }
