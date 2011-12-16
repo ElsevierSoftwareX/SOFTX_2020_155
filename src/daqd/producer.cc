@@ -2244,7 +2244,7 @@ int cycle_delay = daqd.cycle_delay;
       //gmDaqIpc[daqd.controller_dcu].cycle = 0;
       controller_cycle = 0;
       //for (int i = 0; 2 != (gmDaqIpc[daqd.controller_dcu].cycle % 16); i++)
-      for (int i = 0; 1 != (controller_cycle % 16); i++)
+      for (int i = 0; 2 != (controller_cycle % 16); i++)
 #else
       shmemDaqIpc[daqd.controller_dcu]->cycle = 1;
       for (int i = 0; 1 != (shmemDaqIpc[daqd.controller_dcu]->cycle % 16); i++)
