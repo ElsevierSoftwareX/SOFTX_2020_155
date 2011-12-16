@@ -30,6 +30,7 @@
 static dev_t symmetricom_dev;
 static struct cdev symmetricom_cdev;
 static int card_present;
+static int card_type; /* 0 - symmetricom; 1 - spectracom */
 
 /* methods of the character device */
 static int symmetricom_open(struct inode *inode, struct file *filp);
@@ -82,7 +83,22 @@ static int symmetricom_ioctl(struct inode *inode, struct file *file, unsigned in
         case IOCTL_SYMMETRICOM_TIME:
 		{
         	  unsigned long req[3];
-		  if (card_present) {
+		  if (card_present && card_type == 1) {
+  			volatile TSYNC_REGISTER *timeRead = gps;
+  			unsigned int timeSec,timeNsec,sync,junk;
+
+  			junk = timeRead->SUPER_SEC_LOW;
+        		timeSec = timeRead->BCD_SEC;
+        		timeNsec = timeRead->SUB_SEC;
+        		timeSec += 31190400 + 315964815;
+        		sync = ((timeNsec >> 31) & 0x1) + 1;
+			timeNsec &= 0xfffffff;
+			timeNsec *= 5;
+        		//unsigned int tsyncUsec = timeNsec / 1000;
+        		//unsigned int tsyncNsecRes = timeNsec % 1000;
+        		printk("time = %u %u %u\n",timeSec, timeNsec, 0);
+			req[0] = timeSec; req[1] = timeNsec/1000; req[2] = timeNsec%1000;
+		  } else if (card_present && card_type == 0) {
 	      	  gps[0] = 1;
 	      	  //printk("Current time %ds %dus %dns \n", gps[0x34/4], 0xfffff & gps[0x30/4], 100 * ((gps[0x30/4] >> 20) & 0xf));
 		  req[0] = gps[0x34/4];
@@ -144,15 +160,77 @@ static int __init symmetricom_init(void)
 	if (symdev) {
 		printk("Symmetricom GPS card on bus %x; device %x\n", symdev->bus->number, PCI_SLOT(symdev->devfn));
 		card_present = 1;
+		card_type = 0;
 	} else {
 		ret = 0;
-                printk("Symmetricom GPS card not found\n");
+                //printk("Symmetricom GPS card not found\n");
                 //goto out_unalloc_region;
 		card_present = 0;
 		gps = 0xdeadbeaf;
 	}
-	
-if (card_present) {
+if (!card_present) {
+	/* Try looking for Spectracom GPS card */
+	symdev = pci_get_device (TSYNC_VID, TSYNC_TID, 0);
+	if (symdev) {
+		printk("Spectracom GPS card on bus %x; device %x\n", symdev->bus->number, PCI_SLOT(symdev->devfn));
+		card_present = 1;
+		card_type = 1;
+	} else {
+		ret = 0;
+                //printk("Symmetricom GPS card not found\n");
+                //goto out_unalloc_region;
+		card_present = 0;
+		gps = 0xdeadbeaf;
+	}
+
+}
+
+if (!card_present) {
+        printk("Symmetricom/Spectracom GPS card not found\n");
+} else if (card_type == 1) {
+  unsigned int i,ii;
+  static unsigned int pci_io_addr;
+  int pedStatus;
+  unsigned int days,hours,min,sec,msec,usec,nanosec,tsync;
+  unsigned char *addr1;
+  TSYNC_REGISTER *myTime;
+
+  pedStatus = pci_enable_device(symdev);
+  pci_read_config_dword(symdev, PCI_BASE_ADDRESS_0, &pci_io_addr);
+  pci_io_addr &= 0xfffffff0;
+  printk("TSYNC PIC BASE 0 address = %x\n", pci_io_addr);
+
+  addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x30);
+  gps = addr1;
+  printk("Remapped 0x%p\n", addr1);
+
+  myTime = (TSYNC_REGISTER *)addr1;
+for(ii=0;ii<2;ii++)
+{
+  i = myTime->SUPER_SEC_LOW;
+  sec = (i&0xf) + ((i>>4)&0xf) * 10;
+  min = ((i>>8)&0xf) + ((i>>12)&0xf)*10;
+  hours = ((i>>16)&0xf) + ((i>>20)&0xf)*10;
+  days = ((i>>24)&0xf) + ((i>>28)&0xf)*10;
+
+  i = myTime->SUPER_SEC_HIGH;
+  days += (i&0xf)*100;
+
+  i = myTime->SUB_SEC;
+  // nanosec = ((i & 0xffff)*5) + (i&0xfff0000);
+  nanosec = ((i & 0xfffffff)*5);
+  tsync = (i>>31) & 1;
+
+  i = myTime->BCD_SEC;
+  sec = i - 315964819;
+  i = myTime->BCD_SUB_SEC;
+  printk("date = %d days %2d:%2d:%2d\n",days,hours,min,sec);
+  usec = (i&0xf) + ((i>>4)&0xf) *10 + ((i>>8)&0xf) * 100;
+  msec = ((i>>16)&0xf) + ((i>>20)&0xf) *10 + ((i>>24)&0xf) * 100;
+  printk("bcd time = %d sec  %d milliseconds %d microseconds  %d nanosec\n",sec,msec,usec,nanosec);
+  printk("Board sync = %d\n",tsync);
+}
+} else if (card_type == 0) {
 	pci_enable_device(symdev);
 	pci_read_config_dword(symdev, PCI_BASE_ADDRESS_2, &pci_io_addr);
 	pci_io_addr &= 0xfffffff0;
