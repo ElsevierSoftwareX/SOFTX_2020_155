@@ -66,6 +66,9 @@ receiver_mx(int neid)
 	//float *testData;
 	uint32_t match_val=MATCH_VAL_MAIN;
 
+	const struct sched_param param = { 10 };
+        pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
+
 
 	// Allocate NUM_RREQ MX packet receive buffers
 	int len = sizeof(struct daqMXdata);
