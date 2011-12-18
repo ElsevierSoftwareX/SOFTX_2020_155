@@ -67,15 +67,17 @@ static int symmetricom_ioctl(struct inode *inode, struct file *file, unsigned in
         case IOCTL_SYMMETRICOM_STATUS:
                 {
         	  unsigned long req;
-		  if (card_present) {
-		  unsigned int time0 = gps[0x30/4];
-		  if (time0 & (1<<24)) {
+		  if (card_present && card_type == 1) {
+  			req = (((volatile TSYNC_REGISTER *)gps)->SUB_SEC >> 31) & 1;
+		  } else if (card_present && card_type == 0) {
+		  	unsigned int time0 = gps[0x30/4];
+		  	if (time0 & (1<<24)) {
 		  		//printk("Symmetricom unlocked\n");
 				req = 0;
-		  } else  {
+		  	} else  {
 		  		//printk ("Symmetricom locked!\n");
 				req = 1;
-		  }
+		  	}
 		  } else req = 1;
                   if (copy_to_user ((void *) arg, &req,  sizeof (req))) return -EFAULT;
                 }
@@ -96,7 +98,7 @@ static int symmetricom_ioctl(struct inode *inode, struct file *file, unsigned in
 			timeNsec *= 5;
         		//unsigned int tsyncUsec = timeNsec / 1000;
         		//unsigned int tsyncNsecRes = timeNsec % 1000;
-        		printk("time = %u %u %u\n",timeSec, timeNsec, 0);
+        		//printk("time = %u %u %u\n",timeSec, timeNsec, 0);
 			req[0] = timeSec; req[1] = timeNsec/1000; req[2] = timeNsec%1000;
 		  } else if (card_present && card_type == 0) {
 	      	  gps[0] = 1;
