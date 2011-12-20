@@ -5,6 +5,7 @@ static char *versionId = "Version $Id$" ;
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/mman.h>
 #include <unistd.h>
 #include "dtt/gdsmain.h"
 #include "dtt/gdstask.h"
@@ -66,6 +67,7 @@ CDS_HARDWARE cdsPciModules;
       taskID_t		awgTID = 0;
       int		run_awg = 1;
       int		run_tpman = 1;
+      int 		lckall = 0;
 
 
 #if defined(OS_SOLARIS)
@@ -89,8 +91,11 @@ CDS_HARDWARE cdsPciModules;
       }
    
       system_name[0] = 0;
-      while ((c = getopt (argc, argv, "h?ta01248s:l:")) != EOF) {
+      while ((c = getopt (argc, argv, "h?ta01248ws:l:")) != EOF) {
          switch (c) {
+	    case 'w':
+		lckall = 1;
+		break;
 	    case 's':
 		if (strlen(optarg) > (PARAM_ENTRY_LEN-2)) {
 			printf("System name is too long\n");
@@ -154,11 +159,17 @@ CDS_HARDWARE cdsPciModules;
 		"	-2 : run awg at 32 kHz\n"
 		"	-4 : run awg at 64 kHz\n"
 		"	-8 : run awg at 128 kHz\n"
-		"	-8 -2 : run awg at 256 kHz\n");
+		"	-8 -2 : run awg at 256 kHz\n"
+		"	-w : lock all pages in memory\n");
          return 1;
       }
    
       if (!run_awg && !run_tpman) exit(0);
+
+      if (lckall) {
+      	// Lock all current and future process pages in memory
+      	mlockall(MCL_FUTURE);
+      }
 
 #ifdef __linux__
       initReflectiveMemory();
