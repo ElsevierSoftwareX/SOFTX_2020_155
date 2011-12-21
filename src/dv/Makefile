@@ -1,29 +1,54 @@
+# Dataviewer Makefile
+
+# Dataviewer 'version'
+VERSION=2.3.1d
+
+# Installation Location
+INSTALL_PREFIX=/ligo/apps
+
+# Host OS/Architecture selection
+# Supported systems are Darwin, Linux, SunOS
+# There's probably a more elegant way to do this, but this works reasonably
+# enough.
+
+ifeq ($(shell uname), Darwin)
+BUILD_OS=darwin
+BUILD_ARCH=darwin-x86_64
+endif
+
+ifeq ($(shell uname), Linux)
+BUILD_OS=linux
+BUILD_ARCH=${EPICS_HOST_ARCH}
+endif
+
+ifeq ($(shell uname), SunOS)
+BUILD_OS=solaris
+BUILD_ARCH=${EPICS_HOST_ARCH}
+endif
+
+ifeq ($(BUILD_OS),)
+$(error Build OS is unsupported.)
+endif
+
 all:
+	@echo Building for ${BUILD_OS}, arch: ${BUILD_ARCH}...
 	cd Lib/UTC_GPS; make
-	-cd Th; make
-	-cd Display; make framer4 frameMemRead
-	cd Control; make dc3
+	cd Th; make
+	cd Display; make -f Makefile.${BUILD_OS} framer4 frameMemRead
+	cd Control/java_widgets/lib; make -f Makefile.${BUILD_OS}
+	cd Control; make -f Makefile.${BUILD_OS} dc3
 
 install:
-	mkdir -p /opt/rtapps/dv
-	install Control/dc3 /opt/rtapps/dv
-	sed 's:INSTALL_PATH:/opt/rtapps/dv:' Control/dataviewer | sed 's:LOCAL_GRACE:/opt/rtapps:' > /opt/rtapps/dv/dataviewer
-	chmod a+x /opt/rtapps/dv/dataviewer
-#	install Control/dataviewer /opt/rtapps/dv
-	install Display/framer4 /opt/rtapps/dv
-	install Display/frameMemRead /opt/rtapps/dv
-	
-ligoapps:
-	mkdir -p /ligo/apps/linux-x86_64/dv-2.3
-	install Control/dc3 /ligo/apps/linux-x86_64/dv-2.3
-	sed 's:INSTALL_PATH:/ligo/apps/linux-x86_64/dv-2.3:' Control/dataviewer | sed 's:LOCAL_GRACE:/ligo/apps/linux-x86_64:' > /ligo/apps/linux-x86_64/dv-2.3/dataviewer
-	chmod a+x /ligo/apps/linux-x86_64/dv-2.3/dataviewer
-#	install Control/dataviewer /ligo/apps/linux-x86_64/dv-2.3
-	install Display/framer4 /ligo/apps/linux-x86_64/dv-2.3
-	install Display/frameMemRead /ligo/apps/linux-x86_64/dv-2.3
+	mkdir -p ${INSTALL_PREFIX}/${BUILD_ARCH}/dv-${VERSION}
+	install Control/dc3 ${INSTALL_PREFIX}/${BUILD_ARCH}/dv-${VERSION}/dv
+	sed 's:INSTALL_PATH:${INSTALL_PREFIX}/${BUILD_ARCH}/dv-${VERSION}:' Control/dataviewer.${BUILD_OS} | sed 's:LOCAL_GRACE:${INSTALL_PREFIX}/${BUILD_ARCH}:' > ${INSTALL_PREFIX}/${BUILD_ARCH}/dv-${VERSION}/dataviewer
+	chmod a+x ${INSTALL_PREFIX}/${BUILD_ARCH}/dv-${VERSION}/dataviewer
+	install Display/framer4 ${INSTALL_PREFIX}/${BUILD_ARCH}/dv-${VERSION}
+	install Display/frameMemRead ${INSTALL_PREFIX}/${BUILD_ARCH}/dv-${VERSION}
 
 clean:
 	cd Lib/UTC_GPS; make clean
 	cd Th; make clean
-	cd Display; make clean
-	cd Control; make clean
+	cd Display; make -f Makefile.${BUILD_OS} clean
+	cd Control/java_widgets/lib; make -f Makefile.${BUILD_OS} clean
+	cd Control; make -f Makefile.${BUILD_OS} clean

@@ -124,16 +124,16 @@ serverConnect()  {
 	}
       }
       if (replace) {
-        sprintf ( chName[j], allChan[j].name );
+        sprintf ( chName[j], "%s", allChan[j].name );
         chRate[j] = allChan[j].rate;
-        sprintf ( chUnit[j], allChan[j].units );
+        sprintf ( chUnit[j], "%s", allChan[j].units );
       }
     }
     if ( c < 16 ) {
       for ( j=c; j<16; j++ ) {
-        sprintf ( chName[j], allChan[j].name );
+        sprintf ( chName[j], "%s", allChan[j].name );
         chRate[j] = allChan[j].rate;
-        sprintf ( chUnit[j], allChan[j].units );
+        sprintf ( chUnit[j], "%s", allChan[j].units );
       }
     }
     return 0;
@@ -176,7 +176,9 @@ void initApp(int argc, char **argv)
   restoreFile = 0;
   zoomflag = 0;
   nolimit = 0;
+#ifdef __APPLE__
   extern char *optarg;
+#endif
   while (  (c = getopt(argc, argv, optstring)) != -1 ) {
     /* options for starting dc3 */
     switch ( c ) {
@@ -225,7 +227,7 @@ void initApp(int argc, char **argv)
            
   }
   if (strcmp(origDir, "") == 0) {
-    fprintf ( stderr,"Error: the variable $DVPATH is undefined. Exit.\n" );
+    fprintf ( stderr,"Error: the -b argument is required.\nUsually this means the shell variable $DVPATH is undefined.  Exit.\n" );
     exit(0);
   }
   strcat(origDir, "/");
