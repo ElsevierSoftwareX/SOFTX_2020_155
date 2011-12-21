@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <signal.h>
+#include <string.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -454,7 +455,7 @@ daq_connect (daq_t *daq, char *host, int port)
   int resp;
   int v, rv;
   int gherr;
-#ifdef __linux__
+#if defined __linux__ || defined __APPLE__
   extern int h_errno;
   struct hostent *hentp;
 #else
@@ -472,7 +473,7 @@ daq_connect (daq_t *daq, char *host, int port)
     int on = 1;
     setsockopt (daq -> sockfd, SOL_SOCKET, SO_REUSEADDR, (const char *) &on, sizeof (on));
   }
-#ifdef __linux__
+#if defined __linux__ || defined __APPLE__
   hentp = gethostbyname (host);
   if (!hentp) {
     fprintf (stderr, "Can't find hostname `%s'\n", host);
@@ -527,7 +528,7 @@ connect_again:
   fcntl(daq -> sockfd, F_SETFL, 0);
 
   // Doing this does not work on Solaris
-#ifdef __linux__
+#if defined __linux__ || defined __APPLE__
   {
   int fl = fcntl(daq -> sockfd, F_GETFL, 0);
   fcntl(daq -> sockfd, F_SETFL, O_NONBLOCK);
@@ -536,7 +537,7 @@ connect_again:
   if (resp = daq_send (daq, "version;"))
     return resp;
 
-#ifdef __linux__
+#if defined __linux__ || defined __APPLE__
   fcntl(daq -> sockfd, F_SETFL, fl);
   }
 #endif
@@ -705,7 +706,7 @@ daq_recv_block (daq_t *daq)
       if (daq -> s)
 	daq -> s_size = nchannels;
       else {
-	fprintf (stderr, "malloc(%d) failed; errno=%d\n", alloc_size, errno);
+	fprintf (stderr, "malloc(%ld) failed; errno=%d\n", alloc_size, errno);
 	daq -> s_size = 0;
 	return -1;
       }
@@ -715,7 +716,7 @@ daq_recv_block (daq_t *daq)
       if (daq -> s)
 	daq -> s_size = nchannels;
       else {
-	fprintf (stderr, "realloc(%d) failed; errno=%d\n", alloc_size, errno);
+	fprintf (stderr, "realloc(%ld) failed; errno=%d\n", alloc_size, errno);
 	daq -> s_size = 0;
 	return -1;
       }
@@ -791,7 +792,7 @@ daq_recv_block (daq_t *daq)
 	{
 	  if (errno != EAGAIN) {
 #ifdef DAQC_ACCESS_VERBOSE_ERRORS
-	    fprintf (stderr, "read(2) error=%d; oread=%d;\n", errno, oread);
+	    fprintf (stderr, "read(2) error=%d; oread=%ld;\n", errno, oread);
 #endif
 	    return -1;
 	  }

@@ -16,7 +16,7 @@ char *montab[] = {
 , "December"
 } ;
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {

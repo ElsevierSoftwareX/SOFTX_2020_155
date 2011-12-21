@@ -1209,9 +1209,9 @@ FILE   *fp, *fp1, *fp2;
 	      fclose(fp2);
 	      DataQuit();
 	      for ( j=0; j<16; j++ ) {
-		sprintf ( chName[j], allChan[j].name );
+		sprintf ( chName[j], "%s", allChan[j].name );
 		chRate[j] = allChan[j].rate;
-		sprintf ( chUnit[j], allChan[j].units );
+		sprintf ( chUnit[j], "%s", allChan[j].units );
 	      }
 	      if ( c < 16 ) {
 		for ( j=c; j<16; j++ ) {
@@ -3292,7 +3292,7 @@ void setString()
 void showPage(Widget w, XtPointer client_data, XtPointer xt_call_data)
 {
 	XmPushButtonCallbackStruct *call_data = (XmPushButtonCallbackStruct *) xt_call_data ;
-	switch((int)client_data) {
+	switch((long)client_data) {
 		case 1:
 			XmProcessTraversal(connectButton, XmTRAVERSE_CURRENT);
 			break;
@@ -3985,7 +3985,7 @@ void printMessage(char msg[], int de)
 
 void multiSel(Widget w, XtPointer client_data, XtPointer xt_call_data)
 {
-  chMarked [(int)client_data] = XmToggleButtonGetState (w);
+  chMarked [(long)client_data] = XmToggleButtonGetState (w);
   channelMarked();
 }
 
@@ -5668,7 +5668,7 @@ void connectToServer(Widget w, XtPointer client_data, XtPointer xt_call_data)
 
 void sigSet(Widget w, XtPointer client_data, XtPointer xt_call_data)
 {
-	int chnum = (int) client_data;
+	int chnum = (long) client_data;
 	if (chnum <= 16 ) {
           sprintf (chChange, "%d", chnum);
 	  XmTextFieldSetString(selchan, chChange);

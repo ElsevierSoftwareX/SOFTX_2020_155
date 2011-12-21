@@ -348,7 +348,7 @@ static void InsertChild(Widget child)
 		}
 	}
 				
-	XtVaSetValues(child, XmNmappedWhenManaged, show, 0) ;
+	XtVaSetValues(child, XmNmappedWhenManaged, show, 0, NULL) ;
 }
 
 
@@ -586,7 +586,7 @@ static void CardSetPage(XdCardWidget cw, Widget page)
 	if (page != cw->card.currentPage) {
 		if ((child = cw->card.currentPage) != (Widget) 0) {
 			if (!child->core.being_destroyed) {
-				XtVaSetValues(child, XmNmappedWhenManaged, False, 0) ;
+				XtVaSetValues(child, XmNmappedWhenManaged, False, 0, NULL) ;
 			}
 		}
 
@@ -594,7 +594,7 @@ static void CardSetPage(XdCardWidget cw, Widget page)
 
 		if (page != (Widget) 0) {
 			if (!page->core.being_destroyed && page->core.managed) {
-				XtVaSetValues(page, XmNmappedWhenManaged, True, 0) ;
+				XtVaSetValues(page, XmNmappedWhenManaged, True, 0, NULL) ;
 			}
 
 			cw->card.currentPage = page ;

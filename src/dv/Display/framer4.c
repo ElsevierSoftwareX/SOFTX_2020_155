@@ -972,7 +972,9 @@ short chfound, chinsert;
 static short resetReadMode;
 
 	/* Check all the operator display options */
-	sprintf ( mb.mtext, "\0" );
+	/* sprintf ( mb.mtext, "\0" ); */
+	mb.mtext[0] = '\0';
+	mb.mtext[1] = '\0';
 	/*while ( (msgint = msgrcv(msqid, &mb, MSQSIZE, 0, 0)) > 0 ) { */
 	while (1 ) {
 	   if ( (msgint = msgrcv(msqid, &mb, MSQSIZE, 0, 0)) == -1 ){

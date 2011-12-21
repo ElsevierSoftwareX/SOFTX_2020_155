@@ -1,0 +1,6 @@
+#!/bin/bash
+mkdir /tmp/$$DC
+export DVPATH=INSTALL_PATH
+export LANG=C
+$DVPATH/dv -s ${LIGONDSIP} -a $$ -b $DVPATH $*
+/bin/rm -f -r /tmp/$$DC

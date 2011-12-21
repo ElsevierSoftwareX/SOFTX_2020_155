@@ -5,6 +5,7 @@
 /*----------------------------------------------------------------------*/
 
 
+#include <string.h> /* declarations of strcpy and others.*/
 #include "datasrv.h"
 #include "UTC_GPS/leapsecs.h"
 #include "UTC_GPS/tai.h"
@@ -16,6 +17,7 @@ struct caltime ctout;
 struct gps  gpsTime;
 struct gps gps;
 
+static int debug = 0 ; /* For debugging - JCB */
 
 #define  COMMANDSIZE   2048
 
@@ -36,21 +38,28 @@ daq_channel_t channelAll[MAX_CHANNELS];
 
 short         Fast = 1; /* 1 or 16 */
 
+/* Debug fprintf().  */
 void dfprintf(FILE *file, ...) {}
 
-int DataConnect(char* serverName, int serverPort, int lPort, void* read_data())
+/* int DataConnect(char* serverName, int serverPort, int lPort, void* read_data()) */ /* JCB */
+int DataConnect(char* serverName, int serverPort, int lPort, void* (*read_data)())
 {
-int  j;
+      int  j;
+
+      if (debug != 0) fprintf(stderr, "DataConnect()\n") ; /* JCB */
 
        listenerPort = lPort;
+       if (debug != 0) fprintf(stderr, "DataConnect() - calling daq_initialize()\n") ; /* JCB */
        if (0 == daq_initialize(&DataDaq, &listenerPort, read_data)) {
 	  perror("Couldn't initialize DAQ threads");
 	  return 1;
        }
+       if (debug != 0) fprintf(stderr, "DataConnect() - calling daq_connect()\n") ; /* JCB */
        if ( daq_connect(&DataDaq, serverName, serverPort) ) {
           //perror( "ERROR: Couldn't connect to the NDS server" );
           return 1;
        }
+       if (debug != 0) fprintf(stderr, "DataConnect() - calling daq_recv_channels()\n") ; /* JCB */
        if ( daq_recv_channels(&DataDaq, channelAll, MAX_CHANNELS, &NchannelAll) ) {
           //perror( "ERROR: Failed to receive channel information" );
           return 1;
@@ -63,12 +72,15 @@ int  j;
        /*for ( j = 0; j<NchannelAll; j++ )
 	 fprintf ( stderr, "%s\t%d\n", channelAll[j].name, channelAll[j].rate );*/
        
+       if (debug != 0) fprintf(stderr, "   protocol revision = %d\n", DataDaq.rev) ; /* JCB */
+       if (debug != 0) fprintf(stderr, "DataConnect() - returning\n") ; /* JCB */
+
        return 0;
 }
 
 int DataSimpleConnect(char* serverName, int serverPort)
 {
-int  j;
+      int  j;
 
        if ( daq_connect(&DataDaq, serverName, serverPort) ) {
           //perror( "ERROR: Couldn't connect to the NDS server" );
@@ -86,7 +98,7 @@ int  j;
 
 int DataReConnect(char* serverName, int serverPort)
 {
-int  j;
+      int  j;
 
        daq_disconnect(&DataDaq);
        //sleep(1);
@@ -121,7 +133,7 @@ void DataQuit()
 /* returns total channel number in the list  */
 int DataChanAdd(const char* chName, int dataRate)
 {
-int  index, j;
+      int  index, j;
     
       if ( all == 1 ) 
          return NchannelAll;
@@ -178,7 +190,7 @@ int  index, j;
 /* returns total channel number in the list  */
 int DataChanDelete(const char* chName)
 {
-int  j, pos=-1;
+      int  j, pos=-1;
 
       if ( strcmp(chName, "all") == 0 ) {
          NchanList = 0;
@@ -208,10 +220,10 @@ int  j, pos=-1;
 
 unsigned long DataWriteRealtime()
 {
-unsigned long ID;
-int    j;
-char   temp[COMMANDSIZE];
-int    isend;
+      unsigned long ID;
+      int    j;
+      char   temp[COMMANDSIZE];
+      int    isend;
 
        if ( all < 0 ) {
           perror( "datasrv: DataChanSet failed: no channel selected" );
@@ -261,10 +273,10 @@ int    isend;
 
 unsigned long DataWriteRealtimeFast()
 {
-unsigned long ID;
-int    j;
-char   temp[COMMANDSIZE];
-int    isend;
+      unsigned long ID;
+      int    j;
+      char   temp[COMMANDSIZE];
+      int    isend;
 
        if ( all < 0 ) {
           perror( "datasrv: DataChanSet failed: no channel selected" );
@@ -307,20 +319,20 @@ int    isend;
        Fast = 16;
 
        ID = daq_recv_id (&DataDaq);
-       fprintf ( stderr,"datasrv: DataWriteRealtimeFast ID=%d\n", ID );
+       fprintf ( stderr,"datasrv: DataWriteRealtimeFast ID=%lu\n", ID );
        return ID;
 }
 
 
 unsigned long    DataWrite(char* starttime, int duration, int isgps)
 {
-unsigned long ID;
-int    j;
-char   temp[COMMANDSIZE];
+      unsigned long ID;
+      int    j;
+      char   temp[COMMANDSIZE];
 
-long   starttimeInsec, mjd;
-int    yr,mo,da,hr,mn,sc;
-int    isend;
+      long   starttimeInsec, mjd;
+      int    yr,mo,da,hr,mn,sc;
+      int    isend;
      
        if ( isgps == 0 ) { /* UTC time */
 	 sscanf (starttime, "%d-%d-%d-%d-%d-%d", &yr,&mo,&da,&hr,&mn,&sc );
@@ -340,13 +352,13 @@ int    isend;
 	 starttimeInsec = gps.sec;
        }
        else {
-	 sscanf (starttime, "%d", &starttimeInsec );
+	 sscanf (starttime, "%ld", &starttimeInsec );
        }
        if ( all < 0 ) {
           perror( "datasrv: DataChanSet failed: no channel selected" );
 	  return -1;
        }
-       sprintf ( configure, "start net-writer \"%d\" %d %d ", listenerPort, starttimeInsec, duration );
+       sprintf ( configure, "start net-writer \"%d\" %ld %d ", listenerPort, starttimeInsec, duration );
        if ( all == 1 ) {
 	  strcat( configure, "all ");
        }
@@ -391,10 +403,10 @@ int    isend;
 
 unsigned long DataWriteTrendRealtime()
 {
-unsigned long ID;
-int    j;
-char   temp[COMMANDSIZE];
-int    isend;
+      unsigned long ID;
+      int    j;
+      char   temp[COMMANDSIZE];
+      int    isend;
 
        if ( all < 0 ) {
           perror( "datasrv: DataChanSet failed: no channel selected" );
@@ -438,14 +450,15 @@ int    isend;
 
 unsigned long    DataWriteTrend(char* starttime, int duration, int trendlength,  int isgps)
 {
-unsigned long ID;
-int    j;
-char   temp[COMMANDSIZE];
+      unsigned long ID;
+      int    j;
+      char   temp[COMMANDSIZE];
 
-long   starttimeInsec, mjd;
-int    yr,mo,da,hr,mn,sc;
-int    isend=0;
+      long   starttimeInsec, mjd;
+      int    yr,mo,da,hr,mn,sc;
+      int    isend=0;
      
+       if (debug != 0) fprintf(stderr, "DataWriteTrend()\n") ; /* JCB */
        if ( all < 0 ) {
           perror( "datasrv: DataChanSet failed: no channel selected" );
           return -1;
@@ -475,14 +488,14 @@ int    isend=0;
 	    }
 	  }
 	  else 
-	    sscanf (starttime, "%d", &starttimeInsec );
+	    sscanf (starttime, "%ld", &starttimeInsec );
        }
        if ( strcmp(starttime, "0") != 0 ) {
 	  if ( trendlength == 60 ) {
-	     sprintf ( configure, "start trend %d net-writer \"%d\" %d %d ", trendlength, listenerPort, starttimeInsec, duration );
+	     sprintf ( configure, "start trend %d net-writer \"%d\" %ld %d ", trendlength, listenerPort, starttimeInsec, duration );
 	  }
 	  else
-	     sprintf ( configure, "start trend net-writer \"%d\" %d %d ", listenerPort, starttimeInsec, duration );
+	     sprintf ( configure, "start trend net-writer \"%d\" %ld %d ", listenerPort, starttimeInsec, duration );
        }
        else {
 	  starttimeInsec = 0;
@@ -502,6 +515,11 @@ int    isend=0;
        }
        strcat(configure, ";");
        dfprintf ( stderr,"datasrv: configure chan = %s\n", configure );
+       if (debug != 0) 
+       {
+          fprintf(stderr, "DataWriteTrend() - command string = %s\n", configure) ; /* JCB */
+          fprintf(stderr, "DataWriteTrend() - Calling daq_send() \n") ; /* JCB */
+	 }
        isend = daq_send(&DataDaq, configure);
        if ( isend ) 
           fprintf ( stderr, "datasrv: DataWriteTrend failed in daq_send().\n" );
@@ -513,10 +531,13 @@ int    isend=0;
           return -2;
        }
        else if ( isend ) { 
+	  fprintf( stderr, "unknown error returned from daq_send()") ; /* JCB */
           return -2;
        }
 
+      if (debug != 0) fprintf(stderr, "DataWriteTrend() - calling daq_recv_id()\n") ; /* JCB */
       ID = daq_recv_id (&DataDaq);
+      if (debug != 0) fprintf(stderr, "DataWriteTrend() - daq_recv_id() returned %lu\n", ID) ; /* JCB */
       dfprintf ( stderr,"\n" );
       dfprintf ( stderr,"DataWriteTrend ID=%d starttime=%s(%d) duration=%d\n", ID, starttime,starttimeInsec, duration );
       return ID;
@@ -525,10 +546,10 @@ int    isend=0;
 
 void DataWriteStop(unsigned long processID)
 {
-char  tempstring[COMMANDSIZE];
-int   isend;
+      char  tempstring[COMMANDSIZE];
+      int   isend;
 
-       sprintf( tempstring, "kill net-writer %d;", processID );
+       sprintf( tempstring, "kill net-writer %ld;", processID );
        dfprintf ( stderr,"kill net-writer %d;\n", processID );
        isend = daq_send(&DataDaq, tempstring);
 #if 0
@@ -543,7 +564,7 @@ int   isend;
 
 void DataReadStart()
 {
-unsigned long blocknum;
+      unsigned long blocknum;
 
        if ( !(blocknum = daq_recv_block_num(&DataDaq)) ) {
 	 dfprintf ( stderr, "receiving data on-line %d \n", blocknum );
@@ -787,7 +808,7 @@ int  seconds, secrate;
 		   max = *((float *)( DataDaq.tb->data + pos + sizeof(float)*secrate + j*sizeof(float) ));
 		   *((unsigned int *)&max) = ntohl(*((unsigned int *)&max));
 		   mean = *((double *)( DataDaq.tb->data + pos + 2*sizeof(float)*secrate + j*2*sizeof(float) ));
-#ifdef __linux__
+#if defined __linux__ || defined __APPLE__
 		   mean1 = ntohd(mean);
 #else
 		   mean1 = mean;
@@ -836,7 +857,7 @@ int  seconds, secrate;
 			ntohl(*((unsigned int *)( DataDaq.tb->data + pos + sizeof(float)*secrate + j*sizeof(float) )));
 		   (trend+j)->max = max;
 		   mean = *((double *)( DataDaq.tb->data + pos + 2*sizeof(float)*secrate + j*2*sizeof(float) ));
-#ifdef __linux__
+#if defined __linux__ || defined __APPLE__
 		   mean1 = ntohd(mean);
 #else
 		   mean1 = mean;
@@ -863,7 +884,7 @@ int  seconds, secrate;
 		   (trend+j)->max = max1;
 		   }
 		   mean = *((double *)( DataDaq.tb->data + pos + 2*sizeof(int)*secrate + j*2*sizeof(int) ));
-#ifdef __linux__
+#if defined __linux__ || defined __APPLE__
 		   ((unsigned long *)&mean1)[1] = ntohl(((unsigned long *)&mean)[0]);
 		   ((unsigned long *)&mean1)[0] = ntohl(((unsigned long *)&mean)[1]);
 #else
@@ -1001,11 +1022,11 @@ char   temp[100];
        gpsTime.leap = 13;
        gps_to_utc(&gpsTime,&ctout);
        if ( ctout.date.year-2000 < 0 )
-	 sprintf ( timestamp, "%d-%02d-%02d-%02d-%02d-%02d", ctout.date.year-1900, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
+	 sprintf ( timestamp, "%ld-%02d-%02d-%02d-%02d-%02d", ctout.date.year-1900, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
        else if ( ctout.date.year-2000 < 10 )
-	 sprintf ( timestamp, "0%d-%02d-%02d-%02d-%02d-%02d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
+	 sprintf ( timestamp, "0%ld-%02d-%02d-%02d-%02d-%02d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
        else
-	 sprintf ( timestamp, "%d-%02d-%02d-%02d-%02d-%02d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
+	 sprintf ( timestamp, "%ld-%02d-%02d-%02d-%02d-%02d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
        /*fprintf ( stderr, "datasrv: DataTimestamp: %s (%d)\n", currentTime, DataDaq.tb->gps  );*/
        return;
 }
@@ -1028,11 +1049,11 @@ char   temp[100];
        gpsTime.leap = 13;
        gps_to_utc(&gpsTime,&ctout);
        if ( ctout.date.year-2000 < 0 )
-	 sprintf ( utcout, "%d-%d-%d-%d-%d-%d", ctout.date.year-1900, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
+	 sprintf ( utcout, "%ld-%d-%d-%d-%d-%d", ctout.date.year-1900, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
        else if ( ctout.date.year-2000 < 10 )
-	 sprintf ( utcout, "0%d-%d-%d-%d-%d-%d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
+	 sprintf ( utcout, "0%ld-%d-%d-%d-%d-%d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
        else
-	 sprintf ( utcout, "%d-%d-%d-%d-%d-%d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
+	 sprintf ( utcout, "%ld-%d-%d-%d-%d-%d", ctout.date.year-2000, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
        return;
 }
 
@@ -1043,6 +1064,7 @@ long  DataUTCtoGPS(char* utctime)
 long   mjd;
 int    yr,mo,da,hr,mn,sc;
      
+	 if (debug != 0) fprintf(stderr, "DataUTCtoGPS() - utctime = %s\n", utctime) ; /* JCB */
 	 sscanf (utctime, "%d-%d-%d-%d-%d-%d", &yr,&mo,&da,&hr,&mn,&sc );
 	 /*----- enter time in UTC ------------*/
 	 if ( yr == 98 || yr == 99 )
@@ -1055,7 +1077,17 @@ int    yr,mo,da,hr,mn,sc;
 	 ctin.minute     =mn;        /* [0,59] */
 	 ctin.second     =sc;        /* [0,60] */
 	 ctin.offset     =0;         /* offset in minutes from UTC [-5999,5999] */
+	 if (debug != 0) 
+	 {
+	    fprintf(stderr, " ctin.date.month = %d\n", ctin.date.month) ; /* JCB */
+	     fprintf(stderr, " ctin.date.day = %d\n", ctin.date.day) ; /* JCB */
+	     fprintf(stderr, " ctin.hour = %d\n", ctin.hour) ; /* JCB */
+	     fprintf(stderr, " ctin.minute = %d\n", ctin.minute) ; /* JCB */
+	     fprintf(stderr, " ctin.second = %d\n", ctin.second) ; /* JCB */
+	     fprintf(stderr, " ctin.offset = %ld\n", ctin.offset) ; /* JCB */
+	 }
 	 mjd=caldate_mjd(&ctin.date); /* modified Julian day */
+	 fprintf(stderr, " mjd = %ld\n", mjd) ;
 	 utc_to_gps(&ctin,&gps);
 	 return gps.sec;
 }
