@@ -52,7 +52,7 @@ extern void XDdisable_link ( Widget w, XtPointer client_data, XtPointer call_dat
 
 
 
-#include <unistd.h> /* Pick up execlp() declaration */
+
 #include <sys/stat.h>
 #include <dirent.h>
 #include "dc3m.h"
@@ -935,15 +935,15 @@ FILE *fp;
 	  fgpsdur = fgps1 - fgps0;
 	  if (startstop == 0 ) {
 	    DataGPStoUTC(fgps0, tempst);
-	    printf ( "Set start time %s (%ld)\n", tempst, fgps0 );
+	    printf ( "Set start time %s (%d)\n", tempst, fgps0 );
 	    temptime = fgps0;
 	  }
 	  else {
 	    DataGPStoUTC(fgps1, tempst);
-	    printf ( "Set stop time %s (%ld)\n", tempst, fgps1 );
+	    printf ( "Set stop time %s (%d)\n", tempst, fgps1 );
 	    temptime = fgps1;
 	  }
-	  printf ( "Maximum duration: %ld seconds = ", fgpsdur );
+	  printf ( "Maximum duration: %d seconds = ", fgpsdur );
 	  totalPlay.mins = 0;
 	  totalPlay.hours = 0;
 	  totalPlay.days = 0;
@@ -986,7 +986,7 @@ FILE *fp;
 	XmTextFieldSetString(playMn, num);
 	sprintf ( num, "%d", startsc );
 	XmTextFieldSetString(playSc, num);
-	sprintf ( tempst, "%ld", (long int) temptime );
+	sprintf ( tempst, "%d", temptime );
 	XmTextFieldSetString(gpstime, tempst);
 }
 
@@ -1209,9 +1209,9 @@ FILE   *fp, *fp1, *fp2;
 	      fclose(fp2);
 	      DataQuit();
 	      for ( j=0; j<16; j++ ) {
-		sprintf ( chName[j], allChan[j].name );
+		sprintf ( chName[j], "%s", allChan[j].name );
 		chRate[j] = allChan[j].rate;
-		sprintf ( chUnit[j], allChan[j].units );
+		sprintf ( chUnit[j], "%s", allChan[j].units );
 	      }
 	      if ( c < 16 ) {
 		for ( j=c; j<16; j++ ) {
@@ -2842,12 +2842,12 @@ unsigned long processID = 0;
 	XmPushButtonCallbackStruct *call_data = (XmPushButtonCallbackStruct *) xt_call_data ;
 
 	processID = atoi((char *)XmTextFieldGetString(lidtext));
-	printf ( "Stop Long Playback ID = %ld\n", processID);
+	printf ( "Stop Long Playback ID = %d\n", processID);
 	DataSimpleConnect(serverLongIP, 0);
 	DataWriteStop(processID);
 	//sleep(1);
 	DataQuit();
-	printf ( "Long Playback: Process %ld terminated.\n", processID );
+	printf ( "Long Playback: Process %d terminated.\n", processID );
 }
 
 /*
@@ -3026,9 +3026,9 @@ int *position, pcount;
 	  fclose(fp);
 	  showSig = 0;
 	  DataGPStoUTC(fgps0, tmpstr);
-	  printf ( "From time %s (%ld) to ", tmpstr, fgps0 );
+	  printf ( "From time %s (%d) to ", tmpstr, fgps0 );
 	  DataGPStoUTC(fgps1, tmpstr);
-	  printf ( "time %s (%ld)\n", tmpstr, fgps1 );
+	  printf ( "time %s (%d)\n", tmpstr, fgps1 );
 	}
 	else if ( mmSelect == MMMAKETOC ) { /* make toc file */
 	  XmTextFieldSetString(lIPtext, saveFileName );
@@ -3292,7 +3292,7 @@ void setString()
 void showPage(Widget w, XtPointer client_data, XtPointer xt_call_data)
 {
 	XmPushButtonCallbackStruct *call_data = (XmPushButtonCallbackStruct *) xt_call_data ;
-	switch((int)client_data) {
+	switch((long)client_data) {
 		case 1:
 			XmProcessTraversal(connectButton, XmTRAVERSE_CURRENT);
 			break;
@@ -3985,7 +3985,7 @@ void printMessage(char msg[], int de)
 
 void multiSel(Widget w, XtPointer client_data, XtPointer xt_call_data)
 {
-  chMarked [(int)client_data] = XmToggleButtonGetState (w);
+  chMarked [(long)client_data] = XmToggleButtonGetState (w);
   channelMarked();
 }
 
@@ -4813,13 +4813,13 @@ int  trigchno, tr1=0, tr2=0;
 	    else{
 	      startgps = DataUTCtoGPS1(startyr,startmo,startda,starthr,startmn,startsc);
 	      durgps = totalPlay.secs + totalPlay.mins*60 + (totalPlay.hours + totalPlay.days*24)*3600;
-	      fprintf ( fp, "%ld\n", startgps );
-	      fprintf ( fp, "%ld\n", durgps );
+	      fprintf ( fp, "%d\n", startgps );
+	      fprintf ( fp, "%d\n", durgps );
 	    }
 	  }
 	  else { /* GPS isgps=1 */
-	    fprintf ( fp, "%ld\n", startgps );
-	    fprintf ( fp, "%ld\n", durgps );
+	    fprintf ( fp, "%d\n", startgps );
+	    fprintf ( fp, "%d\n", durgps );
 	  }
 	  fprintf ( fp, "%d\n", startstop );
 	  /*}*/
@@ -4865,8 +4865,8 @@ int  trigchno, tr1=0, tr2=0;
 	  sprintf ( temp2, "%s", origDir);
 	  sprintf ( temp3, "%d", totalch);
 	  sprintf ( temp4, "/tmp/%slongfile0", iniDir);
-	  sprintf ( temp5, "%ld", fgps0);
-	  sprintf ( temp6, "%ld", fgps1);
+	  sprintf ( temp5, "%d", fgps0);
+	  sprintf ( temp6, "%d", fgps1);
 	  sprintf ( temp7, "%d", trend);
 	  if ( mmMode == 1 ) {
 	    sprintf ( displaystring, "%stocLongFile", origDir );
@@ -5668,7 +5668,7 @@ void connectToServer(Widget w, XtPointer client_data, XtPointer xt_call_data)
 
 void sigSet(Widget w, XtPointer client_data, XtPointer xt_call_data)
 {
-	int chnum = (int) client_data;
+	int chnum = (long) client_data;
 	if (chnum <= 16 ) {
           sprintf (chChange, "%d", chnum);
 	  XmTextFieldSetString(selchan, chChange);

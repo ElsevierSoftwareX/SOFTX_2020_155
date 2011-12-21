@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h> /* Pick up declaration of exit() */
 #include "caldate.h"
 
 char *montab[] = {
@@ -17,7 +16,7 @@ char *montab[] = {
 , "December"
 } ;
 
-void main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {

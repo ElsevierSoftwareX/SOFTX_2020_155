@@ -1,9 +1,12 @@
 #ifndef CHANNEL_H
 #define CHANNEL_H
 
-/* Sept, 2011 - Updated to 21st-century includes */
-#include <limits.h>
-#include <float.h>
+#ifdef __APPLE__
+  #include <limits.h>
+  #include <float.h>
+#else
+  #include <values.h>
+#endif
 
 /* Allowed maximum length for DMT channels */
 #define MAX_LONG_CHANNEL_NAME_LENGTH 255
@@ -52,22 +55,45 @@ data_type_size (short dtype) {
   }
 }
 
-/* Sept, 2011 - Updated to 21st-century defs */
 inline static double
 data_type_max(short dtype) {
   switch (dtype) {
   case _16bit_integer: // 16 bit integer
-    return SHRT_MAX;
+    #ifdef __APPLE__
+      return SHRT_MAX;
+    #else
+      return MAXSHORT;
+    #endif
   case _32bit_integer: // 32 bit integer
-    return INT_MAX;
+    #ifdef __APPLE__
+      return INT_MAX;
+    #else
+      return MAXINT;
+    #endif
   case _32bit_float: // 32 bit float
-    return FLT_MAX;
+    #ifdef __APPLE__
+      return FLT_MAX;
+    #else
+      return MAXFLOAT;
+    #endif
   case _64bit_integer: // 64 bit integer
-    return LONG_MAX;
+    #ifdef __APPLE__
+      return LONG_MAX;
+    #else
+      return MAXLONG;
+    #endif
   case _64bit_double: // 64 bit double
-    return DBL_MAX;
+    #ifdef __APPLE__
+      return DBL_MAX;
+    #else
+      return MAXDOUBLE;
+    #endif
   case _32bit_complex: // 32 bit complex
-    return FLT_MAX;
+    #ifdef __APPLE__
+      return FLT_MAX;
+    #else
+      return MAXFLOAT;
+    #endif
   default:
     return _undefined;
   }

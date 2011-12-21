@@ -305,3 +305,4 @@ make-makelib warn-auto.sh systype
 
 clean:
 	/bin/rm -f *.o *.a
+	/bin/rm -f leapsecs check easter yearcal nowutc convert

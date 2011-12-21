@@ -1,99 +1,67 @@
-## Darwin version
+# Dataviewer Makefile for Darwin
 # Explicit setting of SHELL - beware since this gets inherited
 # by commands invoked by Make
 SHELL=/bin/sh
 
-UILFLAGS=-I/usr/include/uil
-MRMLIBS=-lMrm
+XINCLUDES= \
+	-I/usr/include \
+	-I/opt/local/include \
+	-I/opt/local/include/X11 \
+	-I/opt/local/include/Xm
+XLIBS = -L/opt/local/lib
+CC = gcc
+USRLIB = -L../Lib/UTC_GPS -ltai 
 
-
-# MacPorts
-XINCLUDES=-I/opt/local/include
-XLIBS=-L/opt/local/lib
-LDLIBS=
-CCC=CC
-CC=gcc
-USRLIB = -L../Lib/UTC_GPS -ltai
-
-##
 JAVA_WIDGETS = java_widgets
 JAVA_WIDGETS_OBJ = java_widgets/lib
-XINCLUDES+=-I${JAVA_WIDGETS}/h
-LDLIBS+=-L${JAVA_WIDGETS_OBJ} -ljavawidgets
-
-
-#LDLIBS = -lPW
-# Program configuration
-# ---------------------
+XINCLUDES += -I${JAVA_WIDGETS}/h
+LDLIBS += -L${JAVA_WIDGETS_OBJ} -ljavawidgets
 
 LDFLAGS = ${XLIBS}
-MOTIFLIBS =  -L/opt/local/lib -lXpm -lXm -lXt -lX11
+MOTIFLIBS = -lXm -lXt -lX11
 
-CFLAGS=-g -I../../daqd -I. ${XINCLUDES}
-CCFLAGS=-g ${CFLAGS}
+CFLAGS = -g -I../../daqd -I. ${XINCLUDES}
+CCFLAGS = -g ${CFLAGS}
 
-UIL=uil
-
-#MOTIFLIBS = -lXm -lXt -lX11 -lPW
-
-#DO NOT EDIT >>>
 XD_C_PROGRAMS=\
 		dc3
 
-#<<< DO NOT EDIT
-
-#DO NOT EDIT >>>
 XD_C_PROGRAM_OBJECTS=\
 		dc3.o
 
-#<<< DO NOT EDIT
-
-#DO NOT EDIT >>>
 XD_C_PROGRAM_SOURCES=\
 		dc3.c
 
-#<<< DO NOT EDIT
-
-#DO NOT EDIT >>>
 XD_C_STUB_OBJECTS=\
 		dc3_stubs.o
 
-#<<< DO NOT EDIT
-
-#DO NOT EDIT >>>
 XD_C_STUB_SOURCES=\
 		dc3_stubs.c
 
-#<<< DO NOT EDIT
 
-XD_ALL_C_SOURCES=$(XD_C_PROGRAM_SOURCES) $(XD_C_SOURCES) $(XD_C_STUB_SOURCES) $(XD_C_FOR_UIL_PROGRAM_SOURCES) $(XD_C_FOR_UIL_SOURCES)
+XD_ALL_C_SOURCES=$(XD_C_PROGRAM_SOURCES) $(XD_C_SOURCES) $(XD_C_STUB_SOURCES)
 
 XD_ALL_CC_SOURCES=$(XD_CC_PROGRAM_SOURCES) $(XD_CC_SOURCES) $(XD_CC_STUB_SOURCES)
 
-all: $(XD_C_PROGRAMS) $(XD_CC_PROGRAMS) $(XD_C_FOR_UIL_PROGRAMS) $(XD_UIL_OBJECTS)
+all: $(XD_C_PROGRAMS) $(XD_CC_PROGRAMS)
 
 depend:
-	makedepend -fMakefile.darwin -- $(CFLAGS) $(CPPFLAGS) -- $(XD_ALL_C_SOURCES)
-	makedepend -fMakefile.darwin -a -- $(CCFLAGS) $(CPPFLAGS) -- $(XD_ALL_CC_SOURCES)
+	makedepend -- $(CFLAGS) $(CPPFLAGS) -- $(XD_ALL_C_SOURCES)
+	makedepend -a -- $(CCFLAGS) $(CPPFLAGS) -- $(XD_ALL_CC_SOURCES)
 
 clean:
 	rm -f $(XD_C_PROGRAMS) $(XD_C_PROGRAM_OBJECTS) $(XD_C_OBJECTS) \
 	      $(XD_CC_PROGRAMS) $(XD_CC_PROGRAM_OBJECTS) $(XD_CC_OBJECTS) \
 	      $(XD_C_STUB_OBJECTS) \
 	      $(XD_CC_STUB_OBJECTS) \
-	      $(XD_C_FOR_UIL_PROGRAMS) $(XD_C_FOR_UIL_PROGRAM_OBJECTS) $(XD_C_FOR_UIL_OBJECTS) \
-	      $(XD_UIL_OBJECTS) *.o
+	      *.o
 
 XD_C_OBJECTS += main.o
 
-${JAVA_WIDGETS_OBJ}/libjavawidgets.a:
-	cd ${JAVA_WIDGETS_OBJ}; make libjavawidgets.a
-
-#DO NOT EDIT >>>
-dc3: dc3.o $(XD_C_OBJECTS) $(XD_C_STUB_OBJECTS) TabBook.o ${JAVA_WIDGETS_OBJ}/libjavawidgets.a ../Th/datasrv.o ../Th/daqc_access.o
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o dc3 dc3.o TabBook.o $(XD_C_OBJECTS) $(XD_C_STUB_OBJECTS) $(MOTIFLIBS) $(LDLIBS) ../Th/datasrv.o ../Th/daqc_access.o $(USRLIB) -lpthread -lm
-#<<< DO NOT EDIT
+dc3: dc3.o $(XD_C_OBJECTS) $(XD_C_STUB_OBJECTS) TabBook.o ../Th/datasrv.o ../Th/daqc_access.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o dc3 dc3.o TabBook.o $(XD_C_OBJECTS) $(XD_C_STUB_OBJECTS) $(MOTIFLIBS) $(LDLIBS) ../Th/datasrv.o ../Th/daqc_access.o $(USRLIB) -lpthread -lm 
 
 .c.o:
-	$(CC)  -DMOTIF $(CFLAGS) $(CPPFLAGS) -c $<
-# DO NOT DELETE
+	$(CC) -DMOTIF $(CFLAGS) $(CPPFLAGS) -c $<
+dc3_stubs.o: dc3_stubs.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c dc3_stubs.c 

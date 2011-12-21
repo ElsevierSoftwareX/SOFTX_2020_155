@@ -1,0 +1,41 @@
+
+# Explicit setting of SHELL - beware since this gets inherited
+# by commands invoked by Make
+
+SHELL=/bin/sh
+TARGET=generic
+ABIDIR=
+SYSDIR=
+ABICFLAGS=
+ABICCFLAGS=
+ABILDFLAGS=
+
+# Default rule
+all: all-${TARGET}
+
+##: system Linux (x86)
+CC=gcc
+MOTIFHOME=/usr/lib
+MOTIFINCLUDES=-I/usr/include
+XINCLUDES=${MOTIFINCLUDES} -I/usr/X11/include/X11
+RANLIB=@:
+CFLAGS=-O -D_NO_PROTO
+##: end
+
+LCLHDRS=../h
+IFLAGS=-I${LCLHDRS} ${XINCLUDES}
+
+all-generic :	Border.c Card.c Flow.c Grid.c GridBag.c Layout.c libjavawidgets.a
+
+.c.o:
+	rm -f $@
+	$(CC) -c $(CFLAGS) ${ABICFLAGS} $(IFLAGS) $*.c
+
+libjavawidgets.a:	Border.o Card.o Flow.o Grid.o GridBag.o Layout.o
+	rm -f $@
+	ar cru $@ *.o
+	-$(RANLIB) $@
+
+clean::
+	-rm -f *.o *.a
+
