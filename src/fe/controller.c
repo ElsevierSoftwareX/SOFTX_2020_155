@@ -46,6 +46,9 @@
 #include <linux/slab.h>
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
+#include "drv/dtoal.c"
+#include <tRamp.h>
+
 
 #if MX_KERNEL == 1
 #include <myriexpress.h>
@@ -78,6 +81,8 @@ extern int iop_rfm_valid;
 #define FE_DIAGS_DAC_STAT	7
 #define FE_DIAGS_DAC_MASTER_STAT	8
 #define FE_DIAGS_AWGTPMAN	9
+#define FE_DIAGS_DUOTONE_DAC	10
+#define DIRECT_DAC_WRITE	1
 
 #define MMAP_SIZE (64*1024*1024 - 5000)
 volatile char *_epics_shm;		// Ptr to EPICS shared memory
@@ -483,6 +488,7 @@ int  getGpsTimeTsync(unsigned int *tsyncSec, unsigned int *tsyncUsec) {
 	timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
 	timeSec = timeRead->BCD_SEC;
 	*tsyncSec = timeSec +    31190400;
+	*tsyncSec += 31536000;
 	timeNsec = timeRead->SUB_SEC;
 	*tsyncUsec = ((timeNsec & 0xfffffff) * 5) / 1000; 
 	sync = ((timeNsec >> 31) & 0x1) + 1;
@@ -673,6 +679,11 @@ void *fe_start(void *arg)
   static float duotoneMeanDac = 0.0;
   static rfmDone = 0;
   static dacBufSelect = 0;
+  static int dacDuoEnable = 0;
+#ifdef DIRECT_DAC_WRITE
+		volatile GSA_18BIT_DAC_REG *dac18bitPtr;
+	   	volatile GSA_DAC_REG *dac16bitPtr;
+#endif
 #endif
   static dacBufOffset = 0;
 
@@ -997,7 +1008,11 @@ udelay(1000);
 		// CDIO1616Output[tdsControl] = 0x7B00000;
 		for(ii=0;ii<tdsCount;ii++)
 		{
+#ifdef DIRECT_DAC_WRITE
 		CDIO1616Output[ii] = TDS_START_ADC_NEG_DAC_POS;
+#else
+		CDIO1616Output[ii] = TDS_START_ADC_NEG_DAC_NEG;
+#endif
 		CDIO1616Input[ii] = writeCDIO1616l(&cdsPciModules, tdsControl[ii], CDIO1616Output[ii]);
 		}
 		break;
@@ -1332,11 +1347,13 @@ udelay(1000);
                     }while((*packedData == 0x110000) && (adcWait < 1000000));
 
 #ifdef ADC_MASTER
+#ifndef RFM_DIRECT_READ
 				if(!rfmDone)
 				{
 					if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(clock16K % 64));
 					if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(clock16K % 64));
 				}
+#endif
 		rfmDone = 0;
 #endif
 
@@ -1356,8 +1373,10 @@ udelay(1000);
 			// Write data to DAC modules
 			// This is done here after 1st ADC ready to allow max time to
 			// load DAC values prior to next 65K clock
+#ifndef DIRECT_DAC_WRITE
 			for(mm=0;mm<cdsPciModules.dacCount;mm++)
-	   		   if(dacWriteEnable > 4) gsaDacDma2(mm,cdsPciModules.dacType[mm],dacBufOffset);
+	   		    if(dacWriteEnable > 4) gsaDacDma2(mm,cdsPciModules.dacType[mm],dacBufOffset);
+#endif
 			// if(clock16K == 65535) 
 			if(clock16K == 0) 
 			{
@@ -1604,8 +1623,15 @@ udelay(1000);
 	   mm = cdsPciModules.dacConfig[jj];
 // printf("mm = %d\n",mm);
 #else
-	   // Check Dac output overflow and write to DMA buffer
-	   pDacData = (unsigned int *)(cdsPciModules.pci_dac[jj] + dacBufOffset);
+#ifdef DIRECT_DAC_WRITE
+	   if(cdsPciModules.dacType[jj] == GSC_18AO8)
+		dac18bitPtr = dacPtr[jj];
+	   else
+	   	dac16bitPtr = dacPtr[jj];
+#else
+	   // pDacData = (unsigned int *)(cdsPciModules.pci_dac[jj] + dacBufOffset);
+	   pDacData = (unsigned int *)(cdsPciModules.pci_dac[jj]);
+#endif
 #endif
 #ifdef ADC_MASTER
 	mm = cdsPciModules.dacConfig[jj];
@@ -1672,6 +1698,11 @@ udelay(1000);
 				// when two or more apps share same DAC module.
 				ioMemData->iodata[mm][ioMemCntrDac].data[ii] = 0;
 			} else dac_out = 0;
+			if((dacDuoEnable) && (ii==(num_outs-1)) && (jj == 0))
+			{
+				// dac_out = adcData[0][31];
+				dac_out = dacOut[0][7];
+			}
 #else
 			dac_out = dacOut[jj][ii];
 #endif
@@ -1702,10 +1733,24 @@ udelay(1000);
 			if (dacOutUsed[jj][ii]) 
 	   			ioMemData->iodata[mm][memCtr].data[ii] = dac_out;
 #else
+#ifdef DUOTEST
+				// dac_out = adcData[0][31] * 2;
+				dac_out = dacOut[0][7];
+#endif
 			dac_out += offset;
 			// if (ii == 15) { dac_out = dWord[0][31]; }
+#ifdef DIRECT_DAC_WRITE
+	   		if(dacWriteEnable > 4) 
+			{
+				if(cdsPciModules.dacType[jj] == GSC_18AO8)
+					dac18bitPtr->OUTPUT_BUF = dac_out;
+				else
+					dac16bitPtr->ODB = dac_out;;
+			}
+#else
 			*pDacData =  (unsigned int)(dac_out & mask);
 			pDacData ++;
+#endif
 #endif
 		}
 #ifdef ADC_SLAVE
@@ -1748,11 +1793,11 @@ udelay(1000);
 		}
                 duotoneMean = duotoneTotal/CYCLE_PER_SECOND;
                 duotoneTotal = 0.0;
-                // duotoneMeanDac = duotoneTotalDac/CYCLE_PER_SECOND;
-                // duotoneTotalDac = 0.0;
+                duotoneMeanDac = duotoneTotalDac/CYCLE_PER_SECOND;
+                duotoneTotalDac = 0.0;
         }
-        duotoneDac[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][15];
-        duotoneTotalDac += dWord[0][15];
+        duotoneDac[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][30];
+        duotoneTotalDac += dWord[0][30];
         duotone[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][31];
         duotoneTotal += dWord[0][31];
         if(clock16K == 16)
@@ -1764,6 +1809,32 @@ udelay(1000);
                 // pLocalEpics->epicsOutput.diags[5] = duotoneTimeDac;
 		// printf("du = %f %f %f %f %f\n",duotone[5], duotone[6], duotone[7],duotone[8],duotone[9]);
         }
+        if(clock16K == 17)
+        {
+	          if(dacDuoEnable != pLocalEpics->epicsInput.dacDuoSet)
+	          {
+	                  dacDuoEnable = pLocalEpics->epicsInput.dacDuoSet;
+	                  if(dacDuoEnable)
+	                  {
+#ifdef DIRECT_DAC_WRITE
+	                             CDIO1616Output[0] = TDS_START_ADC_NEG_DAC_POS;
+#else
+	                             CDIO1616Output[0] = TDS_START_ADC_NEG_DAC_NEG;
+#endif
+	                  } else {
+#ifdef DIRECT_DAC_WRITE
+	                             CDIO1616Output[0] = TDS_START_ADC_NEG_DAC_POS | TDS_NO_DAC_DUOTONE;
+#else
+	                             CDIO1616Output[0] = TDS_START_ADC_NEG_DAC_POS | TDS_NO_DAC_DUOTONE;
+#endif
+	                  }
+	                  CDIO1616Input[0] = writeCDIO1616l(&cdsPciModules, tdsControl[0], CDIO1616Output[0]);
+	                  printf("NEW DIO setting\n");
+
+                  }
+ 	         duotoneTimeDac = duotime(12, duotoneMeanDac, duotoneDac);
+                 pLocalEpics->epicsOutput.diags[FE_DIAGS_DUOTONE_DAC] = duotoneTimeDac;
+	}
 #endif
 
 
@@ -2103,7 +2174,8 @@ udelay(1000);
 		if(cdsPciModules.dacType[jj] == GSC_18AO8)
 		{
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
-			out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
+			// out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
+			out_buf_size = 0;
 			if(out_buf_size > 8)
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(8);
 			    else pLocalEpics->epicsOutput.statDac[jj] |= 8;
@@ -2112,6 +2184,7 @@ udelay(1000);
 		if(cdsPciModules.dacType[jj] == GSC_16AO16)
 		{
 			status = checkDacBuffer(jj);
+			// status = 3;
 			if(status != 3)
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(8);
 			    else pLocalEpics->epicsOutput.statDac[jj] |= 8;
@@ -2124,6 +2197,7 @@ udelay(1000);
 
 	// Compute max time of one cycle.
 	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
+	if(cycleTime > 23) dacWriteEnable = 4;
 	if (longestWrite2 < ((tempClock[3]-tempClock[2])/CPURATE)) longestWrite2 = (tempClock[3]-tempClock[2])/CPURATE;
 	if (cycleTime > (1000000/CYCLE_PER_SECOND))  {
 		// printf("cycle %d time %d; adcWait %d; write1 %d; write2 %d; longest write2 %d\n", clock16K, cycleTime, adcWait, (tempClock[1]-tempClock[0])/CPURATE, (tempClock[3]-tempClock[2])/CPURATE, longestWrite2);
