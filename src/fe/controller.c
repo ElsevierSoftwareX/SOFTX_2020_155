@@ -523,6 +523,7 @@ int  getGpsTimeTsync(unsigned int *tsyncSec, unsigned int *tsyncUsec) {
 	timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
 	timeSec = timeRead->BCD_SEC;
 	*tsyncSec = timeSec +    31190400;
+	*tsyncSec += 31536000;
 	timeNsec = timeRead->SUB_SEC;
 	*tsyncUsec = ((timeNsec & 0xfffffff) * 5) / 1000; 
 	sync = ((timeNsec >> 31) & 0x1) + 1;
@@ -541,6 +542,7 @@ TSYNC_REGISTER *timeRead;
             timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
             timeSec = timeRead->BCD_SEC;
             timeSec +=  31190400;
+	    timeSec += 31536000;
             return(timeSec);
      }
      return(0);
