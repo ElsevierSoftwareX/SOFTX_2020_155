@@ -93,6 +93,7 @@ static int symmetricom_ioctl(struct inode *inode, struct file *file, unsigned in
         		timeSec = timeRead->BCD_SEC;
         		timeNsec = timeRead->SUB_SEC;
         		timeSec += 31190400 + 315964815;
+        		timeSec += 31536000;
         		sync = ((timeNsec >> 31) & 0x1) + 1;
 			timeNsec &= 0xfffffff;
 			timeNsec *= 5;
