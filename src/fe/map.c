@@ -1527,6 +1527,7 @@ int mapTsyncGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
   unsigned int days,hours,min,sec,msec,usec,nanosec,tsync;
   unsigned char *addr1;
   TSYNC_REGISTER *myTime;
+  void *TSYNC_FIFO;	// Pointer to board uP FIFO
 
   pedStatus = pci_enable_device(gpsdev);
   pci_read_config_dword(gpsdev, PCI_BASE_ADDRESS_0, &pci_io_addr);
@@ -1537,6 +1538,37 @@ int mapTsyncGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
   printk("Remapped 0x%p\n", addr1);
   pHardware->gps = addr1;
   pHardware->gpsType = TSYNC_RCVR;
+
+// Spectracom IRIG-B Card does not auto detect Year information from IRIG-B fanout unit
+// This section writes to the module uP CodeExp register to correct this.
+// Delays are required between code lines, as writing to FIFO is slow.
+// Sequence was determined by looking at manufacturer driver code.
+  TSYNC_FIFO = (void *)(addr1 + 384);
+  iowrite16(0x301,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x1000,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x72a,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x280,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x0,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x800,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x0,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x0,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x0,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x500,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0xd400,TSYNC_FIFO);
+  udelay(10000);
+  udelay(10000);
+  udelay(10000);
+// End Code exp setup
 
   myTime = (TSYNC_REGISTER *)addr1;
 for(ii=0;ii<2;ii++)
@@ -1556,7 +1588,15 @@ for(ii=0;ii<2;ii++)
   tsync = (i>>31) & 1;
 
   i = myTime->BCD_SEC;
-  sec = i - 315964819;
+  if(i < 1000000000) 
+  {
+  	printk("TSYNC NOT receiving YEAR info, defaulting to by year patch\n");
+	pHardware->gpsOffset = 31190400 + 31536000;
+  } else {
+  	printk("TSYNC receiving YEAR info\n");
+	pHardware->gpsOffset = -315964800;
+  }
+  sec = i + pHardware->gpsOffset;
   i = myTime->BCD_SUB_SEC;
   printk("date = %d days %2d:%2d:%2d\n",days,hours,min,sec);
   usec = (i&0xf) + ((i>>4)&0xf) *10 + ((i>>8)&0xf) * 100;

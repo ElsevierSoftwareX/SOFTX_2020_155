@@ -522,7 +522,8 @@ int  getGpsTimeTsync(unsigned int *tsyncSec, unsigned int *tsyncUsec) {
   if (cdsPciModules.gps) {
 	timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
 	timeSec = timeRead->BCD_SEC;
-	*tsyncSec = timeSec +    31190400;
+	timeSec += cdsPciModules.gpsOffset;
+	*tsyncSec = timeSec;
 	timeNsec = timeRead->SUB_SEC;
 	*tsyncUsec = ((timeNsec & 0xfffffff) * 5) / 1000; 
 	sync = ((timeNsec >> 31) & 0x1) + 1;
@@ -531,6 +532,37 @@ int  getGpsTimeTsync(unsigned int *tsyncSec, unsigned int *tsyncUsec) {
   }
   return(0);
 }
+//***********************************************************************
+// Get current GPS seconds from TSYNC IRIG-B Rcvr
+unsigned int  getGpsSecTsync() {
+TSYNC_REGISTER *timeRead;
+    unsigned int timeSec,timeNsec,sync;
+
+    if (cdsPciModules.gps) {
+            timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
+            timeSec = timeRead->BCD_SEC;
+	    timeSec += cdsPciModules.gpsOffset;
+            return(timeSec);
+     }
+     return(0);
+}
+//***********************************************************************
+// Get current GPS useconds from TSYNC IRIG-B Rcvr
+   int  getGpsuSecTsync(unsigned int *tsyncUsec) {
+   TSYNC_REGISTER *timeRead;
+   unsigned int timeNsec,sync;
+
+   if (cdsPciModules.gps) {
+            timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
+            timeNsec = timeRead->SUB_SEC;
+            *tsyncUsec = ((timeNsec & 0xfffffff) * 5) / 1000;
+            sync = ((timeNsec >> 31) & 0x1) + 1;
+            // printf("time = %u %u %d\n",timeSec,(timeNsec & 0xffffff),((timeNsec & 0xffffff)/200));
+            return(sync);
+    }
+    return(0);
+}
+
 
 #if 0
 //***********************************************************************
@@ -1195,17 +1227,6 @@ udelay(1000);
 #endif
   onePpsTime = clock16K;
   timeSec = current_time() -1;
-  if(cdsPciModules.gpsType == SYMCOM_RCVR)
-  {
-  	// time = getGpsTime(&ns);
-	// timeSec = time - 252806386;
-  }
-  if(cdsPciModules.gpsType == TSYNC_RCVR) 
-  {
-	// gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
-	// timeSec += 284083219;
-	// timeSec += 0;
-  }
 #ifdef TIME_SLAVE
 	timeSec = *rfmTime;
 #endif
@@ -1433,8 +1454,10 @@ udelay(1000);
 				if(cdsPciModules.gpsType == SYMCOM_RCVR) lockGpsTime();
 				if(cdsPciModules.gpsType == TSYNC_RCVR) 
 				{
-					gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
-					pLocalEpics->epicsOutput.diags[FE_DIAGS_IRIGB_TIME] = usec;
+					// Reading second info will lock the time register, allowing
+					// nanoseconds to be read later (on next cycle). Two step process used to 
+					// save CPU time here, as each read can take 2usec or more.
+					timeSec = getGpsSecTsync();
 				}
 #ifdef IOP_TIME_SLAVE_RFM
 	  timeSec = ((volatile long *)(cdsPciModules.pci_rfm[0]))[1];
@@ -1852,6 +1875,15 @@ udelay(1000);
                 duotoneTotal = 0.0;
                 duotoneMeanDac = duotoneTotalDac/CYCLE_PER_SECOND;
                 duotoneTotalDac = 0.0;
+        }
+	if(clock16K == 1)
+	{
+	        if(cdsPciModules.gpsType == TSYNC_RCVR)
+	        {
+	                gps_receiver_locked = getGpsuSecTsync(&usec);
+	                pLocalEpics->epicsOutput.diags[FE_DIAGS_IRIGB_TIME] = usec;
+	                if((usec > 20) || (usec < 5)) diagWord |= 0x10;;
+	        }
         }
         duotoneDac[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][30];
         duotoneTotalDac += dWord[0][30];
@@ -2705,7 +2737,7 @@ int main(int argc, char **argv)
 					cdsPciModules.cDio6464lCount ++;
 					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
 					cdsPciModules.doInstance[kk] = doCnt;
-					status ++;
+					status += 2;
 				}
 				if((cdsPciModules.cards_used[jj].type == CDO64) && 
 					(cdsPciModules.cards_used[jj].instance == doCnt))
@@ -2781,7 +2813,7 @@ int main(int argc, char **argv)
 	//cdsPciModules.dacCount = ioMemData->dacCount;
 #endif
 	printf("%d PCI cards found \n",status);
-	if(cards != status)
+	if(status < cards)
 	{
 		printf(" ERROR **** Did not find correct number of cards! Expected %d and Found %d\n",cards,status);
 		cardCountErr = 1;
