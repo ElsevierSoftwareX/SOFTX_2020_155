@@ -1,3 +1,6 @@
+Changes beyond 2.4.1
+- Fix for Spectracom IRIG-B Year info readout.
+===========================
 Overview of changes for 2.4.1
 ===========================
 - fix broken "biquad" flag, it turned out that processing of biquad=1 flag
