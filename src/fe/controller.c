@@ -522,8 +522,8 @@ int  getGpsTimeTsync(unsigned int *tsyncSec, unsigned int *tsyncUsec) {
   if (cdsPciModules.gps) {
 	timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
 	timeSec = timeRead->BCD_SEC;
-	*tsyncSec = timeSec +    31190400;
-	*tsyncSec += 31536000;
+	timeSec += cdsPciModules.gpsOffset;
+	*tsyncSec = timeSec;
 	timeNsec = timeRead->SUB_SEC;
 	*tsyncUsec = ((timeNsec & 0xfffffff) * 5) / 1000; 
 	sync = ((timeNsec >> 31) & 0x1) + 1;
@@ -541,8 +541,7 @@ TSYNC_REGISTER *timeRead;
     if (cdsPciModules.gps) {
             timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
             timeSec = timeRead->BCD_SEC;
-            timeSec +=  31190400;
-	    timeSec += 31536000;
+	    timeSec += cdsPciModules.gpsOffset;
             return(timeSec);
      }
      return(0);
@@ -1228,17 +1227,6 @@ udelay(1000);
 #endif
   onePpsTime = clock16K;
   timeSec = current_time() -1;
-  if(cdsPciModules.gpsType == SYMCOM_RCVR)
-  {
-  	// time = getGpsTime(&ns);
-	// timeSec = time - 252806386;
-  }
-  if(cdsPciModules.gpsType == TSYNC_RCVR) 
-  {
-	// gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
-	// timeSec += 284083219;
-	// timeSec += 0;
-  }
 #ifdef TIME_SLAVE
 	timeSec = *rfmTime;
 #endif
@@ -1466,9 +1454,10 @@ udelay(1000);
 				if(cdsPciModules.gpsType == SYMCOM_RCVR) lockGpsTime();
 				if(cdsPciModules.gpsType == TSYNC_RCVR) 
 				{
+					// Reading second info will lock the time register, allowing
+					// nanoseconds to be read later (on next cycle). Two step process used to 
+					// save CPU time here, as each read can take 2usec or more.
 					timeSec = getGpsSecTsync();
-					// gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
-					// pLocalEpics->epicsOutput.diags[FE_DIAGS_IRIGB_TIME] = usec;
 				}
 #ifdef IOP_TIME_SLAVE_RFM
 	  timeSec = ((volatile long *)(cdsPciModules.pci_rfm[0]))[1];
