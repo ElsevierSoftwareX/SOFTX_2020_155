@@ -604,6 +604,7 @@ typedef struct CDS_HARDWARE{
 	unsigned char *buf;
 	volatile unsigned int *gps;	/* GPS card */
 	unsigned int gpsType;
+	int gpsOffset;
 	int dolphinCount;		/* the number of Dolphin cards we have  on the system */
 	volatile unsigned long *dolphin[2]; /* read and write Dolphin memory */
 
