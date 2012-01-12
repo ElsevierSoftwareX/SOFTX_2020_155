@@ -2541,6 +2541,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 		$port = $partInCnt[$ii];                                   # ===  MA  ===
 		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
 	}                                                                  # ===  MA  ===
+	if($partType[$ii] eq "M_LOG10") {                                    # ===  MA  ===
+		$port = $partInCnt[$ii];                                   # ===  MA  ===
+		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
+	}                                                                  # ===  MA  ===
 	if($partType[$ii] eq "DELAY") {
 		print OUT "static double \L$xpartName[$ii] = 0.0;\n";
 	}
@@ -2996,6 +3000,13 @@ HERE
 		$calcExp = "\t\L$xpartName[$mm] = 0.0;\n";                 # ===  MA  ===
 		print OUT "$calcExp";                                      # ===  MA  ===
 		print OUT "\}\n";                                          # ===  MA  ===
+	}                                                                  # ===  MA  ===
+	if ($partType[$mm] eq "M_LOG10") {                                   # ===  MA  ===
+	   print OUT "// MATH FUNCTION - LOG10\n";                        # ===  MA  ===
+		$calcExp = "\t\L$xpartName[$mm]";                          # ===  MA  ===
+		$calcExp .= " = ";                                         # ===  MA  ===
+		$calcExp .= "llog10\($fromExp[0]\);\n";                     # ===  MA  ===
+		print OUT "$calcExp";                                      # ===  MA  ===
 	}                                                                  # ===  MA  ===
 
 	# ******** GROUND INPUT ********************************************************************
