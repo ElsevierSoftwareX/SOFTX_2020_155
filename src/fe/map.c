@@ -1544,7 +1544,7 @@ int mapTsyncGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
 // Delays are required between code lines, as writing to FIFO is slow.
 // Sequence was determined by looking at manufacturer driver code.
   TSYNC_FIFO = (void *)(addr1 + 384);
-  iowrite16(0x301,TSYNC_FIFO);
+  iowrite16(0x101,TSYNC_FIFO);
   udelay(1000);
   iowrite16(0x1000,TSYNC_FIFO);
   udelay(1000);
@@ -1562,17 +1562,20 @@ int mapTsyncGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
   udelay(1000);
   iowrite16(0x0,TSYNC_FIFO);
   udelay(1000);
-  iowrite16(0x500,TSYNC_FIFO);
+  iowrite16(0x400,TSYNC_FIFO);
   udelay(1000);
-  iowrite16(0xd400,TSYNC_FIFO);
+  iowrite16(0xd100,TSYNC_FIFO);
   udelay(10000);
   udelay(10000);
   udelay(10000);
 // End Code exp setup
+// Need following delay to allow module to change time codes
+for(ii=0;ii<500;ii++) udelay(10000);
 
   myTime = (TSYNC_REGISTER *)addr1;
 for(ii=0;ii<2;ii++)
 {
+  udelay(10000);
   i = myTime->SUPER_SEC_LOW;
   sec = (i&0xf) + ((i>>4)&0xf) * 10;
   min = ((i>>8)&0xf) + ((i>>12)&0xf)*10;
