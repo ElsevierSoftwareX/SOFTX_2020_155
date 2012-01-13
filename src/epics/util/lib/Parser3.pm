@@ -438,6 +438,9 @@ sub node_processing {
            elsif ($math_op eq "mod") {                                     # ===  MA  ===
               $block_type = "M_MOD";                                       # ===  MA  ===
            }                                                               # ===  MA  ===
+	   elsif ($math_op eq "log10") {
+	      $block_type = "M_LOG10";
+           }                                                               # ===  MA  ===
            else {                                                          # ===  MA  ===
               die "*** ERROR: Math operator not supported: $math_op \n";   # ===  MA  ===
            }                                                               # ===  MA  ===
