@@ -1912,6 +1912,8 @@ int  j, k, l, thrGpCnt;
         /* get selected group list item */
 	if ( XmListGetSelectedPos(grouplist, &position, &pcount) ) {
 	   sscanf ( groupList[position[0]], "%s", gpname );
+	   //printf("Selected %s\n", gpname);
+
 	   for ( i=0; i<topTotal; i++ ){ /* check if top level */
 	     if ( strcmp(gpname, topGroup[i]) == 0 ) {
 	       if (openTop[i] == 0) openTop[i] = 1;
@@ -1928,11 +1930,21 @@ int  j, k, l, thrGpCnt;
 	       break;
 	     }
 	   }
+	   for ( i=0; i<ttlgrp3rd; i++ ){ /* check if third level */
+	     if ( strcmp(gpname, thirdGroup[i]) == 0 ) {
+	       if (openThird[i] == 0) openThird[i] = 1;
+	       else openThird[i] = 0;
+	       top =3; 
+	       break;
+	     }
+	   }
 #if 0
 	   if ( top == 1)
 	     printf ( "Top level group selected: %s\n", gpname );
-	   else if ( top > 1 )
+	   else if ( top == 2 )
 	     printf ( "2nd level group selected: %s\n", gpname );
+	   else if ( top == 3 )
+	     printf ( "3rd level group selected: %s\n", gpname );
 #endif
 	}
 	XmListDeleteAllItems(siglist);
@@ -1951,61 +1963,78 @@ int  j, k, l, thrGpCnt;
 	     /* top level */
 	     counter ++;
 	     strcpy( groupList[counter], topGroup[i] );
+	    if (openTop[i] > 0) {
 	     /* second level */
 	     sprintf ( tempname, "%s:", topGroup[i] );
 	     sprintf ( tempname1, "%s-", topGroup[i] );
 	     for ( j=0; j<totalgroup; j++ ){
+	       //printf( "Test second group %s or %s vs %s\n", tempname, tempname1, secGroup[j]);
 	       if ( test_substring(tempname, secGroup[j] ) == 0 
 		    || test_substring(tempname1, secGroup[j] ) == 0 ) {
-		 if (openTop[i] > 0) {
 		   counter ++;
 		   sprintf ( groupList[counter], "   %s",  secGroup[j] );
 		   if ( openSec[j] > 0 ) { /* open second level */
-		     thrGpCnt = 0;
-		     fseek(fp, 0, 0); /* reset the reading file stream */
-		     for ( k=0; k<topTotal+totalgroup+3; k++ ){ 
-		       get_a_line(fp, linetemp); /* skip first ... lines */
-		     }
-		     for ( k=0; k<totalchan; k++ ){
-		       get_a_line(fp, linetemp);
-		       sscanf(linetemp, "%s %d %s", chtemp, &rate, unittemp );
-		       chop_string(chtemp, '_');
-		       sprintf ( tempname2, "%s-", secGroup[j] );
-		       sprintf ( tempname3, "%s:", secGroup[j] );
-		       if ( test_substring(tempname2, chtemp ) == 0 || test_substring(tempname3, chtemp ) == 0 ) {
-			 strcpy ( thrGroupTemp[thrGpCnt], chtemp );
-			 thrGpCnt++;
-		       }
-		     }
-		     /* sort 3rd level string */
-		     for ( k=0; k<thrGpCnt; k++ ) {
-		       for ( l=k+1; l<thrGpCnt; l++) {
-			 if ( strcmp(thrGroupTemp[k], thrGroupTemp[l])>0 ){
-			   strcpy ( tempArray, thrGroupTemp[k] );
-			   strcpy ( thrGroupTemp[k], thrGroupTemp[l] );
-			   strcpy ( thrGroupTemp[l], tempArray );
+		     int j3;
+
+		     /* third level */
+	     	     sprintf (tempname2, "%s", secGroup[j]);
+		     for (j3 = 0; j3 < ttlgrp3rd; j3++) {
+	       	       if (test_substring(tempname2, thirdGroup[j3] ) == 0) {
+		   	 counter ++;
+		   	 sprintf (groupList[counter], "      %s",  thirdGroup[j3] );
+		   	 if (openThird[j3] > 0) { /* open third level */
+		           thrGpCnt = 0;
+		           fseek(fp, 0, 0); /* reset the reading file stream */
+		           for ( k=0; k<topTotal+totalgroup+3+ttlgrp3rd+1; k++ ){ 
+		             get_a_line(fp, linetemp); /* skip first ... lines */
+		           }
+		           for ( k=0; k<totalchan; k++ ){
+		         	get_a_line(fp, linetemp);
+		         	sscanf(linetemp, "%s %d %s", chtemp, &rate, unittemp );
+		         	//chop_string(chtemp, '_');
+				char *p = strchr(chtemp, '_');
+				if (p) p = strchr(p+1, '_');
+				if (p) *p = 0;
+				//printf ("Testing %s\n", chtemp);
+		         	if (test_substring(thirdGroup[j3], chtemp ) == 0) {
+			   		strcpy ( thrGroupTemp[thrGpCnt], chtemp );
+			   		thrGpCnt++;
+		           	}
+		           }
+		       	   /* sort 4th level string */
+		       	   for ( k=0; k<thrGpCnt; k++ ) {
+		             for ( l=k+1; l<thrGpCnt; l++) {
+			       if ( strcmp(thrGroupTemp[k], thrGroupTemp[l])>0 ){
+			         strcpy ( tempArray, thrGroupTemp[k] );
+			         strcpy ( thrGroupTemp[k], thrGroupTemp[l] );
+			         strcpy ( thrGroupTemp[l], tempArray );
+			       }
+		             }
+		           }
+		           if (thrGpCnt > 0) {
+		             counter++;
+		             sprintf ( groupList[counter], "         %s", thrGroupTemp[0] );
+		             if (thrGpCnt > 1) 
+			       for ( k=1; k<thrGpCnt; k++ ){
+			         /* check for multiple entries  */
+			         if (strcmp(thrGroupTemp[k], thrGroupTemp[k-1])) {
+			           counter++;
+			           sprintf ( groupList[counter], "         %s", thrGroupTemp[k] );
+			         }
+			       }		     
+		           }
 			 }
+		       } else {
+		   	 //openThird[j3] = 0;
 		       }
 		     }
-		     if (thrGpCnt > 0) {
-		       counter++;
-		       sprintf ( groupList[counter], "      %s", thrGroupTemp[0] );
-		       if (thrGpCnt > 1) 
-			 for ( k=1; k<thrGpCnt; k++ ){
-			   /* check for multiple entries  */
-			   if (strcmp(thrGroupTemp[k], thrGroupTemp[k-1])) {
-			     counter++;
-			     sprintf ( groupList[counter], "      %s", thrGroupTemp[k] );
-			   }
-			 }		     
-		     }
-		   }
+		   } /* openSec[j] */
 		 }
 		 else {
-		   openSec[j] = 0;
+		   //openSec[j] = 0;
 		 }
 	       }
-	     }
+	     } /* openTop[i] */
 	   }
 	   {
 	     XmString *xms = malloc(sizeof(XmString *) * counter);
@@ -2022,10 +2051,10 @@ int  j, k, l, thrGpCnt;
 	   }
 	}
 	else { /* a group name is selected, show right side */
-	  //	  printf ( "Group name selected: %s\n", gpname );
+	  //printf ( "Group name selected: %s\n", gpname );
 	  sprintf ( tempname, "%s_", gpname );
 	  counter = 0; 
-	  for ( i=0; i<topTotal+totalgroup+3; i++ ){ 
+	  for ( i=0; i<topTotal+totalgroup+3+ttlgrp3rd+1; i++ ){ 
 	    get_a_line(fp, linetemp); /* skip first ... lines */
 	  }
 	  for ( i=0; i<totalchan; i++ ){
@@ -3497,7 +3526,7 @@ int  tempRate, j;
 int  group, rate, counter;
 FILE *fp;
 
-//        printf ( "Arranging %d signals...\n", sigCounter ); 
+        //printf ( "Arranging %d signals...\n", sigCounter ); 
         if ( abc ) { 
 	   for ( i=1; i<sigCounter; i++ ) {
 	      for ( j=i+1; j<=sigCounter; j++) {
@@ -3799,6 +3828,23 @@ int i, i1=-1, i2=-1;
   return i2-i1+1;
 }
 
+void
+populate_3rd_lvl_chgrp(char *chtemp) {
+      int i, found;
+      char s[MAX_LONG_CHANNEL_NAME_LENGTH+24];
+      strcpy(s, chtemp);
+      chop_string(s, '_');
+      for (i = 0, found = 0; i < ttlgrp3rd; i++) {
+	if (!strcmp(thirdGroup[i], s)) { found = 1; break; }
+      }
+      if (!found){
+	      //printf("3rd level group %s\n", s);
+	      strcpy(thirdGroup[ttlgrp3rd++], s);
+      }
+}
+
+
+
 void writeChannelset(int reload)
 {
 int  rate, counter, j, k, totalchan_temp;
@@ -3885,6 +3931,8 @@ FILE *fp, *fq;
 	     }
 	   }
 	   sortArray(topGroup, topTotal);
+	   ttlgrp3rd = 0;
+
 	   /* get all group names */
 	   fseek(fq, 0, 0); /* reset the reading file stream */
 	   get_a_line(fq, linetemp);
@@ -3901,14 +3949,10 @@ FILE *fp, *fq;
 	       yes = 0;
 	     if ( yes ) {
 	       totalchan_temp++;
+	       populate_3rd_lvl_chgrp(chtemp);
 	       chop_string(chtemp, '-');
 	       strcpy(linetemp, chtemp);
 	       if ( chop_string(linetemp, ':') == 0 ) { /* if ':' presents */
-		 if ( totalgroup == 0 ) {
-		   strcpy(secGroup[totalgroup], chtemp);
-		   totalgroup ++;
-		 }
-		 else {
 		   counter = 0; 
 		   for ( j=0; j<totalgroup; j++ ){
 		     if ( strcmp(secGroup[j], chtemp ) == 0 ) {
@@ -3917,14 +3961,15 @@ FILE *fp, *fq;
 		     }
 		   }
 		   if ( counter == 0 ) {
+		     //printf("Second level channel group %s\n", chtemp);
 		     strcpy(secGroup[totalgroup], chtemp);
 		     totalgroup ++;
 		   }
-		 }
 	       }
 	     }    
 	   }
 	   sortArray(secGroup, totalgroup);
+	   sortArray(thirdGroup, ttlgrp3rd);
 	   fseek(fq, 0, 0); /* reset the reading file stream */
 
 	   /* write file channelset */
@@ -3940,6 +3985,9 @@ FILE *fp, *fq;
 	   fprintf ( fp, "%d\n", totalgroup);
 	   for ( i=0; i<totalgroup; i++ )
 	     fprintf ( fp, "%s\n", secGroup[i]);
+	   fprintf ( fp, "%d\n", ttlgrp3rd);
+	   for ( i=0; i<ttlgrp3rd; i++ )
+	     fprintf ( fp, "%s\n", thirdGroup[i]);
 	   get_a_line(fq, linetemp); /* skip */
 	   fprintf ( fp, "%d\n", totalchan_temp);
 	   for ( i=0; i<totalchan; i++ ) {
