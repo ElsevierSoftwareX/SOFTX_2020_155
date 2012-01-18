@@ -93,9 +93,12 @@ int  xml_only=1;
 int  totalchan;
 int  topTotal, openTop[MAX_CHANNEL_GROUPS], /* #-number in list, 0-close */
      openSec[MAX_CHANNEL_GROUPS]; 
+int  openThird[MAX_CHANNEL_GROUPS]; 
 int  totalgroup, selGroup, selSig, sigCounter;
+int  ttlgrp3rd;
 char topGroup[MAX_CHANNEL_GROUPS][MAX_LONG_CHANNEL_NAME_LENGTH+1];
 char secGroup[MAX_CHANNEL_GROUPS][MAX_LONG_CHANNEL_NAME_LENGTH+1];
+char thirdGroup[MAX_CHANNEL_GROUPS][MAX_LONG_CHANNEL_NAME_LENGTH+1];
 /*char allGroup[MAX_CHANNEL_GROUPS][MAX_LONG_CHANNEL_NAME_LENGTH+1];*/
 char groupList[2*MAX_CHANNEL_GROUPS][MAX_LONG_CHANNEL_NAME_LENGTH+10];
 char sigListItem[MAX_CHANNELS+1][MAX_LONG_CHANNEL_NAME_LENGTH+80];
