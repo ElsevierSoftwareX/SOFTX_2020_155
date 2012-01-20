@@ -78,12 +78,13 @@ sub printFrontEndVars  {
 # Returns calculated code string
 sub frontEndInitCode {
         my ($i) = @_;
-        my $calcExp = "// ADC $i\n";
+	my $anum = substr($::xpartName[$i],3,1);
+        my $calcExp = "// ADC $anum\n";
 	#print $calcExp, "\n";
 	%seen = ();
         foreach (0 .. $::partCnt) {
 	  foreach  $inp (0 .. $::partInCnt[$_]) {
-            if ("Adc" eq $::partInputType[$_][$inp] && $i == $::partInNum[$_][$inp]) {
+            if ("Adc" eq $::partInputType[$_][$inp] && $anum == $::partInNum[$_][$inp]) {
 	  	#print $_," ", $::xpartName[$_], " ", $::partInputPort[$_][$inp], "\n";
 		$seen{$::partInputPort[$_][$inp]}=1;
 	    }
@@ -92,7 +93,7 @@ sub frontEndInitCode {
 	foreach (sort { $a <=> $b }  keys %seen) {
 	#	print $_, ",";
         	$calcExp .= "dWordUsed\[";
-        	$calcExp .= $i;
+        	$calcExp .= $anum;
         	$calcExp .= "\]\[";
         	$calcExp .= $_;
         	$calcExp .= "\] =  1;\n";
