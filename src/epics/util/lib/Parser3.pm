@@ -310,6 +310,9 @@ sub merge_references {
    my $part_name = transform_part_name(${$node->{FIELDS}}{"SourceBlock"});
    if (-e "lib/$part_name.pm") {
 	   return 0; # Library part
+   } else {
+	my $adcStr = substr($part_name, 0, 3);
+	return 0 if ($adcStr eq "Adc");
    }
    my $ref = ${$node->{FIELDS}}{"SourceBlock"};
    print "Found a library reference $ref\n";
@@ -572,8 +575,16 @@ sub node_processing {
                    $part_name = "Fcn";                                     # ===  MA  ===
                 }                                                          # ===  MA  ===
 		if (! -e "lib/$part_name.pm") {
-			die "Can't find part code in lib/$part_name.pm\n";
+			my $adcStr = substr($part_name, 0, 3);
+			if ($adcStr eq "Adc") {
+				require "lib/Adc.pm";
+				CDS::Adc::initAdc($node);
+				$::partType[$::partCnt] = CDS::Adc::partType($node);
+			} else {
+				die "Can't find part code in lib/$part_name.pm\n";
+			}
 		} else {
+
        		require "lib/$part_name.pm";
 		if ($part_name eq "Dac") {
         	  $::partType[$::partCnt] = CDS::Dac::initDac($node);
@@ -629,70 +640,10 @@ sub node_processing {
                      die "Too many Digital I/O modules \(max is $::maxDioMod\)\n";
                   }
 		}
-# Added for ADC PART CHANGE *****************
-		if ($part_name eq "Adcx0") {
-			require "lib/Adc.pm";
-			#CDS::Adc::initAdc($node);
-			CDS::Adcx0::initAdc($node);
-			$::partType[$::partCnt] = CDS::Adcx0::partType($node);
-		} 
-		if ($part_name eq "Adcx1") {
-			require "lib/Adc.pm";
-			#CDS::Adcx1::initAdc($node);
-			CDS::Adcx1::initAdc($node);
-			$::partType[$::partCnt] = CDS::Adcx1::partType($node);
-		} 
-		if ($part_name eq "Adcx2") {
-			require "lib/Adc.pm";
-			#CDS::Adcx1::initAdc($node);
-			CDS::Adcx2::initAdc($node);
-			$::partType[$::partCnt] = CDS::Adcx2::partType($node);
-		} 
-		if ($part_name eq "Adcx3") {
-			require "lib/Adc.pm";
-			#CDS::Adcx1::initAdc($node);
-			CDS::Adcx3::initAdc($node);
-			$::partType[$::partCnt] = CDS::Adcx3::partType($node);
-		} 
-		if ($part_name eq "Adcx4") {
-			require "lib/Adc.pm";
-			#CDS::Adcx1::initAdc($node);
-			CDS::Adcx4::initAdc($node);
-			$::partType[$::partCnt] = CDS::Adcx4::partType($node);
-		} 
-		if ($part_name eq "Adcx5") {
-			require "lib/Adc.pm";
-			#CDS::Adcx1::initAdc($node);
-			CDS::Adcx5::initAdc($node);
-			$::partType[$::partCnt] = CDS::Adcx5::partType($node);
-		} 
-		if ($part_name eq "Adcx6") {
-			require "lib/Adc.pm";
-			#CDS::Adcx1::initAdc($node);
-			CDS::Adcx6::initAdc($node);
-			$::partType[$::partCnt] = CDS::Adcx6::partType($node);
-		} 
-		if ($part_name eq "Adcx7") {
-			require "lib/Adc.pm";
-			#CDS::Adcx1::initAdc($node);
-			CDS::Adcx7::initAdc($node);
-			$::partType[$::partCnt] = CDS::Adcx7::partType($node);
-		} 
-		if ($part_name eq "Adcx8") {
-			require "lib/Adc.pm";
-			#CDS::Adcx1::initAdc($node);
-			CDS::Adcx8::initAdc($node);
-			$::partType[$::partCnt] = CDS::Adcx8::partType($node);
-		} 
-		if ($part_name eq "Adcx9") {
-			require "lib/Adc.pm";
-			#CDS::Adcx1::initAdc($node);
-			CDS::Adcx9::initAdc($node);
-			$::partType[$::partCnt] = CDS::Adcx9::partType($node);
-		} 
-# End of ADC PART CHANGE **********************************
 
         	 $::partType[$::partCnt] = ("CDS::" . $part_name . "::partType") -> ($node, $::partCnt);
+
+	 #print "PNAME = $part_name \n";
 	 }
 	}
 	# For easy access
