@@ -1995,7 +1995,7 @@ int  j, k, l, thrGpCnt;
 				char *p = strchr(chtemp, '_');
 				if (p) p = strchr(p+1, '_');
 				if (p) *p = 0;
-				//printf ("Testing %s\n", chtemp);
+				//printf ("Testing %s %s\n", chtemp, thirdGroup[j3]);
 		         	if (test_substring(thirdGroup[j3], chtemp ) == 0) {
 			   		strcpy ( thrGroupTemp[thrGpCnt], chtemp );
 			   		thrGpCnt++;
@@ -2052,7 +2052,7 @@ int  j, k, l, thrGpCnt;
 	}
 	else { /* a group name is selected, show right side */
 	  //printf ( "Group name selected: %s\n", gpname );
-	  sprintf ( tempname, "%s_", gpname );
+	  sprintf ( tempname, "%s", gpname );
 	  counter = 0; 
 	  for ( i=0; i<topTotal+totalgroup+3+ttlgrp3rd+1; i++ ){ 
 	    get_a_line(fp, linetemp); /* skip first ... lines */
@@ -2062,6 +2062,7 @@ int  j, k, l, thrGpCnt;
 	    int tp = 0;
 	    get_a_line(fp, linetemp);
 	    sscanf(linetemp, "%s %d %s %d %d", chtemp, &rate, unittemp, &dtype, &tp);
+	    //printf("Testing %s %s\n", tempname, chtemp);
 	    if ( test_substring(tempname, chtemp ) == 0 ) {
 	      if (dtype == 6) {
 		/* Beware, other code relies on the suffix names */
