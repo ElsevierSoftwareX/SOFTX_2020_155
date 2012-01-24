@@ -1,5 +1,3 @@
-Changes beyond 2.4.1
-- Fix for Spectracom IRIG-B Year info readout.
 ===========================
 Overview of changes for 2.4.1
 ===========================
@@ -13,6 +11,8 @@ Overview of changes for 2.4.1
 (GPS 1 second mark) between IOP receipt of ADC data and IOP move of this data for use by
 user application processes. 
 - Bug fix for I/O error bit in STATE_WORD.
+- Fix for ADC part; adc number not parsed correctly to set dWordUsed parameter in C code.
+- Fix for Spectracom IRIG-B Year info readout.
 
 ===========================
 Overview of changes for 2.4
