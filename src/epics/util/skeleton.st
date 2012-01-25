@@ -233,76 +233,6 @@ unsigned int prev_cycle = 0;
 %% static %EPICS_TYPE% *pEpics = &pEpicsSpace;
 #endif
 
-#if defined(SEQUENCER_NAME_hepi) || defined(SEQUENCER_NAME_hepia)
-%% static unsigned int cpunum;
-#endif
-
-#ifdef SEQUENCER_NAME_asc
-#define FILT_QUAD_SIZE 10
-int filt[FILT_QUAD_SIZE];
-assign filt to
-{"{ifo}:{sys}-WFS1_I_QUAD","{ifo}:{sys}-WFS1_Q_QUAD","{ifo}:{sys}-WFS2_I_QUAD",
- "{ifo}:{sys}-WFS2_Q_QUAD","{ifo}:{sys}-WFS3_I_QUAD","{ifo}:{sys}-WFS3_Q_QUAD",
- "{ifo}:{sys}-WFS4_I_QUAD","{ifo}:{sys}-WFS4_Q_QUAD","{ifo}:{sys}-WFS5_I_QUAD",
- "{ifo}:{sys}-WFS5_Q_QUAD"};
-#endif
-
-#ifdef SEQUENCER_NAME_asc40m
-#define FILT_QUAD_SIZE 12
-int filt[FILT_QUAD_SIZE];
-assign filt to
-{"{ifo}:{sys}-WFS1_I_QUAD","{ifo}:{sys}-WFS1_Q_QUAD","{ifo}:{sys}-WFS2_I_QUAD",
- "{ifo}:{sys}-WFS2_Q_QUAD","{ifo}:{sys}-WFS3_I_QUAD","{ifo}:{sys}-WFS3_Q_QUAD",
- "{ifo}:{sys}-WFS4_I_QUAD","{ifo}:{sys}-WFS4_Q_QUAD","{ifo}:{sys}-WFS5_I_QUAD",
- "{ifo}:{sys}-WFS5_Q_QUAD","{ifo}:{sys}-WFS6_I_QUAD","{ifo}:{sys}-WFS6_Q_QUAD"};
-#endif
-
-#ifdef SEQUENCER_NAME_ascmc
-#define FILT_QUAD_SIZE 4
-int filt[FILT_QUAD_SIZE];
-assign filt to
-{"{ifo}:{sys}-WFS1_I_QUAD","{ifo}:{sys}-WFS1_Q_QUAD","{ifo}:{sys}-WFS2_I_QUAD",
- "{ifo}:{sys}-WFS2_Q_QUAD"};
-#endif
-
-#ifdef SEQUENCER_NAME_lsc_removed
-int lscModeSwitch;
-assign lscModeSwitch to "{ifo}:LSC-FE_MODE";
-
-int laState;
-assign laState to "{ifo}:LSC-LA_State_Bits_Read";
-
-%% static int lastLscModeSwitch;
-
-%% static int coeffReset = 0;
-
-#endif
-
-#if defined(SEQUENCER_NAME_tcsh1) || defined(SEQUENCER_NAME_tcsh2)
-
-double tcs1Input;
-assign tcs1Input to "{ifo}:ASC-WFS5_PIT_OUT16"; 
-/*assign tcs1Input to "{ifo}:LSC-LA_SPOB_NORM";*/
-double tcs2Input;
-assign tcs2Input to "{ifo}:LSC-ASI_CORR_OUT16";
-double  inpt;
-double  outpts[4];
-
-double tcsXOutput;
-double tcsYOutput;
-
-
-#if defined(SEQUENCER_NAME_tcsh2)
-assign tcsXOutput to "{ifo}:TCS-ITMX_AOMDRV";
-assign tcsYOutput to "{ifo}:TCS-ITMY_AOMDRV";
-#else
-assign tcsXOutput to "{ifo}:TCS-ITMX_PWRSET";
-assign tcsYOutput to "{ifo}:TCS-ITMY_PWRSET";
-#endif
-
-int tcsEnable;
-assign tcsEnable to "{ifo}:TCS-SERVO_EN";
-#endif
 
 #define update_labels(ii)\
        strcpy(labels0[ii],pVmeCoeff->vmeCoeffs[ii].filtName[0]);\
@@ -592,8 +522,8 @@ state monScreen{
 /* %% strcpy(thresholdErrMsg[5], "MThresh. parse err - cf. stderr");        MA */
 
 %% int thisFilterStatusCount;                                            /* MA */
-%% char fltrParamHelp[10];                                               /* MA */
-%% char fltrSevHelp[10];                                                 /* MA */
+%% char fltrParamHelp[14];                                               /* MA */
+%% char fltrSevHelp[14];                                                 /* MA */
 
 %% pthread_mutex_lock (&seq_lock);
 
@@ -716,70 +646,6 @@ state monScreen{
           pvPut(allNewCoeff);
 %%    }
 
-#if defined(SEQUENCER_NAME_ascmc) || defined(SEQUENCER_NAME_asc) || defined(SEQUENCER_NAME_asc40m)
-%%  for(ii=0;ii<FILT_QUAD_SIZE;ii++){
-      pvGet(filt[ii]);
-%%  }
-#endif
-
-#ifdef SEQUENCER_NAME_lsc_removed
-    pvGet(lscModeSwitch);
-%%  if(lscModeSwitch != lastLscModeSwitch)
-%%  {
-      lastLscModeSwitch = lscModeSwitch;
-%%    if(lscModeSwitch == 0)
-%%    {
-%%	saveSwitch1[0] &= 0xffef;
-%%	saveSwitch1[3] &= 0xffef;
-	pvPut(saveSwitch1[0]);
-	pvPut(saveSwitch1[3]);
-%%	saveSwitch1[30] &= 0xffef;
-%%	saveSwitch1[31] &= 0xffef;
-%%	saveSwitch1[32] &= 0xffef;
-	pvPut(saveSwitch1[30]);
-	pvPut(saveSwitch1[31]);
-	pvPut(saveSwitch1[32]);
-%%    }
-%%    if(lscModeSwitch == 1)
-%%    {
-%%	saveSwitch1[0] |= 0x10;
-%%	saveSwitch1[3] |= 0x10;
-	pvPut(saveSwitch1[0]);
-	pvPut(saveSwitch1[3]);
-%%	saveSwitch1[30] &= 0xffef;
-%%	saveSwitch1[31] &= 0xffef;
-%%	saveSwitch1[32] &= 0xffef;
-	pvPut(saveSwitch1[30]);
-	pvPut(saveSwitch1[31]);
-	pvPut(saveSwitch1[32]);
-%%    }
-%%    if(lscModeSwitch == 2)
-%%    {
-%%	saveSwitch1[30] |= 0x10;
-%%	saveSwitch1[31] |= 0x10;
-%%	saveSwitch1[32] |= 0x10;
-	pvPut(saveSwitch1[30]);
-	pvPut(saveSwitch1[31]);
-	pvPut(saveSwitch1[32]);
-%%    }
-	pvGet(laState);
-%%    if((lscModeSwitch == 2) && (laState & 0x20))
-%%    {
-%%	saveSwitch1[0] |= 0x10;
-%%	saveSwitch1[3] |= 0x10;
-	pvPut(saveSwitch1[0]);
-	pvPut(saveSwitch1[3]);
-%%    }
-%%    if((lscModeSwitch == 2) && ((laState & 0x20) == 0))
-%%    {
-%%	saveSwitch1[0] &= ~0x10;
-%%	saveSwitch1[3] &= ~0x10;
-	pvPut(saveSwitch1[0]);
-	pvPut(saveSwitch1[3]);
-%%    }
-%%  }
-
-#endif
 
 %%  statErrCnt = 0;                                                      /* MA */
 %%  int displayCount;                                                    /* MA */
@@ -1010,8 +876,8 @@ state monScreen{
 %%      }                                                                /* MA */
 
 %%      thisFilterStatusCount = 0;                                       /* MA */
-%%      strcpy(fltrParamHelp, "------");                                 /* MA */
-%%      strcpy(fltrSevHelp, "------");                                   /* MA */
+%%      strcpy(fltrParamHelp, "--------");                                 /* MA */
+%%      strcpy(fltrSevHelp, "--------");                                   /* MA */
 
 %AUPDT%                                                                  /* MA */
 
@@ -1077,12 +943,6 @@ state monScreen{
 %% }
 #endif
 
-%% if (statusFlag) {                                                     /* MA */
-      pvPut(statErrCnt);                                                 /* MA */
-      for (ii = 0; ii < 6; ii++) {                                       /* MA */
-         pvPut(staterr[ii]);                                             /* MA */
-      }                                                                  /* MA */
-%% }                                                                     /* MA */
 
 %DECL4%
 %%    stateWord = pEpics->epicsOutput.stateWord
@@ -1116,6 +976,10 @@ state monScreen{
 %% strcpy(localtimestring, ctime(&lt));
 %% localtimestring[strlen(localtimestring) - 1] = 0; /* Delete newline character */
    pvPut(localtimestring);
+      pvPut(statErrCnt);                                                 /* MA */
+      for (ii = 0; ii < 6; ii++) {                                       /* MA */
+         pvPut(staterr[ii]);                                             /* MA */
+      }                                                                  /* MA */
 
 
 %% pthread_mutex_unlock (&seq_lock);

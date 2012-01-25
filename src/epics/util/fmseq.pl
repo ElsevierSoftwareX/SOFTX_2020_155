@@ -47,6 +47,14 @@ if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
     "saveSwitch2HighSev" => "SW2R.HSV",
     "saveSwitch2LowSev" => "SW2R.LSV",
     "saveSwitch2LoloSev" => "SW2R.LLSV",
+    "outputHihiSev" => "OUTPUT.HHSV",
+    "outputHighSev" => "OUTPUT.HSV",
+    "outputLowSev" => "OUTPUT.LSV",
+    "outputLoloSev" => "OUTPUT.LLSV",
+    "inputHihiSev" => "INMON.HHSV",
+    "inputHighSev" => "INMON.HSV",
+    "inputLowSev" => "INMON.LSV",
+    "inputLoloSev" => "INMON.LLSV",
 	 );
 
 %iparAlarmStat = (
@@ -55,6 +63,8 @@ if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
     "outgainStat" => "GAIN.STAT",
     "saveSwitch1Stat" => "SW1R.STAT",
     "saveSwitch2Stat" => "SW2R.STAT",
+    "outputStat" => "OUTPUT.STAT",
+    "inputStat" => "INMON.STAT",
 	 );
 
 %spar = (
@@ -227,6 +237,7 @@ while (<IN>) {
           $vupdate .= "pvGet(evar_${v_name}_Stat);\n";
 #             $vupdate .= "rfm_assign(pEpics->${v_var}_Stat, evar_${v_name}_Stat);\n";     # ????????
           $vupdate .= "%%  if ( (evar_${v_name}_Stat == HIHI_ALARM) ||\n";
+          $vupdate .= "%%       (evar_${v_name}_Stat == STATE_ALARM) ||\n";
           $vupdate .= "%%       (evar_${v_name}_Stat == LOLO_ALARM) ) {\n";
           $vupdate .= "%%    setpointStatusCount++;\n";
           $vupdate .= "%%    if (setpointDisplayCount < 10) {\n";
@@ -237,6 +248,7 @@ while (<IN>) {
           $vupdate .= "%%    }\n";
           $vupdate .= "%%  }\n";
           $vupdate .= "%%  else if ( (evar_${v_name}_Stat == HIGH_ALARM) ||\n";
+          $vupdate .= "%%            (evar_${v_name}_Stat == STATE_ALARM) ||\n";
           $vupdate .= "%%            (evar_${v_name}_Stat == LOW_ALARM) ) {\n";
           $vupdate .= "%%    setpointStatusCount++;\n";
           $vupdate .= "%%    if (setpointDisplayCount < 10) {\n";
@@ -401,13 +413,16 @@ while (<IN>) {
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init,@eFields ) = split(/\s+/, $_);
 	#print "$v_name = efields $eFields[0] $eFields[1] $eFields[2] $eFields[3] $eFields[4] $eFields[5] $eFields[6]\n";
 	$vdecl .= "$v_type evar_$v_name;\n";
+	$vstat_decl .= "int evar_${v_name}_Stat;\n";
         my $top_name = is_top_name($v_name);
    	my $tv_name;
         if ($top_name) {
 	  	$tv_name = top_name_transform($v_name);
 		$vdecl .= "assign evar_$v_name to \"{ifo}:${tv_name}\";\n";
+            $vstat_decl .="assign evar_${v_name}_Stat to \"{ifo}:${tv_name}.STAT\";\n";
 	} else {
 		$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
+        	$vstat_decl .="assign evar_${v_name}_Stat to \"{ifo}:{sys}-{subsys}${v_name}.STAT\";\n";
 	}
 
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
@@ -420,6 +435,15 @@ while (<IN>) {
 	    $vupdate .= "evar_$v_name = pEpics->${v_var};\n";
 	}
 	$vupdate .= "pvPut(evar_$v_name);\n";
+          $vupdate .= "pvGet(evar_${v_name}_Stat);\n";
+#             $vupdate .= "rfm_assign(pEpics->${v_var}_Stat, evar_${v_name}_Stat);\n";     # ????????
+          $vupdate .= "%%  if ( (evar_${v_name}_Stat != NO_ALARM) ) {\n";
+          $vupdate .= "%%    if (statErrCnt < 6) {\n";
+          $vupdate .= "%%      strcpy(staterr[statErrCnt], \"$v_name\");\n";
+          $vupdate .= "%%    }\n";
+          $vupdate .= "%%    statErrCnt++;\n";
+          $vupdate .= "%%  }\n";
+          # $vupdate .= "%%  }\n";
 
 	if ($top_name) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}\")\n";
@@ -614,10 +638,12 @@ while (<IN>) {
 #          $mupdate .= "%%      rfm_assign(pEpics->${m_var}_Stat_[ii][jj],     # ??????
 #                                          matrix${m_name}Stat_[ij]);\n";      # ??????
         $mupdate .= "%%      if ( (matrix${m_name}Stat_[ij] == HIHI_ALARM) ||\n";
+        $mupdate .= "%%           (matrix${m_name}Stat_[ij] == STATE_ALARM) ||\n";
         $mupdate .= "%%           (matrix${m_name}Stat_[ij] == LOLO_ALARM) ) {\n";
         $mupdate .= "%%        matrixStatusMajCount++;\n";
         $mupdate .= "%%      }\n";
         $mupdate .= "%%      else if ( (matrix${m_name}Stat_[ij] == HIGH_ALARM) ||\n";
+        $mupdate .= "%%                (matrix${m_name}Stat_[ij] == STATE_ALARM) ||\n";
         $mupdate .= "%%                (matrix${m_name}Stat_[ij] == LOW_ALARM) ) {\n";
         $mupdate .= "%%        matrixStatusMinCount++;\n";
         $mupdate .= "%%      }\n";
@@ -859,6 +885,16 @@ while ( ($n1, $n2) = each %iparAlarmStat) {
       $index = $help + 3;
       $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
    }
+   elsif (substr($param, 0, 6) eq "OUTPUT") {
+      $help = "O";
+      $index = 7;
+      $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
+   }
+   elsif (substr($param, 0, 5) eq "INMON") {
+      $help = "I";
+      $index = 6;
+      $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
+   }
    else {
 #     $aupdate .= "\"$param\");\n";
       $paramStrLength = length($param);
@@ -868,12 +904,14 @@ while ( ($n1, $n2) = each %iparAlarmStat) {
    }
 
    $aupdate .= "%%           if ( (${n1}[ii] == HIHI_ALARM) ||\n";
+   $aupdate .= "%%                (${n1}[ii] == STATE_ALARM) ||\n";
    $aupdate .= "%%                (${n1}[ii] == LOLO_ALARM) ) {\n";
 #  $aupdate .= "%%              strcpy(filterSeverity[filterDisplayCount], ";
 #  $aupdate .= "\"MAJOR\");\n";
    $aupdate .= "%%              fltrSevHelp[$index] = \'M\';\n";
    $aupdate .= "%%           }\n";
    $aupdate .= "%%           else if ( (${n1}[ii] == HIGH_ALARM) ||\n";
+   $aupdate .= "%%                     (${n1}[ii] == STATE_ALARM) ||\n";
    $aupdate .= "%%                     (${n1}[ii] == LOW_ALARM) ) {\n";
 #  $aupdate .= "%%              strcpy(filterSeverity[filterDisplayCount], ";
 #  $aupdate .= "\"MINOR\");\n";

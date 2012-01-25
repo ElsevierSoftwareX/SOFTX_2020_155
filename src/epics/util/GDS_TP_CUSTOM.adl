@@ -1,14 +1,14 @@
 
 file {
-	name="/opt/rtcds/llo/l1/core/trunk/src/epics/util/GDS_TP_CUSTOM.adl"
-	version=030104
+	name="/opt/rtcds/llo/l1/core/branch-2.4/src/epics/util/GDS_TP_CUSTOM.adl"
+	version=030105
 }
 display {
 	object {
-		x=220
-		y=81
+		x=151
+		y=460
 		width=573
-		height=300
+		height=310
 	}
 	clr=14
 	bclr=4
@@ -92,7 +92,7 @@ rectangle {
 		x=11
 		y=29
 		width=550
-		height=255
+		height=270
 	}
 	"basic attribute" {
 		clr=2
@@ -103,7 +103,7 @@ rectangle {
 		x=375
 		y=53
 		width=175
-		height=230
+		height=240
 	}
 	"basic attribute" {
 		clr=55
@@ -114,7 +114,7 @@ rectangle {
 		x=201
 		y=53
 		width=170
-		height=230
+		height=240
 	}
 	"basic attribute" {
 		clr=55
@@ -125,7 +125,7 @@ rectangle {
 		x=15
 		y=53
 		width=182
-		height=230
+		height=240
 	}
 	"basic attribute" {
 		clr=55
@@ -1278,22 +1278,6 @@ byte {
 	label="Coeff Load"
 	release_msg="1"
 }
-"text update" {
-	object {
-		x=210
-		y=121
-		width=152
-		height=18
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_MSG"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
 "message button" {
 	object {
 		x=117
@@ -1508,5 +1492,108 @@ rectangle {
 	"dynamic attribute" {
 		clr="alarm"
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DUOTONE_TIME"
+	}
+}
+"text update" {
+	object {
+		x=264
+		y=275
+		width=30
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SETPOINT_STATUS_COUNT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=299
+		y=275
+		width=30
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_STAT_ERR_CNT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=334
+		y=275
+		width=30
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_STATUS_COUNT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=268
+		y=260
+		width=23
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="SPT"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=302
+		y=260
+		width=23
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="RO"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=338
+		y=260
+		width=23
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="FLT"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=210
+		y=121
+		width=152
+		height=18
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_MSG"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
 	}
 }

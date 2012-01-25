@@ -3561,7 +3561,7 @@ my @adcMedm;
 my @byteMedm;
 $sitelc = lc($site);
 $mxpt = 225;
-$mypt = 158;
+$mypt = 145;
 $mbxpt = 32 + $mxpt;
 $mbypt = $mypt + 1;
 $adcMedm[0] = "\"related display\" \{ \n";
@@ -3680,9 +3680,34 @@ $byteMedm[19] = "\tebit=1 \n";
 $mypt += 22;
 if($ii == 4) {
 	$mxpt += 60; 
-	$mypt = 158;
+	$mypt = 145;
 }
 }
+my @alarmMedm;
+$mxpt = 201;
+$mypt = 275;
+$alarmMedm[0] = "\"related display\" \{ \n";
+$alarmMedm[1] = "\tobject  \{ \n";
+$alarmMedm[2] = "\t\tx=";
+$alarmMedm[3] = "$mxpt";
+$alarmMedm[4] = " \n";
+$alarmMedm[5] = "\t\ty=";
+$alarmMedm[6] = "$mypt";
+$alarmMedm[7] = " \n";
+$alarmMedm[8] = "\t\twidth=60 \n";
+$alarmMedm[9] = "\t\theight=16 \n";
+$alarmMedm[10] = "\t\} \n";
+$alarmMedm[11] = "\tdisplay\[0\]  \{ \n";
+$alarmMedm[12] = "\t\tname=\"/opt/rtcds/LOCATION_NAME/";
+$alarmMedm[13] = "$sitelc";
+$alarmMedm[14] = "/medm/MEDMDIR/ALARM_MONITOR";
+$alarmMedm[15] = "\.adl\" \n";
+$alarmMedm[16] = "\t\} \n";
+$alarmMedm[17] = "\tclr=0 \n";
+$alarmMedm[18] = "\tbclr=44 \n";
+$alarmMedm[19] = "\tlabel=\"Alarms\" \n";
+$alarmMedm[20] = "\} \n";
+print OUTGDSM @alarmMedm;
 close(OUTGDSM);
 
 system("cat GDS_TP_TEST.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
