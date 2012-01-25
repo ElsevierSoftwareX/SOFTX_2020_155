@@ -89,10 +89,10 @@ for ($row = 0; $row < $rows; $row ++) {
     $channel = $channelbase . sprintf('%i_%i', $row+1,  $col+1);
 
     # Make the primary text box (for nonzero values)
-    make_text_entry($X, $Y, $W, $H, $channel, 14, 60, "if not zero");
+    make_text_entry($X, $Y, $W, $H, $channel, 35, 14, "if not zero");
 
     # Make the secondary text box (for zero values)
-    make_text_entry($X, $Y, $W, $H, $channel, 10, 5, "if zero");
+    make_text_entry($X, $Y, $W, $H, $channel, 35, 9, "if zero");
 
     # Make the highlight box around the text box
   }
@@ -124,6 +124,7 @@ composite {
       clr=$c
       bclr=$bg
     }
+    clrmod="alarm"
     limits {
     }
   } 
@@ -150,6 +151,7 @@ text {
                 clr=2
         }
         textix="$text"
+	clrmod="alarm"
         align="horiz. centered"
 }
 END

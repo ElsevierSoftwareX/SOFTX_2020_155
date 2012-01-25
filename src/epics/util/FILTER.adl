@@ -1,7 +1,7 @@
 
 file {
-	name="/opt/rtcds/llo/l1/core/trunk/src/epics/util/FILTER.adl"
-	version=030104
+	name="/opt/rtcds/llo/l1/core/branch-2.4/src/epics/util/FILTER.adl"
+	version=030105
 }
 display {
 	object {
@@ -378,9 +378,10 @@ byte {
 	}
 	control {
 		chan="SITE_NAME:FILTERNAME_OFFSET"
-		clr=14
-		bclr=3
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	limits {
 	}
 }
@@ -456,9 +457,10 @@ polygon {
 	}
 	control {
 		chan="SITE_NAME:FILTERNAME_GAIN"
-		clr=14
-		bclr=3
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	limits {
 	}
 }
@@ -471,9 +473,10 @@ polygon {
 	}
 	control {
 		chan="SITE_NAME:FILTERNAME_LIMIT"
-		clr=14
-		bclr=3
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	limits {
 	}
 }
@@ -1363,9 +1366,10 @@ text {
 	}
 	control {
 		chan="SITE_NAME:FILTERNAME_TRAMP"
-		clr=14
-		bclr=3
+		clr=35
+		bclr=14
 	}
+	clrmod="alarm"
 	limits {
 	}
 }
