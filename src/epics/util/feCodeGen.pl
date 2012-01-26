@@ -3715,9 +3715,7 @@ close(OUTGDSM);
 system("cat GDS_TP_TEST.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
 system("cp $rcg_src_dir/src/epics/util/ALARMS.adl ALARMS.adl");
 system("cat ALARMS.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_ALARM_MONITOR.adl");
-#system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR.adl");
-#system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_0.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_0.adl");
-#system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_1.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_1.adl");
+
 my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
 
@@ -3826,6 +3824,7 @@ sub commify_series {
 			$sargs .= "s/FILTERNAME/$tfn/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . ".adl");
+			system("cat $rcg_src_dir/src/epics/util/FILTALH.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . "_ALH.adl");
 		      }
 		    }
 		  } else {
@@ -3854,6 +3853,7 @@ sub commify_series {
 			$sargs = $sed_arg . "s/FILTERNAME/$sysname-$filt_name/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".adl");
+			system("cat $rcg_src_dir/src/epics/util/FILTALH.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . "_ALH.adl");
 		      }
 		    }
 		  } else {
@@ -3890,6 +3890,7 @@ sub commify_series {
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/FILTALH.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . "_ALH.adl");
 			}
 		} else {
 		  	$sys_name = substr($sys_name, 2, 3);
@@ -3901,6 +3902,7 @@ sub commify_series {
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/FILTALH.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . "_ALH.adl");
 			}
 		}
 	}
