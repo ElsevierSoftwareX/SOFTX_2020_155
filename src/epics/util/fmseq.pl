@@ -438,7 +438,7 @@ while (<IN>) {
           $vupdate .= "pvGet(evar_${v_name}_Stat);\n";
 #             $vupdate .= "rfm_assign(pEpics->${v_var}_Stat, evar_${v_name}_Stat);\n";     # ????????
           $vupdate .= "%%  if ( (evar_${v_name}_Stat != NO_ALARM) ) {\n";
-          $vupdate .= "%%    if (statErrCnt < 6) {\n";
+          $vupdate .= "%%    if (statErrCnt < 10) {\n";
           $vupdate .= "%%      strcpy(staterr[statErrCnt], \"$v_name\");\n";
           $vupdate .= "%%    }\n";
           $vupdate .= "%%    statErrCnt++;\n";
@@ -1003,6 +1003,10 @@ print "grecord(stringout,\"%IFO%:FEC-${dcuId}_FESTAT_3\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_FESTAT_4\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_FESTAT_5\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_FESTAT_6\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_FESTAT_7\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_FESTAT_8\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_FESTAT_9\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_FESTAT_10\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_MTRX_STAT_ERR_CNT\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_MTRXSTAT_1\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_MTRXSTAT_2\")\n";

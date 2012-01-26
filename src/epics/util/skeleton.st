@@ -77,11 +77,13 @@ assign statErrCnt to "{ifo}:FEC-{sysnum}_STAT_ERR_CNT";
 string svnString;
 assign svnString to "{ifo}:FEC-{sysnum}_BUILD_SVN";
 
-string staterr[6];
+string staterr[10];
 assign staterr to {
 "{ifo}:FEC-{sysnum}_FESTAT_1","{ifo}:FEC-{sysnum}_FESTAT_2",
 "{ifo}:FEC-{sysnum}_FESTAT_3","{ifo}:FEC-{sysnum}_FESTAT_4",
-"{ifo}:FEC-{sysnum}_FESTAT_5","{ifo}:FEC-{sysnum}_FESTAT_6"};
+"{ifo}:FEC-{sysnum}_FESTAT_5","{ifo}:FEC-{sysnum}_FESTAT_6",
+"{ifo}:FEC-{sysnum}_FESTAT_7","{ifo}:FEC-{sysnum}_FESTAT_8",
+"{ifo}:FEC-{sysnum}_FESTAT_9","{ifo}:FEC-{sysnum}_FESTAT_10"};
 
 int matrixThreshCount;                                                   /* MA */
 assign matrixThreshCount to "{ifo}:FEC-{sysnum}_MTRX_STAT_ERR_CNT";      /* MA */
@@ -401,7 +403,7 @@ state init
 %%  /* printf("About to read file \n"); */
     strcpy(msg, "Reading coeff file...");
     pvPut(msg);
-%%  for(ii=0;ii<6;ii++) {
+%%  for(ii=0;ii<10;ii++) {
 %%    strcpy(staterr[ii], "Clr");
       pvPut(staterr[ii]);
 %%  }
@@ -661,7 +663,7 @@ state monScreen{
 %%  int matrixStatusMajCount = 0;                                        /* MA */
 %%  int matrixStatusMinCount = 0;                                        /* MA */
 
-%%  for(ii = 0; ii < 6; ii++) {                                          /* MA */
+%%  for(ii = 0; ii < 10; ii++) {                                          /* MA */
 %%     strcpy(staterr[ii], "CLR");                                       /* MA */
 %%  }                                                                    /* MA */
 
@@ -868,7 +870,7 @@ state monScreen{
 
 %%      if (thresholdFlag) {                                             /* MA */
 %%         statErrCnt++;                                                 /* MA */
-%%         if (displayCount < 6) {                                       /* MA */
+%%         if (displayCount < 10) {                                       /* MA */
 %%            sprintf(staterr[displayCount], "%2d: ", thresholdFlag);    /* MA */
 %%            strcat(staterr[displayCount], fmmap0[ii].name);            /* MA */
 %%            displayCount++;                                            /* MA */
@@ -977,7 +979,7 @@ state monScreen{
 %% localtimestring[strlen(localtimestring) - 1] = 0; /* Delete newline character */
    pvPut(localtimestring);
       pvPut(statErrCnt);                                                 /* MA */
-      for (ii = 0; ii < 6; ii++) {                                       /* MA */
+      for (ii = 0; ii < 10; ii++) {                                       /* MA */
          pvPut(staterr[ii]);                                             /* MA */
       }                                                                  /* MA */
 
