@@ -1,0 +1,888 @@
+
+file {
+	name="/opt/rtcds/llo/l1/core/branch-2.4/src/epics/util/ALARMS.adl"
+	version=030105
+}
+display {
+	object {
+		x=815
+		y=90
+		width=500
+		height=630
+	}
+	clr=14
+	bclr=4
+	cmap=""
+	gridSpacing=5
+	gridOn=0
+	snapToGrid=0
+}
+"color map" {
+	ncolors=65
+	colors {
+		ffffff,
+		ececec,
+		dadada,
+		c8c8c8,
+		bbbbbb,
+		aeaeae,
+		9e9e9e,
+		919191,
+		858585,
+		787878,
+		696969,
+		5a5a5a,
+		464646,
+		2d2d2d,
+		000000,
+		00d800,
+		1ebb00,
+		339900,
+		2d7f00,
+		216c00,
+		fd0000,
+		de1309,
+		be190b,
+		a01207,
+		820400,
+		5893ff,
+		597ee1,
+		4b6ec7,
+		3a5eab,
+		27548d,
+		fbf34a,
+		f9da3c,
+		eeb62b,
+		e19015,
+		cd6100,
+		ffb0ff,
+		d67fe2,
+		ae4ebc,
+		8b1a96,
+		610a75,
+		a4aaff,
+		8793e2,
+		6a73c1,
+		4d52a4,
+		343386,
+		c7bb6d,
+		b79d5c,
+		a47e3c,
+		7d5627,
+		58340f,
+		99ffff,
+		73dfff,
+		4ea5f9,
+		2a63e4,
+		0a00b8,
+		ebf1b5,
+		d4db9d,
+		bbc187,
+		a6a462,
+		8b8239,
+		73ff6b,
+		52da3b,
+		3cb420,
+		289315,
+		1a7309,
+	}
+}
+"text update" {
+	object {
+		x=79
+		y=244
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_ID_1"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=79
+		y=328
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_ID_5"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=79
+		y=265
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_ID_2"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=252
+		y=244
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_PARAM_1"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=79
+		y=286
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_ID_3"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=252
+		y=265
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_PARAM_2"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=79
+		y=307
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_ID_4"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=252
+		y=286
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_PARAM_3"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=50
+		y=518
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FESTAT_1"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=50
+		y=539
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FESTAT_2"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=50
+		y=81
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SETPOINT_ID_1"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=50
+		y=102
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SETPOINT_ID_2"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=0
+		width=500
+		height=22
+	}
+	"basic attribute" {
+		clr=14
+	}
+}
+text {
+	object {
+		x=10
+		y=4
+		width=200
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="FBID_ALARMS"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=255
+		y=4
+		width=200
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_STRING"
+		clr=2
+		bclr=14
+	}
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=50
+		y=123
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SETPOINT_ID_3"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=50
+		y=144
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SETPOINT_ID_4"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=50
+		y=165
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SETPOINT_ID_5"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=263
+		y=82
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SETPOINT_ID_6"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=263
+		y=103
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SETPOINT_ID_7"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=263
+		y=124
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SETPOINT_ID_8"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=263
+		y=145
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SETPOINT_ID_9"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=263
+		y=166
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SETPOINT_ID_10"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=252
+		y=307
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_PARAM_4"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=252
+		y=328
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_PARAM_5"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=50
+		y=560
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FESTAT_3"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=50
+		y=581
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FESTAT_4"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=50
+		y=602
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FESTAT_5"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=265
+		y=518
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FESTAT_6"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=37
+		width=500
+		height=22
+	}
+	"basic attribute" {
+		clr=54
+	}
+}
+text {
+	object {
+		x=9
+		y=40
+		width=200
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="SETPOINT ALARMS"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=250
+		y=40
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SETPOINT_STATUS_COUNT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=199
+		width=500
+		height=22
+	}
+	"basic attribute" {
+		clr=54
+	}
+}
+text {
+	object {
+		x=9
+		y=202
+		width=200
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="FILTER MODULE ALARMS"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=250
+		y=202
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_STATUS_COUNT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=79
+		y=354
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_ID_6"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=79
+		y=438
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_ID_10"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=79
+		y=375
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_ID_7"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=252
+		y=354
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_PARAM_6"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=79
+		y=396
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_ID_8"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=252
+		y=375
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_PARAM_7"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=79
+		y=417
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_ID_9"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=252
+		y=396
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_PARAM_8"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=252
+		y=417
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_PARAM_9"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=252
+		y=438
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_PARAM_10"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=476
+		width=500
+		height=22
+	}
+	"basic attribute" {
+		clr=54
+	}
+}
+text {
+	object {
+		x=9
+		y=479
+		width=200
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="READOUT ALARMS"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=250
+		y=479
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_STAT_ERR_CNT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=265
+		y=539
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FESTAT_7"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=265
+		y=560
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FESTAT_8"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=265
+		y=581
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FESTAT_9"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=265
+		y=602
+		width=160
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FESTAT_10"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
