@@ -5,10 +5,10 @@ file {
 }
 display {
 	object {
-		x=815
-		y=90
+		x=956
+		y=187
 		width=500
-		height=630
+		height=650
 	}
 	clr=14
 	bclr=4
@@ -90,7 +90,7 @@ display {
 "text update" {
 	object {
 		x=79
-		y=244
+		y=259
 		width=160
 		height=16
 	}
@@ -106,7 +106,7 @@ display {
 "text update" {
 	object {
 		x=79
-		y=328
+		y=343
 		width=160
 		height=16
 	}
@@ -122,7 +122,7 @@ display {
 "text update" {
 	object {
 		x=79
-		y=265
+		y=280
 		width=160
 		height=16
 	}
@@ -138,7 +138,7 @@ display {
 "text update" {
 	object {
 		x=252
-		y=244
+		y=259
 		width=160
 		height=16
 	}
@@ -154,7 +154,7 @@ display {
 "text update" {
 	object {
 		x=79
-		y=286
+		y=301
 		width=160
 		height=16
 	}
@@ -170,7 +170,7 @@ display {
 "text update" {
 	object {
 		x=252
-		y=265
+		y=280
 		width=160
 		height=16
 	}
@@ -186,7 +186,7 @@ display {
 "text update" {
 	object {
 		x=79
-		y=307
+		y=322
 		width=160
 		height=16
 	}
@@ -202,7 +202,7 @@ display {
 "text update" {
 	object {
 		x=252
-		y=286
+		y=301
 		width=160
 		height=16
 	}
@@ -218,7 +218,7 @@ display {
 "text update" {
 	object {
 		x=50
-		y=518
+		y=533
 		width=160
 		height=16
 	}
@@ -234,7 +234,7 @@ display {
 "text update" {
 	object {
 		x=50
-		y=539
+		y=554
 		width=160
 		height=16
 	}
@@ -250,7 +250,7 @@ display {
 "text update" {
 	object {
 		x=50
-		y=81
+		y=96
 		width=160
 		height=16
 	}
@@ -266,7 +266,7 @@ display {
 "text update" {
 	object {
 		x=50
-		y=102
+		y=117
 		width=160
 		height=16
 	}
@@ -321,7 +321,7 @@ text {
 "text update" {
 	object {
 		x=50
-		y=123
+		y=138
 		width=160
 		height=16
 	}
@@ -337,7 +337,7 @@ text {
 "text update" {
 	object {
 		x=50
-		y=144
+		y=159
 		width=160
 		height=16
 	}
@@ -353,7 +353,7 @@ text {
 "text update" {
 	object {
 		x=50
-		y=165
+		y=180
 		width=160
 		height=16
 	}
@@ -369,7 +369,7 @@ text {
 "text update" {
 	object {
 		x=263
-		y=82
+		y=97
 		width=160
 		height=16
 	}
@@ -385,7 +385,7 @@ text {
 "text update" {
 	object {
 		x=263
-		y=103
+		y=118
 		width=160
 		height=16
 	}
@@ -401,7 +401,7 @@ text {
 "text update" {
 	object {
 		x=263
-		y=124
+		y=139
 		width=160
 		height=16
 	}
@@ -417,7 +417,7 @@ text {
 "text update" {
 	object {
 		x=263
-		y=145
+		y=160
 		width=160
 		height=16
 	}
@@ -433,7 +433,7 @@ text {
 "text update" {
 	object {
 		x=263
-		y=166
+		y=181
 		width=160
 		height=16
 	}
@@ -449,7 +449,7 @@ text {
 "text update" {
 	object {
 		x=252
-		y=307
+		y=322
 		width=160
 		height=16
 	}
@@ -465,7 +465,7 @@ text {
 "text update" {
 	object {
 		x=252
-		y=328
+		y=343
 		width=160
 		height=16
 	}
@@ -481,7 +481,7 @@ text {
 "text update" {
 	object {
 		x=50
-		y=560
+		y=575
 		width=160
 		height=16
 	}
@@ -497,7 +497,7 @@ text {
 "text update" {
 	object {
 		x=50
-		y=581
+		y=596
 		width=160
 		height=16
 	}
@@ -513,7 +513,7 @@ text {
 "text update" {
 	object {
 		x=50
-		y=602
+		y=617
 		width=160
 		height=16
 	}
@@ -529,7 +529,7 @@ text {
 "text update" {
 	object {
 		x=265
-		y=518
+		y=533
 		width=160
 		height=16
 	}
@@ -545,7 +545,7 @@ text {
 rectangle {
 	object {
 		x=0
-		y=37
+		y=52
 		width=500
 		height=22
 	}
@@ -556,7 +556,7 @@ rectangle {
 text {
 	object {
 		x=9
-		y=40
+		y=55
 		width=200
 		height=18
 	}
@@ -569,7 +569,7 @@ text {
 "text update" {
 	object {
 		x=250
-		y=40
+		y=55
 		width=50
 		height=16
 	}
@@ -585,7 +585,7 @@ text {
 rectangle {
 	object {
 		x=0
-		y=199
+		y=214
 		width=500
 		height=22
 	}
@@ -596,7 +596,7 @@ rectangle {
 text {
 	object {
 		x=9
-		y=202
+		y=217
 		width=200
 		height=18
 	}
@@ -609,7 +609,7 @@ text {
 "text update" {
 	object {
 		x=250
-		y=202
+		y=217
 		width=50
 		height=16
 	}
@@ -625,7 +625,7 @@ text {
 "text update" {
 	object {
 		x=79
-		y=354
+		y=369
 		width=160
 		height=16
 	}
@@ -641,7 +641,7 @@ text {
 "text update" {
 	object {
 		x=79
-		y=438
+		y=453
 		width=160
 		height=16
 	}
@@ -657,7 +657,7 @@ text {
 "text update" {
 	object {
 		x=79
-		y=375
+		y=390
 		width=160
 		height=16
 	}
@@ -673,7 +673,7 @@ text {
 "text update" {
 	object {
 		x=252
-		y=354
+		y=369
 		width=160
 		height=16
 	}
@@ -689,7 +689,7 @@ text {
 "text update" {
 	object {
 		x=79
-		y=396
+		y=411
 		width=160
 		height=16
 	}
@@ -705,7 +705,7 @@ text {
 "text update" {
 	object {
 		x=252
-		y=375
+		y=390
 		width=160
 		height=16
 	}
@@ -721,7 +721,7 @@ text {
 "text update" {
 	object {
 		x=79
-		y=417
+		y=432
 		width=160
 		height=16
 	}
@@ -737,7 +737,7 @@ text {
 "text update" {
 	object {
 		x=252
-		y=396
+		y=411
 		width=160
 		height=16
 	}
@@ -753,7 +753,7 @@ text {
 "text update" {
 	object {
 		x=252
-		y=417
+		y=432
 		width=160
 		height=16
 	}
@@ -769,7 +769,7 @@ text {
 "text update" {
 	object {
 		x=252
-		y=438
+		y=453
 		width=160
 		height=16
 	}
@@ -785,7 +785,7 @@ text {
 rectangle {
 	object {
 		x=0
-		y=476
+		y=491
 		width=500
 		height=22
 	}
@@ -796,7 +796,7 @@ rectangle {
 text {
 	object {
 		x=9
-		y=479
+		y=494
 		width=200
 		height=18
 	}
@@ -809,7 +809,7 @@ text {
 "text update" {
 	object {
 		x=250
-		y=479
+		y=494
 		width=50
 		height=16
 	}
@@ -825,7 +825,7 @@ text {
 "text update" {
 	object {
 		x=265
-		y=539
+		y=554
 		width=160
 		height=16
 	}
@@ -841,7 +841,7 @@ text {
 "text update" {
 	object {
 		x=265
-		y=560
+		y=575
 		width=160
 		height=16
 	}
@@ -857,7 +857,7 @@ text {
 "text update" {
 	object {
 		x=265
-		y=581
+		y=596
 		width=160
 		height=16
 	}
@@ -873,7 +873,7 @@ text {
 "text update" {
 	object {
 		x=265
-		y=602
+		y=617
 		width=160
 		height=16
 	}
@@ -883,6 +883,47 @@ text {
 		bclr=42
 	}
 	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=25
+		width=500
+		height=22
+	}
+	"basic attribute" {
+		clr=54
+	}
+}
+text {
+	object {
+		x=11
+		y=27
+		width=200
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="ALARM SET CRC"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=234
+		y=28
+		width=80
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ALH_CRC"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	format="hexadecimal"
 	limits {
 	}
 }
