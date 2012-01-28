@@ -14,6 +14,7 @@ if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
     "tp" => "OUTMON",
     "out16Hz" => "OUT16",
     "output" => "OUTPUT",
+    "tramp" => "TRAMP",
 	 );
 
 %ipar = (
@@ -27,34 +28,60 @@ if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
 	 );
 
 %iparAlarmSev = (
-    "limitHihiSev" => "LIMIT.HHSV",
     "limitHighSev" => "LIMIT.HSV",
+    "limitHigh" => "LIMIT.HIGH",
+    "limitLow" => "LIMIT.LOW",
     "limitLowSev" => "LIMIT.LSV",
-    "limitLoloSev" => "LIMIT.LLSV",
-    "offsetHihiSev" => "OFFSET.HHSV",
+
     "offsetHighSev" => "OFFSET.HSV",
+    "offsetHigh" => "OFFSET.HIGH",
     "offsetLowSev" => "OFFSET.LSV",
-    "offsetLoloSev" => "OFFSET.LLSV",
-    "outgainHihiSev" => "GAIN.HHSV",
+    "offsetLow" => "OFFSET.LOW",
+
     "outgainHighSev" => "GAIN.HSV",
+    "outgainHigh" => "GAIN.HIGH",
     "outgainLowSev" => "GAIN.LSV",
-    "outgainLoloSev" => "GAIN.LLSV",
-    "saveSwitch1HihiSev" => "SW1R.HHSV",
+    "outgainLow" => "GAIN.LOW",
+
     "saveSwitch1HighSev" => "SW1R.HSV",
+    "saveSwitch1High" => "SW1R.HIGH",
     "saveSwitch1LowSev" => "SW1R.LSV",
-    "saveSwitch1LoloSev" => "SW1R.LLSV",
-    "saveSwitch2HihiSev" => "SW2R.HHSV",
+    "saveSwitch1Low" => "SW1R.LOW",
+
     "saveSwitch2HighSev" => "SW2R.HSV",
+    "saveSwitch2High" => "SW2R.HIGH",
     "saveSwitch2LowSev" => "SW2R.LSV",
-    "saveSwitch2LoloSev" => "SW2R.LLSV",
-    "outputHihiSev" => "OUTPUT.HHSV",
+    "saveSwitch2Low" => "SW2R.LOW",
+
     "outputHighSev" => "OUTPUT.HSV",
+    "outputHigh" => "OUTPUT.HIGH",
     "outputLowSev" => "OUTPUT.LSV",
-    "outputLoloSev" => "OUTPUT.LLSV",
-    "inputHihiSev" => "INMON.HHSV",
+    "outputLow" => "OUTPUT.LOW",
+
     "inputHighSev" => "INMON.HSV",
+    "inputHigh" => "INMON.HIGH",
     "inputLowSev" => "INMON.LSV",
-    "inputLoloSev" => "INMON.LLSV",
+    "inputLow" => "INMON.LOW",
+
+    "trampHighSev" => "TRAMP.HSV",
+    "trampHigh" => "TRAMP.HIGH",
+    "trampLowSev" => "TRAMP.LSV",
+    "trampLow" => "TRAMP.LOW",
+
+    "out16HighSev" => "OUT16.HSV",
+    "out16High" => "OUT16.HIGH",
+    "out16LowSev" => "OUT16.LSV",
+    "out16Low" => "OUT16.LOW",
+
+    "outmonHighSev" => "OUTMON.HSV",
+    "outmonHigh" => "OUTMON.HIGH",
+    "outmonLowSev" => "OUTMON.LSV",
+    "outmonLow" => "OUTMON.LOW",
+
+    "excmonHighSev" => "EXCMON.HSV",
+    "excmonHigh" => "EXCMON.HIGH",
+    "excmonLowSev" => "EXCMON.LSV",
+    "excmonLow" => "EXCMON.LOW",
 	 );
 
 %iparAlarmStat = (
@@ -65,6 +92,10 @@ if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
     "saveSwitch2Stat" => "SW2R.STAT",
     "outputStat" => "OUTPUT.STAT",
     "inputStat" => "INMON.STAT",
+    "trampStat" => "TRAMP.STAT",
+    "out16Stat" => "OUT16.STAT",
+    "outmonStat" => "OUTMON.STAT",
+    "excmonStat" => "EXCMON.STAT",
 	 );
 
 %spar = (
@@ -804,13 +835,6 @@ open(OUT,">./$ARGV[0].st") || die "cannot open $ARGV[0].st file for writing";
 $cnt2 = $cnt*2;
 $cnt10 = $cnt*10;
 
-$fpar{"gain_ramp_time"} = "TRAMP";
-$iparAlarmSev{"gain_ramp_time_hihi_Sev"} = "TRAMP.HHSV";
-$iparAlarmSev{"gain_ramp_time_high_Sev"} = "TRAMP.HSV";
-$iparAlarmSev{"gain_ramp_time_low_Sev"} = "TRAMP.LSV";
-$iparAlarmSev{"gain_ramp_time_lolo_Sev"} = "TRAMP.LLSV";
-$iparAlarmStat{"gain_ramp_time_Stat"} = "TRAMP.STAT";
-
 @a = ( \%fpar, "double", \%ipar, "int", \%iparAlarmSev, "int", \%iparAlarmStat, "int", \%spar, "string" );
 
 if ($phase > 0) {
@@ -836,25 +860,25 @@ while ( ($n1, $n2) = each %$h ) {
 #}
 
 $ainit .= "\n";
-$ainit .= "%%  for (ii = 0; ii < MAX_MODULES; ii++) {\n";
+# $ainit .= "%%  for (ii = 0; ii < MAX_MODULES; ii++) {\n";
  
-while ( ($n1, $n2) = each %iparAlarmSev) {
-   ($junk, $severity) = split(/\./, $n2);
+# while ( ($n1, $n2) = each %iparAlarmSev) {
+#   ($junk, $severity) = split(/\./, $n2);
  
-   if ( (substr($severity, 0, 2) eq "HH") ||
-        (substr($severity, 0, 2) eq "LL") ) {
+#   if ( (substr($severity, 0, 2) eq "HH") ||
+#        (substr($severity, 0, 2) eq "LL") ) {
 #     $ainit .= "       ${n1}[ii] = MAJOR_ALARM;\n";
-      $ainit .= "       ${n1}[ii] = NO_ALARM;\n";
-   }
-   else {
+#      $ainit .= "       ${n1}[ii] = NO_ALARM;\n";
+#   }
+#   else {
 #     $ainit .= "       ${n1}[ii] = MINOR_ALARM;\n";
-      $ainit .= "       ${n1}[ii] = NO_ALARM;\n";
-   }
+#      $ainit .= "       ${n1}[ii] = NO_ALARM;\n";
+#   }
  
-   $ainit .= "       pvPut(${n1}[ii]);\n";
-}
+#   $ainit .= "       pvPut(${n1}[ii]);\n";
+#}
  
-$ainit .= "%%  }\n";
+#$ainit .= "%%  }\n";
 }
 
 $aupdate .= "\n";
@@ -875,24 +899,55 @@ while ( ($n1, $n2) = each %iparAlarmStat) {
 
    if (substr($param, 0, 5) eq "TRAMP") {
 #     $aupdate .= "\"Ramp Time\");\n";
-      $index = 3;
-      $aupdate .= "%%           fltrParamHelp[3] = \'R\';\n";
+      $help = "R";
+      $index = 6;
+      $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
+   }
+   elsif (substr($param, 0, 6) eq "EXCMON") {
+      $help = "X";
+      $index = 0;
+      $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
+   }
+   elsif (substr($param, 0, 5) eq "INMON") {
+      $help = "I";
+      $index = 1;
+      $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
+   }
+   elsif (substr($param, 0, 6) eq "OFFSET") {
+      $help = "O";
+      $index = 2;
+      $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
    }
    elsif (substr($param, 0, 2) eq "SW") {
 #     $help = substr($param, 0, 3);
 #     $aupdate .= "\"$help\");\n";
       $help = substr($param, 2, 1);
-      $index = $help + 3;
+      $index = $help + 2;
+      $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
+   }
+   elsif (substr($param, 0, 5) eq "GAIN") {
+      $help = "G";
+      $index = 5;
+      $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
+   }
+   elsif (substr($param, 0, 6) eq "LIMIT") {
+      $help = "L";
+      $index = 7;
+      $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
+   }
+   elsif (substr($param, 0, 5) eq "OUT16") {
+      $help = "O";
+      $index = 8;
       $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
    }
    elsif (substr($param, 0, 6) eq "OUTPUT") {
       $help = "O";
-      $index = 7;
+      $index = 9;
       $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
    }
-   elsif (substr($param, 0, 5) eq "INMON") {
-      $help = "I";
-      $index = 6;
+   elsif (substr($param, 0, 6) eq "OUTMON") {
+      $help = "O";
+      $index = 10;
       $aupdate .= "%%           fltrParamHelp[$index] = \'$help\';\n";
    }
    else {
@@ -1008,6 +1063,7 @@ print "grecord(stringout,\"%IFO%:FEC-${dcuId}_FESTAT_8\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_FESTAT_9\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_FESTAT_10\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_MTRX_STAT_ERR_CNT\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_ALH_CRC\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_MTRXSTAT_1\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_MTRXSTAT_2\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_MTRXSTAT_3\")\n";
