@@ -481,6 +481,7 @@ daqd_c::configure_channels_files ()
 #else
   pvValue[1] = daqd.num_channels;
 #endif
+  pvValue[18] = daqd.num_active_channels;
 #endif
   system_log(1, "finished configuring data channels");
   return 0;
