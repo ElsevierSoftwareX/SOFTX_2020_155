@@ -331,6 +331,9 @@ $allBiquad = 0;
 # Set if doing direct DAC writed (no DMA)
 $directDacWrite = 0;
 
+# Set to disable zero padding DAC data
+$noZeroPad = 0;
+
 #
 # IPCx parameter names
 #
@@ -3322,6 +3325,12 @@ if ($::directDacWrite) {
   print OUTM "EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
 } else {
   print OUTM "#EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
+}
+
+if ($::noZeroPad) {
+  print OUTM "EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
+} else {
+  print OUTM "#EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
 }
 
 
