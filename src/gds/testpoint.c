@@ -212,6 +212,8 @@ static char *versionId = "Version $Id$" ;
    {
       CLIENT*		clnt;		/* client handle */
    
+      /* printf("making handle tp node %d, max is %d\n", node, TP_MAX_NODE); */
+
       /* check node */
       if ((node < 0) || (node >= TP_MAX_NODE)) {
          return NULL;
@@ -226,7 +228,10 @@ static char *versionId = "Version $Id$" ;
       clnt = clnt_create (tpNode[node].hostname, tpNode[node].prognum, 
                          tpNode[node].progver, _NETID);
       if (clnt == NULL) {
-	 printf("couldn't create test point handle");
+	 printf("couldn't create test point handle\n");
+	 printf("hostname=%s, prognum=%d, progver=%d\n",
+	 	tpNode[node].hostname, tpNode[node].prognum,
+		                         tpNode[node].progver);
          gdsError (GDS_ERR_MEM, 
                   "couldn't create test point handle");
       }
