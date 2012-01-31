@@ -57,7 +57,8 @@ pvInfo exServer::pvList[] = {
     pvInfo (1, "FAULT",  0xffffffff, 0, excasIoSync, 1, pvValue+14),
     pvInfo (1, "BCAST_RETR",  0xffffffff, 0, excasIoSync, 1, pvValue+15),
     pvInfo (1, "BCAST_FAILED_RETR",  0xffffffff, 0, excasIoSync, 1, pvValue+16),
-    pvInfo (0.5, "GPS",  0xffffffff, 0, excasIoSync, 1, pvValue+17)
+    pvInfo (0.5, "GPS",  0xffffffff, 0, excasIoSync, 1, pvValue+17),
+    pvInfo (0, "CHANS_SAVED", 0xffffffff, 0, excasIoSync, 1, pvValue+18),
 };
 
 const unsigned exServer::pvListNElem = NELEMENTS (exServer::pvList);

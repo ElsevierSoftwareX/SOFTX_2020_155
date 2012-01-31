@@ -1,6 +1,11 @@
 ===========================
 Overview of changes for 2.5 - not yet branched or released
 ===========================
+- added new frame builder record, e.g. C0:DAQ-FB0_CHANS_SAVED
+  to display the total count of saved channels in full frames.
+- added new cdsParameter "no_zero_pad=1" can be used to
+  stop zero padding DAC data. This is usefull if sending a flat DC
+  signal to a DAC channels is desired.
 - fixed broken "biquad=1" flag handling code.
 - map.c has fix added for DAC modules with PEX8111 interface chips ie
   all those boards that are native PCIe and not PCM cards (older revs).
