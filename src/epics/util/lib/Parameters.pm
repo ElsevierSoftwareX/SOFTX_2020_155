@@ -132,6 +132,8 @@ sub parseParams {
 				print "AllBiquad set\n";
 			} elsif ($spp[0] eq "direct_dac_write") { 
 				$::directDacWrite = $spp[1];
+			} elsif ($spp[0] eq "no_zero_pad") { 
+				$::noZeroPad = $spp[1];
 			}
 		}
 	}
