@@ -1314,11 +1314,14 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
         fltrCtrlVal = fltrCtrlVal>>1;
       }
     }
-
+    pFilt->inputs[modNum].mask = epicsExclude;
+    pFilt->inputs[modNum].control = fltrSwitch;
     opSwitchE = (pFilt->inputs[modNum].opSwitchE & ~epicsExclude) | fltrSwitch;
     pFilt->inputs[modNum].opSwitchE = opSwitchE;
   }
   else {
+    pFilt->inputs[modNum].mask = 0;
+    pFilt->inputs[modNum].control = 0;
     opSwitchE = pFilt->inputs[modNum].opSwitchE;
   }
   int ii, jj, kk, ramp, timeout;

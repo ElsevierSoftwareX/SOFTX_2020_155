@@ -108,6 +108,8 @@ typedef struct FM_OP_IN{
   int cnt[FILTERS];     /* used to keep track of up and down cnt of rmpcmp */
                         /* should be initialized to zero */
   float gain_ramp_time; /* gain change ramping time in seconds */
+  UINT32 mask;		/* mask indicating which filters are controlled by FE */
+  UINT32 control;	/* ten control bits to turn on or off filters */
 } FM_OP_IN;
 
 typedef struct FM_GAIN_RAMP {
