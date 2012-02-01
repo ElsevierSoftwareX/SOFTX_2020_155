@@ -29,6 +29,8 @@ int ii;
         dsp->inputs[ii].offset = pDsp->inputs[ii].offset;
         dsp->inputs[ii].outgain = pDsp->inputs[ii].outgain;
         dsp->inputs[ii].limiter = pDsp->inputs[ii].limiter;
+        pDsp->inputs[ii].mask = dsp->inputs[ii].mask;
+        pDsp->inputs[ii].control = dsp->inputs[ii].control;
   }
 }
 

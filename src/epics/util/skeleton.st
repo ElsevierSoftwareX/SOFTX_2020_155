@@ -539,6 +539,8 @@ state init
       pFilt->inputs[ii].limiter = limit[ii];
       pFilt->inputs[ii].opSwitchE = 0;
       pFilt->inputs[ii].rset = 0;
+      pFilt->inputs[ii].mask = 0;
+      pFilt->inputs[ii].control = 0;
 
       sw1[ii] = 0x4;
       sw2[ii] = 0x600;
@@ -897,15 +899,29 @@ state monScreen{
       pvGet(sw1[ii]);
       pvGet(sw2[ii]);	
 
+%%    unsigned int msk = pFilt->inputs[ii].mask;
+%%    unsigned int control = pFilt->inputs[ii].control;
+%% 	/*printf("mask=%d control=%d\n", msk, control);*/
+      if ((saveSwitch1[ii] & (msk & 0xffff)) != (control & 0xffff))
+%%    {
+	saveSwitch1[ii] = (control & msk) | (saveSwitch1[ii] & ~msk);
+      	pvPut(saveSwitch1[ii]);  
+%%    }
       if(sw1[ii]) {
-        saveSwitch1[ii] ^= sw1[ii];
+        saveSwitch1[ii] ^= (sw1[ii] & ~msk);
       	sw1[ii] = 0;
       	pvPut(sw1[ii]);  
       	pvPut(saveSwitch1[ii]);  
       }
+      msk >>=16; control >>= 16;
+      if ((saveSwitch2[ii] & (msk & 0xffff)) != (control & 0xffff))
+%%    {
+	saveSwitch2[ii] = (control & msk) | (saveSwitch2[ii] & ~msk);
+      	pvPut(saveSwitch2[ii]);  
+%%    }
       if(sw2[ii])
 %%    {
-        saveSwitch2[ii] ^= sw2[ii];
+        saveSwitch2[ii] ^= (sw2[ii] & ~msk);
       	sw2[ii] = 0;
       	pvPut(sw2[ii]);  
       	pvPut(saveSwitch2[ii]);  
