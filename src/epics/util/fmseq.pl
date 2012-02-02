@@ -15,6 +15,22 @@ if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
     "out16Hz" => "OUT16",
     "output" => "OUTPUT",
     "tramp" => "TRAMP",
+    "limitHigh" => "LIMIT.HIGH",
+    "limitLow" => "LIMIT.LOW",
+    "offsetHigh" => "OFFSET.HIGH",
+    "offsetLow" => "OFFSET.LOW",
+    "outgainHigh" => "GAIN.HIGH",
+    "outgainLow" => "GAIN.LOW",
+    "outputHigh" => "OUTPUT.HIGH",
+    "outputLow" => "OUTPUT.LOW",
+    "inputHigh" => "INMON.HIGH",
+    "inputLow" => "INMON.LOW",
+    "trampHigh" => "TRAMP.HIGH",
+    "trampLow" => "TRAMP.LOW",
+    "out16High" => "OUT16.HIGH",
+    "out16Low" => "OUT16.LOW",
+    "excmonHigh" => "EXCMON.HIGH",
+    "excmonLow" => "EXCMON.LOW",
 	 );
 
 %ipar = (
@@ -29,49 +45,35 @@ if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
 
 %iparAlarmSev = (
     "limitHighSev" => "LIMIT.HSV",
-    "limitHigh" => "LIMIT.HIGH",
-    "limitLow" => "LIMIT.LOW",
     "limitLowSev" => "LIMIT.LSV",
 
     "offsetHighSev" => "OFFSET.HSV",
-    "offsetHigh" => "OFFSET.HIGH",
     "offsetLowSev" => "OFFSET.LSV",
-    "offsetLow" => "OFFSET.LOW",
 
     "outgainHighSev" => "GAIN.HSV",
-    "outgainHigh" => "GAIN.HIGH",
     "outgainLowSev" => "GAIN.LSV",
-    "outgainLow" => "GAIN.LOW",
 
     "saveSwitch1HighSev" => "SW1R.HSV",
-    "saveSwitch1High" => "SW1R.HIGH",
     "saveSwitch1LowSev" => "SW1R.LSV",
+    "saveSwitch1High" => "SW1R.HIGH",
     "saveSwitch1Low" => "SW1R.LOW",
 
     "saveSwitch2HighSev" => "SW2R.HSV",
-    "saveSwitch2High" => "SW2R.HIGH",
     "saveSwitch2LowSev" => "SW2R.LSV",
+    "saveSwitch2High" => "SW2R.HIGH",
     "saveSwitch2Low" => "SW2R.LOW",
 
     "outputHighSev" => "OUTPUT.HSV",
-    "outputHigh" => "OUTPUT.HIGH",
     "outputLowSev" => "OUTPUT.LSV",
-    "outputLow" => "OUTPUT.LOW",
 
     "inputHighSev" => "INMON.HSV",
-    "inputHigh" => "INMON.HIGH",
     "inputLowSev" => "INMON.LSV",
-    "inputLow" => "INMON.LOW",
 
     "trampHighSev" => "TRAMP.HSV",
-    "trampHigh" => "TRAMP.HIGH",
     "trampLowSev" => "TRAMP.LSV",
-    "trampLow" => "TRAMP.LOW",
 
     "out16HighSev" => "OUT16.HSV",
-    "out16High" => "OUT16.HIGH",
     "out16LowSev" => "OUT16.LSV",
-    "out16Low" => "OUT16.LOW",
 
     "outmonHighSev" => "OUTMON.HSV",
     "outmonHigh" => "OUTMON.HIGH",
@@ -79,9 +81,7 @@ if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
     "outmonLow" => "OUTMON.LOW",
 
     "excmonHighSev" => "EXCMON.HSV",
-    "excmonHigh" => "EXCMON.HIGH",
     "excmonLowSev" => "EXCMON.LSV",
-    "excmonLow" => "EXCMON.LOW",
 	 );
 
 %iparAlarmStat = (
@@ -206,12 +206,15 @@ while (<IN>) {
 	$vdecl .= "$v_type evar_$v_name;\n";
         if ($v_name ne "BURT_RESTORE") {
           $vstat_decl .= "int evar_${v_name}_Stat;\n";
-          if ($ve_type ne "bi") {
-            $vhihi_decl .= "int evar_${v_name}_HihiSev;\n";
+          if (($ve_type ne "bi") && ($ve_type ne "bo")) {
+            $vhihi_decl .= "double evar_${v_name}_HiAset;\n";
             $vhigh_decl .= "int evar_${v_name}_HighSev;\n";
             $vlow_decl  .= "int evar_${v_name}_LowSev;\n";
-            $vlolo_decl .= "int evar_${v_name}_LoloSev;\n";
-          }
+            $vlolo_decl .= "double evar_${v_name}_LowAset;\n";
+            } else {
+            $vhigh_decl .= "int evar_${v_name}_HighSev;\n";
+            $vlow_decl  .= "int evar_${v_name}_LowSev;\n";
+	    }
         }
         my $top_name = is_top_name($v_name);
    	my $tv_name;
@@ -220,23 +223,29 @@ while (<IN>) {
 	  $vdecl .= "assign evar_$v_name to \"{ifo}:${tv_name}\";\n";
           if ($v_name ne "BURT_RESTORE") {
             $vstat_decl .="assign evar_${v_name}_Stat to \"{ifo}:${tv_name}.STAT\";\n";
-            if ($ve_type ne "bi") {
-              $vhihi_decl .="assign evar_${v_name}_HihiSev to \"{ifo}:${tv_name}.HHSV\";\n";
+            if (($ve_type ne "bi") && ($ve_type ne "bo")) {
+              $vhihi_decl .="assign evar_${v_name}_HiAset to \"{ifo}:${tv_name}.HIGH\";\n";
               $vhigh_decl .="assign evar_${v_name}_HighSev to \"{ifo}:${tv_name}.HSV\";\n";
               $vlow_decl  .="assign evar_${v_name}_LowSev to \"{ifo}:${tv_name}.LSV\";\n";
-              $vlolo_decl .="assign evar_${v_name}_LoloSev to \"{ifo}:${tv_name}.LLSV\";\n";
-            }
+              $vlolo_decl .="assign evar_${v_name}_LowAset to \"{ifo}:${tv_name}.LOW\";\n";
+            } else {
+              $vhigh_decl .="assign evar_${v_name}_HighSev to \"{ifo}:${tv_name}.OSV\";\n";
+              $vlow_decl  .="assign evar_${v_name}_LowSev to \"{ifo}:${tv_name}.ZSV\";\n";
+	    }
           }
  	} else {
 	  $vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
           if ($v_name ne "BURT_RESTORE") {
             $vstat_decl .="assign evar_${v_name}_Stat to \"{ifo}:{sys}-{subsys}${v_name}.STAT\";\n";
-            if ($ve_type ne "bi") {
-              $vhihi_decl .="assign evar_${v_name}_HihiSev to \"{ifo}:{sys}-{subsys}${v_name}.HHSV\";\n";
+            if (($ve_type ne "bi") && ($ve_type ne "bo")) {
+              $vhihi_decl .="assign evar_${v_name}_HiAset to \"{ifo}:{sys}-{subsys}${v_name}.HIGH\";\n";
               $vhigh_decl .="assign evar_${v_name}_HighSev to \"{ifo}:{sys}-{subsys}${v_name}.HSV\";\n";
               $vlow_decl  .="assign evar_${v_name}_LowSev to \"{ifo}:{sys}-{subsys}${v_name}.LSV\";\n";
-              $vlolo_decl .="assign evar_${v_name}_LoloSev to \"{ifo}:{sys}-{subsys}${v_name}.LLSV\";\n";
-            }
+              $vlolo_decl  .="assign evar_${v_name}_LowAset to \"{ifo}:{sys}-{subsys}${v_name}.LOW\";\n";
+            } else {
+              $vhigh_decl .="assign evar_${v_name}_HighSev to \"{ifo}:${tv_name}.OSV\";\n";
+              $vlow_decl  .="assign evar_${v_name}_LowSev to \"{ifo}:${tv_name}.ZSV\";\n";
+	    }
           }
 	}
 
@@ -245,20 +254,21 @@ while (<IN>) {
 	$vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
 
         if ($v_name ne "BURT_RESTORE") {
-          if ($ve_type ne "bi") {
-            $vinit .= "%% evar_${v_name}_HihiSev = NO_ALARM;\n";
-            $vinit .= "pvPut(evar_${v_name}_HihiSev);\n";
-#             $vinit .= "%%       pEpics->${v_var}_HihiSev = evar_${v_name}_HihiSev;\n";   # ????????
+            if (($ve_type ne "bi") && ($ve_type ne "bo")) {
+            $vinit .= "%% evar_${v_name}_HiAset = 0.0;\n";
+            $vinit .= "pvPut(evar_${v_name}_HiAset);\n";
             $vinit .= "%% evar_${v_name}_HighSev = NO_ALARM;\n";
             $vinit .= "pvPut(evar_${v_name}_HighSev);\n";
-#             $vinit .= "%%       pEpics->${v_var}_HighSev = evar_${v_name}_HighSev;\n";   # ????????
             $vinit .= "%% evar_${v_name}_LowSev = NO_ALARM;\n";
             $vinit .= "pvPut(evar_${v_name}_LowSev);\n";
-#             $vinit .= "%%       pEpics->${v_var}_LowSev = evar_${v_name}_LowSev;\n";     # ????????
-            $vinit .= "%% evar_${v_name}_LoloSev = NO_ALARM;\n";
-            $vinit .= "pvPut(evar_${v_name}_LoloSev);\n";
-#             $vinit .= "%%       pEpics->${v_var}_LoloSev = evar_${v_name}_LoloSev;\n";   # ????????
-          }
+            $vinit .= "%% evar_${v_name}_LowAset = 0.0;\n";
+            $vinit .= "pvPut(evar_${v_name}_LowAset);\n";
+            } else {
+            $vinit .= "%% evar_${v_name}_HighSev = NO_ALARM;\n";
+            $vinit .= "pvPut(evar_${v_name}_HighSev);\n";
+            $vinit .= "%% evar_${v_name}_LowSev = NO_ALARM;\n";
+            $vinit .= "pvPut(evar_${v_name}_LowSev);\n";
+	    }
         }
 
 	$vupdate .= "pvGet(evar_$v_name);\n";
@@ -266,21 +276,24 @@ while (<IN>) {
 
         if ($v_name ne "BURT_RESTORE") {
           $vupdate .= "pvGet(evar_${v_name}_Stat);\n";
-#             $vupdate .= "rfm_assign(pEpics->${v_var}_Stat, evar_${v_name}_Stat);\n";     # ????????
-          $vupdate .= "%%  if ( (evar_${v_name}_Stat == HIHI_ALARM) ||\n";
-          $vupdate .= "%%       (evar_${v_name}_Stat == STATE_ALARM) ||\n";
-          $vupdate .= "%%       (evar_${v_name}_Stat == LOLO_ALARM) ) {\n";
-          $vupdate .= "%%    setpointStatusCount++;\n";
-          $vupdate .= "%%    if (setpointDisplayCount < 10) {\n";
-          $vupdate .= "%%      strcpy(setpointErrId[setpointDisplayCount], \"$v_name\");\n";
-          $vupdate .= "%%      strcpy(setpointMajorCount[setpointDisplayCount], \"1\");\n";
-          $vupdate .= "%%      strcpy(setpointMinorCount[setpointDisplayCount], \"-\");\n";
-          $vupdate .= "%%      setpointDisplayCount++;\n";
-          $vupdate .= "%%    }\n";
-          $vupdate .= "%%  }\n";
-          $vupdate .= "%%  else if ( (evar_${v_name}_Stat == HIGH_ALARM) ||\n";
-          $vupdate .= "%%            (evar_${v_name}_Stat == STATE_ALARM) ||\n";
-          $vupdate .= "%%            (evar_${v_name}_Stat == LOW_ALARM) ) {\n";
+          $vupdate .= "pvGet(evar_${v_name}_HighSev);\n";
+          $vupdate .= "pvGet(evar_${v_name}_LowSev);\n";
+          if (($ve_type ne "bi") && ($ve_type ne "bo")) {
+		  $vupdate .= "pvGet(evar_${v_name}_HiAset);\n";
+		  $vupdate .= "pvGet(evar_${v_name}_LowAset);\n";
+		  $vupdate .= "%% crctestLength += 24;\n";
+		  $vupdate .= "%% crctest = crc_ptr(&evar_${v_name}_HighSev ,4, crctest);\n";
+		  $vupdate .= "%% crctest = crc_ptr(&evar_${v_name}_LowSev ,4, crctest);\n";
+		  $vupdate .= "%% crctest = crc_ptr(&evar_${v_name}_HiAset ,8, crctest);\n";
+		  $vupdate .= "%% crctest = crc_ptr(&evar_${v_name}_LowAset ,8, crctest);\n";
+		  $vupdate .= "%%  if ( (evar_${v_name}_Stat == HIGH_ALARM) ||\n";
+		  $vupdate .= "%%       (evar_${v_name}_Stat == LOW_ALARM) ) {\n";
+	  } else {
+		  $vupdate .= "%% crctestLength += 8;\n";
+		  $vupdate .= "%% crctest = crc_ptr(&evar_${v_name}_HighSev ,4, crctest);\n";
+		  $vupdate .= "%% crctest = crc_ptr(&evar_${v_name}_LowSev ,4, crctest);\n";
+		  $vupdate .= "%%  if  (evar_${v_name}_Stat == STATE_ALARM)  {\n";
+	  }
           $vupdate .= "%%    setpointStatusCount++;\n";
           $vupdate .= "%%    if (setpointDisplayCount < 10) {\n";
           $vupdate .= "%%      strcpy(setpointErrId[setpointDisplayCount], \"$v_name\");\n";
@@ -445,15 +458,42 @@ while (<IN>) {
 	#print "$v_name = efields $eFields[0] $eFields[1] $eFields[2] $eFields[3] $eFields[4] $eFields[5] $eFields[6]\n";
 	$vdecl .= "$v_type evar_$v_name;\n";
 	$vstat_decl .= "int evar_${v_name}_Stat;\n";
+          if (($ve_type ne "bi") && ($ve_type ne "bo")) {
+            $vhihi_decl .= "double evar_${v_name}_HiAset;\n";
+            $vhigh_decl .= "int evar_${v_name}_HighSev;\n";
+            $vlow_decl  .= "int evar_${v_name}_LowSev;\n";
+            $vlolo_decl .= "double evar_${v_name}_LowAset;\n";
+            } else {
+            $vhigh_decl .= "int evar_${v_name}_HighSev;\n";
+            $vlow_decl  .= "int evar_${v_name}_LowSev;\n";
+	    }
         my $top_name = is_top_name($v_name);
    	my $tv_name;
         if ($top_name) {
 	  	$tv_name = top_name_transform($v_name);
 		$vdecl .= "assign evar_$v_name to \"{ifo}:${tv_name}\";\n";
             $vstat_decl .="assign evar_${v_name}_Stat to \"{ifo}:${tv_name}.STAT\";\n";
+            if (($ve_type ne "bi") && ($ve_type ne "bo")) {
+              $vhihi_decl .="assign evar_${v_name}_HiAset to \"{ifo}:${tv_name}.HIGH\";\n";
+              $vhigh_decl .="assign evar_${v_name}_HighSev to \"{ifo}:${tv_name}.HSV\";\n";
+              $vlow_decl  .="assign evar_${v_name}_LowSev to \"{ifo}:${tv_name}.LSV\";\n";
+              $vlolo_decl .="assign evar_${v_name}_LowAset to \"{ifo}:${tv_name}.LOW\";\n";
+            } else {
+              $vhigh_decl .="assign evar_${v_name}_HighSev to \"{ifo}:${tv_name}.OSV\";\n";
+              $vlow_decl  .="assign evar_${v_name}_LowSev to \"{ifo}:${tv_name}.ZSV\";\n";
+	    }
 	} else {
 		$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
         	$vstat_decl .="assign evar_${v_name}_Stat to \"{ifo}:{sys}-{subsys}${v_name}.STAT\";\n";
+            if (($ve_type ne "bi") && ($ve_type ne "bo")) {
+              $vhihi_decl .="assign evar_${v_name}_HiAset to \"{ifo}:{sys}-{subsys}${v_name}.HIGH\";\n";
+              $vhigh_decl .="assign evar_${v_name}_HighSev to \"{ifo}:{sys}-{subsys}${v_name}.HSV\";\n";
+              $vlow_decl  .="assign evar_${v_name}_LowSev to \"{ifo}:{sys}-{subsys}${v_name}.LSV\";\n";
+              $vlolo_decl  .="assign evar_${v_name}_LowAset to \"{ifo}:{sys}-{subsys}${v_name}.LOW\";\n";
+            } else {
+              $vhigh_decl .="assign evar_${v_name}_HighSev to \"{ifo}:${tv_name}.OSV\";\n";
+              $vlow_decl  .="assign evar_${v_name}_LowSev to \"{ifo}:${tv_name}.ZSV\";\n";
+	    }
 	}
 
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
@@ -467,8 +507,25 @@ while (<IN>) {
 	}
 	$vupdate .= "pvPut(evar_$v_name);\n";
           $vupdate .= "pvGet(evar_${v_name}_Stat);\n";
-#             $vupdate .= "rfm_assign(pEpics->${v_var}_Stat, evar_${v_name}_Stat);\n";     # ????????
-          $vupdate .= "%%  if ( (evar_${v_name}_Stat != NO_ALARM) ) {\n";
+          $vupdate .= "pvGet(evar_${v_name}_HighSev);\n";
+          $vupdate .= "pvGet(evar_${v_name}_LowSev);\n";
+          if (($ve_type ne "bi") && ($ve_type ne "bo")) {
+		  $vupdate .= "pvGet(evar_${v_name}_HiAset);\n";
+		  $vupdate .= "pvGet(evar_${v_name}_LowAset);\n";
+		  $vupdate .= "%% crctestLength += 24;\n";
+		  $vupdate .= "%% crctest = crc_ptr(&evar_${v_name}_HighSev ,4, crctest);\n";
+		  $vupdate .= "%% crctest = crc_ptr(&evar_${v_name}_LowSev ,4, crctest);\n";
+		  $vupdate .= "%% crctest = crc_ptr(&evar_${v_name}_HiAset ,8, crctest);\n";
+		  $vupdate .= "%% crctest = crc_ptr(&evar_${v_name}_LowAset ,8, crctest);\n";
+		  $vupdate .= "%%  if ( (evar_${v_name}_Stat == HIGH_ALARM) ||\n";
+		  $vupdate .= "%%       (evar_${v_name}_Stat == LOW_ALARM) ) {\n";
+	  } else {
+		  $vupdate .= "%% crctestLength += 8;\n";
+		  $vupdate .= "%% crctest = crc_ptr(&evar_${v_name}_HighSev ,4, crctest);\n";
+		  $vupdate .= "%% crctest = crc_ptr(&evar_${v_name}_LowSev ,4, crctest);\n";
+		  $vupdate .= "%%  if  (evar_${v_name}_Stat == STATE_ALARM)  {\n";
+	  }
+#          $vupdate .= "%%  if ( (evar_${v_name}_Stat != NO_ALARM) ) {\n";
           $vupdate .= "%%    if (statErrCnt < 10) {\n";
           $vupdate .= "%%      strcpy(staterr[statErrCnt], \"$v_name\");\n";
           $vupdate .= "%%    }\n";
@@ -835,6 +892,7 @@ open(OUT,">./$ARGV[0].st") || die "cannot open $ARGV[0].st file for writing";
 $cnt2 = $cnt*2;
 $cnt10 = $cnt*10;
 
+#@a = ( \%fpar, "double", \%ipar, "int", \%iparAlarmSev, "int", \%iparAlarmStat, "int", \%spar, "string" );
 @a = ( \%fpar, "double", \%ipar, "int", \%iparAlarmSev, "int", \%iparAlarmStat, "int", \%spar, "string" );
 
 if ($phase > 0) {

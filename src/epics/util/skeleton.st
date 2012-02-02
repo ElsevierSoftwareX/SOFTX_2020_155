@@ -284,6 +284,7 @@ unsigned int prev_cycle = 0;
 %% long crc;                                                             /* MA */
 %% unsigned int crctest;
 %% unsigned int crctestLength;
+%% int alarmTotal;
 
 %% struct stat statBuf;                                                  /* MA */
 
@@ -519,6 +520,8 @@ state monScreen{
 %% int size;                                                             /* MA */
 %% char matrixID[32];                                                    /* MA */
 %% usleep(200000);
+   crctest = 0;
+   crctestLength = 0;
 /* %% char thresholdErrMsg[6][32];                                          MA */
 
 /* %% strcpy(thresholdErrMsg[0], "Threshold file open failed");             MA */
@@ -957,6 +960,8 @@ state monScreen{
 %%	   && prev_cycle == pEpics->epicsOutput.cycle);
 %%    prev_gps = pEpics->epicsOutput.timeDiag;
 %%    prev_cycle = pEpics->epicsOutput.cycle;
+%% alarmTotal = filterStatusCount + setpointStatusCount + statErrCnt;
+%% if(alarmTotal) stateWord |= 0x80;
       pvPut(stateWord);
 
       for (ii = 0; ii < 10; ii++) {                                      /* MA */
@@ -976,122 +981,122 @@ state monScreen{
          pvPut(setpointMajorCount[ii]);                                  /* MA */
          pvPut(setpointMinorCount[ii]);                                  /* MA */
       }                                                                  /* MA */
+
+      pvPut(statErrCnt);                                                 /* MA */
+      for (ii = 0; ii < 10; ii++) {                                       /* MA */
+         pvPut(staterr[ii]);                                             /* MA */
+      }                                                                  /* MA */
+
 %% time_t lt = time(0);
 %% strcpy(localtimestring, ctime(&lt));
 %% localtimestring[strlen(localtimestring) - 1] = 0; /* Delete newline character */
    pvPut(localtimestring);
 
-   crctest = 0;
-   crctestLength = 176 * MAX_MODULES;
+   crctestLength += (264 * MAX_MODULES);
    for (ii = 0; ii < MAX_MODULES; ii++) {        
 	pvGet(excmonLowSev[ii]);
 	crctest = crc_ptr(&excmonLowSev[ii] ,4, crctest);
 	pvGet(excmonHighSev[ii]);
 	crctest = crc_ptr(&excmonHighSev[ii] ,4, crctest);
 	pvGet(excmonLow[ii]);
-	crctest = crc_ptr(&excmonLow[ii] ,4, crctest);
+	crctest = crc_ptr(&excmonLow[ii] ,8, crctest);
 	pvGet(excmonHigh[ii]);
-	crctest = crc_ptr(&excmonHigh[ii] ,4, crctest);
+	crctest = crc_ptr(&excmonHigh[ii] ,8, crctest);
 
 	pvGet(inputLowSev[ii]);
 	crctest = crc_ptr(&inputLowSev[ii] ,4, crctest);
 	pvGet(inputHighSev[ii]);
 	crctest = crc_ptr(&inputHighSev[ii] ,4, crctest);
 	pvGet(inputLow[ii]);
-	crctest = crc_ptr(&inputLow[ii] ,4, crctest);
+	crctest = crc_ptr(&inputLow[ii] ,8, crctest);
 	pvGet(inputHigh[ii]);
-	crctest = crc_ptr(&inputHigh[ii] ,4, crctest);
+	crctest = crc_ptr(&inputHigh[ii] ,8, crctest);
 
 	pvGet(offsetLowSev[ii]);
 	crctest = crc_ptr(&offsetLowSev[ii] ,4, crctest);
 	pvGet(offsetHighSev[ii]);
 	crctest = crc_ptr(&offsetHighSev[ii] ,4, crctest);
 	pvGet(offsetLow[ii]);
-	crctest = crc_ptr(&offsetLow[ii] ,4, crctest);
+	crctest = crc_ptr(&offsetLow[ii] ,8, crctest);
 	pvGet(offsetHigh[ii]);
-	crctest = crc_ptr(&offsetHigh[ii] ,4, crctest);
+	crctest = crc_ptr(&offsetHigh[ii] ,8, crctest);
 
 	pvGet(outgainLowSev[ii]);
 	crctest = crc_ptr(&outgainLowSev[ii] ,4, crctest);
 	pvGet(outgainHighSev[ii]);
 	crctest = crc_ptr(&outgainHighSev[ii] ,4, crctest);
 	pvGet(outgainLow[ii]);
-	crctest = crc_ptr(&outgainLow[ii] ,4, crctest);
+	crctest = crc_ptr(&outgainLow[ii] ,8, crctest);
 	pvGet(outgainHigh[ii]);
-	crctest = crc_ptr(&outgainHigh[ii] ,4, crctest);
+	crctest = crc_ptr(&outgainHigh[ii] ,8, crctest);
 
 	pvGet(saveSwitch1LowSev[ii]);
 	crctest = crc_ptr(&saveSwitch1LowSev[ii] ,4, crctest);
 	pvGet(saveSwitch1HighSev[ii]);
 	crctest = crc_ptr(&saveSwitch1HighSev[ii] ,4, crctest);
 	pvGet(saveSwitch1Low[ii]);
-	crctest = crc_ptr(&saveSwitch1Low[ii] ,4, crctest);
+	crctest = crc_ptr(&saveSwitch1Low[ii] ,8, crctest);
 	pvGet(saveSwitch1High[ii]);
-	crctest = crc_ptr(&saveSwitch1High[ii] ,4, crctest);
+	crctest = crc_ptr(&saveSwitch1High[ii] ,8, crctest);
 
 	pvGet(saveSwitch2LowSev[ii]);
 	crctest = crc_ptr(&saveSwitch2LowSev[ii] ,4, crctest);
 	pvGet(saveSwitch2HighSev[ii]);
 	crctest = crc_ptr(&saveSwitch2HighSev[ii] ,4, crctest);
 	pvGet(saveSwitch2Low[ii]);
-	crctest = crc_ptr(&saveSwitch2Low[ii] ,4, crctest);
+	crctest = crc_ptr(&saveSwitch2Low[ii] ,8, crctest);
 	pvGet(saveSwitch2High[ii]);
-	crctest = crc_ptr(&saveSwitch2High[ii] ,4, crctest);
+	crctest = crc_ptr(&saveSwitch2High[ii] ,8, crctest);
 
 	pvGet(outputLowSev[ii]);
 	crctest = crc_ptr(&outputLowSev[ii] ,4, crctest);
 	pvGet(outputHighSev[ii]);
 	crctest = crc_ptr(&outputHighSev[ii] ,4, crctest);
 	pvGet(outputLow[ii]);
-	crctest = crc_ptr(&outputLow[ii] ,4, crctest);
+	crctest = crc_ptr(&outputLow[ii] ,8, crctest);
 	pvGet(outputHigh[ii]);
-	crctest = crc_ptr(&outputHigh[ii] ,4, crctest);
+	crctest = crc_ptr(&outputHigh[ii] ,8, crctest);
 
 	pvGet(out16LowSev[ii]);
 	crctest = crc_ptr(&out16LowSev[ii] ,4, crctest);
 	pvGet(out16HighSev[ii]);
 	crctest = crc_ptr(&out16HighSev[ii] ,4, crctest);
 	pvGet(out16Low[ii]);
-	crctest = crc_ptr(&out16Low[ii] ,4, crctest);
+	crctest = crc_ptr(&out16Low[ii] ,8, crctest);
 	pvGet(out16High[ii]);
-	crctest = crc_ptr(&out16High[ii] ,4, crctest);
+	crctest = crc_ptr(&out16High[ii] ,8, crctest);
 
 	pvGet(outmonLowSev[ii]);
 	crctest = crc_ptr(&outmonLowSev[ii] ,4, crctest);
 	pvGet(outmonHighSev[ii]);
 	crctest = crc_ptr(&outmonHighSev[ii] ,4, crctest);
 	pvGet(outmonLow[ii]);
-	crctest = crc_ptr(&outmonLow[ii] ,4, crctest);
+	crctest = crc_ptr(&outmonLow[ii] ,8, crctest);
 	pvGet(outmonHigh[ii]);
-	crctest = crc_ptr(&outmonHigh[ii] ,4, crctest);
+	crctest = crc_ptr(&outmonHigh[ii] ,8, crctest);
 
 	pvGet(limitLowSev[ii]);
 	crctest = crc_ptr(&limitLowSev[ii] ,4, crctest);
 	pvGet(limitHighSev[ii]);
 	crctest = crc_ptr(&limitHighSev[ii] ,4, crctest);
 	pvGet(limitLow[ii]);
-	crctest = crc_ptr(&limitLow[ii] ,4, crctest);
+	crctest = crc_ptr(&limitLow[ii] ,8, crctest);
 	pvGet(limitHigh[ii]);
-	crctest = crc_ptr(&limitHigh[ii] ,4, crctest);
+	crctest = crc_ptr(&limitHigh[ii] ,8, crctest);
 
 	pvGet(trampLowSev[ii]);
 	crctest = crc_ptr(&trampLowSev[ii] ,4, crctest);
 	pvGet(trampHighSev[ii]);
 	crctest = crc_ptr(&trampHighSev[ii] ,4, crctest);
 	pvGet(trampLow[ii]);
-	crctest = crc_ptr(&trampLow[ii] ,4, crctest);
+	crctest = crc_ptr(&trampLow[ii] ,8, crctest);
 	pvGet(trampHigh[ii]);
-	crctest = crc_ptr(&trampHigh[ii] ,4, crctest);
+	crctest = crc_ptr(&trampHigh[ii] ,8, crctest);
    }                                                            
 %% crctest = crc_len(crctestLength, crctest);
    alhCrc = crctest;      
    pvPut(alhCrc);         
 
-      pvPut(statErrCnt);                                                 /* MA */
-
-      for (ii = 0; ii < 10; ii++) {                                       /* MA */
-         pvPut(staterr[ii]);                                             /* MA */
-      }                                                                  /* MA */
 
 
 %% pthread_mutex_unlock (&seq_lock);
