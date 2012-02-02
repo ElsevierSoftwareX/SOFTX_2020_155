@@ -1,4 +1,18 @@
 ===========================
+Overview of changes for 2.4.2
+===========================
+- Front end sequencer now monitors alarms and state condition.
+- Update standard filter module screen with black backgounds for all settings,
+  as well as the readbacks. The display mode was also changed to alarm, such that
+  alarming signals show up in red, non-alarm in green.
+- Modified GDS_TP screen to show three alarm counters and related display item to bring
+  up the alarm summary page.
+- Added an alarm summary medm screen.
+- New filterModuleName_ALH.mdl screens now generated for all filter modules. This screen
+  shows, and allows changing of, all filter module alarm settings.
+- Auto-generated matrix screens also had value settings background color changes to 
+  allow viewing of alarmed signals.
+===========================
 Overview of changes for 2.4.1
 ===========================
 - fix broken "biquad" flag, it turned out that processing of biquad=1 flag
