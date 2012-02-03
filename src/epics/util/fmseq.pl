@@ -952,6 +952,29 @@ foreach $i ( @names ) {
 }
     
 # add msg and load coeff records
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_ALH_CRC\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_ERR_CNT\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_OUT_ERR_CNT\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_STAT0\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_STAT1\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_STAT2\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_STAT3\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_STAT4\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_STAT5\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_STAT6\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_STAT7\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_STAT8\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_STAT9\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_OUT_STAT0\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_OUT_STAT1\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_OUT_STAT2\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_OUT_STAT3\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_OUT_STAT4\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_OUT_STAT5\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_OUT_STAT6\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_OUT_STAT7\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_OUT_STAT8\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_OUT_STAT9\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_STATE_WORD\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_BUILD_SVN\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_LOAD_NEW_COEFF\")\n";
