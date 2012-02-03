@@ -42,15 +42,16 @@ void init_vars() {
 }
 
 unsigned int
-field_crc(DBENTRY *pdbentry, char *field, unsigned int crc) {
-	double v;
+field_crc(DBENTRY *pdbentry, char *field, unsigned int crc, unsigned int len_crc) {
 	long status = dbFindField(pdbentry, field);
   	if (status) {
 		printf("No field %s was found\n", field);
 		exit(1);
       	}
- 	v = atof(dbGetString(pdbentry));
-	return crc_ptr((char *)&v, 8, crc);
+ 	char *s = dbGetString(pdbentry);
+	int l = strlen(s);
+	len_crc += l;
+	return crc_ptr(s, l, crc);
 }
 
 void process_alarms(DBBASE *pdbbase, char *pref)
@@ -142,16 +143,14 @@ void process_alarms(DBBASE *pdbbase, char *pref)
     	while (!status) {
       		pdbentry1 = dbCopyEntry(pdbentry);
 		if (j) { // binary
-			crc = field_crc(pdbentry, "ZSV", crc);
-			crc = field_crc(pdbentry, "OSV", crc);
-			crc = field_crc(pdbentry, "COSV", crc);
-			len_crc += 3 * 8;
+			crc = field_crc(pdbentry, "ZSV", crc, &len_crc);
+			crc = field_crc(pdbentry, "OSV", crc, &len_crc);
+			crc = field_crc(pdbentry, "COSV", crc, &len_crc);
 		} else { // analog
-			crc = field_crc(pdbentry, "HIGH", crc);
-			crc = field_crc(pdbentry, "LOW", crc);
-			crc = field_crc(pdbentry, "HSV", crc);
-			crc = field_crc(pdbentry, "LSV", crc);
-			len_crc += 4 * 8;
+			crc = field_crc(pdbentry, "HIGH", crc, &len_crc);
+			crc = field_crc(pdbentry, "LOW", crc, &len_crc);
+			crc = field_crc(pdbentry, "HSV", crc, &len_crc);
+			crc = field_crc(pdbentry, "LSV", crc, &len_crc);
 		}
       		status = dbFindField(pdbentry, "NAME");
       		if (status) {

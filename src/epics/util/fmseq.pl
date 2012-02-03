@@ -952,9 +952,9 @@ foreach $i ( @names ) {
 }
     
 # add msg and load coeff records
-print "grecord(stringout,\"%IFO%:FEC-${dcuId}_ALH_CRC\")\n";
-print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_ERR_CNT\")\n";
-print "grecord(stringout,\"%IFO%:FEC-${dcuId}_OUT_ERR_CNT\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_ALH_CRC\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_IN_ERR_CNT\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_OUT_ERR_CNT\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_STAT0\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_STAT1\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_IN_STAT2\")\n";
