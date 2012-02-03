@@ -145,6 +145,8 @@ install: $(DB)
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'record\(ao|record\(stringout'| sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|SEVERITY|MAJOR_COUNT|MINOR_COUNT|SETPOINT_ID|FILTER_PARAM|GDS_MON|FESTAT|STATUS_COUNT|FILTER_ID|MTRXSTAT|MTRX_STAT_ERR|_MSG|_TIME_STRING|_STAT_ERR_CNT|BURT|LOAD_CONFIG|VME_RES|LOAD_NEW_COEFF|DIAG_RESET|SYNC_RESET|TOTAL$$|Name' | awk '{ printf "[%s]\n", $$0 }' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo -n 'epicsEnvSet PREFIX '>> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		grep _OUT_STAT0  target/$(TARGET)/db/$$ifo/`basename $$i` | head -1 | sed 's/[^"]*"\([^"]*\)_OUT_STAT0.*/\1/g' >>  target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 	  done ; \
 	done
 	for ifo in $(IFO) ; do \
