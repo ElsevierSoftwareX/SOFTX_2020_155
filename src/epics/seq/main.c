@@ -211,6 +211,7 @@ void process_alarms(DBBASE *pdbbase, char *pref)
          printf("Could not put field\n");
          exit(1);
     }
+     //status = dbProcess(pdbentry_crc);
 
     dbFreeEntry(pdbentry);
 }
