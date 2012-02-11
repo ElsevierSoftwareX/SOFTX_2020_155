@@ -15,7 +15,7 @@
 /* Allowed maximum length for engineering units */
 #define MAX_ENGR_UNIT_LENGTH 40
 /* Groups are absolete and need to be removed from the source code */
-#define MAX_CHANNEL_GROUPS 150
+#define MAX_CHANNEL_GROUPS 1024
 /* Hard limit on the number of channel names supported:
    it needs to be eliminated, dynamically allocated arrays should be used */
 /* #define MAX_CHANNELS 60000 */
