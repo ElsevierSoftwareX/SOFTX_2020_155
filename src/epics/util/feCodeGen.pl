@@ -3808,6 +3808,7 @@ sub commify_series {
 			$sargs .= "s/FILTERNAME/$tfn/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . ".adl");
+			system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $subDirName/$usite" . $filt_name . ".opi");
 		      }
 		    }
 		  } else {
@@ -3836,6 +3837,7 @@ sub commify_series {
 			$sargs = $sed_arg . "s/FILTERNAME/$sysname-$filt_name/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".adl");
+			system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".opi");
 		      }
 		    }
 		  } else {
@@ -3872,6 +3874,7 @@ sub commify_series {
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".opi");
 			}
 		} else {
 		  	$sys_name = substr($sys_name, 2, 3);
@@ -3883,6 +3886,7 @@ sub commify_series {
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".opi");
 			}
 		}
 	}
