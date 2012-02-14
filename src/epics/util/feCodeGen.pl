@@ -3626,8 +3626,10 @@ print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
 if($modelType eq "MASTER")
 {
 	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM.adl GDS_TP_TEST.adl");
+	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM.opi GDS_TP_TEST.opi");
 }else{
 	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM_SLAVE.adl GDS_TP_TEST.adl");
+	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM_SLAVE.opi GDS_TP_TEST.opi");
 }
 open(OUTGDSM,">>./"."GDS_TP_TEST.adl") || die "cannot open GDS_TP file for writing ";
 $dacSnum=0;
@@ -3697,6 +3699,7 @@ if($ii == 4) {
 close(OUTGDSM);
 
 system("cat GDS_TP_TEST.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
+system("cat GDS_TP_TEST.opi | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.opi");
 #system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR.adl");
 #system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_0.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_0.adl");
 #system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_1.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_1.adl");
