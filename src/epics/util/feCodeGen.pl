@@ -3870,8 +3870,10 @@ sub commify_series {
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
 				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				system("cat INPUT_FILTER1.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".oip");
 			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".opi");
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 				system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".opi");
@@ -3882,8 +3884,10 @@ sub commify_series {
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
 				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+				system("cat INPUT_FILTER1.opi | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".opi");
 			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.opi | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".opi");
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 				system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".opi");
