@@ -109,7 +109,7 @@ $(pv_value)</tooltip>
         <exp bool_exp="!(pv0&amp;8192)">
           <value>false</value>
         </exp>
-        <pv trig="true">SITE_NAME:FILTER_NAME_SW2R</pv>
+        <pv trig="true">SITE_NAME:FILTERNAME_SW2R</pv>
       </rule>
     </rules>
     <pv_value />
@@ -724,7 +724,7 @@ $(pv_value)</tooltip>
     <height>20</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -752,7 +752,7 @@ $(pv_value)</tooltip>
     <y>88</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
         <value>8</value>
         <timeout>10</timeout>
         <description />
@@ -780,7 +780,7 @@ $(pv_value)</tooltip>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
     <selector_type>0</selector_type>
-    <pv_name>SITE_NAME:FILTER_NAME_OFFSET</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_OFFSET</pv_name>
     <background_color>
       <color red="200" green="200" blue="200" />
     </background_color>
@@ -805,7 +805,7 @@ $(pv_value)</tooltip>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <horizontal_alignment>0</horizontal_alignment>
+    <horizontal_alignment>1</horizontal_alignment>
     <actions hook="false" hook_all="false" />
     <y>108</y>
     <tooltip>$(pv_name)
@@ -820,7 +820,7 @@ $(pv_value)</tooltip>
     <height>25</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_RSET</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_RSET</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -848,7 +848,7 @@ $(pv_value)</tooltip>
     <y>33</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_RSET</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_RSET</pv_name>
         <value>2</value>
         <timeout>10</timeout>
         <description />
@@ -866,7 +866,7 @@ $(pv_value)</tooltip>
     <height>25</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_RSET</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_RSET</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -894,7 +894,7 @@ $(pv_value)</tooltip>
     <y>33</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_RSET</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_RSET</pv_name>
         <value>1</value>
         <timeout>10</timeout>
         <description />
@@ -973,7 +973,7 @@ $(pv_value)</tooltip>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
     <selector_type>0</selector_type>
-    <pv_name>SITE_NAME:FILTER_NAME_LIMIT</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_LIMIT</pv_name>
     <background_color>
       <color red="200" green="200" blue="200" />
     </background_color>
@@ -998,7 +998,7 @@ $(pv_value)</tooltip>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <horizontal_alignment>0</horizontal_alignment>
+    <horizontal_alignment>1</horizontal_alignment>
     <actions hook="false" hook_all="false" />
     <y>107</y>
     <tooltip>$(pv_name)
@@ -1022,7 +1022,7 @@ $(pv_value)</tooltip>
     <off_color>
       <color red="163" green="0" blue="0" />
     </off_color>
-    <pv_name>SITE_NAME:FILTER_NAME_SW2R</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW2R</pv_name>
     <background_color>
       <color red="253" green="0" blue="0" />
     </background_color>
@@ -1060,7 +1060,7 @@ $(pv_value)</tooltip>
     <height>20</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1088,7 +1088,7 @@ $(pv_value)</tooltip>
     <y>87</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
         <value>256</value>
         <timeout>10</timeout>
         <description />
@@ -1106,7 +1106,7 @@ $(pv_value)</tooltip>
     <height>22</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1134,7 +1134,7 @@ $(pv_value)</tooltip>
     <y>140</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
         <value>16384</value>
         <timeout>10</timeout>
         <description />
@@ -1152,7 +1152,7 @@ $(pv_value)</tooltip>
     <height>22</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1180,7 +1180,7 @@ $(pv_value)</tooltip>
     <y>140</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
         <value>4</value>
         <timeout>10</timeout>
         <description />
@@ -1198,7 +1198,7 @@ $(pv_value)</tooltip>
     <height>22</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1226,7 +1226,7 @@ $(pv_value)</tooltip>
     <y>140</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
         <value>16</value>
         <timeout>10</timeout>
         <description />
@@ -1244,7 +1244,7 @@ $(pv_value)</tooltip>
     <height>22</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1272,7 +1272,7 @@ $(pv_value)</tooltip>
     <y>140</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
         <value>1</value>
         <timeout>10</timeout>
         <description />
@@ -1290,7 +1290,7 @@ $(pv_value)</tooltip>
     <height>22</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1318,7 +1318,7 @@ $(pv_value)</tooltip>
     <y>140</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
         <value>64</value>
         <timeout>10</timeout>
         <description />
@@ -1343,7 +1343,7 @@ $(pv_value)</tooltip>
     <format_type>4</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:FILTER_NAME_Name05</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_Name05</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1389,7 +1389,7 @@ $(pv_value)</tooltip>
     <format_type>4</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:FILTER_NAME_Name06</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_Name06</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1435,7 +1435,7 @@ $(pv_value)</tooltip>
     <format_type>4</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:FILTER_NAME_Name07</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_Name07</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1481,7 +1481,7 @@ $(pv_value)</tooltip>
     <format_type>4</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:FILTER_NAME_Name08</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_Name08</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1527,7 +1527,7 @@ $(pv_value)</tooltip>
     <format_type>4</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:FILTER_NAME_Name09</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_Name09</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1566,7 +1566,7 @@ $(pv_value)</tooltip>
     <height>22</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1594,7 +1594,7 @@ $(pv_value)</tooltip>
     <y>81</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
         <value>16</value>
         <timeout>10</timeout>
         <description />
@@ -1612,7 +1612,7 @@ $(pv_value)</tooltip>
     <height>22</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1640,7 +1640,7 @@ $(pv_value)</tooltip>
     <y>81</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
         <value>64</value>
         <timeout>10</timeout>
         <description />
@@ -1658,7 +1658,7 @@ $(pv_value)</tooltip>
     <height>22</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1686,7 +1686,7 @@ $(pv_value)</tooltip>
     <y>81</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
         <value>256</value>
         <timeout>10</timeout>
         <description />
@@ -1704,7 +1704,7 @@ $(pv_value)</tooltip>
     <height>22</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1732,7 +1732,7 @@ $(pv_value)</tooltip>
     <y>81</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
         <value>1024</value>
         <timeout>10</timeout>
         <description />
@@ -1750,7 +1750,7 @@ $(pv_value)</tooltip>
     <height>22</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1778,7 +1778,7 @@ $(pv_value)</tooltip>
     <y>81</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
         <value>4096</value>
         <timeout>10</timeout>
         <description />
@@ -1803,7 +1803,7 @@ $(pv_value)</tooltip>
     <format_type>4</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:FILTER_NAME_Name00</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_Name00</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1849,7 +1849,7 @@ $(pv_value)</tooltip>
     <format_type>4</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:FILTER_NAME_Name01</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_Name01</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1895,7 +1895,7 @@ $(pv_value)</tooltip>
     <format_type>4</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:FILTER_NAME_Name02</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_Name02</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1941,7 +1941,7 @@ $(pv_value)</tooltip>
     <format_type>4</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:FILTER_NAME_Name03</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_Name03</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -1987,7 +1987,7 @@ $(pv_value)</tooltip>
     <format_type>4</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:FILTER_NAME_Name04</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_Name04</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -2082,7 +2082,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:FILTER_NAME_OUT16</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_OUT16</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
@@ -2128,7 +2128,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:FILTER_NAME_OUTPUT</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_OUTPUT</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
@@ -2174,7 +2174,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:FILTER_NAME_OUTMON</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_OUTMON</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
@@ -2213,7 +2213,7 @@ $(pv_value)</tooltip>
     <height>20</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -2241,7 +2241,7 @@ $(pv_value)</tooltip>
     <y>32</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
         <value>2048</value>
         <timeout>10</timeout>
         <description />
@@ -2268,7 +2268,7 @@ $(pv_value)</tooltip>
     <off_color>
       <color red="163" green="0" blue="0" />
     </off_color>
-    <pv_name>SITE_NAME:FILTER_NAME_SW2R</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW2R</pv_name>
     <background_color>
       <color red="253" green="0" blue="0" />
     </background_color>
@@ -2632,7 +2632,7 @@ $(pv_value)</tooltip>
     <height>20</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -2660,7 +2660,7 @@ $(pv_value)</tooltip>
     <y>107</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
         <value>1024</value>
         <timeout>10</timeout>
         <description />
@@ -2687,7 +2687,7 @@ $(pv_value)</tooltip>
     <off_color>
       <color red="163" green="0" blue="0" />
     </off_color>
-    <pv_name>SITE_NAME:FILTER_NAME_SW2R</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW2R</pv_name>
     <background_color>
       <color red="253" green="0" blue="0" />
     </background_color>
@@ -2725,7 +2725,7 @@ $(pv_value)</tooltip>
     <height>20</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
     <background_color>
       <color red="187" green="187" blue="187" />
     </background_color>
@@ -2753,7 +2753,7 @@ $(pv_value)</tooltip>
     <y>69</y>
     <actions hook="false" hook_all="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:FILTER_NAME_SW2</pv_name>
+        <pv_name>SITE_NAME:FILTERNAME_SW2</pv_name>
         <value>512</value>
         <timeout>10</timeout>
         <description />
@@ -2944,7 +2944,7 @@ $(pv_value)</tooltip>
         <exp bool_exp="!(pv0&amp;4096)">
           <value>false</value>
         </exp>
-        <pv trig="true">SITE_NAME:FILTER_NAME_SW2R</pv>
+        <pv trig="true">SITE_NAME:FILTERNAME_SW2R</pv>
       </rule>
     </rules>
     <pv_value />
@@ -2980,21 +2980,21 @@ $(pv_value)</tooltip>
     <enabled>true</enabled>
     <text>Ramp Time (sec):</text>
     <font>
-      <fontdata fontName="Lucida Grande" height="14" style="0" />
+      <opifont.name>Text</opifont.name>
     </font>
-    <width>76</width>
+    <width>94</width>
     <border_style>0</border_style>
     <rules />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <horizontal_alignment>0</horizontal_alignment>
+    <horizontal_alignment>2</horizontal_alignment>
     <actions hook="false" hook_all="false" />
-    <y>157</y>
+    <y>154</y>
     <wrap_words>true</wrap_words>
     <tooltip />
-    <x>560</x>
+    <x>559</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.TextInput" version="1.0">
     <border_alarm_sensitive>false</border_alarm_sensitive>
@@ -3014,7 +3014,7 @@ $(pv_value)</tooltip>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
     <selector_type>0</selector_type>
-    <pv_name>SITE_NAME:FILTER_NAME_TRAMP</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_TRAMP</pv_name>
     <background_color>
       <color red="200" green="200" blue="200" />
     </background_color>
@@ -3039,7 +3039,7 @@ $(pv_value)</tooltip>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <horizontal_alignment>0</horizontal_alignment>
+    <horizontal_alignment>1</horizontal_alignment>
     <actions hook="false" hook_all="false" />
     <y>152</y>
     <tooltip>$(pv_name)
@@ -3081,25 +3081,25 @@ $(pv_value)</tooltip>
     <y>159</y>
     <actions hook="false" hook_all="false">
       <action type="EXECUTE_CMD">
-        <command>"xterm -e view" "/cvs/cds/LOCATION_NAME/opi/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo FEC | tr '[A-Z]' '[a-z]'`/docs/SITE_NAMEFILTER_NAME.txt"</command>
+        <command>"xterm -e view" "/cvs/cds/LOCATION_NAME/opi/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo FEC | tr '[A-Z]' '[a-z]'`/docs/SITE_NAMEFILTERNAME.txt"</command>
         <command_directory>$(user.home)</command_directory>
         <wait_time>10</wait_time>
         <description>"Documentation"</description>
       </action>
       <action type="EXECUTE_CMD">
-        <command>"xwud -in" "/cvs/cds/LOCATION_NAME/opi/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo FEC | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTER_NAME_0.xwd"</command>
+        <command>"xwud -in" "/cvs/cds/LOCATION_NAME/opi/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo FEC | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTERNAME_0.xwd"</command>
         <command_directory>$(user.home)</command_directory>
         <wait_time>10</wait_time>
         <description>"View Last Snapshot"</description>
       </action>
       <action type="EXECUTE_CMD">
-        <command>"xwud -in" "/cvs/cds/LOCATION_NAME/opi/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo FEC | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTER_NAME_1.xwd"</command>
+        <command>"xwud -in" "/cvs/cds/LOCATION_NAME/opi/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo FEC | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTERNAME_1.xwd"</command>
         <command_directory>$(user.home)</command_directory>
         <wait_time>10</wait_time>
         <description>"View Previous Snapshot"</description>
       </action>
       <action type="EXECUTE_CMD">
-        <command>"/cvs/cds/lho/scripts/utilities/xupdatesnap" "SITE_NAMEFILTER_NAME"</command>
+        <command>"/cvs/cds/lho/scripts/utilities/xupdatesnap" "SITE_NAMEFILTERNAME"</command>
         <command_directory>$(user.home)</command_directory>
         <wait_time>10</wait_time>
         <description>"Update Snapshot"</description>
@@ -3173,7 +3173,7 @@ $(pv_value)</tooltip>
     <off_color>
       <color red="163" green="0" blue="0" />
     </off_color>
-    <pv_name>SITE_NAME:FILTER_NAME_SW1R</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW1R</pv_name>
     <background_color>
       <color red="253" green="0" blue="0" />
     </background_color>
@@ -3335,10 +3335,10 @@ $(pv_value)</tooltip>
         <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
         <name>Polygon</name>
         <points>
-          <point x="11" y="16" />
-          <point x="0" y="16" />
-          <point x="4" y="0" />
-          <point x="11" y="16" />
+          <point x="12" y="14" />
+          <point x="1" y="14" />
+          <point x="5" y="-2" />
+          <point x="12" y="14" />
         </points>
         <transparent>false</transparent>
         <pv_name />
@@ -3366,10 +3366,10 @@ $(pv_value)</tooltip>
           <color red="0" green="128" blue="255" />
         </border_color>
         <actions hook="false" hook_all="false" />
-        <y>0</y>
+        <y>-2</y>
         <tooltip>$(pv_name)
 $(pv_value)</tooltip>
-        <x>0</x>
+        <x>1</x>
       </widget>
     </widget>
     <widget typeId="org.csstudio.opibuilder.widgets.groupingContainer" version="1.0">
@@ -3470,10 +3470,10 @@ $(pv_value)</tooltip>
         <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
         <name>Polygon</name>
         <points>
-          <point x="11" y="17" />
-          <point x="0" y="17" />
-          <point x="4" y="0" />
-          <point x="11" y="17" />
+          <point x="13" y="17" />
+          <point x="2" y="17" />
+          <point x="6" y="0" />
+          <point x="13" y="17" />
         </points>
         <transparent>false</transparent>
         <pv_name />
@@ -3504,7 +3504,7 @@ $(pv_value)</tooltip>
         <y>0</y>
         <tooltip>$(pv_name)
 $(pv_value)</tooltip>
-        <x>0</x>
+        <x>2</x>
       </widget>
     </widget>
     <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
@@ -3615,7 +3615,7 @@ $(pv_value)</tooltip>
       <y>24</y>
       <actions hook="false" hook_all="false">
         <action type="WRITE_PV">
-          <pv_name>SITE_NAME:FILTER_NAME_SW1</pv_name>
+          <pv_name>SITE_NAME:FILTERNAME_SW1</pv_name>
           <value>4</value>
           <timeout>10</timeout>
           <description />
@@ -3643,7 +3643,7 @@ $(pv_value)</tooltip>
     <off_color>
       <color red="163" green="0" blue="0" />
     </off_color>
-    <pv_name>SITE_NAME:FILTER_NAME_SW2R</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW2R</pv_name>
     <background_color>
       <color red="253" green="0" blue="0" />
     </background_color>
@@ -3726,7 +3726,7 @@ $(pv_value)</tooltip>
     <off_color>
       <color red="0" green="100" blue="0" />
     </off_color>
-    <pv_name>SITE_NAME:FILTER_NAME_SW1R</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW1R</pv_name>
     <background_color>
       <color red="253" green="0" blue="0" />
     </background_color>
@@ -3773,7 +3773,7 @@ $(pv_value)</tooltip>
     <off_color>
       <color red="0" green="100" blue="0" />
     </off_color>
-    <pv_name>SITE_NAME:FILTER_NAME_SW2R</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW2R</pv_name>
     <background_color>
       <color red="253" green="0" blue="0" />
     </background_color>
@@ -3820,7 +3820,7 @@ $(pv_value)</tooltip>
     <off_color>
       <color red="0" green="100" blue="0" />
     </off_color>
-    <pv_name>SITE_NAME:FILTER_NAME_SW1R</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_SW1R</pv_name>
     <background_color>
       <color red="253" green="0" blue="0" />
     </background_color>
@@ -3868,7 +3868,7 @@ $(pv_value)</tooltip>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
     <selector_type>0</selector_type>
-    <pv_name>SITE_NAME:FILTER_NAME_GAIN</pv_name>
+    <pv_name>SITE_NAME:FILTERNAME_GAIN</pv_name>
     <background_color>
       <color red="200" green="200" blue="200" />
     </background_color>
@@ -3893,7 +3893,7 @@ $(pv_value)</tooltip>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <horizontal_alignment>0</horizontal_alignment>
+    <horizontal_alignment>1</horizontal_alignment>
     <actions hook="false" hook_all="false" />
     <y>110</y>
     <tooltip>$(pv_name)
