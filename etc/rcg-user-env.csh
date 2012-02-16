@@ -39,19 +39,22 @@ else
     echo "No USERAPP setup available - attempt manually"
 #
     setenv USERAPPS_DIR ${userApps}
-    cdsModel=${userApps}/cds/${ifo}/models:${userApps}/cds/common/models
-    hpiModel=${userApps}/hpi/${ifo}/models:${userApps}/hpi/common/models
-    iooModel=${userApps}/ioo/${ifo}/models:${userApps}/ioo/common/models
-    iscModel=${userApps}/isc/${ifo}/models:${userApps}/isc/common/models
-    isiModel=${userApps}/isi/${ifo}/models:${userApps}/isi/common/models
-    pslModel=${userApps}/psl/${ifo}/models:${userApps}/psl/common/models
-    susModel=${userApps}/sus/${ifo}/models:${userApps}/sus/common/models
-    tcsModel=${userApps}/tcs/${ifo}/models:${userApps}/tcs/common/models
-    tstModel=${userApps}/cds/test/models
-    setenv USERAPPS_LIB_PATH ${cdsModel}:${hpiModel}:${iooModel}:${iscModel}:${isiModel}:${pslModel}:${susModel}:${tcsModel}:${tstModel}
+    set cdsModel=${userApps}/cds/${ifo}/models:${userApps}/cds/common/models
+    set aosModel=${userApps}/aos/${ifo}/models:${userApps}/aos/common/models
+    set hpiModel=${userApps}/hpi/${ifo}/models:${userApps}/hpi/common/models
+    set iooModel=${userApps}/ioo/${ifo}/models:${userApps}/ioo/common/models
+    set iscModel=${userApps}/isc/${ifo}/models:${userApps}/isc/common/models
+    set isiModel=${userApps}/isi/${ifo}/models:${userApps}/isi/common/models
+    set pslModel=${userApps}/psl/${ifo}/models:${userApps}/psl/common/models
+    set susModel=${userApps}/sus/${ifo}/models:${userApps}/sus/common/models
+    set tcsModel=${userApps}/tcs/${ifo}/models:${userApps}/tcs/common/models
+    set tstModel=${userApps}/cds/test/models
+    setenv USERAPPS_LIB_PATH ${cdsModel}:${aosModel}:${hpiModel}:${iooModel}:${iscModel}:${isiModel}:${pslModel}:${susModel}:${tcsModel}:${testModel}
 #
     setenv CDS_SRC ${userApps}/cds/common/src
     setenv CDS_IFO_SRC ${userApps}/cds/${ifo}/src
+    setenv AOS_SRC ${userApps}/aos/common/src
+    setenv AOS_IFO_SRC ${userApps}/aos/${ifo}/src
     setenv HPI_SRC ${userApps}/hpi/common/src
     setenv HPI_IFO_SRC ${userApps}/hpi/${ifo}/src
     setenv IOO_SRC ${userApps}/ioo/common/src
@@ -64,27 +67,29 @@ else
     setenv PSL_IFO_SRC ${userApps}/psl/${ifo}/src
     setenv SUS_SRC ${userApps}/sus/common/src
     setenv SUS_IFO_SRC ${userApps}/sus/${ifo}/src
-    setenv TEST_SRC ${userApps}/cds/test/src
+    setenv CDS_TEST_SRC ${userApps}/cds/test/src
 #
-    cdsMedm=${userApps}/cds/common/medm
-    hpiMedm=${userApps}/hpi/common/medm
-    iooMedm=${userApps}/ioo/common/medm
-    iscMedm=${userApps}/isc/common/medm
-    isiMedm=${userApps}/isi/common/medm
-    pslMedm=${userApps}/psl/common/medm
-    susMedm=${userApps}/sus/common/medm
-    testMedm=${userApps}/cds/test/medm
-    setenv USERAPPS_MEDM_PATH ${cdsMedm}:$hpiMedm:$iooMedm:$iscMedm:$isiMedm:$pslMedm:$susMedm:$testMedm
+    set cdsMedm=${userApps}/cds/common/medm
+    set aosMedm=${userApps}/aos/common/medm
+    set hpiMedm=${userApps}/hpi/common/medm
+    set iooMedm=${userApps}/ioo/common/medm
+    set iscMedm=${userApps}/isc/common/medm
+    set isiMedm=${userApps}/isi/common/medm
+    set pslMedm=${userApps}/psl/common/medm
+    set susMedm=${userApps}/sus/common/medm
+    set testMedm=${userApps}/cds/test/medm
+    setenv USERAPPS_MEDM_PATH ${cdsMedm}:${aosMedm}:${hpiMedm}:${iooMedm}:${iscMedm}:${isiMedm}:${pslMedm}:${susMedm}:${testMedm}
 #
-    cdsScr=${userApps}/cds/common/scripts
-    hpiScr=${userApps}/hpi/common/scripts
-    iooScr=${userApps}/ioo/common/scripts
-    iscScr=${userApps}/isc/common/scripts
-    isiScr=${userApps}/isi/common/scripts
-    pslScr=${userApps}/psl/common/scripts
-    susScr=${userApps}/sus/common/scripts
-    testScr=${userApps}/cds/test/scripts
-    setenv USERAPPS_SCRIPTS_PATH ${cdsScr}:$hpiScr:$iooScr:$iscScr:$isiScr:$pslScr:$susScr:$testScr
+    set cdsScr=${userApps}/cds/common/scripts
+    set aosScr=${userApps}/aos/common/scripts
+    set hpiScr=${userApps}/hpi/common/scripts
+    set iooScr=${userApps}/ioo/common/scripts
+    set iscScr=${userApps}/isc/common/scripts
+    set isiScr=${userApps}/isi/common/scripts
+    set pslScr=${userApps}/psl/common/scripts
+    set susScr=${userApps}/sus/common/scripts
+    set testScr=${userApps}/cds/test/scripts
+    setenv USERAPPS_SCRIPTS_PATH ${cdsScr}:${aosScr}:${hpiScr}:${iooScr}:${iscScr}:${isiScr}:${pslScr}:${susScr}:${testScr}
   endif
  endif
 #

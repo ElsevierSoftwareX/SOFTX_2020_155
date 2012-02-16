@@ -39,6 +39,7 @@ else
 #
     USERAPPS_DIR=${userApps}
     cdsModel=${userApps}/cds/${ifo}/models:${userApps}/cds/common/models
+    aosModel=${userApps}/aos/${ifo}/models:${userApps}/aos/common/models
     hpiModel=${userApps}/hpi/${ifo}/models:${userApps}/hpi/common/models
     iooModel=${userApps}/ioo/${ifo}/models:${userApps}/ioo/common/models
     iscModel=${userApps}/isc/${ifo}/models:${userApps}/isc/common/models
@@ -47,10 +48,12 @@ else
     susModel=${userApps}/sus/${ifo}/models:${userApps}/sus/common/models
     tcsModel=${userApps}/tcs/${ifo}/models:${userApps}/tcs/common/models
     tstModel=${userApps}/cds/test/models
-    export USERAPPS_LIB_PATH=${cdsModel}:${hpiModel}:${iooModel}:${iscModel}:${isiModel}:${pslModel}:${susModel}:${tcsModel}:${tstModel}
+    export USERAPPS_LIB_PATH=${cdsModel}:${tstModel}:${aosModel}:${hpiModel}:${iooModel}:${iscModel}:${isiModel}:${pslModel}:${susModel}:${tcsModel}
 #
     export CDS_SRC=${userApps}/cds/common/src
     export CDS_IFO_SRC=${userApps}/cds/${ifo}/src
+    export AOS_SRC=${userApps}/aos/common/src
+    export AOS_IFO_SRC=${userApps}/aos/${ifo}/src
     export HPI_SRC=${userApps}/hpi/common/src
     export HPI_IFO_SRC=${userApps}/hpi/${ifo}/src
     export IOO_SRC=${userApps}/ioo/common/src
@@ -63,9 +66,10 @@ else
     export PSL_IFO_SRC=${userApps}/psl/${ifo}/src
     export SUS_SRC=${userApps}/sus/common/src
     export SUS_IFO_SRC=${userApps}/sus/${ifo}/src
-    export TEST_SRC=${userApps}/cds/test/src
+    export CDS_TEST_SRC=${userApps}/cds/test/src
 #
     cdsMedm=${userApps}/cds/common/medm
+    aosMedm=${userApps}/aos/common/medm
     hpiMedm=${userApps}/hpi/common/medm
     iooMedm=${userApps}/ioo/common/medm
     iscMedm=${userApps}/isc/common/medm
@@ -73,9 +77,10 @@ else
     pslMedm=${userApps}/psl/common/medm
     susMedm=${userApps}/sus/common/medm
     testMedm=${userApps}/cds/test/medm
-    export USERAPPS_MEDM_PATH=${cdsMedm}:$hpiMedm:$iooMedm:$iscMedm:$isiMedm:$pslMedm:$susMedm:$testMedm
+    export USERAPPS_MEDM_PATH=${cdsMedm}:$aosMedm:$hpiMedm:$iooMedm:$iscMedm:$isiMedm:$pslMedm:$susMedm:$testMedm
 #
     cdsScr=${userApps}/cds/common/scripts
+    aosScr=${userApps}/aos/common/scripts
     hpiScr=${userApps}/hpi/common/scripts
     iooScr=${userApps}/ioo/common/scripts
     iscScr=${userApps}/isc/common/scripts
@@ -83,7 +88,7 @@ else
     pslScr=${userApps}/psl/common/scripts
     susScr=${userApps}/sus/common/scripts
     testScr=${userApps}/cds/test/scripts
-    export USERAPPS_SCRIPTS_PATH=${cdsScr}:$hpiScr:$iooScr:$iscScr:$isiScr:$pslScr:$susScr:$testScr
+    export USERAPPS_SCRIPTS_PATH=${cdsScr}:$aosScr:$hpiScr:$iooScr:$iscScr:$isiScr:$pslScr:$susScr:$testScr
   fi
  fi
 #
