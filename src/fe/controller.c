@@ -683,7 +683,7 @@ void *fe_start(void *arg)
   int dacChanErr[16];
   int adcOF[16];
   int dacOF[16];
-  int limit = 32000;                    // ADC/DAC overflow test value
+  int limit = 32767;                    // ADC/DAC overflow test value
   int offset = 0; //0x8000;
   int mask = 0xffff;                    // Bit mask for ADC/DAC read/writes
   int num_outs = 16;                    // Number of DAC channels variable
@@ -1727,7 +1727,7 @@ udelay(1000);
 #else
 		kk = 0;
 #endif
-		limit = 32000;
+		limit = 32767;
 		offset = 0; //0x8000;
 		mask = 0xffff;
 		num_outs = 16;
