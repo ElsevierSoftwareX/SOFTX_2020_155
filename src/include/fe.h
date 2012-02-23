@@ -17,6 +17,7 @@ extern double *testpoint[500];
 extern double xExc[50];
 extern char *_ipc_shm;
 extern int clock16K;
+extern int cycle_gps_time;
 extern CDS_HARDWARE cdsPciModules;
 extern unsigned int ipcErrBits;
 extern unsigned int timeSec;
