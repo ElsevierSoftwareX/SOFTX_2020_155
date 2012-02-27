@@ -1,0 +1,580 @@
+
+file {
+	name="/opt/rtcds/tst/x1/core/advLigoRTS/trunk/src/epics/util/ALARMS.adl"
+	version=030104
+}
+display {
+	object {
+		x=1162
+		y=130
+		width=500
+		height=320
+	}
+	clr=14
+	bclr=4
+	cmap=""
+	gridSpacing=5
+	gridOn=0
+	snapToGrid=0
+}
+"color map" {
+	ncolors=65
+	colors {
+		ffffff,
+		ececec,
+		dadada,
+		c8c8c8,
+		bbbbbb,
+		aeaeae,
+		9e9e9e,
+		919191,
+		858585,
+		787878,
+		696969,
+		5a5a5a,
+		464646,
+		2d2d2d,
+		000000,
+		00d800,
+		1ebb00,
+		339900,
+		2d7f00,
+		216c00,
+		fd0000,
+		de1309,
+		be190b,
+		a01207,
+		820400,
+		5893ff,
+		597ee1,
+		4b6ec7,
+		3a5eab,
+		27548d,
+		fbf34a,
+		f9da3c,
+		eeb62b,
+		e19015,
+		cd6100,
+		ffb0ff,
+		d67fe2,
+		ae4ebc,
+		8b1a96,
+		610a75,
+		a4aaff,
+		8793e2,
+		6a73c1,
+		4d52a4,
+		343386,
+		c7bb6d,
+		b79d5c,
+		a47e3c,
+		7d5627,
+		58340f,
+		99ffff,
+		73dfff,
+		4ea5f9,
+		2a63e4,
+		0a00b8,
+		ebf1b5,
+		d4db9d,
+		bbc187,
+		a6a462,
+		8b8239,
+		73ff6b,
+		52da3b,
+		3cb420,
+		289315,
+		1a7309,
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=0
+		width=500
+		height=22
+	}
+	"basic attribute" {
+		clr=14
+	}
+}
+text {
+	object {
+		x=10
+		y=4
+		width=200
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="FBID_ALARMS"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=255
+		y=4
+		width=200
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_STRING"
+		clr=2
+		bclr=14
+	}
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=52
+		width=500
+		height=22
+	}
+	"basic attribute" {
+		clr=54
+	}
+}
+text {
+	object {
+		x=9
+		y=55
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="SETPOINT ALARMS"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=171
+		y=55
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IN_ERR_CNT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=25
+		width=500
+		height=22
+	}
+	"basic attribute" {
+		clr=54
+	}
+}
+text {
+	object {
+		x=11
+		y=27
+		width=200
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="ALARM SET CRC"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=234
+		y=28
+		width=80
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ALH_CRC"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	format="hexadecimal"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=420
+		y=55
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OUT_ERR_CNT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=277
+		y=57
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="READOUT ALARMS"
+	align="horiz. centered"
+}
+composite {
+	object {
+		x=25
+		y=94
+		width=200
+		height=205
+	}
+	"composite name"=""
+	children {
+		"text update" {
+			object {
+				x=25
+				y=94
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IN_STAT0"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=25
+				y=115
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IN_STAT1"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=25
+				y=136
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IN_STAT2"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=25
+				y=157
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IN_STAT3"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=25
+				y=178
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IN_STAT4"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=25
+				y=199
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IN_STAT5"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=25
+				y=220
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IN_STAT6"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=25
+				y=241
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IN_STAT7"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=25
+				y=262
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IN_STAT8"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=25
+				y=283
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IN_STAT9"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=275
+		y=94
+		width=200
+		height=205
+	}
+	"composite name"=""
+	children {
+		"text update" {
+			object {
+				x=275
+				y=94
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OUT_STAT0"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=275
+				y=115
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OUT_STAT1"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=275
+				y=136
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OUT_STAT2"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=275
+				y=157
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OUT_STAT3"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=275
+				y=178
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OUT_STAT4"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=275
+				y=199
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OUT_STAT5"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=275
+				y=220
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OUT_STAT6"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=275
+				y=241
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OUT_STAT7"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=275
+				y=262
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OUT_STAT8"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=275
+				y=283
+				width=200
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OUT_STAT9"
+				clr=50
+				bclr=42
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+	}
+}
