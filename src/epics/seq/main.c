@@ -73,7 +73,7 @@ void process_alarms(DBBASE *pdbbase, char *pref)
       }
       for (i = 0; i < 2; i++) {
         for (j = 0; j < 10; j++) {
-	char s[256]; sprintf(s, "%s_%s_STAT%d", pref, i? "OUT": "IN", j);
+	char s[256]; sprintf(s, "%s_%s_STAT%d", pref, i? "GRD_RB": "GRD_SP", j);
         status = dbFindRecord(pdbentry, s);
         if (status) { 
     	  printf("Could not find %s record\n", s);
@@ -88,7 +88,7 @@ void process_alarms(DBBASE *pdbbase, char *pref)
       }
       }
       char s[256];
-      sprintf(s, "%s_ALH_CRC", pref);
+      sprintf(s, "%s_GRD_ALH_CRC", pref);
       status = dbFindRecord(pdbentry, s);
       if (status) { 
     	  printf("Could not find %s record\n", s);
@@ -101,7 +101,7 @@ void process_alarms(DBBASE *pdbbase, char *pref)
       }
       pdbentry_crc = dbCopyEntry(pdbentry);
 
-      sprintf(s, "%s_IN_ERR_CNT", pref);
+      sprintf(s, "%s_GRD_SP_ERR_CNT", pref);
       status = dbFindRecord(pdbentry, s);
       if (status) { 
     	  printf("Could not find %s record\n", s);
@@ -114,7 +114,7 @@ void process_alarms(DBBASE *pdbbase, char *pref)
       }
       pdbentry_in_err_cnt = dbCopyEntry(pdbentry);
 
-      sprintf(s, "%s_OUT_ERR_CNT", pref);
+      sprintf(s, "%s_GRD_RB_ERR_CNT", pref);
       status = dbFindRecord(pdbentry, s);
       if (status) { 
     	  printf("Could not find %s record\n", s);

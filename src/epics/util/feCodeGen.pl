@@ -2336,7 +2336,10 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.diags[2] int ao 
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"4000\") field(HHSV,\"MAJOR\")\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME_DAC epicsOutput.diags[10] int ao 0\n";
+if($adcMaster > -1)
+{
 print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ao 0 field(HIHI,\"24\") field(HHSV,\"MAJOR\") field(HIGH,\"18\") field(HSV,\"MINOR\") field(LOW,\"5\") field(LSV,\"MAJOR\")\n";
+}
 print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT epicsOutput.diags[7] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_MASTER_STAT epicsOutput.diags[8] int ao 0\n";
@@ -3576,8 +3579,8 @@ $sed_arg .= "s/MEDMDIR/$skeleton/g;";
 my @adcMedm;
 my @byteMedm;
 $sitelc = lc($site);
-$mxpt = 225;
-$mypt = 145;
+$mxpt = 215;
+$mypt = 172;
 $mbxpt = 32 + $mxpt;
 $mbypt = $mypt + 1;
 $adcMedm[0] = "\"related display\" \{ \n";
@@ -3698,13 +3701,13 @@ $byteMedm[19] = "\tebit=1 \n";
 #print OUTGDSM @byteMedm;
 $mypt += 22;
 if($ii == 4) {
-	$mxpt += 60; 
-	$mypt = 145;
+	$mxpt += 80; 
+	$mypt = 172;
 }
 }
 my @alarmMedm;
-$mxpt = 225;
-$mypt = 275;
+$mxpt = 210;
+$mypt = 102;
 $alarmMedm[0] = "\"related display\" \{ \n";
 $alarmMedm[1] = "\tobject  \{ \n";
 $alarmMedm[2] = "\t\tx=";
@@ -3713,8 +3716,8 @@ $alarmMedm[4] = " \n";
 $alarmMedm[5] = "\t\ty=";
 $alarmMedm[6] = "$mypt";
 $alarmMedm[7] = " \n";
-$alarmMedm[8] = "\t\twidth=60 \n";
-$alarmMedm[9] = "\t\theight=16 \n";
+$alarmMedm[8] = "\t\twidth=85 \n";
+$alarmMedm[9] = "\t\theight=18 \n";
 $alarmMedm[10] = "\t\} \n";
 $alarmMedm[11] = "\tdisplay\[0\]  \{ \n";
 $alarmMedm[12] = "\t\tname=\"/opt/rtcds/LOCATION_NAME/";
@@ -3726,7 +3729,7 @@ $alarmMedm[17] = "\.adl\" \n";
 $alarmMedm[18] = "\t\} \n";
 $alarmMedm[19] = "\tclr=0 \n";
 $alarmMedm[20] = "\tbclr=44 \n";
-$alarmMedm[21] = "\tlabel=\"Alarms\" \n";
+$alarmMedm[21] = "\tlabel=\"Guard (S/R)\" \n";
 $alarmMedm[22] = "\} \n";
 print OUTGDSM @alarmMedm;
 

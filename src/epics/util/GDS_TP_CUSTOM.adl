@@ -5,8 +5,8 @@ file {
 }
 display {
 	object {
-		x=539
-		y=343
+		x=170
+		y=82
 		width=573
 		height=310
 	}
@@ -1266,9 +1266,9 @@ byte {
 "message button" {
 	object {
 		x=210
-		y=99
+		y=126
 		width=152
-		height=20
+		height=18
 	}
 	control {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_LOAD_NEW_COEFF"
@@ -1496,15 +1496,15 @@ rectangle {
 }
 "text update" {
 	object {
-		x=294
-		y=275
+		x=299
+		y=104
 		width=30
 		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_IN_ERR_CNT"
-		clr=50
-		bclr=42
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_ERR_CNT"
+		clr=0
+		bclr=14
 	}
 	align="horiz. centered"
 	limits {
@@ -1512,50 +1512,24 @@ rectangle {
 }
 "text update" {
 	object {
-		x=329
-		y=275
+		x=331
+		y=104
 		width=30
 		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OUT_ERR_CNT"
-		clr=50
-		bclr=42
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_RB_ERR_CNT"
+		clr=0
+		bclr=14
 	}
 	align="horiz. centered"
 	limits {
 	}
-}
-text {
-	object {
-		x=298
-		y=260
-		width=23
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="SPT"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=332
-		y=260
-		width=23
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="RO"
-	align="horiz. centered"
 }
 "text update" {
 	object {
 		x=210
-		y=121
+		y=146
 		width=152
 		height=18
 	}
