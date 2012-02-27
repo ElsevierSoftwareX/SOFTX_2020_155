@@ -24,7 +24,8 @@ sub initAdc {
 	if ($num eq undef) {
 		$num = $::adcCnt;
 	}
-	print "ADC in ADC.pm $::adcCnt; type='$type'; num=$num\n";
+	print "ADC $::adcCnt; type='$type'; num=$num\n";
+        #print "foo=$board_types{$type}\n";
 	
 	# Check if this is a supported board type
 	if ($board_types{$type} != 1) {
@@ -38,16 +39,12 @@ sub initAdc {
 
         $::adcType[$::adcCnt] = $type;
         $::adcNum[$::adcCnt] = $num;
-	$::card2array[$::partCnt] = $::adcCnt;
-        print "foo= $::partCnt  with array $::card2array[$::partCnt]\n";
         $::adcCnt++;
         $::partUsed[$::partCnt] = 1;
         foreach (0 .. $::partCnt) {
           if ("Adc" eq $::partInputType[$_][0]) {
 	  	print $_," ", $::xpartName[$_], "\n";
-		print "Found adc connect \n";
 	  }
-
 	}
 }
 
@@ -81,29 +78,27 @@ sub printFrontEndVars  {
 # Returns calculated code string
 sub frontEndInitCode {
         my ($i) = @_;
-        my $ii;
-        $ii = $::adcNum[$i];
-        my $calcExp = "// ADC $ii\n";
-	print $calcExp, "\n";
-	print "LOOK Card $ii\n";
+	my $anum = substr($::xpartName[$i],3,1);
+        my $calcExp = "// ADC $anum\n";
+	#print $calcExp, "\n";
 	%seen = ();
         foreach (0 .. $::partCnt) {
 	  foreach  $inp (0 .. $::partInCnt[$_]) {
-            if ("Adc" eq $::partInputType[$_][$inp] && $ii == $::partInNum[$_][$inp]) {
+            if ("Adc" eq $::partInputType[$_][$inp] && $anum == $::partInNum[$_][$inp]) {
 	  	#print $_," ", $::xpartName[$_], " ", $::partInputPort[$_][$inp], "\n";
 		$seen{$::partInputPort[$_][$inp]}=1;
 	    }
 	  }
 	}
 	foreach (sort { $a <=> $b }  keys %seen) {
-		print $_, ",";
+	#	print $_, ",";
         	$calcExp .= "dWordUsed\[";
-        	$calcExp .= $i;
+        	$calcExp .= $anum;
         	$calcExp .= "\]\[";
         	$calcExp .= $_;
         	$calcExp .= "\] =  1;\n";
 	}
-	print "\n";
+	#print "\n";
         return $calcExp;
 }
 
@@ -114,15 +109,8 @@ sub frontEndInitCode {
 sub fromExp {
         my ($i, $j) = @_;
         my $card = $::partInNum[$i][$j];
-        my $ii;
-	for($ii=0; $ii < $::adcCnt; $ii++) {
-		if($::adcNum[$ii] == $card) {
-			$car = $ii;
-		};
-	}
         my $chan = $::partInputPort[$i][$j];
-	print "Found card $card $car chan $chan vars $i $j\n";
-        return "dWord\[" . $car . "\]\[" . $chan . "\]";
+        return "dWord\[" . $card . "\]\[" . $chan . "\]";
 }
 
 # Return front end code
