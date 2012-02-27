@@ -65,7 +65,7 @@ static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.5 2009/09/17 18:59:01 a
 #define MAX_SO_SECTIONS 10	/* Maximum number of second order sections supported */
 
 #ifdef FIR_FILTERS
-#define MAX_FIR_MODULES 4      /* Maximum total number of FIR filters allowed per system */
+#define MAX_FIR_MODULES 6      /* Maximum total number of FIR filters allowed per system */
 #include "fmFir.h"
 #define MAX_FIR_SO_SECTIONS (FIR_TAPS/4)	/* Maximum SOS supported for FIR filters */
 #define MAX_FIR_COEFFS	(FIR_TAPS+1)
