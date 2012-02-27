@@ -1,12 +1,12 @@
 
 file {
-	name="/opt/rtcds/llo/l1/core/branch-2.4/src/epics/util/GDS_TP_CUSTOM_SLAVE.adl"
-	version=030105
+	name="/opt/rtcds/tst/x1/core/advLigoRTS/trunk/src/epics/util/GDS_TP_CUSTOM_SLAVE.adl"
+	version=030104
 }
 display {
 	object {
-		x=484
-		y=140
+		x=770
+		y=63
 		width=573
 		height=310
 	}
@@ -1211,9 +1211,9 @@ byte {
 "message button" {
 	object {
 		x=210
-		y=99
+		y=126
 		width=152
-		height=20
+		height=18
 	}
 	control {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_LOAD_NEW_COEFF"
@@ -1226,7 +1226,7 @@ byte {
 "text update" {
 	object {
 		x=210
-		y=121
+		y=146
 		width=152
 		height=18
 	}
@@ -1346,31 +1346,15 @@ rectangle {
 }
 "text update" {
 	object {
-		x=264
-		y=275
-		width=30
-		height=16
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SETPOINT_STATUS_COUNT"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
 		x=299
-		y=275
+		y=104
 		width=30
 		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_STAT_ERR_CNT"
-		clr=50
-		bclr=42
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_ERR_CNT"
+		clr=0
+		bclr=14
 	}
 	align="horiz. centered"
 	limits {
@@ -1378,56 +1362,17 @@ rectangle {
 }
 "text update" {
 	object {
-		x=334
-		y=275
+		x=331
+		y=104
 		width=30
 		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FILTER_STATUS_COUNT"
-		clr=50
-		bclr=42
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_RB_ERR_CNT"
+		clr=0
+		bclr=14
 	}
 	align="horiz. centered"
 	limits {
 	}
-}
-text {
-	object {
-		x=268
-		y=260
-		width=23
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="SPT"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=302
-		y=260
-		width=23
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="RO"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=338
-		y=260
-		width=23
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="FLT"
-	align="horiz. centered"
 }
