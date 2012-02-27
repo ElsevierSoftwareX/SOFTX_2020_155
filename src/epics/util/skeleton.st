@@ -71,108 +71,8 @@ assign msg to "{ifo}:FEC-{sysnum}_MSG";
 string msgDAQ;
 assign msgDAQ to "{ifo}:FEC-{sysnum}_MSGDAQ";
 
-int statErrCnt;
-assign statErrCnt to "{ifo}:FEC-{sysnum}_STAT_ERR_CNT";
-
 string svnString;
 assign svnString to "{ifo}:FEC-{sysnum}_BUILD_SVN";
-
-string staterr[6];
-assign staterr to {
-"{ifo}:FEC-{sysnum}_FESTAT_1","{ifo}:FEC-{sysnum}_FESTAT_2",
-"{ifo}:FEC-{sysnum}_FESTAT_3","{ifo}:FEC-{sysnum}_FESTAT_4",
-"{ifo}:FEC-{sysnum}_FESTAT_5","{ifo}:FEC-{sysnum}_FESTAT_6"};
-
-int matrixThreshCount;                                                   /* MA */
-assign matrixThreshCount to "{ifo}:FEC-{sysnum}_MTRX_STAT_ERR_CNT";      /* MA */
-
-string matrixErr[10];                                                    /* MA */
-assign matrixErr to {                                                    /* MA */
-"{ifo}:FEC-{sysnum}_MTRXSTAT_1","{ifo}:FEC-{sysnum}_MTRXSTAT_2",         /* MA */
-"{ifo}:FEC-{sysnum}_MTRXSTAT_3","{ifo}:FEC-{sysnum}_MTRXSTAT_4",         /* MA */
-"{ifo}:FEC-{sysnum}_MTRXSTAT_5","{ifo}:FEC-{sysnum}_MTRXSTAT_6",         /* MA */
-"{ifo}:FEC-{sysnum}_MTRXSTAT_7","{ifo}:FEC-{sysnum}_MTRXSTAT_8",         /* MA */
-"{ifo}:FEC-{sysnum}_MTRXSTAT_9","{ifo}:FEC-{sysnum}_MTRXSTAT_10"};       /* MA */
-
-int filterStatusCount;                                                   /* MA */
-assign filterStatusCount to  "{ifo}:FEC-{sysnum}_FILTER_STATUS_COUNT";   /* MA */
-
-string filterErrId[10];                                                  /* MA */
-assign filterErrId to {                                                  /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_ID_1","{ifo}:FEC-{sysnum}_FILTER_ID_2",       /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_ID_3","{ifo}:FEC-{sysnum}_FILTER_ID_4",       /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_ID_5","{ifo}:FEC-{sysnum}_FILTER_ID_6",       /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_ID_7","{ifo}:FEC-{sysnum}_FILTER_ID_8",       /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_ID_9","{ifo}:FEC-{sysnum}_FILTER_ID_10"};     /* MA */
-
-string filterParam[10];                                                  /* MA */
-assign filterParam to {                                                  /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_PARAM_1",                                     /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_PARAM_2",                                     /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_PARAM_3",                                     /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_PARAM_4",                                     /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_PARAM_5",                                     /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_PARAM_6",                                     /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_PARAM_7",                                     /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_PARAM_8",                                     /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_PARAM_9",                                     /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_PARAM_10"};                                   /* MA */
-
-string filterSeverity[10];                                               /* MA */
-assign filterSeverity to {                                               /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_1",                                  /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_2",                                  /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_3",                                  /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_4",                                  /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_5",                                  /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_6",                                  /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_7",                                  /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_8",                                  /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_9",                                  /* MA */
-"{ifo}:FEC-{sysnum}_FILTER_SEVERITY_10"};                                /* MA */
-
-int setpointStatusCount;                                                 /* MA */
-assign setpointStatusCount to                                            /* MA */
-    "{ifo}:FEC-{sysnum}_SETPOINT_STATUS_COUNT";                          /* MA */
-
-string setpointErrId[10];                                                /* MA */
-assign setpointErrId to {                                                /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_ID_1",                                   /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_ID_2",                                   /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_ID_3",                                   /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_ID_4",                                   /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_ID_5",                                   /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_ID_6",                                   /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_ID_7",                                   /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_ID_8",                                   /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_ID_9",                                   /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_ID_10"};                                 /* MA */
-
-string setpointMajorCount[10];                                           /* MA */
-assign setpointMajorCount to {                                           /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_1",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_2",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_3",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_4",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_5",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_6",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_7",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_8",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_9",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MAJOR_COUNT_10"};                        /* MA */
-
-string setpointMinorCount[10];                                           /* MA */
-assign setpointMinorCount to {                                           /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_1",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_2",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_3",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_4",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_5",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_6",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_7",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_8",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_9",                          /* MA */
-   "{ifo}:FEC-{sysnum}_SETPOINT_MINOR_COUNT_10"};                        /* MA */
 
 int stateWord;
 assign stateWord to "{ifo}:FEC-{sysnum}_STATE_WORD";
@@ -477,14 +377,6 @@ state init
 %%  /* printf("About to read file \n"); */
     strcpy(msg, "Reading coeff file...");
     pvPut(msg);
-%%  for(ii=0;ii<6;ii++) {
-%%    strcpy(staterr[ii], "Clr");
-      pvPut(staterr[ii]);
-%%  }
-%%  for (ii = 0; ii < 10; ii++) {                                        /* MA */
-%%     strcpy(matrixErr[ii], "Clr");                                     /* MA */
-       pvPut(matrixErr[ii]);                                             /* MA */
-%%  }                                                                    /* MA */
 
 %%  if (fmReadCoeffFile(&fmc, 0) != 0) {
 %%  	fprintf(stderr, "Error: %s\n", fmReadErrMsg());
@@ -789,37 +681,6 @@ state monScreen{
 
 #endif
 
-%%  statErrCnt = 0;                                                      /* MA */
-%%  int displayCount;                                                    /* MA */
-%%  displayCount = /* 0; */ 1;                                                    /* MA */
-%%  int matrixDisplayCount;                                              /* MA */
-%%  matrixDisplayCount = 0;                                              /* MA */
-%%  int thresholdFlag;                                                   /* MA */
-%%  filterStatusCount = 0;                                               /* MA */
-%%  int filterDisplayCount = 0;                                          /* MA */
-
-%%  setpointStatusCount = 0;                                             /* MA */
-%%  int setpointDisplayCount = 0;                                        /* MA */
-%%  int matrixStatusMajCount = 0;                                        /* MA */
-%%  int matrixStatusMinCount = 0;                                        /* MA */
-
-%%  for(ii = 0; ii < 6; ii++) {                                          /* MA */
-%%     strcpy(staterr[ii], "CLR");                                       /* MA */
-%%  }                                                                    /* MA */
-
-%%  for (ii = 0; ii < 10; ii++) {                                        /* MA */
-%%     strcpy(matrixErr[ii], "CLR");                                     /* MA */
-%%  }                                                                    /* MA */
-
-%%  for (ii = 0; ii < 10; ii++) {                                        /* MA */
-%%     strcpy(filterErrId[ii], "CLR");                                   /* MA */
-%%     strcpy(filterParam[ii], "CLR");                                   /* MA */
-%%     strcpy(filterSeverity[ii], "CLR");                                /* MA */
-%%                                                                       /* MA */
-%%     strcpy(setpointErrId[ii], "CLR");                                 /* MA */
-%%     strcpy(setpointMajorCount[ii], "CLR");                            /* MA */
-%%     strcpy(setpointMinorCount[ii], "CLR");                            /* MA */
-%%  }                                                                    /* MA */
 
 #if MAX_MODULES > 0
 %%  for(ii=0;ii<MAX_MODULES;ii++){
@@ -888,8 +749,6 @@ state monScreen{
 	  pvPut(swRset[ii]);
 %%      }
 
-%%    thresholdFlag = 0;                                                 /* MA */
-%%    matrixThreshCount = 0;                                             /* MA */
 
       /* Get saved switch settings, used for burt purposes */
       pvGet(saveSwitch1[ii]);  
@@ -981,34 +840,18 @@ state monScreen{
 	pvPut(excite[ii]);
 	pvGet(offset[ii]);
 
-/* %%    if ( (offset[ii] < thresholds[ii].offset[LOW]) ||                  MA */
-/* %%         (offset[ii] > thresholds[ii].offset[HI]) ) {                  MA */
-/* %%       thresholdFlag += 4;                                             MA */
-/* %%    }                                                                  MA */
 
 %%	rfm_assign(pFilt->inputs[ii].offset, offset[ii]);
 	pvGet(outgain[ii]);
 
-/* %%    if ( (outgain[ii] < thresholds[ii].gain[LOW]) ||                   MA */
-/* %%         (outgain[ii] > thresholds[ii].gain[HI]) ) {                   MA */
-/* %%       thresholdFlag += 8;                                             MA */
-/* %%    }                                                                  MA */
 
 %%	rfm_assign(pFilt->inputs[ii].outgain, outgain[ii]);
 	pvGet(gain_ramp_time[ii]);
 
-/* %%    if ( (gain_ramp_time[ii] < thresholds[ii].rampTime[LOW]) ||        MA */
-/* %%         (gain_ramp_time[ii] > thresholds[ii].rampTime[HI]) ) {        MA */
-/* %%       thresholdFlag += 16;                                            MA */
-/* %%    }                                                                  MA */
 
 %%	rfm_assign(pFilt->inputs[ii].gain_ramp_time, gain_ramp_time[ii]);
 	pvGet(limit[ii]);
 
-/* %%    if ( (limit[ii] < thresholds[ii].limit[LOW]) ||                    MA */
-/* %%         (limit[ii] > thresholds[ii].limit[HI]) ) {                    MA */
-/* %%       thresholdFlag += 32;                                            MA */
-/* %%    }                                                                  MA */
 
 %%	rfm_assign(pFilt->inputs[ii].limiter, limit[ii]);
 %%	t = fpvalidate(pFilt->data[ii].testpoint);
@@ -1022,31 +865,6 @@ state monScreen{
 	pvPut(tp[ii]);
 	pvPut(output[ii]);
 
-%%      if (thresholdFlag) {                                             /* MA */
-%%         statErrCnt++;                                                 /* MA */
-%%         if (displayCount < 6) {                                       /* MA */
-%%            sprintf(staterr[displayCount], "%2d: ", thresholdFlag);    /* MA */
-%%            strcat(staterr[displayCount], fmmap0[ii].name);            /* MA */
-%%            displayCount++;                                            /* MA */
-%%         }                                                             /* MA */
-%%      }                                                                /* MA */
-
-%%      thisFilterStatusCount = 0;                                       /* MA */
-%%      strcpy(fltrParamHelp, "------");                                 /* MA */
-%%      strcpy(fltrSevHelp, "------");                                   /* MA */
-
-%AUPDT%                                                                  /* MA */
-
-%%      if (thisFilterStatusCount) {                                     /* MA */
-%%         filterStatusCount++;                                          /* MA */
- 
-%%         if (filterDisplayCount < 10) {                                /* MA */
-%%            strcpy(filterErrId[filterDisplayCount], fmmap0[ii].name);  /* MA */
-%%            strcpy(filterParam[filterDisplayCount], fltrParamHelp);    /* MA */
-%%            strcpy(filterSeverity[filterDisplayCount], fltrSevHelp);   /* MA */
-%%            filterDisplayCount++;                                      /* MA */
-%%         }                                                             /* MA */
-%%      }                                                                /* MA */
 
 #if !defined(RFM_EPICS)
     	pvGet(epics_exc[ii]);
@@ -1099,12 +917,6 @@ state monScreen{
 %% }
 #endif
 
-%% if (statusFlag) {                                                     /* MA */
-      pvPut(statErrCnt);                                                 /* MA */
-      for (ii = 0; ii < 6; ii++) {                                       /* MA */
-         pvPut(staterr[ii]);                                             /* MA */
-      }                                                                  /* MA */
-%% }                                                                     /* MA */
 
 %DECL4%
 %%    stateWord = pEpics->epicsOutput.stateWord
@@ -1114,26 +926,6 @@ state monScreen{
 %%    prev_cycle = pEpics->epicsOutput.cycle;
       pvPut(stateWord);
 
-      if (matrixStatusFlag) {                                            /* MA */
-         pvPut(matrixThreshCount);                                       /* MA */
-      }                                                                  /* MA */
-      for (ii = 0; ii < 10; ii++) {                                      /* MA */
-         pvPut(matrixErr[ii]);                                           /* MA */
-      }                                                                  /* MA */
-
-      pvPut(filterStatusCount);                                          /* MA */
-      for (ii = 0; ii < 10; ii++) {                                      /* MA */
-         pvPut(filterErrId[ii]);                                         /* MA */
-         pvPut(filterParam[ii]);                                         /* MA */
-         pvPut(filterSeverity[ii]);                                      /* MA */
-      }                                                                  /* MA */
-
-      pvPut(setpointStatusCount);                                        /* MA */
-      for (ii = 0; ii < 10; ii++) {                                      /* MA */
-         pvPut(setpointErrId[ii]);                                       /* MA */
-         pvPut(setpointMajorCount[ii]);                                  /* MA */
-         pvPut(setpointMinorCount[ii]);                                  /* MA */
-      }                                                                  /* MA */
 %% time_t lt = time(0);
 %% strcpy(localtimestring, ctime(&lt));
 %% localtimestring[strlen(localtimestring) - 1] = 0; /* Delete newline character */
