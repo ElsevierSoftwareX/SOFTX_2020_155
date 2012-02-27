@@ -3563,6 +3563,11 @@ mkpath $epicsScreensDir, 0, 0755;
 my $usite = uc $site;
 my $sysname = "FEC";
 $sed_arg = "s/SITE_NAME/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($sysname) . "/g;s/GDS_NODE_ID/" . $gdsNodeId . "/g;";
+$opised_arg = "s/\$\(IFO\)/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/\$\(SYS\)/" . uc($sysname) . "/g;";
+$opised_arg .= "s/\$\(DCUID\)/$dcuId/g;";
+$opised_arg .= "s/\$\{DCUID\}/$dcuId/g;";
+$opised_arg .= "s/\$\{IFO\}/$site/g;";
+$opised_arg .= "s/\$\{SYS\}/$sysname/g;";
 $sed_arg .= "s/LOCATION_NAME/$location/g;";
 $sed_arg .= "s/DCU_NODE_ID/$dcuId/g;";
 $sysname = uc($skeleton);
@@ -3572,7 +3577,7 @@ my @adcMedm;
 my @byteMedm;
 $sitelc = lc($site);
 $mxpt = 225;
-$mypt = 158;
+$mypt = 145;
 $mbxpt = 32 + $mxpt;
 $mbypt = $mypt + 1;
 $adcMedm[0] = "\"related display\" \{ \n";
@@ -3627,6 +3632,7 @@ if($modelType eq "MASTER")
 {
 	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM.adl GDS_TP_TEST.adl");
 	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM.opi GDS_TP_TEST.opi");
+	system("cp $rcg_src_dir/src/epics/util/test2.opi GDS_TP_TEST.opi");
 }else{
 	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM_SLAVE.adl GDS_TP_TEST.adl");
 	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM_SLAVE.opi GDS_TP_TEST.opi");
@@ -3693,13 +3699,44 @@ $byteMedm[19] = "\tebit=1 \n";
 $mypt += 22;
 if($ii == 4) {
 	$mxpt += 60; 
-	$mypt = 158;
+	$mypt = 145;
 }
 }
+my @alarmMedm;
+$mxpt = 225;
+$mypt = 275;
+$alarmMedm[0] = "\"related display\" \{ \n";
+$alarmMedm[1] = "\tobject  \{ \n";
+$alarmMedm[2] = "\t\tx=";
+$alarmMedm[3] = "$mxpt";
+$alarmMedm[4] = " \n";
+$alarmMedm[5] = "\t\ty=";
+$alarmMedm[6] = "$mypt";
+$alarmMedm[7] = " \n";
+$alarmMedm[8] = "\t\twidth=60 \n";
+$alarmMedm[9] = "\t\theight=16 \n";
+$alarmMedm[10] = "\t\} \n";
+$alarmMedm[11] = "\tdisplay\[0\]  \{ \n";
+$alarmMedm[12] = "\t\tname=\"/opt/rtcds/LOCATION_NAME/";
+$alarmMedm[13] = "$sitelc";
+$alarmMedm[14] = "/medm/MEDMDIR/";
+$alarmMedm[15] = "$sysname";
+$alarmMedm[16] = "_ALARM_MONITOR";
+$alarmMedm[17] = "\.adl\" \n";
+$alarmMedm[18] = "\t\} \n";
+$alarmMedm[19] = "\tclr=0 \n";
+$alarmMedm[20] = "\tbclr=44 \n";
+$alarmMedm[21] = "\tlabel=\"Alarms\" \n";
+$alarmMedm[22] = "\} \n";
+print OUTGDSM @alarmMedm;
+
 close(OUTGDSM);
 
 system("cat GDS_TP_TEST.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
-system("cat GDS_TP_TEST.opi | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.opi");
+system("cat GDS_TP_TEST.opi | sed '$opised_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.opi");
+system("cp $rcg_src_dir/src/epics/util/ALARMS.adl ALARMS.adl");
+system("cat ALARMS.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_ALARM_MONITOR.adl");
+
 #system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR.adl");
 #system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_0.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_0.adl");
 #system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_1.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_1.adl");
@@ -3812,6 +3849,7 @@ sub commify_series {
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . ".adl");
 			system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $subDirName/$usite" . $filt_name . ".opi");
+			system("cat $rcg_src_dir/src/epics/util/FILTALH.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . "_ALH.adl");
 		      }
 		    }
 		  } else {
@@ -3841,6 +3879,7 @@ sub commify_series {
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".adl");
 			system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".opi");
+			system("cat $rcg_src_dir/src/epics/util/FILTALH.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . "_ALH.adl");
 		      }
 		    }
 		  } else {
@@ -3873,13 +3912,14 @@ sub commify_series {
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
 				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
-				system("cat INPUT_FILTER1.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".oip");
+				system("cat INPUT_FILTER1.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".opi");
 			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".opi");
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 				system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".opi");
+				system("cat $rcg_src_dir/src/epics/util/FILTALH.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . "_ALH.adl");
 			}
 		} else {
 		  	$sys_name = substr($sys_name, 2, 3);
@@ -3894,6 +3934,7 @@ sub commify_series {
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 				system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".opi");
+				system("cat $rcg_src_dir/src/epics/util/FILTALH.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . "_ALH.adl");
 			}
 		}
 	}
