@@ -1,12 +1,12 @@
 
 file {
-	name="/opt/rtcds/llo/l1/core/trunk/src/epics/util/FILTER.adl"
+	name="/opt/rtcds/tst/x1/core/advLigoRTS/trunk/src/epics/util/FILTER.adl"
 	version=030104
 }
 display {
 	object {
-		x=17
-		y=64
+		x=156
+		y=399
 		width=979
 		height=187
 	}
@@ -137,7 +137,7 @@ text {
 	"basic attribute" {
 		clr=2
 	}
-	textix="SITE_NAME - SYSTEM_NAME"
+	textix="SITE_NAME"
 }
 "text update" {
 	object {
@@ -1372,9 +1372,9 @@ text {
 "shell command" {
 	object {
 		x=4
-		y=159
-		width=150
-		height=25
+		y=165
+		width=75
+		height=20
 	}
 	command[0] {
 		label="Documentation"
@@ -1398,4 +1398,19 @@ text {
 	}
 	clr=14
 	bclr=55
+}
+"related display" {
+	object {
+		x=81
+		y=165
+		width=100
+		height=20
+	}
+	display[0] {
+		name="RCGDIR/src/epics/util/FILTALH.adl"
+		args="FPREFIX=SITE_NAME,FNAME=FILTERNAME,DCUID=DCU_NODE_ID"
+	}
+	clr=0
+	bclr=34
+	label="GUARDIAN SET"
 }
