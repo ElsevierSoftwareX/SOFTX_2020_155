@@ -30,6 +30,16 @@ foreach $i (@rcg_lib_path) {
 	}
 }
 
+# Used to develop sed command to allow Filter module screens to link generic FILTERALH screen.
+@rcg_util_path = split('/', $ENV{"RCG_SRC_DIR"});
+my $ffmedm = "";
+foreach $i (@rcg_util_path) {
+$ffmedm .= $i;
+$ffmedm .= "\\/";
+}
+
+
+
 die "Could't find model file $ARGV[0] on RCG_LIB_PATH " . join(":", @rcg_lib_path). "\n"  unless $model_file_found;
 
 # See if we are not running RTLinux
@@ -3849,10 +3859,10 @@ sub commify_series {
 			$sargs .= "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . $nsys . "/g;";
                         $sargs .= "s/LOCATION_NAME/$location/g;";
 			$sargs .= "s/FILTERNAME/$tfn/g;";
+			$sargs .= "s/RCGDIR/$ffmedm/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . ".adl");
 			system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $subDirName/$usite" . $filt_name . ".opi");
-			system("cat $rcg_src_dir/src/epics/util/FILTALH.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . "_ALH.adl");
 		      }
 		    }
 		  } else {
@@ -3879,10 +3889,10 @@ sub commify_series {
 			my $sargs;
 
 			$sargs = $sed_arg . "s/FILTERNAME/$sysname-$filt_name/g;";
+			$sargs .= "s/RCGDIR/$ffmedm/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".adl");
 			system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".opi");
-			system("cat $rcg_src_dir/src/epics/util/FILTALH.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . "_ALH.adl");
 		      }
 		    }
 		  } else {
@@ -3912,6 +3922,7 @@ sub commify_series {
 			$sargs .= "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . $nsys . "/g;";
                         $sargs .= "s/LOCATION_NAME/$location/g;";
 			$sargs .= "s/FILTERNAME/$tfn/g;";
+			$sargs .= "s/RCGDIR/$ffmedm/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
 				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
@@ -3922,11 +3933,11 @@ sub commify_series {
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 				system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".opi");
-				system("cat $rcg_src_dir/src/epics/util/FILTALH.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . "_ALH.adl");
 			}
 		} else {
 		  	$sys_name = substr($sys_name, 2, 3);
 			$sargs = $sed_arg . "s/FILTERNAME/$sys_name-$filt_name/g;";
+			$sargs .= "s/RCGDIR/$ffmedm/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
 				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
@@ -3937,7 +3948,6 @@ sub commify_series {
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 				system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".opi");
-				system("cat $rcg_src_dir/src/epics/util/FILTALH.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . "_ALH.adl");
 			}
 		}
 	}
