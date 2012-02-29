@@ -1,12 +1,12 @@
 
 file {
-	name="/opt/rtcds/llo/l1/core/branch-2.4/src/epics/util/FILTALH.adl"
-	version=030105
+	name="/opt/rtcds/tst/x1/core/advLigoRTS/trunk/src/epics/util/FILTALH.adl"
+	version=030104
 }
 display {
 	object {
-		x=306
-		y=307
+		x=336
+		y=613
 		width=700
 		height=400
 	}
@@ -141,18 +141,18 @@ text {
 	"basic attribute" {
 		clr=2
 	}
-	textix="SITE_NAMEFILTERNAME"
+	textix="$(FPREFIX)$(FNAME)"
 	align="horiz. centered"
 }
 "text update" {
 	object {
-		x=459
+		x=505
 		y=3
 		width=120
 		height=15
 	}
 	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_TIME_STRING"
+		chan="$(FPREFIX):FEC-$(DCUID)_TIME_STRING"
 		clr=2
 		bclr=14
 	}
@@ -169,7 +169,7 @@ text {
 	"basic attribute" {
 		clr=2
 	}
-	textix="SITE_NAME - SYSTEM_NAME"
+	textix="$(FPREFIX)"
 }
 text {
 	object {
@@ -191,7 +191,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:FILTERNAME_INMON"
+		chan="$(FPREFIX):$(FNAME)_INMON"
 		clr=35
 		bclr=14
 	}
@@ -208,7 +208,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_INMON.HIGH"
+		chan="$(FPREFIX):$(FNAME)_INMON.HIGH"
 		clr=35
 		bclr=14
 	}
@@ -224,7 +224,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_INMON.LOW"
+		chan="$(FPREFIX):$(FNAME)_INMON.LOW"
 		clr=35
 		bclr=14
 	}
@@ -240,7 +240,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_INMON.HSV"
+		chan="$(FPREFIX):$(FNAME)_INMON.HSV"
 		clr=35
 		bclr=14
 	}
@@ -254,7 +254,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_INMON.LSV"
+		chan="$(FPREFIX):$(FNAME)_INMON.LSV"
 		clr=35
 		bclr=14
 	}
@@ -280,7 +280,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:FILTERNAME_EXCMON"
+		chan="$(FPREFIX):$(FNAME)_EXCMON"
 		clr=35
 		bclr=14
 	}
@@ -297,7 +297,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_EXCMON.HIGH"
+		chan="$(FPREFIX):$(FNAME)_EXCMON.HIGH"
 		clr=35
 		bclr=14
 	}
@@ -313,7 +313,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_EXCMON.LOW"
+		chan="$(FPREFIX):$(FNAME)_EXCMON.LOW"
 		clr=35
 		bclr=14
 	}
@@ -329,7 +329,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_EXCMON.HSV"
+		chan="$(FPREFIX):$(FNAME)_EXCMON.HSV"
 		clr=35
 		bclr=14
 	}
@@ -343,7 +343,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_EXCMON.LSV"
+		chan="$(FPREFIX):$(FNAME)_EXCMON.LSV"
 		clr=35
 		bclr=14
 	}
@@ -369,7 +369,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:FILTERNAME_OUT16"
+		chan="$(FPREFIX):$(FNAME)_OUT16"
 		clr=35
 		bclr=14
 	}
@@ -386,7 +386,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OUT16.HIGH"
+		chan="$(FPREFIX):$(FNAME)_OUT16.HIGH"
 		clr=35
 		bclr=14
 	}
@@ -402,7 +402,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OUT16.LOW"
+		chan="$(FPREFIX):$(FNAME)_OUT16.LOW"
 		clr=35
 		bclr=14
 	}
@@ -418,7 +418,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OUT16.HSV"
+		chan="$(FPREFIX):$(FNAME)_OUT16.HSV"
 		clr=35
 		bclr=14
 	}
@@ -432,7 +432,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OUT16.LSV"
+		chan="$(FPREFIX):$(FNAME)_OUT16.LSV"
 		clr=35
 		bclr=14
 	}
@@ -458,7 +458,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:FILTERNAME_OUTPUT"
+		chan="$(FPREFIX):$(FNAME)_OUTPUT"
 		clr=35
 		bclr=14
 	}
@@ -475,7 +475,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OUTPUT.HIGH"
+		chan="$(FPREFIX):$(FNAME)_OUTPUT.HIGH"
 		clr=35
 		bclr=14
 	}
@@ -491,7 +491,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OUTPUT.LOW"
+		chan="$(FPREFIX):$(FNAME)_OUTPUT.LOW"
 		clr=35
 		bclr=14
 	}
@@ -507,7 +507,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OUTPUT.HSV"
+		chan="$(FPREFIX):$(FNAME)_OUTPUT.HSV"
 		clr=35
 		bclr=14
 	}
@@ -521,7 +521,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OUTPUT.LSV"
+		chan="$(FPREFIX):$(FNAME)_OUTPUT.LSV"
 		clr=35
 		bclr=14
 	}
@@ -547,7 +547,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:FILTERNAME_OUTMON"
+		chan="$(FPREFIX):$(FNAME)_OUTMON"
 		clr=35
 		bclr=14
 	}
@@ -564,7 +564,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OUTMON.HIGH"
+		chan="$(FPREFIX):$(FNAME)_OUTMON.HIGH"
 		clr=35
 		bclr=14
 	}
@@ -580,7 +580,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OUTMON.LOW"
+		chan="$(FPREFIX):$(FNAME)_OUTMON.LOW"
 		clr=35
 		bclr=14
 	}
@@ -596,7 +596,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OUTMON.HSV"
+		chan="$(FPREFIX):$(FNAME)_OUTMON.HSV"
 		clr=35
 		bclr=14
 	}
@@ -610,7 +610,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OUTMON.LSV"
+		chan="$(FPREFIX):$(FNAME)_OUTMON.LSV"
 		clr=35
 		bclr=14
 	}
@@ -636,7 +636,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OFFSET.HIGH"
+		chan="$(FPREFIX):$(FNAME)_OFFSET.HIGH"
 		clr=35
 		bclr=14
 	}
@@ -652,7 +652,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OFFSET.LOW"
+		chan="$(FPREFIX):$(FNAME)_OFFSET.LOW"
 		clr=35
 		bclr=14
 	}
@@ -668,7 +668,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OFFSET.HSV"
+		chan="$(FPREFIX):$(FNAME)_OFFSET.HSV"
 		clr=35
 		bclr=14
 	}
@@ -682,7 +682,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OFFSET.LSV"
+		chan="$(FPREFIX):$(FNAME)_OFFSET.LSV"
 		clr=35
 		bclr=14
 	}
@@ -708,7 +708,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_GAIN.HIGH"
+		chan="$(FPREFIX):$(FNAME)_GAIN.HIGH"
 		clr=35
 		bclr=14
 	}
@@ -724,7 +724,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_GAIN.LOW"
+		chan="$(FPREFIX):$(FNAME)_GAIN.LOW"
 		clr=35
 		bclr=14
 	}
@@ -740,7 +740,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_GAIN.HSV"
+		chan="$(FPREFIX):$(FNAME)_GAIN.HSV"
 		clr=35
 		bclr=14
 	}
@@ -754,7 +754,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_GAIN.LSV"
+		chan="$(FPREFIX):$(FNAME)_GAIN.LSV"
 		clr=35
 		bclr=14
 	}
@@ -780,7 +780,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_TRAMP.HIGH"
+		chan="$(FPREFIX):$(FNAME)_TRAMP.HIGH"
 		clr=35
 		bclr=14
 	}
@@ -796,7 +796,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_TRAMP.LOW"
+		chan="$(FPREFIX):$(FNAME)_TRAMP.LOW"
 		clr=35
 		bclr=14
 	}
@@ -812,7 +812,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_TRAMP.HSV"
+		chan="$(FPREFIX):$(FNAME)_TRAMP.HSV"
 		clr=35
 		bclr=14
 	}
@@ -826,7 +826,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_TRAMP.LSV"
+		chan="$(FPREFIX):$(FNAME)_TRAMP.LSV"
 		clr=35
 		bclr=14
 	}
@@ -852,7 +852,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_LIMIT.HIGH"
+		chan="$(FPREFIX):$(FNAME)_LIMIT.HIGH"
 		clr=35
 		bclr=14
 	}
@@ -868,7 +868,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_LIMIT.LOW"
+		chan="$(FPREFIX):$(FNAME)_LIMIT.LOW"
 		clr=35
 		bclr=14
 	}
@@ -884,7 +884,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_LIMIT.HSV"
+		chan="$(FPREFIX):$(FNAME)_LIMIT.HSV"
 		clr=35
 		bclr=14
 	}
@@ -898,7 +898,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_LIMIT.LSV"
+		chan="$(FPREFIX):$(FNAME)_LIMIT.LSV"
 		clr=35
 		bclr=14
 	}
@@ -924,7 +924,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_SW1R.HIGH"
+		chan="$(FPREFIX):$(FNAME)_SW1R.HIGH"
 		clr=35
 		bclr=14
 	}
@@ -941,7 +941,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_SW1R.LOW"
+		chan="$(FPREFIX):$(FNAME)_SW1R.LOW"
 		clr=35
 		bclr=14
 	}
@@ -958,7 +958,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_SW1R.HSV"
+		chan="$(FPREFIX):$(FNAME)_SW1R.HSV"
 		clr=35
 		bclr=14
 	}
@@ -972,7 +972,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_SW1R.LSV"
+		chan="$(FPREFIX):$(FNAME)_SW1R.LSV"
 		clr=35
 		bclr=14
 	}
@@ -998,7 +998,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_SW2R.HIGH"
+		chan="$(FPREFIX):$(FNAME)_SW2R.HIGH"
 		clr=35
 		bclr=14
 	}
@@ -1015,7 +1015,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_SW2R.LOW"
+		chan="$(FPREFIX):$(FNAME)_SW2R.LOW"
 		clr=35
 		bclr=14
 	}
@@ -1032,7 +1032,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_SW2R.HSV"
+		chan="$(FPREFIX):$(FNAME)_SW2R.HSV"
 		clr=35
 		bclr=14
 	}
@@ -1046,7 +1046,7 @@ menu {
 		height=21
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_SW2R.LSV"
+		chan="$(FPREFIX):$(FNAME)_SW2R.LSV"
 		clr=35
 		bclr=14
 	}
@@ -1125,7 +1125,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_OFFSET"
+		chan="$(FPREFIX):$(FNAME)_OFFSET"
 		clr=35
 		bclr=14
 	}
@@ -1141,7 +1141,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_GAIN"
+		chan="$(FPREFIX):$(FNAME)_GAIN"
 		clr=35
 		bclr=14
 	}
@@ -1157,7 +1157,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_TRAMP"
+		chan="$(FPREFIX):$(FNAME)_TRAMP"
 		clr=35
 		bclr=14
 	}
@@ -1173,7 +1173,7 @@ text {
 		height=22
 	}
 	control {
-		chan="SITE_NAME:FILTERNAME_LIMIT"
+		chan="$(FPREFIX):$(FNAME)_LIMIT"
 		clr=35
 		bclr=14
 	}
@@ -1189,7 +1189,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:FILTERNAME_SW1R"
+		chan="$(FPREFIX):$(FNAME)_SW1R"
 		clr=35
 		bclr=14
 	}
@@ -1207,7 +1207,7 @@ text {
 		height=20
 	}
 	monitor {
-		chan="SITE_NAME:FILTERNAME_SW2R"
+		chan="$(FPREFIX):$(FNAME)_SW2R"
 		clr=35
 		bclr=14
 	}
