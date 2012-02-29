@@ -748,6 +748,7 @@ sub remove_tags {
    #print "GotoName is $goto_name\n";
    # Find the line leading to the Goto
    my $goto_line = find_branch($parent, $goto_name, 1, 1, $parent);
+   #print "Found goto line names ", ${$goto_line->{FIELDS}}{"Name"}, "\n";
    #print_node($goto_line);
    my $src_name = ${$goto_line->{FIELDS}}{"SrcBlock"};
    my $src_port = ${$goto_line->{FIELDS}}{"SrcPort"};
@@ -759,10 +760,12 @@ sub remove_tags {
    #print_node($from_line);
    ${$from_line->{FIELDS}}{"SrcBlock"} = $src_name;
    ${$from_line->{FIELDS}}{"SrcPort"} = $src_port;
+   ${$from_line->{FIELDS}}{"Name"} = ${$goto_line->{FIELDS}}{"Name"};
    #print_node($from_line);
    # Rename the tags so they are not picked up by the code upstream...
-   ${$node->{FIELDS}}{"Name"} .= "_Removed";
-   #${$goto->{FIELDS}}{"Name"} .= "_Removed";
+   $node->{NAME} = "Removed";
+   $goto->{NAME} = "Removed";
+   $goto_line->{NAME} = "Removed";
    return 0;
 }
 
@@ -1333,6 +1336,7 @@ sub process {
   }
   CDS::Tree::do_on_nodes($root, \&remove_tags, 0, $root);
   print "Removed Tags\n";
+  #CDS::Tree::print_tree($root);
   $::time_to_die = 0;
   CDS::Tree::do_on_nodes($root, \&remove_busses, 0, $root);
   die if $::time_to_die;
