@@ -765,7 +765,7 @@ sub remove_tags {
    # Rename the tags so they are not picked up by the code upstream...
    $node->{NAME} = "Removed";
    $goto->{NAME} = "Removed";
-   $goto_line->{NAME} = "Removed";
+   #$goto_line->{NAME} = "Removed";
    return 0;
 }
 
