@@ -435,7 +435,7 @@ state init
       pFilt->inputs[ii].control = 0;
 
       sw1[ii] = 0x4;
-      sw2[ii] = 0x600;
+      sw2[ii] = 0x200;
       switchR1[ii] = 0;
       switchR2[ii] = 0;
       saveSwitch1[ii] = 0;
