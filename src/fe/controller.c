@@ -451,8 +451,10 @@ static double feCoeff32x[9] =
 
 
 // History buffers for oversampling filters
-double dHistory[96][40];
-double dDacHistory[96][40];
+//DB double dHistory[96][40];
+//DB double dDacHistory[96][40];
+double dHistory[(MAX_ADC_MODULES * 32)][MAX_HISTRY];
+double dDacHistory[(MAX_DAC_MODULES * 16)][MAX_HISTRY];
 
 #else
 
