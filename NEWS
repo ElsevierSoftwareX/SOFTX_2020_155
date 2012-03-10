@@ -1,136 +1,16 @@
+D.Barker 10Mar2012
 ===========================
-Overview of changes for 2.4.1
+Overview of changes for 2.4.2
 ===========================
-- fix broken "biquad" flag, it turned out that processing of biquad=1 flag
-  was failing in certain cases.
-- map.c has fix added for DAC modules with PEX8111 interface chips ie
-  all those boards that are native PCIe and not PCM cards (older revs).
-- controller.c and cdsHardware.h - Reinstated DAC DMA as default mode after fix above. Since DAC FIFO
-  now used as a buffer, of sorts, moved DMA code into DAC write area.
-- Broke up read of IRIG-B time across two code cycles (1 to read seconds and one to read usec) to reduce delay this causes on cycle 0 
-(GPS 1 second mark) between IOP receipt of ADC data and IOP move of this data for use by
-user application processes. 
-- Bug fix for I/O error bit in STATE_WORD.
-- Fix for ADC part; adc number not parsed correctly to set dWordUsed parameter in C code.
-- Fix for Spectracom IRIG-B Year info readout.
+- fix buffer overflow problem is 4 or more ADC cards are defined by
+a single model. It was found that the 4th ADC data was written to
+the DAC data space.
 
-===========================
-Overview of changes for 2.4
-===========================
+Two lines in controller.c were changed
 
-- Changed all remaining floats into doubles in Epics sequencers.
-- Improved generated autoburt request file, where all readbacks are
-  marked readonly now.
-- Added new cdsParameters setting: biquad.
-  biquad=1 forces all filter modules as well as ADC/DAC up/down filters and
-  DAQ downsampling filters to be calculated using biquad form.
-- Until DMA issues with General Standards DAC modules are resolved the IOP code
-  has direct DAC write code enabled, DMA is not used to write to the DAC modules.
-- DAQ decimation filtering and oversampling filter is done using biquad form IIR filters,
-  if cdsParameters block has biquad=1.
-- Do not update DAQ configuration file (INI file) during installation,
-  move it away into archive and install new file, generated based on DAQ
-  chanenls list in the RCG model.
-- New DCU Id Epics channel, e.g. L1:SUS-ITMX_DCU_ID
-- New FE overall state word Epics channel, named e.g. L1:FEC-28_STATE_WORD,
-  where the lower 7 bits are set as follows:
-  	FE stopped		-	bit 0
-	Code timing problem	-	bit 1
-	I/O problem		- 	bit 2
-	AWG dead		-	bit 3
-	DAQ dead		- 	bit 4
-	IPC errors detected	-	bit 5
-	A/D or D/A overflowed	-	bit 6
-- Source code has ./configure script now, which needs to be executed once
-  before cmopilation of RCG models can be done. Build can be done in a 
-  directory separate from the source now. RCG source can be made read-only now.
-- Do not create backup Makefiles in the FE build directory.
-- DAQ upgraded from 2MB/sec to 4MB/sec.
-- DAQ channel list in the RCG models support.
-- DAQ file check performed at run time.
-- Oscillator and filer module spline ramping
-- Filter module spline offset ramping
-- Spline ramping phase stability improvements
-- Mask input for a filter module with control
-- New FE code timing/daq/GDS monitor screens
-- FE code watchdog in EPICS sequencer (state word bit 0)
-- FPU SSE instructions underflows were turned off and floating point
-  denorms were forced to zero by setting FZ and DAZ bits in the CPU MXCSR register.
-  +-1e-20 limiting code was removed from the filter code.
-- NOTE: DAQ INI file checker script src/epics/util/iniChk.pl needs to be installed
-  in a location on PATH for a front-end system, before the Epics process is
-  restarted. A good location is /opt/rtcds/llo/l1/scripts/iniChk.pl.
-- NOTE: Extra EXC part is broken in this release, will be fixed in the next release.
-  It was discovered that this part is not working correctly and needs debugging.
-  Filter module excitation works fine as before.
-- Added post-build script execution at the end of install step.
-  T1100340-v1 https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=63485
-- When a brand new model is compiled and started for the first time there is no
-  existing burt snapshot for it to restore and it used to be that the operator needed
-  to press the BURT button on the GDS screen within 10 seconds in order for the FE kernel
-  module start running or else the FE execution failed. This was fixed by writing 1 into
-  BURT_RESTORE channel within the generated startup script.
-- Linux kernel 3.0.8 (patched with patches/linux-3.0-cs.patch and configured with
-  patches/linux-3.0.8-cs.config) was tested at LLO and wwas found working just as well as
-  the currently used 2.6.34.1 kernel. mbuf driver (src/drv/mbuf) was modified to
-  compile on 3.0.8 kernel.
-- New Epics channel added to show the total number of testpoint selected L1:FEC-7_TP_CNT.
-- Added DAC Duotone  measurement feature along with the selection switch L1:FEC-7_DACDT_ENABLE.
-- The startup script now looks for an optional safe.snap file, e.g.
-  /opt/rtcds/llo/l1/target/l1lsctest/l1lsctestepics/burt/safe.snap
-  and burt restores this file instead of the latest burt snapshot.
+-double dHistory[96][40];
+-double dDacHistory[96][40];
 
-
-Overview of changes from 2.3 
-============================
-Bug Fixes:
-- fixed rogue testpoints shown up at AEI/GEO and LLOLSC
-
-New Feature:
-- added flip_signals parameter to make working with buffered and unbuffered
-  aa/ai filters easier
-
-Overview of changes from 2.1 to 2.3
-===================================
-
-Bug Fixes:
-- daqLib.c fixed to support up to 256x decimation for DAQ channels. Previous versions only
-provided proper decimation to 32x.
-- FiltCtrl.pm bug fix to provide all filter module switch setting bits at status output.
-- Bit2Word.pm bug fix.
-- controller.c, map.c and map.h changed to support double buffer for DAC outputs. This fixes a bug where
-a race condition could exist between the IOP loading new DAC data into the same buffer and at the same time
-as the DAC module was trying to DMA data out of that buffer.
-- Set the '-2' awgtpman flag for a 4K system in top level Makefile.
-- Fixed biquad filter module operation.
-- Change inputFilter part to use extensions of GAIN,POLE, ZERO instead of K,P,Z.
-- RMS part to have limits of +/-200000 instead of +/-2000.
-
-
-New Additions:
-- Updated dataviewer with support for 32K and 64K resolution data viewing.
-- Various updates to support new longer signal names (Max size, with extensions, 60 chars).
-
-Overview of changes from 2.0 to 2.1
-==================================
-New Branch, which includes:
-
-New Features:
-1) RCG provides default code rate in coeff.txt files for use by foton.
-2) New IIR filter part based on BiQuad filter algorithm as provided by M. Evans.
-3) Ability to include a user-defined library part in an RCG model.
-4) Support for connection of buses between multiple layers of the model, not just on save level.
-5) Auto-generated EPICS.ini files for each model.
-6) Check of 16bit DAC module FIFOs for proper clocking plus new error bit added to GDS_TP screens..
-7) Change of _DAQ to _DQ tag on filter modules in DAQ .ini files.
-
-Bug Fixes:
-1) Fix to EPICS EZCA part to:
-- compile correctly within subsystem parts.
-- Use pvPut instead of EZCA for performance reasons (plus EZCA not supported in latest EPICS).
-2) Removal of SVN tag from BURT file ie BURT restore would overwrite latest SVN tag).
-3) Fix to slave model DAC status info on GDS TP screens (false error indicator).
-4) Change in CDS_PARTS.mdl bus selector part to set use to "Require input signal names to match signals below", instead of "Inheri
-t bus signal names from input ports". This is required to make BUS parts work with new, multi-level BUS parser in RCG.
-
++double dHistory[(MAX_ADC_MODULES * 32)][MAX_HISTRY];
++double dDacHistory[(MAX_DAC_MODULES * 16)][MAX_HISTRY];
 
