@@ -82,6 +82,7 @@ extern int iop_rfm_valid;
 #define FE_ERROR_DAQ		0x10
 #define FE_ERROR_IPC		0x20
 #define FE_ERROR_OVERFLOW	0x40
+#define FE_ERROR_DAC_ENABLE	0x80
 
 #define MMAP_SIZE (64*1024*1024 - 5000)
 volatile char *_epics_shm;		// Ptr to EPICS shared memory
@@ -254,6 +255,7 @@ rtl_pthread_t wthread1;
 rtl_pthread_t wthread2;
 #endif
 int wfd, ipc_fd;
+int iopDacEnable;
 
 /* ADC/DAC overflow variables */
 int overflowAdc[MAX_ADC_MODULES][32];;
@@ -451,9 +453,8 @@ static double feCoeff32x[9] =
 
 
 // History buffers for oversampling filters
-double dHistory[96][40];
-double dDacHistory[96][40];
-
+double dHistory[(MAX_ADC_MODULES * 32)][MAX_HISTRY];
+double dDacHistory[(MAX_DAC_MODULES * 16)][MAX_HISTRY];
 #else
 
 #define OVERSAMPLE_TIMES 1
@@ -982,7 +983,7 @@ udelay(1000);
 
   // Initialize user application software ************************************
   printf("Calling feCode() to initialize\n");
-  feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,1);
+  iopDacEnable = feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,1);
 
   printf("entering the loop\n");
 
@@ -1346,6 +1347,7 @@ udelay(1000);
 	  //printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
 	  pLocalEpics->epicsOutput.diags[9] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
 	  if(pLocalEpics->epicsOutput.diags[9]) feStatus |= FE_ERROR_AWG;
+	  if(!iopDacEnable) feStatus |= FE_ERROR_DAC_ENABLE;
 
 	  // Increment GPS second on cycle 0
 #ifndef ADC_SLAVE
@@ -1682,7 +1684,7 @@ udelay(1000);
 	// Call the front end specific software ***********************************************
         rdtscl(cpuClock[4]);
 
- 	feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,0);
+ 	iopDacEnable = feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,0);
         rdtscl(cpuClock[5]);
 
 
@@ -1770,7 +1772,7 @@ udelay(1000);
 			dac_out = dac_in;
 #else
 #ifdef ADC_MASTER
-			if(!dacChanErr[jj]) {
+			if((!dacChanErr[jj]) && (iopDacEnable)) {
 				dac_out = ioMemData->iodata[mm][ioMemCntrDac].data[ii];
 				// Zero out data in case user app dies by next cycle
 				// when two or more apps share same DAC module.
@@ -1829,6 +1831,7 @@ udelay(1000);
 		}
 #ifdef ADC_SLAVE
 		// Write cycle count to make DAC data complete
+		if(iopDacEnable)
 		ioMemData->iodata[mm][memCtr].cycle = (ioClockDac + kk) % 65536;
 #endif
 #ifdef OVERSAMPLE_DAC
@@ -2257,7 +2260,8 @@ udelay(1000);
 			static int dacWatchDog = 0;
 			if (clock16K == 400) dacWatchDog ^= 1;
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
-			dac18bitPtr->digital_io_ports = (dacWatchDog | GSAO_18BIT_DIO_RW);
+			if(iopDacEnable)
+				dac18bitPtr->digital_io_ports = (dacWatchDog | GSAO_18BIT_DIO_RW);
 			//out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
 			//printf("Out buffg size %d = %d\n",jj,out_buf_size);
 
