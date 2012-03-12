@@ -179,7 +179,7 @@ def parse_block(data_lines,line_number,reference_name):
     #Search the file (i.e. data_lines) for the names in order
     for name in reference_name_tree:
       for current_line_count in range(line_number,len(data_lines)):
-        current_line = data_lines[current_line_count]
+	current_line = data_lines[current_line_count]
         if (current_line.split()[0] == 'Name'):
           if (current_line.split('"')[1] == name):
             break
@@ -202,6 +202,14 @@ def parse_block(data_lines,line_number,reference_name):
     #Then do the usual parse.
     while data_lines[current_line_count].split()[-1] != '{':
       current_line_count += 1
+      if current_line_count == len(data_lines):
+	sys.stderr.write("ERROR: For part: " + reference_name + "\n")
+	sys.stderr.write("Could not find the proper library reference.\n")
+	sys.stderr.write("Your model may be referencing a different source model than what is in the current library path.\n\n")
+	sys.stderr.write("Current path is: " + rcg_lib_path + "\n\n")
+  	sys.stderr.write("Exiting\n")
+  	sys.exit(1)
+
     new_block,scratch = parse_block(data_lines,current_line_count,None)
     if description_present:
       new_block.data['Description'] = temp_description
