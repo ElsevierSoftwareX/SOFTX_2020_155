@@ -16,6 +16,7 @@ int $MYNAME\_STATE;
 int $MYNAME\_RESET;
 int $MYNAME\_BPSET;
 int $MYNAME\_BPTIME;
+int $MYNAME\_PANIC;
 END
 
 }
@@ -29,6 +30,7 @@ OUTVARIABLE $::xpartName[$i]\_STATE $::systemName\.$::xpartName[$i]\_STATE int a
 MOMENTARY $::xpartName[$i]\_RESET $::systemName\.$::xpartName[$i]\_RESET int ai 0
 MOMENTARY $::xpartName[$i]\_BPSET $::systemName\.$::xpartName[$i]\_BPSET int ai 0
 OUTVARIABLE $::xpartName[$i]\_BPTIME $::systemName\.$::xpartName[$i]\_BPTIME int ai 0 \n
+INVARIABLE $::xpartName[$i]\_PANIC $::systemName\.$::xpartName[$i]\_PANIC int bi 0 \n
 END
 }
 
@@ -37,7 +39,7 @@ END
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
-        print ::OUT "static int \L$::xpartName[$i];\n";
+        print ::OUT "static int \L$::xpartName[$i]\[2\];\n";
         print ::OUT "static int \L$::xpartName[$i]_remainingTime;\n";
 }
 
@@ -49,7 +51,8 @@ sub fromExp {
         my ($i, $j) = @_;
         my $from = $::partInNum[$i][$j];
         my $fromPort = $::partInputPort[$i][$j];
-        return "\L$::xpartName[$from]";
+        # return "\L$::xpartName[$from]";
+	return "\L$::xpartName[$from]" . "\[" . $fromPort . "\]";
 }
 
 # Return front end initialization code
@@ -71,21 +74,31 @@ sub frontEndCode {
 	 my $BPTIME = $::fromExp[1];
 	 my $DACSTAT = "dacFault";
 	 my $CYCLE = "cycle";
-	 my $STATE = "\L$::xpartName[$i]";
+	 my $STATE = "\L$::xpartName[$i]\[0\]";
+	 my $RSETOUT = "\L$::xpartName[$i]\[1\]";
 	 my $BPTIME_REMAINING = "\L$::xpartName[$i]_remainingTime";
 	 my $EPICS_STATE = "pLocalEpics->$::systemName\.$::xpartName[$i]\_STATE";
 	 my $EPICS_BPTIME = "pLocalEpics->$::systemName\.$::xpartName[$i]\_BPTIME";
 	 my $EPICS_BPSET = "pLocalEpics->$::systemName\.$::xpartName[$i]\_BPSET";
 	 my $EPICS_RESET = "pLocalEpics->$::systemName\.$::xpartName[$i]\_RESET";
+	 my $EPICS_PANIC = "pLocalEpics->$::systemName\.$::xpartName[$i]\_PANIC";
 
         return <<END;
 
 // DACKILLER MODULE
+if ($RSETOUT) $RSETOUT = 0;
 if ($EPICS_RESET) {
 $STATE = 1;
 $BPTIME_REMAINING = 0;
 $EPICS_RESET = 0;
+$RSETOUT = 1;
 } 
+if ($EPICS_PANIC)
+{
+$STATE = 0;
+$DACSTAT = 0;
+$BPTIME_REMAINING = 0;
+} else {
 if ($BPTIME_REMAINING > 0) {
 $STATE = 1;
 $DACSTAT = 2;
@@ -97,6 +110,7 @@ if ($EPICS_BPSET) {
 $BPTIME_REMAINING = $BPTIME;
 $EPICS_BPSET = 0;
 } 
+}
 if (!$CYCLE) {
 if($BPTIME_REMAINING) $BPTIME_REMAINING -= 1;
 $EPICS_STATE = $DACSTAT;
