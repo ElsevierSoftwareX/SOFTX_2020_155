@@ -2344,10 +2344,10 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_USR_TIME epicsOutput.diags[0] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG1 epicsOutput.diags[1] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.diags[2] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"4000\") field(HHSV,\"MAJOR\")\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME_DAC epicsOutput.diags[10] int ao 0\n";
 if($adcMaster > -1)
 {
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME_DAC epicsOutput.diags[10] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ao 0 field(HIHI,\"24\") field(HHSV,\"MAJOR\") field(HIGH,\"18\") field(HSV,\"MINOR\") field(LOW,\"5\") field(LSV,\"MAJOR\")\n";
 }
 print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ao 0\n";
@@ -2644,13 +2644,13 @@ print OUT "/* CPU 1 code */\n";
 if ($cpus < 3) {
   printVariables();
 }
-print OUT "\nvoid feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
+print OUT "\nint feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
 print OUT "\t\tdouble dacOut[][16],\t\/* DAC outputs *\/\n";
 print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
 print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
 print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
 print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
-print OUT "{\n\nint ii;\n\n";
+print OUT "{\n\nint ii, dacFault;\n\n";
 print OUT "if(feInit)\n\{\n";
 
 # removed for ADC PART CHANGE
@@ -2675,6 +2675,8 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 }
 print OUT "\} else \{\n";
+print OUT "// Enabling DAC outs for those who don't have DAC KILL WD \n";
+print OUT "dacFault = 1;\n";
 
 #
 # All IPCx data receives are to occur
@@ -3079,6 +3081,7 @@ if ($ipcxCnt > 0) {
 }
 
 print OUT "  }\n";
+print OUT "  return(dacFault);\n\n";
 print OUT "}\n";
 print OUT "#include \"$rcg_src_dir/src/fe/controller.c\"\n";
 
@@ -3576,11 +3579,15 @@ mkpath $epicsScreensDir, 0, 0755;
 my $usite = uc $site;
 my $sysname = "FEC";
 $sed_arg = "s/SITE_NAME/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($sysname) . "/g;s/GDS_NODE_ID/" . $gdsNodeId . "/g;";
-$opised_arg = "s/\$\(IFO\)/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/\$\(SYS\)/" . uc($sysname) . "/g;";
+$opised_arg = "s/\$\(IFO\)/$site/g;s/GDS_TP_CUSTOM/" . uc($skeleton) . "GDS_TP" ."/g;s/\$\(SYS\)/" . uc($sysname) . "/g;";
 $opised_arg .= "s/\$\(DCUID\)/$dcuId/g;";
 $opised_arg .= "s/\$\{DCUID\}/$dcuId/g;";
 $opised_arg .= "s/\$\{IFO\}/$site/g;";
 $opised_arg .= "s/\$\{SYS\}/$sysname/g;";
+$opised_arg .= "s/RCGDIR/$ffmedm/g;";
+$opised_arg .= "s/FBID/$sysname/g;";
+$opised_arg .= "s/ALARMS/" . uc($skeleton) . "_GRD_MONITOR" ."/g;";
+$opised_arg .= "s/INPUT_FILTER/\\/src\\/epics\\/util\\/ALARMS/g;";
 $sed_arg .= "s/LOCATION_NAME/$location/g;";
 $sed_arg .= "s/DCU_NODE_ID/$dcuId/g;";
 $sysname = uc($skeleton);
@@ -3645,10 +3652,11 @@ if($modelType eq "MASTER")
 {
 	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM.adl GDS_TP_TEST.adl");
 	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM.opi GDS_TP_TEST.opi");
-	system("cp $rcg_src_dir/src/epics/util/test2.opi GDS_TP_TEST.opi");
+	system("cp $rcg_src_dir/src/epics/util/byte.opi byte.opi");
 }else{
 	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM_SLAVE.adl GDS_TP_TEST.adl");
 	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM_SLAVE.opi GDS_TP_TEST.opi");
+	system("cp $rcg_src_dir/src/epics/util/byte.opi byte.opi");
 }
 open(OUTGDSM,">>./"."GDS_TP_TEST.adl") || die "cannot open GDS_TP file for writing ";
 $dacSnum=0;
@@ -3746,9 +3754,12 @@ print OUTGDSM @alarmMedm;
 close(OUTGDSM);
 
 system("cat GDS_TP_TEST.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
-system("cat GDS_TP_TEST.opi | sed '$opised_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.opi");
+system("cat GDS_TP_TEST.opi | sed '$opised_arg' > /tmp/GDS_TP.opi");
+system("cat byte.opi | sed '$opised_arg' > /tmp/byte.opi");
 system("cp $rcg_src_dir/src/epics/util/ALARMS.adl ALARMS.adl");
+system("cp $rcg_src_dir/src/epics/util/ALARMS.opi ALARMS.opi");
 system("cat ALARMS.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_ALARM_MONITOR.adl");
+system("cat ALARMS.opi | sed '$opised_arg' > $epicsScreensDir/$sysname" . "_ALARM_MONITOR.opi");
 
 #system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR.adl");
 #system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_0.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_0.adl");
@@ -3964,20 +3975,67 @@ sub commify_series {
 		if ($partType[$cur_part_num] eq "Filt") {
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "_INMON"  .  "\"/g;";
+		  $pvtmonitor_args .= "s/$partInput[$cur_part_num][0]_EPICS_CHANNEL/" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "_INMON" . "/g;";
 		} elsif ($partType[$cur_part_num] eq "EpicsOut") {
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "\"/g;";
+		  $pvtmonitor_args .= "s/$partInput[$cur_part_num][0]_EPICS_CHANNEL/" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "/g;";
 		}
         }
 		  $sysname = uc($skeleton);
 }
 #print $monitor_args;
+
+system("cp $rcg_src_dir/src/epics/util/adcmenu.opi /tmp/adcmenu.opi");
+system("cp $rcg_src_dir/src/epics/util/dacmenu.opi /tmp/dacmenu.opi");
+system("cp $rcg_src_dir/src/epics/util/related.opi /tmp/related.opi");
+system("cp $rcg_src_dir/src/epics/util/eof.opi /tmp/eof.opi");
+my $xpos = 205;
+my $ypos = 167;
+my $xbpos = 245;
+my $ccnt = 0;
 for (0 .. $adcCnt - 1) {
    my $adc_monitor_args = $monitor_args;
    $adc_monitor_args .= "s/MONITOR_ADC/MONITOR_ADC$_/g;";
-#print $adc_monitor_args;
    system("cat $rcg_src_dir/src/epics/util/MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$adc_monitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.adl");
+   system("cat $rcg_src_dir/src/epics/util/PVT1.css-pvtable | sed 's/adc_0/adc_$_/' |  sed '$pvtmonitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.css-pvtable");
+system("cat /tmp/adcmenu.opi | sed 's/ADCLABEL/ADC$_/g' | sed 's/XPOS/$xpos/g' | sed 's/YPOS/$ypos/g' | sed 's/MODEL/$sysname/g' > /tmp/adc$_.opi");
+system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
+system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
+system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/ADC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/3/g' | sed 's/WIDE/27/g' > /tmp/adc$_.opi");
+system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
+system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
+$ypos += 25;
+$ccnt ++;
+if($ccnt == 5)
+{
+	$xpos = 290;
+	$xbpos = 330;
+	$ypos = 167;
 }
+}
+	$adcMedm[21] = "$dacCardNum[$dacMedm]\" \n";
+for (0 .. $dacCnt - 1) {
+system("cat /tmp/dacmenu.opi | sed 's/ADCLABEL/DAC$dacCardNum[$_]/g' | sed 's/XPOS/$xpos/g' | sed 's/YPOS/$ypos/g' | sed 's/MODEL/$sysname/g' > /tmp/adc$_.opi");
+system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
+system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
+if ($dacType[$_] eq "GSC_18AO8") {
+system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/DAC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/5/g' | sed 's/WIDE/45/g' > /tmp/adc$_.opi");
+} else {
+system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/DAC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/4/g' | sed 's/WIDE/36/g' > /tmp/adc$_.opi");
+}
+system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
+system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
+$ypos += 25;
+$ccnt ++;
+if($ccnt == 5)
+{
+	$xpos = 290;
+	$xbpos = 330;
+	$ypos = 167;
+}
+}
+system("cat /tmp/GDS_TP.opi /tmp/eof.opi > $epicsScreensDir/$sysname" . "_GDS_TP.opi");
 
 # Print source file names into a file
 #

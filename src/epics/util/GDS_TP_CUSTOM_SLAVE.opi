@@ -4,12 +4,10 @@
   <macros>
     <include_parent_macros>true</include_parent_macros>
   </macros>
-  <wuid>-49d08f8d:1357d3474d7:-7c60</wuid>
-  <boy_version>3.1.0.20120201</boy_version>
   <scripts />
   <show_ruler>true</show_ruler>
   <height>300</height>
-  <name>GDS_TP_CUSTOM_SLAVE</name>
+  <name>GDS_TP_CUSTOM</name>
   <snap_to_geometry>false</snap_to_geometry>
   <show_grid>false</show_grid>
   <background_color>
@@ -20,13 +18,13 @@
   </foreground_color>
   <widget_type>Display</widget_type>
   <show_close_button>true</show_close_button>
-  <width>573</width>
+  <width>552</width>
   <rules />
   <show_edit_range>true</show_edit_range>
   <grid_space>5</grid_space>
-  <actions hook="false" hook_all="false" />
-  <y>140</y>
-  <x>484</x>
+  <actions hook="false" />
+  <y>81</y>
+  <x>220</x>
   <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
@@ -34,53 +32,8 @@
     <line_color>
       <color red="128" green="0" blue="255" />
     </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c5f</wuid>
     <scripts />
-    <height>255</height>
-    <anti_alias>true</anti_alias>
-    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
-    <name>Rectangle</name>
-    <transparent>false</transparent>
-    <pv_name />
-    <background_color>
-      <color red="0" green="0" blue="255" />
-    </background_color>
-    <foreground_color>
-      <color red="218" green="218" blue="218" />
-    </foreground_color>
-    <widget_type>Rectangle</widget_type>
-    <enabled>true</enabled>
-    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
-    <font>
-      <opifont.name>Default</opifont.name>
-    </font>
-    <width>550</width>
-    <line_style>0</line_style>
-    <border_style>0</border_style>
-    <rules />
-    <pv_value />
-    <border_width>1</border_width>
-    <line_width>0</line_width>
-    <horizontal_fill>true</horizontal_fill>
-    <border_color>
-      <color red="0" green="128" blue="255" />
-    </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>29</y>
-    <tooltip>$(pv_name)
-$(pv_value)</tooltip>
-    <x>11</x>
-  </widget>
-  <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
-    <border_alarm_sensitive>false</border_alarm_sensitive>
-    <visible>true</visible>
-    <fill_level>100.0</fill_level>
-    <line_color>
-      <color red="128" green="0" blue="255" />
-    </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c5e</wuid>
-    <scripts />
-    <height>230</height>
+    <height>240</height>
     <anti_alias>true</anti_alias>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Rectangle</name>
@@ -98,19 +51,196 @@ $(pv_value)</tooltip>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>175</width>
     <line_style>0</line_style>
+    <width>170</width>
+    <border_style>3</border_style>
+    <rules />
+    <border_width>2</border_width>
+    <line_width>0</line_width>
+    <horizontal_fill>true</horizontal_fill>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <actions hook="false" />
+    <y>48</y>
+    <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+    <x>203</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+    <visible>true</visible>
+    <fill_level>100.0</fill_level>
+    <line_color>
+      <color red="128" green="0" blue="255" />
+    </line_color>
+    <scripts />
+    <height>18</height>
+    <anti_alias>true</anti_alias>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <name>Rectangle</name>
+    <transparent>false</transparent>
+    <pv_name />
+    <background_color>
+      <color red="0" green="0" blue="255" />
+    </background_color>
+    <foreground_color>
+      <color red="58" green="94" blue="171" />
+    </foreground_color>
+    <widget_type>Rectangle</widget_type>
+    <enabled>true</enabled>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <line_style>0</line_style>
+    <width>543</width>
     <border_style>0</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <line_width>0</line_width>
     <horizontal_fill>true</horizontal_fill>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>53</y>
+    <actions hook="false" />
+    <y>29</y>
+    <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+    <x>8</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+    <visible>true</visible>
+    <fill_level>100.0</fill_level>
+    <line_color>
+      <color red="128" green="0" blue="255" />
+    </line_color>
+    <scripts />
+    <height>240</height>
+    <anti_alias>true</anti_alias>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <name>Rectangle_16</name>
+    <transparent>false</transparent>
+    <pv_name />
+    <background_color>
+      <color red="0" green="0" blue="255" />
+    </background_color>
+    <foreground_color>
+      <color red="235" green="241" blue="181" />
+    </foreground_color>
+    <widget_type>Rectangle</widget_type>
+    <enabled>true</enabled>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <line_style>0</line_style>
+    <width>192</width>
+    <border_style>3</border_style>
+    <rules />
+    <border_width>2</border_width>
+    <line_width>0</line_width>
+    <horizontal_fill>true</horizontal_fill>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <actions hook="false" />
+    <y>48</y>
+    <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+    <x>8</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+    <visible>true</visible>
+    <fill_level>0.0</fill_level>
+    <line_color>
+      <color red="115" green="255" blue="107" />
+    </line_color>
+    <scripts />
+    <height>18</height>
+    <anti_alias>true</anti_alias>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <name>Rectangle</name>
+    <transparent>true</transparent>
+    <pv_name>$(IFO):$(SYS)-$(DCUID)_TIME_ERR</pv_name>
+    <background_color>
+      <color red="0" green="0" blue="255" />
+    </background_color>
+    <foreground_color>
+      <color red="115" green="255" blue="107" />
+    </foreground_color>
+    <widget_type>Rectangle</widget_type>
+    <enabled>true</enabled>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <line_style>0</line_style>
+    <width>65</width>
+    <border_style>0</border_style>
+    <rules>
+      <rule name="Visibility" prop_id="visible" out_exp="false">
+        <exp bool_exp="(pv0&gt;0) &amp;&amp; (pv0&lt;16)">
+          <value>true</value>
+        </exp>
+        <exp bool_exp="!((pv0&gt;0) &amp;&amp; (pv0&lt;16))">
+          <value>false</value>
+        </exp>
+        <pv trig="true">${IFO}:${SYS}-${DCUID}_TIME_ERR</pv>
+      </rule>
+    </rules>
+    <border_width>1</border_width>
+    <line_width>4</line_width>
+    <horizontal_fill>true</horizontal_fill>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <actions hook="false" />
+    <y>151</y>
+    <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+    <x>118</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+    <visible>true</visible>
+    <fill_level>100.0</fill_level>
+    <line_color>
+      <color red="128" green="0" blue="255" />
+    </line_color>
+    <scripts />
+    <height>240</height>
+    <anti_alias>true</anti_alias>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <name>Rectangle</name>
+    <transparent>false</transparent>
+    <pv_name />
+    <background_color>
+      <color red="0" green="0" blue="255" />
+    </background_color>
+    <foreground_color>
+      <color red="235" green="241" blue="181" />
+    </foreground_color>
+    <widget_type>Rectangle</widget_type>
+    <enabled>true</enabled>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <line_style>0</line_style>
+    <width>175</width>
+    <border_style>3</border_style>
+    <rules />
+    <border_width>2</border_width>
+    <line_width>0</line_width>
+    <horizontal_fill>true</horizontal_fill>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <actions hook="false" />
+    <y>48</y>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
     <x>375</x>
@@ -122,95 +252,6 @@ $(pv_value)</tooltip>
     <line_color>
       <color red="128" green="0" blue="255" />
     </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c5d</wuid>
-    <scripts />
-    <height>230</height>
-    <anti_alias>true</anti_alias>
-    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
-    <name>Rectangle</name>
-    <transparent>false</transparent>
-    <pv_name />
-    <background_color>
-      <color red="0" green="0" blue="255" />
-    </background_color>
-    <foreground_color>
-      <color red="235" green="241" blue="181" />
-    </foreground_color>
-    <widget_type>Rectangle</widget_type>
-    <enabled>true</enabled>
-    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
-    <font>
-      <opifont.name>Default</opifont.name>
-    </font>
-    <width>170</width>
-    <line_style>0</line_style>
-    <border_style>0</border_style>
-    <rules />
-    <pv_value />
-    <border_width>1</border_width>
-    <line_width>0</line_width>
-    <horizontal_fill>true</horizontal_fill>
-    <border_color>
-      <color red="0" green="128" blue="255" />
-    </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>53</y>
-    <tooltip>$(pv_name)
-$(pv_value)</tooltip>
-    <x>201</x>
-  </widget>
-  <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
-    <border_alarm_sensitive>false</border_alarm_sensitive>
-    <visible>true</visible>
-    <fill_level>100.0</fill_level>
-    <line_color>
-      <color red="128" green="0" blue="255" />
-    </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c5c</wuid>
-    <scripts />
-    <height>230</height>
-    <anti_alias>true</anti_alias>
-    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
-    <name>Rectangle</name>
-    <transparent>false</transparent>
-    <pv_name />
-    <background_color>
-      <color red="0" green="0" blue="255" />
-    </background_color>
-    <foreground_color>
-      <color red="235" green="241" blue="181" />
-    </foreground_color>
-    <widget_type>Rectangle</widget_type>
-    <enabled>true</enabled>
-    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
-    <font>
-      <opifont.name>Default</opifont.name>
-    </font>
-    <width>182</width>
-    <line_style>0</line_style>
-    <border_style>0</border_style>
-    <rules />
-    <pv_value />
-    <border_width>1</border_width>
-    <line_width>0</line_width>
-    <horizontal_fill>true</horizontal_fill>
-    <border_color>
-      <color red="0" green="128" blue="255" />
-    </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>53</y>
-    <tooltip>$(pv_name)
-$(pv_value)</tooltip>
-    <x>12</x>
-  </widget>
-  <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
-    <border_alarm_sensitive>false</border_alarm_sensitive>
-    <visible>true</visible>
-    <fill_level>100.0</fill_level>
-    <line_color>
-      <color red="128" green="0" blue="255" />
-    </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c5b</wuid>
     <scripts />
     <height>22</height>
     <anti_alias>true</anti_alias>
@@ -230,18 +271,17 @@ $(pv_value)</tooltip>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>570</width>
     <line_style>0</line_style>
+    <width>551</width>
     <border_style>0</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <line_width>0</line_width>
     <horizontal_fill>true</horizontal_fill>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>0</y>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -254,7 +294,6 @@ $(pv_value)</tooltip>
     <line_color>
       <color red="128" green="0" blue="255" />
     </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c5a</wuid>
     <scripts />
     <height>18</height>
     <anti_alias>true</anti_alias>
@@ -274,18 +313,17 @@ $(pv_value)</tooltip>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>153</width>
     <line_style>0</line_style>
+    <width>158</width>
     <border_style>0</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <line_width>0</line_width>
     <horizontal_fill>true</horizontal_fill>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>77</y>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -293,56 +331,11 @@ $(pv_value)</tooltip>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
     <border_alarm_sensitive>false</border_alarm_sensitive>
-    <visible>true</visible>
-    <fill_level>100.0</fill_level>
-    <line_color>
-      <color red="128" green="0" blue="255" />
-    </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c51</wuid>
-    <scripts />
-    <height>18</height>
-    <anti_alias>true</anti_alias>
-    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
-    <name>Rectangle</name>
-    <transparent>false</transparent>
-    <pv_name />
-    <background_color>
-      <color red="0" green="0" blue="255" />
-    </background_color>
-    <foreground_color>
-      <color red="58" green="94" blue="171" />
-    </foreground_color>
-    <widget_type>Rectangle</widget_type>
-    <enabled>true</enabled>
-    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
-    <font>
-      <opifont.name>Default</opifont.name>
-    </font>
-    <width>410</width>
-    <line_style>0</line_style>
-    <border_style>0</border_style>
-    <rules />
-    <pv_value />
-    <border_width>1</border_width>
-    <line_width>0</line_width>
-    <horizontal_fill>true</horizontal_fill>
-    <border_color>
-      <color red="0" green="128" blue="255" />
-    </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>29</y>
-    <tooltip>$(pv_name)
-$(pv_value)</tooltip>
-    <x>11</x>
-  </widget>
-  <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
-    <border_alarm_sensitive>false</border_alarm_sensitive>
-    <visible>true</visible>
+    <visible>false</visible>
     <fill_level>0.0</fill_level>
     <line_color>
       <color red="253" green="0" blue="0" />
     </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c4c</wuid>
     <scripts />
     <height>18</height>
     <anti_alias>true</anti_alias>
@@ -362,83 +355,28 @@ $(pv_value)</tooltip>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>65</width>
     <line_style>0</line_style>
+    <width>65</width>
     <border_style>0</border_style>
     <rules>
       <rule name="Visibility" prop_id="visible" out_exp="false">
-        <exp bool_exp="((pv0&amp;15)====0) || (pv0&gt;15)">
+        <exp bool_exp="((pv0&amp;15)==0) || (pv0&gt;15)">
           <value>true</value>
         </exp>
-        <exp bool_exp="!(((pv0&amp;15)====0) || (pv0&gt;15))">
+        <exp bool_exp="!(((pv0&amp;15)==0) || (pv0&gt;15))">
           <value>false</value>
         </exp>
-        <pv trig="true">SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR</pv>
+        <pv trig="true">${IFO}:${SYS}-${DCUID}_TIME_ERR</pv>
       </rule>
     </rules>
-    <pv_value />
     <border_width>1</border_width>
     <line_width>4</line_width>
     <horizontal_fill>true</horizontal_fill>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>193</y>
-    <tooltip>$(pv_name)
-$(pv_value)</tooltip>
-    <x>118</x>
-  </widget>
-  <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
-    <border_alarm_sensitive>false</border_alarm_sensitive>
-    <visible>true</visible>
-    <fill_level>0.0</fill_level>
-    <line_color>
-      <color red="115" green="255" blue="107" />
-    </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c49</wuid>
-    <scripts />
-    <height>18</height>
-    <anti_alias>true</anti_alias>
-    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
-    <name>Rectangle</name>
-    <transparent>true</transparent>
-    <pv_name />
-    <background_color>
-      <color red="0" green="0" blue="255" />
-    </background_color>
-    <foreground_color>
-      <color red="115" green="255" blue="107" />
-    </foreground_color>
-    <widget_type>Rectangle</widget_type>
-    <enabled>true</enabled>
-    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
-    <font>
-      <opifont.name>Default</opifont.name>
-    </font>
-    <width>65</width>
-    <line_style>0</line_style>
-    <border_style>0</border_style>
-    <rules>
-      <rule name="Visibility" prop_id="visible" out_exp="false">
-        <exp bool_exp="(pv0&gt;0) &amp;&amp; (pv0&lt;16)">
-          <value>true</value>
-        </exp>
-        <exp bool_exp="!((pv0&gt;0) &amp;&amp; (pv0&lt;16))">
-          <value>false</value>
-        </exp>
-        <pv trig="true">SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR</pv>
-      </rule>
-    </rules>
-    <pv_value />
-    <border_width>1</border_width>
-    <line_width>4</line_width>
-    <horizontal_fill>true</horizontal_fill>
-    <border_color>
-      <color red="0" green="128" blue="255" />
-    </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>193</y>
+    <actions hook="false" />
+    <y>151</y>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
     <x>118</x>
@@ -450,51 +388,6 @@ $(pv_value)</tooltip>
     <line_color>
       <color red="128" green="0" blue="255" />
     </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c45</wuid>
-    <scripts />
-    <height>18</height>
-    <anti_alias>true</anti_alias>
-    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
-    <name>Rectangle</name>
-    <transparent>false</transparent>
-    <pv_name />
-    <background_color>
-      <color red="0" green="0" blue="255" />
-    </background_color>
-    <foreground_color>
-      <color red="58" green="94" blue="171" />
-    </foreground_color>
-    <widget_type>Rectangle</widget_type>
-    <enabled>true</enabled>
-    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
-    <font>
-      <opifont.name>Default</opifont.name>
-    </font>
-    <width>140</width>
-    <line_style>0</line_style>
-    <border_style>0</border_style>
-    <rules />
-    <pv_value />
-    <border_width>1</border_width>
-    <line_width>0</line_width>
-    <horizontal_fill>true</horizontal_fill>
-    <border_color>
-      <color red="0" green="128" blue="255" />
-    </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>29</y>
-    <tooltip>$(pv_name)
-$(pv_value)</tooltip>
-    <x>421</x>
-  </widget>
-  <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
-    <border_alarm_sensitive>false</border_alarm_sensitive>
-    <visible>true</visible>
-    <fill_level>100.0</fill_level>
-    <line_color>
-      <color red="128" green="0" blue="255" />
-    </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c3f</wuid>
     <scripts />
     <height>12</height>
     <anti_alias>true</anti_alias>
@@ -514,8 +407,8 @@ $(pv_value)</tooltip>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>14</width>
     <line_style>0</line_style>
+    <width>14</width>
     <border_style>0</border_style>
     <rules>
       <rule name="Visibility" prop_id="visible" out_exp="false">
@@ -525,17 +418,16 @@ $(pv_value)</tooltip>
         <exp bool_exp="!(pv0!=0)">
           <value>false</value>
         </exp>
-        <pv trig="true">SITE_NAME:DAQ-DC0_FBID_STATUS</pv>
+        <pv trig="true">${IFO}:DAQ-DC0_FBID_STATUS</pv>
       </rule>
     </rules>
-    <pv_value />
     <border_width>1</border_width>
     <line_width>0</line_width>
     <horizontal_fill>true</horizontal_fill>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>72</y>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -548,9 +440,8 @@ $(pv_value)</tooltip>
     <line_color>
       <color red="128" green="0" blue="255" />
     </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c3e</wuid>
     <scripts />
-    <height>12</height>
+    <height>20</height>
     <anti_alias>true</anti_alias>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Rectangle</name>
@@ -568,9 +459,9 @@ $(pv_value)</tooltip>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>14</width>
     <line_style>0</line_style>
-    <border_style>0</border_style>
+    <width>14</width>
+    <border_style>2</border_style>
     <rules>
       <rule name="Visibility" prop_id="visible" out_exp="false">
         <exp bool_exp="pv0==0">
@@ -579,18 +470,17 @@ $(pv_value)</tooltip>
         <exp bool_exp="!(pv0==0)">
           <value>false</value>
         </exp>
-        <pv trig="true">SITE_NAME:DAQ-DC0_FBID_STATUS</pv>
+        <pv trig="true">${IFO}:DAQ-DC0_FBID_STATUS</pv>
       </rule>
     </rules>
-    <pv_value />
     <border_width>1</border_width>
     <line_width>0</line_width>
     <horizontal_fill>true</horizontal_fill>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>72</y>
+    <actions hook="false" />
+    <y>68</y>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
     <x>407</x>
@@ -602,97 +492,8 @@ $(pv_value)</tooltip>
     <line_color>
       <color red="128" green="0" blue="255" />
     </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c2f</wuid>
     <scripts />
-    <height>15</height>
-    <anti_alias>true</anti_alias>
-    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
-    <name>Rectangle</name>
-    <transparent>false</transparent>
-    <pv_name />
-    <background_color>
-      <color red="0" green="0" blue="255" />
-    </background_color>
-    <foreground_color>
-      <color red="115" green="255" blue="107" />
-    </foreground_color>
-    <widget_type>Rectangle</widget_type>
-    <enabled>true</enabled>
-    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
-    <font>
-      <opifont.name>Default</opifont.name>
-    </font>
-    <width>10</width>
-    <line_style>0</line_style>
-    <border_style>0</border_style>
-    <rules />
-    <pv_value />
-    <border_width>1</border_width>
-    <line_width>0</line_width>
-    <horizontal_fill>true</horizontal_fill>
-    <border_color>
-      <color red="0" green="128" blue="255" />
-    </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>233</y>
-    <tooltip>$(pv_name)
-$(pv_value)</tooltip>
-    <x>115</x>
-  </widget>
-  <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
-    <border_alarm_sensitive>false</border_alarm_sensitive>
-    <visible>true</visible>
-    <fill_level>100.0</fill_level>
-    <line_color>
-      <color red="128" green="0" blue="255" />
-    </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c2e</wuid>
-    <scripts />
-    <height>15</height>
-    <anti_alias>true</anti_alias>
-    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
-    <name>Rectangle</name>
-    <transparent>false</transparent>
-    <pv_name />
-    <background_color>
-      <color red="0" green="0" blue="255" />
-    </background_color>
-    <foreground_color>
-      <color red="115" green="255" blue="107" />
-    </foreground_color>
-    <widget_type>Rectangle</widget_type>
-    <enabled>true</enabled>
-    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
-    <font>
-      <opifont.name>Default</opifont.name>
-    </font>
-    <width>10</width>
-    <line_style>0</line_style>
-    <border_style>0</border_style>
-    <rules />
-    <pv_value />
-    <border_width>1</border_width>
-    <line_width>0</line_width>
-    <horizontal_fill>true</horizontal_fill>
-    <border_color>
-      <color red="0" green="128" blue="255" />
-    </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>214</y>
-    <tooltip>$(pv_name)
-$(pv_value)</tooltip>
-    <x>115</x>
-  </widget>
-  <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
-    <border_alarm_sensitive>false</border_alarm_sensitive>
-    <visible>true</visible>
-    <fill_level>100.0</fill_level>
-    <line_color>
-      <color red="128" green="0" blue="255" />
-    </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c26</wuid>
-    <scripts />
-    <height>18</height>
+    <height>20</height>
     <anti_alias>true</anti_alias>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Rectangle</name>
@@ -710,18 +511,17 @@ $(pv_value)</tooltip>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>158</width>
     <line_style>0</line_style>
+    <width>158</width>
     <border_style>0</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <line_width>0</line_width>
     <horizontal_fill>true</horizontal_fill>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>167</y>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -729,19 +529,18 @@ $(pv_value)</tooltip>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
     <border_alarm_sensitive>false</border_alarm_sensitive>
-    <visible>true</visible>
+    <visible>false</visible>
     <fill_level>100.0</fill_level>
     <line_color>
       <color red="128" green="0" blue="255" />
     </line_color>
-    <wuid>-49d08f8d:1357d3474d7:-7c0b</wuid>
     <scripts />
-    <height>109</height>
+    <height>74</height>
     <anti_alias>true</anti_alias>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Rectangle</name>
     <transparent>false</transparent>
-    <pv_name />
+    <pv_name>$(IFO):$(SYS)-$(DCUID)_STATE_WORD</pv_name>
     <background_color>
       <color red="0" green="0" blue="255" />
     </background_color>
@@ -754,52 +553,39 @@ $(pv_value)</tooltip>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>182</width>
     <line_style>0</line_style>
+    <width>182</width>
     <border_style>0</border_style>
     <rules>
       <rule name="Visibility" prop_id="visible" out_exp="false">
-        <exp bool_exp="(pv0&amp;1)====1">
+        <exp bool_exp="(pv0&amp;1)==1">
           <value>true</value>
         </exp>
-        <exp bool_exp="!((pv0&amp;1)====1)">
+        <exp bool_exp="!((pv0&amp;1)==1)">
           <value>false</value>
         </exp>
-        <pv trig="true">SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_STATE_WORD</pv>
+        <pv trig="true">${IFO}:${SYS}-${DCUID}_STATE_WORD</pv>
       </rule>
     </rules>
-    <pv_value />
     <border_width>1</border_width>
     <line_width>0</line_width>
     <horizontal_fill>true</horizontal_fill>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>51</y>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
-    <x>14</x>
+    <x>15</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.groupingContainer" version="1.0">
+    <enabled>true</enabled>
+    <widget_type>Grouping Container</widget_type>
     <macros>
       <include_parent_macros>true</include_parent_macros>
     </macros>
     <visible>true</visible>
-    <wuid>-49d08f8d:1357d3474d7:-7c50</wuid>
-    <scripts />
-    <height>17</height>
-    <name>Grouping Container</name>
-    <transparent>true</transparent>
-    <show_scrollbar>false</show_scrollbar>
-    <background_color>
-      <color red="187" green="187" blue="187" />
-    </background_color>
-    <foreground_color>
-      <color red="0" green="0" blue="0" />
-    </foreground_color>
-    <widget_type>Grouping Container</widget_type>
-    <enabled>true</enabled>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
@@ -807,14 +593,25 @@ $(pv_value)</tooltip>
     <border_style>0</border_style>
     <rules />
     <lock_children>false</lock_children>
+    <scripts />
+    <height>17</height>
     <border_width>1</border_width>
+    <name>Grouping Container</name>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <actions hook="false" hook_all="false" />
+    <transparent>true</transparent>
+    <show_scrollbar>false</show_scrollbar>
     <y>29</y>
-    <tooltip />
+    <actions hook="false" />
+    <foreground_color>
+      <color red="0" green="0" blue="0" />
+    </foreground_color>
+    <background_color>
+      <color red="187" green="187" blue="187" />
+    </background_color>
     <x>17</x>
+    <tooltip />
     <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0">
       <border_alarm_sensitive>false</border_alarm_sensitive>
       <visible>true</visible>
@@ -822,7 +619,6 @@ $(pv_value)</tooltip>
       <line_color>
         <color red="128" green="0" blue="255" />
       </line_color>
-      <wuid>-49d08f8d:1357d3474d7:-7c4e</wuid>
       <scripts />
       <height>15</height>
       <anti_alias>true</anti_alias>
@@ -842,8 +638,8 @@ $(pv_value)</tooltip>
       <font>
         <opifont.name>Default</opifont.name>
       </font>
-      <width>10</width>
       <line_style>0</line_style>
+      <width>10</width>
       <border_style>0</border_style>
       <rules>
         <rule name="Visibility" prop_id="visible" out_exp="false">
@@ -853,17 +649,16 @@ $(pv_value)</tooltip>
           <exp bool_exp="!(pv0&amp;1)">
             <value>false</value>
           </exp>
-          <pv trig="true">SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_DIAG</pv>
+          <pv trig="true">${IFO}:${SYS}-${DCUID}_TIME_DIAG</pv>
         </rule>
       </rules>
-      <pv_value />
       <border_width>1</border_width>
       <line_width>0</line_width>
       <horizontal_fill>true</horizontal_fill>
       <border_color>
         <color red="0" green="128" blue="255" />
       </border_color>
-      <actions hook="false" hook_all="false" />
+      <actions hook="false" />
       <y>1</y>
       <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -872,7 +667,6 @@ $(pv_value)</tooltip>
     <widget typeId="org.csstudio.opibuilder.widgets.bytemonitor" version="1.0">
       <border_alarm_sensitive>true</border_alarm_sensitive>
       <visible>true</visible>
-      <wuid>-49d08f8d:1357d3474d7:-7c4f</wuid>
       <bitReverse>false</bitReverse>
       <scripts />
       <square_led>false</square_led>
@@ -886,7 +680,7 @@ $(pv_value)</tooltip>
       <off_color>
         <color red="0" green="100" blue="0" />
       </off_color>
-      <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_WORD</pv_name>
+      <pv_name>${IFO}:${SYS}-${DCUID}_DIAG_WORD</pv_name>
       <background_color>
         <color red="115" green="255" blue="107" />
       </background_color>
@@ -904,13 +698,12 @@ $(pv_value)</tooltip>
       <border_style>0</border_style>
       <effect_3d>true</effect_3d>
       <rules />
-      <pv_value />
       <border_width>1</border_width>
       <horizontal>true</horizontal>
       <border_color>
         <color red="0" green="128" blue="255" />
       </border_color>
-      <actions hook="false" hook_all="false" />
+      <actions hook="false" />
       <y>0</y>
       <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -922,22 +715,20 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c59</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>15</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <name>Text Update</name>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_USR_TIME</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_USR_TIME</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
     <foreground_color>
-      <color red="255" green="176" blue="255" />
+      <color red="255" green="255" blue="255" />
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
@@ -945,19 +736,18 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
-    <border_width>1</border_width>
+    <border_width>2</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>214</y>
+    <actions hook="false" />
+    <y>172</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -966,7 +756,6 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c58</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>17</height>
@@ -993,8 +782,8 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>0</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>214</y>
+    <actions hook="false" />
+    <y>172</y>
     <wrap_words>true</wrap_words>
     <tooltip />
     <x>18</x>
@@ -1004,22 +793,20 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c57</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>15</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <name>Text Update</name>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER_MAX</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_CPU_METER_MAX</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
     <foreground_color>
-      <color red="255" green="176" blue="255" />
+      <color red="255" green="255" blue="255" />
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
@@ -1027,19 +814,18 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
-    <border_width>1</border_width>
+    <border_width>2</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>233</y>
+    <actions hook="false" />
+    <y>194</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -1050,22 +836,20 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c56</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>15</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <name>Text Update</name>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_CPU_METER</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
     <foreground_color>
-      <color red="255" green="176" blue="255" />
+      <color red="255" green="255" blue="255" />
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
@@ -1073,19 +857,18 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>40</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
-    <border_width>1</border_width>
+    <border_width>2</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>234</y>
+    <actions hook="false" />
+    <y>194</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -1094,7 +877,6 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c55</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>17</height>
@@ -1121,8 +903,8 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>0</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>234</y>
+    <actions hook="false" />
+    <y>195</y>
     <wrap_words>true</wrap_words>
     <tooltip />
     <x>18</x>
@@ -1130,7 +912,6 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c54</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>15</height>
@@ -1157,8 +938,8 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>216</y>
+    <actions hook="false" />
+    <y>174</y>
     <wrap_words>true</wrap_words>
     <tooltip />
     <x>176</x>
@@ -1166,7 +947,6 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c53</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>15</height>
@@ -1193,8 +973,8 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>233</y>
+    <actions hook="false" />
+    <y>191</y>
     <wrap_words>true</wrap_words>
     <tooltip />
     <x>176</x>
@@ -1204,42 +984,39 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c52</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>15</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <name>Text Update</name>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_WAIT</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_ADC_WAIT</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
     <foreground_color>
-      <color red="255" green="176" blue="255" />
+      <color red="255" green="255" blue="255" />
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
-    <text>######</text>
+    <text>####</text>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>40</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>214</y>
+    <actions hook="false" />
+    <y>172</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -1248,7 +1025,6 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c4d</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>16</height>
@@ -1265,9 +1041,9 @@ $(pv_value)</tooltip>
     <enabled>true</enabled>
     <text>TIMING STATUS</text>
     <font>
-      <fontdata fontName="Lucida Grande" height="10" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
-    <width>25</width>
+    <width>124</width>
     <border_style>0</border_style>
     <rules />
     <border_width>1</border_width>
@@ -1275,16 +1051,15 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>0</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>32</y>
     <wrap_words>true</wrap_words>
     <tooltip />
     <x>63</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
-    <visible>true</visible>
+    <visible>false</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c4b</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>16</height>
@@ -1313,7 +1088,7 @@ $(pv_value)</tooltip>
         <exp bool_exp="!((pv0&amp;2) ==== 2)">
           <value>false</value>
         </exp>
-        <pv trig="true">SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR</pv>
+        <pv trig="true">${IFO}:${SYS}-${DCUID}_TIME_ERR</pv>
       </rule>
     </rules>
     <border_width>1</border_width>
@@ -1321,16 +1096,15 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>195</y>
+    <actions hook="false" />
+    <y>152</y>
     <wrap_words>true</wrap_words>
     <tooltip />
     <x>125</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
-    <visible>true</visible>
+    <visible>false</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c4a</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>16</height>
@@ -1359,7 +1133,7 @@ $(pv_value)</tooltip>
         <exp bool_exp="!((pv0&amp;255) ==== 0)">
           <value>false</value>
         </exp>
-        <pv trig="true">SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR</pv>
+        <pv trig="true">${IFO}:${SYS}-${DCUID}_TIME_ERR</pv>
       </rule>
     </rules>
     <border_width>1</border_width>
@@ -1367,16 +1141,15 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>195</y>
+    <actions hook="false" />
+    <y>152</y>
     <wrap_words>true</wrap_words>
     <tooltip />
     <x>125</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
-    <visible>true</visible>
+    <visible>false</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c48</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>16</height>
@@ -1405,7 +1178,7 @@ $(pv_value)</tooltip>
         <exp bool_exp="!((pv0&amp;255) ==== 1)">
           <value>false</value>
         </exp>
-        <pv trig="true">SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR</pv>
+        <pv trig="true">${IFO}:${SYS}-${DCUID}_TIME_ERR</pv>
       </rule>
     </rules>
     <border_width>1</border_width>
@@ -1413,8 +1186,8 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>195</y>
+    <actions hook="false" />
+    <y>152</y>
     <wrap_words>true</wrap_words>
     <tooltip />
     <x>125</x>
@@ -1422,7 +1195,6 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c47</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>17</height>
@@ -1449,16 +1221,15 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>0</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>195</y>
+    <actions hook="false" />
+    <y>153</y>
     <wrap_words>true</wrap_words>
     <tooltip />
     <x>18</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
-    <visible>true</visible>
+    <visible>false</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c46</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>16</height>
@@ -1487,7 +1258,7 @@ $(pv_value)</tooltip>
         <exp bool_exp="!(pv0&amp;4)">
           <value>false</value>
         </exp>
-        <pv trig="true">SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR</pv>
+        <pv trig="true">${IFO}:${SYS}-${DCUID}_TIME_ERR</pv>
       </rule>
     </rules>
     <border_width>1</border_width>
@@ -1495,30 +1266,99 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>195</y>
+    <actions hook="false" />
+    <y>152</y>
     <wrap_words>true</wrap_words>
     <tooltip />
-    <x>126</x>
+    <x>125</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.meter" version="1.0">
+    <level_lo>20.0</level_lo>
+    <border_alarm_sensitive>true</border_alarm_sensitive>
+    <visible>true</visible>
+    <color_hihi>
+      <color red="255" green="0" blue="0" />
+    </color_hihi>
+    <show_lo>true</show_lo>
+    <scripts />
+    <height>65</height>
+    <major_tick_step_hint>50</major_tick_step_hint>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <background_color>
+      <color red="106" green="115" blue="193" />
+    </background_color>
+    <enabled>true</enabled>
+    <widget_type>Meter</widget_type>
+    <show_minor_ticks>true</show_minor_ticks>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>85</width>
+    <show_lolo>true</show_lolo>
+    <border_style>7</border_style>
+    <show_markers>false</show_markers>
+    <show_hi>true</show_hi>
+    <maximum>100.0</maximum>
+    <border_width>1</border_width>
+    <log_scale>false</log_scale>
+    <minimum>0.0</minimum>
+    <show_hihi>true</show_hihi>
+    <scale_format />
+    <show_scale>true</show_scale>
+    <color_lo>
+      <color red="255" green="255" blue="0" />
+    </color_lo>
+    <name>Meter</name>
+    <color_hi>
+      <color red="255" green="255" blue="0" />
+    </color_hi>
+    <pv_name>${IFO}:${SYS}-${DCUID}_CPU_METER</pv_name>
+    <foreground_color>
+      <color red="153" green="255" blue="255" />
+    </foreground_color>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+    <level_hi>80.0</level_hi>
+    <scale_font>
+      <opifont.name>Default</opifont.name>
+    </scale_font>
+    <level_hihi>90.0</level_hihi>
+    <ramp_gradient>true</ramp_gradient>
+    <color_lolo>
+      <color red="255" green="0" blue="0" />
+    </color_lolo>
+    <rules />
+    <value_label_format />
+    <needle_color>
+      <color red="255" green="0" blue="0" />
+    </needle_color>
+    <limits_from_pv>true</limits_from_pv>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <level_lolo>10.0</level_lolo>
+    <y>53</y>
+    <actions hook="false" />
+    <x>19</x>
+    <tooltip>$(pv_name)
+$(pv_value)</tooltip>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.bytemonitor" version="1.0">
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <visible>true</visible>
-    <wuid>-49d08f8d:1357d3474d7:-7c43</wuid>
-    <bitReverse>false</bitReverse>
+    <bitReverse>true</bitReverse>
     <scripts />
-    <square_led>false</square_led>
+    <square_led>true</square_led>
     <startBit>0</startBit>
     <on_color>
-      <color red="0" green="255" blue="0" />
+      <color red="255" green="0" blue="0" />
     </on_color>
-    <height>15</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Byte Monitor</name>
     <off_color>
-      <color red="0" green="100" blue="0" />
+      <color red="0" green="254" blue="0" />
     </off_color>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG1</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_DIAG1</pv_name>
     <background_color>
       <color red="115" green="255" blue="107" />
     </background_color>
@@ -1528,30 +1368,28 @@ $(pv_value)</tooltip>
     <widget_type>Byte Monitor</widget_type>
     <enabled>true</enabled>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
-    <numBits>16</numBits>
+    <numBits>4</numBits>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>40</width>
+    <width>50</width>
     <border_style>0</border_style>
     <effect_3d>true</effect_3d>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <horizontal>true</horizontal>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>79</y>
+    <actions hook="false" />
+    <y>76</y>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
-    <x>314</x>
+    <x>312</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c42</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>14</height>
@@ -1568,9 +1406,9 @@ $(pv_value)</tooltip>
     <enabled>true</enabled>
     <text>RT NET STAT</text>
     <font>
-      <fontdata fontName="Lucida Grande" height="8" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
-    <width>50</width>
+    <width>83</width>
     <border_style>0</border_style>
     <rules />
     <border_width>1</border_width>
@@ -1578,28 +1416,26 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>0</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>80</y>
+    <actions hook="false" />
+    <y>77</y>
     <wrap_words>true</wrap_words>
     <tooltip />
-    <x>218</x>
+    <x>215</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0">
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c41</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>15</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Text Update</name>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_DCU_ID</pv_name>
+    <pv_name>${IFO}:DAQ-${SYS}_${DCUID}_DCU_ID</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -1608,23 +1444,22 @@ $(pv_value)</tooltip>
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
-    <text>######</text>
+    <text>###</text>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>25</width>
     <border_style>0</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>31</y>
+    <actions hook="false" />
+    <y>29</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -1633,7 +1468,6 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c40</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>12</height>
@@ -1650,7 +1484,7 @@ $(pv_value)</tooltip>
     <enabled>true</enabled>
     <text>Status  CPS   SUM</text>
     <font>
-      <fontdata fontName="Lucida Grande" height="8" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>110</width>
     <border_style>0</border_style>
@@ -1660,8 +1494,8 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>0</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>54</y>
+    <actions hook="false" />
+    <y>51</y>
     <wrap_words>true</wrap_words>
     <tooltip />
     <x>425</x>
@@ -1671,22 +1505,20 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c3d</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>15</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <name>Text Update</name>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_CHAN_CNT</pv_name>
+    <pv_name>${IFO}:DAQ-${SYS}_${DCUID}_CHAN_CNT</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
     <foreground_color>
-      <color red="255" green="176" blue="255" />
+      <color red="255" green="255" blue="255" />
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
@@ -1694,18 +1526,17 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>35</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
-    <border_width>1</border_width>
+    <border_width>2</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>105</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
@@ -1717,22 +1548,20 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c3c</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>15</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <name>Text Update</name>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_TOTAL</pv_name>
+    <pv_name>${IFO}:DAQ-${SYS}_${DCUID}_TOTAL</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
     <foreground_color>
-      <color red="255" green="176" blue="255" />
+      <color red="255" green="255" blue="255" />
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
@@ -1740,18 +1569,17 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>35</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
-    <border_width>1</border_width>
+    <border_width>2</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>105</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
@@ -1763,22 +1591,20 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c3b</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>15</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <name>Text Update</name>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAQ_BYTE_COUNT</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_DAQ_BYTE_COUNT</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
     <foreground_color>
-      <color red="255" green="176" blue="255" />
+      <color red="255" green="255" blue="255" />
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
@@ -1786,92 +1612,42 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>35</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
-    <border_width>1</border_width>
+    <border_width>2</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>105</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
     <x>504</x>
   </widget>
-  <widget typeId="org.csstudio.opibuilder.widgets.bytemonitor" version="1.0">
-    <border_alarm_sensitive>true</border_alarm_sensitive>
-    <visible>true</visible>
-    <wuid>-49d08f8d:1357d3474d7:-7c3a</wuid>
-    <bitReverse>false</bitReverse>
-    <scripts />
-    <square_led>false</square_led>
-    <startBit>0</startBit>
-    <on_color>
-      <color red="0" green="255" blue="0" />
-    </on_color>
-    <height>15</height>
-    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
-    <name>Byte Monitor</name>
-    <off_color>
-      <color red="0" green="100" blue="0" />
-    </off_color>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_FB_NET_STATUS</pv_name>
-    <background_color>
-      <color red="253" green="0" blue="0" />
-    </background_color>
-    <foreground_color>
-      <color red="115" green="255" blue="107" />
-    </foreground_color>
-    <widget_type>Byte Monitor</widget_type>
-    <enabled>true</enabled>
-    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
-    <numBits>16</numBits>
-    <font>
-      <opifont.name>Default</opifont.name>
-    </font>
-    <width>14</width>
-    <border_style>0</border_style>
-    <effect_3d>true</effect_3d>
-    <rules />
-    <pv_value />
-    <border_width>1</border_width>
-    <horizontal>true</horizontal>
-    <border_color>
-      <color red="0" green="128" blue="255" />
-    </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>105</y>
-    <tooltip>$(pv_name)
-$(pv_value)</tooltip>
-    <x>407</x>
-  </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0">
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c39</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>15</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <name>Text Update</name>
     <format_type>3</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:DAQ-DC0_FBID_STATUS</pv_name>
+    <pv_name>${IFO}:DAQ-DC0_FBID_STATUS</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
     <foreground_color>
-      <color red="255" green="176" blue="255" />
+      <color red="255" green="255" blue="255" />
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
@@ -1879,19 +1655,18 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>35</width>
     <border_style>0</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>72</y>
+    <actions hook="false" />
+    <y>68</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -1902,22 +1677,20 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c38</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>15</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <name>Text Update</name>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:DAQ-DC0_FBID_CRC_CPS</pv_name>
+    <pv_name>${IFO}:DAQ-DC0_FBID_CRC_CPS</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
     <foreground_color>
-      <color red="255" green="176" blue="255" />
+      <color red="255" green="255" blue="255" />
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
@@ -1925,19 +1698,18 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>35</width>
     <border_style>0</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>72</y>
+    <actions hook="false" />
+    <y>68</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -1948,22 +1720,20 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c37</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>15</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <name>Text Update</name>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:DAQ-DC0_FBID_CRC_SUM</pv_name>
+    <pv_name>${IFO}:DAQ-DC0_FBID_CRC_SUM</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
     <foreground_color>
-      <color red="255" green="176" blue="255" />
+      <color red="255" green="255" blue="255" />
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
@@ -1971,19 +1741,18 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>35</width>
     <border_style>0</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>72</y>
+    <actions hook="false" />
+    <y>68</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -1992,7 +1761,6 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c36</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>18</height>
@@ -2019,7 +1787,7 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>4</y>
     <wrap_words>true</wrap_words>
     <tooltip />
@@ -2030,9 +1798,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c35</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>15</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -2040,7 +1806,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_STRING</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_TIME_STRING</pv_name>
     <background_color>
       <color red="10" green="0" blue="184" />
     </background_color>
@@ -2053,18 +1819,17 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
-    <width>200</width>
+    <width>182</width>
     <border_style>0</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>0</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>4</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
@@ -2076,9 +1841,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c34</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>18</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -2086,7 +1849,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_MSGDAQ</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_MSGDAQ</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -2099,18 +1862,17 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="14" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>158</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
-    <border_width>1</border_width>
+    <border_width>2</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>146</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
@@ -2118,9 +1880,8 @@ $(pv_value)</tooltip>
     <x>384</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
-    <visible>true</visible>
+    <visible>false</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c33</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>16</height>
@@ -2149,7 +1910,7 @@ $(pv_value)</tooltip>
         <exp bool_exp="!(pv0&amp;8)">
           <value>false</value>
         </exp>
-        <pv trig="true">SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_ERR</pv>
+        <pv trig="true">${IFO}:${SYS}-${DCUID}_TIME_ERR</pv>
       </rule>
     </rules>
     <border_width>1</border_width>
@@ -2157,21 +1918,20 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>195</y>
+    <actions hook="false" />
+    <y>152</y>
     <wrap_words>true</wrap_words>
     <tooltip />
-    <x>126</x>
+    <x>125</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.ActionButton" version="1.0">
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
-    <wuid>-49d08f8d:1357d3474d7:-7c32</wuid>
     <scripts />
     <height>18</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_LOAD_CONFIG</pv_name>
+    <pv_name>${IFO}:DAQ-${SYS}_${DCUID}_LOAD_CONFIG</pv_name>
     <background_color>
       <color red="52" green="51" blue="134" />
     </background_color>
@@ -2186,11 +1946,10 @@ $(pv_value)</tooltip>
       <opifont.name>Default</opifont.name>
     </font>
     <width>158</width>
-    <border_style>0</border_style>
     <push_action_index>0</push_action_index>
+    <border_style>0</border_style>
     <image />
     <rules />
-    <pv_value />
     <toggle_button>true</toggle_button>
     <border_width>1</border_width>
     <release_action_index>0</release_action_index>
@@ -2198,9 +1957,9 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <y>126</y>
-    <actions hook="false" hook_all="false">
+    <actions hook="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:DAQ-SYSTEM_NAME_DCU_NODE_ID_LOAD_CONFIG</pv_name>
+        <pv_name>${IFO}:DAQ-${SYS}_${DCUID}_LOAD_CONFIG</pv_name>
         <value>1</value>
         <timeout>10</timeout>
         <description />
@@ -2215,56 +1974,52 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c31</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>16</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <name>Text Update</name>
-    <format_type>0</format_type>
-    <precision_from_pv>true</precision_from_pv>
+    <format_type>6</format_type>
+    <precision_from_pv>false</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ACCUM_OVERFLOW</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_ACCUM_OVERFLOW</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
     <foreground_color>
-      <color red="153" green="255" blue="255" />
+      <color red="255" green="255" blue="255" />
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
-    <text>######</text>
+    <text>#</text>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="10" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>80</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>55</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
-    <x>282</x>
+    <x>288</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.ActionButton" version="1.0">
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
-    <wuid>-49d08f8d:1357d3474d7:-7c30</wuid>
     <scripts />
     <height>18</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OVERFLOW_RESET</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_OVERFLOW_RESET</pv_name>
     <background_color>
       <color red="52" green="51" blue="134" />
     </background_color>
@@ -2278,12 +2033,11 @@ $(pv_value)</tooltip>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>70</width>
-    <border_style>0</border_style>
+    <width>75</width>
     <push_action_index>0</push_action_index>
+    <border_style>0</border_style>
     <image />
     <rules />
-    <pv_value />
     <toggle_button>true</toggle_button>
     <border_width>1</border_width>
     <release_action_index>0</release_action_index>
@@ -2291,9 +2045,9 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <y>54</y>
-    <actions hook="false" hook_all="false">
+    <actions hook="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_OVERFLOW_RESET</pv_name>
+        <pv_name>${IFO}:${SYS}-${DCUID}_OVERFLOW_RESET</pv_name>
         <value>1</value>
         <timeout>10</timeout>
         <description />
@@ -2308,9 +2062,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c2d</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>15</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -2318,7 +2070,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_BUILD_SVN</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_BUILD_SVN</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -2331,18 +2083,17 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
     <width>120</width>
     <border_style>0</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>5</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
@@ -2352,7 +2103,6 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c2c</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>15</height>
@@ -2379,7 +2129,7 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>0</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>5</y>
     <wrap_words>true</wrap_words>
     <tooltip />
@@ -2388,46 +2138,9 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c2b</wuid>
     <auto_size>false</auto_size>
     <scripts />
-    <height>17</height>
-    <name>Label</name>
-    <transparent>true</transparent>
-    <show_scrollbar>false</show_scrollbar>
-    <background_color>
-      <color red="255" green="255" blue="255" />
-    </background_color>
-    <foreground_color>
-      <color red="255" green="255" blue="255" />
-    </foreground_color>
-    <widget_type>Label</widget_type>
-    <enabled>true</enabled>
-    <text>I/O STATUS</text>
-    <font>
-      <fontdata fontName="Lucida Grande" height="12" style="0" />
-    </font>
-    <width>69</width>
-    <border_style>0</border_style>
-    <rules />
-    <border_width>1</border_width>
-    <border_color>
-      <color red="0" green="128" blue="255" />
-    </border_color>
-    <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>31</y>
-    <wrap_words>true</wrap_words>
-    <tooltip />
-    <x>254</x>
-  </widget>
-  <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
-    <visible>true</visible>
-    <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c2a</wuid>
-    <auto_size>false</auto_size>
-    <scripts />
-    <height>12</height>
+    <height>14</height>
     <name>Label</name>
     <transparent>true</transparent>
     <show_scrollbar>false</show_scrollbar>
@@ -2439,11 +2152,11 @@ $(pv_value)</tooltip>
     </foreground_color>
     <widget_type>Label</widget_type>
     <enabled>true</enabled>
-    <text>NET CHN   DRATE  TRATE</text>
+    <text>NET CHN  DQR   TOT</text>
     <font>
-      <fontdata fontName="Lucida Grande" height="8" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
-    <width>110</width>
+    <width>140</width>
     <border_style>0</border_style>
     <rules />
     <border_width>1</border_width>
@@ -2451,16 +2164,15 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>0</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>91</y>
+    <actions hook="false" />
+    <y>89</y>
     <wrap_words>true</wrap_words>
     <tooltip />
-    <x>407</x>
+    <x>400</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c29</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>17</height>
@@ -2477,9 +2189,9 @@ $(pv_value)</tooltip>
     <enabled>true</enabled>
     <text>DAQ STATUS</text>
     <font>
-      <fontdata fontName="Lucida Grande" height="12" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
-    <width>69</width>
+    <width>92</width>
     <border_style>0</border_style>
     <rules />
     <border_width>1</border_width>
@@ -2487,16 +2199,15 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>31</y>
     <wrap_words>true</wrap_words>
     <tooltip />
-    <x>429</x>
+    <x>390</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c28</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>12</height>
@@ -2523,7 +2234,7 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>0</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>73</y>
     <wrap_words>true</wrap_words>
     <tooltip />
@@ -2532,7 +2243,6 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c27</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>12</height>
@@ -2559,7 +2269,7 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>0</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>106</y>
     <wrap_words>true</wrap_words>
     <tooltip />
@@ -2568,7 +2278,6 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c25</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>12</height>
@@ -2595,7 +2304,7 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>169</y>
     <wrap_words>true</wrap_words>
     <tooltip />
@@ -2604,7 +2313,6 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c24</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>14</height>
@@ -2631,67 +2339,18 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>0</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>169</y>
     <wrap_words>true</wrap_words>
     <tooltip />
     <x>497</x>
   </widget>
-  <widget typeId="org.csstudio.opibuilder.widgets.bytemonitor" version="1.0">
-    <border_alarm_sensitive>true</border_alarm_sensitive>
-    <visible>true</visible>
-    <wuid>-49d08f8d:1357d3474d7:-7c23</wuid>
-    <bitReverse>false</bitReverse>
-    <scripts />
-    <square_led>false</square_led>
-    <startBit>0</startBit>
-    <on_color>
-      <color red="0" green="255" blue="0" />
-    </on_color>
-    <height>15</height>
-    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
-    <name>Byte Monitor</name>
-    <off_color>
-      <color red="0" green="100" blue="0" />
-    </off_color>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_AWGTPMAN_STAT</pv_name>
-    <background_color>
-      <color red="115" green="255" blue="107" />
-    </background_color>
-    <foreground_color>
-      <color red="253" green="0" blue="0" />
-    </foreground_color>
-    <widget_type>Byte Monitor</widget_type>
-    <enabled>true</enabled>
-    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
-    <numBits>16</numBits>
-    <font>
-      <opifont.name>Default</opifont.name>
-    </font>
-    <width>10</width>
-    <border_style>0</border_style>
-    <effect_3d>true</effect_3d>
-    <rules />
-    <pv_value />
-    <border_width>1</border_width>
-    <horizontal>true</horizontal>
-    <border_color>
-      <color red="0" green="128" blue="255" />
-    </border_color>
-    <actions hook="false" hook_all="false" />
-    <y>168</y>
-    <tooltip>$(pv_name)
-$(pv_value)</tooltip>
-    <x>525</x>
-  </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0">
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c22</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -2699,7 +2358,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_0</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_0</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -2715,16 +2374,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>188</y>
+    <actions hook="false" />
+    <y>195</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -2735,9 +2393,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c21</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -2745,7 +2401,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_1</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_1</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -2761,16 +2417,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>206</y>
+    <actions hook="false" />
+    <y>213</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -2781,9 +2436,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c20</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -2791,7 +2444,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_2</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_2</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -2807,16 +2460,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>224</y>
+    <actions hook="false" />
+    <y>231</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -2827,9 +2479,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c1f</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -2837,7 +2487,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_3</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_3</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -2853,16 +2503,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>242</y>
+    <actions hook="false" />
+    <y>249</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -2873,9 +2522,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c1e</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -2883,7 +2530,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_4</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_4</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -2899,16 +2546,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>260</y>
+    <actions hook="false" />
+    <y>267</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -2919,9 +2565,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c1d</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -2929,7 +2573,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_5</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_5</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -2945,16 +2589,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>188</y>
+    <actions hook="false" />
+    <y>195</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -2965,9 +2608,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c1c</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -2975,7 +2616,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_6</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_6</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -2991,16 +2632,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>206</y>
+    <actions hook="false" />
+    <y>213</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -3011,9 +2651,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c1b</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -3021,7 +2659,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_7</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_7</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -3037,16 +2675,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>224</y>
+    <actions hook="false" />
+    <y>231</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -3057,9 +2694,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c1a</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -3067,7 +2702,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_8</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_8</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -3083,16 +2718,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>242</y>
+    <actions hook="false" />
+    <y>249</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -3103,9 +2737,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c19</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -3113,7 +2745,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_9</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_9</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -3129,16 +2761,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>260</y>
+    <actions hook="false" />
+    <y>267</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -3149,9 +2780,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c18</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -3159,7 +2788,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_10</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_10</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -3175,16 +2804,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>188</y>
+    <actions hook="false" />
+    <y>195</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -3195,9 +2823,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c17</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -3205,7 +2831,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_11</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_11</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -3221,16 +2847,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>206</y>
+    <actions hook="false" />
+    <y>213</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -3241,9 +2866,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c16</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -3251,7 +2874,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_12</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_12</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -3267,16 +2890,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>224</y>
+    <actions hook="false" />
+    <y>231</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -3287,9 +2909,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c15</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -3297,7 +2917,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_13</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_13</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -3313,16 +2933,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>242</y>
+    <actions hook="false" />
+    <y>249</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -3333,9 +2952,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c14</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>16</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -3343,7 +2960,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GDS_MON_14</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GDS_MON_14</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -3359,16 +2976,15 @@ $(pv_value)</tooltip>
       <fontdata fontName="Lucida Grande" height="10" style="0" />
     </font>
     <width>50</width>
-    <border_style>0</border_style>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>260</y>
+    <actions hook="false" />
+    <y>267</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -3377,12 +2993,11 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.ActionButton" version="1.0">
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
-    <wuid>-49d08f8d:1357d3474d7:-7c13</wuid>
     <scripts />
-    <height>20</height>
+    <height>18</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_LOAD_NEW_COEFF</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_LOAD_NEW_COEFF</pv_name>
     <background_color>
       <color red="52" green="51" blue="134" />
     </background_color>
@@ -3396,22 +3011,21 @@ $(pv_value)</tooltip>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>152</width>
-    <border_style>0</border_style>
+    <width>158</width>
     <push_action_index>0</push_action_index>
+    <border_style>0</border_style>
     <image />
     <rules />
-    <pv_value />
     <toggle_button>true</toggle_button>
     <border_width>1</border_width>
     <release_action_index>0</release_action_index>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <y>99</y>
-    <actions hook="false" hook_all="false">
+    <y>126</y>
+    <actions hook="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_LOAD_NEW_COEFF</pv_name>
+        <pv_name>${IFO}:${SYS}-${DCUID}_LOAD_NEW_COEFF</pv_name>
         <value>1</value>
         <timeout>10</timeout>
         <description />
@@ -3426,9 +3040,7 @@ $(pv_value)</tooltip>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c12</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
     <height>18</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
@@ -3436,7 +3048,7 @@ $(pv_value)</tooltip>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_MSG</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_MSG</pv_name>
     <background_color>
       <color red="106" green="115" blue="193" />
     </background_color>
@@ -3449,19 +3061,18 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="14" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
-    <width>152</width>
-    <border_style>0</border_style>
+    <width>158</width>
+    <border_style>3</border_style>
     <rules />
-    <pv_value />
-    <border_width>1</border_width>
+    <border_width>2</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>121</y>
+    <actions hook="false" />
+    <y>146</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -3470,12 +3081,11 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.ActionButton" version="1.0">
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
-    <wuid>-49d08f8d:1357d3474d7:-7c11</wuid>
     <scripts />
     <height>20</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_RESET</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_DIAG_RESET</pv_name>
     <background_color>
       <color red="52" green="51" blue="134" />
     </background_color>
@@ -3489,22 +3099,21 @@ $(pv_value)</tooltip>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>82</width>
-    <border_style>0</border_style>
+    <width>80</width>
     <push_action_index>0</push_action_index>
+    <border_style>0</border_style>
     <image />
     <rules />
-    <pv_value />
     <toggle_button>true</toggle_button>
     <border_width>1</border_width>
     <release_action_index>0</release_action_index>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <y>117</y>
-    <actions hook="false" hook_all="false">
+    <y>93</y>
+    <actions hook="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DIAG_RESET</pv_name>
+        <pv_name>${IFO}:${SYS}-${DCUID}_DIAG_RESET</pv_name>
         <value>1</value>
         <timeout>10</timeout>
         <description />
@@ -3512,12 +3121,11 @@ $(pv_value)</tooltip>
     </actions>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
-    <x>115</x>
+    <x>111</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.bytemonitor" version="1.0">
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <visible>true</visible>
-    <wuid>-49d08f8d:1357d3474d7:-7c10</wuid>
     <bitReverse>false</bitReverse>
     <scripts />
     <square_led>false</square_led>
@@ -3531,7 +3139,7 @@ $(pv_value)</tooltip>
     <off_color>
       <color red="0" green="100" blue="0" />
     </off_color>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_BURT_RESTORE</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_BURT_RESTORE</pv_name>
     <background_color>
       <color red="253" green="0" blue="0" />
     </background_color>
@@ -3549,13 +3157,12 @@ $(pv_value)</tooltip>
     <border_style>0</border_style>
     <effect_3d>true</effect_3d>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <horizontal>true</horizontal>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <actions hook="false" hook_all="false" />
+    <actions hook="false" />
     <y>65</y>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
@@ -3564,12 +3171,11 @@ $(pv_value)</tooltip>
   <widget typeId="org.csstudio.opibuilder.widgets.ActionButton" version="1.0">
     <border_alarm_sensitive>false</border_alarm_sensitive>
     <visible>true</visible>
-    <wuid>-49d08f8d:1357d3474d7:-7c0f</wuid>
     <scripts />
     <height>20</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Action Button</name>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_BURT_RESTORE</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_BURT_RESTORE</pv_name>
     <background_color>
       <color red="52" green="51" blue="134" />
     </background_color>
@@ -3583,21 +3189,20 @@ $(pv_value)</tooltip>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>56</width>
-    <border_style>0</border_style>
+    <width>40</width>
     <push_action_index>0</push_action_index>
+    <border_style>0</border_style>
     <image />
     <rules />
-    <pv_value />
     <toggle_button>false</toggle_button>
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <y>74</y>
-    <actions hook="false" hook_all="false">
+    <y>66</y>
+    <actions hook="false">
       <action type="WRITE_PV">
-        <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_BURT_RESTORE</pv_name>
+        <pv_name>${IFO}:${SYS}-${DCUID}_BURT_RESTORE</pv_name>
         <value>1</value>
         <timeout>10</timeout>
         <description />
@@ -3605,12 +3210,11 @@ $(pv_value)</tooltip>
     </actions>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
-    <x>128</x>
+    <x>134</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
-    <wuid>-49d08f8d:1357d3474d7:-7c0e</wuid>
     <auto_size>false</auto_size>
     <scripts />
     <height>17</height>
@@ -3637,28 +3241,26 @@ $(pv_value)</tooltip>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>0</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>176</y>
+    <actions hook="false" />
+    <y>127</y>
     <wrap_words>true</wrap_words>
     <tooltip />
-    <x>18</x>
+    <x>17</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0">
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c0d</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>15</height>
+    <height>18</height>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Text Update</name>
     <format_type>1</format_type>
     <precision_from_pv>true</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TIME_DIAG</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_TIME_DIAG</pv_name>
     <background_color>
       <color red="10" green="0" blue="184" />
     </background_color>
@@ -3671,49 +3273,46 @@ $(pv_value)</tooltip>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
-      <fontdata fontName="Lucida Grande" height="9" style="0" />
+      <opifont.name>Default</opifont.name>
     </font>
-    <width>100</width>
+    <width>123</width>
     <border_style>0</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>176</y>
+    <actions hook="false" />
+    <y>126</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
-    <x>81</x>
+    <x>75</x>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0">
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <visible>true</visible>
     <vertical_alignment>1</vertical_alignment>
     <show_units>false</show_units>
-    <wuid>-49d08f8d:1357d3474d7:-7c0c</wuid>
     <auto_size>false</auto_size>
-    <rotation_angle>0.0</rotation_angle>
     <scripts />
-    <height>15</height>
+    <height>20</height>
     <forecolor_alarm_sensitive>true</forecolor_alarm_sensitive>
     <name>Text Update</name>
-    <format_type>1</format_type>
-    <precision_from_pv>true</precision_from_pv>
+    <format_type>6</format_type>
+    <precision_from_pv>false</precision_from_pv>
     <transparent>false</transparent>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_TP_CNT</pv_name>
+    <pv_name>${IFO}:${SYS}-${DCUID}_TP_CNT</pv_name>
     <background_color>
       <color red="0" green="0" blue="0" />
     </background_color>
     <foreground_color>
-      <color red="255" green="176" blue="255" />
+      <color red="255" green="255" blue="255" />
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
-    <text>######</text>
+    <text>##</text>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
     <font>
@@ -3722,91 +3321,364 @@ $(pv_value)</tooltip>
     <width>20</width>
     <border_style>0</border_style>
     <rules />
-    <pv_value />
     <border_width>1</border_width>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
     <horizontal_alignment>1</horizontal_alignment>
-    <actions hook="false" hook_all="false" />
-    <y>169</y>
+    <actions hook="false" />
+    <y>167</y>
     <wrap_words>false</wrap_words>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
     <x>467</x>
   </widget>
-  <widget typeId="org.csstudio.opibuilder.widgets.gauge" version="1.0">
-    <level_lo>20.0</level_lo>
+  <widget typeId="org.csstudio.opibuilder.widgets.LED" version="1.0">
     <border_alarm_sensitive>true</border_alarm_sensitive>
     <visible>true</visible>
-    <color_hihi>
-      <color red="255" green="0" blue="0" />
-    </color_hihi>
-    <show_lo>true</show_lo>
     <scripts />
-    <height>97</height>
-    <major_tick_step_hint>50</major_tick_step_hint>
+    <square_led>true</square_led>
+    <on_color>
+      <color red="255" green="0" blue="0" />
+    </on_color>
+    <height>20</height>
+    <data_type>0</data_type>
+    <show_boolean_label>false</show_boolean_label>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <name>LED</name>
+    <off_color>
+      <color red="0" green="238" blue="0" />
+    </off_color>
+    <pv_name>${IFO}:${SYS}-${DCUID}_AWGTPMAN_STAT</pv_name>
     <background_color>
-      <color red="0" green="64" blue="128" />
+      <color red="240" green="240" blue="240" />
     </background_color>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <off_label>OFF</off_label>
+    <widget_type>LED</widget_type>
     <enabled>true</enabled>
-    <widget_type>Gauge</widget_type>
-    <show_minor_ticks>true</show_minor_ticks>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <font>
       <opifont.name>Default</opifont.name>
     </font>
-    <width>97</width>
-    <show_lolo>true</show_lolo>
+    <width>24</width>
     <border_style>0</border_style>
     <effect_3d>true</effect_3d>
-    <pv_value />
-    <show_markers>true</show_markers>
-    <show_hi>true</show_hi>
-    <maximum>100.0</maximum>
-    <border_width>1</border_width>
-    <log_scale>false</log_scale>
-    <minimum>0.0</minimum>
-    <wuid>-49d08f8d:1357d3474d7:-7aa6</wuid>
-    <show_hihi>true</show_hihi>
-    <scale_format />
-    <show_scale>true</show_scale>
-    <color_lo>
-      <color red="255" green="255" blue="0" />
-    </color_lo>
-    <name>Gauge</name>
-    <color_hi>
-      <color red="255" green="255" blue="0" />
-    </color_hi>
-    <pv_name>SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_CPU_METER</pv_name>
-    <foreground_color>
-      <color red="255" green="255" blue="255" />
-    </foreground_color>
-    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
-    <level_hi>80.0</level_hi>
-    <scale_font>
-      <opifont.name>Default</opifont.name>
-    </scale_font>
-    <level_hihi>90.0</level_hihi>
-    <ramp_gradient>true</ramp_gradient>
-    <color_lolo>
-      <color red="255" green="0" blue="0" />
-    </color_lolo>
     <rules />
-    <value_label_format />
-    <transparent_background>true</transparent_background>
-    <needle_color>
-      <color red="255" green="0" blue="0" />
-    </needle_color>
-    <limits_from_pv>true</limits_from_pv>
+    <bit>-1</bit>
+    <border_width>1</border_width>
+    <on_label>ON</on_label>
     <border_color>
       <color red="0" green="128" blue="255" />
     </border_color>
-    <level_lolo>10.0</level_lolo>
-    <y>56</y>
-    <actions hook="false" hook_all="false" />
-    <x>21</x>
+    <actions hook="false" />
+    <y>166</y>
     <tooltip>$(pv_name)
 $(pv_value)</tooltip>
+    <x>518</x>
   </widget>
-</display>
+  <widget typeId="org.csstudio.opibuilder.widgets.bytemonitor" version="1.0">
+    <border_alarm_sensitive>true</border_alarm_sensitive>
+    <visible>true</visible>
+    <bitReverse>false</bitReverse>
+    <scripts />
+    <square_led>true</square_led>
+    <startBit>0</startBit>
+    <on_color>
+      <color red="0" green="255" blue="0" />
+    </on_color>
+    <height>20</height>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <name>Byte Monitor_2</name>
+    <off_color>
+      <color red="255" green="0" blue="0" />
+    </off_color>
+    <pv_name>${IFO}:${SYS}-${DCUID}_FB_NET_STATUS</pv_name>
+    <background_color>
+      <color red="115" green="255" blue="107" />
+    </background_color>
+    <foreground_color>
+      <color red="253" green="0" blue="0" />
+    </foreground_color>
+    <widget_type>Byte Monitor</widget_type>
+    <enabled>true</enabled>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+    <numBits>2</numBits>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>20</width>
+    <border_style>0</border_style>
+    <effect_3d>false</effect_3d>
+    <rules />
+    <border_width>1</border_width>
+    <horizontal>false</horizontal>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <actions hook="false" />
+    <y>104</y>
+    <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+    <x>402</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0">
+    <border_alarm_sensitive>true</border_alarm_sensitive>
+    <visible>true</visible>
+    <vertical_alignment>1</vertical_alignment>
+    <show_units>false</show_units>
+    <auto_size>false</auto_size>
+    <scripts />
+    <height>20</height>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <name>Text Update_36</name>
+    <format_type>1</format_type>
+    <precision_from_pv>true</precision_from_pv>
+    <transparent>false</transparent>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GRD_SP_ERR_CNT</pv_name>
+    <background_color>
+      <color red="0" green="0" blue="0" />
+    </background_color>
+    <foreground_color>
+      <color red="255" green="255" blue="255" />
+    </foreground_color>
+    <widget_type>Text Update</widget_type>
+    <enabled>true</enabled>
+    <text>##</text>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+    <precision>0</precision>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>21</width>
+    <border_style>3</border_style>
+    <rules />
+    <border_width>1</border_width>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <actions hook="false" />
+    <y>103</y>
+    <wrap_words>false</wrap_words>
+    <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+    <x>322</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0">
+    <border_alarm_sensitive>true</border_alarm_sensitive>
+    <visible>true</visible>
+    <vertical_alignment>1</vertical_alignment>
+    <show_units>false</show_units>
+    <auto_size>false</auto_size>
+    <scripts />
+    <height>20</height>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <name>Text Update_37</name>
+    <format_type>6</format_type>
+    <precision_from_pv>false</precision_from_pv>
+    <transparent>false</transparent>
+    <pv_name>${IFO}:${SYS}-${DCUID}_GRD_RB_ERR_CNT</pv_name>
+    <background_color>
+      <color red="0" green="0" blue="0" />
+    </background_color>
+    <foreground_color>
+      <color red="255" green="255" blue="255" />
+    </foreground_color>
+    <widget_type>Text Update</widget_type>
+    <enabled>true</enabled>
+    <text>##</text>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+    <precision>0</precision>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>21</width>
+    <border_style>3</border_style>
+    <rules />
+    <border_width>1</border_width>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <actions hook="false" />
+    <y>103</y>
+    <wrap_words>false</wrap_words>
+    <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+    <x>346</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0">
+    <visible>true</visible>
+    <vertical_alignment>1</vertical_alignment>
+    <auto_size>false</auto_size>
+    <scripts />
+    <height>17</height>
+    <name>Label</name>
+    <transparent>true</transparent>
+    <show_scrollbar>false</show_scrollbar>
+    <background_color>
+      <color red="255" green="255" blue="255" />
+    </background_color>
+    <foreground_color>
+      <color red="255" green="255" blue="255" />
+    </foreground_color>
+    <widget_type>Label</widget_type>
+    <enabled>true</enabled>
+    <text>I/O STATUS</text>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>96</width>
+    <border_style>0</border_style>
+    <rules />
+    <border_width>1</border_width>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <horizontal_alignment>1</horizontal_alignment>
+    <actions hook="false" />
+    <y>31</y>
+    <wrap_words>true</wrap_words>
+    <tooltip />
+    <x>245</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.MenuButton" version="1.0">
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+    <visible>true</visible>
+    <actions_from_pv>false</actions_from_pv>
+    <scripts />
+    <height>20</height>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <name>Menu Button_1</name>
+    <transparent>true</transparent>
+    <pv_name />
+    <background_color>
+      <color red="240" green="240" blue="240" />
+    </background_color>
+    <foreground_color>
+      <color red="0" green="0" blue="0" />
+    </foreground_color>
+    <widget_type>Menu Button</widget_type>
+    <enabled>true</enabled>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>102</width>
+    <border_style>6</border_style>
+    <label>Guard (S/R)</label>
+    <rules />
+    <border_width>1</border_width>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <y>103</y>
+    <actions hook="false">
+      <action type="OPEN_DISPLAY">
+        <path>INPUT_FILTER.opi</path>
+        <macros>
+          <include_parent_macros>true</include_parent_macros>
+        </macros>
+        <replace>0</replace>
+        <description />
+      </action>
+    </actions>
+    <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+    <x>211</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.LED" version="1.0">
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+    <visible>true</visible>
+    <scripts />
+    <square_led>true</square_led>
+    <on_color>
+      <color red="255" green="0" blue="0" />
+    </on_color>
+    <height>20</height>
+    <data_type>0</data_type>
+    <show_boolean_label>false</show_boolean_label>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <name>LED_1</name>
+    <off_color>
+      <color red="0" green="238" blue="0" />
+    </off_color>
+    <pv_name>${IFO}:${SYS}-${DCUID}_USR_TIME.STAT</pv_name>
+    <background_color>
+      <color red="240" green="240" blue="240" />
+    </background_color>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <off_label>OFF</off_label>
+    <widget_type>LED</widget_type>
+    <enabled>true</enabled>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>11</width>
+    <border_style>0</border_style>
+    <effect_3d>false</effect_3d>
+    <rules />
+    <bit>-1</bit>
+    <border_width>1</border_width>
+    <on_label>ON</on_label>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <actions hook="false" />
+    <y>172</y>
+    <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+    <x>114</x>
+  </widget>
+  <widget typeId="org.csstudio.opibuilder.widgets.LED" version="1.0">
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+    <visible>true</visible>
+    <scripts />
+    <square_led>true</square_led>
+    <on_color>
+      <color red="255" green="0" blue="0" />
+    </on_color>
+    <height>20</height>
+    <data_type>0</data_type>
+    <show_boolean_label>false</show_boolean_label>
+    <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+    <name>LED_2</name>
+    <off_color>
+      <color red="0" green="238" blue="0" />
+    </off_color>
+    <pv_name>${IFO}:${SYS}-${DCUID}_CPU_METER_MAX.STAT</pv_name>
+    <background_color>
+      <color red="240" green="240" blue="240" />
+    </background_color>
+    <foreground_color>
+      <color red="192" green="192" blue="192" />
+    </foreground_color>
+    <off_label>OFF</off_label>
+    <widget_type>LED</widget_type>
+    <enabled>true</enabled>
+    <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+    <font>
+      <opifont.name>Default</opifont.name>
+    </font>
+    <width>11</width>
+    <border_style>0</border_style>
+    <effect_3d>false</effect_3d>
+    <rules />
+    <bit>-1</bit>
+    <border_width>1</border_width>
+    <on_label>ON</on_label>
+    <border_color>
+      <color red="0" green="128" blue="255" />
+    </border_color>
+    <actions hook="false" />
+    <y>194</y>
+    <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+    <x>114</x>
+  </widget>
