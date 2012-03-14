@@ -668,6 +668,22 @@ inline unsigned long current_time() {
 	return t.tv_sec;
 }
 
+#ifdef ADC_SLAVE
+// Clear DAC channel shared memory map,
+// used to keep track of non-overlapping DAC channels among slave models
+//
+void deallocate_dac_channels() {
+  int ii, jj;
+  for (ii = 0; ii < MAX_DAC_MODULES; ii++) {
+    // "pd" is the 
+    int pd = cdsPciModules.dacConfig[ii] - cdsPciModules.adcCount;
+    for (jj = 0; jj < 16; jj++)
+	if (dacOutUsed[ii][jj]) 
+	   ioMemData->dacOutUsed[pd][jj] = 0;
+  }
+}
+#endif
+
 //***********************************************************************
 // TASK: fe_start()	
 // This routine is the skeleton for all front end code	
@@ -786,6 +802,11 @@ void *fe_start(void *arg)
     for (jj = 0; jj < 16; jj++) {
  	dacOut[ii][jj] = 0.0;
  	dacOutUsed[ii][jj] = 0;
+#ifdef ADC_MASTER
+	// Zero out DAC channel map in the shared memory
+	// to be used to check on slaves' channel allocation
+	ioMemData->dacOutUsed[ii][jj] = 0;
+#endif
     }
 
   // Set pointers to filter module data buffers
@@ -984,6 +1005,35 @@ udelay(1000);
   // Initialize user application software ************************************
   printf("Calling feCode() to initialize\n");
   iopDacEnable = feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,1);
+
+#ifndef ADC_MASTER
+  // See if my DAC channel map overlaps with already running models
+  for (ii = 0; ii < cdsPciModules.dacCount; ii++) {
+    int pd = cdsPciModules.dacConfig[ii] - cdsPciModules.adcCount; // physical DAC number
+    for (jj = 0; jj < 16; jj++) {
+	if (dacOutUsed[ii][jj]) {
+	  if (ioMemData->dacOutUsed[pd][jj])  {
+    		vmeDone = 1;
+   		printf("Failed to allocate DAC channel.\n");
+		printf("DAC %d channel %d is already allocated.\n", ii, jj);
+	  }
+    	}
+    }
+  }
+  if (vmeDone) {
+     	return(0);
+  } else {
+    for (ii = 0; ii < cdsPciModules.dacCount; ii++) {
+      int pd = cdsPciModules.dacConfig[ii] - cdsPciModules.adcCount; // physical DAC number
+      for (jj = 0; jj < 16; jj++) {
+	if (dacOutUsed[ii][jj]) {
+	  	ioMemData->dacOutUsed[pd][jj] = 1;
+		//printf("Setting %d %d dac usage\n", pd, jj);
+	}
+      }
+    }
+  }
+#endif
 
   printf("entering the loop\n");
 
@@ -1637,6 +1687,7 @@ udelay(1000);
                         {
                                 printf ("ADC TIMEOUT %d %d %d %d\n",mm,ioMemData->iodata[mm][ioMemCntr].cycle, ioMemCntr,ioClock);
 	  			pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
+				deallocate_dac_channels();
   				return (void *)-1;
                         }
                         for(ii=0;ii<32;ii++)
@@ -2390,6 +2441,10 @@ udelay(1000);
 
   printf("exiting from fe_code()\n");
   pLocalEpics->epicsOutput.cpuMeter = 0;
+
+#ifdef ADC_SLAVE
+  deallocate_dac_channels();
+#endif
 
   /* System reset command received */
   return (void *)-1;
