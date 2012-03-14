@@ -85,6 +85,8 @@ typedef struct IO_MEM_DATA{
         int dolphinCount;
         volatile unsigned long *dolphin[2]; /* Read and write addresses to the Dolphin memory */
 	MEM_DATA_BLOCK iodata[MAX_IO_MODULES][IO_MEMORY_SLOTS];
+	// Combined DAC channels map; used to check on slaves DAC channel allocations
+	unsigned int dacOutUsed[MAX_DAC_MODULES][16];
 }IO_MEM_DATA;
 
 
