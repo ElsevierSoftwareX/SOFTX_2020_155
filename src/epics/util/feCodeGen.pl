@@ -3354,8 +3354,8 @@ if ($::noRfmDma) {
   print OUTM "#Comment out to run with RFM DMA\n";
   print OUTM "EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
 } else {
-  print OUTM "#Uncomment to run without RFM DMA\n";
-  print OUTM "#EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
+  print OUTM "#Comment out to run with RFM DMA\n";
+  print OUTM "EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
 }
 
 print OUTM "\n";
@@ -3585,7 +3585,7 @@ $opised_arg .= "s/\$\{DCUID\}/$dcuId/g;";
 $opised_arg .= "s/\$\{IFO\}/$site/g;";
 $opised_arg .= "s/\$\{SYS\}/$sysname/g;";
 $opised_arg .= "s/RCGDIR/$ffmedm/g;";
-$opised_arg .= "s/FBID/$sysname/g;";
+$opised_arg .= "s/FBID/" . uc($skeleton) ."/g;";
 $opised_arg .= "s/ALARMS/" . uc($skeleton) . "_GRD_MONITOR" ."/g;";
 $opised_arg .= "s/INPUT_FILTER/\\/src\\/epics\\/util\\/ALARMS/g;";
 $sed_arg .= "s/LOCATION_NAME/$location/g;";
@@ -3990,9 +3990,9 @@ system("cp $rcg_src_dir/src/epics/util/adcmenu.opi /tmp/adcmenu.opi");
 system("cp $rcg_src_dir/src/epics/util/dacmenu.opi /tmp/dacmenu.opi");
 system("cp $rcg_src_dir/src/epics/util/related.opi /tmp/related.opi");
 system("cp $rcg_src_dir/src/epics/util/eof.opi /tmp/eof.opi");
-my $xpos = 205;
-my $ypos = 167;
-my $xbpos = 245;
+my $xpos = 242;
+my $ypos = 226;
+my $xbpos = 287;
 my $ccnt = 0;
 for (0 .. $adcCnt - 1) {
    my $adc_monitor_args = $monitor_args;
@@ -4002,16 +4002,21 @@ for (0 .. $adcCnt - 1) {
 system("cat /tmp/adcmenu.opi | sed 's/ADCLABEL/ADC$_/g' | sed 's/XPOS/$xpos/g' | sed 's/YPOS/$ypos/g' | sed 's/MODEL/$sysname/g' > /tmp/adc$_.opi");
 system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
 system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
-system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/ADC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/3/g' | sed 's/WIDE/27/g' > /tmp/adc$_.opi");
+if($modelType eq "MASTER")
+{
+system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/ADC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/3/g' | sed 's/WIDE/45/g' | sed 's/STBIT/0/g' > /tmp/adc$_.opi");
+} else {
+system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/ADC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/2/g' | sed 's/WIDE/30/g' | sed 's/STBIT/0/g' > /tmp/adc$_.opi");
+}
 system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
 system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
 $ypos += 25;
 $ccnt ++;
 if($ccnt == 5)
 {
-	$xpos = 290;
-	$xbpos = 330;
-	$ypos = 167;
+	$xpos = 337;
+	$xbpos = 382;
+	$ypos = 226;
 }
 }
 	$adcMedm[21] = "$dacCardNum[$dacMedm]\" \n";
@@ -4019,10 +4024,15 @@ for (0 .. $dacCnt - 1) {
 system("cat /tmp/dacmenu.opi | sed 's/ADCLABEL/DAC$dacCardNum[$_]/g' | sed 's/XPOS/$xpos/g' | sed 's/YPOS/$ypos/g' | sed 's/MODEL/$sysname/g' > /tmp/adc$_.opi");
 system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
 system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
+if($modelType eq "MASTER")
+{
 if ($dacType[$_] eq "GSC_18AO8") {
-system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/DAC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/5/g' | sed 's/WIDE/45/g' > /tmp/adc$_.opi");
+system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/DAC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/5/g' | sed 's/WIDE/45/g' | sed 's/STBIT/0/g' > /tmp/adc$_.opi");
 } else {
-system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/DAC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/4/g' | sed 's/WIDE/36/g' > /tmp/adc$_.opi");
+system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/DAC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/4/g' | sed 's/WIDE/45/g' | sed 's/STBIT/0/g' > /tmp/adc$_.opi");
+}
+} else {
+system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/DAC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/2/g' | sed 's/WIDE/30/g' | sed 's/STBIT/1/g' > /tmp/adc$_.opi");
 }
 system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
 system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
@@ -4030,9 +4040,9 @@ $ypos += 25;
 $ccnt ++;
 if($ccnt == 5)
 {
-	$xpos = 290;
-	$xbpos = 330;
-	$ypos = 167;
+	$xpos = 337;
+	$xbpos = 382;
+	$ypos = 226;
 }
 }
 system("cat /tmp/GDS_TP.opi /tmp/eof.opi > $epicsScreensDir/$sysname" . "_GDS_TP.opi");
