@@ -3972,14 +3972,14 @@ sub commify_series {
 	#print "ADC MONITOR IS TOP =$sysname\n";
 		}
 		#print "ADC input Part $part_name $partType[$cur_part_num] has Adc input \'$partInput[$cur_part_num][0]\'\n";
-		if ($partType[$cur_part_num] eq "Filt") {
+		if (($partType[$cur_part_num] eq "Filt") || ($partType[$cur_part_num] eq "FiltCtrl")) {
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "_INMON"  .  "\"/g;";
-		  $pvtmonitor_args .= "s/$partInput[$cur_part_num][0]_EPICS_CHANNEL/" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "_INMON" . "/g;";
+		  # $pvtmonitor_args .= "s/$partInput[$cur_part_num][0]_EPICS_CHANNEL/" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "_INMON" . "/g;";
 		} elsif ($partType[$cur_part_num] eq "EpicsOut") {
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "\"/g;";
-		  $pvtmonitor_args .= "s/$partInput[$cur_part_num][0]_EPICS_CHANNEL/" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "/g;";
+		  # $pvtmonitor_args .= "s/$partInput[$cur_part_num][0]_EPICS_CHANNEL/" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "/g;";
 		}
         }
 		  $sysname = uc($skeleton);
@@ -3998,7 +3998,7 @@ for (0 .. $adcCnt - 1) {
    my $adc_monitor_args = $monitor_args;
    $adc_monitor_args .= "s/MONITOR_ADC/MONITOR_ADC$_/g;";
    system("cat $rcg_src_dir/src/epics/util/MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$adc_monitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.adl");
-   system("cat $rcg_src_dir/src/epics/util/PVT1.css-pvtable | sed 's/adc_0/adc_$_/' |  sed '$pvtmonitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.css-pvtable");
+   # system("cat $rcg_src_dir/src/epics/util/PVT1.css-pvtable | sed 's/adc_0/adc_$_/' |  sed '$pvtmonitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.css-pvtable");
 system("cat /tmp/adcmenu.opi | sed 's/ADCLABEL/ADC$_/g' | sed 's/XPOS/$xpos/g' | sed 's/YPOS/$ypos/g' | sed 's/MODEL/$sysname/g' > /tmp/adc$_.opi");
 system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
 system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
@@ -4006,7 +4006,7 @@ if($modelType eq "MASTER")
 {
 system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/ADC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/3/g' | sed 's/WIDE/45/g' | sed 's/STBIT/0/g' > /tmp/adc$_.opi");
 } else {
-system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/ADC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/2/g' | sed 's/WIDE/30/g' | sed 's/STBIT/0/g' > /tmp/adc$_.opi");
+system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/ADC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/3/g' | sed 's/WIDE/45/g' | sed 's/STBIT/0/g' > /tmp/adc$_.opi");
 }
 system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
 system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
