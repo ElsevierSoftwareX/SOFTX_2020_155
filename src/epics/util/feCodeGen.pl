@@ -1386,6 +1386,9 @@ close(OUTD);
 print "Found $adcCnt ADC modules part is $adcPartNum[0]\n";
 print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
 print "Found $boCnt Binary modules part is $boPartNum[0]\n";
+if (($adcCnt > 12) || ($dacCnt > 12)) {
+   die "***ERROR: Too many ADC and/or DAC modules (MAX = 12): ADC defined = $adcCnt Dac Define = $dacCnt\n";
+}
 
 for($ii=0;$ii<$subSys;$ii++)
 {
