@@ -235,14 +235,14 @@ fi
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/medm/${system}
 (cd build/${system}epics/medm; ls *.adl | xargs cp -r -t /opt/rtcds/$site/${lower_ifo}/medm/${system};)
 
-echo Installing Epics OPI screens
+#echo Installing Epics OPI screens
 
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/opi/archive
-if test -e /opt/rtcds/$site/${lower_ifo}/opi/${system}; then
-	/bin/cp -a /opt/rtcds/$site/${lower_ifo}/opi/${system} /opt/rtcds/$site/${lower_ifo}/opi/archive/${system}_${cur_date} || exit 1
-fi
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/opi/${system}
-(cd build/${system}epics/medm; ls *.opi | xargs cp -r -t /opt/rtcds/$site/${lower_ifo}/opi/${system};)
+#/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/opi/archive
+#if test -e /opt/rtcds/$site/${lower_ifo}/opi/${system}; then
+#	/bin/cp -a /opt/rtcds/$site/${lower_ifo}/opi/${system} /opt/rtcds/$site/${lower_ifo}/opi/archive/${system}_${cur_date} || exit 1
+#fi
+#/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/opi/${system}
+#(cd build/${system}epics/medm; ls *.opi | xargs cp -r -t /opt/rtcds/$site/${lower_ifo}/opi/${system};)
 
 if [ -e $srcdir/src/epics/util/post_build_script.py ]; then
 	echo Running post-build script
