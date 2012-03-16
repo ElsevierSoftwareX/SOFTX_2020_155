@@ -1345,7 +1345,43 @@ sub process {
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
   print "Found $::adcCnt ADCs $::partCnt parts $::subSys subsystems\n";
 
+  # Check the ADC and DAC numbers are unique
 
+  my @adc_names;
+  my @adc_card_nums;
+  my @dac_card_nums;
+
+  foreach (0 ... $::partCnt) {
+  	if ($::partType[$_] eq "Dac" || $::partType[$_] eq "Dac18") {
+		my $card_num = $::dacNum[$::card2array[$_]];
+		#print "Dac ", $::xpartName[$_], " ", $card_num, "\n";
+		push @dac_card_nums, $card_num;
+
+	} elsif ($::partType[$_] eq "Adc") {
+		my $an = substr($::xpartName[$_],3,1);
+		my $card_num = $::adcNum[$an];
+		#print "Adc ", $::xpartName[$_], " ", $card_num, "\n";
+		push @adc_card_nums, $card_num;
+		push @adc_names, $an;
+	}
+  }
+  # Check that card numbers are unique
+  my %hash   = map { $_, 1 } @dac_card_nums;
+  my @unique = keys %hash;
+  die "DAC card numbers must be unique\n" unless $#dac_card_nums == $#unique;
+
+  my %hash   = map { $_, 1 } @adc_card_nums;
+  my @unique = keys %hash;
+  die "ADC card numbers must be unique\n" unless $#adc_card_nums == $#unique;
+
+  # Go through the array and see if the numbers are all consequtive for ADC names
+  @adc_names = sort(@adc_names);
+  foreach (0 .. $#adc_names) {
+	#printf "ADC #%s\n", $adc_names[$_];
+	if ($_ && $adc_names[$_-1] + 1 != $adc_names[$_]) {
+		die "ADC names must be unique and consecutive\n";
+	}
+  }
 
   # See to it that ADC is on the top level
   # This is needed because the main script can't handle ADCs in the subsystems
