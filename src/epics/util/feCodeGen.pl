@@ -197,6 +197,7 @@ $inBranch = 0;
 $endBranch = 0;
 $adcCnt = 0;
 $dacCnt = 0;
+$dacKillCnt = 0;
 $boCnt = 0;
 $filtCnt = 0;
 $firCnt = 0;
@@ -1388,6 +1389,9 @@ print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
 print "Found $boCnt Binary modules part is $boPartNum[0]\n";
 if (($adcCnt > 12) || ($dacCnt > 12)) {
    die "***ERROR: Too many ADC and/or DAC modules (MAX = 12): ADC defined = $adcCnt Dac Define = $dacCnt\n";
+}
+if ($dacKillCnt > 1) {
+   die "***ERROR: Too many DACKILL parts defined (MAX = 1)  = $dacKillCnt\n";
 }
 
 for($ii=0;$ii<$subSys;$ii++)

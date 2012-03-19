@@ -3,6 +3,7 @@ use Exporter;
 @ISA = ('Exporter');
 
 sub partType {
+	$::dacKillCnt ++;
 	return DacKill;
 }
 
