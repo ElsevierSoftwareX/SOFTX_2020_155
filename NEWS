@@ -1,5 +1,5 @@
 ===========================
-Overview of changes for 2.5 - not yet branched or released
+Overview of changes for 2.5 - Branch released 3/19/12 for testing.
 ===========================
 - Additional checks in RCG to verify that user has correctly numbered ADC/DAC cards.
 - OSEM IOP Watch Dogs:  Added susWatchdogFilters.c in the src/drv directory.  Added the SUS_IOP_WD.mdl and OSEM_WD.mdl models to src/epics/simLink/lib.  The OSEM_WD.mdl is a model which watches a single OSEM input and if the RMS becomes to large, or the DC value is too high or low, sets an output value of 0, indicating to stop running.  The SUS_IOP_WD.mdl chains 6 of the OSEM_WD.mdl parts together for a top stage.  The susWatchdogFilters.c contains hard coded a 100 mHz high pass filter and 10 mHz low pass filter used by the OSEM_WD.mdl model.  These parts are intended to be used in an IOP connected to suspensions, to watch the top stage OSEMs for signs of excessive motion and send a signal to the new cdsDacKill part.
@@ -29,7 +29,8 @@ Overview of changes for 2.5 - not yet branched or released
 - cdsDacKill part added. This part, along with controller.c changes, allows user
   models to communicate DAC shutdown info directly with code actually writing
   the DAC outputs. This was added to allow user watchdogs to kill DAC outputs
-  directly at the source of the DAC output code. 
+  directly at the source of the DAC output code. Only one (1) of these parts is
+  allowed per user model and RCG will kick out error if >1 defined.
 - Fixed filter module on/off switching handoff between the Epics buttons
   and the control input. This applies to the filter module with controls
   only. Filter module can be turned on using the control input bit and this
