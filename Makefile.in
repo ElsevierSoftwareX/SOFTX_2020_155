@@ -13,6 +13,7 @@ infodir     = @infodir@
 mandir      = @mandir@
 infodir     = @infodir@
 libdir      = @libdir@
+datarootdir      = @datarootdir@
 
 CXX=@CXX@
 CC=@CC@
@@ -57,7 +58,7 @@ DEVFLAGS=@DEVFLAGS@
 	@cp src/epics/util/sources.$@ target/$@epics/src/src_locations.txt
 	@cp $@.log target/$@epics/src
 	@cp $@_error.log target/$@epics/src
-	@cat src/epics/util/sources.$@ | xargs cp -aft target/$@epics/src > /dev/null 2>&1
+	@sort src/epics/util/sources.$@ | uniq |  tar czTf - target/$@epics/src/sources.tar.gz > /dev/null 2>&1
 	@echo RCG source code directory:
 	@echo $(srcdir)
 	@echo The following files were used for this build:
