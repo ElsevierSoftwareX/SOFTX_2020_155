@@ -27,11 +27,11 @@ END
 sub printEpics {
         my ($i) = @_;
 	print ::EPICS <<END;
-OUTVARIABLE $::xpartName[$i]\_STATE $::systemName\.$::xpartName[$i]\_STATE int ai 0 \n
+OUTVARIABLE $::xpartName[$i]\_STATE $::systemName\.$::xpartName[$i]\_STATE int ai 0 field(HIGH,\"1\") field(HSV,\"2\") \n
 MOMENTARY $::xpartName[$i]\_RESET $::systemName\.$::xpartName[$i]\_RESET int ai 0
 MOMENTARY $::xpartName[$i]\_BPSET $::systemName\.$::xpartName[$i]\_BPSET int ai 0
-OUTVARIABLE $::xpartName[$i]\_BPTIME $::systemName\.$::xpartName[$i]\_BPTIME int ai 0 \n
-INVARIABLE $::xpartName[$i]\_PANIC $::systemName\.$::xpartName[$i]\_PANIC int bi 0 field(ZNAM,\"NORMAL\") field(ONAM,\"PANIC\") \n
+OUTVARIABLE $::xpartName[$i]\_BPTIME $::systemName\.$::xpartName[$i]\_BPTIME int ai 0 field(HIGH,\"1\") field(HSV,\"2\") \n
+INVARIABLE $::xpartName[$i]\_PANIC $::systemName\.$::xpartName[$i]\_PANIC int bi 0 field(ZNAM,\"NORMAL\") field(ONAM,\"PANIC\") field(OSV,\"2\") \n
 END
 }
 
