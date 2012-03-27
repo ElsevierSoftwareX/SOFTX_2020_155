@@ -675,8 +675,7 @@ inline unsigned long current_time() {
 void deallocate_dac_channels() {
   int ii, jj;
   for (ii = 0; ii < MAX_DAC_MODULES; ii++) {
-    // "pd" is the 
-    int pd = cdsPciModules.dacConfig[ii] - cdsPciModules.adcCount;
+    int pd = cdsPciModules.dacConfig[ii] - ioMemData->adcCount;
     for (jj = 0; jj < 16; jj++)
 	if (dacOutUsed[ii][jj]) 
 	   ioMemData->dacOutUsed[pd][jj] = 0;
@@ -1009,7 +1008,7 @@ udelay(1000);
 #ifndef ADC_MASTER
   // See if my DAC channel map overlaps with already running models
   for (ii = 0; ii < cdsPciModules.dacCount; ii++) {
-    int pd = cdsPciModules.dacConfig[ii] - cdsPciModules.adcCount; // physical DAC number
+    int pd = cdsPciModules.dacConfig[ii] - ioMemData->adcCount; // physical DAC number
     for (jj = 0; jj < 16; jj++) {
 	if (dacOutUsed[ii][jj]) {
 	  if (ioMemData->dacOutUsed[pd][jj])  {
@@ -1024,11 +1023,11 @@ udelay(1000);
      	return(0);
   } else {
     for (ii = 0; ii < cdsPciModules.dacCount; ii++) {
-      int pd = cdsPciModules.dacConfig[ii] - cdsPciModules.adcCount; // physical DAC number
+      int pd = cdsPciModules.dacConfig[ii] - ioMemData->adcCount; // physical DAC number
       for (jj = 0; jj < 16; jj++) {
 	if (dacOutUsed[ii][jj]) {
 	  	ioMemData->dacOutUsed[pd][jj] = 1;
-		//printf("Setting %d %d dac usage\n", pd, jj);
+		printf("Setting card=%d channel=%d dac usage\n", pd, jj);
 	}
       }
     }
