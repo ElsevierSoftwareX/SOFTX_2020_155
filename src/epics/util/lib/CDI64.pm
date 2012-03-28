@@ -12,7 +12,7 @@ sub initCDI64 {
         } 
 	$::boType[$::boCnt] = "CDI64";
 	$::boNum[$::boCnt] = $CDI64num;
-	$::card2array[$::partCnt] = $::bi64Cnt;
+	$::card2array[$::partCnt] = $CDI64num;
 	$::boCnt ++;
 	$::bi64Cnt ++;
 }
@@ -59,8 +59,7 @@ my ($i, $j) = @_;
 	my $j = $::partInNum[$i][$j];
 	my $card = $::card2array[$j];
 	#print "Coding CDI64 with part number $j array number $card\n";
-		        return "CDIO6464InputInput\[" . $card . "\]";
-
+        return "CDIO6464InputInput\[" . $card . "\]";
 }
 
 
