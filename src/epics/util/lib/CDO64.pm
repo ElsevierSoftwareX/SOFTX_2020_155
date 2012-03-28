@@ -12,7 +12,7 @@ sub initCDO64 {
         } 
 	$::boType[$::boCnt] = "CDO64";
 	$::boNum[$::boCnt] = $CDO64num;
-	$::card2array[$::partCnt] = $::bo64Cnt;
+	$::card2array[$::partCnt] = $CDO64num;
 	$::boCnt ++;
 	$::bo64Cnt ++;
 }
@@ -57,8 +57,8 @@ sub frontEndInitCode {
 sub fromExp {
         my ($i, $j) = @_;
 	my $l = length($::partInput[$i][$j]);
-        my $card =  substr($::partInput[$i][$j], ($l-1), 1);
-       	return "CDO64InputInput\[" . $card . "\]";
+        #my $card =  substr($::partInput[$i][$j], ($l-1), 1);
+       	return "CDO64InputInput\[" . $::card2array[$i] . "\]";
 }
 
 # Return front end code
