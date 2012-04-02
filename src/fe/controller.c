@@ -1837,7 +1837,9 @@ udelay(1000);
 				dac_out = adcData[0][31];
 			}      
 #else
-			dac_out = dacOut[jj][ii];
+			// If DAQKILL tripped, send zeroes to IOP
+			if(iopDacEnable) dac_out = dacOut[jj][ii];
+			else dac_out = 0;
 #endif
 #endif
 			if(dac_out > limit) 
@@ -1854,6 +1856,8 @@ udelay(1000);
 				overflowAcc ++;
 				dacOF[jj] = 1;
 			}
+			// If DAQKILL tripped, send zeroes to IOP
+			if(!iopDacEnable) dac_out = 0;
 			// Load last values to EPICS channels for monitoring on GDS_TP screen.
 		 	dacOutEpics[jj][ii] = dac_out;
 
