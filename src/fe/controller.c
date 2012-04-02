@@ -1837,7 +1837,9 @@ udelay(1000);
 				dac_out = adcData[0][31];
 			}      
 #else
-			dac_out = dacOut[jj][ii];
+			// If DAQKILL tripped, send zeroes to IOP
+			if(iopDacEnable) dac_out = dacOut[jj][ii];
+			else dac_out = 0;
 #endif
 #endif
 			if(dac_out > limit) 
