@@ -1487,9 +1487,12 @@ udelay(1000);
 			vmeDone = 1;
 	  		pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
                         printf("timeout %d %d \n",jj,adcWait);
+#if 0
+			// Commented out debugging code
 			printk("register BCR = 0x%x\n",fadcPtr[0]->BCR);
 			if (fadcPtr[0]->BCR & (1 << 15)) printk("input buffer overflow\n");
 			if (fadcPtr[0]->BCR & (1 << 16)) printk("input buffer underflow\n");
+#endif
 			continue;
 		    }
 		    if(jj == 0) 
