@@ -113,7 +113,7 @@ cat > /opt/rtcds/$site/${lower_ifo}/scripts/start${system} << EOF
 #
 
 if [ \`hostname\` != '${hostname}' ]; then
-	echo Cannot run \`basename $0\` on \`hostname\` computer
+	echo Cannot run \`basename \$0\` on \`hostname\` computer
 	exit 1
 fi
 
