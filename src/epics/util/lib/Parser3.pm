@@ -271,9 +271,18 @@ sub do_branches {
 	return 0;
 }
 
+# C language reserved words
+my @c_resv = ("auto", "break", "case", "char", "const", "continue", "default", "do", "double",
+"else", "enum", "extern", "float", "for", "goto", "if", "int", "long", "register", "return",
+"short", "signed", "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned",
+"void", "volatile", "while");
+
 # Check name to contain only allowed characters
+# Disallow C language reserved words
 sub name_check {
-	return @_[0] =~ /^[a-zA-Z0-9_]+$/;
+	return 0 unless @_[0] =~ /^[a-zA-Z0-9_]+$/;
+	return 0 if grep {$_ eq lc(@_[0])} @c_resv;
+	return 1;
 }
 
 sub store_ezca_names {
