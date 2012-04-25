@@ -567,7 +567,7 @@ if ($ipcxCnt > 0) {
          elsif ($value =~ /^ipcRate=(\d+)/) {
             $ipcxData[$ipcxParamCnt][2] = $1;
          }
-         elsif ($value =~ /^ipcHost=(\w+)/) {
+         elsif ($value =~ /^ipcHost=(.+)/) {
             $ipcxData[$ipcxParamCnt][3] = $1;
          }
          elsif ($value =~ /^ipcNum=(\d+)/) {
