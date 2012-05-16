@@ -14,7 +14,7 @@ sub processDefaultSection  {
 
 #
 #  The defult section should begin with the line "[default]", followed
-#  by nine "keyword=value" lines and a zero-length blank line.
+#  by nine "keyword=value" lines
 #
    if ($line =~ /^\[default\]/)  {
       if ($lineCount != 1)  {
@@ -219,16 +219,20 @@ $defaultSection = 1;
 #  Cycle through the file contents, one line at a time.
 #
 foreach $value (@inData)  {
+
+   $value =~ s/\s//g;
+   if (0 == length($value)) { next; } # Empty line
+   if ($value =~ /^#/) { next; } # commented line
    $lineCount++;
 
-#  $valLen = length($value);
-#  print "\nValue=$value \t Length=$valLen\n";
-
-#
-#  The file should begin with a 10-line default section.
-#
+   #  The file should begin with a 10-line default section.
    if ($defaultSection == 1)  {
-      $defaultSection = &processDefaultSection($value);
+      if ($value =~ /^\[/ && $value !~ /^\[default\]/) {
+		# end of default section, next sections starts
+		$defaultSection = 0;
+      } else {
+      	$defaultSection = &processDefaultSection($value);
+      }
 
 #
 #  Check if the end of the default section has been found.
