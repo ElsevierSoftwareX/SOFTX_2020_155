@@ -26,41 +26,42 @@ using namespace std;
 #include "daqd.hh"
 #include "sing_list.hh"
 
-#ifdef USE_FRAMECPP
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-
-#include "framecpp/Version6/FrameH.hh"
-#include "framecpp/Version6/FrCommon.hh"
-#include "framecpp/Version6/Functions.hh"
-#include "framecpp/Version6/IFrameStream.hh"
-#include "framecpp/Version6/OFrameStream.hh"
-#include "framecpp/Version6/Util.hh"
-#include "myimageframewriter.hh"
-#else
-
-#include "framecpp/frame.hh"
-#include "framecpp/detector.hh"
-#include "framecpp/adcdata.hh"
-#include "framecpp/framereader.hh"
-#include "framecpp/framewriter.hh"
-#include "framecpp/framewritertoc.hh"
-#include "framecpp/imageframewriter.hh"
-
-#endif
-#endif
-
 extern daqd_c daqd;
 
+const int crc8_Table[ ] =
+{
+     0,  94, 188, 226,  97,  63, 221, 131, 194, 156, 126,  32, 163, 253,  31,  65,
+     157, 195,  33, 127, 252, 162,  64,  30,  95,   1, 227, 189,  62,  96, 130, 220,
+   35, 125, 159, 193,  66,  28, 254, 160, 225, 191,  93,   3, 128, 222,  60,  98,
+       190, 224,   2,  92, 223, 129,  99,  61, 124,  34, 192, 158,  29,  67, 161, 255,
+       70,  24, 250, 164,  39, 121, 155, 197, 132, 218,  56, 102, 229, 187,  89,   7,
+    219, 133, 103,  57, 186, 228,   6,  88,  25,  71, 165, 251, 120,  38, 196, 154,
+      101,  59, 217, 135,   4,  90, 184, 230, 167, 249,  27,  69, 198, 152, 122,  36,
+   248, 166,  68,  26, 153, 199,  37, 123,  58, 100, 134, 216,  91,   5, 231, 185,
+     140, 210,  48, 110, 237, 179,  81,  15,  78,  16, 242, 172,  47, 113, 147, 205,
+   17,  79, 173, 243, 112,  46, 204, 146, 211, 141, 111,  49, 178, 236,  14,  80,
+     175, 241,  19,  77, 206, 144, 114,  44, 109,  51, 209, 143,  12,  82, 176, 238,
+   50, 108, 142, 208,  83,  13, 239, 177, 240, 174,  76,  18, 145, 207,  45, 115,
+    202, 148, 118,  40, 171, 245,  23,  73,   8,  86, 180, 234, 105,  55, 213, 139,
+    87,   9, 235, 181,  54, 104, 138, 212, 149, 203,  41, 119, 244, 170,  72,  22,
+    233, 183,  85,  11, 136, 214,  52, 106,  43, 117, 151, 201,  74,  20, 246, 168,
+     116,  42, 200, 150,  21,  75, 169, 247, 182, 232,  10,  84, 215, 137, 107,  53
+};
+
+unsigned int
+crc8(char *s) {
+  int crc = 0;
+  for (; *s;s++) { crc = crc8_Table[ crc ^ *s] ; }
+  return crc;
+}
 
 // saves striped data 
 void *
 trender_c::raw_minute_saver ()
 {
 
-#ifndef VMICRFM_PRODUCER
   // Put this thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("raw minute trend saver", 2);
-#endif
 
   long minute_put_cntr;
   unsigned int rmp = raw_minute_trend_saving_period;
@@ -109,8 +110,11 @@ trender_c::raw_minute_saver ()
 	for (k=0;k<rmp;k++) status|=cur_blk[k][j].n;
 	if ( status ) { // don't write bad data points
 	  char tmpf [filesys_c::filename_max + 10];
-	  strcat (strcat (strcpy (tmpf, raw_minute_fsd.get_path ()), "/"),
-		  channels [j].name);
+	  char crc8_name[3];
+	  sprintf(crc8_name, "%x", crc8(channels [j].name));
+	  strcpy (tmpf, raw_minute_fsd.get_path ());
+	  //strcat (strcat (tmpf, "/"), crc8_name);
+	  strcat (strcat (tmpf, "/"), channels [j].name);
 	  int fd = open (tmpf, O_CREAT|O_WRONLY|O_APPEND, 0644);
 	  if (fd < 0) {
 	    system_log(1, "Couldn't open raw minute trend file `%s' for writing; errno %d", tmpf, errno);
@@ -136,7 +140,7 @@ trender_c::raw_minute_saver ()
 	        int wsize = rmp*sizeof (raw_trend_record_struct);
 	        int nw = write (fd, &rmtr, wsize);
 	        if (nw != wsize) {
-		  ftruncate (fd, fst.st_size); // to keep data integrity
+		  int error = ftruncate (fd, fst.st_size); // to keep data integrity
 		  system_log(1, "failed to write raw minute trend file `%s' out; errno %d", tmpf, errno);
 		  daqd.set_fault ();
 		}
@@ -147,7 +151,7 @@ trender_c::raw_minute_saver ()
 	      if (daqd.do_fsync) {
 	        if (fsync (fd) != 0) {
                   // No space left in the file system?
-                  ftruncate (fd, fst.st_size); // to keep data integrity
+                  int error = ftruncate (fd, fst.st_size); // to keep data integrity
                   system_log(1, "failed to write raw minute trend file `%s' out; in fsync() errno %d", tmpf, errno);
                   daqd.set_fault ();
 		}
@@ -174,29 +178,12 @@ trender_c::raw_minute_saver ()
 void *
 trender_c::minute_framer ()
 {
-#if defined(USE_FRAMECPP) || FRAMECPP_DATAFORMAT_VERSION >= 6
-
-#ifndef VMICRFM_PRODUCER
   // Put this thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("minute trend framer", 2);
-#endif
 
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
   FrameCPP::Version::FrameH *frame = 0;
   FrameCPP::Version::FrRawData raw_data ("");
-#elif FRAMECPP_DATAFORMAT_VERSION > 4
-  FrameCPP::Version_6::FrameH* frame = 0;
-  FrameCPP::Version_6::FrRawData raw_data ("");
-  myImageFrameWriter *fw = 0;
-#else
-  FrameCPP::Frame *frame = 0;
-  FrameCPP::RawData raw_data ("");
-  FrameCPP::ImageFrameWriter *fw = 0;
-#endif
 
-#if FRAMECPP_DATAFORMAT_VERSION < 6
-  strstream *ost;
-#endif
   int frame_length_seconds;
   int frame_length_blocks;
 
@@ -206,25 +193,10 @@ trender_c::minute_framer ()
   /* Length in seconds is the product of lengths of trend and minute trend buffers */
   frame_length_seconds = frame_length_blocks * tb -> blocks ();
 
-#if FRAMECPP_DATAFORMAT_VERSION > 4
   FrameCPP::Version::FrDetector detector = daqd.getDetector1();
-#else  
-  /* Detector data */
-  FrameCPP::Detector detector (daqd.detector_name,
-			       FrameCPP::Location (daqd.detector_longitude_degrees,
-						   daqd.detector_longitude_minutes,
-						   daqd.detector_longitude_seconds,
-						   daqd.detector_latitude_degrees,
-						   daqd.detector_latitude_minutes,
-						   daqd.detector_latitude_seconds),
-			       daqd.detector_elevation,
-			       daqd.detector_arm_x_azimuth,
-			       daqd.detector_arm_y_azimuth);
-#endif
 
   // Create minute trend frame
   //
-#if FRAMECPP_DATAFORMAT_VERSION > 4
   try {
     frame = new FrameCPP::Version::FrameH ("LIGO",
 					     0, // run number ??? buffptr -> block_prop (nb) -> prop.run;
@@ -233,55 +205,22 @@ trender_c::minute_framer ()
 					     0, // leap seconds
 					     frame_length_seconds // dt
 					     );
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
     frame -> SetRawData (raw_data);
     frame -> RefDetectProc ().append (detector);
 
-#else
-    frame -> setRawData (raw_data);
-    frame -> refDetectorProc ().append (detector);
-#endif
-
     // Append second detector if it is defined
     if (daqd.detector_name1.length() > 0) {
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
       FrameCPP::Version::FrDetector detector1 = daqd.getDetector2();
       frame -> RefDetectProc ().append (detector1);
-#else
-      FrameCPP::Version_6::FrDetector detector1 = daqd.getDetector2();
-      frame -> refDetectorProc ().append (detector1);
-#endif
     }
   } catch (...) {
     system_log(1, "Couldn't create minute trend frame");
     this -> shutdown_minute_trender ();
     return NULL;
   }
-#else
-  try {
-    frame = new FrameCPP::Frame ("LIGO",
-				 0, // run number ??? buffptr -> block_prop (nb) -> prop.run;
-				 1, // frame number
-				 FrameCPP::Time (0, 0),
-				 0,
-				 0, // localTime
-				 frame_length_blocks // dt
-				 );
-
-    frame -> setRawData (raw_data);
-    frame -> setDetectProc (detector);
-  } catch (...) {
-    system_log(1, "Couldn't create minute trend frame");
-    this -> shutdown_minute_trender ();
-    return NULL;
-  }
-#endif
 
   // Keep pointers to the data samples for each data channel
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
-  unsigned
-#endif
-        char *adc_ptr [num_trend_channels];
+  unsigned char *adc_ptr [num_trend_channels];
   //INT_2U data_valid [num_trend_channels];
   INT_2U *data_valid_ptr [num_trend_channels];
 
@@ -290,7 +229,6 @@ trender_c::minute_framer ()
     REAL_8 junk [frame_length_blocks];
     memset(junk, 0, sizeof(REAL_8)*frame_length_blocks);
     for (int i = 0; i < num_trend_channels; i++) {
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
       FrameCPP::Version::FrAdcData adc
         = FrameCPP::Version::FrAdcData (std::string(trend_channels [i].name),
                                           trend_channels [i].group_num,
@@ -341,93 +279,6 @@ trender_c::minute_framer ()
           break;
         }
       }
-#elif FRAMECPP_DATAFORMAT_VERSION > 4
-      FrameCPP::Version_6::FrAdcData adc
-	= FrameCPP::Version_6::FrAdcData (trend_channels [i].name,
-					  trend_channels [i].group_num,
-					  i, // channel ???
-					  CHAR_BIT * trend_channels [i].bps,
-					  1./frame_length_blocks,
-					  trend_channels [i].signal_offset,
-					  trend_channels [i].signal_slope,
-					  trend_channels [i].signal_units,
-					  .0,
-					  FrameCPP::Version_6::GPSTime( 0, 0 ),
-					  0,
-					  .0);
-
-      frame -> getRawData () -> refAdc ().append (adc);
-
-      FrameCPP::Version_6::Dimension  dims [1] = { FrameCPP::Version_6::Dimension (frame_length_blocks, frame_length_blocks, "") };
-      switch (trend_channels [i].data_type) { 
-      case _64bit_double:
-	{
-	  FrameCPP::Version_6::FrVect vect("", 1, dims, (REAL_8 *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _32bit_float: 
-	{
-	  FrameCPP::Version_6::FrVect vect("", 1, dims, (REAL_4 *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _32bit_integer:
-	{
-	  FrameCPP::Version_6::FrVect vect("", 1, dims, (INT_4S *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      default:
-	{
-	  abort();
-	  FrameCPP::Version_6::FrVect vect("", 1, dims, (INT_2S *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      }
-#else
-      FrameCPP::AdcData adc 
-	= FrameCPP::AdcData (trend_channels [i].name, // channel name
-			     trend_channels [i].group_num,
-			     i, // channel ???
-			     CHAR_BIT * trend_channels [i].bps, // nBits
-			     1./frame_length_blocks,
-			     trend_channels [i].signal_offset,
-			     trend_channels [i].signal_slope,
-			     trend_channels [i].signal_units);
-
-      frame -> getRawData () -> refAdc ().append (adc);
-
-      FrameCPP::Dimension  dims [1] = { FrameCPP::Dimension (frame_length_blocks, frame_length_blocks, "") };
-      switch (trend_channels [i].data_type) { 
-      case _64bit_double:
-	{
-	  FrameCPP::Vect vect("", 1, dims, (REAL_8 *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _32bit_float: 
-	{
-	  FrameCPP::Vect vect("", 1, dims, (REAL_4 *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _32bit_integer:
-	{
-	  FrameCPP::Vect vect("", 1, dims, (INT_4S *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      default:
-	{
-	  abort();
-	  FrameCPP::Vect vect("", 1, dims, (INT_2S *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      }
-#endif
     }
   } catch (...) {
     system_log(1, "Couldn't create one or several adcs");
@@ -438,69 +289,6 @@ trender_c::minute_framer ()
     return NULL;
   }
   system_log(1, "Done creating ADC structures");
-
-#if FRAMECPP_DATAFORMAT_VERSION < 6
-  // Create frame image
-  try {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-    fw = new myImageFrameWriter (*(ost = new strstream ()));
-#else
-    fw = new FrameCPP::ImageFrameWriter (*(ost = new strstream ()));
-#endif
-    fw -> writeFrame (*frame);
-    fw -> close ();
-  } catch (write_failure) {
-    system_log(1, "Couldn't create minute trend image frame writer; write_failure");
-    
-    abort();
-    
-    this -> shutdown_minute_trender ();
-    return NULL;
-  }
-  system_log(1, "Done writing frame image");
-
-  int image_size = ost -> pcount ();
-
-  // Frame itself is not needed any more and may be freed
-  delete frame;
-  frame = 0;
-
-#if 0
-  // Finally, prepare an array of pointers to the ADC data
-  char *adc_ptr [num_trend_channels];
-  INT_2U *data_valid_ptr [num_trend_channels];
-#endif
-
-  {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-    typedef myImageFrameWriter::OMI OMI;
-#else
-    typedef FrameCPP::ImageFrameWriter::OMI OMI;
-#endif
-    for (int i = 0; i < num_trend_channels; i++) {
-      INT_8U offs = 
-	fw -> adcNamePositionMap [trend_channels [i].name].first[0];
-      INT_4U classInstance = fw -> adcDataVectorPtr (offs);
-      INT_2U instance = classInstance  & 0xffff;
-      OMI v = fw -> vectInstanceOffsetMap.find (instance);
-#if 0
-#ifndef NDEBUG
-      cout << "trend vector " << (classInstance >> 16) << "\t" << (classInstance&0xffff) << endl;
-      if (v == fw -> vectInstanceOffsetMap.end()) {
-	cout << "trend vector " << instance << " not found!" << endl;
-	exit(1);
-      } else {
-       cout << "data vector offset is " << v -> second[0] << endl;
-      }
-#endif
-#endif // 0
-
-      adc_ptr [i] = fw->vectorData (v -> second[0]);
-      data_valid_ptr [i] = fw->adcDataValidPtr (offs);
-    }
-  }
-  system_log(1, "Done creating ADC pointers");
-#endif
 
   sem_post (&minute_frame_saver_sem);
   
@@ -583,13 +371,7 @@ trender_c::minute_framer ()
       if (eof_flag)
 	break; // out of the for() loop
 
-#if FRAMECPP_DATAFORMAT_VERSION < 6
-      fw -> setFrameFileAttributes (file_prop.run, file_prop.cycle / 16 / 3600, 0,
-				    file_prop.gps, 3600, file_prop.gps_n,
-				    file_prop.leap_seconds, file_prop.altzone);
-#else
       frame -> SetGTime(FrameCPP::Version::GPSTime (file_prop.gps, file_prop.gps_n));
-#endif
 
       time_t file_gps;
       time_t file_gps_n;
@@ -616,13 +398,6 @@ trender_c::minute_framer ()
 		    "frame write",
 		    tnf_long,   frame_number,   frame_cntr);
 	  
-#if FRAMECPP_DATAFORMAT_VERSION < 6
-	if (daqd.cksum_file != "") {
-	  daqd_c::fr_cksum(daqd.cksum_file, tmpf, (unsigned char *)(ost -> str ()), image_size);
-	}
-#endif
-
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
 	close (fd);
         FrameCPP::Common::FrameBuffer<filebuf>* obuf
             = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
@@ -640,11 +415,6 @@ trender_c::minute_framer ()
         ofs.Close();
         obuf->close();
 	if (1)
-#else
-	/* Write out a frame */
-	int nwritten = write (fd, ost -> str (), image_size);
-        if (nwritten == image_size) 
-#endif
 	{
 	  if (rename(_tmpf, tmpf)) {
 		system_log(1, "minute_framer(): failed to rename file; errno %d", errno);
@@ -660,9 +430,6 @@ trender_c::minute_framer ()
 	  minute_fsd.report_lost_frame ();
 	  daqd.set_fault ();
 	}
-#if FRAMECPP_DATAFORMAT_VERSION < 6
-	close (fd);
-#endif
 	TNF_PROBE_0(minute_trender_c_framer_frame_write_end, "trender_c::framer", "frame write");
       }
 
@@ -680,310 +447,8 @@ trender_c::minute_framer ()
 
   // signal to the producer that we are done
   this -> shutdown_minute_trender ();
-#endif
   return NULL;
 }
-
-#if 0
-// :TODO:
-// change minute framer to use framecpp
-
-void *
-trender_c::minute_framer ()
-{
-
-#ifndef VMICRFM_PRODUCER
-  // Put this thread into the realtime scheduling class with half the priority
-  daqd_c::realtime ("minute trend framer", 2);
-#endif
-
-  long minute_frame_cntr;
-  struct FrameH *minute_frame;
-  struct FrAdcData *minute_min_adc [max_trend_channels];
-  struct FrAdcData *minute_max_adc [max_trend_channels];
-  struct FrAdcData *minute_rms_adc [max_trend_channels];
-  struct FrAdcData *minute_mean_adc [max_trend_channels];
-  struct FrAdcData *minute_n_adc [max_trend_channels];
-  struct FrFile *mFile; // minute long trend frame file
-
-  int minute_frame_length_seconds;
-  int minute_frame_length_blocks;
-
-  /* Create minute long trend data frame */
-  pthread_mutex_lock (&framelib_lock);
-  minute_frame = FrameHNew ("LIGO");
-  pthread_mutex_unlock (&framelib_lock);
-
-  if (! minute_frame)
-    {
-      system_log(1, "framer(): couldn't create minute trend frame");
-      // shutdown_server ();
-      this -> shutdown_minute_trender ();
-      return NULL;
-    }
-
-  // Create detector
-  struct FrDetector *frdetect 
-    = minute_frame -> detectProc = FrDetectorNew (const_cast<char *>(daqd.detector_name.c_str()));
-
-  frdetect->longitudeD   = daqd.detector_longitude_degrees;
-  frdetect->longitudeM   = daqd.detector_longitude_minutes;
-  frdetect->longitudeS   = daqd.detector_longitude_seconds;
-  
-  frdetect->latitudeD    = daqd.detector_latitude_degrees;
-  frdetect->latitudeM    = daqd.detector_latitude_minutes;
-  frdetect->latitudeS    = daqd.detector_latitude_seconds;
-  
-  frdetect->elevation    = daqd.detector_elevation;
-  
-  frdetect->armXazimuth  = daqd.detector_arm_x_azimuth;
-  frdetect->armYazimuth  = daqd.detector_arm_y_azimuth;
-
-  /* Circular buffer length determines minute trend frame length */
-  minute_frame_length_blocks = mtb -> blocks ();
-
-  /* Length in seconds is the product of lengths of trend and minute trend buffers */
-  minute_frame_length_seconds = minute_frame_length_blocks * tb -> blocks ();
-
-  /*
-    Create ADC data channels.
-    There will be three channels created for each configured
-    minute trend channel, naming it with the appropriate suffix.
-  */
-  for (int i = 0; i < num_channels; i++)
-    {
-      char chname [channel_t::channel_name_max_len + 5];
-
-      pthread_mutex_lock (&framelib_lock);
-
-      int minmax_data_type;
-
-      if (channels [i].data_type == _64bit_double)
-	minmax_data_type = -64;
-      else if (channels [i].data_type == _32bit_float)
-	minmax_data_type = -32;
-      else
-	minmax_data_type = 32;
-
-      minute_min_adc [i] = FrAdcDataNew (minute_frame, strcat (strcpy (chname, channels [i].name), ".min"),
-					 1./minute_frame_length_blocks, /* sample rate */
-					 minute_frame_length_blocks, minmax_data_type);
-	
-      minute_max_adc [i] = FrAdcDataNew (minute_frame, strcat (strcpy (chname, channels [i].name), ".max"),
-					 1./minute_frame_length_blocks, /* sample rate */
-					 minute_frame_length_blocks, minmax_data_type);
-      minute_rms_adc [i] = FrAdcDataNew (minute_frame, strcat (strcpy (chname, channels [i].name), ".rms"),
-					 1./minute_frame_length_blocks, /* sample rate */
-					 minute_frame_length_blocks, -64);
-      minute_mean_adc [i] = FrAdcDataNew (minute_frame, strcat (strcpy (chname, channels [i].name), ".mean"),
-					  1./minute_frame_length_blocks, minute_frame_length_blocks, -64);
-      minute_n_adc [i] = FrAdcDataNew (minute_frame, strcat (strcpy (chname, channels [i].name), ".n"),
-				       1./minute_frame_length_blocks, minute_frame_length_blocks, 32);
-      pthread_mutex_unlock (&framelib_lock);
-
-      if (!(((int) minute_min_adc [i] && (int) minute_max_adc [i])
-	    && (int) minute_rms_adc [i]
-	    && (int) minute_mean_adc [i] && (int) minute_n_adc [i]
-	     ))
-	{
-	  system_log(1, "Couldn't create one or several adcs");
-	  // Have to free all already allocated ADC structures at this point
-	  // to avoid memory leaks
-	  // Or (even better) just exit
-	  //	  shutdown_server ();
-	  abort ();
-	  //exit (1);
-	  this -> shutdown_minute_trender ();
-	  return NULL;
-	}
-
-      // Assign calibration values
-      minute_min_adc [i] -> bias =
-	minute_max_adc [i] -> bias =
-	minute_rms_adc [i] -> bias =
-	minute_mean_adc [i] -> bias =
-	channels [i].signal_offset;
-      minute_min_adc [i] -> slope =
-	minute_max_adc [i] -> slope =
-	minute_rms_adc [i] -> slope =
-	minute_mean_adc [i] -> slope =
-	channels [i].signal_slope;
-      minute_min_adc [i] -> units =
-	minute_max_adc [i] -> units =
-	minute_rms_adc [i] -> units =
-	minute_mean_adc [i] -> units =
-	channels [i].signal_units;
-    }
-
-  for (minute_frame_cntr = 0;; minute_frame_cntr++)
-    {
-      int eof_flag = 0;
-      circ_buffer_block_prop_t minute_file_prop;
-      trend_block_t cur_blk [max_trend_output_channels];
-
-      // Accumulate minute trend data into the frame
-      for (int i = 0; i < minute_frame_length_blocks; i++)
-	{
-	  int nb = mtb -> get (msaver_cnum);
-	  DEBUG(3, cerr << "minute trender saver; block " << nb << endl);
-	  TNF_PROBE_1(minute_trender_c_framer_start, "minute_trender_c::framer",
-		      "got one block",
-		      tnf_long,   block_number,    nb);
-	  {
-	    if (! mtb -> block_prop (nb) -> bytes)
-	      {
-		mtb -> unlock (msaver_cnum);
-		eof_flag = 1;
-		DEBUG1(cerr << "minute trender framer EOF" << endl);
-		break; // out of the for() loop
-	      }
-	    if (! i)
-	      minute_file_prop = mtb -> block_prop (nb) -> prop;
-
-	    memcpy (cur_blk, mtb -> block_ptr (nb), num_channels * sizeof (trend_block_t));
-	  }
-	  TNF_PROBE_0(minute_trender_c_framer_end, "minute_trender_c::framer", "end of block processing");
-	  mtb -> unlock (msaver_cnum);
-
-	  // Check if the gps time isn't aligned on an hour bounday
-	  if (! i) {
-	    unsigned long gps_mod = minute_file_prop.gps % 3600;
-	    if ( gps_mod ) {
-	      // adjust time to make files aligned on gps mod 3600
-	      minute_file_prop.gps -= gps_mod;
-	      i += gps_mod/60;
-
-	      // zero out some data that's missing
-	      for (int j = 0; j < num_channels; j++)
-		for (int k = 0; k < gps_mod/60; k++)
-		  {
-		    if (channels [j].data_type == _64bit_double) {
-		      minute_min_adc [j] -> data -> dataD [k] = .0;
-		      minute_max_adc [j] -> data -> dataD [k] = .0;
-		    } else if (channels [j].data_type == _32bit_float) {
-		      minute_min_adc [j] -> data -> dataF [k] = .0;
-		      minute_max_adc [j] -> data -> dataF [k] = .0;
-		    } else {
-		      minute_min_adc [j] -> data -> dataI [k] = 0;
-		      minute_max_adc [j] -> data -> dataI [k] = 0;
-		    }
-		    minute_rms_adc [j] -> data -> dataD [k] = .0;
-		    minute_mean_adc [j] -> data -> dataD [k] = .0;
-		    minute_n_adc [j] -> data -> dataI [k] = 0;
-		  }
-	    }
-	  }
-
-	  for (int j = 0; j < num_channels; j++)
-	    {
-	      if (channels [j].data_type == _64bit_double) {
-		minute_min_adc [j] -> data -> dataD [i] = cur_blk [j].min.D;
-		minute_max_adc [j] -> data -> dataD [i] = cur_blk [j].max.D;
-	      } else if (channels [j].data_type == _32bit_float) {
-		minute_min_adc [j] -> data -> dataF [i] = cur_blk [j].min.F;
-		minute_max_adc [j] -> data -> dataF [i] = cur_blk [j].max.F;
-	      } else {
-		minute_min_adc [j] -> data -> dataI [i] = cur_blk [j].min.I;
-		minute_max_adc [j] -> data -> dataI [i] = cur_blk [j].max.I;
-	      }
-	      minute_rms_adc [j] -> data -> dataD [i] = cur_blk [j].rms;
-	      minute_mean_adc [j] -> data -> dataD [i] = cur_blk [j].mean;
-	      minute_n_adc [j] -> data -> dataI [i] = cur_blk [j].n;
-	    }
-	}
-
-      if (eof_flag)
-	break; // out of the for() loop
-
-      minute_frame -> run = minute_file_prop.run;
-      minute_frame -> GTimeS = minute_file_prop.gps;
-      minute_frame -> GTimeN = minute_file_prop.gps_n;
-      minute_frame -> ULeapS = minute_file_prop.leap_seconds;
-      minute_frame -> localTime = minute_file_prop.altzone;
-
-      minute_frame -> dt = minute_frame_length_seconds;
-      minute_frame -> frame = minute_frame_cntr;
-
-      time_t file_gps;
-      time_t file_gps_n;
-      int dir_num = 0;
-
-      if (! (minute_frame_cntr % frames_per_file))
-	{
-	  char tmpf [filesys_c::filename_max + 10];
-
-	  file_gps = minute_file_prop.gps;
-	  file_gps_n = minute_file_prop.gps_n;
-	  dir_num = minute_fsd.dir_fname (file_gps, tmpf, 1, 3600);
-
-	  // FIXME: using the save `frames_lib_buffer' as in framer() can brake FrameL.c , I think...
-	  // Well, maybe not...
-
-	  pthread_mutex_lock (&framelib_lock);
-#if FRAMELIB_VERSION >= 400
-	  mFile = FrFileONew (tmpf, 0);
-#else
-	  mFile = FrFileONew (tmpf, 0, frames_lib_buffer, daqd_c::frame_buf_size);
-#endif
-	  pthread_mutex_unlock (&framelib_lock);
-
-	  if (! mFile)
-	    {
-	      system_log(1, "minute_framer(): couldn't open trend file `%s'", tmpf);
-	      minute_fsd.report_lost_frame ();
-	      daqd.set_fault ();
-	    }
-	  DEBUG(3, cerr << "`" << tmpf << "' opened" << endl);
-	}
-
-      if (mFile) {
-	TNF_PROBE_1(trender_c_minute_framer_frame_write_start, "minute_trender_c::framer",
-		    "frame write",
-		    tnf_long,   frame_number,   minute_frame_cntr);
-
-	/* Write out a frame */
-	pthread_mutex_lock (&framelib_lock);
-	int fr_write_res = FrameWrite (minute_frame, mFile);
-	pthread_mutex_unlock (&framelib_lock);
-
-	if (fr_write_res != FR_OK) {
-	  system_log(1, "minute_framer(): failed to write trend frame out");
-	  minute_fsd.report_lost_frame ();
-	  daqd.set_fault ();
-	} else {
-	  DEBUG(3, cerr << "minute frame " << minute_frame_cntr << " is written out" << endl);
-	}
-	TNF_PROBE_0(trender_c_minute_framer_frame_write_end, "minute_trender_c::framer", "frame write");
-      }
-
-      // Close trend frame file, if all frames are written out
-      if (minute_frame_cntr % frames_per_file == frames_per_file - 1) {
-	if (mFile)
-	  {
-	    DEBUG(3, cerr << "`" << mFile -> fileName << "' closed" << endl);
-
-	    pthread_mutex_lock (&framelib_lock);
-	    FrFileOEnd (mFile);
-	    pthread_mutex_unlock (&framelib_lock);
-
-	    minute_fsd.update_dir (file_gps, file_gps_n, minute_frame_length_seconds, dir_num);
-
-	    mFile = (struct FrFile *)0;
-	  }
-      }
-    }
-
-  pthread_mutex_lock (&framelib_lock);
-  FrameFree (minute_frame);
-  pthread_mutex_unlock (&framelib_lock);
-
-  // signal to the producer that we are done
-  this -> shutdown_minute_trender ();
-  return NULL;
-}
-
-#endif // 0
-
 
 
 // Minute trender accumulates trend samples into the local storage
@@ -997,10 +462,8 @@ void *
 trender_c::minute_trend ()
 {
 
-#ifndef VMICRFM_PRODUCER
   // Put this thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("minute trender", 2);
-#endif
 
   int tblen = tb -> blocks (); // trend buffer length
   int nc; // number of trend samples accumulated
@@ -1046,7 +509,7 @@ trender_c::minute_trend ()
 	  // correct if wrong
 	  if (prop.gps%tblen) {
 	    nc = prop.gps%tblen;
-    	    system_log(1, "Minute trender made GPS time correction; gps=%d; gps%%%d=%d", prop.gps, tblen, prop.gps%tblen);
+    	    system_log(1, "Minute trender made GPS time correction; gps=%d; gps%%%d=%d", (int)prop.gps, tblen, (int)(prop.gps%tblen));
 	    prop.gps -= prop.gps%tblen; // This minute trend point has skips (gap in the beginning)
 	  }
 	}
@@ -1145,53 +608,22 @@ void *
 trender_c::framer ()
 {
 
-#if defined(USE_FRAMECPP) || FRAMECPP_DATAFORMAT_VERSION >= 6
-
-#ifndef VMICRFM_PRODUCER
   // Put this thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("trend framer", 2);
-#endif
 
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
   FrameCPP::Version::FrameH *frame = 0;
   FrameCPP::Version::FrRawData raw_data ("");
-#elif FRAMECPP_DATAFORMAT_VERSION > 4
-  FrameCPP::Version_6::FrameH* frame = 0;
-  FrameCPP::Version_6::FrRawData raw_data ("");
-  myImageFrameWriter *fw = 0;
-#else  
-  FrameCPP::Frame *frame = 0;
-  FrameCPP::RawData raw_data ("");
-  FrameCPP::ImageFrameWriter *fw = 0;
-#endif
 
-#if FRAMECPP_DATAFORMAT_VERSION < 6
-  strstream *ost;
-#endif
   int frame_length_blocks;
   
   /* Circular buffer length determines trend frame length */
   frame_length_blocks = tb -> blocks ();
 
   /* Detector data */
-#if FRAMECPP_DATAFORMAT_VERSION > 4
   FrameCPP::Version::FrDetector detector = daqd.getDetector1();
-#else
-  FrameCPP::Detector detector (daqd.detector_name,
-			       FrameCPP::Location (daqd.detector_longitude_degrees,
-						   daqd.detector_longitude_minutes,
-						   daqd.detector_longitude_seconds,
-						   daqd.detector_latitude_degrees,
-						   daqd.detector_latitude_minutes,
-						   daqd.detector_latitude_seconds),
-			       daqd.detector_elevation,
-			       daqd.detector_arm_x_azimuth,
-			       daqd.detector_arm_y_azimuth);
-#endif
 
   // Create trend frame
   //
-#if FRAMECPP_DATAFORMAT_VERSION > 4
   try {
     frame = new FrameCPP::Version::FrameH ("LIGO",
 					     0, // run number ??? buffptr -> block_prop (nb) -> prop.run;
@@ -1200,53 +632,21 @@ trender_c::framer ()
 					     0, // localTime
 					     frame_length_blocks // dt
 					     );
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
     frame -> SetRawData (raw_data);
     frame -> RefDetectProc ().append (detector);
-
-#else
-    frame -> setRawData (raw_data);
-    frame -> refDetectorProc ().append (detector);
-#endif
     // Append second detector if it is defined
     if (daqd.detector_name1.length() > 0) {
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
       FrameCPP::Version::FrDetector detector1 = daqd.getDetector2();
       frame -> RefDetectProc ().append (detector1);
-#else
-      FrameCPP::Version_6::FrDetector detector1 = daqd.getDetector2();
-      frame -> refDetectorProc ().append (detector1);
-#endif
     }
   } catch (...) {
     system_log(1, "Couldn't create trend frame");
     this -> shutdown_trender ();
     return NULL;
   }
-#else
-  try {
-    frame = new FrameCPP::Frame ("LIGO",
-				 0, // run number ??? buffptr -> block_prop (nb) -> prop.run;
-				 1, // frame number
-				 FrameCPP::Time (0, 0),
-				 0,
-				 0, // localTime
-				 frame_length_blocks // dt
-				 );
-    frame -> setRawData (raw_data);
-    frame -> setDetectProc (detector);
-  } catch (...) {
-    system_log(1, "Couldn't create trend frame");
-    this -> shutdown_trender ();
-    return NULL;
-  }
-#endif  
 
   // Keep pointers to the data samples for each data channel
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
-  unsigned
-#endif
-	char *adc_ptr [num_trend_channels];
+  unsigned char *adc_ptr [num_trend_channels];
   //INT_2U data_valid [num_trend_channels];
   INT_2U *data_valid_ptr [num_trend_channels];
 
@@ -1254,7 +654,6 @@ trender_c::framer ()
   try {
     for (int i = 0; i < num_trend_channels; i++) {
       REAL_8 junk [16 * 1024];
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
       FrameCPP::Version::FrAdcData adc
 	= FrameCPP::Version::FrAdcData (std::string(trend_channels [i].name),
 					  trend_channels [i].group_num,
@@ -1306,94 +705,6 @@ trender_c::framer ()
 	  break;
 	}
       }
-#elif FRAMECPP_DATAFORMAT_VERSION > 4
-      FrameCPP::Version_6::FrAdcData adc
-
-	= FrameCPP::Version_6::FrAdcData (trend_channels [i].name,
-					  trend_channels [i].group_num,
-					  i, // channel ???
-					  CHAR_BIT * trend_channels [i].bps,
-					  trend_channels [i].sample_rate,
-					  trend_channels [i].signal_offset,
-					  trend_channels [i].signal_slope,
-					  trend_channels [i].signal_units,
-					  .0,
-					  FrameCPP::Version_6::GPSTime( 0, 0 ),
-					  0,
-					  .0);
-
-      frame -> getRawData () -> refAdc ().append (adc);
-
-      FrameCPP::Version_6::Dimension  dims [1] = { FrameCPP::Version_6::Dimension (frame_length_blocks, 1. / trend_channels [i].sample_rate, "") };
-      switch (trend_channels [i].data_type) { 
-      case _64bit_double:
-	{
-	  FrameCPP::Version_6::FrVect vect("", 1, dims, (REAL_8 *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _32bit_float: 
-	{
-	  FrameCPP::Version_6::FrVect vect("", 1, dims, (REAL_4 *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _32bit_integer:
-	{
-	  FrameCPP::Version_6::FrVect vect("", 1, dims, (INT_4S *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      default:
-	{
-	  abort();
-	  FrameCPP::Version_6::FrVect vect("", 1, dims, (INT_2S *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      }
-#else
-      FrameCPP::AdcData adc 
-	= FrameCPP::AdcData (trend_channels [i].name, // channel name
-			     trend_channels [i].group_num,
-			     i, // channel ???
-			     CHAR_BIT * trend_channels [i].bps, // nBits
-			     trend_channels [i].sample_rate,
-			     trend_channels [i].signal_offset,
-			     trend_channels [i].signal_slope,
-			     trend_channels [i].signal_units);
-
-      frame -> getRawData () -> refAdc ().append (adc);
-
-      FrameCPP::Dimension  dims [1] = { FrameCPP::Dimension (frame_length_blocks, 1. / trend_channels [i].sample_rate, "") };
-      switch (trend_channels [i].data_type) { 
-      case _64bit_double:
-	{
-	  FrameCPP::Vect vect("", 1, dims, (REAL_8 *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _32bit_float: 
-	{
-	  FrameCPP::Vect vect("", 1, dims, (REAL_4 *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _32bit_integer:
-	{
-	  FrameCPP::Vect vect("", 1, dims, (INT_4S *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      default:
-	{
-	  abort();
-	  FrameCPP::Vect vect("", 1, dims, (INT_2S *) junk, "");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      }
-#endif
     }
   } catch (...) {
     system_log(1, "Couldn't create one or several adcs");
@@ -1404,8 +715,6 @@ trender_c::framer ()
     return NULL;
   }
 
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
-  
   sem_post (&frame_saver_sem);
 
   long frame_cntr;
@@ -1571,217 +880,9 @@ trender_c::framer ()
       pvValue[10] = fsd.get_cur_dir();
 #endif
     }
-#else
-  try {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-    fw = new myImageFrameWriter (*(ost = new strstream ()));
-#else
-    fw = new FrameCPP::ImageFrameWriter (*(ost = new strstream ()));
-#endif
-    fw -> writeFrame (*frame);
-    fw -> close ();
-  } catch (write_failure) {
-    system_log(1, "Couldn't create image frame writer; write_failure");
-    
-    abort();
-    
-    this -> shutdown_trender ();
-    return NULL;
-  }
-  
-  int image_size = ost -> pcount ();
-
-  // Frame itself is not needed any more and may be freed
-  delete frame;
-  frame = 0;
-
-
-#if 0
-  // Finally, prepare an array of pointers to the ADC data
-  char *adc_ptr [num_trend_channels];
-  INT_2U *data_valid_ptr [num_trend_channels];
-#endif
-
-  {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-    typedef myImageFrameWriter::OMI OMI;
-#else
-    typedef FrameCPP::ImageFrameWriter::OMI OMI;
-#endif
-    for (int i = 0; i < num_trend_channels; i++) {
-      INT_8U offs = 
-	fw -> adcNamePositionMap [trend_channels [i].name].first[0];
-      INT_4U classInstance = fw -> adcDataVectorPtr (offs);
-      INT_2U instance = classInstance  & 0xffff;
-      OMI v = fw -> vectInstanceOffsetMap.find (instance);
-#if 0
-#ifndef NDEBUG
-      cout << "trend vector " << (classInstance >> 16) << "\t" << (classInstance&0xffff) << endl;
-      if (v == fw -> vectInstanceOffsetMap.end()) {
-	cout << "trend vector " << instance << " not found!" << endl;
-	exit(1);
-      } else {
-       cout << "data vector offset is " << v -> second[0] << endl;
-      }
-#endif
-#endif
-      adc_ptr [i] = fw->vectorData (v -> second[0]);
-      data_valid_ptr [i] = fw->adcDataValidPtr (offs);
-    }
-  }
-  
-  sem_post (&frame_saver_sem);
-
-  long frame_cntr;
-  for (frame_cntr = 0;; frame_cntr++)
-    {
-      int eof_flag = 0;
-      circ_buffer_block_prop_t file_prop;
-      trend_block_t cur_blk [max_trend_output_channels];
-
-      // Accumulate frame adc data
-      for (int i = 0; i < frame_length_blocks; i++)
-	{
-	  int nb = tb -> get (saver_cnum);
-	  DEBUG(3, cerr << "trender saver; block " << nb << endl);
-	  TNF_PROBE_1(trender_c_framer_start, "trender_c::framer",
-		      "got one block",
-		      tnf_long,   block_number,    nb);
-	  {
-	    if (! tb -> block_prop (nb) -> bytes)
-	      {
-		tb -> unlock (saver_cnum);
-		eof_flag = 1;
-		DEBUG1(cerr << "trender framer EOF" << endl);
-		break; // out of the for() loop
-	      }
-	    if (! i)
-	      file_prop = tb -> block_prop (nb) -> prop;
-	      
-	    memcpy (cur_blk, tb -> block_ptr (nb), num_channels * sizeof (trend_block_t));
-	  }
-	  TNF_PROBE_0(trender_c_framer_end, "trender_c::framer", "end of block processing");
-	  tb -> unlock (saver_cnum);
-	  
-	  // Check if the gps time isn't aligned on a minute boundary
-	  if (! i) {
-	    unsigned long gps_mod = file_prop.gps % 60;
-	    if ( gps_mod ) {
-	      // adjust time to make files aligned on gps mod 60
-	      file_prop.gps -= gps_mod;
-	      i += gps_mod;
-
-              if (file_prop.cycle > gps_mod*16)
-                file_prop.cycle -= gps_mod*16;
-              else
-                file_prop.cycle = 0;
-
-
-	      // zero out some data that's missing
-	      for (int j = 0; j < num_trend_channels; j++)
-		memset ( adc_ptr [j], 0, gps_mod * trend_channels [j].bps );
-	    }
-
-	  }
-
-	  for (int j = 0; j < num_channels; j++)
-	    {
-	      if (channels [j].data_type == _64bit_double) {
-		memcpy(adc_ptr [5*j] + i*sizeof(REAL_8), &cur_blk [j].min.D, sizeof (REAL_8));
-		memcpy(adc_ptr [5*j+1] + i*sizeof(REAL_8), &cur_blk [j].max.D, sizeof (REAL_8));
-	      } else if (channels [j].data_type == _32bit_float) {
-		memcpy(adc_ptr [5*j] + i*sizeof(REAL_4), &cur_blk [j].min.F, sizeof (REAL_4));
-		memcpy(adc_ptr [5*j+1] + i*sizeof(REAL_4), &cur_blk [j].max.F, sizeof (REAL_4));
-	      } else {
-		memcpy(adc_ptr [5*j] + i*sizeof(INT_4S), &cur_blk [j].min.I, sizeof (INT_4S));
-		memcpy(adc_ptr [5*j+1] + i*sizeof(INT_4S), &cur_blk [j].max.I, sizeof (INT_4S));
-	      }
-	      //cerr << j << "\t" << i << hex << (void*)(adc_ptr[5*j+2]) << endl;
-	      memcpy(adc_ptr [5*j+2] + i*sizeof(INT_4S), &cur_blk [j].n, sizeof (INT_4S));
-	      //adc_ptr [5*j+2][4*i]=0;
-#ifdef not_def
-	      REAL_8 rms = sqrt(cur_blk [j].rms);
-	      memcpy(adc_ptr [5*j+3] + i*sizeof(REAL_8), &rms, sizeof (REAL_8));
-#endif
-	      memcpy(adc_ptr [5*j+3] + i*sizeof(REAL_8), &cur_blk [j].rms, sizeof (REAL_8));
-	      memcpy(adc_ptr [5*j+4] + i*sizeof(REAL_8), &cur_blk [j].mean, sizeof (REAL_8));
-	    }
-	}
-
-      if (eof_flag)
-	break; // out of the for() loop
-
-      fw -> setFrameFileAttributes (file_prop.run, file_prop.cycle / 16 / 60, 0,
-				    file_prop.gps, 60, file_prop.gps_n,
-				    file_prop.leap_seconds, file_prop.altzone);
-
-      time_t file_gps;
-      time_t file_gps_n;
-      int dir_num = 0;
-
-      char tmpf [filesys_c::filename_max + 10];
-      char _tmpf [filesys_c::filename_max + 10];
-
-      file_gps = file_prop.gps;
-      file_gps_n = file_prop.gps_n;
-      dir_num = fsd.getDirFileNames (file_gps, _tmpf, tmpf, 1, 60);
-
-      int fd = creat (_tmpf, 0644);
-      if (fd < 0) {
-	system_log(1, "Couldn't open full trend frame file `%s' for writing; errno %d", tmpf, errno);
-	fsd.report_lost_frame ();
-	daqd.set_fault ();
-      } else {
-	DEBUG(3, cerr << "`" << _tmpf << "' opened" << endl);
-#if 0
-#if defined(DIRECTIO_ON) && defined(DIRECTIO_OFF)
-	if (daqd.do_directio) directio (fd, DIRECTIO_ON);
-#endif
-#endif
-	TNF_PROBE_1(trender_c_framer_frame_write_start, "trender_c::framer",
-		    "frame write",
-		    tnf_long,   frame_number,   frame_cntr);
-
-	if (daqd.cksum_file != "") {
-	  daqd_c::fr_cksum(daqd.cksum_file, tmpf, (unsigned char *)(ost -> str ()), image_size);
-	}
-	  
-	/* Write out a frame */
-	int nwritten = write (fd, ost -> str (), image_size);
-        if (nwritten == image_size) {
-	  if (rename(_tmpf, tmpf)) {
-		system_log(1, "framer(): failed to rename file; errno %d", errno);
-		fsd.report_lost_frame ();
-		daqd.set_fault ();
-	  } else {
-	  	DEBUG(3, cerr << "trend frame " << frame_cntr << " is written out" << endl);
-	  	// Successful frame write
-	  	fsd.update_dir (file_gps, file_gps_n, frame_length_blocks, dir_num);
-	  }
-	} else {
-	  system_log(1, "framer(): failed to write trend frame out; errno %d", errno);
-	  fsd.report_lost_frame ();
-	  daqd.set_fault ();
-	}
-	close (fd);
-	TNF_PROBE_0(trender_c_framer_frame_write_end, "trender_c::framer", "frame write");
-      }
-
-#if EPICS_EDCU == 1
-      /* Epics display: second trend data look back size in seconds */
-      extern unsigned int pvValue[1000];
-      pvValue[9] = fsd.get_max() - fsd.get_min();
-
-      /* Epics display: current trend frame directory */
-      extern unsigned int pvValue[1000];
-      pvValue[10] = fsd.get_cur_dir();
-#endif
-    }
-#endif
 
   // signal to the producer that we are done
   this -> shutdown_trender ();
-#endif
   return NULL;
 }
 
@@ -1940,10 +1041,8 @@ trender_c::trend_loop_func(int j, int* status_ptr, char* block_ptr)  {
 void *
 trender_c::trend ()
 {
-#ifndef VMICRFM_PRODUCER
   // Put this thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("trender", 2);
-#endif
 
   int nb;
   circ_buffer *ltb = this -> tb;

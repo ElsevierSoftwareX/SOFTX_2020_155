@@ -2,23 +2,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-/* With this we switch to the new FrameCPP if the newer compiler is used */
-#if __GNUC__ >= 4
-// Temporarily switch off the framecpp code everywhere
-//#undef USE_FRAMECPP 
-
-//#ifdef USE_FRAMECPP
-// This defines the Frame Spec version we want to use
-// The new library defines FRAME_SPEC_CURRENT to 6 in framecpp/FrameCPP.hh
-#define FRAMECPP_DATAFORMAT_VERSION 8
-//#endif
-
-#else
-// 2.95.3 compiler and the old framecpp library
-// This is needed still to build a DMT frame broadcaster
-//#define USE_FRAMECPP 1
-#endif
-
 /* Define if on AIX 3.
    System headers sometimes define this.
    We just want to avoid a redefinition error message.  */
@@ -198,12 +181,6 @@
 /* Define if DAQD to run as daemon */
 #undef DAEMONIC
 
-/* Define if interfacing to VMIC reflected memory */
-#undef VMICRFM_PRODUCER
-
-/* Define if want to use mmap with the VMI PCI5588 board */
-#undef VMIC_MMAP
-
 /* Define if interfacing to GDS testpoint server */
 #undef GDS_TESTPOINTS
 
@@ -213,20 +190,11 @@
 /* Define if building mini-NDS */
 #undef MINI_NDS
 
-/* Define if configuring channels from files */
-#undef FILE_CHANNEL_CONFIG
-
 /* Define if configured to run Epics EDCU */
 #undef EPICS_EDCU
 
-/* Define if configured with dedicated RFM 5579 connection to controller */
-#undef AUX_5579
-
 /* Define if building with Myrinet */
 #undef USE_GM
-
-/* Define if building for Advanced LIGO */
-#undef _ADVANCED_LIGO
 
 /* Define if building to receive data broadcasts */
 #undef USE_BROADCAST

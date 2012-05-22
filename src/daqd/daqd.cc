@@ -42,11 +42,6 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/ioctl.h>
-#ifdef sun
-#include <sys/priocntl.h>
-#include <sys/rtpriocntl.h>
-#include <sys/lwp.h>
-#endif
 #include <sys/mman.h>
 
 #include <string>
@@ -57,22 +52,6 @@
 #include <hash_map>
 #endif
 #include <fstream>
-
-#ifdef USE_FRAMECPP
-#include "ldas/ldasconfig.hh"
-#include "framecpp/frame.hh"
-#include "framecpp/detector.hh"
-#include "framecpp/adcdata.hh"
-#include "framecpp/framereader.hh"
-#include "framecpp/framewriter.hh"
-#include "framecpp/framewritertoc.hh"
-
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-#include "myimageframewriter.hh"
-#else
-#include "framecpp/imageframewriter.hh"
-#endif
-#endif
 
 using namespace std;
 
@@ -85,12 +64,7 @@ using namespace std;
 #include "sing_list.hh"
 #include "md5.h"
 
-#ifdef _ADVANCED_LIGO
-#include "../..//src/drv/crc.c"
-#else
-#error
-#include "../../../rts/src/drv/crc.c"
-#endif
+#include "../../src/drv/crc.c"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -270,78 +244,7 @@ int _debug = 10;
 // Controls volume of log messages
 int _log_level;
 
-#ifdef USE_FRAMECPP
-unsigned long
-daqd_c::fr_cksum(string cksum_file, char *tmpf, unsigned char* data, int image_size)
-  try {
-    if (cksum_file == "md5sum.log") {
-      std::ofstream out(cksum_file.c_str(), ios::app);
-      unsigned char resblock[16];
-      md5_buffer ((char *)data, image_size, resblock);
-      for (int k = 0; k < 16; k++) {
-	char s[3];
-	sprintf(s,"%02x",resblock[k]);
-	out << s;
-      }
-      out << tmpf << endl;
-      return 0;
-    } else {
-      // Zero out chkFlag and chkSum in FrEndOfFile
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-      memset(data + image_size - 4*sizeof(INT_4U), 0, 8);
-#else
-      memset(data + image_size - 3*sizeof(INT_4U), 0, 8);
-#endif
-
-      // Set the flag and the CRC
-      INT_4U one = 1;
-
-      // Well, new spec wants the flag value to be in before the checksum is calculated
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-      memcpy(data + image_size - 4*sizeof(INT_4U), &one, 4);
-#endif
-
-      // do CRC sum
-      long bytes = image_size;
-      unsigned char *cp = data;
-      unsigned long crc = 0;
-      while(bytes--) {
-	crc = (crc << 8) ^ crctab[((crc >> 24) ^ *(cp++)) & 0xFF];
-      }
-      bytes = image_size;
-      while (bytes > 0) {
-	crc = (crc << 8) ^ crctab[((crc >> 24) ^ bytes) & 0xFF];
-	bytes >>= 8;
-      }
-      crc = ~crc & 0xFFFFFFFF;
-#if 0
-      std::ofstream out(cksum_file.c_str(), ios::app);
-      out << crc << " " << image_size << " " << tmpf << endl;
-#endif
-
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-      memcpy(data + image_size - 3*sizeof(INT_4U), &crc, 4);
-#else
-      memcpy(data + image_size - 3*sizeof(INT_4U), &one, 4);
-      memcpy(data + image_size - 2*sizeof(INT_4U), &crc, 4);
-#endif
-      return crc;
-    }
-  } catch (...) {
-    system_log(1, "failed to open `%s' for output", cksum_file.c_str());
-    return 0;
-  }
-#endif
-
-
-#if defined(FILE_CHANNEL_CONFIG)
-
-
-#ifdef _ADVANCED_LIGO
 #include "../../src/drv/param.c"
-#else
-#include "../../../rts/src/drv/param.c"
-#endif
 
 struct laughable {bool operator()(char *a, char *b) { return !strcmp(a,b); }};
 
@@ -356,10 +259,8 @@ int chan_dcu_eq(const void *a, const void *b) {
   else return dcu1 - dcu2;
 }
 
-#ifdef _ADVANCED_LIGO
 // DCU id of the current configuration file (ini file)
 int ini_file_dcu_id = 0;
-#endif
 
 // Configure data channel info from config files
 int
@@ -382,7 +283,7 @@ daqd_c::configure_channels_files ()
     int chanConfigCallback(char *, struct CHAN_PARAM *, void *user);
     int testpoint = 0;
     char buf[1024];
-    fgets(buf, 1024, mcf);
+    char *c = fgets(buf, 1024, mcf);
     if (feof(mcf)) break;
     if (*buf == '#') continue;
     if (strlen(buf) > 0) {
@@ -397,9 +298,7 @@ daqd_c::configure_channels_files ()
     if (!strcmp(buf + strlen(buf) - 7, "GDS.ini")) continue;
 #endif
 
-#ifdef _ADVANCED_LIGO
     ini_file_dcu_id = 0;
-#endif
     if (0 == parseConfigFile(buf, &crc, chanConfigCallback, testpoint, 0, 0)) {
 	printf("Failed to parse config file %s\n", buf);
 	return 1;
@@ -409,7 +308,6 @@ daqd_c::configure_channels_files ()
     if(daqd.num_channels) {
       daqd.dcuConfigCRC[daqd.channels[daqd.num_channels - 1].ifoid][daqd.channels[daqd.num_channels - 1].dcu_id] = crc;
     }
-#ifdef _ADVANCED_LIGO
     if (ini_file_dcu_id > 0 && ini_file_dcu_id < DCU_COUNT) {
       // only set DCU name if this is an INI file (*.ini)
       if (!strcmp(buf + strlen(buf) - 4, ".ini")) {
@@ -427,7 +325,6 @@ daqd_c::configure_channels_files ()
 	}
       }
     }
-#endif
   }
   fclose(mcf);
 
@@ -454,30 +351,14 @@ daqd_c::configure_channels_files ()
   /* Update sequence number */
   for (int i = 0; i < daqd.num_channels; i++) daqd.channels[i].seq_num = i;
 
-#if defined(VMICRFM_PRODUCER)
-  /* Assign dcu ipc pointers */
-  for (int ifo = 0; ifo < data_feeds; ifo++)
-    for (int i = 0; i < DCU_COUNT; i++)
-      dcuIpc[ifo][i] =
-#ifndef AUX_5579
-	(volatile struct rmIpcStr *)((ifo? rm_mem_ptr1: rm_mem_ptr) + IPC_OFFSET_DCU(i));
-#else
-	(volatile struct rmIpcStr *)(((cit_40m? dcuNet40m: dcuNet)[i]&1? (ifo? rm_mem_ptr1: rm_mem_ptr): (ifo? rm_aux_ptr1: rm_aux_ptr)) + IPC_OFFSET_DCU(i));
-#endif
-#endif
-
 #if EPICS_EDCU == 1
   /* Epics display */
   extern unsigned int pvValue[1000];
-#ifdef _ADVANCED_LIGO
   pvValue[1] = daqd.num_channels
 #ifdef GDS_TESTPOINTS
 	 - daqd.num_gds_channel_aliases
 #endif
 	- daqd.num_epics_channels;
-#else
-  pvValue[1] = daqd.num_channels;
-#endif
   pvValue[18] = daqd.num_active_channels;
 #endif
   system_log(1, "finished configuring data channels");
@@ -501,26 +382,16 @@ chanConfigCallback(char *channel_name, struct CHAN_PARAM *params, void *user)
     return 0;
   }
   ccd -> dcu_id = params->dcuid;
-#ifdef _ADVANCED_LIGO
   ini_file_dcu_id = params->dcuid;
-#endif
 
-#if defined(VMICRFM_PRODUCER)
-  if (params -> ifoid > daqd.data_feeds || params -> ifoid < 0) {
-    system_log(1, "channel `%s' has bad IFO id %d", ccd -> name, params -> ifoid);
-    return 0;
-  }
-#endif
   if (params->ifoid == 0 || params->ifoid == 1)
     ccd -> ifoid = 0; // The 4K Ifo
   else
     ccd -> ifoid = 1; // The 2K Ifo
 
-#if defined(_ADVANCED_LIGO) 
   // We use rm id now to set the system
   ccd -> tp_node = params-> rmid;
   // printf("channel %s has node id %d\n", channel_name, ccd -> tp_node);
-#endif
 
   strncpy (ccd -> name, channel_name, channel_t::channel_name_max_len - 1);
   ccd -> name [channel_t::channel_name_max_len - 1] = 0;
@@ -595,370 +466,8 @@ chanConfigCallback(char *channel_name, struct CHAN_PARAM *params, void *user)
   return 1;
 }
 
-#else
-
-// FIXME: ???? Need to fix data type handling with the VMIC RFM. Do it as it is done with the net producer
-
-int
-daqd_c::configure_channels_rfm ()
-{
-  channel_t *ccd;
-
-  assert(rm_mem_ptr);
-  volatile struct mainMapStr *mmap = (struct mainMapStr *)(rm_mem_ptr + MAIN_MAP);
- 
-  num_channels = 0;
-  memset(channels, 0, sizeof(channels[0]) * daqd_c::max_channels);
-
-  volatile struct rmIpcStr *ipc = (struct rmIpcStr *)(rm_mem_ptr + DAQSC_IPC);
-
-  volatile struct dataInfoStr *dinfo = (struct dataInfoStr *)(rm_mem_ptr + 0x1000);
-
-#ifdef EDCU_SHMEM
-  edcu_chan_idx[0] = edcu_chan_idx[1] = 0;
-#endif
-
-  for (int j = 0;j < bsw(ipc -> channelCount); j++, dinfo++) {
-    if (num_channels >= daqd_c::max_channels) {
-      system_log(1, "too many channels. Channel `%s' ignored", dinfo -> chName);
-      continue;
-    }
-
-    if (! daqd_c::power_of (bsw(dinfo -> rate), 2)) {
-      system_log(1, "channel %s has invalid rate  %d; ignored",
-	   dinfo -> chName, bsw(dinfo -> rate))
-	continue;
-    }
-
-#ifdef not_def
-    // :TODO: use hash table to do this checking
-    // See if channel name is duplicated
-    bool duplicate_found = false;
-    for (int k = 0; k < num_channels; k++) {
-      if (!strncmp((const char *)dinfo -> chName, channels[k].name,  channel_t::channel_name_max_len - 1)) {
-	system_log(1, "channel `%s' #%d is a duplicate of channel #%d; duplicated ADC signal ignored",
-	    channels[k].name, j, k);
-	duplicate_found = true;
-	break;
-      }
-    }
-    if (duplicate_found)
-      continue;
-#endif
 
 
-    ccd = &channels [num_channels++];
-    ccd -> seq_num = num_channels-1;
-    ccd -> id = 0;
-#if 0
-    rfmSetSwapping(rh,rfmSwapNone); // Do not swap on string
-#endif
-    strncpy (ccd -> name, (const char *)dinfo -> chName, channel_t::channel_name_max_len - 1);
-#if 0
-    rfmSetSwapping(rh,rfmSwapSize); // Set big endian swapping on words
-#endif
-    ccd -> name [channel_t::channel_name_max_len - 1] = 0;
-    ccd -> chNum = bsw(dinfo -> chNum);
-    ccd -> bps = data_type_size (bsw(dinfo -> dataType));
-    ccd -> data_type = (daq_data_t) bsw(dinfo -> dataType);
-    //	  ccd -> sample_rate = 1 << bsw(dinfo -> rate);
-    ccd -> sample_rate = bsw(dinfo -> rate);
-    ccd -> rm_offset = bsw(dinfo -> dataOffset) + sizeof (int);
-    //	  ccd -> rm_offset = bsw(mmap -> baseOffset) + IPC2DATA_OFFSET + bsw(dinfo -> dataOffset);
-    ccd -> rm_block_size = bsw(mmap -> dataBlockSize);
-    ccd -> dcu_id = bsw(ipc -> dcuId);
-
-#ifdef EDCU_SHMEM
-    if (ccd -> dcu_id == ADCU_PMC_40_ID) {
-      if (edcu_chan_idx[0] == 0) edcu_chan_idx[0] = bsw(dinfo -> dataOffset); /* First slow channels offset */
-      edcu_chan_idx[1] = bsw(dinfo -> dataOffset);  /* Last slow channels offset will go here */
-    }
-#endif
-
-    // Activate channels for saving into full frames
-    // Do not save 1 Hz slow channels
-    ccd -> active = (bsw(dinfo -> fbcr) & 1) && (ccd -> sample_rate > 1);
-
-    // 1Hz channels will be acquired at 16Hz
-    if (ccd -> sample_rate == 1) {
-      ccd -> sample_rate = 16;
-    }
-
-    // ccd -> group_num = 0;
-    ccd -> group_num = bsw(dinfo -> fbcr) >> 8;
-
-#ifdef GDS_TESTPOINTS
-    ccd -> rm_dinfo = (dataInfoStr *) dinfo;
-    ccd -> gds = (bsw(dinfo -> fbcr) & 6) >> 1;
-
-    // alias channels not trended, they are not signals
-    // Are GDS channels trended?
-
-    if (IS_GDS_ALIAS (*ccd) || IS_GDS_SIGNAL(*ccd))
-      ccd -> trend = 0;
-    else
-      ccd -> trend = ccd -> active; // Trend all active channels;
-
-    if (IS_GDS_ALIAS (*ccd))
-      num_gds_channel_aliases++;
-    else {
-      if (IS_GDS_SIGNAL(*ccd))
-	num_gds_channels++;
-    }
-#else
-    // ccd -> active = 1;
-    ccd -> trend = ccd -> active; // Trend all active channels;
-#endif
-
-    // assign conversion data
-    ccd -> signal_gain = bsw(dinfo -> chGain);
-    ccd -> signal_slope = bsw(dinfo -> slope);
-    ccd -> signal_offset = bsw(dinfo -> offset);
-#if 0
-    rfmSetSwapping(rh,rfmSwapNone	); // Do not swap on string
-#endif
-    strncpy (ccd -> signal_units, (const char *)dinfo -> engUnits,
-	     channel_t::engr_unit_max_len - 1);
-#if 0
-    rfmSetSwapping(rh,rfmSwapSize);
-#endif
-    ccd -> signal_units [channel_t::engr_unit_max_len - 1] = 0;
-
-#if 0
-    DEBUG1(cerr << "rate for channel `" << ccd -> name << "' is " << bsw(dinfo -> rate) << "; block size=" << ccd -> rm_block_size << endl);
-#endif
-  }
-  return 1;
-}
-#endif
-
-
-#if defined(VMICRFM_PRODUCER)
-
-#ifdef __linux__
-// 5565 card DMA memory buffer, that's where data shows up when pread() is done
-volatile char *dma_buf_ptr = 0;
-#endif
-
-void
-daqd_c::init_vmicrfm ()
-{
-#if VMICRFMTYPE == 5565
-  if (RFM2gOpen (rfmFn, &rh) != RFM2G_SUCCESS) 
-#else
-  if ((rh = rfmOpen (rfmFn)) == 0) 
-#endif
-    {
-      system_log(1, "can't open RFM device `%s'; errno=%d", rfmFn, errno);
-      exit (1);
-    }
-#if VMICRFMTYPE == 5579
-    rfmSetSwapping(rh, rfmSwapSize);
-#else
-#ifdef __linux__
-	RFM2gSetDMAThreshold(rh, 1024);
-#endif
-#endif
-
-  if (data_feeds == 2) {
-#if VMICRFMTYPE == 5565
-    if (RFM2gOpen (rfmFn1, &rh1) != RFM2G_SUCCESS)
-#else
-    if ((rh1 = rfmOpen (rfmFn)) == 0)
-#endif
-      {
-        system_log(1, "can't open RFM device `%s'; errno=%d", rfmFn1, errno);
-        exit (1);
-      }
-#if VMICRFMTYPE == 5579
-      rfmSetSwapping(rh1, rfmSwapSize);
-#else
-#ifdef __linux__
-	RFM2gSetDMAThreshold(rh1, 1024);
-#endif
-#endif
-  }
-
-#if AUX_5579
-#ifdef __linux__
-
-  if (RFM2gOpen (rfmFn_aux, &rh5579) != RFM2G_SUCCESS) {
-    system_log(1, "can't open RFM device `%s'; errno=%d", rfmFn_aux, errno);
-    exit (1);
-  }
-
-  if (data_feeds == 2) {
-    if (RFM2gOpen (rfmFn_aux1, &rh5579_1) != RFM2G_SUCCESS) {
-      system_log(1, "can't open RFM device `%s'; errno=%d", rfmFn_aux1, errno);
-      exit (1);
-    }
-  }
-
-  int ret = RFM2gUserMemory(rh5579, (void **)&rm_aux_ptr, 0, 64*1024*1024/getpagesize()); 
-  printf("RFM2gUserMemory(5579 0) returned %d\n", ret);
-  //printf("Not setting RFM2g byteswapping on Linux\n");
-  if (data_feeds == 2) {
-    ret = RFM2gUserMemory(rh5579_1, (void **)&rm_aux_ptr1, 0, 64*1024*1024/getpagesize()); 
-    printf("RFM2gUserMemory(5579 1) returned %d\n", ret);
-  }
-
-#else
-  if ((rh5579 = rfmOpen (rfmFn_aux)) == 0) {
-    system_log(1, "can't open RFM device `%s'; errno=%d", rfmFn_aux, errno);
-    exit (1);
-  }
-  rm_aux_ptr = rfmRfm(rh5579)->rfm_ram;
-  rfmSetSwapping(rh5579, rfmSwapSize);
-
-  if (data_feeds == 2) {
-    if ((rh5579_1 = rfmOpen (rfmFn_aux1)) == 0) {
-      system_log(1, "can't open RFM device `%s'; errno=%d", rfmFn_aux1, errno);
-      exit (1);
-    }
-    rm_aux_ptr1 = rfmRfm(rh5579_1)->rfm_ram;
-    rfmSetSwapping(rh5579_1, rfmSwapSize);    
-  }
-#endif
-#endif
-
-  fflush (stdout); // Workaround for VMIC RM API lib bug
-
-
-#if VMICRFMTYPE == 5565
-
-#ifdef __linux__
-  ret = RFM2gUserMemory(rh, (void **)&rm_mem_ptr,  0 , 64*1024*1024/getpagesize()); 
-  printf("RFM2gUserMemory(5565 0) returned %d\n", ret);
-
-  if (data_feeds == 2) {
-    ret = RFM2gUserMemory(rh1, (void **)&rm_mem_ptr1,  0 , 64*1024*1024/getpagesize()); 
-    printf("RFM2gUserMemory(5565 1) returned %d\n", ret);
-  }
-#if 0
-  ret = RFM2gUserMemory(rh, (void **)&dma_buf_ptr, RFM2G_DMA_MMAP_OFFSET /* 0 */, 128*1024/getpagesize()); 
-  printf("RFM2gUserMemory(5565 1M) for DMA returned %d; addr=0x%x\n", ret, dma_buf_ptr);
-  if (dma_buf_ptr == 0 || dma_buf_ptr == (char *)-1) _exit(1);
-  // See if we can read and write this buffer
-  printf("About to write test data '0x1b' to DMA buffer\n");
-  dma_buf_ptr[0x10] = 0x1b;
-  unsigned int a = dma_buf_ptr[0x10];
-  printf("Reading data from buffer: 0x%x\n", a);
-  
-  //printf("Not setting RFM2g byteswapping on Linux\n");
-  if (data_feeds == 2) {
-    ret = RFM2gUserMemory(rh1, (void **)&rm_mem_ptr1, RFM2G_DMA_MMAP_OFFSET /* 0 */, 64*1024*1024/getpagesize()); 
-    printf("RFM2gUserMemory(5565 1) returned %d\n", ret);
-  }
-#endif
-#else
-  int ret = RFM2gUserMemory(rh, (void **)&rm_mem_ptr, 0, 1); 
-  printf("RFM2gUserMemory() returned %d\n", ret);
-  // Set DMA bnd I/O byteswapping
-  (void)RFM2gSetDMAByteSwap(rh, 1);
-  (void)RFM2gSetPIOByteSwap(rh, 1);
-
-  if (data_feeds == 2) {
-    (void)RFM2gUserMemory(rh1, (void **)&rm_mem_ptr1, 0, 1);
-    // Set DMA bnd I/O byteswapping
-    (void)RFM2gSetDMAByteSwap(rh1, 1);
-    (void)RFM2gSetPIOByteSwap(rh1, 1);
-  }
-#endif
-
-#else
-  rm_mem_ptr = rfmRfm(rh)->rfm_ram;
-  if (data_feeds == 2) rm_mem_ptr1 = rfmRfm(rh1)->rfm_ram;
-#endif
-
-
-  if (! rm_mem_ptr) {
-    system_log(1, "failed to map VMIC Reflected Memory into the address space");
-    exit(1);
-  }
-
-  //requestRFMUpdate ();
-
-}
-
-
-// FIXME: make this a member of daqd_c and clean the messages
-
-/* this function opens a swept sine file for reading... */
-static void read_sweptsine(    FILE *fpsine,   /* name of the swept sine file */
-			       int *n,
-			       float **freq,
-			       float **real,
-			       float **imag)
-{
-
-  FILE *fp;
-  int code,i,npoint=0,nread=0;
-  float *array[3];
-
-  /* check file containing swept sine data */
-  if (fpsine==NULL) {
-    fprintf(stderr,"GRASP: read_calibrate(): file pointed to by first argument is null!\n");
-    fprintf(stderr,"%s\n","grasp error");
-    abort();
-  }
-
-  /* create null pointers for freq, real, imag parts */
-  for (i=0;i<3;i++)
-    array[i]=NULL;
-
-  /* now loop, getting one additional input line per iteration */
-  while (1) {
-    /* if we need more memory space, then allocate it */
-    if (npoint<nread+1) {
-      npoint+=1024;
-      for (i=0;i<3;i++) {
-	array[i]=(float *)realloc((void *)array[i],sizeof(float)
-				  *npoint);
-	if (array[i]==NULL) {
-	  fprintf(stderr,"GRASP: read_calibrate(): failed to allocate ");
-	  fprintf(stderr,"%d floats\n",npoint);
-	  fclose(fpsine);
-	  abort();
-	}
-      }
-    }
-
-    if (nread==0) {
-      /* put in vanishing DC response! */
-      array[0][0]=0.00;
-      array[1][0]=0.00;
-      array[2][0]=0.00;
-      code=3;
-    }
-    else {
-      /* read in the data, 3 items per line: freq, real, imag */
-      code=fscanf(fpsine,"%e %e %e",array[0]+nread,array[1]+nread,array[2]+nread);
-    }
-
-    /* if we are done reading, then exit */
-    if (code==EOF) {
-      break;
-    }
-
-    /* if we did read, but not three items, complain and abort */
-    if (code!=3) {
-      fclose(fpsine);
-      abort();
-    }
-
-    /* increment the number of items read, and continue... */
-    nread++;
-  }
-
-  *n=nread;
-  *freq=array[0];
-  *real=array[1];
-  *imag=array[2];
-
-  return;
-}
-
-#else // !VMIC_RFM_PRODUCER
 
 #if 0
 inline static daq_data_t
@@ -1051,8 +560,6 @@ int daqd_c::configure_channels_reference_frame ()
 #endif
 }
 
-#endif // !VMIC_RFM_PRODUCER
-
 int daqd_c::find_channel_group (const char* channel_name)
 {
   for (int i = 0; i < num_channel_groups; i++) {
@@ -1062,8 +569,6 @@ int daqd_c::find_channel_group (const char* channel_name)
   }
   return 0;
 }
-
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
 
 // Keep pointers to the data samples for each data channel
 unsigned char *fast_adc_ptr [MAX_CHANNELS];
@@ -1202,492 +707,16 @@ daqd_c::full_frame(channel_t* frame_channels, long num_frame_channels, int frame
   
   return frame;
 }
-#endif
-
-#if defined(USE_FRAMECPP)
-#error
-
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-FrameCPP::Version_6::FrameH*
-#else
-FrameCPP::Frame*
-#endif
-daqd_c::full_frame(channel_t* frame_channels, long num_frame_channels, int frame_length_seconds)
-  throw() {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-  FrameCPP::Version_6::FrAdcData adc [num_channels];
-  FrameCPP::Version_6::FrRawData raw_data ("");
-  FrameCPP::Version_6::FrameH *frame = 0;
-  FrameCPP::Version_6::FrHistory history ("", 0, "framebuilder, framecpp-" + string(LDAS_VERSION));
-  /*
-      FrDetector( const std::string& name,
-                  REAL_8 longitude, REAL_8 latitude, REAL_4 elevation,
-                  REAL_4 armXazimuth, REAL_4 armYazimuth,
-                  REAL_4 armXaltitude, REAL_4 armYaltitude,
-                  REAL_4 armXmidpoint, REAL_4 armYmidpoint,
-                  INT_4S localTime, INT_4U dataQuality,
-                  const std::string& qaBitList );
-  */
-
-  FrameCPP::Version_6::FrDetector detector = daqd.getDetector1();
-
-#else
-  FrameCPP::AdcData adc [num_channels];
-  FrameCPP::RawData raw_data ("");
-  FrameCPP::Frame *frame = 0;
-  FrameCPP::History history ("", 0, "framebuilder, framecpp-" + string(LDAS_VERSION));
-  FrameCPP::Detector detector (daqd.detector_name,
-			       FrameCPP::Location (daqd.detector_longitude_degrees,
-						   daqd.detector_longitude_minutes,
-						   daqd.detector_longitude_seconds,
-						   daqd.detector_latitude_degrees,
-						   daqd.detector_latitude_minutes,
-						   daqd.detector_latitude_seconds),
-			       daqd.detector_elevation,
-			       daqd.detector_arm_x_azimuth,
-			       daqd.detector_arm_y_azimuth);
-#endif
-
-  // Create frame
-  //
-  try {
-
-    // FIXME: can't start counting frames from 0:
-    // The bug: FrameL.c uses the frame number in the EndOfFile structure
-    // to check if it is equal to a frame number in the header. Should use
-    // the frame counter instead.
-    // FrameCPP uses the number correctly.
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-    /*
-      FrameH( const std::string& name,
-              INT_4S run,
-              INT_4U frame,
-              const GPSTime& time,
-              INT_2U uLeapS,
-              const REAL_8& dt,
-              INT_4U dqual = 0 );
-    */
-    frame = new FrameCPP::Version_6::FrameH ("LIGO",
-					     0, // run number ??? buffpt -r> block_prop (nb) -> prop.run;
-					     1, // frame number
-					     FrameCPP::Version_6::GPSTime (0, 0),
-					     0, // leap seconds
-					     frame_length_seconds // dt
-					     );
-    frame -> refDetectorProc ().append (detector);
-
-    // Append second detector if it is defined
-    if (daqd.detector_name1.length() > 0) {
-      FrameCPP::Version_6::FrDetector detector1 = daqd.getDetector2();
-      frame -> refDetectorProc ().append (detector1);
-    }
-
-#else
-    frame = new FrameCPP::Frame ("LIGO",
-				 0, // run number ??? buffptr -> block_prop (nb) -> prop.run;
-				 1, // frame number
-				 FrameCPP::Time (0, 0),
-				 0,
-				 0, // localTime
-				 frame_length_seconds // dt
-				 );
-    frame -> setDetectProc (detector);
-#endif
-    frame -> setRawData (raw_data);
-    frame -> refHistory ().append (history);
-  } catch (bad_alloc) {
-    system_log(1, "Couldn't create full frame");
-    //shutdown_server ();
-    return NULL;
-  }
-
-  // Create ADCs
-  // :TODO: supports 4 byte integers too!
-  double *junk = new double [256/8 * 1024 * frame_length_seconds];
-  try {
-
-    // Fast channels
-    for (int i = 0; i < num_frame_channels; i++) {
-
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-      FrameCPP::Version_6::FrAdcData adc
-	= FrameCPP::Version_6::FrAdcData (frame_channels [i].name,
-					  frame_channels [i].group_num,
-					  i, // channel ???
-					  CHAR_BIT * frame_channels [i].bps,
-					  frame_channels [i].sample_rate,
-					  frame_channels [i].signal_offset,
-					  frame_channels [i].signal_slope,
-					  frame_channels [i].signal_units,
-					  frame_channels [i].data_type == _32bit_complex? frame_channels [i].signal_gain: .0, /* Freq shift */
-					  FrameCPP::Version_6::GPSTime( 0, 0 ),
-					  0,
-					  .0); /* heterodyning phase in radians */
-      frame -> getRawData () -> refAdc ().append (adc);
-
-      if (frame_channels [i].sample_rate > 16) {
-        /* Append ADC AUX vector to store 16 status words per second */
-        FrameCPP::Version_6::Dimension  aux_dims [1]
-	  = { FrameCPP::Version_6::Dimension (16 * frame_length_seconds,
-					      1. / 16,
-					      "") };
-        FrameCPP::Version_6::FrVect aux_vect("dataValid", 1, aux_dims, (INT_2S *) junk, "");
-        frame -> getRawData () -> refAdc () [i] -> refAux().append (aux_vect);
-      }
-
-      /* Append ADC data vector */
-      INT_4U nx = frame_channels [i].sample_rate * frame_length_seconds;
-      FrameCPP::Version_6::Dimension  dims [1] = { FrameCPP::Version_6::Dimension (nx, 1. / frame_channels [i].sample_rate, "time") };
-      switch (frame_channels [i].data_type) { 
-      case _32bit_complex:
-	{
-	  FrameCPP::Version_6::FrVect vect(frame_channels [i].name, 1, dims, (COMPLEX_8 *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _64bit_double:
-	{
-	  FrameCPP::Version_6::FrVect vect(frame_channels [i].name, 1, dims, (REAL_8 *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break; 
-	}
-      case _32bit_float: 
-	{
-	  FrameCPP::Version_6::FrVect vect(frame_channels [i].name, 1, dims, (REAL_4 *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _32bit_integer:
-	{
-	  FrameCPP::Version_6::FrVect vect(frame_channels [i].name, 1, dims, (INT_4S *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _64bit_integer:
-	{
-	  abort();
-	}
-      default:
-	{
-	  FrameCPP::Version_6::FrVect vect(frame_channels [i].name, 1, dims, (INT_2S *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      }
-#else
-#error Unsupported framecpp version
-      FrameCPP::AdcData adc
-	= FrameCPP::AdcData (frame_channels [i].name,
-			     frame_channels [i].group_num,
-			     i, // channel ???
-			     CHAR_BIT * frame_channels [i].bps,
-			     frame_channels [i].sample_rate,
-			     frame_channels [i].signal_offset,
-			     frame_channels [i].signal_slope,
-			     frame_channels [i].signal_units);
-
-      frame -> getRawData () -> refAdc ().append (adc);
-      INT_4U nx = frame_channels [i].sample_rate * frame_length_seconds;
-      FrameCPP::Dimension  dims [1] = { FrameCPP::Dimension (nx, 1. / frame_channels [i].sample_rate, "time") };
-      switch (frame_channels [i].data_type) { 
-      case _64bit_double:
-	{
-	  FrameCPP::Vect vect(frame_channels [i].name, 1, dims, (REAL_8 *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break; 
-	}
-      case _32bit_float: 
-	{
-	  FrameCPP::Vect vect(frame_channels [i].name, 1, dims, (REAL_4 *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _32bit_integer:
-	{
-	  FrameCPP::Vect vect(frame_channels [i].name, 1, dims, (INT_4S *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _64bit_integer:
-	{
-	  abort();
-	}
-      default:
-	{
-	  FrameCPP::Vect vect(frame_channels [i].name, 1, dims, (INT_2S *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      }
-#endif
-
-    }
-    delete [] junk;
-  } catch (bad_alloc) {
-    delete [] junk;
-    system_log(1, "Couldn't create ADC channel data");
-    delete frame;
-    //    shutdown_server ();
-    return NULL;
-  }
-  
-  return frame;
-}
-#endif
-
-#ifdef USE_FRAMECPP
-#error
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-FrameCPP::Version_6::FrameH*
-#else
-FrameCPP::Frame*
-#endif
-daqd_c::full_frame_long(long_channel_t* frame_channels, long num_frame_channels, int frame_length_seconds)
-  throw() {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-  FrameCPP::Version_6::FrAdcData adc [num_channels];
-  FrameCPP::Version_6::FrRawData raw_data ("");
-  FrameCPP::Version_6::FrameH *frame = 0;
-  FrameCPP::Version_6::FrHistory history ("", 0, "framebuilder, framecpp-" + string(LDAS_VERSION));
-  /*
-      FrDetector( const std::string& name,
-                  REAL_8 longitude, REAL_8 latitude, REAL_4 elevation,
-                  REAL_4 armXazimuth, REAL_4 armYazimuth,
-                  REAL_4 armXaltitude, REAL_4 armYaltitude,
-                  REAL_4 armXmidpoint, REAL_4 armYmidpoint,
-                  INT_4S localTime, INT_4U dataQuality,
-                  const std::string& qaBitList );
-  */
-
-  FrameCPP::Version_6::FrDetector detector = daqd.getDetector1();
-
-#else
-  FrameCPP::AdcData adc [num_channels];
-  FrameCPP::RawData raw_data ("");
-  FrameCPP::Frame *frame = 0;
-  FrameCPP::History history ("", 0, "framebuilder, framecpp-" + string(LDAS_VERSION));
-  FrameCPP::Detector detector (daqd.detector_name,
-			       FrameCPP::Location (daqd.detector_longitude_degrees,
-						   daqd.detector_longitude_minutes,
-						   daqd.detector_longitude_seconds,
-						   daqd.detector_latitude_degrees,
-						   daqd.detector_latitude_minutes,
-						   daqd.detector_latitude_seconds),
-			       daqd.detector_elevation,
-			       daqd.detector_arm_x_azimuth,
-			       daqd.detector_arm_y_azimuth);
-#endif
-
-  // Create frame
-  //
-  try{ 
-
-    // FIXME: can't start counting frames from 0:
-    // The bug: FrameL.c uses the frame number in the EndOfFile structure
-    // to check if it is equal to a frame number in the header. Should use
-    // the frame counter instead.
-    // FrameCPP uses the number correctly.
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-    /*
-      FrameH( const std::string& name,
-              INT_4S run,
-              INT_4U frame,
-              const GPSTime& time,
-              INT_2U uLeapS,
-              const REAL_8& dt,
-              INT_4U dqual = 0 );
-    */
-    frame = new FrameCPP::Version_6::FrameH ("LIGO",
-					     0, // run number ??? buffpt -r> block_prop (nb) -> prop.run;
-					     0, // frame number
-					     FrameCPP::Version_6::GPSTime (0, 0),
-					     0, // leap seconds
-					     frame_length_seconds // dt
-					     );
-    frame -> refDetectorProc ().append (detector);
-
-    // Append second detector if it is defined
-    if (daqd.detector_name1.length() > 0) {
-      FrameCPP::Version_6::FrDetector detector1 = daqd.getDetector2();
-      frame -> refDetectorProc ().append (detector1);
-    }
-
-#else
-    frame = new FrameCPP::Frame ("LIGO",
-				 0, // run number ??? buffptr -> block_prop (nb) -> prop.run;
-				 1, // frame number
-				 FrameCPP::Time (0, 0),
-				 0,
-				 0, // localTime
-				 frame_length_seconds // dt
-				 );
-    frame -> setDetectProc (detector);
-#endif
-    frame -> setRawData (raw_data);
-    frame -> refHistory ().append (history);
-  } catch (bad_alloc) {
-    system_log(1, "Couldn't create full frame");
-    //shutdown_server ();
-    return NULL;
-  }
-
-  // Create ADCs
-  // :TODO: supports 4 byte integers too!
-  double *junk = new double [256/8 * 1024 * frame_length_seconds];
-  try {
-
-    // Fast channels
-    for (int i = 0; i < num_frame_channels; i++) {
-
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-      FrameCPP::Version_6::FrAdcData adc
-	= FrameCPP::Version_6::FrAdcData (frame_channels [i].name,
-					  frame_channels [i].group_num,
-					  i, // channel ???
-					  CHAR_BIT * frame_channels [i].bps,
-					  frame_channels [i].sample_rate,
-					  frame_channels [i].signal_offset,
-					  frame_channels [i].signal_slope,
-					  frame_channels [i].signal_units,
-					  frame_channels [i].data_type == _32bit_complex? frame_channels [i].signal_gain: .0, /* Freq shift */
-					  FrameCPP::Version_6::GPSTime( 0, 0 ),
-					  0,
-					  .0); /* heterodyning phase in radians */
-      frame -> getRawData () -> refAdc ().append (adc);
-
-      if (frame_channels [i].sample_rate > 16) {
-        /* Append ADC AUX vector to store 16 status words per second */
-        FrameCPP::Version_6::Dimension  aux_dims [1]
-	  = { FrameCPP::Version_6::Dimension (16 * frame_length_seconds,
-					      1. / 16,
-					      "") };
-        FrameCPP::Version_6::FrVect aux_vect("dataValid", 1, aux_dims, (INT_2S *) junk, "");
-        frame -> getRawData () -> refAdc () [i] -> refAux().append (aux_vect);
-      }
-
-      /* Append ADC data vector */
-      INT_4U nx = frame_channels [i].sample_rate * frame_length_seconds;
-      FrameCPP::Version_6::Dimension  dims [1] = { FrameCPP::Version_6::Dimension (nx, 1. / frame_channels [i].sample_rate, "time") };
-      switch (frame_channels [i].data_type) { 
-      case _32bit_complex:
-	{
-	  FrameCPP::Version_6::FrVect vect(frame_channels [i].name, 1, dims, (COMPLEX_8 *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _64bit_double:
-	{
-	  FrameCPP::Version_6::FrVect vect(frame_channels [i].name, 1, dims, (REAL_8 *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break; 
-	}
-      case _32bit_float: 
-	{
-	  FrameCPP::Version_6::FrVect vect(frame_channels [i].name, 1, dims, (REAL_4 *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _32bit_integer:
-	{
-	  FrameCPP::Version_6::FrVect vect(frame_channels [i].name, 1, dims, (INT_4S *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _64bit_integer:
-	{
-	  abort();
-	}
-      default:
-	{
-	  FrameCPP::Version_6::FrVect vect(frame_channels [i].name, 1, dims, (INT_2S *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      }
-#else
-#error Unsupported framecpp version
-      FrameCPP::AdcData adc
-	= FrameCPP::AdcData (frame_channels [i].name,
-			     frame_channels [i].group_num,
-			     i, // channel ???
-			     CHAR_BIT * frame_channels [i].bps,
-			     frame_channels [i].sample_rate,
-			     frame_channels [i].signal_offset,
-			     frame_channels [i].signal_slope,
-			     frame_channels [i].signal_units);
-
-      frame -> getRawData () -> refAdc ().append (adc);
-      INT_4U nx = frame_channels [i].sample_rate * frame_length_seconds;
-      FrameCPP::Dimension  dims [1] = { FrameCPP::Dimension (nx, 1. / frame_channels [i].sample_rate, "time") };
-      switch (frame_channels [i].data_type) { 
-      case _64bit_double:
-	{
-	  FrameCPP::Vect vect(frame_channels [i].name, 1, dims, (REAL_8 *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break; 
-	}
-      case _32bit_float: 
-	{
-	  FrameCPP::Vect vect(frame_channels [i].name, 1, dims, (REAL_4 *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _32bit_integer:
-	{
-	  FrameCPP::Vect vect(frame_channels [i].name, 1, dims, (INT_4S *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      case _64bit_integer:
-	{
-	  abort();
-	}
-      default:
-	{
-	  FrameCPP::Vect vect(frame_channels [i].name, 1, dims, (INT_2S *) junk, "counts");
-	  frame -> getRawData () -> refAdc () [i] -> refData().append (vect);
-	  break;
-	}
-      }
-#endif
-
-    }
-    delete [] junk;
-  } catch (bad_alloc) {
-    delete [] junk;
-    system_log(1, "Couldn't create ADC channel data");
-    delete frame;
-    //    shutdown_server ();
-    return NULL;
-  }
-  
-  return frame;
-}
-#endif
 
 void *
 daqd_c::framer ()
 {
-
-#if defined(USE_FRAMECPP) || FRAMECPP_DATAFORMAT_VERSION >= 6
-#ifndef VMICRFM_PRODUCER
   // Put this  thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("full frame saver", 2);
-#endif
 
   long frame_cntr;
   int nb;
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
   FrameCPP::Version::FrameH *frame = 0;
-#elif FRAMECPP_DATAFORMAT_VERSION > 4
-  FrameCPP::Version_6::FrameH *frame = 0;
-  myImageFrameWriter *fw = 0;
-  strstream *ost;
-#else
-  FrameCPP::Frame *frame = 0;
-  FrameCPP::ImageFrameWriter *fw = 0;
-  strstream *ost;
-#endif
   if (frames_per_file != 1) {
 	printf("Not supported frames_per_file=%d\n", frames_per_file);
 	abort();
@@ -1704,7 +733,6 @@ daqd_c::framer ()
     return NULL;
   }
 
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
   // done creating a frame
   sem_post (&frame_saver_sem);
 
@@ -1984,369 +1012,7 @@ daqd_c::framer ()
 #endif
 
     }
-#else
 
-  // create frame image
-  //
-  try {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-    fw = new myImageFrameWriter (*(ost = new strstream ()));
-#else
-    fw = new FrameCPP::ImageFrameWriter (*(ost = new strstream ()));
-#endif
-    //
-    // Write all frames into image frame file
-    //
-    for (int i = 0; i < frames_per_file; i++)
-      fw -> writeFrame (*frame);
-    fw -> close ();
-  } catch (write_failure) {
-    system_log(1, "Couldn't create image frame writer; write_failure");
-    shutdown_server ();
-    return NULL;
-  }
-
-  int image_size = ost -> pcount ();
-
-  // Frame itself is not needed any more and may be freed
-  delete frame;
-  frame = 0;
-
-  // Finally, prepare an array of pointers to the ADC data
-#if 1
-  char *fast_adc_ptr [frames_per_file] [num_active_channels];
-  INT_2U *data_valid_ptr [frames_per_file] [num_active_channels];
-  INT_2U *aux_data_valid_ptr [frames_per_file] [num_active_channels];
-#else
-  #error Not supported
-  char *fast_adc_ptr [num_channels];
-  INT_2U *data_valid_ptr [num_channels];
-#endif
-
-  {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-    typedef myImageFrameWriter::OMI OMI;
-#else
-    typedef FrameCPP::ImageFrameWriter::OMI OMI;
-#endif
-    for (int i = 0; i < num_active_channels; i++)
-      for (int j = 0; j < frames_per_file; j++) {
-	INT_8U offs = 
-	  fw -> adcNamePositionMap [active_channels [i].name].first[j];
-	INT_4U classInstance = fw -> adcDataVectorPtr (offs);
-	INT_2U instance = classInstance  & 0xffff;
-	OMI v = fw -> vectInstanceOffsetMap.find (instance);
-
-#ifndef NDEBUG
-#if 0
-	cout << "in frame " << j << " vector " << (classInstance >> 16) << "\t" << (classInstance&0xffff) << endl;
-#endif
-	if (v == fw -> vectInstanceOffsetMap.end()) {
-	  cout << "vector " << instance << " not found!" << endl;
-	  exit(1);
-	}
-#endif
-
-	/* Deal with AUX vector -- status words */
-        classInstance = fw -> adcAuxVectorPtr (offs);
-        instance = classInstance  & 0xffff;
-        OMI aux_v = fw -> vectInstanceOffsetMap.find (instance);
-
-	/* Some of the ADCs may not have AUX status vector */
-	if (aux_v != fw -> vectInstanceOffsetMap.end()) {
-	   aux_data_valid_ptr[j][i] = (INT_2U *) fw->vectorData (aux_v -> second[j]);
-	} else {
-	   aux_data_valid_ptr[j][i] = 0;
-	}
-
-#if 1
-	fast_adc_ptr[j][i] = fw->vectorData (v -> second[j]);
-	data_valid_ptr[j][i] = fw->adcDataValidPtr (offs);
-#else
-	fast_adc_ptr[i] = fw->vectorData (v -> second[0]);
-	data_valid_ptr[i] = fw->adcDataValidPtr (offs);
-#endif
-
-      }
-  }
-
-
-  int dir_num = -1;
-  //  int tdir_num;
-
-  sem_post (&frame_saver_sem);
-
-  unsigned long status_ptr = block_size - 17 * sizeof(int) * num_channels;   // Index to the start of signal status memory area
-
-  bool skip_done = false;
-  for (frame_cntr = 0;; frame_cntr++)
-    {
-      int eof_flag = 0;
-      unsigned long fast_data_crc = 0;
-      unsigned long fast_data_length = 0;
-      time_t frame_start;
-      unsigned int run, frame_number;
-      time_t gps, gps_n;
-      int altzone, leap_seconds;
-      struct tm tms;
-      char tmpf [filesys_c::filename_max + 10];
-      char _tmpf [filesys_c::filename_max + 10];
-
-    /* Accumulate frame adc data */
-    for (int i = 0; i < frames_per_file; i++)
-      for (int bnum = 0; bnum < blocks_per_frame; bnum++)
-	{
-	  nb = b1 -> get (cnum);
-
-	  TNF_PROBE_1(daqd_c_framer_start, "daqds_c::framer",
-		      "got one block",
-		      tnf_long,   block_number,    nb);
-	  {
-	    circ_buffer_block_t *prop;
-	    char *buf;
-
-	    prop =  b1 -> block_prop (nb);
-
-            // restart waiting for GPS MOD fileDt
-	    if (!skip_done) { // do it only first time
-		while (prop -> prop.gps % (frames_per_file*blocks_per_frame)) {
-			b1 -> unlock (cnum);
-	  		nb = b1 -> get (cnum);
-	    		prop =  b1 -> block_prop (nb);
-		}
-		skip_done = true;
-	    }
-
-	    buf =  b1 -> block_ptr (nb);
-	    if (!prop -> bytes)
-	      {
-		b1 -> unlock (cnum);
-		eof_flag = 1;
-		DEBUG1(cerr << "framer EOF" << endl);
-		break;
-	      }
-	    else
-	      {
-		if (!(i || bnum))
-		  {
-		    run = prop -> prop.run;
-		    gps = prop -> prop.gps; gps_n = prop -> prop.gps_n;
-		    altzone = prop -> prop.altzone;
-		    leap_seconds = prop -> prop.leap_seconds;
-
-		    //		    frame_start = prop -> timestamp;
-		    frame_start = gps;
-		    // Frame number is based upon the cycle counter
-		    frame_number = prop -> prop.cycle / 16 / (frames_per_file * blocks_per_frame);
-		  }
-		if (! bnum) {
-		    // zero out adc status for new frame
-		    for (int j = 0; j < num_active_channels; j++) {
-			*((unsigned char *)(data_valid_ptr[i][j])) = 0;
-			*(((unsigned char *)(data_valid_ptr[i][j])) + 1) = 0;
-		    }
-		}
-		int j;
-
-		// Put data into the ADC structures
-#if 1
-		for (j = 0; j < num_active_channels; j++) {
-#ifdef USE_BROADCAST
-		  // Tested at the 40m on 11 jun 08
-		  // Short data needed to be sample swapped
-		  if (active_channels [j].bps == 2) {
-		    short *dest = (short *)(fast_adc_ptr[i][j] + bnum*active_channels [j].bytes);
-		    short *src = (short*)(buf + active_channels [j].offset);
-		    unsigned int samples = active_channels [j].bytes / 2;
-		    for (int k = 0; k < samples; k++) dest[k] = src[k^1];
-		  } else {
-		    memcpy (fast_adc_ptr[i][j] + bnum*active_channels [j].bytes,
-			  buf + active_channels [j].offset,
-			  active_channels [j].bytes);
-		  }
-#else
-		  memcpy (fast_adc_ptr[i][j] + bnum*active_channels [j].bytes,
-			  buf + active_channels [j].offset,
-			  active_channels [j].bytes);
-#endif
-
-		  // Status is ORed blocks_per_frame times
-#define	 memor2(dest, tgt) \
- *((unsigned char *)(dest)) |= *((unsigned char *)(tgt)); \
- *(((unsigned char *)(dest)) + 1) |= *(((unsigned char *)(tgt)) + 1);
-
-		  // A pointer to 16 status words for this second
-		  char *stptr = buf + status_ptr
-			+ 17 * sizeof(int) * active_channels [j].seq_num + 2;
-
-		  // This converts integer status into short
-		  memor2 (data_valid_ptr[i][j], stptr);
-
-		  /* Calculate CRC on fast data only */
-		  /* Do not calculate CRC on bad data */
-		  static short zero_short = 0;
-		  if (active_channels [j].sample_rate > 16
-		      && !memcmp(data_valid_ptr[i][j], &zero_short, sizeof(short))) {
-		    fast_data_crc = crc_ptr (buf + active_channels [j].offset,
-					     active_channels [j].bytes,
-					     fast_data_crc);
-	            fast_data_length += active_channels [j].bytes;
-		  }
-
-		  if (aux_data_valid_ptr[i][j]) {
-		    stptr += 4;
-		    for (int k = 0; k < 16; k++)  {
-		      memset(aux_data_valid_ptr[i][j] + k + bnum*16, 0, sizeof(INT_2U));
-		      memor2(aux_data_valid_ptr[i][j] + k + bnum*16, stptr + 4 * k);
-		    }
-		  }
-#undef memor2
-		}
-#else
- 		#error Not supported
-		for (j = 0; j < num_channels; j++) {
-		  memcpy (fast_adc_ptr [j],
-			  buf + channels [j].offset,
-			  channels [j].bytes);
-		  memcpy (data_valid_ptr [j],
-			  buf + status_ptr + 17 * sizeof(int) * channels [j].seq_num,
-			  sizeof(INT_2U));
-		}
-#endif
-
-//		cerr << "saver; block " << nb << " bytes " << prop -> bytes << endl;
-	      }
-	  }
-	  TNF_PROBE_0(daqd_c_framer_end, "daqd_c::framer", "end of block processing");
-	  b1 -> unlock (cnum);
-	}
-
-      /* finish CRC calculation for the fast data */
-#if EPICS_EDCU == 1
-      /* Send fast data CRC to Epics for display and checking */
-      extern unsigned int pvValue[1000];
-      pvValue[13] = crc_len (fast_data_length, fast_data_crc);
-#endif
-
-      if (eof_flag)
-	break;
-
-      gmtime_r (&frame_start, &tms);
-      tms.tm_mon++;
-
-      // FIXME have a function to set them all at once:
-      // fw -> setFrameVars (frame_cntr, gps, gps_n, leap_seconds, altzone);
-/*
-  inline void setFrameFileAttributes(INT_4S run, INT_4U frameNumber,
-                                     INT_4U dqual, INT_4U gps, INT_2U gpsInc,
-                                     INT_4U gpsn,
-                                     INT_2U leapS, INT_4S localTime)
-*/
-
-      fw -> setFrameFileAttributes (run, frame_number, 0,
-				    gps, blocks_per_frame, gps_n,
-				    leap_seconds, altzone);
-
-      DEBUG(3, cerr << "GPS seconds are " << gps << endl);
-      dir_num = fsd.getDirFileNames (gps, _tmpf, tmpf, frames_per_file, blocks_per_frame);
-
-      int fd = creat (_tmpf, 0644);
-      if (fd < 0) {
-	system_log(1, "Couldn't open full frame file `%s' for writing; errno %d", _tmpf, errno);
-	fsd.report_lost_frame ();
-	set_fault ();
-      } else {
-
-#if defined(DIRECTIO_ON) && defined(DIRECTIO_OFF)
-        if (daqd.do_directio) directio (fd, DIRECTIO_ON);
-#endif
-
-
-	TNF_PROBE_1(daq_c_framer_frame_write_start, "daqd_c::framer",
-		    "frame write",
-		    tnf_long,   frame_number,   frame_number);
-	  
-	// Calculate md5 check sum
-	if (cksum_file != "") {
-	  unsigned long crc = fr_cksum(cksum_file, tmpf, (unsigned char *)(ost -> str ()), image_size);
-	  system_log(5, "%d\t%x\n", gps, crc);
-	}
-
-#ifdef not_def
-	   try { 
-		std::ofstream out(cksum_file.c_str(), ios::app);
-		unsigned char resblock[16];
-		if (cksum_file == "md5sum.log") {
-			md5_buffer (ost -> str (), image_size, resblock);
-			for (int k = 0; k < 16; k++) {
-			  char s[3];
-			  sprintf(s,"%02x",resblock[k]);
-			  out << s;
-			}
-			out << tmpf << endl;
-		} else {
-			// Zero out chkFlag and chkSum in FrEndOfFile
-			memset((((INT_4U*)(((unsigned char *)ost -> str ()) + image_size)) - 3), 0, 8);
-			// do CRC sum
-			long bytes = image_size;
-			unsigned char *cp = (unsigned char *)ost -> str ();
-			unsigned long crc = 0;
-			while(bytes--)
-				crc = (crc << 8) ^ crctab[((crc >> 24) ^ *(cp++)) & 0xFF];
-			bytes = image_size;
-			while (bytes > 0) {
-				crc = (crc << 8) ^ crctab[((crc >> 24) ^ bytes) & 0xFF];
-				bytes >>= 8;
-			}
-			crc = ~crc & 0xFFFFFFFF;
-			out << crc << " " << image_size << " " << tmpf << endl;
-			// Set the flag and the CRC
-			INT_4U one = 1;
-			memcpy((((INT_4U*)(((unsigned char *)ost -> str ()) + image_size)) - 3), &one, 4);
-			memcpy((((INT_4U*)(((unsigned char *)ost -> str ()) + image_size)) - 2), &crc, 4);
-		}
-	   } catch (...) {
-		system_log(1, "failed to open `%s' for output", cksum_file.c_str());
-	   }
-
-#endif
-
-
-	/* Write out a frame */
-	int nwritten = write (fd, ost -> str (), image_size);
-        if (nwritten == image_size) {
-	  if (rename(_tmpf, tmpf)) {
-	    system_log(1, "failed to rename file; errno %d", errno);
-	    fsd.report_lost_frame ();
-	    set_fault ();
-	  } else {
-	    DEBUG(3, cerr << "frame " << frame_cntr << "(" << frame_number << ") is written out" << endl);
-	    // Successful frame write
-	    fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
-	  }
-	} else {
-	  system_log(1, "failed to write full frame out; errno %d", errno);
-	  fsd.report_lost_frame ();
-	  set_fault ();
-	}
-	close (fd);
-	TNF_PROBE_0(daqc_c_framer_frame_write_end, "daqd_c::framer", "frame write");
-      }
-
-#if EPICS_EDCU == 1
-      /* Epics display: full res data look back size in seconds */
-      extern unsigned int pvValue[1000];
-      pvValue[7] = fsd.get_max() - fsd.get_min();
-
-      /* Epics display: current full frame saving directory */
-      extern unsigned int pvValue[1000];
-      pvValue[8] = fsd.get_cur_dir();
-#endif
-
-    }
-#endif
-
-#endif
   return NULL;
 }
 
@@ -2375,13 +1041,6 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
     return 1;
   }
 
-#ifdef not_def
-  if (! (b1 = new circ_buffer (0, main_buffer_size, block_size))) {
-    *yyout << "main couldn't construct circular buffer, memory exhausted" << endl;
-    return 1;
-  }
-#endif
-
   // FIXME: This buffer is never freed
   b1 = new (mptr) circ_buffer (0, main_buffer_size, block_size);
   if (! (b1 -> buffer_ptr ())) {
@@ -2391,49 +1050,6 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
     return 1;
   }
 
-#ifdef not_def
-  // Run all consumer saver threads
-  // These are for every command line paramameter -- the old way
-  for (i = 0; i < daqd.num_outputs; i++)
-    {
-      int cons_num;
-
-      //      b1 -> set_cons_num (b1 -> get_cons_num () + 1);
-      if ((cons_num = b1 -> add_consumer ()) >= 0)
-	{
-	  pthread_attr_t attr;
-	  pthread_attr_init (&attr);
-	  pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
-	  pthread_create (&consumer [i], &attr, drain, (void *) cons_num);
-	  pthread_attr_destroy (&attr);
-	  DEBUG(2, cerr << "consumer created; tid=" << consumer [i] << endl);
-	}
-      else
-	{
-	  system_log(1, "failed to create consumer %d", i);
-	  return 1;
-	}
-    }
-#endif
-
-#if defined(VMICRFM_PRODUCER)
-#ifdef VMICRFM_PRODUCER
-  assert(rm_mem_ptr);
-#endif
-
-  vmic_pv_len = 0;
-
-  DEBUG(2, cerr << "Configuring producer put arrays" << endl);
-#endif
-
-#ifndef FILE_CHANNEL_CONFIG
-  move_buf = (unsigned char *) malloc (channels [0].rm_block_size);
-  if (! move_buf) {
-    system_log(1,"out of memory");
-    exit (1);
-  }
-  memset (move_buf, 255, channels [0].rm_block_size);
-#else
   int s = daqd.block_size / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
   if (s < 128*1024) s = 128*1024;
 #ifdef USE_BROADCAST
@@ -2451,7 +1067,6 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
   printf("Allocated move buffer size %d bytes\n", s);
 #ifdef USE_BROADCAST
   move_buf += 2048; // Keep broadcast header space in front of data space
-#endif
 #endif
 
   unsigned long  status_ptr = block_size - 17 * sizeof(int) * num_channels;   // Index to the start of signal status memory area
@@ -2484,7 +1099,6 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
 
   int cur_dcu = -1;
   for (int i = 0; i < num_channels + 1; i++) {
-#ifdef _ADVANCED_LIGO
     int t = 0;
     if (i == num_channels) t = 1;
     else t = cur_dcu != -1 && cur_dcu != channels[i].dcu_id;
@@ -2531,7 +1145,6 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
 	}
     }
 #endif
-#endif
     if (i == num_channels) continue;
     cur_dcu = channels[i].dcu_id;
 
@@ -2553,7 +1166,6 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
     vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + channels [i].rm_offset;
     vmic_pv [vmic_pv_len].dest_vec_idx = channels [i].offset;
     vmic_pv [vmic_pv_len].dest_status_idx = status_ptr + 17 * sizeof(int) * i;
-#ifdef FILE_CHANNEL_CONFIG
 #if EPICS_EDCU == 1
     if (IS_EPICS_DCU(channels [i].dcu_id)) {
       vmic_pv [vmic_pv_len].src_status_addr = edcu1.channel_status + i;
@@ -2576,27 +1188,18 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
       vmic_pv [vmic_pv_len].src_status_addr = dcuStatus[channels [i].ifoid] + channels [i].dcu_id;
     }
 #endif
-#endif
     vmic_pv [vmic_pv_len].vec_len = channels [i].bytes/16;
     // Byteswap all Myrinet data on Sun
-#if defined(sun) && !defined(USE_BROADCAST)
-    if (IS_MYRINET_DCU(cur_dcu)) vmic_pv [vmic_pv_len].bsw = channels [i].bps;
-    else vmic_pv [vmic_pv_len].bsw = 0;
-#else
     vmic_pv [vmic_pv_len].bsw = 0;
-#endif
     DEBUG(10, cerr << channels [i].name << endl);
     DEBUG(10, cerr << "vmic_pv: " << hex << (unsigned long) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
     vmic_pv_len++;
   }
 
-#if defined(VMICRFM_PRODUCER)
-#endif // #if defined(VMICRFM_PRODUCER)
-
 #if EPICS_EDCU == 1
   /* Epics display (Kb/Sec) */
   extern unsigned int pvValue[1000];
-#ifdef _ADVANCED_LIGO
+
   // Want to have the size of DAQ data only
   pvValue[2] = 0;
   for (int i = 0; i < 2; i++) // Ifo number
@@ -2604,9 +1207,6 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
           pvValue[2] += dcuDAQsize[i][j];
   pvValue[2] *= 16;
   pvValue[2] /= 1024; // make it kilobytes
-#else
-  pvValue[2] = block_size/1024;
-#endif
 
   /* Epics display: memory buffer look back */
   pvValue[6] = main_buffer_size;
@@ -2679,19 +1279,6 @@ daqd_c::start_producer (ostream *yyout)
   //  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
 
   int err_no;
-  
-#if defined(VMICRFM_PRODUCER)
-  if (data_feeds > 1) {
-    if (err_no = pthread_create (&producer1.tid1, &attr,
-			       (void *(*)(void *))producer1.grabIfoData_static,
-			       (void *) &producer1)) {
-      pthread_attr_destroy (&attr);
-      system_log(1, "pthread_create() err=%d", err_no);
-      return 1;
-    }
-  }
-#endif
-
   if (err_no = pthread_create (&producer1.tid, &attr,
 			       (void *(*)(void *))producer1.frame_writer_static,
 			       (void *) &producer1)) {
@@ -2740,7 +1327,7 @@ daqd_c::start_frame_saver (ostream *yyout)
   return 0;
 }
 
-#ifdef not_def
+#if 0
 void *
 drain (void *a)
 {
@@ -2766,22 +1353,10 @@ usage (int status)
   cerr << "California Institute of Technology, LIGO Project" << endl;
   cerr << "Client communication protocol version " << DAQD_PROTOCOL_VERSION << "." << DAQD_PROTOCOL_REVISION << endl << endl;
 
-#if !defined(VMICRFM_PRODUCER)
-  cerr << "Usage: \n\t" << programname << " [-f <input frame file name>]" << endl
-#else
-  cerr << "Usage:\n\t" << programname << endl
-#endif
+  cerr << "Usage: \n\t" << programname << endl
        << "\t[-c <configuration file (default -- $HOME/.daqdrc)>]" << endl << endl;
-#if !defined(VMICRFM_PRODUCER)
-  cerr << "\t[-s <frame writer pause usec (default -- 1 sec)>]" << endl << endl;
-#endif
+  //cerr << "\t[-s <frame writer pause usec (default -- 1 sec)>]" << endl << endl;
   
-#if defined(VMICRFM_PRODUCER)
-  cerr << "Data feed:\n\tVMIC reflected memory" << endl;
-#else
-  //cerr << "Data feed:\n\tframe file passed with `-f' flag" << endl;
-#endif
-
   cerr << endl << "This executable compiled on:" << endl;
   cerr << "\t" << PRODUCTION_DATE << endl << "\t" << PRODUCTION_MACHINE << endl;
 
@@ -2794,12 +1369,9 @@ parse_args (int argc, char *argv [])
   int c;
   extern char *optarg;
   extern int optind;
+  FILE *file = 0;
 
-#if !defined(VMICRFM_PRODUCER)
   while ((c = getopt (argc, argv, "n2hHf:s:c:l:")) != -1)
-#else
-  while ((c = getopt (argc, argv, "n2hHc:l:")) != -1)
-#endif
     {
       switch (c) {
       case 'H':
@@ -2807,18 +1379,16 @@ parse_args (int argc, char *argv [])
 	usage (0);
 	break;
       case 'l':
-        freopen(optarg, "w", stdout);
+        file = freopen(optarg, "w", stdout);
 	setvbuf(stdout, NULL, _IOLBF, 0);
         stderr = stdout;
         break;
-#if !defined(VMICRFM_PRODUCER)
       case 'f':
 	strcpy (daqd.frame_fname, optarg);
 	break;
       case 's':
 	daqd.writer_sleep_usec = atoi (optarg);
 	break;
-#endif
       case 'c': // Config file location
 	daqd.config_file_name = strdup (optarg);
 	break;
@@ -2845,27 +1415,8 @@ shandler (int a) {
 	system_log(1,"going down on signal %d", a);
 	seteuid (0); // Try to switch to superuser effective uid
         sprintf (p,"/bin/gcore %d", getpid());
-        system (p);
+        int error = system (p);
 }
-
-#ifdef USE_FRAMECPP
-// this is here to fix c++ compiler bug when it fails to call
-// constructor on static objects located in shared libraries.
-// This is observed on cdssol10 
-// SunOS cdssol10 5.6 Generic_105181-23 sun4u sparc SUNW,Ultra-60
-// >>> c++ -v
-// Reading specs from /usr/local/lib/gcc-lib/sparc-sun-solaris2.6/2.95.2/specs
-// gcc version 2.95.2 19991024 (release)
-
-#if FRAMECPP_DATAFORMAT_VERSION <= 4
-namespace FrameCPP
-{
-  /* Registry of supported dictionaries */
-  Library library;
-}
-#endif
-#endif
-
 
 #ifdef USE_SYMMETRICOM
 
@@ -3002,14 +1553,6 @@ main (int argc, char *argv [])
 #endif
 #endif
 
-#ifdef USE_FRAMECPP
-#if FRAMECPP_DATAFORMAT_VERSION <= 4
-  {
-    FrameCPP::Dictionary *dict = FrameCPP::library.getCurrentVersionDictionary();
-    // cerr << "Current version is " << dict->getVersion() << endl;
-  }
-#endif
-#endif
 
   // see if `/bin/gcore' command has setuid flag
   // give warning if it doesn't
@@ -3022,9 +1565,6 @@ main (int argc, char *argv [])
     (void) signal (SIGILL, shandler);
     (void) signal (SIGTRAP, shandler);
     (void) signal (SIGABRT, shandler);
-#ifdef sun
-    (void) signal (SIGEMT, shandler);
-#endif
     (void) signal (SIGFPE, shandler);
     (void) signal (SIGBUS, shandler);
     (void) signal (SIGSEGV, shandler);
@@ -3044,9 +1584,7 @@ main (int argc, char *argv [])
   }
 
   // Switch effective to real user ID -- can always switch back to saved effective
-#ifdef __linux__
-  nice(-20);
-#endif
+  int error = nice(-20);
   seteuid (getuid ());
 
 #if defined(GPS_YMDHS_IN_FILENAME)
@@ -3087,7 +1625,7 @@ main (int argc, char *argv [])
 #ifdef DAEMONIC
   {
 
-#ifdef not_def
+#if 0
     if (fork ())
       exit (0); // parent terminates
 
@@ -3110,7 +1648,7 @@ main (int argc, char *argv [])
     open("/dev/null", O_RDONLY);
     open("/dev/null", O_WRONLY);
     open("/dev/null", O_RDONLY);
-#endif // not_def
+#endif // 0
 
 
     openlog (programname, LOG_PID, LOG_USER);
@@ -3124,48 +1662,9 @@ main (int argc, char *argv [])
 
   pthread_mutex_init (&framelib_lock, NULL);
 
-#if defined(VMICRFM_PRODUCER)
-  daqd.init_vmicrfm ();
-#endif
-
 #ifdef USE_MX
 void open_mx(void);
 open_mx();
-#elif defined(USE_GM)
-#if defined(sun) && defined(_ADVANCED_LIGO)
-    if (!daqd.no_myrinet) {
-      int res = gm_setup();
-      if (res != 0) {
-        system_log(1, "couldn't setup Myrinet\n");
-        exit (1);
-      }
-    }
-#endif
-#endif
-
-
-#ifdef not_def
-  if (farg < argc) {
-    /* First argument is the producer input file */
-    if ((daqd.ifile [0] = open (argv [farg], O_RDONLY)) < 0)
-      {
-	system_log(1, "can't open input file `%s' errno=%d", argv [farg], errno);
-	exit (1);
-      }
-  }
-  daqd.num_inputs = 1;
-  farg++;
-
-  /* Consumer for each command line parameter */
-  for (i = farg; i < argc; i++)
-    {
-      if ((daqd.files [i-farg] = open (argv [i], O_WRONLY | O_CREAT | O_TRUNC, 0777)) < 0)
-	{
-	  system_log(1, "can't open `%s' errno=%d", argv [i], errno);
-	  exit (1);
-	}
-      daqd.num_outputs++;
-    }
 #endif
 
   /* Process startup file */
@@ -3206,9 +1705,7 @@ open_mx();
       exit (1);
     }
 
-#ifdef __linux__
   sleep(0xffffffff);
-#endif
 
   main_exit_status = 0;
   pthread_exit (&main_exit_status);
@@ -3261,7 +1758,7 @@ void regerr() { abort();};
 char ipexpbuf [ESIZE];
 char dec_num_expbuf [ESIZE];
 
-#ifdef not_def
+#if 0
 char *ipregexp = "^[0-9]\\{1,3\\}\\.[0-9]\\{1,3\\}\\.[0-9]\\{1,3\\}\\.[0-9]\\{1,3\\}$";
 #endif
 
@@ -3273,16 +1770,11 @@ char *dec_num_regexp = "^[0-9]\\{1,\\}$";
 #define GETC()       (*sp++)
 #define PEEKC()      (*sp)
 #define UNGETC(c)    (--sp)
-#ifdef __linux__
 #define RETURN(c)    ;
 #define __DO_NOT_DEFINE_COMPILE
-#else
-#define RETURN(c)    return c;
-#endif
 #define ERROR(c)     ;
 #include <regexp.h>
 
-#ifdef __linux__
 // This was snatched from /usr/include/regexp.h on a redhat 8 system
 // The reason for this was a signed/unsigned char C++ compile bug.
 
@@ -3394,7 +1886,6 @@ compile (char *__restrict instring, char *__restrict expbuf,
   /* Everything is ok.  */
   RETURN ((char *) (__expr_ptr->buffer + __expr_ptr->used));
 }
-#endif
 
 void
 daqd_c::compile_regexp () 
@@ -3414,12 +1905,10 @@ daqd_c::is_valid_ip_address (char *str)
 int
 daqd_c::is_valid_dec_number (char *str)
 {
-#ifdef __linux__
   // Somehow the regular expression stuff is broken on amd64 linux... 
   char *endptr;
-  strtol(str, &endptr, 10);
+  long int res = strtol(str, &endptr, 10);
   return endptr == (str + strlen(str));
-#endif
-  return step (str, dec_num_expbuf);
+  //return step (str, dec_num_expbuf);
 }
 

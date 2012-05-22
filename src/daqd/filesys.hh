@@ -401,17 +401,6 @@ static const int digits_in_dir = 5;
     return file_gps;
   }
 
-#ifdef not_def
-  /*
-    Get file name in `*fname' based on the timestamp in `t'
-    and the directory number in `dnum'
-  */
-  void filename_dir (time_t t, char *fname, int dnum) {
-    locker mon (this);
-    _filename_dir (t, fname, dnum);
-  }
-#endif
-
   /*
     Get temporary file name in `*tmpfname' and the filename in `*fname'
     based on the timestamp passed in `t'.
@@ -432,7 +421,7 @@ static const int digits_in_dir = 5;
 
 if (gps_time_dirs) {
     	char buf[128];
-	sprintf(buf, "%d", t);
+	sprintf(buf, "%d", (int)t);
 	int blen = strlen(buf);
 	if (digits_in_dir < blen) 
 		buf[blen - digits_in_dir] = 0;
@@ -445,22 +434,22 @@ if (gps_time_dirs) {
     mkdir(dname, 0777);
 
     if ( framedt != 1) {
-      sprintf (fname, "%s/%s/%s%d-%d%s", path, buf, prefix, t, framedt, suffix);
-      sprintf (tmpfname, "%s/%s/.%s%d-%d%s", path, buf, prefix, t, framedt, suffix);
+      sprintf (fname, "%s/%s/%s%d-%d%s", path, buf, prefix, (int)t, framedt, suffix);
+      sprintf (tmpfname, "%s/%s/.%s%d-%d%s", path, buf, prefix, (int)t, framedt, suffix);
     } else {
-      sprintf (fname, "%s/%s/%s%d%s", path, buf, prefix, t, suffix);
-      sprintf (tmpfname, "%s/%s/.%s%d%s", path, buf, prefix, t, suffix);
+      sprintf (fname, "%s/%s/%s%d%s", path, buf, prefix, (int)t, suffix);
+      sprintf (tmpfname, "%s/%s/.%s%d%s", path, buf, prefix, (int)t, suffix);
     }
 } else {
 
     DEBUG(22, std::cerr << "getDirFileNames(): t=" << t << ";dnum=" << dnum << std::endl);
 
     if ( framedt != 1) {
-      sprintf (fname, "%s%d/%s%d-%d%s", path, dnum, prefix, t, framedt, suffix);
-      sprintf (tmpfname, "%s%d/.%s%d-%d%s", path, dnum, prefix, t, framedt, suffix);
+      sprintf (fname, "%s%d/%s%d-%d%s", path, dnum, prefix, (int)t, framedt, suffix);
+      sprintf (tmpfname, "%s%d/.%s%d-%d%s", path, dnum, prefix, (int)t, framedt, suffix);
     } else {
-      sprintf (fname, "%s%d/%s%d%s", path, dnum, prefix, t, suffix);
-      sprintf (tmpfname, "%s%d/.%s%d%s", path, dnum, prefix, t, suffix);
+      sprintf (fname, "%s%d/%s%d%s", path, dnum, prefix, (int)t, suffix);
+      sprintf (tmpfname, "%s%d/.%s%d%s", path, dnum, prefix, (int)t, suffix);
     }
 }
     return dnum;
@@ -564,43 +553,12 @@ if (gps_time_dirs) {
     }
   }
 
-  /*
-    The rest you just ignore
-  */
-
-#ifdef not_def
-
-  void set_min_dir (time_t ts, int dnum) {
-      locker mon (this);
-      assert (dnum < num_dirs);
-      dir [dnum].min_time =  ts;
-  }
-
-  void set_max_dir (time_t ts, int dnum) {
-      locker mon (this);
-      assert (dnum < num_dirs);
-      dir [dnum].max_time =  ts;
-  }
-
-  void set_min_max_dir (time_t ts_min, time_t ts_max, int dnum) {
-      locker mon (this);
-      assert (dnum < num_dirs);
-      dir [dnum].min_time =  ts_min;
-      dir [dnum].max_time =  ts_max;
-  }
-#endif
-
   time_t get_frames_saved () {locker mon (this); return frames_saved;}
   time_t get_frames_lost () {locker mon (this); return frames_lost;}
   time_t get_min () {locker mon (this); return min_time;}
   time_t get_max () {locker mon (this); return max_time;}
   int is_empty () {locker mon (this); return !(min_time | max_time);}
   int get_cur_dir () {locker mon (this); return cur_update_dir;}
-
-#ifdef not_def
-  // Public class methods
-  static int directory_not_good (ostream *, char *);
-#endif
 
   // _update_dir() call (or update_dir() call) puts new filename in this buffer.
   circ_buffer *cb;
@@ -662,7 +620,7 @@ inline void
 filesys_c::secstof (time_t secs, char *outs)
 {
 #if ! defined(GPS_YMDHS_IN_FILENAME)
-  sprintf (outs, "%d", secs);
+  sprintf (outs, "%d", (int)secs);
 #else
   struct tm tms;
   

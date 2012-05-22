@@ -11,7 +11,6 @@
 #include <math.h>
 #include <signal.h>
 #include <sys/mman.h>
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -19,12 +18,6 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <limits.h>
-#ifdef sun
-#include <sys/priocntl.h>
-#include <sys/rtpriocntl.h>
-#include <sys/lwp.h>
-#endif
-
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -49,22 +42,6 @@ using namespace std;
 extern daqd_c daqd;
 extern pthread_mutex_t framelib_lock;
 
-#ifdef USE_FRAMECPP
-#if FRAMECPP_DATAFORMAT_VERSION <= 4
-class myImageFrameWriter : public FrameCPP::ImageFrameWriter {
-public:
-	myImageFrameWriter(std::strstream &s): FrameCPP::ImageFrameWriter(s) {}
-	void writeTOC() {
-		Output::mClosed = false;
-		(const_cast<std::vector<INT_8U>&>(getPositionEOF())).clear();
-		// Write table of contents
-		TOC::write ( *this );
-	}
-};
-#else
-#include "myimageframewriter.hh"
-#endif
-#endif
 
 
 /*
@@ -75,118 +52,6 @@ public:
 void *
 net_writer_c::send_frames (void)
 {
-#ifdef USE_FRAMECPP
-  int err_flag = 0;
-  time_t gps = offline.gps;
-  time_t barrier = offline.gps + offline.delta;
-  
-  if (! send_client_header (1))
-    {
-      transmission_block_size = 0; // Set this to the frame file length
-
-      unsigned int header [5];
-      // size of the transmission block minus size of this length word
-      header [0] = htonl (4 * sizeof (unsigned int) + transmission_block_size);
-      // number of seconds of data
-      header [1] = htonl (1);
-
-      for (time_t i = gps; i < barrier; i++) { // For every second required
-	time_t file_first_second;
-	time_t file_length_seconds;
-	time_t file_second_after_the_last;
-	char tmpf [filesys_c::filename_max + 10];
-
-	// Determine filename and for what time there is data in the file
-	if (fsd -> filename (i, tmpf, &file_first_second, &file_length_seconds) < 0)
-	  {
-#ifdef not_def
-	    system_log(1, "net_writer_c::send_frames(): Couldn't map GPS time %d onto the file name", i);
-	    if (send_zero_block (i, 0))
-	      break;
-#endif
-	    continue;
-	  }
-	file_second_after_the_last = file_first_second + file_length_seconds;
-
-	int fildes = open (tmpf, O_RDONLY);
-	if (fildes < 0) {
-	  system_log(2, "net_writer_c::send_frames(): can't open `%s'", tmpf);
-
-#ifdef not_def
-	  if (send_zero_block (i, 0))
-	    break;
-#endif
-
-	  continue;
-	}
-
-	// Need to stat file to get its length
-	struct stat st;
-	if (fstat (fildes, &st) < 0) {
-	  close (fildes);
-	  system_log(2, "net_writer_c::send_frames(): can't fstat `%s'", tmpf);
-
-#ifdef not_def
-	  if (send_zero_block (i, 0))
-	    break;
-#endif
-
-	  continue;
-	}
-	DEBUG1(cerr << "net_writer::send_frames(): opened `" << tmpf << "'" << endl);
-
-	transmission_block_size = st.st_size;
-	header [0] = htonl (4 * sizeof (unsigned int) + transmission_block_size);
-
-	// send block length and the header
-	header [2] = htonl (0);
-	header [3] = htonl (0);
-	header [4] = htonl (seq_num++);
-
-	// Send header
-	if (! send_to_client ((char *) &header, 5 * sizeof (unsigned int))) {
-
-	  // Memory map the file
-	  char *bptr = (char *) mmap ((caddr_t) 0, transmission_block_size, (PROT_READ | PROT_WRITE),
-				      MAP_PRIVATE, fildes, 0);
-
-	  if (bptr == MAP_FAILED) {
-	    system_log(2, "net_writer_c::send_frames(): couldn't mmap `%s'", tmpf);
-
-#ifdef not_def
-	    send_zero_block (i, 0);
-#endif
-
-	    err_flag = 1;
-	  } else {
-	    // Send frame data from the memory mapped frame file
-	    if (send_to_client (bptr, transmission_block_size))
-	      err_flag = 1;
-	    // Unmap mapped frame file
-	    munmap (bptr, transmission_block_size);
-	  }
-	} else {
-	  err_flag = 1;
-	}
-
-	close(fildes);
-
-#ifndef __linux__
-	yield ();
-#endif
-
-	if (err_flag)
-	  break;
-      } // end for every second required
-
-      (void) send_trailer ();
-    }
-  disconnect_srvr_addr ();
-
-  s_link *nwres = daqd.net_writers.remove (this);
-  assert (nwres);
-
-#endif
   return 0;
 }
 
@@ -211,7 +76,7 @@ net_writer_c::send_files (void)
   }
   pthread_mutex_unlock (&bm);
   char jobn_buf[256];
-  sprintf(jobn_buf,"%d",job_num);
+  sprintf(jobn_buf,"%ld",job_num);
   string spec_filename = daqd.nds_jobs_dir + "/jobs/" + jobn_buf;
   string pipe =  daqd.nds_jobs_dir + "/pipe";   // unix domain socket communication endpoint
 
@@ -221,7 +86,7 @@ net_writer_c::send_files (void)
   
   if (sizeof(servaddr.sun_path)-1 < pipe.size())
     {
-      system_log(1, "pipe filename `%s' is too long; maximum size is %d", pipe.c_str(), sizeof(servaddr.sun_path)-1);
+      system_log(1, "pipe filename `%s' is too long; maximum size is %ld", pipe.c_str(), sizeof(servaddr.sun_path)-1);
       return 1;
     }
 
@@ -236,7 +101,7 @@ net_writer_c::send_files (void)
 
   if (connect (socketfd, (struct sockaddr *) &servaddr, sizeof (servaddr)) < 0)
     {
-      system_log(1, "UNIX connect(); errno=%d\n", errno);
+      system_log(1, "UNIX connect(); errno=%d pipe=%s\n", errno, pipe.c_str());
       close(socketfd);
       return 1;
     }
@@ -428,7 +293,6 @@ net_writer_c::send_files (void)
   struct iovec iov[1];
 
 
-#if  defined(__linux__) || defined(_XPG4_2)
 #define HAVE_MSGHDR_MSG_CONTROL
 
 #ifndef CMSG_SPACE
@@ -436,7 +300,6 @@ net_writer_c::send_files (void)
 #endif
 #ifndef CMSG_LEN
 #define CMSG_LEN(size) (sizeof(struct msghdr) + (size))
-#endif
 #endif
 
 #ifdef HAVE_MSGHDR_MSG_CONTROL
@@ -465,11 +328,7 @@ net_writer_c::send_files (void)
 #if __GNUC__ >= 3
   iov[0].iov_base = (void *)"";
 #else
-#ifdef __linux__
   iov[0].iov_base = (void *)"";
-#else
-  iov[0].iov_base = "";
-#endif
 #endif
   iov[0].iov_len = 1;
   msg.msg_iov = iov;
@@ -478,7 +337,7 @@ net_writer_c::send_files (void)
   errno = 0;
   int res = sendmsg(socketfd, &msg, 0);
   if (res != 1) {
-    system_log(1,"senmsg() to NDS failed; res=%s; errno=%d", res, errno);
+    system_log(1,"senmsg() to NDS failed; res=%d; errno=%d", res, errno);
     close(socketfd);
     return 1;
   } else {
@@ -534,14 +393,6 @@ net_writer_c::producer ()
 {
   int nb;
 
-#ifdef VMICRFM_PRODUCER
-  // Only if this thread works on main circular buffer
-  if (buffptr == daqd.b1) {
-    // Put this thread into the realtime scheduling class with half the priority
-    daqd_c::realtime ("net_writer transient producer", 2);
-  }
-#endif
-
   if (writer_type == fast_writer) {
     int first_time = 1;
     DEBUG(5, cerr << "in fast producer...");
@@ -577,10 +428,6 @@ net_writer_c::producer ()
 	      }
 	    }
 	    circ_buffer_block_prop_t &prop = source_buffptr -> block_prop (nb) -> prop16th [nb16th];
-#ifdef not_def
-	    prop.gps = source_buffptr -> block_prop (nb) -> prop16th [nb16th].gps;
-	    prop.gps_n = source_buffptr -> block_prop (nb) -> prop16th [nb16th].gps_n;
-#endif
 
 	    DEBUG(5, cerr << "GPS time in fast producer: " << prop.gps << ":" << prop.gps_n << endl);
 
@@ -612,10 +459,6 @@ net_writer_c::producer ()
 	nb = source_buffptr -> get (cnum);
 	{
 	  circ_buffer_block_prop_t &prop = source_buffptr -> block_prop (nb) -> prop;
-#ifdef not_def
-	  prop.gps = source_buffptr -> block_prop (nb) -> prop.gps;
-	  prop.gps_n = source_buffptr -> block_prop (nb) -> prop.gps_n;
-#endif
 	  int nbi = buffptr -> put_nowait_scattered ((char *) source_buffptr -> block_ptr (nb),
 						     pvec, pvec_len, &prop);
 
@@ -694,9 +537,6 @@ double htond(double in) {
 void *
 net_writer_c::consumer ()
 {
-#ifdef not_def
-  unsigned int drops = 0;
-#endif
   int nb;
   int num_sent = 0;
   unsigned int header [5];
@@ -860,364 +700,8 @@ net_writer_c::consumer ()
     } while (1);
   } else { // No decimation on the data is done
     if (writer_type == frame_writer) {
-#ifndef USE_FRAMECPP
 	  this -> shutdown_net_writer ();
 	  return NULL;
-#else
-
-#ifndef FILE_CHANNEL_CONFIG
-#if !defined(NO_BROADCAST) && defined(GDS_TESTPOINTS)
-      for (int i = 0; i < num_channels; i++) {      
-	if (IS_GDS_SIGNAL(channels[i])||IS_GDS_ALIAS(channels[i])) {
-	  // Pad channels name to the maximum possible length
-	  memset(channels[i].name + strlen(channels[i].name),
-		 ' ', channel_t::channel_name_max_len - 1 - strlen(channels[i].name));
-	  channels[i].name[channel_t::channel_name_max_len-1]=0;
-	}
-      }
-#endif
-#endif
-
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-      FrameCPP::Version_6::FrameH* frame = daqd.full_frame_long(channels, num_channels);
-#else
-      FrameCPP::Frame* frame = daqd.full_frame_long(channels, num_channels);
-#endif
-      if (! frame)
-	{
-	  system_log(1, "Network writer couldn't create frame");
-	  this -> shutdown_net_writer ();
-	  return NULL;
-	}
-      myImageFrameWriter *fw = 0;
-      strstream *ost = 0;
-
-      // create frame image
-      //
-      try {
-	fw = new myImageFrameWriter (*(ost = new strstream ()));
-	fw -> writeFrame (*frame);
-	fw -> close ();
-      } catch (write_failure) {
-	system_log(1, "Couldn't create image frame writer in net_writer; write_failure");
-	delete frame;
-	delete fw;
-	delete ost;
-	this -> shutdown_net_writer ();
-	return NULL;
-      }
-
-      int image_size = ost -> pcount ();
-#ifndef FILE_CHANNEL_CONFIG
-#if !defined(NO_BROADCAST) && defined(GDS_TESTPOINTS)
-      char *eofImage = 0;
-      unsigned int eofImageLength = 0;
-      {
-	unsigned int l, m;
-	// Read TOC offset from file's end
- 	memcpy(&l, ost -> str() + image_size - 4, 4);
-	// Read TOC length
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-	memcpy(&m, ost -> str() + image_size - l + 4, 4);
-#else
-	memcpy(&m, ost -> str() + image_size - l, 4);
-#endif
-	// Image includes all dictionary junk and the end of file structure itself
-	eofImageLength = l - m;
-	eofImage = (char *)malloc(eofImageLength);
-	if (!eofImage) {
-		system_log(1,"Out of memory");
-		delete frame;
-		delete fw;
-		delete ost;
-		this -> shutdown_net_writer ();
-		return NULL;
-	}
-	memcpy(eofImage, ost -> str() + image_size - eofImageLength, eofImageLength); 
-      }
-#endif
-#endif
-
-      // prepare an array of pointers to the ADC data
-      void *adc_name_ptr[num_channels];
-      void *adc_data_ptr[num_channels];
-      void *data_valid_ptr [num_channels];
-
-      {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-	typedef myImageFrameWriter::OMI OMI;
-#else
-	typedef FrameCPP::ImageFrameWriter::OMI OMI;
-#endif
-	for (int i = 0; i < num_channels; i++) {
-	  INT_8U offs = 
-	    fw -> adcNamePositionMap [channels [i].name].first[0];
-	  INT_4U classInstance = fw -> adcDataVectorPtr (offs);
-	  INT_2U instance = classInstance  & 0xffff;
-	  OMI v = fw -> vectInstanceOffsetMap.find (instance);
-#if 0
-#ifndef NDEBUG
-	  cout << "net_writer vector " << (classInstance >> 16) << "\t" << (classInstance&0xffff) << endl;
-	  if (v == fw -> vectInstanceOffsetMap.end()) {
-	    cout << "net_writer vector " << instance << " not found!" << endl;
-	    exit(1);
-	  } else {
-	    cout << "data vector offset is " << v -> second[0] << endl;
-	  }
-#endif
-#endif
-
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-	  adc_name_ptr [i] = fw -> adcName (offs+14);
-#else
-	  adc_name_ptr [i] = fw -> adcName (offs+8);
-#endif
-	  adc_data_ptr [i] = fw -> vectorData (v -> second[0]);
-	  data_valid_ptr [i] = fw -> adcDataValidPtr (offs);
-	}
-      }
-	
-#ifndef FILE_CHANNEL_CONFIG
-#if !defined(NO_BROADCAST) && defined(GDS_TESTPOINTS)
-	
-      // Change pad character from ' ' to '\0' in all GDS signal names.
-      // This basically places zero terminator in place of first pad character.
-      //
-      for (int i = 0; i < num_channels; i++) {
-	if (IS_GDS_SIGNAL(channels[i])||IS_GDS_ALIAS(channels[i])) {
-	  char *ptr = strchr((char *)(adc_name_ptr [i]), ' ');
-	  if (ptr)
-	    *ptr =0;
-	  ptr = strchr(channels [i].name, ' ');
-	  if (ptr) {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-	    FrameCPP::Version_6::FrTOC::MapADC_t::const_iterator itr
-		    = fw -> oframestream.m_toc.m_ADC.find((char *)(channels [i].name));
-		  if (itr != fw -> oframestream.m_toc.m_ADC.end()) {
-		    FrameCPP::Version_6::FrTOC::ADC_t v = itr -> second;
-		    fw -> oframestream.m_toc.m_ADC.erase(channels [i].name);
-		    *ptr = 0;
-		    fw -> oframestream.m_toc.m_ADC[channels [i].name] = v;
-		  } 
-#else
-	    FrameCPP::ImageFrameWriter::ANPINC itr
-	      = fw -> adcNamePositionMap.find(channels[i].name);
-	    if (itr != fw -> adcNamePositionMap.end()) {
-		std::pair< std::vector<INT_8U>, std::vector<INT_4U> > v = itr -> second;
-		fw -> adcNamePositionMap.erase(channels [i].name);
-		*ptr = 0;
-	    	fw -> adcNamePositionMap[channels [i].name] = v;
-	    }
-#endif
-	  }
-	}
-      }
-
-#endif
-#endif
-
-      printf("Frame broadcaster is finished constructing frame image\n");
-
-      nb = 0;
-
-      int *status_ptr = (int *)(buffptr -> block_ptr (nb) + buffptr -> block_prop (nb) -> bytes)
-	- num_channels;
-      do {
-	int bytes;
-
-	nb = buffptr -> get (0);
-	if (! (bytes = buffptr -> block_prop (nb) -> bytes))
-	  break;
-
-	char *buf = buffptr -> block_ptr (nb);
-	int offset = 0;
-
-	// Put data into the ADC structures
-	for (int i = 0; i < num_channels; offset += channels [i].bytes, i++) {
-#ifdef USE_BROADCAST
-                  // Fixed after John Z found out a "big problem" with the boadcast frames
-                  // Short data needed to be sample swapped
-                  if (channels [i].bps == 2) {
-                    short *dest = (short *)(adc_data_ptr [i]);
-                    short *src = (short*)(buf + offset);
-                    unsigned int samples = channels [i].bytes / 2;
-                    for (int k = 0; k < samples; k++) dest[k] = src[k^1];
-		  } else
-#endif
-	  memcpy (adc_data_ptr [i], buf + offset, channels [i].bytes);
-	  
-	  // This memcpy() converts integer status into short
-	  memcpy (data_valid_ptr [i], ((INT_2U *)(status_ptr + i)) + 1, sizeof(INT_2U));
-	}
-
-#ifndef FILE_CHANNEL_CONFIG
-#if !defined(NO_BROADCAST) && defined(GDS_TESTPOINTS)
-#ifdef not_def
-	system_log(1, "Got gds signal %d", buffptr -> block_prop (nb) -> prop.gds_signal_refresh);
-	for ( int i = 0; i < 16; i++) {
-	system_log(1, "%d", buffptr -> block_prop (nb) -> prop16th[i].gds_signal_refresh);
-	}
-#endif
-
-	// Replace test point names, include active test point ADCs
-	// into the frame.
-	// Done in the very beginning and after refresh signal is received
-	if (!num_sent || buffptr -> block_prop (nb) -> prop.gds_signal_refresh) {
-	  system_log(1,"gds refresh signal received");
-	  // Create a list of active alias channels (real signals)
-	  //
-	  channel_t *aliasch[daqd.num_gds_channel_aliases];
-	  int num_alias_ch = 0;
-	  for (int i = 0; i < daqd.num_channels; i++) {
-	    if (IS_GDS_ALIAS(daqd.channels [i])) {
-	      struct dataInfoStr *dinfo = daqd.channels [i].rm_dinfo;
-	      assert (dinfo);
-	      // check data offset
-	      if (bsw(dinfo->dataOffset) != 0) {
-		aliasch[num_alias_ch++] = daqd.channels + i;
-	      }
-	    }
-	  }
-
-	  // Replace GDS signal names
-
-	  //:TODO: Fix for FrameCPP::Version6
-
-	  for (int i = 0; i < num_channels; i++) {
-	    if (IS_GDS_SIGNAL(channels[i])) {
-	      int j;
-	      for (j = 0; j < num_alias_ch; j++) {
-		if (bsw(aliasch [j] -> rm_dinfo -> dataOffset) + sizeof(int)
-		    == channels[i].rm_offset)
-		  break;
-	      }
-	      
-	      if (j != num_alias_ch) {
-		// ALIAS or real signal name is set
-		if (strcmp((char *)(adc_name_ptr[i]), aliasch[j] -> name)) {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-		  FrameCPP::Version_6::FrTOC::MapADC_t::const_iterator itr
-		    = fw -> oframestream.m_toc.m_ADC.find((char *)(adc_name_ptr[i]));
-		  if (itr != fw -> oframestream.m_toc.m_ADC.end()) {
-		    FrameCPP::Version_6::FrTOC::ADC_t v = itr -> second;
-		    fw -> oframestream.m_toc.m_ADC.erase((char *)(adc_name_ptr[i]));
-		    fw -> oframestream.m_toc.m_ADC[aliasch[j] -> name] = v;
-		  } 
-#else
-		  FrameCPP::ImageFrameWriter::ANPINC itr
-		    = fw -> adcNamePositionMap.find((char *)(adc_name_ptr[i]));
-		  if (itr != fw -> adcNamePositionMap.end()) {
-		    std::pair< std::vector<INT_8U>, std::vector<INT_4U> > v = itr -> second;
-		    fw -> adcNamePositionMap.erase((char *)(adc_name_ptr[i]));
-		    fw -> adcNamePositionMap[aliasch[j] -> name] = v;
-		  }
-#endif
-		  else {
-		    system_log(1,"Warning: failed to activate %s (%s) in the TOC", aliasch[j] -> name, adc_name_ptr[i]);
-		  }
-		  
-		  strcpy((char *)(adc_name_ptr[i]), aliasch[j] -> name);
-		  system_log(1,"active GDS test point `%s'", adc_name_ptr[i]);
-		}
-	      } else {
-		if (strcmp((char *)(adc_name_ptr[i]), channels [i].name)) {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-		  FrameCPP::Version_6::FrTOC::MapADC_t::const_iterator itr
-		    = fw -> oframestream.m_toc.m_ADC.find((char *)(adc_name_ptr[i]));
-		  if (itr != fw -> oframestream.m_toc.m_ADC.end()) {
-		    FrameCPP::Version_6::FrTOC::ADC_t v = itr -> second;
-		    fw -> oframestream.m_toc.m_ADC.erase((char *)(adc_name_ptr[i]));
-		    fw -> oframestream.m_toc.m_ADC[channels [i].name] = v;
-		  }
-#else
-		  FrameCPP::ImageFrameWriter::ANPINC itr
-		    = fw -> adcNamePositionMap.find((char *)(adc_name_ptr[i]));
-		  if (itr != fw -> adcNamePositionMap.end()) {
-		    std::pair< std::vector<INT_8U>, std::vector<INT_4U> > v = itr -> second;
-		    fw -> adcNamePositionMap.erase((char *)(adc_name_ptr[i]));
-		    fw -> adcNamePositionMap[channels [i].name] = v;
-		  }
-#endif
-		  else {
-		    system_log(1,"Warning: failed to deactivate %s in the TOC", adc_name_ptr[i]);
-		  }
-
-		  // Reset back to placeholder name
-		  system_log(1,"%s is deactivated to generic `%s'", adc_name_ptr[i], channels [i].name);
-		  strcpy((char *)(adc_name_ptr[i]), channels [i].name);
-		}
-	      }
-	    }
-	  }	  
-		
-	  // Position to the beginning of TOC image
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-	  ost -> seekp(fw -> getTOCOffset());
-#else
-	  ost -> seekp(fw -> getTOCOffset() - 8);
-#endif
-	  // Write new TOC data and then EOF
-	  INT_4U pre_toc_pos = ost ->tellp();
-	  fw -> writeTOC();
-	  // Append EOF structure
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-	  fw -> oframestream.write(eofImage, eofImageLength-24);
-	  fw -> oframestream << (INT_8U)(ost -> tellp() + 24) << (INT_4U)0 << (INT_4U)0;
-	  // Write offset to the TOC from the end of the file
-	  fw -> oframestream << (INT_8U)(ost -> tellp() + 8 - pre_toc_pos);
-#else
-	  fw -> FrameCPP::Output::write(eofImage, eofImageLength-16);
-	  *fw << (INT_4U)(ost -> tellp() + 16) << (INT_4U)0 << (INT_4U)0;
-	  // Write offset to the TOC from the end of the file
-	  *fw << (INT_4U)(ost -> tellp() + 4 - pre_toc_pos);
-#endif
-	  image_size = ost -> tellp();
-	}
-#endif
-#endif
-
-	// Assign status 
-	
-	// Update frame header
-
-	fw -> setFrameFileAttributes (buffptr -> block_prop (nb) -> prop.run,
-				      buffptr -> block_prop (nb) -> prop.seq_num + seq_num,
-				      0,
-				      buffptr -> block_prop (nb) -> prop.gps, 1,
-				      buffptr -> block_prop (nb) -> prop.gps_n,
-				      buffptr -> block_prop (nb) -> prop.leap_seconds,
-				      buffptr -> block_prop (nb) -> prop.altzone);
-
-	// send block length and the header
-	header [0] = htonl (4 * sizeof (unsigned int) + image_size);
-	header [2] = htonl (buffptr -> block_prop (nb) -> prop.gps);
-	header [3] = htonl (buffptr -> block_prop (nb) -> prop.gps_n);
-	header [4] = htonl (buffptr -> block_prop (nb) -> prop.seq_num + seq_num);
-
-	DEBUG(5, cerr << "GPS time in consumer: " << buffptr -> block_prop (nb) -> prop.gps << ":" << buffptr -> block_prop (nb) -> prop.gps_n << endl);
-
-	if (send_to_client ((char *) &header, 5 * sizeof (unsigned int)))
-	  break;
-
-	// send frame image
-	DEBUG1(cerr << "net_writer_c::consumer(): sending block " << nb << " of " << image_size << " bytes" << endl);
-	if (send_to_client (ost -> str (), image_size, buffptr -> block_prop (nb) -> prop.gps, buffptr -> block_period ()))
-	  break;
-
-	num_sent++;
-
-	buffptr -> unlock (0);
-      } while (1);
-
-      delete fw;
-      delete frame;
-      delete ost;
-#ifndef FILE_CHANNEL_CONFIG
-#if !defined(NO_BROADCAST) && defined(GDS_TESTPOINTS)
-      free(eofImage);
-#endif
-#endif
-#endif
 #ifdef DATA_CONCENTRATOR
     } else if (broadcast) {
 
@@ -1422,13 +906,11 @@ net_writer_c::transient_producer ()
       return NULL;
     }
 
-#ifndef VMICRFM_PRODUCER
   // Only if this thread works on main circular buffer
   if (buffptr == daqd.b1) {
     // Put this  thread into the realtime scheduling class with half the priority
     daqd_c::realtime ("net_writer transient producer", 2);
   }
-#endif
 
   for (;;)
     {
@@ -1575,13 +1057,6 @@ net_writer_c::transient_consumer ()
 	    }
 	  else
 	    {
-#ifdef not_def
-	      int num_blocks = 1;
-	      num_blocks = delta_time; // that long will be read from files
-	      if (offline.bstart)
-		num_blocks += offline.blast - offline.bstart + 1; // Plus several blocks from memory, possibly
-#endif
-
 	      if (! (send_client_header (1)))
 		{
 		    
@@ -1723,7 +1198,7 @@ net_writer_c::connect_srvr_addr (int ssize)
   int flag = 1;
 
 
-#ifdef not_def
+#if 0
   // Defeats Nagle buffering algorithm
   int result = setsockopt(sockfd,            /* socket affected */
 			  IPPROTO_TCP,     /* set option at TCP level */
@@ -1733,7 +1208,7 @@ net_writer_c::connect_srvr_addr (int ssize)
 			  sizeof(int));    /* length of option value */
 #endif
 
-#ifdef not_def
+#if 0
   int rcvbuf_size = 1024 * 10;  
   if (setsockopt (sockfd, SOL_SOCKET, SO_RCVBUF, (const char *) &rcvbuf_size, sizeof (rcvbuf_size)))
     fprintf (stderr, "setsockopt(%d, %d); errno=%d\n", sockfd, rcvbuf_size, errno);
@@ -1877,7 +1352,7 @@ net_writer_c::start_net_writer (ostream *yyout, int ofd, int no_data_connection,
       DEBUG1(cerr << "frame net writer consumer thread started; tid=" << consumer_tid << endl);
     }
 
-#ifdef not_def
+#if 0
   else if (name_writer == writer_type)
     {
       daqd.net_writers.insert_first (this);
@@ -1924,18 +1399,10 @@ net_writer_c::start_net_writer (ostream *yyout, int ofd, int no_data_connection,
 	  return DAQD_MALLOC;
 	}
 	
-#ifdef not_def
-	if (! (buffptr = new circ_buffer (1, buffer_blocks, block_size))) {
-	  system_log(1, "couldn't construct net_writer circular buffer, memory exhausted");
-	  disconnect_srvr_addr ();
-	  return DAQD_MALLOC;
-	}
-#endif
-
 	buffptr = new (mptr) circ_buffer (1, buffer_blocks, block_size, src_buffer -> block_period ());
 	if (! (buffptr -> buffer_ptr ())) {
 	  if (!online_writer) {
-	    system_log(1, "couldn't allocate net_writer buffer data blocks; size=%d; errno=%d",
+	    system_log(1, "couldn't allocate net_writer buffer data blocks; size=%ld; errno=%d",
 		       buffer_blocks * block_size + sizeof (circ_buffer_t) - 1, errno);
 	    no_consumer_buffer = 1;
 	  }

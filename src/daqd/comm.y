@@ -21,17 +21,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <limits.h>
-#ifdef sun
-#include <sys/lock.h>
-#include <sys/processor.h>
-#endif
 #include <sys/mman.h>
-
 #include <pthread.h>
-#ifdef sun
-#include <thread.h>
-#endif
-
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -81,9 +72,6 @@ void print_command_help (ostream *yyout);
 static int prompt_lineno;
 
  static void rfmUpdate() {
-#if defined(VMICRFM_PRODUCER)
-  requestRFMUpdate();
-#endif
  }
 
 %}
@@ -303,9 +291,7 @@ CommandLine: /* Nothing */
 		daqd.trender.fsd.start_periodic_scan ($3);
 	}
 	| SET AVOID_RECONNECT {
-#ifdef _ADVANCED_LIGO
 	  	daqd.avoid_reconnect = 1;
-#endif
 	}
 	| SET TP_ALLOW '=' TextExpression {
 	   long ip_addr = -1;
@@ -332,9 +318,7 @@ CommandLine: /* Nothing */
 	}
  	| SET CONTROLLER_DCU '=' INTNUM {
 		AUTH_CHECK(((my_lexer *)lexer));
-#ifdef _ADVANCED_LIGO
 		daqd.controller_dcu = $4;
-#endif
 	}
  	| SET DO_DIRECTIO '=' INTNUM {
 		AUTH_CHECK(((my_lexer *)lexer));
@@ -405,11 +389,7 @@ CommandLine: /* Nothing */
 		for (int i = 0; i < daqd.data_feeds; i++)
 		  for (int j = 0; j < DCU_COUNT; j++) {
 	      	    if (daqd.dcuSize[i][j] == 0) continue;
-#if defined(_ADVANCED_LIGO)
 		    char *name = daqd.dcuName[j];
-#else
-		    char *name = dcuName[j];
-#endif
 	      	    *yyout << "dcu " << j << "\t" << name << "\tCRC errors " << daqd.dcuCrcErrCnt[i][j] << endl;
 		  }
 	}
@@ -506,34 +486,23 @@ CommandLine: /* Nothing */
 #endif
 	}
 	| STATUS DCU {
-#ifdef FILE_CHANNEL_CONFIG
 	  ostream *yyout = ((my_lexer *) lexer)->get_yyout ();
 	  for (int i = 0; i < daqd.data_feeds; i++) 
 	  {
 	    for (int j = 0; j < DCU_COUNT; j++) 
 	      if (j < 4 || daqd.dcuSize[i][j]) {
 		volatile struct rmIpcStr *ipc = daqd.dcuIpc[i][j];
-#if defined(_ADVANCED_LIGO)
 		*yyout << "<ifo: " << i << ";dcu: " << j << "> " << daqd.dcuName[j]
-#else
-		*yyout << "<ifo: " << i << ";dcu: " << j << "> " << dcuName[j]
-#endif
 		       << " size=" << daqd.dcuDAQsize[i][j]
 		       << " status=0x" << hex << daqd.dcuStatus[i][j]
 		       << " cycle=" << dec << daqd.dcuCycle[i][j]
-#ifdef VMICRFM_PRODUCER
-		       << " (rfm status=" << hex << ipc->status << dec << " cycle=" << ipc->cycle << " size=" << ipc->dataBlockSize  << " crc=0x" << hex << ipc->crc << dec << ")"
-#endif
 		       << endl << flush;
 	      }
 	  }
-#endif
 	}
 	| SET MASTER_CONFIG '=' TextExpression {
 		AUTH_CHECK((my_lexer *) lexer);
-#ifdef FILE_CHANNEL_CONFIG
 		daqd.master_config  = $4;
-#endif
 		free($4);
 	}
 	| UPDATE ALL ARCHIVES {
@@ -814,9 +783,6 @@ CommandLine: /* Nothing */
 	}
 	| SET IPC_OFFSET '=' INTNUM {
 	  AUTH_CHECK(((my_lexer *)lexer));
-#ifdef VMICRFM_PRODUCER
-	  daqd.fb_ipc = $4;
-#endif
 	}
 	| WORD_GPS WORD_STRING  {
 		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
@@ -888,12 +854,6 @@ CommandLine: /* Nothing */
 	}
 	| UPLWP {
 		AUTH_CHECK(((my_lexer *)lexer));
-#ifdef sun
-		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
-		int sc;
-		thr_setconcurrency (sc=thr_getconcurrency ()+1);
-		system_log(1, "thread concurrency set to %d", sc);
-#endif
 	}
 	| SET PROFILING_PERIOD '=' INTNUM {
 		AUTH_CHECK(((my_lexer *)lexer));
@@ -944,86 +904,15 @@ CommandLine: /* Nothing */
 
 	| PSRINFO {
 		AUTH_CHECK(((my_lexer *)lexer));
-#ifdef sun
-		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
-
-		processorid_t i;
-		int status;
-		int n=sysconf(_SC_NPROCESSORS_ONLN);
-
-		for (i = 0; n>0; i++) {
-			status = p_online(i, P_STATUS);
-			if (status == -1 && errno == EINVAL)
-				continue;
-			*yyout << "processor " << i << " present" << endl;
-			{
-				processor_info_t pi;
-				status = processor_info (i, &pi);
-				if (!status) {
-				 switch (pi.pi_state) {
-				  case P_ONLINE:
-					*yyout << "processor " << i << " online" << endl;
-					break;
-				  case P_OFFLINE:
-					*yyout << "processor " << i << " offline" << endl;
-					break;
-#ifdef not_def
-				  case P_POWEROFF:
-					*yyout << "processor " << i << " powered off" << endl;
-					break;
-#endif
-				  default:
-					*yyout << "processor " << i << " is in unknown state "
-					       << pi.pi_state << endl;
-					break;
-				 }
-				 *yyout << "processor " << i << " CPU type: " << pi.pi_processor_type << endl;
-				 *yyout << "processor " << i << " FPU type: " << pi.pi_fputypes << endl;
-				 *yyout << "processor " << i << " clock: " << pi.pi_clock << "MHz" << endl;
-			        }
-			}
-			n--;
-		}		
-#endif
 		}
 	| PROCESS_LOCK allOrNothing {
 		AUTH_CHECK(((my_lexer *)lexer));
-#if sun
-		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
-		seteuid (0); // Try to switch to superuser effective uid
-		if (! geteuid ()) {
-		  if ($2 == 1) {
-		    if (plock (PROCLOCK)) {
-		      *yyout << "plock(PROCLOCK) failed: errno=" << errno << endl;
-		      system_log(1, "plock(PROCLOCK) failed: errno=%d", errno);
-		    } else {
-		      //*yyout << "all process pages are locked in memory" << endl;
-		      system_log(1, "all process pages are locked in memory");
-		    }
-		  } else {
-		    if (mlockall (MCL_CURRENT)) {
-                      *yyout << "mlockall (MCL_CURRENT) failed: errno=" << errno << endl;
-                      system_log(1, "mlockall (MCL_CURRENT)) failed: errno=%d", errno);
-		    } else {
-		      //*yyout << "current process pages are locked in memory" << endl;
-		      system_log(1, "current process pages are locked in memory");
-		    }
-		  }
-		  seteuid(getuid());
-		} else {
-			*yyout << "process memory pages lock impossible: not a superuser" << endl;
-		}
-#endif
 	}
 	| PROCESS_UNLOCK {
 		AUTH_CHECK(((my_lexer *)lexer));
 		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
 		seteuid (0); // Try to switch to superuser effective uid
 		if (! geteuid ()) {
-#ifdef not_def
-			if (plock (UNLOCK)) 
-				*yyout << "plock(UNLOCK) failed: errno=" << errno << endl;
-#endif
 			if (munlockall ()) 
 				*yyout << "munlockall () failed: errno=" << errno << endl;
 			else
@@ -1136,7 +1025,7 @@ CommandLine: /* Nothing */
 		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
 
 	//	*yyout << $2 << endl;
-	  	system_log(1, $2);
+	  	system_log(1, "%s", (char *)$2);
 		free ($2);
 	}
 	| SLEEP INTNUM {
@@ -1515,19 +1404,7 @@ CommandLine: /* Nothing */
 		    *yyout << daqd.trender.num_channels << " trend channels" << endl;
 		    *yyout << 1000000/daqd.writer_sleep_usec << "Hz clock" << endl;
 		  }
-#ifdef VMICRFM_PRODUCER
-#ifdef TWO_RFM_BOARDS
-		  *yyout << "chnum\tslow\t|name\t\t\t\t\t\t|board#\t|RFM\t|dcu_id\t|rate\t|trend\t|group\t|bps\t|bytes\t|offset\t|type\t|active" << endl;
-#else
-#ifdef GDS_TESTPOINTS
-		  *yyout << "chnum\tslow\t|name\t\t\t\t\t\t|RFM\t|gds\t|dcu_id\t|rate\t|trend\t|group\t|bps\t|bytes\t|offset\t|type\t|active" << endl;
-#else
-		  *yyout << "chnum\tslow\t|name\t\t\t\t\t\t|RFM\t|dcu_id\t|rate\t|trend\t|group\t|bps\t|bytes\t|offset\t|type\t|active" << endl;
-#endif // #ifdef GDS_TESTPOINTS
-#endif // #ifdef TWO_RFM_BOARDS
-#else
 		  *yyout << "chnum\tslow\t|name\t\t\t\t|rate\t|trend\t|group\t|bps\t|bytes\t|offset\t|type\t|active" << endl;
-#endif // #ifdef VMICRFM_PRODUCER
 
 		  for (int i = 0; i < num_channels; i++) {
 		    *yyout
@@ -1549,16 +1426,6 @@ CommandLine: /* Nothing */
 
 		    *yyout 
 
-#ifdef VMICRFM_PRODUCER
-#ifdef TWO_RFM_BOARDS
-		           << c [i].board << "\t"
-#endif
-			   << c [i].rm_offset << "\t"
-#ifdef GDS_TESTPOINTS
-			   << c [i].gds << "\t"
-#endif
-			   << c [i].dcu_id << "\t"
-#endif // #ifdef VMICRFM_PRODUCER
 			   << c [i].sample_rate << "\t"
 			   << c [i].trend << "\t"
 			   << c [i].group_num << "\t"
@@ -1725,12 +1592,6 @@ status_channels_bailout:
 		    *yyout << setw (80) << setfill (' ')
 			   << daqd.fsd.get_frames_lost () << flush;
 
-#if defined(VMICRFM_PRODUCER)
-		    *yyout << setw (80) << setfill (' ')
-			   << "Cycles Lost:" << flush;
-		    *yyout << setw (80) << setfill (' ')
-			   << daqd.cycles_lost << flush;
-#endif
 		  }
 		  
 		  *yyout << setw (80) << setfill (' ') << " " << flush;
@@ -2581,21 +2442,6 @@ start_trend_bailout:
 					goto start_writer_bailout;
 				    }
 				  }
-#if defined(VMICRFM_PRODUCER)
-				  // update alias channels
-				  for (int i = 0; i< na; i++) {
-#if defined(_ADVANCED_LIGO)
-		/* node 1 connected with Myrinet and 0 with RFM */
- 				    if (ac[i]->tp_node == 0)
-				     {
-#endif
-				     ac [i] -> offset = gds [i] -> offset;
-				     ac [i] -> seq_num = gds [i] -> seq_num;
-#if defined(_ADVANCED_LIGO)
-				    }
-#endif
-	 			  }
-#endif
 				  nw -> clear_testpoints = 1;
 			}
 #endif // #ifdef GDS_TESTPOINTS
@@ -2705,11 +2551,7 @@ start_trend_bailout:
 				}
 			}
 
-#ifdef _ADVANCED_LIGO
 			nw -> decimation_requested = !nw -> broadcast;
-#else
-			nw -> decimation_requested = nw -> block_size != nw -> transmission_block_size;
-#endif
 			printf("decimation flag=%d\n", nw -> decimation_requested);
 			nw -> block_size += nw -> num_channels * sizeof(int);
 			if (fast_net_writer) {
@@ -2872,35 +2714,16 @@ ConfigureChannelsBody: BEGIN_BEGIN {
   daqd.num_channels = daqd.trender.num_channels = 0;} ConfigureChannelsBodyLines END {
 	int i, j, k, offs;
 	ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
-#ifdef FILE_CHANNEL_CONFIG
 	int rm_offs = 0;
-#endif
 
-#if defined(FILE_CHANNEL_CONFIG)
 	// Configure channels from files
 	if (daqd.configure_channels_files ()) exit(1);
-#else
-#  if defined(VMICRFM_PRODUCER)
-	// Configure channels from the RFM
-	daqd.configure_channels_rfm ();
-#  endif /* VMIC RFM */
-#endif
-
-#if defined(VMICRFM_PRODUCER) || defined(FILE_CHANNEL_CONFIG)
 	daqd.num_active_channels = 0;
-#else
-	// Configure test server from reference frame file specified on
-	// the command line with `-f' flag.
-	//
-	daqd.configure_channels_reference_frame();
-#endif
-
 	int cur_dcu = -1;
 
 	// Save channel offsets and assign trend channel data struct
 	for (i = 0, offs = 0; i < daqd.num_channels + 1; i++) {
 
-#ifdef _ADVANCED_LIGO
 		int t = 0;
 		if (i == daqd.num_channels) t = 1;
 		else t = cur_dcu != -1 && cur_dcu != daqd.channels[i].dcu_id;
@@ -2938,7 +2761,6 @@ ConfigureChannelsBody: BEGIN_BEGIN {
 		if (!IS_MYRINET_DCU(cur_dcu) && t) {
 		   daqd.dcuDAQsize[daqd.channels[i-1].ifoid][cur_dcu] = daqd.dcuSize[daqd.channels[i-1].ifoid][cur_dcu];
 		}
-#endif
 		if (i == daqd.num_channels) continue;
 
 		cur_dcu = daqd.channels[i].dcu_id;
@@ -2976,7 +2798,6 @@ ConfigureChannelsBody: BEGIN_BEGIN {
 			offs += daqd.channels [i].bytes;
 			daqd.block_size += daqd.channels [i].bytes;
 
-#ifdef FILE_CHANNEL_CONFIG
 			daqd.dcuSize[daqd.channels[i].ifoid][daqd.channels[i].dcu_id]
 			      += daqd.channels [i].bytes / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 			daqd.channels [i].rm_offset = rm_offs;
@@ -2988,18 +2809,12 @@ ConfigureChannelsBody: BEGIN_BEGIN {
 			  daqd.channels [i].rm_offset += 4;
 			}
 
-#endif
-
 #ifdef GDS_TESTPOINTS
 		}
 #endif
 
-#if defined(VMICRFM_PRODUCER) || defined(FILE_CHANNEL_CONFIG)
-                {
-		  if (daqd.channels [i].active)
+		if (daqd.channels [i].active)
 			daqd.active_channels [daqd.num_active_channels++] = daqd.channels [i];
-		}
-#endif
 
 		if (daqd.channels [i].trend) {
 			if (daqd.trender.num_channels >= trender_c::max_trend_channels) {
@@ -3090,7 +2905,7 @@ ConfigureChannelsBody: BEGIN_BEGIN {
 		if (l > (MAX_CHANNEL_NAME_LENGTH - 6)) {
 			printf("Channel %s length %d over the limit of %d\n", 
 					daqd.trender.channels[i].name,
-					strlen(daqd.trender.channels[i].name),
+					(int)strlen(daqd.trender.channels[i].name),
 					MAX_CHANNEL_NAME_LENGTH - 6);
 			exit(1);
 		}
@@ -3153,37 +2968,6 @@ ConfigureChannelsBodyLines: /* Nothing */
 //
 ConfigureChannelsBodyLine: INTNUM INTNUM INTNUM TextExpression INTNUM INTNUM    INTNUM INTNUM INTNUM {
 
-#if defined(VMICRFM_PRODUCER) || defined(FILE_CHANNEL_CONFIG)
-	   ; // Channels are configured from the RFM
-
-#else 
-	ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
-//	*yyout << $1 << " " << $2 << " " << $3 << " " << $4 << " " << $5 << " " << $6 << " " << $7 << endl;
-	if (strlen ($4) >= channel_t::channel_name_max_len - trender_c::max_trend_sufx_len) {
-		*yyout << "channel name is too long. Maximum " << channel_t::channel_name_max_len - 1 - trender_c::max_trend_sufx_len << " characters" << endl;
-	} else if (daqd.num_channels >= daqd_c::max_channels) {
-		*yyout << "too many channels. Channel `" << $4 << "' ignored" << endl;
-	} else if (! daqd_c::power_of ($5, 2)) {
-		*yyout << "data rate (" << $5 << ") is not a power of 2" << endl;
-		*yyout << " Channel `" << $4 << "' ignored" << endl;
-	} else if (! daqd_c::datatype_ok ($2)) {
-		*yyout << "data type `" << $2 << "' is invalid" << endl;
-		*yyout << " Channel `" << $4 << "' ignored" << endl;
-	} else {
-		int cur_channel;
-		cur_channel = daqd.num_channels++;
-
-		daqd.channels [cur_channel].data_type = (daq_data_t) $2;
-		daqd.channels [cur_channel].id = $3;
-//		daqd.channels [cur_channel].slow = ($5 == 1);
-		strcpy (daqd.channels [cur_channel].name, $4);
-		daqd.channels [cur_channel].sample_rate = $5;
-		daqd.channels [cur_channel].bps = $6; // bytes per sample
-		daqd.channels [cur_channel].active = $7;
-		daqd.channels [cur_channel].trend = $8;
-		daqd.channels [cur_channel].group_num = $9;
-	}
-#endif 
 	free ($4);	
 }
 

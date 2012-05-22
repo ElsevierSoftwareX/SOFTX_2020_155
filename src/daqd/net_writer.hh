@@ -272,20 +272,9 @@ struct sockaddr_in {
     return ((net_writer_c *)a) -> send_frames (); 
   };
 
-#ifdef not_def
-  static void *name_consumer_static (void *a) { 
-    {locker mon ((net_writer_c *) a);}
-    return ((net_writer_c *)a) -> send_names (); 
-  };
-#endif
-
   void destroy (void) { 
     this -> ~net_writer_c ();
     free ((void *) this);
-
-#ifdef not_def
-    delete this;
-#endif
   };
 
   int transient; // Set if this producer doesn't send data online
@@ -373,22 +362,6 @@ struct sockaddr_in {
     return 0;
   }
 
-#ifdef not_def
-  int send_zero_block (time_t gps, time_t gps_n) {
-    unsigned int header [4];
-    
-    // size of the transmission block (zero) minus size of this length word
-    header [0] = htonl (3 * sizeof (unsigned int));
-    header [1] = htonl (0);
-    header [2] = htonl (gps);
-    header [3] = htonl (gps_n);
-
-    if (send_to_client ((char *) &header, 4 * sizeof (unsigned int)))
-      return -1;
-    return 0;
-  }
-#endif
-
   // Determine IP address given socket file descriptor
   // Returns IP on success (similar to inet_addr(3N)), `-1' on failure
   static int ip_fd (int fd)
@@ -437,7 +410,6 @@ struct sockaddr_in {
 	char buf [2048];
 	
 	// Try to resolve name into IP address
-#ifdef __linux__
 #if 0
        int gethostbyname_r(const char *name,
          struct hostent *ret, char *buf, size_t buflen,
@@ -445,9 +417,6 @@ struct sockaddr_in {
 #endif
 
 	if (gethostbyname_r (str, &hent, buf, 2048, &hp, &error)) 
-#else
-	if (! gethostbyname_r (str, &hent, buf, 2048, &error)) 
-#endif
 	  return -1;
 
 	(void) memcpy(&ret, *hent.h_addr_list, sizeof (ret));
@@ -464,13 +433,6 @@ struct sockaddr_in {
   static int ip_str (char *str)
     {
       char *nc = str - 1;
-
-#ifdef not_def
-      // There should be three dots in the `str' for IP address.
-      for (int i = 0; i < 3; i++)
-	if (! (nc = strchr (nc + 1, '.')))
-	  return -1;
-#endif
 
       // `:' separates IP address from the port number
       int res;

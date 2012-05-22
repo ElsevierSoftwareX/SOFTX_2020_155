@@ -207,7 +207,7 @@ listener (void * a)
   pthread_cleanup_push (listener_cleanup, (void *) &listenerArgs);
 */
 
-#ifdef not_def
+#if 0
   {
     // const int max_allowed = 64 * 1024; /* 64K seems to be system imposed limit on Solaris */
     //      int sendbuf_size = (ssize && ssize < max_allowed)? ssize: max_allowed;
@@ -264,7 +264,7 @@ listener (void * a)
       }
     }
 
-#ifdef not_def
+#if 0
   {
     //      const int max_allowed = 64 * 1024; /* 64K seems to be system imposed limit on Solaris */
     //      int sendbuf_size = (ssize && ssize < max_allowed)? ssize: max_allowed;
@@ -322,13 +322,13 @@ listener (void * a)
 	    }
       }
 
-#ifdef not_def
+#if 0
     {
       int rcvbuf_size_len = 4;
 
       int rcvbuf_size = 1024 * 10;
 
-#ifdef not_def    
+#if 0
       if (setsockopt (connfd, SOL_SOCKET, SO_RCVBUF, (const char *) &rcvbuf_size, sizeof (rcvbuf_size)))
 	fprintf (stderr, "setsockopt(%d, %d); errno=%d\n", connfd, rcvbuf_size, errno);
 #endif
@@ -344,7 +344,7 @@ listener (void * a)
     /* Spawn working thread */
     {
       int err_no;
-#ifdef not_def
+#if 0
       fprintf (stderr, "#connfd=%d\n", connfd);
 #endif
       daq -> datafd = connfd;
@@ -356,7 +356,7 @@ listener (void * a)
 	}
       else
 	{
-#ifdef not_def
+#if 0
 	  fprintf (stderr, "#interpreter started; tid=%d\n", daq -> interpreter_tid);
 #endif
 	  pthread_join (daq -> interpreter_tid, NULL);

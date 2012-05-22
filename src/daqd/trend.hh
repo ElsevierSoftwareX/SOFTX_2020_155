@@ -77,7 +77,7 @@ public:
     mtb (0),
     tb (0),
     num_channels (0), num_trend_channels (0), block_size (0), ascii_output (0),
-    frames_per_file (1), trend_buffer_blocks (60), profile ("trend"),
+    frames_per_file (1), trend_buffer_blocks (60), profile ((char *)"trend"),
 		 fsd (60), minute_fsd (3600), raw_minute_trend_saving_period (2),
 		 num_threads (1), worker_first_channel (0),
 		 trend_worker_nb (0), worker_busy (0)
@@ -100,11 +100,11 @@ public:
 	int toffs;
       } sfxs [num_trend_suffixes]
 	= {
-	  {".min", sizeof (int), sizeof (float), sizeof (double), sizeof (double), TB_OFFS(min)},
-	  {".max", sizeof (int), sizeof (float), sizeof (double), sizeof (double), TB_OFFS(max)},
-	  {".n", sizeof (int), sizeof (int), sizeof (int), sizeof (double), TB_OFFS(n)},
-	  {".rms", sizeof (double), sizeof (double), sizeof (double), sizeof (double), TB_OFFS(rms)},
-	  {".mean", sizeof (double), sizeof (double), sizeof (double), sizeof (double), TB_OFFS(mean)},
+	  {(char *)".min", sizeof (int), sizeof (float), sizeof (double), sizeof (double), TB_OFFS(min)},
+	  {(char *)".max", sizeof (int), sizeof (float), sizeof (double), sizeof (double), TB_OFFS(max)},
+	  {(char *)".n", sizeof (int), sizeof (int), sizeof (int), sizeof (double), TB_OFFS(n)},
+	  {(char *)".rms", sizeof (double), sizeof (double), sizeof (double), sizeof (double), TB_OFFS(rms)},
+	  {(char *)".mean", sizeof (double), sizeof (double), sizeof (double), sizeof (double), TB_OFFS(mean)},
 	};
 #undef TB_OFFS
       for (int i = 0; i < num_trend_suffixes; i++) {

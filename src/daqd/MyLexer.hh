@@ -27,13 +27,6 @@ public:
 #endif
     trend_channels (0), auth_ok (0), n_archive_channel_names(0) {
     this->ifd = ifd; this->ofd = ofd;
-#ifdef not_def
-    ifd = ofd = 0;
-    if (arg_yyin)
-      ifd = arg_yyin -> fd();
-    if (arg_yyout)
-      ofd = arg_yyout -> fd();
-#endif
     prompt_lineno = 1;
     cptr = cmnd;
     yy_flex_debug=1;

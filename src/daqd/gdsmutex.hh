@@ -93,7 +93,7 @@ namespace diag {
    class abstractsemaphore { 
    public:
       /// type of lock
-      typedef enum locktype {
+      enum locktype {
       /// read lock
       rdlock = 0,
       /// write lock
@@ -467,7 +467,7 @@ namespace diag {
    class semlock {
    public:
       /// type of lock
-      typedef enum locktype {
+      enum locktype {
       /// read lock
       rdlock = 0,
       /// write lock

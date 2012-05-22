@@ -202,7 +202,7 @@ void open_mx(void)
 
 	if (mx_ep_opened) return;
 
-        printf("%d\n", sizeof(struct daqMXdata));
+        printf("%ld\n", sizeof(struct daqMXdata));
 
 	// So that openmx is not aborting on connection loss
 	putenv("OMX_ERRORS_ARE_FATAL=0");

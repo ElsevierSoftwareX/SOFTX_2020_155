@@ -114,11 +114,7 @@ static char *versionId = "Version $Id$" ;
 #define	_IDLE 			0
 #define	_BUSY	 		1
 #define PRM_FILE		gdsPathFile ("/param", "awg.par")
-#ifdef _ADVANCED_LIGO
 #define PRM_SECTION		gdsSectionSiteIfo ("awg%i")
-#else
-#define PRM_SECTION		gdsSectionSiteIfo ("awg")
-#endif
 #define PRM_ENTRY2		"prognum"
 #define PRM_ENTRY3		"progver"
 
@@ -948,9 +944,7 @@ extern int testpoint_manager_rpc;
       static confServices conf;		/* configuration service */
       static char	confbuf[256];	/* configuration buffer */
       struct in_addr	host;		/* local host address */
-#ifdef _ADVANCED_LIGO
       char		section[30];	/* section name */
-#endif
 
       /* test if low level init */
       gdsDebug ("start awg server client");
@@ -982,27 +976,14 @@ extern int testpoint_manager_rpc;
       prognum = RPC_PROGNUM_AWG;
       progver = RPC_PROGVER_AWG;
 
-#ifdef _ADVANCED_LIGO
       /* make section header */
-      //sprintf (section, PRM_SECTION, testpoint_manager_node);
       sprintf (section, "%s-awg%i", ifo_prefix,  testpoint_manager_node);
       
-#if 0
-      loadNumParam (PRM_FILE, section, PRM_ENTRY2, &prognum);
-      loadNumParam (PRM_FILE, section, PRM_ENTRY3, &progver);
-#endif
-#else
-#error
-      loadNumParam (PRM_FILE, PRM_SECTION, PRM_ENTRY2, &prognum);
-      loadNumParam (PRM_FILE, PRM_SECTION, PRM_ENTRY3, &progver);
-#endif
       if ((prognum == 0) || (progver == 0)) {
          return -5;
       }
 
-#ifdef _ADVANCED_LIGO
       prognum += testpoint_manager_node;
-#endif
    
    #if defined(_AWG_RM)
       /* initialize DCUs */

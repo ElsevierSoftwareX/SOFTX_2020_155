@@ -64,7 +64,7 @@ net_listener::start_listener (ostream *yyout, int port, int pstrict)
     return 1;
   }
   pthread_attr_destroy (&attr);
-  system_log(3, "listener created; port=%d strict=%d tid=%d", port, pstrict, tid);
+  system_log(3, "listener created; port=%d strict=%d tid=%lx", port, pstrict, (long)tid);
   return 0;
 }
 
@@ -155,7 +155,7 @@ interpreter_no_prompt (void *a)
   my_lexer* lexer;
 
   {
-#ifdef not_def
+#if 0
     ifstream::__filebuf_type* inbuf
 	= new ifstream::__filebuf_type (ai1,
 					"interpreter_no_prompt",
@@ -179,7 +179,7 @@ interpreter_no_prompt (void *a)
         = ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (outbuf);
     //delete oldoutbuf;
 
-#ifdef not_def
+#if 0
     ofstream::__filebuf_type* outbuf
 	= new ofstream::__filebuf_type (ai2,
 					"interpreter_no_prompt",
@@ -190,7 +190,7 @@ interpreter_no_prompt (void *a)
 #endif
 
 #else
-#ifdef not_def
+#if 0
     ofstream my_yyin (ai1);
 #endif
     ofstream my_yyout (ai2);
@@ -243,7 +243,7 @@ interpreter (void *a)
   my_lexer* lexer;
 
   {
-#ifdef not_def
+#if 0
     ifstream::__filebuf_type* inbuf
 	= new ifstream::__filebuf_type (ai1,
 					"interpreter",
@@ -265,7 +265,7 @@ interpreter (void *a)
         = ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (outbuf);
     //delete oldoutbuf;
     
-#ifdef not_def
+#if 0
     ofstream::__filebuf_type* outbuf
 	= new ofstream::__filebuf_type (ai2,
 					"interpreter",
@@ -276,7 +276,7 @@ interpreter (void *a)
     delete oldoutbuf;
 #endif
 #else
-#ifdef not_def
+#if 0
     ofstream my_yyin (ai1);
 #endif
     ofstream my_yyout (ai2);
@@ -336,7 +336,7 @@ strict_interpreter (void *a)
   my_lexer* lexer;
 
   {
-#ifdef not_def
+#if 0
     ifstream my_yyin;
     FILE *cfile = fdopen(ai1,"r"); 
     std::ifstream::__filebuf_type* outbuf
@@ -345,7 +345,7 @@ strict_interpreter (void *a)
         = ((std::ifstream::__ios_type* )&my_yyin)->rdbuf (outbuf);
     //delete oldoutbuf;
 
-#ifdef not_def
+#if 0
     ifstream::__filebuf_type* inbuf
 	= new ifstream::__filebuf_type (ai1,
 					"strict_interpreter",
@@ -368,7 +368,7 @@ strict_interpreter (void *a)
         = ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (outbuf);
     //delete oldoutbuf;
 
-#ifdef not_def
+#if 0
     ofstream::__filebuf_type* outbuf
 	= new ofstream::__filebuf_type (ai2,
 					"strict_interpreter",
@@ -380,7 +380,7 @@ strict_interpreter (void *a)
 #endif
 
 #else
-#ifdef not_def
+#if 0
     ofstream my_yyin (ai1);
 #endif
     ofstream my_yyout (ai2);
@@ -390,7 +390,7 @@ strict_interpreter (void *a)
     
     //  pthread_detach (pthread_self ());
     
-#ifdef not_def
+#if 0
     // These incantations here don't work
     // Need to figure out why and how stay portable with C++ compilers
     

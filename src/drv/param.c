@@ -497,6 +497,6 @@ loadDaqConfigFile(DAQ_INFO_BLOCK *info, char *site, char *ifo, char *sys)
   info->numChans = 0;
   if (0 == parseConfigFile(fname, &crc, infoCallback, 0, archive_fname, info)) return 0;
   info->configFileCRC = crc;
-  printf("CRC=0x%x\n", crc);
+  printf("CRC=0x%lx\n", crc);
   return 1;
 }

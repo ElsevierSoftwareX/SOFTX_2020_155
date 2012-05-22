@@ -230,8 +230,8 @@ static char *versionId = "Version $Id$" ;
       if (clnt == NULL) {
 	 printf("couldn't create test point handle\n");
 	 printf("hostname=%s, prognum=%d, progver=%d\n",
-	 	tpNode[node].hostname, tpNode[node].prognum,
-		                         tpNode[node].progver);
+	 	tpNode[node].hostname, (int)tpNode[node].prognum,
+		                         (int)tpNode[node].progver);
          gdsError (GDS_ERR_MEM, 
                   "couldn't create test point handle");
       }
@@ -1617,7 +1617,7 @@ static char *versionId = "Version $Id$" ;
       }
       printf ("TP: node = %i, host = %s, dup = %i, prog = 0x%x, vers = %i\n",
               node, tpNode[node].hostname, tpNode[node].duplicate,
-              tpNode[node].prognum, tpNode[node].progver);
+              (int)tpNode[node].prognum, (int)tpNode[node].progver);
       return 0;
    }
 #endif

@@ -203,11 +203,7 @@ extern "C" {
     @author DS, June 98
     @see Test point API
 ************************************************************************/
-//#if defined(_ADVANCED_LIGO) && !defined(COMPAT_INITIAL_LIGO)
    typedef unsigned int testpoint_t;
-//#else
-   //typedef unsigned short testpoint_t;
-//#endif
 #endif
 
 /*@}*/

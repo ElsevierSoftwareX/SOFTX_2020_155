@@ -464,7 +464,7 @@ static char *versionId = "Version $Id$" ;
                num = read (pdOut, buf, MAXERRMSG);
                if (num > 0) {
                   buf [num] = '\0';
-                  fprintf (stdout, buf);
+                  fprintf (stdout, "%s", buf);
                   gdsConsoleMessage (buf);
                }
             }
@@ -473,7 +473,7 @@ static char *versionId = "Version $Id$" ;
                num = read (pdErr, buf, MAXERRMSG);
                if (num > 0) {
                   buf [num] = '\0';
-                  fprintf (stderr, buf);
+                  fprintf (stderr, "%s", buf);
                   gdsErrorMessage (buf);
                }
             }

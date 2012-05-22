@@ -6,62 +6,23 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-
 #include <semaphore.h>
-
-#ifdef sun
-#include <sys/priocntl.h>
-#include <sys/rtpriocntl.h>
-#include <sys/tspriocntl.h>
-#include <sys/lwp.h>
-#endif
-
 #include <fstream>
 #include <string>
-
 #include "debug.h"
 #include "config.h"
-
-#ifdef USE_FRAMECPP
-#include "framecpp/frame.hh"
-#include "framecpp/detector.hh"
-#include "framecpp/adcdata.hh"
-#include "framecpp/framereader.hh"
-#include "framecpp/framewriter.hh"
-#include "framecpp/framewritertoc.hh"
-#include "framecpp/imageframewriter.hh"
-
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-
-#include "framecpp/Version6/FrameH.hh"
-#include "framecpp/Version6/FrCommon.hh"
-#include "framecpp/Version6/Functions.hh"
-#include "framecpp/Version6/IFrameStream.hh"
-#include "framecpp/Version6/OFrameStream.hh"
-#include "framecpp/Version6/Util.hh"
-
-#endif
-#endif
-
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
 
 #include "ldas/ldasconfig.hh"
 #include "framecpp/Common/FrameSpec.hh"
 #include "framecpp/Common/CheckSum.hh"
 #include "framecpp/Common/IOStream.hh"
 #include "framecpp/Common/FrameStream.hh"
-
 #include "framecpp/FrameCPP.hh"
-
 #include "framecpp/FrameH.hh"
 #include "framecpp/FrAdcData.hh"
 #include "framecpp/FrRawData.hh"
 #include "framecpp/FrVect.hh"
-
 #include "framecpp/Dimension.hh"
-
-#endif
-
 
 using namespace std;
 
@@ -74,26 +35,9 @@ using namespace std;
 #include "circ.hh"
 #include "archive.hh"
 
-#ifdef VMICRFM_PRODUCER
-#if VMICRFMTYPE == 5565
-#include <rfm2g_api.h>
-#else
-#include <rfm_io.h>
-#include <rfmApi.h>
-#include <rfmErrno.h>
-#endif
-
-#if defined(AUX_5579) && !defined(__linux__)
-#include <rfm_io.h>
-#include <rfmApi.h>
-#include <rfmErrno.h>
-#endif
-#endif
 
 #define SHMEM_DAQ 1
 
-#ifdef FILE_CHANNEL_CONFIG
-#if defined(_ADVANCED_LIGO)
 #if !defined(USE_GM) && !defined(USE_MX) 
 #define SHMEM_DAQ 1
 #endif
@@ -102,25 +46,6 @@ using namespace std;
 #include "../../src/include/drv/gmnet.h"
 #include "gm_rcvr.hh"
 #endif
-#else
-#if !defined(USE_GM) && !defined(USE_MX) && !defined(USE_UDP)
-#define SHMEM_DAQ 1
-#endif
-#include "../../../rts/src/include/daqmap.h"
-#ifdef USE_GM
-#include "../../src/include/drv/gmnet.h"
-#include "gm_rcvr.hh"
-#endif
-#endif
-#else
-#include <map10.h>
-#endif
-
-
-#ifndef	VMIC_RFM_DEV
-#define	VMIC_RFM_DEV	"/dev/daqd-rfm"
-#define	VMIC_RFM_DEV1	"/dev/daqd-rfm1"
-#endif	/* VMIC_RFM_DEV */
 
 #if !defined(NO_BROADCAST) || defined(USE_BROADCAST)
 #include <framexmit.hh>
@@ -135,11 +60,7 @@ using namespace std;
 #include "trend.hh"
 #include "net_listener.hh"
 #include "producer.hh"
-#ifdef _ADVANCED_LIGO
 #include "../../src/include/param.h"
-#else
-#include "param.h"
-#endif
 #if EPICS_EDCU == 1
 #include "edcu.hh"
 #include "epicsServer.hh"
@@ -198,27 +119,13 @@ class daqd_c {
 
     frame_saver_tid(0),
     num_active_channels(0),
-
-#if defined(VMICRFM_PRODUCER)
-    cycles_lost(0),
-    rm_mem_ptr(0),
-    rm_mem_ptr1(0),
-    fb_ipc (FB0_IPC),
-    rfmFn(0), rfmFn1(0), rh(0), rh1(0), vmic_pv_len(0),
-#endif
     data_feeds(1),
     dcu_status_check(0),
-#ifdef AUX_5579
-    rfmFn_aux("/dev/daqd-rfm-aux"),
-    rfmFn_aux1("/dev/daqd-rfm-aux1"),
-    rm_aux_ptr(0),
-    rm_aux_ptr1(0),
-#endif
 
     writer_sleep_usec (1000000),
     main_buffer_size (16), shutting_down (0), num_listeners (0),
     block_size (0), thread_stack_size (10 * 1024 * 1024), config_file_name (0),
-    offline_disabled (0),  profile ("main"), 
+    offline_disabled (0),  profile ((char *)"main"), 
     do_scan_frame_reads (0), fsd (1), nds_jobs_dir(),
     detector_name (""),
     detector_prefix (""),
@@ -232,8 +139,8 @@ class daqd_c {
     detector_arm_x_midpoint (.0),
     detector_arm_y_midpoint (.0),
 
-    detector_name1 (""),
-    detector_prefix1 (""),
+    detector_name1 ((char *)""),
+    detector_prefix1 ((char *)""),
     detector_longitude1 (0.),
     detector_latitude1 (0.),
     detector_elevation1 (.0),
@@ -245,16 +152,11 @@ class daqd_c {
     detector_arm_y_midpoint1 (.0),
 
     frames_per_file(1), blocks_per_frame(1),
-    cksum_file(""), zero_bad_data(1)
-
-#ifdef FILE_CHANNEL_CONFIG
-    , master_config("")
-#endif
+    cksum_file((char *)""), zero_bad_data(1)
+    , master_config((char *)"")
     , crc_debug(0), cit_40m(0), nleaps(0)
     , do_fsync(0), do_directio(0)
-#ifdef _ADVANCED_LIGO
     , controller_dcu(DCU_ID_SUS_1), avoid_reconnect(0)
-#endif
     , tp_allow(-1), no_myrinet(0), allow_tpman_connect_failure(0), no_compression(0)
     , symm_gps_offset(0), cycle_delay(4)
     {
@@ -272,20 +174,9 @@ class daqd_c {
 
       _log_level = 2;
 
-#if defined(VMICRFM_PRODUCER) 
-      sweptsine_filename [0] = 0;
-      rfmFn = VMIC_RFM_DEV;
-      rfmFn1 = VMIC_RFM_DEV1;
-#if VMICRFMTYPE == 5565
-      //rfm_event_id = RFM2GEVENT_INTR1;
-#else
-      //rfm_event_id = RFM_EVENTID_A;
-#endif
-#endif
 
       compile_regexp();
 
-#ifdef FILE_CHANNEL_CONFIG
 #if EPICS_EDCU == 1
       extern unsigned int epicsDcuStatus[3][2][DCU_COUNT];
       dcuStatus = epicsDcuStatus[0];
@@ -303,7 +194,6 @@ class daqd_c {
 	  dcuSize[i][j] = 0;
 	  dcuCycle[i][j] = 1;
 	  dcuIpc[i][j] = 0;
-#ifdef _ADVANCED_LIGO
 	  dcuTPOffset[i][j] = 0;
 	  dcuTPOffsetRmem[i][j] = 0;
 	  dcuDAQsize[i][j] = 0;
@@ -317,10 +207,8 @@ class daqd_c {
           extern char epicsDcuName[DCU_COUNT][40];
           epicsDcuName[j][0] = 0;
 #endif
-#endif
 	}
       }
-#endif
     }
   
   ~daqd_c () {
@@ -419,69 +307,13 @@ class daqd_c {
   char *config_file_name; // Name of the startup config file (~/.daqdrc is used if not set)
   int offline_disabled; // If set, off-line data requests are not allowed  
 
-#ifdef FILE_CHANNEL_CONFIG
   int configure_channels_files ();
-#endif
 
   int           data_feeds;             /* The number of data feeds: 1 -default; 2 -Hanford (2 ifos) */
 
-#if defined(VMICRFM_PRODUCER)
-  void init_vmicrfm();
-  //ushort_t rfm_event_id;   // to wait for
-#if VMICRFMTYPE == 5565
-  RFM2GHANDLE	rh;			/* Where RFM gets opened	 */
-  RFM2GHANDLE	rh1;			/* Where second RFM gets opened	 */
-#else
-  RFMHANDLE	rh;			/* Where RFM gets opened	 */
-  RFMHANDLE	rh1;			/* Where RFM gets opened	 */
-#endif
-#if VMICRFMTYPE == 5565
-  uint32_t	rfm_size;		/* Size of shared memory area	 */
-#else
-  ulong_t	rfm_size;		/* Size of shared memory area	 */
-#endif
-#ifdef AUX_5579
-#ifdef __linux__
-  RFM2GHANDLE rh5579;
-  RFM2GHANDLE rh5579_1;
-#else
-  RFMHANDLE rh5579;
-  RFMHANDLE rh5579_1;
-#endif
-  char		*rfmFn_aux;		        /* Name of the AUX 5579 RFM card device */
-  char		*rfmFn_aux1;		        /* Name of the second AUX 5579 RFM card device */
-  volatile unsigned char *rm_aux_ptr;
-  volatile unsigned char *rm_aux_ptr1;
-#endif
-  char		*rfmFn;		        /* Name of the device		 */
-  char		*rfmFn1;		/* Name of the second device	 */
-  volatile unsigned char *rm_mem_ptr;
-  volatile unsigned char *rm_mem_ptr1;
-  int fb_ipc; // frame builder IPC area offset
-#if !defined(VMIC_MMAP)
-  unsigned char *move_buf;
-#endif // #if !defined(VMIC_MMAP)
-
-#ifdef EDCU_SHMEM
-  unsigned char *edcu_shptr;      /* pointer to share memory buffer where EDCU write its data */
-  unsigned long edcu_chan_idx[2]; /* Offset for the first and last channel EDCU channels within RFM data block */
-#endif
-
-  // One scatterred put array is used if private rfm network used
-  int vmic_pv_len;
-  struct put_dpvec vmic_pv [max_channels];
-
-#ifndef FILE_CHANNEL_CONFIG
-  int configure_channels_rfm ();
-#endif
-
-
-  int cycles_lost;
-#else /* !VMICRFM_PRODUCER */
   unsigned char *move_buf;
   int vmic_pv_len;
   struct put_dpvec vmic_pv [max_channels];
-#endif /* VMICRFM_PRODUCER */
   unsigned int  dcu_status_check;       /* 1 - check ifo 0; 2- ifo 1; 3 - both; 0 - none */
 
   inline static int
@@ -504,14 +336,13 @@ class daqd_c {
 
   int find_channel_group (const char* channel_name);
 
-#if !defined(VMICRFM_PRODUCER)
   int configure_channels_reference_frame ();
-#endif
 
   // Put calling thread into the realtime scheduling class, if possible
   // Set threads realtime priority to max/`priority_divider'
   //
   inline static void realtime (char *thread_name, int priority_divider) {
+#if 0
 #ifdef sun
     seteuid (0); // Try to switch to superuser effective uid
     if (! geteuid ()) {
@@ -544,12 +375,14 @@ class daqd_c {
       seteuid (getuid ()); // Go back to real uid
     }
 #endif
+#endif //0
   }
 
   // Put calling thread into the timesharing class
   // Set time-sharing priority to max/`priority_divider'
   //
   inline static void time_sharing (char *thread_name, int priority_divider) {
+#if 0
 #ifdef sun
     seteuid (0); // Try to switch to superuser effective uid
     if (! geteuid ()) {
@@ -585,6 +418,7 @@ class daqd_c {
       }
       seteuid (getuid ()); // Go back to real uid
     }
+#endif
 #endif
   }
 
@@ -656,7 +490,6 @@ class daqd_c {
   float detector_arm_y_midpoint1;
 
 
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
   // Create the first detector
   FrameCPP::Version::FrDetector getDetector1() {
     FrameCPP::Version::FrDetector detector (detector_name,
@@ -691,72 +524,7 @@ class daqd_c {
     return detector;
   }
 
-#elif FRAMECPP_DATAFORMAT_VERSION > 4
-  // Create the first detector
-  FrameCPP::Version_6::FrDetector getDetector1() {
-    FrameCPP::Version_6::FrDetector detector (detector_name,
-					      detector_longitude,
-					      detector_latitude,
-					      detector_elevation,
-					      detector_arm_x_azimuth,
-					      detector_arm_y_azimuth,
-					      detector_arm_x_altitude,
-					      detector_arm_y_altitude,
-					      detector_arm_x_midpoint,
-					      detector_arm_y_midpoint,
-					      0,
-					      0,
-					      "");
-    if (detector_prefix.length() == 2)
-      memcpy(const_cast<char *>(detector.GetPrefix()), detector_prefix.c_str(), 2);
-    return detector;
-  }
-
-  // Create second detector
-  FrameCPP::Version_6::FrDetector getDetector2() {
-    FrameCPP::Version_6::FrDetector detector (detector_name1,
-					      detector_longitude1,
-					      detector_latitude1,
-					      detector_elevation1,
-					      detector_arm_x_azimuth1,
-					      detector_arm_y_azimuth1,
-					      detector_arm_x_altitude1,
-					      detector_arm_y_altitude1,
-					      detector_arm_x_midpoint1,
-					      detector_arm_y_midpoint1,
-					      0,
-					      0,
-					      "");
-    if (detector_prefix1.length() == 2)
-      memcpy(const_cast<char *>(detector.GetPrefix()), detector_prefix1.c_str(), 2);
-    return detector;
-  }
-
-#endif
-  
-
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
   FrameCPP::Version::FrameH* full_frame(channel_t* , long, int frame_length_seconds = 1) throw();
-#endif
-
-#ifdef USE_FRAMECPP
-  // Create a full frame
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-  FrameCPP::Version_6::FrameH*
-#else
-  FrameCPP::Frame* 
-#endif
-  full_frame(channel_t* , long, int frame_length_seconds = 1) throw();
-#endif
-
-#ifdef USE_FRAMECPP
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-  FrameCPP::Version_6::FrameH*
-#else
-  FrameCPP::Frame* 
-#endif
-  full_frame_long(long_channel_t* , long, int frame_length_seconds = 1) throw();
-#endif
 
   // How many full frames to pack in single file
   int frames_per_file;
@@ -772,7 +540,6 @@ class daqd_c {
   // Debug CRC checksum; print them out for this DCU
   int crc_debug;
 
-#ifdef FILE_CHANNEL_CONFIG
   // Is initialized by daqdrc file command w/master config file name
   string master_config;
 
@@ -814,7 +581,6 @@ class daqd_c {
 
   // DCU Inter-processor communication area pointer into an RFM board; for each ifo
   volatile rmIpcStr *dcuIpc[2][DCU_COUNT];
-#endif
 
   static unsigned long fr_cksum(string cksum_file, char *tmpf, unsigned char* data, int image_size);
 
@@ -848,7 +614,6 @@ class daqd_c {
   // Whether to do directio() calls or not when saving data files
   int do_directio;
 
-#ifdef _ADVANCED_LIGO
   // Which DCU to sync up to
   int controller_dcu;
 
@@ -866,7 +631,6 @@ class daqd_c {
   // DCU names assigned from configuration files (file names)
   char dcuName[DCU_COUNT][32];
   char fullDcuName[DCU_COUNT][32];
-#endif
 
   // bitmask of IP addresses allowed to select testpoints
   int tp_allow;
@@ -903,116 +667,5 @@ class daqd_c {
   int cycle_delay;
 
 }; // class daqd_c
-
-
-
-
-#if defined(VMICRFM_PRODUCER)
-
-
-#if VMICRFMTYPE == 5565
-
-#ifdef FILE_CHANNEL_CONFIG
-#define bsw(a) a
-#else
-inline short bsw(short v) {
-  short re;
-  ((char *)&re)[1] =   ((char *)&v)[0];
-  ((char *)&re)[0] =   ((char *)&v)[1];
-  return re;
-}
-
-inline unsigned short bsw(unsigned short v) {
-  short re;
-  ((char *)&re)[1] =   ((char *)&v)[0];
-  ((char *)&re)[0] =   ((char *)&v)[1];
-  return re;
-}
-
-inline int bsw(int v) {
-  int re;
-  ((char *)&re)[3] =   ((char *)&v)[0];
-  ((char *)&re)[2] =   ((char *)&v)[1];
-  ((char *)&re)[1] =   ((char *)&v)[2];
-  ((char *)&re)[0] =   ((char *)&v)[3];
-  return re;
-}
-
-inline unsigned int bsw(unsigned int v) {
-  int re;
-  ((char *)&re)[3] =   ((char *)&v)[0];
-  ((char *)&re)[2] =   ((char *)&v)[1];
-  ((char *)&re)[1] =   ((char *)&v)[2];
-  ((char *)&re)[0] =   ((char *)&v)[3];
-  return re;
-}
-
-inline long bsw(long v) {
-  long re;
-  ((char *)&re)[3] =   ((char *)&v)[0];
-  ((char *)&re)[2] =   ((char *)&v)[1];
-  ((char *)&re)[1] =   ((char *)&v)[2];
-  ((char *)&re)[0] =   ((char *)&v)[3];
-  return re;
-}
-
-inline unsigned long bsw(unsigned long v) {
-  unsigned long re;
-  ((char *)&re)[3] =   ((char *)&v)[0];
-  ((char *)&re)[2] =   ((char *)&v)[1];
-  ((char *)&re)[1] =   ((char *)&v)[2];
-  ((char *)&re)[0] =   ((char *)&v)[3];
-  return re;
-}
-
-inline float bsw(float v) {
-  float re;
-  ((char *)&re)[3] =   ((char *)&v)[0];
-  ((char *)&re)[2] =   ((char *)&v)[1];
-  ((char *)&re)[1] =   ((char *)&v)[2];
-  ((char *)&re)[0] =   ((char *)&v)[3];
-  return re;
-}
-#endif
-#else
-#define bsw(a) a
-#endif
-
-
-// FIXME: shouldn't this use its own IPC area
-
-#ifndef FILE_CHANNEL_CONFIG
-#define  requestRFMUpdate() \
-{ \
-  volatile struct rmIpcStr *ipc = (struct rmIpcStr *) (daqd.rm_mem_ptr + FB0_IPC); \
-  volatile struct rmIpcStr *this_ipc = (struct rmIpcStr *) (daqd.rm_mem_ptr + daqd.fb_ipc); \
-  ipc->reqAck = bsw((short)DAQS_CMD_NO_CMD); \
-  ipc->request = bsw((short)DAQS_CMD_RFM_REFRESH); \
-  this_ipc -> status = bsw((short)DAQ_STATE_CONFIG); \
-  callback: \
-  int i = 0; \
-  while (bsw(ipc->reqAck) != DAQS_CMD_RFM_REFRESH)  { \
-        ipc->request = bsw((short)DAQS_CMD_RFM_REFRESH); \
-        system_log(1, "RFM refresh command sent, spinning on `reqAck'"); \
-    	struct timespec tspec = {1,0}; \
-	if (bsw(ipc->reqAck) == DAQS_REQ_CALLBACK) { \
-		system_log(1, "callback on refresh command"); \
-      		nanosleep (&tspec, NULL); \
-		goto callback; \
-	} \
-        nanosleep (&tspec, NULL); \
-	i++; \
-	if ( i == 15 ) { \
-		system_log(1, "No response from the controller after 15 seconds, retrying again..."); \
-		goto callback; \
-  	} \
-  } \
-  system_log(1, "RFM refresh complete"); \
-}
-#else
-#define  requestRFMUpdate() ;
-#endif
-
-#endif /* VMICRFM_PRODUCER */
 
 #endif

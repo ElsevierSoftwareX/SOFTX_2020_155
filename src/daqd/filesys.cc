@@ -6,9 +6,6 @@
 #include <time.h>
 #include <assert.h>
 #include <pthread.h>
-#ifdef sun
-#include <thread.h>
-#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -26,16 +23,6 @@
 #include <unistd.h>
 #include <iostream>
 
-#ifdef USE_FRAMECPP
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-#include "framecpp/Version6/FrameH.hh"
-#include "framecpp/Version6/IFrameStream.hh"
-#else
-#include "framecpp/frame.hh"
-#include "framecpp/framereader.hh"
-#endif
-#endif
-
 using namespace std;
 
 #include "filesys.hh"
@@ -43,9 +30,7 @@ using namespace std;
 
 extern daqd_c daqd;
 
-#ifdef __linux__
 #define WIPER_POSIX_SPAWN
-#endif
 
 
 /*
@@ -222,52 +207,6 @@ filesys_c::_update_dir (time_t gps, time_t gps_n, time_t period, int dnum)
 inline int
 filesys_c::frame_length_secs (time_t times, int dnum)
 {
-#ifndef __linux__
-if(daqd.do_scan_frame_reads) {
-  long dt, frame_num;
-  char filename [filename_max]; 
-
-  _filename_dir (times, filename, dnum);
-
-  try {
-    ifstream in (filename);
-
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-    FrameCPP::Version_6::IFrameStream fr (in);
-    FrameCPP::Version_6::FrameH* frame = fr.ReadNextFrame();
-#else
-    FrameCPP::FrameReader fr (in);
-    FrameCPP::Frame* frame = fr.readFrame ();
-#endif
-
-#ifdef not_def
-    cout << "Time: " << frame->getGTime ().getSec() << endl;
-    cout << "Time nanosec: " << frame->getGTime ().getNSec() << endl;
-    cout << "Length: " << frame->getDt () << endl;
-#endif
-    dt = (long) frame->getDt ();
-    frame_num = (long) frame->getFrame ();
-    //    fr.close();
-    in.close();
-    delete frame;
-  } catch (read_failure) {
-    system_log(1,"frame read failure");
-    return -1;
-  } catch (bad_alloc) {
-    system_log(1, "out of memory while trying to read frame");
-    return -1;
-  }
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-   catch (exception) {
-     system_log(1,"frame read failed");
-     return -1;
-   }
-#endif
-
-  DEBUG(12, cerr << "frame #" << frame_num << " of `" << filename << "' dt=" << dt << endl);
-  return dt;
-} else
-#endif
   return period;
 }
 
@@ -415,7 +354,7 @@ filesys_c::scan ()
 	    if (frame_len <= 0)
 	      {
 		frame_len = 0;
-		system_log(1, "scan(): Can't determine the length of the FIRST frame %d", tstamps [j].gps);
+		system_log(1, "scan(): Can't determine the length of the FIRST frame %d", (int)tstamps [j].gps);
 		continue;
 	      }
 
@@ -433,7 +372,7 @@ filesys_c::scan ()
 	    // Put the first data range block in the linked list
 	    dir [i].blist.insert_first (cur_range_block);
 
-	    system_log(3, "first range start %d length is %d", tstamps [j].gps, frame_len);
+	    system_log(3, "first range start %d length is %d", (int)tstamps [j].gps, (int)frame_len);
 	  }
 	else
 	  {
@@ -457,7 +396,7 @@ filesys_c::scan ()
 		      - cur_range_block -> current_file_secs ();
 		    time_t last_frame_len = frame_length_secs (last_frame_tst, i);
 		    if (last_frame_len <= 0) {
-		      system_log(1, "scan(): Can't determine the length of LAST frame in the range %d", last_frame_tst);
+		      system_log(1, "scan(): Can't determine the length of LAST frame in the range %d", (int)last_frame_tst);
 		    } else
 		      cur_range_block -> current_max_time_sub (cur_range_block -> current_file_secs () - last_frame_len);
 		  }
@@ -466,12 +405,12 @@ filesys_c::scan ()
 		time_t tmp_frame_len = tstamps [j].dt;
 		if (tmp_frame_len <= 0)
 		  {
-		    system_log(1, "scan(): Can't determine the length of the FIRST frame in the range %d", tstamps [j].gps);
+		    system_log(1, "scan(): Can't determine the length of the FIRST frame in the range %d", (int)tstamps [j].gps);
 		    continue;
 		  }
 		frame_len = tmp_frame_len;
 
-		system_log(3, "new range start %d length is %d", tstamps [j].gps, frame_len);
+		system_log(3, "new range start %d length is %d", (int)tstamps [j].gps, (int)frame_len);
 
 		// See if a new range block should be allocated (current block is full)
 		if (cur_range_block -> is_full ())
@@ -508,7 +447,7 @@ filesys_c::scan ()
 	    - cur_range_block -> current_file_secs ();
 	  time_t last_frame_len = frame_length_secs (last_frame_tst, i);
 	  if (last_frame_len <= 0) {
-	    system_log(1, "scan(): Can't determine the length of LAST frame %d", last_frame_tst);
+	    system_log(1, "scan(): Can't determine the length of LAST frame %d", (int)last_frame_tst);
 	  } else
 	    cur_range_block -> current_max_time_sub (cur_range_block -> current_file_secs ()
 						     - last_frame_len);
@@ -534,13 +473,13 @@ filesys_c::scan ()
 
 	    system_log(3, "num_ranges=%d", rb -> num_ranges);
 	    for (int k = 0; k < rb -> num_ranges; k ++) {
-	      system_log(3, "range %d file_secs=%d num_time=%d max_time=%d", k, rb -> d [k].file_secs, rb -> d [k].min_time, rb -> d [k].max_time);
+	      system_log(3, "range %d file_secs=%d num_time=%d max_time=%d", k, (int) (rb -> d [k].file_secs), (int) (rb -> d [k].min_time), (int) (rb -> d [k].max_time));
 	    }
 	  }
 
 	system_log(3, "directory  %d nfiles=%d", i, dir_nfiles);
-	system_log(3, "directory  %d minimum=%d", i, dir_min);
-	system_log(3, "directory  %d maximum=%d", i, dir_max);
+	system_log(3, "directory  %d minimum=%d", i, (int)dir_min);
+	system_log(3, "directory  %d maximum=%d", i, (int)dir_max);
 
 	dir [i].nfiles =  dir_nfiles;
 	dir [i].min_time =  dir_min;
@@ -575,9 +514,9 @@ filesys_c::_filename_dir (time_t pt, char *fname, int dnum, int framedt)
     DEBUG(22, cerr << "_filename_dir(): pt=" << pt << ";dnum=" << dnum << endl);
 
     if ( framedt != 1) {
-      sprintf (fname, "%s%d/%s%d-%d%s", path, dnum, prefix, pt, framedt, suffix);
+      sprintf (fname, "%s%d/%s%d-%d%s", path, dnum, prefix, (int) pt, framedt, suffix);
     } else {
-      sprintf (fname, "%s%d/%s%d%s", path, dnum, prefix, pt, suffix);
+      sprintf (fname, "%s%d/%s%d%s", path, dnum, prefix, (int) pt, suffix);
     }
     return fname;
   }

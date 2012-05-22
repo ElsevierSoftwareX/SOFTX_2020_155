@@ -152,13 +152,9 @@ static char *versionId = "Version $Id$" ;
 #else
 #define _MAX_BUF		8	
 #endif
-#ifdef _ADVANCED_LIGO
 /* This will need to go higher for systems faster than 32 kHz */
 /* or if DCU block size is increased */
 #define _MAX_PAGE		(DAQ_DCU_SIZE/256)
-#else
-#define _MAX_PAGE		1024
-#endif
 #define _DAC_PAGE		1024	
 #define _LSCTP_PAGE		TP_LSC_CHN_LEN	
 #define _ASCTP_PAGE		TP_ASC_CHN_LEN	

@@ -212,15 +212,6 @@ public:
     if (! num_puts ())
       return -2;
 
-#ifdef not_def
-
-    This is not working when the buffer is not entirely full
-
-    // future date given
-    if (gps > (pbuffer -> block [(pbuffer -> next_block_in + pbuffer -> blocks - 1) % pbuffer -> blocks].prop.gps))
-      return -3;
-#endif
-
     // Find next available `0' in `pbuffer -> tcmask', starting from low end
     for (cons_num = 0; pbuffer -> tcmask & 1 << cons_num; cons_num++)
       ;

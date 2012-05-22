@@ -194,7 +194,7 @@ interpreter (daq_t *daq)
       float last_b = 0.;
 
 
-#ifdef not_def
+#if 0
   /* Allocate some space, should be sufficient to put samples data for all configured channels */
 #define bufsize 1024 * 1024 * 2
   daq_block_t *buf = (daq_block_t *) malloc (sizeof (daq_block_t) + bufsize);
@@ -346,7 +346,7 @@ float hton_float(float in) {
 	}
       }
 
-#ifdef not_def
+#if 0
       /* Delay */
       {
 	int k;
@@ -361,7 +361,7 @@ float hton_float(float in) {
 	//exit(1);
     }
 
-#ifdef not_def
+#if 0
   free (buf);
 #endif
 
