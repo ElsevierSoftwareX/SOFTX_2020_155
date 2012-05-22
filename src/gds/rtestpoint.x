@@ -18,11 +18,7 @@
 %#include "dtt/rpcinc.h"
 
 /* list of test point */
-#if defined(_ADVANCED_LIGO) && !defined(COMPAT_INITIAL_LIGO)
 typedef unsigned int TP_r<>;
-#else
-typedef unsigned short TP_r<>;
-#endif
 
 /* request result */
 struct resultRequestTP_r {

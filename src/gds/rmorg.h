@@ -127,12 +127,7 @@ extern "C" {
     @author DS, September 98
     @see Testpoint Definition
 ************************************************************************/
-#ifdef _ADVANCED_LIGO
 #define TP_MAX_NODE             128
-#else
-#define TP_MAX_NODE		2
-#error
-#endif
 
 /** Maximum number of test point interfaces. This number is currently 4
     (LSC/ASC excitation and LSC/ASC test point readout).
@@ -248,44 +243,28 @@ extern "C" {
     @author DS, June 98
     @see Test point API
 ************************************************************************/
-#if defined(_ADVANCED_LIGO) && !defined(COMPAT_INITIAL_LIGO)
 #define TP_LSC_EX_NUM		64
-#else
-#define TP_LSC_EX_NUM		7
-#endif
 
 /** Defines the number of LSC test point outputs.
 
     @author DS, June 98
     @see Test point API
 ************************************************************************/
-#if defined(_ADVANCED_LIGO) && !defined(COMPAT_INITIAL_LIGO)
 #define TP_LSC_TP_NUM		64
-#else
-#define TP_LSC_TP_NUM		15
-#endif
 
 /** Defines the number of ASC excitation engine test points.
 
     @author DS, June 98
     @see Test point API
 ************************************************************************/
-#if defined(_ADVANCED_LIGO) && !defined(COMPAT_INITIAL_LIGO)
 #define TP_ASC_EX_NUM		64
-#else
-#define TP_ASC_EX_NUM		24
-#endif
 
 /** Defines the number of ASC test point outputs.
 
     @author DS, June 98
     @see Test point API
 ************************************************************************/
-#if defined(_ADVANCED_LIGO) && !defined(COMPAT_INITIAL_LIGO)
 #define TP_ASC_TP_NUM		64
-#else
-#define TP_ASC_TP_NUM		56
-#endif
 
 /*@}*/
 
@@ -694,16 +673,7 @@ extern int sys_freq_mult; /* how many times faster than 16 kHz is the system */
          -1))))))))
 
 #ifdef GDS_UNIX_TARGET
-#ifdef _ADVANCED_LIGO
 #define TP_NODE_ID_TO_RFM_ID(A) 0
-#else
-/* UNIX version of initial LIGO testpoint manager */
-/* Node 0 talks to boards 0 and 1 and node 1 to boards 2 and 3 */
-#define TP_NODE_ID_TO_RFM_ID(A) ( \
-	((A) == 0 ? 0 : \
-	((A) == 1 ? 2 : \
-	 -1)))
-#endif
 #else
 #define TP_NODE_ID_TO_RFM_ID(A) ( \
 	((A) == 0 ? 0 : \

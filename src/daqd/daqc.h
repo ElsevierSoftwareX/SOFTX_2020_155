@@ -21,7 +21,7 @@
 /* response codes */
 
 #define DAQD_OK 0x0000
-#define S_DAQD_OK "0000"
+#define S_DAQD_OK ((char *)"0000")
 
 #define DAQD_ERROR 0x0001
 #define S_DAQD_ERROR "0001"
@@ -120,11 +120,6 @@ typedef struct {
 #endif
 
   int shutting_down;
-
-#ifdef not_def
-  int cur_block; /* current block number */
-  int blocks;    /* number of blocks in the stream; zero for realtime stream */
-#endif
 
   int blocks; /* zero for on-line transmission; positive for off-line */
 

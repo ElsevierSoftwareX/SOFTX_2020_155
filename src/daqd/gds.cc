@@ -18,11 +18,6 @@
 #include <limits.h>
 #include <sys/time.h>
 #include <sys/resource.h>
-#ifndef __linux__
-#include <sys/priocntl.h>
-#include <sys/rtpriocntl.h>
-#include <sys/lwp.h>
-#endif
 #include <sys/mman.h>
 
 #include <string>
@@ -333,11 +328,7 @@ gds_c::clear_tps (long_channel_t *ac[], int nptr)
   for (int s = 0; s < max_gds_servers; s++) {
     /* Clear all 4k IFO test points */
     for (int i = 0; i < nptr; i++) {
-#ifdef _ADVANCED_LIGO
       if (ac[i]->tp_node == s) 
-#else
-      if (ac[i]->ifoid == s) 
-#endif
       {
   	system_log(1,"About to clear `%s' %d on node %d", ac[i]->name, ac[i]->chNum, s);
 	tps[ntps++] = ac[i]->chNum;
@@ -348,7 +339,6 @@ gds_c::clear_tps (long_channel_t *ac[], int nptr)
   return rtn;
 }
 
-#if defined(_ADVANCED_LIGO)
 extern "C" {
 //#ifdef USE_GM
      //extern int gdsTpCounter[DCU_COUNT];
@@ -357,7 +347,6 @@ extern "C" {
 extern struct cdsDaqNetGdsTpNum * gdsTpNum[2][DCU_COUNT];
 //#endif
 }
-#endif
 
 int
 gds_c::req_tps (long_channel_t *ac[], channel_t *gds[], int nptr)
@@ -370,11 +359,7 @@ gds_c::req_tps (long_channel_t *ac[], channel_t *gds[], int nptr)
   for (int s = 0; s < n_gds_servers; s++) {
     ntps = 0;
     for (int i = 0; i < nptr; i++) {
-#ifdef _ADVANCED_LIGO
       if (ac[i]->tp_node == gds_nodes[s]) 
-#else
-      if (ac[i]->ifoid == s) 
-#endif
       {
   	system_log(1,"About to request `%s' %d on node %d", ac[i]->name, ac[i]->chNum, gds_nodes[s]);
 	tps[ntps] = ac[i]->chNum;
@@ -387,15 +372,12 @@ gds_c::req_tps (long_channel_t *ac[], channel_t *gds[], int nptr)
       int rtn = tpRequest(gds_nodes[s], tps, ntps, -1, 0, 0);
       if (rtn) {
 	system_log(1, "tpRequest(%d) failed; returned %d\n", gds_nodes[s], rtn);
-#ifdef _ADVANCED_LIGO
 	if (daqd.avoid_reconnect)  _exit(1);
-#endif
       	return rtn;
       }
     }
   }
 
-#if defined(_ADVANCED_LIGO)
   //int gds_cnt = 0;
 
   int label1_jumps = 0;
@@ -408,13 +390,6 @@ label1:
      int dcuId = 0;
      int index = -1;
      int out = 0;
-
-#if defined(VMICRFM_PRODUCER)
-   /* Myrinet connected to node 1 */
-   if (ac[i]->tp_node > 0) 
-    {
-#endif
-
      int ifo = ac[i]->ifoid;
 
      for (int ntries = 0; ntries < 30; ntries++) {
@@ -463,9 +438,7 @@ label1:
 
      if (index < 0) {
 	  system_log(1,"ETIMEDOUT: test point `%s' (tp_num=%d) was not set by the test point manager; request failed", ac[i]->name, ac[i]->chNum);
-#ifdef _ADVANCED_LIGO
 	  if (daqd.avoid_reconnect) _exit(1);
-#endif
           return -1;
      }
      system_log(1,"dcu %d test point %d at index %d\n", dcuId, ac[i]->chNum, index);
@@ -502,105 +475,7 @@ label1:
 	  break;
 	}
     }
-#if defined(VMICRFM_PRODUCER)
-   }
-#endif
   }
-#if !defined(VMICRFM_PRODUCER)
-  return 0;
-#endif
-#endif
-
-#if defined(VMICRFM_PRODUCER)
-
-  // examine alias data info structures in the reflective
-  // memory and get the dataOffset. Then find corresponding
-  // GDS channels. Put pointers to them into `gds[]'
-  int gds_cnt = 0;
-  for (int i = 0; i < nptr; i++) {
-	int ifoid = ac[i]->ifoid;
-	volatile GDS_CNTRL_BLOCK *gb =
-	  (volatile GDS_CNTRL_BLOCK *)((ifoid? daqd.rm_mem_ptr1: daqd.rm_mem_ptr) + DAQ_GDS_BLOCK_ADD);
-	int dcu = -1;
-	int index = -1;
-
-#if defined(_ADVANCED_LIGO)
-   /* Rmem connected to node 0 */
-   if (ac[i]->tp_node == 0) 
-     {
-#endif
-
-	// Test point number is `ac[i]->chNum'
-	int k;
-	for (int ntries = 0; ntries < 2; ntries++) {
-
-	  // Wait if not found and retry
-	  if (ntries) sleep(1);
-
-	  // For debugging print the test point tables
-	  for (k = 0; k < 4; k++) {
-	    DEBUG1(cerr << dcuName[k + DCU_ID_FIRST_GDS] << " ");
-	    for (int l = 0; l < daqGdsTpNum[k]; l++) {
-	      DEBUG1(cerr << " " << gb->tp[k][0][l]);
-	    }
-	    DEBUG1(cerr << endl);
-	  }
-
-	  // Find this number in the tables.
-	  //
-	  for (k = 0; k < DAQ_GDS_DCU_NUM; k++) {
-	    for (int l = 0; l < daqGdsTpNum[k]; l++) {
-	      if (ac[i]->chNum == gb->tp[k][0][l]) {
-		dcu = DCU_ID_FIRST_GDS + k; index = l;
-		ntries = 100;
-	      }
-	    }
-	  }
-	}
-
-
-	if (dcu == -1) {
-	  system_log(1,"ETIMEDOUT: test point `%s' (tp_num=%d) was not set by the test point manager; request failed", ac[i]->name, ac[i]->chNum);
-            return -1;
-	}
-
-#if defined(DATA_CONCENTRATOR)
-// Swap test point slots; required as the test point manager is running on a big-endian machine
-	index ^= 1;
-#endif
-
-	if (!daqd.cit_40m) {
-	  // Find GDS DCU channel with corresponding index.
-	  // Error if not found.
-	  // Data from the second RFM net is in 50+ channels
-	  index += 50 * gds_c::tpnum_to_rmnet(ac[i]->chNum);
-	}
-
-	for (k = 0; k < daqd.num_channels; k++) {
-	  if (daqd.channels [k].gds & 1
-	      && daqd.channels [k].dcu_id == dcu
-	      && daqd.channels [k].ifoid == ifoid
-	      && daqd.channels [k].chNum == index) {
-#if defined(_ADVANCED_LIGO)
-	    gds [i] = daqd.channels + k;
-#else
-	    gds [gds_cnt++] = daqd.channels + k;
-#endif
-	    break;
-	  }
-	}
-
-	if (k == daqd.num_channels) {
-	  system_log(1,"NOT FOUND: test point `%s' set in dcu %d at index %d; index not configured", ac[i]->name, dcu, index);
-	  return -1;
-	}
-	system_log(1,"connected to `%s' dcuid %d", daqd.channels[k].name, dcu);
-#if defined(_ADVANCED_LIGO)
-   }
-#endif
-  }
-#endif
-
   return 0;
 }
 
@@ -711,7 +586,7 @@ gds_c::update_tp_data (unsigned int *d, char *dest)
     unsigned int ifo = 0;
     unsigned int ntp = ntohl(*d++);
     unsigned int rate = ntohl(*d++);
-    DEBUG1(printf("ifo %d DCU %d rate %d ntp %d gdsTpNum=0x%x\n", ifo, dcuid, rate, ntp, gdsTpNum[ifo][dcuid]));
+    //DEBUG1(printf("ifo %d DCU %d rate %d ntp %d gdsTpNum=0x%x\n", ifo, dcuid, rate, ntp, gdsTpNum[ifo][dcuid]));
     if (ntp > DAQ_GDS_MAX_TP_ALLOWED) ntp = DAQ_GDS_MAX_TP_ALLOWED;
     if (gdsTpNum[ifo][dcuid]) gdsTpNum[ifo][dcuid] -> count  = ntp;
 

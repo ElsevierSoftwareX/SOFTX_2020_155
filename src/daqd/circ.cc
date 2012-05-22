@@ -16,14 +16,11 @@ using namespace std;
 #include <stdio.h>
 #include "circ.hh"
 
-// #if 0 && !defined(VMIC_MMAP) && defined(VMICRFM_PRODUCER)
 #ifndef SCOPE_PROGRAM
 #include "daqd.hh"
 
 extern daqd_c daqd;
 #endif
-
-//#endif
 
 int
 circ_buffer::buffer_malloc (int consumers, int blocks, long block_size, time_t block_period)
@@ -221,21 +218,7 @@ circ_buffer::put16th_dpscattered (struct put_dpvec *pv, int pvlen, circ_buffer_b
 	assert(nbi16th < 16 && nbi16th >= 0);
 	assert(pv [i].dest_vec_idx + pv[i].vec_len * nbi16th + pv [i].vec_len <= pbuffer -> block_size);
 
-// #if !defined(VMIC_MMAP) && defined(VMICRFM_PRODUCER)
-#if 0
-	pread (daqd.rh -> rh_fd, 
-	       dst + pv [i].dest_vec_idx + pv[i].vec_len * nbi16th,
-	       pv [i].vec_len,
-	       (void *) ((char *) pv [i].src_pvec_addr - (char *) daqd.rm_mem_ptr));
-
-#else
-#ifdef FILE_CHANNEL_CONFIG
 	int status = *(pv [i].src_status_addr);
-#else
-	int status;
-	//	memcpy((void *)&status, (void *) ((int *)pv [i].src_pvec_addr - 1), sizeof(status));
-	memcpy((void *)&status, (void *) (pv [i].src_pvec_addr - sizeof(int)), sizeof(status));
-#endif
 
 #ifndef SCOPE_PROGRAM
 	if (status && daqd.zero_bad_data) {
@@ -289,7 +272,6 @@ if (pv [i].dest_status_idx != 0xffffffff) {
 	//	*((int *)(dst + pv [i].dest_status_idx) + 1 + nbi16th) = status;
 	memcpy((char *)(dst + pv [i].dest_status_idx + sizeof(int)*(1 + nbi16th)), &status, sizeof(int));
 }
-#endif
 
 	dlen += pv [i].vec_len;
       }

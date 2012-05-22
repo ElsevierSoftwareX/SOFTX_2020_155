@@ -10,32 +10,15 @@
 #include <stdio.h>
 #include <math.h>
 #include <signal.h>
-#ifdef sun
-#include <sys/processor.h>
-#include <sys/procset.h>
-#endif
 #include <sys/mman.h>
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <limits.h>
-#ifdef sun
-#include <sys/priocntl.h>
-#include <sys/rtpriocntl.h>
-#include <sys/lwp.h>
-#endif
-
 #include <string.h>
 #include <iostream>
 #include <fstream>
-
-#ifdef USE_FRAMECPP
-#include "framecpp/frame.hh"
-#include "framecpp/framereader.hh"
-#include "framecpp/adcdata.hh"
-#endif
 
 using namespace std;
 

@@ -74,9 +74,7 @@ extern "C" {
 /* GDS configuration */
 #if defined(LIGO_GDS)
 
-#ifdef _ADVANCED_LIGO
 #define RMEM_LAYOUT 			2
-#endif
 
 #if (TARGET == TARGET_M_GDS_UNIX || TARGET == TARGET_L_GDS_UNIX || TARGET == TARGET_H_GDS_UNIX || TARGET == TARGET_G_GDS_UNIX || TARGET == TARGET_C_GDS_UNIX )
 #define GDS_UNIX_TARGET

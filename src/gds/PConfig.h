@@ -1,6 +1,5 @@
 /* Version: $Id$ */
 #define LIGO_GDS 1
-#define _ADVANCED_LIGO 1
 #define  TARGET TARGET_G_GDS_UNIX
 extern char *archive;
 #define ARCHIVE archive

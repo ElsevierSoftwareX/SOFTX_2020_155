@@ -207,13 +207,8 @@ extern "C"
          loadParamSectionEntry (PRM_DATATYPE, sec, nentry, &cursor, 
                               5, &info.dataType);
          info.dataRate = 14;
-#if defined(_ADVANCED_LIGO)
          loadParamSectionEntry (PRM_DATARATE, sec, nentry, &cursor, 
                               1, &info.dataRate);
-#else
-         loadParamSectionEntry (PRM_DATARATE, sec, nentry, &cursor, 
-                              5, &info.dataRate);
-#endif
          info.rmOffset = 0;
          loadParamSectionEntry (PRM_RMOFFSET, sec, nentry, &cursor, 
                               4, &info.rmOffset);

@@ -223,12 +223,10 @@ for(;;) {
 		  daqData ++;
 		}
 #endif
-#ifdef _ADVANCED_LIGO
 		if (daqd.controller_dcu == dcuId) {
          	   controller_cycle = gmDaqIpc[daqd.controller_dcu].cycle;
 		   DEBUG(6, printf("Timing dcu=%d cycle=%d\n", dcuId, controller_cycle));
 		}
-#endif
 
 		}
 	} 

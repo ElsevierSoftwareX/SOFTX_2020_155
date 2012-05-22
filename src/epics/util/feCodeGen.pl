@@ -3208,7 +3208,6 @@ print OUTM "EXTRA_CFLAGS += -DRESERVE_CPU2\n";
 if ($cpus > 3) {
 print OUTM "EXTRA_CFLAGS += -DRESERVE_CPU3\n";
 }
-print OUTM "EXTRA_CFLAGS += -D_ADVANCED_LIGO=1\n";
 print OUTM "EXTRA_CFLAGS += -g\n";
 if ($adcOver) {
   print OUTM "EXTRA_CFLAGS += -DROLLING_OVERFLOWS\n";

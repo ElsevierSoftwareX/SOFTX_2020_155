@@ -2,9 +2,6 @@
 #define GDS_C_H
 
 #include "channel.hh"
-#if  defined(sun) || !defined(_ADVANCED_LIGO)
-#include "gdsLib.h"
-#endif
 
 class gds_c {
  private:
@@ -61,16 +58,6 @@ public:
     pthread_mutex_init (&bm, NULL);
     pthread_mutex_init (&signal_mtx, NULL);
     pthread_cond_init (&signal_cv, NULL);
-#ifdef _ADVANCED_LIGO
-//#ifdef USE_GM
-    //for (int i = 0; i < DCU_COUNT; i++) {
-      //gdsTpCounter[i] = 0;
-      //for (int j = 0; j < GM_DAQ_MAX_TPS; j++) {
-        //gdsTpTable[i][j] = 0;
-      //}
-    //}
-//#endif
-#endif
     for (int i = 0; i < max_gds_servers; i++) {
 	dcuid[i] = 0;
 	gds_servers[i][0] = 0;

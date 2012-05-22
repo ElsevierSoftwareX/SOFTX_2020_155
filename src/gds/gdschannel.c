@@ -680,10 +680,6 @@ static char *versionId = "Version $Id$" ;
                               5, &chninfo[chninfonum].rmId);
 
 	 printf("%s rmid %d\n", chninfo[chninfonum].chName, chninfo[chninfonum].rmId);
-#if !defined(_ADVANCED_LIGO)
-	 /* We want to use rmId to set node id for advLIGO */
-         chninfo[chninfonum].rmId = (chninfo[chninfonum].ifoId - 1) % 2;
-#endif
          chninfo[chninfonum].dcuId = -1;
          loadParamSectionEntry (PRM_DCUID, sec, nentry, &cursor, 
                               5, &chninfo[chninfonum].dcuId);
@@ -1132,12 +1128,8 @@ static char *versionId = "Version $Id$" ;
                      p++;
                   }
                   chninfo[chninfonum].ifoId = info->ifoId;
-#if defined(_ADVANCED_LIGO)
 		 /* We want to use rmId to set node id for advLIGO */
                   chninfo[chninfonum].rmId = info->rmId;
-#else
-                  chninfo[chninfonum].rmId = (info->ifoId - 1) % 2;
-#endif
                   chninfo[chninfonum].dcuId = info->dcuId;
                   chninfo[chninfonum].chNum = info->chNum;
                   chninfo[chninfonum].dataType = info->dataType;

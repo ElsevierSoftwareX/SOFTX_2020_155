@@ -108,13 +108,9 @@ struct rmIpcStr {       /* IPC area structure                   */
 
 #define IS_ANALOG_DCU(dcuid) ((dcuid) == DCU_ID_ADCU_1 || (dcuid) == DCU_ID_ADCU_2 || (dcuid) == DCU_ID_ADCU_3 || (dcuid) == DCU_ID_ADCU_4)
 #define IS_EPICS_DCU(dcuid) ((dcuid) == DCU_ID_EDCU)
-#ifdef _ADVANCED_LIGO
 #define IS_HEPI_DCU(dcuid) ((dcuid) == DCU_ID_SUS_ETMY || (dcuid) == DCU_ID_HEPI_1 || (dcuid) == DCU_ID_HEPI_2 || (dcuid) == DCU_ID_HEPI_EX || (dcuid) == DCU_ID_HEPI_EY)
 #define IS_2K_DCU(dcuid)      IS_HEPI_DCU(dcuid)
 #define IS_32K_DCU(dcuid)     (daqd.cit_40m? dcuid == 11: dcuid == DCU_ID_SUS_2)
-#else
-#define IS_HEPI_DCU(dcuid) ((dcuid) == DCU_ID_HEPI_1 || (dcuid) == DCU_ID_HEPI_2 || (dcuid) == DCU_ID_HEPI_EX || (dcuid) == DCU_ID_HEPI_EY)
-#endif
 #define IS_EXC_DCU(dcuid) ((dcuid) == DCU_ID_EX_16K || (dcuid) == DCU_ID_EX_2K)
 
 /* DCU 11 and 22 are the 40m Myrinet DCUs */

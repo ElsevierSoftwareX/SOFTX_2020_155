@@ -101,11 +101,7 @@ static char *versionId = "Version $Id$" ;
 /*            								*/
 /*----------------------------------------------------------------------*/
 #define _NETID			"tcp"
-#ifdef _ADVANCED_LIGO
 #define _MAX_IFO		128
-#else
-#define _MAX_IFO		2
-#endif
 #define _MAX_AWG_PER_IFO	5
 #define MAX_SLOT_NAME 		256
 #define MAX_SLOT_LIST 		16

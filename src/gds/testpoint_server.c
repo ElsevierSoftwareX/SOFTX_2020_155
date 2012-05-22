@@ -959,7 +959,7 @@ static char *versionId = "Version $Id$" ;
                             tpp->id, tpNode.node);*/
                      remove = 1;
                   }
-#if !defined(_ADVANCED_LIGO)
+#if 0
 	/* Disable keepalive feature at LASTI (for now) */
                   /* check keep alive */
                   if ((tpp->users[k].clntId >= 0) && 
@@ -1445,7 +1445,6 @@ printf("interface %d: unitID = %d, base = %d, size = %d\n", j, unitID, base, siz
             continue;
          }
 	
-#if defined(_ADVANCED_LIGO)
 	 loadStringParam (PRM_FILE, section, PRM_ENTRY4, sysname);
 	 printf ("sysname = %s\n", sysname);
 	 if (sysname[0] == 0) continue; /* Mandatory field */
@@ -1457,13 +1456,6 @@ printf("interface %d: unitID = %d, base = %d, size = %d\n", j, unitID, base, siz
             continue;
          }
 	 printf ("this is my node\n");
-#else
-	 /* Determine if this is my node */
-         if ((rpcGetLocaladdress (&laddr) < 0) ||
-            (addr.s_addr != laddr.s_addr)) {
-            continue;
-         }
-#endif
          inet_ntoa_b (addr, tpNode.hostname);
       
          prognum = RPC_PROGNUM_TESTPOINT;

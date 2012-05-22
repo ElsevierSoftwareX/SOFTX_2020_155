@@ -10,11 +10,7 @@
 #define DAQ_BASE_ADDRESS	0x2000000
 #define DAQ_DATA_BASE_ADD	(DAQ_BASE_ADDRESS + 0x100000)
 
-#if defined(COMPAT_INITIAL_LIGO)
-#define DAQ_DCU_SIZE		0x100000
-#else
 #define DAQ_DCU_SIZE		0x400000
-#endif
 #define DAQ_DCU_BLOCK_SIZE	(DAQ_DCU_SIZE/16)
 
 #define DAQ_EDCU_SIZE		0x400000
@@ -238,8 +234,6 @@ typedef struct DAQ_INFO_BLOCK {
  * The following four numbers are matched with the GDS rmorg.h header
  */
 
-#if defined(_ADVANCED_LIGO) && !defined(COMPAT_INITIAL_LIGO)
-
 /* Defines the number of LSC excitation outputs */
 #define DAQ_GDS_TP_LSC_EX_NUM		64
 
@@ -252,22 +246,6 @@ typedef struct DAQ_INFO_BLOCK {
 /* Defines the number of ASC test point outputs */
 #define DAQ_GDS_TP_ASC_TP_NUM		64
 
-#else
-
-/* Defines the number of LSC excitation outputs */
-#define DAQ_GDS_TP_LSC_EX_NUM		7
-
-/* Defines the number of LSC test point outputs */
-#define DAQ_GDS_TP_LSC_TP_NUM		15
-
-/* Defines the number of ASC excitation engine test points */
-#define DAQ_GDS_TP_ASC_EX_NUM		24
-
-/* Defines the number of ASC test point outputs */
-#define DAQ_GDS_TP_ASC_TP_NUM		56
-
-#endif
-
 static const int daqGdsTpNum[4] = { DAQ_GDS_TP_LSC_EX_NUM, DAQ_GDS_TP_ASC_EX_NUM, DAQ_GDS_TP_LSC_TP_NUM, DAQ_GDS_TP_ASC_TP_NUM };
 
 /* GDS layout:
@@ -278,17 +256,6 @@ static const int daqGdsTpNum[4] = { DAQ_GDS_TP_LSC_EX_NUM, DAQ_GDS_TP_ASC_EX_NUM
    GDS_CNTRL_BLOCK.excNum16K[1] has the channel status words
 */
 
-#if defined(COMPAT_INITIAL_LIGO)
-typedef union GDS_CNTRL_BLOCK {
-  unsigned short tp [4][2][DAQ_GDS_MAX_TP_NUM];
-  struct {
-    unsigned short excNum16k[2][DAQ_GDS_MAX_TP_NUM];
-    unsigned short excNum2k[2][DAQ_GDS_MAX_TP_NUM];
-    unsigned short tpNum16k[2][DAQ_GDS_MAX_TP_NUM];
-    unsigned short tpNum2k[2][DAQ_GDS_MAX_TP_NUM];
-  } tpe;
-} GDS_CNTRL_BLOCK;
-#else
 typedef union GDS_CNTRL_BLOCK {
   unsigned int tp [4][2][DAQ_GDS_MAX_TP_NUM];
   struct {
@@ -298,7 +265,6 @@ typedef union GDS_CNTRL_BLOCK {
     unsigned int tpNum2k[2][DAQ_GDS_MAX_TP_NUM];
   } tpe;
 } GDS_CNTRL_BLOCK;
-#endif
 
 #if 0
 /* ADCU 5588 Network layout:

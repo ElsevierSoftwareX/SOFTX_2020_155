@@ -52,19 +52,11 @@ typedef struct {
 
   int dcu_id;
   int ifoid;
-#ifdef _ADVANCED_LIGO
   int tp_node; // Testpoint node id
-#endif
   long rm_offset; // Reflected memory offset for the channel data
-#ifndef FILE_CHANNEL_CONFIG
-  long rm_block_size; // Size of 1/16 sec data block
-#endif
 #ifdef GDS_TESTPOINTS
-#if defined(VMICRFM_PRODUCER)
-  struct dataInfoStr *rm_dinfo; // points to the channel's data nifo structure in the reflective memory
-#endif
   int gds; // Set to 1 if gds channel, set to 3 if gds alias channel
-#endif // defined(VMICRFM_PRODUCER)
+#endif
   
   daq_data_t data_type;
 
@@ -101,21 +93,13 @@ public:
      rcvbuf_offset = a.rcvbuf_offset;
 #endif
 
-#ifdef _ADVANCED_LIGO
      tp_node = a.tp_node; // Testpoint node id
-#endif
      dcu_id = a.dcu_id;
      ifoid =  a.ifoid;
      rm_offset = a.rm_offset;
-#ifndef FILE_CHANNEL_CONFIG
-     rm_block_size = a.rm_block_size;
-#endif
 #ifdef GDS_TESTPOINTS
-#if defined(VMICRFM_PRODUCER)
-     rm_dinfo = a.rm_dinfo;
-#endif
      gds = a.gds;
-#endif // defined(VMICRFM_PRODUCER)
+#endif
   
      data_type = a.data_type;
 

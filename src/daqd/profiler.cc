@@ -10,10 +10,8 @@ void *
 profile_c::profiler ()
 {
 
-#ifndef VMICRFM_PRODUCER
   // Put this  thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("profiler", 2);
-#endif
 
   started = 1;
   period = 0;

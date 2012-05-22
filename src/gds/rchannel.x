@@ -35,11 +35,7 @@ struct channelinfo_r {
          1 - int16, 2 - int32, 3 - int64, 4 - float, 5 - double */
       short		dataType;
       /* data rate: specified in Hz; must be a power of two  */
-#if defined(_ADVANCED_LIGO) 
       int 		dataRate;
-#else
-      short		dataRate;
-#endif
       /* channel group */
       short 		chGroup;
       /* number of bytes per sample */
