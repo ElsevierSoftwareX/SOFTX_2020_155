@@ -16,6 +16,8 @@ infodir     = @infodir@
 mandir      = @mandir@
 infodir     = @infodir@
 libdir      = @libdir@
+datarootdir      = @datarootdir@
+
 
 CXX=@CXX@
 CC=@CC@
