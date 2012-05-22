@@ -238,18 +238,12 @@ producer::grabIfoData(int ifo, int cblk, unsigned char *read_dest) {
 #endif
 #if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
       if (IS_MYRINET_DCU(j)) {
-#if defined(COMPAT_INITIAL_LIGO)
-	//dcu_cycle = gmDaqIpc[j].cycle - 1;
-	//if (dcu_cycle < 0) dcu_cycle = 15;
-	dcu_cycle = cblk;
-#else
 // Do not use the IPC cycle as doing so causes data misses
 #if 0
 	if (daqd.cit_40m) dcu_cycle = cblk;
    	else dcu_cycle = gmDaqIpc[j].cycle;
 #endif
 	dcu_cycle = cblk;
-#endif
 
 	memcpy((void *)read_dest,
 	       ((char *)directed_receive_buffer[j]) + dcu_cycle*2*DAQ_DCU_BLOCK_SIZE,
@@ -436,25 +430,6 @@ producer::grabIfoData(int ifo, int cblk, unsigned char *read_dest) {
       }
       crc = ~crc & 0xFFFFFFFF;
 
-#if 0
-#if defined(_ADVANCED_LIGO) && defined(__linux__) && defined(COMPAT_INITIAL_LIGO) && defined(DATA_CONCENTRATOR)
-// Byteswap data
-// At the 40m, the DUCs are sending the big-endian data
-// Here we want to swap that  so we can do trend calculation on it (
-// :TODO: this hsould be based on channel configuration (chan rates and data sizes)
-// :TODO: we want to save data into frames as is, but byteswap when sending it online
-// and before trend gets calculated
-	{
-		int i;
-		int nshorts = read_size / 2;
-		short *s = (short *)read_dest;
-		for (i = 0; i < nshorts; i++) {
-			*s = ntohs(*s);
-			s++;
-		}
-	}
-#endif
-#endif
       // Reset CRC/second variable for this DCU
       if (cblk % 16 == 0)  {
 	daqd.dcuCrcErrCntPerSecond[ifo][j] = daqd.dcuCrcErrCntPerSecondRunning[ifo][j];

@@ -10,12 +10,7 @@
 #define DAQ_DATA_BASE_ADD	(DAQ_BASE_ADDRESS + 0x100000)
 
 /* Redefine this to change DAQ transmission size */
-#if defined(COMPAT_INITIAL_LIGO)
-#define DAQ_DCU_SIZE		0x100000
-#else
 #define DAQ_DCU_SIZE		0x400000
-#endif
-
 #define DAQ_EDCU_SIZE		0x400000
 #define DAQ_EDCU_BLOCK_SIZE	0x20000
 
@@ -122,60 +117,8 @@ struct rmIpcStr {       /* IPC area structure                   */
 #endif
 #define IS_EXC_DCU(dcuid) ((dcuid) == DCU_ID_EX_16K || (dcuid) == DCU_ID_EX_2K)
 
-#ifdef COMPAT_INITIAL_LIGO
-/* DCU 27; ISI and DCU6; TPT */
-#define IS_MYRINET_DCU(dcuid) (dcuid == 27 || dcuid == 30 || dcuid == 31)
-#else
 /* DCU 11 and 22 are the 40m Myrinet DCUs */
 #define IS_MYRINET_DCU(dcuid) (daqd.cit_40m? ((dcuid) == 11 || (dcuid) == DCU_ID_HEPI_1)  : (((dcuid) >= 5 && (dcuid) <= 12) || ((dcuid) >= 17 && (dcuid) <= (DCU_COUNT-1))) )
-#endif
-
-#ifdef COMPAT_INITIAL_LIGO
-
-static const char * const dcuName[DCU_COUNT] = {"DAQSC",
-					 "FB0", "FB1", "FB2",
-					 "EDCU",
-					 "ADCU_PEM", "ADCU_SUS",
-					 "ADCU_EX", "ADCU_EY",
-					 "SUS1", "SUS2", "SUS3", "SUS4",
-					 "EX16K", "EX2K",
-					 "TP16K", "TP2K",
-					 "LSC", "ASC",
-                                         "SOS", "SUS_EX",
-#if defined(_ADVANCED_LIGO) && !defined(COMPAT_INITIAL_LIGO)
-"SEI",
-#else
-"SUS_EY",
-#endif
-					 "SEI1", "SEI2",
-					 "SEI_EX", "SEI_EY", "IOO",
-					 "FAST1", "FAST2", "FAST3",
-					 "FAST4", "FAST5"};
-
-/* Which network DCU is on (1 for 5565, 2 for 5579 or 3 for both; 0 - none) */
-static unsigned int const dcuNet[DCU_COUNT] = {3,3,3,3,0,
-			/* ADCUs */	2,2,2,2,
-					1,1,1,1,
-					3,3,
-					3,3,
-			/* LSC ASC */	1,1,
-					1,2,2,
-					2,2,
-					2,2,1,
-			/* FAST ADCU */	2,2,2,2,2};
-
-/* How the things are layed out at the 40m lab */
-static unsigned int const dcuNet40m[DCU_COUNT] = {2,2,2,2,0,
-			/* ADCUs */	2,2,1,1,
-					1,1,1,1,
-					3,3,
-					3,3,
-			/* LSC ASC */	1,1,
-					1,1,1,
-					2,2,
-					2,2,1,
-			/* FAST ADCU */	2,2,2,2,2};
-#endif
 
 #define IPC_OFFSET_DCU(dcuid)   ((dcuid) * IPC_BLOCK_SIZE + DAQ_BASE_ADDRESS)
 #define DATA_OFFSET_DCU(dcuid)  DAQ_DATA_BASE_ADD
@@ -315,19 +258,6 @@ static const int daqGdsTpNum[4] = { DAQ_GDS_TP_LSC_EX_NUM, DAQ_GDS_TP_ASC_EX_NUM
    GDS_CNTRL_BLOCK.excNum16K[0] has the test point numbers
    GDS_CNTRL_BLOCK.excNum16K[1] has the channel status words
 */
-
-#if defined(COMPAT_INITIAL_LIGO)
-typedef union GDS_CNTRL_BLOCK {
-  unsigned short tp [4][2][DAQ_GDS_MAX_TP_NUM];
-  struct {
-    unsigned short excNum16k[2][DAQ_GDS_MAX_TP_NUM];
-    unsigned short excNum2k[2][DAQ_GDS_MAX_TP_NUM];
-    unsigned short tpNum16k[2][DAQ_GDS_MAX_TP_NUM];
-    unsigned short tpNum2k[2][DAQ_GDS_MAX_TP_NUM];
-  } tpe;
-} GDS_CNTRL_BLOCK;
-
-#else
 typedef union GDS_CNTRL_BLOCK {
   unsigned int tp [4][2][DAQ_GDS_MAX_TP_NUM];
   struct {
@@ -337,7 +267,6 @@ typedef union GDS_CNTRL_BLOCK {
     unsigned int tpNum2k[2][DAQ_GDS_MAX_TP_NUM];
   } tpe;
 } GDS_CNTRL_BLOCK;
-#endif
 
 /* GDS test point table structure for FE to frame builder communication */
 typedef struct cdsDaqNetGdsTpNum {

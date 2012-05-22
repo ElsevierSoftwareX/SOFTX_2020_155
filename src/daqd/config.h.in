@@ -228,9 +228,6 @@
 /* Define if building for Advanced LIGO */
 #undef _ADVANCED_LIGO
 
-/* Define if building for Initial LIGO Compatibility */
-#undef COMPAT_INITIAL_LIGO
-
 /* Define if building to receive data broadcasts */
 #undef USE_BROADCAST
 

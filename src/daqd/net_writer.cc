@@ -802,7 +802,7 @@ net_writer_c::consumer ()
 	  }
 
 	//}
-#elif !defined(COMPAT_INITIAL_LIGO)
+#else
 	if (dec_vec [i].vec_bps == 2) {
 	  for (int j= 0; j < bytes_to_send/2; j++)
 	    ((unsigned short *)bptr) [j] = htons(((unsigned short *)bptr) [j]);
@@ -835,7 +835,7 @@ net_writer_c::consumer ()
 	      ((unsigned int *)bptr) [j] = htonl(((unsigned int *)bptr) [j]);
 	  }
 	//}
-#elif !defined(COMPAT_INITIAL_LIGO)
+#else
 	if (dec_vec [i].vec_bps == 2) {
 	  for (int j = 0; j < dec_vec [i].vec_len/2; j++)
 	    ((unsigned short *)bptr) [j] = htons(((unsigned short *)bptr) [j]);
