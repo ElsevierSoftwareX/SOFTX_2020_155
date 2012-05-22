@@ -1,1 +1,38 @@
+***
 Need to integrate iniChk.pl script into the Epics sequencer C code.
+
+***
+Jamie reported a bug in file nameing which needs to be fixed:
+
+Date: Tue, 08 May 2012 17:15:33 -0700
+From: Jameson Graef Rollins <jrollins@ligo.caltech.edu>
+To: Alex Ivanov <aivanov@ligo.caltech.edu>, CDS Software <cds-software@ligo.org>
+Subject: Re: bug in RCG MEDM generation?
+Parts/Attachments:
+   1 Shown     21 lines  Text
+      2          851 bytes  Application
+      ----------------------------------------
+
+      On Tue, May 08 2012, Alex Ivanov <aivanov@ligo.caltech.edu> wrote:
+      > I looked at the code and the MEDM file naming is done differently
+      > for the matrices compared to the scheme done for the filter modules. A
+      > filter module MEDM .adl file gets named based on the whole model file
+      > name, i.e. h1iscey.adl gives it H2ISCEY_<FILTER_NAME>.adl. A matrix .adl
+      > file the code truncates to the five characters, so it ends up looking like
+      > H2ISC_<MATRIX_NAME>.adl. I can't figure out which way is right.
+
+      Investigations seem to indicate that the situation has been like this
+      for a long time.  I thought we had decided that we would always just use
+      the first five characters of model names in all circumstances, but I
+      guess that never got put in place (although I'm still puzzled why there
+      would be references to screens that never would have existed).  The most
+      important thing at this point is to just be consistent, and since most
+      things seem to be assuming full model name, we should just settle on
+      that.
+
+      Alex, if you can modify feCodeGen to consistently generate all screen
+      names based on the full model name that would be great.  Thanks.
+
+      jamie.
+
+***
