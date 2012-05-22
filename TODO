@@ -36,3 +36,43 @@ Parts/Attachments:
       jamie.
 
 ***
+
+Another request from Jamie:
+
+Date: Tue, 22 May 2012 11:02:56 -0700
+From: Jameson Graef Rollins <jrollins@ligo.caltech.edu>
+Reply-To: cds-announce@ligo.org
+To: CDS users mailing list <cds-announce@ligo.org>
+Subject: [cds-announce] EPICS records for cdsIPCx errors
+Parts/Attachments:
+   1 Shown     25 lines  Text
+      2          851 bytes  Application
+      ----------------------------------------
+
+      Hi, all.  I have an RCG feature request:
+
+      I would like to request that the cdsIPCx receivers auto-generate an
+      EPICS record that records transmission errors.  This would make it much
+      easier for us to add MEDM indicators that report the state of specific
+      IPCx channels.
+
+      I notice that the RCG developers guide doesn't actually explain how the
+      Err output behaves (it would be nice if it did), but the IPC document
+      [T1000587] does: the Err output apparently reports the number of errors
+      per second.  I assume that means that at every EPICS sample the output
+      is the number of errors in the last second.  I think that's ok for
+      front-end models, since anything non-zero indicates current loss of
+      integrity.  I think it would be nice to have something a little
+      different for the EPICS record, though.  I would suggest they keep a
+      running tally of the number of errors since the last "DIAGNOSTICS
+      RESET".  That way it won't clear automatically if the error rate returns
+      to zero.
+
+      I think it would also be nice if the GDS_TP screens included a section
+      with indicators for these EPICS records for all of the IPCx receivers in
+      the model.  That seems like a logical place to have them automatically
+      called out.
+
+      jamie.
+
+***
