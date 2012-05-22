@@ -410,13 +410,8 @@ label1:
      int out = 0;
 
 #if defined(VMICRFM_PRODUCER)
-#if defined(COMPAT_INITIAL_LIGO)
-   /* Myrinet connected to nodes 2 and higher */
-   if (ac[i]->tp_node > 1) 
-#else
    /* Myrinet connected to node 1 */
    if (ac[i]->tp_node > 0) 
-#endif
     {
 #endif
 
@@ -437,27 +432,6 @@ label1:
 	 }
        }
 
-#if 0
-#ifdef USE_BROADCAST
-	// Include checking for the legacy GDS TP DCUs if build as broadcast receiver
-	int dcu_from = DCU_ID_FIRST_GDS;
-	int dcu_to = DAQ_GDS_DCU_NUM + DCU_ID_FIRST_GDS; // last GDS dcu + 1
-#if defined(COMPAT_INITIAL_LIGO)
-	// Myrinet nodes: figure out the exact dcu id
-        if (ac[i]->tp_node > 1)
-#endif
-	{
-		if (ac[i]->tp_node < max_gds_servers) {
-			dcu_from = dcu_to = dcuid[ac[i]->tp_node];
-			dcu_to++;
-		} else break; // Invalid GDS node id
-	}
-       for (dcuId = dcu_from; dcuId < dcu_to; dcuId++)
-#else
-
-       for (dcuId = DCU_ID_SUS_1; dcuId < DCU_COUNT; dcuId++)
-#endif
-#endif
 	dcuId = ac[i]->tp_node; // From now on the DCU id is the same as GDS node id
         {
          out = 0;
@@ -551,13 +525,8 @@ label1:
 	int index = -1;
 
 #if defined(_ADVANCED_LIGO)
-#if defined(COMPAT_INITIAL_LIGO)
-   /* RMEM goes to nodes 0, 1 */
-   if (ac[i]->tp_node < 2)
-#else
    /* Rmem connected to node 0 */
    if (ac[i]->tp_node == 0) 
-#endif
      {
 #endif
 
@@ -676,41 +645,6 @@ for(int ifo = 0; ifo < daqd.data_feeds; ifo++) {
     unsigned int tp_count = 0;
     unsigned int tp_table[DAQ_GDS_MAX_TP_ALLOWED]; // Legacy testpoint table
     unsigned int tp_table_len = 0;
-#if defined(COMPAT_INITIAL_LIGO)
-    if (IS_TP_DCU(i)) {
-	// This is the legacy RFM testpoint DCU (2/16K TP/EXC; 4 DCUs total)
-	// Examine test point table to find out how many test point numbers
-	// are set.
-
-	// Pointer into the testpoint table in the RFM
-	volatile GDS_CNTRL_BLOCK *gb =
-	   (volatile GDS_CNTRL_BLOCK *)((ifo? daqd.rm_mem_ptr1: daqd.rm_mem_ptr) + DAQ_GDS_BLOCK_ADD);
-
-  	// For debugging print the test point tables
-    	DEBUG(2,cerr << dcuName[i] << " ");
-	int tp_index = i - DCU_ID_FIRST_GDS;
-	tp_table_len = daqGdsTpNum[tp_index];
-	if (tp_table_len > DAQ_GDS_MAX_TP_ALLOWED)  {
-		tp_table_len = DAQ_GDS_MAX_TP_ALLOWED;
-	}
-    	for (int l = 0; l < daqGdsTpNum[tp_index]; l++) {
-		// Swap test point slots; required as the test point manager is running on a big-endian machine
-		int index = l;
-	 	index ^= 1;
-		unsigned int tpnum = gb->tp[tp_index][0][index];
-       		DEBUG(2,cerr << " " << tpnum);
-		// :TODO: look at the status of AWG channel data
-		// and only transmit excitations with good status
-		if (tpnum) tp_count++;
-    		if (tp_count > DAQ_GDS_MAX_TP_ALLOWED) {
-			tp_count = DAQ_GDS_MAX_TP_ALLOWED;
-		}
-		tp_table[l] = tpnum;
-    	}
-    	DEBUG(2,cerr << endl);
-	if (tp_count == 0) continue; // No testpoint defined
-    } else
-#endif
  	   {
 	// Check Myrinet DCUs
 	if (gdsTpNum[ifo][i] == 0) continue;
@@ -733,55 +667,6 @@ for(int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 
     //printf("DCU %d has %d tps\n", i, tp_count);
 
-#if defined(COMPAT_INITIAL_LIGO)
-    if (IS_TP_DCU(i)) {
-      // Legacy testpoint DCU
-
-      // Send TP numbers table
-      for (int j = 0; j < tp_table_len; j++) {
-	if (tp_table[j]) { // test point set
-	  tp_ptr[tidx++] = ntohl(tp_table[j]);
-	}
-      }
-      // Send test point data
-      char *data_src = data + daqd.dcuTPOffset[ifo][i]; // data source address
-
-      for (int j = 0; j < tp_table_len; j++) {
-	if (tp_table[j]) { // test point set; send data
-	  unsigned int rfm_offs = 0;
-
-          // Offset to 5579 RFM data in the second half of DCU
-          if (gds_c::tpnum_to_rmnet(tp_table[j])) {
-	    rfm_offs = 16 * daqd.dcuSize[ifo][i] / 2;
-          } else {
-	    rfm_offs = 0;
-	  }
-
-	DEBUG1(printf("testpoint %d rfm_offs=%d\n", tp_table[j], rfm_offs));
-	DEBUG1(printf("data %d %d %d\n", data_src[
-                                + block_bytes * bn 
-                                + block_bytes_ps * j
-                                + rfm_offs],
-					data_src[
-                                + block_bytes * bn
-                                + block_bytes_ps * j
-                                + rfm_offs + 1],
-					data_src[
-                                + block_bytes * bn
-                                + block_bytes_ps * j
-                                + rfm_offs + 2 ]));
-
-	  memcpy(tp_ptr + tidx, data_src
-				+ block_bytes * bn
-				+ block_bytes_ps * j
-				+ rfm_offs,
-		block_bytes);
-	  tidx += block_bytes/4;
-	}
-      }
-    } else
-#endif
-	   {
       // Myrinet DCU
 
       // Send TP numbers table
@@ -800,7 +685,6 @@ for(int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 		block_bytes);
 	  tidx += block_bytes/4;
       }
-    }
     if (tp_count) ndcu++;
   }
 }
@@ -825,12 +709,6 @@ gds_c::update_tp_data (unsigned int *d, char *dest)
     // Received data per DCU header contains these variables
     unsigned int dcuid = ntohl(*d++);
     unsigned int ifo = 0;
-#if defined(COMPAT_INITIAL_LIGO)
-    if (dcuid > 32) { // This is LHO H2 data
-	dcuid -= 32;
-	ifo = 1;
-    }
-#endif
     unsigned int ntp = ntohl(*d++);
     unsigned int rate = ntohl(*d++);
     DEBUG1(printf("ifo %d DCU %d rate %d ntp %d gdsTpNum=0x%x\n", ifo, dcuid, rate, ntp, gdsTpNum[ifo][dcuid]));

@@ -2585,13 +2585,8 @@ start_trend_bailout:
 				  // update alias channels
 				  for (int i = 0; i< na; i++) {
 #if defined(_ADVANCED_LIGO)
-#if defined(COMPAT_INITIAL_LIGO)
-		/* nodes 0 and 1 going to RFM, the rest are Myrinet */
- 				    if (ac[i]->tp_node < 2)
-#else
 		/* node 1 connected with Myrinet and 0 with RFM */
  				    if (ac[i]->tp_node == 0)
-#endif
 				     {
 #endif
 				     ac [i] -> offset = gds [i] -> offset;

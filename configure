@@ -597,7 +597,6 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-enable_compat_initial_ligo
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1206,12 +1205,6 @@ if test -n "$ac_init_help"; then
 
   cat <<\_ACEOF
 
-Optional Features:
-  --disable-option-checking  ignore unrecognized --enable/--with options
-  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
-  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-compat-initial-ligo    Build for Inital LIGO Compatibility
-
 Report bugs to the package provider.
 _ACEOF
 ac_status=$?
@@ -1639,15 +1632,6 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-
-
-# Check whether --enable-compat-initial-ligo was given.
-if test "${enable_compat_initial_ligo+set}" = set; then :
-  enableval=$enable_compat_initial_ligo; if test x$enableval = xyes; then
-  $as_echo "#define COMPAT_INITIAL_LIGO 1" >>confdefs.h
-
-fi
-fi
 
 
 ac_config_files="$ac_config_files Makefile"

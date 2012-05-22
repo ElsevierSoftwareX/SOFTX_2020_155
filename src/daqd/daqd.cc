@@ -411,9 +411,6 @@ daqd_c::configure_channels_files ()
     }
 #ifdef _ADVANCED_LIGO
     if (ini_file_dcu_id > 0 && ini_file_dcu_id < DCU_COUNT) {
-#ifdef COMPAT_INITIAL_LIGO
-      if (!IS_MYRINET_DCU(ini_file_dcu_id)) continue;
-#endif
       // only set DCU name if this is an INI file (*.ini)
       if (!strcmp(buf + strlen(buf) - 4, ".ini")) {
 	char *slp = strrchr(buf,'/');

@@ -5,9 +5,6 @@
 #if  defined(sun) || !defined(_ADVANCED_LIGO)
 #include "gdsLib.h"
 #endif
-#if defined(COMPAT_INITIAL_LIGO)
-#include "../../../rts/src/include/gdsLib.h"
-#endif
 
 class gds_c {
  private:
@@ -127,42 +124,6 @@ public:
     pthread_mutex_unlock (&signal_mtx);
   }
 
-#if  defined(sun) || defined(COMPAT_INITIAL_LIGO)
-  // Translate test point number to RFM network (0 - 5565 or 1 - 5579)
-  unsigned int tpnum_to_rmnet(unsigned int tpnum) {
-    return IS_GDS_ETMX_TP(tpnum) || IS_GDS_ETMY_TP(tpnum)
-      || IS_GDS_HEPIX_TP(tpnum) || IS_GDS_HEPIY_TP(tpnum)
-      || IS_GDS_HEPI1_TP(tpnum) || IS_GDS_HEPI2_TP(tpnum)
-      || IS_GDS_ADCU_TP(tpnum);
-  }
-
-  // Translate test point number (but not the EXC number) to the DCU ID
-  // Returns 0 if DCU is unknown
-  unsigned int tpnum_to_dcuid(unsigned int tpnum) {
-    if (IS_GDS_ETMX_TP(tpnum)) return  DCU_ID_SUS_ETMX;
-    else if (IS_GDS_ETMY_TP(tpnum)) return  DCU_ID_SUS_ETMY;
-
-    else if (IS_GDS_HEPIX_TP(tpnum)) return  DCU_ID_HEPI_EX;
-    else if (IS_GDS_HEPIY_TP(tpnum)) return  DCU_ID_HEPI_EY;
-    else if (IS_GDS_HEPI1_TP(tpnum)) return  DCU_ID_HEPI_1;
-    else if (IS_GDS_HEPI2_TP(tpnum)) return  DCU_ID_HEPI_2;
-
-    else if (IS_GDS_ASC_TP(tpnum)) return  DCU_ID_ASC;
-    else if (IS_GDS_LSC_TP(tpnum)) return  DCU_ID_LSC;
-
-    else if (IS_GDS_SOS_TP(tpnum)) return  DCU_ID_SUS_SOS;
-    else if (IS_GDS_SUS1_TP(tpnum)) return  DCU_ID_SUS_1;
-    else if (IS_GDS_SUS2_TP(tpnum)) return  DCU_ID_SUS_2;
-    else if (IS_GDS_SUS3_TP(tpnum)) return  DCU_ID_SUS_3;
-
-    else if (IS_GDS_ADCU1_TP(tpnum)) return  DCU_ID_ADCU_1;
-    else if (IS_GDS_ADCU2_TP(tpnum)) return  DCU_ID_ADCU_2;
-    else if (IS_GDS_ADCU3_TP(tpnum)) return  DCU_ID_ADCU_3;
-    else if (IS_GDS_ADCU4_TP(tpnum)) return  DCU_ID_ADCU_4;
-
-    else return 0;
-  }
-#endif
 };
 
 #endif
