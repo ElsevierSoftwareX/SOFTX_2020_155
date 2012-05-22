@@ -62,7 +62,7 @@ using namespace std;
 #include "daqc.h"
 #include "daqd.hh"
 #include "sing_list.hh"
-#include "md5.h"
+//#include "md5.h"
 
 #include "../../src/drv/crc.c"
 
