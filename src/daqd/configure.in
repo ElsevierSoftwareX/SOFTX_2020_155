@@ -111,6 +111,17 @@ AC_SUBST(MYRINET_SRCS)
 AC_SUBST(MYRINET_FLAGS)
 AC_SUBST(MYRINET_LDFLAGS)
 
+AC_ARG_WITH(omx,
+[  --with-omx             Get data from Open MX],
+[ if test x$withval != xno; then
+   MX_OBJS=\$\{MX_OBJS\}
+   MX_SRCS=\$\{MX_SRCS\}
+   MX_FLAGS=\$\{OMX_FLAGS\}
+   MX_LDFLAGS=\$\{OMX_LDFLAGS\}
+   AC_DEFINE(USE_MX)
+ fi
+])
+
 AC_ARG_WITH(mx,
 [  --with-mx             Get data from MX],
 [ if test x$withval != xno; then

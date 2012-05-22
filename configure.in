@@ -4,31 +4,31 @@ dnl AC_CONFIG_HEADER(config.h)
 
 dnl checks for programs
 dnl ===================
-AC_PROG_CXX
-AC_PROG_CC
-AC_PROG_INSTALL
-AC_PROG_LN_S
+dnl AC_PROG_CXX
+dnl AC_PROG_CC
+dnl AC_PROG_INSTALL
+dnl AC_PROG_LN_S
 
 dnl checks for libraries
 dnl ====================
-AC_CHECK_LIB(nsl, inet_addr)
-AC_CHECK_LIB(socket, socket)
-AC_CHECK_LIB(dl, dlopen)
-AC_CHECK_LIB(intl, dgettext)
-AC_CHECK_LIB(posix4, sem_init)
+dnl AC_CHECK_LIB(nsl, inet_addr)
+dnl AC_CHECK_LIB(socket, socket)
+dnl AC_CHECK_LIB(dl, dlopen)
+dnl AC_CHECK_LIB(intl, dgettext)
+dnl AC_CHECK_LIB(posix4, sem_init)
 
 dnl checks for header files
 dnl =======================
 
-AC_HEADER_STDC
-AC_HEADER_TIME
+dnl AC_HEADER_STDC
+dnl AC_HEADER_TIME
 
 
 dnl checks for typedefs
 dnl ===================
 
-AC_TYPE_SIZE_T
-AC_TYPE_OFF_T
+dnl AC_TYPE_SIZE_T
+dnl AC_TYPE_OFF_T
 
 dnl Check for configuration options
 dnl ==========================
