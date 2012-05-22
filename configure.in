@@ -1,34 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(NEWS)
-dnl AC_CONFIG_HEADER(config.h)
-
-dnl checks for programs
-dnl ===================
-dnl AC_PROG_CXX
-dnl AC_PROG_CC
-dnl AC_PROG_INSTALL
-dnl AC_PROG_LN_S
-
-dnl checks for libraries
-dnl ====================
-dnl AC_CHECK_LIB(nsl, inet_addr)
-dnl AC_CHECK_LIB(socket, socket)
-dnl AC_CHECK_LIB(dl, dlopen)
-dnl AC_CHECK_LIB(intl, dgettext)
-dnl AC_CHECK_LIB(posix4, sem_init)
-
-dnl checks for header files
-dnl =======================
-
-dnl AC_HEADER_STDC
-dnl AC_HEADER_TIME
-
-
-dnl checks for typedefs
-dnl ===================
-
-dnl AC_TYPE_SIZE_T
-dnl AC_TYPE_OFF_T
 
 dnl Check for configuration options
 dnl ==========================

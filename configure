@@ -1641,13 +1641,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
-
-
-
-
-
 # Check whether --enable-compat-initial-ligo was given.
 if test "${enable_compat_initial_ligo+set}" = set; then :
   enableval=$enable_compat_initial_ligo; if test x$enableval = xyes; then
