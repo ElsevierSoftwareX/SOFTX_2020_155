@@ -65,12 +65,15 @@ struct rmIpcStr gmDaqIpc[DCU_COUNT];
 // DMA memory area pointers
 void *directed_receive_buffer[DCU_COUNT];
 int controller_cycle = 0;
-#elif defined(USE_BROADCAST)
-int controller_cycle = 0;
 #else
+
 #ifdef USE_SYMMETRICOM
 int controller_cycle = 0;
+#else
+// Point into shared memory for the controller DCU cycle
+#define controller_cycle (shmemDaqIpc[daqd.controller_dcu]->cycle)
 #endif
+
 #endif
 
 #if !defined(USE_GM) && !defined(USE_MX) && !defined(USE_UDP)
