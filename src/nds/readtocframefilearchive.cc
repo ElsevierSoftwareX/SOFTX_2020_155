@@ -235,16 +235,17 @@ Nds::readTocFrameFileArchive()
       time_t t = time(0);
 
       FrameCPP::Version::FrameH new_frame(*ifs.ReadFrameH(0, 0));
-      FrameCPP::Version::FrRawData raw_data ("");
-      new_frame.SetRawData(raw_data);
+      General::SharedPtr< FrameCPP::Version::FrRawData > rawData
+	        = General::SharedPtr< FrameCPP::Version::FrRawData > (new FrameCPP::Version::FrRawData);
+      new_frame.SetRawData(rawData);
       const vector<string> &names = mSpec.getSignalNames(); // ADC signal names we care about
       unsigned int num_signals = names.size();
 
       for (int i = 0; i < num_signals; i++) {
 	FrameCPP::Version::FrAdcData *adc = 
-		ifs.ReadFrAdcData(0, names[i]);
+		ifs.ReadFrAdcData(0, names[i]).get();
 	adc->RefData()[0]->Uncompress();
-	new_frame.GetRawData () -> RefFirstAdc ().append (adc);
+	new_frame.GetRawData () -> RefFirstAdc ().append (*adc);
 	DEBUG(1, printf("Added %s\n", adc->GetName().c_str()));
       }
 

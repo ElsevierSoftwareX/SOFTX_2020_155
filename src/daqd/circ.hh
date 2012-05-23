@@ -40,7 +40,6 @@ struct put_dpvec {
 			// in a group to byteswap
 };
 
-// Classe la grande
 class circ_buffer {
  public:
   enum mem_choice {flag_malloc=0, ptr=1, shmem_ftok=2, shmem_shmid=3, shmem_shmkey=4}; /* how to allocate circular buffer */

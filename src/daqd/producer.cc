@@ -450,6 +450,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 
   }
 
+// TODO make IP addresses configurable from daqdrc
 #ifdef USE_BROADCAST
   diag::frameRecv* NDS = new diag::frameRecv(0);
   if (!NDS->open("225.0.0.1", "10.110.144.0", net_writer_c::concentrator_broadcast_port)) {

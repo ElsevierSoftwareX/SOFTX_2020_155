@@ -181,8 +181,8 @@ trender_c::minute_framer ()
   // Put this thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("minute trend framer", 2);
 
-  FrameCPP::Version::FrameH *frame = 0;
-  FrameCPP::Version::FrRawData raw_data ("");
+  General::SharedPtr<FrameCPP::Version::FrameH> frame;
+  FrameCPP::FrameH::rawData_type rawData (new FrameCPP::FrameH::rawData_type::element_type (""));
 
   int frame_length_seconds;
   int frame_length_blocks;
@@ -198,14 +198,14 @@ trender_c::minute_framer ()
   // Create minute trend frame
   //
   try {
-    frame = new FrameCPP::Version::FrameH ("LIGO",
+    frame = General::SharedPtr<FrameCPP::Version::FrameH> (new FrameCPP::Version::FrameH ("LIGO",
 					     0, // run number ??? buffptr -> block_prop (nb) -> prop.run;
 					     1, // frame number
 					     FrameCPP::Version_6::GPSTime (0, 0),
 					     0, // leap seconds
 					     frame_length_seconds // dt
-					     );
-    frame -> SetRawData (raw_data);
+					     ));
+    frame -> SetRawData (rawData);
     frame -> RefDetectProc ().append (detector);
 
     // Append second detector if it is defined
@@ -226,8 +226,6 @@ trender_c::minute_framer ()
 
   // Create ADCs
   try {
-    REAL_8 junk [frame_length_blocks];
-    memset(junk, 0, sizeof(REAL_8)*frame_length_blocks);
     for (int i = 0; i < num_trend_channels; i++) {
       FrameCPP::Version::FrAdcData adc
         = FrameCPP::Version::FrAdcData (std::string(trend_channels [i].name),
@@ -242,43 +240,33 @@ trender_c::minute_framer ()
                                           0,
                                           0,
                                           .0);
-      frame -> GetRawData () -> RefFirstAdc ().append (adc);
       FrameCPP::Version::Dimension  dims [1] = { FrameCPP::Version::Dimension (frame_length_blocks, frame_length_blocks, "") };     
+      FrameCPP::Version::FrVect *vect;
       switch (trend_channels [i].data_type) {
       case _64bit_double:
         {
-          FrameCPP::Version::FrVect vect("", 1, dims, (REAL_8 *) junk, "");
-          frame -> GetRawData () -> RefFirstAdc () [i] -> RefData().append (vect);
-          bool owns;
-          adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc () [i] -> RefData()[0] -> SteelData(owns);
+          vect = new FrameCPP::Version::FrVect("", 1, dims, new REAL_8[frame_length_blocks], "");
           break;
         }
       case _32bit_float: 
         { 
-          FrameCPP::Version::FrVect vect("", 1, dims, (REAL_4 *) junk, "");
-          frame -> GetRawData () -> RefFirstAdc () [i] -> RefData().append (vect);
-          bool owns;
-          adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc () [i] -> RefData()[0] -> SteelData(owns);
+          vect = new FrameCPP::Version::FrVect("", 1, dims, new REAL_4[frame_length_blocks], "");
           break;
         }
       case _32bit_integer:
         {
-          FrameCPP::Version::FrVect vect("", 1, dims, (INT_4S *) junk, "");
-          frame -> GetRawData () -> RefFirstAdc () [i] -> RefData().append (vect);
-          bool owns;
-          adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc () [i] -> RefData()[0] -> SteelData(owns);
+          vect = new FrameCPP::Version::FrVect("", 1, dims, new INT_4S[frame_length_blocks], "");
           break;
         }
       default:
         {
           abort();
-          FrameCPP::Version::FrVect vect("", 1, dims, (INT_2S *) junk, "");
-          frame -> GetRawData () -> RefFirstAdc () [i] -> RefData().append (vect);
-          bool owns;
-          adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc () [i] -> RefData()[0] -> SteelData(owns);
           break;
         }
       }
+      adc.RefData().append (*vect);
+      frame -> GetRawData () -> RefFirstAdc ().append (adc);
+      adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc ()[i] -> RefData()[0] -> GetData().get();
     }
   } catch (...) {
     system_log(1, "Couldn't create one or several adcs");
@@ -288,6 +276,7 @@ trender_c::minute_framer ()
     this -> shutdown_trender ();
     return NULL;
   }
+
   system_log(1, "Done creating ADC structures");
 
   sem_post (&minute_frame_saver_sem);
@@ -406,10 +395,12 @@ trender_c::minute_framer ()
         ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
         DEBUG(1, cerr << "Begin minute trend WriteFrame()" << endl);
         time_t t = time(0);
-        ofs.WriteFrame(*(frame), //FrameCPP::Common::CheckSum::NONE,
-                        daqd.no_compression? FrameCPP::FrVect::RAW:
+
+        ofs.WriteFrame(frame, //FrameCPP::Common::CheckSum::NONE,
+	               daqd.no_compression? FrameCPP::FrVect::RAW:
 				 FrameCPP::FrVect::ZERO_SUPPRESS_OTHERWISE_GZIP, 1,
-                        FrameCPP::Common::CheckSum::CRC);
+		       FrameCPP::Common::CheckSum::CRC);
+
         t = time(0) - t;
         DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
         ofs.Close();
@@ -611,8 +602,8 @@ trender_c::framer ()
   // Put this thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("trend framer", 2);
 
-  FrameCPP::Version::FrameH *frame = 0;
-  FrameCPP::Version::FrRawData raw_data ("");
+  General::SharedPtr<FrameCPP::Version::FrameH> frame;
+  FrameCPP::FrameH::rawData_type rawData (new FrameCPP::FrameH::rawData_type::element_type (""));
 
   int frame_length_blocks;
   
@@ -625,14 +616,14 @@ trender_c::framer ()
   // Create trend frame
   //
   try {
-    frame = new FrameCPP::Version::FrameH ("LIGO",
+    frame = General::SharedPtr<FrameCPP::Version::FrameH> (new FrameCPP::Version::FrameH ("LIGO",
 					     0, // run number ??? buffptr -> block_prop (nb) -> prop.run;
 					     1, // frame number
 					     FrameCPP::Version_6::GPSTime (0, 0),
 					     0, // localTime
 					     frame_length_blocks // dt
-					     );
-    frame -> SetRawData (raw_data);
+					     ));
+    frame -> SetRawData (rawData);
     frame -> RefDetectProc ().append (detector);
     // Append second detector if it is defined
     if (daqd.detector_name1.length() > 0) {
@@ -653,7 +644,6 @@ trender_c::framer ()
   // Create  ADCs
   try {
     for (int i = 0; i < num_trend_channels; i++) {
-      REAL_8 junk [16 * 1024];
       FrameCPP::Version::FrAdcData adc
 	= FrameCPP::Version::FrAdcData (std::string(trend_channels [i].name),
 					  trend_channels [i].group_num,
@@ -667,44 +657,34 @@ trender_c::framer ()
 					  0,
 					  0,
 					  .0);
-      frame -> GetRawData () -> RefFirstAdc ().append (adc);
 
       FrameCPP::Version::Dimension  dims [1] = { FrameCPP::Version::Dimension (frame_length_blocks, 1. / trend_channels [i].sample_rate, "") };
-      switch (trend_channels [i].data_type) { 
+      FrameCPP::Version::FrVect *vect;
+      switch (trend_channels [i].data_type) {
       case _64bit_double:
-	{
-	  FrameCPP::Version::FrVect vect("", 1, dims, (REAL_8 *) junk, "");
-	  frame -> GetRawData () -> RefFirstAdc () [i] -> RefData().append (vect);
-          bool owns;
-          adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc () [i] -> RefData()[0] -> SteelData(owns);
-	  break;
-	}
+        {
+          vect = new FrameCPP::Version::FrVect("", 1, dims, new REAL_8[frame_length_blocks], "");
+          break;
+        }
       case _32bit_float: 
-	{
-	  FrameCPP::Version::FrVect vect("", 1, dims, (REAL_4 *) junk, "");
-	  frame -> GetRawData () -> RefFirstAdc () [i] -> RefData().append (vect);
-          bool owns;
-          adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc () [i] -> RefData()[0] -> SteelData(owns);
-	  break;
-	}
+        { 
+          vect = new FrameCPP::Version::FrVect("", 1, dims, new REAL_4[frame_length_blocks], "");
+          break;
+        }
       case _32bit_integer:
-	{
-	  FrameCPP::Version::FrVect vect("", 1, dims, (INT_4S *) junk, "");
-	  frame -> GetRawData () -> RefFirstAdc () [i] -> RefData().append (vect);
-          bool owns;
-          adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc () [i] -> RefData()[0] -> SteelData(owns);
-	  break;
-	}
+        {
+          vect = new FrameCPP::Version::FrVect("", 1, dims, new INT_4S[frame_length_blocks], "");
+          break;
+        }
       default:
-	{
-	  abort();
-	  FrameCPP::Version::FrVect vect("", 1, dims, (INT_2S *) junk, "");
-	  frame -> GetRawData () -> RefFirstAdc () [i] -> RefData().append (vect);
-          bool owns;
-          adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc () [i] -> RefData()[0] -> SteelData(owns);
-	  break;
-	}
+        {
+          abort();
+          break;
+        }
       }
+      adc.RefData().append (*vect);
+      frame -> GetRawData () -> RefFirstAdc ().append (adc);
+      adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc ()[i] -> RefData()[0] -> GetData().get();
     }
   } catch (...) {
     system_log(1, "Couldn't create one or several adcs");
@@ -849,10 +829,12 @@ trender_c::framer ()
           ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
           DEBUG(1, cerr << "Begin second trend WriteFrame()" << endl);
           time_t t = time(0);
-          ofs.WriteFrame(*(frame), //FrameCPP::Common::CheckSum::NONE,
-                        daqd.no_compression? FrameCPP::FrVect::RAW:
+
+          ofs.WriteFrame(frame, //FrameCPP::Common::CheckSum::NONE,
+			 daqd.no_compression? FrameCPP::FrVect::RAW:
 				 FrameCPP::FrVect::ZERO_SUPPRESS_OTHERWISE_GZIP, 1,
                         FrameCPP::Common::CheckSum::CRC);
+
           t = time(0) - t;
           DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
           ofs.Close();

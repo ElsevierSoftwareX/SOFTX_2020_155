@@ -14,6 +14,8 @@
 #include "framecpp/Common/CheckSum.hh"
 #include "framecpp/Common/IOStream.hh"
 #include "framecpp/Version8/FrameStream.hh"
+#include "framecpp/Common/FrameBuffer.hh"
+
 
 #include "framecpp/FrameCPP.hh"
 

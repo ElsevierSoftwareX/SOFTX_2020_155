@@ -576,25 +576,26 @@ INT_2U data_valid [MAX_CHANNELS];
 INT_2U *aux_data_valid_ptr [MAX_CHANNELS];
 
 
-FrameCPP::Version::FrameH*
+General::SharedPtr<FrameCPP::Version::FrameH>
 daqd_c::full_frame(channel_t* frame_channels, long num_frame_channels, int frame_length_seconds)
   throw() {
   FrameCPP::Version::FrAdcData *adc  = new FrameCPP::Version::FrAdcData[num_channels];
-  FrameCPP::Version::FrRawData raw_data ("");
-  FrameCPP::Version::FrameH *frame = 0;
+  General::SharedPtr< FrameCPP::Version::FrRawData > rawData 
+  	= General::SharedPtr< FrameCPP::Version::FrRawData > (new FrameCPP::Version::FrRawData);
+  General::SharedPtr<FrameCPP::Version::FrameH> frame;
   FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-" + string(LDAS_VERSION));
   FrameCPP::Version::FrDetector detector = daqd.getDetector1();
 
   // Create frame
   //
   try {
-    frame = new FrameCPP::Version::FrameH ("LIGO",
+    frame = General::SharedPtr<FrameCPP::Version::FrameH> (new FrameCPP::Version::FrameH ("LIGO",
 					     0, // run number ??? buffpt -r> block_prop (nb) -> prop.run;
 					     1, // frame number
 					     FrameCPP::Version::GPSTime (0, 0),
 					     0, // leap seconds
 					     frame_length_seconds // dt
-					     );
+					     ));
     frame -> RefDetectProc ().append (detector);
 
     // Append second detector if it is defined
@@ -603,16 +604,16 @@ daqd_c::full_frame(channel_t* frame_channels, long num_frame_channels, int frame
       frame -> RefDetectProc ().append (detector1);
     }
 
-    frame -> SetRawData (raw_data);
+    frame -> SetRawData (rawData);
     frame -> RefHistory ().append (history);
   } catch (bad_alloc) {
     system_log(1, "Couldn't create full frame");
     //shutdown_server ();
-    return NULL;
+    //return NULL;
+    abort();
   }
 
   // Create ADCs
-  double *junk = new double [256/8 * 1024 * frame_length_seconds];
   try {
     // Fast channels
     for (int i = 0; i < num_frame_channels; i++) {
@@ -629,7 +630,6 @@ daqd_c::full_frame(channel_t* frame_channels, long num_frame_channels, int frame
 					  0,
 					  0,
 					  .0); /* heterodyning phase in radians */
-      frame -> GetRawData () -> RefFirstAdc ().append (adc);
 
       if (frame_channels [i].sample_rate > 16) {
         /* Append ADC AUX vector to store 16 status words per second */
@@ -637,48 +637,34 @@ daqd_c::full_frame(channel_t* frame_channels, long num_frame_channels, int frame
 	  = { FrameCPP::Version::Dimension (16 * frame_length_seconds,
 					      1. / 16,
 					      "") };
-        FrameCPP::Version::FrVect aux_vect("dataValid", 1, aux_dims, (INT_2S *) junk, "");
-        frame -> GetRawData () -> RefFirstAdc () [i] -> RefAux().append (aux_vect);
-	bool owns;
-	aux_data_valid_ptr[i] = (INT_2U *)aux_vect.SteelData(owns);
+	FrameCPP::Version::FrVect *aux_vect 
+        	= new FrameCPP::Version::FrVect("dataValid", 1, aux_dims, new INT_2S [16 * frame_length_seconds], "");
+	adc.RefAux().append (*aux_vect);
       }
 
       /* Append ADC data vector */
       INT_4U nx = frame_channels [i].sample_rate * frame_length_seconds;
       FrameCPP::Version::Dimension  dims [1] = { FrameCPP::Version::Dimension (nx, 1. / frame_channels [i].sample_rate, "time") };
+      FrameCPP::Version::FrVect *vect;
       switch (frame_channels [i].data_type) { 
       case _32bit_complex:
 	{
-	  FrameCPP::Version::FrVect vect(frame_channels [i].name, 1, dims, (COMPLEX_8 *) junk, "counts");
-	  frame -> GetRawData () -> RefFirstAdc () [i] -> RefData().append (vect);
-	  bool owns;
-	  fast_adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc () [i] -> RefData()[0] -> SteelData(owns);
+	  vect = new FrameCPP::Version::FrVect(frame_channels [i].name, 1, dims, new COMPLEX_8[nx], "counts");
 	  break;
 	}
       case _64bit_double:
 	{
-	  FrameCPP::Version::FrVect vect(frame_channels [i].name, 1, dims, (REAL_8 *) junk, "counts");
-	  frame -> GetRawData () -> RefFirstAdc () [i] -> RefData().append (vect);
-	  bool owns;
-	  fast_adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc () [i] -> RefData()[0] -> SteelData(owns);
+	  vect = new FrameCPP::Version::FrVect(frame_channels [i].name, 1, dims, new REAL_8[nx], "counts");
 	  break; 
 	}
       case _32bit_float: 
 	{
-	  FrameCPP::Version::FrVect vect(frame_channels [i].name, 1, dims, (REAL_4 *) junk, "counts");
-	  //vect.Compress(FrameCPP::Version::FrVect::GZIP,
-			//FrameCPP::Version::FrVect::DEFAULT_GZIP_LEVEL);
-	  frame -> GetRawData () -> RefFirstAdc () [i] -> RefData().append (vect);
-	  bool owns;
-	  fast_adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc () [i] -> RefData()[0] -> SteelData(owns);
+	  vect = new FrameCPP::Version::FrVect(frame_channels [i].name, 1, dims, new REAL_4[nx], "counts");
 	  break;
 	}
       case _32bit_integer:
 	{
-	  FrameCPP::Version::FrVect vect(frame_channels [i].name, 1, dims, (INT_4S *) junk, "counts");
-	  frame -> GetRawData () -> RefFirstAdc () [i] -> RefData().append (vect);
-	  bool owns;
-	  fast_adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc () [i] -> RefData()[0] -> SteelData(owns);
+	  vect = new FrameCPP::Version::FrVect(frame_channels [i].name, 1, dims, new INT_4S[nx], "counts");
 	  break;
 	}
       case _64bit_integer:
@@ -687,22 +673,23 @@ daqd_c::full_frame(channel_t* frame_channels, long num_frame_channels, int frame
 	}
       default:
 	{
-	  FrameCPP::Version::FrVect vect(frame_channels [i].name, 1, dims, (INT_2S *) junk, "counts");
-	  frame -> GetRawData () -> RefFirstAdc () [i] -> RefData().append (vect);
-	  bool owns;
-	  fast_adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc () [i] -> RefData()[0] -> SteelData(owns);
+	  vect = new FrameCPP::Version::FrVect(frame_channels [i].name, 1, dims, new INT_2S[nx], "counts");
 	  break;
 	}
       }
-
+      adc.RefData().append (*vect);
+      frame -> GetRawData () -> RefFirstAdc ().append (adc);
+      fast_adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc ()[i] -> RefData()[0] -> GetData().get();
+      if (frame_channels [i].sample_rate > 16) {
+        aux_data_valid_ptr[i] = (INT_2U*) frame -> GetRawData () -> RefFirstAdc ()[i] -> RefAux()[0] -> GetData().get();
+      }
     }
-    delete [] junk;
   } catch (bad_alloc) {
-    delete [] junk;
     system_log(1, "Couldn't create ADC channel data");
-    delete frame;
+    //delete frame;
     //    shutdown_server ();
-    return NULL;
+    //return NULL;
+    abort();
   }
   
   return frame;
@@ -716,7 +703,6 @@ daqd_c::framer ()
 
   long frame_cntr;
   int nb;
-  FrameCPP::Version::FrameH *frame = 0;
   if (frames_per_file != 1) {
 	printf("Not supported frames_per_file=%d\n", frames_per_file);
 	abort();
@@ -724,7 +710,8 @@ daqd_c::framer ()
 
   int frame_file_length_seconds = frames_per_file * blocks_per_frame;
 
-  frame = full_frame (active_channels, num_active_channels, blocks_per_frame);
+  General::SharedPtr<FrameCPP::Version::FrameH> frame
+  	= full_frame (active_channels, num_active_channels, blocks_per_frame);
 
   if (!frame) {
     // Have to free all already allocated ADC structures at this point
@@ -835,7 +822,6 @@ daqd_c::framer ()
 			  buf + active_channels [j].offset,
 			  active_channels [j].bytes);
 #endif
-
 		  // Status is ORed blocks_per_frame times
 #define	 memor2(dest, tgt) \
  *((unsigned char *)(dest)) |= *((unsigned char *)(tgt)); \
@@ -927,13 +913,14 @@ daqd_c::framer ()
           ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
           DEBUG(1, cerr << "Begin WriteFrame()" << endl);
 	  time_t t = time(0);
-          ofs.WriteFrame(*(frame), 
+          ofs.WriteFrame(frame, 
 			//FrameCPP::Version::FrVect::GZIP, 1,
                         daqd.no_compression? FrameCPP::FrVect::RAW:
 				 FrameCPP::FrVect::ZERO_SUPPRESS_OTHERWISE_GZIP, 1,
 			//FrameCPP::Compression::MODE_ZERO_SUPPRESS_SHORT,
 			//FrameCPP::Version::FrVect::DEFAULT_GZIP_LEVEL, /* 6 */
 			FrameCPP::Common::CheckSum::CRC);
+
 	  t = time(0) - t;
           DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
           ofs.Close();
