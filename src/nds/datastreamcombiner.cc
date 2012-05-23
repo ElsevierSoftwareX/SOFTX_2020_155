@@ -156,7 +156,7 @@ Nds::combineMinuteTrend()
     struct sockaddr_un servaddr;
     if (sizeof(servaddr.sun_path)-1 < mPipeFileName.size())
       {
-	system_log(1, "pipe filename `%s' is too long; maximum size is %d", mPipeFileName.c_str(), sizeof(servaddr.sun_path)-1);
+	system_log(1, "pipe filename `%s' is too long; maximum size is %ld", mPipeFileName.c_str(), sizeof(servaddr.sun_path)-1);
 	return false;
       }
 
@@ -324,10 +324,10 @@ typedef unsigned long	nfds_t;
     
     int res = poll(pollfd, nPollFds, 60*60*1000);
     if (res == 0) {
-      system_log(1,"poll(60min) timed out; %d subjobs initially; %d subjobs now", nSubJobs, nPollFds);
+      system_log(1,"poll(60min) timed out; %d subjobs initially; %d subjobs now", nSubJobs, (int)nPollFds);
       return false;
     } else if (res < 0) {
-      system_log(1,"poll() error; errno=%d; %d subjobs initially; %d subjobs now", errno, nSubJobs, nPollFds);
+      system_log(1,"poll() error; errno=%d; %d subjobs initially; %d subjobs now", errno, nSubJobs, (int)nPollFds);
       return false;
     } else {
       pollfd_t  new_pollfd[nPollFds];
@@ -397,6 +397,6 @@ typedef unsigned long	nfds_t;
   // It will zero-fill missing data.
   // 
 
-  system_log(1, "merge processing overall time=%d", time (0) - t_start);
+  system_log(1, "merge processing overall time=%ld", time (0) - t_start);
   return true;
 }
