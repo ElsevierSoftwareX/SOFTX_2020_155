@@ -628,8 +628,8 @@ daqd_net::send_data(FrameCPP::Frame &frame, const char *file_name, unsigned fram
 	{
 	  // Convert floats to shorts
 #if FRAMECPP_DATAFORMAT_VERSION >= 6
-	  short *sptr = (short *)adc[k]->RefData()[0]->GetData();
-	  float *fptr = (float *)adc[k]->RefData()[0]->GetData();
+	  short *sptr = (short *)adc[k]->RefData()[0]->GetData().get();
+	  float *fptr = (float *)adc[k]->RefData()[0]->GetData().get();
 #else
 	  short *sptr = (short *)adc[k]->refData()[0]->getData();
 	  float *fptr = (float *)adc[k]->refData()[0]->getData();
@@ -645,8 +645,8 @@ daqd_net::send_data(FrameCPP::Frame &frame, const char *file_name, unsigned fram
 	  // Convert doubles to shorts
 	  // Convert floats to shorts
 #if FRAMECPP_DATAFORMAT_VERSION >= 6
-	  short *sptr = (short *)adc[k]->RefData()[0]->GetData();
-	  double *dptr = (double *)adc[k]->RefData()[0]->GetData();
+	  short *sptr = (short *)adc[k]->RefData()[0]->GetData().get();
+	  double *dptr = (double *)adc[k]->RefData()[0]->GetData().get();
 #else
 	  short *sptr = (short *)adc[k]->refData()[0]->getData();
 	  double *dptr = (double *)adc[k]->refData()[0]->getData();
@@ -662,8 +662,8 @@ daqd_net::send_data(FrameCPP::Frame &frame, const char *file_name, unsigned fram
 	  {
 	    // Convert doubles to floats
 #if FRAMECPP_DATAFORMAT_VERSION >= 6
-	    float *fptr = (float *)adc[k]->RefData()[0]->GetData();
-	    double *dptr = (double *)adc[k]->RefData()[0]->GetData();
+	    float *fptr = (float *)adc[k]->RefData()[0]->GetData().get();
+	    double *dptr = (double *)adc[k]->RefData()[0]->GetData().get();
 #else
 	    float *fptr = (float *)adc[k]->refData()[0]->getData();
 	    double *dptr = (double *)adc[k]->refData()[0]->getData();
@@ -673,7 +673,7 @@ daqd_net::send_data(FrameCPP::Frame &frame, const char *file_name, unsigned fram
       }
 
 #if FRAMECPP_DATAFORMAT_VERSION >= 6
-    char *sptr = ((char *)adc[k]->RefData()[0]->GetData()) + start_diff*bps[k]*rates[k];
+    char *sptr = ((char *)adc[k]->RefData()[0]->GetData().get()) + start_diff*bps[k]*rates[k];
 #else
     char *sptr = ((char *)adc[k]->refData()[0]->getData()) + start_diff*bps[k]*rates[k];
 #endif

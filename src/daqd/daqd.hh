@@ -17,6 +17,7 @@
 #include "framecpp/Common/CheckSum.hh"
 #include "framecpp/Common/IOStream.hh"
 #include "framecpp/Common/FrameStream.hh"
+#include "framecpp/Common/FrameBuffer.hh"
 #include "framecpp/FrameCPP.hh"
 #include "framecpp/FrameH.hh"
 #include "framecpp/FrAdcData.hh"
@@ -524,7 +525,7 @@ class daqd_c {
     return detector;
   }
 
-  FrameCPP::Version::FrameH* full_frame(channel_t* , long, int frame_length_seconds = 1) throw();
+  General::SharedPtr<FrameCPP::Version::FrameH> full_frame(channel_t* , long, int frame_length_seconds = 1) throw();
 
   // How many full frames to pack in single file
   int frames_per_file;
