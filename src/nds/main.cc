@@ -33,13 +33,14 @@ parse_args (int argc, char *argv [])
   extern int optind;
 
   while ((c = getopt (argc, argv, "Hhl:")) != -1) {
+    FILE *f;
     switch (c) {
       case 'H':
       case 'h':
         usage (0);
         break;
       case 'l':
-        freopen(optarg, "w", stdout);
+        f = freopen(optarg, "w", stdout);
 	setvbuf(stdout, NULL, _IOLBF, 0);
 	stderr = stdout;
 	break;

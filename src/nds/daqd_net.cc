@@ -187,7 +187,7 @@ daqd_net::combine_send_data()
 	  char *data = block.data + 4 * sizeof(unsigned int); // Skip remainder of the header
 	  if (p -> second.signalIndices.size() * sizeof(reconfig_data_t) != block_len) {
 	    system_log(1, "bad config block length; expected %d; received %d; fd=%d",
-		       p -> second.signalIndices.size() * sizeof(reconfig_data_t), block_len, p -> first);
+		       (int)(p -> second.signalIndices.size() * sizeof(reconfig_data_t)), block_len, p -> first);
 	    return false;
 	  } else {
 	    
@@ -235,7 +235,7 @@ daqd_net::combine_send_data()
       unsigned long image_size = transmission_block_size*seconds_to_send/60 + 5 * sizeof(unsigned int);
       char *image = (char *) malloc(image_size);
       if (!image) {
-	system_log(1, "malloc(%d) failed", image_size);
+	system_log(1, "malloc(%ld) failed", image_size);
 	return false;
       }
       memset(image, 0, image_size);
@@ -357,7 +357,7 @@ daqd_net::comb_read(int fildes)
 
   char *block = (char *)malloc(block_len);
   if (!block) {
-    system_log(1, "malloc(%d) failed", block_len);
+    system_log(1, "malloc(%ld) failed", block_len);
     return false;
   }
 
@@ -536,7 +536,7 @@ daqd_net::send_data(FrameCPP::Frame &frame, const char *file_name, unsigned fram
     }
     seconds_to_send -= start_diff;
   } else if (dt < 1) {
-    system_log(1, "%s: frame %d has dt=%f", file_name, frame_number);
+    system_log(1, "%s: frame %d has dt=%d", file_name, frame_number, dt);
     return false;
   }
 

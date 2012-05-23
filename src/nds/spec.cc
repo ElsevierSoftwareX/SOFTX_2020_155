@@ -71,7 +71,7 @@ char buf[1024*1024*2];
 bool
 Spec::parse(std::string fname)
 {
-  char *ser = "%s:%d: syntax error";
+  char *ser = (char *)"%s:%d: syntax error";
   std::ifstream in(fname.c_str());
   if (! in ) {
     system_log(1, "%s: open failed", fname.c_str());

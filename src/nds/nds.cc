@@ -51,7 +51,7 @@ Nds::run()
 
   if (sizeof(servaddr.sun_path)-1 < mPipeFileName.size())
     {
-      system_log(1, "pipe filename `%s' is too long; maximum size is %d", mPipeFileName.c_str(), sizeof(servaddr.sun_path)-1);
+      system_log(1, "pipe filename `%s' is too long; maximum size is %ld", mPipeFileName.c_str(), sizeof(servaddr.sun_path)-1);
     }
 
   if ((listenfd = socket (AF_UNIX, SOCK_STREAM, 0)) < 0)
@@ -212,7 +212,7 @@ Nds::run()
   mSpecFileName = jobn;
   mResultFileName = dirname(mSpecFileName) + "/res";
 
-  chdir(dirname(mSpecFileName).c_str());
+  int res1 = chdir(dirname(mSpecFileName).c_str());
 
   //
   //  nice(2 * NZERO  -1);

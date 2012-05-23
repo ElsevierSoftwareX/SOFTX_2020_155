@@ -84,9 +84,9 @@ Nds::readTocFrameFileArchive()
   gps.erase(remove_if(gps.begin(), gps.end(),
 		      not1(intersect(ulong_pair(start_time, end_time)))), gps.end());
 
-  system_log(5, "%d pertinent range(s)", gps.size());
+  system_log(5, "%d pertinent range(s)", (int)gps.size());
   for(int i=0;i<gps.size();i++) {
-    system_log(5, "%d %d", gps[i].first, gps[i].second);
+    system_log(5, "%ld %ld", gps[i].first, gps[i].second);
   }
 
   const vector<string> &names = mSpec.getSignalNames(); // ADC signal names
@@ -178,7 +178,7 @@ Nds::readTocFrameFileArchive()
 
     VITER i = find_if(tstamps.begin(), tstamps.end(), falls_in(start_time));
     if (i == tstamps.end()) {
-      system_log(1, "FATAL: data for time %d not found in directory %s%d", start_time, mSpec.getArchiveDir().c_str(), dir_num);
+      system_log(1, "FATAL: data for time %ld not found in directory %s%d", start_time, mSpec.getArchiveDir().c_str(), dir_num);
       return false;
     }
 
@@ -193,12 +193,12 @@ Nds::readTocFrameFileArchive()
 
       char file_name[filename_max+1];
       if (dt == 1) {
-	sprintf(file_name, "%s%d/%s%d%s",
+	sprintf(file_name, "%s%d/%s%ld%s",
 		mSpec.getArchiveDir().c_str(), dir_num,
 		mSpec.getArchivePrefix().c_str(), gps, mSpec.getArchiveSuffix().c_str()
 		);
       } else {
-	sprintf(file_name, "%s%d/%s%d-%d%s",
+	sprintf(file_name, "%s%d/%s%ld-%ld%s",
 		mSpec.getArchiveDir().c_str(), dir_num,
 		mSpec.getArchivePrefix().c_str(), gps, dt, mSpec.getArchiveSuffix().c_str()
 		);
@@ -261,7 +261,7 @@ Nds::readTocFrameFileArchive()
   } // data directories
   if (!daqd_net.finish())
     return false;
-  system_log(1, "time=%d read=%d updated=%d missing=%d failed=%d",
+  system_log(1, "time=%ld read=%d updated=%d missing=%d failed=%d",
 	     time(0)-t_start, nfiles_read, nfiles_updated, nfiles_open_failed, nfiles_failed);
 
   return true;

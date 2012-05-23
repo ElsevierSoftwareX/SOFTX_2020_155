@@ -194,7 +194,7 @@ DEBUG1(cerr << "find_offs() returned " << offs << endl);
 	    mmap_ptr = (char *) mmap (0, st.st_size, PROT_READ | PROT_EXEC, MAP_SHARED, fd, 0);
 	  }
 	  if (mmap_ptr == MAP_FAILED) {
-	    system_log(1, "mmap(0, %d, %d, %d, %d, 0) call failed, errno %d\n",  st.st_size, PROT_READ, MAP_SHARED, fd, errno);
+	    system_log(1, "mmap(0, %d, %d, %d, %d, 0) call failed, errno %d\n", (int)st.st_size, PROT_READ, MAP_SHARED, fd, errno);
 	  } else {
 	    raw_trend_record_struct *end_ptr = (raw_trend_record_struct *) (mmap_ptr + st.st_size);
 	    list<data_span> dvec;
