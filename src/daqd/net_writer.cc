@@ -700,7 +700,10 @@ net_writer_c::consumer ()
     } while (1);
   } else { // No decimation on the data is done
     if (writer_type == frame_writer) {
+	  // Do not shutdown net writer thread if compiled to be DMT broadcaster
+#ifdef NO_BROADCAST
 	  this -> shutdown_net_writer ();
+#endif
 	  return NULL;
 #ifdef DATA_CONCENTRATOR
     } else if (broadcast) {

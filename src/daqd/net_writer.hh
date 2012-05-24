@@ -51,7 +51,7 @@ public:
   // Testpoint broadcaster, using different port
   diag::frameSend radio_tp;
 #else
-  static const int radio_buf_len = 15 * 1024 * 1024;
+  static const int radio_buf_len = 64 * 1024 * 1024;
   static const int radio_buf_num = 20;
 #endif
   radio_buffer radio_bufs [radio_buf_num];

@@ -62,7 +62,7 @@ using namespace std;
 #include "daqc.h"
 #include "daqd.hh"
 #include "sing_list.hh"
-//#include "md5.h"
+#include "net_writer.hh"
 
 #include "../../src/drv/crc.c"
 
@@ -935,6 +935,38 @@ daqd_c::framer ()
 	    // Successful frame write
 	    fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
 	  }
+#ifndef NO_BROADCAST
+	 // We are compiled to be a DMT broadcaster
+	 //
+	  fd = open(tmpf, O_RDONLY);
+          if (fd == -1) {
+            system_log(1, "failed to open file; errno %d", errno);
+            exit(1);
+          }
+          struct stat sb;
+          if (fstat(fd, &sb) == -1) {
+            system_log(1, "failed to fstat file; errno %d", errno);
+            exit(1);
+          }
+          void *addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+          if (addr == MAP_FAILED) {
+            system_log(1, "failed to fstat file; errno %d", errno);
+            exit(1);
+          }
+
+          net_writer_c *nw = (net_writer_c *)net_writers.first();
+          assert(nw);
+          assert(nw->broadcast);
+
+          if (nw->send_to_client ((char *) addr, sb.st_size, gps, b1 -> block_period ())) {
+            system_log(1, "failed to broadcast data frame");
+            exit(1);
+          }
+          munmap(addr, sb.st_size);
+          close(fd);
+          unlink(tmpf);
+
+#endif 
   	} /*catch (...) {
 	  system_log(1, "failed to write full frame out");
 	  fsd.report_lost_frame ();
