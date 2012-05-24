@@ -162,7 +162,7 @@ bcst:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/bcst
 	/bin/mkdir -p build/bcst
-	(mysrc=$(srcdir); cd build/bcst; $$mysrc/src/daqd/configure '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-framecpp=/usr/local' --with-epics=/opt/rtapps/epics/base  && make)
+	(mysrc=$(srcdir); cd build/bcst; $$mysrc/src/daqd/configure '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-framecpp=/opt/rtapps/framecpp' --with-epics=/opt/rtapps/epics/base  && make)
 
 # build standalone frame builder
 stand:
