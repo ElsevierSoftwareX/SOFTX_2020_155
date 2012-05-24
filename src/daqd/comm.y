@@ -2217,7 +2217,7 @@ start_trend_bailout:
 		goto start_writer_bailout;
 	 }
 		    
-  	 DEBUG1(cerr << "Creting net_writer tagged " << ifd << endl);
+  	 DEBUG1(cerr << "Creating net_writer tagged " << ifd << endl);
 	 net_writer_c *nw = new (mptr) net_writer_c(ifd);
 	 if (!nw -> alloc_vars($9? MAX_CHANNELS: my_lexer::max_channels)) {
 		if (((my_lexer *)lexer) -> strict) *yyout << S_DAQD_MALLOC << flush;
