@@ -20,6 +20,7 @@
 #include "nds.hh"
 #include "io.h"
 #include "daqd_net.hh"
+#include "../daqd/crc8.cc"
 
 #if FRAMECPP_DATAFORMAT_VERSION < 6
 
@@ -157,7 +158,7 @@ Nds::rawMinuteTrend()
 
   // For every file construct a list of data spans (index, gps, length), `data_span_map'
   for (SSI p = file_set.begin (); p != file_set.end (); p++) {
-    string fname_str = path + "/" + *p;
+    string fname_str = path + "/" + crc8_str(p->c_str()) + "/" +*p;
     const char *fname = fname_str.c_str ();
     int fd = open (fname, O_RDONLY);
     if (fd < 0) {
@@ -468,7 +469,7 @@ DEBUG1(cerr << "find_offs() returned " << offs << endl);
   // Get channel numbers from `fname_channel_map'
   // copy the data  into the transmission image.
   for (DSMI p = data_span_map.begin (); p != data_span_map.end (); p++) {
-    const char *fname = (path + "/" + p -> first).c_str ();
+    const char *fname = (path + "/" + crc8_str(p->first.c_str()) + "/" + p -> first).c_str ();
     int fd = open (fname, O_RDONLY);
     if (fd < 0) {
       system_log(1, "Couldn't open raw minute trend file `%s' for reading {2}; errno %d", fname, errno);

@@ -86,6 +86,9 @@ daqd: daqd.out
 daniel_stream:	daniel_stream.o framesend.o gdstask.o gdsmutex.o
 	$(CXX) $(DEBUGFLAGS)  -o daniel_stream daniel_stream.o framesend.o gdstask.o gdsmutex.o $(LIBS) -lpthread
 
+crc8: crc8.cc
+	$(CXX) -DUSE_MAIN=1 $< -o crc8
+
 mx_rcvr1.o: mx_rcvr.cc
 	$(CXX) $(CCFLAGS) -DUSE_MAIN=1 $< -o mx_rcvr1.o
 
