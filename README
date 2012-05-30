@@ -1,0 +1,65 @@
+
+Wed May 30 15:19:34 PDT 2012
+
+IMPORTANT, installing new daqd and nds will require moving raw minute trend data
+into the subdirectories. The new daqd frame writer will save raw minute trend files not all
+into the same directory (/frames/trend/minute_raw) but instead the CRC8 is calculated
+on the file name, a subdirectory is created using the calculated CRC8 hex number (0 through ff)
+and then the file is created/appended in that subdirectory.
+
+For example, when before we had 
+
+/frames/trend/minute_raw/X2:FEC-18_DAC_OVERFLOW_0_4
+
+from now on it will be kept here:
+
+/frames/trend/minute_raw/0/X2:FEC-18_DAC_OVERFLOW_0_4
+
+where "0" is the subdirectory and its name is arrived at by calculating the CRC8 sum
+on string "X2:FEC-18_DAC_OVERFLOW_0_4". The reason this is implemented is that we
+need to be able to avoid keeping all the files in the same directory, where "ls"
+command would takes a few seconds to execute: the more files are n the same directory
+the slower ls will execute. So we would like to spread the files 
+evenly among the 255 subdirectories and using the CRC8 on the file names creates the uniform
+file distribution.
+
+There are two programs used to move the files into the subdirectories. crc8 program,
+which calculates the CRC8 checksum, needs to be compiled as follows:
+
+./configure
+make rcv
+cd build/rcv
+make crc8
+sudo cp crc8 /usr/local/bin
+
+There is a Perl script which is used to print the move commands out:
+
+cd src/daqd/util
+sudo cp mv_trend.pl /usr/local/bin
+
+Once these two commands are installed in /usr/local/bin they can be used as follows,
+assuming the raw minute trend files are kept in /frames/trend/minute_raw (check frame writer daqdrc file):
+
+cd /frames/trend/minute_raw
+/usr/local/bin/mv_trend.pl
+
+Examine the output of mv_trend.pl script and if it looks good to you, you can rerun it and pipe
+the output into bash in order to execute the move commands:
+
+/usr/local/bin/mv_trend.pl | bash
+
+Once this is done, the contents of /frames/trend/minute_raw should look roughly as follows:
+
+ls@x2daqfw /opt/rtcds/rtscore/alex/advLigoRTS $ ls /frames/trend/minute_raw/
+0   17  2   28  31  3a  43  4d  55  5e  66  6f  77  8   88  90  99  a1  ab  b3  bc  c4  cd  d5  de  e7  f   f8
+1   18  20  29  32  3b  44  4e  56  5f  67  7   78  80  89  91  9a  a2  ac  b4  bd  c5  ce  d6  df  e8  f0  f9
+10  19  21  2a  33  3c  45  4f  57  6   68  70  79  81  8a  92  9b  a3  ad  b5  be  c6  cf  d7  e   e9  f1  fa
+11  1a  22  2b  34  3d  46  5   58  60  69  71  7a  82  8b  93  9c  a4  ae  b6  bf  c7  d   d8  e0  ea  f2  fb
+12  1b  23  2c  35  3f  47  50  59  61  6a  72  7b  83  8c  94  9d  a5  af  b7  c   c8  d0  d9  e1  eb  f3  fc
+13  1c  24  2d  36  4   48  51  5a  62  6b  73  7c  84  8d  95  9e  a6  b   b8  c0  c9  d1  da  e2  ec  f4  fd
+14  1d  25  2e  37  40  49  52  5b  63  6c  74  7d  85  8e  96  9f  a7  b0  b9  c1  ca  d2  db  e4  ed  f5  fe
+15  1e  26  3   38  41  4a  53  5c  64  6d  75  7e  86  8f  97  a   a8  b1  ba  c2  cb  d3  dc  e5  ee  f6  ff
+16  1f  27  30  39  42  4c  54  5d  65  6e  76  7f  87  9   98  a0  aa  b2  bb  c3  cc  d4  dd  e6  ef  f7 
+
+Alex
+
