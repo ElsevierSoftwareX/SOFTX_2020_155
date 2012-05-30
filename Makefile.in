@@ -69,7 +69,8 @@ DEVFLAGS=@DEVFLAGS@
 
 
 all: 
-	
+	/bin/true
+
 reclean:
 	-/bin/rm -rf build config src target
 
@@ -158,6 +159,7 @@ rcv:
 	/bin/mkdir -p build/rcv
 	(mysrc=$(srcdir); cd build/rcv; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-framecpp=/opt/rtapps/framecpp' --with-epics=/opt/rtapps/epics/base  && make)
 
+# Build DMT 1-second frame broadcaster
 bcst:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/bcst
