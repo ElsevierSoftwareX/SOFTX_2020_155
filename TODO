@@ -1,4 +1,10 @@
 ***
+When the front-end is loaded into the kernel, need to make sure
+it is nto trying to load itself on the CPU code which is taken by another
+model's front-end. Jamie had c1lsc locking up when loading c1cal on the cpu 4
+when c1oaf was already running there.
+
+***
 Need to integrate iniChk.pl script into the Epics sequencer C code.
 
 ***
