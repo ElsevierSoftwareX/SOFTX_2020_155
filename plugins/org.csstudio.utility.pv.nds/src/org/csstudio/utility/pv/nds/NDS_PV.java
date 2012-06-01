@@ -469,14 +469,15 @@ public class NDS_PV  implements PV, Runnable, Debug, Defaults, DataTypeConstants
         				ccount++;
         				
         				// Assign data into the queue
-        				double cval[] = new double[1024 * ccount]; // TODO remove hard coded rate
+        				double cval[] = new double[1 + 1024 * ccount]; // TODO remove hard coded rate
+        				cval[0] = now.toDouble(); // First element will contain the time stamp
         				it1 = m.entrySet().iterator();
         				while (it1.hasNext()) {
         					Entry<String, ThreadRef> p = it1.next();
         					if (p.getKey().equals("gps")) continue;
         					double [] val = ValueUtil.getDoubleArray(p.getValue().nds_pv.value);
         					int idx = p.getValue().connectIndex;
-        					System.arraycopy(val, 0, cval, idx * 1024, 1024);
+        					System.arraycopy(val, 0, cval, 1 + idx * 1024, 1024);
         				}
         				IValue ival = ValueFactory.createDoubleValue(now,
     							OK, OK.toString(), meta, Quality.Original,
