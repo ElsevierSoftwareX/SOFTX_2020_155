@@ -1,3 +1,37 @@
+
+***
+Date: Fri, 01 Jun 2012 12:11:46 -0700
+From: Jameson Graef Rollins <jrollins@ligo.caltech.edu>
+Reply-To: cds-software@ligo.org
+To: CDS Software <cds-software@ligo.org>
+Subject: missing bits in filter control
+Parts/Attachments:
+   1 Shown     21 lines  Text
+   2          851 bytes  Application
+----------------------------------------
+
+Hey, folks.  I discovered yesterday, much to my dismay, that the control
+input on the cdsFiltCtrl part only allows for turning on and off the
+filter banks, and does not allow for controlling any of the other
+switches in the module.  This is very unfortunate, since it severely
+limits the usefulness of the control input and makes the control input
+word format inconsistent with the already well-defined format of the
+32-bit internal switch state word, which is also used on the control
+output.
+
+I strongly request that we make the control input be a 32-bit word whose
+format is consistent with internal state word, thereby allowing control
+access to all the switches in the module.  We already have need to
+access these switches in the 40m LSC model, and the need to access them
+will likely continue to increase.
+
+Unfortunately making this change will break existing usages of the
+FiltCtrl part.  It will be a slightly painful transition, but I think
+it's a change we need to make, so the sooner we make the change the
+better.  We'll obviously need to make the mask input be 32-bits as well.
+
+jamie.
+
 ***
 When the front-end is loaded into the kernel, need to make sure
 it is nto trying to load itself on the CPU code which is taken by another
