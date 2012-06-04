@@ -696,6 +696,7 @@ void *fe_start(void *arg)
   static int cpuClock[10];		// Code timing diag variables
   int adcData[MAX_ADC_MODULES][32];	// ADC raw data
   int adcChanErr[16];
+  int static chanHop = 0;
   int dacChanErr[16];
   int adcOF[16];
   int dacOF[16];
@@ -1487,12 +1488,6 @@ udelay(1000);
 			vmeDone = 1;
 	  		pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
                         printf("timeout %d %d \n",jj,adcWait);
-#if 0
-			// Commented out debugging code
-			printk("register BCR = 0x%x\n",fadcPtr[0]->BCR);
-			if (fadcPtr[0]->BCR & (1 << 15)) printk("input buffer overflow\n");
-			if (fadcPtr[0]->BCR & (1 << 16)) printk("input buffer underflow\n");
-#endif
 			continue;
 		    }
 		    if(jj == 0) 
@@ -1557,6 +1552,7 @@ udelay(1000);
                     } else {
 			 status = 16;
   			 adcChanErr[jj] = 1;
+			 chanHop = 1;
 	 	    }	
 
                     limit = 32700;
@@ -2248,6 +2244,14 @@ udelay(1000);
 
 	    }
 	  }
+	    if (chanHop) {
+		stop_working_threads = 1;
+		vmeDone = 1;
+		printf("Channel Hopping Detected on one or more ADC modules !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+		printf("Check GDSTP screen ADC status bits to id affected ADC modules\n");
+		printf("Code is exiting ..............\n");
+		continue;
+	    }
 	  for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	  {
 	    if(dacOF[jj]) 
