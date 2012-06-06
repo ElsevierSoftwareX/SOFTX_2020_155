@@ -1,4 +1,30 @@
 
+Implement frme builder configuratio check and restart, as follows:
+
+Hi Dave,
+
+I think you are correct in 99 percent of the cases. But what Keith is
+worried about could happen I, think. NDS daqd could restart/start when DC
+daqd is down. In this case NDS daqd would wait until it starts getting the
+broadcast, but its channel config would not be changed, it would still
+be whatever was configured on its startup. For example:
+
+1. DC daqd is stopped
+2. NDS daqd is restarted, so it picks up channel config at time (2)
+3. Keith goes ahead and edits channel config
+4. DC daqd is restarted with the new configuration valid at time (4)
+5. NDS daqd starts getting broadcasts using config (2) even though the 
+   data has the config from time (4).
+
+I propose the following: NDS/FW daqd would check the configuration CRC for
+each DCU against its own configuration CRC (see src/daqd/BROADCAST file
+for reference). If NDS/FW daqd detects a broadcast where the two CRCs are
+different or there is a new DCU appearing or the number of DCUs is
+different, then it simply quits and restarts, picking up the new running
+configuration. Would this work?
+
+Alex
+
 ***
 Date: Fri, 01 Jun 2012 12:11:46 -0700
 From: Jameson Graef Rollins <jrollins@ligo.caltech.edu>
