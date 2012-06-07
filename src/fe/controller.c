@@ -6,7 +6,7 @@
 /*                                                                      */
 /*        THE LASER INTERFEROMETER GRAVITATIONAL WAVE OBSERVATORY.      */
 /*                                                                      */
-/*                     (C) The LIGO Project, 2005.                      */
+/*                     (C) The LIGO Project, 2012.                      */
 /*                                                                      */
 /*                                                                      */
 /*                                                                      */
@@ -20,7 +20,6 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-#ifdef NO_RTL
 #include <linux/version.h>
 #include <linux/init.h>
 #include <linux/module.h>
@@ -28,18 +27,6 @@
 #include <linux/kthread.h>
 #include <asm/delay.h>
 
-#else
-#include <rtl_time.h>
-#include <time.h>
-#include <fcntl.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <sys/mman.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <semaphore.h>
-#include <string.h>
-#endif
 #include <linux/slab.h>
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
@@ -47,19 +34,17 @@
 #if MX_KERNEL == 1
 #include <myriexpress.h>
 #endif
-#ifdef NO_RTL
+
 #include </usr/src/linux/arch/x86/include/asm/processor.h>
 #include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
-#endif
 
 char *build_date = __DATE__ " " __TIME__;
 
-#ifndef NO_RTL
-int iop_rfm_valid = 1;
-#else
 extern int iop_rfm_valid;
-#endif
 
+// Need to get rid of NUM_SYSTEMS
+// This is old code to loop thru same code for multiple instances of same device on same CPU
+// as was done for HEPI on iLIGO
 #ifndef NUM_SYSTEMS
 #define NUM_SYSTEMS 1
 #endif
@@ -93,24 +78,17 @@ int daq_fd;			// File descriptor to share memory file
 #endif
 
 long daqBuffer;			// Address for daq dual buffers in daqLib.c
-#ifndef NO_RTL
-sem_t irqsem;			// Semaphore if in IRQ mode.
-#endif
 CDS_HARDWARE cdsPciModules;	// Structure of PCI hardware addresses
 volatile IO_MEM_DATA *ioMemData;
 volatile int vmeDone = 0;	// Code kill command
 volatile int stop_working_threads = 0;
 
-#ifdef NO_RTL
 #define STACK_SIZE    40000
 #define TICK_PERIOD   100000
 #define PERIOD_COUNT  1
 
-#else
-#include "msr.h"
-#endif
 
-#ifdef NO_RTL
+// Code can be run without shutting down CPU by changing this compile flag
 #undef NO_CPU_SHUTDOWN 1
 #ifndef NO_CPU_SHUTDOWN
 char fmt1[512];
@@ -127,7 +105,6 @@ int printk(const char *fmt, ...) {
 }
 #endif
 #define printf printk
-#endif
 
 #ifdef DOLPHIN_TEST
 #include "dolphin.c"
@@ -136,6 +113,7 @@ int printk(const char *fmt, ...) {
 #include "fm10Gen.h"		// CDS filter module defs and C code
 #include "feComms.h"		// Lvea control RFM network defs.
 #include "daqmap.h"		// DAQ network layout
+
 extern unsigned int cpu_khz;
 #define CPURATE	(cpu_khz/1000)
 #define ONE_PPS_THRESH 2000
@@ -149,13 +127,12 @@ extern unsigned int cpu_khz;
 #define TIME_ERR_TDS		0x40
 
 #ifndef NO_DAQ
-#include "drv/gmnet.h"
 #include "drv/fb.h"
-#include "drv/myri.h"		// Myricom network defs
 #include "drv/daqLib.c"		// DAQ/GDS connection software
 #endif
 #include "drv/map.h"		// PCI hardware defs
 #include "drv/epicsXfer.c"	// User defined EPICS to/from FE data transfer function
+#include "timing.c"		// timing module / IRIG-B  functions
 
 // Define standard values based on code rep rate **************************************
 #ifdef SERVO256K
@@ -245,76 +222,73 @@ extern unsigned int cpu_khz;
 DAQ_RANGE daq;			// Range settings for daqLib.c
 int numFb = 0;
 int fbStat[2] = {0,0};		// Status of DAQ backend computer
+double *testpoint[GDS_MAX_NFM_TP];	// Testpoints which are not part of filter modules
+double xExc[GDS_MAX_NFM_EXC];	// GDS EXC not associated with filter modules
 #endif
-
-#ifdef NO_RTL
-;
-#else
-rtl_pthread_t wthread;
-rtl_pthread_t wthread1;
-rtl_pthread_t wthread2;
-#endif
-int wfd, ipc_fd;
-int iopDacEnable;
-
-/* ADC/DAC overflow variables */
-int overflowAdc[MAX_ADC_MODULES][32];;
-int overflowDac[MAX_DAC_MODULES][16];;
-int overflowAcc = 0;
-
-double *testpoint[500];	// Testpoints which are not part of filter modules
-double xExc[50];	// GDS EXC not associated with filter modules
-double floatDacOut[160]; // DAC outputs stored as floats, to be picked up as test points
-
-volatile CDS_EPICS *pLocalEpics;   	// Local mem ptr to EPICS control data
-
-
-// 1/16 sec cycle counters for DAQS and ISC RFM IPC
+// 1/16 sec cycle counters for DAQS 
 int subcycle = 0;		// Internal cycle counter	 
 unsigned int daqCycle;		// DAQS cycle counter	
 
+// Sharded memory discriptors
+int wfd, ipc_fd;
+volatile CDS_EPICS *pLocalEpics;   	// Local mem ptr to EPICS control data
 
-FILT_MOD dsp[NUM_SYSTEMS];			// SFM structure.	
-FILT_MOD *dspPtr[NUM_SYSTEMS];			// SFM structure pointer.
-FILT_MOD *pDsp[NUM_SYSTEMS];			// Ptr to SFM in shmem.	
-COEF dspCoeff[NUM_SYSTEMS];			// Local mem for SFM coeffs.
-VME_COEF *pCoeff[NUM_SYSTEMS];			// Ptr to SFM coeffs in shmem	
-double dWord[MAX_ADC_MODULES][32];		// ADC read values
-unsigned int dWordUsed[MAX_ADC_MODULES][32];	// ADC chans used by app code
-double dacOut[MAX_DAC_MODULES][16];		// DAC output values
-int dacOutEpics[MAX_DAC_MODULES][16];		// DAC outputs reported back to EPICS
-unsigned int dacOutUsed[MAX_DAC_MODULES][16];	// DAC chans used by app code
-int dioInput[MAX_DIO_MODULES];			// BIO card inputs
-int dioOutput[MAX_DIO_MODULES];			// BIO card outputs
-int dioOutputHold[MAX_DIO_MODULES];			// BIO card outputs
 
-// Relay digital I/O cards read operations
-// 0 - do not read card registers
-// 1 - read digital inputs
-// 2 - read digital outputs
-// 3 - both
-int rioReadOps[MAX_DIO_MODULES];
-// Values read from relay digital I/O cards, current input values
-int rioInputInput[MAX_DIO_MODULES];
-// Values read from relay digital I/O cards, current output values
+// Filter module variables
+FILT_MOD dsp[NUM_SYSTEMS];					// SFM structure.	
+FILT_MOD *dspPtr[NUM_SYSTEMS];					// SFM structure pointer.
+FILT_MOD *pDsp[NUM_SYSTEMS];					// Ptr to SFM in shmem.	
+COEF dspCoeff[NUM_SYSTEMS];					// Local mem for SFM coeffs.
+VME_COEF *pCoeff[NUM_SYSTEMS];					// Ptr to SFM coeffs in shmem	
+
+// ADC Variables
+double dWord[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];		// ADC read values
+unsigned int dWordUsed[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];	// ADC chans used by app code
+int overflowAdc[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];		// ADC overflow diagnostics
+
+// DAC Variables
+int iopDacEnable;						// Returned by feCode to allow writing values or zeros to DAC modules
+double dacOut[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];		// DAC output values
+int dacOutEpics[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];		// DAC outputs reported back to EPICS
+unsigned int dacOutUsed[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];	// DAC chans used by app code
+int overflowDac[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];		// DAC overflow diagnostics
+double floatDacOut[160]; // DAC outputs stored as floats, to be picked up as test points
+
+int overflowAcc = 0;						// Total ADC/DAC overflow counter
+
+#ifndef ADC_MASTER
+// Variables for Digital I/O board values
+// DIO board I/O is handled in slave (user) applications for timing reasons (longer I/O access times)
+int dioInput[MAX_DIO_MODULES];	
+int dioOutput[MAX_DIO_MODULES];
+int dioOutputHold[MAX_DIO_MODULES];
+
 int rioInputOutput[MAX_DIO_MODULES];
-
 int rioOutput[MAX_DIO_MODULES];
 int rioOutputHold[MAX_DIO_MODULES];
+
 int rioInput1[MAX_DIO_MODULES];
 int rioOutput1[MAX_DIO_MODULES];
 int rioOutputHold1[MAX_DIO_MODULES];
+
+// Contec 32 bit output modules
 unsigned int CDO32Input[MAX_DIO_MODULES];
 unsigned int CDO32Output[MAX_DIO_MODULES];
-unsigned int CDIO1616InputInput[MAX_DIO_MODULES]; // Binary input bits
-unsigned int CDIO1616Input[MAX_DIO_MODULES]; // Current value of the BO bits
-unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
+
+// Contec 64 input bits plus 64 output bits (Standard for aLIGO)
 unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
 unsigned int CDIO6464Input[MAX_DIO_MODULES]; // Current value of the BO bits
 unsigned int CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
-unsigned int writeCDIO6464l(CDS_HARDWARE *pHardware, int modNum, unsigned int data);
-unsigned int readCDIO6464l(CDS_HARDWARE *pHardware, int modNum);
-unsigned int readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum);
+#endif
+
+// This Contect 16 input / 16 output DIO card is used to control timing slave by IOP
+unsigned int CDIO1616InputInput[MAX_DIO_MODULES]; // Binary input bits
+unsigned int CDIO1616Input[MAX_DIO_MODULES]; // Current value of the BO bits
+unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
+int tdsControl[3];	// Up to 3 timing control modules allowed in case I/O chassis are daisy chained
+int tdsCount = 0;
+
+
 int clock16K = 0;
 int out_buf_size = 0; // test checking DAC buffer size
 unsigned int cycle_gps_time = 0; // Time at which ADCs triggered
@@ -338,6 +312,8 @@ int adcHoldTimeAvgPerSec;
 int usrTime;			// Time spent in user app code
 int usrHoldTime;		// Max time spent in user app code
 int cardCountErr = 0;
+
+// The following are for timing histograms written to /proc files
 #if defined(SERVO64K)
 unsigned int cycleHist[16];
 unsigned int cycleHistMax[16];
@@ -354,23 +330,18 @@ unsigned int cycleHistMax[64];
 struct rmIpcStr *daqPtr;
 #endif
 
-#if 0
-#include <asm/io.h>
-#include <genif.h>
-
-#define COMMDATA_INLINE
-#include "commData2.h"
-#endif
-
 int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
-#ifdef NO_RTL
+
+// Include C code modules
 #include "map.c"
 #include "fb.c"
-#endif
 
 char daqArea[2*DAQ_DCU_SIZE];		// Space allocation for daqLib buffers
 int cpuId = 1;
 
+// The following are for testing systems where all computers do not have I/O chassis attached.
+// Essentially, one computer is designated the time master and sends GPS time to all other
+// control computers via RFM networks.
 #ifdef TIME_MASTER
 volatile unsigned int *rfmTime;
 #endif
@@ -378,11 +349,15 @@ volatile unsigned int *rfmTime;
 #ifdef TIME_SLAVE
 volatile unsigned int *rfmTime;
 #endif
+
 #ifdef IOP_TIME_SLAVE
 volatile unsigned int *rfmTime;
 #endif
 
 
+// All systems not running at 64K require up/down sampling to communicate I/O data
+// with IOP, which is running at 64K.
+// Following defines the filter coeffs for these up/down filters.
 #ifdef OVERSAMPLE
 
 #if defined(CORE_BIQUAD)
@@ -452,6 +427,7 @@ static double feCoeff32x[9] =
 #endif
 
 
+
 // History buffers for oversampling filters
 double dHistory[(MAX_ADC_MODULES * 32)][MAX_HISTRY];
 double dDacHistory[(MAX_DAC_MODULES * 16)][MAX_HISTRY];
@@ -460,16 +436,12 @@ double dDacHistory[(MAX_DAC_MODULES * 16)][MAX_HISTRY];
 #define OVERSAMPLE_TIMES 1
 #endif
 
-#define ADC_SAMPLE_COUNT	0x20
-#define ADC_DMA_BYTES		0x80
 
 // Whether run on internal timer (when no ADC cards found)
 int run_on_timer = 0;
 
 // Initial diag reset flag
 int initialDiagReset = 1;
-int tdsControl[3];
-int tdsCount = 0;
 
 // DIAGNOSTIC_RETURNS_FROM_FE 
 #define FE_NO_ERROR		0x0
@@ -484,189 +456,10 @@ int tdsCount = 0;
 #define ADC_TIMEOUT_ERR		0x1
 
 
-// Function to read time from Symmetricom IRIG-B Module ***********************
-void lockGpsTime()
-{
-  SYMCOM_REGISTER *timeRead;
-	timeRead = (SYMCOM_REGISTER *)cdsPciModules.gps;
-	timeRead->TIMEREQ = 1;	// Trigger module to capture time
-}
-int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec) 
-{
-  SYMCOM_REGISTER *timeRead;
-  unsigned int timeSec,timeNsec,sync;
-
-  if (cdsPciModules.gps) {
-	timeRead = (SYMCOM_REGISTER *)cdsPciModules.gps;
-	// timeRead->TIMEREQ = 1;	// Trigger module to capture time
-	timeSec = timeRead->TIME1;
-	timeNsec = timeRead->TIME0;
-	// *tsyncSec = timeSec - 252806388;
-	*tsyncSec = timeSec - 315964800;
-	*tsyncUsec = (timeNsec & 0xfffff); 
-    // Read seconds, microseconds, nanoseconds
-    sync = !(timeNsec & (1<<24));
-  return sync;
-  //  nsecs = 0xf & (time0 >> 20); // nsecs * 100
-   // the_time = ((double) time1) + .000001 * (double) msecs  /* + .0000001 * (double) nsecs*/;
-  }
-  // printf("%f\n", the_time);
-  return (0);
-}
-
-//***********************************************************************
-// Get current GPS time from TSYNC IRIG-B Rcvr
-int  getGpsTimeTsync(unsigned int *tsyncSec, unsigned int *tsyncUsec) {
-  TSYNC_REGISTER *timeRead;
-  unsigned int timeSec,timeNsec,sync;
-  
-  if (cdsPciModules.gps) {
-	timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
-	timeSec = timeRead->BCD_SEC;
-	timeSec += cdsPciModules.gpsOffset;
-	*tsyncSec = timeSec;
-	timeNsec = timeRead->SUB_SEC;
-	*tsyncUsec = ((timeNsec & 0xfffffff) * 5) / 1000; 
-	sync = ((timeNsec >> 31) & 0x1) + 1;
-	// printf("time = %u %u %d\n",timeSec,(timeNsec & 0xffffff),((timeNsec & 0xffffff)/200));
-  	return(sync);
-  }
-  return(0);
-}
-//***********************************************************************
-// Get current GPS seconds from TSYNC IRIG-B Rcvr
-unsigned int  getGpsSecTsync() {
-TSYNC_REGISTER *timeRead;
-    unsigned int timeSec,timeNsec,sync;
-
-    if (cdsPciModules.gps) {
-            timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
-            timeSec = timeRead->BCD_SEC;
-	    timeSec += cdsPciModules.gpsOffset;
-            return(timeSec);
-     }
-     return(0);
-}
-//***********************************************************************
-// Get current GPS useconds from TSYNC IRIG-B Rcvr
-   int  getGpsuSecTsync(unsigned int *tsyncUsec) {
-   TSYNC_REGISTER *timeRead;
-   unsigned int timeNsec,sync;
-
-   if (cdsPciModules.gps) {
-            timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
-            timeNsec = timeRead->SUB_SEC;
-            *tsyncUsec = ((timeNsec & 0xfffffff) * 5) / 1000;
-            sync = ((timeNsec >> 31) & 0x1) + 1;
-            // printf("time = %u %u %d\n",timeSec,(timeNsec & 0xffffff),((timeNsec & 0xffffff)/200));
-            return(sync);
-    }
-    return(0);
-}
-
-
-#if 0
-//***********************************************************************
-// Get current GPS time from SYMCOM IRIG-B Rcvr
-// Nanoseconds (hundreds at most) are available as an optional ns parameter
-double getGpsTime(unsigned int *ns) {
-  if(cdsPciModules.gpsType == SYMCOM_RCVR) {
-	return getGpsTime1(ns, 0);
-  }
-  return(0);
-}
-
-//***********************************************************************
-// Get current EVENT time off the card
-// Nanoseconds (hundreds at most) are available as an optional ns parameter
-double getGpsEventTime(unsigned int *ns) {
-	return getGpsTime1(ns, 1);
-}
-
-//***********************************************************************
-// Get Gps card microseconds from SYMCOM IRIG-B Rcvr
-unsigned int getGpsUsec() {
-unsigned int time0,time1;
-
-  if (cdsPciModules.gps) {
-    // Sample time
-    cdsPciModules.gps[0] = 1;
-    // Read microseconds, nanoseconds
-    time0 = cdsPciModules.gps[SYMCOM_BC635_TIME0/4];
-    time1 = cdsPciModules.gps[SYMCOM_BC635_TIME1/4];
-    return 0xfffff & time0; // microseconds
-  }
-  return 0;
-}
-//***********************************************************************
-// Get Gps card microseconds from SYMCOM IRIG-B Rcvr
-#endif
-#ifdef ADC_MASTER
-float duotime(int count, float meanVal, float data[])
-{
-  float x,y,sumX,sumY,sumXX,sumXY,msumX;
-  int ii;
-  float xInc;
-  float offset,slope,answer;
-  float den;
-
-  x = 0;
-  sumX = 0;
-  sumY = 0;
-  sumXX = 0;
-  sumXY= 0;
-  xInc = 1000000/CYCLE_PER_SECOND;
-
-
-  for(ii=0;ii<count;ii++)
-  {
-        y = data[ii];
-        sumX += x;
-        sumY += y;
-        sumXX += x * x;
-        sumXY += x * y;
-        x += xInc;
-
-  }
-        msumX = sumX * -1;
-        den = (count*sumXX-sumX*sumX);
-        if(den == 0.0)
-        {
-                // printf("den error\n");
-                return(-1000);
-        }
-        offset = (msumX*sumXY+sumXX*sumY)/den;
-        slope = (msumX*sumY+count*sumXY)/den;
-        if(slope == 0.0)
-        {
-                // printf("slope error\n");
-                 return(-1000);
-        }
-        meanVal -= offset;
-        // answer = meanVal/slope - 19.7;
-        // answer = meanVal/slope;
-        answer = meanVal/slope - 91.552;
-#ifdef ADC_MASTER
-        // answer-= 42.5;
-#endif
-        return(answer);
-
-}
-#endif
-
 // Cache flushing mumbo jumbo suggested by Thomas Gleixner, it is probably useless
 // Did not see any effect
   char fp [64*1024];
 
-
-// Get current kernel time (in GPS)
-inline unsigned long current_time() {
-	struct timespec t;
-	extern struct timespec current_kernel_time(void);
-	t = current_kernel_time();
-	t.tv_sec += - 315964819 + 33 + 2;
-	return t.tv_sec;
-}
 
 #ifdef ADC_SLAVE
 // Clear DAC channel shared memory map,
@@ -694,15 +487,21 @@ void *fe_start(void *arg)
   int ii,jj,kk,ll,mm;			// Dummy loop counter variables
   static int clock1Min = 0;		// Minute counter (Not Used??)
   static int cpuClock[10];		// Code timing diag variables
-  int adcData[MAX_ADC_MODULES][32];	// ADC raw data
-  int adcChanErr[16];
-  int dacChanErr[16];
-  int adcOF[16];
-  int dacOF[16];
-  int limit = 32767;                    // ADC/DAC overflow test value
-  int offset = 0; //0x8000;
-  int mask = 0xffff;                    // Bit mask for ADC/DAC read/writes
-  int num_outs = 16;                    // Number of DAC channels variable
+
+  int adcData[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];	// ADC raw data
+  int adcChanErr[MAX_ADC_MODULES];
+  int adcWait;
+  int adcOF[MAX_ADC_MODULES];		// ADC overrange counters
+
+  int dacChanErr[MAX_DAC_MODULES];
+  int dacOF[MAX_DAC_MODULES];		// DAC overrange counters
+  static int dacWriteEnable = 0;	// No DAC outputs until >4 times through code
+  					// Code runs longer for first few cycles on startup as it settles in,
+					// so this helps prevent long cycles during that time.
+  int limit = OVERFLOW_LIMIT_16BIT;      // ADC/DAC overflow test value
+  int offset = 0;			// offset used to calculate ADC values
+  int mask = GSAI_DATA_MASK;            // Bit mask for ADC/DAC read/writes
+  int num_outs = MAX_DAC_CHN_PER_MOD;   // Number of DAC channels variable
 #ifndef ADC_SLAVE
   volatile int *packedData;		// Pointer to ADC PCI data space
   volatile unsigned int *pDacData;	// Pointer to DAC PCI data space
@@ -710,7 +509,7 @@ void *fe_start(void *arg)
   int wtmin,wtmax;			// Time window for startup on IRIG-B
   int dacEnable = 0;
   struct timespec next;
-  int pBits[9] = {1,2,4,8,16,32,64,128,256};
+  int pBits[9] = {1,2,4,8,16,32,64,128,256};	// Lookup table for quick power of 2 calcs
 #endif
   RFM_FE_COMMS *pEpicsComms;		// Pointer to EPICS shared memory space
   int cycleTime;			// Max code cycle time within 1 sec period
@@ -728,7 +527,6 @@ void *fe_start(void *arg)
   int diagWord = 0;			// Code diagnostic bit pattern returned to EPICS
   int epicsCycle = 0;
   int system = 0;
-  int dac_out = 0;			// Integer value sent to DAC FIFO
   int sampleCount = 1;			// Number of ADC samples to take per code cycle
   int sync21pps = 0;			// Code startup sync to 1PPS flag
   int sync21ppsCycles = 0;		// Number of attempts to sync to 1PPS
@@ -746,40 +544,41 @@ void *fe_start(void *arg)
   int ioMemCntrDac = DAC_PRELOAD_CNT;
   int memCtr = 0;
   double dac_in =  0.0;			// DAC value after upsample filtering
+  int dac_out = 0;			// Integer value sent to DAC FIFO
 
-  static int dacWriteEnable = 0;
-  int adcWait;
   int feStatus = 0;
 
+  int clk, clk1;			// Used only when run on timer enabled (test mode)
+
 #ifdef ADC_MASTER
-  static float duotone[65536];
-  static float duotoneDac[65536];
+  static float duotone[IOP_IO_RATE];		// Duotone timing diagnostic variables
+  static float duotoneDac[IOP_IO_RATE];
   float duotoneTimeDac;
   float duotoneTime;
   static float duotoneTotal = 0.0;
   static float duotoneMean = 0.0;
   static float duotoneTotalDac = 0.0;
   static float duotoneMeanDac = 0.0;
-  static rfmDone = 0;
-  static dacBufSelect = 0;
   static int dacDuoEnable = 0;
-  volatile GSA_18BIT_DAC_REG *dac18bitPtr;
-    volatile GSA_DAC_REG *dac16bitPtr;
+
+  static rfmDone = 0;
+  static dacBufSelect = 0;			// DAC memory double buffer selector
+  volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
+  volatile GSA_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
 #endif
   static dacBufOffset = 0;
 
 
-#ifdef NO_RTL
   int cnt = 0;
   unsigned long cpc;
   // Flush L1 cache
   memset (fp, 0, 64*1024);
   memset (fp, 1, 64*1024);
   clflush_cache_range ((void *)fp, 64*1024);
-#endif
 
   fz_daz(); // Kill the denorms!
 
+// Set memory for cycle time history diagnostics
 #if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
   memset(cycleHist, 0, sizeof(cycleHist));
   memset(cycleHistMax, 0, sizeof(cycleHistMax));
@@ -835,37 +634,14 @@ printf("Sync source = %d\n",syncSource);
 
 
   // Do not proceed until EPICS has had a BURT restore *******************************
-#ifdef NO_RTL
   printf("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRestore);
   cnt = 0;
-#else
-  if(cdsPciModules.gpsType == SYMCOM_RCVR) 
-  {
-  	gps_receiver_locked = getGpsTime(&timeSec,&usec);
-        printf("Found SYMCOM IRIG-B - Time is %d and %d us \n", time, usec);
-  }
-  if(cdsPciModules.gpsType == SYMCOM_RCVR) 
-  {
-  	gps_receiver_locked = getGpsTime(&timeSec,&usec);
-        printf("Found SYMCOM IRIG-B - Time is %f and %d ns 0x%x\n", time, ns);
-  }
-  if(cdsPciModules.gpsType == TSYNC_RCVR) 
-  {
-  	gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
-        printf("Found TSYNC IRIG-B - Time is %d and %d us 0x%x\n", timeSec, usec);
-  }
-  printf("Waiting for EPICS BURT \n");
-#endif
   do{
-#ifdef NO_RTL
 	udelay(20000);
         udelay(20000);
         udelay(20000);
   	printf("Waiting for EPICS BURT %d\n", cnt++);
 	cpu_relax();
-#else
-	usleep(1000000);
-#endif
   }while(!pLocalEpics->epicsInput.burtRestore);
 
   printf("BURT Restore Complete\n");
@@ -918,28 +694,26 @@ printf("Sync source = %d\n",syncSource);
 
   printf("Initialized servo control parameters.\n");
 
-#ifdef NO_RTL
 udelay(1000);
-#endif
 
 // Initialize DAQ variable/software **************************************************
 #if !defined(NO_DAQ) && !defined(IOP_TASK)
   /* Set data range limits for daqLib routine */
 #if defined(SERVO2K) || defined(SERVO4K)
-  daq.filtExMin = 20001;
-  daq.filtTpMin = 30001;
+  daq.filtExMin = GDS_2K_EXC_MIN;
+  daq.filtTpMin = GDS_2K_TP_MIN;
 #else
-  daq.filtExMin = 1;
-  daq.filtTpMin = 10001;
+  daq.filtExMin = GDS_16K_EXC_MIN;
+  daq.filtTpMin = GDS_16K_TP_MIN;
 #endif
   daq.filtExMax = daq.filtExMin + MAX_MODULES;
   daq.filtExSize = MAX_MODULES;
   daq.xExMin = daq.filtExMax;
-  daq.xExMax = daq.xExMin + 50;
+  daq.xExMax = daq.xExMin + GDS_MAX_NFM_EXC;
   daq.filtTpMax = daq.filtTpMin + MAX_MODULES * 3;
   daq.filtTpSize = MAX_MODULES * 3;
   daq.xTpMin = daq.filtTpMax;
-  daq.xTpMax = daq.xTpMin + 500;
+  daq.xTpMax = daq.xTpMin + GDS_MAX_NFM_TP;
 
   printf("DAQ Ex Min/Max = %d %d\n",daq.filtExMin,daq.filtExMax);
   printf("DAQ XEx Min/Max = %d %d\n",daq.xExMin,daq.xExMax);
@@ -948,8 +722,8 @@ udelay(1000);
 
   // Assign DAC testpoint pointers
   for (ii = 0; ii <  cdsPciModules.dacCount; ii++)
-	for (jj = 0; jj < 16; jj++) // 16 per DAC regardless of the actual
-		testpoint[16 * ii + jj] = floatDacOut + 16 * ii + jj;
+	for (jj = 0; jj < MAX_DAC_CHN_PER_MOD; jj++) // 16 per DAC regardless of the actual
+		testpoint[MAX_DAC_CHN_PER_MOD * ii + jj] = floatDacOut + MAX_DAC_CHN_PER_MOD * ii + jj;
 
   // Zero out storage
   memset(floatDacOut, 0, sizeof(floatDacOut));
@@ -1024,7 +798,7 @@ udelay(1000);
   } else {
     for (ii = 0; ii < cdsPciModules.dacCount; ii++) {
       int pd = cdsPciModules.dacConfig[ii] - ioMemData->adcCount; // physical DAC number
-      for (jj = 0; jj < 16; jj++) {
+      for (jj = 0; jj < MAX_DAC_CHN_PER_MOD; jj++) {
 	if (dacOutUsed[ii][jj]) {
 	  	ioMemData->dacOutUsed[pd][jj] = 1;
 		printf("Setting card=%d channel=%d dac usage\n", pd, jj);
@@ -1052,7 +826,7 @@ udelay(1000);
   for(jj=0;jj<cdsPciModules.adcCount;jj++)
   {
 	  // Setup the DMA registers
-	  status = gsaAdcDma1(jj,cdsPciModules.adcType[jj],ADC_DMA_BYTES);
+	  status = gsaAdcDma1(jj,cdsPciModules.adcType[jj]);
 	  // Preload input memory with dummy variables to test that new ADC data has arrived.
 	  packedData = (int *)cdsPciModules.pci_adc[jj];
 	  // Write a dummy 0 to first ADC channel location
@@ -1063,7 +837,7 @@ udelay(1000);
           else packedData += 31;
 	  // Write a number into the last channel which the ADC should never write ie no
 	  // upper bits should be set in channel 31.
-          *packedData = 0xf000000;
+          *packedData = DUMMY_ADC_VAL;
 	  // Set ADC Present Flag
   	  pLocalEpics->epicsOutput.statAdc[jj] = 1;
   }
@@ -1088,13 +862,6 @@ udelay(1000);
 #endif
 
   
-#ifdef NO_RTL
-
-#ifndef NO_CPU_DISABLE
-  // Take the CPU away from Linux
-  //__cpu_disable(); 
-#endif
-#endif
 
 #ifndef ADC_SLAVE
   if (!run_on_timer) {
@@ -1108,19 +875,14 @@ udelay(1000);
 		CDIO1616Input[ii] = writeCDIO1616l(&cdsPciModules, tdsControl[ii], CDIO1616Output[ii]);
 		printf("writing BIO %d\n",tdsControl[ii]);
 		}
-#ifdef NO_RTL
 		udelay(20000);
 		udelay(20000);
-#else
-		usleep(40000);
-#endif
 		// Arm ADC modules
     		gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
 		// Arm DAC outputs
 		gsaDacTrigger(&cdsPciModules);
 		// Set synched flag so later code will not check for 1PPS
 		sync21pps = 1;
-#ifdef NO_RTL
 		udelay(20000);
 		udelay(20000);
 		for(jj=0;jj<cdsPciModules.dacCount;jj++)
@@ -1135,9 +897,6 @@ udelay(1000);
 				for(ii=0;ii<GSAO_16BIT_PRELOAD;ii++) dac16bitPtr->ODB = 0;
 			}       
 		}       
-#else
-		usleep(40000);
-#endif
 		// Start ADC/DAC clocks
 		// CDIO1616Output[tdsControl] = 0x7B00000;
 		for(ii=0;ii<tdsCount;ii++)
@@ -1176,60 +935,27 @@ udelay(1000);
 	default: {
 		    // IRIG-B card not found, so use CPU time to get close to 1PPS on startup
 			// Pause until this second ends
-		#ifdef NO_RTL
-		/*
-			:TODO:
-			wait_delay = nano2count(WAIT_DELAY);
-			period     = nano2count(PERIOD);
-			for(msg = 0; msg < MAXDIM; msg++) {
-				a[msg] = b[msg] = 3.141592;
-			}
-			rtai_cli();
-			aim_time  = rt_get_time();
-			sync_time = aim_time + wait_delay;
-		*/
 #ifdef TIME_SLAVE
-// sync up with the time master on its gps time
-	  unsigned long d = cdsPciModules.dolphin[0][1];
+// sync up with the time master on its gps time via Dolphin RFM
+// This is NOT a normal operating mode.
+  waitDolphintime();
+#endif
 
- 	  if (boot_cpu_has(X86_FEATURE_MWAIT)) {
-	    for (;;) {
-		         if (cdsPciModules.dolphin[0][1] != d) break;
-			 __monitor((void *)&cdsPciModules.dolphin[0][1], 0, 0);
-		         if (cdsPciModules.dolphin[0][1] != d) break;
-			 __mwait(0, 0);
-	    }
- 	  } else {
-            do {
-#ifdef NO_RTL
-		udelay(1);
-#else
-                usleep(1);
-#endif
-            } while(cdsPciModules.dolphin[0][1] != d);
-	  }
-#endif
-	  #ifdef RFM_TIME_SLAVE
+#ifdef RFM_TIME_SLAVE
+// sync up with the time master on its gps time via GEFANUC RFM
+// This is NOT a normal operating mode.
 	  for(;((volatile long *)(cdsPciModules.pci_rfm[0]))[0] != 0;) udelay(1);
 	  timeSec = ((volatile long *)(cdsPciModules.pci_rfm[0]))[1];
 	  timeSec --;
-	  #endif
-		#else
-			clock_gettime(CLOCK_REALTIME, &next);
-			// printf("Start time %ld s %ld ns\n", next.tv_sec, next.tv_nsec);
-			next.tv_nsec = 0;
-			next.tv_sec += 1;
-			clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
-			clock_gettime(CLOCK_REALTIME, &next);
-			// printf("Running time without IRIGb%ld s %ld ns\n", next.tv_sec, next.tv_nsec);
-		#endif
+#endif
+
 		break;
 	}
   }
   }
 
 
-  if (run_on_timer) {
+  if (run_on_timer) {	// NOT normal operating mode; used for test systems without I/O cards/chassis
     printf("*******************************\n");
     printf("*     Running on timer!       *\n");
     printf("*******************************\n");
@@ -1254,11 +980,7 @@ udelay(1000);
  	} else {
 	  // Spin until cycle 0 detected in first ADC buffer location.
           do {
-#ifdef NO_RTL
 		udelay(1);
-#else
-                usleep(1);
-#endif
           } while(ioMemData->iodata[ll][0].cycle != 0);
 	}
         timeSec = ioMemData->iodata[ll][0].timeSec;
@@ -1286,24 +1008,20 @@ udelay(1000);
   // **********************************************************************************************
   // Enter the infinite FE control loop  **********************************************************
   // **********************************************************************************************
-#ifdef NO_RTL
   // Calculate how many CPU cycles per code cycle
   cpc = cpu_khz * 1000;
   cpc /= CYCLE_PER_SECOND;
-#endif
 
   while(!vmeDone){ 	// Run forever until user hits reset
   	if (run_on_timer) {  // NO ADC present, so run on CPU realtime clock
 	  // Pause until next cycle begins
 	  if (clock16K == 0) {
 	    	//printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
-	  	pLocalEpics->epicsOutput.diags[9] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
+	  	pLocalEpics->epicsOutput.diags[FE_DIAGS_AWGTPMAN] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
 	  }
-#ifdef NO_RTL
 #if !defined (TIME_SLAVE) && !defined (RFM_TIME_SLAVE)
 	  // This is local CPU timer (no ADCs)
 	  // advance to the next cycle polling CPU cycles and microsleeping
-  	  int clk, clk1;
 	  rdtscl(clk);
 	  clk += cpc;
 	  for(;;) {
@@ -1325,8 +1043,8 @@ udelay(1000);
 	  d = clock16K;
 	  for(;iop_rfm_valid? cdsPciModules.dolphin[0][1] != d: 0;) udelay(1);
 #endif
-	    ioMemCntr = (clock16K % 64);
-	    for(ii=0;ii<32;ii++)
+	    ioMemCntr = (clock16K % IO_MEMORY_SLOTS);
+	    for(ii=0;ii<IO_MEMORY_SLOT_VALS;ii++)
 	    {
 		ioMemData->iodata[0][ioMemCntr].data[ii] = clock16K/4;
 		ioMemData->iodata[1][ioMemCntr].data[ii] = clock16K/4;
@@ -1337,26 +1055,6 @@ udelay(1000);
 	    ioMemData->iodata[1][ioMemCntr].timeSec = timeSec;;
 	    ioMemData->iodata[0][ioMemCntr].cycle = clock16K;
 	    ioMemData->iodata[1][ioMemCntr].cycle = clock16K;
-#if 0
-	  for (;;) {
-		         if (cdsPciModules.dolphin[0][1] != d) break;
-			 __monitor((void *)&cdsPciModules.dolphin[0][1], 0, 0);
-		         if (cdsPciModules.dolphin[0][1] != d) break;
-			 __mwait(0, 0);
-	  }
-#endif
-	//if (dolphin_memory_read[1] != d+1) printk("dolphin cycle jump from %d to %d\n", d, dolphin_memory_read[1]);
-#endif
-#else
-    	  struct timespec next;
-    	  clock_gettime(CLOCK_REALTIME, &next);
-	  if (clock16K == 0) {
- 	    next.tv_nsec = 0;
-	    next.tv_sec += 1;
-	  } else {
-    	    next.tv_nsec = 1000000000 / CYCLE_PER_SECOND * clock16K;
-	  }
-          clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &next, NULL);
 #endif
 	  rdtscl(cpuClock[0]);
 #if defined(RFM_TIME_SLAVE) || defined(TIME_SLAVE)
@@ -1381,6 +1079,7 @@ udelay(1000);
           pLocalEpics->epicsOutput.timeDiag = timeSec;
 	  }
 	} else {
+	// **********************************************************************************************************
 	// NORMAL OPERATION -- Wait for ADC data ready
 	// On startup, only want to read one sample such that first cycle
 	// coincides with GPS 1PPS. Thereafter, sampleCount will be 
@@ -1388,14 +1087,15 @@ udelay(1000);
 	// code rate eg 32 samples each time thru before proceeding to match 2048 system.
 	// **********************************************************************************************************
 #if 0
+// Used in block transfers of data from GEFANUC RFM; presently not used as IOP takes too long.
 		if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(clock16K % 64));
 		if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(clock16K % 64));
 #endif
        if(clock16K == 0)
         {
 	  //printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
-	  pLocalEpics->epicsOutput.diags[9] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
-	  if(pLocalEpics->epicsOutput.diags[9]) feStatus |= FE_ERROR_AWG;
+	  pLocalEpics->epicsOutput.diags[FE_DIAGS_AWGTPMAN] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
+	  if(pLocalEpics->epicsOutput.diags[FE_DIAGS_AWGTPMAN]) feStatus |= FE_ERROR_AWG;
 	  if(!iopDacEnable) feStatus |= FE_ERROR_DAC_ENABLE;
 
 	  // Increment GPS second on cycle 0
@@ -1416,6 +1116,7 @@ udelay(1000);
         for(ll=0;ll<sampleCount;ll++)
         {
 #ifndef ADC_SLAVE
+// Start of ADC Read *************************************************************************************
 		// Read ADC data
                for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		{
@@ -1433,9 +1134,9 @@ udelay(1000);
 		    // Monitor the first ADC
 		    if (jj == 0) {
 		       for (;;) {
-		         if (*packedData != 0xf000000) break;
+		         if (*packedData != DUMMY_ADC_VAL) break;
 			 __monitor((void *)packedData, 0, 0);
-		         if (*packedData != 0xf000000) break;
+		         if (*packedData != DUMMY_ADC_VAL) break;
 			 __mwait(0, 0);
 		       }
 		       rdtscl(cpuClock[9]);
@@ -1446,10 +1147,7 @@ udelay(1000);
                         kk ++;
 			// Need to delay if not ready as constant banging of the input register
 			// will slow down the ADC DMA.
-			if(*packedData == 0xf000000) {
-//#ifdef NO_RTL
-				//udelay(1);
-//#else
+			if(*packedData == DUMMY_ADC_VAL) {
 				// if(jj==0) usleep(0);
 		    		rdtscl(cpuClock[9]);
 				adcWait = (cpuClock[9] - cpuClock[8])/CPURATE;
@@ -1463,10 +1161,9 @@ udelay(1000);
 				}
 #endif
 #endif
-//#endif
 			}
 			// Allow 1msec for data to be ready (should never take that long).
-                    }while((*packedData == 0xf000000) && (adcWait < 1000000));
+                    }while((*packedData == DUMMY_ADC_VAL) && (adcWait < MAX_ADC_WAIT));
 
 #ifdef ADC_MASTER
 #ifndef RFM_DIRECT_READ
@@ -1482,7 +1179,7 @@ udelay(1000);
 		    // If data not ready in time, abort
 		    // Either the clock is missing or code is running too slow and ADC FIFO
 		    // is overflowing.
-		    if (adcWait >= 1000000) {
+		    if (adcWait >= MAX_ADC_WAIT) {
                         stop_working_threads = 1;
 			vmeDone = 1;
 	  		pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
@@ -1549,31 +1246,30 @@ udelay(1000);
 
                     // Read adc data
                     packedData = (int *)cdsPciModules.pci_adc[jj];
-		    // FIrst, and only first, channel should have upper bit marker set.
+		    // First, and only first, channel should have upper bit marker set.
                     // Return 0x10 if first ADC channel does not have sync bit set
-                    if(*packedData & 0xf0000) 
+                    if(*packedData & ADC_1ST_CHAN_MARKER) 
 		    {
-			status = 0;
+  			 adcChanErr[jj] = 1;
                     } else {
-			 status = 16;
   			 adcChanErr[jj] = 1;
 	 	    }	
 
-                    limit = 32700;
+                    limit = OVERFLOW_LIMIT_16BIT;
                     if (cdsPciModules.adcType[jj] == GSC_18AISS6C) {
-			limit *= 4; // 18 bit limit
-			offset = 0x20000; // Data coding offset in 18-bit DAC
-			mask = 0x3ffff;
-			num_outs = 6;
+			limit = OVERFLOW_LIMIT_18BIT; // 18 bit limit
+			offset = GSAF_DATA_CODE_OFFSET; // Data coding offset in 18-bit DAC
+			mask = GSAF_DATA_MASK;
+			num_outs = GSAF_CHAN_COUNT;
                     } else {
 		    	// Various ADC models have different number of channels/data bits
-                    	offset = 0x8000;
-                    	mask = 0xffff;
-                    	num_outs = 32;
+                    	offset = GSAI_DATA_CODE_OFFSET;
+                    	mask = GSAI_DATA_MASK;
+                    	num_outs = GSAI_CHAN_COUNT;
 		    }
 #ifdef ADC_MASTER
 		    // Determine next ipc memory location to load ADC data
-		    ioMemCntr = (clock16K % 64);
+		    ioMemCntr = (clock16K % IO_MEMORY_SLOTS);
 #endif
                     // Read adc data from PCI mapped memory into local variables
                     for(ii=0;ii<num_outs;ii++)
@@ -1593,9 +1289,9 @@ udelay(1000);
 			// This is defined in user C code
 			if (dWordUsed[jj][ii]) {
 #ifdef CORE_BIQUAD
-				dWord[jj][ii] = iir_filter_biquad(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
+				dWord[jj][ii] = iir_filter_biquad(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*MAX_ADC_CHN_PER_MOD][0]);
 #else
-				dWord[jj][ii] = iir_filter(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
+				dWord[jj][ii] = iir_filter(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*MAX_ADC_CHN_PER_MOD][0]);
 #endif
 			}
 #endif
@@ -1627,10 +1323,10 @@ udelay(1000);
                    packedData = (int *)cdsPciModules.pci_adc[jj];
                    *packedData = 0x0;
 
-                   if (cdsPciModules.adcType[jj] == GSC_18AISS6C) packedData += 5;
-                   else packedData += 31;
+                   if (cdsPciModules.adcType[jj] == GSC_18AISS6C) packedData += GSAF_CHAN_COUNT_M1;
+                   else packedData += GSAI_CHAN_COUNT_M1;
 
-                   *packedData = 0xf000000;
+                   *packedData = DUMMY_ADC_VAL;
 
 		   // Reset DMA Start Flag
 		   // This allows ADC to dump next data set whenever it is ready
@@ -1638,34 +1334,6 @@ udelay(1000);
             }
 #endif
 
-#if 0
-		  // Try synching to 1PPS on ADC[0][31] if not using IRIG-B or TDS
-		  // Only try for 1 sec.
-                  if(!sync21pps)
-                  {
-			// 1PPS signal should rise above 4000 ADC counts if present.
-                        if((adcData[0][31] < ONE_PPS_THRESH) && (sync21ppsCycles < (CYCLE_PER_SECOND*OVERSAMPLE_TIMES))) 
-			{
-				ll = -1;
-				sync21ppsCycles ++;
-                        }else {
-				// Need to start clocking the DAC outputs.
-			        gsaDacTrigger(&cdsPciModules);
-                                sync21pps = 1;
-				// 1PPS never found, so indicate NO SYNC to user
-				if(sync21ppsCycles >= (CYCLE_PER_SECOND*OVERSAMPLE_TIMES))
-				{
-					syncSource = SYNC_SRC_NONE;
-					printf("NO SYNC SOURCE FOUND %d %d\n",sync21ppsCycles,adcData[0][31]);
-				} else {
-				// 1PPS found and synched to
-					printf("GPS Trigg %d %d\n",adcData[0][31],sync21pps);
-					syncSource = SYNC_SRC_1PPS;
-				}
-				pLocalEpics->epicsOutput.timeErr = syncSource;
-                        }
-                }
-#endif
 #ifdef ADC_SLAVE
 		// SLAVE gets its adc data from MASTER via ipc shared memory
                for(jj=0;jj<cdsPciModules.adcCount;jj++)
@@ -1679,20 +1347,16 @@ udelay(1000);
 				adcWait = (cpuClock[9] - cpuClock[8])/CPURATE;
                                 // kk++;
                         }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (adcWait < 1000));
-			// timeSec = ioMemData->gpsSecond;
-	  // printf("cycle = %d  time = %d\n",clock16K,timeSec);
 			timeSec = ioMemData->iodata[mm][ioMemCntr].timeSec;
-                        // }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (kk < 1000));
 
-                        if(adcWait >= 1000)
-                        // if(kk >= 1000)
+                        if(adcWait >= MAX_ADC_WAIT_SLAVE)
                         {
                                 printf ("ADC TIMEOUT %d %d %d %d\n",mm,ioMemData->iodata[mm][ioMemCntr].cycle, ioMemCntr,ioClock);
 	  			pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
 				deallocate_dac_channels();
   				return (void *)-1;
                         }
-                        for(ii=0;ii<32;ii++)
+                        for(ii=0;ii<MAX_ADC_CHN_PER_MOD;ii++)
                         {
                                 adcData[jj][ii] = ioMemData->iodata[mm][ioMemCntr].data[ii];
 #ifdef FLIP_SIGNALS
@@ -1718,7 +1382,7 @@ udelay(1000);
                         }
                 }
 		// Set counters for next read from ipc memory
-                ioClock = (ioClock + 1) % 65536;
+                ioClock = (ioClock + 1) % IOP_IO_RATE;
                 ioMemCntr = (ioMemCntr + 1) % IO_MEMORY_SLOTS;
         	rdtscl(cpuClock[0]);
 
@@ -1728,13 +1392,9 @@ udelay(1000);
 	// After first synced ADC read, must set to code to read number samples/cycle
         sampleCount = OVERSAMPLE_TIMES;
 	}
+// End of ADC Read **************************************************************************************
 
-#ifdef TEST_SYSTEM
-        dWord[0][0] = cycleTime;
-	dWord[0][1] = usrTime;
-	dWord[0][2] = adcHoldTime;
-#endif
-	// Call the front end specific software ***********************************************
+// Call the front end specific software *****************************************************************
         rdtscl(cpuClock[4]);
 
  	iopDacEnable = feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,0);
@@ -1743,6 +1403,9 @@ udelay(1000);
 
 // START OF DAC WRITE ***********************************************************************************
 #ifdef ADC_MASTER
+	// Following was put in before DAC FIFO was used as buffer by preloading; Purpose was to ensure
+	// data xfer to DAC was not happening same time this code was writing data to the DAC transfer
+	// memory space; Can be removed at some point
 	   dacBufSelect = (dacBufSelect + 1) % 2;
 	   dacBufOffset = dacBufSelect * 0x100;
 #endif
@@ -1752,45 +1415,35 @@ udelay(1000);
 #ifdef ADC_SLAVE
 	   // SLAVE writes to MASTER via ipc memory
 	   mm = cdsPciModules.dacConfig[jj];
-// printf("mm = %d\n",mm);
 #else
-#ifdef DIRECT_DAC_WRITE
-       if(cdsPciModules.dacType[jj] == GSC_18AO8)
-             dac18bitPtr = dacPtr[jj];
-         else
-       		dac16bitPtr = dacPtr[jj];
-#else
-	   // Check Dac output overflow and write to DMA buffer
+	   // Point to DAC memory buffer
 	   pDacData = (unsigned int *)(cdsPciModules.pci_dac[jj] + dacBufOffset);
 #endif
-#endif
 #ifdef ADC_MASTER
+	// locate the proper DAC memory block
 	mm = cdsPciModules.dacConfig[jj];
-	// if((jj==1) )
-	// {
-			if(ioMemData->iodata[mm][ioMemCntrDac].cycle == ioClockDac)
-			{
-				dacEnable |= pBits[jj];
-			}else {
-				dacEnable &= ~(pBits[jj]);
-				dacChanErr[jj] += 1;
-			}
-	// }
+	// Determine if memory block has been set with the correct cycle count by Slave app.
+	if(ioMemData->iodata[mm][ioMemCntrDac].cycle == ioClockDac)
+	{
+		dacEnable |= pBits[jj];
+	}else {
+		dacEnable &= ~(pBits[jj]);
+		dacChanErr[jj] += 1;
+	}
 #endif
+// If code is to run <64K rate, need to upsample from code rate to 64K
 #ifdef OVERSAMPLE_DAC
 	   for (kk=0; kk < OVERSAMPLE_TIMES; kk++) {
 #else
 		kk = 0;
 #endif
-		limit = 32767;
-		offset = 0; //0x8000;
-		mask = 0xffff;
-		num_outs = 16;
+		limit = OVERFLOW_LIMIT_16BIT;
+		mask = GSAO_16BIT_MASK;
+		num_outs = GSAO_16BIT_CHAN_COUNT;
 		if (cdsPciModules.dacType[jj] == GSC_18AO8) {
-			limit *= 4; // 18 bit limit
-			//offset = 0x20000; // Data coding offset in 18-bit DAC
-			mask = 0x3ffff;
-			num_outs = 8;
+			limit = OVERFLOW_LIMIT_18BIT; // 18 bit limit
+			mask = GSAO_18BIT_MASK;
+			num_outs = GSAO_18BIT_CHAN_COUNT;
 
 
 		}
@@ -1804,16 +1457,16 @@ udelay(1000);
 #ifdef NO_ZERO_PAD
 		 	  dac_in = dacOut[jj][ii];
 #ifdef CORE_BIQUAD
-		 	  dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
+		 	  dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
 #else
-		 	  dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
+		 	  dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
 #endif
 #else
 			  dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
 #ifdef CORE_BIQUAD
-		 	  dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
+		 	  dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
 #else
-		 	  dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*16][0]);
+		 	  dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
 #endif
 			  dac_in *= OVERSAMPLE_TIMES;
 #endif
@@ -1834,7 +1487,7 @@ udelay(1000);
 			// Write out ADC duotone if DAC duotone is enabled.
 			if((dacDuoEnable) && (ii==(num_outs-1)) && (jj == 0))
 			{       
-				dac_out = adcData[0][31];
+				dac_out = adcData[0][ADC_DUOTONE_CHAN];
 			}      
 #else
 			// If DAQKILL tripped, send zeroes to IOP
@@ -1842,6 +1495,8 @@ udelay(1000);
 			else dac_out = 0;
 #endif
 #endif
+			// Check for outputs > range of DAC
+			// If overflow, clip at DAC limits and report errors
 			if(dac_out > limit) 
 			{
 				dac_out = limit;
@@ -1864,6 +1519,7 @@ udelay(1000);
 			// Load DAC testpoints
 			floatDacOut[16*jj + ii] = dac_out;
 #ifdef ADC_SLAVE
+			// Slave needs to write to memory buffer for IOP
 			memCtr = (ioMemCntrDac + kk) % IO_MEMORY_SLOTS;
 			// Only write to DAC channels being used to allow two or more
 			// slaves to write to same DAC module.
@@ -1871,25 +1527,15 @@ udelay(1000);
 	   			ioMemData->iodata[mm][memCtr].data[ii] = dac_out;
 #else
 
-			dac_out += offset;
-#ifdef DIRECT_DAC_WRITE
-			if(dacWriteEnable > 4)
-			{
-			if(cdsPciModules.dacType[jj] == GSC_18AO8)
-			dac18bitPtr->OUTPUT_BUF = dac_out;
-			else
-			dac16bitPtr->ODB = dac_out;;
-			}
-#else
+			// Write to DAC local memory area, for later xmit to DAC module
 			*pDacData =  (unsigned int)(dac_out & mask);
 			pDacData ++;
-#endif
 #endif
 		}
 #ifdef ADC_SLAVE
 		// Write cycle count to make DAC data complete
 		if(iopDacEnable)
-		ioMemData->iodata[mm][memCtr].cycle = (ioClockDac + kk) % 65536;
+		ioMemData->iodata[mm][memCtr].cycle = (ioClockDac + kk) % IOP_IO_RATE;
 #endif
 #ifdef OVERSAMPLE_DAC
   	   }
@@ -1898,22 +1544,20 @@ udelay(1000);
 		// Mark cycle count as having been used -1
 		// Forces slaves to mark this cycle or will not be used again by Master
 		ioMemData->iodata[mm][ioMemCntrDac].cycle = -1;
-#ifndef DIRECT_DAC_WRITE
 		// DMA Write data to DAC module
 	       if(dacWriteEnable > 4) gsaDacDma2(jj,cdsPciModules.dacType[jj],dacBufOffset);
-#endif
 #endif
 	}
 
 
 #ifdef ADC_SLAVE
 		// Increment DAC memory block pointers for next cycle
-		ioClockDac = (ioClockDac + OVERSAMPLE_TIMES) % 65536;
+		ioClockDac = (ioClockDac + OVERSAMPLE_TIMES) % IOP_IO_RATE;
 		ioMemCntrDac = (ioMemCntrDac  + OVERSAMPLE_TIMES) % IO_MEMORY_SLOTS;
 #endif
 #ifdef ADC_MASTER
 		// Increment DAC memory block pointers for next cycle
-		ioClockDac = (ioClockDac + 1) % 65536;
+		ioClockDac = (ioClockDac + 1) % IOP_IO_RATE;
 		ioMemCntrDac = (ioMemCntrDac + 1) % IO_MEMORY_SLOTS;
 #endif
 	if(dacWriteEnable < 10) dacWriteEnable ++;
@@ -1922,6 +1566,7 @@ udelay(1000);
 
         pLocalEpics->epicsOutput.cycle = clock16K;
 #ifdef ADC_MASTER
+// The following, to endif, is all duotone timing diagnostics.
         if(clock16K == 0)
         {
 		if(cdsPciModules.gpsType == SYMCOM_RCVR) 
@@ -1945,24 +1590,23 @@ udelay(1000);
 	                if((usec > 20) || (usec < 5)) diagWord |= 0x10;;
 	        }
         }
-        duotoneDac[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][30];
-        duotoneTotalDac += dWord[0][30];
-        duotone[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][31];
-        duotoneTotal += dWord[0][31];
+        duotoneDac[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][DAC_DUOTONE_CHAN];
+        duotoneTotalDac += dWord[0][DAC_DUOTONE_CHAN];
+        duotone[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][ADC_DUOTONE_CHAN];
+        duotoneTotal += dWord[0][ADC_DUOTONE_CHAN];
         if(clock16K == 16)
         {
                 duotoneTime = duotime(12, duotoneMean, duotone);
                 pLocalEpics->epicsOutput.diags[FE_DIAGS_DUOTONE_TIME] = duotoneTime;
 		duotoneTimeDac = duotime(12, duotoneMeanDac, duotoneDac);
                 pLocalEpics->epicsOutput.diags[FE_DIAGS_DAC_DUO] = duotoneTimeDac;
-		// printf("du = %f %f %f %f %f\n",duotone[5], duotone[6], duotone[7],duotone[8],duotone[9]);
         }
 	if(clock16K == 17)
 	{
 		if(dacDuoEnable != pLocalEpics->epicsInput.dacDuoSet)
 		{
 			dacDuoEnable = pLocalEpics->epicsInput.dacDuoSet;
-			printf("duo set = %d\n",dacDuoEnable);
+			// printf("duo set = %d\n",dacDuoEnable);
 			if(dacDuoEnable)
 				CDIO1616Output[0] = TDS_START_ADC_NEG_DAC_POS;
 			else CDIO1616Output[0] = TDS_START_ADC_NEG_DAC_POS | TDS_NO_DAC_DUOTONE;
@@ -2015,9 +1659,6 @@ udelay(1000);
 	  	diagWord = 0;
 		ipcErrBits = 0;
 		// feStatus = 0;
-#ifndef NO_RTL
-		// printf("DIAG RESET\n");
-#endif
 	  }
 	  // Flip the onePPS various once/sec as a watchdog monitor.
 	  // pLocalEpics->epicsOutput.onePps ^= 1;
@@ -2031,6 +1672,8 @@ udelay(1000);
 	epicsCycle = subcycle;
 #endif
 
+	// Following call sends one set of filter module data to epics each time called.
+	// This is spread out over MAX_MODULES cycles to reduce load
   	for (system = 0; system < NUM_SYSTEMS; system++)
 		updateEpics(epicsCycle, dspPtr[system], pDsp[system],
 			    &dspCoeff[system], pCoeff[system]);
@@ -2043,6 +1686,7 @@ udelay(1000);
   
 	// If synced to 1PPS on startup, continue to check that code
 	// is still in sync with 1PPS.
+	// This is NOT normal aLIGO mode.
 	if(syncSource == SYNC_SRC_1PPS)
 	{
 
@@ -2062,6 +1706,7 @@ udelay(1000);
 
 #ifndef ADC_MASTER
  // Read Dio cards once per second
+ // IOP does not handle binary I/O module traffic, as it can take too long
         if(clock16K < cdsPciModules.doCount)
         {
                 kk = clock16K;
@@ -2108,6 +1753,7 @@ udelay(1000);
                         }
 		} else if (cdsPciModules.doType[kk] == CON_1616DIO) {
 #if 0
+// Do not want to have user code access this type module, as it is used by IOP for timing control
 			if (CDIO1616Input[ii] != CDIO1616Output[ii]) {
 			  CDIO1616Input[ii] = writeCDIO1616l(&cdsPciModules, kk, CDIO1616Output[ii]);
 			}
@@ -2139,15 +1785,8 @@ udelay(1000);
 		pLocalEpics->epicsOutput.diags[FE_DIAGS_DAQ_BYTE_CNT] = 
 			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
 	  	pLocalEpics->epicsOutput.tpCnt = tpPtr->count;
-		if(pLocalEpics->epicsOutput.diags[FE_DIAGS_DAQ_BYTE_CNT] > 3500) 
+		if(pLocalEpics->epicsOutput.diags[FE_DIAGS_DAQ_BYTE_CNT] > DAQ_DCU_RATE_WARNING) 
 			feStatus |= FE_ERROR_DAQ;;
-#endif
-
-#ifdef NO_RTL
-	//rt_sleep(nano2count(2000));
-	//msleep(1);
-#else
-	// usleep(1);
 #endif
 
         if((subcycle == 0) && (daqCycle == 14))
@@ -2170,7 +1809,7 @@ udelay(1000);
 		feStatus |= FE_ERROR_DAQ;;
 #endif
 	  usrHoldTime = 0;
-  	  if((pLocalEpics->epicsInput.overflowReset) || (overflowAcc > 0x1000000))
+  	  if((pLocalEpics->epicsInput.overflowReset) || (overflowAcc > OVERFLOW_CNTR_LIMIT))
 	  {
 
 #ifdef ROLLING_OVERFLOWS
@@ -2205,7 +1844,7 @@ udelay(1000);
 	      // Send DAC output values at 16Hzfb
 	      for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	      {
-	    	for(ii=0;ii<16;ii++)
+	    	for(ii=0;ii<MAX_DAC_CHN_PER_MOD;ii++)
 	    	{
 			pLocalEpics->epicsOutput.dacValue[jj][ii] = dacOutEpics[jj][ii];
 		}
@@ -2239,7 +1878,7 @@ udelay(1000);
 		pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
 
 #ifdef ROLLING_OVERFLOWS
-                if (overflowAdc[jj][ii] > 0x1000000) {
+                if (overflowAdc[jj][ii] > OVERFLOW_CNTR_LIMIT) {
 		   overflowAdc[jj][ii] = 0;
                 }
 #else
@@ -2264,12 +1903,12 @@ udelay(1000);
 	    }
  	    else pLocalEpics->epicsOutput.statDac[jj] |= 2;
 	    dacChanErr[jj] = 0;
-	    for(ii=0;ii<16;ii++)
+	    for(ii=0;ii<MAX_DAC_CHN_PER_MOD;ii++)
 	    {
 		pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
 
 #ifdef ROLLING_OVERFLOWS
-                if (overflowDac[jj][ii] > 0x1000000) {
+                if (overflowDac[jj][ii] > OVERFLOW_CNTR_LIMIT) {
 		   overflowDac[jj][ii] = 0;
                 }
 #else
@@ -2431,7 +2070,7 @@ udelay(1000);
           clock16K %= CYCLE_PER_SECOND;
 	  clock1Min += 1;
 	  clock1Min %= CYCLE_PER_MINUTE;
-          if(subcycle == DAQ_CYCLE_CHANGE) daqCycle = (daqCycle + 1) % 16;
+          if(subcycle == DAQ_CYCLE_CHANGE) daqCycle = (daqCycle + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
           if(subcycle == END_OF_DAQ_BLOCK) /*we have reached the 16Hz second barrier*/
             {
               /* Reset the data cycle counter */
@@ -2456,7 +2095,6 @@ udelay(1000);
   return (void *)-1;
 }
 // MAIN routine: Code starting point ****************************************************************
-#ifdef NO_RTL
 
 // These externs and "16" need to go to a header file (mbuf.h)
 extern void *kmalloc_area[16];
@@ -2553,13 +2191,7 @@ extern int need_to_load_IOP_first;
 
 
 int init_module (void)
-#else
-int main(int argc, char **argv)
-#endif
 {
-#ifndef NO_RTL
-        pthread_attr_t attr;
-#endif
  	int status;
 	int ii,jj,kk;
 	char fname[128];
@@ -2609,7 +2241,6 @@ int main(int argc, char **argv)
 	jj = 0;
 	printf("cpu clock %u\n",cpu_khz);
 
-#ifdef NO_RTL
 
         int ret =  mbuf_allocate_area(SYSTEM_NAME_STRING_LOWER, 64*1024*1024, 0);
         if (ret < 0) {
@@ -2625,48 +2256,6 @@ int main(int argc, char **argv)
         }
         _ipc_shm = (unsigned char *)(kmalloc_area[ret]);
 
-#else
-        /*
-         * Create the shared memory area.  By passing a non-zero value
-         * for the mode, this means we also create a node in the GPOS.
-         */       
-
-	/* See if we can open new-style shared memory file */
-	sprintf(fname, "/rtl_mem_%s", SYSTEM_NAME_STRING_LOWER);
-        wfd = shm_open(fname, RTL_O_RDWR, 0666);
-	if (wfd == -1) {
-          printf("Warning, couldn't open `%s' read/write (errno=%d)\n", fname, errno);
-          wfd = shm_open("/rtl_epics", RTL_O_RDWR, 0666);
-          if (wfd == -1) {
-                printf("open failed for write on /rtl_epics (%d)\n",errno);
-                rtl_perror("shm_open()");
-                return -1;
-          }
-	}
-
-	// Set pointer to EPICS shared memory
-        _epics_shm = (unsigned char *)rtl_mmap(NULL,MMAP_SIZE,PROT_READ|PROT_WRITE,MAP_SHARED,wfd,0);
-        if (_epics_shm == MAP_FAILED) {
-                printf("mmap failed for epics shared memory area\n");
-                rtl_perror("mmap()");
-                return -1;
-        }
-
-	// See if IPC area is available, open and map it
-	// IPC area is used to pass data between realtime processes on different cores.
-	strcpy(fname, "/rtl_mem_ipc");
-        ipc_fd = shm_open(fname, RTL_O_RDWR, 0666);
-	if (ipc_fd == -1) {
-          //printf("Warning, couldn't open `%s' read/write (errno=%d)\n", fname, errno);
-	} else {
-          _ipc_shm = (unsigned char *)rtl_mmap(NULL,MMAP_SIZE,PROT_READ|PROT_WRITE,MAP_SHARED,ipc_fd,0);
-          if (_ipc_shm == MAP_FAILED) {
-                printf("mmap failed for IPC shared memory area\n");
-                rtl_perror("mmap()");
-                return -1;
-	  }
-        }
-#endif
 	printf("IPC at 0x%p\n",_ipc_shm);
   	ioMemData = (IO_MEM_DATA *)(_ipc_shm+ 0x4000);
 
@@ -2674,7 +2263,6 @@ int main(int argc, char **argv)
 // If DAQ is via shared memory (Framebuilder code running on same machine or MX networking is used)
 // attach DAQ shared memory location.
 #if defined(SHMEM_DAQ)
-#ifdef NO_RTL
         sprintf(fname, "%s_daq", SYSTEM_NAME_STRING_LOWER);
         ret =  mbuf_allocate_area(fname, 64*1024*1024, 0);
         if (ret < 0) {
@@ -2684,23 +2272,6 @@ int main(int argc, char **argv)
         _daq_shm = (unsigned char *)(kmalloc_area[ret]);
         printf("Allocated daq shmem; set at 0x%p\n", _daq_shm);
  	daqPtr = (struct rmIpcStr *) _daq_shm;
-#else
-	// See if frame builder DAQ comm area available
-	sprintf(fname, "/rtl_mem_%s_daq", SYSTEM_NAME_STRING_LOWER);
-        daq_fd = shm_open(fname, RTL_O_RDWR, 0666);
-	if (daq_fd == -1) {
-          printf("Error: couldn't open `%s' read/write (errno=%d)\n", fname, errno);
-	  return -1;
-	} else {
-          _daq_shm = (unsigned char *)rtl_mmap(NULL,MMAP_SIZE,PROT_READ|PROT_WRITE,MAP_SHARED,daq_fd,0);
-          if (_daq_shm == MAP_FAILED) {
-                printf("mmap failed for DAQ shared memory area\n");
-                rtl_perror("mmap()");
-                return -1;
-	  }
- 	  daqPtr = (struct rmIpcStr *) _daq_shm;
-        }
-#endif
 #endif
 
 	// Find and initialize all PCI I/O modules *******************************************************
@@ -3090,7 +2661,6 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	printf("Found %d frameBuilders on network\n",numFb);
 #endif
 
-#ifdef NO_RTL
 
 #ifdef SPECIFIC_CPU
 #define CPUID SPECIFIC_CPU
@@ -3141,110 +2711,14 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	// The code runs on the disabled CPU
 #endif
 
-#if 0
-	// Waiting for FE reset
-        while(pLocalEpics->epicsInput.vmeReset == 0) {
-                msleep(1000);
-		cpu_relax();
-		//printf("vmeReset wait\n");
-        }
-
-#ifndef NO_CPU_SHUTDOWN
-	// Unset the code callback
-        set_fe_code_idle(0, CPUID);
-#endif
-
-	// Stop the code and wait
-        stop_working_threads = 1;
-        msleep(1000);
-
-#ifndef NO_CPU_SHUTDOWN
-	// Bring the CPU back up
-	extern int __cpuinit cpu_up(unsigned int cpu);
-        cpu_up(CPUID);
-
-#endif
-        //msleep(1000);
-	//printkl("Brought the CPU back up\n");
-#endif // 0
-
-#else
-
-        rtl_pthread_attr_init(&attr);
-#ifdef RESERVE_CPU2
-        rtl_pthread_attr_setcpu_np(&attr, 2);
-        rtl_pthread_attr_setreserve_np(&attr, 1);
-        rtl_pthread_create(&wthread1, &attr, cpu2_start, 0);
-	printf("Started cpu2 task\n");
-	usleep(1000000);
-#endif
-
-#ifdef RESERVE_CPU3
-        rtl_pthread_attr_setcpu_np(&attr, 3);
-        rtl_pthread_attr_setreserve_np(&attr, 1);
-        rtl_pthread_create(&wthread2, &attr, cpu3_start, 0);
-	printf("Started cpu3 task\n");
-	usleep(1000000);
-#endif
-
-#ifdef SPECIFIC_CPU
-        rtl_pthread_attr_setcpu_np(&attr, SPECIFIC_CPU);
-#else
-        rtl_pthread_attr_setcpu_np(&attr, 1);
-#endif
-        /* mark this CPU as reserved - only RTLinux runs on it */
-        rtl_pthread_attr_setreserve_np(&attr, 1);
-        rtl_pthread_create(&wthread, &attr, fe_start, 0);
-
-
-	// Main thread is now running. Wait here until thread is killed
-        // ************************************************************
-        rtl_main_wait();
-
-	// Clean up after main thread is dead
-#ifndef NO_DAQ
-	status = cdsDaqNetClose();
-#endif
-
-	//cds_mx_finalize();
-
-	printf("Killing work threads\n");
-	stop_working_threads = 1;
-
-        /* kill the threads */
-        rtl_pthread_cancel(wthread);
-        rtl_pthread_join(wthread, NULL);
-
-#ifdef RESERVE_CPU2
-        rtl_pthread_cancel(wthread1);
-        rtl_pthread_join(wthread1, NULL);
-#endif
-#ifdef RESERVE_CPU3
-        rtl_pthread_cancel(wthread2);
-        rtl_pthread_join(wthread2, NULL);
-#endif
-
-        /* unmap the shared memory areas */
-        munmap(_epics_shm, MMAP_SIZE);
-
-        /* Note that this is a shared area created with shm_open() - we close
-         * it with close(), but use shm_unlink() to actually destroy the area
-         */
-        close(wfd);
-
-#endif
 
 #ifdef DOLPHIN_TEST
 	//finish_dolphin();
 #endif
 
-#ifdef NO_RTL
-        return 0;
-#endif
         return 0;
 }
 
-#ifdef NO_RTL
 void cleanup_module (void) {
 	remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
 //	printk("Setting vmeReset flag to 1\n");
@@ -3281,10 +2755,7 @@ void cleanup_module (void) {
 	printk("Just before returning from cleanup_module for " SYSTEM_NAME_STRING_LOWER "\n");
 
 }
-#endif
 
-#ifdef NO_RTL
 MODULE_DESCRIPTION("Control system");
 MODULE_AUTHOR("LIGO");
 MODULE_LICENSE("Dual BSD/GPL");
-#endif

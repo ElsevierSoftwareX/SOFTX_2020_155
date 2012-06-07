@@ -1,6 +1,3 @@
-#ifndef NO_RTL
-#include <stdio.h>
-#endif
 #include "daqmap.h"
 #include "drv/fb.h"
 
