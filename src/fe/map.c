@@ -4,11 +4,6 @@
 #include <asm/uaccess.h>
 #include <asm/delay.h>
 
-#if 0
-#ifndef NO_DAQ
-#include <drv/gmnet.h>
-#endif
-#endif
 #include <drv/cdsHardware.h>
 #include <drv/map.h>
 #include <commData2.h>
@@ -218,17 +213,17 @@ int clearDacBuffer(int numDac)
 // *****************************************************************************
 // This routine sets up the DMA registers once on code initialization.
 // *****************************************************************************
-int gsaAdcDma1(int modNum, int adcType, int byteCount)
+int gsaAdcDma1(int modNum, int adcType)
 {
   adcDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
   adcDma[modNum]->DMA0_PCI_ADD = (int)adc_dma_handle[modNum];
   if(adcType == GSC_16AI64SSA)
   {
 	adcDma[modNum]->DMA0_LOC_ADD = GSAI_DMA_LOCAL_ADDR;
-	adcDma[modNum]->DMA0_BTC = byteCount;
-  } else  {
+	adcDma[modNum]->DMA0_BTC = GSAI_DMA_BYTE_COUNT;
+  } else  {	// Assumes GSC_18AISS6C type
         adcDma[modNum]->DMA0_LOC_ADD = GSAF_DMA_LOCAL_ADDR;
-        adcDma[modNum]->DMA0_BTC = 24; //byteCount/8;
+        adcDma[modNum]->DMA0_BTC = GSAF_DMA_BYTE_COUNT;
   }
   adcDma[modNum]->DMA0_DESC = GSAI_DMA_TO_PCI;
   return(1);
