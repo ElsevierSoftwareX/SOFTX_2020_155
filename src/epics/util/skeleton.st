@@ -435,7 +435,7 @@ state init
       pFilt->inputs[ii].control = 0;
 
       sw1[ii] = 0x4;
-      sw2[ii] = 0x200;
+      sw2[ii] = 0x600;
       switchR1[ii] = 0;
       switchR2[ii] = 0;
       saveSwitch1[ii] = 0;
@@ -481,7 +481,7 @@ state monScreen{
 %% int rcode = 0;                                                        /* MA */
 %% int size;                                                             /* MA */
 %% char matrixID[32];                                                    /* MA */
-%% usleep(200000);
+%% usleep(100000);
 /* %% char thresholdErrMsg[6][32];                                          MA */
 
 /* %% strcpy(thresholdErrMsg[0], "Threshold file open failed");             MA */
