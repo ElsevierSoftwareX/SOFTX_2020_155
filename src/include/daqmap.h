@@ -1,6 +1,19 @@
 #ifndef MAP_5565_H
 #define MAP_5565_H
 
+#define DAQ_16K_SAMPLE_SIZE     1024    /* Num values for 16K system in 1/16 second     */
+#define DAQ_2K_SAMPLE_SIZE      128     /* Num values for 2K system in 1/16 second      */
+#define DAQ_CONNECT             0
+#define DAQ_WRITE               1
+
+#define DAQ_SRC_FM_TP		0	// Data from filter module testpoint
+#define DAQ_SRC_NFM_TP		1	// Data from non filter module related testpoint
+#define DAQ_SRC_FM_EXC		2	// Data from filter module excitation input
+#define DAQ_SRC_NFM_EXC		3	// Data from non filter module related excitation input
+#define DAQ_NUM_FM_TP		3	// Number of TP avail from each filter module
+
+#define DTAPS   3       /* Num SOS in decimation filters.       */
+
 /*
  * DAQ system inter-processor communication definitions.
  */
@@ -18,6 +31,35 @@
 #define DAQ_NUM_DATA_BLOCKS_PER_SECOND	16
 
 #define DAQ_DCU_BLOCK_SIZE	(DAQ_DCU_SIZE/DAQ_NUM_DATA_BLOCKS)
+
+#define DAQ_DCU_RATE_WARNING	3500	// KByte to set warning DAQ rate is nearing max of 4MB/sec/model
+
+/* Structure for maintaining DAQ channel information */
+typedef struct DAQ_LKUP_TABLE {
+        int type;       /* 0=SFM, 1=nonSFM TP, 2= SFM EXC, 3=nonSFM EXC         */
+	int sysNum;     /* If multi-dim SFM array, which one to use.            */
+	int fmNum;      /* Filter module with signal of interest.               */
+	int sigNum;     /* Which signal within a filter.                        */
+	int decFactor;  /* Decimation factor to use.                            */
+	int offset;     /* Offset to beginning of next channel in local buff.   */
+}DAQ_LKUP_TABLE;
+
+// Structure for maintaining TP channel number ranges
+// which are valid for this front end. These typically
+// come from gdsLib.h.
+typedef struct DAQ_RANGE {
+        int filtTpMin;
+        int filtTpMax;
+        int filtTpSize;
+        int xTpMin;
+        int xTpMax;
+        int filtExMin;
+        int filtExMax;
+        int filtExSize;
+        int xExMin;
+        int xExMax;
+} DAQ_RANGE;
+
 
 /*
  * Inter-processor communication structures
@@ -271,5 +313,11 @@ typedef struct cdsDaqNetGdsTpNum {
 } cdsDaqNetGdsTpNum;
 
 #define GDS_TP_MAX_FE	1250
+#define GDS_MAX_NFM_TP	500
+#define GDS_MAX_NFM_EXC	50
+#define GDS_2K_EXC_MIN	20001
+#define GDS_16K_EXC_MIN	1
+#define GDS_2K_TP_MIN	20001
+#define GDS_16K_TP_MIN	10001
 
 #endif

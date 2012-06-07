@@ -36,7 +36,7 @@
 /*                                                                      	*/
 /*        THE LASER INTERFEROMETER GRAVITATIONAL WAVE OBSERVATORY.      	*/
 /*                                                                      	*/
-/*                     (C) The LIGO Project, 2005.                      	*/
+/*                     (C) The LIGO Project, 2012.                      	*/
 /*                                                                      	*/
 /*                                                                      	*/
 /*                                                                      	*/
@@ -49,43 +49,6 @@
 /* 		Cambridge MA 02139                                             	*/
 /*                                                                      	*/
 /*----------------------------------------------------------------------------- */
-
-char *daqLib5565_cvs_id = "$Id: daqLib.c,v 1.43 2009/09/17 18:55:29 aivanov Exp $";
-
-#define DAQ_16K_SAMPLE_SIZE	1024	/* Num values for 16K system in 1/16 second 	*/
-#define DAQ_2K_SAMPLE_SIZE	128	/* Num values for 2K system in 1/16 second	*/
-#define DAQ_CONNECT		0
-#define DAQ_WRITE		1
-
-#define DTAPS	3	/* Num SOS in decimation filters.	*/
-
-
-/* Structure for maintaining DAQ channel information */
-typedef struct DAQ_LKUP_TABLE {
-	int type;	/* 0=SFM, 1=nonSFM TP, 2= SFM EXC, 3=nonSFM EXC 	*/	
-	int sysNum;	/* If multi-dim SFM array, which one to use.		*/
-	int fmNum;	/* Filter module with signal of interest.		*/
-	int sigNum;	/* Which signal within a filter.			*/
-	int decFactor;	/* Decimation factor to use.				*/
-	int offset;	/* Offset to beginning of next channel in local buff.	*/
-}DAQ_LKUP_TABLE;
-
-// Structure for maintaining TP channel number ranges
-// which are valid for this front end. These typically
-// come from gdsLib.h.
-typedef struct DAQ_RANGE {
-	int filtTpMin;
-	int filtTpMax;
-	int filtTpSize;
-	int xTpMin;
-	int xTpMax;
-	int filtExMin;
-	int filtExMax;
-	int filtExSize;
-	int xExMin;
-	int xExMax;
-} DAQ_RANGE;
-
 
 volatile DAQ_INFO_BLOCK *pInfo;		/* Ptr to DAQ config in shmem.	*/
 
@@ -158,8 +121,8 @@ static volatile char *exciteDataPtr;	  /* Ptr to EXC data in shmem.	*/
 static int validTp;		/* Number of valid GDS sigs selected.	*/
 static int validTpNet;		/* Number of valid GDS sigs selected.	*/
 //static int validEx;		/* Local chan number of 1st EXC signal.	*/
-static int tpNum[GM_DAQ_MAX_TPS]; /* TP/EXC selects to send to FB.	*/
-static int tpNumNet[GM_DAQ_MAX_TPS]; /* TP/EXC selects to send to FB.	*/
+static int tpNum[DAQ_GDS_MAX_TP_ALLOWED]; 	/* TP/EXC selects to send to FB.	*/
+static int tpNumNet[DAQ_GDS_MAX_TP_ALLOWED]; 	/* TP/EXC selects to send to FB.	*/
 static int totalChans;		/* DAQ + TP + EXC chans selected.	*/
 static int totalSize;		/* DAQ + TP + EXC chans size in bytes.	*/
 static int totalSizeNet;	/* DAQ + TP + EXC chans size in bytes.	*/
@@ -265,6 +228,7 @@ static double dCoeff256x[13] =
         -0.9980046339426777,  0.0000000000000000,  1.0000000000000000,  0.0000000000000000};
 #endif
 
+// History buffers for decimation IIR filters
 static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
 
@@ -276,7 +240,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
     /* First block to write out is last from previous second */
     phase = 0;
-    daqBlockNum = 15;
+    daqBlockNum = (DAQ_NUM_DATA_BLOCKS - 1);
     excBlockNum = 0;
 
     /* Allocate memory for two local data swing buffers */
@@ -337,9 +301,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       dataInfo.tp[ii].dataType = pInfo->tp[ii].dataType;
       dataInfo.tp[ii].dataRate = pInfo->tp[ii].dataRate;
       if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
-        crcLength += 2 * dataInfo.tp[ii].dataRate / 16;
+        crcLength += 2 * dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS;
       else
-        crcLength += 4 * dataInfo.tp[ii].dataRate / 16;
+        crcLength += 4 * dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS;
     }
 
     /* Calculate the number of bytes to xfer on each call, based on total number
@@ -366,14 +330,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
 
 
-#ifndef NO_RTL
-    printf("Daq chan count = %d\nBlockSize = 0x%x\n",dataInfo.numChans,crcLength);
-    printf("Daq XferSize = %d\n",xferSize1);
-    printf("Daq xfer should complete in %d cycles\n",(crcLength/xferSize1));
-    printf("Daq xmit Size = %d %d\n",mnDaqSize,sysRate);
-#endif
-
-
     // Fill in the local lookup table for finding data.
     localTable[0].offset = 0;
     offsetAccum = 0;
@@ -382,7 +338,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     {
       /* Need to develop a table of offset pointers to load data into swing buffers 	*/
       /* This is based on decimation factors and data size				*/
-      if ((dataInfo.tp[ii].dataRate / 16) > sysRate) {
+      if ((dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS) > sysRate) {
 	/* Channel data rate is greater than system rate */
 	printf("Channels %d has bad data rate %d\n", ii, dataInfo.tp[ii].dataRate);
 	return(-1);
@@ -453,9 +409,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     totalChans = dataInfo.numChans;
     // Set pointer to GDS table in shmem
     gdsPtr = (GDS_CNTRL_BLOCK *)(_epics_shm + DAQ_GDS_BLOCK_ADD);
-#ifndef NO_RTL
-    printf("gdsCntrl block is at 0x%lx\n",(long)gdsPtr);
-#endif
     // Clear out the GDS TP selections.
     if(sysRate < DAQ_16K_SAMPLE_SIZE) tpx = 3;
     else tpx = 2;
@@ -498,7 +451,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     daqWriteTime = sysRate / 16;
 
 
-    for (i = 0; i < GM_DAQ_MAX_TPS; i++) {
+    for (i = 0; i < DAQ_GDS_MAX_TP_ALLOWED; i++) {
 	tpNum[i] = 0;
 	tpNumNet[i] = 0;
     }
@@ -537,7 +490,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
       dWord = 0;
       /* Read in the data to a local variable, either from a FM TP or other TP */
-      if(localTable[ii].type == 0)
+      if(localTable[ii].type == DAQ_SRC_FM_TP)
       /* Data if from filter module testpoint */
       {
 	switch(localTable[ii].sigNum)
@@ -556,16 +509,16 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	    break;
 	}
       }
-      else if(localTable[ii].type == 1)
+      else if(localTable[ii].type == DAQ_SRC_NFM_TP)
       /* Data is from non filter module  testpoint */
       {
 	    dWord = *(pFloatData[localTable[ii].sigNum]);
       }
-      else if(localTable[ii].type == 2)
+      else if(localTable[ii].type == DAQ_SRC_FM_EXC)
       /* Data is from filter module excitation */
       {
 	    dWord = dspPtr->data[localTable[ii].fmNum].exciteInput;
-      } else if (localTable[ii].type == 3) {
+      } else if (localTable[ii].type == DAQ_SRC_NFM_EXC) {
 	      // Extra excitation
 	      dWord = excSignal[localTable[ii].fmNum];
       }
@@ -662,7 +615,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
   }
 
 #ifndef SHMEM_DAQ
-  /* Write DAQ data to the Framebuilder 256 times per second */
+  /* Write DAQ data to the Framebuilder 16 times per second */
   if(!daqWaitCycle)
   {
 #ifndef SPECIFIC_CPU
@@ -670,7 +623,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 						crcSend,crcLength,validTpNet,tpNumNet,totalSizeNet,pReadBuffer);
 #endif
 	daqWriteCycleSend = daqWriteCycle;
-	daqWriteCycle = (daqWriteCycle + 1) % 16;
+	daqWriteCycle = (daqWriteCycle + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
   }
 #ifdef SPECIFIC_CPU
   if(daqWaitCycle == 2)
@@ -697,10 +650,10 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		{
 			dataPtr = (float *)(exciteDataPtr + excBlockNum * DAQ_DCU_BLOCK_SIZE + exChanOffset +
 					    excSlot * 4 + 4);
-			if(localTable[ii].type == 2)
+			if(localTable[ii].type == DAQ_SRC_FM_EXC)
 			{
 				dspPtr->data[localTable[ii].fmNum].exciteInput = *dataPtr;
-			} else if (localTable[ii].type == 3) {
+			} else if (localTable[ii].type == DAQ_SRC_NFM_EXC) {
 				// extra excitation
 				excSignal[localTable[ii].fmNum] = *dataPtr;
 			}
@@ -724,12 +677,12 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 // Assign global parameters
         dipc->dcuId = dcuId; // DCU id of this system
         dipc->crc = fileCrc; // Checksum of the configuration file
-        dipc->dataBlockSize = totalSizeNet * 16; // actual data size
+        dipc->dataBlockSize = totalSizeNet * DAQ_NUM_DATA_BLOCKS_PER_SECOND; // actual data size
         // Assign current block parameters
         dipc->bp[daqBlockNum].cycle = daqBlockNum;
         dipc->bp[daqBlockNum].crc = crcSend;
         //ipc->bp[daqBlockNum].status = 0;
-	if (daqBlockNum == 15) {
+	if (daqBlockNum == DAQ_NUM_DATA_BLOCKS_PER_SECOND - 1) {
         	dipc->bp[daqBlockNum].timeSec = ((unsigned int) cycle_gps_time - 1);
 	} else {
         	dipc->bp[daqBlockNum].timeSec = (unsigned int) cycle_gps_time;
@@ -747,7 +700,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
 
       /* Increment the 1/16 sec block counter */
-      daqBlockNum = (daqBlockNum + 1) % 16;
+      daqBlockNum = (daqBlockNum + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
 #ifdef SHMEM_DAQ
       mcPtr = daqShmPtr;
@@ -775,9 +728,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		      dataInfo.tp[ii].dataType = pInfo->tp[ii].dataType;
 		      dataInfo.tp[ii].dataRate = pInfo->tp[ii].dataRate;
 		      if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
-			crcLength += 2 * dataInfo.tp[ii].dataRate / 16;
+			crcLength += 2 * dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 		      else
-			crcLength += 4 * dataInfo.tp[ii].dataRate / 16;
+			crcLength += 4 * dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 		    }
 		    /* Calculate the number of bytes to xfer on each call, based on total number
 		       of bytes to write each 1/16sec and the front end data rate (2048/16384Hz) */
@@ -799,7 +752,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		    {
 		      /* Need to develop a table of offset pointers to load data into swing buffers     */
 		      /* This is based on decimation factors and data size                              */
-		      localTable[ii].decFactor = sysRate/(dataInfo.tp[ii].dataRate / 16);
+		      localTable[ii].decFactor = sysRate/(dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS_PER_SECOND);
 		      if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
 			offsetAccum += (sysRate/localTable[ii].decFactor * 2);
 		      else
@@ -817,9 +770,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 			localTable[ii].sysNum = jj / daqRange.filtTpSize;
 			jj -= localTable[ii].sysNum * daqRange.filtTpSize;
 			/* Mark which filter module within a system */
-			localTable[ii].fmNum = jj / 3;
+			localTable[ii].fmNum = jj / DAQ_NUM_FM_TP;
 			/* Mark which of three testpoints to store */
-			localTable[ii].sigNum = jj % 3;
+			localTable[ii].sigNum = jj % DAQ_NUM_FM_TP;
 		      }
 		      else if((dataInfo.tp[ii].tpnum >= daqRange.filtExMin) &&
 			 (dataInfo.tp[ii].tpnum < daqRange.filtExMax))
@@ -884,17 +837,17 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	}
 
 	// Search and clear deselected test points
-	for (i = 0; i < GM_DAQ_MAX_TPS; i++) {
+	for (i = 0; i < DAQ_GDS_MAX_TP_ALLOWED; i++) {
 		if (tpNum[i] == 0) continue;
 		if (!in_the_lists(tpNum[i], i)) {
 		  tpNum[i] = 0; // Removed test point is cleared now
 		  ltSlot = dataInfo.numChans + i;
 
 		  // If we are clearing an EXC signal, reset filter module input
-		  if (localTable[ltSlot].type == 2) {
+		  if (localTable[ltSlot].type == DAQ_SRC_FM_EXC) {
 		    dspPtr->data[excTable[i].fmNum].exciteInput = 0.0;
 		    excTable[i].sigNum = 0;
-		  } else if (localTable[ltSlot].type == 3) {
+		  } else if (localTable[ltSlot].type == DAQ_SRC_NFM_EXC) {
 		    // Extra excitation
 		    excSignal[excTable[i].fmNum] = 0.0;
 		    excTable[i].sigNum = 0;
@@ -905,14 +858,14 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
           	  localTable[ltSlot].fmNum = 0;
           	  localTable[ltSlot].sigNum = 0;
 	  	  localTable[ltSlot].decFactor = 1;
-      		  dataInfo.tp[ltSlot].dataType = 4;
+      		  dataInfo.tp[ltSlot].dataType = DAQ_DATATYPE_FLOAT;
 		}
 	}
 	
 	// Helper function to find an empty slot in the localTable
 	inline unsigned int empty_slot() {
 		int i;
-		for (i = 0; i < GM_DAQ_MAX_TPS; i++) {
+		for (i = 0; i < DAQ_GDS_MAX_TP_ALLOWED; i++) {
 			if (tpNum[i] == 0) return i;	
 		}
 		return -1;
@@ -945,13 +898,13 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		if (!exc) {
        		  if (tpn >= daqRange.filtTpMin && tpn < daqRange.filtTpMax) {
 		    jj = tpn - daqRange.filtTpMin;
-		    localTable[ltSlot].type = 0;
+		    localTable[ltSlot].type = DAQ_SRC_FM_TP;
           	    localTable[ltSlot].sysNum = jj / daqRange.filtTpSize;
 		    jj -= localTable[ltSlot].sysNum * daqRange.filtTpSize;
-          	    localTable[ltSlot].fmNum = jj / 3;
-          	    localTable[ltSlot].sigNum = jj % 3; 
+          	    localTable[ltSlot].fmNum = jj / DAQ_NUM_FM_TP;
+          	    localTable[ltSlot].sigNum = jj % DAQ_NUM_FM_TP; 
 	  	    localTable[ltSlot].decFactor = 1;
-      		    dataInfo.tp[ltSlot].dataType = 4;
+      		    dataInfo.tp[ltSlot].dataType = DAQ_DATATYPE_FLOAT;
 
 		    // Need to recalculate offsets later
 		    //offsetAccum += sysRate * 4;
@@ -963,10 +916,10 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
         	  } else if (tpn >= daqRange.xTpMin && tpn < daqRange.xTpMax) {
 	 	    jj = tpn - daqRange.xTpMin;
-		    localTable[ltSlot].type = 1;
+		    localTable[ltSlot].type = DAQ_SRC_NFM_TP;
 		    localTable[ltSlot].sigNum = jj;
 	  	    localTable[ltSlot].decFactor = 1;
-      		    dataInfo.tp[ltSlot].dataType = 4;
+      		    dataInfo.tp[ltSlot].dataType = DAQ_DATATYPE_FLOAT;
 		    gdsPtr->tp[2 + _2k_sys_offs][1][slot] = 0;
 		    tpNum[slot] = tpn;
 		  
@@ -975,7 +928,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
         	  if (tpn >= daqRange.filtExMin && tpn < daqRange.filtExMax) {
 		    jj = tpn - daqRange.filtExMin;
-		    localTable[ltSlot].type = 2;
+		    localTable[ltSlot].type = DAQ_SRC_FM_EXC;
           	    localTable[ltSlot].sysNum = jj / daqRange.filtExSize;
           	    localTable[ltSlot].fmNum = jj % daqRange.filtExSize;
           	    localTable[ltSlot].sigNum = ii;
@@ -985,14 +938,14 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		    excTable[slot].fmNum = localTable[ltSlot].fmNum;
                     // Save the index into the TPman table
                     excTable[slot].offset = i - DAQ_GDS_MAX_TP_NUM;
-      		    dataInfo.tp[ltSlot].dataType = 4;
+      		    dataInfo.tp[ltSlot].dataType = DAQ_DATATYPE_FLOAT;
 
           	    gdsPtr->tp[_2k_sys_offs][1][slot] = 0;
 		    tpNum[slot] = tpn;
 
         	  } else if (tpn >= daqRange.xExMin && tpn < daqRange.xExMax) {
 	 	    jj = tpn - daqRange.xExMin;
-		    localTable[ltSlot].type = 3;
+		    localTable[ltSlot].type = DAQ_SRC_NFM_EXC;
           	    localTable[ltSlot].fmNum = jj;
           	    localTable[ltSlot].sigNum = slot;
 		    //offsetAccum += sysRate * 4;
@@ -1001,7 +954,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		    excTable[slot].sigNum = tpn;
 		    excTable[slot].sysNum = localTable[ltSlot].sysNum;
 		    excTable[slot].fmNum = localTable[ltSlot].fmNum;
-      		    dataInfo.tp[ltSlot].dataType = 4;
+      		    dataInfo.tp[ltSlot].dataType = DAQ_DATATYPE_FLOAT;
 		   // if (slot < 8) gdsMonitor[slot + 24] = tpn;
           	    gdsPtr->tp[_2k_sys_offs][1][slot] = 0;
 		    tpNum[slot] = tpn;
@@ -1016,7 +969,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	num_tps = 0;
 
 	// Skip empty slots at the end
-	for (i = GM_DAQ_MAX_TPS-1; i >= 0; i--) {
+	for (i = DAQ_GDS_MAX_TP_ALLOWED-1; i >= 0; i--) {
 		if (tpNum[i]) {
 			num_tps = i + 1;
 			break;
