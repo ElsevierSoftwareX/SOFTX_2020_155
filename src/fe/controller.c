@@ -487,6 +487,7 @@ void *fe_start(void *arg)
   int ii,jj,kk,ll,mm;			// Dummy loop counter variables
   static int clock1Min = 0;		// Minute counter (Not Used??)
   static int cpuClock[10];		// Code timing diag variables
+  static int chanHop = 0;
 
   int adcData[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];	// ADC raw data
   int adcChanErr[MAX_ADC_MODULES];
@@ -1248,11 +1249,10 @@ udelay(1000);
                     packedData = (int *)cdsPciModules.pci_adc[jj];
 		    // First, and only first, channel should have upper bit marker set.
                     // Return 0x10 if first ADC channel does not have sync bit set
-                    if(*packedData & ADC_1ST_CHAN_MARKER) 
+                    if(!(*packedData & ADC_1ST_CHAN_MARKER)) 
 		    {
   			 adcChanErr[jj] = 1;
-                    } else {
-  			 adcChanErr[jj] = 1;
+			 chanHop = 1;
 	 	    }	
 
                     limit = OVERFLOW_LIMIT_16BIT;
@@ -1886,6 +1886,14 @@ udelay(1000);
 #endif
 
 	    }
+	  }
+	  if (chanHop) {
+	         stop_working_threads = 1;
+	         vmeDone = 1;
+	         printf("Channel Hopping Detected on one or more ADC modules !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+	         printf("Check GDSTP screen ADC status bits to id affected ADC modules\n");
+	         printf("Code is exiting ..............\n");
+	 	 continue;    
 	  }
 	  for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	  {
