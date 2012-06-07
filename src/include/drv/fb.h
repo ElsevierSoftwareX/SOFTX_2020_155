@@ -1,16 +1,6 @@
 #ifndef FB_H_INCLUDED
 #define FB_H_INCLUDED
 
-#include <drv/gmnet.h>
-#if defined(USE_GM)
-#define cdsDaqNetInit myriNetInit
-#define cdsDaqNetClose myriNetClose
-#define cdsDaqNetCheckCallback myriNetCheckCallback
-#define cdsDaqNetReconnect myriNetReconnect
-#define cdsDaqNetCheckReconnect myriNetCheckReconnect
-#define cdsDaqNetDrop myriNetDrop
-#define cdsDaqNetDaqSend myriNetDaqSend
-#else
 int cdsDaqNetInit(int);	  /* Initialize DAQ network		*/
 int cdsDaqNetClose(void);  /* Close CDS network connection	*/
 int cdsDaqNetCheckCallback(void);/* Check for messages on 	*/
@@ -34,7 +24,6 @@ int cdsDaqNetDaqSend(   int dcuId,
 #define CDS_DAQ_NET_GDS_TP_TABLE_OFFSET 0x1000
 /* Offset to the IPC structure (struct rmIpcStr, defined in daqmap.h) */
 #define CDS_DAQ_NET_IPC_OFFSET 0x0
-#endif
 
 extern int cdsNetStatus;
 extern unsigned int cycle_gps_time;

@@ -29,7 +29,9 @@
 
 /* Define maximum number of each PCI module supported.				*/
 #define MAX_ADC_MODULES		12	
+#define MAX_ADC_CHN_PER_MOD	32	
 #define MAX_DAC_MODULES		12
+#define MAX_DAC_CHN_PER_MOD	16	
 #define MAX_DIO_MODULES		8
 #define MAX_RFM_MODULES		2
 #define MAX_VME_BRIDGES		4
@@ -63,7 +65,18 @@ typedef struct CDS_REMOTE_NODES {
 
 
 #define IO_MEMORY_SLOTS		64
+#define IO_MEMORY_SLOT_VALS	32
 #define MAX_IO_MODULES		24
+#define OVERFLOW_LIMIT_16BIT	32767
+#define OVERFLOW_LIMIT_18BIT	131070
+#define OVERFLOW_CNTR_LIMIT	0x1000000
+#define MAX_ADC_WAIT		1000000		// Max time (usec) to wait for ADC data transfer in iop app
+#define MAX_ADC_WAIT_SLAVE	1000		// Max time (usec) to wait for ADC data transfer in slave app
+#define DUMMY_ADC_VAL		0xf000000	// Dummy value for test last ADC channel has arrived
+#define ADC_1ST_CHAN_MARKER	0xf0000		// Only first ADC channel should have upper bits set as first chan marker.
+#define IOP_IO_RATE		65536
+#define ADC_DUOTONE_CHAN	31
+#define DAC_DUOTONE_CHAN	30
 
 typedef struct MEM_DATA_BLOCK{
 	int timeSec;
@@ -154,7 +167,7 @@ typedef struct PLX_9056_INTCTRL{
 #define PLX_VID         0x10b5		/* PLX9056 Vendor Id	*/
 #define PLX_TID         0x9056		/* PLX9056 Type Id	*/
 
-/* GSA 18-bit ADC module 19AISS6C Definitions ***************************************** */
+/* GSA 18-bit ADC module 18AISS6C Definitions ***************************************** */
 #define ADC_18BIT_SS_ID		0x3467
 
 /* GSA ADC Module Definitions ********************************************************* */
@@ -196,6 +209,7 @@ typedef struct GSA_ADC_REG{
 #define GSAI_DMA_START          0x3
 #define GSAI_DMA1_START          0x300
 #define GSAI_DMA_DONE           0x10
+#define GSAI_DMA_BYTE_COUNT     0x80
 #define GSAI_ISR_ON_SAMPLE      0x3
 #define PLX_INT_ENABLE          0x900
 #define PLX_INT_DISABLE         0x800
@@ -208,6 +222,10 @@ typedef struct GSA_ADC_REG{
 #define GSAI_AUTO_CAL           0x2000
 #define GSAI_DMA_DEMAND_MODE    0x80000
 #define GSAI_18BIT_DATA		0x100000
+#define GSAI_DATA_CODE_OFFSET	0x8000
+#define GSAI_DATA_MASK		0xffff
+#define GSAI_CHAN_COUNT		32
+#define GSAI_CHAN_COUNT_M1	31
 
 /* GSA 18-bit DAC Module Defs ********************************************************* */
 typedef struct GSA_18BIT_DAC_REG {
@@ -246,6 +264,8 @@ typedef struct GSA_18BIT_DAC_REG {
 #define GSAO_18BIT_SIMULT_OUT	(1 << 18)
 #define GSAO_18BIT_DIO_RW	0x80	// Set first nibble write, second read for Watchdog
 #define GSAO_18BIT_PRELOAD	64	// Number of data points to preload DAC FIFO on startup (8 chan x 8 values)
+#define GSAO_18BIT_MASK		0x3ffff
+#define GSAO_18BIT_CHAN_COUNT	8
 
 /* GSA DAC Module Definitions ********************************************************* */
 /* Structure defining DAC module PCI register layout	*/
@@ -280,6 +300,8 @@ typedef struct GSA_DAC_REG{
 #define GSAO_FIFO_1024          7
 #define GSAO_FIFO_2048          8
 #define GSAO_16BIT_PRELOAD	144	// Number of data points to preload DAC FIFO on startup (16 chan x 9 values)
+#define GSAO_16BIT_MASK		0xffff
+#define GSAO_16BIT_CHAN_COUNT	16
 
 #define VMIC_VID		0x114a
 #define VMIC_TID		0x5565
@@ -450,6 +472,7 @@ typedef struct GSA_FAD_REG{
 #define GSAF_ENABLE_RAG		0x4000000
 #define GSAF_ENABLE_INPUT	0x1000
 #define GSAF_DMA_LOCAL_ADDR     0x18
+#define GSAF_DMA_BYTE_COUNT     24
 
 #define GSAF_DAC_4CHAN     	0xF
 #define GSAF_DAC_CLK_INIT     	0x10
@@ -460,6 +483,10 @@ typedef struct GSA_FAD_REG{
 #define GSAF_DAC_CLR_BUFFER     0x800
 #define GSAF_DAC_DMA_LOCAL_ADDR      0x48
 #define GSAF_RATEC_1MHZ     	0x28
+#define GSAF_DATA_CODE_OFFSET	0x20000
+#define GSAF_DATA_MASK		0x3ffff;
+#define GSAF_CHAN_COUNT		6
+#define GSAF_CHAN_COUNT_M1	5
 
 /* GSA 18Bit ADC/DAC Module Definitions ***************************************************** */
 #define AD18_SS_ID       0x3172	/* Subsystem ID to locate module on PCI bus	*/
