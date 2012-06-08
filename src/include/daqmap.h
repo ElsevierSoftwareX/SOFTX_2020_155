@@ -317,7 +317,7 @@ typedef struct cdsDaqNetGdsTpNum {
 #define GDS_MAX_NFM_EXC	50
 #define GDS_2K_EXC_MIN	20001
 #define GDS_16K_EXC_MIN	1
-#define GDS_2K_TP_MIN	20001
+#define GDS_2K_TP_MIN	30001
 #define GDS_16K_TP_MIN	10001
 
 #endif
