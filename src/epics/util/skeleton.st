@@ -77,6 +77,12 @@ assign svnString to "{ifo}:FEC-{sysnum}_BUILD_SVN";
 int stateWord;
 assign stateWord to "{ifo}:FEC-{sysnum}_STATE_WORD";
 
+double epicsSync;
+assign epicsSync to "{ifo}:FEC-{sysnum}_EPICS_SYNC";
+
+int epicsWait;
+assign epicsWait to "{ifo}:FEC-{sysnum}_EPICS_WAIT";
+
 int allNewCoeff;
 assign allNewCoeff to "{ifo}:FEC-{sysnum}_LOAD_NEW_COEFF";
 
@@ -105,6 +111,8 @@ assign dcuId to "{ifo}:DAQ-FEC_{sysnum}_DCU_ID";
 
 unsigned int prev_gps = 0;
 unsigned int prev_cycle = 0;
+int prev_seqTrig = 0;
+
 
 %DECL2%
 
@@ -256,8 +264,6 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 %% struct stat statBuf;                                                  /* MA */
 %% struct stat statBufDAQ;                                               /* ma */
 
-%% int statusFlag = 0;                                                   /* MA */
-%% int matrixStatusFlag = 0;                                             /* MA */
 
 /* %% struct filterThresh thresholds[MAX_MODULES];                          MA */
 
@@ -282,7 +288,7 @@ state init
   when() {
 %% {
 %% int ii, jj;
-%% int ij;                                                               /* MA */
+%% int ij;
 %% time_t lt = time(0);
 %% strcpy(localtimestring, ctime(&lt));
 %% localtimestring[strlen(localtimestring) - 1] = 0; /* Delete newline character */
@@ -476,211 +482,38 @@ state monScreen{
 
   when(1){
 %% int ii, jj;	
-%% int ij;                                                               /* MA */
-%% int mod;                                                              /* MA */
-%% int rcode = 0;                                                        /* MA */
-%% int size;                                                             /* MA */
-%% char matrixID[32];                                                    /* MA */
-%% usleep(100000);
-/* %% char thresholdErrMsg[6][32];                                          MA */
+%% int ij;
+%% int rtruns = 0;
+%% int myTimeout;
 
-/* %% strcpy(thresholdErrMsg[0], "Threshold file open failed");             MA */
-/* %% strcpy(thresholdErrMsg[1], "Thresholds not found");                   MA */
-/* %% strcpy(thresholdErrMsg[2], "Thresh. parse err. - cf. stderr");        MA */
-/* %% strcpy(thresholdErrMsg[3], "Matrix thresh. file open failed");        MA */
-/* %% strcpy(thresholdErrMsg[4], "Matrix thresholds not found");            MA */
-/* %% strcpy(thresholdErrMsg[5], "MThresh. parse err - cf. stderr");        MA */
+%% rtruns = 1;
+%%    stateWord = pEpics->epicsOutput.stateWord
+%%	| (prev_gps == pEpics->epicsOutput.timeDiag
+%%	   && prev_cycle == pEpics->epicsOutput.cycle);
+%%    prev_gps = pEpics->epicsOutput.timeDiag;
+%%    prev_cycle = pEpics->epicsOutput.cycle;
+      pvPut(stateWord);
 
-%% int thisFilterStatusCount;                                            /* MA */
-%% char fltrParamHelp[10];                                               /* MA */
-%% char fltrSevHelp[10];                                                 /* MA */
+// If RT Code runs, sync up to it.
+// else just wait 50msec.
+%% if(stateWord & 1) rtruns = 0;
+%% usleep(10000);
+%% if(rtruns)
+%% {
+%%	myTimeout = 0;
+%% 	do{
+%%		usleep(2000);
+%%		myTimeout ++;
+%% 	}while((pEpics->epicsOutput.epicsSync == prev_seqTrig) && (myTimeout < 60));
+%% } else {
+%% 	usleep(10000);
+%% }
+%% prev_seqTrig = pEpics->epicsOutput.epicsSync;
+   epicsSync = prev_seqTrig * 0.0625  + pEpics->epicsOutput.timeDiag;
+   epicsWait = myTimeout;
+   pvPut(epicsWait);
 
 %% pthread_mutex_lock (&seq_lock);
-
-%%  mod = 0;                                                             /* MA */
-%%  for (ii = 0; ii < fltrTypes; ii++) {                                 /* MA */
-%%     strcpy(buffer, "cksum ");                                         /* MA */
-%%     strcat(buffer, fName[ii]);                                        /* MA */
-%%     if (!stat(fName[ii], &statBuf)) {                                 /* MA */
-%%        if ((pipePtr = popen(buffer, "r")) != NULL) {                  /* MA */
-%%           fgets(buffer, 256, pipePtr);                                /* MA */
-%%           pclose(pipePtr);                                            /* MA */
-%%           sscanf(buffer, "%d", &crc);                                 /* MA */
-%%           if (crc != chkSum[ii]) {                                    /* MA */
-%%              chkSum[ii] = crc;                                        /* MA */
-%%              mod += ii + 1;                                           /* MA */
-%%           }                                                           /* MA */
-%%        }                                                              /* MA */
-%%     }                                                                 /* MA */
-%%  }                                                                    /* MA */
-%%  if (mod) {                                                           /* MA */
-       strcpy(msg, "Modified ");                                         /* MA */
-       strcat(msg, fType[mod - 1]);                                      /* MA */
-       strcat(msg, " file");                                             /* MA */
-%%     if (mod == 3) {                                                   /* MA */
-          strcat(msg, "s");                                              /* MA */
-%%     }                                                                 /* MA */
-       pvPut(msg);                                                       /* MA */
-%%  }                                                                    /* MA */
-
-   /* Coefficient update request */	
-    pvGet(allNewCoeff);
-    if(allNewCoeff)
-%%    {
-
-/* %%        rcode = readThresholdsFile(&fmc,                               MA */
-/* %%                                   &fmmap0,                            MA */
-/* %%                                   &thresholds,                        MA */
-/* %%                                   MAX_MODULES,                        MA */
-/* %%                                   0);                                 MA */
-
-%%        statusFlag = 1;                                                /* MA */
-/* %%        if (rcode) {                                                   MA */
-/* %%           strcpy(msg, thresholdErrMsg[rcode - 1]);                    MA */
-/*              pvPut(msg);                                                 MA */
-
-/* %%           if (rcode != TF_PARSE_ERROR) {                              MA */
-/* %%              strcat(msg, "\n");                                       MA */
-/* %%              fprintf(stderr, "%s", msg);                              MA */
-/* %%              statusFlag = 0;                                          MA */
-/* %%           }                                                           MA */
-/* %%        }                                                              MA */
-
-%%        matrixStatusFlag = 1;                                          /* MA */
-
-/* %DECL3_5%                                                                MA */
-
-	  strcpy(msg, "Reading coeff file...");
-	  pvPut(msg);
-
-
-%%        /* printf("About to read file \n"); */
-%%        if (fmReadCoeffFile(&fmc, 0) != 0) {
-%%              fprintf(stderr, "Error: %s\n", fmReadErrMsg());
-                strncpy(msg, fmReadShortErrMsg(), MAX_STRING_SIZE-1);
-                pvPut(msg);
-%%	  } else {
-#if !defined(RFM_EPICS)
-%%	    /* Successful coeff reload */
-	    sprintf(msg, "Coeff load complete");
-#if MAX_MODULES > 0
-            /* Load filter names to EPICS */
-%%          for (ii=0;ii<MAX_MODULES;ii++) {
-            	update_labels(ii);
-%%	    }
-#endif
-	    initVars(pFilt, pFilt,&coeffSpace, MAX_MODULES, pVmeCoeff);
-#else
-#if MAX_MODULES > 0
-%%           for (ii=0;ii<MAX_MODULES;ii++) {
-%%	       int kk;
-%%	       pFilt->coef_load_error = 0;
-%%
-%%             /* Send new coeff flags to Pentium */
-%%             pFilt->inputs[ii].rset = 1;
-%%	       usleep(100);
-%%
-%%	       for (kk = 0; kk < 2000; kk++) {
-%%		 int vme_ack;
-%%		 vme_ack = pFilt->coef_load_error;
-%%		 if (vme_ack == -1) {
-%%		    /* RFM network error */
-		    sprintf(msg, "%s Transmission Error", fmmap0[ii].name);
-		    pvPut(msg);
-%%		    goto bailout1;
-%%		 } else if (vme_ack == ii + 1) {
-%%		    /* Successful coeff reload */
-		    sprintf(msg, "%s Complete", fmmap0[ii].name);
-		    pvPut(msg);
-                    /* Load filter names to EPICS */
-		    update_labels(ii);
-%%		    break;
-%%		 }
-%%		 usleep(500);
-%%	       }
-%%	       if (kk == 2000) {
-		 strcpy(msg, "Error: front-end timeout");
-		 pvPut(msg);
-%%		 break;
-%%	       }
-%%           }
-#endif
-#endif
-%%	bailout1:
-%%	     if (ii == MAX_MODULES) {
-		strcpy(msg, localtimestring);
-               pvPut(msg);
-%%	     }
-%%	  }
-          allNewCoeff = 0;
-          pvPut(allNewCoeff);
-%%    }
-
-#if defined(SEQUENCER_NAME_ascmc) || defined(SEQUENCER_NAME_asc) || defined(SEQUENCER_NAME_asc40m)
-%%  for(ii=0;ii<FILT_QUAD_SIZE;ii++){
-      pvGet(filt[ii]);
-%%  }
-#endif
-
-#ifdef SEQUENCER_NAME_lsc_removed
-    pvGet(lscModeSwitch);
-%%  if(lscModeSwitch != lastLscModeSwitch)
-%%  {
-      lastLscModeSwitch = lscModeSwitch;
-%%    if(lscModeSwitch == 0)
-%%    {
-%%	saveSwitch1[0] &= 0xffef;
-%%	saveSwitch1[3] &= 0xffef;
-	pvPut(saveSwitch1[0]);
-	pvPut(saveSwitch1[3]);
-%%	saveSwitch1[30] &= 0xffef;
-%%	saveSwitch1[31] &= 0xffef;
-%%	saveSwitch1[32] &= 0xffef;
-	pvPut(saveSwitch1[30]);
-	pvPut(saveSwitch1[31]);
-	pvPut(saveSwitch1[32]);
-%%    }
-%%    if(lscModeSwitch == 1)
-%%    {
-%%	saveSwitch1[0] |= 0x10;
-%%	saveSwitch1[3] |= 0x10;
-	pvPut(saveSwitch1[0]);
-	pvPut(saveSwitch1[3]);
-%%	saveSwitch1[30] &= 0xffef;
-%%	saveSwitch1[31] &= 0xffef;
-%%	saveSwitch1[32] &= 0xffef;
-	pvPut(saveSwitch1[30]);
-	pvPut(saveSwitch1[31]);
-	pvPut(saveSwitch1[32]);
-%%    }
-%%    if(lscModeSwitch == 2)
-%%    {
-%%	saveSwitch1[30] |= 0x10;
-%%	saveSwitch1[31] |= 0x10;
-%%	saveSwitch1[32] |= 0x10;
-	pvPut(saveSwitch1[30]);
-	pvPut(saveSwitch1[31]);
-	pvPut(saveSwitch1[32]);
-%%    }
-	pvGet(laState);
-%%    if((lscModeSwitch == 2) && (laState & 0x20))
-%%    {
-%%	saveSwitch1[0] |= 0x10;
-%%	saveSwitch1[3] |= 0x10;
-	pvPut(saveSwitch1[0]);
-	pvPut(saveSwitch1[3]);
-%%    }
-%%    if((lscModeSwitch == 2) && ((laState & 0x20) == 0))
-%%    {
-%%	saveSwitch1[0] &= ~0x10;
-%%	saveSwitch1[3] &= ~0x10;
-	pvPut(saveSwitch1[0]);
-	pvPut(saveSwitch1[3]);
-%%    }
-%%  }
-
-#endif
-
 
 #if MAX_MODULES > 0
 %%  for(ii=0;ii<MAX_MODULES;ii++){
@@ -786,32 +619,7 @@ state monScreen{
       	pvPut(saveSwitch2[ii]);  
 %%    }
 
-/* %%    if (saveSwitch1[ii] != thresholds[ii].switch1) {                   MA */
-/* %%       thresholdFlag += 1;                                             MA */
-/* %%    }                                                                  MA */
-/* %%    if (saveSwitch2[ii] != thresholds[ii].switch2) {                   MA */
-/* %%       thresholdFlag += 2;                                             MA */
-/* %%    }                                                                  MA */
 
-#if defined(SEQUENCER_NAME_ascmc) || defined(SEQUENCER_NAME_asc) || defined(SEQUENCER_NAME_asc40m)
-      /* check for WFS input group change selections */
-%%    if(ii< 4*FILT_QUAD_SIZE){
-%% 	static const int filton1 = 0x10;
-%% 	static const int filton2 = 0x40;
-%%      if(filt[ii/4]&1){
-%%        saveSwitch1[ii] ^= filton1;
-          pvPut(saveSwitch1[ii]);
-%%      }
-%%      if((filt[ii/4]&2)==2){
-%%        saveSwitch1[ii] ^= filton2;
-          pvPut(saveSwitch1[ii]);
-%%      }
-%%      if((ii%4)==3){
-%%        filt[ii/4]=0;
-          pvPut(filt[ii/4]);
-%%      }
-%%    }
-#endif
 
 
 %%    {
@@ -919,12 +727,8 @@ state monScreen{
 
 
 %DECL4%
-%%    stateWord = pEpics->epicsOutput.stateWord
-%%	| (prev_gps == pEpics->epicsOutput.timeDiag
-%%	   && prev_cycle == pEpics->epicsOutput.cycle);
-%%    prev_gps = pEpics->epicsOutput.timeDiag;
-%%    prev_cycle = pEpics->epicsOutput.cycle;
-      pvPut(stateWord);
+
+   pvPut(epicsSync);
 
 %% time_t lt = time(0);
 %% strcpy(localtimestring, ctime(&lt));
@@ -936,7 +740,7 @@ state monScreen{
 #ifndef NO_DAQ_IN_SKELETON
   }state daqProcess
 #else
-  }state monScreen
+  }state filtCoefChk
 #endif
 }
 
@@ -1069,8 +873,114 @@ state daqProcess
         pvPut(reload);
 %% pthread_mutex_unlock (&seq_lock);
 
-    } state monScreen
+    } state filtCoefChk
 }
 #endif
+
+state filtCoefChk
+{
+  when()
+    {
+    %% int mod,ii;
+%% pthread_mutex_lock (&seq_lock);
+
+%%  mod = 0;                                                             /* MA */
+%%  for (ii = 0; ii < fltrTypes; ii++) {                                 /* MA */
+%%     strcpy(buffer, "cksum ");                                         /* MA */
+%%     strcat(buffer, fName[ii]);                                        /* MA */
+%%     if (!stat(fName[ii], &statBuf)) {                                 /* MA */
+%%        if ((pipePtr = popen(buffer, "r")) != NULL) {                  /* MA */
+%%           fgets(buffer, 256, pipePtr);                                /* MA */
+%%           pclose(pipePtr);                                            /* MA */
+%%           sscanf(buffer, "%d", &crc);                                 /* MA */
+%%           if (crc != chkSum[ii]) {                                    /* MA */
+%%              chkSum[ii] = crc;                                        /* MA */
+%%              mod += ii + 1;                                           /* MA */
+%%           }                                                           /* MA */
+%%        }                                                              /* MA */
+%%     }                                                                 /* MA */
+%%  }                                                                    /* MA */
+%%  if (mod) {                                                           /* MA */
+       strcpy(msg, "Modified ");                                         /* MA */
+       strcat(msg, fType[mod - 1]);                                      /* MA */
+       strcat(msg, " file");                                             /* MA */
+%%     if (mod == 3) {                                                   /* MA */
+          strcat(msg, "s");                                              /* MA */
+%%     }                                                                 /* MA */
+       pvPut(msg);                                                       /* MA */
+%%  }                                                                    /* MA */
+
+   /* Coefficient update request */	
+    pvGet(allNewCoeff);
+    if(allNewCoeff)
+%%    {
+	  strcpy(msg, "Reading coeff file...");
+	  pvPut(msg);
+
+
+%%        /* printf("About to read file \n"); */
+%%        if (fmReadCoeffFile(&fmc, 0) != 0) {
+%%              fprintf(stderr, "Error: %s\n", fmReadErrMsg());
+                strncpy(msg, fmReadShortErrMsg(), MAX_STRING_SIZE-1);
+                pvPut(msg);
+%%	  } else {
+#if !defined(RFM_EPICS)
+%%	    /* Successful coeff reload */
+	    sprintf(msg, "Coeff load complete");
+#if MAX_MODULES > 0
+            /* Load filter names to EPICS */
+%%          for (ii=0;ii<MAX_MODULES;ii++) {
+            	update_labels(ii);
+%%	    }
+#endif
+	    initVars(pFilt, pFilt,&coeffSpace, MAX_MODULES, pVmeCoeff);
+#else
+#if MAX_MODULES > 0
+%%           for (ii=0;ii<MAX_MODULES;ii++) {
+%%	       int kk;
+%%	       pFilt->coef_load_error = 0;
+%%
+%%             /* Send new coeff flags to Pentium */
+%%             pFilt->inputs[ii].rset = 1;
+%%	       usleep(100);
+%%
+%%	       for (kk = 0; kk < 2000; kk++) {
+%%		 int vme_ack;
+%%		 vme_ack = pFilt->coef_load_error;
+%%		 if (vme_ack == -1) {
+%%		    /* RFM network error */
+		    sprintf(msg, "%s Transmission Error", fmmap0[ii].name);
+		    pvPut(msg);
+%%		    goto bailout1;
+%%		 } else if (vme_ack == ii + 1) {
+%%		    /* Successful coeff reload */
+		    sprintf(msg, "%s Complete", fmmap0[ii].name);
+		    pvPut(msg);
+                    /* Load filter names to EPICS */
+		    update_labels(ii);
+%%		    break;
+%%		 }
+%%		 usleep(500);
+%%	       }
+%%	       if (kk == 2000) {
+		 strcpy(msg, "Error: front-end timeout");
+		 pvPut(msg);
+%%		 break;
+%%	       }
+%%           }
+#endif
+#endif
+%%	bailout1:
+%%	     if (ii == MAX_MODULES) {
+		strcpy(msg, localtimestring);
+               pvPut(msg);
+%%	     }
+%%	  }
+          allNewCoeff = 0;
+          pvPut(allNewCoeff);
+%%    }
+%% pthread_mutex_unlock (&seq_lock);
+    } state monScreen
+}
 
 }
