@@ -30,6 +30,8 @@
 #define TIME_ERR_1PPS           0x20
 #define TIME_ERR_TDS            0x40
 
+#define FM_EPICS_UPDATE_CYCLE	20
+
 // Define standard values based on code rep rate **************************************
 #ifdef SERVO256K
         #define CYCLE_PER_MINUTE        (2*7864320)

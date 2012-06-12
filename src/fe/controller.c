@@ -529,14 +529,11 @@ printf("Sync source = %d\n",syncSource);
 // BURT has completed *******************************************************************
 
 // Read in all Filter Module EPICS settings
-  for (system = 0; system < NUM_SYSTEMS; system++)
-  {
-    for(ii=0;ii<END_OF_DAQ_BLOCK;ii++)
+    for(ii=0;ii<MAX_MODULES;ii++)
     {
-	updateEpics(ii, dspPtr[system], pDsp[system],
-		    &dspCoeff[system], pCoeff[system]);
+	updateEpics(ii, dspPtr[0], pDsp[0],
+		    &dspCoeff[0], pCoeff[0]);
     }
-  }
 
   // Need this FE dcuId to make connection to FB
   dcuId = pLocalEpics->epicsInput.dcuId;
@@ -1551,11 +1548,17 @@ udelay(1000);
 	epicsCycle = subcycle;
 #endif
 
-	// Following call sends one set of filter module data to epics each time called.
-	// This is spread out over MAX_MODULES cycles to reduce load
-  	for (system = 0; system < NUM_SYSTEMS; system++)
-		updateEpics(epicsCycle, dspPtr[system], pDsp[system],
-			    &dspCoeff[system], pCoeff[system]);
+if(subcycle == FM_EPICS_UPDATE_CYCLE)
+{
+	for(ii=0;ii<MAX_MODULES;ii++)
+	{
+	// Following call sends all filter module data to epics each time called.
+		updateEpics(ii, dspPtr[0], pDsp[0],
+		    &dspCoeff[0], pCoeff[0]);
+	}
+	// Send sync signal to EPICS sequencer
+	pLocalEpics->epicsOutput.epicsSync = daqCycle;
+}
 
 	// Check if user has pushed reset button.
 	// If so, kill the task

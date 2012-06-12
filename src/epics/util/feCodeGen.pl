@@ -2258,7 +2258,7 @@ print OUTH "\tint dacDuoSet;\n";
 print OUTH "\tint overflowReset;\n";
 print OUTH "} CDS_EPICS_IN;\n\n";
 print OUTH "typedef struct CDS_EPICS_OUT {\n";
-print OUTH "\tint onePps;\n";
+print OUTH "\tint epicsSync;\n";
 print OUTH "\tint timeErr;\n";
 print OUTH "\tint adcWaitTime;\n";
 print OUTH "\tint diagWord;\n";
