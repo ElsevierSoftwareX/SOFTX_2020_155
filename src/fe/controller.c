@@ -68,6 +68,7 @@ volatile int stop_working_threads = 0;
 #define STACK_SIZE    40000
 #define TICK_PERIOD   100000
 #define PERIOD_COUNT  1
+#define MAX_UDELAY    19999
 
 
 // Code can be run without shutting down CPU by changing this compile flag
@@ -517,9 +518,9 @@ printf("Sync source = %d\n",syncSource);
   printf("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRestore);
   cnt = 0;
   do{
-	udelay(20000);
-        udelay(20000);
-        udelay(20000);
+	udelay(MAX_UDELAY);
+        udelay(MAX_UDELAY);
+        udelay(MAX_UDELAY);
   	printf("Waiting for EPICS BURT %d\n", cnt++);
 	cpu_relax();
   }while(!pLocalEpics->epicsInput.burtRestore);
@@ -752,16 +753,16 @@ udelay(1000);
 		CDIO1616Input[ii] = writeCDIO1616l(&cdsPciModules, tdsControl[ii], CDIO1616Output[ii]);
 		printf("writing BIO %d\n",tdsControl[ii]);
 		}
-		udelay(20000);
-		udelay(20000);
+		udelay(MAX_UDELAY);
+		udelay(MAX_UDELAY);
 		// Arm ADC modules
     		gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
 		// Arm DAC outputs
 		gsaDacTrigger(&cdsPciModules);
 		// Set synched flag so later code will not check for 1PPS
 		sync21pps = 1;
-		udelay(20000);
-		udelay(20000);
+		udelay(MAX_UDELAY);
+		udelay(MAX_UDELAY);
 		for(jj=0;jj<cdsPciModules.dacCount;jj++)
 		{       
 			if(cdsPciModules.dacType[jj] == GSC_18AO8)
