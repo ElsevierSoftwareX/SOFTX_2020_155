@@ -87,8 +87,8 @@ init_dolphin(int target_node) {
     printk("Dolphin memory read at 0x%p\n", read_addr);
     cdsPciModules.dolphin[0] = read_addr;
   }
-  udelay(20000);
-  udelay(20000);
+  udelay(MAX_UDELAY);
+  udelay(MAX_UDELAY);
   
   err = sci_connect_segment(NO_BINDING,
 			    4, // DIS_BROADCAST_NODEID_GROUP_ALL
@@ -106,8 +106,8 @@ init_dolphin(int target_node) {
   }
 
   // usleep(20000);
-  udelay(20000);
-  udelay(20000);
+  udelay(MAX_UDELAY);
+  udelay(MAX_UDELAY);
   err = sci_map_segment(remote_segment_handle,
 			DIS_BROADCAST,
 			0,
