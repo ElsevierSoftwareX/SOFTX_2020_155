@@ -445,12 +445,11 @@ def find_cdsParam(node):
   if 'Tag' in node.data:
     if 'cdsParameters' in node.data['Tag']:
       return node.data['Name']
-  else:
-    for subnode in node.subblocks:
-      temp = find_cdsParam(subnode)
-      if temp != None:
-        return temp
-    return None
+  for subnode in node.subblocks:
+    temp = find_cdsParam(subnode)
+    if temp != None:
+      return temp
+  return None
 
 model_params = find_cdsParam(root_block)
 
