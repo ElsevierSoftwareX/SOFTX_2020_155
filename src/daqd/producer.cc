@@ -558,6 +558,10 @@ int cycle_delay = daqd.cycle_delay;
       //for (int i = 0; 2 != (gmDaqIpc[daqd.controller_dcu].cycle % 16); i++)
       for (int i = 0; 2 != (controller_cycle % 16); i++)
 #else
+      if (shmemDaqIpc[daqd.controller_dcu] == 0) }
+		fprintf(stderr, "DCU %d is not configured\n", daqd.controller_dcu);
+		exit(1);
+      }
       shmemDaqIpc[daqd.controller_dcu]->cycle = 1;
       for (int i = 0; 1 != (shmemDaqIpc[daqd.controller_dcu]->cycle % 16); i++)
 #endif
