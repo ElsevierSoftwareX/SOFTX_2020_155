@@ -155,6 +155,7 @@ class daqd_c {
     frames_per_file(1), blocks_per_frame(1),
     cksum_file((char *)""), zero_bad_data(1)
     , master_config((char *)"")
+    , broadcast_config((char *)"")
     , crc_debug(0), cit_40m(0), nleaps(0)
     , do_fsync(0), do_directio(0)
     , controller_dcu(DCU_ID_SUS_1), avoid_reconnect(0)
@@ -543,6 +544,13 @@ class daqd_c {
 
   // Is initialized by daqdrc file command w/master config file name
   string master_config;
+
+  // Is initialized by daqdrc file set command to the broadcast 
+  // channel list config file name (.ini file)
+  string broadcast_config;
+
+  // A set of channel names to broadcast
+  set<string> broadcast_set;
 
   // Indicates whether the DCU is configured or not; holds DCU data size. One for each ifo.
   unsigned int dcuSize[2][DCU_COUNT];

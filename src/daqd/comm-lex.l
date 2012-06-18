@@ -73,6 +73,7 @@ yywrap ()
 "epics" { return EPICS; }
 "dcu" { return DCU; }
 "master_config" { return MASTER_CONFIG; }
+"broadcast_config" { return BROADCAST_CONFIG; }
 "system" { return SYSTEM; }
 "zero_bad_data" { return ZERO_BAD_DATA; }
 "update" { return UPDATE; }

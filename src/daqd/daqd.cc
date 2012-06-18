@@ -262,10 +262,27 @@ int chan_dcu_eq(const void *a, const void *b) {
 // DCU id of the current configuration file (ini file)
 int ini_file_dcu_id = 0;
 
+int bcstConfigCallback(char *name, struct CHAN_PARAM *parm, void *user) {
+	printf("Broadcast channel %s configured\n", name);
+	daqd.broadcast_set.insert(name);
+	return 1;
+}
+
 // Configure data channel info from config files
 int
 daqd_c::configure_channels_files ()
 {
+  // See if we have configured broadcast channel file
+  // where the set of channels to broadcast to the DMT is specified
+  //
+  if (broadcast_config.compare("")) {
+    unsigned long crc = 0;
+    if (0 == parseConfigFile((char *)broadcast_config.c_str(), &crc,
+    	bcstConfigCallback, 0, 0, 0)) {
+	printf("Failed to parse broadcast config file %s\n", broadcast_config.c_str());
+	return 1;
+    }
+  }
 
   // File names are specified in `master_config' file
   FILE *mcf = NULL;

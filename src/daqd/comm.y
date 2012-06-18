@@ -101,6 +101,7 @@ static int prompt_lineno;
 %token <y_void>  EPICS
 %token <y_void>  DCU
 %token <y_void>  MASTER_CONFIG
+%token <y_void>  BROADCAST_CONFIG
 %token <y_void>  SYSTEM
 %token <y_void>  UPDATE
 %token <y_void>  ADD
@@ -499,6 +500,11 @@ CommandLine: /* Nothing */
 		       << endl << flush;
 	      }
 	  }
+	}
+	| SET BROADCAST_CONFIG '=' TextExpression {
+		AUTH_CHECK((my_lexer *) lexer);
+		daqd.broadcast_config  = $4;
+		free($4);
 	}
 	| SET MASTER_CONFIG '=' TextExpression {
 		AUTH_CHECK((my_lexer *) lexer);
@@ -2813,8 +2819,11 @@ ConfigureChannelsBody: BEGIN_BEGIN {
 		}
 #endif
 
-		if (daqd.channels [i].active)
-			daqd.active_channels [daqd.num_active_channels++] = daqd.channels [i];
+		if (daqd.broadcast_set.empty()
+			? daqd.channels [i].active
+			: daqd.broadcast_set.count(daqd.channels [i].name)) {
+				daqd.active_channels [daqd.num_active_channels++] = daqd.channels [i];
+		}
 
 		if (daqd.channels [i].trend) {
 			if (daqd.trender.num_channels >= trender_c::max_trend_channels) {
