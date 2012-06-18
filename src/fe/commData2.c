@@ -158,7 +158,7 @@ int sendBlock;
 			// If PCIE comms show errors, may want to add this cache flushing
 			#if 0
 		 	if(ipcInfo[ii].netType == IPCIE)
-				clflush_cache_range (ipcInfo[ii].pIpcData->dBlock[sendBlock][ipcIndex].data, 16);
+				clflush_cache_range (&(ipcInfo[ii].pIpcData->dBlock[sendBlock][ipcIndex].data), 16);
 			#endif
 		}
         }
