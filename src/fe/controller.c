@@ -1285,6 +1285,7 @@ udelay(1000);
 	// memory space; Can be removed at some point
 	   dacBufSelect = (dacBufSelect + 1) % 2;
 	   dacBufOffset = dacBufSelect * 0x100;
+	   dacBufOffset = 0;
 #endif
 	// Write out data to DAC modules
 	for(jj=0;jj<cdsPciModules.dacCount;jj++)
@@ -1365,6 +1366,7 @@ udelay(1000);
 			if((dacDuoEnable) && (ii==(num_outs-1)) && (jj == 0))
 			{       
 				dac_out = adcData[0][ADC_DUOTONE_CHAN];
+				// dac_out = dacOut[0][7];
 			}      
 #else
 			// If DAQKILL tripped, send zeroes to IOP
@@ -2270,12 +2272,12 @@ int init_module (void)
 					(cdsPciModules.cards_used[jj].instance == doCnt))
 				{
 					kk = cdsPciModules.doCount;
-					printf("Found 6464 DOUT CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
 					cdsPciModules.doType[kk] = CDO64;
 					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
 					cdsPciModules.doCount ++;
 					cdsPciModules.cDio6464lCount ++;
-					cdsPciModules.doInstance[kk] = cdo64Cnt;
+					cdsPciModules.doInstance[kk] = doCnt;
+					printf("Found 6464 DOUT CONTEC at %d 0x%x index %d \n",jj,ioMemData->ipc[ii],doCnt);
 					cdo64Cnt ++;
 					status ++;
 				}
@@ -2283,11 +2285,12 @@ int init_module (void)
 					(cdsPciModules.cards_used[jj].instance == doCnt))
 				{
 					kk = cdsPciModules.doCount;
-					printf("Found 6464 DIN CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
+					// printf("Found 6464 DIN CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
 					cdsPciModules.doType[kk] = CDI64;
 					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
-					cdsPciModules.doInstance[kk] = cdi64Cnt;
+					cdsPciModules.doInstance[kk] = doCnt;
 					cdsPciModules.doCount ++;
+					printf("Found 6464 DIN CONTEC at %d 0x%x index %d \n",jj,ioMemData->ipc[ii],doCnt);
 					cdsPciModules.cDio6464lCount ++;
 					cdi64Cnt ++;
 					status ++;
