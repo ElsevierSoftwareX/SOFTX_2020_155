@@ -2812,12 +2812,12 @@ int main(int argc, char **argv)
 					(cdsPciModules.cards_used[jj].instance == doCnt))
 				{
 					kk = cdsPciModules.doCount;
-					printf("Found 6464 DOUT CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
 					cdsPciModules.doType[kk] = CDO64;
 					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
 					cdsPciModules.doCount ++;
 					cdsPciModules.cDio6464lCount ++;
-					cdsPciModules.doInstance[kk] = cdo64Cnt;
+					cdsPciModules.doInstance[kk] = doCnt;
+					printf("Found 6464 DOUT CONTEC at %d 0x%x index %d\n",jj,ioMemData->ipc[ii],doCnt);
 					cdo64Cnt ++;
 					status ++;
 				}
@@ -2825,10 +2825,10 @@ int main(int argc, char **argv)
 					(cdsPciModules.cards_used[jj].instance == doCnt))
 				{
 					kk = cdsPciModules.doCount;
-					printf("Found 6464 DIN CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
 					cdsPciModules.doType[kk] = CDI64;
 					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
-					cdsPciModules.doInstance[kk] = cdi64Cnt;
+					cdsPciModules.doInstance[kk] = doCnt;
+					printf("Found 6464 DIN CONTEC at %d 0x%x index %d\n",jj,ioMemData->ipc[ii],doCnt);
 					cdsPciModules.doCount ++;
 					cdsPciModules.cDio6464lCount ++;
 					cdi64Cnt ++;
