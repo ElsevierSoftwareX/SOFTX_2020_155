@@ -1,3 +1,10 @@
+===========================================================
+Tagged Release 2.5, with final set of changes listed below.
+==========================================================
+- Bug fix for new Contec BIO cards - Code not addressing boards properly if user model skipped cards in I/O chassis.
+- Reinstate SQRT part in CDS_PARTS - got lost along the way.
+- Channel hopping error detection now results in code exit ie dangerous to keep running if ADC channels are mixed up.
+- Remaining bug fixes from test results can be found in the SVN log.
 ===========================
 Overview of changes for 2.5 - Branch released 3/19/12 for testing.
 ===========================
