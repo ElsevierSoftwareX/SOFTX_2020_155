@@ -914,7 +914,9 @@ state filtCoefChk
     pvGet(allNewCoeff);
     if(allNewCoeff)
 %%    {
-	  strcpy(msg, "Reading coeff file...");
+   pvGet(localtimestring);
+%%              fprintf(stderr, "%s READING COEFF FILE\n",localtimestring);
+	  strcpy(msg, "Reading coeff File...");
 	  pvPut(msg);
 
 
@@ -971,6 +973,7 @@ state filtCoefChk
 #endif
 #endif
 %%	bailout1:
+   pvGet(localtimestring);
 %%	     if (ii == MAX_MODULES) {
 		strcpy(msg, localtimestring);
                pvPut(msg);
