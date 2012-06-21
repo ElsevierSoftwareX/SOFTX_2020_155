@@ -1584,7 +1584,6 @@ udelay(1000);
             }
 #endif
 
-#if 0
 		  // Try synching to 1PPS on ADC[0][31] if not using IRIG-B or TDS
 		  // Only try for 1 sec.
                   if(!sync21pps)
@@ -1611,7 +1610,6 @@ udelay(1000);
 				pLocalEpics->epicsOutput.timeErr = syncSource;
                         }
                 }
-#endif
 #ifdef ADC_SLAVE
 		// SLAVE gets its adc data from MASTER via ipc shared memory
                for(jj=0;jj<cdsPciModules.adcCount;jj++)
