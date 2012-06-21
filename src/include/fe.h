@@ -23,6 +23,8 @@ extern unsigned int ipcErrBits;
 extern unsigned int timeSec;
 int rioReadOps[MAX_DIO_MODULES];
 int rioOutput[MAX_DIO_MODULES];
+int rioOutput1[MAX_DIO_MODULES];
+int rioInput1[MAX_DIO_MODULES];
 int rioInputInput[MAX_DIO_MODULES];
 int gainRamp(float gainReq, int rampTime, int id, float *gain, int gainRate);
 unsigned int CDO32Output[MAX_DIO_MODULES];
