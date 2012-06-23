@@ -146,7 +146,7 @@ sub frontEndCode {
 	$calcExp .= "\t\t\L$::xpartName[$i]_delta_freq = (\L$::xpartName[$i]_freq_request - \L$::xpartName[$i]_freq)/((double) \L$::xpartName[$i]_freq_max_count);\n";
 	#Extra phase shift per cycle to achieve 0 phase on the next GPS second
 	$longCalculation = <<END;
-\t\t\L$::xpartName[$i]_temp = \L$::xpartName[$i]_freq_request * (((double) \L$::xpartName[$i]\E_freq_max_count) + ((double) clock16K)) / ((double) FE_RATE);
+\t\t\L$::xpartName[$i]_temp = \L$::xpartName[$i]_freq_request * (((double) \L$::xpartName[$i]\E_freq_max_count) + ((double) cycleNum)) / ((double) FE_RATE);
 \t\t\L$::xpartName[$i]_temp = \L$::xpartName[$i]_temp - (int) \L$::xpartName[$i]_temp;
 \t\t\L$::xpartName[$i]_extra_phase_shift_per_cycle = \L$::xpartName[$i]_temp;
 \t\t\L$::xpartName[$i]_temp =  (\L$::xpartName[$i]_delta_freq * (((double) \L$::xpartName[$i]_freq_max_count) * 
@@ -158,7 +158,7 @@ sub frontEndCode {
 \t\t(int) \L$::xpartName[$i]_extra_phase_shift_per_cycle) / \L$::xpartName[$i]_freq_max_count;
 END
 	$calcExp .= $longCalculation;
-	$calcExp .= "\t} else if ((clock16K) == 0)\n";
+	$calcExp .= "\t} else if ((cycleNum) == 0)\n";
 	$calcExp .= "\t{\n";
 	$calcExp .= "\t\t\L$::xpartName[$i]_freq_request = ";
 	$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_FREQ;\n";
