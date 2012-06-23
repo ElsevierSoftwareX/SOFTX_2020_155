@@ -30,7 +30,14 @@
 #define TIME_ERR_1PPS           0x20
 #define TIME_ERR_TDS            0x40
 
-#define FM_EPICS_UPDATE_CYCLE	20
+#define CPU_TIMER_CNT		10
+#define CPU_TIME_CYCLE_START	0
+#define CPU_TIME_CYCLE_END	1
+#define CPU_TIME_USR_START	4
+#define CPU_TIME_USR_END	5
+#define CPU_TIME_RDY_ADC	8
+#define CPU_TIME_ADC_WAIT	9
+
 
 // Define standard values based on code rep rate **************************************
 #ifdef SERVO256K
@@ -131,3 +138,31 @@
 #define FE_FB_ONLINE		0x2
 #define FE_MAX_FB_QUE		0x10
 #define ADC_TIMEOUT_ERR		0x1
+
+#define DAC_FOUND_BIT		1
+#define DAC_TIMING_BIT		2
+#define DAC_OVERFLOW_BIT	4
+#define DAC_FIFO_BIT		8
+#define DAC_WD_BIT		16	
+
+#define MAX_IRIGB_SKEW		20
+#define MIN_IRIGB_SKEW		5
+#define DT_SAMPLE_OFFSET	6
+#define DT_SAMPLE_CNT		12
+
+// HOUSEKEEPING CYCLE DEFS
+// 1Hz Jobs
+#define HKP_READ_SYMCOM_IRIGB		0
+#define HKP_READ_TSYNC_IRIBB		1
+#define HKP_DT_CALC			16
+#define HKP_DAC_DT_SWITCH		17
+#define HKP_TIMING_UPDATES		18
+#define HKP_DIAG_UPDATES		19
+#define HKP_DAC_EPICS_UPDATES		20
+#define HKP_ADC_DAC_STAT_UPDATES	21
+#define HKP_RFM_CHK_CYCLE		300	// ONLY IOP
+#define HKP_DAC_WD_CLK			400	// ONLY IOP
+#define HKP_DAC_WD_CHK			500	// ONLY IOP
+#define HKP_DAC_FIFO_CHK		600	// ONLY IOP
+// 16Hz Jobs
+#define HKP_FM_EPICS_UPDATE		30

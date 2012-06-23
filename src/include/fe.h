@@ -16,7 +16,7 @@ extern unsigned int CDIO6464InputInput[MAX_DIO_MODULES];
 extern double *testpoint[500];
 extern double xExc[50];
 extern char *_ipc_shm;
-extern int clock16K;
+extern int cycleNum;
 extern unsigned int cycle_gps_time;
 extern CDS_HARDWARE cdsPciModules;
 extern unsigned int ipcErrBits;

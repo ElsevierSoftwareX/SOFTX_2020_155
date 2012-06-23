@@ -1388,19 +1388,19 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
 #ifdef FIR_FILTERS
     int filterType = pC->coeffs[modNum].filterType[ii];
     if (filterType) {
-      extern int clock16K;
+      extern int cycleNum;
 #ifdef SERVO2K
-      int firNum = (clock16K / 32) % 32;
+      int firNum = (cycleNum / 32) % 32;
 #endif
 #ifdef SERVO4K
-      int firNum = (clock16K / 32) % 64;
+      int firNum = (cycleNum / 32) % 64;
 #endif
-      //int firNum = clock16K % 32;
-      //printf("clock16K=%d; firNum=%d\n", clock16K, firNum);
+      //int firNum = cycleNum % 32;
+      //printf("cycleNum=%d; firNum=%d\n", cycleNum, firNum);
 
       /* FIR filter */
       --filterType;
-      if (clock16K % 32) filtData = pC->prevFirOutput[filterType];
+      if (cycleNum % 32) filtData = pC->prevFirOutput[filterType];
       else {
 	if (filterType >=0 && filterType < MAX_FIR_MODULES) {
 	  double input = fmInput * pC->firFiltCoeff[filterType][ii][0]; /* overall input scale factor */

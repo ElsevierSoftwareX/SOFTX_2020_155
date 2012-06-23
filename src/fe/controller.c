@@ -182,7 +182,7 @@ int tdsControl[3];	// Up to 3 timing control modules allowed in case I/O chassis
 int tdsCount = 0;
 
 
-int clock16K = 0;
+int cycleNum = 0;
 int out_buf_size = 0; // test checking DAC buffer size
 unsigned int cycle_gps_time = 0; // Time at which ADCs triggered
 unsigned int cycle_gps_event_time = 0; // Time at which ADCs triggered
@@ -366,7 +366,7 @@ void *fe_start(void *arg)
   int tempClock[4];
   int ii,jj,kk,ll,mm;			// Dummy loop counter variables
   static int clock1Min = 0;		// Minute counter (Not Used??)
-  static int cpuClock[10];		// Code timing diag variables
+  static int cpuClock[CPU_TIMER_CNT];	// Code timing diag variables
   static int chanHop = 0;
 
   int adcData[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];	// ADC raw data
@@ -406,7 +406,6 @@ void *fe_start(void *arg)
   static int missedCycle = 0;		// Incremented error counter when too many values in ADC FIFO
   // int netRetry;				// Myrinet reconnect variable
   int diagWord = 0;			// Code diagnostic bit pattern returned to EPICS
-  int epicsCycle = 0;
   int system = 0;
   int sampleCount = 1;			// Number of ADC samples to take per code cycle
   int sync21pps = 0;			// Code startup sync to 1PPS flag
@@ -655,7 +654,7 @@ udelay(1000);
 
   // Initialize user application software ************************************
   printf("Calling feCode() to initialize\n");
-  iopDacEnable = feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,1);
+  iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,1);
 
 #ifndef ADC_MASTER
   // See if my DAC channel map overlaps with already running models
@@ -731,7 +730,7 @@ udelay(1000);
 #ifndef ADC_SLAVE
   // Initialize the DAC module variables
   for(jj = 0; jj < cdsPciModules.dacCount; jj++) {
-  	pLocalEpics->epicsOutput.statDac[jj] = 1;
+  	pLocalEpics->epicsOutput.statDac[jj] = DAC_FOUND_BIT;
         pDacData = (unsigned int *) cdsPciModules.pci_dac[jj];
 	// Arm DAC DMA for full data size
 	status = gsaDacDma1(jj, cdsPciModules.dacType[jj]);
@@ -846,7 +845,7 @@ udelay(1000);
 	// Find memory buffer of first ADC to be used in SLAVE application.
         ll = cdsPciModules.adcConfig[0];
         printf("waiting to sync %d\n",ioMemData->iodata[ll][0].cycle);
-        rdtscl(cpuClock[0]);
+        rdtscl(cpuClock[CPU_TIME_CYCLE_START]);
 
  	if (boot_cpu_has(X86_FEATURE_MWAIT)) {
 	  for(;;) {
@@ -863,8 +862,8 @@ udelay(1000);
 	}
         timeSec = ioMemData->iodata[ll][0].timeSec;
 
-        rdtscl(cpuClock[1]);
-        cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
+        rdtscl(cpuClock[CPU_TIME_CYCLE_END]);
+        cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
         printf("Synched %d\n",cycleTime);
 	// Need to set sync21pps so code will not try to sync with 1pps pulse later.
 	sync21pps=1;
@@ -875,7 +874,7 @@ udelay(1000);
 	timeSec --;
 
 #endif
-  onePpsTime = clock16K;
+  onePpsTime = cycleNum;
   timeSec = current_time() -1;
 #ifdef TIME_SLAVE
 	timeSec = *rfmTime;
@@ -893,7 +892,7 @@ udelay(1000);
   while(!vmeDone){ 	// Run forever until user hits reset
   	if (run_on_timer) {  // NO ADC present, so run on CPU realtime clock
 	  // Pause until next cycle begins
-	  if (clock16K == 0) {
+	  if (cycleNum == 0) {
 	    	//printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
 	  	pLocalEpics->epicsOutput.diags[FE_DIAGS_AWGTPMAN] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
 	  }
@@ -910,7 +909,7 @@ udelay(1000);
 #else
 #ifdef RFM_TIME_SLAVE
 	  unsigned long d = ((volatile long *)(cdsPciModules.pci_rfm[0]))[0];
-	  d=clock16K;
+	  d=cycleNum;
 	  for(;((volatile long *)(cdsPciModules.pci_rfm[0]))[0] != d;) udelay(1);
 	  timeSec = ((volatile long *)(cdsPciModules.pci_rfm[0]))[1];
 #elif defined(TIME_SLAVE)
@@ -918,34 +917,34 @@ udelay(1000);
 	  //
 	  unsigned long d = 0;
           //if (iop_rfm_valid) d = cdsPciModules.dolphin[0][1];
-	  d = clock16K;
+	  d = cycleNum;
 	  for(;iop_rfm_valid? cdsPciModules.dolphin[0][1] != d: 0;) udelay(1);
 #endif
-	    ioMemCntr = (clock16K % IO_MEMORY_SLOTS);
+	    ioMemCntr = (cycleNum % IO_MEMORY_SLOTS);
 	    for(ii=0;ii<IO_MEMORY_SLOT_VALS;ii++)
 	    {
-		ioMemData->iodata[0][ioMemCntr].data[ii] = clock16K/4;
-		ioMemData->iodata[1][ioMemCntr].data[ii] = clock16K/4;
+		ioMemData->iodata[0][ioMemCntr].data[ii] = cycleNum/4;
+		ioMemData->iodata[1][ioMemCntr].data[ii] = cycleNum/4;
 	    }
 	    // Write GPS time and cycle count as indicator to slave that adc data is ready
 	    ioMemData->gpsSecond = timeSec;
 	    ioMemData->iodata[0][ioMemCntr].timeSec = timeSec;;
 	    ioMemData->iodata[1][ioMemCntr].timeSec = timeSec;;
-	    ioMemData->iodata[0][ioMemCntr].cycle = clock16K;
-	    ioMemData->iodata[1][ioMemCntr].cycle = clock16K;
+	    ioMemData->iodata[0][ioMemCntr].cycle = cycleNum;
+	    ioMemData->iodata[1][ioMemCntr].cycle = cycleNum;
 #endif
-	  rdtscl(cpuClock[0]);
+	  rdtscl(cpuClock[CPU_TIME_CYCLE_START]);
 #if defined(RFM_TIME_SLAVE) || defined(TIME_SLAVE)
 #ifndef ADC_SLAVE
 	  // Write GPS time and cycle count as indicator to slave that adc data is ready
 	  ioMemData->gpsSecond = timeSec;
-	  ioMemData->iodata[0][0].cycle = clock16K;
+	  ioMemData->iodata[0][0].cycle = cycleNum;
 	  #ifndef RFM_TIME_SLAVE
-          if(clock16K == 0) timeSec++;
+          if(cycleNum == 0) timeSec++;
 	  #endif
 #endif
 #endif
-         if(clock16K == 0) {
+         if(cycleNum == 0) {
 
 #ifdef TIME_SLAVE
 	  if (iop_rfm_valid) timeSec = *rfmTime;
@@ -966,10 +965,10 @@ udelay(1000);
 	// **********************************************************************************************************
 #if 0
 // Used in block transfers of data from GEFANUC RFM; presently not used as IOP takes too long.
-		if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(clock16K % 64));
-		if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(clock16K % 64));
+		if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(cycleNum % 64));
+		if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(cycleNum % 64));
 #endif
-       if(clock16K == 0)
+       if(cycleNum == 0)
         {
 	  //printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
 	  pLocalEpics->epicsOutput.diags[FE_DIAGS_AWGTPMAN] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
@@ -980,7 +979,7 @@ udelay(1000);
 #ifndef ADC_SLAVE
           timeSec ++;
           pLocalEpics->epicsOutput.timeDiag = timeSec;
-	  // printf("cycle = %d  time = %d\n",clock16K,timeSec);
+	  // printf("cycle = %d  time = %d\n",cycleNum,timeSec);
 #endif
 #ifdef TIME_MASTER
 	  // Update time on RFM if this is GPS time master
@@ -1006,7 +1005,7 @@ udelay(1000);
                	    else packedData += 31;
                     kk = 0;
 		
-		    rdtscl(cpuClock[8]);
+		    rdtscl(cpuClock[CPU_TIME_RDY_ADC]);
 
 #if 0
 		    // Monitor the first ADC
@@ -1027,14 +1026,14 @@ udelay(1000);
 			// will slow down the ADC DMA.
 			if(*packedData == DUMMY_ADC_VAL) {
 				// if(jj==0) usleep(0);
-		    		rdtscl(cpuClock[9]);
-				adcWait = (cpuClock[9] - cpuClock[8])/CPURATE;
+		    		rdtscl(cpuClock[CPU_TIME_ADC_WAIT]);
+				adcWait = (cpuClock[CPU_TIME_ADC_WAIT] - cpuClock[CPU_TIME_RDY_ADC])/CPURATE;
 #ifndef RFM_DIRECT_READ
 #ifdef ADC_MASTER
-				if(((cpuClock[9] - cpuClock[0])/CPURATE > 10) && (!rfmDone))
+				if(((cpuClock[CPU_TIME_ADC_WAIT] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE > 10) && (!rfmDone))
 				{
-					if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(clock16K % 64));
-					if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(clock16K % 64));
+					if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(cycleNum % 64));
+					if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(cycleNum % 64));
 					rfmDone = 1;
 				}
 #endif
@@ -1047,8 +1046,8 @@ udelay(1000);
 #ifndef RFM_DIRECT_READ
 				if(!rfmDone)
 				{
-					if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(clock16K % 64));
-					if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(clock16K % 64));
+					if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(cycleNum % 64));
+					if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(cycleNum % 64));
 				}
 #endif
 		rfmDone = 0;
@@ -1073,10 +1072,10 @@ udelay(1000);
 		    if(jj == 0) 
 		    {
 			// Capture cpu clock for cpu meter diagnostics
-			rdtscl(cpuClock[0]);
+			rdtscl(cpuClock[CPU_TIME_CYCLE_START]);
 #ifdef ADC_MASTER
-			// if(clock16K == 65535) 
-			if(clock16K == 0) 
+			// if(cycleNum == 65535) 
+			if(cycleNum == 0) 
 			{
 				// if SymCom type, just do write to lock current time and read later
 				// This save a couple three microseconds here
@@ -1103,7 +1102,7 @@ udelay(1000);
 		if (iop_rfm_valid) {
 			//*rfmTime = timeSec;
           		rdtscl(tempClock[2]);
-			cdsPciModules.dolphin[1][1] = clock16K;
+			cdsPciModules.dolphin[1][1] = cycleNum;
 	  		//sci_flush(&sci_dev_info, 0);
           		rdtscl(tempClock[3]);
   			clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
@@ -1111,13 +1110,13 @@ udelay(1000);
 		if (cdsPciModules.pci_rfm[0]) {
 		    	((volatile long *)(cdsPciModules.pci_rfm[0]))[1] = timeSec;
   			clflush_cache_range (((volatile long *)(cdsPciModules.pci_rfm[0])) + 1, 8);
-		    	((volatile long *)(cdsPciModules.pci_rfm[0]))[0] = clock16K;
+		    	((volatile long *)(cdsPciModules.pci_rfm[0]))[0] = cycleNum;
   			clflush_cache_range (((volatile long *)(cdsPciModules.pci_rfm[0])), 8);
 		}
 		if (cdsPciModules.pci_rfm[1]) {
 		    	((volatile long *)(cdsPciModules.pci_rfm[1]))[1] = timeSec;
   			clflush_cache_range (((volatile long *)(cdsPciModules.pci_rfm[1])) + 1, 8);
-		    	((volatile long *)(cdsPciModules.pci_rfm[1]))[0] = clock16K;
+		    	((volatile long *)(cdsPciModules.pci_rfm[1]))[0] = cycleNum;
   			clflush_cache_range (((volatile long *)(cdsPciModules.pci_rfm[1])), 8);
 		}
 #endif
@@ -1146,7 +1145,7 @@ udelay(1000);
 		    }
 #ifdef ADC_MASTER
 		    // Determine next ipc memory location to load ADC data
-		    ioMemCntr = (clock16K % IO_MEMORY_SLOTS);
+		    ioMemCntr = (cycleNum % IO_MEMORY_SLOTS);
 #endif
                     // Read adc data from PCI mapped memory into local variables
                     for(ii=0;ii<num_outs;ii++)
@@ -1182,7 +1181,7 @@ udelay(1000);
 		    // Write GPS time and cycle count as indicator to slave that adc data is ready
 	  	    ioMemData->gpsSecond = timeSec;;
 		    ioMemData->iodata[jj][ioMemCntr].timeSec = timeSec;;
-		    ioMemData->iodata[jj][ioMemCntr].cycle = clock16K;
+		    ioMemData->iodata[jj][ioMemCntr].cycle = cycleNum;
 #endif
 
 		    // Check for ADC overflows
@@ -1211,19 +1210,46 @@ udelay(1000);
             }
 #endif
 
+
+		  // Try synching to 1PPS on ADC[0][31] if not using IRIG-B or TDS
+		  // Only try for 1 sec.
+                  if(!sync21pps)
+                  {
+			// 1PPS signal should rise above 4000 ADC counts if present.
+                        if((adcData[0][31] < ONE_PPS_THRESH) && (sync21ppsCycles < (CYCLE_PER_SECOND*OVERSAMPLE_TIMES))) 
+			{
+				ll = -1;
+				sync21ppsCycles ++;
+                        }else {
+				// Need to start clocking the DAC outputs.
+			        gsaDacTrigger(&cdsPciModules);
+                                sync21pps = 1;
+				// 1PPS never found, so indicate NO SYNC to user
+				if(sync21ppsCycles >= (CYCLE_PER_SECOND*OVERSAMPLE_TIMES))
+				{
+					syncSource = SYNC_SRC_NONE;
+					printf("NO SYNC SOURCE FOUND %d %d\n",sync21ppsCycles,adcData[0][31]);
+				} else {
+				// 1PPS found and synched to
+					printf("GPS Trigg %d %d\n",adcData[0][31],sync21pps);
+					syncSource = SYNC_SRC_1PPS;
+				}
+				pLocalEpics->epicsOutput.timeErr = syncSource;
+                        }
+                }
 #ifdef ADC_SLAVE
 		// SLAVE gets its adc data from MASTER via ipc shared memory
                for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		{
         		mm = cdsPciModules.adcConfig[jj];
                         kk = 0;
-		    		rdtscl(cpuClock[8]);
+		    		rdtscl(cpuClock[CPU_TIME_RDY_ADC]);
                         do{
                                 // usleep(1);
-		    		rdtscl(cpuClock[9]);
-				adcWait = (cpuClock[9] - cpuClock[8])/CPURATE;
+		    		rdtscl(cpuClock[CPU_TIME_ADC_WAIT]);
+				adcWait = (cpuClock[CPU_TIME_ADC_WAIT] - cpuClock[CPU_TIME_RDY_ADC])/CPURATE;
                                 // kk++;
-                        }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (adcWait < 1000));
+                        }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (adcWait < MAX_ADC_WAIT_SLAVE));
 			timeSec = ioMemData->iodata[mm][ioMemCntr].timeSec;
 
                         if(adcWait >= MAX_ADC_WAIT_SLAVE)
@@ -1261,7 +1287,7 @@ udelay(1000);
 		// Set counters for next read from ipc memory
                 ioClock = (ioClock + 1) % IOP_IO_RATE;
                 ioMemCntr = (ioMemCntr + 1) % IO_MEMORY_SLOTS;
-        	rdtscl(cpuClock[0]);
+        	rdtscl(cpuClock[CPU_TIME_CYCLE_START]);
 
 #endif
 	}
@@ -1272,10 +1298,10 @@ udelay(1000);
 // End of ADC Read **************************************************************************************
 
 // Call the front end specific software *****************************************************************
-        rdtscl(cpuClock[4]);
+        rdtscl(cpuClock[CPU_TIME_USR_START]);
 
- 	iopDacEnable = feCode(clock16K,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,0);
-        rdtscl(cpuClock[5]);
+ 	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,0);
+        rdtscl(cpuClock[CPU_TIME_USR_END]);
 
 
 // START OF DAC WRITE ***********************************************************************************
@@ -1443,10 +1469,10 @@ udelay(1000);
 // END OF DAC WRITE ***********************************************************************************
 // BEGIN HOUSEKEEPING *********************************************************************************
 
-        pLocalEpics->epicsOutput.cycle = clock16K;
+        pLocalEpics->epicsOutput.cycle = cycleNum;
 #ifdef ADC_MASTER
 // The following, to endif, is all duotone timing diagnostics.
-        if(clock16K == 0)
+        if(cycleNum == HKP_READ_SYMCOM_IRIGB)
         {
 		if(cdsPciModules.gpsType == SYMCOM_RCVR) 
 		{
@@ -1454,33 +1480,37 @@ udelay(1000);
 			gps_receiver_locked = getGpsTime(&timeSec,&usec);
 			pLocalEpics->epicsOutput.diags[FE_DIAGS_IRIGB_TIME] = usec;
 		}
-		if((usec > 20) || (usec < 5)) diagWord |= 0x10;;
+		if((usec > MAX_IRIGB_SKEW) || (usec < MIN_IRIGB_SKEW)) diagWord |= TIME_ERR_IRIGB;;
                 duotoneMean = duotoneTotal/CYCLE_PER_SECOND;
                 duotoneTotal = 0.0;
                 duotoneMeanDac = duotoneTotalDac/CYCLE_PER_SECOND;
                 duotoneTotalDac = 0.0;
         }
-	if(clock16K == 1)
+
+	if(cycleNum == HKP_READ_TSYNC_IRIBB)
 	{
 	        if(cdsPciModules.gpsType == TSYNC_RCVR)
 	        {
 	                gps_receiver_locked = getGpsuSecTsync(&usec);
 	                pLocalEpics->epicsOutput.diags[FE_DIAGS_IRIGB_TIME] = usec;
-	                if((usec > 20) || (usec < 5)) diagWord |= 0x10;;
+	                if((usec > MAX_IRIGB_SKEW) || (usec < MIN_IRIGB_SKEW)) diagWord |= TIME_ERR_IRIGB;;
 	        }
         }
-        duotoneDac[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][DAC_DUOTONE_CHAN];
-        duotoneTotalDac += dWord[0][DAC_DUOTONE_CHAN];
-        duotone[(clock16K + 6) % CYCLE_PER_SECOND] = dWord[0][ADC_DUOTONE_CHAN];
-        duotoneTotal += dWord[0][ADC_DUOTONE_CHAN];
-        if(clock16K == 16)
+
+        duotoneDac[(cycleNum + DT_SAMPLE_OFFSET) % CYCLE_PER_SECOND] = dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN];
+        duotoneTotalDac += dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN];
+        duotone[(cycleNum + DT_SAMPLE_OFFSET) % CYCLE_PER_SECOND] = dWord[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN];
+        duotoneTotal += dWord[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN];
+
+        if(cycleNum == HKP_DT_CALC)
         {
-                duotoneTime = duotime(12, duotoneMean, duotone);
+                duotoneTime = duotime(DT_SAMPLE_CNT, duotoneMean, duotone);
                 pLocalEpics->epicsOutput.diags[FE_DIAGS_DUOTONE_TIME] = duotoneTime;
-		duotoneTimeDac = duotime(12, duotoneMeanDac, duotoneDac);
+		duotoneTimeDac = duotime(DT_SAMPLE_CNT, duotoneMeanDac, duotoneDac);
                 pLocalEpics->epicsOutput.diags[FE_DIAGS_DAC_DUO] = duotoneTimeDac;
         }
-	if(clock16K == 17)
+
+	if(cycleNum == HKP_DAC_DT_SWITCH)
 	{
 		if(dacDuoEnable != pLocalEpics->epicsInput.dacDuoSet)
 		{
@@ -1496,7 +1526,7 @@ udelay(1000);
 
 
 	// Send timing info to EPICS at 1Hz
-        if((subcycle == 0) && (daqCycle == 15))
+	if(cycleNum ==HKP_TIMING_UPDATES)	
         {
 	  pLocalEpics->epicsOutput.cpuMeter = timeHold;
 	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
@@ -1544,31 +1574,20 @@ udelay(1000);
 	  pLocalEpics->epicsOutput.diagWord = diagWord;
         }
 
-	/* Update User code Epics variables */
-#if MAX_MODULES > END_OF_DAQ_BLOCK
-	epicsCycle = (epicsCycle + 1) % (MAX_MODULES + 2);
-#else
-	epicsCycle = subcycle;
-#endif
 
-if(subcycle == FM_EPICS_UPDATE_CYCLE)
-{
-	for(ii=0;ii<MAX_MODULES;ii++)
+	/* Update User code Filter Module Epics variables */
+	if(subcycle == HKP_FM_EPICS_UPDATE)
 	{
-	// Following call sends all filter module data to epics each time called.
-		updateEpics(ii, dspPtr[0], pDsp[0],
-		    &dspCoeff[0], pCoeff[0]);
+		for(ii=0;ii<MAX_MODULES;ii++)
+		{
+		// Following call sends all filter module data to epics each time called.
+			updateEpics(ii, dspPtr[0], pDsp[0],
+			    &dspCoeff[0], pCoeff[0]);
+		}
+		// Send sync signal to EPICS sequencer
+		pLocalEpics->epicsOutput.epicsSync = daqCycle;
 	}
-	// Send sync signal to EPICS sequencer
-	pLocalEpics->epicsOutput.epicsSync = daqCycle;
-}
 
-	// Check if user has pushed reset button.
-	// If so, kill the task
-        vmeDone = stop_working_threads | checkEpicsReset(epicsCycle, pLocalEpics);
-	// usleep(1);
-
-  
 	// If synced to 1PPS on startup, continue to check that code
 	// is still in sync with 1PPS.
 	// This is NOT normal aLIGO mode.
@@ -1576,10 +1595,10 @@ if(subcycle == FM_EPICS_UPDATE_CYCLE)
 	{
 
 		// Assign chan 32 to onePps 
-		onePps = adcData[0][31];
+		onePps = adcData[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN];
 		if((onePps > ONE_PPS_THRESH) && (onePpsHi == 0))  
 		{
-			onePpsTime = clock16K;
+			onePpsTime = cycleNum;
 			onePpsHi = 1;
 		}
 		if(onePps < ONE_PPS_THRESH) onePpsHi = 0;  
@@ -1592,9 +1611,9 @@ if(subcycle == FM_EPICS_UPDATE_CYCLE)
 #ifndef ADC_MASTER
  // Read Dio cards once per second
  // IOP does not handle binary I/O module traffic, as it can take too long
-        if(clock16K < cdsPciModules.doCount)
+        if(cycleNum < cdsPciModules.doCount)
         {
-                kk = clock16K;
+                kk = cycleNum;
                 ii = cdsPciModules.doInstance[kk];
                 if(cdsPciModules.doType[kk] == ACS_8DIO)
                 {
@@ -1674,7 +1693,7 @@ if(subcycle == FM_EPICS_UPDATE_CYCLE)
 			feStatus |= FE_ERROR_DAQ;;
 #endif
 
-        if((subcycle == 0) && (daqCycle == 14))
+	if(cycleNum == HKP_DIAG_UPDATES)	
         {
 	  pLocalEpics->epicsOutput.diags[FE_DIAGS_USER_TIME] = usrHoldTime;
 	  pLocalEpics->epicsOutput.diags[FE_DIAGS_IPC_STAT] = ipcErrBits;
@@ -1719,12 +1738,12 @@ if(subcycle == FM_EPICS_UPDATE_CYCLE)
         }
 
 #ifdef ADC_SLAVE
-        if(clock16K == 1)
+        if(cycleNum == 1)
 	{
           pLocalEpics->epicsOutput.timeDiag = timeSec;
 	}
 #endif
-        if(clock16K == 220)
+        if(cycleNum == HKP_DAC_EPICS_UPDATES)
 	{
 	      // Send DAC output values at 16Hzfb
 	      for(jj=0;jj<cdsPciModules.dacCount;jj++)
@@ -1736,7 +1755,7 @@ if(subcycle == FM_EPICS_UPDATE_CYCLE)
 	      }
 	}
 
-        if(clock16K == 200)
+        if(cycleNum == HKP_ADC_DAC_STAT_UPDATES)
         {
 	  if(cardCountErr) feStatus |= FE_ERROR_IO;
 		pLocalEpics->epicsOutput.ovAccum = overflowAcc;
@@ -1784,17 +1803,17 @@ if(subcycle == FM_EPICS_UPDATE_CYCLE)
 	  {
 	    if(dacOF[jj]) 
 	    {
-	    	pLocalEpics->epicsOutput.statDac[jj] &= ~(4);
+	    	pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_OVERFLOW_BIT);
 		feStatus |= FE_ERROR_OVERFLOW;;
 	    }
- 	    else pLocalEpics->epicsOutput.statDac[jj] |= 4;
+ 	    else pLocalEpics->epicsOutput.statDac[jj] |= DAC_OVERFLOW_BIT;
 	    dacOF[jj] = 0;
 	    if(dacChanErr[jj]) 
 	    {
-	    	pLocalEpics->epicsOutput.statDac[jj] &= ~(2);
+	    	pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_TIMING_BIT);
 		feStatus |= FE_ERROR_IO;;
 	    }
- 	    else pLocalEpics->epicsOutput.statDac[jj] |= 2;
+ 	    else pLocalEpics->epicsOutput.statDac[jj] |= DAC_TIMING_BIT;
 	    dacChanErr[jj] = 0;
 	    for(ii=0;ii<MAX_DAC_CHN_PER_MOD;ii++)
 	    {
@@ -1812,26 +1831,25 @@ if(subcycle == FM_EPICS_UPDATE_CYCLE)
 	  }
         }
 #ifdef ADC_MASTER
- 	static const own_data_base_cycle = 300;
 	// Deal with the own-data bits on the VMIC 5565 rfm cards
 	if (cdsPciModules.rfmCount > 0) {
-        	if (clock16K >= own_data_base_cycle && clock16K < (own_data_base_cycle + cdsPciModules.rfmCount)) {
-			int mod = clock16K - own_data_base_cycle;
+        	if (cycleNum >= HKP_RFM_CHK_CYCLE && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount)) {
+			int mod = cycleNum - HKP_RFM_CHK_CYCLE;
 			if (cdsPciModules.rfmType[mod] == 0x5565) {
 				// Check the own-data light
 				if ((cdsPciModules.rfm_reg[mod]->LCSR1 & 1) == 0) ipcErrBits |= 8;
 				//printk("RFM %d own data %d\n", mod, cdsPciModules.rfm_reg[mod]->LCSR1);
 			}
 		}
-		if (clock16K >= (own_data_base_cycle + cdsPciModules.rfmCount) && clock16K < (own_data_base_cycle + cdsPciModules.rfmCount*2)) {
-			int mod = clock16K - own_data_base_cycle - cdsPciModules.rfmCount;
+		if (cycleNum >= (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount) && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount*2)) {
+			int mod = cycleNum - HKP_RFM_CHK_CYCLE - cdsPciModules.rfmCount;
 			if (cdsPciModules.rfmType[mod] == 0x5565) {
 				// Reset the own-data light
 				cdsPciModules.rfm_reg[mod]->LCSR1 &= ~1;
 			}
 		}
-		if (clock16K >= (own_data_base_cycle + 2*cdsPciModules.rfmCount) && clock16K < (own_data_base_cycle + cdsPciModules.rfmCount*3)) {
-			int mod = clock16K - own_data_base_cycle - cdsPciModules.rfmCount*2;
+		if (cycleNum >= (HKP_RFM_CHK_CYCLE + 2*cdsPciModules.rfmCount) && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount*3)) {
+			int mod = cycleNum - HKP_RFM_CHK_CYCLE - cdsPciModules.rfmCount*2;
 			if (cdsPciModules.rfmType[mod] == 0x5565) {
 				// Write data out to the RFM to trigger the light
 	  			((volatile long *)(cdsPciModules.pci_rfm[mod]))[2] = 0;
@@ -1841,27 +1859,25 @@ if(subcycle == FM_EPICS_UPDATE_CYCLE)
 // DAC WD Write for 18 bit DAC modules
 // Check once per second on code cycle 400 to dac count
 // Only one write per code cycle to reduce time
-       	if (clock16K >= 400 && clock16K < (400 + cdsPciModules.dacCount)) 
+       	if (cycleNum >= HKP_DAC_WD_CLK && cycleNum < (HKP_DAC_WD_CLK + cdsPciModules.dacCount)) 
 	{
-		jj = clock16K - 400;
+		jj = cycleNum - HKP_DAC_WD_CLK;
 		if(cdsPciModules.dacType[jj] == GSC_18AO8)
 		{
 			static int dacWatchDog = 0;
-			if (clock16K == 400) dacWatchDog ^= 1;
+			if (cycleNum == HKP_DAC_WD_CLK) dacWatchDog ^= 1;
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
 			if(iopDacEnable)
 				dac18bitPtr->digital_io_ports = (dacWatchDog | GSAO_18BIT_DIO_RW);
-			//out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
-			//printf("Out buffg size %d = %d\n",jj,out_buf_size);
 
 		}
 	}
 // AI Chassis WD CHECK for 18 bit DAC modules
-// Check once per second on code cycle 500 to dac count
+// Check once per second on code cycle HKP_DAC_WD_CHK to dac count
 // Only one read per code cycle to reduce time
-       	if (clock16K >= 500 && clock16K < (500 + cdsPciModules.dacCount)) 
+       	if (cycleNum >= HKP_DAC_WD_CHK && cycleNum < (HKP_DAC_WD_CHK + cdsPciModules.dacCount)) 
 	{
-		jj = clock16K - 500;
+		jj = cycleNum - HKP_DAC_WD_CHK;
 		if(cdsPciModules.dacType[jj] == GSC_18AO8)
 		{
 			static int dacWDread = 0;
@@ -1869,11 +1885,11 @@ if(subcycle == FM_EPICS_UPDATE_CYCLE)
 			dacWDread = dac18bitPtr->digital_io_ports;
 			if(((dacWDread >> 8) & 1) > 0)
 			    {
-			    	pLocalEpics->epicsOutput.statDac[jj] &= ~(16);
+			    	pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_WD_BIT);
 			    	feStatus |= FE_ERROR_IO;
 			    }
 			    else 
-			    	pLocalEpics->epicsOutput.statDac[jj] |= 16;
+			    	pLocalEpics->epicsOutput.statDac[jj] |= DAC_WD_BIT;
 
 		}
 	}
@@ -1884,18 +1900,18 @@ if(subcycle == FM_EPICS_UPDATE_CYCLE)
 	//extern volatile GSA_DAC_REG *dacPtr[MAX_DAC_MODULES];
         //volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[0];
         //out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
-       	if (clock16K >= 600 && clock16K < (600 + cdsPciModules.dacCount)) 
+       	if (cycleNum >= HKP_DAC_FIFO_CHK && cycleNum < (HKP_DAC_FIFO_CHK + cdsPciModules.dacCount)) 
 	{
-		jj = clock16K - 600;
+		jj = cycleNum - HKP_DAC_FIFO_CHK;
 		if(cdsPciModules.dacType[jj] == GSC_18AO8)
 		{
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
 			out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
 			if((out_buf_size < 8) || (out_buf_size > 24))
 			{
-			    pLocalEpics->epicsOutput.statDac[jj] &= ~(8);
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
 			    feStatus |= FE_ERROR_IO;
-			    } else pLocalEpics->epicsOutput.statDac[jj] |= 8;
+			    } else pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
 
 		}
 		if(cdsPciModules.dacType[jj] == GSC_16AO16)
@@ -1903,21 +1919,21 @@ if(subcycle == FM_EPICS_UPDATE_CYCLE)
 			status = checkDacBuffer(jj);
 			if(status != 2)
 			{
-			    pLocalEpics->epicsOutput.statDac[jj] &= ~(8);
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
 			    feStatus |= FE_ERROR_IO;
-			    } else pLocalEpics->epicsOutput.statDac[jj] |= 8;
+			    } else pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
 		}
 	}
 
 #endif
 	// Measure time to complete 1 cycle
-        rdtscl(cpuClock[1]);
+        rdtscl(cpuClock[CPU_TIME_CYCLE_END]);
 
 	// Compute max time of one cycle.
-	cycleTime = (cpuClock[1] - cpuClock[0])/CPURATE;
+	cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
 	if (longestWrite2 < ((tempClock[3]-tempClock[2])/CPURATE)) longestWrite2 = (tempClock[3]-tempClock[2])/CPURATE;
 	if (cycleTime > (1000000/CYCLE_PER_SECOND))  {
-		// printf("cycle %d time %d; adcWait %d; write1 %d; write2 %d; longest write2 %d\n", clock16K, cycleTime, adcWait, (tempClock[1]-tempClock[0])/CPURATE, (tempClock[3]-tempClock[2])/CPURATE, longestWrite2);
+		// printf("cycle %d time %d; adcWait %d; write1 %d; write2 %d; longest write2 %d\n", cycleNum, cycleTime, adcWait, (tempClock[1]-tempClock[0])/CPURATE, (tempClock[3]-tempClock[2])/CPURATE, longestWrite2);
 	}
 	// Hold the max cycle time over the last 1 second
 	if(cycleTime > timeHold) timeHold = cycleTime;
@@ -1936,31 +1952,31 @@ if(subcycle == FM_EPICS_UPDATE_CYCLE)
 		cycleHist[cycleTime<nb?cycleTime:nb]++;
 	}
 #endif
-	adcHoldTime = (cpuClock[0] - adcTime)/CPURATE;
+	adcHoldTime = (cpuClock[CPU_TIME_CYCLE_START] - adcTime)/CPURATE;
 	// Avoid calculating the max hold time on the very first cycle
 	// since we can be holding for up to 1 second when we start running
-	if (clock16K == 0 && startGpsTime == cycle_gps_time) ; else {
+	if (cycleNum == 0 && startGpsTime == cycle_gps_time) ; else {
 		if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
 		if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
 		adcHoldTimeAvg += adcHoldTime;
 		if (adcHoldTimeMax > adcHoldTimeEverMax)  {
 			adcHoldTimeEverMax = adcHoldTimeMax;
 			adcHoldTimeEverMaxWhen = cycle_gps_time;
-			//printf("Maximum adc hold time %d on cycle %d gps %d\n", adcHoldTimeMax, clock16K, cycle_gps_time);
+			//printf("Maximum adc hold time %d on cycle %d gps %d\n", adcHoldTimeMax, cycleNum, cycle_gps_time);
 		}
 	}
-	adcTime = cpuClock[0];
+	adcTime = cpuClock[CPU_TIME_CYCLE_START];
 	// Calc the max time of one cycle of the user code
 #ifdef ADC_MASTER
-	usrTime = (cpuClock[4] - cpuClock[0])/CPURATE;
+	usrTime = (cpuClock[CPU_TIME_USR_START] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
 #else
-	usrTime = (cpuClock[5] - cpuClock[4])/CPURATE;
+	usrTime = (cpuClock[CPU_TIME_USR_END] - cpuClock[CPU_TIME_USR_START])/CPURATE;
 #endif
 	if(usrTime > usrHoldTime) usrHoldTime = usrTime;
 
         // Update internal cycle counters
-          clock16K += 1;
-          clock16K %= CYCLE_PER_SECOND;
+          cycleNum += 1;
+          cycleNum %= CYCLE_PER_SECOND;
 	  clock1Min += 1;
 	  clock1Min %= CYCLE_PER_MINUTE;
           if(subcycle == DAQ_CYCLE_CHANGE) daqCycle = (daqCycle + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
@@ -2045,7 +2061,7 @@ procfile_read(char *buffer,
 			adcHoldTimeAvgPerSec,
 			usrTime,
 			usrHoldTime,
-			clock16K,
+			cycleNum,
 			cycle_gps_time,
 			build_date);
 #if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
