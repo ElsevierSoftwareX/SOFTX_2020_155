@@ -1588,6 +1588,10 @@ udelay(1000);
 		pLocalEpics->epicsOutput.epicsSync = daqCycle;
 	}
 
+	// Check if code exit is requested
+	if(cycleNum == MAX_MODULES) 
+		vmeDone = stop_working_threads | checkEpicsReset(cycleNum, pLocalEpics);
+
 	// If synced to 1PPS on startup, continue to check that code
 	// is still in sync with 1PPS.
 	// This is NOT normal aLIGO mode.
@@ -1743,7 +1747,7 @@ udelay(1000);
           pLocalEpics->epicsOutput.timeDiag = timeSec;
 	}
 #endif
-        if(cycleNum == HKP_DAC_EPICS_UPDATES)
+        if(subcycle == HKP_DAC_EPICS_UPDATES)
 	{
 	      // Send DAC output values at 16Hzfb
 	      for(jj=0;jj<cdsPciModules.dacCount;jj++)
@@ -1791,6 +1795,8 @@ udelay(1000);
 
 	    }
 	  }
+	  // If ADC channels not where they should be, we have no option but to exit
+	  // from the RT code ie loops would be working with wrong input data.
 	  if (chanHop) {
 	         stop_working_threads = 1;
 	         vmeDone = 1;
@@ -1900,6 +1906,12 @@ udelay(1000);
 	//extern volatile GSA_DAC_REG *dacPtr[MAX_DAC_MODULES];
         //volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[0];
         //out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
+//
+// Check DAC FIFO Sizes to determine if DAC modules are synched to code 
+// 18bit DAC reads out FIFO size dirrectly, but 16bit module only has a 4 bit register
+// area for FIFO empty, quarter full, etc. So, to make these bits useful in 16 bit module,
+// code must set a proper FIFO size in map.c code.
+// This code runs once per second.
        	if (cycleNum >= HKP_DAC_FIFO_CHK && cycleNum < (HKP_DAC_FIFO_CHK + cdsPciModules.dacCount)) 
 	{
 		jj = cycleNum - HKP_DAC_FIFO_CHK;
@@ -1926,7 +1938,7 @@ udelay(1000);
 	}
 
 #endif
-	// Measure time to complete 1 cycle
+	// Capture end of cycle time.
         rdtscl(cpuClock[CPU_TIME_CYCLE_END]);
 
 	// Compute max time of one cycle.
@@ -1940,6 +1952,7 @@ udelay(1000);
 	// Hold the max cycle time since last diag reset
 	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
 #if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
+// This produces cycle time histogram in /proc file
 	{
 #if defined(SERVO64K)
 		static const nb = 15;
@@ -1967,6 +1980,7 @@ udelay(1000);
 	}
 	adcTime = cpuClock[CPU_TIME_CYCLE_START];
 	// Calc the max time of one cycle of the user code
+	// For IOP, more interested in time to get thru ADC read code and send to slave apps
 #ifdef ADC_MASTER
 	usrTime = (cpuClock[CPU_TIME_USR_START] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
 #else
