@@ -104,7 +104,7 @@ sub processParameterSection  {
 #
    if ($line !~ /^#/)  {
       if ($line =~ /^\[[A-Z]\d\:\w+\-\w+\]/)  {
-         return 0;
+         return 1;
       }
       elsif ($line =~ /^acquire=(\d+)/)  {
          my $acquireValue = $1;
@@ -119,6 +119,7 @@ sub processParameterSection  {
             print "\n***ERROR: Incorrect acquire value - $acquireValue\n";
             $errorCount++;
          }
+	 return 2;
       }
       elsif ($line =~ /^datarate=(\d+)/)  {
          $dataRate = $1;
@@ -132,6 +133,7 @@ sub processParameterSection  {
             print "\n***ERROR: Incorrect datarate value - $dataRate\n";
             $errorCount++;
          }
+	 return 4;
       }
       elsif ($line =~ /^datatype=(\d+)/)  {
          my $dataType = $1;
@@ -140,6 +142,7 @@ sub processParameterSection  {
             print "\n***ERROR: Incorrect datatype value - $dataType\n";
             $errorCount++;
          }
+	 return 8;
       }
       elsif ($line =~ /^chnnum=(\d+)/)  {
          my $channelNum = $1;
@@ -148,6 +151,7 @@ sub processParameterSection  {
             print "\n***ERROR: Incorrect chnnum value - $channelNum\n";
             $errorCount++;
          }
+	 return 16;
       }
       else  {
          print "\n***ERROR: Found unidentified/incorrect entry - $line\n";
@@ -155,7 +159,7 @@ sub processParameterSection  {
       }
    }
 
-   return 1;
+   return 0;
 }
 
 ###  ###############################################  ###
@@ -211,6 +215,10 @@ $defaultCount = -1;
 $errorCount = 0;
 $lineCount = 0;
 $tooManyBytes = 0;
+$pChk = 31;
+$newName = 0;
+$tester = 0;
+$previousName;
 
 $defaultAcquireValue = -1;
 $defaultSection = 1;
@@ -260,8 +268,27 @@ foreach $value (@inData)  {
          }
       }
    }
-   else  {
-      &processParameterSection($value);
+   #else  {
+   if ($defaultSection == 0)  {
+       $tester = &processParameterSection($value);
+       if($tester == 1)
+       {
+		 if ($pChk != 31)  {
+		    print "***ERROR: $previousName Incorrect number of params\n";
+		    if(!($pChk & 2)) { print "\t Missing Aquire Flag\n";}
+		    if(!($pChk & 4)) { print "\t Missing Data Rate\n";}
+		    if(!($pChk & 8)) { print "\t Missing Data Type\n";}
+		    if(!($pChk & 16)) { print "\t Missing Channel number\n";}
+		    $errorCount++;
+		 }
+		 $previousName = $value;
+		$pChk = 1;
+		#print "New Name found $value $pChk\n";
+       }
+       if($tester > 1)
+       {
+       		$pChk += $tester;
+       }
    }
 }
 
