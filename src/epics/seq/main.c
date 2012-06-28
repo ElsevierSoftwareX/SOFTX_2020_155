@@ -42,7 +42,7 @@ void init_vars() {
 }
 
 unsigned int
-field_crc(DBENTRY *pdbentry, char *field, unsigned int crc, unsigned int len_crc) {
+field_crc(DBENTRY *pdbentry, char *field, unsigned int crc, unsigned int *len_crc) {
 	long status = dbFindField(pdbentry, field);
   	if (status) {
 		printf("No field %s was found\n", field);
@@ -50,7 +50,7 @@ field_crc(DBENTRY *pdbentry, char *field, unsigned int crc, unsigned int len_crc
       	}
  	char *s = dbGetString(pdbentry);
 	int l = strlen(s);
-	len_crc += l;
+	*len_crc += l;
 	return crc_ptr(s, l, crc);
 }
 
