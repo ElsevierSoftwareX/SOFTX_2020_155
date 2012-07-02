@@ -1204,6 +1204,17 @@ udelay(1000);
 
                    *packedData = DUMMY_ADC_VAL;
 
+#ifdef DIAG_TEST
+// For DIAGS ONLY !!!!!!!!
+// This will change ADC DMA BYTE count
+// -- Greater than normal will result in channel hopping.
+// -- Less than normal will result in ADC timeout.
+// In both cases, real-time kernel code should exit with errors to dmesg
+          	   if(pLocalEpics->epicsInput.bumpAdcRd != 0) {
+		   	gsaAdcDmaBump(jj,pLocalEpics->epicsInput.bumpAdcRd);
+		   	pLocalEpics->epicsInput.bumpAdcRd = 0;
+		   }
+#endif
 		   // Reset DMA Start Flag
 		   // This allows ADC to dump next data set whenever it is ready
 		   gsaAdcDma2(jj);
@@ -1990,6 +2001,12 @@ udelay(1000);
 
         // Update internal cycle counters
           cycleNum += 1;
+#ifdef DIAG_TEST
+          if(pLocalEpics->epicsInput.bumpCycle != 0) {
+	  	cycleNum += pLocalEpics->epicsInput.bumpCycle;
+		pLocalEpics->epicsInput.bumpCycle = 0;
+	  }
+#endif
           cycleNum %= CYCLE_PER_SECOND;
 	  clock1Min += 1;
 	  clock1Min %= CYCLE_PER_MINUTE;

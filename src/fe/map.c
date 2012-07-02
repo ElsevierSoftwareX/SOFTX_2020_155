@@ -238,6 +238,11 @@ void gsaAdcDma2(int modNum)
   adcDma[modNum]->DMA_CSR = GSAI_DMA_START;
 }
 
+void gsaAdcDmaBump(int modNum, int bump)
+{
+	adcDma[modNum]->DMA0_BTC = GSAI_DMA_BYTE_COUNT + bump;
+}
+
 // *****************************************************************************
 // This routine sets up the DAC DMA registers.
 // It is only called once to set up the number of bytes to be preloaded into
