@@ -78,6 +78,7 @@ $timeMaster = -1;
 $timeSlave = -1;
 $iopTimeSlave = -1;
 $rfmTimeSlave = -1;
+$diagTest = -1;
 $flipSignals = 0;
 $pciNet = -1;
 $shmem_daq = 0; # Do not use shared memory DAQ connection
@@ -2256,6 +2257,11 @@ print OUTH "\tint dcuId;\n";
 print OUTH "\tint diagReset;\n";
 print OUTH "\tint dacDuoSet;\n";
 print OUTH "\tint overflowReset;\n";
+if($diagTest > -1)
+{
+print OUTH "\tint bumpCycle;\n";
+print OUTH "\tint bumpAdcRd;\n";
+}
 print OUTH "} CDS_EPICS_IN;\n\n";
 print OUTH "typedef struct CDS_EPICS_OUT {\n";
 print OUTH "\tint epicsSync;\n";
@@ -2355,6 +2361,11 @@ if($adcMaster > -1)
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME_DAC epicsOutput.diags[10] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ao 0 field(HIHI,\"24\") field(HHSV,\"MAJOR\") field(HIGH,\"18\") field(HSV,\"MINOR\") field(LOW,\"5\") field(LSV,\"MAJOR\")\n";
+}
+if($diagTest > -1)
+{
+print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_CYCLE epicsInput.bumpCycle int ao 0\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_ADC epicsInput.bumpAdcRd int ao 0\n";
 }
 print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT epicsOutput.diags[7] int ao 0\n";
@@ -3274,6 +3285,9 @@ if ($dac_internal_clocking) {
 if ($adcMaster > -1) {
   print OUTM "EXTRA_CFLAGS += -DADC_MASTER\n";
   $modelType = "MASTER";
+  if($diagTest > -1) {
+  print OUTM "EXTRA_CFLAGS += -DDIAG_TEST\n";
+  }
 } else {
   print OUTM "#Uncomment to run on an I/O Master \n";
   print OUTM "#EXTRA_CFLAGS += -DADC_MASTER\n";
