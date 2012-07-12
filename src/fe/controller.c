@@ -670,7 +670,7 @@ udelay(1000);
 	  if (ioMemData->dacOutUsed[pd][jj])  {
     		vmeDone = 1;
    		printf("Failed to allocate DAC channel.\n");
-		printf("DAC %d channel %d is already allocated.\n", ii, jj);
+		printf("DAC local %d global %d channel %d is already allocated.\n", ii, pd, jj);
 	  }
     	}
     }
@@ -683,7 +683,7 @@ udelay(1000);
       for (jj = 0; jj < MAX_DAC_CHN_PER_MOD; jj++) {
 	if (dacOutUsed[ii][jj]) {
 	  	ioMemData->dacOutUsed[pd][jj] = 1;
-		printf("Setting card=%d channel=%d dac usage\n", pd, jj);
+		printf("Setting card local=%d global = %d channel=%d dac usage\n", ii, pd, jj);
 	}
       }
     }
