@@ -402,6 +402,11 @@ void *fe_start(void *arg)
   float onePps;				// Value of 1PPS signal, if used, for diagnostics
   int onePpsHi = 0;			// One PPS diagnostic check
   int onePpsTime = 0;			// One PPS diagnostic check
+#ifdef DIAG_TEST
+  float onePpsTest;				// Value of 1PPS signal, if used, for diagnostics
+  int onePpsHiTest[6];			// One PPS diagnostic check
+  int onePpsTimeTest[6];			// One PPS diagnostic check
+#endif
   int dcuId;				// DAQ ID number for this process
   static int missedCycle = 0;		// Incremented error counter when too many values in ADC FIFO
   // int netRetry;				// Myrinet reconnect variable
@@ -1129,6 +1134,7 @@ udelay(1000);
 		    {
   			 adcChanErr[jj] = 1;
 			 chanHop = 1;
+	  	 	 pLocalEpics->epicsOutput.stateWord |= FE_ERROR_CHAN_HOP;
 	 	    }	
 
                     limit = OVERFLOW_LIMIT_16BIT;
@@ -1405,6 +1411,13 @@ udelay(1000);
 				dac_out = adcData[0][ADC_DUOTONE_CHAN];
 				// dac_out = dacOut[0][7];
 			}      
+#ifdef DIAG_TEST
+			if((ii==0) && (jj == 0))
+			{       
+				if(cycleNum < 100) dac_out = limit / 20;
+				else dac_out = 0;
+			}      
+#endif
 #else
 			// If DAQKILL tripped, send zeroes to IOP
 			if(iopDacEnable) dac_out = dacOut[jj][ii];
@@ -1622,6 +1635,23 @@ udelay(1000);
 		// If not, set sync error flag
 		if(onePpsTime > 1) pLocalEpics->epicsOutput.timeErr |= TIME_ERR_1PPS;
 	}
+#ifdef DIAG_TEST
+	for(ii=0;ii<5;ii++)
+	{
+		onePpsTest = adcData[0][ii];
+		if((onePpsTest > 400) && (onePpsHiTest[ii] == 0))  
+		{
+			onePpsTimeTest[ii] = cycleNum;
+			onePpsHiTest[ii] = 1;
+			if(ii == 0) pLocalEpics->epicsOutput.timingTest[ii] = cycleNum * 15.26;
+			// Slaves do not see 1pps until after IOP signal loops around and back into ADC channel 0,
+			// therefore, need to subtract IOP loop time.
+			else pLocalEpics->epicsOutput.timingTest[ii] = (cycleNum * 15.26) - pLocalEpics->epicsOutput.timingTest[0];
+		}
+		// Reset the diagnostic for next cycle
+		if(cycleNum > 2000) onePpsHiTest[ii] = 0;  
+	}
+#endif
 
 #ifndef ADC_MASTER
  // Read Dio cards once per second
