@@ -2284,6 +2284,10 @@ print OUTH "\tint tpCnt;\n";
 print OUTH "\tint stateWord;\n";
 print OUTH "\tint dcuId;\n";
 print OUTH "\tint cycle;\n";
+if($diagTest > -1)
+{
+print OUTH "\tint timingTest[5];\n";
+}
 print OUTH "} CDS_EPICS_OUT;\n\n";
 if($useWd)
 {
@@ -2366,6 +2370,11 @@ if($diagTest > -1)
 {
 print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_CYCLE epicsInput.bumpCycle int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_ADC epicsInput.bumpAdcRd int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_64K epicsOutput.timingTest[0] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32K epicsOutput.timingTest[1] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16K epicsOutput.timingTest[2] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04K epicsOutput.timingTest[3] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02K epicsOutput.timingTest[4] int ao 0\n";
 }
 print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT epicsOutput.diags[7] int ao 0\n";
