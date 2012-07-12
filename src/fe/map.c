@@ -238,10 +238,19 @@ void gsaAdcDma2(int modNum)
   adcDma[modNum]->DMA_CSR = GSAI_DMA_START;
 }
 
+#ifdef DIAG_TEST
+// *****************************************************************************
+// For DIAGS ONLY !!!!!!!!
+// This will change ADC DMA BYTE count
+// -- Greater than normal will result in channel hopping.
+// -- Less than normal will result in ADC timeout.
+// In both cases, real-time kernel code should exit with errors to dmesg
+// *****************************************************************************
 void gsaAdcDmaBump(int modNum, int bump)
 {
 	adcDma[modNum]->DMA0_BTC = GSAI_DMA_BYTE_COUNT + bump;
 }
+#endif
 
 // *****************************************************************************
 // This routine sets up the DAC DMA registers.
