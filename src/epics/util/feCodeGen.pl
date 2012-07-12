@@ -411,6 +411,7 @@ require "lib/Parser3.pm";
 open(IN,"<".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 die unless CDS::Parser::parse();
 die unless CDS::Parser::process();
+die unless CDS::Parser::sortDacs();
 
 close(IN);
 

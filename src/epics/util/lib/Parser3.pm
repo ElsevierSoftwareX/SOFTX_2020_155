@@ -2,6 +2,7 @@
 package CDS::Parser;
 use Exporter;
 use Cwd;
+
 @ISA = ('Exporter');
 
 
@@ -31,6 +32,70 @@ sub print_node {
 	#$_->{PRINTED} = 1;
    #}
 };
+
+# We need to sort DACs by placing 18bit frst and sorting on card number
+# For example:
+# 18bit card 0
+# 18bit card 1
+# 16bit card 0
+# 16bit card 1
+#
+# The following arrays will need to be shuffled (sorted)
+#  $::dacPartNum
+#  $::dacType
+#  $::dacNum
+# The following array will need to be reassigned with valid numbers based on the new order
+# from the information in $::daqcPartNum array:
+#  $::card2array
+#
+sub sortDacs {
+        my @dacs;
+        # Calculate relative positions of each DAC
+        for ($_ = 0; $_ < $::dacCnt; $_++) {
+                my $w = 0;
+                if ($::dacType[$_] eq "GSC_18AO8") {
+                        $w = 1;
+                } elsif ($::dacType[$_] eq "GSC_16AO16") {
+                        $w = 100;
+                } else {
+                        die "Unsupported DAC board type " . $::dacType[$_] ;
+                }
+                $dacs[$_] =  $w  + $::dacNum[$_];
+        }
+
+        # Sort the dac weights
+        my @sorted_dacs = sort {$a <=> $b} @dacs;
+
+	#for (0 .. $::dacCnt-1) {
+		#print "Dac weight $_ is " . $dacs[$_] . "\n";
+		#print "Dac weight sorted $_ is " . $sorted_dacs[$_] . "\n";
+	#}
+
+        # Save old array values
+        my @dacPartNumSave = @::dacPartNum;
+        my @dacTypeSave = @::dacType;
+        my @dacNumSave = @::dacNum;
+
+	#print "dacCnt=" . $::dacCnt . "\n";
+        # Find out shuffling indices and shuffle the data
+        for ($_ = 0; $_< $::dacCnt; $_++) {
+                my $w = $dacs[$_];
+                my $i = 0;
+		foo: {
+                for ($i = 0; $i < $::dacCnt; $i++) {
+                        if ($w == $sorted_dacs[$i]) {
+                                last foo;
+                        }
+                }}
+
+		#print "DAC: moving " . $_ . " to " . $i . "\n";
+                $::dacPartNum[$i] = $dacPartNumSave[$_];
+                $::dacType[$i] = $dacTypeSave[$_];
+                $::dacNum[$i] = $dacNumSave[$_];
+                $::card2array[$::dacPartNum[$i]] = $i;
+        }
+	return 1;
+}
 
 #:TODO: lexical analyzer should check MDL format syntax
 sub parse {

@@ -9,6 +9,9 @@ use Exporter;
 );
 $default_board_type = "GSC_16AO16";
 
+# See Parser3.pm function sortDacs(), where the information in global arrays is sorted
+# if there is a new global array introduced, it will need to be addressed in sortDacs()
+#
 sub initDac {
         my ($node) = @_;
         $::dacPartNum[$::dacCnt] = $::partCnt;
