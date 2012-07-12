@@ -17,6 +17,7 @@
 #define FE_ERROR_IPC		0x20
 #define FE_ERROR_OVERFLOW	0x40
 #define FE_ERROR_DAC_ENABLE	0x80
+#define FE_ERROR_CHAN_HOP	0x100
 
 
 #define CPURATE (cpu_khz/1000)
