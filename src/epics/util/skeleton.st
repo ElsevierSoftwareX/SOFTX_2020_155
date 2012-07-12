@@ -861,8 +861,8 @@ state daqProcess
 %%            sleep(1);
               strcpy(msgDAQ, localtimestring);
 %%          } else {
-%%            chnCnt = 0;
-%%            dataSize = 0;
+		pvGet(chnCnt);
+		pvGet(dataSize);
               strcpy(msgDAQ, "ERROR reading DAQ file!");
 %%          }
             pvPut(chnCnt);
