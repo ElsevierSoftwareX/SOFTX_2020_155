@@ -14,9 +14,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Jul 17 13:18:45 2012"
-  RTWModifiedTimeStamp	  264431924
-  ModelVersionFormat	  "1.%<AutoIncrement:13>"
+  LastModifiedDate	  "Thu Jul 19 13:53:17 2012"
+  RTWModifiedTimeStamp	  264606787
+  ModelVersionFormat	  "1.%<AutoIncrement:14>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -693,8 +693,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IIR FM with control 2"
-	Location		[333, 339, 1031, 1192]
-	Open			off
+	Location		[333, 167, 1031, 1020]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -708,7 +708,7 @@ Library {
 	ZoomFactor		"100"
 	Block {
 	  BlockType		  Inport
-	  Name			  "In1"
+	  Name			  "Input"
 	  Position		  [25, 43, 55, 57]
 	  IconDisplay		  "Port number"
 	  OutDataType		  "sfix(16)"
@@ -716,7 +716,7 @@ Library {
 	}
 	Block {
 	  BlockType		  Inport
-	  Name			  "Cin"
+	  Name			  "CtrlIn"
 	  Position		  [50, 278, 80, 292]
 	  Port			  "2"
 	  IconDisplay		  "Port number"
@@ -777,14 +777,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -794,24 +794,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -821,7 +821,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -846,14 +846,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -863,24 +863,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -890,7 +890,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -915,14 +915,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -932,24 +932,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -959,7 +959,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -984,14 +984,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1001,24 +1001,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1028,7 +1028,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1053,14 +1053,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1070,24 +1070,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1097,7 +1097,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1122,14 +1122,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1139,24 +1139,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1166,7 +1166,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1191,14 +1191,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1208,24 +1208,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1235,7 +1235,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1260,14 +1260,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1277,24 +1277,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1304,7 +1304,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1329,14 +1329,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1346,24 +1346,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1373,7 +1373,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1398,14 +1398,14 @@ Library {
 	  DenCoeffs		  "[1 0.1]"
 	  BiQuadCoeffs		  "[1 0.3 0.4 1 0.1 0.2]"
 	  LatticeCoeffs		  "[0.2 0.4]"
-	  denIgnore		  "on"
+	  denIgnore		  on
 	  FiltPerSampPopup	  "One filter per frame"
 	  IC			  "0"
 	  ICnum			  "0"
 	  ICden			  "0"
-	  additionalParams	  "off"
-	  allowOverrides	  "on"
-	  showCoeff		  "off"
+	  additionalParams	  off
+	  allowOverrides	  on
+	  showCoeff		  off
 	  firstCoeffMode	  "Same word length as input"
 	  firstCoeffWordLength	  "16"
 	  firstCoeffFracLength	  "15"
@@ -1415,24 +1415,24 @@ Library {
 	  thirdCoeffMode	  "Same as input"
 	  thirdCoeffWordLength	  "16"
 	  thirdCoeffFracLength	  "15"
-	  showOut		  "off"
+	  showOut		  off
 	  outputMode		  "Same as accumulator"
 	  outputWordLength	  "16"
 	  outputFracLength	  "15"
-	  showAcc		  "off"
+	  showAcc		  off
 	  accumMode		  "Same as product output"
 	  accumWordLength	  "32"
 	  accumFracLength	  "30"
-	  showMpy		  "off"
+	  showMpy		  off
 	  prodOutputMode	  "Same as input"
 	  prodOutputWordLength	  "32"
 	  prodOutputFracLength	  "30"
-	  showMem		  "off"
+	  showMem		  off
 	  memoryMode		  "Same as accumulator"
 	  memoryWordLength	  "16"
 	  memoryFracLength	  "15"
 	  roundingMode		  "Floor"
-	  overflowMode		  "off"
+	  overflowMode		  off
 	  ScaleValues		  "1"
 	  scaleValueFracLength	  "14"
 	  tapSumMode		  "Same as input"
@@ -1442,7 +1442,7 @@ Library {
 	  stageIOWordLength	  "16"
 	  stageInFracLength	  "15"
 	  stageOutFracLength	  "15"
-	  LockScale		  "off"
+	  LockScale		  off
 	  FilterSource		  "Specify via dialog"
 	  dfiltObjectName	  "dfilt.dffir([1 2 1])"
 	  multiplicandMode	  "Same as output"
@@ -1510,7 +1510,7 @@ Library {
 	}
 	Block {
 	  BlockType		  Outport
-	  Name			  "Val"
+	  Name			  "Output"
 	  Position		  [445, 218, 475, 232]
 	  IconDisplay		  "Port number"
 	  OutDataType		  "sfix(16)"
@@ -1518,7 +1518,7 @@ Library {
 	}
 	Block {
 	  BlockType		  Outport
-	  Name			  "Ctrl"
+	  Name			  "CtrlOut"
 	  Position		  [490, 283, 520, 297]
 	  Port			  "2"
 	  IconDisplay		  "Port number"
@@ -1553,7 +1553,7 @@ Library {
 	  OutScaling		  "2^0"
 	}
 	Line {
-	  SrcBlock		  "Cin"
+	  SrcBlock		  "CtrlIn"
 	  SrcPort		  1
 	  Points		  [10, 0; 0, 5]
 	  DstBlock		  "Terminator"
@@ -1562,11 +1562,11 @@ Library {
 	Line {
 	  SrcBlock		  "Gain"
 	  SrcPort		  1
-	  DstBlock		  "Val"
+	  DstBlock		  "Output"
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "In1"
+	  SrcBlock		  "Input"
 	  SrcPort		  1
 	  DstBlock		  "Digital Filter0"
 	  DstPort		  1
@@ -1636,7 +1636,7 @@ Library {
 	Line {
 	  SrcBlock		  "Ground"
 	  SrcPort		  1
-	  DstBlock		  "Ctrl"
+	  DstBlock		  "CtrlOut"
 	  DstPort		  1
 	}
 	Line {
