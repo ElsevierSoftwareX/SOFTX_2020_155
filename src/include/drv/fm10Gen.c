@@ -45,8 +45,10 @@ static const UINT32 pow2_in[10] = {0x10,0x40,0x100,0x400,0x1000,0x4000,0x10000,
 static const UINT32 pow2_out[10] = {0x20,0x80,0x200,0x800,0x2000,0x8000,0x20000,
 				    0x80000,0x200000,0x800000};
 
-static const UINT32 fltrConst[10] = {16, 64, 256, 1024, 4096, 16384,
-                                     65536, 262144, 1048576, 4194304};
+static const UINT32 fltrConst[13] = {16, 64, 256, 1024, 4096, 16384,
+                                     65536, 262144, 1048576, 4194304,
+				     0x4, 0x8, 0x4000000, /* in sw, off sw, out sw */
+				     };
 
 #if defined(SERVO16K) || defined(SERVOMIXED) || defined(SERVO32K) || defined(SERVO64K) || defined(SERVO128K) || defined(SERVO256K)
 static double sixteenKAvgCoeff[9] = {1.9084759e-12,
@@ -1275,16 +1277,16 @@ filterModule2(FILT_MOD *pFilt,     /* Filter module data  */
 	       1  0  1  0
 	       1  1  1  1
       */
-
-inline double
-filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
+double
+filterModuleD2(FILT_MOD *pFilt,     /* Filter module data  */
 	       COEF *pC,            /* Filter coefficients */
 	       int modNum,          /* Filter module number */
 	       double filterInput,  /* Input data sample (output from funtcion inputModule()) */
 	       int fltrCtrlVal,	    /* Filter control value */
-	       int mask)	    /* Mask of bits to act upon */
-	     
-
+	       int mask,	    /* Mask of bits to act upon */
+	       double offset_in,
+	       double gain_in,
+	       double ramp_in)
 {
   int ix;
   UINT32 opSwitchE;
@@ -1292,12 +1294,14 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
   /* Do the shift to match the bits in the the opSwitchE variable so I can do "==" comparisons */
   UINT32 opSwitchP = pFilt->inputs[modNum].opSwitchP >> 1;
 
+  fltrCtrlVal &= 0xffff; /* Limit to the 16 bits */
+
   /* decode arrays for operator switches */
-  if ( mask != 0 && (fltrCtrlVal >= 0) && (fltrCtrlVal < 1024) ) {
+  if (mask != 0 && (fltrCtrlVal >= 0)) {
     UINT32 fltrSwitch = 0;
     UINT32 epicsExclude = 0;
     if (mask > 0) {
-      for (ix = 0; ix < 10; ix++) {
+      for (ix = 0; ix < 13; ix++) {
 	if (mask & (1<<ix)) {
 		// Keep the current bit value
 		// 
@@ -1313,6 +1317,12 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
 	}
         fltrCtrlVal = fltrCtrlVal>>1;
       }
+      // Assign offset, gain and ramp value bits (last 3 bits in 16-bit control input)
+      epicsExclude |= (mask & 0xe000) << 16;
+
+      if (mask & 0x2000) pFilt->inputs[modNum].offset = offset_in; /* Assign local offset */
+      if (mask & 0x4000) pFilt->inputs[modNum].outgain = gain_in;
+      if (mask & 0x8000) pFilt->inputs[modNum].gain_ramp_time = ramp_in;
     }
     pFilt->inputs[modNum].mask = epicsExclude;
     pFilt->inputs[modNum].control = fltrSwitch;
@@ -1552,4 +1562,28 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
     }
   }
   return output;
+}
+
+inline double
+filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
+	       COEF *pC,            /* Filter coefficients */
+	       int modNum,          /* Filter module number */
+	       double filterInput,  /* Input data sample (output from funtcion inputModule()) */
+	       int fltrCtrlVal,	    /* Filter control value */
+	       int mask)	    /* Mask of bits to act upon */
+{
+	/* Limit control to the 10 bits */
+	return filterModuleD2(pFilt, pC, modNum, filterInput, fltrCtrlVal & 0x3ff, mask, 0., 0., 0.);
+}
+
+
+/* Convert opSwitchE bits into the 16-bit FiltCtrl2 Ctrl output format */
+inline unsigned int
+filtCtrlBitConvert(unsigned int v) {
+	unsigned int val = 0;
+	int i;
+	for (i = 0; i < 13; i++) {
+		if (v & fltrConst[i]) val |= 1<<i;
+	}
+	return val;
 }
