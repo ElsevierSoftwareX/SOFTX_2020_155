@@ -646,21 +646,31 @@ state monScreen{
 */
         pvPut(input[ii]);
 	pvPut(excite[ii]);
-	pvGet(offset[ii]);
+	if (msk & 0x2000) { /* Offset is controlled locally by the FE */
+%%		offset[ii] = pFilt->inputs[ii].offset;
+		pvPut(offset[ii]);
+	} else {
+		pvGet(offset[ii]);
+%%		rfm_assign(pFilt->inputs[ii].offset, offset[ii]);
+	}
 
+	if (msk & 0x4000) { /* Gain is controlled locally by the FE */
+%%		outgain[ii] = pFilt->inputs[ii].outgain;
+		pvPut(outgain[ii]);
+	} else {
+		pvGet(outgain[ii]);
+%%		rfm_assign(pFilt->inputs[ii].outgain, outgain[ii]);
+	}
 
-%%	rfm_assign(pFilt->inputs[ii].offset, offset[ii]);
-	pvGet(outgain[ii]);
+	if (msk & 0x8000) { /* Ramp time is controlled locally by the FE */
+%%		gain_ramp_time[ii] = pFilt->inputs[ii].gain_ramp_time;
+		pvPut(gain_ramp_time[ii]);
+	} else {
+		pvGet(gain_ramp_time[ii]);
+%%		rfm_assign(pFilt->inputs[ii].gain_ramp_time, gain_ramp_time[ii]);
+	}
 
-
-%%	rfm_assign(pFilt->inputs[ii].outgain, outgain[ii]);
-	pvGet(gain_ramp_time[ii]);
-
-
-%%	rfm_assign(pFilt->inputs[ii].gain_ramp_time, gain_ramp_time[ii]);
 	pvGet(limit[ii]);
-
-
 %%	rfm_assign(pFilt->inputs[ii].limiter, limit[ii]);
 %%	t = fpvalidate(pFilt->data[ii].testpoint);
 	tp[ii] = t;
