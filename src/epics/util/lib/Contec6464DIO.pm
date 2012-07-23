@@ -65,6 +65,7 @@ sub fromExp {
 # Returns calculated code string
 
 sub frontEndCode {
+	if($::adcMaster != 1) {
 	my ($i) = @_;
 	my $l = length($::partName[$i]);
         my $CDIO6464Num = substr($::partName[$i], ($l-1), 1);
@@ -78,6 +79,7 @@ sub frontEndCode {
 		$calcExp .= ";\n";
         }
         return $calcExp;
+	}
 
         return "";
 }
