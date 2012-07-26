@@ -155,11 +155,10 @@ int sendBlock;
 			// Write timestamp/cycle counter word
                 	ipcInfo[ii].pIpcData->dBlock[sendBlock][ipcIndex].timestamp = syncWord;
 
-			// If PCIE comms show errors, may want to add this cache flushing
-			#if 0
+			// Flush dolphin memory locations to maintain
+			// real-time transmission requirements.
 		 	if(ipcInfo[ii].netType == IPCIE)
-				clflush_cache_range (ipcInfo[ii].pIpcData->dBlock[sendBlock][ipcIndex].data, 16);
-			#endif
+				clflush_cache_range (&(ipcInfo[ii].pIpcData->dBlock[sendBlock][ipcIndex].data), 16);
 		}
         }
   }
