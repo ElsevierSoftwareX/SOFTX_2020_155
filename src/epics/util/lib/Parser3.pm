@@ -1469,6 +1469,9 @@ sub process {
     }
   }
 
+  # Check we have at least two filter modules
+  die "Need to have at least two filter modules in the model" unless $::filtCnt > 1;
+
   return 1;
 }
 
