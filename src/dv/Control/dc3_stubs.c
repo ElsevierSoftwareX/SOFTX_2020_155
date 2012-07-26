@@ -2038,8 +2038,13 @@ int  j, k, l, thrGpCnt;
 	   }
 	   {
 	     XmString *xms = malloc(sizeof(XmString *) * counter);
-	     for (i = 0; i < counter; i++)
-		xms[i] = XmStringCreateSimple(groupList[i+1]);
+	     for (i = 0; i < counter; i++) {
+	     	char t[MAX_LONG_CHANNEL_NAME_LENGTH+10];
+		int l = strlen(groupList[i+1]) - 1;
+		strcpy(t, groupList[i+1]);
+		if (t[l] == '_') t[l] = 0;
+		xms[i] = XmStringCreateSimple(t);
+  	     }
 	     XmListAddItems(grouplist, xms, counter, 1);
 	     for (i = 0; i < counter; i++) XmStringFree(xms[i]);
 	     free(xms);
@@ -2052,7 +2057,7 @@ int  j, k, l, thrGpCnt;
 	}
 	else { /* a group name is selected, show right side */
 	  //printf ( "Group name selected: %s\n", gpname );
-	  sprintf ( tempname, "%s", gpname );
+	  sprintf ( tempname, "%s_", gpname );
 	  counter = 0; 
 	  for ( i=0; i<topTotal+totalgroup+3+ttlgrp3rd+1; i++ ){ 
 	    get_a_line(fp, linetemp); /* skip first ... lines */
@@ -3835,6 +3840,7 @@ populate_3rd_lvl_chgrp(char *chtemp) {
       char s[MAX_LONG_CHANNEL_NAME_LENGTH+24];
       strcpy(s, chtemp);
       chop_string(s, '_');
+      strcat(s,"_");
       for (i = 0, found = 0; i < ttlgrp3rd; i++) {
 	if (!strcmp(thirdGroup[i], s)) { found = 1; break; }
       }
