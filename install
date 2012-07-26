@@ -175,7 +175,7 @@ else
 	testpoint_par_infname=/dev/null
 fi
 echo $srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost}
-$srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost} > /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par || (cp /opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/testpoint_${cur_date}.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par && exit 1)
+($srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost} > /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par || (cp /opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/testpoint_${cur_date}.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par && exit 1)) || exit 1
 echo Installing GDS node ${gds_node} configuration file 
 echo /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par 
 if test -e /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par; then
