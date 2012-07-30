@@ -168,11 +168,11 @@ int rioOutputHold1[MAX_DIO_MODULES];
 unsigned int CDO32Input[MAX_DIO_MODULES];
 unsigned int CDO32Output[MAX_DIO_MODULES];
 
+#endif
 // Contec 64 input bits plus 64 output bits (Standard for aLIGO)
 unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
 unsigned int CDIO6464Input[MAX_DIO_MODULES]; // Current value of the BO bits
 unsigned int CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
-#endif
 
 // This Contect 16 input / 16 output DIO card is used to control timing slave by IOP
 unsigned int CDIO1616InputInput[MAX_DIO_MODULES]; // Binary input bits
@@ -404,8 +404,8 @@ void *fe_start(void *arg)
   int onePpsTime = 0;			// One PPS diagnostic check
 #ifdef DIAG_TEST
   float onePpsTest;				// Value of 1PPS signal, if used, for diagnostics
-  int onePpsHiTest[6];			// One PPS diagnostic check
-  int onePpsTimeTest[6];			// One PPS diagnostic check
+  int onePpsHiTest[10];			// One PPS diagnostic check
+  int onePpsTimeTest[10];			// One PPS diagnostic check
 #endif
   int dcuId;				// DAQ ID number for this process
   static int missedCycle = 0;		// Incremented error counter when too many values in ADC FIFO
@@ -1417,6 +1417,11 @@ udelay(1000);
 				if(cycleNum < 100) dac_out = limit / 20;
 				else dac_out = 0;
 			}      
+			if((ii==0) && (jj == 6))
+			{       
+				if(cycleNum < 100) dac_out = limit / 20;
+				else dac_out = 0;
+			}      
 #endif
 #else
 			// If DAQKILL tripped, send zeroes to IOP
@@ -1636,14 +1641,15 @@ udelay(1000);
 		if(onePpsTime > 1) pLocalEpics->epicsOutput.timeErr |= TIME_ERR_1PPS;
 	}
 #ifdef DIAG_TEST
-	for(ii=0;ii<5;ii++)
+	for(ii=0;ii<10;ii++)
 	{
-		onePpsTest = adcData[0][ii];
+		if(ii<5) onePpsTest = adcData[0][ii];
+		else onePpsTest = adcData[1][(ii-5)];
 		if((onePpsTest > 400) && (onePpsHiTest[ii] == 0))  
 		{
 			onePpsTimeTest[ii] = cycleNum;
 			onePpsHiTest[ii] = 1;
-			if(ii == 0) pLocalEpics->epicsOutput.timingTest[ii] = cycleNum * 15.26;
+			if((ii == 0) || (ii == 5)) pLocalEpics->epicsOutput.timingTest[ii] = cycleNum * 15.26;
 			// Slaves do not see 1pps until after IOP signal loops around and back into ADC channel 0,
 			// therefore, need to subtract IOP loop time.
 			else pLocalEpics->epicsOutput.timingTest[ii] = (cycleNum * 15.26) - pLocalEpics->epicsOutput.timingTest[0];

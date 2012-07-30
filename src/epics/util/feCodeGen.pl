@@ -2287,7 +2287,7 @@ print OUTH "\tint dcuId;\n";
 print OUTH "\tint cycle;\n";
 if($diagTest > -1)
 {
-print OUTH "\tint timingTest[5];\n";
+print OUTH "\tint timingTest[10];\n";
 }
 print OUTH "} CDS_EPICS_OUT;\n\n";
 if($useWd)
@@ -2376,6 +2376,11 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32K epicsOutput.timingTest[1] 
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16K epicsOutput.timingTest[2] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04K epicsOutput.timingTest[3] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02K epicsOutput.timingTest[4] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_64KA epicsOutput.timingTest[5] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32KA epicsOutput.timingTest[6] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16KA epicsOutput.timingTest[7] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04KA epicsOutput.timingTest[8] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02KA epicsOutput.timingTest[9] int ao 0\n";
 }
 print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT epicsOutput.diags[7] int ao 0\n";
