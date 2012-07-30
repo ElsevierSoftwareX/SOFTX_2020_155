@@ -103,12 +103,8 @@ all: target build/$(TARGET)/$(TARGET) install
 
 # Install built epics IOC into target/$(TARGET)
 install: $(DB)
-	mkdir -p target/$(TARGET)/dbd
 	mkdir -p target/$(TARGET)/db
 	cp build/$(TARGET)/$(TARGET) target/$(TARGET)
-	for i in $(DBD) ; do \
-	  cp $$i target/$(TARGET)/dbd/`basename $$i`; \
-	done
 	/bin/rm -f target/$(TARGET)/db/*/autoBurt.req
 	/bin/rm -f target/$(TARGET)/db/*/auto.ini
 	for ifo in $(IFO) ; do \
