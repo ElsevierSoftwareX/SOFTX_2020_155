@@ -1,3 +1,13 @@
+Mon Jul 30 16:11:19 PDT 2012
+
+As of r2996 there is a change to the Epics record/device initialization code.
+In order for the new code to work correctly there is a new requirement to define
+an environment variable EPICS_DB_INCLUDE_PATH to point to $EPICS_BASE/dbd directory,
+for instance:
+
+export EPICS_DB_INCLUDE_PATH=/opt/rtapps/epics/base/dbd
+
+If this is not set in the execution environment, then the Epics process would not start.
 
 Wed May 30 15:19:34 PDT 2012
 
