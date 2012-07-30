@@ -124,9 +124,7 @@ install: $(DB)
 	  echo echo $(TARGET) $$ifo IOC Server started >> target/$(TARGET)/startup$$ifo ; \
 	  chmod +x target/$(TARGET)/startup$$ifo ; \
 	  /bin/rm -f target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
-	  for i in $(DBD) ; do \
-	    echo "dbLoadDatabase \"dbd/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
-	  done ; \
+	  echo "dbLoadDatabase \"base.dbd\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 	  echo 'registerRecordDeviceDriver(pdbbase)' >> target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
 	  echo '[default]' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 	  echo 'gain=1.00' >> target/$(TARGET)/db/$$ifo/auto.ini; \
