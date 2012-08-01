@@ -216,26 +216,41 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
 	int i;
 	struct mbuf_request_struct req;
         void __user *argp = (void __user *)arg;
+	static DEFINE_SPINLOCK(lock);
 
-
+	spin_lock(&lock);
 	//printk("mbuf_ioctl: command=%d\n", cmd);
         switch(cmd){
         case IOCTL_MBUF_ALLOCATE:
 		{
-        	  if (copy_from_user (&req, (void *) argp, sizeof (req))) return -EFAULT;
+        	  if (copy_from_user (&req, (void *) argp, sizeof (req))) {
+			spin_unlock(&lock);
+			return -EFAULT;
+		  }
         	  //printk("mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n", req.name, req.size, cmd, file);
 		  int res = mbuf_allocate_area(req.name, req.size, file);
-		  if (res >= 0) return kmalloc_area_size[res];
-		  else return -EINVAL;
+		  spin_unlock(&lock);
+		  if (res >= 0) {
+			return kmalloc_area_size[res];
+		  } else {
+			return -EINVAL;
+		  }
 		}
 		break;
         case IOCTL_MBUF_DEALLOCATE:
 		{
-        	  if (copy_from_user (&req, (void *) argp, sizeof (req))) return -EFAULT;
+        	  if (copy_from_user (&req, (void *) argp, sizeof (req))) {
+			spin_unlock(&lock);
+			return -EFAULT;
+		  }
         	  //printk("mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n", req.name, req.size, cmd, file);
 		  int res = mbuf_release_area(req.name, file);
-		  if (res >= 0) return  0;
-		  else return -EINVAL;
+		  spin_unlock(&lock);
+		  if (res >= 0) {
+			return  0;
+		  } else {
+			return -EINVAL;
+		  }
 		} 
                 break;
 
@@ -248,11 +263,14 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
 			}
 		}
 #endif
+		spin_unlock(&lock);
                 return 1;
 		break;
-        default:
+        default:		
+		spin_unlock(&lock);
                 return -EINVAL;
         }
+	spin_unlock(&lock);
         return -EINVAL;
 }
 
