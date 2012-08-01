@@ -82,10 +82,12 @@ static int mbuf_open(struct inode *inode, struct file *filp)
         return 0;
 }
 
+static DEFINE_SPINLOCK(lock);
 
 int mbuf_release_area(char *name, struct file *file) {
 	int i;
 
+	spin_lock(&lock);
 	// See if allocated
 	for (i = 0; i < MAX_AREAS; i++) {
 		if (0 == strcmp (mtag[i], name)) {
@@ -99,24 +101,30 @@ int mbuf_release_area(char *name, struct file *file) {
 				kmalloc_area[i] = 0;
 				kmalloc_area_size[i] = 0;
 			}
+			spin_unlock(&lock);
 			return 0;
 		}
 	}
+	spin_unlock(&lock);
         return -1;
 }
 
 EXPORT_SYMBOL(mbuf_release_area);
 
+
 // Returns index of allocated area
 // -1 if no slots
 int mbuf_allocate_area(char *name, int size, struct file *file) {
-	int i;
+	int i, s;
+
+	spin_lock(&lock);
 	// See if already allocated
 	for (i = 0; i < MAX_AREAS; i++) {
 		if (0 == strcmp (mtag[i], name)) {
 			// Found the area
 			usage_cnt[i]++;
                		if (file) file -> private_data = mtag [i];
+			spin_unlock(&lock);
 			return i;
 		}
 	}
@@ -127,9 +135,12 @@ int mbuf_allocate_area(char *name, int size, struct file *file) {
 	}
 	
 	// Out of slots
-	if (i >= MAX_AREAS) return -1;
+	if (i >= MAX_AREAS) {
+		spin_unlock(&lock);
+		return -1;
+	}
 
-	int s = size;
+	s = size;
 	kmalloc_area[i] = 0;
 	kmalloc_area[i] = rvmalloc (size); //rkmalloc (&s, GFP_KERNEL);
 	//printk("rvmalloc() returned %p\n", kmalloc_area[i]);
@@ -138,6 +149,7 @@ int mbuf_allocate_area(char *name, int size, struct file *file) {
 	//kmalloc_area[i] = 0;
 	if (kmalloc_area[i] == 0) {
 		printk("malloc() failed\n");
+		spin_unlock(&lock);
 	       	return -1;
 	}
 
@@ -146,6 +158,7 @@ int mbuf_allocate_area(char *name, int size, struct file *file) {
 	mtag[i][MBUF_NAME_LEN] = 0;
 	usage_cnt[i] = 1;
         if (file) file -> private_data = mtag [i];
+	spin_unlock(&lock);
         return i;
 }
 
@@ -164,7 +177,6 @@ static int mbuf_release(struct inode *inode, struct file *filp)
 // helper function, mmap's the kmalloc'd area which is physically contiguous
 int mmap_kmem(unsigned int i, struct vm_area_struct *vma)
 {
-        int ret;
         long length = vma->vm_end - vma->vm_start;
 
 	if (kmalloc_area_size[i] < length) {
@@ -213,23 +225,19 @@ static long mbuf_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
 #endif
 {
-	int i;
+	int res;
 	struct mbuf_request_struct req;
         void __user *argp = (void __user *)arg;
-	static DEFINE_SPINLOCK(lock);
 
-	spin_lock(&lock);
 	//printk("mbuf_ioctl: command=%d\n", cmd);
         switch(cmd){
         case IOCTL_MBUF_ALLOCATE:
 		{
         	  if (copy_from_user (&req, (void *) argp, sizeof (req))) {
-			spin_unlock(&lock);
 			return -EFAULT;
 		  }
         	  //printk("mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n", req.name, req.size, cmd, file);
-		  int res = mbuf_allocate_area(req.name, req.size, file);
-		  spin_unlock(&lock);
+		  res = mbuf_allocate_area(req.name, req.size, file);
 		  if (res >= 0) {
 			return kmalloc_area_size[res];
 		  } else {
@@ -240,12 +248,10 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
         case IOCTL_MBUF_DEALLOCATE:
 		{
         	  if (copy_from_user (&req, (void *) argp, sizeof (req))) {
-			spin_unlock(&lock);
 			return -EFAULT;
 		  }
         	  //printk("mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n", req.name, req.size, cmd, file);
-		  int res = mbuf_release_area(req.name, file);
-		  spin_unlock(&lock);
+		  res = mbuf_release_area(req.name, file);
 		  if (res >= 0) {
 			return  0;
 		  } else {
@@ -263,14 +269,11 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
 			}
 		}
 #endif
-		spin_unlock(&lock);
                 return 1;
 		break;
         default:		
-		spin_unlock(&lock);
                 return -EINVAL;
         }
-	spin_unlock(&lock);
         return -EINVAL;
 }
 
