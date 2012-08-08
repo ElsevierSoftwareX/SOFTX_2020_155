@@ -53,7 +53,7 @@ fi
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target
 /bin/cp -pr target/${system}epics /opt/rtcds/$site/${lower_ifo}/target/${system}
 /bin/mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/src /opt/rtcds/$site/${lower_ifo}/target/${system}
-/bin/chmod -R -w /opt/rtcds/$site/${lower_ifo}/target/${system}/src
+/bin/chmod -R a-w /opt/rtcds/$site/${lower_ifo}/target/${system}/src
 if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/db/*/autoBurt.req; then
 	/bin/mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/db/*/autoBurt.req /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics || exit 3
 fi
@@ -113,7 +113,7 @@ cat > /opt/rtcds/$site/${lower_ifo}/scripts/start${system} << EOF
 #
 
 if [ \`hostname\` != '${hostname}' ]; then
-	echo Cannot run \`basename $0\` on \`hostname\` computer
+	echo Cannot run \`basename \$0\` on \`hostname\` computer
 	exit 1
 fi
 
@@ -175,7 +175,7 @@ else
 	testpoint_par_infname=/dev/null
 fi
 echo $srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost}
-$srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost} > /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par || exit 1
+$srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost} > /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par || (cp /opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/testpoint_${cur_date}.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par && exit 1)
 echo Installing GDS node ${gds_node} configuration file 
 echo /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par 
 if test -e /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par; then
@@ -233,7 +233,7 @@ if test -e /opt/rtcds/$site/${lower_ifo}/medm/${system}; then
 	/bin/cp -a /opt/rtcds/$site/${lower_ifo}/medm/${system} /opt/rtcds/$site/${lower_ifo}/medm/archive/${system}_${cur_date} || exit 1
 fi
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/medm/${system}
-(cd build/${system}epics/medm; ls *.adl | xargs cp -r -t /opt/rtcds/$site/${lower_ifo}/medm/${system};)
+(cd build/${system}epics/medm; find . -iname '*.adl' | cpio -p --make-directories /opt/rtcds/$site/${lower_ifo}/medm/${system})
 
 #echo Installing Epics OPI screens
 
