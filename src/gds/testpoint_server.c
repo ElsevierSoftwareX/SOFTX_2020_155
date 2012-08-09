@@ -8,8 +8,10 @@ static char *versionId = "Version $Id$" ;
 /*                                                         		*/
 /*----------------------------------------------------------------------*/
 #ifndef DEBUG
-#define DEBUG 3
+/* Only uncomment this for debugging, do not leave uncommented in a live system */
+/*#define DEBUG 3*/
 #endif
+
 #define RPC_SVC_FG
 
 #if 0
