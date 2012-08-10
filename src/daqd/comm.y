@@ -582,6 +582,7 @@ CommandLine: /* Nothing */
 					default: *yyout << "unknown"; break;
 			    	}
 				*yyout << " old=" << a -> channels [i].old;
+				*yyout << " rate=" << a -> channels [i].rate;
 				*yyout << endl;
 			    }
 			    *yyout << endl;
@@ -1248,7 +1249,7 @@ CommandLine: /* Nothing */
 		      int trend = a -> data_type == archive_c::secondtrend || a -> data_type == archive_c::minutetrend;
 		      for (unsigned int i = 0; i < a -> nchannels; i++) {
 		    	*yyout <<  a -> channels [i].name << endl;
-		    	*yyout <<  channel_t::arc_rate << endl;
+		    	*yyout <<  a -> channels [i].rate << endl;
 		    	*yyout <<  a -> channels [i].type << endl;
 		    	*yyout <<  0 << endl;
 			if (!strcasecmp(a->fsd.get_path(), "obsolete")
@@ -1365,9 +1366,9 @@ CommandLine: /* Nothing */
 		    	*yyout << setw (channel_t::channel_name_max_len) << setfill (' ') << a -> channels [i].name;
 		    	yyout -> setf (ios::right, ios::adjustfield);
 		        if ($3) {
-			  *yyout << setw (8) << setfill ('0') << hex << channel_t::arc_rate;
+			  *yyout << setw (8) << setfill ('0') << hex << a -> channels [i].rate;
 			} else {
-			  *yyout << setw (4) << setfill ('0') << hex << channel_t::arc_rate;
+			  *yyout << setw (4) << setfill ('0') << hex << a -> channels [i].rate;
 			}
 		        if ($3 > 1) {
 		          *yyout << setw (8) << setfill ('0') << hex << 0;
@@ -3051,9 +3052,7 @@ ChannelName: TextExpression OptionalIntnum {
 			  break;
 		    }
 
-		// Do not allow archive channels in the requests for the full data.
-		// Do not allow any rate specification.
-		if (chidx < 0 && trend_channels && !$2) {
+		if (chidx < 0) {
 			int fini = 0;
 			// Try to find this channel in the archives
 			for (s_link *clink = daqd.archive.first (); clink; clink = clink -> next ()) {
@@ -3063,14 +3062,21 @@ ChannelName: TextExpression OptionalIntnum {
 		    		for (unsigned int i = 0; i < a -> nchannels; i++) {
 				  int len = strlen (a -> channels [i].name);
 				  if (! strncmp ($1, a -> channels [i].name,  len)) {
-					// Check channel name trend-suffix
-					int j;
-					for (j = 0; j < trender_c::num_trend_suffixes; j++)
+					int full_res = 0;
+				        int j;
+
+				    	// See if name matches exactly (in case this is not
+				        // a trend channel)
+				        if (!strcmp($1, a -> channels [i].name)) {
+					   full_res = 1;
+				        } else {
+					   // Check channel name trend-suffix
+					   for (j = 0; j < trender_c::num_trend_suffixes; j++)
 						if (!strcmp($1 + len, daqd.trender.sufxs[j]))
 							break;
-					if (j == trender_c::num_trend_suffixes)
+					   if (j == trender_c::num_trend_suffixes)
 						continue; // check next channel
-
+					}
 					chidx = i;
 
 					long_channel_t *chan = ((my_lexer *) lexer) -> channels + ((my_lexer *) lexer) -> num_channels;
@@ -3083,8 +3089,13 @@ ChannelName: TextExpression OptionalIntnum {
 					// NOTE: this address will need to be checked in the archive list before its usage begins
 					chan -> id = (void *) a;
 					
-					// Determine and assign the data type
-					switch (j) {
+					if (full_res) {
+						chan -> data_type = a -> channels [i].type;
+						chan -> sample_rate = a -> channels [i].rate;
+						chan -> req_rate = $2? $2: a -> channels [i].rate;
+					} else {
+					  // Determine and assign the data type
+					  switch (j) {
 			  			case 0:
 			  			case 1:
       							if (a -> channels [i].type != _64bit_double
@@ -3100,7 +3111,8 @@ ChannelName: TextExpression OptionalIntnum {
 			  			case 4: // `rms'
 							chan -> data_type = _64bit_double;
 							break;
-		        		}
+		        		  }
+					}
 
 					((my_lexer *) lexer) -> num_channels++;
 					((my_lexer *) lexer) -> n_archive_channel_names++;

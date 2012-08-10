@@ -215,7 +215,11 @@ net_writer_c::send_files (void)
 	  else {
 	    archive_c *a = (archive_c *) channels [i].id;
 	    a -> lock();
-	    out <<  a -> fsd.get_path () << " ";
+	    if (!strcmp(a -> fsd.get_path (), "obsolete")) {
+	    	out << "0 ";
+	    } else {
+	    	out <<  a -> fsd.get_path () << " ";
+	    }
 
 	    // Do not add duplicates to the list
 	    int j = 0;
@@ -230,6 +234,10 @@ net_writer_c::send_files (void)
 
 	for(int i = 0; i < naptrs; i++) {
 	  aptr[i] -> lock();
+	  if (!strcmp(aptr[i] -> fsd.get_path (), "obsolete")) {
+	  	aptr[i] -> unlock();
+	  	continue;
+	  }
 	  out << endl << "[" << aptr[i] -> fsd.get_path() << "]" << endl;
 	  out <<"added_prefix=" << aptr[i] -> fsd.get_prefix() << endl;
 	  out <<"added_suffix=" << aptr[i] -> fsd.get_suffix() << endl;

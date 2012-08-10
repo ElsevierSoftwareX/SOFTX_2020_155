@@ -85,7 +85,7 @@ archive_c::scan(FILE *filep, bool old)
 	  char *swptr;
 	  for (swptr = lptr; *swptr && !isspace(*swptr); swptr++);
 	  if (!*swptr) {
-	    /* Must be two words per line in signals section */
+	    /* Must be two or three words per line in signals section */
 	    return linenum;
 	  }
 
@@ -96,24 +96,40 @@ archive_c::scan(FILE *filep, bool old)
 	  for (++swptr; *swptr && isspace(*swptr); swptr++);
 
 	  if (!*swptr) {
-	    /* Must be two words per line in signals section */
+	    /* Must be two or three words per line in signals section */
 	    return linenum;
 	  }
 	  /* First word is signal name
 	     Second word is signal data type */
 	  daq_data_t chtype = _undefined;
-	  if (!strcasecmp(swptr, "16bit_integer")) {
+	  if (!strncasecmp(swptr, "16bit_integer", 13)) {
 	    chtype = _16bit_integer;
-	  } else if (!strcasecmp(swptr, "32bit_integer")) {
+	  } else if (!strncasecmp(swptr, "32bit_integer", 13)) {
 	    chtype = _32bit_integer;
-	  } else if (!strcasecmp(swptr, "32bit_float")) {
+	  } else if (!strncasecmp(swptr, "32bit_float", 11)) {
 	    chtype = _32bit_float;
-	  } else if (!strcasecmp(swptr, "64bit_double")) {
+	  } else if (!strncasecmp(swptr, "64bit_double", 12)) {
 	    chtype = _64bit_double;
 	  } else {
 	    /* invalid signal type */
 	    return linenum;
 	  }
+
+	  /* Skip the word */
+	  for (; *swptr && !isspace(*swptr); swptr++);
+
+ 	  unsigned int rate = 0;
+	  if (*swptr) {
+	    /* Skip white space until next word */
+	    for (++swptr; *swptr && isspace(*swptr); swptr++);
+
+	    if (*swptr) {
+	      /* rate is specified */
+	      rate = atoi(swptr);
+	    }
+	  }
+	  if(rate <= 0) rate = channel_t::arc_rate;
+
 	  if (strlen(lptr) > MAX_LONG_CHANNEL_NAME_LENGTH)
 	    return linenum;
 	  //	  printf("%s\t%s\n", lptr, swptr);
@@ -121,6 +137,7 @@ archive_c::scan(FILE *filep, bool old)
 	  ch->name = strdup(lptr);
 	  ch->type = chtype;
 	  ch->old = old;
+	  ch->rate = rate;
 	}
 	break;
       default:
