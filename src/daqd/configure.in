@@ -10,7 +10,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_RANLIB
 AC_PATH_XTRA
-AC_PATH_PROG([YACC],[bison],[bison],[/usr/local-2.95.3/bin:$PATH])
+AC_PATH_PROG([YACC],[bison],[bison],[$PATH])
 
 dnl checks for libraries
 dnl ====================
@@ -133,13 +133,15 @@ AC_ARG_WITH(epics,
     AC_DEFINE(EPICS_EDCU)
   fi
 ],
-[ EPICS_BASE=/opt/epics-3.14.9-linux/base
+[ EPICS_BASE=/opt/rtapps/epics/base
   EPICSFLAGS=\$\{CDS_EPICS\}
   EPICSLIBFLAGS=\$\{CDS_EPICS_LIBS\}
   EPICS_OBJS=\$\{EPICS_OBJS\}
   EPICS_SRCS=\$\{EPICS_SRCS\}
   AC_DEFINE(EPICS_EDCU)
 ])
+AC_CHECK_FILE($EPICS_BASE/lib/linux-x86_64/libca.so,,
+	[AC_MSG_ERROR([could not find Epics base libraries])])
 AC_SUBST(EPICS_BASE)
 AC_SUBST(EPICSFLAGS)
 AC_SUBST(EPICSLIBFLAGS)
@@ -183,7 +185,9 @@ AC_ARG_WITH(framecpp,
    LDAS_DIR=$withval
    LDAS_LDFLAGS=\$\{LDASLIBFLAGS\}
   fi
-], [LDAS_DIR=/usr/local-2.95.3])
+], [LDAS_DIR=/opt/rtapps/framecpp])
+AC_CHECK_FILE($LDAS_DIR/linux-x86_64/lib/libframecpp.so,,
+	[AC_MSG_ERROR([could not find framecpp])])
 AC_SUBST(LDAS_DIR)
 AC_SUBST(LDAS_LDFLAGS)
 
