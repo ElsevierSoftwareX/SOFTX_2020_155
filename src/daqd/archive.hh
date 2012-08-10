@@ -47,6 +47,7 @@ public:
     char *name;
     daq_data_t type;
     bool old; // Is this old channel name?
+    unsigned int rate;
   } *channels;
 
   unsigned int nchannels;
