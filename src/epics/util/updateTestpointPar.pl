@@ -8,6 +8,7 @@ my $site_letter = undef;
 my $system = undef;
 my $ignore_errors = undef;
 my $hostname = undef;
+my $remove = undef;
 
 # c.f. http://perldoc.perl.org/Getopt/Long.html
 GetOptions("par_file=s"=>\$par_file,
@@ -15,7 +16,8 @@ GetOptions("par_file=s"=>\$par_file,
            "site_letter=s"=>\$site_letter,
            "system=s"=>\$system,
            "host=s"=>\$hostname,
-	   "f"=>\$ignore_errors);
+	   "f"=>\$ignore_errors,
+	   "remove"=>\$remove);
 
 if ($ignore_errors) {
 	$SIG{__DIE__} = sub { exit (0); };
@@ -30,9 +32,27 @@ if ($par_file eq undef || $gds_node eq undef || $site_letter eq undef || $system
 
 my $par = readf($par_file, 0, 0, 0);
 
-$par->{$site_letter . "-node" . $gds_node . ":hostname"} = $hostname;
-$par->{$site_letter . "-node" . $gds_node . ":system"} = $system;
-$par->{$gds_node} = $site_letter . "-node" . $gds_node;
+if ($remove) {
+ delete $par->{$gds_node};
+} else {
+  if (exists $par->{$gds_node}) {
+	# See if this is the same system/host pair
+	# Otherwise warn and fail
+	if ($par->{$site_letter . "-node" . $gds_node . ":hostname"} ne $hostname
+	    || $par->{$site_letter . "-node" . $gds_node . ":system"} ne $system) {
+		warn "ERROR: This node $gds_node is already installed as\n";
+		warn "	hostname=", $par->{$site_letter . "-node" . $gds_node . ":hostname"}, "\n";
+		warn "	system=", $par->{$site_letter . "-node" . $gds_node . ":system"}, "\n";
+		warn "This script will not overwrite existing entries in testpoint.par\n";
+		warn "If this is an attempt to move an existing system from one host to another,\n";
+		warn "please remove conflicting entry from testpoint.par\n";
+		exit 1;
+	}
+  }
+  $par->{$site_letter . "-node" . $gds_node . ":hostname"} = $hostname;
+  $par->{$site_letter . "-node" . $gds_node . ":system"} = $system;
+  $par->{$gds_node} = $site_letter . "-node" . $gds_node;
+}
 
 #print_r($par);
 
