@@ -2181,6 +2181,21 @@ int init_module (void)
 	int cdo64Cnt;
 	int cdi64Cnt;
 
+#ifdef SPECIFIC_CPU
+#define CPUID SPECIFIC_CPU
+#else 
+#define CPUID 1
+#endif
+
+#ifndef NO_CPU_SHUTDOWN
+	// See if our CPU core is free
+	extern int is_cpu_taken_by_rcg_model(unsigned int cpu);
+        if (is_cpu_taken_by_rcg_model(CPUID)) {
+		printk(KERN_ALERT "Error: CPU %d already taken\n", CPUID);
+		return -1;
+	}
+#endif
+
 #ifdef ADC_SLAVE
 	need_to_load_IOP_first = 0;
 #endif
@@ -2639,12 +2654,6 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 #endif
 
 
-#ifdef SPECIFIC_CPU
-#define CPUID SPECIFIC_CPU
-#else 
-#define CPUID 1
-#endif
-
         pLocalEpics = (CDS_EPICS *)&((RFM_FE_COMMS *)_epics_shm)->epicsSpace;
 	int cnt;
 	for (cnt = 0;  cnt < 10 && pLocalEpics->epicsInput.burtRestore == 0; cnt++) {
@@ -2675,9 +2684,6 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 
 
 #ifndef NO_CPU_SHUTDOWN
-	// TODO: add a check to see whether there is already another
-	// front-end running on the same CPU. Return an error in that case.
-	// 
 	extern void set_fe_code_idle(void (*ptr)(void), unsigned int cpu);
         set_fe_code_idle(fe_start, CPUID);
         msleep(100);

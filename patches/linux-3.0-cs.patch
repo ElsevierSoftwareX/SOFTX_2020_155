@@ -7,6 +7,12 @@ diff -uNr linux-3.0/arch/x86/kernel/smpboot.c linux-3.0-cs/arch/x86/kernel/smpbo
  
 +static DEFINE_PER_CPU(void (*)(void), fe_code);
 +
++
++int is_cpu_taken_by_rcg_model(unsigned int cpu) {
++        return 0 != per_cpu(fe_code, cpu);
++}
++EXPORT_SYMBOL(is_cpu_taken_by_rcg_model);
++
 +void set_fe_code_idle(void (*ptr)(void), unsigned int cpu) {
 +       per_cpu(fe_code, cpu) = ptr;
 +}
