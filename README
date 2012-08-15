@@ -1,3 +1,13 @@
+Wed Aug 15 10:32:57 PDT 2012
+
+There is a change to controller.c which will require a new patch to the kernel to expose
+a new function:
+
+-rw-r--r-- 1 controls controls 6112 Aug 15 10:35 linux-3.0-cs.patch
+-rw-r--r-- 1 controls controls 6198 Aug 15 10:35 linux-2.6.34.1-cs.patch
+
+Please update your kernel or models would not load.
+
 Mon Jul 30 16:11:19 PDT 2012
 
 As of r2996 there is a change to the Epics record/device initialization code.
