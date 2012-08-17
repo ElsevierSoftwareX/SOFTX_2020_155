@@ -205,17 +205,28 @@ int adcHoldTimeAvgPerSec;
 int usrTime;			// Time spent in user app code
 int usrHoldTime;		// Max time spent in user app code
 int cardCountErr = 0;
+int cycleTime;			// Current cycle time
+int timeHold = 0;			// Max code cycle time within 1 sec period
+int timeHoldHold = 0;			// Max code cycle time within 1 sec period; hold for another sec
+int timeHoldWhen= 0;			// Cycle number within last second when maximum reached; running
+int timeHoldWhenHold = 0;		// Cycle number within last second when maximum reached
 
 // The following are for timing histograms written to /proc files
 #if defined(SERVO64K)
 unsigned int cycleHist[16];
 unsigned int cycleHistMax[16];
+unsigned int cycleHistWhen[16];
+unsigned int cycleHistWhenHold[16];
 #elif defined(SERVO32K)
 unsigned int cycleHist[32];
 unsigned int cycleHistMax[32];
+unsigned int cycleHistWhen[32];
+unsigned int cycleHistWhenHold[32];
 #elif defined(SERVO16K)
 unsigned int cycleHist[64];
 unsigned int cycleHistMax[64];
+unsigned int cycleHistWhen[64];
+unsigned int cycleHistWhenHold[64];
 #endif
 
 
@@ -393,8 +404,6 @@ void *fe_start(void *arg)
   int pBits[9] = {1,2,4,8,16,32,64,128,256};	// Lookup table for quick power of 2 calcs
 #endif
   RFM_FE_COMMS *pEpicsComms;		// Pointer to EPICS shared memory space
-  int cycleTime;			// Max code cycle time within 1 sec period
-  int timeHold = 0;
   int timeHoldMax = 0;			// Max code cycle time since last diag reset
   int myGmError2 = 0;			// Myrinet error variable
   // int attemptingReconnect = 0;		// Myrinet reconnect status
@@ -467,6 +476,8 @@ void *fe_start(void *arg)
 #if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
   memset(cycleHist, 0, sizeof(cycleHist));
   memset(cycleHistMax, 0, sizeof(cycleHistMax));
+  memset(cycleHistWhen, 0, sizeof(cycleHistWhen));
+  memset(cycleHistWhenHold, 0, sizeof(cycleHistWhenHold));
 #endif
 // Do all of the initalization ***********************************************************************
 
@@ -1562,10 +1573,15 @@ udelay(1000);
 #ifdef ADC_MASTER
   	  pLocalEpics->epicsOutput.diags[FE_DIAGS_DAC_MASTER_STAT] = dacEnable;
 #endif
+          timeHoldHold = timeHold;
           timeHold = 0;
+	  timeHoldWhenHold = timeHoldWhen;
+
 #if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
 	  memcpy(cycleHistMax, cycleHist, sizeof(cycleHist));
 	  memset(cycleHist, 0, sizeof(cycleHist));
+	  memcpy(cycleHistWhenHold, cycleHistWhen, sizeof(cycleHistWhen));
+	  memset(cycleHistWhen, 0, sizeof(cycleHistWhen));
 #endif
 	  if (timeSec % 4 == 0) pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeMin;
 	  else if (timeSec % 4 == 1)
@@ -1995,7 +2011,10 @@ udelay(1000);
 		// printf("cycle %d time %d; adcWait %d; write1 %d; write2 %d; longest write2 %d\n", cycleNum, cycleTime, adcWait, (tempClock[1]-tempClock[0])/CPURATE, (tempClock[3]-tempClock[2])/CPURATE, longestWrite2);
 	}
 	// Hold the max cycle time over the last 1 second
-	if(cycleTime > timeHold) timeHold = cycleTime;
+	if(cycleTime > timeHold) { 
+		timeHold = cycleTime;
+		timeHoldWhen = cycleNum;
+	}
 	// Hold the max cycle time since last diag reset
 	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
 #if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
@@ -2010,6 +2029,7 @@ udelay(1000);
 #endif
 
 		cycleHist[cycleTime<nb?cycleTime:nb]++;
+		cycleHistWhen[cycleTime<nb?cycleTime:nb] = cycleNum;
 	}
 #endif
 	adcHoldTime = (cpuClock[CPU_TIME_CYCLE_START] - adcTime)/CPURATE;
@@ -2116,7 +2136,9 @@ procfile_read(char *buffer,
 			"usrHoldTime=%d\n"
 			"cycle=%d\n"
 			"gps=%d\n"
-			"buildDate=%s\n",
+			"buildDate=%s\n"
+			"cpuTimeMax(cur,past sec)=%d,%d\n"
+			"cpuTimeMaxCycle(cur,past sec)=%d,%d\n",
 
 			startGpsTime,
 			cycle_gps_time - startGpsTime,
@@ -2130,7 +2152,9 @@ procfile_read(char *buffer,
 			usrHoldTime,
 			cycleNum,
 			cycle_gps_time,
-			build_date);
+			build_date,
+			cycleTime, timeHoldHold,
+			timeHoldWhen, timeHoldWhenHold);
 #if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
 	{
 #if defined(SERVO64K)
@@ -2144,7 +2168,7 @@ procfile_read(char *buffer,
 		for (i = 0; i < nb; i++) {
 			char b[32];
 			if (!cycleHistMax[i]) continue;
-			sprintf(b, "%d=%d ", i, cycleHistMax[i]);
+			sprintf(b, "%d=%d@%d ", i, cycleHistMax[i], cycleHistWhenHold[i]);
 			strcat(buffer, b);
 		}
 		strcat(buffer, "\n");
