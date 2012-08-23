@@ -1,5 +1,6 @@
 package CDS::Parameters;
 use Exporter;
+use Env qw(RCG_HOST);
 @ISA = ('Exporter');
 
 
@@ -70,6 +71,9 @@ sub parseParams {
 			} elsif ($spp[0] eq "host") {
 				print "Target host name is set to $spp[1]\n";
 				$::targetHost = $spp[1];
+				if ($RCG_HOST) {
+					$::targetHost = $RCG_HOST;
+				}
 			#} elsif ($spp[0] eq "gds_node_id") {
 				#print "GDS node id is set to $spp[1]\n";
 				#$::gdsNodeId = $spp[1];
