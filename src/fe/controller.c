@@ -141,6 +141,7 @@ int overflowAdc[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];		// ADC overflow diagnost
 
 // DAC Variables
 int iopDacEnable;						// Returned by feCode to allow writing values or zeros to DAC modules
+int dacOutBufSize [MAX_DAC_MODULES];	
 double dacOut[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];		// DAC output values
 int dacOutEpics[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];		// DAC outputs reported back to EPICS
 unsigned int dacOutUsed[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];	// DAC chans used by app code
@@ -496,6 +497,7 @@ void *fe_start(void *arg)
     for (jj = 0; jj < 16; jj++) {
  	dacOut[ii][jj] = 0.0;
  	dacOutUsed[ii][jj] = 0;
+	dacOutBufSize[ii] = 0;
 #ifdef ADC_MASTER
 	// Zero out DAC channel map in the shared memory
 	// to be used to check on slaves' channel allocation
@@ -1982,21 +1984,23 @@ udelay(1000);
 		{
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
 			out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
+			dacOutBufSize[jj] = out_buf_size;
 			if((out_buf_size < 8) || (out_buf_size > 24))
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
 			    feStatus |= FE_ERROR_IO;
-			    } else pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
+			} else pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
 
 		}
 		if(cdsPciModules.dacType[jj] == GSC_16AO16)
 		{
 			status = checkDacBuffer(jj);
+			dacOutBufSize[jj] = status;
 			if(status != 2)
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
 			    feStatus |= FE_ERROR_IO;
-			    } else pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
+			} else pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
 		}
 	}
 
@@ -2172,9 +2176,18 @@ procfile_read(char *buffer,
 			strcat(buffer, b);
 		}
 		strcat(buffer, "\n");
-		ret = strlen(buffer);
 	}
 #endif
+
+		/* Output DAC buffer size information */
+		for (i = 0; i < cdsPciModules.dacCount; i++) {
+			char b[32];
+			sprintf(b, "DAC #%d %d-bit buf_size=%d\n", i,
+				cdsPciModules.dacType[i] == GSC_18AO8? 18: 16,
+				dacOutBufSize[i]);
+			strcat(buffer, b);
+		}
+		ret = strlen(buffer);
 	}
 
 	return ret;
