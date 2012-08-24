@@ -498,6 +498,7 @@ $(pv_value)</tooltip>
     <scripts />
     <arrows>0</arrows>
     <height>1</height>
+
     <anti_alias>true</anti_alias>
     <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
     <name>Polyline</name>
@@ -1490,6 +1491,7 @@ $(pv_value)</tooltip>
     </foreground_color>
     <widget_type>Text Update</widget_type>
     <enabled>true</enabled>
+
     <text>######</text>
     <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
     <precision>0</precision>
@@ -3081,25 +3083,25 @@ $(pv_value)</tooltip>
     <y>159</y>
     <actions hook="false" hook_all="false">
       <action type="EXECUTE_CMD">
-        <command>"xterm -e view" "/cvs/cds/LOCATION_NAME/opi/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo FEC | tr '[A-Z]' '[a-z]'`/docs/SITE_NAMEFILTERNAME.txt"</command>
+        <command>"xterm -e view" "/opt/rtcds/LOCATION_NAME/IFO_LC/opi/MEDMDIR/docs/SITE_NAMEFILTERNAME.txt"</command>
         <command_directory>$(user.home)</command_directory>
         <wait_time>10</wait_time>
         <description>"Documentation"</description>
       </action>
       <action type="EXECUTE_CMD">
-        <command>"xwud -in" "/cvs/cds/LOCATION_NAME/opi/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo FEC | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTERNAME_0.xwd"</command>
+        <command>"xwud -in" "/opt/rtcds/LOCATION_NAME/IFO_LC/opi/MEDMDIR/snap/SITE_NAMEFILTERNAME_0.xwd"</command>
         <command_directory>$(user.home)</command_directory>
         <wait_time>10</wait_time>
         <description>"View Last Snapshot"</description>
       </action>
       <action type="EXECUTE_CMD">
-        <command>"xwud -in" "/cvs/cds/LOCATION_NAME/opi/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo FEC | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTERNAME_1.xwd"</command>
+        <command>"xwud -in" "/opt/rtcds/LOCATION_NAME/IFO_LC/opi/MEDMDIR/snap/snap/SITE_NAMEFILTERNAME_1.xwd"</command>
         <command_directory>$(user.home)</command_directory>
         <wait_time>10</wait_time>
         <description>"View Previous Snapshot"</description>
       </action>
       <action type="EXECUTE_CMD">
-        <command>"/cvs/cds/lho/scripts/utilities/xupdatesnap" "SITE_NAMEFILTERNAME"</command>
+        <command>"/opt/rtcds/LOCATION_NAME/IFO_LC/scripts/utilities/xupdatesnap" "SITE_NAMEFILTERNAME"</command>
         <command_directory>$(user.home)</command_directory>
         <wait_time>10</wait_time>
         <description>"Update Snapshot"</description>
