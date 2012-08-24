@@ -1,6 +1,6 @@
 
 file {
-	name="/opt/rtcds/llo/l1/core/trunk/src/epics/util/FILTER.adl"
+	name="FILTER.adl"
 	version=030105
 }
 display {
@@ -1383,22 +1383,22 @@ text {
 	command[0] {
 		label="Documentation"
 		name="xterm -e view"
-		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/docs/SITE_NAMEFILTERNAME.txt"
+		args="/opt/rtcds/LOCATION_NAME/IFO_LC/medm/MEDMDIR/docs/SITE_NAMEFILTERNAME.txt"
 	}
 	command[1] {
-		label="View Last Snapshot"
-		name="xwud -in"
-		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTERNAME_0.xwd"
+		label="Update Snapshot"
+		name="/opt/rtcds/LOCATION_NAME/IFO_LC/scripts/medm/medmsnap.pl"
+		args="U &A &X"
 	}
 	command[2] {
-		label="View Previous Snapshot"
-		name="xwud -in"
-		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMEFILTERNAME_1.xwd"
+		label="Current Snapshot"
+		name="/opt/rtcds/LOCATION_NAME/IFO_LC/scripts/medm/medmsnap.pl"
+		args="V &A"
 	}
 	command[3] {
-		label="Update Snapshot"
-		name="/cvs/cds/LOCATION_NAME/scripts/utilities/xupdatesnap"
-		args="SITE_NAMEFILTERNAME"
+		label="Previous Snapshot"
+		name="/opt/rtcds/LOCATION_NAME/IFO_LC/scripts/medm/medmsnap.pl"
+		args="P &A"
 	}
 	clr=14
 	bclr=55
