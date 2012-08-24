@@ -52,10 +52,10 @@ sub frontEndInitCode {
         $::ipcxRef[$::ipcxInitDone] = $i;
  
         for ($l = 0; $l < $::ipcxCnt; $l++) {
-           if ($::ipcxParts[$l][5] == $i) {
+           if ($::ipcxParts[$l][6] == $i) {
               $found = 1;
  
-              if ( ($::ipcxParts[$l][6] =~ /^Ground/) || ($::ipcxParts[$l][6] =~ /\_Ground/) ) {
+              if ( ($::ipcxParts[$l][7] =~ /^Ground/) || ($::ipcxParts[$l][7] =~ /\_Ground/) ) {
                  $calcExp .= "ipcInfo[$::ipcxInitDone]\.mode = IRCV;\n";
               }
               else {

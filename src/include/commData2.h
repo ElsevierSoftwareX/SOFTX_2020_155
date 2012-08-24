@@ -5,13 +5,20 @@
 #ifndef __COMMDATA2_H__
 #define __COMMDATA2_H__
 
+// The total number of IPCs allowed per kind
+#define MAX_IPC		256
+// The number of data blocks buffered per IPC channel
+#define IPC_BLOCKS 	64
+
 typedef struct CDS_IPC_XMIT {
         double data;
         unsigned long timestamp;
 } CDS_IPC_XMIT;
 typedef struct CDS_IPC_COMMS {
-	CDS_IPC_XMIT dBlock[64][64];
+	CDS_IPC_XMIT dBlock[IPC_BLOCKS][MAX_IPC];
 } CDS_IPC_COMMS;
+
+
 typedef struct CDS_IPC_INFO {
         double data;
         int sendNode;
@@ -37,15 +44,13 @@ typedef struct CDS_IPC_KEY_LIST {
 #define IPCIE		1
 #define IRFM0		2
 #define IRFM1		3
-#define IPC_MAX_RFM		64
-#define IPC_MAX			128
 #define IPC_BUFFER_SIZE		sizeof(struct CDS_IPC_COMMS)
 #define IPC_BASE_OFFSET		0x80000
 #define IPC_PCIE_BASE_OFFSET		0x100
+#define IPC_TOTAL_ALLOC_SIZE	(IPC_PCIE_BASE_OFFSET + sizeof(CDS_IPC_COMMS))
 #define IPC_PCIE_READ	2
 #define IPC_PCIE_WRITE	3
 #define IPC_RFM_BLOCK_SIZE 	(IPC_MAX_RFM * IPC_BUFFER_SIZE)
-#define IPC_DBLOCK_SIZE 		(IPC_MAX * IPC_BUFFER_SIZE)
 #define IPC_MAX_RATE		65536
 #define IPC_RFM_XFER_SIZE	0x400	// Set to 1k Byte ie 64 channels
 

@@ -130,7 +130,9 @@ int ii;
 int chan;
 int sendBlock;
 
-  sendBlock = ((cycle + 1) * (IPC_MAX_RATE / FE_RATE)) % 64;
+  sendBlock = ((cycle + 1) * (IPC_MAX_RATE / FE_RATE)) % IPC_BLOCKS;
+  int lastPcie = -1;
+  //int num_pcie = 0;
   for(ii=0;ii<connects;ii++)
   {
         if(ipcInfo[ii].mode == ISND)
@@ -144,7 +146,7 @@ int sendBlock;
 		else syncWord = timeSec;
 		// Combine GPS seconds and cycle counter into long word.
 		syncWord = (syncWord << 32) + dataCycle;
-		// Determine next block to write in 64 block buffer
+		// Determine next block to write in IPC_BLOCKS block buffer
 		ipcIndex = ipcInfo[ii].ipcNum;
 		// Don't write to PCI RFM if network error detected by IOP
         	if(ipcInfo[ii].pIpcData != NULL)
@@ -157,11 +159,19 @@ int sendBlock;
 
 			// Flush Dolphin data out to maintain real-time
 			// transmission requirements
-		 	if(ipcInfo[ii].netType == IPCIE)
-				clflush_cache_range (&(ipcInfo[ii].pIpcData->dBlock[sendBlock][ipcIndex].data), 16);
+		 	if(ipcInfo[ii].netType == IPCIE) {
+			//	num_pcie++;
+				//if (num_pcie == 16) {
+					//clflush_cache_range (&(ipcInfo[ii].pIpcData->dBlock[sendBlock][ipcIndex].data), 16);
+					//num_pcie = 0;
+				//}
+				lastPcie = ii;
+ 			}
 		}
         }
   }
+  // Flush out the last PCIe transmission
+  if (lastPcie >= 0) clflush_cache_range (&(ipcInfo[lastPcie].pIpcData->dBlock[sendBlock][ipcInfo[lastPcie].ipcNum].data), 16);
 }
 
 // *************************************************************************************************
@@ -177,11 +187,13 @@ unsigned long mySyncWord;	// Local version of syncWord for comparison and error 
 int ipcIndex;			// Pointer to next IPC data buffer
 int cycle65k;			// All data sent with 64K cycle count; need to convert local app cycle count to match
 int ii;
-int rcvBlock;			// Which of the 64 IPC data blocks to read from
+int rcvBlock;			// Which of the IPC_BLOCKS IPC data blocks to read from
 double tmp;			// Temp location for data for checking NaN
+static unsigned long ptim = 0;	// last printing time
+static unsigned long nskipped = 0;	// number of skipped error messages (couldn't print that fast)
 
   // Determine which block to read, based on present code cycle
-  rcvBlock = ((cycle) * (IPC_MAX_RATE / FE_RATE)) % 64;
+  rcvBlock = ((cycle) * (IPC_MAX_RATE / FE_RATE)) % IPC_BLOCKS;
   for(ii=0;ii<connects;ii++)
   {
         if(ipcInfo[ii].mode == IRCV) // Zero = Rcv and One = Send
@@ -217,7 +229,17 @@ double tmp;			// Temp location for data for checking NaN
 				ipcInfo[ii].data = tmp;
 			// If IPC syncword != local syncword, data is BAD
 			} else {
-				//printf("sync error my=0x%lx remote=0x%lx\n", mySyncWord, syncWord);
+				if ((cycle_gps_time - startGpsTime) > 2) { // Do not print for the first 2 seconds
+					if (ptim < cycle_gps_time) {
+						if (nskipped) printf("skipped %d sync error messages\n", nskipped);
+						printf("ipc=%d sync error my=0x%lx remote=0x%lx @ %d\n", ii, mySyncWord, syncWord, rcvBlock);
+						ptim = cycle_gps_time;	// Print a single message per second
+						nskipped = 0;
+					} else {
+						nskipped++;
+					}
+					
+				}
 				// ipcInfo[ii].data = ipcInfo[ii].pIpcData->data[ipcIndex];
 				// ipcInfo[ii].data = tmp;
 				ipcInfo[ii].errFlag ++;
