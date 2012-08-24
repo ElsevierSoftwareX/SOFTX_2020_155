@@ -40,20 +40,24 @@ else
     USERAPPS_DIR=${userApps}
     cdsModel=${userApps}/cds/${ifo}/models:${userApps}/cds/common/models
     aosModel=${userApps}/aos/${ifo}/models:${userApps}/aos/common/models
+    ascModel=${userApps}/asc/${ifo}/models:${userApps}/asc/common/models
     hpiModel=${userApps}/hpi/${ifo}/models:${userApps}/hpi/common/models
     iooModel=${userApps}/ioo/${ifo}/models:${userApps}/ioo/common/models
     iscModel=${userApps}/isc/${ifo}/models:${userApps}/isc/common/models
     isiModel=${userApps}/isi/${ifo}/models:${userApps}/isi/common/models
+    lscModel=${userApps}/lsc/${ifo}/models:${userApps}/lsc/common/models
     pslModel=${userApps}/psl/${ifo}/models:${userApps}/psl/common/models
     susModel=${userApps}/sus/${ifo}/models:${userApps}/sus/common/models
     tcsModel=${userApps}/tcs/${ifo}/models:${userApps}/tcs/common/models
     tstModel=${userApps}/cds/test/models
-    export USERAPPS_LIB_PATH=${cdsModel}:${tstModel}:${aosModel}:${hpiModel}:${iooModel}:${iscModel}:${isiModel}:${pslModel}:${susModel}:${tcsModel}
+    export USERAPPS_LIB_PATH=${cdsModel}:${tstModel}:${aosModel}:${ascModel}:${hpiModel}:${iooModel}:${iscModel}:${isiModel}:${lscModel}:${pslModel}:${susModel}:${tcsModel}
 #
     export CDS_SRC=${userApps}/cds/common/src
     export CDS_IFO_SRC=${userApps}/cds/${ifo}/src
     export AOS_SRC=${userApps}/aos/common/src
     export AOS_IFO_SRC=${userApps}/aos/${ifo}/src
+    export ASC_SRC=${userApps}/asc/common/src
+    export ASC_IFO_SRC=${userApps}/asc/${ifo}/src
     export HPI_SRC=${userApps}/hpi/common/src
     export HPI_IFO_SRC=${userApps}/hpi/${ifo}/src
     export IOO_SRC=${userApps}/ioo/common/src
@@ -62,6 +66,8 @@ else
     export ISC_IFO_SRC=${userApps}/isc/${ifo}/src
     export ISI_SRC=${userApps}/isi/common/src
     export ISI_IFO_SRC=${userApps}/isi/${ifo}/src
+    export LSC_SRC=${userApps}/lsc/common/src
+    export LSC_IFO_SRC=${userApps}/lsc/${ifo}/src
     export PSL_SRC=${userApps}/psl/common/src
     export PSL_IFO_SRC=${userApps}/psl/${ifo}/src
     export SUS_SRC=${userApps}/sus/common/src
@@ -70,25 +76,29 @@ else
 #
     cdsMedm=${userApps}/cds/common/medm
     aosMedm=${userApps}/aos/common/medm
+    ascMedm=${userApps}/asc/common/medm
     hpiMedm=${userApps}/hpi/common/medm
     iooMedm=${userApps}/ioo/common/medm
     iscMedm=${userApps}/isc/common/medm
     isiMedm=${userApps}/isi/common/medm
+    lscMedm=${userApps}/lsc/common/medm
     pslMedm=${userApps}/psl/common/medm
     susMedm=${userApps}/sus/common/medm
     testMedm=${userApps}/cds/test/medm
-    export USERAPPS_MEDM_PATH=${cdsMedm}:$aosMedm:$hpiMedm:$iooMedm:$iscMedm:$isiMedm:$pslMedm:$susMedm:$testMedm
+    export USERAPPS_MEDM_PATH=${cdsMedm}:$aosMedm:$ascMedm:$hpiMedm:$iooMedm:$iscMedm:$isiMedm:$lscMedm:$pslMedm:$susMedm:$testMedm
 #
     cdsScr=${userApps}/cds/common/scripts
     aosScr=${userApps}/aos/common/scripts
+    ascScr=${userApps}/asc/common/scripts
     hpiScr=${userApps}/hpi/common/scripts
     iooScr=${userApps}/ioo/common/scripts
     iscScr=${userApps}/isc/common/scripts
     isiScr=${userApps}/isi/common/scripts
+    lscScr=${userApps}/lsc/common/scripts
     pslScr=${userApps}/psl/common/scripts
     susScr=${userApps}/sus/common/scripts
     testScr=${userApps}/cds/test/scripts
-    export USERAPPS_SCRIPTS_PATH=${cdsScr}:$aosScr:$hpiScr:$iooScr:$iscScr:$isiScr:$pslScr:$susScr:$testScr
+    export USERAPPS_SCRIPTS_PATH=${cdsScr}:$aosScr:$ascScr:$hpiScr:$iooScr:$iscScr:$isiScr:$lscScr:$pslScr:$susScr:$testScr
   fi
  fi
 #
@@ -119,8 +129,7 @@ else
 {
 #  addmatlab - add first to MATLABPATH if not already there
     thismat=$1
-    echo ${MATLABPATH} | egrep -i ${thismat}: >&/dev/null
-    if [ "$?" -ne 0 ]; then
+    if [[ ":$MATLABPATH:" != *":$thismat:"* ]]; then 	
         export MATLABPATH=${thismat}:${MATLABPATH}
     fi
 }
