@@ -106,7 +106,7 @@ image {
 		height=25
 	}
 	type="gif"
-	"image name"="/cvs/cds/LOCATION_NAME/scripts/utilities/nova_logo.gif"
+	"image name"="/opt/rtcds/LOCATION_NAME/IFO_LC/scripts/utilities/nova_logo.gif"
 	"dynamic attribute" {
 		chan="SITE_NAME:CONTROL_SYSTEM_SYSTEM_NAME-TIME_STRING"
 	}

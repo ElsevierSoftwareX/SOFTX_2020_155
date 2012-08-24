@@ -1060,23 +1060,23 @@ rectangle {
 	command[0] {
 		label="Documentation"
 		name="xterm -e view"
-		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/docs/SITE_NAMESYSTEM_NAME-MONITOR_ADC.txt"
+		args="/opt/rtcds/LOCATION_NAME/IFO_LC/medm/MEDMDIR/docs/MONITOR.txt"
 	}
 	command[1] {
-		label="View Last Snapshot"
-		name="xwud -in"
-		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMESYSTEM_NAME-MONITOR_ADC_0.xwd"
+		label="Update Snapshot"
+		name="/opt/rtcds/LOCATION_NAME/IFO_LC/scripts/medm/medmsnap.pl"
+		args="U &A &X"
 	}
 	command[2] {
-		label="View Previous Snapshot"
-		name="xwud -in"
-		args="/cvs/cds/LOCATION_NAME/medm/`echo SITE_NAME | tr '[A-Z]' '[a-z]'`/`echo SYSTEM_NAME | tr '[A-Z]' '[a-z]'`/snap/SITE_NAMESYSTEM_NAME-MONITOR_ADC_1.xwd"
+		label="Current Snapshot"
+		name="/opt/rtcds/LOCATION_NAME/IFO_LC/scripts/medm/medmsnap.pl"
+		args="V &A"
 	}
 	command[3] {
-		label="Update Snapshot"
-		name="/cvs/cds/LOCATION_NAME/scripts/utilities/xupdatesnap"
-		args="SITE_NAMESYSTEM_NAME-MONITOR_ADC"
-	}
+		label="Previous Snapshot"
+		name="/opt/rtcds/LOCATION_NAME/IFO_LC/scripts/medm/medmsnap.pl"
+		args="P &A"
+        }
 	clr=14
 	bclr=30
 }
@@ -1088,7 +1088,7 @@ image {
 		height=25
 	}
 	type="gif"
-	"image name"="/cvs/cds/LOCATION_NAME/scripts/utilities/nova_logo.gif"
+	"image name"="/opt/rtcds/LOCATION_NAME/IFO_LC/scripts/utilities/nova_logo.gif"
 	"dynamic attribute" {
 		chan="SITE_NAME:CONTROL_SYSTEM_SYSTEM_NAME-TIME_STRING"
 	}
