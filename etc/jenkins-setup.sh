@@ -29,3 +29,17 @@ export PSL_SRC=$USERAPPS_ROOT/psl/common/src
 export SUS_IFO_SRC=$USERAPPS_ROOT/sus/h1/src
 export SUS_SRC=$USERAPPS_ROOT/sus/common/src
 
+
+export IFO=H1
+export ifo=h1
+export SITE=LHO
+export site=lho
+
+export CDS_MEDM_PATH=$USERAPPS_ROOT/cds/common/medm:$USERAPPS_ROOT/aos/common/medm:$USERAPPS_ROOT/hpi/common/medm:$USERAPPS_ROOT/ioo/common/medm:$USERAPPS_ROOT/isc/common/medm:$USERAPPS_ROOT/isi/common/medm:$USERAPPS_ROOT/pem/common/medm:$USERAPPS_ROOT/psl/common/medm:$USERAPPS_ROOT/sus/common/medm:$USERAPPS_ROOT/cds/test/medm
+
+export CDS_SCRIPTS_PATH=$USERAPPS_ROOT/cds/common/scripts:$USERAPPS_ROOT/aos/common/scripts:$USERAPPS_ROOT/hpi/common/scripts:$USERAPPS_ROOT/ioo/common/scripts:$USERAPPS_ROOT/isc/common/scripts:$USERAPPS_ROOT/isi/common/scripts:$USERAPPS_ROOT/pem/common/scripts:$USERAPPS_ROOT/psl/common/scripts:$USERAPPS_ROOT/sus/common/scripts:$USERAPPS_ROOT/cds/test/scripts
+
+
+export PATH=:/opt/rtapps/linux-x86_64/utils/bin:/opt/rtapps/gds-2.15.2/bin:/opt/rtapps/libmetaio-8.2/linux-x86_64/bin:/opt/rtapps/libframe-8.11/linux-x86_64/bin:/opt/rtapps/framecpp-1.18.2/linux-x86_64/bin:/opt/rtapps/fftw-3.2.2/linux-x86_64/bin:/opt/rtapps/dv:/opt/rtapps/epics-3.14.10_long/extensions/bin/linux-x86_64:/opt/rtapps/epics-3.14.10_long/modules/sncseq/bin/linux-x86_64:/opt/rtapps/epics-3.14.10_long/base/bin/linux-x86_64:/usr/bin:/bin:/usr/sbin:/sbin:/opt/rtcds/lho/h1/scripts:/opt/rtcds/userapps/release/cds/common/scripts:/opt/rtapps/jdk/bin
+export EPICS_DB_INCLUDE_PATH=/opt/rtapps/epics/base/dbd
+

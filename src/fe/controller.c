@@ -141,7 +141,9 @@ int overflowAdc[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];		// ADC overflow diagnost
 
 // DAC Variables
 int iopDacEnable;						// Returned by feCode to allow writing values or zeros to DAC modules
+#ifdef ADC_MASTER
 int dacOutBufSize [MAX_DAC_MODULES];	
+#endif
 double dacOut[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];		// DAC output values
 int dacOutEpics[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];		// DAC outputs reported back to EPICS
 unsigned int dacOutUsed[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];	// DAC chans used by app code
@@ -497,8 +499,8 @@ void *fe_start(void *arg)
     for (jj = 0; jj < 16; jj++) {
  	dacOut[ii][jj] = 0.0;
  	dacOutUsed[ii][jj] = 0;
-	dacOutBufSize[ii] = 0;
 #ifdef ADC_MASTER
+	dacOutBufSize[ii] = 0;
 	// Zero out DAC channel map in the shared memory
 	// to be used to check on slaves' channel allocation
 	ioMemData->dacOutUsed[ii][jj] = 0;
@@ -2160,7 +2162,6 @@ procfile_read(char *buffer,
 			cycleTime, timeHoldHold,
 			timeHoldWhen, timeHoldWhenHold);
 #if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
-	{
 #if defined(SERVO64K)
 		static const nb = 16;
 #elif defined(SERVO32K)
@@ -2176,9 +2177,9 @@ procfile_read(char *buffer,
 			strcat(buffer, b);
 		}
 		strcat(buffer, "\n");
-	}
 #endif
 
+#ifdef ADC_MASTER
 		/* Output DAC buffer size information */
 		for (i = 0; i < cdsPciModules.dacCount; i++) {
 			char b[32];
@@ -2187,6 +2188,25 @@ procfile_read(char *buffer,
 				dacOutBufSize[i]);
 			strcat(buffer, b);
 		}
+#endif
+#ifdef COMMDATA_INLINE
+		// See if we have any IPC with errors and print the numbers out
+		//
+		char b[128];
+		sprintf(b, "ipcErrBits=0x%x\n", ipcErrBits);
+		strcat(buffer, b);
+
+		//int myIpcCount;
+		//CDS_IPC_INFO ipcInfo[1];
+		for (i = 0; i < myIpcCount; i++) {
+	  	  if (ipcInfo[i].errTotal) {
+	  		sprintf(b, "IPC net=%d num=%d errcnt=%d\n", 
+	  		ipcInfo[i].netType, ipcInfo[i].ipcNum, ipcInfo[i].errTotal);
+	  		strcat(buffer, b);
+	  	  }
+ 		}
+#endif
+
 		ret = strlen(buffer);
 	}
 

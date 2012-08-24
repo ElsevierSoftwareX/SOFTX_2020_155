@@ -1,4 +1,5 @@
 #include <genif.h>
+#include "commData2.h"
 
 sci_l_segment_handle_t segment;
 sci_map_handle_t client_map_handle;
@@ -57,7 +58,7 @@ init_dolphin(int target_node) {
 		       0,
 		       1,
 		       DIS_BROADCAST,
-		       0x12000,
+		       IPC_TOTAL_ALLOC_SIZE,
 		       create_segment_callback,
 		       0,
 		       &segment);
@@ -111,7 +112,7 @@ init_dolphin(int target_node) {
   err = sci_map_segment(remote_segment_handle,
 			DIS_BROADCAST,
 			0,
-			0x12000,
+			IPC_TOTAL_ALLOC_SIZE,
 			&client_map_handle);
   printk("DIS segment mapping status %d\n", err);
   if (err) {
