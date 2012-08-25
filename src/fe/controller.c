@@ -2183,9 +2183,12 @@ procfile_read(char *buffer,
 		/* Output DAC buffer size information */
 		for (i = 0; i < cdsPciModules.dacCount; i++) {
 			char b[32];
-			sprintf(b, "DAC #%d %d-bit buf_size=%d\n", i,
-				cdsPciModules.dacType[i] == GSC_18AO8? 18: 16,
-				dacOutBufSize[i]);
+			if (cdsPciModules.dacType[i] == GSC_18AO8) {
+				sprintf(b, "DAC #%d 18-bit buf_size=%d\n", i, dacOutBufSize[i]);
+			} else {
+				sprintf(b, "DAC #%d 16-bit fifo_status=%d (%s)\n", i, dacOutBufSize[i],
+					dacOutBufSize[i] == 2? "OK": (dacOutBufSize[i] == 1? "empty": "full"));
+			}
 			strcat(buffer, b);
 		}
 #endif
