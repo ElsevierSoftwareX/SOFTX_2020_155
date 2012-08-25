@@ -107,6 +107,8 @@ printf("size of data block = %d\n", sizeof(CDS_IPC_COMMS));
                 printf("Net Type = PCIE SEND IPC at 0x%p  *********************************\n",ipcInfo[ii].pIpcData);
         }
         printf("IPC Number = %d\n",ipcInfo[ii].ipcNum);
+        printf("IPC Name = %s\n",ipcInfo[ii].name);
+        printf("Sender Model Name = %s\n",ipcInfo[ii].senderModelName);
         printf("RCV Rate  = %d\n",ipcInfo[ii].rcvRate);
         printf("Send Computer Number  = %d\n",ipcInfo[ii].sendNode);
 
@@ -231,8 +233,9 @@ static unsigned long nskipped = 0;	// number of skipped error messages (couldn't
 			} else {
 				if ((cycle_gps_time - startGpsTime) > 2) { // Do not print for the first 2 seconds
 					if (ptim < cycle_gps_time) {
-						if (nskipped) printf("skipped %d sync error messages\n", nskipped);
-						printf("ipc=%d sync error my=0x%lx remote=0x%lx @ %d\n", ii, mySyncWord, syncWord, rcvBlock);
+						if (nskipped) printf("IPC RCV ERROR: skipped %d sync error messages\n", nskipped);
+						printf("IPC RCV ERROR: ipc=%d name=%s sender=%s sync error my=0x%lx remote=0x%lx @ %d\n",
+							ipcIndex, ipcInfo[ii].name, ipcInfo[ii].senderModelName, mySyncWord, syncWord, rcvBlock);
 						ptim = cycle_gps_time;	// Print a single message per second
 						nskipped = 0;
 					} else {

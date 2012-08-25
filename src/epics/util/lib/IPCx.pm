@@ -67,6 +67,8 @@ sub frontEndInitCode {
               $calcExp .= "ipcInfo[$::ipcxInitDone]\.sendRate = $::ipcxParts[$l][2];\n";
               $calcExp .= "ipcInfo[$::ipcxInitDone]\.ipcNum = $::ipcxParts[$l][4];\n";
               $calcExp .= "ipcInfo[$::ipcxInitDone]\.errFlag = 0;\n";
+              $calcExp .= "ipcInfo[$::ipcxInitDone]\.name = \"$::ipcxParts[$l][0]\";\n";
+              $calcExp .= "ipcInfo[$::ipcxInitDone]\.senderModelName = \"$::ipcxParts[$l][5]\";\n";
 
               last;
            }

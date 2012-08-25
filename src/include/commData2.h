@@ -31,6 +31,8 @@ typedef struct CDS_IPC_INFO {
         int mode;
         int errFlag;
 	int errTotal;
+        char *name;
+        char *senderModelName;
 	CDS_IPC_COMMS *pIpcData;
 } CDS_IPC_INFO;
 typedef struct CDS_IPC_KEY_LIST {
