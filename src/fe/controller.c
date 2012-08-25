@@ -2203,8 +2203,10 @@ procfile_read(char *buffer,
 		//CDS_IPC_INFO ipcInfo[1];
 		for (i = 0; i < myIpcCount; i++) {
 	  	  if (ipcInfo[i].errTotal) {
-	  		sprintf(b, "IPC net=%d num=%d errcnt=%d\n", 
-	  		ipcInfo[i].netType, ipcInfo[i].ipcNum, ipcInfo[i].errTotal);
+	  		sprintf(b, "IPC net=%d num=%d name=%s sender=%s errcnt=%d\n", 
+	  		ipcInfo[i].netType, ipcInfo[i].ipcNum,
+			ipcInfo[i].name, ipcInfo[i].senderModelName,
+			ipcInfo[i].errTotal);
 	  		strcat(buffer, b);
 	  	  }
  		}
