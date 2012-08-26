@@ -67,6 +67,7 @@ char *lmPtr;
 int fillSize;
 #endif
 
+unsigned int curDaqBlockSize;
 
 /* ******************************************************************** */
 /* Routine to connect and write to LIGO DAQ system       		*/
@@ -311,6 +312,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     // Note, this is left over from RFM net. Now used only to calc CRC
     xferSize1 = crcLength/sysRate;
     mnDaqSize = crcLength/16;
+    curDaqBlockSize = mnDaqSize * 256;
     totalSize = mnDaqSize;
     totalSizeNet = mnDaqSize;
     
@@ -978,6 +980,8 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	totalChans += num_tps;
 	validTp = num_tps;
 	
+  	curDaqBlockSize = mnDaqSize * 256;
+
 	// Calculate the total transmission size
 	totalSize = mnDaqSize + validTp * (sysRate / 4);
 
@@ -1007,6 +1011,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     } /* End done 16Hz Cycle */
 
   } /* End case write */
+
   /* Return the FE total DAQ data rate */
   return((totalSize*256)/1000);
 

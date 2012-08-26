@@ -260,6 +260,7 @@ static char *versionId = "Version $Id$" ;
                      int epoch, void* arg);
    extern void rtestpoint_1 (struct svc_req* rqstp, 
                      register SVCXPRT* transp);
+   extern int curDaqBlockSize;
 #endif
 
 
@@ -294,12 +295,12 @@ static char *versionId = "Version $Id$" ;
       #ifdef DEBUG
       printf ("Request tp id=%d; node=%d; node_valid=%d\n",
     	       id, node, tpNode.valid);
-      #endif
    
       /* JCB */
       printf("Request %d testpoint(s)\n", tp.TP_r_len) ;
       for (i = 0; i < tp.TP_r_len; i++)
 	 printf("request tp %d\n", tp.TP_r_val[i]) ;
+      #endif
 
       /* test node ID */
       if ((id < 0) || (node < 0) || (node >= TP_MAX_NODE) ||
@@ -316,6 +317,80 @@ static char *versionId = "Version $Id$" ;
       #ifdef DEBUG
       printf ("Test point list length is %d\n", tp.TP_r_len);
       #endif
+
+
+      // Loop through the list of testpoint to set and check for DAQ overload
+      int projTpNum = 0; /* Projected test point number */
+      for (i = 0; i < tp.TP_r_len; i++) {
+         /* check if ID in list */
+         if ((tp.TP_r_val[i] <= 0) || (tp.TP_r_val[i] >= TP_HIGHEST_INDEX) || (tpNode.tplookup[tp.TP_r_val[i]] == NULL)) {
+            continue;
+         }
+      
+         /* test whether valid test point */
+         tpinterface = TP_ID_TO_INTERFACE (tp.TP_r_val[i]);
+         /* use LSC EXC for DAC channels */
+         if (tpinterface == TP_DAC_INTERFACE) {
+            tpinterface = TP_LSC_EX_INTERFACE;
+         }
+         len = TP_INTERFACE_TO_INDEX_LEN (tpinterface);
+         if ((tpinterface < 0) || (tpinterface >= TP_MAX_INTERFACE)) {
+            continue;
+         }
+      
+         /* test whether already in list */
+         for (j = 0, k = -1; j < len; j++) {
+            tpp = &tpNode.indx[tpinterface][j];
+            /* check for duplicate */
+            if (tpp->id == tp.TP_r_val[i]) {
+               /* already in list; check in use */
+               if (tpp->inUse < _TP_MAX_USER) {
+                  tpp->users[tpp->inUse].reqTime = TAInow();
+                  tpp->users[tpp->inUse].timeout = timeout;
+                  tpp->users[tpp->inUse].clntId = id;
+         //         tpp->inUse++;
+                  k = -2;
+                  break;
+               }
+               /* too many users */
+               else {
+                  k = -1;
+                  break;
+               }
+            }
+            if ((k == -1) && (tpp->id == 0)) {
+               /* found an empty slot */
+               k = j;
+	       projTpNum++;
+            }
+         }
+      }
+      /* Check if the total number of testpoint has reached the limit */
+      {
+	   int tpiface;
+	   int projTpNumNewEntry = -1;
+           for (tpiface = 0; tpiface < TP_MAX_INTERFACE; tpiface++) {
+            /* loop over selected test points */
+            int idxlen = TP_INTERFACE_TO_INDEX_LEN (tpiface);
+	    int tpidx;
+            for (tpidx = 0; tpidx < idxlen; tpidx++) {
+      		tpEntry_t*	tpent;		/* test point entry */
+               	tpent = &tpNode.indx[tpiface][tpidx];
+               	if (tpent->id != 0) projTpNum++;
+	    }
+	   }
+        #ifdef DEBUG
+	   printf("Projected tpnum=%d curDaqSize=%d\n", projTpNum, curDaqBlockSize);
+	#endif
+	   unsigned int projDaqSize = projTpNum * 4 * 16384 * sys_freq_mult + curDaqBlockSize;
+	   if (projDaqSize > DAQ_DCU_SIZE) {
+		printf ("Too many testpoints: projected DAQ size %d > %d (maximum)\n", projDaqSize, DAQ_DCU_SIZE);
+		k = -1;
+      		MUTEX_RELEASE (servermux);
+		return TRUE;
+	   }
+      }
+
       for (i = 0; i < tp.TP_r_len; i++) {
          /* debug */
       #ifdef DEBUG
@@ -338,8 +413,8 @@ static char *versionId = "Version $Id$" ;
             tpinterface = TP_LSC_EX_INTERFACE;
          }
          len = TP_INTERFACE_TO_INDEX_LEN (tpinterface);
-	 printf("Max tp index is %d, tp interface is %d\n", len, tpinterface) ;
       #ifdef DEBUG
+	 printf("Max tp index is %d, tp interface is %d\n", len, tpinterface) ;
          printf ("TP %i has interface %d\n", tp.TP_r_val[i], tpinterface);
       #endif
          if ((tpinterface < 0) || (tpinterface >= TP_MAX_INTERFACE)) {
@@ -380,8 +455,10 @@ static char *versionId = "Version $Id$" ;
                k = j;
             }
          }
+
          /* allocate a new test point */
-         if (k >= 0) {
+	if (k >= 0) {
+
             /* debug */
          #ifdef DEBUG
             printf ("allocate new TP node/interface/slot %i/%i/%i\n", 
@@ -409,6 +486,7 @@ static char *versionId = "Version $Id$" ;
       #ifdef DEBUG
       printf ("result status = %d\n", result->status);
       #endif
+   
       /* if failed, cleanup */
       if (result->status < 0) {
          int		ret;
@@ -422,10 +500,10 @@ static char *versionId = "Version $Id$" ;
             cleartp_1_svc (id, node, tpcln, &ret, rqstp);
          }
       }
-   
+
       /* release server mutex */
       MUTEX_RELEASE (servermux);
-   
+
       /* set activation time */
       time = TAInow();
       result->time = time / _ONESEC + 1;
@@ -520,9 +598,11 @@ static char *versionId = "Version $Id$" ;
       int		clearall;	/* clear all */
    
       gdsDebug ("clear test point");
+#ifdef DEBUG
       printf("Clear test points: len = %d\n", tp.TP_r_len) ;
       for (i = 0; i < tp.TP_r_len; i++)
 	 printf("clear tp %d\n", tp.TP_r_val[i]) ; /* JCB */
+#endif
    
       /* test node ID */
       if ((id < 0) || (node < 0) || (node >= TP_MAX_NODE) ||
@@ -781,8 +861,10 @@ static char *versionId = "Version $Id$" ;
                MUTEX_RELEASE (servermux);
                {
 		 time_t now = time (NULL);
+#ifdef DEBUG
 	         printf ("Allocate new TP handle %i by %s at %s\n", 
 	                 i, inet_ntoa (addr), ctime (&now));
+#endif
 		 fflush(stdout);
 	       }
                return TRUE;

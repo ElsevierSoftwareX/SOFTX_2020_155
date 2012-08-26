@@ -220,7 +220,7 @@ static char *versionId = "Version $Id$" ;
       }
       /* check validity */
       if (!tpNode[node].valid) {
-	 printf("tp node %d invalid\n", node);
+	 //printf("tp node %d invalid\n", node);
          return NULL;
       }
    

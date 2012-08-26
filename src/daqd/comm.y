@@ -2437,8 +2437,8 @@ start_trend_bailout:
 				      res = daqd.gds.req_tps(ac, gds, na);
 
 				    if (res) {
-				      if (daqd.tp_allowed(net_writer_c::ip_fd(((my_lexer *)lexer) -> ifd)))
-				        daqd.gds.clear_tps(ac, na);
+				      //if (daqd.tp_allowed(net_writer_c::ip_fd(((my_lexer *)lexer) -> ifd)))
+				        //daqd.gds.clear_tps(ac, na);
 				      if (((my_lexer *)lexer) -> strict)
 				 	*yyout << S_DAQD_NOT_FOUND << flush;
 			  	       else

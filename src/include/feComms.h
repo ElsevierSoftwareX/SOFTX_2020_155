@@ -19,7 +19,10 @@ typedef struct FEFE_COMMS{
 typedef struct RFM_FE_COMMS {
     union {
       char pad[0x1000];			/* Reserved for 5579 cntrl reg */
-      unsigned int awgtpman_gps;
+      struct {
+      	unsigned int awgtpman_gps;	/* awgtpman passes its current GPS time seconds to the FE for checking */
+	unsigned int feDaqBlockSize;	/* Front-end passes its current DAQ block size so awgtpman can figure out them maximum number of TPs */
+      };
     } padSpace;
     union{				/* Starts at 	0x0000 0040 */
       char sysepics[0x100000];
