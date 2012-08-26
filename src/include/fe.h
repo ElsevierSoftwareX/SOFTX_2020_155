@@ -22,6 +22,7 @@ extern int startGpsTime;
 extern CDS_HARDWARE cdsPciModules;
 extern unsigned int ipcErrBits;
 extern unsigned int timeSec;
+extern unsigned int curDaqBlockSize;
 int rioReadOps[MAX_DIO_MODULES];
 int rioOutput[MAX_DIO_MODULES];
 int rioOutput1[MAX_DIO_MODULES];

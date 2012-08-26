@@ -1759,6 +1759,8 @@ udelay(1000);
 		cycle_gps_time = timeSec; // Time at which ADCs triggered
 		pLocalEpics->epicsOutput.diags[FE_DIAGS_DAQ_BYTE_CNT] = 
 			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
+		// Send the current DAQ block size to the awgtpman for TP number checking
+	  	pEpicsComms->padSpace.feDaqBlockSize = curDaqBlockSize;
 	  	pLocalEpics->epicsOutput.tpCnt = tpPtr->count;
 		if(pLocalEpics->epicsOutput.diags[FE_DIAGS_DAQ_BYTE_CNT] > DAQ_DCU_RATE_WARNING) 
 			feStatus |= FE_ERROR_DAQ;;

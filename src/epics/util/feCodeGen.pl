@@ -2381,7 +2381,7 @@ for($ii=0;$ii<32;$ii++)
 print EPICS "OUTVARIABLE FEC\_$dcuId\_USR_TIME epicsOutput.diags[0] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG1 epicsOutput.diags[1] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.diags[2] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"4000\") field(HHSV,\"MAJOR\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"4000\") field(HHSV,\"MINOR\")\n";
 if($adcMaster > -1)
 {
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ao 0\n";
