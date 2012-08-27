@@ -493,7 +493,7 @@ if ($ipcxCnt > 0) {
    $res[0] =~ s/\D//g;
    my $maxIpcCount = 0 + $res[0];
    die "**ERROR: unable to determine MAX_IPC\n" unless $maxIpcCount > 0;
-   printf "The maxumum allowed IPC numer is maxIpcCount=$maxIpcCount\n";
+   printf "The maximum allowed IPC numer is maxIpcCount=$maxIpcCount\n";
    undef @inData;
 
    #
