@@ -983,11 +983,6 @@ udelay(1000);
 	// increased to appropriate number of 65536 s/sec to match desired
 	// code rate eg 32 samples each time thru before proceeding to match 2048 system.
 	// **********************************************************************************************************
-#if 0
-// Used in block transfers of data from GEFANUC RFM; presently not used as IOP takes too long.
-		if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(cycleNum % 64));
-		if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(cycleNum % 64));
-#endif
        if(cycleNum == 0)
         {
 	  //printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
@@ -1014,6 +1009,11 @@ udelay(1000);
         {
 #ifndef ADC_SLAVE
 // Start of ADC Read *************************************************************************************
+#ifndef RFM_DIRECT_READ
+// Used in block transfers of data from GEFANUC RFM
+		if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(cycleNum % IPC_BLOCKS));
+		if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(cycleNum % IPC_BLOCKS));
+#endif
 		// Read ADC data
                for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		{
@@ -1048,30 +1048,9 @@ udelay(1000);
 				// if(jj==0) usleep(0);
 		    		rdtscl(cpuClock[CPU_TIME_ADC_WAIT]);
 				adcWait = (cpuClock[CPU_TIME_ADC_WAIT] - cpuClock[CPU_TIME_RDY_ADC])/CPURATE;
-#ifndef RFM_DIRECT_READ
-#ifdef ADC_MASTER
-				if(((cpuClock[CPU_TIME_ADC_WAIT] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE > 10) && (!rfmDone))
-				{
-					if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(cycleNum % 64));
-					if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(cycleNum % 64));
-					rfmDone = 1;
-				}
-#endif
-#endif
 			}
 			// Allow 1msec for data to be ready (should never take that long).
                     }while((*packedData == DUMMY_ADC_VAL) && (adcWait < MAX_ADC_WAIT));
-
-#ifdef ADC_MASTER
-#ifndef RFM_DIRECT_READ
-				if(!rfmDone)
-				{
-					if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(cycleNum % 64));
-					if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(cycleNum % 64));
-				}
-#endif
-		rfmDone = 0;
-#endif
 
 		    // If data not ready in time, abort
 		    // Either the clock is missing or code is running too slow and ADC FIFO
@@ -1195,10 +1174,6 @@ udelay(1000);
 			packedData ++;
                     }
 #ifdef ADC_MASTER
-			if(jj==0) {
-				if(cdsPciModules.pci_rfm_dma[0]) status = rfm55DMAdone(0);
-				if(cdsPciModules.pci_rfm_dma[1]) status = rfm55DMAdone(1);
-			}
 		    // Write GPS time and cycle count as indicator to slave that adc data is ready
 	  	    ioMemData->gpsSecond = timeSec;;
 		    ioMemData->iodata[jj][ioMemCntr].timeSec = timeSec;;
@@ -1331,7 +1306,6 @@ udelay(1000);
 
 // Call the front end specific software *****************************************************************
         rdtscl(cpuClock[CPU_TIME_USR_START]);
-
  	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,0);
         rdtscl(cpuClock[CPU_TIME_USR_END]);
 
@@ -1515,6 +1489,11 @@ udelay(1000);
 
         pLocalEpics->epicsOutput.cycle = cycleNum;
 #ifdef ADC_MASTER
+
+#ifndef RFM_DIRECT_READ
+	if (cdsPciModules.pci_rfm[0]) rfm55DMAclr(&cdsPciModules,0);
+	if (cdsPciModules.pci_rfm[1]) rfm55DMAclr(&cdsPciModules,1);
+#endif
 // The following, to endif, is all duotone timing diagnostics.
         if(cycleNum == HKP_READ_SYMCOM_IRIGB)
         {

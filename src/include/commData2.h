@@ -7,6 +7,8 @@
 
 // The total number of IPCs allowed per kind
 #define MAX_IPC		256
+// RFM IPC reduced when using IOP DMA
+#define MAX_IPC_RFM	64
 // The number of data blocks buffered per IPC channel
 #define IPC_BLOCKS 	64
 
@@ -48,13 +50,13 @@ typedef struct CDS_IPC_KEY_LIST {
 #define IRFM1		3
 #define IPC_BUFFER_SIZE		sizeof(struct CDS_IPC_COMMS)
 #define IPC_BASE_OFFSET		0x80000
-#define IPC_PCIE_BASE_OFFSET		0x100
+#define IPC_PCIE_BASE_OFFSET	0x100
 #define IPC_TOTAL_ALLOC_SIZE	(IPC_PCIE_BASE_OFFSET + sizeof(CDS_IPC_COMMS))
 #define IPC_PCIE_READ	2
 #define IPC_PCIE_WRITE	3
-#define IPC_RFM_BLOCK_SIZE 	(IPC_MAX_RFM * IPC_BUFFER_SIZE)
 #define IPC_MAX_RATE		65536
-#define IPC_RFM_XFER_SIZE	0x400	// Set to 1k Byte ie 64 channels
+#define IPC_RFM_BLOCK_SIZE	(sizeof(struct CDS_IPC_XMIT) * MAX_IPC)
+#define IPC_RFM_XFER_SIZE	(sizeof(struct CDS_IPC_XMIT) * MAX_IPC_RFM)
 
 // decide between inline or not for commData functions
 #ifdef COMMDATA_INLINE
