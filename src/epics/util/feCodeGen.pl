@@ -3229,7 +3229,7 @@ print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
 print OUTM "\n";
 }
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
-print OUTM "EXTRA_CFLAGS += -O3 -w -I../../include\n";
+print OUTM "EXTRA_CFLAGS += -O -w -I../../include\n";
 print OUTM "EXTRA_CFLAGS += -I/opt/gm/include\n";
 print OUTM "EXTRA_CFLAGS += -I/opt/mx/include\n";
 
