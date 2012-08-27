@@ -4019,19 +4019,23 @@ sub commify_series {
 		  $sysname = uc($skeleton);
 		  $sysname = substr($sysname, 2, 3);
 		my $part_name = $partName[$cur_part_num];
+		my $subsysName = "";
 		if (is_top_name($partSubName[$cur_part_num])) {
-		  $sysname = substr($partSubName[$cur_part_num], 2, 3);
-	#print "ADC MONITOR IS TOP =$sysname\n";
+		  $sysname = substr($partSubName[$cur_part_num], 0, 3);
+#print "ADC MONITOR IS TOP =$sysname\n";
+		  $subsysName = substr($subSysName[$cur_subsys_num], 3, 0);
+		} else {
+		  $subsysName = $subSysName[$cur_subsys_num];
 		}
 		#print "ADC input Part $part_name $partType[$cur_part_num] has Adc input \'$partInput[$cur_part_num][0]\'\n";
 		if (($partType[$cur_part_num] eq "Filt") || ($partType[$cur_part_num] eq "FiltCtrl")) {
-		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
-		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "_INMON"  .  "\"/g;";
-		  # $pvtmonitor_args .= "s/$partInput[$cur_part_num][0]_EPICS_CHANNEL/" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "_INMON" . "/g;";
+		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subsysName  . ($subsysName eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
+		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "_INMON"  .  "\"/g;";
+		  # $pvtmonitor_args .= "s/$partInput[$cur_part_num][0]_EPICS_CHANNEL/" . $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "_INMON" . "/g;";
 		} elsif ($partType[$cur_part_num] eq "EpicsOut") {
-		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
-		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "\"/g;";
-		  # $pvtmonitor_args .= "s/$partInput[$cur_part_num][0]_EPICS_CHANNEL/" . $site . "\:$sysname-" . $subSysName[$cur_subsys_num]  . ($subSysName[$cur_subsys_num] eq "" ? "": "_") . $part_name . "/g;";
+		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subsysName  . ($subsysName eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
+		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "\"/g;";
+		  # $pvtmonitor_args .= "s/$partInput[$cur_part_num][0]_EPICS_CHANNEL/" . $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "/g;";
 		}
         }
 		  $sysname = uc($skeleton);
@@ -4049,6 +4053,7 @@ my $ccnt = 0;
 for (0 .. $adcCnt - 1) {
    my $adc_monitor_args = $monitor_args;
    $adc_monitor_args .= "s/MONITOR_ADC/MONITOR_ADC$_/g;";
+   #print ("MONITOR sed args: $adc_monitor_args\n");die;
    system("cat $rcg_src_dir/src/epics/util/MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$adc_monitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.adl");
    # system("cat $rcg_src_dir/src/epics/util/PVT1.css-pvtable | sed 's/adc_0/adc_$_/' |  sed '$pvtmonitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.css-pvtable");
 system("cat /tmp/adcmenu.opi | sed 's/ADCLABEL/ADC$_/g' | sed 's/XPOS/$xpos/g' | sed 's/YPOS/$ypos/g' | sed 's/MODEL/$sysname/g' > /tmp/adc$_.opi");
