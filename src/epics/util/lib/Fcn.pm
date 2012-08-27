@@ -36,12 +36,6 @@ sub printFrontEndVars  {
         my ($i) = @_;
         print ::OUT "double \L$::xpartName[$i];\n";
         my $expr = $::functionExpr[$i];
-        if ($expr =~ /deg/) {
-           if ($::convDeg2Rad == 0) {
-              $::convDeg2Rad++;
-              print ::OUT "double conv = 3\.141592654/180\.0;\n";
-           }
-        }
         while ($expr =~ /cos|sin/gc) {
            $::trigCnt++;
            print ::OUT "double lcos$::trigCnt, lsin$::trigCnt;\n";
@@ -76,18 +70,19 @@ sub frontEndCode {
         $deg2rad = "";
         $trigExp = "";
         $expr =~ s/\[(\d+)\]/$1-1/eg;
-        $expr =~ s/(cos|sin)deg\(u(\d+)\)(?{$deg2rad .= "u$2 \*\= conv;\n";})
-                  /$1\(u$2\)/gx;
+             #3\.141592654/180\.0
+	if ($expr =~ m/(cos|sin)deg/) {
+		$deg2rad .= "(3.141592654/180.0)*";
+	}
+        $expr =~ s/(cos|sin)deg\(u(\d+)\)#/$1\(u$2\)/gx;
         $expr =~ s/(cos|sin)\(u(\d+)\)(?{$::trigOut++;})
-                   (?{$trigExp .= "sincos\(u$2, &lsin$::trigOut, &lcos$::trigOut\);\n";})
+                   (?{$trigExp .= "sincos\($deg2rad\(u$2\), &lsin$::trigOut, &lcos$::trigOut\);\n";})
                   /l$1$::trigOut/gx;
         $expr =~ s/u(\d+)/$muxName\[$1\]/g;
-        $deg2rad =~ s/u(\d+)/$muxName\[$1\]/g;
         $trigExp =~ s/u(\d+)/$muxName\[$1\]/g;
         $expr =~ s/fabs/lfabs/g;
         $expr =~ s/log10/llog10/g;
         $expr =~ s/sqrt/lsqrt/g;
-        $calcExp .= $deg2rad;
         $calcExp .= $trigExp;
         $calcExp .= "\L$::xpartName[$i] = ";
         $calcExp .= $expr;
