@@ -1379,16 +1379,23 @@ int stats;
 int myAddress;
 int rfmAddress;
 
-    rfmAddress = IPC_BASE_OFFSET + (offset * IPC_RFM_XFER_SIZE);
-    myAddress = (pHardware->pci_rfm_dma[card] + (offset * IPC_RFM_XFER_SIZE));
+    rfmAddress = IPC_BASE_OFFSET + (offset * IPC_RFM_BLOCK_SIZE);
+    myAddress = (pHardware->pci_rfm_dma[card] + (offset * IPC_RFM_BLOCK_SIZE));
 
-    p5565Dma[card]->DMA_CSR = VMIC_DMA_CLR;	// Clear DMA DONE
+    // p5565Dma[card]->DMA_CSR = VMIC_DMA_CLR;	// Clear DMA DONE
     p5565Dma[card]->DMA0_PCI_ADD = myAddress;	// Computer address space
     p5565Dma[card]->DMA0_LOC_ADD = rfmAddress;	// RFM card offset from base
     // These were set during initialization, so don't need them again (save time)
     // p5565Dma[card]->DMA0_BTC = 0x400;	// Set byte xfer to 1024 bytes
     // p5565Dma[card]->DMA0_DESC = 0x8;	// Set RFM to local memory
     p5565Dma[card]->DMA_CSR = VMIC_DMA_START;	// Start DMA
+}
+// *****************************************************************************
+// Routine to clear RFM done bit
+// *****************************************************************************
+void rfm55DMAclr(CDS_HARDWARE *pHardware, int card)
+{
+    p5565Dma[card]->DMA_CSR = VMIC_DMA_CLR;	// Clear DMA DONE
 }
 // *****************************************************************************
 // Routine to check RFM done bit and clear for next DMA
