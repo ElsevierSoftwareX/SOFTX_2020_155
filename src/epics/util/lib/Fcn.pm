@@ -5,6 +5,9 @@ use Exporter;
 sub partType {
         my ($node, $i) = @_;
         my $expr = ${$node->{FIELDS}}{"Expr"};
+	if (!length($expr)) {
+		$expr = $::defFcnExpr;
+ 	}
         $::functionExpr[$i] = $expr;
 	return Fcn;
 }
