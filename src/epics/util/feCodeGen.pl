@@ -1407,6 +1407,7 @@ close(OUTD);
 # End DIAGNOSTIC
 
 print "Found $adcCnt ADC modules part is $adcPartNum[0]\n";
+die "***ERROR: At least one ADC part is required in the model\n" if ($adcCnt < 1);
 print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
 print "Found $boCnt Binary modules part is $boPartNum[0]\n";
 if (($adcCnt > 12) || ($dacCnt > 12)) {
