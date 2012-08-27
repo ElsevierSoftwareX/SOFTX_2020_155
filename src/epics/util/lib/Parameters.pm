@@ -127,8 +127,8 @@ sub parseParams {
 			} elsif ($spp[0] eq "remote_ipc_port") {
 				$::remoteIPCport = $spp[1];
         			die "Invalid remote_ipc_port specified in cdsParamters\n" unless $::remoteIPCport >= 0;
-			} elsif ($spp[0] eq "no_rfm_dma") {
-				$::noRfmDma = 1;
+			} elsif ($spp[0] eq "rfm_dma") {
+				$::rfmDma = 1;
 			} elsif ($spp[0] eq "flip_signals") { 
 				$::flipSignals = $spp[1];
 			} elsif ($spp[0] eq "biquad") { 

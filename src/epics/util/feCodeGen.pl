@@ -3398,9 +3398,9 @@ if ($::noZeroPad) {
 }
 
 
-if ($::noRfmDma) {
+if ($::rfmDma) {
   print OUTM "#Comment out to run with RFM DMA\n";
-  print OUTM "EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
+  print OUTM "#EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
 } else {
   print OUTM "#Comment out to run with RFM DMA\n";
   print OUTM "EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
