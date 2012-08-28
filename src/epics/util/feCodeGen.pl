@@ -3181,54 +3181,55 @@ if ($no_rtl) {
 if ($no_rtl) {
 print OUTM "# CPU-Shutdown Real Time Linux\n";
 } else {
-print OUTM "# RTLinux makefile\n";
-if ($wind_river_rtlinux) {
-  print OUTM "include /home/controls/common_pc_64_build/build/rtcore-base-5.1/rtl.mk\n";
-} else {
-  print OUTM "include /opt/rtldk-2.2/rtlinuxpro/rtl.mk\n";
+	print OUTM "# RTLinux makefile\n";
+	if ($wind_river_rtlinux) {
+  		print OUTM "include /home/controls/common_pc_64_build/build/rtcore-base-5.1/rtl.mk\n";
+	} else {
+  		print OUTM "include /opt/rtldk-2.2/rtlinuxpro/rtl.mk\n";
+	}
+	print OUTM "\n";
+	print OUTM "\n";
+	print OUTM "TARGET_RTL := $skeleton";
+	print OUTM "fe\.rtl\n";
+	print OUTM "LIBRARY_OBJS := map.o myri.o myriexpress.o  fb.o\n";
+	print OUTM "LDFLAGS_\$(TARGET_RTL) := -g \$(LIBRARY_OBJS)\n";
+	print OUTM "\n";
+	print OUTM "\$(TARGET_RTL): \$(LIBRARY_OBJS)\n";
+	print OUTM "\n";
+	print OUTM "EXTRA_CFLAGS+=\$(CFLAGS)\n";
+	print OUTM "$skeleton";
+	print OUTM "fe\.o: ../controller.c\n";
+	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -c \$< -o \$\@\n";
+	print OUTM "map.o: ../map.c\n";
+	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
+	print OUTM "myri.o: ../myri.c\n";
+	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
+	print OUTM "myriexpress.o: ../myriexpress.c\n";
+	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DMX_KERNEL=1 -c \$<\n";
+	print OUTM "fb.o: ../fb.c\n";
+	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
+	print OUTM "fm10Gen.o: fm10Gen.c\n";
+	if($rate == 480) {
+		print "SERVO IS 2K\n";
+		print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO2K -c \$<\n";
+	} elsif ($rate == 240) {
+		print "SERVO IS 4K\n";
+		print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO4K -c \$<\n";
+	} elsif ($rate == 60) {
+		print "SERVO IS 16K\n";
+		print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO16K -c \$<\n";
+	} elsif ($rate == 30) {
+		print "SERVO IS 32K\n";
+		print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO32K -c \$<\n";
+	} elsif ($rate == 15) {
+		print "SERVO IS 64K\n";
+		print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO64K -c \$<\n";
+	}
+	print OUTM "crc.o: crc.c\n";
+	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
+	print OUTM "\n";
 }
-print OUTM "\n";
-print OUTM "\n";
-print OUTM "TARGET_RTL := $skeleton";
-print OUTM "fe\.rtl\n";
-print OUTM "LIBRARY_OBJS := map.o myri.o myriexpress.o  fb.o\n";
-print OUTM "LDFLAGS_\$(TARGET_RTL) := -g \$(LIBRARY_OBJS)\n";
-print OUTM "\n";
-print OUTM "\$(TARGET_RTL): \$(LIBRARY_OBJS)\n";
-print OUTM "\n";
-print OUTM "EXTRA_CFLAGS+=\$(CFLAGS)\n";
-print OUTM "$skeleton";
-print OUTM "fe\.o: ../controller.c\n";
-print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -c \$< -o \$\@\n";
-print OUTM "map.o: ../map.c\n";
-print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
-print OUTM "myri.o: ../myri.c\n";
-print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
-print OUTM "myriexpress.o: ../myriexpress.c\n";
-print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DMX_KERNEL=1 -c \$<\n";
-print OUTM "fb.o: ../fb.c\n";
-print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
-print OUTM "fm10Gen.o: fm10Gen.c\n";
-if($rate == 480) {
-	print "SERVO IS 2K\n";
-	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO2K -c \$<\n";
-} elsif ($rate == 240) {
-	print "SERVO IS 4K\n";
-	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO4K -c \$<\n";
-} elsif ($rate == 60) {
-	print "SERVO IS 16K\n";
-	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO16K -c \$<\n";
-} elsif ($rate == 30) {
-	print "SERVO IS 32K\n";
-	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO32K -c \$<\n";
-} elsif ($rate == 15) {
-	print "SERVO IS 64K\n";
-	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO64K -c \$<\n";
-}
-print OUTM "crc.o: crc.c\n";
-print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
-print OUTM "\n";
-}
+print OUTM "KBUILD_EXTRA_SYMBOLS=$rcg_src_dir/src/drv/ExtraSymbols.symvers\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
 print OUTM "EXTRA_CFLAGS += -O -w -I../../include\n";
 print OUTM "EXTRA_CFLAGS += -I/opt/gm/include\n";

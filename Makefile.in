@@ -48,6 +48,7 @@ DEVFLAGS=@DEVFLAGS@
 	@echo Building front-end Linux kernel module $@...
 	@make -sC src/fe/$@ clean
 	@make -C src/fe/$@ >> $@.log 2>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
+	@$(srcdir)/src/epics/util/checkUndefined.pl $@_error.log >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@echo Done
 	@/bin/mkdir -p target/$@epics/src
 	@echo $(srcdir) > target/$@epics/src/rcg_location.txt
