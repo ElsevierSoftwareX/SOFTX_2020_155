@@ -446,7 +446,7 @@ class daqd_c {
 #if EPICS_EDCU == 1
 	pvValue[14] = 1;
 #endif
-	exit(1);
+	_exit(1);
   }
   void clear_fault () {
 #if EPICS_EDCU == 1
