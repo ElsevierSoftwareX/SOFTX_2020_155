@@ -111,11 +111,11 @@ extern unsigned int cpu_khz;
 #include "drv/inputFilterModule.h"		
 #include "drv/inputFilterModule1.h"		
 
+double *testpoint[GDS_MAX_NFM_TP];	// Testpoints which are not part of filter modules
 #ifndef NO_DAQ
 DAQ_RANGE daq;			// Range settings for daqLib.c
 int numFb = 0;
 int fbStat[2] = {0,0};		// Status of DAQ backend computer
-double *testpoint[GDS_MAX_NFM_TP];	// Testpoints which are not part of filter modules
 double xExc[GDS_MAX_NFM_EXC];	// GDS EXC not associated with filter modules
 #endif
 // 1/16 sec cycle counters for DAQS 
