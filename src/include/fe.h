@@ -1,6 +1,7 @@
 extern int printk(const char *fmt, ...);
 #define printf printk
 #include "linux/types.h"
+#include "asm/delay.h"
 #include "inlineMath.h"
 #include "drv/cdsHardware.h"
 #include FE_HEADER
