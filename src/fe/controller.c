@@ -2664,6 +2664,11 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	printf("TIME SLAVE IOP AT 0x%x\n",(int)rfmTime);
 	printf("rfmTime = %d\n", *rfmTime);
 #endif
+#else
+// Clear Dolphin pointers so the slave sees NULLs
+	ioMemData->dolphinCount = 0;
+        ioMemData->dolphin[0] = 0;
+        ioMemData->dolphin[1] = 0;
 #endif
         printf("***************************************************************************\n");
   	if (cdsPciModules.gps) {
