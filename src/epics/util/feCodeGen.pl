@@ -639,6 +639,7 @@ if ($ipcxCnt > 0) {
             # considering entries for this host
             #
             if ( ($ipcxParts[$ii][1] eq "ISHME") && ($targetHost ne $ipcxData[$jj][3]) ) {
+	       print "***WARNING: SHMEM IPC $ipcxPartComp found and skipped. My host: $targetHost; IPC file has: $ipcxData[$jj][3]\n";
                next;
             }
 
