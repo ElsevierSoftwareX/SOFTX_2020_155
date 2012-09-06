@@ -3994,6 +3994,8 @@ sub commify_series {
 			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".opi");
+			} elsif ($partType[$cur_part_num] =~ /^FiltCtrl2/) {
+				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL_2.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 				system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".opi");
@@ -4009,6 +4011,8 @@ sub commify_series {
 			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.opi | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".opi");
+			} elsif ($partType[$cur_part_num] =~ /^FiltCtrl2/) {
+				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL_2.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 				system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".opi");
