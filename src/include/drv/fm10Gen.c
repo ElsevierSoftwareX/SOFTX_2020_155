@@ -125,7 +125,7 @@ Returns double value giving the current output.
 
 double junk;
 
-inline double iir_filter(double input,double *coef,int n,double *history){
+double iir_filter(double input,double *coef,int n,double *history){
 
   int i;
   double *coef_ptr;
@@ -176,7 +176,7 @@ inline double iir_filter(double input,double *coef,int n,double *history){
 }
 
 /* Biquad form IIR */
-inline double iir_filter_biquad(double input,double *coef,int n,double *history){
+double iir_filter_biquad(double input,double *coef,int n,double *history){
 
   int i;
   double *coef_ptr;
