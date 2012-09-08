@@ -1,10 +1,10 @@
 
 
-inline double inputFilterModuleRamp(
+static double inputFilterModuleRamp(
 	double *v, 	/* current value in/out */
 	double nv,	/* new value from Epics */
 	double tramp,	/* Ramping time in seconds */
-	double *step) 	/* current ramping step in/out */
+	unsigned long *step) 	/* current ramping step in/out */
 {
 	if (*step) { // currently ramping
 		// Finish ramping right away if user changed ramp time to 0
@@ -30,7 +30,7 @@ inline double inputFilterModuleRamp(
 	return *v;
 }
 
-inline void inputFilterModule(
+void inputFilterModule(
 	double in,						/* input IN0 */
 	double *old_out,					/* input IN1_PREV, output IN1 */
 	double *old_val,					/* input VAL_PREV, output VAL */
@@ -38,7 +38,7 @@ inline void inputFilterModule(
 	double *pk, double *pp, double *pz,			/* input current value, output new values (after ramping was done */
 	double epics_k, double epics_p, double epics_z,		/* EPICS record values, their change initiates ramping */
 	double k_tramp, double p_tramp, double z_tramp,		/* EPICS records, ramp times in seconds */
-	unsigned long *ks, unsigned long *ps, unsigned *zs)	/* ramping steps, in and out */
+	unsigned long *ks, unsigned long *ps, unsigned long *zs)	/* ramping steps, in and out */
 {
 	double p = inputFilterModuleRamp(pp, epics_p, p_tramp, ps) * (double)(M_PI/(double)CYCLE_PER_SECOND);
 	double a = (1.0 - p) / (1.0 + p);

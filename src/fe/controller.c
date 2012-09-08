@@ -22,18 +22,18 @@
 
 #include <linux/version.h>
 #include <linux/init.h>
+#undef printf
 #include <linux/module.h>
+#include <linux/kernel.h>
 #include <linux/proc_fs.h>
 #include <linux/kthread.h>
 #include <asm/delay.h>
+#include <asm/cacheflush.h>
 
 #include <linux/slab.h>
+#define printf printk
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
-
-#if MX_KERNEL == 1
-#include <myriexpress.h>
-#endif
 
 #include </usr/src/linux/arch/x86/include/asm/processor.h>
 #include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
@@ -72,7 +72,7 @@ volatile int stop_working_threads = 0;
 
 
 // Code can be run without shutting down CPU by changing this compile flag
-#undef NO_CPU_SHUTDOWN 1
+#undef NO_CPU_SHUTDOWN 
 #ifndef NO_CPU_SHUTDOWN
 char fmt1[512];
 int printk(const char *fmt, ...) {
@@ -87,7 +87,17 @@ int printk(const char *fmt, ...) {
     return r;
 }
 #endif
-#define printf printk
+
+#if 0
+int printf(const char *fmt, ...) {
+    int r;
+    va_list args;
+    va_start(args, fmt);
+    r = printk(fmt, args);
+    va_end(args);
+    return r;
+}
+#endif
 
 #ifdef DOLPHIN_TEST
 #include "dolphin.c"
@@ -273,26 +283,26 @@ volatile unsigned int *rfmTime;
 
 /* Oversamping base rate is 64K */
 /* Coeffs for the 2x downsampling (32K system) filter */
-static double feCoeff2x[9] =
+static double __attribute__ ((unused)) feCoeff2x[9] =
         {0.053628649721183,
 	 0.2568759660371100, -0.3225906481359000, 1.2568801238621801, 1.6774135096891700,
 	-0.2061764045745400, -1.0941543149527400, 2.0846376586498803, 2.1966597482716801};
 
 /* Coeffs for the 4x downsampling (16K system) filter */
-static double feCoeff4x[9] =
+static double __attribute__ ((unused)) feCoeff4x[9] =
 	{0.014805052402446,  
 	0.7166258547451800, -0.0683289874517300, 0.3031629575762000, 0.5171469569032900,
 	0.6838596423885499, -0.2534855521841101, 1.6838609161411500, 1.7447155374502499};
 //
 // New Brian Lantz 4k decimation filter
-static double feCoeff16x[9] =
+static double __attribute__ ((unused)) feCoeff16x[9] =
         {0.010203728365,
 	0.8052941009065100, -0.0241751519071000, 0.3920490703701900, 0.5612099784288400,
 	0.8339678987936501, -0.0376022631287799, -0.0131581721533700, 0.1145865116421301};
 
 /* Coeffs for the 32x downsampling filter (2K system) */
 /* Original Rana coeffs from 40m lab elog */
-static double feCoeff32x[9] =
+static double __attribute__ ((unused)) feCoeff32x[9] =
         {0.0001104130574447,
 	0.9701834961388200, -0.0010837026165800, -0.0200761119821899, 0.0085463156103800,
 	0.9871502388637901, -0.0039246182095299, 3.9871502388637898, 3.9960753817904697};
@@ -359,7 +369,7 @@ int initialDiagReset = 1;
 // Clear DAC channel shared memory map,
 // used to keep track of non-overlapping DAC channels among slave models
 //
-void deallocate_dac_channels() {
+void deallocate_dac_channels(void) {
   int ii, jj;
   for (ii = 0; ii < MAX_DAC_MODULES; ii++) {
     int pd = cdsPciModules.dacConfig[ii] - ioMemData->adcCount;
@@ -394,7 +404,6 @@ void *fe_start(void *arg)
   					// Code runs longer for first few cycles on startup as it settles in,
 					// so this helps prevent long cycles during that time.
   int limit = OVERFLOW_LIMIT_16BIT;      // ADC/DAC overflow test value
-  int offset = 0;			// offset used to calculate ADC values
   int mask = GSAI_DATA_MASK;            // Bit mask for ADC/DAC read/writes
   int num_outs = MAX_DAC_CHN_PER_MOD;   // Number of DAC channels variable
 #ifndef ADC_SLAVE
@@ -431,9 +440,6 @@ void *fe_start(void *arg)
   int mxStat = 0;			// Net diags when myrinet express is used
   int mxDiag = 0;
   int mxDiagR = 0;
-  unsigned int ns;			// GPS time from IRIG-B
-  double time;	
-  unsigned int usec;
 // ****** Share data
   int ioClock = 0;
   int ioClockDac = DAC_PRELOAD_CNT;
@@ -463,11 +469,13 @@ void *fe_start(void *arg)
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
   volatile GSA_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
 #endif
-  static dacBufOffset = 0;
 
 
   int cnt = 0;
   unsigned long cpc;
+
+  memset (tempClock, 0, sizeof(tempClock));
+
   // Flush L1 cache
   memset (fp, 0, 64*1024);
   memset (fp, 1, 64*1024);
@@ -632,7 +640,7 @@ udelay(1000);
 
 #if !defined(NO_DAQ) && !defined(IOP_TASK)
   // Initialize DAQ function
-  status = daqWrite(0,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],0,pLocalEpics->epicsOutput.gdsMon,xExc);
+  status = daqWrite(0,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],0, (int *)(pLocalEpics->epicsOutput.gdsMon),xExc);
   if(status == -1) 
   {
     printf("DAQ init failed -- exiting\n");
@@ -674,7 +682,7 @@ udelay(1000);
 
   // Initialize user application software ************************************
   printf("Calling feCode() to initialize\n");
-  iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,1);
+  iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0], (struct CDS_EPICS *)pLocalEpics,1);
 
 #ifndef ADC_MASTER
   // See if my DAC channel map overlaps with already running models
@@ -1306,7 +1314,7 @@ udelay(1000);
 
 // Call the front end specific software *****************************************************************
         rdtscl(cpuClock[CPU_TIME_USR_START]);
- 	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],pLocalEpics,0);
+ 	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
         rdtscl(cpuClock[CPU_TIME_USR_END]);
 
 
@@ -1618,7 +1626,7 @@ udelay(1000);
 
 	// Check if code exit is requested
 	if(cycleNum == MAX_MODULES) 
-		vmeDone = stop_working_threads | checkEpicsReset(cycleNum, pLocalEpics);
+		vmeDone = stop_working_threads | checkEpicsReset(cycleNum, (struct CDS_EPICS *)pLocalEpics);
 
 	// If synced to 1PPS on startup, continue to check that code
 	// is still in sync with 1PPS.
@@ -1737,7 +1745,7 @@ udelay(1000);
 		if (cycle_gps_time == 0) startGpsTime = timeSec;
 		cycle_gps_time = timeSec; // Time at which ADCs triggered
 		pLocalEpics->epicsOutput.diags[FE_DIAGS_DAQ_BYTE_CNT] = 
-			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,pLocalEpics->epicsOutput.gdsMon,xExc);
+			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc);
 		// Send the current DAQ block size to the awgtpman for TP number checking
 	  	pEpicsComms->padSpace.feDaqBlockSize = curDaqBlockSize;
 	  	pLocalEpics->epicsOutput.tpCnt = tpPtr->count;
@@ -2008,11 +2016,11 @@ udelay(1000);
 // This produces cycle time histogram in /proc file
 	{
 #if defined(SERVO64K)
-		static const nb = 15;
+		static const int nb = 15;
 #elif defined(SERVO32K)
-		static const nb = 31;
+		static const int nb = 31;
 #elif defined(SERVO16K)
-		static const nb = 63;
+		static const int nb = 63;
 #endif
 
 		cycleHist[cycleTime<nb?cycleTime:nb]++;
@@ -2108,6 +2116,16 @@ procfile_read(char *buffer,
 		/* we have finished to read, return 0 */
 		ret  = 0;
 	} else {
+#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
+#if defined(SERVO64K)
+		static const int nb = 16;
+#elif defined(SERVO32K)
+		static const int nb = 32;
+#elif defined(SERVO16K)
+		static const int nb = 64;
+#endif
+		char b[128];
+
 		/* fill the buffer, return the buffer size */
 		ret = sprintf(buffer,
 
@@ -2142,14 +2160,6 @@ procfile_read(char *buffer,
 			build_date,
 			cycleTime, timeHoldHold,
 			timeHoldWhen, timeHoldWhenHold);
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
-#if defined(SERVO64K)
-		static const nb = 16;
-#elif defined(SERVO32K)
-		static const nb = 32;
-#elif defined(SERVO16K)
-		static const nb = 64;
-#endif
 		strcat(buffer, "cycleHist: ");
 		for (i = 0; i < nb; i++) {
 			char b[32];
@@ -2176,7 +2186,6 @@ procfile_read(char *buffer,
 #ifdef COMMDATA_INLINE
 		// See if we have any IPC with errors and print the numbers out
 		//
-		char b[128];
 		sprintf(b, "ipcErrBits=0x%x\n", ipcErrBits);
 		strcat(buffer, b);
 
@@ -2208,6 +2217,7 @@ EXPORT_SYMBOL(need_to_load_IOP_first);
 extern int need_to_load_IOP_first;
 #endif
 
+extern void set_fe_code_idle(void *(*ptr)(void *), unsigned int cpu);
 
 int init_module (void)
 {
@@ -2223,7 +2233,12 @@ int init_module (void)
 	int doIIRO16Cnt;
 	int cdo64Cnt;
 	int cdi64Cnt;
+	int ret;
+	int cnt;
+	extern int cpu_down(unsigned int);
+	extern int is_cpu_taken_by_rcg_model(unsigned int cpu);
 
+	kk = 0;
 #ifdef SPECIFIC_CPU
 #define CPUID SPECIFIC_CPU
 #else 
@@ -2232,7 +2247,6 @@ int init_module (void)
 
 #ifndef NO_CPU_SHUTDOWN
 	// See if our CPU core is free
-	extern int is_cpu_taken_by_rcg_model(unsigned int cpu);
         if (is_cpu_taken_by_rcg_model(CPUID)) {
 		printk(KERN_ALERT "Error: CPU %d already taken\n", CPUID);
 		return -1;
@@ -2244,12 +2258,7 @@ int init_module (void)
 #endif
 
 #ifdef DOLPHIN_TEST
-#ifdef X1X14_CODE
-	static const target_node = 8; //DIS_TARGET_NODE;
-#else
-	static const target_node = 12; //DIS_TARGET_NODE;
-#endif
-	status = init_dolphin(target_node);
+	status = init_dolphin();
 	if (status != 0) {
 		return -1;
 	}
@@ -2276,7 +2285,7 @@ int init_module (void)
 	printf("cpu clock %u\n",cpu_khz);
 
 
-        int ret =  mbuf_allocate_area(SYSTEM_NAME_STRING_LOWER, 64*1024*1024, 0);
+        ret =  mbuf_allocate_area(SYSTEM_NAME_STRING_LOWER, 64*1024*1024, 0);
         if (ret < 0) {
                 printf("mbuf_allocate_area() failed; ret = %d\n", ret);
                 return -1;
@@ -2522,7 +2531,7 @@ int init_module (void)
                 if(cdsPciModules.adcType[ii] == GSC_18AISS6C)
                 {
                         printf("\tADC %d is a GSC_18AISS6C module\n",ii);
-                        printf("\t\tChannels = 6 \n",jj);
+                        printf("\t\tChannels = 6 \n");
                         printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.adcConfig[ii] & 0xfff));
                 }
                 if(cdsPciModules.adcType[ii] == GSC_16AI64SSA)
@@ -2633,7 +2642,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 		cdsPciModules.pci_rfm[ii] = ioMemData->pci_rfm[ii];
 		cdsPciModules.pci_rfm_dma[ii] = ioMemData->pci_rfm_dma[ii];
 #endif
-		printf("address is 0x%x\n",cdsPciModules.pci_rfm[ii]);
+		printf("address is 0x%lx\n",cdsPciModules.pci_rfm[ii]);
 #ifdef ADC_MASTER
 		// Master sends RFM memory pointers to SLAVES
 		ioMemData->pci_rfm[ii] = cdsPciModules.pci_rfm[ii];
@@ -2703,7 +2712,6 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 
 
         pLocalEpics = (CDS_EPICS *)&((RFM_FE_COMMS *)_epics_shm)->epicsSpace;
-	int cnt;
 	for (cnt = 0;  cnt < 10 && pLocalEpics->epicsInput.burtRestore == 0; cnt++) {
         	printf("Epics burt restore is %d\n", pLocalEpics->epicsInput.burtRestore);
         	msleep(1000);
@@ -2732,11 +2740,9 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 
 
 #ifndef NO_CPU_SHUTDOWN
-	extern void set_fe_code_idle(void (*ptr)(void), unsigned int cpu);
         set_fe_code_idle(fe_start, CPUID);
         msleep(100);
 
-	extern int cpu_down(unsigned int);
 	cpu_down(CPUID);
 
 	// The code runs on the disabled CPU
@@ -2751,13 +2757,14 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 }
 
 void cleanup_module (void) {
+	extern int __cpuinit cpu_up(unsigned int cpu);
+
 	remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
 //	printk("Setting vmeReset flag to 1\n");
 	//pLocalEpics->epicsInput.vmeReset = 1;
         //msleep(1000);
 
 #ifndef NO_CPU_SHUTDOWN
-	extern void set_fe_code_idle(void (*ptr)(void), unsigned int cpu);
 	// Unset the code callback
         set_fe_code_idle(0, CPUID);
 #endif
@@ -2778,7 +2785,6 @@ void cleanup_module (void) {
 	printkl("Will bring back CPU %d\n", CPUID);
         msleep(1000);
 	// Bring the CPU back up
-	extern int __cpuinit cpu_up(unsigned int cpu);
         cpu_up(CPUID);
         //msleep(1000);
 	printkl("Brought the CPU back up\n");

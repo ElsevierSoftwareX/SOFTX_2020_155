@@ -1,9 +1,11 @@
 #include <linux/types.h>
+#include <linux/kernel.h>
+#undef printf
 #include <linux/pci.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
 #include <asm/delay.h>
-
+#define printf printk
 #include <drv/cdsHardware.h>
 #include <drv/map.h>
 #include <commData2.h>
@@ -96,7 +98,7 @@ int gsaDacTrigger(CDS_HARDWARE *pHardware)
       dacPtr[ii]->BOR |= (GSAO_ENABLE_CLK);
 #else
       if (pHardware->dacType[ii] == GSC_18AO8) {
-  	volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[ii];
+  	volatile GSA_18BIT_DAC_REG *dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[ii]);
 	dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_EXT_CLOCK_SRC;
 	//dac18bitPtr->OUTPUT_CONFIG &= ~GSAO_18BIT_EXT_TRIG_SRC;
 	//dac18bitPtr->BUF_OUTPUT_OPS |= (1<<11);
@@ -708,7 +710,6 @@ int map18bitDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
   static unsigned int pci_io_addr;
   int pedStatus;
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;
-  unsigned int reg;
 
 	  devNum = pHardware->dacCount;
           // Enable the device, PCI required
@@ -920,13 +921,11 @@ int mapPciModules(CDS_HARDWARE *pCds)
   int status;
   int i;
   int modCount = 0;
-  int adc_cnt = 0;
   int fast_adc_cnt = 0;
   int dac_cnt = 0;
   int dac_18bit_cnt = 0;
   int bo_cnt = 0;
   int use_it;
-  unsigned int board_type;
 
   dacdev = NULL;
   status = 0;
@@ -1294,7 +1293,6 @@ int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int kind)
   static unsigned int csrAddress;
   static unsigned int dmaAddress;
   int pedStatus;
-  int status;
 
   devNum = pHardware->rfmCount;
   pedStatus = pci_enable_device(rfmdev);
@@ -1310,7 +1308,7 @@ int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int kind)
     pHardware->pci_rfm[devNum] = (long)ioremap_nocache((unsigned long)pci_io_addr, 128*1024*1024);
     // Allocate local memory for IPC DMA xfers from RFM module
     pHardware->pci_rfm_dma[devNum] = (long) pci_alloc_consistent(rfmdev,IPC_BUFFER_SIZE,&rfm_dma_handle[devNum]);
-    printk("RFM address is 0x%lx\n",pci_io_addr);
+    printk("RFM address is 0x%ux\n",pci_io_addr);
 
     // Find the RFM control/status register
     pci_read_config_dword(rfmdev, PCI_BASE_ADDRESS_2, &csrAddress);
@@ -1329,16 +1327,16 @@ int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int kind)
     pci_read_config_dword(rfmdev,
 		 PCI_BASE_ADDRESS_0,
 		 &dmaAddress);
-    printk("DMA address is 0x%lx\n",dmaAddress);
+    printk("DMA address is 0x%ux\n",dmaAddress);
     dmaAddr = ioremap_nocache(dmaAddress,0x200);
     p5565Dma[devNum] = (VMIC5565DMA *)dmaAddr;
     pHardware->rfm_dma[devNum] = p5565Dma[devNum];
-    printk("5565DMA at 0x%lx\n",(int)p5565Dma[devNum]);
-    printk("5565 INTCR = 0x%lx\n",p5565Dma[devNum]->INTCSR);
+    printk("5565DMA at 0x%lx\n",(unsigned long int)p5565Dma[devNum]);
+    printk("5565 INTCR = 0x%ux\n",p5565Dma[devNum]->INTCSR);
     p5565Dma[devNum]->INTCSR = 0;	// Disable interrupts from this card
-    printk("5565 INTCR = 0x%lx\n",p5565Dma[devNum]->INTCSR);
-    printk("5565 MODE = 0x%lx\n",p5565Dma[devNum]->DMA0_MODE);
-    printk("5565 DESC = 0x%lx\n",p5565Dma[devNum]->DMA0_DESC);
+    printk("5565 INTCR = 0x%ux\n",p5565Dma[devNum]->INTCSR);
+    printk("5565 MODE = 0x%ux\n",p5565Dma[devNum]->DMA0_MODE);
+    printk("5565 DESC = 0x%ux\n",p5565Dma[devNum]->DMA0_DESC);
     // Preload some DMA settings
     // Only important items here are BTC and DESC fields, which are used 
     // later by DMA routine.
@@ -1375,7 +1373,6 @@ int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int kind)
 // *****************************************************************************
 void rfm55DMA(CDS_HARDWARE *pHardware, int card, int offset)
 {
-int stats;
 int myAddress;
 int rfmAddress;
 
@@ -1424,12 +1421,9 @@ int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
   int pedStatus;
   unsigned char *addr1;
   unsigned char *addr3;
-  unsigned char *addr4;
-  unsigned char *addr5;
   unsigned int *cmd;
   unsigned int *dramRead;
   unsigned int time0;
-  unsigned char inPut[8];
   SYMCOM_REGISTER *timeReg;
 
   pedStatus = pci_enable_device(gpsdev);
@@ -1439,9 +1433,9 @@ int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
 
   addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x40);
   printk("Remapped 0x%p\n", addr1);
-  pHardware->gps = addr1;
+  pHardware->gps = (unsigned int *)addr1;
   pHardware->gpsType = SYMCOM_RCVR;
-  timeReg = (TSYNC_REGISTER *) addr1;;
+  timeReg = (SYMCOM_REGISTER *) addr1;;
 
   pci_read_config_dword(gpsdev, PCI_BASE_ADDRESS_3, &pci_io_addr);
   pci_io_addr &= 0xfffffff0;
@@ -1552,7 +1546,7 @@ int mapTsyncGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
 
   addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x30);
   printk("Remapped 0x%p\n", addr1);
-  pHardware->gps = addr1;
+  pHardware->gps = (unsigned int *)addr1;
   pHardware->gpsType = TSYNC_RCVR;
 
 // Spectracom IRIG-B Card does not auto detect Year information from IRIG-B fanout unit

@@ -2705,7 +2705,7 @@ print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
 print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
 print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
 print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
-print OUT "{\n\nint ii, dacFault;\n\n";
+print OUT "{\n\nint ii; int dacFault = 0;\n\n";
 print OUT "if(feInit)\n\{\n";
 
 # removed for ADC PART CHANGE
@@ -3182,6 +3182,8 @@ if ($no_rtl) {
 if ($no_rtl) {
 print OUTM "# CPU-Shutdown Real Time Linux\n";
 } else {
+	die "RTLinux is not supported any more\n";
+	# TODO: delete RTLinux code
 	print OUTM "# RTLinux makefile\n";
 	if ($wind_river_rtlinux) {
   		print OUTM "include /home/controls/common_pc_64_build/build/rtcore-base-5.1/rtl.mk\n";
@@ -3232,7 +3234,7 @@ print OUTM "# CPU-Shutdown Real Time Linux\n";
 }
 print OUTM "KBUILD_EXTRA_SYMBOLS=$rcg_src_dir/src/drv/ExtraSymbols.symvers\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
-print OUTM "EXTRA_CFLAGS += --std=gnu99 -O -w -I../../include\n";
+print OUTM "EXTRA_CFLAGS += --std=gnu99 -O -I../../include\n";
 print OUTM "EXTRA_CFLAGS += -I/opt/gm/include\n";
 print OUTM "EXTRA_CFLAGS += -I/opt/mx/include\n";
 

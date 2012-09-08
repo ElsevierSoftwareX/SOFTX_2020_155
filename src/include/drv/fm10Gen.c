@@ -26,7 +26,6 @@
 
 
 #include "fm10Gen.h"
-static const char *fm10Gen_cvsid = "$Id: fm10Gen.c,v 1.23 2009/09/17 18:56:23 aivanov Exp $";
 
 inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
 inline double inputModule(FILT_MOD *pFilt, int modNum);
@@ -40,24 +39,24 @@ inline UINT32 handleEpicsSwitch(UINT32 sw, int modNum, FILT_MOD *dsp, COEF *dspC
 #define OPSWITCH_OUTPUT_ENABLE 0x4000000
 #define OPSWITCH_HOLD_ENABLE 0x8000000
 
-static const UINT32 pow2_in[10] = {0x10,0x40,0x100,0x400,0x1000,0x4000,0x10000,
+const UINT32 pow2_in[10] = {0x10,0x40,0x100,0x400,0x1000,0x4000,0x10000,
 				   0x40000,0x100000,0x400000};
-static const UINT32 pow2_out[10] = {0x20,0x80,0x200,0x800,0x2000,0x8000,0x20000,
+const UINT32 pow2_out[10] = {0x20,0x80,0x200,0x800,0x2000,0x8000,0x20000,
 				    0x80000,0x200000,0x800000};
 
-static const UINT32 fltrConst[13] = {16, 64, 256, 1024, 4096, 16384,
+const UINT32 fltrConst[13] = {16, 64, 256, 1024, 4096, 16384,
                                      65536, 262144, 1048576, 4194304,
 				     0x4, 0x8, 0x4000000, /* in sw, off sw, out sw */
 				     };
 
 #if defined(SERVO16K) || defined(SERVOMIXED) || defined(SERVO32K) || defined(SERVO64K) || defined(SERVO128K) || defined(SERVO256K)
-static double sixteenKAvgCoeff[9] = {1.9084759e-12,
+double sixteenKAvgCoeff[9] = {1.9084759e-12,
 				     -1.99708675982420, 0.99709029700517, 2.00000005830747, 1.00000000739582,
 				     -1.99878510620232, 0.99879373895648, 1.99999994169253, 0.99999999260419};
 #endif
 
 #if defined(SERVO2K) || defined(SERVOMIXED) || defined(SERVO4K)
-static double twoKAvgCoeff[9] = {7.705446e-9,
+double twoKAvgCoeff[9] = {7.705446e-9,
 				 -1.97673337437048, 0.97695747524900,  2.00000006227141,  1.00000000659235,
 				 -1.98984125831661,  0.99039139954634,  1.99999993772859,  0.99999999340765};
 #endif
@@ -95,11 +94,11 @@ static double twoKAvgCoeff[9] = {7.705446e-9,
 
 
 //New tRamp.c gain ramping strcuture
-static RampParamState gain_ramp[MAX_MODULES][10];
+RampParamState gain_ramp[MAX_MODULES][10];
 
 
 //New tRamp.c gain offset strcuture
-static RampParamState offset_ramp[MAX_MODULES][10];
+RampParamState offset_ramp[MAX_MODULES][10];
 
 /**************************************************************************
 iir_filter - Perform IIR filtering sample by sample on doubles
@@ -294,21 +293,21 @@ filterModuleRate(FILT_MOD *pFilt,     /* Filter module data  */
 		 unsigned int rate)   /* Rate in Hz at which this modules gets calculated */
 #else
 #ifdef SERVO16K
-static const int rate = 16384;
+const int rate = 16384;
 #elif defined(SERVO5HZ)
-static const int rate = 5;
+const int rate = 5;
 #elif defined(SERVO2K)
-static const int rate = 2048;
+const int rate = 2048;
 #elif defined(SERVO4K)
-static const int rate = 4096;
+const int rate = 4096;
 #elif defined(SERVO32K)
-static const int rate = 32768;
+const int rate = 32768;
 #elif defined(SERVO64K)
-static const int rate = (2*32768);
+const int rate = (2*32768);
 #elif defined(SERVO128K)
-static const int rate = (4*32768);
+const int rate = (4*32768);
 #elif defined(SERVO256K)
-static const int rate = (8*32768);
+const int rate = (8*32768);
 #endif
 	     
 inline double
@@ -623,7 +622,7 @@ inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_C
   for(ii=bF;ii<sF;ii++)
   {
     filtC->coeffs[ii].biquad = pRfmCoeff->vmeCoeffs[ii].biquad;
-    if(filtC->coeffs[ii].biquad) printf("Found a BQF filter %d\n",ii);
+    //if(filtC->coeffs[ii].biquad) printf("Found a BQF filter %d\n",ii);
     for(jj=0;jj<FILTERS;jj++)
     {
       if(pRfmCoeff->vmeCoeffs[ii].filtSections[jj])
@@ -691,7 +690,7 @@ inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_C
 	- One filter bank at a time.
 	- One SOS at a time.			  */
 /**************************************************/
-inline int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int cycle, volatile VME_COEF *pRfmCoeff, int *changed)
+int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int cycle, volatile VME_COEF *pRfmCoeff, int *changed)
 {
   unsigned int ii, kk, jj;
 #ifdef FIR_FILTERS
@@ -1290,7 +1289,14 @@ filterModuleD2(FILT_MOD *pFilt,     /* Filter module data  */
 {
   int ix;
   UINT32 opSwitchE;
-  UINT32 fltrSwitch;
+  int ii, jj, kk, ramp, timeout;
+  int sw, sw_out, sType, sw_in;
+  double filtData;
+  float avg, compare;
+  double output;
+  double fmInput;
+  int id = 0;                  /* System number (HEPI) */
+
   /* Do the shift to match the bits in the the opSwitchE variable so I can do "==" comparisons */
   UINT32 opSwitchP = pFilt->inputs[modNum].opSwitchP >> 1;
 
@@ -1334,13 +1340,6 @@ filterModuleD2(FILT_MOD *pFilt,     /* Filter module data  */
     pFilt->inputs[modNum].control = 0;
     opSwitchE = pFilt->inputs[modNum].opSwitchE;
   }
-  int ii, jj, kk, ramp, timeout;
-  int sw, sw_out, sType, sw_in;
-  double filtData;
-  float avg, compare;
-  double output;
-  double fmInput;
-  int id = 0;                  /* System number (HEPI) */
 
   /* Set the input to a very small number. If input is zero, code timing becomes a problem. */
   /* This is not fully understood, but it may be due to floating point underflow when the   */

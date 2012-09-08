@@ -105,7 +105,6 @@ static int excSlot;		/* 0-sysRate, slot to read exc data	*/
 static int daqWaitCycle;	/* If 0, write to FB (256Hz)		*/
 static int daqWriteTime;	/* Num daq cycles between writes.	*/
 static int daqWriteCycle;	/* Cycle count to xmit to FB.		*/
-static int daqWriteCycleSend;	/* Cycle count to xmit to FB.		*/
 float *pFloat = 0;		/* Temp ptr to write float data.	*/
 short *pShort = 0;		/* Temp ptr to write short data.	*/
 char *pData;			/* Ptr to start of data set in swing	*/
@@ -138,10 +137,6 @@ unsigned int exc;
 unsigned int tpn;
 int slot;
 int num_tps;
-
-#if DCU_MAX_CHANNELS > DAQ_GDS_MAX_TP_NUM
-#warning DCU_MAX_CHANNELS greater than DAQ_GDS_MAX_TP_NUM
-#endif
 
 #ifdef CORE_BIQUAD
 // Decimation filter coefficient definitions.		
@@ -573,12 +568,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       	  /* add this data offset to the data pointer */
       	  pFloat += decSlot;
       	}
-//#if defined(COMPAT_INITIAL_LIGO)
-#if 0
-	#define byteswap(a,b) ((char *)&a)[0] = ((char *)&b)[3]; ((char *)&a)[1] = ((char *)&b)[2];((char *)&a)[2] = ((char *)&b)[1];((char *)&a)[3] = ((char *)&b)[0];
-#else	
-	#define byteswap(a,b) a
-#endif
 
 	/* Write the data into the local swing buffer */
       	if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
@@ -586,8 +575,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	  	*pShort = (short)dWord;
       	else {
       		/* Write data as float into swing buffer */
-		float t = dWord;
-		byteswap(dWord, t);
 		*pFloat = dWord;
 	}
       }
@@ -818,10 +805,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	// Offset by one into the TP/EXC tables for the 2K systems
 	unsigned int _2k_sys_offs = sysRate < DAQ_16K_SAMPLE_SIZE;
 	
-	// Copy TP/EXC tables into my local memory
-	memcpy(excnum, gdsPtr->tp[_2k_sys_offs][0], sizeof(excnum));
-	memcpy(tpnum, gdsPtr->tp[2 + _2k_sys_offs][0], sizeof(excnum));
-
 	// Helper function to search the lists
 	// Clears the found number from the lists
 	// tpnum and excnum lists of numbers do not intersect
@@ -837,6 +820,19 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		}
 		return 0;
 	}
+
+	// Helper function to find an empty slot in the localTable
+	inline unsigned int empty_slot(void) {
+		int i;
+		for (i = 0; i < DAQ_GDS_MAX_TP_ALLOWED; i++) {
+			if (tpNum[i] == 0) return i;	
+		}
+		return -1;
+	}
+
+	// Copy TP/EXC tables into my local memory
+	memcpy(excnum, (const void *)(gdsPtr->tp[_2k_sys_offs][0]), sizeof(excnum));
+	memcpy(tpnum, (const void *)(gdsPtr->tp[2 + _2k_sys_offs][0]), sizeof(excnum));
 
 	// Search and clear deselected test points
 	for (i = 0; i < DAQ_GDS_MAX_TP_ALLOWED; i++) {
@@ -864,15 +860,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		}
 	}
 	
-	// Helper function to find an empty slot in the localTable
-	inline unsigned int empty_slot() {
-		int i;
-		for (i = 0; i < DAQ_GDS_MAX_TP_ALLOWED; i++) {
-			if (tpNum[i] == 0) return i;	
-		}
-		return -1;
-	}
-
 	// tpnum and excnum lists now have only the new test points
 	// Insert these new numbers into empty localTable slots
 	for (i = 0; i < (2 * DAQ_GDS_MAX_TP_NUM); i++) {

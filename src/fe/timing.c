@@ -1,4 +1,4 @@
-inline void lockGpsTime()
+inline void lockGpsTime(void)
 {
   SYMCOM_REGISTER *timeRead;
           timeRead = (SYMCOM_REGISTER *)cdsPciModules.gps;
@@ -49,9 +49,9 @@ inline int  getGpsTimeTsync(unsigned int *tsyncSec, unsigned int *tsyncUsec) {
 //***********************************************************************
 //// Get current GPS seconds from TSYNC IRIG-B Rcvr
 //***********************************************************************
-inline unsigned int  getGpsSecTsync() {
+inline unsigned int  getGpsSecTsync(void) {
 TSYNC_REGISTER *timeRead;
-    unsigned int timeSec,timeNsec,sync;
+    unsigned int timeSec;
 
         if (cdsPciModules.gps) {
             timeRead = (TSYNC_REGISTER *)cdsPciModules.gps;
@@ -82,7 +82,7 @@ inline int  getGpsuSecTsync(unsigned int *tsyncUsec) {
 //***********************************************************************
 // Get current kernel time (in GPS)
 //***********************************************************************
-inline unsigned long current_time() {
+inline unsigned long current_time(void) {
     struct timespec t;
     extern struct timespec current_kernel_time(void);
     	t = current_kernel_time();
@@ -95,7 +95,7 @@ inline unsigned long current_time() {
 // Test Mode - allows computer w/o IOC to run on timer from MASTER on
 // 		Dolphin RFM network.
 //***********************************************************************
-inline void waitDolphinTime()
+inline void waitDolphinTime(void)
 {
 unsigned long d = cdsPciModules.dolphin[0][1];
 
