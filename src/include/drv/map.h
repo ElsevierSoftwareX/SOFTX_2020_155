@@ -40,13 +40,13 @@ unsigned int readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum);
 #ifdef SERVO2K
 #define OVERSAMPLE_TIMES        32
 #define FE_OVERSAMPLE_COEFF     feCoeff32x
-#elif SERVO4K
+#elif defined(SERVO4K)
 #define OVERSAMPLE_TIMES        16
 #define FE_OVERSAMPLE_COEFF     feCoeff16x
-#elif SERVO16K
+#elif defined(SERVO16K)
 #define OVERSAMPLE_TIMES        4
 #define FE_OVERSAMPLE_COEFF     feCoeff4x
-#elif SERVO32K
+#elif defined(SERVO32K)
 #define OVERSAMPLE_TIMES        2
 #define FE_OVERSAMPLE_COEFF     feCoeff2x
 #else

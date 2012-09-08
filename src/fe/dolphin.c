@@ -51,7 +51,7 @@ signed32 create_segment_callback(void IN *arg,
 }
 
 int
-init_dolphin(int target_node) {
+init_dolphin(void) {
   cdsPciModules.dolphinCount = 0;
   scierror_t err =
     sci_create_segment(NO_BINDING,

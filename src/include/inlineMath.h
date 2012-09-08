@@ -6,11 +6,14 @@
 #define M_PI     3.14159265358979323846
 #define M_TWO_PI 6.28318530717958647692
 
+#if 0
+// These are already defined in kernel's msr.h
 #define rdtscl(low) \
      __asm__ __volatile__("rdtsc" : "=a" (low) : : "edx")
 
 #define rdtscll(val) \
      __asm__ __volatile__("rdtsc" : "=A" (val))
+#endif
 
 #define __lrint_code \
   long int __lrintres;                                                        \
@@ -19,8 +22,8 @@
      : "=m" (__lrintres) : "t" (__x) : "st");                                 \
   return __lrintres
 
-inline int rintf (float __x) { __lrint_code; }
-inline int rint (double __x) { __lrint_code; }
+inline int _rintf (float __x) { __lrint_code; }
+inline int _rint (double __x) { __lrint_code; }
 
 inline void sincos(double __x, double *__sinx, double *__cosx)
 {
@@ -130,8 +133,8 @@ write_mxcsr (unsigned long long val)
 
 /* Set FZ and DAZ bits, disabling underflows and denorms
  * This fixes long execution times caused by 0.0 inputs to filter modules */
-void inline
-fz_daz()
+void
+fz_daz(void)
 {
   //unsigned long long mxcsr = read_mxcsr();
   //printk("mxcsr=%p\n", mxcsr);

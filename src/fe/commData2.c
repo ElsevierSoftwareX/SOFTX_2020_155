@@ -8,6 +8,7 @@
 
 #include "commData2.h"
 #include "isnan.h"
+#include <asm/cacheflush.h>
 
 #ifdef COMMDATA_INLINE
 #  define INLINE inline
@@ -27,7 +28,7 @@ INLINE void commData2Init(
 int ii;
 
 
-printf("size of data block = %d\n", sizeof(CDS_IPC_COMMS));
+printf("size of data block = %lu\n", sizeof(CDS_IPC_COMMS));
   for(ii=0;ii<connects;ii++)
   {
 	// All cycle counts sent as part of data sync word are based on max supported rate of 
@@ -125,15 +126,15 @@ INLINE void commData2Send(int connects,  	 	// Total number of IPC connections i
 // Data is sent at the native rate of the calling application.
 // Data sent is of type double, with timestamp and 65536 cycle count combined into long.
 {
-unsigned long syncWord;	// Combined GPS timestamp and cycle counter
-int ipcIndex;		// Pointer to next IPC data buffer
-int dataCycle;		// Cycle counter 0-65535
-int ii;
-int chan;
-int sendBlock;
+  unsigned long syncWord;	// Combined GPS timestamp and cycle counter
+  int ipcIndex;		// Pointer to next IPC data buffer
+  int dataCycle;		// Cycle counter 0-65535
+  int ii;
+  int chan;
+  int sendBlock;
+  int lastPcie = -1;
 
   sendBlock = ((cycle + 1) * (IPC_MAX_RATE / FE_RATE)) % IPC_BLOCKS;
-  int lastPcie = -1;
   //int num_pcie = 0;
   for(ii=0;ii<connects;ii++)
   {
@@ -177,7 +178,7 @@ int sendBlock;
 }
 
 // *************************************************************************************************
-INLINE void commData2Receive(int connects,  	 	// Total number of IPC connections in the application
+void commData2Receive(int connects,  	 	// Total number of IPC connections in the application
 			     CDS_IPC_INFO ipcInfo[], 	// IPC information structure
 			     int timeSec, 		// Present GPS Second
 			     int cycle)			// Application cycle count (0 to FE_CODE_RATE)
@@ -233,7 +234,7 @@ static unsigned long nskipped = 0;	// number of skipped error messages (couldn't
 			} else {
 				if ((cycle_gps_time - startGpsTime) > 2) { // Do not print for the first 2 seconds
 					if (ptim < cycle_gps_time) {
-						if (nskipped) printf("IPC RCV ERROR: skipped %d sync error messages\n", nskipped);
+						if (nskipped) printf("IPC RCV ERROR: skipped %lu sync error messages\n", nskipped);
 						printf("IPC RCV ERROR: ipc=%d name=%s sender=%s sync error my=0x%lx remote=0x%lx @ %d\n",
 							ipcIndex, ipcInfo[ii].name, ipcInfo[ii].senderModelName, mySyncWord, syncWord, rcvBlock);
 						ptim = cycle_gps_time;	// Print a single message per second

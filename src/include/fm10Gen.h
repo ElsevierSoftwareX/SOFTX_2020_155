@@ -1,8 +1,6 @@
 #ifndef FM10GEN_H
 #define FM10GEN_H
 
-static const char *fm10Gen_h_cvsid = "$Id: fm10Gen.h,v 1.5 2009/09/17 18:59:01 aivanov Exp $";
-
 /*****************************************************************************/
 /*ORGANIZATION OF THE SWITCH CONTROL REGISTER*/
 /*
