@@ -395,7 +395,7 @@ void *fe_start(void *arg)
 
   int adcData[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];	// ADC raw data
   int adcChanErr[MAX_ADC_MODULES];
-  int adcWait;
+  int adcWait = 0;
   int adcOF[MAX_ADC_MODULES];		// ADC overrange counters
 
   int dacChanErr[MAX_DAC_MODULES];
@@ -409,10 +409,8 @@ void *fe_start(void *arg)
 #ifndef ADC_SLAVE
   volatile int *packedData;		// Pointer to ADC PCI data space
   volatile unsigned int *pDacData;	// Pointer to DAC PCI data space
-  int timeDiag = 0;			// GPS seconds, passed to EPICS
   int wtmin,wtmax;			// Time window for startup on IRIG-B
   int dacEnable = 0;
-  struct timespec next;
   int pBits[9] = {1,2,4,8,16,32,64,128,256};	// Lookup table for quick power of 2 calcs
 #endif
   RFM_FE_COMMS *pEpicsComms;		// Pointer to EPICS shared memory space
@@ -441,12 +439,16 @@ void *fe_start(void *arg)
   int mxDiag = 0;
   int mxDiagR = 0;
 // ****** Share data
-  int ioClock = 0;
   int ioClockDac = DAC_PRELOAD_CNT;
   int ioMemCntr = 0;
   int ioMemCntrDac = DAC_PRELOAD_CNT;
+#ifdef ADC_SLAVE
   int memCtr = 0;
+  int ioClock = 0;
+#endif
+#ifdef OVERSAMPLE_DAC
   double dac_in =  0.0;			// DAC value after upsample filtering
+#endif
   int dac_out = 0;			// Integer value sent to DAC FIFO
 
   int feStatus = 0;
@@ -464,15 +466,14 @@ void *fe_start(void *arg)
   static float duotoneMeanDac = 0.0;
   static int dacDuoEnable = 0;
 
-  static rfmDone = 0;
-  static dacBufSelect = 0;			// DAC memory double buffer selector
+  static int dacBufSelect = 0;			// DAC memory double buffer selector
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
   volatile GSA_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
 #endif
 #ifndef ADC_SLAVE
-  unsigned int usec;
-  unsigned int offset;
-  unsigned int dacBufOffset;
+  unsigned int usec = 0;
+  unsigned int offset = 0;
+  unsigned int dacBufOffset = 0;
 #endif
 
 
@@ -799,7 +800,7 @@ udelay(1000);
 		{       
 			if(cdsPciModules.dacType[jj] == GSC_18AO8)
 			{       
-				dac18bitPtr = dacPtr[jj];
+				dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 				for(ii=0;ii<GSAO_18BIT_PRELOAD;ii++) dac18bitPtr->OUTPUT_BUF = 0;
 			}else{  
 				dac16bitPtr = dacPtr[jj];
@@ -1932,8 +1933,9 @@ udelay(1000);
 		if(cdsPciModules.dacType[jj] == GSC_18AO8)
 		{
 			static int dacWatchDog = 0;
+			volatile GSA_18BIT_DAC_REG *dac18bitPtr;
 			if (cycleNum == HKP_DAC_WD_CLK) dacWatchDog ^= 1;
-			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
+			dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 			if(iopDacEnable)
 				dac18bitPtr->digital_io_ports = (dacWatchDog | GSAO_18BIT_DIO_RW);
 
@@ -1948,7 +1950,7 @@ udelay(1000);
 		if(cdsPciModules.dacType[jj] == GSC_18AO8)
 		{
 			static int dacWDread = 0;
-			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
+			volatile GSA_18BIT_DAC_REG *dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 			dacWDread = dac18bitPtr->digital_io_ports;
 			if(((dacWDread >> 8) & 1) > 0)
 			    {
@@ -1978,7 +1980,7 @@ udelay(1000);
 		jj = cycleNum - HKP_DAC_FIFO_CHK;
 		if(cdsPciModules.dacType[jj] == GSC_18AO8)
 		{
-			volatile GSA_18BIT_DAC_REG *dac18bitPtr = dacPtr[jj];
+			volatile GSA_18BIT_DAC_REG *dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 			out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
 			dacOutBufSize[jj] = out_buf_size;
 			if((out_buf_size < 8) || (out_buf_size > 24))
@@ -2228,6 +2230,7 @@ int init_module (void)
 	int ii,jj,kk;
 	char fname[128];
 	int cards;
+#ifdef ADC_SLAVE
 	int adcCnt;
 	int dacCnt;
         int dac18Cnt;
@@ -2236,6 +2239,7 @@ int init_module (void)
 	int doIIRO16Cnt;
 	int cdo64Cnt;
 	int cdi64Cnt;
+#endif
 	int ret;
 	int cnt;
 	extern int cpu_down(unsigned int);

@@ -2705,7 +2705,7 @@ print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
 print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
 print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
 print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
-print OUT "{\n\nint ii; int dacFault = 0;\n\n";
+print OUT "{\n\nint  __attribute__ ((unused)) ii; int dacFault = 0;\n\n";
 print OUT "if(feInit)\n\{\n";
 
 # removed for ADC PART CHANGE
