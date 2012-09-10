@@ -63,7 +63,7 @@ DEVFLAGS=@DEVFLAGS@
 	@echo RCG source code directory:
 	@echo $(srcdir)
 	@echo The following files were used for this build:
-	@cat src/epics/util/sources.$@
+	@sort src/epics/util/sources.$@ | uniq
 	@echo
 	@echo  Successfully compiled
 	@echo '*********************'
