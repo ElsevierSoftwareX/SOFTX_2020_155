@@ -52,9 +52,11 @@ signed32 create_segment_callback(void IN *arg,
 
 int
 init_dolphin(void) {
+  scierror_t err;
+  char *addr;
+  char *read_addr;
   cdsPciModules.dolphinCount = 0;
-  scierror_t err =
-    sci_create_segment(NO_BINDING,
+  err = sci_create_segment(NO_BINDING,
 		       0,
 		       1,
 		       DIS_BROADCAST,
@@ -79,14 +81,14 @@ init_dolphin(void) {
     return -1;
   }
   
-  char *read_addr = sci_local_kernel_virtual_address(segment);
+  read_addr = sci_local_kernel_virtual_address(segment);
   if (read_addr == 0) {
     printk("DIS sci_local_kernel_virtual_address returned 0\n");
     sci_remove_segment(&segment, 0);
     return -1;
   } else {
     printk("Dolphin memory read at 0x%p\n", read_addr);
-    cdsPciModules.dolphin[0] = read_addr;
+    cdsPciModules.dolphin[0] = (volatile unsigned long *)read_addr;
   }
   udelay(MAX_UDELAY);
   udelay(MAX_UDELAY);
@@ -121,7 +123,7 @@ init_dolphin(void) {
     return -1;
   }
   
-  char *addr = sci_kernel_virtual_address_of_mapping(client_map_handle);
+  addr = sci_kernel_virtual_address_of_mapping(client_map_handle);
   if (addr == 0) {
     printk ("Got zero pointer from sci_kernel_virtual_address_of_mapping\n");
     sci_disconnect_segment(&remote_segment_handle, 0);
@@ -129,7 +131,7 @@ init_dolphin(void) {
     return -1;
   } else {
     printk ("Dolphin memory at 0x%p\n", addr);
-    cdsPciModules.dolphin[1] = addr;
+    cdsPciModules.dolphin[1] = (volatile unsigned long *)addr;
   }
 
   sci_register_session_cb(0,0,session_callback,0);
@@ -150,7 +152,7 @@ IRM19_sci_get_device_info(unsigned32 IN local_adapter_number,
 }
 
 void 
-finish_dolphin() {
+finish_dolphin(void) {
   sci_unmap_segment(&client_map_handle, 0);
   sci_disconnect_segment(&remote_segment_handle, 0);
   sci_unexport_segment(segment, 0, 0);
