@@ -922,6 +922,9 @@ int mapPciModules(CDS_HARDWARE *pCds)
   int i;
   int modCount = 0;
   int fast_adc_cnt = 0;
+#ifndef ADC_SLAVE
+  int adc_cnt = 0;
+#endif
   int dac_cnt = 0;
   int dac_18bit_cnt = 0;
   int bo_cnt = 0;

@@ -469,6 +469,11 @@ void *fe_start(void *arg)
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
   volatile GSA_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
 #endif
+#ifndef ADC_SLAVE
+  unsigned int usec;
+  unsigned int offset;
+  unsigned int dacBufOffset;
+#endif
 
 
   int cnt = 0;
