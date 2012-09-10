@@ -2121,6 +2121,7 @@ procfile_read(char *buffer,
 		/* we have finished to read, return 0 */
 		ret  = 0;
 	} else {
+		char b[128];
 #if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
 #if defined(SERVO64K)
 		static const int nb = 16;
@@ -2129,7 +2130,6 @@ procfile_read(char *buffer,
 #elif defined(SERVO16K)
 		static const int nb = 64;
 #endif
-		char b[128];
 
 		/* fill the buffer, return the buffer size */
 		ret = sprintf(buffer,
@@ -2167,7 +2167,6 @@ procfile_read(char *buffer,
 			timeHoldWhen, timeHoldWhenHold);
 		strcat(buffer, "cycleHist: ");
 		for (i = 0; i < nb; i++) {
-			char b[32];
 			if (!cycleHistMax[i]) continue;
 			sprintf(b, "%d=%d@%d ", i, cycleHistMax[i], cycleHistWhenHold[i]);
 			strcat(buffer, b);
@@ -2178,7 +2177,6 @@ procfile_read(char *buffer,
 #ifdef ADC_MASTER
 		/* Output DAC buffer size information */
 		for (i = 0; i < cdsPciModules.dacCount; i++) {
-			char b[32];
 			if (cdsPciModules.dacType[i] == GSC_18AO8) {
 				sprintf(b, "DAC #%d 18-bit buf_size=%d\n", i, dacOutBufSize[i]);
 			} else {
@@ -2189,7 +2187,6 @@ procfile_read(char *buffer,
 		}
 #endif
 #ifdef COMMDATA_INLINE
-		char b[32];
 		// See if we have any IPC with errors and print the numbers out
 		//
 		sprintf(b, "ipcErrBits=0x%x\n", ipcErrBits);
