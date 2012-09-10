@@ -52,6 +52,9 @@ sub frontEndInitCode {
 	$calcExp .= "\L$::xpartName[$i]\_n";
 	$calcExp .= " = ";
 	$calcExp .= "1;\n";
+	$calcExp .= "\L$::xpartName[$i]\_index";
+	$calcExp .= " = ";
+	$calcExp .= "0;\n";
 	return $calcExp;
 }
 
@@ -85,7 +88,7 @@ sub frontEndCode {
 	$calcExp .= "\t}\n\telse {\n";
 	$calcExp .= "\t\t\L$::xpartName[$i]\_index";
 	$calcExp .= " = ";
-	$calcExp .= "(++\L$::xpartName[$i]\_index)\%\U$::xpartName[$i]\_WINSZ;\n";
+	$calcExp .= "(1+\L$::xpartName[$i]\_index)\%\U$::xpartName[$i]\_WINSZ;\n";
 	$calcExp .= "\t\t\L$::xpartName[$i]\_sqrsum";
 	$calcExp .= " -= ";
 	$calcExp .= "\L$::xpartName[$i]\_indatsqrd\[\L$::xpartName[$i]\_index\];\n";
