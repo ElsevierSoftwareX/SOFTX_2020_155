@@ -55,13 +55,13 @@ inline double lsqrt (double __x) { register double __result; __asm __volatile__ 
 
 
 /* Fast Pentium FPU 2^x command for -1<=x<=1*/
-inline double l2xr (double __x) { register double __result; __asm __volatile__ ("f2xm1\n\t fld1\n\t fadd\n\t" : "=t" (__result) : "0" (__x)); return __result; }
+inline double l2xr (double __x) { register double __result; __asm __volatile__ ("f2xm1\n\t fld1\n\t faddp\n\t" : "=t" (__result) : "0" (__x)); return __result; }
 
 /* Fast Pentium FPU round to nearest integer command */
 inline double lrndint (double __x) { register double __result; __asm __volatile__ ("frndint" : "=t" (__result) : "0" (__x)); return __result; }
 
 /* Fast Pentium FPU to multiply with log2(10) */
-inline double lmullog210 (double __x) { register double __result; __asm __volatile__ ("fldl2t\n\t  fmul" : "=t" (__result) : "0" (__x)); return __result; }
+inline double lmullog210 (double __x) { register double __result; __asm __volatile__ ("fldl2t\n\t  fmulp" : "=t" (__result) : "0" (__x)); return __result; }
 
 
 /* Fast Pentium FPU log10(x) command */
