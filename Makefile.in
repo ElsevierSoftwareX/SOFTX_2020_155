@@ -39,15 +39,15 @@ DEVFLAGS=@DEVFLAGS@
 	@/bin/mv -f build/$@epics/config build/$@epics-config
 	@/bin/rm -rf target/$@epics build/$@epics;
 	@echo Building EPICS sequencers...
-	@env RCG_SRC_DIR=$(srcdir) PERL5LIB=$(srcdir)/src/epics/util make -f config/Makefile.$@epics RCG_SRC_DIR=$(srcdir) >> $@.log 2>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
+	@env RCG_SRC_DIR=$(srcdir) PERL5LIB=$(srcdir)/src/epics/util make -f config/Makefile.$@epics RCG_SRC_DIR=$(srcdir) >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@echo Done
-	@($(srcdir)/src/epics/util/nameLengthChk.pl $@) >> $@.log 2>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
+	@($(srcdir)/src/epics/util/nameLengthChk.pl $@) >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@/bin/mkdir -p build/$@epics
 	@/bin/mv -f build/$@epics-medm build/$@epics/medm
 	@/bin/mv -f build/$@epics-config build/$@epics/config
 	@echo Building front-end Linux kernel module $@...
 	@make -sC src/fe/$@ clean
-	@make -C src/fe/$@ >> $@.log 2>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
+	@make -C src/fe/$@ >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@$(srcdir)/src/epics/util/checkUndefined.pl $@_error.log >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@echo Done
 	@/bin/mkdir -p target/$@epics/src
