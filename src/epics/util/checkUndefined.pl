@@ -6,6 +6,6 @@ open(IN, $fname) || die "***ERROR: could not open $fname\n";
 @inData=<IN>;
 close IN;
 
-@res =  grep /undefined/, @inData;
+@res =  grep /^WARNING:.*undefined/, @inData;
 if (@res) { print STDERR  "***ERROR: undefined symbols in the front-end code.\n" }
 exit(@res);
