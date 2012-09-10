@@ -81,7 +81,7 @@ int printk(const char *fmt, ...) {
 
     strcat(strcpy(fmt1, SYSTEM_NAME_STRING_LOWER), ": ");
     strcat(fmt1, fmt);
-    va_start(args, fmt1);
+    va_start(args, fmt);
     r = vprintkl(fmt1, args);
     va_end(args);
     return r;
