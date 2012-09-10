@@ -521,7 +521,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       }
 
       // Perform decimation filtering, if required.
-#if CORE_BIQUAD
+#ifdef CORE_BIQUAD
 #define iir_filter iir_filter_biquad
 #endif
       if(localTable[ii].decFactor == 2) dWord = iir_filter(dWord,&dCoeff2x[0],DTAPS,&dHistory[ii][0]);
@@ -532,7 +532,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       if(localTable[ii].decFactor == 64) dWord = iir_filter(dWord,&dCoeff64x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 128) dWord = iir_filter(dWord,&dCoeff128x[0],DTAPS,&dHistory[ii][0]);
       if(localTable[ii].decFactor == 256) dWord = iir_filter(dWord,&dCoeff256x[0],DTAPS,&dHistory[ii][0]);
-#if CORE_BIQUAD
+#ifdef CORE_BIQUAD
 #undef iir_filter
 #endif
 

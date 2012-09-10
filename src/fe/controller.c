@@ -2189,6 +2189,7 @@ procfile_read(char *buffer,
 		}
 #endif
 #ifdef COMMDATA_INLINE
+		char b[32];
 		// See if we have any IPC with errors and print the numbers out
 		//
 		sprintf(b, "ipcErrBits=0x%x\n", ipcErrBits);
