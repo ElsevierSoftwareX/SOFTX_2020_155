@@ -914,6 +914,20 @@ CommandLine: /* Nothing */
 		}
 	| PROCESS_LOCK allOrNothing {
 		AUTH_CHECK(((my_lexer *)lexer));
+                ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
+                seteuid (0); // Try to switch to superuser effective uid
+                if (! geteuid ()) {
+                    if (mlockall (MCL_CURRENT)) {
+                      *yyout << "mlockall (MCL_CURRENT) failed: errno=" << errno << endl;
+                      system_log(1, "mlockall (MCL_CURRENT)) failed: errno=%d", errno);
+                    } else {
+                      //*yyout << "current process pages are locked in memory" << endl;
+                      system_log(1, "current process pages are locked in memory");
+                    }
+                  seteuid(getuid());
+                } else {
+                        *yyout << "process memory pages lock impossible: not a superuser" << endl;
+                }
 	}
 	| PROCESS_UNLOCK {
 		AUTH_CHECK(((my_lexer *)lexer));
