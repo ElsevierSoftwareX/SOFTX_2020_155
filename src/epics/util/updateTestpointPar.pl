@@ -40,12 +40,15 @@ if ($remove) {
 	# Otherwise warn and fail
 	if ($par->{$site_letter . "-node" . $gds_node . ":hostname"} ne $hostname
 	    || $par->{$site_letter . "-node" . $gds_node . ":system"} ne $system) {
-		warn "ERROR: This node $gds_node is already installed as\n";
+		warn "ERROR: This node $gds_node is already installed as:\n";
 		warn "	hostname=", $par->{$site_letter . "-node" . $gds_node . ":hostname"}, "\n";
 		warn "	system=", $par->{$site_letter . "-node" . $gds_node . ":system"}, "\n";
+		warn "The new entry you are trying to write is as follows:\n";
+		warn "	hostname=$hostname\n";
+		warn "	system=$system\n";
 		warn "This script will not overwrite existing entries in testpoint.par\n";
 		warn "If this is an attempt to move an existing system from one host to another,\n";
-		warn "please remove conflicting entry from testpoint.par\n";
+		warn "please remove conflicting entry from testpoint.par file.\n";
 		exit 1;
 	}
   }
