@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <signal.h>
+#include <ctype.h>
 
 #ifdef NO_RTL
 #include "mbuf/mbuf.h"

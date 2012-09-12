@@ -1,9 +1,6 @@
 #ifndef FM_READ_COEFF_H
 #define FM_READ_COEFF_H
 
-#define NO_FM10GEN_C_CODE
-
-
 /* char vars' length */
 #define CVL  40
 
