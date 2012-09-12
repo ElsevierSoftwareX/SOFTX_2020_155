@@ -24,7 +24,7 @@ SRC += $(RCG_SRC_DIR)/src/drv/sync.c
 PREPROCESS = /usr/bin/gcc -x c -E -P 
 
 # Standard C and C++ compiler and C preprocessor flags
-CFLAGS += -pedantic $(EXTRA_CFLAGS)
+CFLAGS += $(EXTRA_CFLAGS)
 CFLAGS += -I$(EPICS_BASE)/include/os/Linux -I$(EPICS_BASE)/include 
 CFLAGS += -I$(EPICS_SEQ_BASE)/include
 CFLAGS += -I$(EPICS_ROOT)/extensions/include
@@ -41,7 +41,6 @@ endif
 CFLAGS += -D_POSIX_C_SOURCE=199506L -D_POSIX_THREADS  
 CFLAGS += -DOSITHREAD_USE_DEFAULT_STACK  -D_X86_  -DUNIX  -D_BSD_SOURCE -Dlinux
 CFLAGS += -D_REENTRANT -g -fPIC 
-CFLAGS += -DINLINE=inline
 
 rtl_module := $(shell /sbin/lsmod | grep rtl)
 ifeq ($(rtl_module),)
@@ -49,7 +48,7 @@ CFLAGS += -DNO_RTL=1
 endif
 
 CXXFLAGS = $(CFLAGS)
-SNCFLAGS += +a -c 
+SNCFLAGS += +a -c -w
 #SNCFLAGS += -e
 
 # Sequencer file (.st) compiler

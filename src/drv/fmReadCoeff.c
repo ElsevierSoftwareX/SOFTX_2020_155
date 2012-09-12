@@ -24,9 +24,9 @@
 #define FM_SUBSYS_NUM  1
 #endif
 
-#define NO_FM10GEN_C_CODE	1
 #include "fm10Gen.h"
 #include "fmReadCoeff.h"
+#include "crc.h"
 
 /* Cat string and make upper case */
 static char *strcat_upper(char *dest, char *src) {
@@ -496,7 +496,7 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
                         "Filter number (field 2) out of range on line %d in `%s'\n",
                         lineNo, fname[inFileCount]);
                 sprintf(fmShortErrMsgTxt, "Out of range field 2 on %s line %d",
-                        lineNo, fileExt[inFileCount]);
+                        fileExt[inFileCount], lineNo);
                 return FM_INVALID_INPUT_FILE;
               }
 
@@ -510,7 +510,7 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
                         "Invalid switching type number on line %d in `%s'\n",
                         lineNo, fname[inFileCount]);
                 sprintf(fmShortErrMsgTxt, "Bad field 3 on %s line %d",
-                        lineNo, fileExt[inFileCount]);
+                        fileExt[inFileCount], lineNo);
                 return FM_INVALID_INPUT_FILE;
               }
 

@@ -14,6 +14,7 @@ of this distribution.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "iocsh.h"
 #include "dbStaticLib.h"
@@ -195,7 +196,7 @@ void process_alarms(DBBASE *pdbbase, char *pref)
         pdbentry_alarm[i][j] = 0;
       }
      }
-     char *s[16]; sprintf(s, "%d", nalrm);
+     char s[16]; sprintf(s, "%d", nalrm);
      status = dbPutString(i? pdbentry_out_err_cnt: pdbentry_in_err_cnt, s);
      if (status) {
          printf("Could not put field\n");
@@ -205,7 +206,7 @@ void process_alarms(DBBASE *pdbbase, char *pref)
 
     // Output the CRC
     crc = crc_len(len_crc, crc);
-    char *s[16]; sprintf(s, "%d", crc);
+    char s[16]; sprintf(s, "%d", crc);
     status = dbPutString(pdbentry_crc, s);
     if (status) {
          printf("Could not put field\n");

@@ -897,7 +897,7 @@ my $cnt = 0;
 my $daq_name = "DQ";
 
 my $have_daq_spec = 0;
-$have_daq_spec = 1 if defined %DAQ_Channels;
+$have_daq_spec = 1 if %DAQ_Channels;
 
 # Print chnnum, datarate, 
 foreach (sort @section_names) {

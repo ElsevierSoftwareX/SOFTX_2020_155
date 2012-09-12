@@ -18,8 +18,8 @@ program %SEQUENCER_NAME%
 %% #include <alarm.h>                                                    /* MA */
 %% #include <sys/types.h>                                                /* MA */
 %% #include <sys/stat.h>                                                 /* MA */
+%% #include <ctype.h>
 
-%% #define INLINE
 #if defined(RFM_EPICS)
 %% #define SERVO16K
 #else
@@ -36,6 +36,7 @@ program %SEQUENCER_NAME%
 %% #define FM_SUBSYS_NUM  1
 %% #include "fmReadCoeff.h"
 %% #include "feComms.h"
+%% #include "findSharedMemory.h"
 
 /* Cat string and make upper case */                                     /* MA */
 %% static char *strcat_upper(char *dest, char *src) {                    /* MA */
@@ -64,6 +65,23 @@ program %SEQUENCER_NAME%
 #endif
 
 %DECL1%
+
+#if defined(RFM_EPICS)
+%% static volatile RFM_FE_COMMS *pRfm;
+%% static volatile VME_COEF *pVmeCoeff;
+%% static volatile FILT_MOD *pFilt;
+%% static %EPICS_TYPE% *pEpics;
+%% static unsigned int sysnum;
+%% extern void *findRfmCard(int);
+#else
+%% static VME_COEF vmeCoeffSpace;
+%% static COEF coeffSpace;
+%% static FILT_MOD filtSpace;
+%% static VME_COEF *pVmeCoeff = &vmeCoeffSpace;
+%% static FILT_MOD *pFilt = &filtSpace;
+%% static %EPICS_TYPE% pEpicsSpace;
+%% static %EPICS_TYPE% *pEpics = &pEpicsSpace;
+#endif
 
 string msg;
 assign msg to "{ifo}:FEC-{sysnum}_MSG";
@@ -123,23 +141,6 @@ int prev_seqTrig = 0;
 %% static const double conv = 0.000152588;
 %% static const int mask[2] = {0xAAA0,0x30AA};
 %% extern pthread_mutex_t seq_lock;
-
-#if defined(RFM_EPICS)
-%% static volatile RFM_FE_COMMS *pRfm;
-%% static volatile VME_COEF *pVmeCoeff;
-%% static volatile FILT_MOD *pFilt;
-%% static %EPICS_TYPE% *pEpics;
-%% static unsigned int sysnum;
-%% extern void *findRfmCard(int);
-#else
-%% static VME_COEF vmeCoeffSpace;
-%% static COEF coeffSpace;
-%% static FILT_MOD filtSpace;
-%% static VME_COEF *pVmeCoeff = &vmeCoeffSpace;
-%% static FILT_MOD *pFilt = &filtSpace;
-%% static %EPICS_TYPE% pEpicsSpace;
-%% static %EPICS_TYPE% *pEpics = &pEpicsSpace;
-#endif
 
 #if defined(SEQUENCER_NAME_hepi) || defined(SEQUENCER_NAME_hepia)
 %% static unsigned int cpunum;
@@ -212,30 +213,32 @@ int tcsEnable;
 assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 #endif
 
-#define update_labels(ii)\
-       strcpy(labels0[ii],pVmeCoeff->vmeCoeffs[ii].filtName[0]);\
+#define copy_labels(ii)\
+       strcpy(labels0[ii],(const char *)(pVmeCoeff->vmeCoeffs[ii].filtName[0]));\
+       strcpy(labels1[ii],(const char *)(pVmeCoeff->vmeCoeffs[ii].filtName[1]));\
+       strcpy(labels2[ii],(const char *)(pVmeCoeff->vmeCoeffs[ii].filtName[2]));\
+       strcpy(labels3[ii],(const char *)(pVmeCoeff->vmeCoeffs[ii].filtName[3]));\
+       strcpy(labels4[ii],(const char *)(pVmeCoeff->vmeCoeffs[ii].filtName[4]));\
+       strcpy(labels5[ii],(const char *)(pVmeCoeff->vmeCoeffs[ii].filtName[5]));\
+       strcpy(labels6[ii],(const char *)(pVmeCoeff->vmeCoeffs[ii].filtName[6]));\
+       strcpy(labels7[ii],(const char *)(pVmeCoeff->vmeCoeffs[ii].filtName[7]));\
+       strcpy(labels8[ii],(const char *)(pVmeCoeff->vmeCoeffs[ii].filtName[8]));\
+       strcpy(labels9[ii],(const char *)(pVmeCoeff->vmeCoeffs[ii].filtName[9]));
+#define pvput_labels(ii)\
        pvPut(labels0[ii]);\
-       strcpy(labels1[ii],pVmeCoeff->vmeCoeffs[ii].filtName[1]);\
        pvPut(labels1[ii]);\
-       strcpy(labels2[ii],pVmeCoeff->vmeCoeffs[ii].filtName[2]);\
        pvPut(labels2[ii]);\
-       strcpy(labels3[ii],pVmeCoeff->vmeCoeffs[ii].filtName[3]);\
        pvPut(labels3[ii]);\
-       strcpy(labels4[ii],pVmeCoeff->vmeCoeffs[ii].filtName[4]);\
        pvPut(labels4[ii]);\
-       strcpy(labels5[ii],pVmeCoeff->vmeCoeffs[ii].filtName[5]);\
        pvPut(labels5[ii]);\
-       strcpy(labels6[ii],pVmeCoeff->vmeCoeffs[ii].filtName[6]);\
        pvPut(labels6[ii]);\
-       strcpy(labels7[ii],pVmeCoeff->vmeCoeffs[ii].filtName[7]);\
        pvPut(labels7[ii]);\
-       strcpy(labels8[ii],pVmeCoeff->vmeCoeffs[ii].filtName[8]);\
        pvPut(labels8[ii]);\
-       strcpy(labels9[ii],pVmeCoeff->vmeCoeffs[ii].filtName[9]);\
        pvPut(labels9[ii]);
 
+
 %% static DAQ_INFO_BLOCK *info;
-%% static void *base;
+%% static volatile void *base;
 %% static DAQ_INFO_BLOCK infoTmp;
 %% static char site[160];
 %% static char ifo[160];
@@ -346,11 +349,11 @@ state init
 %%  pFilt = (FILT_MOD *)(&pRfm->%EPICS_FILT_VAR%);
 %%  pVmeCoeff = (VME_COEF*)(&pRfm->%EPICS_COEFF_VAR%);
 %%  pEpics = (%EPICS_TYPE%*)(&pRfm->%EPICS_EPICS_VAR%);
-%%  printf("%s pFilt is at 0x%x\n", fmc.subSys[0].name, ((int)pFilt-(int)pRfm));
-%%  printf("%s pVmeCoeff is at 0x%x\n", fmc.subSys[0].name, ((int)pVmeCoeff-(int)pRfm));
-%%  printf("%s pVmeCoeff size is 0x%x\n", fmc.subSys[0].name, sizeof(*pVmeCoeff));
-%%  printf("%s pEpics is at 0x%x\n", fmc.subSys[0].name, ((int)pEpics-(int)pRfm));
-%%  printf("%s pEpics is at 0x%x\n", fmc.subSys[0].name, ((int)pRfm));
+%%  printf("%s pFilt is at 0x%lx\n", fmc.subSys[0].name, ((unsigned long)pFilt-(unsigned long)pRfm));
+%%  printf("%s pVmeCoeff is at 0x%lx\n", fmc.subSys[0].name, ((unsigned long)pVmeCoeff-(unsigned long)pRfm));
+%%  printf("%s pVmeCoeff size is 0x%lx\n", fmc.subSys[0].name, sizeof(*pVmeCoeff));
+%%  printf("%s pEpics is at 0x%lx\n", fmc.subSys[0].name, ((unsigned long)pEpics-(unsigned long)pRfm));
+%%  printf("%s pEpics is at 0x%lx\n", fmc.subSys[0].name, ((unsigned long)pRfm));
 #endif
 
 %% strcpy(fName[0], "/opt/rtcds/");                                        /* MA */
@@ -410,7 +413,8 @@ state init
 
 #if MAX_MODULES > 0
 %%  for(ii=0;ii<MAX_MODULES;ii++) {
-	update_labels(ii);
+%%	copy_labels(ii);
+	pvput_labels(ii);
 %%  }
 #endif
 %%  printf("Should have put the values on the screen by now. ;)\n");
@@ -534,7 +538,8 @@ state monScreen{
 %%	    /* Successful coeff reload */
 	    sprintf(msg, "%s Complete", fmmap0[ii].name);
             /* Load filter names to EPICS */
-            update_labels(ii);
+%%          copy_labels(ii);
+            pvput_labels(ii);
 	    initVars(pFilt, pFilt,&coeffSpace, MAX_MODULES, pVmeCoeff);
 #else
 %%	    int kk;
@@ -555,7 +560,8 @@ state monScreen{
 %%		   /* Successful coeff reload */
 		   sprintf(msg, "%s Complete", fmmap0[ii].name);
                    /* Load filter names to EPICS */
-                   update_labels(ii);
+%%            	   copy_labels(ii);
+                   pvput_labels(ii);
 %%		   break;
 %%		}
 %%		usleep(100);
@@ -782,13 +788,13 @@ state daqInit
 %%      info = ((DAQ_INFO_BLOCK *)((base = (volatile void *)findRfmCard(0)) + DAQ_INFO_ADDRESS));
 	pvPut(dcuId);
 %%    rfm_assign(pEpics->epicsInput.dcuId, dcuId);
-%%      printf("daq info at 0x%lx\n",(long)info);
+%%      printf("daq info at 0x%lx\n",(unsigned long)info);
 %%      memset(&infoTmp, 0, sizeof(infoTmp));
 %%      info->reconfig = 0;
 %%      if (loadDaqConfigFile(&infoTmp, site, ifo, daqsys)) {
            strcpy(msgDAQ, localtimestring);
 %%         copy_info();
-%%         printf("%s%s daqConfig info is at rfm offset 0x%x\n", ifo, daqsys, ((char *)info) - ((char *)base));
+%%         printf("%s%s daqConfig info is at rfm offset 0x%lx\n", ifo, daqsys, ((char *)info) - ((char *)base));
 %%         info -> reconfig = 1;
 %%         chnCnt = infoTmp.numChans;
 %%         dataSize = 0;
@@ -840,7 +846,7 @@ state daqProcess
 %%         if ((pipePtrDAQ = popen(bufferDAQ, "r")) != NULL) {           /* ma */
 %%            fgets(bufferDAQ, 256, pipePtrDAQ);                         /* ma */
 %%            pclose(pipePtrDAQ);                                        /* ma */
-%%            sscanf(bufferDAQ, "%d", &crcDAQ);                          /* ma */
+%%            sscanf(bufferDAQ, "%ld", &crcDAQ);                          /* ma */
 %%            if (crcDAQ != chkSumDAQ) {                                 /* ma */
 %%               chkSumDAQ = crcDAQ;                                     /* ma */
 %%               modDAQ = 1;                                             /* ma */
@@ -861,7 +867,7 @@ state daqProcess
             pvPut(msgDAQ);
 %%          if (loadDaqConfigFile(&infoTmp, site, ifo, daqsys)) {
 %%            copy_info();
-%%            printf("%s%s daqConfig info is at rfm offset 0x%x\n", ifo, daqsys, ((char *)info) - ((char *)base))
+%%            printf("%s%s daqConfig info is at rfm offset 0x%lx\n", ifo, daqsys, ((char *)info) - ((char *)base))
 ;
 %%            info -> reconfig = 1;
 %%            chnCnt = infoTmp.numChans;
@@ -909,7 +915,7 @@ state filtCoefChk
 %%        if ((pipePtr = popen(buffer, "r")) != NULL) {                  /* MA */
 %%           fgets(buffer, 256, pipePtr);                                /* MA */
 %%           pclose(pipePtr);                                            /* MA */
-%%           sscanf(buffer, "%d", &crc);                                 /* MA */
+%%           sscanf(buffer, "%ld", &crc);                                 /* MA */
 %%           if (crc != chkSum[ii]) {                                    /* MA */
 %%              chkSum[ii] = crc;                                        /* MA */
 %%              mod += ii + 1;                                           /* MA */
@@ -950,7 +956,8 @@ state filtCoefChk
 #if MAX_MODULES > 0
             /* Load filter names to EPICS */
 %%          for (ii=0;ii<MAX_MODULES;ii++) {
-            	update_labels(ii);
+%%            	copy_labels(ii);
+                pvput_labels(ii);
 %%	    }
 #endif
 	    initVars(pFilt, pFilt,&coeffSpace, MAX_MODULES, pVmeCoeff);
@@ -977,7 +984,8 @@ state filtCoefChk
 		    sprintf(msg, "%s Complete", fmmap0[ii].name);
 		    pvPut(msg);
                     /* Load filter names to EPICS */
-		    update_labels(ii);
+%%		    copy_labels(ii);
+		    pvput_labels(ii);
 %%		    break;
 %%		 }
 %%		 usleep(500);
