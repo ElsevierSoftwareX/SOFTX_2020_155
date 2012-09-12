@@ -74,6 +74,8 @@ volatile int stop_working_threads = 0;
 // Code can be run without shutting down CPU by changing this compile flag
 #undef NO_CPU_SHUTDOWN 
 #ifndef NO_CPU_SHUTDOWN
+extern int vprintkl(const char*, va_list);
+extern int printkl(const char*, ...);
 char fmt1[512];
 int printk(const char *fmt, ...) {
     va_list args;
@@ -2223,6 +2225,7 @@ extern int need_to_load_IOP_first;
 #endif
 
 extern void set_fe_code_idle(void *(*ptr)(void *), unsigned int cpu);
+extern void msleep(unsigned int);
 
 int init_module (void)
 {
