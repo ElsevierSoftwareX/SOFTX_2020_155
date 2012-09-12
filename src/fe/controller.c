@@ -312,18 +312,18 @@ static double __attribute__ ((unused)) feCoeff32x[9] =
 
 /* Oversamping base rate is 64K */
 /* Coeffs for the 2x downsampling (32K system) filter */
-static double feCoeff2x[9] =
+static double __attribute__ ((unused)) feCoeff2x[9] =
         {0.053628649721183,
         -1.25687596603711,    0.57946661417301,    0.00000415782507,    1.00000000000000,
         -0.79382359542546,    0.88797791037820,    1.29081406322442,    1.00000000000000};
 /* Coeffs for the 4x downsampling (16K system) filter */
-static double feCoeff4x[9] =
+static double __attribute__ ((unused)) feCoeff4x[9] =
 	{0.014805052402446,  
 	-1.71662585474518,    0.78495484219691,   -1.41346289716898,   0.99893884152400,
 	-1.68385964238855,    0.93734519457266,    0.00000127375260,   0.99819981588176};
 //
 // New Brian Lantz 4k decimation filter
-static double feCoeff16x[9] =
+static double __attribute__ ((unused)) feCoeff16x[9] =
         {0.010203728365,
         -1.80529410090651,   0.82946925281361,  -1.41324503053632,   0.99863016087226,
         -1.83396789879365,   0.87157016192243,  -1.84712607094702,   0.99931484571793};
@@ -339,7 +339,7 @@ static double feCoeff32x[9] =
 #endif
 
 /* Coeffs for the 32x downsampling filter (2K system) per Brian Lantz May 5, 2009 */
-static double feCoeff32x[9] =
+static double __attribute__ ((unused)) feCoeff32x[9] =
 	{0.010581064947739,
         -1.90444302586137,    0.91078434629894,   -1.96090276933603,    0.99931924465090,
         -1.92390910024681,    0.93366146580083,   -1.84652529182276,    0.99866506867980};
@@ -2109,7 +2109,9 @@ procfile_read(char *buffer,
 	      off_t offset, int buffer_length, int *eof, void *data)
 {
 	int ret, i;
-	
+	i = 0;
+	*buffer = 0;
+
 	/* 
 	 * We give all of our information in one go, so if the
 	 * user asks us if we have more information the
@@ -2125,8 +2127,8 @@ procfile_read(char *buffer,
 		/* we have finished to read, return 0 */
 		ret  = 0;
 	} else {
-		char b[128];
 #if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
+		char b[128];
 #if defined(SERVO64K)
 		static const int nb = 16;
 #elif defined(SERVO32K)
@@ -2134,7 +2136,7 @@ procfile_read(char *buffer,
 #elif defined(SERVO16K)
 		static const int nb = 64;
 #endif
-
+#endif
 		/* fill the buffer, return the buffer size */
 		ret = sprintf(buffer,
 
@@ -2169,6 +2171,7 @@ procfile_read(char *buffer,
 			build_date,
 			cycleTime, timeHoldHold,
 			timeHoldWhen, timeHoldWhenHold);
+#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
 		strcat(buffer, "cycleHist: ");
 		for (i = 0; i < nb; i++) {
 			if (!cycleHistMax[i]) continue;
