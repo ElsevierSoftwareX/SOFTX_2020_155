@@ -1337,7 +1337,7 @@ sub process {
   $block_parameter_defaults_node = CDS::Tree::find_node($root, "BlockParameterDefaults");
   $node = CDS::Tree::find_node($block_parameter_defaults_node, "Fcn", "BlockType");
   $expr = ${$node->{FIELDS}}{"Expr"};
-  print "expr=$expr\n"; 
+  #print "expr=$expr\n"; 
   $::defFcnExpr = $expr;
 
   # Set system name
