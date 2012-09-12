@@ -96,7 +96,7 @@ if [ "x\`ps h -C ${system}epics\`" != x ]; then
 fi
 
 sudo killall ${system}epics
-sudo /sbin/rmmod ${system}
+sudo /sbin/rmmod ${system} 2&>/dev/null
 
 res=\`ps h -C awgtpman | grep ${system}\`
 if [ "x\${res}" != x ]; then
