@@ -804,8 +804,8 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
       if(daqBlockNum == 15)
       {
-	static unsigned int tpnum[DAQ_GDS_MAX_TP_NUM];		// Current TP nums
-	static unsigned int excnum[DAQ_GDS_MAX_TP_NUM];	// Current EXC nums
+	unsigned int tpnum[DAQ_GDS_MAX_TP_ALLOWED];		// Current TP nums
+	unsigned int excnum[DAQ_GDS_MAX_TP_ALLOWED];	// Current EXC nums
 	// Offset by one into the TP/EXC tables for the 2K systems
 	unsigned int _2k_sys_offs = sysRate < DAQ_16K_SAMPLE_SIZE;
 	
@@ -814,7 +814,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	// tpnum and excnum lists of numbers do not intersect
 	inline int in_the_lists(unsigned int tp, unsigned int slot) {
 		int i;
-		for (i = 0; i < DAQ_GDS_MAX_TP_NUM; i++){
+		for (i = 0; i < DAQ_GDS_MAX_TP_ALLOWED; i++){
 			if (tpnum[i] == tp) return (tpnum[i] = 0, 1);
                         if (excnum[i] == tp) {
                                 // Check if the excitation is still in the same slot
@@ -836,7 +836,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
 	// Copy TP/EXC tables into my local memory
 	memcpy(excnum, (const void *)(gdsPtr->tp[_2k_sys_offs][0]), sizeof(excnum));
-	memcpy(tpnum, (const void *)(gdsPtr->tp[2 + _2k_sys_offs][0]), sizeof(excnum));
+	memcpy(tpnum, (const void *)(gdsPtr->tp[2 + _2k_sys_offs][0]), sizeof(tpnum));
 
         //printf("TPnum[0]=%d\n", tpNum[0]);
         //printf("excnum[0]=%d\n", excnum[0]);
@@ -870,19 +870,17 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	
 	// tpnum and excnum lists now have only the new test points
 	// Insert these new numbers into empty localTable slots
-	for (i = 0; i < (2 * DAQ_GDS_MAX_TP_NUM); i++) {
+	for (i = 0; i < (2 * DAQ_GDS_MAX_TP_ALLOWED); i++) {
 		exc = 0;
 		// Do test points first
-		if (i < DAQ_GDS_MAX_TP_NUM) {
-			if (i > (DAQ_GDS_MAX_TP_ALLOWED-1)) continue;
+		if (i < DAQ_GDS_MAX_TP_ALLOWED) {
 			if (tpnum[i] == 0) continue;
 			tpn = tpnum[i];
 		} else {
-			if (i > (DAQ_GDS_MAX_TP_ALLOWED-1 + DAQ_GDS_MAX_TP_NUM)) continue;
-			if (excnum[i - DAQ_GDS_MAX_TP_NUM] == 0) continue;
-			tpn = excnum[i - DAQ_GDS_MAX_TP_NUM];
+			if (excnum[i - DAQ_GDS_MAX_TP_ALLOWED] == 0) continue;
+			tpn = excnum[i - DAQ_GDS_MAX_TP_ALLOWED];
 			exc = 1;
-			ii = i - DAQ_GDS_MAX_TP_NUM;
+			ii = i - DAQ_GDS_MAX_TP_ALLOWED;
 		}
 
         	//printf("tpn=%d at %d\n", tpn, i);
