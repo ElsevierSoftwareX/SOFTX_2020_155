@@ -209,9 +209,16 @@ $trigOut = 0;                                                              # ===
 $convDeg2Rad = 0;                                                          # ===  MA  ===
 $groundDecl = 0;                                                           # =+=  MA  =+=
 $groundInit = 0;                                                           # =+=  MA  =+=
+
+# IPCx PART CODE VARIABLES
 $ipcxCnt = 0;                                                              # ===  IPCx  ===
 $ipcxDeclDone = 0;                                                         # ===  IPCx  ===
 $ipcxInitDone = 0;                                                         # ===  IPCx  ===
+$ipcxBlockTags[0] = undef;
+$ipcxParts[0][0] = undef;
+$ipcxTagCount = 0;
+# END IPCx PART CODE VARIABLES
+
 $oscUsed = 0;
 $useFIRs = 0;
 # ***  DEBUG  ***
@@ -345,28 +352,6 @@ $directDacWrite = 0;
 # Set to disable zero padding DAC data
 $noZeroPad = 0;
 
-#
-# IPCx parameter names
-#
-$ipcxMissing[0] = "Signal Name";
-$ipcxMissing[1] = "ipcType";
-$ipcxMissing[2] = "ipcRate";
-$ipcxMissing[3] = "ipcHost";
-$ipcxMissing[4] = "ipcNum";
-$ipcxMissing[5] = "ipcModel";
-
-$ipcxType[0] = "SHMEM";
-$ipcxType[1] = "RFM0";
-$ipcxType[2] = "RFM1";
-$ipcxType[3] = "PCIE";
-
-for ($ii = 0; $ii < 4; $ii++) {
-   $ipcxMaxNum[$ii] = -999;
-}
-
-$ipcxBlockTags[0] = undef;
-$ipcxTagCount = 0;
-
 # Remove leading subsystems name
 sub remove_subsystem {
         my ($s) = @_;
@@ -441,375 +426,9 @@ for ($ii = 0; $ii < $partCnt; $ii++) {
    }
 }
 
-#
-# Find all IPCx parts and start building IPCx parts matrix
-#
-for ($ii = 0; $ii < $partCnt; $ii++) {
-   if ($partType[$ii] =~ /^IPCx/) {
-      $ipcxParts[$ipcxCnt][0] = $xpartName[$ii];
-      print "IPC $ii $ipcxCnt is $ipcxParts[$ipcxCnt][0] \n";
+  require "lib/IPCx.pm";
+   ("CDS::IPCx::procIpc") -> ($partCnt);
 
-#     $ipcxParts[$ipcxCnt][1] = "I" . substr($ipcxBlockTags[$ii], 8, 3);
-      $ipcxCommMech = substr($ipcxBlockTags[$ii], 8, 4);
-      $ipcxParts[$ipcxCnt][1] = "I" . $ipcxCommMech;
-      if ($ipcxCommMech eq "RFM") {
-#        print "\n+++  TEST:  Found an RFM\n";
-#        print "\n+++  DESCR=$blockDescr[$ii]\n";
-         if ($blockDescr[$ii] =~ /^card=(\d)/) {
-#           print "\nVALUE=$1\n";
-            $ipcxParts[$ipcxCnt][1] .= $1;
-         }
-         else {
-            die "\n***ERROR: IPCx part of type RFM with NO card number\n";
-         }
-      }
-      print "IPC $ii $ipcxCnt is $ipcxParts[$ipcxCnt][1] \n";
-
-      $ipcxParts[$ipcxCnt][2] = undef;
-      $ipcxParts[$ipcxCnt][3] = $targetHost;
-      $ipcxParts[$ipcxCnt][4] = undef;
-      $ipcxParts[$ipcxCnt][5] = $skeleton;
-      $ipcxParts[$ipcxCnt][6] = $ii;
-      $ipcxCnt++;
-   }
-   #
-   # We will need the location and site parameters from
-   # cdsParameters, so keep track of this part as well
-   #
-   elsif ($partType[$ii] eq "Parameters") {
-      $oo = $ii;
-   }
-}
-
-if ($ipcxCnt > 0) {
-
-   # Determine allowed maximum IPC number
-   open(CD2, "$rcg_src_dir/src/include/commData2.h") || die "***ERROR: could not open commData2.h header\n";
-   @inData=<CD2>;
-   close CD2;
-
-   @res = grep /.*define.*MAX_IPC.*/, @inData;
-   die "***ERROR: couldn't find MAX_IPC in commData2.h\n" unless @res;
-   $res[0] =~ s/\D//g;
-   my $maxIpcCount = 0 + $res[0];
-   die "**ERROR: unable to determine MAX_IPC\n" unless $maxIpcCount > 0;
-   printf "The maximum allowed IPC numer is maxIpcCount=$maxIpcCount\n";
-   undef @inData;
-
-   #
-   # This model does include IPCx parts, so extract location and
-   # site from cdsParameters and read the IPCx parameter file
-   #
-   ("CDS::Parameters::printHeaderStruct") -> ($oo);
-
-   #$iFile = "/cvs/cds/";
-   $iFile = "/opt/rtcds/";
-   $iFile .= $location;
-   $iFile .= "/";
-   $iFile .= lc $site;
-   $iFile .= "/chans/ipc/";
-   $iFile .= $site;
-   $iFile .= "\.ipc";
-
-   open(IPCIN, "<$iFile") || die "***ERROR: IPCx parameter file $iFile not found\n";
-   chomp(@inData=<IPCIN>);
-   close IPCIN;
-
-   #
-   # Process one line at a time from the IPCx parameter file
-   #
-   $ipcxParamCnt = -1;
-   $skip = 0;
-
-   foreach $value (@inData) {
-      #
-      # Skip lines that begin with '#' or 'desc='
-      # Also, skip blank lines and default lines
-      #
-      if ( ($value =~ /^#/) || ($value =~ /^desc=/) ) {
-         next;
-      }
-      elsif ( (length($value) == 0) || ($value =~ /\s/) ) {
-         next;
-      }
-
-      if ($value =~ /^\[default\]/) {
-         $skip = 1;
-         next;
-      }
-
-      #
-      # Find the Signal Name line and copy the
-      # value to the IPCx parts matrix
-      #
-      if ($value =~ /^\[([\w\:\-\_]+)\]/) {
-         $skip = 0;
-         $ipcxParamCnt++;
-
-         $ipcxData[$ipcxParamCnt][0] = $1;
-         $ipcxData[$ipcxParamCnt][1] = undef;
-         $ipcxData[$ipcxParamCnt][2] = undef;
-         $ipcxData[$ipcxParamCnt][3] = undef;
-         $ipcxData[$ipcxParamCnt][4] = undef;
-         $ipcxData[$ipcxParamCnt][5] = undef;
-
-         next;
-      }
-
-      #
-      # Copy the IPCx Communication Mechanism, the
-      # Sender Data Rate, and the IPCx Number
-      # to the IPCx parts matrix as well
-      #
-      if ($skip == 0)  {
-         if ($value =~ /^ipcType=(\w+)/) {
-            my $typeString = $1;
-            $ipcxData[$ipcxParamCnt][1] = "I" . substr($typeString, 0, 4);
-
-            if ($typeString =~ /^SHME/) {
-               $typeIndex = 0;
-            }
-            elsif ($typeString =~ /^RFM0/) {
-               $typeIndex = 1;
-            }
-            elsif ($typeString =~ /^RFM1/) {
-               $typeIndex = 2;
-            }
-            elsif ($typeString =~ /^PCIE/) {
-               $typeIndex = 3;
-            }
-            else {
-               die "***ERROR: IPCx Communication Mechanism not recognized: $typeString\n";
-            }
-         }
-         elsif ($value =~ /^ipcRate=(\d+)/) {
-            $ipcxData[$ipcxParamCnt][2] = $1;
-         }
-         elsif ($value =~ /^ipcHost=(.+)/) {
-            $ipcxData[$ipcxParamCnt][3] = $1;
-         }
-         elsif ($value =~ /^ipcNum=(\d+)/) {
-            $ipcxData[$ipcxParamCnt][4] = $1;
-
-            if ($1 > $ipcxMaxNum[$typeIndex]) {
-               if ( ($typeIndex > 0) || ($targetHost eq $ipcxData[$ipcxParamCnt][3]) ) {
-                  $ipcxMaxNum[$typeIndex] = $1;
-               }
-            }
-         }
-         elsif ($value =~ /^ipcModel=(.+)/) {
-            $ipcxData[$ipcxParamCnt][5] = $1;
-         }
-      }
-   }
-
-   $ipcxParamCnt++;
-
-   $ipcxNotFound = 0;
-   $ipcxRcvrCnt = 0;
-
-   for ($ii = 0; $ii < 4; $ii++) {
-      if ($ipcxMaxNum[$ii] == -999) {
-         $ipcxMaxNum[$ii] = -1;
-      }
-   }
-
-   #
-   # Locate each IPCx module in the IPCx parts matrix
-   #
-   for ($ii = 0; $ii < $ipcxCnt; $ii++) {
-      $found = 0;
-
-      if ($ipcxParts[$ii][0] =~ /^[A-Z]\d\:/) {
-         $ipcxPartComp = $ipcxParts[$ii][0];
-      }
-      else {
-         if ($ipcxParts[$ii][0] =~ /^\w+([A-Z]\d\:.+)/) {
-            $ipcxPartComp = $1;
-         }
-         else {
-            $ipcxPartComp = "";
-         }
-      }
-
-      for ($jj = 0; $jj < $ipcxParamCnt; $jj++) {
-         if ($ipcxPartComp eq $ipcxData[$jj][0]) {
-            #
-            # If IPCx type is SHMEM, then make sure we're only
-            # considering entries for this host
-            #
-            if ( ($ipcxParts[$ii][1] eq "ISHME") && ($targetHost ne $ipcxData[$jj][3]) ) {
-	       print "***WARNING: SHMEM IPC $ipcxPartComp found and skipped. My host: $targetHost; IPC file has: $ipcxData[$jj][3]\n";
-               next;
-            }
-
-            #
-            # Make sure no IPCx parameters are missing
-            #
-            for ($kk = 2; $kk < 6; $kk++) {
-               if (defined($ipcxData[$jj][$kk]) ) {
-                  $ipcxParts[$ii][$kk] = $ipcxData[$jj][$kk];
-               }
-               else {
-                  die "***ERROR: Data missing for IPCx component $ipcxParts[$ii][0] - $ipcxMissing[$kk]\n";
-               }
-            }
-
-            $kk = $ipcxParts[$ii][6];
-            $ipcxParts[$ii][7] = $partInput[$kk][0];
-            $found = 1;
-            $typeComp = $ipcxParts[$ii][1];
-
-            if ($ipcxData[$jj][1] ne $typeComp) {
-               die "***ERROR: IPCx type mis-match for IPCx component $ipcxParts[$ii][0] $ipcxParts[$ii][1] : $typeComp vs\. $ipcxData[$jj][1]\n";
-            }
-
-            #
-            # Make sure each IPCx part has exactly one input
-            #
-            if ($partInCnt[$kk] != 1) {
-               die "***ERROR: IPCx SENDER/RECEIVER component $ipcxParts[$ii][0] has $partInCnt[$kk] input(s)\n";
-            }
-
-            #
-            # If the input to an IPCx part is 'Ground',
-            # then this part is a RECEIVER of data,
-            # which means there should be either one
-            # or two outputs
-            #
-            if ( ($partInput[$kk][0] =~ /^Ground/) || ($partInput[$kk][0] =~ /\_Ground/) ) {
-               if ( ($partOutCnt[$kk] < 1) || ($partOutCnt[$kk] > 2) ) {
-                  #die "***ERROR: IPCx RECEIVER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
-                  #die "***ERROR: IPCx RECEIVER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
-               }
-            }
-            #
-            # If the input to an IPCx part is NOT 'Ground',
-            # then this part is a SENDER of data, which
-            # means there should be no outputs
-            #
-            else {
-               if ($partOutCnt[$kk] != 0) {
-                  die "***ERROR: IPCx SENDER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
-               }
-	       # Make sure we are not trying to transmit to the existing channel second time
-	       if (($ipcxParts[$ii][1] ne "ISHME") && ($ipcxData[$jj][5] ne $skeleton)) {
-		  die "***ERROR: Model name mismatch for IPCx SENDER name=$ipcxParts[$ii][0] type=$ipcxParts[$ii][1] : my=$skeleton vs\. ipc_file=$ipcxData[$jj][5]\n***ERROR: If this is an attempt to move an IPCx SENDER , please remove offending entry from the IPC file\n";
-	       }
-            }
-
-            last;
-         }
-      }
-
-      #
-      # Check if the IPCx module was found in the IPCx parts matrix
-      #
-      if ($found == 0) {
-         print "### IPCx component ($ii) $ipcxParts[$ii][0] not found in IPCx parameter file $iFile\n";
-
-         $ipcxAdd[$ipcxNotFound][0] = $ii;
-
-         $kk = $ipcxParts[$ii][6];
-
-         if ( ($partInput[$kk][0] =~ /^Ground/) || ($partInput[$kk][0] =~ /\_Ground/) ) {
-            $ipcxAdd[$ipcxNotFound][1] = 2;
-            $ipcxRcvrCnt++;
-         }
-         else {
-            if ($partOutCnt[$kk] != 0) {
-               die "***ERROR: IPCx SENDER component $ipcxParts[$ii][0] has $partOutCnt[$kk] output(s)\n";
-            }
-            else {
-               $ipcxAdd[$ipcxNotFound][1] = 1;
-            }
-         }
-
-         $ipcxNotFound++;
-      }
-   }
-
-   #
-   # Check if there are any IPCx modules to add to the IPCx parts matrix
-   #
-   if ($ipcxNotFound > 0) {
-      open (IPCOUT, ">>$iFile") || die "***ERROR: Could not open IPCx parameter file $iFile for output\n";
-
-      $ipcxRate = 983040/$rate;
-      $ipcxNew = 0;
-
-      for ($jj = 0; $jj < $ipcxNotFound; $jj++) {
-         if ($ipcxAdd[$jj][1] == 1) {
-            #
-            # Get type index
-            #
-            $ipcxTypeIndex = -999;
-
-            $ipcxCommMech = substr($ipcxParts[$ipcxAdd[$jj][0]][1], 1, 4);
-
-            for ($kk = 0; $kk < 4; $kk++) {
-               if ($ipcxCommMech eq substr($ipcxType[$kk], 0, 4) ) {
-                  $ipcxTypeIndex = $kk;
-               }
-            }
-
-            if ($ipcxTypeIndex < 0) {
-               die "***ERROR: IPCx Communication Mechanism not recognized: $ipcxCommMech\n";
-            }
-
-            #
-            # Add data to the IPCx parameter file
-            #
-            if (++$ipcxMaxNum[$ipcxTypeIndex] > $maxIpcCount) {
-               die "***ERROR: IPCx number > $maxIpcCount for ipcType = $ipcxType[$ipcxTypeIndex]\n";
-            }
-
-            $signalName = $ipcxParts[$ipcxAdd[$jj][0]][0];
-            if ($signalName =~ /^\w+([A-Z]\d\:.+)/) {
-               $signalName = $1;
-            }
-
-            print IPCOUT "\[$signalName\]\n";
-            print IPCOUT "ipcType=$ipcxType[$ipcxTypeIndex]\n";
-            print IPCOUT "ipcRate=$ipcxRate\n";
-            print IPCOUT "ipcHost=$targetHost\n";
-            print IPCOUT "ipcModel=$skeleton\n";
-            print IPCOUT "ipcNum=$ipcxMaxNum[$ipcxTypeIndex]\n";
-            print IPCOUT "desc=Automatically generated by feCodeGen\.pl on $theTime\n\n";
-
-            $ipcxDataAdded[$ipcxNew][0] = $ipcxParts[$ipcxAdd[$jj][0]];
-            $ipcxDataAdded[$ipcxNew][1] = "I" . substr($ipcxType[$ipcxTypeIndex], 0, 4);
-            $ipcxDataAdded[$ipcxNew][2] = $ipcxRate;
-            $ipcxDataAdded[$ipcxNew][3] = $targetHost;
-            $ipcxDataAdded[$ipcxNew][4] = $ipcxMaxNum[$ipcxTypeIndex];
-
-            $ipcxParts[$ipcxAdd[$jj][0]][2] = $ipcxRate;
-            $ipcxParts[$ipcxAdd[$jj][0]][3] = $targetHost;
-            $ipcxParts[$ipcxAdd[$jj][0]][4] = $ipcxMaxNum[$ipcxTypeIndex];
-            $ipcxParts[$ipcxAdd[$jj][0]][5] = $skeleton;
-
-            $ipcxNew++;
-         }
-      }
-
-      close IPCOUT;
-
-      #
-      # This code can only automatically add IPCx SENDER modules
-      #
-      if ($ipcxRcvrCnt > 0) {
-         print "\n\n***ERROR: The following IPCx RECEIVER module(s) not found in the file $iFile:\n\n";
-
-         for ($jj = 0; $jj < $ipcxNotFound; $jj++) {
-            if ($ipcxAdd[$jj][1] == 2) {
-               print "\t\t$ipcxParts[$ipcxAdd[$jj][0]][0]\n";
-            }
-         }
-
-	 die "\n***ERROR: Aborting (this code can only automatically add IPCx SENDER modules)\n\n";
-      }
-   }
-}
 
 $kk = 0;
 for($ii=0;$ii<$partCnt;$ii++)
@@ -1601,7 +1220,7 @@ sub find_node {
 foreach $i (0 .. $subSys-1) {
 	debug(0, "Subsystem $i ", $subSysName[$i]);
 }
-
+# Following code (to PDE END) is only used on PDE for load balancing multiple CPUS
 if ($cpus > 2) {
 foreach $i (0 .. $subSys-1) {
 	debug(2, "Subsystem $i (", $subSysName[$i], "):");
@@ -1669,6 +1288,7 @@ foreach $i (0 .. $subSys-1) {
 	debug(2, "  }");
 }
 }
+#PDE END support for load balancing mulitple CPUs
 
 
 
@@ -2705,7 +2325,7 @@ print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
 print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
 print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
 print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
-print OUT "{\n\nint  __attribute__ ((unused)) ii; int dacFault = 0;\n\n";
+print OUT "{\n\nint ii, dacFault;\n\n";
 print OUT "if(feInit)\n\{\n";
 
 # removed for ADC PART CHANGE
@@ -2733,6 +2353,7 @@ print OUT "\} else \{\n";
 print OUT "// Enabling DAC outs for those who don't have DAC KILL WD \n";
 print OUT "dacFault = 1;\n";
 
+# IPCx PART CODE
 #
 # All IPCx data receives are to occur
 # first in the processing loop
@@ -2741,6 +2362,7 @@ if ($ipcxCnt > 0) {
    print OUT "\ncommData2Receive(myIpcCount, ipcInfo, timeSec , cycle);\n\n";
 
 }
+# END IPCx PART CODE
 
 #print "*****************************************************\n";
 
@@ -3127,13 +2749,14 @@ print OUT "$ipcOutputCode";
 print OUT "    }\n";
 print OUT "$feTailCode";
 
-#
+# IPCx PART CODE
 # The actual sending of IPCx data is to occur
 # as the last step of the processing loop
 #
 if ($ipcxCnt > 0) {
    print OUT "\n    commData2Send(myIpcCount, ipcInfo, timeSec, cycle);\n\n";
 }
+# END IPCx PART CODE
 
 print OUT "  }\n";
 print OUT "  return(dacFault);\n\n";
@@ -3182,8 +2805,6 @@ if ($no_rtl) {
 if ($no_rtl) {
 print OUTM "# CPU-Shutdown Real Time Linux\n";
 } else {
-	die "RTLinux is not supported any more\n";
-	# TODO: delete RTLinux code
 	print OUTM "# RTLinux makefile\n";
 	if ($wind_river_rtlinux) {
   		print OUTM "include /home/controls/common_pc_64_build/build/rtcore-base-5.1/rtl.mk\n";
@@ -3234,7 +2855,7 @@ print OUTM "# CPU-Shutdown Real Time Linux\n";
 }
 print OUTM "KBUILD_EXTRA_SYMBOLS=$rcg_src_dir/src/drv/ExtraSymbols.symvers\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
-print OUTM "EXTRA_CFLAGS += --std=gnu99 -O -I../../include\n";
+print OUTM "EXTRA_CFLAGS += --std=gnu99 -O -w -I../../include\n";
 print OUTM "EXTRA_CFLAGS += -I/opt/gm/include\n";
 print OUTM "EXTRA_CFLAGS += -I/opt/mx/include\n";
 
