@@ -170,7 +170,7 @@ for ($ii = 0; $ii < $i; $ii++) {
       if ($::ipcxCommMech eq "RFM") {
 #        print "\n+++  TEST:  Found an RFM\n";
 #        print "\n+++  DESCR=$blockDescr[$ii]\n";
-         if ($blockDescr[$ii] =~ /^card=(\d)/) {
+         if ($::blockDescr[$ii] =~ /^card=(\d)/) {
 #           print "\nVALUE=$1\n";
             $::ipcxParts[$::ipcxCnt][1] .= $1;
          }
