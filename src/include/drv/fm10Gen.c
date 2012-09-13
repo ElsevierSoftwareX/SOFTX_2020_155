@@ -124,7 +124,7 @@ Returns double value giving the current output.
 
 double junk;
 
-double iir_filter(double input,double *coef,int n,double *history){
+inline double iir_filter(double input,double *coef,int n,double *history){
 
   int i;
   double *coef_ptr;
@@ -175,7 +175,7 @@ double iir_filter(double input,double *coef,int n,double *history){
 }
 
 /* Biquad form IIR */
-double iir_filter_biquad(double input,double *coef,int n,double *history){
+inline double iir_filter_biquad(double input,double *coef,int n,double *history){
 
   int i;
   double *coef_ptr;
@@ -1426,7 +1426,13 @@ filterModuleD2(FILT_MOD *pFilt,     /* Filter module data  */
     } else
 #endif
     /* Calculate filter */
-    filtData = (pC->coeffs[modNum].biquad? iir_filter_biquad: iir_filter)(sw_in?fmInput:0,
+    if (pC->coeffs[modNum].biquad)  
+      filtData = iir_filter_biquad(sw_in?fmInput:0,
+			  pC->coeffs[modNum].filtCoeff[ii],
+			  pC->coeffs[modNum].filtSections[ii],
+			  pC->coeffs[modNum].filtHist[ii]);
+    else
+      filtData = iir_filter(sw_in?fmInput:0,
 			  pC->coeffs[modNum].filtCoeff[ii],
 			  pC->coeffs[modNum].filtSections[ii],
 			  pC->coeffs[modNum].filtHist[ii]);
