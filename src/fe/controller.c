@@ -2127,7 +2127,7 @@ procfile_read(char *buffer,
 		/* we have finished to read, return 0 */
 		ret  = 0;
 	} else {
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
+#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K) || defined(COMMDATA_INLINE)
 		char b[128];
 #if defined(SERVO64K)
 		static const int nb = 16;
