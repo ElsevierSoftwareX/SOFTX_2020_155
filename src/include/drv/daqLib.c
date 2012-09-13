@@ -118,8 +118,8 @@ int offsetAccum;		/* Used to set localTable.offset	*/
 static int tpStart;		/* Marks address of first TP data	*/
 static volatile GDS_CNTRL_BLOCK *gdsPtr;  /* Ptr to GDS table in shmem.	*/
 static volatile char *exciteDataPtr;	  /* Ptr to EXC data in shmem.	*/
-static int validTp;		/* Number of valid GDS sigs selected.	*/
-static int validTpNet;		/* Number of valid GDS sigs selected.	*/
+static int validTp = 0;		/* Number of valid GDS sigs selected.	*/
+static int validTpNet = 0;		/* Number of valid GDS sigs selected.	*/
 //static int validEx;		/* Local chan number of 1st EXC signal.	*/
 static int tpNum[DAQ_GDS_MAX_TP_ALLOWED]; 	/* TP/EXC selects to send to FB.	*/
 static int tpNumNet[DAQ_GDS_MAX_TP_ALLOWED]; 	/* TP/EXC selects to send to FB.	*/
@@ -452,7 +452,10 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	tpNum[i] = 0;
 	tpNumNet[i] = 0;
     }
+    validTp = 0;
+    validTpNet = 0;
 
+    //printf("at connect TPnum[0]=%d\n", tpNum[0]);
   } /* End DAQ CONNECT */
 
 /* ******************************************************************************** */
@@ -470,6 +473,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	xferLength = crcLength;
 	xferSize = xferSize1;
 	xferDone = 0;
+        //printf("TPnum[0]=%d\n", tpNum[0]);
     }
 
     /* If size of data remaining to be sent is less than calc xfer size, reduce xfer size
@@ -834,6 +838,10 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	memcpy(excnum, (const void *)(gdsPtr->tp[_2k_sys_offs][0]), sizeof(excnum));
 	memcpy(tpnum, (const void *)(gdsPtr->tp[2 + _2k_sys_offs][0]), sizeof(excnum));
 
+        //printf("TPnum[0]=%d\n", tpNum[0]);
+        //printf("excnum[0]=%d\n", excnum[0]);
+        //printf("tpnum[0]=%d\n", tpnum[0]);
+
 	// Search and clear deselected test points
 	for (i = 0; i < DAQ_GDS_MAX_TP_ALLOWED; i++) {
 		if (tpNum[i] == 0) continue;
@@ -866,14 +874,18 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		exc = 0;
 		// Do test points first
 		if (i < DAQ_GDS_MAX_TP_NUM) {
+			if (i > (DAQ_GDS_MAX_TP_ALLOWED-1)) continue;
 			if (tpnum[i] == 0) continue;
 			tpn = tpnum[i];
 		} else {
+			if (i > (DAQ_GDS_MAX_TP_ALLOWED-1 + DAQ_GDS_MAX_TP_NUM)) continue;
 			if (excnum[i - DAQ_GDS_MAX_TP_NUM] == 0) continue;
 			tpn = excnum[i - DAQ_GDS_MAX_TP_NUM];
 			exc = 1;
 			ii = i - DAQ_GDS_MAX_TP_NUM;
 		}
+
+        	//printf("tpn=%d at %d\n", tpn, i);
 		slot = empty_slot();
 		if (slot < 0) {
 			// No more slots left, table's full
