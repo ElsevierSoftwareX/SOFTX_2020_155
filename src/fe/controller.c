@@ -2664,7 +2664,6 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	}
 	ioMemData->dolphinCount = 0;
 #ifdef DOLPHIN_TEST
-
 	ioMemData->dolphinCount = cdsPciModules.dolphinCount;
 	ioMemData->dolphin[0] = cdsPciModules.dolphin[0];
 	ioMemData->dolphin[1] = cdsPciModules.dolphin[1];
@@ -2687,10 +2686,12 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	printf("rfmTime = %d\n", *rfmTime);
 #endif
 #else
+#ifdef ADC_MASTER
 // Clear Dolphin pointers so the slave sees NULLs
 	ioMemData->dolphinCount = 0;
         ioMemData->dolphin[0] = 0;
         ioMemData->dolphin[1] = 0;
+#endif
 #endif
         printf("***************************************************************************\n");
   	if (cdsPciModules.gps) {
