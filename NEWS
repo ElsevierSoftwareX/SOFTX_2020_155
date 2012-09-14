@@ -1,4 +1,43 @@
 ===========================
+Overview of changes for 2.6 - Branch pending release..
+===========================
+- IPC code generation portion of feCodeGen.pl moved to IPCx.pm (part of cleanup)
+- Bug Fix: Memory size mismatch for TP table between awgtpman and daqLib.
+- RCG_HOST environment variable added. This setting will override the hostname in the user model to allow running
+  on different machines in test stands ie startup command will now have this computer name to check on startup.
+- General cleanup based on compiler warning messages; warning messages turned back on to provide info the build logs.
+- Added C99 compile flag to Makefiles. Changed O3 optimization flag to just O after some errors at 40m lab in their
+  C code which generated large arrays.
+- Increased max IPC channels per net or computer to 256 (previously 64). Added RCG compile time error if this is exceeded.
+- Implemented TP upper limit checking ie ensure total DAQ network rate/model <4MByte/sec. This is a coordinated effor
+  between daqLib.c and awgtpman ie daqLib passes size to awgtpman, which will reject further requests if >4MByte/sec.
+- Added IPC name and sender model name to IPC info tables for additional diagnostics vi dmesg and /proc files.
+- Added DAC buffer size info to /proc. EPICS Dac diag info only indicates if DAC buffer data size is incorrect. Diags to /proc
+  file indicate if this is an overflow or underflow condition.
+- Bug Fix (#400): RCG Makefile now checks for undefined symbols in the kernel object and throws error. 
+- Bug fixes for 394, 395, 404, 406, 407, 402, 409
+- Added new filter module w/control 2 part. Allows setting of offsets, gains, and ramp times and switching of input, offset, 
+  and output switches from within model.
+- Changed Dolphin network cache flushing to only occur after last write in list. This takes much less time than fix for 2.5.1,
+  where cache flushing occurs after every write. Tested ok with test model sending 200 signals at 32K.
+- Check added to verify CPU core is not in use by another model prior to loading new one. Requires a kernel patch (see .patch
+  files).
+- EPICS update rate increase from 4-5Hz to 16Hz, triggered by RT code. New EPICS channel (IFO:FEC-DCUID_EPICS_SYNC) updated (0-15) 
+  at 16Hz for use by scripts, if desired.
+- Bug fix for models containing both 18bit and 16bit DAC modules. However, it is required that 18bit DAC modules show up on
+  the PCIe bus before 16bit modules in the I/O chassis.
+===========================================================
+Tagged release 2.5.1 from branch 2.5
+===========================================================
+- Cache flushing added to Dolphin network writes. This cleared IPC errors on receivers.
+===========================================================
+Tagged Release 2.5, with final set of changes listed below.
+==========================================================
+- Bug fix for new Contec BIO cards - Code not addressing boards properly if user model skipped cards in I/O chassis.
+- Reinstate SQRT part in CDS_PARTS - got lost along the way.
+- Channel hopping error detection now results in code exit ie dangerous to keep running if ADC channels are mixed up.
+- Remaining bug fixes from test results can be found in the SVN log.
+===========================
 Overview of changes for 2.5 - Branch released 3/19/12 for testing.
 ===========================
 - Additional checks in RCG to verify that user has correctly numbered ADC/DAC cards.
