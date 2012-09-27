@@ -936,7 +936,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		    excTable[slot].sysNum = localTable[ltSlot].sysNum;
 		    excTable[slot].fmNum = localTable[ltSlot].fmNum;
                     // Save the index into the TPman table
-                    excTable[slot].offset = i - DAQ_GDS_MAX_TP_NUM;
+                    excTable[slot].offset = i - DAQ_GDS_MAX_TP_ALLOWED;
       		    dataInfo.tp[ltSlot].dataType = DAQ_DATATYPE_FLOAT;
 
           	    gdsPtr->tp[_2k_sys_offs][1][slot] = 0;
