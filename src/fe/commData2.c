@@ -232,6 +232,7 @@ static unsigned long nskipped = 0;	// number of skipped error messages (couldn't
 				ipcInfo[ii].data = tmp;
 			// If IPC syncword != local syncword, data is BAD
 			} else {
+#if 0
 				if ((cycle_gps_time - startGpsTime) > 2) { // Do not print for the first 2 seconds
 					if (ptim < cycle_gps_time) {
 						if (nskipped) printf("IPC RCV ERROR: skipped %lu sync error messages\n", nskipped);
@@ -244,6 +245,7 @@ static unsigned long nskipped = 0;	// number of skipped error messages (couldn't
 					}
 					
 				}
+#endif
 				// ipcInfo[ii].data = ipcInfo[ii].pIpcData->data[ipcIndex];
 				// ipcInfo[ii].data = tmp;
 				ipcInfo[ii].errFlag ++;
