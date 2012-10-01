@@ -72,9 +72,9 @@ DEVFLAGS=@DEVFLAGS@
 all: 
 	/bin/true
 
-docs:	
-	mkdir -p docs
-	(cd docs && doxygen $(srcdir)/etc/doxygen.cfg)
+.PHONY : doc
+doc:	
+	(cd doc && doxygen doxygen.cfg)
 	
 
 reclean:
