@@ -72,6 +72,11 @@ DEVFLAGS=@DEVFLAGS@
 all: 
 	/bin/true
 
+docs:	
+	mkdir -p docs
+	(cd docs && doxygen $(srcdir)/etc/doxygen.cfg)
+	
+
 reclean:
 	-/bin/rm -rf build config src target
 
