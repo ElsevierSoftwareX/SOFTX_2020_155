@@ -2243,6 +2243,7 @@ int init_module (void)
 	int doCnt;
 	int do32Cnt;
 	int doIIRO16Cnt;
+	int doIIRO8Cnt;
 	int cdo64Cnt;
 	int cdi64Cnt;
 #endif
@@ -2360,6 +2361,7 @@ int init_module (void)
 	cdo64Cnt = 0;
 	cdi64Cnt = 0;
 	doIIRO16Cnt = 0;
+	doIIRO8Cnt = 0;
 
 	// Have to search thru all cards and find desired instance for application
 	// Master will map ADC cards first, then DAC and finally DIO
@@ -2470,20 +2472,37 @@ int init_module (void)
                                       	cdsPciModules.doCount ++; 
                                       	cdsPciModules.cDo32lCount ++; 
 					cdsPciModules.doInstance[kk] = do32Cnt;
+					status ++;
 				 }
 				 break;
 			case ACS_16DIO:
 				if((cdsPciModules.cards_used[jj].type == ACS_16DIO) && 
 					(cdsPciModules.cards_used[jj].instance == doIIRO16Cnt))
 				{
+					kk = cdsPciModules.doCount;
 					printf("Found Access IIRO-16 at %d 0x%x\n",jj,ioMemData->ipc[ii]);
-					cdsPciModules.doType[doCnt] = ioMemData->model[ii];
-					cdsPciModules.pci_do[doCnt] = ioMemData->ipc[ii];
+					cdsPciModules.doType[doIIRO16Cnt] = ioMemData->model[ii];
+					cdsPciModules.pci_do[doIIRO16Cnt] = ioMemData->ipc[ii];
 					cdsPciModules.doCount ++;
 					cdsPciModules.iiroDio1Count ++;
 					cdsPciModules.doInstance[kk] = doIIRO16Cnt;
+					status ++;
 				}
 				break;
+			case ACS_8DIO:
+			       if((cdsPciModules.cards_used[jj].type == ACS_8DIO) &&
+			               (cdsPciModules.cards_used[jj].instance == doIIRO8Cnt))
+			       {
+			               kk = cdsPciModules.doCount;
+			               printf("Found Access IIRO-8 at %d 0x%x\n",jj,ioMemData->ipc[ii]);
+			               cdsPciModules.doType[doIIRO8Cnt] = ioMemData->model[ii];
+			               cdsPciModules.pci_do[doIIRO8Cnt] = ioMemData->ipc[ii];
+			               cdsPciModules.doCount ++;
+			               cdsPciModules.iiroDioCount ++;
+			               cdsPciModules.doInstance[kk] = doIIRO8Cnt;
+			               status ++;
+			       }
+		 	       break;
 			default:
 				break;
 		   }
@@ -2494,6 +2513,7 @@ int init_module (void)
 		if(ioMemData->model[ii] == CON_6464DIO) doCnt ++;
 		if(ioMemData->model[ii] == CON_32DO) do32Cnt ++;
 		if(ioMemData->model[ii] == ACS_16DIO) doIIRO16Cnt ++;
+		if(ioMemData->model[ii] == ACS_8DIO) doIIRO8Cnt ++;
 	}
 	// If no ADC cards were found, then SLAVE cannot run
 	if(!cdsPciModules.adcCount)
