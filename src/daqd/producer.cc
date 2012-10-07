@@ -224,7 +224,8 @@ gm_receiver_thread(void *p)
   gm_recv();
 #elif defined(USE_MX)
   void receiver_mx(int);
-  receiver_mx(0);
+  long a = (long)p;
+  receiver_mx(a);
 #elif defined(USE_UDP)
   void receiver_udp(int);
   receiver_udp(dcu_id);
@@ -322,7 +323,6 @@ producer::frame_writer ()
    daqd_c::realtime("Producer", 1);
    unsigned char *read_dest;
    circ_buffer_block_prop_t prop;
-   pthread_t gm_tid;
 #ifdef USE_SYMMETRICOM
    unsigned long prev_gps, prev_frac;
    unsigned long gps, frac;
@@ -337,8 +337,8 @@ producer::frame_writer ()
      exit (1);
    }
 #elif defined(USE_MX)
-   void open_mx(void);
-   open_mx();
+   extern unsigned int open_mx(void);
+   unsigned int max_endpoints = open_mx();
 #endif
 
 #if defined(USE_MX) || defined(USE_UDP)
@@ -400,6 +400,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
    }
 #else
    {
+     pthread_t gm_tid;
      pthread_attr_t attr;
      pthread_attr_init (&attr);
      pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
@@ -407,20 +408,31 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
      //  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
      int err_no;
   
-     if (err_no = pthread_create (&gm_tid, &attr,
-				  gm_receiver_thread, 0)) {
-     	pthread_attr_destroy (&attr);
-     	system_log(1, "pthread_create() err=%d", err_no);
-	exit(1);
+  #if 0
+     for (int j = 0; j < DCU_COUNT; j++) {
+       if (daqd.dcuSize[0][j]) {
+           if (!strncasecmp(daqd.dcuName[j], "iop", 3)) {
+     		if (err_no = pthread_create (&gm_tid, &attr,
+				  gm_receiver_thread, (void *)j)) {
+     			pthread_attr_destroy (&attr);
+     			system_log(1, "pthread_create() err=%d", err_no);
+			exit(1);
+     	   	}
+     		system_log(1, "MX receiver dcu=%d thread started", j);
+          }
+       }
+     }
+     #endif
+
+     for (int j = 0; j < max_endpoints; j++) {
+       if (err_no = pthread_create (&gm_tid, &attr,
+                     gm_receiver_thread, (void *)j)) {
+                  pthread_attr_destroy (&attr);
+                  system_log(1, "pthread_create() err=%d", err_no);
+                  exit(1);
+       }
      }
      pthread_attr_destroy (&attr);
-#ifdef USE_GM
-     system_log(1, "Myrinet receiver thread started");
-#elif defined(USE_MX)
-     system_log(1, "MX receiver thread started");
-#elif defined(USE_UDP)
-     system_log(1, "UDP receiver thread started");
-#endif
    }
 #endif
 
