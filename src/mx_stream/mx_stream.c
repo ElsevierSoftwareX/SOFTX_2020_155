@@ -4,7 +4,7 @@
 //
 
 #include "myriexpress.h"
-
+#include "mx_extensions.h"
 #include <unistd.h>
 #include <ctype.h>
 #include <sys/time.h>
@@ -15,9 +15,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <errno.h>
-
 #include <pthread.h>
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -153,18 +151,24 @@ do {
 			   1000, &dest);
 			   // MX_INFINITE, &dest);
 		if (conStat != MX_SUCCESS) {
-			fprintf(stderr, "mx_connect failed\n");
+			fprintf(stderr, "mx_connect failed %s\n", mx_strerror(conStat));
 			myErrorSignal = 1;
 			for (int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= 1;
-			 exit(1);
+			exit(1);
 		}
 		else {
 			myErrorSignal = 0;
 			for (int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= 2;
-		fprintf(stderr, "Connection Made\n");
-		fflush(stderr);
+			fprintf(stderr, "Connection Made\n");
+			fflush(stderr);
 		}
 	}while(myErrorSignal);
+
+	mx_return_t ret = mx_set_request_timeout(ep, 0, 1); // Set one second timeout
+	if (ret != MX_SUCCESS) {
+		fprintf(stderr, "Failed to set request timeout %s\n", mx_strerror(ret));
+		exit(1);
+	}
 
 // Have a connection
 	myErrorSignal = 0;
@@ -229,16 +233,27 @@ do {
 		  // mx_isend(ep, &seg, 1, dest, 1, NULL, &req[cur_req]);
 
 		  /* wait for the send to complete */
-		  mx_wait(ep, &req[cur_req], MX_INFINITE, &stat, &result);
-		  if (!result) {
-			fprintf(stderr, "mxWait failed with status %s\n", mx_strstatus(stat.code));
-			//exit(1);
-			myErrorSignal = 1;
-		  }
-		  if (stat.code != MX_STATUS_SUCCESS) {
+		  mx_return_t ret;
+again:
+		  ret = mx_wait(ep, &req[cur_req], 25/*MX_INFINITE*/, &stat, &result);
+                  if (ret != MX_SUCCESS) {
+                          fprintf(stderr, "mx_cancel() failed with status %s\n", mx_strerror(ret));
+                          exit(1);
+                  }
+                  if (result == 0) { // Request incomplete
+                        goto again; // Restart incomplete request
+                  } else { // Request is complete
+		     if (stat.code != MX_STATUS_SUCCESS) {
 			fprintf(stderr, "isendxxx failed with status %s\n", mx_strstatus(stat.code));
-			//exit(1);
+                        ret = mx_disconnect(ep, dest);
+                        if (ret != MX_SUCCESS) {
+                           fprintf(stderr, "mx_disconnect() failed with status %s\n", mx_strerror(ret));
+                        } else {
+                           fprintf(stderr, "disconnected from the sender\n");
+                        }
+			exit(1);
 			myErrorSignal = 1;
+		     }
 		  }
 		 // if(lastCycle == 15) myErrorSignal = 1;
 		  if(lastCycle == 15) shmIpcPtr[i]->status ^= 2;

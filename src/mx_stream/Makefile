@@ -24,7 +24,7 @@ rfm.o: ../drv/rfm.c
 CFLAGS = -I${prefix}/include -I.
 CFLAGS += -Wall -g -O2 -std=c99
 CFLAGS += $(OPTIM_CFLAGS)
-CPPFLAGS = -I../common -I$(top_srcdir)/common -I$(top_srcdir)/common/bsd -DNO_RTL 
+CPPFLAGS = -I../common -I$(top_srcdir)/common -I$(top_srcdir)/common/bsd -DNO_RTL  -D_XOPEN_SOURCE -D_BSD_SOURCE
 #CPPFLAGS += -DMX_THREAD_SAFE=$(MX_THREAD_SAFE)
 
 LDFLAGS = -L${prefix}/lib -lmyriexpress -lpthread  -g
