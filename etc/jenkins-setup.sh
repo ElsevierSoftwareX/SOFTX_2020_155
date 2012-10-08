@@ -42,4 +42,5 @@ export CDS_SCRIPTS_PATH=$USERAPPS_ROOT/cds/common/scripts:$USERAPPS_ROOT/aos/com
 
 export PATH=:/opt/rtapps/linux-x86_64/utils/bin:/opt/rtapps/gds-2.15.2/bin:/opt/rtapps/libmetaio-8.2/linux-x86_64/bin:/opt/rtapps/libframe-8.11/linux-x86_64/bin:/opt/rtapps/framecpp-1.18.2/linux-x86_64/bin:/opt/rtapps/fftw-3.2.2/linux-x86_64/bin:/opt/rtapps/dv:/opt/rtapps/epics-3.14.10_long/extensions/bin/linux-x86_64:/opt/rtapps/epics-3.14.10_long/modules/sncseq/bin/linux-x86_64:/opt/rtapps/epics-3.14.10_long/base/bin/linux-x86_64:/usr/bin:/bin:/usr/sbin:/sbin:/opt/rtcds/lho/h1/scripts:/opt/rtcds/userapps/release/cds/common/scripts:/opt/rtapps/jdk/bin
 export EPICS_DB_INCLUDE_PATH=/opt/rtapps/epics/base/dbd
+export EPICS_HOST_ARCH=linux-x86_64
 
