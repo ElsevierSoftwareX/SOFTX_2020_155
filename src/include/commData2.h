@@ -6,7 +6,7 @@
 #define __COMMDATA2_H__
 
 // The total number of IPCs allowed per kind
-#define MAX_IPC		256
+#define MAX_IPC		512
 // RFM IPC reduced when using IOP DMA
 #define MAX_IPC_RFM	64
 // The number of data blocks buffered per IPC channel
