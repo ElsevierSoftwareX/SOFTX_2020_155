@@ -122,6 +122,12 @@ MDL_MODELS = $(shell if [ -e /etc/rt.sh ]; then /etc/rt.sh; fi)
 World: $(MDL_MODELS)
 	@echo Successfully compiled $(MDL_MODELS)
 
+startWorld:
+	@echo $(patsubst %,start% \;,$(MDL_MODELS))
+
+killWorld:
+	@echo $(patsubst %,kill% \;,$(MDL_MODELS))
+
 showWorld:
 	@echo $(MDL_MODELS)
 
