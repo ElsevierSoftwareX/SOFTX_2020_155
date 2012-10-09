@@ -407,12 +407,10 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     // Set pointer to GDS table in shmem
     gdsPtr = (GDS_CNTRL_BLOCK *)(_epics_shm + DAQ_GDS_BLOCK_ADD);
     // Clear out the GDS TP selections.
-    if(sysRate < DAQ_16K_SAMPLE_SIZE) tpx = 3;
-    else tpx = 2;
-    for(ii=0;ii<24;ii++) gdsPtr->tp[tpx][0][ii] = 0;
-    if(sysRate < DAQ_16K_SAMPLE_SIZE) tpx = 1;
-    else tpx = 0;
-    for(ii=0;ii<8;ii++) gdsPtr->tp[tpx][0][ii] = 0;
+    if (sysRate < DAQ_16K_SAMPLE_SIZE) tpx = 3; else tpx = 2;
+    for (ii=0; ii < DAQ_GDS_MAX_TP_ALLOWED; ii++) gdsPtr->tp[tpx][0][ii] = 0;
+    if(sysRate < DAQ_16K_SAMPLE_SIZE) tpx = 1; else tpx = 0;
+    for (ii=0; ii < DAQ_GDS_MAX_TP_ALLOWED; ii++) gdsPtr->tp[tpx][0][ii] = 0;
     // Following can be uncommented for testing.
     // gdsPtr->tp[3][0][0] = 31250;
     // gdsPtr->tp[3][0][1] = 11002;
