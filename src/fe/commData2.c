@@ -178,7 +178,7 @@ INLINE void commData2Send(int connects,  	 	// Total number of IPC connections i
 }
 
 // *************************************************************************************************
-void commData2Receive(int connects,  	 	// Total number of IPC connections in the application
+INLINE void commData2Receive(int connects,  	 	// Total number of IPC connections in the application
 			     CDS_IPC_INFO ipcInfo[], 	// IPC information structure
 			     int timeSec, 		// Present GPS Second
 			     int cycle)			// Application cycle count (0 to FE_CODE_RATE)
