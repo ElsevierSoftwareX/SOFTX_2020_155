@@ -2199,20 +2199,26 @@ procfile_read(char *buffer,
 		sprintf(b, "ipcErrBits=0x%x\n", ipcErrBits);
 		strcat(buffer, b);
 
-		//int myIpcCount;
-		//CDS_IPC_INFO ipcInfo[1];
+		// The following loop has a chance to overflow the buffer,
+		// which is set to PROC_BLOCK_SIZE. (PAGE_SIZE-1024 = 3072 bytes).
+		// We will simply stop printing at that point.
+#define PROC_BLOCK_SIZE (3*1024)
+		unsigned int byte_cnt = strlen(buffer) + 1;
 		for (i = 0; i < myIpcCount; i++) {
 	  	  if (ipcInfo[i].errTotal) {
-	  		sprintf(b, "IPC net=%d num=%d name=%s sender=%s errcnt=%d\n", 
-	  		ipcInfo[i].netType, ipcInfo[i].ipcNum,
-			ipcInfo[i].name, ipcInfo[i].senderModelName,
-			ipcInfo[i].errTotal);
+	  		unsigned int cnt =
+				sprintf(b, "IPC net=%d num=%d name=%s sender=%s errcnt=%d\n", 
+					ipcInfo[i].netType, ipcInfo[i].ipcNum,
+					ipcInfo[i].name, ipcInfo[i].senderModelName,
+					ipcInfo[i].errTotal);
+			if (byte_cnt + cnt > PROC_BLOCK_SIZE) break;
+			byte_cnt += cnt;
 	  		strcat(buffer, b);
 	  	  }
  		}
 #endif
 
-		ret = strlen(buffer);
+		ret = byte_cnt;
 	}
 
 	return ret;
