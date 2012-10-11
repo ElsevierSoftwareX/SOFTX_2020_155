@@ -2217,8 +2217,7 @@ procfile_read(char *buffer,
 	  	  }
  		}
 #endif
-
-		ret = byte_cnt;
+		ret = strlen(buffer);
 	}
 
 	return ret;
