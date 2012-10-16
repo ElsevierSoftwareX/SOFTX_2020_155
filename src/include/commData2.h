@@ -5,44 +5,73 @@
 #ifndef __COMMDATA2_H__
 #define __COMMDATA2_H__
 
-// The total number of IPCs allowed per kind
-#define MAX_IPC		512
-// RFM IPC reduced when using IOP DMA
+///	\file commData2.h
+///	\brief Header file with IPC communications structures
+///
+
+///	Defines max number of IPC allowed per network type
+#define MAX_IPC		256
+///	Defines max number of IPC allowed on a RFM network if using DMA 
 #define MAX_IPC_RFM	64
-// The number of data blocks buffered per IPC channel
+/// The number of data blocks buffered per IPC channel
 #define IPC_BLOCKS 	64
 
+
+///	Struct for a single IPC xmission
 typedef struct CDS_IPC_XMIT {
+///	Signal value being xmitted
         double data;
+///	Combination of GDS seconds and cycle count
         unsigned long timestamp;
 } CDS_IPC_XMIT;
+
+
+///	Defines the array buffer in memory for IPC comms
 typedef struct CDS_IPC_COMMS {
 	CDS_IPC_XMIT dBlock[IPC_BLOCKS][MAX_IPC];
 } CDS_IPC_COMMS;
 
 
+///	Structure to maintain all IPC information
 typedef struct CDS_IPC_INFO {
+///	Data value to be sent or being received
         double data;
+///	Not Used
         int sendNode;
+///	Communication mechanism (as defined ISHME, IRFM0, IRFM1,IPCIE)
         int netType;
+///	Cycle count to be sent as part of the timestamp data
         int sendCycle;
+///	Rate at which data is being sent
         int sendRate;
+///	Rate at which data is to be received
         int rcvRate;
+///	Cycle on which to receive data
         int rcvCycle;
+/// IPC number given from the IPC configuration file
         int ipcNum;
+///	Should code send or receive this IPC
         int mode;
+///	Errors/sec detected for a single IPC
         int errFlag;
+///	Marks error to IPC status by network type
 	int errTotal;
+///	Name of the IPC signal from the user model
         char *name;
+///	Name of the model which contains the IPC sender part
         char *senderModelName;
+///	Pointer to the IPC data memory location
 	CDS_IPC_COMMS *pIpcData;
 } CDS_IPC_INFO;
+
 typedef struct CDS_IPC_KEY_LIST {
 	char name[32];
 	unsigned int masterKey;
 } CDS_IPC_KEY_LIST;
 
+/// Indicates data is to be sent
 #define ISND		1	
+/// Indicates data is to be received
 #define IRCV		0
 #define ISHME		0
 #define IPCIE		1
