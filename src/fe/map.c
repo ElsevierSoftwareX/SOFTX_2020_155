@@ -1,3 +1,6 @@
+///	\file map.c
+///	This file contains the I/O driver and mapping software used by the
+///	RCG for supported PCIe I/O modules.
 #include <linux/types.h>
 #include <linux/kernel.h>
 #undef printf
@@ -14,7 +17,7 @@ int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int);
 void rfm55DMA(CDS_HARDWARE *pHardware, int card, int offset);
 
 // PCI Device variables
-volatile PLX_9056_DMA *adcDma[MAX_ADC_MODULES];	/* DMA struct for GSA ADC */
+volatile PLX_9056_DMA *adcDma[MAX_ADC_MODULES];	/// DMA struct for GSA ADC
 volatile PLX_9056_DMA *dacDma[MAX_DAC_MODULES];	/* DMA struct for GSA DAC */
 volatile PLX_9056_INTCTRL *plxIcr;		/* Ptr to interrupt cntrl reg on PLX chip */
 dma_addr_t adc_dma_handle[MAX_ADC_MODULES];	/* PCI add of ADC DMA memory */
@@ -26,15 +29,18 @@ volatile GSA_DAC_REG *dacPtr[MAX_DAC_MODULES];	/* Ptr to DAC registers */
 volatile VMIC5565_CSR *p5565Csr;		// VMIC5565 Control/Status Registers
 volatile VMIC5565DMA *p5565Dma[2];		// VMIC5565 DMA Engine
 
-
+// *****************************************************************************
+/// Function checks status of DMA DONE bit for an ADC module.
+/// Note: This function not presently used.
+// *****************************************************************************
 int checkAdcDmaDone(int module)
 {
 	if((adcDma[module]->DMA_CSR & GSAI_DMA_DONE) == 0) return(0);
 	else return(1);
 }
 // *****************************************************************************
-// Function checks if DMA from ADC module is complete
-// Note: This function not presently used.
+/// Function checks if DMA from ADC module is complete
+/// Note: This function not presently used.
 // *****************************************************************************
 int adcDmaDone(int module, int *data)
 {
@@ -44,8 +50,8 @@ int adcDmaDone(int module, int *data)
 	if (*data == 0) return 0; else return 16;
 }
 // *****************************************************************************
-// Function checks if DMA from DAC module is complete
-// Note: This function not presently used.
+/// Function checks if DMA from DAC module is complete
+/// Note: This function not presently used.
 // *****************************************************************************
 int dacDmaDone(int module)
 {
@@ -55,8 +61,8 @@ int dacDmaDone(int module)
 }
 
 // *****************************************************************************
-// Function clears ADC buffer and starts acquisition via external clock
-// Also sets up ADC for Demand DMA mode and set GO bit in DMA Mode Register
+/// Function clears ADC buffer and starts acquisition via external clock
+/// Also sets up ADC for Demand DMA mode and set GO bit in DMA Mode Register
 // *****************************************************************************
 int gsaAdcTrigger(int adcCount, int adcType[])
 {
@@ -85,7 +91,7 @@ int gsaAdcTrigger(int adcCount, int adcType[])
 }
 
 // *****************************************************************************
-// Function...
+/// Function enables DAC modules to begin receiving external clocking signals.
 // *****************************************************************************
 int gsaDacTrigger(CDS_HARDWARE *pHardware)
 {
@@ -120,7 +126,7 @@ int gsaDacTrigger(CDS_HARDWARE *pHardware)
 }
 
 // *****************************************************************************
-// Function stops ADC acquisition
+/// Function stops ADC acquisition
 // *****************************************************************************
 int gsaAdcStop()
 {
@@ -130,8 +136,8 @@ int gsaAdcStop()
 
 
 // *****************************************************************************
-// Test if ADC has a sample ready
-// Only to be used with 2MS/sec ADC module.
+/// Test if ADC has a sample ready.
+/// Only to be used with 2MS/sec ADC module.
 // *****************************************************************************
 int checkAdcRdy(int count,int numAdc,int type)
 {
@@ -181,7 +187,7 @@ int checkAdcRdy(int count,int numAdc,int type)
 }
 
 // *****************************************************************************
-// Check number of samples in ADC FIFO.
+/// Check number of samples in ADC FIFO.
 // *****************************************************************************
 int checkAdcBuffer(int numAdc)
 {
@@ -193,7 +199,7 @@ int checkAdcBuffer(int numAdc)
 }
 //
 // *****************************************************************************
-// Check number of samples in DAC FIFO.
+/// Check number of samples in DAC FIFO.
 // *****************************************************************************
 int checkDacBuffer(int numDac)
 {
@@ -203,7 +209,7 @@ int checkDacBuffer(int numDac)
 }
 
 // *****************************************************************************
-// Clear DAC FIFO.
+/// Clear DAC FIFO.
 // *****************************************************************************
 int clearDacBuffer(int numDac)
 {
@@ -213,7 +219,7 @@ int clearDacBuffer(int numDac)
 
 
 // *****************************************************************************
-// This routine sets up the DMA registers once on code initialization.
+/// This routine sets up the ADC DMA registers once on code initialization.
 // *****************************************************************************
 int gsaAdcDma1(int modNum, int adcType)
 {
@@ -232,8 +238,7 @@ int gsaAdcDma1(int modNum, int adcType)
 }
 
 // *****************************************************************************
-// This routine starts a DMA operation.
-// It must first be setup by the Dma1 call above.
+/// This routine starts an ADC DMA operation. It must first be setup by the Dma1 call above.
 // *****************************************************************************
 void gsaAdcDma2(int modNum)
 {
@@ -242,11 +247,13 @@ void gsaAdcDma2(int modNum)
 
 #ifdef DIAG_TEST
 // *****************************************************************************
-// For DIAGS ONLY !!!!!!!!
-// This will change ADC DMA BYTE count
-// -- Greater than normal will result in channel hopping.
-// -- Less than normal will result in ADC timeout.
-// In both cases, real-time kernel code should exit with errors to dmesg
+/// For DIAGS ONLY !!!!!!!!
+/// This will change ADC DMA BYTE count
+
+/// -- Greater than normal will result in channel hopping.
+/// -- Less than normal will result in ADC timeout.
+
+/// In both cases, real-time kernel code should exit with errors to dmesg
 // *****************************************************************************
 void gsaAdcDmaBump(int modNum, int bump)
 {
@@ -255,9 +262,9 @@ void gsaAdcDmaBump(int modNum, int bump)
 #endif
 
 // *****************************************************************************
-// This routine sets up the DAC DMA registers.
-// It is only called once to set up the number of bytes to be preloaded into
-// the DAC prior to fe code realtime loop.
+/// This routine sets up the DAC DMA registers.
+/// It is only called once to set up the number of bytes to be preloaded into
+/// the DAC prior to fe code realtime loop.
 // *****************************************************************************
 int dacDmaPreload(int modNum, int samples)
 {
@@ -271,7 +278,7 @@ int dacDmaPreload(int modNum, int samples)
 
 
 // *****************************************************************************
-// This routine sets up the DAC DMA registers once on code initialization.
+/// This routine sets up the DAC DMA registers once on code initialization.
 // *****************************************************************************
 int gsaDacDma1(int modNum, int dacType)
 {
@@ -300,8 +307,8 @@ int gsaDacDma1(int modNum, int dacType)
 }
 
 // *****************************************************************************
-// This routine starts a DMA operation to a DAC module.
-// It must first be setup by the Dma1 call above.
+/// This routine starts a DMA operation to a DAC module.
+/// It must first be setup by the Dma1 call above.
 // *****************************************************************************
 void gsaDacDma2(int modNum, int dacType, int offset)
 {
@@ -318,7 +325,7 @@ void gsaDacDma2(int modNum, int dacType, int offset)
 }
 
 // *****************************************************************************
-// Routine to read ACCESS DIO modules
+/// Routine to read ACCESS DIO modules
 // *****************************************************************************
 unsigned int readDio(CDS_HARDWARE *pHardware, int modNum)
 {
@@ -328,7 +335,7 @@ unsigned int readDio(CDS_HARDWARE *pHardware, int modNum)
 }
 
 // *****************************************************************************
-// Routine to write ACCESS DIO modules
+/// Routine to write ACCESS DIO modules
 // *****************************************************************************
 void writeDio(CDS_HARDWARE *pHardware, int modNum, int data)
 {
@@ -336,7 +343,7 @@ void writeDio(CDS_HARDWARE *pHardware, int modNum, int data)
 }
 
 // *****************************************************************************
-// Routine to initialize ACCESS DIO modules
+/// Routine to initialize ACCESS DIO modules
 // *****************************************************************************
 int mapDio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 {
@@ -360,7 +367,7 @@ int mapDio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 }
 
 // *****************************************************************************
-// Routine to read ACCESS IIRO-8 Isolated DIO modules
+/// Routine to read ACCESS IIRO-8 Isolated DIO modules
 // *****************************************************************************
 unsigned int readIiroDio(CDS_HARDWARE *pHardware, int modNum)
 {
@@ -370,7 +377,7 @@ unsigned int readIiroDio(CDS_HARDWARE *pHardware, int modNum)
 }
 
 // *****************************************************************************
-// Routine to read ACCESS IIRO-8 Isolated DIO modules outputs from register
+/// Routine to read ACCESS IIRO-8 Isolated DIO modules outputs from register
 // *****************************************************************************
 unsigned int readIiroDioOutput(CDS_HARDWARE *pHardware, int modNum)
 {
@@ -380,7 +387,7 @@ unsigned int readIiroDioOutput(CDS_HARDWARE *pHardware, int modNum)
 }
 
 // *****************************************************************************
-// Routine to write ACCESS IIRO-8 Isolated DIO modules
+/// Routine to write ACCESS IIRO-8 Isolated DIO modules
 // *****************************************************************************
 void writeIiroDio(CDS_HARDWARE *pHardware, int modNum, int data)
 {
@@ -388,7 +395,7 @@ void writeIiroDio(CDS_HARDWARE *pHardware, int modNum, int data)
 }
 
 // *****************************************************************************
-// Routine to initialize ACCESS IIRO-8 Isolated DIO modules
+/// Routine to initialize ACCESS IIRO-8 Isolated DIO modules
 // *****************************************************************************
 int mapIiroDio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 {
@@ -412,7 +419,7 @@ int mapIiroDio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 }
 
 // *****************************************************************************
-// Routine to read ACCESS IIRO-16 Isolated DIO modules
+/// Routine to read ACCESS IIRO-16 Isolated DIO modules
 // *****************************************************************************
 unsigned int readIiroDio1(CDS_HARDWARE *pHardware, int modNum)
 {
@@ -424,7 +431,7 @@ return (v);
 }
 
 // *****************************************************************************
-// Routine to write ACCESS IIRO-16 Isolated DIO modules
+/// Routine to write ACCESS IIRO-16 Isolated DIO modules
 // *****************************************************************************
 void writeIiroDio1(CDS_HARDWARE *pHardware, int modNum, int data)
 {
@@ -433,7 +440,7 @@ void writeIiroDio1(CDS_HARDWARE *pHardware, int modNum, int data)
 }
 
 // *****************************************************************************
-// Routine to initialize ACCESS IIRO-16 Isolated DIO modules
+/// Routine to initialize ACCESS IIRO-16 Isolated DIO modules
 // *****************************************************************************
 int mapIiroDio1(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 {
@@ -456,7 +463,7 @@ int mapIiroDio1(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 }
 
 // *****************************************************************************
-// Initialize CONTEC PCIe 6464 DIO module
+/// Initialize CONTEC PCIe 6464 DIO module
 // *****************************************************************************
 int mapContec6464dio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 {
@@ -488,7 +495,7 @@ int mapContec6464dio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 }
 
 // *****************************************************************************
-// Initialize CONTEC PCIe 1616 DIO module
+/// Initialize CONTEC PCIe 1616 DIO module
 // *****************************************************************************
 int mapContec1616dio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 {
@@ -514,7 +521,7 @@ int mapContec1616dio(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 
 
 // *****************************************************************************
-// Routine to Initialize CONTEC PCIe-32 Isolated DO modules
+/// Routine to Initialize CONTEC PCIe-32 Isolated DO modules
 // *****************************************************************************
 int mapContec32out(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 {
@@ -541,7 +548,7 @@ int mapContec32out(CDS_HARDWARE *pHardware, struct pci_dev *diodev)
 }
 
 // *****************************************************************************
-// Routine to write CONTEC PCIe-32 Isolated DO modules
+/// Routine to write CONTEC PCIe-32 Isolated DO modules
 // *****************************************************************************
 unsigned int writeCDO32l(CDS_HARDWARE *pHardware, int modNum, unsigned int data)
 {
@@ -552,7 +559,7 @@ unsigned int writeCDO32l(CDS_HARDWARE *pHardware, int modNum, unsigned int data)
 }
 
 // *****************************************************************************
-// Routine to read CONTEC PCIe-32 Isolated DO modules
+/// Routine to read CONTEC PCIe-32 Isolated DO modules
 // *****************************************************************************
 unsigned int readCDO32l(CDS_HARDWARE *pHardware, int modNum)
 {
@@ -560,7 +567,7 @@ unsigned int readCDO32l(CDS_HARDWARE *pHardware, int modNum)
 }
 
 // *****************************************************************************
-// Routines to write to CONTEC PCIe-16 DIO modules
+/// Routine to write to CONTEC PCIe-16 DIO modules
 // *****************************************************************************
 unsigned int writeCDIO1616l(CDS_HARDWARE *pHardware, int modNum, unsigned int data)
 {
@@ -570,6 +577,9 @@ unsigned int writeCDIO1616l(CDS_HARDWARE *pHardware, int modNum, unsigned int da
 	return(data);
 }
 
+// *****************************************************************************
+/// Routine to read CONTEC PCIe-16 DIO modules
+// *****************************************************************************
 unsigned int readCDIO1616l(CDS_HARDWARE *pHardware, int modNum)
 {
 	// The binary output state bits register is at +2
@@ -583,7 +593,7 @@ unsigned int readInputCDIO1616l(CDS_HARDWARE *pHardware, int modNum)
 }
 
 // *****************************************************************************
-// Routine to write to CONTEC PCIe-64 DIO modules
+/// Routine to write to CONTEC PCIe-64 DIO modules
 // *****************************************************************************
 unsigned int writeCDIO6464l(CDS_HARDWARE *pHardware, int modNum, unsigned int data)
 {
@@ -593,7 +603,7 @@ unsigned int writeCDIO6464l(CDS_HARDWARE *pHardware, int modNum, unsigned int da
 }
 
 // *****************************************************************************
-// Routine to read CONTEC PCIe-64 DIO modules - the output register
+/// Routine to read CONTEC PCIe-64 DIO modules - the output register.
 // *****************************************************************************
 unsigned int readCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
 {
@@ -604,7 +614,7 @@ unsigned int readCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
 }
 
 // *****************************************************************************
-// Routine to read CONTEC PCIe-64 DIO modules
+/// Routine to read CONTEC PCIe-64 DIO modules - the input register.
 // *****************************************************************************
 unsigned int readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
 {
@@ -613,6 +623,11 @@ unsigned int readInputCDIO6464l(CDS_HARDWARE *pHardware, int modNum)
 	return out;
 }
 
+// *****************************************************************************
+/// Patch to properly handle PEX PCIe chip for newer (PCIe) General Standards
+/// DAC modules ie those that are integrated PCIe boards vs. earlier versions
+/// built with carrier boards. This is extracted from code provided by GSC..
+// *****************************************************************************
 void set_8111_prefetch(struct pci_dev *dacdev) {
 	struct pci_dev *dev = dacdev->bus->self;
 
@@ -635,7 +650,7 @@ void set_8111_prefetch(struct pci_dev *dacdev) {
 }
 
 // *****************************************************************************
-// Routine to initialize DAC modules
+/// Routine to initialize GSC 16AO16 DAC modules.
 // *****************************************************************************
 int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 {
@@ -703,6 +718,9 @@ int mapDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 	  return(0);
 }
 
+// *****************************************************************************
+/// Routine to initialize GSC 18AO8 DAC modules.
+// *****************************************************************************
 int map18bitDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 {
   int devNum;
@@ -779,7 +797,7 @@ int map18bitDac(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 }
 
 // *****************************************************************************
-// Routine to initialize GSA ADC modules
+/// Routine to initialize GSC ADC modules
 // *****************************************************************************
 int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
 {
@@ -856,7 +874,7 @@ int mapAdc(CDS_HARDWARE *pHardware, struct pci_dev *adcdev)
 
 }
 // *****************************************************************************
-// Routine to initialize GSA PMC66_18AISS6C ADC modules 
+/// Routine to initialize GSA PMC66_18AISS6C ADC modules 
 // *****************************************************************************
 int mapFadc(CDS_HARDWARE *pHardware,
             struct pci_dev *adcdev)
@@ -911,7 +929,7 @@ int mapFadc(CDS_HARDWARE *pHardware,
 
 
 // *****************************************************************************
-// Routine to find and map PCI adc/dac modules
+/// Routine to find and map PCI adc/dac modules
 // *****************************************************************************
 int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev);
 int mapTsyncGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev);
@@ -1284,7 +1302,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 }
 
 // *****************************************************************************
-// Routine to initialize VMIC RFM modules
+/// Routine to initialize VMIC RFM modules
 // Support provided is only for use of RFM with RCG IPC components
 // *****************************************************************************
 int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int kind)
@@ -1372,7 +1390,7 @@ int mapRfm(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev, int kind)
   return(0);
 }
 // *****************************************************************************
-// RFM DMA Read in support of commData
+/// RFM DMA Read in support of commData
 // *****************************************************************************
 void rfm55DMA(CDS_HARDWARE *pHardware, int card, int offset)
 {
@@ -1391,14 +1409,14 @@ int rfmAddress;
     p5565Dma[card]->DMA_CSR = VMIC_DMA_START;	// Start DMA
 }
 // *****************************************************************************
-// Routine to clear RFM done bit
+/// Routine to clear RFM done bit
 // *****************************************************************************
 void rfm55DMAclr(CDS_HARDWARE *pHardware, int card)
 {
     p5565Dma[card]->DMA_CSR = VMIC_DMA_CLR;	// Clear DMA DONE
 }
 // *****************************************************************************
-// Routine to check RFM done bit and clear for next DMA
+/// Routine to check RFM done bit and clear for next DMA
 // *****************************************************************************
 int rfm55DMAdone(int card)
 {
@@ -1415,7 +1433,7 @@ int ii;
 }
 
 // *****************************************************************************
-// Initialize Symmetricom GPS card (model BC635PCI-U)
+/// Initialize Symmetricom GPS card (model BC635PCI-U)
 // *****************************************************************************
 int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
 {
@@ -1530,7 +1548,7 @@ int mapSymComGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
 }
 
 // *****************************************************************************
-// Initialize TSYNC GPS card (model BC635PCI-U)
+/// Initialize TSYNC GPS card (model BC635PCI-U)
 // *****************************************************************************
 int mapTsyncGps(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
 {
