@@ -1,10 +1,11 @@
-// *************************************************************************************************
-// This is the generic software for communicating realtime data between CDS applications.
-// This software supports data communication via:
-//	1) Shared memory, between two processes on the same computer
-//	2) GE Fanuc 5565 Reflected Memory PCIe hardware
-//	3) Dolphinics Reflected Memory over a PCIe network.
-//
+///	\ingroup comms
+/// 	\file commData2.c
+///	 This is the generic software for communicating realtime data between CDS applications.
+///	 This software supports data communication via:
+///	1) Shared memory, between two processes on the same computer
+///	2) GE Fanuc 5565 Reflected Memory PCIe hardware
+///	3) Dolphinics Reflected Memory over a PCIe network.
+
 
 #include "commData2.h"
 #include "isnan.h"
@@ -16,9 +17,11 @@
 #  define INLINE
 #endif
 
-// *************************************************************************************************
-// initialize the commData state structure
-//
+///	This function is called from the user application to initialize communications structures
+///	and pointers. 
+///	@param[in] connects = total number of IPC connections in the application
+///	@param[in] rate = Sample rate of the calling application eg 2048
+///	@param[in,out] ipcInfo[] = Stucture to hold information about each IPC
 INLINE void commData2Init(
 			  int connects, 		// total number of IPC connections in the application
 			  int rate, 			// Sample rate of the calling application eg 2048, 16384, etc.
@@ -31,8 +34,9 @@ int ii;
 printf("size of data block = %lu\n", sizeof(CDS_IPC_COMMS));
   for(ii=0;ii<connects;ii++)
   {
-	// All cycle counts sent as part of data sync word are based on max supported rate of 
-	// 65536 cycles/sec, regardless of sender/receiver native cycle rate.
+	// Set the sendCycle field, used by all send/rcv to determine IPC data block to write/read
+	//      All cycle counts sent as part of data sync word are based on max supported rate of 
+	// 	65536 cycles/sec, regardless of sender/receiver native cycle rate.
 	ipcInfo[ii].sendCycle = IPC_MAX_RATE / rate;	
 	// Sender always sends data at his native rate. It is the responsiblity of the reciever
 	// to sync to this rate, regardless of the rate of the receiver application.
@@ -117,6 +121,11 @@ printf("size of data block = %lu\n", sizeof(CDS_IPC_COMMS));
 }
 
 // *************************************************************************************************
+///	This function is called from the user application to send data via IPC connections.
+///	@param[in] connects = total number of IPC connections in the application
+///	@param[in,out] ipcInfo[] = Stucture to hold information about each IPC
+///	@param[in] timeSec = Present GPS time in GPS seconds
+///	@param[in] cycle = Present cycle of the user application making this call.
 INLINE void commData2Send(int connects,  	 	// Total number of IPC connections in the application
 			  CDS_IPC_INFO ipcInfo[], 	// IPC information structure
 			  int timeSec, 			// Present GPS Second
@@ -126,18 +135,19 @@ INLINE void commData2Send(int connects,  	 	// Total number of IPC connections i
 // Data is sent at the native rate of the calling application.
 // Data sent is of type double, with timestamp and 65536 cycle count combined into long.
 {
-  unsigned long syncWord;	// Combined GPS timestamp and cycle counter
-  int ipcIndex;		// Pointer to next IPC data buffer
-  int dataCycle;		// Cycle counter 0-65535
-  int ii;
-  int chan;
-  int sendBlock;
+  unsigned long syncWord;	///	\param syncWord Combined GPS timestamp and cycle counter
+  int ipcIndex;			///	\param ipcIndex Pointer to next IPC data buffer
+  int dataCycle;		///	\param dataCycle Cycle counter 0-65535
+  int ii;			///	\param ii Loop counter
+  int chan;			///	\param chan Local ipc number
+  int sendBlock;		///	\param sendBlock Data block data is to be sent to
   int lastPcie = -1;
 
   sendBlock = ((cycle + 1) * (IPC_MAX_RATE / FE_RATE)) % IPC_BLOCKS;
   //int num_pcie = 0;
   for(ii=0;ii<connects;ii++)
   {
+	// If IPC Sender:
         if(ipcInfo[ii].mode == ISND)
         {
 		chan = ipcInfo[ii].ipcNum;
@@ -178,6 +188,11 @@ INLINE void commData2Send(int connects,  	 	// Total number of IPC connections i
 }
 
 // *************************************************************************************************
+///	This function is called from the user application to receive data via IPC connections.
+///	@param[in] connects = total number of IPC connections in the application
+///	@param[in,out] ipcInfo[] = Stucture to hold information about each IPC
+///	@param[in] timeSec = Present GPS time in GPS seconds
+///	@param[in] cycle = Present cycle of the user application making this call.
 INLINE void commData2Receive(int connects,  	 	// Total number of IPC connections in the application
 			     CDS_IPC_INFO ipcInfo[], 	// IPC information structure
 			     int timeSec, 		// Present GPS Second
