@@ -108,6 +108,7 @@ die "Unspecified channel name\n" unless defined $chname;
 die "Bad channel name\n" unless defined $channels{$chname};
 $req_seconds = 1 if ! defined $req_seconds;
 
+#print "Acquiring $chname for $req_seconds from $gps\n";
 my $remote = IO::Socket::INET->new( Proto => "tcp", PeerAddr => $DAQ::host, PeerPort => $DAQ::port);
 unless ($remote) { die "cannot connect to daqd on $DAQ::host:$DAQ::port" }
 $remote->autoflush(1);
@@ -138,12 +139,14 @@ $len = unpack( 'N', $len );
 #if ($len) { 
 #print "Getting offline data\n";
 #} else {
-#received 0 response (online data)
+#print "received 0 response (online data)\n";
 #}
 
 my $accum_seconds = 0;
 
 while(read($remote, $len, 4)) {
+  undef @result_array;
+
   $len = unpack( 'N', $len );
   #print "$len\n";
   read($remote, $seconds, 4);
