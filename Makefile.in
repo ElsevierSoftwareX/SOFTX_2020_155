@@ -193,6 +193,14 @@ mx:
 	/bin/mkdir -p build/mx
 	(mysrc=$(srcdir); cd build/mx; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics-3.14.10/base' '--with-framecpp=/opt/rtapps/framecpp' --with-mx && make)
 
+mx-symm:
+	(cd $(srcdir)/src/daqd; autoconf)
+	/bin/rm -rf build/mx-symm
+	/bin/mkdir -p build/mx-symm
+	(mysrc=$(srcdir); cd build/mx-symm; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics-3.14.10/base' '--with-framecpp=/opt/rtapps/framecpp' --with-mx '--enable-symmetricom' && make)
+
+
+
 standiop:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/standiop
