@@ -1,0 +1,53 @@
+/*!	\mainpage
+This document is for RCG V2.6.
+
+This manual is divided into the following sections:
+- \subpage intro 
+- \subpage advanced "RCG Code Developer Guide"
+*/
+
+/*! \page intro Introduction
+This page introduces the RCG
+Now you can proceed to <a href="https://dcc.ligo.org/">Ligo DCC</a> 
+*/
+
+/*! \page advanced RCG Code Developer Guide
+This page introduces the RCG for programmers
+Now you can proceed to \ref rts "RTS Modules" 
+*/
+
+/*!	\defgroup rts Real-time Core
+*	Pointers to DCC Documentation
+<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">Controller</a>
+*
+<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=8037">daqLib</a>
+*
+<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7687">iirFilter</a>
+@{
+@file controller.c
+* Main RTS Code Thread.
+@file daqLib.c
+@file fm10Gen.c
+@file epicsXfer.c
+@}
+*/
+
+///	\defgroup iod I/O Drivers
+///	@{
+///	@file map.c
+///	@file timing.c
+///	@}
+///	\defgroup rtnet Networking
+///	@{
+///	@file commData2.c 
+///	@file dolphin.c
+///	@file mx_stream.c
+///	@}
+///	\defgroup test Test Results
+///	@{
+///	@file dackillTestData.dox
+///	@file tpTestData.dox
+///	@file ipcTestData.dox
+///	@file duotoneTestData.dox
+///	@}
+
