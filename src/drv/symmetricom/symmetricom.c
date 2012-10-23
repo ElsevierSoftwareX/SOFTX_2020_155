@@ -41,7 +41,11 @@ static int symmetricom_ioctl(struct inode *inode, struct file *filp, unsigned in
 static struct file_operations symmetricom_fops = {
         .open = symmetricom_open,
         .release = symmetricom_release,
+#ifdef HAVE_UNLOCKED_IOCTL
+        .unlocked_ioctl = symmetricom_ioctl,
+#else
         .ioctl = symmetricom_ioctl,
+#endif
         .owner = THIS_MODULE,
 };
 
