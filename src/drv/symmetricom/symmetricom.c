@@ -35,7 +35,11 @@ static int card_type; /* 0 - symmetricom; 1 - spectracom */
 /* methods of the character device */
 static int symmetricom_open(struct inode *inode, struct file *filp);
 static int symmetricom_release(struct inode *inode, struct file *filp);
+#ifdef HAVE_UNLOCKED_IOCTL
+static int symmetricom_ioctl(struct inode *inode, unsigned int cmd, unsigned long arg);
+#else
 static int symmetricom_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg);
+#endif
 
 /* the file operations, i.e. all character device methods */
 static struct file_operations symmetricom_fops = {
@@ -64,7 +68,11 @@ static int symmetricom_release(struct inode *inode, struct file *filp)
 
 static volatile unsigned int *gps;
 
-static int symmetricom_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
+#ifdef HAVE_UNLOCKED_IOCTL
+static int symmetricom_ioctl(struct inode *inode, unsigned int cmd, unsigned long arg)
+#else
+static int symmetricom_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg)
+#endif
 {
 
         switch(cmd){
