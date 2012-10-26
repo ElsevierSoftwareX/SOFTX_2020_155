@@ -15,7 +15,7 @@ beep;
 $verbose = 0;
 
 # Keep frame file system at this percent usage level
-$percent_keep = 98.0;
+$percent_keep = 87.0;
 
 # ######################################################
 # Below keep values are percentages within $percent_keep
@@ -24,10 +24,10 @@ $percent_keep = 98.0;
 # to bring the file system usage to the specified values.
 
 # Keep full frames under this percentage
-$full_frames_percent_keep = 99.7;
+$full_frames_percent_keep = 89.7;
 
 # Keep trend frames under this percentage
-$second_frames_percent_keep = 0.2;
+$second_frames_percent_keep = 10.2;
 
 # Keep minute trend frames under this percentage
 $minute_frames_percent_keep = 0.005;
@@ -53,10 +53,10 @@ $raw_minute_trend_frames_dir = $frames_dir . "/trend/minute_raw";
 sub ddu {
    ($dname) =  @_;
    $_= `du -sk $dname`;
-   $n = split;
-   die "Couldn't determine disk usage in $dname\n" unless $n == 2;
-   $du{@_[1]} = @_[0];
-   return @_[0];
+   my @l = split;
+   die "Couldn't determine disk usage in $dname\n" unless (0+@l) == 2;
+   $du{@l[1]} = @l[0];
+   return @l[0];
 }
 
 # Determinue file system size and free space in kilobytes
@@ -66,17 +66,21 @@ sub ddu {
 sub ddf {
    ($dname) =  @_;
    $_= `df -k $dname | tail -1`;
-   $n = split;
-   die "Couldn't df filesystem $dname\n" unless $n == 6;
-   return (@_[1], @_[2]);
+   my @l = split;
+   die "Couldn't df filesystem $dname\n" unless (0+@l) == 6;
+   return (@l[1], @l[2]);
 }
 
 
 # Determine usage for each directory
 ddu $full_frames_dir;
+sleep 2;
 ddu $second_trend_frames_dir;
+sleep 2;
 ddu $minute_trend_frames_dir;
+sleep 2;
 ddu $raw_minute_trend_frames_dir;
+sleep 2;
 
 
 $combined = 0;
@@ -154,6 +158,7 @@ sub delete_frames {
 	  # Delete $file here
 	  if (!$dry_run) {	
 	    unlink($file);
+	    sleep 1;
 	  }
 	  if ($verbose) {
 		print "Unlink $file\n";
