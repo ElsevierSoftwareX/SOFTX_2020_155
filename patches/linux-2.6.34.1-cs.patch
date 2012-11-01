@@ -1,7 +1,7 @@
 diff -ur linux-2.6.34.1/arch/x86/kernel/smpboot.c linux-2.6.34.1-cs/arch/x86/kernel/smpboot.c
 --- linux-2.6.34.1/arch/x86/kernel/smpboot.c	2010-07-05 11:24:10.000000000 -0700
 +++ linux-2.6.34.1-cs/arch/x86/kernel/smpboot.c	2010-07-29 11:52:50.000000000 -0700
-@@ -1330,6 +1330,15 @@
+@@ -1330,6 +1330,20 @@
  	pr_err("CPU %u didn't die...\n", cpu);
  }
  
