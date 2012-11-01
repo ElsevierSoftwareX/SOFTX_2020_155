@@ -1,7 +1,7 @@
 diff -uNr linux-3.0/arch/x86/kernel/smpboot.c linux-3.0-cs/arch/x86/kernel/smpboot.c
 --- linux-3.0/arch/x86/kernel/smpboot.c	2011-07-22 04:17:23.000000000 +0200
 +++ linux-3.0-cs/arch/x86/kernel/smpboot.c	2011-08-03 11:34:39.565642221 +0200
-@@ -1316,6 +1316,15 @@
+@@ -1316,6 +1316,21 @@
  	pr_err("CPU %u didn't die...\n", cpu);
  }
  
