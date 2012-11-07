@@ -1887,7 +1887,8 @@ $inCnt = 0;
 print OUTH "#define MAX_FIR \t $firCnt\n";
 print OUTH "#define MAX_FIR_POLY \t $firCnt\n\n";
 # ########    TEST    ############
-$svnVer = `cd $rcg_src_dir; svnversion`;
+if (-d $rcg_src_dir/.git) {$svnVer = `cd $rcg_src_dir; git log | grep git-svn-id | head -1 | sed 's/.*\\///g' | cut -d' ' -f1`;}
+else {$svnVer = `cd $rcg_src_dir; svnversion`;}
 print "\nVersion = $svnVer\n";
 $size = length($svnVer);
 print "\nLength = $size\n";
