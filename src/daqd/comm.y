@@ -391,7 +391,12 @@ CommandLine: /* Nothing */
 		  for (int j = 0; j < DCU_COUNT; j++) {
 	      	    if (daqd.dcuSize[i][j] == 0) continue;
 		    char *name = daqd.dcuName[j];
-	      	    *yyout << "dcu " << j << "\t" << name << "\tCRC errors " << daqd.dcuCrcErrCnt[i][j] << endl;
+	      	    *yyout << name << "\tdcu=" << j << " crc_errs=" << daqd.dcuCrcErrCnt[i][j];
+		    if (daqd.producer1.rcvr_stats[j].getN()) {
+		    	*yyout << " ";
+		    	daqd.producer1.rcvr_stats[j].print(*yyout);
+		    }
+		    *yyout << endl;
 		  }
 		daqd.producer1.print(*yyout);
 	}
@@ -406,7 +411,7 @@ CommandLine: /* Nothing */
 	}
 	| SET CRC_T DEBUG_T '=' INTNUM {
 		AUTH_CHECK(((my_lexer *)lexer));
-	  daqd.crc_debug = $5;
+	  	daqd.crc_debug = $5;
 	}
 	| START EPICS SERVER TextExpression  TextExpression  OptionalTextExpression {
 #if EPICS_EDCU == 1

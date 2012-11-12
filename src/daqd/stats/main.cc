@@ -34,5 +34,7 @@ main() {
 		struct timespec t = {0, 1000000};
 		nanosleep(&t, 0);
 	}
-	ps.print(cout);
+	time_t now = time(0);
+	cout << ctime(&now);
+	ps.println(cout);
 }

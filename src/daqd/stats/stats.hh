@@ -35,10 +35,7 @@ def online_variance(data):
 //
 class stats {
 public:
-	stats() : mean(.0),
-		min(std::numeric_limits<double>::max()),
-		max(std::numeric_limits<double>::min()),
-		n(.0), M2(.0), t(.0), do_clear(false) {};
+	stats()  { do_clear = true; clear(); }
 	double getMean() { return mean; };
 	double getMin() { return min; };
 	double getMax() { return max; };
@@ -49,7 +46,7 @@ public:
 		return sqrt(M2 / (n - 1.0));
 	};
 	/*
-	 * Accumulate a double
+	 * Accumulate a sample
 	 */
 	inline void accumulateNext(double x) {
 		n++;
@@ -60,20 +57,20 @@ public:
 		max = x > max? x: max;
 	};
 	/*
+	 * Begin the measurement of time segment to be completed
+	 * and recorded by a following call to tick()
+	 */
+	inline void sample() {
+		clear();
+		t = cur_time();
+	}
+	/*
 	 * Accumulate time difference since the last invocation
+	 * of tick() or sample()
 	 */
 	inline void tick() {
-		if (do_clear) {
-			do_clear = false;
-			mean = n = M2 = .0;
-			min = std::numeric_limits<double>::max();
-			max = std::numeric_limits<double>::min();
-		}
-        	struct timeval tv;
-	        struct timezone tz;
-	        gettimeofday(&tv, &tz);
-	        //printf("%d %d \n", tv.tv_sec, tv.tv_usec);
-		double nt = ((double)tv.tv_sec) + ((double)tv.tv_usec) / 1000000.;
+		clear();
+		double nt = cur_time();
 		if (t != 0.0) accumulateNext(nt - t);
 		t = nt;
 	}
@@ -81,17 +78,37 @@ public:
 	 * Override to add your label, then call this one 
 	 */
 	virtual void print(std::ostream &os) {
-		os << "stddev=" << getStddev() << std::endl;
-		os << "mean=" << getMean() << std::endl;
-		os << "min=" << getMin() << std::endl;
-		os << "max=" << getMax() << std::endl;
-		os << "n=" << getN() << std::endl;
+		os << "mean=" << getMean() 
+		 << " max=" << getMax()
+		 << " min=" << getMin()
+		 << " stddev=" << getStddev()
+		 << " n=" << getN();
+	}
+	virtual void println(std::ostream &os) {
+		print(os); os << std::endl;
+	}
+	/*
+	 * Print current date/time
+	 */
+	void printDate(std::ostream &os) {
+		time_t now = time(0);
+		os << ctime(&now);
 	}
 	/*
 	 * Clear the statistics
 	 */
 	virtual void clearStats() {
 		do_clear = true;
+	}
+	/*
+	 * Return the current system time with fractional microseconds
+	 */
+	static inline double cur_time() {
+        	struct timeval tv;
+	        struct timezone tz;
+	        gettimeofday(&tv, &tz);
+	        //printf("%d %d \n", tv.tv_sec, tv.tv_usec);
+		return ((double)tv.tv_sec) + ((double)tv.tv_usec) / 1000000.;
 	}
 private:
 	double mean;
@@ -101,6 +118,19 @@ private:
 	double M2;
 	double t; // last tick's time
 	bool do_clear; // trigger to clear the accumulated statistics
+
+	/*
+	 * Clear the accumulated stats if requested
+	 */
+	inline void clear () {
+		if (do_clear) {
+			do_clear = false;
+			mean = n = M2 = .0;
+			min = std::numeric_limits<double>::max();
+			max = std::numeric_limits<double>::min();
+			t = .0;
+		}
+	}
 };
 
 #endif

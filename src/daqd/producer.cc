@@ -1049,7 +1049,7 @@ for(;;) {
 #else
 #if defined(USE_SYMMETRICOM) || defined(USE_LOCAL_TIME)
 	//printf("gps=%d  prev_gps=%d bfrac=%d prev_frac=%d\n", gps, prev_gps, frac, prev_frac);
-       const int polls_per_sec = 32;
+       const int polls_per_sec = 320; // 320 polls gives 1 millisecond stddev of cycle time (AEI Nov 2012)
        for (int ntries = 0;; ntries++) {
          struct timespec tspec = {0,1000000000/polls_per_sec}; // seconds, nanoseconds
          nanosleep (&tspec, NULL);
