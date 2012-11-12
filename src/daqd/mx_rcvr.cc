@@ -67,9 +67,10 @@ receiver_mx(int neid)
 	uint32_t match_val=MATCH_VAL_MAIN;
 	mx_request_t req[NUM_RREQ];
 
-	//const struct sched_param param = { 10 };
-        //pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
-
+	const struct sched_param param = { 10 };
+   	//seteuid (0);
+   	pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
+   	//seteuid (getuid ());
 
         mx_return_t ret = mx_open_endpoint(MX_ANY_NIC, neid, FILTER, NULL, 0, &ep[neid]);
         if (ret != MX_SUCCESS) {
@@ -77,11 +78,13 @@ receiver_mx(int neid)
 	                exit(1);
         }
         printf("MX endpoint %d opened\n", neid);
+	#if 0
 	ret = mx_set_request_timeout(ep[neid], 0, 1);
         if (ret != MX_SUCCESS) {
 	                fprintf(stderr, "Failed to et request timeout %s\n", mx_strerror(ret));
 			exit(1);
 	}
+	#endif
 
 	// Allocate NUM_RREQ MX packet receive buffers
 	int len = sizeof(struct daqMXdata);
@@ -111,7 +114,7 @@ receiver_mx(int neid)
 		
 // 	mx_test_or_wait(blocking, ep, &sreq, MX_INFINITE, &stat, &result);
 again:
-		mx_return_t ret = mx_wait(ep[neid], &req[cur_req], 25 /*MX_INFINITE*/, &stat, &result);
+		mx_return_t ret = mx_wait(ep[neid], &req[cur_req], MX_INFINITE, &stat, &result);
 		myErrorStat = 0;
 		if (ret != MX_SUCCESS) {
 			fprintf(stderr, "mx_cancel() failed with status %s\n", mx_strerror(ret));
@@ -152,6 +155,10 @@ again:
 		  struct daqMXdata *dataPtr = (struct daqMXdata *) seg.segment_ptr;
 		  int dcu_id = dataPtr->mxIpcData.dcuId;
 		  #ifndef USE_MAIN
+		  if (dcu_id < 0 || dcu_id > (DCU_COUNT-1)) {
+			mx_irecv(ep[neid], &seg, 1, match_val, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
+		  	continue; // Bad DCU ID
+		  }
 		  if (daqd.dcuSize[0][dcu_id] == 0) {
 			mx_irecv(ep[neid], &seg, 1, match_val, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
 		  	continue; // Unconfigured DCU
@@ -198,7 +205,9 @@ again:
 		  }
 #endif
 		  #endif
+		  daqd.producer1.rcvr_stats[dcu_id].tick();
 		}
+		//daqd.producer1.rcvr_stats[neid].tick();
 		mx_irecv(ep[neid], &seg, 1, match_val, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
 		#if 0
 		if (kk != myErrorStat){

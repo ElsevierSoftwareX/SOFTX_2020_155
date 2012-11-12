@@ -1621,7 +1621,7 @@ main (int argc, char *argv [])
 
   // Switch effective to real user ID -- can always switch back to saved effective
   int error = nice(-20);
-  seteuid (getuid ());
+  // seteuid (getuid ());
 
 #if defined(GPS_YMDHS_IN_FILENAME)
   // We want to keep it all in UTC

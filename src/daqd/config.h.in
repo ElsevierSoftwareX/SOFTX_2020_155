@@ -214,4 +214,6 @@
 /* Define if building with the IOP for timing */
 #undef USE_IOP
 
+/* Define if using localtime() for timing */
+#undef USE_LOCAL_TIME
 #endif
