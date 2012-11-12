@@ -63,14 +63,17 @@ public:
 
   // Override class stats print call
   virtual void print(std::ostream &os) {
-	os << "Producer thread statistics:" << endl;
+	os << "Producer: ";
 	stats::print(os);
+	os << endl;
+	#if 0
 	for (vector<class stats>::iterator i = rcvr_stats.begin(); i != rcvr_stats.end(); i++) {
 		if (i->getN()) {
 			os << "DCU " << std::distance(rcvr_stats.begin(), i) << " rcv stats:" << endl;
 			i->print(os);
 		}
 	}
+	#endif
   }
 
   // Override the clear from class stats

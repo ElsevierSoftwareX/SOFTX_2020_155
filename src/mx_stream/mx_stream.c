@@ -19,7 +19,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
+#include <iostream>
 #include "../drv/crc.c"
+#include "../daqd/stats/stats.hh"
 
 #define FILTER     0x12345
 #define MATCH_VAL  0xabcdef
@@ -49,7 +52,8 @@
 int do_verbose;
 int num_threads;
 volatile int threads_running;
-
+unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
+unsigned int wait_delay = 4; // Wait before acknowledging sends with mx_wait() for this number of cycles times nsys
 
 extern void *findSharedMemory(char *);
 
@@ -58,17 +62,15 @@ usage()
 {
 	fprintf(stderr, "Usage: mx_stream [args] -s sys_names -d rem_host:0\n");
 	fprintf(stderr, "-l filename - log file name\n"); 
-	fprintf(stderr, "-n nic_id - local NIC ID [MX_ANY_NIC]\n");
 	fprintf(stderr, "-b board_id - local Board ID [MX_ANY_NIC]\n");
 	fprintf(stderr, "-e local_eid - local endpoint ID [%d]\n", DFLT_EID);
 	fprintf(stderr, "-r remote_eid - remote endpoint ID [%d]\n", DFLT_EID);
 	fprintf(stderr, "-d hostname - destination hostname, required for sender\n");
-	//fprintf(stderr, "-f filter - endpoint filter, default %x\n", FILTER);
-	//fprintf(stderr, "-N iter - iterations, default %d\n", DFLT_ITER);
+	fprintf(stderr, "-W  - specify delay in mx_wait() execution\n");
 	fprintf(stderr, "-s - system names: \"x1x12 x1lsc x1asc\"\n");
 	fprintf(stderr, "-v - verbose\n");
 	//fprintf(stderr, "-x - bothways\n");
-	fprintf(stderr, "-w - wait\n");
+	fprintf(stderr, "-w - wait a given number of milliseconds before starting a cycle\n");
 	fprintf(stderr, "-h - help\n");
 }
 
@@ -107,13 +109,35 @@ struct daqMXdata {
 	cdsDaqNetGdsTpNum mxTpTable;
 	char mxDataBlock[DAQ_DCU_BLOCK_SIZE];
 };
-int nsys; // The number of mapped shared memories (number of data sources)
+unsigned int nsys; // The number of mapped shared memories (number of data sources)
 static struct rmIpcStr *shmIpcPtr[128];
 static char *shmDataPtr[128];
 static struct cdsDaqNetGdsTpNum *shmTpTable[128];
 static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
 static const int header_size = sizeof(struct rmIpcStr) + sizeof(struct cdsDaqNetGdsTpNum);
 
+class stats loop_stats;
+class stats mx_wait_stats;
+class stats mx_isend_stats;
+class stats mx_total_stats;
+
+
+void
+shandler (int a) {
+	loop_stats.printDate(std::cerr);
+	std::cerr << "loop:"; loop_stats.println(std::cerr);
+	std::cerr << "mx total:"; mx_total_stats.println(std::cerr);
+	std::cerr << "mx_wait():"; mx_wait_stats.println(std::cerr);
+	std::cerr << "mx_isend():"; mx_total_stats.println(std::cerr);
+}
+
+void
+reset_stats (int a) {
+	loop_stats.clearStats();
+	mx_wait_stats.clearStats();
+	mx_isend_stats.clearStats();
+	mx_total_stats.clearStats();
+}
 
 static inline void
 sender(	mx_endpoint_t ep,
@@ -124,6 +148,7 @@ sender(	mx_endpoint_t ep,
 {
 
 int cur_req;
+unsigned long total_reqs = 0; // The total number of send requests made
 mx_status_t stat;	
 mx_request_t req[NUM_SREQ];
 mx_segment_t seg;
@@ -153,12 +178,12 @@ do {
 		if (conStat != MX_SUCCESS) {
 			fprintf(stderr, "mx_connect failed %s\n", mx_strerror(conStat));
 			myErrorSignal = 1;
-			for (int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= 1;
+			for (unsigned int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= 1;
 			exit(1);
 		}
 		else {
 			myErrorSignal = 0;
-			for (int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= 2;
+			for (unsigned int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= 2;
 			fprintf(stderr, "Connection Made\n");
 			fflush(stderr);
 		}
@@ -170,7 +195,7 @@ do {
 		exit(1);
 	}
 
-// Have a connection
+
 	myErrorSignal = 0;
 	cur_req = 0;
 	usleep(1000000);
@@ -188,18 +213,22 @@ do {
 			//printf("%d\n", shmIpcPtr[0]->cycle);
 			new_cycle = shmIpcPtr[0]->cycle;
 	        } while (new_cycle == lastCycle);
+
+		// Pause to spread the MX load
+		if (do_wait) usleep(do_wait*1000);
 		        
-		 lastCycle++;
-		 lastCycle %= 16;
+		lastCycle++;
+		lastCycle %= 16;
+
+		loop_stats.tick();
 
 		// Send data for each system
-		for (int i = 0; i < nsys; i++) {
+		for (unsigned int i = 0; i < nsys; i++) {
 		  mxDataBlock.mxTpTable = shmTpTable[i][0];
 		  // printf("data copy\n");
 
 		  // Copy values from shmmem to MX buffer
 		  if (lastCycle == 0) shmIpcPtr[i]->status ^= 1;
-		  cur_req = (cur_req + 1) % NUM_SREQ;
 		  mxDataBlock.mxIpcData.cycle = lastCycle;
 		  mxDataBlock.mxIpcData.crc = shmIpcPtr[i]->crc;
 		  mxDataBlock.mxIpcData.dcuId = shmIpcPtr[i]->dcuId;
@@ -217,44 +246,77 @@ do {
 		  myCrc = crc_len(mxDataBlock.mxIpcData.dataBlockSize,myCrc);
 		  //if(myCrc != mxDataBlock.mxIpcData.bp[lastCycle].crc) printf("CRC error in sender\n");
 		  sendLength = header_size + mxDataBlock.mxIpcData.dataBlockSize;
- //printf("send length = %d  total length = %ld\n",sendLength,sizeof(struct daqMXdata));
+		  if (do_verbose) 
+ 		  	printf("send length = %d  total length = %ld\n",sendLength,sizeof(struct daqMXdata));
 
 		  seg.segment_ptr = &mxDataBlock;
 		  // seg.segment_length = len;
 		  seg.segment_length = sendLength;
 		  //printf("isend req %d\n", cur_req);
+		  double lst = stats::cur_time(); // Sample current time
 		  mx_return_t res = mx_isend(ep, &seg, 1, dest, match_val, NULL, &req[cur_req]);
+		  mx_isend_stats.accumulateNext(stats::cur_time() - lst); // finish the measurement
 		  if (res != MX_SUCCESS) {
 			fprintf(stderr, "mx_isend failed ret=%d\n", res);
 			//exit(1);
 			myErrorSignal = 1;
 			break;
 		  }
+
+		  total_reqs++;
 		  // mx_isend(ep, &seg, 1, dest, 1, NULL, &req[cur_req]);
 
-		  /* wait for the send to complete */
-		  mx_return_t ret;
+		  // Have nsys times 4 oustanding send requests
+		  if (total_reqs > nsys*wait_delay) {
+		  	/* wait for the send to complete */
+		 	mx_return_t ret;
+			// Handle the requests nsys sends back
+			int ack_reqn = (cur_req + NUM_SREQ - nsys*wait_delay) % NUM_SREQ;
+			//printf("mx_wait req %d\n", ack_reqn);
+		  	mx_wait_stats.sample(); // begin the measurement
 again:
-		  ret = mx_wait(ep, &req[cur_req], 25/*MX_INFINITE*/, &stat, &result);
-                  if (ret != MX_SUCCESS) {
+		  	ret = mx_wait(ep, &req[ack_reqn], 25/*MX_INFINITE*/, &stat, &result);
+                  	if (ret != MX_SUCCESS) {
                           fprintf(stderr, "mx_cancel() failed with status %s\n", mx_strerror(ret));
                           exit(1);
-                  }
-                  if (result == 0) { // Request incomplete
-                        goto again; // Restart incomplete request
-                  } else { // Request is complete
-		     if (stat.code != MX_STATUS_SUCCESS) {
-			fprintf(stderr, "isendxxx failed with status %s\n", mx_strstatus(stat.code));
-                        ret = mx_disconnect(ep, dest);
-                        if (ret != MX_SUCCESS) {
-                           fprintf(stderr, "mx_disconnect() failed with status %s\n", mx_strerror(ret));
-                        } else {
-                           fprintf(stderr, "disconnected from the sender\n");
-                        }
-			exit(1);
-			myErrorSignal = 1;
-		     }
+                  	}
+                  	if (result == 0) { // Request incomplete
+                        	goto again; // Restart incomplete request
+                  	} else { // Request is complete
+		     	  if (stat.code != MX_STATUS_SUCCESS) {
+				fprintf(stderr, "isendxxx failed with status %s\n", mx_strstatus(stat.code));
+                        	ret = mx_disconnect(ep, dest);
+                       		if (ret != MX_SUCCESS) {
+                           		fprintf(stderr, "mx_disconnect() failed with status %s\n", mx_strerror(ret));
+                        	} else {
+                           		fprintf(stderr, "disconnected from the sender\n");
+                        	}
+				exit(1);
+				myErrorSignal = 1;
+		     	  }
+		       }
+		       mx_wait_stats.tick();
 		  }
+
+		  // Wait for the mx_isend() buffering completion.
+		  // Only need to do that if we are not done with the cycle, i.e.
+		  // for the two systems configuration (nsys == 2) we will do this
+		  // once on the first iteration and will not do this on the last one.
+		  if (i < nsys - 1) {
+		    // Do not do this if the wait_dely is not set.
+		    // This ode does not work with OpenMX for some reason,
+		    // so we disable the wait delay there.
+		    if (wait_delay > 0) {
+		    	// Wait for the MX to copy our data into its buffer
+		  	// so we can change it on the next cycle
+		  	do {
+		        	res = mx_ibuffered(ep, &req[cur_req], &result);
+		  	} while (res == MX_SUCCESS && !result);
+		    }
+		  }
+
+		  mx_total_stats.accumulateNext(stats::cur_time() - lst); // finish the measurement
+		  cur_req = (cur_req + 1) % NUM_SREQ;
 		 // if(lastCycle == 15) myErrorSignal = 1;
 		  if(lastCycle == 15) shmIpcPtr[i]->status ^= 2;
 		}
@@ -270,7 +332,6 @@ int
 main(int argc, char **argv)
 {
 	mx_endpoint_t ep;
-	uint64_t nic_id;
 	uint16_t my_eid;
 	uint64_t his_nic_id;
 	uint32_t board_id;
@@ -279,9 +340,7 @@ main(int argc, char **argv)
 	char *rem_host;
 	char *sysname;
 	int len;
-	int iter;
 	int c;
-	int do_wait;
 	int do_bothways;
 	extern char *optarg;
 	mx_return_t ret;
@@ -291,8 +350,8 @@ main(int argc, char **argv)
 	mx_debug_mask = 0xFFF;
 #endif
 	// So that openmx is not aborting on connection loss
-	putenv("OMX_FATAL_ERRORS=0");
-	putenv("MX_FATAL_ERRORS=0");
+	putenv((char *)"OMX_FATAL_ERRORS=0");
+	putenv((char *)"MX_FATAL_ERRORS=0");
 
 	mx_init();
 	/* set up defaults */
@@ -303,13 +362,11 @@ main(int argc, char **argv)
 	his_eid = DFLT_EID;
 	board_id = MX_ANY_NIC;
 	len = DFLT_LEN;
-	iter = DFLT_ITER;
-	do_wait = 0;
 	do_bothways = 0;
 	num_threads = 1;
 
 
-	while ((c = getopt(argc, argv, "hd:e:f:n:b:r:s:l:N:Vvwx")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "hd:e:f:n:b:r:s:l:W:Vvw:x")) != EOF) switch(c) {
 	case 'd':
 		rem_host = optarg;
 		break;
@@ -322,10 +379,6 @@ main(int argc, char **argv)
 		break;
 	case 'f':
 		filter = atoi(optarg);
-		break;
-	case 'n':
-		sscanf(optarg, "%"SCNx64, &nic_id);
-		mx_nic_id_to_board_number(nic_id, &board_id);
 		break;
 	case 'b':
 		board_id = atoi(optarg);
@@ -341,14 +394,14 @@ main(int argc, char **argv)
 		setvbuf(stdout, NULL, _IOLBF, 0);
 		stderr = stdout;
 		break;
-	case 'N':
-		iter = atoi(optarg);
+	case 'W':
+		wait_delay = atoi(optarg);
 		break;
 	case 'v':
 		do_verbose = 1;
 		break;
 	case 'w':
-		do_wait = 1;
+		do_wait = atoi(optarg);
 		break;
 	case 'x':
 #if MX_THREAD_SAFE
@@ -385,7 +438,7 @@ main(int argc, char **argv)
 	char *sname[128];
 	sname[0] = strtok(sysname, " ");
 	for(;;) {
-		printf("%s\n", sname[nsys - 1]);
+		//printf("%s\n", sname[nsys - 1]);
 		char *s = strtok(0, " ");
 		if (!s) break;
 		sname[nsys] = s;
@@ -393,21 +446,28 @@ main(int argc, char **argv)
 	}
 
 	// Map shared memory for all systems
-	for (int i = 0; i < nsys; i++) {
+	for (unsigned int i = 0; i < nsys; i++) {
 		char shmem_fname[128];
 		sprintf(shmem_fname, "%s_daq", sname[i]);
 		void *dcu_addr = findSharedMemory(shmem_fname);
 		if (dcu_addr <= 0) {
 			fprintf(stderr, "Can't map shmem\n");
 			exit(1);
-		} else printf("mapped at 0x%lx\n",(unsigned long)dcu_addr);
-		shmIpcPtr[i] = (struct rmIpcStr *)(dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
-		shmDataPtr[i] = (char *)(dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
-		shmTpTable[i] = (struct cdsDaqNetGdsTpNum *)(dcu_addr + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
+		} else {
+			//printf("mapped at 0x%lx\n",(unsigned long)dcu_addr);
+		}
+		shmIpcPtr[i] = (struct rmIpcStr *)((char *)dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
+		shmDataPtr[i] = (char *)((char *)dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
+		shmTpTable[i] = (struct cdsDaqNetGdsTpNum *)((char *)dcu_addr + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
 	}
 
+    	(void) signal (SIGHUP, shandler);
+    	(void) signal (SIGUSR1, reset_stats);
+
 	len = sizeof(struct daqMXdata);
-	printf("send len = %d\n",len);
+	fprintf(stderr, "send len = %d\n",len);
+	fflush(stderr);
+
 	sender(ep,his_nic_id, his_eid, len,MATCH_VAL_MAIN,my_eid); 
   
 	mx_close_endpoint(ep);
