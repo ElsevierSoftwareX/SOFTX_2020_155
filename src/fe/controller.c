@@ -227,12 +227,7 @@ int timeHoldWhen= 0;			// Cycle number within last second when maximum reached; 
 int timeHoldWhenHold = 0;		// Cycle number within last second when maximum reached
 
 // The following are for timing histograms written to /proc files
-#if defined(SERVO64K)
-unsigned int cycleHist[16];
-unsigned int cycleHistMax[16];
-unsigned int cycleHistWhen[16];
-unsigned int cycleHistWhenHold[16];
-#elif defined(SERVO32K)
+#if defined(SERVO64K) || defined(SERVO32K)
 unsigned int cycleHist[32];
 unsigned int cycleHistMax[32];
 unsigned int cycleHistWhen[32];
@@ -840,10 +835,22 @@ udelay(1000);
 	  	printf("Triggered the DAC\n");
 		break;
 	case SYNC_SRC_1PPS:
+		for(jj=0;jj<cdsPciModules.dacCount;jj++)
+		{       
+			if(cdsPciModules.dacType[jj] == GSC_18AO8)
+			{       
+				dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
+				for(ii=0;ii<GSAO_18BIT_PRELOAD;ii++) dac18bitPtr->OUTPUT_BUF = 0;
+			}else{  
+				dac16bitPtr = dacPtr[jj];
+				printf("writing DAC %d\n",jj);
+				for(ii=0;ii<GSAO_16BIT_PRELOAD;ii++) dac16bitPtr->ODB = 0;
+			}       
+		}       
 		// Arm ADC modules
 		gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
 		// Start clocking the DAC outputs
-		gsaDacTrigger(&cdsPciModules);
+		// gsaDacTrigger(&cdsPciModules);
 		break;
 	default: {
 		    // IRIG-B card not found, so use CPU time to get close to 1PPS on startup
@@ -1323,6 +1330,7 @@ udelay(1000);
 // Call the front end specific software *****************************************************************
         rdtscl(cpuClock[CPU_TIME_USR_START]);
  	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
+	
         rdtscl(cpuClock[CPU_TIME_USR_END]);
 
 
@@ -1622,14 +1630,29 @@ udelay(1000);
 	/* Update User code Filter Module Epics variables */
 	if(subcycle == HKP_FM_EPICS_UPDATE)
 	{
-		for(ii=0;ii<MAX_MODULES;ii++)
-		{
+	   if(!(daqCycle % 4))
+	   {
+		//.for(ii=0;ii<MAX_MODULES;ii++)
+		//{
 		// Following call sends all filter module data to epics each time called.
-			updateEpics(ii, dspPtr[0], pDsp[0],
-			    &dspCoeff[0], pCoeff[0]);
-		}
+			//updateEpics(ii, dspPtr[0], pDsp[0],
+			    //&dspCoeff[0], pCoeff[0]);
+		//}
 		// Send sync signal to EPICS sequencer
 		pLocalEpics->epicsOutput.epicsSync = daqCycle;
+	   }
+	}
+	// Spread out filter update, but keep updates at 16 Hz
+	// here we are rounding up:
+	//   x/y rounded up equals (x + y - 1) / y
+	//
+	{ 
+		static const unsigned int mpc = (MAX_MODULES + (FE_RATE / 16) - 1) / (FE_RATE / 16); // Modules per cycle
+		unsigned int smpc = mpc * subcycle; // Start module counter
+		unsigned int empc = smpc + mpc; // End module counter
+		unsigned int i;
+		for (i = smpc; i < MAX_MODULES && i < empc ; i++) 
+			updateEpics(i, dspPtr[0], pDsp[0], &dspCoeff[0], pCoeff[0]);
 	}
 
 	// Check if code exit is requested
@@ -2024,9 +2047,7 @@ udelay(1000);
 #if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
 // This produces cycle time histogram in /proc file
 	{
-#if defined(SERVO64K)
-		static const int nb = 15;
-#elif defined(SERVO32K)
+#if defined(SERVO64K) || defined(SERVO32K)
 		static const int nb = 31;
 #elif defined(SERVO16K)
 		static const int nb = 63;
@@ -2129,9 +2150,7 @@ procfile_read(char *buffer,
 	} else {
 #if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K) || defined(COMMDATA_INLINE)
 		char b[128];
-#if defined(SERVO64K)
-		static const int nb = 16;
-#elif defined(SERVO32K)
+#if defined(SERVO64K) || defined(SERVO32K)
 		static const int nb = 32;
 #elif defined(SERVO16K)
 		static const int nb = 64;
@@ -2188,7 +2207,9 @@ procfile_read(char *buffer,
 				sprintf(b, "DAC #%d 18-bit buf_size=%d\n", i, dacOutBufSize[i]);
 			} else {
 				sprintf(b, "DAC #%d 16-bit fifo_status=%d (%s)\n", i, dacOutBufSize[i],
-					dacOutBufSize[i] == 2? "OK": (dacOutBufSize[i] == 1? "empty": "full"));
+					dacOutBufSize[i] & 8? "full":
+						(dacOutBufSize[i] & 1? "empty":
+							(dacOutBufSize[i] & 4? "high quarter": "OK")));
 			}
 			strcat(buffer, b);
 		}
