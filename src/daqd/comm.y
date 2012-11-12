@@ -393,12 +393,16 @@ CommandLine: /* Nothing */
 		    char *name = daqd.dcuName[j];
 	      	    *yyout << "dcu " << j << "\t" << name << "\tCRC errors " << daqd.dcuCrcErrCnt[i][j] << endl;
 		  }
+		daqd.producer1.print(*yyout);
 	}
 	| CLEAR CRC_T {
 		AUTH_CHECK(((my_lexer *)lexer));
 		for (int i = 0; i < daqd.data_feeds; i++)
-		  for (int j = 0; j < DCU_COUNT; j++)
+		  for (int j = 0; j < DCU_COUNT; j++) {
 		    daqd.dcuCrcErrCnt[i][j] = 0;
+		    
+		  }
+		daqd.producer1.clearStats();
 	}
 	| SET CRC_T DEBUG_T '=' INTNUM {
 		AUTH_CHECK(((my_lexer *)lexer));

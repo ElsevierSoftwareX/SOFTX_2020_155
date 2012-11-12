@@ -67,7 +67,7 @@ void *directed_receive_buffer[DCU_COUNT];
 int controller_cycle = 0;
 #else
 
-#ifdef USE_SYMMETRICOM
+#if defined(USE_SYMMETRICOM) || defined(USE_LOCAL_TIME)
 int controller_cycle = 0;
 #else
 // Point into shared memory for the controller DCU cycle
@@ -320,10 +320,15 @@ gm_receiver_thread(void *p)
 void *
 producer::frame_writer ()
 {
+   const struct sched_param param = { 5 };
+   //seteuid (0);
+   pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
+   //seteuid (getuid ());
+
    daqd_c::realtime("Producer", 1);
    unsigned char *read_dest;
    circ_buffer_block_prop_t prop;
-#ifdef USE_SYMMETRICOM
+#if defined(USE_SYMMETRICOM) || defined(USE_LOCAL_TIME)
    unsigned long prev_gps, prev_frac;
    unsigned long gps, frac;
 #endif
@@ -339,6 +344,8 @@ producer::frame_writer ()
 #elif defined(USE_MX)
    extern unsigned int open_mx(void);
    unsigned int max_endpoints = open_mx();
+#else
+   static const unsigned int max_endpoints = 1;
 #endif
 
 #if defined(USE_MX) || defined(USE_UDP)
@@ -424,7 +431,14 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
      }
      #endif
 
+     for (int j = 0; j < DCU_COUNT; j++) {
+	class stats s;
+     	rcvr_stats.push_back(s);
+     }
+
      for (int j = 0; j < max_endpoints; j++) {
+       //class stats s;
+       //rcvr_stats.push_back(s);
        if (err_no = pthread_create (&gm_tid, &attr,
                      gm_receiver_thread, (void *)j)) {
                   pthread_attr_destroy (&attr);
@@ -523,16 +537,30 @@ int cycle_delay = daqd.cycle_delay;
 #endif
 
       if ((daqd.dcu_status_check & 4) == 0) {
+#if defined(USE_SYMMETRICOM) || defined(USE_LOCAL_TIME)
 #ifdef USE_SYMMETRICOM
 	if (daqd.symm_ok() == 0) {
-		printf("The Symmetricon IRIG-B timing card is not synchronized\n");
+		printf("The Symmetricom IRIG-B timing card is not synchronized\n");
 		//exit(10);
 	}
+#endif
 	unsigned long f;
 	const unsigned int c = 1000000000/16;
 	// Wait for the beginning of a second
 	for(;;) {
+#ifdef USE_SYMMETRICOM
 		prev_gps = daqd.symm_gps(&f);
+#elif defined(USE_LOCAL_TIME)
+		struct timeval tv;
+		struct timezone tz;
+		gettimeofday(&tv, &tz);
+		//printf("%d %d \n", tv.tv_sec, tv.tv_usec);
+		// This needs cleanup in daqdrc and in symmetricom.c
+		tv.tv_sec += - 315964800 - 315964819 + 33 + daqd.symm_gps_offset;
+		prev_gps = tv.tv_sec; f = tv.tv_usec * 1000;
+#else
+#error
+#endif
 #ifdef USE_IOP
 	 	//prev_frac = 1000000000 - 1000000000/16;
 		prev_frac = 0;
@@ -578,9 +606,9 @@ int cycle_delay = daqd.cycle_delay;
       for (int i = 0; 1 != (shmemDaqIpc[daqd.controller_dcu]->cycle % 16); i++)
 #endif
        {
-         struct timespec tspec = {0,1000000000/16/100}; // seconds, nanoseconds
+         struct timespec tspec = {0,1000000000/16/2}; // seconds, nanoseconds
          nanosleep (&tspec, NULL);
-	 if (i > 1600*4 && !daqd.avoid_reconnect) {
+	 if (i > 32*10 && !daqd.avoid_reconnect) {
 		/* OK the front end isn't there, let's get going on our own */
 		system_log(1, "Looks like dcu %d is not there. Running on my own.", daqd.controller_dcu);
 		//exit(1);
@@ -599,7 +627,7 @@ int cycle_delay = daqd.cycle_delay;
    pvValue[5] = 0;
    pvValue[17] = 0;
 #endif
-#ifndef USE_SYMMETRICOM
+#if !defined(USE_SYMMETRICOM) && !defined(USE_LOCAL_TIME)
    time_t zero_time = time(0);//  - 315964819 + 33;
 #endif
    int prev_controller_cycle = -1;
@@ -609,8 +637,9 @@ int cycle_delay = daqd.cycle_delay;
    if (daqd.dcu_status_check & 4) resync = 1;
 
    for (unsigned long i = 0;;i++) { // timing
-#ifdef USE_SYMMETRICON
-     DEBUG(6, printf("Timing %d gps=%d frac=%d\n", i, gps, frac));
+      tick(); // measure statistics
+#ifdef USE_SYMMETRICOM
+     //DEBUG(6, printf("Timing %d gps=%d frac=%d\n", i, gps, frac));
 #endif
 #ifndef USE_BROADCAST
      read_dest = daqd.move_buf;
@@ -782,18 +811,20 @@ int cycle_delay = daqd.cycle_delay;
 	  shmemDaqIpc[j]->bp[cblk].crc = 0;
 #endif
 
-#ifdef USE_SYMMETRICOM
-
+#if defined(USE_SYMMETRICOM) || defined(USE_LOCAL_TIME)
 	  //system_log(5, "dcu %d block %d cycle %d  gps %d symm %d\n", j, cblk, gmDaqIpc[j].bp[cblk].cycle,  dcu_gps, gps);
 	  unsigned long mygps = gps;
 	  if (cblk > (15 - cycle_delay)) mygps--;
+#else
+	  // FIXME: need to factor out these constants
+	  unsigned long mygps = i/16 + zero_time - 315964819 + 33 + 2;
+#endif
 	  if (dcu_gps != mygps) {
 	    daqd.dcuStatus[0][j] |= 0x4000;
 	    daqd.dcuCrcErrCnt[0][j]++;
 	    daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
-	    system_log(5, "GPS MISS dcu %d (%s); dcu_gps=%d gps=%ld\n", j, daqd.dcuName[j], dcu_gps, gps);
+	    system_log(5, "GPS MISS dcu %d (%s); dcu_gps=%d gps=%ld\n", j, daqd.dcuName[j], dcu_gps, mygps);
 	  }
-#endif
 
 	  if (rfm_crc != crc) {
 	    system_log(5, "MISS dcu %d (%s); crc[%d]=%x; computed crc=%lx\n",
@@ -866,11 +897,11 @@ int cycle_delay = daqd.cycle_delay;
 
 #endif
      //prop.gps = time(0) - 315964819 + 33;
-#ifdef USE_SYMMETRICOM
+#if defined(USE_SYMMETRICOM) || defined(USE_LOCAL_TIME)
      prop.gps = gps;
      if (cblk > (15 - cycle_delay)) prop.gps--;
 #else
-     prop.gps = i/16 + zero_time - 315964819 + 33;
+     prop.gps = i/16 + zero_time - 315964819 + 33 + 2;
 #endif
      prop.gps_n = 1000000000/16 * (i % 16);
      //printf("before put %d %d %d\n", prop.gps, prop.gps_n, frac);
@@ -1016,34 +1047,49 @@ for(;;) {
      }
 #endif
 #else
-#ifdef USE_SYMMETRICOM
+#if defined(USE_SYMMETRICOM) || defined(USE_LOCAL_TIME)
 	//printf("gps=%d  prev_gps=%d bfrac=%d prev_frac=%d\n", gps, prev_gps, frac, prev_frac);
-       const int polls_per_sec = 1600;
+       const int polls_per_sec = 32;
        for (int ntries = 0;; ntries++) {
          struct timespec tspec = {0,1000000000/polls_per_sec}; // seconds, nanoseconds
          nanosleep (&tspec, NULL);
 
+#ifdef USE_SYMMETRICOM
 	 gps = daqd.symm_gps(&frac);
+#elif defined(USE_LOCAL_TIME)
+	struct timeval tv;
+	struct timezone tz;
+	gettimeofday(&tv, &tz);
+	//printf("%d %d \n", tv.tv_sec, tv.tv_usec);
+	// This needs cleanup in daqdrc and in symmetricom.c
+	tv.tv_sec += - 315964800 - 315964819 + 33 + daqd.symm_gps_offset;
+	gps = tv.tv_sec; frac = tv.tv_usec * 1000;
+#else
+#error
+#endif
 	 if (prev_frac == 937500000) { 
 		if (gps == prev_gps + 1) {
 		  frac = 0;
 		  break;
 		} else {
 		   if (gps > prev_gps + 1) {
-			fprintf(stderr, "GPS card time jumped from %ld to %ld\n", prev_gps, gps);
-			exit(1);
+			fprintf(stderr, "GPS card time jumped from %ld (%ld) to %ld (%ld)\n", prev_gps, prev_frac, gps, frac);
+			print(cout);
+			_exit(1);
 		   } else if (gps < prev_gps) {
 			fprintf(stderr, "GPS card time moved back from %ld to %ld\n", prev_gps, gps);
-			exit(1);
+			print(cout);
+			_exit(1);
 		   }
 		}
 	 } else if (frac >= prev_frac + 62500000) {
-		frac = prev_frac + 62500000;
 		// Check if GPS seconds moved for some reason (because of delay)
 		if (gps != prev_gps) {
-		        fprintf(stderr, "GPS time jumped from %ld to %ld\n", prev_gps, gps);
-		        exit(1);
+		        fprintf(stderr, "WARNING: GPS time jumped from %ld (%ld) to %ld (%ld)\n", prev_gps, prev_frac, gps, frac);
+			print(cout);
+			gps = prev_gps;
 		}
+		frac = prev_frac + 62500000;
 		break;
 	 }
 
@@ -1071,7 +1117,7 @@ for(;;) {
 	 if (sync_diff) {
 	    if (sync_diff < 0) sync_diff = 16 + sync_diff;
 	    for (int j = 0; j < sync_diff; j++) {
-     		prop.gps = i/16 + zero_time - 315964819 + 33;
+     		prop.gps = i/16 + zero_time - 315964819 + 33 + 2;
      		prop.gps_n = 1000000000/16 * (i % 16);
      		daqd.b1 -> put16th_dpscattered (daqd.vmic_pv, daqd.vmic_pv_len, &prop);
 		i++;
@@ -1114,7 +1160,7 @@ for(;;) {
 #endif
 #endif
      prev_controller_cycle = controller_cycle;
-#ifdef USE_SYMMETRICOM
+#if defined(USE_SYMMETRICOM) || defined(USE_LOCAL_TIME)
      prev_gps = gps;
      prev_frac = frac;
 #endif
