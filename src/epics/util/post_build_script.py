@@ -50,7 +50,7 @@ print ""
 try:
   site = os.environ['site']
 except KeyError:
-  sys.stderr.write("ERROR: No environment variable SITE defined\n")
+  sys.stderr.write("ERROR: No environment variable 'site' defined\n")
   error = True
 
 try:
