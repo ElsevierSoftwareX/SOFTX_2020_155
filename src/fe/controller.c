@@ -1018,6 +1018,18 @@ udelay(1000);
 	// increased to appropriate number of 65536 s/sec to match desired
 	// code rate eg 32 samples each time thru before proceeding to match 2048 system.
 	// **********************************************************************************************************
+#ifdef ADC_MASTER
+#ifndef RFM_DIRECT_READ
+// Used in block transfers of data from GEFANUC RFM
+// Want to start the DMA ASAP, before ADC data starts coming in.
+// Note that data only xferred every 4th cycle of IOP, so max data rate on RFM is 16K.
+	if((cycleNum % 4) == 0)
+	{
+		if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(cycleNum % IPC_BLOCKS));
+		if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(cycleNum % IPC_BLOCKS));
+	}
+#endif
+#endif
        if(cycleNum == 0)
         {
 	  //printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
@@ -1044,11 +1056,6 @@ udelay(1000);
         {
 #ifndef ADC_SLAVE
 // Start of ADC Read *************************************************************************************
-#ifndef RFM_DIRECT_READ
-// Used in block transfers of data from GEFANUC RFM
-		if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(cycleNum % IPC_BLOCKS));
-		if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(cycleNum % IPC_BLOCKS));
-#endif
 		// Read ADC data
                for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		{
@@ -1525,11 +1532,6 @@ udelay(1000);
 
         pLocalEpics->epicsOutput.cycle = cycleNum;
 #ifdef ADC_MASTER
-
-#ifndef RFM_DIRECT_READ
-	if (cdsPciModules.pci_rfm[0]) rfm55DMAclr(&cdsPciModules,0);
-	if (cdsPciModules.pci_rfm[1]) rfm55DMAclr(&cdsPciModules,1);
-#endif
 // The following, to endif, is all duotone timing diagnostics.
         if(cycleNum == HKP_READ_SYMCOM_IRIGB)
         {
