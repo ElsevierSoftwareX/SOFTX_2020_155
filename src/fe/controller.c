@@ -9,15 +9,6 @@
 /*                     (C) The LIGO Project, 2012.                      */
 /*                                                                      */
 /*                                                                      */
-/*                                                                      */
-/* California Institute of Technology                                   */
-/* LIGO Project MS 18-34                                                */
-/* Pasadena CA 91125                                                    */
-/*                                                                      */
-/* Massachusetts Institute of Technology                                */
-/* LIGO Project MS 20B-145                                              */
-/* Cambridge MA 01239                                                   */
-/*                                                                      */
 /*----------------------------------------------------------------------*/
 
 #include <linux/version.h>
@@ -123,7 +114,8 @@ extern unsigned int cpu_khz;
 #include "drv/inputFilterModule.h"		
 #include "drv/inputFilterModule1.h"		
 
-double *testpoint[GDS_MAX_NFM_TP];	// Testpoints which are not part of filter modules
+/// Testpoints which are not part of filter modules
+double *testpoint[GDS_MAX_NFM_TP];
 #ifndef NO_DAQ
 DAQ_RANGE daq;			// Range settings for daqLib.c
 int numFb = 0;
@@ -140,28 +132,43 @@ volatile CDS_EPICS *pLocalEpics;   	// Local mem ptr to EPICS control data
 
 
 // Filter module variables
+/// Standard Filter Module Structure
 FILT_MOD dsp[NUM_SYSTEMS];					// SFM structure.	
+/// Pointer to local memory SFM Structure
 FILT_MOD *dspPtr[NUM_SYSTEMS];					// SFM structure pointer.
+/// Pointer to SFM in shared memory.
 FILT_MOD *pDsp[NUM_SYSTEMS];					// Ptr to SFM in shmem.	
+/// Pointer to filter coeffs local memory.
 COEF dspCoeff[NUM_SYSTEMS];					// Local mem for SFM coeffs.
+/// Pointer to filter coeffs shared memory.
 VME_COEF *pCoeff[NUM_SYSTEMS];					// Ptr to SFM coeffs in shmem	
 
 // ADC Variables
+/// Array of ADC values
 double dWord[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];		// ADC read values
+/// List of ADC channels used by this app. Used to determine if downsampling required.
 unsigned int dWordUsed[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];	// ADC chans used by app code
+/// Arrary of ADC overflow counters.
 int overflowAdc[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];		// ADC overflow diagnostics
 
 // DAC Variables
+/// Enables writing of DAC values; Used with DACKILL parts..
 int iopDacEnable;						// Returned by feCode to allow writing values or zeros to DAC modules
 #ifdef ADC_MASTER
 int dacOutBufSize [MAX_DAC_MODULES];	
 #endif
+/// Array of DAC output values.
 double dacOut[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];		// DAC output values
+/// DAC output values returned to EPICS
 int dacOutEpics[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];		// DAC outputs reported back to EPICS
+/// DAC channels used by an app.; determines up sampling required.
 unsigned int dacOutUsed[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];	// DAC chans used by app code
+/// Array of DAC overflow (overrange) counters.
 int overflowDac[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];		// DAC overflow diagnostics
+/// DAC outputs stored as floats, to be picked up as test points
 double floatDacOut[160]; // DAC outputs stored as floats, to be picked up as test points
 
+/// Counter for total ADC/DAC overflows
 int overflowAcc = 0;						// Total ADC/DAC overflow counter
 
 #ifndef ADC_MASTER
@@ -185,8 +192,11 @@ unsigned int CDO32Output[MAX_DIO_MODULES];
 
 #endif
 // Contec 64 input bits plus 64 output bits (Standard for aLIGO)
+/// Contec6464 input register values
 unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
+/// Contec6464 output register values read back from the module
 unsigned int CDIO6464Input[MAX_DIO_MODULES]; // Current value of the BO bits
+/// Contec6464 values to be written to the output register
 unsigned int CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
 
 // This Contect 16 input / 16 output DIO card is used to control timing slave by IOP
@@ -197,7 +207,9 @@ int tdsControl[3];	// Up to 3 timing control modules allowed in case I/O chassis
 int tdsCount = 0;
 
 
+/// Maintains present cycle count within a one second period.
 int cycleNum = 0;
+/// Value of readback from DAC FIFO size registers; used in diags for FIFO overflow/underflow.
 int out_buf_size = 0; // test checking DAC buffer size
 unsigned int cycle_gps_time = 0; // Time at which ADCs triggered
 unsigned int cycle_gps_event_time = 0; // Time at which ADCs triggered
@@ -1930,7 +1942,7 @@ udelay(1000);
 			int mod = cycleNum - HKP_RFM_CHK_CYCLE;
 			if (cdsPciModules.rfmType[mod] == 0x5565) {
 				// Check the own-data light
-				if ((cdsPciModules.rfm_reg[mod]->LCSR1 & 1) == 0) ipcErrBits |= 8;
+				if ((cdsPciModules.rfm_reg[mod]->LCSR1 & 1) == 0) ipcErrBits |= 4 + (mod * 4);
 				//printk("RFM %d own data %d\n", mod, cdsPciModules.rfm_reg[mod]->LCSR1);
 			}
 		}
