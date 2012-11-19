@@ -1,6 +1,8 @@
 package CDS::IPCx;
 use Exporter;
 @ISA = ('Exporter');
+
+require "lib/Util.pm";
  
 sub partType {
         return IPCx;
@@ -198,20 +200,8 @@ for ($ii = 0; $ii < $i; $ii++) {
 
 if ($::ipcxCnt > 0) {
 
-
-
-   # Determine allowed maximum IPC number
-   open(CD2, "$::rcg_src_dir/src/include/commData2.h") || die "***ERROR: could not open commData2.h header\n";
-   @inData=<CD2>;
-   close CD2;
-
-   @res = grep /.*define.*MAX_IPC.*/, @inData;
-   die "***ERROR: couldn't find MAX_IPC in commData2.h\n" unless @res;
-   $res[0] =~ s/\D//g;
-   $maxIpcCount = 0 + $res[0];
-   die "**ERROR: unable to determine MAX_IPC\n" unless $maxIpcCount > 0;
-   printf "The maximum allowed IPC numer is maxIpcCount=$maxIpcCount\n";
-   undef @inData;
+   # Find the IPC count limits
+   ($maxIpcCount, $maxRfmIpcCount) = CDS::Util::findDefine("src/include/commData2.h", "MAX_IPC", "MAX_IPC_RFM");
 
    #
    # This model does include IPCx parts, so extract location and
@@ -474,16 +464,22 @@ $ipcxRcvrCnt = 0;
                die "***ERROR: IPCx Communication Mechanism not recognized: $::ipcxCommMech\n";
             }
 
-            #
-            # Add data to the IPCx parameter file
-            #
-            if (++$ipcxMaxNum[$ipcxTypeIndex] > $maxIpcCount) {
-               die "***ERROR: IPCx number > $maxIpcCount for ipcType = $ipcxType[$ipcxTypeIndex]\n";
-            }
+	    # See if this is an RFM IPC and use the appropriate limit
+	    my $myIpcLimit = $maxIpcCount;
+	    if ($ipcxTypeIndex == 1 || $ipcTypeIndex == 2) {
+		$myIpcLimit = $maxRfmIpcCount;
+	    }
 
             $signalName = $::ipcxParts[$ipcxAdd[$jj][0]][0];
             if ($signalName =~ /^\w+([A-Z]\d\:.+)/) {
                $signalName = $1;
+            }
+
+            #
+            # Add data to the IPCx parameter file
+            #
+            if (++$ipcxMaxNum[$ipcxTypeIndex] > $myIpcLimit) {
+               die "***ERROR: IPC signal = $signalName; IPC number = $ipcxMaxNum[$ipcxTypeIndex]\n***ERROR: IPCx number > $myIpcLimit for ipcType = $ipcxType[$ipcxTypeIndex]\n";
             }
 
             print IPCOUT "\[$signalName\]\n";
