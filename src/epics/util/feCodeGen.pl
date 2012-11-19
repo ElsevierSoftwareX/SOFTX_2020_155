@@ -1030,9 +1030,14 @@ print "Found $adcCnt ADC modules part is $adcPartNum[0]\n";
 die "***ERROR: At least one ADC part is required in the model\n" if ($adcCnt < 1);
 print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
 print "Found $boCnt Binary modules part is $boPartNum[0]\n";
-if (($adcCnt > 12) || ($dacCnt > 12)) {
-   die "***ERROR: Too many ADC and/or DAC modules (MAX = 12): ADC defined = $adcCnt Dac Define = $dacCnt\n";
-}
+
+($::maxAdcModules, $::maxDacModules) =
+	CDS::Util::findDefine("src/include/drv/cdsHardware.h",
+			"MAX_ADC_MODULES", "MAX_DAC_MODULES");
+
+die "***ERROR: Too many ADC modules (MAX = $::maxAdcModules): ADC defined = $adcCnt\n" if ($adcCnt > $::maxAdcModules);
+die "***ERROR: Too many DAC modules (MAX = $::maxDacModules): DAC defined = $dacCnt\n" if  ($dacCnt > $::maxDacModules);
+
 if ($dacKillCnt > 1) {
    die "***ERROR: Too many DACKILL parts defined (MAX = 1)  = $dacKillCnt\n";
 }
