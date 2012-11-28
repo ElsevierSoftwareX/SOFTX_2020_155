@@ -117,7 +117,7 @@ else
  alias rcgcode "pushd ${RCG_DIR}"
 
 #  define RCG_LIB_PATH for builds
- simDir=${RCG_PATH}/src/epics/simLink
+ set simDir=${RCG_PATH}/src/epics/simLink
  setenv RCG_LIB_PATH ${USERAPPS_LIB_PATH}:${simDir}:${simDir}/lib
 
 # define variables for post-build scripts
@@ -126,7 +126,7 @@ else
 
 #
 # ** add in RCG Simlink library
- rcgLib=${simDir}/lib
+ set rcgLib=${simDir}/lib
  echo ${MATLABPATH} | egrep -i "${rcgLib}" >&/dev/null
  if ($status != 0) then
    setenv MATLABPATH ${rcgLib}:${MATLABPATH}
