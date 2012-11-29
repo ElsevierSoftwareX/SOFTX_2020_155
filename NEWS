@@ -1,6 +1,12 @@
 ===========================
-Overview of changes for 2.6 - Branch pending release..
+Overview of changes for 2.6
 ===========================
+- mx_stream and daqd changes to improve OpenMX to MX communication
+- Bug Fix: changed front-end filter module to the Epics variable update rate. It used to
+  read and write these variables on every front-end cycle. There was a problem with this arrangement
+  detected at AEI in Hannover on the AMD hardware. We needed to slow down the rate of the communication,
+  which is done through the shared memory, in order to fix a dramatic slow down in the front-end
+  running speed, which was seen right after the code upgrade.
 - IPC code generation portion of feCodeGen.pl moved to IPCx.pm (part of cleanup)
 - Bug Fix: Memory size mismatch for TP table between awgtpman and daqLib.
 - RCG_HOST environment variable added. This setting will override the hostname in the user model to allow running
