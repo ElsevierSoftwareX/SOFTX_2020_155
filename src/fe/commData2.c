@@ -138,27 +138,31 @@ INLINE void commData2Send(int connects,  	 	// Total number of IPC connections i
   unsigned long syncWord;	///	\param syncWord Combined GPS timestamp and cycle counter
   int ipcIndex;			///	\param ipcIndex Pointer to next IPC data buffer
   int dataCycle;		///	\param dataCycle Cycle counter 0-65535
-  int ii;			///	\param ii Loop counter
+  int ii = 0;			///	\param ii Loop counter
   int chan;			///	\param chan Local ipc number
   int sendBlock;		///	\param sendBlock Data block data is to be sent to
   int lastPcie = -1;
 
   sendBlock = ((cycle + 1) * (IPC_MAX_RATE / FE_RATE)) % IPC_BLOCKS;
   //int num_pcie = 0;
+
+// Calculate the SYNC word to be sent with all data.
+// Determine the cycle count to be sent with the data
+  dataCycle = ((cycle + 1) * ipcInfo[0].sendCycle) % IPC_MAX_RATE;
+// Since this is write ahead, need to increment the GPS second if
+// writing to the first block of a new second.
+  if(dataCycle == 0) syncWord = timeSec + 1;
+  else syncWord = timeSec;
+// Combine GPS seconds and cycle counter into long word.
+  syncWord = (syncWord << 32) + dataCycle;
+
   for(ii=0;ii<connects;ii++)
   {
-	// If IPC Sender:
-        if(ipcInfo[ii].mode == ISND)
+	// If IPC Sender on RFM Network:
+	// RFM network has highest latency, so want to get these signals out first.
+        if((ipcInfo[ii].mode == ISND) && ((ipcInfo[ii].netType == IRFM0) || (ipcInfo[ii].netType == IRFM1)))
         {
 		chan = ipcInfo[ii].ipcNum;
-		// Determine the cycle count to be sent with the data
-                dataCycle = ((cycle + 1) * ipcInfo[ii].sendCycle) % IPC_MAX_RATE;
-		// Since this is write ahead, need to increment the GPS second if
-		// writing to the first block of a new second.
-		if(dataCycle == 0) syncWord = timeSec + 1;
-		else syncWord = timeSec;
-		// Combine GPS seconds and cycle counter into long word.
-		syncWord = (syncWord << 32) + dataCycle;
 		// Determine next block to write in IPC_BLOCKS block buffer
 		ipcIndex = ipcInfo[ii].ipcNum;
 		// Don't write to PCI RFM if network error detected by IOP
@@ -166,18 +170,28 @@ INLINE void commData2Send(int connects,  	 	// Total number of IPC connections i
 		{
 			// Write Data
                 	ipcInfo[ii].pIpcData->dBlock[sendBlock][ipcIndex].data = ipcInfo[ii].data;
-			// clflush_cache_range (ipcInfo[ii].pIpcData->data+ipcIndex, 8);
 			// Write timestamp/cycle counter word
                 	ipcInfo[ii].pIpcData->dBlock[sendBlock][ipcIndex].timestamp = syncWord;
+		}
+  	}
+  }
 
-			// Flush Dolphin data out to maintain real-time
-			// transmission requirements
+  for(ii=0;ii<connects;ii++)
+  {
+	// If IPC Sender on PCIE Network or via Shared Memory:
+        if((ipcInfo[ii].mode == ISND) && ((ipcInfo[ii].netType == ISHME) || (ipcInfo[ii].netType == IPCIE)))
+        {
+		chan = ipcInfo[ii].ipcNum;
+		// Determine next block to write in IPC_BLOCKS block buffer
+		ipcIndex = ipcInfo[ii].ipcNum;
+		// Don't write to PCI RFM if network error detected by IOP
+        	if(ipcInfo[ii].pIpcData != NULL)
+		{
+			// Write Data
+                	ipcInfo[ii].pIpcData->dBlock[sendBlock][ipcIndex].data = ipcInfo[ii].data;
+			// Write timestamp/cycle counter word
+                	ipcInfo[ii].pIpcData->dBlock[sendBlock][ipcIndex].timestamp = syncWord;
 		 	if(ipcInfo[ii].netType == IPCIE) {
-			//	num_pcie++;
-				//if (num_pcie == 16) {
-					//clflush_cache_range (&(ipcInfo[ii].pIpcData->dBlock[sendBlock][ipcIndex].data), 16);
-					//num_pcie = 0;
-				//}
 				lastPcie = ii;
  			}
 		}
