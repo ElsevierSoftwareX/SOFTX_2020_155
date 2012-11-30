@@ -129,6 +129,8 @@ assign dcuId to "{ifo}:DAQ-FEC_{sysnum}_DCU_ID";
 
 unsigned int prev_gps = 0;
 unsigned int prev_cycle = 0;
+%% /* ezCaWrites we want to update slower */
+unsigned int pvUpdateCycle = 0;
 int prev_seqTrig = 0;
 
 
@@ -512,6 +514,7 @@ state monScreen{
 %% } else {
 %% 	usleep(10000);
 %% }
+%% pvUpdateCycle++;
 %% prev_seqTrig = pEpics->epicsOutput.epicsSync;
    epicsSync = prev_seqTrig * 0.0625  + pEpics->epicsOutput.timeDiag;
    epicsWait = myTimeout;
