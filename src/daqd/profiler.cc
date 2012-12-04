@@ -10,9 +10,6 @@ void *
 profile_c::profiler ()
 {
 
-  // Put this  thread into the realtime scheduling class with half the priority
-  daqd_c::realtime ("profiler", 2);
-
   started = 1;
   period = 0;
   for (;;) {
@@ -32,9 +29,9 @@ profile_c::profiler ()
     //int bfree = daqd.b1 -> blocks ();
 
     if (bfree < 2) {
-      system_log(1, "%s profiler warning: %d empty blocks in the buffer", name, bfree);
+      system_log(1, "%s profiler warning: %d empty blocks in the buffer", name.c_str(), bfree);
       if (!bfree && coredump) {
-	system_log(1, "%s profiler: buffer is full -- aborting the program", name);
+	system_log(1, "%s profiler: buffer is full -- aborting the program", name.c_str());
 	abort ();
       }
     }
@@ -56,9 +53,9 @@ void
 profile_c::print_status (ostream *outs)
 {
   if (started) {
-    *outs << "profiler is running" << endl;
+    *outs << name << " profiler is running" << endl;
   } else {
-    *outs << "profiler is not running" << endl;
+    *outs << name << " profiler is not running" << endl;
   }
 
   if (period)

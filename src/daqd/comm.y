@@ -910,12 +910,20 @@ CommandLine: /* Nothing */
 			*yyout << "`start trend profiler': start trend before starting profiler" << endl;
 		else
 			daqd.trender.profile.start_profiler(daqd.trender.tb);
+		if (daqd.trender.mtb)
+			daqd.trender.profile_mt.start_profiler(daqd.trender.mtb);
 	}
 	| STATUS TREND PROFILER {
 		AUTH_CHECK(((my_lexer *)lexer));
 		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
 
 		daqd.trender.profile.print_status(yyout);
+		daqd.trender.profile_mt.print_status(yyout);
+		*yyout << "Minute trend saving period stats (" <<
+			daqd.trender.num_channels << " channels/files )" << endl;
+		daqd.trender.mt_stats.println(*yyout);
+		*yyout << "Minute trend file saving stats (per file)" << endl;
+		daqd.trender.mt_file_stats.println(*yyout);
 	}
 
 	| PSRINFO {
