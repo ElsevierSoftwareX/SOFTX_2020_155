@@ -76,7 +76,10 @@ trender_c::raw_minute_saver ()
     time_t t = time(0);
     DEBUG(1, cerr << "Begin raw minute trend writing" << endl);
 
-    for (int j = 0; j < num_channels; j++)
+    mt_stats.sample();
+    for (int j = 0;
+    	mt_file_stats.sample(), j < num_channels;
+	mt_file_stats.tick(), j++)
       {
 	// Calculate combined status
 	int status = 0;
@@ -137,6 +140,9 @@ trender_c::raw_minute_saver ()
 	  }
 	}
       } // for
+
+      mt_stats.tick();
+
       t = time(0) - t;
       DEBUG(1, cerr << "Finished raw minute trend writing in " << t << " seconds" << endl);
   }

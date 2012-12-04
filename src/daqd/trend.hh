@@ -3,6 +3,7 @@
 
 #include "daqd.hh"
 #include "profiler.hh"
+#include "stats/stats.hh"
 
 /* Trend circular buffer block structure */
 // Do not put any shorts in this structure, because compiler puts holes in to align the double
@@ -75,9 +76,11 @@ public:
     shutdown_minute_now (0),
     minute_trend_buffer_blocks (60),
     mtb (0),
+    mt_stats(), mt_file_stats(),
     tb (0),
     num_channels (0), num_trend_channels (0), block_size (0), ascii_output (0),
     frames_per_file (1), trend_buffer_blocks (60), profile ((char *)"trend"),
+    		 profile_mt((char *)"mt"),
 		 fsd (60), minute_fsd (3600), raw_minute_trend_saving_period (2),
 		 num_threads (1), worker_first_channel (0),
 		 trend_worker_nb (0), worker_busy (0)
@@ -120,6 +123,8 @@ public:
   pthread_mutex_t lock;
   circ_buffer *tb;  // trend circular buffer object
   circ_buffer *mtb;  // minute trend circular buffer object
+  class stats mt_stats; // minute trend period stats
+  class stats mt_file_stats; // minute trend file saving stats
   pthread_t tsaver; // This thread saves trend data into the `fname'
   pthread_t mtsaver; // This thread saves minute trend data into the `fname'
   pthread_t consumer; /* Thread reads data from the main circular
@@ -190,6 +195,7 @@ public:
   static void *raw_minute_trend_saver_static (void *a) { return ((trender_c *)a) -> raw_minute_saver (); };
 
   profile_c profile; // profile on trend circular buffer.
+  profile_c profile_mt; // profile on minute trend circular buffer.
   unsigned int raw_minute_trend_saving_period;
 
   unsigned int num_threads;
