@@ -12,18 +12,18 @@ class profile_c {
   int *counters;
   int profiling_period;
   int coredump;
-  char name [13];
+  std::string name;
 
   // Thread to collect program statistics
   void *profiler ();
   static void *profiler_static (void *a) { return ((profile_c *)a) -> profiler (); };
  public:
 
-  profile_c(char *pname) :
+  profile_c(string pname) :
     main_avg_free(0), main_min_free(-1), period(0),
     started(0), shutdown(0), counters(0),
-    cb(0), profiling_period(1), coredump(0) {
-    strncpy (name, pname, 12);
+    cb(0), profiling_period(1), coredump(0),
+    name(pname) {
   }
 
   ~profile_c() {
