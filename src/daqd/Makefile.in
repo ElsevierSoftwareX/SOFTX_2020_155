@@ -20,8 +20,8 @@ CXX=@CXX@
 CC=@CC@
 LIBS=@LIBS@
 DEBUGFLAGS=-g -Wno-deprecated -Wno-write-strings
-PERFORMANCEFLAGS=-DNDEBUG -g -O5
-RELEASEFLAGS=-DNDEBUG -DNPROBE -g -O5
+PERFORMANCEFLAGS=-DNDEBUG -g -O
+RELEASEFLAGS=-DNDEBUG -DNPROBE -g -O
 #DEBUGFLAGS=-DNDEBUG -O5 -unroll=16
 DEVFLAGS=@DEVFLAGS@
 
@@ -51,7 +51,7 @@ LDASLIBFLAGS=-L$(LDAS_DIR)/linux-x86_64/lib -lgeneral -lframecpp -lframecpp8 -lz
 VARIOUS_DEFINES=-DSERVER_VERSION=\"2.0\" "-DPRODUCTION_DATE=\"`date`\"" "-DPRODUCTION_MACHINE=\"`uname -a`\"" ${GDSFLAGS} ${LDASFLAGS} ${EPICSFLAGS} ${MYRINET_FLAGS} ${MX_FLAGS}
 INCLUDEFLAGS=-I. -I@srcdir@ -I$(srcdir)/../../../rts/src/include -I$(srcdir)/../include -I/usr/sfw/include
 CFLAGS=${VARIOUS_DEFINES} ${DEVFLAGS} -c ${INCLUDEFLAGS} -D_REENTRANT  -DNO_RTL=1
-CCFLAGS=${CFLAGS} @CPPFLAGS@  @CXXFLAGS@
+CCFLAGS=${CFLAGS} @CPPFLAGS@ -g -O
 LEX=flex -+
 YACC=@YACC@ -o y.tab.c
 YFLAGS=-d
@@ -192,7 +192,7 @@ comm-lex.o: comm-lex.l
 y.tab.h comm.o: comm.y
 	$(YACC) $(YFLAGS) $(srcdir)/comm.y
 	/bin/mv -f y.tab.c comm.cc
-	$(CC) $(CCFLAGS) -O2 comm.cc
+	$(CC) $(CCFLAGS) -O comm.cc
 
 #daqd.o: y.tab.h
 #listener.o: y.tab.h
