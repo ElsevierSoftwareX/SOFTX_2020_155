@@ -1,0 +1,26 @@
+=== modified file 'src/db/db_access.c"
+--- src/db/db_access.c	2011-12-12 14:14:45.000000000 -0600
++++ src/db/db_access.c	2012-01-27 16:43:39.000000000 -0600
+@@ -109,7 +109,7 @@ typedef char DBSTRING[MAX_STRING_SIZE];
+ 
+ 
+ #ifndef MAX_STRING_SIZE
+-#define MAX_STRING_SIZE	40
++#define MAX_STRING_SIZE	60
+ #endif
+ 
+ /*
+
+=== modified file 'src/libCom/misc/epicsTypes.h'
+--- src/libCom/misc/epicsTypes.h	2011-12-12 14:14:45.000000000 -0600
++++ src/libCom/misc/epicsTypes.h	2012-01-27 16:29:24.000000000 -0600
+@@ -75,7 +75,7 @@ typedef struct {
+  * db_access.h 
+  *
+  */
+-#define MAX_STRING_SIZE 40
++#define MAX_STRING_SIZE 60
+ typedef char            epicsOldString[MAX_STRING_SIZE]; 
+ 
+ /*
+

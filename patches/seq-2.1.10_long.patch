@@ -1,0 +1,13 @@
+=== modified file seq-2.1.10/src/pv/pvType.h
+--- seq-2.1.10/src/pv/pvType.h	2012-09-06 05:11:25.000000000 -0500
++++ seq-2.1.10/src/pv/pvType.h	2012-12-04 10:52:50.873940401 -0600
+@@ -47,7 +47,8 @@
+ typedef epicsInt32   pvLong;
+ typedef epicsFloat32 pvFloat;
+ typedef epicsFloat64 pvDouble;
+-typedef char         pvString[40]; /* use sizeof( pvString ) */
++/* Raise to 60 to match MAX_STRING_SIZE in LIGO CDS */
++typedef char         pvString[60]; /* use sizeof( pvString ) */
+ 
+ #define PV_TIME_XXX(type) \
+     typedef struct { \
