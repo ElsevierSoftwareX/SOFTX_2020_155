@@ -16,6 +16,7 @@ if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
 push @rcg_lib_path, "$rcg_src_dir/src/epics/simLink";
 #print join "\n", @rcg_lib_path, "\n";
 my $model_file_found = 0;
+$mdlfile = $ARGV[0];
 foreach $i (@rcg_lib_path) {
 	my $fname = $i;
 	$fname .= "/";
@@ -217,6 +218,7 @@ $ipcxInitDone = 0;                                                         # ===
 $ipcxBlockTags[0] = undef;
 $ipcxParts[0][0] = undef;
 $ipcxTagCount = 0;
+$ipcxReset = "";
 # END IPCx PART CODE VARIABLES
 
 $oscUsed = 0;
@@ -1902,6 +1904,7 @@ print OUTH "#define BUILD_SVN_VERSION_NO \t \"$svnVerSub\"\n\n";
 # ########    TEST    ############
 print OUTH "typedef struct CDS_EPICS_IN {\n";
 print OUTH "\tint vmeReset;\n";
+print OUTH "\tint ipcDiagReset;\n";
 print OUTH "\tint burtRestore;\n";
 print OUTH "\tint dcuId;\n";
 print OUTH "\tint diagReset;\n";
@@ -1973,6 +1976,7 @@ $filtCnt *= 10;
 print OUTH "#define MAX_FILTERS \t $filtCnt\n\n";
 
 print EPICS "MOMENTARY FEC\_$dcuId\_VME_RESET epicsInput.vmeReset int ao 0\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_IPC_DIAG_RESET epicsInput.ipcDiagReset int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_DIAG_RESET epicsInput.diagReset int ao 0\n";
 print EPICS "INVARIABLE FEC\_$dcuId\_DACDT_ENABLE epicsInput.dacDuoSet int bo 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_OVERFLOW_RESET epicsInput.overflowReset int ao 0\n";
@@ -2365,6 +2369,7 @@ print OUT "dacFault = 1;\n";
 # first in the processing loop
 #
 if ($ipcxCnt > 0) {
+   
    print OUT "\ncommData2Receive(myIpcCount, ipcInfo, timeSec , cycle);\n\n";
 
 }
@@ -2760,6 +2765,7 @@ print OUT "$feTailCode";
 # as the last step of the processing loop
 #
 if ($ipcxCnt > 0) {
+   print OUT "      if(!cycle && pLocalEpics->epicsInput.ipcDiagReset) pLocalEpics->epicsInput.ipcDiagReset = 0;\n";
    print OUT "\n    commData2Send(myIpcCount, ipcInfo, timeSec, cycle);\n\n";
 }
 # END IPCx PART CODE
@@ -3739,8 +3745,12 @@ if($ccnt == 5)
 }
 system("cat /tmp/GDS_TP.opi /tmp/eof.opi > $epicsScreensDir/$sysname" . "_GDS_TP.opi");
 
+#GENERATE IPC SCREENS
+   ("CDS::IPCx::createIpcMedm") -> ($sysname,$ipcxCnt);
+
 # Print source file names into a file
 #
 open(OUT,">sources.\L$sysname\E") || die "cannot open \"sources.$sysname\" file for writing ";
 print OUT join("\n", @sources), "\n";
 close OUT;
+
