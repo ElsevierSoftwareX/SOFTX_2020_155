@@ -3440,6 +3440,34 @@ $alarmMedm[21] = "\tlabel=\"Guard (S/R)\" \n";
 $alarmMedm[22] = "\} \n";
 print OUTGDSM @alarmMedm;
 
+$mxpt = 210;
+$mypt = 77;
+$alarmMedm[0] = "\"related display\" \{ \n";
+$alarmMedm[1] = "\tobject  \{ \n";
+$alarmMedm[2] = "\t\tx=";
+$alarmMedm[3] = "$mxpt";
+$alarmMedm[4] = " \n";
+$alarmMedm[5] = "\t\ty=";
+$alarmMedm[6] = "$mypt";
+$alarmMedm[7] = " \n";
+$alarmMedm[8] = "\t\twidth=85 \n";
+$alarmMedm[9] = "\t\theight=18 \n";
+$alarmMedm[10] = "\t\} \n";
+$alarmMedm[11] = "\tdisplay\[0\]  \{ \n";
+$alarmMedm[12] = "\t\tname=\"/opt/rtcds/LOCATION_NAME/";
+$alarmMedm[13] = "$sitelc";
+$alarmMedm[14] = "/medm/MEDMDIR/";
+$alarmMedm[15] = "$sysname";
+$alarmMedm[16] = "_IPC_STATUS";
+$alarmMedm[17] = "\.adl\" \n";
+$alarmMedm[18] = "\t\} \n";
+$alarmMedm[19] = "\tclr=0 \n";
+$alarmMedm[20] = "\tbclr=44 \n";
+$alarmMedm[21] = "\tlabel=\"RT NET STAT\" \n";
+$alarmMedm[22] = "\} \n";
+print OUTGDSM @alarmMedm;
+
+
 close(OUTGDSM);
 
 system("cat GDS_TP_TEST.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");

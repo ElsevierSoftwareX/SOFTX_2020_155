@@ -498,18 +498,6 @@ byte {
 	sbit=0
 	ebit=3
 }
-text {
-	object {
-		x=218
-		y=80
-		width=50
-		height=14
-	}
-	"basic attribute" {
-		clr=0
-	}
-	textix="RT NET STAT"
-}
 "text update" {
 	object {
 		x=507
