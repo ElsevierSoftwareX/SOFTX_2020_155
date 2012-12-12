@@ -3,7 +3,20 @@ use Exporter;
 @ISA = ('Exporter');
 
 require "lib/Util.pm";
+require "lib/medmGen.pm";
  
+# Key global variables used in this module
+# ipcxParts[][]
+#	[][0] = IPC Name
+#	[][1] = IPC Type
+#	[][2] = sender rate
+#	[][3] = sender computer host name 
+#	[][4] = IPC number
+#	[][5] = sender model name
+#	[][6] = model part number
+#	[][7] = input part name
+#	[][8] = EPICS channel name (less ending eg _RCV)
+
 sub partType {
         return IPCx;
 }
@@ -12,14 +25,42 @@ sub partType {
 # Current part number is passed as first argument
 sub printHeaderStruct {
         my ($i) = @_;
-        ;
+	# Only add EPICS comms if this is an IPC RCVR part
+        if ($::partInputType[$i][0] eq "GROUND") {
+		my $pfile = substr($::mdlfile,5);
+		my @fnam = split(/\./,$pfile);
+		my $ov = uc($fnam[0]);
+		my $ss = substr($::xpartName[$i],3);
+		$ss =~ s/\:/_/;
+		$ss =~ s/\-/_/;
+		# Add Err rate var ie errors/sec
+		print ::OUTH "\tint $ss\_ER;\n";
+		# Add time of last error detection
+		print ::OUTH "\tint $ss\_ET;\n";
+		# Add status byte
+		print ::OUTH "\tint $ss\_PS;\n";
+	}
 }
 
 # Print Epics variable definitions
 # Current part number is passed as first argument
 sub printEpics {
         my ($i) = @_;
-        ;
+	# Only add EPICS channels if this is an IPC RCVR part
+        if ($::partInputType[$i][0] eq "GROUND") {
+		my $pfile = substr($::mdlfile,5);
+		my @fnam = split(/\./,$pfile);
+		my $ov = uc($fnam[0]);
+		my $ss = substr($::xpartName[$i],3);
+		$ss =~ s/\:/_/;
+		$ss =~ s/\-/_/;
+		# Add Err rate var ie errors/sec
+		print ::EPICS "OUTVARIABLE $ov\_IPC_$ss\_ER $::systemName\.$ss\_ER int ao 0\n";
+		# Add time of last error detection
+		print ::EPICS "OUTVARIABLE $ov\_IPC_$ss\_ET $::systemName\.$ss\_ET int ao 0\n";
+		# Add status byte
+		print ::EPICS "OUTVARIABLE $ov\_IPC_$ss\_PS $::systemName\.$ss\_PS int ao 0\n";
+	}
 }
 
 # Print variable declarations into front-end file
@@ -27,6 +68,7 @@ sub printEpics {
 sub printFrontEndVars  {
         my ($i) = @_;
 
+	# Print this in code header only once
         if ($::ipcxDeclDone == 0) {
            $::ipcxDeclDone = 1;
 
@@ -44,6 +86,7 @@ sub frontEndInitCode {
         my ($i) = @_;
         my $found = 0;
  
+	# Print this in code initialization area only once
         if ($::ipcxInitDone == 0) {
            $calcExp = "\nmyIpcCount = $::ipcxCnt;\n\n";
         }
@@ -53,6 +96,7 @@ sub frontEndInitCode {
 
         $::ipcxRef[$::ipcxInitDone] = $i;
  
+	# Write out initialization of IPC parts all at one time
         for ($l = 0; $l < $::ipcxCnt; $l++) {
            if ($::ipcxParts[$l][6] == $i) {
               $found = 1;
@@ -82,6 +126,7 @@ sub frontEndInitCode {
            die "***ERROR: Did not find IPCx part $i\n";
         }
 
+	# Need to call commData2.c during initialization only once.
         if ($::ipcxInitDone eq $::ipcxCnt) {
            $calcExp .= "\ncommData2Init(myIpcCount, FE_RATE, ipcInfo);\n\n";
         }
@@ -127,10 +172,6 @@ sub fromExp {
 sub frontEndCode {
         my ($i) = @_;
 
-        if ($::partInputType[$i][0] eq "GROUND") {
-           $calcExp = "";
-        }
-        else {
            my $index = -999;
 
            for ($k = 0; $k < $::ipcxCnt; $k++) {
@@ -143,6 +184,26 @@ sub frontEndCode {
            if ($index < 0) {
               die "***ERROR: index-FEC=$index\n";
            }
+	# Code only generated if RCV module
+        if ($::partInputType[$i][0] eq "GROUND") {
+		my $ss = substr($::xpartName[$i],3);
+		$ss =~ s/\:/_/;
+		$ss =~ s/\-/_/;
+           $calcExp = "// IPCx RCVR DIAGNOSTICS:  $::xpartName[$i]\n";
+	   $calcExp .= "if(!cycle && ipcInfo[$index]\.errTotal) {\n";
+	   $calcExp .= "\tpLocalEpics->$::systemName\.$ss\_ET = ";
+           $calcExp .= "timeSec;\n";
+	   $calcExp .= "\tpLocalEpics->$::systemName\.$ss\_ER = ";
+           $calcExp .= "ipcInfo[$index]\.errTotal;\n";
+	   $calcExp .= "\tpLocalEpics->$::systemName\.$ss\_PS = 0;\n";
+	   $calcExp .= "} \n";
+	   $calcExp .= "if(!cycle && pLocalEpics->epicsInput.ipcDiagReset) { \n";
+	   $calcExp .= "\t pLocalEpics->$::systemName\.$ss\_PS = 1;\n";
+	   $calcExp .= "\t pLocalEpics->$::systemName\.$ss\_ET = 0;\n";
+	   $calcExp .= "\t pLocalEpics->$::systemName\.$ss\_ER = 0;\n";
+	   $calcExp .= "} \n";
+        }
+        else {
 
            $calcExp = "// IPCx:  $::xpartName[$i]\n";
            $calcExp .= "ipcInfo[$index]\.data = ";
@@ -151,41 +212,49 @@ sub frontEndCode {
 
         return $calcExp;
 }
+
+
+# This sub will parse through all parts looking for IPC parts.
+# Once identified, code will determine all the parameters necessary to set up
+# the communications table.
+# Argument passed is total model part count.
 sub procIpc {
 
 my ($i) = @_;
+# IPC parameter list
 my @ipcxMissing = ("Signal Name","ipcType","ipcRate","ipcHost","ipcNum","ipcModel");
+# IPC comm network types
 my @ipcxType = ("SHMEM","RFM0","RFM1","PCIE");
 my @ipcxMaxNum = (-999,-999,-999,-999);
 
 #
-# Find all IPCx parts and start building IPCx parts matrix
+# Loop thru all parts and find all IPCx parts and start building IPCx parts matrix
 #
 for ($ii = 0; $ii < $i; $ii++) {
    if ($::partType[$ii] =~ /^IPCx/) {
+      # Add signal name to info table
       $::ipcxParts[$::ipcxCnt][0] = $::xpartName[$ii];
-      print "IPC $ii $::ipcxCnt is $::ipcxParts[$::ipcxCnt][0] \n";
 
-#     $::ipcxParts[$::ipcxCnt][1] = "I" . substr($::ipcxBlockTags[$ii], 8, 3);
       $::ipcxCommMech = substr($::ipcxBlockTags[$ii], 8, 4);
+      # Add IPC net type to info table
       $::ipcxParts[$::ipcxCnt][1] = "I" . $::ipcxCommMech;
+      # If comm type RFM, need to get the card number as possible to have 2
       if ($::ipcxCommMech eq "RFM") {
-#        print "\n+++  TEST:  Found an RFM\n";
-#        print "\n+++  DESCR=$blockDescr[$ii]\n";
          if ($::blockDescr[$ii] =~ /^card=(\d)/) {
-#           print "\nVALUE=$1\n";
             $::ipcxParts[$::ipcxCnt][1] .= $1;
          }
          else {
             die "\n***ERROR: IPCx part of type RFM with NO card number\n";
          }
       }
-      print "IPC $ii $::ipcxCnt is $::ipcxParts[$::ipcxCnt][1] \n";
 
       $::ipcxParts[$::ipcxCnt][2] = undef;
+      # Add name of sending computer to info table
       $::ipcxParts[$::ipcxCnt][3] = $::targetHost;
       $::ipcxParts[$::ipcxCnt][4] = undef;
+      # Add name of model to info table
       $::ipcxParts[$::ipcxCnt][5] = $::skeleton;
+      # Save model part number to info table
       $::ipcxParts[$::ipcxCnt][6] = $ii;
       $::ipcxCnt++;
    }
@@ -196,8 +265,9 @@ for ($ii = 0; $ii < $i; $ii++) {
    elsif ($::partType[$ii] eq "Parameters") {
       $oo = $ii;
    }
-}
+} #End of loop thru all parts
 
+# Continue if IPC parts were found
 if ($::ipcxCnt > 0) {
 
    # Find the IPC count limits
@@ -210,6 +280,7 @@ if ($::ipcxCnt > 0) {
    ("CDS::Parameters::printHeaderStruct") -> ($oo);
 
 
+   # Develop name of IPC parameter file based on return from above.
         #my ($i) = @_;
 	my $iFile = "/opt/rtcds/";
 	$iFile .= $::location;
@@ -218,6 +289,7 @@ if ($::ipcxCnt > 0) {
 	$iFile .= "/chans/ipc/";
 	$iFile .= $::site;
 	$iFile .= "\.ipc";
+   # Open and input data from IPC parameter file
    open(IPCIN, "<$iFile") || die "***ERROR: IPCx parameter file $iFile not found\n";
    chomp(@inData=<IPCIN>);
    close IPCIN;
@@ -385,6 +457,24 @@ $ipcxRcvrCnt = 0;
             # or two outputs
             #
             if ( ($::partInput[$kk][0] =~ /^Ground/) || ($::partInput[$kk][0] =~ /\_Ground/) ) {
+		# Create EPICS variable name for use in auto screen generation.
+		my $pfile = substr($::mdlfile,5);
+		my @fnam = split(/\./,$pfile);
+		my $ov = uc($fnam[0]);
+		my $ss = substr($::xpartName[$kk],3);
+		$ss =~ s/\:/_/;
+		$ss =~ s/\-/_/;
+		my $eVar = $::site;
+		$eVar .= ":";
+		$eVar .= uc($::systemName);
+		$eVar .= "-";
+		$eVar .= $ov;
+		$eVar .= "_IPC_";
+		$eVar .= $ss;
+		$::ipcxParts[$ii][8] = $eVar;
+		$::ipcxParts[$ii][9] = 0;
+		
+      		# print "IPC $ii is $::ipcxParts[$ii][8] $ov $ss \n";
                if ( ($::partOutCnt[$kk] < 1) || ($::partOutCnt[$kk] > 2) ) {
                   #die "***ERROR: IPCx RECEIVER component $::ipcxParts[$ii][0] has $::partOutCnt[$kk] output(s)\n";
                   #die "***ERROR: IPCx RECEIVER component $::ipcxParts[$ii][0] has $::partOutCnt[$kk] output(s)\n";
@@ -396,6 +486,7 @@ $ipcxRcvrCnt = 0;
             # means there should be no outputs
             #
             else {
+		$::ipcxParts[$ii][9] = 1;
                if ($::partOutCnt[$kk] != 0) {
                   die "***ERROR: IPCx SENDER component $::ipcxParts[$ii][0] has $::partOutCnt[$kk] output(s)\n";
                }
@@ -524,4 +615,82 @@ $ipcxRcvrCnt = 0;
    }
 }
 
+}
+
+# Subroutine to create IPC RCV status screen for all models
+sub createIpcMedm 
+{
+	# Define colors to be sent to screen gen.
+	my %ecolors = ( "white" => "0",
+             "black" => "14",
+	     "red" => "20",
+	     "green" => "60",
+	     "blue" => "54"
+           );
+
+	# Calculate screen height based on number of IPC RCV signals
+	my $dispH = 50;
+	for(my $ii=0;$ii<$::ipcxCnt;$ii++)
+	{
+		if($::ipcxParts[$ii][9] == 0)
+		{
+			$dispH += 20;
+		}
+	}
+
+	# Generate the base screen file, with name and height/width information
+	("CDS::medmGen::medmGenFile") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","740",$dispH);
+	my $xpos = 0;
+	my $ypos = 0;
+	my $width = 740;
+	my $height = 22;
+	# Put blue rectangle banner at top of screen
+	("CDS::medmGen::medmGenRectangle") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,$ecolors{blue});
+	# Add time string to banner
+	("CDS::medmGen::medmGenTextMon") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","540","3","160","15","$::site\:FEC-$::dcuId\_TIME_STRING",$ecolors{white},$ecolors{blue});
+	# Add screen title to banner
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","310","3","100","15","@_[0] IPC RCV STATUS",$ecolors{white});
+	# Add the IPC column headings
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","50","30","100","15","SIGNAL NAME",$ecolors{black});
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","220","30","100","15","SEND COMP",$ecolors{black});
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","320","30","100","15","SENDER MODEL",$ecolors{black});
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","420","30","100","15","IPC TYPE",$ecolors{black});
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","518","30","100","15","ERR/SEC",$ecolors{black});
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","615","30","100","15","ERR TIME",$ecolors{black});
+	#print "My IPC count = @_[1]\n";
+	$ypos = 50;
+	$width = 50;
+	$height = 15;
+	# Place IPC info into the screen for each IPC RCV signal
+	for($ii=0;$ii<$::ipcxCnt;$ii++)
+	{
+		$xpos = 40;
+		# Verify that this is a RCV signal
+		if($::ipcxParts[$ii][9] == 0)
+		{
+			# Add signal name to screen file.
+			("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,"140",$height,$::ipcxParts[$ii][0],$ecolors{black});
+			$xpos += 200;
+			# Add name of sending computer to screen file.
+			("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,$::ipcxParts[$ii][3],$ecolors{black});
+			$xpos += 100;
+			# Add name of sending model to screen file.
+			("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,$::ipcxParts[$ii][5],$ecolors{black});
+			$xpos += 100;
+			# Add IPC type to screen file.
+			("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,$::ipcxParts[$ii][1],$ecolors{black});
+			$xpos += 80;
+			# Add IPC status byte to screen file; holds util diag reset.
+			("CDS::medmGen::medmGenByte") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,"15",$height,"$::ipcxParts[$ii][8]\_PS","0","0",$ecolors{green},$ecolors{red});
+			$xpos += 20;
+			# Add IPC errors/sec to screen file; holds until diag reset, unless errors are continuing.
+			("CDS::medmGen::medmGenTextMon") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,"$::ipcxParts[$ii][8]\_ER",$ecolors{white},$ecolors{black});
+			$xpos += 70;
+			$width = 100;
+			# Add time of last detected IPC errors to screen file; holds until diag reset, unless errors are continuing.
+			("CDS::medmGen::medmGenTextMon") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,"$::ipcxParts[$ii][8]\_ET",$ecolors{white},$ecolors{black});
+			$ypos += 20;
+			$width = 50;
+		}
+	}
 }

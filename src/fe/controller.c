@@ -1629,6 +1629,7 @@ udelay(1000);
 	  {
 		initialDiagReset = 0;
 		pLocalEpics->epicsInput.diagReset = 0;
+		pLocalEpics->epicsInput.ipcDiagReset = 1;
   		// pLocalEpics->epicsOutput.diags[1] = 0;
 		timeHoldMax = 0;
 	  	diagWord = 0;
