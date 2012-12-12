@@ -639,24 +639,24 @@ sub createIpcMedm
 	}
 
 	# Generate the base screen file, with name and height/width information
-	("CDS::medmGen::medmGenFile") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","700",$dispH);
+	("CDS::medmGen::medmGenFile") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","740",$dispH);
 	my $xpos = 0;
 	my $ypos = 0;
-	my $width = 700;
+	my $width = 740;
 	my $height = 22;
 	# Put blue rectangle banner at top of screen
 	("CDS::medmGen::medmGenRectangle") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,$ecolors{blue});
 	# Add time string to banner
-	("CDS::medmGen::medmGenTextMon") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","500","3","160","15","$::site\:FEC-$::dcuId\_TIME_STRING",$ecolors{white},$ecolors{blue});
+	("CDS::medmGen::medmGenTextMon") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","540","3","160","15","$::site\:FEC-$::dcuId\_TIME_STRING",$ecolors{white},$ecolors{blue});
 	# Add screen title to banner
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","280","3","100","15","@_[0] IPC RCV STATUS",$ecolors{white});
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","310","3","100","15","@_[0] IPC RCV STATUS",$ecolors{white});
 	# Add the IPC column headings
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","25","30","100","15","SIGNAL NAME",$ecolors{black});
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","170","30","100","15","SEND COMP",$ecolors{black});
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","270","30","100","15","SENDER MODEL",$ecolors{black});
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","370","30","100","15","IPC TYPE",$ecolors{black});
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","468","30","100","15","ERR/SEC",$ecolors{black});
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","565","30","100","15","ERR TIME",$ecolors{black});
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","50","30","100","15","SIGNAL NAME",$ecolors{black});
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","220","30","100","15","SEND COMP",$ecolors{black});
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","320","30","100","15","SENDER MODEL",$ecolors{black});
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","420","30","100","15","IPC TYPE",$ecolors{black});
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","518","30","100","15","ERR/SEC",$ecolors{black});
+	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","615","30","100","15","ERR TIME",$ecolors{black});
 	#print "My IPC count = @_[1]\n";
 	$ypos = 50;
 	$width = 50;
@@ -664,13 +664,13 @@ sub createIpcMedm
 	# Place IPC info into the screen for each IPC RCV signal
 	for($ii=0;$ii<$::ipcxCnt;$ii++)
 	{
-		$xpos = 10;
+		$xpos = 40;
 		# Verify that this is a RCV signal
 		if($::ipcxParts[$ii][9] == 0)
 		{
 			# Add signal name to screen file.
 			("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,"140",$height,$::ipcxParts[$ii][0],$ecolors{black});
-			$xpos += 180;
+			$xpos += 200;
 			# Add name of sending computer to screen file.
 			("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,$::ipcxParts[$ii][3],$ecolors{black});
 			$xpos += 100;
