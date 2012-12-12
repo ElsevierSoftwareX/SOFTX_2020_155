@@ -1,3 +1,4 @@
+- Added IPC receiver diagnostics code, as discussed in CDS meeting 12/12/12. 
 ===========================
 Overview of changes for 2.6
 ===========================
@@ -14,7 +15,12 @@ Overview of changes for 2.6
 - General cleanup based on compiler warning messages; warning messages turned back on to provide info the build logs.
 - Added C99 compile flag to Makefiles. Changed O3 optimization flag to just O after some errors at 40m lab in their
   C code which generated large arrays.
-- Increased max IPC channels per net or computer to 256 (previously 64). Added RCG compile time error if this is exceeded.
+- Increased max IPC channels per net or computer to 512 (previously 64). Added RCG compile time error if this is exceeded.
+- Reinstated support for RFM comms via DMA (rfm_dma=1 in param block). A couple of caviats:
+	- IOP, as well as user models, must be compiled with this option.
+	- Only supports 96 total IPC channels on each RFM network (not full 512).
+	- Max send rate is limited to 16K.
+	- Sender model must complete in <40usec to deliver signal across 4Km to be received in proper time slot. 
 - Implemented TP upper limit checking ie ensure total DAQ network rate/model <4MByte/sec. This is a coordinated effor
   between daqLib.c and awgtpman ie daqLib passes size to awgtpman, which will reject further requests if >4MByte/sec.
 - Added IPC name and sender model name to IPC info tables for additional diagnostics vi dmesg and /proc files.
