@@ -1,3 +1,6 @@
+- Added IPC receiver diagnostics code, as discussed in CDS meeting 12/12/12. This was also added in branch2.6 for
+  inclusion in release V2.6.1.
+- Bug fix for Acces I/O 8 and 16 channel relay I/O cards. Also added to branch2.6 for inclusion in release V2.6.1.
 ===========================
 Overview of changes for 2.6
 ===========================
