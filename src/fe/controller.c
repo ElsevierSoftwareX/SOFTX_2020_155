@@ -288,12 +288,6 @@ int dioInput[MAX_DIO_MODULES];			// BIO card inputs
 int dioOutput[MAX_DIO_MODULES];			// BIO card outputs
 int dioOutputHold[MAX_DIO_MODULES];			// BIO card outputs
 
-// Relay digital I/O cards read operations
-// 0 - do not read card registers
-// 1 - read digital inputs
-// 2 - read digital outputs
-// 3 - both
-int rioReadOps[MAX_DIO_MODULES];
 // Values read from relay digital I/O cards, current input values
 int rioInputInput[MAX_DIO_MODULES];
 // Values read from relay digital I/O cards, current output values
@@ -980,8 +974,8 @@ udelay(1000);
 	ii = cdsPciModules.doInstance[kk];
 	if(cdsPciModules.doType[kk] == ACS_8DIO)
 	{
-	  if (rioReadOps[ii] & 1) rioInputInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
-	  if (rioReadOps[ii] & 2) rioInputOutput[ii] = readIiroDioOutput(&cdsPciModules, kk) & 0xff;
+	  rioInputInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
+	  rioInputOutput[ii] = readIiroDioOutput(&cdsPciModules, kk) & 0xff;
 	} else if(cdsPciModules.doType[kk] == ACS_16DIO) {
   	  rioInput1[ii] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
 	} else if (cdsPciModules.doType[kk] == CON_32DO) {
@@ -2062,8 +2056,8 @@ udelay(1000);
                 ii = cdsPciModules.doInstance[kk];
                 if(cdsPciModules.doType[kk] == ACS_8DIO)
                 {
-	  		if (rioReadOps[ii] & 1) rioInputInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
-	  		if (rioReadOps[ii] & 2) rioInputOutput[ii] = readIiroDioOutput(&cdsPciModules, kk) & 0xff;
+	  		rioInputInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
+	  		rioInputOutput[ii] = readIiroDioOutput(&cdsPciModules, kk) & 0xff;
                 }
                 if(cdsPciModules.doType[kk] == ACS_16DIO)
                 {
@@ -2855,8 +2849,8 @@ int main(int argc, char **argv)
 				{
 			                kk = cdsPciModules.doCount;
 					printf("Found Access IIRO-16 at %d 0x%x\n",jj,ioMemData->ipc[ii]);
-					cdsPciModules.doType[doIIRO16Cnt] = ioMemData->model[ii];
-					cdsPciModules.pci_do[doIIRO16Cnt] = ioMemData->ipc[ii];
+					cdsPciModules.doType[kk] = ioMemData->model[ii];
+					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
 					cdsPciModules.doCount ++;
 					cdsPciModules.iiroDio1Count ++;
 					cdsPciModules.doInstance[kk] = doIIRO16Cnt;
@@ -2869,8 +2863,8 @@ int main(int argc, char **argv)
 			        {
 			                kk = cdsPciModules.doCount;
 			                printf("Found Access IIRO-8 at %d 0x%x\n",jj,ioMemData->ipc[ii]);
-			                cdsPciModules.doType[doIIRO8Cnt] = ioMemData->model[ii];
-			                cdsPciModules.pci_do[doIIRO8Cnt] = ioMemData->ipc[ii];
+			                cdsPciModules.doType[kk] = ioMemData->model[ii];
+			                cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
 			                cdsPciModules.doCount ++;
 			                cdsPciModules.iiroDioCount ++;
 			                cdsPciModules.doInstance[kk] = doIIRO8Cnt;
