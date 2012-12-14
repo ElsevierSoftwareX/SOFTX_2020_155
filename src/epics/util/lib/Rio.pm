@@ -47,37 +47,6 @@ sub printFrontEndVars  {
 # Returns calculated code string
 sub frontEndInitCode {
 	my ($i) = @_;
-
-	#print "partOutputPortUsed = ", $::partOutputPortUsed[$i][0], "\n";
-	#print "partOutputPortUsed = ", $::partOutputPortUsed[$i][1], "\n";
-	print "DBG: partOutputPortUsed = ", $::partOutputPortUsed[$i][0], "\n";
-	print "DBG: partOutputPortUsed = ", $::partOutputPortUsed[$i][1], "\n";
-	my $rioReadInitVal = 0;
-	# First output has  digital inputs
-	if ($::partOutputPortUsed[$i][0] != undef) {
-	  if ($::partOutputPortUsed[$i][0] == 0) { $rioReadInitVal |= 1; }
-	  if ($::partOutputPortUsed[$i][0] == 1) { $rioReadInitVal |= 2; }
-	}
-	# print "rioReadInitVal = ", $rioReadInitVal, "\n";
-	# Second output has digital outputs
-	if ($::partOutputPortUsed[$i][1] != undef) {
-	  if ($::partOutputPortUsed[$i][1] == 0) { $rioReadInitVal |= 1;}
-	  if ($::partOutputPortUsed[$i][1] == 1) { $rioReadInitVal |= 2; }
-	}
-
-	# print "rioReadInitVal = ", $rioReadInitVal, "\n";
-	# Initialize board read operations selector
-	# my $bnum = $::boNum[$::boCnt - 1]; # This board number
-        # my $bnum = $::boNum[$i] - 1;
-        my $bnum = -1;
-        for (0 .. $::maxDioMod-1) {
-           if ($::boPartNum[$_] == $i) {
-              $bnum = $_;
-           }
-        }
-        if ($bnum == -1) {
-           die "ERROR: Rio index not found\n";
-        }
         return "";
 }
 
