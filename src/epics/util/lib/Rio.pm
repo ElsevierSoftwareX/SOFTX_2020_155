@@ -78,7 +78,7 @@ sub frontEndInitCode {
         if ($bnum == -1) {
            die "ERROR: Rio index not found\n";
         }
-        return "rioReadOps\[$bnum\] = $rioReadInitVal;\n";
+        return "";
 }
 
 # Figure out part input code
