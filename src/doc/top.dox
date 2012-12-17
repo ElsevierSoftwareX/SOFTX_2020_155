@@ -18,6 +18,7 @@ Now you can proceed to \ref rts "RTS Modules"
 
 /*!	\defgroup rts Real-time Core
 *	Pointers to DCC Documentation
+*
 <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">Controller</a>
 *
 <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=8037">daqLib</a>
