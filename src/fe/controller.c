@@ -11,6 +11,9 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
+///	\file controller.c
+///	\brief Main scheduler program for compiled real-time kernal object.
+
 #include <linux/version.h>
 #include <linux/init.h>
 #undef printf
@@ -22,6 +25,7 @@
 #include <asm/cacheflush.h>
 
 #include <linux/slab.h>
+/// Can't use printf in kernel module so redefine to use Linux printk function
 #define printf printk
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
@@ -33,21 +37,19 @@ char *build_date = __DATE__ " " __TIME__;
 
 extern int iop_rfm_valid;
 
-// Need to get rid of NUM_SYSTEMS
-// This is old code to loop thru same code for multiple instances of same device on same CPU
-// as was done for HEPI on iLIGO
 #ifndef NUM_SYSTEMS
+/// Need to get rid of NUM_SYSTEMS This is old code to loop thru same code for multiple instances of same device on same CPU as was done for HEPI on iLIGO
 #define NUM_SYSTEMS 1
 #endif
 
 #define INLINE  inline
 #define MMAP_SIZE (64*1024*1024 - 5000)
 
-volatile char *_epics_shm;		// Ptr to EPICS shared memory
-char *_ipc_shm;			// Ptr to inter-process communication area 
+volatile char *_epics_shm;	///< Ptr to EPICS shared memory area
+char *_ipc_shm;			///< Ptr to inter-process communication area 
 #if defined(SHMEM_DAQ)
-char *_daq_shm;			// Ptr to frame builder comm shared mem area 
-int daq_fd;			// File descriptor to share memory file 
+char *_daq_shm;			///< Ptr to frame builder comm shared mem area 
+int daq_fd;			///< File descriptor to share memory file 
 #endif
 
 long daqBuffer;			// Address for daq dual buffers in daqLib.c
@@ -120,10 +122,12 @@ double *testpoint[GDS_MAX_NFM_TP];
 DAQ_RANGE daq;			// Range settings for daqLib.c
 int numFb = 0;
 int fbStat[2] = {0,0};		// Status of DAQ backend computer
+/// Excitation points which are not part of filter modules
 double xExc[GDS_MAX_NFM_EXC];	// GDS EXC not associated with filter modules
 #endif
-// 1/16 sec cycle counters for DAQS 
+/// 1/16 sec cycle counters for DAQS 
 int subcycle = 0;		// Internal cycle counter	 
+/// DAQ cycle counter (0-15)
 unsigned int daqCycle;		// DAQS cycle counter	
 
 // Sharded memory discriptors
@@ -174,8 +178,11 @@ int overflowAcc = 0;						// Total ADC/DAC overflow counter
 #ifndef ADC_MASTER
 // Variables for Digital I/O board values
 // DIO board I/O is handled in slave (user) applications for timing reasons (longer I/O access times)
+/// Read value from Acces I/O 24bit module
 int dioInput[MAX_DIO_MODULES];	
+/// Write value to Acces I/O 24bit module
 int dioOutput[MAX_DIO_MODULES];
+/// Last value written to Acces I/O 24bit module
 int dioOutputHold[MAX_DIO_MODULES];
 
 int rioInputOutput[MAX_DIO_MODULES];
@@ -187,7 +194,9 @@ int rioOutput1[MAX_DIO_MODULES];
 int rioOutputHold1[MAX_DIO_MODULES];
 
 // Contec 32 bit output modules
+/// Read value from Contec 32bit I/O module
 unsigned int CDO32Input[MAX_DIO_MODULES];
+/// Write value to Contec 32bit I/O module
 unsigned int CDO32Output[MAX_DIO_MODULES];
 
 #endif
@@ -200,10 +209,15 @@ unsigned int CDIO6464Input[MAX_DIO_MODULES]; // Current value of the BO bits
 unsigned int CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
 
 // This Contect 16 input / 16 output DIO card is used to control timing slave by IOP
+/// Contec1616 input register values
 unsigned int CDIO1616InputInput[MAX_DIO_MODULES]; // Binary input bits
+/// Contec1616 output register values read back from the module
 unsigned int CDIO1616Input[MAX_DIO_MODULES]; // Current value of the BO bits
+/// Contec1616 values to be written to the output register
 unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
+/// Holds ID number of Contec1616 DIO card(s) used for timing control.
 int tdsControl[3];	// Up to 3 timing control modules allowed in case I/O chassis are daisy chained
+/// Total number of timing control modules found on bus
 int tdsCount = 0;
 
 
@@ -216,27 +230,28 @@ unsigned int cycle_gps_event_time = 0; // Time at which ADCs triggered
 unsigned int   cycle_gps_ns = 0;
 unsigned int   cycle_gps_event_ns = 0;
 unsigned int   gps_receiver_locked = 0; // Lock/unlock flag for GPS time card
+/// GPS time in GPS seconds
 unsigned int timeSec = 0;
 unsigned int timeSecDiag = 0;
 /* 1 - error occured on shmem; 2 - RFM; 3 - Dolphin */
 unsigned int ipcErrBits = 0;
-int adcTime;			// Used in code cycle timing
-int adcHoldTime;		// Stores time between code cycles
-int adcHoldTimeMax;		// Stores time between code cycles
-int adcHoldTimeEverMax;		// Maximum cycle time recorded
+int adcTime;			///< Used in code cycle timing
+int adcHoldTime;		///< Stores time between code cycles
+int adcHoldTimeMax;		///< Stores time between code cycles
+int adcHoldTimeEverMax;		///< Maximum cycle time recorded
 int adcHoldTimeEverMaxWhen;
 int startGpsTime;
 int adcHoldTimeMin;
 int adcHoldTimeAvg;
 int adcHoldTimeAvgPerSec;
-int usrTime;			// Time spent in user app code
-int usrHoldTime;		// Max time spent in user app code
+int usrTime;			///< Time spent in user app code
+int usrHoldTime;		///< Max time spent in user app code
 int cardCountErr = 0;
-int cycleTime;			// Current cycle time
-int timeHold = 0;			// Max code cycle time within 1 sec period
-int timeHoldHold = 0;			// Max code cycle time within 1 sec period; hold for another sec
-int timeHoldWhen= 0;			// Cycle number within last second when maximum reached; running
-int timeHoldWhenHold = 0;		// Cycle number within last second when maximum reached
+int cycleTime;			///< Current cycle time
+int timeHold = 0;			///< Max code cycle time within 1 sec period
+int timeHoldHold = 0;			///< Max code cycle time within 1 sec period; hold for another sec
+int timeHoldWhen= 0;			///< Cycle number within last second when maximum reached; running
+int timeHoldWhenHold = 0;		///< Cycle number within last second when maximum reached
 
 // The following are for timing histograms written to /proc files
 #if defined(SERVO64K) || defined(SERVO32K)
@@ -398,53 +413,51 @@ void *fe_start(void *arg)
   int longestWrite2 = 0;
   int tempClock[4];
   int ii,jj,kk,ll,mm;			// Dummy loop counter variables
-  static int clock1Min = 0;		// Minute counter (Not Used??)
-  static int cpuClock[CPU_TIMER_CNT];	// Code timing diag variables
-  static int chanHop = 0;
+  static int clock1Min = 0;		///  @param clockMin Minute counter (Not Used??)
+  static int cpuClock[CPU_TIMER_CNT];	///  @param cpuClock[] Code timing diag variables
+  static int chanHop = 0;		/// @param chanHop Adc channel hopping status
 
-  int adcData[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];	// ADC raw data
+  int adcData[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];	/// @param adcData[][]  ADC raw data
   int adcChanErr[MAX_ADC_MODULES];
   int adcWait = 0;
-  int adcOF[MAX_ADC_MODULES];		// ADC overrange counters
+  int adcOF[MAX_ADC_MODULES];		/// @param adcOF[]  ADC overrange counters
 
   int dacChanErr[MAX_DAC_MODULES];
-  int dacOF[MAX_DAC_MODULES];		// DAC overrange counters
-  static int dacWriteEnable = 0;	// No DAC outputs until >4 times through code
-  					// Code runs longer for first few cycles on startup as it settles in,
-					// so this helps prevent long cycles during that time.
-  int limit = OVERFLOW_LIMIT_16BIT;      // ADC/DAC overflow test value
-  int mask = GSAI_DATA_MASK;            // Bit mask for ADC/DAC read/writes
-  int num_outs = MAX_DAC_CHN_PER_MOD;   // Number of DAC channels variable
+  int dacOF[MAX_DAC_MODULES];		/// @param dacOF[]  DAC overrange counters
+  static int dacWriteEnable = 0;	/// @param dacWriteEnable  No DAC outputs until >4 times through code
+  					///< Code runs longer for first few cycles on startup as it settles in,
+					///< so this helps prevent long cycles during that time.
+  int limit = OVERFLOW_LIMIT_16BIT;      /// @param limit ADC/DAC overflow test value
+  int mask = GSAI_DATA_MASK;            /// @param mask Bit mask for ADC/DAC read/writes
+  int num_outs = MAX_DAC_CHN_PER_MOD;   /// @param num_outs Number of DAC channels variable
 #ifndef ADC_SLAVE
-  volatile int *packedData;		// Pointer to ADC PCI data space
-  volatile unsigned int *pDacData;	// Pointer to DAC PCI data space
-  int wtmin,wtmax;			// Time window for startup on IRIG-B
+  volatile int *packedData;		/// @param *packedData Pointer to ADC PCI data space
+  volatile unsigned int *pDacData;	/// @param *pDacData Pointer to DAC PCI data space
+  int wtmin,wtmax;			/// @param wtmin Time window for startup on IRIG-B
   int dacEnable = 0;
-  int pBits[9] = {1,2,4,8,16,32,64,128,256};	// Lookup table for quick power of 2 calcs
+  int pBits[9] = {1,2,4,8,16,32,64,128,256};	/// @param pBits[] Lookup table for quick power of 2 calcs
 #endif
-  RFM_FE_COMMS *pEpicsComms;		// Pointer to EPICS shared memory space
-  int timeHoldMax = 0;			// Max code cycle time since last diag reset
-  int myGmError2 = 0;			// Myrinet error variable
-  // int attemptingReconnect = 0;		// Myrinet reconnect status
-  int status;				// Typical function return value
-  float onePps;				// Value of 1PPS signal, if used, for diagnostics
-  int onePpsHi = 0;			// One PPS diagnostic check
-  int onePpsTime = 0;			// One PPS diagnostic check
+  RFM_FE_COMMS *pEpicsComms;		/// @param *pEpicsComms Pointer to EPICS shared memory space
+  int timeHoldMax = 0;			/// @param timeHoldMax Max code cycle time since last diag reset
+  int myGmError2 = 0;			/// @param myGmError2 Myrinet error variable
+  int status;				/// @param status Typical function return value
+  float onePps;				/// @param onePps Value of 1PPS signal, if used, for diagnostics
+  int onePpsHi = 0;			/// @param onePpsHi One PPS diagnostic check
+  int onePpsTime = 0;			/// @param onePpsTime One PPS diagnostic check
 #ifdef DIAG_TEST
-  float onePpsTest;				// Value of 1PPS signal, if used, for diagnostics
-  int onePpsHiTest[10];			// One PPS diagnostic check
-  int onePpsTimeTest[10];			// One PPS diagnostic check
+  float onePpsTest;			/// @param onePpsTest Value of 1PPS signal, if used, for diagnostics
+  int onePpsHiTest[10];			/// @param onePpsHiTest[] One PPS diagnostic check
+  int onePpsTimeTest[10];		/// @param onePpsTimeTest[] One PPS diagnostic check
 #endif
-  int dcuId;				// DAQ ID number for this process
-  static int missedCycle = 0;		// Incremented error counter when too many values in ADC FIFO
-  // int netRetry;				// Myrinet reconnect variable
-  int diagWord = 0;			// Code diagnostic bit pattern returned to EPICS
+  int dcuId;				/// @param dcuId DAQ ID number for this process
+  static int missedCycle = 0;		/// @param missedCycle Incremented error counter when too many values in ADC FIFO
+  int diagWord = 0;			/// @param diagWord Code diagnostic bit pattern returned to EPICS
   int system = 0;
-  int sampleCount = 1;			// Number of ADC samples to take per code cycle
-  int sync21pps = 0;			// Code startup sync to 1PPS flag
-  int sync21ppsCycles = 0;		// Number of attempts to sync to 1PPS
-  int syncSource = SYNC_SRC_NONE;	// Code startup synchronization source
-  int mxStat = 0;			// Net diags when myrinet express is used
+  int sampleCount = 1;			/// @param sampleCount Number of ADC samples to take per code cycle
+  int sync21pps = 0;			/// @param sync21pps Code startup sync to 1PPS flag
+  int sync21ppsCycles = 0;		/// @param sync32ppsCycles Number of attempts to sync to 1PPS
+  int syncSource = SYNC_SRC_NONE;	/// @param syncSource Code startup synchronization source
+  int mxStat = 0;			/// @param mxStat Net diags when myrinet express is used
   int mxDiag = 0;
   int mxDiagR = 0;
 // ****** Share data
@@ -456,9 +469,9 @@ void *fe_start(void *arg)
   int ioClock = 0;
 #endif
 #ifdef OVERSAMPLE_DAC
-  double dac_in =  0.0;			// DAC value after upsample filtering
+  double dac_in =  0.0;			/// @param dac_in DAC value after upsample filtering
 #endif
-  int dac_out = 0;			// Integer value sent to DAC FIFO
+  int dac_out = 0;			/// @param dac_out Integer value sent to DAC FIFO
 
   int feStatus = 0;
 
@@ -734,13 +747,13 @@ udelay(1000);
 
   // Clear a couple of timing diags.
   adcHoldTime = 0;
-  adcHoldTimeMax = 0;
-  adcHoldTimeEverMax = 0;
-  adcHoldTimeEverMaxWhen = 0;
+  adcHoldTimeMax = 0;	/// @param adcHoldTimeMax Maximum time between code triggers in 1sec period
+  adcHoldTimeEverMax = 0;	/// @param adcHoldTimeEverMax Maximum time between code triggers since code start
+  adcHoldTimeEverMaxWhen = 0;	/// @param adcHoldTImeEverMaxWhen Time that max time ever between triggers occurred
   startGpsTime = 0;
-  adcHoldTimeMin = 0xffff;
-  adcHoldTimeAvg = 0;
-  usrHoldTime = 0;
+  adcHoldTimeMin = 0xffff;	/// @param adcHoldTimeMin Minimum time between code triggers in 1 sec period.
+  adcHoldTimeAvg = 0;		/// @param adcHoldTimeAvg Average time between code triggers in 1 sec period.
+  usrHoldTime = 0;		/// @param usrHoldTime Maximum time to run user code in 1 sec period.
   missedCycle = 0;
 
   // Initialize the ADC 
@@ -2272,33 +2285,34 @@ extern int need_to_load_IOP_first;
 extern void set_fe_code_idle(void *(*ptr)(void *), unsigned int cpu);
 extern void msleep(unsigned int);
 
+/// Startup function for initialization of kernel module.
 int init_module (void)
 {
  	int status;
-	int ii,jj,kk;
-	char fname[128];
-	int cards;
+	int ii,jj,kk;		/// @param ii,jj,kk default loop counters
+	char fname[128];	/// @param fname[128] Name of shared mem area to allocate for DAQ data
+	int cards;		/// @param cards Number of PCIe cards found on bus
 #ifdef ADC_SLAVE
-	int adcCnt;
-	int dacCnt;
-        int dac18Cnt;
-	int doCnt;
-	int do32Cnt;
-	int doIIRO16Cnt;
-	int doIIRO8Cnt;
-	int cdo64Cnt;
-	int cdi64Cnt;
+	int adcCnt;		/// @param adcCnt Number of ADC cards found by slave model.
+	int dacCnt;		/// @param dacCnt Number of 16bit DAC cards found by slave model.
+        int dac18Cnt;		/// @param dac18Cnt Number of 18bit DAC cards found by slave model.
+	int doCnt;		/// @param doCnt Total number of digital I/O cards found by slave model.
+	int do32Cnt;		/// @param do32Cnt Total number of Contec 32 bit DIO cards found by slave model.
+	int doIIRO16Cnt;	/// @param doIIRO16Cnt Total number of Acces I/O 16 bit relay cards found by slave model.
+	int doIIRO8Cnt;		/// @param doIIRO8Cnt Total number of Acces I/O 8 bit relay cards found by slave model.
+	int cdo64Cnt;		/// @param cdo64Cnt Total number of Contec 6464 DIO card 32bit output sections mapped by slave model.
+	int cdi64Cnt;		/// @param cdo64Cnt Total number of Contec 6464 DIO card 32bit input sections mapped by slave model.
 #endif
-	int ret;
+	int ret;		/// @param ret Return value from various Malloc calls to allocate memory.
 	int cnt;
-	extern int cpu_down(unsigned int);
-	extern int is_cpu_taken_by_rcg_model(unsigned int cpu);
+	extern int cpu_down(unsigned int);	/// @param cpu_down CPU shutdown call.
+	extern int is_cpu_taken_by_rcg_model(unsigned int cpu);	/// @param is_cpu_taken_by_rcg_model Check to verify CPU availability for shutdown.
 
 	kk = 0;
 #ifdef SPECIFIC_CPU
 #define CPUID SPECIFIC_CPU
 #else 
-#define CPUID 1
+#define CPUID 1 
 #endif
 
 #ifndef NO_CPU_SHUTDOWN
