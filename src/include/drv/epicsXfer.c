@@ -57,7 +57,7 @@ inline int checkEpicsReset(int subcycle, CDS_EPICS *plocalEpics){
         //printf("VME_RESET PUSHED !!! \n");
 #endif
 #ifdef ADC_MASTER
-	if (cdsPciModules.adcCount > 0) gsaAdcStop();
+	if (cdsPciModules.adcCount > 0)  gsc16ai64AdcStop();
 #endif
         return(1);
   }
