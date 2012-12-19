@@ -37,6 +37,18 @@ Now you can proceed to \ref rts "RTS Modules"
 ///	@{
 ///	@file map.c
 ///	@file timing.c
+///	@file accesDio24.c
+///	@file accesIIRO8.c
+///	@file accesIIRO16.c
+///	@file contec1616.c
+///	@file contec32o.c
+///	@file contec6464.c
+///	@file gsc16ai64.c
+///	@file gsc16ao16.c
+///	@file gsc18ao8.c
+///	@file spectracomGPS.c
+///	@file symmetricomGps.c
+///	@file vmic5565.c
 ///	@}
 ///	\defgroup rtnet Networking
 ///	@{
