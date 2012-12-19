@@ -41,8 +41,8 @@ inline void RampParamLoad(RampParamState* state, double req, double tRamp, const
     state->ddxMax = state->softRatio * state->dxMax * inv_nRamp;
         
     // if currently ramping, allow high accelleration
-    //if( state->isRamping )
-    //  state->ddxMax = lfabs(state->dxMax + state->dxPrev) / state->minAccCycles;
+    if( state->isRamping )
+      state->ddxMax = lfabs(state->dxMax + state->dxPrev) / state->minAccCycles;
       
     // start the ramp
     state->isRamping = 1;
