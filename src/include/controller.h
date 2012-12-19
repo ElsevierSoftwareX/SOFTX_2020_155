@@ -167,3 +167,116 @@
 // 16Hz Jobs triggered by subcycle count in controller code
 #define HKP_DAC_EPICS_UPDATES		20
 #define HKP_FM_EPICS_UPDATE		30
+
+#define NUM_SYSTEMS 1
+#define INLINE  inline
+#define MMAP_SIZE (64*1024*1024 - 5000)
+
+#define STACK_SIZE    40000
+#define TICK_PERIOD   100000
+#define PERIOD_COUNT  1
+#define MAX_UDELAY    19999
+
+
+char *build_date = __DATE__ " " __TIME__;
+extern int iop_rfm_valid;
+volatile char *_epics_shm;      ///< Ptr to EPICS shared memory area
+char *_ipc_shm;                 ///< Ptr to inter-process communication area 
+#if defined(SHMEM_DAQ)
+char *_daq_shm;                 ///< Ptr to frame builder comm shared mem area 
+int daq_fd;                     ///< File descriptor to share memory file 
+#endif
+
+long daqBuffer;                 // Address for daq dual buffers in daqLib.c
+CDS_HARDWARE cdsPciModules;     // Structure of PCI hardware addresses
+volatile IO_MEM_DATA *ioMemData;
+volatile int vmeDone = 0;       // Code kill command
+volatile int stop_working_threads = 0;
+
+extern unsigned int cpu_khz;
+
+/// Testpoints which are not part of filter modules
+double *testpoint[GDS_MAX_NFM_TP];
+#ifndef NO_DAQ
+DAQ_RANGE daq;                  // Range settings for daqLib.c
+int numFb = 0;
+int fbStat[2] = {0,0};          // Status of DAQ backend computer
+/// Excitation points which are not part of filter modules
+double xExc[GDS_MAX_NFM_EXC];   // GDS EXC not associated with filter modules
+#endif
+/// 1/16 sec cycle counters for DAQS 
+int subcycle = 0;               // Internal cycle counter        
+/// DAQ cycle counter (0-15)
+unsigned int daqCycle;          // DAQS cycle counter   
+
+// Sharded memory discriptors
+int wfd, ipc_fd;
+volatile CDS_EPICS *pLocalEpics;        // Local mem ptr to EPICS control data
+
+
+// Filter module variables
+/// Standard Filter Module Structure
+FILT_MOD dsp[NUM_SYSTEMS];                                      // SFM structure.       
+/// Pointer to local memory SFM Structure
+FILT_MOD *dspPtr[NUM_SYSTEMS];                                  // SFM structure pointer.
+/// Pointer to SFM in shared memory.
+FILT_MOD *pDsp[NUM_SYSTEMS];                                    // Ptr to SFM in shmem. 
+/// Pointer to filter coeffs local memory.
+COEF dspCoeff[NUM_SYSTEMS];                                     // Local mem for SFM coeffs.
+/// Pointer to filter coeffs shared memory.
+VME_COEF *pCoeff[NUM_SYSTEMS];                                  // Ptr to SFM coeffs in shmem   
+
+// ADC Variables
+/// Array of ADC values
+double dWord[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];             // ADC read values
+/// List of ADC channels used by this app. Used to determine if downsampling required.
+unsigned int dWordUsed[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];   // ADC chans used by app code
+/// Arrary of ADC overflow counters.
+int overflowAdc[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];          // ADC overflow diagnostics
+
+// DAC Variables
+/// Enables writing of DAC values; Used with DACKILL parts..
+int iopDacEnable;                                               // Returned by feCode to allow writing values or zeros to DAC modules
+#ifdef ADC_MASTER
+int dacOutBufSize [MAX_DAC_MODULES];    
+#endif
+/// Array of DAC output values.
+double dacOut[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];            // DAC output values
+/// DAC output values returned to EPICS
+int dacOutEpics[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];          // DAC outputs reported back to EPICS
+/// DAC channels used by an app.; determines up sampling required.
+unsigned int dacOutUsed[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];  // DAC chans used by app code
+/// Array of DAC overflow (overrange) counters.
+int overflowDac[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];          // DAC overflow diagnostics
+/// DAC outputs stored as floats, to be picked up as test points
+double floatDacOut[160]; // DAC outputs stored as floats, to be picked up as test points
+
+/// Counter for total ADC/DAC overflows
+int overflowAcc = 0;                                            // Total ADC/DAC overflow counter
+
+#ifndef ADC_MASTER
+// Variables for Digital I/O board values
+// DIO board I/O is handled in slave (user) applications for timing reasons (longer I/O access times)
+/// Read value from Acces I/O 24bit module
+int dioInput[MAX_DIO_MODULES];
+/// Write value to Acces I/O 24bit module
+int dioOutput[MAX_DIO_MODULES];
+/// Last value written to Acces I/O 24bit module
+int dioOutputHold[MAX_DIO_MODULES];
+
+int rioInputOutput[MAX_DIO_MODULES];
+int rioOutput[MAX_DIO_MODULES];
+int rioOutputHold[MAX_DIO_MODULES];
+
+int rioInput1[MAX_DIO_MODULES];
+int rioOutput1[MAX_DIO_MODULES];
+int rioOutputHold1[MAX_DIO_MODULES];
+
+// Contec 32 bit output modules
+/// Read value from Contec 32bit I/O module
+unsigned int CDO32Input[MAX_DIO_MODULES];
+/// Write value to Contec 32bit I/O module
+unsigned int CDO32Output[MAX_DIO_MODULES];
+
+#endif
+
