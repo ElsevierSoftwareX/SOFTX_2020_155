@@ -33,37 +33,6 @@
 #include </usr/src/linux/arch/x86/include/asm/processor.h>
 #include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
 
-char *build_date = __DATE__ " " __TIME__;
-
-extern int iop_rfm_valid;
-
-#ifndef NUM_SYSTEMS
-/// Need to get rid of NUM_SYSTEMS This is old code to loop thru same code for multiple instances of same device on same CPU as was done for HEPI on iLIGO
-#define NUM_SYSTEMS 1
-#endif
-
-#define INLINE  inline
-#define MMAP_SIZE (64*1024*1024 - 5000)
-
-volatile char *_epics_shm;	///< Ptr to EPICS shared memory area
-char *_ipc_shm;			///< Ptr to inter-process communication area 
-#if defined(SHMEM_DAQ)
-char *_daq_shm;			///< Ptr to frame builder comm shared mem area 
-int daq_fd;			///< File descriptor to share memory file 
-#endif
-
-long daqBuffer;			// Address for daq dual buffers in daqLib.c
-CDS_HARDWARE cdsPciModules;	// Structure of PCI hardware addresses
-volatile IO_MEM_DATA *ioMemData;
-volatile int vmeDone = 0;	// Code kill command
-volatile int stop_working_threads = 0;
-
-#define STACK_SIZE    40000
-#define TICK_PERIOD   100000
-#define PERIOD_COUNT  1
-#define MAX_UDELAY    19999
-
-
 // Code can be run without shutting down CPU by changing this compile flag
 #undef NO_CPU_SHUTDOWN 
 #ifndef NO_CPU_SHUTDOWN
@@ -83,17 +52,6 @@ int printk(const char *fmt, ...) {
 }
 #endif
 
-#if 0
-int printf(const char *fmt, ...) {
-    int r;
-    va_list args;
-    va_start(args, fmt);
-    r = printk(fmt, args);
-    va_end(args);
-    return r;
-}
-#endif
-
 #ifdef DOLPHIN_TEST
 #include "dolphin.c"
 #endif
@@ -102,12 +60,11 @@ int printf(const char *fmt, ...) {
 #include "feComms.h"		// Lvea control RFM network defs.
 #include "daqmap.h"		// DAQ network layout
 
-extern unsigned int cpu_khz;
-
 #ifndef NO_DAQ
 #include "drv/fb.h"
 #include "drv/daqLib.c"		// DAQ/GDS connection software
 #endif
+
 #include "drv/map.h"		// PCI hardware defs
 #include "drv/epicsXfer.c"	// User defined EPICS to/from FE data transfer function
 #include "timing.c"		// timing module / IRIG-B  functions
@@ -116,90 +73,6 @@ extern unsigned int cpu_khz;
 #include "drv/inputFilterModule.h"		
 #include "drv/inputFilterModule1.h"		
 
-/// Testpoints which are not part of filter modules
-double *testpoint[GDS_MAX_NFM_TP];
-#ifndef NO_DAQ
-DAQ_RANGE daq;			// Range settings for daqLib.c
-int numFb = 0;
-int fbStat[2] = {0,0};		// Status of DAQ backend computer
-/// Excitation points which are not part of filter modules
-double xExc[GDS_MAX_NFM_EXC];	// GDS EXC not associated with filter modules
-#endif
-/// 1/16 sec cycle counters for DAQS 
-int subcycle = 0;		// Internal cycle counter	 
-/// DAQ cycle counter (0-15)
-unsigned int daqCycle;		// DAQS cycle counter	
-
-// Sharded memory discriptors
-int wfd, ipc_fd;
-volatile CDS_EPICS *pLocalEpics;   	// Local mem ptr to EPICS control data
-
-
-// Filter module variables
-/// Standard Filter Module Structure
-FILT_MOD dsp[NUM_SYSTEMS];					// SFM structure.	
-/// Pointer to local memory SFM Structure
-FILT_MOD *dspPtr[NUM_SYSTEMS];					// SFM structure pointer.
-/// Pointer to SFM in shared memory.
-FILT_MOD *pDsp[NUM_SYSTEMS];					// Ptr to SFM in shmem.	
-/// Pointer to filter coeffs local memory.
-COEF dspCoeff[NUM_SYSTEMS];					// Local mem for SFM coeffs.
-/// Pointer to filter coeffs shared memory.
-VME_COEF *pCoeff[NUM_SYSTEMS];					// Ptr to SFM coeffs in shmem	
-
-// ADC Variables
-/// Array of ADC values
-double dWord[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];		// ADC read values
-/// List of ADC channels used by this app. Used to determine if downsampling required.
-unsigned int dWordUsed[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];	// ADC chans used by app code
-/// Arrary of ADC overflow counters.
-int overflowAdc[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];		// ADC overflow diagnostics
-
-// DAC Variables
-/// Enables writing of DAC values; Used with DACKILL parts..
-int iopDacEnable;						// Returned by feCode to allow writing values or zeros to DAC modules
-#ifdef ADC_MASTER
-int dacOutBufSize [MAX_DAC_MODULES];	
-#endif
-/// Array of DAC output values.
-double dacOut[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];		// DAC output values
-/// DAC output values returned to EPICS
-int dacOutEpics[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];		// DAC outputs reported back to EPICS
-/// DAC channels used by an app.; determines up sampling required.
-unsigned int dacOutUsed[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];	// DAC chans used by app code
-/// Array of DAC overflow (overrange) counters.
-int overflowDac[MAX_DAC_MODULES][MAX_DAC_CHN_PER_MOD];		// DAC overflow diagnostics
-/// DAC outputs stored as floats, to be picked up as test points
-double floatDacOut[160]; // DAC outputs stored as floats, to be picked up as test points
-
-/// Counter for total ADC/DAC overflows
-int overflowAcc = 0;						// Total ADC/DAC overflow counter
-
-#ifndef ADC_MASTER
-// Variables for Digital I/O board values
-// DIO board I/O is handled in slave (user) applications for timing reasons (longer I/O access times)
-/// Read value from Acces I/O 24bit module
-int dioInput[MAX_DIO_MODULES];	
-/// Write value to Acces I/O 24bit module
-int dioOutput[MAX_DIO_MODULES];
-/// Last value written to Acces I/O 24bit module
-int dioOutputHold[MAX_DIO_MODULES];
-
-int rioInputOutput[MAX_DIO_MODULES];
-int rioOutput[MAX_DIO_MODULES];
-int rioOutputHold[MAX_DIO_MODULES];
-
-int rioInput1[MAX_DIO_MODULES];
-int rioOutput1[MAX_DIO_MODULES];
-int rioOutputHold1[MAX_DIO_MODULES];
-
-// Contec 32 bit output modules
-/// Read value from Contec 32bit I/O module
-unsigned int CDO32Input[MAX_DIO_MODULES];
-/// Write value to Contec 32bit I/O module
-unsigned int CDO32Output[MAX_DIO_MODULES];
-
-#endif
 // Contec 64 input bits plus 64 output bits (Standard for aLIGO)
 /// Contec6464 input register values
 unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
@@ -274,8 +147,10 @@ struct rmIpcStr *daqPtr;
 int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
 
 // Include C code modules
+#include "moduleLoad.c"
 #include "map.c"
 #include "fb.c"
+
 
 char daqArea[2*DAQ_DCU_SIZE];		// Space allocation for daqLib buffers
 int cpuId = 1;
@@ -350,15 +225,6 @@ static double __attribute__ ((unused)) feCoeff16x[9] =
         -1.80529410090651,   0.82946925281361,  -1.41324503053632,   0.99863016087226,
         -1.83396789879365,   0.87157016192243,  -1.84712607094702,   0.99931484571793};
 //
-
-#if 0
-/* Coeffs for the 32x downsampling filter (2K system) */
-/* Original Rana coeffs from 40m lab elog */
-static double feCoeff32x[9] =
-        {0.0001104130574447,
-        -1.97018349613882,    0.97126719875540,   -1.99025960812101,    0.99988962634797,
-        -1.98715023886379,    0.99107485707332,    2.00000000000000,    1.00000000000000};
-#endif
 
 /* Coeffs for the 32x downsampling filter (2K system) per Brian Lantz May 5, 2009 */
 static double __attribute__ ((unused)) feCoeff32x[9] =
@@ -490,7 +356,7 @@ void *fe_start(void *arg)
 
   static int dacBufSelect = 0;			// DAC memory double buffer selector
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
-  volatile GSA_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
+  volatile GSC_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
 #endif
 #ifndef ADC_SLAVE
   unsigned int usec = 0;
@@ -686,22 +552,20 @@ udelay(1000);
 	ii = cdsPciModules.doInstance[kk];
 	if(cdsPciModules.doType[kk] == ACS_8DIO)
 	{
-	  rioInputInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
-	  rioInputOutput[ii] = readIiroDioOutput(&cdsPciModules, kk) & 0xff;
+	  rioInputInput[ii] = accesIiro8ReadInputRegister(&cdsPciModules, kk) & 0xff;
+	  rioInputOutput[ii] = accesIiro8ReadOutputRegister(&cdsPciModules, kk) & 0xff;
 	  rioOutputHold[ii] = -1;
 	} else if(cdsPciModules.doType[kk] == ACS_16DIO) {
-  	  rioInput1[ii] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
+  	  rioInput1[ii] = accesIiro16ReadInputRegister(&cdsPciModules, kk) & 0xffff;
 	  rioOutputHold1[ii] = -1;
 	} else if (cdsPciModules.doType[kk] == CON_32DO) {
-  	  CDO32Input[ii] = readCDO32l(&cdsPciModules, kk);
-	} else if (cdsPciModules.doType[kk] == CON_1616DIO) {
-  	  CDIO1616Input[ii] = readCDIO1616l(&cdsPciModules, kk);
+  	  CDO32Input[ii] = contec32ReadOutputRegister(&cdsPciModules, kk);
 	} else if (cdsPciModules.doType[kk] == CON_6464DIO) {
-  	  CDIO6464Input[ii] = readCDIO6464l(&cdsPciModules, kk);
+  	  CDIO6464Input[ii] = contec6464ReadInputRegister(&cdsPciModules, kk);
 	} else if (cdsPciModules.doType[kk] == CDI64) {
-  	  CDIO6464Input[ii] = readCDIO6464l(&cdsPciModules, kk);
+  	  CDIO6464Input[ii] = contec6464ReadInputRegister(&cdsPciModules, kk);
 	} else if(cdsPciModules.doType[kk] == ACS_24DIO) {
-  	  dioInput[ii] = readDio(&cdsPciModules, kk);
+  	  dioInput[ii] = accesDio24ReadInputRegister(&cdsPciModules, kk);
 	}
      }
 #endif
@@ -761,7 +625,7 @@ udelay(1000);
   for(jj=0;jj<cdsPciModules.adcCount;jj++)
   {
 	  // Setup the DMA registers
-	  status = gsaAdcDma1(jj,cdsPciModules.adcType[jj]);
+	  status = gsc16ai64DmaSetup(jj);
 	  // Preload input memory with dummy variables to test that new ADC data has arrived.
 	  packedData = (int *)cdsPciModules.pci_adc[jj];
 	  // Write a dummy 0 to first ADC channel location
@@ -791,7 +655,11 @@ udelay(1000);
   	pLocalEpics->epicsOutput.statDac[jj] = DAC_FOUND_BIT;
         pDacData = (unsigned int *) cdsPciModules.pci_dac[jj];
 	// Arm DAC DMA for full data size
-	status = gsaDacDma1(jj, cdsPciModules.dacType[jj]);
+	if(cdsPciModules.dacType[jj] == GSC_16AO16) {
+		status = gsc16ao16DmaSetup(jj);
+	} else {
+		status = gsc18ao8DmaSetup(jj);
+	}
   }
   printf("DAC setup complete \n");
 #endif
@@ -807,15 +675,16 @@ udelay(1000);
 		for(ii=0;ii<tdsCount;ii++)
 		{
 		CDIO1616Output[ii] = TDS_STOP_CLOCKS;
-		CDIO1616Input[ii] = writeCDIO1616l(&cdsPciModules, tdsControl[ii], CDIO1616Output[ii]);
+		CDIO1616Input[ii] = contec1616WriteOutputRegister(&cdsPciModules, tdsControl[ii], CDIO1616Output[ii]);
 		printf("writing BIO %d\n",tdsControl[ii]);
 		}
 		udelay(MAX_UDELAY);
 		udelay(MAX_UDELAY);
 		// Arm ADC modules
-    		gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
+    		gsc16ai64Enable(cdsPciModules.adcCount);
 		// Arm DAC outputs
-		gsaDacTrigger(&cdsPciModules);
+		gsc18ao8Enable(&cdsPciModules);
+		gsc16ao16Enable(&cdsPciModules);
 		// Set synched flag so later code will not check for 1PPS
 		sync21pps = 1;
 		udelay(MAX_UDELAY);
@@ -838,7 +707,7 @@ udelay(1000);
 		{
 		// CDIO1616Output[ii] = TDS_START_ADC_NEG_DAC_POS;
 		CDIO1616Output[ii] = TDS_START_ADC_NEG_DAC_POS | TDS_NO_DAC_DUOTONE;
-		CDIO1616Input[ii] = writeCDIO1616l(&cdsPciModules, tdsControl[ii], CDIO1616Output[ii]);
+		CDIO1616Input[ii] = contec1616WriteOutputRegister(&cdsPciModules, tdsControl[ii], CDIO1616Output[ii]);
 		}
 		break;
 	case SYNC_SRC_IRIG_B:
@@ -851,9 +720,10 @@ udelay(1000);
 			if(cdsPciModules.gpsType == TSYNC_RCVR) gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
 		}while ((usec < wtmin) || (usec > wtmax));
 		// Arm ADC modules
-		gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
+		gsc16ai64Enable(cdsPciModules.adcCount);
 		// Start clocking the DAC outputs
-		gsaDacTrigger(&cdsPciModules);
+		gsc18ao8Enable(&cdsPciModules);
+		gsc16ao16Enable(&cdsPciModules);
 		// Set synched flag so later code will not check for 1PPS
 		sync21pps = 1;
 		// Send IRIG-B locked/not locked diagnostic info
@@ -875,9 +745,8 @@ udelay(1000);
 			}       
 		}       
 		// Arm ADC modules
-		gsaAdcTrigger(cdsPciModules.adcCount,cdsPciModules.adcType);
+		gsc16ai64Enable(cdsPciModules.adcCount);
 		// Start clocking the DAC outputs
-		// gsaDacTrigger(&cdsPciModules);
 		break;
 	default: {
 		    // IRIG-B card not found, so use CPU time to get close to 1PPS on startup
@@ -1040,8 +909,8 @@ udelay(1000);
 // Note that data only xferred every 4th cycle of IOP, so max data rate on RFM is 16K.
 	if((cycleNum % 4) == 0)
 	{
-		if (cdsPciModules.pci_rfm[0]) rfm55DMA(&cdsPciModules,0,(cycleNum % IPC_BLOCKS));
-		if (cdsPciModules.pci_rfm[1]) rfm55DMA(&cdsPciModules,1,(cycleNum % IPC_BLOCKS));
+		if (cdsPciModules.pci_rfm[0]) vmic5565DMA(&cdsPciModules,0,(cycleNum % IPC_BLOCKS));
+		if (cdsPciModules.pci_rfm[1]) vmic5565DMA(&cdsPciModules,1,(cycleNum % IPC_BLOCKS));
 	}
 #endif
 #endif
@@ -1084,19 +953,6 @@ udelay(1000);
 		
 		    rdtscl(cpuClock[CPU_TIME_RDY_ADC]);
 
-#if 0
-		    // Monitor the first ADC
-		    if (jj == 0) {
-		       for (;;) {
-		         if (*packedData != DUMMY_ADC_VAL) break;
-			 __monitor((void *)packedData, 0, 0);
-		         if (*packedData != DUMMY_ADC_VAL) break;
-			 __mwait(0, 0);
-		       }
-		       rdtscl(cpuClock[9]);
-		       adcWait = (cpuClock[9] - cpuClock[8])/CPURATE;
-		    } else 
-#endif
                     do {
                         kk ++;
 			// Need to delay if not ready as constant banging of the input register
@@ -1117,12 +973,6 @@ udelay(1000);
 			vmeDone = 1;
 	  		pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
                         printf("timeout %d %d \n",jj,adcWait);
-#if 0
-			// Commented out debugging code
-			printk("register BCR = 0x%x\n",fadcPtr[0]->BCR);
-			if (fadcPtr[0]->BCR & (1 << 15)) printk("input buffer overflow\n");
-			if (fadcPtr[0]->BCR & (1 << 16)) printk("input buffer underflow\n");
-#endif
 			continue;
 		    }
 		    if(jj == 0) 
@@ -1264,13 +1114,13 @@ udelay(1000);
 // -- Less than normal will result in ADC timeout.
 // In both cases, real-time kernel code should exit with errors to dmesg
           	   if(pLocalEpics->epicsInput.bumpAdcRd != 0) {
-		   	gsaAdcDmaBump(jj,pLocalEpics->epicsInput.bumpAdcRd);
+		   	gsc16ai64DmaBump(jj,pLocalEpics->epicsInput.bumpAdcRd);
 		   	pLocalEpics->epicsInput.bumpAdcRd = 0;
 		   }
 #endif
 		   // Reset DMA Start Flag
 		   // This allows ADC to dump next data set whenever it is ready
-		   gsaAdcDma2(jj);
+		   gsc16ai64DmaEnable(jj);
             }
 #endif
 
@@ -1286,7 +1136,8 @@ udelay(1000);
 				sync21ppsCycles ++;
                         }else {
 				// Need to start clocking the DAC outputs.
-			        gsaDacTrigger(&cdsPciModules);
+				gsc18ao8Enable(&cdsPciModules);
+				gsc16ao16Enable(&cdsPciModules);
                                 sync21pps = 1;
 				// 1PPS never found, so indicate NO SYNC to user
 				if(sync21ppsCycles >= (CYCLE_PER_SECOND*OVERSAMPLE_TIMES))
@@ -1526,7 +1377,13 @@ udelay(1000);
 		// Forces slaves to mark this cycle or will not be used again by Master
 		ioMemData->iodata[mm][ioMemCntrDac].cycle = -1;
 		// DMA Write data to DAC module
-	       if(dacWriteEnable > 4) gsaDacDma2(jj,cdsPciModules.dacType[jj],dacBufOffset);
+	        if(dacWriteEnable > 4) {
+			if(cdsPciModules.dacType[jj] == GSC_16AO16) {
+				gsc16ao16DmaStart(jj);
+			} else {
+				gsc18ao8DmaStart(jj);
+			}
+		}
 #endif
 	}
 
@@ -1595,7 +1452,7 @@ udelay(1000);
 			if(dacDuoEnable)
 				CDIO1616Output[0] = TDS_START_ADC_NEG_DAC_POS;
 			else CDIO1616Output[0] = TDS_START_ADC_NEG_DAC_POS | TDS_NO_DAC_DUOTONE;
-			CDIO1616Input[0] = writeCDIO1616l(&cdsPciModules, tdsControl[0], CDIO1616Output[0]);
+			CDIO1616Input[0] = contec1616WriteOutputRegister(&cdsPciModules, tdsControl[0], CDIO1616Output[0]);
 		}
 	}
 #endif
@@ -1736,22 +1593,22 @@ udelay(1000);
                 ii = cdsPciModules.doInstance[kk];
                 if(cdsPciModules.doType[kk] == ACS_8DIO)
                 {
-	  		rioInputInput[ii] = readIiroDio(&cdsPciModules, kk) & 0xff;
-	  		rioInputOutput[ii] = readIiroDioOutput(&cdsPciModules, kk) & 0xff;
+	  		rioInputInput[ii] = accesIiro8ReadInputRegister(&cdsPciModules, kk) & 0xff;
+	  		rioInputOutput[ii] = accesIiro8ReadOutputRegister(&cdsPciModules, kk) & 0xff;
                 }
                 if(cdsPciModules.doType[kk] == ACS_16DIO)
                 {
-                        rioInput1[ii] = readIiroDio1(&cdsPciModules, kk) & 0xffff;
+                        rioInput1[ii] = accesIiro16ReadInputRegister(&cdsPciModules, kk) & 0xffff;
                 }
 		if(cdsPciModules.doType[kk] == ACS_24DIO)
 		{
-		  dioInput[ii] = readDio(&cdsPciModules, kk);
+		  dioInput[ii] = accesDio24ReadInputRegister(&cdsPciModules, kk);
 		}
 		if (cdsPciModules.doType[kk] == CON_6464DIO) {
-	 		CDIO6464InputInput[ii] = readInputCDIO6464l(&cdsPciModules, kk);
+	 		CDIO6464InputInput[ii] = contec6464ReadInputRegister(&cdsPciModules, kk);
 		}
 		if (cdsPciModules.doType[kk] == CDI64) {
-	 		CDIO6464InputInput[ii] = readInputCDIO6464l(&cdsPciModules, kk);
+	 		CDIO6464InputInput[ii] = contec6464ReadInputRegister(&cdsPciModules, kk);
 		}
         }
         // Write Dio cards on change
@@ -1760,39 +1617,31 @@ udelay(1000);
                 ii = cdsPciModules.doInstance[kk];
                 if((cdsPciModules.doType[kk] == ACS_8DIO) && (rioOutput[ii] != rioOutputHold[ii]))
                 {
-                        writeIiroDio(&cdsPciModules, kk, rioOutput[ii]);
+                        accesIiro8WriteOutputRegister(&cdsPciModules, kk, rioOutput[ii]);
                         rioOutputHold[ii] = rioOutput[ii];
                 } else 
                 if((cdsPciModules.doType[kk] == ACS_16DIO) && (rioOutput1[ii] != rioOutputHold1[ii]))
                 {
-                        writeIiroDio1(&cdsPciModules, kk, rioOutput1[ii]);
+                        accesIiro16WriteOutputRegister(&cdsPciModules, kk, rioOutput1[ii]);
                         rioOutputHold1[ii] = rioOutput1[ii];
                 } else 
                 if(cdsPciModules.doType[kk] == CON_32DO)
                 {
                         if (CDO32Input[ii] != CDO32Output[ii]) {
-                          CDO32Input[ii] = writeCDO32l(&cdsPciModules, kk, CDO32Output[ii]);
+                          CDO32Input[ii] = contec32WriteOutputRegister(&cdsPciModules, kk, CDO32Output[ii]);
                         }
-		} else if (cdsPciModules.doType[kk] == CON_1616DIO) {
-#if 0
-// Do not want to have user code access this type module, as it is used by IOP for timing control
-			if (CDIO1616Input[ii] != CDIO1616Output[ii]) {
-			  CDIO1616Input[ii] = writeCDIO1616l(&cdsPciModules, kk, CDIO1616Output[ii]);
-			}
-#endif
-			CDIO1616InputInput[ii] = readInputCDIO1616l(&cdsPciModules, kk);
 		} else if (cdsPciModules.doType[kk] == CON_6464DIO) {
 			if (CDIO6464Input[ii] != CDIO6464Output[ii]) {
-			  CDIO6464Input[ii] = writeCDIO6464l(&cdsPciModules, kk, CDIO6464Output[ii]);
+			  CDIO6464Input[ii] = contec6464WriteOutputRegister(&cdsPciModules, kk, CDIO6464Output[ii]);
 			}
 		} else if (cdsPciModules.doType[kk] == CDO64) {
 			if (CDIO6464Input[ii] != CDIO6464Output[ii]) {
-			  CDIO6464Input[ii] = writeCDIO6464l(&cdsPciModules, kk, CDIO6464Output[ii]);
+			  CDIO6464Input[ii] = contec6464WriteOutputRegister(&cdsPciModules, kk, CDIO6464Output[ii]);
 			}
                 } else
                 if((cdsPciModules.doType[kk] == ACS_24DIO) && (dioOutputHold[ii] != dioOutput[ii]))
 		{
-                        writeDio(&cdsPciModules, kk, dioOutput[ii]);
+                        accesDio24WriteOutputRegister(&cdsPciModules, kk, dioOutput[ii]);
 			dioOutputHold[ii] = dioOutput[ii];
 		}
         }
@@ -1957,25 +1806,29 @@ udelay(1000);
 	if (cdsPciModules.rfmCount > 0) {
         	if (cycleNum >= HKP_RFM_CHK_CYCLE && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount)) {
 			int mod = cycleNum - HKP_RFM_CHK_CYCLE;
+			vmic5565CheckOwnDataRcv(mod);
+#if 0
 			if (cdsPciModules.rfmType[mod] == 0x5565) {
 				// Check the own-data light
 				if ((cdsPciModules.rfm_reg[mod]->LCSR1 & 1) == 0) ipcErrBits |= 4 + (mod * 4);
 				//printk("RFM %d own data %d\n", mod, cdsPciModules.rfm_reg[mod]->LCSR1);
 			}
+#endif
 		}
 		if (cycleNum >= (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount) && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount*2)) {
 			int mod = cycleNum - HKP_RFM_CHK_CYCLE - cdsPciModules.rfmCount;
+			vmic5565ResetOwnDataLight(mod);
+#if 0
 			if (cdsPciModules.rfmType[mod] == 0x5565) {
 				// Reset the own-data light
 				cdsPciModules.rfm_reg[mod]->LCSR1 &= ~1;
 			}
+#endif
 		}
 		if (cycleNum >= (HKP_RFM_CHK_CYCLE + 2*cdsPciModules.rfmCount) && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount*3)) {
 			int mod = cycleNum - HKP_RFM_CHK_CYCLE - cdsPciModules.rfmCount*2;
-			if (cdsPciModules.rfmType[mod] == 0x5565) {
 				// Write data out to the RFM to trigger the light
 	  			((volatile long *)(cdsPciModules.pci_rfm[mod]))[2] = 0;
-			}
 		}
 	}
 // DAC WD Write for 18 bit DAC modules
@@ -2046,7 +1899,7 @@ udelay(1000);
 		}
 		if(cdsPciModules.dacType[jj] == GSC_16AO16)
 		{
-			status = checkDacBuffer(jj);
+			status = gsc16ao16CheckDacBuffer(jj);
 			dacOutBufSize[jj] = status;
 			if(status != 2)
 			{
@@ -2144,745 +1997,3 @@ udelay(1000);
   /* System reset command received */
   return (void *)-1;
 }
-// MAIN routine: Code starting point ****************************************************************
-
-// These externs and "16" need to go to a header file (mbuf.h)
-extern void *kmalloc_area[16];
-extern int mbuf_allocate_area(char *name, int size, struct file *file);
-
-// /proc filesystem entry
-struct proc_dir_entry *proc_entry;
-
-int
-procfile_read(char *buffer,
-	      char **buffer_location,
-	      off_t offset, int buffer_length, int *eof, void *data)
-{
-	int ret, i;
-	i = 0;
-	*buffer = 0;
-
-	/* 
-	 * We give all of our information in one go, so if the
-	 * user asks us if we have more information the
-	 * answer should always be no.
-	 *
-	 * This is important because the standard read
-	 * function from the library would continue to issue
-	 * the read system call until the kernel replies
-	 * that it has no more information, or until its
-	 * buffer is filled.
-	 */
-	if (offset > 0) {
-		/* we have finished to read, return 0 */
-		ret  = 0;
-	} else {
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K) || defined(COMMDATA_INLINE)
-		char b[128];
-#if defined(SERVO64K) || defined(SERVO32K)
-		static const int nb = 32;
-#elif defined(SERVO16K)
-		static const int nb = 64;
-#endif
-#endif
-		/* fill the buffer, return the buffer size */
-		ret = sprintf(buffer,
-
-			"startGpsTime=%d\n"
-			"uptime=%d\n"
-			"adcHoldTime=%d\n"
-			"adcHoldTimeEverMax=%d\n"
-			"adcHoldTimeEverMaxWhen=%d\n"
-			"adcHoldTimeMax=%d\n"
-			"adcHoldTimeMin=%d\n"
-			"adcHoldTimeAvg=%d\n"
-			"usrTime=%d\n"
-			"usrHoldTime=%d\n"
-			"cycle=%d\n"
-			"gps=%d\n"
-			"buildDate=%s\n"
-			"cpuTimeMax(cur,past sec)=%d,%d\n"
-			"cpuTimeMaxCycle(cur,past sec)=%d,%d\n",
-
-			startGpsTime,
-			cycle_gps_time - startGpsTime,
-			adcHoldTime,
-			adcHoldTimeEverMax,
-			adcHoldTimeEverMaxWhen,
-			adcHoldTimeMax,
-			adcHoldTimeMin,
-			adcHoldTimeAvgPerSec,
-			usrTime,
-			usrHoldTime,
-			cycleNum,
-			cycle_gps_time,
-			build_date,
-			cycleTime, timeHoldHold,
-			timeHoldWhen, timeHoldWhenHold);
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
-		strcat(buffer, "cycleHist: ");
-		for (i = 0; i < nb; i++) {
-			if (!cycleHistMax[i]) continue;
-			sprintf(b, "%d=%d@%d ", i, cycleHistMax[i], cycleHistWhenHold[i]);
-			strcat(buffer, b);
-		}
-		strcat(buffer, "\n");
-#endif
-
-#ifdef ADC_MASTER
-		/* Output DAC buffer size information */
-		for (i = 0; i < cdsPciModules.dacCount; i++) {
-			if (cdsPciModules.dacType[i] == GSC_18AO8) {
-				sprintf(b, "DAC #%d 18-bit buf_size=%d\n", i, dacOutBufSize[i]);
-			} else {
-				sprintf(b, "DAC #%d 16-bit fifo_status=%d (%s)\n", i, dacOutBufSize[i],
-					dacOutBufSize[i] & 8? "full":
-						(dacOutBufSize[i] & 1? "empty":
-							(dacOutBufSize[i] & 4? "high quarter": "OK")));
-			}
-			strcat(buffer, b);
-		}
-#endif
-#ifdef COMMDATA_INLINE
-		// See if we have any IPC with errors and print the numbers out
-		//
-		sprintf(b, "ipcErrBits=0x%x\n", ipcErrBits);
-		strcat(buffer, b);
-
-		// The following loop has a chance to overflow the buffer,
-		// which is set to PROC_BLOCK_SIZE. (PAGE_SIZE-1024 = 3072 bytes).
-		// We will simply stop printing at that point.
-#define PROC_BLOCK_SIZE (3*1024)
-		unsigned int byte_cnt = strlen(buffer) + 1;
-		for (i = 0; i < myIpcCount; i++) {
-	  	  if (ipcInfo[i].errTotal) {
-	  		unsigned int cnt =
-				sprintf(b, "IPC net=%d num=%d name=%s sender=%s errcnt=%d\n", 
-					ipcInfo[i].netType, ipcInfo[i].ipcNum,
-					ipcInfo[i].name, ipcInfo[i].senderModelName,
-					ipcInfo[i].errTotal);
-			if (byte_cnt + cnt > PROC_BLOCK_SIZE) break;
-			byte_cnt += cnt;
-	  		strcat(buffer, b);
-	  	  }
- 		}
-#endif
-		ret = strlen(buffer);
-	}
-
-	return ret;
-}
-
-/* Track dependency between the IOP and the slaves */
-#ifdef ADC_MASTER
-int need_to_load_IOP_first;
-EXPORT_SYMBOL(need_to_load_IOP_first);
-#endif
-#ifdef ADC_SLAVE
-extern int need_to_load_IOP_first;
-#endif
-
-extern void set_fe_code_idle(void *(*ptr)(void *), unsigned int cpu);
-extern void msleep(unsigned int);
-
-/// Startup function for initialization of kernel module.
-int init_module (void)
-{
- 	int status;
-	int ii,jj,kk;		/// @param ii,jj,kk default loop counters
-	char fname[128];	/// @param fname[128] Name of shared mem area to allocate for DAQ data
-	int cards;		/// @param cards Number of PCIe cards found on bus
-#ifdef ADC_SLAVE
-	int adcCnt;		/// @param adcCnt Number of ADC cards found by slave model.
-	int dacCnt;		/// @param dacCnt Number of 16bit DAC cards found by slave model.
-        int dac18Cnt;		/// @param dac18Cnt Number of 18bit DAC cards found by slave model.
-	int doCnt;		/// @param doCnt Total number of digital I/O cards found by slave model.
-	int do32Cnt;		/// @param do32Cnt Total number of Contec 32 bit DIO cards found by slave model.
-	int doIIRO16Cnt;	/// @param doIIRO16Cnt Total number of Acces I/O 16 bit relay cards found by slave model.
-	int doIIRO8Cnt;		/// @param doIIRO8Cnt Total number of Acces I/O 8 bit relay cards found by slave model.
-	int cdo64Cnt;		/// @param cdo64Cnt Total number of Contec 6464 DIO card 32bit output sections mapped by slave model.
-	int cdi64Cnt;		/// @param cdo64Cnt Total number of Contec 6464 DIO card 32bit input sections mapped by slave model.
-#endif
-	int ret;		/// @param ret Return value from various Malloc calls to allocate memory.
-	int cnt;
-	extern int cpu_down(unsigned int);	/// @param cpu_down CPU shutdown call.
-	extern int is_cpu_taken_by_rcg_model(unsigned int cpu);	/// @param is_cpu_taken_by_rcg_model Check to verify CPU availability for shutdown.
-
-	kk = 0;
-#ifdef SPECIFIC_CPU
-#define CPUID SPECIFIC_CPU
-#else 
-#define CPUID 1 
-#endif
-
-#ifndef NO_CPU_SHUTDOWN
-	// See if our CPU core is free
-        if (is_cpu_taken_by_rcg_model(CPUID)) {
-		printk(KERN_ALERT "Error: CPU %d already taken\n", CPUID);
-		return -1;
-	}
-#endif
-
-#ifdef ADC_SLAVE
-	need_to_load_IOP_first = 0;
-#endif
-
-#ifdef DOLPHIN_TEST
-	status = init_dolphin();
-	if (status != 0) {
-		return -1;
-	}
-#endif
-
-	proc_entry = create_proc_entry(SYSTEM_NAME_STRING_LOWER, 0644, NULL);
-	
-	if (proc_entry == NULL) {
-		remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
-		printk(KERN_ALERT "Error: Could not initialize /proc/%s\n",
-		       SYSTEM_NAME_STRING_LOWER);
-		return -ENOMEM;
-	}
-	
-	proc_entry->read_proc = procfile_read;
-	//proc_entry->owner 	 = THIS_MODULE;
-	proc_entry->mode 	 = S_IFREG | S_IRUGO;
-	proc_entry->uid 	 = 0;
-	proc_entry->gid 	 = 0;
-	proc_entry->size 	 = 10240;
-
-	printf("startup time is %ld\n", current_time());
-	jj = 0;
-	printf("cpu clock %u\n",cpu_khz);
-
-
-        ret =  mbuf_allocate_area(SYSTEM_NAME_STRING_LOWER, 64*1024*1024, 0);
-        if (ret < 0) {
-                printf("mbuf_allocate_area() failed; ret = %d\n", ret);
-                return -1;
-        }
-        _epics_shm = (unsigned char *)(kmalloc_area[ret]);
-        printf("Epics shmem set at 0x%p\n", _epics_shm);
-        ret =  mbuf_allocate_area("ipc", 4*1024*1024, 0);
-        if (ret < 0) {
-                printf("mbuf_allocate_area(ipc) failed; ret = %d\n", ret);
-                return -1;
-        }
-        _ipc_shm = (unsigned char *)(kmalloc_area[ret]);
-
-	printf("IPC at 0x%p\n",_ipc_shm);
-  	ioMemData = (IO_MEM_DATA *)(_ipc_shm+ 0x4000);
-
-
-// If DAQ is via shared memory (Framebuilder code running on same machine or MX networking is used)
-// attach DAQ shared memory location.
-#if defined(SHMEM_DAQ)
-        sprintf(fname, "%s_daq", SYSTEM_NAME_STRING_LOWER);
-        ret =  mbuf_allocate_area(fname, 64*1024*1024, 0);
-        if (ret < 0) {
-                printf("mbuf_allocate_area() failed; ret = %d\n", ret);
-                return -1;
-        }
-        _daq_shm = (unsigned char *)(kmalloc_area[ret]);
-        printf("Allocated daq shmem; set at 0x%p\n", _daq_shm);
- 	daqPtr = (struct rmIpcStr *) _daq_shm;
-#endif
-
-	// Find and initialize all PCI I/O modules *******************************************************
-	  // Following I/O card info is from feCode
-	  cards = sizeof(cards_used)/sizeof(cards_used[0]);
-	  printf("configured to use %d cards\n", cards);
-	  cdsPciModules.cards = cards;
-	  cdsPciModules.cards_used = cards_used;
-          //return -1;
-	printf("Initializing PCI Modules\n");
-	cdsPciModules.adcCount = 0;
-	cdsPciModules.dacCount = 0;
-	cdsPciModules.dioCount = 0;
-	cdsPciModules.doCount = 0;
-
-#ifndef ADC_SLAVE
-	// Call PCI initialization routine in map.c file.
-	status = mapPciModules(&cdsPciModules);
-	 //return 0;
-#endif
-#ifdef ADC_SLAVE
-// If running as a slave process, I/O card information is via ipc shared memory
-	printf("%d PCI cards found\n",ioMemData->totalCards);
-	status = 0;
-	adcCnt = 0;
-	dacCnt = 0;
-	dac18Cnt = 0;
-	doCnt = 0;
-	do32Cnt = 0;
-	cdo64Cnt = 0;
-	cdi64Cnt = 0;
-	doIIRO16Cnt = 0;
-	doIIRO8Cnt = 0;
-
-	// Have to search thru all cards and find desired instance for application
-	// Master will map ADC cards first, then DAC and finally DIO
-	for(ii=0;ii<ioMemData->totalCards;ii++)
-	{
-		/*
-		printf("Model %d = %d\n",ii,ioMemData->model[ii]);
-		*/
-		for(jj=0;jj<cards;jj++)
-		{
-			/*
-			printf("Model %d = %d, type = %d, instance = %d, dacCnt = %d \n",
-				ii,ioMemData->model[ii],
-				cdsPciModules.cards_used[jj].type,
-				cdsPciModules.cards_used[jj].instance,
- 				dacCnt);
-				*/
-		   switch(ioMemData->model[ii])
-		   {
-			case GSC_16AI64SSA:
-				if((cdsPciModules.cards_used[jj].type == GSC_16AI64SSA) && 
-					(cdsPciModules.cards_used[jj].instance == adcCnt))
-				{
-					printf("Found ADC at %d %d\n",jj,ioMemData->ipc[ii]);
-					kk = cdsPciModules.adcCount;
-					cdsPciModules.adcType[kk] = GSC_16AI64SSA;
-					cdsPciModules.adcConfig[kk] = ioMemData->ipc[ii];
-					cdsPciModules.adcCount ++;
-					status ++;
-				}
-				break;
-			case GSC_16AO16:
-				if((cdsPciModules.cards_used[jj].type == GSC_16AO16) && 
-					(cdsPciModules.cards_used[jj].instance == dacCnt))
-				{
-					printf("Found DAC at %d %d\n",jj,ioMemData->ipc[ii]);
-					kk = cdsPciModules.dacCount;
-					cdsPciModules.dacType[kk] = GSC_16AO16;
-					cdsPciModules.dacConfig[kk] = ioMemData->ipc[ii];
-	   				cdsPciModules.pci_dac[kk] = (long)(ioMemData->iodata[ii]);
-					cdsPciModules.dacCount ++;
-					status ++;
-				}
-				break;
-			case GSC_18AO8:
-				if((cdsPciModules.cards_used[jj].type == GSC_18AO8) && 
-					(cdsPciModules.cards_used[jj].instance == dac18Cnt))
-				{
-					printf("Found DAC at %d %d\n",jj,ioMemData->ipc[ii]);
-					kk = cdsPciModules.dacCount;
-					cdsPciModules.dacType[kk] = GSC_18AO8;
-					cdsPciModules.dacConfig[kk] = ioMemData->ipc[ii];
-	   				cdsPciModules.pci_dac[kk] = (long)(ioMemData->iodata[ii]);
-					cdsPciModules.dacCount ++;
-					status ++;
-				}
-				break;
-			case CON_6464DIO:
-				if((cdsPciModules.cards_used[jj].type == CON_6464DIO) && 
-					(cdsPciModules.cards_used[jj].instance == doCnt))
-				{
-					kk = cdsPciModules.doCount;
-					printf("Found 6464 DIO CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
-					cdsPciModules.doType[kk] = ioMemData->model[ii];
-					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
-					cdsPciModules.doCount ++;
-					cdsPciModules.cDio6464lCount ++;
-					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
-					cdsPciModules.doInstance[kk] = doCnt;
-					status += 2;
-				}
-				if((cdsPciModules.cards_used[jj].type == CDO64) && 
-					(cdsPciModules.cards_used[jj].instance == doCnt))
-				{
-					kk = cdsPciModules.doCount;
-					cdsPciModules.doType[kk] = CDO64;
-					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
-					cdsPciModules.doCount ++;
-					cdsPciModules.cDio6464lCount ++;
-					cdsPciModules.doInstance[kk] = doCnt;
-					printf("Found 6464 DOUT CONTEC at %d 0x%x index %d \n",jj,ioMemData->ipc[ii],doCnt);
-					cdo64Cnt ++;
-					status ++;
-				}
-				if((cdsPciModules.cards_used[jj].type == CDI64) && 
-					(cdsPciModules.cards_used[jj].instance == doCnt))
-				{
-					kk = cdsPciModules.doCount;
-					// printf("Found 6464 DIN CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
-					cdsPciModules.doType[kk] = CDI64;
-					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
-					cdsPciModules.doInstance[kk] = doCnt;
-					cdsPciModules.doCount ++;
-					printf("Found 6464 DIN CONTEC at %d 0x%x index %d \n",jj,ioMemData->ipc[ii],doCnt);
-					cdsPciModules.cDio6464lCount ++;
-					cdi64Cnt ++;
-					status ++;
-				}
-				break;
-                        case CON_32DO:
-		                if((cdsPciModules.cards_used[jj].type == CON_32DO) &&
-		                        (cdsPciModules.cards_used[jj].instance == do32Cnt))
-		                {
-					kk = cdsPciModules.doCount;
-               			      	printf("Found 32 DO CONTEC at %d 0x%x\n",jj,ioMemData->ipc[ii]);
-		                      	cdsPciModules.doType[kk] = ioMemData->model[ii];
-                                      	cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
-                                      	cdsPciModules.doCount ++; 
-                                      	cdsPciModules.cDo32lCount ++; 
-					cdsPciModules.doInstance[kk] = do32Cnt;
-					status ++;
-				 }
-				 break;
-			case ACS_16DIO:
-				if((cdsPciModules.cards_used[jj].type == ACS_16DIO) && 
-					(cdsPciModules.cards_used[jj].instance == doIIRO16Cnt))
-				{
-					kk = cdsPciModules.doCount;
-					printf("Found Access IIRO-16 at %d 0x%x\n",jj,ioMemData->ipc[ii]);
-					cdsPciModules.doType[kk] = ioMemData->model[ii];
-					cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
-					cdsPciModules.doCount ++;
-					cdsPciModules.iiroDio1Count ++;
-					cdsPciModules.doInstance[kk] = doIIRO16Cnt;
-					status ++;
-				}
-				break;
-			case ACS_8DIO:
-			       if((cdsPciModules.cards_used[jj].type == ACS_8DIO) &&
-			               (cdsPciModules.cards_used[jj].instance == doIIRO8Cnt))
-			       {
-			               kk = cdsPciModules.doCount;
-			               printf("Found Access IIRO-8 at %d 0x%x\n",jj,ioMemData->ipc[ii]);
-			               cdsPciModules.doType[kk] = ioMemData->model[ii];
-			               cdsPciModules.pci_do[kk] = ioMemData->ipc[ii];
-			               cdsPciModules.doCount ++;
-			               cdsPciModules.iiroDioCount ++;
-			               cdsPciModules.doInstance[kk] = doIIRO8Cnt;
-			               status ++;
-			       }
-		 	       break;
-			default:
-				break;
-		   }
-		}
-		if(ioMemData->model[ii] == GSC_16AI64SSA) adcCnt ++;
-		if(ioMemData->model[ii] == GSC_16AO16) dacCnt ++;
-		if(ioMemData->model[ii] == GSC_18AO8) dac18Cnt ++;
-		if(ioMemData->model[ii] == CON_6464DIO) doCnt ++;
-		if(ioMemData->model[ii] == CON_32DO) do32Cnt ++;
-		if(ioMemData->model[ii] == ACS_16DIO) doIIRO16Cnt ++;
-		if(ioMemData->model[ii] == ACS_8DIO) doIIRO8Cnt ++;
-	}
-	// If no ADC cards were found, then SLAVE cannot run
-	if(!cdsPciModules.adcCount)
-	{
-		printf("No ADC cards found - exiting\n");
-		return -1;
-	}
-	// This did not quite work for some reason
-	// Need to find a way to handle skipped DAC cards in slaves
-	//cdsPciModules.dacCount = ioMemData->dacCount;
-#endif
-	printf("%d PCI cards found \n",status);
-	if(status < cards)
-	{
-		printf(" ERROR **** Did not find correct number of cards! Expected %d and Found %d\n",cards,status);
-		cardCountErr = 1;
-	}
-
-	// Print out all the I/O information
-        printf("***************************************************************************\n");
-#ifdef ADC_MASTER
-		// Master send module counds to SLAVE via ipc shm
-		ioMemData->totalCards = status;
-		ioMemData->adcCount = cdsPciModules.adcCount;
-		ioMemData->dacCount = cdsPciModules.dacCount;
-		ioMemData->bioCount = cdsPciModules.doCount;
-		// kk will act as ioMem location counter for mapping modules
-		kk = cdsPciModules.adcCount;
-#if defined (TIME_SLAVE) || defined (RFM_TIME_SLAVE)
-		ioMemData->totalCards = 2;
-		ioMemData->adcCount = 2;
-		ioMemData->dacCount = 0;
-		ioMemData->bioCount = 0;
-		ioMemData->model[0] = GSC_16AI64SSA;
-		ioMemData->ipc[0] = 0;	// ioData memory buffer location for SLAVE to use
-		ioMemData->model[1] = GSC_16AI64SSA;
-		ioMemData->ipc[1] = 1;	// ioData memory buffer location for SLAVE to use
-#endif
-#endif
-	printf("%d ADC cards found\n",cdsPciModules.adcCount);
-	for(ii=0;ii<cdsPciModules.adcCount;ii++)
-        {
-#ifdef ADC_MASTER
-		// MASTER maps ADC modules first in ipc shm for SLAVES
-		ioMemData->model[ii] = cdsPciModules.adcType[ii];
-		ioMemData->ipc[ii] = ii;	// ioData memory buffer location for SLAVE to use
-#endif
-                if(cdsPciModules.adcType[ii] == GSC_18AISS6C)
-                {
-                        printf("\tADC %d is a GSC_18AISS6C module\n",ii);
-                        printf("\t\tChannels = 6 \n");
-                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.adcConfig[ii] & 0xfff));
-                }
-                if(cdsPciModules.adcType[ii] == GSC_16AI64SSA)
-                {
-                        printf("\tADC %d is a GSC_16AI64SSA module\n",ii);
-                        if((cdsPciModules.adcConfig[ii] & 0x10000) > 0) jj = 32;
-                        else jj = 64;
-                        printf("\t\tChannels = %d \n",jj);
-                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.adcConfig[ii] & 0xfff));
-                }
-        }
-        printf("***************************************************************************\n");
-	printf("%d DAC cards found\n",cdsPciModules.dacCount);
-	for(ii=0;ii<cdsPciModules.dacCount;ii++)
-        {
-                if(cdsPciModules.dacType[ii] == GSC_18AO8)
-		{
-                        printf("\tDAC %d is a GSC_18AO8 module\n",ii);
-		}
-                if(cdsPciModules.dacType[ii] == GSC_16AO16)
-                {
-                        printf("\tDAC %d is a GSC_16AO16 module\n",ii);
-                        if((cdsPciModules.dacConfig[ii] & 0x10000) == 0x10000) jj = 8;
-                        if((cdsPciModules.dacConfig[ii] & 0x20000) == 0x20000) jj = 12;
-                        if((cdsPciModules.dacConfig[ii] & 0x30000) == 0x30000) jj = 16;
-                        printf("\t\tChannels = %d \n",jj);
-                        if((cdsPciModules.dacConfig[ii] & 0xC0000) == 0x0000)
-			{
-                        	printf("\t\tFilters = None\n");
-			}
-                        if((cdsPciModules.dacConfig[ii] & 0xC0000) == 0x40000)
-			{
-                        	printf("\t\tFilters = 10kHz\n");
-			}
-                        if((cdsPciModules.dacConfig[ii] & 0xC0000) == 0x80000)
-			{
-                        	printf("\t\tFilters = 100kHz\n");
-			}
-                        if((cdsPciModules.dacConfig[ii] & 0x100000) == 0x100000)
-			{
-                        	printf("\t\tOutput Type = Differential\n");
-			}
-                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.dacConfig[ii] & 0xfff));
-                }
-#ifdef ADC_MASTER
-		// Pass DAC info to SLAVE processes
-		ioMemData->model[kk] = cdsPciModules.dacType[ii];
-		ioMemData->ipc[kk] = kk;
-		// Following used by MASTER to point to ipc memory for inputting DAC data from SLAVES
-                cdsPciModules.dacConfig[ii]  = kk;
-printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
-		kk ++;
-#endif
-	}
-        printf("***************************************************************************\n");
-	printf("%d DIO cards found\n",cdsPciModules.dioCount);
-        printf("***************************************************************************\n");
-	printf("%d IIRO-8 Isolated DIO cards found\n",cdsPciModules.iiroDioCount);
-        printf("***************************************************************************\n");
-	printf("%d IIRO-16 Isolated DIO cards found\n",cdsPciModules.iiroDio1Count);
-        printf("***************************************************************************\n");
-	printf("%d Contec 32ch PCIe DO cards found\n",cdsPciModules.cDo32lCount);
-	printf("%d Contec PCIe DIO1616 cards found\n",cdsPciModules.cDio1616lCount);
-	printf("%d Contec PCIe DIO6464 cards found\n",cdsPciModules.cDio6464lCount);
-	printf("%d DO cards found\n",cdsPciModules.doCount);
-#ifdef ADC_MASTER
-	// MASTER sends DIO module information to SLAVES
-	// Note that for DIO, SLAVE modules will perform the I/O directly and therefore need to
-	// know the PCIe address of these modules.
-	ioMemData->bioCount = cdsPciModules.doCount;
-	for(ii=0;ii<cdsPciModules.doCount;ii++)
-        {
-		// MASTER needs to find Contec 1616 I/O card to control timing slave.
-		if(cdsPciModules.doType[ii] == CON_1616DIO)
-		{
-			tdsControl[tdsCount] = ii;
-			printf("TDS controller %d is at %d\n",tdsCount,ii);
-			tdsCount ++;
-		}
-		ioMemData->model[kk] = cdsPciModules.doType[ii];
-		// Unlike ADC and DAC, where a memory buffer number is passed, a PCIe address is passed
-		// for DIO cards.
-		ioMemData->ipc[kk] = cdsPciModules.pci_do[ii];
-		kk ++;
-	}
-	printf("Total of %d I/O modules found and mapped\n",kk);
-#endif
-        printf("***************************************************************************\n");
-// Following section maps Reflected Memory, both VMIC hardware style and Dolphin PCIe network style.
-// Slave units will perform I/O transactions with RFM directly ie MASTER does not do RFM I/O.
-// Master unit only maps the RFM I/O space and passes pointers to SLAVES.
-
-#ifdef ADC_SLAVE
-	// Slave gets RFM module count from MASTER.
-	cdsPciModules.rfmCount = ioMemData->rfmCount;
-	cdsPciModules.dolphinCount = ioMemData->dolphinCount;
-	cdsPciModules.dolphin[0] = ioMemData->dolphin[0];
-	cdsPciModules.dolphin[1] = ioMemData->dolphin[1];
-#endif
-	printf("%d RFM cards found\n",cdsPciModules.rfmCount);
-#ifdef ADC_MASTER
-	ioMemData->rfmCount = cdsPciModules.rfmCount;
-#endif
-	for(ii=0;ii<cdsPciModules.rfmCount;ii++)
-        {
-                 printf("\tRFM %d is a VMIC_%x module with Node ID %d\n", ii, cdsPciModules.rfmType[ii], cdsPciModules.rfmConfig[ii]);
-#ifdef ADC_SLAVE
-		cdsPciModules.pci_rfm[ii] = ioMemData->pci_rfm[ii];
-		cdsPciModules.pci_rfm_dma[ii] = ioMemData->pci_rfm_dma[ii];
-#endif
-		printf("address is 0x%lx\n",cdsPciModules.pci_rfm[ii]);
-#ifdef ADC_MASTER
-		// Master sends RFM memory pointers to SLAVES
-		ioMemData->pci_rfm[ii] = cdsPciModules.pci_rfm[ii];
-		ioMemData->pci_rfm_dma[ii] = cdsPciModules.pci_rfm_dma[ii];
-#endif
-	}
-	ioMemData->dolphinCount = 0;
-#ifdef DOLPHIN_TEST
-	ioMemData->dolphinCount = cdsPciModules.dolphinCount;
-	ioMemData->dolphin[0] = cdsPciModules.dolphin[0];
-	ioMemData->dolphin[1] = cdsPciModules.dolphin[1];
-
-// Where not all FE computers have an IRIG-B module to tell time, a master and multiple
-// slaves may be defined to send/receive GPS time seconds via PCIe RFM. This is only
-// for use by ADC_MASTER applications.
-#ifdef TIME_MASTER
-	rfmTime = (volatile unsigned int *)cdsPciModules.dolphin[1];
-	printf("TIME MASTER AT 0x%x\n",(int)rfmTime);
-#endif
-#ifdef TIME_SLAVE
-	rfmTime = (volatile unsigned int *)cdsPciModules.dolphin[0];
-	printf("TIME SLAVE AT 0x%x\n",(int)rfmTime);
-	printf("rfmTime = %d\n", *rfmTime);
-#endif
-#ifdef IOP_TIME_SLAVE
-	rfmTime = (volatile unsigned int *)cdsPciModules.dolphin[0];
-	printf("TIME SLAVE IOP AT 0x%x\n",(int)rfmTime);
-	printf("rfmTime = %d\n", *rfmTime);
-#endif
-#else
-#ifdef ADC_MASTER
-// Clear Dolphin pointers so the slave sees NULLs
-	ioMemData->dolphinCount = 0;
-        ioMemData->dolphin[0] = 0;
-        ioMemData->dolphin[1] = 0;
-#endif
-#endif
-        printf("***************************************************************************\n");
-  	if (cdsPciModules.gps) {
-	printf("IRIG-B card found %d\n",cdsPciModules.gpsType);
-        printf("***************************************************************************\n");
-  	}
-
- 	//cdsPciModules.adcCount = 2;
-
-	// Code will run on internal timer if no ADC modules are found
-	if (cdsPciModules.adcCount == 0) {
-		printf("No ADC modules found, running on timer\n");
-		run_on_timer = 1;
-        	//munmap(_epics_shm, MMAP_SIZE);
-        	//close(wfd);
-        	//return 0;
-	}
-
-	// Initialize buffer for daqLib.c code
-	printf("Initializing space for daqLib buffers\n");
-	daqBuffer = (long)&daqArea[0];
- 
-#ifndef NO_DAQ
-	printf("Initializing Network\n");
-	numFb = cdsDaqNetInit(2);
-	if (numFb <= 0) {
-		printf("Couldn't initialize Myrinet network connection\n");
-		return -1;
-	}
-	printf("Found %d frameBuilders on network\n",numFb);
-#endif
-
-
-        pLocalEpics = (CDS_EPICS *)&((RFM_FE_COMMS *)_epics_shm)->epicsSpace;
-	for (cnt = 0;  cnt < 10 && pLocalEpics->epicsInput.burtRestore == 0; cnt++) {
-        	printf("Epics burt restore is %d\n", pLocalEpics->epicsInput.burtRestore);
-        	msleep(1000);
-	}
-	if (cnt == 10) {
-		// Cleanup
-		remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
-#ifdef DOLPHIN_TEST
-		finish_dolphin();
-#endif
-		return -1;
-	}
-
-        pLocalEpics->epicsInput.vmeReset = 0;
-
-#ifdef NO_CPU_SHUTDOWN
-        struct task_struct *p;
-        p = kthread_create(fe_start, 0, "fe_start/%d", CPUID);
-        if (IS_ERR(p)){
-                printf("Failed to kthread_create()\n");
-                return -1;
-        }
-        kthread_bind(p, CPUID);
-        wake_up_process(p);
-#endif
-
-
-#ifndef NO_CPU_SHUTDOWN
-        set_fe_code_idle(fe_start, CPUID);
-        msleep(100);
-
-	cpu_down(CPUID);
-
-	// The code runs on the disabled CPU
-#endif
-
-
-#ifdef DOLPHIN_TEST
-	//finish_dolphin();
-#endif
-
-        return 0;
-}
-
-void cleanup_module (void) {
-	extern int __cpuinit cpu_up(unsigned int cpu);
-
-	remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
-//	printk("Setting vmeReset flag to 1\n");
-	//pLocalEpics->epicsInput.vmeReset = 1;
-        //msleep(1000);
-
-#ifndef NO_CPU_SHUTDOWN
-	// Unset the code callback
-        set_fe_code_idle(0, CPUID);
-#endif
-
-	printk("Setting stop_working_threads to 1\n");
-	// Stop the code and wait
-        stop_working_threads = 1;
-        msleep(1000);
-
-#ifdef DOLPHIN_TEST
-	finish_dolphin();
-#endif
-
-#ifndef NO_CPU_SHUTDOWN
-
-	// Unset the code callback
-        set_fe_code_idle(0, CPUID);
-	printkl("Will bring back CPU %d\n", CPUID);
-        msleep(1000);
-	// Bring the CPU back up
-        cpu_up(CPUID);
-        //msleep(1000);
-	printkl("Brought the CPU back up\n");
-#endif
-	printk("Just before returning from cleanup_module for " SYSTEM_NAME_STRING_LOWER "\n");
-
-}
-
-MODULE_DESCRIPTION("Control system");
-MODULE_AUTHOR("LIGO");
-MODULE_LICENSE("Dual BSD/GPL");
