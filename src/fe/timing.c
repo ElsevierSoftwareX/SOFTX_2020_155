@@ -1,6 +1,9 @@
-
+///	\file timing.c
+///	\brief File contains some timing diagnostics previously imbedded
+///<		into the controller.c code.
 //***********************************************************************
-// Get current kernel time (in GPS)
+/// \brief Get current kernel time (in GPS)
+///	@return Current time in form of GPS Seconds.
 //***********************************************************************
 inline unsigned long current_time(void) {
     struct timespec t;
@@ -12,8 +15,8 @@ inline unsigned long current_time(void) {
 
 #ifdef TIME_SLAVE
 //***********************************************************************
-// Test Mode - allows computer w/o IOC to run on timer from MASTER on
-// 		Dolphin RFM network.
+/// \brief Test Mode - allows computer w/o IOC to run on timer from MASTER on
+///< 		Dolphin RFM network.
 //***********************************************************************
 inline void waitDolphinTime(void)
 {
@@ -36,8 +39,8 @@ unsigned long d = cdsPciModules.dolphin[0][1];
 #endif
 
 //***********************************************************************
-// Calculate ADC/DAC duotone offset for diagnostics
-// Code should only run on IOP
+/// \brief Calculate ADC/DAC duotone offset for diagnostics. \n
+///< Code should only run on IOP
 //***********************************************************************
 #ifdef ADC_MASTER
 inline float duotime(int count, float meanVal, float data[])
