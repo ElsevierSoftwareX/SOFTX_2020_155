@@ -1,6 +1,6 @@
 ///	\file map.c
-///	This file contains the I/O driver and mapping software used by the
-///	RCG for supported PCIe I/O modules.
+///	\brief This file contains the software to find PCIe devices on the bus.
+
 #include <linux/types.h>
 #include <linux/kernel.h>
 #undef printf
@@ -31,9 +31,9 @@
 
 
 // *****************************************************************************
-/// Patch to properly handle PEX PCIe chip for newer (PCIe) General Standards
-/// DAC modules ie those that are integrated PCIe boards vs. earlier versions
-/// built with carrier boards. This is extracted from code provided by GSC..
+/// \brief Patch to properly handle PEX PCIe chip for newer (PCIe) General Standards
+///< DAC modules ie those that are integrated PCIe boards vs. earlier versions
+///< built with carrier boards. \n This is extracted from code provided by GSC..
 // *****************************************************************************
 void set_8111_prefetch(struct pci_dev *dacdev) {
 	struct pci_dev *dev = dacdev->bus->self;
@@ -57,7 +57,7 @@ void set_8111_prefetch(struct pci_dev *dacdev) {
 }
 
 // *****************************************************************************
-/// Routine to find and map PCI modules
+/// Routine to find PCI modules and call the appropriate driver initialization software.
 // *****************************************************************************
 int mapPciModules(CDS_HARDWARE *pCds)
 {
