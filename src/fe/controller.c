@@ -52,9 +52,6 @@ int printk(const char *fmt, ...) {
 }
 #endif
 
-#ifdef DOLPHIN_TEST
-#include "dolphin.c"
-#endif
 
 #include "fm10Gen.h"		// CDS filter module defs and C code
 #include "feComms.h"		// Lvea control RFM network defs.
@@ -72,6 +69,10 @@ int printk(const char *fmt, ...) {
 
 #include "drv/inputFilterModule.h"		
 #include "drv/inputFilterModule1.h"		
+
+#ifdef DOLPHIN_TEST
+#include "dolphin.c"
+#endif
 
 // Contec 64 input bits plus 64 output bits (Standard for aLIGO)
 /// Contec6464 input register values
@@ -154,22 +155,6 @@ int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec);
 
 char daqArea[2*DAQ_DCU_SIZE];		// Space allocation for daqLib buffers
 int cpuId = 1;
-
-// The following are for testing systems where all computers do not have I/O chassis attached.
-// Essentially, one computer is designated the time master and sends GPS time to all other
-// control computers via RFM networks.
-#ifdef TIME_MASTER
-volatile unsigned int *rfmTime;
-#endif
-
-#ifdef TIME_SLAVE
-volatile unsigned int *rfmTime;
-#endif
-
-#ifdef IOP_TIME_SLAVE
-volatile unsigned int *rfmTime;
-#endif
-
 
 // All systems not running at 64K require up/down sampling to communicate I/O data
 // with IOP, which is running at 64K.
@@ -354,14 +339,12 @@ void *fe_start(void *arg)
   static float duotoneMeanDac = 0.0;
   static int dacDuoEnable = 0;
 
-  static int dacBufSelect = 0;			// DAC memory double buffer selector
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
   volatile GSC_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
 #endif
 #ifndef ADC_SLAVE
   unsigned int usec = 0;
   unsigned int offset = 0;
-  unsigned int dacBufOffset = 0;
 #endif
 
 
@@ -751,20 +734,6 @@ udelay(1000);
 	default: {
 		    // IRIG-B card not found, so use CPU time to get close to 1PPS on startup
 			// Pause until this second ends
-#ifdef TIME_SLAVE
-// sync up with the time master on its gps time via Dolphin RFM
-// This is NOT a normal operating mode.
-  waitDolphintime();
-#endif
-
-#ifdef RFM_TIME_SLAVE
-// sync up with the time master on its gps time via GEFANUC RFM
-// This is NOT a normal operating mode.
-	  for(;((volatile long *)(cdsPciModules.pci_rfm[0]))[0] != 0;) udelay(1);
-	  timeSec = ((volatile long *)(cdsPciModules.pci_rfm[0]))[1];
-	  timeSec --;
-#endif
-
 		break;
 	}
   }
@@ -815,9 +784,6 @@ udelay(1000);
 #endif
   onePpsTime = cycleNum;
   timeSec = current_time() -1;
-#ifdef TIME_SLAVE
-	timeSec = *rfmTime;
-#endif
 
   rdtscl(adcTime);
 
@@ -835,7 +801,6 @@ udelay(1000);
 	    	//printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
 	  	pLocalEpics->epicsOutput.diags[FE_DIAGS_AWGTPMAN] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
 	  }
-#if !defined (TIME_SLAVE) && !defined (RFM_TIME_SLAVE)
 	  // This is local CPU timer (no ADCs)
 	  // advance to the next cycle polling CPU cycles and microsleeping
 	  rdtscl(clk);
@@ -845,20 +810,6 @@ udelay(1000);
 		if (clk1 >= clk) break;
 		udelay(1);
 	  }
-#else
-#ifdef RFM_TIME_SLAVE
-	  unsigned long d = ((volatile long *)(cdsPciModules.pci_rfm[0]))[0];
-	  d=cycleNum;
-	  for(;((volatile long *)(cdsPciModules.pci_rfm[0]))[0] != d;) udelay(1);
-	  timeSec = ((volatile long *)(cdsPciModules.pci_rfm[0]))[1];
-#elif defined(TIME_SLAVE)
-	  // sync up with the time master on its gps time
-	  //
-	  unsigned long d = 0;
-          //if (iop_rfm_valid) d = cdsPciModules.dolphin[0][1];
-	  d = cycleNum;
-	  for(;iop_rfm_valid? cdsPciModules.dolphin[0][1] != d: 0;) udelay(1);
-#endif
 	    ioMemCntr = (cycleNum % IO_MEMORY_SLOTS);
 	    for(ii=0;ii<IO_MEMORY_SLOT_VALS;ii++)
 	    {
@@ -871,27 +822,12 @@ udelay(1000);
 	    ioMemData->iodata[1][ioMemCntr].timeSec = timeSec;;
 	    ioMemData->iodata[0][ioMemCntr].cycle = cycleNum;
 	    ioMemData->iodata[1][ioMemCntr].cycle = cycleNum;
-#endif
 	  rdtscl(cpuClock[CPU_TIME_CYCLE_START]);
-#if defined(RFM_TIME_SLAVE) || defined(TIME_SLAVE)
-#ifndef ADC_SLAVE
-	  // Write GPS time and cycle count as indicator to slave that adc data is ready
-	  ioMemData->gpsSecond = timeSec;
-	  ioMemData->iodata[0][0].cycle = cycleNum;
-	  #ifndef RFM_TIME_SLAVE
-          if(cycleNum == 0) timeSec++;
-	  #endif
-#endif
-#endif
+
          if(cycleNum == 0) {
 
-#ifdef TIME_SLAVE
-	  if (iop_rfm_valid) timeSec = *rfmTime;
-	//*((volatile unsigned int *)dolphin_memory) = timeSec ++;
-#else
 	  // Increment GPS second on cycle 0
           timeSec ++;
-#endif
           pLocalEpics->epicsOutput.timeDiag = timeSec;
 	  }
 	} else {
@@ -926,14 +862,6 @@ udelay(1000);
           timeSec ++;
           pLocalEpics->epicsOutput.timeDiag = timeSec;
 	  // printf("cycle = %d  time = %d\n",cycleNum,timeSec);
-#endif
-#ifdef TIME_MASTER
-	  // Update time on RFM if this is GPS time master
-          rdtscl(tempClock[0]);
-	  *rfmTime = timeSec;
-	  //sci_flush(&sci_dev_info, 0);
-          rdtscl(tempClock[1]);
-  	  clflush_cache_range (cdsPciModules.dolphin[1], 8);
 #endif
 	}
         for(ll=0;ll<sampleCount;ll++)
@@ -993,39 +921,10 @@ udelay(1000);
 					// save CPU time here, as each read can take 2usec or more.
 					timeSec = getGpsSecTsync();
 				}
-#ifdef IOP_TIME_SLAVE_RFM
-	  timeSec = ((volatile long *)(cdsPciModules.pci_rfm[0]))[1];
-	  timeSec ++;
-#endif
 			}
 			
-#ifdef IOP_TIME_SLAVE
-	  		if (iop_rfm_valid) timeSec = *rfmTime;
-#endif
 #endif
 		    }
-#ifdef TIME_MASTER
-		if (iop_rfm_valid) {
-			//*rfmTime = timeSec;
-          		rdtscl(tempClock[2]);
-			cdsPciModules.dolphin[1][1] = cycleNum;
-	  		//sci_flush(&sci_dev_info, 0);
-          		rdtscl(tempClock[3]);
-  			clflush_cache_range (cdsPciModules.dolphin[1] + 1, 8);
-		}
-		if (cdsPciModules.pci_rfm[0]) {
-		    	((volatile long *)(cdsPciModules.pci_rfm[0]))[1] = timeSec;
-  			clflush_cache_range (((volatile long *)(cdsPciModules.pci_rfm[0])) + 1, 8);
-		    	((volatile long *)(cdsPciModules.pci_rfm[0]))[0] = cycleNum;
-  			clflush_cache_range (((volatile long *)(cdsPciModules.pci_rfm[0])), 8);
-		}
-		if (cdsPciModules.pci_rfm[1]) {
-		    	((volatile long *)(cdsPciModules.pci_rfm[1]))[1] = timeSec;
-  			clflush_cache_range (((volatile long *)(cdsPciModules.pci_rfm[1])) + 1, 8);
-		    	((volatile long *)(cdsPciModules.pci_rfm[1]))[0] = cycleNum;
-  			clflush_cache_range (((volatile long *)(cdsPciModules.pci_rfm[1])), 8);
-		}
-#endif
 
                     // Read adc data
                     packedData = (int *)cdsPciModules.pci_adc[jj];
@@ -1220,14 +1119,6 @@ udelay(1000);
 
 
 // START OF DAC WRITE ***********************************************************************************
-#ifdef ADC_MASTER
-	// Following was put in before DAC FIFO was used as buffer by preloading; Purpose was to ensure
-	// data xfer to DAC was not happening same time this code was writing data to the DAC transfer
-	// memory space; Can be removed at some point
-	   dacBufSelect = (dacBufSelect + 1) % 2;
-	   dacBufOffset = dacBufSelect * 0x100;
-	   dacBufOffset = 0;
-#endif
 	// Write out data to DAC modules
 	for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	{
@@ -1236,7 +1127,7 @@ udelay(1000);
 	   mm = cdsPciModules.dacConfig[jj];
 #else
 	   // Point to DAC memory buffer
-	   pDacData = (unsigned int *)(cdsPciModules.pci_dac[jj] + dacBufOffset);
+	   pDacData = (unsigned int *)(cdsPciModules.pci_dac[jj]);
 #endif
 #ifdef ADC_MASTER
 	// locate the proper DAC memory block
@@ -1807,23 +1698,10 @@ udelay(1000);
         	if (cycleNum >= HKP_RFM_CHK_CYCLE && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount)) {
 			int mod = cycleNum - HKP_RFM_CHK_CYCLE;
 			vmic5565CheckOwnDataRcv(mod);
-#if 0
-			if (cdsPciModules.rfmType[mod] == 0x5565) {
-				// Check the own-data light
-				if ((cdsPciModules.rfm_reg[mod]->LCSR1 & 1) == 0) ipcErrBits |= 4 + (mod * 4);
-				//printk("RFM %d own data %d\n", mod, cdsPciModules.rfm_reg[mod]->LCSR1);
-			}
-#endif
 		}
 		if (cycleNum >= (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount) && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount*2)) {
 			int mod = cycleNum - HKP_RFM_CHK_CYCLE - cdsPciModules.rfmCount;
 			vmic5565ResetOwnDataLight(mod);
-#if 0
-			if (cdsPciModules.rfmType[mod] == 0x5565) {
-				// Reset the own-data light
-				cdsPciModules.rfm_reg[mod]->LCSR1 &= ~1;
-			}
-#endif
 		}
 		if (cycleNum >= (HKP_RFM_CHK_CYCLE + 2*cdsPciModules.rfmCount) && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount*3)) {
 			int mod = cycleNum - HKP_RFM_CHK_CYCLE - cdsPciModules.rfmCount*2;
