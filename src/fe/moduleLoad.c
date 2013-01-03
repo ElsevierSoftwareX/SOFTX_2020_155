@@ -454,16 +454,6 @@ int init_module (void)
 		ioMemData->bioCount = cdsPciModules.doCount;
 		// kk will act as ioMem location counter for mapping modules
 		kk = cdsPciModules.adcCount;
-#if defined (TIME_SLAVE) || defined (RFM_TIME_SLAVE)
-		ioMemData->totalCards = 2;
-		ioMemData->adcCount = 2;
-		ioMemData->dacCount = 0;
-		ioMemData->bioCount = 0;
-		ioMemData->model[0] = GSC_16AI64SSA;
-		ioMemData->ipc[0] = 0;	// ioData memory buffer location for SLAVE to use
-		ioMemData->model[1] = GSC_16AI64SSA;
-		ioMemData->ipc[1] = 1;	// ioData memory buffer location for SLAVE to use
-#endif
 #endif
 	printf("%d ADC cards found\n",cdsPciModules.adcCount);
 	for(ii=0;ii<cdsPciModules.adcCount;ii++)
@@ -600,23 +590,6 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	ioMemData->dolphin[0] = cdsPciModules.dolphin[0];
 	ioMemData->dolphin[1] = cdsPciModules.dolphin[1];
 
-// Where not all FE computers have an IRIG-B module to tell time, a master and multiple
-// slaves may be defined to send/receive GPS time seconds via PCIe RFM. This is only
-// for use by ADC_MASTER applications.
-#ifdef TIME_MASTER
-	rfmTime = (volatile unsigned int *)cdsPciModules.dolphin[1];
-	printf("TIME MASTER AT 0x%x\n",(int)rfmTime);
-#endif
-#ifdef TIME_SLAVE
-	rfmTime = (volatile unsigned int *)cdsPciModules.dolphin[0];
-	printf("TIME SLAVE AT 0x%x\n",(int)rfmTime);
-	printf("rfmTime = %d\n", *rfmTime);
-#endif
-#ifdef IOP_TIME_SLAVE
-	rfmTime = (volatile unsigned int *)cdsPciModules.dolphin[0];
-	printf("TIME SLAVE IOP AT 0x%x\n",(int)rfmTime);
-	printf("rfmTime = %d\n", *rfmTime);
-#endif
 #else
 #ifdef ADC_MASTER
 // Clear Dolphin pointers so the slave sees NULLs
@@ -631,7 +604,6 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
         printf("***************************************************************************\n");
   	}
 
- 	//cdsPciModules.adcCount = 2;
 
 	// Code will run on internal timer if no ADC modules are found
 	if (cdsPciModules.adcCount == 0) {
@@ -700,9 +672,6 @@ void cleanup_module (void) {
 	extern int __cpuinit cpu_up(unsigned int cpu);
 
 	remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
-//	printk("Setting vmeReset flag to 1\n");
-	//pLocalEpics->epicsInput.vmeReset = 1;
-        //msleep(1000);
 
 #ifndef NO_CPU_SHUTDOWN
 	// Unset the code callback
