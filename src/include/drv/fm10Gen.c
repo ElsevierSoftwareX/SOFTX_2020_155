@@ -479,7 +479,7 @@ struct filtResetId {
   int fmSubCounter;
   FILT_MOD *fmResetDsp;
   int changed[FILTERS];
-} filtResetId[10] = {
+} filtResetId[FILTERS] = {
   {0,0,0,0,{0,0,0,0,0,0,0,0,0,0}},
   {0,0,0,0,{0,0,0,0,0,0,0,0,0,0}},
   {0,0,0,0,{0,0,0,0,0,0,0,0,0,0}},
