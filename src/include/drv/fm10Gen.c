@@ -23,6 +23,9 @@
 /*                                                                              */
 /*----------------------------------------------------------------------------- */
 
+///	@file fm10Gen.c
+///	@brief This file contains the routines for performing the real-time
+///		IIR/FIR filter calculations.
 
 
 #include "fm10Gen.h"
