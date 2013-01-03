@@ -1,63 +1,65 @@
+///	@file daqmap.h
+///	@brief File contains defs and structures used in DAQ and GDS/TP routines. \n
+///<		NOTE: This file used by daqd, as well as real-time and EPICS code.
+
 #ifndef MAP_5565_H
 #define MAP_5565_H
 
-#define DAQ_16K_SAMPLE_SIZE     1024    /* Num values for 16K system in 1/16 second     */
-#define DAQ_2K_SAMPLE_SIZE      128     /* Num values for 2K system in 1/16 second      */
-#define DAQ_CONNECT             0
-#define DAQ_WRITE               1
+#define DAQ_16K_SAMPLE_SIZE     1024    ///< Num values for 16K system in 1/16 second   
+#define DAQ_2K_SAMPLE_SIZE      128     ///< Num values for 2K system in 1/16 second 
+#define DAQ_CONNECT             0	///< Initialize DAQ flag
+#define DAQ_WRITE               1	///< Runtime DAQ flag ie acquiring data.
 
-#define DAQ_SRC_FM_TP		0	// Data from filter module testpoint
-#define DAQ_SRC_NFM_TP		1	// Data from non filter module related testpoint
-#define DAQ_SRC_FM_EXC		2	// Data from filter module excitation input
-#define DAQ_SRC_NFM_EXC		3	// Data from non filter module related excitation input
-#define DAQ_NUM_FM_TP		3	// Number of TP avail from each filter module
+#define DAQ_SRC_FM_TP		0	///< Data from filter module testpoint
+#define DAQ_SRC_NFM_TP		1	///< Data from non filter module related testpoint
+#define DAQ_SRC_FM_EXC		2	///< Data from filter module excitation input
+#define DAQ_SRC_NFM_EXC		3	///< Data from non filter module related excitation input
+#define DAQ_NUM_FM_TP		3	///< Number of TP avail from each filter module
 
-#define DTAPS   3       /* Num SOS in decimation filters.       */
+#define DTAPS   3       		///< Num SOS in decimation filters.   
 
 /*
  * DAQ system inter-processor communication definitions.
  */
 
-#define DCU_COUNT 128
-#define DAQ_BASE_ADDRESS	0x2000000
-#define DAQ_DATA_BASE_ADD	(DAQ_BASE_ADDRESS + 0x100000)
+#define DCU_COUNT 128		///< MAX number of real-time DAQ processes in single control system
+#define DAQ_BASE_ADDRESS	0x2000000			///< DAQ base offset from shared mem start
+#define DAQ_DATA_BASE_ADD	(DAQ_BASE_ADDRESS + 0x100000)	///< DAQ data location in shared mem
 
 /* Redefine this to change DAQ transmission size */
-#define DAQ_DCU_SIZE		0x400000
-#define DAQ_EDCU_SIZE		0x400000
+#define DAQ_DCU_SIZE		0x400000	///< MAX data in bytes/sec allowed per process
+#define DAQ_EDCU_SIZE		0x400000	///< MAX epics data xfer size per process
 #define DAQ_EDCU_BLOCK_SIZE	0x20000
 
-#define DAQ_NUM_DATA_BLOCKS	16
-#define DAQ_NUM_DATA_BLOCKS_PER_SECOND	16
+#define DAQ_NUM_DATA_BLOCKS	16		///< Number of DAQ data blocks
+#define DAQ_NUM_DATA_BLOCKS_PER_SECOND	16	///< Number of DAQ data blocks to xfer each second
 
-#define DAQ_DCU_BLOCK_SIZE	(DAQ_DCU_SIZE/DAQ_NUM_DATA_BLOCKS)
+#define DAQ_DCU_BLOCK_SIZE	(DAQ_DCU_SIZE/DAQ_NUM_DATA_BLOCKS)	///< Size of one DAQ data block
 
-#define DAQ_DCU_RATE_WARNING	3500	// KByte to set warning DAQ rate is nearing max of 4MB/sec/model
+#define DAQ_DCU_RATE_WARNING	3500	///< KByte to set warning DAQ rate is nearing max of 4MB/sec/model
 
-/* Structure for maintaining DAQ channel information */
+/// Structure for maintaining DAQ channel information
 typedef struct DAQ_LKUP_TABLE {
-        int type;       /* 0=SFM, 1=nonSFM TP, 2= SFM EXC, 3=nonSFM EXC         */
-	int sysNum;     /* If multi-dim SFM array, which one to use.            */
-	int fmNum;      /* Filter module with signal of interest.               */
-	int sigNum;     /* Which signal within a filter.                        */
-	int decFactor;  /* Decimation factor to use.                            */
-	int offset;     /* Offset to beginning of next channel in local buff.   */
+        int type;       ///< 0=SFM, 1=nonSFM TP, 2= SFM EXC, 3=nonSFM EXC        
+	int sysNum;     ///< If multi-dim SFM array, which one to use.          
+	int fmNum;      ///< Filter module with signal of interest.         
+	int sigNum;     ///< Which signal within a filter.               
+	int decFactor;  ///< Decimation factor to use.                
+	int offset;     ///< Offset to beginning of next channel in local buff.
 }DAQ_LKUP_TABLE;
 
-// Structure for maintaining TP channel number ranges
-// which are valid for this front end. These typically
-// come from gdsLib.h.
+/// Structure for maintaining TP channel number ranges which are valid for this front end. These typically come from gdsLib.h.
 typedef struct DAQ_RANGE {
-        int filtTpMin;
-        int filtTpMax;
-        int filtTpSize;
-        int xTpMin;
-        int xTpMax;
-        int filtExMin;
-        int filtExMax;
-        int filtExSize;
-        int xExMin;
-        int xExMax;
+        int filtTpMin;		///< Value of minimum allowed TP number for filter modules.
+        int filtTpMax;		///< Value of maximum allowed TP number for filter modules.
+        int filtTpSize;		///< Total number of TP for filter modules.
+        int xTpMin;		///< Value of minimum allowed TP number for non-filter TP
+        int xTpMax;		///< Value of maximum allowed TP number for non-filter TP
+        int filtExMin;		///< Value of mimimum allowed EXC number for filter modules.
+        int filtExMax;		///< Value of maximum allowed EXC number for filter modules.
+        int filtExSize;		///< Totol number of EXC allowed for filter modules.
+        int xExMin;		///< Value of minimum allowed EXC number for non-filter EXC
+        int xExMax;		///< Value of maximum allowed EXC number for non-filter EXC
 } DAQ_RANGE;
 
 
@@ -65,14 +67,15 @@ typedef struct DAQ_RANGE {
  * Inter-processor communication structures
  */
 
+/// Stucture to provide timing and crc info DAQ network driver via shared memory.
 typedef struct blockProp {
   unsigned int status;
 #ifdef SHMEM_DAQ
-  unsigned int timeSec;
-  unsigned int timeNSec;
+  unsigned int timeSec;		///< DAQ data timestamp seconds
+  unsigned int timeNSec;	///< DAQ data timestamp nanoseconds
   unsigned int run;
   unsigned int cycle;
-  unsigned int crc; /* block data CRC checksum */
+  unsigned int crc; 	///< block data CRC checksum 
 #else
   unsigned long timeSec;
   unsigned long timeNSec;
@@ -82,22 +85,23 @@ typedef struct blockProp {
 #endif
 } blockPropT;
 
-struct rmIpcStr {       /* IPC area structure                   */
+/// Structure for passing data info to DAQ network writer via shared memory
+struct rmIpcStr {    
 #ifdef SHMEM_DAQ
-  unsigned int cycle;  /* Copy of latest cycle num from blocks */
+  unsigned int cycle;  ///< Copy of latest cycle num from blocks 
 #else
   unsigned long cycle;  /* Copy of latest cycle num from blocks */
 #endif
-  unsigned int dcuId;          /* id of unit, unique within each site  */
-  unsigned int crc;	       /* Configuration file's checksum        */
-  unsigned int command;        /* Allows DAQSC to command unit.        */
-  unsigned int cmdAck;         /* Allows unit to acknowledge DAQS cmd. */
-  unsigned int request;        /* DCU request of controller            */
-  unsigned int reqAck;         /* controller acknowledge of DCU req.   */
-  unsigned int status;         /* Status is set by the controller.     */
-  unsigned int channelCount;   /* Number of data channels in a DCU     */
-  unsigned int dataBlockSize; /* Num bytes actually written by DCU within a 1/16 data block */
-  blockPropT bp [DAQ_NUM_DATA_BLOCKS];  /* An array of block property structures */
+  unsigned int dcuId;          ///< id of unit, unique within each site  
+  unsigned int crc;	       ///< Configuration file's checksum       
+  unsigned int command;        ///< Allows DAQSC to command unit.      
+  unsigned int cmdAck;         ///< Allows unit to acknowledge DAQS cmd. 
+  unsigned int request;        ///< DCU request of controller           
+  unsigned int reqAck;         ///< controller acknowledge of DCU req. 
+  unsigned int status;         ///< Status is set by the controller.   
+  unsigned int channelCount;   ///< Number of data channels in a DCU  
+  unsigned int dataBlockSize; 	///< Num bytes actually written by DCU within a 1/16 data block
+  blockPropT bp [DAQ_NUM_DATA_BLOCKS];  ///< An array of block property structures 
 };
 
 /*
@@ -164,12 +168,12 @@ struct rmIpcStr {       /* IPC area structure                   */
 #define IS_TP_DCU(dcuid) ((dcuid) == DCU_ID_EX_16K || (dcuid) == DCU_ID_TP_16K || (dcuid) == DCU_ID_EX_2K || (dcuid) == DCU_ID_TP_2K)
 
 /* dataType Defintions */
-#define DAQ_DATATYPE_16BIT_INT  1       /* Data type signed 16bit integer */
-#define DAQ_DATATYPE_32BIT_INT  2       /* Data type signed 32bit integer */
-#define DAQ_DATATYPE_64BIT_INT  3       /* Data type signed 64bit integer */
-#define DAQ_DATATYPE_FLOAT      4       /* Data type 32bit floating point */
-#define DAQ_DATATYPE_DOUBLE     5       /* Data type 64bit double float */
-#define DAQ_DATATYPE_COMPLEX    6       /* Complex data; two 32bit floats */
+#define DAQ_DATATYPE_16BIT_INT  1       ///< Data type signed 16bit integer 
+#define DAQ_DATATYPE_32BIT_INT  2       ///< Data type signed 32bit integer 
+#define DAQ_DATATYPE_64BIT_INT  3       ///< Data type signed 64bit integer 
+#define DAQ_DATATYPE_FLOAT      4       ///< Data type 32bit floating point 
+#define DAQ_DATATYPE_DOUBLE     5       ///< Data type 64bit double float 
+#define DAQ_DATATYPE_COMPLEX    6       ///< Complex data; two 32bit floats
 
 #define DAQ_DATA_TYPE_SIZE(a) (((a)==DAQ_DATATYPE_16BIT_INT)? 2: 4)
 
@@ -237,35 +241,33 @@ struct rmIpcStr {       /* IPC area structure                   */
  * GDS communication data
  */
 
-/* Gds control block starts at this offset */
+/// Gds control block starts at this offset 
 #define DAQ_GDS_BLOCK_ADD	(DAQ_BASE_ADDRESS + 0x600000)
 
-/* The maximum possibile size (allocated space) of the test point table */
+/// The maximum possibile size (allocated space) of the test point table 
 #define DAQ_GDS_MAX_TP_NUM           0x100
 
-/* We only allow this many TPs to be set */
+/// We only allow this many TPs to be set 
 #define DAQ_GDS_MAX_TP_ALLOWED	64
 
-/* The total number of test point DCUs */
+/// The total number of test point DCUs 
 #define DAQ_GDS_DCU_NUM       4
 
-/* Total number of channels allowed per DCU */
+/// Total number of channels allowed per DCU 
 #define DCU_MAX_CHANNELS	512
 
-/* RFM offset of DCU DAQ configuration area; used for communicating
-   configuration from Epics processor to a front-end processor */
+/// Offset to DAQ configuration info from base address of shared memory.
 #define DAQ_INFO_ADDRESS	0x01ff0000
 
-/* DCU DAQ configuration area starts at DAQ_INFO_ADDRESS offset in RFM
-   and contains an array of DAQ_INFO_BLOCK of DCU_COUNT elements */
+/// Structure for DAQ setup information in shared memory from EPICS
 typedef struct DAQ_INFO_BLOCK {
-  int reconfig; /* Set to 1 by the Epics to indicate configuration change */
-  int numChans; /* Defines how many channels are configured int struct tp[] */
-  unsigned long configFileCRC; /* DAQ config file checksum */
+  int reconfig; 		///< Set to 1 by the Epics to indicate configuration change 
+  int numChans; 		///< Defines how many channels are configured int struct tp[] 
+  unsigned long configFileCRC; 	///< DAQ config file checksum 
   struct {
-    unsigned int tpnum; /* Test point number to which this DAQ channel connects */
-    unsigned int dataType;
-    unsigned int dataRate;
+    unsigned int tpnum; 	///< Test point number to which this DAQ channel connects 
+    unsigned int dataType;	///< Type cast of DAQ data channel
+    unsigned int dataRate;	///< Acquisition rate of DAQ channel
     float dataGain;
   } tp[DCU_MAX_CHANNELS];
 } DAQ_INFO_BLOCK;
@@ -296,6 +298,7 @@ static const int daqGdsTpNum[4] = { DAQ_GDS_TP_LSC_EX_NUM, DAQ_GDS_TP_ASC_EX_NUM
    GDS_CNTRL_BLOCK.excNum16K[0] has the test point numbers
    GDS_CNTRL_BLOCK.excNum16K[1] has the channel status words
 */
+/// Structure of GDS TP table in shared memory.
 typedef union GDS_CNTRL_BLOCK {
   unsigned int tp [4][2][DAQ_GDS_MAX_TP_NUM];
   struct {
@@ -306,7 +309,7 @@ typedef union GDS_CNTRL_BLOCK {
   } tpe;
 } GDS_CNTRL_BLOCK;
 
-/* GDS test point table structure for FE to frame builder communication */
+/// GDS test point table structure for FE to frame builder communication
 typedef struct cdsDaqNetGdsTpNum {
    int count; /* test points count */
    int tpNum[DAQ_GDS_MAX_TP_NUM];
