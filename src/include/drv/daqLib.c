@@ -1,70 +1,22 @@
-/*----------------------------------------------------------------------------- */
-/*                                                                      	*/
-/* Module Name: daqLib.c                                                	*/
-/*                                                                      	*/
-/* Module Description: 								*/
-/*
-	This module provides the generic routines for:
-		- Writing DAQ, GDS TP and GDS EXC signals to the
-		  Framebuilder.
-		- Reading GDS EXC signals from shmem and writing them
-		  to the requested front end code exc channels.
-										*/
-/*                                                                      	*/
-/* Module Arguments:    							*/
-/*
-		
-	daqWrite(int flag - 0 to initialize or 1 to write data.
-		 int dcuId - DAQ node ID of this front end.
-		 DAQ_RANGE daqRange - struct defining front end valid
-				      test point and exc ranges.
-		 int sysRate - Data rate of front end CPU / 16.
-		 double *pFloatData[] - Pointer to TP data not associated
-				       with filter modules.
-		 FILT_MOD *dspPtr - Point to array of FM data.
-		 int netStatus - Status of myrinet
-		 int gdsMonitor[] - Array to return values of GDS
-				    TP/EXC selections.
-		 double excSignal[] - Array to write EXC signals not
-				     associated with filter modules.
-										*/
-/*                                                                      	*/
-/*                                                                      	*/
-/*                      -------------------                             	*/
-/*                                                                      	*/
-/*                             LIGO                                     	*/
-/*                                                                      	*/
-/*        THE LASER INTERFEROMETER GRAVITATIONAL WAVE OBSERVATORY.      	*/
-/*                                                                      	*/
-/*                     (C) The LIGO Project, 2012.                      	*/
-/*                                                                      	*/
-/*                                                                      	*/
-/*                                                                      	*/
-/* 		California Institute of Technology                             	*/
-/* 		LIGO Project MS 18-34                                          	*/
-/* 		Pasadena CA 91125                                              	*/
-/*                                                                      	*/
-/* 		Massachusetts Institute of Technology                          	*/
-/* 		LIGO Project MIT NW17-161                                     	*/
-/* 		Cambridge MA 02139                                             	*/
-/*                                                                      	*/
-/*----------------------------------------------------------------------------- */
+///	@file daqLib.c                                                	
+///	@brief	This module provides the generic routines for: \n
+///<		- Writing DAQ, GDS TP and GDS EXC signals to the
+///<		  Framebuilder. \n
+///<		- Reading GDS EXC signals from shmem and writing them
+///<		  to the requested front end code exc channels.
 
-volatile DAQ_INFO_BLOCK *pInfo;		/* Ptr to DAQ config in shmem.	*/
+volatile DAQ_INFO_BLOCK *pInfo;		///< Ptr to DAQ config in shmem.
 
-/* Fast Pentium FPU SQRT command */
-// inline double lsqrt (double __x) { register double __result; __asm __volatile__ ("fsqrt" : "=t" (__result) : "0" (__x)); return __result; }
-
-extern volatile char *_epics_shm;		/* Ptr to EPICS shmem block		*/
-extern long daqBuffer;			/* Address of daqLib swing buffers.	*/
+extern volatile char *_epics_shm;	///< Ptr to EPICS shmem block
+extern long daqBuffer;			///< Address of daqLib swing buffers.
 #ifdef SHMEM_DAQ
-extern char *_daq_shm;
-struct rmIpcStr *dipc;
-struct cdsDaqNetGdsTpNum *tpPtr;
-char *mcPtr;
-char *lmPtr;
-    char *daqShmPtr;
-int fillSize;
+extern char *_daq_shm;			///< Pointer to DAQ base address in shared memory.
+struct rmIpcStr *dipc;			///< Pointer to DAQ IPC data in shared memory.
+struct cdsDaqNetGdsTpNum *tpPtr;	///< Pointer to TP table in shared memory.
+char *mcPtr;				///< Pointer to current DAQ data in shared memory.
+char *lmPtr;				///< Pointer to current DAQ data in local memory data buffer.
+char *daqShmPtr;			///< Pointer to DAQ data in shared memory.
+int fillSize;				///< Amount of data to copy local to shared memory.
 #endif
 
 unsigned int curDaqBlockSize;
@@ -72,6 +24,22 @@ unsigned int curDaqBlockSize;
 /* ******************************************************************** */
 /* Routine to connect and write to LIGO DAQ system       		*/
 /* ******************************************************************** */
+///	@brief This function provides for reading GDS TP/EXC and writing DAQ data.
+///<	For DAQ data, this routine also provides all necessary decimation filtering.
+
+///	For additional information in LIGO DCC, see
+/// <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=8037">T0900638 CDS Real-time DAQ Software</a>
+///	@param[in] flag Initialization flag 
+///	@param[in] dcuId		DAQ Data unit ID - unique within a control system
+///	@param[in] daqRange		Struct defining fron end valid test point and exc ranges.
+///	@param[in] sysRate		Data rate of the code / 16
+///	@param[in] *pFloatData[]	Pointer to TP data not associated with filter modules.
+///	@param[in] *dspPtr		Pointer to array of filter module data.
+///	@param[in] netStatus		Status of DAQ network
+///	@param[out] gdsMonitor[]	Array to return values of GDS TP/EXC selections.
+///	@param[out] excSignals[]	Array to write EXC signals not associated with filter modules.
+///	@return	Total size of data transmitted in KB/sec.
+
 int daqWrite(int flag,
 	     int dcuId,
 	     DAQ_RANGE daqRange,
