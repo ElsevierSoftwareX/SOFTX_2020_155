@@ -27,9 +27,6 @@
 
 #include "fm10Gen.h"
 
-inline double filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double inModOut);
-inline double inputModule(FILT_MOD *pFilt, int modNum);
-inline UINT32 handleEpicsSwitch(UINT32 sw, int modNum, FILT_MOD *dsp, COEF *dspCoeff);
 
 /* Switching register bits */
 #define OPSWITCH_INPUT_ENABLE 0x4
@@ -39,23 +36,26 @@ inline UINT32 handleEpicsSwitch(UINT32 sw, int modNum, FILT_MOD *dsp, COEF *dspC
 #define OPSWITCH_OUTPUT_ENABLE 0x4000000
 #define OPSWITCH_HOLD_ENABLE 0x8000000
 
+/// Quick look up table for power of 2 calcs
 const UINT32 pow2_in[10] = {0x10,0x40,0x100,0x400,0x1000,0x4000,0x10000,
 				   0x40000,0x100000,0x400000};
+/// Quick look up table for power of 2 calcs
 const UINT32 pow2_out[10] = {0x20,0x80,0x200,0x800,0x2000,0x8000,0x20000,
 				    0x80000,0x200000,0x800000};
 
+/// Quick look up table for filter module switch decoding
 const UINT32 fltrConst[13] = {16, 64, 256, 1024, 4096, 16384,
                                      65536, 262144, 1048576, 4194304,
 				     0x4, 0x8, 0x4000000, /* in sw, off sw, out sw */
 				     };
 
-#if defined(SERVO16K) || defined(SERVOMIXED) || defined(SERVO32K) || defined(SERVO64K) || defined(SERVO128K) || defined(SERVO256K)
+#if defined(SERVO16K) || defined(SERVO32K) || defined(SERVO64K) || defined(SERVO128K) || defined(SERVO256K)
 double sixteenKAvgCoeff[9] = {1.9084759e-12,
 				     -1.99708675982420, 0.99709029700517, 2.00000005830747, 1.00000000739582,
 				     -1.99878510620232, 0.99879373895648, 1.99999994169253, 0.99999999260419};
 #endif
 
-#if defined(SERVO2K) || defined(SERVOMIXED) || defined(SERVO4K)
+#if defined(SERVO2K) || defined(SERVO4K)
 double twoKAvgCoeff[9] = {7.705446e-9,
 				 -1.97673337437048, 0.97695747524900,  2.00000006227141,  1.00000000659235,
 				 -1.98984125831661,  0.99039139954634,  1.99999993772859,  0.99999999340765};
@@ -69,8 +69,6 @@ double twoKAvgCoeff[9] = {7.705446e-9,
 #define avgCoeff twoKAvgCoeff
 #elif defined(SERVO4K)
 #define avgCoeff twoKAvgCoeff
-#elif defined(SERVOMIXED)
-#define filterModule(a,b,c,d) filterModuleRate(a,b,c,d,16384)
 #elif defined(SERVO5HZ)
 #else
 #error need to define 2k or 16k or mixed
@@ -93,37 +91,20 @@ double twoKAvgCoeff[9] = {7.705446e-9,
 #endif
 
 
-//New tRamp.c gain ramping strcuture
+/// New tRamp.c gain ramping strcuture
 RampParamState gain_ramp[MAX_MODULES][10];
 
 
-//New tRamp.c gain offset strcuture
+/// New tRamp.c gain offset strcuture
 RampParamState offset_ramp[MAX_MODULES][10];
 
-/**************************************************************************
-iir_filter - Perform IIR filtering sample by sample on doubles
-
-Implements cascaded direct form II second order sections.
-Requires arrays for history and coefficients.
-The length (n) of the filter specifies the number of sections.
-The size of the history array is 2*n.
-The size of the coefficient array is 4*n + 1 because
-the first coefficient is the overall scale factor for the filter.
-Returns one output sample for each input sample.
-
-double iir_filter(double input,double *coef,int n,double *history)
-
-    double input        new double input sample
-    double *coef        pointer to filter coefficients
-    int n              number of sections in filter
-    double *history     history array pointer
-
-Returns double value giving the current output.
-
-*************************************************************************/
-
-double junk;
-
+/// @brief Perform IIR filtering sample by sample on doubles. 
+/// Implements cascaded direct form II second order sections.
+///	@param[in] input New input sample
+///	@param[in] *coef Pointer to filter coefficient data with size 4*n + 1 (gain)
+///	@param[in] n Number of second order sections in filter definition
+///	@param[in,out] *history Pointer to filter history data of size 2*n
+///	@return Result of filter calculation
 inline double iir_filter(double input,double *coef,int n,double *history){
 
   int i;
@@ -136,12 +117,6 @@ inline double iir_filter(double input,double *coef,int n,double *history){
   hist1_ptr = history;            /* first history */
   hist2_ptr = hist1_ptr + 1;      /* next history */
   
-#if 0
-  input += 1e-16;
-  junk = input;
-  input -= 1e-16;
-#endif
-
   output = input * (*coef_ptr++); /* overall input scale factor */
   
   for(i = 0 ; i < n ; i++) {
@@ -156,14 +131,6 @@ inline double iir_filter(double input,double *coef,int n,double *history){
     output = new_hist + history1 * (*coef_ptr++);
     output = output + history2 * (*coef_ptr++);      /* zeros */
 
-#if 0
-    if((new_hist < 1e-20) && (new_hist > -1e-20)) new_hist = new_hist<0 ? -1e-20: 1e-20;
-    
-    new_hist += 1e-16;
-    junk = new_hist;
-    new_hist -= 1e-16;
-#endif
-
     *hist2_ptr++ = *hist1_ptr;
     *hist1_ptr++ = new_hist;
     hist1_ptr++;
@@ -175,6 +142,13 @@ inline double iir_filter(double input,double *coef,int n,double *history){
 }
 
 /* Biquad form IIR */
+/// @brief Perform IIR filtering sample by sample on doubles. 
+/// Implements Biquad form calculations.
+///	@param[in] input New input sample
+///	@param[in] *coef Pointer to filter coefficient data with size 4*n + 1 (gain)
+///	@param[in] n Number of second order sections in filter definition
+///	@param[in,out] *history Pointer to filter history data of size 2*n
+///	@return Result of filter calculation
 inline double iir_filter_biquad(double input,double *coef,int n,double *history){
 
   int i;
@@ -187,12 +161,6 @@ inline double iir_filter_biquad(double input,double *coef,int n,double *history)
   hist1_ptr = history;            /* first history */
   hist2_ptr = hist1_ptr + 1;      /* next history */
   
-  #if 0
-  input += 1e-16;
-  junk = input;
-  input -= 1e-16;
-  #endif
-
   output = input * (*coef_ptr++); /* overall input scale factor */
   
   for(i = 0 ; i < n ; i++) {
@@ -209,18 +177,6 @@ inline double iir_filter_biquad(double input,double *coef,int n,double *history)
     output = output + w * c1 + u * c2;
     new_u = w + u;   
 
-//    if((new_w < 1e-30) && (new_w > -1e-30)) new_w = 0.0;
-    //if((new_u < 1e-30) && (new_u > -1e-30)) new_u = 0.0;
-    
-    #if 0
-    new_w += 1e-16;
-    junk = new_w;
-    new_w -= 1e-16;
-    new_u += 1e-16;
-    junk = new_u;
-    new_u -= 1e-16;
-    #endif
-
     *hist1_ptr++ = new_w;
     *hist2_ptr++ = new_u;
     hist1_ptr++;
@@ -233,23 +189,13 @@ inline double iir_filter_biquad(double input,double *coef,int n,double *history)
 }
 
 #ifdef FIR_FILTERS
-/**************************************************************************
-
-fir_filter - Perform fir filtering sample by sample on floats
-
-Requires array of filter coefficients and pointer to history.
-Returns one output sample for each input sample.
-
-float fir_filter(float input,float *coef,int n,float *history)
-
-    double input        new float input sample
-    double *coef        pointer to filter coefficients
-    int n               number of coefficients in filter
-    double *history     history array pointer
-
-Returns float value giving the current output.
-
-*************************************************************************/
+// *************************************************************************/
+///	@brief Perform FIR filter calculations.
+///	@param[in] input New input sample
+///	@param[in] *coef Pointer to filter coefficients
+///	@param[in] n Number of taps
+///	@param[in,out] *history Pointer to filter history data
+///	@return Result of FIR filter calculation
 inline double fir_filter(double input, double *coef, int n, double *history)
 {
     int i;
@@ -274,24 +220,6 @@ inline double fir_filter(double input, double *coef, int n, double *history)
 #endif
 
 
-
-/**************************************************************************
-filterModule - Perform filtering for a string of up to 10 filters
-
-Decodes Operator Switches.
-Filters sections according to specified filter type (1-3).
-Outputs answer to the output module function.
-Sets readback filter bit for EPICS display screen.
-*************************************************************************/
-
-#ifdef SERVOMIXED
-inline double
-filterModuleRate(FILT_MOD *pFilt,     /* Filter module data  */
-		 COEF *pC,            /* Filter coefficients */
-		 int modNum,          /* Filter module number */
-		 double filterInput,  /* Input data sample (output from funtcion inputModule()) */
-		 unsigned int rate)   /* Rate in Hz at which this modules gets calculated */
-#else
 #ifdef SERVO16K
 const int rate = 16384;
 #elif defined(SERVO5HZ)
@@ -310,304 +238,14 @@ const int rate = (4*32768);
 const int rate = (8*32768);
 #endif
 	     
-inline double
-filterModuleId(FILT_MOD *pFilt,     /* Filter module data  */
-	       COEF *pC,            /* Filter coefficients */
-	       int modNum,          /* Filter module number */
-	       double filterInput,  /* Input data sample (output from funtcion inputModule()) */
-	       int id)		    /* System number (HEPI) */
-	     
-#endif
-{
-  /* decode arrays for operator switches */
-  UINT32 opSwitchE = pFilt->inputs[modNum].opSwitchE;
-  /* Do the shift to match the bits in the the opSwitchE variable so I can do "==" comparisons */
-  UINT32 opSwitchP = pFilt->inputs[modNum].opSwitchP >> 1;
-  int ii, jj, kk, ramp, timeout;
-  int sw, sw_out, sType, sw_in;
-  double filtData;
-  float avg, compare;
-  double output;
-
-  /* Apply Filtering */
-
-  /* Loop through all filters */
-  for (ii=0; ii<FILTERS; ii++) {
-    /* Do not do anything for any filter with zero filter sections */
-    if (!pC->coeffs[modNum].filtSections[ii]) continue;
-
-    sw = opSwitchE & pow2_in[ii];       /* Epics screen filter on/off request bit */
-    sw_out = opSwitchP & pow2_in[ii];   /* Pentium output ack bit (opSwitchP was right shifted by 1) */
-
-    /* Filter switching type */
-    sType = pC->coeffs[modNum].sType[ii];
-
-    /* If sType is type 1X, the input will always go to filter to be calculated */
-    /* If sType is type 2X, then the input will be zero if output is turned off */
-    /* If sType is type 22, then the input will go to filter if filter is turning on (ramping up)*/
-    sw_in = sType < 20 || sw_out || (sType == 22 && sw);
-
-    /* Calculate filter */
-    filtData = iir_filter(sw_in?filterInput:1e-16,
-			  pC->coeffs[modNum].filtCoeff[ii],
-			  pC->coeffs[modNum].filtSections[ii],
-			  pC->coeffs[modNum].filtHist[ii]);
-
-    if (sw == sw_out) { /* No switching */
-      if (sw) filterInput = filtData; /* Use the filtered value if the filter is turned on */
-    } else {  /* Switching request */
-      int sTypeMod10 = sType%10;
-      /* Process filter switching according to output type [1-3] */
-      switch (sTypeMod10) {
-      case 1: /* Instantenious switch */
-	/* Turn output on/off according to the request */
-	if ((sw_out = sw)) filterInput = filtData; /* Use the filtered value if the filter is turned on */
-	break;
-      case 2: /* Ramp in/out filter output */
-	ramp = pFilt->inputs[modNum].rmpcmp[ii];   /* Ramp slope coefficient */
-	kk = pFilt->inputs[modNum].cnt[ii];        /* Ramp count */
-	/* printf("kk=%d; ramp=%d; sw=%d; sw_out=%d\n", kk, ramp, sw, sw_out); */
-
-	if (kk == ramp) {                          /* Done ramping */
-	  /* Turn output on/off according to the request */
-	  if ((sw_out = sw)) filterInput = filtData; /* Use the filtered value if the filter is turned on */
-	  kk = 0;
-	} else {                                   /* Ramping will be done */
-	  if (kk) {                                /* Currently ramping */
-	    double t = (double)kk / (double)ramp;  /* Slope */
-	    if (sw)                                /* Turn on request */
-	      filterInput = (1.0 - t) * filterInput + t * filtData;
-	    else                                   /* Turn off request */
-	      filterInput = t * filterInput + (1.0 - t) * filtData;
-	  } else {                                 /* Start to ramp */
-	    if (sw)                                /* Turn on request */
-	      ;                                    /* At the start of turning on ramp input goes to output (filter bypassed) */
-	    else                                   /* Turn off request */
-	      filterInput = filtData;	           /* At the start of turning off the ramp is at filter output */
-	  }
-	  kk++;
-	}
-	pFilt->inputs[modNum].cnt[ii] = kk;
-	break;
-      case 3: /* Comparator */
-      case 4: /* Zero crossing */
-	ramp = pFilt->inputs[modNum].rmpcmp[ii];  /* Filter comparison range */
-	timeout = pFilt->inputs[modNum].timeout[ii]; 	/* Comparison timeout number */
-	kk = pFilt->inputs[modNum].cnt[ii];   /* comparison count */
-	if (sTypeMod10 == 3) compare = filterInput - filtData; /* Comparator looks at the filter in/out diff */
-	else compare = sw_out? filtData: filterInput; /* Use the filtered value if waiting to switch off */
-	if (compare < .0) compare = -compare;
-
-	++kk;
-	if (kk >= timeout || compare <= (float)ramp) { /* If timed out or the difference is in the range */
-	  /* Turn output on/off according to the request */
-	  if ((sw_out = sw)) filterInput = filtData; /* Use the filtered value if the filter is turned on */
-	  kk = 0;
-	} else { /* Waiting for the match or the timeout */
-	  if (sw_out) filterInput = filtData; /* Use the filtered value if waiting to switch off */
-	}
-	pFilt->inputs[modNum].cnt[ii] = kk;
-	break;
-      default:
-	filterInput = 777;
-	break;
-      }
-    
-      if (sw == sw_out) { /* If turning the filter on/off NOW */
-	/* Clear history buffer if filter is turned off NOW */
-	/* History is cleared one time only */
-	if (!sw) { /* Turn off request */
-	  for(jj=0;jj<MAX_HISTRY;jj++)
-	    pC->coeffs[modNum].filtHist[ii][jj] = 0.0;
-
-	}
-
-	/* Send back the readback switches when there is change */
-	if (sw_out) { /* switch is on, turn it on */
-	  pFilt->inputs[modNum].opSwitchP |= pow2_out[ii];
-	} else { /* switch is off, turn it off */
-	  pFilt->inputs[modNum].opSwitchP &= ~pow2_out[ii];
-	}
-      }
-    }
-  }
-
-  /* Calculate output values */
-  {
-    if (pFilt->inputs[modNum].outgain != gain_ramp[modNum][id].req) {
-      RampParamLoad(&gain_ramp[modNum][id],pFilt->inputs[modNum].outgain,pFilt->inputs[modNum].gain_ramp_time,rate);
-      pFilt->inputs[modNum].opSwitchP |= 0x10000000;
-    }
-    if (gain_ramp[modNum][id].isRamping == 0) {
-      pFilt->inputs[modNum].opSwitchP &= ~0x10000000;
-    }
-    
-    output = filterInput * RampParamUpdate(&gain_ramp[modNum][id]);
-
-    /* Limiting */
-    if (opSwitchE &  OPSWITCH_LIMITER_ENABLE) {
-      if(output > pFilt->inputs[modNum].limiter)
-	output = pFilt->inputs[modNum].limiter;
-      else if(output < -pFilt->inputs[modNum].limiter)
-	output = -pFilt->inputs[modNum].limiter;
-    }
-
-    /* Set Test Point */
-    pFilt->data[modNum].testpoint = output;
-
-#if defined(SERVO5HZ)
-    avg = output;
-#else
-    /* Do the Decimation regardless of whether it is enabled or disabled */
-    avg = iir_filter(output,
-#if defined(SERVOMIXED)
-		     rate==16384? sixteenKAvgCoeff: twoKAvgCoeff,
-#else
-		     avgCoeff,
-#endif
-		     2,
-		     pC->coeffs[modNum].decHist);
-#endif
-
-    /* Test Output Switch and output hold on/off */
-    if (opSwitchE & OPSWITCH_HOLD_ENABLE) {
-      ; /* Outputs are not assigned, hence they are held */
-    } else {
-      if (opSwitchE & OPSWITCH_OUTPUT_ENABLE) {
-	pFilt->data[modNum].output = output;
-
-	/* Decimation */
-	if (opSwitchE & OPSWITCH_DECIMATE_ENABLE) 
-	  pFilt->data[modNum].output16Hz = avg;
-	else
-	  pFilt->data[modNum].output16Hz = output;
-      } else {
-        pFilt->data[modNum].output = 0;
-        pFilt->data[modNum].output16Hz = 0;
-      }
-    }
-  }
-  return pFilt->data[modNum].output;
-}
-
-inline double
-filterModule(FILT_MOD *pFilt, COEF *pC, int modNum, double filterInput) {
-  return filterModuleId(pFilt, pC, modNum, filterInput, 0);
-}
-
-/**************************************************************************
-inputModule - Performs setup calculations for the filterModule function
-
-Decodes Operator Switches - calculates the input to the filterModule stage
-
-double inputModule(FILT_MOD *pFilt, int modNum)                    
-
-    FILT_MOD *pFilt     pointer to the complete filter module structure
-    int modNum          the filter module number we are working with (<30)
-
-Returns double value giving the filter bank input value.
-
-:TODO: integrate this whole function into filterModule().Check code speed.
-
-*************************************************************************/
-inline double inputModule(FILT_MOD *pFilt, int modNum){  
-
-  double output = (double)pFilt->data[modNum].exciteInput;
-  if (pFilt->inputs[modNum].opSwitchE & OPSWITCH_INPUT_ENABLE)
-    output += pFilt->data[modNum].filterInput;
-  pFilt->data[modNum].inputTestpoint = output;
-  if (pFilt->inputs[modNum].opSwitchE & OPSWITCH_OFFSET_ENABLE)
-    output += pFilt->inputs[modNum].offset;
-  return output<-1e-16?output:(output<1e-16?1e-16:output);
-}
-
-
-/**************************************************************************
-  Handle double-switching, i.e. when ramping or comparator type
-  of switching is in progress, handle operator inputs.
-
-  This function needs to be called when new Epics operator settings are 
-  received from the Epics and assigned into the FILT_MOD structures. It should not
-  be called in the time-critical ADC readout section of the code.
-
-  The following example for filter module 'ii' shows new opSwitchE
-  word received from the VME (via dspVme pointer) and the local copy
-  of the opSwitchE then assigned:
-
-  dsp.inputs[ii].opSwitchE = handleEpicsSwitch(dspVme->inputs[ii].opSwitchE, ii, &dsp, &dspCoeff);
-
-*************************************************************************/
-
-/* Build with double-switching handled by reversing the switching action */
-#define SWITCHING_STYLE_2
-
-inline UINT32
-handleEpicsSwitch(UINT32 sw,       /* New input values for the opSwitchE (from the Epics) */
-		  int modNum,      /* Filter module number */
-		  FILT_MOD *dsp,
-		  COEF *dspCoeff)
-{
-
-#ifdef SWITCHING_STYLE_1
-
-    /* Allows switching only if none of it is going on already */
-
-    /* 0x555550 is the mask for the input filter switching bits
-       (one bit for every filter in the bank of ten).
-       Initiated switching disables any other switching in any if the filters in the bank.
-    */
-    if ((dsp->inputs[modNum].opSwitchP >> 1 & 0x555550) /* Output switching bits */
-	== (dsp->inputs[modNum].opSwitchE & 0x555550))  /* Input switching bits  */
-      return sw;
-    else
-      return dsp->inputs[modNum].opSwitchE;
-
-#endif
-
-#ifdef SWITCHING_STYLE_2
-
-    /* Reverse currently active switchers */
-
-    int jj;
-    UINT32 switchers;
-
-    /* Select current switchers */
-    switchers = ((dsp->inputs[modNum].opSwitchP >> 1 & 0x555550)
-		 ^ (dsp->inputs[modNum].opSwitchE & 0x555550));
-    if (switchers) {
-      /* Fix all conflicting switchers */
-      for (jj = 0; jj < FILTERS; jj++) {
-	if (switchers & pow2_in[jj]
-	    && ((sw & pow2_in[jj])
-		!= (dsp->inputs[modNum].opSwitchE & pow2_in[jj]))) {
-	  switch (dspCoeff->coeffs[modNum].sType[jj]%10) {
-	  case 2: /* Ramping */
-	    /* Adjust the counter */
-	    dsp->inputs[modNum].cnt[jj] =
-	      dsp->inputs[modNum].rmpcmp[jj]
-	      - dsp->inputs[modNum].cnt[jj];
-	    /* Switch ramping direction */
-	    dsp->inputs[modNum].opSwitchP ^= pow2_out[jj];
-	    break;
-	  case 3: /* Comparator */
-	  case 4: /* Zero-crossing comparator */
-	    dsp->inputs[modNum].cnt[jj] = 0; /* Reset comparator timeout counter */
-	    break;
-	  default:
-	    break;
-	  }
-	}
-      }
-    }
-
-    return sw;    
-#endif
-}
-
-
 /************************************************************************/
-/* Read all filter coeffs via VME backplane from EPICS CPU		*/
 /************************************************************************/
+/// @brief Read in filter coeffs from shared memory on code initialization.
+///	@param[in,out] *filtC Pointer to coeffs in local memory
+///	@param[in] *fmt Pointer to filter data in local memory
+///	@param[in] bF	Start filter number
+///	@param[in] sF	End filter number
+///	@param[in] *pRfmCoeff Pointer to coeffs in shared memory
 inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_COEF *pRfmCoeff)
 {
   int ii,jj,kk;
@@ -652,32 +290,6 @@ inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_C
 	    filtC->coeffs[ii].filtCoeff[jj][kk] = pRfmCoeff->vmeCoeffs[ii].filtCoeff[jj][kk];
 	  }
 	}
-#if 0
-	{
-	printf("**********************************************\n");
-        printf("Bank %d Filter %d has %d sections with ramp = %d and timeout %d\n",
-                ii,jj,filtC->coeffs[ii].filtSections[jj],fmt->inputs[ii].rmpcmp[jj],
-		fmt->inputs[ii].timeout[jj]);
-#if -
-        printf("Coeffs are:\n%e %e %e %e %e\n",
-                filtC->coeffs[ii].filtCoeff[jj][0],filtC->coeffs[ii].filtCoeff[jj][1],
-		filtC->coeffs[ii].filtCoeff[jj][2],filtC->coeffs[ii].filtCoeff[jj][3],
-		filtC->coeffs[ii].filtCoeff[jj][4]);
-	if(filtC->coeffs[ii].filtSections[jj] > 1)
-		printf("\t%e %e %e %e \n",
-                filtC->coeffs[ii].filtCoeff[jj][5],filtC->coeffs[ii].filtCoeff[jj][6],
-		filtC->coeffs[ii].filtCoeff[jj][7],filtC->coeffs[ii].filtCoeff[jj][8]);
-	if(filtC->coeffs[ii].filtSections[jj] > 2)
-		printf("\t%e %e %e %e \n",
-                filtC->coeffs[ii].filtCoeff[jj][9],filtC->coeffs[ii].filtCoeff[jj][10],
-		filtC->coeffs[ii].filtCoeff[jj][11],filtC->coeffs[ii].filtCoeff[jj][12]);
-	if(filtC->coeffs[ii].filtSections[jj] > 3)
-		printf("\t%e %e %e %e \n",
-                filtC->coeffs[ii].filtCoeff[jj][13],filtC->coeffs[ii].filtCoeff[jj][14],
-		filtC->coeffs[ii].filtCoeff[jj][15],filtC->coeffs[ii].filtCoeff[jj][16]);
-#endif
-	}
-#endif
       }
     }
   }
@@ -690,6 +302,14 @@ inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_C
 	- One filter bank at a time.
 	- One SOS at a time.			  */
 /**************************************************/
+/// @brief Read in filter coeffs from shared memory while code is running ie filter reload initiated.
+///	@param[in,out] *filtC Pointer to coeffs in local memory
+///	@param[in] *fmt Pointer to filter data in local memory
+///	@param[in] modNum1	ID number of the filter module
+///	@param[in] filtNum	ID number of the filter within the module
+///	@param[in] cycle	Code cycle number
+///	@param[in] *pRfmCoeff 	Pointer to coeffs in shared memory
+///	@param[in] *changed	Pointer to filter coef change flag memory.
 int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int cycle, volatile VME_COEF *pRfmCoeff, int *changed)
 {
   unsigned int ii, kk, jj;
@@ -852,7 +472,7 @@ int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int cycle,
 #undef MAX_UPDATE_CYCLE
 }
 
-/* Filter module update globals */
+/// Filter module update globals 
 struct filtResetId {
   int fmResetCoeff;
   int fmResetCounter;
@@ -875,6 +495,14 @@ struct filtResetId {
 /***************************************/
 /* Check for history resets or new coeffs for filter banks */
 /***************************************/
+///	@brief Checks for history resets or new coefs for filter modules.
+///	@param[in] bankNum	Filter module ID number
+///	@param[in,out] *pL	Pointer to filter module data in local memory.
+///	@param[in] *dspVme	Pointer to filter module data in shared memory.
+///	@param[in,out] *pC	Pointer to filter coefs in local memory.
+///	@param[in] totMod	Total number of filter modules
+///	@param[in] *pRfmCoeff	Pointer to filter coefs in shared memory.
+///	@param[in] id		System ID number (old HEPI only).
 inline void checkFiltResetId(int bankNum, FILT_MOD *pL, volatile FILT_MOD *dspVme, COEF *pC, int totMod, volatile VME_COEF *pRfmCoeff, int id)
 {
   int jj,kk;
@@ -945,10 +573,24 @@ inline void checkFiltResetId(int bankNum, FILT_MOD *pL, volatile FILT_MOD *dspVm
   }
 }
 
+///	@brief Calls checkFiltResetId with dummy sys id of 0
+///	@param[in] bankNum	Filter module ID number
+///	@param[in,out] *pL	Pointer to filter module data in local memory.
+///	@param[in] *dspVme	Pointer to filter module data in shared memory.
+///	@param[in,out] *pC	Pointer to filter coefs in local memory.
+///	@param[in] totMod	Total number of filter modules
+///	@param[in] *pRfmCoeff	Pointer to filter coefs in shared memory.
 inline void checkFiltReset(int bankNum, FILT_MOD *pL, volatile FILT_MOD *dspVme, COEF *pC, int totMod, volatile VME_COEF *pRfmCoeff) {
   checkFiltResetId(bankNum, pL, dspVme, pC, totMod, pRfmCoeff, 0);
 }
 
+///	@brief Initialize filter module variables on code startup
+///	@param[in,out] *pL	Pointer to filter module data in local memory
+///	@param[in] *pV		Pointer to filter module data in shared memory
+///	@param[in,out] *pC	Pointer to filter coeffs in local memory
+///	@param[in] totMod	Total number of filter modules
+///	@param[in] *pRfmCoeff	Pointer to filter coeffs in shared memory
+///	@param[in] id		System id (old HEPI only)
 inline int
 initVarsId(FILT_MOD *pL,
 	 volatile FILT_MOD *pV,
@@ -1005,261 +647,18 @@ initVarsId(FILT_MOD *pL,
   return readCoefVme(pC, pL, 0, totMod, pRfmCoeff);
 }
 
+///	@brief Calls initVarsId with dummy sys id of 0
+///	@param[in,out] *pL	Pointer to filter module data in local memory
+///	@param[in] *pV		Pointer to filter module data in shared memory
+///	@param[in,out] *pC	Pointer to filter coeffs in local memory
+///	@param[in] totMod	Total number of filter modules
+///	@param[in] *pRfmCoeff	Pointer to filter coeffs in shared memory
 inline int
 initVars(FILT_MOD *pL, volatile FILT_MOD *pV, COEF *pC, int totMod,
          volatile VME_COEF *pRfmCoeff) {
   return initVarsId(pL, pV, pC, totMod, pRfmCoeff, 0);
 }
 
-inline void
-initVars1Id(FILT_MOD *pL,
-	  volatile FILT_MOD *pV,
-	  COEF *pC,
-	  int modStart,
-	  int totMod,
-	  volatile VME_COEF *pRfmCoeff,
-	  int id)                       /* System Id (HEPI) */
-{
-  int ii,kk,hh;
-
-  /*Initialize all the variables */
-  for(ii=modStart; ii<totMod;ii++){
-    
-    for(kk=0;kk<FILTERS;kk++){
-      /*set History*/
-      for(hh=0;hh<MAX_HISTRY;hh++){
-	pC->coeffs[ii].filtHist[kk][hh] = 0;
-      }
-      
-      pL->inputs[ii].cnt[kk] = 0;
-    }
-
-    /*set decimation history*/
-    for(hh=0;hh<8;hh++){
-      pC->coeffs[ii].decHist[hh] = 0;
-    }
-    
-    /*set switch/offsets/gains/limits*/
-    pL->inputs[ii].opSwitchE = 
-      pV->inputs[ii].opSwitchE;
-    
-    pL->inputs[ii].opSwitchP = 0;
-    pL->inputs[ii].rset = 0;
-    pL->inputs[ii].offset = pV->inputs[ii].offset;
-    pL->inputs[ii].outgain = pV->inputs[ii].outgain;
-    pL->inputs[ii].limiter =  pV->inputs[ii].limiter;
-    pL->inputs[ii].gain_ramp_time = pV->inputs[ii].gain_ramp_time;
-    RampParamInit(&offset_ramp[ii][id],
-                  (pL->inputs[ii].opSwitchE & OPSWITCH_OFFSET_ENABLE)?pL->inputs[ii].offset: 0.0,
-                  FE_RATE);
-    RampParamInit(&gain_ramp[ii][id],pL->inputs[ii].outgain,FE_RATE);
-  }
-
-  readCoefVme(pC + modStart, pL, modStart, totMod, pRfmCoeff + modStart);
-}
-
-inline void
-initVars1(FILT_MOD *pL, volatile FILT_MOD *pV, COEF *pC, int modStart,
-	  int totMod, volatile VME_COEF *pRfmCoeff)  {
-  initVars1Id(pL, pV, pC, modStart, totMod, pRfmCoeff, 0);
-}
-
-#ifndef SERVOMIXED
-
-/**************************************************************************
-filterModule - Perform filtering for a string of up to 10 filters
-
-Decodes Operator Switches.
-Filters sections according to specified filter type (1-3).
-Outputs answer to the output module function.
-Sets readback filter bit for EPICS display screen.
-*************************************************************************/
-
-inline double
-filterModule2(FILT_MOD *pFilt,     /* Filter module data  */
-	     COEF *pC,            /* Filter coefficients */
-	     int modNum,          /* Filter module number */
-	     double filterInput,  /* Input data sample (output from funtcion inputModule()) */
-	     int *mask)		 /* Allows external switching control */
-{
-  /* decode arrays for operator switches */
-  UINT32 opSwitchE = pFilt->inputs[modNum].opSwitchE;
-  /* Do the shift to match the bits in the the opSwitchE variable so I can do "==" comparisons */
-  UINT32 opSwitchP = pFilt->inputs[modNum].opSwitchP >> 1;
-  int ii, jj, kk, ramp, timeout;
-  int sw, sw_out, sType, sw_in,swControl;
-  double filtData;
-  float avg, compare;
-  double output;
-  double fmInput;
-
-  fmInput = 0;
-  pFilt->data[modNum].filterInput = (float)(filterInput + fmInput);
-  fmInput += (double)pFilt->data[modNum].exciteInput;
-  if (pFilt->inputs[modNum].opSwitchE & OPSWITCH_INPUT_ENABLE)
-    fmInput += filterInput;
-  pFilt->data[modNum].inputTestpoint = fmInput;
-  if (pFilt->inputs[modNum].opSwitchE & OPSWITCH_OFFSET_ENABLE)
-    fmInput += pFilt->inputs[modNum].offset;
-
-  /* Apply Filtering */
-
-  /* Loop through all filters */
-  for (ii=0; ii<FILTERS; ii++) {
-    /* Do not do anything for any filter with zero filter sections */
-    if (!pC->coeffs[modNum].filtSections[ii]) continue;
-
-    sw = opSwitchE & pow2_in[ii];       /* Epics screen filter on/off request bit */
-    swControl = *mask & pow2_in[ii];
-    sw_out = opSwitchP & pow2_in[ii];   /* Pentium output ack bit (opSwitchP was right shifted by 1) */
-
-    /* Filter switching type */
-    sType = pC->coeffs[modNum].sType[ii];
-
-    /* If sType is type 1X, the input will always go to filter to be calculated */
-    /* If sType is type 2X, then the input will be zero if output is turned off */
-    /* If sType is type 22, then the input will go to filter if filter is turning on (ramping up)*/
-    sw_in = sType < 20 || sw_out || (sType == 22 && sw);
-
-    /* Calculate filter */
-    filtData = iir_filter(sw_in?fmInput:0,
-			  pC->coeffs[modNum].filtCoeff[ii],
-			  pC->coeffs[modNum].filtSections[ii],
-			  pC->coeffs[modNum].filtHist[ii]);
-
-    if (sw == sw_out) { /* No switching */
-      if (sw) fmInput = filtData; /* Use the filtered value if the filter is turned on */
-    } else {  /* Switching request */
-      int sTypeMod10 = sType%10;
-      /* Process filter switching according to output type [1-3] */
-      switch (sTypeMod10) {
-      case 1: /* Instantenious switch */
-	/* Turn output on/off according to the request */
-	if ((sw_out = sw)) fmInput = filtData; /* Use the filtered value if the filter is turned on */
-	*mask |= pow2_out[ii];
-	break;
-      case 2: /* Ramp in/out filter output */
-	ramp = pFilt->inputs[modNum].rmpcmp[ii];   /* Ramp slope coefficient */
-	kk = pFilt->inputs[modNum].cnt[ii];        /* Ramp count */
-	/* printf("kk=%d; ramp=%d; sw=%d; sw_out=%d\n", kk, ramp, sw, sw_out); */
-
-	if (kk == ramp) {                          /* Done ramping */
-	  /* Turn output on/off according to the request */
-	  if ((sw_out = sw)) fmInput = filtData; /* Use the filtered value if the filter is turned on */
-	  kk = 0;
-	  *mask |= pow2_out[ii];
-	} else {                                   /* Ramping will be done */
-	  if (kk) {                                /* Currently ramping */
-	    double t = (double)kk / (double)ramp;  /* Slope */
-	    if (sw)                                /* Turn on request */
-	      fmInput = (1.0 - t) * fmInput + t * filtData;
-	    else                                   /* Turn off request */
-	      fmInput = t * fmInput + (1.0 - t) * filtData;
-	  } else {                                 /* Start to ramp */
-	    if (sw)                                /* Turn on request */
-	      ;                                    /* At the start of turning on ramp input goes to output (filter bypassed) */
-	    else                                   /* Turn off request */
-	      fmInput = filtData;	           /* At the start of turning off the ramp is at filter output */
-	  }
-	  kk++;
-	}
-	pFilt->inputs[modNum].cnt[ii] = kk;
-	break;
-      case 3: /* Comparator */
-      case 4: /* Zero crossing */
-	ramp = pFilt->inputs[modNum].rmpcmp[ii];  /* Filter comparison range */
-	timeout = pFilt->inputs[modNum].timeout[ii]; 	/* Comparison timeout number */
-	kk = pFilt->inputs[modNum].cnt[ii];   /* comparison count */
-	if (sTypeMod10 == 3) compare = fmInput - filtData; /* Comparator looks at the filter in/out diff */
-	else compare = sw_out? filtData: fmInput; /* Use the filtered value if waiting to switch off */
-	if (compare < .0) compare = -compare;
-
-	++kk;
-	if (kk >= timeout || compare <= (float)ramp) { /* If timed out or the difference is in the range */
-	  *mask |= pow2_out[ii];
-	  kk = timeout;
-	}
-	if((*mask & pow2_in[ii]) && (*mask & pow2_out[ii]))
-	{
-	  /* Turn output on/off according to the request */
-	  if ((sw_out = sw)) fmInput = filtData; /* Use the filtered value if the filter is turned on */
-	  kk = 0;
-	} else { /* Waiting for the match or the timeout */
-	  if (sw_out) fmInput = filtData; /* Use the filtered value if waiting to switch off */
-	}
-
-	pFilt->inputs[modNum].cnt[ii] = kk;
-	break;
-      default:
-	fmInput = 777;
-	break;
-      }
-    
-      if (sw == sw_out) { /* If turning the filter on/off NOW */
-	/* Clear history buffer if filter is turned off NOW */
-	/* History is cleared one time only */
-	if (!sw) { /* Turn off request */
-	  for(jj=0;jj<MAX_HISTRY;jj++)
-	    pC->coeffs[modNum].filtHist[ii][jj] = 0.0;
-
-	}
-
-	/* Send back the readback switches when there is change */
-	if (sw_out) { /* switch is on, turn it on */
-	  pFilt->inputs[modNum].opSwitchP |= pow2_out[ii];
-	} else { /* switch is off, turn it off */
-	  pFilt->inputs[modNum].opSwitchP &= ~pow2_out[ii];
-	}
-      }
-    }
-  }
-
-  /* Calculate output values */
-  {
-    output = fmInput * (double)pFilt->inputs[modNum].outgain;
-
-    /* Limiting */
-    if (opSwitchE &  OPSWITCH_LIMITER_ENABLE) {
-      if(output > pFilt->inputs[modNum].limiter)
-	output = pFilt->inputs[modNum].limiter;
-      else if(output < -pFilt->inputs[modNum].limiter)
-	output = -pFilt->inputs[modNum].limiter;
-    }
-
-    /* Set Test Point */
-    pFilt->data[modNum].testpoint = output;
-
-#if defined(SERVO5HZ)
-    avg = output;
-#else
-    /* Do the Decimation regardless of whether it is enabled or disabled */
-    avg = iir_filter(output,avgCoeff,2,pC->coeffs[modNum].decHist);
-#endif
-
-    /* Test Output Switch and output hold on/off */
-    if (opSwitchE & OPSWITCH_HOLD_ENABLE) {
-      ; /* Outputs are not assigned, hence they are held */
-    } else {
-      if (opSwitchE & OPSWITCH_OUTPUT_ENABLE) {
-	pFilt->data[modNum].output = output;
-
-	/* Decimation */
-	if (opSwitchE & OPSWITCH_DECIMATE_ENABLE) 
-	  pFilt->data[modNum].output16Hz = avg;
-	else
-	  pFilt->data[modNum].output16Hz = output;
-      } else {
-        pFilt->data[modNum].output = 0;
-        pFilt->data[modNum].output16Hz = 0;
-	output = 0.0;
-      }
-    }
-  }
-  return output;
-}
-
-#endif
-	     
 /* This module added to hanle all input, calculations and outputs as doubles. This module also
    incorporates the input module, done separately above for older systems. */
 
@@ -1276,6 +675,18 @@ filterModule2(FILT_MOD *pFilt,     /* Filter module data  */
 	       1  0  1  0
 	       1  1  1  1
       */
+/// 	@brief This function is called by filterModuleD, or, in the case of FMC2 parts, user code directly to
+///< perform CDS standard filter module calculations.
+///	@param[in,out] *pFilt Filter Module Data
+///	@param[in] *pC Filter module coefficients
+///	@param[in] modNum Filter module ID number
+///	@param[in] filterInput Input data sample
+///	@param[in] fltrCtrlVal Filter control value
+///	@param[in] mask Control mask
+///	@param[in] offset_in Filter module DC offset value from user model.
+///	@param[in] gain_in Filter module gain value from user model.
+///	@param[in] ramp_in Ramping time from user model.
+///	@return Output of IIR/FIR filter calculations.
 double
 filterModuleD2(FILT_MOD *pFilt,     /* Filter module data  */
 	       COEF *pC,            /* Filter coefficients */
@@ -1341,9 +752,6 @@ filterModuleD2(FILT_MOD *pFilt,     /* Filter module data  */
     opSwitchE = pFilt->inputs[modNum].opSwitchE;
   }
 
-  /* Set the input to a very small number. If input is zero, code timing becomes a problem. */
-  /* This is not fully understood, but it may be due to floating point underflow when the   */
-  /* remaining calculations are done.							    */
   fmInput = 0;
 
   /* Load the filter input testpoint to the input value. */
@@ -1569,6 +977,16 @@ filterModuleD2(FILT_MOD *pFilt,     /* Filter module data  */
   return output;
 }
 
+/// 	@brief This function is called by user apps using standard IIR/FIR filters..
+///< This function in turn calls filterModuleD2 to actually perform the calcs, with dummy
+///< vars added.
+///	@param[in,out] *pFilt Filter Module Data
+///	@param[in] *pC Filter module coefficients
+///	@param[in] modNum Filter module ID number
+///	@param[in] filterInput Input data sample
+///	@param[in] fltrCtrlVal Filter control value
+///	@param[in] mask Control mask
+///	@return Output of IIR/FIR filter calculations.
 inline double
 filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
 	       COEF *pC,            /* Filter coefficients */
