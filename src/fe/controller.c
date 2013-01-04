@@ -141,16 +141,13 @@ unsigned int cycleHistWhenHold[64];
 #endif
 
 
-#if defined(SHMEM_DAQ)
 struct rmIpcStr *daqPtr;
-#endif
 
 int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
 
 // Include C code modules
 #include "moduleLoad.c"
 #include "map.c"
-#include "fb.c"
 
 
 char daqArea[2*DAQ_DCU_SIZE];		// Space allocation for daqLib buffers
@@ -1559,10 +1556,6 @@ udelay(1000);
 	  pLocalEpics->epicsOutput.diags[FE_DIAGS_IPC_STAT] = ipcErrBits;
 	  if(ipcErrBits) feStatus |= FE_ERROR_IPC;
 	  // Create FB status word for return to EPICS
-#ifdef USE_GM
-  	  pLocalEpics->epicsOutput.diags[FE_DIAGS_FB_NET_STAT] = (fbStat[1] & 3) * 4 + (fbStat[0] & 3);
-#endif
-#if defined(SHMEM_DAQ)
 	  mxStat = 0;
 	  mxDiagR = daqPtr->status;
 	  if((mxDiag & 1) != (mxDiagR & 1)) mxStat = 1;
@@ -1571,7 +1564,6 @@ udelay(1000);
   	  mxDiag = mxDiagR;
 	  if(mxStat != 3)
 		feStatus |= FE_ERROR_DAQ;;
-#endif
 	  usrHoldTime = 0;
   	  if((pLocalEpics->epicsInput.overflowReset) || (overflowAcc > OVERFLOW_CNTR_LIMIT))
 	  {

@@ -70,28 +70,16 @@ typedef struct DAQ_RANGE {
 /// Stucture to provide timing and crc info DAQ network driver via shared memory.
 typedef struct blockProp {
   unsigned int status;
-#ifdef SHMEM_DAQ
   unsigned int timeSec;		///< DAQ data timestamp seconds
   unsigned int timeNSec;	///< DAQ data timestamp nanoseconds
   unsigned int run;
   unsigned int cycle;
   unsigned int crc; 	///< block data CRC checksum 
-#else
-  unsigned long timeSec;
-  unsigned long timeNSec;
-  unsigned long run;
-  unsigned long cycle;
-  unsigned long crc; /* block data CRC checksum */
-#endif
 } blockPropT;
 
 /// Structure for passing data info to DAQ network writer via shared memory
 struct rmIpcStr {    
-#ifdef SHMEM_DAQ
   unsigned int cycle;  ///< Copy of latest cycle num from blocks 
-#else
-  unsigned long cycle;  /* Copy of latest cycle num from blocks */
-#endif
   unsigned int dcuId;          ///< id of unit, unique within each site  
   unsigned int crc;	       ///< Configuration file's checksum       
   unsigned int command;        ///< Allows DAQSC to command unit.      
