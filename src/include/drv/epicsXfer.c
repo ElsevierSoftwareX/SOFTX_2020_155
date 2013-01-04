@@ -1,9 +1,15 @@
+///	@file epicsXfer.c
+///	@brief File contains routines for:
+///<		- Exchanging filter module data with EPICS shared memory
+///<		- Checking for process kill command from EPICS
+///<		- Ramping algorithm, used by Product.pm part.
 /************************************************************************/
-/* TASK: updateEpics()                                          */
-/*      Initiates/performs functions required on particular clock cycle */
-/*      counts. Due to performace reqs of LSC, do not want to do more   */
-/*      than one housekeeping I/O function per LSC cycle. Resulting     */
-/*      update rate to/from EPICS is 16Hz.                              */
+///	Function to exchange filter module data with EPICS via shared memory.
+///	@param[in] subcycle		Filter Module ID for data transfer.
+///	@param[in] *dsp			Pointer to process memory fm data.
+///	@param[in] *pDsp		Pointer to shared memory fm data.
+///	@param[in] *dspCoeff		Pointer to process memory fm coeff data.
+///	@param[in] *pCoeff		Pointer to shared memory fm coeff data.
 /************************************************************************/
 inline void updateEpics(int subcycle,
 			FILT_MOD *dsp,
@@ -14,7 +20,6 @@ inline void updateEpics(int subcycle,
 int ii;
 
   ii = subcycle;
-  /* Check for new filter coeffs or history resets */
   if((ii >= 0) && (ii < MAX_MODULES))
   {
         checkFiltReset(ii, dsp, pDsp, dspCoeff, MAX_MODULES, pCoeff);
@@ -47,15 +52,15 @@ int ii;
 }
 
 
+/// Check for process stop command from EPICS
+///	@param[in] subcycle	Present code cycle
+///	@param[in] *plocalEpics	Pointer to EPICS data in shared memory
 inline int checkEpicsReset(int subcycle, CDS_EPICS *plocalEpics){
   int ii;
 
   ii = subcycle;
 
   if ((ii==MAX_MODULES) && (plocalEpics->epicsInput.vmeReset)) {
-#ifndef NO_RTL
-        //printf("VME_RESET PUSHED !!! \n");
-#endif
 #ifdef ADC_MASTER
 	if (cdsPciModules.adcCount > 0)  gsc16ai64AdcStop();
 #endif
@@ -66,6 +71,7 @@ inline int checkEpicsReset(int subcycle, CDS_EPICS *plocalEpics){
 
 }
 
+///	Perform gain ramping
 int gainRamp(float gainReq, int rampTime, int id, float *gain, int gainRate)
 {
 
