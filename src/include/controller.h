@@ -182,10 +182,8 @@ char *build_date = __DATE__ " " __TIME__;
 extern int iop_rfm_valid;
 volatile char *_epics_shm;      ///< Ptr to EPICS shared memory area
 char *_ipc_shm;                 ///< Ptr to inter-process communication area 
-#if defined(SHMEM_DAQ)
 char *_daq_shm;                 ///< Ptr to frame builder comm shared mem area 
 int daq_fd;                     ///< File descriptor to share memory file 
-#endif
 
 long daqBuffer;                 // Address for daq dual buffers in daqLib.c
 CDS_HARDWARE cdsPciModules;     // Structure of PCI hardware addresses

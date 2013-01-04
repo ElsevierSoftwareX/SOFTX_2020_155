@@ -244,7 +244,6 @@ int init_module (void)
 
 // If DAQ is via shared memory (Framebuilder code running on same machine or MX networking is used)
 // attach DAQ shared memory location.
-#if defined(SHMEM_DAQ)
         sprintf(fname, "%s_daq", SYSTEM_NAME_STRING_LOWER);
         ret =  mbuf_allocate_area(fname, 64*1024*1024, 0);
         if (ret < 0) {
@@ -254,7 +253,6 @@ int init_module (void)
         _daq_shm = (unsigned char *)(kmalloc_area[ret]);
         printf("Allocated daq shmem; set at 0x%p\n", _daq_shm);
  	daqPtr = (struct rmIpcStr *) _daq_shm;
-#endif
 
 	// Find and initialize all PCI I/O modules *******************************************************
 	  // Following I/O card info is from feCode
@@ -633,7 +631,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
  
 #ifndef NO_DAQ
 	printf("Initializing Network\n");
-	numFb = cdsDaqNetInit(2);
+	numFb = 1;
 	if (numFb <= 0) {
 		printf("Couldn't initialize Myrinet network connection\n");
 		return -1;
