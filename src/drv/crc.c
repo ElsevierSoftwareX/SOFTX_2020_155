@@ -1,3 +1,6 @@
+///	@file crc.c
+///	@brief Contains functions for performing CRC checksum calculations.
+
 unsigned int crctab[256] =
 {
   0x0,
@@ -54,8 +57,12 @@ unsigned int crctab[256] =
   0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4
 };
 
-/* Calculate CRC checksum on array 'cp' of length 'bytes'.
-   Use new checksum to the 'crc' */
+/// Calculate CRC checksum on array 'cp' of length 'bytes'.
+///   Use new checksum to the 'crc' 
+///	@param[in] *cp		Pointer to data on which to perform crc calc.
+///	@param[in] bytes	Number of bytes to perform crc on.
+///	@param[in] crc		Previous crc calc result.
+///	@return Intermediate CRC checksum value.
 unsigned int
 crc_ptr(char* cp, unsigned int bytes, unsigned int crc)
 {
@@ -65,7 +72,10 @@ crc_ptr(char* cp, unsigned int bytes, unsigned int crc)
   return crc;
 }
 
-/* Finish calculating the CRC checksum using the total length 'bytes' */
+/// Finish calculating the CRC checksum using the total length 'bytes' 
+///	@param[in] bytes	Total number of bytes in crc calc.
+///	@param[in] crc		Intermediate crc calc result.
+///	@return Final CRC checksum value.
 unsigned int
 crc_len(unsigned int bytes, unsigned int crc)
 {
