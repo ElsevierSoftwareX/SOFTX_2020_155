@@ -1,3 +1,5 @@
+///	@file moduleLoad.c
+///	@brief File contains startup routines for real-time code.
 
 // These externs and "16" need to go to a header file (mbuf.h)
 extern void *kmalloc_area[16];
@@ -7,9 +9,19 @@ extern int run_on_timer;
 extern char daqArea[2*DAQ_DCU_SIZE];           // Space allocation for daqLib buffers
 
 
-// /proc filesystem entry
+/// /proc filesystem entry
 struct proc_dir_entry *proc_entry;
 
+/// Routine to read the /proc file. \n \n
+///	 We give all of our information in one go, so if the
+///	 user asks us if we have more information the \n
+///	 answer should always be no.
+///	 
+///	  This is important because the standard read
+///	  function from the library would continue to issue \n
+///	  the read system call until the kernel replies
+///	  that it has no more information, or until its \n
+///	  buffer is filled.
 int
 procfile_read(char *buffer,
 	      char **buffer_location,
@@ -129,6 +141,7 @@ procfile_read(char *buffer,
 
 	return ret;
 }
+
 // MAIN routine: Code starting point ****************************************************************
 #ifdef ADC_MASTER
 int need_to_load_IOP_first;
