@@ -1,3 +1,6 @@
+///	@file fmReadCoeff.c
+///	@brief Routines compiled with skeleton.st to allow EPICS to read in DAQ .ini configuration files.
+
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef SOLARIS
@@ -112,11 +115,11 @@ void memcpy_swap_words(void *dest, void *src) {
 }
 
 #ifdef FIR_FILTERS
-  /* Temporary storage for FIR filter coefficients */
+  /// Temporary storage for FIR filter coefficients 
   double firFiltCoeff[MAX_FIR_MODULES][FILTERS][1 + FIR_TAPS];
 #endif
 
-/* Read system 'fmc' coeffs for subsys 'n' */
+/// Read system 'fmc' coeffs for subsys 'n' 
 int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
   int i, j, k;
   int ix;
@@ -920,6 +923,9 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
   return 0;
 }
 
+/// Test routine which will print out filter coefs to screen.
+///	@param[in] *fmc		Pointer to filter coef data.
+///	@param[in] subsystems	Number of subsystems
 void
 printCoefs(fmReadCoeff *fmc, int subsystems) {
   int i, j, k, l;
