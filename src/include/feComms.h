@@ -1,36 +1,25 @@
-//#include "feSelectHeader.h"
+///	@file feComms.h
+///	@brief Defines structure for data passing between EPICS and real-time process.
+
 #include FE_HEADER
 
-/* Vme bus reset */
-#define SYSVME_RESET_MAGIC_WORD 0x13571113
-
-typedef struct FE2FE_COMMS{
-	double dData[16];
-	float fData[16];
-	int iData[16];
-}FE2FE_COMMS;
-
-typedef struct FEFE_COMMS{
-	FE2FE_COMMS feComms[32];
-}FEFE_COMMS;
-
-#define FE2FE_OFFSET	0x10000
-
+/// Structure for passing data between EPICS and Real-time Code. \n
+/// Original use was via RFM network, but now used in shared memory.
 typedef struct RFM_FE_COMMS {
     union {
-      char pad[0x1000];			/* Reserved for 5579 cntrl reg */
+      char pad[0x1000];			///< Reserved for 5579 cntrl reg 
       struct {
-      	unsigned int awgtpman_gps;	/* awgtpman passes its current GPS time seconds to the FE for checking */
-	unsigned int feDaqBlockSize;	/* Front-end passes its current DAQ block size so awgtpman can figure out them maximum number of TPs */
+      	unsigned int awgtpman_gps;	///< awgtpman passes its current GPS time seconds to the FE for checking 
+	unsigned int feDaqBlockSize;	///< Front-end passes its current DAQ block size so awgtpman can figure out the maximum number of TPs 
       };
     } padSpace;
     union{				/* Starts at 	0x0000 0040 */
       char sysepics[0x100000];
-      CDS_EPICS epicsShm;
+      CDS_EPICS epicsShm;		///< EPICS shared memory space
     }epicsSpace;
     union{				/*		0x0000 1000 */
       char sysdsp[0x200000];
-      FILT_MOD epicsDsp;
+      FILT_MOD epicsDsp;		///< Filter module input/output data space.
     }dspSpace
 #ifdef PNM
 	[NUM_SYSTEMS]
@@ -38,16 +27,11 @@ typedef struct RFM_FE_COMMS {
     ;
     union{				/*		0x0000 2000 */
       char syscoeff[0x400000];
-      VME_COEF epicsCoeff;
+      VME_COEF epicsCoeff;		///< Filter module coefficient info space.
     }coeffSpace
 #ifdef PNM
 	[NUM_SYSTEMS]
 #endif
     ;
 }RFM_FE_COMMS;
-
-typedef struct GDS_SELECTIONS {
-        int gdsExcMon[15];
-        int gdsTpMon[30];
-}GDS_SELECTIONS; 
 
