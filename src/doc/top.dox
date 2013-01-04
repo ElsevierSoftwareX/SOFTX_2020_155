@@ -26,14 +26,43 @@ Now you can proceed to \ref rts "RTS Modules"
 <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7687">iirFilter</a>
 @{
 @file controller.c
+@file moduleLoad.c
 * Main RTS Code Thread.
-@file daqLib.c
-@file fm10Gen.c
-@file epicsXfer.c
 @}
 */
 
-///	\defgroup iod I/O Drivers
+///	\defgroup filters Digital Filtering
+///	@{
+///	\defgroup filtRt Realtime
+///	@{
+///	@file fm10Gen.c
+///	@file epicsXfer.c
+///	@file inputFilterModule.h
+///	@file inputFilterModule1.h
+///	@}
+///	\defgroup filtEpics EPICS
+///	@{
+///	@file fmReadCoeff.c 
+///	@}
+///	@}
+
+///	\defgroup daq Data Acquisition
+///	@{
+///	\defgroup daqrt DAQ Realtime
+///	@{
+///	@file daqLib.c
+///	@}
+///	\defgroup daqNet DAQ Network
+///	@{
+///	@file mx_stream.c
+///	@}
+///	\defgroup daqEpics DAQ EPICS
+///	@{
+///	@file param.c
+///	@}
+///	@}
+
+///	\defgroup iod PCIe Module I/O Drivers
 ///	@{
 ///	@file map.c
 ///	@file timing.c
@@ -50,11 +79,25 @@ Now you can proceed to \ref rts "RTS Modules"
 ///	@file symmetricomGps.c
 ///	@file vmic5565.c
 ///	@}
-///	\defgroup rtnet Networking
+///	\defgroup rtnet Real-Time Networking
 ///	@{
 ///	@file commData2.c 
 ///	@file dolphin.c
-///	@file mx_stream.c
+///	@}
+///	\defgroup head Headers
+///	@{
+///	@file commData2.h 
+///	@file controller.h 
+///	@file feComms.h 
+///	@file daqmap.h 
+///	@file crc.h 
+///	@file fmReadCoeff.h 
+///	@}
+///	\defgroup supp Support
+///	@{
+///	@file crc.c 
+///	@file rfm.c 
+///	@file susWatchdogFilters.c 
 ///	@}
 ///	\defgroup test Test Results
 ///	@{
