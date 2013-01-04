@@ -1,4 +1,6 @@
-
+///	@file inputFilterModule1.h
+///	@brief File contains routines to support single pole/ single zero filter modules
+///<		with EPICS inputs.
 
 static double inputFilterModuleRamp1(
 	double *v, 	/* current value in/out */

@@ -1,5 +1,8 @@
+///	@file inputFilterModule.h
+///	@brief File contains routines for running single pole/single zero filter modules
+///		with settings from EPICS.
 
-
+/// Control ramping of filter parameters
 static double inputFilterModuleRamp(
 	double *v, 	/* current value in/out */
 	double nv,	/* new value from Epics */
@@ -30,6 +33,23 @@ static double inputFilterModuleRamp(
 	return *v;
 }
 
+/// Perform single pole / single zero filter calcs.
+///	@param[in] in		input IN0
+///	@param[in,out] *old_out		input IN1_PREV, output IN1
+///	@param[in,out] *old_val		input VAL_PREV, output VAL
+///	@param[in] offset		filter DC offset
+///	@param[in,out] *pk		input current gain value, output new value (after ramping was done)
+///	@param[in,out] *pp		input current pole value, output new value (after ramping was done)
+///	@param[in,out] *pz		input current zero value, output new value (after ramping was done)
+///	@param[in] epics_k		EPICS gain value
+///	@param[in] epics_p		EPICS pole value
+///	@param[in] epics_z		EPICS zero value
+///	@param[in] k_tramp		EPICS gain ramp time in seconds
+///	@param[in] p_tramp		EPICS pole ramp time in seconds
+///	@param[in] z_tramp		EPICS zero ramp time in seconds
+///	@param[in,out] *ks		Gain ramping steps
+///	@param[in,out] *ps		Pole ramping steps
+///	@param[in,out] *zs		Zero ramping steps
 void inputFilterModule(
 	double in,						/* input IN0 */
 	double *old_out,					/* input IN1_PREV, output IN1 */
