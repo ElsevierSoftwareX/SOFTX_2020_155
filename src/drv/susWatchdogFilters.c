@@ -1,3 +1,6 @@
+///	@file susWatchdogFilters.c
+///	@brief File contains hard-coded filters for use in quad suspension watchdogs.
+
 /* PREDEFINEDFILTER.c
  * 
  * This function implements a hard coded filter. band-limited rms filter
@@ -13,24 +16,27 @@
 
 #define LOCAL_TAPS 3
 
-// 100mHz 6th order Butterworth High Pass
+/// 100mHz 6th order Butterworth High Pass
 static double coeff100mHzHP[13] = {0.9999814787757688,
 -1.9999814786838519, 0.9999814787757688, -2.0000000000000000, 1.0000000000000000,
 -1.9999864413972834, 0.9999864414892007, -2.0000000000000000, 1.0000000000000000,
 -1.9999950371273625, 0.9999950372192801, -2.0000000000000000, 1.0000000000000000};
 
-// 10mHz 6th order Butterworth Low Pass
+/// 10mHz 6th order Butterworth Low Pass
 static double coeff10mHzLP[13] = {1.213441511757052e-38,
 -1.9999981478612208, 0.9999981478621400, 2.0000000000000000, 1.0000000000000000,
 -1.9999986441397286, 0.9999986441406479, 2.0000000000000000, 1.0000000000000000,
 -1.9999995037199008, 0.9999995037208200, 2.0000000000000000, 1.0000000000000000};
 
-// Variable to store history
+/// Variable to store history
 static double fixedFilterHistory[MAX_HISTRY];
 
 
-/* This function implements a hard coded 100 mHz High pass filter.
- */
+/// This function implements a hard coded 100 mHz High pass filter.
+///	@param[in] *argin	Inputs 0=input value for filtering, 1=history reset flag.
+///	@param[in] nargin	Number of values to read in from argin.
+///	@param[out] *argout	Result of IIR filter operation.
+///	@param[in] nargout	Number of values returned in argout.
 void FILTER100MHZHP(double *argin, int nargin, double *argout, int nargout){
 	static double reset_history = 0;
 	int ii = 0;
@@ -47,6 +53,11 @@ void FILTER100MHZHP(double *argin, int nargin, double *argout, int nargout){
 
 }
 
+/// This function implements a hard coded 10 mHz low pass filter.
+///	@param[in] *argin	Inputs 0=input value for filtering, 1=history reset flag.
+///	@param[in] nargin	Number of values to read in from argin.
+///	@param[out] *argout	Result of IIR filter operation.
+///	@param[in] nargout	Number of values returned in argout.
 void FILTER10MHZLP(double *argin, int nargin, double *argout, int nargout){
 	static double reset_history = 0;
         int ii = 0;
