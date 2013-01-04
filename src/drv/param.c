@@ -1,3 +1,6 @@
+///	@file param.c
+///	@brief File contains routines for reading in DAQ config info by EPICS (skeleton.st).
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -54,14 +57,12 @@ static char *strcat_lower(char *dest, char *src) {                    /* MA */
 
 int default_dcu_rate; 
 
-/*
- * Parse DAQ system config file `fname' and call `callback' function
- * for each data channel configured. Config files's CRC will be saved in
- * `*crc'. Parameter `testpoint' is here for frame builder use.
- * `arch_file' is a base name of archive file, ie. it is a full path
- * Archive file name will be a base name with added date and time at the end.
- * `user' is a user defined pointer passed to callback.
- */
+ ///Parse DAQ system config file `fname' and call `callback' function
+ /// for each data channel configured. Config files's CRC will be saved in
+ /// `*crc'. Parameter `testpoint' is here for frame builder use.
+ /// `arch_file' is a base name of archive file, ie. it is a full path
+ /// Archive file name will be a base name with added date and time at the end.
+ /// `user' is a user defined pointer passed to callback.
 int
 parseConfigFile(char *fname, unsigned long *crc,
 		int (*callback)(char *channel_name, struct CHAN_PARAM *params, void *user),
@@ -456,11 +457,9 @@ infoCallback(char *channel_name, struct CHAN_PARAM *params, void *user) {
 }
 
 
-/*
- * Load DAQ configuration file and store data in `info'.
- * Input and archive file names are determined based on provided site, ifo
- * and system names.
- */
+ /// Load DAQ configuration file and store data in `info'.
+ /// Input and archive file names are determined based on provided site, ifo
+ /// and system names.
 int
 loadDaqConfigFile(DAQ_INFO_BLOCK *info, char *site, char *ifo, char *sys)
 {
