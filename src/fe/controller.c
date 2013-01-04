@@ -956,6 +956,12 @@ udelay(1000);
 			// adcData is the integer representation of the ADC data
 			adcData[jj][ii] = (*packedData & mask);
 			adcData[jj][ii]  -= offset;
+#ifdef DEC_TEST
+			if(ii==0)
+			{
+				adcData[jj][ii] = dspPtr[0]->data[0].exciteInput;
+			}
+#endif
 			// dWord is the double representation of the ADC data
 			// This is the value used by the rest of the code calculations.
 			dWord[jj][ii] = adcData[jj][ii];
@@ -1689,7 +1695,8 @@ udelay(1000);
 	if (cdsPciModules.rfmCount > 0) {
         	if (cycleNum >= HKP_RFM_CHK_CYCLE && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount)) {
 			int mod = cycleNum - HKP_RFM_CHK_CYCLE;
-			vmic5565CheckOwnDataRcv(mod);
+			status = vmic5565CheckOwnDataRcv(mod);
+			if(!status) ipcErrBits |= 4 + (mod * 4);
 		}
 		if (cycleNum >= (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount) && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount*2)) {
 			int mod = cycleNum - HKP_RFM_CHK_CYCLE - cdsPciModules.rfmCount;
