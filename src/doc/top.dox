@@ -107,4 +107,8 @@ Now you can proceed to \ref rts "RTS Modules"
 ///	@file duotoneTestData.dox
 ///	@file fmc2TestData.dox
 ///	@}
+///	\defgroup rcg RCG Perl Modules
+///	@{
+///	@file IPCx.dox
+///	@}
 
