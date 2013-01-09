@@ -1,35 +1,59 @@
 /*!	\mainpage
 This document is for RCG V2.6.
 
-This manual is divided into the following sections:
+This documentation is divided into the following sections:
 - \subpage intro 
-- \subpage advanced "RCG Code Developer Guide"
+- \subpage userguide "RCG User's Guide"
+- \subpage devguidetop "CDS Code Design and Development"
+	- \subpage devguidercg "RCG Software"
+	- \subpage devguidedaqd "CDS DAQ Data Concentrator/Framebuilder Software"
+	- \subpage devguidends "CDS DAQ Network Data Server (NDS) Software"
 */
 
-/*! \page intro Introduction
-This page introduces the RCG
-Now you can proceed to <a href="https://dcc.ligo.org/">Ligo DCC</a> 
+/*! \page intro CDS Overview Documentation
+The Control and Data System (CDS) Real-time Code Generator (RCG) software was developed for the aLIGO project. \n
+Related Documents \n
+<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=60665">LIGO P1100052 New Control and Data Acquisition System in the Advanced LIGO Project</a> \n
+<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7834">LIGO T0900612 aLIGO CDS Design Overview</a> 
 */
 
-/*! \page advanced RCG Code Developer Guide
-This page introduces the RCG for programmers
-Now you can proceed to \ref rts "RTS Modules" 
+/*! \page userguide RCG Code Developer Guide
+This page introduces the RCG for users. \n\n
+<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=1033">LIGO T080135 RCG Application Developer's Guide</a> 
 */
 
-/*!	\defgroup rts Real-time Core
-*	Pointers to DCC Documentation
-*
-<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">Controller</a>
-*
-<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=8037">daqLib</a>
-*
-<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7687">iirFilter</a>
-@{
-@file controller.c
-@file moduleLoad.c
-* Main RTS Code Thread.
-@}
+/*! \page devguidetop RCG Software
+This page links to code documentation for RCG code developers. \n
+- \subpage devguidercg "RCG Software"
+- \subpage devguidedaqd "CDS DAQ Data Concentrator/Framebuilder Software"
+- \subpage devguidends "CDS DAQ Network Data Server (NDS) Software"
 */
+/*! \page devguidercg RCG Software
+	- \ref rcg
+	- \subpage devguidercg1 "Real-time Computer Software"
+*/
+/*! \page devguidercg1 Real-time Computer Software
+	- \ref rts \n
+	- \ref filters \n
+	- \ref daq
+	- \ref iod
+	- \ref rtnet
+	- \ref head
+	- \ref supp
+	- \ref test
+*/
+/*! \page devguidedaqd CDS DAQ Data Concentrator/Framebuilder Software
+*/
+/*! \page devguidends CDS DAQ Network Data Server (NDS) Software
+*/
+
+///	\defgroup rtc Real-time Software
+///	@{
+///	\defgroup rts Real-time Sequencer and Initialization Software
+///	@{
+///	@file controller.c
+///	@file moduleLoad.c
+///	@}
 
 ///	\defgroup filters Digital Filtering
 ///	@{
@@ -107,8 +131,10 @@ Now you can proceed to \ref rts "RTS Modules"
 ///	@file duotoneTestData.dox
 ///	@file fmc2TestData.dox
 ///	@}
+///	@}
 ///	\defgroup rcg RCG Perl Modules
 ///	@{
 ///	@file IPCx.dox
+///	@file FiltCtrl2.dox
 ///	@}
 
