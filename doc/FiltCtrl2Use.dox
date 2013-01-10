@@ -1,0 +1,12 @@
+///	\file FiltCtrl2Use.dox Document for FiltCtrl2 part.
+///     \verbatim
+1. Overview
+A variation of the CDS Standard Filter Module, this part was developed to allow additional SFM parameters, normally controlled via EPICS, to be controlled within the real-time software. 
+\endverbatim
+/// 2. Related Documentation \n
+///     <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=94185">T1200345 RCG V2.6 Filter Module with Control 2</a>
+///     \verbatim
+3. General Description and Use within an RCG model.
+4. Code Documentation
+
+\endverbatim
