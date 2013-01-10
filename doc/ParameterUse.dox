@@ -1,0 +1,67 @@
+///	\file ParameterUse.dox Document for IPCx part
+///	\verbatim
+1. Overview
+The purpose of this component is to define necessary run-time parameters and compile options.
+\endverbatim
+/// \n
+///     \subpage rcgParts "<<-- Parts Library"
+///	\verbatim
+2. Related Documentation
+\endverbatim
+/// 3. General Description and Use within an RCG model.
+///	\image html ParameterPart.tiff "Parameter Part" width=50cm
+///	\verbatim
+This module must appear once, and only once, at the top level of an RCG application model, by convention usually in the upper left-hand corner. It contains seven required fields, as shown in the example:
+
+1) site: Somewhat of a misnomer, this field is actually the designator for the site and interferometer on which the code will run. This can be a single entry (as shown) or comma delimited for multiple IFO use, such as site=H1,H2,L1. In this case, the RCG will generate code for three IFOs. This field will be used in the EPICS channel generation as the first two characters of the channel name. In the example at right, all channel names within this RCG model will have an M1: prefix.  The following sites are recognized:
+	a. C (= CalTech or California Institute of Technology)
+	b. G (= GEO)
+	c. H (= LHO or LIGO Hanford Observatory)
+	d. L  (= LLO or LIGO Livingston Observatory)
+	e. M (= MIT or Massachusetts Institute of Technology)
+	f. S  (= Stanford)
+	g. X (= Offline test systems
+
+2) rate: The sample rate of the generated code must be defined as one of the supported rates:
+	a. 64K (65,536 samples/sec)
+	b. 32K (32,768 samples/sec)
+	c. 16K (16,384 samples/sec)
+	d. 4K (4096 samples/sec)
+	e. 2K (2,048 samples/sec)
+
+3) dcuid: All real-time processes must have a unique (per IFO) dcuid number. This is used to identify a front end process to the data acquisition system for proper communications to the framebuilders. Note this same number will be used to produce a GDS node id, required for operation of GDS tools.
+
+4) host: Name of the computer on which the executable code is to run. This is used by code startup scripts to verify that this software is intended to run on the computer on which the startup script is run. This is intended to reduce the chance that an operator may start code on the wrong computer, which is a particular possibility in a large control system.
+
+5) Specific_cpu=X, where X is 1, if an IOP task, or >1 for all other applications to run on the same computer. Note also that no two tasks assigned to the same computer shall have the same cpu number.
+
+6) adcSlave=1 (if a user application model or adcMaster=1 (If model is to run as an IOP).
+7) shmem_daq=1: With RCG version 1.9 thru V2.6, this is a required field and setting. After V2.6, this was made default in software and no longer required.
+
+For items 3 and 4 above, the site system administrator should be contacted for proper id. numbers if this code is to operate on an integrated CDS computer.
+
+
+In addition to the above fields, there are additional optional entries. Each of these entries must be on its own line, followed by a carriage return:
+➢ plant_name
+	o Plant name. Only used in 40m lab plant simulations.
+➢ accum_overflow
+	o ADC overflow accumulator value.
+➢ no_daq
+	o System is to run without data acquisition capabilities. 
+➢ adcMaster=1
+	o Front-end will run as an I/O processor (IOP).
+➢ adcSlave=1
+	o Default for user applications that run as “slaves” to an IOP. 
+➢ pciRfm=1
+	o Front-end will run with PCIE Reflected Memory (RFM) network. This flag is only set in an IOP model if the computer is to be connected to the CDS PCIe real-time network. This flag should never be set in a user application.
+➢ rfm_dma=1
+	o Data to be received from the VMIC RFM network will be transferred via DMA, rather than individual read operations by each user model. NOTE: This option MUST be set in both the user model and the IOP model for the same target computer.
+
+
+
+\endverbatim
+/// 4. EPICS Channels - None \n
+/// 5. Auto Generated MEDM Screens - None \n
+/// \n
+///     \subpage rcgParts "<<-- Parts Library"
+

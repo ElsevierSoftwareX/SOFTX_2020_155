@@ -17,9 +17,25 @@ Related Documents \n
 <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7834">LIGO T0900612 aLIGO CDS Design Overview</a> 
 */
 
-/*! \page userguide RCG Code Developer Guide
+/*! \page userguide RCG Application Developer Guide
 This page introduces the RCG for users. \n\n
 <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=1033">LIGO T080135 RCG Application Developer's Guide</a> 
+	- \subpage rcgParts "RCG PARTS LIBRARY"
+*/
+/*! \page rcgParts RCG Parts Library
+	- \ref ParameterUse.dox "Parameter Block"
+	- \subpage rcgPartsIo "I/O Components"
+	- \ref FiltCtrl2Use.dox "Filter Module w/Control 2"
+*/
+/*! \page rcgPartsIo RCG I/O Parts Library
+The I/O Parts Libary within the CDS_PARTS.mdl contains all of the RCG components which support I/O modules/methods, as shown in the following figure.
+ 
+	- \ref AdcUse.dox "ADC and ADC Selector"
+	- \ref DacUse.dox "DAC Modules"
+	- \ref IpcxUse.dox "Inter-Process Communication (IPC)"
+
+
+\image html IoParts.tiff "CDS_PARTS I/O Library"
 */
 
 /*! \page devguidetop RCG Software
@@ -134,6 +150,7 @@ This page links to code documentation for RCG code developers. \n
 ///	@}
 ///	\defgroup rcg RCG Perl Modules
 ///	@{
+///	@file Adc.dox
 ///	@file IPCx.dox
 ///	@file FiltCtrl2.dox
 ///	@}
