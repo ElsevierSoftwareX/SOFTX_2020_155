@@ -19,12 +19,12 @@ Related Documents \n
 
 /*! \page userguide RCG Application Developer Guide
 This page introduces the RCG for users. \n\n
-<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=1033">LIGO T080135 RCG Application Developer's Guide</a> 
 	- \subpage rcgParts "RCG PARTS LIBRARY"
 */
 /*! \page rcgParts RCG Parts Library
 	- \ref ParameterUse.dox "Parameter Block"
 	- \subpage rcgPartsIo "I/O Components"
+	- \subpage rcgPartsEpics "EPICS Components"
 	- \ref FiltCtrl2Use.dox "Filter Module w/Control 2"
 */
 /*! \page rcgPartsIo RCG I/O Parts Library
@@ -33,9 +33,21 @@ The I/O Parts Libary within the CDS_PARTS.mdl contains all of the RCG components
 	- \ref AdcUse.dox "ADC and ADC Selector"
 	- \ref DacUse.dox "DAC Modules"
 	- \ref IpcxUse.dox "Inter-Process Communication (IPC)"
+	- \ref Contec6464DioUse.dox "Contec DIO-6464L-PE Module"
 
 
 \image html IoParts.tiff "CDS_PARTS I/O Library"
+*/
+/*! \page rcgPartsEpics RCG EPICS Parts Library
+The EPICS Parts Libary within the CDS_PARTS.mdl contains all of the RCG components which support EPICS, as shown in the following figure.
+ 
+	- \ref EpicsInputUse.dox "EPICS Input"
+	- \ref EpicsOutputUse.dox "EPICS Output"
+	- \ref EpicsMomentaryUse.dox "EPICS Momentary"
+	- \ref EzcaUse.dox "EPICS EZCA Read/Write"
+
+
+\image html EpicsParts.tiff "CDS_PARTS EPICS Library"
 */
 
 /*! \page devguidetop RCG Software
@@ -45,7 +57,7 @@ This page links to code documentation for RCG code developers. \n
 - \subpage devguidends "CDS DAQ Network Data Server (NDS) Software"
 */
 /*! \page devguidercg RCG Software
-	- \ref rcg
+	- \subpage devguidercg2 "PERL Code"
 	- \subpage devguidercg1 "Real-time Computer Software"
 */
 /*! \page devguidercg1 Real-time Computer Software
@@ -57,6 +69,53 @@ This page links to code documentation for RCG code developers. \n
 	- \ref head
 	- \ref supp
 	- \ref test
+
+*/
+/*! \page devguidercg2 RCG PERL 
+General RCG MATLAB parsing files:
+	- \ref feCodeGen.dox "feCodeGen.pl - Primary .mdl parsing file" \n
+	- \ref Parser3.dox "lib/Parser3.pm" \n
+	- \ref Util.dox "lib/Util.pm" \n
+
+EPICS Database / Code Generation
+	- \ref fmseq.dox "fmseq.pl" \n
+
+The following PERL modules support individual parts in the RCG Library. \n
+These are all located in the epics/util/lib directory.\n\n
+\b I/O \b Parts
+	- \ref Adc.dox "Adc.pm" \n
+	- \ref Dac.dox "Dac.pm" \n
+	- \ref Dac18.dox "Dac18.pm" \n
+	- \ref IPCx.dox "IPCx.pm" \n
+	- \ref CDI64.dox "CDI64.pm" \n
+	- \ref CDO64.dox "CDO64.pm" \n
+	- \ref Rio.dox "Rio.pm" \n
+	- \ref Rio1.dox "Rio1.pm" \n
+
+\b EPICS \b Parts
+	- \ref EpicsBinIn.dox "EpicsBinIn.pm" \n
+	- \ref EpicsIn.dox "EpicsIn.pm" \n
+	- \ref EpicsOut.dox "EpicsOut.pm" \n
+	- \ref EpicsMomentary.dox "EpicsMomentary.pm" \n
+	- \ref EzCaRead.dox "EzCaRead.pm" \n
+	- \ref EzCaWrite.dox "EzCaWrite.pm" \n
+
+
+	- \ref DacKill.dox "DacKill.pm" \n
+	- \ref Filt.dox "Filt.pm" \n
+	- \ref FiltCtrl.dox "FiltCtrl.pm"\n
+	- \ref FiltCtrl2.dox "FiltCtrl2.pm\n
+	- \ref FiltMuxMatrix.dox "FiltMuxMatrix.pm\n
+	- \ref FunctionCall.dox "FunctionCall.pm\n
+	- \ref Parameters.dox "Parameters.pm" \n
+	- \ref Osc.dox "Osc.pm" \n
+	- \ref Matrix.dox "Matrix.pm" \n
+	- \ref MuxMatrix.dox "MuxMatrix.pm" \n
+	- \ref Noise.dox "Noise.pm" \n
+	- \ref Phase.dox "Phase.pm" \n
+	- \ref medmGen.dox "medmGen.pm" \n
+	- \ref EXC.dox "EXC.pm" \n
+	- \ref fcn.dox "Fcn.pm" \n
 */
 /*! \page devguidedaqd CDS DAQ Data Concentrator/Framebuilder Software
 */
@@ -150,7 +209,7 @@ This page links to code documentation for RCG code developers. \n
 ///	@}
 ///	\defgroup rcg RCG Perl Modules
 ///	@{
-///	@file Adc.dox
+///	@file Adc.dox 
 ///	@file IPCx.dox
 ///	@file FiltCtrl2.dox
 ///	@}
