@@ -1,6 +1,13 @@
 #!/usr/bin/perl
 use Cwd;
 
+#//     \file fmseq.dox
+#//     \brief Documentation for fmseq.pl
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 $currWorkDir = &Cwd::cwd();
 $rcg_src_dir = $ENV{"RCG_SRC_DIR"};
 if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
