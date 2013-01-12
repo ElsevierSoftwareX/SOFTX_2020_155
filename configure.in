@@ -7,3 +7,4 @@ dnl ==========================
 AC_OUTPUT( Makefile )
 AC_OUTPUT( src/epics/util/Makefile )
 AC_OUTPUT( doc/doxygen.cfg )
+AC_OUTPUT( doc/doxScript )

@@ -74,7 +74,7 @@ all:
 
 .PHONY : doc
 doc:	
-	(cd doc && doxygen doxygen.cfg)
+	(cd doc && bash ./doxScript && doxygen doxygen.cfg)
 	
 
 reclean:
