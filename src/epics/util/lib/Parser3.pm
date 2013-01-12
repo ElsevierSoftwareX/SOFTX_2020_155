@@ -5,6 +5,13 @@ use Cwd;
 
 @ISA = ('Exporter');
 
+#//     \file Parser3.dox
+#//     \brief Documentation for Parser3.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 
 require "lib/Tree.pm";
 

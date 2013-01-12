@@ -2,6 +2,13 @@ package CDS::Rio;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file Rio.dox
+#//     \brief Documentation for Rio.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 
 sub initRio {
 	my ($node) = @_;

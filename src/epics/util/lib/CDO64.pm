@@ -2,6 +2,13 @@ package CDS::CDO64;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file CDO64.dox
+#//     \brief Documentation for CDO64.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 sub initCDO64 {
 	my ($node) = @_;
 	$::boPartNum[$::boCnt] = $::partCnt;

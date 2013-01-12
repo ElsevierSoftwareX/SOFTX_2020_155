@@ -2,6 +2,13 @@ package CDS::EpicsIn;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file EpicsIn.dox
+#//     \brief Documentation for EpicsIn.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 sub partType {
         my ($node, $i) = @_;
         $desc = ${$node->{FIELDS}}{"Description"};

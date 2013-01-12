@@ -2,6 +2,14 @@ package CDS::EXC;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file EXC.dox
+#//     \brief Documentation for EXC.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
+
 sub partType {
 	$::extraEXCcount = 0;
 	return EXC;

@@ -2,6 +2,14 @@ package CDS::Noise;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file Noise.dox
+#//     \brief Documentation for Noise.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
+
 $printed = 0;
 $init_code_printed = 0;
 1;

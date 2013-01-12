@@ -4,6 +4,14 @@ use Env qw(RCG_HOST);
 @ISA = ('Exporter');
 
 
+#//     \file Parameters.dox
+#//     \brief Documentation for Parameters.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
+
 # Print Epics communication structure into a header file
 # Current part number is passed as first argument
 sub partType {

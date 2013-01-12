@@ -2,6 +2,13 @@ package CDS::FiltMuxMatrix;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file FiltMuxMatrix.dox
+#//     \brief Documentation for FiltMuxMatrix.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 sub partType {
 	return FiltMuxMatrix;
 }

@@ -2,6 +2,13 @@ package CDS::medmGen;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file medmGen.dox
+#//     \brief Documentation for medmGen.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 #Package intended for use in generating MEDM screens
 
 # This sub will create the basic MEDM file and add color map..

@@ -2,6 +2,13 @@ package CDS::EzCaRead;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file EzCaRead.dox
+#//     \brief Documentation for EzCaRead.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 sub partType {
 	return EzCaRead;
 }

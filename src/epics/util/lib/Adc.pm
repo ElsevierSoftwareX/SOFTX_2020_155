@@ -2,6 +2,13 @@ package CDS::Adc;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file Adc.dox
+#//     \brief Documentation for Adc.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 # ADC cards we support
 %board_types = (
 	GSC_16AI64SSA => 1, # Slow General Standards board
