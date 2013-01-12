@@ -2,6 +2,13 @@ package CDS::Dac;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file Dac.dox
+#//     \brief Documentation for Dac.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 # DAC cards we support
 %board_types = (
 	GSC_16AO16 => 1, # General Standards board

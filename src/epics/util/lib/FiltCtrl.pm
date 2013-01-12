@@ -2,6 +2,14 @@ package CDS::FiltCtrl;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file FiltCtrl.dox
+#//     \brief Documentation for FiltCtrl.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
+
 sub partType {
 #	if (length $::xpartName[$::partCnt] > $::max_name_len) {
 #		die "Filter name \"", $::xpartName[$::partCnt], "\" too long (max $::max_name_len charachters)";

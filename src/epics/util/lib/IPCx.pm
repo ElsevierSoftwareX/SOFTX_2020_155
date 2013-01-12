@@ -2,30 +2,50 @@ package CDS::IPCx;
 use Exporter;
 @ISA = ('Exporter');
 
+#//	\file IPCx.dox
+#//	\brief Documentation for IPCx.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
+#//
+#// \b Required \b Modules \n
+#// 		- \b lib/Util.pm \n
+#// 		- \b lib/medmGen.pm \n
+#//	
 require "lib/Util.pm";
 require "lib/medmGen.pm";
  
-# Key global variables used in this module
-# ipcxParts[][]
-#	[][0] = IPC Name
-#	[][1] = IPC Type
-#	[][2] = sender rate
-#	[][3] = sender computer host name 
-#	[][4] = IPC number
-#	[][5] = sender model name
-#	[][6] = model part number
-#	[][7] = input part name
-#	[][8] = EPICS channel name (less ending eg _RCV)
+#// \n\n \b Key \b global \b variables \n\n
+#// \b ipcxParts[][] \n
+#//	- [][0] = IPC Name \n
+#//	- [][1] = IPC Type \n
+#//	- [][2] = sender rate \n
+#//	- [][3] = sender computer host name \n 
+#//	- [][4] = IPC number \n
+#//	- [][5] = sender model name \n
+#//	- [][6] = model part number \n
+#//	- [][7] = input part name \n
+#//	- [][8] = EPICS channel name (less ending eg _RCV) \n\n
+#//	
 
+#// \b Functions: ******************************************************** \n\n
+#// \b sub \b partType -----------------------------------------------------------------\n
+#// Returns "IPCx" as the RCG part type \n\n
 sub partType {
         return IPCx;
 }
  
-# Print Epics communication structure into a header file
-# Current part number is passed as first argument
+#// \b sub \b printHeaderStruct --------------------------------------------------------\n
+#// Print Epics communication structure into a header file if IPC part is RCVR type.\n
+#// 	- \b Param[in] \b $i = Current part number is passed as first argument \n
+#//	- \b Param[in] \b $::partInputType[][]
+#//	- \b Param[out] \b $::OUTH  Output to model header file
+#//	
 sub printHeaderStruct {
         my ($i) = @_;
-	# Only add EPICS comms if this is an IPC RCVR part
+	# Only add EPICS comms if this is an IPC RCVR part ie has a GROUND at input
         if ($::partInputType[$i][0] eq "GROUND") {
 		my $pfile = substr($::mdlfile,5);
 		my @fnam = split(/\./,$pfile);
@@ -42,8 +62,18 @@ sub printHeaderStruct {
 	}
 }
 
-# Print Epics variable definitions
-# Current part number is passed as first argument
+#// \n \b sub \b printEpics ------------------------------------------------------------\n
+#// Print Epics variable definitions into file for later use by fmseq \n
+#// This routine produces 3 EPICS channels for IPCx receivers only.
+#// 	- _ER = RCVR Error rate \n
+#// 	- _ET = RCVR Error timestamp \n
+#// 	- _PS = RCVR Error Status \n
+#//	
+#// Parameters: \n
+#// 	- \b Param[in] \b $i = Current part number is passed as first argument \n
+#// 	- \b Param[in] \b $::mdlfile = Model file name\n
+#// 	- \b Param[out] \b $::EPICS = Pointer to EPICS channel def file\b \n
+#//	
 sub printEpics {
         my ($i) = @_;
 	# Only add EPICS channels if this is an IPC RCVR part
@@ -63,8 +93,13 @@ sub printEpics {
 	}
 }
 
-# Print variable declarations into front-end file
-# Current part number is passed as first argument
+#// \b sub \b printFrontEndVars --------------------------------------------------------\n
+#// Print variable declarations into front-end file \n
+#// Returns IPC comms data structure only once per file.
+#// Parameters: \n
+#// 	- \b Param[in] \b $i = Current part number is passed as first argument \n
+#// 	- \b Param[out] \b $::OUT = Pointer to RT C code file \n
+#//	
 sub printFrontEndVars  {
         my ($i) = @_;
 
@@ -79,9 +114,12 @@ sub printFrontEndVars  {
         }
 }
 
-# Return front end initialization code
-# Argument 1 is the part number
-# Returns calculated code string
+#// \b sub \b frontEndInitCode ---------------------------------------------------------\n
+#//  Return front end initialization code for all IPC parts on first call\n
+#// Parameters: \n
+#// 	- \b Param[in] \b $i = Current part number is passed as first argument \n
+#// 	- \b Param[out] \b $::ipcxInitDone = Flag indicating IPC init is complete \n
+#//	
 sub frontEndInitCode {
         my ($i) = @_;
         my $found = 0;
@@ -134,10 +172,13 @@ sub frontEndInitCode {
         return $calcExp;
 }
 
-# Figure out part input code
-# Argument 1 is the part number
-# Argument 2 is the input number
-# Returns calculated input code
+#// \b sub \b fromExp ------------------------------------------------------------------\n
+#// Figure out part input code \n
+#// Returns calculated input code \n
+#// Parameters: \n
+#// 	- \b Param[in] \b $i = Current part number is passed as first argument \n
+#// 	- \b Param[in] \b $j = Input number \n
+#//	
 sub fromExp {
         my ($i, $j) = @_;
         my $from1 = $::partInNum[$i][$j];
@@ -166,9 +207,10 @@ sub fromExp {
         }
 }
 
-# Return front end code
-# Argument 1 is the part number
-# Returns calculated code string
+#// \b sub \b frontEndCode -------------------------------------------------------------\n
+#// Return front end code \n
+#// Argument 1 is the part number \n
+#// Returns calculated code string \n\n
 sub frontEndCode {
         my ($i) = @_;
 
@@ -214,10 +256,11 @@ sub frontEndCode {
 }
 
 
-# This sub will parse through all parts looking for IPC parts.
-# Once identified, code will determine all the parameters necessary to set up
-# the communications table.
-# Argument passed is total model part count.
+#// \b sub \b procIpc ------------------------------------------------------------------\n
+#// This sub will parse through all parts looking for IPC parts. \n
+#// Once identified, code will determine all the parameters necessary to set up
+#// the communications table. \n
+#// Argument passed is total model part count. \n\n
 sub procIpc {
 
 my ($i) = @_;

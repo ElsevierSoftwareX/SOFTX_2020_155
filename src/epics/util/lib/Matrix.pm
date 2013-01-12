@@ -2,6 +2,14 @@ package CDS::Matrix;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file Matrix.dox
+#//     \brief Documentation for Matrix.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
+
 sub partType {
 	return Matrix;
 }

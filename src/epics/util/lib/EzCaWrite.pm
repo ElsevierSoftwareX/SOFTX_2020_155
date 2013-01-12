@@ -2,6 +2,13 @@ package CDS::EzCaWrite;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file EzCaWrite.dox
+#//     \brief Documentation for EzCaWrite.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 sub partType {
 	return EzCaWrite;
 }

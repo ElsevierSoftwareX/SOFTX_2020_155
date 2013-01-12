@@ -2,6 +2,13 @@ package CDS::Util;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file Util.dox
+#//     \brief Documentation for Util.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 # Open $fname (C header file) and locate each of the rest of the arguments
 #   as a "define" name, return an array of numbers 
 #

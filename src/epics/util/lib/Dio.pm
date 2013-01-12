@@ -2,6 +2,13 @@ package CDS::Dio;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file Dio.dox
+#//     \brief Documentation for Dio.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 sub initDio {
 	my ($node) = @_;
 	$::boPartNum[$::boCnt] = $::partCnt;

@@ -2,6 +2,13 @@ package CDS::Fcn;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file Fcn.dox
+#//     \brief Documentation for Fcn.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 sub partType {
         my ($node, $i) = @_;
         my $expr = ${$node->{FIELDS}}{"Expr"};

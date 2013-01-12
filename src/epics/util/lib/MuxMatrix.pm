@@ -2,6 +2,14 @@ package CDS::MuxMatrix;
 use Exporter;
 @ISA = ('Exporter');
 
+
+#//     \file MuxMatrix.dox
+#//     \brief Documentation for MuxMatrix.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
 sub partType {
 	return MuxMatrix;
 }

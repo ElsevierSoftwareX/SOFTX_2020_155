@@ -2,6 +2,14 @@ package CDS::Phase;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \file Phase.dox
+#//     \brief Documentation for Phase.pm
+#//
+#// \n
+#//     \subpage devguidercg2 "<<-- Parts Library"
+#// \n
+
+
 sub partType {
 	return Phase;
 }
