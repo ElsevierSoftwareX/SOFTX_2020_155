@@ -1,4 +1,6 @@
-// nds test driver
+///	\file nds/daqd.cc
+///	\brief NDS test driver program.
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -11,8 +13,8 @@
 #include <stdio.h>
 #include <string.h>
 
-int
-main(int argc, char* argv[]) {
+///	\brief NDS test driver program.
+int main(int argc, char* argv[]) {
   if (argc != 3) {
     fprintf(stderr,"usage: %s <pipe file name> <result file name>\n", argv[0]);
     return 1;

@@ -454,25 +454,12 @@ double htond(double in) {
 }
 
 bool
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
 daqd_net::send_data(FrameCPP::Version::FrameH &frame, const char *file_name, unsigned frame_number, int *seq_num)
-#elif FRAMECPP_DATAFORMAT_VERSION > 4
-daqd_net::send_data(FrameCPP::Version_6::FrameH &frame, const char *file_name, unsigned frame_number, int *seq_num)
-#else
-daqd_net::send_data(FrameCPP::Frame &frame, const char *file_name, unsigned frame_number, int *seq_num)
-#endif
 {
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
   FrameCPP::Version::FrRawData::firstAdc_type adc(frame.GetRawData()->RefFirstAdc());
-#elif FRAMECPP_DATAFORMAT_VERSION > 4
-  FrameCPP::Version_6::FrRawData::AdcDataContainer &adc(frame.getRawData()->refAdc());
-#else
-  FrameCPP::RawData::AdcDataContainer &adc(frame.getRawData()->refAdc());
-#endif
 
   // Take care of the reconfiguration block
   bool config_changed = false;
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
   for (int k = 0; k < num_signals; k++) {
     if (reconfig_data[k].signal_offset != adc[k]->GetBias()
 	|| reconfig_data[k].signal_slope != adc[k]->GetSlope()
@@ -484,19 +471,6 @@ daqd_net::send_data(FrameCPP::Frame &frame, const char *file_name, unsigned fram
 	reconfig_data[k].signal_status = adc[k]->GetDataValid();
       }
   }
-#else
-  for (int k = 0; k < num_signals; k++) {
-    if (reconfig_data[k].signal_offset != adc[k]->getBias()
-	|| reconfig_data[k].signal_slope != adc[k]->getSlope()
-	|| reconfig_data[k].signal_status != adc[k]->getDataValid())
-      {
-	config_changed = true;
-	reconfig_data[k].signal_offset = adc[k]->getBias();
-	reconfig_data[k].signal_slope = adc[k]->getSlope();
-	reconfig_data[k].signal_status = adc[k]->getDataValid();
-      }
-  }
-#endif
   
   if (first_time || config_changed) {
     first_time = false;
@@ -511,20 +485,10 @@ daqd_net::send_data(FrameCPP::Frame &frame, const char *file_name, unsigned fram
   //
   // Shift from the start of data in frame (in seconds or in minutes for the minute trend data)
   unsigned start_diff = 0;
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
   unsigned dt = (unsigned) frame.GetDt(); 
-#else
-  unsigned dt = (unsigned) frame.getDt(); 
-#endif
   // How many seconds (or minutes for minute trend data) of data to send
   unsigned seconds_to_send = dt;
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
   const FrameCPP::Version::GPSTime &gps = frame.GetGTime();
-#elif FRAMECPP_DATAFORMAT_VERSION > 4
-  const FrameCPP::Version_6::GPSTime &gps = frame.getGTime();
-#else
-  const FrameCPP::Time &gps = frame.getGTime();
-#endif
   unsigned long start_time = mSpec.getStartGpsTime();
   unsigned long end_time = mSpec.getEndGpsTime();
   if (dt > 1) {
@@ -583,110 +547,58 @@ daqd_net::send_data(FrameCPP::Frame &frame, const char *file_name, unsigned fram
     // :TODO: support 32 bit integer data type -- required changes to the frmebuilder too.
 
     // Check data type
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
     unsigned int frameDataType = (unsigned int) adc[k]->RefData()[0]->GetType();
     unsigned int file_rate = (unsigned int) adc[k]->GetSampleRate();
-#else
-    unsigned int frameDataType = (unsigned int) adc[k]->refData()[0]->getType();
-    unsigned int file_rate = (unsigned int) adc[k]->getSampleRate();
-#endif
 
     switch (frameDataType) {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
     case FrameCPP::Version::FrVect::FR_VECT_2S:
     case FrameCPP::Version::FrVect::FR_VECT_4S:
     case FrameCPP::Version::FrVect::FR_VECT_2U:
     case FrameCPP::Version::FrVect::FR_VECT_4R:
     case FrameCPP::Version::FrVect::FR_VECT_8R:
-#else
-    case FrameCPP::FrVect::FR_VECT_2S:
-    case FrameCPP::FrVect::FR_VECT_2U:
-    case FrameCPP::FrVect::FR_VECT_4R:
-    case FrameCPP::FrVect::FR_VECT_8R:
-#endif
       break;
     default:
       if (file_rate != rates[k]) {
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
 	system_log(1, "%s: frame %d has an ADC `%s' of unsupported framecpp data type %d",
 		   file_name, frame_number, adc[k]->GetName().c_str(), frameDataType);
-#else
-	system_log(1, "%s: frame %d has an ADC `%s' of unsupported framecpp data type %d",
-		   file_name, frame_number, adc[k]->getName().c_str(), frameDataType);
-#endif
 	return false;
       } else break;
     }
 
     // See if conversion is required and if so do it in place
     if (mSpec.getSignalTypes()[k] == Spec::_16bit_integer) {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
       if (frameDataType == FrameCPP::Version::FrVect::FR_VECT_4R)
-#else
-      if (frameDataType == FrameCPP::FrVect::FR_VECT_4R)
-#endif
 	{
 	  // Convert floats to shorts
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
 	  short *sptr = (short *)adc[k]->RefData()[0]->GetData().get();
 	  float *fptr = (float *)adc[k]->RefData()[0]->GetData().get();
-#else
-	  short *sptr = (short *)adc[k]->refData()[0]->getData();
-	  float *fptr = (float *)adc[k]->refData()[0]->getData();
-#endif
 	  for (int l = 0; l < file_rate*seconds_to_send; l++) *sptr++ = (short) *fptr++;
 	}
-#if FRAMECPP_DATAFORMAT_VERSION > 4
       else if (frameDataType == FrameCPP::Version::FrVect::FR_VECT_8R)
-#else
-      else if (frameDataType == FrameCPP::FrVect::FR_VECT_8R)
-#endif
 	{
 	  // Convert doubles to shorts
 	  // Convert floats to shorts
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
 	  short *sptr = (short *)adc[k]->RefData()[0]->GetData().get();
 	  double *dptr = (double *)adc[k]->RefData()[0]->GetData().get();
-#else
-	  short *sptr = (short *)adc[k]->refData()[0]->getData();
-	  double *dptr = (double *)adc[k]->refData()[0]->getData();
-#endif
 	  for (int l = 0; l < file_rate*seconds_to_send; l++) *sptr++ = (short) *dptr++;
 	}
     } else if (mSpec.getSignalTypes()[k] == Spec::_32bit_float) {
-#if FRAMECPP_DATAFORMAT_VERSION > 4
       if (frameDataType == FrameCPP::Version::FrVect::FR_VECT_8R)
-#else
-	if (frameDataType == FrameCPP::FrVect::FR_VECT_8R)
-#endif
 	  {
 	    // Convert doubles to floats
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
 	    float *fptr = (float *)adc[k]->RefData()[0]->GetData().get();
 	    double *dptr = (double *)adc[k]->RefData()[0]->GetData().get();
-#else
-	    float *fptr = (float *)adc[k]->refData()[0]->getData();
-	    double *dptr = (double *)adc[k]->refData()[0]->getData();
-#endif
 	    for (int l = 0; l < file_rate*seconds_to_send; l++) *fptr++ = (float) *dptr++;
 	  }
       }
 
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
     char *sptr = ((char *)adc[k]->RefData()[0]->GetData().get()) + start_diff*bps[k]*rates[k];
-#else
-    char *sptr = ((char *)adc[k]->refData()[0]->getData()) + start_diff*bps[k]*rates[k];
-#endif
 
     if (mSpec.getDataType() != Spec::MinuteTrendData) {
       if (file_rate != rates[k]) {
 	int samples_per_point = file_rate / rates[k];
 	DEBUG(1, cerr << "decimating "
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
 	      << adc[k]->GetName()
-#else
-	      << adc[k]->getName()
-#endif
 	      << " file_rate=" << file_rate
 	      << " rate=" << rates[k]
 	      << "samples_per_point=" << samples_per_point << endl);
