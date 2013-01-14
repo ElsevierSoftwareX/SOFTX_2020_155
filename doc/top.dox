@@ -120,8 +120,19 @@ These are all located in the epics/util/lib directory.\n\n
 /*! \page devguidedaqd CDS DAQ Data Concentrator/Framebuilder Software
 */
 /*! \page devguidends CDS DAQ Network Data Server (NDS) Software
+	- \ref nds
 */
 
+///	\defgroup nds NDS Software Components
+///	@{
+///	@class CDS_NDS::Nds
+///	@class CDS_NDS::daqd_net
+///	@class CDS_NDS::Spec
+///	@struct CDS_NDS::reconfig_data_t
+///	@struct CDS_NDS::raw_trend_record_struct
+///	@file	nds.hh
+///	@file	daqd_net.hh
+///	@}
 ///	\defgroup rtc Real-time Software
 ///	@{
 ///	\defgroup rts Real-time Sequencer and Initialization Software
