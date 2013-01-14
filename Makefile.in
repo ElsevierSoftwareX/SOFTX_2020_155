@@ -148,7 +148,7 @@ nds:
 	(cd $(srcdir)/src/nds; autoconf)
 	/bin/rm -rf build/nds
 	/bin/mkdir -p build/nds
-	(mysrc=$(srcdir); cd build/nds; $$mysrc/src/nds/configure --with-framecpp=/usr/local && make)
+	(mysrc=$(srcdir); cd build/nds; $$mysrc/src/nds/configure --with-framecpp=/opt/rtapps/framecpp && make)
 
 # Build frame builder data concentrator program
 dc:
