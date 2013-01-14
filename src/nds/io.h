@@ -7,7 +7,8 @@
 
 class basic_io {
  public:
-static ssize_t						/* Read "n" bytes from a descriptor. */
+/// Read "n" bytes from a descriptor.
+static ssize_t
 readn(int fd, void *vptr, size_t n)
 {
 	size_t	nleft;
@@ -32,7 +33,8 @@ readn(int fd, void *vptr, size_t n)
 }
 /* end readn */
 
-static ssize_t						/* Write "n" bytes to a descriptor. */
+/// Write "n" bytes to a descriptor.
+static ssize_t
 writen(int fd, const void *vptr, size_t n)
 {
 	size_t		nleft;
@@ -55,7 +57,6 @@ writen(int fd, const void *vptr, size_t n)
 	return(n);
 }
 /* end writen */
-
 
 };
 #endif

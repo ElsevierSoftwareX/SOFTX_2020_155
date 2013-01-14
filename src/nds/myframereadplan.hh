@@ -5,31 +5,22 @@
 #include "framecpp/Version6/IFrameStream.hh"
 #include "mmstream.hh"
 
-//-----------------------------------------------------------------------------
-//
-//: Frame Reading Plan
-//
+/// Frame Reading Plan
 class myFrameReadPlan : public FrameCPP::Version_6::IFrameStream
 {
 public:
-  //
-  //: Constructor
-  //   
-  //!exc: std::bad_alloc - Out of memory.
-  //!exc: read_failure - Read failed.
-  //   
+  /// Constructor
+  ///	@throw std::bad_alloc  Out of memory.
+  ///	@throw read_failure  Read failed.
   myFrameReadPlan( std::istream& in );
 
-  //: Destructor
-  //
-  //!exc: None.
+  /// Destructor
+  ///	@throw None.
   ~myFrameReadPlan();
 
-  //: Read frame data
-  //   
-  //!exc: read_failure - Read failed.
-  //!exc: cannot_update    
-  //      
+  /// Read frame data
+  ///	@thorw read_failure - Read failed.
+  ///	@throw cannot_update    
   FrameCPP::Version_6::FrameH& readFrame( INT_4U frameNumber, const std::vector<std::string> &adcNames );
 
 #if 0  
@@ -45,13 +36,13 @@ public:
   bool can_be_used_for_frame(char *fname);
 private:
 
-  //: Skeleton frame object
+  /// Skeleton frame object
   FrameCPP::Version_6::FrameH frame;
 
-  //: Skeleton raw data object
+  /// Skeleton raw data object
   FrameCPP::Version_6::FrRawData raw_data;
 
-  //: TOC offset variable read from the file, last 8 bytes
+  /// TOC offset variable read from the file, last 8 bytes
   char toc_offset[8];
 }; // class FrameReadPlan
 

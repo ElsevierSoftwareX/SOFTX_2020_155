@@ -1,3 +1,6 @@
+///	\file nds.cc
+///	\brief UNIX daemon forking, job spec file reading code.
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -10,7 +13,6 @@
 #include <sys/mman.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
-
 #include <iostream>
 #include <fstream>
 #include <list>
@@ -18,16 +20,8 @@
 #include <map>
 #include <string>
 #include <algorithm>
-
 #include "nds.hh"
 #include "io.h"
-
-#if FRAMECPP_DATAFORMAT_VERSION < 6
-
-#include "framecpp/daqframe.hh"
-#include "framecpp/daqreader.hh"
-
-#endif
 
 using namespace CDS_NDS;
 
@@ -43,8 +37,7 @@ Nds::Nds(std::string p)
 }
 
 
-bool
-Nds::run()
+bool Nds::run()
 {
   int listenfd;
   struct sockaddr_un servaddr, cliaddr;

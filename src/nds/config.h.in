@@ -187,7 +187,4 @@
 /* Define if broadcast should be disabled */
 #undef NO_BROADCAST
 
-// This thing is gone from FrameCPP headers
-#define FRAMECPP_DATAFORMAT_VERSION 6
-
 #endif

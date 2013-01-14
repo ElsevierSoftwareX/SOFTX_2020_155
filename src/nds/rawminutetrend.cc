@@ -22,14 +22,6 @@
 #include "daqd_net.hh"
 #include "../daqd/crc8.cc"
 
-#if FRAMECPP_DATAFORMAT_VERSION < 6
-
-#include "framecpp/daqframe.hh"
-#include "framecpp/daqreader.hh"
-
-#endif
-
-
 using namespace CDS_NDS;
 using namespace std;
 

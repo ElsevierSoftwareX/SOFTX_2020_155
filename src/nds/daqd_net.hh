@@ -6,125 +6,143 @@
 #include <list>
 #include <map>
 #include "ldas/ldasconfig.hh"
-
-#if FRAMECPP_DATAFORMAT_VERSION >= 6
-
 #include "ldas/ldasconfig.hh"
 #include "framecpp/Common/FrameSpec.hh"
 #include "framecpp/Common/CheckSum.hh"
 #include "framecpp/Common/IOStream.hh"
 #include "framecpp/Version8/FrameStream.hh"
 #include "framecpp/Common/FrameBuffer.hh"
-
-
 #include "framecpp/FrameCPP.hh"
-
 #include "framecpp/FrameH.hh"
 #include "framecpp/FrAdcData.hh"
 #include "framecpp/FrRawData.hh"
 #include "framecpp/FrVect.hh"
-
 #include "framecpp/Dimension.hh"
-
-#else
-
-#ifdef LDAS_VERSION_NUMBER
-#include "framecpp/Version6/FrameH.hh"
-#else
-#include "framecpp/frame.hh"
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-#include "framecpp/Version6/FrameH.hh"
-#endif
-#endif
-#endif
-
 #include "spec.hh"
 
 
 namespace CDS_NDS {
 
-// DAQD network protocol reconfig data
+/// DAQD network protocol reconfig data.
 typedef struct reconfig_data_t {
   float signal_offset;
   float signal_slope;
   unsigned int signal_status;
 } reconfig_data_t;
 
+/// DAQD protocol communication back to client.
 class daqd_net {
 public:
 
-  // Subjob state
+  /// Subjob state.
   class SubjobReadState {
   public:
+    /// Constructor using a set of signal indices.
     SubjobReadState(const std::vector<unsigned int> &v)
       : finished(false), seq_num(-1),
 	block_list(), signalIndices(v)
       {}
-    // Set if subjob finished
+    /// Set if subjob finished.
     bool finished;
-    // Sequence number send by the sub-NDS when subjob finished
+    /// Sequence number send by the sub-NDS when subjob finished.
     int seq_num;
-    // Subjob data block (input block)
+    //// Subjob data block (input block).
     class BT {
     public:
+      /// Default constructor.
       BT() : length(0), dt(0), data(0) {}
+      /// Constructor with length 'l' and data pointser 'p'.
       BT(unsigned long l, char *p) : length(l), dt(0), data(p) {}
-      unsigned long length; // 'data' length
-      unsigned long dt;     // used for block splitting in combine_send_data()
-      char * data;          // malloced block's data
+      /// 'data' length.
+      unsigned long length; 
+      /// Used for block splitting in combine_send_data().
+      unsigned long dt;
+      /// malloced block's data.
+      char * data;
+      /// Output some debugging information.
       void print_debug_info() {
 	std::cerr << "BT: length=" << length << "; dt=" << dt << std::endl;
       }
     };
+    /// A linked list of subjob data blocks.
     typedef std::list<BT> BLT;
+    /// A linked list of subjob data blocks.
     BLT block_list;
+    /// A const iterator on a linked list of subjob data blocks.
     typedef std::list<BT>::const_iterator BLI;
+    /// An iterator on a linked list of subjob data blocks.
     typedef std::list<BT>::iterator BLINC;
-    // Add new block to the list
+    /// Add new block to the list.
     void add_block(unsigned long size, char *block) {
       block_list.insert (block_list.end(), BT(size, block));
     }
-    // Signal indices in 'spec.getSignalNames()' vector
+    /// Signal indices in 'spec.getSignalNames()' vector.
     std::vector<unsigned int> signalIndices;
   };
 
-  // See if the data block 'd' is a reconfiguration block
+  /// See if the data block 'd' is a reconfiguration block.
   inline bool is_reconfig_block(const char * d) const {
     unsigned long l;
     memcpy(&l,d,sizeof(l));
     return ntohl (l) == 0xffffffff;
   }
 
-  // Map FIFO read file descriptor onto the vector of signal indices
+  /// Map subjob FIFO read file descriptor onto the vector of signal indices.
   typedef std::map<int, std::vector<unsigned int> > CPT;
   typedef std::map<int, std::vector<unsigned int> >::const_iterator CPMI;
-  // Map FIFO read file descriptor into the read state object
+  /// Map subjob FIFO read file descriptor into the read state object
   typedef std::map<int, SubjobReadState> CRST;
   typedef std::map<int, SubjobReadState>::const_iterator CRMI;
   typedef std::map<int, SubjobReadState>::iterator CRMINC;
 
+  /// Constructor.
   daqd_net (int fd, Spec &spec);
-  daqd_net (int fd, Spec &spec, CPT &v); // Combination processing
+  /// Combination processing.
+  daqd_net (int fd, Spec &spec, CPT &v);
+  /// Default destructor.
   ~daqd_net ();
 
-#ifdef LDAS_VERSION_NUMBER
+  /// \brief Send frame data to the client.
+  ///     @param[in] &frame Frame object to send.
+  ///     @param[in] *file_name Name of the file where the frame was read from.
+  ///	  @param[in] frame_number Frame number of the frame within the frame file.
+  ///	  @param[in, out] *seq_num Current data block sequencer number, gets incremented by one for each block transmitted.
+  ///     @return True if data was sent successfully.
   bool send_data (FrameCPP::Version::FrameH &frame, const char *file_name, unsigned frame_number, int *seq_num);
-#else
-#if FRAMECPP_DATAFORMAT_VERSION > 4
-  bool send_data (FrameCPP::Version::FrameH &frame, const char *file_name, unsigned frame_number, int *seq_num);
-#else
-  bool send_data (FrameCPP::Frame &frame, const char *file_name, unsigned frame_number, int *seq_num);
-#endif
-#endif
+  /// Finalize the send.
   bool finish ();
+  /// \brief Read a block from fildes and do combination processing.
+  ///	@param[in] fildes File descriptor to read from.
+  ///	@return True if read, processed and transmitted the data successfully.
   bool comb_read(int fildes);
+  /// Finish one subjob processing.
+  ///	@param[in] fildes File descriptor to read from.
+  ///	@param[in] seq_num Current data block sequence number.
+  ///	@return True if read, processed and transmitted the data successfully.
   bool comb_subjob_done(int fildes, int seq_num);
+  /// Assign the data an send one metadata reconfiguration block.
+  ///	@param[in] &spec Job specification.
+  ///	@return	True if sent the block successfully.
   bool send_reconfig_data(Spec &spec);
+  /// Send one metadata reconfiguration block.
+  ///	@return	True if sent the block successfully.
   bool send_reconfig_block();
-
+  /// Read the number of bytes from the file descriptor.
+  ///	@param[in] fd	File descriptor to read from.
+  ///	@param[in] *cptr  Pointer where to write the bytes.
+  ///	@param[in] numb	The number of bytes to read.
+  ///	@return The number of bytes read.
   static int read_bytes (int fd, char *cptr, int numb);
+  /// Read one 4 byte long integer from the file descriptor.
+  /// The four bytes are converted to long with ntohl() call.
+  ///	@param[in] fd File descirptor to read from.
+  ///	@return The integer rad from the file.
   static unsigned long read_long (int fd);
 
+  /// Average an array of shorts.
+  /// 	@param[in] *v	A pointer to the array.
+  ///	@param[in] num  The number of elements in the array.
+  ///	@return The average of the elements in the array.
   static inline short averaging (short *v, int num) {
     assert (num > 0 && num < SHRT_MAX);
     long res = 0;
@@ -134,6 +152,10 @@ public:
     return (short) (res / num);
   }
 
+  /// Average an array of ints.
+  /// 	@param[in] *v	A pointer to the array.
+  ///	@param[in] num  The number of elements in the array.
+  ///	@return The average of the elements in the array.
   static inline int averaging (int *v, int num) {
     assert (num > 0 && num < SHRT_MAX);
     long long res = 0;
@@ -143,6 +165,10 @@ public:
     return (int) (res / num);
   }
 
+  /// Average an array of floats.
+  ///   @param[in] *v   A pointer to the array.
+  ///   @param[in] num  The number of elements in the array.
+  ///   @return The average of the elements in the array.
   static inline float averaging (float *v, int num) {
     assert (num > 0 && num < SHRT_MAX);
     double res = 0;
@@ -152,6 +178,10 @@ public:
     return (float) (res / num);
   }
 
+  /// Average an array of doubles.
+  ///   @param[in] *v   A pointer to the array.
+  ///   @param[in] num  The number of elements in the array.
+  ///   @return The average of the elements in the array.
   static inline double averaging (double *v, int num) {
     assert (num > 0 && num < SHRT_MAX);
     long double res = 0;
@@ -161,7 +191,8 @@ public:
     return (double) (res / num);
   }
 
-  // Merge received data and send
+  /// Merge received data and send
+  /// @return	True if transmitted all the data successfully.
   bool combine_send_data();
 
 private:
@@ -170,13 +201,13 @@ private:
   unsigned num_signals;
   reconfig_data_t *reconfig_data;
   bool first_time;
-  int mDataFd; // client data socket file descriptor
-  const Spec &mSpec;  // job specification
+  int mDataFd; ///< Client data socket file descriptor.
+  const Spec &mSpec;  ///< Job specification.
   const static unsigned long buf_size = 1024*1024;
-  unsigned long transmission_block_size; // merger output block size for one second of time
-  CRST subjobReadStateMap; // merger input state
-  unsigned long seq_num; // merged output block's sequence number
-  std::vector<unsigned long> mSignalBlockOffsets; // merged data block's signal offsets (for one unit of data)
+  unsigned long transmission_block_size; ///< Merger output block size for one second of time.
+  CRST subjobReadStateMap; ///< Merger input state.
+  unsigned long seq_num; ///< Merged output block's sequence number.
+  std::vector<unsigned long> mSignalBlockOffsets; ///< Merged data block's signal offsets (for one unit of data).
 };
 
 } // namespace

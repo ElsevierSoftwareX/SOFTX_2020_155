@@ -24,29 +24,6 @@ Spec::Spec()
   , mArchiveGps()
 {}
 
-#if 0
-Spec::Spec(DataClassType dataType, unsigned long startGpsTime, unsigned long endGpsTime,
-	   const std::vector<std::string> &signalNames, const std::vector<DataTypeType> &signalTypes,
-	   const std::string &archiveDir, const std::string &prefix, const std::string &suffix,
-	   const std::vector<std::pair<unsigned long, unsigned long> > &gps)
-  : mDataType(dataType)
-  , mStartGpsTime(startGpsTime)
-  , mEndGpsTime(endGpsTime)
-  , mFilter()
-  , mSignalNames(signalNames)
-  , mSignalRates()
-  , mSignalBps()
-  , mSignalTypes(signalTypes)
-  , mDaqdResultFile()
-  , mArchiveDir(archiveDir)
-  , mArchivePrefix(prefix)
-  , mArchiveSuffix(suffix)
-  , mAddedArchives()
-  , mAddedFlags()
-  , mArchiveGps(gps)
-{}
-#endif // 0
-
 const std::vector<std::string>
 Spec::split(std::string value) throw()
 {
