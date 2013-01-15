@@ -639,7 +639,7 @@ sub node_processing {
 	    && $source_block !~ /^cdsIPC/
 	    && $source_block !~ /^cdsEzCa/) {
 	    if (!name_check($::partName[$::partCnt])) {
-		    #die "Invalid part name \"$::partName[$::partCnt]\"; source_block \"$source_block\"; block  type \"$block_type\"" unless ("$::partName[$::partCnt]");
+		    die "Invalid part name \"$::partName[$::partCnt]\"; source_block \"$source_block\"; block  type \"$block_type\"" unless ("$::partName[$::partCnt]");
 	    }
 	}
 	if (!$in_sub) {
