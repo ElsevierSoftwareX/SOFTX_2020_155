@@ -19,6 +19,7 @@ if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
 
 @sources = ();
 
+# Search for the Matlab file in the RCG_LIB_PATH
 @rcg_lib_path = split(':', $ENV{"RCG_LIB_PATH"});
 push @rcg_lib_path, "$rcg_src_dir/src/epics/simLink";
 #print join "\n", @rcg_lib_path, "\n";
@@ -47,31 +48,17 @@ $ffmedm .= "\\/";
 }
 
 
-
+# Exit if cannot find the Matlab file.
 die "Could't find model file $ARGV[0] on RCG_LIB_PATH " . join(":", @rcg_lib_path). "\n"  unless $model_file_found;
 
-# See if we are not running RTLinux
-$no_rtl = system("/sbin/lsmod | grep rtl");
+# Default is to run LIGO patched Linux; Windriver support removed 1/14/2013 RGB.
+print "Generating Firm Real-time code for patched vanilla Linux kernel\n";
 
-#ifeq ($(rtl_module),)
-#CFLAGS += -DNO_RTL=1
-#endif
-
-if ($no_rtl) {
-	print "Generating Firm Real-time code for patched vanilla Linux kernel\n";
-}
-
+# Get MAX_DIO_MODULES allowed from header file.
+# This is used by Parser3.pm to stop compile if RCG limits exceeded.
 my $mdmStr = `grep "define MAX_DIO_MODULES" ../../include/drv/cdsHardware.h`;
 my @mdmNum = ($mdmStr =~ m/(\d+)/);
 $maxDioMod = pop(@mdmNum);
-
-# See if this is the latest Wind River system
-$kernel_release = `uname -r`;
-chomp $kernel_release;
-if ($kernel_release eq '2.6.21.7') {
-	print "Running on WindRiver RTLinux release\n";
-	$wind_river_rtlinux = 1;
-}
 
 $site = "M1"; # Default value for the site name
 $location = "mit"; # Default value for the location name
@@ -101,6 +88,8 @@ $no_oversampling = 0; # Default is to iversample
 $no_dac_interpolation = 0; # Default is to interpolate D/A outputs
 $max_name_len = 39;	# Maximum part name length
 
+# Normally, ARGV !> 2, so the following are not invoked in a standard make
+# This is legacy.
 if (@ARGV > 2) {
 	$dcuId = $ARGV[2];
 }
@@ -138,15 +127,21 @@ if (@ARGV > 4) {
 		$rate = 15;
 	} else  { die "Invalid speed $param_speed specified\n"; }
 }
+
+
+# Load model name without .mdl extension.
 $skeleton = $ARGV[1];
 
+# Check to verify model name begins with a valid IFO designator.
 if ($skeleton !~ m/^[cghklmsx]\d.*/) {
    die "***ERROR: Model name must begin with <ifo><subsystem>: $skeleton\n";
 }
 
+# First two chars of model name must be IFO, such as h1, l1, h2, etc.
 $ifo = substr($skeleton, 0, 2);
-print "file out is $skeleton\n";
 
+# Create the paths for RCG output files.
+print "file out is $skeleton\n";
 $cFile = "../../fe/";
 $cFile .= $ARGV[1];
 $cFileDirectory = $cFile;
@@ -167,10 +162,9 @@ $meFile .= epics;
 $epicsScreensDir = "../../../build/" . $ARGV[1] . "epics/medm";
 $configFilesDir = "../../../build/" . $ARGV[1] . "epics/config";
 
-#print "DCUID = $dcuId\n";
-#if($dcuId < 16) {$rate = 60;}
-#if($dcuId > 16) {$rate = 480;}
+# This is where the various RCG output files are created and opened.
 if (@ARGV == 2) { $skeleton = $ARGV[1]; }
+# Open files for EPICS generation by fmseq.pl
 open(EPICS,">../fmseq/".$ARGV[1]) || die "cannot open output file for writing";
 open(DAQ,">../fmseq/".$ARGV[1]."_daq") || die "cannot open DAQ output file for writing";
 mkdir $cFileDirectory, 0755;
@@ -179,12 +173,7 @@ open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
 @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
   my ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
   my $year = 1900 + $yearOffset;
-  #my $theTime = $year . "_$months[$month]" . "_$dayOfMonth" . "_$hour:$minute:$second";
   $theTime = sprintf("%d_%s_%02d_%02d:%02d:%02d", $year, $months[$month], $dayOfMonth, $hour, $minute, $second);
-#if (-s $mFile) {
-#  system ("/bin/mv $mFile $mFile" . "_$theTime");
-#  #open(OUTM, "/dev/null") || die "cannot open /dev/null for writing";
-#}
 open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
 my $hfname = "$rcg_src_dir/src/include/$ARGV[1].h";
@@ -193,8 +182,8 @@ if (-e $hfname) {
 }
 open(OUTH,">./".$hFile) || die "cannot open header file for writing";
 
+# Diags file will provide list of all parts and their connections. 
 $diag = "./diags\.txt";
-#$diag = "/dev/null";
 open(OUTD,">".$diag) || die "cannot open diag file for writing";
 
 $mySeq = 0;
@@ -335,23 +324,6 @@ $ipcOutputCode = "";
 # Front-end tailing code
 $feTailCode = "";
 
-# Remote IPC hosts total number
-$remoteIPChosts = 0;
-
-# Remote IPC nodes (host:port) mapped to index
-%remoteIPChostIdx;
-
-# Remote IPC nodes in a list
-@remoteIPCnodes;
-
-# Can only connect to this many remote IPC hosts
-# and send this many variables
-$maxRemoteIPCHosts = 4;
-$maxRemoteIPCVars = 4;
-
-# My remote IPC MX port
-$remoteIPCport = 0;
-
 # Set if all filters are biquad
 $allBiquad = 0;
 
@@ -369,6 +341,7 @@ sub remove_subsystem {
 
 
 # Clear the part input and output counters
+# This implies a maximum part count of 2000 per model.
 for ($ii = 0; $ii < 2000; $ii++) {
   $partInCnt[$ii] = 0;
   $partOutCnt[$ii] = 0;
@@ -384,25 +357,9 @@ print OUTH "\#define SYSTEM_NAME_STRING_LOWER \"\L$system_name\"\n";
 
 
 require "lib/ParsingDiagnostics.pm";
-# Old parser
-if (0) {
-init_vars();
-
-# Parser input file (Simulink model)
-require "lib/Parser1.pm";
-#open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
-open(IN,"<".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
-die unless CDS::Parser::parse();
-close(IN);
-
-# Print diagnostics
-#CDS::ParsingDiagnostics::print_diagnostics("parser_diag_good.txt");
-}
 
 init_vars();
 require "lib/Parser3.pm";
-#print "###################   mdl file is $ARGV[0] #############\n";
-#open(IN,"<../simLink/".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 open(IN,"<".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 die unless CDS::Parser::parse();
 die unless CDS::Parser::process();
@@ -410,13 +367,6 @@ die unless CDS::Parser::sortDacs();
 
 close(IN);
 
-
-#CDS::ParsingDiagnostics::print_diagnostics("parser_diag.txt");
-
-# By default, set DAC input counts to 16
-#for($ii=0;$ii<$dacCnt;$ii++) {
-#  $partInCnt[$dacPartNum[$ii]] = 16;
-#}
 
 $systemName = substr($systemName, 2, 3);
 $plantName = $systemName; # Default plant name is the model name
@@ -435,10 +385,12 @@ for ($ii = 0; $ii < $partCnt; $ii++) {
    }
 }
 
+#Process all IPC parts in one go.
   require "lib/IPCx.pm";
    ("CDS::IPCx::procIpc") -> ($partCnt);
 
 
+#// Check that all subsystem INPUT parts are connected; else exit w/error.
 $kk = 0;
 for($ii=0;$ii<$partCnt;$ii++)
 {
@@ -1154,527 +1106,11 @@ for($ii=0;$ii<$subSys;$ii++)
 		$subRemaining = $subSys;
 		$seqCnt = 0;
 
-		#
-		$old_style_multiprocessing = 0;
-
-		# Total number of CPUs available to us
-		$cpus = 2;
-
-		# subSysName -> step*10 + cpu
-		# 'step' is the processing step from one  sync point to the next
-		# 'cpu' is the processor number: 0, 1 ... $cpus
-		%sys_cpu_step;
-
-		# Current processing step (a running counter)
-		$cur_step = 1;
-
-		# How many processors are available on the current processing step
-		# Running counter
-		$cur_step_cpus = $cpus;
-
-		# Parts tree root name
-		$tree_root_name = "__root__";
-
-	# Parts "tree" root
-	# It points to ADC input groups (they are grouped for each subsystem)
-$root = {
-	NAME => $tree_root_name,
-	NEXT => [], # array of references to leaves
-};
-
-# Run a function on all tree leaves
-# Arguments:
-#	tree root reference
-#	function reference
-#
-sub do_on_leaves {
-	my($tree, $f) = @_;
-	if (0 == @{$tree->{NEXT}}) {
-		&$f($tree);
-	} else {
-		for (@{$tree->{NEXT}}) {
-                	do_on_leaves($_, $f);
-        	}
-	}
-}
-
-# Run a function on all tree nodes
-# Arguments:
-#	tree root reference
-#	function reference
-#	function argument
-sub do_on_nodes {
-	my($tree, $f, $arg, $parent) = @_;
-	&$f($tree, $arg, $parent);
-	for (@{$tree->{NEXT}}) {
-               	do_on_nodes($_, $f, $arg, $tree);
-	}
-}
-
-# Find graph node by name
-#
-sub find_node {
-	my($tree, $name) = @_;
-	if ($tree->{NAME} eq $name) {
-		return $tree;
-	} else {
-		for (@{$tree->{NEXT}}) {
-			#print $_->{NAME}, "\n";
-                	$res = find_node($_, $name);
-			if ($res) {
-				return $res;
-			}
-        	}
-	}
-	return undef;
-}
-
 # Construct parts linked list
 #
 foreach $i (0 .. $subSys-1) {
 	debug(0, "Subsystem $i ", $subSysName[$i]);
 }
-# Following code (to PDE END) is only used on PDE for load balancing multiple CPUS
-if ($cpus > 2) {
-foreach $i (0 .. $subSys-1) {
-	debug(2, "Subsystem $i (", $subSysName[$i], "):");
-	debug(2, " inputs=", $subCntr[$i]);
-	debug(2, "  parts=", $seqParts[$i]);
-	# See if this subsystem has ADC inputs
-	$has_inputs = 0;
-	for ($subSysPartStart[$i] .. $subSysPartStop[$i]) {
-		if ($partType[$_] eq "INPUT" && $partInputType[$_][0] eq "Adc") {
-			$has_inputs = 1;
-			break;
-		}
-	}
-
-	# insert new tree node for the group of inputs
-	# and the input parts afterwards
-	if ($has_inputs) {
-		$inputs_node = {
-			NAME => $subSysName[$i] . "_INPUTS",
-			TYPE => "input_group",
-			NEXT => [],
-			PART => -1,
-			SUBSYS => $i,
-		};
-		push @{$root->{NEXT}}, $inputs_node;
-
-		# Insert individual ADC inputs after the input group
-		for ($subSysPartStart[$i] .. $subSysPartStop[$i]) {
-			if ($partInput[$_][0] =~ m/adc_(\d+)_(\d+)/
-			    && $partInputType[$_][0] eq "Adc") {
-				$node = {
-					NAME => $xpartName[$_],
-					TYPE => $partType[$_],
-					NEXT => [],
-					PART => $_,
-					SUBSYS => $i,
-				};
-				push @{$inputs_node->{NEXT}}, $node;
-			}
-		}
-	}
-
-	# Insert all ground and const inputs into the root
-	for ($subSysPartStart[$i] .. $subSysPartStop[$i]) {
-		if (($partType[$_] eq "GROUND") || ($partType[$_] eq "CONSTANT")) {
-			$node = {
-				NAME => $xpartName[$_],
-				TYPE => $partType[$_],
-				NEXT => [],
-				PART => $_,
-				SUBSYS => $i,
-			};
-			push @{$root->{NEXT}}, $node;
-		}
-	}
-
-	debug(2, "  {");
-	foreach $j ($subSysPartStart[$i] .. $subSysPartStop[$i]) {
-		debug(2, "\tPart $j ", $xpartName[$j], " type=", $partType[$j], " inputs=", $partInCnt[$j], " outputs=", $partOutCnt[$j]);
-		
-		#debug(2, "\tPart Name ", $seqName[$i][$j]);
-		#debug(2, "\tPart Type ", $partType[$i][$j]);
-		#debug(2, "\t    seq=", $seq[$i][$j]);
-	}
-	debug(2, "  }");
-}
-}
-#PDE END support for load balancing mulitple CPUs
-
-
-
-# Recursively insert a node into the tree
-#
-sub insert_node {
-my($tree, $pnum) = @_;
-
-# See if the node is in the tree already and return
-if (find_node($root, $xpartName[$pnum])) {
-	return;
-}
-
-#debug 1, "Node ", $xpartName[$pnum], " #", $pnum, " type=", $partType[$pnum], " not in the tree";
-
-# Make sure each input node is in the tree before inserting current node
-for (0 .. $partInCnt[$pnum] - 1) {
-	if ($partType[$pnum] eq "INPUT") {
-		debug 1, "Input Node";
-	} elsif ($partInput[$pnum][$_] =~ m/adc_(\d+)_(\d+)/) {
-		debug 1, "\tadc input node";
-		debug 1, "\t\t $partInput[$pnum][$_]\t input_type=$partInputType[$pnum][$_]\t$partInNum[$pnum][$_]";
-		# create a node for this adc input and then create a link to it from
-		# the corresponding second level node
-	} else {
-		#debug 1, "\t Recursively insert node $partInput[$pnum][$_]\t input_type=$partInputType[$pnum][$_]\t$partInNum[$pnum][$_]";
-		insert_node($tree, $partInNum[$pnum][$_]);
-	}
-}
-
-# At this point all input nodes are alredy resolved
-# Insert this node then.
-# Find in which subsystem this node is
-#
-my $subsys = -1;
-
-foreach $i (0 .. $subSys-1) {
-	if ($subSysPartStart[$i] <= $pnum && $pnum <  $subSysPartStop[$i]) {
-		$subsys = $i;
-		break;
-	}
-}
-
-$my_node = {
-	NAME => $xpartName[$pnum],
-	TYPE => $partType[$pnum],
-	NEXT => [],
-	PART => $pnum,
-	SUBSYS => $subsys,
-};
-
-# Find each input in the tree and update its NEXT field with the pointer to the node
-
-for (0 .. $partInCnt[$pnum] - 1) {
-	my $node;
-	if (($node = find_node($tree, $partInput[$pnum][$_]))) {
-		push @{$node->{NEXT}}, $my_node;
-	} else {
-		die "Node not found: $partInput[$pnum][$_]\n";
-	}
-}
-}
-
-if ($cpus > 2) {
-
-# Insert all parts into the tree
-#
-foreach $i (0 .. $subSys-1) {
-	for ($subSysPartStart[$i] .. $subSysPartStop[$i]-1) {
-	  if ($partType[$_] eq "INPUT") {
-		next;
-	  }
-	  insert_node($root, $_);
-	}
-}
-
-# Print all terminator nodes
-#do_on_leaves($root, sub {if ($_->{PRINTED} != 1) {print $_->{NAME}, "\n"; $_->{PRINTED} = 1; }});
-
-# Print the tree
-$print_no_repeats = 0;
-sub print_tree {
-	my($tree, $level) = @_;
-	my($space);
-	if ($print_no_repeats && $tree->{PRINTED}) { return; }
-	for (0 .. $level) { $space .= ' '; }
-	debug 0, $space, "{", $tree->{NAME}, " nref=", scalar @{$tree->{NEXT}}," subsys=", $tree->{SUBSYS}," type=", $tree->{TYPE}, "}";
-	for (@{$tree->{NEXT}}) {
-		print_tree($_, $level + 1);
-	}
-	if ($print_no_repeats) { $tree->{PRINTED} = 1; }
-}
-
-#debug(0, "Tree:\n");
-#print_tree($root);
-#debug(0, "\n");
-
-
-# Tag each node with the subsystem number
-sub tag_node {
-	my ($node, $subsys) = @_;
-
-	# see if this node is already tagged
-	#
-	for (@{$node->{INPUTS}}) {
-		if ($_ == $subsys) {
-			return; # already tagged
-		}
-	}
-
-	push @{$node->{INPUTS}}, $subsys;
-	#print "Tagged ", $node->{NAME}, " with $subsys\n";
-}
-
-for (@{$root->{NEXT}}) {
-	if ($_->{NAME} =~ m/.*INPUTS/) {
-		my $subsys = $_->{SUBSYS};
-		#print "Marking ", $_->{NAME}, " with $subsys\n";
-		do_on_nodes($_, \&tag_node, $subsys);
-	}
-}
-
-#do_on_nodes($root, sub {if ($_->{PRINTED} != 1) {print $_->{NAME}, " ", @{$_->{INPUTS}}, "\n"; $_->{PRINTED} = 1; }});
-
-# See how many different groups we have got
-%prog_groups;
-%prog_group_fmods; # How many filter modules in a group
-
-sub find_prog_groups {
-	my ($node) = @_;
-	my $nm;
-	if ($node->{VISITED}) { return; }
-	$node->{VISITED} = 1;
-	for (sort @{$node->{INPUTS}}) {
-		if (length $nm) { $nm .= "_"; }
-		$nm .= $_;
-	}
-	$prog_groups{$nm}++;
-	if ($node->{TYPE} eq "Filt") {
-		$prog_group_fmods{$nm}++;
-	}
-	$node->{GROUP} = $nm;
-}
-
-sub reset_visited { 
-	my ($node) = @_;
-	$node->{VISITED} = 0;
-}
-
-
-do_on_nodes($root,\&reset_visited);
-do_on_nodes($root,\&find_prog_groups);
-
-
-sub processing_order {
-	my $idx = index $a, $b;
-	#print "processing_order $a $b\n";
-	if ($a eq $b) { return 0; }
-	if ($idx >= 0) { return 1; }
-	$idx = index $b, $a;
-	if ($idx >= 0) { return -1; }
-	# independent, go by length
-	return length $a <=> length $b;
-}
-
-print "\n";
-for (sort processing_order keys %prog_groups) {
-	#print "cluster=$_ -> parts=", $prog_groups{$_}, " fmods=", $prog_group_fmods{$_}, "\n";
-}
-
-
-# Construct cluster tree
-$root1 = {
-	NAME => $tree_root_name,
-	NEXT => [], # array of references to leaves
-};
-
-sub get_nums_array {
-	my ($str) = @_;
-	return @ret = $str =~ m/(\d+)/g;
-}
-
-sub add_refs {
-	my ($node, $ref_node) = @_;
-	if ($node->{VISITED}) { return; }
-	if ($ref_node->{NAME} eq $node->{NAME}) { return; }
-	#@ref_node_nums = $ref_node->{NAME} =~ m/(\d+)/g;
-	#@node_nums =  $node->{NAME} =~ m/(\d+)/g;
-	@ref_node_nums =  get_nums_array($ref_node->{NAME});
-	@node_nums =  get_nums_array($node->{NAME});
-	#print "ref node '", $ref_node->{NAME} ,"' nums: ", @ref_node_nums, "\n";
-	#print "node '", $node->{NAME}, "' nums: ", @node_nums, "\n";
-	$pass = 1;
-	for (@node_nums) {
-		$in_it = 0;
-		$cur_num = $_;
-		for (@ref_node_nums) {
-			if ($cur_num == $_) {
-				$in_it = 1;
-				break;
-			}
-		}
-		if (!$in_it) {
-			$pass = 0;
-			break;
-		}
-	}
-	if ($pass) {
-		push @{$node->{NEXT}}, $ref_node;
-		push @{$ref_node->{PARENTS}}, $node;
-	}
-	$node->{VISITED} = 1;
-}
-
-for (sort processing_order keys %prog_groups) {
-	if (length($_) == 0) { next; }
-	$node = {
-		NAME => $_,
-		NEXT => [],
-		PARTS => $prog_groups{$_},
-		FILTERS => $prog_group_fmods{$_},
-	};
-	# initial node
-	if (index($_, "_") == -1) {
-		#print "Initial node $_\n";
-		push @{$root1->{NEXT}}, $node;
-		push @{$node->{PARENTS}}, $root1;
-	} else {
-		do_on_nodes($root1,\&reset_visited);
-		$root1->{VISITED} = 1;
-		do_on_nodes($root1, \&add_refs, $node);
-	}
-}
-
-
-$exit_node_name = "__exit__";
-$exit_node = {
-	NAME => $exit_node_name,
-	NEXT => [], # array of references to leaves
-};
-
-# Insert exit node
-for (sort processing_order keys %prog_groups) {
-	if (length($_) == 0) { next; }
-	$node = find_node($root1, $_);
-	die "Node $_ not found\n" unless $node != undef;
-	if (scalar @{$node->{NEXT}} == 0) {
-		push @{$node->{NEXT}}, $exit_node;
-		push @{$exit_node->{PARENTS}}, $node;
-	}
-}
-
-# Calculate t-levels for each node
-for ($tree_root_name, sort processing_order keys %prog_groups, $exit_node_name) {
-	if (length($_) == 0) { next; }
-	$node = find_node($root1, $_);
-	die "Node $_ not found\n" unless $node != undef;
-	#print "Node $_ has parents: ";
-	$max_t_level = 0;
-	for (@{$node->{PARENTS}}) {
-		#print $_->{NAME}, " ";
-		$pt = $_->{T_LEVEL} + $_->{FILTERS};
-		if ($pt > $max_t_level) {
-			$max_t_level = $pt;
-		}
-	}
-	$node->{T_LEVEL} = $max_t_level;
-	#print "t_level=", $node->{T_LEVEL}, "\n";
-}
-
-# Calculate b-levels for each node
-for ($exit_node_name, reverse(sort processing_order keys %prog_groups), $tree_root_name) {
-	if (length($_) == 0) { next; }
-	$node = find_node($root1, $_);
-	die "Node $_ not found\n" unless $node != undef;
-	$max_b_level = 0;
-	for (@{$node->{NEXT}}) {
-		if ($_->{B_LEVEL} > $max_b_level) {
-			$max_b_level = $_->{B_LEVEL};
-		}
-	}
-	$node->{B_LEVEL} = $max_b_level + $node->{FILTERS};
-	#print "Node ", $node->{NAME} ," b_level=", $node->{B_LEVEL}, "\n";
-}
-
-sub b_level_order {
-	if (length($a) == 0) { return 0; }
-	if (length($b) == 0) { return 0; }
-	$anode = find_node($root1, $a);
-	$bnode = find_node($root1, $b);
-	die "Node $_ not found\n" unless $anode != undef && $bnode != undef;
-	#print $anode->{B_LEVEL}, " ", $bnode->{B_LEVEL}, "\n";
-	return $bnode->{B_LEVEL} <=> $anode->{B_LEVEL};
-}
-
-print "-----------------------\n";
-print "CPU allocation schedule\n";
-print "---------------------------------------------------\n";
-print "Node\tB-level\tcpu\tlevel\tweight\tlevel time\n";
-print "---------------------------------------------------";
-# Assign clusters to CPUs (b-level based list algorithm)
-$level = 0;
-$cpu = 1; # goes from 1 to $cpus
-$max_level_time = 0;
-$total_time = 0;
-$cum_time = 0;
-@sorted_clusters = sort b_level_order keys %prog_groups;
-@running_clusters = (); # currently running clusters (on CPUs)
-@saved_nodes = ();
-while(scalar @sorted_clusters) {
-	$_ = shift @sorted_clusters;
-	if (length($_) == 0) { next; }
-	$node = find_node($root1, $_);
-	die "\nNode $_ not found\n" unless $node != undef;
-	# See if just popped cluster can be run on this processing level
-	$repeat = 0;
-	for (@running_clusters) {
-		if (find_node(find_node($root1, $_), $node->{NAME}) != undef) {
-			# Current node depends on this running cluster...
-			unshift @saved_nodes, $node->{NAME};
-			$repeat = 1;
-			break;
-		}
-	}
-	if ($repeat) {
-		next;
-	} else {
-		for (@saved_nodes) {
-			unshift @sorted_clusters, $_;
-		}
-		@saved_nodes = ();
-	}
-	push @{$cpu_clusters[$cpu]}, $_;
-	$node->{CPU} = $cpu;
-	$node->{LEVEL} = $level;
-	push @running_clusters, $_;
-	print "\n", $node->{NAME} ,"\t", $node->{B_LEVEL}, "\t", $cpu, "\t", $level, "\t", $node->{FILTERS};
-	$cpu++;
-	$cum_time += $node->{FILTERS};
-	if ($node->{FILTERS} > $max_level_time) {
-		$max_level_time = $node->{FILTERS};
-	}
-	if ($cpu == $cpus) {
-		$cpu = 1;
-		print "\t", $max_level_time;
-		@running_clusters = ();
-		$total_time += $max_level_time,;
-		$max_level_time = 0;
-		$level++;
-	}
-}
-
-if ($cpu != 1) {
-	print "\t", $max_level_time;
-	$total_time += $max_level_time,;
-}
-print "\n---------------------------------------------------\n";
-print "Total time is ", $total_time, "\n";
-print "Cumulative time is ", $cum_time, "(", $cum_time/($cpus - 1), " per cpu)\n";
-print "TODO: need to eliminate unnecessary CPU sync points (merge levels)\n";
-#$print_no_repeats = 1;
-#print_tree($root1);
-
-# Check all nodes are scheduled
-for (sort processing_order keys %prog_groups) {
-	if (length($_) == 0) { next; }
-	$node = find_node($root1, $_);
-	die "Node $_ not found\n" unless $node != undef;
-	die "Node $_ was not scheduled for execution\n" unless $node->{CPU};
-}
-
-} # If $cpus > 2
 
 # First pass defines processing step 0
 # It finds all input sybsystems
@@ -1698,8 +1134,6 @@ $allADC = 1;
 		$seqCnt ++;
 		 #print "Subsys $ii $subSysName[$ii] has all ADC inputs and can go $seqCnt\n";
 		$subRemaining --;
-		if ($cur_step_cpus == 1) { $cur_step_cpus = $cpus; }
-		$sys_cpu_step{$subSysName[$ii]} = --$cur_step_cpus;
 	}
 }
 #print "Searching parts $searchCnt\n";
@@ -1724,16 +1158,12 @@ for($ii=0;$ii<$searchCnt;$ii++)
 			$seqList[$seqCnt] = $xx;
 			$seqType[$seqCnt] = "PART";
 			$seqCnt ++;
-			if ($cur_step_cpus == 1) { $cur_step_cpus = $cpus; }
-			$sys_cpu_step{$xpartName[$xx]} = --$cur_step_cpus;
 		}
 	}
 }
 print "first pass done $partsRemaining $subRemaining\n";
 
 # Second multiprocessing step
-$cur_step = 1;
-$cur_step_cpus = $cpus;
 $numTries = 0;
 until((($partsRemaining < 1) && ($subRemaining < 1)) || ($numTries > 50))
 {
@@ -1769,8 +1199,6 @@ $numTries ++;
 				$seqList[$seqCnt] = $ii;
 				$seqType[$seqCnt] = "SUBSYS";
 				$seqCnt ++;
-				if ($cur_step_cpus == 1) { $cur_step_cpus = $cpus; }
-				$sys_cpu_step{$subSysName[$ii]} = --$cur_step_cpus + 10 * $cur_step;
 			}
 		}
 	}
@@ -1806,8 +1234,6 @@ $numTries ++;
 				$seqList[$seqCnt] = $xx;
 				$seqType[$seqCnt] = "PART";
 				$seqCnt ++;
-				if ($cur_step_cpus == 1) { $cur_step_cpus = $cpus; }
-				$sys_cpu_step{$xpartName[$xx]} = --$cur_step_cpus + 10* $cur_step;
 			}
 		}
 	}
@@ -1888,11 +1314,6 @@ if($processCnt != $ftotal)
 	print "Please check the model for missing links around these parts.\n";
 	exit(1);
 }
-
-#print "CPU_STEPS:\n";
-#while (($k, $v) = each %sys_cpu_step) {
-#	print "$k => $v\n";
-#}
 
 $fpartCnt = 0;
 $inCnt = 0;
@@ -2163,29 +1584,6 @@ for ($ii = 0; $ii < $partCnt; $ii++) {
    }
 }
 
-# Define remote IPC stuff (if any)
-if ($remoteIPChosts) {
-	print OUT "// Remote IPC buffers\n";
-	print OUT "double remote_ipc_send[$maxRemoteIPCHosts][$maxRemoteIPCVars];\n";
-	print OUT "double remote_ipc_rcv[$maxRemoteIPCHosts][$maxRemoteIPCVars];\n\n";
-
-	print OUT "// The number of remote IPC nodes\n";
-	my $nodes = @remoteIPCnodes;
-	print OUT "unsigned int cds_remote_ipc_nodes = $nodes;\n";
-	print OUT "// The size of remote IPC data buffer\n";
-	print OUT "unsigned int cds_remote_ipc_size = $maxRemoteIPCVars;\n\n";
-	print OUT "// Remote IPC nodes\n";
-	print OUT "CDS_REMOTE_NODES remote_nodes[] = {\n";
-	foreach (@remoteIPCnodes) {
-		@f = /(\w+):(\d+)/g;
-		print OUT "\t{\"$f[0]\", $f[1]},\n";
-	}
-	print OUT "};\n\n";
-	print OUT "// My remote IPC MX port\n";
-	print OUT "unsigned int remote_ipc_mx_port = $remoteIPCport;\n";
-	print OUT "\n";
-}
-
 sub printVariables {
 for($ii=0;$ii<$partCnt;$ii++)
 {
@@ -2273,69 +1671,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 print OUT "\n\n";
 }
 
-if ($cpus > 2) {
-
-# Output multiprocessing functions
-print OUT "/* Multi-cpu synchronization primitives */\n";
-for ($i = 2; $i < $cpus; $i++) {
-	print OUT "volatile int go$i = 0;\n";
-	print OUT "volatile int done$i = 0;\n";
-}
-print OUT "\n";
-
-
-# Print common to all functions variables as globals
 printVariables();
-
-for ($i = 2; $i < $cpus; $i++) {
-    print OUT "/* CPU $i code */\n";
-    print OUT "void cpu${i}_start(){\n";
-    print OUT "\tint ii, jj;\n";
-    print OUT "\twhile(!stop_working_threads) {\n";
-
-if ($old_style_multiprocessing) {
-    # Processing steps
-    for ($step = 0; $step <= $cur_step; $step++) {
-      # Wait for signal from main thread
-      print OUT "\t\twhile(!go$i && !stop_working_threads);\n";
-      print OUT "\t\tgo$i = 0;\n";
-
-      # Processing for this step
-      while (($k, $v) = each %sys_cpu_step) {
-	#printf "feCode: $k => $v  %d %d\n", $v % 10, $v / 10;
-	if ($v == $step*10 + $i) {
-  	  &printSubsystem("$k");
-	}
-      }
-      print OUT "\t\tdone$i = 1;\n";
-    }
-} else {
-    for (@{$cpu_clusters[$i]}) {
-      # Wait for signal from main thread
-      print OUT "\t\twhile(!go$i && !stop_working_threads);\n";
-      print OUT "\t\tgo$i = 0;\n";
-      &printCluster($_);
-      print OUT "\t\tdone$i = 1;\n";
-    }
-}
-
-    print OUT "\t}\n";
-    print OUT "\tdone$i = 1;\n";
-    print OUT "}\n\n";
-}
-
-sub printCluster {
-	my ($cluster) = @_;
-	print OUT "/* Do $cluster cluster */\n";
-        &printSubsystem(".", $cluster);
-}
-
-print OUT "/* CPU 1 code */\n";
-}
-
-if ($cpus < 3) {
-  printVariables();
-}
 print OUT "\nint feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
 print OUT "\t\tdouble dacOut[][16],\t\/* DAC outputs *\/\n";
 print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
@@ -2344,11 +1680,6 @@ print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
 print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
 print OUT "{\n\nint ii, dacFault;\n\n";
 print OUT "if(feInit)\n\{\n";
-
-# removed for ADC PART CHANGE
-#for($ii=0;$ii<$adcCnt;$ii++) {
-#   print OUT ("CDS::Adc::frontEndInitCode") -> ($ii);
-#}
 
 for($ii=0;$ii<$partCnt;$ii++)
 {
@@ -2384,78 +1715,15 @@ if ($ipcxCnt > 0) {
 
 #print "*****************************************************\n";
 
-# Print subsystems processing step by step
-# along with signalling primitives to other threads
-if ($cpus > 2) {
-if ($old_style_multiprocessing) {
-  for ($step = 0; $step <= $cur_step; $step++) {
-    # Signal other threads to go
-    for ($i = 2; $i < $cpus; $i++) {
-	print OUT "go$i = 1;\n";
-    }
-
-    # Print cpu 1 subsystems for $step
-    while (($k, $v) = each %sys_cpu_step) {
-	#printf "feCode: $k => $v  %d %d\n", $v % 10, $v / 10;
-	if ($v == $step*10 + 1) {
-  	  &printSubsystem("$k");
-	}
-    }
-
-    # Wait for other threads to finish this processing step
-    for ($i = 2; $i < $cpus; $i++) {
-	print OUT "while(!done$i && !stop_working_threads);\n";
-	print OUT "done$i = 0;\n";
-    }
-  }
-} else {
-    for (@{$cpu_clusters[1]}) {
-      # Signal other threads to go
-      for ($i = 2; $i < $cpus; $i++) {
-	  print OUT "go$i = 1;\n";
-      }
-
-      &printCluster($_);
-
-      # Wait for other threads to finish this processing step
-      for ($i = 2; $i < $cpus; $i++) {
-	print OUT "while(!done$i && !stop_working_threads);\n";
-	print OUT "done$i = 0;\n";
-      }
-    }
-}
-
-  # Output standalone parts (DAC output)
-  &printSubsystem("__PART__");
-} else {
   &printSubsystem(".");
-}
 
 sub printSubsystem {
-my ($subsys, $cluster) = @_;
-
-$do_cluster = 0;
-
-if (scalar(@_) > 1) {
-	$do_cluster = 1;
-}
+my ($subsys) = @_;
 
 $ts = 0;
 $xx = 0;
 $do_print = 0;
-@cluster_parts = ();
 
-if ($do_cluster) {
-	# get all cluster part names
-	do_on_nodes($root, \&reset_visited);
-	do_on_nodes($root, sub{ if (!$_->{VISITED} && $_->{GROUP} eq $cluster) { push @cluster_parts, $_->{NAME}; $_->{VISITED} = 1;}});
-
-	#print ("Cluster $cluster has these parts: ");
-	for (@cluster_parts) {
-		#print $_, " ";
-	}
-	#print "\n";
-}
 
 for($xx=0;$xx<$processCnt;$xx++) 
 {
@@ -2480,16 +1748,6 @@ for($xx=0;$xx<$processCnt;$xx++)
 	if (! $do_print)  { next; };
 	$mm = $processPartNum[$xx];
 	#print "looking for part $mm type=$partType[$mm] name=$xpartName[$mm]\n";
-	if ($do_cluster) {
-		my $do_print = 0;
-		for (@cluster_parts) {
-			if ($xpartName[$mm] eq $_) {
-				$do_print = 1;
-				break;
-			}
-		}
-		if (! $do_print)  { next; };
-	}
 	$inCnt = $partInCnt[$mm];
 #print "Processing $xpartName[$mm]\n";
 	for($qq=0;$qq<$inCnt;$qq++)
@@ -2788,11 +2046,6 @@ print OUTH "\tCDS_EPICS_OUT epicsOutput;\n";
 print OUTH "\t\U$systemName \L$systemName;\n";
 print OUTH "} CDS_EPICS;\n";
 
-if ($remoteIPChosts) {
-	print OUTH "#define MAX_REMOTE_IPC_VARS $maxRemoteIPCVars\n";
-	print OUTH "#define MAX_REMOTE_IPC_HOSTS $maxRemoteIPCHosts\n";
-}
-
 
 if($partsRemaining != 0) {
 	print "WARNING -- NOT ALL PARTS CONNECTED !!!!\n";
@@ -2814,64 +2067,10 @@ print OUTH "\#endif\n";
 close OUTH;
 close OUTD;
 close EPICS;
-if ($no_rtl) {
-	system ("/bin/cp GNUmakefile  ../../fe/$skeleton");
-	#system ("echo '#include \"$rcg_src_dir/src/fe/controller.c\"' > ../../fe/$skeleton/$skeleton" . "fe.c");
-} else {
-	system ("/bin/rm -f ../../fe/$skeleton/GNUmakefile");
-}
 
-if ($no_rtl) {
+system ("/bin/cp GNUmakefile  ../../fe/$skeleton");
+
 print OUTM "# CPU-Shutdown Real Time Linux\n";
-} else {
-	print OUTM "# RTLinux makefile\n";
-	if ($wind_river_rtlinux) {
-  		print OUTM "include /home/controls/common_pc_64_build/build/rtcore-base-5.1/rtl.mk\n";
-	} else {
-  		print OUTM "include /opt/rtldk-2.2/rtlinuxpro/rtl.mk\n";
-	}
-	print OUTM "\n";
-	print OUTM "\n";
-	print OUTM "TARGET_RTL := $skeleton";
-	print OUTM "fe\.rtl\n";
-	print OUTM "LIBRARY_OBJS := map.o myri.o myriexpress.o  fb.o\n";
-	print OUTM "LDFLAGS_\$(TARGET_RTL) := -g \$(LIBRARY_OBJS)\n";
-	print OUTM "\n";
-	print OUTM "\$(TARGET_RTL): \$(LIBRARY_OBJS)\n";
-	print OUTM "\n";
-	print OUTM "EXTRA_CFLAGS+=\$(CFLAGS)\n";
-	print OUTM "$skeleton";
-	print OUTM "fe\.o: ../controller.c\n";
-	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -c \$< -o \$\@\n";
-	print OUTM "map.o: ../map.c\n";
-	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
-	print OUTM "myri.o: ../myri.c\n";
-	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
-	print OUTM "myriexpress.o: ../myriexpress.c\n";
-	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DMX_KERNEL=1 -c \$<\n";
-	print OUTM "fb.o: ../fb.c\n";
-	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
-	print OUTM "fm10Gen.o: fm10Gen.c\n";
-	if($rate == 480) {
-		print "SERVO IS 2K\n";
-		print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO2K -c \$<\n";
-	} elsif ($rate == 240) {
-		print "SERVO IS 4K\n";
-		print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO4K -c \$<\n";
-	} elsif ($rate == 60) {
-		print "SERVO IS 16K\n";
-		print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO16K -c \$<\n";
-	} elsif ($rate == 30) {
-		print "SERVO IS 32K\n";
-		print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO32K -c \$<\n";
-	} elsif ($rate == 15) {
-		print "SERVO IS 64K\n";
-		print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -DSERVO64K -c \$<\n";
-	}
-	print OUTM "crc.o: crc.c\n";
-	print OUTM "\t\$(CC) \$(EXTRA_CFLAGS) -D__KERNEL__ -c \$<\n";
-	print OUTM "\n";
-}
 print OUTM "KBUILD_EXTRA_SYMBOLS=$rcg_src_dir/src/drv/ExtraSymbols.symvers\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
 print OUTM "EXTRA_CFLAGS += --std=gnu99 -O -w -I../../include\n";
@@ -2894,12 +2093,6 @@ if($systemName eq "sei" || $useFIRs)
 {
 print OUTM "EXTRA_CFLAGS += -DFIR_FILTERS\n";
 }
-if ($cpus > 2) {
-print OUTM "EXTRA_CFLAGS += -DRESERVE_CPU2\n";
-}
-if ($cpus > 3) {
-print OUTM "EXTRA_CFLAGS += -DRESERVE_CPU3\n";
-}
 print OUTM "EXTRA_CFLAGS += -g\n";
 if ($adcOver) {
   print OUTM "EXTRA_CFLAGS += -DROLLING_OVERFLOWS\n";
@@ -2921,13 +2114,6 @@ if ($no_daq) {
 } else {
   print OUTM "#Uncomment to disable DAQ and testpoints\n";
   print OUTM "#EXTRA_CFLAGS += -DNO_DAQ\n";
-}
-if ($remoteIPChosts) {
-  print OUTM "#Comment out to disable remote IPC over MX\n";
-  print OUTM "EXTRA_CFLAGS += -DUSE_MX=1\n";
-} else {
-  print OUTM "#Uncomment to enable remote IPC over MX\n";
-  print OUTM "#EXTRA_CFLAGS += -DUSE_MX=1\n";
 }
 if ($shmem_daq) {
   print OUTM "#Comment out to disable local frame builder connection; uncomment USE_GM setting too\n";
@@ -3062,7 +2248,6 @@ print OUTM "\n";
 print OUTM "clean:\n";
 print OUTM "\trm -f \$(ALL) *.o\n";
 print OUTM "\n";
-if ($no_rtl) {
 
 print OUTM "EXTRA_CFLAGS += -DMODULE -DNO_RTL=1\n";
 print OUTM "EXTRA_CFLAGS += -I\$(SUBDIRS)/../../include -I$rcg_src_dir/src/include\n";
@@ -3070,14 +2255,6 @@ print OUTM "EXTRA_CFLAGS += -ffast-math -msse2\n";
 
 print OUTM "obj-m += $skeleton" . ".o\n";
 
-} else {
-if ($wind_river_rtlinux) {
-  print OUTM "EXTRA_CFLAGS += -DKBUILD_MODNAME=1\n";
-  print OUTM "include /home/controls/common_pc_64_build/build/rtcore-base-5.1/Rules.make\n";
-} else {
-  print OUTM "include /opt/rtldk-2.2/rtlinuxpro/Rules.make\n";
-}
-}
 print OUTM "\n";
 close OUTM;
 
@@ -3165,67 +2342,6 @@ if($rate == 480) {
 
 mkpath $configFilesDir, 0, 0755;
 
-# Create DAQ config file (default section and a few ADC input channels)
-#my $daqFile = $configFilesDir . "/$site" . uc($skeleton) . "\.ini";
-#open(OUTG,">".$daqFile) || die "cannot open $daqFile file for writing";
-#print OUTG 	"[default]\n".
-#		"gain=1.00\n".
-#		"acquire=0\n".
-#		"dcuid=$dcuId\n".
-#		"ifoid=$ifoid\n".
-#		"datatype=4\n".
-#		"datarate=" . get_freq() . "\n".
-#		"offset=0\n".
-#		"slope=6.1028e-05\n".
-#		"units=V\n".
-#		"\n";
-
-#for ( 0 .. 2 ) {
-	#print OUTG "[$site:" . uc($skeleton) . "-CHAN_" . $_ ."]\n";
-	#print OUTG "chnnum=" . ($gdsTstart + 3*$_) . "\n";
-	#print OUTG "#acquire=1\n";
-#}
-
-# Open testpoints file
-#my $parFile = "../../../build/" . $ARGV[1] . "epics/" . $skeleton . "\.par";
-#open(INTP,"<".$parFile) || die "cannot open $parFile file for reading";
-## Read all lines into the array
-#@tp_data=<INTP>;
-#close INTP;
-
-#my %sections;
-#my @section_names;
-#my $section_name;
-#my $def_datarate;
-#foreach (@tp_data) {
-# s/\s+//g;
-# if (@a = m/\[(.+)\]/) { $section_name = $a[0]; push @section_names, $a[0]; }
-# elsif (@a = m/(.+)=(.+)/) {
-#	$sections{$section_name}{$a[0]} = $a[1];
-#	if ($a[0] eq "datarate") { $def_datarate = $a[1]; }
-# }
-#}
-#my $cnt = 0;
-## Print chnnum, datarate, 
-#foreach (sort @section_names) {
-#	if ($cnt < 2 && m/_OUT$/) {
-#		$comment = "";
-#		$cnt++;
-#	} else {
-#		$comment = "#";
-#	}
-#	print OUTG "${comment}[${_}_${def_datarate}]\n"; 
-#	print OUTG  "${comment}acquire=0\n";
-#	foreach $sec (keys %{$sections{$_}}) {
-#	  if ($sec eq "chnnum" || $sec eq "datarate" || $sec eq "datatype") { 
-#		print OUTG  "${comment}$sec=${$sections{$_}}{$sec}\n";
-#	  }
-#	}
-#}
-
-#print %sections;
-
-close OUTG;
 
 # Create Foton filter file (with header)
 $jj = $filtCnt / 40;
@@ -3273,221 +2389,26 @@ my $usite = uc $site;
 my $lsite = lc $site;
 my $sysname = "FEC";
 $sed_arg = "s/SITE_NAME/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($sysname) . "/g;s/GDS_NODE_ID/" . $gdsNodeId . "/g;";
-$opised_arg = "s/\$\(IFO\)/$site/g;s/GDS_TP_CUSTOM/" . uc($skeleton) . "GDS_TP" ."/g;s/\$\(SYS\)/" . uc($sysname) . "/g;";
-$opised_arg .= "s/\$\(DCUID\)/$dcuId/g;";
-$opised_arg .= "s/\$\{DCUID\}/$dcuId/g;";
-$opised_arg .= "s/\$\{IFO\}/$site/g;";
-$opised_arg .= "s/\$\{SYS\}/$sysname/g;";
-$opised_arg .= "s/RCGDIR/$ffmedm/g;";
-$opised_arg .= "s/FBID/" . uc($skeleton) ."/g;";
-$opised_arg .= "s/IFO_LC/$lsite/g;";
-$opised_arg .= "s/ALARMS/" . uc($skeleton) . "_GRD_MONITOR" ."/g;";
-$opised_arg .= "s/INPUT_FILTER/\\/src\\/epics\\/util\\/ALARMS/g;";
 $sed_arg .= "s/LOCATION_NAME/$location/g;";
 $sed_arg .= "s/DCU_NODE_ID/$dcuId/g;";
 $sysname = uc($skeleton);
 $sed_arg .= "s/FBID/$sysname/g;";
 $sed_arg .= "s/MEDMDIR/$skeleton/g;";
 $sed_arg .= "s/IFO_LC/$lsite/g;";
-my @adcMedm;
-my @byteMedm;
 $sitelc = lc($site);
 $mxpt = 215;
 $mypt = 172;
 $mbxpt = 32 + $mxpt;
 $mbypt = $mypt + 1;
-$adcMedm[0] = "\"related display\" \{ \n";
-$adcMedm[1] = "\tobject  \{ \n";
-$adcMedm[2] = "\t\tx=";
-$adcMedm[3] = "$mxpt";
-$adcMedm[4] = " \n";
-$adcMedm[5] = "\t\ty=";
-$adcMedm[6] = "$mypt";
-$adcMedm[7] = " \n";
-$adcMedm[8] = "\t\twidth=30 \n";
-$adcMedm[9] = "\t\theight=20 \n";
-$adcMedm[10] = "\t\} \n";
-$adcMedm[11] = "\tdisplay\[0\]  \{ \n";
-$adcMedm[12] = "\t\tname=\"/opt/rtcds/LOCATION_NAME/";
-$adcMedm[13] = "$sitelc";
-$adcMedm[14] = "/medm/MEDMDIR/FBID_MONITOR_ADC";
-$adcMedm[15] = "$adcCnt";
-$adcMedm[16] = "\.adl\" \n";
-$adcMedm[17] = "\t\} \n";
-$adcMedm[18] = "\tclr=0 \n";
-$adcMedm[19] = "\tbclr=34 \n";
-$adcMedm[20] = "\tlabel=\"A";
-$adcMedm[21] = "$adcCnt\" \n";
-$adcMedm[22] = "\} \n";
-$byteMedm[0] = "byte \{ \n";
-$byteMedm[1] = "\tobject  \{ \n";
-$byteMedm[2] = "\t\tx=";
-$byteMedm[3] = "$mbxpt";
-$byteMedm[4] = " \n";
-$byteMedm[5] = "\t\ty=";
-$byteMedm[6] = "$mbypt";
-$byteMedm[7] = " \n";
-$byteMedm[8] = "\t\twidth=21 \n";
-$byteMedm[9] = "\t\theight=18 \n";
-$byteMedm[10] = "\t\} \n";
-$byteMedm[11] = "\tmonitor \{\n";
-$byteMedm[12] = "\t\tchan=\"SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_ADC_STAT_";
-$byteMedm[13] = "$adcCnt";
-$byteMedm[14] = "\" \n";
-$byteMedm[15] = "\t\tclr=60 \n";
-$byteMedm[16] = "\t\tbclr=20 \n";
-$byteMedm[17] = "\t\} \n";
-$byteMedm[18] = "\tsbit=0 \n";
-$byteMedm[19] = "\tebit=1 \n";
-$byteMedm[20] = "\} \n";
 $dacMedm = 0;
 $totalMedm = $adcCnt + $dacCnt;
 print "Found $adcCnt ADC modules part is $adcPartNum[0]\n";
 print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
-if($modelType eq "MASTER")
-{
-	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM.adl GDS_TP_TEST.adl");
-	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM.opi GDS_TP_TEST.opi");
-	system("cp $rcg_src_dir/src/epics/util/byte.opi byte.opi");
-}else{
-	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM_SLAVE.adl GDS_TP_TEST.adl");
-	system("cp $rcg_src_dir/src/epics/util/GDS_TP_CUSTOM_SLAVE.opi GDS_TP_TEST.opi");
-	system("cp $rcg_src_dir/src/epics/util/byte.opi byte.opi");
-}
-open(OUTGDSM,">>./"."GDS_TP_TEST.adl") || die "cannot open GDS_TP file for writing ";
-$dacSnum=0;
-for($ii=0;$ii<$totalMedm;$ii++)
-{
-$adcMedm[3] = "$mxpt";
-$adcMedm[6] = "$mypt";
-$adcMedm[15] = "$ii";
-$adcMedm[21] = "$adcCardNum[$ii]\" \n";
-$byteMedm[19] = "\tebit=2 \n";
-if($ii>=$adcCnt)
-{
-      if ($dacType[$dacSnum] eq "GSC_18AO8") {
-	$dsed_arg = $sed_arg;
-	$dsed_arg .= "s/CHNUM/$dacSnum/g;";
-	$dsed_arg .= "s/CNUM/$dacCardNum[$dacMedm]/g;";
-	system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_8.adl | sed '$dsed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_" . $dacSnum . ".adl");
-	$byteMedm[19] = "\tebit=4 \n";
-	} else {
-	$dsed_arg = $sed_arg;
-	$dsed_arg .= "s/CHNUM/$dacSnum/g;";
-	$dsed_arg .= "s/CNUM/$dacCardNum[$dacMedm]/g;";
-	system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_16.adl | sed '$dsed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_" . $dacSnum . ".adl");
-	$byteMedm[19] = "\tebit=3 \n";
-	}
-	$adcMedm[14] = "/medm/MEDMDIR/FBID_DAC_MONITOR_";
-	$adcMedm[15] = "$dacSnum";
-	$adcMedm[19] = "\tbclr=44 \n";
-	$adcMedm[20] = "\tlabel=\"D";
-	$adcMedm[21] = "$dacCardNum[$dacMedm]\" \n";
-	$dacSnum+=1;
-}
-print OUTGDSM @adcMedm;
-$mbxpt = 32 + $mxpt;
-$mbypt = $mypt + 1;
-$byteMedm[3] = "$mbxpt";
-$byteMedm[6] = "$mbypt";
-$byteMedm[13] = "$ii";
-$byteMedm[18] = "\tsbit=0 \n";
-#$byteMedm[19] = "";
-if($ii>=$adcCnt)
-{
-	$byteMedm[12] = "\t\tchan=\"SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_DAC_STAT_";
-	$byteMedm[13] = "$dacMedm";
-	#$byteMedm[19] = "\tebit=3 \n";
-	$byteMedm[8] = "\t\twidth=28 \n";
-	if($modelType ne "MASTER")
-	{
-		$byteMedm[18] = "\tsbit=1 \n";
-		$byteMedm[19] = "\tebit=2 \n";
-		$byteMedm[8] = "\t\twidth=14 \n";
-	}
-	$dacMedm ++;
-}
-print OUTGDSM @byteMedm;
-$mbxpt = 12 + $mbxpt;
-$byteMedm[3] = "$mbxpt";
-$byteMedm[18] = "\tsbit=1 \n";
-$byteMedm[19] = "\tebit=1 \n";
-#print OUTGDSM @byteMedm;
-$mypt += 22;
-if($ii == 4) {
-	$mxpt += 80; 
-	$mypt = 172;
-}
-}
-my @alarmMedm;
-$mxpt = 210;
-$mypt = 102;
-$alarmMedm[0] = "\"related display\" \{ \n";
-$alarmMedm[1] = "\tobject  \{ \n";
-$alarmMedm[2] = "\t\tx=";
-$alarmMedm[3] = "$mxpt";
-$alarmMedm[4] = " \n";
-$alarmMedm[5] = "\t\ty=";
-$alarmMedm[6] = "$mypt";
-$alarmMedm[7] = " \n";
-$alarmMedm[8] = "\t\twidth=85 \n";
-$alarmMedm[9] = "\t\theight=18 \n";
-$alarmMedm[10] = "\t\} \n";
-$alarmMedm[11] = "\tdisplay\[0\]  \{ \n";
-$alarmMedm[12] = "\t\tname=\"/opt/rtcds/LOCATION_NAME/";
-$alarmMedm[13] = "$sitelc";
-$alarmMedm[14] = "/medm/MEDMDIR/";
-$alarmMedm[15] = "$sysname";
-$alarmMedm[16] = "_ALARM_MONITOR";
-$alarmMedm[17] = "\.adl\" \n";
-$alarmMedm[18] = "\t\} \n";
-$alarmMedm[19] = "\tclr=0 \n";
-$alarmMedm[20] = "\tbclr=44 \n";
-$alarmMedm[21] = "\tlabel=\"Guard (S/R)\" \n";
-$alarmMedm[22] = "\} \n";
-print OUTGDSM @alarmMedm;
 
-$mxpt = 210;
-$mypt = 77;
-$alarmMedm[0] = "\"related display\" \{ \n";
-$alarmMedm[1] = "\tobject  \{ \n";
-$alarmMedm[2] = "\t\tx=";
-$alarmMedm[3] = "$mxpt";
-$alarmMedm[4] = " \n";
-$alarmMedm[5] = "\t\ty=";
-$alarmMedm[6] = "$mypt";
-$alarmMedm[7] = " \n";
-$alarmMedm[8] = "\t\twidth=85 \n";
-$alarmMedm[9] = "\t\theight=18 \n";
-$alarmMedm[10] = "\t\} \n";
-$alarmMedm[11] = "\tdisplay\[0\]  \{ \n";
-$alarmMedm[12] = "\t\tname=\"/opt/rtcds/LOCATION_NAME/";
-$alarmMedm[13] = "$sitelc";
-$alarmMedm[14] = "/medm/MEDMDIR/";
-$alarmMedm[15] = "$sysname";
-$alarmMedm[16] = "_IPC_STATUS";
-$alarmMedm[17] = "\.adl\" \n";
-$alarmMedm[18] = "\t\} \n";
-$alarmMedm[19] = "\tclr=0 \n";
-$alarmMedm[20] = "\tbclr=44 \n";
-$alarmMedm[21] = "\tlabel=\"RT NET STAT\" \n";
-$alarmMedm[22] = "\} \n";
-print OUTGDSM @alarmMedm;
-
-
-close(OUTGDSM);
-
-system("cat GDS_TP_TEST.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_GDS_TP.adl");
-system("cat GDS_TP_TEST.opi | sed '$opised_arg' > /tmp/GDS_TP.opi");
-system("cat byte.opi | sed '$opised_arg' > /tmp/byte.opi");
+# Generate Guardian Alarm Monitor Screen
 system("cp $rcg_src_dir/src/epics/util/ALARMS.adl ALARMS.adl");
-system("cp $rcg_src_dir/src/epics/util/ALARMS.opi ALARMS.opi");
 system("cat ALARMS.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_ALARM_MONITOR.adl");
-system("cat ALARMS.opi | sed '$opised_arg' > $epicsScreensDir/$sysname" . "_ALARM_MONITOR.opi");
 
-#system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR.adl");
-#system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_0.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_0.adl");
-#system("cat $rcg_src_dir/src/epics/util/DAC_MONITOR_1.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_DAC_MONITOR_1.adl");
 my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
 
@@ -3597,7 +2518,6 @@ sub commify_series {
 			$sargs .= "s/RCGDIR/$ffmedm/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . ".adl");
-			system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $subDirName/$usite" . $filt_name . ".opi");
 		      }
 		    }
 		  } else {
@@ -3627,7 +2547,6 @@ sub commify_series {
 			$sargs .= "s/RCGDIR/$ffmedm/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".adl");
-			system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".opi");
 		      }
 		    }
 		  } else {
@@ -3661,15 +2580,12 @@ sub commify_series {
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
 				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
-				system("cat INPUT_FILTER1.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".opi");
 			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
-				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".opi");
 			} elsif ($partType[$cur_part_num] =~ /^FiltCtrl2/) {
 				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL_2.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
-				system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".opi");
 			}
 		} else {
 		  	$sys_name = substr($sys_name, 2, 3);
@@ -3678,15 +2594,12 @@ sub commify_series {
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
 				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
-				system("cat INPUT_FILTER1.opi | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".opi");
 			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
-				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.opi | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".opi");
 			} elsif ($partType[$cur_part_num] =~ /^FiltCtrl2/) {
 				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL_2.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
-				system("cat $rcg_src_dir/src/epics/util/FILTER.opi | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".opi");
 			}
 		}
 	}
@@ -3707,42 +2620,29 @@ sub commify_series {
 		if (($partType[$cur_part_num] eq "Filt") || ($partType[$cur_part_num] eq "FiltCtrl")) {
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subsysName  . ($subsysName eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "_INMON"  .  "\"/g;";
-		  # $pvtmonitor_args .= "s/$partInput[$cur_part_num][0]_EPICS_CHANNEL/" . $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "_INMON" . "/g;";
 		} elsif ($partType[$cur_part_num] eq "EpicsOut") {
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subsysName  . ($subsysName eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
 		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "\"/g;";
-		  # $pvtmonitor_args .= "s/$partInput[$cur_part_num][0]_EPICS_CHANNEL/" . $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "/g;";
 		}
         }
 		  $sysname = uc($skeleton);
 }
 #print $monitor_args;
 
-system("cp $rcg_src_dir/src/epics/util/adcmenu.opi /tmp/adcmenu.opi");
-system("cp $rcg_src_dir/src/epics/util/dacmenu.opi /tmp/dacmenu.opi");
-system("cp $rcg_src_dir/src/epics/util/related.opi /tmp/related.opi");
-system("cp $rcg_src_dir/src/epics/util/eof.opi /tmp/eof.opi");
 my $xpos = 242;
 my $ypos = 226;
 my $xbpos = 287;
 my $ccnt = 0;
+$dac18 = 0;
 for (0 .. $adcCnt - 1) {
    my $adc_monitor_args = $monitor_args;
    $adc_monitor_args .= "s/MONITOR_ADC/MONITOR_ADC$_/g;";
    #print ("MONITOR sed args: $adc_monitor_args\n");die;
    system("cat $rcg_src_dir/src/epics/util/MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$adc_monitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.adl");
-   # system("cat $rcg_src_dir/src/epics/util/PVT1.css-pvtable | sed 's/adc_0/adc_$_/' |  sed '$pvtmonitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.css-pvtable");
-system("cat /tmp/adcmenu.opi | sed 's/ADCLABEL/ADC$_/g' | sed 's/XPOS/$xpos/g' | sed 's/YPOS/$ypos/g' | sed 's/MODEL/$sysname/g' > /tmp/adc$_.opi");
-system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
-system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
 if($modelType eq "MASTER")
 {
-system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/ADC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/3/g' | sed 's/WIDE/45/g' | sed 's/STBIT/0/g' > /tmp/adc$_.opi");
 } else {
-system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/ADC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/3/g' | sed 's/WIDE/45/g' | sed 's/STBIT/0/g' > /tmp/adc$_.opi");
 }
-system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
-system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
 $ypos += 25;
 $ccnt ++;
 if($ccnt == 5)
@@ -3752,36 +2652,22 @@ if($ccnt == 5)
 	$ypos = 226;
 }
 }
-	$adcMedm[21] = "$dacCardNum[$dacMedm]\" \n";
-for (0 .. $dacCnt - 1) {
-system("cat /tmp/dacmenu.opi | sed 's/ADCLABEL/DAC$dacCardNum[$_]/g' | sed 's/XPOS/$xpos/g' | sed 's/YPOS/$ypos/g' | sed 's/MODEL/$sysname/g' > /tmp/adc$_.opi");
-system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
-system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
-if($modelType eq "MASTER")
-{
-if ($dacType[$_] eq "GSC_18AO8") {
-system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/DAC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/5/g' | sed 's/WIDE/45/g' | sed 's/STBIT/0/g' > /tmp/adc$_.opi");
-} else {
-system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/DAC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/4/g' | sed 's/WIDE/45/g' | sed 's/STBIT/0/g' > /tmp/adc$_.opi");
-}
-} else {
-system("cat /tmp/byte.opi | sed 's/ADC_STAT_0/DAC_STAT_$_/g' | sed 's/XPOS/$xbpos/g' | sed 's/YPOS/$ypos/g' | sed 's/BITCNT/2/g' | sed 's/WIDE/30/g' | sed 's/STBIT/1/g' > /tmp/adc$_.opi");
-}
-system("cat /tmp/GDS_TP.opi /tmp/adc$_.opi > /tmp/adc.opi");
-system("cp /tmp/adc.opi /tmp/GDS_TP.opi");
-$ypos += 25;
-$ccnt ++;
-if($ccnt == 5)
-{
-	$xpos = 337;
-	$xbpos = 382;
-	$ypos = 226;
-}
-}
-system("cat /tmp/GDS_TP.opi /tmp/eof.opi > $epicsScreensDir/$sysname" . "_GDS_TP.opi");
 
 #GENERATE IPC SCREENS
    ("CDS::IPCx::createIpcMedm") -> ($sysname,$ipcxCnt);
+#GENERATE GDS_TP SCREENS
+require "lib/medmGenGdsTp.pm";
+my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
+   ("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$adcCnt,$dacCnt,$adcMaster,@dacType);
+#GENERATE DAC SCREENS
+for($ii=0;$ii<$dacCnt;$ii++)
+{
+   if ($dacType[$ii] eq "GSC_16AO16") {
+   ("CDS::Dac::createDac16Medm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii);
+   } else {
+   ("CDS::Dac18::createDac18Medm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii);
+   }
+}
 
 # Print source file names into a file
 #
