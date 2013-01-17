@@ -2409,7 +2409,6 @@ print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
 system("cp $rcg_src_dir/src/epics/util/ALARMS.adl ALARMS.adl");
 system("cat ALARMS.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_ALARM_MONITOR.adl");
 
-my $monitor_args = $sed_arg;
 my $cur_subsys_num = 0;
 
 # Determine whether passed name need to become a top name
@@ -2604,6 +2603,7 @@ sub commify_series {
 		}
 	}
 	#print "No=$cur_part_num\n";
+	# Get data from generating ADC Monitor MEDM screens
 	if ($partInputType[$cur_part_num][0] eq "Adc") {
 		  $sysname = uc($skeleton);
 		  $sysname = substr($sysname, 2, 3);
@@ -2618,39 +2618,21 @@ sub commify_series {
 		}
 		#print "ADC input Part $part_name $partType[$cur_part_num] has Adc input \'$partInput[$cur_part_num][0]\'\n";
 		if (($partType[$cur_part_num] eq "Filt") || ($partType[$cur_part_num] eq "FiltCtrl")) {
-		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subsysName  . ($subsysName eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
-		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "_INMON"  .  "\"/g;";
+		  #Get ADC card number
+		  $adcScard = substr $partInput[$cur_part_num][0],4,1;
+		  #Get ADC channel number
+		  $adcSchan = substr $partInput[$cur_part_num][0],6,2;
+		  #Get ADC channel name
+		  $adcSname = $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "_INMON";
+		  $adcScreen[$adcScard][$adcSchan] = $adcSname;
 		} elsif ($partType[$cur_part_num] eq "EpicsOut") {
-		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]\"/\"" . $subsysName  . ($subsysName eq "" ? "": "_") . "$part_name ($partInput[$cur_part_num][0])\"/g;";
-		  $monitor_args .= "s/\"$partInput[$cur_part_num][0]_EPICS_CHANNEL\"/\"" . $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "\"/g;";
+		  $adcScard = substr $partInput[$cur_part_num][0],4,1;
+		  $adcSchan = substr $partInput[$cur_part_num][0],6,2;
+		  $adcSname = $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name;
+		  $adcScreen[$adcScard][$adcSchan] = $adcSname;
 		}
         }
 		  $sysname = uc($skeleton);
-}
-#print $monitor_args;
-
-my $xpos = 242;
-my $ypos = 226;
-my $xbpos = 287;
-my $ccnt = 0;
-$dac18 = 0;
-for (0 .. $adcCnt - 1) {
-   my $adc_monitor_args = $monitor_args;
-   $adc_monitor_args .= "s/MONITOR_ADC/MONITOR_ADC$_/g;";
-   #print ("MONITOR sed args: $adc_monitor_args\n");die;
-   system("cat $rcg_src_dir/src/epics/util/MONITOR.adl | sed 's/adc_0/adc_$_/' |  sed '$adc_monitor_args' > $epicsScreensDir/$sysname" . "_MONITOR_ADC$_.adl");
-if($modelType eq "MASTER")
-{
-} else {
-}
-$ypos += 25;
-$ccnt ++;
-if($ccnt == 5)
-{
-	$xpos = 337;
-	$xbpos = 382;
-	$ypos = 226;
-}
 }
 
 #GENERATE IPC SCREENS
@@ -2659,6 +2641,11 @@ if($ccnt == 5)
 require "lib/medmGenGdsTp.pm";
 my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
    ("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$adcCnt,$dacCnt,$adcMaster,@dacType);
+#GENERATE ADC SCREENS
+for($ii=0;$ii<$adcCnt;$ii++)
+{
+   ("CDS::Adc::createAdcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii,@adcScreen);
+}
 #GENERATE DAC SCREENS
 for($ii=0;$ii<$dacCnt;$ii++)
 {
