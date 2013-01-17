@@ -150,7 +150,7 @@ sub createAdcMedm
 
 	my $ii=0;
 
-        my $fname = "$mdlName\_MONITOR_ADCT$adcNum.adl";
+        my $fname = "$mdlName\_MONITOR_ADC$adcNum.adl";
         # Create MEDM File
         my $xpos = 0; my $ypos = 0; my $width = 726; my $height = 470;
         ("CDS::medmGen::medmGenFile") -> ($medmDir,$fname,$width,$height);
