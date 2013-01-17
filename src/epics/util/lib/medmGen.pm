@@ -20,22 +20,23 @@ use Exporter;
 sub medmGenFile
 {
 
-print "opening file @_[0]\/@_[1] \n";
-        open(OUTMEDM, ">@_[0]/@_[1]") || die "cannot open @_[0]/@_[1] for writing ";
+my ($mdir,$mfile,$wid,$ht) = @_;
+print "creating file $mdir\/$mfile \n";
+        open(OUTMEDM, ">$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 file {
-        name=@_[1]
+        name=$mfile
         version=030104
 }
 display {
         object {
                 x=100
                 y=100
-                width=@_[2]
-                height=@_[3]
+                width=$wid
+                height=$ht
         }
         clr=14
-        bclr=2
+        bclr=4
         cmap=""
         gridSpacing=5
         gridOn=0
@@ -127,24 +128,26 @@ close OUTMEDM;
 #	6 = channel name
 #	7 = forground color
 #	8 = background color
+#	9 = clrmod
 sub medmGenTextMon
 {
-print "opening file @_[0]\/@_[1] \n";
-        open(OUTMEDM, ">>@_[0]/@_[1]") || die "cannot open @_[0]/@_[1] for writing ";
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
+print "opening file $mdir\/$mfile \n";
+        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 "text update" {
         object {
-                x=@_[2]
-                y=@_[3]
-                width=@_[4]
-                height=@_[5]
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
         }
         monitor {
-                chan="@_[6]"
-                clr="@_[7]"
-                bclr="@_[8]"
+                chan="$chan"
+                clr="$fgc"
+                bclr="$bgc"
         }
-        clrmod="static"
+        clrmod="$clrmod"
         align="horiz. centered"
         limits {
         }
@@ -167,26 +170,63 @@ close OUTMEDM;
 #	7 = Text color
 sub medmGenText
 {
-print "opening file @_[0]\/@_[1] \n";
-        open(OUTMEDM, ">>@_[0]/@_[1]") || die "cannot open @_[0]/@_[1] for writing ";
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$tix,$fgc) = @_;
+print "opening file $mdir\/$mfile \n";
+        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 text {
         object {
-                x=@_[2]
-                y=@_[3]
-                width=@_[4]
-                height=@_[5]
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
         }
 	"basic attribute" {
-                clr=@_[7]
+                clr=$fgc
         }
         align="horiz. centered"
-        textix="@_[6]"
+        textix="$tix"
 
 }
+END
+close OUTMEDM;
+}
+# This sub will create an MEDM dynamic text block *************************************************
+#	0 = MEDM directory
+#	1 = File name
+#	2 = xpos
+#	3 = ypos
+#	4 = width
+#	5 = height
+#	6 = Text string
+#	7 = Text color
+#	8 = Calc
+#	9 = Channel 
+sub medmGenTextDyn
+{
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$tix,$fgc,$mcalc,$chan) = @_;
+print "opening file $mdir\/$mfile \n";
+        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
+        print OUTMEDM <<END;
+text {
+        object {
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
+        }
+	"basic attribute" {
+                clr=$fgc
+        }
+	"dynamic attribute" {
+		vis="calc"
+		calc="$mcalc"
+		chan="$chan"
+        }
+        align="horiz. centered"
+        textix="$tix"
 
-
-
+}
 END
 close OUTMEDM;
 }
@@ -205,23 +245,24 @@ close OUTMEDM;
 #	10= "0" color
 sub medmGenByte
 {
-print "opening file @_[0]\/@_[1] \n";
-        open(OUTMEDM, ">>@_[0]/@_[1]") || die "cannot open @_[0]/@_[1] for writing ";
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$sb,$eb,$oclr,$zclr) = @_;
+print "opening file $mdir\/$mfile \n";
+        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 byte {
         object {
-                x=@_[2]
-                y=@_[3]
-                width=@_[4]
-                height=@_[5]
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
         }
         monitor {
-                chan="@_[6]"
-                clr=@_[9]
-                bclr=@_[10]
+                chan="$chan"
+                clr=$oclr
+                bclr=$zclr
         }
-	sbit=@_[7]
-	ebit=@_[8]
+	sbit=$sb
+	ebit=$eb
 }
 
 
@@ -229,6 +270,8 @@ byte {
 END
 close OUTMEDM;
 }
+
+
 # This sub will create an MEDM rectangle  *************************************************
 #	0 = MEDM directory
 #	1 = File name
@@ -237,25 +280,182 @@ close OUTMEDM;
 #	4 = width
 #	5 = height
 #	6 = rectangle color
+#	7 = visability
+#	8 = calc
+#	9 = chan
 sub medmGenRectangle
 {
-print "opening file @_[0]\/@_[1] \n";
-        open(OUTMEDM, ">>@_[0]/@_[1]") || die "cannot open @_[0]/@_[1] for writing ";
+my ($mdir,$mfile,$x,$y,$w,$h,$color,$vis,$calc,$chan) = @_;
+print "opening file $mdir\/$mfile \n";
+        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 rectangle {
         object {
-                x=@_[2]
-                y=@_[3]
-                width=@_[4]
-                height=@_[5]
+                x=$x
+                y=$y
+                width=$w
+                height=$h
         }
 	"basic attribute" {
-                clr=@_[6]
+                clr=$color
+        }
+	"dynamic attribute" {
+                vis="$vis"
+		calc="$calc"
+		chan="$chan"
         }
 
 }
 
 
+
+END
+close OUTMEDM;
+}
+# This sub will create an MEDM Meter *************************************************
+#	0 = MEDM directory
+#	1 = File name
+#	2 = xpos
+#	3 = ypos
+#	4 = width
+#	5 = height
+#	6 = channel
+#	7 = color
+#	8= background color
+sub medmGenMeter
+{
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) = @_;
+print "opening file $mdir\/$mfile \n";
+        open(OUTMEDM, ">>@_[0]/@_[1]") || die "cannot open @_[0]/@_[1] for writing ";
+        print OUTMEDM <<END;
+meter {
+        object {
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
+        }
+	monitor {
+		chan="$chan";
+		clr=$fgc
+		bclr=$bgc
+	}
+	label="limits"
+	limits {
+	}
+}
+
+
+
+END
+close OUTMEDM;
+}
+# This sub will create an MEDM related display  *************************************************
+#	0 = MEDM directory
+#	1 = File name
+#	2 = xpos
+#	3 = ypos
+#	4 = width
+#	5 = height
+#	6 = Display name
+#	7 = color
+#	8= background color
+#	9 = Label
+sub medmGenRelDisp
+{
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$disp,$fgc,$bgc,$label) = @_;
+print "opening file $mdir\/$mfile \n";
+        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
+        print OUTMEDM <<END;
+"related display" {
+        object {
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
+        }
+        display[0] {
+                name="$disp"
+        }
+	clr=$fgc
+	bclr=$bgc
+	label="$label"
+}
+
+
+
+END
+close OUTMEDM;
+}
+# This sub will create an MEDM Message Button  *************************************************
+#	0 = MEDM directory
+#	1 = File name
+#	2 = xpos
+#	3 = ypos
+#	4 = width
+#	5 = height
+#	6 = channel name
+#	7 = color
+#	8= background color
+#	9 = Label
+#	10 = Message
+sub medmGenMessage
+{
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$label,$message) = @_;
+print "opening file $mdir\/$mfile \n";
+        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
+        print OUTMEDM <<END;
+"message button" {
+        object {
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
+        }
+        control {
+                chan="$chan"
+		clr=$fgc
+		bclr=$bgc
+        }
+	label="$label"
+	release_msg="$message"
+}
+
+
+
+END
+close OUTMEDM;
+}
+# This sub will create a choice button MEDM part ******************************************
+# Arguments:
+#	0 = MEDM directory
+#	1 = File name
+#	2 = xpos
+#	3 = ypos
+#	4 = width
+#	5 = height
+#	6 = channel name
+#	7 = forground color
+#	8 = background color
+sub medmGenChoice
+{
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) = @_;
+print "opening file $mdir\/$mfile \n";
+        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
+        print OUTMEDM <<END;
+"choice button" {
+        object {
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
+        }
+        control {
+                chan="$chan"
+                clr="$fgc"
+                bclr="$bgc"
+        }
+}
 
 END
 close OUTMEDM;
