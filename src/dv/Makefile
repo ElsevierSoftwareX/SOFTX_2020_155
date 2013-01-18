@@ -1,7 +1,7 @@
 # Dataviewer Makefile
 
 # Dataviewer 'version'
-VERSION=2.3.2
+VERSION=2.6.1
 
 # Installation Location
 INSTALL_PREFIX=/ligo/apps
