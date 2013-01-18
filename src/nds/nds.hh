@@ -24,7 +24,8 @@ public:
   /// Main processing loop.
   bool run();
   /// Striped raw minute trend data reader.
-  bool rawMinuteTrend();
+  /// @param[in] path raw minute trend archive directory
+  bool rawMinuteTrend(std::string path);
   /// Older code to read a frame file archive.
   bool readFrameFileArchive();
   /// Newer code to read a frame file archive.
