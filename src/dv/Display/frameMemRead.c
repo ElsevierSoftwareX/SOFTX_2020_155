@@ -5,6 +5,9 @@
 /*                 -L/home/hding/Try/Lib/UTC_GPS -ltai              */
 /*                 -lm -lnsl -lsocket -lpthread                           */
 
+#ifdef __APPLE__
+#include <float.h>
+#endif
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
