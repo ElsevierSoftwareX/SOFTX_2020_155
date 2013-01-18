@@ -231,7 +231,9 @@ bool Nds::run()
 	  // See if this single archive is the obsolete channel archive
 	  if (mSpec.getAddedFlags()[0] == "obsolete") {
             mSpec.setSignalSlopes(1.0); // Correct signal slopes
-	    job_res = rawMinuteTrend();
+	    std::vector<std::string>v = Spec::split(mSpec.getArchiveDir());
+	    job_res = true;
+      	    for (int i = 0; i < v.size(); i++) job_res &= rawMinuteTrend(v[i]);
 	  } else {
 	    mSpec.setMainArchive(mSpec.getAddedArchives()[0]); // make added archive into main archive
 	    mSpec.setDataType(Spec::MinuteTrendData);
@@ -240,7 +242,9 @@ bool Nds::run()
 	} else 
 	  job_res = combineMinuteTrend();
       } else {
-	job_res = rawMinuteTrend();
+	 std::vector<std::string>v = Spec::split(mSpec.getArchiveDir());
+	 job_res = true;
+      	 for (int i = 0; i < v.size(); i++) job_res &= rawMinuteTrend(v[i]);
       }
     } else
       job_res = readTocFrameFileArchive();

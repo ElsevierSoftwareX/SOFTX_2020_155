@@ -98,8 +98,9 @@ byteswap(char *image_ptr, int chb)
 	}
 }
 
+// Find and send requested minute trend data to the user
 bool
-Nds::rawMinuteTrend()
+Nds::rawMinuteTrend(string path)
 {
   // Send reconfiguration block ( this is current calibration values passed by the daqd )
   {
@@ -108,8 +109,9 @@ Nds::rawMinuteTrend()
   }
 
 
-  multimap<string, int> fname_channel_mmap; // file_name -> set of channel numbers
+  multimap<string, int> fname_channel_mmap; // file_name -> index of the signal in the user request
   typedef multimap<string, int>::const_iterator FCMI;
+  set<string> file_set; // to keep file names
   map<string, list<data_span> > data_span_map; // file_name -> list of data spans
   typedef map<string, list<data_span> >::const_iterator DSMI;
   typedef map<string, list<data_span> >::iterator NCDSMI;
@@ -117,7 +119,6 @@ Nds::rawMinuteTrend()
   typedef list<data_span>::iterator NCDSI;
   typedef list<mapping_data_span>::const_iterator MDSI;
   typedef list<mapping_data_span>::iterator NCMDSI;
-  set<string> file_set; // to keep file names
   typedef set<string>::const_iterator SSI;
   const vector<string> &signals = mSpec.getSignalNames();
   int num_channels = signals.size();
@@ -132,6 +133,10 @@ Nds::rawMinuteTrend()
 #endif
 
   // Construct a multimap of file names into the signal number(s) `fname_channel_mmap'
+  // Here we strip the suffix from the channel name in order to get the raw minute
+  // trend file name. If there is no suffix (or rather no dot separator) we do not
+  // continue and return an error.
+  // Also construct a set of file name we will be working with.
   for (int i = 0 ; i < num_channels; i++) {
     int idx = signals[i].find_first_of('.');
     if (idx == string::npos) {
@@ -144,11 +149,11 @@ Nds::rawMinuteTrend()
     DEBUG(1, cerr << "multimap construction: " << name << endl);
   }
 
-  string path(mSpec.getArchiveDir());
   unsigned int gps = mSpec.getStartGpsTime();
   unsigned int end_gps = mSpec.getEndGpsTime();
 
   // For every file construct a list of data spans (index, gps, length), `data_span_map'
+  // Each file contains data with gaps. This we end up with the list of data spans.
   for (SSI p = file_set.begin (); p != file_set.end (); p++) {
     string fname_str = path + "/" + crc8_str(p->c_str()) + "/" +*p;
     const char *fname = fname_str.c_str ();
@@ -168,7 +173,7 @@ Nds::rawMinuteTrend()
 
 	// index search
 	unsigned long offs = find_offs (gps, fd, 0, structs);
-DEBUG1(cerr << "find_offs() returned " << offs << endl);
+	DEBUG1(cerr << "find_offs() returned " << offs << endl);
 
 	// Sort out the cases when no data is available
 	if (offs == structs) { // End of file hit -- no data available for the current channel
@@ -283,7 +288,7 @@ DEBUG1(cerr << "find_offs() returned " << offs << endl);
           DEBUG1(cerr << "number of reads = " << nreads << endl);
 	    munmap (mmap_ptr, st.st_size);
 	    if (dvec.size ())
-	      data_span_map.insert (pair<string, list<data_span> > (*p, dvec));
+	      data_span_map.insert (pair<string, list<data_span> > (*p, dvec)); // File name -> the list of data spans in the file
 	  }
 	}
       }
@@ -292,11 +297,13 @@ DEBUG1(cerr << "find_offs() returned " << offs << endl);
   }
 
   // Bail out if no data is found, ie. if `data_span_map' is empty
+  // TODO: need to send and indication to the client that no data was found
   if (data_span_map.empty ()) {
     DEBUG1(cerr << "data span map is empty -- bailing out" << endl);
     return true;
   }
 
+  // File set will not be used any more
   file_set.clear ();
 
 #ifndef	NDEBUG
@@ -385,6 +392,8 @@ DEBUG1(cerr << "find_offs() returned " << offs << endl);
 #endif
 
   // Iterate over this merged list and merge the spans into the united spans.
+  // This operation finds "real" holes in the data, i.e. holes common to all channels.
+  // Data transmission protocol cannot send different holes for different channels.
   list<mapping_data_span> united_data_spans;
   mapping_data_span cur_span;
   cur_span.gps=0;
@@ -405,6 +414,8 @@ DEBUG1(cerr << "find_offs() returned " << offs << endl);
       cur_span = *p;
     }
   }  
+
+  // No longer needed
   summary_data_spans.clear ();
 
 #ifndef	NDEBUG
