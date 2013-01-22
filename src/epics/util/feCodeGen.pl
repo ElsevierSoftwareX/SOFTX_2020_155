@@ -174,8 +174,6 @@ open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
   my ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
   my $year = 1900 + $yearOffset;
   $theTime = sprintf("%d_%s_%02d_%02d:%02d:%02d", $year, $months[$month], $dayOfMonth, $hour, $minute, $second);
-open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
-open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
 my $hfname = "$rcg_src_dir/src/include/$ARGV[1].h";
 if (-e $hfname) {
 	system("/bin/mv -f $hfname $hfname~");
@@ -226,128 +224,6 @@ $useFIRs = 0;
 # set debug level (0 - no debug messages)
 $dbg_level = 2;
 
-# Print debug message
-# Example:
-# debug (0, "debug test: openBrace=$openBrace");
-#
-sub debug {
-  if ($dbg_level > shift @_) {
-	print @_, "\n";
-  }
-}
-
-sub init_vars {
-# Global variables set by parser
-$epics_fields[0] = undef; # list of lists; for each part number, epics fields
-$extraTestPoints;	# a list of test point names not related to filters
-$extraTpcount = 0;		# How many extra TPs we have
-@top_names; 	# array of top-level subsytem names marked with "top_names" tag
-$systemName = "";	# model name
-$adcCnt = 0;	# Total A/D converter boards
-$adcType[0] = 0;	# A/D board types
-$adcNum[0] = 0;	# A/D board numbers, sequential
-$dacCnt = 0;	# Total D/A converter boards
-$dacType[0] = 0;	# D/A board types
-$dacNum[0] = 0;	# D/A board numbers, sequential
-$boCnt = 0;	# Total binary output boards
-$boType[0] = 0;	# Binary output board types
-$boNum[0] = 0;	# Binary output board numbers, sequential
-$card2array[0] = 0;
-$bo64Cnt = 0;
-$bi64Cnt = 0;
-$nonSubCnt = 0; # Total of non-sybsystem parts found in the model
-$blockDescr[0] = undef;
-
-# Keeps non-subsystem part numbers
-$nonSubPart[0] = 0;	# $nonSubPart[0 .. $nonSubCnt]
-
-$partCnt = 0;	# Total parts found in the simulink model
-
-# Element is set to one for each CDS parts
-$cdsPart[0] = 0;	# $cdsPart[0 .. $partCnt]
-
-$ppFIR[0] = 0;          # Set to one for PPFIR filters
-
-$biQuad[0] = 0;          # Set to one for biquad IIR filters
-
-# Total number of inputs for each part
-# i.e. how many parts are connected to it with lines (branches)
-$partInCnt[0] = 0;	# $partInCnt[0 .. $partCnt]
-# Source part name (a string) for each part, for each input
-# This shows which source part is connected to that input
-$partInput[0][0] = "";	# $partInput[0 .. $partCnt][0 .. $partInCnt[0]]
-# Source port number
-# This shows which source parts' port is connected to each input
-$partInputPort[0][0] = 0;	# $partInputPort[0 .. $partCnt][0 .. $partInCnt[$_]]
-$partInputs[0] = 0;		# Stores 'Inputs' field of the part declaration in SUM part, 'Operator' in RelationaOperator part, 'Value' Constant part, etc
-$partInputs1[0] = 0;		# Same as $partInputs, i.e. extra part parameter, used with Saturation part
-
-$partOutputs[0] = 0; 	# Stores 'Outputs' field value for some parts
-# Total number of outputs for each part
-# i.e. how many parts are connected with lines (branches) to it
-$partOutCnt[0] = 0;	# $partOutCnt[0 .. $partCnt]
-# Destination part name (a string) for each part, for each output
-# Shows which destination part is connected to that output
-$partOutput[0][0] = "";	# $partOutput[0 .. $partCnt][0 .. $partOutCnt[$_]]
-# Destination port number
-# This shows which destination parts' port is connected to each output
-$partOutputPort[0][0] = 0;	# $partOutputPort[0 .. $partCnt][0 .. $partOutCnt[$_]]
-
-# Output port source number
-# For each part, for each output port it keeps the output port source number
-$partOutputPortUsed[0][0] = 0;	# $partOutputPortUsed[0 .. $partCnt][0 .. $partOutCnt[$_]]
-
-# Part names annotated with subsystem names
-$xpartName[0] = "";	# $xpartName[0 .. $partCnt]
-
-# Part names not annotated with subsystem names
-$partName[0] = "";	# $partName[0 .. $partCnt]
-
-# Part type
-$partType[0] = "";	# $partType[0 .. $partCnt]
-
-# Name of subsystem where part belongs
-$partSubName[0] = "";	# $partSubName[0 .. $partCnt]
-
-# For each part its subsystem number
-$partSubNum[0] = 0;	# $partSubNum[0 .. $partCnt]
-$subSys = 0;	# Subsystems counter
-$subSysName[0] = "";	# Subsystem names
-
-# Subsystem part number ranges
-$subSysPartStart[0] = 0;
-$subSysPartStop[0] = 0;
-
-# IPC output code
-$ipcOutputCode = "";
-
-# Front-end tailing code
-$feTailCode = "";
-
-# Set if all filters are biquad
-$allBiquad = 0;
-
-# Set if doing direct DAC writed (no DMA)
-$directDacWrite = 0;
-
-# Set to disable zero padding DAC data
-$noZeroPad = 0;
-
-# Remove leading subsystems name
-sub remove_subsystem {
-        my ($s) = @_;
-        return substr $s, 1 + rindex $s, "_";
-}
-
-
-# Clear the part input and output counters
-# This implies a maximum part count of 2000 per model.
-for ($ii = 0; $ii < 2000; $ii++) {
-  $partInCnt[$ii] = 0;
-  $partOutCnt[$ii] = 0;
-  $partInUsed[$ii] = 0;
-}
-}
 
 my $system_name = $ARGV[1];
 print OUTH "\#ifndef \U$system_name";
@@ -358,7 +234,9 @@ print OUTH "\#define SYSTEM_NAME_STRING_LOWER \"\L$system_name\"\n";
 
 require "lib/ParsingDiagnostics.pm";
 
+#Initialize various parser variables.
 init_vars();
+# Read .mdl file and flatten all subsystems to single subsystem part.
 require "lib/Parser3.pm";
 open(IN,"<".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 die unless CDS::Parser::parse();
@@ -407,6 +285,8 @@ if($kk > 0)
 {
          die "\n***ERROR: Found total of ** $kk ** INPUT parts not connected\n\n";
 }
+
+# Find Bus Selector parts and feed thru actual part connections.
 # Loop thru all parts
 for($ii=0;$ii<$partCnt;$ii++)
 {
@@ -470,7 +350,6 @@ for($ii=0;$ii<$partCnt;$ii++)
         }
 }
 
-#exit(1);
 
 #print "Looped thru $partCnt looking for BUSS \n\n\n";
 
@@ -548,7 +427,6 @@ $xp = 0;
 	}
 }
 
-# exit(1);
 
 # FIND all FROM links
 # Supports MATLAB tags ie types Goto and From parts.
@@ -587,7 +465,6 @@ for($ii=0;$ii<$partCnt;$ii++)
            }
         }
 }
-#print "\nLooped thru Froms  \n\n\n";
 
 
 
@@ -888,12 +765,13 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 			         $partInputType[$kk][0] = "PART";
 				$partInNum[$kk][0] = $xx;
 				
+				print "OUTPUT COUNT for $xpartName[$xx] is $partOutCnt[$kk]  ** $mm ** \n";
 				for($ll=0;$ll<$partOutCnt[$kk];$ll++)
 				{
 					$toNum = $partOutNum[$kk][$ll];
 					$toPort = $partOutputPort[$kk][$ll];
-					$toPort1 = $partOutputPortUsed[$kk][$ll];
-				#print "Found nonADC connect from $xpartName[$xx] port $mm to $xpartName[$toNum] $partInputPort[$xx][$jj] $partOutput[$xx][$jj]\n";
+					$toPort1 = $partOutputPortUsed[$kk][0];
+					#$toPort1 = $partOutputPortUsed[$kk][$ll];
 					$partInNum[$toNum][$toPort] = $xx;
 					$partInput[$toNum][$toPort] = $xpartName[$xx];
 					$partInputPort[$toNum][$toPort] = $toPort1;
@@ -1584,93 +1462,6 @@ for ($ii = 0; $ii < $partCnt; $ii++) {
    }
 }
 
-sub printVariables {
-for($ii=0;$ii<$partCnt;$ii++)
-{
-#       print "DBG: cdsPart = $cdsPart[$ii]   partType = $partType[$ii]\n";          # DBG
-	if ($cdsPart[$ii]) {
-           if ($partType[$ii] ne "FunctionCall") {
-              if ($partType[$ii] =~ /^TrueRMS/) {
-#                print "\n+++  TEST:  Found a TrueRMS\n";
-#                print "\n+++  DESCR=$blockDescr[$ii]\n";
-
-                 if ($blockDescr[$ii] =~ /^window_size=(\d+)/) {
-#                   print "\n+++  VALUE=$1\n";
-                    $windowSize = $1;
-                 }
-		 else {
-                    $windowSize = 1024;
-		 }
-	      }
-              ("CDS::" . $partType[$ii] . "::printFrontEndVars") -> ($ii);
-           }
-	}
-
-	if($partType[$ii] eq "MUX") {
-		$port = $partInCnt[$ii];
-		print OUT "double \L$xpartName[$ii]\[$port\];\n";
-	}
-	if($partType[$ii] eq "DEMUX") {
-		$port = $partOutputs[$ii];
-		print OUT "double \L$xpartName[$ii]\[$port\];\n";
-	}
-	if($partType[$ii] eq "SUM"
-	   || $partType[$ii] eq "Switch"
-	   || $partType[$ii] eq "Gain"
-	   || $partType[$ii] eq "Abs"
-	   || $partType[$ii] eq "RelationalOperator"
-	   || $partType[$ii] eq "SATURATE") {
-		$port = $partInCnt[$ii];
-		print OUT "double \L$xpartName[$ii] = 0.0;\n";
-	}
-	if($partType[$ii] eq "MULTIPLY") {
-		$port = $partInCnt[$ii];
-		print OUT "double \L$xpartName[$ii];\n";
-	}
-	if($partType[$ii] eq "DIVIDE") {
-		$port = $partInCnt[$ii];
-		print OUT "double \L$xpartName[$ii];\n";
-	}
-	if($partType[$ii] eq "M_SQR") {                                    # ===  MA  ===
-		$port = $partInCnt[$ii];                                   # ===  MA  ===
-		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
-	}                                                                  # ===  MA  ===
-	if($partType[$ii] eq "M_SQT") {                                    # ===  MA  ===
-		$port = $partInCnt[$ii];                                   # ===  MA  ===
-		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
-	}                                                                  # ===  MA  ===
-	if($partType[$ii] eq "M_REC") {                                    # ===  MA  ===
-		$port = $partInCnt[$ii];                                   # ===  MA  ===
-		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
-	}                                                                  # ===  MA  ===
-	if($partType[$ii] eq "M_MOD") {                                    # ===  MA  ===
-		$port = $partInCnt[$ii];                                   # ===  MA  ===
-		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
-	}                                                                  # ===  MA  ===
-	if($partType[$ii] eq "M_LOG10") {                                    # ===  MA  ===
-		$port = $partInCnt[$ii];                                   # ===  MA  ===
-		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
-	}                                                                  # ===  MA  ===
-	if($partType[$ii] eq "DELAY") {
-		print OUT "static double \L$xpartName[$ii] = 0.0;\n";
-	}
-	if($partType[$ii] eq "GROUND")  {
-            if ($groundDecl == 0)  {                                       # =+=  MA  =+=
-                print OUT "static double ground;\n";                       # =+=  MA  =+=
-                $groundDecl++;                                             # =+=  MA  =+=
-            }                                                              # =+=  MA  =+=
-	}
-	if($partType[$ii] eq "CONSTANT")  {
-		print OUT "static double \L$xpartName[$ii];\n";
-	}
-	if($partType[$ii] eq "AND") {
-		$port = $partInCnt[$ii];
-		print OUT "int \L$xpartName[$ii];\n";
-	}
-}
-print OUT "\n\n";
-}
-
 printVariables();
 print OUT "\nint feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
 print OUT "\t\tdouble dacOut[][16],\t\/* DAC outputs *\/\n";
@@ -2068,277 +1859,10 @@ close OUTH;
 close OUTD;
 close EPICS;
 
-system ("/bin/cp GNUmakefile  ../../fe/$skeleton");
 
-print OUTM "# CPU-Shutdown Real Time Linux\n";
-print OUTM "KBUILD_EXTRA_SYMBOLS=$rcg_src_dir/src/drv/ExtraSymbols.symvers\n";
-print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
-print OUTM "EXTRA_CFLAGS += --std=gnu99 -O -w -I../../include\n";
-print OUTM "EXTRA_CFLAGS += -I/opt/gm/include\n";
-print OUTM "EXTRA_CFLAGS += -I/opt/mx/include\n";
+createCmakefile();
 
-if($rate == 480) { print OUTM "EXTRA_CFLAGS += -DSERVO2K\n"; }
-elsif($rate == 240) { print OUTM "EXTRA_CFLAGS += -DSERVO4K\n"; }
-elsif($rate == 60) { print OUTM "EXTRA_CFLAGS += -DSERVO16K\n"; }
-elsif($rate == 30) { print OUTM "EXTRA_CFLAGS += -DSERVO32K\n"; }
-elsif($rate == 15) { print OUTM "EXTRA_CFLAGS += -DSERVO64K\n"; }
-
-print OUTM "EXTRA_CFLAGS += -D";
-print OUTM "\U$skeleton";
-print OUTM "_CODE\n";
-print OUTM "EXTRA_CFLAGS += -DFE_SRC=\\\"\L$skeleton/\L$skeleton.c\\\"\n";
-print OUTM "EXTRA_CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
-
-if($systemName eq "sei" || $useFIRs)
-{
-print OUTM "EXTRA_CFLAGS += -DFIR_FILTERS\n";
-}
-print OUTM "EXTRA_CFLAGS += -g\n";
-if ($adcOver) {
-  print OUTM "EXTRA_CFLAGS += -DROLLING_OVERFLOWS\n";
-}
-if ($no_sync) {
-  print OUTM "#Comment out to enable 1PPS synchronization\n";
-  print OUTM "EXTRA_CFLAGS += -DNO_SYNC\n";
-} else {
-  print OUTM "#Uncomment to disable 1PPS signal sinchronization (channel 31 (last), ADC 0)\n";
-  print OUTM "#EXTRA_CFLAGS += -DNO_SYNC\n";
-}
-if (0 == $dac_testpoint_names && 0 == $::extraTestPoints && 0 == $filtCnt) {
-	print "Not compiling DAQ into the front-end\n";
-	$no_daq = 1;
-}
-if ($no_daq) {
-  print OUTM "#Comment out to enable DAQ\n";
-  print OUTM "EXTRA_CFLAGS += -DNO_DAQ\n";
-} else {
-  print OUTM "#Uncomment to disable DAQ and testpoints\n";
-  print OUTM "#EXTRA_CFLAGS += -DNO_DAQ\n";
-}
-if ($shmem_daq) {
-  print OUTM "#Comment out to disable local frame builder connection; uncomment USE_GM setting too\n";
-  print OUTM "EXTRA_CFLAGS += -DSHMEM_DAQ\n";
-  print OUTM "#EXTRA_CFLAGS += -DUSE_GM=1\n";
-} else {
-  print OUTM "#Uncomment to enable local frame builder; comment out USE_GM setting too\n";
-  print OUTM "#EXTRA_CFLAGS += -DSHMEM_DAQ\n";
-if ($no_daq) {
-  print OUTM "#EXTRA_CFLAGS += -DUSE_GM=1\n";
-} else {
-  print OUTM "EXTRA_CFLAGS += -DUSE_GM=1\n";
-}
-}
-# Use oversampling code if not 64K system
-if($rate != 15) {
-  if ($no_oversampling) {
-    print OUTM "#Uncomment to oversample A/D inputs\n";
-    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE\n";
-    print OUTM "#Uncomment to interpolate D/A outputs\n";
-    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
-  } else {
-    print OUTM "#Comment out to stop A/D oversampling\n";
-    print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE\n";
-    if ($no_dac_interpolation) {
-    } else {
-      print OUTM "#Comment out to stop interpolating D/A outputs\n";
-      print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
-    }
-  }
-}
-if ($dac_internal_clocking) {
-  print OUTM "#Comment out to enable external D/A converter clocking\n";
-  print OUTM "EXTRA_CFLAGS += -DDAC_INTERNAL_CLOCKING\n";
-}
-if ($adcMaster > -1) {
-  print OUTM "EXTRA_CFLAGS += -DADC_MASTER\n";
-  $modelType = "MASTER";
-  if($diagTest > -1) {
-  print OUTM "EXTRA_CFLAGS += -DDIAG_TEST\n";
-  }
-} else {
-  print OUTM "#Uncomment to run on an I/O Master \n";
-  print OUTM "#EXTRA_CFLAGS += -DADC_MASTER\n";
-}
-if ($adcSlave > -1) {
-  print OUTM "EXTRA_CFLAGS += -DADC_SLAVE\n";
-  $modelType = "SLAVE";
-} else {
-  print OUTM "#Uncomment to run on an I/O slave process\n";
-  print OUTM "#EXTRA_CFLAGS += -DADC_SLAVE\n";
-}
-if ($timeMaster > -1) {
-  print OUTM "EXTRA_CFLAGS += -DTIME_MASTER=1\n";
-} else {
-  print OUTM "#Uncomment to build a time master\n";
-  print OUTM "#EXTRA_CFLAGS += -DTIME_MASTER=1\n";
-}
-if ($timeSlave > -1) {
-  print OUTM "EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
-} else {
-  print OUTM "#Uncomment to build a time slave\n";
-  print OUTM "#EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
-}
-if ($iopTimeSlave > -1) {
-  print OUTM "EXTRA_CFLAGS += -DIOP_TIME_SLAVE=1\n";
-} else {
-  print OUTM "#Uncomment to build an IOP time slave\n";
-  print OUTM "#EXTRA_CFLAGS += -DIOP_TIME_SLAVE=1\n";
-}
-if ($rfmTimeSlave > -1) {
-  print OUTM "EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
-} else {
-  print OUTM "#Uncomment to build an RFM time slave\n";
-  print OUTM "#EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
-}
-if ($flipSignals) {
-  print OUTM "EXTRA_CFLAGS += -DFLIP_SIGNALS=1\n";
-}
-if ($pciNet > -1) {
-  print OUTM "#Enable use of PCIe RFM Network\n";
-  print OUTM "DISDIR = /opt/srcdis\n";
-  print OUTM "EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
-} else {
-  print OUTM "#Uncomment to use PCIe RFM Network\n";
-  print OUTM "#DISDIR = /home/controls/DIS\n";
-  print OUTM "#EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
-}
-if ($specificCpu > -1) {
-  print OUTM "#Comment out to run on first available CPU\n";
-  print OUTM "EXTRA_CFLAGS += -DSPECIFIC_CPU=$specificCpu\n";
-} else {
-  print OUTM "#Uncomment to run on a specific CPU\n";
-  print OUTM "#EXTRA_CFLAGS += -DSPECIFIC_CPU=2\n";
-}
-if ($::allBiquad) {
-  print OUTM "#Comment out to go back to old iir_filter calculation form\n";
-  print OUTM "EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
-} else {
-  print OUTM "#Uncomment to run with biquad form iir_filters\n";
-  print OUTM "#EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
-}
-if ($::directDacWrite) {
-  print OUTM "EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
-} else {
-  print OUTM "#EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
-}
-
-if ($::noZeroPad) {
-  print OUTM "EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
-} else {
-  print OUTM "#EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
-}
-
-
-if ($::rfmDma) {
-  print OUTM "#Comment out to run with RFM DMA\n";
-  print OUTM "#EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
-} else {
-  print OUTM "#Comment out to run with RFM DMA\n";
-  print OUTM "EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
-}
-
-print OUTM "\n";
-print OUTM "ifneq (\$(CDIR),)\n";
-print OUTM "override EXTRA_CFLAGS += \$(patsubst %,-I../../../%,\$(CDIR))\n";
-print OUTM "endif\n";
-
-print OUTM "\n";
-print OUTM "all: \$(ALL)\n";
-print OUTM "\n";
-print OUTM "clean:\n";
-print OUTM "\trm -f \$(ALL) *.o\n";
-print OUTM "\n";
-
-print OUTM "EXTRA_CFLAGS += -DMODULE -DNO_RTL=1\n";
-print OUTM "EXTRA_CFLAGS += -I\$(SUBDIRS)/../../include -I$rcg_src_dir/src/include\n";
-print OUTM "EXTRA_CFLAGS += -ffast-math -msse2\n";
-
-print OUTM "obj-m += $skeleton" . ".o\n";
-
-print OUTM "\n";
-close OUTM;
-
-print OUTME "\n";
-print OUTME "# Define Epics system name. It should be unique.\n";
-print OUTME "TARGET = $skeleton";
-print OUTME "epics\n";
-print OUTME "\n";
-print OUTME "SRC = build/\$(TARGET)/";
-print OUTME "$skeleton";
-print OUTME "\.st\n";
-print OUTME "\n";
-print OUTME "SRC += $rcg_src_dir/src/drv/rfm.c\n";
-print OUTME "SRC += $rcg_src_dir/src/drv/param.c\n";
-print OUTME "SRC += $rcg_src_dir/src/drv/crc.c\n";
-print OUTME "SRC += $rcg_src_dir/src/drv/fmReadCoeff.c\n";
-#print OUTME "SRC += src/epics/seq/get_local_time.st\n";
-for($ii=0;$ii<$useWd;$ii++)
-{
-	print OUTME "SRC += src/epics/seq/hepiWatchdog";
-	print OUTME "\U$useWdName[$ii]";
-	print OUTME "\L\.st\n";
-}
-print OUTME "\n";
-#print OUTME "DB += src/epics/db/local_time.db\n";
-print OUTME "DB += build/\$(TARGET)/";
-print OUTME "$skeleton";
-print OUTME "1\.db\n";
-print OUTME "\n";
-print OUTME "IFO = $site\n";
-print OUTME "SITE = $location\n";
-print OUTME "\n";
-print OUTME "SEQ += \'";
-print OUTME "$skeleton";
-print OUTME ",(\"ifo=$site, site=$location, sys=\U$systemName\, \Lsysnum=$dcuId\, \Lsysfile=\U$skeleton \")\'\n";
-#print OUTME "SEQ += \'get_local_time,(\"ifo=$site, sys=\U$systemName\")\'\n";
-for($ii=0;$ii<$useWd;$ii++)
-{
-print OUTME "SEQ += \'";
-print OUTME "hepiWatchdog";
-print OUTME "\U$useWdName[$ii]";
-print OUTME ",(\"ifo=$site, sys=\U$systemName\,\Lsubsys=\U$useWdName[$ii]\")\'\n";
-}
-print OUTME "\n";
-print OUTME "EXTRA_CFLAGS += -D";
-print OUTME "\U$skeleton";
-print OUTME "_CODE\n";
-print OUTME "EXTRA_CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
-print OUTME "\n";
-print OUTME "LIBFLAGS += -lezca\n";
-if($systemName eq "sei" || $useFIRs)
-{
-print OUTME "EXTRA_CFLAGS += -DFIR_FILTERS\n";
-}
-print OUTME "include $rcg_src_dir/config/Makefile.linux\n";
-print OUTME "\n";
-print OUTME "build/\$(TARGET)/";
-print OUTME "$skeleton";
-print OUTME "1\.db: build/\$(TARGET)/";
-print OUTME "$skeleton";
-print OUTME "\.db\n";
-print OUTME "\tsed 's/%SYS%/";
-print OUTME "\U$systemName";
-print OUTME "/g;s/%SUBSYS%//g' \$< > \$\@\n";
-print OUTME "\n";
-print OUTME "\n";
-close OUTME;
-
-
-#exit;
-
-sub get_freq {
-if($rate == 480) {
-	return 2*1024;
-} elsif ($rate == 240) {
-	return 4*1024;
-} elsif ($rate == 60) {
-	return 16*1024;
-} elsif ($rate == 30) {
-	return 32*1024;
-} elsif ($rate == 15) {
-	return 64*1024;
-}
-}
+createEpicsMakefile();
 
 mkpath $configFilesDir, 0, 0755;
 
@@ -2661,4 +2185,484 @@ for($ii=0;$ii<$dacCnt;$ii++)
 open(OUT,">sources.\L$sysname\E") || die "cannot open \"sources.$sysname\" file for writing ";
 print OUT join("\n", @sources), "\n";
 close OUT;
+
+# Remove leading subsystems name
+sub remove_subsystem {
+        my ($s) = @_;
+        return substr $s, 1 + rindex $s, "_";
+}
+# Print debug message
+# Example:
+# debug (0, "debug test: openBrace=$openBrace");
+#
+sub debug {
+  if ($dbg_level > shift @_) {
+	print @_, "\n";
+  }
+}
+sub get_freq {
+if($rate == 480) {
+	return 2*1024;
+} elsif ($rate == 240) {
+	return 4*1024;
+} elsif ($rate == 60) {
+	return 16*1024;
+} elsif ($rate == 30) {
+	return 32*1024;
+} elsif ($rate == 15) {
+	return 64*1024;
+}
+}
+sub init_vars {
+# Global variables set by parser
+$epics_fields[0] = undef; # list of lists; for each part number, epics fields
+$extraTestPoints;	# a list of test point names not related to filters
+$extraTpcount = 0;		# How many extra TPs we have
+@top_names; 	# array of top-level subsytem names marked with "top_names" tag
+$systemName = "";	# model name
+$adcCnt = 0;	# Total A/D converter boards
+$adcType[0] = 0;	# A/D board types
+$adcNum[0] = 0;	# A/D board numbers, sequential
+$dacCnt = 0;	# Total D/A converter boards
+$dacType[0] = 0;	# D/A board types
+$dacNum[0] = 0;	# D/A board numbers, sequential
+$boCnt = 0;	# Total binary output boards
+$boType[0] = 0;	# Binary output board types
+$boNum[0] = 0;	# Binary output board numbers, sequential
+$card2array[0] = 0;
+$bo64Cnt = 0;
+$bi64Cnt = 0;
+$nonSubCnt = 0; # Total of non-sybsystem parts found in the model
+$blockDescr[0] = undef;
+
+# Keeps non-subsystem part numbers
+$nonSubPart[0] = 0;	# $nonSubPart[0 .. $nonSubCnt]
+
+$partCnt = 0;	# Total parts found in the simulink model
+
+# Element is set to one for each CDS parts
+$cdsPart[0] = 0;	# $cdsPart[0 .. $partCnt]
+
+$ppFIR[0] = 0;          # Set to one for PPFIR filters
+
+$biQuad[0] = 0;          # Set to one for biquad IIR filters
+
+# Total number of inputs for each part
+# i.e. how many parts are connected to it with lines (branches)
+$partInCnt[0] = 0;	# $partInCnt[0 .. $partCnt]
+# Source part name (a string) for each part, for each input
+# This shows which source part is connected to that input
+$partInput[0][0] = "";	# $partInput[0 .. $partCnt][0 .. $partInCnt[0]]
+# Source port number
+# This shows which source parts' port is connected to each input
+$partInputPort[0][0] = 0;	# $partInputPort[0 .. $partCnt][0 .. $partInCnt[$_]]
+$partInputs[0] = 0;		# Stores 'Inputs' field of the part declaration in SUM part, 'Operator' in RelationaOperator part, 'Value' Constant part, etc
+$partInputs1[0] = 0;		# Same as $partInputs, i.e. extra part parameter, used with Saturation part
+
+$partOutputs[0] = 0; 	# Stores 'Outputs' field value for some parts
+# Total number of outputs for each part
+# i.e. how many parts are connected with lines (branches) to it
+$partOutCnt[0] = 0;	# $partOutCnt[0 .. $partCnt]
+# Destination part name (a string) for each part, for each output
+# Shows which destination part is connected to that output
+$partOutput[0][0] = "";	# $partOutput[0 .. $partCnt][0 .. $partOutCnt[$_]]
+# Destination port number
+# This shows which destination parts' port is connected to each output
+$partOutputPort[0][0] = 0;	# $partOutputPort[0 .. $partCnt][0 .. $partOutCnt[$_]]
+
+# Output port source number
+# For each part, for each output port it keeps the output port source number
+$partOutputPortUsed[0][0] = 0;	# $partOutputPortUsed[0 .. $partCnt][0 .. $partOutCnt[$_]]
+
+# Part names annotated with subsystem names
+$xpartName[0] = "";	# $xpartName[0 .. $partCnt]
+
+# Part names not annotated with subsystem names
+$partName[0] = "";	# $partName[0 .. $partCnt]
+
+# Part type
+$partType[0] = "";	# $partType[0 .. $partCnt]
+
+# Name of subsystem where part belongs
+$partSubName[0] = "";	# $partSubName[0 .. $partCnt]
+
+# For each part its subsystem number
+$partSubNum[0] = 0;	# $partSubNum[0 .. $partCnt]
+$subSys = 0;	# Subsystems counter
+$subSysName[0] = "";	# Subsystem names
+
+# Subsystem part number ranges
+$subSysPartStart[0] = 0;
+$subSysPartStop[0] = 0;
+
+# IPC output code
+$ipcOutputCode = "";
+
+# Front-end tailing code
+$feTailCode = "";
+
+# Set if all filters are biquad
+$allBiquad = 0;
+
+# Set if doing direct DAC writed (no DMA)
+$directDacWrite = 0;
+
+# Set to disable zero padding DAC data
+$noZeroPad = 0;
+
+# Clear the part input and output counters
+# This implies a maximum part count of 2000 per model.
+for ($ii = 0; $ii < 2000; $ii++) {
+  $partInCnt[$ii] = 0;
+  $partOutCnt[$ii] = 0;
+  $partInUsed[$ii] = 0;
+}
+}
+sub createEpicsMakefile {
+	open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
+	print OUTME "\n";
+	print OUTME "# Define Epics system name. It should be unique.\n";
+	print OUTME "TARGET = $skeleton";
+	print OUTME "epics\n";
+	print OUTME "\n";
+	print OUTME "SRC = build/\$(TARGET)/";
+	print OUTME "$skeleton";
+	print OUTME "\.st\n";
+	print OUTME "\n";
+	print OUTME "SRC += $rcg_src_dir/src/drv/rfm.c\n";
+	print OUTME "SRC += $rcg_src_dir/src/drv/param.c\n";
+	print OUTME "SRC += $rcg_src_dir/src/drv/crc.c\n";
+	print OUTME "SRC += $rcg_src_dir/src/drv/fmReadCoeff.c\n";
+	#print OUTME "SRC += src/epics/seq/get_local_time.st\n";
+	for($ii=0;$ii<$useWd;$ii++)
+	{
+		print OUTME "SRC += src/epics/seq/hepiWatchdog";
+		print OUTME "\U$useWdName[$ii]";
+		print OUTME "\L\.st\n";
+	}
+	print OUTME "\n";
+	#print OUTME "DB += src/epics/db/local_time.db\n";
+	print OUTME "DB += build/\$(TARGET)/";
+	print OUTME "$skeleton";
+	print OUTME "1\.db\n";
+	print OUTME "\n";
+	print OUTME "IFO = $site\n";
+	print OUTME "SITE = $location\n";
+	print OUTME "\n";
+	print OUTME "SEQ += \'";
+	print OUTME "$skeleton";
+	print OUTME ",(\"ifo=$site, site=$location, sys=\U$systemName\, \Lsysnum=$dcuId\, \Lsysfile=\U$skeleton \")\'\n";
+	#print OUTME "SEQ += \'get_local_time,(\"ifo=$site, sys=\U$systemName\")\'\n";
+	for($ii=0;$ii<$useWd;$ii++)
+	{
+	print OUTME "SEQ += \'";
+	print OUTME "hepiWatchdog";
+	print OUTME "\U$useWdName[$ii]";
+	print OUTME ",(\"ifo=$site, sys=\U$systemName\,\Lsubsys=\U$useWdName[$ii]\")\'\n";
+	}
+	print OUTME "\n";
+	print OUTME "EXTRA_CFLAGS += -D";
+	print OUTME "\U$skeleton";
+	print OUTME "_CODE\n";
+	print OUTME "EXTRA_CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
+	print OUTME "\n";
+	print OUTME "LIBFLAGS += -lezca\n";
+	if($systemName eq "sei" || $useFIRs)
+	{
+	print OUTME "EXTRA_CFLAGS += -DFIR_FILTERS\n";
+	}
+	print OUTME "include $rcg_src_dir/config/Makefile.linux\n";
+	print OUTME "\n";
+	print OUTME "build/\$(TARGET)/";
+	print OUTME "$skeleton";
+	print OUTME "1\.db: build/\$(TARGET)/";
+	print OUTME "$skeleton";
+	print OUTME "\.db\n";
+	print OUTME "\tsed 's/%SYS%/";
+	print OUTME "\U$systemName";
+	print OUTME "/g;s/%SUBSYS%//g' \$< > \$\@\n";
+	print OUTME "\n";
+	print OUTME "\n";
+	close OUTME;
+}
+sub createCmakefile{
+
+system ("/bin/cp GNUmakefile  ../../fe/$skeleton");
+open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
+
+print OUTM "# CPU-Shutdown Real Time Linux\n";
+print OUTM "KBUILD_EXTRA_SYMBOLS=$rcg_src_dir/src/drv/ExtraSymbols.symvers\n";
+print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
+print OUTM "EXTRA_CFLAGS += --std=gnu99 -O -w -I../../include\n";
+print OUTM "EXTRA_CFLAGS += -I/opt/gm/include\n";
+print OUTM "EXTRA_CFLAGS += -I/opt/mx/include\n";
+
+if($rate == 480) { print OUTM "EXTRA_CFLAGS += -DSERVO2K\n"; }
+elsif($rate == 240) { print OUTM "EXTRA_CFLAGS += -DSERVO4K\n"; }
+elsif($rate == 60) { print OUTM "EXTRA_CFLAGS += -DSERVO16K\n"; }
+elsif($rate == 30) { print OUTM "EXTRA_CFLAGS += -DSERVO32K\n"; }
+elsif($rate == 15) { print OUTM "EXTRA_CFLAGS += -DSERVO64K\n"; }
+
+print OUTM "EXTRA_CFLAGS += -D";
+print OUTM "\U$skeleton";
+print OUTM "_CODE\n";
+print OUTM "EXTRA_CFLAGS += -DFE_SRC=\\\"\L$skeleton/\L$skeleton.c\\\"\n";
+print OUTM "EXTRA_CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
+
+if($systemName eq "sei" || $useFIRs)
+{
+print OUTM "EXTRA_CFLAGS += -DFIR_FILTERS\n";
+}
+print OUTM "EXTRA_CFLAGS += -g\n";
+if ($adcOver) {
+  print OUTM "EXTRA_CFLAGS += -DROLLING_OVERFLOWS\n";
+}
+if ($no_sync) {
+  print OUTM "#Comment out to enable 1PPS synchronization\n";
+  print OUTM "EXTRA_CFLAGS += -DNO_SYNC\n";
+} else {
+  print OUTM "#Uncomment to disable 1PPS signal sinchronization (channel 31 (last), ADC 0)\n";
+  print OUTM "#EXTRA_CFLAGS += -DNO_SYNC\n";
+}
+if (0 == $dac_testpoint_names && 0 == $::extraTestPoints && 0 == $filtCnt) {
+	print "Not compiling DAQ into the front-end\n";
+	$no_daq = 1;
+}
+if ($no_daq) {
+  print OUTM "#Comment out to enable DAQ\n";
+  print OUTM "EXTRA_CFLAGS += -DNO_DAQ\n";
+} else {
+  print OUTM "#Uncomment to disable DAQ and testpoints\n";
+  print OUTM "#EXTRA_CFLAGS += -DNO_DAQ\n";
+}
+if ($shmem_daq) {
+  print OUTM "#Comment out to disable local frame builder connection; uncomment USE_GM setting too\n";
+  print OUTM "EXTRA_CFLAGS += -DSHMEM_DAQ\n";
+  print OUTM "#EXTRA_CFLAGS += -DUSE_GM=1\n";
+} else {
+  print OUTM "#Uncomment to enable local frame builder; comment out USE_GM setting too\n";
+  print OUTM "#EXTRA_CFLAGS += -DSHMEM_DAQ\n";
+if ($no_daq) {
+  print OUTM "#EXTRA_CFLAGS += -DUSE_GM=1\n";
+} else {
+  print OUTM "EXTRA_CFLAGS += -DUSE_GM=1\n";
+}
+}
+# Use oversampling code if not 64K system
+if($rate != 15) {
+  if ($no_oversampling) {
+    print OUTM "#Uncomment to oversample A/D inputs\n";
+    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE\n";
+    print OUTM "#Uncomment to interpolate D/A outputs\n";
+    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
+  } else {
+    print OUTM "#Comment out to stop A/D oversampling\n";
+    print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE\n";
+    if ($no_dac_interpolation) {
+    } else {
+      print OUTM "#Comment out to stop interpolating D/A outputs\n";
+      print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
+    }
+  }
+}
+if ($dac_internal_clocking) {
+  print OUTM "#Comment out to enable external D/A converter clocking\n";
+  print OUTM "EXTRA_CFLAGS += -DDAC_INTERNAL_CLOCKING\n";
+}
+if ($adcMaster > -1) {
+  print OUTM "EXTRA_CFLAGS += -DADC_MASTER\n";
+  $modelType = "MASTER";
+  if($diagTest > -1) {
+  print OUTM "EXTRA_CFLAGS += -DDIAG_TEST\n";
+  }
+} else {
+  print OUTM "#Uncomment to run on an I/O Master \n";
+  print OUTM "#EXTRA_CFLAGS += -DADC_MASTER\n";
+}
+if ($adcSlave > -1) {
+  print OUTM "EXTRA_CFLAGS += -DADC_SLAVE\n";
+  $modelType = "SLAVE";
+} else {
+  print OUTM "#Uncomment to run on an I/O slave process\n";
+  print OUTM "#EXTRA_CFLAGS += -DADC_SLAVE\n";
+}
+if ($timeMaster > -1) {
+  print OUTM "EXTRA_CFLAGS += -DTIME_MASTER=1\n";
+} else {
+  print OUTM "#Uncomment to build a time master\n";
+  print OUTM "#EXTRA_CFLAGS += -DTIME_MASTER=1\n";
+}
+if ($timeSlave > -1) {
+  print OUTM "EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
+} else {
+  print OUTM "#Uncomment to build a time slave\n";
+  print OUTM "#EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
+}
+if ($iopTimeSlave > -1) {
+  print OUTM "EXTRA_CFLAGS += -DIOP_TIME_SLAVE=1\n";
+} else {
+  print OUTM "#Uncomment to build an IOP time slave\n";
+  print OUTM "#EXTRA_CFLAGS += -DIOP_TIME_SLAVE=1\n";
+}
+if ($rfmTimeSlave > -1) {
+  print OUTM "EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
+} else {
+  print OUTM "#Uncomment to build an RFM time slave\n";
+  print OUTM "#EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
+}
+if ($flipSignals) {
+  print OUTM "EXTRA_CFLAGS += -DFLIP_SIGNALS=1\n";
+}
+if ($pciNet > -1) {
+  print OUTM "#Enable use of PCIe RFM Network\n";
+  print OUTM "DISDIR = /opt/srcdis\n";
+  print OUTM "EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
+} else {
+  print OUTM "#Uncomment to use PCIe RFM Network\n";
+  print OUTM "#DISDIR = /home/controls/DIS\n";
+  print OUTM "#EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
+}
+if ($specificCpu > -1) {
+  print OUTM "#Comment out to run on first available CPU\n";
+  print OUTM "EXTRA_CFLAGS += -DSPECIFIC_CPU=$specificCpu\n";
+} else {
+  print OUTM "#Uncomment to run on a specific CPU\n";
+  print OUTM "#EXTRA_CFLAGS += -DSPECIFIC_CPU=2\n";
+}
+if ($::allBiquad) {
+  print OUTM "#Comment out to go back to old iir_filter calculation form\n";
+  print OUTM "EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
+} else {
+  print OUTM "#Uncomment to run with biquad form iir_filters\n";
+  print OUTM "#EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
+}
+if ($::directDacWrite) {
+  print OUTM "EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
+} else {
+  print OUTM "#EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
+}
+
+if ($::noZeroPad) {
+  print OUTM "EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
+} else {
+  print OUTM "#EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
+}
+
+
+if ($::rfmDma) {
+  print OUTM "#Comment out to run with RFM DMA\n";
+  print OUTM "#EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
+} else {
+  print OUTM "#Comment out to run with RFM DMA\n";
+  print OUTM "EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
+}
+
+print OUTM "\n";
+print OUTM "ifneq (\$(CDIR),)\n";
+print OUTM "override EXTRA_CFLAGS += \$(patsubst %,-I../../../%,\$(CDIR))\n";
+print OUTM "endif\n";
+
+print OUTM "\n";
+print OUTM "all: \$(ALL)\n";
+print OUTM "\n";
+print OUTM "clean:\n";
+print OUTM "\trm -f \$(ALL) *.o\n";
+print OUTM "\n";
+
+print OUTM "EXTRA_CFLAGS += -DMODULE -DNO_RTL=1\n";
+print OUTM "EXTRA_CFLAGS += -I\$(SUBDIRS)/../../include -I$rcg_src_dir/src/include\n";
+print OUTM "EXTRA_CFLAGS += -ffast-math -msse2\n";
+
+print OUTM "obj-m += $skeleton" . ".o\n";
+
+print OUTM "\n";
+close OUTM;
+}
+
+sub printVariables {
+for($ii=0;$ii<$partCnt;$ii++)
+{
+#       print "DBG: cdsPart = $cdsPart[$ii]   partType = $partType[$ii]\n";          # DBG
+	if ($cdsPart[$ii]) {
+           if ($partType[$ii] ne "FunctionCall") {
+              if ($partType[$ii] =~ /^TrueRMS/) {
+#                print "\n+++  TEST:  Found a TrueRMS\n";
+#                print "\n+++  DESCR=$blockDescr[$ii]\n";
+
+                 if ($blockDescr[$ii] =~ /^window_size=(\d+)/) {
+#                   print "\n+++  VALUE=$1\n";
+                    $windowSize = $1;
+                 }
+		 else {
+                    $windowSize = 1024;
+		 }
+	      }
+              ("CDS::" . $partType[$ii] . "::printFrontEndVars") -> ($ii);
+           }
+	}
+
+	if($partType[$ii] eq "MUX") {
+		$port = $partInCnt[$ii];
+		print OUT "double \L$xpartName[$ii]\[$port\];\n";
+	}
+	if($partType[$ii] eq "DEMUX") {
+		$port = $partOutputs[$ii];
+		print OUT "double \L$xpartName[$ii]\[$port\];\n";
+	}
+	if($partType[$ii] eq "SUM"
+	   || $partType[$ii] eq "Switch"
+	   || $partType[$ii] eq "Gain"
+	   || $partType[$ii] eq "Abs"
+	   || $partType[$ii] eq "RelationalOperator"
+	   || $partType[$ii] eq "SATURATE") {
+		$port = $partInCnt[$ii];
+		print OUT "double \L$xpartName[$ii] = 0.0;\n";
+	}
+	if($partType[$ii] eq "MULTIPLY") {
+		$port = $partInCnt[$ii];
+		print OUT "double \L$xpartName[$ii];\n";
+	}
+	if($partType[$ii] eq "DIVIDE") {
+		$port = $partInCnt[$ii];
+		print OUT "double \L$xpartName[$ii];\n";
+	}
+	if($partType[$ii] eq "M_SQR") {                                    # ===  MA  ===
+		$port = $partInCnt[$ii];                                   # ===  MA  ===
+		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
+	}                                                                  # ===  MA  ===
+	if($partType[$ii] eq "M_SQT") {                                    # ===  MA  ===
+		$port = $partInCnt[$ii];                                   # ===  MA  ===
+		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
+	}                                                                  # ===  MA  ===
+	if($partType[$ii] eq "M_REC") {                                    # ===  MA  ===
+		$port = $partInCnt[$ii];                                   # ===  MA  ===
+		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
+	}                                                                  # ===  MA  ===
+	if($partType[$ii] eq "M_MOD") {                                    # ===  MA  ===
+		$port = $partInCnt[$ii];                                   # ===  MA  ===
+		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
+	}                                                                  # ===  MA  ===
+	if($partType[$ii] eq "M_LOG10") {                                    # ===  MA  ===
+		$port = $partInCnt[$ii];                                   # ===  MA  ===
+		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
+	}                                                                  # ===  MA  ===
+	if($partType[$ii] eq "DELAY") {
+		print OUT "static double \L$xpartName[$ii] = 0.0;\n";
+	}
+	if($partType[$ii] eq "GROUND")  {
+            if ($groundDecl == 0)  {                                       # =+=  MA  =+=
+                print OUT "static double ground;\n";                       # =+=  MA  =+=
+                $groundDecl++;                                             # =+=  MA  =+=
+            }                                                              # =+=  MA  =+=
+	}
+	if($partType[$ii] eq "CONSTANT")  {
+		print OUT "static double \L$xpartName[$ii];\n";
+	}
+	if($partType[$ii] eq "AND") {
+		$port = $partInCnt[$ii];
+		print OUT "int \L$xpartName[$ii];\n";
+	}
+}
+print OUT "\n\n";
+}
 
