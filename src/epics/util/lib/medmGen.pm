@@ -132,7 +132,6 @@ close OUTMEDM;
 sub medmGenTextMon
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
-print "opening file $mdir\/$mfile \n";
         open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 "text update" {
@@ -171,7 +170,6 @@ close OUTMEDM;
 sub medmGenText
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$tix,$fgc) = @_;
-print "opening file $mdir\/$mfile \n";
         open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 text {
@@ -205,7 +203,6 @@ close OUTMEDM;
 sub medmGenTextDyn
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$tix,$fgc,$mcalc,$chan) = @_;
-print "opening file $mdir\/$mfile \n";
         open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 text {
@@ -246,7 +243,6 @@ close OUTMEDM;
 sub medmGenByte
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$sb,$eb,$oclr,$zclr) = @_;
-print "opening file $mdir\/$mfile \n";
         open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 byte {
@@ -286,7 +282,6 @@ close OUTMEDM;
 sub medmGenRectangle
 {
 my ($mdir,$mfile,$x,$y,$w,$h,$color,$vis,$calc,$chan) = @_;
-print "opening file $mdir\/$mfile \n";
         open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 rectangle {
@@ -325,7 +320,6 @@ close OUTMEDM;
 sub medmGenMeter
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) = @_;
-print "opening file $mdir\/$mfile \n";
         open(OUTMEDM, ">>@_[0]/@_[1]") || die "cannot open @_[0]/@_[1] for writing ";
         print OUTMEDM <<END;
 meter {
@@ -364,7 +358,6 @@ close OUTMEDM;
 sub medmGenRelDisp
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$disp,$fgc,$bgc,$label) = @_;
-print "opening file $mdir\/$mfile \n";
         open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 "related display" {
@@ -402,7 +395,6 @@ close OUTMEDM;
 sub medmGenMessage
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$label,$message) = @_;
-print "opening file $mdir\/$mfile \n";
         open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 "message button" {
@@ -440,7 +432,6 @@ close OUTMEDM;
 sub medmGenChoice
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) = @_;
-print "opening file $mdir\/$mfile \n";
         open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 "choice button" {
