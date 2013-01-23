@@ -107,7 +107,7 @@ trender_c::raw_minute_saver ()
 	    } else {
 	      // Will not try writing to improperly sized file
 	      if (fst.st_size % sizeof(raw_trend_record_struct) != 0) {
-		system_log(1, "failed to write raw minute trend file `%s' out; errno %d", tmpf, errno);
+		system_log(1, "Improperly sized file `%s', must be modulo %u in size", tmpf, (unsigned int)sizeof(raw_trend_record_struct));
 		daqd.set_fault ();
 	      } else {
 	        raw_trend_record_struct rmtr[rmp];
