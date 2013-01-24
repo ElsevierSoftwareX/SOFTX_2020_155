@@ -5,7 +5,7 @@ use Exporter;
 require "lib/medmGen.pm";
 
 #//     \file Adc.dox
-#//     \brief Documentation for Adc.pm
+#//     \brief Adc.pm - provides standard subroutines for handling ADC parts in CDS PARTS library.
 #//
 #// \n
 #//     \subpage devguidercg2 "<<-- Parts Library"
@@ -20,6 +20,9 @@ require "lib/medmGen.pm";
 # default board type (if none specified with type=<type> in block Description)
 $default_board_type = "GSC_16AI64SSA";
 
+#// \n \n
+#// \b sub \b initAdc \n 
+#// Called by Parser3.pm to check if ADC supported and fill in ADC info. \n \n
 sub initAdc {
         my ($node) = @_;
         $::adcPartNum[$::adcCnt] = $::partCnt;
@@ -57,34 +60,47 @@ sub initAdc {
 	}
 }
 
+#// \b sub \b partType \n 
+#// Required subroutine for RCG \n
+#// Returns Adc \n\n
 sub partType {
 	return Adc;
 }
 
-# Print Epics communication structure into a header file
-# Current part number is passed as first argument
+#// \b sub \b printHeaderStruct \n 
+#// Required subroutine for RCG \n
+#// Print Epics communication structure into a header file \n
+#// Current part number is passed as first argument \n
+#// For ADC part, nothing required to be placed in the Epics comms struct. \n\n
 sub printHeaderStruct {
         my ($i) = @_;
         ;
 }
 
-# Print Epics variable definitions
-# Current part number is passed as first argument
+#// \b sub \b printEpics \n 
+#// Required subroutine for RCG \n
+#// Print Epics variable definitions \n
+#// Current part number is passed as first argument \n
+#// For ADC part, there are no EPICS records generated. \n\n
 sub printEpics {
         my ($i) = @_;
         ;
 }
 
-# Print variable declarations int front-end file
-# Current part number is passed as first argument
+#// \b sub \b printFrontEndVars \n 
+#// Required subroutine for RCG \n
+#// Print variable declarations int front-end file \n
+#// Current part number is passed as first argument \n\n
 sub printFrontEndVars  {
         my ($i) = @_;
         ;
 }
 
-# Return front end initialization code
-# Argument 1 is the part number
-# Returns calculated code string
+#// \b sub \b frontEndInitCode \n 
+#// Required subroutine for RCG \n
+#// Return front end initialization code \n
+#// Argument 1 is the part number \n
+#// Returns calculated code string \n \n
 sub frontEndInitCode {
         my ($i) = @_;
 	my $anum = substr($::xpartName[$i],3,1);
@@ -111,10 +127,12 @@ sub frontEndInitCode {
         return $calcExp;
 }
 
-# Figure out part input code
-# Argument 1 is the part number
-# Argument 2 is the input number
-# Returns calculated input code
+#// \b sub \b fromExp \n 
+#// Required subroutine for RCG \n
+#// Figure out part input code \n
+#// Argument 1 is the part number \n
+#// Argument 2 is the input number \n
+#// Returns calculated input code \n\n
 sub fromExp {
         my ($i, $j) = @_;
         my $card = $::partInNum[$i][$j];
@@ -122,15 +140,20 @@ sub fromExp {
         return "dWord\[" . $card . "\]\[" . $chan . "\]";
 }
 
-# Return front end code
-# Argument 1 is the part number
-# Returns calculated code string
+#// \b sub \b frontEndCode \n 
+#// Required subroutine for RCG \n
+#// Return front end code \n
+#// Argument 1 is the part number \n
+#// Returns calculated code string \n\n
 
 sub frontEndCode {
 	my ($i) = @_;
         return "";
 }
 
+#// \b sub \b createAdcMedm \n 
+#// Called by feCodeGen.pl to auto gen ADC channel MEDM screens \n
+#// This code requires /lib/medmGen.pm \n\n
 sub createAdcMedm
 {
         my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$adcNum,@adcChannel) = @_;
