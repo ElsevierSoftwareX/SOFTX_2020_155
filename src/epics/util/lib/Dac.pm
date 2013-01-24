@@ -5,7 +5,7 @@ use Exporter;
 require "lib/medmGen.pm";
 
 #//     \file Dac.dox
-#//     \brief Documentation for Dac.pm
+#//     \brief Dac.pm - used by RCG to produce code in support of General Standards 16 bit / 16 channel DAC modules.
 #//
 #// \n
 #//     \subpage devguidercg2 "<<-- Parts Library"
@@ -19,8 +19,11 @@ require "lib/medmGen.pm";
 $default_board_type = "GSC_16AO16";
 
 
-# See Parser3.pm function sortDacs(), where the information in global arrays is sorted
-# if there is a new global array introduced, it will need to be addressed in sortDacs()
+#// \n \n
+#// \b sub \b initDac \n 
+#// Called by Parser3.pm to check if ADC supported and fill in ADC info. \n
+#// See Parser3.pm function sortDacs(), where the information in global arrays is sorted \n
+#// if there is a new global array introduced, it will need to be addressed in sortDacs() \n\n
 #
 sub initDac {
         my ($node) = @_;
@@ -59,35 +62,49 @@ sub initDac {
 }
 
 
+#// \b sub \b partType \n 
+#// Required subroutine for RCG \n
+#// Returns Dac \n\n
+
 sub partType {
 	return Dac;
 }
 
-# Print Epics communication structure into a header file
-# Current part number is passed as first argument
+#// \b sub \b printHeaderStruct \n 
+#// Required subroutine for RCG \n
+#// Print Epics communication structure into a header file \n
+#// Current part number is passed as first argument \n
+#// For DAC part, nothing required to be placed in the Epics comms struct. \n\n
 sub printHeaderStruct {
         my ($i) = @_;
 	;
 }
 
-# Print Epics variable definitions
-# Current part number is passed as first argument
+#// \b sub \b printEpics \n 
+#// Required subroutine for RCG \n
+#// Print Epics variable definitions \n
+#// Current part number is passed as first argument \n
+#// For DAC part, there are no EPICS records generated. \n\n
 sub printEpics {
         my ($i) = @_;
         ; 
 }
 
 
-# Print variable declarations int front-end file
-# Current part number is passed as first argument
+#// \b sub \b printFrontEndVars \n 
+#// Required subroutine for RCG \n
+#// Print variable declarations int front-end file \n
+#// Current part number is passed as first argument \n\n
 sub printFrontEndVars  {
         my ($i) = @_;
         ;
 }
 
-# Return front end initialization code
-# Argument 1 is the part number
-# Returns calculated code string
+#// \b sub \b frontEndInitCode \n 
+#// Required subroutine for RCG \n
+#// Return front end initialization code \n
+#// Argument 1 is the part number \n
+#// Returns calculated code string \n \n
 sub frontEndInitCode {
 	my ($i) = @_;
 	my $dacNum = $::card2array[$i];
@@ -106,19 +123,23 @@ sub frontEndInitCode {
         return "";
 }
 
-# Figure out part input code
-# Argument 1 is the part number
-# Argument 2 is the input number
-# Returns calculated input code
+#// \b sub \b fromExp \n 
+#// Required subroutine for RCG \n
+#// Figure out part input code \n
+#// Argument 1 is the part number \n
+#// Argument 2 is the input number \n
+#// Returns calculated input code \n\n
 sub fromExp {
         my ($i, $j) = @_;
         return "";
 }
 
-# Return front end code
-# Argument 1 is the part number
-# Returns calculated code string
 
+#// \b sub \b frontEndCode \n 
+#// Required subroutine for RCG \n
+#// Return front end code \n
+#// Argument 1 is the part number \n
+#// Returns calculated code string \n\n
 sub frontEndCode {
 	my ($i) = @_;
 	my $dacNum = $::card2array[$i];
@@ -138,6 +159,11 @@ sub frontEndCode {
         }
 	return $calcExp;
 }
+
+#// \b sub \b createDac16Medm \n 
+#// Called by feCodeGen.pl to auto gen DAC16 channel MEDM screens \n
+#// This code requires /lib/medmGen.pm \n\n
+
 sub createDac16Medm
 {
         my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$dacNum) = @_;
