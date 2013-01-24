@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 #//     \file feCodeGen.dox
-#//     \brief Documentation for feCodeGen.pl
+#//     \brief Documentation for feCodeGen.pl - Controls parsing of Matlab files and code generation.
 #//
 #// \n
 #//     \subpage devguidercg2 "<<-- Parts Library"
@@ -10,9 +10,11 @@
 use File::Path;
 use Cwd;
 
+# Normal call from Makefile is just first two args.
 die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>] [<speed>]\n\t" . "site is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
         if (@ARGV != 2 && @ARGV != 3 && @ARGV != 4 && @ARGV != 5);
 
+#Setup current working directory and pointer to RCG source directory.
 $currWorkDir = &Cwd::cwd();
 $rcg_src_dir = $ENV{"RCG_SRC_DIR"};
 if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
@@ -269,7 +271,7 @@ for ($ii = 0; $ii < $partCnt; $ii++) {
    ("CDS::IPCx::procIpc") -> ($partCnt);
 
 
-#// Check that all subsystem INPUT parts are connected; else exit w/error.
+# Check that all subsystem INPUT parts are connected; else exit w/error.
 $kk = 0;
 for($ii=0;$ii<$partCnt;$ii++)
 {
