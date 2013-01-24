@@ -933,7 +933,8 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 				{
 					$toNum = $partOutNum[$kk][$ll];
 					$toPort = $partOutputPort[$kk][$ll];
-					$toPort1 = $partOutputPortUsed[$kk][$ll];
+					$toPort1 = $partOutputPortUsed[$kk][0];
+
 				#print "Found nonADC connect from $xpartName[$xx] port $mm to $xpartName[$toNum] $partInputPort[$xx][$jj] $partOutput[$xx][$jj]\n";
 					$partInNum[$toNum][$toPort] = $xx;
 					$partInput[$toNum][$toPort] = $xpartName[$xx];
