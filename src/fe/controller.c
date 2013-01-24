@@ -12,7 +12,9 @@
 /*----------------------------------------------------------------------*/
 
 ///	\file controller.c
-///	\brief Main scheduler program for compiled real-time kernal object.
+///	Main scheduler program for compiled real-time kernal object. \n
+///< 	More information can be found in the following DCC document:
+///<	<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">T0900607 CDS RT Sequencer Software</a>
 
 #include <linux/version.h>
 #include <linux/init.h>
@@ -256,6 +258,15 @@ void deallocate_dac_channels(void) {
 // TASK: fe_start()	
 // This routine is the skeleton for all front end code	
 //***********************************************************************
+/// This function is the main real-time sequencer or scheduler for all code built
+/// using the RCG. \n
+/// There are two primary modes of operation, based on two compile options: \n
+///	- ADC_MASTER: Software is compiled as an I/O Processor (IOP). 
+///	- ADC_SLAVE: Normal user control process.
+/// This code runs in a continuous loop at the rate specified in the RCG model. The
+/// loop is synchronized and triggered by the arrival of ADC data, the ADC module in turn
+/// is triggered to sample by the 64KHz clock provided by the Timing Distribution System.
+///	- 
 void *fe_start(void *arg)
 {
   int longestWrite2 = 0;
