@@ -11,12 +11,13 @@ use Exporter;
 
 #Package intended for use in generating MEDM screens
 
-# This sub will create the basic MEDM file and add color map..
-# Arguments:
-#	0 = MEDM directory
-#	1 = File name
-#	2 = display width
-#	3 = display height
+#// sub medmGenFile
+#// This sub will create the basic MEDM file and add color map..
+#// Arguments:
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = display width
+#//	3 = display height
 sub medmGenFile
 {
 
@@ -45,71 +46,13 @@ display {
 "color map" {
         ncolors=65
         colors {
-                ffffff,
-                ececec,
-                dadada,
-                c8c8c8,
-                bbbbbb,
-                aeaeae,
-                9e9e9e,
-                919191,
-                858585,
-                787878,
-                696969,
-                5a5a5a,
-                464646,
-                2d2d2d,
-                000000,
-                00d800,
-                1ebb00,
-                339900,
-                2d7f00,
-                216c00,
-                fd0000,
-                de1309,
-                be190b,
-                a01207,
-                820400,
-                5893ff,
-                597ee1,
-                4b6ec7,
-                3a5eab,
-                27548d,
-                fbf34a,
-                f9da3c,
-                eeb62b,
-                e19015,
-                cd6100,
-                ffb0ff,
-                d67fe2,
-                ae4ebc,
-                8b1a96,
-                610a75,
-                a4aaff,
-                8793e2,
-                6a73c1,
-                4d52a4,
-                343386,
-                c7bb6d,
-                b79d5c,
-                a47e3c,
-                7d5627,
-                58340f,
-                99ffff,
-                73dfff,
-                4ea5f9,
-                2a63e4,
-                0a00b8,
-                ebf1b5,
-                d4db9d,
-                bbc187,
-                a6a462,
-                8b8239,
-                73ff6b,
-                52da3b,
-                3cb420,
-                289315,
-                1a7309,
+                ffffff, ececec, dadada, c8c8c8, bbbbbb, aeaeae, 9e9e9e, 919191, 858585, 787878,
+                696969, 5a5a5a, 464646, 2d2d2d, 000000, 00d800, 1ebb00, 339900, 2d7f00, 216c00,
+                fd0000, de1309, be190b, a01207, 820400, 5893ff, 597ee1, 4b6ec7, 3a5eab, 27548d,
+                fbf34a, f9da3c, eeb62b, e19015, cd6100, ffb0ff, d67fe2, ae4ebc, 8b1a96, 610a75,
+                a4aaff, 8793e2, 6a73c1, 4d52a4, 343386, c7bb6d, b79d5c, a47e3c, 7d5627, 58340f,
+                99ffff, 73dfff, 4ea5f9, 2a63e4, 0a00b8, ebf1b5, d4db9d, bbc187, a6a462, 8b8239,
+                73ff6b, 52da3b, 3cb420, 289315, 1a7309,
         }
 }
 
@@ -117,18 +60,19 @@ END
 close OUTMEDM;
 }
 
-# This sub will create a text monitoring MEDM part ******************************************
-# Arguments:
-#	0 = MEDM directory
-#	1 = File name
-#	2 = xpos
-#	3 = ypos
-#	4 = width
-#	5 = height
-#	6 = channel name
-#	7 = forground color
-#	8 = background color
-#	9 = clrmod
+#// sub medmGenTextMon
+#// This sub will create a text monitoring MEDM part ******************************************
+#// Arguments:
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = channel name
+#//	7 = forground color
+#//	8 = background color
+#//	9 = clrmod
 sub medmGenTextMon
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
@@ -152,21 +96,20 @@ my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
         }
 }
 
-
-
 END
 close OUTMEDM;
 }
 
-# This sub will create an MEDM text block *************************************************
-#	0 = MEDM directory
-#	1 = File name
-#	2 = xpos
-#	3 = ypos
-#	4 = width
-#	5 = height
-#	6 = Text string
-#	7 = Text color
+#// sub medmGenText
+#// This sub will create an MEDM text block *************************************************
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = Text string
+#//	7 = Text color
 sub medmGenText
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$tix,$fgc) = @_;
@@ -189,17 +132,19 @@ text {
 END
 close OUTMEDM;
 }
-# This sub will create an MEDM dynamic text block *************************************************
-#	0 = MEDM directory
-#	1 = File name
-#	2 = xpos
-#	3 = ypos
-#	4 = width
-#	5 = height
-#	6 = Text string
-#	7 = Text color
-#	8 = Calc
-#	9 = Channel 
+
+#// sub medmGenTextDyn
+#// This sub will create an MEDM dynamic text block *************************************************
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = Text string
+#//	7 = Text color
+#//	8 = Calc
+#//	9 = Channel 
 sub medmGenTextDyn
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$tix,$fgc,$mcalc,$chan) = @_;
@@ -228,18 +173,19 @@ END
 close OUTMEDM;
 }
 
-# This sub will create an MEDM byte monitor *************************************************
-#	0 = MEDM directory
-#	1 = File name
-#	2 = xpos
-#	3 = ypos
-#	4 = width
-#	5 = height
-#	6 = EPICS channel name
-#	7 = Starting bit
-#	8 = End bit
-#	9 = "1" color
-#	10= "0" color
+#// sub medmGenByte
+#// This sub will create an MEDM byte monitor *************************************************
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = EPICS channel name
+#//	7 = Starting bit
+#//	8 = End bit
+#//	9 = "1" color
+#//	10= "0" color
 sub medmGenByte
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$sb,$eb,$oclr,$zclr) = @_;
@@ -268,17 +214,18 @@ close OUTMEDM;
 }
 
 
-# This sub will create an MEDM rectangle  *************************************************
-#	0 = MEDM directory
-#	1 = File name
-#	2 = xpos
-#	3 = ypos
-#	4 = width
-#	5 = height
-#	6 = rectangle color
-#	7 = visability
-#	8 = calc
-#	9 = chan
+#// sub medmGenRectangle
+#// This sub will create an MEDM rectangle  *************************************************
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = rectangle color
+#//	7 = visability
+#//	8 = calc
+#//	9 = chan
 sub medmGenRectangle
 {
 my ($mdir,$mfile,$x,$y,$w,$h,$color,$vis,$calc,$chan) = @_;
@@ -307,16 +254,18 @@ rectangle {
 END
 close OUTMEDM;
 }
-# This sub will create an MEDM Meter *************************************************
-#	0 = MEDM directory
-#	1 = File name
-#	2 = xpos
-#	3 = ypos
-#	4 = width
-#	5 = height
-#	6 = channel
-#	7 = color
-#	8= background color
+
+#// sub medmGenMeter
+#// This sub will create an MEDM Meter *************************************************
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = channel
+#//	7 = color
+#//	8= background color
 sub medmGenMeter
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) = @_;
@@ -344,20 +293,22 @@ meter {
 END
 close OUTMEDM;
 }
-# This sub will create an MEDM related display  *************************************************
-#	0 = MEDM directory
-#	1 = File name
-#	2 = xpos
-#	3 = ypos
-#	4 = width
-#	5 = height
-#	6 = Display name
-#	7 = color
-#	8= background color
-#	9 = Label
+
+#// sub medmGenRelDisp
+#// This sub will create an MEDM related display  *************************************************
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = Display name
+#//	7 = color
+#//	8= background color
+#//	9 = Label
 sub medmGenRelDisp
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$disp,$fgc,$bgc,$label) = @_;
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$disp,$fgc,$bgc,$label,$dargs) = @_;
         open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
         print OUTMEDM <<END;
 "related display" {
@@ -369,6 +320,7 @@ my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$disp,$fgc,$bgc,$label) = @_;
         }
         display[0] {
                 name="$disp"
+		args="$dargs"
         }
 	clr=$fgc
 	bclr=$bgc
@@ -380,18 +332,20 @@ my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$disp,$fgc,$bgc,$label) = @_;
 END
 close OUTMEDM;
 }
-# This sub will create an MEDM Message Button  *************************************************
-#	0 = MEDM directory
-#	1 = File name
-#	2 = xpos
-#	3 = ypos
-#	4 = width
-#	5 = height
-#	6 = channel name
-#	7 = color
-#	8= background color
-#	9 = Label
-#	10 = Message
+
+#// sub medmGenMessage
+#// This sub will create an MEDM Message Button  *************************************************
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = channel name
+#//	7 = color
+#//	8= background color
+#//	9 = Label
+#//	10 = Message
 sub medmGenMessage
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$label,$message) = @_;
@@ -418,17 +372,19 @@ my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$label,$message) = @_;
 END
 close OUTMEDM;
 }
-# This sub will create a choice button MEDM part ******************************************
-# Arguments:
-#	0 = MEDM directory
-#	1 = File name
-#	2 = xpos
-#	3 = ypos
-#	4 = width
-#	5 = height
-#	6 = channel name
-#	7 = forground color
-#	8 = background color
+
+#// sub medmGenChoice
+#// This sub will create a choice button MEDM part ******************************************
+#// Arguments:
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = channel name
+#//	7 = forground color
+#//	8 = background color
 sub medmGenChoice
 {
 my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) = @_;
@@ -449,5 +405,221 @@ my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) = @_;
 }
 
 END
+close OUTMEDM;
+}
+
+#// sub medmGenTextEntry
+#// This sub will create a text entry MEDM part ******************************************
+#// Arguments:
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = channel name
+#//	7 = forground color
+#//	8 = background color
+#//	9 = clrmod
+sub medmGenTextEntry
+{
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
+        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
+        print OUTMEDM <<END;
+"text entry" {
+        object {
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
+        }
+        control {
+                chan="$chan"
+                clr="$fgc"
+                bclr="$bgc"
+        }
+        clrmod="$clrmod"
+        align="horiz. centered"
+        limits {
+        }
+}
+
+END
+close OUTMEDM;
+}
+
+#// sub medmGenTriangle
+#// This sub will create an MEDM static triangle block *************************************************
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = Line width
+#//	7 = Text color
+#//	8 = Triangle points (4xpos + 4ypos).
+sub medmGenTriangle
+{
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$lwide,$fgc,@xpts) = @_;
+        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
+        print OUTMEDM <<END;
+polygon {
+        object {
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
+        }
+	"basic attribute" {
+                clr=$fgc
+		width=$lwide
+        }
+	points {
+		($xpts[0],$xpts[1])
+		($xpts[2],$xpts[3])
+		($xpts[4],$xpts[5])
+		($xpts[6],$xpts[7])
+	}
+
+}
+END
+close OUTMEDM;
+}
+
+#// sub medmGenLine}
+#// This sub will create an MEDM Line  *************************************************
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = Line width
+#//	7 = Color
+sub medmGenLine
+{
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$lwide,$fgc) = @_;
+if($ht > $wid) {
+	$sx = $xpos;
+	$ex = $xpos;
+	$sy = $ypos;
+	$ey = $ypos + $ht;
+} else {
+	$sx = $xpos;
+	$ex = $xpos + $wid;
+	$sy = $ypos;
+	$ey = $ypos;
+}
+        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
+        print OUTMEDM <<END;
+polyline {
+        object {
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
+        }
+	"basic attribute" {
+                clr=$fgc
+		width=$lwide
+        }
+	points {
+		($sx,$sy)
+		($ex,$ey)
+	}
+
+}
+END
+close OUTMEDM;
+}
+
+#// sub medmGenTriangleDyn
+#// This sub will create an MEDM Triangle block with dynamic attibutes ***********************************
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = line width
+#//	7 = color
+#//	8 = visibility calculation
+#//	9 = Channel name
+#//	10 = Triangle points (4xpos + 4ypos).
+sub medmGenTriangleDyn
+{
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$lwide,$fgc,$mcalc,$chan,@xpts) = @_;
+        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
+        print OUTMEDM <<END;
+polygon {
+        object {
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
+        }
+	"basic attribute" {
+                clr=$fgc
+		width=$lwide
+        }
+	"dynamic attribute" {
+		vis="calc"
+		calc="$mcalc"
+		chan="$chan"
+        }
+	points {
+		($xpts[0],$xpts[1])
+		($xpts[2],$xpts[3])
+		($xpts[4],$xpts[5])
+		($xpts[6],$xpts[7])
+	}
+
+}
+END
+close OUTMEDM;
+}
+
+#// sub medmGenShellCmd
+#// This sub will create an MEDM Shell Command block *************************************************
+#//	0 = MEDM directory
+#//	1 = File name
+#//	2 = xpos
+#//	3 = ypos
+#//	4 = width
+#//	5 = height
+#//	6 = Text color
+#//	7 = Background color
+#//	8 = Number of commands
+#//	9 = Label
+#//	10 = List of commands, in order:
+#//		- Label
+#//		- Command
+#//		- Command Arguments
+sub medmGenShellCmd
+{
+my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$fgc,$bgc,$numCmds,$label,@sargs) = @_;
+        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
+
+	print OUTMEDM  "\"shell command\" { \n";
+	print OUTMEDM  "\tobject  { \n";
+	print OUTMEDM  "\t\tx=$xpos \n";
+	print OUTMEDM  "\t\ty=$ypos \n";
+	print OUTMEDM  "\t\twidth=$wid \n";
+	print OUTMEDM  "\t\theight=$ht \n";
+	print OUTMEDM "\t}\n";
+for(my $ii=0;$ii<$numCmds;$ii++)
+{
+	print OUTMEDM "\tcommand[$ii] { \n";
+	print OUTMEDM "\t\tlabel=\"$sargs[$ii]\" \n";
+	print OUTMEDM "\t\tname=\"$sargs[$ii+ $numCmds]\" \n";
+	print OUTMEDM "\t\targs=\"$sargs[$ii+ 2*$numCmds]\" \n";
+	print OUTMEDM "\t}\n";
+}
+
+	print OUTMEDM  "\tclr=$fgc \n";
+	print OUTMEDM  "\tbclr=$bgc \n";
+	print OUTMEDM  "\tlabel=\"$label\" \n";
+	print OUTMEDM "}\n";
 close OUTMEDM;
 }
