@@ -236,6 +236,7 @@ require "lib/ParsingDiagnostics.pm";
 
 #Initialize various parser variables.
 init_vars();
+
 # Read .mdl file and flatten all subsystems to single subsystem part.
 require "lib/Parser3.pm";
 open(IN,"<".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
@@ -1409,7 +1410,7 @@ if ($::extraExcitations) {
 print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site " . get_freq() . " $dcuId $ifoid\n";
 print EPICS "\n\n";
 
-# Start process of writing .c file.
+# Start process of writing .c file. **********************************************************************
 print OUT "// ******* This is a computer generated file *******\n";
 print OUT "// ******* DO NOT HAND EDIT ************************\n";
 print OUT "#include \"fe.h\"";
@@ -1949,20 +1950,6 @@ sub is_top_name {
    return 0;
 };
 
-# Transform record name for exculsion of sys/subsystem parts
-# This function replaces first underscode with the hyphen
-sub top_name_transform {
-   ($name) =  @_;
-   $name =~ s/_/-/;
-   return $name;
-};
-
-# Get the system name (the part before the hyphen)
-sub system_name_part {
-   ($name) =  @_;
-   $name =~ s/([^_]+)-\w+/$1/;
-   return $name;
-}
 
 foreach $cur_part_num (0 .. $partCnt-1) {
 	if ($cur_part_num >= $subSysPartStop[$cur_subsys_num]) {
@@ -1986,13 +1973,6 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 			$basename = $partSubName[$cur_part_num] . "_" . $basename;
 		}
 
-# Create comma separated string from the lements of an array
-sub commify_series {
-    my $sepchar = grep(/,/ => @_) ? ";" : ",";
-    (@_ == 0) ? ''                                      :
-    (@_ == 1) ?  $_[0]                                   :
-                join("$sepchar", @_[0 .. $#_]);
-}
 		$collabels = commify_series(@{$partInput[$cur_part_num]});
 
 		# This doesn't work so well if output has branches
@@ -2108,7 +2088,10 @@ sub commify_series {
 			} elsif ($partType[$cur_part_num] =~ /^FiltCtrl2/) {
 				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL_2.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			} else {
-				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				# system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				$sys_name = substr($sys_name, 2, 3);
+		  		$chanName = $site . "\:$sys_name-" . $subsysName  . ($subsysName eq "" ? "": "_") . $filt_name;
+   				("CDS::Filt::createFiltMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$filt_name,$chanNam,$rcg_src_dir);
 			}
 		} else {
 		  	$sys_name = substr($sys_name, 2, 3);
@@ -2122,7 +2105,9 @@ sub commify_series {
 			} elsif ($partType[$cur_part_num] =~ /^FiltCtrl2/) {
 				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL_2.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} else {
-				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+				#system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+		  		$chanName = $site . "\:$sys_name-" . $subsysName  . ($subsysName eq "" ? "": "_") . $filt_name;
+   				("CDS::Filt::createFiltMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$filt_name,$chanName,$rcg_src_dir);
 			}
 		}
 	}
@@ -2666,3 +2651,24 @@ for($ii=0;$ii<$partCnt;$ii++)
 print OUT "\n\n";
 }
 
+# Create comma separated string from the lements of an array
+sub commify_series {
+    my $sepchar = grep(/,/ => @_) ? ";" : ",";
+    (@_ == 0) ? ''                                      :
+    (@_ == 1) ?  $_[0]                                   :
+                join("$sepchar", @_[0 .. $#_]);
+}
+# Transform record name for exculsion of sys/subsystem parts
+# This function replaces first underscode with the hyphen
+sub top_name_transform {
+   ($name) =  @_;
+   $name =~ s/_/-/;
+   return $name;
+};
+
+# Get the system name (the part before the hyphen)
+sub system_name_part {
+   ($name) =  @_;
+   $name =~ s/([^_]+)-\w+/$1/;
+   return $name;
+}
