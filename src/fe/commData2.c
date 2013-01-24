@@ -1,9 +1,8 @@
-///	\ingroup comms
 /// 	\file commData2.c
 ///	 This is the generic software for communicating realtime data between CDS applications.
-///	 This software supports data communication via:
-///	1) Shared memory, between two processes on the same computer
-///	2) GE Fanuc 5565 Reflected Memory PCIe hardware
+///	 This software supports data communication via: \n
+///	1) Shared memory, between two processes on the same computer \n
+///	2) GE Fanuc 5565 Reflected Memory PCIe hardware \n
 ///	3) Dolphinics Reflected Memory over a PCIe network.
 
 
