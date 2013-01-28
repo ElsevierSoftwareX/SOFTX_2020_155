@@ -2147,7 +2147,7 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 }
 
 #GENERATE IPC SCREENS
-   ("CDS::IPCx::createIpcMedm") -> ($sysname,$ipcxCnt);
+   ("CDS::IPCx::createIpcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ipcxCnt);
 #GENERATE GDS_TP SCREENS
 require "lib/medmGenGdsTp.pm";
 my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
