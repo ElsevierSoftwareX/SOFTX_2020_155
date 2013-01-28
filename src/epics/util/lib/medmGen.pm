@@ -22,9 +22,7 @@ sub medmGenFile
 {
 
 my ($mdir,$mfile,$wid,$ht) = @_;
-print "creating file $mdir\/$mfile \n";
-        open(OUTMEDM, ">$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
-        print OUTMEDM <<END;
+        return <<END;
 file {
         name=$mfile
         version=030104
@@ -57,27 +55,23 @@ display {
 }
 
 END
-close OUTMEDM;
 }
 
 #// \b sub \b medmGenTextMon \n
 #// This sub will create a text monitoring MEDM part ****************************************** \n
 #// Arguments:\n
-#//	0 = MEDM directory\n
-#//	1 = File name\n
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = channel name \n
-#//	7 = forground color \n
-#//	8 = background color \n
-#//	9 = clrmod \n\n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = channel name \n
+#//	5 = forground color \n
+#//	6 = background color \n
+#//	7 = clrmod \n\n
 sub medmGenTextMon
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
-        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
-        print OUTMEDM <<END;
+my ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
+        return <<END;
 "text update" {
         object {
                 x=$xpos
@@ -97,24 +91,20 @@ my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
 }
 
 END
-close OUTMEDM;
 }
 
-#// \bsub \b medmGenText ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$tix,$fgc) \n
+#// \bsub \b medmGenText ($xpos,$ypos,$wid,$ht,$tix,$fgc) \n
 #// This sub will create an MEDM text block ************************************************* \n
-#//	0 = MEDM directory \n
-#//	1 = File name \n
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = Text string \n
-#//	7 = Text color \n\n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = Text string \n
+#//	5 = Text color \n\n
 sub medmGenText
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$tix,$fgc) = @_;
-        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
-        print OUTMEDM <<END;
+my ($xpos,$ypos,$wid,$ht,$tix,$fgc) = @_;
+        return <<END;
 text {
         object {
                 x=$xpos
@@ -130,26 +120,22 @@ text {
 
 }
 END
-close OUTMEDM;
 }
 
-#// \bsub \b medmGenTextDyn ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$tix,$fgc,$mcalc,$chan) \n
+#// \bsub \b medmGenTextDyn ($xpos,$ypos,$wid,$ht,$tix,$fgc,$mcalc,$chan) \n
 #// This sub will create an MEDM dynamic text block ************************************************* \n
-#//	0 = MEDM directory \n
-#//	1 = File name \n
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = Text string \n
-#//	7 = Text color \n
-#//	8 = Calc \n
-#//	9 = Channel \n\n 
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = Text string \n
+#//	5 = Text color \n
+#//	6 = Calc \n
+#//	7 = Channel \n\n 
 sub medmGenTextDyn
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$tix,$fgc,$mcalc,$chan) = @_;
-        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
-        print OUTMEDM <<END;
+my ($xpos,$ypos,$wid,$ht,$tix,$fgc,$mcalc,$chan) = @_;
+        return <<END;
 text {
         object {
                 x=$xpos
@@ -170,27 +156,23 @@ text {
 
 }
 END
-close OUTMEDM;
 }
 
-#// \b sub \b medmGenByte ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$sb,$eb,$oclr,$zclr) \n
+#// \b sub \b medmGenByte ($xpos,$ypos,$wid,$ht,$chan,$sb,$eb,$oclr,$zclr) \n
 #// This sub will create an MEDM byte monitor ************************************************* \n
-#//	0 = MEDM directory \n
-#//	1 = File name \n
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = EPICS channel name \n
-#//	7 = Starting bit \n
-#//	8 = End bit \n
-#//	9 = "1" color \n
-#//	10= "0" color \n\n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = EPICS channel name \n
+#//	5 = Starting bit \n
+#//	6 = End bit \n
+#//	7 = "1" color \n
+#//	8= "0" color \n\n
 sub medmGenByte
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$sb,$eb,$oclr,$zclr) = @_;
-        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
-        print OUTMEDM <<END;
+my ($xpos,$ypos,$wid,$ht,$chan,$sb,$eb,$oclr,$zclr) = @_;
+        return <<END;
 byte {
         object {
                 x=$xpos
@@ -210,27 +192,23 @@ byte {
 
 
 END
-close OUTMEDM;
 }
 
 
-#// \b sub \b medmGenRectangle ($mdir,$mfile,$x,$y,$w,$h,$color,$vis,$calc,$chan) \n
+#// \b sub \b medmGenRectangle ($x,$y,$w,$h,$color,$vis,$calc,$chan) \n
 #// This sub will create an MEDM rectangle  ************************************************* \n
-#//	0 = MEDM directory \n
-#//	1 = File name \n
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = rectangle color \n
-#//	7 = visability \n
-#//	8 = calc \n
-#//	9 = chan \n\n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = rectangle color \n
+#//	5 = visability \n
+#//	6 = calc \n
+#//	7 = chan \n\n
 sub medmGenRectangle
 {
-my ($mdir,$mfile,$x,$y,$w,$h,$color,$vis,$calc,$chan) = @_;
-        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
-        print OUTMEDM <<END;
+my ($x,$y,$w,$h,$color,$vis,$calc,$chan) = @_;
+        return <<END;
 rectangle {
         object {
                 x=$x
@@ -252,25 +230,21 @@ rectangle {
 
 
 END
-close OUTMEDM;
 }
 
-#// \b sub \b medmGenMeter ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) \n
+#// \b sub \b medmGenMeter ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) \n
 #// This sub will create an MEDM Meter ************************************************* \n
-#//	0 = MEDM directory \n
-#//	1 = File name \n
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = channel \n
-#//	7 = color \n
-#//	8= background color \n\n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = channel \n
+#//	5 = color \n
+#//	6= background color \n\n
 sub medmGenMeter
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) = @_;
-        open(OUTMEDM, ">>@_[0]/@_[1]") || die "cannot open @_[0]/@_[1] for writing ";
-        print OUTMEDM <<END;
+my ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) = @_;
+        return <<END;
 meter {
         object {
                 x=$xpos
@@ -291,26 +265,22 @@ meter {
 
 
 END
-close OUTMEDM;
 }
 
-#// \b sub \b medmGenRelDisp ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$disp,$fgc,$bgc,$label,$dargs) \n
+#// \b sub \b medmGenRelDisp ($xpos,$ypos,$wid,$ht,$disp,$fgc,$bgc,$label,$dargs) \n
 #// This sub will create an MEDM related display  ************************************************* \n
-#//	0 = MEDM directory \n
-#//	1 = File name \n
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = Display name \n
-#//	7 = color \n
-#//	8= background color \n
-#//	9 = Label \n\n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = Display name \n
+#//	5 = color \n
+#//	6= background color \n
+#//	7 = Label \n\n
 sub medmGenRelDisp
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$disp,$fgc,$bgc,$label,$dargs) = @_;
-        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
-        print OUTMEDM <<END;
+my ($xpos,$ypos,$wid,$ht,$disp,$fgc,$bgc,$label,$dargs) = @_;
+        return <<END;
 "related display" {
         object {
                 x=$xpos
@@ -330,27 +300,23 @@ my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$disp,$fgc,$bgc,$label,$dargs) = @_;
 
 
 END
-close OUTMEDM;
 }
 
-#// \b sub \b medmGenMessage ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$label,$message) \n
+#// \b sub \b medmGenMessage ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$label,$message) \n
 #// This sub will create an MEDM Message Button  ************************************************* \n
-#//	0 = MEDM directory \n
-#//	1 = File name \n 
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = channel name \n
-#//	7 = color \n
-#//	8= background color \n
-#//	9 = Label \n
-#//	10 = Message \n\n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = channel name \n
+#//	5 = color \n
+#//	6= background color \n
+#//	7 = Label \n
+#//	8 = Message \n\n
 sub medmGenMessage
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$label,$message) = @_;
-        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
-        print OUTMEDM <<END;
+my ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$label,$message) = @_;
+        return <<END;
 "message button" {
         object {
                 x=$xpos
@@ -370,26 +336,22 @@ my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$label,$message) = @_;
 
 
 END
-close OUTMEDM;
 }
 
-#// \b sub \b medmGenChoice ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) \n
+#// \b sub \b medmGenChoice ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) \n
 #// This sub will create a choice button MEDM part ****************************************** \n
 #// Arguments: \n
-#//	0 = MEDM directory \n
-#//	1 = File name \n
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = channel name \n
-#//	7 = forground color \n
-#//	8 = background color \n\n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = channel name \n
+#//	5 = forground color \n
+#//	6 = background color \n\n
 sub medmGenChoice
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) = @_;
-        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
-        print OUTMEDM <<END;
+my ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) = @_;
+        return <<END;
 "choice button" {
         object {
                 x=$xpos
@@ -405,27 +367,23 @@ my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc) = @_;
 }
 
 END
-close OUTMEDM;
 }
 
-#// \b sub \b medmGenTextEntry ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) \n
+#// \b sub \b medmGenTextEntry ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) \n
 #// This sub will create a text entry MEDM part ****************************************** \n
 #// Arguments: \n
-#//	0 = MEDM directory \n
-#//	1 = File name \n
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = channel name \n
-#//	7 = forground color \n
-#//	8 = background color \n
-#//	9 = clrmod \n\n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = channel name \n
+#//	5 = forground color \n
+#//	6 = background color \n
+#//	7 = clrmod \n\n
 sub medmGenTextEntry
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
-        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
-        print OUTMEDM <<END;
+my ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
+        return <<END;
 "text entry" {
         object {
                 x=$xpos
@@ -445,25 +403,21 @@ my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
 }
 
 END
-close OUTMEDM;
 }
 
-#// \b sub \b medmGenTriangle ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$lwide,$fgc,@xpts) \n
+#// \b sub \b medmGenTriangle ($xpos,$ypos,$wid,$ht,$lwide,$fgc,@xpts) \n
 #// This sub will create an MEDM static triangle block ************************************** \n
-#//	0 = MEDM directory \n
-#//	1 = File name \n
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = Line width \n
-#//	7 = Text color \n
-#//	8 = Triangle points (4xpos + 4ypos). \n\n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = Line width \n
+#//	5 = Text color \n
+#//	6 = Triangle points (4xpos + 4ypos). \n\n
 sub medmGenTriangle
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$lwide,$fgc,@xpts) = @_;
-        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
-        print OUTMEDM <<END;
+my ($xpos,$ypos,$wid,$ht,$lwide,$fgc,@xpts) = @_;
+        return <<END;
 polygon {
         object {
                 x=$xpos
@@ -484,22 +438,19 @@ polygon {
 
 }
 END
-close OUTMEDM;
 }
 
-#// \b sub \b medmGenLine ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$lwide,$fgc) \n
+#// \b sub \b medmGenLine ($xpos,$ypos,$wid,$ht,$lwide,$fgc) \n
 #// This sub will create an MEDM Line  ************************************************* \n
-#//	0 = MEDM directory \n
-#//	1 = File name \n
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = Line width \n
-#//	7 = Color \n\n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = Line width \n
+#//	5 = Color \n\n
 sub medmGenLine
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$lwide,$fgc) = @_;
+my ($xpos,$ypos,$wid,$ht,$lwide,$fgc) = @_;
 if($ht > $wid) {
 	$sx = $xpos;
 	$ex = $xpos;
@@ -511,8 +462,7 @@ if($ht > $wid) {
 	$sy = $ypos;
 	$ey = $ypos;
 }
-        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
-        print OUTMEDM <<END;
+        return <<END;
 polyline {
         object {
                 x=$xpos
@@ -531,27 +481,23 @@ polyline {
 
 }
 END
-close OUTMEDM;
 }
 
-#// \b sub \b medmGenTriangleDyn ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$lwide,$fgc,$mcalc,$chan,@xpts) \n
+#// \b sub \b medmGenTriangleDyn ($xpos,$ypos,$wid,$ht,$lwide,$fgc,$mcalc,$chan,@xpts) \n
 #// This sub will create an MEDM Triangle block with dynamic attibutes *********************************** \n
-#//	0 = MEDM directory \n
-#//	1 = File name \n
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = line width \n
-#//	7 = color \n
-#//	8 = visibility calculation \n
-#//	9 = Channel name \n
-#//	10 = Triangle points (4xpos + 4ypos). \n\n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = line width \n
+#//	5 = color \n
+#//	6 = visibility calculation \n
+#//	7 = Channel name \n
+#//	8 = Triangle points (4xpos + 4ypos). \n\n
 sub medmGenTriangleDyn
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$lwide,$fgc,$mcalc,$chan,@xpts) = @_;
-        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
-        print OUTMEDM <<END;
+my ($xpos,$ypos,$wid,$ht,$lwide,$fgc,$mcalc,$chan,@xpts) = @_;
+        return <<END;
 polygon {
         object {
                 x=$xpos
@@ -577,49 +523,46 @@ polygon {
 
 }
 END
-close OUTMEDM;
 }
 
-#// \b sub \b medmGenShellCmd ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$fgc,$bgc,$numCmds,$label,@sargs) \n
+#// \b sub \b medmGenShellCmd ($xpos,$ypos,$wid,$ht,$fgc,$bgc,$numCmds,$label,@sargs) \n
 #// This sub will create an MEDM Shell Command block ************************************************* \n
-#//	0 = MEDM directory \n
-#//	1 = File name \n
-#//	2 = xpos \n
-#//	3 = ypos \n
-#//	4 = width \n
-#//	5 = height \n
-#//	6 = Text color \n
-#//	7 = Background color \n
-#//	8 = Number of commands \n
-#//	9 = Label \n
-#//	10 = List of commands, in order: \n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = Text color \n
+#//	5 = Background color \n
+#//	6 = Number of commands \n
+#//	7 = Label \n
+#//	8 = List of commands, in order: \n
 #//		- Label \n
 #//		- Command \n
 #//		- Command Arguments \n\n
 sub medmGenShellCmd
 {
-my ($mdir,$mfile,$xpos,$ypos,$wid,$ht,$fgc,$bgc,$numCmds,$label,@sargs) = @_;
-        open(OUTMEDM, ">>$mdir/$mfile") || die "cannot open $mdir/$mfile for writing ";
+my ($xpos,$ypos,$wid,$ht,$fgc,$bgc,$numCmds,$label,@sargs) = @_;
 
-	print OUTMEDM  "\"shell command\" { \n";
-	print OUTMEDM  "\tobject  { \n";
-	print OUTMEDM  "\t\tx=$xpos \n";
-	print OUTMEDM  "\t\ty=$ypos \n";
-	print OUTMEDM  "\t\twidth=$wid \n";
-	print OUTMEDM  "\t\theight=$ht \n";
-	print OUTMEDM "\t}\n";
+	$rstr = "\"shell command\" { \n";
+	$rstr .=  "\tobject  { \n";
+	$rstr .=  "\t\tx=$xpos \n";
+	$rstr .=  "\t\ty=$ypos \n";
+	$rstr .=  "\t\twidth=$wid \n";
+	$rstr .=  "\t\theight=$ht \n";
+	$rstr .= "\t}\n";
 for(my $ii=0;$ii<$numCmds;$ii++)
 {
-	print OUTMEDM "\tcommand[$ii] { \n";
-	print OUTMEDM "\t\tlabel=\"$sargs[$ii]\" \n";
-	print OUTMEDM "\t\tname=\"$sargs[$ii+ $numCmds]\" \n";
-	print OUTMEDM "\t\targs=\"$sargs[$ii+ 2*$numCmds]\" \n";
-	print OUTMEDM "\t}\n";
+	$rstr .= "\tcommand[$ii] { \n";
+	$rstr .= "\t\tlabel=\"$sargs[$ii]\" \n";
+	$rstr .= "\t\tname=\"$sargs[$ii+ $numCmds]\" \n";
+	$rstr .= "\t\targs=\"$sargs[$ii+ 2*$numCmds]\" \n";
+	$rstr .= "\t}\n";
 }
 
-	print OUTMEDM  "\tclr=$fgc \n";
-	print OUTMEDM  "\tbclr=$bgc \n";
-	print OUTMEDM  "\tlabel=\"$label\" \n";
-	print OUTMEDM "}\n";
-close OUTMEDM;
+	$rstr .=  "\tclr=$fgc \n";
+	$rstr .=  "\tbclr=$bgc \n";
+	$rstr .=  "\tlabel=\"$label\" \n";
+	$rstr .= "}\n";
+
+	return $rstr;
 }

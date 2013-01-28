@@ -663,6 +663,7 @@ $ipcxRcvrCnt = 0;
 # Subroutine to create IPC RCV status screen for all models
 sub createIpcMedm 
 {
+my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$ipcxCnt1) = @_;
 	# Define colors to be sent to screen gen.
 	my %ecolors = ( "white" => "0",
              "black" => "14",
@@ -673,67 +674,77 @@ sub createIpcMedm
 
 	# Calculate screen height based on number of IPC RCV signals
 	my $dispH = 50;
-	for(my $ii=0;$ii<$::ipcxCnt;$ii++)
+	for(my $ii=0;$ii<$ipcxCnt1;$ii++)
 	{
 		if($::ipcxParts[$ii][9] == 0)
 		{
 			$dispH += 20;
 		}
 	}
+       my $fname = "$mdlName\_IPC_STATUS.adl";
+        # Create MEDM File
+        print "creating file $medmDir\/$fname \n";
+        open(OUTMEDM, ">$medmDir/$fname") || die "cannot open $medmDir/$fname for writing ";
+
 
 	# Generate the base screen file, with name and height/width information
-	("CDS::medmGen::medmGenFile") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","740",$dispH);
+	$medmdata = ("CDS::medmGen::medmGenFile") -> ($medmDir,$fname,"740",$dispH);
 	my $xpos = 0;
 	my $ypos = 0;
 	my $width = 740;
 	my $height = 22;
 	# Put blue rectangle banner at top of screen
-	("CDS::medmGen::medmGenRectangle") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,$ecolors{blue});
+	$medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{blue});
 	# Add time string to banner
-	("CDS::medmGen::medmGenTextMon") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","540","3","160","15","$::site\:FEC-$::dcuId\_TIME_STRING",$ecolors{white},$ecolors{blue});
+	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ("540","3","160","15","$::site\:FEC-$::dcuId\_TIME_STRING",$ecolors{white},$ecolors{blue});
 	# Add screen title to banner
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","310","3","100","15","@_[0] IPC RCV STATUS",$ecolors{white});
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ("310","3","100","15","IPC RCV STATUS",$ecolors{white});
 	# Add the IPC column headings
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","50","30","100","15","SIGNAL NAME",$ecolors{black});
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","220","30","100","15","SEND COMP",$ecolors{black});
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","320","30","100","15","SENDER MODEL",$ecolors{black});
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","420","30","100","15","IPC TYPE",$ecolors{black});
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","518","30","100","15","ERR/SEC",$ecolors{black});
-	("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl","615","30","100","15","ERR TIME",$ecolors{black});
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ("50","30","100","15","SIGNAL NAME",$ecolors{black});
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ("220","30","100","15","SEND COMP",$ecolors{black});
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ("320","30","100","15","SENDER MODEL",$ecolors{black});
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ("420","30","100","15","IPC TYPE",$ecolors{black});
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ("518","30","100","15","ERR/SEC",$ecolors{black});
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ("30","100","15","ERR TIME",$ecolors{black});
 	#print "My IPC count = @_[1]\n";
 	$ypos = 50;
 	$width = 50;
 	$height = 15;
 	# Place IPC info into the screen for each IPC RCV signal
-	for($ii=0;$ii<$::ipcxCnt;$ii++)
+	for($ii=0;$ii<$ipcxCnt1;$ii++)
 	{
 		$xpos = 40;
 		# Verify that this is a RCV signal
 		if($::ipcxParts[$ii][9] == 0)
 		{
 			# Add signal name to screen file.
-			("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,"140",$height,$::ipcxParts[$ii][0],$ecolors{black});
+			$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,"140",$height,$::ipcxParts[$ii][0],$ecolors{black});
 			$xpos += 200;
 			# Add name of sending computer to screen file.
-			("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,$::ipcxParts[$ii][3],$ecolors{black});
+			$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,$::ipcxParts[$ii][3],$ecolors{black});
 			$xpos += 100;
 			# Add name of sending model to screen file.
-			("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,$::ipcxParts[$ii][5],$ecolors{black});
+			$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,$::ipcxParts[$ii][5],$ecolors{black});
 			$xpos += 100;
 			# Add IPC type to screen file.
-			("CDS::medmGen::medmGenText") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,$::ipcxParts[$ii][1],$ecolors{black});
+			$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,$::ipcxParts[$ii][1],$ecolors{black});
 			$xpos += 80;
 			# Add IPC status byte to screen file; holds util diag reset.
-			("CDS::medmGen::medmGenByte") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,"15",$height,"$::ipcxParts[$ii][8]\_PS","0","0",$ecolors{green},$ecolors{red});
+			$medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,"15",$height,"$::ipcxParts[$ii][8]\_PS","0","0",$ecolors{green},$ecolors{red});
 			$xpos += 20;
 			# Add IPC errors/sec to screen file; holds until diag reset, unless errors are continuing.
-			("CDS::medmGen::medmGenTextMon") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,"$::ipcxParts[$ii][8]\_ER",$ecolors{white},$ecolors{black});
+			$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$::ipcxParts[$ii][8]\_ER",$ecolors{white},$ecolors{black});
 			$xpos += 70;
 			$width = 100;
 			# Add time of last detected IPC errors to screen file; holds until diag reset, unless errors are continuing.
-			("CDS::medmGen::medmGenTextMon") -> ($::epicsScreensDir,"@_[0]\_IPC_STATUS.adl",$xpos,$ypos,$width,$height,"$::ipcxParts[$ii][8]\_ET",$ecolors{white},$ecolors{black});
+			$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$::ipcxParts[$ii][8]\_ET",$ecolors{white},$ecolors{black});
 			$ypos += 20;
 			$width = 50;
 		}
 	}
+
+# Write data to file and close file.
+print OUTMEDM "$medmdata \n";
+close OUTMEDM;
+
 }
