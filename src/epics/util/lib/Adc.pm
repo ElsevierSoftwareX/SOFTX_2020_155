@@ -175,25 +175,28 @@ sub createAdcMedm
 
         my $fname = "$mdlName\_MONITOR_ADC$adcNum.adl";
         # Create MEDM File
+        print "creating file $medmDir\/$fname \n";
+        open(OUTMEDM, ">$medmDir/$fname") || die "cannot open $medmDir/$fname for writing ";
+
         my $xpos = 0; my $ypos = 0; my $width = 726; my $height = 470;
-        ("CDS::medmGen::medmGenFile") -> ($medmDir,$fname,$width,$height);
+        $medmdata = ("CDS::medmGen::medmGenFile") -> ($medmDir,$file,$width,$height);
 
 	# ************* Create Banner ******************************************************************************
         # Put blue rectangle banner at top of screen
         $height = 22;
-        ("CDS::medmGen::medmGenRectangle") -> ($medmDir,$fname,$xpos,$ypos,$width,$height,$ecolors{blue},"","","");
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{blue},"","","");
         # Add Display Name
         $xpos = 300; $ypos = 4; $width = 120; $height = 15;        
-	("CDS::medmGen::medmGenText") -> ($medmDir,$fname,$xpos,$ypos,$width,$height,"$mdlName\_MONITOR_ADC$adcNum",$ecolors{white});
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$mdlName\_MONITOR_ADC$adcNum",$ecolors{white});
         # Add time string to banner
         $xpos = 526; $ypos = 4; $width = 200; $height = 15;
-        ("CDS::medmGen::medmGenTextMon") -> ($medmDir,$fname,$xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_TIME_STRING",$ecolors{white},$ecolors{blue},"static");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_TIME_STRING",$ecolors{white},$ecolors{blue},"static");
 
 
         # ************* Create Background **************************************************************************
         # Add Background rectangles
         $xpos = 13; $ypos = 37; $width = 700; $height = 380;
-        ("CDS::medmGen::medmGenRectangle") -> ($medmDir,$fname,$xpos,$ypos,$width,$height,$ecolors{gray},"","","");
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{gray},"","","");
 
         # ************* Add Text  **********************************************************************************
 	$xpos = 100; $ypos = 47; $width = 60; $height = 15;
@@ -202,9 +205,9 @@ sub createAdcMedm
 		if(($ii % 4) == 0) {$ypos += 10;}
 		$xpos = 20; $width = 250;
 		$labelName = substr $adcChannel[$adcNum][$ii],7;
-		("CDS::medmGen::medmGenText") -> ($medmDir,$fname,$xpos,$ypos,$width,$height,"$labelName",$ecolors{black});
+		$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$labelName",$ecolors{black});
 		$xpos = 300; $width = 60;
-		("CDS::medmGen::medmGenTextMon") -> ($medmDir,$fname,$xpos,$ypos,$width,$height,"$adcChannel[$adcNum][$ii]",$ecolors{white},$ecolors{blue},"static");
+		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$adcChannel[$adcNum][$ii]",$ecolors{white},$ecolors{blue},"static");
 		$ypos += 20;
 	}
 
@@ -214,10 +217,13 @@ sub createAdcMedm
 		if(($ii % 4) == 0) {$ypos += 10;}
 		$xpos = 380; $width = 250;
 		$labelName = substr $adcChannel[$adcNum][$ii],7;
-		("CDS::medmGen::medmGenText") -> ($medmDir,$fname,$xpos,$ypos,$width,$height,"$labelName",$ecolors{black});
+		$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$labelName",$ecolors{black});
 		$xpos = 640; $width = 60;
-		("CDS::medmGen::medmGenTextMon") -> ($medmDir,$fname,$xpos,$ypos,$width,$height,"$adcChannel[$adcNum][$ii]",$ecolors{white},$ecolors{blue},"static");
+		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$adcChannel[$adcNum][$ii]",$ecolors{white},$ecolors{blue},"static");
 		$ypos += 20;
 	}
+
+print OUTMEDM "$medmdata \n";
+close OUTMEDM;
 
 }
