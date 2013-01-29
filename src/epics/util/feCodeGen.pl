@@ -7,10 +7,51 @@
 #//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
+#// \n\n This script is invoked by the auto generated build/src/epics/util/Makefile. \n\n\n
 use File::Path;
 use Cwd;
 
+#// \b REQUIRED \b ARGUMENTS: \n
+#//	- Model file name with .mdl extension \n
+#//	- Output file name (from Makefile, this is same name without .mdl extension.\n
+#//	
+#// Remaining arguments listed in code are optional and not normally used by RCG Makefile. \n\n
+
 # Normal call from Makefile is just first two args.
+
+#//	
+#// \b PRODUCTS: \n
+#//	- C code 
+#//		- C source file <em> (build/src/fe/model_name/model_name.c)</em>, representing user model parts and processing sequence.\n
+#//		- C code Makefile <em>(build/fe/model_name/Makefile)</em>. \n
+#//	- Header file <em>(build/src/include/model_name/model_name.h)</em>, containing data passing structure between real-time code and EPICS sequencer code. \n
+#//	- EPICS channel list <em>(build/src/epics/fmseq/model_name)</em>, to be used later by <em>fmseq.pl</em> to produce EPICS products. Included in this file: \n
+#//		- List of all filter modules \n
+#//		- List of all EPICS channel names and types. \n
+#//		- List of extra test points ie those not associated with Filter modules. \n
+#//	- EPICS state code Makefile <em>(build/config/Makefile.model_nameepics) </em>
+#//	- File containing list of all code source files <em>(build/src/epics/util/sources.model_name)</em> \n
+#//	- File containing list of all DAQ channels and rates <em>(build/src/epics/fmseq/model_name_daq)</em>.
+#//		- NOTE: Opened here, but actually written to by <em>lib/Parser3.pm</em>
+#//	- Foton IIR filter definition file <em>(build/build/model_nameepics/config/MODEL_NAME.txt)</em>
+#//	- Various common MEDM screen files, including:
+#//		- MODEL_NAME_GDS_TP.adl: Contains primary runtime diags, including timing, networks, DAQ. 
+#//			- This code calls sub in <em>lib/medmGenGdsTp.pm</em> to actually produce the MEDM file.
+#//		- MODEL_NAME_DAC_MONITOR_num.adl: Outputs from DAC modules, directly from the main sequencer code. 
+#//			- This code calls sub in <em>lib/DAC.pm</em> or <em>lib/DAC18.pm</em> to actually produce the MEDM files.
+#//		- MODEL_NAME_MONITOR_ADCnum.adl: Inputs to all ADC channels used by the model. 
+#//			- This code calls sub in <em>lib/ADC.pm</em> to actually produce the MEDM files.
+#//		- MODEL_NAME_MATRIXNAME.adl: Inputs from matrix elements.
+#//			- This code calls sub in <em>mkmatrix.pl</em> to actually produce the MEDM files.
+#//		- MODEL_NAME_FILTERNAME.adl: Interface for Filter modules.
+#//			- This code calls sub in <em>/lib/Filt.pm</em> to actually produce the MEDM files.
+#//	- Parser diagnostics file <em>(build/epics/util/diags.txt)</em>, which lists all parts and their connections after model parsing.
+
+#	
+#//	
+#// <b>BASIC CODE SEQUENCE:</b>: \n
+#//	
+
 die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>] [<speed>]\n\t" . "site is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
         if (@ARGV != 2 && @ARGV != 3 && @ARGV != 4 && @ARGV != 5);
 
@@ -21,7 +62,7 @@ if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
 
 @sources = ();
 
-# Search for the Matlab file in the RCG_LIB_PATH
+#//	- Search for the Matlab file in the RCG_LIB_PATH; exit if not found \n
 @rcg_lib_path = split(':', $ENV{"RCG_LIB_PATH"});
 push @rcg_lib_path, "$rcg_src_dir/src/epics/simLink";
 #print join "\n", @rcg_lib_path, "\n";
@@ -41,15 +82,6 @@ foreach $i (@rcg_lib_path) {
 	}
 }
 
-# Used to develop sed command to allow Filter module screens to link generic FILTERALH screen.
-@rcg_util_path = split('/', $ENV{"RCG_SRC_DIR"});
-my $ffmedm = "";
-foreach $i (@rcg_util_path) {
-$ffmedm .= $i;
-$ffmedm .= "\\/";
-}
-
-
 # Exit if cannot find the Matlab file.
 die "Could't find model file $ARGV[0] on RCG_LIB_PATH " . join(":", @rcg_lib_path). "\n"  unless $model_file_found;
 
@@ -62,6 +94,7 @@ my $mdmStr = `grep "define MAX_DIO_MODULES" ../../include/drv/cdsHardware.h`;
 my @mdmNum = ($mdmStr =~ m/(\d+)/);
 $maxDioMod = pop(@mdmNum);
 
+# Initialize default settings.
 $site = "M1"; # Default value for the site name
 $location = "mit"; # Default value for the location name
 $rate = "60"; # In microseconds (default setting)
@@ -142,7 +175,7 @@ if ($skeleton !~ m/^[cghklmsx]\d.*/) {
 # First two chars of model name must be IFO, such as h1, l1, h2, etc.
 $ifo = substr($skeleton, 0, 2);
 
-# Create the paths for RCG output files.
+#//	- Create the paths for RCG output files. \n
 print "file out is $skeleton\n";
 $cFile = "../../fe/";
 $cFile .= $ARGV[1];
@@ -167,6 +200,7 @@ $configFilesDir = "../../../build/" . $ARGV[1] . "epics/config";
 # This is where the various RCG output files are created and opened.
 if (@ARGV == 2) { $skeleton = $ARGV[1]; }
 # Open files for EPICS generation by fmseq.pl
+# Need to open early as Parser3.pm will write filter name info first.
 open(EPICS,">../fmseq/".$ARGV[1]) || die "cannot open output file for writing";
 open(DAQ,">../fmseq/".$ARGV[1]."_daq") || die "cannot open DAQ output file for writing";
 mkdir $cFileDirectory, 0755;
@@ -180,11 +214,9 @@ my $hfname = "$rcg_src_dir/src/include/$ARGV[1].h";
 if (-e $hfname) {
 	system("/bin/mv -f $hfname $hfname~");
 }
+# Need to open header file early, as calls in Parser3.pm will start the writing process.
 open(OUTH,">./".$hFile) || die "cannot open header file for writing";
 
-# Diags file will provide list of all parts and their connections. 
-$diag = "./diags\.txt";
-open(OUTD,">".$diag) || die "cannot open diag file for writing";
 
 $mySeq = 0;
 $connects = 0;
@@ -217,7 +249,7 @@ $ipcxTagCount = 0;
 $ipcxReset = "";
 # END IPCx PART CODE VARIABLES
 
-$oscUsed = 0;
+$oscUsed = 0; # Needed by OSC part for one time inits.
 $useFIRs = 0;
 # ***  DEBUG  ***
 # $useFIRs = 1;
@@ -239,7 +271,8 @@ require "lib/ParsingDiagnostics.pm";
 #Initialize various parser variables.
 init_vars();
 
-# Read .mdl file and flatten all subsystems to single subsystem part.
+#//	- Read .mdl file and flatten all subsystems to top level subsystem part. \n
+#//		- Done by making calls to subs in <em>lib/Parers3.pm</em>
 require "lib/Parser3.pm";
 open(IN,"<".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 die unless CDS::Parser::parse();
@@ -248,10 +281,16 @@ die unless CDS::Parser::sortDacs();
 
 close(IN);
 
+#//	
+#// Model now consists of top level parts and single level subsystem(s). <em>Parser3.pm</em> has taken care of all part
+#// removals/connections for lower level subsystems.\n
+#// Following parsing code now needs to finish top level connections. \n
 
 $systemName = substr($systemName, 2, 3);
 $plantName = $systemName; # Default plant name is the model name
 
+#//	- Perform some specific part checks/processing.
+#//		- Check parts which require GROUND input in fact have ground connections. \n
 # 
 # Make sure all EpicsCounter, EpicsMbbi, and
 # EpicsStringIn modules have Ground as input
@@ -266,12 +305,12 @@ for ($ii = 0; $ii < $partCnt; $ii++) {
    }
 }
 
-#Process all IPC parts in one go.
+#//		- Process all IPC parts in one go. Requires <em>lib/IPCx.pm</em>, with call to procIpc. \n
   require "lib/IPCx.pm";
    ("CDS::IPCx::procIpc") -> ($partCnt);
 
 
-# Check that all subsystem INPUT parts are connected; else exit w/error.
+#//		- Check that all subsystem INPUT parts are connected; else exit w/error. \n
 $kk = 0;
 for($ii=0;$ii<$partCnt;$ii++)
 {
@@ -289,7 +328,12 @@ if($kk > 0)
          die "\n***ERROR: Found total of ** $kk ** INPUT parts not connected\n\n";
 }
 
-# Find Bus Selector parts and feed thru actual part connections.
+#//	
+#//	- Need to process BUSS, FROM and GOTO parts so they can be removed later.
+
+#//		- Find all parts which have input from Bus Selector parts and feed thru actual part connections.\n
+#//			- Change part input connect from BUSS to part feeding signal to BUSS.
+#//			- Change output of part feeding BUSS directly to part receiving signal.
 # Loop thru all parts
 for($ii=0;$ii<$partCnt;$ii++)
 {
@@ -309,13 +353,14 @@ for($ii=0;$ii<$partCnt;$ii++)
 				$gfrom = $partInputPort[$ii][$jj];
 				$adcName = $partInput[$kk][$gfrom];
 				$adcTest = substr($adcName,0,3);
-				if($adcTest eq "adc")
+				# Check if BUSS is actually an ADC part.
+				if($adcTest eq "adc")	# Make ADC channel connection.
 				{
     					($var1,$var2) = split(' ',$adcName);
 					# print  "\t this is an adc connect $var1 $var2\n";
 					$partInputType[$kk][$gfrom] = "Adc";
 
-				} else {
+				} else {	#If BUSS is not ADC part.
     					($var1,$var2) = split(' ',$adcName);
 					#print "\t $xpartName[$kk] this other part connect $var1 port $var2\n";
 					$partInput[$ii][$jj] = $var1;
@@ -335,8 +380,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 								{
 									for($q1=0;$q1<$partOutCnt[$xx];$q1++)
 									{
+										
 										if($partOutput[$xx][$q1] =~ m/Bus/)
 										{
+											# Redefine part output from BUSS to real part.
 											$partOutput[$xx][$q1] = $xpartName[$ii];
 											$partOutputPort[$xx][$q1] = $jj;
 										}
@@ -356,10 +403,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 
 #print "Looped thru $partCnt looking for BUSS \n\n\n";
 
-# FIND all FROM links
+#//		-  FIND and replace all GOTO links
 # Supports MATLAB tags ie types Goto and From parts.
-# This section searches all part inputs for From tags, finds the real name
-# of the signal being sent to this tag, and substitutes that name at the part input.
+#//			- This section searches all part inputs for From tags, finds the real name
+#// of the signal being sent to this tag, and substitutes that name at the part input. \n
 
 # Loop thru all parts
 for($ii=0;$ii<$partCnt;$ii++)
@@ -368,7 +415,7 @@ for($ii=0;$ii<$partCnt;$ii++)
         for($jj=0;$jj<$partOutCnt[$ii];$jj++)
         {
 $xp = 0;
-	   # Loop thru all parts looking for part name that matches input name
+	   # Loop thru all parts looking for part name that matches output name
            for($kk=0;$kk<$partCnt;$kk++)
            {
 		# If name match
@@ -377,7 +424,7 @@ $xp = 0;
 			# If output is to a GOTO part
                         if($partType[$kk] eq "GOTO")
                         {
-				# Search thru all parts looking for a matching GOTO tag
+				# Search thru all parts looking for a matching FROM tag
                                 for($mm=0;$mm<$partCnt;$mm++)
                                 {
                                         if(($partType[$mm] eq "FROM") && ($partInput[$mm][3] eq $partOutput[$kk][3]) )
@@ -389,7 +436,6 @@ $xp = 0;
 						$xp = 0;
 						for($yy=0;$yy<$partOutCnt[$mm];$yy++)
 						{
-							# $partInput[$ii][$jj] = $partInput[$mm][0];
 							if($yy > 0)
 							{
 								$port = $totalPorts;
@@ -399,23 +445,17 @@ $xp = 0;
 								$port = $jj;
 							}
 							$partOutput[$ii][$port] = $partOutput[$mm][$yy];
-							#$partOutput[$mm][0] = $xpartName[$ii];
-							#$partOutput[$mm][0] = "";
 							if($partType[$ii] eq "OUTPUT")
 							{
-							$partOutputPort[$ii][$port] = $partOutputPort[$mm][$yy]+1;;
+								$partOutputPort[$ii][$port] = $partOutputPort[$mm][$yy]+1;;
 							} else {
-							$partOutputPort[$ii][$port] = $partOutputPort[$mm][$yy];;
+								$partOutputPort[$ii][$port] = $partOutputPort[$mm][$yy];;
 							}
 						#print "\t $partOutput[$ii][$jj] $partOutput[$mm][0] $partOutputPort[$ii][$jj]\n";
 						#print "\t $xpartName[$ii] $partOutput[$ii][$jj] $partOutputPort[$ii][$jj]\n";
 						}
 							$partOutCnt[$mm] = 0;
 
-					#$partOutput[$xx][$jj] = $xpartName[$toNum];
-					#$partOutputPort[$xx][$jj] = $toPort;
-					#$partOutNum[$xx][$jj] = $toNum;
-					#$partOutputType[$xx][$jj] = $partType[$toNum];
 
                                         }
                                 }
@@ -431,7 +471,7 @@ $xp = 0;
 }
 
 
-# FIND all FROM links
+#//		- FIND and replace all FROM links \n
 # Supports MATLAB tags ie types Goto and From parts.
 # This section searches all part inputs for From tags, finds the real name
 # of the signal being sent to this tag, and substitutes that name at the part input.
@@ -451,7 +491,7 @@ for($ii=0;$ii<$partCnt;$ii++)
                         # If input is from a FROM part
                         if($partType[$kk] eq "FROM")
                         {
- #print "Found FROM $partInput[$kk][1] in part $xpartName[$ii]\n";
+				 #print "Found FROM $partInput[$kk][1] in part $xpartName[$ii]\n";
                                 # Search thru all parts looking for a matching GOTO tag
                                 for($ll=0;$ll<$partCnt;$ll++)
                                 {
@@ -472,9 +512,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 
 
 
+#//	- Continue to make part connections.
 # ********************************************************************
-# Take all of the part outputs and find connections.
-# Fill in connected part numbers and types.
+#//		- Take all of the part outputs and find connections.
+#// Fill in connected part numbers and types.\n
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	for($jj=0;$jj<$partOutCnt[$ii];$jj++)
@@ -490,8 +531,8 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 }
 
-# Take all of the part inputs and find connections.
-# Fill in connected part numbers and types.
+#//		-  Take all of the part inputs and find connections.
+#// Fill in connected part numbers and types. \n
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	for($jj=0;$jj<$partInCnt[$ii];$jj++)
@@ -509,7 +550,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 }
 
-# Start the process of removing subsystems OUTPUT parts 
+#//	- Start the process of removing subsystems OUTPUT parts \n
 for($ii=0;$ii<$partCnt;$ii++)
 {
 $foundCon = 0;
@@ -628,7 +669,7 @@ $foundSysCon = 0;
 	}
 }
 
-# Find connections for non subsystem parts
+#//	- Find connections for non subsystem (top level) parts \n
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	$xx = $ii;
@@ -793,8 +834,8 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 	}
 }
 
-# Remove all parts which will not require further processing in the code for the part
-# total.
+#//	-  Remove all parts which will not require further processing in the code for the part
+#// total. \n
 $ftotal = $partCnt;
    for($kk=0;$kk<$partCnt;$kk++)
    {
@@ -809,65 +850,16 @@ print "Total parts to process $ftotal\n";
 # DIAGNOSTIC
 print "Found $subSys subsystems\n";
 
-# Write a parts and connection list to file for diagnostics.
-for ($ll = 0; $ll < $subSys; $ll++) {
-  $xx = $subSysPartStop[$ll] - $subSysPartStart[$ll]; # Parts count for this subsystem
-  $subCntr[$ll] = 0;
-  #print "SubSys $ll $subSysName[$ll] from $subSysPartStart[$ll] to $subSysPartStop[$ll]\n";
-  print OUTD "\nSubSystem $ll has $xx parts ************************************\n";
-  for ($ii = $subSysPartStart[$ll]; $ii < $subSysPartStop[$ll]; $ii++) {
-    print OUTD "Part $ii $xpartName[$ii] is type $partType[$ii] with $partInCnt[$ii] inputs and $partOutCnt[$ii] outputs\n";
-    print OUTD "INS FROM:\n";
-    print OUTD "\tPart Name\tType\tNum\tPort\n";
-    for($jj=0;$jj<$partInCnt[$ii];$jj++) {
-      #$from = $partInNum[$ii][$jj];
-      print OUTD "\t$partInput[$ii][$jj]\t$partInputType[$ii][$jj]\t$partInNum[$ii][$jj]\t$partInputPort[$ii][$jj]\n";
-      if (($partType[$ii] eq "INPUT") && ($partOutCnt[$ii] > 0)) {
-	print OUTD "From Subsystem $partSysFrom[$ii]\n";
-	$subInputs[$ll][$subCntr[$ll]] = $partSysFrom[$ii];
-	$subInputsType[$ll][$subCntr[$ll]] = $partInputType[$ii][$jj];
-	$subCntr[$ll] ++;
-      }
-    }
-    print OUTD "OUT TO:\n";
-    print OUTD "\tPart Name\tType\tNum\tPort\tPort Used\n";
-    for($jj = 0;$jj < $partOutCnt[$ii]; $jj++) {
-      #$to = $partOutNum[$ii][$jj];
-      print OUTD "\t$partOutput[$ii][$jj]\t$partOutputType[$ii][$jj]\t$partOutNum[$ii][$jj]\t$partOutputPort[$ii][$jj]\t$partOutputPortUsed[$ii][$jj]\n";
-    }
-    print OUTD "\n****************************************************************\n";
-  }
-}
-print OUTD "Non sub parts ************************************\n";
-for ($ii = 0; $ii < $nonSubCnt; $ii++) {
-  $xx = $nonSubPart[$ii];
-  print OUTD "Part $xx $xpartName[$xx] is type $partType[$xx] with $partInCnt[$xx] inputs and $partOutCnt[$xx] outputs\n";
-  print OUTD "INS FROM:\n";
-  for ($jj = 0; $jj < $partInCnt[$xx]; $jj++) {
-    #$from = $partInNum[$xx][0];
-    if ($partSysFromx[$xx][$jj] == -1) {
-      print OUTD "\t$partInput[$xx][$jj]\t$partInputType[$xx][$jj]\t$partInNum[$xx][$jj]\t$partInputPort[$xx][$jj] subsys NONE\n";
-    } else {
-      print OUTD "\t$partInput[$xx][$jj]\t$partInputType[$xx][$jj]\t$partInNum[$xx][$jj]\t$partInputPort[$xx][$jj] subsys $partSysFromx[$xx][$jj]\n";
-    }
-  }
-  print OUTD "OUT TO:\n";
-  print OUTD "\tPart Name\tType\tNum\tPort\tPort Used\n";
-  for ($jj = 0; $jj < $partOutCnt[$xx]; $jj++) {
-    $to = $partOutNum[$xx][$jj];
-    print OUTD "\t$partOutput[$xx][$jj]\t$partOutputType[$xx][$jj]\t$partOutNum[$xx][$jj]\t$partOutputPort[$xx][$jj]\t$partOutputPortUsed[$xx][$jj]\n";
-  }
-  print OUTD "\n****************************************************************\n";
-}
-for ($ii = 0; $ii < $subSys; $ii++) {
-  print OUTD "\nSUBS $ii $subSysName[$ii] *******************************\n";
-  for($ll=0;$ll<$subCntr[$ii];$ll++) {
-    print OUTD "$ll $subInputs[$ii][$ll] $subInputsType[$ii][$ll]\n";
-  }
-}
-close(OUTD);
-# End DIAGNOSTIC
+#//	
+#// \n
+#// At this point, all parts should have all of their defined inputs and output connections made.
+#//	- Write a parts and connection list to file <em>(build/src/epics/util/diags.txt)</em> for diagnostics. \n\n
 
+# Diags file will provide list of all parts and their connections. 
+writeDiagsFile();
+
+#//	
+#// \n\n Start the process of producing the code sequencing. 
 print "Found $adcCnt ADC modules part is $adcPartNum[0]\n";
 die "***ERROR: At least one ADC part is required in the model\n" if ($adcCnt < 1);
 print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
@@ -884,6 +876,8 @@ if ($dacKillCnt > 1) {
    die "***ERROR: Too many DACKILL parts defined (MAX = 1)  = $dacKillCnt\n";
 }
 
+#//	- Need to remove some parts from processing list, such as BUSS, DELAY, GROUND, as code is not produced for these parts.
+#//		- Loop thru all of the parts within a subsystem.
 for($ii=0;$ii<$subSys;$ii++)
 {
 	$partsRemaining = $subSysPartStop[$ii] - $subSysPartStart[$ii];
@@ -973,6 +967,7 @@ for($ii=0;$ii<$subSys;$ii++)
 		}
 		$partsRemaining = 0;
 		$searchCnt = 0;
+#//		- Loop thru all of the parts at model top level.
 		for($ii=0;$ii<$nonSubCnt;$ii++)
 		{
 			$xx = $nonSubPart[$ii];
@@ -987,7 +982,7 @@ for($ii=0;$ii<$subSys;$ii++)
 		$subRemaining = $subSys;
 		$seqCnt = 0;
 
-# Construct parts linked list
+#//	-  Construct parts linked list \n
 #
 foreach $i (0 .. $subSys-1) {
 	debug(0, "Subsystem $i ", $subSysName[$i]);
@@ -995,7 +990,9 @@ foreach $i (0 .. $subSys-1) {
 
 # First pass defines processing step 0
 # It finds all input sybsystems
+#//		- First pass
 
+#//			- Determine if subsystem has all of its inputs from ADC; if so, it can be added to process list.
 for($ii=0;$ii<$subSys;$ii++)
 {
 $subUsed[$ii] = 0;
@@ -1018,6 +1015,7 @@ $allADC = 1;
 	}
 }
 #print "Searching parts $searchCnt\n";
+#//			- Check if top level parts have ADC connections and therefore can go first.
 for($ii=0;$ii<$searchCnt;$ii++)
 {
 	$allADC = 1;
@@ -1044,11 +1042,13 @@ for($ii=0;$ii<$searchCnt;$ii++)
 }
 print "first pass done $partsRemaining $subRemaining\n";
 
+#//		- Make 50 more passes through parts to complete linked list
 # Second multiprocessing step
 $numTries = 0;
 until((($partsRemaining < 1) && ($subRemaining < 1)) || ($numTries > 50))
 {
 $numTries ++;
+#//			- Continue through subsystem parts.
 	for($ii=0;$ii<$subSys;$ii++)
 	{
 		$allADC = 1;
@@ -1083,6 +1083,7 @@ $numTries ++;
 			}
 		}
 	}
+#//			- Continue through top level parts.
 	for($ii=0;$ii<$searchCnt;$ii++)
 	{
 		$allADC = 1;
@@ -1119,6 +1120,7 @@ $numTries ++;
 		}
 	}
 }
+#//		- If still have parts that are not in linked list, then print error and exit.
 if(($partsRemaining > 0) || ($subRemaining > 0)) {
         print "Linkage failed (parts remaining $partsRemaining; subs remaining $subRemaining)\n";
 # FIXME: the following code doen't report correctly failed parts
@@ -1199,7 +1201,12 @@ if($processCnt != $ftotal)
 $fpartCnt = 0;
 $inCnt = 0;
 
-# Write Epics structs common to all CDS front ends to the .h file.
+# END OF CODE PARSING and LINKED LIST GENERATION**************************************************************************
+#//	
+#// Now have all info necessary to produce the supporting code and text files. \n
+#// Start the process of writing files.\n
+#//	- Write Epics/real-time data structures to header file.
+#//		- Write Epics structs common to all CDS front ends to the .h file.
 print OUTH "#define MAX_FIR \t $firCnt\n";
 print OUTH "#define MAX_FIR_POLY \t $firCnt\n\n";
 # ########    TEST    ############
@@ -1268,6 +1275,7 @@ print OUTH "} SEI_WATCHDOG;\n\n";
 }
 print OUTH "typedef struct \U$systemName {\n";
 print EPICS "\nEPICS CDS_EPICS dspSpace coeffSpace epicsSpace\n\n";
+#//		- Make call to <em>::printHeaderStruct</em> in supporting lib/.pm part files for app specific data structure.
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if ($cdsPart[$ii]) {
@@ -1284,6 +1292,8 @@ print OUTH "\n\n#define MAX_MODULES \t $filtCnt\n";
 $filtCnt *= 10;
 print OUTH "#define MAX_FILTERS \t $filtCnt\n\n";
 
+#//	- Write EPICS database info file for later use by fmseq.pl in generating EPICS code/database.
+#//		- Write info common to all models.
 print EPICS "MOMENTARY FEC\_$dcuId\_VME_RESET epicsInput.vmeReset int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_IPC_DIAG_RESET epicsInput.ipcDiagReset int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_DIAG_RESET epicsInput.diagReset int ao 0\n";
@@ -1349,7 +1359,9 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT epicsOutput.diags[7] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_MASTER_STAT epicsOutput.diags[8] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_AWGTPMAN_STAT epicsOutput.diags[9] int ao 0\n";
 print EPICS "\n\n";
+
 #Load EPICS I/O Parts
+#//		- Write part specific info by making call to <em>/lib/.pm</em> part support module.
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if ($cdsPart[$ii]) {
@@ -1357,6 +1369,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 }
 print EPICS "\n\n";
+#//		- Add ADC diagnostic channels.
 for($ii=0;$ii<$adcCnt;$ii++)
 {
 	print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT_$ii epicsOutput.statAdc\[$ii\] int ao 0\n";
@@ -1366,6 +1379,7 @@ for($ii=0;$ii<$adcCnt;$ii++)
 	}
 }
 print EPICS "\n\n";
+#//		- Add DAC diagnostic channels.
 for($ii=0;$ii<$dacCnt;$ii++)
 {
 	print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT_$ii epicsOutput.statDac\[$ii\] int ao 0\n";
@@ -1381,6 +1395,7 @@ print EPICS "systems \U$systemName\-\n";
 if ($plantName ne $systemName) {
 	print EPICS "plant \U$plantName\n";
 }
+
 #$gdsXstart = ($dcuId - 5) * 1250;
 #$gdsTstart = $gdsXstart + 10000;
 if($rate == 480 || $rate == 240) {
@@ -1404,15 +1419,19 @@ for($ii = 0; $ii < $dacCnt; $ii++) {
    }
 }
 
+#//		- Add extra test point channels.
 print EPICS "test_points $dac_testpoint_names $::extraTestPoints\n";
 #print EPICS "test_points $::extraTestPoints\n";
 if ($::extraExcitations) {
 	print EPICS "excitations $::extraExcitations\n";
 }
+#//		- Add GDS info.
 print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site " . get_freq() . " $dcuId $ifoid\n";
 print EPICS "\n\n";
 
+#//	- Write C source code file.
 # Start process of writing .c file. **********************************************************************
+#//		- Standard opening information.
 print OUT "// ******* This is a computer generated file *******\n";
 print OUT "// ******* DO NOT HAND EDIT ************************\n";
 print OUT "#include \"fe.h\"";
@@ -1439,6 +1458,7 @@ print OUT "\n\n";
 $adcCCtr=0;
 $dacCCtr=0;
 # Hardware configuration
+#//		- PCIe Hardware information.
 print OUT "/* Hardware configuration */\n";
 print OUT "CDS_CARDS cards_used[] = {\n";
 for (0 .. $adcCnt-1) {
@@ -1456,6 +1476,8 @@ for (0 .. $boCnt-1) {
 }
 print OUT "};\n\n";
 
+
+#//		- Includes for User defined function calls.
 # Group includes for function calls at beginning
 for ($ii = 0; $ii < $partCnt; $ii++) {
    if ($cdsPart[$ii]) {
@@ -1465,7 +1487,12 @@ for ($ii = 0; $ii < $partCnt; $ii++) {
    }
 }
 
+#//		- Variable definitions.
 printVariables();
+#//		- Main user code subroutine call opening information.
+#//			- <em>feCode(
+#//				int cycle, double dWord[][32],double dacOut[][16],
+#//				FILT_MOD *dsp_ptr, COEF *dspCoeff, CDS_EPICS *pLocalEpics,int feInit)</em>
 print OUT "\nint feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
 print OUT "\t\tdouble dacOut[][16],\t\/* DAC outputs *\/\n";
 print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
@@ -1475,6 +1502,8 @@ print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
 print OUT "{\n\nint ii, dacFault;\n\n";
 print OUT "if(feInit)\n\{\n";
 
+#//		- Variable declarations and initializations in subroutine which take place on first call at runtime.
+#//			- For most parts, added by call to <em>::frontEndInitCode</em> in /lib/.pm support module.
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if ( -e "lib/$partType[$ii].pm" ) {
@@ -1495,10 +1524,10 @@ print OUT "\} else \{\n";
 print OUT "// Enabling DAC outs for those who don't have DAC KILL WD \n";
 print OUT "dacFault = 1;\n";
 
+#//		- Main processing thread.
 # IPCx PART CODE
 #
-# All IPCx data receives are to occur
-# first in the processing loop
+#//			- All IPCx data receives are to occur first in the processing loop
 #
 if ($ipcxCnt > 0) {
    
@@ -1519,6 +1548,7 @@ $xx = 0;
 $do_print = 0;
 
 
+#//			- Produce code for all parts in the linked list.
 for($xx=0;$xx<$processCnt;$xx++) 
 {
 	if($xx == $processSeqEnd[$ts]) {
@@ -1811,8 +1841,10 @@ print OUT "\n";
 }
 }
 
+#//			- Add all UNIT DELAY part code.
 print OUT "    // Unit delays\n";
 print OUT "$unitDelayCode";
+#//			- Add all IPC Output code.
 print OUT "    // All IPC outputs\n";
 print OUT "    if (_ipc_shm != 0) {\n";
 print OUT "$ipcOutputCode";
@@ -1863,13 +1895,16 @@ close OUTD;
 close EPICS;
 
 
+#//	- Write C code MAKEFILE
 createCmakefile();
 
+#//	- Write EPICS code MAKEFILE
 createEpicsMakefile();
 
 mkpath $configFilesDir, 0, 0755;
 
 
+#//	- Write FOTON filter definition file.
 # Create Foton filter file (with header)
 $jj = $filtCnt / 40;
 $jj ++;
@@ -1910,7 +1945,17 @@ EOF
 }
 close OUTG;
 
-# Take care of generating Epics screens
+#//	- Generate standard set of MEDM screen files.
+# Take care of generating Epics screens *****************************************************
+
+# Used to develop sed command to allow Filter module screens to link generic FILTERALH screen.
+@rcg_util_path = split('/', $ENV{"RCG_SRC_DIR"});
+my $ffmedm = "";
+foreach $i (@rcg_util_path) {
+$ffmedm .= $i;
+$ffmedm .= "\\/";
+}
+
 mkpath $epicsScreensDir, 0, 0755;
 my $usite = uc $site;
 my $lsite = lc $site;
@@ -1932,7 +1977,7 @@ $totalMedm = $adcCnt + $dacCnt;
 print "Found $adcCnt ADC modules part is $adcPartNum[0]\n";
 print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
 
-# Generate Guardian Alarm Monitor Screen
+#//		-  Generate Guardian Alarm Monitor Screen
 system("cp $rcg_src_dir/src/epics/util/ALARMS.adl ALARMS.adl");
 system("cat ALARMS.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_ALARM_MONITOR.adl");
 
@@ -2146,18 +2191,18 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 		  $sysname = uc($skeleton);
 }
 
-#GENERATE IPC SCREENS
+#//		- GENERATE IPC SCREENS
    ("CDS::IPCx::createIpcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ipcxCnt);
-#GENERATE GDS_TP SCREENS
+#//		- GENERATE GDS_TP SCREEN
 require "lib/medmGenGdsTp.pm";
 my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
    ("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$adcCnt,$dacCnt,$adcMaster,@dacType);
-#GENERATE ADC SCREENS
+#//		- GENERATE ADC SCREENS
 for($ii=0;$ii<$adcCnt;$ii++)
 {
    ("CDS::Adc::createAdcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii,@adcScreen);
 }
-#GENERATE DAC SCREENS
+#//		- GENERATE DAC SCREENS
 for($ii=0;$ii<$dacCnt;$ii++)
 {
    if ($dacType[$ii] eq "GSC_16AO16") {
@@ -2167,26 +2212,33 @@ for($ii=0;$ii<$dacCnt;$ii++)
    }
 }
 
-# Print source file names into a file
+#//	-  Print source file names into a file
 #
 open(OUT,">sources.\L$sysname\E") || die "cannot open \"sources.$sysname\" file for writing ";
 print OUT join("\n", @sources), "\n";
 close OUT;
 
-# Remove leading subsystems name
+#//	
+#// \n \b SUBROUTINES ******************************************************************************\n\n
+#// \b sub \b remove_subsystem \n
+#// Remove leading subsystems name \n\n
 sub remove_subsystem {
         my ($s) = @_;
         return substr $s, 1 + rindex $s, "_";
 }
-# Print debug message
-# Example:
-# debug (0, "debug test: openBrace=$openBrace");
+
+#// \b sub \b debug \n
+#// Print debug message \n
+#// Example: \n
+#// debug (0, "debug test: openBrace=$openBrace"); \n\n
 #
 sub debug {
   if ($dbg_level > shift @_) {
 	print @_, "\n";
   }
 }
+#// \b sub \b get_freq \n
+#// Determine user code sample rate \n\n
 sub get_freq {
 if($rate == 480) {
 	return 2*1024;
@@ -2200,6 +2252,9 @@ if($rate == 480) {
 	return 64*1024;
 }
 }
+
+#// \b sub \b init_vars \n
+#// Initialize global variables used by the model parser \n\n
 sub init_vars {
 # Global variables set by parser
 $epics_fields[0] = undef; # list of lists; for each part number, epics fields
@@ -2305,6 +2360,8 @@ for ($ii = 0; $ii < 2000; $ii++) {
   $partInUsed[$ii] = 0;
 }
 }
+#// \b sub \b createEpicsMakefile \n
+#// Create the EPICS Makefile \n\n
 sub createEpicsMakefile {
 	open(OUTME,">./".$meFile) || die "cannot open EPICS Makefile file for writing";
 	print OUTME "\n";
@@ -2372,6 +2429,8 @@ sub createEpicsMakefile {
 	print OUTME "\n";
 	close OUTME;
 }
+#// \b sub \b createCmakefile \n
+#// Generate the user C code Makefile  \n\n
 sub createCmakefile{
 
 system ("/bin/cp GNUmakefile  ../../fe/$skeleton");
@@ -2566,6 +2625,8 @@ print OUTM "\n";
 close OUTM;
 }
 
+#// \b sub \b printVariables \n
+#// Add top level variable declarations to generated C Code for selected CDS parts. \n\n
 sub printVariables {
 for($ii=0;$ii<$partCnt;$ii++)
 {
@@ -2653,24 +2714,91 @@ for($ii=0;$ii<$partCnt;$ii++)
 print OUT "\n\n";
 }
 
-# Create comma separated string from the lements of an array
+#// \b sub \b commify_series \n
+#// Create comma separated string from the lements of an array \n\n
 sub commify_series {
     my $sepchar = grep(/,/ => @_) ? ";" : ",";
     (@_ == 0) ? ''                                      :
     (@_ == 1) ?  $_[0]                                   :
                 join("$sepchar", @_[0 .. $#_]);
 }
-# Transform record name for exculsion of sys/subsystem parts
-# This function replaces first underscode with the hyphen
+#// \b sub \b top_name_transform \n
+#// Transform record name for exculsion of sys/subsystem parts \n
+#// This function replaces first underscode with the hyphen \n\n
 sub top_name_transform {
    ($name) =  @_;
    $name =~ s/_/-/;
    return $name;
 };
 
-# Get the system name (the part before the hyphen)
+#// \b sub \b system_name_part \n
+#//  Get the system name (the part before the hyphen) \n\n
 sub system_name_part {
    ($name) =  @_;
    $name =~ s/([^_]+)-\w+/$1/;
    return $name;
+}
+
+#// \b sub \b writeDiagsFile \n
+#//  Write file with list of all parts and their connections. \n\n
+sub writeDiagsFile {
+$diag = "./diags\.txt";
+open(OUTD,">".$diag) || die "cannot open diag file for writing";
+for ($ll = 0; $ll < $subSys; $ll++) {
+  $xx = $subSysPartStop[$ll] - $subSysPartStart[$ll]; # Parts count for this subsystem
+  $subCntr[$ll] = 0;
+  #print "SubSys $ll $subSysName[$ll] from $subSysPartStart[$ll] to $subSysPartStop[$ll]\n";
+  print OUTD "\nSubSystem $ll has $xx parts ************************************\n";
+  for ($ii = $subSysPartStart[$ll]; $ii < $subSysPartStop[$ll]; $ii++) {
+    print OUTD "Part $ii $xpartName[$ii] is type $partType[$ii] with $partInCnt[$ii] inputs and $partOutCnt[$ii] outputs\n";
+    print OUTD "INS FROM:\n";
+    print OUTD "\tPart Name\tType\tNum\tPort\n";
+    for($jj=0;$jj<$partInCnt[$ii];$jj++) {
+      #$from = $partInNum[$ii][$jj];
+      print OUTD "\t$partInput[$ii][$jj]\t$partInputType[$ii][$jj]\t$partInNum[$ii][$jj]\t$partInputPort[$ii][$jj]\n";
+      if (($partType[$ii] eq "INPUT") && ($partOutCnt[$ii] > 0)) {
+	print OUTD "From Subsystem $partSysFrom[$ii]\n";
+	$subInputs[$ll][$subCntr[$ll]] = $partSysFrom[$ii];
+	$subInputsType[$ll][$subCntr[$ll]] = $partInputType[$ii][$jj];
+	$subCntr[$ll] ++;
+      }
+    }
+    print OUTD "OUT TO:\n";
+    print OUTD "\tPart Name\tType\tNum\tPort\tPort Used\n";
+    for($jj = 0;$jj < $partOutCnt[$ii]; $jj++) {
+      #$to = $partOutNum[$ii][$jj];
+      print OUTD "\t$partOutput[$ii][$jj]\t$partOutputType[$ii][$jj]\t$partOutNum[$ii][$jj]\t$partOutputPort[$ii][$jj]\t$partOutputPortUsed[$ii][$jj]\n";
+    }
+    print OUTD "\n****************************************************************\n";
+  }
+}
+print OUTD "Non sub parts ************************************\n";
+for ($ii = 0; $ii < $nonSubCnt; $ii++) {
+  $xx = $nonSubPart[$ii];
+  print OUTD "Part $xx $xpartName[$xx] is type $partType[$xx] with $partInCnt[$xx] inputs and $partOutCnt[$xx] outputs\n";
+  print OUTD "INS FROM:\n";
+  for ($jj = 0; $jj < $partInCnt[$xx]; $jj++) {
+    #$from = $partInNum[$xx][0];
+    if ($partSysFromx[$xx][$jj] == -1) {
+      print OUTD "\t$partInput[$xx][$jj]\t$partInputType[$xx][$jj]\t$partInNum[$xx][$jj]\t$partInputPort[$xx][$jj] subsys NONE\n";
+    } else {
+      print OUTD "\t$partInput[$xx][$jj]\t$partInputType[$xx][$jj]\t$partInNum[$xx][$jj]\t$partInputPort[$xx][$jj] subsys $partSysFromx[$xx][$jj]\n";
+    }
+  }
+  print OUTD "OUT TO:\n";
+  print OUTD "\tPart Name\tType\tNum\tPort\tPort Used\n";
+  for ($jj = 0; $jj < $partOutCnt[$xx]; $jj++) {
+    $to = $partOutNum[$xx][$jj];
+    print OUTD "\t$partOutput[$xx][$jj]\t$partOutputType[$xx][$jj]\t$partOutNum[$xx][$jj]\t$partOutputPort[$xx][$jj]\t$partOutputPortUsed[$xx][$jj]\n";
+  }
+  print OUTD "\n****************************************************************\n";
+}
+for ($ii = 0; $ii < $subSys; $ii++) {
+  print OUTD "\nSUBS $ii $subSysName[$ii] *******************************\n";
+  for($ll=0;$ll<$subCntr[$ii];$ll++) {
+    print OUTD "$ll $subInputs[$ii][$ll] $subInputsType[$ii][$ll]\n";
+  }
+}
+close(OUTD);
+# End DIAGNOSTIC
 }
