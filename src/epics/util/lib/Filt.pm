@@ -111,7 +111,7 @@ sub createFiltMedm
         my $ii=0;
 
         my $fname = "$mdlName\_$filterName.adl";
-	print "creating file $medmDir\/$fname \n";
+	#print "creating file $medmDir\/$fname \n";
         open(OUTMEDM, ">$medmDir/$fname") || die "cannot open $medmDir/$fname for writing ";
 
         # Create MEDM File
@@ -121,7 +121,6 @@ sub createFiltMedm
         # Put black rectangle banner at top of screen
         $height = 22;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{black},"","","");
-	print "Opened file with following data \n\n $medmdata \n";
         # Add Display Name
         $xpos = 450; $ypos = 4; $width = 120; $height = 15;
 	$title = substr $mdlName,0,5;
