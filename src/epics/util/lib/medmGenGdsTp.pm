@@ -238,7 +238,7 @@ sub createGdsMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"FE",$ecolors{black});
 	# Add DAQ Net Monitor
 	$xpos = 407; $ypos = 105; $width = 14; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_FB_NET_STATUS","0","1",$ecolors{red},$ecolors{green});
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_FB_NET_STATUS","0","1",$ecolors{green},$ecolors{red});
 
 	# Add DAQ Status label
 	$xpos = 407; $ypos = 91; $width = 110; $height = 12;
