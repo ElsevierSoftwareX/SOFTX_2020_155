@@ -54,19 +54,19 @@ nds: nds.out
 	/bin/mv nds.out nds
 
 fracfg: fracfg.o mmstream.o
-	$(CXX) $(DEBUGFLAGS) -o fracfg fracfg.o mmstream.o -R/usr/local/lib ${LDASLIBFLAGS}
+	$(CXX) $(DEBUGFLAGS) -o fracfg fracfg.o mmstream.o ${LDASLIBFLAGS}
 
 frcrc: frcrc.o mmstream.o
-	$(CXX) $(DEBUGFLAGS) -o frcrc frcrc.o mmstream.o -R/usr/local/lib ${LDASLIBFLAGS}
+	$(CXX) $(DEBUGFLAGS) -o frcrc frcrc.o mmstream.o ${LDASLIBFLAGS}
 
 frvtoc: frvtoc.o mmstream.o
-	$(CXX) $(DEBUGFLAGS) -o frvtoc frvtoc.o mmstream.o -R/usr/local/lib ${LDASLIBFLAGS}
+	$(CXX) $(DEBUGFLAGS) -o frvtoc frvtoc.o mmstream.o ${LDASLIBFLAGS}
 
 fririgb: fririgb.o mmstream.o
-	$(CXX) $(DEBUGFLAGS) -o fririgb fririgb.o mmstream.o -R/usr/local/lib ${LDASLIBFLAGS}
+	$(CXX) $(DEBUGFLAGS) -o fririgb fririgb.o mmstream.o ${LDASLIBFLAGS}
 
 frdiff: frdiff.o mmstream.o
-	$(CXX) $(DEBUGFLAGS) -o frdiff frdiff.o mmstream.o -R/usr/local/lib ${LDASLIBFLAGS}
+	$(CXX) $(DEBUGFLAGS) -o frdiff frdiff.o mmstream.o ${LDASLIBFLAGS}
 
 clean:
 	-/bin/rm  *.o nds combiner
