@@ -52,15 +52,58 @@ The EPICS Parts Libary within the CDS_PARTS.mdl contains all of the RCG componen
 
 /*! \page devguidetop RCG Software
 This page links to code documentation for RCG code developers. \n
-- \subpage devguidercg "RCG Software"
+- \subpage devguidercg "RCG Software Developer's Guide"
 - \subpage devguidedaqd "CDS DAQ Data Concentrator/Framebuilder Software"
 - \subpage devguidends "CDS DAQ Network Data Server (NDS) Software"
 */
-/*! \page devguidercg RCG Software
-	- \subpage devguidercg2 "PERL Code"
-	- \subpage devguidercg1 "Real-time Computer Software"
+
+/*! \page devguidercg RCG Software Developer's Guide
+This section is intended as a general guide for code modifications to the RCG parsers and compilers. \n\n
+\par \b Introduction \n
+The purpose of this documentation is to provide a description of the software which comprises the Real-time Code Generator (RCG). It is intended to be of sufficient detail for experienced software developers to modify, enhance or maintain the core RCG software. This includes the RCG compiler functions and the various RCG perl and C code components necessary to produce and compile the code that runs on the aLIGO real-time control computers.
+\par \b Overview \n
+\verbatim
+The RCG consists of four primary components: \n
+	1) Matlab Simulink, which provides the Graphical User Interface (GUI) and text files which represent the code to be generated. In support of this, the RCG provides a standard parts library in the form of a library model file (CDS_PARTS.mdl).
+	2) Perl parser scripts, which read the Matlab .mdl files and produce:
+		a. C code file, in the form of a called subroutine, to be compiled for real-time execution.
+		b. EPICS State Notation Language (SNL) code, which acts as the interface between the real-time software EPICS database records.
+		c. EPICS database records, which act as the interface to the controls network via EPICS Channel Access (CA).
+	3) Core header and C code files that are compiled as part of every application built by the RCG. 
+	4) Standard set of configuration and Makefiles to compile the final executable kernel object.
+
+\endverbatim
+
+	- \subpage devguidercg4 "CDS Parts Library"
+	- \subpage devguidercg2 "PERL Code Modules"
+	- \subpage devguidercg1 "Real-time C Code Modules"
+	- \subpage devguidercg3 "Configuration and Makefiles"
 */
-/*! \page devguidercg1 Real-time Computer Software
+/*! \page devguidercg4 CDS Parts Library 
+Placeholder for top level CDS_PARTS.
+\par \b Overview
+\verbatim
+Matlab is used as the GUI to allow the “application programmer” to define a control process via a graphical diagram. The output of Matlab is a text file, which describes the various parts and their connections. This text (.mdl) file is then used by the RCG in the compilation process.
+All parts that RCG supports are contained in the CDS_PARTS.mdl library file in the $ROOT/src/epics/simLink directory, where $ROOT is the top level directory of the particular advLigoRTS checkout. Graphical representations of the individual parts in this library are contained in the simLink/lib directory. Note that the CDS_PARTS are only graphical parts which contain information necessary for the RCG parsers in compiling code. They are not true Matlab parts, as they have no Matlab code associated with them.
+
+\endverbatim
+\image html CDS_PARTS.tiff "CDS Parts Library"
+\par \b Adding a new part to the library.
+\verbatim
+There are three steps involved in creating a new library part to the RCG:
+	1) Creating a GUI component in RCG_LIB/src/epics/simLink/lib.
+	2) Adding the new GUI component to the CDS_PARTS.mdl libary file.
+	3) Adding supporting Perl scripts.
+\endverbatim
+\par Adding GUI library part.
+\par Adding GUI part to CDS_PARTS.mdl
+\par Adding code generation Perl module.
+*/
+/*! \page devguidercg3 Configuration and Makefiles 
+Placeholder for top level configurationa and makefile info.
+*/
+
+/*! \page devguidercg1 Real-time C Code Modules
 	- \ref rts \n
 	- \ref filters \n
 	- \ref daq
@@ -71,18 +114,23 @@ This page links to code documentation for RCG code developers. \n
 	- \ref test
 
 */
-/*! \page devguidercg2 RCG PERL 
-General RCG MATLAB parsing files:
+
+/*! \page devguidercg2 RCG PERL CODE MODULES 
+\par \b Overview
+\verbatim
+This section describes the various Perl code modules which provide for parsing of Matlab files and produce the final code executables. These Perl modules are located in $RCG_SRC_DIR/src/epics/util.
+\endverbatim
+\par General RCG MATLAB parsing files:
 	- \ref feCodeGen.dox "feCodeGen.pl - Primary .mdl parsing file" \n
 	- \ref Parser3.dox "lib/Parser3.pm" \n
 	- \ref Util.dox "lib/Util.pm" \n
 
-EPICS Database / Code Generation
+\par EPICS Database / Code Generation
 	- \ref fmseq.dox "fmseq.pl" \n
 
 The following PERL modules support individual parts in the RCG Library. \n
 These are all located in the epics/util/lib directory.\n\n
-\b I/O \b Parts
+\par I/O Parts
 	- \ref Adc.dox "Adc.pm" \n
 	- \ref Dac.dox "Dac.pm" \n
 	- \ref Dac18.dox "Dac18.pm" \n
@@ -92,7 +140,7 @@ These are all located in the epics/util/lib directory.\n\n
 	- \ref Rio.dox "Rio.pm" \n
 	- \ref Rio1.dox "Rio1.pm" \n
 
-\b EPICS \b Parts
+\par EPICS Parts
 	- \ref EpicsBinIn.dox "EpicsBinIn.pm" \n
 	- \ref EpicsIn.dox "EpicsIn.pm" \n
 	- \ref EpicsOut.dox "EpicsOut.pm" \n
