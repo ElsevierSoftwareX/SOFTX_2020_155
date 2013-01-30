@@ -50,7 +50,7 @@ int daqWrite(int flag,
 {
 int ii,jj;			/* Loop counters.			*/
 int status;			/* Return value from called routines.	*/
-float dWord;			/* Temp value for storage of DAQ values */
+double dWord;			/* Temp value for storage of DAQ values */
 static int daqBlockNum;		/* 1-16, tracks DAQ block to write to.	*/
 static int excBlockNum;		/* 1-16, tracks EXC block to read from.	*/
 static int excDataSize;
@@ -73,6 +73,7 @@ static int daqWriteTime;	/* Num daq cycles between writes.	*/
 static int daqWriteCycle;	/* Cycle count to xmit to FB.		*/
 float *pFloat = 0;		/* Temp ptr to write float data.	*/
 short *pShort = 0;		/* Temp ptr to write short data.	*/
+unsigned int *pInteger = 0;	/* Temp ptr to write unsigned int data. */
 char *pData;			/* Ptr to start of data set in swing	*/
 char *bufPtr;			/* Ptr to data for crc calculation.	*/
 static unsigned int crcTest;	/* Continuous calc of CRC.		*/
@@ -490,14 +491,17 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 #ifdef CORE_BIQUAD
 #define iir_filter iir_filter_biquad
 #endif
-      if(localTable[ii].decFactor == 2) dWord = iir_filter(dWord,&dCoeff2x[0],DTAPS,&dHistory[ii][0]);
-      if(localTable[ii].decFactor == 4) dWord = iir_filter(dWord,&dCoeff4x[0],DTAPS,&dHistory[ii][0]);
-      if(localTable[ii].decFactor == 8) dWord = iir_filter(dWord,&dCoeff8x[0],DTAPS,&dHistory[ii][0]);
-      if(localTable[ii].decFactor == 16) dWord = iir_filter(dWord,&dCoeff16x[0],DTAPS,&dHistory[ii][0]);
-      if(localTable[ii].decFactor == 32) dWord = iir_filter(dWord,&dCoeff32x[0],DTAPS,&dHistory[ii][0]);
-      if(localTable[ii].decFactor == 64) dWord = iir_filter(dWord,&dCoeff64x[0],DTAPS,&dHistory[ii][0]);
-      if(localTable[ii].decFactor == 128) dWord = iir_filter(dWord,&dCoeff128x[0],DTAPS,&dHistory[ii][0]);
-      if(localTable[ii].decFactor == 256) dWord = iir_filter(dWord,&dCoeff256x[0],DTAPS,&dHistory[ii][0]);
+      if(dataInfo.tp[ii].dataType != DAQ_DATATYPE_32BIT_INT)
+      {
+	      if(localTable[ii].decFactor == 2) dWord = iir_filter(dWord,&dCoeff2x[0],DTAPS,&dHistory[ii][0]);
+	      if(localTable[ii].decFactor == 4) dWord = iir_filter(dWord,&dCoeff4x[0],DTAPS,&dHistory[ii][0]);
+	      if(localTable[ii].decFactor == 8) dWord = iir_filter(dWord,&dCoeff8x[0],DTAPS,&dHistory[ii][0]);
+	      if(localTable[ii].decFactor == 16) dWord = iir_filter(dWord,&dCoeff16x[0],DTAPS,&dHistory[ii][0]);
+	      if(localTable[ii].decFactor == 32) dWord = iir_filter(dWord,&dCoeff32x[0],DTAPS,&dHistory[ii][0]);
+	      if(localTable[ii].decFactor == 64) dWord = iir_filter(dWord,&dCoeff64x[0],DTAPS,&dHistory[ii][0]);
+	      if(localTable[ii].decFactor == 128) dWord = iir_filter(dWord,&dCoeff128x[0],DTAPS,&dHistory[ii][0]);
+	      if(localTable[ii].decFactor == 256) dWord = iir_filter(dWord,&dCoeff256x[0],DTAPS,&dHistory[ii][0]);
+      }
 #ifdef CORE_BIQUAD
 #undef iir_filter
 #endif
@@ -523,6 +527,19 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       	  /* Need to sample swap short data */
       	  if((decSlot % 2) == 0) pShort ++;
       	  else pShort --;
+	  // Write data as short to swing buffer
+	  *pShort = (short)dWord;
+	}else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) {
+	// 32 bit integer type
+          /* Point to local swing buffer */
+      	  pInteger = (unsigned int *)pData;
+	  /* Determine offset from start of 1/16 sec data for this channel given the DAQ cycle
+	     and the decimation factor */
+	  decSlot = daqSlot/localTable[ii].decFactor;
+      	  /* add this data offset to the data pointer */
+      	  pInteger += decSlot;
+	  // Write data as int to swing buffer
+	  *pInteger = (unsigned int)dWord;
 	}
       	else	/* Floating point number is to be written */
       	{
@@ -533,8 +550,11 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	  decSlot = daqSlot/localTable[ii].decFactor;
       	  /* add this data offset to the data pointer */
       	  pFloat += decSlot;
+	  // Write data as float to swing buffer
+	  *pFloat = dWord;
       	}
 
+#if 0
 	/* Write the data into the local swing buffer */
       	if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
       		/* Write data as short into swing buffer */
@@ -543,6 +563,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       		/* Write data as float into swing buffer */
 		*pFloat = dWord;
 	}
+#endif
       }
     } /* end swing buffer write loop */
 
@@ -660,6 +681,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 			crcLength += 2 * dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 		      else
 			crcLength += 4 * dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) printf("Found int32 type \n");
 		    }
 		    /* Calculate the number of bytes to xfer on each call, based on total number
 		       of bytes to write each 1/16sec and the front end data rate (2048/16384Hz) */
