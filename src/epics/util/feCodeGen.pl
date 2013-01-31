@@ -1,11 +1,8 @@
 #!/usr/bin/perl
 
-#//     \file feCodeGen.dox
-#//     \brief Documentation for feCodeGen.pl - Controls parsing of Matlab files and code generation.
+#//     \page feCodeGen feCodeGen.pl
+#//     Documentation for feCodeGen.pl - Controls parsing of Matlab files and code generation.
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
-#// \n
 
 #// \n\n This script is invoked by the auto generated build/src/epics/util/Makefile. \n\n\n
 use File::Path;
