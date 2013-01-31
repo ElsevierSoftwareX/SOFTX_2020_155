@@ -1,11 +1,10 @@
-///	\file AdcUse.dox \b RCG ADC Part 
+///	\page AdcUse RCG ADC Part 
 /// \n
 /// \n 1. Overview \n
 ///	\verbatim
 The purpose of this RCG component is to define an ADC module. Presently, only the General Standards 32 channel, 16 bit ADC is supported. 
 \endverbatim
 /// \n
-///	\subpage rcgPartsIo "<<-- Parts Library"
 /// \n
 /// \n\n 2. Related Documentation \n\n
 ///	<a href="http://www.generalstandards.com/view-products2.php?BD_family=16ai64ssc">GSC 16AI64SSC Manual</a> \n
@@ -30,5 +29,4 @@ NOTE: All 32 for an IOP, but only those channels actually used (connected) in a 
 For each ADC, an MEDM screen is generated which contains the EPICS channels generated above.  The screen name is of the form MODELNAME_MONITOR_ADC#.adl. This screen is automatically linked to the higher level GDS_TP screen generated for this model.
 \endverbatim
 ///	\image html AdcMedm.tiff "ADC AutoGen MEDM Screen" width=50cm
-///	\subpage rcgParts "<<-- Parts Library"
 

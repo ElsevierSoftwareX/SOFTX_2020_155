@@ -1,10 +1,9 @@
-///	\file ParameterUse.dox Document for IPCx part
+///	\page ParameterUse Parameter Block
 ///	\verbatim
 1. Overview
 The purpose of this component is to define necessary run-time parameters and compile options.
 \endverbatim
 /// \n
-///     \subpage rcgParts "<<-- Parts Library"
 ///	\verbatim
 2. Related Documentation
 \endverbatim
@@ -63,5 +62,4 @@ In addition to the above fields, there are additional optional entries. Each of 
 /// 4. EPICS Channels - None \n
 /// 5. Auto Generated MEDM Screens - None \n
 /// \n
-///     \subpage rcgParts "<<-- Parts Library"
 

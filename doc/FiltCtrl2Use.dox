@@ -1,4 +1,4 @@
-///	\file FiltCtrl2Use.dox Document for FiltCtrl2 part.
+///	\page FiltCtrl2Use Filter Module w/Control 2
 ///     \verbatim
 1. Overview
 A variation of the CDS Standard Filter Module, this part was developed to allow additional SFM parameters, normally controlled via EPICS, to be controlled within the real-time software. 
