@@ -4,11 +4,10 @@ use Exporter;
 
 require "lib/medmGen.pm";
 
-#//     \file Dac18.dox
-#//     \brief Dac18.pm - provides RCG support for General Standards 18 bit, 8 channel DAC modules.
+#//     \page Dac18 Dac18.pm
+#//     Dac18.pm - provides RCG support for General Standards 18 bit, 8 channel DAC modules.
 #//
 #// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 # DAC cards we support

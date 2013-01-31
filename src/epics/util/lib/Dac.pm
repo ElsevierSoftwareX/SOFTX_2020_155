@@ -4,11 +4,10 @@ use Exporter;
 
 require "lib/medmGen.pm";
 
-#//     \file Dac.dox
-#//     \brief Dac.pm - used by RCG to produce code in support of General Standards 16 bit / 16 channel DAC modules.
+#//     \page Dac Dac.pm
+#//     Dac.pm - used by RCG to produce code in support of General Standards 16 bit / 16 channel DAC modules.
 #//
 #// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 # DAC cards we support

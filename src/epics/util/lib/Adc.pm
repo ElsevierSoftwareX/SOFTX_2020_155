@@ -4,11 +4,10 @@ use Exporter;
 
 require "lib/medmGen.pm";
 
-#//     \file Adc.dox
-#//     \brief Adc.pm - provides standard subroutines for handling ADC parts in CDS PARTS library.
+#//     \page Adc Adc.pm
+#//     Adc.pm - provides standard subroutines for handling ADC parts in CDS PARTS library.
 #//
 #// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 # ADC cards we support

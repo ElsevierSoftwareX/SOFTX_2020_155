@@ -5,11 +5,9 @@ use Cwd;
 
 @ISA = ('Exporter');
 
-#//     \file Parser3.dox
-#//     \brief Parser3.pm - Parses MATLAB file and flattens model into single subsystem.
+#//     \page Parser3 Parser3.pm
+#//     Parser3.pm - Parses MATLAB file and flattens model into single subsystem.
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 
