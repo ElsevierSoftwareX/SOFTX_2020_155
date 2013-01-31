@@ -1,8 +1,63 @@
 /*! \page devguidercg1 Real-time C Code Modules
-        - \ref rts \n
-        - \ref filters \n        - \ref daq
-        - \ref iod
-        - \ref rtnet        - \ref head
+        - \subpage devguideController "Primary Initialization and Sequencing Code"
+        - \subpage devguideFilters "Digital Filtering"
+        - \subpage devguideDaq "Data Acquisition"
+        - \subpage devguideIod "PCIe Module I/O Drivers"
+        - \subpage devguideRtn "Real-time Networking"
+        - \subpage devguideHeaders "Header Files"
         - \ref supp
         - \ref test
+*/
+
+/*! \page devguideController Initialization and Timing Control Modules
+This is documentation for controller.c and moduleLoad.c
+
+*/
+/*! \page devguideFilters Digital Filtering
+This is documentation for: \n
+fm10Gen.c  \n
+epicsXfer.c \n
+epicsXfer.c \n
+inputFilterModule.c \n
+inputFilterModule1.c \n
+
+*/
+/*! \page devguideDaq Data Acquisition
+This is documentation for: \n
+daqLib.c  \n
+mx_stream.c  \n
+param.c  \n
+*/
+/*! \page devguideIod PCIe Module I/O Drivers
+This is documentation for: \n
+map.c  \n
+timing.c  \n
+accesDio24.c  \n
+accesIIRO8.c  \n
+accesIIRO16.c  \n
+contec1616.c  \n
+contec32o.c  \n
+contec6464.c  \n
+gsc16ai64.c  \n
+gsc16ao16.c  \n
+gsc18ao8.c  \n
+spectracomGPS.c \n
+symmetricomGps.c \n
+vmic5565.c \n
+
+*/
+/*! \page devguideRtn Real-time Networking
+This is documentation for: \n
+commData2.c  \n
+dolphin.c  \n
+*/
+
+/*! \page devguideHeaders Header Files
+This is documentation for: \n
+commData2.h  \n
+controller.h  \n
+feComms.h  \n
+daqmap.h  \n
+crc.h  \n
+fmReadCoeff.h  \n
 */
