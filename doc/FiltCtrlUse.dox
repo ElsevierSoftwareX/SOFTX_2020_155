@@ -1,0 +1,81 @@
+///	\page FiltCtrlUse Filter Module w/Control
+///     \verbatim
+1. Overview
+A variation of the CDS Standard Filter Module, this part was developed to allow additional SFM parameters, normally controlled via EPICS, to be controlled within the real-time software. 
+\endverbatim
+/// 2. Related Documentation \n
+///     <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=94185">T1200345 RCG V2.6 Filter Module with Control 2</a>
+///     \verbatim
+3. General Description and Use within an RCG model.
+IIR FM w/Ctrl:
+==============
+
+This module is a standard filter module, with the addition that the SFM
+switch and filter status are output and two optional inputs has been 
+added.
+
+Usage:
+The additional inputs should be connected to ground or some other module
+(e.g., cdsEpicsIn) to avoid compile time and run-time problems.  
+
+The in1 input is used for the data to be filtered.
+
+The Cin input is used to control which of the 10 filter banks should be on.
+If the 0th bit is set to 1, the 1st filter bank will be on.  If the 0th bit is 
+set to 0, the 1st module will be off. Bits 0 through 9 are used to control 
+filter banks 1-10.
+
+The Mask input is used to indicate which filter banks are under operator
+control and which are under front end control as indicated by the Cin 
+input.  If Mask bit 0 is set to 1, the Cin bit 0 will be used to 
+determine the 1st filter bank state.  If Mask bit 0 is set to 0, then Epics
+commands from the operator will be used to determine the filter bank state.
+Bits 0 through 9 are used to mask control of filter banks 1-10.
+
+The additional control output is used to provide some downstream control or
+decision making based on the switch settings within the SFM.  Typically 
+this output is tied to a bitwise operator to select the desired bits, often
+to then go to binary output modules to switch relays based on filters being
+on/off.
+
+Operation:
+In addition to the SFM operation, this block outputs the internal switch
+information in the form of a 32-bit integer.  The bits of this integer are
+defined as follows:
+
+Bit     Name            Description
+---------------------------------------------------------------------------
+ 0      Coeff Reset     This is a momentary bit.  When set, the EPICS CPU
+                        will read in new SFM coeffs from file and send this
+                        information to the FE via the RFM network.  The FE
+                        SFM will read and load new filter coefficients from
+                        RFM.
+ 1      Master Reset    Momentary; when set, SFM will reset all filter
+                        history buffers.
+ 2      Input On/Off    Enables/disables signal input to SFM.
+ 3      Offset Switch   Enables/disables application of SFM input offset
+                        value.
+Even    \               Set to one when an SFM filter is requested ON, or
+bits 4   Filter Request zero when SFM filter requested OFF (bit 4 is
+to 22   /               associated with filter module 1, bit 6 with filter
+                        module 2, etc.).
+Odd     \               Set to one by SFM when an SFM filter is ON, or zero
+bits 5   Filter Status  when SFM filter is OFF (bit 5 is associated with
+to 23   /               filter module 1, bit 7 with filter module 2, etc.).
+24      Limiter Switch  Enables/disables application of SFM output limit
+                        value.
+25      Decimation      Enables/Disables application of decimation filter
+        Switch          to SFM OUT16 calculation.
+26      Output Switch   Enables/Disables SFM output (SFM OUT and OUT16
+                        variables)
+27      Hold Output     If (!bit 26 && bit27), SFM OUT will be held at last
+                        value.
+28      Gain Ramp       If set, gain of filter module != requested gain.
+                        This bit is set when SFM gain is ramping to a new
+                        gain request.
+
+Associated EPICS Records:
+Same as cdsFilt module.
+
+
+\endverbatim

@@ -1,0 +1,32 @@
+///	\page MathFuncUse Matlab Math Function Part
+///     \verbatim
+1. Overview
+This module is used to include one of several mathematical functions in a model.
+\endverbatim
+/// 2. Related Documentation \n
+///     \verbatim
+3. General Description and Use within an RCG model.
+Currently, the following mathematical functions are supported:
+
+-	Square of input value.
+-	Square root of input value.
+-	Reciprocal of input value.
+-	Modulo of two input values.
+
+
+When using this module, place it in the model window and double click on the icon.  This brings up a Function Block Parameters window.  Click on the down arrow at the right end of the “Function:” line.  This brings up a list of mathematical functions.  Click on one of the supported functions (square, sqrt, reciprocal, or mod), followed by clicking OK.  Please note that clicking on any of the non-supported functions (exp, log, 10^u, log10, magnitude^2, pow, conj, hypot, rem, transpose, or hermitian) will result in a fatal error when attempting to make (compile) the model.
+
+The square function will calculate the square of any input (double precision) value and pass it on as the output value (in double precision).
+
+The reciprocal function will calculate the inverse of any input (double precision) value and pass it on as the output value (in double precision), unless the input value is equal to zero in which case the output value will be set to zero.
+
+The mod (modulo) function takes two input values, In1 and In2.  Since the modulo function only operates on integer values, the output value (Out1, in double precision) is calculated as:
+
+	Out1 =  (double)  ( (int) In1%(int) In2)
+
+except if the In2 value is equal to zero in which case the output value will be set to zero.
+
+
+
+\endverbatim
+/// \image html MathFunc.tiff "Math Function Example"
