@@ -1,10 +1,9 @@
-///	\file IPCxUse.dox Document for IPCx part
+///	\page IPCxUse Inter-Process Communication (IPCx)
 ///	\verbatim
 1. Overview
 The purpose of these modules is to allow inter-process communications (IPC), via a PCI Express (PCIE) Network or via a Reflected Memory (RFM) Network for applications running on different computers or via Shared Memory (SHMEM) for real-time processes running on the same computer (but on separate CPU cores).  
 \endverbatim
 /// \n
-///     \subpage rcgPartsIo "<<-- Parts Library"
 /// \n
 ///	\verbatim
 2. Related Documentation
