@@ -26,8 +26,11 @@ Many examples of models built for aLIGO use can be found within the CDS SVN Repo
 /*! \page rcgParts RCG Parts Library
         - \subpage ParameterUse "Parameter Block"
         - \subpage rcgPartsIo "I/O Components"
+        - \subpage rcgPartsSimulink "Standard Simulink Components"
         - \subpage rcgPartsEpics "EPICS Components"
         - \subpage rcgPartsFilts "FILTER Components"
+        - \subpage CcodeUse "User Defined C Code Modules"
+\image html CDS_PARTS.tiff "RCG Parts Library"
 */
 /*! \page rcgPartsIo RCG I/O Parts Library
 The I/O Parts Libary within the CDS_PARTS.mdl contains all of the RCG components which support I/O modules/methods, as shown in the following figure.
@@ -54,7 +57,21 @@ The EPICS Parts Libary within the CDS_PARTS.mdl contains all of the RCG componen
 
 /*! \page rcgPartsFilts RCG FILTER Parts Library
         - \subpage FiltUse "Standard IIR Filter Module"
+        - \subpage FiltCtrlUse "Filter Module w/Control"
         - \subpage FiltCtrl2Use "Filter Module w/Control 2"
+        - \subpage FiltPolyphaseUse "Polyphase FIR Filter Module"
+        - \subpage trueRmsUse "True RMS"
+        - \subpage ExcTpUse "GDS EXC/TP"
 
 \image html filterMods.tiff "CDS_PARTS FILTER Library"
+*/
+/*! \page rcgPartsSimulink RCG Simulink Parts Library
+The Simulink Parts Libary within the CDS_PARTS.mdl contains all of the standard Matlab parts which are supported by the RCG, as shown in the following figure.
+
+        - \subpage UnitDelayUse "Unit Delay"
+        - \subpage SubsystemUse "Matlab Subsystem"
+        - \subpage MathFuncUse "Math Function"
+
+
+\image html simParts.tiff "Simulink Library"
 */
