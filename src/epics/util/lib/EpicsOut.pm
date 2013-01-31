@@ -2,11 +2,9 @@ package CDS::EpicsOut;
 use Exporter;
 @ISA = ('Exporter');
 
-#//     \file EpicsOut.dox
-#//     \brief Documentation for EpicsOut.pm
+#//     \page EpicsOut EpicsOut.pm
+#//     Documentation for EpicsOut.pm
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 sub partType {
