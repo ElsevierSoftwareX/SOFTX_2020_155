@@ -3,11 +3,9 @@ use Exporter;
 @ISA = ('Exporter');
 
 
-#//     \file MuxMatrix.dox
-#//     \brief Documentation for MuxMatrix.pm
+#//     \page MuxMatrix MuxMatrix.pm
+#//     Documentation for MuxMatrix.pm
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 sub partType {

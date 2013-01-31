@@ -4,11 +4,9 @@ use Env qw(RCG_HOST);
 @ISA = ('Exporter');
 
 
-#//     \file Parameters.dox
-#//     \brief Documentation for Parameters.pm
+#//     \page Parameters Parameter.pm
+#//     Documentation for Parameters.pm
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 

@@ -2,7 +2,7 @@ package CDS::EpicsIn;
 use Exporter;
 @ISA = ('Exporter');
 
-#//     \page EpicsIn.dox
+#//     \page EpicsIn EpicsIn.pm
 #//     Documentation for EpicsIn.pm
 #//
 #// \n

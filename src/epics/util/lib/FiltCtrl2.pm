@@ -2,11 +2,9 @@ package CDS::FiltCtrl2;
 use Exporter;
 @ISA = ('Exporter');
 
-#//     \file FiltCtrl2.dox
-#//     \brief Documentation for FiltCtrl2.pm
+#//     \page FiltCtrl2 FiltCtrl2.pm
+#//     Documentation for FiltCtrl2.pm
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 sub partType {

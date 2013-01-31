@@ -2,11 +2,9 @@ package CDS::DacKill;
 use Exporter;
 @ISA = ('Exporter');
 
-#//     \file DacKill.dox
-#//     \brief Documentation for DacKill.pm
+#//     \page DacKill DacKill.pm
+#//     Documentation for DacKill.pm
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 sub partType {

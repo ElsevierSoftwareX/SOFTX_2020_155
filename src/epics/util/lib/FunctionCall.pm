@@ -3,11 +3,9 @@ use Exporter;
 use Env;
 use File::Basename;
 
-#//     \file FunctionCall.dox
-#//     \brief Documentation for FunctionCall.pm
+#//     \page FunctionCall FunctionCall.pm
+#//     Documentation for FunctionCall.pm
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 

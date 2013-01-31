@@ -2,11 +2,9 @@ package CDS::Osc;
 use Exporter;
 @ISA = ('Exporter');
 
-#//     \file Osc.dox
-#//     \brief Documentation for Osc.pm
+#//     \page Osc Osc.pm
+#//     Documentation for Osc.pm
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 

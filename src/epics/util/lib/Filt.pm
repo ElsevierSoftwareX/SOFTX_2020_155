@@ -2,11 +2,9 @@ package CDS::Filt;
 use Exporter;
 @ISA = ('Exporter');
 
-#//     \file Filt.dox
-#//     \brief Documentation for Filt.pm
+#//     \page Filt Filt.pm
+#//     Documentation for Filt.pm
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 
