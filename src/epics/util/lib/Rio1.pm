@@ -2,11 +2,9 @@ package CDS::Rio1;
 use Exporter;
 @ISA = ('Exporter');
 
-#//     \file Rio1.dox
-#//     \brief Documentation for Rio1.pm
+#//     \page Rio1 Rio1.pm
+#//     Documentation for Rio1.pm
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 

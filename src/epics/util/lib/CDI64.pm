@@ -2,11 +2,10 @@ package CDS::CDI64;
 use Exporter;
 @ISA = ('Exporter');
 
-#//     \file CDI64.dox
-#//     \brief Documentation for CDI64.pm
+#//     \page CDI64 CDI64.pm
+#//     Documentation for CDI64.pm
 #//
 #// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 

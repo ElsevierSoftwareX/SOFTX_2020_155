@@ -2,11 +2,10 @@ package CDS::IPCx;
 use Exporter;
 @ISA = ('Exporter');
 
-#//	\file IPCx.dox
-#//	\brief Documentation for IPCx.pm
+#//	\page IPCx IPCx.pm
+#//	Documentation for IPCx.pm
 #//
 #// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 #//

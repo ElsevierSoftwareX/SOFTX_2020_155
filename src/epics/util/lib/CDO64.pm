@@ -2,11 +2,9 @@ package CDS::CDO64;
 use Exporter;
 @ISA = ('Exporter');
 
-#//     \file CDO64.dox
-#//     \brief Documentation for CDO64.pm
+#//     \page CDO64 CDO64.pm
+#//     Documentation for CDO64.pm
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 sub initCDO64 {

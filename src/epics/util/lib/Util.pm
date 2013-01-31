@@ -2,11 +2,9 @@ package CDS::Util;
 use Exporter;
 @ISA = ('Exporter');
 
-#//     \file Util.dox
-#//     \brief Documentation for Util.pm
+#//     \page Util Util.pm
+#//     Documentation for Util.pm
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 # Open $fname (C header file) and locate each of the rest of the arguments
