@@ -2,11 +2,9 @@ package CDS::medmGen;
 use Exporter;
 @ISA = ('Exporter');
 
-#//     \file medmGen.dox
-#//     \brief medmGen.pm - Contains subroutines to create MEDM files and add MEDM parts to the files for auto screen generation.
+#//     \page medmGen medmGen.pm
+#//     medmGen.pm - Contains subroutines to create MEDM files and add MEDM parts to the files for auto screen generation.
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 #Package intended for use in generating MEDM screens
