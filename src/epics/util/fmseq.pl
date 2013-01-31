@@ -1,11 +1,9 @@
 #!/usr/bin/perl
 use Cwd;
 
-#//     \file fmseq.dox
+#//     \page fmseq fmseq.pl
 #//     \brief Documentation for fmseq.pl
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 $currWorkDir = &Cwd::cwd();
