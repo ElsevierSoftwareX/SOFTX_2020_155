@@ -29,6 +29,8 @@ Many examples of models built for aLIGO use can be found within the CDS SVN Repo
         - \subpage rcgPartsSimulink "Standard Simulink Components"
         - \subpage rcgPartsEpics "EPICS Components"
         - \subpage rcgPartsFilts "FILTER Components"
+        - \subpage rcgPartsMatrix "Matrix Components"
+        - \subpage rcgPartsOscPhase "Oscillator/Phase Shifter Components"
         - \subpage CcodeUse "User Defined C Code Modules"
 \image html CDS_PARTS.tiff "RCG Parts Library"
 */
@@ -71,7 +73,22 @@ The Simulink Parts Libary within the CDS_PARTS.mdl contains all of the standard 
         - \subpage UnitDelayUse "Unit Delay"
         - \subpage SubsystemUse "Matlab Subsystem"
         - \subpage MathFuncUse "Math Function"
+        - \subpage FcnUse "Matlab Fcn"
+        - \subpage GotoFromUse "GOTO/FROM"
 
 
 \image html simParts.tiff "Simulink Library"
+*/
+/*! \page rcgPartsMatrix RCG Matrix Parts Library
+
+        - \subpage MuxMatrixUse "MuxMatrix"
+        - \subpage BitWordUse "Bit2Word and Word2Bit"
+
+\image html MatrixParts.tiff "Matrix Library"
+*/
+/*! \page rcgPartsOscPhase RCG Oscillator/Phase Shifter Library
+
+        - \subpage OscUse "Oscillator"
+
+\image html OscPhase.tiff "OSC/Phase Library"
 */
