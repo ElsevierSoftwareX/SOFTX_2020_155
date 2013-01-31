@@ -1,0 +1,30 @@
+///	\page EpicsOutputUse RCG EPICS Output 
+/// \n
+/// \n 1. Overview \n
+///	\verbatim
+The purpose of this RCG component is to define a Contec digitial I/O module that has 64 inputs/64 outputs.
+\endverbatim
+/// \n
+/// \n
+/// \n\n 2. Related Documentation \n\n
+///	\n
+///	\verbatim
+3. General Description and Use within an RCG model.
+The cdsEpicsOutput module is used to write data into an EPICS channel.
+Note:  The resulting EPICS channel(s) are built on and communicate (via
+shared memory) on the local computer.
+
+Usage:
+For the EpicsOutput, connect the signal to be sent to EPICS via the 'In1'
+connection.  The 'Out1' connection may be used to continue the signal into
+another RCG part.
+
+\endverbatim
+///	\verbatim
+4. EPICS Channels 
+EPICS output database record based on name provided in model.
+\endverbatim
+///	\verbatim
+5. Auto Generated MEDM Screens - None
+\endverbatim
+
