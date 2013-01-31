@@ -1,0 +1,104 @@
+///	\page FiltUse IIR Filter Module 
+///     \verbatim
+1. Overview
+A variation of the CDS Standard Filter Module, this part was developed to allow additional SFM parameters, normally controlled via EPICS, to be controlled within the real-time software. 
+\endverbatim
+/// 2. Related Documentation \n
+///     <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=94185">T1200345 RCG V2.6 Filter Module with Control 2</a>
+///     \verbatim
+3. General Description and Use within an RCG model.
+
+All CDS FE processors use digital Infinite Impulse Response (IIR) filters to perform a majority of their signal conditioning and control algorithm tasks. In order to facilitate their incorporation into FE software and to provide a standard set of DAQ and diagnostic capabilities, the Standard Filter Module (SFM) was developed. 
+
+Usage
+Desired input signal is connected at ‘In1’ and output at ‘Out1’. ‘IIR Filter Module’ name tag is replaced with user name.
+
+Operation
+To help illustrate the operation of the LIGO CDS Standard Filter Module (SFM), an operator MEDM screen shot is shown below. Signal flow is from Input (left) to Output (right).
+\endverbatim
+/// 	\image html filtMedm.png "IIR Filter Module - MEDM Screen"
+///     \verbatim
+
+SFM Input Section
+The SFM input is as defined by the user in the MATLAB Simulink model. At run-time, this signal is available to EPICS (_INMON) and is available to diagnostic tools as a test point (_IN1) at the sampling rate of the software.  This signal may continue on or be set to zero at this point by use of the Input On/Off switch. 
+
+Each SFM also has an excitation signal input available from the Arbitrary Waveform Generator (AWG). This signal is available for EPICS (_EXCMON).  The AWG signal is summed with the input signal, and available to diagnostic tools as a second test point (_IN2). 
+To this resulting signal, a DC offset may be added (Input DC Offset) and this offset may be turned on/off via the Offset on/off switch.  The sum of the input, AWG and offset signal is then fed to the IIR filtering section.
+\endverbatim
+/// 	\image html filtInput.png "IIR Filter Module - Input Section"
+///     \verbatim
+Filtering Section
+
+The filter section may have up to 10 IIR filters defined, with up to 10 Second Order Sections (SOS) each. The software allows for any/all of these filters to be redefined “on the fly”, i.e., an FE process does not need to be rebooted, restarted or otherwise interrupted from its tasks during reconfiguration. 
+
+Each filter within an SFM may be individually turned on/off during operation. Various types of input/output switching may be defined for each individual filter.
+The filter coefficients and switching properties are defined in a text file produced by the foton tool. Filter coefficient files used by the SFM must be located in the /cvs/cds/<site>/chans directory. This file contains:
+
+•	The names of all SFMs defined within an FE processor. Each SFM within a front end is given a unique name in the EPICS sequencer software used to download the SFM coefficients to the front end.  These names must be provided in this file for use by foton. This is done by listing the SFM names after the keyword ‘MODULES’.  As an example, from the LSC FE file:
+•	# MODULES DARM MICH PRC CARM MICH_CORR
+•	# MODULES BS RM AS1_I
+•	A line (or lines) for each filter within an SFM, describing filter attributes and coefficients. These lines must contain the information listed in the following table, in the exact order given in the table.
+
+\endverbatim
+/// 	\image html filtFilt.png "IIR Filter Module - Filter Section"
+///     \verbatim
+Field		Description
+SFM Name	The EPICS name of the filter module to which the remaining parameters are to apply.
+Filter Number	The number of the filter (0-9) within the given SFM to which the remaining parameters are to apply.
+Filter Switching	As previously mentioned, individual filters may have different switching capabilities set. This two digit number describes how the filter is to switch on/off. This number is calculated by input_switch_type x 10 + output_switch_type.
+
+The supported values for input switching are:
+•	0 – Input is always applied to filter.
+•	1 – Input switch will switch with output switch. When filter output switch goes to ‘OFF’, all filter history variables will be set to zero.
+
+Four types of output switching are supported. These are:
+•	0 – Immediate. The output will switch on or off as soon as commanded.
+•	1 – Ramp: The output will ramp up over the number of cycles defined by the RAMP field.
+•	2 – Input Crossing: The output will switch when the filter input and output are within a given value of each other. This value is contained in the RAMP field.
+•	3 – Zero Crossing: The output will switch when the filter input crosses zero.
+
+Number of SOS	This field contains the number of Second Order Sections in this filter.
+RAMP	The contents of this field are dependent on the Filter Switching type.
+Timeout	For type 2 and 3 filter output switching (input and zero crossing), a time-out value must be provided (in FE cycles). If the output switching requirements are not met within this number of cycles, the output will switch anyway.
+Filter Name	This name will be printed to the EPICS displays which have that filter. It is basically a comment field.
+Filter Gain	Overall gain term of the filter.
+Filter Coefficients	The coefficients which describe the filter design.
+
+A skeleton coefficient file is produced the first time ‘make-install’ is invoked after compiling a model file. Thereafter, whenever ‘make-install’ is executed, the install process will make a back-up of the present coefficient file, then patch the present file with any new filter modules or renaming of filter modules.
+
+\endverbatim
+///     \verbatim
+Output Section
+
+The following figure shows the output section. The output section provides for:
+•	A variable gain to be applied to the filter section output. This gain may be ramped over time from one setting to another by setting the gain ramp time.
+•	This output to be limited to a selected value (the output limiter can be switched on or off).
+•	A GDS TP. This TP is always on, regardless of whether the output is turned on or off.
+•	Ability to turn output on or off.
+•	A decimation filter to provide a 16Hz output (typically used by EPICS; the decimation filter can be switched on or off).
+•	A “hold” output feature. When enabled, the output of the SFM will be held to its present value.
+
+\endverbatim
+/// 	\image html filtOut.png "IIR Filter Module - Output Section"
+///     \verbatim
+Associated EPICS Records
+
+_INMON = Filter module input value (RO)
+_EXCMON = Filter module excitation signal input value (RO)
+_OFFSET = User settable offset value (W/R)
+_GAIN = Filter module output gain (W/R)
+_TRAMP = Gain ramping time, in seconds (W/R)
+_LIMIT = User defined filter module output limit (W/R)
+_OUTMON = Output test-point value (RO)
+_OUT16 = Filter module output, decimation filtered to 16Hz (RO)
+_OUTPUT = Filter module output value (RO)
+_SW1 = Momentary filter switch selections, lower 16 bits (WO)
+_SW2 = Momentary filter switch selections, upper 16 bits (WO)
+_RSET = Momentary clear filter history switch (WO)
+_SW1R = Filter switch read-backs, lower 16 bits (RO)
+_SW2R = Filter switch read-backs, upper 16 bits (RO)
+_SW1S = Saved filter switch selections, lower 16 bits (RO)
+_SW2S = Saved filter switch selections, upper 16 bits (RO)
+_Name00 thru _Name09 = Individual filter names, as defined in the coefficient file (RO)
+
+\endverbatim

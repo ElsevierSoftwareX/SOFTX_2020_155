@@ -1,0 +1,40 @@
+///	\page EzcaUse RCG EPICS EZCA Read/Write 
+/// \n
+/// \n 1. Overview \n
+///	\verbatim
+The purpose of this RCG component is to define a Contec digitial I/O module that has 64 inputs/64 outputs.
+\endverbatim
+/// \n
+/// \n
+/// \n\n 2. Related Documentation \n\n
+///	\n
+///	\verbatim
+3. General Description and Use within an RCG model.
+
+These blocks are used to communicate data, via EPICS channel access,
+between real-time code running on separate computers.  The EPICS sequencer
+which supports the real-time code will have pvGet/pvPut commands
+added to obtain/set the desired values via the Ethernet.  Values are passed
+out of/into the real-time code via shared memory.  Each of these two
+modules will produce a double precision floating-point EPICS channel access
+record.
+
+Usage:
+Insert the block into the model and modify the name to be the exact name of
+the remote EPICS channel to be accessed.  This must be the full name, in
+LIGO standard format, including IFO:SYS-.
+
+The EZCA Read part now has a second output (CONNECTED). The value at this port
+will be zero (0) if the remote EPICS channel is NOT connected, or a one (1)
+if the remote connect is established. The OUT value is held to the last 
+valid read if connection is lost, or zero if connection has not yet been 
+established.
+
+\endverbatim
+///	\verbatim
+4. EPICS Channels 
+\endverbatim
+///	\verbatim
+5. Auto Generated MEDM Screens - None
+\endverbatim
+

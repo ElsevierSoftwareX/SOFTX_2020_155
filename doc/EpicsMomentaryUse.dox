@@ -1,0 +1,21 @@
+///	\page EpicsMomentaryUse RCG EPICS Momentary Input 
+/// \n
+/// \n 1. Overview \n
+///	\verbatim
+The purpose of this RCG component is to define a Contec digitial I/O module that has 64 inputs/64 outputs.
+\endverbatim
+/// \n
+/// \n
+/// \n\n 2. Related Documentation \n\n
+///	\n
+///	\verbatim
+3. General Description and Use within an RCG model.
+
+\endverbatim
+///	\verbatim
+4. EPICS Channels - None.
+\endverbatim
+///	\verbatim
+5. Auto Generated MEDM Screens - None
+\endverbatim
+

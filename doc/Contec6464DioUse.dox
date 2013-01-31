@@ -1,0 +1,31 @@
+///	\page Contec6464DioUse  RCG Contec Digital I/O 64in/64out Part 
+/// \n
+/// \n 1. Overview \n
+///	\verbatim
+The purpose of this RCG component is to define a Contec digitial I/O module that has 64 inputs/64 outputs.
+\endverbatim
+/// \n
+/// \n
+/// \n\n 2. Related Documentation \n\n
+///	<a href="http://www.contec.com/product.php?id=1710">DIO-6464L-PE Manual</a>
+///	\n
+///	\verbatim
+3. General Description and Use within an RCG model.
+Up to 4 Contec6464 modules per I/O chassis are supported by the RCG. As shown in the figure below of the Contec6464 Library, use of this part is dependent of the model type:
+    ➢ IOP: If to be used as an IOP, the model must contain a Contec6464 part for each module in the expansion chassis. These must be sequentially numbered, Contec6464_0 thru Contec6464_n. These should be from the 4 parts listed below IOP Parts ***. No input/output connections are required in an IOP model.
+    ➢ USER_MODEL: For a user model, Contec6464 User Application Parts should be used. Note that there are 4 parts defined for each Contec6464 module. Unlike the IOP, only the desired Contec6464 parts need to be placed in the user model.
+	    ➢ CBI_L32_C#, where # corresponds to the card number. The lower 32 bits read from the Contec6464 module input register is provided at the part output.
+	    ➢ CBI_H32_C#, where # corresponds to the card number. The upper 32 bits read from the Contec6464 module input register is provided at the part output.
+	    ➢ CBO_L32_C#, where # corresponds to the card number. The input to this module is written to the lower 32 bits of the Contec6464 module output register..
+	    ➢ CBO_H32_C#, where # corresponds to the card number. The input to this module is written to the upper 32 bits of the Contec6464 module output register..
+
+
+\endverbatim
+///	\image html Contec6464DioPart.tiff "Contec 6464 Part Library" width=50cm
+///	\verbatim
+4. EPICS Channels - None.
+\endverbatim
+///	\verbatim
+5. Auto Generated MEDM Screens - None
+\endverbatim
+

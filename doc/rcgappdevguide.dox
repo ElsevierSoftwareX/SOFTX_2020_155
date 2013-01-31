@@ -1,0 +1,60 @@
+/*! \page userguide RCG Application Developer Guide
+This page introduces the RCG for users. \n\n
+<b>RCG Overview</b> \n
+The RCG uses MATLAB Simulink as a ‘drawing’ tool to allow for applications to be developed via a Graphical User Interface (GUI). A basic description of 
+this process, the RCG itself, and resulting application software is provided in the following subsections.
+        -\subpage appDev1 "Code Model Development"
+
+        - \subpage rcgParts "RCG PARTS LIBRARY"
+*/
+
+/*! \page appDev1 Code Model Development
+Code development is done by graphically placing and connecting blocks in the MATLAB Simulink editor. The ‘building blocks’ supported by the RCG are included in the CDS_PARTS.mdl file.
+
+Parts from the CDS library are copied (drag and drop) to the user application window and then connected to show processing/signal flow. A simple example is shown in the following figures, the first of which is the “top” level, the second showing the detail of one of the top level subsystem parts.
+\n This example shows:\n
+•       A CDS parameter block: This block must exist in all models. It is used by the RCG in setting code compile options and linking this application with various other components in a CDS distributed system. \n
+•       A single, 32 channel ADC (Analog-to-Digital Converter; adc_0). \n
+•       Tags used to connect ADC signals to subsystem parts (X1, X2) \n
+•       A single, 16 channel DAC output block.\n
+•       Within the subsystem level, selection of ADC channels and connection to CDS standard IIR filter modules. \n\n
+This Simulink diagram is then saved to a user defined .mdl file, which is then processed by the RCG to provide the final real-time and supporting software which run on a CDS front end computer.
+Many examples of models built for aLIGO use can be found within the CDS SVN Repository in the cds user apps section.
+\image html RCGexampl1.png "Example Model - Top Level"
+\image html RCGexampl2.png "Example Model - Subsystem Level"
+*/
+/*! \page rcgParts RCG Parts Library
+        - \subpage ParameterUse "Parameter Block"
+        - \subpage rcgPartsIo "I/O Components"
+        - \subpage rcgPartsEpics "EPICS Components"
+        - \subpage rcgPartsFilts "FILTER Components"
+*/
+/*! \page rcgPartsIo RCG I/O Parts Library
+The I/O Parts Libary within the CDS_PARTS.mdl contains all of the RCG components which support I/O modules/methods, as shown in the following figure.
+
+        - \subpage AdcUse "ADC and ADC Selector"
+        - \subpage DacUse "DAC Modules"
+        - \subpage IPCxUse "Inter-Process Communication (IPCx)"
+        - \subpage Contec6464DioUse "Contec DIO-6464L-PE Module"
+
+
+\image html IoParts.tiff "CDS_PARTS I/O Library"
+*/
+/*! \page rcgPartsEpics RCG EPICS Parts Library
+The EPICS Parts Libary within the CDS_PARTS.mdl contains all of the RCG components which support EPICS, as shown in the following figure.
+
+        - \subpage EpicsInputUse "EPICS Input"
+        - \subpage EpicsOutputUse "EPICS Output"
+        - \subpage EpicsMomentaryUse "EPICS Momentary"
+        - \subpage EzcaUse "EPICS EZCA Read/Write"
+
+
+\image html EpicsParts.tiff "CDS_PARTS EPICS Library"
+*/
+
+/*! \page rcgPartsFilts RCG FILTER Parts Library
+        - \subpage FiltUse "Standard IIR Filter Module"
+        - \subpage FiltCtrl2Use "Filter Module w/Control 2"
+
+\image html filterMods.tiff "CDS_PARTS FILTER Library"
+*/
