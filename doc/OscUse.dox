@@ -1,0 +1,45 @@
+///	\page OscUse  Oscillator
+///     \verbatim
+Overview
+This module is used to produce a sine wave at a specific frequency.
+
+This block is a software oscillator, developed to support dither locking
+where two signals with 90 degrees phase rotation are required.
+
+\endverbatim
+///     \verbatim
+General Description and Use within an RCG model.
+
+NOTE: THIS PART MUST HAVE A GROUND CONNECTION AT ITS INPUT TO COMPILE
+PROPERLY.
+
+The three outputs are a sine wave at the user requested frequency.  The 
+'CLK' and 'SIN' outputs are in phase with each other and the 'COS' output
+is 90 degrees out of phase.  The block internal sine wave varies in
+amplitude from -1 to +1.  The three outputs are then multiplied by their
+individual gain settings to produce the 'CLK', 'SIN', and 'COS' outputs.
+
+When changing a gain, if the TRAMP channel is set to 0 (or below), it will 
+instantly change the gain.  A postive TRAMP value will cause the gain to 
+perform a spline ramp ot the new gain over the a number of seconds equal to
+ the value.
+
+When changing frequency, if the TRAMP channel is set to 0 (or below), it 
+will change frequency at the next GPS second (as clocked by the front end).
+It will have an initial phase of 0.  If the TRAMP channel is positive, it 
+will immediately start ramping to the new frequency over a number of 
+seconds equal to the value.  It will have a phase such that at the next GPS
+ second after it finishes ramping it will have a phase of 0.
+
+\endverbatim
+///     \verbatim
+Associated EPICS Records
+
+Four EPICS records are produced for user entries:
+_FREQ: Desired frequency in Hz
+_CLKGAIN: CLK gain setting
+_SINGAIN: SIN gain setting
+_COSGAIN: COS gain setting
+_TRAMP: Time to do gain and frequency ramping.
+
+\endverbatim

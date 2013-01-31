@@ -1,0 +1,26 @@
+///	\page BitWordUse  Bit2Word and Word2Bit
+///     \verbatim
+Overview
+The purpose of these two blocks is to convert from 16 single bit inputs to one 16-bit output word (cdsBit2Word) and from one 16-bit input word to 16 single bit outputs (cdsWord2Bit), respectively
+\endverbatim
+///     \verbatim
+General Description and Use within an RCG model.
+
+For cdsBit2Word, connect 16 binary inputs to ‘B0’ through ‘B15’, with the least significant bit connected to 'B0', the second least significant bit connected to ‘B1’, etc., and connect ‘Out’ to the module that should receive the 16-bit output word.
+
+For cdsWord2Bit, connect the module that supplies the 16-bit input to ‘In’ and 16 binary outputs to ‘B0’ through ‘B15’, with the least significant bit connected to ‘B0’, the second least significant bit connected to ‘B1’, etc.
+
+cdsBit2Word will calculate the output as Out = B0 * 1 + B1 * 2 + B2 * 4 + ... + B15 * 32,768 (i.e.,
+Out = B0 * 2**0 + B1 * 2**1 + B2 * 2**2 + ... + B15 * 2**15), where B0 through B15 are equal to 1 or 0, e.g., if the binary inputs connected to B1, B2, B5, and B12 are equal to one and all other binary inputs are equal to zero, then the output (16-bit) word would be equal to (1 * 2 + 1 * 4 + 1 * 32 + 1 * 4,096 =) 4,134.
+
+cdsWord2Bit will convert the 16-bit (integer) input, ‘In’, into 16 bits, e.g., the ‘In’ value 33,609 will result in the following bit pattern on the output: B15 = 1, B14 = 0, B13 = 0, B12 = 0, B11 = 0, B10 = 0, B9 = 1,
+B8 = 1, B7 = 0, B6 = 1, B5 = 0, B4 = 0, B3 = 1, B2 = 0, B1 = 0, and B0 = 1.
+
+
+\endverbatim
+///     \verbatim
+Associated EPICS Records
+
+None.
+
+\endverbatim

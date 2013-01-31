@@ -1,0 +1,21 @@
+///	\page MuxMatrixUse  cdsMuxMatrix
+///     \verbatim
+Overview
+The primary function of this block is to produce output signals based on the scaling and addition of various input signals.
+\endverbatim
+///     \verbatim
+General Description and Use within an RCG model.
+
+Inputs are connected via the Mux part and outputs are connected via the Demux part. The number of connections available at the input/output may be modified to any size by double clicking on the Mux/Demux parts and modifying the number of connection fields in the pop-up window.
+
+Basic code function is:
+Output[1] = 
+    Input[1] * Matrix_11 + Input[2] * Matrix_12 + Input[n] * Matrix_1n,  where Matrix_xx is an EPICS entry field.
+
+\endverbatim
+///     \verbatim
+Associated EPICS Records
+
+The RCG will produce an A x B matrix of EPICS records for use as input variables, where B is the number of inputs and A is the number of outputs. The EPICS record names will be in the form of PARTNAME_AB, starting at PARTNAME_11. 
+
+\endverbatim
