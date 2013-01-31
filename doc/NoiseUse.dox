@@ -1,0 +1,28 @@
+///	\page NoiseUse  Noise Generator
+///     \verbatim
+Overview
+This block generates a random number between 0 and 1 with equal 
+probability of each number.
+\endverbatim
+///     \verbatim
+General Description and Use within an RCG model.
+
+Connect the output 'Noise' to the desired RCG part, generally a filter bank
+ to offset, scale, and otherwise shape the output noise.
+
+Operation:
+This block utilizes the pseudo-random number generator from page 342 
+(section 7.1) of the third edition of Numerical recipies.  It has been 
+written as an inline function call.
+
+This block utilizes the rdtscl c function once to get the system time to
+ set the initial random seed used by the generator for the entire model.
+
+Each instance of this block then calls the same inline function to get a
+random number with equal probability between 0 and 1 on each cycle.
+\endverbatim
+///     \verbatim
+Associated EPICS Records
+
+None.
+\endverbatim

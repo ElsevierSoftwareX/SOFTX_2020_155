@@ -1,0 +1,31 @@
+///	\page SatCountUse  Saturation Counter
+///     \verbatim
+Overview
+The purpose of this block is to count the number of times a channel has saturated since the last time the counter was reset.
+
+
+\endverbatim
+///     \verbatim
+General Description and Use within an RCG model.
+
+This block is used to monitor a data channel in order to keep track of whether or not the input datum is greater than or equal to a saturation threshold value and also keep counts of how often this happens.
+
+Both the TotalCount counter and the RunningCount counter are zeroed on initialization.
+
+The TotalCount counter will keep incrementing (by one per cycle) as long as the absolute value of the channel (input) datum is greater than or equal to the TRIGGER (EPICS input) threshold value.  The TotalCount counter can only be reset (to zero) by entering a one in the RESET (EPICS input) switch.
+
+The RunningCount counter will keep incrementing (by one per cycle) as long as the absolute value of the channel (input) datum is greater than or equal to the TRIGGER (EPICS input) threshold value.  This counter will be reset (to zero) when the channel (input) datum becomes less than the TRIGGER (EPICS input) threshold value or, conversely, when the TRIGGER (EPICS input) threshold value is modified to a value greater than the channel (input) datum.
+
+
+\endverbatim
+///     \verbatim
+Associated EPICS Records
+
+Two EPICS records are produced for user inputs:
+
+_RESET:	This is a momentary RESET switch that zeroes the TotalCount output (when set to one; initial default value is equal to zero and the RESET switch returns to zero after the TotalCount output has been zeroed).
+
+_TRIGGER:	The TotalCount and RunningCount counters (and outputs) will increment as long as the absolute value of the channel (input) datum is greater than or equal to the TRIGGER threshold value (initial default TRIGGER value is equal to zero).
+
+
+\endverbatim
