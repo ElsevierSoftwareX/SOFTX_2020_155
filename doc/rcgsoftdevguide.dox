@@ -2,7 +2,9 @@
 This section is intended as a general guide for code modifications to the RCG parsers and compilers. \n\n\b Introduction \n\verbatimThe purpose of this documentation is to provide a description of the software which comprises the Real-time Code Generator (RCG). It is intended to be o
 f sufficient detail for experienced software developers to modify, enhance or maintain the core RCG software. This includes the RCG compiler functions and the various RCG perl and C code components necessary to produce and compile the code that runs on the aLIGO real-time control computers.
 \endverbatim
-\b Overview \n\verbatimThe RCG consists of four primary components: \n
+\b Overview \n
+\verbatim
+The RCG consists of four primary components: \n
         1) Matlab Simulink, which provides the Graphical User Interface (GUI) and text files which represent the code to be generated. In support of thi
 s, the RCG provides a standard parts library in the form of a library model file (CDS_PARTS.mdl).
         2) Perl parser scripts, which read the Matlab .mdl files and produce:
