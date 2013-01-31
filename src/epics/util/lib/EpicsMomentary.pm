@@ -2,11 +2,9 @@ package CDS::EpicsMomentary;
 use Exporter;
 @ISA = ('Exporter');
 
-#//     \file EpicsMomentary.dox
-#//     \brief Documentation for EpicsMomentary.pm
+#//     \page EpicsMomentary EpicsMomentary.pm
+#//     Documentation for EpicsMomentary.pm
 #//
-#// \n
-#//     \subpage devguidercg2 "<<-- Parts Library"
 #// \n
 
 sub partType {
