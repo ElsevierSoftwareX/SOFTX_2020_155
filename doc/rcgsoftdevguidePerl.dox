@@ -1,0 +1,108 @@
+/*! \page devguidercg2 RCG PERL CODE MODULES
+\b Overview
+\verbatim
+This section describes the various Perl code modules which provide for parsing of Matlab files and produce the final code executables. These Perl modules are located in $RCG_SRC_DIR/src/epics/util.
+
+Once the Matlab model has been built and .mdl file saved, the RCG build process is executed using a standard “make” command. Prior to this process, a “build” directory needs to be established and configured. This is done by:
+        1) Creating a directory, typically in the /opt/rtcds/<site>/<ifo> directory. This area is designated $BUILD for the remainder of this document.
+        2) Moving into that directory and, from the command line, executing $ROOT/configure. The latter will create a Makefile and produce subdirectories needed in the make process. Once this is done, executing ‘make modelname’ will invoke the various RCG Perl scripts and compilers to produce runtime executable code and various supporting configuration files. Invoking ‘make install-modelname will then install all of the generated objects to appropriate target directories to load the software onto the real-time control computers.
+
+\endverbatim<b>RCG MATLAB parsing files:</b>
+        - \subpage feCodeGen "feCodeGen.pl" \n        
+	- \subpage Parser3 "lib/Parser3.pm" \n
+        - \subpage Util.dox "lib/Util.pm" \n
+\verbatim
+To develop executable software from the Matlab file, the RCG basically has to do two things:
+        1) Find all of the parts defined in the file, for which code will be substituted.
+        2) Find all the links between parts to determine the processing sequence.The Perl scripts and modules that perform these functions are located in the $ROOT/src/epics/util (Perl scripts) and $ROOT/src/epics/util/lib directories (Perl modules). The first script invoked by the make command is feCodeGen.pl. This script essentially has three parts:
+        1) Find all the parts and links between parts. This is done with the help of the lib/Parser3.pm module. At the end of this step, a diags.txt file is produced in the build directory under src/epics/util. This file contains a list of all parts found and all inputs/outputs to/from each part. This file is not used in the remaining build process, but may be a useful diagnostic tool for code developers if the build process does not complete successfully.
+        2) The script produces an ordered execution list for all of the parts. The basic concept here is that a part gets added to the execution sequence list when, and only when, all of the parts that provide input for this part are already on the execution list. The first items placed on the execution
+ list are those parts which either do not require an input from another part, or have only one input connection and that input connection is from an ADC
+ module. Once these items are placed in the list, the script continues to loop over the remaining parts until all part input requirements have been satisfied or the code finds that there are connection errors in the Matlab model.
+        3) Writing of source code and header files. The script now runs through the execution parts list, essentially substituting source code for each 
+part. Some of this substitution is handled directly by feCodeGen.pl, and others are handled by Perl modules located in the epics/util/lib directory. As 
+a general rule, parts that are supported by Matlab itself, as depicted in the CDS_PARTS.mdl, Simulink Parts subsystem block, are handled by the feCodeGe
+n.pl script itself, with all other parts using the supporting Perl modules.
+
+
+\endverbatim
+
+<b>EPICS Database / Code Generation</b>
+        - \subpage fmseq "fmseq.pl" \n
+\verbatim
+Another Perl script, $ROOT/src/epics/util/fmseq.pl, is invoked to generate the EPICS interface side of the code. This script reads in the following file
+s to obtain system information and produce the EPICS products:
+        1) The model name text file produced by feCodeGen.pl in the $BUILD/src/epics/fmseq directory.
+        2) The skeleton.st and skeleton.db files located in the $ROOT/src/epics/util directory. The skeleton.st file is the template for generation of E
+PICS SNL code, which fmseq will fill in with model specific items. The skeleton.db file is a template of all EPICS records to be produced for filter mod
+ules.
+
+From the text file in epics/fmseq, the fmseq script will develop the following products in the $BUILD/build/<modelname>epics directory.
+        1) EPICS SNL code (modelname.st). This code will be used to move data between the EPICS database records and the real-time code via shared memor
+y on the real-time computer.
+        2) EPICS database (modelname.db file). The database records will allow data to be communicated on the control system networks to various EPICS c
+ompatible software tools, such as operator display graphical user interfaces.
+        3) A Data Acquisition (DAQ) channel list file (modelname.ini). This file is read by both the real-time code and DAQ software to acquire data at 
+runtime. As of RCG V2.5, channels to be acquired and saved to disk are listed within the application models via a new DAQ part.
+        4) A Global Diagnostics channel list (modelname.par). This file is used by the real-time code and DAQ system to provide a list of all data chann
+els available “on demand” as testpoints or excitation entry points.
+
+As the make process continues, the SNL code will be run through the SNL precompiler and then GNU compiler to produce exectuables in the $BUILD/target/<m
+odelname>epics directory. The final startup scripts and databases are also generated here, for later movement to the runtime target directory when make 
+install is invoked.
+
+\endverbatim
+
+<b>CDS PARTS Support </b>\n
+\verbatim
+All of the cdsPart.pm modules contain the same sub components, such that they can be easily developed and “plugged into” the RCG package. These sub comp
+onents are:
+        1) sub partType: Returns the part type information to the RCG for use in later code generation calls. This part type must be unique.
+        2) sub printHeaderStruct: Includes EPICS definitions to be installed in the modelname.h file, which is later used to develop the EPICS to real-t
+ime interface definition.
+        3) sub printEpics: List of EPICS channels associated with this application, in the form need by fmseq.pl (described in next section).
+        4) sub printFrontEndVars: List of variables to be used by this part that need to be defined in the real-time C source.
+        5) sub frontEndInitCode: Any code required during the initialization of the real-time code.
+        6) sub fromExp: Code to be inserted when another part requires data from this part.
+        7) sub frontEndCode: Source that defines the processing to be performed when this part is executed.
+\endverbatim
+
+
+The following PERL modules support individual parts in the RCG Library. \n
+These are all located in the epics/util/lib directory.\n\n
+\par I/O Parts
+        - \subpage Adc "Adc.pm" \n
+        - \subpage Dac "Dac.pm" \n
+        - \subpage Dac18 "Dac18.pm" \n
+        - \subpage IPCx "IPCx.pm" \n
+        - \subpage CDI64 "CDI64.pm" \n
+        - \subpage CDO64 "CDO64.pm" \n
+        - \subpage Rio.dox "Rio.pm" \n
+        - \subpage Rio1.dox "Rio1.pm" \n
+
+\par EPICS Parts
+        - \subpage EpicsBinIn "EpicsBinIn.pm" \n
+        - \subpage EpicsIn "EpicsIn.pm" \n
+        - \subpage EpicsOut "EpicsOut.pm" \n
+        - \subpage EpicsMomentary "EpicsMomentary.pm" \n
+        - \subpage EzCaRead "EzCaRead.pm" \n
+        - \subpage EzCaWrite "EzCaWrite.pm" \n
+
+
+        - \subpage DacKill "DacKill.pm" \n
+        - \subpage Filt "Filt.pm" \n
+        - \subpage FiltCtrl "FiltCtrl.pm"\n
+        - \subpage FiltCtrl2 "FiltCtrl2.pm\n
+        - \subpage FiltMuxMatrix "FiltMuxMatrix.pm\n
+        - \subpage FunctionCall "FunctionCall.pm\n
+        - \subpage Parameters "Parameters.pm" \n
+        - \subpage Osc "Osc.pm" \n
+        - \subpage Matrix "Matrix.pm" \n
+        - \subpage MuxMatrix "MuxMatrix.pm" \n
+        - \subpage Noise "Noise.pm" \n
+        - \subpage Phase "Phase.pm" \n
+        - \subpage medmGen "medmGen.pm" \n
+        - \subpage EXC "EXC.pm" \n
+        - \subpage Fcn "Fcn.pm" \n
+*/
+

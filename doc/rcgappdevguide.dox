@@ -13,11 +13,12 @@ Code development is done by graphically placing and connecting blocks in the MAT
 
 Parts from the CDS library are copied (drag and drop) to the user application window and then connected to show processing/signal flow. A simple example is shown in the following figures, the first of which is the “top” level, the second showing the detail of one of the top level subsystem parts.
 \n This example shows:\n
-•       A CDS parameter block: This block must exist in all models. It is used by the RCG in setting code compile options and linking this application with various other components in a CDS distributed system. \n
-•       A single, 32 channel ADC (Analog-to-Digital Converter; adc_0). \n
-•       Tags used to connect ADC signals to subsystem parts (X1, X2) \n
-•       A single, 16 channel DAC output block.\n
-•       Within the subsystem level, selection of ADC channels and connection to CDS standard IIR filter modules. \n\n
+	• A CDS parameter block: This block must exist in all models. It is used by the RCG in setting code compile options and linking this application with various other components in a CDS distributed system. \n
+	• A single, 32 channel ADC (Analog-to-Digital Converter; adc_0). \n
+	• Tags used to connect ADC signals to subsystem parts (X1, X2) \n
+	• A single, 16 channel DAC output block.\n
+	• Within the subsystem level, selection of ADC channels and connection to CDS standard IIR filter modules. \n\n
+
 This Simulink diagram is then saved to a user defined .mdl file, which is then processed by the RCG to provide the final real-time and supporting software which run on a CDS front end computer.
 Many examples of models built for aLIGO use can be found within the CDS SVN Repository in the cds user apps section.
 \image html RCGexampl1.png "Example Model - Top Level"
@@ -31,7 +32,9 @@ Many examples of models built for aLIGO use can be found within the CDS SVN Repo
         - \subpage rcgPartsFilts "FILTER Components"
         - \subpage rcgPartsMatrix "Matrix Components"
         - \subpage rcgPartsOscPhase "Oscillator/Phase Shifter Components"
+        - \subpage rcgPartsWatchdogs "Watchdog Components"
         - \subpage CcodeUse "User Defined C Code Modules"
+        - \subpage DaqChanUse "DAQ Channels"
 \image html CDS_PARTS.tiff "RCG Parts Library"
 */
 /*! \page rcgPartsIo RCG I/O Parts Library
@@ -40,6 +43,10 @@ The I/O Parts Libary within the CDS_PARTS.mdl contains all of the RCG components
         - \subpage AdcUse "ADC and ADC Selector"
         - \subpage DacUse "DAC Modules"
         - \subpage IPCxUse "Inter-Process Communication (IPCx)"
+        - \subpage Contec6464DioUse "Contec DIO-6464L-PE Module"
+        - \subpage DioUse "Acces 24bit Binary Input Module"
+        - \subpage RioUse "Acces 8bit Relay I/O Module"
+        - \subpage Rio1Use "Acces 16bit Relay I/O Module"
         - \subpage Contec6464DioUse "Contec DIO-6464L-PE Module"
 
 
@@ -51,8 +58,15 @@ The EPICS Parts Libary within the CDS_PARTS.mdl contains all of the RCG componen
         - \subpage EpicsInputUse "EPICS Input"
         - \subpage EpicsOutputUse "EPICS Output"
         - \subpage EpicsMomentaryUse "EPICS Momentary"
+        - \subpage EpicsBinInUse "EPICS Binary Input"
+        - \subpage EpicsRemoteIntlkUse "EPICS Remote Intlk"
         - \subpage EzcaUse "EPICS EZCA Read/Write"
 
+
+        - \subpage EpicsStringInUse "EPICS String Input"
+        - \subpage EpicsMbbiUse "EPICS Multi-bit Binary Input"
+        - \subpage EpicsMbboUse "EPICS Multi-bit Binary Output"
+        - \subpage EpicsCounterUse "EPICS Counter"
 
 \image html EpicsParts.tiff "CDS_PARTS EPICS Library"
 */
@@ -64,6 +78,7 @@ The EPICS Parts Libary within the CDS_PARTS.mdl contains all of the RCG componen
         - \subpage FiltPolyphaseUse "Polyphase FIR Filter Module"
         - \subpage trueRmsUse "True RMS"
         - \subpage ExcTpUse "GDS EXC/TP"
+        - \subpage FiltBiquadUse "Biquad IIR Filter Module"
 
 \image html filterMods.tiff "CDS_PARTS FILTER Library"
 */
@@ -82,13 +97,18 @@ The Simulink Parts Libary within the CDS_PARTS.mdl contains all of the standard 
 /*! \page rcgPartsMatrix RCG Matrix Parts Library
 
         - \subpage MuxMatrixUse "MuxMatrix"
+        - \subpage FiltMuxMatrixUse "Filter MuxMatrix"
         - \subpage BitWordUse "Bit2Word and Word2Bit"
 
 \image html MatrixParts.tiff "Matrix Library"
 */
 /*! \page rcgPartsOscPhase RCG Oscillator/Phase Shifter Library
 
+        - \subpage PhaseUse "Phase"
+        - \subpage WfsPhaseUse "WFS Phase"
         - \subpage OscUse "Oscillator"
+        - \subpage NoiseUse "Noise Generator"
+        - \subpage SatCountUse "Saturation Counter"
 
 \image html OscPhase.tiff "OSC/Phase Library"
 */

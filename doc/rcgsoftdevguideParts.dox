@@ -1,0 +1,28 @@
+/*! \page devguidercg4 CDS Parts Library
+Placeholder for top level CDS_PARTS.
+\par \b Overview
+\verbatim
+Matlab is used as the GUI to allow the “application programmer” to define a control process via a graphical diagram. The output of Matlab is a text file
+, which describes the various parts and their connections. This text (.mdl) file is then used by the RCG in the compilation process.
+All parts that RCG supports are contained in the CDS_PARTS.mdl library file in the $ROOT/src/epics/simLink directory, where $ROOT is the top level direc
+tory of the particular advLigoRTS checkout. Graphical representations of the individual parts in this library are contained in the simLink/lib directory
+. Note that the CDS_PARTS are only graphical parts which contain information necessary for the RCG parsers in compiling code. They are not true Matlab p
+arts, as they have no Matlab code associated with them.
+
+\endverbatim
+\image html CDS_PARTS.tiff "CDS Parts Library"
+\par \b Adding a new part to the library.
+\verbatim
+There are three steps involved in creating a new library part to the RCG:
+        1) Creating a GUI component in RCG_LIB/src/epics/simLink/lib.
+        2) Adding the new GUI component to the CDS_PARTS.mdl libary file.
+        3) Adding supporting Perl scripts.
+\endverbatim
+\par Adding GUI library part.
+\par Adding GUI part to CDS_PARTS.mdl
+\par Adding code generation Perl module.
+*/
+/*! \page devguidercg3 Configuration and Makefiles
+Placeholder for top level configurationa and makefile info.
+*/
+
