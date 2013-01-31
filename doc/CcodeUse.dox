@@ -1,0 +1,44 @@
+///	\page CcodeUse User Defined C code modules
+///     \verbatim
+1. Overview
+The purpose of this block is to allow users to link their own C code into
+the real-time application built by RCG.  It is typically used when RCG
+does not support desired functions or the desired process is too
+complicated to be drawn in a model file.
+\endverbatim
+/// 2. Related Documentation \n
+///     \verbatim
+3. General Description and Use within an RCG model.
+
+Process variables are passed into and out of the user C function by
+connecting signals at the Mux inputs and Demux outputs.  Any number of
+inputs or outputs may be connected by adjusting the Mux/Demux I/O sizes in
+MATLAB. 
+
+Once placed in the model and given a name, use Block Properties to change
+the description field, which must contain:
+
+    inline FunctionName CodeSourceFileName
+
+For example, "inline MAG2DB /opt/rtcds/lho/h2/usrsrc/MAG2DB.c"
+
+A wildcard may also be used in the source file name to set the path, for
+example "inline MAG2DB $USER_CODE_BASE/MAG2DB.c",
+    where the environment variable USER_CODE_BASE has been defined.
+
+
+The user defined C code function must be of the form:	
+
+void FunctionName (double *in, int inSize, double *out, int outSize)
+
+where:
+	1) FunctionName is the name of the function to be called. 
+	2) *in is a pointer to the input variables.  Inputs are passed in the same
+    order as they are connected to the input Mux.
+	3) inSize indicates the number of parameters being passed to the function.
+	4) *out is a pointer to the output variables.  Outputs are passed back to
+    the main code in the same order as the Demux connections.
+	5 )outSize is the number of outputs allowed from the code module.
+
+
+\endverbatim

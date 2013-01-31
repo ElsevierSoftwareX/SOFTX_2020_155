@@ -1,0 +1,21 @@
+///	\page FiltPolyphaseUse Polyphase FIR Filter
+///     \verbatim
+1. Overview
+A variation of the CDS Standard Filter Module, this part was developed to allow additional SFM parameters, normally controlled via EPICS, to be controlled within the real-time software. 
+\endverbatim
+/// 2. Related Documentation \n
+///     \verbatim
+3. General Description and Use within an RCG model.
+This module allows the use of PolyPhase FIR (Finite Impulse Response)
+filters, typically used in seismic isolation system controls.
+
+Usage:
+This part is placed into the model and functions exactly as the cdsFilter
+part.  To load an FIR at runtime, a separate coefficient file must be
+provided for FIR filters (/cvs/cds/site/chans/modelName.fir).
+
+N.B.  The sample rate must be either 2K or 4K when PolyPhase FIR Filters
+are being used.
+
+
+\endverbatim

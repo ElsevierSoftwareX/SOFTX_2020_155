@@ -1,0 +1,22 @@
+///	\page SubsystemUse Matlab Subsystem Part
+///     \verbatim
+1. Overview
+This is a standard MATLAB part for grouping individual parts into a subsystem.
+\endverbatim
+/// 2. Related Documentation \n
+///     \verbatim
+3. General Description and Use within an RCG model.
+Any number of parts within the application model may be grouped into a subsystem using the MATLAB subsystem part. The RCG uses the assigned name as a prefix to all block names within the subsystem. This is done in two ways:
+	➢ In the top example at right, if it is at the top level of the model, all signal names for blocks within ASC would become SITE:ModelFileName-ASC_xxxx. So, if the model file name is omc.mdl and site defined as L1, names for parts within the ASC subsystem part would become L1:OMC-ASC_xxxx.
+	➢ In the lower example (LSC), a tag has been added (using the Block Properties Window) “top_names”. This is a flag to the RCG to use the name of this subsystem to replace the model file name. Using the same example as above, all parts within this subsystem would be prefixed L1:LSC-xxxx.
+
+The use of the ‘top_names’ subsystem part tags provides a couple of useful features:
+	1) A single model may contain parts with multiple SYS names in the LIGO naming convention. As seen in the example above, SYS is OMC (model name) for all ASC subsystem parts (L1:OMC-ASC_), but L1:LSC- for all LSC subsystem parts. In the same manner, ASC could also be defined ‘top_names’ and the results would be L1:ASC- and L1:LSC-.
+	2) Multiple models may contain the same SYS name. This allows models running on different processors to use the same SYS identifier in the signal names.
+
+Warning: Since the name of all subsystems marked with the ‘top_names’ tag are used to replace the three character SYS part in the LIGO naming convention, this name must be 3 characters in length, no more, no less!
+
+Warning: Subsystems with the ‘top_names’ tag may only appear at the highest level of the model, i.e., they may not be nested within other subsystems. 
+
+\endverbatim
+/// \image html Subsystem.png "Subsystem Example"

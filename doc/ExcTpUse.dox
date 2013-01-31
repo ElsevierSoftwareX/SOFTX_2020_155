@@ -1,0 +1,13 @@
+///	\page ExcTpUse GDS EXC/TP
+///     \verbatim
+1. Overview
+A variation of the CDS Standard Filter Module, this part was developed to allow additional SFM parameters, normally controlled via EPICS, to be controlled within the real-time software. 
+\endverbatim
+/// 2. Related Documentation \n
+///     \verbatim
+3. General Description and Use within an RCG model.
+The purpose of the TP and EXC blocks are to allow users to define GDS TP
+outputs and EXC inputs at any location within a model without having to use
+a Filter Module part.
+
+\endverbatim

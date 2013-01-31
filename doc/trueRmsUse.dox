@@ -1,0 +1,14 @@
+///	\page trueRmsUse  True RMS
+///     \verbatim
+1. Overview
+A variation of the CDS Standard Filter Module, this part was developed to allow additional SFM parameters, normally controlled via EPICS, to be controlled within the real-time software. 
+\endverbatim
+/// 2. Related Documentation \n
+///     \verbatim
+3. General Description and Use within an RCG model.
+This block computes the RMS value of the input signal.  It take root mean 
+square value of a number of samples equal to the window_size parameter.  
+
+The output value is the RMS value of the input value.
+
+\endverbatim

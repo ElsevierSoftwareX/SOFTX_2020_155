@@ -1,0 +1,13 @@
+///	\page UnitDelayUse Unit Delay
+///     \verbatim
+1. Overview
+Typically, the RCG produces sequential code that starts with ADC inputs, performs the required calculations, and ends with the DAC outputs. However, there are cases where calculations performed within the code are to be fed back as inputs on the next code cycle. In these cases, the desired feedback signal must be run through a UnitDelay block to indicate to the RCG that this signal will be used on the next cycle
+\endverbatim
+/// 2. Related Documentation \n
+///     \verbatim
+3. General Description and Use within an RCG model.
+An example showing the use of the UnitDelay block is shown at right. If the output of Module 1 were to be tied directly back to the summing junction at the input, it would produce an infinite loop in the code generator. By placing the UnitDelay in line, the output of Module 1 is sent back to its input on the next cycle of the software.
+This part introduces a one cycle delay.
+
+\endverbatim
+/// \image html UnitDelay.png "Unit Delay Example"
