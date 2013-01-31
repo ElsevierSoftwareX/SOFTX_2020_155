@@ -1,0 +1,31 @@
+///	\page FcnUse Matlab Fcn Part
+///     \verbatim
+1. Overview
+This module is used to include a user defined in-line (math) function in a model.
+\endverbatim
+/// 2. Related Documentation \n
+///     \verbatim
+3. General Description and Use within an RCG model.
+
+When using this module, place it in the model window and connect the desired number of input variables via a Mux and one output that will pass on the resulting value from the (user defined) function.  Double click on the Fcn icon and enter the desired function in the Expression field.  The first (top) input variable to the Mux is defined as ‘u[1]’, the second input variable (from the top) is defined as ‘u[2]’, etc. (please note the square brackets).  The user defined function can consist of any combination of terms made up of constants multiplied with variables, sine and/or cosine functions, floating-point absolute values, log10 values, and/or square roots.
+
+\endverbatim
+/// \image html Fcn1.png "Fcn Example"
+///     \verbatim
+A (ficticious) example could be as follows 
+Once the function has been defined, click on OK and the function will be incorporated into the model.  Please note that it is up to the user to ensure the validity of entered functions and values, e.g., only positive values for logarithms, no negative values for square roots, no divisions by zero, etc.  Also, sine and cosine values should, by default, be given in radians.  If angles in degrees are desired, replace ‘sin’ with ‘sindeg’ and ‘cos’ with ‘cosdeg’.
+
+\endverbatim
+/// \image html Fcn2.png "Fcn Example"
+///     \verbatim
+In order to include polynomials, a special technique must be used.  This is best explained with an example.  Let’s assume the following polynomial should be used:
+
+	Out = 2.0 * In1 – 3.5 * In2 ** 2 + 5.0 * In3 ** 3
+
+This would require a Mux with six inputs: 
+
+In other words, the first input variable (‘In1’) is connected to the first input to the Mux (‘u[1]’), the second input variable (‘In2’) is connected to the second and third inputs to the Mux (and will be referred to as ‘u[2]’ and ‘u[3]’ in the function expression), and the third input variable (‘In3’) is connected to the fourth, fifth, and sixth inputs to the Mux (referred to as ‘u[4]’, ‘u[5]’, and ‘u[6]’, respectively).
+
+\endverbatim
+/// \image html Fcn3.png "Polynomial Example"
+/// \image html Fcn4.png "Polynomial Example"
