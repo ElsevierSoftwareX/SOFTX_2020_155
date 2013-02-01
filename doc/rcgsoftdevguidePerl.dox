@@ -5,7 +5,9 @@ This section describes the various Perl code modules which provide for parsing o
 
 Once the Matlab model has been built and .mdl file saved, the RCG build process is executed using a standard “make” command. Prior to this process, a “build” directory needs to be established and configured. This is done by:
         1) Creating a directory, typically in the /opt/rtcds/<site>/<ifo> directory. This area is designated $BUILD for the remainder of this document.
-        2) Moving into that directory and, from the command line, executing $ROOT/configure. The latter will create a Makefile and produce subdirectories needed in the make process. Once this is done, executing ‘make modelname’ will invoke the various RCG Perl scripts and compilers to produce runtime executable code and various supporting configuration files. Invoking ‘make install-modelname will then install all of the generated objects to appropriate target directories to load the software onto the real-time control computers.
+        2) Moving into that directory and, from the command line, executing $ROOT/configure. The latter will create a Makefile and produce subdirectories needed in the make process. 
+
+Once this is done, executing ‘make modelname’ will invoke the various RCG Perl scripts and compilers to produce runtime executable code and various supporting configuration files. Invoking ‘make install-modelname will then install all of the generated objects to appropriate target directories to load the software onto the real-time control computers.
 
 \endverbatim<b>RCG MATLAB parsing files:</b>
         - \subpage feCodeGen "feCodeGen.pl" \n        
@@ -14,7 +16,9 @@ Once the Matlab model has been built and .mdl file saved, the RCG build process 
 \verbatim
 To develop executable software from the Matlab file, the RCG basically has to do two things:
         1) Find all of the parts defined in the file, for which code will be substituted.
-        2) Find all the links between parts to determine the processing sequence.The Perl scripts and modules that perform these functions are located in the $ROOT/src/epics/util (Perl scripts) and $ROOT/src/epics/util/lib directories (Perl modules). The first script invoked by the make command is feCodeGen.pl. This script essentially has three parts:
+        2) Find all the links between parts to determine the processing sequence.The Perl scripts and modules that perform these functions are located in the $ROOT/src/epics/util (Perl scripts) and $ROOT/src/epics/util/lib directories (Perl modules). 
+
+The first script invoked by the make command is feCodeGen.pl. This script essentially has three parts:
         1) Find all the parts and links between parts. This is done with the help of the lib/Parser3.pm module. At the end of this step, a diags.txt file is produced in the build directory under src/epics/util. This file contains a list of all parts found and all inputs/outputs to/from each part. This file is not used in the remaining build process, but may be a useful diagnostic tool for code developers if the build process does not complete successfully.
         2) The script produces an ordered execution list for all of the parts. The basic concept here is that a part gets added to the execution sequence list when, and only when, all of the parts that provide input for this part are already on the execution list. The first items placed on the execution
  list are those parts which either do not require an input from another part, or have only one input connection and that input connection is from an ADC
@@ -26,6 +30,11 @@ n.pl script itself, with all other parts using the supporting Perl modules.
 
 
 \endverbatim
+	
+An overview of the model parsing and code generation is shown in the following figure. For further details, see \subpage feCodeGen "feCodeGen.pl" \n
+
+\image html Parser.tiff "Model Parsing and Products"
+
 
 <b>EPICS Database / Code Generation</b>
         - \subpage fmseq "fmseq.pl" \n
