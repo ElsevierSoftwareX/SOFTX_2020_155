@@ -1,0 +1,79 @@
+/*! \page autoMedm Auto-generated MEDM Screens
+As part of the build process, the RCG generates a number of EPICS MEDM screens. These are described in the following subsections,
+or reference links are provided to other documentation. \n\n
+<b>GDS_TP Screens</b> \n
+\verbatim
+A single GDS_TP screen is generated for each code model. This screen provides diagnostic information to the user as to the state of
+the real-time and EPICS code at runtime.
+
+Shown is an example GDS_TP screen, further exploded into the 3 primary sections, with information on each field listed below.
+\endverbatim
+\image html gdsTpMedm1.png "IOP GDSTP Screen"
+\verbatim
+
+\endverbatim
+\image html gdsTpMedm5.png "IOP GDSTP Screen - Exploded"
+<b>Timing Status Section</b>
+\verbatim
+1. ADC Timeout Indicator: 
+	- Normal Indication: GREEN, all ADC modules are clocking on time.
+	- Fault Indication: RED, one, or more ADC modules are not clocking on time and real-time code will exit.
+2. CPU Meter: Updated once/second, this indicates the time of the longest code cycle in that period of time. The banner is set to the
+		maximum amount of time allotted for a code cycle, given the user set sample rate.
+3. GPS Time: The present GPS Time, in GPS seconds, as presently set in the real-time code.
+4. Sync Source: The source of synchonization for the real-time code.
+	- Normal Indication:
+		- IOP process: TDS (Timing Distribution System) or 1PPS. Note for aLIGO systems, this should always be TDS.
+		- User App (Slave) process: IOP, indicating code is being synchronized by the IOP process on that computer.
+	- Fault Indication: NO SYNC, indicating that the code is free-running on internal computer time.
+5. Cycle Time: Time, in usec, between code cycle triggers. This value switches once per second between:
+	- Average time
+	- Maximum time
+	- Minimum time
+6. CPU Max Time: Same as CPU meter (2 above)
+
+NOTE: Following 7,8 and 9 only pertain to IOP processes. These will not show up on user app screens.
+7. Duotone Time ADC: 
+8. IRIG-B Time Offset:
+9: Duotone Time DAC:
+
+10. CPU Max Time since last Diag Reset:
+11. User code time:
+12. Diagnostic Reset:
+13. BURT Status:
+\endverbatim
+
+<b>I/O Status Section</b>
+\verbatim
+14. Overflow counter and reset:
+15. Real-time Network Status and Related Display
+16. Guardian Status:
+17. Filter Coefficient Reload:
+18. ADC Status and Related Display:
+19. DAC Status and Related Display:
+\endverbatim
+
+<b>DAQ Status Section</b>
+\verbatim
+DAQ Status Section
+20. DAQ Status:
+21. DAQ CRC errors/sec:
+22. DAQ total CRC errors:
+23. DCUID Number:
+24. DAQ Network Status:
+25. DAQ - Number of DAQ channels.
+26. DAQ - DAQ Data rate
+27. DAQ - Total DAQ rate:
+28. DAQ channel configuration reload:
+29. Number of TP selected:
+30. Individual TP selection numbers:
+31. Arbitrary Waveform Generator (AWG) Status:
+\endverbatim
+
+- \subpage AdcUse "ADC Input Monitor Display"
+- \subpage DacUse "DAC Output Monitor Display"
+- \subpage IPCxUse "Real-time Network Status Display"
+\verbatim
+\endverbatim
+
+*/

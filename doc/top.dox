@@ -1,14 +1,22 @@
 /*!	\mainpage
-This document is for RCG V2.6.
+This document is for RCG V2.7.
 
 This documentation is divided into the following sections:
-- \subpage intro 
+- \subpage intro "CDS Overview Documentation"
 - \subpage userguide "RCG User's Guide"
 - \subpage devguidetop "CDS Code Design and Development"
 	- \subpage devguidercg "RCG Software"
 	- \subpage devguidedaqd "CDS DAQ Data Concentrator/Framebuilder Software"
 	- \subpage devguidends "CDS DAQ Network Data Server (NDS) Software"
+- \subpage testing "CDS Software Testing"
 */
+/*! \page intro CDS Overview Documentation
+The Control and Data System (CDS) Real-time Code Generator (RCG) software was developed for the aLIGO project. \n
+Related Documents \n
+<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=60665">LIGO P1100052 New Control and Data Acquisition System in the Advanced LIGO Project</a> \n
+<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7834">LIGO T0900612 aLIGO CDS Design Overview</a>
+*/
+
 
 /*! \page devguidetop RCG Software
 This page links to code documentation for RCG code developers. \n

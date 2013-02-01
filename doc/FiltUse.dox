@@ -4,7 +4,7 @@
 A variation of the CDS Standard Filter Module, this part was developed to allow additional SFM parameters, normally controlled via EPICS, to be controlled within the real-time software. 
 \endverbatim
 /// 2. Related Documentation \n
-///     <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=94185">T1200345 RCG V2.6 Filter Module with Control 2</a>
+///     <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7687">T0900606 CDS Standard IIR Filter Module Software</a>
 ///     \verbatim
 3. General Description and Use within an RCG model.
 
@@ -23,7 +23,8 @@ SFM Input Section
 The SFM input is as defined by the user in the MATLAB Simulink model. At run-time, this signal is available to EPICS (_INMON) and is available to diagnostic tools as a test point (_IN1) at the sampling rate of the software.  This signal may continue on or be set to zero at this point by use of the Input On/Off switch. 
 
 Each SFM also has an excitation signal input available from the Arbitrary Waveform Generator (AWG). This signal is available for EPICS (_EXCMON).  The AWG signal is summed with the input signal, and available to diagnostic tools as a second test point (_IN2). 
-To this resulting signal, a DC offset may be added (Input DC Offset) and this offset may be turned on/off via the Offset on/off switch.  The sum of the input, AWG and offset signal is then fed to the IIR filtering section.
+To this resulting signal, a DC offset may be added (Input DC Offset) and this offset may be turned on/off via the Offset on/off switch.  When changed, the DC offset value will be ramped from present value to new value over the period of time set in the RAMP TIME setting.
+The sum of the input, AWG and offset signal is then fed to the IIR filtering section.
 \endverbatim
 /// 	\image html filtInput.png "IIR Filter Module - Input Section"
 ///     \verbatim
