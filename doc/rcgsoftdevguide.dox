@@ -1,5 +1,7 @@
 /*! \page devguidercg RCG Software Developer's Guide
-This section is intended as a general guide for code modifications to the RCG parsers and compilers. \n\n\b Introduction \n\verbatimThe purpose of this documentation is to provide a description of the software which comprises the Real-time Code Generator (RCG). It is intended to be o
+This section is intended as a general guide for code modifications to the RCG parsers and compilers. \n\n\b Introduction \n
+\verbatim
+The purpose of this documentation is to provide a description of the software which comprises the Real-time Code Generator (RCG). It is intended to be o
 f sufficient detail for experienced software developers to modify, enhance or maintain the core RCG software. This includes the RCG compiler functions and the various RCG perl and C code components necessary to produce and compile the code that runs on the aLIGO real-time control computers.
 \endverbatim
 \b Overview \n
@@ -10,7 +12,8 @@ s, the RCG provides a standard parts library in the form of a library model file
         2) Perl parser scripts, which read the Matlab .mdl files and produce:
                 a. C code file, in the form of a called subroutine, to be compiled for real-time execution.
                 b. EPICS State Notation Language (SNL) code, which acts as the interface between the real-time software EPICS database records.
-                c. EPICS database records, which act as the interface to the controls network via EPICS Channel Access (CA).        3) Core header and C code files that are compiled as part of every application built by the RCG.
+                c. EPICS database records, which act as the interface to the controls network via EPICS Channel Access (CA).        
+	3) Core header and C code files that are compiled as part of every application built by the RCG.
         4) Standard set of configuration and Makefiles to compile the final executable kernel object.
 \endverbatim
 
@@ -28,7 +31,13 @@ dl.
 Perl scripts are used by the RCG to generate the real-time and supporting runtime code. This section describes those Perl modules and the products that 
 they produce.
 \endverbatim
-        - \subpage devguidercg1 "Real-time C Code Modules"
-        - \subpage devguidercg3 "Configuration and Makefiles"
+\subpage devguidercg1 "Real-time C Code Modules"
+\verbatim
+
+\endverbatim
+\subpage devguidercg3 "Configuration and Makefiles"
+\verbatim
+
+\endverbatim
 */
 
