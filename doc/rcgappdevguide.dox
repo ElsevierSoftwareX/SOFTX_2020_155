@@ -3,12 +3,16 @@ This page introduces the RCG for users. \n\n
 <b>RCG Overview</b> \n
 The RCG uses MATLAB Simulink as a ‘drawing’ tool to allow for applications to be developed via a Graphical User Interface (GUI). A basic description of 
 this process, the RCG itself, and resulting application software is provided in the following subsections.
-        -\subpage appDev1 "Code Model Development"
+        -\subpage appDev1 "Code Model Development Basics"
+        	- \subpage rcgParts "RCG PARTS LIBRARY"
+        -\subpage appDev2 "Code Model General Rules and Guidelines"
+        -\subpage appDev3 "Code Model Compilation"
+        -\subpage appDev4 "Code Execution"
+        -\subpage autoMedm "Auto-generated MEDM Screens"
 
-        - \subpage rcgParts "RCG PARTS LIBRARY"
 */
 
-/*! \page appDev1 Code Model Development
+/*! \page appDev1 Code Model Development Basics
 Code development is done by graphically placing and connecting blocks in the MATLAB Simulink editor. The ‘building blocks’ supported by the RCG are included in the CDS_PARTS.mdl file.
 
 Parts from the CDS library are copied (drag and drop) to the user application window and then connected to show processing/signal flow. A simple example is shown in the following figures, the first of which is the “top” level, the second showing the detail of one of the top level subsystem parts.
@@ -24,6 +28,32 @@ Many examples of models built for aLIGO use can be found within the CDS SVN Repo
 \image html RCGexampl1.png "Example Model - Top Level"
 \image html RCGexampl2.png "Example Model - Subsystem Level"
 */
+
+/*! \page appDev2 Code Model General Rules and Guidelines
+\verbatim
+Some overview notes before starting an application development process:
+	1) Only modules shown in the CDS_PARTS.mdl file may be used in the application development. Simulink native parts that may be used are shown in the CDS_PARTS >> simLinkParts window. A description of all available parts is given in Section 7.
+	2) The tool is designed to work with the LIGO CDS standard naming convention, which includes:
+		a. All channel names shall be upper case.
+		b. All channel names shall be of the form A1:SYS-SUBSYS_XXX_YYY where:
+			i. A1 is the Interferometer (IFO) site and number, such as H1, H2, L1, M1, etc., followed by a colon (:). The IFO part of the name is set using the cdsParameters part in the application model (see example in next section).
+			ii. SYS is a three letter system designator, such as SUS, ISI, SEI, LSC, ASC, etc., followed by a dash (-). 
+			iii. SUBSYS and beyond are user definable, up to a maximum channel name length of 28 characters (limit set by EPICS software). 
+			     Underscores are used to further break up the name, with any number of characters in between.
+	3) The Matlab file name shall be of the form:
+		a. IFO name (two characters eg h1.
+		b. Subsystem name (three characters) eg sus, sei, isi, etc.
+		c. Remainder of name is arbitrary, but should provide a further description of the system to be controlled and must make the name unique for a particular installation. 
+		d. Examples for aLIGO:  h1susetmx, h1susetmy, h1seiham2. The RCG will pick off the first two characters as the interferometer (IFO) name and expect the next three characters to be the system name in order to produce a channel list consistent with (2) above.
+	4) Every model shall contain one, and only one, Parameter Block (See 8.1.1).
+	5) Every model shall contain at least one ADC part.
+	6) For ease of duplication, the top level of models should be limited to I/O parts, with other parts nested in subsystem components. For example, the following model could easily be duplicated by simply changing the “QUAD1” subsystem block name to “QUAD2” and change a few parameter block entries to make a new model to perform the same controls on another suspension system.
+
+\endverbatim
+*/
+
+
+
 /*! \page rcgParts RCG Parts Library
         - \subpage ParameterUse "Parameter Block"
         - \subpage rcgPartsIo "I/O Components"

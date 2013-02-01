@@ -79,6 +79,8 @@ ime interface definition.
 
 The following PERL modules support individual parts in the RCG Library. \n
 These are all located in the epics/util/lib directory.\n\n
+\par Parameter Block
+        - \subpage Parameters "Parameters.pm" \n
 \par I/O Parts
         - \subpage Adc "Adc.pm" \n
         - \subpage Dac "Dac.pm" \n
@@ -89,6 +91,9 @@ These are all located in the epics/util/lib directory.\n\n
         - \subpage Rio.dox "Rio.pm" \n
         - \subpage Rio1.dox "Rio1.pm" \n
 
+\par Simulink Parts
+        - \subpage Fcn "Fcn.pm" \n
+
 \par EPICS Parts
         - \subpage EpicsBinIn "EpicsBinIn.pm" \n
         - \subpage EpicsIn "EpicsIn.pm" \n
@@ -97,21 +102,29 @@ These are all located in the epics/util/lib directory.\n\n
         - \subpage EzCaRead "EzCaRead.pm" \n
         - \subpage EzCaWrite "EzCaWrite.pm" \n
 
+\par Matrix Parts
+        - \subpage FiltMuxMatrix "FiltMuxMatrix.pm\n
+        - \subpage Matrix "Matrix.pm" \n
+        - \subpage MuxMatrix "MuxMatrix.pm" \n
 
-        - \subpage DacKill "DacKill.pm" \n
+\par FILTER Parts
         - \subpage Filt "Filt.pm" \n
         - \subpage FiltCtrl "FiltCtrl.pm"\n
         - \subpage FiltCtrl2 "FiltCtrl2.pm\n
-        - \subpage FiltMuxMatrix "FiltMuxMatrix.pm\n
-        - \subpage FunctionCall "FunctionCall.pm\n
-        - \subpage Parameters "Parameters.pm" \n
-        - \subpage Osc "Osc.pm" \n
-        - \subpage Matrix "Matrix.pm" \n
-        - \subpage MuxMatrix "MuxMatrix.pm" \n
-        - \subpage Noise "Noise.pm" \n
-        - \subpage Phase "Phase.pm" \n
-        - \subpage medmGen "medmGen.pm" \n
         - \subpage EXC "EXC.pm" \n
-        - \subpage Fcn "Fcn.pm" \n
+
+\par Osc and Phase Parts
+        - \subpage Osc "Osc.pm" \n
+        - \subpage Phase "Phase.pm" \n
+        - \subpage Noise "Noise.pm" \n
+
+\par Watchdog Parts
+        - \subpage DacKill "DacKill.pm" \n
+
+\par User Defined C Code
+        - \subpage FunctionCall "FunctionCall.pm\n
+
+\par Support Modules
+        - \subpage medmGen "medmGen.pm" \n
 */
 
