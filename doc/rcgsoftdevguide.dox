@@ -33,6 +33,16 @@ they produce.
 \endverbatim
 \subpage devguidercg1 "Real-time C Code Modules"
 \verbatim
+Once the RCG Perl Modules have produced the C code for the user model, compilation continues by adding a number of common C code modules to finally produce a runtime kernel object. The primary C code source files are shown in the figure below.
+
+
+\endverbatim
+\image html CcodeCompile.png "C Code Modules"
+\verbatim
+
+\endverbatim
+\subpage devguideepics "EPICS State Notation Language (SNL) and C Files"
+\verbatim
 
 \endverbatim
 \subpage devguidercg3 "Configuration and Makefiles"

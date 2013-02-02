@@ -1,12 +1,57 @@
 /*! \page devguidercg1 Real-time C Code Modules
-        - \subpage devguideController "Primary Initialization and Sequencing Code"
-        - \subpage devguideFilters "Digital Filtering"
-        - \subpage devguideDaq "Data Acquisition"
-        - \subpage devguideIod "PCIe Module I/O Drivers"
-        - \subpage devguideRtn "Real-time Networking"
-        - \subpage devguideHeaders "Header Files"
-        - \ref supp
-        - \ref test
+\verbatim
+This section provides a brief description of the various C code modules compiled with user apps to produce a runtime kernel object.
+\endverbatim
+	
+<b>Module Initialization</b>
+- moduleLoad.c
+	- This file contains the main startup/initialization code. \n
+
+<b>Scheduler</b>
+- controller.c
+	- This file contains the primary sequencer, or scheduler, code. \n
+Further information can be found at <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">LIGO T0900607 aLIGO CDS Realtime Sequencer Software</a>
+
+<b>Digital Filtering</b>
+- fm10Gen.c
+	- Contains the standard IIR/FIR filter routines.
+- epicsXfer.c
+	- Provides for transfer of filter module data between the RT code and EPICS via shared memory.
+- inputFilterModule.c
+- inputFilterModule1.h
+
+<b>Data Acquisition</b>
+- daqLib.c
+	- Routine for gathering DAQ and GDS TP data from RT code and passing to shared memory.
+- mx_stream.c
+	- Triggered by daqLib.c routine, transfers DAQ/TP data via open-mx network to data concentrator.
+- param.c
+
+<b>PCIe Module Drivers</b>
+- map.c  \n
+- timing.c  \n
+- accesDio24.c  \n
+- accesIIRO8.c  \n
+- accesIIRO16.c  \n
+- contec1616.c  \n
+- contec32o.c  \n
+- contec6464.c  \n
+- gsc16ai64.c  \n
+- gsc16ao16.c  \n
+- gsc18ao8.c  \n
+- spectracomGPS.c \n
+- symmetricomGps.c \n
+- vmic5565.c \n
+
+<b>Real-time Networking </b>
+- commData2.c
+- dolphin.c
+
+
+<b>Support</b>
+- crc.c
+- susWatchdogFilters.c
+
 */
 
 /*! \page devguideController Initialization and Timing Control Modules
@@ -26,7 +71,6 @@ inputFilterModule1.c \n
 This is documentation for: \n
 daqLib.c  \n
 mx_stream.c  \n
-param.c  \n
 */
 /*! \page devguideIod PCIe Module I/O Drivers
 This is documentation for: \n
@@ -60,4 +104,8 @@ feComms.h  \n
 daqmap.h  \n
 crc.h  \n
 fmReadCoeff.h  \n
+*/
+
+/*! \page devguideepics EPICS State Notation Language (SNL) and C Files
+param.c  \n
 */
