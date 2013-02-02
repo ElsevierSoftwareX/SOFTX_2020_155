@@ -17,8 +17,8 @@ libdir      = @libdir@
 CXX=@CXX@
 LIBS=@LIBS@
 DEBUGFLAGS=-g
-PERFORMANCEFLAGS=-g -DNDEBUG -O5
-RELEASEFLAGS=-g -DNDEBUG -DNPROBE -O5
+PERFORMANCEFLAGS=-g -DNDEBUG 
+RELEASEFLAGS=-g -DNDEBUG -DNPROBE
 
 DEVFLAGS=@DEVFLAGS@
 
@@ -53,8 +53,8 @@ daqd: daqd.o
 nds: nds.out
 	/bin/mv nds.out nds
 
-fracfg: fracfg.o mmstream.o
-	$(CXX) $(DEBUGFLAGS) -o fracfg fracfg.o mmstream.o ${LDASLIBFLAGS}
+fracfg: fracfg.o plan.o
+	$(CXX) $(DEBUGFLAGS) -o fracfg fracfg.o plan.o  ${LDASLIBFLAGS}
 
 frcrc: frcrc.o mmstream.o
 	$(CXX) $(DEBUGFLAGS) -o frcrc frcrc.o mmstream.o ${LDASLIBFLAGS}
