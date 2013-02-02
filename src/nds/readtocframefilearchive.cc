@@ -212,6 +212,8 @@ Nds::readTocFrameFileArchive()
             = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::in);
       ibuf -> open(file_name, std::ios::in | std::ios::binary);
 
+      // FIXME: catch std::runtime_error here
+      // framecpp-1.19.24/lib/framecpp/src/Common/FrameBuffer.cc source file
 #if 0
       if (! in ) {
 	system_log(3, "%s: frame file open failed", file_name);
