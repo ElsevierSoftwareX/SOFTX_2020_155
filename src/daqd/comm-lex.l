@@ -159,6 +159,8 @@ yywrap ()
 "minute-trend-frame-dir" { return MINUTE_TREND_FRAME_DIR; }
 "raw_minute_trend_dir" { return RAW_MINUTE_TREND_DIR; }
 "raw-minute-trend-dir" { return RAW_MINUTE_TREND_DIR; }
+"old_raw_minute_trend_dirs" { return OLD_RAW_MINUTE_TREND_DIRS; }
+"old-raw-minute-trend-dirs" { return OLD_RAW_MINUTE_TREND_DIRS; }
 "minute_trend_frames" { return MINUTE_TREND_FRAMES; }
 "minute-trend-frames" { return MINUTE_TREND_FRAMES; }
 "minute_trend"  { return MINUTE_TREND; }
