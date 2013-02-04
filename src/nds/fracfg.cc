@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <arpa/inet.h>
-#include "debug.h"
 #include "plan.hh"
-#include "mmstream.hh"
 
 
 using namespace std;
