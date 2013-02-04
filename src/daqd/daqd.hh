@@ -160,7 +160,7 @@ class daqd_c {
     , do_fsync(0), do_directio(0)
     , controller_dcu(DCU_ID_SUS_1), avoid_reconnect(0)
     , tp_allow(-1), no_myrinet(0), allow_tpman_connect_failure(0), no_compression(0)
-    , symm_gps_offset(0), cycle_delay(4)
+    , symm_gps_offset(0), cycle_delay(4), old_raw_minute_trend_dirs("")
     {
       // Initialize frame saver startup synchronization semaphore
       sem_init (&frame_saver_sem, 0, 1);
@@ -675,6 +675,9 @@ class daqd_c {
   // Delay data taking by this many 16 hz cycles (default is 4 set above(
   int cycle_delay;
 
+  // Space separated list of directories where old raw minute trend is kept
+  // They need to be in temporal order, oldest first.
+  string old_raw_minute_trend_dirs;
 }; // class daqd_c
 
 #endif

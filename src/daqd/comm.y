@@ -158,6 +158,7 @@ static int prompt_lineno;
 %token <y_void>  PROCESS_UNLOCK
 
 %token <y_void>  RAW_MINUTE_TREND_DIR
+%token <y_void>  OLD_RAW_MINUTE_TREND_DIRS
 
 %token <y_void>  MINUTE_TREND_FRAMES_PER_DIR
 %token <y_void>  MINUTE_TREND_FRAMES
@@ -963,6 +964,11 @@ CommandLine: /* Nothing */
        	| SET RAW_MINUTE_TREND_DIR '=' TextExpression {
 		AUTH_CHECK((my_lexer *) lexer);
 		daqd.trender.raw_minute_fsd.set_filename_attrs ($4);
+		free ($4);
+	}
+       	| SET OLD_RAW_MINUTE_TREND_DIRS '=' TextExpression {
+		AUTH_CHECK((my_lexer *) lexer);
+		daqd.old_raw_minute_trend_dirs = $4;
 		free ($4);
 	}
 	| SET MINUTE_TREND_NUM_DIRS '=' INTNUM {

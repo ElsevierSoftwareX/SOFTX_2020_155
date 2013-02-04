@@ -120,7 +120,12 @@ net_writer_c::send_files (void)
       out << "# NDS job specification file" << endl;
       if (source_buffptr == daqd.trender.mtb) {
 	out << "datatype=rawminutetrend" << endl;
-	out << "archive_dir=" << daqd.trender.raw_minute_fsd.get_path() << endl;
+	// We assume the directories are sorted by time
+	out << "archive_dir="
+		<< daqd.old_raw_minute_trend_dirs
+		<< " "
+		<< daqd.trender.raw_minute_fsd.get_path()
+		<< endl;
       } else  if (source_buffptr == daqd.trender.tb) {
 	out << "datatype=secondtrend" << endl;
 	if (daqd.trender.fsd.gps_time_dirs)
