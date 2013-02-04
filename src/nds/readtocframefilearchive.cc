@@ -21,6 +21,7 @@
 #include "nds.hh"
 #include "daqd_net.hh"
 #include "mmstream.hh"
+#include "plan.hh"
 
 using namespace CDS_NDS;
 using namespace std;
@@ -173,7 +174,12 @@ Nds::readTocFrameFileArchive()
       return false;
     }
 
+    plan *first_reader = 0;
+    FrameCPP::Version::FrameH *new_frame = 0;
 
+    const vector<string> &names = mSpec.getSignalNames(); // ADC signal names we care about
+    unsigned int num_signals = names.size();
+    unsigned long prev_gps = 0;
     // Iterate over the frame files
     for (;i != tstamps.end() && end_time >= i->first; i++) {
       unsigned long gps, dt;
@@ -181,6 +187,13 @@ Nds::readTocFrameFileArchive()
       dt = i->second;
 
       DEBUG1(cerr << "gps=" << gps << "; dt=" << dt << endl);
+      //
+      // Delete the first reader if there is a gap in the frame files
+      if (first_reader && gps != prev_gps + dt) {
+      	delete first_reader;
+	first_reader = 0;
+      }
+      prev_gps = gps;
 
       char file_name[filename_max+1];
       if (dt == 1) {
@@ -222,33 +235,45 @@ Nds::readTocFrameFileArchive()
       }
 #endif
 
-      FrameCPP::Version::IFrameStream  ifs(ibuf);
 
       DEBUG(1, cerr << "Begin ReadFrame()" << endl);
       time_t t = time(0);
 
-      FrameCPP::Version::FrameH new_frame(*ifs.ReadFrameH(0, 0));
-      General::SharedPtr< FrameCPP::Version::FrRawData > rawData
+      //FrameCPP::Version::IFrameStream  ifs(ibuf);
+      if (first_reader == 0) {
+      	first_reader = new plan(ibuf, 0);
+        new_frame = new FrameCPP::Version::FrameH(*first_reader->ReadFrameH(0, 0));
+        General::SharedPtr< FrameCPP::Version::FrRawData > rawData
 	        = General::SharedPtr< FrameCPP::Version::FrRawData > (new FrameCPP::Version::FrRawData);
-      new_frame.SetRawData(rawData);
-      const vector<string> &names = mSpec.getSignalNames(); // ADC signal names we care about
-      unsigned int num_signals = names.size();
+        new_frame->SetRawData(rawData);
 
-      for (int i = 0; i < num_signals; i++) {
-	FrameCPP::Version::FrAdcData *adc = 
+        for (int i = 0; i < num_signals; i++) {
+	  FrameCPP::Version::FrAdcData *adc = 
+		first_reader->ReadFrAdcData(0, names[i]).get();
+	  adc->RefData()[0]->Uncompress();
+	  new_frame->GetRawData () -> RefFirstAdc ().append (*adc);
+	  DEBUG(1, printf("Added first %s\n", adc->GetName().c_str()));
+        }
+      } else {
+        plan ifs(ibuf, first_reader);
+        for (int i = 0; i < num_signals; i++) {
+	  FrameCPP::Version::FrAdcData *adc = 
 		ifs.ReadFrAdcData(0, names[i]).get();
-	adc->RefData()[0]->Uncompress();
-	new_frame.GetRawData () -> RefFirstAdc ().append (*adc);
-	DEBUG(1, printf("Added %s\n", adc->GetName().c_str()));
+	  adc->RefData()[0]->Uncompress();
+	  if (first_reader) new_frame->GetRawData () -> RefFirstAdc ().erase(0);
+	  new_frame->GetRawData () -> RefFirstAdc ().append (*adc);
+	  DEBUG(1, printf("Added %s\n", adc->GetName().c_str()));
+        }
+	// Set frame time
+	new_frame->SetGTime(General::GPSTime(gps, 0));
       }
-
 
       t = time(0) - t;
       DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
       ibuf->close();
 
       // decimate and send the data, taking care of DAQD network protocol
-      if (!daqd_net.send_data(new_frame, file_name, 0, &seq_num))
+      if (!daqd_net.send_data(*new_frame, file_name, 0, &seq_num))
 	  return false;
     }
   } // data directories
