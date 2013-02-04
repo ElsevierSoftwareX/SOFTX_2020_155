@@ -84,19 +84,3 @@ main(int argc, char* argv[])
     }
   }
 }
-
-/*
-const INT_2U FR_VECT_C = 0;
-const INT_2U FR_VECT_2S = 1;
-const INT_2U FR_VECT_8R = 2;
-const INT_2U FR_VECT_4R = 3;
-const INT_2U FR_VECT_4S = 4;
-const INT_2U FR_VECT_8S = 5;
-const INT_2U FR_VECT_8C = 6;
-const INT_2U FR_VECT_16C = 7;
-const INT_2U FR_VECT_STR = 8;
-const INT_2U FR_VECT_2U = 9;
-const INT_2U FR_VECT_4U = 10;
-const INT_2U FR_VECT_8U = 11;
-const INT_2U FR_VECT_1U = 12;
-*/
