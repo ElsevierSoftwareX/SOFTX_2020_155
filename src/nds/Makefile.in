@@ -53,8 +53,8 @@ daqd: daqd.o
 nds: nds.out
 	/bin/mv nds.out nds
 
-fracfg: fracfg.o plan.o
-	$(CXX) $(DEBUGFLAGS) -o fracfg fracfg.o plan.o  ${LDASLIBFLAGS}
+fracfg: fracfg.o
+	$(CXX) $(DEBUGFLAGS) -o fracfg fracfg.o ${LDASLIBFLAGS}
 
 frcrc: frcrc.o mmstream.o
 	$(CXX) $(DEBUGFLAGS) -o frcrc frcrc.o mmstream.o ${LDASLIBFLAGS}

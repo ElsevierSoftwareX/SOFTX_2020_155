@@ -12,9 +12,8 @@
 class plan : public FrameCPP::Common::IFrameStream
 {
 public:
-  plan( buffer_type* Stream );
-  plan( buffer_type* Stream, plan *master );
-  ~plan();
+  plan( buffer_type* Stream, plan *master = 0 ) : IFrameStream(Stream), master_plan(master) {}
+  ~plan() {}
 
 
   typedef typename General::SharedPtr< FrameCPP::Version::FrameH > frame_h_type;
@@ -27,7 +26,6 @@ public:
         return General::DynamicPointerCast< typename frame_h_type::element_type >( retval );
   }
 
-
   fr_adc_data_type ReadFrAdcData( INT_4U Frame, const std::string& Channel ) {
       if (master_plan && !m_toc_loaded) {
 	// Will not load the TOC but rather use the master plan TOC 
@@ -35,7 +33,7 @@ public:
 	// that the frame sequence is continuous
 	// Assign the TOC pointer from the mater plan
 	m_toc = master_plan->m_toc;
-	// Copy over the hash, neede to resolve structure types
+	// Copy over the hash, needed to resolve structure types
 	// :TODO: this needs to come out of here into the contructor
 	m_stream_id_to_fsi_id = master_plan->m_stream_id_to_fsi_id;
 	m_toc_loaded = true;
@@ -59,31 +57,7 @@ public:
       } 
       return General::DynamicPointerCast< typename fr_adc_data_type::element_type > ( readFrAdcData( Frame, Channel ) );
   }
-
-  void load_toc();
-
-#if 0  
-  //: Include ADCs in the frame
-  //   
-  //!exc: std::bad_alloc - Out of memory.
-  //!exc: read_failure - Read failed.
-  //!exc: not_found_error - Data is not found.   
-  //      
-  void daqTriggerADC( const std::vector<std::string> &adcNames );
-#endif
-
-  bool can_be_used_for_frame(char *fname);
 private:
-
-  /// Skeleton frame object
-  FrameCPP::Version::FrameH frame;
-
-  /// Skeleton raw data object
-  FrameCPP::Version::FrRawData raw_data;
-
-  /// TOC offset variable read from the file, last 8 bytes
-  char toc_offset[8];
-
   plan *master_plan;
 }; // class FrameReadPlan
 
