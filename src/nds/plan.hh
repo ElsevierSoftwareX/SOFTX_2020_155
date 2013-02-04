@@ -27,14 +27,14 @@ public:
   ~plan() {}
 
 
-  typedef typename General::SharedPtr< FrameCPP::Version::FrameH > frame_h_type;
-  typedef typename General::SharedPtr< FrameCPP::Version::FrAdcData > fr_adc_data_type;
-  typedef typename General::SharedPtr< FrameCPP::Version::FrTOC > fr_toc_data_type;
+  typedef General::SharedPtr< FrameCPP::Version::FrameH > frame_h_type;
+  typedef General::SharedPtr< FrameCPP::Version::FrAdcData > fr_adc_data_type;
+  typedef General::SharedPtr< FrameCPP::Version::FrTOC > fr_toc_data_type;
 
 
   frame_h_type ReadFrameH(INT_4U Frame, INT_4U ContainerSet) {
         object_type       retval = readFrameHSubset(Frame, ContainerSet);
-        return General::DynamicPointerCast< typename frame_h_type::element_type >( retval );
+        return General::DynamicPointerCast< frame_h_type::element_type >( retval );
   }
 
   fr_adc_data_type ReadFrAdcData( INT_4U Frame, const std::string& Channel ) {
@@ -57,7 +57,7 @@ public:
 	*this >> i->second.m_positionADC[ 0 ]; //i->second.m_positionADC[ 0 ];
 	//std::cerr << "adc position: " << i->second.m_positionADC[ 0 ] << std::endl;
       } 
-      return General::DynamicPointerCast< typename fr_adc_data_type::element_type > ( readFrAdcData( Frame, Channel ) );
+      return General::DynamicPointerCast< fr_adc_data_type::element_type > ( readFrAdcData( Frame, Channel ) );
   }
 private:
   plan *master_plan;
