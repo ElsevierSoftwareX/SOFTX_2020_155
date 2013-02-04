@@ -1,0 +1,132 @@
+diff -Naur framecpp-1.19.24/lib/framecpp/src/Common/FrameStream.hh framecpp-1.19.24-p1/lib/framecpp/src/Common/FrameStream.hh
+--- framecpp-1.19.24/lib/framecpp/src/Common/FrameStream.hh	2012-03-14 12:38:02.000000000 -0700
++++ framecpp-1.19.24-p1/lib/framecpp/src/Common/FrameStream.hh	2013-02-01 14:38:55.323322816 -0800
+@@ -371,7 +371,7 @@
+ 
+       virtual void pushResolver( resolver_type Resolver );
+ 
+-    private:
++    public:
+       friend class Verify;
+       struct detector_info_type {
+ 	INT_2U	m_class;
+diff -Naur framecpp-1.19.24/lib/framecpp/src/Version6/FrTOCAdcData.cc framecpp-1.19.24-p1/lib/framecpp/src/Version6/FrTOCAdcData.cc
+--- framecpp-1.19.24/lib/framecpp/src/Version6/FrTOCAdcData.cc	2012-03-14 12:38:10.000000000 -0700
++++ framecpp-1.19.24-p1/lib/framecpp/src/Version6/FrTOCAdcData.cc	2013-02-01 12:12:26.533793592 -0800
+@@ -41,9 +41,9 @@
+ 
+ 	Stream >> m_keys
+ 	       >> channel_ids
+-	       >> group_ids
+-	       >> positions
+-	  ;
++	       >> group_ids;
++        m_positions_start = Stream.tellg( );
++	Stream >> positions;
+ 	//---------------------------------------------------------------
+ 	// Move into structure.
+ 	//---------------------------------------------------------------
+@@ -54,17 +54,19 @@
+ 	std::vector< position_type >::const_iterator
+ 	  cur_position = positions.begin( );
+ 
++	unsigned int j = 0;
+ 	for ( key_container_type::const_iterator
+ 		cur = m_keys.begin( ),
+ 		last = m_keys.end( );
+ 	      cur != last;
+ 	      ++cur, ++cur_channel_id, ++cur_group_id,
+-		cur_position += FrameCount )
++		cur_position += FrameCount, j++ )
+ 	{
+ 	  adc_info_type& i = m_info[ *cur ];
+ 	  i.m_channelID = *cur_channel_id;
+ 	  i.m_groupID = *cur_group_id;
+ 	  i.m_positionADC.assign( cur_position, cur_position + FrameCount );
++	  i.m_index = j;
+ 	}
+       }
+     }
+diff -Naur framecpp-1.19.24/lib/framecpp/src/Version6/FrTOCAdcData.hh framecpp-1.19.24-p1/lib/framecpp/src/Version6/FrTOCAdcData.hh
+--- framecpp-1.19.24/lib/framecpp/src/Version6/FrTOCAdcData.hh	2011-04-20 08:38:19.000000000 -0700
++++ framecpp-1.19.24-p1/lib/framecpp/src/Version6/FrTOCAdcData.hh	2013-02-01 11:54:10.871569113 -0800
+@@ -40,6 +40,10 @@
+ 	/// The size of the array is nFrame
+ 	//---------------------------------------------------------------
+ 	std::vector< position_type >	m_positionADC;
++	//---------------------------------------------------------------
++	/// \brief Adc channel index number, sequential as read from the TOC
++	//---------------------------------------------------------------
++	INT_4U	m_index;
+       };
+ 
+       typedef std::vector< name_type >			key_container_type;
+@@ -74,6 +78,9 @@
+       static void Description( Common::Description& Desc );
+ 
+     protected:
++      // Offset from the beginnig of file to the 
++      // start of the array of ADC positions in the TOC
++      position_type		m_positions_start;
+       key_container_type	m_keys;
+       MapADC_type		m_info;
+ 
+diff -Naur framecpp-1.19.24/lib/framecpp/src/Version8/FrTOCAdcData.cc framecpp-1.19.24-p1/lib/framecpp/src/Version8/FrTOCAdcData.cc
+--- framecpp-1.19.24/lib/framecpp/src/Version8/FrTOCAdcData.cc	2012-03-14 12:38:13.000000000 -0700
++++ framecpp-1.19.24-p1/lib/framecpp/src/Version8/FrTOCAdcData.cc	2013-02-01 17:32:43.692201529 -0800
+@@ -40,11 +40,16 @@
+ 
+ 	m_keys.resize( s );
+ 
+-	Stream >> m_keys
+-	       >> channel_ids
+-	       >> group_ids
+-	       >> positions
+-	  ;
++        Stream >> m_keys
++               >> channel_ids
++               >> group_ids;
++        m_positions_start = Stream.tellg( );
++	Stream.seekg(0, std::ios_base::end);
++	position_type endp = Stream.tellg( );
++	Stream.seekg(m_positions_start, std::ios_base::beg);
++	m_positions_start = endp - m_positions_start;
++        Stream >> positions;
++
+ 	//---------------------------------------------------------------
+ 	// Move into structure.
+ 	//---------------------------------------------------------------
+@@ -55,17 +60,19 @@
+ 	std::vector< position_type >::const_iterator
+ 	  cur_position = positions.begin( );
+ 
++	unsigned int idx = 0;
+ 	for ( key_container_type::const_iterator
+ 		cur = m_keys.begin( ),
+ 		last = m_keys.end( );
+ 	      cur != last;
+ 	      ++cur, ++cur_channel_id, ++cur_group_id,
+-		cur_position += FrameCount )
++		cur_position += FrameCount, idx++ )
+ 	{
+ 	  adc_info_type& i = m_info[ *cur ];
+ 	  i.m_channelID = *cur_channel_id;
+ 	  i.m_groupID = *cur_group_id;
+ 	  i.m_positionADC.assign( cur_position, cur_position + FrameCount );
++	  i.m_index = idx;
+ 	}
+       }
+     }
+diff -Naur framecpp-1.19.24/lib/framecpp/src/Version8/FrTOCAdcData.hh framecpp-1.19.24-p1/lib/framecpp/src/Version8/FrTOCAdcData.hh
+--- framecpp-1.19.24/lib/framecpp/src/Version8/FrTOCAdcData.hh	2012-03-14 12:38:13.000000000 -0700
++++ framecpp-1.19.24-p1/lib/framecpp/src/Version8/FrTOCAdcData.hh	2013-02-01 17:22:32.151897430 -0800
+@@ -144,6 +144,9 @@
+       template< typename SE >
+       static void Description( Common::Description& Desc );
+ 
++      // Offset from the end of file to the 
++      // start of the array of ADC positions in the TOC
++      position_type		m_positions_start;
+     protected:
+       key_container_type	m_keys;
+       MapADC_type		m_info;
