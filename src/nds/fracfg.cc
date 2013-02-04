@@ -80,7 +80,7 @@ main(int argc, char* argv[])
         printf("Added %s\n", adc->GetName().c_str());
       }
     } catch (exception &e) {
-            fprintf(stderr, "Failed to read first frame; %s\n", e.what());
+            fprintf(stderr, "Failed to read file; %s\n", e.what());
     }
   }
 }
