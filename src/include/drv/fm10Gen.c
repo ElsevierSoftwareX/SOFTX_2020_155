@@ -25,7 +25,9 @@
 
 ///	@file fm10Gen.c
 ///	@brief This file contains the routines for performing the real-time
-///		IIR/FIR filter calculations.
+///		IIR/FIR filter calculations. \n
+///	Further information is provided in the LIGO DCC 
+///	<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7687">T0900606 CDS Standard IIR Filter Module Software</a>
 
 
 #include "fm10Gen.h"
