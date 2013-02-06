@@ -91,7 +91,7 @@ my ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
 END
 }
 
-#// \bsub \b medmGenText ($xpos,$ypos,$wid,$ht,$tix,$fgc) \n
+#// \b sub \b medmGenText ($xpos,$ypos,$wid,$ht,$tix,$fgc) \n
 #// This sub will create an MEDM text block ************************************************* \n
 #//	0 = xpos \n
 #//	1 = ypos \n
@@ -120,7 +120,7 @@ text {
 END
 }
 
-#// \bsub \b medmGenTextDyn ($xpos,$ypos,$wid,$ht,$tix,$fgc,$mcalc,$chan) \n
+#// \b sub \b medmGenTextDyn ($xpos,$ypos,$wid,$ht,$tix,$fgc,$mcalc,$chan) \n
 #// This sub will create an MEDM dynamic text block ************************************************* \n
 #//	0 = xpos \n
 #//	1 = ypos \n
