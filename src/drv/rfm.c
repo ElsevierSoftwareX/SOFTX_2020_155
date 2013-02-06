@@ -1,4 +1,4 @@
-///	@file rfm.c
+///	@file src/drv/rfm.c
 /// 	@brief Routines for finding shared memory locations.
 
 #include <sys/mman.h>
