@@ -38,9 +38,14 @@ An overview of the model parsing and code generation is shown in the following f
 
 <b>EPICS Database / Code Generation</b>
         - \subpage fmseq "fmseq.pl" \n
+	
 \verbatim
-Another Perl script, $ROOT/src/epics/util/fmseq.pl, is invoked to generate the EPICS interface side of the code. This script reads in the following file
-s to obtain system information and produce the EPICS products:
+To pass data between the real-time code and EPICS, EPICS State Notation Language (SNL) code and an EPICS database must be created. The sequence of creating and compiling this code, along with auxillary files, is shown in the following figure.
+	- Makefile.linux invokes fmseq.pl to create the SNL code (modelname.st) and the EPICS database.
+	- Makefile.linux invokes the Makefile.modelnameepics, previously created by feCodeGen.pl.
+	- Makefile.linux creates final products in the $BUILD/target/modelnameepics directory, for later installation by make install-modelname command.
+
+The fmseq.pl script reads in the following files to obtain system information and produce the EPICS products:
         1) The model name text file produced by feCodeGen.pl in the $BUILD/src/epics/fmseq directory.
         2) The skeleton.st and skeleton.db files located in the $ROOT/src/epics/util directory. The skeleton.st file is the template for generation of E
 PICS SNL code, which fmseq will fill in with model specific items. The skeleton.db file is a template of all EPICS records to be produced for filter mod
@@ -56,12 +61,10 @@ runtime. As of RCG V2.5, channels to be acquired and saved to disk are listed wi
         4) A Global Diagnostics channel list (modelname.par). This file is used by the real-time code and DAQ system to provide a list of all data chann
 els available “on demand” as testpoints or excitation entry points.
 
-As the make process continues, the SNL code will be run through the SNL precompiler and then GNU compiler to produce exectuables in the $BUILD/target/<m
-odelname>epics directory. The final startup scripts and databases are also generated here, for later movement to the runtime target directory when make 
-install is invoked.
-
 \endverbatim
+As the make process continues, the SNL code will be run through the SNL precompiler and then GNU compiler, which links in supporting \subpage devguideepics "C code from $RCG/src/drv", to produce exectuables in the $BUILD/target/<modelname>epics directory. The final startup scripts and databases are also generated here, for later movement to the runtime target directory when make install is invoked.
 
+\image html fmseqCode.png "fmseq Parsing and Products"
 <b>CDS PARTS Support </b>\n
 \verbatim
 All of the cdsPart.pm modules contain the same sub components, such that they can be easily developed and “plugged into” the RCG package. These sub comp
