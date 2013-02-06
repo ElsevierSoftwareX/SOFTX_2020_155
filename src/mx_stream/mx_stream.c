@@ -1,6 +1,7 @@
 //
-// Open-MX data sender, supports sending data
-// from the IOP as well as from the slaves
+///	@file mx_stream.c
+///	@brief  Open-MX data sender, supports sending data
+///< from the IOP as well as from the slaves
 //
 
 #include "myriexpress.h"
