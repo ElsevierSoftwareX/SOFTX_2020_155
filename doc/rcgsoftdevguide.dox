@@ -1,12 +1,34 @@
 /*! \page devguidercg RCG Software Developer's Guide
-This section is intended as a general guide for code modifications to the RCG parsers and compilers. \n\n\b Introduction \n
+This section is intended as a general guide for code modifications to the RCG parsers and compilers. \n\n\b 1. \b Introduction \n
 \verbatim
 The purpose of this documentation is to provide a description of the software which comprises the Real-time Code Generator (RCG). It is intended to be o
 f sufficient detail for experienced software developers to modify, enhance or maintain the core RCG software. This includes the RCG compiler functions and the various RCG perl and C code components necessary to produce and compile the code that runs on the aLIGO real-time control computers.
 \endverbatim
-\b Overview \n
+\b 2. \b Overview \n
+
+\subpar 2.1 RCG Runtime 
 \verbatim
-The RCG consists of four primary components: \n
+An overview of the RCG runtime products (yellow background) and code/hardware interconnections is shown in the following diagram.
+Runtime products include:
+	1) Real-time Application:
+		a) I/O Processor (IOP): One IOP is required per real-time computer. This is a special case model with compile option "ADC_MASTER=1" set. The IOP is responsible for:
+			i. PCIe device initialization and memory mapping.
+			ii. Timing system setup and synchronization.
+			iii. Reading in all ADC module data and writing out all DAC module data and communicating this information with user application processes.
+			iv. Reading data from Reflected Memory (RFM) realtime network interface modules.
+			v. Synchronization of user applications.
+		b) User application (compile option ADC_SLAVE=1). This is the typical application built for user application models. 
+	2) EPICS sequencer: This is an application, based on EPICS State Notation Language (SNL), which passes data between EPICS database records and the real-time application via shared memory.
+	3) EPICS Database: Standard EPICS database records which allow communication to other computers, primarily operator stations, via EPICS channel access network protocol.
+
+The RCG library also contains some separate support code modules, two of which are shown in the following diagram:
+	1) Awgtpman: Program to set testpoints in the real-time code and inject excitation data.
+	2) MX Stream: Program to communicate DAQ data to the DAQ system (Data Concentrator computer) via a separate DAQ network.
+\endverbatim
+\image html rcgRuntime.png "RCG Runtime Overview"
+\subpar 2.2 RCG Compiler Components
+\verbatim
+The RCG compiler consists of four primary components: \n
         1) Matlab Simulink, which provides the Graphical User Interface (GUI) and text files which represent the code to be generated. In support of thi
 s, the RCG provides a standard parts library in the form of a library model file (CDS_PARTS.mdl).
         2) Perl parser scripts, which read the Matlab .mdl files and produce:
@@ -16,7 +38,9 @@ s, the RCG provides a standard parts library in the form of a library model file
 	3) Core header and C code files that are compiled as part of every application built by the RCG.
         4) Standard set of configuration and Makefiles to compile the final executable kernel object.
 \endverbatim
+	
 
+\par 3. CDS PARTS LIBRARY
 \subpage devguidercg4 "CDS Parts Library"
 \verbatim
 This section provides information on adding parts to the CDS Parts Library.
@@ -26,24 +50,23 @@ The CDS Parts Library consists of:
 dl.
         - "Part".pm, which is a Perl module written to support code generation for each part in the library.
 \endverbatim
+\par 4. RCG PERL MODULES
 \subpage devguidercg2 "PERL Code Modules"
 \verbatim
 Perl scripts are used by the RCG to generate the real-time and supporting runtime code. This section describes those Perl modules and the products that 
 they produce.
 \endverbatim
-\subpage devguidercg1 "Real-time C Code Modules"
+\par 5. C Code Modules
+There are number of files containing C source routines which get compiled as part of the overall RCG make process. These fall into two main categories:
+	- \subpage devguidercg1 "Real-time C Code Modules"
 \verbatim
 Once the RCG Perl Modules have produced the C code for the user model, compilation continues by adding a number of common C code modules to finally produce a runtime kernel object. The primary C code source files are shown in the figure below.
 
 
 \endverbatim
-\image html CcodeCompile.png "C Code Modules"
+	- \subpage devguideepics "EPICS State Notation Language (SNL) and C Files"
 \verbatim
-
-\endverbatim
-\subpage devguideepics "EPICS State Notation Language (SNL) and C Files"
-\verbatim
-
+To interface the RT code with EPICS, the RCG produces an EPICS SNL file. At runtime, this sequencer moves data between shared memory and EPICS database records. In addition, a number of C code source files are provided to perform auxillary functions.
 \endverbatim
 \subpage devguidercg3 "Configuration and Makefiles"
 \verbatim

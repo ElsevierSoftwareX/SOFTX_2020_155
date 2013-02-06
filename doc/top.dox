@@ -114,7 +114,7 @@ This page links to code documentation for RCG code developers. \n
 ///	\defgroup supp Support
 ///	@{
 ///	@file crc.c 
-///	@file rfm.c 
+///	@file src/drv/rfm.c 
 ///	@file susWatchdogFilters.c 
 ///	@}
 ///	\defgroup test Test Results

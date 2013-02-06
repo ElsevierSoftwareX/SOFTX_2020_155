@@ -2,6 +2,7 @@
 \verbatim
 This section provides a brief description of the various C code modules compiled with user apps to produce a runtime kernel object.
 \endverbatim
+\image html CcodeCompile.png "C Code Modules"
 	
 <b>Module Initialization</b>
 - moduleLoad.c
@@ -107,5 +108,12 @@ fmReadCoeff.h  \n
 */
 
 /*! \page devguideepics EPICS State Notation Language (SNL) and C Files
-param.c  \n
+A number of C code files are compiled and linked in with the model.st file to produce the final EPICS sequencer code to interface data between the RT code and EPICS database records.
+
+	- src/epics/seq/main.c	- Required startup routine for EPICS; modified to monitor alarms for GUARDIAN support.
+	- src/drv/rfm.c  	- Provides routine for getting pointer to shared memory. \n
+	- src/drv/param.c  	- Contains routines to read and load data from DAQ configuration (.ini) files. \n
+	- src/drv/crc.c  		- Provides routines for performing CRC checksum calculations. \n
+	- src/drv/fmReadCoeff.c 	- Provides routines for reading and loading IIR filter coefficients. \n
+
 */
