@@ -62,8 +62,10 @@ $names2 = "%%static  fmSubSysMap  fmmap0 [MAX_MODULES] = { \n%%";
 
 $do_epics_input = 0;
 
-# Determine whether passed name needs to become a top name
-# i.e. whether the system/subsystem parts need to excluded 
+#// \b sub \b is_top_name \n
+#// Determine whether passed name needs to become a top name
+#// i.e. whether the system/subsystem parts need to excluded  \n
+#// Returns 1 if top name, else returns 0 \n\n
 sub is_top_name {
    ($_) =  @_;
    if (/^GDS_MON/) { return 0; } # Do not count testpoint channels
@@ -77,8 +79,9 @@ sub is_top_name {
    return 0;
 };
 
-# Transform record name for exculsion of sys/subsystem parts
-# This function replaces first underscore with the hyphen
+#// \b su \b top_name_transform \n
+#// Transform record name for exculsion of sys/subsystem parts
+#// This function replaces first underscore with the hyphen \n\n
 sub top_name_transform {
    ($name) =  @_;
    $name =~ s/_/-/;
