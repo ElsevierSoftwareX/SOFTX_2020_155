@@ -1,3 +1,6 @@
+///	@file /src/epics/seq/main.c
+///	@brief Contains required 'main' function to startup EPICS sequencers, along with supporting routines. 
+///<		This code is taken from EPICS example included in the EPICS distribution and modified for LIGO use.
 /* demoMain.c */
 /* Author:  Marty Kraimer Date:    17MAR2000 */
 
@@ -20,19 +23,23 @@ of this distribution.
 #include "dbStaticLib.h"
 #include "crc.h"
 
-// Pointers to status record
+/// Pointers to status record
 DBENTRY  *pdbentry_status[2][10];
 
-// Pointers to records currently alarmed
-// Two lists of 10 records, one inputs (ai, bi)
-// the other outputs (ao, bo)
+/// Pointers to records currently alarmed
+///< Two lists of 10 records, one inputs (ai, bi)
+///< the other outputs (ao, bo)
 DBENTRY  *pdbentry_alarm[2][10];
 
 
+/// Alarm configuration CRC checksum.
 DBENTRY  *pdbentry_crc = 0;
+/// Number of setpoints in alarm..
 DBENTRY  *pdbentry_in_err_cnt = 0;
+/// Number of readbacks in alarm..
 DBENTRY  *pdbentry_out_err_cnt = 0;
 
+/// Initialize alarm variables.
 void init_vars() {
 	int i, j;
 	for (i = 0; i < 2; i++)
@@ -42,6 +49,7 @@ void init_vars() {
 		}
 }
 
+/// Calculate Alarm (state) setpoint CRC checksums
 unsigned int
 field_crc(DBENTRY *pdbentry, char *field, unsigned int crc, unsigned int *len_crc) {
 	long status = dbFindField(pdbentry, field);
@@ -55,6 +63,7 @@ field_crc(DBENTRY *pdbentry, char *field, unsigned int crc, unsigned int *len_cr
 	return crc_ptr(s, l, crc);
 }
 
+/// Main subroutine for monitoring alarms
 void process_alarms(DBBASE *pdbbase, char *pref)
 {
     DBENTRY  *pdbentry;
@@ -252,6 +261,7 @@ void dbDumpRecords(DBBASE *pdbbase)
     dbFreeEntry(pdbentry);
 }
 
+/// Called on EPICS startup; This is generic EPICS provided function, modified for LIGO use.
 int main(int argc,char *argv[])
 {
     if(argc>=2) {
