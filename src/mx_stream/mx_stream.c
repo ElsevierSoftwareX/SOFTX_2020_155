@@ -230,7 +230,7 @@ do {
 
 		  // Copy values from shmmem to MX buffer
 		  if (lastCycle == 0) shmIpcPtr[i]->status ^= 1;
-		  mxDataBlock.mxIpcData.cycle = lastCycle;
+		  mxDataBlock.mxIpcData.cycle = shmIpcPtr[i]->cycle;
 		  mxDataBlock.mxIpcData.crc = shmIpcPtr[i]->crc;
 		  mxDataBlock.mxIpcData.dcuId = shmIpcPtr[i]->dcuId;
 		  mxDataBlock.mxIpcData.dataBlockSize = shmIpcPtr[i]->dataBlockSize;
