@@ -24,9 +24,6 @@ Further information can be found at <a href="https://dcc.ligo.org/cgi-bin/privat
 <b>Data Acquisition</b>
 - daqLib.c
 	- Routine for gathering DAQ and GDS TP data from RT code and passing to shared memory.
-- mx_stream.c
-	- Triggered by daqLib.c routine, transfers DAQ/TP data via open-mx network to data concentrator.
-- param.c
 
 <b>PCIe Module Drivers</b>
 - map.c  \n
@@ -110,6 +107,7 @@ fmReadCoeff.h  \n
 /*! \page devguideepics EPICS State Notation Language (SNL) and C Files
 A number of C code files are compiled and linked in with the model.st file to produce the final EPICS sequencer code to interface data between the RT code and EPICS database records.
 
+	- <b> src/epics/util/skeleton.st </b> - Used as the base file for fmseq.pl to produce EPICS SNL code.
 	- src/epics/seq/main.c	- Required startup routine for EPICS; modified to monitor alarms for GUARDIAN support.
 	- src/drv/rfm.c  	- Provides routine for getting pointer to shared memory. \n
 	- src/drv/param.c  	- Contains routines to read and load data from DAQ configuration (.ini) files. \n
