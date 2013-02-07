@@ -821,8 +821,6 @@ int cycle_delay = daqd.cycle_delay;
 #endif
 	  if (dcu_gps != mygps) {
 	    daqd.dcuStatus[0][j] |= 0x4000;
-	    daqd.dcuCrcErrCnt[0][j]++;
-	    daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
 	    system_log(5, "GPS MISS dcu %d (%s); dcu_gps=%d gps=%ld\n", j, daqd.dcuName[j], dcu_gps, mygps);
 	  }
 
@@ -833,11 +831,13 @@ int cycle_delay = daqd.cycle_delay;
 	    /* Set DCU status to BAD, all data will be marked as BAD 
 	       because of the CRC mismatch */
 	    daqd.dcuStatus[0][j] |= 0x1000;
-	    daqd.dcuCrcErrCnt[0][j]++;
-	    daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
 	  } else {
 	    system_log(6, " MATCH dcu %d (%s); crc[%d]=%x; computed crc=%lx\n",
 		       j, daqd.dcuName[j], cblk, rfm_crc, crc);
+	  }
+	  if (daqd.dcuStatus[0][j]) {
+	    daqd.dcuCrcErrCnt[0][j]++;
+	    daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
 	  }
         }
 
