@@ -321,7 +321,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
         when DMA xfers are used on 5565 RFM modules. Note that this usually results
 	in data not being written on every 2048/16384 cycle and last data xfer
 	in a 1/16 sec block well may be shorter than the rest.			*/
-    // if(((crcLength/xferSize1) > sysRate) || ((xferSize1 % 8) > 0)) 
  	xferSize1 = ((xferSize1/8) + 1) * 8;
 	// printf("DAQ resized %d\n", xferSize1);
 
@@ -733,7 +732,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 			when DMA xfers are used on 5565 RFM modules. Note that this usually results
 			in data not being written on every 2048/16384 cycle and last data xfer
 			in a 1/16 sec block well may be shorter than the rest.                  */
-		    if(((crcLength/xferSize1) > sysRate) || ((xferSize1 % 8) > 0))
 			xferSize1 = ((xferSize1/8) + 1) * 8;
 
 		    localTable[0].offset = 0;
