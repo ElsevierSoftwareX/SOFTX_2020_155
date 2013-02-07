@@ -53,9 +53,9 @@ printf("size of data block = %lu\n", sizeof(CDS_IPC_COMMS));
 	// Clear the data point
         ipcInfo[ii].data = 0.0;
 	ipcInfo[ii].pIpcData = NULL;
-        printf("IPC DATA for IPC %d ******************\n",ii);
-        if(ipcInfo[ii].mode) printf("Mode = SENDER w Cycle = %d\n",ipcInfo[ii].sendCycle);
-        else printf("Mode = RECEIVER w rcvRate and cycle = %d %d\n",ipcInfo[ii].rcvRate,ipcInfo[ii].rcvCycle);
+        // printf("IPC DATA for IPC %d ******************\n",ii);
+        // if(ipcInfo[ii].mode) printf("Mode = SENDER w Cycle = %d\n",ipcInfo[ii].sendCycle);
+        // else printf("Mode = RECEIVER w rcvRate and cycle = %d %d\n",ipcInfo[ii].rcvRate,ipcInfo[ii].rcvCycle);
 
 	// Save pointers to the IPC communications memory locations.
         if(ipcInfo[ii].netType == IRFM0)		// VMIC Reflected Memory *******************************
@@ -69,7 +69,7 @@ printf("size of data block = %lu\n", sizeof(CDS_IPC_COMMS));
 	    if(ipcInfo[ii].mode == ISND) ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[0] + IPC_BASE_OFFSET);
 	    			    else ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm_dma[0]);
 #endif
-	    printf("Net Type = RFM 0 at 0x%p\n",ipcInfo[ii].pIpcData);
+	    // printf("Net Type = RFM 0 at 0x%p\n",ipcInfo[ii].pIpcData);
 	  }
 	}
         if(ipcInfo[ii].netType == IRFM1)		// VMIC Reflected Memory *******************************
@@ -81,7 +81,7 @@ printf("size of data block = %lu\n", sizeof(CDS_IPC_COMMS));
 	    if(ipcInfo[ii].mode == ISND) ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[1] + IPC_BASE_OFFSET);
 	    			    else ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm_dma[1]);
 #endif
-	    printf("Net Type = RFM 1 at 0x%p\n",ipcInfo[ii].pIpcData);
+	    // printf("Net Type = RFM 1 at 0x%p\n",ipcInfo[ii].pIpcData);
 	  }
 	  // If there isn't a second card (like in the end stations), default to first card
 	  if(cdsPciModules.rfmCount == 1) {
@@ -91,30 +91,33 @@ printf("size of data block = %lu\n", sizeof(CDS_IPC_COMMS));
 	    if(ipcInfo[ii].mode == ISND) ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm[0] + IPC_BASE_OFFSET);
 	    			    else ipcInfo[ii].pIpcData  = (CDS_IPC_COMMS *)(cdsPciModules.pci_rfm_dma[0]);
 #endif
-	    printf("DEFAULTING TO RFM0 - ONLY ONE CARD\nNet Type = RFM 1 at 0x%p\n",ipcInfo[ii].pIpcData);
+	    // printf("DEFAULTING TO RFM0 - ONLY ONE CARD\nNet Type = RFM 1 at 0x%p\n",ipcInfo[ii].pIpcData);
 	  }
 	}
         if(ipcInfo[ii].netType == ISHME)		// Computer shared memory ******************************
 	{
                 ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)(_ipc_shm + IPC_BASE_OFFSET);
-                printf("Net Type = LOCAL IPC at 0x%p\n",ipcInfo[ii].pIpcData);
+                // printf("Net Type = LOCAL IPC at 0x%p\n",ipcInfo[ii].pIpcData);
         }
 	// PCIe communications requires one pointer for sending data and a second one for receiving data.
         if((ipcInfo[ii].netType == IPCIE) && (ipcInfo[ii].mode == IRCV) && (cdsPciModules.dolphin[0]))
 	{
                 ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphin[0]) + IPC_PCIE_BASE_OFFSET);
-                printf("Net Type = PCIE RCV IPC %d at 0x%p  *********************************\n",ipcInfo[ii].sendRate,ipcInfo[ii].pIpcData);
+                // printf("Net Type = PCIE RCV IPC %d at 0x%p  *********************************\n",ipcInfo[ii].sendRate,ipcInfo[ii].pIpcData);
         }
         if((ipcInfo[ii].netType == IPCIE) && (ipcInfo[ii].mode == ISND) && (cdsPciModules.dolphin[1]))
 	{
                 ipcInfo[ii].pIpcData = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphin[1]) + IPC_PCIE_BASE_OFFSET);
-                printf("Net Type = PCIE SEND IPC at 0x%p  *********************************\n",ipcInfo[ii].pIpcData);
+                // printf("Net Type = PCIE SEND IPC at 0x%p  *********************************\n",ipcInfo[ii].pIpcData);
         }
+#if 0
+	// Following for diags, if desired. Otherwise, leave out as it fills dmesg
         printf("IPC Number = %d\n",ipcInfo[ii].ipcNum);
         printf("IPC Name = %s\n",ipcInfo[ii].name);
         printf("Sender Model Name = %s\n",ipcInfo[ii].senderModelName);
         printf("RCV Rate  = %d\n",ipcInfo[ii].rcvRate);
         printf("Send Computer Number  = %d\n",ipcInfo[ii].sendNode);
+#endif
 
     }
 }
