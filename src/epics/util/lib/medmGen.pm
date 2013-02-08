@@ -68,7 +68,7 @@ END
 #//	7 = clrmod \n\n
 sub medmGenTextMon
 {
-my ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
+my ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod,$form) = @_;
         return <<END;
 "text update" {
         object {
@@ -83,6 +83,7 @@ my ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod) = @_;
                 bclr="$bgc"
         }
         clrmod="$clrmod"
+        format="$form"
         align="horiz. centered"
         limits {
         }

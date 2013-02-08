@@ -245,7 +245,7 @@ sub createGdsMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"    NET CHN   DRATE  TRATE",$ecolors{black});
 	# Add DAQ DC chan count Monitor
 	$xpos = 424; $ypos = 72; $width = 35; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:DAQ-DC0_$mdlName\_STATUS",$ecolors{white},$ecolors{black},"alarm");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:DAQ-DC0_$mdlName\_STATUS",$ecolors{white},$ecolors{black},"alarm","hexadecimal");
 	# Add DAQ DC CRC Error Monitor
 	$xpos = 464; $ypos = 72; $width = 35; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:DAQ-DC0_$mdlName\_CRC_CPS",$ecolors{white},$ecolors{black},"alarm");
