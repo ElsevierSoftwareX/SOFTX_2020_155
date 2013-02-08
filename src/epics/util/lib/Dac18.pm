@@ -180,7 +180,7 @@ sub createDac18Medm
 
 	my $ii=0;
 
-        my $fname = "$mdlName\_DAC_MONITOR_$dacNum.adl";
+        my $fname = "$mdlName\_DAC_MONITOR_$::dacCardNum[$dacNum].adl";
         # Create MEDM File
         print "creating file $medmDir\/$fname \n";
         open(OUTMEDM, ">$medmDir/$fname") || die "cannot open $medmDir/$fname for writing ";
@@ -194,7 +194,7 @@ sub createDac18Medm
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{blue},"","","");
         # Add Display Name
         $xpos = 25; $ypos = 4; $width = 120; $height = 15;        
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$mdlName\_DAC_MONITOR_$dacNum",$ecolors{white});
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$mdlName\_DAC_MONITOR_$::dacCardNum[$dacNum]",$ecolors{white});
 
         # ************* Create Background **************************************************************************
         # Add Background rectangles
@@ -204,7 +204,7 @@ sub createDac18Medm
         # ************* Add Text  **********************************************************************************
         # Add DAC top label
         $xpos = 13; $ypos = 43; $width = 140; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DAC $dacNum - 18bit",$ecolors{black});
+        $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DAC $::dacCardNum[$dacNum] - 18bit",$ecolors{black});
         # Add DAC OUT label
         $xpos = 49; $ypos = 64; $width = 45; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"OUT",$ecolors{black});
