@@ -205,8 +205,12 @@ sub createAdcMedm
 		$xpos = 20; $width = 250;
 		$labelName = substr $adcChannel[$adcNum][$ii],7;
 		$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$labelName",$ecolors{black});
-		$xpos = 300; $width = 60;
-		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$adcChannel[$adcNum][$ii]",$ecolors{white},$ecolors{blue},"static");
+		if($labelName ne "") {
+			$xpos = 285; $width = 10;
+			$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,$ii,$ecolors{black});
+			$xpos = 300; $width = 60;
+			$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$adcChannel[$adcNum][$ii]",$ecolors{white},$ecolors{blue},"static");
+		}
 		$ypos += 20;
 	}
 
@@ -217,8 +221,12 @@ sub createAdcMedm
 		$xpos = 380; $width = 250;
 		$labelName = substr $adcChannel[$adcNum][$ii],7;
 		$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$labelName",$ecolors{black});
-		$xpos = 640; $width = 60;
-		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$adcChannel[$adcNum][$ii]",$ecolors{white},$ecolors{blue},"static");
+		if($labelName ne "") {
+			$xpos = 625; $width = 10;
+			$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,$ii,$ecolors{black});
+			$xpos = 640; $width = 60;
+			$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$adcChannel[$adcNum][$ii]",$ecolors{white},$ecolors{blue},"static");
+		}
 		$ypos += 20;
 	}
 
