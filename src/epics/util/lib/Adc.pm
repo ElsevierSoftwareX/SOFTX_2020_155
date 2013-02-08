@@ -172,7 +172,7 @@ sub createAdcMedm
 
 	my $ii=0;
 
-        my $fname = "$mdlName\_MONITOR_ADC$adcNum.adl";
+        my $fname = "$mdlName\_MONITOR_ADC$::adcCardNum[$adcNum].adl";
         # Create MEDM File
         print "creating file $medmDir\/$fname \n";
         open(OUTMEDM, ">$medmDir/$fname") || die "cannot open $medmDir/$fname for writing ";
@@ -186,7 +186,7 @@ sub createAdcMedm
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{blue},"","","");
         # Add Display Name
         $xpos = 300; $ypos = 4; $width = 120; $height = 15;        
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$mdlName\_MONITOR_ADC$adcNum",$ecolors{white});
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$mdlName\_MONITOR_ADC$::adcCardNum[$adcNum]",$ecolors{white});
         # Add time string to banner
         $xpos = 526; $ypos = 4; $width = 200; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_TIME_STRING",$ecolors{white},$ecolors{blue},"static");
