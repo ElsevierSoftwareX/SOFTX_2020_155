@@ -10,7 +10,7 @@ tory of the particular advLigoRTS checkout. Graphical representations of the ind
 arts, as they have no Matlab code associated with them.
 
 \endverbatim
-\image html CDS_PARTS.tiff "CDS Parts Library"
+\image html CDS_PARTS.png "CDS Parts Library"
 \par \b Adding a new part to the library.
 \verbatim
 There are three steps involved in creating a new library part to the RCG:

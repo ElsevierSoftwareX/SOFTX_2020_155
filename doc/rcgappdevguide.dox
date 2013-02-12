@@ -65,7 +65,7 @@ Some overview notes before starting an application development process:
         - \subpage rcgPartsWatchdogs "Watchdog Components"
         - \subpage CcodeUse "User Defined C Code Modules"
         - \subpage DaqChanUse "DAQ Channels"
-\image html CDS_PARTS.tiff "RCG Parts Library"
+\image html CDS_PARTS.png "RCG Parts Library"
 */
 /*! \page rcgPartsIo RCG I/O Parts Library
 The I/O Parts Libary within the CDS_PARTS.mdl contains all of the RCG components which support I/O modules/methods, as shown in the following figure.
@@ -80,7 +80,7 @@ The I/O Parts Libary within the CDS_PARTS.mdl contains all of the RCG components
         - \subpage Contec6464DioUse "Contec DIO-6464L-PE Module"
 
 
-\image html IoParts.tiff "CDS_PARTS I/O Library"
+\image html IoParts.png "CDS_PARTS I/O Library"
 */
 /*! \page rcgPartsEpics RCG EPICS Parts Library
 The EPICS Parts Libary within the CDS_PARTS.mdl contains all of the RCG components which support EPICS, as shown in the following figure.
@@ -98,7 +98,7 @@ The EPICS Parts Libary within the CDS_PARTS.mdl contains all of the RCG componen
         - \subpage EpicsMbboUse "EPICS Multi-bit Binary Output"
         - \subpage EpicsCounterUse "EPICS Counter"
 
-\image html EpicsParts.tiff "CDS_PARTS EPICS Library"
+\image html EpicsParts.png "CDS_PARTS EPICS Library"
 */
 
 /*! \page rcgPartsFilts RCG FILTER Parts Library
@@ -110,7 +110,7 @@ The EPICS Parts Libary within the CDS_PARTS.mdl contains all of the RCG componen
         - \subpage ExcTpUse "GDS EXC/TP"
         - \subpage FiltBiquadUse "Biquad IIR Filter Module"
 
-\image html filterMods.tiff "CDS_PARTS FILTER Library"
+\image html filterMods.png "CDS_PARTS FILTER Library"
 */
 /*! \page rcgPartsSimulink RCG Simulink Parts Library
 The Simulink Parts Libary within the CDS_PARTS.mdl contains all of the standard Matlab parts which are supported by the RCG, as shown in the following figure.
@@ -122,7 +122,7 @@ The Simulink Parts Libary within the CDS_PARTS.mdl contains all of the standard 
         - \subpage GotoFromUse "GOTO/FROM"
 
 
-\image html simParts.tiff "Simulink Library"
+\image html simParts.png "Simulink Library"
 */
 /*! \page rcgPartsMatrix RCG Matrix Parts Library
 
@@ -130,7 +130,7 @@ The Simulink Parts Libary within the CDS_PARTS.mdl contains all of the standard 
         - \subpage FiltMuxMatrixUse "Filter MuxMatrix"
         - \subpage BitWordUse "Bit2Word and Word2Bit"
 
-\image html MatrixParts.tiff "Matrix Library"
+\image html MatrixParts.png "Matrix Library"
 */
 /*! \page rcgPartsOscPhase RCG Oscillator/Phase Shifter Library
 
@@ -140,5 +140,5 @@ The Simulink Parts Libary within the CDS_PARTS.mdl contains all of the standard 
         - \subpage NoiseUse "Noise Generator"
         - \subpage SatCountUse "Saturation Counter"
 
-\image html OscPhase.tiff "OSC/Phase Library"
+\image html OscPhase.png "OSC/Phase Library"
 */

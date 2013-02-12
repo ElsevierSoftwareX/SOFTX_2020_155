@@ -33,7 +33,7 @@ n.pl script itself, with all other parts using the supporting Perl modules.
 	
 An overview of the model parsing and code generation is shown in the following figure. For further details, see \subpage feCodeGen "feCodeGen.pl" \n
 
-\image html Parser.tiff "Model Parsing and Products"
+\image html Parser.png "Model Parsing and Products"
 
 
 <b>EPICS Database / Code Generation</b>

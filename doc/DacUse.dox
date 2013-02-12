@@ -19,8 +19,8 @@ There are 12 DAC parts located in the RCG I/O parts section of CDS_PARTS.mdl in 
 	USER_MODEL: The standard user application model need only contain those DAC parts from which signals will be used eg if only signals from DAC2 are needed, then only DAC2 need be placed in the user model.
 
 \endverbatim
-///	\image html DacPart1.tiff "DAC Subsystems" width=50cm
-///	\image html DacPart2.tiff "DAC Parts" width=50cm
+///	\image html DacPart1.png "DAC Subsystems" width=50cm
+///	\image html DacPart2.png "DAC Parts" width=50cm
 ///	\verbatim
 4. EPICS Channels
 For each DAC, EPICS channels will be auto-generated, of the form IFO:FEC-DCUID_DAC_OUTPUT_CARDNUM_CHANNUM
@@ -29,5 +29,5 @@ For each DAC, EPICS channels will be auto-generated, of the form IFO:FEC-DCUID_D
 5. Auto Generated MEDM Screens
 For each DAC, an MEDM screen is generated which contains the EPICS channels generated above.  The screen name is of the form MODELNAME_DAC_MONITOR_CARD#.adl. This screen is automatically linked to the higher level GDS_TP screen generated for this model.
 \endverbatim
-///	\image html DacMedm.tiff "DAC AutoGen MEDM Screen" width=50cm
+///	\image html DacMedm.png "DAC AutoGen MEDM Screen" width=50cm
 

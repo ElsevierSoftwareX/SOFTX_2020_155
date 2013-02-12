@@ -8,7 +8,7 @@ The purpose of this component is to define necessary run-time parameters and com
 2. Related Documentation
 \endverbatim
 /// 3. General Description and Use within an RCG model.
-///	\image html ParameterPart.tiff "Parameter Part" width=50cm
+///	\image html ParameterPart.png "Parameter Part" width=50cm
 ///	\verbatim
 This module must appear once, and only once, at the top level of an RCG application model, by convention usually in the upper left-hand corner. It contains seven required fields, as shown in the example:
 

@@ -18,7 +18,7 @@ There are 10 ADC parts located in the RCG I/O parts section of CDS_PARTS.mdl, AD
 The output of this block must be tied to one or more ADC Selector blocks to pick out and further connect individual ADC signal channels. As shown in the example, each ADC part actually contains a bus creator, with channels 0 thru 31 predefined. Individual channels are then selected via bus selector for further connection to user code components.
 
 \endverbatim
-///	\image html AdcPart.tiff "ADC example" width=50cm
+///	\image html AdcPart.png "ADC example" width=50cm
 ///	\verbatim
 4. EPICS Channels
 For each ADC, 32 EPICS channels will be auto-generated, of the form IFO:SYS-MADC#_EPICS_CH#
@@ -28,5 +28,5 @@ NOTE: All 32 for an IOP, but only those channels actually used (connected) in a 
 5. Auto Generated MEDM Screens
 For each ADC, an MEDM screen is generated which contains the EPICS channels generated above.  The screen name is of the form MODELNAME_MONITOR_ADC#.adl. This screen is automatically linked to the higher level GDS_TP screen generated for this model.
 \endverbatim
-///	\image html AdcMedm.tiff "ADC AutoGen MEDM Screen" width=50cm
+///	\image html AdcMedm.png "ADC AutoGen MEDM Screen" width=50cm
 

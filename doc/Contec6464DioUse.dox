@@ -21,7 +21,7 @@ Up to 4 Contec6464 modules per I/O chassis are supported by the RCG. As shown in
 
 
 \endverbatim
-///	\image html Contec6464DioPart.tiff "Contec 6464 Part Library" width=50cm
+///	\image html Contec6464DioPart.png "Contec 6464 Part Library" width=50cm
 ///	\verbatim
 4. EPICS Channels - None.
 \endverbatim
