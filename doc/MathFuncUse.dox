@@ -29,4 +29,4 @@ except if the In2 value is equal to zero in which case the output value will be 
 
 
 \endverbatim
-/// \image html MathFunc.tiff "Math Function Example"
+/// \image html MathFunc.png "Math Function Example"

@@ -13,4 +13,4 @@ These modules must be used in pairs, a single named GOTO with a matching FROM.
 These modules must appear on the same level of a model ie a GOTO from one subsystem level may not be connected to a matching FROM at a higher or lower level.
 
 \endverbatim
-/// 	\image html GotoFrom.tiff "GOTO FROM Example"
+/// 	\image html GotoFrom.png "GOTO FROM Example"
