@@ -1,3 +1,15 @@
+============================
+Changes for 2.6.2
+============================
+- Makefile.in fixed to point to framecpp library in /opt/rtapps instead of /usr/local 
+- DAQ reload problem fixed ie reloading same file could result in CRC errors. Fix was in daqLib.c
+- RCG compiler fix. If multi-output part, such as matrix, placed at top level, with inputs to subsystem
+  part, which in turn connected to multiple parts within the subsystem, could result in errant 
+  connections.
+============================
+Changes for 2.6.1
+============================
+- Fix to ramping code ie errant ramps when aborted before completion.
 - Added IPC receiver diagnostics code, as discussed in CDS meeting 12/12/12. 
 - Bug fix for Acces I/O 8 and 16 channel relay I/O cards.
 ===========================
