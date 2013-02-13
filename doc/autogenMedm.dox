@@ -46,11 +46,44 @@ NOTE: Following 7,8 and 9 only pertain to IOP processes. These will not show up 
 <b>I/O Status Section</b>
 \verbatim
 14. Overflow counter and reset:
+
 15. Real-time Network Status and Related Display
+Control information can be passed between RT applications via three mechanisms, each of which has a status bit shown in this section of the screen:
+	1) Shared Memory
+	2) PCIe realtime network.
+	3 and 4) Reflected Memory (RFM) network, one network to each end station. In the case of an IOP, these two bits are set according to the status of the "Own Data" bit read from the RFM card. The IOP sends dummy data out at 1Hz and verifies that it receives its own data as a diagnostic for RFM loop integrety.
+
+The related display is provided to give IPC status information for each data channel being received via one of these IPC mechanisms to further track down the exact cause of the error.
+
 16. Guardian Status:
+
 17. Filter Coefficient Reload:
+An MEDM message button is provided such that, when pushed, it will cause the filter coefficient file to be reloaded. Status information is provided below this button, which displays either:
+	1) Time of last reload (shown in example figure above).
+	2) Message indicating that the coefficient file has been changed and does not match what is presently loaded into the realtime code. 
+	3) At reload time, provides status of the reload process.
+
 18. ADC Status and Related Display:
+	A related display pushbutton and status information is provided for each ADC module defined in a model. 
+	For an IOP, three status bits are shown:
+	- Bit 0: ADC found and initialized.
+	- Bit 1: ADC timing is correct.
+	- Bit 2: ADC overflow ie input signal is beyond the input range of the ADC.
+For a slave (user app) process, only two status bits are provided:
+	- Bit 0: Communications established with IOP to receive ADC data.
+	- Bit 1: ADC overflow indicator.
+
 19. DAC Status and Related Display:
+	For an IOP, a related display button and status indicators will be provided for each DAC module installed in the I/O chassis and defined in the IOP model. The number of status bits is dependent on the DAC type, ie 16bit or 18 bit. The status bits are defined as:
+	- Bit 0: DAC is present and was mapped and initialized by the IOP code.
+	- Bit 1: A slave (user app) model is writing to the DAC, is in sync with IOP. This bit may also indicate bad (Red) if DACKILL part in user model is tripped.
+	- Bit 2: Overflow indicator. If code is trying to write value beyond the limits of the DAC, this indicator will go red.
+	- Bit 3: DAC FIFO empty/full: If DAC clocking is correct and synched to IOP, this indicator is green (OK). If the DAC FIFO becomes empty or full, indicator will be red (error). More info can be found on the computer on which the IOP is running by checking its /proc/<iopmodelname> file.
+	- Bit 4: (18 bit DAC only) Digital I/O built into these modules is used to reset a watchdog bit (at 1Hz) rate in the suspension control AI chassis. The WD setting is then read back and indicated in this bit (green=ok, red=fault). 
+
+	For a slave (user app) model, related display and status indicators only appear for those DAC modules defined in the model. There are also only 2 status bits for each DAC:
+	- Bit 0: Communication of DAC data established with IOP.
+	- Bit 1: Overflow indicator, same definition as Bit 2 for an IOP above.
 \endverbatim
 
 <b>DAQ Status Section</b>
