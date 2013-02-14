@@ -49,9 +49,6 @@ struct daqMXdata {
 
 static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
 
-// MX endpoint
-mx_endpoint_t ep[256];
-
 
 void
 receiver_mx(int neid)
@@ -66,13 +63,18 @@ receiver_mx(int neid)
 	//float *testData;
 	uint32_t match_val=MATCH_VAL_MAIN;
 	mx_request_t req[NUM_RREQ];
+	mx_endpoint_t ep[256];
+
 
 	const struct sched_param param = { 10 };
    	//seteuid (0);
    	pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
    	//seteuid (getuid ());
 
-        mx_return_t ret = mx_open_endpoint(MX_ANY_NIC, neid, FILTER, NULL, 0, &ep[neid]);
+	unsigned int board_num = neid >> 8;
+	neid &= 0xff;
+
+        mx_return_t ret = mx_open_endpoint(board_num, neid, FILTER, NULL, 0, &ep[neid]);
         if (ret != MX_SUCCESS) {
 	                fprintf(stderr, "Failed to open endpoint %s\n", mx_strerror(ret));
 	                exit(1);
@@ -240,9 +242,10 @@ open_mx(void)
 	mx_return_t ret;
 	int fd;
 	static uint32_t max_endpoints = 0;
+	static uint32_t nics_available = 0;
 	
 
-	if (mx_ep_opened) return max_endpoints;
+	if (mx_ep_opened) return max_endpoints | (nics_available << 8);
 
         printf("%ld\n", sizeof(struct daqMXdata));
 
@@ -280,8 +283,15 @@ open_mx(void)
 		exit(1);
 	}
 	fprintf(stderr, "MX has %d maximum end-points configured\n", max_endpoints);
+	ret = mx_get_info(0, MX_NIC_COUNT, 0, 0, &nics_available, sizeof(nics_available));
+	if (ret != MX_SUCCESS) {
+		fprintf(stderr, "Failed to do mx_get_info: %s\n", mx_strerror(ret));
+		exit(1);
+	}
+	fprintf(stderr, "%d MX NICs available\n", nics_available);
+
 	mx_ep_opened = 1;
-	return max_endpoints;
+	return max_endpoints | (nics_available << 8);
 }
 
 void close_mx() {
