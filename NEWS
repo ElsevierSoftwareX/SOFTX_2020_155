@@ -6,6 +6,8 @@ Changes for 2.6.2
 - RCG compiler fix. If multi-output part, such as matrix, placed at top level, with inputs to subsystem
   part, which in turn connected to multiple parts within the subsystem, could result in errant 
   connections.
+- Bug fix for ADC/DAC overflow detection. Code would not detect overflow errors on positive rail side as
+  alarm limit was set to 32768, but max reading from ADC on positive rail is limited to 32767.
 ============================
 Changes for 2.6.1
 ============================
