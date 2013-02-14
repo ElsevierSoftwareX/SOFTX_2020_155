@@ -67,8 +67,8 @@ typedef struct CDS_REMOTE_NODES {
 #define IO_MEMORY_SLOTS		64
 #define IO_MEMORY_SLOT_VALS	32
 #define MAX_IO_MODULES		24
-#define OVERFLOW_LIMIT_16BIT	32767
-#define OVERFLOW_LIMIT_18BIT	131070
+#define OVERFLOW_LIMIT_16BIT	32760
+#define OVERFLOW_LIMIT_18BIT	131060
 #define OVERFLOW_CNTR_LIMIT	0x1000000
 #define MAX_ADC_WAIT		1000000		// Max time (usec) to wait for ADC data transfer in iop app
 #define MAX_ADC_WAIT_SLAVE	1000		// Max time (usec) to wait for ADC data transfer in slave app
