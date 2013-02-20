@@ -1172,7 +1172,7 @@ udelay(1000);
 		    {
   			 adcChanErr[jj] = 1;
 			 chanHop = 1;
-	  	 	 pLocalEpics->epicsOutput.stateWord |= FE_ERROR_CHAN_HOP;
+	  	 	 pLocalEpics->epicsOutput.stateWord |= FE_ERROR_ADC;
 	 	    }	
 
                     limit = OVERFLOW_LIMIT_16BIT;
@@ -1864,15 +1864,15 @@ udelay(1000);
 
         if(cycleNum == HKP_ADC_DAC_STAT_UPDATES)
         {
-	  if(cardCountErr) feStatus |= FE_ERROR_IO;
-		pLocalEpics->epicsOutput.ovAccum = overflowAcc;
+	  // Pass overflow total count to EPICS
+	  pLocalEpics->epicsOutput.ovAccum = overflowAcc;
 	  for(jj=0;jj<cdsPciModules.adcCount;jj++)
 	  {
 	    // SET/CLR Channel Hopping Error
 	    if(adcChanErr[jj]) 
 	    {
 	    	pLocalEpics->epicsOutput.statAdc[jj] &= ~(2);
-		feStatus |= FE_ERROR_IO;;
+		feStatus |= FE_ERROR_ADC;;
 	    }
  	    else pLocalEpics->epicsOutput.statAdc[jj] |= 2;
 	    adcChanErr[jj] = 0;
@@ -1920,7 +1920,6 @@ udelay(1000);
 	    if(dacChanErr[jj]) 
 	    {
 	    	pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_TIMING_BIT);
-		feStatus |= FE_ERROR_IO;;
 	    }
  	    else pLocalEpics->epicsOutput.statDac[jj] |= DAC_TIMING_BIT;
 	    dacChanErr[jj] = 0;
@@ -1996,7 +1995,6 @@ udelay(1000);
 			if(((dacWDread >> 8) & 1) > 0)
 			    {
 			    	pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_WD_BIT);
-			    	feStatus |= FE_ERROR_IO;
 			    }
 			    else 
 			    	pLocalEpics->epicsOutput.statDac[jj] |= DAC_WD_BIT;
@@ -2027,7 +2025,7 @@ udelay(1000);
 			if((out_buf_size < 8) || (out_buf_size > 24))
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
-			    feStatus |= FE_ERROR_IO;
+			    feStatus |= FE_ERROR_DAC;
 			} else pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
 
 		}
@@ -2038,7 +2036,7 @@ udelay(1000);
 			if(status != 2)
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
-			    feStatus |= FE_ERROR_IO;
+			    feStatus |= FE_ERROR_DAC;
 			} else pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
 		}
 	}
