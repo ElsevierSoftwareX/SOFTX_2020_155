@@ -10,14 +10,17 @@
 #define FE_DIAGS_DAC_MASTER_STAT	8
 #define FE_DIAGS_AWGTPMAN	9
 #define FE_DIAGS_DAC_DUO	10	
-#define FE_ERROR_TIMING		0x2
-#define FE_ERROR_IO		0x4
-#define FE_ERROR_AWG		0x8
-#define FE_ERROR_DAQ		0x10
-#define FE_ERROR_IPC		0x20
-#define FE_ERROR_OVERFLOW	0x40
-#define FE_ERROR_DAC_ENABLE	0x80
-#define FE_ERROR_CHAN_HOP	0x100
+
+// Bit definitions for STATE_WORD
+#define FE_ERROR_TIMING         0x2     // bit 1
+#define FE_ERROR_ADC            0x4     // bit 2
+#define FE_ERROR_DAC            0x8     // bit 3
+#define FE_ERROR_DAQ            0x10    // bit 4
+#define FE_ERROR_IPC            0x20    // bit 5
+#define FE_ERROR_AWG            0x40    // bit 6
+#define FE_ERROR_DAC_ENABLE     0x80    // bit 7
+#define FE_ERROR_EXC_SET        0x100   // bit 8
+#define FE_ERROR_OVERFLOW       0x200   // bit 9
 
 
 #define CPURATE (cpu_khz/1000)
