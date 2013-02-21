@@ -644,7 +644,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
         dipc->bp[daqBlockNum].timeNSec = (unsigned int)daqBlockNum;
 
         // Assign the test points table
-        tpPtr->count = validTpNet;
+        tpPtr->count = validTpNet | validEx;
         memcpy(tpPtr->tpNum, tpNumNet, sizeof(tpNumNet[0]) * validTp);
 
         // As the last step set the cycle counter
