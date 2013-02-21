@@ -11,10 +11,7 @@
 #define FE_DIAGS_AWGTPMAN	9
 #define FE_DIAGS_DAC_DUO	10	
 
-#define FE_ERROR_OVERFLOW	0x40	// bit 6
-#define FE_ERROR_DAC_ENABLE	0x80	// bit 7
-#define FE_ERROR_CHAN_HOP	0x100	// bit 8
-
+// The following bits define the EPICS STATE_WORD
 #define FE_ERROR_TIMING		0x2	// bit 1
 #define FE_ERROR_ADC		0x4	// bit 2
 #define FE_ERROR_DAC		0x8	// bit 3
@@ -156,6 +153,8 @@
 #define MIN_IRIGB_SKEW		5
 #define DT_SAMPLE_OFFSET	6
 #define DT_SAMPLE_CNT		12
+#define MAX_DT_DIAG_VAL		6
+#define MIN_DT_DIAG_VAL		5
 
 // HOUSEKEEPING CYCLE DEFS
 // 1Hz Jobs triggered by cycleNum count in controller code
