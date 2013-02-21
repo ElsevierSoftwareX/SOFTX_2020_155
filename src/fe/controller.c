@@ -58,6 +58,7 @@ int printk(const char *fmt, ...) {
 #include "fm10Gen.h"		// CDS filter module defs and C code
 #include "feComms.h"		// Lvea control RFM network defs.
 #include "daqmap.h"		// DAQ network layout
+#include "controller.h"
 
 #ifndef NO_DAQ
 #include "drv/fb.h"
@@ -67,7 +68,6 @@ int printk(const char *fmt, ...) {
 #include "drv/map.h"		// PCI hardware defs
 #include "drv/epicsXfer.c"	// User defined EPICS to/from FE data transfer function
 #include "timing.c"		// timing module / IRIG-B  functions
-#include "controller.h"
 
 #include "drv/inputFilterModule.h"		
 #include "drv/inputFilterModule1.h"		
@@ -905,9 +905,11 @@ udelay(1000);
 		    // Either the clock is missing or code is running too slow and ADC FIFO
 		    // is overflowing.
 		    if (adcWait >= MAX_ADC_WAIT) {
+	  		pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
+	  		pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
+			pLocalEpics->epicsOutput.epicsSync = (daqCycle + 1) % 16;
                         stop_working_threads = 1;
 			vmeDone = 1;
-	  		pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
                         printf("timeout %d %d \n",jj,adcWait);
 			continue;
 		    }
@@ -1318,7 +1320,11 @@ udelay(1000);
 			gps_receiver_locked = getGpsTime(&timeSec,&usec);
 			pLocalEpics->epicsOutput.diags[FE_DIAGS_IRIGB_TIME] = usec;
 		}
-		if((usec > MAX_IRIGB_SKEW) || (usec < MIN_IRIGB_SKEW)) diagWord |= TIME_ERR_IRIGB;;
+		if((usec > MAX_IRIGB_SKEW) || (usec < MIN_IRIGB_SKEW)) 
+		{
+			diagWord |= TIME_ERR_IRIGB;;
+			feStatus |= FE_ERROR_TIMING;;
+		}
                 duotoneMean = duotoneTotal/CYCLE_PER_SECOND;
                 duotoneTotal = 0.0;
                 duotoneMeanDac = duotoneTotalDac/CYCLE_PER_SECOND;
@@ -1331,7 +1337,11 @@ udelay(1000);
 	        {
 	                gps_receiver_locked = getGpsuSecTsync(&usec);
 	                pLocalEpics->epicsOutput.diags[FE_DIAGS_IRIGB_TIME] = usec;
-	                if((usec > MAX_IRIGB_SKEW) || (usec < MIN_IRIGB_SKEW)) diagWord |= TIME_ERR_IRIGB;;
+	                if((usec > MAX_IRIGB_SKEW) || (usec < MIN_IRIGB_SKEW)) 
+			{
+				feStatus |= FE_ERROR_TIMING;;
+				diagWord |= TIME_ERR_IRIGB;;
+			}
 	        }
         }
 
@@ -1344,6 +1354,7 @@ udelay(1000);
         {
                 duotoneTime = duotime(DT_SAMPLE_CNT, duotoneMean, duotone);
                 pLocalEpics->epicsOutput.diags[FE_DIAGS_DUOTONE_TIME] = duotoneTime;
+		if((duotoneTime < MIN_DT_DIAG_VAL) || (duotoneTime > MAX_DT_DIAG_VAL)) feStatus |= FE_ERROR_TIMING;
 		duotoneTimeDac = duotime(DT_SAMPLE_CNT, duotoneMeanDac, duotoneDac);
                 pLocalEpics->epicsOutput.diags[FE_DIAGS_DAC_DUO] = duotoneTimeDac;
         }
@@ -1562,7 +1573,8 @@ udelay(1000);
 			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc);
 		// Send the current DAQ block size to the awgtpman for TP number checking
 	  	pEpicsComms->padSpace.feDaqBlockSize = curDaqBlockSize;
-	  	pLocalEpics->epicsOutput.tpCnt = tpPtr->count;
+	  	pLocalEpics->epicsOutput.tpCnt = tpPtr->count & 0xff;
+		feStatus |= (FE_ERROR_EXC_SET & tpPtr->count);
 		if(pLocalEpics->epicsOutput.diags[FE_DIAGS_DAQ_BYTE_CNT] > DAQ_DCU_RATE_WARNING) 
 			feStatus |= FE_ERROR_DAQ;;
 #endif
@@ -1662,6 +1674,8 @@ udelay(1000);
 	  // If ADC channels not where they should be, we have no option but to exit
 	  // from the RT code ie loops would be working with wrong input data.
 	  if (chanHop) {
+	  	pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
+		pLocalEpics->epicsOutput.epicsSync = (daqCycle + 1) % 16;
 	         stop_working_threads = 1;
 	         vmeDone = 1;
 	         printf("Channel Hopping Detected on one or more ADC modules !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
