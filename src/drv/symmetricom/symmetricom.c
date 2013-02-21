@@ -104,8 +104,7 @@ static int symmetricom_ioctl(struct inode *inode, struct file *filp, unsigned in
   			junk = timeRead->SUPER_SEC_LOW;
         		timeSec = timeRead->BCD_SEC;
         		timeNsec = timeRead->SUB_SEC;
-        		timeSec += 31190400 + 315964815;
-        		timeSec += 31536000;
+/* K. Thorne 2013-02-21 - removed time offsets as SpectraCom driver updated to get year info */
         		sync = ((timeNsec >> 31) & 0x1) + 1;
 			timeNsec &= 0xfffffff;
 			timeNsec *= 5;
@@ -209,6 +208,9 @@ if (!card_present) {
   unsigned int days,hours,min,sec,msec,usec,nanosec,tsync;
   unsigned char *addr1;
   TSYNC_REGISTER *myTime;
+/* K. Thorne 2013-02-21 - add variables to set card to read YEAR info */
+  void *TSYNC_FIFO;	// Pointer to board uP FIFO
+  int gpsOffset;
 
   pedStatus = pci_enable_device(symdev);
   pci_read_config_dword(symdev, PCI_BASE_ADDRESS_0, &pci_io_addr);
@@ -218,10 +220,48 @@ if (!card_present) {
   addr1 = (unsigned char *)ioremap_nocache((unsigned long)pci_io_addr, 0x30);
   gps = addr1;
   printk("Remapped 0x%p\n", addr1);
+/* K. Thorne 2013-02-21 - ported from src/include/drv/spectracomGPS.c 
+                         Needs to become calls to these new routines */
+// Spectracom IRIG-B Card does not auto detect Year information from IRIG-B fanout unit
+// This section writes to the module uP CodeExp register to correct this.
+// Delays are required between code lines, as writing to FIFO is slow.
+// Sequence was determined by looking at manufacturer driver code.
+  TSYNC_FIFO = (void *)(addr1 + 384);
+  iowrite16(0x101,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x1000,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x72a,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x280,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x0,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x800,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x0,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x0,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x0,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0x400,TSYNC_FIFO);
+  udelay(1000);
+  iowrite16(0xd100,TSYNC_FIFO);
+  udelay(10000);
+  udelay(10000);
+  udelay(10000);
+// End Code exp setup
+// Need following delay to allow module to change time codes
+for(ii=0;ii<500;ii++) udelay(10000);
+/* K. Thorne 2013-02-21 - END */
 
   myTime = (TSYNC_REGISTER *)addr1;
 for(ii=0;ii<2;ii++)
 {
+/* K. Thorne 2013-02-21 - ported from src/include/drv/spectracomGPS.c */
+  udelay(10000);
+/* K. Thorne 2013-02-21 - END */
   i = myTime->SUPER_SEC_LOW;
   sec = (i&0xf) + ((i>>4)&0xf) * 10;
   min = ((i>>8)&0xf) + ((i>>12)&0xf)*10;
@@ -237,7 +277,17 @@ for(ii=0;ii<2;ii++)
   tsync = (i>>31) & 1;
 
   i = myTime->BCD_SEC;
-  sec = i - 315964819;
+/* K. Thorne 2013-02-21 - ported from src/include/drv/spectracomGPS.c */
+  if(i < 1000000000) 
+  {
+  	printk("TSYNC NOT receiving YEAR info, defaulting to by year patch\n");
+	gpsOffset = 31190400 + 31536000;
+  } else {
+  	printk("TSYNC receiving YEAR info\n");
+	gpsOffset = -315964800;
+  }
+  sec = i + gpsOffset;
+/* K. Thorne 2013-02-21 - END */
   i = myTime->BCD_SUB_SEC;
   printk("date = %d days %2d:%2d:%2d\n",days,hours,min,sec);
   usec = (i&0xf) + ((i>>4)&0xf) *10 + ((i>>8)&0xf) * 100;
