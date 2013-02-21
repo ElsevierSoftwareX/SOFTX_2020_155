@@ -87,7 +87,7 @@ static volatile GDS_CNTRL_BLOCK *gdsPtr;  /* Ptr to GDS table in shmem.	*/
 static volatile char *exciteDataPtr;	  /* Ptr to EXC data in shmem.	*/
 static int validTp = 0;		/* Number of valid GDS sigs selected.	*/
 static int validTpNet = 0;		/* Number of valid GDS sigs selected.	*/
-//static int validEx;		/* Local chan number of 1st EXC signal.	*/
+static int validEx;		/* EXC signal set status indicator.	*/
 static int tpNum[DAQ_GDS_MAX_TP_ALLOWED]; 	/* TP/EXC selects to send to FB.	*/
 static int tpNumNet[DAQ_GDS_MAX_TP_ALLOWED]; 	/* TP/EXC selects to send to FB.	*/
 static int totalChans;		/* DAQ + TP + EXC chans selected.	*/
@@ -590,6 +590,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
   // Read in any selected EXC signals.
   excSlot = (excSlot + 1) % sysRate;
   //if(validEx)
+  validEx = 0;
   {
 	// Go through all test points
   	for(ii=dataInfo.numChans;ii<totalChans;ii++)
@@ -601,6 +602,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		statusPtr = (int *)(exciteDataPtr + excBlockNum * DAQ_DCU_BLOCK_SIZE + exChanOffset);
 		if(*statusPtr == 0)
 		{
+			validEx = FE_ERROR_EXC_SET;
 			dataPtr = (float *)(exciteDataPtr + excBlockNum * DAQ_DCU_BLOCK_SIZE + exChanOffset +
 					    excSlot * 4 + 4);
 			if(localTable[ii].type == DAQ_SRC_FM_EXC)
