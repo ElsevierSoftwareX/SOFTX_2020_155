@@ -907,7 +907,6 @@ udelay(1000);
 		    if (adcWait >= MAX_ADC_WAIT) {
 	  		pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
 	  		pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
-			pLocalEpics->epicsOutput.epicsSync = (daqCycle + 1) % 16;
                         stop_working_threads = 1;
 			vmeDone = 1;
                         printf("timeout %d %d \n",jj,adcWait);
@@ -1085,6 +1084,7 @@ udelay(1000);
                         if(adcWait >= MAX_ADC_WAIT_SLAVE)
                         {
                                 printf ("ADC TIMEOUT %d %d %d %d\n",mm,ioMemData->iodata[mm][ioMemCntr].cycle, ioMemCntr,ioClock);
+	  			pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
 	  			pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
 				deallocate_dac_channels();
   				return (void *)-1;
@@ -1675,7 +1675,6 @@ udelay(1000);
 	  // from the RT code ie loops would be working with wrong input data.
 	  if (chanHop) {
 	  	pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
-		pLocalEpics->epicsOutput.epicsSync = (daqCycle + 1) % 16;
 	         stop_working_threads = 1;
 	         vmeDone = 1;
 	         printf("Channel Hopping Detected on one or more ADC modules !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
