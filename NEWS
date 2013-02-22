@@ -8,6 +8,23 @@ Changes for 2.6.2
   connections.
 - Bug fix for ADC/DAC overflow detection. Code would not detect overflow errors on positive rail side as
   alarm limit was set to 32768, but max reading from ADC on positive rail is limited to 32767.
+- Redefinition and additons to EPICS STATE_WORD:
+	- Bit 0: FE Code running (no change)
+	- Bit 1: Timing error (no change to bit location; more items may cause this error. All errors:
+		- IRIG-B time offset from second mark greater/less than limits.
+		- ADC duotone time offset from second mark greater/less than limits.
+		- Time between code cycles (new adc data rdy) greater/less than limits.
+		- Code execution time greater than alloted time.
+	- Bit 2: ADC (changed for I/O) error. In either of the following cases, realtime code will exit.
+		- Data no longer arriving on time from one or more ADC modules.
+		- ADC channel hopping detected.
+	- Bit 3: DAC module timing error.
+	- Bit 4: DAQ error (no change).
+	- Bit 5: IPC error: (no change).
+	- Bit 6: AWG no running error.
+	- Bit 7: DAC Kill error.
+	- Bit 8: EXC - one, or more, EXC signals are selected and active ie awg is producing injections.
+	- Bit 9: Overflow. One, or more, ADC or DAC channels are being driven beyond their range.
 ============================
 Changes for 2.6.1
 ============================
