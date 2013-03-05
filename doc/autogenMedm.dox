@@ -1,80 +1,141 @@
 /*! \page autoMedm Auto-generated MEDM Screens
-As part of the build process, the RCG generates a number of EPICS MEDM screens. These are described in the following subsections,
-or reference links are provided to other documentation. \n\n
-<b>GDS_TP Screens</b> \n
-\verbatim
+As part of the build process, the RCG generates a number of EPICS MEDM screens.
+	- \ref gdsTpScreen "GDS TP Screen"
+	- \ref adcUse5 "ADC Input Monitor Display"
+	- \ref dacUse5 "DAC Output Monitor Display"
+	- \ref ipcUse5 "Real-time Network Status Display"
+
+\section gdsTpScreen GDS_TP Screens
+\section gtp1 Overview
 A single GDS_TP screen is generated for each code model. This screen provides diagnostic information to the user as to the state of
 the real-time and EPICS code at runtime.
 
 Shown is an example GDS_TP screen, further exploded into the 3 primary sections, with information on each field listed below.
-\endverbatim
-\image html gdsTpMedm1.png "IOP GDSTP Screen"
-\verbatim
 
-\endverbatim
+\image html gdsTpMedm1.png "IOP GDSTP Screen"
+
 \image html gdsTpMedm5.png "IOP GDSTP Screen - Exploded"
-<b>Timing Status Section</b>
-\verbatim
-1. ADC Timeout Indicator: 
+\section gtp2 Timing Status Section
+<b> 1. ADC timeout Indicator: </b>
 	- Normal Indication: GREEN, all ADC modules are clocking on time.
 	- Fault Indication: RED, one, or more ADC modules are not clocking on time and real-time code will exit.
-2. CPU Meter: Updated once/second, this indicates the time of the longest code cycle in that period of time. The banner is set to the
+	
+<b> 2. CPU Meter:</b> Updated once/second, this indicates the time of the longest code cycle in that period of time. The banner is set to the
 		maximum amount of time allotted for a code cycle, given the user set sample rate.
-3. GPS Time: The present GPS Time, in GPS seconds, as presently set in the real-time code.
-4. Sync Source: The source of synchonization for the real-time code.
+	
+<b> 3. GPS time:</b> The present GPS time, in GPS seconds, as presently set in the real-time code.
+	
+<b> 4. Sync Source:</b> The source of synchonization for the real-time code.
 	- Normal Indication:
 		- IOP process: TDS (Timing Distribution System) or 1PPS. Note for aLIGO systems, this should always be TDS.
 		- User App (Slave) process: IOP, indicating code is being synchronized by the IOP process on that computer.
 	- Fault Indication: NO SYNC, indicating that the code is free-running on internal computer time.
-5. Cycle Time: Time, in usec, between code cycle triggers. This value switches once per second between:
+	
+<b> 5. Cycle time:</b> time, in usec, between code cycle triggers. This value switches once per second between:
 	- Average time
 	- Maximum time
 	- Minimum time
-6. CPU Max Time: Same as CPU meter (2 above)
+	
+<b> 6. CPU Max time:</b> Same as CPU meter (2 above)
 
+	
 NOTE: Following 7,8 and 9 only pertain to IOP processes. These will not show up on user app screens.
-7. Duotone Time ADC: 
-8. IRIG-B Time Offset:
-9: Duotone Time DAC:
+	
+<b> 7. Duotone time ADC:</b> The IOP code will perform a zero crossing calculation of the ADC duotone signal at the 1 second mark. Offset from \n
+the 1 second mark is displayed in microseconds.
+	- Normal Indication: 5.
+	- Fault Indication: <5 or >6: If ADC has received too many or too few clocks within a 1 second period, this time will change \n
+by +/- 15usec. If a considerable number of ADC clocks are errant, this diagnostic will become out of range, and following IRIG-B time \n
+diagnostic would provide further information of how bad timing has become.
+	
+<b> 8. IRIG-B time Offset:</b> At each 1 second mark, the time in the IRIG-B receiver card is captured. The microseconds time offset from a one \n
+second mark is shown on the screen.
+	- Normal Indication: 13 +/- 2.
+	- Abnormal Indication: Outside normal range, indicates number of microseconds code timing is off. 
+	
+<b> 9: Duotone time DAC:</b> If switched on, the ADC duotone signal is wrapped around via a DAC and ADC channel, and time offset from one second \n
+mark calculated, same as for 7 above. Normal indications are based on DAC type and code speed:
+	- 18bit DAC
+		- 32K Model: 122
+		- 16K Model: 198
+		- 4K Model:  488
+		- 2K Model:  610
+	- 16bit DAC
+		- 32K Model: 122
+		- 16K Model: 198
+		- 4K Model:  503
+		- 2K Model:  625
+	
 
-10. CPU Max Time since last Diag Reset:
-11. User code time:
-12. Diagnostic Reset:
-13. BURT Status:
+<b> 10. CPU Max time since last Diag Reset:</b>
+	
+This field holds the maximum value of 6 above since time of last Diag Reset.
+	
+<b> 11. User code time: </b> Maximum amount of time, in usec, that it took to process one cycle of the user application during a 1 second period. \n
+This differs from 6 above, as it only includes the processing time of the code generated from the user model, not I/O time, DAQ time, etc.
+	
+<b> 12. Diagnostic Reset: </b>
+	
+Resets various diagnostic values which are typically latched at a fault or max value:
+	- IPC errors
+	- CPU Max (10 above)
+	
+<b> 13. BURT Status:</b>
+	
+
+\verbatim
+
+
 \endverbatim
 
-<b>I/O Status Section</b>
-\verbatim
-14. Overflow counter and reset:
-
-15. Real-time Network Status and Related Display
+\section gtp3 I/O Status Section
+<b> 14. Overflow counter and reset:</b>
+	
+The data field provides a running total of the number of ADC/DAC overflows detected.\n
+The button labelled "OVERFLOWS" resets this counter.
+	
+<b> 15. Real-time Network Status and Related Display</b>
+	
 Control information can be passed between RT applications via three mechanisms, each of which has a status bit shown in this section of the screen:
-	1) Shared Memory
-	2) PCIe realtime network.
-	3 and 4) Reflected Memory (RFM) network, one network to each end station. In the case of an IOP, these two bits are set according to the status of the "Own Data" bit read from the RFM card. The IOP sends dummy data out at 1Hz and verifies that it receives its own data as a diagnostic for RFM loop integrety.
+	- Bit 0: Shared Memory
+	- Bit 1: PCIe realtime network.
+	- Bit 3 and 4: Reflected Memory (RFM) network, one network to each end station. In the case of an IOP, these two bits are set according to the status of the "Own Data" bit read from the RFM card. The IOP sends dummy data out at 1Hz and verifies that it receives its own data as a diagnostic for RFM loop integrety.
 
-The related display is provided to give IPC status information for each data channel being received via one of these IPC mechanisms to further track down the exact cause of the error.
+An \ref ipcUse5 "IPC related display" is provided to give IPC status information for each data channel being received via one of these IPC mechanisms to further track down the exact cause of the error. 
 
-16. Guardian Status:
+	
+<b> 16. Guardian Status:</b>
+	
+In support of Guardian scripts, this screen provides:
+	- Related display link to screen which shows signals, by name, which are outside of the alarm limit tolerances.
+	- Setpoint errors: Total number of operator setpoints which are outside limits set by Guardian.
+	- Readback errors: Total number of readbacks from system which are outside limits set by Guardian.
 
-17. Filter Coefficient Reload:
+	
+<b> 17. Filter Coefficient Reload:</b>
+	
 An MEDM message button is provided such that, when pushed, it will cause the filter coefficient file to be reloaded. Status information is provided below this button, which displays either:
-	1) Time of last reload (shown in example figure above).
-	2) Message indicating that the coefficient file has been changed and does not match what is presently loaded into the realtime code. 
-	3) At reload time, provides status of the reload process.
+	- time of last reload (shown in example figure above).
+	- Message indicating that the coefficient file has been changed and does not match what is presently loaded into the realtime code. 
+	- At reload time, provides status of the reload process.
 
-18. ADC Status and Related Display:
-	A related display pushbutton and status information is provided for each ADC module defined in a model. 
-	For an IOP, three status bits are shown:
+	
+<b> 18. ADC Status and Related Display:</b>
+	A \ref adcUse5 "related display" pushbutton and status information is provided for each ADC module defined in a model. 
+	
+For an IOP, three status bits are shown:
 	- Bit 0: ADC found and initialized.
 	- Bit 1: ADC timing is correct.
 	- Bit 2: ADC overflow ie input signal is beyond the input range of the ADC.
+	
 For a slave (user app) process, only two status bits are provided:
 	- Bit 0: Communications established with IOP to receive ADC data.
 	- Bit 1: ADC overflow indicator.
 
-19. DAC Status and Related Display:
-	For an IOP, a related display button and status indicators will be provided for each DAC module installed in the I/O chassis and defined in the IOP model. The number of status bits is dependent on the DAC type, ie 16bit or 18 bit. The status bits are defined as:
+	
+<b> 19. DAC Status and Related Display:</b>
+	
+For an IOP, a \ref dacUse5 "related display" button and status indicators will be provided for each DAC module installed in the I/O chassis and defined in the IOP model. The number of status bits is dependent on the DAC type, ie 16bit or 18 bit. The status bits are defined as:
 	- Bit 0: DAC is present and was mapped and initialized by the IOP code.
 	- Bit 1: A slave (user app) model is writing to the DAC, is in sync with IOP. This bit may also indicate bad (Red) if DACKILL part in user model is tripped.
 	- Bit 2: Overflow indicator. If code is trying to write value beyond the limits of the DAC, this indicator will go red.
@@ -84,29 +145,65 @@ For a slave (user app) process, only two status bits are provided:
 	For a slave (user app) model, related display and status indicators only appear for those DAC modules defined in the model. There are also only 2 status bits for each DAC:
 	- Bit 0: Communication of DAC data established with IOP.
 	- Bit 1: Overflow indicator, same definition as Bit 2 for an IOP above.
-\endverbatim
 
-<b>DAQ Status Section</b>
+	
 \verbatim
-DAQ Status Section
-20. DAQ Status:
-21. DAQ CRC errors/sec:
-22. DAQ total CRC errors:
-23. DCUID Number:
-24. DAQ Network Status:
-25. DAQ - Number of DAQ channels.
-26. DAQ - DAQ Data rate
-27. DAQ - Total DAQ rate:
-28. DAQ channel configuration reload:
-29. Number of TP selected:
-30. Individual TP selection numbers:
-31. Arbitrary Waveform Generator (AWG) Status:
-\endverbatim
 
-- \subpage AdcUse "ADC Input Monitor Display"
-- \subpage DacUse "DAC Output Monitor Display"
-- \subpage IPCxUse "Real-time Network Status Display"
-\verbatim
+
 \endverbatim
+\section gtp4 DAQ Status Section 
+	
+<b> 20. DAQ Status:</b> This number comes from the DAQ system data concentrator. Normal indication is 0x0, indicating no errors.
+	
+Fault indications are:
+	- 0x1000: CRC errors detected in the data reception.
+	- 0x2bad: Data not being recieved.
+	- 0x2000: Configuration error. There is a DAQ configuration mismatch between the real-time code and the DAQ system. 
+	This is usually remedied by a DAQ system restart or a DAQ reload on the real-time computer.
+	
+<b> 21. DAQ CRC errors/sec:</b> Number of CRC errors detected in data reception by the DAQ system per second.
+	
+<b> 22. DAQ total CRC errors:</b> Total number of CRC errors detected by DAQ system since last CRC reset on DAQ system.
+	
+<b> 23. DCUID Number:</b> Data Collection Unit (DCU) identification number: Within a control system, each model must have a unique DCUID \n
+number, which is displayed here.
+	
+<b> 24. DAQ Network Status:</b>
+	
+Two part byte indicator:
+	- Bit 0: Real-time computer network transmission code is running. 
+	- Bit 1: DAQ system connection made.
+	
+If there is a fault at the DAQ end and real-time computer fails to make connections, these bits will be RED, with bit 0 flashing GREEN \n
+periodically. This is because DAQ network code on real-time computer will continue to start/stop until connection is made.
+	
+<b> 25. DAQ - Number of DAQ channels.</b> Number of channels constantly being sent by code to DAQ.
+	
+<b> 26. DAQ - DAQ Data rate</b> Rate, in KByte/sec, for DAQ data.
+	
+<b> 27. DAQ - Total DAQ rate:</b> Total data rate to DAQ system, including all selected test points. The maximum allowed rate is 4MByte/sec.
+	
+<b> 28. DAQ channel configuration reload:</b>
+	
+Normally, the channels to be acquired by the DAQ, and their acquisition rate, is defined in the user model and a <MODELNAME>.ini DAQ \n
+configuration file created. This configuration is this loaded on code start. However, the configuration file can be hand/computer edited \n
+at any time. In this case, the configuration must be reloaded in runtime by pressing the DAQ Reload button, followed by a reset of the \n
+DAQ system. 
+	
+DAQ Configuration status information is given in the EPICS field below the reload button. Values may be:
+	- Date and time of last read of DAQ configuration file.
+	- "Modified DAQ file detected", indicating configuration file has been modified since last read and does not match presently \n 
+loaded configuration.
+	- "Reading DAQ .ini ...", indicating file is being read and configuration being reloaded.
+	
+<b> 29. Number of TP selected:</b> Total number of GDS EXC + TP channels presently selected.
+	
+<b> 30. Individual TP selection numbers:</b> Each TP/EXC channel has a unique, to the application, number associated with it. When selected, \n
+these numbers show up in the fields provided.
+	
+<b> 31. Arbitrary Waveform Generator (AWG) Status:</b> Each application has an associated awgtpman task to control GDS TP/EXC signals. This \n
+indicator should be GREEN. If not (RED), then this task is not running.
+	
+
 
 */
