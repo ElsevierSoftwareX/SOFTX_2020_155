@@ -1,33 +1,22 @@
-///	\page DacUse RCG DAC Parts 
-/// \n
-/// \n 1. Overview \n
-///	\verbatim
+/*! \page DacUse RCG DAC Parts 
+\section dacUse1 Overview
 The purpose of this RCG component is to define an DAC module. The RCG supports two types of DAC modules:
-	1) General Standards 16AO16, 16 bit, 16 channel
-	2) General Standards 18AO8, 18 bit, 8 channel
-\endverbatim
-/// \n
-/// \n
-/// \n\n 2. Related Documentation \n\n
-///	<a href="http://www.generalstandards.com/view-products2.php?BD_family=16ao16">GSC 16AO16 Manual</a> \n
-///	<a href="http://www.generalstandards.com/view-products2.php?BD_family=18ao8">GSC 18AO8 Manual</a> \n
-///	\n
-/// 3. General Description and Use within an RCG model.
-///	\verbatim
+	- General Standards 16AO16, 16 bit, 16 channel
+	- General Standards 18AO8, 18 bit, 8 channel
+\section dacUse2 Related Documentation
+	<a href="http://www.generalstandards.com/view-products2.php?BD_family=16ao16">GSC 16AO16 Manual</a> \n
+	<a href="http://www.generalstandards.com/view-products2.php?BD_family=18ao8">GSC 18AO8 Manual</a> \n
+\section dacUse3 General Description and Use within an RCG model.
 There are 12 DAC parts located in the RCG I/O parts section of CDS_PARTS.mdl in each of the DAC module blocks, DAC0 thru DAC11. Each RCG model must include at least one (1) ADC part and it must exist at the top most level of the model (general rule for all I/O parts).:
 	IOP: If to be used as an IOP, the model must contain a DAC part for each DAC module in the expansion chassis. These must be sequentially numbered, DAC0 thru DACn. NOTE: If a mix of 18bit and 16bit DAC cards are to be used in the expansion chassis, then the modules must be inserted such that the 18bit cards show up on the PCIe bus before the 16bit modules.
 	USER_MODEL: The standard user application model need only contain those DAC parts from which signals will be used eg if only signals from DAC2 are needed, then only DAC2 need be placed in the user model.
 
-\endverbatim
-///	\image html DacPart1.png "DAC Subsystems" width=50cm
-///	\image html DacPart2.png "DAC Parts" width=50cm
-///	\verbatim
-4. EPICS Channels
+	\image html DacPart1.png "DAC Subsystems" width=50cm
+	\image html DacPart2.png "DAC Parts" width=50cm
+\section dacUse4 EPICS Channels
 For each DAC, EPICS channels will be auto-generated, of the form IFO:FEC-DCUID_DAC_OUTPUT_CARDNUM_CHANNUM
-\endverbatim
-///	\verbatim
-5. Auto Generated MEDM Screens
+\section dacUse5 Auto Generated MEDM Screens
 For each DAC, an MEDM screen is generated which contains the EPICS channels generated above.  The screen name is of the form MODELNAME_DAC_MONITOR_CARD#.adl. This screen is automatically linked to the higher level GDS_TP screen generated for this model.
-\endverbatim
-///	\image html DacMedm.png "DAC AutoGen MEDM Screen" width=50cm
+\image html DacMedm.png "DAC AutoGen MEDM Screen" width=50cm
 
+*/
