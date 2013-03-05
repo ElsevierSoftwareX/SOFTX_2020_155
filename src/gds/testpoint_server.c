@@ -1216,12 +1216,14 @@ static char *versionId = "Version $Id$" ;
          #if 0
 	    printf("rmWrite(0, %x %x %d )\n", tp, addr, len * sizeof (testpoint_t)); 
 	 #endif
+#if 0
          #if TARGET !=  (TARGET_L1_GDS_AWG1 + 20) && TARGET !=  (TARGET_L1_GDS_AWG1 + 21)
             if (rmWrite (1 + TP_NODE_ID_TO_RFM_ID (tpNode.node), (char*) tp, addr, 
                len * sizeof (testpoint_t), 0) != 0) {
                gdsError (GDS_ERR_PROG, "RM2 write failure");
             }
          #endif
+#endif
          #else
 
             if (rmWrite (TP_NODE_ID_TO_RFM_ID (tpNode.node), (char*) tp, addr, 
