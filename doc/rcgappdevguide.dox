@@ -1,21 +1,32 @@
 /*! \page userguide RCG Application Developer Guide
-This page introduces the RCG for users. \n\n
-<b>RCG Overview</b> \n
-The RCG uses MATLAB Simulink as a ‘drawing’ tool to allow for applications to be developed via a Graphical User Interface (GUI). A basic description of 
+\section ug0 1.0 RCG Overview
+
+The RCG uses MATLAB Simulink as a drawing tool to allow for applications to be developed via a Graphical User Interface (GUI). A basic description of 
 this process, the RCG itself, and resulting application software is provided in the following subsections.
-        -\subpage appDev1 "Code Model Development Basics"
+
+\subsection ug1 1.1 Code Development
+Code development is done by graphically placing and connecting blocks in the MATLAB Simulink editor. The ‘building blocks’ supported by the RCG are included in the \subpage rcgParts "CDS_PARTS.mdl" file. Parts from the CDS library are copied (drag and drop) to the user application window and then connected to show processing/signal flow.
+
+        -\subpage mdlExample "Example Models"
         	- \subpage rcgParts "RCG PARTS LIBRARY"
         -\subpage appDev2 "Code Model General Rules and Guidelines"
         -\subpage appDev3 "Code Model Compilation"
         -\subpage appDev4 "Code Execution"
         -\subpage autoMedm "Auto-generated MEDM Screens"
 
+\subsection ug2 1.2 Code Compilation and Installation
+
+\subsection ug3  1.3 Runtime Software
 */
 
-/*! \page appDev1 Code Model Development Basics
-Code development is done by graphically placing and connecting blocks in the MATLAB Simulink editor. The ‘building blocks’ supported by the RCG are included in the CDS_PARTS.mdl file.
+/*! \page mdlExample Example Models
 
-Parts from the CDS library are copied (drag and drop) to the user application window and then connected to show processing/signal flow. A simple example is shown in the following figures, the first of which is the “top” level, the second showing the detail of one of the top level subsystem parts.
+Parts from the CDS library are copied (drag and drop) to the user application window and then connected to show processing/signal flow.
+
+This Simulink diagram is then saved to a user defined .mdl file, which is then processed by the RCG to provide the final real-time and supporting software which run on a CDS front end computer.
+Many examples of models built for aLIGO use can be found within the CDS SVN Repository in the cds user apps section.
+\section ex1 Example IOP Model
+An example of a typical IOP model is shown in the following figures, the first of which is the “top” level, the second showing the detail of one of the top level subsystem parts.
 \n This example shows:\n
 	• A CDS parameter block: This block must exist in all models. It is used by the RCG in setting code compile options and linking this application with various other components in a CDS distributed system. \n
 	• A single, 32 channel ADC (Analog-to-Digital Converter; adc_0). \n
@@ -23,10 +34,9 @@ Parts from the CDS library are copied (drag and drop) to the user application wi
 	• A single, 16 channel DAC output block.\n
 	• Within the subsystem level, selection of ADC channels and connection to CDS standard IIR filter modules. \n\n
 
-This Simulink diagram is then saved to a user defined .mdl file, which is then processed by the RCG to provide the final real-time and supporting software which run on a CDS front end computer.
-Many examples of models built for aLIGO use can be found within the CDS SVN Repository in the cds user apps section.
-\image html RCGexampl1.png "Example Model - Top Level"
-\image html RCGexampl2.png "Example Model - Subsystem Level"
+\image html RCGexampl1.png "Example I/O Processor Model - Top Level"
+\image html RCGexampl2.png "Example I/O Processor Model - Subsystem Level 1"
+\image html RCGexampl3.png "Example I/O Processor Model - Subsystem Level 2"
 */
 
 /*! \page appDev2 Code Model General Rules and Guidelines
