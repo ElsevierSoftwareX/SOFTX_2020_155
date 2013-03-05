@@ -116,6 +116,8 @@ int adcHoldTime;		///< Stores time between code cycles
 int adcHoldTimeMax;		///< Stores time between code cycles
 int adcHoldTimeEverMax;		///< Maximum cycle time recorded
 int adcHoldTimeEverMaxWhen;
+int cpuTimeEverMax;		///< Maximum code cycle time recorded
+int cpuTimeEverMaxWhen;
 int startGpsTime;
 int adcHoldTimeMin;
 int adcHoldTimeAvg;
@@ -605,6 +607,8 @@ udelay(1000);
   adcHoldTimeMax = 0;	/// @param adcHoldTimeMax Maximum time between code triggers in 1sec period
   adcHoldTimeEverMax = 0;	/// @param adcHoldTimeEverMax Maximum time between code triggers since code start
   adcHoldTimeEverMaxWhen = 0;	/// @param adcHoldTImeEverMaxWhen Time that max time ever between triggers occurred
+  cpuTimeEverMax = 0;		/// @param cpuTimeEverMax Maximum time for a cycle of running one itration of control code
+  cpuTimeEverMaxWhen = 0;	/// @param cpuTimeEverMaxWhen Time that max time ever between triggers occurred
   startGpsTime = 0;
   adcHoldTimeMin = 0xffff;	/// @param adcHoldTimeMin Minimum time between code triggers in 1 sec period.
   adcHoldTimeAvg = 0;		/// @param adcHoldTimeAvg Average time between code triggers in 1 sec period.
@@ -1838,9 +1842,8 @@ udelay(1000);
 	}
 #endif
 	adcHoldTime = (cpuClock[CPU_TIME_CYCLE_START] - adcTime)/CPURATE;
-	// Avoid calculating the max hold time on the very first cycle
-	// since we can be holding for up to 1 second when we start running
-	if (cycleNum == 0 && startGpsTime == cycle_gps_time) ; else {
+	// Avoid calculating the max hold time for the first few seconds
+	if (cycleNum == 0 && (startGpsTime+3) < cycle_gps_time) {
 		if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
 		if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
 		adcHoldTimeAvg += adcHoldTime;
@@ -1848,6 +1851,10 @@ udelay(1000);
 			adcHoldTimeEverMax = adcHoldTimeMax;
 			adcHoldTimeEverMaxWhen = cycle_gps_time;
 			//printf("Maximum adc hold time %d on cycle %d gps %d\n", adcHoldTimeMax, cycleNum, cycle_gps_time);
+		}
+		if (timeHoldMax > cpuTimeEverMax)  {
+			cpuTimeEverMax = timeHoldMax;
+			cpuTimeEverMaxWhen = cycle_gps_time;
 		}
 	}
 	adcTime = cpuClock[CPU_TIME_CYCLE_START];

@@ -59,6 +59,8 @@ procfile_read(char *buffer,
 
 			"startGpsTime=%d\n"
 			"uptime=%d\n"
+			"cpuTimeEverMax=%d\n"
+			"cpuTimeEverMaxWhen=%d\n"
 			"adcHoldTime=%d\n"
 			"adcHoldTimeEverMax=%d\n"
 			"adcHoldTimeEverMaxWhen=%d\n"
@@ -75,6 +77,8 @@ procfile_read(char *buffer,
 
 			startGpsTime,
 			cycle_gps_time - startGpsTime,
+			cpuTimeEverMax,
+			cpuTimeEverMaxWhen,
 			adcHoldTime,
 			adcHoldTimeEverMax,
 			adcHoldTimeEverMaxWhen,
