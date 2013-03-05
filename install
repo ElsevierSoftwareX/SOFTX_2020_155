@@ -137,7 +137,11 @@ if [ "x\$fname" != x ]; then
 fi
 # Always write one into burt to let the FE go
 caput \`grep -m 1 BURT_RESTORE /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/autoBurt.req\` 1
-(cd /opt/rtcds/$site/${lower_ifo}/target/gds && ./awgtpman_startup/awgtpman_${system}.cmd)
+if [ -e /var/run/init.d/awgtpman_${system} ]; then
+	sudo /var/run/init.d/awgtpman_${system} start
+else
+	(cd /opt/rtcds/$site/${lower_ifo}/target/gds && ./awgtpman_startup/awgtpman_${system}.cmd)
+fi
 touch /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
 chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
 
