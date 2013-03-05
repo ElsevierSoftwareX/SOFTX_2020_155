@@ -8,8 +8,8 @@ this process, the RCG itself, and resulting application software is provided in 
 Code development is done by graphically placing and connecting blocks in the MATLAB Simulink editor. The ‘building blocks’ supported by the RCG are included in the \subpage rcgParts "CDS_PARTS.mdl" file. Parts from the CDS library are copied (drag and drop) to the user application window and then connected to show processing/signal flow.
 
         -\subpage mdlExample "Example Models"
-        	- \subpage rcgParts "RCG PARTS LIBRARY"
         -\subpage appDev2 "Code Model General Rules and Guidelines"
+	-\subpage rcgParts "RCG PARTS LIBRARY"
         -\subpage appDev3 "Code Model Compilation"
         -\subpage appDev4 "Code Execution"
         -\subpage autoMedm "Auto-generated MEDM Screens"
@@ -33,7 +33,12 @@ As a general rule, the top level of all aLIGO control models should only contain
 In the case of an IOP model, the I/O parts are NOT required to have connections, unless there is an intent to use some signals within the application code part of the IOP. In the example, it can be seen that the DAC modules are not connected to anything. Binary I/O modules, however, do require a ground input, only for model parsing reasons. 
 
 It is required that the IOP model contain:
-	- All of the I/O modules that will be installed in the I/O chassis connected to this FE computer. The primary purpose of the generated code will be to map and control all I/O devices that are to be addressed by user code running on this FE.
+	- \ref ParameterUse "cdsParameter" Block with following settings:
+		- adcMaster=1: This is what defines a model as an IOP model to the RCG.
+		- specific_cpu=1 or not defined (as in example). The IOP must always be assigned to CPU core 1 on an FE computer. CPU 0 is reserved for Linux and CPU core 2 up to total number of available cores is reserved for user model applications.
+		- If this FE computer is to be connected to the Dolphin real-time network, then pciRfm=1 must be set. This is only ever set in an IOP model ie not required for user models.
+		- rate=64K: An IOP must always run at the ADC input clock frequency.
+	- All of the \ref rcgPartsIo "I/O modules" that will be installed in the I/O chassis connected to this FE computer. The primary purpose of the generated code will be to map and control all I/O devices that are to be addressed by user code running on this FE.
 	- A Contec1616dio part. This particular module will be used to control the timing slave within the I/O chassis. It will not be available for use in user application models.
 
 <b> NOTE: The IOP model only writes data to the DAC modules relayed from the user applications ie an IOP model can not be set up to write its own data to DAC channels. Also, I/O to binary I/O modules is done directly by the user application, with the IOP only providing memory mapping and initialization functions.</b>
@@ -51,34 +56,44 @@ Within the next level, the ADC channels are broken out and applied to the next s
 At the lowest level, an \ref EpicsOutputUse "EPICS Output" and \ref ExcTpUse "TestPoint" is connected to every ADC channel. This allows each channel to be displayed on the auto-generated ADC monitoring screens and provide on demand signal availability to the DAQ system for diagnostics at the full data rate (64K).
 
 \image html RCGexampl3.png "Example I/O Processor Model - Subsystem Level 2"
+
+
+
+\section ex2 Example User Application Model
+A user application model is built in a similar fashion as the IOP model, example below.  The primary differences are:
+	- \ref ParameterUse "cdsParameter" Block:
+		- Must have adcSlave=1 set.
+		- specific_cpu= must be set to 2 or higher, up to the number of cores available on the FE computer.
+	- While IOP does not require connections to all I/O parts, user models do. Note, however, that not every channel of an I/O part needs to be connected. In the example, only one channel of two DAC modules are connected. The RCG allows sharing of DAC modules, ie another model running on the same FE may have the same DAC modules defined with connections to different channels. Verfication that two user models are not trying to use the same channel on the same DAC module is done at runtime. For ADC modules, any number of models may share the same modules and channels.
+
+\image html userAppEx1.png "Example User Application Model - Top Level"
 */
 
 /*! \page appDev2 Code Model General Rules and Guidelines
-\verbatim
-Some overview notes before starting an application development process:
-	1) Only modules shown in the CDS_PARTS.mdl file may be used in the application development. Simulink native parts that may be used are shown in the CDS_PARTS >> simLinkParts window. A description of all available parts is given in Section 7.
-	2) The tool is designed to work with the LIGO CDS standard naming convention, which includes:
-		a. All channel names shall be upper case.
-		b. All channel names shall be of the form A1:SYS-SUBSYS_XXX_YYY where:
-			i. A1 is the Interferometer (IFO) site and number, such as H1, H2, L1, M1, etc., followed by a colon (:). The IFO part of the name is set using the cdsParameters part in the application model (see example in next section).
-			ii. SYS is a three letter system designator, such as SUS, ISI, SEI, LSC, ASC, etc., followed by a dash (-). 
-			iii. SUBSYS and beyond are user definable, up to a maximum channel name length of 28 characters (limit set by EPICS software). 
-			     Underscores are used to further break up the name, with any number of characters in between.
-	3) The Matlab file name shall be of the form:
-		a. IFO name (two characters eg h1.
-		b. Subsystem name (three characters) eg sus, sei, isi, etc.
-		c. Remainder of name is arbitrary, but should provide a further description of the system to be controlled and must make the name unique for a particular installation. 
-		d. Examples for aLIGO:  h1susetmx, h1susetmy, h1seiham2. The RCG will pick off the first two characters as the interferometer (IFO) name and expect the next three characters to be the system name in order to produce a channel list consistent with (2) above.
-	4) Every model shall contain one, and only one, Parameter Block (See 8.1.1).
-	5) Every model shall contain at least one ADC part.
-	6) For ease of duplication, the top level of models should be limited to I/O parts, with other parts nested in subsystem components. For example, the following model could easily be duplicated by simply changing the “QUAD1” subsystem block name to “QUAD2” and change a few parameter block entries to make a new model to perform the same controls on another suspension system.
+Some overview notes before starting an application development process:\n
+	- Only modules shown in the CDS_PARTS.mdl file may be used in the application development. Simulink native parts that may be used are shown in the CDS_PARTS >> simLinkParts window. \n
+	- The tool is designed to work with the LIGO CDS standard naming convention, which includes: \n
+		- All channel names shall be upper case. \n
+		- All channel names shall be of the form A1:SYS-SUBSYS_XXX_YYY where: \n
+			- A1 is the Interferometer (IFO) site and number, such as H1, H2, L1, M1, etc., followed by a colon (:). The IFO part of the name is set using the cdsParameters part in the application model (see example in next section). \n
+			- SYS is a three letter system designator, such as SUS, ISI, SEI, LSC, ASC, etc., followed by a dash (-).  \n
+			-  SUBSYS and beyond are user definable, up to a maximum channel name length of 28 characters (limit set by EPICS software).  Underscores are used to further break up the name, with any number of characters in between. \n
+	- The Matlab file name shall be of the form: \n
+		- IFO name (two characters eg h1. \n
+		- Subsystem name (three characters) eg sus, sei, isi, etc. \n
+		- Remainder of name is arbitrary, but should provide a further description of the system to be controlled and must make the name unique for a particular installation. \n
+			- Examples for aLIGO:  h1susetmx, h1susetmy, h1seiham2. The RCG will pick off the first two characters as the interferometer (IFO) name and expect the next three characters to be the system name in order to produce a channel list consistent with (2) above. \n
+	- Every model shall contain one, and only one, \ref ParameterUse "Parameter Block". \n
+	- Every model shall contain at least one ADC part. \n
+	- For ease of duplication, the top level of models should be limited to I/O parts, with other parts nested in subsystem components. 
 
-\endverbatim
 */
 
 
 
 /*! \page rcgParts RCG Parts Library
+The CDS_PARTS.mdl file, supplied with the RCG code checkout, provides all parts which are supported by the RCG in a single Matlab library. Along with the supported parts, brief documentation on part usage is provided by a Matlab DOC part.
+
         - \subpage ParameterUse "Parameter Block"
         - \subpage rcgPartsIo "I/O Components"
         - \subpage rcgPartsSimulink "Standard Simulink Components"
@@ -107,7 +122,8 @@ The I/O Parts Libary within the CDS_PARTS.mdl contains all of the RCG components
 \image html IoParts.png "CDS_PARTS I/O Library"
 */
 /*! \page rcgPartsEpics RCG EPICS Parts Library
-The EPICS Parts Libary within the CDS_PARTS.mdl contains all of the RCG components which support EPICS, as shown in the following figure.
+\section epicsPart1 Overview
+The EPICS Parts Libary within the CDS_PARTS.mdl contains all of the RCG components which support EPICS, as shown in the following figure. The RCG also allows the initialization settings for EPICS Input and Output records, as described in the \ref epicsPart2 "next section".
 
         - \subpage EpicsInputUse "EPICS Input"
         - \subpage EpicsOutputUse "EPICS Output"
@@ -123,6 +139,44 @@ The EPICS Parts Libary within the CDS_PARTS.mdl contains all of the RCG componen
         - \subpage EpicsCounterUse "EPICS Counter"
 
 \image html EpicsParts.png "CDS_PARTS EPICS Library"
+
+\section epicsPart2 Setting EPICS Database Fields for Epics Input and Epics Output Parts.
+
+EPICS database records have a number of parameters, or fields, which may be set as part of the database record definition file. For each model compiled with the RCG, a corresponding EPICS database file is created for runtime support. \n
+
+By default, the RCG only sets the precision of EPICS input and output records in the database file (PREC=3), which provides 3 decimal places of precision when viewed on an MEDM screen. \n
+
+The RCG does allow users to define parameter fields for the EPICS Input and Output part types within the user model, as described below. A complete list of parameters supported by EPICS AO and AI record types can be found in the EPICS user guide online. \n
+
+To define these EPICS fields:
+	- Place an EPICS Input or Output part into the model and provide a name for the part. 
+	- Open the block properties window for the part. By default, the Description field provides some basic info on the part (Figure 1 below).
+
+\image html epicsField1.png "Block Properties (Default)"
+
+	- Delete the provided Description information. (While RCG will ignore this default information, it is probably best to delete it for ease of reading later).
+	- Add EPICS database parameter information, as shown in Figure 2 below, in the Description area.
+		- Each entry must be of the form ‘field(PARAM,”VALUE”)’, where:
+			- PARAM = The EPICS parameter definition, such as PREC, HIGH, LOW, etc. The most commonly used are:
+				- PREC (Precision), number of decimal places returned to MEDM screens for viewing. Note that this does not affect the calculation precision ie all EPICS values are treated as doubles in the runtime code.
+				- HOPR (High Operating Range)
+				- LOPR (Low Operating Range)
+				- Alarm Severities: HHSV, HSV,LSV,LLSV. 
+				- Alarm Setpoints: HIHI, HIGH, LOW, LOLO
+			- VALUE = Desired default setting, which must be in quotes.
+				- Alarm Severities are limited to the following:
+					- MAJOR
+					- MINOR
+					- INVALID
+					- NO_ALARM (Default, if not specified)
+				- Other entries listed above are all taken as floating point numbers.
+	- Field definition entries may be separated by white space or new lines, or both, as shown in the example below.
+
+
+\b WARNING: Presently, the RCG does not perform any checking of the validity of user definitions provided with the field entries. As long as the entry is of the right form, the RCG will add it to the database definition file. Therefore, it is the user responsibility to ensure entries are correct. Entry error checking is presently being worked for RCG release V2.7 and later.
+
+
+\image html epicsField2.png "Block Properties w/EPICS field entries"
 */
 
 /*! \page rcgPartsFilts RCG FILTER Parts Library
