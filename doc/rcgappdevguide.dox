@@ -26,16 +26,30 @@ Parts from the CDS library are copied (drag and drop) to the user application wi
 This Simulink diagram is then saved to a user defined .mdl file, which is then processed by the RCG to provide the final real-time and supporting software which run on a CDS front end computer.
 Many examples of models built for aLIGO use can be found within the CDS SVN Repository in the cds user apps section.
 \section ex1 Example IOP Model
-An example of a typical IOP model is shown in the following figures, the first of which is the “top” level, the second showing the detail of one of the top level subsystem parts.
-\n This example shows:\n
-	• A CDS parameter block: This block must exist in all models. It is used by the RCG in setting code compile options and linking this application with various other components in a CDS distributed system. \n
-	• A single, 32 channel ADC (Analog-to-Digital Converter; adc_0). \n
-	• Tags used to connect ADC signals to subsystem parts (X1, X2) \n
-	• A single, 16 channel DAC output block.\n
-	• Within the subsystem level, selection of ADC channels and connection to CDS standard IIR filter modules. \n\n
+It is required that for each real-time Front End (FE) computer, that a special model be built to handle timing and I/O connections for all remaining user models to be run on that FE computer. This special case model is referred to as an Input/Output Processor (IOP) model. 
+An example of a typical IOP model is shown in the following figures, the first of which is the “top” level, the second showing the detail of one of the top level subsystem parts, and finally the third, or bottom level of the code model. Some notes on the model layout: \n
+\subsection iop1 Level 1
+As a general rule, the top level of all aLIGO control models should only contain a \ref ParameterUse "Parameter" block (upper left), I/O parts and then remaining subsystem top level parts (See \ref appDev2 "General Guidelines"). This allows subsystem parts to become libary parts that can be shared between control models, with the only difference being the I/O channel connections specific to that particular control model. 
+In the case of an IOP model, the I/O parts are NOT required to have connections, unless there is an intent to use some signals within the application code part of the IOP. In the example, it can be seen that the DAC modules are not connected to anything. Binary I/O modules, however, do require a ground input, only for model parsing reasons. 
+
+It is required that the IOP model contain:
+	- All of the I/O modules that will be installed in the I/O chassis connected to this FE computer. The primary purpose of the generated code will be to map and control all I/O devices that are to be addressed by user code running on this FE.
+	- A Contec1616dio part. This particular module will be used to control the timing slave within the I/O chassis. It will not be available for use in user application models.
+
+<b> NOTE: The IOP model only writes data to the DAC modules relayed from the user applications ie an IOP model can not be set up to write its own data to DAC channels. Also, I/O to binary I/O modules is done directly by the user application, with the IOP only providing memory mapping and initialization functions.</b>
 
 \image html RCGexampl1.png "Example I/O Processor Model - Top Level"
+
+\subsection iop2 Level 2
+Within the next level, the ADC channels are broken out and applied to the next subsystem level. There are also two filter modules shown which support two primary diagnostics:
+	- ADC Duotone: The timing slave provides a duotone signal to the last channel of the first ADC in the I/O chassis (960Hz/961Hz). The IOP code will check the zero crossing time of this signal once per second to verify correct timing in the system.
+	- DAC Duotone: On operator request, the ADC duotone signal will be fed to the last output channel of the first DAC module, which is then directly connected back to the next to last channel of the first ADC module. Similar to the ADC duotone signal, a zero crossing calculation is done. This provides a total loopback time indication to verify DAC modules are clocking on time.
+
 \image html RCGexampl2.png "Example I/O Processor Model - Subsystem Level 1"
+
+\subsection iop3 Level 3
+At the lowest level, an \ref EpicsOutputUse "EPICS Output" and \ref ExcTpUse "TestPoint" is connected to every ADC channel. This allows each channel to be displayed on the auto-generated ADC monitoring screens and provide on demand signal availability to the DAQ system for diagnostics at the full data rate (64K).
+
 \image html RCGexampl3.png "Example I/O Processor Model - Subsystem Level 2"
 */
 
