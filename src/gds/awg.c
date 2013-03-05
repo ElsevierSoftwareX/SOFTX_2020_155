@@ -2608,10 +2608,6 @@ Organization of generating waveforms:
       awg = AWG + ID;
       MUTEX_GET (awg->mux);
    
-      /* zero buffer */
-      memset ((void*) _GET_OUTPUT_BUFFER (epoch, ID), 0, 
-             _MAX_PAGE * sizeof (float));
-   
       /* check whether anything to do */
       if (((awg->status & AWG_CONFIG) == 0) || 
          ((awg->status & AWG_ENABLE) == 0)) {
@@ -2621,6 +2617,10 @@ Organization of generating waveforms:
    
       /* get time delay of channel */
       delay = awg->delay;
+   
+      /* zero buffer */
+      memset ((void*) _GET_OUTPUT_BUFFER (epoch, ID), 0, 
+             _MAX_PAGE * sizeof (float));
    
       /* cycle through awg components */
       invCount = 0;
