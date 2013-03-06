@@ -4,6 +4,8 @@ As part of the build process, the RCG generates a number of EPICS MEDM screens.
 	- \ref adcUse5 "ADC Input Monitor Display"
 	- \ref dacUse5 "DAC Output Monitor Display"
 	- \ref ipcUse5 "Real-time Network Status Display"
+	- \ref almMon1 "Guardian Alarm Monitor Screen" 
+	- \ref filtUse5 "Filter Module Screens" 
 
 \section gdsTpScreen GDS_TP Screens
 \section gtp1 Overview
@@ -107,7 +109,7 @@ An \ref ipcUse5 "IPC related display" is provided to give IPC status information
 <b> 16. Guardian Status:</b>
 	
 In support of Guardian scripts, this screen provides:
-	- Related display link to screen which shows signals, by name, which are outside of the alarm limit tolerances.
+	- \ref almMon1 "Related display" link to screen which shows signals, by name, which are outside of the alarm limit tolerances.
 	- Setpoint errors: Total number of operator setpoints which are outside limits set by Guardian.
 	- Readback errors: Total number of readbacks from system which are outside limits set by Guardian.
 
@@ -205,5 +207,21 @@ these numbers show up in the fields provided.
 indicator should be GREEN. If not (RED), then this task is not running.
 	
 
+\verbatim
+
+
+\endverbatim
+
+\section almMon1 Guardian Alarm Monitor Screen 
+For each control model, the RCG generates a Guardian alarm monitor screen, as shown below. Items on this display, linked from the GDS_TP screen, \n
+include:
+	- Alarm Set CRC: Runtime code maintains a CRC checksum on all alarm settings. This is made available to the Guardian scripts to \n
+	verify that the FE monitoring code is monitoring the correct state.
+	- SETPOINT ALARMS: Number of EPICS setpoints presently outside of nominal limits.
+	- READOUT ALARMS: Number of EPICS readback channels presently outside of nominal limits.
+	- List of setpoint channels which are in alarm condition (bottom left).
+	- List of readback channels which are in alarm condition (bottom right).
+
+\image html alarmMonitor.png "Guardian Alarm Monitor Screen"
 
 */
