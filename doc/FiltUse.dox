@@ -1,34 +1,29 @@
-///	\page FiltUse IIR Filter Module 
-///     \verbatim
-1. Overview
+/*!	\page FiltUse IIR Filter Module 
+\section filtUse1 Overview
 A variation of the CDS Standard Filter Module, this part was developed to allow additional SFM parameters, normally controlled via EPICS, to be controlled within the real-time software. 
-\endverbatim
-/// 2. Related Documentation \n
-///     <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7687">T0900606 CDS Standard IIR Filter Module Software</a>
-///     \verbatim
-3. General Description and Use within an RCG model.
+\section filtUse2 Related Documentation 
+<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7687">T0900606 CDS Standard IIR Filter Module Software</a>
+
+\section filtUse3 General Description and Use within an RCG model.
 
 All CDS FE processors use digital Infinite Impulse Response (IIR) filters to perform a majority of their signal conditioning and control algorithm tasks. In order to facilitate their incorporation into FE software and to provide a standard set of DAQ and diagnostic capabilities, the Standard Filter Module (SFM) was developed. 
 
-Usage
+\subsection filtUse3a Usage
 Desired input signal is connected at ‘In1’ and output at ‘Out1’. ‘IIR Filter Module’ name tag is replaced with user name.
 
-Operation
+\subsection filtUse3b Operation
 To help illustrate the operation of the LIGO CDS Standard Filter Module (SFM), an operator MEDM screen shot is shown below. Signal flow is from Input (left) to Output (right).
-\endverbatim
-/// 	\image html filtMedm.png "IIR Filter Module - MEDM Screen"
-///     \verbatim
+ 	\image html filtMedm.png "IIR Filter Module - MEDM Screen"
 
-SFM Input Section
+\subsection filtUse3c SFM Input Section
 The SFM input is as defined by the user in the MATLAB Simulink model. At run-time, this signal is available to EPICS (_INMON) and is available to diagnostic tools as a test point (_IN1) at the sampling rate of the software.  This signal may continue on or be set to zero at this point by use of the Input On/Off switch. 
 
 Each SFM also has an excitation signal input available from the Arbitrary Waveform Generator (AWG). This signal is available for EPICS (_EXCMON).  The AWG signal is summed with the input signal, and available to diagnostic tools as a second test point (_IN2). 
 To this resulting signal, a DC offset may be added (Input DC Offset) and this offset may be turned on/off via the Offset on/off switch.  When changed, the DC offset value will be ramped from present value to new value over the period of time set in the RAMP TIME setting.
 The sum of the input, AWG and offset signal is then fed to the IIR filtering section.
-\endverbatim
-/// 	\image html filtInput.png "IIR Filter Module - Input Section"
-///     \verbatim
-Filtering Section
+ 	\image html filtInput.png "IIR Filter Module - Input Section"
+
+\subsection filtUse3d Filtering Section
 
 The filter section may have up to 10 IIR filters defined, with up to 10 Second Order Sections (SOS) each. The software allows for any/all of these filters to be redefined “on the fly”, i.e., an FE process does not need to be rebooted, restarted or otherwise interrupted from its tasks during reconfiguration. 
 
@@ -40,9 +35,8 @@ The filter coefficients and switching properties are defined in a text file prod
 •	# MODULES BS RM AS1_I
 •	A line (or lines) for each filter within an SFM, describing filter attributes and coefficients. These lines must contain the information listed in the following table, in the exact order given in the table.
 
-\endverbatim
-/// 	\image html filtFilt.png "IIR Filter Module - Filter Section"
-///     \verbatim
+ 	\image html filtFilt.png "IIR Filter Module - Filter Section"
+     \verbatim
 Field		Description
 SFM Name	The EPICS name of the filter module to which the remaining parameters are to apply.
 Filter Number	The number of the filter (0-9) within the given SFM to which the remaining parameters are to apply.
@@ -68,9 +62,9 @@ Filter Coefficients	The coefficients which describe the filter design.
 A skeleton coefficient file is produced the first time ‘make-install’ is invoked after compiling a model file. Thereafter, whenever ‘make-install’ is executed, the install process will make a back-up of the present coefficient file, then patch the present file with any new filter modules or renaming of filter modules.
 
 \endverbatim
-///     \verbatim
-Output Section
+\subsection filtUse3e Output Section
 
+///     \verbatim
 The following figure shows the output section. The output section provides for:
 •	A variable gain to be applied to the filter section output. This gain may be ramped over time from one setting to another by setting the gain ramp time.
 •	This output to be limited to a selected value (the output limiter can be switched on or off).
@@ -80,10 +74,11 @@ The following figure shows the output section. The output section provides for:
 •	A “hold” output feature. When enabled, the output of the SFM will be held to its present value.
 
 \endverbatim
-/// 	\image html filtOut.png "IIR Filter Module - Output Section"
-///     \verbatim
-Associated EPICS Records
+	\image html filtOut.png "IIR Filter Module - Output Section"
 
+\section filtUse4 Associated EPICS Records
+
+///     \verbatim
 _INMON = Filter module input value (RO)
 _EXCMON = Filter module excitation signal input value (RO)
 _OFFSET = User settable offset value (W/R)
@@ -103,3 +98,14 @@ _SW2S = Saved filter switch selections, upper 16 bits (RO)
 _Name00 thru _Name09 = Individual filter names, as defined in the coefficient file (RO)
 
 \endverbatim
+
+\section filtUse5 Auto-generated MEDM Screens
+Two MEDM screens are generated for each filter module in the user model:
+	- Setpoint and Monitor Screen, as shown in \ref filtUse3a "Operation" section above.
+	- A related display page which allows setting of alarm setpoints for each filter module setting/readback channel, as shown below. \n
+	Note: This is actually a generic screen, with the related display pushbutton on the main filter operation screen opening this file \n
+	with parameter substitution to display data for the specific filter module.
+
+\image html filterAlarmSet.png "Filter Module Alarm Setting Screen"
+
+*/
