@@ -1,0 +1,116 @@
+diff -rupN medm3_1_5.orig/medm/utils.c medm3_1_5/medm/utils.c
+--- medm3_1_5.orig/medm/utils.c	2010-07-07 11:36:09.000000000 -0700
++++ medm3_1_5/medm/utils.c	2012-12-13 17:34:58.000000000 -0800
+@@ -42,6 +42,9 @@
+ #include <cvtFast.h>
+ #include <postfix.h>
+ #include "medm.h"
++#include <string.h>
++#include <sys/stat.h>
++#include <ctype.h>
+ 
+ /* Include this after medm.h to avoid problems with Exceed 6 */
+ #ifdef WIN32
+@@ -3163,6 +3166,67 @@ void  moveSelectedElementsAfterElement(D
+ 
+ /*** Name value table routines ***/
+ 
++read_macros(char *str, char *buf) {
++  char *pch = strtok (str,",");
++  *buf = 0;
++  while (pch != NULL)
++  {
++    //printf ("%s\n",pch);
++    if (*pch == '%' && pch[1] == '(') {
++        // This is the directive to do stuff
++        pch+=2; // skip over "$("
++        // find closing bracket
++        char *endbrkt = strstr(pch,")");
++        if (endbrkt) {
++                *endbrkt = 0;
++                //printf("%s\n", pch);
++                // Split the string into two fields
++                char **ap, *argv[2];
++                for (ap = argv; (*ap = strsep(&pch, " \t")) != NULL;)
++                   if (**ap != '\0')
++                           if (++ap >= &argv[2])
++                                   break;
++                //printf("command='%s' argument='%s'\n", argv[0], argv[1]);
++                if (!strcmp("read", argv[0])) {
++                        // Open the file
++                        if (argv[1] == 0) {
++                                fprintf(stderr, "Unspecified file name in macro read command\n");
++                        } else {
++                                FILE *fp = fopen(argv[1], "r");
++                                if (fp == 0) {
++                                        fprintf(stderr, "Cannot open macro file %s\n", argv[1]);
++                                } else {
++                                        struct stat st;
++                                        char buffer[10240];
++                                        fstat(fileno(fp), &st);
++                                        if (st.st_size > 10239) {
++                                                fprintf(stderr, "File %s too big\n", argv[1]);
++                                        } else {
++                                                fread(buffer, sizeof(char), st.st_size, fp);
++						 buffer[st.st_size] = 0;
++                                                //printf("%s\n", buffer);
++                                                // Trim trailing space
++                                                char *end = buffer + strlen(buffer) - 1;
++                                                while(end > buffer && isspace(*end)) end--;
++                                                // Write new null terminator
++                                                *(end+1) = 0;
++                                                strcat(buf, buffer);
++                                        }
++                                        fclose(fp);
++                                }
++                        }
++                } else {
++                        fprintf(stderr, "Unknown macro command %s\n", argv[0]);
++                }
++        }
++    } else {
++        strcat(buf, pch);
++    }
++    pch = strtok (NULL, ",");
++    if (pch) strcat(buf, ",");
++  }
++}
++
++
+ /*
+  * generate a name-value table from the passed-in argument string
+  *	returns a pointer to a NameValueTable as the function value,
+@@ -3171,7 +3235,7 @@ void  moveSelectedElementsAfterElement(D
+  */
+ NameValueTable *generateNameValueTable(char *argsString, int *numNameValues)
+ {
+-    char *copyOfArgsString,  *name, *value;
++    char *name, *value;
+     char *s1;
+     char nameEntry[80], valueEntry[80];
+     int i = 0, j = 0, tableIndex = 0, numPairs = 0, numEntries = 0;
+@@ -3180,11 +3244,13 @@ NameValueTable *generateNameValueTable(c
+ 
+ 
+     nameTable = NULL;
+-    copyOfArgsString = NULL;
+ 
+     if(argsString != NULL) {
+-
+-	copyOfArgsString = STRDUP(argsString);
++	char copyOfArgsString[10240];
++	char *strcp = STRDUP(argsString);
++	read_macros(strcp, copyOfArgsString);
++	free(strcp);
++	printf("input=%s output=%s\n", argsString, copyOfArgsString);
+       /* see how many a=b name/value pairs are in the string */
+ 	numPairs = 0;
+ 	i = 0;
+@@ -3228,7 +3294,6 @@ NameValueTable *generateNameValueTable(c
+ 		tableIndex++;
+ 	    }
+ 	}
+-	if(copyOfArgsString) free(copyOfArgsString);
+ 
+     } else {
+ 
