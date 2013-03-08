@@ -7,16 +7,19 @@ this process, the RCG itself, and resulting application software is provided in 
 \subsection ug1 1.1 Code Development
 Code development is done by graphically placing and connecting blocks in the MATLAB Simulink editor. The ‘building blocks’ supported by the RCG are included in the \subpage rcgParts "CDS_PARTS.mdl" file. Parts from the CDS library are copied (drag and drop) to the user application window and then connected to show processing/signal flow.
 
-        -\subpage mdlExample "Example Models"
-        -\subpage appDev2 "Code Model General Rules and Guidelines"
-	-\subpage rcgParts "RCG PARTS LIBRARY"
-        -\subpage appDev3 "Code Model Compilation"
-        -\subpage appDev4 "Code Execution"
-        -\subpage autoMedm "Auto-generated MEDM Screens"
+        - \ref mdlExample "Example Models"
+        - \ref appDev2 "Code Model General Rules and Guidelines"
+	- \ref rcgParts "RCG PARTS LIBRARY"
+        - \ref appDev3 "Code Model Compilation"
+        - \ref appDev4 "Code Execution"
+        - \ref autoMedm "Auto-generated MEDM Screens"
 
 \subsection ug2 1.2 Code Compilation and Installation
 
 \subsection ug3  1.3 Runtime Software
+
+\ref rcgsg2a "Runtime Overview"
+
 */
 
 /*! \page mdlExample Example Models
@@ -116,7 +119,6 @@ The I/O Parts Libary within the CDS_PARTS.mdl contains all of the RCG components
         - \subpage DioUse "Acces 24bit Binary Input Module"
         - \subpage RioUse "Acces 8bit Relay I/O Module"
         - \subpage Rio1Use "Acces 16bit Relay I/O Module"
-        - \subpage Contec6464DioUse "Contec DIO-6464L-PE Module"
 
 
 \image html IoParts.png "CDS_PARTS I/O Library"
