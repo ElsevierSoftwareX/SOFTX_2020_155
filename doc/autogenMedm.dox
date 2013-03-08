@@ -1,4 +1,5 @@
 /*! \page autoMedm Auto-generated MEDM Screens
+\tableofcontents
 As part of the build process, the RCG generates a number of EPICS MEDM screens.
 	- \ref gdsTpScreen "GDS TP Screen"
 	- \ref adcUse5 "ADC Input Monitor Display"

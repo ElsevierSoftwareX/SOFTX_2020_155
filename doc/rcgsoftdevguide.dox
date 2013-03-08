@@ -1,72 +1,63 @@
 /*! \page devguidercg RCG Software Developer's Guide
-This section is intended as a general guide for code modifications to the RCG parsers and compilers. \n\n\b 1. \b Introduction \n
-\verbatim
+\section rcgsg1 Introduction 
 The purpose of this documentation is to provide a description of the software which comprises the Real-time Code Generator (RCG). It is intended to be o
 f sufficient detail for experienced software developers to modify, enhance or maintain the core RCG software. This includes the RCG compiler functions and the various RCG perl and C code components necessary to produce and compile the code that runs on the aLIGO real-time control computers.
-\endverbatim
-\b 2. \b Overview \n
 
-\subpar 2.1 RCG Runtime 
-\verbatim
+\section rcgsg2 Overview
+
+\subsection rcgsg2a RCG Runtime 
 An overview of the RCG runtime products (yellow background) and code/hardware interconnections is shown in the following diagram.
 Runtime products include:
-	1) Real-time (RT) Application: The RCG compiles all RT applications as stand-alone kernel objects. At runtime, an RT application is assigned to a single CPU core. This core is marked as unavailable to the Linux OS scheduler and interrupt services ie locked for exclusive use by the RT application. CPU core 0 is always reserved for Linux and non-RT applications. CPU core 1 is reserved for the IOP task, with remaining RT applications assigned to CPU core 2 thru N, where N is the total number of CPU cores available. 
-		a) I/O Processor (IOP): One IOP is required per real-time computer. This is a special case model with compile option "ADC_MASTER=1" set. The IOP is responsible for:
-			i. PCIe device initialization and memory mapping.
-			ii. Timing system setup and synchronization.
-			iii. Reading in all ADC module data and writing out all DAC module data and communicating this information with user application processes.
-			iv. Reading data from Reflected Memory (RFM) realtime network interface modules.
-			v. Synchronization of user applications.
-		b) User application (compile option ADC_SLAVE=1). This is the typical application built for user application models. 
-	2) EPICS sequencer: This is an application, based on EPICS State Notation Language (SNL), which passes data between EPICS database records and the real-time application via shared memory. The RT application will trigger this sequencer to update all EPICS information at 16Hz. Note, however, that this code is not running in a real-time context, and therefore not guaranteed to run at 16Hz.
-	3) EPICS Database: Standard EPICS database records which allow communication to other computers, primarily operator stations, via EPICS channel access network protocol.
+	- Real-time (RT) Application: The RCG compiles all RT applications as stand-alone kernel objects. At runtime, an RT application is assigned to a single CPU core. This core is marked as unavailable to the Linux OS scheduler and interrupt services ie locked for exclusive use by the RT application. CPU core 0 is always reserved for Linux and non-RT applications. CPU core 1 is reserved for the IOP task, with remaining RT applications assigned to CPU core 2 thru N, where N is the total number of CPU cores available. 
+		- I/O Processor (IOP): One IOP is required per real-time computer. This is a special case model with compile option "ADC_MASTER=1" set. The IOP is responsible for:
+			-  PCIe device initialization and memory mapping.
+			-  Timing system setup and synchronization.
+			-  Reading in all ADC module data and writing out all DAC module data and communicating this information with user application processes.
+			- Reading data from Reflected Memory (RFM) realtime network interface modules.
+			-  Synchronization of user applications.
+		-  User application (compile option ADC_SLAVE=1). This is the typical application built for user application models. 
+	- EPICS sequencer: This is an application, based on EPICS State Notation Language (SNL), which passes data between EPICS database records and the real-time application via shared memory. The RT application will trigger this sequencer to update all EPICS information at 16Hz. Note, however, that this code is not running in a real-time context, and therefore not guaranteed to run at 16Hz.
+	- EPICS Database: Standard EPICS database records which allow communication to other computers, primarily operator stations, via EPICS channel access network protocol.
 
+	
 The RCG library also contains some separate support code modules, two of which are shown in the following diagram:
-	1) Awgtpman: Program to set testpoints in the real-time code and inject excitation data, one per RT application. Timing information is provided to this task by the RT IOP process at 16Hz.
-	2) MX Stream: Program to communicate DAQ data to the DAQ system (Data Concentrator computer) via a separate DAQ network, one per RT computer.
-\endverbatim
+	- Awgtpman: Program to set testpoints in the real-time code and inject excitation data, one per RT application. Timing information is provided to this task by the RT IOP process at 16Hz.
+	- MX Stream: Program to communicate DAQ data to the DAQ system (Data Concentrator computer) via a separate DAQ network, one per RT computer.
 \image html rcgRuntime.png "RCG Runtime Overview"
-\subpar 2.2 RCG Compiler Components
-\verbatim
+
+\subsection rcgsg2b RCG Compiler Components
 The RCG compiler consists of four primary components: \n
-        1) Matlab Simulink, which provides the Graphical User Interface (GUI) and text files which represent the code to be generated. In support of thi
-s, the RCG provides a standard parts library in the form of a library model file (CDS_PARTS.mdl).
-        2) Perl parser scripts, which read the Matlab .mdl files and produce:
-                a. C code file, in the form of a called subroutine, to be compiled for real-time execution.
-                b. EPICS State Notation Language (SNL) code, which acts as the interface between the real-time software EPICS database records.
-                c. EPICS database records, which act as the interface to the controls network via EPICS Channel Access (CA).        
-	3) Core header and C code files that are compiled as part of every application built by the RCG.
-        4) Standard set of configuration and Makefiles to compile the final executable kernel object.
-\endverbatim
+	-  Matlab Simulink, which provides the Graphical User Interface (GUI) and text files which represent the code to be generated. In \n 
+support of this, the RCG provides a standard parts library in the form of a library model file (CDS_PARTS.mdl).
+	- Perl parser scripts, which read the Matlab .mdl files and produce:
+		- C code file, in the form of a called subroutine, to be compiled for real-time execution.
+		- EPICS State Notation Language (SNL) code, which acts as the interface between the real-time software EPICS database records.
+		- EPICS database records, which act as the interface to the controls network via EPICS Channel Access (CA).        
+	- Core header and C code files that are compiled as part of every application built by the RCG.
+	- Standard set of configuration and Makefiles to compile the final executable kernel object.
 	
 
-\b 3.  \subpage devguidercg4 "CDS PARTS LIBRARY"
-\verbatim
-This section provides information on adding parts to the CDS Parts Library.
+\section rcgsg3 CDS PARTS LIBRARY 
+This section provides information on adding parts to the \ref devguidercg4 "CDS Parts Library".
 The CDS Parts Library consists of:
         - CDS_PARTS.mdl, which is a library of parts supported by the RCG.
         - "Part".mdl, which is a library part created for each part supported by the RCG. This individual part is then incorporated into the CDS_PARTS.m
 dl.
         - "Part".pm, which is a Perl module written to support code generation for each part in the library.
-\endverbatim
-\b 4.  \subpage devguidercg2 "PERL CODE MODULES"
-\verbatim
-Perl scripts are used by the RCG to generate the real-time and supporting runtime code. This section describes those Perl modules and the products that 
+
+
+\section rcgsg4  PERL CODE MODULES
+\ref devguidercg2 "PERL scripts" are used by the RCG to generate the real-time and supporting runtime code. This section describes those Perl modules and the products that 
 they produce.
-\endverbatim
 	
-<b> 5. C CODE MODULES </b> \n
+\section rcgsg5 C CODE MODULES 
 There are number of files containing C source routines which get compiled as part of the overall RCG make process. These fall into two main categories:
-	- \subpage devguidercg1 "Real-time C Code Modules"
-\verbatim
-Once the RCG Perl Modules have produced the C code for the user model, compilation continues by adding a number of common C code modules to finally produce a runtime kernel object. The primary C code source files are shown in the figure below.
+	- \ref devguidercg1 "Real-time C Code Modules" \n
+Once the RCG Perl Modules have produced the C code for the user model, compilation continues by adding a number of common C code modules to finally \n produce a runtime kernel object.
 
-
-\endverbatim
-	- \subpage devguideepics "EPICS State Notation Language (SNL) and C Files"
-\verbatim
-To interface the RT code with EPICS, the RCG produces an EPICS SNL file. At runtime, this sequencer moves data between shared memory and EPICS database records. In addition, a number of C code source files are provided to perform auxillary functions.
-\endverbatim
+	- \ref devguideepics "EPICS State Notation Language (SNL) and C Files" \n
+To interface the RT code with EPICS, the RCG produces an EPICS SNL file. At runtime, this sequencer moves data between shared memory and EPICS database \n
+records. In addition, a number of C code source files are provided to perform auxillary functions.
 	
 There is also separate code used to support the RT applications, as shown in the RT runtime figure above. These are:
 	- awgtpman.c
@@ -74,7 +65,7 @@ There is also separate code used to support the RT applications, as shown in the
 	- mbuf.c
 		- kvmem.c
 	
-\b 5.  \subpage devguidercg3 "CONFIGURATION and MAKEFILES"
+\section rcgsg6 Configuration and Makefiles
 \verbatim
 
 \endverbatim
