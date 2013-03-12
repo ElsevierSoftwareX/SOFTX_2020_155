@@ -1843,7 +1843,7 @@ udelay(1000);
 #endif
 	adcHoldTime = (cpuClock[CPU_TIME_CYCLE_START] - adcTime)/CPURATE;
 	// Avoid calculating the max hold time for the first few seconds
-	if (cycleNum == 0 && (startGpsTime+3) < cycle_gps_time) {
+	if (cycleNum != 0 && (startGpsTime+3) < cycle_gps_time) {
 		if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
 		if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
 		adcHoldTimeAvg += adcHoldTime;
