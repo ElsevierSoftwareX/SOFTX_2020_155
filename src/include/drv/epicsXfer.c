@@ -23,16 +23,17 @@ int ii;
   if((ii >= 0) && (ii < MAX_MODULES))
   {
         checkFiltReset(ii, dsp, pDsp, dspCoeff, MAX_MODULES, pCoeff);
-        dsp->inputs[ii].opSwitchE = pDsp->inputs[ii].opSwitchE;
+        // dsp->inputs[ii].opSwitchE = pDsp->inputs[ii].opSwitchE;
         pDsp->data[ii].filterInput = dsp->data[ii].filterInput;
         pDsp->data[ii].exciteInput = dsp->data[ii].exciteInput;
         pDsp->data[ii].output16Hz = dsp->data[ii].output16Hz;
         pDsp->data[ii].output = dsp->data[ii].output;
         pDsp->data[ii].testpoint = dsp->data[ii].testpoint;
         pDsp->inputs[ii].opSwitchP = dsp->inputs[ii].opSwitchP;
-        dsp->inputs[ii].limiter = pDsp->inputs[ii].limiter;
+        // dsp->inputs[ii].limiter = pDsp->inputs[ii].limiter;
         pDsp->inputs[ii].mask = dsp->inputs[ii].mask;
         pDsp->inputs[ii].control = dsp->inputs[ii].control;
+#if 0
 	if (dsp->inputs[ii].mask & 0x20000000) { /* Offset controlled by the FE */
         	pDsp->inputs[ii].offset = dsp->inputs[ii].offset;
 	} else {
@@ -48,7 +49,38 @@ int ii;
 	} else {
         	dsp->inputs[ii].gain_ramp_time = pDsp->inputs[ii].gain_ramp_time;
 	}
+#endif
   }
+}
+inline void updateFmSetpoints(
+			FILT_MOD *dsp,
+			FILT_MOD *pDsp,
+			COEF *dspCoeff,
+			VME_COEF *pCoeff)
+{
+int ii;
+
+	for(ii=0;ii<MAX_MODULES;ii++)
+	{
+		dsp->inputs[ii].opSwitchE = pDsp->inputs[ii].opSwitchE;
+		dsp->inputs[ii].limiter = pDsp->inputs[ii].limiter;
+		if (dsp->inputs[ii].mask & 0x20000000) { /* Offset controlled by the FE */
+			pDsp->inputs[ii].offset = dsp->inputs[ii].offset;
+		} else {
+			dsp->inputs[ii].offset = pDsp->inputs[ii].offset;
+		}
+		if (dsp->inputs[ii].mask & 0x40000000) { /* Gain controlled by the FE */
+			pDsp->inputs[ii].outgain = dsp->inputs[ii].outgain;
+		} else {
+			dsp->inputs[ii].outgain = pDsp->inputs[ii].outgain;
+		}
+		if (dsp->inputs[ii].mask & 0x80000000) { /* Ramp time controlled by the FE */
+			pDsp->inputs[ii].gain_ramp_time = dsp->inputs[ii].gain_ramp_time;
+		} else {
+			dsp->inputs[ii].gain_ramp_time = pDsp->inputs[ii].gain_ramp_time;
+		}
+	}
+
 }
 
 

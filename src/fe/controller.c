@@ -1435,10 +1435,9 @@ udelay(1000);
 
 
 	/* Update User code Filter Module Epics variables */
-	if(subcycle == HKP_FM_EPICS_UPDATE)
+	// if(subcycle == HKP_FM_EPICS_UPDATE)
+        if(subcycle == (DAQ_CYCLE_CHANGE - 1)) 
 	{
-	   if(!(daqCycle % 4))
-	   {
 		//.for(ii=0;ii<MAX_MODULES;ii++)
 		//{
 		// Following call sends all filter module data to epics each time called.
@@ -1446,8 +1445,8 @@ udelay(1000);
 			    //&dspCoeff[0], pCoeff[0]);
 		//}
 		// Send sync signal to EPICS sequencer
-		pLocalEpics->epicsOutput.epicsSync = daqCycle;
-	   }
+		// pLocalEpics->epicsOutput.epicsSync = daqCycle;
+		updateFmSetpoints(dspPtr[0], pDsp[0], &dspCoeff[0], pCoeff[0]);
 	}
 	// Spread out filter update, but keep updates at 16 Hz
 	// here we are rounding up:
@@ -1878,7 +1877,11 @@ udelay(1000);
           cycleNum %= CYCLE_PER_SECOND;
 	  clock1Min += 1;
 	  clock1Min %= CYCLE_PER_MINUTE;
-          if(subcycle == DAQ_CYCLE_CHANGE) daqCycle = (daqCycle + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+          if(subcycle == DAQ_CYCLE_CHANGE) 
+	  {
+		daqCycle = (daqCycle + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+		pLocalEpics->epicsOutput.epicsSync = daqCycle;
+}
           if(subcycle == END_OF_DAQ_BLOCK) /*we have reached the 16Hz second barrier*/
             {
               /* Reset the data cycle counter */

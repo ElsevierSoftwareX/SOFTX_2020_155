@@ -510,7 +510,7 @@ state monScreen{
 %% 	do{
 %%		usleep(2000);
 %%		myTimeout ++;
-%% 	}while((pEpics->epicsOutput.epicsSync == prev_seqTrig) && (myTimeout < 60));
+%% 	}while((pEpics->epicsOutput.epicsSync == prev_seqTrig) && (myTimeout < 250));
 %% } else {
 %% 	usleep(10000);
 %% }
