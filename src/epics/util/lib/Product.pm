@@ -19,7 +19,7 @@ sub printHeaderStruct {
 # Current part number is passed as first argument
 sub printEpics {
         my ($i) = @_;
-	print ::EPICS "INVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] double ai 0 field(PREC,\"3\")\n";
         print ::EPICS "INVARIABLE $::xpartName[$i]\_TRAMP $::systemName\.$::xpartName[$i]\_TRAMP int ai 0 field(PREC,\"0\")\n";
         print ::EPICS "OUTVARIABLE $::xpartName[$i]\_RMON $::systemName\.$::xpartName[$i]\_RMON int ao 0 field(PREC,\"0\")\n";
 }

@@ -23,13 +23,13 @@ sub printHeaderStruct {
 sub printEpics {
    	my ($i) = @_;
 
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_OFFSET $::systemName\.$::xpartName[$i]\_OFFSET float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_GAIN $::systemName\.$::xpartName[$i]\_GAIN float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_POLE $::systemName\.$::xpartName[$i]\_POLE float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_ZERO $::systemName\.$::xpartName[$i]\_ZERO float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_GAIN_TRAMP $::systemName\.$::xpartName[$i]\_GAIN_TRAMP float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_POLE_TRAMP $::systemName\.$::xpartName[$i]\_POLE_TRAMP float ai 0 field(PREC,\"3\")\n";
-	print ::EPICS "INVARIABLE $::xpartName[$i]\_ZERO_TRAMP $::systemName\.$::xpartName[$i]\_ZERO_TRAMP float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_OFFSET $::systemName\.$::xpartName[$i]\_OFFSET double ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_GAIN $::systemName\.$::xpartName[$i]\_GAIN double ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_POLE $::systemName\.$::xpartName[$i]\_POLE double ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_ZERO $::systemName\.$::xpartName[$i]\_ZERO double ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_GAIN_TRAMP $::systemName\.$::xpartName[$i]\_GAIN_TRAMP double ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_POLE_TRAMP $::systemName\.$::xpartName[$i]\_POLE_TRAMP double ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "INVARIABLE $::xpartName[$i]\_ZERO_TRAMP $::systemName\.$::xpartName[$i]\_ZERO_TRAMP double ai 0 field(PREC,\"3\")\n";
 }
 
 sub printFrontEndVars  {

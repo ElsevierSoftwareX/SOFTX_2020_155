@@ -17,7 +17,7 @@ sub printHeaderStruct {
 # Current part number is passed as first argument
 sub printEpics {
         my ($i) = @_;
-	print ::EPICS "PHASEDEG $::xpartName[$i] $::systemName\.$::xpartName[$i] float ai 0 field(PREC,\"3\")\n";
+	print ::EPICS "PHASEDEG $::xpartName[$i] $::systemName\.$::xpartName[$i] double ai 0 field(PREC,\"3\")\n";
 }
 
 
