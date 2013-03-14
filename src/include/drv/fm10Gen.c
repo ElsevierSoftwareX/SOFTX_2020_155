@@ -760,7 +760,7 @@ filterModuleD2(FILT_MOD *pFilt,     /* Filter module data  */
   fmInput = 0;
 
   /* Load the filter input testpoint to the input value. */
-  pFilt->data[modNum].filterInput = (float)(filterInput + fmInput);
+  pFilt->data[modNum].filterInput = (filterInput + fmInput);
 
   /* Add excitation signal to input value. */
   fmInput += (double)pFilt->data[modNum].exciteInput;

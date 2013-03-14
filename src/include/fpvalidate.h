@@ -1,3 +1,5 @@
+#define fpvalidate(a) a
+/*
 INLINE float 
 fpvalidate(float p) {
  float f = p;
@@ -9,3 +11,4 @@ fpvalidate(float p) {
   
  return f;
 }
+*/
