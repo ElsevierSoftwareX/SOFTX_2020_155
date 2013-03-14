@@ -91,12 +91,12 @@ typedef struct FM_GAIN_RAMP {
 
 /// Struct of data output for each filter module
 typedef struct FM_OP_DATA{
-  float filterInput;    ///< Input to the filter bank module 
-  float exciteInput;    ///< an Excitation point/bypasses input switch 
-  float inputTestpoint; ///< Filter Bank switched input plus excitation
-  float testpoint;      ///< Filter Bank output;always enabled
-  float output;         ///< Filter Bank Output;ENABLE/DISABLE/HOLD 
-  float output16Hz;     ///< 16hz Output; ENABLE/DISABLE/HOLD 
+  double filterInput;    ///< Input to the filter bank module 
+  double exciteInput;    ///< an Excitation point/bypasses input switch 
+  double inputTestpoint; ///< Filter Bank switched input plus excitation
+  double testpoint;      ///< Filter Bank output;always enabled
+  double output;         ///< Filter Bank Output;ENABLE/DISABLE/HOLD 
+  double output16Hz;     ///< 16hz Output; ENABLE/DISABLE/HOLD 
 }FM_OP_DATA;
 
 /// Struct of local memory filter module coefficients 
