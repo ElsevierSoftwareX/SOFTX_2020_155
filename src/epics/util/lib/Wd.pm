@@ -25,7 +25,7 @@ sub printEpics {
         print ::EPICS "OUTVARIABLE $::xpartName[$i]\_STAT $::systemName\.$::xpartName[$i]_STAT int ao 0 \n";
 	for (0 .. $::partInCnt[$i]-1) {
           my $a = 1 + $_;
-          print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_$a $::systemName\.$::xpartName[$i]\_VAR\[$_\] float ao 0 field(PREC,\"1\")\n";
+          print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_$a $::systemName\.$::xpartName[$i]\_VAR\[$_\] double ao 0 field(PREC,\"1\")\n";
         }
         print ::EPICS "INVARIABLE $::xpartName[$i]\_MAX $::systemName\.$::xpartName[$i]\_MAX int ai 0 field(PREC,\"0\")\n";
 }
