@@ -410,6 +410,11 @@ void *fe_start(void *arg)
   // Clear the FE reset which comes from Epics
   pLocalEpics->epicsInput.vmeReset = 0;
 
+  // Clear input masks
+  pLocalEpics->epicsInput.burtRestore_mask = 0;
+  pLocalEpics->epicsInput.dacDuoSet_mask = 0;
+  memset(proc_futures, 0, sizeof(proc_futures));
+
 #ifndef ADC_SLAVE
   // Look for DIO card or IRIG-B Card
   // if Contec 1616 BIO present, TDS slave will be used for timing.
@@ -1130,6 +1135,26 @@ udelay(1000);
         sampleCount = OVERSAMPLE_TIMES;
 	}
 // End of ADC Read **************************************************************************************
+
+	// Process future setpoints
+	for (jj = 0; jj < MAX_PROC_FUTURES; jj++) {
+		if (proc_futures[jj].proc_epics) {
+			if (proc_futures[jj].gps <=  cycle_gps_time
+				&& proc_futures[jj].cycle <= cycleNum) {
+				// It is time to execute the setpoint
+				switch (proc_futures[jj].proc_epics->type) {
+				  case 0: /* int */
+					*((int *)(((void *)pLocalEpics) + proc_futures[jj].proc_epics->idx)) = proc_futures[jj].val;
+					break;
+				  case 1: /* double */
+					*((double *)(((void *)pLocalEpics) + proc_futures[jj].proc_epics->idx)) = proc_futures[jj].val;
+					break;
+				}
+				// Invalidate this setpoint: mark as processed
+				proc_futures[jj].proc_epics = 0;
+			}
+		}
+	}
 
 // Call the front end specific software *****************************************************************
         rdtscl(cpuClock[CPU_TIME_USR_START]);

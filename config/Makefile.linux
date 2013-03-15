@@ -207,6 +207,7 @@ build/$(TARGET)/%.i: build/$(TARGET)/%.st
 build/$(TARGET)/%.st: src/epics/fmseq/% $(FMSEQFILES)
 	(cd src/epics/fmseq; \
 	 cat $(notdir $<) | cpp $(CFLAGS) -  | grep -v ^# | $(if $(FMSEQ), $(FMSEQ), $(RCG_SRC_DIR)/src/epics/util/fmseq.pl) $(notdir $<) &&\
+	 mv $(notdir $<)_proc.h ../../include/ &&\
 	 mv $(notdir $<).* ../../../build/$(TARGET))
 
 

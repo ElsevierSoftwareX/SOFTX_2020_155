@@ -1223,6 +1223,8 @@ print OUTH "\tint dcuId;\n";
 print OUTH "\tint diagReset;\n";
 print OUTH "\tint dacDuoSet;\n";
 print OUTH "\tint overflowReset;\n";
+print OUTH "\tchar burtRestore_mask;\n";
+print OUTH "\tchar dacDuoSet_mask;\n";
 if($diagTest > -1)
 {
 print OUTH "\tint bumpCycle;\n";
@@ -1282,6 +1284,13 @@ for($ii=0;$ii<$partCnt;$ii++)
 
 die "Unspecified \"host\" parameter in cdsParameters block\n" if ($targetHost eq "localhost");
 
+# Print masks
+for($ii=0;$ii<$partCnt;$ii++)
+{
+	if ($cdsPart[$ii] &&  $partType[$ii] eq "EpicsIn" ) {
+		print ::OUTH "\tchar $::xpartName[$ii]_mask;\n";
+	}
+}
 print EPICS "\n\n";
 print OUTH "} \U$systemName;\n\n";
 
@@ -2451,6 +2460,7 @@ print OUTM "\U$skeleton";
 print OUTM "_CODE\n";
 print OUTM "EXTRA_CFLAGS += -DFE_SRC=\\\"\L$skeleton/\L$skeleton.c\\\"\n";
 print OUTM "EXTRA_CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
+print OUTM "EXTRA_CFLAGS += -DFE_PROC_FILE=\\\"\L${skeleton}_proc.h\\\"\n";
 
 if($systemName eq "sei" || $useFIRs)
 {
