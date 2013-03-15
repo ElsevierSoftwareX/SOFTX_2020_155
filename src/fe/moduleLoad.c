@@ -1,6 +1,10 @@
 ///	@file moduleLoad.c
 ///	@brief File contains startup routines for real-time code.
 
+#include <asm/uaccess.h>
+#include <linux/ctype.h>
+
+
 // These externs and "16" need to go to a header file (mbuf.h)
 extern void *kmalloc_area[16];
 extern int mbuf_allocate_area(char *name, int size, struct file *file);
@@ -8,11 +12,20 @@ extern void *fe_start(void *arg);
 extern int run_on_timer;
 extern char daqArea[2*DAQ_DCU_SIZE];           // Space allocation for daqLib buffers
 
+#include FE_PROC_FILE
 
-/// /proc filesystem entry
+/// /proc filesystem directory entry
+struct proc_dir_entry *proc_dir_entry;
+/// /proc/{sysname}/status entry
 struct proc_dir_entry *proc_entry;
+/// /proc/{sysname}/gps entry
+struct proc_dir_entry *proc_gps_entry;
+/// /proc/{sysname}/epics directory entry
+struct proc_dir_entry *proc_epics_dir_entry;
+/// /proc/{sysname}/futures entry
+struct proc_dir_entry *proc_futures_entry;
 
-/// Routine to read the /proc file. \n \n
+/// Routine to read the /proc/{model}/status file. \n \n
 ///	 We give all of our information in one go, so if the
 ///	 user asks us if we have more information the \n
 ///	 answer should always be no.
@@ -23,7 +36,7 @@ struct proc_dir_entry *proc_entry;
 ///	  that it has no more information, or until its \n
 ///	  buffer is filled.
 int
-procfile_read(char *buffer,
+procfile_status_read(char *buffer,
 	      char **buffer_location,
 	      off_t offset, int buffer_length, int *eof, void *data)
 {
@@ -146,6 +159,273 @@ procfile_read(char *buffer,
 	return ret;
 }
 
+/// Routine to read the /proc/{model}/gps file. \n \n
+///
+int
+procfile_gps_read(char *buffer,
+	      char **buffer_location,
+	      off_t offset, int buffer_length, int *eof, void *data)
+{
+	*buffer = 0;
+
+	if (offset > 0) {
+		/* we have finished to read, return 0 */
+		return 0;
+	} else {
+		/* fill the buffer, return the buffer size */
+		/* print current GPS time and zero padded fraction */
+		return sprintf(buffer, "%d.%02d\n", cycle_gps_time, (cycleNum*100/CYCLE_PER_SECOND)%100);
+	}
+	// Never reached
+}
+
+/// Routine to read the /proc/{model}/epics/{chname} files. \n \n
+///
+int
+procfile_epics_read(char *buffer,
+	      char **buffer_location,
+	      off_t offset, int buffer_length, int *eof, void *data)
+{
+	*buffer = 0;
+
+	if (offset > 0) {
+		/* we have finished to read, return 0 */
+		return 0;
+	} else {
+		/* fill the buffer, return the buffer size */
+		struct proc_epics *pe = (struct proc_epics *)data;
+		switch (pe -> type) {
+			case 0: /* int */
+				return sprintf(buffer, "%s%d\n",
+					(*((char *)(((void *)pLocalEpics) + pe->mask_idx)))? "\t": "",
+					*((int *)(((void *)pLocalEpics) + pe->idx)));
+	//			printf("Accessing data at %x\n", (((void *)pLocalEpics) + pe->idx));
+				break;
+			case 1: /* double */ {
+				char s[64];
+				return sprintf(buffer, "%s%s\n",
+					(*((char *)(((void *)pLocalEpics) + pe->mask_idx)))? "\t": "",
+					dtoa_r(s, *((double *)(((void *)pLocalEpics) + pe->idx))));
+				break;
+			}
+		}
+	}
+	// Never reached
+}
+
+#define PROC_BLOCK_SIZE (3*1024)
+// Who owns /proc/{system} files
+#define PROC_UID 1001
+#define PROC_MODE 0644
+
+// Scan a double
+double
+simple_strtod(char *start, char **end) {
+	int integer;
+	if (*start != '.') {
+		integer = simple_strtol(start, end, 0);
+        	if (*end == start) return 0.0;
+		start = *end;
+	} else integer = 0;
+	if (*start != '.') return integer;
+	else {
+		start++;
+		double frac = simple_strtol(start, end, 0);
+        	if (*end == start) return integer;
+		int i;
+		for (i = 0; i < (*end - start); i++) frac /= 10.0;
+		return ((double)integer) + frac;
+	}
+	// Never reached
+}
+
+int
+procfile_epics_write(struct file *file, const char __user *buf,
+                     unsigned long count, void *data)
+{
+        ssize_t ret = -ENOMEM;
+        char *page;
+        char *start;
+ 	unsigned int future = 0;
+
+        if (count > PROC_BLOCK_SIZE)
+                return -EOVERFLOW;
+
+        start = page = (char *)__get_free_page(GFP_KERNEL);
+        if (page) {
+                ret = -EFAULT;
+                if (copy_from_user(page, buf, count))
+                        goto out;
+		ret = count;
+		page[count] = 0;
+		struct proc_epics *pe = (struct proc_epics *)data;
+	        char *end;
+		for(;isspace(*start);start++);
+		// See if this a single-character command
+		switch (*start) {
+			case 'm':
+				*((char *)(((void *)pLocalEpics) + pe->mask_idx)) = 1;
+				start++;
+				break;
+			case 'u':
+				*((char *)(((void *)pLocalEpics) + pe->mask_idx)) = 0;
+				start++;
+				break;
+			case 'f':
+				future=1;
+				start++;
+				break;
+		}
+		for(;isspace(*start);start++);
+		double new_double = 0.0;
+		int new_int = 0;
+		switch (pe -> type) {
+			case 0: /* int */ 
+			        new_int = simple_strtol(start, &end, 0);
+			        if (new_int > INT_MAX || new_int < INT_MIN)
+					goto out;
+				break;
+			case 1: /* double */ 
+			        new_double = simple_strtod(start, &end);
+				//printf("User wrote %s\n", dtoa1(new_double));
+				break;
+		}
+	        if (end == start) goto out;
+		if (!future) {
+			switch (pe -> type) {
+				case 0: /* int */ 
+					*((int *)(((void *)pLocalEpics) + pe->idx)) = new_int;
+					break;
+				case 1: /* double */ 
+					*((double *)(((void *)pLocalEpics) + pe->idx)) = new_double;
+					break;
+			}
+		} else if ((*((char *)(((void *)pLocalEpics) + pe->mask_idx)))) { // Allow to setup a futures only if masked
+			unsigned long cycle;
+			start = end;
+			for(;isspace(*start);start++);
+			// check for gps seconds
+			double gps = simple_strtod(start, &end);
+			if (end == start) {
+				gps = cycle_gps_time + 5;
+				cycle = cycleNum;
+			} else {
+				// Convert gps time
+				unsigned long gps_int = gps;
+				gps -= gps_int;
+				cycle = gps * CYCLE_PER_SECOND;
+				gps = gps_int;
+			}
+			// Add new future setpoint
+			// Find first available slot
+			int i;
+			for (i = 0; (i < MAX_PROC_FUTURES) && proc_futures[i].proc_epics; i++);
+			if (i == MAX_PROC_FUTURES) {
+				ret = -ENOMEM;
+			} else {
+				// Found a slot
+				proc_futures[i].cycle = cycle;
+				proc_futures[i].gps = gps;
+				proc_futures[i].val = pe->type? new_double: new_int;
+				proc_futures[i].proc_epics = pe; // FE code reads/writes this variable
+			}
+		} else ret = -EFAULT;
+        }
+out:
+        free_page((unsigned long)page);
+        return ret;
+}
+
+/// Routine to read the /proc/{model}/epics/futures files. \n \n
+///
+int
+procfile_futures_read(char *buffer,
+	      char **buffer_location,
+	      off_t offset, int buffer_length, int *eof, void *data)
+{
+	*buffer = 0;
+
+	if (offset > 0) {
+		/* we have finished to read, return 0 */
+		return 0;
+	} else {
+		/* fill the buffer, return the buffer size */
+		char b[128];
+		int i;
+		for (i = 0; i < MAX_PROC_FUTURES; i++) {
+			// Copy the entry to avoid race with the FE code
+			struct proc_futures pf = proc_futures[i];
+			if (pf.proc_epics) {
+				char s[64];
+				sprintf(b, "%s %s %d %d\n", pf.proc_epics->name, dtoa_r(s, pf.val), pf.gps, pf.cycle);
+				strcat(buffer, b);
+			}
+		}
+		return strlen(buffer);
+	}
+	// Never reached
+}
+
+
+static const ner = sizeof(proc_epics)/sizeof(struct proc_epics);
+
+/// Function to create /proc/{model}/epics/* files
+///
+int
+create_epics_proc_files() {
+	int i;
+
+	for (i = 0; i < ner; i++) proc_epics_entry[i]  = 0;
+
+	for (i = 0; i < ner; i++) {
+		//printf("%s\n", proc_epics[i].name);
+        	proc_epics_entry[i] = create_proc_entry(proc_epics[i].name, PROC_MODE, proc_epics_dir_entry);
+        	if (proc_epics_entry[i]  == NULL) {
+		        remove_epics_proc_files();
+                	printk(KERN_ALERT "Error: Could not initialize /proc/%s/epics/%s\n", SYSTEM_NAME_STRING_LOWER, proc_epics[i].name);
+                	return 0;
+        	}
+		proc_epics_entry[i]->mode = S_IFREG | S_IRUGO;
+		switch (proc_epics[i].in) {
+			case 0:
+				proc_epics_entry[i]->write_proc = procfile_epics_write;
+				proc_epics_entry[i]->mode |= S_IWUGO;
+				// Fall through
+			case 1:
+				proc_epics_entry[i]->read_proc = procfile_epics_read;
+				break;
+		}
+		proc_epics_entry[i]->uid 	 = PROC_UID;
+		proc_epics_entry[i]->gid 	 = 0;
+		proc_epics_entry[i]->size 	 = 128;
+		proc_epics_entry[i]->data 	 = proc_epics + i;
+	}
+	proc_futures_entry = create_proc_entry("futures", PROC_MODE, proc_epics_dir_entry);
+        if (proc_futures_entry  == NULL) {
+                remove_epics_proc_files();
+                printk(KERN_ALERT "Error: Could not initialize /proc/%s/epics/futures\n", SYSTEM_NAME_STRING_LOWER);
+                return 0;
+	}
+	proc_futures_entry->mode = S_IFREG | S_IRUGO;
+	proc_futures_entry->uid 	= PROC_UID;
+	proc_futures_entry->gid 	= 0;
+	proc_futures_entry->size	= 10240;
+	proc_futures_entry->read_proc = procfile_futures_read;
+	return 1;
+}
+
+/// Function to delete /proc/{model}/epics/* files
+///
+void remove_epics_proc_files() {
+	int i;
+	for (i = 0; i < ner; i++)
+		if (proc_epics_entry[i] != NULL) {
+			remove_proc_entry(proc_epics[i].name, proc_epics_dir_entry);
+			proc_epics_entry[i] = 0;
+		}
+	remove_proc_entry("futures", proc_epics_dir_entry);
+}
+
 // MAIN routine: Code starting point ****************************************************************
 #ifdef ADC_MASTER
 int need_to_load_IOP_first;
@@ -207,21 +487,58 @@ int init_module (void)
 	}
 #endif
 
-	proc_entry = create_proc_entry(SYSTEM_NAME_STRING_LOWER, 0644, NULL);
-	
-	if (proc_entry == NULL) {
-		remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
-		printk(KERN_ALERT "Error: Could not initialize /proc/%s\n",
-		       SYSTEM_NAME_STRING_LOWER);
+	// Create /proc filesystem tree
+	proc_dir_entry = proc_mkdir(SYSTEM_NAME_STRING_LOWER, NULL);
+	if (proc_dir_entry == NULL) {
+		printk(KERN_ALERT "Error: Could not initialize /proc/%s\n", SYSTEM_NAME_STRING_LOWER);
 		return -ENOMEM;
 	}
 	
-	proc_entry->read_proc = procfile_read;
-	//proc_entry->owner 	 = THIS_MODULE;
+	proc_entry = create_proc_entry("status", PROC_MODE, proc_dir_entry);
+	if (proc_entry == NULL) {
+		remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
+		printk(KERN_ALERT "Error: Could not initialize /proc/%s/status\n", SYSTEM_NAME_STRING_LOWER);
+		return -ENOMEM;
+	}
+	
+	proc_gps_entry = create_proc_entry("gps", PROC_MODE, proc_dir_entry);
+	if (proc_gps_entry == NULL) {
+		remove_proc_entry("status", proc_dir_entry);
+		remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
+		printk(KERN_ALERT "Error: Could not initialize /proc/%s/gps\n", SYSTEM_NAME_STRING_LOWER);
+		return -ENOMEM;
+	}
+
+	proc_epics_dir_entry = proc_mkdir("epics", proc_dir_entry);
+	if (proc_epics_dir_entry == NULL) {
+		remove_proc_entry("gps", proc_dir_entry);
+		remove_proc_entry("status", proc_dir_entry);
+		remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
+		printk(KERN_ALERT "Error: Could not initialize /proc/%s/epics\n", SYSTEM_NAME_STRING_LOWER);
+		return -ENOMEM;
+	}
+
+	proc_entry->read_proc = procfile_status_read;
 	proc_entry->mode 	 = S_IFREG | S_IRUGO;
-	proc_entry->uid 	 = 0;
+	proc_entry->uid 	 = PROC_UID;
 	proc_entry->gid 	 = 0;
 	proc_entry->size 	 = 10240;
+
+	proc_gps_entry->read_proc = procfile_gps_read;
+	proc_gps_entry->mode 	 = S_IFREG | S_IRUGO;
+	proc_gps_entry->uid 	 = PROC_UID;
+	proc_gps_entry->gid 	 = 0;
+	proc_gps_entry->size 	 = 128;
+	proc_gps_entry->data 	 = &cycle_gps_time;
+
+	// Create all /proc/{system}/epics/* files, one file per  existing Epics channel
+  	if (create_epics_proc_files() == 0) {
+		remove_proc_entry("epics", proc_dir_entry);
+		remove_proc_entry("gps", proc_dir_entry);
+		remove_proc_entry("status", proc_dir_entry);
+		remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
+		return -ENOMEM;
+	}
 
 	printf("startup time is %ld\n", current_time());
 	jj = 0;
@@ -634,6 +951,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	daqBuffer = (long)&daqArea[0];
  
 #ifndef NO_DAQ
+#ifndef SHMEM_DAQ
 	printf("Initializing Network\n");
 	numFb = 1;
 	if (numFb <= 0) {
@@ -641,6 +959,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 		return -1;
 	}
 	printf("Found %d frameBuilders on network\n",numFb);
+#endif
 #endif
 
 
@@ -651,6 +970,10 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	}
 	if (cnt == 10) {
 		// Cleanup
+		remove_epics_proc_files();
+		remove_proc_entry("epics", proc_dir_entry);
+		remove_proc_entry("gps", proc_dir_entry);
+		remove_proc_entry("status", proc_dir_entry);
 		remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
 #ifdef DOLPHIN_TEST
 		finish_dolphin();
@@ -684,8 +1007,13 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 }
 
 void cleanup_module (void) {
+	int i;
 	extern int __cpuinit cpu_up(unsigned int cpu);
 
+	remove_epics_proc_files();
+	remove_proc_entry("epics", proc_dir_entry);
+	remove_proc_entry("gps", proc_dir_entry);
+	remove_proc_entry("status", proc_dir_entry);
 	remove_proc_entry(SYSTEM_NAME_STRING_LOWER, NULL);
 
 #ifndef NO_CPU_SHUTDOWN
@@ -708,6 +1036,10 @@ void cleanup_module (void) {
         set_fe_code_idle(0, CPUID);
 	printkl("Will bring back CPU %d\n", CPUID);
         msleep(1000);
+	// Unmask all masked epics channels
+	for (i = 0; i < ner; i++) {
+  	  *((char *)(((void *)pLocalEpics) + proc_epics[i].mask_idx)) = 0;
+	}
 	// Bring the CPU back up
         cpu_up(CPUID);
         //msleep(1000);

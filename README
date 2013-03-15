@@ -1,3 +1,116 @@
+Fri Mar 15 15:18:12 PDT 2013
+
+There is a change to /proc/{system} file.
+
+First, a single file was replaced with the directory:
+
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ ls -altR /proc/x1ats/ | head -30
+/proc/x1ats/:
+total 0
+dr-xr-xr-x   3 root root     0 Mar 15 15:19 .
+dr-xr-xr-x   2 root root     0 Mar 15 15:19 epics
+-r--r--r--   1 1001 root   128 Mar 15 15:19 gps
+-r--r--r--   1 1001 root 10240 Mar 15 15:19 status
+dr-xr-xr-x 122 root root     0 Mar  5 02:39 ..
+
+/proc/x1ats/epics:
+total 0
+-r--r--r-- 1 1001 root   128 Mar 15 15:19 X1:ATS-_DCU_ID
+-r--r--r-- 1 1001 root   128 Mar 15 15:19 X1:FEC-77_ADC_WAIT
+-rw-rw-rw- 1 1001 root   128 Mar 15 15:19 X1:FEC-77_BURT_RESTORE
+-r--r--r-- 1 1001 root   128 Mar 15 15:19 X1:FEC-77_CPU_METER
+-r--r--r-- 1 1001 root   128 Mar 15 15:19 X1:FEC-77_CPU_METER_MAX
+-rw-rw-rw- 1 1001 root   128 Mar 15 15:19 X1:FEC-77_DACDT_ENABLE
+-r--r--r-- 1 1001 root   128 Mar 15 15:19 X1:FEC-77_DIAG_WORD
+-r--r--r-- 1 1001 root   128 Mar 15 15:19 X1:FEC-77_GDS_MON_0
+-r--r--r-- 1 1001 root   128 Mar 15 15:19 X1:FEC-77_GDS_MON_1
+
+/proc/x1ats/status has the status information now (same as before):
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ cat /proc/x1ats/status
+startGpsTime=1047420886
+uptime=365
+cpuTimeEverMax=2
+cpuTimeEverMaxWhen=1047420890
+adcHoldTime=61
+adcHoldTimeEverMax=63
+adcHoldTimeEverMaxWhen=1047420907
+adcHoldTimeMax=62
+adcHoldTimeMin=59
+adcHoldTimeAvg=60
+usrTime=0
+usrHoldTime=0
+cycle=12285
+gps=1047421251
+buildDate=Mar 15 2013 15:13:57
+cpuTimeMax(cur,past sec)=1,2
+cpuTimeMaxCycle(cur,past sec)=4140,4146
+cycleHist: 1=16383@17 2=1@4146
+
+In addition there is a gps file that report the current GPS seconds and a fraction:
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ cat /proc/x1ats/gps
+1047421291.43
+
+There is new directory /proc/x1ats/epics which has a file per Epics channel. These files,
+as indicated by the permissions, are read only or read/write. Reading them returns
+the current value of the corresponding Epics channel.
+
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ cat /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+1
+
+Read/write files are the setpoints. The mechanism to modify them is as follows: A set of 
+channels needs to be masked before a new values can be written. User needs to write single letter "m"
+to mask the channel or single letter "u" to unmask it.
+
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ echo m > /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ cat /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+        1
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ echo u > /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ cat /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+1
+
+Note the difference in readout value (the presence of a tab before the value) when channel is masked.
+
+After a channel is masked then its values cannot be changed via Epics channels access route. There are two 
+ways to change a value of a channel through the /proc file:
+
+1. Write to the file to change the value immediately:
+
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ echo m > /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ echo 123 > /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ cat /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+        123
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ caget X1:FEC-77_BURT_RESTORE
+X1:FEC-77_BURT_RESTORE         123
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ echo u > /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+controls@standalone /opt/rtcds/tst/x1/rtbtrunk/src/include $ caget X1:FEC-77_BURT_RESTORE
+X1:FEC-77_BURT_RESTORE         123
+
+2. 'f' command can be used to program value change in the future:
+
+controls@standalone ~ $ echo m > /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+controls@standalone ~ $ cat /proc/x1ats/gps
+1047422062.40
+controls@standalone ~ $ cat /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+        123
+controls@standalone ~ $ echo f 1 1047422162.40 > /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+controls@standalone ~ $ cat /proc/x1ats/epics/futures
+X1:FEC-77_BURT_RESTORE 1 1047422162 6553
+controls@standalone ~ $ cat /proc/x1ats/gps
+1047422110.13
+controls@standalone ~ $ cat /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+        123
+controls@standalone ~ $ cat /proc/x1ats/gps
+	1047422131.30
+controls@standalone ~ $ cat /proc/x1ats/gps
+	1047422163.82
+controls@standalone ~ $ cat /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+        1
+controls@standalone ~ $ cat /proc/x1ats/epics/futures
+controls@standalone ~ $ echo u > /proc/x1ats/epics/X1\:FEC-77_BURT_RESTORE
+
+The format of 'f' command is 'f' <new value> <gps time>. File /proc/x1ats/epics/futures
+can be examined to see currently programmed future value updates.
+
 Wed Aug 15 10:32:57 PDT 2012
 
 There is a change to controller.c which will require a new patch to the kernel to expose

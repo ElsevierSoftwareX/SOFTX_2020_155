@@ -152,6 +152,7 @@ while (<IN>) {
         }
         my $top_name = is_top_name($v_name);
    	my $tv_name;
+	my $proc_name;
         if ($top_name) {
 	  $tv_name = top_name_transform($v_name);
 	  $vdecl .= "assign evar_$v_name to \"{ifo}:${tv_name}\";\n";
@@ -164,6 +165,7 @@ while (<IN>) {
               $vlolo_decl .="assign evar_${v_name}_LoloSev to \"{ifo}:${tv_name}.LLSV\";\n";
             }
           }
+  	  $proc_name = "%SITE%:$tv_name";
  	} else {
 	  $vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
           if ($v_name ne "BURT_RESTORE") {
@@ -175,14 +177,27 @@ while (<IN>) {
               $vlolo_decl .="assign evar_${v_name}_LoloSev to \"{ifo}:{sys}-{subsys}${v_name}.LLSV\";\n";
             }
           }
+	  $proc_name = "%SITE%:%SYS%$v_name";
 	}
+
+	$vproc .= "{\"$proc_name\", "
+		. ($v_type eq "int"? "0": "1") .
+		" /* $v_type */ , 0 /* in */, (void *)&(pLocalEpics->$v_var) - (void *)pLocalEpics, ".
+		"(void *)&(pLocalEpics->${v_var}_mask) - (void *)pLocalEpics},\n";
+	$vproc_size++;
 
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
 	$vinit .= "pvPut(evar_$v_name);\n";
 	$vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
+	$vinit .= "%%       pEpics->${v_var}_mask = 0;\n";
 
+	$vupdate .= "%% if (pEpics->${v_var}_mask) {\n";
+	$vupdate .= "%%  evar_$v_name = pEpics->${v_var};\n";
+	$vupdate .= "pvPut(evar_$v_name);\n";
+	$vupdate .= "%% } else {\n";
 	$vupdate .= "pvGet(evar_$v_name);\n";
 	$vupdate .= "%%  rfm_assign(pEpics->${v_var}, evar_$v_name);\n";
+	$vupdate .= "%% }\n";
 
         if ($top_name) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}\")\n";
@@ -339,13 +354,20 @@ while (<IN>) {
 	$vdecl .= "$v_type evar_$v_name;\n";
         my $top_name = is_top_name($v_name);
    	my $tv_name;
+	my $proc_name;
         if ($top_name) {
 	  	$tv_name = top_name_transform($v_name);
 		$vdecl .= "assign evar_$v_name to \"{ifo}:${tv_name}\";\n";
+		$proc_name = "%SITE%:$tv_name";
 	} else {
 		$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
+		$proc_name = "%SITE%:%SYS%$v_name";
 	}
 
+	$vproc .= "{\"$proc_name\", "
+		. ($v_type eq "int"? "0": "1") .
+		" /* $v_type */ , 1 /* out */, (void *)&(pLocalEpics->$v_var) - (void *)pLocalEpics, 0},\n";
+	$vproc_size++;
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
 	$vinit .= "pvPut(evar_$v_name);\n";
 	$vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
@@ -947,6 +969,13 @@ if (keys %DAQ_Channels) {
 close OUTG;
 
 }
-
+open(PROC, ">$ARGV[0]_proc.h") || die "cannot open $ARGV[0]_proc.h file for writing";
+print PROC "struct proc_dir_entry *proc_epics_entry[$vproc_size];\n";
+print PROC "struct proc_epics proc_epics[] = {\n";
+$vproc =~ s/%SITE%/$site/g;
+$vproc =~ s/%SYS%/$systems[0]/g;
+print PROC $vproc;
+print PROC "};\n";
+close PROC;
 
 exit(0);

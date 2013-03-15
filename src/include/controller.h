@@ -284,3 +284,15 @@ unsigned int CDO32Output[MAX_DIO_MODULES];
 
 #endif
 
+// /proc epics channel interface
+struct proc_epics { char *name; unsigned short type; unsigned short in; unsigned long idx; unsigned long mask_idx;};
+// Maximum number of setpoint futures
+#define MAX_PROC_FUTURES 256
+// Array of setpoint futures
+struct proc_futures {
+	struct proc_epics *proc_epics; // Pointer to the proc_epics array entry
+	unsigned long gps;	// GPS time of the setting in the future
+	unsigned long cycle;	// code cycle within "gps" second of the setting in the future
+	double val;		// New value
+} proc_futures[MAX_PROC_FUTURES];
+
