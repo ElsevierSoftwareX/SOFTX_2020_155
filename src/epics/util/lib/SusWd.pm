@@ -13,6 +13,7 @@ sub printHeaderStruct {
         print ::OUTH "\tint $::xpartName[$i];\n";
         print ::OUTH "\tint $::xpartName[$i]\_MAX;\n";
         print ::OUTH "\tdouble $::xpartName[$i]\_VAR\[20\];\n";
+	return "\tchar $::xpartName[$i]\_MAX_mask;\n";
 }
 
 # Print Epics variable definitions

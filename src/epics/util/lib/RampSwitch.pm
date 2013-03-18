@@ -11,6 +11,7 @@ sub partType {
 sub printHeaderStruct {
         my ($i) = @_;
 	print ::OUTH "\tint $::xpartName[$i];\n";
+	return "\tchar $::xpartName[$i]_mask;\n";
 }
 
 # Print Epics variable definitions

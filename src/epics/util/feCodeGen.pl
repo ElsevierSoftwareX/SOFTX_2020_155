@@ -1275,22 +1275,28 @@ print OUTH "} SEI_WATCHDOG;\n\n";
 print OUTH "typedef struct \U$systemName {\n";
 print EPICS "\nEPICS CDS_EPICS dspSpace coeffSpace epicsSpace\n\n";
 #//		- Make call to <em>::printHeaderStruct</em> in supporting lib/.pm part files for app specific data structure.
+my $header_masks;
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if ($cdsPart[$ii]) {
-	  ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
+	  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
+	  if (length($masks) > 5) {
+	  	$header_masks .= $masks;
+		#print "mask=$masks";
+	  }
 	}
 }
 
 die "Unspecified \"host\" parameter in cdsParameters block\n" if ($targetHost eq "localhost");
 
 # Print masks
-for($ii=0;$ii<$partCnt;$ii++)
-{
-	if ($cdsPart[$ii] &&  $partType[$ii] eq "EpicsIn" ) {
-		print ::OUTH "\tchar $::xpartName[$ii]_mask;\n";
-	}
-}
+#for($ii=0;$ii<$partCnt;$ii++)
+#{
+	#if ($cdsPart[$ii] &&  $partType[$ii] eq "EpicsIn" ) {
+		#print ::OUTH "\tchar $::xpartName[$ii]_mask;\n";
+	#}
+#}
+print OUTH $header_masks;
 print EPICS "\n\n";
 print OUTH "} \U$systemName;\n\n";
 

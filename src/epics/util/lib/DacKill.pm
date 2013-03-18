@@ -25,6 +25,7 @@ int $MYNAME\_BPTIME;
 int $MYNAME\_PANIC;
 END
 
+	return "\tchar $MYNAME\_PANIC_mask;\n";
 }
 
 # Print Epics variable definitions

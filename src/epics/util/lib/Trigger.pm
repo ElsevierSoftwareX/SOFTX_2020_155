@@ -27,6 +27,7 @@ int $MYNAME\_STATE;
 int $MYNAME\_RESET;
 int $MYNAME\_THRESHOLD;
 END
+	return "\tchar $::xpartName[$i]_THRESHOLD_mask\n";
 }
 
 # Print Epics variable definitions

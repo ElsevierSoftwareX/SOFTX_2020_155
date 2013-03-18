@@ -17,6 +17,15 @@ sub printHeaderStruct {
 	print ::OUTH "\tdouble $::xpartName[$i]\_Z;\n";
 	print ::OUTH "\tdouble $::xpartName[$i]\_TRAMP;\n";
 	print ::OUTH "\tint $::xpartName[$i]\_DORAMP;\n";
+$here = <<END;
+\tchar $::xpartName[$i]\_OFFSET_mask;\n
+\tchar $::xpartName[$i]\_K_mask;\n
+\tchar $::xpartName[$i]\_P_mask;\n
+\tchar $::xpartName[$i]\_Z_mask;\n
+\tchar $::xpartName[$i]\_TRAMP_mask;\n
+\tchar $::xpartName[$i]\_DORAMP_mask;\n
+END
+	return $here;
 }
 
 sub printEpics {

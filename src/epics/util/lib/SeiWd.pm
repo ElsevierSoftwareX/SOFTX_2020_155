@@ -15,6 +15,19 @@ sub printHeaderStruct {
 	$::useWdName[$::useWdCounter] =~ s/^([A-Z]*)_.*$/\1/g;
 	$::useWdCounter++;
         print ::OUTH "\tSEI_WATCHDOG $::xpartName[$i];\n";
+$here = <<END;
+\tchar	$::xpartName[$i]\_MAX_S_mask;\n
+\tchar	$::xpartName[$i]\_MAX_PV_mask;\n
+\tchar	$::xpartName[$i]\_MAX_PH_mask;\n
+\tchar	$::xpartName[$i]\_MAX_GV_mask;\n
+\tchar	$::xpartName[$i]\_MAX_GH_mask;\n
+\tchar	$::xpartName[$i]\_MAX_SF_mask;\n
+\tchar	$::xpartName[$i]\_MAX_PVF_mask;\n
+\tchar	$::xpartName[$i]\_MAX_PHF_mask;\n
+\tchar	$::xpartName[$i]\_MAX_GVF_mask;\n
+\tchar	$::xpartName[$i]\_MAX_GHF_mask;\n
+END
+	return $here;
 }
 
 # Print Epics variable definitions
