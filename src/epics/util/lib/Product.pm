@@ -13,6 +13,11 @@ sub printHeaderStruct {
 	print ::OUTH "\tdouble $::xpartName[$i];\n";
         print ::OUTH "\tint $::xpartName[$i]\_TRAMP;\n";
         print ::OUTH "\tint $::xpartName[$i]\_RMON;\n";
+$here = <<END
+\tchar $::xpartName[$i]_mask;\n
+\tchar $::xpartName[$i]_TRAMP_mask;\n
+END
+	return $here;
 }
 
 # Print Epics variable definitions

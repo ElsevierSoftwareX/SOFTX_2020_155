@@ -14,6 +14,7 @@ sub printHeaderStruct {
         print ::OUTH "\tint $::xpartName[$i]_STAT;\n";
         print ::OUTH "\tint $::xpartName[$i]\_MAX;\n";
         print ::OUTH "\tdouble $::xpartName[$i]\_VAR\[$::partInCnt[$i]\];\n";
+	return "\tchar int $::xpartName[$i]\_MAX_mask;\n";
 }
 
 # Print Epics variable definitions

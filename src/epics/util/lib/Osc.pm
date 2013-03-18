@@ -21,6 +21,14 @@ sub printHeaderStruct {
         print ::OUTH "\tdouble $::xpartName[$i]\_SINGAIN;\n";
         print ::OUTH "\tdouble $::xpartName[$i]\_COSGAIN;\n";
 	print ::OUTH "\tdouble $::xpartName[$i]\_TRAMP;\n";
+$here = <<END;
+\tchar $::xpartName[$i]\_FREQ_mask;\n
+\tchar $::xpartName[$i]\_CLKGAIN_mask;\n
+\tchar $::xpartName[$i]\_SINGAIN_mask;\n
+\tchar $::xpartName[$i]\_COSGAIN_mask;\n
+\tchar $::xpartName[$i]\_TRAMP_mask;\n
+END
+	return $here;
 }
 
 # Print Epics variable definitions

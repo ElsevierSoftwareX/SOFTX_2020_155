@@ -18,6 +18,16 @@ sub printHeaderStruct {
 	print ::OUTH "\tdouble $::xpartName[$i]\_GAIN_TRAMP;\n";
 	print ::OUTH "\tdouble $::xpartName[$i]\_POLE_TRAMP;\n";
 	print ::OUTH "\tdouble $::xpartName[$i]\_ZERO_TRAMP;\n";
+$here = <<END;
+\tchar $::xpartName[$i]\_OFFSET_mask;\n
+\tchar $::xpartName[$i]\_GAIN_mask;\n
+\tchar $::xpartName[$i]\_POLE_mask;\n
+\tchar $::xpartName[$i]\_ZERO_mask;\n
+\tchar $::xpartName[$i]\_GAIN_TRAMP_mask;\n
+\tchar $::xpartName[$i]\_POLE_TRAMP_mask;\n
+\tchar $::xpartName[$i]\_ZERO_TRAMP_mask;\n
+END
+	return $here;
 }
 
 sub printEpics {

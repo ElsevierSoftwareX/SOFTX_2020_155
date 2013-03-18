@@ -12,6 +12,11 @@ sub printHeaderStruct {
         my ($i) = @_;
         print ::OUTH "\tint $::xpartName[$i]\_RESET;\n";
         print ::OUTH "\tdouble $::xpartName[$i]\_TRIGGER;\n";
+$here = <<END;
+\tchar $::xpartName[$i]\_RESET_mask;\n
+\tchar $::xpartName[$i]\_TRIGGER_mask;\n
+END
+	return $here;
 }
  
 # Print Epics variable definitions
