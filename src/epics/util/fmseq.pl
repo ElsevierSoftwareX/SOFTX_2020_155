@@ -88,6 +88,22 @@ sub top_name_transform {
    return $name;
 };
 
+#// add_vproc_entry
+#// Add new record to the /proc table
+sub add_vproc_entry {
+	($proc_name, $v_type, $out, $v_var, $nrow, $ncol) =  @_;
+	$nrow = 0 if ! defined $nrow;
+	$ncol = 0 if ! defined $ncol;
+	$vproc .= "{\"$proc_name\", (void *)&(pLocalEpics->$v_var) - (void *)pLocalEpics, ";
+	if ($out) {
+		$vproc .= "0, ";
+	} else {
+		$vproc .= "(void *)&(pLocalEpics->${v_var}_mask) - (void *)pLocalEpics, ";
+	}
+	$vproc .= ($v_type eq "int"? "0": "1") .  " /* $v_type */ , $out, $nrow, $ncol}, \n";
+	$vproc_size++;
+}
+
 while (<IN>) {
     s/^\s//g;
     s/\s$//g;
@@ -180,11 +196,12 @@ while (<IN>) {
 	  $proc_name = "%SITE%:%SYS%$v_name";
 	}
 
-	$vproc .= "{\"$proc_name\", "
-		. ($v_type eq "int"? "0": "1") .
-		" /* $v_type */ , 0 /* in */, (void *)&(pLocalEpics->$v_var) - (void *)pLocalEpics, ".
-		"(void *)&(pLocalEpics->${v_var}_mask) - (void *)pLocalEpics},\n";
-	$vproc_size++;
+	add_vproc_entry($proc_name, $v_type, 0, $v_var);
+	#$vproc .= "{\"$proc_name\", "
+		#. ($v_type eq "int"? "0": "1") .
+		#" /* $v_type */ , 0 /* in */, (void *)&(pLocalEpics->$v_var) - (void *)pLocalEpics, ".
+		#"(void *)&(pLocalEpics->${v_var}_mask) - (void *)pLocalEpics},\n";
+	#$vproc_size++;
 
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
 	$vinit .= "pvPut(evar_$v_name);\n";
@@ -364,10 +381,11 @@ while (<IN>) {
 		$proc_name = "%SITE%:%SYS%$v_name";
 	}
 
-	$vproc .= "{\"$proc_name\", "
-		. ($v_type eq "int"? "0": "1") .
-		" /* $v_type */ , 1 /* out */, (void *)&(pLocalEpics->$v_var) - (void *)pLocalEpics, 0},\n";
-	$vproc_size++;
+	add_vproc_entry($proc_name, $v_type, 1, $v_var);
+	#$vproc .= "{\"$proc_name\", "
+		#. ($v_type eq "int"? "0": "1") .
+		#" /* $v_type */ , 1 /* out */, (void *)&(pLocalEpics->$v_var) - (void *)pLocalEpics, 0},\n";
+	#$vproc_size++;
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
 	$vinit .= "pvPut(evar_$v_name);\n";
 	$vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
@@ -508,19 +526,35 @@ while (<IN>) {
 
 	$minit .= "%%    }\n";
 
+	$mupdate .= "%%  unsigned int __lcl_msk = pEpics->${m_var}_mask;\n";
 	$mupdate .= "%%  for (ii = 0; ii < ${x}; ii++)\n";
 	$mupdate .= "%%    for (jj = 0; jj < ${y}; jj++) {\n";
         $mupdate .= "%%      ij = ii * ${y} + jj;\n";
-	$mupdate .= "        pvGet(matrix${m_name}[ij]);\n";
-	$mupdate .= "%%      rfm_assign(pEpics->${m_var}[ii][jj], matrix${m_name}[ij]);\n";
-
+	$mupdate .= "%% 	if (__lcl_msk) {\n";
+	$mupdate .= "%%           matrix${m_name}[ij] = pEpics->${m_var}[ii][jj];\n";
+	$mupdate .= "             pvPut(matrix${m_name}[ij]);\n";
+	$mupdate .= "%%		} else {\n";
+	$mupdate .= "             pvGet(matrix${m_name}[ij]);\n";
+	$mupdate .= "%%           rfm_assign(pEpics->${m_var}[ii][jj], matrix${m_name}[ij]);\n";
+	$mupdate .= "%%		} \n";
 	$mupdate .= "%%    }\n";
 
         my $top_name = is_top_name($m_name);
    	my $tv_name;
+	my $proc_name;
         if ($top_name) {
 	  	$tv_name = top_name_transform($m_name);
+		$proc_name = "%SITE%:$tv_name";
+	} else {
+		$proc_name = "%SITE%:%SYS%$m_name";
 	}
+
+	my $s = $/; $/="_"; chomp $proc_name; $/ = $s;
+	add_vproc_entry($proc_name, "double", 0, $m_var, $x, $y);
+	#$vproc .= "{\"$proc_name\", 1, ".
+		#"0 /* in */, (void *)&(pLocalEpics->$m_var) - (void *)pLocalEpics, ".
+		#"(void *)&(pLocalEpics->${m_var}_mask) - (void *)pLocalEpics},\n";
+	#$vproc_size++;
 
 	for ($i = 1; $i < $x+1; $i++) {
 	    for ($j = 1; $j < $y+1; $j++) {

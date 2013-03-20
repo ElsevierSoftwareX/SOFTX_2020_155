@@ -194,6 +194,7 @@ procfile_epics_read(char *buffer,
 	} else {
 		/* fill the buffer, return the buffer size */
 		struct proc_epics *pe = (struct proc_epics *)data;
+		unsigned int ncel = pe->nrow * pe->ncol; // Matrix size
 		switch (pe -> type) {
 			case 0: /* int */
 				return sprintf(buffer, "%s%d\n",
@@ -202,10 +203,26 @@ procfile_epics_read(char *buffer,
 	//			printf("Accessing data at %x\n", (((void *)pLocalEpics) + pe->idx));
 				break;
 			case 1: /* double */ {
-				char s[64];
-				return sprintf(buffer, "%s%s\n",
-					(*((char *)(((void *)pLocalEpics) + pe->mask_idx)))? "\t": "",
-					dtoa_r(s, *((double *)(((void *)pLocalEpics) + pe->idx))));
+				char lb[64];
+				if (ncel) { /* Print Matrix */
+					unsigned int i, j;
+					unsigned int nrow = pe->nrow;
+					unsigned int ncol = pe->ncol;
+					unsigned int s = 0;
+					unsigned int masked = *((char *)(((void *)pLocalEpics) + pe->mask_idx));
+					for (i = 0; i < nrow; i++)  {
+						if (masked) s += sprintf(buffer + s, "\t");
+						for (j = 0; j < ncol; j++)  {
+							s += sprintf(buffer + s, "%s ", dtoa_r(lb, ((double *)(((void *)pLocalEpics) + pe->idx))[ncol*i + j]));
+						}
+						s += sprintf(buffer + s, "\n");
+					}
+					return s;
+				}  else { /* Print single value */
+					return sprintf(buffer, "%s%s\n",
+						(*((char *)(((void *)pLocalEpics) + pe->mask_idx)))? "\t": "",
+						dtoa_r(lb, *((double *)(((void *)pLocalEpics) + pe->idx))));
+				}
 				break;
 			}
 		}
@@ -256,8 +273,8 @@ procfile_epics_write(struct file *file, const char __user *buf,
                 ret = -EFAULT;
                 if (copy_from_user(page, buf, count))
                         goto out;
-		ret = count;
 		page[count] = 0;
+		ret = count;
 		struct proc_epics *pe = (struct proc_epics *)data;
 	        char *end;
 		for(;isspace(*start);start++);
@@ -282,8 +299,10 @@ procfile_epics_write(struct file *file, const char __user *buf,
 		switch (pe -> type) {
 			case 0: /* int */ 
 			        new_int = simple_strtol(start, &end, 0);
-			        if (new_int > INT_MAX || new_int < INT_MIN)
+			        if (new_int > INT_MAX || new_int < INT_MIN) {
+                			ret = -EFAULT;
 					goto out;
+				}
 				break;
 			case 1: /* double */ 
 			        new_double = simple_strtod(start, &end);
@@ -291,16 +310,30 @@ procfile_epics_write(struct file *file, const char __user *buf,
 				break;
 		}
 	        if (end == start) goto out;
+		// See if this is a matrix
+		int idx = 0;
+		int ncel = pe->nrow * pe->ncol;
+		if (ncel) {
+			// Expect the cell index number next
+			start = end;
+			for(;isspace(*start);start++);
+			idx = simple_strtol(start, &end, 0);
+			if (idx >= ncel || idx < 0) {
+               			ret = -EFAULT;
+				goto out;
+			}
+			
+		}
 		if (!future) {
 			switch (pe -> type) {
 				case 0: /* int */ 
 					*((int *)(((void *)pLocalEpics) + pe->idx)) = new_int;
 					break;
-				case 1: /* double */ 
-					*((double *)(((void *)pLocalEpics) + pe->idx)) = new_double;
+				case 1: /* double */
+					((double *)(((void *)pLocalEpics) + pe->idx))[idx] = new_double;
 					break;
 			}
-		} else if ((*((char *)(((void *)pLocalEpics) + pe->mask_idx)))) { // Allow to setup a futures only if masked
+		} else if ((*((char *)(((void *)pLocalEpics) + pe->mask_idx)))) { // Allow to setup a future only if masked
 			unsigned long cycle;
 			start = end;
 			for(;isspace(*start);start++);
@@ -328,6 +361,7 @@ procfile_epics_write(struct file *file, const char __user *buf,
 				proc_futures[i].gps = gps;
 				proc_futures[i].val = pe->type? new_double: new_int;
 				proc_futures[i].proc_epics = pe; // FE code reads/writes this variable
+				proc_futures[i].idx = idx;
 			}
 		} else ret = -EFAULT;
         }
@@ -357,7 +391,12 @@ procfile_futures_read(char *buffer,
 			struct proc_futures pf = proc_futures[i];
 			if (pf.proc_epics) {
 				char s[64];
-				sprintf(b, "%s %s %d %d\n", pf.proc_epics->name, dtoa_r(s, pf.val), pf.gps, pf.cycle);
+				char s1[64];
+				if (pf.idx) { /* matrix */
+					sprintf(b, "%s %s@%s %d %d\n", pf.proc_epics->name, dtoa_r(s, pf.val), dtoa_r(s1, pf.idx), pf.gps, pf.cycle);
+				} else {
+					sprintf(b, "%s %s %d %d\n", pf.proc_epics->name, dtoa_r(s, pf.val), pf.gps, pf.cycle);
+				}
 				strcat(buffer, b);
 			}
 		}
@@ -397,7 +436,8 @@ create_epics_proc_files() {
 		}
 		proc_epics_entry[i]->uid 	 = PROC_UID;
 		proc_epics_entry[i]->gid 	 = 0;
-		proc_epics_entry[i]->size 	 = 128;
+		unsigned int ncel = proc_epics[i].nrow * proc_epics[i].ncol; // Enough space to deal with the matrix
+		proc_epics_entry[i]->size 	 = ncel? 64 * ncel: 128;
 		proc_epics_entry[i]->data 	 = proc_epics + i;
 	}
 	proc_futures_entry = create_proc_entry("futures", PROC_MODE, proc_epics_dir_entry);

@@ -1147,7 +1147,7 @@ udelay(1000);
 					*((int *)(((void *)pLocalEpics) + proc_futures[jj].proc_epics->idx)) = proc_futures[jj].val;
 					break;
 				  case 1: /* double */
-					*((double *)(((void *)pLocalEpics) + proc_futures[jj].proc_epics->idx)) = proc_futures[jj].val;
+					((double *)(((void *)pLocalEpics) + proc_futures[jj].proc_epics->idx))[proc_futures[jj].idx] = proc_futures[jj].val;
 					break;
 				}
 				// Invalidate this setpoint: mark as processed

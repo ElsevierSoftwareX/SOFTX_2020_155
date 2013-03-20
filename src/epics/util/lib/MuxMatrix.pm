@@ -33,6 +33,7 @@ sub printHeaderStruct {
 	my $matIns = $::partInCnt[$::partInNum[$i][0]];
         print ::EPICS "MATRIX $::xpartName[$i]_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]\n";
         print ::OUTH "\tdouble $::xpartName[$i]\[$matOuts\]\[$matIns\];\n";
+	return "\tchar $::xpartName[$i]_mask;\n";
 }
 
 # Print Epics variable definitions
