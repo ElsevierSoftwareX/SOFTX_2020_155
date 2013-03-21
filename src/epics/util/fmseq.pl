@@ -526,6 +526,7 @@ while (<IN>) {
 
 	$minit .= "%%    }\n";
 
+	$mupdate .= "%%  {\n";
 	$mupdate .= "%%  unsigned int __lcl_msk = pEpics->${m_var}_mask;\n";
 	$mupdate .= "%%  for (ii = 0; ii < ${x}; ii++)\n";
 	$mupdate .= "%%    for (jj = 0; jj < ${y}; jj++) {\n";
@@ -538,6 +539,7 @@ while (<IN>) {
 	$mupdate .= "%%           rfm_assign(pEpics->${m_var}[ii][jj], matrix${m_name}[ij]);\n";
 	$mupdate .= "%%		} \n";
 	$mupdate .= "%%    }\n";
+	$mupdate .= "%%  }\n";
 
         my $top_name = is_top_name($m_name);
    	my $tv_name;
