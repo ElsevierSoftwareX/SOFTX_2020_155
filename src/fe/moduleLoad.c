@@ -351,6 +351,7 @@ procfile_epics_write(struct file *file, const char __user *buf,
 			}
 			// Add new future setpoint
 			// Find first available slot
+			// :TODO: need to put a spinlock on proc_futures
 			int i;
 			for (i = 0; (i < MAX_PROC_FUTURES) && proc_futures[i].proc_epics; i++);
 			if (i == MAX_PROC_FUTURES) {
@@ -360,8 +361,11 @@ procfile_epics_write(struct file *file, const char __user *buf,
 				proc_futures[i].cycle = cycle;
 				proc_futures[i].gps = gps;
 				proc_futures[i].val = pe->type? new_double: new_int;
-				proc_futures[i].proc_epics = pe; // FE code reads/writes this variable
 				proc_futures[i].idx = idx;
+
+				// This pointer has to be set last; Indicates a vailid entry for the
+ 				// real-time code in controller.c
+				proc_futures[i].proc_epics = pe; // FE code reads/writes this variable
 			}
 		} else ret = -EFAULT;
         }
