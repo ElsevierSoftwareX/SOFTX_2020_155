@@ -3,6 +3,7 @@
 
 #include <asm/uaccess.h>
 #include <linux/ctype.h>
+#include <linux/spinlock_types.h>
 
 
 // These externs and "16" need to go to a header file (mbuf.h)
@@ -256,6 +257,7 @@ simple_strtod(char *start, char **end) {
 	// Never reached
 }
 
+
 int
 procfile_epics_write(struct file *file, const char __user *buf,
                      unsigned long count, void *data)
@@ -351,10 +353,12 @@ procfile_epics_write(struct file *file, const char __user *buf,
 			}
 			// Add new future setpoint
 			// Find first available slot
-			// :TODO: need to put a spinlock on proc_futures
 			int i;
+			static DEFINE_SPINLOCK(fut_lock);
+			spin_lock(&fut_lock);
 			for (i = 0; (i < MAX_PROC_FUTURES) && proc_futures[i].proc_epics; i++);
 			if (i == MAX_PROC_FUTURES) {
+				spin_unlock(&fut_lock);
 				ret = -ENOMEM;
 			} else {
 				// Found a slot
@@ -366,6 +370,7 @@ procfile_epics_write(struct file *file, const char __user *buf,
 				// This pointer has to be set last; Indicates a vailid entry for the
  				// real-time code in controller.c
 				proc_futures[i].proc_epics = pe; // FE code reads/writes this variable
+				spin_unlock(&fut_lock);
 			}
 		} else ret = -EFAULT;
         }
