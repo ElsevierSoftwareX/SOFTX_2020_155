@@ -2451,7 +2451,7 @@ open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 print OUTM "# CPU-Shutdown Real Time Linux\n";
 print OUTM "KBUILD_EXTRA_SYMBOLS=$rcg_src_dir/src/drv/ExtraSymbols.symvers\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
-print OUTM "EXTRA_CFLAGS += --std=gnu99 -O -w -I../../include\n";
+print OUTM "EXTRA_CFLAGS += -O -w -I../../include\n";
 print OUTM "EXTRA_CFLAGS += -I/opt/gm/include\n";
 print OUTM "EXTRA_CFLAGS += -I/opt/mx/include\n";
 
