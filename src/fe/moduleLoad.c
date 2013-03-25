@@ -381,6 +381,8 @@ out:
 
 /// Routine to read the /proc/{model}/epics/futures files. \n \n
 ///
+// :TODO: the function does not check for buffer overflow, Linux kernel catches it though,
+//  when proc_futures contains too many entries.
 int
 procfile_futures_read(char *buffer,
 	      char **buffer_location,
