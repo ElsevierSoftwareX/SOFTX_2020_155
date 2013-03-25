@@ -241,14 +241,14 @@ double
 simple_strtod(char *start, char **end) {
 	int integer;
 	if (*start != '.') {
-		integer = simple_strtol(start, end, 0);
+		integer = simple_strtol(start, end, 10);
         	if (*end == start) return 0.0;
 		start = *end;
 	} else integer = 0;
 	if (*start != '.') return integer;
 	else {
 		start++;
-		double frac = simple_strtol(start, end, 0);
+		double frac = simple_strtol(start, end, 10);
         	if (*end == start) return integer;
 		int i;
 		for (i = 0; i < (*end - start); i++) frac /= 10.0;
@@ -300,7 +300,7 @@ procfile_epics_write(struct file *file, const char __user *buf,
 		int new_int = 0;
 		switch (pe -> type) {
 			case 0: /* int */ 
-			        new_int = simple_strtol(start, &end, 0);
+			        new_int = simple_strtol(start, &end, 10);
 			        if (new_int > INT_MAX || new_int < INT_MIN) {
                 			ret = -EFAULT;
 					goto out;
@@ -319,7 +319,7 @@ procfile_epics_write(struct file *file, const char __user *buf,
 			// Expect the cell index number next
 			start = end;
 			for(;isspace(*start);start++);
-			idx = simple_strtol(start, &end, 0);
+			idx = simple_strtol(start, &end, 10);
 			if (idx >= ncel || idx < 0) {
                			ret = -EFAULT;
 				goto out;
