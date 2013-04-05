@@ -1,0 +1,40 @@
+/*! \page rcgSect6 6.0  Running the RCG Application
+\section rcgSect61 6.1 Automatic Scripts
+\verbatim
+During the make install process, scripts are generated in the /opt/rtcds/<site>/<ifo>/scripts area for conveniently starting and 
+stopping the user application. This directory should be put into the user’s PATH. Note that the user must have super user privileges, 
+as the real-time code needs to be inserted into the kernel.
+
+To start the RCG processes, type ‘start<sys>’, where <sys> is the name of the model file. This will result in:
+	• The EPICS code being started, along with an automatic restoration of the last EPICS settings (if EPICS Back Up 
+	  and Restore Tool (BURT) is in the user’s path and a back-up had been made previously).
+	• The awgtpman process will be executed to provide GDS support for this system. Note again that this task will only 
+	  function properly if the appropriate system parameters have been set up, as described in the SysAdmin Guide.
+	• The real-time code thread will be executed and inserted into the kernel of the assigned CPU core. 
+
+To verify that the software is functioning, use the auto generated MEDM screen, described below in section 6.2. There are 
+also log files produced in the target areas for the EPICS and real-time code that provide additional diagnostic information.
+
+To stop the software, execute the kill<sys> script, where again <sys> is the model name. This will kill all tasks associated with this model.
+
+\endverbatim
+\section rcgSect62 6.2 Runtime Diagnostics
+Once the code is running, a number of diagnostics, in the form of EPICS MEDM screens and log files, are available to verify proper operation. \n
+These diagnostics are described in <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?.submit=Number&docid=T1100625&version=">LIGO T1100625 RCG Runtime Diagnostics</a> \n
+\section rcgSect63 6.3 Additional Run Time Tools
+\verbatim
+Along with EPICS MEDM, various additional tools are available to support real-time applications during run-time. These are listed below, 
+with a few described briefly in the following subsections. For more detailed information, see the appropriate user guides for these applications.
+	• EPICS Back Up and Restore Tool (BURT): Used to save and restore operator settings. 
+	• EPICS StripTool: Provides strip charting for EPICS channels.
+	• Dataviewer: Allows users to view DAQ and GDS TP channels, either live or from disk.
+	• ligoDV: Based on the GEO developed tool, this is a MATLAB tool for reading, plotting and analyzing DAQ data.
+	• Diagnostic Test Tool (DTT): Allows for analysis of live or recorded DAQ/TP data, particularly useful for calculating 
+	  and plotting transfer functions.
+	• DaqGui: A graphical user interface for setting up DAQ channels.
+	• Foton: A GUI for the development of filter coefficients for use by the real-time software.
+	• Ezca based scripting tools, along with TDS scripting tools. These tools allow for the addition of automated scripts 
+	  which may be used to sequence through operator settings automatically.
+
+\endverbatim
+*/

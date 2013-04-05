@@ -1,0 +1,109 @@
+/*! \page rcgSect4 4.0 RCG Overview
+The RCG uses MATLAB Simulink as a ‘drawing’ tool to allow real-time control applications to be developed via a Graphical User Interface (GUI). A basic description of this process, the RCG itself, and resulting application software is provided in the following subsections.\n
+
+\section sect41 4.1 Code Development
+Code development is done by graphically placing and connecting blocks in the MATLAB Simulink editor. The ‘building blocks’ \n
+supported by the RCG are included in the CDS_PARTS.mdl file. The contents of the present file are shown below, with further \n
+descriptions of the blocks listed in \ref rcgSect7 "Section 7 RCG PARTS LIBRARY". Parts from the CDS library are \n
+copied (drag and drop) to the user application window and then connected to show processing/signal flow. This Simulink \n
+diagram is then saved to a user defined .mdl file, which is then processed by the RCG to provide the final real-time \n
+and supporting software which run on a CDS front end computer.  Many examples of models built for aLIGO use can be found \n
+in the <a href="https://redoubt.ligo-wa.caltech.edu/websvn/">CDS SVN repository. </a> \n
+Simple examples of code models are described in \ref mdlExample "Example Models".
+\n
+\image html CDS_PARTS.png "RCG Parts Library"
+\n
+\section sect42 4.2 Code Generator
+
+\verbatim
+The code generation process is shown in the following figure and the basic process is described below. 
+
+1) Once the user application is complete, it is saved to the user .mdl file in a predefined CDS software directory.
+
+2) The ‘make’ command is now invoked in the designated CDS build directory. This results in the following actions:
+	a) A CDS Perl script (feCodeGen.pl) parses the user .mdl file and creates:
+		1) Real-time C source code for all of the parts in the user .mdl file, in the sequence 
+		   specified by the links between parts.
+		2) A Makefile to compile the real-time C code.
+		3) A text file for use by a second Perl script to generate the EPICS code.
+		4) An EPICS code Makefile.
+		5) A header file, common to both the real-time code and EPICS interface code, for the communication 
+		   of data between the two during run-time.
+		6) Reads/appends inter-process communications signals to an interferometer common text file.
+	b) The compiler is invoked on the application C code file, which links in the standard CDS developed C 
+	   code modules, and produces a real-time executable.
+	c) The Perl script for EPICS code generation (fmseq.pl) is invoked, which:
+		1) Produces an EPICS database file.
+		2) Produces an executable code object, based on EPICS State Notation Language (SNL). 
+		   This code module provides communication between CDS workstations on the CDS Ethernet and the 
+		   real-time FE (Front End) code.
+		3) Produces basic EPICS MEDM (Motif Editor & Display Manager) screens.
+		4) An EPICS BURT (Back Up and Restore Tool) back-up file for use in saving EPICS settings.
+		5) The header for the CDS standard filter module coefficient file.
+		6) A list of all test points, for use by the GDS (Global Diagnostic System) tools.
+		7) A basic DAQ (Data Acquisition) file.
+		8) A list of all EPICS channels for use by the EDCU (EPICS Data Collection Unit).
+
+\endverbatim
+\image html codeGen.png "RCG Code Generation"
+\section sect43 4.3 Run-time Software
+\verbatim
+The primary software modules that get executed on the CDS FE computers are shown in the figure below. 
+The computer itself is a multi-CPU and/or multi-core machine. The operating system is presently GPL 
+Gentoo Linux, with a LIGO CDS custom patch for real-time applications. CDS applications are spread 
+among the various CPU cores:
+	o CPU core 0: Reserved for the Linux OS and non-realtime critical applications.
+	o CPU core 1: Reserved for a special case RCG model known as in Input/Output Processor (IOP).
+	o CPU core 2 thru n: Real-time user applications built from the RCG to perform system control. Any core not reserved \n
+			     for a real-time application is made available to the Linux OS to run non-realtime applications.
+
+\endverbatim
+\image html rcgRuntime.png "RCG Run-time Software Overview"
+\subsection sect431 4.3.1 Real-Time
+Each application built using the RCG from a Matlab model becomes a self-contained kernel module. At run time, it is loaded \n
+onto the CPU core specified in the model. This code makes use of the Linux OS facilities to load the code and allow the code \n
+ to perform its necessary initialization. At that point, the code takes full control of the CPU core and that core is removed \n
+ from the Linux list of available resources. This prevents that core from being interrupted and/or having other processes \n 
+loaded by Linux. Code scheduling in now entirely controlled by the special case IOP software.
+\subsubsection sect4311 4.3.1.1 IOP
+\verbatim
+The IOP task is essentially the real-time scheduler for the FE computer. It is triggered by the arrival of data from the 
+ADC modules, which are in turn slaved to the timing system (65536Hz clocks), which is locked to the GPS. It is also the  
+conduit for passed data ADC and DAC data between the PCIe modules and the user applications.  
+Key functions of the IOP include:
+	• Initialization and setup all PCIe I/O devices. 
+	• Timing control, including:
+		o Starting the clocks from the Timing Slave module in the I/O chassis such that startup begins synchronous 
+		  with the GPS 1PPS mark.
+		o Monitoring ADC data ready, caused by a GPS clock cycle, and initiating a real-time code cycle. 
+		  This information is passed on to the user applications to synchronously trigger their code cycles.
+	• Synchronously reading ADC module data and passing data on to user applications.
+	• Synchronously writing data to DAC modules, data which is received from user applications.
+	• Providing real-time network and binary I/O module memory address information to user applications, 
+	  such that these applications may communicate directly with those devices.
+
+\endverbatim
+\subsubsection sect4312 4.3.1.2 User Application
+User applications are those that perform actual control functions. There may be as many user applications running on \n
+an FE computer as there are available cores (total cores – 2). Timing of these processes is controlled by the IOP and \n
+all ADC/DAC data is passed via the IOP to ensure synchronous read/write. The user applications may run at rates from 2K to 64K.
+\subsection sect432 4.3.2 Non-Real-Time
+\verbatim
+The ‘Non-Real-time’ CPU core(s) runs the following tasks:
+	• EPICS based network interface. This consists of several components:
+		o EPICS State Notation Language (SNL) sequencer software. This component is built and compiled by the RCG 
+		  for each application. This code is designed to communicate data between the real-time application and the EPICS database records.
+		o EPICS Database Records: Produced by the RCG and loaded at runtime. This EPICS database becomes the communication 
+		  mechanism to various EPICS tools used in operating the system, via EPICS Channel Access (ECA). These tools include 
+		  such items as MEDM, used to create and run operator interfaces.
+	• GDS Test Point Manager (TPM) and Arbitrary Waveform Generator (AWG). For each real-time application, a copy of awgtpman 
+		is started. This program allows for the injection of test signals into the real-time application (AWG) and the 
+		readout of testpoint data, on demand, via the aLIGO DAQ system.
+	• MX Stream: In a distributed system, this software communicates DAQ data from real-time applications to the aLIGO DAQ 
+		system for archival and/or real-time diagnostic use. A single instance of this program handles this DAQ data for 
+		all real-time applications on that particular computer.
+
+\endverbatim
+*/
+
+
