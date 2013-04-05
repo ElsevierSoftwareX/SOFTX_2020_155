@@ -14,7 +14,7 @@ This documentation is divided into the following sections:
 */
 /*! \page intro CDS Overview Documentation
 The Control and Data System (CDS) Real-time Code Generator (RCG) software was developed for the aLIGO project. \n
-Related Documents \n
+System hardware/software overviews may be found in the DCC. Two such documents are linked below: \n\n
 <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=60665">LIGO P1100052 New Control and Data Acquisition System in the Advanced LIGO Project</a> \n
 <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7834">LIGO T0900612 aLIGO CDS Design Overview</a>
 */
