@@ -10,7 +10,7 @@ The CDS_PARTS.mdl file, supplied with the RCG code checkout, provides all parts 
         - \ref rcgSect76 "Oscillator/Phase Shifter Components"
         - \ref rcgSect77 "Watchdog Components"
         - \ref CcodeUse "User Defined C Code Modules"
-        - \ref DaqChanUse "DAQ Channels"
+        - \ref DaqPartUse "DAQ Channels"
 \image html CDS_PARTS.png "RCG Parts Library"
 
 */

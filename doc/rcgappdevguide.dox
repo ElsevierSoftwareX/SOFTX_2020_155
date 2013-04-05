@@ -9,29 +9,20 @@ The software produced by the RCG includes:
 
 \endverbatim
 
-\section ug1 2.0 Document Overview
-This document describes the means to develop a user application using the RCG. It contains the following sections: \n \n
-	• Reference Section (3): The RCG produces software which integrates with various other components of CDS software. In addition, there are various files and services which must be configured prior to code operation. These items are covered under separate documentation, listed in the reference section.  \n
-	• RCG Overview (4): Provides a brief description of the RCG, its components and resulting code threads. \n
-	• Application Development (5): Provides the basics for developing an application using the RCG. \n
-	• Software Execution (6): Describes how to start and stop the software application. \n
-	• RCG Software Parts Library (7): Describes the various components supported by the RCG. \n
-\n
-\section ug17 3.0 References
+\section ug17 2.0 References
 Additional RCG design overview documentation can be found at the following links:\n
 
 <a href="https://dcc.ligo.org/LIGO-T080135-v5">LIGO T080135 aLIGO CDS RCG Application Developers Guide in DCC</a> \n
 <a href="https://dcc.ligo.org/LIGO-T0900612-v2">LIGO T0900612 aLIGO CDS Design Overview</a> \n
 
-\ref rcgSect4 "4.0 RCG Overview" \n
-\ref rcgSect5 "5.0 RCG Application Development" \n
-\ref rcgSect6 "6.0 Running the RCG Application" \n
-\ref rcgSect7 "7.0 RCG PARTS LIBRARY"
-
-\section usg1 8.0 Scripting with kaTools
-\ref KaTools "KaTools"
-
-\ref rcgsg2a "Runtime Overview"
+\section ug1 3.0 Document Overview
+This document describes the means to develop a user application using the RCG. It contains the following sections: \n \n
+	• \ref rcgSect4 "4.0 RCG Overview": Provides a brief description of the RCG, its components and resulting code threads. \n
+	• \ref rcgSect5 "5.0 RCG Application Development": Provides the basics for developing an application using the RCG. \n
+	• \ref rcgSect6 "6.0 Running the RCG Application": Describes how to start and stop the software application. \n
+	• \ref rcgSect7 "7.0 RCG PARTS LIBRARY": Describes the various components supported by the RCG. \n
+	• \ref KaTools "8.0 Scripting with KaTools": Preliminary doc on synchronous scripting tools. \n
+\n
 
 */
 

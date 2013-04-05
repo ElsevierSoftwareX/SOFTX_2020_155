@@ -1,0 +1,16 @@
+/*! \page DaqPartUse RCG DAQ Part 
+
+\section Function
+The function of this part is to define model channels that are to be sent to the DAQ system for data storage.
+
+\image html daqPart.png DAQ Channel Definition Block
+
+\section Usage
+This part may be placed at any level within an RCG model. Entries must be made as:
+ChannelName AcquisitionRate
+\section Operation
+During the code installation process, these channels will be set within the MODELNAME.ini file to acquire data \n
+at the desired rate. This file is used by both the RT runtime code and the DAQ system to determine which channels \n
+ are to be recorded and at what rate. Presently, all values are stored by the DAQ as 32 bit floating point numbers.
+
+*/
