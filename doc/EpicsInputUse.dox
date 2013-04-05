@@ -7,6 +7,7 @@ The purpose of this RCG component is to define a Contec digitial I/O module that
 /// \n
 /// \n
 /// \n\n 2. Related Documentation \n\n
+/// \ref epicsPart2 "Setting EPICS Database Fields" \n
 ///	\n
 ///	\verbatim
 3. General Description and Use within an RCG model.
