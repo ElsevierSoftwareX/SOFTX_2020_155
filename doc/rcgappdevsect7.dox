@@ -1,0 +1,143 @@
+/*! \page rcgSect7 7.0 RCG Parts Library
+The CDS_PARTS.mdl file, supplied with the RCG code checkout, provides all parts which are supported by the RCG in a single Matlab library. Along with the supported parts, brief documentation on part usage is provided by a Matlab DOC part.
+
+        - \ref ParameterUse "Parameter Block"
+        - \ref rcgSect71 "I/O Components"
+        - \ref rcgSect72 "Standard Simulink Components"
+        - \ref rcgSect73 "EPICS Components"
+        - \ref rcgSect74 "FILTER Components"
+        - \ref rcgSect75 "Matrix Components"
+        - \ref rcgSect76 "Oscillator/Phase Shifter Components"
+        - \ref rcgSect77 "Watchdog Components"
+        - \ref CcodeUse "User Defined C Code Modules"
+        - \ref DaqChanUse "DAQ Channels"
+\image html CDS_PARTS.png "RCG Parts Library"
+
+*/
+
+/*! \page rcgSect71 RCG I/O Parts Library
+The I/O Parts Libary within the CDS_PARTS.mdl contains all of the RCG components which support I/O modules/methods, as shown in the following f
+igure.
+
+        - \ref AdcUse "ADC and ADC Selector"
+        - \ref DacUse "DAC Modules"
+        - \ref IPCxUse "Inter-Process Communication (IPCx)"
+        - \ref Contec6464DioUse "Contec DIO-6464L-PE Module"
+        - \ref DioUse "Acces 24bit Binary Input Module"
+        - \ref RioUse "Acces 8bit Relay I/O Module"
+        - \ref Rio1Use "Acces 16bit Relay I/O Module"
+
+\image html IoParts.png "CDS_PARTS I/O Library"
+*/
+
+/*! \page rcgSect72 RCG Simulink Parts Library
+The Simulink Parts Libary within the CDS_PARTS.mdl contains all of the standard Matlab parts which are supported by the RCG, as shown in the following figure.
+
+        - \ref UnitDelayUse "Unit Delay"
+        - \ref SubsystemUse "Matlab Subsystem"
+        - \ref MathFuncUse "Math Function"
+        - \ref FcnUse "Matlab Fcn"
+        - \ref GotoFromUse "GOTO/FROM"
+
+
+\image html simParts.png "Simulink Library"
+*/
+
+/*! \page rcgSect74 RCG FILTER Parts Library
+        - \ref FiltUse "Standard IIR Filter Module"
+        - \ref FiltCtrlUse "Filter Module w/Control"
+        - \ref FiltCtrl2Use "Filter Module w/Control 2"
+        - \ref FiltPolyphaseUse "Polyphase FIR Filter Module"
+        - \ref trueRmsUse "True RMS"
+        - \ref ExcTpUse "GDS EXC/TP"
+        - \ref FiltBiquadUse "Biquad IIR Filter Module"
+
+\image html filterMods.png "CDS_PARTS FILTER Library"
+*/
+
+/*! \page rcgSect75 RCG Matrix Parts Library
+
+        - \ref MuxMatrixUse "MuxMatrix"
+        - \ref FiltMuxMatrixUse "Filter MuxMatrix"
+        - \ref BitWordUse "Bit2Word and Word2Bit"
+
+\image html MatrixParts.png "Matrix Library"
+*/
+/*! \page rcgSect76 RCG Oscillator/Phase Shifter Library
+
+        - \ref PhaseUse "Phase"
+        - \ref WfsPhaseUse "WFS Phase"
+        - \ref OscUse "Oscillator"
+        - \ref NoiseUse "Noise Generator"
+        - \ref SatCountUse "Saturation Counter"
+
+\image html OscPhase.png "OSC/Phase Library"
+*/
+
+/*! \page rcgSect73 RCG EPICS Parts Library
+\section epicsPart1 OverviewThe EPICS Parts Libary within the CDS_PARTS.mdl contains all of the RCG components which support EPICS, as shown in the following figure. The R
+CG also allows the initialization settings for EPICS Input and Output records, as described in the \ref epicsPart2 "next section".
+
+        - \ref EpicsInputUse "EPICS Input"
+        - \ref EpicsOutputUse "EPICS Output"
+        - \ref EpicsMomentaryUse "EPICS Momentary"
+        - \ref EpicsBinInUse "EPICS Binary Input"
+        - \ref EpicsRemoteIntlkUse "EPICS Remote Intlk"
+        - \ref EzcaUse "EPICS EZCA Read/Write"
+
+
+        - \ref EpicsStringInUse "EPICS String Input"
+        - \ref EpicsMbbiUse "EPICS Multi-bit Binary Input"
+        - \ref EpicsMbboUse "EPICS Multi-bit Binary Output"
+        - \ref EpicsCounterUse "EPICS Counter"
+\image html EpicsParts.png "CDS_PARTS EPICS Library"
+*/
+
+/*! \page  epicsPart2 Setting EPICS Database Fields for Epics Input and Epics Output Parts.
+
+EPICS database records have a number of parameters, or fields, which may be set as part of the database record definition file. For each model 
+compiled with the RCG, a corresponding EPICS database file is created for runtime support. \n
+
+By default, the RCG only sets the precision of EPICS input and output records in the database file (PREC=3), which provides 3 decimal places of
+ precision when viewed on an MEDM screen. \n
+
+The RCG does allow users to define parameter fields for the EPICS Input and Output part types within the user model, as described below. A comp
+lete list of parameters supported by EPICS AO and AI record types can be found in the EPICS user guide online. \n
+
+To define these EPICS fields:
+        - Place an EPICS Input or Output part into the model and provide a name for the part.
+        - Open the block properties window for the part. By default, the Description field provides some basic info on the part (Figure 1 below
+).
+
+\image html epicsField1.png "Block Properties (Default)"
+
+        - Delete the provided Description information. (While RCG will ignore this default information, it is probably best to delete it for ea
+se of reading later).
+        - Add EPICS database parameter information, as shown in Figure 2 below, in the Description area.
+                - Each entry must be of the form ‘field(PARAM,”VALUE”)’, where:
+                        - PARAM = The EPICS parameter definition, such as PREC, HIGH, LOW, etc. The most commonly used are:
+                                - PREC (Precision), number of decimal places returned to MEDM screens for viewing. Note that this does not affe
+ct the calculation precision ie all EPICS values are treated as doubles in the runtime code.
+                                - HOPR (High Operating Range)
+                                - LOPR (Low Operating Range)
+                                - Alarm Severities: HHSV, HSV,LSV,LLSV.
+                                - Alarm Setpoints: HIHI, HIGH, LOW, LOLO
+                        - VALUE = Desired default setting, which must be in quotes.
+                                - Alarm Severities are limited to the following:
+                                        - MAJOR
+                                        - MINOR
+                                        - INVALID
+                                        - NO_ALARM (Default, if not specified)
+                                - Other entries listed above are all taken as floating point numbers.
+        - Field definition entries may be separated by white space or new lines, or both, as shown in the example below.
+
+
+\b WARNING: Presently, the RCG does not perform any checking of the validity of user definitions provided with the field entries. As long as th
+e entry is of the right form, the RCG will add it to the database definition file. Therefore, it is the user responsibility to ensure entries a
+re correct. Entry error checking is presently being worked for RCG release V2.7 and later.
+
+
+\image html epicsField2.png "Block Properties w/EPICS field entries"
+*/
+
+
