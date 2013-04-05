@@ -141,3 +141,13 @@ re correct. Entry error checking is presently being worked for RCG release V2.7 
 */
 
 
+/*! \page rcgSect77 RCG Watchdog Components
+While the RCG supports several watchdog components, the primary two in use are the WD and DACKILL parts. \n\n
+\section rcgSect771 WD
+This part was developed to provide watchdog protection for aLIGO large optics. A further description of this part and its \n
+usage can be found in <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?.submit=Number&docid=G1200172&version=">LIGO-G1200172 RCG V2.5 WatchDog Code Design</a> \n
+
+\ref rcgSect772 "cdsDacKill"
+
+\image html wdParts.png "Watchdog Modules"
+*/

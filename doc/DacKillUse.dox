@@ -1,0 +1,94 @@
+
+/*! \page rcgSect772 cdsDacKill
+
+\section rcgSec7721 Function
+The purpose of this part is force the code to output a zero (0) value to all DAC channels defined in the model, \n
+regardless of the actual application code requested value. This part typically receives a fault condition input  \n
+from user specified fault monitoring logic/code within the RCG model. 
+
+NOTE: Only one (1) DacKill part may exist in a given RCG model.
+
+\image html dacKill.png "cdsDacKill Part" \n
+
+\section rcgSec7722 Usage
+\verbatim
+This part has two inputs and two outputs, as described below. Input connections are required, but output 
+connections are optional.
+
+Inputs
+	1) Signal (0 = Fault, 1 = OK)
+	2) Bypass Time (Number of seconds WD can be bypassed)
+
+Outputs 
+	1) Watchdog Status (0 = Tripped, 1 = OK, 2 = Bypassed
+	2) Reset (Held HIGH (1) for one code cycle when WD reset
+\endverbatim
+
+\section rcgSec7723 Operation
+This part has three defined states, as described in the following subsections.
+
+\subsection rcgSec77231 MONITOR State
+\verbatim
+In this state, the code monitors the Sig input. As long as this input is one (1), all DAC outputs are sent as 
+calculated by the user application. If the Sig input goes to zero (0), the code state will go to FAULT.
+
+To achieve this state requires two things:
+	1) Sig input must be set to one (1) 
+	2) After 1 above, a reset must be sent via the EPICS RESET channel (see next section).
+
+On code startup, the default condition of the DacKill part is “FAULT”, and requires the above two conditions 
+to clear the fault condition.
+\endverbatim
+
+\subsection rcgSec77232 FAULT State
+\verbatim
+A fault state is entered when:
+	1) Application containing this part is first started, regardless of the Sig input value.
+	2) Sig input is zero and code is not presently in Bypass state.
+	3) Panic input is set to one via the EPICS PANIC input.
+
+In this state, DAC outputs are set to zero. Which DAC channels are set to zero is dependent on the code model type:
+	1) IOP: All channels of all DAC modules connected to the computer will be set to zero.
+	2) User Application: Only those DAC channels defined in the user application will be set to zero. For example, 
+	   if two user applications (app1 and app2) are sharing channels on the same DAC module, and the Sig input goes 
+	   to zero only in app1, then: 
+		a. DAC channels defined by app1 will go to zero
+		b. Those defined by app2 will continue to function normally
+
+Note that once in this state, it will become “latched” ie even if the Sig input returns to one (OK), a RESET will be required 
+to return to the MONITOR state. This state is also maintained as long as the PANIC input from EPICS is set to one.
+\endverbatim
+
+\subsection rcgSec77233 BYPASS State
+\verbatim
+Entering this state requires:
+	1) PANIC is not set to one, via the PANIC EPICS channel
+	2) BPSET EPICS channel momentarily set to one.
+
+While in this state, the Sig input is ignored and all DAC channel outputs will continue to be passed normally from the user 
+application code until either:
+	1) Bypass time expires. Note that once in the Bypass state, all further BPSET requests are ignored ie one cannot force reset of the Bypass timer and thereby extend the Bypass time. Once the timer has expired, the code will return to the MONITOR state (no RESET required).
+	2) EPICS PANIC is set to one. This will force the Bypass timer to be cleared and code to go to the FAULT state.
+
+\endverbatim
+\section rcgSec7724 Associated EPICS Records
+\verbatim
+- Three EPICS Input Channels 
+	1) _RESET: Momentary that:
+		- a) Clears Trip State, if, and only if, Sig Input = OK
+		- b) Turns OFF WD Bypass Mode
+		- c) Sends 1 to RST output
+	2) _BPSET: (Momentary) Turns ON Bypass mode (all DAC outputs enabled) for number of seconds specified at 
+		   Bypass Time input. During this time, the WD ignores Sig Input.
+	3) _PANIC: Binary input, trips and holds WD in a trip condition until PANIC turned OFF (0). Also clears BPSET, 
+		   such that WD will not come back up in Bypass mode when PANIC turned OFF.
+- Two EPICS Output Channels
+	1)  _STATE:  The part output (wD) status:
+		a. 0 = Tripped (Fault)
+		b. 1 = OK
+		c. 2 = In BYPASS Mode
+	2)  _BPTIME: Amount of time, in seconds, remaining on the bypass timer when in bypass mode.
+
+
+\endverbatim
+*/
