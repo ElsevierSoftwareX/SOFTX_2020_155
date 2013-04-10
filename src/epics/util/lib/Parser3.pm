@@ -5,6 +5,11 @@ use Cwd;
 
 @ISA = ('Exporter');
 
+#//     \page Parser3 Parser3.pm
+#//     Parser3.pm - Parses MATLAB file and flattens model into single subsystem.
+#//
+#// \n
+
 
 require "lib/Tree.pm";
 
@@ -20,7 +25,8 @@ $root = {
 	NEXT => [], # array of references to leaves
 };
 
-# Print block information, including all the fields
+#// \n \n \b sub \b print_node \n
+#// Print block information, including all the fields \n\n
 sub print_node {
    ($node) =  @_;
    #if ($node->{PRINTED} != 1) {
@@ -33,20 +39,21 @@ sub print_node {
    #}
 };
 
-# We need to sort DACs by placing 18bit frst and sorting on card number
+#// \b sub \b sortDacs \n
+#// We need to sort DACs by placing 18bit frst and sorting on card number \n
 # For example:
 # 18bit card 0
 # 18bit card 1
 # 16bit card 0
 # 16bit card 1
 #
-# The following arrays will need to be shuffled (sorted)
-#  $::dacPartNum
-#  $::dacType
-#  $::dacNum
-# The following array will need to be reassigned with valid numbers based on the new order
-# from the information in $::daqcPartNum array:
-#  $::card2array
+#// The following arrays will need to be shuffled (sorted) \n
+#//  $::dacPartNum \n
+#//  $::dacType \n
+#//  $::dacNum n\
+#// The following array will need to be reassigned with valid numbers based on the new order
+#// from the information in $::daqcPartNum array: \n
+#//  $::card2array \n\n
 #
 sub sortDacs {
         my @dacs;
@@ -97,6 +104,8 @@ sub sortDacs {
 	return 1;
 }
 
+#// \b sub \b parse \n
+#// Primary model parser routine \n\n
 #:TODO: lexical analyzer should check MDL format syntax
 sub parse {
   my ($myroot, $desc, $dbg) =  @_;
@@ -196,7 +205,8 @@ sub parse {
   return 1;
 }
 
-# Change Reference source name (CDS part)
+#// \b sub \b transform_part_name \n
+#// Change Reference source name (CDS part) \n\n
 sub transform_part_name {
         $::ppFIR[$::partCnt] = 0;         # Set to zero initially; change to 1 below for PPFIR
 	($r) = @_;
@@ -224,7 +234,8 @@ sub transform_part_name {
 	return $r;
 }
 
-# Change Block type name
+#// \b sub \b transform_block_type \n
+#// Change Block type name \n\n
 sub transform_block_type {
 	my ($blockType) = @_;
 
@@ -249,7 +260,8 @@ sub transform_block_type {
 	else { return $blockType; }
 }
 
-# Store line information
+#// \b sub \b process_line \n
+#// Store line information \n\n
 sub process_line {
 	my ($src, $src_port, $dst, $dst_port, $node) = @_;
 	my $part_num = $parts{$dst};
@@ -317,7 +329,8 @@ sub process_line {
 	}
 }
 
-# There could be nested branching structure (1 to many connection)
+#// \b sub \b do_branches \n
+#// There could be nested branching structure (1 to many connection) \n\n
 sub do_branches {
 	my ($node, $in_sub, $branch) = @_;
 	foreach (@{$branch->{NEXT}}) {
@@ -342,14 +355,16 @@ my @c_resv = ("auto", "break", "case", "char", "const", "continue", "default", "
 "short", "signed", "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned",
 "void", "volatile", "while");
 
-# Check name to contain only allowed characters
-# Disallow C language reserved words
+#// \b sub \b name_check \n
+#// Check name to contain only allowed characters \n
+#// Disallow C language reserved words \n\n
 sub name_check {
 	return 0 unless @_[0] =~ /^[a-zA-Z0-9_]+$/;
 	return 0 if grep {$_ eq lc(@_[0])} @c_resv;
 	return 1;
 }
 
+#// \b sub \b store_ezca_names \n
 sub store_ezca_names {
    my ($node, $in_sub, $parent) =  @_;
    my $src_block = ${$node->{FIELDS}}{"SourceBlock"};
@@ -369,7 +384,8 @@ sub store_ezca_names {
    ${$node->{FIELDS}}{"Description"} = $name;
    return 0;
 }
-# Bring library references into the tree
+#// \b sub \b merge_references \n
+#// Bring library references into the tree \n\n
 sub merge_references {
    my ($node, $in_sub, $parent) =  @_;
    if ($node->{NAME} ne "Block") {
@@ -453,7 +469,8 @@ sub merge_references {
    return 0;
 }
 
-# Find parts and sybsystems
+#// \b sub \b node_processing \n
+#// Find parts and sybsystems \n\n
 sub node_processing {
    my ($node, $in_sub) =  @_;
    if ($node->{NAME} eq "Line") {
@@ -567,7 +584,7 @@ sub node_processing {
         #	$::partType[$::partCnt] = CDS::Adc::partType($node);
 	#} 
 	if ($block_type eq "SubSystem") {
-                die "Cannot handle nested subsystems\n" if $in_sub;
+                die "Cannot handle nested subsystems in $block_name\n" if $in_sub;
                 $::subSysPartStart[$::subSys] = $::partCnt;
                 $::subSysName[$::subSys] = $block_name;
 		if (!name_check($block_name)) {
@@ -594,10 +611,9 @@ sub node_processing {
 		  #return 0;
 	 	#}
 		# This is CDS part
-
+		#print "CDS part $block_name type $source_block\n";
         	$::cdsPart[$::partCnt] = 1;
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name;
-		#print "CDS part $block_name type $source_block\n";
         } elsif ($block_type eq "FCN") {                                   # ===  MA  ===
         	$::cdsPart[$::partCnt] = 1;                                # ===  MA  ===
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name; #= MA =
@@ -632,7 +648,7 @@ sub node_processing {
 	    && $source_block !~ /^cdsIPC/
 	    && $source_block !~ /^cdsEzCa/) {
 	    if (!name_check($::partName[$::partCnt])) {
-		    #die "Invalid part name \"$::partName[$::partCnt]\"; source_block \"$source_block\"; block  type \"$block_type\"" unless ("$::partName[$::partCnt]");
+		    die "Invalid part name \"$::partName[$::partCnt]\"; source_block \"$source_block\"; block  type \"$block_type\"" unless ("$::partName[$::partCnt]");
 	    }
 	}
 	if (!$in_sub) {
@@ -641,7 +657,12 @@ sub node_processing {
 	} else {
 		$::partSubNum[$::partCnt] = $::subSys;
 		$::partSubName[$::partCnt] = $::subSysName[$::subSys];
+	     	if($source_block !~ /^cdsEzCa/) {
 		$::xpartName[$::partCnt] = $::subSysName[$::subSys] . "_" . $::xpartName[$::partCnt];
+		} else {
+		$::xpartName[$::partCnt] = $::subSysName[$::subSys] . "_" . $::xpartName[$::partCnt];
+		print "Found ezca part $::xpartName[$::partCnt] $::partName[$::partCnt]\n";
+		}
 	}
 	if ($::cdsPart[$::partCnt]) {
 		my $part_name = transform_part_name(${$node->{FIELDS}}{"SourceBlock"});
@@ -789,7 +810,8 @@ sub node_processing {
    return 0;
 }
 
-# Gather tag names
+#// \b sub \b check_tags \n
+#// Gather tag names \n\n
 sub check_tags {
    my ($node, $in_sub, $parent) =  @_;
    return 0 if ($node->{NAME} ne "Block");
@@ -806,7 +828,8 @@ sub check_tags {
    return 0;
 }
 
-# Remove tags, replace'm with lines
+#// \b sub \b remove_tags \n
+#// Remove tags, replace'm with lines \n\n
 sub remove_tags {
    my ($node, $in_sub, $parent) =  @_;
    return 0 if ($node->{NAME} ne "Block");
@@ -843,7 +866,8 @@ sub remove_tags {
    return 0;
 }
 
-# Remove buses, replace'm with lines
+#// \b sub \b remove_busses \n
+#// Remove buses, replace'm with lines \n\n
 sub remove_busses {
    my ($node, $in_sub, $parent) =  @_;
    #print("node=$node, parent=$parent\n");
@@ -947,8 +971,9 @@ sub remove_busses {
 # subsystems level
 @subsys_level;
 
-# recursive branch processing
-# annotate names
+#// \b sub \b flatten_do_branches \n
+#// recursive branch processing \n
+#// annotate names \n\n
 sub flatten_do_branches {
    ($_, $ant) = @_;
    #if (${$_->{FIELDS}}{Parent} == 1) { return; } # Stop annotating if discovered parent's block
@@ -964,7 +989,8 @@ sub flatten_do_branches {
    }
 }
 
-# Find a line in the $node, starting from $src_name and $src_port
+#// \b sub \b find_line \n
+#// Find a line in the $node, starting from $src_name and $src_port \n\n
 sub find_line {
    my ($node, $src_name, $src_port) = @_;
    foreach (@{$node->{NEXT}}) {
@@ -976,9 +1002,10 @@ sub find_line {
    }
    return undef;
 }
-# Find a branch (or a line) in the $node, leading to $dst_name and $dst_port
-# if $flag is 1, then it returns a reference to Line for a branch.
-# Line is a parent node for a branch.
+#// \b sub \b find_branch \n
+#// Find a branch (or a line) in the $node, leading to $dst_name and $dst_port 
+#// if $flag is 1, then it returns a reference to Line for a branch. \n
+#// Line is a parent node for a branch. \n\n
 sub find_branch {
    my ($node, $dst_name, $dst_port, $flag, $prnt) = @_;
    #print "find_branch: ". $_->{NAME} . "+++". ${$node->{FIELDS}}{Name} . ", $dst_name, $dst_port, $flag\n";
@@ -1029,8 +1056,9 @@ sub find_branch {
    return undef;
 }
 
-# This recursive function flattens the bottom most system
-# first and then flattens the rest of the systems in ascending order.
+#// \b sub \b flatten \n
+#// This recursive function flattens the bottom most system
+#// first and then flattens the rest of the systems in ascending order. \n\n
 sub flatten {
    my @inports;
    my @outports;
@@ -1065,8 +1093,14 @@ sub flatten {
      my $idx = 0;
      # Parent node has "System" node next, move down to it
      if ($parent->{NAME} ne "System") {
-       $parent = ${$parent->{NEXT}}[0];
+       foreach (@{$parent->{NEXT}}) {
+	if ($_->{NAME} eq "System") {
+       		$parent = $_;
+		last;
+	}
+       }
      }
+     die "Failed to parse the MDL file at System\n" if $parent->{NAME} ne "System";
      foreach (@{$parent->{NEXT}}) {
 	if ($_ == $node) {
 		#print "Found node at index $idx\n";
@@ -1077,7 +1111,14 @@ sub flatten {
      splice(@{$parent->{NEXT}}, $idx, 1,);
 
      # Annotate blocks in this node with its name
-     $node = ${$node->{NEXT}}[0]; # Move down to the "System" node
+     # Move down to the "System" node
+     foreach (@{$node->{NEXT}}) {
+	if ($_->{NAME} eq "System") {
+		$node = $_;
+		last;
+	}
+     }
+     die "Failed to parse the MDL file at System ", ${$node->{FIELDS}}{Name}, "\n" if $node->{NAME} ne "System";
      #print "Following blocks found in ", ${$node->{FIELDS}}{Name}, ":\n";
      foreach (@{$node->{NEXT}}) {
 	if ($_->{NAME} eq "Block") {
@@ -1110,8 +1151,8 @@ sub flatten {
 	    flatten_do_branches($_);
 	    #print "\n";
 	  } else {
-	    #print "Source=", ${$_->{FIELDS}}{SrcBlock}, ":", ${$_->{FIELDS}}{SrcPort}, ", dst=",
-		${$_->{FIELDS}}{DstBlock}, ":", ${$_->{FIELDS}}{DstPort}, "\n";
+	   # print "Source=", ${$_->{FIELDS}}{SrcBlock}, ":", ${$_->{FIELDS}}{SrcPort}, ", dst=",
+		#${$_->{FIELDS}}{DstBlock}, ":", ${$_->{FIELDS}}{DstPort}, "\n";
 	  }
  	}
      }
@@ -1275,11 +1316,12 @@ if (0) {
    }
 }
 
+#// \b sub \b flatten_nested_subsystems \n
 sub flatten_nested_subsystems {
    my ($node) =  @_;
 
-# This code flattens all subsystems
-# It is not working properly
+# This code flattens all subsystems \n
+# It is not working properly \n\n
 if (0) {
    foreach (@{$node->{NEXT}}) {
      if ($_->{NAME} eq "Block" && ${$_->{FIELDS}}{BlockType} eq "SubSystem") {
@@ -1290,7 +1332,7 @@ if (0) {
    }
 }
 
-# This code flattens only second-level subsystems
+#// This code flattens only second-level subsystems \n\n
 if (1) {
    # Find all top-level subsystems
    foreach (@{$node->{NEXT}}) {
@@ -1302,6 +1344,7 @@ if (1) {
 	# Flatten all second-level subsystems
 	my $system = $_->{NEXT}[0];
 	foreach $ssub (@{$system->{NEXT}}) {
+	  #print "0; Second-level subsystem ", ${$ssub->{FIELDS}}{Name}, "\n";
           if ($ssub->{NAME} eq "Block" && ${$ssub->{FIELDS}}{BlockType} eq "SubSystem") {
 	    #print "Second-level subsystem ", ${$ssub->{FIELDS}}{Name}, "\n";
 	    @subsys = ($_);
@@ -1326,6 +1369,8 @@ if (1) {
 }
 
 
+#// \b sub \b process \n
+#// Start node processing \n\n
 sub process {
 
   print "Starting node processing\n";
@@ -1414,12 +1459,12 @@ sub process {
   }
   CDS::Tree::do_on_nodes($root, \&remove_tags, 0, $root);
   print "Removed Tags\n";
-  #CDS::Tree::print_tree($root);
   $::time_to_die = 0;
   CDS::Tree::do_on_nodes($root, \&remove_busses, 0, $root);
   die if $::time_to_die;
   print "Removed Busses\n";
 
+  #CDS::Tree::print_tree($root);
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
   print "Found $::adcCnt ADCs $::partCnt parts $::subSys subsystems\n";
 
