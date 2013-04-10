@@ -584,7 +584,7 @@ sub node_processing {
         #	$::partType[$::partCnt] = CDS::Adc::partType($node);
 	#} 
 	if ($block_type eq "SubSystem") {
-                die "Cannot handle nested subsystems\n" if $in_sub;
+                die "Cannot handle nested subsystems in $block_name\n" if $in_sub;
                 $::subSysPartStart[$::subSys] = $::partCnt;
                 $::subSysName[$::subSys] = $block_name;
 		if (!name_check($block_name)) {
@@ -611,10 +611,9 @@ sub node_processing {
 		  #return 0;
 	 	#}
 		# This is CDS part
-
+		#print "CDS part $block_name type $source_block\n";
         	$::cdsPart[$::partCnt] = 1;
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name;
-		#print "CDS part $block_name type $source_block\n";
         } elsif ($block_type eq "FCN") {                                   # ===  MA  ===
         	$::cdsPart[$::partCnt] = 1;                                # ===  MA  ===
 		$::xpartName[$::partCnt] = $::partName[$::partCnt] = $block_name; #= MA =
@@ -658,7 +657,12 @@ sub node_processing {
 	} else {
 		$::partSubNum[$::partCnt] = $::subSys;
 		$::partSubName[$::partCnt] = $::subSysName[$::subSys];
+	     	if($source_block !~ /^cdsEzCa/) {
 		$::xpartName[$::partCnt] = $::subSysName[$::subSys] . "_" . $::xpartName[$::partCnt];
+		} else {
+		$::xpartName[$::partCnt] = $::subSysName[$::subSys] . "_" . $::xpartName[$::partCnt];
+		print "Found ezca part $::xpartName[$::partCnt] $::partName[$::partCnt]\n";
+		}
 	}
 	if ($::cdsPart[$::partCnt]) {
 		my $part_name = transform_part_name(${$node->{FIELDS}}{"SourceBlock"});
@@ -1089,8 +1093,14 @@ sub flatten {
      my $idx = 0;
      # Parent node has "System" node next, move down to it
      if ($parent->{NAME} ne "System") {
-       $parent = ${$parent->{NEXT}}[0];
+       foreach (@{$parent->{NEXT}}) {
+	if ($_->{NAME} eq "System") {
+       		$parent = $_;
+		last;
+	}
+       }
      }
+     die "Failed to parse the MDL file at System\n" if $parent->{NAME} ne "System";
      foreach (@{$parent->{NEXT}}) {
 	if ($_ == $node) {
 		#print "Found node at index $idx\n";
@@ -1101,7 +1111,14 @@ sub flatten {
      splice(@{$parent->{NEXT}}, $idx, 1,);
 
      # Annotate blocks in this node with its name
-     $node = ${$node->{NEXT}}[0]; # Move down to the "System" node
+     # Move down to the "System" node
+     foreach (@{$node->{NEXT}}) {
+	if ($_->{NAME} eq "System") {
+		$node = $_;
+		last;
+	}
+     }
+     die "Failed to parse the MDL file at System ", ${$node->{FIELDS}}{Name}, "\n" if $node->{NAME} ne "System";
      #print "Following blocks found in ", ${$node->{FIELDS}}{Name}, ":\n";
      foreach (@{$node->{NEXT}}) {
 	if ($_->{NAME} eq "Block") {
@@ -1134,8 +1151,8 @@ sub flatten {
 	    flatten_do_branches($_);
 	    #print "\n";
 	  } else {
-	    #print "Source=", ${$_->{FIELDS}}{SrcBlock}, ":", ${$_->{FIELDS}}{SrcPort}, ", dst=",
-		${$_->{FIELDS}}{DstBlock}, ":", ${$_->{FIELDS}}{DstPort}, "\n";
+	   # print "Source=", ${$_->{FIELDS}}{SrcBlock}, ":", ${$_->{FIELDS}}{SrcPort}, ", dst=",
+		#${$_->{FIELDS}}{DstBlock}, ":", ${$_->{FIELDS}}{DstPort}, "\n";
 	  }
  	}
      }
@@ -1327,6 +1344,7 @@ if (1) {
 	# Flatten all second-level subsystems
 	my $system = $_->{NEXT}[0];
 	foreach $ssub (@{$system->{NEXT}}) {
+	  #print "0; Second-level subsystem ", ${$ssub->{FIELDS}}{Name}, "\n";
           if ($ssub->{NAME} eq "Block" && ${$ssub->{FIELDS}}{BlockType} eq "SubSystem") {
 	    #print "Second-level subsystem ", ${$ssub->{FIELDS}}{Name}, "\n";
 	    @subsys = ($_);
@@ -1441,12 +1459,12 @@ sub process {
   }
   CDS::Tree::do_on_nodes($root, \&remove_tags, 0, $root);
   print "Removed Tags\n";
-  #CDS::Tree::print_tree($root);
   $::time_to_die = 0;
   CDS::Tree::do_on_nodes($root, \&remove_busses, 0, $root);
   die if $::time_to_die;
   print "Removed Busses\n";
 
+  #CDS::Tree::print_tree($root);
   CDS::Tree::do_on_nodes($root, \&node_processing, 0);
   print "Found $::adcCnt ADCs $::partCnt parts $::subSys subsystems\n";
 
