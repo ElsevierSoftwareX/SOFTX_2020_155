@@ -463,6 +463,13 @@ sub merge_references {
    # Replace subsystem name
    ${$mynode->{FIELDS}}{"Name"} = $name;
    my $next = $mynode->{NEXT}[0];
+   foreach (@{$mynode->{NEXT}}) {
+      if ($_->{NAME} eq "System") {
+            $next = $_;
+            last;
+      }
+   }
+   die "Failed to parse the MDL file merging references at System", $name, "\n" if $next->{NAME} ne "System";
    ${$next->{FIELDS}}{"Name"} = $name;
    $_ = $mynode; # replace the current node (do_on_nodes)
    $n_merged++;
@@ -1065,11 +1072,14 @@ sub flatten {
    my @lines;
    my ($node) =  @_;
 
+   #print "flatten called: ", $node->{NAME}, " name: ", ${$node->{FIELDS}}{Name}, "\n";
+
    if ($node->{NAME} eq "Block"
        && ${$node->{FIELDS}}{BlockType} eq "SubSystem") {
      push @subsys, $node;
    }
    foreach (@{$node->{NEXT}}) {
+  	#print ${$_->{FIELDS}}{Name}, ", ";
 	flatten($_);
    }
    if ($node->{NAME} eq "Block"
@@ -1214,10 +1224,10 @@ sub flatten {
 	my $port_num = ${$_->{FIELDS}}{Port};
 	if ($port_num eq undef) { $port_num = 1; }
 	my $port_name = ${$_->{FIELDS}}{Name};
-	#print "Processing output port #$port_num name=$port_name\n";
+	print "Processing output port #$port_num name=$port_name\n";
 	# Find line connected to this output port (if any)
 	my $branch = find_branch($node, $port_name, 1);
-	#print_node($branch);
+	print_node($branch);
 	die "OutPort $port_name disconnected\n" if ($branch eq undef);
 	# Find parent's line connected to this node, output port $port_num
 	my $line = find_line($parent, ${$node->{FIELDS}}{Name}, $port_num);
@@ -1337,12 +1347,19 @@ if (1) {
    # Find all top-level subsystems
    foreach (@{$node->{NEXT}}) {
      if ($_->{NAME} eq "Block" && ${$_->{FIELDS}}{BlockType} eq "SubSystem") {
-	#print "Top-level subsystem ", ${$_->{FIELDS}}{Name}, "\n";
+	print "Top-level subsystem ", ${$_->{FIELDS}}{Name}, "\n";
 	if (${$_->{FIELDS}}{Tag} eq "top_names") {
 		push @::top_names, ${$_->{FIELDS}}{Name};
 	}
 	# Flatten all second-level subsystems
 	my $system = $_->{NEXT}[0];
+        foreach (@{$_->{NEXT}}) {
+           if ($_->{NAME} eq "System") {
+                $system = $_;
+                last;
+           }
+        }
+        die "Failed to parse the MDL file flattening System", ${$_->{FIELDS}}{Name}, "\n" if $system->{NAME} ne "System";
 	foreach $ssub (@{$system->{NEXT}}) {
 	  #print "0; Second-level subsystem ", ${$ssub->{FIELDS}}{Name}, "\n";
           if ($ssub->{NAME} eq "Block" && ${$ssub->{FIELDS}}{BlockType} eq "SubSystem") {
