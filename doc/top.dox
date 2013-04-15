@@ -10,7 +10,7 @@ This documentation is divided into the following sections:
 	- \ref devguidercg "RCG Software"
 	- \ref devguidedaqd "CDS DAQ Data Concentrator/Framebuilder Software"
 	- \ref devguidends "CDS DAQ Network Data Server (NDS) Software"
-	-\ref testing "CDS Software Testing"
+	- \ref testing "CDS Software Testing"
 */
 /*! \page intro CDS Overview Documentation
 The Control and Data System (CDS) Real-time Code Generator (RCG) software was developed for the aLIGO project. \n
@@ -32,6 +32,7 @@ This page links to code documentation for RCG code developers. \n
 /*! \page devguidends CDS DAQ Network Data Server (NDS) Software
 	- \ref nds
 */
+
 
 ///	\defgroup nds NDS Software Components
 ///	@{
