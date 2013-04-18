@@ -16,5 +16,6 @@
 \section testpage3 RCG System Level Testing 
 	- \ref rcgCoreTest "RCG Core Test"
 	- \ref ipcTestData "RCG IPC Test"
+	- \ref duotoneTest "Duotone Test"
 */
 
