@@ -7,12 +7,12 @@
 <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=95499">LIGO T1200393 aLIGO RCG V2.4 Testing at LLO</a> \n
 
 \section testpage2 RCG Component Testing 
-	- \ref ipcTestData "IPC Test"
 	- \ref fmcTest "Filter Module"
 	- \ref fmcControlTest "Filter Module w/Control"
 	- \ref fmcControl2Test "Filter Module w/Control2"
 	- \ref matrixTest "Matrix"
 	- \ref oscTest "Oscillator"
+	- \ref ezca "EzcaRead / EzcaWrite"
 \section testpage3 RCG System Level Testing 
 	- \ref rcgCoreTest "RCG Core Test"
 	- \ref ipcTestData "RCG IPC Test"
