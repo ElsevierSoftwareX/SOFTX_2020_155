@@ -17,5 +17,6 @@
 	- \ref rcgCoreTest "RCG Core Test"
 	- \ref ipcTestData "RCG IPC Test"
 	- \ref duotoneTest "Duotone Test"
+	- \ref dackillTest "DACKILL w/OSEM Watchdog Test"
 */
 
