@@ -1461,7 +1461,7 @@ udelay(1000);
 
 	/* Update User code Filter Module Epics variables */
 	// if(subcycle == HKP_FM_EPICS_UPDATE)
-        if(subcycle == (DAQ_CYCLE_CHANGE - 1)) 
+        if((subcycle == (DAQ_CYCLE_CHANGE - 1)) && ((daqCycle % 2) == 1)) 
 	{
 		//.for(ii=0;ii<MAX_MODULES;ii++)
 		//{
@@ -1905,7 +1905,7 @@ udelay(1000);
           if(subcycle == DAQ_CYCLE_CHANGE) 
 	  {
 		daqCycle = (daqCycle + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-		pLocalEpics->epicsOutput.epicsSync = daqCycle;
+		if(!(daqCycle % 2)) pLocalEpics->epicsOutput.epicsSync = daqCycle;
 }
           if(subcycle == END_OF_DAQ_BLOCK) /*we have reached the 16Hz second barrier*/
             {
