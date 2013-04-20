@@ -20,7 +20,7 @@ PWD		:= $(shell pwd)
 CC		:= gcc -Wall -g
 
 TARGET		:= symmetricom.ko
-INSTDIR		:= /lib/modules/$(KVER)/kernel/drivers/$(MODULENAME)
+INSTDIR		:= /lib/modules/$(KVER)/extra
 
 ifeq ($(KERNELRELEASE),)
 #all:	$(MODULENAME)_test
@@ -40,9 +40,13 @@ install:
 	#remove all old versions of the driver
 	find $(INSTALL_MOD_PATH)/lib/modules/$(KVER) -name $(TARGET) -exec rm -f {} \; || true
 	find $(INSTALL_MOD_PATH)/lib/modules/$(KVER) -name $(TARGET).gz -exec rm -f {} \; || true
+	# Install new driver
 	install -D -m 644 $(TARGET) $(INSTALL_MOD_PATH)$(INSTDIR)/$(TARGET)
 	/sbin/depmod -a || true
 	/sbin/modprobe $(MODULENAME)
+	if [ -e /dev/$(MODULENAME) ] ; then \
+	    rm -f /dev/$(MODULENAME) ; \
+	fi
 	mknod /dev/$(MODULENAME) c `grep $(MODULENAME) /proc/devices|awk '{print $$1}'` 0
 	chown controls /dev/$(MODULENAME) 
 
