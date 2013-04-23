@@ -326,6 +326,7 @@ gds_c::clear_tps (long_channel_t *ac[], int nptr)
   int rtn = 0;
 
   for (int s = 0; s < max_gds_servers; s++) {
+    ntps = 0;
     /* Clear all 4k IFO test points */
     for (int i = 0; i < nptr; i++) {
       if (ac[i]->tp_node == s) 
