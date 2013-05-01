@@ -847,7 +847,7 @@ daqd_c::framer ()
 
 		  // A pointer to 16 status words for this second
 		  char *stptr = buf + status_ptr
-			+ 17 * sizeof(int) * active_channels [j].seq_num + 2;
+			+ 17 * sizeof(int) * active_channels [j].seq_num;
 
 		  // This converts integer status into short
 		  memor2 (data_valid + j, stptr);
