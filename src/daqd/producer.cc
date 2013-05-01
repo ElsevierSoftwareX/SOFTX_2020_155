@@ -344,6 +344,8 @@ producer::frame_writer ()
 #elif defined(USE_MX)
    extern unsigned int open_mx(void);
    unsigned int max_endpoints = open_mx();
+   unsigned int nics_available = max_endpoints >> 8;
+   max_endpoints &= 0xff;
 #else
    static const unsigned int max_endpoints = 1;
 #endif
@@ -436,16 +438,20 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
      	rcvr_stats.push_back(s);
      }
 
+   for (int bnum = 0; bnum < 2; bnum++) { // Start
      for (int j = 0; j < max_endpoints; j++) {
        //class stats s;
        //rcvr_stats.push_back(s);
+       unsigned int bp = j;
+       if (bnum) bp |= 0x100;
        if (err_no = pthread_create (&gm_tid, &attr,
-                     gm_receiver_thread, (void *)j)) {
+                     gm_receiver_thread, (void *)bp)) {
                   pthread_attr_destroy (&attr);
                   system_log(1, "pthread_create() err=%d", err_no);
                   exit(1);
        }
      }
+   }
      pthread_attr_destroy (&attr);
    }
 #endif
@@ -821,8 +827,6 @@ int cycle_delay = daqd.cycle_delay;
 #endif
 	  if (dcu_gps != mygps) {
 	    daqd.dcuStatus[0][j] |= 0x4000;
-	    daqd.dcuCrcErrCnt[0][j]++;
-	    daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
 	    system_log(5, "GPS MISS dcu %d (%s); dcu_gps=%d gps=%ld\n", j, daqd.dcuName[j], dcu_gps, mygps);
 	  }
 
@@ -833,11 +837,13 @@ int cycle_delay = daqd.cycle_delay;
 	    /* Set DCU status to BAD, all data will be marked as BAD 
 	       because of the CRC mismatch */
 	    daqd.dcuStatus[0][j] |= 0x1000;
-	    daqd.dcuCrcErrCnt[0][j]++;
-	    daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
 	  } else {
 	    system_log(6, " MATCH dcu %d (%s); crc[%d]=%x; computed crc=%lx\n",
 		       j, daqd.dcuName[j], cblk, rfm_crc, crc);
+	  }
+	  if (daqd.dcuStatus[0][j]) {
+	    daqd.dcuCrcErrCnt[0][j]++;
+	    daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
 	  }
         }
 
