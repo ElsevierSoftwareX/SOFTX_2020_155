@@ -6,6 +6,7 @@
 #define M_PI     3.14159265358979323846
 #define M_TWO_PI 6.28318530717958647692
 
+#include <asm/msr.h>
 #if 0
 // These are already defined in kernel's msr.h
 #define rdtscl(low) \
