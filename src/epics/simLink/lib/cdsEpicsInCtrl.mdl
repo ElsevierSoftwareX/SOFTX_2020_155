@@ -14,9 +14,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "aivanov"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue May  7 10:31:21 2013"
+  LastModifiedDate	  "Tue May  7 10:45:10 2013"
   RTWModifiedTimeStamp	  0
-  ModelVersionFormat	  "1.%<AutoIncrement:5>"
+  ModelVersionFormat	  "1.%<AutoIncrement:6>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -620,8 +620,23 @@ Library {
     Block {
       BlockType		      SubSystem
       Name		      "Subsystem"
+      Tag		      "cdsEpicsInCtrl"
+      Description	      "Purpose:                                                                                     "
+      "                                          \nCreate an EPICS input channel connection to the FE realtime controls"
+      ". Allow                                                            \nFE to control the value if Mask input is se"
+      "t to 1, in which case the value becomes                                                     \nreally the output "
+      "value and treated by the EPICS CA as read only.                                                                 "
+      "     \n                                                                                                         "
+      "                              \nOperation:                                                                      "
+      "                                                       \nOutputs value from an EPICS ai record. Value is floatin"
+      "g point with a precision of 3. Takes the mask and the values inputs from the FE.\nUsage:                        "
+      "                                                                                                         \nName "
+      "the part with the desired EPICS channel name.                                                                   "
+      "                  "
       Ports		      [2, 1]
-      Position		      [165, 85, 205, 145]
+      Position		      [165, 86, 245, 144]
+      BackgroundColor	      "green"
+      AttributesFormatString  "%<Tag>"
       MinAlgLoopOccurrences   off
       PropExecContextOutsideSubsystem off
       RTWSystemCode	      "Auto"
@@ -632,7 +647,7 @@ Library {
       System {
 	Name			"Subsystem"
 	Location		[690, 182, 895, 282]
-	Open			on
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -681,7 +696,7 @@ Library {
     Block {
       BlockType		      Outport
       Name		      "Out1"
-      Position		      [205, 108, 235, 122]
+      Position		      [285, 108, 315, 122]
       IconDisplay	      "Port number"
       OutDataType	      "sfix(16)"
       OutScaling	      "2^0"
