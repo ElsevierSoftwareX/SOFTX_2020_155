@@ -43,7 +43,10 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
-        ;
+print ::OUT  <<END
+unsigned int $::xpartName[$i]_gps;
+unsigned int $::xpartName[$i]_cycle;
+END
 }
 
 # Return front end initialization code
@@ -51,7 +54,10 @@ sub printFrontEndVars  {
 # Returns calculated code string
 sub frontEndInitCode {
         my ($i) = @_;
-        return "";
+return  <<END
+$::xpartName[$i]_gps = 0;
+$::xpartName[$i]_cycle = 0;
+END
 }
 
 # Figure out part input code
@@ -69,11 +75,37 @@ sub fromExp {
 # Returns calculated code string
 
 sub frontEndCode {
-	my ($i) = @_;
-	// Assign mask
-	$ret .= "pLocalEpics->$::systemName\.$::xpartName[$i]_mask = ";
-        $ret .= "$::fromExp[0];\n";
+my ($i) = @_;
+return <<END
+// See if mask transitions from 0 to 1, if so do it right away
+// If mask transitions from 1 to 0, then need to delay this transition by one second
+// to allow the sequencer code to pick up the new value.
+{
+	unsigned char mask = $::fromExp[0];
+	unsigned char seq_mask = pLocalEpics->$::systemName\.$::xpartName[$i]_mask;
+	if (seq_mask == 0) {
+		if (mask == 1) {
+			pLocalEpics->$::systemName\.$::xpartName[$i]_mask = mask;
+			// Remember when the mask is allowed to get changed back to 0
+			$::xpartName[$i]_gps = cycle_gps_time + 1;
+			$::xpartName[$i]_cycle = cycleNum;
+		}
+	} else if (mask == 0) { // Delay transition from 1 to 0 if needed
+		if ($::xpartName[$i]_gps) { // Currently waiting for transition from 1 to 0
+			if ($::xpartName[$i]_gps < cycle_gps_time // We are far in the future
+			    || ($::xpartName[$i]_gps == cycle_gps_time && $::xpartName[$i]_cycle <= cycleNum)) {
+				// Done waiting for a transition, finish it up
+				$::xpartName[$i]_gps = 0;
+				pLocalEpics->$::systemName\.$::xpartName[$i]_mask = mask;
+			}
+		} else {
+			// Setup transition
+			$::xpartName[$i]_gps = cycle_gps_time + 1;
+			$::xpartName[$i]_cycle = cycleNum;
+		}
+	}
 	// Assign the value from the second input if masked
-        $ret .= "if ($::fromExp[0]) pLocalEpics->$::systemName\.$::xpartName[$i] = $::fromExp[1];\n";
-        return "";
+	if (pLocalEpics->$::systemName\.$::xpartName[$i]_mask) pLocalEpics->$::systemName\.$::xpartName[$i] = $::fromExp[1];
+}
+END
 }
