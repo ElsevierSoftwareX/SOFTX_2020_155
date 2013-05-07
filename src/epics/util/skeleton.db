@@ -6,15 +6,15 @@ grecord(ao,"%IFO%:%FILTER%_EXCMON")
 {
 	field(PREC,"%PREC1%")
 }
+grecord(ai,"%IFO%:%FILTER%_TRAMP")
+{
+	field(PREC,"3")
+}
 grecord(ai,"%IFO%:%FILTER%_OFFSET")
 {
 	field(PREC,"1")
 }
 grecord(ai,"%IFO%:%FILTER%_GAIN")
-{
-	field(PREC,"3")
-}
-grecord(ai,"%IFO%:%FILTER%_TRAMP")
 {
 	field(PREC,"3")
 }
