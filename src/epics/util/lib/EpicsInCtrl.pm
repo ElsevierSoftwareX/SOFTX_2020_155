@@ -83,14 +83,8 @@ return <<END
 {
 	unsigned char mask = $::fromExp[0];
 	unsigned char seq_mask = pLocalEpics->$::systemName\.$::xpartName[$i]_mask;
-	if (seq_mask == 0) {
-		if (mask == 1) {
-			pLocalEpics->$::systemName\.$::xpartName[$i]_mask = mask;
-			// Remember when the mask is allowed to get changed back to 0
-			$::xpartName[$i]_gps = cycle_gps_time + 1;
-			$::xpartName[$i]_cycle = cycleNum;
-		}
-	} else if (mask == 0) { // Delay transition from 1 to 0 if needed
+	if (seq_mask == 0) pLocalEpics->$::systemName\.$::xpartName[$i]_mask = mask;
+	else if (mask == 0) { // Delay transition from 1 to 0 if needed
 		if ($::xpartName[$i]_gps) { // Currently waiting for transition from 1 to 0
 			if ($::xpartName[$i]_gps < cycle_gps_time // We are far in the future
 			    || ($::xpartName[$i]_gps == cycle_gps_time && $::xpartName[$i]_cycle <= cycleNum)) {
@@ -105,7 +99,14 @@ return <<END
 		}
 	}
 	// Assign the value from the second input if masked
-	if (pLocalEpics->$::systemName\.$::xpartName[$i]_mask) pLocalEpics->$::systemName\.$::xpartName[$i] = $::fromExp[1];
+	if (pLocalEpics->$::systemName\.$::xpartName[$i]_mask) {
+		// See if the value is changing and remember the time when the mask is allowed to be set to 0
+		if (pLocalEpics->$::systemName\.$::xpartName[$i] != $::fromExp[1]) {
+			$::xpartName[$i]_gps = cycle_gps_time + 1;
+			$::xpartName[$i]_cycle = cycleNum;
+		}
+		pLocalEpics->$::systemName\.$::xpartName[$i] = $::fromExp[1];
+	}
 }
 END
 }
