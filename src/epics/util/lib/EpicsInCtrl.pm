@@ -44,8 +44,9 @@ sub printEpics {
 sub printFrontEndVars  {
         my ($i) = @_;
 print ::OUT  <<END
-unsigned int $::xpartName[$i]_gps;
-unsigned int $::xpartName[$i]_cycle;
+unsigned int $::xpartName[$i]_gps;   // GPS time of the last value update
+unsigned int $::xpartName[$i]_cycle; // Cycle number of the last valid value update
+double $::xpartName[$i]_last; // Last valid value received from the FE
 END
 }
 
@@ -57,6 +58,7 @@ sub frontEndInitCode {
 return  <<END
 $::xpartName[$i]_gps = 0;
 $::xpartName[$i]_cycle = 0;
+$::xpartName[$i]_last = 0;
 END
 }
 
@@ -77,20 +79,29 @@ sub fromExp {
 sub frontEndCode {
 my ($i) = @_;
 return <<END
+//
+// mask==1 : means the value is under the FE control
+// mask==0 : means the value is under the EPICS control
+//
 // See if mask transitions from 0 to 1, if so do it right away
 // If mask transitions from 1 to 0, then need to delay this transition by one second
 // to allow the sequencer code to pick up the new value.
+// Code keeps sending the last valid value received from the second input for at least one second.
+//
 {
-	unsigned char mask = $::fromExp[0];
-	unsigned char seq_mask = pLocalEpics->$::systemName\.$::xpartName[$i]_mask;
-	if (seq_mask == 0) pLocalEpics->$::systemName\.$::xpartName[$i]_mask = mask;
-	else if (mask == 0) { // Delay transition from 1 to 0 if needed
+	unsigned char mask = $::fromExp[0]; // Part's mask input (from the FE)
+	unsigned char seq_mask = pLocalEpics->$::systemName\.$::xpartName[$i]_mask; // Shared memory mask variable (to EPICS), EPICS never writes it
+	if (!seq_mask) pLocalEpics->$::systemName\.$::xpartName[$i]_mask = mask; // if seq_mask == 0, transition right away (if mask == 1)
+	else if (!mask) { // if mask == 0 && seq_mask == 1 then delay transition from 1 to 0 if needed	
 		if ($::xpartName[$i]_gps) { // Currently waiting for transition from 1 to 0
 			if ($::xpartName[$i]_gps < cycle_gps_time // We are far in the future
 			    || ($::xpartName[$i]_gps == cycle_gps_time && $::xpartName[$i]_cycle <= cycleNum)) {
 				// Done waiting for a transition, finish it up
 				$::xpartName[$i]_gps = 0;
-				pLocalEpics->$::systemName\.$::xpartName[$i]_mask = mask;
+				pLocalEpics->$::systemName\.$::xpartName[$i]_mask = 0;
+			} else {
+				// Keep sending the last good value
+				pLocalEpics->$::systemName\.$::xpartName[$i] = $::xpartName[$i]_last;
 			}
 		} else {
 			// Setup transition
@@ -98,14 +109,16 @@ return <<END
 			$::xpartName[$i]_cycle = cycleNum;
 		}
 	}
-	// Assign the value from the second input if masked
-	if (pLocalEpics->$::systemName\.$::xpartName[$i]_mask) {
+	if (pLocalEpics->$::systemName\.$::xpartName[$i]_mask && mask) { // Case when we are sending the value to the EPICS
 		// See if the value is changing and remember the time when the mask is allowed to be set to 0
 		if (pLocalEpics->$::systemName\.$::xpartName[$i] != $::fromExp[1]) {
 			$::xpartName[$i]_gps = cycle_gps_time + 1;
 			$::xpartName[$i]_cycle = cycleNum;
 		}
+		// Assign the value from the second input 
 		pLocalEpics->$::systemName\.$::xpartName[$i] = $::fromExp[1];
+		// Remember the last known good value from the input
+		$::xpartName[$i]_last = $::fromExp[1];
 	}
 }
 END
