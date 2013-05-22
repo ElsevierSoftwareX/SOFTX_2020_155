@@ -29,6 +29,9 @@ if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
     "switchR2" => "SW2R",
     "saveSwitch1" => "SW1S",
     "saveSwitch2" => "SW2S",
+    "swStatus" => "SWSTAT",
+    "swReq" => "SWREQ",
+    "swMask" => "SWMASK",
 	 );
 
 

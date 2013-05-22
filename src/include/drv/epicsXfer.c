@@ -29,6 +29,7 @@ int ii;
         pDsp->data[ii].output16Hz = dsp->data[ii].output16Hz;
         pDsp->data[ii].output = dsp->data[ii].output;
         pDsp->data[ii].testpoint = dsp->data[ii].testpoint;
+        pDsp->data[ii].swStatus = dsp->data[ii].swStatus;
         pDsp->inputs[ii].opSwitchP = dsp->inputs[ii].opSwitchP;
         // dsp->inputs[ii].limiter = pDsp->inputs[ii].limiter;
         pDsp->inputs[ii].mask = dsp->inputs[ii].mask;

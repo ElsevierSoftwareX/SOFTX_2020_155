@@ -49,9 +49,9 @@ const UINT32 pow2_out[10] = {0x20,0x80,0x200,0x800,0x2000,0x8000,0x20000,
 				    0x80000,0x200000,0x800000};
 
 /// Quick look up table for filter module switch decoding
-const UINT32 fltrConst[13] = {16, 64, 256, 1024, 4096, 16384,
+const UINT32 fltrConst[15] = {16, 64, 256, 1024, 4096, 16384,
                                      65536, 262144, 1048576, 4194304,
-				     0x4, 0x8, 0x4000000, /* in sw, off sw, out sw */
+				     0x4, 0x8, 0x4000000,0x1000000,0x1 /* in sw, off sw, out sw , limit sw*/
 				     };
 
 #if defined(SERVO16K) || defined(SERVO32K) || defined(SERVO64K) || defined(SERVO128K) || defined(SERVO256K)
@@ -242,6 +242,17 @@ const int rate = (4*32768);
 #elif defined(SERVO256K)
 const int rate = (8*32768);
 #endif
+
+/* Convert opSwitchE bits into the 16-bit FiltCtrl2 Ctrl output format */
+inline unsigned int
+filtCtrlBitConvert(unsigned int v) {
+	unsigned int val = 0;
+	int i;
+	for (i = 0; i < 15; i++) {
+		if (v & fltrConst[i]) val |= 1<<i;
+	}
+	return val;
+}
 	     
 /************************************************************************/
 /************************************************************************/
@@ -954,6 +965,7 @@ filterModuleD2(FILT_MOD *pFilt,     /* Filter module data  */
 
     /* Set Output Test Point */
     pFilt->data[modNum].testpoint = output;
+    pFilt->data[modNum].swStatus = filtCtrlBitConvert(opSwitchE);
 
     /* Test Output Switch and output hold on/off */
     if (opSwitchE & OPSWITCH_HOLD_ENABLE) {
@@ -1005,13 +1017,3 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
 }
 
 
-/* Convert opSwitchE bits into the 16-bit FiltCtrl2 Ctrl output format */
-inline unsigned int
-filtCtrlBitConvert(unsigned int v) {
-	unsigned int val = 0;
-	int i;
-	for (i = 0; i < 13; i++) {
-		if (v & fltrConst[i]) val |= 1<<i;
-	}
-	return val;
-}

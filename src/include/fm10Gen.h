@@ -79,6 +79,8 @@ typedef struct FM_OP_IN{
   float gain_ramp_time; ///< Gain change ramping time in seconds 
   UINT32 mask;		///< mask indicating which filters are controlled by FE
   UINT32 control;	///< ten control bits to turn on or off filters 
+  UINT32 swReq;	 	///< Switch settings requested by Guardian
+  UINT32 swMask;	 ///< Guardian switch setting mask
 } FM_OP_IN;
 
 /// Structure for holding filter module ramping information.
@@ -97,6 +99,7 @@ typedef struct FM_OP_DATA{
   double testpoint;      ///< Filter Bank output;always enabled
   double output;         ///< Filter Bank Output;ENABLE/DISABLE/HOLD 
   double output16Hz;     ///< 16hz Output; ENABLE/DISABLE/HOLD 
+  UINT32 swStatus;	 ///< Status of fm switch settings
 }FM_OP_DATA;
 
 /// Struct of local memory filter module coefficients 
