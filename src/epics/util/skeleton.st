@@ -452,12 +452,16 @@ state init
       switchR2[ii] = 0;
       saveSwitch1[ii] = 0;
       saveSwitch2[ii] = 0;
+      swMask[ii] = 0;
+      swReq[ii] = 0;
       pvPut(sw1[ii]);
       pvPut(switchR1[ii]);
       pvPut(saveSwitch1[ii]);
       pvPut(sw2[ii]);
       pvPut(switchR2[ii]);
       pvPut(saveSwitch2[ii]);
+      pvPut(swMask[ii]);
+      pvPut(swReq[ii]);
 %%  }
 #endif
 
@@ -581,6 +585,29 @@ state monScreen{
 	  pvPut(swRset[ii]);
 %%      }
 
+	swStatus[ii] = pFilt->data[ii].swStatus;
+	pvGet(swMask[ii]);
+	pvGet(swReq[ii]);
+%%      if(swMask[ii])
+%%      {
+%%	int smask = swMask[ii];
+%%	int sreq = swReq[ii];
+%%	int sstat = swStatus[ii];
+%%	for(jj = 0; jj<14;jj++)
+%%	{
+%%		if(smask & 1)
+%%		{
+%%			if((sreq & 1) != (sstat & 1))
+%%			{
+%%				swStatus[ii] |= 0x8000;
+%%			}
+%%		}
+%%		smask >>= 1;
+%%		sreq >>= 1;
+%%		sstat >>= 1;
+%%	}
+%%      }
+	
       /* Check for history reset */
       if(swRset[ii]&2)
 %%      {
@@ -589,7 +616,9 @@ state monScreen{
 %%	  pFilt->inputs[ii].rset = 2;
 	  swRset[ii] = 0;
 	  pvPut(swRset[ii]);
+	  swStatus[ii] |= 0x4000;
 %%      }
+	pvPut(swStatus[ii]);
 
 
       /* Get saved switch settings, used for burt purposes */
