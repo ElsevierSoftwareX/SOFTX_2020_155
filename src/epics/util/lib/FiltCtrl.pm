@@ -28,6 +28,7 @@ sub partType {
 # Current part number is passed as first argument
 sub printHeaderStruct {
         my ($i) = @_;
+	print ::OUTH "\tint $::xpartName[$i]\_MASK;\n";
 	;
 }
 
@@ -35,6 +36,7 @@ sub printHeaderStruct {
 # Current part number is passed as first argument
 sub printEpics {
         my ($i) = @_;
+	print ::EPICS "OUTVARIABLE $::xpartName[$i]\_MASK $::systemName\.$::xpartName[$i]\_MASK int ao 0 field(PREC,\"0\")\n";
         ;
 }
 
@@ -83,6 +85,7 @@ sub fromExp {
 sub frontEndCode {
 	my ($i) = @_;
         my $calcExp = "// FILTER MODULE with CONTROL:  $::xpartName[$i]\n";
+	$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_MASK = $::fromExp[2];\n";
         $calcExp .= "\L$::xpartName[$i]";
         $calcExp .= " = ";
         if ($::cpus > 2) {
