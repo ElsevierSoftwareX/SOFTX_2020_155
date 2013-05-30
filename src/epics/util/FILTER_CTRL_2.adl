@@ -1,7 +1,7 @@
 
 file {
-	name="/opt/rtcds/tst/x1/core/advLigoRTS/trunk/src/epics/util/FILTER_CTRL_2.adl"
-	version=030105
+	name="/opt/rtcds/rtscore/trunk/src/epics/util/FILTER_CTRL_2.adl"
+	version=030107
 }
 display {
 	object {
@@ -1718,4 +1718,20 @@ text {
 	}
 	textix="FILTER MODULE w/Control 2"
 	align="horiz. centered"
+}
+rectangle {
+	object {
+		x=183
+		y=178
+		width=20
+		height=18
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		clr="alarm"
+		chan="SITE_NAME:FILTERNAME_SWSTAT"
+	}
 }
