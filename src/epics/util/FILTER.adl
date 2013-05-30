@@ -1,7 +1,7 @@
 
 file {
-	name="FILTER.adl"
-	version=030105
+	name="/opt/rtcds/rtscore/trunk/src/epics/util/FILTER.adl"
+	version=030107
 }
 display {
 	object {
@@ -1417,4 +1417,20 @@ text {
 	clr=0
 	bclr=34
 	label="GUARDIAN SET"
+}
+rectangle {
+	object {
+		x=183
+		y=166
+		width=20
+		height=18
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		clr="alarm"
+		chan="SITE_NAME:FILTERNAME_SWSTAT"
+	}
 }

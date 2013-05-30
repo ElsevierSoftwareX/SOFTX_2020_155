@@ -1,14 +1,14 @@
 
 file {
-	name="/opt/rtcds/tst/x1/core/advLigoRTS/trunk/src/epics/util/FILTALH.adl"
-	version=030104
+	name="/opt/rtcds/rtscore/trunk/src/epics/util/FILTALH.adl"
+	version=030107
 }
 display {
 	object {
-		x=336
-		y=613
-		width=700
-		height=400
+		x=105
+		y=444
+		width=701
+		height=530
 	}
 	clr=14
 	bclr=4
@@ -85,6 +85,17 @@ display {
 		3cb420,
 		289315,
 		1a7309,
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=402
+		width=700
+		height=115
+	}
+	"basic attribute" {
+		clr=56
 	}
 }
 rectangle {
@@ -1216,4 +1227,831 @@ text {
 	format="hexadecimal"
 	limits {
 	}
+}
+rectangle {
+	object {
+		x=181
+		y=462
+		width=61
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+}
+"text entry" {
+	object {
+		x=98
+		y=435
+		width=77
+		height=20
+	}
+	control {
+		chan="$(FPREFIX):$(FNAME)_SWREQ"
+		clr=35
+		bclr=14
+	}
+	clrmod="alarm"
+	format="hexadecimal"
+	limits {
+	}
+}
+text {
+	object {
+		x=251
+		y=409
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="IN"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=280
+		y=409
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="OSET"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=434
+		y=409
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="FILTERS"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=582
+		y=409
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="LIM"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=611
+		y=409
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="OUT"
+	align="horiz. centered"
+}
+byte {
+	object {
+		x=249
+		y=435
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWREQ"
+		clr=50
+		bclr=54
+	}
+	sbit=10
+	ebit=10
+}
+byte {
+	object {
+		x=278
+		y=435
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWREQ"
+		clr=50
+		bclr=54
+	}
+	sbit=11
+	ebit=11
+}
+byte {
+	object {
+		x=308
+		y=435
+		width=128
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWREQ"
+		clr=50
+		bclr=54
+	}
+	sbit=0
+	ebit=4
+}
+byte {
+	object {
+		x=439
+		y=435
+		width=128
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWREQ"
+		clr=50
+		bclr=54
+	}
+	sbit=5
+	ebit=9
+}
+byte {
+	object {
+		x=579
+		y=435
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWREQ"
+		clr=50
+		bclr=54
+	}
+	sbit=13
+	ebit=13
+}
+byte {
+	object {
+		x=608
+		y=435
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWREQ"
+		clr=50
+		bclr=54
+	}
+	sbit=12
+	ebit=12
+}
+text {
+	object {
+		x=188
+		y=435
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="SWREQ"
+}
+menu {
+	object {
+		x=96
+		y=461
+		width=80
+		height=21
+	}
+	control {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT.HSV"
+		clr=35
+		bclr=14
+	}
+	clrmod="alarm"
+}
+byte {
+	object {
+		x=308
+		y=423
+		width=128
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWMASK"
+		clr=31
+		bclr=56
+	}
+	sbit=0
+	ebit=4
+}
+byte {
+	object {
+		x=249
+		y=423
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWMASK"
+		clr=31
+		bclr=56
+	}
+	sbit=10
+	ebit=10
+}
+byte {
+	object {
+		x=278
+		y=423
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWMASK"
+		clr=31
+		bclr=56
+	}
+	sbit=11
+	ebit=11
+}
+byte {
+	object {
+		x=439
+		y=423
+		width=128
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWMASK"
+		clr=31
+		bclr=56
+	}
+	sbit=5
+	ebit=9
+}
+byte {
+	object {
+		x=579
+		y=423
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWMASK"
+		clr=31
+		bclr=56
+	}
+	sbit=13
+	ebit=13
+}
+byte {
+	object {
+		x=608
+		y=423
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWMASK"
+		clr=31
+		bclr=56
+	}
+	sbit=12
+	ebit=12
+}
+text {
+	object {
+		x=188
+		y=421
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="SWMASK"
+}
+byte {
+	object {
+		x=307
+		y=465
+		width=128
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	sbit=0
+	ebit=4
+}
+byte {
+	object {
+		x=248
+		y=465
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	sbit=10
+	ebit=10
+}
+byte {
+	object {
+		x=277
+		y=465
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	sbit=11
+	ebit=11
+}
+byte {
+	object {
+		x=438
+		y=465
+		width=128
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	sbit=5
+	ebit=9
+}
+byte {
+	object {
+		x=578
+		y=465
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	sbit=13
+	ebit=13
+}
+byte {
+	object {
+		x=607
+		y=465
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	sbit=12
+	ebit=12
+}
+text {
+	object {
+		x=187
+		y=465
+		width=50
+		height=15
+	}
+	"basic attribute" {
+		clr=0
+	}
+	"dynamic attribute" {
+		clr="alarm"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+	}
+	textix="SWSTATUS"
+}
+"text entry" {
+	object {
+		x=98
+		y=413
+		width=77
+		height=20
+	}
+	control {
+		chan="$(FPREFIX):$(FNAME)_SWMASK"
+		clr=35
+		bclr=14
+	}
+	clrmod="alarm"
+	format="hexadecimal"
+	limits {
+	}
+}
+polygon {
+	object {
+		x=314
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&1) && ((A&1) != (C&1))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(314,447)
+		(325,447)
+		(319,463)
+		(314,447)
+	}
+}
+polygon {
+	object {
+		x=339
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&2) && ((A&2) != (C&2))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(339,447)
+		(350,447)
+		(344,463)
+		(339,447)
+	}
+}
+polygon {
+	object {
+		x=365
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&4) && ((A&4) != (C&4))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(365,447)
+		(376,447)
+		(370,463)
+		(365,447)
+	}
+}
+polygon {
+	object {
+		x=390
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&8) && ((A&8) != (C&8))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(390,447)
+		(401,447)
+		(395,463)
+		(390,447)
+	}
+}
+polygon {
+	object {
+		x=416
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&16) && ((A&16) != (C&16))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(416,447)
+		(427,447)
+		(421,463)
+		(416,447)
+	}
+}
+polygon {
+	object {
+		x=446
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&32) && ((A&32) != (C&32))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(446,447)
+		(457,447)
+		(451,463)
+		(446,447)
+	}
+}
+polygon {
+	object {
+		x=472
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&64) && ((A&64) != (C&64))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(472,447)
+		(483,447)
+		(477,463)
+		(472,447)
+	}
+}
+polygon {
+	object {
+		x=497
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&128) && ((A&128) != (C&128))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(497,447)
+		(508,447)
+		(502,463)
+		(497,447)
+	}
+}
+polygon {
+	object {
+		x=521
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&256) && ((A&256) != (C&256))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(521,447)
+		(532,447)
+		(526,463)
+		(521,447)
+	}
+}
+polygon {
+	object {
+		x=546
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&512) && ((A&512) != (C&512))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(546,447)
+		(557,447)
+		(551,463)
+		(546,447)
+	}
+}
+polygon {
+	object {
+		x=255
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&1024) && ((A&1024) != (C&1024))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(255,447)
+		(266,447)
+		(260,463)
+		(255,447)
+	}
+}
+polygon {
+	object {
+		x=283
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&2048) && ((A&2048) != (C&2048))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(283,447)
+		(294,447)
+		(288,463)
+		(283,447)
+	}
+}
+polygon {
+	object {
+		x=585
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&8192) && ((A&8192) != (C&8192))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(585,447)
+		(596,447)
+		(590,463)
+		(585,447)
+	}
+}
+polygon {
+	object {
+		x=615
+		y=447
+		width=11
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+		width=3
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(B&4096) && ((A&4096) != (C&4096))"
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		chanB="$(FPREFIX):$(FNAME)_SWMASK"
+		chanC="$(FPREFIX):$(FNAME)_SWREQ"
+	}
+	points {
+		(615,447)
+		(626,447)
+		(620,463)
+		(615,447)
+	}
+}
+"text entry" {
+	object {
+		x=98
+		y=485
+		width=77
+		height=20
+	}
+	control {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT.HIGH"
+		clr=35
+		bclr=14
+	}
+	clrmod="alarm"
+	format="hexadecimal"
+	limits {
+	}
+}
+text {
+	object {
+		x=32
+		y=433
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="FILTER"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=32
+		y=455
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="SWITCHES"
+	align="horiz. centered"
 }
