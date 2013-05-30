@@ -2146,11 +2146,13 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			} elsif ($partType[$cur_part_num] =~ /^FiltCtrl2/) {
 				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL_2.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+			} elsif ($partType[$cur_part_num] =~ /^FiltCtrl/) {
+				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			} else {
-				# system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
-				$sys_name = substr($sys_name, 2, 3);
-		  		$chanName = $site . "\:$sys_name-" . $subsysName  . ($subsysName eq "" ? "": "_") . $filt_name;
-   				("CDS::Filt::createFiltMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$filt_name,$chanNam,$rcg_src_dir);
+				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				# $sys_name = substr($sys_name, 2, 3);
+		  		# $chanName = $site . "\:$sys_name-" . $subsysName  . ($subsysName eq "" ? "": "_") . $filt_name;
+   				# ("CDS::Filt::createFiltMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$filt_name,$chanNam,$rcg_src_dir);
 			}
 		} else {
 		  	$sys_name = substr($sys_name, 2, 3);
@@ -2163,10 +2165,12 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} elsif ($partType[$cur_part_num] =~ /^FiltCtrl2/) {
 				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL_2.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+			} elsif ($partType[$cur_part_num] =~ /^FiltCtrl/) {
+				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} else {
-				#system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
-		  		$chanName = $site . "\:$sys_name-" . $subsysName  . ($subsysName eq "" ? "": "_") . $filt_name;
-   				("CDS::Filt::createFiltMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$filt_name,$chanName,$rcg_src_dir);
+				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
+		  		# $chanName = $site . "\:$sys_name-" . $subsysName  . ($subsysName eq "" ? "": "_") . $filt_name;
+   				# ("CDS::Filt::createFiltMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$filt_name,$chanName,$rcg_src_dir);
 			}
 		}
 	}
