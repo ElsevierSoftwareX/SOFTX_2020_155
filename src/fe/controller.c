@@ -348,6 +348,7 @@ void *fe_start(void *arg)
   static float duotoneTotalDac = 0.0;
   static float duotoneMeanDac = 0.0;
   static int dacDuoEnable = 0;
+  static int dacTimingError = 0;
 
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
   volatile GSC_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
@@ -1164,6 +1165,11 @@ udelay(1000);
 
 
 // START OF DAC WRITE ***********************************************************************************
+#ifdef ADC_MASTER
+	// If DAC FIFO error, always output zero to DAC modules.
+	// Code will require restart to clear.
+	if(dacTimingError) iopDacEnable = 0;
+#endif
 	// Write out data to DAC modules
 	for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	{
@@ -1820,6 +1826,7 @@ udelay(1000);
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
 			    feStatus |= FE_ERROR_DAC;
+			    dacTimingError = 1;
 			} else pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
 
 		}
@@ -1831,6 +1838,7 @@ udelay(1000);
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
 			    feStatus |= FE_ERROR_DAC;
+			    dacTimingError = 1;
 			} else pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
 		}
 	}
