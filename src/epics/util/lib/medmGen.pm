@@ -85,6 +85,7 @@ my ($xpos,$ypos,$wid,$ht,$chan,$fgc,$bgc,$clrmod,$form) = @_;
         clrmod="$clrmod"
         format="$form"
         align="horiz. centered"
+	format="$form"
         limits {
         }
 }
