@@ -18,5 +18,6 @@
 	- \ref ipcTestData "RCG IPC Test"
 	- \ref duotoneTest "Duotone Test"
 	- \ref dackillTest "DACKILL w/OSEM Watchdog Test"
+	- \ref decFiltTest "IOP Decimation Filter Test"
 */
 
