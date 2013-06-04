@@ -1433,26 +1433,44 @@ sub process {
       my @sp = split(/\\n/, ${$annot->{FIELDS}}{Name});
       # See if the channel name and rate specified
       foreach $i (@sp) {
+	      my $rate = "";
+	      my $type = "";
+	      my $science = "";
+
 	      next if ($i =~ "^#");
 	      my @nr = split(/\s+/, $i);
 	      next unless length $nr[0];
 	      my $pn = $prefix . $nr[0];
+	      # See if this is a science mode channel (ends with an asterisk)
+	      if ($pn =~ /\*$/) {
+		chop $pn;
+		$science ="science";
+	      }
 	      die "Bad DAQ channel name specified: $pn\n" unless name_check($pn);
-	      my $rate;
-	      if (defined $nr[1]) {
-		my @rates = qw(32 64 128 256 512 1024 2048 4096 8192 16384 32768 65536);
-		my @res = grep {$nr[1] == $_} @rates;
-		#print $nr[1], " ", @res, "\n";
-		die "Bad DAQ channel rate specified: $pn, $nr[1]\n" unless @res;
-		#print $pn," ", $nr[1], "\n";
-      	      } else {
-		#print $pn," default rate\n";
+	      # There are up to three extra fields allowed
+	      # rate, if it is a number
+	      # "uint32" specified data type
+	      # or "science" to indicate a science run mode channel
+	      shift @nr;
+	      foreach $f (@nr) {
+		if ($f eq "science") {
+		  $science = $f;
+		} elsif ($f eq "uint32") {
+		  $type = "uint32";
+	        } elsif ($f =~ /^\d+$/) { # An integer
+		  my @rates = qw(32 64 128 256 512 1024 2048 4096 8192 16384 32768 65536);
+		  my @res = grep {$f == $_} @rates;
+		  print $f, " ", @res, "\n";
+		  die "Bad DAQ channel rate specified: $pn, $f\n" unless @res;
+		  print $pn," ", $f, "\n";
+		  $rate = $f;
+	        }
 	      }
       	      # Add channel name and rate into the hash and print into the _daq file
 	      # fmseq.pl then will open and process the DAQ channel data
 	      die "Duplicated DAQ channel name $pn\n" if defined $::DAQ_Channels{$pn};
-	      $::DAQ_Channels{$pn} = $nr[1];
-	      print ::DAQ $pn, " ", $nr[1], "\n";
+	      $::DAQ_Channels{$pn} = $rate;
+	      print ::DAQ $pn, " $rate $type $science\n";
       }
       ${$annot->{FIELDS}}{Name} = "Removed";
     }
