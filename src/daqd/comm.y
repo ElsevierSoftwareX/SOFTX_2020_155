@@ -184,9 +184,11 @@ static int prompt_lineno;
 
 %token <y_void>  FRAMES
 %token <y_void>  FRAME_SAVER
+%token <y_void>  SCIENCE_FRAME_SAVER
 %token <y_void>  NUM_DIRS
 %token <y_void>  FRAME_WIPER
 %token <y_void>  FRAME_DIR
+%token <y_void>  SCIENCE_FRAME_DIR
 
 %token <y_void>  TREND_FRAMES
 %token <y_void>  TREND_FRAME_SAVER
@@ -1085,6 +1087,11 @@ CommandLine: /* Nothing */
 		daqd.fsd.set_filename_attrs ($8, $6, $4);
 		free ($4); free ($6); free ($8);
 	}
+	| SET SCIENCE_FRAME_DIR '=' TextExpression ',' TextExpression ',' TextExpression {
+		AUTH_CHECK(((my_lexer *)lexer));
+		daqd.science_fsd.set_filename_attrs ($8, $6, $4);
+		free ($4); free ($6); free ($8);
+	}
 	| SET FRAMES_PER_DIR '=' INTNUM {
 		AUTH_CHECK(((my_lexer *)lexer));
 		daqd.fsd.set_files_per_dir ($4);
@@ -1879,9 +1886,17 @@ status_channels_bailout:
 	     //pvValue[5]++;
 	     pvValue[0]++;
 #endif
+	     system_log(1, "waiting on frame_saver semaphore");
 	     sleep(1);
 	   }
 	   sem_post (&daqd.frame_saver_sem);
+	}
+	| SYNC  SCIENCE_FRAME_SAVER {
+	   // Command is used to sync with the `start science-frame-saver'
+	   for (;sem_trywait (&daqd.science_frame_saver_sem);) {
+	     sleep(1);
+	   }
+	   sem_post (&daqd.science_frame_saver_sem);
 	}
 	| START FRAME_SAVER {
 		AUTH_CHECK(((my_lexer *)lexer));
@@ -1891,7 +1906,21 @@ status_channels_bailout:
 			*yyout << "`start main' before starting frame saver" << endl;
 			exit (1);
 		} else {
-			if (! daqd.start_frame_saver (yyout)) {
+			if (! daqd.start_frame_saver (yyout, 0)) {
+				system_log(1, "frame saver started");
+			} else
+				exit (1);
+		}		
+	}
+	| START SCIENCE_FRAME_SAVER {
+		AUTH_CHECK(((my_lexer *)lexer));
+		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
+
+		if (! daqd.b1) {
+			*yyout << "`start main' before starting science frame saver" << endl;
+			exit (1);
+		} else {
+			if (! daqd.start_frame_saver (yyout, 1)) {
 				system_log(1, "frame saver started");
 			} else
 				exit (1);
@@ -2762,7 +2791,6 @@ ConfigureChannelsBody: BEGIN_BEGIN {
 
 	// Configure channels from files
 	if (daqd.configure_channels_files ()) exit(1);
-	daqd.num_active_channels = 0;
 	int cur_dcu = -1;
 
 	// Save channel offsets and assign trend channel data struct
@@ -2857,10 +2885,9 @@ ConfigureChannelsBody: BEGIN_BEGIN {
 		}
 #endif
 
-		if (daqd.broadcast_set.empty()
-			? daqd.channels [i].active
-			: daqd.broadcast_set.count(daqd.channels [i].name)) {
-				daqd.active_channels [daqd.num_active_channels++] = daqd.channels [i];
+		if (!daqd.broadcast_set.empty()) {
+			// Activate configured DMT broadcast channels
+			daqd.channels [i].active = daqd.broadcast_set.count(daqd.channels [i].name);
 		}
 
 		if (daqd.channels [i].trend) {
