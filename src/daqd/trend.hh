@@ -59,7 +59,6 @@ public:
     max_trend_channels = MAX_TREND_CHANNELS,
     num_trend_suffixes = 5, // That many trend channels are created for each input channel
     max_trend_sufx_len = 5,
-    max_trend_output_channels = max_trend_channels * num_trend_suffixes
   };
 
   ~trender_c () {

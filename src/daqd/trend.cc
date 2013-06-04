@@ -43,7 +43,7 @@ trender_c::raw_minute_saver ()
   circ_buffer_block_prop_t *cur_prop = new circ_buffer_block_prop_t[rmp];
   trend_block_t *cur_blk[rmp];
   for (int i = 0; i < rmp; i++)
-    cur_blk[i] = new trend_block_t[max_trend_output_channels];
+    cur_blk[i] = new trend_block_t[num_channels];
 
   for (minute_put_cntr = 0;; minute_put_cntr++) {
     int eof_flag = 0;
@@ -268,7 +268,7 @@ trender_c::minute_framer ()
     {
       int eof_flag = 0;
       circ_buffer_block_prop_t file_prop;
-      trend_block_t cur_blk [max_trend_output_channels];
+      trend_block_t cur_blk [num_channels];
 
       // Accumulate frame adc data
       for (int i = 0; i < frame_length_blocks; i++)
@@ -684,7 +684,7 @@ trender_c::framer ()
     {
       int eof_flag = 0;
       circ_buffer_block_prop_t file_prop;
-      trend_block_t cur_blk [max_trend_output_channels];
+      trend_block_t cur_blk [num_channels];
 
       // Accumulate frame adc data
       for (int i = 0; i < frame_length_blocks; i++)
