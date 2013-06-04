@@ -37,12 +37,12 @@ unsigned int epicsDcuStatus[3][2][DCU_COUNT];
 //
 pvInfo exServer::pvList[] = {
     pvInfo (1, "CYCLE", 0xffffffff, 0, excasIoSync, 1, pvValue),
-    pvInfo (0, "TOTAL_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+1),
-    pvInfo (0, "DATA_RATE", 0xffffffff, 0, excasIoSync, 1, pvValue+2),
+    pvInfo (1, "TOTAL_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+1),
+    pvInfo (1, "DATA_RATE", 0xffffffff, 0, excasIoSync, 1, pvValue+2),
     pvInfo (1, "EDCU_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+3),
     pvInfo (1, "EDCU_CONN_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+4),
     pvInfo (1, "UPTIME_SECONDS", 0xffffffff, 0, excasIoSync, 1, pvValue+5),
-    pvInfo (0, "LOOKBACK_RAM",  0xffffffff, 0, excasIoSync, 1, pvValue+6),
+    pvInfo (1, "LOOKBACK_RAM",  0xffffffff, 0, excasIoSync, 1, pvValue+6),
     pvInfo (1, "LOOKBACK_FULL",  0xffffffff, 0, excasIoSync, 1, pvValue+7),
     pvInfo (1, "LOOKBACK_DIR",  0xffffffff, 0, excasIoSync, 1, pvValue+8),
     pvInfo (1, "LOOKBACK_STREND",  0xffffffff, 0, excasIoSync, 1, pvValue+9),
@@ -54,7 +54,7 @@ pvInfo exServer::pvList[] = {
     pvInfo (1, "BCAST_RETR",  0xffffffff, 0, excasIoSync, 1, pvValue+15),
     pvInfo (1, "BCAST_FAILED_RETR",  0xffffffff, 0, excasIoSync, 1, pvValue+16),
     pvInfo (0.5, "GPS",  0xffffffff, 0, excasIoSync, 1, pvValue+17),
-    pvInfo (0, "CHANS_SAVED", 0xffffffff, 0, excasIoSync, 1, pvValue+18),
+    pvInfo (1, "CHANS_SAVED", 0xffffffff, 0, excasIoSync, 1, pvValue+18),
 };
 
 const unsigned exServer::pvListNElem = NELEMENTS (exServer::pvList);
