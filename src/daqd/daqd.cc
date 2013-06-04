@@ -52,6 +52,7 @@
 #include <hash_map>
 #endif
 #include <fstream>
+#include <vector>
 
 using namespace std;
 
@@ -166,65 +167,6 @@ daqd_c::update_archive(char *name, unsigned long gps, unsigned long dt, unsigned
     return DAQD_OK;
 }
 
-
-#if 0
-unsigned int crctab[256] =
-{
-  0x0,
-  0x04C11DB7, 0x09823B6E, 0x0D4326D9, 0x130476DC, 0x17C56B6B,
-  0x1A864DB2, 0x1E475005, 0x2608EDB8, 0x22C9F00F, 0x2F8AD6D6,
-  0x2B4BCB61, 0x350C9B64, 0x31CD86D3, 0x3C8EA00A, 0x384FBDBD,
-  0x4C11DB70, 0x48D0C6C7, 0x4593E01E, 0x4152FDA9, 0x5F15ADAC,
-  0x5BD4B01B, 0x569796C2, 0x52568B75, 0x6A1936C8, 0x6ED82B7F,
-  0x639B0DA6, 0x675A1011, 0x791D4014, 0x7DDC5DA3, 0x709F7B7A,
-  0x745E66CD, 0x9823B6E0, 0x9CE2AB57, 0x91A18D8E, 0x95609039,
-  0x8B27C03C, 0x8FE6DD8B, 0x82A5FB52, 0x8664E6E5, 0xBE2B5B58,
-  0xBAEA46EF, 0xB7A96036, 0xB3687D81, 0xAD2F2D84, 0xA9EE3033,
-  0xA4AD16EA, 0xA06C0B5D, 0xD4326D90, 0xD0F37027, 0xDDB056FE,
-  0xD9714B49, 0xC7361B4C, 0xC3F706FB, 0xCEB42022, 0xCA753D95,
-  0xF23A8028, 0xF6FB9D9F, 0xFBB8BB46, 0xFF79A6F1, 0xE13EF6F4,
-  0xE5FFEB43, 0xE8BCCD9A, 0xEC7DD02D, 0x34867077, 0x30476DC0,
-  0x3D044B19, 0x39C556AE, 0x278206AB, 0x23431B1C, 0x2E003DC5,
-  0x2AC12072, 0x128E9DCF, 0x164F8078, 0x1B0CA6A1, 0x1FCDBB16,
-  0x018AEB13, 0x054BF6A4, 0x0808D07D, 0x0CC9CDCA, 0x7897AB07,
-  0x7C56B6B0, 0x71159069, 0x75D48DDE, 0x6B93DDDB, 0x6F52C06C,
-  0x6211E6B5, 0x66D0FB02, 0x5E9F46BF, 0x5A5E5B08, 0x571D7DD1,
-  0x53DC6066, 0x4D9B3063, 0x495A2DD4, 0x44190B0D, 0x40D816BA,
-  0xACA5C697, 0xA864DB20, 0xA527FDF9, 0xA1E6E04E, 0xBFA1B04B,
-  0xBB60ADFC, 0xB6238B25, 0xB2E29692, 0x8AAD2B2F, 0x8E6C3698,
-  0x832F1041, 0x87EE0DF6, 0x99A95DF3, 0x9D684044, 0x902B669D,
-  0x94EA7B2A, 0xE0B41DE7, 0xE4750050, 0xE9362689, 0xEDF73B3E,
-  0xF3B06B3B, 0xF771768C, 0xFA325055, 0xFEF34DE2, 0xC6BCF05F,
-  0xC27DEDE8, 0xCF3ECB31, 0xCBFFD686, 0xD5B88683, 0xD1799B34,
-  0xDC3ABDED, 0xD8FBA05A, 0x690CE0EE, 0x6DCDFD59, 0x608EDB80,
-  0x644FC637, 0x7A089632, 0x7EC98B85, 0x738AAD5C, 0x774BB0EB,
-  0x4F040D56, 0x4BC510E1, 0x46863638, 0x42472B8F, 0x5C007B8A,
-  0x58C1663D, 0x558240E4, 0x51435D53, 0x251D3B9E, 0x21DC2629,
-  0x2C9F00F0, 0x285E1D47, 0x36194D42, 0x32D850F5, 0x3F9B762C,
-  0x3B5A6B9B, 0x0315D626, 0x07D4CB91, 0x0A97ED48, 0x0E56F0FF,
-  0x1011A0FA, 0x14D0BD4D, 0x19939B94, 0x1D528623, 0xF12F560E,
-  0xF5EE4BB9, 0xF8AD6D60, 0xFC6C70D7, 0xE22B20D2, 0xE6EA3D65,
-  0xEBA91BBC, 0xEF68060B, 0xD727BBB6, 0xD3E6A601, 0xDEA580D8,
-  0xDA649D6F, 0xC423CD6A, 0xC0E2D0DD, 0xCDA1F604, 0xC960EBB3,
-  0xBD3E8D7E, 0xB9FF90C9, 0xB4BCB610, 0xB07DABA7, 0xAE3AFBA2,
-  0xAAFBE615, 0xA7B8C0CC, 0xA379DD7B, 0x9B3660C6, 0x9FF77D71,
-  0x92B45BA8, 0x9675461F, 0x8832161A, 0x8CF30BAD, 0x81B02D74,
-  0x857130C3, 0x5D8A9099, 0x594B8D2E, 0x5408ABF7, 0x50C9B640,
-  0x4E8EE645, 0x4A4FFBF2, 0x470CDD2B, 0x43CDC09C, 0x7B827D21,
-  0x7F436096, 0x7200464F, 0x76C15BF8, 0x68860BFD, 0x6C47164A,
-  0x61043093, 0x65C52D24, 0x119B4BE9, 0x155A565E, 0x18197087,
-  0x1CD86D30, 0x029F3D35, 0x065E2082, 0x0B1D065B, 0x0FDC1BEC,
-  0x3793A651, 0x3352BBE6, 0x3E119D3F, 0x3AD08088, 0x2497D08D,
-  0x2056CD3A, 0x2D15EBE3, 0x29D4F654, 0xC5A92679, 0xC1683BCE,
-  0xCC2B1D17, 0xC8EA00A0, 0xD6AD50A5, 0xD26C4D12, 0xDF2F6BCB,
-  0xDBEE767C, 0xE3A1CBC1, 0xE760D676, 0xEA23F0AF, 0xEEE2ED18,
-  0xF0A5BD1D, 0xF464A0AA, 0xF9278673, 0xFDE69BC4, 0x89B8FD09,
-  0x8D79E0BE, 0x803AC667, 0x84FBDBD0, 0x9ABC8BD5, 0x9E7D9662,
-  0x933EB0BB, 0x97FFAD0C, 0xAFB010B1, 0xAB710D06, 0xA6322BDF,
-  0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4
-};
-#endif
-
 extern void *interpreter_no_prompt (void *);
 int shutdown_server ();
 
@@ -246,8 +188,7 @@ int _log_level;
 
 #include "../../src/drv/param.c"
 
-struct laughable {bool operator()(char *a, char *b) { return !strcmp(a,b); }};
-
+struct cmp_struct {bool operator()(char *a, char *b) { return !strcmp(a,b); }};
 
 // Sort on IFO number and DCU id
 // Do not change channel order within a DCU
@@ -266,6 +207,19 @@ int bcstConfigCallback(char *name, struct CHAN_PARAM *parm, void *user) {
 	printf("Broadcast channel %s configured\n", name);
 	daqd.broadcast_set.insert(name);
 	return 1;
+}
+
+void RemoveSpaces(char* source)
+{
+  char* i = source;
+  char* j = source;
+  while(*j != 0)
+  {
+    *i = *j++;
+    if(*i != ' ')
+      i++;
+  }
+  *i = 0;
 }
 
 // Configure data channel info from config files
@@ -293,6 +247,8 @@ daqd_c::configure_channels_files ()
   }
 
   num_channels = 0;
+  num_active_channels = 0;
+  num_science_channels = 0;
   memset(channels, 0, sizeof(channels[0]) * daqd_c::max_channels);
 
   for(;;){
@@ -303,9 +259,12 @@ daqd_c::configure_channels_files ()
     char *c = fgets(buf, 1024, mcf);
     if (feof(mcf)) break;
     if (*buf == '#') continue;
+    RemoveSpaces(buf);
     if (strlen(buf) > 0) {
       if (buf[strlen(buf) - 1] == '\n') buf[strlen(buf) - 1] = 0;
     }
+    if (strlen(buf) == 0) continue;
+
     if (strlen(buf) > 4) {
 	testpoint = !strcmp(buf + strlen(buf) - 4, ".par");
     }
@@ -348,9 +307,9 @@ daqd_c::configure_channels_files ()
   // See if we have duplicate names
   {
 #if __GNUC__ >= 4
-     __gnu_cxx::hash_map<char *, int, __gnu_cxx::hash<char *>, laughable> m;
+     __gnu_cxx::hash_map<char *, int, __gnu_cxx::hash<char *>, cmp_struct> m;
 #else
-     hash_map<char *, int, hash<char *>, laughable> m;
+     hash_map<char *, int, hash<char *>, cmp_struct> m;
 #endif
 
      for (int i = 0; i < daqd.num_channels; i++) {
@@ -376,7 +335,6 @@ daqd_c::configure_channels_files ()
 	 - daqd.num_gds_channel_aliases
 #endif
 	- daqd.num_epics_channels;
-  pvValue[18] = daqd.num_active_channels;
 #endif
   system_log(1, "finished configuring data channels");
   return 0;
@@ -422,7 +380,16 @@ chanConfigCallback(char *channel_name, struct CHAN_PARAM *params, void *user)
 
   // Activate channels for saving into full frames
   // Do not save 1 Hz slow channels
-  ccd -> active = ((params->acquire) & 1) && (ccd -> sample_rate > 1);
+  ccd -> active = 0;
+  if (ccd -> sample_rate > 1) {
+  	ccd -> active = params->acquire;
+  }
+  if (ccd -> active) {
+  	daqd.num_active_channels++;
+  	if (ccd -> active & 2) {
+  		daqd.num_science_channels++;
+	}
+  }
 
   // 1Hz channels will be acquired at 16Hz
   if (ccd -> sample_rate == 1) {
@@ -483,100 +450,6 @@ chanConfigCallback(char *channel_name, struct CHAN_PARAM *params, void *user)
   return 1;
 }
 
-
-
-
-#if 0
-inline static daq_data_t
-frlibvect_to_dtype( INT_2U type )
-{
-  switch (type)  {
-  case FR_VECT_2S:
-  case FR_VECT_2U:
-    return _16bit_integer;
-  case FR_VECT_4S:
-  case FR_VECT_4U:
-    return _32bit_integer;
-  case FR_VECT_8S:
-  case FR_VECT_8U:
-    return _64bit_integer;
-  case FR_VECT_4R:
-    return _32bit_float;
-  case FR_VECT_8R:
-    return _64bit_double;
-  case FR_VECT_8C:
-    return _32bit_complex;
-  default:
-    return _undefined;
-  }
-}
-#endif
-
-
-// open reference frame file (specified on the command line with `-f' flag)
-// configure all channels found in referenfce frame
-//
-int daqd_c::configure_channels_reference_frame ()
-{
-#if 0
-  FrameCPP::Frame* frame = 0;
-  try {
-    ifstream in (frame_fname);
-    FrameCPP::FrameReader fr (in);
-    frame = fr.readFrame ();
-    in.close ();
-  } catch (read_failure) {
-    system_log(1, "configure_channels_reference_frame(): can't read frame `%s'", frame_fname);
-    exit (1);
-  } catch (bad_alloc) {
-    system_log(1, "configure_channels_reference_frame(): out of memory");
-    exit (1);
-  }
-
-  FrameCPP::RawData* raw = frame -> getRawData();
-  FrameCPP::RawData::adcData_iterator iter (raw -> refAdc ().begin());
-
-  for (;iter != raw->refAdc().end(); iter++) {
-    FrameCPP::AdcData& adc (**iter);
-
-    if (num_channels >= max_channels) {
-      system_log(1, "too many channels. Channel `%s' ignored", adc.getName().c_str());
-      continue;
-    }
-    if (adc.refData().getSize() == 0) {
-      system_log(1, "Channel `%s' ignored because it had no data vector", adc.getName().c_str());
-      continue;
-    }
-
-    channel_t *ccd = &channels [num_channels++];
-    ccd -> id = 0;
-    strncpy (ccd -> name, adc.getName().c_str(), channel_t::channel_name_max_len - 1);
-    ccd -> name [channel_t::channel_name_max_len - 1] = 0;
-    int bps = ((int)adc.getNBits())/8;
-    if ( bps < 0 )
-      ccd -> bps = - bps;
-    else
-      ccd -> bps = bps;
-
-    ccd -> data_type = frlibvect_to_dtype(adc.refData()[0]->getType());
-    ccd -> sample_rate = (int) adc.getSampleRate();
-    ccd -> active = 1;
-    ccd -> group_num = find_channel_group (adc.getName().c_str());
-    ccd -> trend = 1;
-    // assign conversion data
-    ccd -> signal_gain = 0;
-    ccd -> signal_slope = adc.getSlope();
-    ccd -> signal_offset = adc.getBias();
-    strncpy (ccd -> signal_units, adc.getUnits().c_str(), channel_t::engr_unit_max_len - 1);
-    ccd -> signal_units [channel_t::engr_unit_max_len - 1] = 0;
-
-    active_channels[num_active_channels++] = *ccd;
-  }
-
-  return 0;
-#endif
-}
-
 int daqd_c::find_channel_group (const char* channel_name)
 {
   for (int i = 0; i < num_channel_groups; i++) {
@@ -587,16 +460,18 @@ int daqd_c::find_channel_group (const char* channel_name)
   return 0;
 }
 
-// Keep pointers to the data samples for each data channel
-unsigned char *fast_adc_ptr [MAX_CHANNELS];
-INT_2U data_valid [MAX_CHANNELS];
-INT_2U *aux_data_valid_ptr [MAX_CHANNELS];
-
-
 General::SharedPtr<FrameCPP::Version::FrameH>
-daqd_c::full_frame(channel_t* frame_channels, long num_frame_channels, int frame_length_seconds)
+daqd_c::full_frame(int frame_length_seconds, int science,
+		   adc_data_ptr_type &dptr)
   throw() {
-  FrameCPP::Version::FrAdcData *adc  = new FrameCPP::Version::FrAdcData[num_channels];
+  unsigned long nchans = 0;
+
+  if (science) {
+  	nchans = num_science_channels;
+  } else {
+  	nchans = num_active_channels;
+  }
+  FrameCPP::Version::FrAdcData *adc  = new FrameCPP::Version::FrAdcData[nchans];
   General::SharedPtr< FrameCPP::Version::FrRawData > rawData 
   	= General::SharedPtr< FrameCPP::Version::FrRawData > (new FrameCPP::Version::FrRawData);
   General::SharedPtr<FrameCPP::Version::FrameH> frame;
@@ -633,22 +508,27 @@ daqd_c::full_frame(channel_t* frame_channels, long num_frame_channels, int frame
   // Create ADCs
   try {
     // Fast channels
-    for (int i = 0; i < num_frame_channels; i++) {
+    unsigned int cur_chn = 0;
+
+    for (int i = 0; i < num_channels; i++) {
+      // Skip chanels we don't want to save
+      if (science? 0 == (channels[i].active & 2): !channels[i].active) continue;
+
       FrameCPP::Version::FrAdcData adc
-	  = FrameCPP::Version::FrAdcData (std::string(frame_channels [i].name),
-					  frame_channels [i].group_num,
+	  = FrameCPP::Version::FrAdcData (std::string(channels [i].name),
+					  channels [i].group_num,
 					  i, // channel ???
-					  CHAR_BIT * frame_channels [i].bps,
-					  frame_channels [i].sample_rate,
-					  frame_channels [i].signal_offset,
-					  frame_channels [i].signal_slope,
-					  std::string(frame_channels [i].signal_units),
-					  frame_channels [i].data_type == _32bit_complex? frame_channels [i].signal_gain: .0, /* Freq shift */
+					  CHAR_BIT * channels [i].bps,
+					  channels [i].sample_rate,
+					  channels [i].signal_offset,
+					  channels [i].signal_slope,
+					  std::string(channels [i].signal_units),
+					  channels [i].data_type == _32bit_complex? channels [i].signal_gain: .0, /* Freq shift */
 					  0,
 					  0,
 					  .0); /* heterodyning phase in radians */
 
-      if (frame_channels [i].sample_rate > 16) {
+      if (channels [i].sample_rate > 16) {
         /* Append ADC AUX vector to store 16 status words per second */
         FrameCPP::Version::Dimension  aux_dims [1]
 	  = { FrameCPP::Version::Dimension (16 * frame_length_seconds,
@@ -660,28 +540,28 @@ daqd_c::full_frame(channel_t* frame_channels, long num_frame_channels, int frame
       }
 
       /* Append ADC data vector */
-      INT_4U nx = frame_channels [i].sample_rate * frame_length_seconds;
-      FrameCPP::Version::Dimension  dims [1] = { FrameCPP::Version::Dimension (nx, 1. / frame_channels [i].sample_rate, "time") };
+      INT_4U nx = channels [i].sample_rate * frame_length_seconds;
+      FrameCPP::Version::Dimension  dims [1] = { FrameCPP::Version::Dimension (nx, 1. / channels [i].sample_rate, "time") };
       FrameCPP::Version::FrVect *vect;
-      switch (frame_channels [i].data_type) { 
+      switch (channels [i].data_type) { 
       case _32bit_complex:
 	{
-	  vect = new FrameCPP::Version::FrVect(frame_channels [i].name, 1, dims, new COMPLEX_8[nx], "counts");
+	  vect = new FrameCPP::Version::FrVect(channels [i].name, 1, dims, new COMPLEX_8[nx], "counts");
 	  break;
 	}
       case _64bit_double:
 	{
-	  vect = new FrameCPP::Version::FrVect(frame_channels [i].name, 1, dims, new REAL_8[nx], "counts");
+	  vect = new FrameCPP::Version::FrVect(channels [i].name, 1, dims, new REAL_8[nx], "counts");
 	  break; 
 	}
       case _32bit_float: 
 	{
-	  vect = new FrameCPP::Version::FrVect(frame_channels [i].name, 1, dims, new REAL_4[nx], "counts");
+	  vect = new FrameCPP::Version::FrVect(channels [i].name, 1, dims, new REAL_4[nx], "counts");
 	  break;
 	}
       case _32bit_integer:
 	{
-	  vect = new FrameCPP::Version::FrVect(frame_channels [i].name, 1, dims, new INT_4S[nx], "counts");
+	  vect = new FrameCPP::Version::FrVect(channels [i].name, 1, dims, new INT_4S[nx], "counts");
 	  break;
 	}
       case _64bit_integer:
@@ -690,16 +570,19 @@ daqd_c::full_frame(channel_t* frame_channels, long num_frame_channels, int frame
 	}
       default:
 	{
-	  vect = new FrameCPP::Version::FrVect(frame_channels [i].name, 1, dims, new INT_2S[nx], "counts");
+	  vect = new FrameCPP::Version::FrVect(channels [i].name, 1, dims, new INT_2S[nx], "counts");
 	  break;
 	}
       }
       adc.RefData().append (*vect);
       frame -> GetRawData () -> RefFirstAdc ().append (adc);
-      fast_adc_ptr[i] = frame -> GetRawData () -> RefFirstAdc ()[i] -> RefData()[0] -> GetData().get();
-      if (frame_channels [i].sample_rate > 16) {
-        aux_data_valid_ptr[i] = (INT_2U*) frame -> GetRawData () -> RefFirstAdc ()[i] -> RefAux()[0] -> GetData().get();
+      unsigned char *dptr_fast_data = frame -> GetRawData () -> RefFirstAdc ()[cur_chn] -> RefData()[0] -> GetData().get();
+      INT_2U *dptr_aux_data = 0;
+      if (channels [i].sample_rate > 16) {
+        dptr_aux_data = (INT_2U*) frame -> GetRawData () -> RefFirstAdc ()[cur_chn] -> RefAux()[0] -> GetData().get();
       }
+      dptr.push_back(pair<unsigned char*, INT_2U*>(dptr_fast_data, dptr_aux_data));
+      cur_chn++;
     }
   } catch (bad_alloc) {
     system_log(1, "Couldn't create ADC channel data");
@@ -713,11 +596,13 @@ daqd_c::full_frame(channel_t* frame_channels, long num_frame_channels, int frame
 }
 
 void *
-daqd_c::framer ()
+daqd_c::framer (int science)
 {
+
   // Put this  thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("full frame saver", 2);
 
+  unsigned long nac = 0; // Number of active channels
   long frame_cntr;
   int nb;
   if (frames_per_file != 1) {
@@ -726,9 +611,13 @@ daqd_c::framer ()
   }
 
   int frame_file_length_seconds = frames_per_file * blocks_per_frame;
+  if (science) {
+    system_log(1, "Start up science mode frame writer\n");
+  }
 
+  adc_data_ptr_type dptr;
   General::SharedPtr<FrameCPP::Version::FrameH> frame
-  	= full_frame (active_channels, num_active_channels, blocks_per_frame);
+  	= full_frame (blocks_per_frame, science, dptr);
 
   if (!frame) {
     // Have to free all already allocated ADC structures at this point
@@ -738,15 +627,19 @@ daqd_c::framer ()
   }
 
   // done creating a frame
-  sem_post (&frame_saver_sem);
+  if (!science) {
+    sem_post (&frame_saver_sem);
+    sem_post (&frame_saver_sem);
+  } else {
+    sem_post (&science_frame_saver_sem);
+    sem_post (&science_frame_saver_sem);
+  }
 
   // Store data in the frame 
   // write frame files
 
   int dir_num = -1;
   //  int tdir_num;
-
-  sem_post (&frame_saver_sem);
 
   unsigned long status_ptr = block_size - 17 * sizeof(int) * num_channels;   // Index to the start of signal status memory area
 
@@ -768,6 +661,7 @@ daqd_c::framer ()
     for (int i = 0; i < 1 /*frames_per_file */; i++)
       for (int bnum = 0; bnum < blocks_per_frame; bnum++)
 	{
+	  int cnum = science? daqd.science_cnum: daqd.cnum;
 	  nb = b1 -> get (cnum);
 
 	  TNF_PROBE_1(daqd_c_framer_start, "daqds_c::framer",
@@ -811,33 +705,41 @@ daqd_c::framer ()
 		    // Frame number is based upon the cycle counter
 		    frame_number = prop -> prop.cycle / 16 / (frames_per_file * blocks_per_frame);
 		  }
-		if (! bnum) {
-		    // zero out adc status for new frame
-		    for (int j = 0; j < num_active_channels; j++) {
-			data_valid[j] = 0;
-		    }
-		}
-		int j;
+
+		nac = 0;
 
 		// Put data into the ADC structures
-		for (j = 0; j < num_active_channels; j++) {
+		for (int j = 0; j < num_channels; j++) {
+			if (channels[j].active) {
+				if (science) {
+					// Science mode frames are indicated by the second bit
+					if (channels[j].active & 2) {
+						;
+					} else {
+						continue; // Skip it, it is commissioning only
+					}
+				}
+			} else {
+				continue; // Skip it, it is not active
+			}
+		  unsigned char *fast_adc_ptr = dptr[nac].first;
 #ifdef USE_BROADCAST
 		  // Tested at the 40m on 11 jun 08
 		  // Short data needed to be sample swapped
-		  if (active_channels [j].bps == 2) {
-		    short *dest = (short *)(fast_adc_ptr[j] + bnum*active_channels [j].bytes);
-		    short *src = (short*)(buf + active_channels [j].offset);
-		    unsigned int samples = active_channels [j].bytes / 2;
+		  if (channels [j].bps == 2) {
+		    short *dest = (short *)(fast_adc_ptr + bnum*channels [j].bytes);
+		    short *src = (short*)(buf + channels [j].offset);
+		    unsigned int samples = channels [j].bytes / 2;
 		    for (int k = 0; k < samples; k++) dest[k] = src[k^1];
 		  } else {
-		    memcpy (fast_adc_ptr[j] + bnum*active_channels [j].bytes,
-			  buf + active_channels [j].offset,
-			  active_channels [j].bytes);
+		    memcpy (fast_adc_ptr + bnum*channels [j].bytes,
+			  buf + channels [j].offset,
+			  channels [j].bytes);
 		  }
 #else
-		  memcpy (fast_adc_ptr[j] + bnum*active_channels [j].bytes,
-			  buf + active_channels [j].offset,
-			  active_channels [j].bytes);
+		  memcpy (fast_adc_ptr + bnum*channels [j].bytes,
+			  buf + channels [j].offset,
+			  channels [j].bytes);
 #endif
 		  // Status is ORed blocks_per_frame times
 #define	 memor2(dest, tgt) \
@@ -847,32 +749,43 @@ daqd_c::framer ()
 
 		  // A pointer to 16 status words for this second
 		  char *stptr = buf + status_ptr
-			+ 17 * sizeof(int) * active_channels [j].seq_num;
+			+ 17 * sizeof(int) * channels [j].seq_num;
 
+		  unsigned short data_valid = 0;
 		  // This converts integer status into short
-		  memor2 (data_valid + j, stptr);
+		  memor2 (&data_valid, stptr);
 
-		  frame -> GetRawData () -> RefFirstAdc ()
-			[j] -> SetDataValid(data_valid[j]);
+		  // Reset data valid to zero in the begining of a second
+		  if (! bnum) {
+		  	frame -> GetRawData () -> RefFirstAdc ()[nac] -> SetDataValid(0);
+		  }
+
+		  // Assign data valid if not zero, so once it gets set it sticks for the duration of a second
+		  if (data_valid) {
+		  	frame -> GetRawData () -> RefFirstAdc ()[nac] -> SetDataValid(data_valid);
+		  }
+		  data_valid = frame -> GetRawData () -> RefFirstAdc ()[nac] -> GetDataValid();
 
 		  /* Calculate CRC on fast data only */
 		  /* Do not calculate CRC on bad data */
-		  if (active_channels [j].sample_rate > 16
-			&& data_valid[j] == 0) {
-		    fast_data_crc = crc_ptr (buf + active_channels [j].offset,
-					     active_channels [j].bytes,
+		  if (channels [j].sample_rate > 16
+			&& data_valid == 0) {
+		    fast_data_crc = crc_ptr (buf + channels [j].offset,
+					     channels [j].bytes,
 					     fast_data_crc);
-	            fast_data_length += active_channels [j].bytes;
+	            fast_data_length += channels [j].bytes;
 		  }
 
-		  if (aux_data_valid_ptr[j]) {
+		  INT_2U *aux_data_valid_ptr = dptr[nac].second;
+		  if (aux_data_valid_ptr) {
 		    stptr += 4;
 		    for (int k = 0; k < 16; k++)  {
-		      memset(aux_data_valid_ptr[j] + k + bnum*16, 0, sizeof(INT_2U));
-		      memor2(aux_data_valid_ptr[j] + k + bnum*16, stptr + 4 * k);
+		      memset(aux_data_valid_ptr + k + bnum*16, 0, sizeof(INT_2U));
+		      memor2(aux_data_valid_ptr + k + bnum*16, stptr + 4 * k);
 		    }
 		  }
 #undef memor2
+	  	  nac++;
 		}
 
 //		cerr << "saver; block " << nb << " bytes " << prop -> bytes << endl;
@@ -913,12 +826,20 @@ daqd_c::framer ()
       //frame -> SetULeapS(leap_seconds);
 
       DEBUG(1, cerr << "about to write frame @ " << gps << endl);
-      dir_num = fsd.getDirFileNames (gps, _tmpf, tmpf, frames_per_file, blocks_per_frame);
+      if (science) {
+      	dir_num = science_fsd.getDirFileNames (gps, _tmpf, tmpf, frames_per_file, blocks_per_frame);
+      } else {
+      	dir_num = fsd.getDirFileNames (gps, _tmpf, tmpf, frames_per_file, blocks_per_frame);
+      }
 
       int fd = creat (_tmpf, 0644);
       if (fd < 0) {
 	system_log(1, "Couldn't open full frame file `%s' for writing; errno %d", _tmpf, errno);
-	fsd.report_lost_frame ();
+        if (science) {
+	  fsd.report_lost_frame ();
+	} else {
+	  fsd.report_lost_frame ();
+	}
 	set_fault ();
       } else {
 	close (fd);
@@ -945,13 +866,27 @@ daqd_c::framer ()
 
 	  if (rename(_tmpf, tmpf)) {
 	    system_log(1, "failed to rename file; errno %d", errno);
-	    fsd.report_lost_frame ();
+            if (science) {
+	      science_fsd.report_lost_frame ();
+	    } else {
+	      fsd.report_lost_frame ();
+	    }
 	    set_fault ();
 	  } else {
 	    DEBUG(3, cerr << "frame " << frame_cntr << "(" << frame_number << ") is written out" << endl);
 	    // Successful frame write
-	    fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
+            if (science) {
+	      science_fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
+	    } else {
+	      fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
+	    }
 	  }
+
+	  if (!science) {
+	  	// Update the EPICS_SAVED value
+  	 	 pvValue[18] = nac;
+	  }
+
 #ifndef NO_BROADCAST
 	 // We are compiled to be a DMT broadcaster
 	 //
@@ -1038,13 +973,17 @@ daqd_c::framer ()
 #endif
 
 #if EPICS_EDCU == 1
-      /* Epics display: full res data look back size in seconds */
-      extern unsigned int pvValue[1000];
-      pvValue[7] = fsd.get_max() - fsd.get_min();
+      if (!science) {
+        /* Epics display: full res data look back size in seconds */
+        extern unsigned int pvValue[1000];
+        pvValue[7] = fsd.get_max() - fsd.get_min();
+      }
 
-      /* Epics display: current full frame saving directory */
-      extern unsigned int pvValue[1000];
-      pvValue[8] = fsd.get_cur_dir();
+      if (science) {
+        /* Epics display: current full frame saving directory */
+        extern unsigned int pvValue[1000];
+        pvValue[8] = science_fsd.get_cur_dir();
+      }
 #endif
 
     }
@@ -1328,15 +1267,17 @@ daqd_c::start_producer (ostream *yyout)
 }
 
 int
-daqd_c::start_frame_saver (ostream *yyout)
+daqd_c::start_frame_saver (ostream *yyout, int science)
 {
   assert (b1);
 #if EPICS_EDCU == 1
   extern unsigned int pvValue[1000];
 #endif
-  if ((cnum = b1 -> add_consumer ()) >= 0)
+  int cn = 0;
+  if ((cn = b1 -> add_consumer ()) >= 0)
     {
-      sem_wait (&frame_saver_sem);
+      if (science) sem_wait (&science_frame_saver_sem);
+      else sem_wait (&frame_saver_sem);
 
       pthread_attr_t attr;
       pthread_attr_init (&attr);
@@ -1344,20 +1285,35 @@ daqd_c::start_frame_saver (ostream *yyout)
       pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
       //      pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
       int err_no;
-      if (err_no = pthread_create (&consumer [cnum], &attr, (void *(*)(void *)) daqd.framer_static,
-				   (void *) this)) {
+      if (science) {
+        err_no = pthread_create (&consumer [cnum], &attr, (void *(*)(void *)) daqd.science_framer_static, (void *) this);
+      } else {
+        err_no = pthread_create (&consumer [cnum], &attr, (void *(*)(void *)) daqd.framer_static, (void *) this);
+      }
+      if (err_no) {
 	pthread_attr_destroy (&attr);
 	system_log(1, "pthread_create() err=%d", err_no);
 	return 1;
       }
 
       pthread_attr_destroy (&attr);
-      DEBUG(2, cerr << "frame saver created; tid=" << consumer [cnum] << endl);
-      frame_saver_tid = consumer [cnum];
+      if (science) {
+      	DEBUG(2, cerr << "science frame saver created; tid=" << consumer [cnum] << endl);
+        science_frame_saver_tid = consumer [cnum];
+	science_cnum = cn;
+      } else {
+      	DEBUG(2, cerr << "frame saver created; tid=" << consumer [cnum] << endl);
+        frame_saver_tid = consumer [cnum];
+	cnum = cn;
+      }
     }
   else
     {
-      *yyout << "start_frame_saver: too many consumers, saver was not started" << endl;
+      if (science) {
+        *yyout << "start_science_frame_saver: too many consumers, saver was not started" << endl;
+      } else {
+        *yyout << "start_frame_saver: too many consumers, saver was not started" << endl;
+      }
       return 1;
     }
   return 0;

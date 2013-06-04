@@ -188,6 +188,8 @@ yywrap ()
 "trend-ascii-output" { return TREND_ASCII_OUTPUT; }
 "frame_saver" { return FRAME_SAVER; }
 "frame-saver" { return FRAME_SAVER; }
+"science_frame_saver" { return SCIENCE_FRAME_SAVER; }
+"science-frame-saver" { return SCIENCE_FRAME_SAVER; }
 "frame_wiper" { return FRAME_WIPER; }
 "frame-wiper" { return FRAME_WIPER; }
 "minute_trend_frame_saver" { return MINUTE_TREND_FRAME_SAVER; }
@@ -205,6 +207,8 @@ yywrap ()
 "trend-frame-dir" { return TREND_FRAME_DIR; }
 "frame_dir" { return FRAME_DIR; }
 "frame-dir" { return FRAME_DIR; }
+"science_frame_dir" { return SCIENCE_FRAME_DIR; }
+"science_frame-dir" { return SCIENCE_FRAME_DIR; }
 "scan" { return SCAN; }
 "pscan" { return PSCAN; }
 "frames" { return FRAMES; }

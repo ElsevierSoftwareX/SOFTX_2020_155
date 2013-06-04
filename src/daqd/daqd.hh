@@ -105,7 +105,11 @@ class daqd_c {
 
  public:
   daqd_c () :
-    b1 (0), producer1 (0),  num_channels (0), num_channel_groups (0),
+    b1 (0), producer1 (0),
+    num_channels (0),
+    num_active_channels (0),
+    num_science_channels (0),
+    num_channel_groups (0),
     num_epics_channels (0),
 
 #if EPICS_EDCU == 1
@@ -119,7 +123,7 @@ class daqd_c {
 #endif
 
     frame_saver_tid(0),
-    num_active_channels(0),
+    science_frame_saver_tid(0),
     data_feeds(1),
     dcu_status_check(0),
 
@@ -127,7 +131,7 @@ class daqd_c {
     main_buffer_size (16), shutting_down (0), num_listeners (0),
     block_size (0), thread_stack_size (10 * 1024 * 1024), config_file_name (0),
     offline_disabled (0),  profile ((char *)"main"), 
-    do_scan_frame_reads (0), fsd (1), nds_jobs_dir(),
+    do_scan_frame_reads (0), fsd (1), science_fsd (1), nds_jobs_dir(),
     detector_name (""),
     detector_prefix (""),
     detector_longitude (0.),
@@ -164,6 +168,7 @@ class daqd_c {
     {
       // Initialize frame saver startup synchronization semaphore
       sem_init (&frame_saver_sem, 0, 1);
+      sem_init (&science_frame_saver_sem, 0, 1);
 
       pthread_mutex_init (&bm, NULL);
 
@@ -215,6 +220,7 @@ class daqd_c {
   
   ~daqd_c () {
     sem_destroy (&frame_saver_sem);
+    sem_destroy (&science_frame_saver_sem);
     pthread_mutex_destroy (&bm);
   };
 
@@ -239,14 +245,12 @@ class daqd_c {
      probably will be factored out later on */
   pthread_t consumer [MAX_CONSUMERS];
 
-  int cnum; /* Consumer number for the directory frame saver */
-  void *framer ();
-  static void *framer_static (void *a) { return ((daqd_c *)a) -> framer (); };
+  int cnum; /* Consumer number for the frame saver */
+  int science_cnum; /* Consumer number for the science frame saver */
+  void *framer (int);
+  static void *framer_static (void *a) { return ((daqd_c *)a) -> framer (0); };
+  static void *science_framer_static (void *a) { return ((daqd_c *)a) -> framer (1); };
 
-
-  // Active channels are framed. Both types are served online.
-  int num_active_channels;
-  channel_t active_channels [max_channels];
 
 #ifdef GDS_TESTPOINTS
   int num_gds_channels;
@@ -256,7 +260,10 @@ class daqd_c {
   char frame_fname [filesys_c::filename_max]; /* Name of input frame file */
 
   /* Channels config data */
+  // TODO: make channels this a vector and remove MAX_CHANNELS limitation
   int num_channels;
+  int num_active_channels;
+  int num_science_channels;
   channel_t channels [max_channels];
 
   int num_channel_groups;
@@ -265,14 +272,16 @@ class daqd_c {
 
   int start_main (int, ostream *);
   int start_producer (ostream *);
-  int start_frame_saver (ostream *);
+  int start_frame_saver (ostream *, int science);
 #if EPICS_EDCU == 1
   int start_edcu (ostream *);
   int start_epics_server (ostream *, char *, char *, char *);
 #endif
   sem_t frame_saver_sem;
+  sem_t science_frame_saver_sem;
 
   pthread_t frame_saver_tid;
+  pthread_t science_frame_saver_tid;
 
   long writer_sleep_usec; /* pause in usecs for the main producer (-s option) */
   long main_buffer_size; /* number of blocks in main circular buffer */
@@ -283,6 +292,7 @@ class daqd_c {
 
   // time to filename map and place to keep timestamps describing the data we have
   filesys_c fsd;
+  filesys_c science_fsd; // Science frames
 
   // directory name where NDS jobs created
   string nds_jobs_dir;
@@ -337,8 +347,6 @@ class daqd_c {
   }
 
   int find_channel_group (const char* channel_name);
-
-  int configure_channels_reference_frame ();
 
   // Put calling thread into the realtime scheduling class, if possible
   // Set threads realtime priority to max/`priority_divider'
@@ -526,7 +534,10 @@ class daqd_c {
     return detector;
   }
 
-  General::SharedPtr<FrameCPP::Version::FrameH> full_frame(channel_t* , long, int frame_length_seconds = 1) throw();
+  // Keep pointers to the data samples for each data channel
+  // An array of two pointers, fast_adc_ptr and aux_data_valid_ptr
+  typedef std::vector<std::pair<unsigned char *, INT_2U *> > adc_data_ptr_type;
+  General::SharedPtr<FrameCPP::Version::FrameH> full_frame(int frame_length_seconds, int sience, adc_data_ptr_type &dptr) throw();
 
   // How many full frames to pack in single file
   int frames_per_file;
