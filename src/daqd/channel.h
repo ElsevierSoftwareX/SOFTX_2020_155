@@ -19,8 +19,8 @@
 /* Hard limit on the number of channel names supported:
    it needs to be eliminated, dynamically allocated arrays should be used */
 /* #define MAX_CHANNELS 60000 */
-#define MAX_CHANNELS 250000
-#define MAX_TREND_CHANNELS  300000
+#define MAX_CHANNELS 524288
+#define MAX_TREND_CHANNELS  MAX_CHANNELS
 
 /* numbering must be contiguous */
 typedef enum {
