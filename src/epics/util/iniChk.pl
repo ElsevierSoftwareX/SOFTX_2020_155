@@ -115,6 +115,9 @@ sub processParameterSection  {
          elsif ($acquireValue == 1)  {
             $acquireCount[1]++;
          }
+         elsif ($acquireValue == 3)  {
+            $acquireCount[2]++;
+         }
          else  {
             print "\n***ERROR: Incorrect acquire value - $acquireValue\n";
             $errorCount++;
@@ -258,6 +261,7 @@ foreach $value (@inData)  {
 
          $acquireCount[0] = 0;
          $acquireCount[1] = 0;
+         $acquireCount[2] = 0;
 
 #        if ($defaultAcquireValue != -1)  {
 #           $acquireCount[$defaultAcquireValue]++;
@@ -297,11 +301,12 @@ foreach $value (@inData)  {
 #  number of lines with "acquire=0" and "acquire=1", as
 #  well as the total of these two values.
 #
-$acquireTotal = $acquireCount[0] + $acquireCount[1];
+$acquireTotal = $acquireCount[0] + $acquireCount[1] + $acquireCount[2];
 
 print "\nTotal count of \'acquire=0\' is $acquireCount[0]";
 print "\nTotal count of \'acquire=1\' is $acquireCount[1]";
-print "\nTotal count of \'acquire=0\' and \'acquire=1\' is $acquireTotal\n";
+print "\nTotal count of \'acquire=3\' is $acquireCount[2]";
+print "\nTotal count of \'acquire={0,1,3}\' is $acquireTotal\n";
 
 #
 #  Print the counts for each datarate, as well as

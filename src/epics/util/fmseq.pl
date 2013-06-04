@@ -639,16 +639,33 @@ while (<IN>) {
     s/\s$//g;
     my @nr = split /\s+/;
     next unless length $nr[0];
-    $nr[1] = $gds_datarate unless defined $nr[1];
-    die "Invalid DAQ channel $nr[0] rate $nr[1]; system rate is $gds_datarate" if $nr[1] > $gds_datarate;
-    if (is_top_name($nr[0])) {
-    	$nr[0] = "$site:" . top_name_transform($nr[0]);
-    } else {
-    	$nr[0] = "$site:$systems[0]$nr[0]";
+
+    my $name, $rate, $type, $science;
+    $rate = $gds_datarate;
+    $name = shift @nr;
+    $type = "float";
+    $science = 0;
+    foreach $f (@nr) {
+      if ($f eq "uint32") {
+        $type = "uint32";
+      } elsif ($f eq "science") {
+        $science = 1;
+      } elsif ($f =~ /^\d+$/) { # An integer
+        $rate = $f;
+      }
     }
 
-    $DAQ_Channels{$nr[0]} = $nr[1];
-    #print $nr[0], " ", $nr[1], "\n";
+    die "Invalid DAQ channel $name rate $rate; system rate is $gds_datarate" if $rate > $gds_datarate;
+    if (is_top_name($name)) {
+    	$name = "$site:" . top_name_transform($name);
+    } else {
+    	$name = "$site:$systems[0]$name";
+    }
+
+    $DAQ_Channels{$name} = $rate;
+    $DAQ_Channels_type{$name} = $type;
+    $DAQ_Channels_science{$name} = $science;
+    #print $name, " ", $rate, "\n";
 }
 close IN;
 
@@ -930,18 +947,21 @@ if ($gds_specified) {
 # Create DAQ config file (default section and a few ADC input channels)
 my $daqFile = "$ARGV[0].ini";
 open(OUTG,">".$daqFile) || die "cannot open $daqFile file for writing";
-print OUTG      "[default]\n".
-                "gain=1.00\n".
-                "acquire=1\n".
-                "dcuid=$dcuId\n".
-                "ifoid=$ifoid\n".
-                "datatype=4\n".
-                "datarate=" . $gds_datarate . "\n".
-                "offset=0\n".
-                "slope=6.1035e-04\n".
-                "units=V\n".
-                "\n";
+$header = <<END
+[default]
+gain=1.00
+acquire=1
+dcuid=$dcuId
+ifoid=$ifoid
+datatype=4
+datarate=$gds_datarate 
+offset=0
+slope=6.1035e-04
+units=V
 
+END
+;
+print OUTG $header;
 
 # Open testpoints file
 my $parFile = "$ARGV[0].par";
@@ -977,6 +997,10 @@ foreach (sort @section_names) {
 	    ${$sections{$_}}{"datarate"} = $DAQ_Channels{$_};
 	    undef $comment;
 	    delete $DAQ_Channels{$_};
+	    # See if this is an integer channel
+	    if ($DAQ_Channels_type{$_} eq "uint32") {
+		${$sections{$_}}{"datatype"} = 2;
+	    }
 	  } else {
 	    $comment = "#";
           }
@@ -989,8 +1013,19 @@ foreach (sort @section_names) {
 	  }
 	}
 #        print OUTG "${comment}[${_}_${def_datarate}]\n";
+	my $science = $DAQ_Channels_science{$_};
         print OUTG "${comment}[${_}_${daq_name}]\n";
-        print OUTG  "${comment}acquire=$have_daq_spec\n";
+	if ($science) {
+		my $hds = 0;
+		if ($have_daq_spec) {
+			# bit 1 set to indicate storage into commissioning;
+			# bit 2 set to indicate storage into science frames
+			$hds = 3;
+		}
+        	print OUTG  "${comment}acquire=$hds\n";
+	} else {
+        	print OUTG  "${comment}acquire=$have_daq_spec\n";
+	}
         foreach $sec (keys %{$sections{$_}}) {
           if ($sec eq "chnnum" || $sec eq "datarate" || $sec eq "datatype") {
                 print OUTG  "${comment}$sec=${$sections{$_}}{$sec}\n";
