@@ -24,7 +24,10 @@ $percent_keep = 87.0;
 # to bring the file system usage to the specified values.
 
 # Keep full frames under this percentage
-$full_frames_percent_keep = 89.7;
+$full_frames_percent_keep = 79.7;
+
+# Keep science data frames under this percentage
+$science_frames_percent_keep = 10;
 
 # Keep trend frames under this percentage
 $second_frames_percent_keep = 10.2;
@@ -36,8 +39,10 @@ $minute_frames_percent_keep = 0.005;
 
 # Frame file system mount point
 $frames_dir = "/frames";
-# Fill frame directory
+# Full frame directory
 $full_frames_dir = $frames_dir . "/full";
+# Science frame directory
+$science_frames_dir = $frames_dir . "/science";
 # Second trend frame directory
 $second_trend_frames_dir = $frames_dir . "/trend/second";
 # Minute trend frame directory
@@ -65,7 +70,7 @@ sub ddu {
 # second is file system free space in kilobytes
 sub ddf {
    ($dname) =  @_;
-   $_= `df -P -k $dname | tail -1`;
+   $_= `df  -P -k $dname | tail -1`;
    my @l = split;
    die "Couldn't df filesystem $dname\n" unless (0+@l) == 6;
    return (@l[1], @l[2]);
@@ -74,6 +79,8 @@ sub ddf {
 
 # Determine usage for each directory
 ddu $full_frames_dir;
+sleep 2;
+ddu $science_frames_dir;
 sleep 2;
 ddu $second_trend_frames_dir;
 sleep 2;
@@ -120,6 +127,11 @@ $full_frames_keep = $full_frames_percent_keep * $frame_area_percent;
 printf "$full_frames_dir size %dk keep %dk\n", $du{$full_frames_dir}, $full_frames_keep;
 
 if ($du{$full_frames_dir} > $full_frames_keep) { $do_full = 1; };
+
+$science_frames_keep = $science_frames_percent_keep * $frame_area_percent;
+printf "$science_frames_dir size %dk keep %dk\n", $du{$science_frames_dir}, $science_frames_keep;
+
+if ($du{$science_frames_dir} > $science_frames_keep) { $do_science = 1; };
 
 $second_frames_keep = $second_frames_percent_keep * $frame_area_percent;
 printf "$second_trend_frames_dir size %dk keep %dk\n", $du{$second_trend_frames_dir}, $second_frames_keep;
@@ -173,6 +185,14 @@ if ($do_full) {
 	printf "Deleting some full frames to free %dk\n", $k_need_to_free;
 
 	delete_frames($full_frames_dir, $k_need_to_free);
+}
+
+# See what we need to remove in science frames
+if ($do_science) {
+	$k_need_to_free = $du{$science_frames_dir} -$science_frames_keep;
+	printf "Deleting some science frames to free %dk\n", $k_need_to_free;
+
+	delete_frames($science_frames_dir, $k_need_to_free);
 }
 
 # See if anythings needs to go in second trends
