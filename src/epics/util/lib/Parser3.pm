@@ -1437,22 +1437,32 @@ sub process {
 	      my @nr = split(/\s+/, $i);
 	      next unless length $nr[0];
 	      my $pn = $prefix . $nr[0];
+              # See if this is a science mode channel (ends with an asterisk)
+              if ($pn =~ /\*$/) {
+                chop $pn;
+              }
 	      die "Bad DAQ channel name specified: $pn\n" unless name_check($pn);
 	      my $rate;
-	      if (defined $nr[1]) {
-		my @rates = qw(32 64 128 256 512 1024 2048 4096 8192 16384 32768 65536);
-		my @res = grep {$nr[1] == $_} @rates;
-		#print $nr[1], " ", @res, "\n";
-		die "Bad DAQ channel rate specified: $pn, $nr[1]\n" unless @res;
-		#print $pn," ", $nr[1], "\n";
-      	      } else {
-		#print $pn," default rate\n";
-	      }
+
+              shift @nr;
+	      # Ignore uint32 keyword
+              foreach $f (@nr) {
+                if ($f eq "uint32") {
+                } elsif ($f =~ /^\d+$/) { # An integer
+                  my @rates = qw(32 64 128 256 512 1024 2048 4096 8192 16384 32768 65536);
+                  my @res = grep {$f == $_} @rates;
+                  print $f, " ", @res, "\n";
+                  die "Bad DAQ channel rate specified: $pn, $f\n" unless @res;
+                  print $pn," ", $f, "\n";
+                  $rate = $f;
+                }
+              }
+
       	      # Add channel name and rate into the hash and print into the _daq file
 	      # fmseq.pl then will open and process the DAQ channel data
 	      die "Duplicated DAQ channel name $pn\n" if defined $::DAQ_Channels{$pn};
-	      $::DAQ_Channels{$pn} = $nr[1];
-	      print ::DAQ $pn, " ", $nr[1], "\n";
+	      $::DAQ_Channels{$pn} = $rate;
+	      print ::DAQ $pn, " ", $rate, "\n";
       }
       ${$annot->{FIELDS}}{Name} = "Removed";
     }
