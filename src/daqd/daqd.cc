@@ -880,6 +880,21 @@ daqd_c::framer (int science)
 	    } else {
 	      fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
 	    }
+
+	    // Report frame size to the Epics world
+            fd = open(tmpf, O_RDONLY);
+            if (fd == -1) {
+             	system_log(1, "failed to open file; errno %d", errno);
+                exit(1);
+            }
+            struct stat sb;
+            if (fstat(fd, &sb) == -1) {
+              system_log(1, "failed to fstat file; errno %d", errno);
+              exit(1);
+            }
+	    if (science) pvValue[20] = sb.st_size;
+	    else pvValue[19] = sb.st_size;
+	    close(fd);
 	  }
 
 	  if (!science) {
