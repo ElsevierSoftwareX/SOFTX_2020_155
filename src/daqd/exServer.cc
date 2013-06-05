@@ -23,7 +23,8 @@
 
 char epicsDcuName[DCU_COUNT][40];
 
-unsigned int pvValue[128] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+unsigned int pvValue[128] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 // First subscript is the variable index:
 // DCU status is the first element
@@ -55,6 +56,8 @@ pvInfo exServer::pvList[] = {
     pvInfo (1, "BCAST_FAILED_RETR",  0xffffffff, 0, excasIoSync, 1, pvValue+16),
     pvInfo (0.5, "GPS",  0xffffffff, 0, excasIoSync, 1, pvValue+17),
     pvInfo (1, "CHANS_SAVED", 0xffffffff, 0, excasIoSync, 1, pvValue+18),
+    pvInfo (1, "FRAME_SIZE", 0xffffffff, 0, excasIoSync, 1, pvValue+19),
+    pvInfo (1, "SCIENCE_FRAME_SIZE", 0xffffffff, 0, excasIoSync, 1, pvValue+20),
 };
 
 const unsigned exServer::pvListNElem = NELEMENTS (exServer::pvList);
