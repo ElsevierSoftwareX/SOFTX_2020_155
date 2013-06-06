@@ -454,6 +454,7 @@ state init
       saveSwitch2[ii] = 0;
       swMask[ii] = 0;
       swReq[ii] = 0;
+      swstat_alarm_level[ii] = 0x7fff;
       pvPut(sw1[ii]);
       pvPut(switchR1[ii]);
       pvPut(saveSwitch1[ii]);
@@ -462,6 +463,7 @@ state init
       pvPut(saveSwitch2[ii]);
       pvPut(swMask[ii]);
       pvPut(swReq[ii]);
+      pvPut(swstat_alarm_level[ii]);
 %%  }
 #endif
 

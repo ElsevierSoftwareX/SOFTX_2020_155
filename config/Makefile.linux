@@ -136,13 +136,14 @@ install: $(DB)
 		cat $$i | sed s/%IFO%/$$ifo/g\;s/%IFO0%/$$ifo0/g\;s/%SYS%/$$system/g > target/$(TARGET)/db/$$ifo/`basename $$i`; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(ao|record\(stringout' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(stringin' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(ao' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0, $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(ao' | egrep -v 'SWSTAT' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0, $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'SWSTAT' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.LOW\n", $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		\
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(bo|record\(bi' | sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(bo|record\(bi' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.OSV\n%s.ZSV\n", $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		\
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'record\(ao|record\(string|record\(bi|record\(bo'| sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'record\(ao|record\(string|record\(bi|record\(bo' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0 , $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'SWSTAT|record\(ao|record\(string|record\(bi|record\(bo' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0 , $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		\
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|SEVERITY|MAJOR_COUNT|MINOR_COUNT|SETPOINT_ID|FILTER_PARAM|GDS_MON|FESTAT|STATUS_COUNT|FILTER_ID|MTRXSTAT|MTRX_STAT_ERR|_MSG|_TIME_STRING|_STAT_ERR_CNT|BURT|LOAD_CONFIG|VME_RES|LOAD_NEW_COEFF|DIAG_RESET|SYNC_RESET|TOTAL$$|Name|_SW1|_SW2|_SW1R|_SW2R|_RSET|_OUTMON|_SW2S|_SW1S' | awk '{ printf "[%s]\n", $$0 }' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
