@@ -2,11 +2,15 @@
 Changes for 2.7
 ============================
 - Makefile.linux modified to exclude some filter module channels from EDCU.ini files,
-as outlined in LIGO-T1300494. This also fixes bugzilla #460.
-- controller.c file modified to set DACKILL when DAC timing error detected. This will cause all DAC outputs to go to zero. To reset, must restart the code. This was done to avoid
-channel hopping of DAC channels.
-- Filter module w/control (FMC) part .pm and MEDM screens changed. EPICS channel added for MASK setting and now reflected on new screen template.
+	as outlined in LIGO-T1300494. This also fixes bugzilla #460.
+- controller.c file modified to set DACKILL when DAC timing error detected. This will cause 
+  	all DAC outputs to go to zero. To reset, must restart the code. This was done to avoid
+	channel hopping of DAC channels.
+- Filter module w/control (FMC) part .pm and MEDM screens changed. EPICS channel added for MASK 
+	setting and now reflected on new screen template.
 - New filter module EPICS channels added as described in LIGO T1300494.
+	- skeleton.st and fmseq.pl modified to automatically set filter module SWSTAT.HIGH alarm levels to 0x7fff.
+	- Makefile.linux changed to exclude this channel in burt, such that burt cannot reset it.
 - Bug Fix (461) TRAMP moved to top of burt restore settings for filter modules.
 ============================
 Changes for 2.6.2
