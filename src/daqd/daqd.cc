@@ -1457,7 +1457,9 @@ shandler (int a) {
         char p[25];
 	system_log(1,"going down on signal %d", a);
 	seteuid (0); // Try to switch to superuser effective uid
-        sprintf (p,"/bin/gcore %d", getpid());
+	sprintf (p,"/bin/gcore %d", getpid());
+	// Works on Gentoo this way:
+        //sprintf (p,"gdb --pid=%d --batch -ex gcore", getpid());
         int error = system (p);
 }
 
@@ -1651,7 +1653,7 @@ main (int argc, char *argv [])
   {
     const struct rlimit lmt = {1024, 1024};
     setrlimit (RLIMIT_NOFILE, &lmt);
-    const struct rlimit ulmt = {4294966272UL, 4294966272UL};
+    const struct rlimit ulmt = {RLIM_INFINITY, RLIM_INFINITY};
     const struct rlimit small = {536870912, 536870912};
 #ifndef NDEBUG
     // Want to dump unlimited core for debugging
