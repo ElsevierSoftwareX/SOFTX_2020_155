@@ -243,6 +243,7 @@ static int prompt_lineno;
 %token <y_str>  MKNUMBER
 %token <y_str>  SUBSTR
 %token <y_str>  DECODE
+%token <y_str>	FCKRS
 
 %type <y_str>  TextExpression
 %type <y_str>  OptionalTextExpression
@@ -1008,6 +1009,10 @@ CommandLine: /* Nothing */
 	| ENABLE OFFLINE {
 		AUTH_CHECK(((my_lexer *)lexer));
 		daqd.offline_disabled = 0;
+	}
+	| ENABLE FCKRS {
+		AUTH_CHECK(((my_lexer *)lexer));
+		daqd.enable_fckrs = true;
 	}
 	| HELP {
 		print_command_help (((my_lexer *)lexer)->get_yyout ());

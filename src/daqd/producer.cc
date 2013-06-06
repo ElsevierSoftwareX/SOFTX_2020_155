@@ -825,6 +825,10 @@ int cycle_delay = daqd.cycle_delay;
 	  // FIXME: need to factor out these constants
 	  unsigned long mygps = i/16 + zero_time - 315964819 + 33 + 2;
 #endif
+	  if (daqd.edcuFileStatus[j]) {
+	    daqd.dcuStatus[0][j] |= 0x8000;
+	    system_log(5, "EDCU .ini FILE CRC MISS dcu %d (%s)", j, daqd.dcuName[j]);
+	  }
 	  if (dcu_gps != mygps) {
 	    daqd.dcuStatus[0][j] |= 0x4000;
 	    system_log(5, "GPS MISS dcu %d (%s); dcu_gps=%d gps=%ld\n", j, daqd.dcuName[j], dcu_gps, mygps);
