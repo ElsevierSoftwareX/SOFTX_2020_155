@@ -12,7 +12,7 @@ profile_c::profiler ()
 
   started = 1;
   period = 0;
-  for (;;) {
+  for (unsigned long i = 0;;++i) {
     sleep (profiling_period);
 
 #ifdef USE_BROADCAST
@@ -21,6 +21,16 @@ profile_c::profiler ()
                 daqd.trender.fsd.scan ();
     }
 #endif
+
+    if (this -> cb == daqd.b1 && daqd.edcu_ini_fckrs.size()) {
+	// Go through the vector of files one per iteration
+	file_checker &f = daqd.edcu_ini_fckrs[i%daqd.edcu_ini_fckrs.size()];
+	int res = f.match();
+	if (res == 0) {
+      		DEBUG1(printf("%s CRC mismatch; dcu=%ld", f.file_name.c_str(), f.tag));
+        }
+	daqd.edcuFileStatus[f.tag] = !res;
+    }
 
     if (shutdown)
       break;

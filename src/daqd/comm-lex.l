@@ -251,6 +251,7 @@ yywrap ()
 "quit" { return QUIT; }
 "exit" { return QUIT; }
 "tpconfig" { return TPCONFIG; }
+"fckrs"    { return FCKRS; }
 
 -?[0-9]+ { 
          lvalp -> y_int = atoi (yytext);
