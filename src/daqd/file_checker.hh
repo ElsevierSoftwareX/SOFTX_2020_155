@@ -36,7 +36,13 @@ public:
 	  if (mt == mtime) return 1; // Same mtime, assume no change
 	  // Parse and compute the CRC sum
 	  int res = parseConfigFile(const_cast<char *>(file_name.c_str()), &new_crc, noop, 0, 0, 0);
-	  return res? new_crc == crc: 0; // If parsed correctly and CRC is the same, return 1, no change (match)
+	  // If parsed correctly and CRC is the same, return 1, no change (match)
+	  // Record new modification time this avoid re-parsing the file all the time
+	  if (res && new_crc == crc) {
+		mtime = mt;
+	  	return 1;
+	  }
+	  return 0;
 	}
 private:
 	// Determine my file's mod time
