@@ -676,6 +676,7 @@ $cnt2 = $cnt*2;
 $cnt10 = $cnt*10;
 
 $fpar{"gain_ramp_time"} = "TRAMP";
+$fpar{"swstat_alarm_level"} = "SWSTAT.HIGH";
 
 @a = ( \%fpar, "double", \%ipar, "int", \%spar, "string" );
 
