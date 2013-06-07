@@ -1013,7 +1013,7 @@ filterModuleD(FILT_MOD *pFilt,     /* Filter module data  */
 	       int mask)	    /* Mask of bits to act upon */
 {
 	/* Limit control to the 10 bits */
-	return filterModuleD2(pFilt, pC, modNum, filterInput, fltrCtrlVal & 0x3ff, mask, 0., 0., 0.);
+	return filterModuleD2(pFilt, pC, modNum, filterInput, fltrCtrlVal & 0x3ff, mask & 0x3ff, 0., 0., 0.);
 }
 
 
