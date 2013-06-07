@@ -8,7 +8,7 @@ Changes for 2.7
 	properly in the reentrant code. Changes are planned to clean this up and eliminate more
 	redundancy in order to shrink the memory footprint.
 - frame builder code has a set of new daqdrc commands to configure and start a second full-res
-	fame writer thread, to write frames in the "science" mode. The comamnds are:
+	frame writer thread, to write frames in the "science" mode. The commands are:
 	set science_frame_dir="/frames/science", "M-R-", ".gwf";
 	start science-frame-saver;
 	sync science-frame-saver;
@@ -27,7 +27,7 @@ Changes for 2.7
 	run as intended:
 	1) daqdrc must start the profiler (must contain "start profiler;" command)
 	2) the "master" file must have all EDCU .ini lines listed after all fast DAQ .ini lines
-	The code checkds one EDCU .ini file per second, so it will take a few seconds to detect a
+	The code checks one EDCU .ini file per second, so it will take a few seconds to detect a
 	particular EDCU .ini file change.
 - Makefile.linux modified to exclude some filter module channels from EDCU.ini files,
 	as outlined in LIGO-T1300494. This also fixes bugzilla #460.
