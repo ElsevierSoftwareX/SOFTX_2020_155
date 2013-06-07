@@ -144,8 +144,8 @@ $len = unpack( 'N', $len );
 
 my $accum_seconds = 0;
 
+undef @result_array;
 while(read($remote, $len, 4)) {
-  undef @result_array;
 
   $len = unpack( 'N', $len );
   #print "$len\n";
