@@ -102,7 +102,8 @@ return $gps;
 # get data starting at (optional) $gps for $req_seconds (default 1 second)
 # for the channel $chname
 sub acquire {
-my ($chname, $req_seconds, $gps) = @_;
+my ($chname, $req_seconds, $gps, $dtype) = @_;
+$dtype ||= "f";
 die "Need to connect first\n" unless defined $remote;
 die "Unspecified channel name\n" unless defined $chname;
 die "Bad channel name\n" unless defined $channels{$chname};
@@ -113,7 +114,7 @@ my $remote = IO::Socket::INET->new( Proto => "tcp", PeerAddr => $DAQ::host, Peer
 unless ($remote) { die "cannot connect to daqd on $DAQ::host:$DAQ::port" }
 $remote->autoflush(1);
 
-if (defined $gps) {
+if (defined $gps && $gps > 0) {
 	print $remote "start net-writer $gps $req_seconds {\"$chname\"};\n";
 } else {
 	print $remote "start net-writer {\"$chname\"};\n";
@@ -167,7 +168,7 @@ while(read($remote, $len, 4)) {
 	@data_array = unpack( '(a4)*', $data );
 	my $as = @data_array;
 	#print $as, "\n";
-	for (@data_array) { $_ = unpack 'f', reverse; }
+	for (@data_array) { $_ = unpack $dtype, reverse; }
 	#for (@data_array) { printf "%.1f ", $_; }
 	#print "\n";
 	push (@result_array, @data_array);
