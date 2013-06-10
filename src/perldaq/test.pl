@@ -8,18 +8,18 @@ require "daq.pm";
 #$mychan = "G1:GCO-FILTERSB1POS_OUT";
 #$mychan = "G1:GCO-AFTERMAT1X_IN1_DAQ";
 #$mychan = "G1:GCO-DELAYDDMOD1R_OUT_DAQ";
-$mychan = "G1:GCO-FILTERINPUTLI_IN1";
+$mychan = "H1:FE3-TIM32_T1_ADC_FILTER_5_OUT_DQ";
 # get the channel list
-DAQ::connect("gco-fe1", 8088);
+DAQ::connect("x1nds0", 8088);
 #DAQ::print_channel();
 #DAQ::print_channel("C1:SUS-ETMY_OPLEV_SUM");
 
 # get current time
 $gps = DAQ::gps();
 
-$gps -= 300;
+#$gps -= 300;
 
-@data = DAQ::acquire($mychan, 3);
+@data = DAQ::acquire($mychan, 3, 0, 'L');
 
 # calculate average on the data and print
 $avg = 0.0;
@@ -28,7 +28,7 @@ $max = -0xffffffff + 0.0;
 $cnt = 0;
 for (@data) {
 	$cnt++;
-	#printf "%.1f ", $_;
+	printf "%.1f ", $_;
 	$avg += $_;
 	if ($_ < $min) { $min = $_; }
 	if ($_ > $max) { $max = $_; }
