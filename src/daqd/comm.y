@@ -1085,6 +1085,7 @@ CommandLine: /* Nothing */
 	| SET NUM_DIRS '=' INTNUM {
 		AUTH_CHECK(((my_lexer *)lexer));
 		daqd.fsd.set_num_dirs ($4);
+		daqd.science_fsd.set_num_dirs ($4);
 		DEBUG1(cerr << "Number of directories in `daqd.fsd' set to " << $4 << endl);
 	}
 	| SET FRAME_DIR '=' TextExpression ',' TextExpression ',' TextExpression {
@@ -1100,6 +1101,7 @@ CommandLine: /* Nothing */
 	| SET FRAMES_PER_DIR '=' INTNUM {
 		AUTH_CHECK(((my_lexer *)lexer));
 		daqd.fsd.set_files_per_dir ($4);
+		daqd.science_fsd.set_files_per_dir ($4);
 	}
 	| SET TREND_NUM_DIRS '=' INTNUM {
 		AUTH_CHECK(((my_lexer *)lexer));
