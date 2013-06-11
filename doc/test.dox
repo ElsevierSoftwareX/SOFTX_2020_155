@@ -10,6 +10,7 @@
 	- \ref fmcTest "Filter Module"
 	- \ref fmcControlTest "Filter Module w/Control"
 	- \ref fmcControl2Test "Filter Module w/Control2"
+	- \ref inputFiltTest "Input Filter (Single pole/zero)"
 	- \ref matrixTest "Matrix"
 	- \ref oscTest "Oscillator"
 	- \ref ezca "EzcaRead / EzcaWrite"
@@ -20,5 +21,6 @@
 	- \ref dackillTest "DACKILL w/OSEM Watchdog Test"
 	- \ref decFiltTest "IOP Decimation Filter Test"
 	- \ref daqFiltTest "DAQ (daqLib) Decimation Filter Test"
+	- \ref uint32Test "DAQ UINT32 Data Type Test"
 */
 
