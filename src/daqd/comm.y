@@ -1380,11 +1380,15 @@ CommandLine: /* Nothing */
 	 	    } else {
 		      *yyout << setw (4) << setfill ('0') << hex << c[i].chNum;
 		    }
+#ifdef GDS_TESTPOINTS
 		    if (IS_GDS_ALIAS(c[i])) {
 		    	*yyout << setw (4) << setfill ('0') << hex << c[i].tp_node;
 		    } else {
+#endif
 		    	*yyout << setw (4) << setfill ('0') << hex << c[i].group_num;
+#ifdef GDS_TESTPOINTS
 		    }
+#endif
 		    if ($3 < 2) {
 		      *yyout << setw (4) << setfill ('0') << hex << (c[i].bps > 0xffff? 0:  c[i].bps);
 		    }

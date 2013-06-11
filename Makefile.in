@@ -164,13 +164,21 @@ dc-omx:
 	/bin/mkdir -p build/dc-omx
 	(mysrc=$(srcdir); cd build/dc-omx; $$mysrc/src/daqd/configure '--enable-symmetricom' '--with-omx' '--without-myrinet' '--enable-debug' --with-epics=/opt/rtapps/epics/base '--with-framecpp=/opt/rtapps/framecpp' '--with-concentrator' && make)
 
-# Build frame builder NDS or frame writer (broadcast receiver)
+# Build frame builder NDS (broadcast receiver)
 rcv:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/rcv
 	/bin/mkdir -p build/rcv
 	(mysrc=$(srcdir); cd build/rcv; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-framecpp=/opt/rtapps/framecpp' --with-epics=/opt/rtapps/epics/base  && make)
 
+# Build frame writer (broadcast receiver) without test points support
+fw:
+	(cd $(srcdir)/src/daqd; autoconf)
+	/bin/rm -rf build/fw
+	/bin/mkdir -p build/fw
+	(mysrc=$(srcdir); cd build/fw; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-framecpp=/opt/rtapps/framecpp' --with-epics=/opt/rtapps/epics/base --disable-testpoints  && make)
+
+#
 # Build DMT 1-second frame broadcaster
 bcst:
 	(cd $(srcdir)/src/daqd; autoconf)

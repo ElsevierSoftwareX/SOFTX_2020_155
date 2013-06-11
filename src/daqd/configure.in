@@ -148,6 +148,15 @@ AC_SUBST(EPICSLIBFLAGS)
 AC_SUBST(EPICS_OBJS)
 AC_SUBST(EPICS_SRCS)
 
+AC_ARG_ENABLE(testpoints,
+[  --enable-testpoints         Enable GDS testpoints (default)],
+[if test x$enableval = xyes; then
+  AC_DEFINE(GDS_TESTPOINTS)
+fi],
+[
+  AC_DEFINE(GDS_TESTPOINTS)
+])
+
 AC_ARG_ENABLE(daemon,
 [  --enable-daemon         Be a Daemon],
 [if test x$enableval = xyes; then
@@ -169,7 +178,6 @@ AC_ARG_ENABLE(release,
 fi],)
 AC_SUBST(DEVFLAGS)
 
-AC_DEFINE(GDS_TESTPOINTS)
 GDSOBJECTS=\$\{CDS_GDSOBJECTS\}
 GDSFLAGS=\$\{CDS_GDSFLAGS\}
 GDSLIBFLAGS=\$\{CDS_GDSLIBFLAGS\}
