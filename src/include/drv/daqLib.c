@@ -74,7 +74,6 @@ static int daqWriteCycle;	/* Cycle count to xmit to FB.		*/
 float *pFloat = 0;		/* Temp ptr to write float data.	*/
 short *pShort = 0;		/* Temp ptr to write short data.	*/
 unsigned int *pInteger = 0;	/* Temp ptr to write unsigned int data. */
-char *pData;			/* Ptr to start of data set in swing	*/
 char *bufPtr;			/* Ptr to data for crc calculation.	*/
 static unsigned int crcTest;	/* Continuous calc of CRC.		*/
 static unsigned int crcSend;	/* CRC sent to FB.			*/
@@ -506,63 +505,17 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 #endif
 
       // Write the data into the swing buffer.
-      if((daqSlot % localTable[ii].decFactor) == 0)
-      {
-	/* Set the buffer pointer to the start of this channels data */
-      	pData = (char *)pWriteBuffer;
-      	pData += localTable[ii].offset;
-
-	/* Set either a short pointer or float pointer to the next data location in the 
-	   local swing buffer, as based on dataType */
-      	if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
-      	{
-          /* Point to local swing buffer */
-      	  pShort = (short *)pData;
-	  /* Determine offset from start of 1/16 sec data for this channel given the DAQ cycle
-	     and the decimation factor */
-	  decSlot = daqSlot/localTable[ii].decFactor;
-      	  /* add this data offset to the data pointer */
-      	  pShort += decSlot;
-      	  /* Need to sample swap short data */
-      	  if((decSlot % 2) == 0) pShort ++;
-      	  else pShort --;
-	  // Write data as short to swing buffer
-	  *pShort = (short)dWord;
-	}else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) {
-	// 32 bit integer type
-          /* Point to local swing buffer */
-      	  pInteger = (unsigned int *)pData;
-	  /* Determine offset from start of 1/16 sec data for this channel given the DAQ cycle
-	     and the decimation factor */
-	  decSlot = daqSlot/localTable[ii].decFactor;
-      	  /* add this data offset to the data pointer */
-      	  pInteger += decSlot;
-	  // Write data as int to swing buffer
-	  *pInteger = (unsigned int)dWord;
-	}
-      	else	/* Floating point number is to be written */
-      	{
-          /* Point to local swing buffer */
-      	  pFloat = (float *)pData;
-	  /* Determine offset from start of 1/16 sec data for this channel given the DAQ cycle
-	     and the decimation factor */
-	  decSlot = daqSlot/localTable[ii].decFactor;
-      	  /* add this data offset to the data pointer */
-      	  pFloat += decSlot;
-	  // Write data as float to swing buffer
-	  *pFloat = dWord;
+      if ((daqSlot % localTable[ii].decFactor) == 0) {
+      	if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT) {
+	  // Write short data; (XOR 1) here provides sample swapping
+	  ((short *)(pWriteBuffer + localTable[ii].offset))[(daqSlot/localTable[ii].decFactor)^1] = (short)dWord;
+	} else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) {
+	  // 32 bit integer type
+	  ((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (unsigned int)dWord;
+	} else {
+	  // Write a 32-bit float (downcast from the double passed)
+	  ((float *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (float)dWord;
       	}
-
-#if 0
-	/* Write the data into the local swing buffer */
-      	if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
-      		/* Write data as short into swing buffer */
-	  	*pShort = (short)dWord;
-      	else {
-      		/* Write data as float into swing buffer */
-		*pFloat = dWord;
-	}
-#endif
       } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) {
 	// This the case when we have written a value for the uint32 type 
 	// on the initial cycle, now we need to AND the value into the buffer
