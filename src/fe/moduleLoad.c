@@ -4,7 +4,7 @@
 #include <asm/uaccess.h>
 #include <linux/ctype.h>
 #include <linux/spinlock_types.h>
-
+#include <proc.h>
 
 // These externs and "16" need to go to a header file (mbuf.h)
 extern void *kmalloc_area[16];
@@ -232,9 +232,6 @@ procfile_epics_read(char *buffer,
 }
 
 #define PROC_BLOCK_SIZE (3*1024)
-// Who owns /proc/{system} files
-#define PROC_UID 1001
-#define PROC_MODE 0644
 
 // Scan a double
 double
