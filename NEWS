@@ -2,6 +2,10 @@
 Changes for 2.7
 ============================
 
+
+- Archived filter coeff file names were changed to use the GPS time instead of local time (bug #458).
+	This requires working "tconvert" and /proc/gps support using the new Symmetricom driver.
+	If either tconvert or /proc/gps is not found, the code would use local time as before.
 - frame builder code has a maximum channel limit increased to 524288 (that is .5 * 1024 * 1024).
 	Some internal data structures were eliminated, but there are still some old historic
 	data structures remaining in the code from the days when the C++ library was not working
