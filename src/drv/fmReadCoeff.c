@@ -201,31 +201,30 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
   }
 
   {
-#if 1
-    long a = time(0);
-    struct tm t;
-    char buf[100];
+    char buf[128];
+    unsigned long t = 0;
 
-    localtime_r(&a, &t);
-    sprintf(buf, "%02d%02d%02d_%02d%02d%02d", 
+    // See if we have /proc/gps time and read the GPS time from it
+    FILE *f = fopen("/proc/gps", "r");
+    if (f) {
+      if (fgets(buf, 128, f)) {
+        t = atol(buf);
+      }
+      close(f);
+    }
+
+    // Failed to get the time from /proc/gps, so use system time
+    if (t <= 0) {
+      long a = time(0);
+      struct tm t;
+
+      localtime_r(&a, &t);
+      sprintf(buf, "%02d%02d%02d_%02d%02d%02d", 
 	    (t.tm_year - 100), (t.tm_mon + 1), t.tm_mday,
 	    t.tm_hour, t.tm_min, t.tm_sec);
-#else
-#ifdef UNIX
-    char buf[100];
-
-    long t = time(0);
-    ctime_r(&t, buf);
-#else
-    size_t s = 27;
-    char buf[s];
-
-    long t = time(0);
-    ctime_r(&t, buf, &s);
-#endif
-    buf[24] = 0;
-#endif
-
+    } else {
+      sprintf(buf, "%ld", t);
+    }
     strcat(strcat(archiveFname[0], "_"), buf);
   }
 

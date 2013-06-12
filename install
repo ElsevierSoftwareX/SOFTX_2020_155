@@ -24,7 +24,11 @@ if test ${site} = tst; then site_letter=X; fi
 if test ${site} = stn; then site_letter=S; fi
 ifo=`grep ifo= target/${system}epics/${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`
 lower_ifo=`echo $ifo | tr A-Z a-z`
-cur_date=`date +%y%m%d_%H%M%S`
+
+# Use the GPS seconds (if tconvert is found) or %y%m%d_%H%M%S otherwise
+cur_date=$(tconvert now 2>/dev/null)
+cur_date=${cur_date:-`date +%y%m%d_%H%M%S`}
+
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/chans
 echo Installing system=$system site=$site ifo=$ifo,$lower_ifo
 echo Installing /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt
