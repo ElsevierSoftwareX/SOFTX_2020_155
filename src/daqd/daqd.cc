@@ -1512,11 +1512,6 @@ unsigned long
 daqd_c::symm_gps(unsigned long *frac, int *stt) {
     unsigned long t[3];
     ioctl (symmetricom_fd, IOCTL_SYMMETRICOM_TIME, &t);
-    //printf("%lds %ldu %ldn\n", t[0], t[1], t[2]);
-    t[0] -= 315964800;
-    //
-    //Without DC level shift feature enabled
-    //t[0] -= 345585;
     t[1] *= 1000;
     t[1] += t[2];
     if (frac) *frac = t[1];
