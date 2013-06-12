@@ -46,7 +46,7 @@ typedef u_int32_t in_addr_t;
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include "shutdown.h"
 
    using namespace std;
 
@@ -603,6 +603,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
             #endif
 #ifndef USE_UDP
 	       //abort();
+	        server_is_shutting_down = true;
 		exit(1);
 //#error
 #endif

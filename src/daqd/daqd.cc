@@ -170,6 +170,9 @@ daqd_c::update_archive(char *name, unsigned long gps, unsigned long dt, unsigned
 extern void *interpreter_no_prompt (void *);
 int shutdown_server ();
 
+// Server shutdown flag
+bool server_is_shutting_down = false;
+
 daqd_c daqd; // root object
 
 /* Set to the program's executable name during run time */

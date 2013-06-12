@@ -36,6 +36,7 @@ using namespace std;
 #include "circ.hh"
 #include "archive.hh"
 #include "file_checker.hh"
+#include "shutdown.h"
 
 #define SHMEM_DAQ 1
 

@@ -4,7 +4,7 @@
 #include "exServer.h"
 #include "epicsServer.hh"
 #include "debug.h"
-
+#include "shutdown.h"
 
 void *
 epicsServer::epics_main ()
@@ -18,6 +18,6 @@ epicsServer::epics_main ()
     }
     pCAS->setDebugLevel(0);
     system_log(1, "Epics server started");
-    for(;;) fileDescriptorManager.process(1000.0);
+    for(;!server_is_shutting_down;) fileDescriptorManager.process(1000.0);
 }
 
