@@ -76,18 +76,19 @@ static int symmetricom_release(struct inode *inode, struct file *filp)
         return 0;
 }
 
-static volatile unsigned int *gps;
-
 // Read current GPS time from the card
-void get_cur_time(unsigned long *req) {
+int get_cur_time(unsigned long *req) {
   unsigned int timeSec;
   unsigned int timeUsec;
   if (card_present && card_type == 1) {
-	getGpsTimeTsync(&timeSec, &timeUsec);
+	int sync = getGpsTimeTsync(&timeSec, &timeUsec);
 	req[0] = timeSec; req[1] = timeUsec; req[2] = 0;
+	return sync;
   } else if (card_present && card_type == 0) {
-	getGpsTime(&timeSec, &timeUsec);
+  	lockGpsTime();
+	int sync = getGpsTime(&timeSec, &timeUsec);
 	req[0] = timeSec; req[1] = timeUsec; req[2] = 0;
+	return sync;
   } else {
 	// Get current kernel time (in GPS)
         struct timespec t;
@@ -95,7 +96,9 @@ void get_cur_time(unsigned long *req) {
         t = current_kernel_time();
         t.tv_sec += - 315964819 + 33;
  	req[0] = t.tv_sec; req[1] = 0; req[2] = t.tv_nsec;
+	return 1;
   }
+  // Never reached
 }
 
 #ifdef HAVE_UNLOCKED_IOCTL
@@ -108,20 +111,9 @@ static int symmetricom_ioctl(struct inode *inode, struct file *filp, unsigned in
         switch(cmd){
         case IOCTL_SYMMETRICOM_STATUS:
                 {
-        	  unsigned long req;
-		  if (card_present && card_type == 1) {
-  			req = (((volatile TSYNC_REGISTER *)gps)->SUB_SEC >> 31) & 1;
-		  } else if (card_present && card_type == 0) {
-		  	unsigned int time0 = gps[0x30/4];
-		  	if (time0 & (1<<24)) {
-		  		//printk("Symmetricom unlocked\n");
-				req = 0;
-		  	} else  {
-		  		//printk ("Symmetricom locked!\n");
-				req = 1;
-		  	}
-		  } else req = 1;
-                  if (copy_to_user ((void *) arg, &req,  sizeof (req))) return -EFAULT;
+        	  unsigned long req[3];
+		  unsigned long res = get_cur_time(req);
+                  if (copy_to_user ((void *) arg, &res,  sizeof (res))) return -EFAULT;
                 }
                 break;
         case IOCTL_SYMMETRICOM_TIME:
@@ -153,7 +145,7 @@ procfile_gps_read(char *buffer,
                 /* fill the buffer, return the buffer size */
 		unsigned long req[3];
 		get_cur_time(req);
-                return sprintf(buffer, "%d.%02d\n", req[0], req[1]/10000);
+                return sprintf(buffer, "%ld.%02ld\n", req[0], req[1]/10000);
         }
         // Never reached
 }
@@ -203,7 +195,6 @@ static int __init symmetricom_init(void)
                 //printk("Symmetricom GPS card not found\n");
                 //goto out_unalloc_region;
 		card_present = 0;
-		gps = 0xdeadbeaf;
 	}
 	if (!card_present) {
 		/* Try looking for Spectracom GPS card */
@@ -217,7 +208,6 @@ static int __init symmetricom_init(void)
                 	//printk("Symmetricom GPS card not found\n");
                 	//goto out_unalloc_region;
 			card_present = 0;
-			gps = 0xdeadbeaf;
 		}
 	}
 
