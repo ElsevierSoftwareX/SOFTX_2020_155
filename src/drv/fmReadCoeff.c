@@ -214,7 +214,7 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n, unsigned long gps) {
         if (fgets(buf, 128, f)) {
           t = atol(buf);
         }
-        close(f);
+        fclose(f);
       }
     }
 
