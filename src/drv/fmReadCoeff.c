@@ -120,7 +120,7 @@ void memcpy_swap_words(void *dest, void *src) {
 #endif
 
 /// Read system 'fmc' coeffs for subsys 'n' 
-int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
+int fmReadCoeffFile(fmReadCoeff *fmc, int n, unsigned long gps) {
   int i, j, k;
   int ix;
 
@@ -204,13 +204,18 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n) {
     char buf[128];
     unsigned long t = 0;
 
-    // See if we have /proc/gps time and read the GPS time from it
-    FILE *f = fopen("/proc/gps", "r");
-    if (f) {
-      if (fgets(buf, 128, f)) {
-        t = atol(buf);
+    // If GPS time is supplied by the front-end, use that
+    if (gps > 0) {
+	t = gps;
+    } else {
+      // See if we have /proc/gps time and read the GPS time from it
+      FILE *f = fopen("/proc/gps", "r");
+      if (f) {
+        if (fgets(buf, 128, f)) {
+          t = atol(buf);
+        }
+        close(f);
       }
-      close(f);
     }
 
     // Failed to get the time from /proc/gps, so use system time

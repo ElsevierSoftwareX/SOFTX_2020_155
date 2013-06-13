@@ -389,7 +389,7 @@ state init
     strcpy(msg, "Reading coeff file...");
     pvPut(msg);
 
-%%  if (fmReadCoeffFile(&fmc, 0) != 0) {
+%%  if (fmReadCoeffFile(&fmc, 0, pEpics->epicsOutput.timeDiag) != 0) {
 %%  	fprintf(stderr, "Error: %s\n", fmReadErrMsg());
 	strncpy(msg, fmReadShortErrMsg(), MAX_STRING_SIZE-1);
 %%  } else {
@@ -538,7 +538,7 @@ state monScreen{
 	  pvPut(msg);
 
 %%	  /* printf("About to read file \n"); */
-%%	  if (fmReadCoeffFile(&fmc, 0) != 0) {
+%%	  if (fmReadCoeffFile(&fmc, 0, pEpics->epicsOutput.timeDiag) != 0) {
 %%	     fprintf(stderr, "Error: %s\n", fmReadErrMsg());
 	     strncpy(msg, fmReadShortErrMsg(), MAX_STRING_SIZE-1);
              pvPut(msg);
@@ -979,7 +979,7 @@ state filtCoefChk
 
 
 %%        /* printf("About to read file \n"); */
-%%        if (fmReadCoeffFile(&fmc, 0) != 0) {
+%%        if (fmReadCoeffFile(&fmc, 0, pEpics->epicsOutput.timeDiag) != 0) {
 %%              fprintf(stderr, "Error: %s\n", fmReadErrMsg());
                 strncpy(msg, fmReadShortErrMsg(), MAX_STRING_SIZE-1);
                 pvPut(msg);
