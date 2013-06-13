@@ -509,17 +509,16 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       	if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT) {
 	  // Write short data; (XOR 1) here provides sample swapping
 	  ((short *)(pWriteBuffer + localTable[ii].offset))[(daqSlot/localTable[ii].decFactor)^1] = (short)dWord;
-	} else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) {
-	  // 32 bit integer type
-	  ((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (unsigned int)dWord;
 	} else {
 	  // Write a 32-bit float (downcast from the double passed)
 	  ((float *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (float)dWord;
       	}
-      } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) {
-	// This the case when we have written a value for the uint32 type 
-	// on the initial cycle, now we need to AND the value into the buffer
-	((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] &= (unsigned int)dWord;
+      }
+      if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) {
+        if ((daqSlot % localTable[ii].decFactor) == 1) 
+		((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (unsigned int)dWord;
+	else
+		((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] &= (unsigned int)dWord;
       }
     } /* end swing buffer write loop */
 
