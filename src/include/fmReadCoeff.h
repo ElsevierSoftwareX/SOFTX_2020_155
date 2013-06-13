@@ -49,7 +49,7 @@ typedef struct fmReadCoeff {
 #define TF_THRESHOLDS_NOT_FOUND   2                                      /* MA */
 #define TF_PARSE_ERROR            3                                      /* MA */
 
-int fmReadCoeffFile(fmReadCoeff *, int);
+int fmReadCoeffFile(fmReadCoeff *, int, unsigned long);
 char* fmReadErrMsg();
 char* fmReadShortErrMsg();
 
