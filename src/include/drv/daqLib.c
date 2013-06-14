@@ -512,8 +512,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
         } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) {
 	  if (localTable[ii].decFactor == 1)
-	    ((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor]
-		= ((unsigned int)dWord);
+	    ((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot] = ((unsigned int)dWord);
 	  else 
 	    ((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor]
 		= ((unsigned int)dWord) & *((unsigned int *)(dHistory[ii]));
