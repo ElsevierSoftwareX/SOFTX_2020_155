@@ -83,12 +83,15 @@ sub printEpics {
 		my $ss = substr($::xpartName[$i],3);
 		$ss =~ s/\:/_/;
 		$ss =~ s/\-/_/;
+		if (length($ov) > 0) {
+		   $ov .= "_";
+		}
 		# Add Err rate var ie errors/sec
-		print ::EPICS "OUTVARIABLE $ov\_IPC_$ss\_ER $::systemName\.$ss\_ER int ao 0\n";
+		print ::EPICS "OUTVARIABLE $ov\IPC_$ss\_ER $::systemName\.$ss\_ER int ao 0\n";
 		# Add time of last error detection
-		print ::EPICS "OUTVARIABLE $ov\_IPC_$ss\_ET $::systemName\.$ss\_ET int ao 0\n";
+		print ::EPICS "OUTVARIABLE $ov\IPC_$ss\_ET $::systemName\.$ss\_ET int ao 0\n";
 		# Add status byte
-		print ::EPICS "OUTVARIABLE $ov\_IPC_$ss\_PS $::systemName\.$ss\_PS int ao 0\n";
+		print ::EPICS "OUTVARIABLE $ov\IPC_$ss\_PS $::systemName\.$ss\_PS int ao 0\n";
 	}
 }
 
