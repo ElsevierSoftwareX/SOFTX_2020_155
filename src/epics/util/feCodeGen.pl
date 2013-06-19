@@ -1317,7 +1317,11 @@ print EPICS "DAQVAR $dcuId\_TOTAL int ao 0\n";
 print EPICS "DAQVAR $dcuId\_MSG int ao 0\n";
 print EPICS "DAQVAR  $dcuId\_DCU_ID int ao 0\n";
 my $subs = substr($skeleton,5);
-print EPICS "OUTVARIABLE  \U$subs\E_DCU_ID epicsOutput.dcuId int ao 0\n";
+if (0 == length($subs)) {
+	print EPICS "OUTVARIABLE  DCU_ID epicsOutput.dcuId int ao 0\n";
+} else {
+	print EPICS "OUTVARIABLE  \U$subs\E_DCU_ID epicsOutput.dcuId int ao 0\n";
+}
 
 $frate = $rate;
 if($frate == 15)
