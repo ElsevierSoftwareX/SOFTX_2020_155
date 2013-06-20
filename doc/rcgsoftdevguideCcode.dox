@@ -18,7 +18,7 @@ Further information can be found at <a href="https://dcc.ligo.org/cgi-bin/privat
 	- Contains the standard IIR/FIR filter routines.
 - epicsXfer.c
 	- Provides for transfer of filter module data between the RT code and EPICS via shared memory.
-- inputFilterModule.c
+- inputFilterModule.h
 - inputFilterModule1.h
 
 <b>Data Acquisition</b>
