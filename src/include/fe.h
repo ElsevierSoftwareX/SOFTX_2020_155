@@ -1,6 +1,7 @@
 #include "linux/types.h"
 #include "linux/kernel.h"
 #include "asm/delay.h"
+#include </usr/src/linux/arch/x86/include/asm/processor.h>
 //extern int printf(const char *, ...) __attribute__((format(printf, 1, 2)));
 //extern int printf(const char *, ...);
 #define printf printk
