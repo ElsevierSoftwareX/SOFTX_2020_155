@@ -9,6 +9,8 @@
 #include "drv/cdsHardware.h"
 #include FE_HEADER
 #include "tRamp.h"
+extern int cycleNum;
+extern unsigned int cycle_gps_time;
 #include "fm10Gen.h"
 #include "drv/dtoal.c"
 extern unsigned int dWordUsed[MAX_ADC_MODULES][32];
@@ -20,8 +22,6 @@ extern unsigned int CDIO6464InputInput[MAX_DIO_MODULES];
 extern double *testpoint[500];
 extern double xExc[50];
 extern char *_ipc_shm;
-extern int cycleNum;
-extern unsigned int cycle_gps_time;
 extern int startGpsTime;
 extern CDS_HARDWARE cdsPciModules;
 extern unsigned int ipcErrBits;
