@@ -874,7 +874,8 @@ int cycle_delay = daqd.cycle_delay;
 		  prop.dcu_data[j].crc = shmemDaqIpc[j]->bp[cblk].crc;
 #endif
 		  //printf("dcu %d crc=0x%x\n", j, prop.dcu_data[j].crc);
-  		  prop.dcu_data[j].status = daqd.dcuStatus[0 /* IFO */][j];
+		  // Remove 0x8000 status from propagating to the broadcast receivers
+  		  prop.dcu_data[j].status = daqd.dcuStatus[0 /* IFO */][j] & ~0x8000;
       		} else
 		// EDCU is "attached" to H1, not H2
 		if (j == DCU_ID_EDCU && ifo == 0) {
