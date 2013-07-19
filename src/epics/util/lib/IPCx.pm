@@ -509,17 +509,20 @@ $ipcxRcvrCnt = 0;
 		my $ss = substr($::xpartName[$kk],3);
 		$ss =~ s/\:/_/;
 		$ss =~ s/\-/_/;
+
 		my $eVar = $::site;
 		$eVar .= ":";
 		$eVar .= uc($::systemName);
-		$eVar .= "-";
+		if (length($ov) ==  0) {
+		$ov .= "-";
+		}
 		$eVar .= $ov;
-		$eVar .= "_IPC_";
+		$eVar .= "IPC_";
 		$eVar .= $ss;
 		$::ipcxParts[$ii][8] = $eVar;
 		$::ipcxParts[$ii][9] = 0;
 		
-      		# print "IPC $ii is $::ipcxParts[$ii][8] $ov $ss \n";
+      		 #print "IPC $ii is $::ipcxParts[$ii][8] $ov $ss \n";
                if ( ($::partOutCnt[$kk] < 1) || ($::partOutCnt[$kk] > 2) ) {
                   #die "***ERROR: IPCx RECEIVER component $::ipcxParts[$ii][0] has $::partOutCnt[$kk] output(s)\n";
                   #die "***ERROR: IPCx RECEIVER component $::ipcxParts[$ii][0] has $::partOutCnt[$kk] output(s)\n";
