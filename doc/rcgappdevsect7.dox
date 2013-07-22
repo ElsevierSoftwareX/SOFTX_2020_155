@@ -50,7 +50,7 @@ The Simulink Parts Libary within the CDS_PARTS.mdl contains all of the standard 
         - \ref FiltPolyphaseUse "Polyphase FIR Filter Module"
         - \ref trueRmsUse "True RMS"
         - \ref ExcTpUse "GDS EXC/TP"
-        - \ref FiltBiquadUse "Biquad IIR Filter Module"
+        - \ref FiltInputUse "EPICS Input Filter"
 
 \image html filterMods.png "CDS_PARTS FILTER Library"
 */
@@ -83,6 +83,7 @@ CG also allows the initialization settings for EPICS Input and Output records, a
         - \ref EpicsMomentaryUse "EPICS Momentary"
         - \ref EpicsBinInUse "EPICS Binary Input"
         - \ref EpicsRemoteIntlkUse "EPICS Remote Intlk"
+        - \ref EpicsInCtrlUse "EPICS Input w/Control"
         - \ref EzcaUse "EPICS EZCA Read/Write"
 
 
