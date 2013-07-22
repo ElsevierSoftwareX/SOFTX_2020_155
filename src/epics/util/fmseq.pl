@@ -957,7 +957,7 @@ ifoid=$ifoid
 datatype=4
 datarate=$gds_datarate
 offset=0
-slope=6.1035e-04
+slope=3.0518e-04
 units=V
 
 END

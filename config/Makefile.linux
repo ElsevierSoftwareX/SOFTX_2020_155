@@ -125,7 +125,7 @@ install: $(DB)
 	  echo 'gain=1.00' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 	  echo 'datatype=4' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 	  echo 'ifoid=0' >> target/$(TARGET)/db/$$ifo/auto.ini; \
-	  echo 'slope=6.1028e-05' >> target/$(TARGET)/db/$$ifo/auto.ini; \
+	  echo 'slope=3.0518e-04' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 	  echo 'acquire=1' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 	  echo 'offset=0' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 	  echo 'units=V' >> target/$(TARGET)/db/$$ifo/auto.ini; \
