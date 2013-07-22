@@ -2,8 +2,10 @@
 Changes for 2.7
 ============================
 
+- Change to the default slope values for the Fast and the EDCU .ini DAQ channel configuration files.
+  	The slope value is set to 3.0518e-04.
 - Bug fix to IPCx.pm. Code was not generating EPICS screens properly when model does not include
-  subsystem name eg H1ASC, H1LSC. 
+  	subsystem name eg H1ASC, H1LSC. 
 - Archived filter coeff file names were changed to use the GPS time instead of local time (bug #458).
 	This requires working "tconvert" and /proc/gps support using the new Symmetricom driver.
 	If either tconvert or /proc/gps is not found, the code would use local time as before.
