@@ -95,7 +95,9 @@ sub fromExp {
 sub frontEndCode {
 	my ($i) = @_;
         my $calcExp = "// FILTER MODULE with CONTROL:  $::xpartName[$i]\n";
-        $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_MASK = $::fromExp[2];\n";
+        $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_MASK = ";
+        $calcExp .= $::fromExp[2]? $::fromExp[2]: "0";
+        $calcExp .= ";\n";
         $calcExp .= "\L$::xpartName[$i]";
         $calcExp .= " = ";
         if ($::cpus > 2) {
@@ -107,7 +109,10 @@ sub frontEndCode {
         $calcExp .= ",";
         $calcExp .= $::fromExp[0];
         $calcExp .= ",";
-        $calcExp .= "$::fromExp[1], $::fromExp[2], $::fromExp[3], $::fromExp[4], $::fromExp[5]";
+        $calcExp .= "$::fromExp[1], ". ($::fromExp[2]?$::fromExp[2]:"0")
+			. ", " . ($::fromExp[3]?$::fromExp[3]:"0")
+			. ", " . ($::fromExp[4]?$::fromExp[4]:"0")
+			. ", " . ($::fromExp[5]?$::fromExp[5]:"0");
         $calcExp .= ");\n";
         return $calcExp;
 }

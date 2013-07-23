@@ -85,7 +85,11 @@ sub fromExp {
 sub frontEndCode {
 	my ($i) = @_;
         my $calcExp = "// FILTER MODULE with CONTROL:  $::xpartName[$i]\n";
-	$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_MASK = $::fromExp[2];\n";
+	if ($::partInCnt[$i] > 2) {
+		$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_MASK = $::fromExp[2];\n";
+	} else {
+		$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_MASK = 0;\n";
+	}
         $calcExp .= "\L$::xpartName[$i]";
         $calcExp .= " = ";
         if ($::cpus > 2) {
