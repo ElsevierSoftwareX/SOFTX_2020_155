@@ -131,6 +131,10 @@ killWorld:
 showWorld:
 	@echo $(MDL_MODELS)
 
+# Extract all "ai" Epics record (setpoints) and print SQL commands to insert into the Archiver database
+settingsWorld:
+	@for i in $(MDL_MODELS); do grep grecord\(ai /opt/rtcds/lho/h1/target/$$i/$${i}epics/db/H1/$${i}1.db; done | sed 's/grecord(ai,"\(.*\)")/\1/g' | awk "{ printf \"insert into channel (name, grp_id) values ('%s', 1);\n\", \$$0 }"
+
 cleanWorld: $(patsubst %,clean-%,$(MDL_MODELS))
 	@echo Cleaned $(MDL_MODELS)
 
