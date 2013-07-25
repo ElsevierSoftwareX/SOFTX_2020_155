@@ -58,6 +58,8 @@ pvInfo exServer::pvList[] = {
     pvInfo (1, "CHANS_SAVED", 0xffffffff, 0, excasIoSync, 1, pvValue+18),
     pvInfo (1, "FRAME_SIZE", 0xffffffff, 0, excasIoSync, 1, pvValue+19),
     pvInfo (1, "SCIENCE_FRAME_SIZE", 0xffffffff, 0, excasIoSync, 1, pvValue+20),
+    pvInfo (1, "SCIENCE_TOTAL_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+21),
+    pvInfo (1, "SCIENCE_CHANS_SAVED", 0xffffffff, 0, excasIoSync, 1, pvValue+22),
 };
 
 const unsigned exServer::pvListNElem = NELEMENTS (exServer::pvList);
