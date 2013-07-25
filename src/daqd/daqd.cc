@@ -374,6 +374,7 @@ daqd_c::configure_channels_files ()
 	 - daqd.num_gds_channel_aliases
 #endif
 	- daqd.num_epics_channels;
+  pvValue[21] = daqd.num_science_channels - daqd.num_epics_channels;
 #endif
   system_log(1, "finished configuring data channels");
   return 0;
@@ -936,9 +937,11 @@ daqd_c::framer (int science)
 	    close(fd);
 	  }
 
+	  // Update the EPICS_SAVED value
 	  if (!science) {
-	  	// Update the EPICS_SAVED value
   	 	 pvValue[18] = nac;
+	  } else {
+  	 	 pvValue[22] = nac;
 	  }
 
 #ifndef NO_BROADCAST
