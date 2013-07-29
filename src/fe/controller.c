@@ -416,7 +416,8 @@ void *fe_start(void *arg)
   // Set pointers to filter module data buffers
     pDsp[system] = (FILT_MOD *)(&pEpicsComms->dspSpace);
     pCoeff[system] = (VME_COEF *)(&pEpicsComms->coeffSpace);
-    dspPtr[system] = dsp;
+    // dspPtr[system] = dsp;
+    dspPtr[system] = (FILT_MOD *)(&pEpicsComms->dspSpace);
 
   // Clear the FE reset which comes from Epics
   pLocalEpics->epicsInput.vmeReset = 0;
@@ -459,11 +460,10 @@ printf("Sync source = %d\n",syncSource);
 
 // BURT has completed *******************************************************************
 
-// Read in all Filter Module EPICS settings
+// Read in all Filter Module EPICS coeff settings
     for(ii=0;ii<MAX_MODULES;ii++)
     {
-	updateEpics(ii, dspPtr[0], pDsp[0],
-		    &dspCoeff[0], pCoeff[0]);
+	checkFiltReset(ii, dspPtr[0], pDsp[0], &dspCoeff[0], MAX_MODULES, pCoeff[0]);
     }
 
   // Need this FE dcuId to make connection to FB
@@ -1475,21 +1475,7 @@ udelay(1000);
         }
 
 
-	/* Update User code Filter Module Epics variables */
-	// if(subcycle == HKP_FM_EPICS_UPDATE)
-        if((subcycle == (DAQ_CYCLE_CHANGE - 1)) && ((daqCycle % 2) == 1)) 
-	{
-		//.for(ii=0;ii<MAX_MODULES;ii++)
-		//{
-		// Following call sends all filter module data to epics each time called.
-			//updateEpics(ii, dspPtr[0], pDsp[0],
-			    //&dspCoeff[0], pCoeff[0]);
-		//}
-		// Send sync signal to EPICS sequencer
-		// pLocalEpics->epicsOutput.epicsSync = daqCycle;
-		updateFmSetpoints(dspPtr[0], pDsp[0], &dspCoeff[0], pCoeff[0]);
-	}
-	// Spread out filter update, but keep updates at 16 Hz
+	// Spread out filter coeff update, but keep updates at 16 Hz
 	// here we are rounding up:
 	//   x/y rounded up equals (x + y - 1) / y
 	//
@@ -1499,7 +1485,7 @@ udelay(1000);
 		unsigned int empc = smpc + mpc; // End module counter
 		unsigned int i;
 		for (i = smpc; i < MAX_MODULES && i < empc ; i++) 
-			updateEpics(i, dspPtr[0], pDsp[0], &dspCoeff[0], pCoeff[0]);
+			checkFiltReset(i, dspPtr[0], pDsp[0], &dspCoeff[0], MAX_MODULES, pCoeff[0]);
 	}
 
 	// Check if code exit is requested
