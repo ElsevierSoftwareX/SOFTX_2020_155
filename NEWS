@@ -47,6 +47,13 @@ Changes for 2.7
 	- skeleton.st and fmseq.pl modified to automatically set filter module SWSTAT.HIGH alarm levels to 0x7fff.
 	- Makefile.linux changed to exclude this channel in burt, such that burt cannot reset it.
 - Bug Fix (461) TRAMP moved to top of burt restore settings for filter modules.
+
+============================
+Changes for 2.6.3
+============================
+- Bug fix (453) - assigning names to signal lines out of subsystems causes RCG compilation to fail.
+- Support for two 10gigE cards on data concentrator.
+
 ============================
 Changes for 2.6.2
 ============================
