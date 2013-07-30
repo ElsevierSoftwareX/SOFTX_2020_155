@@ -1,4 +1,9 @@
 ============================
+Changes for 2.7.1
+============================
+- Bug fix (bug 477) - improper generation of DAC monitor screens when both 16bit and 18bit DAC modules 
+  in same model.
+============================
 Changes for 2.7
 ============================
 
