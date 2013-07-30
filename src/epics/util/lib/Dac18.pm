@@ -180,7 +180,7 @@ sub createDac18Medm
 
 	my $ii=0;
 
-        my $fname = "$mdlName\_DAC_MONITOR_$::dacCardNum[$dacNum].adl";
+        my $fname = "$mdlName\_DAC_MONITOR_$dacNum.adl";
         # Create MEDM File
         print "creating file $medmDir\/$fname \n";
         open(OUTMEDM, ">$medmDir/$fname") || die "cannot open $medmDir/$fname for writing ";
