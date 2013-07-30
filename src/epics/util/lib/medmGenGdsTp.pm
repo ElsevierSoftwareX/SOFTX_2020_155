@@ -326,7 +326,7 @@ sub createGdsMedm
 	$b1width = 14;
 	for($ii=0;$ii<$dacCnt;$ii++)
 	{
-		$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_DAC_MONITOR_$::dacCardNum[$ii].adl";
+		$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_DAC_MONITOR_$ii.adl";
 		if($dactype[$ii] eq "GSC_18AO8" ) {
 			$medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{dacblue},"D$::dacCardNum[$ii]");
 			if($adcMaster == 1)
