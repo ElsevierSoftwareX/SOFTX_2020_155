@@ -1,4 +1,9 @@
 ============================
+Changes for future release
+============================
+- Bug fix (bug 477) - Improper generation of DAC monitor screens when model contains mix of 16bit and 18bit DAC modules.
+- Filter Module memory change. Previously, RT code used a local copy of filter module EPICS data during execution of filter module code. This required copying of this data to/from EPICS shared memory at 16Hz to communicate to EPICS sequencer. This was changed such that RT code uses EPICS shared memory space directly, same as for other EPICS channels. Calls to move data between EPICS shared memory and local memory in controller.c (calls to subroutines in epicsXfer.c) were removed. Regression testing was performed on LHO DAQ test system on July 29, 2013.
+============================
 Changes for 2.7
 ============================
 
