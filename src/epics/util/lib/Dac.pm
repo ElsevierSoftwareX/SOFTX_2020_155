@@ -182,9 +182,10 @@ sub createDac16Medm
 
 	my $ii=0;
 
-        my $fname = "$mdlName\_DAC_MONITOR_$::dacCardNum[$dacNum].adl";
+        #my $fname = "$mdlName\_DAC_MONITOR_$::dacCardNum[$dacNum].adl";
+        my $fname = "$mdlName\_DAC_MONITOR_$dacNum.adl";
         # Create MEDM File
-        print "creating file $medmDir\/$fname \n";
+        print "creating file $medmDir\/$fname DAC 16bit\n";
         open(OUTMEDM, ">$medmDir/$fname") || die "cannot open $medmDir/$fname for writing ";
 
         my $xpos = 0; my $ypos = 0; my $width = 171; my $height = 430;
