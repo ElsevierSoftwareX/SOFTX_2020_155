@@ -79,8 +79,8 @@ int printk(const char *fmt, ...) {
 // Contec 64 input bits plus 64 output bits (Standard for aLIGO)
 /// Contec6464 input register values
 unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
-/// Contec6464 output register values read back from the module
-unsigned int CDIO6464Input[MAX_DIO_MODULES]; // Current value of the BO bits
+/// Contec6464 - Last output request sent to module.
+unsigned int CDIO6464LastOutState[MAX_DIO_MODULES]; // Current requested value of the BO bits
 /// Contec6464 values to be written to the output register
 unsigned int CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
 
@@ -570,9 +570,11 @@ udelay(1000);
 	} else if (cdsPciModules.doType[kk] == CON_32DO) {
   	  CDO32Input[ii] = contec32ReadOutputRegister(&cdsPciModules, kk);
 	} else if (cdsPciModules.doType[kk] == CON_6464DIO) {
-  	  CDIO6464Input[ii] = contec6464ReadInputRegister(&cdsPciModules, kk);
+	  // Initialize output state request comparison value w/present setting of card
+  	  CDIO6464LastOutState[ii] = contec6464ReadOutputRegister(&cdsPciModules, kk);
 	} else if (cdsPciModules.doType[kk] == CDI64) {
-  	  CDIO6464Input[ii] = contec6464ReadInputRegister(&cdsPciModules, kk);
+	  // Initialize output state request comparison value w/present setting of card
+  	  CDIO6464LastOutState[ii] = contec6464ReadOutputRegister(&cdsPciModules, kk);
 	} else if(cdsPciModules.doType[kk] == ACS_24DIO) {
   	  dioInput[ii] = accesDio24ReadInputRegister(&cdsPciModules, kk);
 	}
@@ -1591,12 +1593,12 @@ udelay(1000);
                           CDO32Input[ii] = contec32WriteOutputRegister(&cdsPciModules, kk, CDO32Output[ii]);
                         }
 		} else if (cdsPciModules.doType[kk] == CON_6464DIO) {
-			if (CDIO6464Input[ii] != CDIO6464Output[ii]) {
-			  CDIO6464Input[ii] = contec6464WriteOutputRegister(&cdsPciModules, kk, CDIO6464Output[ii]);
+			if (CDIO6464LastOutState[ii] != CDIO6464Output[ii]) {
+			  CDIO6464LastOutState[ii] = contec6464WriteOutputRegister(&cdsPciModules, kk, CDIO6464Output[ii]);
 			}
 		} else if (cdsPciModules.doType[kk] == CDO64) {
-			if (CDIO6464Input[ii] != CDIO6464Output[ii]) {
-			  CDIO6464Input[ii] = contec6464WriteOutputRegister(&cdsPciModules, kk, CDIO6464Output[ii]);
+			if (CDIO6464LastOutState[ii] != CDIO6464Output[ii]) {
+			  CDIO6464LastOutState[ii] = contec6464WriteOutputRegister(&cdsPciModules, kk, CDIO6464Output[ii]);
 			}
                 } else
                 if((cdsPciModules.doType[kk] == ACS_24DIO) && (dioOutputHold[ii] != dioOutput[ii]))
