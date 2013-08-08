@@ -668,6 +668,11 @@ int  seconds;
 		   data[j] = *((double *)(DataDaq.tb->data+pos+j*sizeof(double)));
                 }
                 break;
+            case 2: /* 32 bit-integer */
+                for ( j=0; j<channelAll[index].rate/Fast; j++ ) {
+		   data[j] = *((int *)(DataDaq.tb->data+pos+j*sizeof(int)));
+                }
+                break;
             default: /* 16 bit-integer */
                 for ( j=0; j<channelAll[index].rate/Fast; j++ ) {
 		   data[j] = *((short *)(DataDaq.tb->data+pos+j*sizeof(short)));
@@ -731,6 +736,13 @@ int  seconds;
 		   }
                 }
                 break;
+            case 2: /* 32 bit-integer */
+                for ( j=0; j<chanList[index].rate/Fast; j++ ) {
+		   if (DataDaq.tb_size >= pos+j*sizeof(int)) {
+		     data[j] = (int) ntohl(*((int *)(DataDaq.tb->data+pos+j*sizeof(int))) );
+		   }
+               }
+               break;
             default: /* 16 bit-integer */
                 for ( j=0; j<chanList[index].rate/Fast; j++ ) {
 		   if (DataDaq.tb_size >= pos+j*sizeof(short)) {
