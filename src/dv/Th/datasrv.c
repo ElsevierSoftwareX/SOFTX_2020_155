@@ -1156,6 +1156,9 @@ int getBlockLength(int datatype, int trend)
          case 5: 
              return sizeof(double);
              break;
+         case 2: 
+             return sizeof(int);
+             break;
          default: 
 	     if ( trend == 1 )
 	        return sizeof(int);
