@@ -472,7 +472,8 @@ Nds::rawMinuteTrend(string path)
   // Get channel numbers from `fname_channel_map'
   // copy the data  into the transmission image.
   for (DSMI p = data_span_map.begin (); p != data_span_map.end (); p++) {
-    const char *fname = (path + "/" + crc8_str(p->first.c_str()) + "/" + p -> first).c_str ();
+    string fname_str = path + "/" + crc8_str(p->first.c_str()) + "/" + p->first;
+    const char *fname = fname_str.c_str ();
     int fd = open (fname, O_RDONLY);
     if (fd < 0) {
       system_log(1, "Couldn't open raw minute trend file `%s' for reading {2}; errno %d", fname, errno);
