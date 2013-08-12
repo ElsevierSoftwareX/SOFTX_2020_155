@@ -497,9 +497,9 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
   }
 #endif
 
-  char *bufptr = (char *)daqd.move_buf - 2048;
+  char *bufptr = (char *)daqd.move_buf - BROADCAST_HEADER_SIZE;
   int buflen = daqd.block_size / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-  buflen += 1024*100 + 2048; // Extra overhead for the headers
+  buflen += 1024*100 + BROADCAST_HEADER_SIZE; // Extra overhead for the headers
   if (buflen < 64000) buflen = 64000;
   unsigned int seq, gps, gps_n;
   printf("Opened broadcaster receiver\n");
@@ -932,11 +932,10 @@ int cycle_delay = daqd.cycle_delay;
      // Parse received broadcast transmission header and
      // check config file CRCs and data CRCs, check DCU size and number
      // Assign DCU status and cycle.
-     unsigned int *header = (unsigned int *)(((char *)daqd.move_buf) - 2048);
+     unsigned int *header = (unsigned int *)(((char *)daqd.move_buf) - BROADCAST_HEADER_SIZE);
      int ndcu = ntohl(*header++);
      //printf("ndcu = %d\n", ndcu);
-     // :TODO: the header needs to be expanded from 2048 to 4096 to accommodate more than 85 DCUs
-     if (ndcu > 0 && ndcu < 85) {
+     if (ndcu > 0 && ndcu <= MAX_BROADCAST_DCU_NUM) {
      int data_offs = 0; // Offset to the current DCU data
      for (int j = 0; j < ndcu; j++) {
 	unsigned int dcu_number;
@@ -1032,7 +1031,6 @@ int cycle_delay = daqd.cycle_delay;
 #endif
 
 #ifdef USE_BROADCAST
-     // Header takes first 2048 bytes
 for(;;) {
      int old_seq = seq;
      int length = NDS->receive(bufptr, buflen, &seq, &gps, &gps_n);

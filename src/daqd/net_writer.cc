@@ -726,7 +726,7 @@ net_writer_c::consumer ()
 // and data CRC, config CRC, status.
 // The receiver will use this information to check the data and set its own DCU status
 //
-	static const unsigned int header_size = 2048; // Header has fixed size
+	static const unsigned int header_size = BROADCAST_HEADER_SIZE; // Header has fixed size
 	char *tbuf =  (char *) malloc (transmission_block_size + header_size);
 	if (tbuf == 0) abort(); // Memory allocation failed for some reason, we can't continue
 	unsigned int *hptr = (unsigned int *) tbuf; // Pointer into header area
@@ -739,10 +739,6 @@ net_writer_c::consumer ()
 		if (daqd.dcuSize[ifo][i] == 0) continue; // Skip unconfigured DCUs
 		printf("DCU %d IFO %d; size=%d\n", i, ifo, daqd.dcuSize[ifo][i]);
 		ndcu++;
-// broadcast protocol dependency
-#if DCU_COUNT != 32
-//#error
-#endif
 		// DCU number
 		hptr[tidx++] = htonl(i + ifo*DCU_COUNT);
 		// DCU size
@@ -756,6 +752,11 @@ net_writer_c::consumer ()
 		// DCU cycle (will patch in later)
 		hptr[tidx++] = htonl(0);
 	  }
+	}
+	// Make sure that the total number of DCUs is less the maximum
+	if (ndcu > MAX_BROADCAST_DCU_NUM) {
+		printf("Too many DCUs configured. Have %d max is %d\n", ndcu, MAX_BROADCAST_DCU_NUM);
+	 	exit(1); 
 	}
 	*hptr = htonl(ndcu); // Assign the number of DCUs after they're counted
 
