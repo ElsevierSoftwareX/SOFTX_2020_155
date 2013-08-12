@@ -1739,22 +1739,30 @@ for($xx=0;$xx<$processCnt;$xx++)
 		  print OUT "$calcExp1 = $calcExp;\n";
 		}
 	}
-	# ******** DIVIDE ********************************************************************
-	if($partType[$mm] eq "DIVIDE")
-	{
-	   print OUT "// DIVIDE\n";
-	   $ce =<<HERE
-\L$xpartName[$mm]\E = $fromExp[0] /
-	(($fromExp[1] < 0.0)
-		?
-		(($fromExp[1] > -1e-20)? -1e-20: $fromExp[1])
-		:
-		(($fromExp[1] < 1e-20)? 1e-20: $fromExp[1]));
+        # ******** DIVIDE ********************************************************************
+        if($partType[$mm] eq "DIVIDE")
+        {
+           my $from, $to;
+           if ($partInputs[$mm] eq "*/")  {
+                $from = 0;
+                $to = 1;
+           } else {
+                $from = 1;
+                $to = 0;
+           }
+           print OUT "// DIVIDE\n";
+           $ce =<<HERE
+\L$xpartName[$mm]\E = $fromExp[$from] /
+        (($fromExp[$to] < 0.0)
+                ?
+                (($fromExp[$to] > -1e-20)? -1e-20: $fromExp[$to])
+                :
+                (($fromExp[$to] < 1e-20)? 1e-20: $fromExp[$to]));
 HERE
-	   ;
-	   # print "\tUsed Divide $xpartName[$mm] $partOutCnt[$mm]\n";
-	   print OUT $ce;
-	}
+           ;
+           # print "\tUsed Divide $xpartName[$mm] $partOutCnt[$mm]\n";
+           print OUT $ce;
+        }
         # Process Math Function blocks  ========================================  MA  ===
 	if ($partType[$mm] eq "M_SQR") {                                   # ===  MA  ===
 	   print OUT "// MATH FUNCTION - SQUARE\n";                        # ===  MA  ===
