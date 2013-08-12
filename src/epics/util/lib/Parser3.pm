@@ -786,7 +786,8 @@ sub node_processing {
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
 		$::partInputs[$::partCnt] =~ tr/+-//cd; # delete other characters
 	} elsif ($block_type eq "MULTIPLY" &&
-		 ${$node->{FIELDS}}{Inputs} eq "*\/") {
+		 (${$node->{FIELDS}}{Inputs} eq "*\/" ||
+		  ${$node->{FIELDS}}{Inputs} eq "\/*" )) {
 		$::partType[$::partCnt] = "DIVIDE";
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
 	} elsif ($block_type eq "Gain") {
