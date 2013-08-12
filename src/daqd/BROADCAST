@@ -18,7 +18,7 @@ foreach DCU {
 			// 0x2000 - configuration mismatch).
 	uint32 cycle; 	// DCU cycle
 }
-Header size is fixed at 2048 bytes.
+Header size is fixed at 4096 bytes, enough room for 170 DCUs.
 Following the header is the data for each DCU.
 TODO: need to add EDCU channel status on per-channel basis?
 

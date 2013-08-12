@@ -1085,8 +1085,8 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
   int s = daqd.block_size / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
   if (s < 128*1024) s = 128*1024;
 #ifdef USE_BROADCAST
-  // Broadcast has 2048 bytes header, so we allocate space for it here
-  s += 2048;
+  // Broadcast has 4096 byte header, so we allocate space for it here
+  s += BROADCAST_HEADER_SIZE;
   // Broadcast needs extra room for its own header
   s += 100*1024;
 #endif
@@ -1098,7 +1098,7 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
   memset (move_buf, 255, s);
   printf("Allocated move buffer size %d bytes\n", s);
 #ifdef USE_BROADCAST
-  move_buf += 2048; // Keep broadcast header space in front of data space
+  move_buf += BROADCAST_HEADER_SIZE; // Keep broadcast header space in front of data space
 #endif
 
   unsigned long  status_ptr = block_size - 17 * sizeof(int) * num_channels;   // Index to the start of signal status memory area
