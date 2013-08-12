@@ -37,6 +37,7 @@ using namespace std;
 #include "archive.hh"
 #include "file_checker.hh"
 #include "shutdown.h"
+#include "broadcast_daqd.h"
 
 #define SHMEM_DAQ 1
 
