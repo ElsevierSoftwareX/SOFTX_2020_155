@@ -3,6 +3,11 @@ Changes for 2.7.1
 ============================
 - Bug fix (bug 477) - improper generation of DAC monitor screens when both 16bit and 18bit DAC modules 
   in same model.
+- Bug fix: Contec modules not initialized properly on startup.
+- Bug fix: Number of DCUs limited in DAQ code to 85; going beyond this limit would result in status
+	   being marked bad for all data channels in frame files and corruption of first set of EPICS
+	   channels.
+- Bug fix: NDS had problems finding some channels in raw minute trend files. 
 ============================
 Changes for 2.7
 ============================
