@@ -1,16 +1,3 @@
-
-#define FE_DIAGS_USER_TIME	0
-#define FE_DIAGS_IPC_STAT	1
-#define FE_DIAGS_FB_NET_STAT	2
-#define FE_DIAGS_DAQ_BYTE_CNT	3
-#define FE_DIAGS_DUOTONE_TIME	4
-#define FE_DIAGS_IRIGB_TIME	5
-#define FE_DIAGS_ADC_STAT	6
-#define FE_DIAGS_DAC_STAT	7
-#define FE_DIAGS_DAC_MASTER_STAT	8
-#define FE_DIAGS_AWGTPMAN	9
-#define FE_DIAGS_DAC_DUO	10	
-
 // The following bits define the EPICS STATE_WORD
 #define FE_ERROR_TIMING         0x2     // bit 1
 #define FE_ERROR_ADC            0x4     // bit 2
@@ -216,6 +203,7 @@ unsigned int daqCycle;          // DAQS cycle counter
 // Sharded memory discriptors
 int wfd, ipc_fd;
 volatile CDS_EPICS *pLocalEpics;        // Local mem ptr to EPICS control data
+volatile char *pEpicsDaq;        // Local mem ptr to EPICS daq data
 
 
 // Filter module variables
