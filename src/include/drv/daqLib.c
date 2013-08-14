@@ -13,11 +13,16 @@ extern char *_daq_shm;			///< Pointer to DAQ base address in shared memory.
 struct rmIpcStr *dipc;			///< Pointer to DAQ IPC data in shared memory.
 struct cdsDaqNetGdsTpNum *tpPtr;	///< Pointer to TP table in shared memory.
 char *mcPtr;				///< Pointer to current DAQ data in shared memory.
+float *testPtr;				///< Pointer to current DAQ data in shared memory.
+int *testPtrI;				///< Pointer to current DAQ data in shared memory.
+int *readPtrI;
 char *lmPtr;				///< Pointer to current DAQ data in local memory data buffer.
 char *daqShmPtr;			///< Pointer to DAQ data in shared memory.
 int fillSize;				///< Amount of data to copy local to shared memory.
-
+char *pEpicsIntData;
+double *pEpicsDblData;
 unsigned int curDaqBlockSize;
+
 
 /* ******************************************************************** */
 /* Routine to connect and write to LIGO DAQ system       		*/
@@ -46,7 +51,8 @@ int daqWrite(int flag,
 	     FILT_MOD *dspPtr,
 	     int netStatus,
 	     int gdsMonitor[],
-	     double excSignal[])
+	     double excSignal[],
+	     char *pEpics)
 {
 int ii,jj;			/* Loop counters.			*/
 int status;			/* Return value from called routines.	*/
@@ -91,7 +97,7 @@ static int tpNum[DAQ_GDS_MAX_TP_ALLOWED]; 	/* TP/EXC selects to send to FB.	*/
 static int tpNumNet[DAQ_GDS_MAX_TP_ALLOWED]; 	/* TP/EXC selects to send to FB.	*/
 static int totalChans;		/* DAQ + TP + EXC chans selected.	*/
 static int totalSize;		/* DAQ + TP + EXC chans size in bytes.	*/
-static int totalSizeNet;	/* DAQ + TP + EXC chans size in bytes.	*/
+static int totalSizeNet;        /* DAQ + TP + EXC chans size in bytes sent to network driver.  */
 int *statusPtr;
 volatile float *dataPtr;	/* Ptr to excitation chan data.		*/
 int exChanOffset;		/* shmem offset to next EXC value.	*/
@@ -103,6 +109,7 @@ unsigned int exc;
 unsigned int tpn;
 int slot;
 int num_tps;
+static int epicsIntXferSize;
 
 #ifdef CORE_BIQUAD
 // Decimation filter coefficient definitions.		
@@ -239,7 +246,20 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
     /* Set up pointer to DAQ configuration information in shmem */
     pInfo = (DAQ_INFO_BLOCK *)(_epics_shm + DAQ_INFO_ADDRESS);
-    // printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
+
+    // Setup EPICS channel information/pointers
+    dataInfo.numEpicsInts = pInfo->numEpicsInts;
+    dataInfo.numEpicsFloats = pInfo->numEpicsFloats;
+    dataInfo.numEpicsFilts = pInfo->numEpicsFilts;
+    dataInfo.numEpicsTotal = pInfo->numEpicsTotal;
+    pEpicsIntData = pEpics;
+    epicsIntXferSize = dataInfo.numEpicsInts * 4;
+    pEpicsDblData = (pEpicsIntData + epicsIntXferSize);
+
+    printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
+    printf("DAQ EPICS INT DATA is at 0x%x with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
+    printf("DAQ EPICS FLT DATA is at 0x%x\n",(long)pEpicsDblData);
+
 
     /* Get the .INI file crc checksum to pass to DAQ Framebuilders for config checking */
     fileCrc = pInfo->configFileCRC;
@@ -247,12 +267,17 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     pInfo->reconfig = 0;
     /* Get the number of channels to be acquired */
     dataInfo.numChans = pInfo->numChans;
+    printf("EPICS: Int = %d  Flt = %d Filters = %d Total = %d Fast = %d\n",dataInfo.numEpicsInts,dataInfo.numEpicsFloats,dataInfo.numEpicsFilts, dataInfo.numEpicsTotal, dataInfo.numChans);
     // Verify number of channels is legal
     if((dataInfo.numChans < 1) || (dataInfo.numChans > DCU_MAX_CHANNELS))
     {
 	printf("Invalid num daq chans = %d\n",dataInfo.numChans);
 	return(-1);
     }
+
+    // Initialize CRC length with EPICS data size.
+    crcLength = 4 * dataInfo.numEpicsTotal;
+printf("crc length epics = %d\n",crcLength);
 
     /* Get the DAQ configuration information for all channels and calc a crc checksum length */
     for(ii=0;ii<dataInfo.numChans;ii++)
@@ -270,10 +295,14 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
        of bytes to write each 1/16sec and the front end data rate (2048/16384Hz) */
     // Note, this is left over from RFM net. Now used only to calc CRC
     xferSize1 = crcLength/sysRate;
-    mnDaqSize = crcLength/16;
-    curDaqBlockSize = mnDaqSize * 256;
-    totalSize = mnDaqSize;
-    totalSizeNet = mnDaqSize;
+    // mnDaqSize = crcLength/DAQ_NUM_DATA_BLOCKS;
+    mnDaqSize = crcLength;
+    // curDaqBlockSize = mnDaqSize * 256;
+    curDaqBlockSize = crcLength * DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+    totalSize = crcLength;
+    totalSizeNet = crcLength;
+
+printf (" xfer sizes = %d %d %d %d \n",sysRate,xferSize1,totalSize,crcLength);
     
     if (xferSize1 == 0) {
 	printf("DAQ size too small\n");
@@ -286,13 +315,16 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	in data not being written on every 2048/16384 cycle and last data xfer
 	in a 1/16 sec block well may be shorter than the rest.			*/
  	xferSize1 = ((xferSize1/8) + 1) * 8;
-	// printf("DAQ resized %d\n", xferSize1);
+	printf("DAQ resized %d\n", xferSize1);
 
 
 
     // Fill in the local lookup table for finding data.
-    localTable[0].offset = 0;
-    offsetAccum = 0;
+    // offsetAccum = 0;
+    offsetAccum = 4 * dataInfo.numEpicsTotal;
+    localTable[0].offset = offsetAccum;
+
+printf("Fast data offset = %d \n",offsetAccum);
 
     for(ii=0;ii<dataInfo.numChans;ii++)
     {
@@ -443,6 +475,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     {
 	xferSize = xferLength;
 	if(xferSize <= 0)  xferDone = 1;
+
     }
 
 
@@ -528,11 +561,57 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
       }
     } /* end swing buffer write loop */
 
+    // Copy data from read buffer to shared memory
     memcpy(mcPtr,lmPtr,fillSize);
     mcPtr += fillSize;
     lmPtr += fillSize;
 
-
+if(daqSlot == 0)
+{
+// Write EPICS integer values
+      memcpy(pWriteBuffer,pEpicsIntData,epicsIntXferSize);
+}
+if(daqSlot == 41)
+{
+// Write EPICS double values as float values
+    pEpicsDblData = (pEpicsIntData + epicsIntXferSize);
+    	// testPtr = (pWriteBuffer + epicsIntXferSize); 
+    	testPtr = (float *)pWriteBuffer; 
+    	testPtr += dataInfo.numEpicsInts; 
+ 	for(ii=0;ii<dataInfo.numEpicsFloats;ii++)
+	{
+		*testPtr = (float)*pEpicsDblData;
+		testPtr ++;
+		pEpicsDblData ++;
+	}
+}
+if(daqSlot == 42)
+{
+// Write filter module EPICS values as floats
+ 	for(ii=0;ii<MAX_MODULES;ii++)
+	{
+		*testPtr = (float)dspPtr->data[ii].filterInput;;
+		testPtr ++;
+		// *testPtr = (float)dspPtr->data[ii].exciteInput;;
+		// testPtr ++;
+		*testPtr = (float)dspPtr->inputs[ii].offset;;
+		testPtr ++;
+		*testPtr = (float)dspPtr->inputs[ii].outgain;;
+		testPtr ++;
+		*testPtr = (float)dspPtr->inputs[ii].limiter;;
+		testPtr ++;
+		*testPtr = (float)dspPtr->data[ii].output16Hz;;
+		testPtr ++;
+		*testPtr = (float)dspPtr->data[ii].output;;
+		testPtr ++;
+		*testPtr = (float)dspPtr->data[ii].swStatus;;
+		testPtr ++;
+		*testPtr = (float)dspPtr->inputs[ii].swReq;;
+		testPtr ++;
+		*testPtr = (float)dspPtr->inputs[ii].swMask;;
+		testPtr ++;
+	}
+}
   if(!xferDone)
   {
     /* Do CRC check sum calculation */
@@ -541,7 +620,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     else crcTest = crc_ptr(bufPtr, xferSize, crcTest);
     xferLength -= xferSize;
   }
-    if(daqSlot == (sysRate - 1))
+  if(daqSlot == (sysRate - 1))
   /* Done with 1/16 second data block */
   {
       /* Complete CRC checksum calc */
@@ -585,6 +664,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     if(daqSlot == (sysRate - 1))
     /* Done with 1/16 second DAQ data block */
     {
+
       /* Swap swing buffers */
       phase = (phase + 1) % 2;
       pReadBuffer = (char *)pDaqBuffer[phase];
@@ -593,6 +673,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 // Assign global parameters
         dipc->dcuId = dcuId; // DCU id of this system
         dipc->crc = fileCrc; // Checksum of the configuration file
+        // dipc->dataBlockSize = crcLength; // actual data size
         dipc->dataBlockSize = totalSizeNet * DAQ_NUM_DATA_BLOCKS_PER_SECOND; // actual data size
         // Assign current block parameters
         dipc->bp[daqBlockNum].cycle = daqBlockNum;
@@ -634,6 +715,26 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		    /* Get the number of channels to be acquired */
 		    dataInfo.numChans = pInfo->numChans;
 		    crcLength = 0;
+
+		    // Setup EPICS channel information/pointers
+    dataInfo.numEpicsInts = pInfo->numEpicsInts;
+    dataInfo.numEpicsFloats = pInfo->numEpicsFloats;
+    dataInfo.numEpicsFilts = pInfo->numEpicsFilts;
+    dataInfo.numEpicsTotal = pInfo->numEpicsTotal;
+    pEpicsIntData = pEpics;
+    epicsIntXferSize = dataInfo.numEpicsInts * 4;
+    pEpicsDblData = (pEpicsIntData + epicsIntXferSize);
+
+    printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
+    printf("DAQ EPICS INT DATA is at 0x%x with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
+    printf("DAQ EPICS FLT DATA is at 0x%x\n",(long)pEpicsDblData);
+    printf("EPICS: Int = %d  Flt = %d Filters = %d Total = %d Fast = %d\n",dataInfo.numEpicsInts,dataInfo.numEpicsFloats,dataInfo.numEpicsFilts, dataInfo.numEpicsTotal, dataInfo.numChans);
+
+	    // Initialize CRC length with EPICS data size.
+    crcLength = 4 * dataInfo.numEpicsTotal;
+	printf("crc length epics = %d\n",crcLength);
+
+
 		    /* Get the DAQ configuration information for all channels and calc a crc checksum length */
 		    for(ii=0;ii<dataInfo.numChans;ii++)
 		    {
@@ -649,8 +750,9 @@ if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) printf("Found int32 type 
 		    /* Calculate the number of bytes to xfer on each call, based on total number
 		       of bytes to write each 1/16sec and the front end data rate (2048/16384Hz) */
 		    xferSize1 = crcLength/sysRate;
-    		    mnDaqSize = crcLength/16;
-    		    totalSize = mnDaqSize;
+    		    // mnDaqSize = crcLength/16;
+    		    mnDaqSize = crcLength;
+    		    totalSize = crcLength;
 
 		    /*  Maintain 8 byte data boundaries for writing data, particularly important
 			when DMA xfers are used on 5565 RFM modules. Note that this usually results
@@ -658,8 +760,8 @@ if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) printf("Found int32 type 
 			in a 1/16 sec block well may be shorter than the rest.                  */
 		    xferSize1 = ((xferSize1/8) + 1) * 8;
 
-		    localTable[0].offset = 0;
-		    offsetAccum = 0;
+		    offsetAccum = 4 * pInfo->numEpicsTotal;
+		    localTable[0].offset = offsetAccum;
 
 		    for(ii=0;ii<dataInfo.numChans;ii++)
 		    {
@@ -884,7 +986,7 @@ if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) printf("Found int32 type 
 	// Calculate total number of test points to transmit
 	totalChans = dataInfo.numChans; // Set to the DAQ channels number
 	validTp = 0;
-	totalSize = mnDaqSize;
+	// totalSize = mnDaqSize;
 	num_tps = 0;
 
 	// Skip empty slots at the end
@@ -896,11 +998,11 @@ if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) printf("Found int32 type 
 	}
 	totalChans += num_tps;
 	validTp = num_tps;
-	
-  	curDaqBlockSize = mnDaqSize * 256;
 
+	curDaqBlockSize = crcLength * DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+	
 	// Calculate the total transmission size
-	totalSize = mnDaqSize + validTp * (sysRate / 4);
+	totalSize = crcLength + validTp * sysRate * 4;
 
 	//printf("totalSize=%d; totalChans=%d; validTp=%d\n", totalSize, totalChans, validTp);
 
@@ -930,6 +1032,6 @@ if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) printf("Found int32 type 
   } /* End case write */
 
   /* Return the FE total DAQ data rate */
-  return((totalSize*256)/1000);
+  return((totalSize*DAQ_NUM_DATA_BLOCKS_PER_SECOND)/1000);
 
 }

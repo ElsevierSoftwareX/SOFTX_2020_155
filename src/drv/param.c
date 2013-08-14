@@ -447,12 +447,23 @@ infoCallback(char *channel_name, struct CHAN_PARAM *params, void *user) {
     fprintf(stderr, "Too many channels. Hard limit is %d", DCU_MAX_CHANNELS);
     return 0;
   }
+  if((params->chnnum >= 40000) && (params->chnnum < 50000) && (params->datatype == 2))
+  {
+	info->numEpicsInts ++;
+	info->numEpicsTotal ++;
+  } else if ((params->chnnum >= 40000) && (params->chnnum < 50000) && (params->datatype == 4)){
+	info->numEpicsFloats ++;
+	info->numEpicsTotal ++;
+  } else if (params->chnnum >= 50000) {
+	info->numEpicsFilts ++;
+	info->numEpicsTotal ++;
+  } else {
   info->tp[info->numChans].tpnum = params->chnnum;
   info->tp[info->numChans].dataType = params->datatype;
   info->tp[info->numChans].dataRate = params->datarate;
   info->tp[info->numChans].dataGain = (int)params->gain;
-  //if(params->gain != 0.0)printf("New gain channel %d = %f\n",params->chnnum,params->gain);
   info->numChans++;
+  }
   return 1;
 }
 
@@ -494,8 +505,14 @@ loadDaqConfigFile(DAQ_INFO_BLOCK *info, char *site, char *ifo, char *sys)
   }
 
   info->numChans = 0;
+	info->numEpicsInts = 0;
+	info->numEpicsTotal = 0;
+	info->numEpicsFloats = 0;
+	info->numEpicsFilts = 0;
   if (0 == parseConfigFile(fname, &crc, infoCallback, 0, archive_fname, info)) return 0;
   info->configFileCRC = crc;
   printf("CRC=0x%lx\n", crc);
+  printf("dataSize=0x%lx 0x%lx\n", sizeof(DAQ_INFO_BLOCK), (0x1fe0000 + sizeof(DAQ_INFO_BLOCK)));
+  printf("EPICS: INT = %d  FLOAT = %d  FILTERS = %d FAST = %d SLOW = %d \n",info->numEpicsInts,info->numEpicsFloats,info->numEpicsFilts,info->numChans,info->numEpicsTotal);
   return 1;
 }
