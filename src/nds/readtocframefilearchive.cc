@@ -21,7 +21,7 @@
 #include "nds.hh"
 #include "daqd_net.hh"
 #include "mmstream.hh"
-#include "plan.hh"
+#include "framecpp/Version8/FrameStreamPlan.hh"
 
 using namespace CDS_NDS;
 using namespace std;
@@ -174,7 +174,7 @@ Nds::readTocFrameFileArchive()
       return false;
     }
 
-    plan *first_reader = 0;
+    FrameCPP::Version_8::IFrameStreamPlan *first_reader = 0;
     FrameCPP::Version::FrameH *new_frame = 0;
 
     const vector<string> &names = mSpec.getSignalNames(); // ADC signal names we care about
@@ -209,7 +209,7 @@ Nds::readTocFrameFileArchive()
       }
 
       // stat file here and see if its size changed
-      // delete frame read plan, if it changed
+      // delete frame read FrameCPP::Version_8::IFrameStreamPlan, if it changed
       {
 	static unsigned long fsize; // this is set to current file size that should match
 	struct stat buf;
@@ -241,7 +241,7 @@ Nds::readTocFrameFileArchive()
 
       //FrameCPP::Version::IFrameStream  ifs(ibuf);
       if (first_reader == 0) {
-      	first_reader = new plan(ibuf, 0);
+      	first_reader = new FrameCPP::Version_8::IFrameStreamPlan(ibuf, 0);
         new_frame = new FrameCPP::Version::FrameH(*first_reader->ReadFrameH(0, 0));
         General::SharedPtr< FrameCPP::Version::FrRawData > rawData
 	        = General::SharedPtr< FrameCPP::Version::FrRawData > (new FrameCPP::Version::FrRawData);
@@ -255,7 +255,7 @@ Nds::readTocFrameFileArchive()
 	  DEBUG(1, printf("Added first %s\n", adc->GetName().c_str()));
         }
       } else {
-        plan ifs(ibuf, first_reader);
+        FrameCPP::Version_8::IFrameStreamPlan ifs(ibuf, first_reader);
         for (int i = 0; i < num_signals; i++) {
 	  FrameCPP::Version::FrAdcData *adc = 
 		ifs.ReadFrAdcData(0, names[i]).get();
