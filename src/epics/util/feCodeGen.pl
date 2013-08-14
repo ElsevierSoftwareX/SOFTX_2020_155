@@ -1203,7 +1203,7 @@ $inCnt = 0;
 #// Now have all info necessary to produce the supporting code and text files. \n
 #// Start the process of writing files.\n
 #//	- Write Epics/real-time data structures to header file.
-#//		- Write Epics structs common to all CDS front ends to the .h file.
+#//	- Write Epics structs common to all CDS front ends to the .h file.
 print OUTH "#define MAX_FIR \t $firCnt\n";
 print OUTH "#define MAX_FIR_POLY \t $firCnt\n\n";
 # ########    TEST    ############
@@ -1215,16 +1215,24 @@ print "\nLength = $size\n";
 $svnVerSub = substr($svnVer, 0, ($size - 1));
 print OUTH "#define BUILD_SVN_VERSION_NO \t \"$svnVerSub\"\n\n";
 # ########    TEST    ############
+print EPICS "\nEPICS CDS_EPICS dspSpace coeffSpace epicsSpace\n\n";
+print EPICS "\n\n";
 print OUTH "typedef struct CDS_EPICS_IN {\n";
 print OUTH "\tint vmeReset;\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_VME_RESET epicsInput.vmeReset int ao 0\n";
 print OUTH "\tint ipcDiagReset;\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_IPC_DIAG_RESET epicsInput.ipcDiagReset int ao 0\n";
 print OUTH "\tint burtRestore;\n";
+print EPICS "INVARIABLE FEC\_$dcuId\_BURT_RESTORE epicsInput.burtRestore int ai 0\n";
 print OUTH "\tint dcuId;\n";
 print OUTH "\tint diagReset;\n";
-print OUTH "\tint dacDuoSet;\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_DIAG_RESET epicsInput.diagReset int ao 0\n";
 print OUTH "\tint overflowReset;\n";
-print OUTH "\tchar burtRestore_mask;\n";
-print OUTH "\tchar dacDuoSet_mask;\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_OVERFLOW_RESET epicsInput.overflowReset int ao 0\n";
+print OUTH "\tint burtRestore_mask;\n";
+print OUTH "\tint dacDuoSet_mask;\n";
+print OUTH "\tint dacDuoSet;\n";
+print EPICS "INVARIABLE FEC\_$dcuId\_DACDT_ENABLE epicsInput.dacDuoSet int bo 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 if($diagTest > -1)
 {
 print OUTH "\tint bumpCycle;\n";
@@ -1232,30 +1240,145 @@ print OUTH "\tint bumpAdcRd;\n";
 }
 print OUTH "} CDS_EPICS_IN;\n\n";
 print OUTH "typedef struct CDS_EPICS_OUT {\n";
-print OUTH "\tint epicsSync;\n";
-print OUTH "\tint timeErr;\n";
-print OUTH "\tint adcWaitTime;\n";
-print OUTH "\tint diagWord;\n";
-print OUTH "\tint timeDiag;\n";
-print OUTH "\tint cpuMeter;\n";
-print OUTH "\tint cpuMeterMax;\n";
-print OUTH "\tint gdsMon[32];\n";
-print OUTH "\tint diags[15];\n";
-print OUTH "\tint overflowAdc[12][32];\n";
-print OUTH "\tint overflowDac[12][16];\n";
-print OUTH "\tint dacValue[12][16];\n";
-print OUTH "\tint ovAccum;\n";
-print OUTH "\tint statAdc[16];\n";
-print OUTH "\tint statDac[16];\n";
-print OUTH "\tint awgtpmanGPS;\n";
-print OUTH "\tint tpCnt;\n";
-print OUTH "\tint stateWord;\n";
 print OUTH "\tint dcuId;\n";
+my $subs = substr($skeleton,5);
+if (0 == length($subs)) {
+	print EPICS "OUTVARIABLE  DCU_ID epicsOutput.dcuId int ao 0\n";
+} else {
+	print EPICS "OUTVARIABLE  \U$subs\E_DCU_ID epicsOutput.dcuId int ao 0\n";
+}
+print OUTH "\tint tpCnt;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TP_CNT epicsOutput.tpCnt int ao 0\n";
+
+print OUTH "\tint cpuMeter;\n";
+$frate = $rate;
+if($frate == 15)
+{
+	$brate =  13;
+} else {
+	$frate =  $rate * .85;
+	$brate = $frate;
+}
+print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\")\n";
+
+print OUTH "\tint cpuMeterMax;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER_MAX epicsOutput.cpuMeterMax int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\")\n";
+
+print OUTH "\tint adcWaitTime;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT epicsOutput.adcWaitTime int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
+
+print OUTH "\tint timeErr;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_ERR epicsOutput.timeErr int ao 0\n";
+
+print OUTH "\tint timeDiag;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_DIAG epicsOutput.timeDiag int ao 0\n";
+
+print OUTH "\tint diagWord;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG_WORD epicsOutput.diagWord int ao 0\n";
+print EPICS "\n\n";
+
+print OUTH "\tint statAdc[$adcCnt];\n";
+for($ii=0;$ii<$adcCnt;$ii++)
+{
+	print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT_$ii epicsOutput.statAdc\[$ii\] int ao 0\n";
+}
+
+print OUTH "\tint overflowAdc[$adcCnt][32];\n";
+for($ii=0;$ii<$adcCnt;$ii++)
+{
+	for($jj=0;$jj<32;$jj++)
+	{
+		print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_OVERFLOW_$ii\_$jj epicsOutput.overflowAdc\[$ii\]\[$jj\] int ao 0\n";
+	}
+}
+
+print OUTH "\tint statDac[$dacCnt];\n";
+for($ii=0;$ii<$dacCnt;$ii++)
+{
+	print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT_$ii epicsOutput.statDac\[$ii\] int ao 0\n";
+}
+
+print OUTH "\tint overflowDac[$dacCnt][16];\n";
+for($ii=0;$ii<$dacCnt;$ii++)
+{
+	for($jj=0;$jj<16;$jj++)
+	{
+		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OVERFLOW_$ii\_$jj epicsOutput.overflowDac\[$ii\]\[$jj\] int ao 0\n";
+	}
+}
+
+print OUTH "\tint dacValue[$dacCnt][16];\n";
+for($ii=0;$ii<$dacCnt;$ii++)
+{
+	for($jj=0;$jj<16;$jj++)
+	{
+		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OUTPUT_$ii\_$jj epicsOutput.dacValue\[$ii\]\[$jj\] int ao 0\n";
+	}
+}
+
+print OUTH "\tint ovAccum;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ACCUM_OVERFLOW epicsOutput.ovAccum int ao 0\n";
+
+print OUTH "\tint userTime;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_USR_TIME epicsOutput.userTime int ao 0\n";
+
+print OUTH "\tint ipcStat;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_IPC_STAT epicsOutput.ipcStat int ao 0\n";
+
+print OUTH "\tint fbNetStat;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.fbNetStat int ao 0\n";
+
+print OUTH "\tint daqByteCnt;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.daqByteCnt int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"4000\") field(HHSV,\"MINOR\")\n";
+
+print OUTH "\tint dacEnable;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_MASTER_STAT epicsOutput.dacEnable int ao 0\n";
+
 print OUTH "\tint cycle;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_CYCLE_CNT epicsOutput.cycle int ao 0\n";
+print OUTH "\tint stateWord;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_STATE_WORD_FE epicsOutput.stateWord int ao 0\n";
+print OUTH "\tint epicsSync;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_EPICS_SYNC epicsOutput.epicsSync int ao 0\n";
+
+if($adcMaster > -1)
+{
+print OUTH "\tint dtTime;\n";
+print OUTH "\tint dacDtTime;\n";
+print OUTH "\tint irigbTime;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.dtTime int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME_DAC epicsOutput.dacDtTime int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.irigbTime int ao 0 field(HIHI,\"24\") field(HHSV,\"MAJOR\") field(HIGH,\"18\") field(HSV,\"MINOR\") field(LOW,\"5\") field(LSV,\"MAJOR\")\n";
+}
+print OUTH "\tint awgStat;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_AWGTPMAN_STAT epicsOutput.awgStat int ao 0\n";
+print OUTH "\tint gdsMon[32];\n";
+for($ii=0;$ii<32;$ii++)
+{
+	print EPICS "OUTVARIABLE FEC\_$dcuId\_GDS_MON_$ii epicsOutput.gdsMon\[$ii\] int ao 0\n";
+}
+
+# print OUTH "\tint awgtpmanGPS;\n";
+
+
+# The following code is in solely for automated testing.
 if($diagTest > -1)
 {
 print OUTH "\tint timingTest[10];\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_CYCLE epicsInput.bumpCycle int ao 0\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_ADC epicsInput.bumpAdcRd int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_64K epicsOutput.timingTest[0] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32K epicsOutput.timingTest[1] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16K epicsOutput.timingTest[2] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04K epicsOutput.timingTest[3] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02K epicsOutput.timingTest[4] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_64KA epicsOutput.timingTest[5] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32KA epicsOutput.timingTest[6] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16KA epicsOutput.timingTest[7] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04KA epicsOutput.timingTest[8] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02KA epicsOutput.timingTest[9] int ao 0\n";
 }
+
 print OUTH "} CDS_EPICS_OUT;\n\n";
 if($useWd)
 {
@@ -1273,12 +1396,31 @@ print OUTH "\tint tripState;\n";
 print OUTH "} SEI_WATCHDOG;\n\n";
 }
 print OUTH "typedef struct \U$systemName {\n";
-print EPICS "\nEPICS CDS_EPICS dspSpace coeffSpace epicsSpace\n\n";
 #//		- Make call to <em>::printHeaderStruct</em> in supporting lib/.pm part files for app specific data structure.
 my $header_masks;
 for($ii=0;$ii<$partCnt;$ii++)
 {
-	if ($cdsPart[$ii]) {
+	if (($cdsPart[$ii]) && (($partType[$ii] eq "IPCx") || ($partType[$ii] eq "FiltCtrl") || ($partType[$ii] eq "FiltCtrl2") || ($partType[$ii] eq "EpicsBinIn") || ($partType[$ii] eq "DacKill") || ($partType[$ii] eq "EpicsMomentary") || ($partType[$ii] eq "EpicsCounter") || ($partType[$ii] eq "Word2Bit") || ($partType[$ii] eq "InputFilter"))) {
+	  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
+	  if (length($masks) > 5) {
+	  	$header_masks .= $masks;
+		#print "mask=$masks";
+	  }
+	}
+}
+for($ii=0;$ii<$partCnt;$ii++)
+{
+	if (($cdsPart[$ii]) && ($partType[$ii] eq "MuxMatrix")) {
+	  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
+	  if (length($masks) > 5) {
+	  	$header_masks .= $masks;
+		#print "mask=$masks";
+	  }
+	}
+}
+for($ii=0;$ii<$partCnt;$ii++)
+{
+	if (($cdsPart[$ii]) && ($partType[$ii] ne "IPCx") && ($partType[$ii] ne "FiltCtrl") && ($partType[$ii] ne "FiltCtrl2") && ($partType[$ii] ne "EpicsBinIn") && ($partType[$ii] ne "DacKill") && ($partType[$ii] ne "EpicsMomentary") && ($partType[$ii] ne "EpicsCounter") && ($partType[$ii] ne "MuxMatrix") && ($partType[$ii] ne "InputFilter")) {
 	  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
 	  if (length($masks) > 5) {
 	  	$header_masks .= $masks;
@@ -1297,84 +1439,28 @@ die "Unspecified \"host\" parameter in cdsParameters block\n" if ($targetHost eq
 	#}
 #}
 print OUTH $header_masks;
-print EPICS "\n\n";
 print OUTH "} \U$systemName;\n\n";
 
 print OUTH "\n\n#define MAX_MODULES \t $filtCnt\n";
 $filtCnt *= 10;
 print OUTH "#define MAX_FILTERS \t $filtCnt\n\n";
+print OUTH "typedef struct CDS_EPICS {\n";
+print OUTH "\tCDS_EPICS_IN epicsInput;\n";
+print OUTH "\tCDS_EPICS_OUT epicsOutput;\n";
+print OUTH "\t\U$systemName \L$systemName;\n";
+print OUTH "} CDS_EPICS;\n";
+print OUTH "\#define TARGET_HOST_NAME $targetHost\n";
+print OUTH "\#endif\n";
 
 #//	- Write EPICS database info file for later use by fmseq.pl in generating EPICS code/database.
 #//		- Write info common to all models.
-print EPICS "MOMENTARY FEC\_$dcuId\_VME_RESET epicsInput.vmeReset int ao 0\n";
-print EPICS "MOMENTARY FEC\_$dcuId\_IPC_DIAG_RESET epicsInput.ipcDiagReset int ao 0\n";
-print EPICS "MOMENTARY FEC\_$dcuId\_DIAG_RESET epicsInput.diagReset int ao 0\n";
-print EPICS "INVARIABLE FEC\_$dcuId\_DACDT_ENABLE epicsInput.dacDuoSet int bo 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
-print EPICS "MOMENTARY FEC\_$dcuId\_OVERFLOW_RESET epicsInput.overflowReset int ao 0\n";
 print EPICS "DAQVAR $dcuId\_LOAD_CONFIG int ao 0\n";
 print EPICS "DAQVAR $dcuId\_CHAN_CNT int ao 0\n";
+print EPICS "DAQVAR $dcuId\_EPICS_CHAN_CNT int ao 0\n";
 print EPICS "DAQVAR $dcuId\_TOTAL int ao 0\n";
 print EPICS "DAQVAR $dcuId\_MSG int ao 0\n";
 print EPICS "DAQVAR  $dcuId\_DCU_ID int ao 0\n";
-my $subs = substr($skeleton,5);
-if (0 == length($subs)) {
-	print EPICS "OUTVARIABLE  DCU_ID epicsOutput.dcuId int ao 0\n";
-} else {
-	print EPICS "OUTVARIABLE  \U$subs\E_DCU_ID epicsOutput.dcuId int ao 0\n";
-}
 
-$frate = $rate;
-if($frate == 15)
-{
-	$brate =  13;
-} else {
-	$frate =  $rate * .85;
-	$brate = $frate;
-}
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TP_CNT epicsOutput.tpCnt int ao 0\n";
-#print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\")\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER_MAX epicsOutput.cpuMeterMax int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\")\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT epicsOutput.adcWaitTime int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
-#print EPICS "OUTVARIABLE FEC\_$dcuId\_ONE_PPS epicsOutput.onePps int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_ERR epicsOutput.timeErr int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_DIAG epicsOutput.timeDiag int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG_WORD epicsOutput.diagWord int ao 0\n";
-print EPICS "INVARIABLE FEC\_$dcuId\_BURT_RESTORE epicsInput.burtRestore int ai 0\n";
-for($ii=0;$ii<32;$ii++)
-{
-	print EPICS "OUTVARIABLE FEC\_$dcuId\_GDS_MON_$ii epicsOutput.gdsMon\[$ii\] int ao 0\n";
-}
-print EPICS "OUTVARIABLE FEC\_$dcuId\_USR_TIME epicsOutput.diags[0] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG1 epicsOutput.diags[1] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.diags[2] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.diags[3] int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"4000\") field(HHSV,\"MINOR\")\n";
-if($adcMaster > -1)
-{
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.diags[4] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME_DAC epicsOutput.diags[10] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.diags[5] int ao 0 field(HIHI,\"24\") field(HHSV,\"MAJOR\") field(HIGH,\"18\") field(HSV,\"MINOR\") field(LOW,\"5\") field(LSV,\"MAJOR\")\n";
-}
-if($diagTest > -1)
-{
-print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_CYCLE epicsInput.bumpCycle int ao 0\n";
-print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_ADC epicsInput.bumpAdcRd int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_64K epicsOutput.timingTest[0] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32K epicsOutput.timingTest[1] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16K epicsOutput.timingTest[2] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04K epicsOutput.timingTest[3] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02K epicsOutput.timingTest[4] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_64KA epicsOutput.timingTest[5] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32KA epicsOutput.timingTest[6] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16KA epicsOutput.timingTest[7] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04KA epicsOutput.timingTest[8] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02KA epicsOutput.timingTest[9] int ao 0\n";
-}
-print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT epicsOutput.diags[6] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT epicsOutput.diags[7] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_MASTER_STAT epicsOutput.diags[8] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_AWGTPMAN_STAT epicsOutput.diags[9] int ao 0\n";
-print EPICS "\n\n";
 
 #Load EPICS I/O Parts
 #//		- Write part specific info by making call to <em>/lib/.pm</em> part support module.
@@ -1384,28 +1470,6 @@ for($ii=0;$ii<$partCnt;$ii++)
 	  ("CDS::" . $partType[$ii] . "::printEpics") -> ($ii);
 	}
 }
-print EPICS "\n\n";
-#//		- Add ADC diagnostic channels.
-for($ii=0;$ii<$adcCnt;$ii++)
-{
-	print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_STAT_$ii epicsOutput.statAdc\[$ii\] int ao 0\n";
-	for($jj=0;$jj<32;$jj++)
-	{
-		print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_OVERFLOW_$ii\_$jj epicsOutput.overflowAdc\[$ii\]\[$jj\] int ao 0\n";
-	}
-}
-print EPICS "\n\n";
-#//		- Add DAC diagnostic channels.
-for($ii=0;$ii<$dacCnt;$ii++)
-{
-	print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT_$ii epicsOutput.statDac\[$ii\] int ao 0\n";
-	for($jj=0;$jj<16;$jj++)
-	{
-		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OVERFLOW_$ii\_$jj epicsOutput.overflowDac\[$ii\]\[$jj\] int ao 0\n";
-		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OUTPUT_$ii\_$jj epicsOutput.dacValue\[$ii\]\[$jj\] int ao 0\n";
-	}
-}
-print EPICS "OUTVARIABLE FEC\_$dcuId\_ACCUM_OVERFLOW epicsOutput.ovAccum int ao 0\n";
 print EPICS "\n\n";
 print EPICS "systems \U$systemName\-\n";
 if ($plantName ne $systemName) {
@@ -1444,6 +1508,7 @@ if ($::extraExcitations) {
 #//		- Add GDS info.
 print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site " . get_freq() . " $dcuId $ifoid\n";
 print EPICS "\n\n";
+close EPICS;
 
 #//	- Write C source code file.
 # Start process of writing .c file. **********************************************************************
@@ -1890,12 +1955,6 @@ print OUT "  return(dacFault);\n\n";
 print OUT "}\n";
 print OUT "#include \"$rcg_src_dir/src/fe/controller.c\"\n";
 
-print OUTH "typedef struct CDS_EPICS {\n";
-print OUTH "\tCDS_EPICS_IN epicsInput;\n";
-print OUTH "\tCDS_EPICS_OUT epicsOutput;\n";
-print OUTH "\t\U$systemName \L$systemName;\n";
-print OUTH "} CDS_EPICS;\n";
-
 
 if($partsRemaining != 0) {
 	print "WARNING -- NOT ALL PARTS CONNECTED !!!!\n";
@@ -1912,12 +1971,13 @@ close IN;
 close OUT;
 
 
-print OUTH "\#define TARGET_HOST_NAME $targetHost\n";
-print OUTH "\#endif\n";
-close OUTH;
 close OUTD;
-close EPICS;
 
+my $hdrFile = "./src/include/";
+$hdrFile .= $ARGV[1];
+$hdrFile .= ".h";
+my $epicsDaqChans = system("grep double $hdrFile | wc -l");
+print "Number of epics DAQ channels = $epicsDaqChans in $hdrFile\n";
 
 #//	- Write C code MAKEFILE
 createCmakefile();
@@ -2245,6 +2305,7 @@ for($ii=0;$ii<$dacCnt;$ii++)
 open(OUT,">sources.\L$sysname\E") || die "cannot open \"sources.$sysname\" file for writing ";
 print OUT join("\n", @sources), "\n";
 close OUT;
+close OUTH;
 
 #//	
 #// \n \b SUBROUTINES ******************************************************************************\n\n
