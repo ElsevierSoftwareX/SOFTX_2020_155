@@ -79,8 +79,8 @@ int printk(const char *fmt, ...) {
 // Contec 64 input bits plus 64 output bits (Standard for aLIGO)
 /// Contec6464 input register values
 unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
-/// Contec6464 output register values read back from the module
-unsigned int CDIO6464Input[MAX_DIO_MODULES]; // Current value of the BO bits
+/// Contec6464 - Last output request sent to module.
+unsigned int CDIO6464LastOutState[MAX_DIO_MODULES]; // Current requested value of the BO bits
 /// Contec6464 values to be written to the output register
 unsigned int CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
 
@@ -393,6 +393,10 @@ void *fe_start(void *arg)
   /* Init comms with EPICS processor */
   pEpicsComms = (RFM_FE_COMMS *)_epics_shm;
   pLocalEpics = (CDS_EPICS *)&pEpicsComms->epicsSpace;
+  //pEpicsDaq = (char *)&pEpicsComms->epicsSpace;
+  //pEpicsDaq = (char *) (pEpicsDaq + sizeof(CDS_EPICS_IN));
+  pEpicsDaq = (char *)&(pLocalEpics->epicsOutput);
+printf("Epics at 0x%x and DAQ at 0x%x  size = %d \n",pLocalEpics,pEpicsDaq,sizeof(CDS_EPICS_IN));
 
 #ifdef OVERSAMPLE
   // Zero out filter histories
@@ -537,13 +541,13 @@ udelay(1000);
   memset(floatDacOut, 0, sizeof(floatDacOut));
 
 #endif
-  pLocalEpics->epicsOutput.diags[FE_DIAGS_IPC_STAT] = 0;
-  pLocalEpics->epicsOutput.diags[FE_DIAGS_FB_NET_STAT] = 0;
+  pLocalEpics->epicsOutput.ipcStat = 0;
+  pLocalEpics->epicsOutput.fbNetStat = 0;
   pLocalEpics->epicsOutput.tpCnt = 0;
 
 #if !defined(NO_DAQ) && !defined(IOP_TASK)
   // Initialize DAQ function
-  status = daqWrite(0,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],0, (int *)(pLocalEpics->epicsOutput.gdsMon),xExc);
+  status = daqWrite(0,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],0, (int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
   if(status == -1) 
   {
     printf("DAQ init failed -- exiting\n");
@@ -570,9 +574,11 @@ udelay(1000);
 	} else if (cdsPciModules.doType[kk] == CON_32DO) {
   	  CDO32Input[ii] = contec32ReadOutputRegister(&cdsPciModules, kk);
 	} else if (cdsPciModules.doType[kk] == CON_6464DIO) {
-  	  CDIO6464Input[ii] = contec6464ReadInputRegister(&cdsPciModules, kk);
+  	  CDIO6464LastOutState[ii] = contec6464ReadOutputRegister(&cdsPciModules, kk);
+	  printf ("Initial state of contec6464 number %d = 0x%x \n",ii,CDIO6464LastOutState[ii]);
 	} else if (cdsPciModules.doType[kk] == CDI64) {
-  	  CDIO6464Input[ii] = contec6464ReadInputRegister(&cdsPciModules, kk);
+  	  CDIO6464LastOutState[ii] = contec6464ReadOutputRegister(&cdsPciModules, kk);
+	  printf ("Initial state of contec6464 number %d = 0x%x \n",ii,CDIO6464LastOutState[ii]);
 	} else if(cdsPciModules.doType[kk] == ACS_24DIO) {
   	  dioInput[ii] = accesDio24ReadInputRegister(&cdsPciModules, kk);
 	}
@@ -827,7 +833,7 @@ udelay(1000);
 	  // Pause until next cycle begins
 	  if (cycleNum == 0) {
 	    	//printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
-	  	pLocalEpics->epicsOutput.diags[FE_DIAGS_AWGTPMAN] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
+	  	pLocalEpics->epicsOutput.awgStat = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
 	  }
 	  // This is local CPU timer (no ADCs)
 	  // advance to the next cycle polling CPU cycles and microsleeping
@@ -881,8 +887,8 @@ udelay(1000);
        if(cycleNum == 0)
         {
 	  //printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
-	  pLocalEpics->epicsOutput.diags[FE_DIAGS_AWGTPMAN] = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
-	  if(pLocalEpics->epicsOutput.diags[FE_DIAGS_AWGTPMAN]) feStatus |= FE_ERROR_AWG;
+	  pLocalEpics->epicsOutput.awgStat = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
+	  if(pLocalEpics->epicsOutput.awgStat) feStatus |= FE_ERROR_AWG;
 	  if(!iopDacEnable) feStatus |= FE_ERROR_DAC_ENABLE;
 
 	  // Increment GPS second on cycle 0
@@ -1363,7 +1369,7 @@ udelay(1000);
 		{
 		// Retrieve time set in at adc read and report offset from 1PPS
 			gps_receiver_locked = getGpsTime(&timeSec,&usec);
-			pLocalEpics->epicsOutput.diags[FE_DIAGS_IRIGB_TIME] = usec;
+			pLocalEpics->epicsOutput.irigbTime = usec;
 		}
 		if((usec > MAX_IRIGB_SKEW) || (usec < MIN_IRIGB_SKEW)) 
 		{
@@ -1381,7 +1387,7 @@ udelay(1000);
 	        if(cdsPciModules.gpsType == TSYNC_RCVR)
 	        {
 	                gps_receiver_locked = getGpsuSecTsync(&usec);
-	                pLocalEpics->epicsOutput.diags[FE_DIAGS_IRIGB_TIME] = usec;
+	                pLocalEpics->epicsOutput.irigbTime = usec;
 	                if((usec > MAX_IRIGB_SKEW) || (usec < MIN_IRIGB_SKEW)) 
 			{
 				feStatus |= FE_ERROR_TIMING;;
@@ -1398,10 +1404,10 @@ udelay(1000);
         if(cycleNum == HKP_DT_CALC)
         {
                 duotoneTime = duotime(DT_SAMPLE_CNT, duotoneMean, duotone);
-                pLocalEpics->epicsOutput.diags[FE_DIAGS_DUOTONE_TIME] = duotoneTime;
+                pLocalEpics->epicsOutput.dtTime = duotoneTime;
 		if((duotoneTime < MIN_DT_DIAG_VAL) || (duotoneTime > MAX_DT_DIAG_VAL)) feStatus |= FE_ERROR_TIMING;
 		duotoneTimeDac = duotime(DT_SAMPLE_CNT, duotoneMeanDac, duotoneDac);
-                pLocalEpics->epicsOutput.diags[FE_DIAGS_DAC_DUO] = duotoneTimeDac;
+                pLocalEpics->epicsOutput.dacDtTime = duotoneTimeDac;
         }
 
 	if(cycleNum == HKP_DAC_DT_SWITCH)
@@ -1425,7 +1431,7 @@ udelay(1000);
 	  pLocalEpics->epicsOutput.cpuMeter = timeHold;
 	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
 #ifdef ADC_MASTER
-  	  pLocalEpics->epicsOutput.diags[FE_DIAGS_DAC_MASTER_STAT] = dacEnable;
+  	  pLocalEpics->epicsOutput.dacEnable = dacEnable;
 #endif
           timeHoldHold = timeHold;
           timeHold = 0;
@@ -1577,12 +1583,12 @@ udelay(1000);
                           CDO32Input[ii] = contec32WriteOutputRegister(&cdsPciModules, kk, CDO32Output[ii]);
                         }
 		} else if (cdsPciModules.doType[kk] == CON_6464DIO) {
-			if (CDIO6464Input[ii] != CDIO6464Output[ii]) {
-			  CDIO6464Input[ii] = contec6464WriteOutputRegister(&cdsPciModules, kk, CDIO6464Output[ii]);
+			if (CDIO6464LastOutState[ii] != CDIO6464Output[ii]) {
+			  CDIO6464LastOutState[ii] = contec6464WriteOutputRegister(&cdsPciModules, kk, CDIO6464Output[ii]);
 			}
 		} else if (cdsPciModules.doType[kk] == CDO64) {
-			if (CDIO6464Input[ii] != CDIO6464Output[ii]) {
-			  CDIO6464Input[ii] = contec6464WriteOutputRegister(&cdsPciModules, kk, CDIO6464Output[ii]);
+			if (CDIO6464LastOutState[ii] != CDIO6464Output[ii]) {
+			  CDIO6464LastOutState[ii] = contec6464WriteOutputRegister(&cdsPciModules, kk, CDIO6464Output[ii]);
 			}
                 } else
                 if((cdsPciModules.doType[kk] == ACS_24DIO) && (dioOutputHold[ii] != dioOutput[ii]))
@@ -1599,27 +1605,27 @@ udelay(1000);
 		// Call daqLib
 		if (cycle_gps_time == 0) startGpsTime = timeSec;
 		cycle_gps_time = timeSec; // Time at which ADCs triggered
-		pLocalEpics->epicsOutput.diags[FE_DIAGS_DAQ_BYTE_CNT] = 
-			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc);
+		pLocalEpics->epicsOutput.daqByteCnt = 
+			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
 		// Send the current DAQ block size to the awgtpman for TP number checking
 	  	pEpicsComms->padSpace.feDaqBlockSize = curDaqBlockSize;
 	  	pLocalEpics->epicsOutput.tpCnt = tpPtr->count & 0xff;
 		feStatus |= (FE_ERROR_EXC_SET & tpPtr->count);
-		if(pLocalEpics->epicsOutput.diags[FE_DIAGS_DAQ_BYTE_CNT] > DAQ_DCU_RATE_WARNING) 
+		if(pLocalEpics->epicsOutput.daqByteCnt > DAQ_DCU_RATE_WARNING) 
 			feStatus |= FE_ERROR_DAQ;;
 #endif
 
 	if(cycleNum == HKP_DIAG_UPDATES)	
         {
-	  pLocalEpics->epicsOutput.diags[FE_DIAGS_USER_TIME] = usrHoldTime;
-	  pLocalEpics->epicsOutput.diags[FE_DIAGS_IPC_STAT] = ipcErrBits;
+	  pLocalEpics->epicsOutput.userTime = usrHoldTime;
+	  pLocalEpics->epicsOutput.ipcStat = ipcErrBits;
 	  if(ipcErrBits) feStatus |= FE_ERROR_IPC;
 	  // Create FB status word for return to EPICS
 	  mxStat = 0;
 	  mxDiagR = daqPtr->status;
 	  if((mxDiag & 1) != (mxDiagR & 1)) mxStat = 1;
 	  if((mxDiag & 2) != (mxDiagR & 2)) mxStat += 2;
-	  pLocalEpics->epicsOutput.diags[FE_DIAGS_FB_NET_STAT] = mxStat;
+	  pLocalEpics->epicsOutput.fbNetStat = mxStat;
   	  mxDiag = mxDiagR;
 	  if(mxStat != 3)
 		feStatus |= FE_ERROR_DAQ;;
