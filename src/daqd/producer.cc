@@ -438,7 +438,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
      	rcvr_stats.push_back(s);
      }
 
-   for (int bnum = 0; bnum < 2; bnum++) { // Start
+   for (int bnum = 0; bnum < nics_available; bnum++) { // Start
      for (int j = 0; j < max_endpoints; j++) {
        //class stats s;
        //rcvr_stats.push_back(s);
