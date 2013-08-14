@@ -118,6 +118,9 @@ assign dcmsg to "{ifo}:DAQ-FEC_{sysnum}_MSG";
 int chnCnt;
 assign chnCnt to "{ifo}:DAQ-FEC_{sysnum}_CHAN_CNT";
 
+int epicschnCnt;
+assign epicschnCnt to "{ifo}:DAQ-FEC_{sysnum}_EPICS_CHAN_CNT";
+
 int dataSize;
 assign dataSize to "{ifo}:DAQ-FEC_{sysnum}_TOTAL";
 
@@ -283,6 +286,10 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 %%   }
 %%   info -> configFileCRC = infoTmp.configFileCRC;
 %%   info->numChans = infoTmp.numChans;
+%%   info->numEpicsInts = infoTmp.numEpicsInts;
+%%   info->numEpicsFloats = infoTmp.numEpicsFloats;
+%%   info->numEpicsFilts = infoTmp.numEpicsFilts;
+%%   info->numEpicsTotal = infoTmp.numEpicsTotal;
 %% }
 
 
@@ -831,12 +838,14 @@ state daqInit
 %%         printf("%s%s daqConfig info is at rfm offset 0x%lx\n", ifo, daqsys, ((char *)info) - ((char *)base));
 %%         info -> reconfig = 1;
 %%         chnCnt = infoTmp.numChans;
+%%         epicschnCnt = infoTmp.numEpicsInts + infoTmp.numEpicsFloats + infoTmp.numEpicsFilts;
 %%         dataSize = 0;
 %%         { int i;
 %%              for(i=0; i < infoTmp.numChans; i++) {
 %%                      dataSize += infoTmp.tp[i].dataRate * DAQ_DATA_TYPE_SIZE(infoTmp.tp[i].dataType);
 %%              }
 %%         }
+%%		dataSize += 64 * (infoTmp.numEpicsInts + infoTmp.numEpicsFloats + infoTmp.numEpicsFilts);
 %%         dataSize /= 1000;
            strcpy(msgDAQ, localtimestring);
 %%      } else {
@@ -857,6 +866,7 @@ state daqInit
 
         pvPut(dcmsg);
         pvPut(chnCnt);
+        pvPut(epicschnCnt);
         pvPut(dataSize);
         pvPut(msgDAQ);
     } state monScreen
@@ -905,12 +915,14 @@ state daqProcess
 ;
 %%            info -> reconfig = 1;
 %%            chnCnt = infoTmp.numChans;
+%%         epicschnCnt = infoTmp.numEpicsInts + infoTmp.numEpicsFloats + infoTmp.numEpicsFilts;
 %%            dataSize = 0;
 %%            { int i;
 %%              for(i=0; i < infoTmp.numChans; i++) {
 %%                      dataSize += infoTmp.tp[i].dataRate * DAQ_DATA_TYPE_SIZE(infoTmp.tp[i].dataType);
 %%              }
 %%            }
+%%		dataSize += 64 * (infoTmp.numEpicsInts + infoTmp.numEpicsFloats + infoTmp.numEpicsFilts);
 %%            dataSize /= 1000;
 %%            sleep(1);
               strcpy(msgDAQ, localtimestring);
@@ -920,6 +932,7 @@ state daqProcess
               strcpy(msgDAQ, "ERROR reading DAQ file!");
 %%          }
             pvPut(chnCnt);
+            pvPut(epicschnCnt);
             pvPut(dataSize);
             pvPut(msgDAQ);
 %%        }

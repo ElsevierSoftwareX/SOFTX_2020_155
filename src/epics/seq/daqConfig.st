@@ -56,6 +56,10 @@ assign dataSize to "{ifo}:DAQ-{sys}_TOTAL";
 %%   }
 %%   info -> configFileCRC = infoTmp.configFileCRC;
 %%   info->numChans = infoTmp.numChans;
+%%   info->numChans = infoTmp.numEpicsInts;
+%%   info->numChans = infoTmp.numEpicsFloats;
+%%   info->numChans = infoTmp.numEpicsFilts;
+%%   info->numChans = infoTmp.numEpicsTotal;
 %% }
 
 ss daqConfigControl {

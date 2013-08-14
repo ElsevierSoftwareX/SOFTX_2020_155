@@ -241,6 +241,9 @@ struct rmIpcStr {
 /// The total number of test point DCUs 
 #define DAQ_GDS_DCU_NUM       4
 
+// Have to be careful with the next two number definitions
+// Size of DAQ_INFO_BLOCK is set by DCU_MAX_CHANNELS and size could
+// cause overflow from base DAQ_INFO_ADDRESS into DAQ_BASE_ADDRESS
 /// Total number of channels allowed per DCU 
 #define DCU_MAX_CHANNELS	512
 
@@ -251,6 +254,10 @@ struct rmIpcStr {
 typedef struct DAQ_INFO_BLOCK {
   int reconfig; 		///< Set to 1 by the Epics to indicate configuration change 
   int numChans; 		///< Defines how many channels are configured int struct tp[] 
+  int numEpicsInts;
+  int numEpicsFloats;
+  int numEpicsFilts; 
+  int numEpicsTotal; 
   unsigned long configFileCRC; 	///< DAQ config file checksum 
   struct {
     unsigned int tpnum; 	///< Test point number to which this DAQ channel connects 

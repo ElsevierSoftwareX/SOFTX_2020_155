@@ -58,6 +58,10 @@ open(IN,"<-") || die "cannot open standard input\n";
 $cnt = 0;
 $mcnt = 0;
 $phase = 0;
+$edcuSizeI = 0;
+$edcuSizeD = 0;
+$edcuTpNum = 40000;
+$edcuFiltNum = 50000;
 my @eFields;
 
 $names1 = "%TYPE% %NAME%[MAX_MODULES];\nassign %NAME% to\n{\n";
@@ -105,6 +109,59 @@ sub add_vproc_entry {
 	}
 	$vproc .= ($v_type eq "int"? "0": "1") .  " /* $v_type */ , $out, $nrow, $ncol}, \n";
 	$vproc_size++;
+}
+sub add_edcu_entry {
+	($proc_name, $v_type, $out, $v_var, $nrow, $ncol) =  @_;
+	#if(($v_type ne "int") || ($v_type ne "double")) {return;}
+	$nrow = 0 if ! defined $nrow;
+	$ncol = 0 if ! defined $ncol;
+	if((index($proc_name, "BURT") == -1) && (index($proc_name, "DACDT_ENABLE") == -1)
+	   && (index($proc_name, "VME_RESET") == -1) && (index($proc_name, "IPC_DIAG_RESET") == -1)
+	   && (index($proc_name, "DIAG_RESET") == -1) && (index($proc_name, "OVERFLOW_RESET") == -1))
+	{
+	if($nrow || $ncol)
+	{
+		for(my $ii=0;$ii<$nrow;$ii++)
+		{
+			for(my $jj=0;$jj<$ncol;$jj++)
+			{
+				if($v_type eq "int") {
+					$edcuEntryI .= "\[$proc_name\_$ii\_$jj\] \n";
+					$edcuEntryI .= "acquire=3 \n";
+					$edcuEntryI .= "datarate=16 \n";
+					$edcuEntryI .= "datatype=2 \n";
+					$edcuEntryI .= "chnnum=$edcuTpNum \n";
+					$edcuSizeI ++;
+					$edcuTpNum ++;
+				} else {
+					$edcuEntryD .= "\[$proc_name\_$ii\_$jj\] \n";
+					$edcuEntryD .= "acquire=3 \n";
+					$edcuEntryD .= "datarate=16 \n";
+					$edcuEntryD .= "datatype=4 \n";
+					$edcuEntryD .= "chnnum=$edcuTpNum \n";
+					$edcuSizeD ++;
+					$edcuTpNum ++;
+				}
+			}
+		}
+	} elsif ($v_type eq "double"){
+		$edcuEntryD .= "\[$proc_name\] \n";
+					$edcuEntryD .= "acquire=3 \n";
+					$edcuEntryD .= "datarate=16 \n";
+					$edcuEntryD .= "datatype=4 \n";
+					$edcuEntryD .= "chnnum=$edcuTpNum \n";
+					$edcuSizeD ++;
+					$edcuTpNum ++;
+	} elsif ($v_type eq "int"){
+		$edcuEntryI .= "\[$proc_name\] \n";
+					$edcuEntryI .= "acquire=3 \n";
+					$edcuEntryI .= "datarate=16 \n";
+					$edcuEntryI .= "datatype=2 \n";
+					$edcuEntryI .= "chnnum=$edcuTpNum \n";
+					$edcuSizeI ++;
+					$edcuTpNum ++;
+	}
+	}
 }
 
 while (<IN>) {
@@ -200,6 +257,7 @@ while (<IN>) {
 	}
 
 	add_vproc_entry($proc_name, $v_type, 0, $v_var);
+	add_edcu_entry($proc_name, $v_type, 0, $v_var);
 	#$vproc .= "{\"$proc_name\", "
 		#. ($v_type eq "int"? "0": "1") .
 		#" /* $v_type */ , 0 /* in */, (void *)&(pLocalEpics->$v_var) - (void *)pLocalEpics, ".
@@ -340,8 +398,10 @@ while (<IN>) {
         if ($top_name) {
 	  	$tv_name = top_name_transform($v_name);
 		$vdecl .= "assign evar_$v_name to \"{ifo}:${tv_name}\";\n";
+		$proc_name = "%SITE%:$tv_name";
 	} else {
 		$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
+		$proc_name = "%SITE%:%SYS%$v_name";
 	}
 
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
@@ -367,6 +427,7 @@ while (<IN>) {
 	$vardb .= "    $v_efield3\n";
 	$vardb .= "    $v_efield4\n";
 	$vardb .= "}\n";
+	add_edcu_entry($proc_name, $v_type, 1, $v_var);
     } elsif (substr($_,0,11) eq "OUTVARIABLE") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init,@eFields ) = split(/\s+/, $_);
@@ -385,6 +446,7 @@ while (<IN>) {
 	}
 
 	add_vproc_entry($proc_name, $v_type, 1, $v_var);
+	add_edcu_entry($proc_name, $v_type, 1, $v_var);
 	#$vproc .= "{\"$proc_name\", "
 		#. ($v_type eq "int"? "0": "1") .
 		#" /* $v_type */ , 1 /* out */, (void *)&(pLocalEpics->$v_var) - (void *)pLocalEpics, 0},\n";
@@ -556,6 +618,7 @@ while (<IN>) {
 
 	my $s = $/; $/="_"; chomp $proc_name; $/ = $s;
 	add_vproc_entry($proc_name, "double", 0, $m_var, $x, $y);
+	add_edcu_entry($proc_name, "double", 0, $m_var, $x, $y);
 	#$vproc .= "{\"$proc_name\", 1, ".
 		#"0 /* in */, (void *)&(pLocalEpics->$m_var) - (void *)pLocalEpics, ".
 		#"(void *)&(pLocalEpics->${m_var}_mask) - (void *)pLocalEpics},\n";
@@ -844,8 +907,10 @@ if ($gds_specified) {
     	if ($top_name) {
 	 $tv_name = top_name_transform($i);
 	 print "[$site:${tv_name}_EXC]\n";
+	 $edcuFiltName = "[$site:${tv_name}";
 	} else {
 	 print "[$site:${systm}${i}_EXC]\n";
+	 $edcuFiltName = "[$site:${systm}${i}";
 	}
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
@@ -854,6 +919,23 @@ if ($gds_specified) {
 	print "datatype = 4\n";	
 	print "datarate = $gds_datarate\n\n";
 	$excnum++;
+	for(my $efn = 0;$efn < 9; $efn ++)
+	{
+		if($efn == 0) {$edcuFilt .= "$edcuFiltName\_INMON]\n";}
+		if($efn == 1) {$edcuFilt .= "$edcuFiltName\_OFFSET]\n";}
+		if($efn == 2) {$edcuFilt .= "$edcuFiltName\_GAIN]\n";}
+		if($efn == 3) {$edcuFilt .= "$edcuFiltName\_LIMIT]\n";}
+		if($efn == 4) {$edcuFilt .= "$edcuFiltName\_OUT16]\n";}
+		if($efn == 5) {$edcuFilt .= "$edcuFiltName\_OUTPUT]\n";}
+		if($efn == 6) {$edcuFilt .= "$edcuFiltName\_SWSTAT]\n";}
+		if($efn == 7) {$edcuFilt .= "$edcuFiltName\_SWREQ]\n";}
+		if($efn == 8) {$edcuFilt .= "$edcuFiltName\_SWMASK]\n";}
+	 $edcuFilt .= "acquire=3\n";
+	 $edcuFilt .= "datarate=16\n";
+	 $edcuFilt .= "datatype=4\n";
+	 $edcuFilt .= "chnnum=$edcuFiltNum\n";
+	  $edcuFiltNum ++;
+	}
       }
       # Print extra excitations
       foreach $i ( @excitations ) {
@@ -963,6 +1045,13 @@ units=V
 END
 ;
 print OUTG $header;
+$edcuEntryI =~ s/%SITE%/$site/g;
+$edcuEntryI =~ s/%SYS%/$systems[0]/g;
+$edcuEntryD =~ s/%SITE%/$site/g;
+$edcuEntryD =~ s/%SYS%/$systems[0]/g;
+print OUTG $edcuEntryI;
+print OUTG $edcuEntryD;
+print OUTG $edcuFilt;
 
 # Open testpoints file
 my $parFile = "$ARGV[0].par";
@@ -1051,6 +1140,18 @@ $vproc =~ s/%SITE%/$site/g;
 $vproc =~ s/%SYS%/$systems[0]/g;
 print PROC $vproc;
 print PROC "};\n";
+close PROC;
+
+print STDERR "SENDINGEPICS FILE TO $ARGV[0]_edcu16 $edcuSizeI $edcuSizeD\n";
+open(PROC, ">$ARGV[0]_edcu16") || die "cannot open $ARGV[0]_edcu16.h file for writing";
+$edcuEntryI =~ s/%SITE%/$site/g;
+$edcuEntryI =~ s/%SYS%/$systems[0]/g;
+$edcuEntryD =~ s/%SITE%/$site/g;
+$edcuEntryD =~ s/%SYS%/$systems[0]/g;
+print PROC $edcuEntryI;
+print PROC $edcuEntryD;
+print PROC "Int Count = $edcuSizeI \n";
+print PROC "Double Count = $edcuSizeD \n";
 close PROC;
 
 exit(0);
