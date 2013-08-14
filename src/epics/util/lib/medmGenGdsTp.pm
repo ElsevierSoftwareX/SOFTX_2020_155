@@ -69,7 +69,7 @@ sub createGdsMedm
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{yellow},"","","");
 	$xpos = 210; $ypos = 77; $width = 153; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{blue},"","","");
-	$xpos = 384; $ypos = 167; $width = 158; $height = 18;
+	$xpos = 384; $ypos = 187; $width = 158; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{blue},"","","");
 	$xpos = 125; $ypos = 150; $width = 50; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{black},"","","");
@@ -199,7 +199,7 @@ sub createGdsMedm
         $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"RT NET STAT");
 	# Add IPC Status Monitor
 	$xpos = 314; $ypos = 79; $width = 40; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DIAG1","0","3",$ecolors{red},$ecolors{green});
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_IPC_STAT","0","3",$ecolors{red},$ecolors{green});
 
 	# Add Guardian Alarm Monitor related display
 	$xpos = 210; $ypos = 102; $width = 85; $height = 18;
@@ -256,6 +256,8 @@ sub createGdsMedm
 	# Add DAQ chan count Monitor
 	$xpos = 424; $ypos = 105; $width = 35; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:DAQ-FEC_$dcuid\_CHAN_CNT",$ecolors{white},$ecolors{black},"alarm");
+	$xpos = 424; $ypos = 125; $width = 35; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:DAQ-FEC_$dcuid\_EPICS_CHAN_CNT",$ecolors{white},$ecolors{black},"alarm");
 	# Add DAQ + TP chan counter Monitor
 	$xpos = 464; $ypos = 105; $width = 35; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:DAQ-FEC_$dcuid\_TOTAL",$ecolors{white},$ecolors{black},"alarm");
@@ -264,39 +266,39 @@ sub createGdsMedm
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAQ_BYTE_COUNT",$ecolors{white},$ecolors{black},"alarm");
 
 	# Add DAQ Reload
-	$xpos = 384; $ypos = 126; $width = 158; $height = 18;
+	$xpos = 384; $ypos = 146; $width = 158; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenMessage") -> ($xpos,$ypos,$width,$height,"$site\:DAQ-FEC_$dcuid\_LOAD_CONFIG",$ecolors{white},$ecolors{blue},"DAQ Reload","1");
 	# Add DAQ load time Monitor
-	$xpos = 384; $ypos = 146; $width = 158; $height = 18;
+	$xpos = 384; $ypos = 166; $width = 158; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_MSGDAQ",$ecolors{white},$ecolors{blue},"static");
 
 	# Add TP label
-	$xpos = 386; $ypos = 169; $width = 80; $height = 12; 
+	$xpos = 386; $ypos = 189; $width = 80; $height = 12; 
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"Test Points",$ecolors{white});
 	# Add AWG label
-	$xpos = 497; $ypos = 169; $width = 20; $height = 12; 
+	$xpos = 497; $ypos = 189; $width = 20; $height = 12; 
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"AWG",$ecolors{white});
 	# Add TP Counter Monitor
-	$xpos = 467; $ypos = 169; $width = 20; $height = 15;
+	$xpos = 467; $ypos = 189; $width = 20; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_TP_CNT",$ecolors{white},$ecolors{black},"alarm");
 	# Add AWG Monitor
-	$xpos = 525; $ypos = 168; $width = 10; $height = 15;
+	$xpos = 525; $ypos = 188; $width = 10; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_AWGTPMAN_STAT","0","0",$ecolors{red},$ecolors{green});
 
 	# Add Individual TP channel number monitors
-	$xpos = 384; $ypos = 188; $width = 50; $height = 15;
+	$xpos = 384; $ypos = 208; $width = 50; $height = 15;
 	for(my $ii=0;$ii<5;$ii++)
 	{
 		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_GDS_MON_$ii",$ecolors{white},$ecolors{blue},"static");
 		$ypos += 18;
 	}
-	$xpos = 438; $ypos = 188;
+	$xpos = 438; $ypos = 208;
 	for($ii=5;$ii<10;$ii++)
 	{
 		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_GDS_MON_$ii",$ecolors{white},$ecolors{blue},"static");
 		$ypos += 18;
 	}
-	$xpos = 492; $ypos = 188;
+	$xpos = 492; $ypos = 208;
 	for(my $ii=10;$ii<15;$ii++)
 	{
 		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_GDS_MON_$ii",$ecolors{white},$ecolors{blue},"static");
