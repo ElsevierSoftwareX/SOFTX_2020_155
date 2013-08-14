@@ -161,9 +161,7 @@ uint32_t filter = FILTER;
 //struct timeval start_time;
 char *dataBuff;
 int sendLength = 0;
-int myCrc = 0;
-
-	
+//int myCrc = 0;
 
 mx_set_error_handler(MX_ERRORS_RETURN);
 
@@ -243,8 +241,8 @@ do {
 
 		  dataBuff = (char *)(shmDataPtr[i] + lastCycle * buf_size);
 		  memcpy((void *)&mxDataBlock.mxDataBlock[0],dataBuff,mxDataBlock.mxIpcData.dataBlockSize);
-		  myCrc = crc_ptr((char *)&mxDataBlock.mxDataBlock[0],mxDataBlock.mxIpcData.dataBlockSize,0);
-		  myCrc = crc_len(mxDataBlock.mxIpcData.dataBlockSize,myCrc);
+		  //myCrc = crc_ptr((char *)&mxDataBlock.mxDataBlock[0],mxDataBlock.mxIpcData.dataBlockSize,0);
+		  //myCrc = crc_len(mxDataBlock.mxIpcData.dataBlockSize,myCrc);
 		  //if(myCrc != mxDataBlock.mxIpcData.bp[lastCycle].crc) printf("CRC error in sender\n");
 		  sendLength = header_size + mxDataBlock.mxIpcData.dataBlockSize;
 		  if (do_verbose) 
