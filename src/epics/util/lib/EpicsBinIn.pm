@@ -30,7 +30,7 @@ sub printHeaderStruct {
 # Current part number is passed as first argument
 sub printEpics {
         my ($i) = @_;
-	print ::EPICS "INVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] float bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")";
+	print ::EPICS "INVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")";
         foreach $ef (@{$::epics_fields[$i]}) {
                 print ::EPICS  " " . $ef;
         }

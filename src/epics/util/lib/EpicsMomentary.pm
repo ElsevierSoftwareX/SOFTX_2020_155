@@ -15,7 +15,7 @@ sub partType {
 # Current part number is passed as first argument
 sub printHeaderStruct {
         my ($i) = @_;
-        print ::OUTH "\tunsigned int $::xpartName[$i];\n";
+        print ::OUTH "\tint $::xpartName[$i];\n";
 }
  
 # Print Epics variable definitions
@@ -29,7 +29,7 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
-        print ::OUT "static unsigned int \L$::xpartName[$i];\n";
+        print ::OUT "static int \L$::xpartName[$i];\n";
         ;
 }
 
