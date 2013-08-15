@@ -175,9 +175,9 @@ sub processDataRate  {
    my ($rate) = @_;
 
    my $correctDataRate = -1;
-   my $dataRateHelp = 256;
+   my $dataRateHelp = 16;
 
-   for (my $i = 0; $i < 9; $i++)  {
+   for (my $i = 0; $i < 13; $i++)  {
       if ($rate == $dataRateHelp)  {
          $correctDataRate = $i;
          last;
@@ -312,10 +312,10 @@ print "\nTotal count of \'acquire={0,1,3}\' is $acquireTotal\n";
 #  Print the counts for each datarate, as well as
 #  the total datarate (in bytes).
 #
-$dataRateHelp = 256;
+$dataRateHelp = 16;
 $totalByteCount = 0;
 
-for ($i = 0; $i < 9; $i++)  {
+for ($i = 0; $i < 13; $i++)  {
    $totalBytes = $dataRateHelp * $rateCount[$i];
    print "\nCounted $rateCount[$i] entries of datarate=$dataRateHelp \tfor a total of $totalBytes";
 
