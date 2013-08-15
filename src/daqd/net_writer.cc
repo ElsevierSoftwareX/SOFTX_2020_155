@@ -1109,12 +1109,9 @@ net_writer_c::transient_consumer ()
 			assert (buffptr);
 			(void) consumer (); // Send data blocks
 		      }
-		    else
-		      {
-			(void) send_trailer ();
-			shutdown_net_writer ();
-		      }
 		  }
+		  (void) send_trailer ();
+		  shutdown_net_writer ();
 		}
 	      else
 		shutdown_net_writer ();
