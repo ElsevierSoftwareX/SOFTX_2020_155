@@ -121,9 +121,9 @@ sub add_edcu_entry {
 	{
 	if($nrow || $ncol)
 	{
-		for(my $ii=0;$ii<$nrow;$ii++)
+		for(my $ii=1;$ii<($nrow+1);$ii++)
 		{
-			for(my $jj=0;$jj<$ncol;$jj++)
+			for(my $jj=1;$jj<($ncol+1);$jj++)
 			{
 				if($v_type eq "int") {
 					$edcuEntryI .= "\[$proc_name\_$ii\_$jj\] \n";
