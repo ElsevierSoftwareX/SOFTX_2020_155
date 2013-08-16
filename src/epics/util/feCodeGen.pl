@@ -1233,6 +1233,7 @@ print OUTH "\tint burtRestore_mask;\n";
 print OUTH "\tint dacDuoSet_mask;\n";
 print OUTH "\tint dacDuoSet;\n";
 print EPICS "INVARIABLE FEC\_$dcuId\_DACDT_ENABLE epicsInput.dacDuoSet int bo 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
+print OUTH "\tint pad1;\n";
 if($diagTest > -1)
 {
 print OUTH "\tint bumpCycle;\n";
