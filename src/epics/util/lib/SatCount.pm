@@ -10,7 +10,7 @@ sub partType {
 # Current part number is passed as first argument
 sub printHeaderStruct {
         my ($i) = @_;
-        print ::OUTH "\tint $::xpartName[$i]\_RESET;\n";
+        print ::OUTH "\tdouble $::xpartName[$i]\_RESET;\n";
         print ::OUTH "\tdouble $::xpartName[$i]\_TRIGGER;\n";
 $here = <<END;
 \tchar $::xpartName[$i]\_RESET_mask;\n
@@ -23,7 +23,7 @@ END
 # Current part number is passed as first argument
 sub printEpics {
         my ($i) = @_;
-        print ::EPICS "MOMENTARY $::xpartName[$i]\_RESET $::systemName\.$::xpartName[$i]\_RESET int ai 0\n";
+        print ::EPICS "MOMENTARY $::xpartName[$i]\_RESET $::systemName\.$::xpartName[$i]\_RESET double ai 0\n";
         print ::EPICS "INVARIABLE $::xpartName[$i]\_TRIGGER $::systemName\.$::xpartName[$i]\_TRIGGER double ai 0 field(PREC,\"3\")\n";
 }
 
