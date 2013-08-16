@@ -270,7 +270,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	printf("Have at least 1 int mem hole %d %d \n",ii,jj);
     	dataInfo.epicsdblDataOffset = 1;
     }
-    if ((ii%2)) {
+    if ((ii%2) &&(jj>0)) {
 	// Have 4 byte mem hole after CDS data
 	// This will require 2 memcpys of integer data.
 	dataInfo.cpyIntSize[0] = ii *4;
@@ -608,12 +608,10 @@ if(daqSlot == 0)
 	}
 
 }
-if(daqSlot == 41)
+if(daqSlot == 0)
 {
 // Write EPICS double values as float values
     	pEpicsDblData1 = pEpicsDblData;
-// printf("DBlP old = 0x%x\n",(long)pEpicsDblData);
-    	// testPtr = (pWriteBuffer + epicsIntXferSize); 
     	testPtr = (float *)pWriteBuffer; 
     	testPtr += dataInfo.numEpicsInts; 
  	for(ii=0;ii<dataInfo.numEpicsFloats;ii++)
@@ -623,7 +621,7 @@ if(daqSlot == 41)
 		pEpicsDblData1 ++;
 	}
 }
-if(daqSlot == 42)
+if(daqSlot == 1)
 {
 // Write filter module EPICS values as floats
  	for(ii=0;ii<MAX_MODULES;ii++)
@@ -775,7 +773,7 @@ if(daqSlot == 42)
 			printf("Have at least 1 int mem hole %d %d \n",ii,jj);
 			dataInfo.epicsdblDataOffset = 1;
 		    }
-		    if ((ii%2)) {
+		    if ((ii%2) &&(jj>0)) {
 			// Have 4 byte mem hole after CDS data
 			// This will require 2 memcpys of integer data.
 			dataInfo.cpyIntSize[0] = ii *4;
