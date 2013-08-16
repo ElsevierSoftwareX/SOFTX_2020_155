@@ -14,13 +14,14 @@ struct rmIpcStr *dipc;			///< Pointer to DAQ IPC data in shared memory.
 struct cdsDaqNetGdsTpNum *tpPtr;	///< Pointer to TP table in shared memory.
 char *mcPtr;				///< Pointer to current DAQ data in shared memory.
 float *testPtr;				///< Pointer to current DAQ data in shared memory.
-int *testPtrI;				///< Pointer to current DAQ data in shared memory.
-int *readPtrI;
+char *testPtrI;				///< Pointer to current DAQ data in shared memory.
+char *readPtrI;
 char *lmPtr;				///< Pointer to current DAQ data in local memory data buffer.
 char *daqShmPtr;			///< Pointer to DAQ data in shared memory.
 int fillSize;				///< Amount of data to copy local to shared memory.
 char *pEpicsIntData;
 double *pEpicsDblData;
+double *pEpicsDblData1;
 unsigned int curDaqBlockSize;
 
 
@@ -254,7 +255,32 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     dataInfo.numEpicsTotal = pInfo->numEpicsTotal;
     pEpicsIntData = pEpics;
     epicsIntXferSize = dataInfo.numEpicsInts * 4;
+
+    dataInfo.epicsdblDataOffset = 0;
+    dataInfo.cpyepics2times = 0;
+    dataInfo.cpyIntSize[0] = dataInfo.numEpicsInts * 4;
+    dataInfo.cpyIntSize[1] = 0;
+
+
+    ii = (sizeof(CDS_EPICS_OUT) / 4);
+    jj = dataInfo.numEpicsInts - ii;
+    printf("Have %d CDS epics integer and %d USR epics integer channels\n",ii,jj);
+
+    if((ii%2) || (jj%2)) {
+	printf("Have at least 1 int mem hole %d %d \n",ii,jj);
+    	dataInfo.epicsdblDataOffset = 1;
+    }
+    if ((ii%2)) {
+	// Have 4 byte mem hole after CDS data
+	// This will require 2 memcpys of integer data.
+	dataInfo.cpyIntSize[0] = ii *4;
+	dataInfo.cpyIntSize[1] = jj *4;
+	dataInfo.cpyepics2times = 1;
+	printf("Have 2 mem holes %d %d \nNeet to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo.cpyIntSize[0],dataInfo.cpyIntSize[1]);
+    }
+
     pEpicsDblData = (pEpicsIntData + epicsIntXferSize);
+    if(dataInfo.epicsdblDataOffset) pEpicsDblData ++;
 
     printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
     printf("DAQ EPICS INT DATA is at 0x%x with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
@@ -569,20 +595,32 @@ printf("Fast data offset = %d \n",offsetAccum);
 if(daqSlot == 0)
 {
 // Write EPICS integer values
-      memcpy(pWriteBuffer,pEpicsIntData,epicsIntXferSize);
+
+      if(dataInfo.cpyepics2times)
+	{
+	      memcpy(pWriteBuffer,pEpicsIntData,dataInfo.cpyIntSize[0]);
+	      testPtrI = pWriteBuffer;
+	      testPtrI += dataInfo.cpyIntSize[0];
+	      readPtrI = pEpicsIntData + dataInfo.cpyIntSize[0] + 4;
+	      memcpy(testPtrI,readPtrI,dataInfo.cpyIntSize[1]);
+	} else {
+	      memcpy(pWriteBuffer,pEpicsIntData,dataInfo.cpyIntSize[0]);
+	}
+
 }
 if(daqSlot == 41)
 {
 // Write EPICS double values as float values
-    pEpicsDblData = (pEpicsIntData + epicsIntXferSize);
+    	pEpicsDblData1 = pEpicsDblData;
+// printf("DBlP old = 0x%x\n",(long)pEpicsDblData);
     	// testPtr = (pWriteBuffer + epicsIntXferSize); 
     	testPtr = (float *)pWriteBuffer; 
     	testPtr += dataInfo.numEpicsInts; 
  	for(ii=0;ii<dataInfo.numEpicsFloats;ii++)
 	{
-		*testPtr = (float)*pEpicsDblData;
+		*testPtr = (float)*pEpicsDblData1;
 		testPtr ++;
-		pEpicsDblData ++;
+		pEpicsDblData1 ++;
 	}
 }
 if(daqSlot == 42)
@@ -717,22 +755,47 @@ if(daqSlot == 42)
 		    crcLength = 0;
 
 		    // Setup EPICS channel information/pointers
-    dataInfo.numEpicsInts = pInfo->numEpicsInts;
-    dataInfo.numEpicsFloats = pInfo->numEpicsFloats;
-    dataInfo.numEpicsFilts = pInfo->numEpicsFilts;
-    dataInfo.numEpicsTotal = pInfo->numEpicsTotal;
-    pEpicsIntData = pEpics;
-    epicsIntXferSize = dataInfo.numEpicsInts * 4;
-    pEpicsDblData = (pEpicsIntData + epicsIntXferSize);
+		    dataInfo.numEpicsInts = pInfo->numEpicsInts;
+		    dataInfo.numEpicsFloats = pInfo->numEpicsFloats;
+		    dataInfo.numEpicsFilts = pInfo->numEpicsFilts;
+		    dataInfo.numEpicsTotal = pInfo->numEpicsTotal;
+		    pEpicsIntData = pEpics;
+		    epicsIntXferSize = dataInfo.numEpicsInts * 4;
 
-    printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
-    printf("DAQ EPICS INT DATA is at 0x%x with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
-    printf("DAQ EPICS FLT DATA is at 0x%x\n",(long)pEpicsDblData);
-    printf("EPICS: Int = %d  Flt = %d Filters = %d Total = %d Fast = %d\n",dataInfo.numEpicsInts,dataInfo.numEpicsFloats,dataInfo.numEpicsFilts, dataInfo.numEpicsTotal, dataInfo.numChans);
+		    dataInfo.epicsdblDataOffset = 0;
+		    dataInfo.cpyepics2times = 0;    dataInfo.cpyIntSize[0] = dataInfo.numEpicsInts * 4;
+		    dataInfo.cpyIntSize[1] = 0;
 
-	    // Initialize CRC length with EPICS data size.
-    crcLength = 4 * dataInfo.numEpicsTotal;
-	printf("crc length epics = %d\n",crcLength);
+
+		    ii = (sizeof(CDS_EPICS_OUT) / 4);
+		    jj = dataInfo.numEpicsInts - ii;
+		    printf("Have %d CDS epics integer and %d USR epics integer channels\n",ii,jj);
+
+		    if((ii%2) || (jj%2)) {
+			printf("Have at least 1 int mem hole %d %d \n",ii,jj);
+			dataInfo.epicsdblDataOffset = 1;
+		    }
+		    if ((ii%2)) {
+			// Have 4 byte mem hole after CDS data
+			// This will require 2 memcpys of integer data.
+			dataInfo.cpyIntSize[0] = ii *4;
+			dataInfo.cpyIntSize[1] = jj *4;
+			dataInfo.cpyepics2times = 1;        printf("Have 2 mem holes %d %d \nNeet to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo.cpyIntSize[0]
+		,dataInfo.cpyIntSize[1]);
+		    }
+
+		    pEpicsDblData = (pEpicsIntData + epicsIntXferSize);
+		    if(dataInfo.epicsdblDataOffset) pEpicsDblData ++;
+
+
+		    printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
+		    printf("DAQ EPICS INT DATA is at 0x%x with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
+		    printf("DAQ EPICS FLT DATA is at 0x%x\n",(long)pEpicsDblData);
+		    printf("EPICS: Int = %d  Flt = %d Filters = %d Total = %d Fast = %d\n",dataInfo.numEpicsInts,dataInfo.numEpicsFloats,dataInfo.numEpicsFilts, dataInfo.numEpicsTotal, dataInfo.numChans);
+
+		    // Initialize CRC length with EPICS data size.
+		    crcLength = 4 * dataInfo.numEpicsTotal;
+			printf("crc length epics = %d\n",crcLength);
 
 
 		    /* Get the DAQ configuration information for all channels and calc a crc checksum length */

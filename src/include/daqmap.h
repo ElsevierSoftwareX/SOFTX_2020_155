@@ -258,6 +258,9 @@ typedef struct DAQ_INFO_BLOCK {
   int numEpicsFloats;
   int numEpicsFilts; 
   int numEpicsTotal; 
+  int epicsdblDataOffset;
+  int cpyepics2times;
+  int cpyIntSize[2];
   unsigned long configFileCRC; 	///< DAQ config file checksum 
   struct {
     unsigned int tpnum; 	///< Test point number to which this DAQ channel connects 
@@ -283,6 +286,9 @@ typedef struct DAQ_INFO_BLOCK {
 
 /* Defines the number of ASC test point outputs */
 #define DAQ_GDS_TP_ASC_TP_NUM		56
+
+#define DAQ_DBL_PER_CYCLE	50
+#define DAQ_DBL_CYCLE_START	40
 
 static const int daqGdsTpNum[4] = { DAQ_GDS_TP_LSC_EX_NUM, DAQ_GDS_TP_ASC_EX_NUM, DAQ_GDS_TP_LSC_TP_NUM, DAQ_GDS_TP_ASC_TP_NUM };
 
