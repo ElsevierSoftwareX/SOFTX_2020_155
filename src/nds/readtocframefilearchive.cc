@@ -270,7 +270,7 @@ Nds::readTocFrameFileArchive()
 
       t = time(0) - t;
       DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
-      ibuf->close();
+      //ibuf->close();
 
       // decimate and send the data, taking care of DAQD network protocol
       if (!daqd_net.send_data(*new_frame, file_name, 0, &seq_num))
