@@ -1401,7 +1401,7 @@ print OUTH "typedef struct \U$systemName {\n";
 my $header_masks;
 for($ii=0;$ii<$partCnt;$ii++)
 {
-	if (($cdsPart[$ii]) && (($partType[$ii] eq "IPCx") || ($partType[$ii] eq "FiltCtrl") || ($partType[$ii] eq "FiltCtrl2") || ($partType[$ii] eq "EpicsBinIn") || ($partType[$ii] eq "DacKill") || ($partType[$ii] eq "EpicsMomentary") || ($partType[$ii] eq "EpicsCounter") || ($partType[$ii] eq "Word2Bit") || ($partType[$ii] eq "InputFilter"))) {
+	if (($cdsPart[$ii]) && (($partType[$ii] eq "IPCx") || ($partType[$ii] eq "FiltCtrl") || ($partType[$ii] eq "FiltCtrl2") || ($partType[$ii] eq "EpicsBinIn") || ($partType[$ii] eq "DacKill") || ($partType[$ii] eq "EpicsMomentary") || ($partType[$ii] eq "EpicsCounter") || ($partType[$ii] eq "Word2Bit") )) {
 	  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
 	  if (length($masks) > 5) {
 	  	$header_masks .= $masks;
@@ -1421,7 +1421,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 }
 for($ii=0;$ii<$partCnt;$ii++)
 {
-	if (($cdsPart[$ii]) && ($partType[$ii] ne "IPCx") && ($partType[$ii] ne "FiltCtrl") && ($partType[$ii] ne "FiltCtrl2") && ($partType[$ii] ne "EpicsBinIn") && ($partType[$ii] ne "DacKill") && ($partType[$ii] ne "EpicsMomentary") && ($partType[$ii] ne "EpicsCounter") && ($partType[$ii] ne "MuxMatrix") && ($partType[$ii] ne "InputFilter")) {
+	if (($cdsPart[$ii]) && ($partType[$ii] ne "IPCx") && ($partType[$ii] ne "FiltCtrl") && ($partType[$ii] ne "FiltCtrl2") && ($partType[$ii] ne "EpicsBinIn") && ($partType[$ii] ne "DacKill") && ($partType[$ii] ne "EpicsMomentary") && ($partType[$ii] ne "EpicsCounter") && ($partType[$ii] ne "MuxMatrix") ) {
 	  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
 	  if (length($masks) > 5) {
 	  	$header_masks .= $masks;
