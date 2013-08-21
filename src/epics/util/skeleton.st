@@ -351,6 +351,7 @@ state init
 %%  pFilt = (FILT_MOD *)(&pRfm->%EPICS_FILT_VAR%);
 %%  pVmeCoeff = (VME_COEF*)(&pRfm->%EPICS_COEFF_VAR%);
 %%  pEpics = (%EPICS_TYPE%*)(&pRfm->%EPICS_EPICS_VAR%);
+%%  memset(pEpics, 0, sizeof(%EPICS_TYPE%));
 %%  printf("%s pFilt is at 0x%lx\n", fmc.subSys[0].name, ((unsigned long)pFilt-(unsigned long)pRfm));
 %%  printf("%s pVmeCoeff is at 0x%lx\n", fmc.subSys[0].name, ((unsigned long)pVmeCoeff-(unsigned long)pRfm));
 %%  printf("%s pVmeCoeff size is 0x%lx\n", fmc.subSys[0].name, sizeof(*pVmeCoeff));
