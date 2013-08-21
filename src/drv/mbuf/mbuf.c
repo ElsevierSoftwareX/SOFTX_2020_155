@@ -26,6 +26,12 @@
 
 #include "kvmem.c"
 
+/* Set if the allocated memory filled in with one-bits */
+static short int one_fill = 0;
+
+module_param(one_fill, short, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+MODULE_PARM_DESC(on_fill, "Set to 1 want to fill newly allocated memory with one bits");
+
 /* character device structures */
 static dev_t mbuf_dev;
 static struct cdev mbuf_cdev;
@@ -143,6 +149,8 @@ int mbuf_allocate_area(char *name, int size, struct file *file) {
 	s = size;
 	kmalloc_area[i] = 0;
 	kmalloc_area[i] = rvmalloc (size); //rkmalloc (&s, GFP_KERNEL);
+	if (one_fill) memset(kmalloc_area[i], 0xff, size);
+
 	//printk("rvmalloc() returned %p\n", kmalloc_area[i]);
 	//printk("rkmalloc() returned %p %d\n", kmalloc_area[i], s);
 	//rkfree(kmalloc_area[i], s);
