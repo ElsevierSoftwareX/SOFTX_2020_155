@@ -420,7 +420,6 @@ printf("Epics at 0x%x and DAQ at 0x%x  size = %d \n",pLocalEpics,pEpicsDaq,sizeo
   // Set pointers to filter module data buffers
     pDsp[system] = (FILT_MOD *)(&pEpicsComms->dspSpace);
     pCoeff[system] = (VME_COEF *)(&pEpicsComms->coeffSpace);
-    // dspPtr[system] = dsp;
     dspPtr[system] = (FILT_MOD *)(&pEpicsComms->dspSpace);
 
   // Clear the FE reset which comes from Epics
@@ -494,12 +493,12 @@ printf("Sync source = %d\n",syncSource);
   // Initialize all filter module excitation signals to zero 
   for (system = 0; system < NUM_SYSTEMS; system++)
     for(ii=0;ii<MAX_MODULES;ii++)
-       dsp[system].data[ii].exciteInput = 0.0;
+       // dsp[system].data[ii].exciteInput = 0.0;
+       pDsp[0]->data[ii].exciteInput = 0.0;
 
 
   /* Initialize DSP filter bank values */
-  for (system = 0; system < NUM_SYSTEMS; system++)
-    if (initVars(dsp + system, pDsp[system], dspCoeff + system, MAX_MODULES, pCoeff[system])) {
+    if (initVars(pDsp[0], pDsp[0], dspCoeff, MAX_MODULES, pCoeff[0])) {
     	printf("Filter module init failed, exiting\n");
 	return 0;
     }
