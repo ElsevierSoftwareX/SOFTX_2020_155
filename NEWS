@@ -1,4 +1,11 @@
 ============================
+Changes for 2.7.2
+============================
+- add utility to remove old IIR filter trends removed in RCG 2.7
+- Zero out the whole EPICS structure in the shared memory.
+  This is needed to make sure all masks are set to zero and
+    all EPICS channels come up unmasked when the code starts.
+============================
 Changes for 2.7.1
 ============================
 - Bug fix (bug 477) - improper generation of DAC monitor screens when both 16bit and 18bit DAC modules 
