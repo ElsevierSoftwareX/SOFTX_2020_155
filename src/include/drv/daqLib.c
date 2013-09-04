@@ -626,25 +626,27 @@ if(daqSlot == 1)
 // Write filter module EPICS values as floats
  	for(ii=0;ii<MAX_MODULES;ii++)
 	{
-		*testPtr = (float)dspPtr->data[ii].filterInput;;
-		testPtr ++;
-		// *testPtr = (float)dspPtr->data[ii].exciteInput;;
-		// testPtr ++;
 		*testPtr = (float)dspPtr->inputs[ii].offset;;
 		testPtr ++;
 		*testPtr = (float)dspPtr->inputs[ii].outgain;;
 		testPtr ++;
 		*testPtr = (float)dspPtr->inputs[ii].limiter;;
 		testPtr ++;
+		*testPtr = (float)dspPtr->inputs[ii].gain_ramp_time;;
+		testPtr ++;
+		*testPtr = (float)dspPtr->inputs[ii].swReq;;
+		testPtr ++;
+		*testPtr = (float)dspPtr->inputs[ii].swMask;;
+		testPtr ++;
+		*testPtr = (float)dspPtr->data[ii].filterInput;;
+		testPtr ++;
+		*testPtr = (float)dspPtr->data[ii].exciteInput;;
+		testPtr ++;
 		*testPtr = (float)dspPtr->data[ii].output16Hz;;
 		testPtr ++;
 		*testPtr = (float)dspPtr->data[ii].output;;
 		testPtr ++;
 		*testPtr = (float)dspPtr->data[ii].swStatus;;
-		testPtr ++;
-		*testPtr = (float)dspPtr->inputs[ii].swReq;;
-		testPtr ++;
-		*testPtr = (float)dspPtr->inputs[ii].swMask;;
 		testPtr ++;
 	}
 }

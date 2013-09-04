@@ -919,17 +919,19 @@ if ($gds_specified) {
 	print "datatype = 4\n";	
 	print "datarate = $gds_datarate\n\n";
 	$excnum++;
-	for(my $efn = 0;$efn < 9; $efn ++)
+	for(my $efn = 0;$efn < 11; $efn ++)
 	{
-		if($efn == 0) {$edcuFilt .= "$edcuFiltName\_INMON]\n";}
-		if($efn == 1) {$edcuFilt .= "$edcuFiltName\_OFFSET]\n";}
-		if($efn == 2) {$edcuFilt .= "$edcuFiltName\_GAIN]\n";}
-		if($efn == 3) {$edcuFilt .= "$edcuFiltName\_LIMIT]\n";}
-		if($efn == 4) {$edcuFilt .= "$edcuFiltName\_OUT16]\n";}
-		if($efn == 5) {$edcuFilt .= "$edcuFiltName\_OUTPUT]\n";}
-		if($efn == 6) {$edcuFilt .= "$edcuFiltName\_SWSTAT]\n";}
-		if($efn == 7) {$edcuFilt .= "$edcuFiltName\_SWREQ]\n";}
-		if($efn == 8) {$edcuFilt .= "$edcuFiltName\_SWMASK]\n";}
+		if($efn == 0) {$edcuFilt .= "$edcuFiltName\_OFFSET]\n";}
+		if($efn == 1) {$edcuFilt .= "$edcuFiltName\_GAIN]\n";}
+		if($efn == 2) {$edcuFilt .= "$edcuFiltName\_LIMIT]\n";}
+		if($efn == 3) {$edcuFilt .= "$edcuFiltName\_TRAMP]\n";}
+		if($efn == 4) {$edcuFilt .= "$edcuFiltName\_SWREQ]\n";}
+		if($efn == 5) {$edcuFilt .= "$edcuFiltName\_SWMASK]\n";}
+		if($efn == 6) {$edcuFilt .= "$edcuFiltName\_INMON]\n";}
+		if($efn == 7) {$edcuFilt .= "$edcuFiltName\_EXCMON]\n";}
+		if($efn == 8) {$edcuFilt .= "$edcuFiltName\_OUT16]\n";}
+		if($efn == 9) {$edcuFilt .= "$edcuFiltName\_OUTPUT]\n";}
+		if($efn == 10) {$edcuFilt .= "$edcuFiltName\_SWSTAT]\n";}
 	 $edcuFilt .= "acquire=3\n";
 	 $edcuFilt .= "datarate=16\n";
 	 $edcuFilt .= "datatype=4\n";
@@ -1140,18 +1142,6 @@ $vproc =~ s/%SITE%/$site/g;
 $vproc =~ s/%SYS%/$systems[0]/g;
 print PROC $vproc;
 print PROC "};\n";
-close PROC;
-
-print STDERR "SENDINGEPICS FILE TO $ARGV[0]_edcu16 $edcuSizeI $edcuSizeD\n";
-open(PROC, ">$ARGV[0]_edcu16") || die "cannot open $ARGV[0]_edcu16.h file for writing";
-$edcuEntryI =~ s/%SITE%/$site/g;
-$edcuEntryI =~ s/%SYS%/$systems[0]/g;
-$edcuEntryD =~ s/%SITE%/$site/g;
-$edcuEntryD =~ s/%SYS%/$systems[0]/g;
-print PROC $edcuEntryI;
-print PROC $edcuEntryD;
-print PROC "Int Count = $edcuSizeI \n";
-print PROC "Double Count = $edcuSizeD \n";
 close PROC;
 
 exit(0);
