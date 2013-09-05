@@ -23,5 +23,6 @@
 	- \ref decFiltTest "IOP Decimation Filter Test"
 	- \ref daqFiltTest "DAQ (daqLib) Decimation Filter Test"
 	- \ref uint32Test "DAQ UINT32 Data Type Test"
+	- \ref tpTestData "GDS Testpoint Test"
 */
 
