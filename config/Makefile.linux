@@ -105,7 +105,6 @@ install: $(DB)
 	mkdir -p target/$(TARGET)/db
 	cp build/$(TARGET)/$(TARGET) target/$(TARGET)
 	/bin/rm -f target/$(TARGET)/db/*/autoBurt.req
-	/bin/rm -f target/$(TARGET)/db/*/auto.ini
 	for ifo in $(IFO) ; do \
 	  system=`echo $(subst epics,,$(TARGET)) | tr a-z A-Z | cut -c1-3`; \
 	  ifo0=`echo $$ifo | sed 's/[0-9]/0/g'`; \
@@ -121,17 +120,6 @@ install: $(DB)
 	  /bin/rm -f target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
 	  echo "dbLoadDatabase \"base.dbd\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 	  echo 'registerRecordDeviceDriver(pdbbase)' >> target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
-	  echo '[default]' >> target/$(TARGET)/db/$$ifo/auto.ini; \
-	  echo 'gain=1.00' >> target/$(TARGET)/db/$$ifo/auto.ini; \
-	  echo 'datatype=4' >> target/$(TARGET)/db/$$ifo/auto.ini; \
-	  echo 'ifoid=0' >> target/$(TARGET)/db/$$ifo/auto.ini; \
-	  echo 'slope=3.0518e-04' >> target/$(TARGET)/db/$$ifo/auto.ini; \
-	  echo 'acquire=3' >> target/$(TARGET)/db/$$ifo/auto.ini; \
-	  echo 'offset=0' >> target/$(TARGET)/db/$$ifo/auto.ini; \
-	  echo 'units=V' >> target/$(TARGET)/db/$$ifo/auto.ini; \
-	  echo 'dcuid=4' >> target/$(TARGET)/db/$$ifo/auto.ini; \
-	  echo 'datarate=16' >> target/$(TARGET)/db/$$ifo/auto.ini; \
-	  echo '' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 	  for i in $(DB) ; do \
 		cat $$i | sed s/%IFO%/$$ifo/g\;s/%IFO0%/$$ifo0/g\;s/%SYS%/$$system/g > target/$(TARGET)/db/$$ifo/`basename $$i`; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(ao|record\(stringout' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
@@ -145,7 +133,6 @@ install: $(DB)
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'record\(ao|record\(string|record\(bi|record\(bo'| sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'SWSTAT|record\(ao|record\(string|record\(bi|record\(bo' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0 , $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		\
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | sed 's/.*"\(.*\)\".*/\1/g' | egrep -v 'VME_Reset|SEVERITY|MAJOR_COUNT|MINOR_COUNT|SETPOINT_ID|FILTER_PARAM|GDS_MON|FESTAT|STATUS_COUNT|FILTER_ID|MTRXSTAT|MTRX_STAT_ERR|_MSG|_TIME_STRING|_STAT_ERR_CNT|BURT|LOAD_CONFIG|VME_RES|LOAD_NEW_COEFF|DIAG_RESET|SYNC_RESET|TOTAL$$|Name|_SW1|_SW2|_SW1R|_SW2R|_RSET|_OUTMON|_SW2S|_SW1S' | awk '{ printf "[%s]\n", $$0 }' >> target/$(TARGET)/db/$$ifo/auto.ini; \
 		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo -n 'epicsEnvSet PREFIX '>> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		grep _GRD_RB_STAT0  target/$(TARGET)/db/$$ifo/`basename $$i` | head -1 | sed 's/[^"]*"\([^"]*\)_GRD_RB_STAT0.*/\1/g' >>  target/$(TARGET)/$(TARGET)$$ifo.cmd; \
