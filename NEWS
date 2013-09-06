@@ -1,6 +1,8 @@
 ============================
 Changes for future release
 ============================
+- Bug Fix (#487): IPCx.pl modified to produce IPC EPICS error channel names using FEC-DCUID instead of
+  model name information. 
 - Synchronous acquisition of EPICS channels at 16Hz via DAQ network. Presently functional, but still needs 
   cleanup and performance enhancements.
 		- All integer types acquired at start (first cycle) of 1/16 sec. block
@@ -22,7 +24,9 @@ Changes for future release
 	- INSTALLATION NOTE: To run this code requires newest iniChk.pl to be copied into site/ifo scripts 
 	  area. Previously, this DAQ file checking code would return error if data rates in DAQ files were 
 	  below 256Hz.
-
+- Bug fix (bug 490) - On startup, some models have matrix input values locked to zero. Found to be due to
+  improper initialization of local/remote control mask bits. Skeleton.st file modified to clear all of EPICS
+  memory at startup. This bug fix was also part of release V2.7.2.
 - Bug fix (bug 477) - Improper generation of DAC monitor screens when model contains mix of 16bit and 18bit 
   DAC modules. This fix also applied to release V2.7.1.
 
