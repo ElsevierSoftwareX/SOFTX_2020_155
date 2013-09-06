@@ -122,15 +122,15 @@ install: $(DB)
 	  echo 'registerRecordDeviceDriver(pdbbase)' >> target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
 	  for i in $(DB) ; do \
 		cat $$i | sed s/%IFO%/$$ifo/g\;s/%IFO0%/$$ifo0/g\;s/%SYS%/$$system/g > target/$(TARGET)/db/$$ifo/`basename $$i`; \
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(ao|record\(stringout' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'DACKILL_PANIC|DACKILL_BPTIME|DACKILL_RESET|DACKILL_BPSET|DACKILL_STATE|record\(ao|record\(stringout' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(stringin' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(ao' | egrep -v 'SWSTAT' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0, $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(ao' | egrep -v 'SWSTAT|PANIC' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0, $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'SWSTAT' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.LOW\n", $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		\
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(bo|record\(bi' | sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(bo|record\(bi' | egrep -v 'DACKILL_PANIC|DACKILL_BPSET' | sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(bo|record\(bi' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.OSV\n%s.ZSV\n", $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		\
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'record\(ao|record\(string|record\(bi|record\(bo'| sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'DACKILL_PANIC|DACKILL_BPTIME|DACKILL_RESET|DACKILL_BPSET|DACKILL_STATE|record\(ao|record\(string|record\(bi|record\(bo'| sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'SWSTAT|record\(ao|record\(string|record\(bi|record\(bo' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0 , $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		\
 		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
