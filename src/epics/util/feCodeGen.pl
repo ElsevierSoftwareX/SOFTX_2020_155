@@ -836,7 +836,7 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 $ftotal = $partCnt;
    for($kk=0;$kk<$partCnt;$kk++)
    {
-	 if(($partType[$kk] eq "INPUT") || ($partType[$kk] eq "OUTPUT") || ($partType[$kk] eq "BUSC") || ($partType[$kk] eq "BUSS") || ($partType[$kk] eq "EpicsIn") || ($partType[$kk] eq "TERM") || ($partType[$kk] eq "FROM") || ($partType[$kk] eq "GOTO") || ($partType[$kk] eq "GROUND") || ($partType[$kk] eq "CONSTANT") || ($partType[$kk] eq "Adc"))
+	 if(($partType[$kk] eq "INPUT") || ($partType[$kk] eq "OUTPUT") || ($partType[$kk] eq "BUSC") || ($partType[$kk] eq "BUSS") || ($partType[$kk] eq "EpicsIn") || ($partType[$kk] eq "TERM") || ($partType[$kk] eq "FROM") || ($partType[$kk] eq "GOTO") || ($partType[$kk] eq "GROUND") || ($partType[$kk] eq "CONSTANT") || ($partType[$kk] eq "Adc") || ($partType[$kk] eq "Gps"))
 	{
 		$ftotal --;
 	}
@@ -884,7 +884,7 @@ for($ii=0;$ii<$subSys;$ii++)
 	for($jj=$subSysPartStart[$ii];$jj<$subSysPartStop[$ii];$jj++)
 	{
 		#if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "BUSS") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "FROM") || ($partType[$jj] eq "GOTO") || ($partType[$jj] eq "EpicsIn") || ($partType[$jj] eq "CONSTANT"))
-		if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "BUSS") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "EpicsIn") || ($partType[$jj] eq "CONSTANT") || ($partType[$jj] eq "EzCaRead") || ($partType[$jj] eq "DELAY"))
+		if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "BUSS") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "EpicsIn") || ($partType[$jj] eq "CONSTANT") || ($partType[$jj] eq "EzCaRead") || ($partType[$jj] eq "DELAY") || ($partType[$jj] eq "Gps"))
 				{
 					if(($partType[$jj] ne "DELAY"))
 					{
@@ -1162,7 +1162,7 @@ for($ii=0;$ii<$seqCnt;$ii++)
 	{
 		$xx = $seqList[$ii];
 		$processName[$processCnt] = $xpartName[$xx];
-if(($partType[$xx] eq "TERM") || ($partType[$xx] eq "GROUND") || ($partType[$xx] eq "FROM") || ($partType[$xx] eq "GOTO") || ($partType[$xx] eq "EpicsIn") || ($partType[$xx] eq "CONSTANT")) 
+if(($partType[$xx] eq "TERM") || ($partType[$xx] eq "GROUND") || ($partType[$xx] eq "FROM") || ($partType[$xx] eq "GOTO") || ($partType[$xx] eq "EpicsIn") || ($partType[$xx] eq "CONSTANT") || ($partType[$xx] eq "Gps")) 
 {$ftotal ++;}
 		$processSeqType{$xpartName[$xx]} = $seqType[$ii];
 		$processPartNum[$processCnt] = $xx;
