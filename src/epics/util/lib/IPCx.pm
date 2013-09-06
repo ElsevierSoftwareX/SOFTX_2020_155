@@ -48,7 +48,6 @@ sub printHeaderStruct {
         if ($::partInputType[$i][0] eq "GROUND") {
 		my $pfile = substr($::mdlfile,5);
 		my @fnam = split(/\./,$pfile);
-		my $ov = uc($fnam[0]);
 		my $ss = substr($::xpartName[$i],3);
 		$ss =~ s/\:/_/;
 		$ss =~ s/\-/_/;
@@ -79,19 +78,15 @@ sub printEpics {
         if ($::partInputType[$i][0] eq "GROUND") {
 		my $pfile = substr($::mdlfile,5);
 		my @fnam = split(/\./,$pfile);
-		my $ov = uc($fnam[0]);
 		my $ss = substr($::xpartName[$i],3);
 		$ss =~ s/\:/_/;
 		$ss =~ s/\-/_/;
-		if (length($ov) > 0) {
-		   $ov .= "_";
-		}
 		# Add Err rate var ie errors/sec
-		print ::EPICS "OUTVARIABLE $ov\IPC_$ss\_ER $::systemName\.$ss\_ER int ao 0\n";
+		print ::EPICS "OUTVARIABLE FEC_$::dcuId\_IPC_$ss\_ER $::systemName\.$ss\_ER int ao 0\n";
 		# Add time of last error detection
-		print ::EPICS "OUTVARIABLE $ov\IPC_$ss\_ET $::systemName\.$ss\_ET int ao 0\n";
+		print ::EPICS "OUTVARIABLE FEC_$::dcuId\_IPC_$ss\_ET $::systemName\.$ss\_ET int ao 0\n";
 		# Add status byte
-		print ::EPICS "OUTVARIABLE $ov\IPC_$ss\_PS $::systemName\.$ss\_PS int ao 0\n";
+		print ::EPICS "OUTVARIABLE FEC_$::dcuId\_IPC_$ss\_PS $::systemName\.$ss\_PS int ao 0\n";
 	}
 }
 
@@ -512,13 +507,9 @@ $ipcxRcvrCnt = 0;
 
 		my $eVar = $::site;
 		$eVar .= ":";
-		$eVar .= uc($::systemName);
-		$eVar .= "-";
-		if (length($ov) >  0) {
-		$ov .= "_";
-		}
-		$eVar .= $ov;
-		$eVar .= "IPC_";
+		$eVar .= "FEC-";
+		$eVar .= $::dcuId;
+		$eVar .= "_IPC_";
 		$eVar .= $ss;
 		$::ipcxParts[$ii][8] = $eVar;
 		$::ipcxParts[$ii][9] = 0;
