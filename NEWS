@@ -1,6 +1,7 @@
 ============================
 Changes for future release
 ============================
+- Bug Fix (#456): Mark DACKILL part settings as RO in autoburt files.
 - Bug Fix (#487): IPCx.pl modified to produce IPC EPICS error channel names using FEC-DCUID instead of
   model name information. 
 - Synchronous acquisition of EPICS channels at 16Hz via DAQ network. Presently functional, but still needs 
