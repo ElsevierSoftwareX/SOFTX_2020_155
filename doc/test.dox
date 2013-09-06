@@ -15,6 +15,7 @@
 	- \ref oscTest "Oscillator"
 	- \ref ezca "EzcaRead / EzcaWrite"
 	- \ref simPartsTest "Supported Simulink Parts"
+	- \ref eicTest "EPICS input w/control"
 \section testpage3 RCG System Level Testing 
 	- \ref rcgCoreTest "RCG Core Test"
 	- \ref ipcTestData "RCG IPC Test"
