@@ -20,7 +20,7 @@ char *lmPtr;				///< Pointer to current DAQ data in local memory data buffer.
 char *daqShmPtr;			///< Pointer to DAQ data in shared memory.
 int fillSize;				///< Amount of data to copy local to shared memory.
 char *pEpicsIntData;
-double *pEpicsDblData;
+char *pEpicsDblData;
 double *pEpicsDblData1;
 unsigned int curDaqBlockSize;
 
@@ -265,23 +265,30 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     ii = (sizeof(CDS_EPICS_OUT) / 4);
     jj = dataInfo.numEpicsInts - ii;
     printf("Have %d CDS epics integer and %d USR epics integer channels\n",ii,jj);
+    ii *= 4;
+    jj *= 4;
 
-    if((ii%2) || (jj%2)) {
+    // Look for memory holes ie integer types not ending on 8 byte boundary.
+    // Need to check both standard CDS struct and User channels
+    // If either doesn't end on 8 byte boundary, then a 4 byte hole will appear
+    // before the double type data in shared memory.
+    if((ii % 8) || (jj % 8)) {
 	printf("Have at least 1 int mem hole %d %d \n",ii,jj);
-    	dataInfo.epicsdblDataOffset = 1;
+    	dataInfo.epicsdblDataOffset = 4;
     }
-    if ((ii%2) &&(jj>0)) {
+    if ((ii%8) &&(jj>0)) { // If standard CDS struct doesn't end on 8 byte boundary, then
 	// Have 4 byte mem hole after CDS data
-	// This will require 2 memcpys of integer data.
-	dataInfo.cpyIntSize[0] = ii *4;
-	dataInfo.cpyIntSize[1] = jj *4;
+	// This will require 2 memcpys of integer data to get 8 byte alignment for xfer to DAQ buffer..
+	dataInfo.cpyIntSize[0] = ii;
+	dataInfo.cpyIntSize[1] = jj;
 	dataInfo.cpyepics2times = 1;
 	printf("Have 2 mem holes %d %d \nNeet to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo.cpyIntSize[0],dataInfo.cpyIntSize[1]);
     }
 
-    pEpicsDblData = (pEpicsIntData + epicsIntXferSize);
-    if(dataInfo.epicsdblDataOffset) pEpicsDblData ++;
+    // Set the pointer to start of EPICS double type data in shared memory.
+    pEpicsDblData = (pEpicsIntData + epicsIntXferSize + dataInfo.epicsdblDataOffset);
 
+    // Send diags to dmesg
     printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
     printf("DAQ EPICS INT DATA is at 0x%x with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
     printf("DAQ EPICS FLT DATA is at 0x%x\n",(long)pEpicsDblData);
@@ -611,7 +618,7 @@ if(daqSlot == 0)
 if(daqSlot == 0)
 {
 // Write EPICS double values as float values
-    	pEpicsDblData1 = pEpicsDblData;
+    	pEpicsDblData1 = (double *)pEpicsDblData;
     	testPtr = (float *)pWriteBuffer; 
     	testPtr += dataInfo.numEpicsInts; 
  	for(ii=0;ii<dataInfo.numEpicsFloats;ii++)
@@ -763,30 +770,36 @@ if(daqSlot == 1)
 		    epicsIntXferSize = dataInfo.numEpicsInts * 4;
 
 		    dataInfo.epicsdblDataOffset = 0;
-		    dataInfo.cpyepics2times = 0;    dataInfo.cpyIntSize[0] = dataInfo.numEpicsInts * 4;
+		    dataInfo.cpyepics2times = 0;    
+		    dataInfo.cpyIntSize[0] = dataInfo.numEpicsInts * 4;
 		    dataInfo.cpyIntSize[1] = 0;
 
 
 		    ii = (sizeof(CDS_EPICS_OUT) / 4);
 		    jj = dataInfo.numEpicsInts - ii;
 		    printf("Have %d CDS epics integer and %d USR epics integer channels\n",ii,jj);
+		    ii *= 4;
+		    jj *= 4;
 
-		    if((ii%2) || (jj%2)) {
+		    // Look for memory holes ie integer types not ending on 8 byte boundary.
+		    // Need to check both standard CDS struct and User channels
+		    // If either doesn't end on 8 byte boundary, then a 4 byte hole will appear
+		    // before the double type data in shared memory.
+		    if((ii%8) || (jj%8)) {
 			printf("Have at least 1 int mem hole %d %d \n",ii,jj);
-			dataInfo.epicsdblDataOffset = 1;
+			dataInfo.epicsdblDataOffset = 4;
 		    }
-		    if ((ii%2) &&(jj>0)) {
+		    if ((ii%8) &&(jj>0)) {
 			// Have 4 byte mem hole after CDS data
 			// This will require 2 memcpys of integer data.
-			dataInfo.cpyIntSize[0] = ii *4;
-			dataInfo.cpyIntSize[1] = jj *4;
-			dataInfo.cpyepics2times = 1;        printf("Have 2 mem holes %d %d \nNeet to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo.cpyIntSize[0]
-		,dataInfo.cpyIntSize[1]);
+			dataInfo.cpyIntSize[0] = ii;
+			dataInfo.cpyIntSize[1] = jj;
+			dataInfo.cpyepics2times = 1;        
+			printf("Have 2 mem holes %d %d \nNeet to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo.cpyIntSize[0] ,dataInfo.cpyIntSize[1]);
 		    }
 
-		    pEpicsDblData = (pEpicsIntData + epicsIntXferSize);
-		    if(dataInfo.epicsdblDataOffset) pEpicsDblData ++;
-
+		    // Set the pointer to start of EPICS double type data in shared memory.
+		    pEpicsDblData = (pEpicsIntData + epicsIntXferSize + dataInfo.epicsdblDataOffset);
 
 		    printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
 		    printf("DAQ EPICS INT DATA is at 0x%x with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
