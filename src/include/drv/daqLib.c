@@ -282,6 +282,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	dataInfo.cpyIntSize[0] = ii;
 	dataInfo.cpyIntSize[1] = jj;
 	dataInfo.cpyepics2times = 1;
+    	dataInfo.epicsdblDataOffset += 4;
 	printf("Have 2 mem holes %d %d \nNeet to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo.cpyIntSize[0],dataInfo.cpyIntSize[1]);
     }
 
@@ -795,6 +796,7 @@ if(daqSlot == 1)
 			dataInfo.cpyIntSize[0] = ii;
 			dataInfo.cpyIntSize[1] = jj;
 			dataInfo.cpyepics2times = 1;        
+			dataInfo.epicsdblDataOffset += 4;
 			printf("Have 2 mem holes %d %d \nNeet to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo.cpyIntSize[0] ,dataInfo.cpyIntSize[1]);
 		    }
 
