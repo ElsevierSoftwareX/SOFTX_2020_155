@@ -347,7 +347,9 @@ producer::frame_writer ()
    unsigned int nics_available = max_endpoints >> 8;
    max_endpoints &= 0xff;
 #else
-   static const unsigned int max_endpoints = 1;
+   unsigned int max_endpoints = 1;
+   static const unsigned int nics_available = 1;
+   max_endpoints &= 0xff;
 #endif
 
 #if defined(USE_MX) || defined(USE_UDP)
