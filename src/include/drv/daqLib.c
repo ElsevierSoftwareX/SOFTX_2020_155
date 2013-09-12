@@ -1,39 +1,35 @@
-///	@file daqLib.c                                                	
-///	@brief	This module provides the generic routines for: \n
-///<		- Writing DAQ, GDS TP and GDS EXC signals to the
-///<		  Framebuilder. \n
-///<		- Reading GDS EXC signals from shmem and writing them
-///<		  to the requested front end code exc channels.
+/*!	\file daqLib.c                                                	
+ *	\brief File contains routines to support DAQ on realtime systems. \n
+ *	\author R.Bork, A. Ivanov
+*/
 
 volatile DAQ_INFO_BLOCK *pInfo;		///< Ptr to DAQ config in shmem.
-
 extern volatile char *_epics_shm;	///< Ptr to EPICS shmem block
 extern long daqBuffer;			///< Address of daqLib swing buffers.
 extern char *_daq_shm;			///< Pointer to DAQ base address in shared memory.
 struct rmIpcStr *dipc;			///< Pointer to DAQ IPC data in shared memory.
 struct cdsDaqNetGdsTpNum *tpPtr;	///< Pointer to TP table in shared memory.
 char *mcPtr;				///< Pointer to current DAQ data in shared memory.
-float *testPtr;				///< Pointer to current DAQ data in shared memory.
-char *testPtrI;				///< Pointer to current DAQ data in shared memory.
-char *readPtrI;
 char *lmPtr;				///< Pointer to current DAQ data in local memory data buffer.
 char *daqShmPtr;			///< Pointer to DAQ data in shared memory.
 int fillSize;				///< Amount of data to copy local to shared memory.
-char *pEpicsIntData;
-char *pEpicsDblData;
+char *pEpicsIntData;			///< Pointer to EPICS integer type data in shared memory.
+char *pEpicsDblData;			///< Pointer to EPICS double type data in shared memory.
+unsigned int curDaqBlockSize;		///< Total DAQ data rate diag
+// Added to get EPICS data for RCG V2.8
+char *pEpicsInt;				// Pointer to current DAQ data in shared memory.
+char *pEpicsInt1;
+float *pEpicsFloat;				// Pointer to current DAQ data in shared memory.
 double *pEpicsDblData1;
-unsigned int curDaqBlockSize;
 
 
 /* ******************************************************************** */
 /* Routine to connect and write to LIGO DAQ system       		*/
 /* ******************************************************************** */
-///	@brief This function provides for reading GDS TP/EXC and writing DAQ data.
-///<	For DAQ data, this routine also provides all necessary decimation filtering.
-
-///	For additional information in LIGO DCC, see
-/// <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=8037">T0900638 CDS Real-time DAQ Software</a>
-///	@param[in] flag Initialization flag 
+///	@author R.Bork, A. Ivanov\n
+///	@brief This function provides for reading GDS TP/EXC and writing DAQ data. \n
+///	@detail For additional information in LIGO DCC, see <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=8037">T0900638 CDS Real-time DAQ Software</a>
+///	@param[in] flag 		Initialization flag (1=Init call, 0 = run)
 ///	@param[in] dcuId		DAQ Data unit ID - unique within a control system
 ///	@param[in] daqRange		Struct defining fron end valid test point and exc ranges.
 ///	@param[in] sysRate		Data rate of the code / 16
@@ -61,13 +57,9 @@ double dWord;			/* Temp value for storage of DAQ values */
 static int daqBlockNum;		/* 1-16, tracks DAQ block to write to.	*/
 static int excBlockNum;		/* 1-16, tracks EXC block to read from.	*/
 static int excDataSize;
-static int xferSize;		/* Tracks remaining xfer size for crc	*/
-static int xferSize1;
-static int mnDaqSize;
-static int xferLength;
+static DAQ_XFER_INFO xferInfo;
 static int xferDone;
-static int crcLength;		/* Number of bytes in 1/16 sec data 	*/
-static char *pDaqBuffer[2];	/* Pointers to local swing buffers.	*/
+static char *pDaqBuffer[DAQ_NUM_SWING_BUFFERS];	/* Pointers to local swing buffers.	*/
 static DAQ_LKUP_TABLE localTable[DCU_MAX_CHANNELS];
 static DAQ_LKUP_TABLE excTable[DCU_MAX_CHANNELS];
 static char *pWriteBuffer;	/* Ptr to swing buff to write data	*/
@@ -75,9 +67,6 @@ static char *pReadBuffer;	/* Ptr to swing buff to xmit data to FB */
 static int phase;		/* 0-1, switches swing buffers.		*/
 static int daqSlot;		/* 0-sysRate, data slot to write data	*/
 static int excSlot;		/* 0-sysRate, slot to read exc data	*/
-static int daqWaitCycle;	/* If 0, write to FB (256Hz)		*/
-static int daqWriteTime;	/* Num daq cycles between writes.	*/
-static int daqWriteCycle;	/* Cycle count to xmit to FB.		*/
 float *pFloat = 0;		/* Temp ptr to write float data.	*/
 short *pShort = 0;		/* Temp ptr to write short data.	*/
 unsigned int *pInteger = 0;	/* Temp ptr to write unsigned int data. */
@@ -85,11 +74,9 @@ char *bufPtr;			/* Ptr to data for crc calculation.	*/
 static unsigned int crcTest;	/* Continuous calc of CRC.		*/
 static unsigned int crcSend;	/* CRC sent to FB.			*/
 static DAQ_INFO_BLOCK dataInfo; /* Local DAQ config info buffer.	*/
-static UINT32 fileCrc;		/* .ini file CRC, sent to FB.		*/
 int decSlot;			/* Tracks decimated data positions.	*/
-int offsetAccum;		/* Used to set localTable.offset	*/
 static int tpStart;		/* Marks address of first TP data	*/
-static volatile GDS_CNTRL_BLOCK *gdsPtr;  /* Ptr to GDS table in shmem.	*/
+static volatile GDS_CNTRL_BLOCK *gdsPtr;  /* Ptr to shm to pass TP info to DAQ */
 static volatile char *exciteDataPtr;	  /* Ptr to EXC data in shmem.	*/
 static int validTp = 0;		/* Number of valid GDS sigs selected.	*/
 static int validTpNet = 0;		/* Number of valid GDS sigs selected.	*/
@@ -97,8 +84,6 @@ static int validEx;		/* EXC signal set status indicator.	*/
 static int tpNum[DAQ_GDS_MAX_TP_ALLOWED]; 	/* TP/EXC selects to send to FB.	*/
 static int tpNumNet[DAQ_GDS_MAX_TP_ALLOWED]; 	/* TP/EXC selects to send to FB.	*/
 static int totalChans;		/* DAQ + TP + EXC chans selected.	*/
-static int totalSize;		/* DAQ + TP + EXC chans size in bytes.	*/
-static int totalSizeNet;        /* DAQ + TP + EXC chans size in bytes sent to network driver.  */
 int *statusPtr;
 volatile float *dataPtr;	/* Ptr to excitation chan data.		*/
 int exChanOffset;		/* shmem offset to next EXC value.	*/
@@ -110,7 +95,8 @@ unsigned int exc;
 unsigned int tpn;
 int slot;
 int num_tps;
-static int epicsIntXferSize;
+unsigned int tpnum[DAQ_GDS_MAX_TP_ALLOWED];		// Current TP nums
+unsigned int excnum[DAQ_GDS_MAX_TP_ALLOWED];	// Current EXC nums
 
 #ifdef CORE_BIQUAD
 // Decimation filter coefficient definitions.		
@@ -205,6 +191,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
 
 // ************************************************************************************** 
+/// If flag input is 1, then this is a startup initialization request from controller code.
   if(flag == DAQ_CONNECT)	/* Initialize DAQ connection */
   {
 
@@ -213,238 +200,53 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     daqBlockNum = (DAQ_NUM_DATA_BLOCKS - 1);
     excBlockNum = 0;
 
-    /* Allocate memory for two local data swing buffers */
-    for(ii=0;ii<2;ii++) 
+    /// ** INITIALIZATION **************\n
+    /// \> Two local memory swing buffers will be used to store acquired data, each containing
+    /// 1/16 sec of data.\n
+    /// ----  One for writing ie copying/filtering data from shared memory on each cycle. \n
+    /// ----  One for reading data ie copying data from local memory to memory shared with 
+    /// DAQ network communication software. \n
+    /// \> Buffers switch roles every 1/16 sec. \n
+    /// \> Introduces 1/16 sec delay on delivery of data to network. However, this is done for
+    /// performance reasons ie it takes too long to perform CRC checksum on full data set and
+    /// to get the data out. With this method, the computing load can be spread out on a per
+    /// per cycle basis. \n
+    /// \>\> Allocate memory for two local data swing buffers
+    for(ii=0;ii<DAQ_NUM_SWING_BUFFERS;ii++) 
     {
       pDaqBuffer[ii] = (char *)daqBuffer;
       pDaqBuffer[ii] += DAQ_DCU_SIZE * ii;
-      // printf("DAQ buffer %d is at 0x%x\n",ii,(long long)pDaqBuffer[ii]);
     }
-
-    // Clear the decimation filter histories
-    for(ii=0;ii<DCU_MAX_CHANNELS;ii++)
-	for(jj=0;jj<MAX_HISTRY;jj++)
-	     dHistory[ii][jj] = 0.0;
-
-    /* Set pointers to two swing buffers */
+    /// \>\> Set pointers to two swing buffers
     pWriteBuffer = (char *)pDaqBuffer[phase^1];
     pReadBuffer = (char *)pDaqBuffer[phase];
     daqSlot = -1;
     excSlot = 0;
 
+    ///	\> CDS standard IIR filters will be used for decimation filtering from
+    /// the native application rate down to DAQ sample rate. \n 
+    /// \>\> Need to clear the decimation filter histories.
+    for(ii=0;ii<DCU_MAX_CHANNELS;ii++)
+	for(jj=0;jj<MAX_HISTRY;jj++)
+	     dHistory[ii][jj] = 0.0;
+
+    /// \> Setup Pointers to the various shared memories:\n
+    /// ----  Assign Ptr to data shared memory to network driver (mx_stream) \n
     daqShmPtr = _daq_shm + CDS_DAQ_NET_DATA_OFFSET;
-    buf_size = DAQ_DCU_BLOCK_SIZE*2;
+    buf_size = DAQ_DCU_BLOCK_SIZE*DAQ_NUM_SWING_BUFFERS;
+    /// ----  Setup Ptr to interprocess comms with network driver
     dipc = (struct rmIpcStr *)(_daq_shm + CDS_DAQ_NET_IPC_OFFSET);
+    /// ----  Setup Ptr to awgtpman shared memory (TP number table)
     tpPtr = (struct cdsDaqNetGdsTpNum *)(_daq_shm + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
-    mcPtr = daqShmPtr;
-    lmPtr = pReadBuffer;
+    mcPtr = daqShmPtr;		// Set daq2net data ptr to start of daq2net shared memory.
+    lmPtr = pReadBuffer;	// Set read buffer ptr to start of read buffer..
+
+    // Set mem cpy size evenly over all code cycles.
     fillSize = DAQ_DCU_BLOCK_SIZE / sysRate;
-    printf("DIRECT MEMORY MODE of size %d\n",fillSize);
-
-
-    crcLength = 0;
-    printf("daqLib DCU_ID = %d\n",dcuId);
-
-    /* Set up pointer to DAQ configuration information in shmem */
+    /// ----  Set up pointer to DAQ configuration information in shmem */
     pInfo = (DAQ_INFO_BLOCK *)(_epics_shm + DAQ_INFO_ADDRESS);
-
-    // Setup EPICS channel information/pointers
-    dataInfo.numEpicsInts = pInfo->numEpicsInts;
-    dataInfo.numEpicsFloats = pInfo->numEpicsFloats;
-    dataInfo.numEpicsFilts = pInfo->numEpicsFilts;
-    dataInfo.numEpicsTotal = pInfo->numEpicsTotal;
-    pEpicsIntData = pEpics;
-    epicsIntXferSize = dataInfo.numEpicsInts * 4;
-
-    dataInfo.epicsdblDataOffset = 0;
-    dataInfo.cpyepics2times = 0;
-    dataInfo.cpyIntSize[0] = dataInfo.numEpicsInts * 4;
-    dataInfo.cpyIntSize[1] = 0;
-
-
-    ii = (sizeof(CDS_EPICS_OUT) / 4);
-    jj = dataInfo.numEpicsInts - ii;
-    printf("Have %d CDS epics integer and %d USR epics integer channels\n",ii,jj);
-    ii *= 4;
-    jj *= 4;
-
-    // Look for memory holes ie integer types not ending on 8 byte boundary.
-    // Need to check both standard CDS struct and User channels
-    // If either doesn't end on 8 byte boundary, then a 4 byte hole will appear
-    // before the double type data in shared memory.
-    if((ii % 8) || (jj % 8)) {
-	printf("Have at least 1 int mem hole %d %d \n",ii,jj);
-    	dataInfo.epicsdblDataOffset = 4;
-    }
-    if ((ii%8) &&(jj>0)) { // If standard CDS struct doesn't end on 8 byte boundary, then
-	// Have 4 byte mem hole after CDS data
-	// This will require 2 memcpys of integer data to get 8 byte alignment for xfer to DAQ buffer..
-	dataInfo.cpyIntSize[0] = ii;
-	dataInfo.cpyIntSize[1] = jj;
-	dataInfo.cpyepics2times = 1;
-    	dataInfo.epicsdblDataOffset += 4;
-	printf("Have 2 mem holes %d %d \nNeet to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo.cpyIntSize[0],dataInfo.cpyIntSize[1]);
-    }
-
-    // Set the pointer to start of EPICS double type data in shared memory.
-    pEpicsDblData = (pEpicsIntData + epicsIntXferSize + dataInfo.epicsdblDataOffset);
-
-    // Send diags to dmesg
-    printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
-    printf("DAQ EPICS INT DATA is at 0x%x with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
-    printf("DAQ EPICS FLT DATA is at 0x%x\n",(long)pEpicsDblData);
-
-
-    /* Get the .INI file crc checksum to pass to DAQ Framebuilders for config checking */
-    fileCrc = pInfo->configFileCRC;
-    // Clear the reconfiguration flag in shmem.
-    pInfo->reconfig = 0;
-    /* Get the number of channels to be acquired */
-    dataInfo.numChans = pInfo->numChans;
-    printf("EPICS: Int = %d  Flt = %d Filters = %d Total = %d Fast = %d\n",dataInfo.numEpicsInts,dataInfo.numEpicsFloats,dataInfo.numEpicsFilts, dataInfo.numEpicsTotal, dataInfo.numChans);
-    // Verify number of channels is legal
-    if((dataInfo.numChans < 1) || (dataInfo.numChans > DCU_MAX_CHANNELS))
-    {
-	printf("Invalid num daq chans = %d\n",dataInfo.numChans);
-	return(-1);
-    }
-
-    // Initialize CRC length with EPICS data size.
-    crcLength = 4 * dataInfo.numEpicsTotal;
-printf("crc length epics = %d\n",crcLength);
-
-    /* Get the DAQ configuration information for all channels and calc a crc checksum length */
-    for(ii=0;ii<dataInfo.numChans;ii++)
-    {
-      dataInfo.tp[ii].tpnum = pInfo->tp[ii].tpnum;
-      dataInfo.tp[ii].dataType = pInfo->tp[ii].dataType;
-      dataInfo.tp[ii].dataRate = pInfo->tp[ii].dataRate;
-      if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
-        crcLength += 2 * dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS;
-      else
-        crcLength += 4 * dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS;
-    }
-
-    /* Calculate the number of bytes to xfer on each call, based on total number
-       of bytes to write each 1/16sec and the front end data rate (2048/16384Hz) */
-    // Note, this is left over from RFM net. Now used only to calc CRC
-    xferSize1 = crcLength/sysRate;
-    // mnDaqSize = crcLength/DAQ_NUM_DATA_BLOCKS;
-    mnDaqSize = crcLength;
-    // curDaqBlockSize = mnDaqSize * 256;
-    curDaqBlockSize = crcLength * DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-    totalSize = crcLength;
-    totalSizeNet = crcLength;
-
-printf (" xfer sizes = %d %d %d %d \n",sysRate,xferSize1,totalSize,crcLength);
-    
-    if (xferSize1 == 0) {
-	printf("DAQ size too small\n");
-	return -1;
-    }
-/*    if (xferSize1 == 0) xferSize1 = 8;  ???? */
-
-    /* 	Maintain 8 byte data boundaries for writing data, particularly important
-        when DMA xfers are used on 5565 RFM modules. Note that this usually results
-	in data not being written on every 2048/16384 cycle and last data xfer
-	in a 1/16 sec block well may be shorter than the rest.			*/
- 	xferSize1 = ((xferSize1/8) + 1) * 8;
-	printf("DAQ resized %d\n", xferSize1);
-
-
-
-    // Fill in the local lookup table for finding data.
-    // offsetAccum = 0;
-    offsetAccum = 4 * dataInfo.numEpicsTotal;
-    localTable[0].offset = offsetAccum;
-
-printf("Fast data offset = %d \n",offsetAccum);
-
-    for(ii=0;ii<dataInfo.numChans;ii++)
-    {
-      /* Need to develop a table of offset pointers to load data into swing buffers 	*/
-      /* This is based on decimation factors and data size				*/
-      if ((dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS) > sysRate) {
-	/* Channel data rate is greater than system rate */
-	printf("Channels %d has bad data rate %d\n", ii, dataInfo.tp[ii].dataRate);
-	return(-1);
-      } else {
-      localTable[ii].decFactor = sysRate/(dataInfo.tp[ii].dataRate / 16);
-      }
-      if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
-	offsetAccum += (sysRate/localTable[ii].decFactor * 2);
-      else
-	offsetAccum += (sysRate/localTable[ii].decFactor * 4);
-      localTable[ii+1].offset = offsetAccum;
-      /* Need to determine if data is from a filter module TP or non-FM TP */
-      if((dataInfo.tp[ii].tpnum >= daqRange.filtTpMin) &&
-	 (dataInfo.tp[ii].tpnum < daqRange.filtTpMax))
-      /* This is a filter module testpoint */
-      {
-	jj = dataInfo.tp[ii].tpnum - daqRange.filtTpMin;
-	/* Mark as coming from a filter module testpoint */
-	localTable[ii].type = 0;
-	/* Mark which system filter module is in */
-	localTable[ii].sysNum = jj / daqRange.filtTpSize;
-	jj -= localTable[ii].sysNum * daqRange.filtTpSize; 
-	/* Mark which filter module within a system */
-	localTable[ii].fmNum = jj / 3;
-	/* Mark which of three testpoints to store */
-	localTable[ii].sigNum = jj % 3;
-      }
-      else if((dataInfo.tp[ii].tpnum >= daqRange.filtExMin) &&
-	 (dataInfo.tp[ii].tpnum < daqRange.filtExMax))
-      /* This is a filter module excitation input */
-      {
-	/* Mark as coming from a filter module excitation input */
-	localTable[ii].type = 2;
-	/* Mark filter module number */
-	localTable[ii].fmNum =  dataInfo.tp[ii].tpnum - daqRange.filtExMin;
-      }
-      else if((dataInfo.tp[ii].tpnum >= daqRange.xTpMin) &&
-	 (dataInfo.tp[ii].tpnum < daqRange.xTpMax))
-      /* This testpoint is not part of a filter module */
-      {
-	jj = dataInfo.tp[ii].tpnum - daqRange.xTpMin;
-	/* Mark as a non filter module testpoint */
-	localTable[ii].type = 1;
-	/* Mark the offset into the local data buffer */
-	localTable[ii].sigNum = jj;
-      }
-      // :TODO: this is broken, needs some work to make extra EXC work.
-      else if((dataInfo.tp[ii].tpnum >= daqRange.xExMin) &&
-	 (dataInfo.tp[ii].tpnum < daqRange.xExMax))
-      /* This exc testpoint is not part of a filter module */
-      {
-	jj = dataInfo.tp[ii].tpnum - daqRange.xExMin;
-	/* Mark as a non filter module testpoint */
-	localTable[ii].type = 3;
-	/* Mark the offset into the local data buffer */
-	localTable[ii].fmNum = jj;
-	localTable[ii].sigNum = jj;
-      }
-      else
-      {
-	printf("Invalid chan num found %d = %d\n",ii,dataInfo.tp[ii].tpnum);
-	return(-1);
-      }
-    }
-
-    // Set the start of TP data after DAQ data.
-    tpStart = offsetAccum;
-    totalChans = dataInfo.numChans;
-    // Set pointer to GDS table in shmem
+    /// ----  Set pointer to shared mem to pass GDS info to DAQ
     gdsPtr = (GDS_CNTRL_BLOCK *)(_epics_shm + DAQ_GDS_BLOCK_ADD);
-    // Clear out the GDS TP selections.
-    if (sysRate < DAQ_16K_SAMPLE_SIZE) tpx = 3; else tpx = 2;
-    for (ii=0; ii < DAQ_GDS_MAX_TP_ALLOWED; ii++) gdsPtr->tp[tpx][0][ii] = 0;
-    if(sysRate < DAQ_16K_SAMPLE_SIZE) tpx = 1; else tpx = 0;
-    for (ii=0; ii < DAQ_GDS_MAX_TP_ALLOWED; ii++) gdsPtr->tp[tpx][0][ii] = 0;
-    // Following can be uncommented for testing.
-    // gdsPtr->tp[3][0][0] = 31250;
-    // gdsPtr->tp[3][0][1] = 11002;
-    // gdsPtr->tp[0][0][0] = 5000;
-
     // Set pointer to EXC data in shmem.
     if(sysRate < DAQ_16K_SAMPLE_SIZE)
 	{
@@ -455,26 +257,29 @@ printf("Fast data offset = %d \n",offsetAccum);
     }
     excDataSize = 4 + 4 * sysRate;
 
-    // Following just sets in some dummy data for testing.
-    for(ii=0;ii<16;ii++)
-    {
-	statusPtr = (int *)(exciteDataPtr + ii * DAQ_DCU_BLOCK_SIZE);
-	*statusPtr = 0;
-	dataPtr = (float *)(exciteDataPtr + ii * DAQ_DCU_BLOCK_SIZE + 4);
-	for(jj=0;jj<1024;jj++)
-	{
-		*dataPtr = (float)(ii * 1000 + jj);
-		dataPtr ++;
-	}
-    }
 
+    // Clear the reconfiguration flag in shmem.
+    pInfo->reconfig = 0;
 
-    // Initialize network variables.
-    daqWaitCycle = -1;
-    daqWriteCycle = 0;
-    daqWriteTime = sysRate / 16;
+    // Configure data channels *****************************************************
+    // Return error if configuration is incorrect.
+    /// \> Load DAQ configuration info from memory shared with EPICS
+    if((xferInfo.crcLength = daqConfig(&dataInfo,pInfo,pEpics)) == -1) return(-1);
 
+    /// \> Load local table information with channel info
+    if((status = loadLocalTable(&xferInfo,localTable,sysRate,&dataInfo,&daqRange)) == -1) return(-1);
 
+    // Set the start of TP data after DAQ data.
+    tpStart = xferInfo.offsetAccum;
+    totalChans = dataInfo.numChans;
+
+    /// \> Clear out the GDS TP selections.
+    if (sysRate < DAQ_16K_SAMPLE_SIZE) tpx = 3; else tpx = 2;
+    for (ii=0; ii < DAQ_GDS_MAX_TP_ALLOWED; ii++) gdsPtr->tp[tpx][0][ii] = 0;
+    if(sysRate < DAQ_16K_SAMPLE_SIZE) tpx = 1; else tpx = 0;
+    for (ii=0; ii < DAQ_GDS_MAX_TP_ALLOWED; ii++) gdsPtr->tp[tpx][0][ii] = 0;
+
+    /// \> Clear the GDS TP lookup table
     for (i = 0; i < DAQ_GDS_MAX_TP_ALLOWED; i++) {
 	tpNum[i] = 0;
 	tpNumNet[i] = 0;
@@ -483,42 +288,42 @@ printf("Fast data offset = %d \n",offsetAccum);
     validTpNet = 0;
 
     //printf("at connect TPnum[0]=%d\n", tpNum[0]);
-  } /* End DAQ CONNECT */
+  } ///  End DAQ CONNECT INITIALIZATION ******************************
 
 /* ******************************************************************************** */
 /* Write Data to FB 			******************************************* */
 /* ******************************************************************************** */
+/// If flag=0, data is to be acquired. This is called every code cycle by controller.c
+/// ** Data Acquisition Mode ********************************************************
   if(flag == DAQ_WRITE)
   {
-    /* Calc data offset into swing buffer */
+    /// \> Calc data offset into current write swing buffer 
     daqSlot = (daqSlot + 1) % sysRate;
-    daqWaitCycle = (daqWaitCycle + 1) % daqWriteTime;
 
-    /* At start of 1/16 sec. data block, reset the xfer sizes and done bit */
+    /// \> At start of 1/16 sec. data block, reset the xfer sizes and done bit */
     if(daqSlot == 0)
     {
-	xferLength = crcLength;
-	xferSize = xferSize1;
+	xferInfo.xferLength = xferInfo.crcLength;
+	xferInfo.xferSize = xferInfo.xferSize1;
 	xferDone = 0;
-        //printf("TPnum[0]=%d\n", tpNum[0]);
     }
 
-    /* If size of data remaining to be sent is less than calc xfer size, reduce xfer size
-       to that of data remaining and mark that data xfer is complete for this 1/16 sec block */
-    if((xferLength < xferSize1) && (!xferDone))
+    /// \> If size of data remaining to be sent is less than calc xfer size, reduce xfer size
+    ///   to that of data remaining and mark that data xfer is complete for this 1/16 sec block 
+    if((xferInfo.xferLength < xferInfo.xferSize1) && (!xferDone))
     {
-	xferSize = xferLength;
-	if(xferSize <= 0)  xferDone = 1;
+	xferInfo.xferSize = xferInfo.xferLength;
+	if(xferInfo.xferSize <= 0)  xferDone = 1;
 
     }
 
 
-    /* Write data into local swing buffer */
+    /// \> Write data into local swing buffer 
     for(ii=0;ii<totalChans;ii++)
     {
 
       dWord = 0;
-      /* Read in the data to a local variable, either from a FM TP or other TP */
+      /// \> Read data to a local variable, either from a FM TP or other TP */
       if(localTable[ii].type == DAQ_SRC_FM_TP)
       /* Data if from filter module testpoint */
       {
@@ -552,7 +357,7 @@ printf("Fast data offset = %d \n",offsetAccum);
 	      dWord = excSignal[localTable[ii].fmNum];
       }
 
-      // Perform decimation filtering, if required.
+      /// \> Perform decimation filtering, if required.
 #ifdef CORE_BIQUAD
 #define iir_filter iir_filter_biquad
 #endif
@@ -571,7 +376,7 @@ printf("Fast data offset = %d \n",offsetAccum);
 #undef iir_filter
 #endif
 
-      // Write the data into the swing buffer.
+      /// \> Write fast data into the swing buffer.
       if ((daqSlot % localTable[ii].decFactor) == 0) {
       	if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT) {
 	  // Write short data; (XOR 1) here provides sample swapping
@@ -595,86 +400,92 @@ printf("Fast data offset = %d \n",offsetAccum);
       }
     } /* end swing buffer write loop */
 
-    // Copy data from read buffer to shared memory
-    memcpy(mcPtr,lmPtr,fillSize);
-    mcPtr += fillSize;
-    lmPtr += fillSize;
-
+/// \> Write EPICS data into swing buffer at 16Hz.
 if(daqSlot == 0)
 {
-// Write EPICS integer values
+/// \>\> On 16Hz boundary: \n
+/// - ----  Write EPICS integer values to beginning of local write buffer
 
       if(dataInfo.cpyepics2times)
 	{
 	      memcpy(pWriteBuffer,pEpicsIntData,dataInfo.cpyIntSize[0]);
-	      testPtrI = pWriteBuffer;
-	      testPtrI += dataInfo.cpyIntSize[0];
-	      readPtrI = pEpicsIntData + dataInfo.cpyIntSize[0] + 4;
-	      memcpy(testPtrI,readPtrI,dataInfo.cpyIntSize[1]);
+	      pEpicsInt = pWriteBuffer;
+	      pEpicsInt += dataInfo.cpyIntSize[0];
+	      pEpicsInt1 = pEpicsIntData + dataInfo.cpyIntSize[0] + 4;
+	      memcpy(pEpicsInt,pEpicsInt1,dataInfo.cpyIntSize[1]);
 	} else {
 	      memcpy(pWriteBuffer,pEpicsIntData,dataInfo.cpyIntSize[0]);
 	}
 
-}
-if(daqSlot == 0)
-{
-// Write EPICS double values as float values
+/// - ---- Write EPICS double values as float values after EPICS integer type data.
     	pEpicsDblData1 = (double *)pEpicsDblData;
-    	testPtr = (float *)pWriteBuffer; 
-    	testPtr += dataInfo.numEpicsInts; 
+    	pEpicsFloat = (float *)pWriteBuffer; 
+    	pEpicsFloat += dataInfo.numEpicsInts; 
  	for(ii=0;ii<dataInfo.numEpicsFloats;ii++)
 	{
-		*testPtr = (float)*pEpicsDblData1;
-		testPtr ++;
+		*pEpicsFloat = (float)*pEpicsDblData1;
+		pEpicsFloat ++;
 		pEpicsDblData1 ++;
 	}
 }
 if(daqSlot == 1)
 {
-// Write filter module EPICS values as floats
+/// \>\> On 16Hz boundary + 1 cycle: \n
+/// - ----  Write filter module EPICS values as floats
  	for(ii=0;ii<MAX_MODULES;ii++)
 	{
-		*testPtr = (float)dspPtr->inputs[ii].offset;;
-		testPtr ++;
-		*testPtr = (float)dspPtr->inputs[ii].outgain;;
-		testPtr ++;
-		*testPtr = (float)dspPtr->inputs[ii].limiter;;
-		testPtr ++;
-		*testPtr = (float)dspPtr->inputs[ii].gain_ramp_time;;
-		testPtr ++;
-		*testPtr = (float)dspPtr->inputs[ii].swReq;;
-		testPtr ++;
-		*testPtr = (float)dspPtr->inputs[ii].swMask;;
-		testPtr ++;
-		*testPtr = (float)dspPtr->data[ii].filterInput;;
-		testPtr ++;
-		*testPtr = (float)dspPtr->data[ii].exciteInput;;
-		testPtr ++;
-		*testPtr = (float)dspPtr->data[ii].output16Hz;;
-		testPtr ++;
-		*testPtr = (float)dspPtr->data[ii].output;;
-		testPtr ++;
-		*testPtr = (float)dspPtr->data[ii].swStatus;;
-		testPtr ++;
+		*pEpicsFloat = (float)dspPtr->inputs[ii].offset;
+		pEpicsFloat ++;
+		*pEpicsFloat = (float)dspPtr->inputs[ii].outgain;;
+		pEpicsFloat ++;
+		*pEpicsFloat = (float)dspPtr->inputs[ii].limiter;;
+		pEpicsFloat ++;
+		*pEpicsFloat = (float)dspPtr->inputs[ii].gain_ramp_time;;
+		pEpicsFloat ++;
+		*pEpicsFloat = (float)dspPtr->inputs[ii].swReq;;
+		pEpicsFloat ++;
+		*pEpicsFloat = (float)dspPtr->inputs[ii].swMask;;
+		pEpicsFloat ++;
+		*pEpicsFloat = (float)dspPtr->data[ii].filterInput;;
+		pEpicsFloat ++;
+		*pEpicsFloat = (float)dspPtr->data[ii].exciteInput;;
+		pEpicsFloat ++;
+		*pEpicsFloat = (float)dspPtr->data[ii].output16Hz;;
+		pEpicsFloat ++;
+		*pEpicsFloat = (float)dspPtr->data[ii].output;;
+		pEpicsFloat ++;
+		*pEpicsFloat = (float)dspPtr->data[ii].swStatus;;
+		pEpicsFloat ++;
 	}
 }
+
+    /// \> Copy data from read buffer to DAQ network shared memory on each code cycle.
+    /// - ---- Entire buffer is moved during 1/16sec period, in equal amounts each cycle, even though
+    /// entire buffer is not full of data.
+    memcpy(mcPtr,lmPtr,fillSize);
+    mcPtr += fillSize;
+    lmPtr += fillSize;
+
+  /// - ----  Perform CRC checksum on data moved from read buffer to DAQ network shared memory.
   if(!xferDone)
   {
     /* Do CRC check sum calculation */
-    bufPtr = (char *)pReadBuffer + daqSlot * xferSize1;
-    if(daqSlot == 0) crcTest = crc_ptr(bufPtr, xferSize, 0);
-    else crcTest = crc_ptr(bufPtr, xferSize, crcTest);
-    xferLength -= xferSize;
+    bufPtr = (char *)pReadBuffer + daqSlot * xferInfo.xferSize1;
+    if(daqSlot == 0) crcTest = crc_ptr(bufPtr, xferInfo.xferSize, 0);
+    else crcTest = crc_ptr(bufPtr, xferInfo.xferSize, crcTest);
+    xferInfo.xferLength -= xferInfo.xferSize;
   }
   if(daqSlot == (sysRate - 1))
   /* Done with 1/16 second data block */
   {
       /* Complete CRC checksum calc */
-      crcTest = crc_len(crcLength, crcTest);
+      crcTest = crc_len(xferInfo.crcLength, crcTest);
       crcSend = crcTest;
   }
 
-  // Read in any selected EXC signals.
+  /// \> Read in any selected EXC signals. \n
+  /// --- NOTE: EXC signals have to be read and loaded in advance by 1 cycle ie must be loaded and
+  /// available to the realtime application when the next code cycle is initiated.
   excSlot = (excSlot + 1) % sysRate;
   //if(validEx)
   validEx = 0;
@@ -683,7 +494,7 @@ if(daqSlot == 1)
   	for(ii=dataInfo.numChans;ii<totalChans;ii++)
   	{
 		// Do not pickup any testpoints (type 0 or 1)
-		if (localTable[ii].type < 2) continue;
+		if (localTable[ii].type < DAQ_SRC_FM_EXC) continue;
 
 		exChanOffset = localTable[ii].sigNum * excDataSize;
 		statusPtr = (int *)(exciteDataPtr + excBlockNum * DAQ_DCU_BLOCK_SIZE + exChanOffset);
@@ -704,208 +515,80 @@ if(daqSlot == 1)
   	}
   }
 
-  // Move to the next 1/16 EXC signal data block
-  if(excSlot == (sysRate - 1)) excBlockNum = (excBlockNum + 1) % 16;
+  /// \> Move to the next 1/16 EXC signal data block if end of 16Hz block
+  if(excSlot == (sysRate - 1)) excBlockNum = (excBlockNum + 1) % DAQ_NUM_DATA_BLOCKS;
 
+    /// \> If last cycle of a 16Hz block:
     if(daqSlot == (sysRate - 1))
     /* Done with 1/16 second DAQ data block */
     {
 
-      /* Swap swing buffers */
-      phase = (phase + 1) % 2;
+      /// - -- Swap swing buffers 
+      phase = (phase + 1) % DAQ_NUM_SWING_BUFFERS;
       pReadBuffer = (char *)pDaqBuffer[phase];
       pWriteBuffer = (char *)pDaqBuffer[(phase^1)];
 
-// Assign global parameters
-        dipc->dcuId = dcuId; // DCU id of this system
-        dipc->crc = fileCrc; // Checksum of the configuration file
-        // dipc->dataBlockSize = crcLength; // actual data size
-        dipc->dataBlockSize = totalSizeNet * DAQ_NUM_DATA_BLOCKS_PER_SECOND; // actual data size
-        // Assign current block parameters
+	/// - -- Fill in the IPC table for DAQ network driver (mx_stream) \n
+        dipc->dcuId = dcuId; /// -   ------ DCU id of this system
+        dipc->crc = xferInfo.fileCrc; /// -   ------ Checksum of the configuration file
+        dipc->dataBlockSize = xferInfo.totalSizeNet * DAQ_NUM_DATA_BLOCKS_PER_SECOND; /// -   ------ Actual data size
+        /// -   ------  Data block number
         dipc->bp[daqBlockNum].cycle = daqBlockNum;
+        /// -   ------  Data block CRC
         dipc->bp[daqBlockNum].crc = crcSend;
-        //ipc->bp[daqBlockNum].status = 0;
+	/// -   ------ Timestamp GPS Second
 	if (daqBlockNum == DAQ_NUM_DATA_BLOCKS_PER_SECOND - 1) {
         	dipc->bp[daqBlockNum].timeSec = ((unsigned int) cycle_gps_time - 1);
 	} else {
         	dipc->bp[daqBlockNum].timeSec = (unsigned int) cycle_gps_time;
 	}
+	/// -   ------ Timestamp GPS nanoSecond
         dipc->bp[daqBlockNum].timeNSec = (unsigned int)daqBlockNum;
 
-        // Assign the test points table
+        /// - ------ Write test point info to DAQ net shared memory
         tpPtr->count = validTpNet | validEx;
         memcpy(tpPtr->tpNum, tpNumNet, sizeof(tpNumNet[0]) * validTp);
 
         // As the last step set the cycle counter
         // Frame builder is looking for cycle change
+	/// - ------ Write IPC cycle number. This will trigger DAQ network driver to send data to DAQ
         dipc->cycle =daqBlockNum; // Ready cycle (16 Hz)
 
 
-      /* Increment the 1/16 sec block counter */
+      /// - -- Increment the 1/16 sec block counter
       daqBlockNum = (daqBlockNum + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
+      /// - -- Reset pointers to DAQ net shared memory and local read buffer.
       mcPtr = daqShmPtr;
       mcPtr += buf_size * daqBlockNum;
       lmPtr = pReadBuffer;
 
-      // Check for reconfig request at start of each second
+      /// - -- Check for reconfig request at start of each second
       if((pInfo->reconfig == 1) && (daqBlockNum == 0))
       {
 	    printf("New daq config\n");
-	    status = pInfo->numChans;
 	    pInfo->reconfig = 0;
-	    if((status > 0) && (status <= DCU_MAX_CHANNELS))
+	    // Configure EPICS data channels
+	    xferInfo.crcLength = daqConfig(&dataInfo,pInfo,pEpics);
+	    if(xferInfo.crcLength)
 	    {
-		    /* Get the .INI file crc checksum to pass to DAQ Framebuilders for config checking */
-		    fileCrc = pInfo->configFileCRC;
-		    /* Get the number of channels to be acquired */
-		    dataInfo.numChans = pInfo->numChans;
-		    crcLength = 0;
-
-		    // Setup EPICS channel information/pointers
-		    dataInfo.numEpicsInts = pInfo->numEpicsInts;
-		    dataInfo.numEpicsFloats = pInfo->numEpicsFloats;
-		    dataInfo.numEpicsFilts = pInfo->numEpicsFilts;
-		    dataInfo.numEpicsTotal = pInfo->numEpicsTotal;
-		    pEpicsIntData = pEpics;
-		    epicsIntXferSize = dataInfo.numEpicsInts * 4;
-
-		    dataInfo.epicsdblDataOffset = 0;
-		    dataInfo.cpyepics2times = 0;    
-		    dataInfo.cpyIntSize[0] = dataInfo.numEpicsInts * 4;
-		    dataInfo.cpyIntSize[1] = 0;
-
-
-		    ii = (sizeof(CDS_EPICS_OUT) / 4);
-		    jj = dataInfo.numEpicsInts - ii;
-		    printf("Have %d CDS epics integer and %d USR epics integer channels\n",ii,jj);
-		    ii *= 4;
-		    jj *= 4;
-
-		    // Look for memory holes ie integer types not ending on 8 byte boundary.
-		    // Need to check both standard CDS struct and User channels
-		    // If either doesn't end on 8 byte boundary, then a 4 byte hole will appear
-		    // before the double type data in shared memory.
-		    if((ii%8) || (jj%8)) {
-			printf("Have at least 1 int mem hole %d %d \n",ii,jj);
-			dataInfo.epicsdblDataOffset = 4;
-		    }
-		    if ((ii%8) &&(jj>0)) {
-			// Have 4 byte mem hole after CDS data
-			// This will require 2 memcpys of integer data.
-			dataInfo.cpyIntSize[0] = ii;
-			dataInfo.cpyIntSize[1] = jj;
-			dataInfo.cpyepics2times = 1;        
-			dataInfo.epicsdblDataOffset += 4;
-			printf("Have 2 mem holes %d %d \nNeet to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo.cpyIntSize[0] ,dataInfo.cpyIntSize[1]);
-		    }
-
-		    // Set the pointer to start of EPICS double type data in shared memory.
-		    pEpicsDblData = (pEpicsIntData + epicsIntXferSize + dataInfo.epicsdblDataOffset);
-
-		    printf("DAQ DATA INFO is at 0x%x\n",(long)pInfo);
-		    printf("DAQ EPICS INT DATA is at 0x%x with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
-		    printf("DAQ EPICS FLT DATA is at 0x%x\n",(long)pEpicsDblData);
-		    printf("EPICS: Int = %d  Flt = %d Filters = %d Total = %d Fast = %d\n",dataInfo.numEpicsInts,dataInfo.numEpicsFloats,dataInfo.numEpicsFilts, dataInfo.numEpicsTotal, dataInfo.numChans);
-
-		    // Initialize CRC length with EPICS data size.
-		    crcLength = 4 * dataInfo.numEpicsTotal;
-			printf("crc length epics = %d\n",crcLength);
-
-
-		    /* Get the DAQ configuration information for all channels and calc a crc checksum length */
+		    status = loadLocalTable(&xferInfo,localTable,sysRate,&dataInfo,&daqRange);
+		    // Clear decimation filter history
 		    for(ii=0;ii<dataInfo.numChans;ii++)
 		    {
-		      dataInfo.tp[ii].tpnum = pInfo->tp[ii].tpnum;
-		      dataInfo.tp[ii].dataType = pInfo->tp[ii].dataType;
-		      dataInfo.tp[ii].dataRate = pInfo->tp[ii].dataRate;
-		      if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
-			crcLength += 2 * dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-		      else
-			crcLength += 4 * dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) printf("Found int32 type \n");
-		    }
-		    /* Calculate the number of bytes to xfer on each call, based on total number
-		       of bytes to write each 1/16sec and the front end data rate (2048/16384Hz) */
-		    xferSize1 = crcLength/sysRate;
-    		    // mnDaqSize = crcLength/16;
-    		    mnDaqSize = crcLength;
-    		    totalSize = crcLength;
-
-		    /*  Maintain 8 byte data boundaries for writing data, particularly important
-			when DMA xfers are used on 5565 RFM modules. Note that this usually results
-			in data not being written on every 2048/16384 cycle and last data xfer
-			in a 1/16 sec block well may be shorter than the rest.                  */
-		    xferSize1 = ((xferSize1/8) + 1) * 8;
-
-		    offsetAccum = 4 * pInfo->numEpicsTotal;
-		    localTable[0].offset = offsetAccum;
-
-		    for(ii=0;ii<dataInfo.numChans;ii++)
-		    {
-		      /* Need to develop a table of offset pointers to load data into swing buffers     */
-		      /* This is based on decimation factors and data size                              */
-		      localTable[ii].decFactor = sysRate/(dataInfo.tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS_PER_SECOND);
-		      if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
-			offsetAccum += (sysRate/localTable[ii].decFactor * 2);
-		      else
-			offsetAccum += (sysRate/localTable[ii].decFactor * 4);
-		      localTable[ii+1].offset = offsetAccum;
-		      /* Need to determine if data is from a filter module TP or non-FM TP */
-		      if((dataInfo.tp[ii].tpnum >= daqRange.filtTpMin) &&
-			 (dataInfo.tp[ii].tpnum < daqRange.filtTpMax))
-		      /* This is a filter module testpoint */
-		      {
-			jj = dataInfo.tp[ii].tpnum - daqRange.filtTpMin;
-			/* Mark as coming from a filter module testpoint */
-			localTable[ii].type = 0;
-			/* Mark which system filter module is in */
-			localTable[ii].sysNum = jj / daqRange.filtTpSize;
-			jj -= localTable[ii].sysNum * daqRange.filtTpSize;
-			/* Mark which filter module within a system */
-			localTable[ii].fmNum = jj / DAQ_NUM_FM_TP;
-			/* Mark which of three testpoints to store */
-			localTable[ii].sigNum = jj % DAQ_NUM_FM_TP;
-		      }
-		      else if((dataInfo.tp[ii].tpnum >= daqRange.filtExMin) &&
-			 (dataInfo.tp[ii].tpnum < daqRange.filtExMax))
-		      /* This is a filter module excitation input */
-		      {
-			/* Mark as coming from a filter module excitation input */
-			localTable[ii].type = 2;
-			/* Mark filter module number */
-			localTable[ii].fmNum =  dataInfo.tp[ii].tpnum - daqRange.filtExMin;
-		      }
-		      else if((dataInfo.tp[ii].tpnum >= daqRange.xTpMin) &&
-			 (dataInfo.tp[ii].tpnum < daqRange.xTpMax))
-		      /* This testpoint is not part of a filter module */
-		      {
-			jj = dataInfo.tp[ii].tpnum - daqRange.xTpMin;
-			/* Mark as a non filter module testpoint */
-			localTable[ii].type = 1;
-			/* Mark the offset into the local data buffer */
-			localTable[ii].sigNum = jj;
-		      }
-		      else
-		      {
-			printf("Invalid chan num found %d = %d\n",ii,dataInfo.tp[ii].tpnum);
-			return(-1);
-		      }
 		      for(jj=0;jj<MAX_HISTRY;jj++) dHistory[ii][jj] = 0.0;
 		    }
 
-		    tpStart = offsetAccum;
+		    tpStart = xferInfo.offsetAccum;
 		    totalChans = dataInfo.numChans;
 
 	    }
-	}
-      // Check for new TP
+      }
+      /// - -- If last cycle of 1 sec time frame, check for new TP and load info.
       // This will cause new TP to be written to local memory at start of 1 sec block.
 
       if(daqBlockNum == 15)
       {
-	unsigned int tpnum[DAQ_GDS_MAX_TP_ALLOWED];		// Current TP nums
-	unsigned int excnum[DAQ_GDS_MAX_TP_ALLOWED];	// Current EXC nums
 	// Offset by one into the TP/EXC tables for the 2K systems
 	unsigned int _2k_sys_offs = sysRate < DAQ_16K_SAMPLE_SIZE;
 	
@@ -938,11 +621,7 @@ if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) printf("Found int32 type 
 	memcpy(excnum, (const void *)(gdsPtr->tp[_2k_sys_offs][0]), sizeof(excnum));
 	memcpy(tpnum, (const void *)(gdsPtr->tp[2 + _2k_sys_offs][0]), sizeof(tpnum));
 
-        //printf("TPnum[0]=%d\n", tpNum[0]);
-        //printf("excnum[0]=%d\n", excnum[0]);
-        //printf("tpnum[0]=%d\n", tpnum[0]);
-
-	// Search and clear deselected test points
+	/// - ------ Search and clear deselected test points
 	for (i = 0; i < DAQ_GDS_MAX_TP_ALLOWED; i++) {
 		if (tpNum[i] == 0) continue;
 		if (!in_the_lists(tpNum[i], i)) {
@@ -1005,10 +684,6 @@ if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) printf("Found int32 type 
 	  	    localTable[ltSlot].decFactor = 1;
       		    dataInfo.tp[ltSlot].dataType = DAQ_DATATYPE_FLOAT;
 
-		    // Need to recalculate offsets later
-		    //offsetAccum += sysRate * 4;
-		    //localTable[totalChans+1].offset = offsetAccum;
-
 		    //if (slot < 24) gdsMonitor[slot] = tpn;
           	    gdsPtr->tp[2 + _2k_sys_offs][1][slot] = 0;
 		    tpNum[slot] = tpn;
@@ -1047,8 +722,6 @@ if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) printf("Found int32 type 
 		    localTable[ltSlot].type = DAQ_SRC_NFM_EXC;
           	    localTable[ltSlot].fmNum = jj;
           	    localTable[ltSlot].sigNum = slot;
-		    //offsetAccum += sysRate * 4;
-		    //localTable[totalChans+1].offset = offsetAccum;
 	  	    localTable[ltSlot].decFactor = 1;
 		    excTable[slot].sigNum = tpn;
 		    excTable[slot].sysNum = localTable[ltSlot].sysNum;
@@ -1061,10 +734,9 @@ if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) printf("Found int32 type 
 		}
 	}
 
-	// Calculate total number of test points to transmit
+	/// - ------ Calculate total number of test points to transmit
 	totalChans = dataInfo.numChans; // Set to the DAQ channels number
 	validTp = 0;
-	// totalSize = mnDaqSize;
 	num_tps = 0;
 
 	// Skip empty slots at the end
@@ -1077,18 +749,15 @@ if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) printf("Found int32 type 
 	totalChans += num_tps;
 	validTp = num_tps;
 
-	curDaqBlockSize = crcLength * DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-	
-	// Calculate the total transmission size
-	totalSize = crcLength + validTp * sysRate * 4;
+	/// - ------ Calculate the total transmission size (DAQ +TP)
+	xferInfo.totalSize = xferInfo.crcLength + validTp * sysRate * 4;
 
-	//printf("totalSize=%d; totalChans=%d; validTp=%d\n", totalSize, totalChans, validTp);
 
 	// Assign offsets into the localTable
-	offsetAccum = tpStart;
+	xferInfo.offsetAccum = tpStart;
 	for (i = 0; i < validTp; i++) {
-	    localTable[dataInfo.numChans + i].offset = offsetAccum;
-	    offsetAccum += sysRate * 4;
+	    localTable[dataInfo.numChans + i].offset = xferInfo.offsetAccum;
+	    xferInfo.offsetAccum += sysRate * 4;
 	    if (i < 32) gdsMonitor[i] = tpNum[i];
 	}
 
@@ -1102,14 +771,239 @@ if(dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) printf("Found int32 type 
 	for(ii=0;ii<validTp;ii++)
 		tpNumNet[ii] = tpNum[ii];
 	validTpNet = validTp;
-	totalSizeNet = totalSize;
+	xferInfo.totalSizeNet = xferInfo.totalSize;
       }
 
     } /* End done 16Hz Cycle */
 
   } /* End case write */
 
-  /* Return the FE total DAQ data rate */
-  return((totalSize*DAQ_NUM_DATA_BLOCKS_PER_SECOND)/1000);
+  /// \> Return the FE total DAQ data rate */
+  return((xferInfo.totalSize*DAQ_NUM_DATA_BLOCKS_PER_SECOND)/1000);
+
+}
+
+// **************************************************************************************
+///	@author R.Bork\n
+///	@brief This function updates the DAQ configuration from information
+///< 		loaded from EPICS by the RCG EPICS sequencer.\n
+///	@param[out] dataInfo	Pointer to DAQ local configuration table
+///	@param[in] pInfo	Pointer to DAQ config info in shared memory
+///	@param[in] pEpics	Pointer to beginning of EPICS data.
+///	@return	Size, in bytes, of DAQ data.
+// **************************************************************************************
+int daqConfig( DAQ_INFO_BLOCK *dataInfo,  	
+                DAQ_INFO_BLOCK *pInfo,	
+		char *pEpics
+              )
+{
+int ii,jj;      		// Loop counters
+int epicsIntXferSize = 0;	// Size, in bytes, of EPICS integer type data.
+int dataLength = 0;		// Total size, in bytes, of data to be sent
+int status = 0;
+
+/// \> Verify correct channel count before proceeding. \n
+/// - ---- Required to be at least one and not more than DCU_MAX_CHANNELS.
+    status = pInfo->numChans;
+    if((status < 1) || (status > DCU_MAX_CHANNELS))
+    {   
+	printf("Invalid num daq chans = %d\n",status);
+	return(-1);
+    }
+
+    /// \> Get the number of fast channels to be acquired 
+    dataInfo->numChans = pInfo->numChans;
+
+/// \> Setup EPICS channel information/pointers
+    dataInfo->numEpicsInts = pInfo->numEpicsInts;
+    dataInfo->numEpicsFloats = pInfo->numEpicsFloats;
+    dataInfo->numEpicsFilts = pInfo->numEpicsFilts;
+    dataInfo->numEpicsTotal = pInfo->numEpicsTotal;
+    pEpicsIntData = pEpics;
+    epicsIntXferSize = dataInfo->numEpicsInts * 4;
+
+    dataInfo->epicsdblDataOffset = 0;
+    dataInfo->cpyepics2times = 0;
+    dataInfo->cpyIntSize[0] = dataInfo->numEpicsInts * 4;
+    dataInfo->cpyIntSize[1] = 0;
+
+    ii = (sizeof(CDS_EPICS_OUT) / 4);
+    jj = dataInfo->numEpicsInts - ii;
+    printf("Have %d CDS epics integer and %d USR epics integer channels\n",ii,jj);
+    ii *= 4;
+    jj *= 4;
+
+    /// \>  Look for memory holes ie integer types not ending on 8 byte boundary.
+    /// Need to check both standard CDS struct and User channels
+    /// - ---- If either doesn't end on 8 byte boundary, then a 4 byte hole will appear
+    /// before the double type data in shared memory.
+    if((ii % 8) || (jj % 8)) {
+        printf("Have at least 1 int mem hole %d %d \n",ii,jj);
+        dataInfo->epicsdblDataOffset = 4;
+    }
+    if ((ii%8) &&(jj>0)) { 
+        /// - ---- If standard CDS struct doesn't end on 8 byte boundary, then
+        /// have 4 byte mem hole after CDS data
+        /// This will require 2 memcpys of integer data to get 8 byte alignment for xfer to DAQ buffer..
+        dataInfo->cpyIntSize[0] = ii;
+        dataInfo->cpyIntSize[1] = jj;        
+	dataInfo->cpyepics2times = 1;
+        dataInfo->epicsdblDataOffset += 4;
+        printf("Have 2 mem holes %d %d \nNeet to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo->cpyIntSize[0],dataInfo->cpyIntSize[1]);
+    }
+
+    /// \> Set the pointer to start of EPICS double type data in shared memory. \n
+    /// - ---- Ptr to double type data is at EPICS integer start + EPICS integer size + Memory holes
+    pEpicsDblData = (pEpicsIntData + epicsIntXferSize + dataInfo->epicsdblDataOffset);
+
+    // Send EPICS data diags to dmesg
+    printf("DAQ EPICS INT DATA is at 0x%x with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
+    printf("DAQ EPICS FLT DATA is at 0x%x\n",(long)pEpicsDblData);
+    printf("DAQ EPICS: Int = %d  Flt = %d Filters = %d Total = %d Fast = %d\n",dataInfo->numEpicsInts,dataInfo->numEpicsFloats,dataInfo->numEpicsFilts, dataInfo->numEpicsTotal, dataInfo->numChans);
+    /// \> Initialize CRC length with EPICS data size.
+    dataLength = 4 * dataInfo->numEpicsTotal;
+    printf("crc length epics = %d\n",dataLength);
+
+    /// \>  Get the DAQ configuration information for all fast DAQ channels and calc a crc checksum length
+    for(ii=0;ii<dataInfo->numChans;ii++)
+    {
+      dataInfo->tp[ii].tpnum = pInfo->tp[ii].tpnum;
+      dataInfo->tp[ii].dataType = pInfo->tp[ii].dataType;
+      dataInfo->tp[ii].dataRate = pInfo->tp[ii].dataRate;
+      if(dataInfo->tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
+        dataLength += 2 * dataInfo->tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS;
+      else
+        dataLength += 4 * dataInfo->tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS;
+    }
+    /// \> Set DAQ bytes/sec global, which is output to EPICS by controller.c
+    curDaqBlockSize = dataLength * DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+
+    /// \> RETURN dataLength, used in other code for CRC checksum byte count
+    return(dataLength);
+
+}
+
+// **************************************************************************************
+///	@author R.Bork\n
+///	@brief This function populates the local DAQ/TP tables.
+///	@param *pDxi	Pointer to struct with data transfer size information.
+///	@param localTable[]	Table to be populated with data pointer information
+///	@param sysRate			Number of code cycles in 1/16 second.
+///	@param *dataInfo		DAQ configuration information
+///	@param *daqRange		Info on GDS TP number ranges which provides type information 
+///	@return	0=OK or -1=FAIL
+// **************************************************************************************
+int loadLocalTable(DAQ_XFER_INFO *pDxi,
+		   DAQ_LKUP_TABLE localTable[],
+		   int sysRate,
+		   DAQ_INFO_BLOCK *dataInfo,
+	     	   DAQ_RANGE *daqRange
+		  )
+{
+int ii,jj;
+
+
+    /// \> Get the .INI file crc checksum to pass to DAQ Framebuilders for config checking */
+    pDxi->fileCrc = pInfo->configFileCRC;
+    /// \> Calculate the number of bytes to xfer on each call, based on total number
+    ///   of bytes to write each 1/16sec and the front end data rate (2048/16384Hz)
+    pDxi->xferSize1 = pDxi->crcLength/sysRate;
+    pDxi->totalSize = pDxi->crcLength;
+    pDxi->totalSizeNet = pDxi->crcLength;
+
+    printf (" xfer sizes = %d %d %d %d \n",sysRate,pDxi->xferSize1,pDxi->totalSize,pDxi->crcLength);
+    
+    if (pDxi->xferSize1 == 0) {
+	printf("DAQ size too small\n");
+	return -1;
+    }
+
+    /// \> Maintain 8 byte data boundaries for writing data, particularly important
+    ///    when DMA xfers are used on 5565 RFM modules. Note that this usually results
+    ///    in data not being written on every 2048/16384 cycle and last data xfer
+    ///    in a 1/16 sec block well may be shorter than the rest.	
+ 	pDxi->xferSize1 = ((pDxi->xferSize1/8) + 1) * 8;
+	printf("DAQ resized %d\n", pDxi->xferSize1);
+
+   /// \> Find first memory location for fast data in read/write swing buffers.
+    pDxi->offsetAccum = 4 * dataInfo->numEpicsTotal;
+    localTable[0].offset = pDxi->offsetAccum;
+
+   /// \> Fill in the local lookup table for finding data.
+   /// - (Need to develop a table of offset pointers to load data into swing buffers)  \n 
+   /// - (This is based on decimation factors and data size.)
+for(ii=0;ii<dataInfo->numChans;ii++)
+    {
+      if ((dataInfo->tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS) > sysRate) {
+        /* Channel data rate is greater than system rate */
+        printf("Channels %d has bad data rate %d\n", ii, dataInfo->tp[ii].dataRate);
+        return(-1);
+      } else {
+      /// - ---- Load decimation factor
+      localTable[ii].decFactor = sysRate/(dataInfo->tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS);
+      }
+
+      /// - ---- Calc offset into swing buffer for writing data
+      if(dataInfo->tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
+        pDxi->offsetAccum += (sysRate/localTable[ii].decFactor * 2);
+      else
+        pDxi->offsetAccum += (sysRate/localTable[ii].decFactor * 4);
+
+      localTable[ii+1].offset = pDxi->offsetAccum;
+      /// - ----  Need to determine if data is from a filter module TP or non-FM TP and tag accordingly
+      if((dataInfo->tp[ii].tpnum >= daqRange->filtTpMin) &&
+         (dataInfo->tp[ii].tpnum < daqRange->filtTpMax))
+      /* This is a filter module testpoint */
+      {
+        jj = dataInfo->tp[ii].tpnum - daqRange->filtTpMin;
+        /* Mark as coming from a filter module testpoint */
+        localTable[ii].type = DAQ_SRC_FM_TP;
+        /* Mark which system filter module is in */
+        localTable[ii].sysNum = jj / daqRange->filtTpSize;
+        jj -= localTable[ii].sysNum * daqRange->filtTpSize;
+        /* Mark which filter module within a system */
+        localTable[ii].fmNum = jj / DAQ_NUM_FM_TP;
+        /* Mark which of three testpoints to store */
+        localTable[ii].sigNum = jj % DAQ_NUM_FM_TP;
+      }
+      else if((dataInfo->tp[ii].tpnum >= daqRange->filtExMin) &&
+         (dataInfo->tp[ii].tpnum < daqRange->filtExMax))
+      /* This is a filter module excitation input */
+      {
+        /* Mark as coming from a filter module excitation input */
+        localTable[ii].type = DAQ_SRC_FM_EXC;
+        /* Mark filter module number */
+        localTable[ii].fmNum =  dataInfo->tp[ii].tpnum - daqRange->filtExMin;
+      }
+      else if((dataInfo->tp[ii].tpnum >= daqRange->xTpMin) &&
+         (dataInfo->tp[ii].tpnum < daqRange->xTpMax))
+      /* This testpoint is not part of a filter module */
+      {
+        jj = dataInfo->tp[ii].tpnum - daqRange->xTpMin;
+        /* Mark as a non filter module testpoint */
+        localTable[ii].type = DAQ_SRC_NFM_TP;
+        /* Mark the offset into the local data buffer */
+        localTable[ii].sigNum = jj;
+      }
+      // :TODO: this is broken, needs some work to make extra EXC work.
+      else if((dataInfo->tp[ii].tpnum >= daqRange->xExMin) &&
+         (dataInfo->tp[ii].tpnum < daqRange->xExMax))
+      /* This exc testpoint is not part of a filter module */
+      {
+	jj = dataInfo->tp[ii].tpnum - daqRange->xExMin;
+        /* Mark as a non filter module testpoint */
+        localTable[ii].type = DAQ_SRC_NFM_EXC;
+        /* Mark the offset into the local data buffer */
+        localTable[ii].fmNum = jj;
+        localTable[ii].sigNum = jj;
+      }
+      else
+      {
+        printf("Invalid chan num found %d = %d\n",ii,dataInfo->tp[ii].tpnum);
+        return(-1);
+      }
+}
+return(0);
+/// \> RETURN 0=OK or -1=FAIL
 
 }
