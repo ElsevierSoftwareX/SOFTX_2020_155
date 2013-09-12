@@ -32,6 +32,7 @@
 #define DAQ_EDCU_BLOCK_SIZE	0x20000
 
 #define DAQ_NUM_DATA_BLOCKS	16		///< Number of DAQ data blocks
+#define DAQ_NUM_SWING_BUFFERS	2		///< Number of DAQ read/write swing buffers
 #define DAQ_NUM_DATA_BLOCKS_PER_SECOND	16	///< Number of DAQ data blocks to xfer each second
 
 #define DAQ_DCU_BLOCK_SIZE	(DAQ_DCU_SIZE/DAQ_NUM_DATA_BLOCKS)	///< Size of one DAQ data block
@@ -270,6 +271,16 @@ typedef struct DAQ_INFO_BLOCK {
   } tp[DCU_MAX_CHANNELS];
 } DAQ_INFO_BLOCK;
 
+typedef struct DAQ_XFER_INFO {
+   int crcLength;		///< Number of bytes in 1/16 sec data block
+   int xferSize;		///< Tracks remaining xfer size for crc
+   int xferSize1;		///< Amount of data to transfer on each cycle
+   int xferLength;
+   int totalSize;		///< DAQ + TP + EXC chans size in bytes.
+   int totalSizeNet;		///<  DAQ + TP + EXC chans size in bytes sent to network driver.
+   int offsetAccum;
+   int fileCrc			///< CRC checksum of the DAQ configuration file.
+} DAQ_XFER_INFO;
 
 /*
  * The following four numbers are matched with the GDS rmorg.h header
