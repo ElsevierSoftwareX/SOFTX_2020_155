@@ -23,6 +23,7 @@ sub printHeaderStruct {
 	$::extraEXCmap{$key} = $::extraEXCcount;
 	$::extraEXCcount ++;
 	$::extraExcitations .= " $key";
+	return "";
 }
 
 # Print Epics variable definitions
