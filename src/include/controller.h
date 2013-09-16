@@ -148,17 +148,18 @@
 // 1Hz Jobs triggered by cycleNum count in controller code
 #define HKP_READ_SYMCOM_IRIGB		0
 #define HKP_READ_TSYNC_IRIBB		1
+#define HKP_READ_DIO			10
 #define HKP_DT_CALC			16
 #define HKP_DAC_DT_SWITCH		17
 #define HKP_TIMING_UPDATES		18
 #define HKP_DIAG_UPDATES		19
+#define HKP_DAC_EPICS_UPDATES		20
 #define HKP_ADC_DAC_STAT_UPDATES	21
 #define HKP_RFM_CHK_CYCLE		300	// ONLY IOP
 #define HKP_DAC_WD_CLK			400	// ONLY IOP
 #define HKP_DAC_WD_CHK			500	// ONLY IOP
 #define HKP_DAC_FIFO_CHK		600	// ONLY IOP
 // 16Hz Jobs triggered by subcycle count in controller code
-#define HKP_DAC_EPICS_UPDATES		20
 #define HKP_FM_EPICS_UPDATE		30
 
 #define NUM_SYSTEMS 1
