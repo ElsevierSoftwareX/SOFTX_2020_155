@@ -353,7 +353,7 @@ trender_c::minute_framer ()
 
       file_gps = file_prop.gps;
       file_gps_n = file_prop.gps_n;
-      dir_num = minute_fsd.getDirFileNames (file_gps, _tmpf, tmpf, 1, 3600 );
+      dir_num = minute_fsd.getDirFileNames (file_gps, _tmpf, tmpf, 1, frame_length_blocks * 60 );
 
       int fd = creat (_tmpf, 0644);
       if (fd < 0) {
@@ -779,7 +779,7 @@ trender_c::framer ()
 
       file_gps = file_prop.gps;
       file_gps_n = file_prop.gps_n;
-      dir_num = fsd.getDirFileNames (file_gps, _tmpf, tmpf, 1, 60);
+      dir_num = fsd.getDirFileNames (file_gps, _tmpf, tmpf, 1, frame_length_blocks);
 
       int fd = creat (_tmpf, 0644);
       if (fd < 0) {
@@ -1239,7 +1239,7 @@ trender_c::trend_worker ()
 
 int 
 trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames_per_file,
-			int ptrend_buffer_blocks, int pminute_trend_buffer_blocks, int pnum_threads = 1)
+			int ptrend_buffer_blocks, int pminute_trend_buffer_blocks)
 {
   if (this -> tb) {
     *yyout << "trend is already running" << endl;
@@ -1253,7 +1253,6 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
   minute_frames_per_file = pminute_frames_per_file;
   trend_buffer_blocks = ptrend_buffer_blocks;
   minute_trend_buffer_blocks = pminute_trend_buffer_blocks;
-  num_threads = pnum_threads;
 
   // Allocate trend circular buffer
   {
