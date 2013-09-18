@@ -81,7 +81,7 @@ public:
     frames_per_file (1), trend_buffer_blocks (60), profile ((char *)"trend"),
     		 profile_mt((char *)"mt"),
 		 fsd (60), minute_fsd (3600), raw_minute_trend_saving_period (2),
-		 num_threads (1), worker_first_channel (0),
+		 worker_first_channel (0),
 		 trend_worker_nb (0), worker_busy (0)
     {
       sem_init (&minute_frame_saver_sem, 0, 1);
@@ -166,7 +166,7 @@ public:
 
   int block_size; // circ buffer data block size (sum of the sizes of the configured channels)
 
-  int start_trend (ostream *, int, int, int, int, int);
+  int start_trend (ostream *, int, int, int, int);
   sem_t trender_sem;
   int start_trend_saver (ostream *);
   int start_minute_trend_saver (ostream *);
@@ -197,8 +197,6 @@ public:
   profile_c profile_mt; // profile on minute trend circular buffer.
   unsigned int raw_minute_trend_saving_period;
 
-  unsigned int num_threads;
-  
   // worked thread does processing from this channel until the last one
   unsigned int worker_first_channel;
 
