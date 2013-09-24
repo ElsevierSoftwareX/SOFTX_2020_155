@@ -232,7 +232,7 @@ public class DaqdNet9_0 extends Net implements DataTypeConstants, Debug {
       else if (preferences.minuteTrendAcquisitionModeSelected ())
 	command += "trend 60 net-writer";
       else
-	command += "fast-writer";
+	command += "net-writer";
 
       command += (gps > 0 ? (" " + Long.toString (gps)): "")
 	+ (period > 0 ? (" " + Integer.toString (period)): "")
@@ -359,9 +359,9 @@ public class DaqdNet9_0 extends Net implements DataTypeConstants, Debug {
     String rs = "";
     for (Enumeration e = chSet.elements (); e.hasMoreElements ();) {
       Channel ch = (Channel) e.nextElement ();
-      rs += " \"" + ch.getName () + (trend? ".min": "") + "\" " + 
-	  (trend ? (" \"" + ch.getName () + ".max" + "\" " + 
-		    " \"" + ch.getName () + ".rms" + "\" " 
+      rs += " \"" + ch.getName () + (trend? ".mean": "") + "\" " + 
+	  (trend ? (" \"" + ch.getName () + ".min" + "\" " + 
+		    " \"" + ch.getName () + ".max" + "\" " 
 		    ): "") +
 	(!trend && ch.getRate () != ((Channel) chSet.getServerSet ().channelObject (ch.getName ())).getRate ()?
 	 Integer.toString (ch.getRate ()): "");
