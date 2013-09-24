@@ -88,6 +88,9 @@ public abstract class Net implements Debug {
     return true;
   }
 
+  public boolean is_connected() {
+	  	return clientSocket != null;
+  }
   /**
    * Get DAQD net protocol version and revision string in a format like "8.1"
    */

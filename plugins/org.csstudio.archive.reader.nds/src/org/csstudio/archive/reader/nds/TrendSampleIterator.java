@@ -18,24 +18,25 @@ import org.csstudio.utility.pv.nds.DataBlock;
 import org.csstudio.utility.pv.nds.NDS_PV;
 import org.csstudio.utility.pv.nds.Net;
 
-public class RawSampleIterator extends AbstractNDSValueIterator implements ValueIterator {
+public class TrendSampleIterator extends AbstractNDSValueIterator implements ValueIterator {
 	DataBlock block = null;
 	Net net = null;
 	int samples_left = 0;
 	static Logger LOG;
-	DataInputStream block_in;
-	int rate_hz = 0;
+	DataInputStream block_in_mean;
+	DataInputStream block_in_min;
+	DataInputStream block_in_max;
+
+	//int rate_hz = 1; // Second trend comes in always at 1 Hz
 	int total_samples = 0;
-	long block_time = 0;
 	
     static {
     	LOG = Logger.getAnonymousLogger();
     }
 
 	// This expect the request already sent and will be reading the blocks from the socket
-	public RawSampleIterator(NDS_PV nds, int rateHz) {
+	public TrendSampleIterator(NDS_PV nds) {
 			net = nds.getNet();
-			rate_hz = rateHz;
 	}
 
 	@Override
@@ -64,27 +65,27 @@ public class RawSampleIterator extends AbstractNDSValueIterator implements Value
 		
 
 		int samples_sent = total_samples - samples_left;
-		long period_nsec = (long)1e9 / rate_hz;
 		//LOG.finest("NDS Raw Iterator =" + block.getTimestamp () + " dataLen=" + block.getWave().length);
 
-        final ITimestamp now = TimestampFactory.createTimestamp(block_time + samples_sent/rate_hz, block.getNano() + samples_sent % rate_hz * period_nsec);
+        final ITimestamp now = TimestampFactory.createTimestamp(TConvert.unix(block.getTimestamp () + samples_sent), 0);
         final ISeverity OK = ValueFactory.createOKSeverity();
         final INumericMetaData meta = ValueFactory.createNumericMetaData(0, 0, 0, 0, 0, 0, 1, "counts");
 
-		double a[] = {0.};
+		double mean[] = {0.};
+		double min = 0, max = 0;
     	try {
-    		double f=block_in.readFloat ();
-    		//System.out.println (f);
-    		a[0]=f;
+    		 mean[0] = block_in_mean.readDouble ();
+    		 min = block_in_min.readFloat ();
+    		 max = block_in_max.readFloat ();
     	} catch (IOException e) {
     		e.printStackTrace();
     	}
     	
-    	IValue value = ValueFactory.createDoubleValue(now, OK, OK.toString(), meta, Quality.Original, a);
+    	IValue value = ValueFactory.createMinMaxDoubleValue(now, OK, OK.toString(), meta, Quality.Original, mean, min, max);
 
-		//LOG.info("RawSampleIterator::next called " + now.seconds() + "." + now.nanoseconds() + " val=" + a [0]);
+		//LOG.info("TrendSampleIterator::next called " + now.seconds() + "." + now.nanoseconds() + " val=" + a [0]);
 		//LOG.info("samples_sent=" + samples_sent);
-
+    	
 		samples_left--;
 		return value;
 	}
@@ -94,11 +95,23 @@ public class RawSampleIterator extends AbstractNDSValueIterator implements Value
 	private boolean nextBlock() {
 		block = net.getDataBlock ();
 		if (block != null && !block.getEot()) {
-			// See how many samples we got on this one and populate our counter
-			samples_left = block.getPeriod() * rate_hz; // :TODO: Of course this only works with one sample per second request (full res)
-			total_samples = block.getPeriod() * rate_hz;
-			block_in = new DataInputStream (new ByteArrayInputStream (block.getWave()));
-			block_time = TConvert.unix(block.getTimestamp ());
+			try {
+				// See how many samples we got on this one and populate our
+				// counter
+				samples_left = block.getPeriod();
+				total_samples = block.getPeriod();
+				block_in_mean = new DataInputStream(new ByteArrayInputStream(
+						block.getWave()));
+				
+				block_in_min = new DataInputStream(new ByteArrayInputStream(
+						block.getWave()));
+				block_in_min.skip(8 * total_samples);
+				block_in_max = new DataInputStream(new ByteArrayInputStream(
+						block.getWave()));
+				block_in_max.skip(12 * total_samples);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		return block == null;
 	}

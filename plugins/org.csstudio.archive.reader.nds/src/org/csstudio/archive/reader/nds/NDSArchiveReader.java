@@ -1,5 +1,8 @@
 package org.csstudio.archive.reader.nds;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.logging.Logger;
@@ -9,9 +12,13 @@ import org.csstudio.archive.reader.ArchiveReader;
 import org.csstudio.archive.reader.UnknownChannelException;
 import org.csstudio.archive.reader.ValueIterator;
 import org.csstudio.data.values.ITimestamp;
+import org.csstudio.data.values.TimestampFactory;
+import org.csstudio.data.values.ValueFactory;
+import org.csstudio.data.values.IValue.Quality;
 import org.csstudio.utility.pv.nds.*;
 
 public class NDSArchiveReader implements ArchiveReader {
+	static final int rate_hz = 16;
 
 	static Logger LOG;
     final private String url;
@@ -99,18 +106,60 @@ public class NDSArchiveReader implements ArchiveReader {
 	@Override
 	public ValueIterator getRawValues(int key, String name, ITimestamp start,
 			ITimestamp end) throws UnknownChannelException, Exception {
-		LOG.info("NDsArchiveReader::getRawValues called on name=" + name + " start=" + start.seconds()
-				+ " end=" + end.seconds());
-		return new RawSampleIterator(this, name, start, end);
+		long gps_start = TConvert.gps(start.seconds());
+		long gps_end = TConvert.gps(end.seconds());
+
+		LOG.info("NDsArchiveReader::getRawValues called on name=" + name + " start=" + gps_start
+				+ " end=" + gps_end);
+		
+		// Make NDS request and fetch the data
+		//
+		final NDS_PV nds = new NDS_PV("");
+		nds.connect();
+		final Net net = nds.getNet();
+		final Preferences preferences = nds.getPreferences();
+		preferences.setAcquisitionMode("full");
+		final ChannelSet cs = new ChannelSet(null, net);
+		preferences.updateChannelSet(cs);
+		if (!preferences.getChannelSet().addChannel(name.substring(6), rate_hz))
+			throw new Exception();
+		//final ChannelSet serverSet = cs.getServerSet();
+		
+		if (!net.startNetWriter(preferences.getChannelSet(), gps_start, (int) (gps_end - gps_start)))
+		  throw new Exception();
+				
+		return new RawSampleIterator(nds, rate_hz);
 	}
 
 	@Override
 	public ValueIterator getOptimizedValues(int key, String name,
 			ITimestamp start, ITimestamp end, int count)
 					throws UnknownChannelException, Exception {
-		LOG.info("NDsArchiveReader::getOptimizedValues called on name=" + name + " start=" + start.seconds()
-				+ " end=" + end.seconds() + " count=" + count);
-		return getRawValues(key, name, start, end) ;
+		long gps_start = TConvert.gps(start.seconds());
+		long gps_end = TConvert.gps(end.seconds());
+
+		LOG.info("NDsArchiveReader::getOptimizedValues called on name=" + name + " start=" + gps_start
+				+ " end=" + gps_end + " count=" + count);
+		
+		long diff = gps_end - gps_start;
+		if (count < diff) {
+			final NDS_PV nds = new NDS_PV("");
+			nds.connect();
+			final Net net = nds.getNet();
+			final Preferences preferences = nds.getPreferences();
+			preferences.setAcquisitionMode("trend");
+			final ChannelSet cs = new ChannelSet(null, net);
+			preferences.updateChannelSet(cs);
+			if (!preferences.getChannelSet().addChannel(name.substring(6)))
+				throw new Exception();
+			//final ChannelSet serverSet = cs.getServerSet();
+			
+			if (!net.startNetWriter(preferences.getChannelSet(), gps_start, (int) (gps_end - gps_start)))
+			  throw new Exception();
+			return new TrendSampleIterator(nds);
+		} else
+			return getRawValues(key, name, start, end) ;
+		//return null;
 	}
 
 	@Override

@@ -116,7 +116,7 @@ public class NDS_PV  implements PV, Runnable, Debug, Defaults, DataTypeConstants
 	
 	/**
 	 * Class field map that maps NDS PV name into theThread and reference count.
-	 * Setting the value object to null will stop the running DAQ thrad.
+	 * Setting the value object to null will stop the running DAQ thread.
 	 */
 	
 	private static Map<String,ThreadRef> m;
@@ -220,14 +220,14 @@ public class NDS_PV  implements PV, Runnable, Debug, Defaults, DataTypeConstants
         			// Load channel from the server
         			preferences.updateChannelSet(new ChannelSet(null, net));
 
-        			if (!preferences.getChannelSet().addChannel(name, 16384))
+        			if (!preferences.getChannelSet().addChannel(name, 16))
         				throw new Exception();
 
-        			if (!net.startNetWriter(preferences.getChannelSet(), 0, 0))
-        				throw new Exception();
+        			//if (!net.startNetWriter(preferences.getChannelSet(), 0, 0))
+        				//throw new Exception();
 
-        			final Thread update_thread = new Thread(this, getName());
-        			update_thread.start();
+        			//final Thread update_thread = new Thread(this, getName());
+        			//update_thread.start();
         			
         			// See how many elements there are in the map already, calculate the index
     				int ccount = 0;
@@ -240,7 +240,7 @@ public class NDS_PV  implements PV, Runnable, Debug, Defaults, DataTypeConstants
     					ccount++;
     				}
 
-        			m.put(name, new ThreadRef(1, update_thread, this, ccount));
+        			//m.put(name, new ThreadRef(1, update_thread, this, ccount));
         		}
 			}
 			LOG.log(Level.FINE,"name=" + getName() + " this=" + this + " NDS PV references =" + m.get(name).count());
@@ -468,8 +468,9 @@ public class NDS_PV  implements PV, Runnable, Debug, Defaults, DataTypeConstants
         				}
         				ccount++;
         				
+        				final int r = 1;
         				// Assign data into the queue
-        				double cval[] = new double[1 + 1024 * ccount]; // TODO remove hard coded rate
+        				double cval[] = new double[1 + r * ccount]; // TODO remove hard coded rate
         				cval[0] = now.toDouble(); // First element will contain the time stamp
         				it1 = m.entrySet().iterator();
         				while (it1.hasNext()) {
@@ -477,7 +478,7 @@ public class NDS_PV  implements PV, Runnable, Debug, Defaults, DataTypeConstants
         					if (p.getKey().equals("gps")) continue;
         					double [] val = ValueUtil.getDoubleArray(p.getValue().nds_pv.value);
         					int idx = p.getValue().connectIndex;
-        					System.arraycopy(val, 0, cval, 1 + idx * 1024, 1024);
+        					System.arraycopy(val, 0, cval, 1 + idx * r, r);
         				}
         				IValue ival = ValueFactory.createDoubleValue(now,
     							OK, OK.toString(), meta, Quality.Original,
@@ -517,8 +518,9 @@ public class NDS_PV  implements PV, Runnable, Debug, Defaults, DataTypeConstants
 	private void update() {
 		//value = TextUtil.parseValueFromString("1.234", null);
 
-        for (PVListener listener : listeners)
-            listener.pvValueUpdate(this);
+		// Commented on Aug 28, 2014
+       // for (PVListener listener : listeners)
+            //listener.pvValueUpdate(this);
 	}
 
 }
