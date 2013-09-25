@@ -62,7 +62,7 @@ struct ToLower { char operator() (char c) const  { return std::tolower(c); }};
 /* GM and shared memory communication area */
 #if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
 struct rmIpcStr gmDaqIpc[DCU_COUNT];
-// DMA memory area pointers
+/// DMA memory area pointers
 void *directed_receive_buffer[DCU_COUNT];
 int controller_cycle = 0;
 #else
@@ -70,7 +70,7 @@ int controller_cycle = 0;
 #if defined(USE_SYMMETRICOM) || defined(USE_LOCAL_TIME)
 int controller_cycle = 0;
 #else
-// Point into shared memory for the controller DCU cycle
+/// Point into shared memory for the controller DCU cycle
 #define controller_cycle (shmemDaqIpc[daqd.controller_dcu]->cycle)
 #endif
 
@@ -81,20 +81,20 @@ int controller_cycle = 0;
 #include "../../src/include/daqmap.h"
 #include "../../src/include/drv/fb.h"
 
-  // Memory mapped addresses for the DCUs
+  /// Memory mapped addresses for the DCUs
   volatile unsigned char *dcu_addr[DCU_COUNT];
 
-  // Pointers to IPC areas for each DCU
+  /// Pointers to IPC areas for each DCU
   struct rmIpcStr *shmemDaqIpc[DCU_COUNT];
 
-  // Pointers into the shared memory for the cycle and time (coming from the IOP (e.g. x00))
+  /// Pointers into the shared memory for the cycle and time (coming from the IOP (e.g. x00))
   volatile int *ioMemDataCycle;
   volatile int *ioMemDataGPS;
   volatile IO_MEM_DATA *ioMemData;
 
 #endif
 
-  // Pointer to GDS TP tables
+  /// Pointer to GDS TP tables
   struct cdsDaqNetGdsTpNum *gdsTpNum[2][DCU_COUNT];
 
 #if 0
@@ -123,6 +123,7 @@ struct daqMXdata {
 
 static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
 
+/// Experimental UDP data receiver
 void
 receiver_udp(int my_dcu_id) {
 
@@ -215,6 +216,7 @@ receiver_udp(int my_dcu_id) {
 }
 #endif
 
+/// Data receiving thread
 void*
 gm_receiver_thread(void *p)
 {
@@ -317,6 +319,7 @@ gm_receiver_thread(void *p)
 #endif
 }
 
+/// The main data movement thread (the producer)
 void *
 producer::frame_writer ()
 {

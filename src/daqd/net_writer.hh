@@ -3,6 +3,8 @@
 
 #include "daqd.hh"
 
+/// Request processing. New net writer is created for each
+/// new data request.
 class net_writer_c : public s_link {
  private:
   pthread_mutex_t bm;
@@ -159,19 +161,19 @@ public:
     } else return true;
   }
 
-  int num_channels; /* Size of the array below */
-  long_channel_t *channels; /* Data channels to send */
+  int num_channels; ///< Size of "channels" array below 
+  long_channel_t *channels; ///< Data channels to send 
 
-  int pvec_len; // Number of elements in `pvec'/`pvec16th'
+  int pvec_len; ///< Number of elements in `pvec'/`pvec16th'
 // :IMPORTANT: max chan num times two
-  struct put_vec *pvec; // Put vector prepared for `put_nowait_scattered()' operation in producer
+  struct put_vec *pvec; ///< Put vector prepared for `put_nowait_scattered()' operation in producer
 // :IMPORTANT: max chan num times two
-  struct put_vec *pvec16th [16]; // Put vector prepared for `put_nowait_scattered()' operation in the fast producer
+  struct put_vec *pvec16th [16]; ///< Put vector prepared for `put_nowait_scattered()' operation in the fast producer
 
-  int dec_vec_len; // Number of elements in `dec_vec'
-  struct dec_put_vec *dec_vec; // Scattered vector used for data decimation
+  int dec_vec_len; ///< Number of elements in `dec_vec'
+  struct dec_put_vec *dec_vec; ///< Scattered vector used for data decimation
 
-  int block_size; // net-writer data block size (sum of the sizes of the configured channels)
+  int block_size; ///< net-writer data block size (sum of the sizes of the configured channels)
   // size of the network transmission block (could be less than `block_size' if there are decimated channels
   int transmission_block_size;
 
@@ -215,8 +217,8 @@ public:
 
 
   circ_buffer *buffptr;
-  circ_buffer *source_buffptr; // Data feed
-  filesys_c *fsd; // Time to filename map to get data from files
+  circ_buffer *source_buffptr; ///< Data feed
+  filesys_c *fsd; ///< Time to filename map to get data from files
 
   pthread_t producer_tid;
   pthread_t consumer_tid;
@@ -231,9 +233,9 @@ struct sockaddr_in {
 };
 */
 
-  struct sockaddr_in srvr_addr; // Data connection address
-  int fileno; // Data connection socket file descriptor
-  int connect_srvr_addr (int); // Connect to `srvr_addr' and set `fileno' socket
+  struct sockaddr_in srvr_addr; ///< Data connection address
+  int fileno; ///< Data connection socket file descriptor
+  int connect_srvr_addr (int); ///< Connect to `srvr_addr' and set `fileno' socket
   int set_send_buf_size (int, int);
   int disconnect_srvr_addr () { 
     int res = 0;
@@ -277,7 +279,7 @@ struct sockaddr_in {
     free ((void *) this);
   };
 
-  int transient; // Set if this producer doesn't send data online
+  int transient; ///< Set if this producer doesn't send data online
 
   /*
     Data used by transient net-writer. This sort of net-writer sends off-line
@@ -311,15 +313,14 @@ struct sockaddr_in {
 
   bool need_send_reconfig_block;
 
-  // Is set by 'downsample' parameter to 'start net-writer' command
+  /// Is set by 'downsample' parameter to 'start net-writer' command
   bool no_averaging;
 
-  // Send some data to the client
+  /// Send some data to the client
   int send_to_client (char *data, unsigned long len, unsigned long gps = 0, int period = 0, int tp = 0);
 
 
-  // Send ACK to the client + net-writer ID
-  //
+  /// Send ACK to the client + net-writer ID
   int send_positive_response () {
     int res;
     char sbuf [9];
@@ -331,19 +332,19 @@ struct sockaddr_in {
     return res;
   }
 
-  // Send to the client transmission header (indicator of how many data blocks wil follow)
+  /// Send to the client transmission header (indicator of how many data blocks wil follow)
   int send_client_header (unsigned int blocks) {
     //    blocks = htonl (blocks);
     blocks = htonl (!!blocks); // 1 for off-line; 0 for online
     return send_to_client ((char *) &blocks, sizeof (unsigned int));
   }
 
-  // The time period is given by `offline.gps' and `offline.delta'
+  /// The time period is given by `offline.gps' and `offline.delta'
   int send_files (void);
   int send_raw_files (void);
   void *send_frames (void);
 
-  // Send data transmission trailer
+  /// Send data transmission trailer
   int send_trailer () {
     unsigned int header [5];
     
@@ -362,8 +363,8 @@ struct sockaddr_in {
     return 0;
   }
 
-  // Determine IP address given socket file descriptor
-  // Returns IP on success (similar to inet_addr(3N)), `-1' on failure
+  /// Determine IP address given socket file descriptor
+  /// Returns IP on success (similar to inet_addr(3N)), `-1' on failure
   static int ip_fd (int fd)
     {
       struct sockaddr_in paddr;
@@ -388,8 +389,8 @@ struct sockaddr_in {
     return istr;
   }
 
-  // This is here to substitute unrealiable system's inet_ntoa() function
-  // There were memory leaks detected inside of it by Purify
+  /// This is here to substitute unrealiable system's inet_ntoa() function
+  /// There were memory leaks detected inside of it by Purify
   static char *inet_ntoa (struct in_addr in, char *buf) {
     unsigned char bt [4];
     memcpy (bt, (const void *) &in.s_addr, 4);
@@ -397,8 +398,8 @@ struct sockaddr_in {
     return buf;
   }
 
-  // Match `str' against the regular expression to see if
-  // this is a valid IP address. If not try to resolv `str' into the IP address.
+  /// Match `str' against the regular expression to see if
+  /// this is a valid IP address. If not try to resolv `str' into the IP address.
   static int get_inet_addr (char *str)
     {
       // See if the string is IP address
@@ -426,10 +427,10 @@ struct sockaddr_in {
     }
 
 
-  // Get IP address from the string in format `127.0.0.1:9090'
-  // Returns IP (value of inet_addr(3N)) on success, `-1' if failed.
-  // Fails if there is no IP address in the `str' or if `inet_addr()' failed.
-  // Data in the string `str' must not be in the static storage.
+  /// Get IP address from the string in format `127.0.0.1:9090'
+  /// Returns IP (value of inet_addr(3N)) on success, `-1' if failed.
+  /// Fails if there is no IP address in the `str' or if `inet_addr()' failed.
+  /// Data in the string `str' must not be in the static storage.
   static int ip_str (char *str)
     {
       char *nc = str - 1;
@@ -448,7 +449,7 @@ struct sockaddr_in {
       return res;
     }
 
-  // Get port number from the string in the format `127.0.0.1:9090'
+  /// Get port number from the string in the format `127.0.0.1:9090'
   static int port_str (char *str)
     {
       char *nc;

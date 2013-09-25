@@ -67,9 +67,12 @@ using namespace std;
 #if EPICS_EDCU == 1
 #include "edcu.hh"
 #include "epicsServer.hh"
+/// Epics IOC variable storage
 extern unsigned int pvValue[1000];
 #endif
 
+/// Daqd server main class. This is a top-level class, which encloses various objects
+/// representing threads of execution.
 class daqd_c {
  public:
   enum {
@@ -227,16 +230,18 @@ class daqd_c {
     pthread_mutex_destroy (&bm);
   };
 
+  /// Main circular buffer.
   circ_buffer *b1;
 
+  /// Trend calculation thread object.
   trender_c trender;
 
-  int num_listeners; // number of network listeners
+  int num_listeners; ///< number of network listeners
   net_listener listeners [max_listeners];
 
-  //  net_writer_c net_writer;
-  s_list net_writers; // singly linked list of network writers
+  s_list net_writers; ///< singly linked list of network writers
   
+  /// The producer thread object.
   producer producer1;
 
 #if EPICS_EDCU == 1
@@ -248,10 +253,11 @@ class daqd_c {
      probably will be factored out later on */
   pthread_t consumer [MAX_CONSUMERS];
 
-  int cnum; /* Consumer number for the frame saver */
-  int science_cnum; /* Consumer number for the science frame saver */
-  void *framer (int);
+  int cnum; ///< Consumer number for the frame saver
+  int science_cnum; ///< Consumer number for the science frame saver 
+  void *framer (int); ///< Full resolution frames saver thread
   static void *framer_static (void *a) { return ((daqd_c *)a) -> framer (0); };
+  /// Science-mode frame saver thread.
   static void *science_framer_static (void *a) { return ((daqd_c *)a) -> framer (1); };
 
 
@@ -260,13 +266,14 @@ class daqd_c {
   int num_gds_channel_aliases;
 #endif
 
-  char frame_fname [filesys_c::filename_max]; /* Name of input frame file */
+  char frame_fname [filesys_c::filename_max]; ///< Name of input frame file 
 
   /* Channels config data */
   // TODO: make channels this a vector and remove MAX_CHANNELS limitation
   int num_channels;
   int num_active_channels;
   int num_science_channels;
+  /// Array of configured data channels
   channel_t channels [max_channels];
 
   int num_channel_groups;
@@ -287,19 +294,21 @@ class daqd_c {
   pthread_t science_frame_saver_tid;
 
   long writer_sleep_usec; /* pause in usecs for the main producer (-s option) */
-  long main_buffer_size; /* number of blocks in main circular buffer */
+  long main_buffer_size; ///< number of blocks in main circular buffer 
 
-  int shutting_down; // set when the whole program goes down
+  int shutting_down; ///< set when the whole program goes down
 
-  int block_size; // size of the main circular buffer block
+  int block_size; ///< size of the main circular buffer block
 
-  // time to filename map and place to keep timestamps describing the data we have
+  /// time to filename map and place to keep timestamps describing the data we have
   filesys_c fsd;
-  filesys_c science_fsd; // Science frames
+  /// science frames time to filename map and place to keep timestamps describing the data we have
+  filesys_c science_fsd; 
 
-  // directory name where NDS jobs created
+  /// directory name where NDS jobs created
   string nds_jobs_dir;
 
+  /// See if the number is a power of "r"
   static int power_of (int value, int r) {
     int rm;
 
@@ -316,11 +325,11 @@ class daqd_c {
     return 1;
   }
 
-  int thread_stack_size; // Size of the stack in kilobytes for the threads
-  char password [max_password_len + 1]; // Most of the commands are password protected
+  int thread_stack_size; ///< Size of the stack in kilobytes for the threads
+  char password [max_password_len + 1]; ///< Most of the commands are password protected
 
-  char *config_file_name; // Name of the startup config file (~/.daqdrc is used if not set)
-  int offline_disabled; // If set, off-line data requests are not allowed  
+  char *config_file_name; ///< Name of the startup config file (~/.daqdrc is used if not set)
+  int offline_disabled; ///< If set, off-line data requests are not allowed  
 
   int configure_channels_files ();
 
@@ -351,9 +360,8 @@ class daqd_c {
 
   int find_channel_group (const char* channel_name);
 
-  // Put calling thread into the realtime scheduling class, if possible
-  // Set threads realtime priority to max/`priority_divider'
-  //
+  /// Put calling thread into the realtime scheduling class, if possible
+  /// Set threads realtime priority to max/`priority_divider'
   inline static void realtime (char *thread_name, int priority_divider) {
 #if 0
 #ifdef sun
@@ -391,9 +399,8 @@ class daqd_c {
 #endif //0
   }
 
-  // Put calling thread into the timesharing class
-  // Set time-sharing priority to max/`priority_divider'
-  //
+  /// Put calling thread into the timesharing class
+  /// Set time-sharing priority to max/`priority_divider'
   inline static void time_sharing (char *thread_name, int priority_divider) {
 #if 0
 #ifdef sun
@@ -437,6 +444,7 @@ class daqd_c {
 
   char sweptsine_filename [FILENAME_MAX + 1];
 
+  /// Main profiler thread object.
   profile_c profile;
 
   void compile_regexp ();
@@ -477,7 +485,7 @@ class daqd_c {
   // have the same length as set for the current run
   int do_scan_frame_reads;
 
-  // Detector information
+  /// Detector information
   string detector_name;
   string detector_prefix; // Channel prefix
   double detector_longitude;
@@ -503,7 +511,7 @@ class daqd_c {
   float detector_arm_y_midpoint1;
 
 
-  // Create the first detector
+  /// Create the first detector
   FrameCPP::Version::FrDetector getDetector1() {
     FrameCPP::Version::FrDetector detector (detector_name,
 					      detector_prefix.c_str(),
@@ -520,7 +528,7 @@ class daqd_c {
     return detector;
   }
 
-  // Create second detector
+  /// Create second detector
   FrameCPP::Version::FrDetector getDetector2() {
     FrameCPP::Version::FrDetector detector (detector_name1,
 					      detector_prefix1.c_str(),
@@ -537,76 +545,76 @@ class daqd_c {
     return detector;
   }
 
-  // Keep pointers to the data samples for each data channel
-  // An array of two pointers, fast_adc_ptr and aux_data_valid_ptr
+  /// Keep pointers to the data samples for each data channel
+  /// An array of two pointers, fast_adc_ptr and aux_data_valid_ptr
   typedef std::vector<std::pair<unsigned char *, INT_2U *> > adc_data_ptr_type;
   General::SharedPtr<FrameCPP::Version::FrameH> full_frame(int frame_length_seconds, int sience, adc_data_ptr_type &dptr) throw();
 
-  // How many full frames to pack in single file
+  /// How many full frames to pack in single file
   int frames_per_file;
-  // How many blocks of data pack up into a frame
+  /// How many blocks of data pack up into a frame
   int blocks_per_frame;
 
-  // Where to put the checksum data
+  /// Where to put the checksum data
   string cksum_file;
 
-  // Whether we want to put zeros for bad data
+  /// Whether we want to put zeros for bad data
   int zero_bad_data;
 
-  // Debug CRC checksum; print them out for this DCU
+  /// Debug CRC checksum; print them out for this DCU
   int crc_debug;
 
-  // Is initialized by daqdrc file command w/master config file name
+  /// Is initialized by daqdrc file command w/master config file name
   string master_config;
 
-  // Is initialized by daqdrc file set command to the broadcast 
-  // channel list config file name (.ini file)
+  /// Is initialized by daqdrc file set command to the broadcast 
+  /// channel list config file name (.ini file)
   string broadcast_config;
 
-  // A set of channel names to broadcast
+  /// A set of channel names to broadcast
   set<string> broadcast_set;
 
-  // Indicates whether the DCU is configured or not; holds DCU data size. One for each ifo.
+  /// Indicates whether the DCU is configured or not; holds DCU data size. One for each ifo.
   unsigned int dcuSize[2][DCU_COUNT];
 
 #if EPICS_EDCU == 1
-  // DCU status; for each ifo
-  // Points to a static array in exServer.cc
+  /// DCU status; for each ifo
+  /// Points to a static array in exServer.cc
   unsigned int (*dcuStatus)[DCU_COUNT];
 #else
   unsigned int dcuStatus[2][DCU_COUNT];
 #endif
 
-  // Array of EDCU file status flags; one for each DCU
-  // "true" indicates detected EDCU .ini file mismatch
+  /// Array of EDCU file status flags; one for each DCU
+  /// "true" indicates detected EDCU .ini file mismatch
   bool edcuFileStatus[DCU_COUNT];
 
 #if EPICS_EDCU == 1
-  // DCU CRC error counter; for each ifo
+  /// DCU CRC error counter; for each ifo
   unsigned int (*dcuCrcErrCnt)[DCU_COUNT];
 #else
   unsigned int dcuCrcErrCnt[2][DCU_COUNT];
 #endif
 
 #if EPICS_EDCU == 1
-  // DCU CRC error count per second; for each ifo
+  /// DCU CRC error count per second; for each ifo
   unsigned int (*dcuCrcErrCntPerSecond)[DCU_COUNT];
 #else
   unsigned int dcuCrcErrCntPerSecond[2][DCU_COUNT];
 #endif
 
-  // DCU CRC error running counter
-  // This one is not tied to the Epics
-  // There is one array for each ifo
+  /// DCU CRC error running counter
+  /// This one is not tied to the Epics
+  /// There is one array for each ifo
   unsigned int dcuCrcErrCntPerSecondRunning[2][DCU_COUNT];
 
-  // DCU cycle; for each ifo
+  /// DCU cycle; for each ifo
   unsigned long dcuCycle[2][DCU_COUNT];
 
-  // DCU config file's CRC checksum; for each ifo
+  /// DCU config file's CRC checksum; for each ifo
   unsigned int dcuConfigCRC[2][DCU_COUNT];
 
-  // DCU Inter-processor communication area pointer into an RFM board; for each ifo
+  /// DCU Inter-processor communication area pointer into an RFM board; for each ifo
   volatile rmIpcStr *dcuIpc[2][DCU_COUNT];
 
   static unsigned long fr_cksum(string cksum_file, char *tmpf, unsigned char* data, int image_size);
@@ -616,17 +624,17 @@ class daqd_c {
   int update_archive(char *name, unsigned long gps, unsigned long dt, unsigned int dir_num);
   int configure_archive_channels(char *archive_name, char *file_name, char *);
 
-  // List of known archives
+  /// List of known archives
   s_list archive;
 
-  // 40M flag
+  /// 40M flag
   int cit_40m;
 
-  // leapseconds table
-  unsigned int gps_leaps[16]; // gps leap seconds
-  int nleaps; // leapseconds table size
+  /// leapseconds table
+  unsigned int gps_leaps[16]; ///< gps leap seconds
+  int nleaps; ///< leapseconds table size
 
-
+  
   inline unsigned int
   gps_leap_seconds(unsigned int gps_time) {
     unsigned int leaps = LEAP_SECONDS;
@@ -635,72 +643,72 @@ class daqd_c {
     return leaps;
   }
 
-  // Whether to do fsync() calls or not when saving raw minute trend files
+  /// Whether to do fsync() calls or not when saving raw minute trend files
   int do_fsync;
 
-  // Whether to do directio() calls or not when saving data files
+  /// Whether to do directio() calls or not when saving data files
   int do_directio;
 
-  // Which DCU to sync up to
+  /// Which DCU to sync up to
   int controller_dcu;
 
-  // Offset in the main buffer for the testpoints data foreach DCU
+  /// Offset in the main buffer for the testpoints data foreach DCU
   unsigned long dcuTPOffset[2][DCU_COUNT];
   unsigned long dcuTPOffsetRmem[2][DCU_COUNT];
   unsigned long dcuDAQsize[2][DCU_COUNT];
 
-  // DCU rate settings
+  /// DCU rate settings
   unsigned long dcuRate[2][DCU_COUNT];
 
-  // Do not keep running when controller DCU quits
+  /// Do not keep running when controller DCU quits
   unsigned int avoid_reconnect;
 
-  // DCU names assigned from configuration files (file names)
+  /// DCU names assigned from configuration files (file names)
   char dcuName[DCU_COUNT][32];
   char fullDcuName[DCU_COUNT][32];
 
-  // bitmask of IP addresses allowed to select testpoints
+  /// bitmask of IP addresses allowed to select testpoints
   int tp_allow;
 
-  // Set to ignore Myrinet
+  /// Set to ignore Myrinet
   int no_myrinet;
 
-  // See if 'ip' is allowed to request testpoints
+  /// See if 'ip' is allowed to request testpoints
   int tp_allowed (int ip) {
     return ip == (ip & tp_allow);
   }
 
-  // Set if want to ignore tpman connection failure on startup
-  // Default is not to start if one of the test point mangers is not there
+  /// Set if want to ignore tpman connection failure on startup
+  /// Default is not to start if one of the test point mangers is not there
   int allow_tpman_connect_failure;
 
 #ifdef USE_SYMMETRICOM
-  // Read GPS time from the symmetricom board
+  /// Read GPS time from the symmetricom board
   unsigned long symm_gps(unsigned long *frac = 0, int *stt = 0);
 
-  // See if the symmetricon IRIG-B board is synchronized
+  /// See if the symmetricon IRIG-B board is synchronized
   bool symm_ok();
 #endif
 
-  // Set if we do not want to compress frames
+  /// Set if we do not want to compress frames
   int no_compression;
 
-  // An offset to be added to the time read off the Symmetricom card
-  // This is introduced to fix a problem with IRIG-B signal lacking 
-  // leap seconds information
+  /// An offset to be added to the time read off the Symmetricom card
+  /// This is introduced to fix a problem with IRIG-B signal lacking 
+  /// leap seconds information
   int symm_gps_offset;
 
-  // Delay data taking by this many 16 hz cycles (default is 4 set above(
+  /// Delay data taking by this many 16 hz cycles (default is 4 set above(
   int cycle_delay;
 
-  // Space separated list of directories where old raw minute trend is kept
-  // They need to be in temporal order, oldest first.
+  /// Space separated list of directories where old raw minute trend is kept
+  /// They need to be in temporal order, oldest first.
   string old_raw_minute_trend_dirs;
 
-  // EDCU init file checkers
+  /// EDCU init file checkers
   vector<file_checker>	edcu_ini_fckrs;
 
-  // Enable/disable file checkers
+  /// Enable/disable file checkers
   bool enable_fckrs;
 }; // class daqd_c
 

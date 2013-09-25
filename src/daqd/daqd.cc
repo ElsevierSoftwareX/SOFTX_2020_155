@@ -100,6 +100,7 @@ int printf(const char * s,...)
 }
 #endif
 
+/// Helper function to deal with the archive channels.
 int
 daqd_c::configure_archive_channels(char *archive_name, char *file_name, char *f1) {
   archive_c *arc = 0;
@@ -116,8 +117,8 @@ daqd_c::configure_archive_channels(char *archive_name, char *file_name, char *f1
   return res? DAQD_NOT_FOUND: DAQD_OK;
 }
 
-// Remove an archive from the list of known archives
-// :TODO: have to use locking here to avoid deleteing "live" archives
+/// Remove an archive from the list of known archives
+/// :TODO: have to use locking here to avoid deleteing "live" archives
 int
 daqd_c::delete_archive(char *name) {
   for (s_link *clink = archive.first (); clink; clink = clink -> next()) {
@@ -130,8 +131,8 @@ daqd_c::delete_archive(char *name) {
   return DAQD_NOT_FOUND;
 }
 
-// Create new archive if it's not created already
-// Set archive's prefix, suffix, number of Data dirs; scan archive file names
+/// Create new archive if it's not created already
+/// Set archive's prefix, suffix, number of Data dirs; scan archive file names
 int
 daqd_c::scan_archive(char *name, char *prefix, char *suffix, int ndirs) {
   archive_c *arc = 0;
@@ -149,9 +150,9 @@ daqd_c::scan_archive(char *name, char *prefix, char *suffix, int ndirs) {
   return arc->scan(name, prefix, suffix, ndirs);
 }
 
-// Update file directory info for the archive
-// Called when new file is written into the archive by an external archive writer
-//
+/// Update file directory info for the archive
+/// Called when new file is written into the archive by an external archive writer
+///
 int
 daqd_c::update_archive(char *name, unsigned long gps, unsigned long dt, unsigned int dir_num) {
   archive_c *arc = 0;
@@ -170,31 +171,31 @@ daqd_c::update_archive(char *name, unsigned long gps, unsigned long dt, unsigned
 extern void *interpreter_no_prompt (void *);
 int shutdown_server ();
 
-// Server shutdown flag
+/// Server shutdown flag
 bool server_is_shutting_down = false;
 
-daqd_c daqd; // root object
+daqd_c daqd; ///< root object
 
-/* Set to the program's executable name during run time */
+/// Is set to the program's executable name during run time 
 char *programname;
 
-// Mutual exclusion on Frames library calls
+/// Mutual exclusion on Frames library calls
 pthread_mutex_t framelib_lock;
 
 #ifndef NDEBUG
-// Controls volume of the debugging messages that is printed out
+/// Controls volume of the debugging messages that is printed out
 int _debug = 10;
 #endif
 
-// Controls volume of log messages
+/// Controls volume of log messages
 int _log_level;
 
 #include "../../src/drv/param.c"
 
 struct cmp_struct {bool operator()(char *a, char *b) { return !strcmp(a,b); }};
 
-// Sort on IFO number and DCU id
-// Do not change channel order within a DCU
+/// Sort on IFO number and DCU id
+/// Do not change channel order within a DCU
 int chan_dcu_eq(const void *a, const void *b) {
   unsigned int dcu1, dcu2;
   dcu1 = ((channel_t *)a)->dcu_id + DCU_COUNT * ((channel_t *)a)->ifoid;
@@ -203,15 +204,17 @@ int chan_dcu_eq(const void *a, const void *b) {
   else return dcu1 - dcu2;
 }
 
-// DCU id of the current configuration file (ini file)
+/// DCU id of the current configuration file (ini file)
 int ini_file_dcu_id = 0;
 
+/// Broadcast channel configuration callback function.
 int bcstConfigCallback(char *name, struct CHAN_PARAM *parm, void *user) {
 	printf("Broadcast channel %s configured\n", name);
 	daqd.broadcast_set.insert(name);
 	return 1;
 }
 
+/// Remove spaces in place
 void RemoveSpaces(char* source)
 {
   char* i = source;
@@ -225,7 +228,7 @@ void RemoveSpaces(char* source)
   *i = 0;
 }
 
-// Configure data channel info from config files
+/// Configure data channel info from config files
 int
 daqd_c::configure_channels_files ()
 {
@@ -381,6 +384,7 @@ daqd_c::configure_channels_files ()
 }
 
 
+/// Channel configuration callback function.
 int
 chanConfigCallback(char *channel_name, struct CHAN_PARAM *params, void *user)
 {
@@ -490,6 +494,7 @@ chanConfigCallback(char *channel_name, struct CHAN_PARAM *params, void *user)
   return 1;
 }
 
+/// Linear search for a channel group name in channel_groups array.
 int daqd_c::find_channel_group (const char* channel_name)
 {
   for (int i = 0; i < num_channel_groups; i++) {
@@ -500,6 +505,7 @@ int daqd_c::find_channel_group (const char* channel_name)
   return 0;
 }
 
+/// Create full resolution frame object.
 General::SharedPtr<FrameCPP::Version::FrameH>
 daqd_c::full_frame(int frame_length_seconds, int science,
 		   adc_data_ptr_type &dptr)
@@ -635,6 +641,7 @@ daqd_c::full_frame(int frame_length_seconds, int science,
   return frame;
 }
 
+/// Full resolution frame saving thread.
 void *
 daqd_c::framer (int science)
 {
@@ -1048,7 +1055,7 @@ daqd_c::framer (int science)
   return NULL;
 }
 
-
+// Allocate and initialize main circular buffer.
 int
 daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
 {
@@ -1249,6 +1256,7 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
 
 #if EPICS_EDCU == 1
 
+/// Start Epics DCU thread.
 int
 daqd_c::start_edcu (ostream *yyout)
 {
@@ -1272,6 +1280,7 @@ daqd_c::start_edcu (ostream *yyout)
   return 0;
 }
 
+/// Start Epics IOC server. This one serves the daqd status Epics channels.
 int
 daqd_c::start_epics_server (ostream *yyout, char *prefix, char *prefix1, char *prefix2)
 {
@@ -1300,7 +1309,8 @@ daqd_c::start_epics_server (ostream *yyout, char *prefix, char *prefix1, char *p
 
 #endif
 
-
+/// Start the producer thread. Its purpose is to extract the data from the 
+/// receiver buffers and put it into the main circular buffer.
 int
 daqd_c::start_producer (ostream *yyout)
 {
@@ -1323,6 +1333,7 @@ daqd_c::start_producer (ostream *yyout)
   return 0;
 }
 
+/// Start full resolution frame saving thread.
 int
 daqd_c::start_frame_saver (ostream *yyout, int science)
 {
@@ -1392,9 +1403,7 @@ drain (void *a)
 }
 #endif
 
-/*
-  Print out usage message and exit
-*/
+/// Print out usage message and exit
 void
 usage (int status)
 {
@@ -1412,6 +1421,7 @@ usage (int status)
   exit (status);
 }
 
+/// Parse command line arguments.
 int
 parse_args (int argc, char *argv [])
 {
@@ -1456,8 +1466,8 @@ parse_args (int argc, char *argv [])
 
 int main_exit_status;
 
-// Use gcore command to produce core on fatal signals.
-// This is done, so that the program can run suid on execution.
+/// Use gcore command to produce core on fatal signals.
+/// This is done, so that the program can run suid on execution.
 void
 shandler (int a) {
         char p[25];
@@ -1513,7 +1523,7 @@ daqd_c::symm_ok() {
 
 int symmetricom_fd = -1;
 
-// Get current GPS time from the symmetricom IRIG-B card
+/// Get current GPS time from the symmetricom IRIG-B card
 unsigned long
 daqd_c::symm_gps(unsigned long *frac, int *stt) {
     unsigned long t[3];
@@ -1525,6 +1535,7 @@ daqd_c::symm_gps(unsigned long *frac, int *stt) {
     return  t[0] + daqd.symm_gps_offset;
 }
 
+/// See if the GPS card is locked.
 bool
 daqd_c::symm_ok() {
   unsigned long req = 0;
@@ -1535,7 +1546,7 @@ daqd_c::symm_ok() {
 
 #else // ifdef USE_IOP
 
-// Get current GPS time from the IOP
+/// Get current GPS time from the IOP
 unsigned long
 daqd_c::symm_gps(unsigned long *frac, int *stt) {
 	 if (stt) *stt = 0;
@@ -1549,7 +1560,7 @@ daqd_c::symm_gps(unsigned long *frac, int *stt) {
 bool daqd_c::symm_ok() { return 1; }
 #endif
 #endif
-
+/// Server main function.
 main (int argc, char *argv [])
 {
   int farg;
@@ -1757,6 +1768,7 @@ open_mx();
   pthread_exit (&main_exit_status);
 }
 
+/// Shutdown the daqd server, exit.
 int
 shutdown_server ()
 {
@@ -1942,6 +1954,7 @@ daqd_c::compile_regexp ()
   (void) compile (0, dec_num_expbuf, &dec_num_expbuf[ESIZE],'\0');
 }
 
+/// See if the IP address is valid
 int
 daqd_c::is_valid_ip_address (char *str)
 {

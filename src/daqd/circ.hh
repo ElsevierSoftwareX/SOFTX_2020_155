@@ -12,37 +12,37 @@
 
 #define nvl(a,b) ((a)?(a):(b))
 
-// Do not mark immediate block on the producer path
-// for the transient consumer
-// Don't set this equal to zero
+/// Do not mark immediate block on the producer path
+/// for the transient consumer
+/// Don't set this equal to zero
 const int circ_buffer_transient_thresh = 1;
 
-// Defines parameter to `put_nowait_scattered'
+/// Defines parameter to `put_nowait_scattered'
 struct put_vec {
   unsigned long vec_idx;
   unsigned long vec_len;
 };
 
-// Defines parameter to `put_pscattered'
+/// Defines parameter to `put_pscattered'
 struct put_pvec {
   char *pvec_addr;
   unsigned long pvec_len;
 };
 
-// Defines parameter to `put16th_dpscattered'
+/// Defines parameter to `put16th_dpscattered'
 struct put_dpvec {
   unsigned char *src_pvec_addr;
   unsigned long dest_vec_idx;
   unsigned long vec_len;
   unsigned int *src_status_addr;
   unsigned long dest_status_idx;
-  unsigned int  bsw; // byteswap or not; if not zero then the number of bytes
-			// in a group to byteswap
+  unsigned int  bsw; ///< byteswap or not; if not zero then the number of bytes in a group to byteswap
 };
 
+/// Circular buffer class
 class circ_buffer {
  public:
-  enum mem_choice {flag_malloc=0, ptr=1, shmem_ftok=2, shmem_shmid=3, shmem_shmkey=4}; /* how to allocate circular buffer */
+  enum mem_choice {flag_malloc=0, ptr=1, shmem_ftok=2, shmem_shmid=3, shmem_shmkey=4}; ///< how to allocate circular buffer 
  private:
   /*
     Locking on the instance of the class can be done with the
@@ -69,10 +69,10 @@ class circ_buffer {
 
   mem_choice mem_flag;
 
-  /* Variables are factored out to the `circ_buffer_t' struct */
+  /// Variables are factored out to the `circ_buffer_t' struct 
   circ_buffer_t *pbuffer;
 
-  int buffer_malloc (int consumers, int blocks, long block_size, time_t buffer_period); /* This is a part of the constructor, really */
+  int buffer_malloc (int consumers, int blocks, long block_size, time_t buffer_period); ///< This is a part of the constructor, really 
 
 public:
   circ_buffer (int consumers = 1, int blocks = 100, long block_size = 10240, time_t block_period = 1, mem_choice mem_flagp=flag_malloc, char *param1 = NULL);
@@ -101,7 +101,7 @@ public:
     return pbuffer -> block_size;
   }
 
-  // Get the number of free blocks in the buffer
+  /// Get the number of free blocks in the buffer
   int bfree () {
     int free_blocks = blocks ();
     int fb;
@@ -159,9 +159,9 @@ public:
     return consumers;
   };
 
-  /* Add new consumer to the circular buffer.  Returns -1 if no more
-    consumers allowed.  Otherwise returns consumer number.
-    Set `fast' true if new concumer will be using get16th() call */
+  /// Add new consumer to the circular buffer.  Returns -1 if no more
+  /// consumers allowed.  Otherwise returns consumer number.
+  /// Set `fast' true if new concumer will be using get16th() call 
   int add_consumer (int fast = 0) {
     int i;
     locker mon (this);
@@ -189,16 +189,16 @@ public:
     return i;
   }
 
-  /* Add new transient consumer to the circular buffer.  No bit in `cmask' is
-    set for new consumer (producer will not be marking new blocks for this
-    consumer).  Look through the timestamps on the blocks in the circular
-    buffer and set `busy' bits for the block inside the time period.  Time
-    period is passed as the GPS time and period length in seconds.
-
-    Returns -1 if no more consumers allowed.  Returns -2 if no data
-    found. Returns -3 if `gps' is in the future.
-    
-    Otherwise returns consumer number.  */
+  /// Add new transient consumer to the circular buffer.  No bit in `cmask' is
+  /// set for new consumer (producer will not be marking new blocks for this
+  /// consumer).  Look through the timestamps on the blocks in the circular
+  /// buffer and set `busy' bits for the block inside the time period.  Time
+  /// period is passed as the GPS time and period length in seconds.
+  ///
+  /// Returns -1 if no more consumers allowed.  Returns -2 if no data
+  /// found. Returns -3 if `gps' is in the future.
+  /// 
+  /// Otherwise returns consumer number.  
   int add_transient_consumer (time_t gps, time_t delta, time_t *bstart, time_t *blast) {
     int cons_num;
     locker mon (this);

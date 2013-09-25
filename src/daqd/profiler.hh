@@ -1,12 +1,13 @@
 #ifndef PROFILER_HH
 #define PROFILER_HH
 
+/// Statistic gathering for main or trend circ buffer
 class profile_c {
   circ_buffer *cb;
   int shutdown;
   int started;
-  int main_avg_free; // Number of free block in the main circular buffer, averaged over the profiler runtime
-  int main_min_free; // Minimal recorded number of free blocks in main circular buffer over the profiler runtime
+  int main_avg_free; /// Number of free block in the main circular buffer, averaged over the profiler runtime
+  int main_min_free; /// Minimal recorded number of free blocks in main circular buffer over the profiler runtime
   int period;
   int num_counters;
   int *counters;
@@ -14,7 +15,7 @@ class profile_c {
   int coredump;
   std::string name;
 
-  // Thread to collect program statistics
+  /// Thread to collect program statistics
   void *profiler ();
   static void *profiler_static (void *a) { return ((profile_c *)a) -> profiler (); };
  public:
