@@ -5,37 +5,37 @@
 #include "profiler.hh"
 #include "stats/stats.hh"
 
-/* Trend circular buffer block structure */
-// Do not put any shorts in this structure, because compiler puts holes in to align the double
+/// Trend circular buffer block structure 
+/// Do not put any shorts in this structure, because compiler puts holes in to align the double
 
-// This structure is 40 byte long on 32-bit architecture
-// and 48 byte long on 64-bit due to compiler alignment dillidallying
+//// This structure is 40 byte long on 32-bit architecture
+//// and 48 byte long on 64-bit due to compiler alignment dillidallying
 typedef struct {
   union {int I; double D; float F;} min;
   union {int I; double D; float F;} max;
-  int n; // the number of valid points used in calculating min, max, rms and mean
+  int n; /// the number of valid points used in calculating min, max, rms and mean
   double rms;
   double mean;
 } trend_block_t;
 
-// This one should be 40 bytes long on any architecture
-// do not assign double into it, memcpy them
+/// This one should be 40 bytes long on any architecture
+/// do not assign double into it, memcpy them
 typedef struct  trend_block_on_disk_t {
-// These two ints represent a double
+/// These two ints represent a double
   unsigned int min;
   unsigned int min2;
-// These two ints represent a double
+/// These two ints represent a double
   unsigned int max;
   unsigned int max2;
   unsigned int n;
-// These two ints represent a double
+/// These two ints represent a double
   unsigned int rms;
   unsigned int rms2;
-// These two ints represent a double
+/// These two ints represent a double
   unsigned int mean;
   unsigned int mean2;
 
-// Assign with the in-memory trend structure
+/// Assign with the in-memory trend structure
   void operator=(const trend_block_t& t) {
 	memcpy(&min, &t.min, 2*sizeof(unsigned int));
 	memcpy(&max, &t.max, 2*sizeof(unsigned int));
@@ -52,12 +52,12 @@ typedef struct raw_trend_record_struct {
 } raw_trend_record_struct;
 
 
-/* Trend frame calculation thread */
+/// Trend frame calculation thread 
 class trender_c {
 public:
   enum {
     max_trend_channels = MAX_TREND_CHANNELS,
-    num_trend_suffixes = 5, // That many trend channels are created for each input channel
+    num_trend_suffixes = 5, /// That many trend channels are created for each input channel
     max_trend_sufx_len = 5,
   };
 
@@ -98,7 +98,7 @@ public:
 	int short_bps;
 	int float_bps;
 	int double_bps;
-	int tsize; // size of the trend var in the trend block
+	int tsize; /// size of the trend var in the trend block
 	int toffs;
       } sfxs [num_trend_suffixes]
 	= {
@@ -120,51 +120,47 @@ public:
     }
 
   pthread_mutex_t lock;
-  circ_buffer *tb;  // trend circular buffer object
-  circ_buffer *mtb;  // minute trend circular buffer object
-  class stats mt_stats; // minute trend period stats
-  class stats mt_file_stats; // minute trend file saving stats
-  pthread_t tsaver; // This thread saves trend data into the `fname'
-  pthread_t mtsaver; // This thread saves minute trend data into the `fname'
-  pthread_t consumer; /* Thread reads data from the main circular
-			 buffer, calculates trend and puts it into `tb' */
-  pthread_t mconsumer; /* Thread reads data from the trend circular buffer, `tb',
-			  calculates minute trend and puts it into `mtb' */
-  int ascii_output; // If set, no frame files, just plain ascii trend file is created
+  circ_buffer *tb;  ///< trend circular buffer object
+  circ_buffer *mtb;  ///< minute trend circular buffer object
+  class stats mt_stats; ///< minute trend period stats
+  class stats mt_file_stats; ///< minute trend file saving stats
+  pthread_t tsaver; ///< This thread saves trend data into the `fname'
+  pthread_t mtsaver; ///< This thread saves minute trend data into the `fname'
+  pthread_t consumer; ///< Thread reads data from the main circular buffer, calculates trend and puts it into `tb' 
+  pthread_t mconsumer; ///< Thread reads data from the trend circular buffer, `tb', calculates minute trend and puts it into `mtb' 
+  int ascii_output; ///< If set, no frame files, just plain ascii trend file is created
   ofstream *fout;
-  int cnum; /* trend consumer `consumer' thread consumer number in main cb */
-  int mcnum; /* minute trend consumer `mconsumer' consumer number in `tb' */
-  int saver_cnum; // Saver conumer number (in the trend circular buffer `tb')
-  int msaver_cnum; // Minute trend saver conumer number (in the minute trend circular buffer, `mtb')
-  int raw_msaver_cnum; // Raw minute trend saver consumer number (in the minute trend cir cular buffer, `mtb')
+  int cnum; ///< trend consumer `consumer' thread consumer number in main cb 
+  int mcnum; ///< minute trend consumer `mconsumer' consumer number in `tb' 
+  int saver_cnum; ///< Saver conumer number (in the trend circular buffer `tb')
+  int msaver_cnum; ///< Minute trend saver conumer number (in the minute trend circular buffer, `mtb')
+  int raw_msaver_cnum; ///< Raw minute trend saver consumer number (in the minute trend cir cular buffer, `mtb')
 
   /* Trend calculation params */
-  int frames_per_file; /* Determines when framer ought to create new file */
-  int minute_frames_per_file; /* Determines when minute framer ought to create new file */
-  int trend_buffer_blocks; /* Size of trend circ buffer. Also the size of the 
-			      trend frame in seconds */
-  int minute_trend_buffer_blocks; /* Size of minute trend circ buffer. Also the size of the 
-				     minute trend frame in minutes */
+  int frames_per_file; ///< Determines when framer ought to create new file 
+  int minute_frames_per_file; ///< Determines when minute framer ought to create new file 
+  int trend_buffer_blocks; ///< Size of trend circ buffer. Also the size of the trend frame in seconds 
+  int minute_trend_buffer_blocks; ///< Size of minute trend circ buffer. Also the size of the minute trend frame in minutes 
 
-  char sufxs [num_trend_suffixes][max_trend_sufx_len + 1]; // Added to input channel name, giving `input_channel.min'
-  int bps [MAX_DATA_TYPE + 1][num_trend_suffixes]; // Bytes per second for each data type for each trend type
-  int tsize [num_trend_suffixes]; // sizeof each trend type variable in the trend block
-  int toffs [num_trend_suffixes]; // offset to each trend type variable in the trend bloc
-  daq_data_t dtypes [num_trend_suffixes]; // data type of each trend variable
+  char sufxs [num_trend_suffixes][max_trend_sufx_len + 1]; ///< Added to input channel name, giving `input_channel.min'
+  int bps [MAX_DATA_TYPE + 1][num_trend_suffixes]; ///< Bytes per second for each data type for each trend type
+  int tsize [num_trend_suffixes]; ///< sizeof each trend type variable in the trend block
+  int toffs [num_trend_suffixes]; ///< offset to each trend type variable in the trend bloc
+  daq_data_t dtypes [num_trend_suffixes]; ///< data type of each trend variable
 
-  // Input channels
+  /// Input channels
   int num_channels;
-  channel_t channels [max_trend_channels];  // Channels for which trend is calculated
+  channel_t channels [max_trend_channels];  ///< Channels for which trend is calculated
 
-  // Output or trend channels
+  /// Output or trend channels
   int num_trend_channels;
-  channel_t trend_channels [max_trend_channels * num_trend_suffixes];  // Channels for which trend is calculated
+  channel_t trend_channels [max_trend_channels * num_trend_suffixes];  ///< Channels for which trend is calculated
 
-  filesys_c fsd; // Trend frames filesystem map
-  filesys_c minute_fsd; // Minute trend frames filesystem map
-  raw_filesys_c raw_minute_fsd; // Raw minute trend filesystem map
+  filesys_c fsd; ///< Trend frames filesystem map
+  filesys_c minute_fsd; ///< Minute trend frames filesystem map
+  raw_filesys_c raw_minute_fsd; ///< Raw minute trend filesystem map
 
-  int block_size; // circ buffer data block size (sum of the sizes of the configured channels)
+  int block_size; ///< circ buffer data block size (sum of the sizes of the configured channels)
 
   int start_trend (ostream *, int, int, int, int);
   sem_t trender_sem;
@@ -193,42 +189,43 @@ public:
   static void *minute_trend_framer_static (void *a) { return ((trender_c *)a) -> minute_framer (); };
   static void *raw_minute_trend_saver_static (void *a) { return ((trender_c *)a) -> raw_minute_saver (); };
 
-  profile_c profile; // profile on trend circular buffer.
-  profile_c profile_mt; // profile on minute trend circular buffer.
+  profile_c profile; ///< profile on trend circular buffer.
+  profile_c profile_mt; ///< profile on minute trend circular buffer.
   unsigned int raw_minute_trend_saving_period;
 
-  // worked thread does processing from this channel until the last one
+  /// worked thread does processing from this channel until the last one
   unsigned int worker_first_channel;
 
-  // next block number for trend worker
-  // trender sets this before signaling to worker
+  /// next block number for trend worker
+  /// trender sets this before signaling to worker
   int trend_worker_nb;
 
-  // worker thread mutex and condition var
-  // trender signals on cond var when new data is ready to be processed
+  /// worker thread mutex and condition var
+  /// trender signals on cond var when new data is ready to be processed
   pthread_mutex_t worker_lock;
   pthread_cond_t worker_notempty;
 
-  // worker signals to trender on cond var when it is done processing
+  /// worker signals to trender on cond var when it is done processing
   pthread_cond_t worker_done;
-  unsigned int worker_busy; // worker clears it when it is finished
+  unsigned int worker_busy; ///< worker clears it when it is finished
 
   pthread_t worker_tid;
 
-  // worker will start processing channels in the direction from the end to the start
-  // trender will do from the start to the end.
-  // They will meet at some point, when next_trender_block >= next_worker_block.
+  /// worker will start processing channels in the direction from the end to the start
+  /// trender will do from the start to the end.
+  /// They will meet at some point, when next_trender_block >= next_worker_block.
   unsigned int next_trender_block;
   unsigned int next_worker_block;
 
-  // Main trender local buffer area
+  /// Main trender local buffer area
   trend_block_t ttb [max_trend_channels];
 private:
   int shutdown_now;
   int shutdown_minute_now;
   void shutdown_trender () { shutdown_now = 1; }
   void shutdown_minute_trender () { shutdown_minute_now = 1; }
-  void shutdown_buffer () { // kill the buffer and close the socket
+  /// kill the buffer and close the socket
+  void shutdown_buffer () {
     circ_buffer *oldb;
 
     oldb = tb;

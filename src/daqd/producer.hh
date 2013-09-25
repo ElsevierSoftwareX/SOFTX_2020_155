@@ -4,7 +4,7 @@
 #include <stats/stats.hh>
 #include <iterator>
 
-/* Data producer thread */
+/// Data producer thread 
 class producer : public stats {
 private:
   const int pnum;
@@ -42,7 +42,7 @@ public:
   static void *grabIfoData_static(void *a) { ((producer *)a) -> grabIfoDataThread();};
 
   pthread_t tid;
-  pthread_t tid1; // Parallel producer thread
+  pthread_t tid1; ///< Parallel producer thread
 #if 0
   sem_t go;       // Signal for the tid1 to go
   sem_t done;     // tid1 is signalling back to main producer when done
@@ -54,14 +54,14 @@ public:
   int prod_done;
 #endif
 
-  int dcuStatus[2][DCU_COUNT];               /* Internal rep of DCU status   */
-  unsigned int dcuStatCycle[2][DCU_COUNT];   /* Cycle count for DCU OK       */
+  int dcuStatus[2][DCU_COUNT];               ///< Internal rep of DCU status 
+  unsigned int dcuStatCycle[2][DCU_COUNT];   ///< Cycle count for DCU OK 
   unsigned int dcuLastCycle[2][DCU_COUNT];
-  int dcuCycleStatus[2][DCU_COUNT];          /* Status check each 1/16 sec   */
-  int cycle_input;			     /* Where to input controller cycle from: 1-5565rfm; 2-5579rfm */
-  int parallel;		/* Can we do parallel data input ? */
+  int dcuCycleStatus[2][DCU_COUNT];          ///< Status check each 1/16 sec
+  int cycle_input;			     ///< Where to input controller cycle from: 1-5565rfm; 2-5579rfm 
+  int parallel;		///< Can we do parallel data input ? 
 
-  // Override class stats print call
+  /// Override class stats print call
   virtual void print(std::ostream &os) {
 	os << "Producer: ";
 	stats::print(os);
@@ -76,16 +76,14 @@ public:
 	#endif
   }
 
-  // Override the clear from class stats
+  /// Override the clear from class stats
   virtual void clearStats() {
 	stats::clearStats();
 	for (vector<class stats>::iterator i = rcvr_stats.begin(); i != rcvr_stats.end(); i++)
 		i->clearStats();
   }
 
-  /*
-   * Statistics for the receiver threads
-   */
+  /// Statistics for the receiver threads
   std::vector<class stats> rcvr_stats;
 };
 

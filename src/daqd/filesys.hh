@@ -19,13 +19,8 @@
 #include<sys/stat.h>
 #include<sys/types.h>
 
-/*
-  Linkable time range block class.
-
-  This is to store time ranges (up to range_block::max_range_blocks).
-
-*/
-
+// Linkable time range block class.
+// This is to store time ranges (up to range_block::max_range_blocks).
 class range_block: public s_link {
 public:
   enum { max_range_blocks = 10 };
@@ -68,23 +63,6 @@ public:
   time_t current_max_time_sub (time_t t) { return d [num_ranges - 1].max_time -= t; }
 };
 
-/*
-  Filesystem map class
-
-  In this class I want to maintain the consistent map from the GPS time,
-  expressed in seconds, to the directory number (if any) where the
-  corresponding frame file is located.
-
-  There must be a way for the user to access frame files from the program's
-  previous run. For the `filesys_c' class this means that the time period
-  variables for each directory have to be properly initialized on the program
-  startup. This is done with the directory scan to find out time period(s) for
-  the files in directories.
-
-  It is possible to deal with holes in data (some data files missing) for a
-  directory. The list of periods is maintained for a directory.
-
-*/
 
 #ifdef MINI_NDS
 #define MAX_FRAME_DIRS 10000
@@ -92,16 +70,31 @@ public:
 #define MAX_FRAME_DIRS 1000
 #endif
 
+///  Filesystem map class
+///
+///  In this class I want to maintain the consistent map from the GPS time,
+///  expressed in seconds, to the directory number (if any) where the
+///  corresponding frame file is located.
+///
+///  There must be a way for the user to access frame files from the program's
+///  previous run. For the `filesys_c' class this means that the time period
+///  variables for each directory have to be properly initialized on the program
+///  startup. This is done with the directory scan to find out time period(s) for
+///  the files in directories.
+///
+///  It is possible to deal with holes in data (some data files missing) for a
+///  directory. The list of periods is maintained for a directory.
+
 class filesys_c {
  public:
 
-// new style directories; gps time first digits
+/// new style directories; gps time first digits
 static const int gps_time_dirs = 1;
 
-// how many digits to keep in a directory
-// 123456789 will result in directory '123'
-// IMPORTANT: this is just matched NDS code in scanarchive.c
-// if this is changed, you have to update NDS code
+/// how many digits to keep in a directory
+/// 123456789 will result in directory '123'
+/// IMPORTANT: this is just matched NDS code in scanarchive.c
+/// if this is changed, you have to update NDS code
 static const int digits_in_dir = 5;
 
   enum { filename_max = FILENAME_MAX };
@@ -121,34 +114,34 @@ static const int digits_in_dir = 5;
   int frames_saved;
   int frames_lost;
 
-  // Filename suffix; no suffix if == \000
+  /// Filename suffix; no suffix if == \000
   char suffix [80];
 
-  // Filename prefix
+  /// Filename prefix
   char prefix [80];
 
-  // Filename path
+  /// Filename path
   char path [FILENAME_MAX + 1];
 
-  // Time range for all directories
+  /// Time range for all directories
   time_t min_time;
   time_t max_time;
 
-  // Time ranges for directories
+  /// Time ranges for directories
   struct {
-    int nfiles; // The number of files in this directory
+    int nfiles; ///< The number of files in this directory
     
-    int dir_num; // which directory
+    int dir_num; ///< which directory
 
-    // Time range for the directory
+    /// Time range for the directory
     time_t min_time;
     time_t max_time;
 
-    // Linked list of blocks of time ranges
+    /// Linked list of blocks of time ranges
     s_list blist;
   } dir [MAX_FRAME_DIRS];
 
-  int num_dirs; // how many data directories we have
+  int num_dirs; ///< how many data directories we have
 
   int cur_dir;
 
@@ -156,16 +149,14 @@ static const int digits_in_dir = 5;
 
   int files_per_dir;
 
-  /*
-    Map GPS time (seconds) onto the directory number. Returns the timstamp in
-    `*tr' for which the file exists (`*tr' is in the first second in the file;
-    it determines the filename).
+  ///  Map GPS time (seconds) onto the directory number. Returns the timstamp in
+  ///  `*tr' for which the file exists (`*tr' is in the first second in the file;
+  ///  it determines the filename).
 
-    `t' is the requested time.
+  ///  `t' is the requested time.
 
-    `*fsecs' is set to the file length in seconds
-  */
-  int dir_number (time_t t, time_t *tr, time_t *fsecs) { 
+  ///  `*fsecs' is set to the file length in seconds
+  int dir_number (time_t t, time_t *tr, time_t *fsecs) {
       int fdir;
       int i;
 
@@ -218,7 +209,7 @@ static const int digits_in_dir = 5;
   static void *wiper (void *);
   void start_wiper (int d);
 
-  int period; // our file period in seconds
+  int period; ///< our file period in seconds
 
   inline time_t ftosecs (char *filename, time_t *dt);
  public:
@@ -295,15 +286,15 @@ static const int digits_in_dir = 5;
   }
   void disable_wiper () {wiper_enabled = 0;}
 
-  // Allows to update the map with another map
-  // NOT IMPLEMENTED YET
+  /// Allows to update the map with another map
+  /// NOT IMPLEMENTED YET
   void operator+= (filesys_c &fmap) {
     locker mon (this);
     std::cerr << "`+=' on the filesys_c" << std::endl;
   }
 
-  // Free current map, make a copy of the map in `fmap'
-  // `fmap' should have the same dir_num as this->dir_num.
+  /// Free current map, make a copy of the map in `fmap'
+  /// `fmap' should have the same dir_num as this->dir_num.
 
   void operator= (filesys_c &fmap) {
     locker mon (this);
@@ -351,17 +342,12 @@ static const int digits_in_dir = 5;
 
   /*
     Following functions are the primary interface to the map:
-
-    * start_periodic_scan(period) starts a thread to periodically rescan files
-    * use scan() to scan the directories with files to create the map
-    * use update_dir() or new_fname_update() to update the map
-    * use filename() to get full-pathed filename where you can find the
-      the data for time `t'
-
   */
+  /// starts a thread to periodically rescan files
   int start_periodic_scan (int s) { return 0; }
+  /// use scan() to scan the directories with files to create the map
   int scan ();
-
+  /// use update_dir() or new_fname_update() to update the map
   inline int update_dir (time_t gps, time_t gps_n, time_t period, int dnum) {
     locker mon (this);
     return _update_dir (gps, gps_n, period, dnum);
@@ -371,14 +357,12 @@ static const int digits_in_dir = 5;
   int new_fname_update (char *fname);
 #endif
 
-  /*
-    Maps GPS time (seconds) onto the file name. Returns directory number or -1
-    if failed. Constructs filename in `fname' and sets `*file_first_second'
-    and `*file_length_seconds' on success.
+///  Maps GPS time (seconds) onto the file name. Returns directory number or -1
+///  if failed. Constructs filename in `fname' and sets `*file_first_second'
+///  and `*file_length_seconds' on success.
 
-    `file_first_second' and `file_length_seconds' shouldn't point
-    to the same memory location.
-  */
+///  `file_first_second' and `file_length_seconds' shouldn't point
+///   to the same memory location.
   int filename (time_t t, char *fname,
 		time_t* file_first_second,
 		time_t* file_length_seconds)
@@ -392,20 +376,16 @@ static const int digits_in_dir = 5;
       return dnum;
     }
 
-  /*
-    return file gps where the passed time is
-  */
+  ///  return file gps where the passed time is
   time_t file_gps(time_t gps) {
     time_t file_gps, file_secs;
     dir_number (gps, &file_gps, &file_secs);
     return file_gps;
   }
 
-  /*
-    Get temporary file name in `*tmpfname' and the filename in `*fname'
-    based on the timestamp passed in `t'.
-    Returns directory number where the file goes to.
-  */
+  ///  Get temporary file name in `*tmpfname' and the filename in `*fname'
+  ///  based on the timestamp passed in `t'.
+  ///  Returns directory number where the file goes to.
   int getDirFileNames (time_t t, char *tmpfname, char *fname,
 			int frames = 1, int framedt = 1) {
     locker mon (this);
@@ -455,10 +435,8 @@ if (gps_time_dirs) {
     return dnum;
   }
 
-  /*
-    Get filename in `*fname' based on the timestamp passed
-    in `t'. Returns directory number where the file goes to.
-  */
+  ///  Get filename in `*fname' based on the timestamp passed
+  ///  in `t'. Returns directory number where the file goes to.
   int dir_fname (time_t t, char *fname, int framedt = 1) {
     locker mon (this);
     int dnum = 0;
@@ -475,7 +453,7 @@ if (gps_time_dirs) {
     return dnum;
   }
 
-  // Set the bits to construct the filename from: suffix, prefix and path
+  /// Set the bits to construct the filename from: suffix, prefix and path
   int set_filename_attrs (char *sfx, char *prx, char *pth) {
     locker mon (this);
     if (strlen (prx) > 79)
@@ -490,7 +468,7 @@ if (gps_time_dirs) {
     return 0;
   }
 
-  // Set and get the number of directories in the map
+  /// Set and get the number of directories in the map
   void set_num_dirs (int dirs) {
     locker mon (this);
     assert (dirs <= MAX_FRAME_DIRS);
@@ -499,7 +477,7 @@ if (gps_time_dirs) {
   }
   int get_num_dirs () {locker mon (this); return num_dirs;}
 
-  // Set and get the number of files per directory
+  /// Set and get the number of files per directory
   void set_files_per_dir (int nfiles) {
     locker mon (this);
     files_per_dir = nfiles;
@@ -564,10 +542,7 @@ if (gps_time_dirs) {
   circ_buffer *cb;
 };
 
-/*
-  See if the `fname' has valid for us timestamp in it
-*/
-
+/// See if the `fname' has valid for us timestamp in it
 inline int
 filesys_c::valid_fname (char *fname)
 {
@@ -591,10 +566,7 @@ filesys_c::valid_fname (char *fname)
   return 1;
 }
 
-/*
-  Convert `filename' into the UTC time
-*/
-
+///  Convert `filename' into the UTC time
 inline time_t
 filesys_c::ftosecs (char *filename, time_t *dt)
 {
@@ -612,10 +584,8 @@ filesys_c::ftosecs (char *filename, time_t *dt)
   }
 }
 
-/*
-  Convert UTC time `secs' into the filename-style string timestamp,
-  which is written out into `outs'.
-*/
+///  Convert UTC time `secs' into the filename-style string timestamp,
+///  which is written out into `outs'.
 inline void
 filesys_c::secstof (time_t secs, char *outs)
 {

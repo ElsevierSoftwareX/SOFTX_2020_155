@@ -387,6 +387,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
   pCds->gps = 0;
   pCds->gpsType = 0;
   // Look for Symmetricom GPS board
+#if 0
   if ((dacdev = pci_get_device(SYMCOM_VID, SYMCOM_BC635_TID, dacdev))) {
             	printk("Symmetricom GPS card on bus %x; device %x\n",
                    	dacdev->bus->number,
@@ -397,7 +398,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		  modCount ++;
 		}
   }
-
+#endif
   dacdev = NULL;
   status = 0;
   // Look for TSYNC GPS board

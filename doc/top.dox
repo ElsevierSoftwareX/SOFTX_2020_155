@@ -28,12 +28,42 @@ This page links to code documentation for RCG code developers. \n
 */
 
 /*! \page devguidedaqd CDS DAQ Data Concentrator/Framebuilder Software
+	- \ref daqd
 */
 /*! \page devguidends CDS DAQ Network Data Server (NDS) Software
 	- \ref nds
 */
 
-
+///	\defgroup daqd DAQD Software Components
+///	@{
+///	@class daqd_c
+///	@class producer
+///	@struct circ_buffer_t
+///	@struct channel_t
+///	@class circ_buffer
+///	@class edcu
+///	@class epicsServer
+///	@class file_checker
+///	@class filesys_c
+///	@class diag::frameRecv
+///	@class net_listener
+///	@class net_writer_c
+///	@class profile_c
+///	@class trender_c
+///	@file	daqd.hh
+///	@file	producer.hh
+///	@file	circ.h
+///	@file	circ.hh
+///	@file	channel.hh
+///	@file	edcu.hh
+///	@file	epicsServer.hh
+///	@file	file_checker.hh
+///	@file	filesys.hh
+///	@file	net_listener.hh
+///	@file	net_writer.hh
+///	@file	profiler.hh
+///	@file	trend.hh
+///	@}
 ///	\defgroup nds NDS Software Components
 ///	@{
 ///	@class CDS_NDS::Nds

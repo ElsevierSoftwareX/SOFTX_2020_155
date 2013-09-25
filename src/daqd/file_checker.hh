@@ -9,15 +9,15 @@
 #include <daqmap.h>
 #include <param.h>
 
-// noop callback we need here; local to this source code file
+/// noop callback we need here; local to this source code file
 static int noop(char *channel_name, struct CHAN_PARAM *params, void *user){ return 1;};
 
-// Check on a file's modification time and then the CRC .
-// This can be used to periodically check on some config files to ascertain they
-// are not changed from the underneath of a running application.
+/// Check on a file's modification time and then the CRC .
+/// This can be used to periodically check on some config files to ascertain they
+/// are not changed from the underneath of a running application.
 class file_checker {
 public:
-	// Save the file name and the initial CRC
+	/// Save the file name and the initial CRC
 	file_checker(std::string name, unsigned long incrc, unsigned long intag = 0)
 		: file_name(name), crc(incrc), mtime(0), tag(intag)
  	{
@@ -28,7 +28,7 @@ public:
 	unsigned long mtime;	// File modification time during the construction time
 	unsigned long tag;	// Tag given during the construction time
 public:
-	// Recalculate the CRC on the file; returns 1 if matches or zero if not
+	/// Recalculate the CRC on the file; returns 1 if matches or zero if not
 	bool match() {
 	  unsigned long new_crc;
 	  // See if the file was touched and parse then
@@ -45,7 +45,7 @@ public:
 	  return 0;
 	}
 private:
-	// Determine my file's mod time
+	/// Determine my file's mod time
 	time_t fmtime() {
 	    struct stat sb;
 	    // Open the file read-only

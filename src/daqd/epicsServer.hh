@@ -2,7 +2,7 @@
 #define EPICS_SERVER_HH
 #include <string>
 
-/* Epics Channel Server */
+/// Epics soft IOC Channel Server
 class epicsServer {
 public:
   epicsServer () : running (0), prefix(""), prefix1(""), prefix2("") {};
