@@ -279,7 +279,7 @@ typedef struct DAQ_XFER_INFO {
    int totalSize;		///< DAQ + TP + EXC chans size in bytes.
    int totalSizeNet;		///<  DAQ + TP + EXC chans size in bytes sent to network driver.
    int offsetAccum;
-   int fileCrc			///< CRC checksum of the DAQ configuration file.
+   int fileCrc;			///< CRC checksum of the DAQ configuration file.
 } DAQ_XFER_INFO;
 
 /*
