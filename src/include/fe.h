@@ -10,6 +10,7 @@
 #include FE_HEADER
 #include "tRamp.h"
 extern int cycleNum;
+extern unsigned int odcStateWord;
 extern unsigned int cycle_gps_time;
 #include "fm10Gen.h"
 #include "drv/dtoal.c"

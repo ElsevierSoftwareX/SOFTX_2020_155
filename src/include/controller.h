@@ -9,6 +9,11 @@
 #define FE_ERROR_EXC_SET        0x100   // bit 8
 #define FE_ERROR_OVERFLOW       0x200   // bit 9
 
+#define ODC_ADC_OVF		0x1
+#define ODC_DAC_OVF		0x2
+#define ODC_EXC_SET		0x4
+
+
 
 #define CPURATE (cpu_khz/1000)
 #define ONE_PPS_THRESH 2000
