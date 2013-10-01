@@ -100,6 +100,7 @@ int tdsCount = 0;
 
 /// Maintains present cycle count within a one second period.
 int cycleNum = 0;
+unsigned int odcStateWord = 0xffff;
 /// Value of readback from DAC FIFO size registers; used in diags for FIFO overflow/underflow.
 int out_buf_size = 0; // test checking DAC buffer size
 unsigned int cycle_gps_time = 0; // Time at which ADCs triggered
@@ -340,9 +341,7 @@ void *fe_start(void *arg)
   int memCtr = 0;
   int ioClock = 0;
 #endif
-#ifdef OVERSAMPLE_DAC
   double dac_in =  0.0;			/// @param dac_in DAC value after upsample filtering
-#endif
   int dac_out = 0;			/// @param dac_out Integer value sent to DAC FIFO
 
   int feStatus = 0;
@@ -901,12 +900,15 @@ udelay(1000);
 #endif
 #endif
 
-/// \> On 1PPS mark, check awgtpman status.
+/// \> On 1PPS mark \n
        if(cycleNum == 0)
         {
+	  /// - ---- Check awgtpman status.
 	  //printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
 	  pLocalEpics->epicsOutput.awgStat = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
 	  if(pLocalEpics->epicsOutput.awgStat) feStatus |= FE_ERROR_AWG;
+	  /// - ---- Check if DAC outputs are enabled, report error.
+	  if(!iopDacEnable) feStatus |= FE_ERROR_DAC_ENABLE;
 	  if(!iopDacEnable) feStatus |= FE_ERROR_DAC_ENABLE;
 
 #ifdef ADC_MASTER
@@ -1039,6 +1041,7 @@ udelay(1000);
 				overflowAdc[jj][ii] ++;
 				overflowAcc ++;
 				adcOF[jj] = 1;
+				odcStateWord |= ODC_ADC_OVF;
 			  }
                     }
 
@@ -1148,6 +1151,7 @@ udelay(1000);
 				overflowAdc[jj][ii] ++;
 				overflowAcc ++;
 				adcOF[jj] = 1;
+				odcStateWord |= ODC_ADC_OVF;
 			  }
 #endif
                                 // No filter  dWord[kk][ll] = adcData[kk][ll];
@@ -1191,191 +1195,241 @@ udelay(1000);
 		}
 	}
 
-/// \> Call the front end specific application \n
-/// - ---- This is where the user application produced by RCG gets called and executed.
+/// \> Call the front end specific application  ******************\n
+/// - -- This is where the user application produced by RCG gets called and executed. \n\n
         rdtscl(cpuClock[CPU_TIME_USR_START]);
  	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
         rdtscl(cpuClock[CPU_TIME_USR_END]);
 
+  	odcStateWord = 0;
+/// WRITE DAC OUTPUTS ***************************************** \n
 
-/// START OF DAC WRITE *****************************************
+/// Writing of DAC outputs is dependent on code compile option: \n
+/// - -- IOP (ADC_MASTER) reads DAC output values from memory shared with user apps and writes to DAC hardware. \n
+/// - -- USER APP (ADC_SLAVE) sends output values to memory shared with IOP. \n
+
+/// START OF IOP DAC WRITE ***************************************** \n
 #ifdef ADC_MASTER
-	// If DAC FIFO error, always output zero to DAC modules.
-	// Code will require restart to clear.
-	// COMMENT OUT NEX LINE FOR TEST STAND w/bad DAC cards. 
-	if(dacTimingError) iopDacEnable = 0;
-#endif
-	// Write out data to DAC modules
-	for(jj=0;jj<cdsPciModules.dacCount;jj++)
-	{
-#ifdef ADC_SLAVE
-	   // SLAVE writes to MASTER via ipc memory
-	   mm = cdsPciModules.dacConfig[jj];
-#else
-	   // Point to DAC memory buffer
-	   pDacData = (unsigned int *)(cdsPciModules.pci_dac[jj]);
-#endif
-#ifdef ADC_MASTER
-	// locate the proper DAC memory block
-	mm = cdsPciModules.dacConfig[jj];
-	// Determine if memory block has been set with the correct cycle count by Slave app.
-	if(ioMemData->iodata[mm][ioMemCntrDac].cycle == ioClockDac)
-	{
-		dacEnable |= pBits[jj];
-	}else {
-		dacEnable &= ~(pBits[jj]);
-		dacChanErr[jj] += 1;
-	}
-#endif
-// If code is to run <64K rate, need to upsample from code rate to 64K
-#ifdef OVERSAMPLE_DAC
-	   for (kk=0; kk < OVERSAMPLE_TIMES; kk++) {
-#else
-		kk = 0;
-#endif
-		limit = OVERFLOW_LIMIT_16BIT;
-		mask = GSAO_16BIT_MASK;
-		num_outs = GSAO_16BIT_CHAN_COUNT;
-		if (cdsPciModules.dacType[jj] == GSC_18AO8) {
-			limit = OVERFLOW_LIMIT_18BIT; // 18 bit limit
-			mask = GSAO_18BIT_MASK;
-			num_outs = GSAO_18BIT_CHAN_COUNT;
-
-
-		}
-		for (ii=0; ii < num_outs; ii++)
+        /// \> If DAC FIFO error, always output zero to DAC modules. \n
+        /// - -- Code will require restart to clear.
+        // COMMENT OUT NEX LINE FOR TEST STAND w/bad DAC cards. 
+        if(dacTimingError) iopDacEnable = 0;
+        // Write out data to DAC modules
+	/// \> Loop thru all DAC modules
+        for(jj=0;jj<cdsPciModules.dacCount;jj++)
+        {
+           	/// - -- Point to DAC memory buffer
+           	pDacData = (unsigned int *)(cdsPciModules.pci_dac[jj]);
+        	/// - -- locate the proper DAC memory block
+        	mm = cdsPciModules.dacConfig[jj];
+        	/// - -- Determine if memory block has been set with the correct cycle count by Slave app.
+		if(ioMemData->iodata[mm][ioMemCntrDac].cycle == ioClockDac)
 		{
+			dacEnable |= pBits[jj];
+		}else {
+			dacEnable &= ~(pBits[jj]);
+			dacChanErr[jj] += 1;
+		}
+		/// - -- Set overflow limits, data mask, and chan count based on DAC type
+                limit = OVERFLOW_LIMIT_16BIT;
+                mask = GSAO_16BIT_MASK;
+                num_outs = GSAO_16BIT_CHAN_COUNT;
+                if (cdsPciModules.dacType[jj] == GSC_18AO8) {
+                        limit = OVERFLOW_LIMIT_18BIT; // 18 bit limit
+                        mask = GSAO_18BIT_MASK;
+                        num_outs = GSAO_18BIT_CHAN_COUNT;
+
+
+                }
+		/// - -- For each DAC channel
+                for (ii=0; ii < num_outs; ii++)
+                {
 #ifdef FLIP_SIGNALS
-			dacOut[jj][ii] *= -1;
+                        dacOut[jj][ii] *= -1;
 #endif
-#ifdef OVERSAMPLE_DAC
-			if (dacOutUsed[jj][ii]) {
-#ifdef NO_ZERO_PAD
-		 	  dac_in = dacOut[jj][ii];
-#ifdef CORE_BIQUAD
-		 	  dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
-#else
-		 	  dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
-#endif
-#else
-			  dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
-#ifdef CORE_BIQUAD
-		 	  dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
-#else
-		 	  dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
-#endif
-			  dac_in *= OVERSAMPLE_TIMES;
-#endif
-			}
-			else dac_in = 0.0;
-			// Smooth out some of the double > short roundoff errors
-			if(dac_in > 0.0) dac_in += 0.5;
-			else dac_in -= 0.5;
-			dac_out = dac_in;
-#else
-#ifdef ADC_MASTER
-			if((!dacChanErr[jj]) && (iopDacEnable)) {
-				dac_out = ioMemData->iodata[mm][ioMemCntrDac].data[ii];
-				// Zero out data in case user app dies by next cycle
-				// when two or more apps share same DAC module.
-				ioMemData->iodata[mm][ioMemCntrDac].data[ii] = 0;
-			} else dac_out = 0;
-			// Write out ADC duotone if DAC duotone is enabled.
-			if((dacDuoEnable) && (ii==(num_outs-1)) && (jj == 0))
-			{       
-				dac_out = adcData[0][ADC_DUOTONE_CHAN];
-				// dac_out = dacOut[0][7];
-			}      
+			/// - ---- Read DAC output value from shared memory and reset memory to zero
+                        if((!dacChanErr[jj]) && (iopDacEnable)) {
+                                dac_out = ioMemData->iodata[mm][ioMemCntrDac].data[ii];
+                                /// - --------- Zero out data in case user app dies by next cycle
+                                /// when two or more apps share same DAC module.
+                                ioMemData->iodata[mm][ioMemCntrDac].data[ii] = 0;
+                        } else dac_out = 0;
+                        /// - ----  Write out ADC duotone signal to first DAC, last channel, 
+			/// if DAC duotone is enabled.
+                        if((dacDuoEnable) && (ii==(num_outs-1)) && (jj == 0))
+                        {
+                                dac_out = adcData[0][ADC_DUOTONE_CHAN];
+                        }
+// Code below is only for use in DAQ test system.
 #ifdef DIAG_TEST
-			if((ii==0) && (jj == 0))
-			{       
-				if(cycleNum < 100) dac_out = limit / 20;
-				else dac_out = 0;
-			}      
-			if((ii==0) && (jj == 6))
-			{       
-				if(cycleNum < 100) dac_out = limit / 20;
-				else dac_out = 0;
-			}      
+                        if((ii==0) && (jj == 0))
+                        {
+                                if(cycleNum < 100) dac_out = limit / 20;
+                                else dac_out = 0;
+                        }
+                        if((ii==0) && (jj == 6))
+                        {
+                                if(cycleNum < 100) dac_out = limit / 20;
+                                else dac_out = 0;
+                        }
 #endif
-#else
-			// If DAQKILL tripped, send zeroes to IOP
-			if(iopDacEnable) dac_out = dacOut[jj][ii];
-			else dac_out = 0;
-#endif
-#endif
-			// Check for outputs > range of DAC
-			// If overflow, clip at DAC limits and report errors
-			if(dac_out > limit) 
-			{
-				dac_out = limit;
-				overflowDac[jj][ii] ++;
-				overflowAcc ++;
-				dacOF[jj] = 1;
-			}
-			if(dac_out < -limit) 
-			{
-				dac_out = -limit;
-				overflowDac[jj][ii] ++;
-				overflowAcc ++;
-				dacOF[jj] = 1;
-			}
-		        // If DAQKILL tripped, send zeroes to IOP
-		        if(!iopDacEnable) dac_out = 0;
-			// Load last values to EPICS channels for monitoring on GDS_TP screen.
-		 	dacOutEpics[jj][ii] = dac_out;
+                        /// - ---- Check output values are within range of DAC \n
+                        /// - --------- If overflow, clip at DAC limits and report errors
+                        if(dac_out > limit)
+                        {
+                                dac_out = limit;
+                                overflowDac[jj][ii] ++;
+                                overflowAcc ++;
+                                dacOF[jj] = 1;
+				odcStateWord |= ODC_DAC_OVF;;
+                        }
+                        if(dac_out < -limit)
+                        {
+                                dac_out = -limit;
+                                overflowDac[jj][ii] ++;
+                                overflowAcc ++;
+                                dacOF[jj] = 1;
+				odcStateWord |= ODC_DAC_OVF;;
+                        }
+                        /// - ---- If DAQKILL tripped, set output to zero.
+                        if(!iopDacEnable) dac_out = 0;
+                        /// - ---- Load last values to EPICS channels for monitoring on GDS_TP screen.
+                        dacOutEpics[jj][ii] = dac_out;
 
-			// Load DAC testpoints
-			floatDacOut[16*jj + ii] = dac_out;
-#ifdef ADC_SLAVE
-			// Slave needs to write to memory buffer for IOP
-			memCtr = (ioMemCntrDac + kk) % IO_MEMORY_SLOTS;
-			// Only write to DAC channels being used to allow two or more
-			// slaves to write to same DAC module.
-			if (dacOutUsed[jj][ii]) 
-	   			ioMemData->iodata[mm][memCtr].data[ii] = dac_out;
-#else
+                        /// - ---- Load DAC testpoints
+                        floatDacOut[16*jj + ii] = dac_out;
 
-			// Write to DAC local memory area, for later xmit to DAC module
-			*pDacData =  (unsigned int)(dac_out & mask);
-			pDacData ++;
-#endif
+                        /// - ---- Write to DAC local memory area, for later xmit to DAC module
+                        *pDacData =  (unsigned int)(dac_out & mask);
+                        pDacData ++;
 		}
-#ifdef ADC_SLAVE
-		// Write cycle count to make DAC data complete
-		if(iopDacEnable)
-		ioMemData->iodata[mm][memCtr].cycle = (ioClockDac + kk) % IOP_IO_RATE;
-#endif
-#ifdef OVERSAMPLE_DAC
-  	   }
-#endif
-#ifdef ADC_MASTER
-		// Mark cycle count as having been used -1
-		// Forces slaves to mark this cycle or will not be used again by Master
-		ioMemData->iodata[mm][ioMemCntrDac].cycle = -1;
-		// DMA Write data to DAC module
-	        if(dacWriteEnable > 4) {
-			if(cdsPciModules.dacType[jj] == GSC_16AO16) {
-				gsc16ao16DmaStart(jj);
-			} else {
-				gsc18ao8DmaStart(jj);
-			}
-		}
-#endif
+                /// - -- Mark cycle count as having been used -1 \n
+                /// - --------- Forces slaves to mark this cycle or will not be used again by Master
+                ioMemData->iodata[mm][ioMemCntrDac].cycle = -1;
+                /// - -- DMA Write data to DAC module
+                if(dacWriteEnable > 4) {
+                        if(cdsPciModules.dacType[jj] == GSC_16AO16) {
+                                gsc16ao16DmaStart(jj);
+                        } else {
+                                gsc18ao8DmaStart(jj);
+                        }
+                }
 	}
+        /// \> Increment DAC memory block pointers for next cycle
+        ioClockDac = (ioClockDac + 1) % IOP_IO_RATE;
+        ioMemCntrDac = (ioMemCntrDac + 1) % IO_MEMORY_SLOTS;
+        if(dacWriteEnable < 10) dacWriteEnable ++;
+/// END OF IOP DAC WRITE *************************************************
 
-
+#endif
 #ifdef ADC_SLAVE
-		// Increment DAC memory block pointers for next cycle
-		ioClockDac = (ioClockDac + OVERSAMPLE_TIMES) % IOP_IO_RATE;
-		ioMemCntrDac = (ioMemCntrDac  + OVERSAMPLE_TIMES) % IO_MEMORY_SLOTS;
+/// START OF USER APP DAC WRITE *****************************************
+        // Write out data to DAC modules
+	/// \> Loop thru all DAC modules
+        for(jj=0;jj<cdsPciModules.dacCount;jj++)
+        {
+		/// - -- locate the proper DAC memory block
+           	mm = cdsPciModules.dacConfig[jj];
+		/// - -- Set overflow limits, data mask, and chan count based on DAC type
+                limit = OVERFLOW_LIMIT_16BIT;
+                mask = GSAO_16BIT_MASK;
+                num_outs = GSAO_16BIT_CHAN_COUNT;
+                if (cdsPciModules.dacType[jj] == GSC_18AO8) {
+                        limit = OVERFLOW_LIMIT_18BIT; // 18 bit limit
+                        mask = GSAO_18BIT_MASK;
+                        num_outs = GSAO_18BIT_CHAN_COUNT;
+
+
+                }
+		/// - -- If user app < 64k rate (typical), need to upsample from code rate to IOP rate
+           	for (kk=0; kk < OVERSAMPLE_TIMES; kk++) {
+		     /// - -- For each DAC channel
+                    for (ii=0; ii < num_outs; ii++)
+                    {
+#ifdef FLIP_SIGNALS
+                        dacOut[jj][ii] *= -1;
 #endif
-#ifdef ADC_MASTER
-		// Increment DAC memory block pointers for next cycle
-		ioClockDac = (ioClockDac + 1) % IOP_IO_RATE;
-		ioMemCntrDac = (ioMemCntrDac + 1) % IO_MEMORY_SLOTS;
+			/// - ---- Read in DAC value, if channel is used by the application,  and run thru upsample filter\n
+                        if (dacOutUsed[jj][ii]) {
+#ifdef OVERSAMPLE_DAC
+#ifdef NO_ZERO_PAD
+				/// - --------- If set to NO_ZERO_PAD (not standard setting), then DAC output value is 
+				/// repeatedly run thru the filter OVERSAMPE_TIMES.\n
+                          	dac_in = dacOut[jj][ii];
+#ifdef CORE_BIQUAD
+                          	dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
+#else
+                          	dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
 #endif
-	if(dacWriteEnable < 10) dacWriteEnable ++;
+#else
+				/// - --------- Otherwise zero padding is used (standard), 
+				/// ie DAC output value is applied to filter on first
+				/// interation, thereafter zeros are applied.
+                          	dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
+#ifdef CORE_BIQUAD
+                          	dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
+#else
+                          	dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
+#endif
+                          	dac_in *= OVERSAMPLE_TIMES;
+#endif
+#else
+                          	dac_in = dacOut[jj][ii];
+#endif
+                        }
+			/// - ---- If channel is not used, then set value to zero.
+                        else 
+				dac_in = 0.0;
+                        /// - ---- Smooth out some of the double > short roundoff errors
+                        if(dac_in > 0.0) dac_in += 0.5;
+                        else dac_in -= 0.5;
+                        dac_out = dac_in;
+
+			/// - ---- Check output values are within range of DAC \n
+                        /// - --------- If overflow, clip at DAC limits and report errors
+                        if(dac_out > limit)
+                        {
+                                dac_out = limit;
+                                overflowDac[jj][ii] ++;
+                                overflowAcc ++;
+                                dacOF[jj] = 1;
+				odcStateWord |= ODC_DAC_OVF;;
+                        }
+                        if(dac_out < -limit)
+                        {
+                                dac_out = -limit;
+                                overflowDac[jj][ii] ++;
+                                overflowAcc ++;
+                                dacOF[jj] = 1;
+				odcStateWord |= ODC_DAC_OVF;;
+                        }
+			/// - ---- If DAQKILL tripped, set output to zero.
+                        if(!iopDacEnable) dac_out = 0;
+			/// - ---- Load last values to EPICS channels for monitoring on GDS_TP screen.
+                        dacOutEpics[jj][ii] = dac_out;
+
+                        /// - ---- Load DAC testpoints
+                        floatDacOut[16*jj + ii] = dac_out;
+                        /// - ---- Determine shared memory location for new DAC output data 
+                        memCtr = (ioMemCntrDac + kk) % IO_MEMORY_SLOTS;
+			/// - ---- Write DAC output to shared memory. \n
+                        /// - --------- Only write to DAC channels being used to allow two or more
+                        /// slaves to write to same DAC module.
+                        if (dacOutUsed[jj][ii])
+                                ioMemData->iodata[mm][memCtr].data[ii] = dac_out;
+		    }
+                /// - ---- Write cycle count to make DAC data complete
+                if(iopDacEnable)
+                ioMemData->iodata[mm][memCtr].cycle = (ioClockDac + kk) % IOP_IO_RATE;
+           }
+	}
+        /// \> Increment DAC memory block pointers for next cycle
+        ioClockDac = (ioClockDac + OVERSAMPLE_TIMES) % IOP_IO_RATE;
+        ioMemCntrDac = (ioMemCntrDac  + OVERSAMPLE_TIMES) % IO_MEMORY_SLOTS;
+        if(dacWriteEnable < 10) dacWriteEnable ++;
+/// END OF USER APP DAC WRITE *************************************************
+
+#endif
 /// END OF DAC WRITE *************************************************
 
 
@@ -1398,7 +1452,7 @@ udelay(1000);
 		{
 			diagWord |= TIME_ERR_IRIGB;;
 			feStatus |= FE_ERROR_TIMING;;
-		}
+	        }
 /// - ---- Calc duotone diagnostic mean values for past second and reset.
                 duotoneMean = duotoneTotal/CYCLE_PER_SECOND;
                 duotoneTotal = 0.0;
@@ -1433,7 +1487,8 @@ udelay(1000);
         {
                 duotoneTime = duotime(DT_SAMPLE_CNT, duotoneMean, duotone);
                 pLocalEpics->epicsOutput.dtTime = duotoneTime;
-		if((duotoneTime < MIN_DT_DIAG_VAL) || (duotoneTime > MAX_DT_DIAG_VAL)) feStatus |= FE_ERROR_TIMING;
+		if((duotoneTime < MIN_DT_DIAG_VAL) || (duotoneTime > MAX_DT_DIAG_VAL)) 
+			feStatus |= FE_ERROR_TIMING;
 		duotoneTimeDac = duotime(DT_SAMPLE_CNT, duotoneMeanDac, duotoneDac);
                 pLocalEpics->epicsOutput.dacDtTime = duotoneTimeDac;
         }
@@ -1484,12 +1539,13 @@ udelay(1000);
 	  if((adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcHoldTime < CYCLE_TIME_ALRM_LO)) 
 	  {
 	  	diagWord |= FE_ADC_HOLD_ERR;
-		feStatus |= FE_ERROR_TIMING;;
+		feStatus |= FE_ERROR_TIMING;
+	  
 	  }
 	  if(timeHoldMax > CYCLE_TIME_ALRM) 
 	  {
 	  	diagWord |= FE_PROC_TIME_ERR;
-		feStatus |= FE_ERROR_TIMING;;
+		feStatus |= FE_ERROR_TIMING;
 	  }
 	  pLocalEpics->epicsOutput.stateWord = feStatus;
   	  feStatus = 0;
@@ -1643,8 +1699,10 @@ udelay(1000);
 	  	pEpicsComms->padSpace.feDaqBlockSize = curDaqBlockSize;
 	  	pLocalEpics->epicsOutput.tpCnt = tpPtr->count & 0xff;
 		feStatus |= (FE_ERROR_EXC_SET & tpPtr->count);
+		if (FE_ERROR_EXC_SET & tpPtr->count) odcStateWord |= ODC_EXC_SET;
+		else odcStateWord &= ~(ODC_EXC_SET);
 		if(pLocalEpics->epicsOutput.daqByteCnt > DAQ_DCU_RATE_WARNING) 
-			feStatus |= FE_ERROR_DAQ;;
+			feStatus |= FE_ERROR_DAQ;
 #endif
 
 /// \> Cycle 19, write updated diag info to EPICS
