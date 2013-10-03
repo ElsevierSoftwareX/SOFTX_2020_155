@@ -251,6 +251,15 @@ struct rmIpcStr {
 /// Offset to DAQ configuration info from base address of shared memory.
 #define DAQ_INFO_ADDRESS	0x01ff0000
 
+/// Cycle (16Hz Daq Clk) on which to transfer EPICS integer data.
+#define DAQ_XFER_CYCLE_INT	0
+/// Cycle (16Hz Daq Clk) on which to transfer EPICS double data.
+#define DAQ_XFER_CYCLE_DBL	1
+/// Cycle (16Hz Daq Clk) on which to start transfer of Filter Module EPICS data.
+#define DAQ_XFER_CYCLE_FMD	2
+/// Number of filter modules for which data is to be transferred per DAQ cycle.
+#define DAQ_XFER_FMD_PER_CYCLE	100
+
 /// Structure for DAQ setup information in shared memory from EPICS
 typedef struct DAQ_INFO_BLOCK {
   int reconfig; 		///< Set to 1 by the Epics to indicate configuration change 
@@ -262,6 +271,8 @@ typedef struct DAQ_INFO_BLOCK {
   int epicsdblDataOffset;
   int cpyepics2times;
   int cpyIntSize[2];
+  int numEpicsFiltXfers;
+  int numEpicsFiltsLast;
   unsigned long configFileCRC; 	///< DAQ config file checksum 
   struct {
     unsigned int tpnum; 	///< Test point number to which this DAQ channel connects 

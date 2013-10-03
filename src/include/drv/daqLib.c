@@ -51,7 +51,7 @@ int daqWrite(int flag,
 	     double excSignal[],
 	     char *pEpics)
 {
-int ii,jj;			/* Loop counters.			*/
+int ii,jj,kk;			/* Loop counters.			*/
 int status;			/* Return value from called routines.	*/
 double dWord;			/* Temp value for storage of DAQ values */
 static int daqBlockNum;		/* 1-16, tracks DAQ block to write to.	*/
@@ -401,7 +401,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     } /* end swing buffer write loop */
 
 /// \> Write EPICS data into swing buffer at 16Hz.
-if(daqSlot == 0)
+if(daqSlot == DAQ_XFER_CYCLE_INT)
 {
 /// \>\> On 16Hz boundary: \n
 /// - ----  Write EPICS integer values to beginning of local write buffer
@@ -417,6 +417,9 @@ if(daqSlot == 0)
 	      memcpy(pWriteBuffer,pEpicsIntData,dataInfo.cpyIntSize[0]);
 	}
 
+}
+if(daqSlot == DAQ_XFER_CYCLE_DBL)
+{
 /// - ---- Write EPICS double values as float values after EPICS integer type data.
     	pEpicsDblData1 = (double *)pEpicsDblData;
     	pEpicsFloat = (float *)pWriteBuffer; 
@@ -428,11 +431,19 @@ if(daqSlot == 0)
 		pEpicsDblData1 ++;
 	}
 }
-if(daqSlot == 1)
+if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 {
-/// \>\> On 16Hz boundary + 1 cycle: \n
+/// \>\> On 16Hz boundary + 1 (or more) cycle(s): \n
 /// - ----  Write filter module EPICS values as floats
- 	for(ii=0;ii<MAX_MODULES;ii++)
+	jj = DAQ_XFER_FMD_PER_CYCLE * (daqSlot - DAQ_XFER_CYCLE_FMD);
+	if(daqSlot == (dataInfo.numEpicsFiltXfers - 1))
+	{
+		kk = jj + dataInfo.numEpicsFiltsLast;
+	} else {
+		kk = jj + DAQ_XFER_FMD_PER_CYCLE;
+	}
+	// printf("Cycle = %d jj = %d kk = %d\n",daqSlot,jj,kk);
+ 	for(ii=jj;ii<kk;ii++)
 	{
 		*pEpicsFloat = (float)dspPtr->inputs[ii].offset;
 		pEpicsFloat ++;
@@ -819,6 +830,16 @@ int status = 0;
     dataInfo->numEpicsFloats = pInfo->numEpicsFloats;
     dataInfo->numEpicsFilts = pInfo->numEpicsFilts;
     dataInfo->numEpicsTotal = pInfo->numEpicsTotal;
+/// \> Determine how many filter modules are to have their data transferred per cycle.
+/// - ---- This is to balance load (CPU time) across several cycles if number of filter modules > 100
+    dataInfo->numEpicsFiltXfers = MAX_MODULES/DAQ_XFER_FMD_PER_CYCLE;
+    dataInfo->numEpicsFiltsLast = DAQ_XFER_FMD_PER_CYCLE;
+    if(MAX_MODULES % DAQ_XFER_FMD_PER_CYCLE) 
+    {
+	dataInfo->numEpicsFiltXfers ++;
+	dataInfo->numEpicsFiltsLast = (MAX_MODULES % DAQ_XFER_FMD_PER_CYCLE);
+    }
+    dataInfo->numEpicsFiltXfers += DAQ_XFER_CYCLE_FMD;
     pEpicsIntData = pEpics;
     epicsIntXferSize = dataInfo->numEpicsInts * 4;
 
@@ -860,6 +881,7 @@ int status = 0;
     printf("DAQ EPICS INT DATA is at 0x%x with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
     printf("DAQ EPICS FLT DATA is at 0x%x\n",(long)pEpicsDblData);
     printf("DAQ EPICS: Int = %d  Flt = %d Filters = %d Total = %d Fast = %d\n",dataInfo->numEpicsInts,dataInfo->numEpicsFloats,dataInfo->numEpicsFilts, dataInfo->numEpicsTotal, dataInfo->numChans);
+    printf("DAQ EPICS: Number of Filter Module Xfers = %d last = %d\n",dataInfo->numEpicsFiltXfers,dataInfo->numEpicsFiltsLast);
     /// \> Initialize CRC length with EPICS data size.
     dataLength = 4 * dataInfo->numEpicsTotal;
     printf("crc length epics = %d\n",dataLength);
