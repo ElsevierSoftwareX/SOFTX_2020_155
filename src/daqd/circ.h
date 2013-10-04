@@ -7,7 +7,8 @@
 #include <assert.h>
 #include "config.h"
 
-#define MAX_BLOCKS 200
+// Raise from 200 to 700 to allow for longer trend frames
+#define MAX_BLOCKS 700
 
 /*
   There is one bit allocated for each consumer
