@@ -1269,6 +1269,12 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
     }
 #endif
 
+// check that we don't exceed limit
+    if ( trend_buffer_blocks > MAX_BLOCKS ) {
+      system_log(1, "FATAL: second trend frame length exceeds MAX_BLOCKS limit of %d", MAX_BLOCKS);
+      return 1;
+    }
+
     tb = new (mptr) circ_buffer (0, trend_buffer_blocks, block_size);
     if (! (tb -> buffer_ptr ())) {
       tb -> ~circ_buffer();
@@ -1284,6 +1290,12 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
     void *mptr = malloc (sizeof(circ_buffer));
     if (!mptr) {
       *yyout << "couldn't construct minute trend circular buffer, memory exhausted" << endl;
+      return 1;
+    }
+
+    // check that we don't exceed limit
+    if ( trend_buffer_blocks > MAX_BLOCKS ) {
+      system_log(1, "FATAL: minute trend frame length exceeds MAX_BLOCKS limit of %d", MAX_BLOCKS);
       return 1;
     }
 
