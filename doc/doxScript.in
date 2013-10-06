@@ -21,6 +21,8 @@ grep \#\/\/ @top_srcdir@/src/epics/util/lib/EpicsBinIn.pm | sed s/\#/\\//g > Epi
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/EpicsIn.pm | sed s/\#/\\//g > EpicsIn.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/EpicsOut.pm | sed s/\#/\\//g > EpicsOut.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/EpicsMomentary.pm | sed s/\#/\\//g > EpicsMomentary.dox
+grep \#\/\/ @top_srcdir@/src/epics/util/lib/Gps.pm | sed s/\#/\\//g > Gps.dox
+grep \#\/\/ @top_srcdir@/src/epics/util/lib/StateWord.pm | sed s/\#/\\//g > StateWord.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/EzCaRead.pm | sed s/\#/\\//g > EzCaRead.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/EzCaWrite.pm | sed s/\#/\\//g > EzCaWrite.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/EXC.pm | sed s/\#/\\//g > EXC.dox

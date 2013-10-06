@@ -127,6 +127,10 @@ These are all located in the epics/util/lib directory.\n\n
 \par User Defined C Code
         - \subpage FunctionCall "FunctionCall.pm\n
 
+\par Real-time Links
+	- \subpage Gps "Gps.pm" \n
+	- \subpage stateWord "StateWord.pm"
+
 \par Support Modules
         - \subpage medmGen "medmGen.pm" \n
 */
