@@ -858,8 +858,12 @@ int status = 0;
     /// Need to check both standard CDS struct and User channels
     /// - ---- If either doesn't end on 8 byte boundary, then a 4 byte hole will appear
     /// before the double type data in shared memory.
-    if((ii % 8) || (jj % 8)) {
-        printf("Have at least 1 int mem hole %d %d \n",ii,jj);
+    if(ii % 8) {
+        printf("Have int mem hole after CDS %d %d \n",ii,jj);
+        dataInfo->epicsdblDataOffset = 4;
+    }
+    if(jj % 8) {
+        printf("Have int mem hole after user %d %d \n",ii,jj);
         dataInfo->epicsdblDataOffset = 4;
     }
     if ((ii%8) &&(jj>0)) { 
@@ -869,8 +873,8 @@ int status = 0;
         dataInfo->cpyIntSize[0] = ii;
         dataInfo->cpyIntSize[1] = jj;        
 	dataInfo->cpyepics2times = 1;
-        dataInfo->epicsdblDataOffset += 4;
-        printf("Have 2 mem holes %d %d \nNeet to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo->cpyIntSize[0],dataInfo->cpyIntSize[1]);
+        // dataInfo->epicsdblDataOffset += 4;
+        printf("Have mem holes after CDS  %d %d \nNeed to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo->cpyIntSize[0],dataInfo->cpyIntSize[1]);
     }
 
     /// \> Set the pointer to start of EPICS double type data in shared memory. \n
