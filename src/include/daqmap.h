@@ -264,21 +264,21 @@ struct rmIpcStr {
 typedef struct DAQ_INFO_BLOCK {
   int reconfig; 		///< Set to 1 by the Epics to indicate configuration change 
   int numChans; 		///< Defines how many channels are configured int struct tp[] 
-  int numEpicsInts;
-  int numEpicsFloats;
-  int numEpicsFilts; 
-  int numEpicsTotal; 
-  int epicsdblDataOffset;
-  int cpyepics2times;
-  int cpyIntSize[2];
-  int numEpicsFiltXfers;
-  int numEpicsFiltsLast;
+  int numEpicsInts;		///< Number of EPICS integer values to acquire.
+  int numEpicsFloats;		///< Number of EPICS floating values to acquire.
+  int numEpicsFilts; 		///< Number of filter module EPICS channels to acquire.
+  int numEpicsTotal; 		///< Total number of EPICS channels to acquire.
+  int epicsdblDataOffset;	///< Offset from start of data buffer to start of float data.
+  int cpyepics2times;		///< Set if EPICS integers need to be copied twice.
+  int cpyIntSize[2];		///< Size of each memcpy of EPICS integer data.
+  int numEpicsFiltXfers;	///< Number of cycles required to copy filter module data.
+  int numEpicsFiltsLast;	///< Number of filter modules to copy data from on last xfer.
   unsigned long configFileCRC; 	///< DAQ config file checksum 
   struct {
     unsigned int tpnum; 	///< Test point number to which this DAQ channel connects 
     unsigned int dataType;	///< Type cast of DAQ data channel
     unsigned int dataRate;	///< Acquisition rate of DAQ channel
-    float dataGain;
+    float dataGain;		///< Gain to be applied to TP data.
   } tp[DCU_MAX_CHANNELS];
 } DAQ_INFO_BLOCK;
 
