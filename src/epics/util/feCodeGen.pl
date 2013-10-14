@@ -100,6 +100,7 @@ $dcuId = 10; # Default dcu Id
 $targetHost = "localhost"; # Default target host name
 $specificCpu = -1; # Defaults is to run the FE on the first available CPU
 $adcMaster = -1;
+$dacWdOverride = -1;
 $adcSlave = -1;
 $timeMaster = -1;
 $timeSlave = -1;
@@ -119,6 +120,10 @@ $dac_internal_clocking = 0; # Default is DAC external clocking
 $no_oversampling = 0; # Default is to iversample
 $no_dac_interpolation = 0; # Default is to interpolate D/A outputs
 $max_name_len = 39;	# Maximum part name length
+$dacKillMod[0][0] = undef;
+$dacKillModCnt[0] = undef;
+@dacKillDko = qw(x x x x x x x x x x x x x);
+$dkTimesCalled = 0;
 
 # Normally, ARGV !> 2, so the following are not invoked in a standard make
 # This is legacy.
@@ -869,10 +874,6 @@ print "Found $boCnt Binary modules part is $boPartNum[0]\n";
 die "***ERROR: Too many ADC modules (MAX = $::maxAdcModules): ADC defined = $adcCnt\n" if ($adcCnt > $::maxAdcModules);
 die "***ERROR: Too many DAC modules (MAX = $::maxDacModules): DAC defined = $dacCnt\n" if  ($dacCnt > $::maxDacModules);
 
-if ($dacKillCnt > 1) {
-   die "***ERROR: Too many DACKILL parts defined (MAX = 1)  = $dacKillCnt\n";
-}
-
 #//	- Need to remove some parts from processing list, such as BUSS, DELAY, GROUND, as code is not produced for these parts.
 #//		- Loop thru all of the parts within a subsystem.
 for($ii=0;$ii<$subSys;$ii++)
@@ -1401,7 +1402,7 @@ print OUTH "typedef struct \U$systemName {\n";
 my $header_masks;
 for($ii=0;$ii<$partCnt;$ii++)
 {
-	if (($cdsPart[$ii]) && (($partType[$ii] eq "IPCx") || ($partType[$ii] eq "FiltCtrl") || ($partType[$ii] eq "FiltCtrl2") || ($partType[$ii] eq "EpicsBinIn") || ($partType[$ii] eq "DacKill") || ($partType[$ii] eq "EpicsMomentary") || ($partType[$ii] eq "EpicsCounter") || ($partType[$ii] eq "Word2Bit") )) {
+	if (($cdsPart[$ii]) && (($partType[$ii] eq "IPCx") || ($partType[$ii] eq "FiltCtrl") || ($partType[$ii] eq "FiltCtrl2") || ($partType[$ii] eq "EpicsBinIn") || ($partType[$ii] eq "DacKill") || ($partType[$ii] eq "DacKillIop") || ($partType[$ii] eq "EpicsMomentary") || ($partType[$ii] eq "EpicsCounter") || ($partType[$ii] eq "Word2Bit") )) {
 	  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
 	  if (length($masks) > 5) {
 	  	$header_masks .= $masks;
@@ -1421,7 +1422,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 }
 for($ii=0;$ii<$partCnt;$ii++)
 {
-	if (($cdsPart[$ii]) && ($partType[$ii] ne "IPCx") && ($partType[$ii] ne "FiltCtrl") && ($partType[$ii] ne "FiltCtrl2") && ($partType[$ii] ne "EpicsBinIn") && ($partType[$ii] ne "DacKill") && ($partType[$ii] ne "EpicsMomentary") && ($partType[$ii] ne "EpicsCounter") && ($partType[$ii] ne "MuxMatrix") ) {
+	if (($cdsPart[$ii]) && ($partType[$ii] ne "IPCx") && ($partType[$ii] ne "FiltCtrl") && ($partType[$ii] ne "FiltCtrl2") && ($partType[$ii] ne "EpicsBinIn") && ($partType[$ii] ne "DacKill") && ($partType[$ii] ne "DacKillIop") && ($partType[$ii] ne "EpicsMomentary") && ($partType[$ii] ne "EpicsCounter") && ($partType[$ii] ne "MuxMatrix") ) {
 	  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
 	  if (length($masks) > 5) {
 	  	$header_masks .= $masks;
@@ -2611,6 +2612,9 @@ if ($adcMaster > -1) {
   $modelType = "MASTER";
   if($diagTest > -1) {
   print OUTM "EXTRA_CFLAGS += -DDIAG_TEST\n";
+  }
+  if($dacWdOverride > -1) {
+  print OUTM "EXTRA_CFLAGS += -DDAC_WD_OVERRIDE\n";
   }
 } else {
   print OUTM "#Uncomment to run on an I/O Master \n";
