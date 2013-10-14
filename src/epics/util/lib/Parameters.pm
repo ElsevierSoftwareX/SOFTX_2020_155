@@ -116,6 +116,9 @@ sub parseParams {
 			} elsif ($spp[0] eq "diagTest") {
 				print "FE Compiles as DIAG TEST CODE\n";
 				$::diagTest = $spp[1];
+			} elsif ($spp[0] eq "dacwdoverride") {
+				print "FE Compiles with override of bad DAC error\n";
+				$::dacWdOverride = $spp[1];
 			} elsif ($spp[0] eq "adcSlave") {
 				print "FE will run as SLAVE to IOP\n";
 				$::adcSlave = $spp[1];
