@@ -295,7 +295,7 @@ void *fe_start(void *arg)
   int adcWait = 0;
   int adcOF[MAX_ADC_MODULES];		/// @param adcOF[]  ADC overrange counters
 
-  int dacChanErr[MAX_DAC_MODULES];
+  // int dacChanErr[MAX_DAC_MODULES];
   int dacOF[MAX_DAC_MODULES];		/// @param dacOF[]  DAC overrange counters
   static int dacWriteEnable = 0;	/// @param dacWriteEnable  No DAC outputs until >4 times through code
   					///< Code runs longer for first few cycles on startup as it settles in,
@@ -310,6 +310,7 @@ void *fe_start(void *arg)
   int dacEnable = 0;
   int pBits[9] = {1,2,4,8,16,32,64,128,256};	/// @param pBits[] Lookup table for quick power of 2 calcs
 #endif
+  int dkiTrip = 0;
   RFM_FE_COMMS *pEpicsComms;		/// @param *pEpicsComms Pointer to EPICS shared memory space
   int timeHoldMax = 0;			/// @param timeHoldMax Max code cycle time since last diag reset
   int myGmError2 = 0;			/// @param myGmError2 Myrinet error variable
@@ -908,8 +909,7 @@ udelay(1000);
 	  pLocalEpics->epicsOutput.awgStat = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
 	  if(pLocalEpics->epicsOutput.awgStat) feStatus |= FE_ERROR_AWG;
 	  /// - ---- Check if DAC outputs are enabled, report error.
-	  if(!iopDacEnable) feStatus |= FE_ERROR_DAC_ENABLE;
-	  if(!iopDacEnable) feStatus |= FE_ERROR_DAC_ENABLE;
+	  if(!iopDacEnable || dkiTrip) feStatus |= FE_ERROR_DAC_ENABLE;
 
 #ifdef ADC_MASTER
 	  /// - ---- If IOP, Increment GPS second
@@ -1213,8 +1213,11 @@ udelay(1000);
         /// \> If DAC FIFO error, always output zero to DAC modules. \n
         /// - -- Code will require restart to clear.
         // COMMENT OUT NEX LINE FOR TEST STAND w/bad DAC cards. 
+#ifndef DAC_WD_OVERRIDE
         if(dacTimingError) iopDacEnable = 0;
+#endif
         // Write out data to DAC modules
+	dkiTrip = 0;
 	/// \> Loop thru all DAC modules
         for(jj=0;jj<cdsPciModules.dacCount;jj++)
         {
@@ -1253,7 +1256,10 @@ udelay(1000);
                                 /// - --------- Zero out data in case user app dies by next cycle
                                 /// when two or more apps share same DAC module.
                                 ioMemData->iodata[mm][ioMemCntrDac].data[ii] = 0;
-                        } else dac_out = 0;
+                        } else {
+				dac_out = 0;
+				dkiTrip = 1;
+			}
                         /// - ----  Write out ADC duotone signal to first DAC, last channel, 
 			/// if DAC duotone is enabled.
                         if((dacDuoEnable) && (ii==(num_outs-1)) && (jj == 0))
