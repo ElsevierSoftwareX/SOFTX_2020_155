@@ -1,6 +1,6 @@
 Library {
   Name			  "CDS_PARTS"
-  Version		  8.0
+  Version		  8.1
   MdlSubVersion		  0
   SavedCharacterEncoding  "ISO-8859-1"
   LibraryType		  "BlockLibrary"
@@ -19,7 +19,7 @@ Library {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [458.0, 282.0, 1175.0, 1022.0]
+      Location		      [172.0, 22.0, 1215.0, 878.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -41,11 +41,11 @@ Library {
 	$ObjectID		5
 	$ClassName		"Simulink.EditorInfo"
 	IsActive		[1]
-	ViewObjType		"SimulinkTopLevel"
-	LoadSaveID		"0"
-	Extents			[1141.0, 860.0]
-	ZoomFactor		[1.5699999999999998]
-	Offset			[-5.6843418860808015e-14, -5.6843418860808015e-14]
+	ViewObjType		"SimulinkSubsys"
+	LoadSaveID		"164"
+	Extents			[1181.0, 716.0]
+	ZoomFactor		[1.25]
+	Offset			[0.0, 0.0]
       }
     }
   }
@@ -53,11 +53,11 @@ Library {
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "rolfbork"
+  LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Sep 06 14:32:17 2013"
-  RTWModifiedTimeStamp	  300378735
-  ModelVersionFormat	  "1.%<AutoIncrement:355>"
+  LastModifiedDate	  "Wed Oct 09 19:46:42 2013"
+  RTWModifiedTimeStamp	  303248645
+  ModelVersionFormat	  "1.%<AutoIncrement:362>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -126,13 +126,13 @@ Library {
     Dimension		    1
     Simulink.ConfigSet {
       $ObjectID		      6
-      Version		      "1.12.1"
+      Version		      "1.13.0"
       Array {
 	Type			"Handle"
 	Dimension		8
 	Simulink.SolverCC {
 	  $ObjectID		  7
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  StartTime		  "0.0"
 	  StopTime		  "10.0"
 	  AbsTol		  "auto"
@@ -167,7 +167,7 @@ Library {
 	}
 	Simulink.DataIOCC {
 	  $ObjectID		  8
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  Decimation		  "1"
 	  ExternalInput		  "[t, u]"
 	  FinalStateName	  "xFinal"
@@ -199,7 +199,7 @@ Library {
 	}
 	Simulink.OptimizationCC {
 	  $ObjectID		  9
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    4
@@ -251,7 +251,7 @@ Library {
 	}
 	Simulink.DebuggingCC {
 	  $ObjectID		  10
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  RTPrefix		  "error"
 	  ConsistencyChecking	  "none"
 	  ArrayBoundsChecking	  "none"
@@ -341,11 +341,12 @@ Library {
 	}
 	Simulink.HardwareCC {
 	  $ObjectID		  11
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  ProdBitPerChar	  8
 	  ProdBitPerShort	  16
 	  ProdBitPerInt		  32
 	  ProdBitPerLong	  32
+	  ProdBitPerLongLong	  64
 	  ProdBitPerFloat	  32
 	  ProdBitPerDouble	  64
 	  ProdBitPerPointer	  32
@@ -355,17 +356,20 @@ Library {
 	  ProdEndianess		  "Unspecified"
 	  ProdWordSize		  32
 	  ProdShiftRightIntArith  on
+	  ProdLongLongMode	  off
 	  ProdHWDeviceType	  "32-bit Generic"
 	  TargetBitPerChar	  8
 	  TargetBitPerShort	  16
 	  TargetBitPerInt	  32
 	  TargetBitPerLong	  32
+	  TargetBitPerLongLong	  64
 	  TargetBitPerFloat	  32
 	  TargetBitPerDouble	  64
 	  TargetBitPerPointer	  32
 	  TargetLargestAtomicInteger "Char"
 	  TargetLargestAtomicFloat "None"
 	  TargetShiftRightIntArith on
+	  TargetLongLongMode	  off
 	  TargetIntDivRoundTo	  "Undefined"
 	  TargetEndianess	  "Unspecified"
 	  TargetWordSize	  32
@@ -378,7 +382,7 @@ Library {
 	}
 	Simulink.ModelReferenceCC {
 	  $ObjectID		  12
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  UpdateModelReferenceTargets "IfOutOfDateOrStructuralChange"
 	  CheckModelReferenceTargetMessage "error"
 	  EnableParallelModelReferenceBuilds off
@@ -393,7 +397,7 @@ Library {
 	}
 	Simulink.SFSimCC {
 	  $ObjectID		  13
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  SFSimEnableDebug	  on
 	  SFSimOverflowDetection  on
 	  SFSimEcho		  on
@@ -408,7 +412,7 @@ Library {
 	Simulink.RTWCC {
 	  $BackupClass		  "Simulink.RTWCC"
 	  $ObjectID		  14
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    6
@@ -448,6 +452,7 @@ Library {
 	  CodeExecutionProfileVariable "executionProfile"
 	  CodeProfilingSaveOptions "SummaryOnly"
 	  CodeProfilingInstrumentation off
+	  SILDebugging		  off
 	  TargetLang		  "C"
 	  IncludeBusHierarchyInRTWFileBlockHierarchyMap	off
 	  IncludeERTFirstTime	  off
@@ -468,7 +473,7 @@ Library {
 	    Dimension		    2
 	    Simulink.CodeAppCC {
 	      $ObjectID		      15
-	      Version		      "1.12.1"
+	      Version		      "1.13.0"
 	      Array {
 		Type			"Cell"
 		Dimension		17
@@ -508,7 +513,7 @@ Library {
 	      IncDataTypeInIds	      off
 	      MangleLength	      1
 	      CustomSymbolStrGlobalVar "$R$N$M"
-	      CustomSymbolStrType     "$N$R$M"
+	      CustomSymbolStrType     "$N$R$M_T"
 	      CustomSymbolStrField    "$N$M"
 	      CustomSymbolStrFcn      "$R$N$M$F"
 	      CustomSymbolStrFcnArg   "rt$I$N$M"
@@ -523,7 +528,7 @@ Library {
 	      SimulinkBlockComments   on
 	      MATLABSourceComments    off
 	      EnableCustomComments    off
-	      InternalIdentifier      "Classic"
+	      InternalIdentifier      "Shortened"
 	      InlinedPrmAccess	      "Literals"
 	      ReqsInCode	      off
 	      UseSimReservedNames     off
@@ -531,7 +536,7 @@ Library {
 	    Simulink.GRTTargetCC {
 	      $BackupClass	      "Simulink.TargetCC"
 	      $ObjectID		      16
-	      Version		      "1.12.1"
+	      Version		      "1.13.0"
 	      Array {
 		Type			"Cell"
 		Dimension		15
@@ -543,13 +548,13 @@ Library {
 		Cell			"GenerateTestInterfaces"
 		Cell			"ModelStepFunctionPrototypeControlCompliant"
 		Cell			"CPPClassGenCompliant"
-		Cell			"MultiInstanceERTCode"
+		Cell			"SupportNonInlinedSFcns"
 		Cell			"PurelyIntegerCode"
 		Cell			"PortableWordSizes"
 		Cell			"SupportComplex"
 		Cell			"SupportAbsoluteTime"
 		Cell			"SupportContinuousTime"
-		Cell			"SupportNonInlinedSFcns"
+		Cell			"GenerateAllocFcn"
 		PropName		"DisabledProps"
 	      }
 	      TargetFcnLib	      "ansi_tfl_table_tmw.mat"
@@ -588,10 +593,12 @@ Library {
 	      SupportVariableSizeSignals off
 	      EnableShiftOperators    on
 	      ParenthesesLevel	      "Nominal"
+	      MATLABClassNameForMDSCustomization "Simulink.SoftwareTarget.GRTCustomization"
 	      ModelStepFunctionPrototypeControlCompliant off
 	      CPPClassGenCompliant    off
 	      AutosarCompliant	      off
 	      GRTInterface	      on
+	      GenerateAllocFcn	      off
 	      UseMalloc		      off
 	      ExtMode		      off
 	      ExtModeStaticAlloc      off
@@ -739,6 +746,7 @@ Library {
     }
     Block {
       BlockType		      Goto
+      GotoTag		      "A"
       IconDisplay	      "Tag"
       TagVisibility	      "local"
     }
@@ -825,6 +833,7 @@ Library {
       SystemSampleTime	      "-1"
       RTWFcnNameOpts	      "Auto"
       RTWFileNameOpts	      "Auto"
+      FunctionInterfaceSpec   "void_void"
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"
@@ -884,8 +893,8 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [458, 282, 1633, 1304]
-    Open		    on
+    Location		    [172, 22, 1387, 900]
+    Open		    off
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
     ScreenColor		    "white"
@@ -898,7 +907,7 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "156"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "326"
+    SIDHighWatermark	    "349"
     Block {
       BlockType		      SubSystem
       Name		      "C Code"
@@ -916,7 +925,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"C Code"
-	Location		[458, 282, 1633, 1304]
+	Location		[140, 22, 1355, 900]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -952,7 +961,7 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.274"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag0"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
@@ -1017,7 +1026,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"DAQ Channels"
-	Location		[458, 282, 1633, 1304]
+	Location		[140, 22, 1355, 900]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1030,7 +1039,7 @@ Library {
 	TiledPageScale		1
 	ShowPageBoundaries	off
 	ZoomFactor		"100"
-	SIDHighWatermark	"6"
+	SIDHighWatermark	"7"
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock6"
@@ -1042,7 +1051,7 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.274"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag1"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
@@ -1050,12 +1059,13 @@ Library {
 	  DocumentType		  "Text"
 	}
 	Annotation {
-	  SID			  "6:2"
+	  SID			  "6:7"
 	  Name			  "#DAQ Channels\n\nONE_DAQ_CHANNEL 2048\nANOTHER_DAQ_CHANNEL 1024\nSCIENCE_FRAME_CHAN* 1024\nUINT32_CHAN ui"
 	  "nt32 2048\nDAQ_CHANNEL_AT_DEFAULT_RATE"
 	  Position		  [66, 131]
 	  HorizontalAlignment	  "left"
 	  DropShadow		  on
+	  ZOrder		  -1
 	  FontSize		  14
 	}
       }
@@ -1071,7 +1081,7 @@ Library {
       BackgroundColor	      "yellow"
       ShowName		      off
       AttributesFormatString  "%<Description>"
-      LibraryVersion	      "1.281"
+      LibraryVersion	      "1.274"
       UserDataPersistent      on
       UserData		      "DataTag2"
       SourceBlock	      "simulink/Model-Wide\nUtilities/DocBlock"
@@ -1095,7 +1105,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"EpicsParts"
-	Location		[409, 171, 1584, 1193]
+	Location		[371, 51, 1586, 1251]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1569,16 +1579,18 @@ Library {
 	  DstPort		  1
 	}
 	Annotation {
-	  SID			  "34"
+	  SID			  "332"
 	  Name			  "RCG EPICS Parts Library ******************************"
 	  Position		  [287, 31]
+	  ZOrder		  -1
 	  FontName		  "times"
 	  FontSize		  18
 	}
 	Annotation {
-	  SID			  "35"
+	  SID			  "333"
 	  Name			  "Custom For Guardian Scripts ***************************"
 	  Position		  [272, 431]
+	  ZOrder		  -2
 	  FontName		  "times"
 	  FontSize		  18
 	}
@@ -1603,7 +1615,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Filters/\nGDS"
-	Location		[409, 171, 1584, 1193]
+	Location		[371, 51, 1586, 1251]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -1987,9 +1999,10 @@ Library {
 	  SourceType		  "SubSystem"
 	}
 	Annotation {
-	  SID			  "54"
+	  SID			  "334"
 	  Name			  "aLIGO RCG - Filter Modules and GDS Parts"
 	  Position		  [197, 25]
+	  ZOrder		  -1
 	  FontName		  "Times New Roman"
 	  FontSize		  18
 	}
@@ -2012,7 +2025,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IO_PARTS"
-	Location		[409, 171, 1584, 1193]
+	Location		[371, 51, 1586, 1251]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -2031,7 +2044,7 @@ Library {
 	  SID			  "59"
 	  Ports			  []
 	  Position		  [345, 357, 528, 511]
-	  ZOrder		  -4
+	  ZOrder		  -1
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  MinAlgLoopOccurrences	  off
@@ -2043,7 +2056,7 @@ Library {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "16x16-bit DACs"
-	    Location		    [424, 200, 1301, 1052]
+	    Location		    [386, 80, 1303, 1110]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -2340,7 +2353,7 @@ Library {
 	  SID			  "72"
 	  Ports			  []
 	  Position		  [110, 357, 292, 510]
-	  ZOrder		  -5
+	  ZOrder		  -2
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  MinAlgLoopOccurrences	  off
@@ -2352,7 +2365,7 @@ Library {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "8x18-bit DACs"
-	    Location		    [8, 44, 822, 746]
+	    Location		    [8, 44, 862, 924]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -2885,7 +2898,7 @@ Library {
 	  MaskHideContents	  off
 	  System {
 	    Name		    "Contec6464\nModules"
-	    Location		    [246, 44, 1081, 746]
+	    Location		    [208, 44, 1083, 924]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -2898,11 +2911,11 @@ Library {
 	    TiledPageScale	    1
 	    ShowPageBoundaries	    off
 	    ZoomFactor		    "100"
-	    SIDHighWatermark	    "320"
+	    SIDHighWatermark	    "348"
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBI_H32_C0"
-	      SID		      "98:299"
+	      SID		      "98:98"
 	      Tag		      "cdsCDI64"
 	      Description	      "card_num=1"
 	      Ports		      [0, 1]
@@ -2926,7 +2939,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBI_H32_C1"
-	      SID		      "98:300"
+	      SID		      "98:328"
 	      Tag		      "cdsCDI64"
 	      Description	      "card_num=3"
 	      Ports		      [0, 1]
@@ -2950,7 +2963,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBI_H32_C2"
-	      SID		      "98:301"
+	      SID		      "98:329"
 	      Tag		      "cdsCDI64"
 	      Description	      "card_num=5"
 	      Ports		      [0, 1]
@@ -2974,7 +2987,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBI_H32_C3"
-	      SID		      "98:302"
+	      SID		      "98:330"
 	      Tag		      "cdsCDI64"
 	      Description	      "card_num=7"
 	      Ports		      [0, 1]
@@ -2998,7 +3011,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBI_L32_C0"
-	      SID		      "98:303"
+	      SID		      "98:331"
 	      Tag		      "cdsCDI64"
 	      Description	      "card_num=0"
 	      Ports		      [0, 1]
@@ -3022,7 +3035,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBI_L32_C1"
-	      SID		      "98:304"
+	      SID		      "98:332"
 	      Tag		      "cdsCDI64"
 	      Description	      "card_num=2"
 	      Ports		      [0, 1]
@@ -3046,7 +3059,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBI_L32_C2"
-	      SID		      "98:305"
+	      SID		      "98:333"
 	      Tag		      "cdsCDI64"
 	      Description	      "card_num=4"
 	      Ports		      [0, 1]
@@ -3070,7 +3083,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBI_L32_C3"
-	      SID		      "98:306"
+	      SID		      "98:334"
 	      Tag		      "cdsCDI64"
 	      Description	      "card_num=6"
 	      Ports		      [0, 1]
@@ -3094,7 +3107,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBO_H32_C0"
-	      SID		      "98:307"
+	      SID		      "98:335"
 	      Tag		      "cdsCDO64"
 	      Description	      "card_num=1"
 	      Ports		      [1]
@@ -3118,7 +3131,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBO_H32_C1"
-	      SID		      "98:308"
+	      SID		      "98:336"
 	      Tag		      "cdsCDO64"
 	      Description	      "card_num=3"
 	      Ports		      [1]
@@ -3142,7 +3155,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBO_H32_C2"
-	      SID		      "98:309"
+	      SID		      "98:337"
 	      Tag		      "cdsCDO64"
 	      Description	      "card_num=5"
 	      Ports		      [1]
@@ -3166,7 +3179,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBO_H32_C3"
-	      SID		      "98:310"
+	      SID		      "98:338"
 	      Tag		      "cdsCDO64"
 	      Description	      "card_num=7"
 	      Ports		      [1]
@@ -3190,7 +3203,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBO_L32_C0"
-	      SID		      "98:311"
+	      SID		      "98:339"
 	      Tag		      "cdsCDO64"
 	      Description	      "card_num=0"
 	      Ports		      [1]
@@ -3214,7 +3227,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBO_L32_C1"
-	      SID		      "98:312"
+	      SID		      "98:340"
 	      Tag		      "cdsCDO64"
 	      Description	      "card_num=2"
 	      Ports		      [1]
@@ -3238,7 +3251,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBO_L32_C2"
-	      SID		      "98:313"
+	      SID		      "98:341"
 	      Tag		      "cdsCDO64"
 	      Description	      "card_num=4"
 	      Ports		      [1]
@@ -3262,7 +3275,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CBO_L32_C3"
-	      SID		      "98:314"
+	      SID		      "98:342"
 	      Tag		      "cdsCDO64"
 	      Description	      "card_num=6"
 	      Ports		      [1]
@@ -3286,7 +3299,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CONTEC6464_0"
-	      SID		      "98:315"
+	      SID		      "98:343"
 	      Tag		      "cdsDIO6464"
 	      Ports		      [1, 1]
 	      Position		      [120, 395, 185, 455]
@@ -3308,7 +3321,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CONTEC6464_1"
-	      SID		      "98:316"
+	      SID		      "98:344"
 	      Tag		      "cdsDIO6464"
 	      Ports		      [1, 1]
 	      Position		      [295, 395, 360, 455]
@@ -3330,7 +3343,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CONTEC6464_2"
-	      SID		      "98:317"
+	      SID		      "98:345"
 	      Tag		      "cdsDIO6464"
 	      Ports		      [1, 1]
 	      Position		      [470, 395, 535, 455]
@@ -3352,7 +3365,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "CONTEC6464_3"
-	      SID		      "98:318"
+	      SID		      "98:346"
 	      Tag		      "cdsDIO6464"
 	      Ports		      [1, 1]
 	      Position		      [665, 395, 730, 455]
@@ -3374,7 +3387,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DocBlock1"
-	      SID		      "98:319"
+	      SID		      "98:347"
 	      Description	      "Contec6464\nUser Apps "
 	      Ports		      []
 	      Position		      [22, 200, 62, 239]
@@ -3400,7 +3413,7 @@ Library {
 	    Block {
 	      BlockType		      Reference
 	      Name		      "DocBlock5"
-	      SID		      "98:320"
+	      SID		      "98:348"
 	      Description	      "Contec6464\nIOP Usage "
 	      Ports		      []
 	      Position		      [22, 405, 62, 444]
@@ -3424,51 +3437,58 @@ Library {
 	      DocumentType	      "Text"
 	    }
 	    Annotation {
-	      SID		      "98:23"
+	      SID		      "98:321"
 	      Name		      "CONTEC6464 Binary I/O Modules "
 	      Position		      [157, 21]
+	      ZOrder		      -1
 	      FontName		      "times"
 	      FontSize		      18
 	    }
 	    Annotation {
-	      SID		      "98:24"
+	      SID		      "98:322"
 	      Name		      "Card 0 "
 	      Position		      [152, 111]
+	      ZOrder		      -2
 	      FontName		      "times"
 	      FontSize		      18
 	    }
 	    Annotation {
-	      SID		      "98:25"
+	      SID		      "98:323"
 	      Name		      "Card 1 "
 	      Position		      [327, 111]
+	      ZOrder		      -3
 	      FontName		      "times"
 	      FontSize		      18
 	    }
 	    Annotation {
-	      SID		      "98:26"
+	      SID		      "98:324"
 	      Name		      "Card 2 "
 	      Position		      [507, 111]
+	      ZOrder		      -4
 	      FontName		      "times"
 	      FontSize		      18
 	    }
 	    Annotation {
-	      SID		      "98:27"
+	      SID		      "98:325"
 	      Name		      "User Application Parts *********************************"
 	      Position		      [262, 86]
+	      ZOrder		      -5
 	      FontName		      "times"
 	      FontSize		      18
 	    }
 	    Annotation {
-	      SID		      "98:28"
+	      SID		      "98:326"
 	      Name		      "IOP Parts *********************************"
 	      Position		      [222, 361]
+	      ZOrder		      -6
 	      FontName		      "times"
 	      FontSize		      18
 	    }
 	    Annotation {
-	      SID		      "98:29"
+	      SID		      "98:327"
 	      Name		      "Card 3 "
 	      Position		      [697, 111]
+	      ZOrder		      -7
 	      FontName		      "times"
 	      FontSize		      18
 	    }
@@ -3718,37 +3738,42 @@ Library {
 	  SourceType		  "SubSystem"
 	}
 	Annotation {
-	  SID			  "292"
+	  SID			  "335"
 	  Name			  "Binary I/O Modules *******************************************************************"
 	  Position		  [397, 831]
+	  ZOrder		  -1
 	  FontName		  "times"
 	  FontSize		  18
 	}
 	Annotation {
-	  SID			  "121"
+	  SID			  "336"
 	  Name			  "Digital to Analog (DAC) Modules ********"
 	  Position		  [187, 316]
+	  ZOrder		  -2
 	  FontName		  "times"
 	  FontSize		  18
 	}
 	Annotation {
-	  SID			  "123"
+	  SID			  "337"
 	  Name			  "Real-time Communications ********"
 	  Position		  [162, 566]
+	  ZOrder		  -3
 	  FontName		  "times"
 	  FontSize		  18
 	}
 	Annotation {
-	  SID			  "124"
+	  SID			  "338"
 	  Name			  " aLIGO Real-time Code Generator - I/O Parts Library"
 	  Position		  [385, 20]
+	  ZOrder		  -4
 	  FontName		  "times"
 	  FontSize		  24
 	}
 	Annotation {
-	  SID			  "125"
+	  SID			  "339"
 	  Name			  "Analog to Digial (ADC) Modules ***************************************************"
 	  Position		  [387, 66]
+	  ZOrder		  -5
 	  FontName		  "times"
 	  FontSize		  18
 	}
@@ -3771,7 +3796,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"MatrixParts"
-	Location		[741, 208, 1916, 1230]
+	Location		[703, 88, 1918, 1288]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -4150,16 +4175,18 @@ Library {
 	  DstPort		  1
 	}
 	Annotation {
-	  SID			  "148"
+	  SID			  "340"
 	  Name			  " aLIGO Real-time Code Generator - Matrix Parts Library ***************"
 	  Position		  [310, 30]
+	  ZOrder		  -1
 	  FontName		  "Times New Roman"
 	  FontSize		  18
 	}
 	Annotation {
-	  SID			  "149"
+	  SID			  "341"
 	  Name			  " Legacy Parts Built to Support HEPI Controls **************************"
 	  Position		  [325, 345]
+	  ZOrder		  -2
 	  FontName		  "Times New Roman"
 	  FontSize		  18
 	}
@@ -4182,7 +4209,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Osc/Phase"
-	Location		[409, 171, 1584, 1193]
+	Location		[371, 51, 1586, 1251]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -4391,9 +4418,10 @@ Library {
 	  DstPort		  1
 	}
 	Annotation {
-	  SID			  "163"
+	  SID			  "342"
 	  Name			  "RCG OSC/Phase Parts Library"
 	  Position		  [182, 21]
+	  ZOrder		  -1
 	  FontName		  "times"
 	  FontSize		  18
 	}
@@ -4402,13 +4430,12 @@ Library {
     Block {
       BlockType		      SubSystem
       Name		      "RT Links"
-      SID		      "326"
+      SID		      "327"
       Ports		      []
-      Position		      [561, 336, 606, 404]
-      ZOrder		      2
+      Position		      [550, 334, 595, 406]
+      ZOrder		      -9
       DropShadow	      on
-      AncestorBlock	      "CDS_PARTS/DAQ Channels"
-      LibraryVersion	      "*1.352"
+      LibraryVersion	      "1.216"
       MinAlgLoopOccurrences   off
       PropExecContextOutsideSubsystem off
       RTWSystemCode	      "Auto"
@@ -4418,7 +4445,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"RT Links"
-	Location		[458, 282, 1633, 1304]
+	Location		[172, 22, 1387, 900]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -4431,20 +4458,18 @@ Library {
 	TiledPageScale		1
 	ShowPageBoundaries	off
 	ZoomFactor		"100"
-	SIDHighWatermark	"7"
-	SIDPrevWatermark	"6"
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock6"
-	  SID			  "326:6"
+	  SID			  "330"
 	  Description		  "GPS"
 	  Ports			  []
-	  Position		  [122, 30, 162, 69]
+	  Position		  [137, 45, 177, 84]
 	  ZOrder		  -1
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.274"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag44"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
@@ -4454,14 +4479,28 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "GPS"
-	  SID			  "326:7"
+	  SID			  "331"
 	  Tag			  "cdsGps"
 	  Ports			  [0, 1]
-	  Position		  [20, 19, 60, 81]
-	  ZOrder		  1
+	  Position		  [35, 34, 75, 96]
+	  ZOrder		  -2
 	  AttributesFormatString  "%<Tag>"
 	  LibraryVersion	  "1.6"
 	  SourceBlock		  "cdsGps/Subsystem"
+	  SourceType		  "SubSystem"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "STATEWORD"
+	  SID			  "347"
+	  Tag			  "cdsStateWord"
+	  Ports			  [0, 1]
+	  Position		  [30, 160, 90, 210]
+	  ZOrder		  4
+	  BackgroundColor	  "darkGreen"
+	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.2"
+	  SourceBlock		  "cdsStateWord/Subsystem"
 	  SourceType		  "SubSystem"
 	}
       }
@@ -4472,7 +4511,7 @@ Library {
       SID		      "164"
       Ports		      []
       Position		      [270, 336, 315, 404]
-      ZOrder		      -9
+      ZOrder		      -10
       DropShadow	      on
       MinAlgLoopOccurrences   off
       PropExecContextOutsideSubsystem off
@@ -4483,8 +4522,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"WatchDogs"
-	Location		[409, 171, 1584, 1193]
-	Open			off
+	Location		[172, 22, 1387, 900]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -4502,7 +4541,7 @@ Library {
 	  SID			  "314"
 	  Description		  "cdsDacKill"
 	  Ports			  [2, 2]
-	  Position		  [30, 445, 135, 540]
+	  Position		  [275, 300, 380, 395]
 	  ZOrder		  -1
 	  ForegroundColor	  "red"
 	  DropShadow		  on
@@ -4511,6 +4550,22 @@ Library {
 	  FontName		  "times"
 	  FontSize		  12
 	  SourceBlock		  "cdsDacKill/Subsystem"
+	  SourceType		  "SubSystem"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "DACKILL_IOP"
+	  SID			  "348"
+	  Tag			  "cdsDacKillIop"
+	  Description		  "card_num=0,1,2"
+	  Ports			  [4, 2]
+	  Position		  [455, 294, 560, 416]
+	  ZOrder		  2
+	  ForegroundColor	  "red"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Description>\\n%<Tag>"
+	  LibraryVersion	  "1.2"
+	  SourceBlock		  "cdsDacKillIop/Subsystem"
 	  SourceType		  "SubSystem"
 	}
 	Block {
@@ -4524,7 +4579,7 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.274"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag45"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
@@ -4542,7 +4597,7 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.274"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag46"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
@@ -4560,7 +4615,7 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.274"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag47"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
@@ -4573,14 +4628,32 @@ Library {
 	  SID			  "318"
 	  Description		  "cdsDaqKill"
 	  Ports			  []
-	  Position		  [162, 460, 202, 499]
+	  Position		  [307, 235, 347, 274]
 	  ZOrder		  -5
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.274"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag48"
+	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
+	  SourceType		  "DocBlock"
+	  DocumentType		  "Text"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "DocBlock4"
+	  SID			  "349"
+	  Description		  "cdsDaqKillIop"
+	  Ports			  []
+	  Position		  [487, 210, 527, 249]
+	  ZOrder		  3
+	  BackgroundColor	  "yellow"
+	  ShowName		  off
+	  AttributesFormatString  "%<Description>"
+	  LibraryVersion	  "1.274"
+	  UserDataPersistent	  on
+	  UserData		  "DataTag49"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  DocumentType		  "Text"
@@ -4637,7 +4710,7 @@ Library {
       SID		      "322"
       Ports		      []
       Position		      [366, 112, 413, 182]
-      ZOrder		      -10
+      ZOrder		      -11
       DropShadow	      on
       MinAlgLoopOccurrences   off
       PropExecContextOutsideSubsystem off
@@ -4648,7 +4721,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[409, 171, 1584, 1193]
+	Location		[371, 51, 1586, 1251]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -4755,7 +4828,7 @@ Library {
 	  AttributesFormatString  "%<Description>"
 	  LibraryVersion	  "1.281"
 	  UserDataPersistent	  on
-	  UserData		  "DataTag49"
+	  UserData		  "DataTag50"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  DocumentType		  "Text"
@@ -4773,7 +4846,7 @@ Library {
 	  AttributesFormatString  "%<Description>"
 	  LibraryVersion	  "1.281"
 	  UserDataPersistent	  on
-	  UserData		  "DataTag50"
+	  UserData		  "DataTag51"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  DocumentType		  "Text"
@@ -4791,7 +4864,7 @@ Library {
 	  AttributesFormatString  "%<Description>"
 	  LibraryVersion	  "1.281"
 	  UserDataPersistent	  on
-	  UserData		  "DataTag51"
+	  UserData		  "DataTag52"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
 	  DocumentType		  "Text"
@@ -4828,7 +4901,6 @@ Library {
 	  SID			  "187"
 	  Position		  [40, 540, 80, 570]
 	  ZOrder		  -14
-	  GotoTag		  "A"
 	}
 	Block {
 	  BlockType		  Ground
@@ -4952,15 +5024,17 @@ Library {
 	  SourceType		  "SubSystem"
 	}
 	Annotation {
-	  SID			  "200"
+	  SID			  "343"
 	  Name			  "MUXs"
 	  Position		  [185, 561]
+	  ZOrder		  -1
 	  FontSize		  24
 	}
 	Annotation {
-	  SID			  "201"
+	  SID			  "344"
 	  Name			  "BUS CREATOR"
 	  Position		  [306, 563]
+	  ZOrder		  -2
 	  FontSize		  18
 	}
       }
@@ -5002,32 +5076,34 @@ Library {
       "                                             \ndcuid= is site specific ie it must be unique at each site.       "
       "                                                                                                                "
       "                                                       "
-      Ports		      []
+      Ports		      [1, 1]
       Position		      [75, 110, 115, 170]
-      ZOrder		      -11
+      ZOrder		      -12
       BackgroundColor	      "orange"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
-      LibraryVersion	      "1.5"
+      LibraryVersion	      "1.4"
       SourceBlock	      "cdsParameters/Subsystem"
       SourceType	      "SubSystem"
     }
     Annotation {
-      SID		      "203"
+      SID		      "345"
       Name		      "One cdsParameters Block is\nRequired per User Model."
       Position		      [152, 81]
+      ZOrder		      -1
     }
     Annotation {
-      SID		      "204"
+      SID		      "346"
       Name		      "Matlab Parts Library for Use with aLIGO Real-time Code Generator - V2.8"
       Position		      [330, 30]
+      ZOrder		      -2
       FontName		      "times"
       FontSize		      18
     }
   }
 }
 MatData {
-  NumRecords		  52
+  NumRecords		  53
   DataRecord {
     Tag			    DataTag0
     Data		    "  %)30     .    R 8   8    (     @         %    \"     $    !     0         %  0 \"     $    0    =F5R<"
@@ -5891,13 +5967,31 @@ MatData {
   }
   DataRecord {
     Tag			    DataTag49
+    Data		    "  %)30     .    D 0   8    (     @         %    \"     $    !     0         %  0 \"     $    8    =F5R<"
+    "VEO;@!C;VYT96YT &9O<FUA=   #@   #@    &    \"     8         !0    @    !     0    $         \"0    @    S,S,S,S/S/"
+    "PX   #  P  !@    @    $          4    (     0   (P#   !         !    \", P  8V1S1&%Q2VEL;#H-\"CT]/3T]/0T*#0I4:&4@8"
+    "V1S1&%Q2VEL;\"!P87)T(&%L;&]W<R!A('5S97(@;6]D96P@=&\\@8V]M;75N:6-A=&4@1$%#('-H=71D;W=N(&EN9F\\@9&ER96-T;'D@=VET:\"!"
+    "C;V1E(&%C='5A;&QY('=R:71I;F<@=&AE($1!0R!O=71P=71S+@T*#0I)9B!A('-I9VYA;\"!O9B P(&ES(&EN<'5T(&EN=&\\@=&AE(%-I9R!P;W)"
+    "T+\"!I=\"!W:6QL(&-A=7-E('1H92!C9'-$86-+:6QL('!A<G0@=&\\@<W1O<\"!A;&P@1$%#(&]U='!U=\"!I;B!T:&4@;6]D96PN(\"!!('-I9VY"
+    "A;\"!O9B Q(&QE=',@;F]R;6%L($1!0R!O8V-U<BX-\"@T*07-S;V-I871E9\"!%4$E#4R!296-O<F1S.@T*5&\\@<W5P<&]R=\"!T:&ES(&UO9'5L"
+    "92P@=&AE(&9O;&QO=VEN9R!%4$E#4R!R96-O<F1S(&%R92!P<F]D=6-E9\"!F;W(-\"F]P97)A=&]R(&EN=&5R86-T:6]N.@T*#0H@7U!!3DE#(\"!"
+    "\":6YA<GD@:6X@1F]R8V5S('1R:7 N(\"!3970@=&\\@,2!T;R!S=&]P('1H92!$04,L('-E=\"!T;R P('1O(&%L;&]W(&YO<FUA;\"!O<&5R871I"
+    ";VXN#0H@7T)04T54(\"!-;VUE;G1A<GD@=&\\@='5R;B!\">7!A<W,@;VX@8GD@8F5I;F<@<V5T('1O(#$N#0H@7U)%4T54(\"!-;VUE;G1A<GD@<W"
+    "=I=&-H('1O(')E<V5T(&5V97)Y=&AI;F<@=VAE;B Q+\"!I;F-L=61I;F<@0GEP87-S:6YG+\"!A;F0@<VEG;F%L#0H@(\" @(\" @(\" @(\"!C87"
+    "5S960@=')I<',@*&EN8VQU9&EN9R!T:&4@4E-4(&]U='!U=\"!O9B!T:&4@8FQO8VL@=VAI8V@@9V]E<R!T;R Q('=H96X@<F5S971I;F<I+@T*(%]"
+    "\"4%1)344@5&EM92!R96UA:6YI;F<@;VX@=&AE($)Y<&%S<R!I;B!S96-O;F1S+@T*(%]35$%412 @4F5A9&)A8VL@;VX@<W1A=&4N(# @:7,@(DDG"
+    ";2!K:6QL:6YG(BP@,2!I<R B22=M(&]K(BP@86YD(#(@:7,@(DDG;2!B>7!A<W-I;F<B#0H     #@   #     &    \"     0         !0   "
+    " @    !     P    $         $  # %185  "
+  }
+  DataRecord {
+    Tag			    DataTag50
     Data		    "  %)30     .    * $   8    (     @         %    \"     $    !     0         %  0 \"     $    0    =F5R<"
     "VEO;@!C;VYT96YT  X    X    !@    @    &          4    (     0    $    !          D    (    FIF9F9F9\\3\\.    F    "
     " 8    (    !          %    \"     $   !G     0         0    9P   %5N:71$96QA>3H-\"CT]/3T]/3T]/3T-\"@T*5&AI<R!B;&]C"
     ":R!I<R!U<V5D(&9E960@8F%C:R!V86QU97,@;VX@=&AE(&YE>'0@8V]D92!C>6-L92!O9B!T:&4@<V]F='=A<F4N#0H "
   }
   DataRecord {
-    Tag			    DataTag50
+    Tag			    DataTag51
     Data		    "  %)30     .    D \\   8    (     @         %    \"     $    !     0         %  0 \"     $    0    =F5R"
     "<VEO;@!C;VYT96YT  X    X    !@    @    &          4    (     0    $    !          D    (    FIF9F9F9\\3\\.      \\"
     "   8    (    !          %    \"     $   !F!P   0         1    S X  $T 80!T &@ 1@!U &X 8P!T &D ;P!N #H #0 * #T /0 ]"
@@ -5949,7 +6043,7 @@ MatData {
     " ( !B &4 ( !S &4 =  @ '0 ;P @ 'H 90!R &\\ +@ -  H       "
   }
   DataRecord {
-    Tag			    DataTag51
+    Tag			    DataTag52
     Data		    "  %)30     .    P D   8    (     @         %    \"     $    !     0         %  0 \"     $    8    =F5R<"
     "VEO;@!C;VYT96YT &9O<FUA=   #@   #@    &    \"     8         !0    @    !     0    $         \"0    @    S,S,S,S/S/"
     "PX   #P\"   !@    @    $          4    (     0   +D(   !         !    \"Y\"   1F-N.@T*/3T]/0T*#0I4:&ES(&UO9'5L92!I"
