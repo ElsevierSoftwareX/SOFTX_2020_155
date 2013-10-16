@@ -542,7 +542,7 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 	/// - -- Fill in the IPC table for DAQ network driver (mx_stream) \n
         dipc->dcuId = dcuId; /// -   ------ DCU id of this system
         dipc->crc = xferInfo.fileCrc; /// -   ------ Checksum of the configuration file
-        dipc->dataBlockSize = xferInfo.totalSizeNet * DAQ_NUM_DATA_BLOCKS_PER_SECOND; /// -   ------ Actual data size
+        dipc->dataBlockSize = xferInfo.totalSizeNet; /// -   ------ Actual data size
         /// -   ------  Data block number
         dipc->bp[daqBlockNum].cycle = daqBlockNum;
         /// -   ------  Data block CRC
@@ -860,11 +860,11 @@ int status = 0;
     /// before the double type data in shared memory.
     if(ii % 8) {
         printf("Have int mem hole after CDS %d %d \n",ii,jj);
-        dataInfo->epicsdblDataOffset = 4;
+        dataInfo->epicsdblDataOffset += 4;
     }
     if(jj % 8) {
         printf("Have int mem hole after user %d %d \n",ii,jj);
-        dataInfo->epicsdblDataOffset = 4;
+        dataInfo->epicsdblDataOffset += 4;
     }
     if ((ii%8) &&(jj>0)) { 
         /// - ---- If standard CDS struct doesn't end on 8 byte boundary, then
