@@ -1975,12 +1975,6 @@ close OUT;
 
 close OUTD;
 
-my $hdrFile = "./src/include/";
-$hdrFile .= $ARGV[1];
-$hdrFile .= ".h";
-my $epicsDaqChans = system("grep double $hdrFile | wc -l");
-print "Number of epics DAQ channels = $epicsDaqChans in $hdrFile\n";
-
 #//	- Write C code MAKEFILE
 createCmakefile();
 
