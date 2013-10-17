@@ -1634,7 +1634,7 @@ udelay(1000);
  /// - ---- IOP does not handle binary I/O module traffic, as it can take too long
         if((cycleNum < (HKP_READ_DIO + cdsPciModules.doCount)) && (cycleNum >= HKP_READ_DIO))
         {
-                kk = cycleNum;
+                kk = cycleNum - HKP_READ_DIO;
                 ii = cdsPciModules.doInstance[kk];
                 if(cdsPciModules.doType[kk] == ACS_8DIO)
                 {
