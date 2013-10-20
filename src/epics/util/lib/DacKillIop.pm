@@ -111,13 +111,13 @@ END
 sub printEpics {
         my ($i) = @_;
 	print ::EPICS <<END;
-OUTVARIABLE $::xpartName[$i]\_STATE $::systemName\.$::xpartName[$i]\_STATE int ai 0 field(HIGH,\"1\") field(HSV,\"2\") \n
+OUTVARIABLE $::xpartName[$i]\_STATE $::systemName\.$::xpartName[$i]\_STATE int ai 0 field(HIGH,\"2\") field(HSV,\"MINOR\") field(HHSV,\"MAJOR\") field(HIHI,\"3\") field(LOW,\"0\") field(LSV,\"MAJOR\") \n
 MOMENTARY $::xpartName[$i]\_RESET $::systemName\.$::xpartName[$i]\_RESET int ai 0
 MOMENTARY $::xpartName[$i]\_BPSET $::systemName\.$::xpartName[$i]\_BPSET int ai 0
 INVARIABLE $::xpartName[$i]\_PANIC $::systemName\.$::xpartName[$i]\_PANIC int bi 0 field(ZNAM,\"NORMAL\") field(ONAM,\"PANIC\") field(OSV,\"2\") \n
 OUTVARIABLE $::xpartName[$i]\_BPTIME $::systemName\.$::xpartName[$i]\_BPTIME int ai 0 field(HIGH,\"1\") field(HSV,\"2\") \n
-OUTVARIABLE $::xpartName[$i]\_WDTIME $::systemName\.$::xpartName[$i]\_WDTIME int ai 0 field(HIGH,\"1\") field(HSV,\"2\") \n
-OUTVARIABLE $::xpartName[$i]\_DTTIME $::systemName\.$::xpartName[$i]\_DTTIME int ai 0 field(HIGH,\"1\") field(HSV,\"2\") \n
+OUTVARIABLE $::xpartName[$i]\_WDTIME $::systemName\.$::xpartName[$i]\_WDTIME int ai 0 field(LOW,\"0\") field(LSV,\"MAJOR\") \n
+OUTVARIABLE $::xpartName[$i]\_DTTIME $::systemName\.$::xpartName[$i]\_DTTIME int ai 0 field(LOW,\"0\") field(LSV,\"MAJOR\") \n
 END
 }
 
@@ -265,7 +265,7 @@ sub frontEndCode {
 if ($RSETOUT) $RSETOUT = 0;
 
 /// Check if reset sent from EPICS
-if ($EPICS_RESET && $SIGNAL) {
+if ($EPICS_RESET && !$EPICS_PANIC) {
 	/// Reset WD output line to OK
 	$WDOUT = 1;
 	/// Clear WD timer
@@ -276,14 +276,14 @@ if ($EPICS_RESET && $SIGNAL) {
 	$DKSTAT = 1;
 	/// Set DAC enable mode as OK.
 	$DACSTAT = 0;
-} 
-if ($EPICS_RESET) {
 	///  Clear Bypass timer
 	$BPTIME_REMAINING = 0;
 	/// Clear reset from EPICS as it is a momentary switch
 	$EPICS_RESET = 0;
 	/// Set the Dackill reset output line high (reset)
 	$RSETOUT = 1;
+	/// Clear Bypass mode.
+	$EPICS_BPSET = 0;
 } 
 
 /// Check if in Panic state request
@@ -295,12 +295,16 @@ if ($EPICS_PANIC)
 	$DACSTAT = 1;
 	/// Clear Bypass Timer
 	$BPTIME_REMAINING = 0;
+	/// Clear Bypass mode.
+	$EPICS_BPSET = 0;
 	/// Clear WD Timer
 	$WDTIME_REMAINING = 0;
 	/// Clear DT Timer
 	$DTTIME_REMAINING = 0;
 	/// Send dackill status to EPICS
 	$DKSTAT = 0;
+	/// Clear reset from EPICS as it is a momentary switch
+	$EPICS_RESET = 0;
 } else {
 	/// If Bypass timer is running
 	if ($BPTIME_REMAINING > 0) {
@@ -360,7 +364,7 @@ if ($EPICS_PANIC)
 		}
 	}
 	/// If in Bypass mode and timer has expired.
-	if ($EPICS_BPSET && (0 == $BPTIME_REMAINING)) {
+	if ($EPICS_BPSET && (0 == $BPTIME_REMAINING) && !$EPICS_PANIC) {
 		/// Reset the bypass mode timer.
 		$BPTIME_REMAINING = $BPTIME;
 		/// Clear Bypass mode.
