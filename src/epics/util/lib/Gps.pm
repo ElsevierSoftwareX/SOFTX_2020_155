@@ -2,6 +2,12 @@ package CDS::Gps;
 use Exporter;
 @ISA = ('Exporter');
 
+#//     \page Gps Gps.pm
+#//     Gps.pm - provides standard subroutines for handling GPS parts in CDS PARTS library.
+#//
+#// \n
+#// \n
+
 sub partType {
 	return Gps;
 }
