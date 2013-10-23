@@ -21,6 +21,7 @@
 	- \ref ipcTestData "RCG IPC Test"
 	- \ref duotoneTest "Duotone Test"
 	- \ref dackillTest "DACKILL w/OSEM Watchdog Test"
+	- \ref dacKillIopTest "DACKILL IOP w/OSEM Watchdog Test"
 	- \ref decFiltTest "IOP Decimation Filter Test"
 	- \ref daqFiltTest "DAQ (daqLib) Decimation Filter Test"
 	- \ref uint32Test "DAQ UINT32 Data Type Test"

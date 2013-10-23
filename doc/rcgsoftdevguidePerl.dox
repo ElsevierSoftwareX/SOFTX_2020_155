@@ -124,6 +124,7 @@ These are all located in the epics/util/lib directory.\n\n
 \par Watchdog Parts
         - \subpage DacKill "DacKill.pm" \n
         - \subpage DacKillIop "DacKillIop.pm" \n
+        - \subpage DacKillDelay "DacKillTimed.pm" \n
 
 \par User Defined C Code
         - \subpage FunctionCall "FunctionCall.pm\n
