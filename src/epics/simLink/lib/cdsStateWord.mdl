@@ -19,7 +19,7 @@ Library {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [104.0, 521.0, 562.0, 438.0]
+      Location		      [181.0, 383.0, 562.0, 438.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -53,11 +53,11 @@ Library {
   Creator		  "rolfbork"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "rolfbork"
+  LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Mon Sep 30 17:34:56 2013"
-  RTWModifiedTimeStamp	  302462947
-  ModelVersionFormat	  "1.%<AutoIncrement:2>"
+  LastModifiedDate	  "Tue Oct 22 15:15:46 2013"
+  RTWModifiedTimeStamp	  304355738
+  ModelVersionFormat	  "1.%<AutoIncrement:3>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -730,7 +730,7 @@ Library {
   }
   System {
     Name		    "cdsStateWord"
-    Location		    [104, 521, 666, 959]
+    Location		    [181, 383, 743, 821]
     Open		    on
     ModelBrowserVisibility  on
     ModelBrowserWidth	    200
@@ -744,13 +744,13 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "101"
+    SIDHighWatermark	    "103"
     Block {
       BlockType		      SubSystem
       Name		      "Subsystem"
       SID		      "3"
-      Ports		      [0, 1]
-      Position		      [45, 28, 95, 72]
+      Ports		      [0, 3]
+      Position		      [45, 30, 95, 100]
       ZOrder		      3
       BackgroundColor	      "magenta"
       MinAlgLoopOccurrences   off
@@ -762,7 +762,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Subsystem"
-	Location		[104, 521, 1293, 1375]
+	Location		[181, 383, 743, 821]
 	Open			off
 	ModelBrowserVisibility	on
 	ModelBrowserWidth	200
@@ -777,10 +777,28 @@ Library {
 	ZoomFactor		"200"
 	Block {
 	  BlockType		  Outport
-	  Name			  "StateWord"
+	  Name			  "ADC_OVF"
 	  SID			  "100"
 	  Position		  [95, 33, 125, 47]
 	  ZOrder		  -97
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "DAC_OVF"
+	  SID			  "102"
+	  Position		  [90, 68, 120, 82]
+	  ZOrder		  1
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "EXC_ON"
+	  SID			  "103"
+	  Position		  [90, 108, 120, 122]
+	  ZOrder		  2
+	  Port			  "3"
 	  IconDisplay		  "Port number"
 	}
       }
