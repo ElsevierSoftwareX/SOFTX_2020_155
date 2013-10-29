@@ -2,6 +2,15 @@
 /* Time ramp function */
 /* Takes in a ramping state */
 
+inline double RampParamGetVal(RampParamState* state) {
+  return state->val; 
+}
+
+inline int RampParamGetIsRamping(RampParamState* state) {
+  return state->isRamping;
+}
+
+
 inline void RampParamInit(RampParamState* state, double xInit, const int fe_rate)
 {
   state->isRamping = 0;

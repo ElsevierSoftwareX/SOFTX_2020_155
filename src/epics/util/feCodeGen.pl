@@ -2095,6 +2095,11 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 			$outcnt = $partOutputs[$partOutNum[$cur_part_num][0]];
 			$incnt = $partInCnt[$partInNum[$cur_part_num][0]];
 		}
+		if ($partType[$cur_part_num] eq "RampMuxMatrix") {
+                        # RampMuxMatrix uses mux and demux parts
+                        $outcnt = $partOutputs[$partOutNum[$cur_part_num][0]];
+                        $incnt = $partInCnt[$partInNum[$cur_part_num][0]];
+                }
 		my $basename = $partName[$cur_part_num];
 		if ($partSubName[$cur_part_num] ne "") {
 			$basename = $partSubName[$cur_part_num] . "_" . $basename;
@@ -2150,6 +2155,8 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . ".adl");
 		      }
 		    }
+		  } elsif ($partType[$cur_part_num] eq "RampMuxMatrix") {
+			system("$rcg_src_dir/src/epics/util/mkrampmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
 		  } else {
 		    system("$rcg_src_dir/src/epics/util/mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
 		  }
@@ -2179,6 +2186,8 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".adl");
 		      }
 		    }
+		  } elsif ($partType[$cur_part_num] eq "RampMuxMatrix") {
+			system("$rcg_src_dir/src/epics/util/mkrampmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
 		  } else {
 		    system("$rcg_src_dir/src/epics/util/mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
 		  }
