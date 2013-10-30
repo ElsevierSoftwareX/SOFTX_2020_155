@@ -124,6 +124,8 @@ $dacKillMod[0][0] = undef;
 $dacKillModCnt[0] = undef;
 @dacKillDko = qw(x x x x x x x x x x x x x);
 $dkTimesCalled = 0;
+$remoteGpsPart = 0;
+$remoteGPS = 0;
 
 # Normally, ARGV !> 2, so the following are not invoked in a standard make
 # This is legacy.
@@ -1955,6 +1957,17 @@ if ($ipcxCnt > 0) {
 print OUT "  }\n";
 print OUT "  return(dacFault);\n\n";
 print OUT "}\n";
+if(($remoteGpsPart != 0) && ($remoteGPS != 0))
+{
+print "RGPS DIAG **********************************\n";
+print "\tPart number is $remoteGpsPart\n";
+	print OUT "unsigned int remote_time(CDS_EPICS *pLocalEpics) {\n\treturn ";
+	$calcExp = ("CDS::EzCaRead::remoteGps") -> ($remoteGpsPart);
+	print "$calcExp \n";
+	print OUT "$calcExp;\n}\n";
+
+}
+
 print OUT "#include \"$rcg_src_dir/src/fe/controller.c\"\n";
 
 
@@ -2557,6 +2570,9 @@ print OUTM "EXTRA_CFLAGS += -DFIR_FILTERS\n";
 print OUTM "EXTRA_CFLAGS += -g\n";
 if ($adcOver) {
   print OUTM "EXTRA_CFLAGS += -DROLLING_OVERFLOWS\n";
+}
+if ($remoteGPS) {
+  print OUTM "EXTRA_CFLAGS += -DREMOTE_GPS\n";
 }
 if ($no_sync) {
   print OUTM "#Comment out to enable 1PPS synchronization\n";
