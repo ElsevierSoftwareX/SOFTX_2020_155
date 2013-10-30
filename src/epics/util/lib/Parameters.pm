@@ -133,6 +133,9 @@ sub parseParams {
 			} elsif ($spp[0] eq "pciRfm") {
 				print "FE will run with PCIE RFM Network\n";
 				$::pciNet = $spp[1];
+			} elsif ($spp[0] eq "remoteGPS") {
+				print "FE will run with EPICS for GPS Time\n";
+				$::remoteGPS = $spp[1];
 			} elsif ($spp[0] eq "remote_ipc_port") {
 				$::remoteIPCport = $spp[1];
         			die "Invalid remote_ipc_port specified in cdsParamters\n" unless $::remoteIPCport >= 0;

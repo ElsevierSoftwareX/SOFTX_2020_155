@@ -830,7 +830,12 @@ udelay(1000);
 
 #endif
   onePpsTime = cycleNum;
+#ifdef REMOTE_GPS
+  timeSec = remote_time((struct CDS_EPICS *)pLocalEpics);
+  printf ("Using remote GPS time %d \n",timeSec);
+#else
   timeSec = current_time() -1;
+#endif
 
   rdtscl(adcTime);
 
