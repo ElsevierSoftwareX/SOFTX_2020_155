@@ -18,6 +18,7 @@ grep \#\/\/ @top_srcdir@/src/epics/util/lib/Dac.pm | sed s/\#/\\//g > Dac.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/Dac18.pm | sed s/\#/\\//g > Dac18.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/DacKill.pm | sed s/\#/\\//g > DacKill.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/DacKillIop.pm | sed s/\#/\\//g > DacKillIop.dox
+grep \#\/\/ @top_srcdir@/src/epics/util/lib/DacKillTimed.pm | sed s/\#/\\//g > DacKillTimed.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/EpicsBinIn.pm | sed s/\#/\\//g > EpicsBinIn.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/EpicsIn.pm | sed s/\#/\\//g > EpicsIn.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/EpicsOut.pm | sed s/\#/\\//g > EpicsOut.dox
