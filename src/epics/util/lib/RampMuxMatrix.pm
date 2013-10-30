@@ -122,10 +122,6 @@ sub frontEndCode {
     $calcExp .= "printk(\"LOAD_MATRIX is 1\\n\");\n";
     $calcExp .= "\tfor (matrixOutputCount = 0; matrixOutputCount < $matOuts; matrixOutputCount++) {\n";
     $calcExp .= "\t\tfor (matrixInputCount = 0; matrixInputCount < $matIns; matrixInputCount++) {\n";
-    $calcExp .= "printk(\"current is %s\\n\",dtoa2(pLocalEpics->$::systemName\.$::xpartName[$i]_CURRENT\[matrixOutputCount\]\[matrixInputCount\]));\n";
-    $calcExp .= "printk(\"requested is %s\\n\",dtoa1(pLocalEpics->$::systemName\.$::xpartName[$i]\[matrixOutputCount\]\[matrixInputCount\]));\n";
-    $calcExp .= "printk(\"val is %s\\n\",dtoa1(RampParamGetVal(&\L$::xpartName[$i]_state" . "\[matrixOutputCount\]\[matrixInputCount\])));\n";
-    $calcExp .= "printk(\"isRamping (int) is %d\\n\",((int) RampParamGetIsRamping(&\L$::xpartName[$i]_state" . "\[matrixOutputCount\]\[matrixInputCount\])));\n";
     $calcExp .= "\t\t\tRampParamLoad(&\L$::xpartName[$i]_state" . "\[matrixOutputCount\]\[matrixInputCount\],";
     $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\[matrixOutputCount\]\[matrixInputCount\], pLocalEpics->$::systemName\.$::xpartName[$i]\_TRAMP,FE_RATE);\n";
     $calcExp .= "\t\t}\n";
