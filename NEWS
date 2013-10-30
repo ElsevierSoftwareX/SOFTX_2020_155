@@ -1,6 +1,16 @@
 ============================
 Changes for future release
 ============================
+- Added new Parameter block compile option: remoteGPS=1.
+	- Built specifically for use on PEM at LHO mid stations, where IRIG-B time is not available.
+	- Allows IOP module to get startup GPS seconds from another FE via its GPS EPICS record.
+- Added new OSEM WD part to CDS_PARTS: WD2.
+	- Original WD part ANDs DC and RMS paths within the part, with a single FAULT output.
+	- New WD part removes AND within part and brings DC and RMS out as separate outputs. This
+	  is to allow user to only use RMS trips, if desired.
+- Two new DACKILL parts added: DACKILLIOP and DACKILLTIMED. See V2.8 release notes.
+- Enhancement (Bugzilla 492): Modified old GPS part for a single output: time in GPS seconds. This part 
+  has been added to CDS_PARTS.
 - Bug Fix (#456): Mark DACKILL part settings as RO in autoburt files.
 - Bug Fix (#487): IPCx.pl modified to produce IPC EPICS error channel names using FEC-DCUID instead of
   model name information. 
@@ -25,6 +35,10 @@ Changes for future release
 	- INSTALLATION NOTE: To run this code requires newest iniChk.pl to be copied into site/ifo scripts 
 	  area. Previously, this DAQ file checking code would return error if data rates in DAQ files were 
 	  below 256Hz.
+- Filter Module memory change. Previously, RT code used a local copy of filter module EPICS data during execution of filter module code. This required copying of this data to/from EPICS shared memory at 16Hz to communicate to EPICS sequencer. This was changed such that RT code uses EPICS shared memory space directly, same as for other EPICS channels. Calls to move data between EPICS shared memory and local memory in controller.c (calls to subroutines in epicsXfer.c) were removed. Regression testing was performed on LHO DAQ test system on July 29, 2013.
+============================
+Post 2.7 and trunk bug fixes
+============================
 - Bug fix (bug 490) - On startup, some models have matrix input values locked to zero. Found to be due to
   improper initialization of local/remote control mask bits. Skeleton.st file modified to clear all of EPICS
   memory at startup. This bug fix was also part of release V2.7.2.
@@ -37,7 +51,6 @@ Changes for future release
 - Bug fix (bug 482) - Contec module outputs set errantly on code startup after reboot. This fix also applied to
   RCG release V2.7.1.
 
-- Filter Module memory change. Previously, RT code used a local copy of filter module EPICS data during execution of filter module code. This required copying of this data to/from EPICS shared memory at 16Hz to communicate to EPICS sequencer. This was changed such that RT code uses EPICS shared memory space directly, same as for other EPICS channels. Calls to move data between EPICS shared memory and local memory in controller.c (calls to subroutines in epicsXfer.c) were removed. Regression testing was performed on LHO DAQ test system on July 29, 2013.
 
 ============================
 Changes for 2.7
