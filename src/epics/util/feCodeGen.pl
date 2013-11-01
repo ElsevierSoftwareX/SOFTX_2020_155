@@ -2568,6 +2568,7 @@ if($systemName eq "sei" || $useFIRs)
 print OUTM "EXTRA_CFLAGS += -DFIR_FILTERS\n";
 }
 print OUTM "EXTRA_CFLAGS += -g\n";
+
 if ($adcOver) {
   print OUTM "EXTRA_CFLAGS += -DROLLING_OVERFLOWS\n";
 }
@@ -2592,19 +2593,11 @@ if ($no_daq) {
   print OUTM "#Uncomment to disable DAQ and testpoints\n";
   print OUTM "#EXTRA_CFLAGS += -DNO_DAQ\n";
 }
-if ($shmem_daq) {
-  print OUTM "#Comment out to disable local frame builder connection; uncomment USE_GM setting too\n";
+
+# SHMEM_DAQ set as the default for RCG V2.8 - No longer support GM
+  print OUTM "#Comment out to disable local frame builder connection\n";
   print OUTM "EXTRA_CFLAGS += -DSHMEM_DAQ\n";
-  print OUTM "#EXTRA_CFLAGS += -DUSE_GM=1\n";
-} else {
-  print OUTM "#Uncomment to enable local frame builder; comment out USE_GM setting too\n";
-  print OUTM "#EXTRA_CFLAGS += -DSHMEM_DAQ\n";
-if ($no_daq) {
-  print OUTM "#EXTRA_CFLAGS += -DUSE_GM=1\n";
-} else {
-  print OUTM "EXTRA_CFLAGS += -DUSE_GM=1\n";
-}
-}
+
 # Use oversampling code if not 64K system
 if($rate != 15) {
   if ($no_oversampling) {
@@ -2689,13 +2682,11 @@ if ($specificCpu > -1) {
   print OUTM "#Uncomment to run on a specific CPU\n";
   print OUTM "#EXTRA_CFLAGS += -DSPECIFIC_CPU=2\n";
 }
-if ($::allBiquad) {
+
+# Set BIQUAD as default starting RCG V2.8
   print OUTM "#Comment out to go back to old iir_filter calculation form\n";
   print OUTM "EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
-} else {
-  print OUTM "#Uncomment to run with biquad form iir_filters\n";
-  print OUTM "#EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
-}
+
 if ($::directDacWrite) {
   print OUTM "EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
 } else {
