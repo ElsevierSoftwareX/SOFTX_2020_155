@@ -31,14 +31,18 @@ sub printHeaderStruct {
 	}
 	my $matOuts = $::partOutputs[$::partOutNum[$i][0]];
 	my $matIns = $::partInCnt[$::partInNum[$i][0]];
-        print ::EPICS "MATRIX $::xpartName[$i]_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]\n";
         print ::OUTH "\tdouble $::xpartName[$i]\[$matOuts\]\[$matIns\];\n";
 	return "\tchar $::xpartName[$i]_mask;\n";
 }
 
 # Print Epics variable definitions
 # Current part number is passed as first argument
-sub printEpics {}
+sub printEpics {
+        my ($i) = @_;
+	my $matOuts = $::partOutputs[$::partOutNum[$i][0]];
+	my $matIns = $::partInCnt[$::partInNum[$i][0]];
+        print ::EPICS "MATRIX $::xpartName[$i]_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]\n";
+}
 
 # Print variable declarations int front-end file
 # Current part number is passed as first argument
