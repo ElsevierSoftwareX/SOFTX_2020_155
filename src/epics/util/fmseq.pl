@@ -529,7 +529,7 @@ while (<IN>) {
         $vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
 							       
         $vupdate .= "evar_$v_name = fpvalidate(pEpics->${v_var});\n";
-        $vupdate .= "if (0 == (pvUpdateCycle % 4)) pvPut(evar_$v_name);\n";
+        $vupdate .= "pvPut(evar_$v_name);\n";
     } elsif (substr($_,0,10) eq "EZ_CA_READ") {
 	($junk, $v_name, $var_name, $v_var) = split(/\s+/, $_);
 	#$vupdate .= "%%ezcaGet(\"$var_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
