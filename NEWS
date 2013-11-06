@@ -1,6 +1,8 @@
 ============================
 Changes for future release
 ============================
+- Changed the update rate of EZCA_WRITE tranmissions to same as EPICS sequencer rate of 8Hz. This
+  had previously been throttled down to 2Hz to avoid overload of Beckhoff systems. 
 - New Matrix part added (JB). This matrix part has ramping capabilities. See V2.8 release notes.
 - Added new subsystem block to CDS_PARTS, RT Links. This is to include parts which can access internal
   runtime parameters already maintained as part of the real-time core software. Initial parts in this
