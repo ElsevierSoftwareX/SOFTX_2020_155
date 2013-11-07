@@ -16,6 +16,7 @@ extern unsigned int cycle_gps_time;
 #include "drv/dtoal.c"
 extern unsigned int dWordUsed[MAX_ADC_MODULES][32];
 extern unsigned int dacOutUsed[MAX_DAC_MODULES][16];
+extern int dacChanErr[MAX_DAC_MODULES];
 extern unsigned int CDIO6464Output[MAX_DIO_MODULES];
 extern unsigned int CDIO1616Output[MAX_DIO_MODULES];
 extern unsigned int CDIO1616InputInput[MAX_DIO_MODULES];

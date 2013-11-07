@@ -1,4 +1,4 @@
-package CDS::StateWord;
+package CDS::ModelRate;
 use Exporter;
 @ISA = ('Exporter');
 
@@ -8,7 +8,7 @@ use Exporter;
 #// \n
 
 sub partType {
-        return StateWord;
+        return ModelRate;
 }
 
 
@@ -46,18 +46,7 @@ sub frontEndInitCode {
 # Returns calculated input code
 sub fromExp {
         my ($i, $j) = @_;
-	my $from = $::partInNum[$i][$j];
-        my $fromPort = $::partInputPort[$i][$j];
-	my $bit = 1;
-	if ($fromPort == 0) {
-		return "(odcStateWord & 1)"
-	}
-	if ($fromPort == 1) {
-		return "(odcStateWord & 2) >> 1"
-	}
-	if ($fromPort == 2) {
-		return "(odcStateWord & 4) >> 2"
-	}
+	return "FE_RATE"
 
 }
 

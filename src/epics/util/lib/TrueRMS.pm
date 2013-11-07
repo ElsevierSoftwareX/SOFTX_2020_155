@@ -29,6 +29,7 @@ sub printFrontEndVars  {
 	print ::OUT "double \L$::xpartName[$i];\n";
 	print ::OUT "double \L$::xpartName[$i]\_indatsqrd\[\U$::xpartName[$i]\_WINSZ\];\n";
 	print ::OUT "double \L$::xpartName[$i]\_sqrsum;\n";
+	print ::OUT "double \L$::xpartName[$i]\_sqrval;\n";
 }
 
 # Figure out part input code
@@ -102,9 +103,11 @@ sub frontEndCode {
 	$calcExp .= "\t\L$::xpartName[$i]\_sqrsum";
 	$calcExp .= " += ";
 	$calcExp .= "\L$::xpartName[$i]\_indatsqrd\[\L$::xpartName[$i]\_index\];\n";
-	$calcExp .= "\t\L$::xpartName[$i]";
+	$calcExp .= "\t\L$::xpartName[$i]\_sqrval = \L$::xpartName[$i]\_sqrsum\/(double) \L$::xpartName[$i]\_n;\n";
+	$calcExp .= "\tif (\L$::xpartName[$i]\_sqrval > 0.0)  \n";
+	$calcExp .= "\t\t\L$::xpartName[$i]";
 	$calcExp .= " = ";
-	$calcExp .= "lsqrt(\L$::xpartName[$i]\_sqrsum\/(double) \L$::xpartName[$i]\_n);\n";
+	$calcExp .= "lsqrt(\L$::xpartName[$i]\_sqrval);\n";
 	$calcExp .= "}\n";
 	return $calcExp;
 }

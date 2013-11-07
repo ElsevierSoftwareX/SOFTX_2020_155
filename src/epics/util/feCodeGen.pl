@@ -100,6 +100,7 @@ $dcuId = 10; # Default dcu Id
 $targetHost = "localhost"; # Default target host name
 $specificCpu = -1; # Defaults is to run the FE on the first available CPU
 $adcMaster = -1;
+$dacWdOverride = -1;
 $adcSlave = -1;
 $timeMaster = -1;
 $timeSlave = -1;
@@ -119,6 +120,12 @@ $dac_internal_clocking = 0; # Default is DAC external clocking
 $no_oversampling = 0; # Default is to iversample
 $no_dac_interpolation = 0; # Default is to interpolate D/A outputs
 $max_name_len = 39;	# Maximum part name length
+$dacKillMod[0][0] = undef;
+$dacKillModCnt[0] = undef;
+@dacKillDko = qw(x x x x x x x x x x x x x);
+$dkTimesCalled = 0;
+$remoteGpsPart = 0;
+$remoteGPS = 0;
 
 # Normally, ARGV !> 2, so the following are not invoked in a standard make
 # This is legacy.
@@ -836,7 +843,7 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 $ftotal = $partCnt;
    for($kk=0;$kk<$partCnt;$kk++)
    {
-	 if(($partType[$kk] eq "INPUT") || ($partType[$kk] eq "OUTPUT") || ($partType[$kk] eq "BUSC") || ($partType[$kk] eq "BUSS") || ($partType[$kk] eq "EpicsIn") || ($partType[$kk] eq "TERM") || ($partType[$kk] eq "FROM") || ($partType[$kk] eq "GOTO") || ($partType[$kk] eq "GROUND") || ($partType[$kk] eq "CONSTANT") || ($partType[$kk] eq "Adc") || ($partType[$kk] eq "Gps") || ($partType[$kk] eq "StateWord"))
+	 if(($partType[$kk] eq "INPUT") || ($partType[$kk] eq "OUTPUT") || ($partType[$kk] eq "BUSC") || ($partType[$kk] eq "BUSS") || ($partType[$kk] eq "EpicsIn") || ($partType[$kk] eq "TERM") || ($partType[$kk] eq "FROM") || ($partType[$kk] eq "GOTO") || ($partType[$kk] eq "GROUND") || ($partType[$kk] eq "CONSTANT") || ($partType[$kk] eq "Adc") || ($partType[$kk] eq "Gps") || ($partType[$kk] eq "StateWord") || ($partType[$kk] eq "ModelRate"))
 	{
 		$ftotal --;
 	}
@@ -869,10 +876,6 @@ print "Found $boCnt Binary modules part is $boPartNum[0]\n";
 die "***ERROR: Too many ADC modules (MAX = $::maxAdcModules): ADC defined = $adcCnt\n" if ($adcCnt > $::maxAdcModules);
 die "***ERROR: Too many DAC modules (MAX = $::maxDacModules): DAC defined = $dacCnt\n" if  ($dacCnt > $::maxDacModules);
 
-if ($dacKillCnt > 1) {
-   die "***ERROR: Too many DACKILL parts defined (MAX = 1)  = $dacKillCnt\n";
-}
-
 #//	- Need to remove some parts from processing list, such as BUSS, DELAY, GROUND, as code is not produced for these parts.
 #//		- Loop thru all of the parts within a subsystem.
 for($ii=0;$ii<$subSys;$ii++)
@@ -884,7 +887,7 @@ for($ii=0;$ii<$subSys;$ii++)
 	for($jj=$subSysPartStart[$ii];$jj<$subSysPartStop[$ii];$jj++)
 	{
 		#if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "BUSS") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "FROM") || ($partType[$jj] eq "GOTO") || ($partType[$jj] eq "EpicsIn") || ($partType[$jj] eq "CONSTANT"))
-		if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "BUSS") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "EpicsIn") || ($partType[$jj] eq "CONSTANT") || ($partType[$jj] eq "EzCaRead") || ($partType[$jj] eq "DELAY") || ($partType[$jj] eq "Gps") || ($partType[$jj] eq "StateWord"))
+		if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "BUSS") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "EpicsIn") || ($partType[$jj] eq "CONSTANT") || ($partType[$jj] eq "EzCaRead") || ($partType[$jj] eq "DELAY") || ($partType[$jj] eq "Gps") || ($partType[$jj] eq "StateWord") || ($partType[$jj] eq "ModelRate"))
 				{
 					if(($partType[$jj] ne "DELAY"))
 					{
@@ -1162,7 +1165,7 @@ for($ii=0;$ii<$seqCnt;$ii++)
 	{
 		$xx = $seqList[$ii];
 		$processName[$processCnt] = $xpartName[$xx];
-if(($partType[$xx] eq "TERM") || ($partType[$xx] eq "GROUND") || ($partType[$xx] eq "FROM") || ($partType[$xx] eq "GOTO") || ($partType[$xx] eq "EpicsIn") || ($partType[$xx] eq "CONSTANT") || ($partType[$xx] eq "Gps") || ($partType[$xx] eq "StateWord")) 
+if(($partType[$xx] eq "TERM") || ($partType[$xx] eq "GROUND") || ($partType[$xx] eq "FROM") || ($partType[$xx] eq "GOTO") || ($partType[$xx] eq "EpicsIn") || ($partType[$xx] eq "CONSTANT") || ($partType[$xx] eq "Gps") || ($partType[$xx] eq "StateWord") || ($partType[$xx] eq "ModelRate")) 
 {$ftotal ++;}
 		$processSeqType{$xpartName[$xx]} = $seqType[$ii];
 		$processPartNum[$processCnt] = $xx;
@@ -1401,31 +1404,19 @@ print OUTH "typedef struct \U$systemName {\n";
 my $header_masks;
 for($ii=0;$ii<$partCnt;$ii++)
 {
-	if (($cdsPart[$ii]) && (($partType[$ii] eq "IPCx") || ($partType[$ii] eq "FiltCtrl") || ($partType[$ii] eq "FiltCtrl2") || ($partType[$ii] eq "EpicsBinIn") || ($partType[$ii] eq "DacKill") || ($partType[$ii] eq "EpicsMomentary") || ($partType[$ii] eq "EpicsCounter") || ($partType[$ii] eq "Word2Bit") )) {
+	if (($cdsPart[$ii]) && (($partType[$ii] eq "IPCx") || ($partType[$ii] eq "FiltCtrl") || ($partType[$ii] eq "FiltCtrl2") || ($partType[$ii] eq "EpicsBinIn") || ($partType[$ii] eq "DacKill") || ($partType[$ii] eq "DacKillIop") || ($partType[$ii] eq "DacKillTimed") || ($partType[$ii] eq "EpicsMomentary") || ($partType[$ii] eq "EpicsCounter") || ($partType[$ii] eq "Word2Bit") )) {
 	  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
 	  if (length($masks) > 5) {
 	  	$header_masks .= $masks;
-		#print "mask=$masks";
 	  }
 	}
 }
 for($ii=0;$ii<$partCnt;$ii++)
 {
-	if (($cdsPart[$ii]) && ($partType[$ii] eq "MuxMatrix")) {
+	if (($cdsPart[$ii]) && ($partType[$ii] ne "IPCx") && ($partType[$ii] ne "FiltCtrl") && ($partType[$ii] ne "FiltCtrl2") && ($partType[$ii] ne "EpicsBinIn") && ($partType[$ii] ne "DacKill") && ($partType[$ii] ne "DacKillIop") && ($partType[$ii] ne "DacKillTimed") && ($partType[$ii] ne "EpicsMomentary") && ($partType[$ii] ne "EpicsCounter")  ) {
 	  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
 	  if (length($masks) > 5) {
 	  	$header_masks .= $masks;
-		#print "mask=$masks";
-	  }
-	}
-}
-for($ii=0;$ii<$partCnt;$ii++)
-{
-	if (($cdsPart[$ii]) && ($partType[$ii] ne "IPCx") && ($partType[$ii] ne "FiltCtrl") && ($partType[$ii] ne "FiltCtrl2") && ($partType[$ii] ne "EpicsBinIn") && ($partType[$ii] ne "DacKill") && ($partType[$ii] ne "EpicsMomentary") && ($partType[$ii] ne "EpicsCounter") && ($partType[$ii] ne "MuxMatrix") ) {
-	  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
-	  if (length($masks) > 5) {
-	  	$header_masks .= $masks;
-		#print "mask=$masks";
 	  }
 	}
 }
@@ -1954,6 +1945,17 @@ if ($ipcxCnt > 0) {
 print OUT "  }\n";
 print OUT "  return(dacFault);\n\n";
 print OUT "}\n";
+if(($remoteGpsPart != 0) && ($remoteGPS != 0))
+{
+print "RGPS DIAG **********************************\n";
+print "\tPart number is $remoteGpsPart\n";
+	print OUT "unsigned int remote_time(CDS_EPICS *pLocalEpics) {\n\treturn ";
+	$calcExp = ("CDS::EzCaRead::remoteGps") -> ($remoteGpsPart);
+	print "$calcExp \n";
+	print OUT "$calcExp;\n}\n";
+
+}
+
 print OUT "#include \"$rcg_src_dir/src/fe/controller.c\"\n";
 
 
@@ -2094,6 +2096,11 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 			$outcnt = $partOutputs[$partOutNum[$cur_part_num][0]];
 			$incnt = $partInCnt[$partInNum[$cur_part_num][0]];
 		}
+		if ($partType[$cur_part_num] eq "RampMuxMatrix") {
+                        # RampMuxMatrix uses mux and demux parts
+                        $outcnt = $partOutputs[$partOutNum[$cur_part_num][0]];
+                        $incnt = $partInCnt[$partInNum[$cur_part_num][0]];
+                }
 		my $basename = $partName[$cur_part_num];
 		if ($partSubName[$cur_part_num] ne "") {
 			$basename = $partSubName[$cur_part_num] . "_" . $basename;
@@ -2149,6 +2156,8 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . ".adl");
 		      }
 		    }
+		  } elsif ($partType[$cur_part_num] eq "RampMuxMatrix") {
+			system("$rcg_src_dir/src/epics/util/mkrampmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
 		  } else {
 		    system("$rcg_src_dir/src/epics/util/mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
 		  }
@@ -2178,6 +2187,8 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".adl");
 		      }
 		    }
+		  } elsif ($partType[$cur_part_num] eq "RampMuxMatrix") {
+			system("$rcg_src_dir/src/epics/util/mkrampmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
 		  } else {
 		    system("$rcg_src_dir/src/epics/util/mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
 		  }
@@ -2545,8 +2556,12 @@ if($systemName eq "sei" || $useFIRs)
 print OUTM "EXTRA_CFLAGS += -DFIR_FILTERS\n";
 }
 print OUTM "EXTRA_CFLAGS += -g\n";
+
 if ($adcOver) {
   print OUTM "EXTRA_CFLAGS += -DROLLING_OVERFLOWS\n";
+}
+if ($remoteGPS) {
+  print OUTM "EXTRA_CFLAGS += -DREMOTE_GPS\n";
 }
 if ($no_sync) {
   print OUTM "#Comment out to enable 1PPS synchronization\n";
@@ -2566,19 +2581,11 @@ if ($no_daq) {
   print OUTM "#Uncomment to disable DAQ and testpoints\n";
   print OUTM "#EXTRA_CFLAGS += -DNO_DAQ\n";
 }
-if ($shmem_daq) {
-  print OUTM "#Comment out to disable local frame builder connection; uncomment USE_GM setting too\n";
+
+# SHMEM_DAQ set as the default for RCG V2.8 - No longer support GM
+  print OUTM "#Comment out to disable local frame builder connection\n";
   print OUTM "EXTRA_CFLAGS += -DSHMEM_DAQ\n";
-  print OUTM "#EXTRA_CFLAGS += -DUSE_GM=1\n";
-} else {
-  print OUTM "#Uncomment to enable local frame builder; comment out USE_GM setting too\n";
-  print OUTM "#EXTRA_CFLAGS += -DSHMEM_DAQ\n";
-if ($no_daq) {
-  print OUTM "#EXTRA_CFLAGS += -DUSE_GM=1\n";
-} else {
-  print OUTM "EXTRA_CFLAGS += -DUSE_GM=1\n";
-}
-}
+
 # Use oversampling code if not 64K system
 if($rate != 15) {
   if ($no_oversampling) {
@@ -2605,6 +2612,9 @@ if ($adcMaster > -1) {
   $modelType = "MASTER";
   if($diagTest > -1) {
   print OUTM "EXTRA_CFLAGS += -DDIAG_TEST\n";
+  }
+  if($dacWdOverride > -1) {
+  print OUTM "EXTRA_CFLAGS += -DDAC_WD_OVERRIDE\n";
   }
 } else {
   print OUTM "#Uncomment to run on an I/O Master \n";
@@ -2660,13 +2670,11 @@ if ($specificCpu > -1) {
   print OUTM "#Uncomment to run on a specific CPU\n";
   print OUTM "#EXTRA_CFLAGS += -DSPECIFIC_CPU=2\n";
 }
-if ($::allBiquad) {
+
+# Set BIQUAD as default starting RCG V2.8
   print OUTM "#Comment out to go back to old iir_filter calculation form\n";
   print OUTM "EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
-} else {
-  print OUTM "#Uncomment to run with biquad form iir_filters\n";
-  print OUTM "#EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
-}
+
 if ($::directDacWrite) {
   print OUTM "EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
 } else {

@@ -1,5 +1,5 @@
 Library {
-  Name			  "cdsStateWord"
+  Name			  "SUS_IOP_WD_2_DC_RMS"
   Version		  8.0
   MdlSubVersion		  0
   SavedCharacterEncoding  "ISO-8859-1"
@@ -19,12 +19,12 @@ Library {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [181.0, 383.0, 562.0, 438.0]
+      Location		      [318.0, 130.0, 538.0, 642.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
 	$ClassName		"Simulink.ModelBrowserInfo"
-	Visible			[1]
+	Visible			[0]
 	DockPosition		"Left"
 	Width			[50]
 	Height			[50]
@@ -43,25 +43,25 @@ Library {
 	IsActive		[1]
 	ViewObjType		"SimulinkTopLevel"
 	LoadSaveID		"0"
-	Extents			[338.0, 276.0]
+	Extents			[504.0, 480.0]
 	ZoomFactor		[1.0]
 	Offset			[0.0, 0.0]
       }
     }
   }
-  Created		  "Mon Sep 30 17:28:07 2013"
-  Creator		  "rolfbork"
+  Created		  "Fri Mar  9 14:13:58 2012"
+  Creator		  "controls"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Oct 22 15:15:46 2013"
-  RTWModifiedTimeStamp	  304355738
-  ModelVersionFormat	  "1.%<AutoIncrement:3>"
-  ConfigurationManager	  "None"
+  LastModifiedDate	  "Thu Oct 17 09:50:12 2013"
+  RTWModifiedTimeStamp	  303904208
+  ModelVersionFormat	  "1.%<AutoIncrement:11>"
+  ConfigurationManager	  "none"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
-  LibraryLinkDisplay	  "disabled"
+  LibraryLinkDisplay	  "none"
   WideLines		  off
   ShowLineDimensions	  off
   ShowPortDataTypes	  off
@@ -179,7 +179,7 @@ Library {
 	  SaveFinalState	  off
 	  SaveCompleteFinalSimState off
 	  SaveFormat		  "Array"
-	  SignalLoggingSaveFormat "Dataset"
+	  SignalLoggingSaveFormat "ModelDataLogs"
 	  SaveOutput		  on
 	  SaveState		  off
 	  SignalLogging		  on
@@ -202,7 +202,7 @@ Library {
 	  Version		  "1.12.1"
 	  Array {
 	    Type		    "Cell"
-	    Dimension		    8
+	    Dimension		    7
 	    Cell		    "BooleansAsBitfields"
 	    Cell		    "PassReuseOutputArgsAs"
 	    Cell		    "PassReuseOutputArgsThreshold"
@@ -210,7 +210,6 @@ Library {
 	    Cell		    "ZeroInternalMemoryAtStartup"
 	    Cell		    "OptimizeModelRefInitCode"
 	    Cell		    "NoFixptDivByZeroProtection"
-	    Cell		    "UseSpecifiedMinMax"
 	    PropName		    "DisabledProps"
 	  }
 	  BlockReduction	  on
@@ -304,7 +303,7 @@ Library {
 	  UnnecessaryDatatypeConvMsg "none"
 	  VectorMatrixConversionMsg "none"
 	  InvalidFcnCallConnMsg	  "error"
-	  FcnCallInpInsideContextMsg "EnableAllAsError"
+	  FcnCallInpInsideContextMsg "UseLocalSettings"
 	  SignalLabelMismatchMsg  "none"
 	  UnconnectedInputMsg	  "warning"
 	  UnconnectedOutputMsg	  "warning"
@@ -415,22 +414,13 @@ Library {
 	  Version		  "1.12.1"
 	  Array {
 	    Type		    "Cell"
-	    Dimension		    15
+	    Dimension		    6
 	    Cell		    "IncludeHyperlinkInReport"
 	    Cell		    "GenerateTraceInfo"
 	    Cell		    "GenerateTraceReport"
 	    Cell		    "GenerateTraceReportSl"
 	    Cell		    "GenerateTraceReportSf"
 	    Cell		    "GenerateTraceReportEml"
-	    Cell		    "PortableWordSizes"
-	    Cell		    "GenerateWebview"
-	    Cell		    "GenerateCodeMetricsReport"
-	    Cell		    "GenerateCodeReplacementReport"
-	    Cell		    "GenerateErtSFunction"
-	    Cell		    "CreateSILPILBlock"
-	    Cell		    "CodeExecutionProfiling"
-	    Cell		    "CodeProfilingSaveOptions"
-	    Cell		    "CodeProfilingInstrumentation"
 	    PropName		    "DisabledProps"
 	  }
 	  SystemTargetFile	  "grt.tlc"
@@ -484,18 +474,15 @@ Library {
 	      Version		      "1.12.1"
 	      Array {
 		Type			"Cell"
-		Dimension		22
+		Dimension		19
 		Cell			"IgnoreCustomStorageClasses"
 		Cell			"IgnoreTestpoints"
 		Cell			"InsertBlockDesc"
-		Cell			"InsertPolySpaceComments"
 		Cell			"SFDataObjDesc"
-		Cell			"MATLABFcnDesc"
 		Cell			"SimulinkDataObjDesc"
 		Cell			"DefineNamingRule"
 		Cell			"SignalNamingRule"
 		Cell			"ParamNamingRule"
-		Cell			"InternalIdentifier"
 		Cell			"InlinedPrmAccess"
 		Cell			"CustomSymbolStr"
 		Cell			"CustomSymbolStrGlobalVar"
@@ -526,7 +513,7 @@ Library {
 	      IncDataTypeInIds	      off
 	      MangleLength	      1
 	      CustomSymbolStrGlobalVar "$R$N$M"
-	      CustomSymbolStrType     "$N$R$M"
+	      CustomSymbolStrType     "$N$R$M_T"
 	      CustomSymbolStrField    "$N$M"
 	      CustomSymbolStrFcn      "$R$N$M$F"
 	      CustomSymbolStrFcnArg   "rt$I$N$M"
@@ -541,7 +528,7 @@ Library {
 	      SimulinkBlockComments   on
 	      MATLABSourceComments    off
 	      EnableCustomComments    off
-	      InternalIdentifier      "Classic"
+	      InternalIdentifier      "Shortened"
 	      InlinedPrmAccess	      "Literals"
 	      ReqsInCode	      off
 	      UseSimReservedNames     off
@@ -552,7 +539,7 @@ Library {
 	      Version		      "1.12.1"
 	      Array {
 		Type			"Cell"
-		Dimension		15
+		Dimension		16
 		Cell			"GeneratePreprocessorConditionals"
 		Cell			"IncludeMdlTerminateFcn"
 		Cell			"CombineOutputUpdateFcns"
@@ -562,8 +549,9 @@ Library {
 		Cell			"GenerateTestInterfaces"
 		Cell			"ModelStepFunctionPrototypeControlCompliant"
 		Cell			"CPPClassGenCompliant"
-		Cell			"MultiInstanceERTCode"
+		Cell			"PortableWordSizes"
 		Cell			"PurelyIntegerCode"
+		Cell			"GenerateAllocFcn"
 		Cell			"SupportComplex"
 		Cell			"SupportAbsoluteTime"
 		Cell			"SupportContinuousTime"
@@ -588,7 +576,7 @@ Library {
 	      ConcurrentExecutionCompliant on
 	      IncludeMdlTerminateFcn  on
 	      GeneratePreprocessorConditionals "Disable all"
-	      CombineOutputUpdateFcns on
+	      CombineOutputUpdateFcns off
 	      CombineSignalStateStructs	off
 	      SuppressErrorStatus     off
 	      ERTFirstTimeCompliant   off
@@ -609,7 +597,7 @@ Library {
 	      ModelStepFunctionPrototypeControlCompliant off
 	      CPPClassGenCompliant    off
 	      AutosarCompliant	      off
-	      GRTInterface	      off
+	      GRTInterface	      on
 	      UseMalloc		      off
 	      ExtMode		      off
 	      ExtModeStaticAlloc      off
@@ -631,7 +619,7 @@ Library {
       }
       Name		      "Configuration"
       CurrentDlgPage	      "Solver"
-      ConfigPrmDlgPosition     [ 840, 405, 1720, 1035 ] 
+      ConfigPrmDlgPosition     [ 2120, 405, 3000, 1035 ] 
     }
     PropName		    "ConfigurationSets"
   }
@@ -688,6 +676,33 @@ Library {
   }
   BlockParameterDefaults {
     Block {
+      BlockType		      Inport
+      Port		      "1"
+      OutputFunctionCall      off
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: auto"
+      LockScale		      off
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      VarSizeSig	      "Inherit"
+      SampleTime	      "-1"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      LatchByDelayingOutsideSignal off
+      LatchInputForFeedbackSignals off
+      Interpolate	      on
+    }
+    Block {
+      BlockType		      Logic
+      Operator		      "AND"
+      Inputs		      "2"
+      IconShape		      "rectangular"
+      AllPortsSameDT	      on
+      OutDataTypeStr	      "Inherit: Logical (see Configuration Parameters: Optimization)"
+      SampleTime	      "-1"
+    }
+    Block {
       BlockType		      Outport
       Port		      "1"
       OutMin		      "[]"
@@ -729,10 +744,10 @@ Library {
     }
   }
   System {
-    Name		    "cdsStateWord"
-    Location		    [181, 383, 743, 821]
+    Name		    "SUS_IOP_WD_2_DC_RMS"
+    Location		    [318, 130, 856, 772]
     Open		    on
-    ModelBrowserVisibility  on
+    ModelBrowserVisibility  off
     ModelBrowserWidth	    200
     ScreenColor		    "white"
     PaperOrientation	    "landscape"
@@ -744,15 +759,16 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "103"
+    SIDHighWatermark	    "41"
     Block {
       BlockType		      SubSystem
-      Name		      "Subsystem"
-      SID		      "3"
-      Ports		      [0, 3]
-      Position		      [45, 30, 95, 100]
-      ZOrder		      3
-      BackgroundColor	      "magenta"
+      Name		      "WD"
+      SID		      "1"
+      Ports		      [7, 2]
+      Position		      [90, 63, 200, 247]
+      ZOrder		      -1
+      BackgroundColor	      "yellow"
+      DropShadow	      on
       MinAlgLoopOccurrences   off
       PropExecContextOutsideSubsystem off
       RTWSystemCode	      "Auto"
@@ -761,10 +777,10 @@ Library {
       RequestExecContextInheritance off
       MaskHideContents	      off
       System {
-	Name			"Subsystem"
-	Location		[181, 383, 743, 821]
+	Name			"WD"
+	Location		[370, 127, 1537, 987]
 	Open			off
-	ModelBrowserVisibility	on
+	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
 	PaperOrientation	"landscape"
@@ -774,32 +790,483 @@ Library {
 	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
 	TiledPageScale		1
 	ShowPageBoundaries	off
-	ZoomFactor		"200"
+	ZoomFactor		"112"
 	Block {
-	  BlockType		  Outport
-	  Name			  "ADC_OVF"
-	  SID			  "100"
-	  Position		  [95, 33, 125, 47]
-	  ZOrder		  -97
+	  BlockType		  Inport
+	  Name			  "OSEM1_IN"
+	  SID			  "2"
+	  Position		  [45, 53, 75, 67]
+	  ZOrder		  -1
 	  IconDisplay		  "Port number"
 	}
 	Block {
-	  BlockType		  Outport
-	  Name			  "DAC_OVF"
-	  SID			  "102"
-	  Position		  [90, 68, 120, 82]
-	  ZOrder		  1
+	  BlockType		  Inport
+	  Name			  "OSEM2_IN"
+	  SID			  "3"
+	  Position		  [45, 138, 75, 152]
+	  ZOrder		  -2
 	  Port			  "2"
 	  IconDisplay		  "Port number"
 	}
 	Block {
-	  BlockType		  Outport
-	  Name			  "EXC_ON"
-	  SID			  "103"
-	  Position		  [90, 108, 120, 122]
-	  ZOrder		  2
+	  BlockType		  Inport
+	  Name			  "OSEM3_IN"
+	  SID			  "4"
+	  Position		  [45, 223, 75, 237]
+	  ZOrder		  -3
 	  Port			  "3"
 	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "OSEM4_IN"
+	  SID			  "5"
+	  Position		  [45, 318, 75, 332]
+	  ZOrder		  -4
+	  Port			  "4"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "OSEM5_IN"
+	  SID			  "6"
+	  Position		  [45, 413, 75, 427]
+	  ZOrder		  -5
+	  Port			  "5"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "OSEM6_IN"
+	  SID			  "7"
+	  Position		  [45, 508, 75, 522]
+	  ZOrder		  -6
+	  Port			  "6"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "RESET_IN"
+	  SID			  "27"
+	  Position		  [45, 88, 75, 102]
+	  ZOrder		  -7
+	  ForegroundColor	  "red"
+	  Port			  "7"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Logic
+	  Name			  "DC1"
+	  SID			  "36"
+	  Ports			  [2, 1]
+	  Position		  [495, 102, 525, 133]
+	  ZOrder		  9
+	  AllPortsSameDT	  off
+	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  Logic
+	  Name			  "DC2"
+	  SID			  "37"
+	  Ports			  [2, 1]
+	  Position		  [580, 242, 610, 273]
+	  ZOrder		  10
+	  AllPortsSameDT	  off
+	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  Logic
+	  Name			  "DC3"
+	  SID			  "38"
+	  Ports			  [2, 1]
+	  Position		  [355, 407, 385, 438]
+	  ZOrder		  11
+	  AllPortsSameDT	  off
+	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  Logic
+	  Name			  "DC4"
+	  SID			  "39"
+	  Ports			  [2, 1]
+	  Position		  [580, 527, 610, 558]
+	  ZOrder		  12
+	  AllPortsSameDT	  off
+	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  Logic
+	  Name			  "DC5"
+	  SID			  "40"
+	  Ports			  [2, 1]
+	  Position		  [730, 397, 760, 428]
+	  ZOrder		  13
+	  AllPortsSameDT	  off
+	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "OSEM1"
+	  SID			  "28"
+	  Ports			  [2, 2]
+	  Position		  [100, 43, 270, 112]
+	  ZOrder		  1
+	  LibraryVersion	  "1.18"
+	  SourceBlock		  "OSEM_WD_2_OUTPUTS/OSEM_WD"
+	  SourceType		  "SubSystem"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "OSEM2"
+	  SID			  "29"
+	  Ports			  [2, 2]
+	  Position		  [105, 128, 275, 197]
+	  ZOrder		  2
+	  LibraryVersion	  "1.18"
+	  SourceBlock		  "OSEM_WD_2_OUTPUTS/OSEM_WD"
+	  SourceType		  "SubSystem"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "OSEM3"
+	  SID			  "30"
+	  Ports			  [2, 2]
+	  Position		  [105, 213, 275, 282]
+	  ZOrder		  3
+	  LibraryVersion	  "1.18"
+	  SourceBlock		  "OSEM_WD_2_OUTPUTS/OSEM_WD"
+	  SourceType		  "SubSystem"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "OSEM4"
+	  SID			  "31"
+	  Ports			  [2, 2]
+	  Position		  [105, 308, 275, 377]
+	  ZOrder		  4
+	  LibraryVersion	  "1.18"
+	  SourceBlock		  "OSEM_WD_2_OUTPUTS/OSEM_WD"
+	  SourceType		  "SubSystem"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "OSEM5"
+	  SID			  "32"
+	  Ports			  [2, 2]
+	  Position		  [105, 403, 275, 472]
+	  ZOrder		  5
+	  LibraryVersion	  "1.18"
+	  SourceBlock		  "OSEM_WD_2_OUTPUTS/OSEM_WD"
+	  SourceType		  "SubSystem"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "OSEM6"
+	  SID			  "33"
+	  Ports			  [2, 2]
+	  Position		  [105, 498, 275, 567]
+	  ZOrder		  6
+	  LibraryVersion	  "1.18"
+	  SourceBlock		  "OSEM_WD_2_OUTPUTS/OSEM_WD"
+	  SourceType		  "SubSystem"
+	}
+	Block {
+	  BlockType		  Logic
+	  Name			  "RMS_AND1"
+	  SID			  "13"
+	  Ports			  [2, 1]
+	  Position		  [355, 52, 385, 83]
+	  ZOrder		  -8
+	  ForegroundColor	  "red"
+	  AllPortsSameDT	  off
+	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  Logic
+	  Name			  "RMS_AND2"
+	  SID			  "16"
+	  Ports			  [2, 1]
+	  Position		  [435, 187, 465, 218]
+	  ZOrder		  -11
+	  ForegroundColor	  "red"
+	  AllPortsSameDT	  off
+	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  Logic
+	  Name			  "RMS_AND3"
+	  SID			  "34"
+	  Ports			  [2, 1]
+	  Position		  [355, 317, 385, 348]
+	  ZOrder		  7
+	  ForegroundColor	  "red"
+	  AllPortsSameDT	  off
+	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  Logic
+	  Name			  "RMS_AND4"
+	  SID			  "35"
+	  Ports			  [2, 1]
+	  Position		  [435, 492, 465, 523]
+	  ZOrder		  8
+	  ForegroundColor	  "red"
+	  AllPortsSameDT	  off
+	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  Logic
+	  Name			  "RMS_AND5"
+	  SID			  "17"
+	  Ports			  [2, 1]
+	  Position		  [535, 317, 565, 348]
+	  ZOrder		  -12
+	  ForegroundColor	  "red"
+	  AllPortsSameDT	  off
+	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "WD_RMS"
+	  SID			  "26"
+	  Position		  [635, 328, 665, 342]
+	  ZOrder		  -19
+	  ForegroundColor	  "red"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "WD_DC"
+	  SID			  "41"
+	  Position		  [830, 408, 860, 422]
+	  ZOrder		  14
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	}
+	Line {
+	  SrcBlock		  "OSEM1_IN"
+	  SrcPort		  1
+	  DstBlock		  "OSEM1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "OSEM2_IN"
+	  SrcPort		  1
+	  DstBlock		  "OSEM2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "OSEM3_IN"
+	  SrcPort		  1
+	  DstBlock		  "OSEM3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "OSEM4_IN"
+	  SrcPort		  1
+	  DstBlock		  "OSEM4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "OSEM5_IN"
+	  SrcPort		  1
+	  DstBlock		  "OSEM5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "OSEM6_IN"
+	  SrcPort		  1
+	  DstBlock		  "OSEM6"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "RMS_AND1"
+	  SrcPort		  1
+	  Points		  [15, 0; 0, 125]
+	  DstBlock		  "RMS_AND2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "RMS_AND2"
+	  SrcPort		  1
+	  Points		  [25, 0; 0, 120]
+	  DstBlock		  "RMS_AND5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "RMS_AND5"
+	  SrcPort		  1
+	  DstBlock		  "WD_RMS"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "RESET_IN"
+	  SrcPort		  1
+	  Points		  [5, 0]
+	  Branch {
+	    DstBlock		    "OSEM1"
+	    DstPort		    2
+	  }
+	  Branch {
+	    Points		    [0, 85]
+	    Branch {
+	      DstBlock		      "OSEM2"
+	      DstPort		      2
+	    }
+	    Branch {
+	      Points		      [0, 85]
+	      Branch {
+		DstBlock		"OSEM3"
+		DstPort			2
+	      }
+	      Branch {
+		Points			[0, 95]
+		Branch {
+		  DstBlock		  "OSEM4"
+		  DstPort		  2
+		}
+		Branch {
+		  Points		  [0, 95]
+		  Branch {
+		    Points		    [0, 17; -61, 0; 0, 78]
+		    DstBlock		    "OSEM6"
+		    DstPort		    2
+		  }
+		  Branch {
+		    DstBlock		    "OSEM5"
+		    DstPort		    2
+		  }
+		}
+	      }
+	    }
+	  }
+	}
+	Line {
+	  SrcBlock		  "OSEM1"
+	  SrcPort		  1
+	  DstBlock		  "RMS_AND1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "OSEM2"
+	  SrcPort		  1
+	  Points		  [25, 0; 0, -70]
+	  DstBlock		  "RMS_AND1"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "OSEM3"
+	  SrcPort		  1
+	  Points		  [65, 0; 0, -20]
+	  DstBlock		  "RMS_AND2"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "RMS_AND3"
+	  SrcPort		  1
+	  Points		  [30, 0]
+	  DstBlock		  "RMS_AND4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "OSEM4"
+	  SrcPort		  1
+	  DstBlock		  "RMS_AND3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "OSEM5"
+	  SrcPort		  1
+	  Points		  [25, 0; 0, -80]
+	  DstBlock		  "RMS_AND3"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "OSEM6"
+	  SrcPort		  1
+	  DstBlock		  "RMS_AND4"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "RMS_AND4"
+	  SrcPort		  1
+	  Points		  [20, 0; 0, -170]
+	  DstBlock		  "RMS_AND5"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "OSEM1"
+	  SrcPort		  2
+	  Points		  [13, 0; 0, 15]
+	  DstBlock		  "DC1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "OSEM2"
+	  SrcPort		  2
+	  Points		  [66, 0; 0, -33; 116, 0; 0, -22]
+	  DstBlock		  "DC1"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "OSEM3"
+	  SrcPort		  2
+	  DstBlock		  "DC2"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "DC1"
+	  SrcPort		  1
+	  Points		  [32, 0; 0, 130]
+	  DstBlock		  "DC2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "OSEM4"
+	  SrcPort		  2
+	  Points		  [45, 0; 0, 55]
+	  DstBlock		  "DC3"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "OSEM5"
+	  SrcPort		  2
+	  Points		  [50, 0; 0, -25]
+	  DstBlock		  "DC3"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "OSEM6"
+	  SrcPort		  2
+	  DstBlock		  "DC4"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "DC3"
+	  SrcPort		  1
+	  Points		  [145, 0; 0, 110]
+	  DstBlock		  "DC4"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "DC4"
+	  SrcPort		  1
+	  Points		  [55, 0; 0, -125]
+	  DstBlock		  "DC5"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "DC2"
+	  SrcPort		  1
+	  Points		  [84, 0; 0, 145]
+	  DstBlock		  "DC5"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "DC5"
+	  SrcPort		  1
+	  DstBlock		  "WD_DC"
+	  DstPort		  1
 	}
       }
     }

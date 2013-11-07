@@ -7,8 +7,11 @@
 #include <assert.h>
 #include "config.h"
 
-// Raise from 200 to 700 to allow for longer trend frames
-#define MAX_BLOCKS 700
+/* 
+  Raise limit of blocks in circular buffer to 2000 for longer trend frames
+    2000 should allow for 30-minute second trend frames (1800 blocks) + cushion
+*/ 
+#define MAX_BLOCKS 2000
 
 /*
   There is one bit allocated for each consumer

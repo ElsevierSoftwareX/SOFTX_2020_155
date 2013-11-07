@@ -27,6 +27,7 @@ sub printHeaderStruct {
 # Current part number is passed as first argument
 sub printEpics {
         my ($i) = @_;
+	$::remoteGpsPart = $i;
 	$temp = $::xpartName[$i];
 	$temp =~ s/\-/\_/g;
 	$temp =~ s/\:/\_/g;
@@ -66,6 +67,15 @@ sub fromExp {
         	return "pLocalEpics->" . $::systemName . "\." . $temp;
         }
 }
+sub remoteGps {
+	my $i = @_;
+	my $temp = $::xpartName[$::remoteGpsPart];
+	$temp =~ s/\-/\_/g;
+	$temp =~ s/\:/\_/g;
+	print "Called EZCAREAD  $temp $i $::remoteGpsPart\n";
+	return "pLocalEpics->" . $::systemName . "\." . $temp;
+}
+	
 
 # Return front end code
 # Argument 1 is the part number

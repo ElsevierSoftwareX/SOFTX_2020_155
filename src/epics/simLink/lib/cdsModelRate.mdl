@@ -1,5 +1,5 @@
 Library {
-  Name			  "cdsStateWord"
+  Name			  "cdsModelRate"
   Version		  8.0
   MdlSubVersion		  0
   SavedCharacterEncoding  "ISO-8859-1"
@@ -19,7 +19,7 @@ Library {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [181.0, 383.0, 562.0, 438.0]
+      Location		      [358.0, 324.0, 800.0, 522.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -28,7 +28,7 @@ Library {
 	DockPosition		"Left"
 	Width			[50]
 	Height			[50]
-	Filter			[9]
+	Filter			[8]
       }
       Object {
 	$PropName		"ExplorerBarInfo"
@@ -43,21 +43,21 @@ Library {
 	IsActive		[1]
 	ViewObjType		"SimulinkTopLevel"
 	LoadSaveID		"0"
-	Extents			[338.0, 276.0]
+	Extents			[576.0, 360.0]
 	ZoomFactor		[1.0]
 	Offset			[0.0, 0.0]
       }
     }
   }
-  Created		  "Mon Sep 30 17:28:07 2013"
-  Creator		  "rolfbork"
+  Created		  "Tue Oct 22 15:11:11 2013"
+  Creator		  "controls"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Oct 22 15:15:46 2013"
-  RTWModifiedTimeStamp	  304355738
-  ModelVersionFormat	  "1.%<AutoIncrement:3>"
+  LastModifiedDate	  "Tue Oct 22 15:13:07 2013"
+  RTWModifiedTimeStamp	  304355539
+  ModelVersionFormat	  "1.%<AutoIncrement:1>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -729,8 +729,8 @@ Library {
     }
   }
   System {
-    Name		    "cdsStateWord"
-    Location		    [181, 383, 743, 821]
+    Name		    "cdsModelRate"
+    Location		    [358, 324, 1158, 846]
     Open		    on
     ModelBrowserVisibility  on
     ModelBrowserWidth	    200
@@ -744,15 +744,14 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "103"
+    SIDHighWatermark	    "4"
     Block {
       BlockType		      SubSystem
       Name		      "Subsystem"
-      SID		      "3"
-      Ports		      [0, 3]
-      Position		      [45, 30, 95, 100]
-      ZOrder		      3
-      BackgroundColor	      "magenta"
+      SID		      "2"
+      Ports		      [0, 1]
+      Position		      [135, 121, 190, 159]
+      ZOrder		      2
       MinAlgLoopOccurrences   off
       PropExecContextOutsideSubsystem off
       RTWSystemCode	      "Auto"
@@ -762,7 +761,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Subsystem"
-	Location		[181, 383, 743, 821]
+	Location		[358, 324, 1158, 846]
 	Open			off
 	ModelBrowserVisibility	on
 	ModelBrowserWidth	200
@@ -774,31 +773,13 @@ Library {
 	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
 	TiledPageScale		1
 	ShowPageBoundaries	off
-	ZoomFactor		"200"
+	ZoomFactor		"100"
 	Block {
 	  BlockType		  Outport
-	  Name			  "ADC_OVF"
-	  SID			  "100"
-	  Position		  [95, 33, 125, 47]
-	  ZOrder		  -97
-	  IconDisplay		  "Port number"
-	}
-	Block {
-	  BlockType		  Outport
-	  Name			  "DAC_OVF"
-	  SID			  "102"
-	  Position		  [90, 68, 120, 82]
-	  ZOrder		  1
-	  Port			  "2"
-	  IconDisplay		  "Port number"
-	}
-	Block {
-	  BlockType		  Outport
-	  Name			  "EXC_ON"
-	  SID			  "103"
-	  Position		  [90, 108, 120, 122]
-	  ZOrder		  2
-	  Port			  "3"
+	  Name			  "Rate"
+	  SID			  "4"
+	  Position		  [360, 103, 390, 117]
+	  ZOrder		  -2
 	  IconDisplay		  "Port number"
 	}
       }

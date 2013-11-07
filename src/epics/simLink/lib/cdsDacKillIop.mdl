@@ -1,6 +1,6 @@
 Library {
-  Name			  "cdsStateWord"
-  Version		  8.0
+  Name			  "cdsDacKillIop"
+  Version		  8.1
   MdlSubVersion		  0
   SavedCharacterEncoding  "ISO-8859-1"
   LibraryType		  "BlockLibrary"
@@ -19,7 +19,7 @@ Library {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [181.0, 383.0, 562.0, 438.0]
+      Location		      [83.0, 111.0, 800.0, 522.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -43,21 +43,21 @@ Library {
 	IsActive		[1]
 	ViewObjType		"SimulinkTopLevel"
 	LoadSaveID		"0"
-	Extents			[338.0, 276.0]
+	Extents			[576.0, 360.0]
 	ZoomFactor		[1.0]
 	Offset			[0.0, 0.0]
       }
     }
   }
-  Created		  "Mon Sep 30 17:28:07 2013"
-  Creator		  "rolfbork"
+  Created		  "Wed Oct 09 14:58:42 2013"
+  Creator		  "rolf"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "controls"
+  LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Oct 22 15:15:46 2013"
-  RTWModifiedTimeStamp	  304355738
-  ModelVersionFormat	  "1.%<AutoIncrement:3>"
+  LastModifiedDate	  "Thu Oct 10 11:39:35 2013"
+  RTWModifiedTimeStamp	  303232118
+  ModelVersionFormat	  "1.%<AutoIncrement:2>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -126,13 +126,13 @@ Library {
     Dimension		    1
     Simulink.ConfigSet {
       $ObjectID		      6
-      Version		      "1.12.1"
+      Version		      "1.13.0"
       Array {
 	Type			"Handle"
 	Dimension		8
 	Simulink.SolverCC {
 	  $ObjectID		  7
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  StartTime		  "0.0"
 	  StopTime		  "10.0"
 	  AbsTol		  "auto"
@@ -167,7 +167,7 @@ Library {
 	}
 	Simulink.DataIOCC {
 	  $ObjectID		  8
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  Decimation		  "1"
 	  ExternalInput		  "[t, u]"
 	  FinalStateName	  "xFinal"
@@ -199,7 +199,7 @@ Library {
 	}
 	Simulink.OptimizationCC {
 	  $ObjectID		  9
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    8
@@ -231,7 +231,7 @@ Library {
 	  EnableMemcpy		  on
 	  MemcpyThreshold	  64
 	  PassReuseOutputArgsAs	  "Structure reference"
-	  ExpressionDepthLimit	  2147483647
+	  ExpressionDepthLimit	  128
 	  FoldNonRolledExpr	  on
 	  LocalBlockOutputs	  on
 	  RollThreshold		  5
@@ -255,7 +255,7 @@ Library {
 	}
 	Simulink.DebuggingCC {
 	  $ObjectID		  10
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  RTPrefix		  "error"
 	  ConsistencyChecking	  "none"
 	  ArrayBoundsChecking	  "none"
@@ -345,11 +345,12 @@ Library {
 	}
 	Simulink.HardwareCC {
 	  $ObjectID		  11
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  ProdBitPerChar	  8
 	  ProdBitPerShort	  16
 	  ProdBitPerInt		  32
 	  ProdBitPerLong	  32
+	  ProdBitPerLongLong	  64
 	  ProdBitPerFloat	  32
 	  ProdBitPerDouble	  64
 	  ProdBitPerPointer	  32
@@ -359,17 +360,20 @@ Library {
 	  ProdEndianess		  "Unspecified"
 	  ProdWordSize		  32
 	  ProdShiftRightIntArith  on
+	  ProdLongLongMode	  off
 	  ProdHWDeviceType	  "32-bit Generic"
 	  TargetBitPerChar	  8
 	  TargetBitPerShort	  16
 	  TargetBitPerInt	  32
 	  TargetBitPerLong	  32
+	  TargetBitPerLongLong	  64
 	  TargetBitPerFloat	  32
 	  TargetBitPerDouble	  64
 	  TargetBitPerPointer	  32
 	  TargetLargestAtomicInteger "Char"
 	  TargetLargestAtomicFloat "None"
 	  TargetShiftRightIntArith on
+	  TargetLongLongMode	  off
 	  TargetIntDivRoundTo	  "Undefined"
 	  TargetEndianess	  "Unspecified"
 	  TargetWordSize	  32
@@ -382,7 +386,7 @@ Library {
 	}
 	Simulink.ModelReferenceCC {
 	  $ObjectID		  12
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  UpdateModelReferenceTargets "IfOutOfDateOrStructuralChange"
 	  CheckModelReferenceTargetMessage "error"
 	  EnableParallelModelReferenceBuilds off
@@ -397,7 +401,7 @@ Library {
 	}
 	Simulink.SFSimCC {
 	  $ObjectID		  13
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  SFSimEnableDebug	  on
 	  SFSimOverflowDetection  on
 	  SFSimEcho		  on
@@ -412,7 +416,7 @@ Library {
 	Simulink.RTWCC {
 	  $BackupClass		  "Simulink.RTWCC"
 	  $ObjectID		  14
-	  Version		  "1.12.1"
+	  Version		  "1.13.0"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    15
@@ -461,6 +465,7 @@ Library {
 	  CodeExecutionProfileVariable "executionProfile"
 	  CodeProfilingSaveOptions "SummaryOnly"
 	  CodeProfilingInstrumentation off
+	  SILDebugging		  off
 	  TargetLang		  "C"
 	  IncludeBusHierarchyInRTWFileBlockHierarchyMap	off
 	  IncludeERTFirstTime	  off
@@ -481,7 +486,7 @@ Library {
 	    Dimension		    2
 	    Simulink.CodeAppCC {
 	      $ObjectID		      15
-	      Version		      "1.12.1"
+	      Version		      "1.13.0"
 	      Array {
 		Type			"Cell"
 		Dimension		22
@@ -526,7 +531,7 @@ Library {
 	      IncDataTypeInIds	      off
 	      MangleLength	      1
 	      CustomSymbolStrGlobalVar "$R$N$M"
-	      CustomSymbolStrType     "$N$R$M"
+	      CustomSymbolStrType     "$N$R$M_T"
 	      CustomSymbolStrField    "$N$M"
 	      CustomSymbolStrFcn      "$R$N$M$F"
 	      CustomSymbolStrFcnArg   "rt$I$N$M"
@@ -541,7 +546,7 @@ Library {
 	      SimulinkBlockComments   on
 	      MATLABSourceComments    off
 	      EnableCustomComments    off
-	      InternalIdentifier      "Classic"
+	      InternalIdentifier      "Shortened"
 	      InlinedPrmAccess	      "Literals"
 	      ReqsInCode	      off
 	      UseSimReservedNames     off
@@ -549,7 +554,7 @@ Library {
 	    Simulink.GRTTargetCC {
 	      $BackupClass	      "Simulink.TargetCC"
 	      $ObjectID		      16
-	      Version		      "1.12.1"
+	      Version		      "1.13.0"
 	      Array {
 		Type			"Cell"
 		Dimension		15
@@ -562,7 +567,7 @@ Library {
 		Cell			"GenerateTestInterfaces"
 		Cell			"ModelStepFunctionPrototypeControlCompliant"
 		Cell			"CPPClassGenCompliant"
-		Cell			"MultiInstanceERTCode"
+		Cell			"GenerateAllocFcn"
 		Cell			"PurelyIntegerCode"
 		Cell			"SupportComplex"
 		Cell			"SupportAbsoluteTime"
@@ -606,10 +611,12 @@ Library {
 	      SupportVariableSizeSignals off
 	      EnableShiftOperators    on
 	      ParenthesesLevel	      "Nominal"
+	      MATLABClassNameForMDSCustomization "Simulink.SoftwareTarget.GRTCustomization"
 	      ModelStepFunctionPrototypeControlCompliant off
 	      CPPClassGenCompliant    off
 	      AutosarCompliant	      off
 	      GRTInterface	      off
+	      GenerateAllocFcn	      off
 	      UseMalloc		      off
 	      ExtMode		      off
 	      ExtModeStaticAlloc      off
@@ -631,7 +638,7 @@ Library {
       }
       Name		      "Configuration"
       CurrentDlgPage	      "Solver"
-      ConfigPrmDlgPosition     [ 840, 405, 1720, 1035 ] 
+      ConfigPrmDlgPosition     [ 190, 135, 1250, 765 ] 
     }
     PropName		    "ConfigurationSets"
   }
@@ -688,6 +695,24 @@ Library {
   }
   BlockParameterDefaults {
     Block {
+      BlockType		      Inport
+      Port		      "1"
+      OutputFunctionCall      off
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: auto"
+      LockScale		      off
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      VarSizeSig	      "Inherit"
+      SampleTime	      "-1"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      LatchByDelayingOutsideSignal off
+      LatchInputForFeedbackSignals off
+      Interpolate	      on
+    }
+    Block {
       BlockType		      Outport
       Port		      "1"
       OutMin		      "[]"
@@ -714,6 +739,7 @@ Library {
       SystemSampleTime	      "-1"
       RTWFcnNameOpts	      "Auto"
       RTWFileNameOpts	      "Auto"
+      FunctionInterfaceSpec   "void_void"
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"
@@ -729,8 +755,8 @@ Library {
     }
   }
   System {
-    Name		    "cdsStateWord"
-    Location		    [181, 383, 743, 821]
+    Name		    "cdsDacKillIop"
+    Location		    [83, 111, 883, 633]
     Open		    on
     ModelBrowserVisibility  on
     ModelBrowserWidth	    200
@@ -744,15 +770,17 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "103"
+    SIDHighWatermark	    "8"
     Block {
       BlockType		      SubSystem
       Name		      "Subsystem"
-      SID		      "3"
-      Ports		      [0, 3]
-      Position		      [45, 30, 95, 100]
-      ZOrder		      3
-      BackgroundColor	      "magenta"
+      SID		      "1"
+      Ports		      [4, 2]
+      Position		      [140, 87, 245, 198]
+      ZOrder		      1
+      ForegroundColor	      "red"
+      BackgroundColor	      "gray"
+      DropShadow	      on
       MinAlgLoopOccurrences   off
       PropExecContextOutsideSubsystem off
       RTWSystemCode	      "Auto"
@@ -762,7 +790,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Subsystem"
-	Location		[181, 383, 743, 821]
+	Location		[121, 202, 921, 724]
 	Open			off
 	ModelBrowserVisibility	on
 	ModelBrowserWidth	200
@@ -774,32 +802,70 @@ Library {
 	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
 	TiledPageScale		1
 	ShowPageBoundaries	off
-	ZoomFactor		"200"
+	ZoomFactor		"100"
 	Block {
-	  BlockType		  Outport
-	  Name			  "ADC_OVF"
-	  SID			  "100"
-	  Position		  [95, 33, 125, 47]
-	  ZOrder		  -97
+	  BlockType		  Inport
+	  Name			  "Sig"
+	  SID			  "2"
+	  Position		  [110, 103, 140, 117]
+	  ZOrder		  -1
 	  IconDisplay		  "Port number"
 	}
 	Block {
-	  BlockType		  Outport
-	  Name			  "DAC_OVF"
-	  SID			  "102"
-	  Position		  [90, 68, 120, 82]
-	  ZOrder		  1
+	  BlockType		  Inport
+	  Name			  "Bypass Time"
+	  SID			  "4"
+	  Position		  [110, 143, 140, 157]
+	  ZOrder		  2
 	  Port			  "2"
 	  IconDisplay		  "Port number"
 	}
 	Block {
-	  BlockType		  Outport
-	  Name			  "EXC_ON"
-	  SID			  "103"
-	  Position		  [90, 108, 120, 122]
-	  ZOrder		  2
+	  BlockType		  Inport
+	  Name			  "WD Trip Time"
+	  SID			  "6"
+	  Position		  [110, 183, 140, 197]
+	  ZOrder		  4
 	  Port			  "3"
 	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "DAC Trip Time"
+	  SID			  "8"
+	  Position		  [110, 223, 140, 237]
+	  ZOrder		  5
+	  Port			  "4"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "WD"
+	  SID			  "3"
+	  Position		  [360, 103, 390, 117]
+	  ZOrder		  -2
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "RST"
+	  SID			  "5"
+	  Position		  [360, 143, 390, 157]
+	  ZOrder		  1
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	}
+	Line {
+	  SrcBlock		  "Sig"
+	  SrcPort		  1
+	  DstBlock		  "WD"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Bypass Time"
+	  SrcPort		  1
+	  DstBlock		  "RST"
+	  DstPort		  1
 	}
       }
     }

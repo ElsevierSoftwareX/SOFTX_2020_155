@@ -1,16 +1,22 @@
-package CDS::DacKillIop;
+package CDS::DacKillTimed;
 use Exporter;
 @ISA = ('Exporter');
 
-#//     \page DacKillIop DacKillIop.pm
+#//     \page DacKillDelay DacKillTimed.pm
 #// \b Description: \n
-#// This part is used as part of a watchdog shutdown system. It is an enhancement of the basic DacKill part.\n 
-#// The primary differences in the use of the DacKillIop (DKIOP) and the DacKill (DK) part are: \n
-#// - Multiple DKIOP parts are allowed within a single model, whereas use of the DK part is limited to one per model.
-#// - The DK part shuts down all connected DAC outputs on a trip. Each DKIOP part can be directed to shut down one or more individual DAC modules, as defined by the user in the part Description field.
-#// - The DKIOP part has two additional input connections.
+#// This part is used as part of a watchdog shutdown system. It is an enhancement of the basic DacKill part and a.\n 
+#// variation of the DacKillIop (DKIOP) part.
+#// The primary differences in the use of the DacKillTimed (DKT) and the DacKill (DK) part are: \n
+#// - Multiple DKT parts are allowed within a single model, whereas use of the DK part is limited to one per model.
+#// - The DKT part has two additional input connections.
 #//		- WD Trip Time: Time, in seconds, that a fault (0) indication at the Sig input must remain prior to the producing a fault (0) at the WD output.
-#//		- DAC Trip Time: Time, in seconds, that a fault (0) indication at the Sig input must remain beyond the WD Trip Time before the DKIOP part shuts down the DAC module outputs.
+#//		- DAC Trip Time: Time, in seconds, that a fault (0) indication at the Sig input must remain beyond the WD Trip Time before the DKT part shuts down the DAC module outputs.
+#// The part operates similarly to the DKIOP part. Differences are:
+#//	- This part may be used within a user application model. The DKIOP may only be used in an IOP model.
+#//	- The DKIOP allows selection of which DAC modules are to be shutoff on trip. This DKT part will shutdown all \n
+#//	  DAC modules/channels assigned to this model. 
+#//		- Useful for a user app model, as only used channels of DAC modules are shutoff, instead of entire DAC modules, \n
+#//		  when DAC modules are shared shared among multiple user models.
 #//
 #// \n
 #// \b Operation: \n
@@ -25,12 +31,9 @@ use Exporter;
 #// - Once the DAC Trip timer expires:
 #//		- Outputs of all defined DAC modules are set, and latched, to zero.
 #//		- Removal of fault indication at Sig input will not clear this, nor the WD fault output.
-#//		- Requires DKIOP Reset command and clearing of fault indication at Sig input to clear the trip condition.
+#//		- Requires DKT Reset command and clearing of fault indication at Sig input to clear the trip condition.
 #//
 #// \n
-#// \b Restrictions: \n
-#// - As presently coded, this part may only be used in an IOP model.
-#//		- For use in a user application model, the controller.c code with 'ifdef ADC_SLAVE' must be changed in the DAC write code section.
 #//
 #// \n
 
@@ -41,25 +44,14 @@ use Exporter;
 #// - Checks that this part is only used in IOP model. \n
 #// - Loads DAC modules to be controlled by this part. \n
 #// 
-#// Returns DacKillIop \n\n
+#// Returns DacKillTimer \n\n
 sub partType {
 	my ($i,$j) = @_;
-	if($::adcMaster < 0) {
-                die "***ERROR: DACKILL IOP parts can only be used in IOP models\n";
-        }
 	my $desc = ${$i->{FIELDS}}{"Description"};
 	my ($num) = $desc =~ m/card_num=([^ ]+)/g;
 	my @vals = split(',',$num);
-	my $ii = 0;
-	foreach (@vals) {
-		$::dacKillMod[$::dacKillCnt][$ii] = int($_);
-		print "\t\tDacKillIop $::dacKillCnt module $ii = $::dacKillMod[$::dacKillCnt][$ii] \n";
-		$ii ++;
-	}
-	$::dacKillModCnt[$::dacKillCnt] = $ii;
-	$::dacKillPartNum[$::dacKillCnt] = $j;
 	$::dacKillCnt ++;
-	return DacKillIop;
+	return DacKillTimed;
 }
 
 #// \b sub \b printHeaderStruct \n 
@@ -188,16 +180,13 @@ sub frontEndCode {
 	 }
 	 #// _dacState maintains DAC kill value.
 	 #// This value is sent back to controller.c to shutdown DAC modules.
-	 #//	0 = OK 
-	 #//	1 = Set DAC module outputs to zero. 
+	 #//	1 = OK 
+	 #//	0 = Set DAC module outputs to zero. 
 	 my $DACSTAT = "\L$::xpartName[$i]_dacState";
-	 for ($ii=0;$ii < $::dacKillModCnt[$jj];$ii++) {
-		$modNum = $::dacKillMod[$jj][$ii];
-		if($::dacKillDko[$modNum] eq "x") {
-	 		$::dacKillDko[$modNum] = "$DACSTAT";
-		} else {
-	 		$::dacKillDko[$modNum] .= " | $DACSTAT";
-		}
+	 if($::dacKillDko[0] eq "x") {
+		$::dacKillDko[0] = "$DACSTAT";
+	 } else {
+		$::dacKillDko[0] .= " | $DACSTAT";
 	 }
 	 my $DKERR = '';
 	 #// SIGNAL = DKI Sig Input
@@ -243,11 +232,7 @@ sub frontEndCode {
 	 #// has code written. This takes care of case where there are multiple
 	 #// of these parts and some DAC modules are shared between the two.
 	 if($::dkTimesCalled == $::dacKillCnt) {
-		for ($ii=0;$ii<12;$ii++) {
-			if($::dacKillDko[$ii] ne "x") {
-				$DKERR .= "dacChanErr[$ii] = $::dacKillDko[$ii]; \n";
-			}
-		}
+		$DKERR .= "dacFault = $::dacKillDko[0]; \n";
 	 }
 
 	# Write out the C Code
@@ -275,7 +260,7 @@ if ($EPICS_RESET && !$EPICS_PANIC) {
 	/// Set DK status as OK
 	$DKSTAT = 1;
 	/// Set DAC enable mode as OK.
-	$DACSTAT = 0;
+	$DACSTAT = 1;
 	///  Clear Bypass timer
 	$BPTIME_REMAINING = 0;
 	/// Clear reset from EPICS as it is a momentary switch
@@ -292,7 +277,7 @@ if ($EPICS_PANIC)
 	/// Set WD output to FAULT
 	$WDOUT = 0;
 	/// Set return to one to force zero output from DAC modules.
-	$DACSTAT = 1;
+	$DACSTAT = 0;
 	/// Clear Bypass Timer
 	$BPTIME_REMAINING = 0;
 	/// Clear Bypass mode.
@@ -311,7 +296,7 @@ if ($EPICS_PANIC)
 		/// Set WD output to OK.
 		$WDOUT = 1;
 		/// Set DAC enable mode as OK.
-		$DACSTAT = 0;
+		$DACSTAT = 1;
 		/// Send dackill state as BYPASS to EPICS
 		$DKSTAT = 2;
 	/// If normal watchdog mode, fault at input
@@ -333,13 +318,13 @@ if ($EPICS_PANIC)
 			case 4:	// DAC TIMER RUNNING STATE
 				if ($DTTIME_REMAINING <= 0) {
 					/// KILL DAC Modules
-					$DACSTAT = 1;
+					$DACSTAT = 0;
 					/// Set DK state to WD trip, DAC timer running.
 					$DKSTAT = 0;
 				}
 				break;
 			default:
-				$DACSTAT = 1;
+				$DACSTAT = 0;
 				$WDOUT = 0;
 				break;
 		}
@@ -348,7 +333,7 @@ if ($EPICS_PANIC)
 		switch ($DKSTAT)
 		{
 			case 0:
-				$DACSTAT = 1;
+				$DACSTAT = 0;
 				$WDOUT = 0;
 				break;
 			case 3:	// WD TIMER RUNNING STATE

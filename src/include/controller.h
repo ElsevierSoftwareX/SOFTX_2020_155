@@ -235,6 +235,7 @@ int overflowAdc[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];          // ADC overflow 
 // DAC Variables
 /// Enables writing of DAC values; Used with DACKILL parts..
 int iopDacEnable;                                               // Returned by feCode to allow writing values or zeros to DAC modules
+int dacChanErr[MAX_DAC_MODULES];
 #ifdef ADC_MASTER
 int dacOutBufSize [MAX_DAC_MODULES];    
 #endif

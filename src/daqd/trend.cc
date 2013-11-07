@@ -29,6 +29,12 @@ using namespace std;
 extern daqd_c daqd;
 
 #include "crc8.cc"
+
+/* Define duration of trend quantities */
+#define SECPERMIN 60 // # of seconds per minute
+#define SECPERHOUR 3600 // # of seconds per hour
+#define MINPERHOUR 60 // # of minutes per hour
+
 // saves striped data 
 void *
 trender_c::raw_minute_saver ()
@@ -49,18 +55,17 @@ trender_c::raw_minute_saver ()
     int eof_flag = 0;
 
     int nb = mtb -> get (raw_msaver_cnum);
-    DEBUG(3, cerr << "minute trender saver; block " << nb << endl);
+    DEBUG(3, cerr << "raw minute trender saver; block " << nb << endl);
     TNF_PROBE_1(raw_minute_trender_c_saver_start, "minute_trender_c::raw_saver",
 		"got one block",
 		tnf_long,   block_number,    nb);
     {
-      cur_prop[minute_put_cntr % rmp]
-	= mtb -> block_prop (nb) -> prop;
+      cur_prop[minute_put_cntr % rmp] = mtb -> block_prop (nb) -> prop;
       if (! mtb -> block_prop (nb) -> bytes)
 	{
 	  mtb -> unlock (raw_msaver_cnum);
 	  eof_flag = 1;
-	  DEBUG1(cerr << "minute trender framer EOF" << endl);
+	  DEBUG1(cerr << "raw minute trender framer EOF" << endl);
 	  break; // out of the for() loop
 	}
       memcpy (cur_blk[minute_put_cntr % rmp],
@@ -172,8 +177,8 @@ trender_c::minute_framer ()
   /* Circular buffer length determines minute trend frame length */
   frame_length_blocks = mtb -> blocks ();
 
-  /* Length in seconds is the product of lengths of trend and minute trend buffers */
-  frame_length_seconds = frame_length_blocks * tb -> blocks ();
+  /* Length in seconds is the product of lengths of minute trend buffers*seconds in minute */
+  frame_length_seconds = frame_length_blocks * SECPERMIN;
 
   FrameCPP::Version::FrDetector detector = daqd.getDetector1();
 
@@ -283,7 +288,7 @@ trender_c::minute_framer ()
 	      {
 		mtb -> unlock (msaver_cnum);
 		eof_flag = 1;
-		DEBUG1(cerr << "trender framer EOF" << endl);
+		DEBUG1(cerr << "minute trender framer EOF" << endl);
 		break; // out of the for() loop
 	      }
 	    if (! i)
@@ -296,7 +301,7 @@ trender_c::minute_framer ()
 
 	  // Check if the gps time isn't aligned on an hour boundary
 	  if (! i) {
-	    unsigned long gps_mod = file_prop.gps % 3600;
+	    unsigned long gps_mod = file_prop.gps % SECPERHOUR;
 	    if ( gps_mod ) {
 	      // adjust time to make files aligned on gps mod 3600
 	      file_prop.gps -= gps_mod;
@@ -304,7 +309,7 @@ trender_c::minute_framer ()
 	      	file_prop.cycle -= gps_mod*16;
 	      else
 		file_prop.cycle = 0;
-	      i += gps_mod/60;
+	      i += gps_mod/MINPERHOUR;
 	    }
 
 #if 0
@@ -353,7 +358,7 @@ trender_c::minute_framer ()
 
       file_gps = file_prop.gps;
       file_gps_n = file_prop.gps_n;
-      dir_num = minute_fsd.getDirFileNames (file_gps, _tmpf, tmpf, 1, frame_length_blocks * 60 );
+      dir_num = minute_fsd.getDirFileNames (file_gps, _tmpf, tmpf, 1, frame_length_blocks * SECPERMIN );
 
       int fd = creat (_tmpf, 0644);
       if (fd < 0) {
@@ -438,7 +443,7 @@ trender_c::minute_trend ()
   // Put this thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("minute trender", 2);
 
-  int tblen = tb -> blocks (); // trend buffer length
+  int tblen = mtb -> blocks (); // trend buffer length
   int nc; // number of trend samples accumulated
   int nb; // trend buffer block number
   trend_block_t ttb [num_channels]; // minute trend local storage
@@ -712,7 +717,7 @@ trender_c::framer ()
 	  
 	  // Check if the gps time isn't aligned on a minute boundary
 	  if (! i) {
-	    unsigned long gps_mod = file_prop.gps % 60;
+	    unsigned long gps_mod = file_prop.gps % SECPERMIN;
 	    if ( gps_mod ) {
 	      // adjust time to make files aligned on gps mod 60
 	      file_prop.gps -= gps_mod;
@@ -1263,7 +1268,7 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
     }
 
 #ifdef not_def
-    if (! (tb = new circ_buffer (0, trend_buffer_blocks, block_size))) {
+    if (! (tb = new circ_buffer (0, trend_buffer_blocks, block_size,1))) {
       *yyout << "couldn't construct trender circular buffer, memory exhausted" << endl;
       return 1;
     }
@@ -1275,7 +1280,7 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
       return 1;
     }
 
-    tb = new (mptr) circ_buffer (0, trend_buffer_blocks, block_size);
+    tb = new (mptr) circ_buffer (0, trend_buffer_blocks, block_size,1);
     if (! (tb -> buffer_ptr ())) {
       tb -> ~circ_buffer();
       free ((void *) tb);
@@ -1294,18 +1299,18 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
     }
 
     // check that we don't exceed limit
-    if ( trend_buffer_blocks > MAX_BLOCKS ) {
+    if ( minute_trend_buffer_blocks > MAX_BLOCKS ) {
       system_log(1, "FATAL: minute trend frame length exceeds MAX_BLOCKS limit of %d", MAX_BLOCKS);
       return 1;
     }
 
-    // `trend_buffer_blocks' gives minute trend buffer data block period
-    mtb = new (mptr) circ_buffer (0, minute_trend_buffer_blocks, block_size, trend_buffer_blocks);
+    // SECPERMIN gives minute trend buffer data block period
+    mtb = new (mptr) circ_buffer (0, minute_trend_buffer_blocks, block_size, SECPERMIN);
     if (! (mtb -> buffer_ptr ())) {
-      tb -> ~circ_buffer();
-      free ((void *) tb);
-      tb = 0;
-      *yyout << "couldn't allocate trender buffer data blocks, memory exhausted" << endl;
+      mtb -> ~circ_buffer();
+      free ((void *) mtb);
+      mtb = 0;
+      *yyout << "couldn't allocate minute trender buffer data blocks, memory exhausted" << endl;
       return 1;
     }
   }
