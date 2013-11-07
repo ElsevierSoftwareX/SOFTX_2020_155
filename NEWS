@@ -4,6 +4,9 @@ Changes for future release
 - Changed the update rate of EZCA_WRITE tranmissions to same as EPICS sequencer rate of 8Hz. This
   had previously been throttled down to 2Hz to avoid overload of Beckhoff systems. 
 - New Matrix part added (JB). This matrix part has ramping capabilities. See V2.8 release notes.
+- Added ability to increase duration of trend frames in DAQ. Implemented with expanded config input
+   - start trender <second-blocks> <minute-blocks>. 
+   Defaults remain 60 (1 minute for sec, 1 hour for minutes). Max values about 1800.
 - Added new subsystem block to CDS_PARTS, RT Links. This is to include parts which can access internal
   runtime parameters already maintained as part of the real-time core software. Initial parts in this
   area are:
