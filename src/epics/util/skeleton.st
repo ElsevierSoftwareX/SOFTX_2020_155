@@ -532,6 +532,7 @@ state monScreen{
 %% pvUpdateCycle++;
 %% prev_seqTrig = pEpics->epicsOutput.epicsSync;
    epicsSync = prev_seqTrig * 0.0625  + pEpics->epicsOutput.timeDiag;
+%% if(prev_seqTrig == 0) epicsSync += 1;
    epicsWait = myTimeout;
    pvPut(epicsWait);
 
