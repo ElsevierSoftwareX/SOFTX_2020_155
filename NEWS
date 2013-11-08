@@ -1,6 +1,12 @@
 ============================
 Changes for future release
 ============================
+- Bug Fix. Turns out EPICS_SYNC record was being produced twice per model and used by two competing
+  pieces of code. To fix this, added another EPICS record, EPICS_SYNC_TIME. 
+	- IFO:FEC-DCUID_EPICS_SYNC = internal sync from RT code to EPICS sequencer at 8 hz. This
+	  channel step from 0 to 14 in increments of 2.
+	- IFO:FEC-DCUID_EPICS_SYNC_TIME = Produced by EPICS sequencer, is GPS time of EPICS update
+	  at 8 Hz in the form second.msec.
 - Changed the update rate of EZCA_WRITE tranmissions to same as EPICS sequencer rate of 8Hz. This
   had previously been throttled down to 2Hz to avoid overload of Beckhoff systems. 
 - New Matrix part added (JB). This matrix part has ramping capabilities. See V2.8 release notes.
