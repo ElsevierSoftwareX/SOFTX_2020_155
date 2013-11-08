@@ -1343,7 +1343,7 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_CYCLE_CNT epicsOutput.cycle int ao 0\n";
 print OUTH "\tint stateWord;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_STATE_WORD_FE epicsOutput.stateWord int ao 0\n";
 print OUTH "\tint epicsSync;\n";
-#print EPICS "OUTVARIABLE FEC\_$dcuId\_EPICS_SYNC epicsOutput.epicsSync int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_EPICS_SYNC epicsOutput.epicsSync int ao 0 field(PREC,\"4\")\n";
 
 if($adcMaster > -1)
 {
