@@ -45,4 +45,7 @@ export PATH=:/opt/rtapps/linux-x86_64/utils/bin:/opt/rtapps/gds-2.15.2/bin:/opt/
 export EPICS_DB_INCLUDE_PATH=/opt/rtapps/epics/base/dbd
 export EPICS_HOST_ARCH=linux-x86_64
 export EPICS_BASE=/opt/rtapps/epics-3.14.12.2_long/base-3.14.12.2
+export PYEPICS_LOCATION=/opt/rtapps/epics/pyext/pyepics 
+prepend "${PYEPICS_LOCATION}/lib/python2.6/site-packages" "PYTHONPATH" "${PYTHONPATH}"
+
 

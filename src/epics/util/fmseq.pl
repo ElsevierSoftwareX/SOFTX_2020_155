@@ -875,7 +875,7 @@ print "{\n	field(SCAN,\".5 second\")\n}\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_RB_STAT9\")\n";
 print "{\n	field(SCAN,\".5 second\")\n}\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_STATE_WORD\")\n";
-print "grecord(ao,\"%IFO%:FEC-${dcuId}_EPICS_SYNC\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_EPICS_SYNC_TIME\")\n";
 print "{\n	field(PREC,\"4\")\n}\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_EPICS_WAIT\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_BUILD_SVN\")\n";

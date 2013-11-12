@@ -95,8 +95,8 @@ assign svnString to "{ifo}:FEC-{sysnum}_BUILD_SVN";
 int stateWord;
 assign stateWord to "{ifo}:FEC-{sysnum}_STATE_WORD";
 
-double epicsSync;
-assign epicsSync to "{ifo}:FEC-{sysnum}_EPICS_SYNC";
+double epicsSyncTime;
+assign epicsSyncTime to "{ifo}:FEC-{sysnum}_EPICS_SYNC_TIME";
 
 int epicsWait;
 assign epicsWait to "{ifo}:FEC-{sysnum}_EPICS_WAIT";
@@ -531,7 +531,8 @@ state monScreen{
 %% }
 %% pvUpdateCycle++;
 %% prev_seqTrig = pEpics->epicsOutput.epicsSync;
-   epicsSync = prev_seqTrig * 0.0625  + pEpics->epicsOutput.timeDiag;
+   epicsSyncTime = prev_seqTrig * 0.0625  + pEpics->epicsOutput.timeDiag;
+%% if(prev_seqTrig == 0) epicsSyncTime += 1;
    epicsWait = myTimeout;
    pvPut(epicsWait);
 
@@ -787,7 +788,7 @@ state monScreen{
 
 %DECL4%
 
-   pvPut(epicsSync);
+   pvPut(epicsSyncTime);
 
 %% time_t lt = time(0);
 %% strcpy(localtimestring, ctime(&lt));
