@@ -893,6 +893,9 @@ sub remove_busses {
 		#my @out_ports = split(/\D*/,$ports);
 		# Output signal names, comma separated
    		my @out_signals = split(/,/,${$node->{FIELDS}}{"OutputSignals"});
+		if(($outsize = @out_signals) == 0) { 
+			die "Failed to find output signals - No OutputSignals field in .mdl file for $block_name\n";
+		}
 		# find the outgoing linesPorts
 		#for my $index (0 .. $#out_ports) {
 		#print "port=$out_ports[$index]; signal=$out_signals[$index]\n";
