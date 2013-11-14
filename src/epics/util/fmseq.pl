@@ -126,19 +126,19 @@ sub add_edcu_entry {
 			for(my $jj=1;$jj<($ncol+1);$jj++)
 			{
 				if($v_type eq "int") {
-					$edcuEntryI .= "\[$proc_name\_$ii\_$jj\] \n";
-					$edcuEntryI .= "acquire=3 \n";
-					$edcuEntryI .= "datarate=16 \n";
-					$edcuEntryI .= "datatype=2 \n";
-					$edcuEntryI .= "chnnum=$edcuTpNum \n";
+					$edcuEntryI .= "\[$proc_name\_$ii\_$jj\]\n";
+					$edcuEntryI .= "acquire=3\n";
+					$edcuEntryI .= "datarate=16\n";
+					$edcuEntryI .= "datatype=2\n";
+					$edcuEntryI .= "chnnum=$edcuTpNum\n";
 					$edcuSizeI ++;
 					$edcuTpNum ++;
 				} else {
-					$edcuEntryD .= "\[$proc_name\_$ii\_$jj\] \n";
-					$edcuEntryD .= "acquire=3 \n";
-					$edcuEntryD .= "datarate=16 \n";
-					$edcuEntryD .= "datatype=4 \n";
-					$edcuEntryD .= "chnnum=$edcuTpNum \n";
+					$edcuEntryD .= "\[$proc_name\_$ii\_$jj\]\n";
+					$edcuEntryD .= "acquire=3\n";
+					$edcuEntryD .= "datarate=16\n";
+					$edcuEntryD .= "datatype=4\n";
+					$edcuEntryD .= "chnnum=$edcuTpNum\n";
 					$edcuSizeD ++;
 					$edcuTpNum ++;
 				}
@@ -146,18 +146,18 @@ sub add_edcu_entry {
 		}
 	} elsif ($v_type eq "double"){
 		$edcuEntryD .= "\[$proc_name\] \n";
-					$edcuEntryD .= "acquire=3 \n";
-					$edcuEntryD .= "datarate=16 \n";
-					$edcuEntryD .= "datatype=4 \n";
-					$edcuEntryD .= "chnnum=$edcuTpNum \n";
+					$edcuEntryD .= "acquire=3\n";
+					$edcuEntryD .= "datarate=16\n";
+					$edcuEntryD .= "datatype=4\n";
+					$edcuEntryD .= "chnnum=$edcuTpNum\n";
 					$edcuSizeD ++;
 					$edcuTpNum ++;
 	} elsif ($v_type eq "int"){
 		$edcuEntryI .= "\[$proc_name\] \n";
-					$edcuEntryI .= "acquire=3 \n";
-					$edcuEntryI .= "datarate=16 \n";
-					$edcuEntryI .= "datatype=2 \n";
-					$edcuEntryI .= "chnnum=$edcuTpNum \n";
+					$edcuEntryI .= "acquire=3\n";
+					$edcuEntryI .= "datarate=16\n";
+					$edcuEntryI .= "datatype=2\n";
+					$edcuEntryI .= "chnnum=$edcuTpNum\n";
 					$edcuSizeI ++;
 					$edcuTpNum ++;
 	}
