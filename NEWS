@@ -1,6 +1,13 @@
-============================
-Changes for future release
-============================
+==================================================================================================
+Post 2.8 and trunk bug fixes
+==================================================================================================
+- fmseq.pl modified to not place extra space at end of line when writing EPICS channel names to
+  DAQ .ini files. This did not affect the system, but LHO DAQ .ini file checker scripts had
+  issues with it.
+- Makefile.linux change: DACKILL PANIC was not being written properly to autoburt files.
+==================================================================================================
+Branched at this point for RCG V2.8 release.
+==================================================================================================
 - Bug Fix. Turns out EPICS_SYNC record was being produced twice per model and used by two competing
   pieces of code. To fix this, added another EPICS record, EPICS_SYNC_TIME. 
 	- IFO:FEC-DCUID_EPICS_SYNC = internal sync from RT code to EPICS sequencer at 8 hz. This
