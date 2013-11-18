@@ -715,11 +715,12 @@ trender_c::framer ()
 	  TNF_PROBE_0(trender_c_framer_end, "trender_c::framer", "end of block processing");
 	  tb -> unlock (saver_cnum);
 	  
-	  // Check if the gps time isn't aligned on a minute boundary
+	  // Check if the gps time isn't aligned on a frame start time
+	  //   Second trend frames align at gps=0 and every frame-length-blocks (multiples of 60)
 	  if (! i) {
-	    unsigned long gps_mod = file_prop.gps % SECPERMIN;
+	    unsigned long gps_mod = file_prop.gps % frame_length_blocks;
 	    if ( gps_mod ) {
-	      // adjust time to make files aligned on gps mod 60
+	      // adjust time to make files aligned on gps mod frame_length_blocks
 	      file_prop.gps -= gps_mod;
 	      i += gps_mod;
 
@@ -1274,9 +1275,17 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
     }
 #endif
 
+
 // check that we don't exceed limit
     if ( trend_buffer_blocks > MAX_BLOCKS ) {
       system_log(1, "FATAL: second trend frame length exceeds MAX_BLOCKS limit of %d", MAX_BLOCKS);
+      return 1;
+    }
+
+// check that second trend frames are in multiples of whole minutes
+    int blkresid = trend_buffer_blocks % SECPERMIN;
+    if (blkresid > 0) {
+      system_log(1, "FATAL: second trend frame length must be whole minutes - multiple of %d", SECPERMIN);
       return 1;
     }
 
@@ -1301,6 +1310,13 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
     // check that we don't exceed limit
     if ( minute_trend_buffer_blocks > MAX_BLOCKS ) {
       system_log(1, "FATAL: minute trend frame length exceeds MAX_BLOCKS limit of %d", MAX_BLOCKS);
+      return 1;
+    }
+
+    // check that minute trend frames are in multiples of whole hours
+    int blkresid = minute_trend_buffer_blocks % MINPERHOUR;
+    if (blkresid > 0) {
+      system_log(1, "FATAL: minute trend frame length must be whole hours - multiple of %d", MINPERHOUR);
       return 1;
     }
 
