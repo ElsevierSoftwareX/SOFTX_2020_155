@@ -19,7 +19,7 @@ Library {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [991.0, 232.0, 928.0, 827.0]
+      Location		      [692.0, 85.0, 1020.0, 983.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -41,11 +41,11 @@ Library {
 	$ObjectID		5
 	$ClassName		"Simulink.EditorInfo"
 	IsActive		[1]
-	ViewObjType		"SimulinkTopLevel"
-	LoadSaveID		"0"
-	Extents			[894.0, 665.0]
-	ZoomFactor		[1.3541829554339326]
-	Offset			[-0.088337182448036344, -26.535508083140932]
+	ViewObjType		"SimulinkSubsys"
+	LoadSaveID		"164"
+	Extents			[986.0, 821.0]
+	ZoomFactor		[1.0]
+	Offset			[-89.727272727272748, -119.76033057851237]
       }
     }
   }
@@ -55,9 +55,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "rolfbork"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Nov 01 11:56:55 2013"
-  RTWModifiedTimeStamp	  305027368
-  ModelVersionFormat	  "1.%<AutoIncrement:377>"
+  LastModifiedDate	  "Thu Nov 21 12:10:47 2013"
+  RTWModifiedTimeStamp	  306936614
+  ModelVersionFormat	  "1.%<AutoIncrement:378>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -884,8 +884,8 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [991, 232, 1919, 1059]
-    Open		    on
+    Location		    [2808, 276, 3736, 1103]
+    Open		    off
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
     ScreenColor		    "white"
@@ -898,7 +898,7 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "135"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "364"
+    SIDHighWatermark	    "365"
     Block {
       BlockType		      SubSystem
       Name		      " "
@@ -2854,7 +2854,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"EpicsParts"
-	Location		[832, 189, 1882, 1085]
+	Location		[2808, 276, 3736, 1103]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -4611,8 +4611,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"WatchDogs"
-	Location		[1146, 221, 2092, 1013]
-	Open			off
+	Location		[692, 85, 1712, 1068]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -4623,7 +4623,7 @@ Library {
 	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
 	TiledPageScale		1
 	ShowPageBoundaries	off
-	ZoomFactor		"121"
+	ZoomFactor		"100"
 	Block {
 	  BlockType		  Reference
 	  Name			  "DACKILL"
@@ -4800,6 +4800,22 @@ Library {
 	}
 	Block {
 	  BlockType		  Reference
+	  Name			  "HWWD"
+	  SID			  "365"
+	  Tag			  "cdsHWWD"
+	  Ports			  [1, 2]
+	  Position		  [680, 339, 765, 446]
+	  ZOrder		  10
+	  ForegroundColor	  "red"
+	  BackgroundColor	  "gray"
+	  DropShadow		  on
+	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.4"
+	  SourceBlock		  "cdsHWWD/Subsystem"
+	  SourceType		  "SubSystem"
+	}
+	Block {
+	  BlockType		  Reference
 	  Name			  "Seismic Watchdog"
 	  SID			  "319"
 	  Tag			  "cdsSusWd"
@@ -4874,7 +4890,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"simLinkParts"
-	Location		[371, 51, 1586, 1251]
+	Location		[2808, 276, 3736, 1103]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
