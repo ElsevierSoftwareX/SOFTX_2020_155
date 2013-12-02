@@ -1,6 +1,9 @@
 ==================================================================================================
 Post 2.8 and trunk bug fixes
 ==================================================================================================
+- BugFix (#514): trend.cc modified to align trend frames to multiples of duration. Check that second
+  trends are in whole minutes (blocks are multiple of 60 seconds). Check that minute trends are in 
+  whole hours (blocks in multiples of 60 minutes)
 - fmseq.pl modified to not place extra space at end of line when writing EPICS channel names to
   DAQ .ini files. This did not affect the system, but LHO DAQ .ini file checker scripts had
   issues with it.
