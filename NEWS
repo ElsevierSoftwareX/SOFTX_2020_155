@@ -1,5 +1,5 @@
 ==================================================================================================
-Post 2.8 and trunk bug fixes
+Changes for release 2.8.1
 ==================================================================================================
 - BugFix (#514): trend.cc modified to align trend frames to multiples of duration. Check that second
   trends are in whole minutes (blocks are multiple of 60 seconds). Check that minute trends are in 
