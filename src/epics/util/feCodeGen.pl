@@ -1432,7 +1432,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 }
 for($ii=0;$ii<$partCnt;$ii++)
 {
-		if (($cdsPart[$ii]) && ($partType[$ii] ne "IPCx") && ($partType[$ii] ne "FiltCtrl") && ($partType[$ii] ne "FiltCtrl2") && ($partType[$ii] ne "EpicsBinIn") && ($partType[$ii] ne "DacKill") && ($partType[$ii] ne "DacKillIop") && ($partType[$ii] ne "DacKillTimed") && ($partType[$ii] ne "EpicsMomentary") && ($partType[$ii] ne "EpicsCounter") && ($partType[$ii] ne "EzCaRead") ) {
+		if (($cdsPart[$ii]) && ($partType[$ii] ne "IPCx") && ($partType[$ii] ne "FiltCtrl") && ($partType[$ii] ne "FiltCtrl2") && ($partType[$ii] ne "EpicsBinIn") && ($partType[$ii] ne "DacKill") && ($partType[$ii] ne "DacKillIop") && ($partType[$ii] ne "DacKillTimed") && ($partType[$ii] ne "EpicsMomentary") && ($partType[$ii] ne "EpicsCounter") && ($partType[$ii] ne "EzCaRead") && ($partType[$ii] ne "EzCaWrite")) {
 		  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
 		  if (length($masks) > 5) {
 			$header_masks .= $masks;
@@ -1441,7 +1441,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 }
 for($ii=0;$ii<$partCnt;$ii++)
 {
-		if (($cdsPart[$ii]) && ($partType[$ii] eq "EzCaRead")) {
+		if (($cdsPart[$ii]) && (($partType[$ii] eq "EzCaRead") || ($partType[$ii] eq "EzCaWrite"))) {
 		  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
 		  if (length($masks) > 5) {
 			$header_masks .= $masks;
