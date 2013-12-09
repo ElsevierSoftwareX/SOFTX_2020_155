@@ -207,6 +207,7 @@ if (@ARGV == 2) { $skeleton = $ARGV[1]; }
 # Need to open early as Parser3.pm will write filter name info first.
 open(EPICS,">../fmseq/".$ARGV[1]) || die "cannot open output file for writing";
 open(DAQ,">../fmseq/".$ARGV[1]."_daq") || die "cannot open DAQ output file for writing";
+open(WARNINGS,">../../../".$ARGV[1]."_warnings.log") || die "cannot open compile warnings output file for writing";
 mkdir $cFileDirectory, 0755;
 open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
 # Save existing front-end Makefile
@@ -668,7 +669,7 @@ $foundSysCon = 0;
 
 	# Did not find any connections to subsystem OUTPUT, so print error.
 	if($foundCon == 0 && $foundSysCon == 0){
-		print "No connect for $xpartName[$ii] $partOutput[$ii][0] $partOutputPort[$ii][0]\n";
+		print WARNINGS "WARNING  *********** No connection to subsystem output named  $xpartName[$ii] $partOutput[$ii][0] $partOutputPort[$ii][0]\n";
 	}
 	}
 }
@@ -861,6 +862,24 @@ print "Found $subSys subsystems\n";
 
 # Diags file will provide list of all parts and their connections. 
 writeDiagsFile();
+$kk = 0;
+for($ii=0;$ii<$partCnt;$ii++)
+{
+	if($partType[$ii] eq "INPUT")
+	{
+		#print "\nINPUT $xpartName[$ii] has input type $partInputType[$ii][0] \n";
+		if(($partInCnt[$ii] == 0) || (length($partInputType[$ii][0]) == 0))
+		#if($partInCnt[$ii] == 0)
+		{
+		print "\nINPUT $xpartName[$ii] is NOT connected \n";
+		$kk ++;
+	 	}
+	}
+}
+if($kk > 0)
+{
+         die "\n***ERROR: Found total of ** $kk ** INPUT parts not connected\n\n";
+}
 
 #//	
 #// \n\n Start the process of producing the code sequencing. 
@@ -1413,207 +1432,216 @@ for($ii=0;$ii<$partCnt;$ii++)
 }
 for($ii=0;$ii<$partCnt;$ii++)
 {
-	if (($cdsPart[$ii]) && ($partType[$ii] ne "IPCx") && ($partType[$ii] ne "FiltCtrl") && ($partType[$ii] ne "FiltCtrl2") && ($partType[$ii] ne "EpicsBinIn") && ($partType[$ii] ne "DacKill") && ($partType[$ii] ne "DacKillIop") && ($partType[$ii] ne "DacKillTimed") && ($partType[$ii] ne "EpicsMomentary") && ($partType[$ii] ne "EpicsCounter")  ) {
-	  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
-	  if (length($masks) > 5) {
-	  	$header_masks .= $masks;
-	  }
-	}
+		if (($cdsPart[$ii]) && ($partType[$ii] ne "IPCx") && ($partType[$ii] ne "FiltCtrl") && ($partType[$ii] ne "FiltCtrl2") && ($partType[$ii] ne "EpicsBinIn") && ($partType[$ii] ne "DacKill") && ($partType[$ii] ne "DacKillIop") && ($partType[$ii] ne "DacKillTimed") && ($partType[$ii] ne "EpicsMomentary") && ($partType[$ii] ne "EpicsCounter") && ($partType[$ii] ne "EzCaRead") ) {
+		  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
+		  if (length($masks) > 5) {
+			$header_masks .= $masks;
+		  }
+		}
+}
+for($ii=0;$ii<$partCnt;$ii++)
+{
+		if (($cdsPart[$ii]) && ($partType[$ii] eq "EzCaRead")) {
+		  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
+		  if (length($masks) > 5) {
+			$header_masks .= $masks;
+		  }
+		}
 }
 
-die "Unspecified \"host\" parameter in cdsParameters block\n" if ($targetHost eq "localhost");
+	die "Unspecified \"host\" parameter in cdsParameters block\n" if ($targetHost eq "localhost");
 
-# Print masks
-#for($ii=0;$ii<$partCnt;$ii++)
-#{
-	#if ($cdsPart[$ii] &&  $partType[$ii] eq "EpicsIn" ) {
-		#print ::OUTH "\tchar $::xpartName[$ii]_mask;\n";
+	# Print masks
+	#for($ii=0;$ii<$partCnt;$ii++)
+	#{
+		#if ($cdsPart[$ii] &&  $partType[$ii] eq "EpicsIn" ) {
+			#print ::OUTH "\tchar $::xpartName[$ii]_mask;\n";
+		#}
 	#}
-#}
-print OUTH $header_masks;
-print OUTH "} \U$systemName;\n\n";
+	print OUTH $header_masks;
+	print OUTH "} \U$systemName;\n\n";
 
-print OUTH "\n\n#define MAX_MODULES \t $filtCnt\n";
-$filtCnt *= 10;
-print OUTH "#define MAX_FILTERS \t $filtCnt\n\n";
-print OUTH "typedef struct CDS_EPICS {\n";
-print OUTH "\tCDS_EPICS_IN epicsInput;\n";
-print OUTH "\tCDS_EPICS_OUT epicsOutput;\n";
-print OUTH "\t\U$systemName \L$systemName;\n";
-print OUTH "} CDS_EPICS;\n";
-print OUTH "\#define TARGET_HOST_NAME $targetHost\n";
-print OUTH "\#endif\n";
+	print OUTH "\n\n#define MAX_MODULES \t $filtCnt\n";
+	$filtCnt *= 10;
+	print OUTH "#define MAX_FILTERS \t $filtCnt\n\n";
+	print OUTH "typedef struct CDS_EPICS {\n";
+	print OUTH "\tCDS_EPICS_IN epicsInput;\n";
+	print OUTH "\tCDS_EPICS_OUT epicsOutput;\n";
+	print OUTH "\t\U$systemName \L$systemName;\n";
+	print OUTH "} CDS_EPICS;\n";
+	print OUTH "\#define TARGET_HOST_NAME $targetHost\n";
+	print OUTH "\#endif\n";
 
-#//	- Write EPICS database info file for later use by fmseq.pl in generating EPICS code/database.
-#//		- Write info common to all models.
-print EPICS "DAQVAR $dcuId\_LOAD_CONFIG int ao 0\n";
-print EPICS "DAQVAR $dcuId\_CHAN_CNT int ao 0\n";
-print EPICS "DAQVAR $dcuId\_EPICS_CHAN_CNT int ao 0\n";
-print EPICS "DAQVAR $dcuId\_TOTAL int ao 0\n";
-print EPICS "DAQVAR $dcuId\_MSG int ao 0\n";
-print EPICS "DAQVAR  $dcuId\_DCU_ID int ao 0\n";
+	#//	- Write EPICS database info file for later use by fmseq.pl in generating EPICS code/database.
+	#//		- Write info common to all models.
+	print EPICS "DAQVAR $dcuId\_LOAD_CONFIG int ao 0\n";
+	print EPICS "DAQVAR $dcuId\_CHAN_CNT int ao 0\n";
+	print EPICS "DAQVAR $dcuId\_EPICS_CHAN_CNT int ao 0\n";
+	print EPICS "DAQVAR $dcuId\_TOTAL int ao 0\n";
+	print EPICS "DAQVAR $dcuId\_MSG int ao 0\n";
+	print EPICS "DAQVAR  $dcuId\_DCU_ID int ao 0\n";
 
 
-#Load EPICS I/O Parts
-#//		- Write part specific info by making call to <em>/lib/.pm</em> part support module.
-for($ii=0;$ii<$partCnt;$ii++)
-{
-	if ($cdsPart[$ii]) {
-	  ("CDS::" . $partType[$ii] . "::printEpics") -> ($ii);
+	#Load EPICS I/O Parts
+	#//		- Write part specific info by making call to <em>/lib/.pm</em> part support module.
+	for($ii=0;$ii<$partCnt;$ii++)
+	{
+		if ($cdsPart[$ii]) {
+		  ("CDS::" . $partType[$ii] . "::printEpics") -> ($ii);
+		}
 	}
-}
-print EPICS "\n\n";
-print EPICS "systems \U$systemName\-\n";
-if ($plantName ne $systemName) {
-	print EPICS "plant \U$plantName\n";
-}
-
-#$gdsXstart = ($dcuId - 5) * 1250;
-#$gdsTstart = $gdsXstart + 10000;
-if($rate == 480 || $rate == 240) {
-  $gdsXstart = 20001;
-  $gdsTstart = 30001;
-} else {
-  $gdsXstart = 1;
-  $gdsTstart = 10001;
-}
-
-$dac_testpoint_names = "";
-
-$pref = uc(substr($skeleton, 5, length $skeleton));
-
-for($ii = 0; $ii < $dacCnt; $ii++) {
-   for($jj = 0; $jj < 16; $jj++) {
-	if ($pref) {
-	  $dac_testpoint_names .= "${pref}_";
+	print EPICS "\n\n";
+	print EPICS "systems \U$systemName\-\n";
+	if ($plantName ne $systemName) {
+		print EPICS "plant \U$plantName\n";
 	}
-	$dac_testpoint_names .= "MDAC". $ii . "_TP_CH" . $jj . " ";
-   }
-}
 
-#//		- Add extra test point channels.
-print EPICS "test_points $dac_testpoint_names $::extraTestPoints\n";
-#print EPICS "test_points $::extraTestPoints\n";
-if ($::extraExcitations) {
-	print EPICS "excitations $::extraExcitations\n";
-}
-#//		- Add GDS info.
-print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site " . get_freq() . " $dcuId $ifoid\n";
-print EPICS "\n\n";
-close EPICS;
-
-#//	- Write C source code file.
-# Start process of writing .c file. **********************************************************************
-#//		- Standard opening information.
-print OUT "// ******* This is a computer generated file *******\n";
-print OUT "// ******* DO NOT HAND EDIT ************************\n";
-print OUT "#include \"fe.h\"";
-print OUT "\n\n";
-print OUT "\#ifdef SERVO64K\n";
-print OUT "\t\#define FE_RATE\t65536\n";
-print OUT "\#endif\n";
-print OUT "\#ifdef SERVO32K\n";
-print OUT "\t\#define FE_RATE\t32768\n";
-print OUT "\#endif\n";
-print OUT "\#ifdef SERVO16K\n";
-print OUT "\t\#define FE_RATE\t16384\n";
-print OUT "\#endif\n";
-print OUT "\#ifdef SERVO4K\n";
-print OUT "\t\#define FE_RATE\t4096\n";
-print OUT "\#endif\n";
-print OUT "\#ifdef SERVO2K\n";
-print OUT "\t\#define FE_RATE\t2048\n";
-print OUT "\#endif\n";
-print OUT "\n\n";
-
-@adcCardNum;
-@dacCardNum;
-$adcCCtr=0;
-$dacCCtr=0;
-# Hardware configuration
-#//		- PCIe Hardware information.
-print OUT "/* Hardware configuration */\n";
-print OUT "CDS_CARDS cards_used[] = {\n";
-for (0 .. $adcCnt-1) {
-	print OUT "\t{", $adcType[$_], ",", $adcNum[$_], "},\n";
-	$adcCardNum[$adcCCtr] = substr($adcNum[$_],0,1);
-	$adcCCtr ++;
-}
-for (0 .. $dacCnt-1) {
-	print OUT "\t{", $dacType[$_], ",", $dacNum[$_], "},\n";
-	$dacCardNum[$dacCCtr] = substr($dacNum[$_],0,1);
-	$dacCCtr ++;
-}
-for (0 .. $boCnt-1) {
-	print OUT "\t{", $boType[$_], ",", $boNum[$_], "},\n";
-}
-print OUT "};\n\n";
-
-
-#//		- Includes for User defined function calls.
-# Group includes for function calls at beginning
-for ($ii = 0; $ii < $partCnt; $ii++) {
-   if ($cdsPart[$ii]) {
-      if ($partType[$ii] eq "FunctionCall") {
-         ("CDS::" . $partType[$ii] . "::printFrontEndVars") -> ($ii);
-      }
-   }
-}
-
-#//		- Variable definitions.
-printVariables();
-#//		- Main user code subroutine call opening information.
-#//			- <em>feCode(
-#//				int cycle, double dWord[][32],double dacOut[][16],
-#//				FILT_MOD *dsp_ptr, COEF *dspCoeff, CDS_EPICS *pLocalEpics,int feInit)</em>
-print OUT "\nint feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
-print OUT "\t\tdouble dacOut[][16],\t\/* DAC outputs *\/\n";
-print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
-print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
-print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
-print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
-print OUT "{\n\nint ii, dacFault;\n\n";
-print OUT "if(feInit)\n\{\n";
-
-#//		- Variable declarations and initializations in subroutine which take place on first call at runtime.
-#//			- For most parts, added by call to <em>::frontEndInitCode</em> in /lib/.pm support module.
-for($ii=0;$ii<$partCnt;$ii++)
-{
-	if ( -e "lib/$partType[$ii].pm" ) {
-	   print OUT ("CDS::" . $partType[$ii] . "::frontEndInitCode") -> ($ii);
-	}	
-
-	if($partType[$ii] eq "GROUND") {
-            if ($groundInit == 0)  {                                       # =+=  MA  =+=
-                print OUT "ground = 0\.0;\n";                              # =+=  MA  =+=
-                $groundInit++;                                             # =+=  MA  =+=
-            }                                                              # =+=  MA  =+=
+	#$gdsXstart = ($dcuId - 5) * 1250;
+	#$gdsTstart = $gdsXstart + 10000;
+	if($rate == 480 || $rate == 240) {
+	  $gdsXstart = 20001;
+	  $gdsTstart = 30001;
+	} else {
+	  $gdsXstart = 1;
+	  $gdsTstart = 10001;
 	}
-	if($partType[$ii] eq "CONSTANT") {
-		print OUT "\L$xpartName[$ii] = (double)$partInputs[$ii];\n";
+
+	$dac_testpoint_names = "";
+
+	$pref = uc(substr($skeleton, 5, length $skeleton));
+
+	for($ii = 0; $ii < $dacCnt; $ii++) {
+	   for($jj = 0; $jj < 16; $jj++) {
+		if ($pref) {
+		  $dac_testpoint_names .= "${pref}_";
+		}
+		$dac_testpoint_names .= "MDAC". $ii . "_TP_CH" . $jj . " ";
+	   }
 	}
-}
-print OUT "\} else \{\n";
-print OUT "// Enabling DAC outs for those who don't have DAC KILL WD \n";
-print OUT "dacFault = 1;\n";
 
-#//		- Main processing thread.
-# IPCx PART CODE
-#
-#//			- All IPCx data receives are to occur first in the processing loop
-#
-if ($ipcxCnt > 0) {
-   
-   print OUT "\ncommData2Receive(myIpcCount, ipcInfo, timeSec , cycle);\n\n";
+	#//		- Add extra test point channels.
+	print EPICS "test_points $dac_testpoint_names $::extraTestPoints\n";
+	#print EPICS "test_points $::extraTestPoints\n";
+	if ($::extraExcitations) {
+		print EPICS "excitations $::extraExcitations\n";
+	}
+	#//		- Add GDS info.
+	print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site " . get_freq() . " $dcuId $ifoid\n";
+	print EPICS "\n\n";
+	close EPICS;
 
-}
-# END IPCx PART CODE
+	#//	- Write C source code file.
+	# Start process of writing .c file. **********************************************************************
+	#//		- Standard opening information.
+	print OUT "// ******* This is a computer generated file *******\n";
+	print OUT "// ******* DO NOT HAND EDIT ************************\n";
+	print OUT "#include \"fe.h\"";
+	print OUT "\n\n";
+	print OUT "\#ifdef SERVO64K\n";
+	print OUT "\t\#define FE_RATE\t65536\n";
+	print OUT "\#endif\n";
+	print OUT "\#ifdef SERVO32K\n";
+	print OUT "\t\#define FE_RATE\t32768\n";
+	print OUT "\#endif\n";
+	print OUT "\#ifdef SERVO16K\n";
+	print OUT "\t\#define FE_RATE\t16384\n";
+	print OUT "\#endif\n";
+	print OUT "\#ifdef SERVO4K\n";
+	print OUT "\t\#define FE_RATE\t4096\n";
+	print OUT "\#endif\n";
+	print OUT "\#ifdef SERVO2K\n";
+	print OUT "\t\#define FE_RATE\t2048\n";
+	print OUT "\#endif\n";
+	print OUT "\n\n";
 
-#print "*****************************************************\n";
+	@adcCardNum;
+	@dacCardNum;
+	$adcCCtr=0;
+	$dacCCtr=0;
+	# Hardware configuration
+	#//		- PCIe Hardware information.
+	print OUT "/* Hardware configuration */\n";
+	print OUT "CDS_CARDS cards_used[] = {\n";
+	for (0 .. $adcCnt-1) {
+		print OUT "\t{", $adcType[$_], ",", $adcNum[$_], "},\n";
+		$adcCardNum[$adcCCtr] = substr($adcNum[$_],0,1);
+		$adcCCtr ++;
+	}
+	for (0 .. $dacCnt-1) {
+		print OUT "\t{", $dacType[$_], ",", $dacNum[$_], "},\n";
+		$dacCardNum[$dacCCtr] = substr($dacNum[$_],0,1);
+		$dacCCtr ++;
+	}
+	for (0 .. $boCnt-1) {
+		print OUT "\t{", $boType[$_], ",", $boNum[$_], "},\n";
+	}
+	print OUT "};\n\n";
 
-  &printSubsystem(".");
 
-sub printSubsystem {
+	#//		- Includes for User defined function calls.
+	# Group includes for function calls at beginning
+	for ($ii = 0; $ii < $partCnt; $ii++) {
+	   if ($cdsPart[$ii]) {
+	      if ($partType[$ii] eq "FunctionCall") {
+		 ("CDS::" . $partType[$ii] . "::printFrontEndVars") -> ($ii);
+	      }
+	   }
+	}
+
+	#//		- Variable definitions.
+	printVariables();
+	#//		- Main user code subroutine call opening information.
+	#//			- <em>feCode(
+	#//				int cycle, double dWord[][32],double dacOut[][16],
+	#//				FILT_MOD *dsp_ptr, COEF *dspCoeff, CDS_EPICS *pLocalEpics,int feInit)</em>
+	print OUT "\nint feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
+	print OUT "\t\tdouble dacOut[][16],\t\/* DAC outputs *\/\n";
+	print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
+	print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
+	print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
+	print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
+	print OUT "{\n\nint ii, dacFault;\n\n";
+	print OUT "if(feInit)\n\{\n";
+
+	#//		- Variable declarations and initializations in subroutine which take place on first call at runtime.
+	#//			- For most parts, added by call to <em>::frontEndInitCode</em> in /lib/.pm support module.
+	for($ii=0;$ii<$partCnt;$ii++)
+	{
+		if ( -e "lib/$partType[$ii].pm" ) {
+		   print OUT ("CDS::" . $partType[$ii] . "::frontEndInitCode") -> ($ii);
+		}	
+
+		if($partType[$ii] eq "GROUND") {
+		    if ($groundInit == 0)  {                                       # =+=  MA  =+=
+			print OUT "ground = 0\.0;\n";                              # =+=  MA  =+=
+			$groundInit++;                                             # =+=  MA  =+=
+		    }                                                              # =+=  MA  =+=
+		}
+		if($partType[$ii] eq "CONSTANT") {
+			print OUT "\L$xpartName[$ii] = (double)$partInputs[$ii];\n";
+		}
+	}
+	print OUT "\} else \{\n";
+	print OUT "// Enabling DAC outs for those who don't have DAC KILL WD \n";
+	print OUT "dacFault = 1;\n";
+
+	#//		- Main processing thread.
+	# IPCx PART CODE
+	#
+	#//			- All IPCx data receives are to occur first in the processing loop
+	#
+	if ($ipcxCnt > 0) {
+	   
+	   print OUT "\ncommData2Receive(myIpcCount, ipcInfo, timeSec , cycle);\n\n";
+
+	}
+	# END IPCx PART CODE
+
+	#print "*****************************************************\n";
+
+	  &printSubsystem(".");
+
+	sub printSubsystem {
 my ($subsys) = @_;
 
 $ts = 0;
@@ -1960,7 +1988,7 @@ print OUT "#include \"$rcg_src_dir/src/fe/controller.c\"\n";
 
 
 if($partsRemaining != 0) {
-	print "WARNING -- NOT ALL PARTS CONNECTED !!!!\n";
+	print WARNINGS "WARNING -- NOT ALL PARTS CONNECTED !!!!\n";
 for($ii=0;$ii<$partCnt;$ii++)
 {
 	if($partUsed[$ii] == 0)
@@ -1975,6 +2003,7 @@ close OUT;
 
 
 close OUTD;
+close WARNINGS;
 
 #//	- Write C code MAKEFILE
 createCmakefile();

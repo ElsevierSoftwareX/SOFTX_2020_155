@@ -362,9 +362,15 @@ while (<IN>) {
         if ($top_name) {
 	  	$tv_name = top_name_transform($v_name);
 		$vdecl .= "assign evar_$v_name to \"{ifo}:${tv_name}\";\n";
+		$proc_name1 = "%SITE%:$tv_name\_SIN";
+		$proc_name2 = "%SITE%:$tv_name\_COS";
 	} else {
 		$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
+		$proc_name1 = "%SITE%:%SYS%$v_name\_SIN";
+		$proc_name2 = "%SITE%:%SYS%$v_name\_COS";
 	}
+	add_edcu_entry($proc_name1, "double", 1, $v_var);
+	add_edcu_entry($proc_name2, "double", 1, $v_var);
 
 	$vinit .= "%% evar_$v_name  = $v_init;\n";
 	$vinit .= "pvPut(evar_$v_name);\n";
