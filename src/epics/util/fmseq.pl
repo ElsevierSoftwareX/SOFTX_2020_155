@@ -145,7 +145,7 @@ sub add_edcu_entry {
 			}
 		}
 	} elsif ($v_type eq "double"){
-		$edcuEntryD .= "\[$proc_name\] \n";
+		$edcuEntryD .= "\[$proc_name\]\n";
 					$edcuEntryD .= "acquire=3\n";
 					$edcuEntryD .= "datarate=16\n";
 					$edcuEntryD .= "datatype=4\n";
@@ -153,7 +153,7 @@ sub add_edcu_entry {
 					$edcuSizeD ++;
 					$edcuTpNum ++;
 	} elsif ($v_type eq "int"){
-		$edcuEntryI .= "\[$proc_name\] \n";
+		$edcuEntryI .= "\[$proc_name\]\n";
 					$edcuEntryI .= "acquire=3\n";
 					$edcuEntryI .= "datarate=16\n";
 					$edcuEntryI .= "datatype=2\n";
