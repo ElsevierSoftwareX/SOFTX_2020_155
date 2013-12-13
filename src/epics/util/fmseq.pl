@@ -330,8 +330,10 @@ while (<IN>) {
 
 	if ($top_name) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}_D\")\n";
+		$proc_name = "%SITE%:$tv_name";
 	} else {
 		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}_D\")\n";
+		$proc_name = "%SITE%:%SYS%$v_name";
 	}
 	$vardb .= "{\n";
 #	$vardb .= "    field(PREC,\"3\")\n";
@@ -352,6 +354,7 @@ while (<IN>) {
 	$vardb .= "    $v_efield3\n";
 	$vardb .= "    $v_efield4\n";
 	$vardb .= "}\n";
+	add_edcu_entry($proc_name, "double", 0, $m_var, 2, 2);
     } elsif (substr($_,0,5) eq "PHASE") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
         $phase++;
