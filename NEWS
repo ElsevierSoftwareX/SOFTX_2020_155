@@ -4,7 +4,7 @@ Changes for release 2.8.2
 - Bug fix: Use of PHASE and EzCa parts produced errors in DAQ .ini file for associated EPICS
            records. 
 	- File feCodeGen.pl modified to move EzCa part variables to end of shared mem header file
-	- Phase part writing of EPICS channels fixed in fmseq.pl
+	- Phase parts (standard and wfs) writing of EPICS channels fixed in fmseq.pl
 = Bug Fix: fmseq.pl modified to not add white space at end of EPICS channel names written to DAQ
 	   .ini files. 
 ==================================================================================================
