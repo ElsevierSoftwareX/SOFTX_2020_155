@@ -13,8 +13,6 @@ use Exporter;
 
 #// \b sub \b partType \n 
 #// Required subroutine for RCG \n
-#// - Checks that this part is only used in IOP model. \n
-#// - Loads DAC modules to be controlled by this part. \n
 #// 
 #// Returns HWWD \n\n
 sub partType {
@@ -51,7 +49,8 @@ double $MYNAME\_RMS_REQ;
 double $MYNAME\_TIME_REQ;
 double $MYNAME\_RMS_RD;
 double $MYNAME\_TIME_RD;
-double $MYNAME\_TTF;
+double $MYNAME\_TTF_SEI;
+double $MYNAME\_TTF_SUS;
 double $MYNAME\_MODE;
 END
 
@@ -73,11 +72,12 @@ sub printEpics {
 	print ::EPICS <<END;
 OUTVARIABLE $::xpartName[$i]\_STATE $::systemName\.$::xpartName[$i]\_STATE double ai 0 
 MOMENTARY $::xpartName[$i]\_CMD $::systemName\.$::xpartName[$i]\_CMD double ai 0
-INVARIABLE $::xpartName[$i]\_RMS_REQ $::systemName\.$::xpartName[$i]\_RMS_REQ double ai 1 field(PREC,\"1\")
-INVARIABLE $::xpartName[$i]\_TIME_REQ $::systemName\.$::xpartName[$i]\_TIME_REQ double ai 20 field(PREC,\"1\")
+INVARIABLE $::xpartName[$i]\_RMS_REQ $::systemName\.$::xpartName[$i]\_RMS_REQ double ai 1 field(PREC,\"1\") field(HOPR,\"3.0\") field(LOPR,\"0.5\")
+INVARIABLE $::xpartName[$i]\_TIME_REQ $::systemName\.$::xpartName[$i]\_TIME_REQ double ai 20 field(PREC,\"1\") field(HOPR,\"30.0\") field(LOPR,\"10.0\")
 OUTVARIABLE $::xpartName[$i]\_RMS_RD $::systemName\.$::xpartName[$i]\_RMS_RD double ao 1 field(PREC,\"1\")
 OUTVARIABLE $::xpartName[$i]\_TIME_RD $::systemName\.$::xpartName[$i]\_TIME_RD double ao 20 field(PREC,\"1\") 
-OUTVARIABLE $::xpartName[$i]\_TTF $::systemName\.$::xpartName[$i]\_TTF double ao 0 
+OUTVARIABLE $::xpartName[$i]\_TTF_SEI $::systemName\.$::xpartName[$i]\_TTF_SEI double ao 0 
+OUTVARIABLE $::xpartName[$i]\_TTF_SUS $::systemName\.$::xpartName[$i]\_TTF_SUS double ao 0 
 OUTVARIABLE $::xpartName[$i]\_MODE $::systemName\.$::xpartName[$i]\_MODE double ao 0 
 END
 }
@@ -97,6 +97,8 @@ sub printFrontEndVars  {
         print ::OUT "static double \L$::xpartName[$i]_wdTime;\n";
         print ::OUT "static int \L$::xpartName[$i]_mode;\n";
         print ::OUT "static int \L$::xpartName[$i]_modestep;\n";
+        print ::OUT "static int \L$::xpartName[$i]_cmdack;\n";
+        print ::OUT "static int \L$::xpartName[$i]_ackcnt;\n";
 }
 
 # Figure out part input code
@@ -131,6 +133,8 @@ $here = <<END;
 \L$::xpartName[$i]_modestep = 0;
 \L$::xpartName[$i]_wdTime = 0;
 \L$::xpartName[$i]_rmsTime = 0;
+\L$::xpartName[$i]_cmdack = 0;
+\L$::xpartName[$i]_ackcnt = 47;
 \L$::xpartName[$i]\[0\] = 0;
 \L$::xpartName[$i]\[1\] = 0;
 END
@@ -163,6 +167,8 @@ sub frontEndCode {
 	 my $TIME_REMAINING = "\L$::xpartName[$i]_remainingTime";
 	 my $ONE_SEC_PULSE = "\L$::xpartName[$i]_onesecpulse";
 	 my $FIVE_SEC_PULSE = "\L$::xpartName[$i]_onesecpulse * 5";
+	 my $CMD_ACK = "\L$::xpartName[$i]_cmdack";
+	 my $ACK_CNT = "\L$::xpartName[$i]_ackcnt";
 	 #// Time remaining until WD output trips (goes to zero).
 	 my $WDTIME = "\L$::xpartName[$i]_wdTime";
 	 #// Time remaining until DAC modules are shutdown
@@ -175,7 +181,8 @@ sub frontEndCode {
 	 my $EPICS_TIMEREQ = "pLocalEpics->$::systemName\.$::xpartName[$i]\_TIME_REQ";
 	 my $EPICS_RMSRD = "pLocalEpics->$::systemName\.$::xpartName[$i]\_RMS_RD";
 	 my $EPICS_TIMERD = "pLocalEpics->$::systemName\.$::xpartName[$i]\_TIME_RD";
-	 my $EPICS_TTF = "pLocalEpics->$::systemName\.$::xpartName[$i]\_TTF";
+	 my $EPICS_TTF_SEI = "pLocalEpics->$::systemName\.$::xpartName[$i]\_TTF_SEI";
+	 my $EPICS_TTF_SUS = "pLocalEpics->$::systemName\.$::xpartName[$i]\_TTF_SUS";
 	 my $EPICS_MODE = "pLocalEpics->$::systemName\.$::xpartName[$i]\_MODE";
 
 	# Write out the C Code
@@ -184,8 +191,16 @@ sub frontEndCode {
 // HWWD MODULE
 $EPICS_STATE = $SIGNAL;
 $WDOUT = $SIGNAL;
-if(!$CYCLE && !$SIGNAL) $EPICS_TTF = $EPICS_TIMEREQ * 60;
-if(!$CYCLE && $SIGNAL && ($EPICS_TTF > 0)) $EPICS_TTF --;
+if(!$CYCLE && !$SIGNAL) $EPICS_TTF_SEI = $EPICS_TIMERD * 60;
+if(!$CYCLE && $SIGNAL && ($EPICS_TTF_SEI > 0)) $EPICS_TTF_SEI --;
+if(!$CYCLE && !((int)$SIGNAL & 10)) $EPICS_TTF_SUS = $EPICS_TIMERD * 60 + $EPICS_TTF_SEI;
+if(!$CYCLE && ((int)$SIGNAL & 1) && ((int)$SIGNAL & 10) && ($EPICS_TTF_SUS > 0)) $EPICS_TTF_SUS --;
+if($HWWD_MODE == 5) $EPICS_TTF_SEI = $ACK_CNT;
+if($ACK_CNT == 47)
+{
+	$ACK_CNT = 0;
+	$EPICS_CMD = 3;
+}
 if($HWWD_MODE == 0)
 {
 	switch ($EPICS_CMD_INT)
@@ -202,7 +217,7 @@ if($HWWD_MODE == 0)
 			}
 			break;
 		case 2:	// READ COMMAND
-			if ($SIGNAL != 1 && $SIGNAL != 5)
+			if (!((int)$SIGNAL & 5))
 			{
 				/// Set output to HWWD reset high
 				$RSETOUT = 1;
@@ -212,7 +227,7 @@ if($HWWD_MODE == 0)
 			}
 			break;
 		case 3:	// WRITE RMS COMMAND
-			if ($SIGNAL != 1 && $SIGNAL != 5)
+			if (!((int)$SIGNAL & 5))
 			{
 				/// Set output to HWWD reset high
 				$RSETOUT = 1;
@@ -222,7 +237,7 @@ if($HWWD_MODE == 0)
 			}
 			break;
 		case 4:	// WRITE TIME COMMAND
-			if ($SIGNAL != 1 && $SIGNAL != 5)
+			if (!((int)$SIGNAL & 5))
 			{
 				/// Set output to HWWD reset high
 				$RSETOUT = 1;
@@ -238,6 +253,7 @@ if($HWWD_MODE == 0)
 	switch ($HWWD_MODE)
 	{
 		case 1:	// RESET COMMAND
+			$TIME_REMAINING --;
 			if($TIME_REMAINING <= 0)
 			{
 				$RSETOUT = 0;
@@ -302,9 +318,11 @@ if($HWWD_MODE == 0)
 			if(($TIME_REMAINING <= 0) && ($HWWD_MODE_STEP == 3))
 			{
 				$RSETOUT = 0;
-				$TIME_REMAINING = 0;
+				$TIME_REMAINING = $ONE_SEC_PULSE * 12;
 				$HWWD_MODE_STEP = 0;
-				$HWWD_MODE = 0;
+				$HWWD_MODE = 5;
+				$CMD_ACK = 0;
+				$ACK_CNT = 10;
 			}
 			break;
 		case 4:	// TRIP TIME SET COMMAND
@@ -324,9 +342,36 @@ if($HWWD_MODE == 0)
 			if(($TIME_REMAINING <= 0) && ($HWWD_MODE_STEP == 3))
 			{
 				$RSETOUT = 0;
-				$TIME_REMAINING = 0;
+				$TIME_REMAINING = $ONE_SEC_PULSE * 20;
 				$HWWD_MODE_STEP = 0;
+				$HWWD_MODE = 5;
+				$CMD_ACK = 0;
+				$ACK_CNT = 15;
+			}
+			break;
+		case 5:	// COMMAND ACK
+			$TIME_REMAINING --;
+			if(($CMD_ACK == 0) && ($SIGNAL))
+			{
+				$ACK_CNT --;
+				$CMD_ACK = 1;
+			}
+			if(($CMD_ACK == 1) && (!$SIGNAL))
+			{
+				$CMD_ACK = 0;
+			}
+			if(($TIME_REMAINING <= 0) || ($ACK_CNT <= 0))
+			{
+				$TIME_REMAINING = 0;
 				$HWWD_MODE = 0;
+				if (!((int)$SIGNAL & 5))
+				{
+					/// Set output to HWWD reset high
+					$RSETOUT = 1;
+					$TIME_REMAINING = $ONE_SEC_PULSE;
+					$HWWD_MODE = 2;
+					$HWWD_MODE_STEP = 1;
+				}
 			}
 			break;
 		default:
@@ -338,7 +383,6 @@ $EPICS_CMD = 0;
 $EPICS_MODE = $HWWD_MODE;
 
 
-/// On one second mark
 
 END
 }
