@@ -99,6 +99,7 @@ sub printFrontEndVars  {
         print ::OUT "static int \L$::xpartName[$i]_modestep;\n";
         print ::OUT "static int \L$::xpartName[$i]_cmdack;\n";
         print ::OUT "static int \L$::xpartName[$i]_ackcnt;\n";
+        print ::OUT "static int \L$::xpartName[$i]_nxtreq;\n";
 }
 
 # Figure out part input code
@@ -135,6 +136,7 @@ $here = <<END;
 \L$::xpartName[$i]_rmsTime = 0;
 \L$::xpartName[$i]_cmdack = 0;
 \L$::xpartName[$i]_ackcnt = 47;
+\L$::xpartName[$i]_nxtreq = 3;
 \L$::xpartName[$i]\[0\] = 0;
 \L$::xpartName[$i]\[1\] = 0;
 END
@@ -169,6 +171,7 @@ sub frontEndCode {
 	 my $FIVE_SEC_PULSE = "\L$::xpartName[$i]_onesecpulse * 5";
 	 my $CMD_ACK = "\L$::xpartName[$i]_cmdack";
 	 my $ACK_CNT = "\L$::xpartName[$i]_ackcnt";
+	 my $NXT_REQ = "\L$::xpartName[$i]_nxtreq";
 	 #// Time remaining until WD output trips (goes to zero).
 	 my $WDTIME = "\L$::xpartName[$i]_wdTime";
 	 #// Time remaining until DAC modules are shutdown
@@ -195,11 +198,14 @@ if(!$CYCLE && !$SIGNAL) $EPICS_TTF_SEI = $EPICS_TIMERD * 60;
 if(!$CYCLE && $SIGNAL && ($EPICS_TTF_SEI > 0)) $EPICS_TTF_SEI --;
 if(!$CYCLE && !((int)$SIGNAL & 10)) $EPICS_TTF_SUS = $EPICS_TIMERD * 60 + $EPICS_TTF_SEI;
 if(!$CYCLE && ((int)$SIGNAL & 1) && ((int)$SIGNAL & 10) && ($EPICS_TTF_SUS > 0)) $EPICS_TTF_SUS --;
-if($HWWD_MODE == 5) $EPICS_TTF_SEI = $ACK_CNT;
-if($ACK_CNT == 47)
+if(($EPICS_TIMERD > ($EPICS_TIMEREQ * 1.2)) || ($EPICS_TIMERD < ($EPICS_TIMEREQ * .8)))
+	$EPICS_STATE += 16;
+if(($EPICS_RMSRD > ($EPICS_RMSREQ * 1.1)) || ($EPICS_RMSRD < ($EPICS_RMSREQ * .9)))
+	$EPICS_STATE += 32;
+if($NXT_REQ  && ($HWWD_MODE == 0))
 {
-	$ACK_CNT = 0;
-	$EPICS_CMD = 3;
+	$EPICS_CMD = $NXT_REQ;
+	$NXT_REQ = 0;
 }
 if($HWWD_MODE == 0)
 {
@@ -227,7 +233,14 @@ if($HWWD_MODE == 0)
 			}
 			break;
 		case 3:	// WRITE RMS COMMAND
-			if (!((int)$SIGNAL & 5))
+			if(($EPICS_RMSREQ > 3.0) || ($EPICS_RMSREQ < 0.5))
+			{
+				$TIME_REMAINING = $ONE_SEC_PULSE * 4;
+				$NXT_REQ = 4;
+				$HWWD_MODE = 6;
+				break;
+		
+			} else if (!((int)$SIGNAL & 5))
 			{
 				/// Set output to HWWD reset high
 				$RSETOUT = 1;
@@ -237,7 +250,13 @@ if($HWWD_MODE == 0)
 			}
 			break;
 		case 4:	// WRITE TIME COMMAND
-			if (!((int)$SIGNAL & 5))
+			if(($EPICS_TIMEREQ > 30.0) || ($EPICS_TIMEREQ < 2.0))
+			{
+				$TIME_REMAINING = $ONE_SEC_PULSE * 4;
+				$HWWD_MODE = 6;
+				$NXT_REQ = 2;
+				break;
+			} else if (!((int)$SIGNAL & 5))
 			{
 				/// Set output to HWWD reset high
 				$RSETOUT = 1;
@@ -296,9 +315,11 @@ if($HWWD_MODE == 0)
 				$EPICS_TIMERD = $WDTIME / FE_RATE * 5;
 				$RMSTIME = 0;
 				$WDTIME = 0;
-				$TIME_REMAINING = 0;
+				$TIME_REMAINING = $ONE_SEC_PULSE * 8;
 				$HWWD_MODE_STEP = 0;
-				$HWWD_MODE = 0;
+				$HWWD_MODE = 5;
+				$CMD_ACK = 0;
+				$ACK_CNT = 5;
 			}
 			break;
 		case 3:	// RMS SET COMMAND
@@ -323,6 +344,7 @@ if($HWWD_MODE == 0)
 				$HWWD_MODE = 5;
 				$CMD_ACK = 0;
 				$ACK_CNT = 10;
+				$NXT_REQ = 4;
 			}
 			break;
 		case 4:	// TRIP TIME SET COMMAND
@@ -347,6 +369,7 @@ if($HWWD_MODE == 0)
 				$HWWD_MODE = 5;
 				$CMD_ACK = 0;
 				$ACK_CNT = 15;
+				$NXT_REQ = 2;
 			}
 			break;
 		case 5:	// COMMAND ACK
@@ -364,16 +387,15 @@ if($HWWD_MODE == 0)
 			{
 				$TIME_REMAINING = 0;
 				$HWWD_MODE = 0;
-				if (!((int)$SIGNAL & 5))
-				{
-					/// Set output to HWWD reset high
-					$RSETOUT = 1;
-					$TIME_REMAINING = $ONE_SEC_PULSE;
-					$HWWD_MODE = 2;
-					$HWWD_MODE_STEP = 1;
-				}
 			}
 			break;
+		case 6:	// SETTING REQ NOT IN RANGE 
+			$TIME_REMAINING --;
+			if(($TIME_REMAINING <= 0))
+			{
+				$TIME_REMAINING = 0;
+				$HWWD_MODE = 0;
+			}
 		default:
 			break;
 	}
