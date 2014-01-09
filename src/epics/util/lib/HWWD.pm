@@ -196,8 +196,10 @@ $EPICS_STATE = $SIGNAL;
 $WDOUT = $SIGNAL;
 if(!$CYCLE && !$SIGNAL) $EPICS_TTF_SEI = $EPICS_TIMERD * 60;
 if(!$CYCLE && $SIGNAL && ($EPICS_TTF_SEI > 0)) $EPICS_TTF_SEI --;
+if(!$CYCLE && ((int)$SIGNAL & 1)) $EPICS_TTF_SEI = 0;
 if(!$CYCLE && !((int)$SIGNAL & 10)) $EPICS_TTF_SUS = $EPICS_TIMERD * 60 + $EPICS_TTF_SEI;
-if(!$CYCLE && ((int)$SIGNAL & 1) && ((int)$SIGNAL & 10) && ($EPICS_TTF_SUS > 0)) $EPICS_TTF_SUS --;
+if(!$CYCLE && ((int)$SIGNAL & 10) && ($EPICS_TTF_SUS > 0)) $EPICS_TTF_SUS --;
+if(!$CYCLE && ((int)$SIGNAL & 4)) $EPICS_TTF_SUS = 0;
 if(($EPICS_TIMERD > ($EPICS_TIMEREQ * 1.2)) || ($EPICS_TIMERD < ($EPICS_TIMEREQ * .8)))
 	$EPICS_STATE += 16;
 if(($EPICS_RMSRD > ($EPICS_RMSREQ * 1.1)) || ($EPICS_RMSRD < ($EPICS_RMSREQ * .9)))
@@ -233,7 +235,7 @@ if($HWWD_MODE == 0)
 			}
 			break;
 		case 3:	// WRITE RMS COMMAND
-			if(($EPICS_RMSREQ > 3.0) || ($EPICS_RMSREQ < 0.5))
+			if(($EPICS_RMSREQ > 20.0) || ($EPICS_RMSREQ < 3.5))
 			{
 				$TIME_REMAINING = $ONE_SEC_PULSE * 4;
 				$NXT_REQ = 4;
@@ -311,7 +313,7 @@ if($HWWD_MODE == 0)
 			}
 			if((($TIME_REMAINING <= 0) || (!$SIGNAL)) && ($HWWD_MODE_STEP == 6))
 			{
-				$EPICS_RMSRD = $RMSTIME / FE_RATE / 2;
+				$EPICS_RMSRD = $RMSTIME / FE_RATE / 2 * 7.0;
 				$EPICS_TIMERD = $WDTIME / FE_RATE * 5;
 				$RMSTIME = 0;
 				$WDTIME = 0;
@@ -333,7 +335,7 @@ if($HWWD_MODE == 0)
 			if(($TIME_REMAINING <= 0) && ($HWWD_MODE_STEP == 2))
 			{
 				$RSETOUT = 1;
-				$TIME_REMAINING = $ONE_SEC_PULSE * 2 * $EPICS_RMSREQ;
+				$TIME_REMAINING = $ONE_SEC_PULSE * 2 * $EPICS_RMSREQ / 7;
 				$HWWD_MODE_STEP = 3;
 			}
 			if(($TIME_REMAINING <= 0) && ($HWWD_MODE_STEP == 3))
