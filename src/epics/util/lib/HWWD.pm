@@ -235,7 +235,7 @@ if($HWWD_MODE == 0)
 			}
 			break;
 		case 3:	// WRITE RMS COMMAND
-			if(($EPICS_RMSREQ > 20.0) || ($EPICS_RMSREQ < 3.5))
+			if(($EPICS_RMSREQ > 600.0) || ($EPICS_RMSREQ < 100))
 			{
 				$TIME_REMAINING = $ONE_SEC_PULSE * 4;
 				$NXT_REQ = 4;
@@ -313,7 +313,7 @@ if($HWWD_MODE == 0)
 			}
 			if((($TIME_REMAINING <= 0) || (!$SIGNAL)) && ($HWWD_MODE_STEP == 6))
 			{
-				$EPICS_RMSRD = $RMSTIME / FE_RATE / 2 * 7.0;
+				$EPICS_RMSRD = $RMSTIME / FE_RATE / 2 * 200.0;
 				$EPICS_TIMERD = $WDTIME / FE_RATE * 5;
 				$RMSTIME = 0;
 				$WDTIME = 0;
@@ -335,7 +335,7 @@ if($HWWD_MODE == 0)
 			if(($TIME_REMAINING <= 0) && ($HWWD_MODE_STEP == 2))
 			{
 				$RSETOUT = 1;
-				$TIME_REMAINING = $ONE_SEC_PULSE * 2 * $EPICS_RMSREQ / 7;
+				$TIME_REMAINING = $ONE_SEC_PULSE * 2 * $EPICS_RMSREQ / 200;
 				$HWWD_MODE_STEP = 3;
 			}
 			if(($TIME_REMAINING <= 0) && ($HWWD_MODE_STEP == 3))
