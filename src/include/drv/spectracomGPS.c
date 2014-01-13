@@ -88,7 +88,12 @@ for(ii=0;ii<2;ii++)
   if(i < 1000000000)
   {
         printk("TSYNC NOT receiving YEAR info, defaulting to by year patch\n");
-        pHardware->gpsOffset = 31190400 + 31536000;
+/* add offsets for leap-seconds - +15 through 2008 */
+/* add offset at end of 2011 (31536000 normal year) */
+/* Add offset for June 30, 2012 leap second */
+/* add offset at end of 2012 (31622400 leap year) */
+/* add offset at end of 2013 (31536000 normal year) */
+	    pHardware->gpsOffset = 31190400 + 15 + 31536000 + 1 + 31622400 + 15 + 31536000;
   } else {
         printk("TSYNC receiving YEAR info\n");
         pHardware->gpsOffset = -315964800;
