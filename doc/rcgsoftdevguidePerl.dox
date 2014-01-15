@@ -125,6 +125,7 @@ These are all located in the epics/util/lib directory.\n\n
         - \subpage DacKill "DacKill.pm" \n
         - \subpage DacKillIop "DacKillIop.pm" \n
         - \subpage DacKillDelay "DacKillTimed.pm" \n
+        - \subpage SusHWWD  "HWWD.pm" \n
 
 \par User Defined C Code
         - \subpage FunctionCall "FunctionCall.pm\n

@@ -5,10 +5,28 @@ use Exporter;
 #//     \page SusHWWD HWWD.pm
 #// \b Description: \n
 #//
+#// This part is used to monitor and control a SUS Hardware WatchDog (HWWD) chassis. \n
 #// \n
 #// \b Operation: \n
 #// \n
-
+#// - Input = Single word, with the lower four bits received via a binary input channel \n
+#// 	from the HWWD.\n
+#// - Outputs:
+#//	- 1) HWWD Status, a reflection of the input signal.
+#//	- 2) RESET/COMMAND output: To be connected to binary output attached to HWWD RESET input.
+#// - Monitoring Functions:
+#// This part monitors the 4 status bits from the HWWD and reports them to an EPICS record (see \n
+#// _STATE definition in printEpics). Additionally, this part provides two timers (1 sec downcounters)\n
+#// to provide an estimate of time until the HWWD will trip the connected SUS and SEI systems.
+#// - Control Functions:
+#// This part provides the capability to send control data to the HWWD via its RESET input line. This \n
+#// RESET line is connected via a single binary output channel of a BIO card. \n
+#//	- 1) HWWD Reset 
+#//	- 2) Set HWWD RMS Trip Point (100 to 600 mV RMS)
+#//	- 3) Set HWWD Time to Trip (T2T) (2 to 30 minutes)
+#//	- 4) Read RMS and T2T settings from HWWD
+#//
+#// \n
 #// \b SUBROUTINES ************************* \n\n
 
 #// \b sub \b partType \n 
@@ -24,19 +42,25 @@ sub partType {
 #// Required subroutine for RCG \n
 #// Print Epics communication structure into a header file \n
 #// Current part number is passed as first argument \n\n
-#// This part passes 8 double type values: \n
+#// This part passes 8 double type values to/from the EPICS sequencer. All of these have corresponding \n
+#// EPICS variables.
 #// - _STATE = HWWD Status, bits defined as. \n
 #// 	- 0 = SEI Trip\n
-#// 	- 1 = Photodiode RMS  \n
+#// 	- 1 = Photodiode RMS Fault \n
 #// 	- 2 = SUS Trip \n
 #// 	- 3 = LED Fault \n
-#// - _CMD =  \n
-#// - _RMS_REQ =  \n
-#// - _TIME_REQ =  \n
-#// - _RMS_RD = . \n
-#// - _TIME_RD = . \n
-#// - _TTF = . \n
-#// - _MODE = . \n
+#// - _CMD = control command to be sent to HWWD \n
+#// 	- 1 = Reset\n
+#// 	- 2 = Read Settings\n
+#// 	- 3 = Write RMS trip point setting\n
+#// 	- 4 = Write T2T setting\n
+#// - _RMS_REQ = Requested RMS trip point setting \n
+#// - _TIME_REQ = Requested T2T setting \n
+#// - _RMS_RD = RMS trip point setting read back from HWWD \n
+#// - _TIME_RD = T2T setting read back from HWWD. \n
+#// - _TTF_SEI = Estimated time to SEI trip \n
+#// - _TTF_SUS = Estimated time to SUS trip \n
+#// - _MODE = Present software state \n
 #//
 
 sub printHeaderStruct {
@@ -123,7 +147,9 @@ sub fromExp {
 #// Required subroutine for RCG \n
 #// - Argument 1 is the part number \n
 #// - Returns C code initialization code\n
-#//		- No init required for this part.
+#//	- Variable initialization of note: \n
+#//		- _onesecpulse = FE_RATE: Number of code cycles per second for use by timers. \n.
+#//		- _nxtreq = 3: Forces a read of HWWD settings on code startup.
 #//
 sub frontEndInitCode {
 	my ($i) = @_;
@@ -152,6 +178,68 @@ END
 #// - Argument 1 is the part number \n
 #// - Returns C Code for this part. \n
 #//
+#// The 'return << END' section writes out the C coded needed to support this part. It consists \n
+#//	of three basic sections:\n
+#//	- Monitoring: Reads in the HWWD status and updates EPICS information.
+#//	- If not presently in a HHWD command sequence ($HWWD_MODE == 0), check for new commands.
+#//		- Initiate the command sequence requested.
+#//	- If in a command sequence ($HWWD_MODE != 0), continue the command sequence until complete.
+#//
+#// HHWD Commands. \n
+#// Overview: \n
+#// The HWWD chassis has a single connection, RESET, from a single binary output channel ( single bit, 0 or 1). \n
+#// While initially designed for the sole purpose of allowing remote RESET, this input was later adapted to allow \n
+#// the setting of HWWD trip points and times. In order for the HWWD to recognize these commands (listed below), this \n
+#// software must send a precisely timed series of pulses to this HWWD input. This software must also be capable of \n
+#// reading precisely timed pulse trains back from the HWWD status monitor to read and verify the settings.\n
+#//
+#// General Notes: \n
+#//	- 1) RESET command is only recognized by the HWWD when in a tripped condition (SEI and/or SUS fault). Unless \n
+#//	the status readback indicates that the HWWD is in that state, this command should NOT be sent.
+#//	- 2) The READ, SET RMS, SET TIME commands are not recognized by the HWWD unless the HWWD status is \n
+#//	NOT in a tripped state. Therefore, do NOT attempt to send these commands unless HWWD is not in tripped state. \n
+#//	- 3) Upon receipt, and completion, of a 'SET RMS Trip Point' command, this code will continue a sequence to also \n
+#//	set the T2T and readback the new settings from the HWWD. \n
+#//	
+#//
+#// Supported Commands:
+#//	- RESET: \n
+#//		- Clears HWWD SUS and SEI trip if, and only if, PD and LED indicators are OK.
+#//		- Command Sequence:
+#//			- Set RESET output high (1) for 2 seconds, then return to zero (0).
+#//	- READ: \n
+#//		- Reads back the RMS trip point and T2T values set in the HHWD.
+#//		- Command Sequence:
+#//			- Set RESET output high (1) for 1 second \n
+#//			- Set RESET output low (0) for 1 second \n
+#//			- Set RESET output high (1) for 5 seconds \n
+#//			- Set RESET output low (0) \n
+#//			- Wait for STATUS = 0 \n
+#//			- Wait for STATUS > 0 \n
+#//			- Measure time duration of PD and LED status = 1 \n
+#//				- Time duration of PD bit set high indicates RMS trip point setting.
+#//				- Time duration of LED bit set high indicates T2T setting.
+#//			- Convert signal durations to proper engineering units and write to EPICS channels.
+#//			- Verify receipt of command acknowledgment signal from HHWD.
+#//				- Series of five on/off (1/0), one second pulses on LED and PD status bits.
+#//	- SET RMS TRIP POINT
+#//		- Writes the RMS trip point setting to the HWWD in range of 100 to 600 mV RMS.
+#//		- Command Sequence:
+#//			- Set RESET output high (1) for 10 seconds \n
+#//			- Set RESET output low (0) for 1 second \n
+#//			- Set RESET output high (1) for 2 seconds * RMS request/200 \n
+#//			- Set RESET output low (0) \n
+#//			- Verify receipt of command acknowledgment signal from HHWD.
+#//				- Series of ten on/off (1/0), one second pulses on LED and PD status bits.
+#//	- SET T2T 
+#//		- Writes the T2T setting to the HWWD in range of 2 to 30 minutes.
+#//		- Command Sequence:
+#//			- Set RESET output high (1) for 15 seconds \n
+#//			- Set RESET output low (0) for 1 second \n
+#//			- Set RESET output high (1) for 1 second * T2T request/5 \n
+#//			- Set RESET output low (0) \n
+#//			- Verify receipt of command acknowledgment signal from HHWD.
+#//				- Series of fiftenn on/off (1/0), one second pulses on LED and PD status bits.
 sub frontEndCode {
 	my ($i) = @_;
 	 #// SIGNAL = HWWD Sig Input
@@ -176,7 +264,7 @@ sub frontEndCode {
 	 my $WDTIME = "\L$::xpartName[$i]_wdTime";
 	 #// Time remaining until DAC modules are shutdown
 	 my $RMSTIME = "\L$::xpartName[$i]_rmsTime";
-	 #// Following are DKI variables sent to / received from EPICS
+	 #// Following are HWWD variables sent to / received from EPICS
 	 my $EPICS_STATE = "pLocalEpics->$::systemName\.$::xpartName[$i]\_STATE";
 	 my $EPICS_CMD_INT = "(int)pLocalEpics->$::systemName\.$::xpartName[$i]\_CMD";
 	 my $EPICS_CMD = "pLocalEpics->$::systemName\.$::xpartName[$i]\_CMD";

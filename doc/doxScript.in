@@ -12,6 +12,7 @@ grep \#\/\/ @top_srcdir@/src/epics/util/lib/Osc.pm | sed s/\#/\\//g > Osc.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/Matrix.pm | sed s/\#/\\//g > Matrix.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/Noise.pm | sed s/\#/\\//g > Noise.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/medmGen.pm | sed s/\#/\\//g > medmGen.dox
+grep \#\/\/ @top_srcdir@/src/epics/util/lib/HWWD.pm | sed s/\#/\\//g > HWWD.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/CDI64.pm | sed s/\#/\\//g > CDI64.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/CDO64.pm | sed s/\#/\\//g > CDO64.dox
 grep \#\/\/ @top_srcdir@/src/epics/util/lib/Dac.pm | sed s/\#/\\//g > Dac.dox
