@@ -53,11 +53,11 @@ Library {
   Creator		  "rolfbork"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "controls"
+  LastModifiedBy	  "rolfbork"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Oct 22 15:15:46 2013"
-  RTWModifiedTimeStamp	  304355738
-  ModelVersionFormat	  "1.%<AutoIncrement:3>"
+  LastModifiedDate	  "Mon Feb 03 13:54:01 2014"
+  RTWModifiedTimeStamp	  313336439
+  ModelVersionFormat	  "1.%<AutoIncrement:4>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -750,7 +750,7 @@ Library {
       Name		      "Subsystem"
       SID		      "3"
       Ports		      [0, 3]
-      Position		      [45, 30, 95, 100]
+      Position		      [145, 70, 195, 140]
       ZOrder		      3
       BackgroundColor	      "magenta"
       MinAlgLoopOccurrences   off
