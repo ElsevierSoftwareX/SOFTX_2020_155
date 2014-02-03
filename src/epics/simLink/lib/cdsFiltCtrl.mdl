@@ -1,23 +1,63 @@
 Library {
   Name			  "cdsFiltCtrl"
-  Version		  7.5
+  Version		  8.0
   MdlSubVersion		  0
-  SavedCharacterEncoding  "UTF-8"
+  SavedCharacterEncoding  "ISO-8859-1"
   LibraryType		  "BlockLibrary"
   SaveDefaultBlockParams  on
   ScopeRefreshTime	  0.035000
   OverrideScopeRefreshTime on
   DisableAllScopes	  off
+  FPTRunName		  "Run 1"
   MaxMDLFileLineLength	  120
+  Object {
+    $PropName		    "BdWindowsInfo"
+    $ObjectID		    1
+    $ClassName		    "Simulink.BDWindowsInfo"
+    Object {
+      $PropName		      "WindowsInfo"
+      $ObjectID		      2
+      $ClassName	      "Simulink.WindowInfo"
+      IsActive		      [1]
+      Location		      [1738.0, 368.0, 620.0, 438.0]
+      Object {
+	$PropName		"ModelBrowserInfo"
+	$ObjectID		3
+	$ClassName		"Simulink.ModelBrowserInfo"
+	Visible			[0]
+	DockPosition		"Left"
+	Width			[50]
+	Height			[50]
+	Filter			[9]
+      }
+      Object {
+	$PropName		"ExplorerBarInfo"
+	$ObjectID		4
+	$ClassName		"Simulink.ExplorerBarInfo"
+	Visible			[1]
+      }
+      Object {
+	$PropName		"EditorsInfo"
+	$ObjectID		5
+	$ClassName		"Simulink.EditorInfo"
+	IsActive		[1]
+	ViewObjType		"SimulinkTopLevel"
+	LoadSaveID		"0"
+	Extents			[586.0, 276.0]
+	ZoomFactor		[1.0]
+	Offset			[0.0, 0.0]
+      }
+    }
+  }
   Created		  "Mon Oct 23 16:38:35 2006"
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "controls"
+  LastModifiedBy	  "rolfbork"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Aug 25 16:22:40 2011"
-  RTWModifiedTimeStamp	  236190131
-  ModelVersionFormat	  "1.%<AutoIncrement:8>"
+  LastModifiedDate	  "Mon Feb 03 13:47:57 2014"
+  RTWModifiedTimeStamp	  313336076
+  ModelVersionFormat	  "1.%<AutoIncrement:9>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -25,6 +65,7 @@ Library {
   WideLines		  off
   ShowLineDimensions	  off
   ShowPortDataTypes	  off
+  ShowDesignRanges	  off
   ShowLoopsOnError	  on
   IgnoreBidirectionalLines off
   ShowStorageClass	  off
@@ -84,14 +125,14 @@ Library {
     Type		    "Handle"
     Dimension		    1
     Simulink.ConfigSet {
-      $ObjectID		      1
-      Version		      "1.10.0"
+      $ObjectID		      6
+      Version		      "1.12.1"
       Array {
 	Type			"Handle"
 	Dimension		8
 	Simulink.SolverCC {
-	  $ObjectID		  2
-	  Version		  "1.10.0"
+	  $ObjectID		  7
+	  Version		  "1.12.1"
 	  StartTime		  "0.0"
 	  StopTime		  "10.0"
 	  AbsTol		  "auto"
@@ -109,6 +150,8 @@ Library {
 	  MaxConsecutiveMinStep	  "1"
 	  RelTol		  "1e-3"
 	  SolverMode		  "SingleTasking"
+	  EnableConcurrentExecution off
+	  ConcurrentTasks	  off
 	  Solver		  "ode45"
 	  SolverName		  "ode45"
 	  SolverJacobianMethodControl "auto"
@@ -123,8 +166,8 @@ Library {
 	  InsertRTBMode		  "Whenever possible"
 	}
 	Simulink.DataIOCC {
-	  $ObjectID		  3
-	  Version		  "1.10.0"
+	  $ObjectID		  8
+	  Version		  "1.12.1"
 	  Decimation		  "1"
 	  ExternalInput		  "[t, u]"
 	  FinalStateName	  "xFinal"
@@ -136,6 +179,7 @@ Library {
 	  SaveFinalState	  off
 	  SaveCompleteFinalSimState off
 	  SaveFormat		  "Array"
+	  SignalLoggingSaveFormat "ModelDataLogs"
 	  SaveOutput		  on
 	  SaveState		  off
 	  SignalLogging		  on
@@ -154,8 +198,8 @@ Library {
 	  Refine		  "1"
 	}
 	Simulink.OptimizationCC {
-	  $ObjectID		  4
-	  Version		  "1.10.0"
+	  $ObjectID		  9
+	  Version		  "1.12.1"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    4
@@ -170,12 +214,13 @@ Library {
 	  ConditionallyExecuteInputs on
 	  InlineParams		  off
 	  UseIntDivNetSlope	  off
+	  UseFloatMulNetSlope	  off
+	  UseSpecifiedMinMax	  off
 	  InlineInvariantSignals  off
 	  OptimizeBlockIOStorage  on
 	  BufferReuse		  on
 	  EnhancedBackFolding	  off
 	  StrengthReduction	  off
-	  EnforceIntegerDowncast  on
 	  ExpressionFolding	  on
 	  BooleansAsBitfields	  off
 	  BitfieldContainerType	  "uint_T"
@@ -202,10 +247,11 @@ Library {
 	  BufferReusableBoundary  on
 	  SimCompilerOptimization "Off"
 	  AccelVerboseBuild	  off
+	  ParallelExecutionInRapidAccelerator on
 	}
 	Simulink.DebuggingCC {
-	  $ObjectID		  5
-	  Version		  "1.10.0"
+	  $ObjectID		  10
+	  Version		  "1.12.1"
 	  RTPrefix		  "error"
 	  ConsistencyChecking	  "none"
 	  ArrayBoundsChecking	  "none"
@@ -228,6 +274,8 @@ Library {
 	  MinStepSizeMsg	  "warning"
 	  TimeAdjustmentMsg	  "none"
 	  MaxConsecutiveZCsMsg	  "error"
+	  MaskedZcDiagnostic	  "warning"
+	  IgnoredZcDiagnostic	  "warning"
 	  SolverPrmCheckMsg	  "none"
 	  InheritedTsInSrcMsg	  "warning"
 	  DiscreteInheritContinuousMsg "warning"
@@ -252,18 +300,20 @@ Library {
 	  UnnecessaryDatatypeConvMsg "none"
 	  VectorMatrixConversionMsg "none"
 	  InvalidFcnCallConnMsg	  "error"
-	  FcnCallInpInsideContextMsg "Use local settings"
+	  FcnCallInpInsideContextMsg "UseLocalSettings"
 	  SignalLabelMismatchMsg  "none"
 	  UnconnectedInputMsg	  "warning"
 	  UnconnectedOutputMsg	  "warning"
 	  UnconnectedLineMsg	  "warning"
 	  SFcnCompatibilityMsg	  "none"
+	  FrameProcessingCompatibilityMsg "warning"
 	  UniqueDataStoreMsg	  "none"
 	  BusObjectLabelMismatch  "warning"
 	  RootOutportRequireBusObject "warning"
 	  AssertControl		  "UseLocalSettings"
 	  EnableOverflowDetection off
 	  ModelReferenceIOMsg	  "none"
+	  ModelReferenceMultiInstanceNormalModeStructChecksumCheck "error"
 	  ModelReferenceVersionMismatchMessage "none"
 	  ModelReferenceIOMismatchMessage "none"
 	  ModelReferenceCSMismatchMessage "none"
@@ -273,19 +323,34 @@ Library {
 	  ModelReferenceExtraNoncontSigs "error"
 	  StateNameClashWarn	  "warning"
 	  SimStateInterfaceChecksumMismatchMsg "warning"
+	  SimStateOlderReleaseMsg "error"
+	  InitInArrayFormatMsg	  "warning"
 	  StrictBusMsg		  "Warning"
 	  BusNameAdapt		  "WarnAndRepair"
 	  NonBusSignalsTreatedAsBus "none"
 	  LoggingUnavailableSignals "error"
 	  BlockIODiagnostic	  "none"
+	  SFUnusedDataAndEventsDiag "warning"
+	  SFUnexpectedBacktrackingDiag "warning"
+	  SFInvalidInputDataAccessInChartInitDiag "warning"
+	  SFNoUnconditionalDefaultTransitionDiag "warning"
+	  SFTransitionOutsideNaturalParentDiag "warning"
+	  SFUnconditionalTransitionShadowingDiag "warning"
+	  SFUndirectedBroadcastEventsDiag "warning"
+	  SFTransitionActionBeforeConditionDiag	"warning"
 	}
 	Simulink.HardwareCC {
-	  $ObjectID		  6
-	  Version		  "1.10.0"
+	  $ObjectID		  11
+	  Version		  "1.12.1"
 	  ProdBitPerChar	  8
 	  ProdBitPerShort	  16
 	  ProdBitPerInt		  32
 	  ProdBitPerLong	  32
+	  ProdBitPerFloat	  32
+	  ProdBitPerDouble	  64
+	  ProdBitPerPointer	  32
+	  ProdLargestAtomicInteger "Char"
+	  ProdLargestAtomicFloat  "None"
 	  ProdIntDivRoundTo	  "Undefined"
 	  ProdEndianess		  "Unspecified"
 	  ProdWordSize		  32
@@ -295,6 +360,11 @@ Library {
 	  TargetBitPerShort	  16
 	  TargetBitPerInt	  32
 	  TargetBitPerLong	  32
+	  TargetBitPerFloat	  32
+	  TargetBitPerDouble	  64
+	  TargetBitPerPointer	  32
+	  TargetLargestAtomicInteger "Char"
+	  TargetLargestAtomicFloat "None"
 	  TargetShiftRightIntArith on
 	  TargetIntDivRoundTo	  "Undefined"
 	  TargetEndianess	  "Unspecified"
@@ -307,11 +377,12 @@ Library {
 	  ProdEqTarget		  on
 	}
 	Simulink.ModelReferenceCC {
-	  $ObjectID		  7
-	  Version		  "1.10.0"
+	  $ObjectID		  12
+	  Version		  "1.12.1"
 	  UpdateModelReferenceTargets "IfOutOfDateOrStructuralChange"
 	  CheckModelReferenceTargetMessage "error"
 	  EnableParallelModelReferenceBuilds off
+	  ParallelModelReferenceErrorOnInvalidPool on
 	  ParallelModelReferenceMATLABWorkerInit "None"
 	  ModelReferenceNumInstancesAllowed "Multi"
 	  PropagateVarSize	  "Infer from blocks in model"
@@ -321,8 +392,8 @@ Library {
 	  SupportModelReferenceSimTargetCustomCode off
 	}
 	Simulink.SFSimCC {
-	  $ObjectID		  8
-	  Version		  "1.10.0"
+	  $ObjectID		  13
+	  Version		  "1.12.1"
 	  SFSimEnableDebug	  on
 	  SFSimOverflowDetection  on
 	  SFSimEcho		  on
@@ -331,12 +402,13 @@ Library {
 	  SimExtrinsic		  on
 	  SimIntegrity		  on
 	  SimUseLocalCustomCode	  off
+	  SimParseCustomCode	  on
 	  SimBuildMode		  "sf_incremental_build"
 	}
 	Simulink.RTWCC {
 	  $BackupClass		  "Simulink.RTWCC"
-	  $ObjectID		  9
-	  Version		  "1.10.0"
+	  $ObjectID		  14
+	  Version		  "1.12.1"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    6
@@ -352,6 +424,7 @@ Library {
 	  GenCodeOnly		  off
 	  MakeCommand		  "make_rtw"
 	  GenerateMakefile	  on
+	  PackageGeneratedCodeAndArtifacts off
 	  TemplateMakefile	  "grt_default_tmf"
 	  GenerateReport	  off
 	  SaveLog		  off
@@ -368,6 +441,13 @@ Library {
 	  RTWUseSimCustomCode	  off
 	  IncludeHyperlinkInReport off
 	  LaunchReport		  off
+	  PortableWordSizes	  off
+	  GenerateErtSFunction	  off
+	  CreateSILPILBlock	  "None"
+	  CodeExecutionProfiling  off
+	  CodeExecutionProfileVariable "executionProfile"
+	  CodeProfilingSaveOptions "SummaryOnly"
+	  CodeProfilingInstrumentation off
 	  TargetLang		  "C"
 	  IncludeBusHierarchyInRTWFileBlockHierarchyMap	off
 	  IncludeERTFirstTime	  off
@@ -377,6 +457,9 @@ Library {
 	  GenerateTraceReportSf	  off
 	  GenerateTraceReportEml  off
 	  GenerateCodeInfo	  off
+	  GenerateWebview	  off
+	  GenerateCodeMetricsReport off
+	  GenerateCodeReplacementReport	off
 	  RTWCompilerOptimization "Off"
 	  CheckMdlBeforeBuild	  "Off"
 	  CustomRebuildMode	  "OnUpdate"
@@ -384,8 +467,8 @@ Library {
 	    Type		    "Handle"
 	    Dimension		    2
 	    Simulink.CodeAppCC {
-	      $ObjectID		      10
-	      Version		      "1.10.0"
+	      $ObjectID		      15
+	      Version		      "1.12.1"
 	      Array {
 		Type			"Cell"
 		Dimension		17
@@ -417,9 +500,11 @@ Library {
 	      PreserveName	      off
 	      PreserveNameWithParent  off
 	      ShowEliminatedStatement off
+	      OperatorAnnotations     off
 	      IncAutoGenComments      off
 	      SimulinkDataObjDesc     off
 	      SFDataObjDesc	      off
+	      MATLABFcnDesc	      off
 	      IncDataTypeInIds	      off
 	      MangleLength	      1
 	      CustomSymbolStrGlobalVar "$R$N$M"
@@ -434,19 +519,22 @@ Library {
 	      ParamNamingRule	      "None"
 	      SignalNamingRule	      "None"
 	      InsertBlockDesc	      off
+	      InsertPolySpaceComments off
 	      SimulinkBlockComments   on
+	      MATLABSourceComments    off
 	      EnableCustomComments    off
+	      InternalIdentifier      "Classic"
 	      InlinedPrmAccess	      "Literals"
 	      ReqsInCode	      off
 	      UseSimReservedNames     off
 	    }
 	    Simulink.GRTTargetCC {
 	      $BackupClass	      "Simulink.TargetCC"
-	      $ObjectID		      11
-	      Version		      "1.10.0"
+	      $ObjectID		      16
+	      Version		      "1.12.1"
 	      Array {
 		Type			"Cell"
-		Dimension		16
+		Dimension		15
 		Cell			"IncludeMdlTerminateFcn"
 		Cell			"CombineOutputUpdateFcns"
 		Cell			"SuppressErrorStatus"
@@ -457,21 +545,19 @@ Library {
 		Cell			"CPPClassGenCompliant"
 		Cell			"MultiInstanceERTCode"
 		Cell			"PurelyIntegerCode"
-		Cell			"SupportNonFinite"
+		Cell			"PortableWordSizes"
 		Cell			"SupportComplex"
 		Cell			"SupportAbsoluteTime"
 		Cell			"SupportContinuousTime"
 		Cell			"SupportNonInlinedSFcns"
-		Cell			"PortableWordSizes"
 		PropName		"DisabledProps"
 	      }
 	      TargetFcnLib	      "ansi_tfl_table_tmw.mat"
 	      TargetLibSuffix	      ""
 	      TargetPreCompLibLocation ""
-	      TargetFunctionLibrary   "ANSI_C"
+	      CodeReplacementLibrary  "ANSI_C"
 	      UtilityFuncGeneration   "Auto"
 	      ERTMultiwordTypeDef     "System defined"
-	      ERTCodeCoverageTool     "None"
 	      ERTMultiwordLength      256
 	      MultiwordLength	      2048
 	      GenerateFullHeader      on
@@ -481,9 +567,11 @@ Library {
 	      ModelReferenceCompliant on
 	      ParMdlRefBuildCompliant on
 	      CompOptLevelCompliant   on
+	      ConcurrentExecutionCompliant on
 	      IncludeMdlTerminateFcn  on
 	      GeneratePreprocessorConditionals "Disable all"
 	      CombineOutputUpdateFcns off
+	      CombineSignalStateStructs	off
 	      SuppressErrorStatus     off
 	      ERTFirstTimeCompliant   off
 	      IncludeFileDelimiter    "Auto"
@@ -500,10 +588,10 @@ Library {
 	      SupportVariableSizeSignals off
 	      EnableShiftOperators    on
 	      ParenthesesLevel	      "Nominal"
-	      PortableWordSizes	      off
 	      ModelStepFunctionPrototypeControlCompliant off
 	      CPPClassGenCompliant    off
 	      AutosarCompliant	      off
+	      GRTInterface	      on
 	      UseMalloc		      off
 	      ExtMode		      off
 	      ExtModeStaticAlloc      off
@@ -515,6 +603,7 @@ Library {
 	      RTWCAPISignals	      off
 	      RTWCAPIParams	      off
 	      RTWCAPIStates	      off
+	      RTWCAPIRootIO	      off
 	      GenerateASAP2	      off
 	    }
 	    PropName		    "Components"
@@ -524,10 +613,11 @@ Library {
       }
       Name		      "Configuration"
       CurrentDlgPage	      "Solver"
-      ConfigPrmDlgPosition    " [ 400, 210, 1280, 840 ] "
+      ConfigPrmDlgPosition     [ 400, 210, 1280, 840 ] 
     }
     PropName		    "ConfigurationSets"
   }
+  ExplicitPartitioning	  off
   BlockDefaults {
     ForegroundColor	    "black"
     BackgroundColor	    "white"
@@ -559,6 +649,25 @@ Library {
     FontWeight		    "normal"
     FontAngle		    "normal"
   }
+  MaskDefaults {
+    SelfModifiable	    "off"
+    IconFrame		    "on"
+    IconOpaque		    "on"
+    RunInitForIconRedraw    "off"
+    IconRotate		    "none"
+    PortRotate		    "default"
+    IconUnits		    "autoscale"
+  }
+  MaskParameterDefaults {
+    Evaluate		    "on"
+    Tunable		    "on"
+    NeverSave		    "off"
+    Internal		    "off"
+    ReadOnly		    "off"
+    Enabled		    "on"
+    Visible		    "on"
+    ToolTip		    "on"
+  }
   BlockParameterDefaults {
     Block {
       BlockType		      Gain
@@ -566,16 +675,9 @@ Library {
       Multiplication	      "Element-wise(K.*u)"
       ParamMin		      "[]"
       ParamMax		      "[]"
-      ParameterDataTypeMode   "Same as input"
-      ParameterDataType	      "fixdt(1,16,0)"
-      ParameterScalingMode    "Best Precision: Matrix-wise"
-      ParameterScaling	      "[]"
       ParamDataTypeStr	      "Inherit: Same as input"
       OutMin		      "[]"
       OutMax		      "[]"
-      OutDataTypeMode	      "Same as input"
-      OutDataType	      "fixdt(1,16,0)"
-      OutScaling	      "[]"
       OutDataTypeStr	      "Inherit: Same as input"
       LockScale		      off
       RndMeth		      "Floor"
@@ -588,19 +690,15 @@ Library {
     Block {
       BlockType		      Inport
       Port		      "1"
-      UseBusObject	      off
-      BusObject		      "BusObject"
+      OutputFunctionCall      off
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: auto"
+      LockScale		      off
       BusOutputAsStruct	      off
       PortDimensions	      "-1"
       VarSizeSig	      "Inherit"
       SampleTime	      "-1"
-      OutMin		      "[]"
-      OutMax		      "[]"
-      DataType		      "auto"
-      OutDataType	      "fixdt(1,16,0)"
-      OutScaling	      "[]"
-      OutDataTypeStr	      "Inherit: auto"
-      LockScale		      off
       SignalType	      "auto"
       SamplingMode	      "auto"
       LatchByDelayingOutsideSignal off
@@ -610,19 +708,14 @@ Library {
     Block {
       BlockType		      Outport
       Port		      "1"
-      UseBusObject	      off
-      BusObject		      "BusObject"
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: auto"
+      LockScale		      off
       BusOutputAsStruct	      off
       PortDimensions	      "-1"
       VarSizeSig	      "Inherit"
       SampleTime	      "-1"
-      OutMin		      "[]"
-      OutMax		      "[]"
-      DataType		      "auto"
-      OutDataType	      "fixdt(1,16,0)"
-      OutScaling	      "[]"
-      OutDataTypeStr	      "Inherit: auto"
-      LockScale		      off
       SignalType	      "auto"
       SamplingMode	      "auto"
       SourceOfInitialOutputValue "Dialog"
@@ -646,7 +739,11 @@ Library {
       RTWMemSecDataParameters "Inherit from model"
       SimViewingDevice	      off
       DataTypeOverride	      "UseLocalSettings"
+      DataTypeOverrideAppliesTo	"AllNumericTypes"
       MinMaxOverflowLogging   "UseLocalSettings"
+      SFBlockType	      "NONE"
+      Variant		      off
+      GeneratePreprocessorConditionals off
     }
     Block {
       BlockType		      Terminator
@@ -654,7 +751,7 @@ Library {
   }
   System {
     Name		    "cdsFiltCtrl"
-    Location		    [2283, 486, 2863, 746]
+    Location		    [1738, 368, 2358, 806]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -668,11 +765,11 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    20
+    SIDHighWatermark	    "20"
     Block {
       BlockType		      SubSystem
       Name		      "IIR FM with control"
-      SID		      1
+      SID		      "1"
       Tag		      "cdsFiltCtrl"
       Description	      "cdsFiltCntrl is the standard IIR filter module (exactly the same as cdsFilt) but with added c"
       "ontrol data output 'Ctrl'. Filter module digital signal output appears on the first output, which is called 'Val"
@@ -723,7 +820,8 @@ Library {
       "                                                                                                                "
       " "
       Ports		      [3, 2]
-      Position		      [125, 67, 185, 103]
+      Position		      [230, 102, 290, 138]
+      ZOrder		      -1
       BackgroundColor	      "darkGreen"
       AttributesFormatString  "%<Tag>"
       MinAlgLoopOccurrences   off
@@ -735,7 +833,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"IIR FM with control"
-	Location		[292, 79, 990, 479]
+	Location		[254, 44, 992, 622]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -751,41 +849,37 @@ Library {
 	Block {
 	  BlockType		  Inport
 	  Name			  "In1"
-	  SID			  2
+	  SID			  "2"
 	  Position		  [25, 43, 55, 57]
+	  ZOrder		  -1
 	  IconDisplay		  "Port number"
-	  OutDataType		  "sfix(16)"
-	  OutScaling		  "2^0"
 	}
 	Block {
 	  BlockType		  Inport
 	  Name			  "Cin"
-	  SID			  3
+	  SID			  "3"
 	  Position		  [50, 278, 80, 292]
+	  ZOrder		  -2
 	  Port			  "2"
 	  IconDisplay		  "Port number"
-	  OutDataType		  "sfix(16)"
-	  OutScaling		  "2^0"
 	}
 	Block {
 	  BlockType		  Inport
 	  Name			  "Mask"
-	  SID			  4
+	  SID			  "4"
 	  Position		  [175, 333, 205, 347]
+	  ZOrder		  -3
 	  Port			  "3"
 	  IconDisplay		  "Port number"
-	  OutDataType		  "sfix(16)"
-	  OutScaling		  "2^0"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "Digital Filter0"
-	  SID			  5
+	  SID			  "5"
 	  Ports			  [1, 1]
 	  Position		  [80, 23, 165, 77]
+	  ZOrder		  -4
 	  LibraryVersion	  "1.288"
-	  DialogController	  "dspdialog.DigitalFilter"
-	  DialogControllerArgs	  "DataTag0"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
 	  TypePopup		  "IIR (poles & zeros)"
@@ -851,12 +945,11 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Digital Filter1"
-	  SID			  6
+	  SID			  "6"
 	  Ports			  [1, 1]
 	  Position		  [180, 23, 265, 77]
+	  ZOrder		  -5
 	  LibraryVersion	  "1.288"
-	  DialogController	  "dspdialog.DigitalFilter"
-	  DialogControllerArgs	  "DataTag1"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
 	  TypePopup		  "IIR (poles & zeros)"
@@ -922,12 +1015,11 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Digital Filter2"
-	  SID			  7
+	  SID			  "7"
 	  Ports			  [1, 1]
 	  Position		  [280, 23, 365, 77]
+	  ZOrder		  -6
 	  LibraryVersion	  "1.288"
-	  DialogController	  "dspdialog.DigitalFilter"
-	  DialogControllerArgs	  "DataTag2"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
 	  TypePopup		  "IIR (poles & zeros)"
@@ -993,12 +1085,11 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Digital Filter3"
-	  SID			  8
+	  SID			  "8"
 	  Ports			  [1, 1]
 	  Position		  [380, 23, 465, 77]
+	  ZOrder		  -7
 	  LibraryVersion	  "1.288"
-	  DialogController	  "dspdialog.DigitalFilter"
-	  DialogControllerArgs	  "DataTag3"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
 	  TypePopup		  "IIR (poles & zeros)"
@@ -1064,12 +1155,11 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Digital Filter4"
-	  SID			  9
+	  SID			  "9"
 	  Ports			  [1, 1]
 	  Position		  [480, 23, 565, 77]
+	  ZOrder		  -8
 	  LibraryVersion	  "1.288"
-	  DialogController	  "dspdialog.DigitalFilter"
-	  DialogControllerArgs	  "DataTag4"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
 	  TypePopup		  "IIR (poles & zeros)"
@@ -1135,12 +1225,11 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Digital Filter5"
-	  SID			  10
+	  SID			  "10"
 	  Ports			  [1, 1]
 	  Position		  [80, 123, 165, 177]
+	  ZOrder		  -9
 	  LibraryVersion	  "1.288"
-	  DialogController	  "dspdialog.DigitalFilter"
-	  DialogControllerArgs	  "DataTag5"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
 	  TypePopup		  "IIR (poles & zeros)"
@@ -1206,12 +1295,11 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Digital Filter6"
-	  SID			  11
+	  SID			  "11"
 	  Ports			  [1, 1]
 	  Position		  [185, 118, 270, 172]
+	  ZOrder		  -10
 	  LibraryVersion	  "1.288"
-	  DialogController	  "dspdialog.DigitalFilter"
-	  DialogControllerArgs	  "DataTag6"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
 	  TypePopup		  "IIR (poles & zeros)"
@@ -1277,12 +1365,11 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Digital Filter7"
-	  SID			  12
+	  SID			  "12"
 	  Ports			  [1, 1]
 	  Position		  [285, 118, 370, 172]
+	  ZOrder		  -11
 	  LibraryVersion	  "1.288"
-	  DialogController	  "dspdialog.DigitalFilter"
-	  DialogControllerArgs	  "DataTag7"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
 	  TypePopup		  "IIR (poles & zeros)"
@@ -1348,12 +1435,11 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Digital Filter8"
-	  SID			  13
+	  SID			  "13"
 	  Ports			  [1, 1]
 	  Position		  [385, 118, 470, 172]
+	  ZOrder		  -12
 	  LibraryVersion	  "1.288"
-	  DialogController	  "dspdialog.DigitalFilter"
-	  DialogControllerArgs	  "DataTag8"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
 	  TypePopup		  "IIR (poles & zeros)"
@@ -1419,12 +1505,11 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "Digital Filter9"
-	  SID			  14
+	  SID			  "14"
 	  Ports			  [1, 1]
 	  Position		  [485, 118, 570, 172]
+	  ZOrder		  -13
 	  LibraryVersion	  "1.288"
-	  DialogController	  "dspdialog.DigitalFilter"
-	  DialogControllerArgs	  "DataTag9"
 	  SourceBlock		  "dsparch4/Digital Filter"
 	  SourceType		  "Digital Filter"
 	  TypePopup		  "IIR (poles & zeros)"
@@ -1490,54 +1575,50 @@ Library {
 	Block {
 	  BlockType		  Gain
 	  Name			  "Gain"
-	  SID			  15
+	  SID			  "15"
 	  Position		  [300, 210, 330, 240]
-	  ParameterDataTypeMode	  "Inherit via internal rule"
-	  ParameterDataType	  "sfix(16)"
-	  ParameterScaling	  "2^0"
+	  ZOrder		  -14
 	  ParamDataTypeStr	  "Inherit: Inherit via internal rule"
-	  OutDataTypeMode	  "Inherit via internal rule"
-	  OutDataType		  "sfix(16)"
-	  OutScaling		  "2^0"
 	  OutDataTypeStr	  "Inherit: Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
 	  BlockType		  Ground
 	  Name			  "Ground"
-	  SID			  16
+	  SID			  "16"
 	  Position		  [115, 220, 135, 240]
+	  ZOrder		  -15
 	}
 	Block {
 	  BlockType		  Terminator
 	  Name			  "Terminator"
-	  SID			  17
+	  SID			  "17"
 	  Position		  [125, 280, 145, 300]
+	  ZOrder		  -16
 	}
 	Block {
 	  BlockType		  Terminator
 	  Name			  "Terminator1"
-	  SID			  18
+	  SID			  "18"
 	  Position		  [250, 335, 270, 355]
+	  ZOrder		  -17
 	}
 	Block {
 	  BlockType		  Outport
 	  Name			  "Val"
-	  SID			  19
+	  SID			  "19"
 	  Position		  [445, 218, 475, 232]
+	  ZOrder		  -18
 	  IconDisplay		  "Port number"
-	  OutDataType		  "sfix(16)"
-	  OutScaling		  "2^0"
 	}
 	Block {
 	  BlockType		  Outport
 	  Name			  "Ctrl"
-	  SID			  20
+	  SID			  "20"
 	  Position		  [170, 223, 200, 237]
+	  ZOrder		  -19
 	  Port			  "2"
 	  IconDisplay		  "Port number"
-	  OutDataType		  "sfix(16)"
-	  OutScaling		  "2^0"
 	}
 	Line {
 	  SrcBlock		  "Cin"
@@ -1635,48 +1716,5 @@ Library {
 	}
       }
     }
-  }
-}
-MatData {
-  NumRecords		  10
-  DataRecord {
-    Tag			    DataTag9
-    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
-  }
-  DataRecord {
-    Tag			    DataTag8
-    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
-  }
-  DataRecord {
-    Tag			    DataTag7
-    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
-  }
-  DataRecord {
-    Tag			    DataTag6
-    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
-  }
-  DataRecord {
-    Tag			    DataTag5
-    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
-  }
-  DataRecord {
-    Tag			    DataTag4
-    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
-  }
-  DataRecord {
-    Tag			    DataTag3
-    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
-  }
-  DataRecord {
-    Tag			    DataTag2
-    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
-  }
-  DataRecord {
-    Tag			    DataTag1
-    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
-  }
-  DataRecord {
-    Tag			    DataTag0
-    Data		    "  %)30     .    ,     8    (    !          %    \"     $    \"     0         0  ( 6UT   "
   }
 }
