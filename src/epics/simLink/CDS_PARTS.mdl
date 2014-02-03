@@ -19,7 +19,7 @@ Library {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [692.0, 85.0, 1020.0, 983.0]
+      Location		      [857.0, 306.0, 1020.0, 983.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -41,11 +41,11 @@ Library {
 	$ObjectID		5
 	$ClassName		"Simulink.EditorInfo"
 	IsActive		[1]
-	ViewObjType		"SimulinkSubsys"
-	LoadSaveID		"164"
+	ViewObjType		"SimulinkTopLevel"
+	LoadSaveID		"0"
 	Extents			[986.0, 821.0]
-	ZoomFactor		[1.0]
-	Offset			[-89.727272727272748, -119.76033057851237]
+	ZoomFactor		[1.49]
+	Offset			[0.0, 0.0]
       }
     }
   }
@@ -55,9 +55,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "rolfbork"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Nov 21 12:10:47 2013"
-  RTWModifiedTimeStamp	  306936614
-  ModelVersionFormat	  "1.%<AutoIncrement:378>"
+  LastModifiedDate	  "Mon Feb 03 13:59:14 2014"
+  RTWModifiedTimeStamp	  313336712
+  ModelVersionFormat	  "1.%<AutoIncrement:382>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -884,8 +884,8 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [2808, 276, 3736, 1103]
-    Open		    off
+    Location		    [857, 306, 1877, 1289]
+    Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
     ScreenColor		    "white"
@@ -896,12 +896,12 @@ Library {
     TiledPaperMargins	    [0.500000, 0.500000, 0.500000, 0.500000]
     TiledPageScale	    1
     ShowPageBoundaries	    off
-    ZoomFactor		    "135"
+    ZoomFactor		    "149"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "365"
+    SIDHighWatermark	    "366"
     Block {
       BlockType		      SubSystem
-      Name		      " "
+      Name		      " I/O "
       SID		      "55"
       Ports		      []
       Position		      [271, 113, 317, 182]
@@ -915,8 +915,8 @@ Library {
       RequestExecContextInheritance off
       MaskHideContents	      off
       System {
-	Name			" "
-	Location		[371, 51, 1586, 1251]
+	Name			" I/O "
+	Location		[857, 306, 1877, 1289]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -928,7 +928,7 @@ Library {
 	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
 	TiledPageScale		1
 	ShowPageBoundaries	off
-	ZoomFactor		"100"
+	ZoomFactor		"79"
 	Block {
 	  BlockType		  SubSystem
 	  Name			  "16x16-bit DACs"
@@ -1559,7 +1559,7 @@ Library {
 	  ForegroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.15"
+	  LibraryVersion	  "1.16"
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx0/ADC0"
 	  SourceType		  "SubSystem"
@@ -1576,7 +1576,7 @@ Library {
 	  ForegroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.14"
+	  LibraryVersion	  "1.15"
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx1/ADC1"
 	  SourceType		  "SubSystem"
@@ -1593,7 +1593,7 @@ Library {
 	  ForegroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.15"
+	  LibraryVersion	  "1.16"
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx2/ADC2"
 	  SourceType		  "SubSystem"
@@ -1610,7 +1610,7 @@ Library {
 	  ForegroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.15"
+	  LibraryVersion	  "1.16"
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx3/ADC3"
 	  SourceType		  "SubSystem"
@@ -1627,7 +1627,7 @@ Library {
 	  ForegroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.18"
+	  LibraryVersion	  "1.19"
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx4/ADC4"
 	  SourceType		  "SubSystem"
@@ -1644,7 +1644,7 @@ Library {
 	  ForegroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.18"
+	  LibraryVersion	  "1.19"
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx5/ADC5"
 	  SourceType		  "SubSystem"
@@ -1661,7 +1661,7 @@ Library {
 	  ForegroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.19"
+	  LibraryVersion	  "1.20"
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx6/ADC6"
 	  SourceType		  "SubSystem"
@@ -1678,7 +1678,7 @@ Library {
 	  ForegroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.21"
+	  LibraryVersion	  "1.22"
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx7/ADC7"
 	  SourceType		  "SubSystem"
@@ -1695,7 +1695,7 @@ Library {
 	  ForegroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.22"
+	  LibraryVersion	  "1.23"
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx8/ADC8"
 	  SourceType		  "SubSystem"
@@ -1712,7 +1712,7 @@ Library {
 	  ForegroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.1"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsAdcx9/ADC9"
 	  SourceType		  "SubSystem"
 	}
@@ -2675,7 +2675,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"C Code"
-	Location		[140, 22, 1355, 900]
+	Location		[857, 306, 1877, 1289]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -2711,7 +2711,7 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.274"
+	  LibraryVersion	  "1.281"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag10"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
@@ -2728,7 +2728,7 @@ Library {
 	  Position		  [115, 40, 155, 100]
 	  ZOrder		  -3
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.3"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsFunctionCall/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -2776,7 +2776,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"DAQ Channels"
-	Location		[1411, 254, 2626, 1132]
+	Location		[857, 306, 1877, 1289]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -2854,7 +2854,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"EpicsParts"
-	Location		[2808, 276, 3736, 1103]
+	Location		[857, 306, 1877, 1289]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -3083,7 +3083,7 @@ Library {
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.5"
+	  LibraryVersion	  "1.6"
 	  SourceBlock		  "cdsEpicsBinIn/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -3098,7 +3098,7 @@ Library {
 	  BackgroundColor	  "[0.670588, 0.556863, 0.258824]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.3"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsEpicsCounter/EpicsCounter"
 	  SourceType		  "SubSystem"
 	}
@@ -3123,7 +3123,7 @@ Library {
 	  ZOrder		  -14
 	  BackgroundColor	  "green"
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.6"
+	  LibraryVersion	  "1.7"
 	  SourceBlock		  "cdsEpicsInCtrl/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -3145,7 +3145,7 @@ Library {
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.2"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsEpicsIn/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -3161,7 +3161,7 @@ Library {
 	  BackgroundColor	  "[0.000000, 0.501961, 0.501961]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.5"
+	  LibraryVersion	  "1.6"
 	  SourceBlock		  "cdsEpicsMbbi/EpicsMbbi"
 	  SourceType		  "SubSystem"
 	}
@@ -3192,8 +3192,22 @@ Library {
 	  BackgroundColor	  "[0.501961, 1.000000, 0.501961]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.5"
+	  LibraryVersion	  "1.6"
 	  SourceBlock		  "cdsEpicsMomentary/EpicsMomentary"
+	  SourceType		  "SubSystem"
+	}
+	Block {
+	  BlockType		  Reference
+	  Name			  "EpicsName"
+	  SID			  "366"
+	  Tag			  "cdsEpicsOutInt"
+	  Ports			  [1, 1]
+	  Position		  [590, 75, 650, 95]
+	  ZOrder		  1
+	  BackgroundColor	  "green"
+	  AttributesFormatString  "%<Tag>"
+	  LibraryVersion	  "1.1"
+	  SourceBlock		  "cdsEpicsOutInt/Subsystem"
 	  SourceType		  "SubSystem"
 	}
 	Block {
@@ -3211,7 +3225,7 @@ Library {
 	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.1"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -3244,7 +3258,7 @@ Library {
 	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.2"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsRemoteIntlk/Name"
 	  SourceType		  "SubSystem"
 	}
@@ -3260,7 +3274,7 @@ Library {
 	  BackgroundColor	  "[0.000000, 0.501961, 0.250980]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.3"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsEpicsStringIn/EpicsStringIn"
 	  SourceType		  "SubSystem"
 	}
@@ -3293,7 +3307,7 @@ Library {
 	  ZOrder		  -24
 	  BackgroundColor	  "[0.792741, 0.563703, 0.940000]"
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.3"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsEzCaRead/cdsEzCaRead"
 	  SourceType		  "SubSystem"
 	}
@@ -3311,7 +3325,7 @@ Library {
 	  ZOrder		  -25
 	  BackgroundColor	  "[0.698999, 0.245793, 1.000000]"
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.1"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsEzCaWrite/cdsEzCaWrite"
 	  SourceType		  "SubSystem"
 	}
@@ -3362,7 +3376,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Filters/\nGDS"
-	Location		[371, 51, 1586, 1251]
+	Location		[857, 306, 1877, 1289]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -3511,7 +3525,7 @@ Library {
 	  ZOrder		  1
 	  BackgroundColor	  "darkGreen"
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.4"
+	  LibraryVersion	  "1.5"
 	  SourceBlock		  "cdsInputFilter/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -3525,7 +3539,7 @@ Library {
 	  ZOrder		  -10
 	  BackgroundColor	  "green"
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.7"
+	  LibraryVersion	  "1.8"
 	  SourceBlock		  "cdsEXC/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -3585,7 +3599,7 @@ Library {
 	  ZOrder		  -11
 	  BackgroundColor	  "darkGreen"
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.8"
+	  LibraryVersion	  "1.9"
 	  SourceBlock		  "cdsFiltCtrl/IIR FM with control"
 	  SourceType		  "SubSystem"
 	}
@@ -3645,7 +3659,7 @@ Library {
 	  ZOrder		  -12
 	  BackgroundColor	  "darkGreen"
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.14"
+	  LibraryVersion	  "1.15"
 	  SourceBlock		  "cdsFiltCtrl2/IIR FM with control 2"
 	  SourceType		  "SubSystem"
 	}
@@ -3677,7 +3691,7 @@ Library {
 	  BackgroundColor	  "darkGreen"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.2"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsFilt/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -3695,7 +3709,7 @@ Library {
 	  BackgroundColor	  "orange"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.3"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsPPFIR/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -3711,7 +3725,7 @@ Library {
 	  BackgroundColor	  "[0.741176, 0.800000, 0.215686]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.1"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsRms/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -3725,7 +3739,7 @@ Library {
 	  ZOrder		  -16
 	  BackgroundColor	  "green"
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.4"
+	  LibraryVersion	  "1.5"
 	  SourceBlock		  "cdsTP/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -3741,7 +3755,7 @@ Library {
 	  BackgroundColor	  "[0.462745, 0.721569, 0.337255]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.7"
+	  LibraryVersion	  "1.8"
 	  SourceBlock		  "cdsTrueRMS/TrueRMS"
 	  SourceType		  "SubSystem"
 	}
@@ -3771,7 +3785,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"MatrixParts"
-	Location		[1146, 221, 1982, 811]
+	Location		[857, 306, 1877, 1289]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -4098,7 +4112,7 @@ Library {
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.1"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsRampMuxMatrix/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -4130,7 +4144,7 @@ Library {
 	  BackgroundColor	  "lightBlue"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.5"
+	  LibraryVersion	  "1.6"
 	  SourceBlock		  "cdsBit2Word/cdsBit2Word"
 	  SourceType		  "SubSystem"
 	}
@@ -4145,7 +4159,7 @@ Library {
 	  ZOrder		  -19
 	  BackgroundColor	  "[1.000000, 0.488510, 0.499362]"
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.1"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsFiltMuxMatrix/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -4161,7 +4175,7 @@ Library {
 	  BackgroundColor	  "green"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.1"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsMuxMatrix/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -4177,7 +4191,7 @@ Library {
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "cdsWord2Bit"
-	  LibraryVersion	  "1.5"
+	  LibraryVersion	  "1.6"
 	  SourceBlock		  "cdsWord2Bit/cdsWord2Bit"
 	  SourceType		  "SubSystem"
 	}
@@ -4250,7 +4264,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Osc/Phase"
-	Location		[371, 51, 1586, 1251]
+	Location		[857, 306, 1877, 1289]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -4378,7 +4392,7 @@ Library {
 	  ZOrder		  -8
 	  BackgroundColor	  "[1.000000, 0.577622, 0.434895]"
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.4"
+	  LibraryVersion	  "1.5"
 	  SourceBlock		  "cdsNoise/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -4394,7 +4408,7 @@ Library {
 	  BackgroundColor	  "magenta"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.5"
+	  LibraryVersion	  "1.6"
 	  SourceBlock		  "cdsOsc/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -4410,7 +4424,7 @@ Library {
 	  BackgroundColor	  "lightBlue"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.1"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsPhase/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -4426,7 +4440,7 @@ Library {
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.1"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsWfsPhase/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -4442,7 +4456,7 @@ Library {
 	  BackgroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.5"
+	  LibraryVersion	  "1.6"
 	  SourceBlock		  "cdsSatCount/Saturation Count Name"
 	  SourceType		  "SubSystem"
 	}
@@ -4485,7 +4499,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"RT Links"
-	Location		[1146, 221, 1819, 880]
+	Location		[857, 306, 1877, 1289]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -4497,7 +4511,7 @@ Library {
 	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
 	TiledPageScale		1
 	ShowPageBoundaries	off
-	ZoomFactor		"158"
+	ZoomFactor		"157"
 	Block {
 	  BlockType		  Reference
 	  Name			  "DocBlock1"
@@ -4561,7 +4575,7 @@ Library {
 	  Position		  [35, 34, 75, 96]
 	  ZOrder		  -2
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.6"
+	  LibraryVersion	  "1.7"
 	  SourceBlock		  "cdsGps/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -4588,7 +4602,7 @@ Library {
 	  ZOrder		  4
 	  BackgroundColor	  "darkGreen"
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.3"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsStateWord/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -4611,8 +4625,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"WatchDogs"
-	Location		[692, 85, 1712, 1068]
-	Open			on
+	Location		[857, 306, 1877, 1289]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -4635,7 +4649,7 @@ Library {
 	  ForegroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.7"
+	  LibraryVersion	  "1.8"
 	  FontName		  "times"
 	  FontSize		  12
 	  SourceBlock		  "cdsDacKill/Subsystem"
@@ -5250,7 +5264,7 @@ Library {
       BackgroundColor	      "orange"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
-      LibraryVersion	      "1.5"
+      LibraryVersion	      "1.6"
       SourceBlock	      "cdsParameters/Subsystem"
       SourceType	      "SubSystem"
     }
@@ -5269,7 +5283,7 @@ Library {
     }
     Annotation {
       SID		      "346"
-      Name		      "Matlab Parts Library for Use with aLIGO Real-time Code Generator - V2.8"
+      Name		      "Matlab Parts Library for Use with aLIGO Real-time Code Generator - V2.9"
       Position		      [330, 30]
       FontName		      "times"
       FontSize		      18
