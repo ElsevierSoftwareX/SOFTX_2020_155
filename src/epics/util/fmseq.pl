@@ -125,7 +125,7 @@ sub add_edcu_entry {
 		{
 			for(my $jj=1;$jj<($ncol+1);$jj++)
 			{
-				if($v_type eq "int") {
+				if(($v_type eq "int") || (index($v_type, "unsigned") != -1)) {
 					$edcuEntryI .= "\[$proc_name\_$ii\_$jj\]\n";
 					$edcuEntryI .= "acquire=3\n";
 					$edcuEntryI .= "datarate=16\n";
@@ -269,6 +269,7 @@ while (<IN>) {
 	$vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
 	$vinit .= "%%       pEpics->${v_var}_mask = 0;\n";
 
+        if ($ve_type ne "bi") {
 	$vupdate .= "%% if (pEpics->${v_var}_mask) {\n";
 	$vupdate .= "%%  evar_$v_name = pEpics->${v_var};\n";
 	$vupdate .= "pvPut(evar_$v_name);\n";
@@ -276,6 +277,15 @@ while (<IN>) {
 	$vupdate .= "pvGet(evar_$v_name);\n";
 	$vupdate .= "%%  rfm_assign(pEpics->${v_var}, evar_$v_name);\n";
 	$vupdate .= "%% }\n";
+ 	} else {
+	$vupdate .= "%% if (pEpics->${v_var}_mask) {\n";
+	$vupdate .= "%%  evar_$v_name = pEpics->${v_var} == 1? 1:0;\n";
+	$vupdate .= "pvPut(evar_$v_name);\n";
+	$vupdate .= "%% } else {\n";
+	$vupdate .= "pvGet(evar_$v_name);\n";
+	$vupdate .= "%%  rfm_assign(pEpics->${v_var}, evar_$v_name == 1? 1:0);\n";
+	$vupdate .= "%% }\n";
+	}
 
         if ($top_name) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}\")\n";
@@ -441,7 +451,12 @@ while (<IN>) {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init,@eFields ) = split(/\s+/, $_);
 	#print "$v_name = efields $eFields[0] $eFields[1] $eFields[2] $eFields[3] $eFields[4] $eFields[5] $eFields[6]\n";
+	if ($v_type eq "uint32") {
+	$vdecl .= "unsigned int evar_$v_name;\n";
+	$v_type = "int";
+	} else {
 	$vdecl .= "$v_type evar_$v_name;\n";
+	}
         my $top_name = is_top_name($v_name);
    	my $tv_name;
 	my $proc_name;
@@ -466,6 +481,8 @@ while (<IN>) {
 
 	if ($v_type eq "float") {
 	    $vupdate .= "evar_$v_name = fpvalidate(pEpics->${v_var});\n";
+	} elsif ($v_type eq "uint32") {
+	    $vupdate .= "evar_$v_name = pEpics->${v_var};\n";
 	} else {
 	    $vupdate .= "evar_$v_name = pEpics->${v_var};\n";
 	}
