@@ -284,6 +284,10 @@ while (<IN>) {
 	$vupdate .= "%% } else {\n";
 	$vupdate .= "pvGet(evar_$v_name);\n";
 	$vupdate .= "%%  rfm_assign(pEpics->${v_var}, evar_$v_name == 1? 1:0);\n";
+	$vupdate .= "%%  if(evar_$v_name > 1) { \n";
+	$vupdate .= "%%		evar_$v_name = 0; \n";
+	$vupdate .= "		pvPut(evar_$v_name);\n";
+	$vupdate .= "%%   }\n";
 	$vupdate .= "%% }\n";
 	}
 
