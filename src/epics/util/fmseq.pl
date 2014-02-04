@@ -269,6 +269,7 @@ while (<IN>) {
 	$vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
 	$vinit .= "%%       pEpics->${v_var}_mask = 0;\n";
 
+	if ($ve_type ne "bi") {
 	$vupdate .= "%% if (pEpics->${v_var}_mask) {\n";
 	$vupdate .= "%%  evar_$v_name = pEpics->${v_var};\n";
 	$vupdate .= "pvPut(evar_$v_name);\n";
@@ -276,6 +277,19 @@ while (<IN>) {
 	$vupdate .= "pvGet(evar_$v_name);\n";
 	$vupdate .= "%%  rfm_assign(pEpics->${v_var}, evar_$v_name);\n";
 	$vupdate .= "%% }\n";
+	} else {
+        $vupdate .= "%% if (pEpics->${v_var}_mask) {\n";
+        $vupdate .= "%%  evar_$v_name = pEpics->${v_var} == 1? 1:0;\n";
+        $vupdate .= "pvPut(evar_$v_name);\n";
+        $vupdate .= "%% } else {\n";
+        $vupdate .= "pvGet(evar_$v_name);\n";
+        $vupdate .= "%%  rfm_assign(pEpics->${v_var}, evar_$v_name == 1? 1:0);\n";
+        $vupdate .= "%%  if(evar_$v_name > 1) { \n";
+        $vupdate .= "%%         evar_$v_name = 0; \n";
+        $vupdate .= "           pvPut(evar_$v_name);\n";
+        $vupdate .= "%%   }\n";
+        $vupdate .= "%% }\n";
+        }
 
         if ($top_name) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}\")\n";
