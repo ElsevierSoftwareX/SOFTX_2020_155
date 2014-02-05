@@ -250,7 +250,7 @@ sub frontEndCode {
 if ($RSETOUT) $RSETOUT = 0;
 
 /// Check if reset sent from EPICS
-if ($EPICS_RESET && !$EPICS_PANIC) {
+if ($EPICS_RESET && !$EPICS_PANIC && ($SIGNAL || $BPTIME_REMAINING)) {
 	/// Reset WD output line to OK
 	$WDOUT = 1;
 	/// Clear WD timer
