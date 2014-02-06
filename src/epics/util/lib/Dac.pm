@@ -188,7 +188,7 @@ sub createDac16Medm
         print "creating file $medmDir\/$fname DAC 16bit\n";
         open(OUTMEDM, ">$medmDir/$fname") || die "cannot open $medmDir/$fname for writing ";
 
-        my $xpos = 0; my $ypos = 0; my $width = 171; my $height = 430;
+        my $xpos = 0; my $ypos = 0; my $width = 200; my $height = 460;
         $medmdata = ("CDS::medmGen::medmGenFile") -> ($medmDir,$fname,$width,$height);
 
 	# ************* Create Banner ******************************************************************************
@@ -196,27 +196,30 @@ sub createDac16Medm
         $height = 22;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{blue},"","","");
         # Add Display Name
-        $xpos = 25; $ypos = 4; $width = 120; $height = 15;        
+        $xpos = 45; $ypos = 4; $width = 120; $height = 15;        
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$mdlName\_DAC_MONITOR_$::dacCardNum[$dacNum]",$ecolors{white});
+	# Add Time String
+        $xpos = 0; $ypos = 24; $width = 200; $height = 15;        
+	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_TIME_STRING",$ecolors{white},$ecolors{blue},"static");
 
         # ************* Create Background **************************************************************************
         # Add Background rectangles
-        $xpos = 13; $ypos = 37; $width = 140; $height = 380;
+        $xpos = 13; $ypos = 60; $width = 170; $height = 380;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{gray},"","","");
 
         # ************* Add Text  **********************************************************************************
         # Add DAC top label
-        $xpos = 13; $ypos = 43; $width = 140; $height = 15;
+        $xpos = 13; $ypos = 66; $width = 170; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DAC $::dacCardNum[$dacNum] - 16bit",$ecolors{black});
         # Add DAC OUT label
-        $xpos = 49; $ypos = 64; $width = 45; $height = 15;
+        $xpos = 49; $ypos = 87; $width = 45; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"OUT",$ecolors{black});
         # Add OFC OUT label
-        $xpos = 99; $ypos = 64; $width = 45; $height = 15;
+        $xpos = 99; $ypos = 87; $width = 75; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"OFC",$ecolors{black});
 
         # Add DAC Channel labels
-        $xpos = 14; $ypos = 93; $width = 35; $height = 15;
+        $xpos = 14; $ypos = 116; $width = 35; $height = 15;
 	for($ii=0;$ii<16;$ii+=2)
 	{
 		$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"CH $ii",$ecolors{black});
@@ -225,20 +228,20 @@ sub createDac16Medm
 
         # ************* Add Data Monitors  ***************************************************************************
         # Add Output Status Monitor
-        $xpos = 62; $ypos = 77; $width = 20; $height = 12;
+        $xpos = 62; $ypos = 100; $width = 20; $height = 12;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","1","1",$ecolors{green},$ecolors{red});
         # Add Overflow Status Monitor
-        $xpos = 112; $ypos = 77; $width = 20; $height = 12;
+        $xpos = 125; $ypos = 100; $width = 20; $height = 12;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","2","2",$ecolors{green},$ecolors{red});
 
         # Add DAC Data Monitors
-        $xpos = 49; $ypos = 92; $width = 45; $height = 15;
+        $xpos = 49; $ypos = 115; $width = 45; $height = 15;
 	for($ii=0;$ii<16;$ii++)
 	{
         	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_OUTPUT_$dacNum\_$ii",$ecolors{white},$ecolors{blue},"static");
 		$ypos += 20;
 	}
-        $xpos = 99; $ypos = 92; $width = 45; $height = 15;
+        $xpos = 99; $ypos = 115; $width = 75; $height = 15;
 	for($ii=0;$ii<16;$ii++)
 	{
         	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_OVERFLOW_$dacNum\_$ii",$ecolors{white},$ecolors{blue},"static");
