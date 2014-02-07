@@ -1044,6 +1044,9 @@ udelay(1000);
 			if((adcData[jj][ii] > limit) || (adcData[jj][ii] < -limit))
 			  {
 				overflowAdc[jj][ii] ++;
+#ifdef ROLLING_OVERFLOWS
+				pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
+#endif
 				overflowAcc ++;
 				adcOF[jj] = 1;
 				odcStateWord |= ODC_ADC_OVF;
@@ -1154,6 +1157,9 @@ udelay(1000);
 			if((adcData[jj][ii] > limit) || (adcData[jj][ii] < -limit))
 			  {
 				overflowAdc[jj][ii] ++;
+#ifdef ROLLING_OVERFLOWS
+				pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
+#endif
 				overflowAcc ++;
 				adcOF[jj] = 1;
 				odcStateWord |= ODC_ADC_OVF;
@@ -1290,6 +1296,9 @@ udelay(1000);
                         {
                                 dac_out = limit;
                                 overflowDac[jj][ii] ++;
+#ifdef ROLLING_OVERFLOWS
+				pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
+#endif
                                 overflowAcc ++;
                                 dacOF[jj] = 1;
 				odcStateWord |= ODC_DAC_OVF;;
@@ -1298,6 +1307,9 @@ udelay(1000);
                         {
                                 dac_out = -limit;
                                 overflowDac[jj][ii] ++;
+#ifdef ROLLING_OVERFLOWS
+				pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
+#endif
                                 overflowAcc ++;
                                 dacOF[jj] = 1;
 				odcStateWord |= ODC_DAC_OVF;;
@@ -1402,6 +1414,9 @@ udelay(1000);
                         {
                                 dac_out = limit;
                                 overflowDac[jj][ii] ++;
+#ifdef ROLLING_OVERFLOWS
+				pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
+#endif
                                 overflowAcc ++;
                                 dacOF[jj] = 1;
 				odcStateWord |= ODC_DAC_OVF;;
@@ -1410,6 +1425,9 @@ udelay(1000);
                         {
                                 dac_out = -limit;
                                 overflowDac[jj][ii] ++;
+#ifdef ROLLING_OVERFLOWS
+				pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
+#endif
                                 overflowAcc ++;
                                 dacOF[jj] = 1;
 				odcStateWord |= ODC_DAC_OVF;;
@@ -1802,13 +1820,13 @@ udelay(1000);
 	    adcOF[jj] = 0;
 	    for(ii=0;ii<32;ii++)
 	    {
-		pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
 
 #ifdef ROLLING_OVERFLOWS
                 if (overflowAdc[jj][ii] > OVERFLOW_CNTR_LIMIT) {
 		   overflowAdc[jj][ii] = 0;
                 }
 #else
+		pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
 		overflowAdc[jj][ii] = 0;
 #endif
 
@@ -1842,13 +1860,13 @@ udelay(1000);
 	    dacChanErr[jj] = 0;
 	    for(ii=0;ii<MAX_DAC_CHN_PER_MOD;ii++)
 	    {
-		pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
 
 #ifdef ROLLING_OVERFLOWS
                 if (overflowDac[jj][ii] > OVERFLOW_CNTR_LIMIT) {
 		   overflowDac[jj][ii] = 0;
                 }
 #else
+		pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
 		overflowDac[jj][ii] = 0;
 #endif
 
