@@ -6,25 +6,38 @@
 
 <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=95499">LIGO T1200393 aLIGO RCG V2.4 Testing at LLO</a> \n
 
+\section tc RCG Core Functionality Testing
+	- \ref rcgCoreTest "RCG Core Test"
+	- \ref tpTestData "GDS Testpoint Test"
+	- \ref duotoneTest "Duotone Test"
+	- \ref ovfTest "Overflow Counter Test"
+	- \ref uint32Test "DAQ UINT32 Data Type Test"
+	- \ref cpuTimeTest "CPU times by SVN"
+	- \ref decFiltTest "IOP Decimation Filter Test"
+	- \ref daqFiltTest "DAQ (daqLib) Decimation Filter Test"
 \section testpage2 RCG Component Testing 
+\subsection iot I/O Components
+	- \ref ipcTestData "RCG IPC Test"
+\subsection ep EPICS Parts
+	- \ref eicTest "EPICS input w/control"
+	- \ref ezca "EzcaRead / EzcaWrite"
+\subsection slp Simulink Parts
+	- \ref simPartsTest "Supported Simulink Parts"
+\subsection mp Matrix Parts
+	- \ref matrixTest "Mux Matrix"
+\subsection ospp OSC/PHASE 
+	- \ref oscTest "Oscillator"
+\subsection ft IIR Filters
 	- \ref fmcTest "Filter Module"
+	- \ref sfmTest "IIR Filter Module"
 	- \ref fmcControlTest "Filter Module w/Control"
 	- \ref fmcControl2Test "Filter Module w/Control2"
 	- \ref inputFiltTest "Input Filter (Single pole/zero)"
-	- \ref matrixTest "Matrix"
-	- \ref oscTest "Oscillator"
-	- \ref ezca "EzcaRead / EzcaWrite"
-	- \ref simPartsTest "Supported Simulink Parts"
-	- \ref eicTest "EPICS input w/control"
-\section testpage3 RCG System Level Testing 
-	- \ref rcgCoreTest "RCG Core Test"
-	- \ref ipcTestData "RCG IPC Test"
-	- \ref duotoneTest "Duotone Test"
+\subsection wdt WatchDogs
 	- \ref dackillTest "DACKILL w/OSEM Watchdog Test"
 	- \ref dacKillIopTest "DACKILL IOP w/OSEM Watchdog Test"
-	- \ref decFiltTest "IOP Decimation Filter Test"
-	- \ref daqFiltTest "DAQ (daqLib) Decimation Filter Test"
-	- \ref uint32Test "DAQ UINT32 Data Type Test"
-	- \ref tpTestData "GDS Testpoint Test"
+	- \ref dktTest "DACKILL Timed"
+\section testpage3 RCG System Level Testing 
+	- \ref testreport "Test Page"
 */
 
