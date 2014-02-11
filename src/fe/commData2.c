@@ -1,9 +1,21 @@
-/// 	\file commData2.c
-///	 This is the generic software for communicating realtime data between CDS applications.
-///	 This software supports data communication via: \n
-///	1) Shared memory, between two processes on the same computer \n
-///	2) GE Fanuc 5565 Reflected Memory PCIe hardware \n
-///	3) Dolphinics Reflected Memory over a PCIe network.
+/// 	@file commData2.c
+///	@brief This is the generic software for communicating realtime data between CDS applications.
+///	@detail This software supports data communication via: \n
+///		1) Shared memory, between two processes on the same computer \n
+///		2) GE Fanuc 5565 Reflected Memory PCIe hardware \n
+///		3) Dolphinics Reflected Memory over a PCIe network.
+///     @author R.Bork, A.Ivanov
+///     @copyright Copyright (C) 2014 LIGO Project 	\n
+///<	California Institute of Technology 		\n
+///<	Massachusetts Institute of Technology		\n\n
+///     @license This program is free software: you can redistribute it and/or modify
+///<    it under the terms of the GNU General Public License as published by
+///<    the Free Software Foundation, version 3 of the License.			\n
+///<    This program is distributed in the hope that it will be useful,
+///<    but WITHOUT ANY WARRANTY; without even the implied warranty of
+///<    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+///<    GNU General Public License for more details.
+
 
 
 #include "commData2.h"
