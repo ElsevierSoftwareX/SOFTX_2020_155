@@ -455,9 +455,8 @@ while (<IN>) {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init,@eFields ) = split(/\s+/, $_);
 	#print "$v_name = efields $eFields[0] $eFields[1] $eFields[2] $eFields[3] $eFields[4] $eFields[5] $eFields[6]\n";
-	if ($v_type eq "uint32") {
+	if ($ve_type eq "longout") {
 	$vdecl .= "unsigned int evar_$v_name;\n";
-	$v_type = "int";
 	} else {
 	$vdecl .= "$v_type evar_$v_name;\n";
 	}
@@ -485,8 +484,6 @@ while (<IN>) {
 
 	if ($v_type eq "float") {
 	    $vupdate .= "evar_$v_name = fpvalidate(pEpics->${v_var});\n";
-	} elsif ($v_type eq "uint32") {
-	    $vupdate .= "evar_$v_name = pEpics->${v_var};\n";
 	} else {
 	    $vupdate .= "evar_$v_name = pEpics->${v_var};\n";
 	}
