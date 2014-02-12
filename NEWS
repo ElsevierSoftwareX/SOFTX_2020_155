@@ -1,6 +1,26 @@
 ==================================================================================================
-Post 2.8 and trunk bug fixes
+Post 2.8 changes
 ==================================================================================================
+- Added support for EPICS longint record type. This is to be used as unsigned int to support
+  unsigned int type for EPICS records being stored to DAQ. 
+- Modified code for ADC/DAC overflow counters: now writes overflow counter whenever overflow
+  detected vs once per second. Note: This change only affects models which have "accum_overflow"
+  set in the parameter block. If this is not set, then code still updates counter once per second.
+- Added overflow counters to auto-generated ADC monitor MEDM screens. (SVN 3606)
+- Bug Fix: During testing, found that DACKILL IOP and TIMED parts would allow reset while
+  fault condition at input.
+- RCG parts in simLink/lib file updated to Matlab 2012b from various older versions.
+- Bug Fix (#523): EPICS binary parts could take on values other than 0 or 1.
+- Modified binary I/O read (SVN 3586). Now reads one card every code cycle to support reading
+  of information from SUS hardware watchdog via digital line.
+- Added warnings for unconnected subsystem part outputs.
+- Bug fix: Use of PHASE and EzCa parts produced errors in DAQ .ini file for associated EPICS
+           records.
+        - File feCodeGen.pl modified to move EzCa part variables to end of shared mem header file
+        - Phase part writing of EPICS channels fixed in fmseq.pl
+- Bug fix (#515): In transition from Matlab 2010a to 2012b, some bus selectors were left without OutputSignals
+  field in .mdl file, required by RCG to produce proper links. On RCG side, added check for this field
+  and exit with error if it does not exist. See bug report on how to fix Matlab side.
 - BugFix (#514): trend.cc modified to align trend frames to multiples of duration. Check that second 
   trends are in whole minutes (blocks are multiple of 60 seconds). Check that minute trends are in 
   whole hours (blocks in multiples of 60 minutes)
@@ -8,6 +28,7 @@ Post 2.8 and trunk bug fixes
   DAQ .ini files. This did not affect the system, but LHO DAQ .ini file checker scripts had
   issues with it.
 - Makefile.linux change: DACKILL PANIC was not being written properly to autoburt files.
+- Added new watchdog part to control and monitor SUS hardware watchdog chassis.
 ============================
 Changes for 2.8
 ============================
