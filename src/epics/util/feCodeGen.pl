@@ -1064,7 +1064,7 @@ print "first pass done $partsRemaining $subRemaining\n";
 #//		- Make 50 more passes through parts to complete linked list
 # Second multiprocessing step
 $numTries = 0;
-until((($partsRemaining < 1) && ($subRemaining < 1)) || ($numTries > 50))
+until((($partsRemaining < 1) && ($subRemaining < 1)) || ($numTries > 60))
 {
 $numTries ++;
 #//			- Continue through subsystem parts.
@@ -1152,7 +1152,7 @@ if(($partsRemaining > 0) || ($subRemaining > 0)) {
 	}
 	for($ii=0;$ii<$partCnt;$ii++)
 	{
-		if($partUsed[$ii] == 0)
+		if(($partUsed[$ii] == 0) && ($partType[$ii] ne "BUSC") && ($partType[$ii] ne "BUSS"))
 		{
 		print "Part $ii $xpartName[$ii] failed to connect\n";
 		}
@@ -1423,7 +1423,8 @@ print OUTH "typedef struct \U$systemName {\n";
 my $header_masks;
 for($ii=0;$ii<$partCnt;$ii++)
 {
-	if (($cdsPart[$ii]) && (($partType[$ii] eq "IPCx") || ($partType[$ii] eq "FiltCtrl") || ($partType[$ii] eq "FiltCtrl2") || ($partType[$ii] eq "EpicsBinIn") || ($partType[$ii] eq "DacKill") || ($partType[$ii] eq "DacKillIop") || ($partType[$ii] eq "DacKillTimed") || ($partType[$ii] eq "EpicsMomentary") || ($partType[$ii] eq "EpicsCounter") || ($partType[$ii] eq "Word2Bit") )) {
+	if (($cdsPart[$ii]) && (($partType[$ii] eq "IPCx") || ($partType[$ii] eq "FiltCtrl") || ($partType[$ii] eq "FiltCtrl2") || ($partType[$ii] eq "EpicsBinIn") || ($partType[$ii] eq "DacKill") || ($partType[$ii] eq "DacKillIop") || ($partType[$ii] eq "DacKillTimed") || ($partType[$ii] eq "EpicsMomentary") || ($partType[$ii] eq "EpicsCounter") || ($partType[$ii] eq "Word2Bit") || ($partType[$ii] eq "EpicsOutLong") )) {
+
 	  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
 	  if (length($masks) > 5) {
 	  	$header_masks .= $masks;
@@ -1432,7 +1433,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 }
 for($ii=0;$ii<$partCnt;$ii++)
 {
-		if (($cdsPart[$ii]) && ($partType[$ii] ne "IPCx") && ($partType[$ii] ne "FiltCtrl") && ($partType[$ii] ne "FiltCtrl2") && ($partType[$ii] ne "EpicsBinIn") && ($partType[$ii] ne "DacKill") && ($partType[$ii] ne "DacKillIop") && ($partType[$ii] ne "DacKillTimed") && ($partType[$ii] ne "EpicsMomentary") && ($partType[$ii] ne "EpicsCounter") && ($partType[$ii] ne "EzCaRead") && ($partType[$ii] ne "EzCaWrite")) {
+		if (($cdsPart[$ii]) && ($partType[$ii] ne "IPCx") && ($partType[$ii] ne "FiltCtrl") && ($partType[$ii] ne "FiltCtrl2") && ($partType[$ii] ne "EpicsBinIn") && ($partType[$ii] ne "DacKill") && ($partType[$ii] ne "DacKillIop") && ($partType[$ii] ne "DacKillTimed") && ($partType[$ii] ne "EpicsMomentary") && ($partType[$ii] ne "EpicsCounter") && ($partType[$ii] ne "EzCaRead") && ($partType[$ii] ne "EzCaWrite") && ($partType[$ii] ne "EpicsOutLong")) {
 		  $masks = ("CDS::" . $partType[$ii] . "::printHeaderStruct") -> ($ii);
 		  if (length($masks) > 5) {
 			$header_masks .= $masks;
@@ -2304,7 +2305,7 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 		  #Get ADC channel name
 		  $adcSname = $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "_INMON";
 		  $adcScreen[$adcScard][$adcSchan] = $adcSname;
-		} elsif ($partType[$cur_part_num] eq "EpicsOut") {
+		} elsif (($partType[$cur_part_num] eq "EpicsOut") || ($partType[$cur_part_num] eq "EpicsOutLong")) {
 		  $adcScard = substr $partInput[$cur_part_num][0],4,1;
 		  $adcSchan = substr $partInput[$cur_part_num][0],6,2;
 		  $adcSname = $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name;
