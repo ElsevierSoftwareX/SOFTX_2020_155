@@ -119,13 +119,12 @@ sub add_edcu_entry {
 	   && (index($proc_name, "VME_RESET") == -1) && (index($proc_name, "IPC_DIAG_RESET") == -1)
 	   && (index($proc_name, "DIAG_RESET") == -1) && (index($proc_name, "OVERFLOW_RESET") == -1))
 	{
-	if($nrow || $ncol)
-	{
+	if($nrow || $ncol) {
 		for(my $ii=1;$ii<($nrow+1);$ii++)
 		{
 			for(my $jj=1;$jj<($ncol+1);$jj++)
 			{
-				if(($v_type eq "int") || (index($v_type, "unsigned") != -1)) {
+				if($v_type eq "int") {
 					$edcuEntryI .= "\[$proc_name\_$ii\_$jj\]\n";
 					$edcuEntryI .= "acquire=3\n";
 					$edcuEntryI .= "datarate=16\n";
@@ -146,20 +145,29 @@ sub add_edcu_entry {
 		}
 	} elsif ($v_type eq "double"){
 		$edcuEntryD .= "\[$proc_name\]\n";
-					$edcuEntryD .= "acquire=3\n";
-					$edcuEntryD .= "datarate=16\n";
-					$edcuEntryD .= "datatype=4\n";
-					$edcuEntryD .= "chnnum=$edcuTpNum\n";
-					$edcuSizeD ++;
-					$edcuTpNum ++;
-	} elsif ($v_type eq "int"){
+		$edcuEntryD .= "acquire=3\n";
+		$edcuEntryD .= "datarate=16\n";
+		$edcuEntryD .= "datatype=4\n";
+		$edcuEntryD .= "chnnum=$edcuTpNum\n";
+		$edcuSizeD ++;
+		$edcuTpNum ++;
+	} elsif (($v_type eq "int") && ($ve_type ne "longout")){
 		$edcuEntryI .= "\[$proc_name\]\n";
-					$edcuEntryI .= "acquire=3\n";
-					$edcuEntryI .= "datarate=16\n";
-					$edcuEntryI .= "datatype=2\n";
-					$edcuEntryI .= "chnnum=$edcuTpNum\n";
-					$edcuSizeI ++;
-					$edcuTpNum ++;
+		$edcuEntryI .= "acquire=3\n";
+		$edcuEntryI .= "datarate=16\n";
+		$edcuEntryI .= "datatype=2\n";
+		$edcuEntryI .= "chnnum=$edcuTpNum\n";
+		$edcuSizeI ++;
+		$edcuTpNum ++;
+	} else {	# This must be unsigned int type
+		$edcuEntryI .= "\[$proc_name\]\n";
+		$edcuEntryI .= "acquire=3\n";
+		$edcuEntryI .= "datarate=16\n";
+		$edcuEntryI .= "datatype=7\n";
+		$edcuEntryI .= "chnnum=$edcuTpNum\n";
+		$edcuSizeI ++;
+		$edcuTpNum ++;
+
 	}
 	}
 }
