@@ -683,6 +683,9 @@ template <class T>
 	    case DAQ_DATATYPE_DOUBLE:
 	       convertRTDDData (fptr, (real_8_t*) dptr, ndata);
 	       break;
+	    case DAQ_DATATYPE_32BIT_UINT:
+	       convertRTDDData (fptr, (int_4u_t*) dptr, ndata);
+	       break;
 	    default:
 	       memset (fptr, 0, cmplxmul*ndata * sizeof (float));
 	       break;

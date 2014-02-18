@@ -459,6 +459,7 @@ struct dataInfoStr {            /* DataInfo Area structure              */
 #define DAQ_DATATYPE_FLOAT	4	/* Data type 32bit floating point */
 #define DAQ_DATATYPE_DOUBLE	5	/* Data type 64bit double float */
 #define DAQ_DATATYPE_COMPLEX    6       /* Data type 64bit complex floating point */
+#define DAQ_DATATYPE_32BIT_UINT 7       /* Data type unsigned 32bit integer */
 
 /* dataBlock Definitions */
 #define DAQ_SLOW_DATA	1
