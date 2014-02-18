@@ -806,6 +806,9 @@ namespace diag {
          case DAQ_DATATYPE_COMPLEX:
             databps = 2 * sizeof (float);
             break;
+         case DAQ_DATATYPE_32BIT_UINT:
+            databps = sizeof (int);
+            break;
          default:
             databps = 0;
             break;

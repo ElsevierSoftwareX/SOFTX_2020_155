@@ -134,6 +134,7 @@ static unsigned int const dcuNet[DCU_COUNT] = {3,3,3,3,0,
 #define DAQ_DATATYPE_FLOAT      4       /* Data type 32bit floating point */
 #define DAQ_DATATYPE_DOUBLE     5       /* Data type 64bit double float */
 #define DAQ_DATATYPE_COMPLEX    6       /* Data type 64bit complex floating point */
+#define DAQ_DATATYPE_32BIT_UINT 7       /* Data type unsigned 32bit integer */
 
 /*
  * Compatibility definitions
