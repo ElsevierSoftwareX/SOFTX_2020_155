@@ -447,7 +447,7 @@ infoCallback(char *channel_name, struct CHAN_PARAM *params, void *user) {
     fprintf(stderr, "Too many channels. Hard limit is %d", DCU_MAX_CHANNELS);
     return 0;
   }
-  if((params->chnnum >= 40000) && (params->chnnum < 50000) && (params->datatype == 2))
+  if((params->chnnum >= 40000) && (params->chnnum < 50000) && ((params->datatype == 2) || (params->datatype == 7)))
   {
 	info->numEpicsInts ++;
 	info->numEpicsTotal ++;
