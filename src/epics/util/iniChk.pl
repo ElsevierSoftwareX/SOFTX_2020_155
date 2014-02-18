@@ -50,7 +50,7 @@ sub processDefaultSection  {
       my $dataType = $1;
       $defaultCount += 100;
 
-      if ( ($dataType != 1) && ($dataType != 2) && ($dataType != 3) && ($dataType != 4) )  {
+      if ( ($dataType != 1) && ($dataType != 2) && ($dataType != 3) && ($dataType != 4) && ($dataType != 7))  {
          print "\n***ERROR: Incorrect datatype value in default section - $dataType\n";
          $errorCount++;
       }
@@ -141,7 +141,7 @@ sub processParameterSection  {
       elsif ($line =~ /^datatype=(\d+)/)  {
          my $dataType = $1;
 
-         if ( ($dataType != 1) && ($dataType != 2) && ($dataType != 3) && ($dataType != 4) )  {
+         if ( ($dataType != 1) && ($dataType != 2) && ($dataType != 3) && ($dataType != 4) && ($dataType != 7))  {
             print "\n***ERROR: Incorrect datatype value - $dataType\n";
             $errorCount++;
          }
