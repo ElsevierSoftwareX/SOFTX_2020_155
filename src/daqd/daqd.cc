@@ -610,6 +610,11 @@ daqd_c::full_frame(int frame_length_seconds, int science,
 	  vect = new FrameCPP::Version::FrVect(channels [i].name, 1, dims, new INT_4S[nx], "counts");
 	  break;
 	}
+      case _32bit_uint:
+	{
+	  vect = new FrameCPP::Version::FrVect(channels [i].name, 1, dims, new INT_4U[nx], "counts");
+	  break;
+	}
       case _64bit_integer:
 	{
 	  abort();

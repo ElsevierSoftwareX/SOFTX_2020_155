@@ -245,6 +245,11 @@ trender_c::minute_framer ()
           vect = new FrameCPP::Version::FrVect("", 1, dims, new INT_4S[frame_length_blocks], "");
           break;
         }
+      case _32bit_uint:
+        {
+          vect = new FrameCPP::Version::FrVect("", 1, dims, new INT_4U[frame_length_blocks], "");
+          break;
+        }
       default:
         {
           abort();
