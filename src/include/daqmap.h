@@ -163,6 +163,7 @@ struct rmIpcStr {
 #define DAQ_DATATYPE_FLOAT      4       ///< Data type 32bit floating point 
 #define DAQ_DATATYPE_DOUBLE     5       ///< Data type 64bit double float 
 #define DAQ_DATATYPE_COMPLEX    6       ///< Complex data; two 32bit floats
+#define DAQ_DATATYPE_32BIT_UINT  7       ///< Data type unsigned signed 32bit integer 
 
 #define DAQ_DATA_TYPE_SIZE(a) (((a)==DAQ_DATATYPE_16BIT_INT)? 2: 4)
 
