@@ -189,6 +189,9 @@ net_writer_c::send_files (void)
 	case _32bit_integer:
 	  out << "_32bit_integer";
 	  break;
+	case _32bit_uint:
+	  out << "_32bit_uint";
+	  break;
 	case _64bit_integer:
 	  out << "_64bit_integer";
 	  break;

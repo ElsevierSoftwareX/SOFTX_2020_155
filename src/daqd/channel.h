@@ -30,7 +30,8 @@ typedef enum {
   _64bit_integer = 3,
   _32bit_float = 4,
   _64bit_double = 5,
-  _32bit_complex = 6
+  _32bit_complex = 6,
+  _32bit_uint = 7
 } daq_data_t;
 
 /* should be equal to the last data type   */
@@ -44,6 +45,7 @@ data_type_size (short dtype) {
     return 2;
   case _32bit_integer: // 32 bit integer
   case _32bit_float: // 32 bit float
+  case _32bit_uint: // 32 bit unsigned integer
     return 4;
   case _64bit_integer: // 64 bit integer
   case _64bit_double: // 64 bit double
@@ -65,6 +67,7 @@ data_type_max(short dtype) {
       return MAXSHORT;
     #endif
   case _32bit_integer: // 32 bit integer
+  case _32bit_uint: // 32 bit unsigned integer
     #ifdef __APPLE__
       return INT_MAX;
     #else

@@ -347,6 +347,7 @@ class daqd_c {
       return 2;
     case _32bit_integer: // 32 bit integer
     case _32bit_float: // 32 bit float
+    case _32bit_uint: // 32 bit unsigned int
       return 4;
     case _64bit_integer: // 64 bit integer
     case _64bit_double: // 64 bit double
