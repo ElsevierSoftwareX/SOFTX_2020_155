@@ -1126,7 +1126,7 @@ foreach (sort @section_names) {
 	    delete $DAQ_Channels{$_};
 	    # See if this is an integer channel
 	    if ($DAQ_Channels_type{$_} eq "uint32") {
-		${$sections{$_}}{"datatype"} = 2;
+		${$sections{$_}}{"datatype"} = 7;
 	    }
 	  } else {
 	    $comment = "#";
