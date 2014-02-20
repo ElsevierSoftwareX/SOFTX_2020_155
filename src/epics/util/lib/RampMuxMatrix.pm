@@ -32,7 +32,7 @@ sub printHeaderStruct {
 	my $matOuts = $::partOutputs[$::partOutNum[$i][0]];
 	my $matIns = $::partInCnt[$::partInNum[$i][0]];
         print ::OUTH "\tdouble $::xpartName[$i]\[$matOuts\]\[$matIns\];\n";
-        print ::OUTH "\tdouble $::xpartName[$i]" . "_CURRENT\[$matOuts\]\[$matIns\];\n";
+        print ::OUTH "\tdouble $::xpartName[$i]" . "_SETTING\[$matOuts\]\[$matIns\];\n";
 	print ::OUTH "\tdouble $::xpartName[$i]" . "_RAMPING\[$matOuts\]\[$matIns\];\n";
         print ::OUTH "\tdouble $::xpartName[$i]_LOAD_MATRIX;\n";
         print ::OUTH "\tdouble $::xpartName[$i]" . "_TRAMP;\n";
@@ -40,7 +40,7 @@ sub printHeaderStruct {
 $here = <<END;
 \tchar $::xpartName[$i]\_LOAD_MATRIX_mask;\n
 \tchar $::xpartName[$i]\_mask;\n
-\tchar $::xpartName[$i]\_CURRENT_mask;\n
+\tchar $::xpartName[$i]\_SETTING_mask;\n
 \tchar $::xpartName[$i]\_RAMPING_mask;\n
 \tchar $::xpartName[$i]\_TRAMP_mask;\n
 END
@@ -54,7 +54,7 @@ sub printEpics {
 	my $matOuts = $::partOutputs[$::partOutNum[$i][0]];
 	my $matIns = $::partInCnt[$::partInNum[$i][0]];
         print ::EPICS "MATRIX $::xpartName[$i]_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]\n";
-        print ::EPICS "MATRIX $::xpartName[$i]_CURRENT_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]_CURRENT\n";
+        print ::EPICS "MATRIX $::xpartName[$i]_SETTING_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]_SETTING\n";
 	print ::EPICS "MATRIX $::xpartName[$i]_RAMPING_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]_RAMPING\n";
     print ::EPICS "MOMENTARY $::xpartName[$i]_LOAD_MATRIX $::systemName\.$::xpartName[$i]_LOAD_MATRIX double ao 0\n";
     print ::EPICS "INVARIABLE $::xpartName[$i]\_TRAMP $::systemName\.$::xpartName[$i]\_TRAMP double ai 0 field(PREC,\"1\")\n";
@@ -117,7 +117,7 @@ sub frontEndCode {
 	my $muxName = "\L$::xpartName[$::partInNum[$i][0]]";
     my $calcExp = "// RampMuxMatrix:  $::xpartName[$i]\n";
 
-    $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]_CURRENT_mask = 1;\n";
+    $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]_mask = 1;\n";
     $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]_RAMPING_mask = 1;\n";
     $calcExp .= "if (pLocalEpics->". $::systemName . "\." . "$::xpartName[$i]_LOAD_MATRIX" . " == 1)\n";
     $calcExp .= "{\n";
@@ -125,7 +125,7 @@ sub frontEndCode {
     $calcExp .= "\tfor (matrixOutputCount = 0; matrixOutputCount < $matOuts; matrixOutputCount++) {\n";
     $calcExp .= "\t\tfor (matrixInputCount = 0; matrixInputCount < $matIns; matrixInputCount++) {\n";
     $calcExp .= "\t\t\tRampParamLoad(&\L$::xpartName[$i]_state" . "\[matrixOutputCount\]\[matrixInputCount\],";
-    $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\[matrixOutputCount\]\[matrixInputCount\], pLocalEpics->$::systemName\.$::xpartName[$i]\_TRAMP,FE_RATE);\n";
+    $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]_SETTING\[matrixOutputCount\]\[matrixInputCount\], pLocalEpics->$::systemName\.$::xpartName[$i]\_TRAMP,FE_RATE);\n";
     $calcExp .= "\t\t}\n";
     $calcExp .= "\t}\n";
     $calcExp .= "}\n";    
@@ -145,7 +145,7 @@ sub frontEndCode {
     $calcExp .= "}\n";
     $calcExp .= "for (matrixOutputCount = 0; matrixOutputCount < $matOuts; matrixOutputCount++) {\n";
     $calcExp .= "\tfor (matrixInputCount = 0; matrixInputCount < $matIns; matrixInputCount++) {\n";
-    $calcExp .= "\t\tpLocalEpics->$::systemName\.$::xpartName[$i]_CURRENT\[matrixOutputCount\]\[matrixInputCount\] = RampParamGetVal(&\L$::xpartName[$i]_state" ."\[matrixOutputCount\]\[matrixInputCount\]);\n";
+    $calcExp .= "\t\tpLocalEpics->$::systemName\.$::xpartName[$i]\[matrixOutputCount\]\[matrixInputCount\] = RampParamGetVal(&\L$::xpartName[$i]_state" ."\[matrixOutputCount\]\[matrixInputCount\]);\n";
     $calcExp .= "\t\tpLocalEpics->$::systemName\.$::xpartName[$i]_RAMPING\[matrixOutputCount\]\[matrixInputCount\] = RampParamGetIsRamping(&\L$::xpartName[$i]_state" ."\[matrixOutputCount\]\[matrixInputCount\]);\n";
     $calcExp .= "\t}\n";
     $calcExp .= "}\n";
