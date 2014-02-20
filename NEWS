@@ -1,6 +1,8 @@
 ==================================================================================================
 Changes for release 2.8.3
 ==================================================================================================
+- Bug Fix: Model with EXC part fails to compile. Problem was that EXC part was not in
+  list of signal sources.
 - Bug Fix to DacKillIop and DacKillTimed parts which prevents ability to reset the trip condition
   with input still in fault state.
 - Bug Fix (523) Epics binary input taking on values other than zero or one. Code modified such
