@@ -25,6 +25,7 @@
 	- \ref simPartsTest "Supported Simulink Parts"
 \subsection mp Matrix Parts
 	- \ref matrixTest "Mux Matrix"
+	- \ref rampmatrixTest "Ramp Mux Matrix"
 \subsection ospp OSC/PHASE 
 	- \ref oscTest "Oscillator"
 \subsection ft IIR Filters
