@@ -599,7 +599,7 @@ int init_module (void)
                 return -1;
         }
         _epics_shm = (unsigned char *)(kmalloc_area[ret]);
-        printf("Epics shmem set at 0x%p\n", _epics_shm);
+        printf("EPICSM at 0x%x\n", _epics_shm);
         ret =  mbuf_allocate_area("ipc", 4*1024*1024, 0);
         if (ret < 0) {
                 printf("mbuf_allocate_area(ipc) failed; ret = %d\n", ret);
@@ -607,8 +607,9 @@ int init_module (void)
         }
         _ipc_shm = (unsigned char *)(kmalloc_area[ret]);
 
-	printf("IPC at 0x%p\n",_ipc_shm);
+	printf("IPC    at 0x%x\n",_ipc_shm);
   	ioMemData = (IO_MEM_DATA *)(_ipc_shm+ 0x4000);
+	printf("IOMEM  at 0x%x size 0x%x\n",(_ipc_shm + 0x4000),sizeof(IO_MEM_DATA));
 
 
 // If DAQ is via shared memory (Framebuilder code running on same machine or MX networking is used)
@@ -620,7 +621,8 @@ int init_module (void)
                 return -1;
         }
         _daq_shm = (unsigned char *)(kmalloc_area[ret]);
-        printf("Allocated daq shmem; set at 0x%p\n", _daq_shm);
+        // printf("Allocated daq shmem; set at 0x%x\n", _daq_shm);
+	printf("DAQSM at 0x%x\n",_daq_shm);
  	daqPtr = (struct rmIpcStr *) _daq_shm;
 
 	// Find and initialize all PCI I/O modules *******************************************************
@@ -964,7 +966,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 		ioMemData->pci_rfm_dma[ii] = cdsPciModules.pci_rfm_dma[ii];
 #endif
 	}
-	ioMemData->dolphinCount = 0;
+	// ioMemData->dolphinCount = 0;
 #ifdef DOLPHIN_TEST
 	ioMemData->dolphinCount = cdsPciModules.dolphinCount;
 	ioMemData->dolphin[0] = cdsPciModules.dolphin[0];

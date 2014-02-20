@@ -16,6 +16,17 @@
 /// 	@detail More information can be found in the following DCC document:
 ///<	<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">T0900607 CDS RT Sequencer Software</a>
 ///	@author R.Bork, A.Ivanov
+///     @copyright Copyright (C) 2014 LIGO Project      \n
+///<    California Institute of Technology              \n
+///<    Massachusetts Institute of Technology           \n\n
+///     @license This program is free software: you can redistribute it and/or modify
+///<    it under the terms of the GNU General Public License as published by
+///<    the Free Software Foundation, version 3 of the License.                 \n
+///<    This program is distributed in the hope that it will be useful,
+///<    but WITHOUT ANY WARRANTY; without even the implied warranty of
+///<    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+///<    GNU General Public License for more details.
+
 
 #include <linux/version.h>
 #include <linux/init.h>
@@ -37,7 +48,7 @@
 #include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
 
 // Code can be run without shutting down CPU by changing this compile flag
-#undef NO_CPU_SHUTDOWN 
+#undef NO_CPU_SHUTDOWN
 #ifndef NO_CPU_SHUTDOWN
 extern int vprintkl(const char*, va_list);
 extern int printkl(const char*, ...);
