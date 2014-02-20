@@ -1,6 +1,8 @@
 ==================================================================================================
 Post 2.8 changes
 ==================================================================================================
+- Bug Fix: Model with EXC part fails to compile. Problem was that EXC part was not in
+  list of signal sources. Bug also fixed in branch-2.8 (SVN 3621).
 - Added support for EPICS longint record type. This is to be used as unsigned int to support
   unsigned int type for EPICS records being stored to DAQ. 
 - Modified code for ADC/DAC overflow counters: now writes overflow counter whenever overflow
