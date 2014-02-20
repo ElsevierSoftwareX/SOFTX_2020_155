@@ -42,7 +42,8 @@ INLINE void commData2Init(
 int ii;
 
 
-printf("size of data block = %lu\n", sizeof(CDS_IPC_COMMS));
+printf("size of data block = 0x%x\n", sizeof(CDS_IPC_COMMS));
+printf("Dolphin num = %d at 0x%x and 0x%x \n",cdsPciModules.dolphinCount,cdsPciModules.dolphin[0],cdsPciModules.dolphin[1]);
   for(ii=0;ii<connects;ii++)
   {
 	// Set the sendCycle field, used by all send/rcv to determine IPC data block to write/read
