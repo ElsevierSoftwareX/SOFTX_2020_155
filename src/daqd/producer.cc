@@ -17,6 +17,7 @@
 #include <signal.h>
 #include <sys/mman.h>
 #include <sys/types.h>
+#include <sys/syscall.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -329,6 +330,11 @@ producer::frame_writer ()
    //seteuid (getuid ());
 
    daqd_c::realtime("Producer", 1);
+/* Get Thread ID */
+   pid_t prod_tid;
+   prod_tid = (pid_t) syscall(SYS_gettid);
+   system_log(1, "producer thread pid=%d\n", (int) prod_tid);  
+
    unsigned char *read_dest;
    circ_buffer_block_prop_t prop;
 #if defined(USE_SYMMETRICOM) || defined(USE_LOCAL_TIME)

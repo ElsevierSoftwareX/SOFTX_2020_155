@@ -1,3 +1,5 @@
+#include <sys/types.h>
+#include <sys/syscall.h>
 #include "cadef.h"
 #include "envDefs.h"
 #include "fdManager.h"
@@ -9,6 +11,11 @@
 void *
 epicsServer::epics_main ()
 {
+/* Get Thread ID */
+    pid_t epics_tid;
+    epics_tid = (pid_t) syscall(SYS_gettid);
+    system_log(1, "EPICS IOC thread pid=%d", (int) epics_tid);  
+
     exServer *pCAS;
     try {
       pCAS = new exServer (prefix.c_str(), prefix1.c_str(), prefix2.c_str(), 0, 1);

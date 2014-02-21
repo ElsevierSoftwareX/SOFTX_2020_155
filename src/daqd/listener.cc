@@ -12,6 +12,7 @@
 #include <signal.h>
 
 #include <sys/types.h>
+#include <sys/syscall.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -75,6 +76,11 @@ net_listener::listener ()
   const int on = 1;
   int onlen = sizeof (on);
   int srvr_addr_len;
+/* Get Thread ID */
+  pid_t list_tid;
+  list_tid = (pid_t) syscall(SYS_gettid);
+  int lport = ntohs (srvr_addr.sin_port);
+  system_log(1, "listener port %d thread pid=%d\n", lport , (int) list_tid);  
 
   if ((listenfd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
