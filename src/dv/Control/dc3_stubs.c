@@ -1889,8 +1889,8 @@ butifyRate(int rate)
 char *
 dataType(int dt)
 {
- 	static char *buf[] = {"","short", "int", "long", "float", "double", "complex" };
-	return dt >= 0 && dt < 7? buf[dt]: buf[0];
+ 	static char *buf[] = {"","short", "int", "long", "float", "double", "complex", "uint" };
+	return dt >= 0 && dt < 8? buf[dt]: buf[0];
 }
 
 /*
