@@ -10,13 +10,13 @@ use Getopt::Long;
 # Default options
 
 my $W = 50;	# Width of each text box
-my $H = 25;	# Height of each text box
+my $H = 20;	# Height of each text box
 my $rows = 5;	# Number of rows in the matrix
 my $cols = 5;	# Number of columns in the matrix
 my $x = 80;	# X-coordinate of left side of the matrix
 my $y = 60;	# Y-coordinate of the top of the matrix
 my $padx = 10;	# Horizontal padding between entries
-my $pady = 10;  # Vertical padding between entries
+my $pady = 30;  # Vertical padding between entries
 my $channelbase = 'C1:ASS-PIT_SENMTRX_';
 
 my $rowlabels = '';
@@ -91,74 +91,27 @@ for ($row = 0; $row < $rows; $row ++) {
     $X = $x + ($W + $padx) * $col;
     $Y = $y + ($H + $pady) * $row;
     $channel = $channelbase . sprintf('%i_%i', $row+1,  $col+1);
-    $channelCurrent = $channelbase . sprintf('CURRENT_%i_%i', $row+1, $col+1);
+    $channelSetting = $channelbase . sprintf('SETTING_%i_%i', $row+1, $col+1);
     $channelRamping = $channelbase . sprintf('RAMPING_%i_%i', $row+1, $col+1);
-    
 
     #Make green box (equal values)
-    make_text_entry_with_calc($X, $Y, $W, $H, $channel, $channel, $channelCurrent, 14, 60, "calc", "A=B");
+    make_text_update_with_calc($X, $Y, $W, $H, $channel, $channel, $channelSetting, 14, 60, "calc", "(A=B)&(A#0)");
     #Make grey box (both 0)
-    make_text_entry_with_calc($X, $Y, $W, $H, $channel, $channel, $channelCurrent, 10, 5, "calc", "!(A|B)");
+    make_text_update_with_calc($X, $Y, $W, $H, $channel, $channel, $channelSetting, 10, 5, "calc", "!(A|B)");
     #make red box (different values)
-    make_text_entry_with_calc($X, $Y, $W, $H, $channel, $channel, $channelCurrent, 14, 20, "calc", "A#B");
+    make_text_update_with_calc($X, $Y, $W, $H, $channel, $channel, $channelSetting, 14, 20, "calc", "A#B");
     #make yellow box (ramping)
-    make_text_entry_with_calc($X, $Y, $W, $H, $channel, $channelRamping, $channelRamping, 10, 30, "if not zero", "A");
+    make_text_update_with_calc($X, $Y, $W, $H, $channel, $channelRamping, $channelRamping, 10, 30, "if not zero", "A");
 
-  }
-}
-
-# Make the SECOND readback matrix!
-
-$x = (2 * $x) + $matrix_width;
-$y = $y;
-print <<END;
-composite {
-  "composite name" = "matrix"
-  object {
-    x = $x 
-    y = $y
-    height = $matrix_height
-    width  = $matrix_width
-  }
-  children {
-END
-
-# Put in row and column labels
-if ($#rowlabels > 0) {
-  for ($row = 0; $row < $rows; $row ++) {
-    $X = $x + ($W + $padx) * -1;
-    $Y = $y + ($H + $pady) * $row;
-    make_text_box($X, $Y, $W, $H, $rowlabels[$row]);
-  }
-}
-
-if ($#collabels > 0) {
-  for ($col = 0; $col < $cols; $col ++) {
-    $X = $x + ($W + $padx) * $col;
-    $Y = $y + ($H + $pady) * -1;
-    make_text_box($X, $Y, $W, $H, $collabels[$col]);
-  }
-}
-
-
-for ($row = 0; $row < $rows; $row ++) {
-  for ($col = 0; $col < $cols; $col ++) {
-
-    $X = $x + ($W + $padx) * $col;
-    $Y = $y + ($H + $pady) * $row;
-    $channel = $channelbase . sprintf('%i_%i', $row+1,  $col+1);
-    $channelCurrent = $channelbase . sprintf('CURRENT_%i_%i', $row+1, $col+1);
-    $channelRamping = $channelbase . sprintf('RAMPING_%i_%i', $row+1, $col+1);
-    
-
-    #Make green box (equal values, not zero)
-    make_text_update_with_calc($X, $Y, $W, $H, $channelCurrent, $channel, $channelCurrent, 14, 60, "calc", "(A=B)&(A#0)");
+    #Make green box (equal values)
+    make_text_entry_with_calc($X, $Y+22, $W, $H, $channelSetting, $channel, $channelSetting, 14, 60, "calc", "A=B");
     #Make grey box (both 0)
-    make_text_update_with_calc($X, $Y, $W, $H, $channelCurrent, $channel, $channelCurrent, 10, 5, "calc", "!(A|B)");
+    make_text_entry_with_calc($X, $Y+22, $W, $H, $channelSetting, $channel, $channelSetting, 10, 5, "calc", "!(A|B)");
     #make red box (different values)
-    make_text_update_with_calc($X, $Y, $W, $H, $channelCurrent, $channel, $channelCurrent, 14, 20, "calc", "A#B");
+    make_text_entry_with_calc($X, $Y+22, $W, $H, $channelSetting, $channel, $channelSetting, 14, 20, "calc", "A#B");
     #make yellow box (ramping)
-    make_text_update_with_calc($X, $Y, $W, $H, $channelCurrent, $channelRamping, $channelRamping, 10, 30, "if not zero", "A");
+    make_text_entry_with_calc($X, $Y+22, $W, $H, $channelSetting, $channelRamping, $channelRamping, 10, 30, "if not zero", "A");
+
 
   }
 }
