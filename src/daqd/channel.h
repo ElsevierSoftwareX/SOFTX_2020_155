@@ -35,7 +35,7 @@ typedef enum {
 } daq_data_t;
 
 /* should be equal to the last data type   */
-#define MAX_DATA_TYPE _32bit_complex
+#define MAX_DATA_TYPE _32bit_uint
 #define MIN_DATA_TYPE _16bit_integer
 
 inline static int

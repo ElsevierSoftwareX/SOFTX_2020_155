@@ -11,6 +11,7 @@
 #include <math.h>
 #include <signal.h>
 
+#include <sys/syscall.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -39,6 +40,11 @@ extern daqd_c daqd;
 void *
 trender_c::raw_minute_saver ()
 {
+
+/* Get Thread ID */
+  pid_t mtraw_tid;
+  mtraw_tid = (pid_t) syscall(SYS_gettid);
+  system_log(1, "raw minute trend saver thread pid=%d\n", (int) mtraw_tid);  
 
   // Put this thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("raw minute trend saver", 2);
@@ -165,6 +171,11 @@ trender_c::raw_minute_saver ()
 void *
 trender_c::minute_framer ()
 {
+/* Get Thread ID */
+  pid_t mtrfr_tid;
+  mtrfr_tid = (pid_t) syscall(SYS_gettid);
+  system_log(1, "minute trend frame saver thread pid=%d\n", (int) mtrfr_tid);  
+
   // Put this thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("minute trend framer", 2);
 
@@ -333,6 +344,9 @@ trender_c::minute_framer ()
 	      } else if (channels [j].data_type == _32bit_float) {
 		memcpy(adc_ptr [5*j] + i*sizeof(REAL_4), &cur_blk [j].min.F, sizeof (REAL_4));
 		memcpy(adc_ptr [5*j+1] + i*sizeof(REAL_4), &cur_blk [j].max.F, sizeof (REAL_4));
+	      } else if (channels [j].data_type == _32bit_uint) {
+		memcpy(adc_ptr [5*j] + i*sizeof(INT_4U), &cur_blk [j].min.U, sizeof (INT_4U));
+		memcpy(adc_ptr [5*j+1] + i*sizeof(INT_4U), &cur_blk [j].max.U, sizeof (INT_4U));
 	      } else {
 		memcpy(adc_ptr [5*j] + i*sizeof(INT_4S), &cur_blk [j].min.I, sizeof (INT_4S));
 		memcpy(adc_ptr [5*j+1] + i*sizeof(INT_4S), &cur_blk [j].max.I, sizeof (INT_4S));
@@ -445,6 +459,11 @@ void *
 trender_c::minute_trend ()
 {
 
+/* Get Process ID */
+  pid_t mtrco_tid;
+  mtrco_tid = (pid_t) syscall(SYS_gettid);
+  system_log(1, "minute trend consumer thread pid=%d\n", (int) mtrco_tid);  
+
   // Put this thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("minute trender", 2);
 
@@ -519,6 +538,11 @@ trender_c::minute_trend ()
 		    ttb [j].min.F = btr [j].min.F;
 		  if (btr [j].max.F > ttb [j].max.F)
 		    ttb [j].max.F = btr [j].max.F;
+		} else if (channels [j].data_type == _32bit_uint) {
+		  if (btr [j].min.U < ttb [j].min.U)
+		    ttb [j].min.U = btr [j].min.U;
+		  if (btr [j].max.U > ttb [j].max.U)
+		    ttb [j].max.U = btr [j].max.U;
 		} else {
 		  if (btr [j].min.I < ttb [j].min.I)
 		    ttb [j].min.I = btr [j].min.I;
@@ -590,6 +614,10 @@ trender_c::saver ()
 void *
 trender_c::framer ()
 {
+/* Get Thread ID */
+  pid_t strfr_tid;
+  strfr_tid = (pid_t) syscall(SYS_gettid);
+  system_log(1, "second trend frame saver thread pid=%d\n", (int) strfr_tid);  
 
   // Put this thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("trend framer", 2);
@@ -753,6 +781,9 @@ trender_c::framer ()
 	      } else if (channels [j].data_type == _32bit_float) {
 		memcpy(adc_ptr [5*j] + i*sizeof(REAL_4), &cur_blk [j].min.F, sizeof (REAL_4));
 		memcpy(adc_ptr [5*j+1] + i*sizeof(REAL_4), &cur_blk [j].max.F, sizeof (REAL_4));
+	      } else if (channels [j].data_type == _32bit_uint) {
+		memcpy(adc_ptr [5*j] + i*sizeof(INT_4U), &cur_blk [j].min.U, sizeof (INT_4U));
+		memcpy(adc_ptr [5*j+1] + i*sizeof(INT_4U), &cur_blk [j].max.U, sizeof (INT_4U));
 	      } else {
 		memcpy(adc_ptr [5*j] + i*sizeof(INT_4S), &cur_blk [j].min.I, sizeof (INT_4S));
 		memcpy(adc_ptr [5*j+1] + i*sizeof(INT_4S), &cur_blk [j].max.I, sizeof (INT_4S));
@@ -978,6 +1009,34 @@ trender_c::trend_loop_func(int j, int* status_ptr, char* block_ptr)  {
 	   ttb [j].mean = mean / (double)rate;
 	   ttb [j].min.F = min;
 	   ttb [j].max.F = max;
+	} else if (channels [j].data_type == _32bit_uint) { // Treat as unsigned, because it is...
+	  register unsigned int *data = (unsigned int *) (block_ptr + channels [j].offset);
+	  
+#ifndef NO_RMS
+	  register double rms = (double) (*data * *data);
+#endif
+	  register double mean = *data;
+	  register unsigned int min = *data;
+	  register unsigned int max = *data;
+	  
+	  for (register int i = 1; i < rate; i++)
+	    {
+	      register unsigned int test = data [i];
+#ifndef NO_RMS
+	      rms += (double) (test * test);
+#endif
+	      mean += test;
+	      if (test < min)
+		min = test;
+	      if (test > max)
+		max = test;
+	    }
+#ifndef NO_RMS
+	   ttb [j].rms = sqrt (rms / (double)rate);
+#endif
+	   ttb [j].mean = mean / (double)rate;
+	   ttb [j].min.U = min;
+	   ttb [j].max.U = max;
 	} else if (channels [j].data_type == _32bit_integer) { // Treat this data as unsigned
 	  register unsigned int *data = (unsigned int *) (block_ptr + channels [j].offset);
 	  
@@ -1044,6 +1103,11 @@ trender_c::trend_loop_func(int j, int* status_ptr, char* block_ptr)  {
 void *
 trender_c::trend ()
 {
+/* Get Thread ID */
+  pid_t strco_tid;
+  strco_tid = (pid_t) syscall(SYS_gettid);
+  system_log(1, "second trend consumer thread pid=%d\n", (int) strco_tid);  
+
   // Put this thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("trender", 2);
 
@@ -1190,6 +1254,11 @@ trender_c::trend ()
 void *
 trender_c::trend_worker ()
 {
+/* Get Thread ID */
+      pid_t strwk_tid;
+      strwk_tid = (pid_t) syscall(SYS_gettid);
+      system_log(1, "second trend worker thread pid=%d\n", (int) strwk_tid);  
+
   for (;;)
     {
       // get control from the trender thread
@@ -1299,7 +1368,7 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
       tb -> ~circ_buffer();
       free ((void *) tb);
       tb = 0;
-      *yyout << "couldn't allocate trender buffer data blocks, memory exhausted" << endl;
+      *yyout << "couldn't allocate second trender buffer data blocks, memory exhausted" << endl;
       return 1;
     }
   }
@@ -1346,7 +1415,7 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
       pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
       int err_no;
       if (err_no = pthread_create (&mconsumer, &attr, (void *(*)(void *))minute_trend_static, (void *) this)) {
-	system_log(1, "couldn't create minute trender thread; pthread_create() err=%d", err_no);
+	system_log(1, "couldn't create minute trend consumer thread; pthread_create() err=%d", err_no);
 	tb -> delete_consumer (mcnum);
 	mcnum = 0;
 	tb -> ~circ_buffer();
@@ -1359,7 +1428,7 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
 	return 1;
       }
       pthread_attr_destroy (&attr);
-      DEBUG(2, cerr << "minute trender created; tid=" << consumer << endl);
+      DEBUG(2, cerr << "minute trend consumer created; tid=" << mconsumer << endl);
     }
   else
     {
@@ -1373,7 +1442,7 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
       return 1;
     }
 
-  // Start trender
+  // Start second trender
   if ((cnum = daqd.b1 -> add_consumer ()) >= 0)
     {
       sem_wait (&trender_sem);
@@ -1386,12 +1455,12 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
       int err_no;
 
       if (err_no = pthread_create (&worker_tid, &attr, (void *(*)(void *))trend_worker_static, (void *) this)) {
-	system_log(1, "couldn't create trender worker thread; pthread_create() err=%d", err_no);
+	system_log(1, "couldn't create second trend worker thread; pthread_create() err=%d", err_no);
 	abort();
       }
 
       if (err_no = pthread_create (&consumer, &attr, (void *(*)(void *))trend_static, (void *) this)) {
-	system_log(1, "couldn't create trender thread; pthread_create() err=%d", err_no);
+	system_log(1, "couldn't create second trend consumer thread; pthread_create() err=%d", err_no);
 
 	// FIXME: have to cancel minute trend thread here first !!!
 	abort();
@@ -1408,7 +1477,7 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
 	return 1;
       }
       pthread_attr_destroy (&attr);
-      DEBUG(2, cerr << "trender created; tid=" << consumer << endl);
+      DEBUG(2, cerr << "second trend consumer created; tid=" << consumer << endl);
     }
   else
     {
@@ -1452,11 +1521,11 @@ trender_c::start_raw_minute_trend_saver (ostream *yyout)
   pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
   pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
 
-    /* Start minute trend frame saver thread */
+    /* Start raw minute trend file saver thread */
   int err_no;
-  if (err_no = pthread_create (&tsaver, &attr, (void *(*)(void *))daqd.trender.raw_minute_trend_saver_static,
+  if (err_no = pthread_create (&mtraw, &attr, (void *(*)(void *))daqd.trender.raw_minute_trend_saver_static,
 			       (void *) this)) {
-    system_log(1, "couldn't create raw minute trend framer thread; pthread_create() err=%d", err_no);
+    system_log(1, "couldn't create raw minute trend saver thread; pthread_create() err=%d", err_no);
 
       // FIXME: have to cancel frame saver thread here
     abort();
@@ -1467,7 +1536,7 @@ trender_c::start_raw_minute_trend_saver (ostream *yyout)
     return 1;
   }
   pthread_attr_destroy (&attr);
-  DEBUG(2, cerr << "raw minute trend saver thread started; tid=" << tsaver << endl);
+  DEBUG(2, cerr << "raw minute trend saver thread started; tid=" << mtraw << endl);
   return 0;
 }
 
@@ -1499,7 +1568,7 @@ trender_c::start_minute_trend_saver (ostream *yyout)
 
     /* Start minute trend frame saver thread */
     int err_no;
-    if (err_no = pthread_create (&tsaver, &attr, (void *(*)(void *))daqd.trender.minute_trend_framer_static,
+    if (err_no = pthread_create (&mtsaver, &attr, (void *(*)(void *))daqd.trender.minute_trend_framer_static,
 				     (void *) this)) {
       system_log(1, "couldn't create minute trend framer thread; pthread_create() err=%d", err_no);
 
@@ -1512,7 +1581,7 @@ trender_c::start_minute_trend_saver (ostream *yyout)
       return 1;
     }
     pthread_attr_destroy (&attr);
-    DEBUG(2, cerr << "minute trend saver thread started; tid=" << tsaver << endl);
+    DEBUG(2, cerr << "minute trend framer thread started; tid=" << mtsaver << endl);
   }
 
   return 0;
@@ -1564,16 +1633,16 @@ trender_c::start_trend_saver (ostream *yyout)
     {
       sem_wait (&frame_saver_sem);
 
-      /* Start trend frame saver thread */
+      /* Start second trend framer thread */
       int err_no;
       if (err_no = pthread_create (&tsaver, &attr, (void *(*)(void *))daqd.trender.trend_framer_static, (void *) this)) {
-	system_log(1, "couldn't create trend framer thread; pthread_create() err=%d", err_no);
+	system_log(1, "couldn't create second trend framer thread; pthread_create() err=%d", err_no);
 	tb -> delete_consumer (saver_cnum);
 	pthread_attr_destroy (&attr);
 	return 1;
       }
       pthread_attr_destroy (&attr);
-      DEBUG(2, cerr << "trend saver thread started; tid=" << tsaver << endl);
+      DEBUG(2, cerr << "second trend framer thread started; tid=" << tsaver << endl);
     }
 
   return 0;

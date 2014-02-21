@@ -12,6 +12,7 @@
 #include <signal.h>
 #include <sys/mman.h>
 #include <sys/types.h>
+#include <sys/syscall.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -66,6 +67,11 @@ void subscriptionHandler(struct event_handler_args args) {
 void *
 edcu::edcu_main ()
 {
+/* Get Thread ID */
+     pid_t edcu_tid;
+     edcu_tid = (pid_t) syscall(SYS_gettid);
+     system_log(1, "EDCU thread pid=%d", (int) edcu_tid);  
+
      ca_context_create(ca_enable_preemptive_callback);
      for (int i = fidx; i < (fidx + num_chans); i++) {
 	chid chid1;

@@ -14,8 +14,8 @@
 typedef struct s_48 {
   unsigned int gps;
   unsigned int pad1;
-  union {int I; double D; float F;} min;
-  union {int I; double D; float F;} max;
+  union {int I; double D; float F; unsigned int U} min;
+  union {int I; double D; float F; unsigned int U} max;
   int n; // the number of valid points used in calculating min, max, rms and mean 
   unsigned int pad2;
   double rms;
@@ -24,8 +24,8 @@ typedef struct s_48 {
 
 typedef struct s_40 {
   unsigned int gps;
-  union {int I; double D; float F;} min;
-  union {int I; double D; float F;} max;
+  union {int I; double D; float F; unsigned int U} min;
+  union {int I; double D; float F; unsigned int U} max;
   int n; // the number of valid points used in calculating min, max, rms and mean 
   double rms;
   double mean;

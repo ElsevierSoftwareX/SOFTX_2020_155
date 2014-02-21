@@ -34,6 +34,7 @@
 #include <math.h>
 #include <signal.h>
 
+#include <sys/syscall.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -650,6 +651,16 @@ daqd_c::full_frame(int frame_length_seconds, int science,
 void *
 daqd_c::framer (int science)
 {
+/* Get Thread ID */
+  if (science) {
+      pid_t scifr_tid;
+      scifr_tid = (pid_t) syscall(SYS_gettid);
+      system_log(1, "science frame saver thread pid=%d\n", (int) scifr_tid);  
+  } else {
+      pid_t fulfr_tid;
+      fulfr_tid = (pid_t) syscall(SYS_gettid);
+      system_log(1, "full frame saver thread pid=%d\n", (int) fulfr_tid);  
+  }      
 
   // Put this  thread into the realtime scheduling class with half the priority
   daqd_c::realtime ("full frame saver", 2);
@@ -1276,7 +1287,7 @@ daqd_c::start_edcu (ostream *yyout)
 			       (void *(*)(void *))edcu1.edcu_static,
 			       (void *) &edcu1)) {
     pthread_attr_destroy (&attr);
-    system_log(1, "pthread_create() err=%d", err_no);
+    system_log(1, "EDCU pthread_create() err=%d", err_no);
     return 1;
   }
   pthread_attr_destroy (&attr);
@@ -1303,9 +1314,9 @@ daqd_c::start_epics_server (ostream *yyout, char *prefix, char *prefix1, char *p
 			       (void *(*)(void *))epics1.epics_static,
 			       (void *) &epics1)) {
     pthread_attr_destroy (&attr);
-    system_log(1, "pthread_create() err=%d", err_no);
+    system_log(1, "Epics pthread_create() err=%d", err_no);
     return 1;
-  }
+  } 
   pthread_attr_destroy (&attr);
   DEBUG(2, cerr << "Epics server thread created; tid=" <<  epics1.tid << endl);
   epics1.running = 1;
@@ -1330,7 +1341,7 @@ daqd_c::start_producer (ostream *yyout)
 			       (void *(*)(void *))producer1.frame_writer_static,
 			       (void *) &producer1)) {
     pthread_attr_destroy (&attr);
-    system_log(1, "pthread_create() err=%d", err_no);
+    system_log(1, "producer pthread_create() err=%d", err_no);
     return 1;
   }
   pthread_attr_destroy (&attr);
@@ -1371,11 +1382,11 @@ daqd_c::start_frame_saver (ostream *yyout, int science)
 
       pthread_attr_destroy (&attr);
       if (science) {
-      	DEBUG(2, cerr << "science frame saver created; tid=" << consumer [cnum] << endl);
+        DEBUG(2, cerr << "science frame saver created; tid=" << consumer [cnum] << endl);
         science_frame_saver_tid = consumer [cnum];
 	science_cnum = cn;
       } else {
-      	DEBUG(2, cerr << "frame saver created; tid=" << consumer [cnum] << endl);
+    	DEBUG(2, cerr << "frame saver created; tid=" << consumer [cnum] << endl);
         frame_saver_tid = consumer [cnum];
 	cnum = cn;
       }

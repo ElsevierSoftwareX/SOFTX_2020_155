@@ -5,18 +5,19 @@
 #define _BSD_SOURCE
 #endif
 
-// define DEBUG to enable log messages on std out
-// DEBUG = 1: basic messages
-// DEBUG = 2: verbose
-// DEBUG = 3: verbose and random packet receiving errors
-#define DEBUG 2
-#undef DEBUG
+// define DBUG to enable log messages on std out
+// DBUG = 1: basic messages
+// DBUG = 2: verbose
+// DBUG = 3: verbose and random packet receiving errors
+#define DBUG 2
+#undef DBUG
 
 #include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/syscall.h>
 #include <sys/socket.h>
 #ifdef __linux__
 #include <sys/time.h>
@@ -48,6 +49,7 @@ typedef u_int32_t in_addr_t;
 #include <fcntl.h>
 #include "shutdown.h"
 
+#include "debug.h"
    using namespace std;
 
 #if defined(USE_MAIN)
@@ -64,7 +66,10 @@ main() {
   }
   char *bufptr = buffer;
   unsigned int seq, gps, gps_n;
-  printf("Opened broadcaster receiver\n");
+/* Get Thread ID */
+  pid_t rcvfr_tid;
+  rcvfr_tid = (pid_t) syscall(SYS_gettid);
+  printf("Opened broadcaster receiver thread pid=%d\n",(int) rcvfr_tid);
   while (1) {
     int length = NDS->receive(bufptr, buflen, &seq, &gps, &gps_n);
     printf("len=%d seq=%d gps=%d gps_n=%d data=%d\n", length, seq, gps, gps_n, ntohl(*((unsigned int *)bufptr)));
@@ -225,7 +230,7 @@ namespace diag {
       // open socket
       sock = socket (PF_INET, SOCK_DGRAM, 0);
       if (sock < 0) {
-      #ifdef DEBUG
+      #ifdef DBUG
          cerr << "socket() failed" << endl;
       #endif
          return false;
@@ -237,7 +242,7 @@ namespace diag {
                      (char*) &reuse, sizeof (int)) != 0) {
          ::close (sock);
          sock = -1;
-      #ifdef DEBUG
+      #ifdef DBUG
          cerr << "socketopt() failed" << endl;
       #endif
          return false;
@@ -254,7 +259,7 @@ namespace diag {
                      (char*) &bufsize, sizeof (int)) != 0) {
          ::close (sock);
          sock = -1;
-      #ifdef DEBUG
+      #ifdef DBUG
          cerr << "socketopt(2) failed" << endl;
       #endif
          return false;
@@ -278,7 +283,7 @@ namespace diag {
       if (bind (sock, (struct sockaddr*) &name, sizeof (name))) {
          ::close (sock);
          sock = -1;
-      #ifdef DEBUG
+      #ifdef DBUG
          cerr << "bind() failed" << endl;
       #endif
          return false;
@@ -318,7 +323,7 @@ namespace diag {
                     inet_ntoa (*(in_addr*) &i_addr));
             addLog (buf);
          }
-      #ifdef DEBUG
+      #ifdef DBUG
          cout << "join multicast " << mcast_addr << " at " <<
             inet_ntoa (*(in_addr*) &i_addr) << endl;
       #endif
@@ -333,7 +338,7 @@ namespace diag {
             sock = -1;
             return false;
          }
-      #ifdef DEBUG
+      #ifdef DBUG
          cout << "broadcast port "  << port << endl;
       #endif
       }
@@ -415,7 +420,7 @@ namespace diag {
 int drop_seq = 0; // sequence to drop (for debugging)
 
    int frameRecv::receive (char*& data, int maxlen, unsigned int* sequence,
-                     unsigned int* time, unsigned int* duration)
+                     unsigned int* recvtime, unsigned int* duration)
    {
       // check socket
       if (sock < 0) {
@@ -451,7 +456,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
             return -3;
          }
       }
-   #ifdef DEBUG
+   #ifdef DBUG
       //cout << "first packet received" << endl;
    #endif
       // if first, set the old sequence number to one of the first packet
@@ -559,7 +564,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
             	int n = 0;
             	rpkt.pktResend[n++] = 0;
 
-         #ifdef DEBUG
+         #ifdef DBUG
             	cout << "ask for retransmission " << n << " (rate " <<
                	newRetransmissionRate << "; seq " << newseq << ") at " << endl;
                	//(TAInow() % 1000000000000LL) / 1E9 << endl;
@@ -597,7 +602,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
                           newseq);
                   addLog (buf);
                }
-            #ifdef DEBUG
+            #ifdef DBUG
 	       if (diff != 0) 
                   cout << "have to skip (" << (int)diff << ")" << endl;
             #endif
@@ -658,8 +663,8 @@ int drop_seq = 0; // sequence to drop (for debugging)
                   if (sequence != 0) {
                      *sequence = newseq;
                   }
-                  if (time != 0) {
-                     *time = pkts[0]->header.timestamp;
+                  if (recvtime != 0) {
+                     *recvtime = pkts[0]->header.timestamp;
                   }
                   if (duration != 0) {
                      *duration = pkts[0]->header.duration;
@@ -679,7 +684,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
                          pkts[0]->header.pktLen);
                   len += pkts[0]->header.pktLen;
                   pktCntrl[pktNum].received = true;
-               //#if DEBUG - 0 > 2 // add a random error rate!
+               //#if DBUG - 0 > 2 // add a random error rate!
 		#if 0
                   if ((double)rand() < rcvErrorRate * RAND_MAX) {
                      pktCntrl[pktNum].received = false;
@@ -691,7 +696,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
                // check if last packet
                if (pkts[0]->header.pktTotal == pkts[0]->header.pktNum + 1) {
                   seqDone = true;
-               #ifdef DEBUG
+               #ifdef DBUG
                   //cout << "received last package at " << TAInow() << endl;
                   cout << "received last package len=" << len << endl;
                #endif
@@ -729,7 +734,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
             retransmissionRate = newRetransmissionRate;
             return len; // done!
          }
-         #ifdef DEBUG
+         #ifdef DBUG
           cout << "missing packets " << missingPackets << 
              " (packets pending " << pkts.size() << ")" << endl;
          #endif
@@ -768,7 +773,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
                        "packet buffer limit exceeded" : "");
                addLog (buf);
             }
-         #ifdef DEBUG
+         #ifdef DBUG
             // status message
             cout << "have to skip (missing " << missingPackets << "): ";
             if (missingPackets > maximumRetransmit) {
@@ -830,17 +835,20 @@ int drop_seq = 0; // sequence to drop (for debugging)
                }
             }
             if (logison) {
+/*
                char buf[256];
                sprintf (buf, "Ask for retransmission of %i packets; port %d", n, port);
 		
                addLog (buf);
+*/
+               system_log(1, "Ask for retransmission of %i packets; port %d", n, port);		
             }
-         #ifdef DEBUG
+         #ifdef DBUG
             cout << "ask for retransmission " << n << " (rate " <<
                newRetransmissionRate << "; seq " << newseq << ") at " << endl;
                //(TAInow() % 1000000000000LL) / 1E9 << endl;
          #endif
-         #if DEBUG - 0 > 1
+         #if DBUG - 0 > 1
             cout << "Packets =";
             for (int jj = 0; jj < n; ++jj) {
                cout << " " << rpkt.pktResend[jj];
@@ -875,7 +883,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
 
    bool frameRecv::getPacket (bool block)
    {
-      #if DEBUG > 1
+      #if DBUG > 1
       //cout << "packet buffer size = " << pkts.size() << endl;
       #endif
       // check if enough space for a new packet
@@ -883,7 +891,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
          if (logison) {
             addLog ("Packet buffer is full");
          }
-      #ifdef DEBUG
+      #ifdef DBUG
          cout << "packet buffer full" << endl;
       #endif
 	 abort();
@@ -909,7 +917,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
             FD_SET (sock, &readfds);
             int nset = select (FD_SETSIZE, &readfds, 0, 0, &wait);
             if (nset < 0) {
-            #ifdef DEBUG
+            #ifdef DBUG
                cout << "select on receiver socket failed" << endl;
             #endif
                return false;
@@ -927,7 +935,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
          }
          // swap if necessary
          pkt->ntoh();
-#if DEBUG
+#if DBUG
 	printf("packet type=%d received\n", pkt->header.pktType);
 #endif
       // repeat until valid packet
@@ -936,7 +944,7 @@ int drop_seq = 0; // sequence to drop (for debugging)
               (pkt->header.pktType != PKT_REBROADCAST)) ||
               (n != (int)sizeof (packetHeader) + pkt->header.pktLen));
    
-      #if DEBUG - 0 > 1
+      #if DBUG - 0 > 1
          cout << "received packet " << pkt->header.pktNum << 
              (pkt->header.pktType == PKT_REBROADCAST ? "R " : " ") <<
              " seq=" << pkt->header.seq << "time=" << pkt->header.timestamp

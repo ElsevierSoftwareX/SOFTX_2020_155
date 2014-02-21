@@ -11,8 +11,8 @@
 //// This structure is 40 byte long on 32-bit architecture
 //// and 48 byte long on 64-bit due to compiler alignment dillidallying
 typedef struct {
-  union {int I; double D; float F;} min;
-  union {int I; double D; float F;} max;
+  union {int I; double D; float F; unsigned int U;} min;
+  union {int I; double D; float F; unsigned int U;} max;
   int n; /// the number of valid points used in calculating min, max, rms and mean
   double rms;
   double mean;
@@ -126,14 +126,15 @@ public:
   class stats mt_file_stats; ///< minute trend file saving stats
   pthread_t tsaver; ///< This thread saves trend data into the `fname'
   pthread_t mtsaver; ///< This thread saves minute trend data into the `fname'
+  pthread_t mtraw; ///< This thread saves minute trend data to raw minute trend files
   pthread_t consumer; ///< Thread reads data from the main circular buffer, calculates trend and puts it into `tb' 
   pthread_t mconsumer; ///< Thread reads data from the trend circular buffer, `tb', calculates minute trend and puts it into `mtb' 
   int ascii_output; ///< If set, no frame files, just plain ascii trend file is created
   ofstream *fout;
   int cnum; ///< trend consumer `consumer' thread consumer number in main cb 
   int mcnum; ///< minute trend consumer `mconsumer' consumer number in `tb' 
-  int saver_cnum; ///< Saver conumer number (in the trend circular buffer `tb')
-  int msaver_cnum; ///< Minute trend saver conumer number (in the minute trend circular buffer, `mtb')
+  int saver_cnum; ///< Saver consumer number (in the trend circular buffer `tb')
+  int msaver_cnum; ///< Minute trend saver consumer number (in the minute trend circular buffer, `mtb')
   int raw_msaver_cnum; ///< Raw minute trend saver consumer number (in the minute trend cir cular buffer, `mtb')
 
   /* Trend calculation params */

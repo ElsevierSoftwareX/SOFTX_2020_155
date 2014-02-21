@@ -590,7 +590,8 @@ CommandLine: /* Nothing */
 				switch (a -> channels [i].type) {
 					case _16bit_integer: *yyout << "_16bit_integer"; break;
 					case _32bit_integer: *yyout << "_32bit_integer"; break;
-						case _32bit_float:   *yyout << "_32bit_float"; break;
+					case _32bit_uint: *yyout << "_32bit_uint"; break;
+					case _32bit_float:   *yyout << "_32bit_float"; break;
 					case _64bit_double:  *yyout << "_64bit_double"; break;
 					default: *yyout << "unknown"; break;
 			    	}
