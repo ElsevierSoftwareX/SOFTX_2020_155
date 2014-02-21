@@ -8,6 +8,8 @@ Changes for release 2.8.3
 - Bug Fix (523) Epics binary input taking on values other than zero or one. Code modified such
   that RCG EPICS sequencer would detect this error and not pass invalid values to real-time code.
   Fix also forces valid value back to EPICS record.
+- Bug Fix (596) Correct naming scheme for matrix elements of RampMuxMatrix to match similar parts
+- Bug Fix (597) Make a single matrix in MEDM for RampMuxMatrix, with each element split horizontally 
 ==================================================================================================
 Changes for release 2.8.2
 ==================================================================================================
