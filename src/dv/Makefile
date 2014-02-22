@@ -1,7 +1,7 @@
 # Dataviewer Makefile
 
 # Dataviewer 'version'
-VERSION=2.8
+VERSION=2.8.1
 
 # Installation Location
 INSTALL_PREFIX=/ligo/apps
@@ -53,6 +53,7 @@ install:
 	chmod a+x $(APPLOC)/dv-${VERSION}/dataviewer
 	install Display/framer4 $(APPLOC)/dv-${VERSION}
 	install Display/frameMemRead $(APPLOC)/dv-${VERSION}
+	cp Lib/UTC_GPS/leapsecs.dat $(APPLOC)/dv-${VERSION}
 
 clean:
 	cd Lib/UTC_GPS; make clean
