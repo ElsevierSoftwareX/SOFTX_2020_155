@@ -25,7 +25,7 @@ int leapsecs_read()
   char *inv, leapfile[FILENAME_MAX];
 
   fprintf(stderr, "leapsecs_read()\n") ;
-  inv = getenv("DVPATH=");
+  inv = getenv("DVPATH");
   if (inv == NULL)
     strcpy(leapfile, "leapsecs.dat");
   else
