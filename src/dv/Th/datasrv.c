@@ -17,7 +17,7 @@ struct caltime ctout;
 struct gps  gpsTime;
 struct gps gps;
 
-static int debug = 0 ; /* For debugging - JCB */
+static int debug = 1 ; /* For debugging - JCB */
 
 #define  COMMANDSIZE   2048
 
@@ -1031,7 +1031,17 @@ char   temp[100];
 
        gpsTime.sec = (unsigned long)DataDaq.tb->gps;
 
-       gpsTime.leap = 13;
+       /* If we know the gpsTime, we should know the leap seconds. */
+       if (gpsTime.sec < 599184012) /* 1998-12-31 23:59:60 */
+	  gpsTime.leap = 12;
+       else if (gpsTime.sec < 820108813) /* 2005-12-31 23:59:60 */
+	  gpsTime.leap = 13;
+       else if (gpsTime.sec < 914803214) /* 2008-12-31 23:59:60 */
+	  gpsTime.leap = 14;
+       else if (gpsTime.sec < 1025136015) /* 2012-06-60 23:59:60 */
+	  gpsTime.leap = 15;
+       else
+	  gpsTime.leap = 16;
        gps_to_utc(&gpsTime,&ctout);
        if ( ctout.date.year-2000 < 0 )
 	 sprintf ( timestamp, "%ld-%02d-%02d-%02d-%02d-%02d", ctout.date.year-1900, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
@@ -1058,7 +1068,17 @@ void DataGPStoUTC(long gpsin, char* utcout)
 char   temp[100];
 
        gpsTime.sec = (unsigned long)gpsin;
-       gpsTime.leap = 13;
+       /* If we know the gpsTime, we should know the leap seconds. */
+       if (gpsTime.sec < 599184012) /* 1998-12-31 23:59:60 */
+	  gpsTime.leap = 12;
+       else if (gpsTime.sec < 820108813) /* 2005-12-31 23:59:60 */
+	  gpsTime.leap = 13;
+       else if (gpsTime.sec < 914803214) /* 2008-12-31 23:59:60 */
+	  gpsTime.leap = 14;
+       else if (gpsTime.sec < 1025136015) /* 2012-06-60 23:59:60 */
+	  gpsTime.leap = 15;
+       else
+	  gpsTime.leap = 16;
        gps_to_utc(&gpsTime,&ctout);
        if ( ctout.date.year-2000 < 0 )
 	 sprintf ( utcout, "%ld-%d-%d-%d-%d-%d", ctout.date.year-1900, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
