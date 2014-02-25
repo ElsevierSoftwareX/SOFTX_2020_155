@@ -361,7 +361,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 #ifdef CORE_BIQUAD
 #define iir_filter iir_filter_biquad
 #endif
-      if(dataInfo.tp[ii].dataType != DAQ_DATATYPE_32BIT_INT)
+      if((dataInfo.tp[ii].dataType != DAQ_DATATYPE_32BIT_INT) && (dataInfo.tp[ii].dataType != DAQ_DATATYPE_32BIT_UINT))
       {
 	      if(localTable[ii].decFactor == 2) dWord = iir_filter(dWord,&dCoeff2x[0],DTAPS,&dHistory[ii][0]);
 	      if(localTable[ii].decFactor == 4) dWord = iir_filter(dWord,&dCoeff4x[0],DTAPS,&dHistory[ii][0]);
@@ -384,6 +384,12 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
         } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) {
 	  if (localTable[ii].decFactor == 1)
+	    ((int *)(pWriteBuffer + localTable[ii].offset))[daqSlot] = ((int)dWord);
+	  else 
+	    ((int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor]
+		= ((int)dWord) & *((int *)(dHistory[ii]));
+        } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_UINT) {
+	  if (localTable[ii].decFactor == 1)
 	    ((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot] = ((unsigned int)dWord);
 	  else 
 	    ((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor]
@@ -393,6 +399,11 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	  ((float *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (float)dWord;
       	}
       } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) {
+        if ((daqSlot % localTable[ii].decFactor) == 1)
+	  *((int *)(dHistory[ii])) = (int)dWord;
+ 	else
+	  *((int *)(dHistory[ii])) &= (int)dWord;
+      } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_UINT) {
         if ((daqSlot % localTable[ii].decFactor) == 1)
 	  *((unsigned int *)(dHistory[ii])) = (unsigned int)dWord;
  	else
