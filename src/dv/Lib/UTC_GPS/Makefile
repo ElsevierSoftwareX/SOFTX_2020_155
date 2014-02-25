@@ -7,6 +7,9 @@ default: it
 it: \
 libtai.a leapsecs check easter yearcal nowutc convert
 
+leapsecs.dat: leapsecs leapsecs.txt
+	./leapsecs < leapsecs.txt > leapsecs.dat
+
 convert: \
 load convert.o libtai.a
 	./load convert libtai.a
