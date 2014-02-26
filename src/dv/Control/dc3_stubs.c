@@ -1903,16 +1903,16 @@ tempArray[MAX_LONG_CHANNEL_NAME_LENGTH+1];
 
 void grouplistSel(Widget w, XtPointer client_data, XtPointer xt_call_data)
 {
-int  *position, pcount;
-int  group, rate, counter, top=0; /* 1-top level, 2 -sec level */
-FILE *fp;
-int  j, k, l, thrGpCnt;
+  int  *position, pcount;
+  int  group, rate, counter, top=0; /* 1-top level, 2 -sec level */
+  FILE *fp;
+  int  j, k, l, thrGpCnt;
 
 	XmListCallbackStruct *call_data = (XmListCallbackStruct *) xt_call_data ;
         /* get selected group list item */
 	if ( XmListGetSelectedPos(grouplist, &position, &pcount) ) {
 	   sscanf ( groupList[position[0]], "%s", gpname );
-	   //printf("Selected %s\n", gpname);
+	   //printf("Selected %s\n", gpname); 
 
 	   for ( i=0; i<topTotal; i++ ){ /* check if top level */
 	     if ( strcmp(gpname, topGroup[i]) == 0 ) {
@@ -1939,6 +1939,8 @@ int  j, k, l, thrGpCnt;
 	     }
 	   }
 #if 0
+	   if (top == 0)
+	     printf ( "top = 0\n") ;
 	   if ( top == 1)
 	     printf ( "Top level group selected: %s\n", gpname );
 	   else if ( top == 2 )
@@ -2001,6 +2003,7 @@ int  j, k, l, thrGpCnt;
 			   		thrGpCnt++;
 		           	}
 		           }
+			   //printf("thrGpCnt = %d\n", thrGpCnt) ;
 		       	   /* sort 4th level string */
 		       	   for ( k=0; k<thrGpCnt; k++ ) {
 		             for ( l=k+1; l<thrGpCnt; l++) {
@@ -2055,20 +2058,25 @@ int  j, k, l, thrGpCnt;
 #endif
 	   }
 	}
-	else { /* a group name is selected, show right side */
+	else 
+	{ /* a group name is selected, show right side */
+	  int dtype = 0;
+	  int tp = 0;
+
 	  //printf ( "Group name selected: %s\n", gpname );
+	  //printf( "top == 0, gpname = %s\n", gpname); /* JCB */
 	  sprintf ( tempname, "%s_", gpname );
+	  //printf( "  tempname = %s\n", tempname) ; /* JCB */
 	  counter = 0; 
 	  for ( i=0; i<topTotal+totalgroup+3+ttlgrp3rd+1; i++ ){ 
 	    get_a_line(fp, linetemp); /* skip first ... lines */
 	  }
+	  //printf("\n\n\n\n ================================================================================\n") ;
 	  for ( i=0; i<totalchan; i++ ){
-	    int dtype = 0;
-	    int tp = 0;
 	    get_a_line(fp, linetemp);
 	    sscanf(linetemp, "%s %d %s %d %d", chtemp, &rate, unittemp, &dtype, &tp);
-	    //printf("Testing %s %s\n", tempname, chtemp);
-	    if ( test_substring(tempname, chtemp ) == 0 ) {
+	    //printf("Testing %s %s\n", tempname, chtemp); /* JCB */
+	    if ( test_substring(tempname, chtemp ) == 0 || strcmp(gpname, chtemp) == 0) {
 	      if (dtype == 6) {
 		/* Beware, other code relies on the suffix names */
 	        sprintf( sigListItem[++counter],"%s.real   (%s, complex)", chtemp, butifyRate(rate));
