@@ -638,6 +638,11 @@ int  seconds;
 	  pos += channelAll[index].rate*getBlockLength(channelAll[j].data_type, 0)*bpos;
 	  pos /= Fast;
           switch ( channelAll[index].data_type ) {
+            case 7: /* 32 bit unsigned integer */
+                for ( j=0; j<channelAll[index].rate/Fast; j++ ) {
+		   data[j] = *((unsigned int *)(DataDaq.tb->data+pos+j*sizeof(unsigned int)));
+                }
+                break;
             case 4: /* 32 bit-float */
                 for ( j=0; j<channelAll[index].rate/Fast; j++ ) {
 //		   data[j] = *((float *)(DataDaq.tb->data+pos+j*sizeof(float)));
@@ -697,6 +702,13 @@ int  seconds;
 	  pos /= Fast;
 /*fprintf (stderr, "chan=%s, index=%d, pos=%d ", chName, index, pos);*/
           switch ( chanList[index].data_type ) {
+            case 7: /* 32 bit unsigned-integer */
+                for ( j=0; j<chanList[index].rate/Fast; j++ ) {
+		   if (DataDaq.tb_size >= pos+j*sizeof(unsigned int)) {
+		     data[j] = (unsigned int) ntohl(*((unsigned int *)(DataDaq.tb->data+pos+j*sizeof(unsigned int))) );
+		   }
+               }
+               break;
             case 4: /* 32 bit-float */
                 for ( j=0; j<chanList[index].rate/Fast; j++ ) {
 //		   data[j] = *((float *)(DataDaq.tb->data+pos+j*sizeof(float)));
@@ -1167,6 +1179,9 @@ int   j;
 int getBlockLength(int datatype, int trend)
 {
        switch ( datatype ) {
+         case 7: 
+             return sizeof(unsigned int);
+             break;
          case 6: 
              return 2*sizeof(float);
              break;
