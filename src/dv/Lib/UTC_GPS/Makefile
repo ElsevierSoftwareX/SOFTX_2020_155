@@ -5,7 +5,7 @@ SHELL=/bin/sh
 default: it
 
 it: \
-libtai.a leapsecs check easter yearcal nowutc convert
+libtai.a leapsecs check easter yearcal nowutc convert leapsecs.dat
 
 leapsecs.dat: leapsecs leapsecs.txt
 	./leapsecs < leapsecs.txt > leapsecs.dat
