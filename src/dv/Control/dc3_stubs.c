@@ -14,6 +14,7 @@
 */
 
 #include <stdlib.h>
+#include <unistd.h> /* Bring in declaration of execlp() */
 #include <X11/Xatom.h>
 #include <X11/Intrinsic.h>
 #include <X11/Shell.h>
@@ -935,15 +936,15 @@ FILE *fp;
 	  fgpsdur = fgps1 - fgps0;
 	  if (startstop == 0 ) {
 	    DataGPStoUTC(fgps0, tempst);
-	    printf ( "Set start time %s (%d)\n", tempst, fgps0 );
+	    printf ( "Set start time %s (%ld)\n", tempst, fgps0 );
 	    temptime = fgps0;
 	  }
 	  else {
 	    DataGPStoUTC(fgps1, tempst);
-	    printf ( "Set stop time %s (%d)\n", tempst, fgps1 );
+	    printf ( "Set stop time %s (%ld)\n", tempst, fgps1 );
 	    temptime = fgps1;
 	  }
-	  printf ( "Maximum duration: %d seconds = ", fgpsdur );
+	  printf ( "Maximum duration: %ld seconds = ", fgpsdur );
 	  totalPlay.mins = 0;
 	  totalPlay.hours = 0;
 	  totalPlay.days = 0;
@@ -986,7 +987,7 @@ FILE *fp;
 	XmTextFieldSetString(playMn, num);
 	sprintf ( num, "%d", startsc );
 	XmTextFieldSetString(playSc, num);
-	sprintf ( tempst, "%d", temptime );
+	sprintf ( tempst, "%d", (int) temptime );
 	XmTextFieldSetString(gpstime, tempst);
 }
 
@@ -2885,12 +2886,12 @@ unsigned long processID = 0;
 	XmPushButtonCallbackStruct *call_data = (XmPushButtonCallbackStruct *) xt_call_data ;
 
 	processID = atoi((char *)XmTextFieldGetString(lidtext));
-	printf ( "Stop Long Playback ID = %d\n", processID);
+	printf ( "Stop Long Playback ID = %ld\n", processID);
 	DataSimpleConnect(serverLongIP, 0);
 	DataWriteStop(processID);
 	//sleep(1);
 	DataQuit();
-	printf ( "Long Playback: Process %d terminated.\n", processID );
+	printf ( "Long Playback: Process %ld terminated.\n", processID );
 }
 
 /*
@@ -3069,9 +3070,9 @@ int *position, pcount;
 	  fclose(fp);
 	  showSig = 0;
 	  DataGPStoUTC(fgps0, tmpstr);
-	  printf ( "From time %s (%d) to ", tmpstr, fgps0 );
+	  printf ( "From time %s (%ld) to ", tmpstr, fgps0 );
 	  DataGPStoUTC(fgps1, tmpstr);
-	  printf ( "time %s (%d)\n", tmpstr, fgps1 );
+	  printf ( "time %s (%ld)\n", tmpstr, fgps1 );
 	}
 	else if ( mmSelect == MMMAKETOC ) { /* make toc file */
 	  XmTextFieldSetString(lIPtext, saveFileName );
@@ -4876,13 +4877,13 @@ int  trigchno, tr1=0, tr2=0;
 	    else{
 	      startgps = DataUTCtoGPS1(startyr,startmo,startda,starthr,startmn,startsc);
 	      durgps = totalPlay.secs + totalPlay.mins*60 + (totalPlay.hours + totalPlay.days*24)*3600;
-	      fprintf ( fp, "%d\n", startgps );
-	      fprintf ( fp, "%d\n", durgps );
+	      fprintf ( fp, "%ld\n", startgps );
+	      fprintf ( fp, "%ld\n", durgps );
 	    }
 	  }
 	  else { /* GPS isgps=1 */
-	    fprintf ( fp, "%d\n", startgps );
-	    fprintf ( fp, "%d\n", durgps );
+	    fprintf ( fp, "%ld\n", startgps );
+	    fprintf ( fp, "%ld\n", durgps );
 	  }
 	  fprintf ( fp, "%d\n", startstop );
 	  /*}*/
@@ -4928,8 +4929,8 @@ int  trigchno, tr1=0, tr2=0;
 	  sprintf ( temp2, "%s", origDir);
 	  sprintf ( temp3, "%d", totalch);
 	  sprintf ( temp4, "/tmp/%slongfile0", iniDir);
-	  sprintf ( temp5, "%d", fgps0);
-	  sprintf ( temp6, "%d", fgps1);
+	  sprintf ( temp5, "%ld", fgps0);
+	  sprintf ( temp6, "%ld", fgps1);
 	  sprintf ( temp7, "%d", trend);
 	  if ( mmMode == 1 ) {
 	    sprintf ( displaystring, "%stocLongFile", origDir );
