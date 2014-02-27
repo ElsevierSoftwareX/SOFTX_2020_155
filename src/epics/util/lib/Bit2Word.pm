@@ -57,6 +57,9 @@ sub frontEndInitCode {
 # Returns calculated code string
 sub frontEndCode {
 	my ($i) = @_;
+	if($::partInCnt[$i] < 16) {
+                die "\n***ERROR: $::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires 16; Only $::partInCnt[$i] provided:  Please ground any unused inputs\n";
+        }
         my $calcExp = "// Bit2Word:  $::xpartName[$i]\n{\n";
         $calcExp .= "double ins[$::partInCnt[$i]] = {\n";
         for (0 .. $::partInCnt[$i]-2) {
