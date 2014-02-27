@@ -1,6 +1,10 @@
 ==================================================================================================
 Post 2.8 changes
 ==================================================================================================
+- Bug Fix (621) - ADC part errant code if ADC part named incorrectly. Fix also applied to
+  Branch-2.8 (SVN 3645).
+- Bug Fix (595) - FMC2 part compiling improperly if not inputs connected. This bug also fixed
+  in Branch-2.8.
 - Bug Fix: Model with EXC part fails to compile. Problem was that EXC part was not in
   list of signal sources. Bug also fixed in branch-2.8 (SVN 3621).
 - Added support for EPICS longint record type. This is to be used as unsigned int to support
