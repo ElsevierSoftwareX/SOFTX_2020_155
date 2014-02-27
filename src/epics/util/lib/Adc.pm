@@ -27,8 +27,12 @@ sub initAdc {
         $::adcPartNum[$::adcCnt] = $::partCnt;
 	# Set ADC type and number
 	my $desc = ${$node->{FIELDS}}{"Description"};
+	my $src = ${$node->{FIELDS}}{"SourceBlock"};
+	my $name = ${$node->{FIELDS}}{"Name"};
 	my ($type) = $desc =~ m/type=([^,]+)/g;
 	my ($num) = $desc =~ m/card_num=([^,]+)/g;
+	my ($srcnum) = $src =~ m/ADC([^,]+)/g;
+	my ($namenum) = $name =~ m/ADC([^,]+)/g;
 	if ($type eq undef) {
 		$type = $default_board_type;
 	}
@@ -36,7 +40,7 @@ sub initAdc {
 		$num = $::adcCnt;
 	}
 	print "ADC $::adcCnt; type='$type'; num=$num\n";
-        #print "foo=$board_types{$type}\n";
+        # print "foo=$board_types{$type} and srcnum = $srcnum and namenum = $namenum\n";
 	
 	# Check if this is a supported board type
 	if ($board_types{$type} != 1) {
@@ -46,6 +50,11 @@ sub initAdc {
 			print "\t$_\n";
 		}
 		exit 1;
+	}
+
+	# Verify ADC number in ADC block matchs name in description field (required).
+	if($srcnum != $namenum) {
+		die "ERROR ***** ADC number in name ($name) does not match ADC number in ADC part block \(ADC$srcnum\)\nAfter you fix this, please verify all connected BUS selectors have valid entries.\n";
 	}
 
         $::adcType[$::adcCnt] = $type;
