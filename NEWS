@@ -1,5 +1,10 @@
 ==================================================================================================
-Changes for release 2.8.3
+Changes for release 2.8.4
+==================================================================================================
+- Bug Fix (595) - FMC2 part compiling improperly if not inputs connected.
+- Bug Fix (621) - ADC part errant code if ADC part named incorrectly.
+==================================================================================================
+Changes for release 2.8.3 (Released 2/24/14)
 ==================================================================================================
 - Bug Fix: Model with EXC part fails to compile. Problem was that EXC part was not in
   list of signal sources.
