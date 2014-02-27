@@ -371,6 +371,7 @@ void *fe_start(void *arg)
   static float duotoneMeanDac = 0.0;
   static int dacDuoEnable = 0;
   static int dacTimingError = 0;
+  static int dacTimingErrorPending = 0;
 
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
   volatile GSC_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
@@ -952,20 +953,31 @@ udelay(1000);
 		    packedData = (int *)cdsPciModules.pci_adc[jj];
                     if (cdsPciModules.adcType[jj] == GSC_18AISS6C) packedData += 5;
                	    else packedData += 31;
-                    kk = 0;
 		
 		    rdtscl(cpuClock[CPU_TIME_RDY_ADC]);
 
                     do {
-                        kk ++;
 			/// - ---- Need to delay if not ready as constant banging of the input register
 			/// will slow down the ADC DMA.
-			if(*packedData == DUMMY_ADC_VAL) {
+			// if(*packedData == DUMMY_ADC_VAL) {
 		    		rdtscl(cpuClock[CPU_TIME_ADC_WAIT]);
 				adcWait = (cpuClock[CPU_TIME_ADC_WAIT] - cpuClock[CPU_TIME_RDY_ADC])/CPURATE;
-			}
-			/// - ---- Allow 1msec for data to be ready (should never take that long).
+			// }
+			/// - ---- Allow 1sec for data to be ready (should never take that long).
                     }while((*packedData == DUMMY_ADC_VAL) && (adcWait < MAX_ADC_WAIT));
+
+			/// - ---- Added ADC timing diagnostics to verify timing consistent and all rdy together.
+		    if(jj==0)
+			    adcRdTime[jj] = (cpuClock[CPU_TIME_ADC_WAIT] - cpuClock[CPU_TIME_CYCLE_START]) / CPURATE;
+		    else
+			    adcRdTime[jj] = adcWait;
+	
+		    if(adcRdTime[jj] > adcRdTimeMax[jj]) adcRdTimeMax[jj] = adcRdTime[jj];
+
+		    if((jj==0) && (adcRdTimeMax[jj] > MAX_ADC_WAIT_CARD_0)) 
+			pLocalEpics->epicsOutput.stateWord |= FE_ERROR_ADC;
+		    if((jj!=0) && (adcRdTimeMax[jj] > MAX_ADC_WAIT_CARD_S)) 
+			pLocalEpics->epicsOutput.stateWord |= FE_ERROR_ADC;
 
 		    /// - --------- If data not ready in time, abort.
 		    /// Either the clock is missing or code is running too slow and ADC FIFO
@@ -1599,6 +1611,9 @@ udelay(1000);
 	  	diagWord = 0;
 		ipcErrBits = 0;
 		// feStatus = 0;
+#ifdef ADC_MASTER
+               for(jj=0;jj<cdsPciModules.adcCount;jj++) adcRdTimeMax[jj] = 0;
+#endif
 	  }
 	  // Flip the onePPS various once/sec as a watchdog monitor.
 	  // pLocalEpics->epicsOutput.onePps ^= 1;
@@ -1960,8 +1975,12 @@ udelay(1000);
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
 			    feStatus |= FE_ERROR_DAC;
-			    dacTimingError = 1;
-			} else pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
+			    if(dacTimingErrorPending) dacTimingError = 1;
+  			    dacTimingErrorPending = 1;
+			} else {
+			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
+  			    dacTimingErrorPending = 0;
+			}
 
 		}
 		if(cdsPciModules.dacType[jj] == GSC_16AO16)
@@ -1972,8 +1991,12 @@ udelay(1000);
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
 			    feStatus |= FE_ERROR_DAC;
-			    dacTimingError = 1;
-			} else pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
+			    if(dacTimingErrorPending) dacTimingError = 1;
+  			    dacTimingErrorPending = 1;
+			} else {
+			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
+  			    dacTimingErrorPending = 0;
+			}
 		}
 	}
 

@@ -129,6 +129,11 @@ procfile_status_read(char *buffer,
 			}
 			strcat(buffer, b);
 		}
+		/* Output ADC read time information */
+		for (i = 0; i < cdsPciModules.adcCount; i++) {
+			sprintf(b, "ADC #%d read time MAX=%d Current=%d\n", i, adcRdTimeMax[i],adcRdTime[i]);
+			strcat(buffer, b);
+		}
 #endif
 #ifdef COMMDATA_INLINE
 		// See if we have any IPC with errors and print the numbers out

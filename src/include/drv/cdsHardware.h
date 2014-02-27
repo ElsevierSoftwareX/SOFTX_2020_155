@@ -71,6 +71,8 @@ typedef struct CDS_REMOTE_NODES {
 #define OVERFLOW_LIMIT_18BIT	131060
 #define OVERFLOW_CNTR_LIMIT	0x1000000
 #define MAX_ADC_WAIT		1000000		// Max time (usec) to wait for ADC data transfer in iop app
+#define MAX_ADC_WAIT_CARD_0	17		// Max time (usec) to wait for 1st ADC card data ready
+#define MAX_ADC_WAIT_CARD_S	1 		// Max time (usec) to wait for remianing ADC card data ready
 #define MAX_ADC_WAIT_SLAVE	1000		// Max time (usec) to wait for ADC data transfer in slave app
 #define DUMMY_ADC_VAL		0xf000000	// Dummy value for test last ADC channel has arrived
 #define ADC_1ST_CHAN_MARKER	0xf0000		// Only first ADC channel should have upper bits set as first chan marker.
