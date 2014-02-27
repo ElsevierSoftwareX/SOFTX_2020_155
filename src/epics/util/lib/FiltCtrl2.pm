@@ -94,6 +94,9 @@ sub fromExp {
 
 sub frontEndCode {
 	my ($i) = @_;
+	if($::partInCnt[$i] < 5) {
+		die "\n***ERROR: $::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires 5; Only $::partInCnt[$i] provided:  Please ground any unused inputs\n";
+	}
         my $calcExp = "// FILTER MODULE with CONTROL:  $::xpartName[$i]\n";
         $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_MASK = ";
         $calcExp .= $::fromExp[2]? $::fromExp[2]: "0";
