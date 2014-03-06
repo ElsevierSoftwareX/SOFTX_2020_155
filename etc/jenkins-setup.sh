@@ -3,10 +3,11 @@
 # Sources are checked out on x1boot machine into these directories
 CHECKOUT_ROOT=/opt/rtcds/jenkins/x1boot/home/workspace/svn_checkouts
 USERAPPS_ROOT=$CHECKOUT_ROOT/userapps_trunk
-export RCG_DIR=$CHECKOUT_ROOT/rcg_trunk
+VERSION_ROOT=/opt/rtcds/jenkins/x1boot/home/workspace/svn2.8-co
+export RCG_DIR=$VERSION_ROOT/rcg_branch2.8
 
 # Locations of the model files
-export RCG_LIB_PATH=$USERAPPS_ROOT/lsc/h1/models:$USERAPPS_ROOT/asc/h1/models:$USERAPPS_ROOT/cds/h1/models:$USERAPPS_ROOT/cds/common/models:$USERAPPS_ROOT/cds/test/models:$USERAPPS_ROOT/aos/h1/models:$USERAPPS_ROOT/aos/common/models:$USERAPPS_ROOT/hpi/h1/models:$USERAPPS_ROOT/hpi/common/models:$USERAPPS_ROOT/ioo/h1/models:$USERAPPS_ROOT/ioo/common/models:$USERAPPS_ROOT/isc/h1/models:$USERAPPS_ROOT/isc/common/models:$USERAPPS_ROOT/isi/h1/models:$USERAPPS_ROOT/isi/common/models:$USERAPPS_ROOT/pem/h1/models:$USERAPPS_ROOT/pem/common/models:$USERAPPS_ROOT/psl/h1/models:$USERAPPS_ROOT/psl/common/models:$USERAPPS_ROOT/sus/h1/models:$USERAPPS_ROOT/sus/common/models:$USERAPPS_ROOT/tcs/h1/models:$USERAPPS_ROOT/tcs/common/models:$USERAPPS_ROOT/asc/l1/models:$RCG_DIR/src/epics/simLink:$RCG_DIR/src/epics/simLink/lib
+export RCG_LIB_PATH=$USERAPPS_ROOT/lsc/h1/models:$USERAPPS_ROOT/lsc/common/models:$USERAPPS_ROOT/omc/h1/models:$USERAPPS_ROOT/omc/common/models:$USERAPPS_ROOT/asc/h1/models:$USERAPPS_ROOT/sys/h1/models:$USERAPPS_ROOT/sys/common/models:$USERAPPS_ROOT/pem/h1/models:$USERAPPS_ROOT/asc/common/models:$USERAPPS_ROOT/cds/h1/models:$USERAPPS_ROOT/cds/common/models:$USERAPPS_ROOT/aos/h1/models:$USERAPPS_ROOT/aos/common/models:$USERAPPS_ROOT/hpi/h1/models:$USERAPPS_ROOT/hpi/common/models:$USERAPPS_ROOT/ioo/h1/models:$USERAPPS_ROOT/ioo/common/models:$USERAPPS_ROOT/isc/h1/models:$USERAPPS_ROOT/isc/common/models:$USERAPPS_ROOT/isi/h1/models:$USERAPPS_ROOT/isi/common/models:$USERAPPS_ROOT/pem/h1/models:$USERAPPS_ROOT/pem/common/models:$USERAPPS_ROOT/psl/h1/models:$USERAPPS_ROOT/psl/common/models:$USERAPPS_ROOT/sus/h1/models:$USERAPPS_ROOT/sus/common/models:$USERAPPS_ROOT/tcs/h1/models:$USERAPPS_ROOT/tcs/common/models:$USERAPPS_ROOT/asc/l1/models:$USERAPPS_ROOT/cds/test/models:$RCG_DIR/src/epics/simLink:$RCG_DIR/src/epics/simLink/lib
 
 # Source code locations for the model files
 export AOS_IFO_SRC=$USERAPPS_ROOT/aos/h1/src
@@ -28,6 +29,7 @@ export PSL_IFO_SRC=$USERAPPS_ROOT/psl/h1/src
 export PSL_SRC=$USERAPPS_ROOT/psl/common/src
 export SUS_IFO_SRC=$USERAPPS_ROOT/sus/h1/src
 export SUS_SRC=$USERAPPS_ROOT/sus/common/src
+export SYS_SRC=$USERAPPS_ROOT/sys/common/src
 
 
 export IFO=H1
@@ -45,7 +47,10 @@ export PATH=:/opt/rtapps/linux-x86_64/utils/bin:/opt/rtapps/gds-2.15.2/bin:/opt/
 export EPICS_DB_INCLUDE_PATH=/opt/rtapps/epics/base/dbd
 export EPICS_HOST_ARCH=linux-x86_64
 export EPICS_BASE=/opt/rtapps/epics-3.14.12.2_long/base-3.14.12.2
-export PYEPICS_LOCATION=/opt/rtapps/epics/pyext/pyepics 
-prepend "${PYEPICS_LOCATION}/lib/python2.6/site-packages" "PYTHONPATH" "${PYTHONPATH}"
+
+export PYEPICS_LOCATION=/opt/rtapps/epics/pyext/pyepics
+export PYTHONPATH=$PYEPICS_LOCATION/lib/python2.6/site-packages:/opt/rtapps/nds2-client-0.10.4_big/lib64/python2.7/site-packages:/usr/lib/portage/pym:/opt/rtcds/userapps/trunk/cds/test/scripts:/opt/rtcds/userapps/trunk/cds/test/scripts/python
+echo $PYTHONPATH
+
 
 
