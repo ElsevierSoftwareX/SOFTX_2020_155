@@ -723,6 +723,9 @@ filterModuleD2(FILT_MOD *pFilt,     /* Filter module data  */
   double output;
   double fmInput;
   int id = 0;                  /* System number (HEPI) */
+#ifdef FIR_FILTERS
+  int filterType;
+#endif
 
   /* Do the shift to match the bits in the the opSwitchE variable so I can do "==" comparisons */
   UINT32 opSwitchP = pFilt->inputs[modNum].opSwitchP >> 1;
@@ -819,7 +822,7 @@ filterModuleD2(FILT_MOD *pFilt,     /* Filter module data  */
     sw_in = sType < 20 || sw_out || (sType == 22 && sw);
 
 #ifdef FIR_FILTERS
-    int filterType = pC->coeffs[modNum].filterType[ii];
+    filterType = pC->coeffs[modNum].filterType[ii];
     if (filterType) {
       extern int cycleNum;
 #ifdef SERVO2K

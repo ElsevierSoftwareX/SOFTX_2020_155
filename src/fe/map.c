@@ -65,7 +65,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
   int status;
   int i;
   int modCount = 0;
-  int fast_adc_cnt = 0;
+  // int fast_adc_cnt = 0;
 #ifndef ADC_SLAVE
   int adc_cnt = 0;
 #endif

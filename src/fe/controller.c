@@ -309,6 +309,7 @@ void *fe_start(void *arg)
   int wtmin,wtmax;			/// @param wtmin Time window for startup on IRIG-B
   int dacEnable = 0;
   int pBits[9] = {1,2,4,8,16,32,64,128,256};	/// @param pBits[] Lookup table for quick power of 2 calcs
+  int sync21ppsCycles = 0;		/// @param sync32ppsCycles Number of attempts to sync to 1PPS
 #endif
   int dkiTrip = 0;
   RFM_FE_COMMS *pEpicsComms;		/// @param *pEpicsComms Pointer to EPICS shared memory space
@@ -329,7 +330,6 @@ void *fe_start(void *arg)
   int system = 0;
   int sampleCount = 1;			/// @param sampleCount Number of ADC samples to take per code cycle
   int sync21pps = 0;			/// @param sync21pps Code startup sync to 1PPS flag
-  int sync21ppsCycles = 0;		/// @param sync32ppsCycles Number of attempts to sync to 1PPS
   int syncSource = SYNC_SRC_NONE;	/// @param syncSource Code startup synchronization source
   int mxStat = 0;			/// @param mxStat Net diags when myrinet express is used
   int mxDiag = 0;

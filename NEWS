@@ -3,6 +3,10 @@ Changes for release 2.8.4
 ==================================================================================================
 - Bug Fix (595) - FMC2 part compiling improperly if not inputs connected.
 - Bug Fix (621) - ADC part errant code if ADC part named incorrectly.
+- Bug Fix (553) - Errant code produced when not all 16 inputs of Bit2Word part connected.
+- Bug Fix - It was noted that somewhere along the line, warnings were turned off in the C code
+  Makefile. This was fixed, so warnings are now written to the modelname_error.log at compile
+  time. To reduce the number of warnings produced, there was also some RCG code cleanup.
 ==================================================================================================
 Changes for release 2.8.3 (Released 2/24/14)
 ==================================================================================================

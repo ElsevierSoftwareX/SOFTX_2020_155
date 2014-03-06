@@ -22,6 +22,8 @@ char *pEpicsInt1;
 float *pEpicsFloat;				// Pointer to current DAQ data in shared memory.
 double *pEpicsDblData1;
 
+int daqConfig( DAQ_INFO_BLOCK *, DAQ_INFO_BLOCK *, char *);
+int loadLocalTable(DAQ_XFER_INFO *, DAQ_LKUP_TABLE [], int, DAQ_INFO_BLOCK *, DAQ_RANGE *);
 
 /* ******************************************************************** */
 /* Routine to connect and write to LIGO DAQ system       		*/
@@ -67,14 +69,14 @@ static char *pReadBuffer;	/* Ptr to swing buff to xmit data to FB */
 static int phase;		/* 0-1, switches swing buffers.		*/
 static int daqSlot;		/* 0-sysRate, data slot to write data	*/
 static int excSlot;		/* 0-sysRate, slot to read exc data	*/
-float *pFloat = 0;		/* Temp ptr to write float data.	*/
-short *pShort = 0;		/* Temp ptr to write short data.	*/
-unsigned int *pInteger = 0;	/* Temp ptr to write unsigned int data. */
+//float *pFloat = 0;		/* Temp ptr to write float data.	*/
+//short *pShort = 0;		/* Temp ptr to write short data.	*/
+//unsigned int *pInteger = 0;	/* Temp ptr to write unsigned int data. */
 char *bufPtr;			/* Ptr to data for crc calculation.	*/
 static unsigned int crcTest;	/* Continuous calc of CRC.		*/
 static unsigned int crcSend;	/* CRC sent to FB.			*/
 static DAQ_INFO_BLOCK dataInfo; /* Local DAQ config info buffer.	*/
-int decSlot;			/* Tracks decimated data positions.	*/
+// int decSlot;			/* Tracks decimated data positions.	*/
 static int tpStart;		/* Marks address of first TP data	*/
 static volatile GDS_CNTRL_BLOCK *gdsPtr;  /* Ptr to shm to pass TP info to DAQ */
 static volatile char *exciteDataPtr;	  /* Ptr to EXC data in shmem.	*/
@@ -882,8 +884,8 @@ int status = 0;
     pEpicsDblData = (pEpicsIntData + epicsIntXferSize + dataInfo->epicsdblDataOffset);
 
     // Send EPICS data diags to dmesg
-    printf("DAQ EPICS INT DATA is at 0x%x with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
-    printf("DAQ EPICS FLT DATA is at 0x%x\n",(long)pEpicsDblData);
+    printf("DAQ EPICS INT DATA is at 0x%lx with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
+    printf("DAQ EPICS FLT DATA is at 0x%lx\n",(long)pEpicsDblData);
     printf("DAQ EPICS: Int = %d  Flt = %d Filters = %d Total = %d Fast = %d\n",dataInfo->numEpicsInts,dataInfo->numEpicsFloats,dataInfo->numEpicsFilts, dataInfo->numEpicsTotal, dataInfo->numChans);
     printf("DAQ EPICS: Number of Filter Module Xfers = %d last = %d\n",dataInfo->numEpicsFiltXfers,dataInfo->numEpicsFiltsLast);
     /// \> Initialize CRC length with EPICS data size.

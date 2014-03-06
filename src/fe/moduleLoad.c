@@ -26,6 +26,9 @@ struct proc_dir_entry *proc_epics_dir_entry;
 /// /proc/{sysname}/futures entry
 struct proc_dir_entry *proc_futures_entry;
 
+int create_epics_proc_files(void);
+void remove_epics_proc_files(void);
+
 /// Routine to read the /proc/{model}/status file. \n \n
 ///	 We give all of our information in one go, so if the
 ///	 user asks us if we have more information the \n
@@ -42,6 +45,7 @@ procfile_status_read(char *buffer,
 	      off_t offset, int buffer_length, int *eof, void *data)
 {
 	int ret, i;
+	unsigned int byte_cnt;
 	i = 0;
 	*buffer = 0;
 
@@ -140,7 +144,7 @@ procfile_status_read(char *buffer,
 		// which is set to PROC_BLOCK_SIZE. (PAGE_SIZE-1024 = 3072 bytes).
 		// We will simply stop printing at that point.
 #define PROC_BLOCK_SIZE (3*1024)
-		unsigned int byte_cnt = strlen(buffer) + 1;
+		byte_cnt = strlen(buffer) + 1;
 		for (i = 0; i < myIpcCount; i++) {
 	  	  if (ipcInfo[i].errTotal) {
 	  		unsigned int cnt =
@@ -237,6 +241,8 @@ procfile_epics_read(char *buffer,
 double
 simple_strtod(char *start, char **end) {
 	int integer;
+	double frac;
+	int i;
 	if (*start != '.') {
 		integer = simple_strtol(start, end, 10);
         	if (*end == start) return 0.0;
@@ -245,9 +251,8 @@ simple_strtod(char *start, char **end) {
 	if (*start != '.') return integer;
 	else {
 		start++;
-		double frac = simple_strtol(start, end, 10);
+		frac = simple_strtol(start, end, 10);
         	if (*end == start) return integer;
-		int i;
 		for (i = 0; i < (*end - start); i++) frac /= 10.0;
 		return ((double)integer) + frac;
 	}
@@ -263,6 +268,16 @@ procfile_epics_write(struct file *file, const char __user *buf,
         char *page;
         char *start;
  	unsigned int future = 0;
+	char *end;
+	struct proc_epics *pe;
+	double new_double;
+	int new_int;
+	int idx;
+	int ncel;
+	unsigned long cycle;
+	double gps;
+	unsigned long gps_int;
+	int i;
 
         if (count > PROC_BLOCK_SIZE)
                 return -EOVERFLOW;
@@ -274,8 +289,7 @@ procfile_epics_write(struct file *file, const char __user *buf,
                         goto out;
 		page[count] = 0;
 		ret = count;
-		struct proc_epics *pe = (struct proc_epics *)data;
-	        char *end;
+		pe = (struct proc_epics *)data;
 		for(;isspace(*start);start++);
 		// See if this a single-character command
 		switch (*start) {
@@ -293,8 +307,8 @@ procfile_epics_write(struct file *file, const char __user *buf,
 				break;
 		}
 		for(;isspace(*start);start++);
-		double new_double = 0.0;
-		int new_int = 0;
+		new_double = 0.0;
+		new_int = 0;
 		switch (pe -> type) {
 			case 0: /* int */ 
 			        new_int = simple_strtol(start, &end, 10);
@@ -310,8 +324,8 @@ procfile_epics_write(struct file *file, const char __user *buf,
 		}
 	        if (end == start) goto out;
 		// See if this is a matrix
-		int idx = 0;
-		int ncel = pe->nrow * pe->ncol;
+		idx = 0;
+		ncel = pe->nrow * pe->ncol;
 		if (ncel) {
 			// Expect the cell index number next
 			start = end;
@@ -333,24 +347,22 @@ procfile_epics_write(struct file *file, const char __user *buf,
 					break;
 			}
 		} else if ((*((char *)(((void *)pLocalEpics) + pe->mask_idx)))) { // Allow to setup a future only if masked
-			unsigned long cycle;
 			start = end;
 			for(;isspace(*start);start++);
 			// check for gps seconds
-			double gps = simple_strtod(start, &end);
+			gps = simple_strtod(start, &end);
 			if (end == start) {
 				gps = cycle_gps_time + 5;
 				cycle = cycleNum;
 			} else {
 				// Convert gps time
-				unsigned long gps_int = gps;
+				gps_int = gps;
 				gps -= gps_int;
 				cycle = gps * CYCLE_PER_SECOND;
 				gps = gps_int;
 			}
 			// Add new future setpoint
 			// Find first available slot
-			int i;
 			static DEFINE_SPINLOCK(fut_lock);
 			spin_lock(&fut_lock);
 			for (i = 0; (i < MAX_PROC_FUTURES) && proc_futures[i].proc_epics; i++);
@@ -421,6 +433,7 @@ static const ner = sizeof(proc_epics)/sizeof(struct proc_epics);
 int
 create_epics_proc_files() {
 	int i;
+	unsigned int ncel;
 
 	for (i = 0; i < ner; i++) proc_epics_entry[i]  = 0;
 
@@ -444,7 +457,7 @@ create_epics_proc_files() {
 		}
 		proc_epics_entry[i]->uid 	 = PROC_UID;
 		proc_epics_entry[i]->gid 	 = 0;
-		unsigned int ncel = proc_epics[i].nrow * proc_epics[i].ncol; // Enough space to deal with the matrix
+		ncel = proc_epics[i].nrow * proc_epics[i].ncol; // Enough space to deal with the matrix
 		proc_epics_entry[i]->size 	 = ncel? 64 * ncel: 128;
 		proc_epics_entry[i]->data 	 = proc_epics + i;
 	}
