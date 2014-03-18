@@ -141,6 +141,17 @@ cleanWorld: $(patsubst %,clean-%,$(MDL_MODELS))
 installWorld: $(patsubst %,install-%,$(MDL_MODELS)) 
 	@echo Installed $(MDL_MODELS)
 
+# For test builds of IFO models
+TST_MODELS = $(shell if [ -e /etc/rt-${site}-${ifo}.sh ]; then /etc/rt-${site}-${ifo}.sh; fi)
+
+Test: $(TST_MODELS)
+	@echo Successfully compiled $(TST_MODELS)
+
+showTest:
+	@echo $(TST_MODELS)
+
+cleanTest: $(patsubst %,clean-%,$(TST_MODELS))
+	@echo Cleaned $(TST_MODELS)
 
 # Show all predefined preprocessor definitions
 dump_predefines:
