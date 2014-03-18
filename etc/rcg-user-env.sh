@@ -6,8 +6,11 @@ if [ "${site}set" = "set" ]; then
 elif [ "${ifo}set" = "set" ] ; then
   echo "RCG setup failed - environment variable <ifo> is not defined"
 else
-#  check location
- if [ -d /opt/rtcds/rtscore/release ]; then
+#  check location - first try in directory this script is in
+AUTO_RCGDIR=$(dirname $(dirname $(readlink -f $BASH_SOURCE)))
+if [ -d "${AUTO_RCGDIR}" ] ; then
+  rcgDir=${AUTO_RCGDIR}
+ elif [ -d /opt/rtcds/rtscore/release ]; then
   rcgDir=/opt/rtcds/rtscore/release
  elif [ -d /opt/rtcds/${site}/${ifo}/core/release ]; then
   rcgDir=/opt/rtcds/${site}/${ifo}/core/release
