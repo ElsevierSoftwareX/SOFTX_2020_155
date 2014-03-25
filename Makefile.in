@@ -142,16 +142,20 @@ installWorld: $(patsubst %,install-%,$(MDL_MODELS))
 	@echo Installed $(MDL_MODELS)
 
 # For test builds of IFO models
-TST_MODELS = $(shell if [ -e /etc/rt-${site}-${ifo}.sh ]; then /etc/rt-${site}-${ifo}.sh; fi)
+cdstest:=$(USERAPPS_DIR)/cds/test/scripts
+TST_MODELS = $(shell if [ -e $(cdstest)/rt-allmodels.sh ]; then $(cdstest)/rt-allmodels.sh; fi)
 
-Test: $(TST_MODELS)
+WorldTest: $(TST_MODELS)
 	@echo Successfully compiled $(TST_MODELS)
 
-showTest:
+showWorldTest:
 	@echo $(TST_MODELS)
 
-cleanTest: $(patsubst %,clean-%,$(TST_MODELS))
+cleanWorldTest: $(patsubst %,clean-%,$(TST_MODELS))
 	@echo Cleaned $(TST_MODELS)
+
+installWorldTest: $(patsubst %,install-%,$(TST_MODELS)) 
+	@echo Installed $(TST_MODELS)
 
 # Show all predefined preprocessor definitions
 dump_predefines:
@@ -163,7 +167,7 @@ nds:
 	(cd $(srcdir)/src/nds; autoconf)
 	/bin/rm -rf build/nds
 	/bin/mkdir -p build/nds
-	(mysrc=$(srcdir); cd build/nds; $$mysrc/src/nds/configure --with-framecpp=/opt/rtapps/framecpp && make)
+	(mysrc=$(srcdir); cd build/nds; $$mysrc/src/nds/configure -with-epics=/opt/rtapps/epics/base --with-framecpp=/opt/rtapps/framecpp && make)
 
 # Build frame builder data concentrator program
 dc:
