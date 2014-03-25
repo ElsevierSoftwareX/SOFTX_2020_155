@@ -22,7 +22,7 @@ use Exporter;
 #// This part provides the capability to send control data to the HWWD via its RESET input line. This \n
 #// RESET line is connected via a single binary output channel of a BIO card. \n
 #//	- 1) HWWD Reset 
-#//	- 2) Set HWWD RMS Trip Point (100 to 600 mV RMS)
+#//	- 2) Set HWWD RMS Trip Point (60 to 360 mV RMS)
 #//	- 3) Set HWWD Time to Trip (T2T) (2 to 30 minutes)
 #//	- 4) Read RMS and T2T settings from HWWD
 #//
@@ -223,11 +223,11 @@ END
 #//			- Verify receipt of command acknowledgment signal from HHWD.
 #//				- Series of five on/off (1/0), one second pulses on LED and PD status bits.
 #//	- SET RMS TRIP POINT
-#//		- Writes the RMS trip point setting to the HWWD in range of 100 to 600 mV RMS.
+#//		- Writes the RMS trip point setting to the HWWD in range of 60 to 360 mV RMS.
 #//		- Command Sequence:
 #//			- Set RESET output high (1) for 10 seconds \n
 #//			- Set RESET output low (0) for 1 second \n
-#//			- Set RESET output high (1) for 2 seconds * RMS request/200 \n
+#//			- Set RESET output high (1) for 2 seconds * RMS request/120 \n
 #//			- Set RESET output low (0) \n
 #//			- Verify receipt of command acknowledgment signal from HHWD.
 #//				- Series of ten on/off (1/0), one second pulses on LED and PD status bits.
@@ -323,7 +323,7 @@ if($HWWD_MODE == 0)
 			}
 			break;
 		case 3:	// WRITE RMS COMMAND
-			if(($EPICS_RMSREQ > 600.0) || ($EPICS_RMSREQ < 100))
+			if(($EPICS_RMSREQ > 360.0) || ($EPICS_RMSREQ < 60))
 			{
 				$TIME_REMAINING = $ONE_SEC_PULSE * 4;
 				$NXT_REQ = 4;
@@ -401,7 +401,7 @@ if($HWWD_MODE == 0)
 			}
 			if((($TIME_REMAINING <= 0) || (!$SIGNAL)) && ($HWWD_MODE_STEP == 6))
 			{
-				$EPICS_RMSRD = $RMSTIME / FE_RATE / 2 * 200.0;
+				$EPICS_RMSRD = $RMSTIME / FE_RATE / 2 * 120.0;
 				$EPICS_TIMERD = $WDTIME / FE_RATE * 5;
 				$RMSTIME = 0;
 				$WDTIME = 0;
@@ -423,7 +423,7 @@ if($HWWD_MODE == 0)
 			if(($TIME_REMAINING <= 0) && ($HWWD_MODE_STEP == 2))
 			{
 				$RSETOUT = 1;
-				$TIME_REMAINING = $ONE_SEC_PULSE * 2 * $EPICS_RMSREQ / 200;
+				$TIME_REMAINING = $ONE_SEC_PULSE * 2 * $EPICS_RMSREQ / 120;
 				$HWWD_MODE_STEP = 3;
 			}
 			if(($TIME_REMAINING <= 0) && ($HWWD_MODE_STEP == 3))
