@@ -1,6 +1,9 @@
 ==================================================================================================
 Post 2.8 changes
 ==================================================================================================
+- Bug #660 - Add daqd thread pid info to log files
+- Bug #590 - Implement support for unsigned 32-bit integers for both fast and slow (EPICS) 
+channels.  Added new RCG part, updated DAQ code and modified Dataviewer to handle new data type
 - Added ADC timing diagnostic ie time between ADC rdy cycles. If errant, reported to stateword ADC
   bit. Current info also reported via /proc/modelname/status file. Note that this only affects IOP
   models.
