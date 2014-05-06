@@ -62,9 +62,7 @@ sub printFrontEndVars  {
 	print ::OUT "static double \L$::xpartName[$i]\_freq_cycle_count;\n";
         print ::OUT "static double \L$::xpartName[$i]\_delta_freq;\n";
 	print ::OUT "static double \L$::xpartName[$i]\_freq_request;\n";
-	print ::OUT "static double \L$::xpartName[$i]\_extra_phase_shift_per_cycle;\n";
 	print ::OUT "static int \L$::xpartName[$i]\_freq_max_count;\n";
-	print ::OUT "static double \L$::xpartName[$i]\_temp;\n";
         if ($::oscUsed == 0) {
           print ::OUT "double lsinx, lcosx, valx;\n";
           $::oscUsed = 1;
@@ -108,9 +106,7 @@ sub frontEndInitCode {
 	$calcExp .= "\L$::xpartName[$i]_freq_request = \L$::xpartName[$i]_freq;\n";
 	$calcExp .= "\L$::xpartName[$i]\_freq_cycle_count = 0;\n";
 	$calcExp .= "\L$::xpartName[$i]\_delta_freq = 0;\n";
-	$calcExp .= "\L$::xpartName[$i]\_extra_phase_shift_per_cycle = 0;\n";
 	$calcExp .= "\L$::xpartName[$i]\_freq_max_count = 0;\n";
-	$calcExp .= "\L$::xpartName[$i]\_temp = 0;\n";
 	return $calcExp;
 }
 
@@ -158,21 +154,7 @@ sub frontEndCode {
 	$calcExp .= "\t\t\L$::xpartName[$i]_freq_max_count = ((double) \UFE_RATE) * ";
 	$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_TRAMP;\n";
 	$calcExp .= "\t\t\L$::xpartName[$i]_delta_freq = (\L$::xpartName[$i]_freq_request - \L$::xpartName[$i]_freq)/((double) \L$::xpartName[$i]_freq_max_count);\n";
-	#Extra phase shift per cycle to achieve 0 phase on the next GPS second
-	$longCalculation = <<END;
-\t\t\L$::xpartName[$i]_temp = \L$::xpartName[$i]_freq_request * (((double) \L$::xpartName[$i]\E_freq_max_count) + ((double) cycleNum)) / ((double) FE_RATE);
-\t\t\L$::xpartName[$i]_temp = \L$::xpartName[$i]_temp - (int) \L$::xpartName[$i]_temp;
-\t\t\L$::xpartName[$i]_extra_phase_shift_per_cycle = \L$::xpartName[$i]_temp;
-\t\t\L$::xpartName[$i]_temp =  (\L$::xpartName[$i]_delta_freq * (((double) \L$::xpartName[$i]_freq_max_count) * 
-\t\t(((double) \L$::xpartName[$i]_freq_max_count) + 1.0) / 2.0 ) + ((double) \L$::xpartName[$i]_freq_max_count) * \L$::xpartName[$i]_freq)/((double) \UFE_RATE);
-\t\t\L$::xpartName[$i]_extra_phase_shift_per_cycle -= \L$::xpartName[$i]_temp;
-\t\t\L$::xpartName[$i]_temp = latan2(\L$::xpartName[$i]\_sin_prev, 1.0 + \L$::xpartName[$i]\_cos_prev) / \UM_PI;
-\t\t\L$::xpartName[$i]_extra_phase_shift_per_cycle -= \L$::xpartName[$i]_temp;
-\t\t\L$::xpartName[$i]_extra_phase_shift_per_cycle = \UM_TWO_PI * (\L$::xpartName[$i]_extra_phase_shift_per_cycle - \
-\t\t(int) \L$::xpartName[$i]_extra_phase_shift_per_cycle) / \L$::xpartName[$i]_freq_max_count;
-END
-	$calcExp .= $longCalculation;
-	$calcExp .= "\t} else if ((cycleNum) == 0)\n";
+	$calcExp .= "\t} else\n";
 	$calcExp .= "\t{\n";
 	$calcExp .= "\t\t\L$::xpartName[$i]_freq_request = ";
 	$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_FREQ;\n";
@@ -199,8 +181,7 @@ END
 	$calcExp .= "\t\t\L$::xpartName[$i]\_freq += \L$::xpartName[$i]\_delta_freq;\n";
 
         $calcExp .= "\t\t\L$::xpartName[$i]\_delta = (\UM_TWO_PI * ";
-        $calcExp .= "\L$::xpartName[$i]_freq / \UFE_RATE) + ";
-	$calcExp .= " \L$::xpartName[$i]_extra_phase_shift_per_cycle;\n";
+        $calcExp .= "\L$::xpartName[$i]_freq / \UFE_RATE);\n";
 	$calcExp .= "\t}\n";
 
         $calcExp .= "\tvalx = \L$::xpartName[$i]\_delta \/ 2.0;\n";
