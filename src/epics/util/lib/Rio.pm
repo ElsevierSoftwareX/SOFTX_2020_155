@@ -75,19 +75,20 @@ sub fromExp {
 # Returns calculated code string
 
 sub frontEndCode {
-	my ($i) = @_;
-	my $l = length($::partName[$i][$j]);
-        my $rioNum = substr($::partName[$i], ($l-1), 1);
-        my $calcExp = "// Rio number is $rioNum name $::partName[$i]\n";
-        my $fromType = $::partInputType[$i][$_];
-        if (($fromType ne "GROUND") && ($::partInput[$i][0] ne "NC")) {
-                $calcExp .= "rioOutput\[";
-                $calcExp .= $rioNum;
-                $calcExp .= "\] = ";
-                $calcExp .= $::fromExp[0];
-                $calcExp .= ";\n";
-        }
-        return $calcExp;
-
+	if($::adcMaster != 1) {
+		my ($i) = @_;
+		my $l = length($::partName[$i][$j]);
+		my $rioNum = substr($::partName[$i], ($l-1), 1);
+		my $calcExp = "// Rio number is $rioNum name $::partName[$i]\n";
+		my $fromType = $::partInputType[$i][$_];
+		if (($fromType ne "GROUND") && ($::partInput[$i][0] ne "NC")) {
+			$calcExp .= "rioOutput\[";
+			$calcExp .= $rioNum;
+			$calcExp .= "\] = ";
+			$calcExp .= $::fromExp[0];
+			$calcExp .= ";\n";
+		}
+		return $calcExp;
+	}
         return "";
 }
