@@ -227,7 +227,7 @@ END
 #//		- Command Sequence:
 #//			- Set RESET output high (1) for 10 seconds \n
 #//			- Set RESET output low (0) for 1 second \n
-#//			- Set RESET output high (1) for 2 seconds * RMS request/120 \n
+#//			- Set RESET output high (1) for 2 seconds * RMS request/110 \n
 #//			- Set RESET output low (0) \n
 #//			- Verify receipt of command acknowledgment signal from HHWD.
 #//				- Series of ten on/off (1/0), one second pulses on LED and PD status bits.
@@ -401,7 +401,7 @@ if($HWWD_MODE == 0)
 			}
 			if((($TIME_REMAINING <= 0) || (!$SIGNAL)) && ($HWWD_MODE_STEP == 6))
 			{
-				$EPICS_RMSRD = $RMSTIME / FE_RATE / 2 * 120.0;
+				$EPICS_RMSRD = $RMSTIME / FE_RATE / 2 * 110.0;
 				$EPICS_TIMERD = $WDTIME / FE_RATE * 5;
 				$RMSTIME = 0;
 				$WDTIME = 0;
@@ -423,7 +423,7 @@ if($HWWD_MODE == 0)
 			if(($TIME_REMAINING <= 0) && ($HWWD_MODE_STEP == 2))
 			{
 				$RSETOUT = 1;
-				$TIME_REMAINING = $ONE_SEC_PULSE * 2 * $EPICS_RMSREQ / 120;
+				$TIME_REMAINING = $ONE_SEC_PULSE * 2 * $EPICS_RMSREQ / 110;
 				$HWWD_MODE_STEP = 3;
 			}
 			if(($TIME_REMAINING <= 0) && ($HWWD_MODE_STEP == 3))
