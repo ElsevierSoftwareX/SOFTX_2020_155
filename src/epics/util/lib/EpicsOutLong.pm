@@ -71,7 +71,7 @@ sub frontEndCode {
 	my ($i) = @_;
         #print "Found EPICS OUTPUT $::xpartName[$i] $::partInputType[$i][0] in loop\n";
         my $ret = "// EpicsOutInt:  $::xpartName[$i]\n";
-        $ret .= "pLocalEpics->$::systemName\.$::xpartName[$i] = ";
+        $ret .= "pLocalEpics->$::systemName\.$::xpartName[$i] = (unsigned int)";
         $ret .= "$::fromExp[0];\n";
 	return $ret;
 }
