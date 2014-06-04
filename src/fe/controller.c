@@ -1637,9 +1637,11 @@ udelay(1000);
 /// \> Cycle 10 to number of BIO cards:\n
  /// - ---- If User App, Read Dio cards once per second \n
  /// - ---- IOP does not handle binary I/O module traffic, as it can take too long
-        if((cycleNum < (HKP_READ_DIO + cdsPciModules.doCount)) && (cycleNum >= HKP_READ_DIO))
+	if(cdsPciModules.doCount)
+        // if((cycleNum < (HKP_READ_DIO + cdsPciModules.doCount)) && (cycleNum >= HKP_READ_DIO))
         {
-                kk = cycleNum - HKP_READ_DIO;
+                // kk = cycleNum - HKP_READ_DIO;
+		kk = cycleNum % cdsPciModules.doCount;
                 ii = cdsPciModules.doInstance[kk];
                 if(cdsPciModules.doType[kk] == ACS_8DIO)
                 {
