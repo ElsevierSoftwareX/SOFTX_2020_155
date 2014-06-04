@@ -269,8 +269,7 @@ sub make_load_and_ramp {
                 bclr=30
         }
         label="LOAD MATRIX"
-        press_msg="1"
-        release_msg="0"
+        release_msg="1"
 }
 "text entry" {
         object {
