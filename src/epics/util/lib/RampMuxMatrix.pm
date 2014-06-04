@@ -56,8 +56,8 @@ sub printEpics {
         print ::EPICS "MATRIX $::xpartName[$i]_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]\n";
         print ::EPICS "MATRIX $::xpartName[$i]_SETTING_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]_SETTING\n";
 	print ::EPICS "MATRIX $::xpartName[$i]_RAMPING_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]_RAMPING\n";
-    print ::EPICS "MOMENTARY $::xpartName[$i]_LOAD_MATRIX $::systemName\.$::xpartName[$i]_LOAD_MATRIX double ao 0\n";
-    print ::EPICS "INVARIABLE $::xpartName[$i]\_TRAMP $::systemName\.$::xpartName[$i]\_TRAMP double ai 0 field(PREC,\"1\")\n";
+	print ::EPICS "MOMENTARY $::xpartName[$i]_LOAD_MATRIX $::systemName\.$::xpartName[$i]_LOAD_MATRIX int ao 0\n";
+    	print ::EPICS "INVARIABLE $::xpartName[$i]\_TRAMP $::systemName\.$::xpartName[$i]\_TRAMP double ai 0 field(PREC,\"1\")\n";
 }
 
 # Print variable declarations int front-end file
@@ -121,7 +121,7 @@ sub frontEndCode {
     $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]_RAMPING_mask = 1;\n";
     $calcExp .= "if (pLocalEpics->". $::systemName . "\." . "$::xpartName[$i]_LOAD_MATRIX" . " == 1)\n";
     $calcExp .= "{\n";
-    $calcExp .= "printk(\"LOAD_MATRIX is 1\\n\");\n";
+    $calcExp .= "pLocalEpics->". $::systemName . "\." . "$::xpartName[$i]_LOAD_MATRIX = 0;\n";
     $calcExp .= "\tfor (matrixOutputCount = 0; matrixOutputCount < $matOuts; matrixOutputCount++) {\n";
     $calcExp .= "\t\tfor (matrixInputCount = 0; matrixInputCount < $matIns; matrixInputCount++) {\n";
     $calcExp .= "\t\t\tRampParamLoad(&\L$::xpartName[$i]_state" . "\[matrixOutputCount\]\[matrixInputCount\],";
