@@ -320,6 +320,7 @@ void *fe_start(void *arg)
   int wtmin,wtmax;			/// @param wtmin Time window for startup on IRIG-B
   int dacEnable = 0;
   int pBits[9] = {1,2,4,8,16,32,64,128,256};	/// @param pBits[] Lookup table for quick power of 2 calcs
+  int sync21ppsCycles = 0;		/// @param sync32ppsCycles Number of attempts to sync to 1PPS
 #endif
   int dkiTrip = 0;
   RFM_FE_COMMS *pEpicsComms;		/// @param *pEpicsComms Pointer to EPICS shared memory space
@@ -340,7 +341,6 @@ void *fe_start(void *arg)
   int system = 0;
   int sampleCount = 1;			/// @param sampleCount Number of ADC samples to take per code cycle
   int sync21pps = 0;			/// @param sync21pps Code startup sync to 1PPS flag
-  int sync21ppsCycles = 0;		/// @param sync32ppsCycles Number of attempts to sync to 1PPS
   int syncSource = SYNC_SRC_NONE;	/// @param syncSource Code startup synchronization source
   int mxStat = 0;			/// @param mxStat Net diags when myrinet express is used
   int mxDiag = 0;
@@ -371,7 +371,7 @@ void *fe_start(void *arg)
   static float duotoneMeanDac = 0.0;
   static int dacDuoEnable = 0;
   static int dacTimingError = 0;
-  static int dacTimingErrorPending = 0;
+  static int dacTimingErrorPending[MAX_DAC_MODULES];
 
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
   volatile GSC_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
@@ -417,6 +417,7 @@ void *fe_start(void *arg)
 
   /// \> Zero out DAC outputs
   for (ii = 0; ii < MAX_DAC_MODULES; ii++)
+    dacTimingErrorPending[ii] = 0;
     for (jj = 0; jj < 16; jj++) {
  	dacOut[ii][jj] = 0.0;
  	dacOutUsed[ii][jj] = 0;
@@ -1975,11 +1976,12 @@ udelay(1000);
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
 			    feStatus |= FE_ERROR_DAC;
-			    if(dacTimingErrorPending) dacTimingError = 1;
-  			    dacTimingErrorPending = 1;
+			    if(dacTimingErrorPending[jj]) dacTimingError = 1;
+  			    dacTimingErrorPending[jj] = 1;
+  			    dacTimingError = 1;
 			} else {
 			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
-  			    dacTimingErrorPending = 0;
+  			    dacTimingErrorPending[jj] = 0;
 			}
 
 		}
@@ -1991,11 +1993,11 @@ udelay(1000);
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
 			    feStatus |= FE_ERROR_DAC;
-			    if(dacTimingErrorPending) dacTimingError = 1;
-  			    dacTimingErrorPending = 1;
+			    if(dacTimingErrorPending[jj]) dacTimingError = 1;
+  			    dacTimingErrorPending[jj] = 1;
 			} else {
 			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
-  			    dacTimingErrorPending = 0;
+  			    dacTimingErrorPending[jj] = 0;
 			}
 		}
 	}
