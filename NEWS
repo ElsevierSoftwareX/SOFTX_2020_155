@@ -1,6 +1,21 @@
 ==================================================================================================
 Changes for release 2.8.4
 ==================================================================================================
+- Code Modification: In order to make the SUS OSEM WD part more closely resemble the SUS HWWD,
+  OSEM_WD_2_OUTPUTS.mdl was changed:
+	- High pass filter on output of TRUE RMS part removed. This slow integrator results in
+	  a lot of slow oscillation (hunting) at the output. 
+	- Conversion factor (0.018) added to change counts into mV RMS.
+	- Trip point comparator constant was changed from 15000 to 90, to corrsepond to the new
+	  mV RMS value instead of the arbitrary 15000 counts. In this fashion, the OSEM WD 
+	  will produce a trip lower than the SUS HWWD (default setting of 100mV RMS).  
+- Enhancement: Part to support SUS HWWD chassis added. This was planned for V2.9, however SUS
+  HWWD ready to deploy sooner.  Along with adding HWWD.pm support module, controller.c had to be
+  changed to read binary I/O modules on every cycle, one module per cycle, in order to properly
+  read the settings from the SUS HWWD. Both of these changes were already part of the SVN
+  trunk.
+- Bug Fix - DacKillTimed and DacKillIOP parts: Parts ignored reset command while in fault mode,
+  however, would remember the reset request and would reset as soon as fault cleared.
 - Bug Fix (595) - FMC2 part compiling improperly if not inputs connected.
 - Bug Fix (621) - ADC part errant code if ADC part named incorrectly.
 - Bug Fix (553) - Errant code produced when not all 16 inputs of Bit2Word part connected.
