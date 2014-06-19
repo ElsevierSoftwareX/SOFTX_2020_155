@@ -417,7 +417,9 @@ void *fe_start(void *arg)
 
   /// \> Zero out DAC outputs
   for (ii = 0; ii < MAX_DAC_MODULES; ii++)
+#ifdef ADC_MASTER
     dacTimingErrorPending[ii] = 0;
+#endif
     for (jj = 0; jj < 16; jj++) {
  	dacOut[ii][jj] = 0.0;
  	dacOutUsed[ii][jj] = 0;
