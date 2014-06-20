@@ -1,6 +1,6 @@
 Library {
   Name			  "OSEM_WD_2_OUTPUTS"
-  Version		  8.1
+  Version		  8.0
   MdlSubVersion		  0
   SavedCharacterEncoding  "ISO-8859-1"
   LibraryType		  "BlockLibrary"
@@ -14,85 +14,50 @@ Library {
     $PropName		    "BdWindowsInfo"
     $ObjectID		    1
     $ClassName		    "Simulink.BDWindowsInfo"
-    Array {
-      Type		      "Simulink.WindowInfo"
-      Dimension		      2
+    Object {
+      $PropName		      "WindowsInfo"
+      $ObjectID		      2
+      $ClassName	      "Simulink.WindowInfo"
+      IsActive		      [1]
+      Location		      [1440.0, 216.0, 1436.0, 934.0]
       Object {
-	$ObjectID		2
+	$PropName		"ModelBrowserInfo"
+	$ObjectID		3
+	$ClassName		"Simulink.ModelBrowserInfo"
+	Visible			[0]
+	DockPosition		"Left"
+	Width			[50]
+	Height			[50]
+	Filter			[9]
+      }
+      Object {
+	$PropName		"ExplorerBarInfo"
+	$ObjectID		4
+	$ClassName		"Simulink.ExplorerBarInfo"
+	Visible			[1]
+      }
+      Object {
+	$PropName		"EditorsInfo"
+	$ObjectID		5
+	$ClassName		"Simulink.EditorInfo"
 	IsActive		[1]
-	Location		[648.0, 22.0, 750.0, 793.0]
-	Object {
-	  $PropName		  "ModelBrowserInfo"
-	  $ObjectID		  3
-	  $ClassName		  "Simulink.ModelBrowserInfo"
-	  Visible		  [0]
-	  DockPosition		  "Left"
-	  Width			  [50]
-	  Height		  [50]
-	  Filter		  [9]
-	}
-	Object {
-	  $PropName		  "ExplorerBarInfo"
-	  $ObjectID		  4
-	  $ClassName		  "Simulink.ExplorerBarInfo"
-	  Visible		  [1]
-	}
-	Object {
-	  $PropName		  "EditorsInfo"
-	  $ObjectID		  5
-	  $ClassName		  "Simulink.EditorInfo"
-	  IsActive		  [1]
-	  ViewObjType		  "SimulinkTopLevel"
-	  LoadSaveID		  "0"
-	  Extents		  [716.0, 631.0]
-	  ZoomFactor		  [1.0]
-	  Offset		  [0.0, 0.0]
-	}
+	ViewObjType		"SimulinkSubsys"
+	LoadSaveID		"1"
+	Extents			[1402.0, 772.0]
+	ZoomFactor		[1.3299999999999998]
+	Offset			[0.0, 0.0]
       }
-      Object {
-	$ObjectID		6
-	IsActive		[0]
-	Location		[820.0, 462.0, 620.0, 438.0]
-	Object {
-	  $PropName		  "ModelBrowserInfo"
-	  $ObjectID		  7
-	  $ClassName		  "Simulink.ModelBrowserInfo"
-	  Visible		  [0]
-	  DockPosition		  "Left"
-	  Width			  [50]
-	  Height		  [50]
-	  Filter		  [9]
-	}
-	Object {
-	  $PropName		  "ExplorerBarInfo"
-	  $ObjectID		  8
-	  $ClassName		  "Simulink.ExplorerBarInfo"
-	  Visible		  [1]
-	}
-	Object {
-	  $PropName		  "EditorsInfo"
-	  $ObjectID		  9
-	  $ClassName		  "Simulink.EditorInfo"
-	  IsActive		  [1]
-	  ViewObjType		  "SimulinkTopLevel"
-	  LoadSaveID		  "0"
-	  Extents		  [586.0, 276.0]
-	  ZoomFactor		  [1.0]
-	  Offset		  [0.0, 0.0]
-	}
-      }
-      PropName		      "WindowsInfo"
     }
   }
   Created		  "Wed Mar 07 14:52:08 2012"
   Creator		  "controls"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "rolf"
+  LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Oct 17 06:45:45 2013"
-  RTWModifiedTimeStamp	  303859628
-  ModelVersionFormat	  "1.%<AutoIncrement:18>"
+  LastModifiedDate	  "Tue Jun 03 18:30:38 2014"
+  RTWModifiedTimeStamp	  323713101
+  ModelVersionFormat	  "1.%<AutoIncrement:24>"
   ConfigurationManager	  "none"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -160,14 +125,14 @@ Library {
     Type		    "Handle"
     Dimension		    1
     Simulink.ConfigSet {
-      $ObjectID		      10
-      Version		      "1.13.0"
+      $ObjectID		      6
+      Version		      "1.12.1"
       Array {
 	Type			"Handle"
 	Dimension		8
 	Simulink.SolverCC {
-	  $ObjectID		  11
-	  Version		  "1.13.0"
+	  $ObjectID		  7
+	  Version		  "1.12.1"
 	  StartTime		  "0.0"
 	  StopTime		  "10.0"
 	  AbsTol		  "auto"
@@ -201,8 +166,8 @@ Library {
 	  InsertRTBMode		  "Whenever possible"
 	}
 	Simulink.DataIOCC {
-	  $ObjectID		  12
-	  Version		  "1.13.0"
+	  $ObjectID		  8
+	  Version		  "1.12.1"
 	  Decimation		  "1"
 	  ExternalInput		  "[t, u]"
 	  FinalStateName	  "xFinal"
@@ -233,8 +198,8 @@ Library {
 	  Refine		  "1"
 	}
 	Simulink.OptimizationCC {
-	  $ObjectID		  13
-	  Version		  "1.13.0"
+	  $ObjectID		  9
+	  Version		  "1.12.1"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    7
@@ -288,8 +253,8 @@ Library {
 	  ParallelExecutionInRapidAccelerator on
 	}
 	Simulink.DebuggingCC {
-	  $ObjectID		  14
-	  Version		  "1.13.0"
+	  $ObjectID		  10
+	  Version		  "1.12.1"
 	  RTPrefix		  "error"
 	  ConsistencyChecking	  "none"
 	  ArrayBoundsChecking	  "none"
@@ -378,13 +343,12 @@ Library {
 	  SFTransitionActionBeforeConditionDiag	"warning"
 	}
 	Simulink.HardwareCC {
-	  $ObjectID		  15
-	  Version		  "1.13.0"
+	  $ObjectID		  11
+	  Version		  "1.12.1"
 	  ProdBitPerChar	  8
 	  ProdBitPerShort	  16
 	  ProdBitPerInt		  32
 	  ProdBitPerLong	  32
-	  ProdBitPerLongLong	  64
 	  ProdBitPerFloat	  32
 	  ProdBitPerDouble	  64
 	  ProdBitPerPointer	  32
@@ -394,20 +358,17 @@ Library {
 	  ProdEndianess		  "Unspecified"
 	  ProdWordSize		  32
 	  ProdShiftRightIntArith  on
-	  ProdLongLongMode	  off
 	  ProdHWDeviceType	  "32-bit Generic"
 	  TargetBitPerChar	  8
 	  TargetBitPerShort	  16
 	  TargetBitPerInt	  32
 	  TargetBitPerLong	  32
-	  TargetBitPerLongLong	  64
 	  TargetBitPerFloat	  32
 	  TargetBitPerDouble	  64
 	  TargetBitPerPointer	  32
 	  TargetLargestAtomicInteger "Char"
 	  TargetLargestAtomicFloat "None"
 	  TargetShiftRightIntArith on
-	  TargetLongLongMode	  off
 	  TargetIntDivRoundTo	  "Undefined"
 	  TargetEndianess	  "Unspecified"
 	  TargetWordSize	  32
@@ -419,8 +380,8 @@ Library {
 	  ProdEqTarget		  on
 	}
 	Simulink.ModelReferenceCC {
-	  $ObjectID		  16
-	  Version		  "1.13.0"
+	  $ObjectID		  12
+	  Version		  "1.12.1"
 	  UpdateModelReferenceTargets "IfOutOfDateOrStructuralChange"
 	  CheckModelReferenceTargetMessage "error"
 	  EnableParallelModelReferenceBuilds off
@@ -434,8 +395,8 @@ Library {
 	  SupportModelReferenceSimTargetCustomCode off
 	}
 	Simulink.SFSimCC {
-	  $ObjectID		  17
-	  Version		  "1.13.0"
+	  $ObjectID		  13
+	  Version		  "1.12.1"
 	  SFSimEnableDebug	  on
 	  SFSimOverflowDetection  on
 	  SFSimEcho		  on
@@ -449,8 +410,8 @@ Library {
 	}
 	Simulink.RTWCC {
 	  $BackupClass		  "Simulink.RTWCC"
-	  $ObjectID		  18
-	  Version		  "1.13.0"
+	  $ObjectID		  14
+	  Version		  "1.12.1"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    6
@@ -490,7 +451,6 @@ Library {
 	  CodeExecutionProfileVariable "executionProfile"
 	  CodeProfilingSaveOptions "SummaryOnly"
 	  CodeProfilingInstrumentation off
-	  SILDebugging		  off
 	  TargetLang		  "C"
 	  IncludeBusHierarchyInRTWFileBlockHierarchyMap	off
 	  IncludeERTFirstTime	  off
@@ -510,8 +470,8 @@ Library {
 	    Type		    "Handle"
 	    Dimension		    2
 	    Simulink.CodeAppCC {
-	      $ObjectID		      19
-	      Version		      "1.13.0"
+	      $ObjectID		      15
+	      Version		      "1.12.1"
 	      Array {
 		Type			"Cell"
 		Dimension		19
@@ -575,8 +535,8 @@ Library {
 	    }
 	    Simulink.GRTTargetCC {
 	      $BackupClass	      "Simulink.TargetCC"
-	      $ObjectID		      20
-	      Version		      "1.13.0"
+	      $ObjectID		      16
+	      Version		      "1.12.1"
 	      Array {
 		Type			"Cell"
 		Dimension		16
@@ -634,12 +594,10 @@ Library {
 	      SupportVariableSizeSignals off
 	      EnableShiftOperators    on
 	      ParenthesesLevel	      "Nominal"
-	      MATLABClassNameForMDSCustomization "Simulink.SoftwareTarget.GRTCustomization"
 	      ModelStepFunctionPrototypeControlCompliant off
 	      CPPClassGenCompliant    off
 	      AutosarCompliant	      off
 	      GRTInterface	      on
-	      GenerateAllocFcn	      off
 	      UseMalloc		      off
 	      ExtMode		      off
 	      ExtModeStaticAlloc      off
@@ -789,6 +747,21 @@ Library {
       InitialOutput	      "[]"
     }
     Block {
+      BlockType		      Product
+      Inputs		      "2"
+      Multiplication	      "Element-wise(.*)"
+      CollapseMode	      "All dimensions"
+      CollapseDim	      "1"
+      InputSameDT	      on
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: Same as first input"
+      LockScale		      off
+      RndMeth		      "Zero"
+      SaturateOnIntegerOverflow	on
+      SampleTime	      "-1"
+    }
+    Block {
       BlockType		      RelationalOperator
       Operator		      ">="
       InputSameDT	      on
@@ -806,7 +779,6 @@ Library {
       SystemSampleTime	      "-1"
       RTWFcnNameOpts	      "Auto"
       RTWFileNameOpts	      "Auto"
-      FunctionInterfaceSpec   "void_void"
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"
@@ -839,8 +811,8 @@ Library {
   }
   System {
     Name		    "OSEM_WD_2_OUTPUTS"
-    Location		    [648, 22, 1398, 815]
-    Open		    on
+    Location		    [134, 151, 884, 944]
+    Open		    off
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
     ScreenColor		    "white"
@@ -853,7 +825,7 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "61"
+    SIDHighWatermark	    "64"
     Block {
       BlockType		      SubSystem
       Name		      "OSEM_WD"
@@ -870,8 +842,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"OSEM_WD"
-	Location		[648, 22, 1398, 815]
-	Open			off
+	Location		[1440, 216, 2876, 1150]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -882,7 +854,7 @@ Library {
 	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
 	TiledPageScale		1
 	ShowPageBoundaries	off
-	ZoomFactor		"133"
+	ZoomFactor		"132"
 	Block {
 	  BlockType		  Inport
 	  Name			  "OSEM_IN"
@@ -911,7 +883,7 @@ Library {
 	  Position		  [315, 415, 355, 475]
 	  ZOrder		  -3
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.3"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsFunctionCall/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -925,21 +897,7 @@ Library {
 	  Position		  [325, 270, 365, 330]
 	  ZOrder		  -4
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.3"
-	  SourceBlock		  "cdsFunctionCall/Subsystem"
-	  SourceType		  "SubSystem"
-	}
-	Block {
-	  BlockType		  Reference
-	  Name			  "10MHZLP1"
-	  SID			  "22"
-	  Tag			  "cdsFunctionCall"
-	  Description		  "inline FILTER10MHZLP $RCG_DIR/src/drv/susWatchdogFilters.c"
-	  Ports			  [1, 1]
-	  Position		  [570, 365, 610, 425]
-	  ZOrder		  -5
-	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.3"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsFunctionCall/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -963,9 +921,9 @@ Library {
 	  BlockType		  Constant
 	  Name			  "Constant2"
 	  SID			  "54"
-	  Position		  [765, 420, 795, 450]
+	  Position		  [745, 420, 775, 450]
 	  ZOrder		  -8
-	  Value			  "15000"
+	  Value			  "90"
 	}
 	Block {
 	  BlockType		  Constant
@@ -976,24 +934,28 @@ Library {
 	  Value			  "-12000"
 	}
 	Block {
+	  BlockType		  Constant
+	  Name			  "Constant4"
+	  SID			  "63"
+	  Position		  [465, 475, 495, 505]
+	  ZOrder		  3
+	  Value			  "0.018"
+	}
+	Block {
+	  BlockType		  Constant
+	  Name			  "Constant5"
+	  SID			  "64"
+	  Position		  [180, 460, 210, 490]
+	  ZOrder		  4
+	  Value			  "0"
+	}
+	Block {
 	  BlockType		  Demux
 	  Name			  "Demux"
 	  SID			  "20"
 	  Ports			  [1, 1]
 	  Position		  [385, 246, 390, 354]
 	  ZOrder		  -10
-	  BackgroundColor	  "black"
-	  ShowName		  off
-	  Outputs		  "1"
-	  DisplayOption		  "bar"
-	}
-	Block {
-	  BlockType		  Demux
-	  Name			  "Demux1"
-	  SID			  "23"
-	  Ports			  [1, 1]
-	  Position		  [630, 341, 635, 449]
-	  ZOrder		  -11
 	  BackgroundColor	  "black"
 	  ShowName		  off
 	  Outputs		  "1"
@@ -1026,7 +988,7 @@ Library {
 	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.1"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -1047,17 +1009,6 @@ Library {
 	  Ports			  [2, 1]
 	  Position		  [295, 245, 300, 360]
 	  ZOrder		  -16
-	  ShowName		  off
-	  Inputs		  "2"
-	  DisplayOption		  "bar"
-	}
-	Block {
-	  BlockType		  Mux
-	  Name			  "Mux1"
-	  SID			  "24"
-	  Ports			  [2, 1]
-	  Position		  [540, 340, 545, 455]
-	  ZOrder		  -17
 	  ShowName		  off
 	  Inputs		  "2"
 	  DisplayOption		  "bar"
@@ -1100,11 +1051,22 @@ Library {
 	  Name			  "Operator2"
 	  SID			  "51"
 	  Ports			  [2, 1]
-	  Position		  [835, 377, 865, 408]
+	  Position		  [830, 387, 860, 418]
 	  ZOrder		  -21
 	  Operator		  "<"
 	  InputSameDT		  off
 	  OutDataTypeStr	  "boolean"
+	}
+	Block {
+	  BlockType		  Product
+	  Name			  "Product"
+	  SID			  "62"
+	  Ports			  [2, 1]
+	  Position		  [525, 377, 555, 408]
+	  ZOrder		  2
+	  InputSameDT		  off
+	  OutDataTypeStr	  "Inherit: Inherit via internal rule"
+	  SaturateOnIntegerOverflow off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1116,12 +1078,12 @@ Library {
 	  "input value and passes it to EPICS record.  \n                                                  \nUsage:           "
 	  "                                 \nName the part with the desired EPICS rrecord name."
 	  Ports			  [1, 1]
-	  Position		  [685, 370, 765, 400]
+	  Position		  [580, 380, 660, 410]
 	  ZOrder		  -22
 	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.1"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -1144,14 +1106,14 @@ Library {
 	  Name			  "TrueRMS"
 	  SID			  "17"
 	  Tag			  "cdsTrueRMS"
-	  Description		  "window_size=655360"
+	  Description		  "window_size=327680"
 	  Ports			  [1, 1]
-	  Position		  [410, 371, 495, 419]
+	  Position		  [410, 361, 495, 409]
 	  ZOrder		  -24
 	  BackgroundColor	  "[0.462745, 0.721569, 0.337255]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.7"
+	  LibraryVersion	  "1.8"
 	  SourceBlock		  "cdsTrueRMS/TrueRMS"
 	  SourceType		  "SubSystem"
 	}
@@ -1159,7 +1121,7 @@ Library {
 	  BlockType		  Outport
 	  Name			  "WD_RMS"
 	  SID			  "18"
-	  Position		  [975, 388, 1005, 402]
+	  Position		  [975, 398, 1005, 412]
 	  ZOrder		  -25
 	  IconDisplay		  "Port number"
 	}
@@ -1193,13 +1155,6 @@ Library {
 	  DstPort		  1
 	}
 	Line {
-	  SrcBlock		  "TrueRMS"
-	  SrcPort		  1
-	  Points		  [25, 0]
-	  DstBlock		  "Mux1"
-	  DstPort		  1
-	}
-	Line {
 	  SrcBlock		  "10MHZLP"
 	  SrcPort		  1
 	  DstBlock		  "Demux"
@@ -1210,26 +1165,6 @@ Library {
 	  SrcPort		  1
 	  Points		  [0, -5]
 	  DstBlock		  "10MHZLP"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "10MHZLP1"
-	  SrcPort		  1
-	  DstBlock		  "Demux1"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Mux1"
-	  SrcPort		  1
-	  Points		  [5, 0]
-	  DstBlock		  "10MHZLP1"
-	  DstPort		  1
-	}
-	Line {
-	  SrcBlock		  "Demux1"
-	  SrcPort		  1
-	  Points		  [30, 0]
-	  DstBlock		  "RMSOUT"
 	  DstPort		  1
 	}
 	Line {
@@ -1247,7 +1182,7 @@ Library {
 	Line {
 	  SrcBlock		  "Demux2"
 	  SrcPort		  1
-	  Points		  [5, 0; 0, -50]
+	  Points		  [5, 0; 0, -60]
 	  DstBlock		  "TrueRMS"
 	  DstPort		  1
 	}
@@ -1261,7 +1196,7 @@ Library {
 	Line {
 	  SrcBlock		  "Constant2"
 	  SrcPort		  1
-	  Points		  [20, 0]
+	  Points		  [32, 0; 0, -25]
 	  DstBlock		  "Operator2"
 	  DstPort		  2
 	}
@@ -1271,12 +1206,6 @@ Library {
 	  Points		  [10, 0; 0, -10]
 	  DstBlock		  "Operator1"
 	  DstPort		  2
-	}
-	Line {
-	  SrcBlock		  "RMSOUT"
-	  SrcPort		  1
-	  DstBlock		  "Operator2"
-	  DstPort		  1
 	}
 	Line {
 	  SrcBlock		  "LPOUT"
@@ -1295,23 +1224,8 @@ Library {
 	Line {
 	  SrcBlock		  "RESET_IN"
 	  SrcPort		  1
-	  Points		  [175, 0]
-	  Branch {
-	    DstBlock		    "Mux"
-	    DstPort		    2
-	  }
-	  Branch {
-	    Points		    [0, 145]
-	    Branch {
-	      DstBlock		      "Mux2"
-	      DstPort		      2
-	    }
-	    Branch {
-	      Points		      [0, 55; 285, 0]
-	      DstBlock		      "Mux1"
-	      DstPort		      2
-	    }
-	  }
+	  DstBlock		  "Mux"
+	  DstPort		  2
 	}
 	Line {
 	  SrcBlock		  "Sum"
@@ -1353,11 +1267,41 @@ Library {
 	  DstBlock		  "WD_DC"
 	  DstPort		  1
 	}
+	Line {
+	  SrcBlock		  "Constant4"
+	  SrcPort		  1
+	  Points		  [10, 0]
+	  DstBlock		  "Product"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "TrueRMS"
+	  SrcPort		  1
+	  DstBlock		  "Product"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Product"
+	  SrcPort		  1
+	  DstBlock		  "RMSOUT"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "RMSOUT"
+	  SrcPort		  1
+	  DstBlock		  "Operator2"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "Constant5"
+	  SrcPort		  1
+	  DstBlock		  "Mux2"
+	  DstPort		  2
+	}
 	Annotation {
 	  SID			  "60"
 	  Name			  "Outputs 1 when OK\nOutputs 0 when FAULT"
 	  Position		  [955, 304]
-	  ZOrder		  -1
 	  FontSize		  18
 	}
       }
