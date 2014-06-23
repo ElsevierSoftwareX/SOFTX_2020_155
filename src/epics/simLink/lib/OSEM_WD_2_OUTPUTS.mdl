@@ -923,7 +923,7 @@ Library {
 	  SID			  "54"
 	  Position		  [745, 420, 775, 450]
 	  ZOrder		  -8
-	  Value			  "90"
+	  Value			  "110"
 	}
 	Block {
 	  BlockType		  Constant
