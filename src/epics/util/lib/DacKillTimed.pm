@@ -269,7 +269,10 @@ if ($EPICS_RESET && !$EPICS_PANIC && ($SIGNAL || $BPTIME_REMAINING)) {
 	$RSETOUT = 1;
 	/// Clear Bypass mode.
 	$EPICS_BPSET = 0;
-} 
+} else if($EPICS_RESET) {
+	/// Clear reset from EPICS as it is a momentary switch
+	$EPICS_RESET = 0;
+}
 
 /// Check if in Panic state request
 if ($EPICS_PANIC)
