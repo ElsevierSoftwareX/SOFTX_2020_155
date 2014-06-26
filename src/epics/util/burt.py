@@ -5,6 +5,7 @@ from Tkinter import *
 import Tkconstants, tkFileDialog
 from epics import PV
 import sys, argparse
+import time
     
 class TkFileDialogExample(Frame):
     
@@ -21,17 +22,17 @@ class TkFileDialogExample(Frame):
 		frame_opt = {'padx': 10, 'pady': 30}
    
 		# define buttons
-		self.mlabel = LabelFrame(self,text='FE BURT - File Loaded')
-		self.mlabel.pack(fill="both", expand="yes", **frame_opt)
+		#self.mlabel = LabelFrame(self,text='FE BURT - File Loaded')
+		#self.mlabel.pack(fill="both", expand="yes", **frame_opt)
 
 		# Label(self.mlabel, text='PRESENT BURT FILE').pack(**button_opt)
-		self.pbf = Label(self.mlabel, text='')
-		self.pbf.pack(fill="both", expand="yes", **button_opt)
-		ename = self.dcuid + '_SDF_LOADED'
-		print 'Loaded file is ',ename
-		e = PV(ename)
-		pf = e.value
-		self.pbf.config(text = pf)
+		#self.pbf = Label(self.mlabel, text='')
+		#self.pbf.pack(fill="both", expand="yes", **button_opt)
+		#ename = self.dcuid + '_SDF_LOADED'
+		#print 'Loaded file is ',ename
+		#e = PV(ename)
+		#pf = e.value
+		#self.pbf.config(text = pf)
 
 		self.mlabel1 = LabelFrame(self,text='FE BURT - Select File')
 		self.mlabel1.pack(fill="both", expand="yes", **frame_opt)
@@ -41,7 +42,7 @@ class TkFileDialogExample(Frame):
 
 		self.mlabel2 = LabelFrame(self,text='FE BURT - Load Settings')
 		self.mlabel2.pack(fill="both", expand="yes", **frame_opt)
-		self.b3 = Button(self.mlabel2, text='Load BURT File', command=self.asksaveasfile).pack(**button_opt)
+		self.b3 = Button(self.mlabel2, text='Load BURT File', command=self.loadfile).pack(**button_opt)
 
 		self.mlabel3 = LabelFrame(self,text='FE BURT - Read Only')
 		self.mlabel3.pack(fill="both", expand="yes", **frame_opt)
@@ -114,13 +115,15 @@ class TkFileDialogExample(Frame):
 			e.value = fn[0]
 			print 'Putting new file name in ',ename,' = ',fn[0]
    
-	def asksaveasfile(self):
+	def loadfile(self):
    
 	       """Returns an opened file in write mode."""
 	       ename = self.dcuid + '_SDF_RELOAD'
-	       print 'Sending new file name in ',ename
+	       print 'Sending Load Command ',ename
 	       e = PV(ename)
 	       e.value = 1
+	       time.sleep(2)
+	       self.quit()
    
 	       # return tkFileDialog.asksaveasfile(mode='w', **self.file_opt)
    
@@ -128,17 +131,21 @@ class TkFileDialogExample(Frame):
    
 	       """Returns an opened file in write mode."""
 	       ename = self.dcuid + '_SDF_RELOAD'
-	       print 'Sending new file name in ',ename
+	       print 'Sending Read command in ',ename
 	       e = PV(ename)
 	       e.value = 2
+	       time.sleep(2)
+	       self.quit()
    
 	def resetsettings(self):
    
 	       """Commands reset of settings marked as care."""
 	       ename = self.dcuid + '_SDF_RELOAD'
-	       print 'Sending new file name in ',ename
+	       print 'Sending Reset ',ename
 	       e = PV(ename)
 	       e.value = 3
+	       time.sleep(2)
+	       self.quit()
    
 	def asksaveasfilename(self):
    
@@ -169,3 +176,4 @@ if __name__=='__main__':
      root = Tk()
      TkFileDialogExample(root,args.site,args.ifo,args.model,args.dcuid).pack()
      root.mainloop()
+     root.destroy()
