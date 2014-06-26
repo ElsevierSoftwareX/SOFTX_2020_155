@@ -1,6 +1,11 @@
 ==================================================================================================
 Post 2.8 changes
 ==================================================================================================
+As of SVN 3694, marked by this file submission to SVN, the reading of BURT files from the FE code
+is supported. This is prodominantly handled by the src/epics/seq/main.c program.
+Bug Fix - DacKillTimed and DacKillIOP parts: Parts ignored reset command while in fault mode,
+  however, would remember the reset request and would reset as soon as fault cleared. This fix
+  was also made to branch-2.8 prior to release V2.8.4.
 - Bug #660 - Add daqd thread pid info to log files
 - Bug #590 - Implement support for unsigned 32-bit integers for both fast and slow (EPICS) 
 channels.  Added new RCG part, updated DAQ code and modified Dataviewer to handle new data type
