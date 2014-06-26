@@ -410,6 +410,7 @@ state init
 %%  }
     pvPut(msg);
 
+#if 0
 %%  for (ii = 0; ii < fltrTypes; ii++) {                                 /* MA */
 %%     strcpy(buffer, "cksum ");                                         /* MA */
 %%     strcat(buffer, fName[ii]);                                        /* MA */
@@ -421,6 +422,7 @@ state init
 %%        }                                                              /* MA */
 %%     }                                                                 /* MA */
 %%  }                                                                    /* MA */
+#endif
 
 #if MAX_MODULES > 0
 %%  for(ii=0;ii<MAX_MODULES;ii++) {
@@ -857,6 +859,7 @@ state daqInit
 %%         /*dataSize = 0;*/
 %%      }
 
+#if 0
 %%      strcpy(bufferDAQ, "cksum ");                                     /* ma */
 %%      strcat(bufferDAQ, fNameDAQ);                                     /* ma */
 %%      if (!stat(fNameDAQ, &statBufDAQ) ) {                             /* ma */
@@ -866,6 +869,7 @@ state daqInit
 %%            sscanf(bufferDAQ, "%ld", &chkSumDAQ);                      /* ma */
 %%         }                                                             /* ma */
 %%      }                                                                /* ma */
+#endif
 
         pvPut(dcmsg);
         pvPut(chnCnt);
@@ -883,7 +887,7 @@ state daqProcess
 %%	static unsigned int cksum_cnt = 0;
 
 %% pthread_mutex_lock (&seq_lock);
-
+#if 0
 %%      modDAQ = 0;                                                      /* ma */
 %%      strcpy(bufferDAQ, "cksum ");                                     /* ma */
 %%      strcat(bufferDAQ, fNameDAQ);                                     /* ma */
@@ -905,6 +909,7 @@ state daqProcess
 	   pvPut(msgDAQ);                                                /* ma */
 %%       }                                                                /* ma */
 %%      } else cksum_cnt++;
+#endif
 
         pvGet(reload);
         if (reload)
@@ -955,9 +960,10 @@ state filtCoefChk
 %%	static unsigned int cksum_cnt = 0;
 %% pthread_mutex_lock (&seq_lock);
 %%  
+#if 0
 %%if (cksum_cnt == 32) {
 %%  cksum_cnt = 0;
-%%  mod = 0;                                                             /* MA */
+%%  mod = 0;                                                            /* MA */
 %%  for (ii = 0; ii < fltrTypes; ii++) {                                 /* MA */
 %%     strcpy(buffer, "cksum ");                                         /* MA */
 %%     strcat(buffer, fName[ii]);                                        /* MA */
@@ -983,6 +989,7 @@ state filtCoefChk
        pvPut(msg);                                                       /* MA */
 %%  }                                                                    /* MA */
 %%} else cksum_cnt++;
+#endif
 
    /* Coefficient update request */	
     pvGet(allNewCoeff);
