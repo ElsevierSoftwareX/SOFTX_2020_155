@@ -236,8 +236,8 @@ int cycle65k;			// All data sent with 64K cycle count; need to convert local app
 int ii;
 int rcvBlock;			// Which of the IPC_BLOCKS IPC data blocks to read from
 double tmp;			// Temp location for data for checking NaN
-static unsigned long ptim = 0;	// last printing time
-static unsigned long nskipped = 0;	// number of skipped error messages (couldn't print that fast)
+// static unsigned long ptim = 0;	// last printing time
+// static unsigned long nskipped = 0;	// number of skipped error messages (couldn't print that fast)
 
   // Determine which block to read, based on present code cycle
   rcvBlock = ((cycle) * (IPC_MAX_RATE / FE_RATE)) % IPC_BLOCKS;
