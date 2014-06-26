@@ -26,6 +26,9 @@ struct proc_dir_entry *proc_epics_dir_entry;
 /// /proc/{sysname}/futures entry
 struct proc_dir_entry *proc_futures_entry;
 
+void remove_epics_proc_files(void);
+int create_epics_proc_files(void);
+
 /// Routine to read the /proc/{model}/status file. \n \n
 ///	 We give all of our information in one go, so if the
 ///	 user asks us if we have more information the \n
