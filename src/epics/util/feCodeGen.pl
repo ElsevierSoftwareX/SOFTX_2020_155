@@ -1383,6 +1383,11 @@ for($ii=0;$ii<32;$ii++)
 
 # print OUTH "\tint awgtpmanGPS;\n";
 
+print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD int ai 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_STATUS int ao 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_SDF_NAME int stringin 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_TIME int stringout 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_SDF_LOADED int stringout 0\n";
 
 # The following code is in solely for automated testing.
 if($diagTest > -1)
@@ -2320,7 +2325,9 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 #//		- GENERATE GDS_TP SCREEN
 require "lib/medmGenGdsTp.pm";
 my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
-   ("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$adcCnt,$dacCnt,$adcMaster,@dacType);
+my $scriptTarget = "/opt/rtcds/$location/$lsite/scripts/burt.py";
+my $scriptArgs = "-s $location -i $lsite -m $skeleton -d $dcuId &"; 
+   ("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dacType);
 #//		- GENERATE ADC SCREENS
 for($ii=0;$ii<$adcCnt;$ii++)
 {
