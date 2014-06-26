@@ -22,6 +22,9 @@ char *pEpicsInt1;
 float *pEpicsFloat;				// Pointer to current DAQ data in shared memory.
 double *pEpicsDblData1;
 
+int daqConfig(struct DAQ_INFO_BLOCK *, struct DAQ_INFO_BLOCK *, char *);
+int loadLocalTable(DAQ_XFER_INFO *, DAQ_LKUP_TABLE [], int , DAQ_INFO_BLOCK *, DAQ_RANGE *);
+int daqWrite(int,int,struct DAQ_RANGE,int,double *[],struct FILT_MOD *,int,int [],double [],char *);
 
 /* ******************************************************************** */
 /* Routine to connect and write to LIGO DAQ system       		*/
@@ -67,14 +70,10 @@ static char *pReadBuffer;	/* Ptr to swing buff to xmit data to FB */
 static int phase;		/* 0-1, switches swing buffers.		*/
 static int daqSlot;		/* 0-sysRate, data slot to write data	*/
 static int excSlot;		/* 0-sysRate, slot to read exc data	*/
-float *pFloat = 0;		/* Temp ptr to write float data.	*/
-short *pShort = 0;		/* Temp ptr to write short data.	*/
-unsigned int *pInteger = 0;	/* Temp ptr to write unsigned int data. */
 char *bufPtr;			/* Ptr to data for crc calculation.	*/
 static unsigned int crcTest;	/* Continuous calc of CRC.		*/
 static unsigned int crcSend;	/* CRC sent to FB.			*/
 static DAQ_INFO_BLOCK dataInfo; /* Local DAQ config info buffer.	*/
-int decSlot;			/* Tracks decimated data positions.	*/
 static int tpStart;		/* Marks address of first TP data	*/
 static volatile GDS_CNTRL_BLOCK *gdsPtr;  /* Ptr to shm to pass TP info to DAQ */
 static volatile char *exciteDataPtr;	  /* Ptr to EXC data in shmem.	*/
@@ -361,7 +360,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 #ifdef CORE_BIQUAD
 #define iir_filter iir_filter_biquad
 #endif
-      if((dataInfo.tp[ii].dataType != DAQ_DATATYPE_32BIT_INT) && (dataInfo.tp[ii].dataType != DAQ_DATATYPE_32BIT_UINT))
+      if(dataInfo.tp[ii].dataType != DAQ_DATATYPE_32BIT_UINT)
       {
 	      if(localTable[ii].decFactor == 2) dWord = iir_filter(dWord,&dCoeff2x[0],DTAPS,&dHistory[ii][0]);
 	      if(localTable[ii].decFactor == 4) dWord = iir_filter(dWord,&dCoeff4x[0],DTAPS,&dHistory[ii][0]);
@@ -383,11 +382,8 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	  ((short *)(pWriteBuffer + localTable[ii].offset))[(daqSlot/localTable[ii].decFactor)^1] = (short)dWord;
 
         } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) {
-	  if (localTable[ii].decFactor == 1)
-	    ((int *)(pWriteBuffer + localTable[ii].offset))[daqSlot] = ((int)dWord);
-	  else 
-	    ((int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor]
-		= ((int)dWord) & *((int *)(dHistory[ii]));
+	  // Write a 32-bit int (downcast from the double passed)
+	  ((int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (int)dWord;
         } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_UINT) {
 	  if (localTable[ii].decFactor == 1)
 	    ((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot] = ((unsigned int)dWord);
@@ -398,11 +394,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	  // Write a 32-bit float (downcast from the double passed)
 	  ((float *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (float)dWord;
       	}
-      } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) {
-        if ((daqSlot % localTable[ii].decFactor) == 1)
-	  *((int *)(dHistory[ii])) = (int)dWord;
- 	else
-	  *((int *)(dHistory[ii])) &= (int)dWord;
       } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_UINT) {
         if ((daqSlot % localTable[ii].decFactor) == 1)
 	  *((unsigned int *)(dHistory[ii])) = (unsigned int)dWord;
