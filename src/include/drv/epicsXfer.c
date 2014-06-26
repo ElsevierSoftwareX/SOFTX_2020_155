@@ -94,9 +94,6 @@ inline int checkEpicsReset(int subcycle, CDS_EPICS *plocalEpics){
   ii = subcycle;
 
   if ((ii==MAX_MODULES) && (plocalEpics->epicsInput.vmeReset)) {
-#ifdef ADC_MASTER
-	if (cdsPciModules.adcCount > 0)  gsc16ai64AdcStop();
-#endif
         return(1);
   }
 
