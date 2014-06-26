@@ -129,18 +129,6 @@ sleep 5
 /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
 sleep 5
 sudo killall -q daqd
-if [ -e /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/burt/safe.snap ]; then
-	fname=/opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/burt/safe.snap;
-else
-	fname=\`ls -t /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/burt/${system}_burt_*.snap  2>/dev/null | head -1\`
-fi
-if [ "x\$fname" != x ]; then
-	log_fname=\${fname%.*}.log
-	burtwb -f \${fname} -l \${log_fname} -v
-	echo Burt restored \$fname
-fi
-# Always write one into burt to let the FE go
-caput \`grep -m 1 BURT_RESTORE /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/autoBurt.req\` 1
 if [ -e /var/run/init.d/awgtpman_${system} ]; then
 	sudo /var/run/init.d/awgtpman_${system} start
 else
