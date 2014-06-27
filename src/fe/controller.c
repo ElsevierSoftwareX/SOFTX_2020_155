@@ -417,6 +417,7 @@ void *fe_start(void *arg)
 
   /// \> Zero out DAC outputs
   for (ii = 0; ii < MAX_DAC_MODULES; ii++)
+  {
 #ifdef ADC_MASTER
     dacTimingErrorPending[ii] = 0;
 #endif
@@ -430,6 +431,7 @@ void *fe_start(void *arg)
 	ioMemData->dacOutUsed[ii][jj] = 0;
 #endif
     }
+  }
 
   /// \> Set pointers to filter module data buffers. \n
   /// - ---- Prior to V2.8, separate local/shared memories for FILT_MOD data.\n
