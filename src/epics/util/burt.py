@@ -16,73 +16,68 @@ class TkFileDialogExample(Frame):
     
 		Frame.__init__(self, root)
     
+		self.root = root
+		title = model + ' BURT'
+		self.root.title(title)
 		# options for buttons
 		#button_opt = {'fill': Tkconstants.BOTH, 'padx': 5, 'pady': 5}
-		button_opt = {'padx': 10, 'pady': 10}
-		frame_opt = {'padx': 10, 'pady': 30}
+		button_opt = {'padx': 20, 'pady': 10}
+		frame_opt = {'padx': 20, 'pady': 30}
    
-		# define buttons
-		#self.mlabel = LabelFrame(self,text='FE BURT - File Loaded')
-		#self.mlabel.pack(fill="both", expand="yes", **frame_opt)
-
-		# Label(self.mlabel, text='PRESENT BURT FILE').pack(**button_opt)
-		#self.pbf = Label(self.mlabel, text='')
-		#self.pbf.pack(fill="both", expand="yes", **button_opt)
-		#ename = self.dcuid + '_SDF_LOADED'
-		#print 'Loaded file is ',ename
-		#e = PV(ename)
-		#pf = e.value
-		#self.pbf.config(text = pf)
-
-		self.mlabel1 = LabelFrame(self,text='FE BURT - Select File')
+		# Configure the various selection buttones
+		lftitle = model.upper() + ' BURT - Select File'
+		self.mlabel1 = LabelFrame(self,text=lftitle)
 		self.mlabel1.pack(fill="both", expand="yes", **frame_opt)
-		# self.b1 = Button(self.mlabel, text='askopenfile', command=self.askopenfile).pack(**button_opt)
-		self.b2 = Button(self.mlabel1, text='Open CDF', command=self.askopenfilename)
-		self.b2.pack(**button_opt)
+		self.mlabel1.configure(bg = 'light grey')
+		self.b1 = Button(self.mlabel1, text='Select BURT File', command=self.askopenfilename)
+		self.b1.pack(**button_opt)
+		self.b1.configure(bg = 'wheat')
 
-		self.mlabel2 = LabelFrame(self,text='FE BURT - Load Settings')
+		lftitle = model.upper() + ' BURT - Load Settings'
+		self.mlabel2 = LabelFrame(self,text=lftitle)
 		self.mlabel2.pack(fill="both", expand="yes", **frame_opt)
-		self.b3 = Button(self.mlabel2, text='Load BURT File', command=self.loadfile).pack(**button_opt)
+		self.mlabel2.configure(bg = 'light grey')
+		self.b2 = Button(self.mlabel2, text='Load BURT File', command=self.loadfile)
+		self.b2.pack(**button_opt)
+		self.b2.configure(bg = 'wheat')
 
-		self.mlabel3 = LabelFrame(self,text='FE BURT - Read Only')
+		lftitle = model.upper() + ' BURT - Read Only'
+		self.mlabel3 = LabelFrame(self,text=lftitle)
 		self.mlabel3.pack(fill="both", expand="yes", **frame_opt)
-		self.b3 = Button(self.mlabel3, text='Read BURT File', command=self.readfile).pack(**button_opt)
+		self.b3 = Button(self.mlabel3, text='Read BURT File', command=self.readfile)
+		self.b3.pack(**button_opt)
+		self.b3.configure(bg = 'wheat')
 
-		self.mlabel4 = LabelFrame(self,text='FE BURT - Reset')
+		lftitle = model.upper() + ' BURT - RESET'
+		self.mlabel4 = LabelFrame(self,text=lftitle)
 		self.mlabel4.pack(fill="both", expand="yes", **frame_opt)
-		self.b4 = Button(self.mlabel4, text='BURT Reset', command=self.resetsettings).pack(**button_opt)
+		self.b4 = Button(self.mlabel4, text='BURT Reset', command=self.resetsettings)
+		self.b4.pack(**button_opt)
+		self.b4.configure(bg = 'wheat')
 
 		ename = self.dcuid + '_SDF_LOADED'
 		print 'Loaded file is ',ename
 		e = PV(ename)
 		pf = e.value
    
-		# self.b2.configure(text = "Close CDF")
+		# Add file to be loaded to LOAD button text
 		self.b2.configure(text = pf)
 		# define options for opening or saving a file
 		self.file_opt = options = {}
 		options['defaultextension'] = '.snap'
 		options['filetypes'] = [('burt files', '.snap'),('all files', '.*')]
 		options['initialdir'] = self.dir
-		# options['initialfile'] = model + '_safe.snap'
 		options['parent'] = root
-		options['title'] = 'CDF GUI'
+		options['title'] = 'Select BURT File'
    
-		# This is only available on the Macintosh, and only when Navigation Services are installed.
-		#options['message'] = 'message'
-	   
-		# if you use the multiple file version of the module functions this option is set automatically.
-		#options['multiple'] = 1
 	   
 		# defining options for opening a directory
 		self.dir_opt = options = {}
 		options['initialdir'] = self.dir
 		options['mustexist'] = False
 		options['parent'] = root
-		options['title'] = 'CDF GUI'
-	def yview(self, *args):
-		apply(self.lb1.yview, args)
-		#apply(self.lb2.yview, args)
+		options['title'] = 'Select BURT File '
+
 	def askopenfile(self):
    
 	       """Returns an opened file in read mode."""
@@ -117,7 +112,7 @@ class TkFileDialogExample(Frame):
    
 	def loadfile(self):
    
-	       """Returns an opened file in write mode."""
+	       """Sends load signal to FE code and exits BURT GUI"""
 	       ename = self.dcuid + '_SDF_RELOAD'
 	       print 'Sending Load Command ',ename
 	       e = PV(ename)
@@ -125,11 +120,9 @@ class TkFileDialogExample(Frame):
 	       time.sleep(2)
 	       self.quit()
    
-	       # return tkFileDialog.asksaveasfile(mode='w', **self.file_opt)
-   
 	def readfile(self):
    
-	       """Returns an opened file in write mode."""
+	       """Sends Read Only command to FE and closes BURT GUI"""
 	       ename = self.dcuid + '_SDF_RELOAD'
 	       print 'Sending Read command in ',ename
 	       e = PV(ename)
@@ -139,7 +132,7 @@ class TkFileDialogExample(Frame):
    
 	def resetsettings(self):
    
-	       """Commands reset of settings marked as care."""
+	       """Sends Reset command to FE and closes BURT GUI"""
 	       ename = self.dcuid + '_SDF_RELOAD'
 	       print 'Sending Reset ',ename
 	       e = PV(ename)
@@ -166,6 +159,7 @@ class TkFileDialogExample(Frame):
    
 	       return tkFileDialog.askdirectory(**self.dir_opt)
    
+# Main Routine
 if __name__=='__main__':
      parser = argparse.ArgumentParser(description='Input Model Info')
      parser.add_argument('-s',dest='site')
