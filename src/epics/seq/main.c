@@ -309,6 +309,7 @@ int newvalue(int numchans,int command) {
 	}
 }
 
+// Function to read BURT files and load data into local tables.
 int readConfig(char *pref,char *sdfile, int command)
 {
 	FILE *cdf;
@@ -458,6 +459,7 @@ int readConfig(char *pref,char *sdfile, int command)
 }
 
 /// Calculate Alarm (state) setpoint CRC checksums
+// Not presently used.
 unsigned int
 field_crc(DBENTRY *pdbentry, char *field, unsigned int crc, unsigned int *len_crc) {
 	long status = dbFindField(pdbentry, field);
@@ -472,6 +474,8 @@ field_crc(DBENTRY *pdbentry, char *field, unsigned int crc, unsigned int *len_cr
 }
 
 /// Main subroutine for monitoring alarms
+// NOTE: This code is not presently called. It was used when alarm monitoring was intended
+// 	 as the means to determine diffs between BURT and present settings.
 void process_alarms(DBBASE *pdbbase, char *pref)
 {
     DBENTRY  *pdbentry;
@@ -692,26 +696,31 @@ int main(int argc,char *argv[])
 	printf("Executing post script commands\n");
 	dbDumpRecords(*iocshPpdbbase);
 	init_vars();
+	// Get environment variables from startup command to formulate EPICS record names.
 	char *pref = getenv("PREFIX");
 	char *sdfDir = getenv("SDF_DIR");
 	char *sdf = getenv("SDF_FILE");
 	strcat(sdf,"_safe");
 	char sdfile[256];
 	// sprintf(sdfile, "%s%s%s", sdfDir, sdf,".sdf");
-	sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");
+	sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");					// Initialize with BURT_safe.snap
 	printf("SDF FILE = %s\n",sdfile);
-	char reloadChan[256]; sprintf(reloadChan, "%s_%s", pref, "SDF_RELOAD");
-	char reloadStat[256]; sprintf(reloadStat, "%s_%s", pref, "SDF_RELOAD_STATUS");
-	char sdfFileName[256]; sprintf(sdfFileName, "%s_%s", pref, "SDF_NAME");
-	char loadedFile[256]; sprintf(loadedFile, "%s_%s", pref, "SDF_LOADED");
-	char speStat[256]; sprintf(speStat, "%s_%s", pref, "GRD_SP_ERR_CNT");
+	// Create BURT/SDF EPICS channel names
+	char reloadChan[256]; sprintf(reloadChan, "%s_%s", pref, "SDF_RELOAD");		// Request to load new BURT
+	char reloadStat[256]; sprintf(reloadStat, "%s_%s", pref, "SDF_RELOAD_STATUS");	// Status of last reload
+	char sdfFileName[256]; sprintf(sdfFileName, "%s_%s", pref, "SDF_NAME");		// Name of file to load next request
+	char loadedFile[256]; sprintf(loadedFile, "%s_%s", pref, "SDF_LOADED");		// Name of file presently loaded
+	char speStat[256]; sprintf(speStat, "%s_%s", pref, "GRD_SP_ERR_CNT");		// Setpoint error counter
 	printf("SDF FILE EPICS = %s\n",sdfFileName);
 	sprintf(timechannel,"%s_%s", pref, "TIME_STRING");
 	printf("timechannel = %s\n",timechannel);
-	sprintf(reloadtimechannel,"%s_%s", pref, "SDF_RELOAD_TIME");
+	sprintf(reloadtimechannel,"%s_%s", pref, "SDF_RELOAD_TIME");			// Time of last BURT reload
+
+	// Clear request to load new BURT file
 	status = dbNameToAddr(reloadChan,&taddr);
 	status = dbPutField(&taddr,DBR_LONG,&cdfReq,1);
 
+	// Initialize BURT file to be loaded next request = BURT_safe.snap
 	status = dbNameToAddr(sdfFileName,&saddr);
 	status = dbPutField(&saddr,DBR_STRING,sdf,1);
 
@@ -728,6 +737,7 @@ int main(int argc,char *argv[])
 	sleep(2);
 
 	for(;;) {
+		// Following line is from old alarm monitor version.
 		// process_alarms(*iocshPpdbbase, pref);
 		sleep(1);
 		// Check for reload request
@@ -754,6 +764,7 @@ int main(int argc,char *argv[])
 		}
 		status = dbPutField(&raddr,DBR_LONG,&burtstatus,1);
 		sleep(1);
+		// Check present settings vs BURT settings and report diffs.
 		sperror = spChecker(pref);
 		status = dbPutField(&speaddr,DBR_LONG,&sperror,1);
 	}
