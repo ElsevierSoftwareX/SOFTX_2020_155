@@ -884,8 +884,8 @@ int status = 0;
     pEpicsDblData = (pEpicsIntData + epicsIntXferSize + dataInfo->epicsdblDataOffset);
 
     // Send EPICS data diags to dmesg
-    printf("DAQ EPICS INT DATA is at 0x%x with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
-    printf("DAQ EPICS FLT DATA is at 0x%x\n",(long)pEpicsDblData);
+    printf("DAQ EPICS INT DATA is at 0x%lx with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
+    printf("DAQ EPICS FLT DATA is at 0x%lx\n",(long)pEpicsDblData);
     printf("DAQ EPICS: Int = %d  Flt = %d Filters = %d Total = %d Fast = %d\n",dataInfo->numEpicsInts,dataInfo->numEpicsFloats,dataInfo->numEpicsFilts, dataInfo->numEpicsTotal, dataInfo->numChans);
     printf("DAQ EPICS: Number of Filter Module Xfers = %d last = %d\n",dataInfo->numEpicsFiltXfers,dataInfo->numEpicsFiltsLast);
     /// \> Initialize CRC length with EPICS data size.
