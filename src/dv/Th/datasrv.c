@@ -17,7 +17,7 @@ struct caltime ctout;
 struct gps  gpsTime;
 struct gps gps;
 
-static int debug = 1 ; /* For debugging - JCB */
+static int debug = 0 ; /* For debugging - JCB */
 
 #define  COMMANDSIZE   2048
 
@@ -638,11 +638,6 @@ int  seconds;
 	  pos += channelAll[index].rate*getBlockLength(channelAll[j].data_type, 0)*bpos;
 	  pos /= Fast;
           switch ( channelAll[index].data_type ) {
-            case 7: /* 32 bit unsigned integer */
-                for ( j=0; j<channelAll[index].rate/Fast; j++ ) {
-		   data[j] = *((unsigned int *)(DataDaq.tb->data+pos+j*sizeof(unsigned int)));
-                }
-                break;
             case 4: /* 32 bit-float */
                 for ( j=0; j<channelAll[index].rate/Fast; j++ ) {
 //		   data[j] = *((float *)(DataDaq.tb->data+pos+j*sizeof(float)));
@@ -702,13 +697,6 @@ int  seconds;
 	  pos /= Fast;
 /*fprintf (stderr, "chan=%s, index=%d, pos=%d ", chName, index, pos);*/
           switch ( chanList[index].data_type ) {
-            case 7: /* 32 bit unsigned-integer */
-                for ( j=0; j<chanList[index].rate/Fast; j++ ) {
-		   if (DataDaq.tb_size >= pos+j*sizeof(unsigned int)) {
-		     data[j] = (unsigned int) ntohl(*((unsigned int *)(DataDaq.tb->data+pos+j*sizeof(unsigned int))) );
-		   }
-               }
-               break;
             case 4: /* 32 bit-float */
                 for ( j=0; j<chanList[index].rate/Fast; j++ ) {
 //		   data[j] = *((float *)(DataDaq.tb->data+pos+j*sizeof(float)));
@@ -909,8 +897,7 @@ int  seconds, secrate;
 		   }
 		   mean = *((double *)( DataDaq.tb->data + pos + 2*sizeof(int)*secrate + j*2*sizeof(int) ));
 #if defined __linux__ || defined __APPLE__
-		   ((unsigned long *)&mean1)[1] = ntohl(((unsigned long *)&mean)[0]);
-		   ((unsigned long *)&mean1)[0] = ntohl(((unsigned long *)&mean)[1]);
+		   mean1 = ntohd(mean);
 #else
 		   mean1 = mean;
 #endif
@@ -1043,17 +1030,7 @@ char   temp[100];
 
        gpsTime.sec = (unsigned long)DataDaq.tb->gps;
 
-       /* If we know the gpsTime, we should know the leap seconds. */
-       if (gpsTime.sec < 599184012) /* 1998-12-31 23:59:60 */
-	  gpsTime.leap = 12;
-       else if (gpsTime.sec < 820108813) /* 2005-12-31 23:59:60 */
-	  gpsTime.leap = 13;
-       else if (gpsTime.sec < 914803214) /* 2008-12-31 23:59:60 */
-	  gpsTime.leap = 14;
-       else if (gpsTime.sec < 1025136015) /* 2012-06-60 23:59:60 */
-	  gpsTime.leap = 15;
-       else
-	  gpsTime.leap = 16;
+       gpsTime.leap = 13;
        gps_to_utc(&gpsTime,&ctout);
        if ( ctout.date.year-2000 < 0 )
 	 sprintf ( timestamp, "%ld-%02d-%02d-%02d-%02d-%02d", ctout.date.year-1900, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
@@ -1080,17 +1057,7 @@ void DataGPStoUTC(long gpsin, char* utcout)
 char   temp[100];
 
        gpsTime.sec = (unsigned long)gpsin;
-       /* If we know the gpsTime, we should know the leap seconds. */
-       if (gpsTime.sec < 599184012) /* 1998-12-31 23:59:60 */
-	  gpsTime.leap = 12;
-       else if (gpsTime.sec < 820108813) /* 2005-12-31 23:59:60 */
-	  gpsTime.leap = 13;
-       else if (gpsTime.sec < 914803214) /* 2008-12-31 23:59:60 */
-	  gpsTime.leap = 14;
-       else if (gpsTime.sec < 1025136015) /* 2012-06-60 23:59:60 */
-	  gpsTime.leap = 15;
-       else
-	  gpsTime.leap = 16;
+       gpsTime.leap = 13;
        gps_to_utc(&gpsTime,&ctout);
        if ( ctout.date.year-2000 < 0 )
 	 sprintf ( utcout, "%ld-%d-%d-%d-%d-%d", ctout.date.year-1900, ctout.date.month, ctout.date.day, ctout.hour, ctout.minute, ctout.second);
@@ -1179,9 +1146,6 @@ int   j;
 int getBlockLength(int datatype, int trend)
 {
        switch ( datatype ) {
-         case 7: 
-             return sizeof(unsigned int);
-             break;
          case 6: 
              return 2*sizeof(float);
              break;

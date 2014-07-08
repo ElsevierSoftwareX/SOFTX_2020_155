@@ -13,7 +13,7 @@
 ! messageBox1
 
 ! label44
-DataViewer*MessageLabel.labelString: aLIGO DataViewer 2.3\nJune 13th, 2011
+DataViewer*MessageLabel.labelString: aLIGO DataViewer 2.8.4\nJuly 8th, 2014
 
 
 ! restoreWin
