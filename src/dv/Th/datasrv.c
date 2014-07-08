@@ -897,8 +897,7 @@ int  seconds, secrate;
 		   }
 		   mean = *((double *)( DataDaq.tb->data + pos + 2*sizeof(int)*secrate + j*2*sizeof(int) ));
 #if defined __linux__ || defined __APPLE__
-		   ((unsigned long *)&mean1)[1] = ntohl(((unsigned long *)&mean)[0]);
-		   ((unsigned long *)&mean1)[0] = ntohl(((unsigned long *)&mean)[1]);
+		   mean1 = ntohd(mean);
 #else
 		   mean1 = mean;
 #endif
