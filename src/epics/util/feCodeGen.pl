@@ -1385,9 +1385,14 @@ for($ii=0;$ii<32;$ii++)
 
 print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD int ai 0\n";
 print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_STATUS int ao 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_SDF_FULL_CH_COUNT int ao 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_SDF_SUBSET_CH_COUNT int ao 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_SDF_MON_COUNT int ao 0\n";
 print EPICS "DUMMY FEC\_$dcuId\_SDF_NAME int stringin 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_SDF_NAME_SUBSET int stringin 0\n";
 print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_TIME int stringout 0\n";
 print EPICS "DUMMY FEC\_$dcuId\_SDF_LOADED int stringout 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_SDF_LOADED_SUBSET int stringout 0\n";
 
 # The following code is in solely for automated testing.
 if($diagTest > -1)
