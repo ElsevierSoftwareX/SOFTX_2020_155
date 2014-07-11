@@ -2088,6 +2088,7 @@ $sysname = uc($skeleton);
 $sed_arg .= "s/FBID/$sysname/g;";
 $sed_arg .= "s/MEDMDIR/$skeleton/g;";
 $sed_arg .= "s/IFO_LC/$lsite/g;";
+$sed_arg .= "s/MODEL_LC/$skeleton/g;";
 $sitelc = lc($site);
 $mxpt = 215;
 $mypt = 172;
@@ -2101,6 +2102,8 @@ print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
 #//		-  Generate Guardian Alarm Monitor Screen
 system("cp $rcg_src_dir/src/epics/util/ALARMS.adl ALARMS.adl");
 system("cat ALARMS.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_ALARM_MONITOR.adl");
+system("cp $rcg_src_dir/src/epics/util/BURT_RESTORE.adl BURT_RESTORE.adl");
+system("cat BURT_RESTORE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_BURT_RESTORE.adl");
 
 my $cur_subsys_num = 0;
 
