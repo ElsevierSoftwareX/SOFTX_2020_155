@@ -230,18 +230,37 @@ int newfilterstats(int numchans,int command) {
 	int myerror = 0;
 	int ii;
 	FILE *log;
+	char chname[128];
+	int mask = 0x3fff;
 
 	if(command == BURT_RESET) return(0);
 	for(ii=0;ii<numchans;ii++) {
+		bzero(chname,strlen(chname));
 		// Find address of channel
-		status = dbNameToAddr(filterTable[ii].fname,&paddr);
+		strcpy(chname,filterTable[ii].fname);
+		strcat(chname,"SWREQ");
+		status = dbNameToAddr(chname,&paddr);
 		if(!status)
 		{
 			status = dbPutField(&paddr,DBR_LONG,&filterTable[ii].swreq,1);
 		} else {				// Write errors to log file.
 			myerror = 4;
 			log = fopen("./ioc.log","a");
-			fprintf(log,"CDF Load Error - Channel Not Found: %s\n",filterTable[ii].fname);
+			fprintf(log,"CDF Load Error - Channel Not Found: %s\n",chname);
+			fclose(log);
+		}
+		bzero(chname,strlen(chname));
+		// Find address of channel
+		strcpy(chname,filterTable[ii].fname);
+		strcat(chname,"SWMASK");
+		status = dbNameToAddr(chname,&paddr);
+		if(!status)
+		{
+			status = dbPutField(&paddr,DBR_LONG,&mask,1);
+		} else {				// Write errors to log file.
+			myerror = 4;
+			log = fopen("./ioc.log","a");
+			fprintf(log,"CDF Load Error - Channel Not Found: %s\n",chname);
 			fclose(log);
 		}
 	}
@@ -440,8 +459,8 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 					{
 						bzero(filterTable[fmNum].fname,strlen(filterTable[fmNum].fname));
 						strncpy(filterTable[fmNum].fname,s1,(strlen(s1)-4));
-						if(strstr(filterTable[fmNum].fname,"SWREQ") == NULL) 
-						strcat(filterTable[fmNum].fname,"SWREQ");
+						// if(strstr(filterTable[fmNum].fname,"SWREQ") == NULL) 
+						// strcat(filterTable[fmNum].fname,"SWREQ");
 						tmpreq = (int)atof(s3);
 					}
 					if((strstr(s1,"_SW2S") != NULL) && (strstr(s1,"_SW2S.") == NULL))
