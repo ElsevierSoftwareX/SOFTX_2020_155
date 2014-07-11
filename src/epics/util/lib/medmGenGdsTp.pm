@@ -101,32 +101,56 @@ sub createGdsMedm
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{yellow},"","","");
 	$xpos = 375; $ypos = 93; $width = 175; $height = 225;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{yellow},"","","");
-	$xpos = 555; $ypos = 93; $width = 215; $height = 100;
+	# BURT Background
+	$xpos = 555; $ypos = 93; $width = 215; $height = 107;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{yellow},"","","");
-	$xpos = 555; $ypos = 205; $width = 215; $height = 50;
+	# Coeff load background
+	$xpos = 555; $ypos = 210; $width = 215; $height = 50;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{yellow},"","","");
+	# DAQ Reload background
 	$xpos = 555; $ypos = 268; $width = 215; $height = 50;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{yellow},"","","");
 	# File loading
 	$xpos = 625; $ypos = 72; $width = 69; $height = 15; 
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"CONFIGURATION FILES",$ecolors{white});
-	$xpos = 562; $ypos = 104; $width = 200; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_NAME",$ecolors{white},$ecolors{blue},"static");
-	$xpos = 562; $ypos = 123; $width = 200; $height = 18;
-        #$medmdata .= ("CDS::medmGen::medmGenMessage") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD",$ecolors{white},$ecolors{black},"BURT Load","1");
-	
-	$arg1 = "BURT Restore";
-	$arg2 = $scriptTarget;
-	$arg3 = $scriptArgs;
-        $medmdata .= ("CDS::medmGen::medmGenShellCmd") -> ($xpos,$ypos,$width,$height,$ecolors{white},$ecolors{black},"1","BURT Load",$arg1,$arg2,$arg3);
-
-	$xpos = 562; $ypos = 146; $width = 200; $height = 15;
+	# BURT STUFF ******************************************************************************************************
+	# Add BURT related display
+	$xpos = 562; $ypos = 106; $width = 135; $height = 18;
+	$mdlNamelc = lc($mdlName);
+	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_BURT_RESTORE.adl";
+        $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"BURT RESTORE");
+	# BURT Diffs Label
+	$xpos = 704; $ypos = 94; $width = 24; $height = 12;
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DIFFS",$ecolors{black});
+	# BURT Alarm Label
+	$xpos = 735; $ypos = 94; $width = 24; $height = 12;
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"ALM",$ecolors{black});
+	# Add Guardian setpoint error  Counter Monitor
+	$xpos = 701; $ypos = 108; $width = 30; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_GRD_SP_ERR_CNT",$ecolors{white},$ecolors{black},"alarm");
+	# Add Guardian readback error  Counter Monitor
+	$xpos = 735; $ypos = 108; $width = 30; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_GRD_RB_ERR_CNT",$ecolors{white},$ecolors{black},"alarm");
+	# BURT FULL Label
+	$xpos = 559; $ypos = 128; $width = 40; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"FULL",$ecolors{black});
+	# BURT PARTIAL Label
+	$xpos = 559; $ypos = 147; $width = 40; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"PART",$ecolors{black});
+	# BURT FULL File Loaded
+	$xpos = 602; $ypos = 128; $width = 160; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_LOADED",$ecolors{white},$ecolors{blue},"static");
-	$xpos = 562; $ypos = 162; $width = 65; $height = 10;
+	# BURT Partial File Loaded
+	$xpos = 602; $ypos = 148; $width = 160; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_LOADED_SUBSET",$ecolors{white},$ecolors{blue},"static");
+	# BURT Reload Status bit 0
+	$xpos = 562; $ypos = 166; $width = 65; $height = 10;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_STATUS","0","0",$ecolors{yellow},$ecolors{green});
-	$xpos = 628; $ypos = 162; $width = 134; $height = 10;
+	# BURT Reload Status bit 1 and 2
+	$xpos = 628; $ypos = 166; $width = 134; $height = 10;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_STATUS","1","2",$ecolors{red},$ecolors{green});
-	$xpos = 562; $ypos = 173; $width = 200; $height = 15;
+	# BURT Reload Time
+	$xpos = 562; $ypos = 177; $width = 200; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_TIME",$ecolors{white},$ecolors{blue},"static");
 
 	$xpos = 210; $ypos = 117; $width = 153; $height = 18;
@@ -253,17 +277,6 @@ sub createGdsMedm
 	$xpos = 314; $ypos = 119; $width = 40; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_IPC_STAT","0","3",$ecolors{red},$ecolors{green});
 
-	# Add Guardian Alarm Monitor related display
-	$xpos = 210; $ypos = 142; $width = 85; $height = 18;
-	$mdlNamelc = lc($mdlName);
-	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_ALARM_MONITOR.adl";
-        $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"Guard (S/R)");
-	# Add Guardian setpoint error  Counter Monitor
-	$xpos = 299; $ypos = 144; $width = 30; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_GRD_SP_ERR_CNT",$ecolors{white},$ecolors{black},"alarm");
-	# Add Guardian readback error  Counter Monitor
-	$xpos = 331; $ypos = 144; $width = 30; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_GRD_RB_ERR_CNT",$ecolors{white},$ecolors{black},"alarm");
 
 	# Add Coeff Reload
 	$xpos = 562; $ypos = 212; $width = 200; $height = 18;
