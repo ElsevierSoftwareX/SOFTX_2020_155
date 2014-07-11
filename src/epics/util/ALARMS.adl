@@ -1,17 +1,17 @@
 
 file {
-	name="/opt/rtcds/rtscore/trunk/src/epics/util/ALARMS.adl"
-	version=030107
+	name="/opt/rtcds/tst/x1/core/advLigoRTS/trunk/src/epics/util/ALARMS.adl"
+	version=030104
 }
 display {
 	object {
-		x=136
-		y=146
-		width=565
-		height=400
+		x=196
+		y=402
+		width=550
+		height=320
 	}
 	clr=14
-	bclr=3
+	bclr=4
 	cmap=""
 	gridSpacing=5
 	gridOn=0
@@ -91,7 +91,7 @@ rectangle {
 	object {
 		x=0
 		y=0
-		width=565
+		width=550
 		height=22
 	}
 	"basic attribute" {
@@ -113,7 +113,7 @@ text {
 }
 "text update" {
 	object {
-		x=326
+		x=332
 		y=4
 		width=200
 		height=15
@@ -129,8 +129,8 @@ text {
 rectangle {
 	object {
 		x=0
-		y=24
-		width=565
+		y=52
+		width=550
 		height=22
 	}
 	"basic attribute" {
@@ -139,8 +139,8 @@ rectangle {
 }
 text {
 	object {
-		x=12
-		y=27
+		x=20
+		y=55
 		width=100
 		height=18
 	}
@@ -152,8 +152,8 @@ text {
 }
 "text update" {
 	object {
-		x=122
-		y=27
+		x=200
+		y=55
 		width=50
 		height=16
 	}
@@ -166,15 +166,56 @@ text {
 	limits {
 	}
 }
+rectangle {
+	object {
+		x=0
+		y=25
+		width=550
+		height=22
+	}
+	"basic attribute" {
+		clr=54
+	}
+}
+text {
+	object {
+		x=20
+		y=27
+		width=100
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="ALARM SET CRC"
+	align="horiz. centered"
+}
 "text update" {
 	object {
-		x=326
-		y=27
-		width=200
+		x=192
+		y=28
+		width=80
 		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_ALH_CRC"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	format="hexadecimal"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=465
+		y=55
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_RB_ERR_CNT"
 		clr=50
 		bclr=42
 	}
@@ -184,28 +225,28 @@ text {
 }
 text {
 	object {
-		x=222
-		y=29
+		x=294
+		y=57
 		width=100
 		height=18
 	}
 	"basic attribute" {
 		clr=2
 	}
-	textix="BURT FILE"
+	textix="READOUT ALARMS"
 	align="horiz. centered"
 }
 "text update" {
 	object {
-		x=10
-		y=80
+		x=20
+		y=94
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT0"
-		clr=14
-		bclr=50
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -213,15 +254,15 @@ text {
 }
 "text update" {
 	object {
-		x=10
-		y=95
+		x=20
+		y=115
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT1"
-		clr=14
-		bclr=1
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -229,79 +270,15 @@ text {
 }
 "text update" {
 	object {
-		x=255
-		y=80
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT0_BURT"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=80
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT0_LIVE"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=255
-		y=95
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT1_BURT"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=95
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT1_LIVE"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=10
-		y=110
+		x=20
+		y=136
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT2"
-		clr=14
-		bclr=50
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -309,15 +286,15 @@ text {
 }
 "text update" {
 	object {
-		x=10
-		y=125
+		x=20
+		y=157
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT3"
-		clr=14
-		bclr=1
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -325,142 +302,15 @@ text {
 }
 "text update" {
 	object {
-		x=255
-		y=110
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT2_BURT"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=110
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT2_LIVE"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=255
-		y=125
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT3_BURT"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=125
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT3_LIVE"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-rectangle {
-	object {
-		x=10
-		y=56
-		width=545
-		height=22
-	}
-	"basic attribute" {
-		clr=14
-	}
-}
-text {
-	object {
-		x=32
-		y=59
-		width=200
-		height=18
-	}
-	"basic attribute" {
-		clr=2
-	}
-	textix="CHANNEL NAME"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=256
-		y=60
-		width=60
-		height=18
-	}
-	"basic attribute" {
-		clr=2
-	}
-	textix="BURT"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=320
-		y=60
-		width=60
-		height=18
-	}
-	"basic attribute" {
-		clr=2
-	}
-	textix="PRESENT"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=385
-		y=60
-		width=170
-		height=18
-	}
-	"basic attribute" {
-		clr=2
-	}
-	textix="TIME OF LAST CHANGE"
-	align="horiz. centered"
-}
-"text update" {
-	object {
-		x=10
-		y=140
+		x=20
+		y=178
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT4"
-		clr=14
-		bclr=50
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -468,15 +318,15 @@ text {
 }
 "text update" {
 	object {
-		x=10
-		y=155
+		x=20
+		y=199
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT5"
-		clr=14
-		bclr=1
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -484,79 +334,15 @@ text {
 }
 "text update" {
 	object {
-		x=255
-		y=140
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT4_BURT"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=140
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT4_LIVE"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=255
-		y=155
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT5_BURT"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=155
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT5_LIVE"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=10
-		y=170
+		x=20
+		y=220
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT6"
-		clr=14
-		bclr=50
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -564,15 +350,15 @@ text {
 }
 "text update" {
 	object {
-		x=10
-		y=185
+		x=20
+		y=241
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT7"
-		clr=14
-		bclr=1
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -580,79 +366,15 @@ text {
 }
 "text update" {
 	object {
-		x=255
-		y=170
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT6_BURT"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=170
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT6_LIVE"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=255
-		y=185
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT7_BURT"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=185
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT7_LIVE"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=10
-		y=200
+		x=20
+		y=262
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT8"
-		clr=14
-		bclr=50
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -660,15 +382,15 @@ text {
 }
 "text update" {
 	object {
-		x=10
-		y=215
+		x=20
+		y=283
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
 		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT9"
-		clr=14
-		bclr=1
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -676,79 +398,15 @@ text {
 }
 "text update" {
 	object {
-		x=255
-		y=200
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT8_BURT"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=200
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT8_LIVE"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=255
-		y=215
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT9_BURT"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=215
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT9_LIVE"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=10
-		y=230
+		x=290
+		y=94
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10"
-		clr=14
-		bclr=50
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_RB_STAT0"
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -756,15 +414,15 @@ text {
 }
 "text update" {
 	object {
-		x=10
-		y=245
+		x=290
+		y=115
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11"
-		clr=14
-		bclr=1
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_RB_STAT1"
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -772,79 +430,15 @@ text {
 }
 "text update" {
 	object {
-		x=255
-		y=230
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10_BURT"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=230
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10_LIVE"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=255
-		y=245
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11_BURT"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=245
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11_LIVE"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=10
-		y=260
+		x=290
+		y=136
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12"
-		clr=14
-		bclr=50
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_RB_STAT2"
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -852,15 +446,15 @@ text {
 }
 "text update" {
 	object {
-		x=10
-		y=275
+		x=290
+		y=157
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13"
-		clr=14
-		bclr=1
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_RB_STAT3"
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -868,79 +462,15 @@ text {
 }
 "text update" {
 	object {
-		x=255
-		y=260
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12_BURT"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=260
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12_LIVE"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=255
-		y=275
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13_BURT"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=275
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13_LIVE"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=10
-		y=290
+		x=290
+		y=178
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14"
-		clr=14
-		bclr=50
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_RB_STAT4"
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -948,15 +478,15 @@ text {
 }
 "text update" {
 	object {
-		x=10
-		y=305
+		x=290
+		y=199
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15"
-		clr=14
-		bclr=1
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_RB_STAT5"
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -964,335 +494,15 @@ text {
 }
 "text update" {
 	object {
-		x=255
-		y=290
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14_BURT"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=290
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14_LIVE"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=255
-		y=305
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15_BURT"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=305
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15_LIVE"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=80
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT0_TIME"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=95
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT1_TIME"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=110
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT2_TIME"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=125
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT3_TIME"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=140
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT4_TIME"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=155
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT5_TIME"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=170
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT6_TIME"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=185
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT7_TIME"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=200
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT8_TIME"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=215
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT9_TIME"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=230
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10_TIME"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=245
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11_TIME"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=260
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12_TIME"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=275
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13_TIME"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=290
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14_TIME"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=305
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15_TIME"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=10
-		y=320
+		x=290
+		y=220
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16"
-		clr=14
-		bclr=50
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_RB_STAT6"
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -1300,15 +510,15 @@ text {
 }
 "text update" {
 	object {
-		x=10
-		y=335
+		x=290
+		y=241
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17"
-		clr=14
-		bclr=1
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_RB_STAT7"
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -1316,79 +526,15 @@ text {
 }
 "text update" {
 	object {
-		x=255
-		y=320
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16_BURT"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=320
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16_LIVE"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=255
-		y=335
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17_BURT"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=335
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17_LIVE"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=10
-		y=350
+		x=290
+		y=262
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18"
-		clr=14
-		bclr=50
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_RB_STAT8"
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
@@ -1396,143 +542,15 @@ text {
 }
 "text update" {
 	object {
-		x=10
-		y=365
+		x=290
+		y=283
 		width=240
-		height=15
+		height=16
 	}
 	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=255
-		y=350
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18_BURT"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=350
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18_LIVE"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=255
-		y=365
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19_BURT"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=320
-		y=365
-		width=60
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19_LIVE"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=320
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16_TIME"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=335
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17_TIME"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=350
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18_TIME"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=385
-		y=365
-		width=170
-		height=15
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19_TIME"
-		clr=14
-		bclr=1
+		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_RB_STAT9"
+		clr=50
+		bclr=42
 	}
 	align="horiz. centered"
 	limits {
