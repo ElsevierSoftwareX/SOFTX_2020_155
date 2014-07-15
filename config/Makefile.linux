@@ -128,11 +128,11 @@ install: $(DB)
 		\
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(bo|record\(bi' | sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		\
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'DACKILL | record\(ao|record\(string|record\(bi|record\(bo'| sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'DACKILL|SDF_RELOAD|record\(ao|record\(string|record\(bi|record\(bo'| sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		\
 		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet SDF_DIR /opt/rtcds/$(SITE)/${ifo}/target/$$model/$(TARGET)/burt/" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
-		echo "epicsEnvSet SDF_FILE $$model" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+                echo "epicsEnvSet SDF_FILE $$model" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo -n 'epicsEnvSet PREFIX '>> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		grep _GRD_RB_STAT0  target/$(TARGET)/db/$$ifo/`basename $$i` | head -1 | sed 's/[^"]*"\([^"]*\)_GRD_RB_STAT0.*/\1/g' >>  target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 	  done ; \
