@@ -15,8 +15,9 @@ from subprocess import call
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('-i',dest='chname')
 parser.add_argument('-m',dest='model')
+parser.add_argument('-d',dest='medmdir')
 args = parser.parse_args()
-basedir = '/opt/rtcds/lho/h1/medm/h1fe3tim02/'
+basedir = args.medmdir
 
 ec = PV(args.chname)
 grdchan = ec.value
