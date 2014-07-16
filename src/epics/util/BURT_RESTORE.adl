@@ -1,6 +1,6 @@
 
 file {
-	name="/opt/rtcds/rtscore/trunk/src/epics/util/BURT_RESTORE.adl"
+	name="/opt/rtcds/rtscore/branches/branch-2.9/src/epics/util/BURT_RESTORE.adl"
 	version=030107
 }
 display {
@@ -8,7 +8,7 @@ display {
 		x=1204
 		y=215
 		width=610
-		height=880
+		height=856
 	}
 	clr=14
 	bclr=3
@@ -630,6 +630,7 @@ text {
 		bclr=50
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -646,6 +647,7 @@ text {
 		bclr=50
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -662,6 +664,7 @@ text {
 		bclr=1
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -678,6 +681,7 @@ text {
 		bclr=1
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -726,6 +730,7 @@ text {
 		bclr=50
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -742,6 +747,7 @@ text {
 		bclr=50
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -758,6 +764,7 @@ text {
 		bclr=1
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -774,6 +781,7 @@ text {
 		bclr=1
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -822,6 +830,7 @@ text {
 		bclr=50
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -838,6 +847,7 @@ text {
 		bclr=50
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -854,6 +864,7 @@ text {
 		bclr=1
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -870,6 +881,7 @@ text {
 		bclr=1
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -918,6 +930,7 @@ text {
 		bclr=50
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -934,6 +947,7 @@ text {
 		bclr=50
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -950,6 +964,7 @@ text {
 		bclr=1
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -966,6 +981,7 @@ text {
 		bclr=1
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -1014,6 +1030,7 @@ text {
 		bclr=50
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -1030,6 +1047,7 @@ text {
 		bclr=50
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -1046,6 +1064,7 @@ text {
 		bclr=1
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -1062,6 +1081,7 @@ text {
 		bclr=1
 	}
 	align="horiz. centered"
+	format="string"
 	limits {
 	}
 }
@@ -1235,7 +1255,7 @@ text {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT0 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT0 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -1283,7 +1303,7 @@ text {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT3 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT3 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54

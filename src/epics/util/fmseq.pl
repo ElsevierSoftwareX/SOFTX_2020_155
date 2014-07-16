@@ -875,12 +875,12 @@ for(my $ffn = 0;$ffn < 40; $ffn ++)
 	$strGrdName .= $ffn;
 	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\")\n";
 	print "{\n	field(SCAN,\".5 second\")\n}\n";
-	print "grecord(ao,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\_BURT\")\n";
+	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\_BURT\")\n";
 	print "{\n	field(SCAN,\".5 second\")\n";
-	print "	field(PREC,\"3\")\n}\n";
-	print "grecord(ao,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\_LIVE\")\n";
+	print "	}\n";
+	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\_LIVE\")\n";
 	print "{\n	field(SCAN,\".5 second\")\n";
-	print "	field(PREC,\"3\")\n}\n";
+	print "	}\n";
 	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\_TIME\")\n";
 	print "{\n	field(SCAN,\".5 second\")\n}\n";
 }
