@@ -1,14 +1,14 @@
 
 file {
 	name="/opt/rtcds/rtscore/branches/branch-2.9/src/epics/util/BURT_RESTORE.adl"
-	version=030107
+	version=030105
 }
 display {
 	object {
-		x=1204
-		y=215
+		x=101
+		y=274
 		width=610
-		height=856
+		height=890
 	}
 	clr=14
 	bclr=3
@@ -1271,7 +1271,7 @@ text {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT1 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT1 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -1287,7 +1287,7 @@ text {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT2 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT2 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -1319,7 +1319,7 @@ text {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT4 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT4 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -1335,7 +1335,7 @@ text {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT5 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT5 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -1351,7 +1351,7 @@ text {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT6 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT6 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -1367,7 +1367,7 @@ text {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT7 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT7 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -1383,7 +1383,7 @@ text {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT8 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT8 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -1399,7 +1399,7 @@ text {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT9 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT9 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -1407,825 +1407,814 @@ text {
 }
 composite {
 	object {
-		x=13
+		x=48
 		y=439
-		width=580
+		width=545
 		height=200
 	}
 	"composite name"=""
 	children {
-		composite {
+		"text update" {
 			object {
 				x=48
 				y=439
-				width=545
-				height=200
+				width=240
+				height=20
 			}
-			"composite name"=""
-			children {
-				"text update" {
-					object {
-						x=48
-						y=439
-						width=240
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=48
-						y=459
-						width=240
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=293
-						y=439
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10_BURT"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=358
-						y=439
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10_LIVE"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=293
-						y=459
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11_BURT"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=358
-						y=459
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11_LIVE"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=48
-						y=479
-						width=240
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=48
-						y=499
-						width=240
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=293
-						y=479
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12_BURT"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=358
-						y=479
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12_LIVE"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=293
-						y=499
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13_BURT"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=358
-						y=499
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13_LIVE"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=48
-						y=519
-						width=240
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=48
-						y=539
-						width=240
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=293
-						y=519
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14_BURT"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=358
-						y=519
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14_LIVE"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=293
-						y=539
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15_BURT"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=358
-						y=539
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15_LIVE"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=423
-						y=439
-						width=170
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10_TIME"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=423
-						y=459
-						width=170
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11_TIME"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=423
-						y=479
-						width=170
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12_TIME"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=423
-						y=499
-						width=170
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13_TIME"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=423
-						y=519
-						width=170
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14_TIME"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=423
-						y=539
-						width=170
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15_TIME"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=48
-						y=559
-						width=240
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=48
-						y=579
-						width=240
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=293
-						y=559
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16_BURT"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=358
-						y=559
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16_LIVE"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=293
-						y=579
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17_BURT"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=358
-						y=579
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17_LIVE"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=48
-						y=599
-						width=240
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=48
-						y=619
-						width=240
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=293
-						y=599
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18_BURT"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=358
-						y=599
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18_LIVE"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=293
-						y=619
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19_BURT"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=358
-						y=619
-						width=60
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19_LIVE"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=423
-						y=559
-						width=170
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16_TIME"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=423
-						y=579
-						width=170
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17_TIME"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=423
-						y=599
-						width=170
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18_TIME"
-						clr=14
-						bclr=50
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				"text update" {
-					object {
-						x=423
-						y=619
-						width=170
-						height=20
-					}
-					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19_TIME"
-						clr=14
-						bclr=1
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
 			}
 		}
-		"shell command" {
+		"text update" {
 			object {
-				x=13
-				y=440
-				width=30
-				height=18
+				x=48
+				y=459
+				width=240
+				height=20
 			}
-			command[0] {
-				label="GUARD CH1"
-				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11"
+				clr=14
+				bclr=1
 			}
-			clr=0
-			bclr=54
-			label="11"
+			align="horiz. centered"
+			limits {
+			}
 		}
-		"shell command" {
+		"text update" {
 			object {
-				x=13
-				y=460
-				width=30
-				height=18
+				x=293
+				y=439
+				width=60
+				height=20
 			}
-			command[0] {
-				label="GUARD CH1"
-				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10_BURT"
+				clr=14
+				bclr=50
 			}
-			clr=0
-			bclr=54
-			label="12"
+			align="horiz. centered"
+			limits {
+			}
 		}
-		"shell command" {
+		"text update" {
 			object {
-				x=13
-				y=480
-				width=30
-				height=18
+				x=358
+				y=439
+				width=60
+				height=20
 			}
-			command[0] {
-				label="GUARD CH1"
-				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10_LIVE"
+				clr=14
+				bclr=50
 			}
-			clr=0
-			bclr=54
-			label="13"
+			align="horiz. centered"
+			limits {
+			}
 		}
-		"shell command" {
+		"text update" {
 			object {
-				x=13
-				y=500
-				width=30
-				height=18
+				x=293
+				y=459
+				width=60
+				height=20
 			}
-			command[0] {
-				label="GUARD CH1"
-				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11_BURT"
+				clr=14
+				bclr=1
 			}
-			clr=0
-			bclr=54
-			label="14"
+			align="horiz. centered"
+			limits {
+			}
 		}
-		"shell command" {
+		"text update" {
 			object {
-				x=13
-				y=520
-				width=30
-				height=18
+				x=358
+				y=459
+				width=60
+				height=20
 			}
-			command[0] {
-				label="GUARD CH1"
-				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11_LIVE"
+				clr=14
+				bclr=1
 			}
-			clr=0
-			bclr=54
-			label="15"
+			align="horiz. centered"
+			limits {
+			}
 		}
-		"shell command" {
+		"text update" {
 			object {
-				x=13
-				y=540
-				width=30
-				height=18
+				x=48
+				y=479
+				width=240
+				height=20
 			}
-			command[0] {
-				label="GUARD CH1"
-				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12"
+				clr=14
+				bclr=50
 			}
-			clr=0
-			bclr=54
-			label="16"
+			align="horiz. centered"
+			limits {
+			}
 		}
-		"shell command" {
+		"text update" {
 			object {
-				x=13
-				y=560
-				width=30
-				height=18
+				x=48
+				y=499
+				width=240
+				height=20
 			}
-			command[0] {
-				label="GUARD CH1"
-				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13"
+				clr=14
+				bclr=1
 			}
-			clr=0
-			bclr=54
-			label="17"
+			align="horiz. centered"
+			limits {
+			}
 		}
-		"shell command" {
+		"text update" {
 			object {
-				x=13
-				y=580
-				width=30
-				height=18
+				x=293
+				y=479
+				width=60
+				height=20
 			}
-			command[0] {
-				label="GUARD CH1"
-				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12_BURT"
+				clr=14
+				bclr=50
 			}
-			clr=0
-			bclr=54
-			label="18"
+			align="horiz. centered"
+			limits {
+			}
 		}
-		"shell command" {
+		"text update" {
 			object {
-				x=13
-				y=600
-				width=30
-				height=18
+				x=358
+				y=479
+				width=60
+				height=20
 			}
-			command[0] {
-				label="GUARD CH1"
-				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12_LIVE"
+				clr=14
+				bclr=50
 			}
-			clr=0
-			bclr=54
-			label="19"
+			align="horiz. centered"
+			limits {
+			}
 		}
-		"shell command" {
+		"text update" {
 			object {
-				x=13
-				y=620
-				width=30
-				height=18
+				x=293
+				y=499
+				width=60
+				height=20
 			}
-			command[0] {
-				label="GUARD CH1"
-				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13_BURT"
+				clr=14
+				bclr=1
 			}
-			clr=0
-			bclr=54
-			label="20"
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=358
+				y=499
+				width=60
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13_LIVE"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=48
+				y=519
+				width=240
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=48
+				y=539
+				width=240
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=293
+				y=519
+				width=60
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14_BURT"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=358
+				y=519
+				width=60
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14_LIVE"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=293
+				y=539
+				width=60
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15_BURT"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=358
+				y=539
+				width=60
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15_LIVE"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=423
+				y=439
+				width=170
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10_TIME"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=423
+				y=459
+				width=170
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11_TIME"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=423
+				y=479
+				width=170
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12_TIME"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=423
+				y=499
+				width=170
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13_TIME"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=423
+				y=519
+				width=170
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14_TIME"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=423
+				y=539
+				width=170
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15_TIME"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=48
+				y=559
+				width=240
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=48
+				y=579
+				width=240
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=293
+				y=559
+				width=60
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16_BURT"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=358
+				y=559
+				width=60
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16_LIVE"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=293
+				y=579
+				width=60
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17_BURT"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=358
+				y=579
+				width=60
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17_LIVE"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=48
+				y=599
+				width=240
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=48
+				y=619
+				width=240
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=293
+				y=599
+				width=60
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18_BURT"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=358
+				y=599
+				width=60
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18_LIVE"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=293
+				y=619
+				width=60
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19_BURT"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=358
+				y=619
+				width=60
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19_LIVE"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=423
+				y=559
+				width=170
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16_TIME"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=423
+				y=579
+				width=170
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17_TIME"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=423
+				y=599
+				width=170
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18_TIME"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=423
+				y=619
+				width=170
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19_TIME"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			limits {
+			}
 		}
 	}
+}
+"shell command" {
+	object {
+		x=13
+		y=440
+		width=30
+		height=18
+	}
+	command[0] {
+		label="GUARD CH1"
+		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+	}
+	clr=0
+	bclr=54
+	label="11"
+}
+"shell command" {
+	object {
+		x=13
+		y=460
+		width=30
+		height=18
+	}
+	command[0] {
+		label="GUARD CH1"
+		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+	}
+	clr=0
+	bclr=54
+	label="12"
+}
+"shell command" {
+	object {
+		x=13
+		y=480
+		width=30
+		height=18
+	}
+	command[0] {
+		label="GUARD CH1"
+		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+	}
+	clr=0
+	bclr=54
+	label="13"
+}
+"shell command" {
+	object {
+		x=13
+		y=500
+		width=30
+		height=18
+	}
+	command[0] {
+		label="GUARD CH1"
+		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+	}
+	clr=0
+	bclr=54
+	label="14"
+}
+"shell command" {
+	object {
+		x=13
+		y=520
+		width=30
+		height=18
+	}
+	command[0] {
+		label="GUARD CH1"
+		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+	}
+	clr=0
+	bclr=54
+	label="15"
+}
+"shell command" {
+	object {
+		x=13
+		y=540
+		width=30
+		height=18
+	}
+	command[0] {
+		label="GUARD CH1"
+		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+	}
+	clr=0
+	bclr=54
+	label="16"
+}
+"shell command" {
+	object {
+		x=13
+		y=560
+		width=30
+		height=18
+	}
+	command[0] {
+		label="GUARD CH1"
+		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+	}
+	clr=0
+	bclr=54
+	label="17"
+}
+"shell command" {
+	object {
+		x=13
+		y=580
+		width=30
+		height=18
+	}
+	command[0] {
+		label="GUARD CH1"
+		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+	}
+	clr=0
+	bclr=54
+	label="18"
+}
+"shell command" {
+	object {
+		x=13
+		y=600
+		width=30
+		height=18
+	}
+	command[0] {
+		label="GUARD CH1"
+		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+	}
+	clr=0
+	bclr=54
+	label="19"
+}
+"shell command" {
+	object {
+		x=13
+		y=620
+		width=30
+		height=18
+	}
+	command[0] {
+		label="GUARD CH1"
+		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+	}
+	clr=0
+	bclr=54
+	label="20"
 }
 "text update" {
 	object {
@@ -2877,7 +2866,7 @@ composite {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT20 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT20 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -2893,7 +2882,7 @@ composite {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT21 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT21 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -2909,7 +2898,7 @@ composite {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT22 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT22 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -2925,7 +2914,7 @@ composite {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT23 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT23 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -2941,7 +2930,7 @@ composite {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT24 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT24 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -2957,7 +2946,7 @@ composite {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT25 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT25 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -2973,7 +2962,7 @@ composite {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT26 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT26 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -2989,7 +2978,7 @@ composite {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT27 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT27 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -3005,7 +2994,7 @@ composite {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT28 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT28 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
@@ -3021,7 +3010,7 @@ composite {
 	command[0] {
 		label="GUARD CH1"
 		name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT29 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED"
+		args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT29 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 	}
 	clr=0
 	bclr=54
