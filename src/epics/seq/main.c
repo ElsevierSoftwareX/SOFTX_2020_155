@@ -159,20 +159,50 @@ int spChecker(char *pref)
 		DBRtime
 		double rval;
 		}buffer;
+	struct strbuffer {
+		DBRstatus
+		DBRtime
+		char sval[128];;
+		}strbuffer;
 	long options = DBR_STATUS|DBR_TIME;
 	time_t mtime;
 	char localtimestring[256];
 	static int lastcount = 0;
+	int localErr = 0;
+	char liveset[64];
+	char burtset[64];
 
 	     if(chNum) {
 		for(ii=0;ii<chNum;ii++) {
-			if((cdTable[ii].datatype == 0) && (errCntr < 40) && (cdTable[ii].mask != 0))
+			if((errCntr < 40) && (cdTable[ii].mask != 0))
 			{
+				localErr = 0;
 				// Find address of channel
 				status = dbNameToAddr(cdTable[ii].chname,&paddr);
-				// status = dbGetField(&paddr,DBR_DOUBLE,&rval,&ropts,&nvals,NULL);
-				status = dbGetField(&paddr,DBR_DOUBLE,&buffer,&options,&nvals,NULL);
-				if(cdTable[ii].chval != buffer.rval)
+				// If this is a digital data type, then get as double.
+				if(cdTable[ii].datatype == 0)
+				{
+					status = dbGetField(&paddr,DBR_DOUBLE,&buffer,&options,&nvals,NULL);
+					if(cdTable[ii].chval != buffer.rval)
+					{
+						sprintf(burtset,"%.3f",cdTable[ii].chval);
+						sprintf(liveset,"%.3f",buffer.rval);
+						mtime = buffer.time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
+						localErr = 1;
+					}
+				// If this is a string type, then get as string.
+				} else {
+					status = dbGetField(&paddr,DBR_STRING,&strbuffer,&options,&nvals,NULL);
+					if(strcmp(cdTable[ii].strval,strbuffer.sval) != 0)
+					{
+						sprintf(burtset,"%s",cdTable[ii].strval);
+						sprintf(liveset,"%s",strbuffer.sval);
+						mtime = strbuffer.time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
+						localErr = 1;
+					}
+				}
+				// If a diff was found, then write info the guardian EPICS records.
+				if(localErr)
 				{
 					sprintf(s, "%s_%s_STAT%d", pref,"GRD_SP", errCntr);
 					status = dbNameToAddr(s,&saddr);
@@ -180,14 +210,13 @@ int spChecker(char *pref)
 
 					sprintf(s1, "%s_%s_STAT%d_BURT", pref,"GRD_SP", errCntr);
 					status = dbNameToAddr(s1,&baddr);
-					status = dbPutField(&baddr,DBR_DOUBLE,&cdTable[ii].chval,1);
+					status = dbPutField(&baddr,DBR_STRING,burtset,1);
 
 					sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"GRD_SP", errCntr);
 					status = dbNameToAddr(s2,&maddr);
-					status = dbPutField(&maddr,DBR_DOUBLE,&buffer.rval,1);
+					status = dbPutField(&maddr,DBR_STRING,liveset,1);
 
 					sprintf(s3, "%s_%s_STAT%d_TIME", pref,"GRD_SP", errCntr);
-					mtime = buffer.time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 					strcpy(localtimestring, ctime(&mtime));
 					localtimestring[strlen(localtimestring) - 1] = 0;
 					status = dbNameToAddr(s3,&taddr);
@@ -206,11 +235,11 @@ int spChecker(char *pref)
 
 			sprintf(s1, "%s_%s_STAT%d_BURT", pref,"GRD_SP", ii);
 			status = dbNameToAddr(s1,&baddr);
-			status = dbPutField(&baddr,DBR_DOUBLE,&clearentry,1);
+			status = dbPutField(&baddr,DBR_STRING," ",1);
 
 			sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"GRD_SP", ii);
 			status = dbNameToAddr(s2,&maddr);
-			status = dbPutField(&maddr,DBR_DOUBLE,&clearentry,1);
+			status = dbPutField(&maddr,DBR_STRING," ",1);
 
 
 			sprintf(s3, "%s_%s_STAT%d_TIME", pref,"GRD_SP", ii);
@@ -397,10 +426,6 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 	starttime = t.tv_nsec;
 
 	getSdfTime(timestring);
-#if 0
-	status = dbNameToAddr(timechannel,&paddr);
-	status = dbGetField(&paddr,DBR_STRING,timestring,&ropts,&nvals,NULL);
-#endif
 
 	switch(command)
 	{
@@ -459,8 +484,6 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 					{
 						bzero(filterTable[fmNum].fname,strlen(filterTable[fmNum].fname));
 						strncpy(filterTable[fmNum].fname,s1,(strlen(s1)-4));
-						// if(strstr(filterTable[fmNum].fname,"SWREQ") == NULL) 
-						// strcat(filterTable[fmNum].fname,"SWREQ");
 						tmpreq = (int)atof(s3);
 					}
 					if((strstr(s1,"_SW2S") != NULL) && (strstr(s1,"_SW2S.") == NULL))
