@@ -623,6 +623,7 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 	// Calc time to load settings and make log entry
 	clock_gettime(CLOCK_REALTIME,&t);
 	totaltime = t.tv_nsec - starttime;
+	if(totaltime < 0) totaltime += 1000000000;
 	log = fopen("./ioc.log","a");
 	if(command == BURT_LOAD_PARTIAL) {
 		fprintf(log,"New SDF request (SUBSET): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNumP,(totaltime/1000));
@@ -861,7 +862,7 @@ int main(int argc,char *argv[])
 	dbAddr naddr;
 	dbAddr ssnaddr;
 	dbAddr speaddr;
-	dbAddr ssaddr;
+	// dbAddr ssaddr;
 	dbAddr sccaddr;
 	dbAddr fccaddr;
 	dbAddr mccaddr;
@@ -877,6 +878,8 @@ int main(int argc,char *argv[])
    	int sperror = 0;
 	char *ssdf;
 	int noMon;
+	FILE *csFile;
+	int ii;
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -892,16 +895,19 @@ int main(int argc,char *argv[])
 	// strcat(sdf,"_safe");
 	char sdfile[256];
 	char ssdfile[256];
+	char bufile[256];
 	// sprintf(sdfile, "%s%s%s", sdfDir, sdf,".sdf");
 	sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");					// Initialize with BURT_safe.snap
+	sprintf(bufile, "%s%s", sdfDir, "fec.snap");				// Initialize table dump file
 	printf("SDF FILE = %s\n",sdfile);
+	printf("CURRENt FILE = %s\n",bufile);
 	// Create BURT/SDF EPICS channel names
 	char reloadChan[256]; sprintf(reloadChan, "%s_%s", pref, "SDF_RELOAD");		// Request to load new BURT
 	char reloadStat[256]; sprintf(reloadStat, "%s_%s", pref, "SDF_RELOAD_STATUS");	// Status of last reload
 	char sdfFileName[256]; sprintf(sdfFileName, "%s_%s", pref, "SDF_NAME");		// Name of file to load next request
-	char ssdfFileName[256]; sprintf(ssdfFileName, "%s_%s", pref, "SDF_NAME_SUBSET");	// Name of file to load next subset request
+	// char ssdfFileName[256]; sprintf(ssdfFileName, "%s_%s", pref, "SDF_NAME_SUBSET");	// Name of file to load next subset request
 	char loadedFile[256]; sprintf(loadedFile, "%s_%s", pref, "SDF_LOADED");		// Name of file presently loaded
-	char ssloadedFile[256]; sprintf(ssloadedFile, "%s_%s", pref, "SDF_LOADED_SUBSET");	// Name of subset file presently loaded
+	char ssloadedFile[256]; sprintf(ssloadedFile, "%s_%s", pref, "SDF_LOADED_INIT");	// Name of subset file presently loaded
 	char speStat[256]; sprintf(speStat, "%s_%s", pref, "GRD_SP_ERR_CNT");		// Setpoint error counter
 	char fcc[256]; sprintf(fcc, "%s_%s", pref, "SDF_FULL_CH_COUNT");		// Channels in Full BURT file
 	char scc[256]; sprintf(scc, "%s_%s", pref, "SDF_SUBSET_CH_COUNT");		// Channels in Partial BURT file
@@ -919,7 +925,7 @@ int main(int argc,char *argv[])
 	status = dbNameToAddr(sdfFileName,&saddr);
 	status = dbPutField(&saddr,DBR_STRING,sdf,1);
 
-	status = dbNameToAddr(ssdfFileName,&ssaddr);
+	// status = dbNameToAddr(ssdfFileName,&ssaddr);
 	status = dbNameToAddr(fcc,&fccaddr);
 	status = dbNameToAddr(scc,&sccaddr);
 	status = dbNameToAddr(mcc,&mccaddr);
@@ -948,8 +954,8 @@ char subchancnt[256];
 		// Get File Name
 		status = dbNameToAddr(sdfFileName,&saddr);
 		status = dbGetField(&saddr,DBR_STRING,sdf,&ropts,&nvals,NULL);
-		status = dbNameToAddr(ssdfFileName,&ssaddr);
-		status = dbGetField(&ssaddr,DBR_STRING,ssdf,&ropts,&nvals,NULL);
+		// status = dbNameToAddr(ssdfFileName,&ssaddr);
+		// status = dbGetField(&ssaddr,DBR_STRING,ssdf,&ropts,&nvals,NULL);
 		// sprintf(sdfile, "%s%s%s", sdfDir, sdf,".sdf");
 		sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");
 		sprintf(ssdfile, "%s%s%s", sdfDir, ssdf,".snap");
@@ -991,6 +997,20 @@ char subchancnt[256];
 				status = dbPutField(&fccaddr,DBR_LONG,&chNum,1);
 			noMon = chNum - chMon;
 			status = dbPutField(&mccaddr,DBR_LONG,&noMon,1);
+			csFile = fopen(bufile,"w");
+			for(ii=0;ii<chNum;ii++)
+			{
+				// printf("%s datatype is %d\n",cdTable[ii].chname,cdTable[ii].datatype);
+				char tabs[8];
+				if(strlen(cdTable[ii].chname) > 39) sprintf(tabs,"%s","\t");
+				else sprintf(tabs,"%s","\t\t");
+
+				if(cdTable[ii].datatype == 0)
+					fprintf(csFile,"%s%s%d\t%e\t\%d\n",cdTable[ii].chname,tabs,1,cdTable[ii].chval,cdTable[ii].mask);
+				else
+					fprintf(csFile,"%s%s%d\t%s\t\%d\n",cdTable[ii].chname,tabs,1,cdTable[ii].strval,cdTable[ii].mask);
+			}
+			fclose(csFile);
 		}
 		status = dbPutField(&raddr,DBR_LONG,&burtstatus,1);
 		sleep(1);
