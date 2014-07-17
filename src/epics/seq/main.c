@@ -10,6 +10,20 @@ described on the COPYRIGHT_UniversityOfChicago file included as part
 of this distribution.
 ****************************************************************************/
 
+// TODO:
+// Need to check RESET and READ file yet.
+// Still need to add save/save as features
+// Fix display:
+//	- Based on new python script 
+//	- channel counts and file names: baseline + changes?
+//	- Get rid of 2nd LOAD button.
+// Check top with full model loads for memory and cpu usage.
+// Add command error checking, command out of range, etc.
+// Verify changing of alarm settings will trigger errors
+// Add more filter modules to tim16 to boost number of settings for test.
+// Check autoBurt, particularly for SDF stuff
+// ADD ability to add channels from larger files.
+
 /*
  * Main program for demo sequencer
  */
@@ -34,10 +48,12 @@ of this distribution.
 #include "asCa.h"
 #include "asDbLib.h"
 
-#define BURT_LOAD_FULL		1
+#define BURT_LOAD_FULL		5
 #define BURT_READ_ONLY		2
 #define BURT_RESET		3
-#define BURT_LOAD_PARTIAL	4
+#define BURT_LOAD_PARTIAL	1
+
+#define MAX_BURT_CHANS	300000
 
 /// Pointers to status record
 DBENTRY  *pdbentry_status[2][10];
@@ -84,8 +100,8 @@ char reloadtimechannel[256];
 char fullchancnt[256];
 char subchancnt[256];
 
-CDS_CD_TABLE cdTable[20000];
-CDS_CD_TABLE cdTableP[1000];
+CDS_CD_TABLE cdTable[MAX_BURT_CHANS];
+CDS_CD_TABLE cdTableP[MAX_BURT_CHANS];
 FILTER_TABLE filterTable[1000];
 
 
@@ -420,6 +436,7 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 	double tmpreq = 0;
 	char tempstr[128];
 	int localCtr = 0;
+	int fmatch = 0;
 	// FILTER_TABLE fTable[1000];
 
 	clock_gettime(CLOCK_REALTIME,&t);
@@ -429,7 +446,6 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 
 	switch(command)
 	{
-		case BURT_READ_ONLY:
 		case BURT_LOAD_FULL:
 			cdf = fopen(sdfile,"r");
 			if(cdf == NULL) {
@@ -470,7 +486,6 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 					if(isdigit(s4[0])) {
 						// printf("%s %s %s %s\n",s1,s2,s3,s4);
 						cdTable[chNum].mask = atoi(s4);
-						chMon ++;
 					} else {
 						// printf("%s %s %s \n",s1,s2,s3);
 						cdTable[chNum].mask = 0;
@@ -503,8 +518,9 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 			lderror = newvalue(chNum,cdTable,command);
 			flderror = newfilterstats(fmNum,command);
 			break;
+		case BURT_READ_ONLY:
 		case BURT_LOAD_PARTIAL:
-			cdf = fopen(ssdfile,"r");
+			cdf = fopen(sdfile,"r");
 			if(cdf == NULL) {
 				logFileError(sdfile);
 				lderror = 2;
@@ -536,11 +552,43 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 						cdTableP[chNumP].datatype = 0;
 						// printf("%s %f\n",cdTable[chNum].chname,cdTable[chNum].chval);
 					}
+					// Check if s4 (monitor or not) is set (0/1). If doesn/'t exist in file, set to zero in local table.
+					if(isdigit(s4[0])) {
+						// printf("%s %s %s %s\n",s1,s2,s3,s4);
+						cdTableP[chNumP].mask = atoi(s4);
+						if((cdTableP[chNumP].mask < 0) || (cdTableP[chNumP].mask > 1))
+							cdTableP[chNumP].mask = -1;
+					} else {
+						// printf("%s %s %s \n",s1,s2,s3);
+						cdTableP[chNumP].mask = -1;
+					}
+					// Find channel in full list and replace setting info
+					fmatch = 0;
+					for(ii=0;ii<chNum;ii++)
+					{
+						if(strcmp(cdTable[ii].chname,cdTableP[chNumP].chname) == 0)
+						{
+							// printf("NEW channel compare %s\n",cdTable[chNumP].chname);
+							fmatch = 1;
+							if(cdTableP[chNumP].datatype == 1)
+							{
+								strcpy(cdTable[ii].strval,cdTableP[chNumP].strval);
+							} else {
+								cdTable[ii].chval = cdTableP[chNumP].chval;
+							}
+							if(cdTableP[chNumP].mask != -1)
+								cdTable[ii].mask = cdTableP[chNumP].mask;
+						}
+					}
+					if(!fmatch) printf("NEW channel not found %s\n",cdTable[chNumP].chname);
 					localCtr ++;
 					chNumP ++;
 				}
 			}
 			fclose(cdf);
+			chMon = 0;
+			for(ii=0;ii<chNum;ii++)
+				if(cdTable[ii].mask) chMon ++;
 			lderror = newvalue(chNumP,cdTableP,command);
 			break;
 		case BURT_RESET:
@@ -817,7 +865,7 @@ int main(int argc,char *argv[])
 	dbAddr sccaddr;
 	dbAddr fccaddr;
 	dbAddr mccaddr;
-	int cdfReq = 1;
+	int cdfReq = BURT_LOAD_FULL;
 	long status;
 	int request;
 	int ropts = 0;
@@ -841,7 +889,7 @@ int main(int argc,char *argv[])
 	char *sdf = getenv("SDF_FILE");
 	char ssdf[256];;
 	strcpy(ssdf,sdf);
-	strcat(sdf,"_safe");
+	// strcat(sdf,"_safe");
 	char sdfile[256];
 	char ssdfile[256];
 	// sprintf(sdfile, "%s%s%s", sdfDir, sdf,".sdf");
@@ -913,24 +961,22 @@ char subchancnt[256];
 			// Clear Request
 			status = dbPutField(&taddr,DBR_LONG,&ropts,1);
 			switch (request){
-				case BURT_LOAD_PARTIAL:
-					strcpy(loadedSsdf,ssdf); 
-					status = dbPutField(&ssnaddr,DBR_STRING,loadedSsdf,1);
-					printf("NEW PARTIAL SDF REQ = %s   \n%s   %s\n%s\nReqest = %d\n",sdfile,sdf,loadedSdf,ssdfile,request);
-					break;
 				case BURT_LOAD_FULL:
+					strcpy(loadedSdf,sdf); 
+					status = dbPutField(&naddr,DBR_STRING,loadedSdf,1);
+					status = dbPutField(&ssnaddr,DBR_STRING,loadedSdf,1);
+					chNumP = 0;
+				case BURT_LOAD_PARTIAL:
 				case BURT_RESET:
 					strcpy(loadedSdf,sdf); 
 					status = dbPutField(&naddr,DBR_STRING,loadedSdf,1);
-					strcpy(loadedSsdf,""); 
-					status = dbPutField(&ssnaddr,DBR_STRING,loadedSsdf,1);
 					chNumP = 0;
 					printf("NEW FULL SDF REQ = %s   \n%s   %s\n%s\nReqest = %d\n",sdfile,sdf,loadedSdf,ssdfile,request);
 					break;
 				case BURT_READ_ONLY:
 					strcpy(loadedSdf,sdf); 
 					status = dbPutField(&naddr,DBR_STRING,loadedSdf,1);
-					printf("NEW FULL SDF REQ = %s   \n%s   %s\n%s\nReqest = %d\n",sdfile,sdf,loadedSdf,ssdfile,request);
+					printf("NEW READ SDF REQ = %s   \n%s   %s\n%s\nReqest = %d\n",sdfile,sdf,loadedSdf,ssdfile,request);
 					break;
 				default:
 					break;
@@ -939,8 +985,10 @@ char subchancnt[256];
 			if (rdstatus) burtstatus |= rdstatus;
 			else burtstatus &= ~(6);
 			status = dbPutField(&raddr,DBR_LONG,&rdstatus,1);
-			status = dbPutField(&fccaddr,DBR_LONG,&chNum,1);
 			status = dbPutField(&sccaddr,DBR_LONG,&chNumP,1);
+			if(request == BURT_LOAD_FULL)
+				status = dbPutField(&sccaddr,DBR_LONG,&chNum,1);
+				status = dbPutField(&fccaddr,DBR_LONG,&chNum,1);
 			noMon = chNum - chMon;
 			status = dbPutField(&mccaddr,DBR_LONG,&noMon,1);
 		}
