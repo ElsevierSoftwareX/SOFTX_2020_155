@@ -139,10 +139,10 @@ sub createGdsMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"PART",$ecolors{black});
 	# BURT FULL File Loaded
 	$xpos = 602; $ypos = 128; $width = 160; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_LOADED",$ecolors{white},$ecolors{blue},"static");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_LOADED_INIT",$ecolors{white},$ecolors{blue},"static");
 	# BURT Partial File Loaded
 	$xpos = 602; $ypos = 148; $width = 160; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_LOADED_SUBSET",$ecolors{white},$ecolors{blue},"static");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_LOADED",$ecolors{white},$ecolors{blue},"static");
 	# BURT Reload Status bit 0
 	$xpos = 562; $ypos = 166; $width = 65; $height = 10;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_STATUS","0","0",$ecolors{yellow},$ecolors{green});
