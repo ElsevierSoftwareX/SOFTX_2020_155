@@ -36,8 +36,9 @@ def fe_load_burt(model, burtfile, load=None, dcuid=None, ifo=os.getenv('IFO')):
         dcuid = get_model_dcuid(model, ifo)
     prefix = '%s:FEC-%s_SDF_' % (ifo.upper(), dcuid)
     channel = prefix + 'NAME'
-    print >>sys.stderr, "%s = %s" % (channel, burtfile)
-    epics.caput(channel, burtfile, wait=True)
+    basefile, ext = os.path.splitext(burtfile)
+    print >>sys.stderr, "%s = %s" % (channel, basefile)
+    epics.caput(channel, basefile, wait=True)
     if load:
         channel = prefix + 'RELOAD'
         print >>sys.stderr, "%s = %s" % (channel, load)
@@ -109,35 +110,45 @@ written to the <IFO>:FEC-<DCUID>_SDF_NAME channel, but not loaded.
     if not os.path.exists(burt_dir):
         sys.exit("Model burt directory not found: %s" % burt_dir)
 
+    ##########
+
     if args.file:
-        burtfile = args.file
+        dirname = os.path.dirname(args.file)
+        if dirname == '':
+            dirname = burt_dir
+            basename, ext = os.path.splitext(args.file)
+            # only add missing .snap extension if not full path is
+            # specified
+            if ext == '':
+                ext = '.snap'
+            fullpath = os.path.join(dirname, basename+ext)
+        else:
+            fullpath = args.file
+
     else:
-        burtfile = select_burt_dialog(burt_dir, args.model)
-        if burtfile == '':
+        # Tk gui to select file, returns full path
+        fullpath = select_burt_dialog(burt_dir, args.model)
+        if fullpath == '':
             sys.exit(-1)
+        print >>sys.stderr, "selected: %s" % fullpath
 
-    base_dir = os.path.dirname(burtfile)
-
-    if base_dir == '':
-        basename = burtfile
-        __, ext = os.path.splitext(basename)
-        if ext != '.snap':
-            basename += '.snap'
-    else:
-        if base_dir != burt_dir:
-            sys.exit("File not in model burt directory: %s" % burt_dir)
-        basename = os.path.basename(burtfile)
-
-    basefile, ext = os.path.splitext(basename)
+    basename, ext = os.path.splitext(os.path.basename(fullpath))
     if ext != '.snap':
         sys.exit("File does not have .snap extension.")
-
-    fullpath = os.path.join(burt_dir, basefile+ext)
 
     if not os.path.exists(fullpath):
         sys.exit("File not found: %s" % fullpath)
 
-    print >>sys.stderr, "loading file: %s" % fullpath
+    # if realpath of the specified file and the "resolved" path aren't
+    # the same file, then assume the specified file wasn't in the
+    # right place.
+    fullpath = os.path.realpath(fullpath)
+    calcpath = os.path.join(burt_dir, basename+ext)
+    calcpath = os.path.realpath(calcpath)
+    if not os.path.samefile(fullpath, calcpath):
+        sys.exit("File not in model burt directory: %s" % burt_dir)
 
-    fe_load_burt(args.model, basefile,
+    print >>sys.stderr, "loading file: %s" % calcpath
+
+    fe_load_burt(args.model, basename,
                  load=args.load, dcuid=args.dcuid, ifo=args.ifo)
