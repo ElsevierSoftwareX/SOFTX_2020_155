@@ -1,0 +1,154 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import epics
+
+SDF_LOAD = 1
+SDF_READONLY = 2
+
+def select_burt_dialog(burtdir, model):
+    import Tkinter
+    import tkFileDialog
+    options = {}
+    options['title'] = 'Select BURT File to load on %s:' % model
+    options['initialdir'] = burtdir
+    options['defaultextension'] = '.snap'
+    #options['filetypes'] = [('burt files', '.snap'), ('all files', '.*')]
+    options['filetypes'] = [('burt files', '.snap')]
+    Tkinter.Tk().withdraw()
+    return tkFileDialog.askopenfilename(**options)
+
+def get_model_dcuid(model, ifo=None):
+    if ifo == None:
+        ifo = model[0:2].upper()
+    subsys = model[2:5].upper()
+    if len(model) > 5:
+        subsub = model[5:].upper()
+        prefix = '%s-%s_' % (subsys, subsub)
+    else:
+        prefix = '%s-' % subsys
+    channel = '%s:%sDCU_ID' % (ifo, prefix)
+    return int(epics.caget(channel))
+
+def fe_load_burt(model, burtfile, load=None, dcuid=None, ifo=os.getenv('IFO')):
+    if not dcuid:
+        dcuid = get_model_dcuid(model, ifo)
+    prefix = '%s:FEC-%s_SDF_' % (ifo.upper(), dcuid)
+    channel = prefix + 'NAME'
+    basefile, ext = os.path.splitext(burtfile)
+    print >>sys.stderr, "%s = %s" % (channel, basefile)
+    epics.caput(channel, basefile, wait=True)
+    if load:
+        channel = prefix + 'RELOAD'
+        print >>sys.stderr, "%s = %s" % (channel, load)
+        epics.caput(channel, load, wait=True)
+
+##################################################
+
+if __name__ == '__main__':
+    import argparse
+
+    description = """Load BURT .snap file directly in front end.
+
+If file is not specified, a dialog will be opened for selecting file.
+The file must contain the '.snap' extension, and must exist (or be a
+soft link) in the model burt directory:
+
+/opt/rtcds/<site>/<ifo>/target/<model>/<model>epics/burt
+
+A file in the above directory may be specified by name only, with or
+without the .snap extension (although the file must ultimately have a
+.snap extension to be loaded by the front end).  File may contain any
+subset of channels in the front end.  Channels not belonging to the
+specified front end are ignored.
+
+If the 'load' or 'readonly' options are given, the file will be loaded
+by the front end: 'load' loads all settings, 'readonly' loads only
+monitor bits.  If neither option is specified, the file name is
+written to the <IFO>:FEC-<DCUID>_SDF_NAME channel, but not loaded.
+"""
+
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     description=description)
+    parser.add_argument('-s', '--site', dest='site', default=os.getenv('SITE'),
+                        help="site designator (default: %s (from env))" % os.getenv('SITE'))
+    parser.add_argument('-i', '--ifo', dest='ifo', default=os.getenv('IFO'),
+                        help="ifo designator (default: %s (from env))" % os.getenv('IFO'))
+    parser.add_argument('-d', '--dcuid',
+                        help="DCUID of model (default: determined from model name)")
+
+    loadarg = parser.add_mutually_exclusive_group()
+    loadarg.add_argument('-l', '--load', dest='load', action='store_const', const=SDF_LOAD,
+                         help="load file after reading")
+    loadarg.add_argument('-r', '--readonly', dest='load', action='store_const', const=SDF_READONLY,
+                         help="load file READONLY after reading")
+
+    parser.add_argument('model',
+                        help="full name of front end model (e.g. 'h1susetmy')")
+    parser.add_argument('file', nargs='?',
+                        help="burt .snap file to load")
+    args = parser.parse_args()
+
+    if not args.site:
+        sys.exit("Site designator not specified.")
+    if not args.ifo:
+        sys.exit("Ifo designator not specified.")
+
+    if set(args.model) & set('/.'):
+        sys.exit("Improper model name: %s" % args.model)
+
+    target_dir = os.path.join('/opt', 'rtcds', args.site.lower(), args.ifo.lower(), 'target')
+    if not os.path.exists(target_dir):
+        sys.exit("Target directory not found: %s" % target_dir)
+
+    model_dir = os.path.join(target_dir, args.model)
+    if not os.path.exists(model_dir):
+        sys.exit("Unknown model: %s" % args.model)
+
+    burt_dir = os.path.join(model_dir, args.model+'epics', 'burt')
+    if not os.path.exists(burt_dir):
+        sys.exit("Model burt directory not found: %s" % burt_dir)
+
+    ##########
+
+    if args.file:
+        dirname = os.path.dirname(args.file)
+        if dirname == '':
+            dirname = burt_dir
+            basename, ext = os.path.splitext(args.file)
+            # only add missing .snap extension if not full path is
+            # specified
+            if ext == '':
+                ext = '.snap'
+            fullpath = os.path.join(dirname, basename+ext)
+        else:
+            fullpath = args.file
+
+    else:
+        # Tk gui to select file, returns full path
+        fullpath = select_burt_dialog(burt_dir, args.model)
+        if fullpath == '':
+            sys.exit(-1)
+        print >>sys.stderr, "selected: %s" % fullpath
+
+    basename, ext = os.path.splitext(os.path.basename(fullpath))
+    if ext != '.snap':
+        sys.exit("File does not have .snap extension.")
+
+    if not os.path.exists(fullpath):
+        sys.exit("File not found: %s" % fullpath)
+
+    # if realpath of the specified file and the "resolved" path aren't
+    # the same file, then assume the specified file wasn't in the
+    # right place.
+    fullpath = os.path.realpath(fullpath)
+    calcpath = os.path.join(burt_dir, basename+ext)
+    calcpath = os.path.realpath(calcpath)
+    if not os.path.samefile(fullpath, calcpath):
+        sys.exit("File not in model burt directory: %s" % burt_dir)
+
+    print >>sys.stderr, "loading file: %s" % calcpath
+
+    fe_load_burt(args.model, basename,
+                 load=args.load, dcuid=args.dcuid, ifo=args.ifo)
