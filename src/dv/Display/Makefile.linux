@@ -3,31 +3,32 @@
 LIBS = -I../../daqd -I../Th -L../Lib/UTC_GPS -ltai -lm -lnsl -lpthread 
 all: framer4 frameMemRead 
 
+GRACELIBS = -L/ligo/apps/linux-x86_64/grace/lib -lgrace_np
 OBJS = ../Th/datasrv.o ../Th/daqc_access.o
 
 # Explicit setting of SHELL - beware since this gets inherited
 
 # online data display
 framer4: framer4.c ${OBJS}
-	gcc -g -o framer4 framer4.c ${OBJS} ${LIBS} -lgrace_np 
+	gcc -g -o framer4 framer4.c ${OBJS} ${LIBS} ${GRACELIBS}
 
 framer3: framer3.c ${OBJS}
-	gcc -g -o framer3 framer3.c ${OBJS} ${LIBS} -lacegr_np_my
+	gcc -g -o framer3 framer3.c ${OBJS} ${LIBS} ${GRACELIBS}
 
 # playback
 frameMemRead: frameMemRead.c ${OBJS}
-	gcc -g -o frameMemRead frameMemRead.c ${OBJS} ${LIBS} -lgrace_np 
+	gcc -g -o frameMemRead frameMemRead.c ${OBJS} ${LIBS} ${GRACELIBS}
 
 frameMemReadXMGR: frameMemReadXMGR.c ${OBJS}
-	gcc -g -o frameMemReadXMGR frameMemReadXMGR.c ${OBJS} ${LIBS} -lacegr_np_my
+	gcc -g -o frameMemReadXMGR frameMemReadXMGR.c ${OBJS} ${LIBS} ${GRACELIBS}
 
 # playback w/trigger
 frameMemTrig: frameMemTrig.c ${OBJS}
-	gcc -g -o frameMemTrig frameMemTrig.c ${OBJS} ${LIBS} -lgrace_np 
+	gcc -g -o frameMemTrig frameMemTrig.c ${OBJS} ${LIBS} ${GRACELIBS}
 
 # frame file playback
 tocLongRead: tocLongRead.c ${OBJS}
-	gcc -g -o tocLongRead tocLongRead.c ${OBJS} ${LIBS} -lgrace_np
+	gcc -g -o tocLongRead tocLongRead.c ${OBJS} ${LIBS} ${GRACELIBS}
 
 
 clean:
