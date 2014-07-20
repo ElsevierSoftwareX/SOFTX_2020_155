@@ -863,25 +863,25 @@ foreach $i ( @names ) {
 }
     
 # add msg and load coeff records
-print "grecord(ao,\"%IFO%:FEC-${dcuId}_GRD_ALH_CRC\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_ALH_CRC\")\n";
 print "{\n	field(SCAN,\".5 second\")\n}\n";
-print "grecord(ao,\"%IFO%:FEC-${dcuId}_GRD_SP_ERR_CNT\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_SP_ERR_CNT\")\n";
 print "{\n	field(SCAN,\".5 second\")\n}\n";
-print "grecord(ao,\"%IFO%:FEC-${dcuId}_GRD_RB_ERR_CNT\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_RB_ERR_CNT\")\n";
 print "{\n	field(SCAN,\".5 second\")\n}\n";
 for(my $ffn = 0;$ffn < 40; $ffn ++)
 {
-	my $strGrdName = "%IFO%:FEC-${dcuId}_GRD_SP_STAT";
+	my $strGrdName = "%IFO%:FEC-${dcuId}_SDF_SP_STAT";
 	$strGrdName .= $ffn;
-	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\")\n";
+	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\")\n";
 	print "{\n	field(SCAN,\".5 second\")\n}\n";
-	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\_BURT\")\n";
+	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\_BURT\")\n";
 	print "{\n	field(SCAN,\".5 second\")\n";
 	print "	}\n";
-	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\_LIVE\")\n";
+	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\_LIVE\")\n";
 	print "{\n	field(SCAN,\".5 second\")\n";
 	print "	}\n";
-	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\_TIME\")\n";
+	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\_TIME\")\n";
 	print "{\n	field(SCAN,\".5 second\")\n}\n";
 }
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_RB_STAT0\")\n";

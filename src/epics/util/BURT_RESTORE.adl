@@ -1,14 +1,14 @@
 
 file {
 	name="/opt/rtcds/rtscore/branches/branch-2.9/src/epics/util/BURT_RESTORE.adl"
-	version=030105
+	version=030107
 }
 display {
 	object {
 		x=1191
 		y=89
 		width=610
-		height=900
+		height=856
 	}
 	clr=14
 	bclr=3
@@ -139,158 +139,16 @@ rectangle {
 }
 text {
 	object {
-		x=27
-		y=68
-		width=100
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="INITIALIZATION"
-	align="horiz. centered"
-}
-"text update" {
-	object {
-		x=388
-		y=69
-		width=50
-		height=16
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_FULL_CH_COUNT"
-		clr=0
-		bclr=14
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-text {
-	object {
 		x=26
-		y=46
+		y=58
 		width=100
 		height=18
 	}
 	"basic attribute" {
 		clr=14
 	}
-	textix="BURT"
+	textix="SDF MONITORING"
 	align="horiz. centered"
-}
-"text update" {
-	object {
-		x=182
-		y=69
-		width=200
-		height=16
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED_INIT"
-		clr=50
-		bclr=42
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-text {
-	object {
-		x=388
-		y=48
-		width=50
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="TOTAL"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=445
-		y=48
-		width=90
-		height=16
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="!MONITORED"
-	align="horiz. centered"
-}
-"text update" {
-	object {
-		x=461
-		y=69
-		width=50
-		height=16
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_MON_COUNT"
-		clr=0
-		bclr=14
-	}
-	align="horiz. centered"
-	limits {
-	}
-}
-text {
-	object {
-		x=230
-		y=47
-		width=100
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="BURT FILE"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=390
-		y=28
-		width=200
-		height=16
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="-------- CHANNELS ---------"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=539
-		y=48
-		width=50
-		height=16
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="DIFFS"
-	align="horiz. centered"
-}
-"text update" {
-	object {
-		x=538
-		y=69
-		width=50
-		height=16
-	}
-	monitor {
-		chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_ERR_CNT"
-		clr=0
-		bclr=14
-	}
-	align="horiz. centered"
-	limits {
-	}
 }
 rectangle {
 	object {
@@ -639,7 +497,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT0"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT0"
 				clr=14
 				bclr=50
 			}
@@ -655,7 +513,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT1"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT1"
 				clr=14
 				bclr=1
 			}
@@ -671,7 +529,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT0_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT0_BURT"
 				clr=14
 				bclr=50
 			}
@@ -688,7 +546,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT0_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT0_LIVE"
 				clr=14
 				bclr=50
 			}
@@ -705,7 +563,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT1_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT1_BURT"
 				clr=14
 				bclr=1
 			}
@@ -722,7 +580,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT1_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT1_LIVE"
 				clr=14
 				bclr=1
 			}
@@ -739,7 +597,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT2"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT2"
 				clr=14
 				bclr=50
 			}
@@ -755,7 +613,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT3"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT3"
 				clr=14
 				bclr=1
 			}
@@ -771,7 +629,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT2_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT2_BURT"
 				clr=14
 				bclr=50
 			}
@@ -788,7 +646,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT2_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT2_LIVE"
 				clr=14
 				bclr=50
 			}
@@ -805,7 +663,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT3_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT3_BURT"
 				clr=14
 				bclr=1
 			}
@@ -822,7 +680,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT3_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT3_LIVE"
 				clr=14
 				bclr=1
 			}
@@ -839,7 +697,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT4"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT4"
 				clr=14
 				bclr=50
 			}
@@ -855,7 +713,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT5"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT5"
 				clr=14
 				bclr=1
 			}
@@ -871,7 +729,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT4_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT4_BURT"
 				clr=14
 				bclr=50
 			}
@@ -888,7 +746,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT4_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT4_LIVE"
 				clr=14
 				bclr=50
 			}
@@ -905,7 +763,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT5_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT5_BURT"
 				clr=14
 				bclr=1
 			}
@@ -922,7 +780,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT5_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT5_LIVE"
 				clr=14
 				bclr=1
 			}
@@ -939,7 +797,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT6"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT6"
 				clr=14
 				bclr=50
 			}
@@ -955,7 +813,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT7"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT7"
 				clr=14
 				bclr=1
 			}
@@ -971,7 +829,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT6_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT6_BURT"
 				clr=14
 				bclr=50
 			}
@@ -988,7 +846,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT6_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT6_LIVE"
 				clr=14
 				bclr=50
 			}
@@ -1005,7 +863,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT7_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT7_BURT"
 				clr=14
 				bclr=1
 			}
@@ -1022,7 +880,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT7_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT7_LIVE"
 				clr=14
 				bclr=1
 			}
@@ -1039,7 +897,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT8"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT8"
 				clr=14
 				bclr=50
 			}
@@ -1055,7 +913,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT9"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT9"
 				clr=14
 				bclr=1
 			}
@@ -1071,7 +929,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT8_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT8_BURT"
 				clr=14
 				bclr=50
 			}
@@ -1088,7 +946,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT8_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT8_LIVE"
 				clr=14
 				bclr=50
 			}
@@ -1105,7 +963,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT9_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT9_BURT"
 				clr=14
 				bclr=1
 			}
@@ -1122,7 +980,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT9_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT9_LIVE"
 				clr=14
 				bclr=1
 			}
@@ -1139,7 +997,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT0_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT0_TIME"
 				clr=14
 				bclr=50
 			}
@@ -1155,7 +1013,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT1_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT1_TIME"
 				clr=14
 				bclr=1
 			}
@@ -1171,7 +1029,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT2_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT2_TIME"
 				clr=14
 				bclr=50
 			}
@@ -1187,7 +1045,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT3_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT3_TIME"
 				clr=14
 				bclr=1
 			}
@@ -1203,7 +1061,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT4_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT4_TIME"
 				clr=14
 				bclr=50
 			}
@@ -1219,7 +1077,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT5_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT5_TIME"
 				clr=14
 				bclr=1
 			}
@@ -1235,7 +1093,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT6_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT6_TIME"
 				clr=14
 				bclr=50
 			}
@@ -1251,7 +1109,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT7_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT7_TIME"
 				clr=14
 				bclr=1
 			}
@@ -1267,7 +1125,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT8_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT8_TIME"
 				clr=14
 				bclr=50
 			}
@@ -1283,7 +1141,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT9_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT9_TIME"
 				clr=14
 				bclr=1
 			}
@@ -1301,7 +1159,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT0 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT0 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -1317,7 +1175,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT1 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT1 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -1333,7 +1191,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT2 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT2 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -1349,7 +1207,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT3 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT3 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -1365,7 +1223,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT4 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT4 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -1381,7 +1239,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT5 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT5 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -1397,7 +1255,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT6 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT6 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -1413,7 +1271,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT7 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT7 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -1429,7 +1287,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT8 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT8 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -1445,7 +1303,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT9 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT9 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -1468,7 +1326,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT10"
 						clr=14
 						bclr=50
 					}
@@ -1484,7 +1342,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT11"
 						clr=14
 						bclr=1
 					}
@@ -1500,7 +1358,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10_BURT"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT10_BURT"
 						clr=14
 						bclr=50
 					}
@@ -1516,7 +1374,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10_LIVE"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT10_LIVE"
 						clr=14
 						bclr=50
 					}
@@ -1532,7 +1390,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11_BURT"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT11_BURT"
 						clr=14
 						bclr=1
 					}
@@ -1548,7 +1406,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11_LIVE"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT11_LIVE"
 						clr=14
 						bclr=1
 					}
@@ -1564,7 +1422,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT12"
 						clr=14
 						bclr=50
 					}
@@ -1580,7 +1438,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT13"
 						clr=14
 						bclr=1
 					}
@@ -1596,7 +1454,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12_BURT"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT12_BURT"
 						clr=14
 						bclr=50
 					}
@@ -1612,7 +1470,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12_LIVE"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT12_LIVE"
 						clr=14
 						bclr=50
 					}
@@ -1628,7 +1486,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13_BURT"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT13_BURT"
 						clr=14
 						bclr=1
 					}
@@ -1644,7 +1502,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13_LIVE"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT13_LIVE"
 						clr=14
 						bclr=1
 					}
@@ -1660,7 +1518,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT14"
 						clr=14
 						bclr=50
 					}
@@ -1676,7 +1534,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT15"
 						clr=14
 						bclr=1
 					}
@@ -1692,7 +1550,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14_BURT"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT14_BURT"
 						clr=14
 						bclr=50
 					}
@@ -1708,7 +1566,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14_LIVE"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT14_LIVE"
 						clr=14
 						bclr=50
 					}
@@ -1724,7 +1582,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15_BURT"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT15_BURT"
 						clr=14
 						bclr=1
 					}
@@ -1740,7 +1598,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15_LIVE"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT15_LIVE"
 						clr=14
 						bclr=1
 					}
@@ -1756,7 +1614,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10_TIME"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT10_TIME"
 						clr=14
 						bclr=50
 					}
@@ -1772,7 +1630,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11_TIME"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT11_TIME"
 						clr=14
 						bclr=1
 					}
@@ -1788,7 +1646,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12_TIME"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT12_TIME"
 						clr=14
 						bclr=50
 					}
@@ -1804,7 +1662,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13_TIME"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT13_TIME"
 						clr=14
 						bclr=1
 					}
@@ -1820,7 +1678,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14_TIME"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT14_TIME"
 						clr=14
 						bclr=50
 					}
@@ -1836,7 +1694,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15_TIME"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT15_TIME"
 						clr=14
 						bclr=1
 					}
@@ -1852,7 +1710,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT16"
 						clr=14
 						bclr=50
 					}
@@ -1868,7 +1726,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT17"
 						clr=14
 						bclr=1
 					}
@@ -1884,7 +1742,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16_BURT"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT16_BURT"
 						clr=14
 						bclr=50
 					}
@@ -1900,7 +1758,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16_LIVE"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT16_LIVE"
 						clr=14
 						bclr=50
 					}
@@ -1916,7 +1774,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17_BURT"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT17_BURT"
 						clr=14
 						bclr=1
 					}
@@ -1932,7 +1790,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17_LIVE"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT17_LIVE"
 						clr=14
 						bclr=1
 					}
@@ -1948,7 +1806,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT18"
 						clr=14
 						bclr=50
 					}
@@ -1964,7 +1822,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT19"
 						clr=14
 						bclr=1
 					}
@@ -1980,7 +1838,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18_BURT"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT18_BURT"
 						clr=14
 						bclr=50
 					}
@@ -1996,7 +1854,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18_LIVE"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT18_LIVE"
 						clr=14
 						bclr=50
 					}
@@ -2012,7 +1870,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19_BURT"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT19_BURT"
 						clr=14
 						bclr=1
 					}
@@ -2028,7 +1886,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19_LIVE"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT19_LIVE"
 						clr=14
 						bclr=1
 					}
@@ -2044,7 +1902,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16_TIME"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT16_TIME"
 						clr=14
 						bclr=50
 					}
@@ -2060,7 +1918,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17_TIME"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT17_TIME"
 						clr=14
 						bclr=1
 					}
@@ -2076,7 +1934,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18_TIME"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT18_TIME"
 						clr=14
 						bclr=50
 					}
@@ -2092,7 +1950,7 @@ composite {
 						height=20
 					}
 					monitor {
-						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19_TIME"
+						chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT19_TIME"
 						clr=14
 						bclr=1
 					}
@@ -2112,7 +1970,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT10 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT10 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2128,7 +1986,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT11 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT11 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2144,7 +2002,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT12 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT12 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2160,7 +2018,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT13 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT13 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2176,7 +2034,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT14 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT14 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2192,7 +2050,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT15 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT15 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2208,7 +2066,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT16 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT16 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2224,7 +2082,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT17 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT17 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2240,7 +2098,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT18 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT18 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2256,7 +2114,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT19 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT19 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2270,7 +2128,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT20"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT20"
 				clr=14
 				bclr=50
 			}
@@ -2286,7 +2144,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT21"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT21"
 				clr=14
 				bclr=1
 			}
@@ -2302,7 +2160,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT20_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT20_BURT"
 				clr=14
 				bclr=50
 			}
@@ -2318,7 +2176,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT20_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT20_LIVE"
 				clr=14
 				bclr=50
 			}
@@ -2334,7 +2192,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT21_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT21_BURT"
 				clr=14
 				bclr=1
 			}
@@ -2350,7 +2208,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT21_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT21_LIVE"
 				clr=14
 				bclr=1
 			}
@@ -2366,7 +2224,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT22"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT22"
 				clr=14
 				bclr=50
 			}
@@ -2382,7 +2240,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT23"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT23"
 				clr=14
 				bclr=1
 			}
@@ -2398,7 +2256,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT22_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT22_BURT"
 				clr=14
 				bclr=50
 			}
@@ -2414,7 +2272,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT22_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT22_LIVE"
 				clr=14
 				bclr=50
 			}
@@ -2430,7 +2288,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT23_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT23_BURT"
 				clr=14
 				bclr=1
 			}
@@ -2446,7 +2304,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT23_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT23_LIVE"
 				clr=14
 				bclr=1
 			}
@@ -2462,7 +2320,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT24"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT24"
 				clr=14
 				bclr=50
 			}
@@ -2478,7 +2336,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT25"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT25"
 				clr=14
 				bclr=1
 			}
@@ -2494,7 +2352,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT24_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT24_BURT"
 				clr=14
 				bclr=50
 			}
@@ -2510,7 +2368,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT24_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT24_LIVE"
 				clr=14
 				bclr=50
 			}
@@ -2526,7 +2384,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT25_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT25_BURT"
 				clr=14
 				bclr=1
 			}
@@ -2542,7 +2400,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT25_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT25_LIVE"
 				clr=14
 				bclr=1
 			}
@@ -2558,7 +2416,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT20_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT20_TIME"
 				clr=14
 				bclr=50
 			}
@@ -2574,7 +2432,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT21_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT21_TIME"
 				clr=14
 				bclr=1
 			}
@@ -2590,7 +2448,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT22_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT22_TIME"
 				clr=14
 				bclr=50
 			}
@@ -2606,7 +2464,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT23_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT23_TIME"
 				clr=14
 				bclr=1
 			}
@@ -2622,7 +2480,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT24_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT24_TIME"
 				clr=14
 				bclr=50
 			}
@@ -2638,7 +2496,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT25_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT25_TIME"
 				clr=14
 				bclr=1
 			}
@@ -2654,7 +2512,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT26"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT26"
 				clr=14
 				bclr=50
 			}
@@ -2670,7 +2528,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT27"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT27"
 				clr=14
 				bclr=1
 			}
@@ -2686,7 +2544,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT26_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT26_BURT"
 				clr=14
 				bclr=50
 			}
@@ -2702,7 +2560,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT26_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT26_LIVE"
 				clr=14
 				bclr=50
 			}
@@ -2718,7 +2576,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT27_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT27_BURT"
 				clr=14
 				bclr=1
 			}
@@ -2734,7 +2592,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT27_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT27_LIVE"
 				clr=14
 				bclr=1
 			}
@@ -2750,7 +2608,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT28"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT28"
 				clr=14
 				bclr=50
 			}
@@ -2766,7 +2624,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT29"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT29"
 				clr=14
 				bclr=1
 			}
@@ -2782,7 +2640,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT28_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT28_BURT"
 				clr=14
 				bclr=50
 			}
@@ -2798,7 +2656,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT28_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT28_LIVE"
 				clr=14
 				bclr=50
 			}
@@ -2814,7 +2672,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT29_BURT"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT29_BURT"
 				clr=14
 				bclr=1
 			}
@@ -2830,7 +2688,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT29_LIVE"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT29_LIVE"
 				clr=14
 				bclr=1
 			}
@@ -2846,7 +2704,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT26_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT26_TIME"
 				clr=14
 				bclr=50
 			}
@@ -2862,7 +2720,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT27_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT27_TIME"
 				clr=14
 				bclr=1
 			}
@@ -2878,7 +2736,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT28_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT28_TIME"
 				clr=14
 				bclr=50
 			}
@@ -2894,7 +2752,7 @@ composite {
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT29_TIME"
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT29_TIME"
 				clr=14
 				bclr=1
 			}
@@ -2912,7 +2770,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT20 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT20 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2928,7 +2786,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT21 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT21 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2944,7 +2802,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT22 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT22 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2960,7 +2818,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT23 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT23 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2976,7 +2834,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT24 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT24 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -2992,7 +2850,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT25 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT25 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -3008,7 +2866,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT26 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT26 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -3024,7 +2882,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT27 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT27 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -3040,7 +2898,7 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT28 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT28 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
@@ -3056,11 +2914,210 @@ composite {
 			command[0] {
 				label="GUARD CH1"
 				name="/opt/rtcds/lho/h1/scripts/grdfiltdecode.py"
-				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_GRD_SP_STAT29 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
+				args="-i SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_STAT29 -m SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_LOADED -d TARGET_MEDM"
 			}
 			clr=0
 			bclr=54
 			label="30"
+		}
+	}
+}
+composite {
+	object {
+		x=288
+		y=29
+		width=50
+		height=47
+	}
+	"composite name"=""
+	children {
+		"text update" {
+			object {
+				x=288
+				y=60
+				width=50
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_FULL_CH_COUNT"
+				clr=0
+				bclr=14
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		text {
+			object {
+				x=288
+				y=29
+				width=50
+				height=16
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="TOTAL"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=288
+				y=45
+				width=50
+				height=16
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="SET PTS"
+			align="horiz. centered"
+		}
+	}
+}
+composite {
+	object {
+		x=343
+		y=29
+		width=50
+		height=47
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=343
+				y=45
+				width=50
+				height=16
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="MONITORED"
+			align="horiz. centered"
+		}
+		"text update" {
+			object {
+				x=343
+				y=60
+				width=50
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_MON_COUNT"
+				clr=0
+				bclr=14
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		text {
+			object {
+				x=343
+				y=29
+				width=50
+				height=16
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="NOT"
+			align="horiz. centered"
+		}
+	}
+}
+composite {
+	object {
+		x=398
+		y=45
+		width=51
+		height=31
+	}
+	"composite name"=""
+	children {
+		text {
+			object {
+				x=399
+				y=45
+				width=50
+				height=16
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="DIFFS"
+			align="horiz. centered"
+		}
+		"text update" {
+			object {
+				x=398
+				y=60
+				width=50
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_SP_ERR_CNT"
+				clr=0
+				bclr=14
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=454
+		y=29
+		width=50
+		height=47
+	}
+	"composite name"=""
+	children {
+		"text update" {
+			object {
+				x=454
+				y=60
+				width=50
+				height=16
+			}
+			monitor {
+				chan="SITE_NAME:SYSTEM_NAME-DCU_NODE_ID_SDF_ALARM_COUNT"
+				clr=0
+				bclr=14
+			}
+			align="horiz. centered"
+			limits {
+			}
+		}
+		text {
+			object {
+				x=454
+				y=29
+				width=50
+				height=16
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="ALARM"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=454
+				y=45
+				width=50
+				height=16
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="SETS"
+			align="horiz. centered"
 		}
 	}
 }
