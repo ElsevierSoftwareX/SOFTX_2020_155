@@ -23,6 +23,8 @@ of this distribution.
 // Add more filter modules to tim16 to boost number of settings for test.
 // Check autoBurt, particularly for SDF stuff
 // ADD ability to add channels from larger files.
+// ADD MBBO or ENUM as radio button to select table entries
+// Fix GDSTP screen again.
 
 /*
  * Main program for demo sequencer
@@ -93,12 +95,11 @@ typedef struct FILTER_TABLE {
 
 int chNum = 0;
 int chMon = 0;
+int alarmCnt = 0;
 int chNumP = 0;
 int fmNum = 0;
 char timechannel[256];
 char reloadtimechannel[256];
-char fullchancnt[256];
-char subchancnt[256];
 
 CDS_CD_TABLE cdTable[MAX_BURT_CHANS];
 CDS_CD_TABLE cdTableP[MAX_BURT_CHANS];
@@ -220,19 +221,19 @@ int spChecker(char *pref)
 				// If a diff was found, then write info the guardian EPICS records.
 				if(localErr)
 				{
-					sprintf(s, "%s_%s_STAT%d", pref,"GRD_SP", errCntr);
+					sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", errCntr);
 					status = dbNameToAddr(s,&saddr);
 					status = dbPutField(&saddr,DBR_STRING,&cdTable[ii].chname,1);
 
-					sprintf(s1, "%s_%s_STAT%d_BURT", pref,"GRD_SP", errCntr);
+					sprintf(s1, "%s_%s_STAT%d_BURT", pref,"SDF_SP", errCntr);
 					status = dbNameToAddr(s1,&baddr);
 					status = dbPutField(&baddr,DBR_STRING,burtset,1);
 
-					sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"GRD_SP", errCntr);
+					sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"SDF_SP", errCntr);
 					status = dbNameToAddr(s2,&maddr);
 					status = dbPutField(&maddr,DBR_STRING,liveset,1);
 
-					sprintf(s3, "%s_%s_STAT%d_TIME", pref,"GRD_SP", errCntr);
+					sprintf(s3, "%s_%s_STAT%d_TIME", pref,"SDF_SP", errCntr);
 					strcpy(localtimestring, ctime(&mtime));
 					localtimestring[strlen(localtimestring) - 1] = 0;
 					status = dbNameToAddr(s3,&taddr);
@@ -245,20 +246,20 @@ int spChecker(char *pref)
 		if(lastcount > errCntr) {
 		for(ii=errCntr;ii<lastcount;ii++)
 		{
-			sprintf(s, "%s_%s_STAT%d", pref,"GRD_SP", ii);
+			sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
 			status = dbNameToAddr(s,&saddr);
 			status = dbPutField(&saddr,DBR_STRING," ",1);
 
-			sprintf(s1, "%s_%s_STAT%d_BURT", pref,"GRD_SP", ii);
+			sprintf(s1, "%s_%s_STAT%d_BURT", pref,"SDF_SP", ii);
 			status = dbNameToAddr(s1,&baddr);
 			status = dbPutField(&baddr,DBR_STRING," ",1);
 
-			sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"GRD_SP", ii);
+			sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"SDF_SP", ii);
 			status = dbNameToAddr(s2,&maddr);
 			status = dbPutField(&maddr,DBR_STRING," ",1);
 
 
-			sprintf(s3, "%s_%s_STAT%d_TIME", pref,"GRD_SP", ii);
+			sprintf(s3, "%s_%s_STAT%d_TIME", pref,"SDF_SP", ii);
 			status = dbNameToAddr(s3,&taddr);
 			status = dbPutField(&taddr,DBR_STRING," ",1);
 		}
@@ -520,6 +521,7 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 			break;
 		case BURT_READ_ONLY:
 		case BURT_LOAD_PARTIAL:
+			printf("Loading %s\n",sdfile);
 			cdf = fopen(sdfile,"r");
 			if(cdf == NULL) {
 				logFileError(sdfile);
@@ -528,6 +530,7 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 			}
 			localCtr = 0;
 			chNumP = 0;
+			alarmCnt = 0;
 			strcpy(s4,"x");
 			strncpy(ifo,pref,3);
 			while(fgets(line,sizeof line,cdf) != NULL)
@@ -536,7 +539,11 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 				strcpy(s4,"x");
 				sscanf(line,"%s%s%s%s",s1,s2,s3,s4);
 				// If 1st three chars match IFO ie checking this this line is not BURT header or channel marked RO
-				if(strncmp(s1,ifo,3) == 0)
+				if(	strncmp(s1,ifo,3) == 0 && 
+					// Don't allow load of SWSTAT or SWMASK, which are set by this program.
+					strstr(s1,"_SWMASK") == NULL &&
+					strstr(s1,"_SDF_NAME") == NULL &&
+					strstr(s1,"_SWREQ") == NULL)
 				{
 					// Clear out the local tabel channel name string.
 					bzero(cdTableP[chNumP].chname,strlen(cdTableP[chNumP].chname));
@@ -564,6 +571,18 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 					}
 					// Find channel in full list and replace setting info
 					fmatch = 0;
+					// We can set alarm values, but do not put them in cdTable
+					if((strstr(cdTableP[chNumP].chname,".HIGH") != NULL) || 
+						(strstr(s1,".HIHI") != NULL) || 
+						(strstr(s1,".LOW") != NULL) || 
+						(strstr(s1,".LOLO") != NULL) || 
+						(strstr(s1,".HSV") != NULL) || 
+						(strstr(s1,".OSV") != NULL) || 
+						(strstr(s1,".ZSV") != NULL) || 
+						(strstr(s1,".LSV") != NULL) )
+					{
+						alarmCnt ++;
+					} else {
 					for(ii=0;ii<chNum;ii++)
 					{
 						if(strcmp(cdTable[ii].chname,cdTableP[chNumP].chname) == 0)
@@ -580,7 +599,8 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 								cdTable[ii].mask = cdTableP[chNumP].mask;
 						}
 					}
-					if(!fmatch) printf("NEW channel not found %s\n",cdTable[chNumP].chname);
+					if(!fmatch) printf("NEW channel not found %s\n",cdTableP[chNumP].chname);
+					}
 					localCtr ++;
 					chNumP ++;
 				}
@@ -675,7 +695,7 @@ void process_alarms(DBBASE *pdbbase, char *pref)
       }
       for (i = 0; i < 2; i++) {
         for (j = 0; j < 10; j++) {
-	char s[256]; sprintf(s, "%s_%s_STAT%d", pref, i? "GRD_RB": "GRD_SP", j);
+	char s[256]; sprintf(s, "%s_%s_STAT%d", pref, i? "SDF_RB": "SDF_SP", j);
         status = dbFindRecord(pdbentry, s);
         if (status) { 
     	  printf("Could not find %s record\n", s);
@@ -690,7 +710,7 @@ void process_alarms(DBBASE *pdbbase, char *pref)
       }
       }
       char s[256];
-      sprintf(s, "%s_GRD_ALH_CRC", pref);
+      sprintf(s, "%s_SDF_ALH_CRC", pref);
       status = dbFindRecord(pdbentry, s);
       if (status) { 
     	  printf("Could not find %s record\n", s);
@@ -703,7 +723,7 @@ void process_alarms(DBBASE *pdbbase, char *pref)
       }
       pdbentry_crc = dbCopyEntry(pdbentry);
 
-      sprintf(s, "%s_GRD_SP_ERR_CNT", pref);
+      sprintf(s, "%s_SDF_SP_ERR_CNT", pref);
       status = dbFindRecord(pdbentry, s);
       if (status) { 
     	  printf("Could not find %s record\n", s);
@@ -716,12 +736,12 @@ void process_alarms(DBBASE *pdbbase, char *pref)
       }
       pdbentry_in_err_cnt = dbCopyEntry(pdbentry);
 
-      sprintf(s, "%s_GRD_RB_ERR_CNT", pref);
-      status = dbFindRecord(pdbentry, s);
-      if (status) { 
-    	  printf("Could not find %s record\n", s);
-	  exit(1);
-      }
+      // sprintf(s, "%s__RB_ERR_CNT", pref);
+      // status = dbFindRecord(pdbentry, s);
+      // if (status) { 
+    	  // printf("Could not find %s record\n", s);
+	  // exit(1);
+      // }
       status = dbFindField(pdbentry, "VAL");
       if (status) {
 	  printf("No field \"VAL\" was found\n");
@@ -822,33 +842,58 @@ void dbDumpRecords(DBBASE *pdbbase)
 {
     DBENTRY  *pdbentry;
     long  status;
+    char mytype[4][64];
+    int ii;
 
+    sprintf(mytype[0],"%s","ai");
+    sprintf(mytype[1],"%s","bi");
+    sprintf(mytype[2],"%s","stringin");
     pdbentry = dbAllocEntry(pdbbase);
-    status = dbFirstRecordType(pdbentry);
+
+    chNum = 0;
+    for(ii=0;ii<3;ii++) {
+    status = dbFindRecordType(pdbentry,mytype[ii]);
+
+    // status = dbFirstRecordType(pdbentry);
     if(status) {printf("No record descriptions\n");return;}
     while(!status) {
         printf("record type: %s",dbGetRecordTypeName(pdbentry));
         status = dbFirstRecord(pdbentry);
-        //if (status) printf("  No Records\n"); 
+        if (status) printf("  No Records\n"); 
 	int cnt = 0;
+	// if((dbGetRecordTypeName(pdbentry),"ai") == 0){
         while (!status) {
 	    cnt++;
-            /*f (dbIsAlias(pdbentry)) {
+            if (dbIsAlias(pdbentry)) {
                 printf("\n  Alias:%s\n",dbGetRecordName(pdbentry));
-            } else*/ {
-                //printf("\n  Record:%s\n",dbGetRecordName(pdbentry));
-                status = dbFirstField(pdbentry,TRUE);
-                    if(status) printf("    No Fields\n");
-                while(!status) {
-                    //printf("    %s: %s",dbGetFieldName(pdbentry), dbGetString(pdbentry));
-                    status=dbNextField(pdbentry,TRUE);
-                }
+            } else {
+                // printf("\n  Record:%s\n",dbGetRecordName(pdbentry));
+		sprintf(cdTable[chNum].chname,"%s",dbGetRecordName(pdbentry));
+		// cdTable[chNum].chname = dbGetRecordName(pdbentry);
+		if(ii == 0) {
+			cdTable[chNum].datatype = 0;
+			cdTable[chNum].chval = 0.0;
+		} else {
+			cdTable[chNum].datatype = 1;
+			sprintf(cdTable[chNum].strval,"");
+		}
+		cdTable[chNum].mask = 1;
+                // status = dbFirstField(pdbentry,TRUE);
+                    // if(status) printf("    No Fields\n");
+                // while(!status) {
+                    // printf("    %s: %s",dbGetFieldName(pdbentry), dbGetString(pdbentry));
+                    // status=dbNextField(pdbentry,TRUE);
+                // }
             }
+	    
+	    chNum ++;
             status = dbNextRecord(pdbentry);
         }
 	printf("  %d Records\n", cnt);
-        status = dbNextRecordType(pdbentry);
+       //  status = dbNextRecordType(pdbentry);
     }
+}
+    // }
     printf("End of all Records\n");
     dbFreeEntry(pdbentry);
 }
@@ -862,11 +907,12 @@ int main(int argc,char *argv[])
 	dbAddr naddr;
 	dbAddr ssnaddr;
 	dbAddr speaddr;
+	dbAddr spaaddr;
 	// dbAddr ssaddr;
 	dbAddr sccaddr;
 	dbAddr fccaddr;
 	dbAddr mccaddr;
-	int cdfReq = BURT_LOAD_FULL;
+	int cdfReq = BURT_LOAD_PARTIAL;
 	long status;
 	int request;
 	int ropts = 0;
@@ -880,6 +926,7 @@ int main(int argc,char *argv[])
 	int noMon;
 	FILE *csFile;
 	int ii;
+	int setChans = 0;
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -896,6 +943,7 @@ int main(int argc,char *argv[])
 	char sdfile[256];
 	char ssdfile[256];
 	char bufile[256];
+	printf("My prefix is %s\n",pref);
 	// sprintf(sdfile, "%s%s%s", sdfDir, sdf,".sdf");
 	sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");					// Initialize with BURT_safe.snap
 	sprintf(bufile, "%s%s", sdfDir, "fec.snap");				// Initialize table dump file
@@ -908,7 +956,8 @@ int main(int argc,char *argv[])
 	// char ssdfFileName[256]; sprintf(ssdfFileName, "%s_%s", pref, "SDF_NAME_SUBSET");	// Name of file to load next subset request
 	char loadedFile[256]; sprintf(loadedFile, "%s_%s", pref, "SDF_LOADED");		// Name of file presently loaded
 	char ssloadedFile[256]; sprintf(ssloadedFile, "%s_%s", pref, "SDF_LOADED_INIT");	// Name of subset file presently loaded
-	char speStat[256]; sprintf(speStat, "%s_%s", pref, "GRD_SP_ERR_CNT");		// Setpoint error counter
+	char speStat[256]; sprintf(speStat, "%s_%s", pref, "SDF_SP_ERR_CNT");		// Setpoint error counter
+	char spaStat[256]; sprintf(spaStat, "%s_%s", pref, "SDF_ALARM_COUNT");		// Setpoint error counter
 	char fcc[256]; sprintf(fcc, "%s_%s", pref, "SDF_FULL_CH_COUNT");		// Channels in Full BURT file
 	char scc[256]; sprintf(scc, "%s_%s", pref, "SDF_SUBSET_CH_COUNT");		// Channels in Partial BURT file
 	char mcc[256]; sprintf(mcc, "%s_%s", pref, "SDF_MON_COUNT");		// Channels in Partial BURT file
@@ -918,10 +967,12 @@ int main(int argc,char *argv[])
 	sprintf(reloadtimechannel,"%s_%s", pref, "SDF_RELOAD_TIME");			// Time of last BURT reload
 
 	// Clear request to load new BURT file
+	printf("reload = %s\n",reloadChan);
 	status = dbNameToAddr(reloadChan,&taddr);
 	status = dbPutField(&taddr,DBR_LONG,&cdfReq,1);
 
 	// Initialize BURT file to be loaded next request = BURT_safe.snap
+	printf("burt1 = %s\n",sdfFileName);
 	status = dbNameToAddr(sdfFileName,&saddr);
 	status = dbPutField(&saddr,DBR_STRING,sdf,1);
 
@@ -940,8 +991,8 @@ int main(int argc,char *argv[])
 	status = dbNameToAddr(speStat,&speaddr);
 	status = dbPutField(&speaddr,DBR_LONG,&sperror,1);
 	printf("sp channel = %s is loaded\n",speStat);
-char fullchancnt[256];
-char subchancnt[256];
+	status = dbNameToAddr(spaStat,&spaaddr);
+	status = dbPutField(&spaaddr,DBR_LONG,&alarmCnt,1);
 
 	sleep(2);
 
@@ -988,15 +1039,18 @@ char subchancnt[256];
 					break;
 			}
 			rdstatus = readConfig(pref,sdfile,ssdfile,request);
+printf("Chan count = %d and alarmCnt = %d\n",chNumP,alarmCnt);
 			if (rdstatus) burtstatus |= rdstatus;
 			else burtstatus &= ~(6);
 			status = dbPutField(&raddr,DBR_LONG,&rdstatus,1);
-			status = dbPutField(&sccaddr,DBR_LONG,&chNumP,1);
+			setChans = chNumP - alarmCnt;
+			status = dbPutField(&sccaddr,DBR_LONG,&setChans,1);
 			if(request == BURT_LOAD_FULL)
 				status = dbPutField(&sccaddr,DBR_LONG,&chNum,1);
 				status = dbPutField(&fccaddr,DBR_LONG,&chNum,1);
 			noMon = chNum - chMon;
 			status = dbPutField(&mccaddr,DBR_LONG,&noMon,1);
+			status = dbPutField(&spaaddr,DBR_LONG,&alarmCnt,1);
 			csFile = fopen(bufile,"w");
 			for(ii=0;ii<chNum;ii++)
 			{
