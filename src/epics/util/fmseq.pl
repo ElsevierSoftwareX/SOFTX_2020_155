@@ -869,6 +869,19 @@ print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_SP_ERR_CNT\")\n";
 print "{\n	field(SCAN,\".5 second\")\n}\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_RB_ERR_CNT\")\n";
 print "{\n	field(SCAN,\".5 second\")\n}\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_CH_NOT_FOUND\")\n";
+print "{\n	field(SCAN,\".5 second\")\n}\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_CH_NOT_INIT\")\n";
+print "{\n	field(SCAN,\".5 second\")\n}\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_TABLE_ENTRIES\")\n";
+print "{\n	field(SCAN,\".5 second\")\n}\n";
+print "grecord(mbbi,\"%IFO%:FEC-${dcuId}_SDF_SORT\")\n";
+print "{\n	field(ZRVL,\"0\")\n";
+print "		field(ONVL,\"1\")\n";
+print "		field(TWVL,\"2\")\n";
+print "		field(ZRST,\"SETTING DIFFS\")\n";
+print "		field(ONST,\"CHANS NOT FOUND\")\n";
+print "		field(TWST,\"CHANS NOT INIT\")\n}\n";
 for(my $ffn = 0;$ffn < 40; $ffn ++)
 {
 	my $strGrdName = "%IFO%:FEC-${dcuId}_SDF_SP_STAT";

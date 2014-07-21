@@ -1383,7 +1383,7 @@ for($ii=0;$ii<32;$ii++)
 
 # print OUTH "\tint awgtpmanGPS;\n";
 
-print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD int ai 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD int ao 0\n";
 print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_STATUS int ao 0\n";
 print EPICS "DUMMY FEC\_$dcuId\_SDF_FULL_CH_COUNT int ao 0\n";
 print EPICS "DUMMY FEC\_$dcuId\_SDF_SUBSET_CH_COUNT int ao 0\n";
