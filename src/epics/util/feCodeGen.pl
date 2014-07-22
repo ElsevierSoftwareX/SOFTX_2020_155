@@ -1383,17 +1383,17 @@ for($ii=0;$ii<32;$ii++)
 
 # print OUTH "\tint awgtpmanGPS;\n";
 
-print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD int ao 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_STATUS int ao 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_FULL_CNT int ao 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_SUBSET_CH_COUNT int ao 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_MON_CNT int ao 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_ALARM_COUNT int ao 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_NAME int stringout 0\n";
+#print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD int ao 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_STATUS int ao 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_FULL_CNT int ao 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_SUBSET_CH_COUNT int ao 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_MON_CNT int ao 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_ALARM_COUNT int ao 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_NAME int stringout 0\n";
 # print EPICS "DUMMY FEC\_$dcuId\_SDF_NAME_SUBSET int stringin 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_TIME int stringout 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_LOADED int stringout 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_LOADED_INIT int stringout 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_TIME int stringout 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_LOADED int stringout 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_LOADED_INIT int stringout 0\n";
 
 # The following code is in solely for automated testing.
 if($diagTest > -1)
