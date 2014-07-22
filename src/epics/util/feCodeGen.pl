@@ -1385,9 +1385,9 @@ for($ii=0;$ii<32;$ii++)
 
 print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD int ao 0\n";
 print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_STATUS int ao 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_FULL_CH_COUNT int ao 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_SDF_FULL_CNT int ao 0\n";
 print EPICS "DUMMY FEC\_$dcuId\_SDF_SUBSET_CH_COUNT int ao 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_MON_COUNT int ao 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_SDF_MON_CNT int ao 0\n";
 print EPICS "DUMMY FEC\_$dcuId\_SDF_ALARM_COUNT int ao 0\n";
 print EPICS "DUMMY FEC\_$dcuId\_SDF_NAME int stringout 0\n";
 # print EPICS "DUMMY FEC\_$dcuId\_SDF_NAME_SUBSET int stringin 0\n";
