@@ -115,42 +115,27 @@ sub createGdsMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"CONFIGURATION FILES",$ecolors{white});
 	# BURT STUFF ******************************************************************************************************
 	# Add BURT related display
-	$xpos = 562; $ypos = 106; $width = 135; $height = 18;
+	$xpos = 562; $ypos = 106; $width = 160; $height = 18;
 	$mdlNamelc = lc($mdlName);
 	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_BURT_RESTORE.adl";
         $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"BURT RESTORE");
 	# BURT Diffs Label
-	$xpos = 704; $ypos = 94; $width = 24; $height = 12;
+	$xpos = 733; $ypos = 94; $width = 24; $height = 12;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DIFFS",$ecolors{black});
-	# BURT Alarm Label
-	$xpos = 735; $ypos = 94; $width = 24; $height = 12;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"ALM",$ecolors{black});
 	# Add Guardian setpoint error  Counter Monitor
-	$xpos = 701; $ypos = 108; $width = 30; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_GRD_SP_ERR_CNT",$ecolors{white},$ecolors{black},"alarm");
-	# Add Guardian readback error  Counter Monitor
-	$xpos = 735; $ypos = 108; $width = 30; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_GRD_RB_ERR_CNT",$ecolors{white},$ecolors{black},"alarm");
-	# BURT FULL Label
-	$xpos = 559; $ypos = 128; $width = 40; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"FULL",$ecolors{black});
-	# BURT PARTIAL Label
-	$xpos = 559; $ypos = 147; $width = 40; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"PART",$ecolors{black});
-	# BURT FULL File Loaded
-	$xpos = 602; $ypos = 128; $width = 160; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_LOADED_INIT",$ecolors{white},$ecolors{blue},"static");
+	$xpos = 725; $ypos = 108; $width = 35; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_SP_ERR_CNT",$ecolors{white},$ecolors{black},"alarm");
 	# BURT Partial File Loaded
-	$xpos = 602; $ypos = 148; $width = 160; $height = 15;
+	$xpos = 562; $ypos = 128; $width = 200; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_LOADED",$ecolors{white},$ecolors{blue},"static");
 	# BURT Reload Status bit 0
-	$xpos = 562; $ypos = 166; $width = 65; $height = 10;
+	$xpos = 562; $ypos = 146; $width = 65; $height = 10;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_STATUS","0","0",$ecolors{yellow},$ecolors{green});
 	# BURT Reload Status bit 1 and 2
-	$xpos = 628; $ypos = 166; $width = 134; $height = 10;
+	$xpos = 628; $ypos = 146; $width = 134; $height = 10;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_STATUS","1","2",$ecolors{red},$ecolors{green});
 	# BURT Reload Time
-	$xpos = 562; $ypos = 177; $width = 200; $height = 15;
+	$xpos = 562; $ypos = 160; $width = 200; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_TIME",$ecolors{white},$ecolors{blue},"static");
 
 	$xpos = 210; $ypos = 117; $width = 153; $height = 18;

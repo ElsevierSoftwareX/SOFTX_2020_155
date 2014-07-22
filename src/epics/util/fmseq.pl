@@ -863,25 +863,47 @@ foreach $i ( @names ) {
 }
     
 # add msg and load coeff records
-print "grecord(ao,\"%IFO%:FEC-${dcuId}_GRD_ALH_CRC\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_RELOAD\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_RELOAD_STATUS\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_FULL_CNT\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_FILE_SET_CNT\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_MON_CNT\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_ALARM_COUNT\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_NAME\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_RELOAD_TIME\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_LOADED\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_ALH_CRC\")\n";
 print "{\n	field(SCAN,\".5 second\")\n}\n";
-print "grecord(ao,\"%IFO%:FEC-${dcuId}_GRD_SP_ERR_CNT\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_SP_ERR_CNT\")\n";
 print "{\n	field(SCAN,\".5 second\")\n}\n";
-print "grecord(ao,\"%IFO%:FEC-${dcuId}_GRD_RB_ERR_CNT\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_RB_ERR_CNT\")\n";
 print "{\n	field(SCAN,\".5 second\")\n}\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_DROP_CNT\")\n";
+print "{\n	field(SCAN,\".5 second\")\n}\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_UNSET_CNT\")\n";
+print "{\n	field(SCAN,\".5 second\")\n}\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_TABLE_ENTRIES\")\n";
+print "{\n	field(SCAN,\".5 second\")\n}\n";
+print "grecord(mbbi,\"%IFO%:FEC-${dcuId}_SDF_SORT\")\n";
+print "{\n	field(ZRVL,\"0\")\n";
+print "		field(ONVL,\"1\")\n";
+print "		field(TWVL,\"2\")\n";
+print "		field(ZRST,\"SETTING DIFFS\")\n";
+print "		field(ONST,\"CHANS NOT FOUND\")\n";
+print "		field(TWST,\"CHANS NOT INIT\")\n}\n";
 for(my $ffn = 0;$ffn < 40; $ffn ++)
 {
-	my $strGrdName = "%IFO%:FEC-${dcuId}_GRD_SP_STAT";
+	my $strGrdName = "%IFO%:FEC-${dcuId}_SDF_SP_STAT";
 	$strGrdName .= $ffn;
-	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\")\n";
+	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\")\n";
 	print "{\n	field(SCAN,\".5 second\")\n}\n";
-	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\_BURT\")\n";
+	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\_BURT\")\n";
 	print "{\n	field(SCAN,\".5 second\")\n";
 	print "	}\n";
-	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\_LIVE\")\n";
+	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\_LIVE\")\n";
 	print "{\n	field(SCAN,\".5 second\")\n";
 	print "	}\n";
-	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_SP_STAT$ffn\_TIME\")\n";
+	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\_TIME\")\n";
 	print "{\n	field(SCAN,\".5 second\")\n}\n";
 }
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_RB_STAT0\")\n";

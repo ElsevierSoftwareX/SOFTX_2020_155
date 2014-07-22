@@ -1254,7 +1254,7 @@ print EPICS "MOMENTARY FEC\_$dcuId\_OVERFLOW_RESET epicsInput.overflowReset int 
 print OUTH "\tint burtRestore_mask;\n";
 print OUTH "\tint dacDuoSet_mask;\n";
 print OUTH "\tint dacDuoSet;\n";
-print EPICS "INVARIABLE FEC\_$dcuId\_DACDT_ENABLE epicsInput.dacDuoSet int bo 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
+print EPICS "INVARIABLE FEC\_$dcuId\_DACDT_ENABLE epicsInput.dacDuoSet int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
 print OUTH "\tint pad1;\n";
 if($diagTest > -1)
 {
@@ -1383,16 +1383,17 @@ for($ii=0;$ii<32;$ii++)
 
 # print OUTH "\tint awgtpmanGPS;\n";
 
-print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD int ai 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_STATUS int ao 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_FULL_CH_COUNT int ao 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_SUBSET_CH_COUNT int ao 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_MON_COUNT int ao 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_NAME int stringin 0\n";
+#print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD int ao 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_STATUS int ao 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_FULL_CNT int ao 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_SUBSET_CH_COUNT int ao 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_MON_CNT int ao 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_ALARM_COUNT int ao 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_NAME int stringout 0\n";
 # print EPICS "DUMMY FEC\_$dcuId\_SDF_NAME_SUBSET int stringin 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_TIME int stringout 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_LOADED int stringout 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_SDF_LOADED_INIT int stringout 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_TIME int stringout 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_LOADED int stringout 0\n";
+# print EPICS "DUMMY FEC\_$dcuId\_SDF_LOADED_INIT int stringout 0\n";
 
 # The following code is in solely for automated testing.
 if($diagTest > -1)
