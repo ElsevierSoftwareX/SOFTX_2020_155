@@ -25,6 +25,9 @@ of this distribution.
 // ADD ability to add channels from larger files.
 // ADD MBBO or ENUM as radio button to select table entries
 // Fix GDSTP screen again.
+// Finish fixing names to Jamie's list.
+// Get rid of burt load full.
+// Add burt restore only ie no table update.
 
 /*
  * Main program for demo sequencer
@@ -106,6 +109,7 @@ int chMon = 0;
 int alarmCnt = 0;
 int chNumP = 0;
 int fmNum = 0;
+int fmtInit = 0;
 int chNotFound = 0;
 int chNotInit = 0;
 char timechannel[256];
@@ -618,6 +622,7 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 			localCtr = 0;
 			chNumP = 0;
 			alarmCnt = 0;
+			if(!fmtInit) fmNum = 0;
 			strcpy(s4,"x");
 			strncpy(ifo,pref,3);
 			while(fgets(line,sizeof line,cdf) != NULL)
@@ -689,6 +694,27 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 					}
 					if(!fmatch) printf("NEW channel not found %s\n",cdTableP[chNumP].chname);
 					}
+					if(!fmtInit) {
+						// Following is optional:
+						// Uses the SWREQ AND SWMASK records of filter modules to decode which switch settings are incorrect.
+						// This presently assumes that filter module SW1S will appear before SW2S in the burt files.
+						if((strstr(s1,"_SW1S") != NULL) && (strstr(s1,"_SW1S.") == NULL))
+						{
+							bzero(filterTable[fmNum].fname,strlen(filterTable[fmNum].fname));
+							strncpy(filterTable[fmNum].fname,s1,(strlen(s1)-4));
+							tmpreq = (int)atof(s3);
+						}
+						if((strstr(s1,"_SW2S") != NULL) && (strstr(s1,"_SW2S.") == NULL))
+						{
+							int treq;
+							treq = (int) atof(s3);
+							tmpreq = tmpreq + (treq << 16);
+							filterTable[fmNum].swreq = filtCtrlBitConvert(tmpreq);
+							// printf("%s 0x%x %f %f\n",fTable[fmNum].fname,fTable[fmNum].swreq,tmpreq,atof(s3));
+							tmpreq = 0;
+							fmNum ++;
+						}
+					}
 					localCtr ++;
 					chNumP ++;
 				}
@@ -698,6 +724,8 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 			for(ii=0;ii<chNum;ii++)
 				if(cdTable[ii].mask) chMon ++;
 			lderror = newvalue(chNumP,cdTableP,command);
+			if(!fmtInit) flderror = newfilterstats(fmNum,command);
+			fmtInit = 1;
 			break;
 		case BURT_RESET:
 			lderror = newvalue(chNum,cdTable,command);
@@ -1053,12 +1081,12 @@ int main(int argc,char *argv[])
 	char ssloadedFile[256]; sprintf(ssloadedFile, "%s_%s", pref, "SDF_LOADED_INIT");	// Name of subset file presently loaded
 	char speStat[256]; sprintf(speStat, "%s_%s", pref, "SDF_SP_ERR_CNT");		// Setpoint error counter
 	char spaStat[256]; sprintf(spaStat, "%s_%s", pref, "SDF_ALARM_COUNT");		// Setpoint error counter
-	char fcc[256]; sprintf(fcc, "%s_%s", pref, "SDF_FULL_CH_COUNT");		// Channels in Full BURT file
+	char fcc[256]; sprintf(fcc, "%s_%s", pref, "SDF_FULL_CNT");		// Channels in Full BURT file
 	char scc[256]; sprintf(scc, "%s_%s", pref, "SDF_SUBSET_CH_COUNT");		// Channels in Partial BURT file
-	char mcc[256]; sprintf(mcc, "%s_%s", pref, "SDF_MON_COUNT");			// Channels in Partial BURT file
+	char mcc[256]; sprintf(mcc, "%s_%s", pref, "SDF_MON_CNT");			// Channels in Partial BURT file
 	char tsrname[256]; sprintf(tsrname, "%s_%s", pref, "SDF_SORT");			// SDF Table sorting request
-	char cnfname[256]; sprintf(cnfname, "%s_%s", pref, "SDF_CH_NOT_FOUND");		// SDF Table sorting request
-	char cniname[256]; sprintf(cniname, "%s_%s", pref, "SDF_CH_NOT_INIT");		// SDF Table sorting request
+	char cnfname[256]; sprintf(cnfname, "%s_%s", pref, "SDF_DROP_CNT");		// SDF Table sorting request
+	char cniname[256]; sprintf(cniname, "%s_%s", pref, "SDF_UNSET_CNT");		// SDF Table sorting request
 	char stename[256]; sprintf(stename, "%s_%s", pref, "SDF_TABLE_ENTRIES");	// SDF Table sorting request
 	printf("SDF FILE EPICS = %s\n",sdfFileName);
 	sprintf(timechannel,"%s_%s", pref, "TIME_STRING");
@@ -1154,7 +1182,7 @@ printf("Chan count = %d and alarmCnt = %d\n",chNumP,alarmCnt);
 			status = dbPutField(&sccaddr,DBR_LONG,&setChans,1);
 			if(request == BURT_LOAD_FULL)
 				status = dbPutField(&sccaddr,DBR_LONG,&chNum,1);
-				status = dbPutField(&fccaddr,DBR_LONG,&chNum,1);
+			status = dbPutField(&fccaddr,DBR_LONG,&chNum,1);
 			noMon = chNum - chMon;
 			status = dbPutField(&mccaddr,DBR_LONG,&noMon,1);
 			status = dbPutField(&spaaddr,DBR_LONG,&alarmCnt,1);
