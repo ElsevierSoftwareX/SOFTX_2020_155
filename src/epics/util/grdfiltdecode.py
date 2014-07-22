@@ -22,9 +22,8 @@ basedir = args.medmdir
 ec = PV(args.chname)
 grdchan = ec.value
 
-mc = PV(args.model)
-word = mc.value.split("_")
-modelname = word[0].upper()
+modelname = args.model.upper()
+
 
 if '_SW1S' in grdchan or '_SW2S' in grdchan:
 	x = len(grdchan) - 5
