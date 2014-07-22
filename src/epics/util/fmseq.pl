@@ -866,13 +866,12 @@ foreach $i ( @names ) {
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_RELOAD\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_RELOAD_STATUS\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_FULL_CNT\")\n";
-print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_SUBSET_CH_COUNT\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_FILE_SET_CNT\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_MON_CNT\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_ALARM_COUNT\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_NAME\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_RELOAD_TIME\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_LOADED\")\n";
-print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_LOADED_INIT\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_ALH_CRC\")\n";
 print "{\n	field(SCAN,\".5 second\")\n}\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_SP_ERR_CNT\")\n";
