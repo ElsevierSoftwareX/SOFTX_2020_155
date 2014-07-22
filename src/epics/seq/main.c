@@ -53,7 +53,7 @@ of this distribution.
 #include "asCa.h"
 #include "asDbLib.h"
 
-#define BURT_LOAD_FULL		5
+#define BURT_LOAD_ONLY		4
 #define BURT_READ_ONLY		2
 #define BURT_RESET		3
 #define BURT_LOAD_PARTIAL	1
@@ -396,46 +396,49 @@ int newfilterstats(int numchans,int command) {
 }
 
 // This function writes BURT settings to EPICS records.
-int newvalue(int numchans,CDS_CD_TABLE cdTable[],int command) {
+int newvalue(int numchans,CDS_CD_TABLE myTable[],int command) {
 	dbAddr paddr;
 	long status;
 	double newVal;
 	int ii;
 	FILE *log;
 	int myerror = 0;
+	int mychans = 0;
 
 	chNotFound = 0;
 	switch (command)
 	{
-		case BURT_LOAD_FULL:
+		case BURT_LOAD_ONLY:
 		case BURT_LOAD_PARTIAL:
 			for(ii=0;ii<numchans;ii++) {
 				// Find address of channel
-				status = dbNameToAddr(cdTable[ii].chname,&paddr);
+				status = dbNameToAddr(myTable[ii].chname,&paddr);
 				if(!status)
 				{
-				   if(cdTable[ii].datatype == 0)	// Value if floating point number
+				   if(myTable[ii].datatype == 0)	// Value if floating point number
 				   {
-					status = dbPutField(&paddr,DBR_DOUBLE,&cdTable[ii].chval,1);
+					status = dbPutField(&paddr,DBR_DOUBLE,&myTable[ii].chval,1);
 				   } else {			// Value is a string type
-					status = dbPutField(&paddr,DBR_STRING,&cdTable[ii].strval,1);
+					status = dbPutField(&paddr,DBR_STRING,&myTable[ii].strval,1);
 				   }
+				   mychans ++;
 				}
 				else {				// Write errors to log file.
 					myerror = 4;
-					sprintf(unknownChans[chNotFound].chname,"%s",cdTable[ii].chname);
-				   	if(cdTable[ii].datatype == 0)	// Value if floating point number
-						sprintf(unknownChans[chNotFound].burtset,"%.3f",cdTable[ii].chval);
+					sprintf(unknownChans[chNotFound].chname,"%s",myTable[ii].chname);
+				   	if(myTable[ii].datatype == 0)	// Value if floating point number
+						sprintf(unknownChans[chNotFound].burtset,"%.3f",myTable[ii].chval);
 					else
-						sprintf(unknownChans[chNotFound].burtset,"%s",cdTable[ii].strval);
+						sprintf(unknownChans[chNotFound].burtset,"%s",myTable[ii].strval);
 					sprintf(unknownChans[chNotFound].liveset,"%s"," ");
 					sprintf(unknownChans[chNotFound].timeset,"%s"," ");
 					log = fopen("./ioc.log","a");
-					fprintf(log,"SDF Load Error - Channel Not Found: %s\n",cdTable[ii].chname);
+					fprintf(log,"SDF Load Error - Channel Not Found: %s\n",myTable[ii].chname);
 					fclose(log);
 					chNotFound ++;
 				}
 			}
+			printf("Wrote out %d channels of data.\n",mychans);
 			return(myerror);
 			break;
 		case BURT_READ_ONLY:
@@ -447,27 +450,31 @@ int newvalue(int numchans,CDS_CD_TABLE cdTable[],int command) {
 		case BURT_RESET:
 			// Only want to set those channels marked by a mask back to their original BURT setting.
 			for(ii=0;ii<numchans;ii++) {
-			    if(cdTable[ii].mask) {
+			    if(myTable[ii].mask) {
 				// Find address of channel
-				status = dbNameToAddr(cdTable[ii].chname,&paddr);
+				status = dbNameToAddr(myTable[ii].chname,&paddr);
 				if(!status)
 				{
-				   if(cdTable[ii].datatype == 0)	// Value if floating point number
+				   if(myTable[ii].datatype == 0)	// Value if floating point number
 				   {
-					status = dbPutField(&paddr,DBR_DOUBLE,&cdTable[ii].chval,1);
+					status = dbPutField(&paddr,DBR_DOUBLE,&myTable[ii].chval,1);
 				   } else {			// Value is a string type
-					status = dbPutField(&paddr,DBR_STRING,&cdTable[ii].strval,1);
+					status = dbPutField(&paddr,DBR_STRING,&myTable[ii].strval,1);
 				   }
 				}
 				else {				// Write errors to log file.
 					myerror = 4;
 					log = fopen("./ioc.log","a");
-					fprintf(log,"CDF Load Error - Channel Not Found: %s\n",cdTable[ii].chname);
+					fprintf(log,"CDF Load Error - Channel Not Found: %s\n",myTable[ii].chname);
 					fclose(log);
 				}
 			    }
 			}
 			return(myerror);
+			break;
+		default:
+			printf("newvalue setting routine got unknown request \n");
+			return(0);
 			break;
 	}
 }
@@ -538,17 +545,16 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 
 	switch(command)
 	{
-		case BURT_LOAD_FULL:
+		case BURT_LOAD_ONLY:
+			printf("LOAD_ONLY = %s\n",sdfile);
 			cdf = fopen(sdfile,"r");
 			if(cdf == NULL) {
 				logFileError(sdfile);
 				lderror = 2;
 				return(lderror);
 			}
-			chNum = 0;
-			fmNum = 0;
-			chMon = 0;
-			localCtr = 0;
+			chNumP = 0;
+			alarmCnt = 0;
 			strcpy(s4,"x");
 			strncpy(ifo,pref,3);
 			// Read the settings file
@@ -558,61 +564,47 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 				strcpy(s4,"x");
 				sscanf(line,"%s%s%s%s",s1,s2,s3,s4);
 				// If 1st three chars match IFO ie checking this this line is not BURT header or channel marked RO
-				if(strncmp(s1,ifo,3) == 0)
+				if(	strncmp(s1,ifo,3) == 0 && 
+					// Don't allow load of SWSTAT or SWMASK, which are set by this program.
+					strstr(s1,"_SWMASK") == NULL &&
+					strstr(s1,"_SDF_NAME") == NULL &&
+					strstr(s1,"_SWREQ") == NULL)
 				{
 					// Clear out the local tabel channel name string.
-					bzero(cdTable[chNum].chname,strlen(cdTable[chNum].chname));
+					bzero(cdTableP[chNumP].chname,strlen(cdTableP[chNumP].chname));
 					// Load channel name into local table.
-					strcpy(cdTable[chNum].chname,s1);
+					strcpy(cdTableP[chNumP].chname,s1);
 					// Determine if setting (s3) is string or numeric type data.
 					if(isalpha(s3[0])) {
-						strcpy(cdTable[chNum].strval,s3);
-						cdTable[chNum].datatype = 1;
-						// printf("%s %s ********************\n",cdTable[chNum].chname,cdTable[chNum].strval);
+						strcpy(cdTableP[chNumP].strval,s3);
+						cdTableP[chNumP].datatype = 1;
+						// printf("%s %s ********************\n",cdTableP[chNumP].chname,cdTableP[chNumP].strval);
 					} else {
-						cdTable[chNum].chval = atof(s3);
-						cdTable[chNum].datatype = 0;
-						// printf("%s %f\n",cdTable[chNum].chname,cdTable[chNum].chval);
+						cdTableP[chNumP].chval = atof(s3);
+						cdTableP[chNumP].datatype = 0;
+						// printf("%s %f\n",cdTableP[chNumP].chname,cdTableP[chNumP].chval);
 					}
-					// Check if s4 (monitor or not) is set (0/1). If doesn/'t exist in file, set to zero in local table.
-					if(isdigit(s4[0])) {
-						// printf("%s %s %s %s\n",s1,s2,s3,s4);
-						cdTable[chNum].mask = atoi(s4);
-					} else {
-						// printf("%s %s %s \n",s1,s2,s3);
-						cdTable[chNum].mask = 0;
-					}
-					chNum ++;
-					localCtr ++;
-					// Following is optional:
-					// Uses the SWREQ AND SWMASK records of filter modules to decode which switch settings are incorrect.
-					// This presently assumes that filter module SW1S will appear before SW2S in the burt files.
-					if((strstr(s1,"_SW1S") != NULL) && (strstr(s1,"_SW1S.") == NULL))
+					if((strstr(cdTableP[chNumP].chname,".HIGH") != NULL) || 
+						(strstr(s1,".HIHI") != NULL) || 
+						(strstr(s1,".LOW") != NULL) || 
+						(strstr(s1,".LOLO") != NULL) || 
+						(strstr(s1,".HSV") != NULL) || 
+						(strstr(s1,".OSV") != NULL) || 
+						(strstr(s1,".ZSV") != NULL) || 
+						(strstr(s1,".LSV") != NULL) )
 					{
-						bzero(filterTable[fmNum].fname,strlen(filterTable[fmNum].fname));
-						strncpy(filterTable[fmNum].fname,s1,(strlen(s1)-4));
-						tmpreq = (int)atof(s3);
+						alarmCnt ++;
 					}
-					if((strstr(s1,"_SW2S") != NULL) && (strstr(s1,"_SW2S.") == NULL))
-					{
-						int treq;
-						treq = (int) atof(s3);
-						tmpreq = tmpreq + (treq << 16);
-						filterTable[fmNum].swreq = filtCtrlBitConvert(tmpreq);
-						// printf("%s 0x%x %f %f\n",fTable[fmNum].fname,fTable[fmNum].swreq,tmpreq,atof(s3));
-						tmpreq = 0;
-						fmNum ++;
-					}
+					chNumP ++;
 				}
 				
 			}
 			fclose(cdf);
-			lderror = newvalue(chNum,cdTable,command);
-			flderror = newfilterstats(fmNum,command);
+			lderror = newvalue(chNumP,cdTableP,command);
 			break;
 		case BURT_READ_ONLY:
 		case BURT_LOAD_PARTIAL:
-			printf("Loading %s\n",sdfile);
+			printf("PARTIAL %s\n",sdfile);
 			cdf = fopen(sdfile,"r");
 			if(cdf == NULL) {
 				logFileError(sdfile);
@@ -762,9 +754,9 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 	if(totaltime < 0) totaltime += 1000000000;
 	log = fopen("./ioc.log","a");
 	if(command == BURT_LOAD_PARTIAL) {
-		fprintf(log,"New SDF request (SUBSET): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNumP,(totaltime/1000));
-	} else {
-		fprintf(log,"New SDF request (FULL): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNum,(totaltime/1000));
+		fprintf(log,"New SDF request (w/table update): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNumP,(totaltime/1000));
+	} else if(command == BURT_LOAD_ONLY){
+		fprintf(log,"New SDF request (No table update): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNum,(totaltime/1000));
 	}
 	fprintf(log,"***************************************************\n");
 	fclose(log);
@@ -1152,12 +1144,9 @@ int main(int argc,char *argv[])
 		if(request) {
 			// Clear Request
 			status = dbPutField(&taddr,DBR_LONG,&ropts,1);
+			printf("New request is %d\n",request);
 			switch (request){
-				case BURT_LOAD_FULL:
-					strcpy(loadedSdf,sdf); 
-					status = dbPutField(&naddr,DBR_STRING,loadedSdf,1);
-					status = dbPutField(&ssnaddr,DBR_STRING,loadedSdf,1);
-					chNumP = 0;
+				case BURT_LOAD_ONLY:
 				case BURT_LOAD_PARTIAL:
 				case BURT_RESET:
 					strcpy(loadedSdf,sdf); 
@@ -1171,17 +1160,16 @@ int main(int argc,char *argv[])
 					printf("NEW READ SDF REQ = %s   \n%s   %s\n%s\nReqest = %d\n",sdfile,sdf,loadedSdf,ssdfile,request);
 					break;
 				default:
+					printf("ERROR: UNKNOWN REQUEST --  request is %d\n",request);
 					break;
 			}
 			rdstatus = readConfig(pref,sdfile,ssdfile,request);
-printf("Chan count = %d and alarmCnt = %d\n",chNumP,alarmCnt);
+			printf("Chan count = %d and alarmCnt = %d\n\n\n\n",chNumP,alarmCnt);
 			if (rdstatus) burtstatus |= rdstatus;
 			else burtstatus &= ~(6);
 			status = dbPutField(&raddr,DBR_LONG,&rdstatus,1);
 			setChans = chNumP - alarmCnt;
 			status = dbPutField(&sccaddr,DBR_LONG,&setChans,1);
-			if(request == BURT_LOAD_FULL)
-				status = dbPutField(&sccaddr,DBR_LONG,&chNum,1);
 			status = dbPutField(&fccaddr,DBR_LONG,&chNum,1);
 			noMon = chNum - chMon;
 			status = dbPutField(&mccaddr,DBR_LONG,&noMon,1);
