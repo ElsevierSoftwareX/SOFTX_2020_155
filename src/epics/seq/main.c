@@ -13,21 +13,11 @@ of this distribution.
 // TODO:
 // Need to check RESET and READ file yet.
 // Still need to add save/save as features
-// Fix display:
-//	- Based on new python script 
-//	- channel counts and file names: baseline + changes?
-//	- Get rid of 2nd LOAD button.
 // Check top with full model loads for memory and cpu usage.
 // Add command error checking, command out of range, etc.
-// Verify changing of alarm settings will trigger errors
-// Add more filter modules to tim16 to boost number of settings for test.
 // Check autoBurt, particularly for SDF stuff
 // ADD ability to add channels from larger files.
-// ADD MBBO or ENUM as radio button to select table entries
 // Fix GDSTP screen again.
-// Finish fixing names to Jamie's list.
-// Get rid of burt load full.
-// Add burt restore only ie no table update.
 
 /*
  * Main program for demo sequencer
@@ -53,12 +43,14 @@ of this distribution.
 #include "asCa.h"
 #include "asDbLib.h"
 
-#define BURT_LOAD_ONLY		4
-#define BURT_READ_ONLY		2
-#define BURT_RESET		3
-#define BURT_LOAD_PARTIAL	1
+#define SDF_LOAD_ONLY		4
+#define SDF_READ_ONLY		2
+#define SDF_RESET		3
+#define SDF_LOAD_PARTIAL	1
 
-#define MAX_BURT_CHANS	300000
+#define SDF_MAX_CHANS		300000
+#define SDF_MAX_TSIZE		20000
+#define SDF_ERR_TSIZE		40
 
 /// Pointers to status record
 DBENTRY  *pdbentry_status[2][10];
@@ -115,12 +107,12 @@ int chNotInit = 0;
 char timechannel[256];
 char reloadtimechannel[256];
 
-CDS_CD_TABLE cdTable[20000];
-CDS_CD_TABLE cdTableP[MAX_BURT_CHANS];
+CDS_CD_TABLE cdTable[SDF_MAX_TSIZE];
+CDS_CD_TABLE cdTableP[SDF_MAX_CHANS];
 FILTER_TABLE filterTable[1000];
-SET_ERR_TABLE setErrTable[50];
-SET_ERR_TABLE unknownChans[50];
-SET_ERR_TABLE uninitChans[50];
+SET_ERR_TABLE setErrTable[SDF_ERR_TSIZE];
+SET_ERR_TABLE unknownChans[SDF_ERR_TSIZE];
+SET_ERR_TABLE uninitChans[SDF_ERR_TSIZE];
 
 
 struct timespec t;
@@ -185,23 +177,9 @@ long options = DBR_STATUS|DBR_TIME;
 
 	for(jj=0;jj<numEntries;jj++)
 	{
-		if((!cdTable[jj].initialized) && (chNotInit < 40)) {
+		if((!cdTable[jj].initialized) && (chNotInit < SDF_ERR_TSIZE)) {
 			printf("Chan %s not init %d %d %d\n",cdTable[jj].chname,cdTable[jj].initialized,jj,numEntries);
 			sprintf(uninitChans[chNotInit].chname,"%s",cdTable[jj].chname);
-#if 0
-			status = dbNameToAddr(cdTable[jj].chname,&gaddr);
-			if(!status)
-			{
-			   if(cdTable[jj].datatype == 0)	// Value if floating point number
-			   {
-				status = dbGetField(&gaddr,DBR_DOUBLE,&buffer,&options,&nvals,NULL);
-				// sprintf(uninitChans[chNotInit].liveset,"%.3f",buffer.rval);
-			   } else {			// Value is a string type
-				status = dbGetField(&gaddr,DBR_STRING,&strbuffer,&options,&nvals,NULL);
-				// sprintf(uninitChans[chNotInit].liveset,"%s",strbuffer.sval);
-			   }
-			}
-#endif
 			sprintf(uninitChans[chNotInit].burtset,"%s"," ");
 			sprintf(uninitChans[chNotInit].timeset,"%s"," ");
 			chNotInit ++;
@@ -224,7 +202,7 @@ char s3[64];
 long status;
 static int lastcount = 0;
 
-	if(numEntries > 40) numEntries = 40;
+	if(numEntries > SDF_ERR_TSIZE) numEntries = SDF_ERR_TSIZE;
 	for(ii=0;ii<numEntries;ii++)
 	{
 		sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
@@ -279,10 +257,9 @@ int spChecker(char *pref)
 {
    	int errCntr = 0;
 	dbAddr paddr;
-	dbAddr tscaddr;
 	long status;
-	int ropts = 0;
-	int nvals = 1;
+	long ropts = 0;
+	long nvals = 1;
 	int ii;
 	struct buffer {
 		DBRstatus
@@ -303,7 +280,7 @@ int spChecker(char *pref)
 
 	     if(chNum) {
 		for(ii=0;ii<chNum;ii++) {
-			if((errCntr < 40) && (cdTable[ii].mask != 0))
+			if((errCntr < SDF_ERR_TSIZE) && (cdTable[ii].mask != 0))
 			{
 				localErr = 0;
 				// Find address of channel
@@ -314,8 +291,8 @@ int spChecker(char *pref)
 					status = dbGetField(&paddr,DBR_DOUBLE,&buffer,&options,&nvals,NULL);
 					if(cdTable[ii].chval != buffer.rval)
 					{
-						sprintf(burtset,"%.3f",cdTable[ii].chval);
-						sprintf(liveset,"%.3f",buffer.rval);
+						sprintf(burtset,"%.6f",cdTable[ii].chval);
+						sprintf(liveset,"%.6f",buffer.rval);
 						mtime = buffer.time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 						localErr = 1;
 					}
@@ -330,7 +307,7 @@ int spChecker(char *pref)
 						localErr = 1;
 					}
 				}
-				// If a diff was found, then write info the guardian EPICS records.
+				// If a diff was found, then write info the EPICS setpoint diff table.
 				if(localErr)
 				{
 					sprintf(setErrTable[errCntr].chname,"%s", cdTable[ii].chname);
@@ -347,7 +324,6 @@ int spChecker(char *pref)
 			}
 		}
 	     }
-	// reportSetErrors(pref, errCntr);
 	return(errCntr);
 }
 
@@ -361,7 +337,7 @@ int newfilterstats(int numchans,int command) {
 	char chname[128];
 	int mask = 0x3fff;
 
-	if(command == BURT_RESET) return(0);
+	if(command == SDF_RESET) return(0);
 	for(ii=0;ii<numchans;ii++) {
 		bzero(chname,strlen(chname));
 		// Find address of channel
@@ -408,8 +384,8 @@ int newvalue(int numchans,CDS_CD_TABLE myTable[],int command) {
 	chNotFound = 0;
 	switch (command)
 	{
-		case BURT_LOAD_ONLY:
-		case BURT_LOAD_PARTIAL:
+		case SDF_LOAD_ONLY:
+		case SDF_LOAD_PARTIAL:
 			for(ii=0;ii<numchans;ii++) {
 				// Find address of channel
 				status = dbNameToAddr(myTable[ii].chname,&paddr);
@@ -427,7 +403,7 @@ int newvalue(int numchans,CDS_CD_TABLE myTable[],int command) {
 					myerror = 4;
 					sprintf(unknownChans[chNotFound].chname,"%s",myTable[ii].chname);
 				   	if(myTable[ii].datatype == 0)	// Value if floating point number
-						sprintf(unknownChans[chNotFound].burtset,"%.3f",myTable[ii].chval);
+						sprintf(unknownChans[chNotFound].burtset,"%.6f",myTable[ii].chval);
 					else
 						sprintf(unknownChans[chNotFound].burtset,"%s",myTable[ii].strval);
 					sprintf(unknownChans[chNotFound].liveset,"%s"," ");
@@ -441,13 +417,13 @@ int newvalue(int numchans,CDS_CD_TABLE myTable[],int command) {
 			printf("Wrote out %d channels of data.\n",mychans);
 			return(myerror);
 			break;
-		case BURT_READ_ONLY:
+		case SDF_READ_ONLY:
 			// If request was only to re-read the BURT file, then don't want to apply new settings.
 			// This is typically the case where only mask fields were changed in the BURT file to
 			// apply setpoint monitoring of channels.
 			return(0);
 			break;
-		case BURT_RESET:
+		case SDF_RESET:
 			// Only want to set those channels marked by a mask back to their original BURT setting.
 			for(ii=0;ii<numchans;ii++) {
 			    if(myTable[ii].mask) {
@@ -479,6 +455,19 @@ int newvalue(int numchans,CDS_CD_TABLE myTable[],int command) {
 	}
 }
 
+
+void getSdfTime(char *timestring)
+{
+
+	dbAddr paddr;
+	long ropts = 0;
+	long nvals = 1;
+	long status;
+
+	status = dbNameToAddr(timechannel,&paddr);
+	status = dbGetField(&paddr,DBR_STRING,timestring,&ropts,&nvals,NULL);
+}
+
 void logFileError(char *filename)
 {
 	FILE *cdf;
@@ -498,21 +487,9 @@ void logFileError(char *filename)
 
 }
 
-void getSdfTime(char *timestring)
-{
-
-	dbAddr paddr;
-	int ropts = 0;
-	int nvals = 1;
-	long status;
-
-	status = dbNameToAddr(timechannel,&paddr);
-	status = dbGetField(&paddr,DBR_STRING,timestring,&ropts,&nvals,NULL);
-}
-
 
 // Function to read BURT files and load data into local tables.
-int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
+int readConfig(char *pref,char *sdfile, int command)
 {
 	FILE *cdf;
 	FILE *log;
@@ -524,7 +501,6 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 	long status;
 	int lderror = 0;
 	int flderror = 0;
-	int request;
 	int ropts = 0;
 	int nvals = 1;
 	int starttime,totaltime;
@@ -536,7 +512,6 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 	char tempstr[128];
 	int localCtr = 0;
 	int fmatch = 0;
-	// FILTER_TABLE fTable[1000];
 
 	clock_gettime(CLOCK_REALTIME,&t);
 	starttime = t.tv_nsec;
@@ -545,8 +520,9 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 
 	switch(command)
 	{
-		case BURT_LOAD_ONLY:
-			printf("LOAD_ONLY = %s\n",sdfile);
+		case SDF_LOAD_ONLY:
+		// Read the file and set EPICS records. DO NOT update the local setpoints table.
+			// printf("LOAD_ONLY = %s\n",sdfile);
 			cdf = fopen(sdfile,"r");
 			if(cdf == NULL) {
 				logFileError(sdfile);
@@ -602,8 +578,8 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 			fclose(cdf);
 			lderror = newvalue(chNumP,cdTableP,command);
 			break;
-		case BURT_READ_ONLY:
-		case BURT_LOAD_PARTIAL:
+		case SDF_READ_ONLY:
+		case SDF_LOAD_PARTIAL:
 			printf("PARTIAL %s\n",sdfile);
 			cdf = fopen(sdfile,"r");
 			if(cdf == NULL) {
@@ -719,7 +695,7 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 			if(!fmtInit) flderror = newfilterstats(fmNum,command);
 			fmtInit = 1;
 			break;
-		case BURT_RESET:
+		case SDF_RESET:
 			lderror = newvalue(chNum,cdTable,command);
 		default:
 			break;
@@ -753,9 +729,9 @@ int readConfig(char *pref,char *sdfile, char *ssdfile,int command)
 	totaltime = t.tv_nsec - starttime;
 	if(totaltime < 0) totaltime += 1000000000;
 	log = fopen("./ioc.log","a");
-	if(command == BURT_LOAD_PARTIAL) {
+	if(command == SDF_LOAD_PARTIAL) {
 		fprintf(log,"New SDF request (w/table update): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNumP,(totaltime/1000));
-	} else if(command == BURT_LOAD_ONLY){
+	} else if(command == SDF_LOAD_ONLY){
 		fprintf(log,"New SDF request (No table update): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNum,(totaltime/1000));
 	}
 	fprintf(log,"***************************************************\n");
@@ -1010,32 +986,30 @@ void dbDumpRecords(DBBASE *pdbbase)
 /// Called on EPICS startup; This is generic EPICS provided function, modified for LIGO use.
 int main(int argc,char *argv[])
 {
-	dbAddr taddr;
-	dbAddr saddr;
-	dbAddr raddr;
-	dbAddr naddr;
-	dbAddr ssnaddr;
-	dbAddr speaddr;
-	dbAddr spaaddr;
-	// dbAddr ssaddr;
-	dbAddr sccaddr;
-	dbAddr fccaddr;
-	dbAddr mccaddr;
-	dbAddr tsraddr;
-	dbAddr cnfaddr;
-	dbAddr cniaddr;
-	dbAddr steaddr;
-	int cdfReq = BURT_LOAD_PARTIAL;
+	// Addresses for SDF EPICS records.
+	dbAddr reload_addr;
+	dbAddr sdfname_addr;
+	dbAddr reloadstat_addr;
+	dbAddr loadedfile_addr;
+	dbAddr sperroraddr;
+	dbAddr alrmchcountaddr;
+	dbAddr filesetcntaddr;
+	dbAddr fulldbcntaddr;
+	dbAddr monchancntaddr;
+	dbAddr tablesortreqaddr;
+	dbAddr chnotfoundaddr;
+	dbAddr chnotinitaddr;
+	dbAddr sorttableentriesaddr;
+	// Initialize request for file load on startup.
+	int sdfReq = SDF_LOAD_PARTIAL;
 	long status;
 	int request;
-	int ropts = 0;
-	int nvals = 1;
+	long ropts = 0;
+	long nvals = 1;
 	int rdstatus = 0;
 	int burtstatus = 0;
 	char loadedSdf[256];
-	char loadedSsdf[256];
    	int sperror = 0;
-	char *ssdf;
 	int noMon;
 	FILE *csFile;
 	int ii;
@@ -1052,11 +1026,8 @@ int main(int argc,char *argv[])
 	char *pref = getenv("PREFIX");
 	char *sdfDir = getenv("SDF_DIR");
 	char *sdf = getenv("SDF_FILE");
-	char ssdf[256];;
-	strcpy(ssdf,sdf);
 	// strcat(sdf,"_safe");
 	char sdfile[256];
-	char ssdfile[256];
 	char bufile[256];
 	printf("My prefix is %s\n",pref);
 	// sprintf(sdfile, "%s%s%s", sdfDir, sdf,".sdf");
@@ -1068,54 +1039,50 @@ int main(int argc,char *argv[])
 	char reloadChan[256]; sprintf(reloadChan, "%s_%s", pref, "SDF_RELOAD");		// Request to load new BURT
 	char reloadStat[256]; sprintf(reloadStat, "%s_%s", pref, "SDF_RELOAD_STATUS");	// Status of last reload
 	char sdfFileName[256]; sprintf(sdfFileName, "%s_%s", pref, "SDF_NAME");		// Name of file to load next request
-	// char ssdfFileName[256]; sprintf(ssdfFileName, "%s_%s", pref, "SDF_NAME_SUBSET");	// Name of file to load next subset request
 	char loadedFile[256]; sprintf(loadedFile, "%s_%s", pref, "SDF_LOADED");		// Name of file presently loaded
-	char ssloadedFile[256]; sprintf(ssloadedFile, "%s_%s", pref, "SDF_LOADED_INIT");	// Name of subset file presently loaded
 	char speStat[256]; sprintf(speStat, "%s_%s", pref, "SDF_SP_ERR_CNT");		// Setpoint error counter
 	char spaStat[256]; sprintf(spaStat, "%s_%s", pref, "SDF_ALARM_COUNT");		// Setpoint error counter
 	char fcc[256]; sprintf(fcc, "%s_%s", pref, "SDF_FULL_CNT");		// Channels in Full BURT file
-	char scc[256]; sprintf(scc, "%s_%s", pref, "SDF_SUBSET_CH_COUNT");		// Channels in Partial BURT file
+	char fsc[256]; sprintf(fsc, "%s_%s", pref, "SDF_FILE_SET_CNT");		// Channels in Partial BURT file
 	char mcc[256]; sprintf(mcc, "%s_%s", pref, "SDF_MON_CNT");			// Channels in Partial BURT file
 	char tsrname[256]; sprintf(tsrname, "%s_%s", pref, "SDF_SORT");			// SDF Table sorting request
 	char cnfname[256]; sprintf(cnfname, "%s_%s", pref, "SDF_DROP_CNT");		// SDF Table sorting request
 	char cniname[256]; sprintf(cniname, "%s_%s", pref, "SDF_UNSET_CNT");		// SDF Table sorting request
 	char stename[256]; sprintf(stename, "%s_%s", pref, "SDF_TABLE_ENTRIES");	// SDF Table sorting request
-	printf("SDF FILE EPICS = %s\n",sdfFileName);
+	// printf("SDF FILE EPICS = %s\n",sdfFileName);
 	sprintf(timechannel,"%s_%s", pref, "TIME_STRING");
-	printf("timechannel = %s\n",timechannel);
+	// printf("timechannel = %s\n",timechannel);
 	sprintf(reloadtimechannel,"%s_%s", pref, "SDF_RELOAD_TIME");			// Time of last BURT reload
 
-	// Clear request to load new BURT file
-	printf("reload = %s\n",reloadChan);
-	status = dbNameToAddr(reloadChan,&taddr);
-	status = dbPutField(&taddr,DBR_LONG,&cdfReq,1);
+	// Set request to load safe.snap on startup
+	// printf("reload = %s\n",reloadChan);
+	status = dbNameToAddr(reloadChan,&reload_addr);
+	status = dbPutField(&reload_addr,DBR_LONG,&sdfReq,1);
 
 	// Initialize BURT file to be loaded next request = BURT_safe.snap
-	printf("burt1 = %s\n",sdfFileName);
-	status = dbNameToAddr(sdfFileName,&saddr);
-	status = dbPutField(&saddr,DBR_STRING,sdf,1);
+	// printf("burt1 = %s\n",sdfFileName);
+	status = dbNameToAddr(sdfFileName,&sdfname_addr);
+	status = dbPutField(&sdfname_addr,DBR_STRING,sdf,1);
 
-	// status = dbNameToAddr(ssdfFileName,&ssaddr);
-	status = dbNameToAddr(fcc,&fccaddr);
-	status = dbNameToAddr(scc,&sccaddr);
-	status = dbNameToAddr(mcc,&mccaddr);
-	status = dbNameToAddr(tsrname,&tsraddr);
-	status = dbNameToAddr(cnfname,&cnfaddr);
-	status = dbNameToAddr(cniname,&cniaddr);
-	status = dbNameToAddr(stename,&steaddr);
+	status = dbNameToAddr(fcc,&fulldbcntaddr);
+	status = dbNameToAddr(fsc,&filesetcntaddr);
+	status = dbNameToAddr(mcc,&monchancntaddr);
+	status = dbNameToAddr(tsrname,&tablesortreqaddr);
+	status = dbNameToAddr(cnfname,&chnotfoundaddr);
+	status = dbNameToAddr(cniname,&chnotinitaddr);
+	status = dbNameToAddr(stename,&sorttableentriesaddr);
 
-	status = dbNameToAddr(reloadStat,&raddr);
-	status = dbPutField(&raddr,DBR_LONG,&rdstatus,1);
+	status = dbNameToAddr(reloadStat,&reloadstat_addr);
+	status = dbPutField(&reloadstat_addr,DBR_LONG,&rdstatus,1);
 
-	status = dbNameToAddr(loadedFile,&naddr);
-	status = dbNameToAddr(ssloadedFile,&ssnaddr);
+	status = dbNameToAddr(loadedFile,&loadedfile_addr);
 
-	printf("sp channel = %s\n",speStat);
-	status = dbNameToAddr(speStat,&speaddr);
-	status = dbPutField(&speaddr,DBR_LONG,&sperror,1);
-	printf("sp channel = %s is loaded\n",speStat);
-	status = dbNameToAddr(spaStat,&spaaddr);
-	status = dbPutField(&spaaddr,DBR_LONG,&alarmCnt,1);
+	// printf("sp channel = %s\n",speStat);
+	status = dbNameToAddr(speStat,&sperroraddr);
+	status = dbPutField(&sperroraddr,DBR_LONG,&sperror,1);
+	// printf("sp channel = %s is loaded\n",speStat);
+	status = dbNameToAddr(spaStat,&alrmchcountaddr);
+	status = dbPutField(&alrmchcountaddr,DBR_LONG,&alarmCnt,1);
 
 	sleep(2);
 
@@ -1124,59 +1091,55 @@ int main(int argc,char *argv[])
 		// process_alarms(*iocshPpdbbase, pref);
 		sleep(1);
 		// Check for reload request
-		status = dbGetField(&taddr,DBR_LONG,&request,&ropts,&nvals,NULL);
+		status = dbGetField(&reload_addr,DBR_LONG,&request,&ropts,&nvals,NULL);
 		// Get File Name
-		status = dbNameToAddr(sdfFileName,&saddr);
-		status = dbGetField(&saddr,DBR_STRING,sdf,&ropts,&nvals,NULL);
-		status = dbGetField(&tsraddr,DBR_STRING,tsrString,&ropts,&nvals,NULL);
+		status = dbNameToAddr(sdfFileName,&sdfname_addr);
+		status = dbGetField(&sdfname_addr,DBR_STRING,sdf,&ropts,&nvals,NULL);
+		status = dbGetField(&tablesortreqaddr,DBR_STRING,tsrString,&ropts,&nvals,NULL);
 		if(strcmp(tsrString,"CHANS NOT FOUND") == 0) tsrVal = 1;
 		else if(strcmp(tsrString,"CHANS NOT INIT") == 0) tsrVal = 2;
 		else tsrVal = 0;
-		// status = dbNameToAddr(ssdfFileName,&ssaddr);
-		// status = dbGetField(&ssaddr,DBR_STRING,ssdf,&ropts,&nvals,NULL);
-		// sprintf(sdfile, "%s%s%s", sdfDir, sdf,".sdf");
 		sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");
-		sprintf(ssdfile, "%s%s%s", sdfDir, ssdf,".snap");
 		// Check if file name != to one presently loaded
 		if(strcmp(sdf,loadedSdf) != 0) burtstatus |= 1;
 		else burtstatus &= ~(1);
 		
-		if(request) {
+		if(request != 0) {
 			// Clear Request
-			status = dbPutField(&taddr,DBR_LONG,&ropts,1);
+			status = dbPutField(&reload_addr,DBR_LONG,&ropts,1);
 			printf("New request is %d\n",request);
 			switch (request){
-				case BURT_LOAD_ONLY:
-				case BURT_LOAD_PARTIAL:
-				case BURT_RESET:
+				case SDF_LOAD_ONLY:
+				case SDF_LOAD_PARTIAL:
+				case SDF_RESET:
 					strcpy(loadedSdf,sdf); 
-					status = dbPutField(&naddr,DBR_STRING,loadedSdf,1);
+					status = dbPutField(&loadedfile_addr,DBR_STRING,loadedSdf,1);
 					chNumP = 0;
-					printf("NEW FULL SDF REQ = %s   \n%s   %s\n%s\nReqest = %d\n",sdfile,sdf,loadedSdf,ssdfile,request);
+					// printf("NEW FULL SDF REQ = %s   \n%s   %s\n%s\nReqest = %d\n",sdfile,sdf,loadedSdf,request);
 					break;
-				case BURT_READ_ONLY:
+				case SDF_READ_ONLY:
 					strcpy(loadedSdf,sdf); 
-					status = dbPutField(&naddr,DBR_STRING,loadedSdf,1);
-					printf("NEW READ SDF REQ = %s   \n%s   %s\n%s\nReqest = %d\n",sdfile,sdf,loadedSdf,ssdfile,request);
+					status = dbPutField(&loadedfile_addr,DBR_STRING,loadedSdf,1);
+					// printf("NEW READ SDF REQ = %s   \n%s   %s\n%s\nReqest = %d\n",sdfile,sdf,loadedSdf,request);
 					break;
 				default:
-					printf("ERROR: UNKNOWN REQUEST --  request is %d\n",request);
+					// printf("ERROR: UNKNOWN REQUEST --  request is %d\n",request);
 					break;
 			}
-			rdstatus = readConfig(pref,sdfile,ssdfile,request);
-			printf("Chan count = %d and alarmCnt = %d\n\n\n\n",chNumP,alarmCnt);
+			rdstatus = readConfig(pref,sdfile,request);
+			// printf("Chan count = %d and alarmCnt = %d\n\n\n\n",chNumP,alarmCnt);
 			if (rdstatus) burtstatus |= rdstatus;
 			else burtstatus &= ~(6);
-			status = dbPutField(&raddr,DBR_LONG,&rdstatus,1);
+			status = dbPutField(&reloadstat_addr,DBR_LONG,&rdstatus,1);
 			setChans = chNumP - alarmCnt;
-			status = dbPutField(&sccaddr,DBR_LONG,&setChans,1);
-			status = dbPutField(&fccaddr,DBR_LONG,&chNum,1);
+			status = dbPutField(&filesetcntaddr,DBR_LONG,&setChans,1);
+			status = dbPutField(&fulldbcntaddr,DBR_LONG,&chNum,1);
 			noMon = chNum - chMon;
-			status = dbPutField(&mccaddr,DBR_LONG,&noMon,1);
-			status = dbPutField(&spaaddr,DBR_LONG,&alarmCnt,1);
-			status = dbPutField(&cnfaddr,DBR_LONG,&chNotFound,1);
+			status = dbPutField(&monchancntaddr,DBR_LONG,&noMon,1);
+			status = dbPutField(&alrmchcountaddr,DBR_LONG,&alarmCnt,1);
+			status = dbPutField(&chnotfoundaddr,DBR_LONG,&chNotFound,1);
 			compileUninitErrs(chNum);
-			status = dbPutField(&cniaddr,DBR_LONG,&chNotInit,1);
+			status = dbPutField(&chnotinitaddr,DBR_LONG,&chNotInit,1);
 			csFile = fopen(bufile,"w");
 			for(ii=0;ii<chNum;ii++)
 			{
@@ -1186,33 +1149,33 @@ int main(int argc,char *argv[])
 				else sprintf(tabs,"%s","\t\t");
 
 				if(cdTable[ii].datatype == 0)
-					fprintf(csFile,"%s%s%d\t%e\t\%d\t%d\n",cdTable[ii].chname,tabs,1,cdTable[ii].chval,cdTable[ii].mask,cdTable[ii].initialized);
+					fprintf(csFile,"%s%s%d\t%.15e\t\%d\t%d\n",cdTable[ii].chname,tabs,1,cdTable[ii].chval,cdTable[ii].mask,cdTable[ii].initialized);
 				else
 					fprintf(csFile,"%s%s%d\t%s\t\%d\t%d\n",cdTable[ii].chname,tabs,1,cdTable[ii].strval,cdTable[ii].mask,cdTable[ii].initialized);
 			}
 			fclose(csFile);
 		}
-		status = dbPutField(&raddr,DBR_LONG,&burtstatus,1);
+		status = dbPutField(&reloadstat_addr,DBR_LONG,&burtstatus,1);
 		sleep(1);
 		// Check present settings vs BURT settings and report diffs.
 		sperror = spChecker(pref);
-		status = dbPutField(&speaddr,DBR_LONG,&sperror,1);
+		status = dbPutField(&sperroraddr,DBR_LONG,&sperror,1);
 		switch(tsrVal) { 
 			case 0:
 				reportSetErrors(pref, sperror,setErrTable);
-				status = dbPutField(&steaddr,DBR_LONG,&sperror,1);
+				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&sperror,1);
 				break;
 			case 1:
 				reportSetErrors(pref, chNotFound,unknownChans);
-				status = dbPutField(&steaddr,DBR_LONG,&chNotFound,1);
+				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotFound,1);
 				break;
 			case 2:
 				reportSetErrors(pref, chNotInit, uninitChans);
-				status = dbPutField(&steaddr,DBR_LONG,&chNotInit,1);
+				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotInit,1);
 				break;
 			default:
 				reportSetErrors(pref, sperror,setErrTable);
-				status = dbPutField(&steaddr,DBR_LONG,&sperror,1);
+				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&sperror,1);
 				break;
 		}
 	}
