@@ -872,6 +872,11 @@ print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_ALARM_COUNT\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_NAME\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_RELOAD_TIME\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_LOADED\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_LOADED_EDB\")\n";
+print "grecord(bo,\"%IFO%:FEC-${dcuId}_SDF_MON_ALL\")\n";
+print "{\n	field(ZNAM,\"MASK\")\n";
+print "		field(ONAM,\"ALL\")\n}\n";
+
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_ALH_CRC\")\n";
 print "{\n	field(SCAN,\".5 second\")\n}\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_SP_ERR_CNT\")\n";
@@ -888,9 +893,11 @@ print "grecord(mbbi,\"%IFO%:FEC-${dcuId}_SDF_SORT\")\n";
 print "{\n	field(ZRVL,\"0\")\n";
 print "		field(ONVL,\"1\")\n";
 print "		field(TWVL,\"2\")\n";
+print "		field(THVL,\"2\")\n";
 print "		field(ZRST,\"SETTING DIFFS\")\n";
 print "		field(ONST,\"CHANS NOT FOUND\")\n";
-print "		field(TWST,\"CHANS NOT INIT\")\n}\n";
+print "		field(TWST,\"CHANS NOT INIT\")\n";
+print "		field(THST,\"CHANS NOT MON\")\n}\n";
 for(my $ffn = 0;$ffn < 40; $ffn ++)
 {
 	my $strGrdName = "%IFO%:FEC-${dcuId}_SDF_SP_STAT";
