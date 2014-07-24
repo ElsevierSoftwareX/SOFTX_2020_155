@@ -17,10 +17,10 @@ of this distribution.
 // Add command error checking, command out of range, etc.
 // Check autoBurt, particularly for SDF stuff
 // ADD ability to add channels from larger files.
-// Fix GDSTP screen again.
-// Finish up MON_ALL code; already added to MEDM and dbase.
 // Add file CRC checking.
 // File save on exit.
+// Add code start time to log.
+// Move log to new directory. Keep appending??
 
 /*
  * Main program for demo sequencer
@@ -141,6 +141,156 @@ void init_vars() {
 		}
 }
 
+int getEpicsSettings(int numchans)
+{
+dbAddr geaddr;
+int ii;
+long status;
+long statusR;
+double dval;
+char sval[64];
+int chcount = 0;
+int nvals = 1;
+
+	for(ii=0;ii<numchans;ii++)
+	{
+		// Find address of channel
+		sprintf(cdTableP[ii].chname,"%s",cdTable[ii].chname);
+		cdTableP[ii].datatype = cdTable[ii].datatype;
+		cdTableP[ii].mask = cdTable[ii].mask;
+		cdTableP[ii].initialized = cdTable[ii].initialized;
+		// Find address of channel
+		status = dbNameToAddr(cdTableP[ii].chname,&geaddr);
+		if(!status) {
+			if(cdTableP[ii].datatype == 0)
+			{
+				statusR = dbGetField(&geaddr,DBR_DOUBLE,&dval,NULL,&nvals,NULL);
+				if(!statusR) cdTableP[ii].chval = dval;
+			} else {
+				statusR = dbGetField(&geaddr,DBR_STRING,&sval,NULL,&nvals,NULL);
+				if(!statusR) sprintf(cdTableP[ii].strval,"%s",sval);
+			}
+			chcount ++;
+		}
+	}
+printf("Read %d EPICS values in getEpics \n",chcount);
+
+}
+
+
+// writeTable2File ftype options:
+#define SDF_WITH_INIT_FLAG	0
+#define SDF_FILE_PARAMS_ONLY	1
+#define SDF_FILE_BURT_ONLY	2
+int writeTable2File(char *filename, int ftype, CDS_CD_TABLE myTable[])
+{
+int ii;
+FILE *csFile;
+
+	// Write out local monitoring table as snap file.
+	csFile = fopen(filename,"w");
+	for(ii=0;ii<chNum;ii++)
+	{
+		// printf("%s datatype is %d\n",myTable[ii].chname,myTable[ii].datatype);
+		char tabs[8];
+		if(strlen(myTable[ii].chname) > 39) sprintf(tabs,"%s","\t");
+		else sprintf(tabs,"%s","\t\t");
+
+		switch(ftype)
+		{
+		   case SDF_WITH_INIT_FLAG:
+			if(myTable[ii].datatype == 0)
+				fprintf(csFile,"%s%s%d\t%.15e\t\%d\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].chval,myTable[ii].mask,myTable[ii].initialized);
+			else
+				fprintf(csFile,"%s%s%d\t%s\t\%d\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].strval,myTable[ii].mask,myTable[ii].initialized);
+			break;
+		   case SDF_FILE_PARAMS_ONLY:
+			if(myTable[ii].datatype == 0)
+				fprintf(csFile,"%s%s%d\t%.15e\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].chval,myTable[ii].mask);
+			else
+				fprintf(csFile,"%s%s%d\t%s\t\%dn",myTable[ii].chname,tabs,1,myTable[ii].strval,myTable[ii].mask);
+			break;
+		   case SDF_FILE_BURT_ONLY:
+			if(myTable[ii].datatype == 0)
+				fprintf(csFile,"%s%s%d\t%.15e\n",myTable[ii].chname,tabs,1,myTable[ii].chval);
+			else
+				fprintf(csFile,"%s%s%d\t%s\n",myTable[ii].chname,tabs,1,myTable[ii].strval);
+			break;
+		   default:
+			break;
+		}
+	}
+	fclose(csFile);
+}
+// Savetype
+#define SAVE_TABLE_AS_SDF	1
+#define SAVE_TABLE_AS_BURT	2
+#define SAVE_EPICS_AS_SDF	3
+#define SAVE_EPICS_AS_BURT	4
+// Saveopts
+#define SAVE_TIME_NOW		1
+#define SAVE_OVERWRITE		2
+#define SAVE_AS			3
+
+int savesdffile(int saveType, int saveOpts, char *sdfdir, char *model, char *currentfile, char *saveasfile)
+{
+char filename[256];
+char ftype[16];
+int status;
+	time_t now = time(NULL);
+	struct tm *mytime  = localtime(&now);
+
+	// Figure out the name of the file to save *******************************************************
+	if(saveType == 1 || saveType == 3) sprintf(ftype,"%s","sdf");
+	else sprintf(ftype,"%s","burt");
+
+	switch(saveOpts)
+	{
+		case SAVE_TIME_NOW:
+			sprintf(filename,"%s%s_%s_%d%02d%02d_%02d%02d%02d.snap", sdfdir,model,ftype,
+			(mytime->tm_year - 100),  (mytime->tm_mon + 1),  mytime->tm_mday,  mytime->tm_hour,  mytime->tm_min,  mytime->tm_sec);
+			printf("File to save is TIME NOW: %s\n",filename);
+			break;
+		case SAVE_OVERWRITE:
+			sprintf(filename,"%s",currentfile);
+			printf("File to save is OVERWRITE: %s\n",filename);
+			break;
+		case SAVE_AS:
+			sprintf(filename,"%s%s_%s.snap",sdfdir,saveasfile,ftype);
+			printf("File to save is SAVE_AS: %s\n",filename);
+			break;
+
+		default:
+			return(-1);
+	}
+	// SAVE THE DATA TO FILE **********************************************************************
+	switch(saveType)
+	{
+		case SAVE_TABLE_AS_SDF:
+			printf("Save table as sdf\n");
+			status = writeTable2File(filename,SDF_FILE_PARAMS_ONLY,cdTable);
+			break;
+		case SAVE_TABLE_AS_BURT:
+			printf("Save table as burt\n");
+			status = writeTable2File(filename,SDF_FILE_BURT_ONLY,cdTable);
+			break;
+		case SAVE_EPICS_AS_SDF:
+			printf("Save epics as sdf\n");
+			status = getEpicsSettings(chNum);
+			status = writeTable2File(filename,SDF_FILE_PARAMS_ONLY,cdTableP);
+			break;
+		case SAVE_EPICS_AS_BURT:
+			printf("Save epics as burt\n");
+			status = getEpicsSettings(chNum);
+			status = writeTable2File(filename,SDF_FILE_BURT_ONLY,cdTableP);
+			break;
+		default:
+			return(-1);
+	}
+	return(0);
+}
+
+
 // Routine to change ASG, thereby changing record locking
 void resetASG(char *name, int lock) {
     
@@ -162,7 +312,6 @@ void resetASG(char *name, int lock) {
 void createSortTableEntries(int numEntries)
 {
 int jj;
-int nvals = 1;
 long status;
 dbAddr gaddr;
 struct buffer {
@@ -176,6 +325,7 @@ struct strbuffer {
 	char sval[128];;
 }strbuffer;
 long options = DBR_STATUS|DBR_TIME;
+int nvals = 1;
 int notMon = 0;
 
 	chNotInit = 0;
@@ -1023,6 +1173,10 @@ int main(int argc,char *argv[])
 	dbAddr monflagaddr;
 	dbAddr reloadtimeaddr;
 	dbAddr edbloadedaddr;
+	dbAddr savecmdaddr;
+	dbAddr saveasaddr;
+	dbAddr savetypeaddr;
+	dbAddr saveoptsaddr;
 	// Initialize request for file load on startup.
 	int sdfReq = SDF_LOAD_PARTIAL;
 	long status;
@@ -1034,12 +1188,17 @@ int main(int argc,char *argv[])
 	char loadedSdf[256];
    	int sperror = 0;
 	int noMon;
-	FILE *csFile;
+	// FILE *csFile;
 	int ii;
 	int setChans = 0;
 	char tsrString[64];
 	int tsrVal = 0;
 	int monFlag = 0;
+	int sdfSaveReq = 0;
+	int saveType = 0;
+	char saveTypeString[64];
+	int saveOpts = 0;
+	char saveOptsString[64];
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -1050,9 +1209,11 @@ int main(int argc,char *argv[])
 	char *pref = getenv("PREFIX");
 	char *sdfDir = getenv("SDF_DIR");
 	char *sdf = getenv("SDF_FILE");
+	char *modelname =  getenv("SDF_MODEL");
 	// strcat(sdf,"_safe");
 	char sdfile[256];
 	char bufile[256];
+	char saveasfilename[128];
 	printf("My prefix is %s\n",pref);
 	// sprintf(sdfile, "%s%s%s", sdfDir, sdf,".sdf");
 	sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");					// Initialize with BURT_safe.snap
@@ -1075,6 +1236,10 @@ int main(int argc,char *argv[])
 	char cniname[256]; sprintf(cniname, "%s_%s", pref, "SDF_UNSET_CNT");		// SDF Table sorting request
 	char stename[256]; sprintf(stename, "%s_%s", pref, "SDF_TABLE_ENTRIES");	// SDF Table sorting request
 	char monflagname[256]; sprintf(monflagname, "%s_%s", pref, "SDF_MON_ALL");	// SDF Table sorting request
+	char savecmdname[256]; sprintf(savecmdname, "%s_%s", pref, "SDF_SAVE_CMD");	// SDF Table sorting request
+	char saveasname[256]; sprintf(saveasname, "%s_%s", pref, "SDF_SAVE_AS_NAME");	// SDF Table sorting request
+	char savetypename[256]; sprintf(savetypename, "%s_%s", pref, "SDF_SAVE_TYPE");	// SDF Table sorting request
+	char saveoptsname[256]; sprintf(saveoptsname, "%s_%s", pref, "SDF_SAVE_OPTS");	// SDF Table sorting request
 	// printf("SDF FILE EPICS = %s\n",sdfFileName);
 	sprintf(timechannel,"%s_%s", pref, "TIME_STRING");
 	// printf("timechannel = %s\n",timechannel);
@@ -1098,8 +1263,17 @@ int main(int argc,char *argv[])
 	status = dbNameToAddr(cniname,&chnotinitaddr);
 	status = dbNameToAddr(stename,&sorttableentriesaddr);
 	status = dbNameToAddr(reloadtimechannel,&reloadtimeaddr);
+	// Zero out the MONITOR ALL request
 	status = dbNameToAddr(monflagname,&monflagaddr);
 	status = dbPutField(&monflagaddr,DBR_LONG,&rdstatus,1);
+ 	// Zero out the save cmd
+	status = dbNameToAddr(savecmdname,&savecmdaddr);
+	status = dbPutField(&savecmdaddr,DBR_LONG,&rdstatus,1);
+	// Clear out the save as file name request
+	status = dbNameToAddr(saveasname,&saveasaddr);
+	status = dbPutField(&saveasaddr,DBR_STRING,"default",1);
+	status = dbNameToAddr(savetypename,&savetypeaddr);
+	status = dbNameToAddr(saveoptsname,&saveoptsaddr);
 
 	status = dbNameToAddr(reloadStat,&reloadstat_addr);
 	status = dbPutField(&reloadstat_addr,DBR_LONG,&rdstatus,1);
@@ -1125,11 +1299,6 @@ int main(int argc,char *argv[])
 		// Get File Name
 		status = dbNameToAddr(sdfFileName,&sdfname_addr);
 		status = dbGetField(&sdfname_addr,DBR_STRING,sdf,&ropts,&nvals,NULL);
-		status = dbGetField(&tablesortreqaddr,DBR_STRING,tsrString,&ropts,&nvals,NULL);
-		if(strcmp(tsrString,"CHANS NOT FOUND") == 0) tsrVal = 1;
-		else if(strcmp(tsrString,"CHANS NOT INIT") == 0) tsrVal = 2;
-		else if(strcmp(tsrString,"CHANS NOT MON") == 0) tsrVal = 3;
-		else tsrVal = 0;
 		sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");
 		// Check if file name != to one presently loaded
 		if(strcmp(sdf,loadedSdf) != 0) burtstatus |= 1;
@@ -1179,27 +1348,46 @@ int main(int argc,char *argv[])
 			status = dbPutField(&chnotfoundaddr,DBR_LONG,&chNotFound,1);
 			status = dbPutField(&chnotinitaddr,DBR_LONG,&chNotInit,1);
 			// Write out local monitoring table as snap file.
-			csFile = fopen(bufile,"w");
-			for(ii=0;ii<chNum;ii++)
-			{
-				// printf("%s datatype is %d\n",cdTable[ii].chname,cdTable[ii].datatype);
-				char tabs[8];
-				if(strlen(cdTable[ii].chname) > 39) sprintf(tabs,"%s","\t");
-				else sprintf(tabs,"%s","\t\t");
-
-				if(cdTable[ii].datatype == 0)
-					fprintf(csFile,"%s%s%d\t%.15e\t\%d\t%d\n",cdTable[ii].chname,tabs,1,cdTable[ii].chval,cdTable[ii].mask,cdTable[ii].initialized);
-				else
-					fprintf(csFile,"%s%s%d\t%s\t\%d\t%d\n",cdTable[ii].chname,tabs,1,cdTable[ii].strval,cdTable[ii].mask,cdTable[ii].initialized);
-			}
-			fclose(csFile);
+			status = writeTable2File(bufile,SDF_WITH_INIT_FLAG,cdTable);
 		}
 		status = dbPutField(&reloadstat_addr,DBR_LONG,&burtstatus,1);
-		sleep(1);
+		// sleep(1);
+		// Check for SAVE requests
+		status = dbGetField(&savecmdaddr,DBR_LONG,&sdfSaveReq,&ropts,&nvals,NULL);
+		if(sdfSaveReq)
+		{
+			// Clear the save file request
+			status = dbPutField(&savecmdaddr,DBR_LONG,&ropts,1);
+			// Determine file type
+			status = dbGetField(&savetypeaddr,DBR_STRING,saveTypeString,&ropts,&nvals,NULL);
+			if(strcmp(saveTypeString,"TABLE AS SDF") == 0) saveType = 1;
+			else if(strcmp(saveTypeString,"TABLE AS BURT") == 0) saveType = 2;
+			else if(strcmp(saveTypeString,"EPICS DB AS SDF") == 0) saveType = 3;
+			else if(strcmp(saveTypeString,"EPICS DB AS BURT") == 0) saveType = 4;
+			else saveType = 0;
+			// Determine file options
+			status = dbGetField(&saveoptsaddr,DBR_STRING,saveOptsString,&ropts,&nvals,NULL);
+			if(strcmp(saveOptsString,"TIME NOW") == 0) saveOpts = 1;
+			else if(strcmp(saveOptsString,"OVERWRITE") == 0) saveOpts = 2;
+			else if(strcmp(saveOptsString,"SAVE AS") == 0) saveOpts = 3;
+			else saveOpts = 0;
+			// Get saveas filename
+			status = dbGetField(&saveasaddr,DBR_STRING,saveasfilename,&ropts,&nvals,NULL);
+			// Save the file
+			printf("savefile cmd: type = %d  opts = %d\n",saveType,saveOpts);
+			savesdffile(saveType,saveOpts,sdfDir,modelname,sdfile,saveasfilename);
+		}
 		// Check present settings vs BURT settings and report diffs.
+		// Check if MON ALL CHANNELS is set
 		status = dbGetField(&monflagaddr,DBR_LONG,&monFlag,&ropts,&nvals,NULL);
 		sperror = spChecker(pref,monFlag);
 		status = dbPutField(&sperroraddr,DBR_LONG,&sperror,1);
+		// Table sorting and presentation
+		status = dbGetField(&tablesortreqaddr,DBR_STRING,tsrString,&ropts,&nvals,NULL);
+		if(strcmp(tsrString,"CHANS NOT FOUND") == 0) tsrVal = 1;
+		else if(strcmp(tsrString,"CHANS NOT INIT") == 0) tsrVal = 2;
+		else if(strcmp(tsrString,"CHANS NOT MON") == 0) tsrVal = 3;
+		else tsrVal = 0;
 		switch(tsrVal) { 
 			case 0:
 				reportSetErrors(pref, sperror,setErrTable);

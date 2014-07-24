@@ -864,12 +864,14 @@ foreach $i ( @names ) {
     
 # add msg and load coeff records
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_RELOAD\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_SAVE_CMD\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_RELOAD_STATUS\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_FULL_CNT\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_FILE_SET_CNT\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_MON_CNT\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_ALARM_COUNT\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_NAME\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SAVE_AS_NAME\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_RELOAD_TIME\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_LOADED\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_LOADED_EDB\")\n";
@@ -898,6 +900,23 @@ print "		field(ZRST,\"SETTING DIFFS\")\n";
 print "		field(ONST,\"CHANS NOT FOUND\")\n";
 print "		field(TWST,\"CHANS NOT INIT\")\n";
 print "		field(THST,\"CHANS NOT MON\")\n}\n";
+print "grecord(mbbi,\"%IFO%:FEC-${dcuId}_SDF_SAVE_TYPE\")\n";
+print "{\n	field(ZRVL,\"0\")\n";
+print "		field(ONVL,\"1\")\n";
+print "		field(TWVL,\"2\")\n";
+print "		field(THVL,\"2\")\n";
+print "		field(ZRST,\"TABLE AS SDF\")\n";
+print "		field(ONST,\"TABLE AS BURT\")\n";
+print "		field(TWST,\"EPICS DB AS SDF\")\n";
+print "		field(THST,\"EPICS DB AS BURT\")\n}\n";
+print "grecord(mbbi,\"%IFO%:FEC-${dcuId}_SDF_SAVE_OPTS\")\n";
+print "{\n	field(ZRVL,\"0\")\n";
+print "		field(ONVL,\"1\")\n";
+print "		field(TWVL,\"2\")\n";
+print "		field(THVL,\"2\")\n";
+print "		field(ZRST,\"TIME NOW\")\n";
+print "		field(ONST,\"OVERWRITE\")\n";
+print "		field(TWST,\"SAVE AS\")\n}\n";
 for(my $ffn = 0;$ffn < 40; $ffn ++)
 {
 	my $strGrdName = "%IFO%:FEC-${dcuId}_SDF_SP_STAT";
