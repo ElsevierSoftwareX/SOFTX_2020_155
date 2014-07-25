@@ -20,6 +20,8 @@ of this distribution.
 // File save on exit.
 // Add code start time to log.
 // Move log to new directory. Keep appending??
+// Make sure diffs aren't because of no init.
+// Add time of save and name of file saved messages.
 
 /*
  * Main program for demo sequencer
@@ -920,7 +922,7 @@ void dbDumpRecords(DBBASE *pdbbase)
     pdbentry = dbAllocEntry(pdbbase);
 
     chNum = 0;
-    for(ii=0;ii<3;ii++) {
+    for(ii=0;ii<2;ii++) {
     status = dbFindRecordType(pdbentry,mytype[ii]);
 
     // status = dbFirstRecordType(pdbentry);
