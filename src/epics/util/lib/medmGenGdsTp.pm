@@ -117,8 +117,8 @@ sub createGdsMedm
 	# Add BURT related display
 	$xpos = 562; $ypos = 106; $width = 160; $height = 18;
 	$mdlNamelc = lc($mdlName);
-	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_BURT_RESTORE.adl";
-        $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"BURT RESTORE");
+	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_SDF_RESTORE.adl";
+        $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"SDF RESTORE");
 	# BURT Diffs Label
 	$xpos = 733; $ypos = 94; $width = 24; $height = 12;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DIFFS",$ecolors{black});
@@ -128,12 +128,9 @@ sub createGdsMedm
 	# BURT Partial File Loaded
 	$xpos = 562; $ypos = 128; $width = 200; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_LOADED",$ecolors{white},$ecolors{blue},"static");
-	# BURT Reload Status bit 0
-	$xpos = 562; $ypos = 146; $width = 65; $height = 10;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_STATUS","0","0",$ecolors{yellow},$ecolors{green});
-	# BURT Reload Status bit 1 and 2
-	$xpos = 628; $ypos = 146; $width = 134; $height = 10;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_STATUS","1","2",$ecolors{red},$ecolors{green});
+	# BURT Reload Status bit 1 FILE NOT FOUND
+	$xpos = 562; $ypos = 146; $width = 200; $height = 10;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_STATUS","1","1",$ecolors{red},$ecolors{green});
 	# BURT Reload Time
 	$xpos = 562; $ypos = 160; $width = 200; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_TIME",$ecolors{white},$ecolors{blue},"static");
