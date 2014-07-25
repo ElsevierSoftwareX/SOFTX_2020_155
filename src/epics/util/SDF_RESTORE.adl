@@ -1,0 +1,953 @@
+
+file {
+	name="/opt/rtcds/rtscore/branches/branch-2.9/src/epics/util/SDF_RESTORE.adl"
+	version=030107
+}
+display {
+	object {
+		x=900
+		y=98
+		width=500
+		height=460
+	}
+	clr=14
+	bclr=3
+	cmap=""
+	gridSpacing=5
+	gridOn=0
+	snapToGrid=0
+}
+"color map" {
+	ncolors=65
+	colors {
+		ffffff,
+		ececec,
+		dadada,
+		c8c8c8,
+		bbbbbb,
+		aeaeae,
+		9e9e9e,
+		919191,
+		858585,
+		787878,
+		696969,
+		5a5a5a,
+		464646,
+		2d2d2d,
+		000000,
+		00d800,
+		1ebb00,
+		339900,
+		2d7f00,
+		216c00,
+		fd0000,
+		de1309,
+		be190b,
+		a01207,
+		820400,
+		5893ff,
+		597ee1,
+		4b6ec7,
+		3a5eab,
+		27548d,
+		fbf34a,
+		f9da3c,
+		eeb62b,
+		e19015,
+		cd6100,
+		ffb0ff,
+		d67fe2,
+		ae4ebc,
+		8b1a96,
+		610a75,
+		a4aaff,
+		8793e2,
+		6a73c1,
+		4d52a4,
+		343386,
+		c7bb6d,
+		b79d5c,
+		a47e3c,
+		7d5627,
+		58340f,
+		99ffff,
+		73dfff,
+		4ea5f9,
+		2a63e4,
+		0a00b8,
+		ebf1b5,
+		d4db9d,
+		bbc187,
+		a6a462,
+		8b8239,
+		73ff6b,
+		52da3b,
+		3cb420,
+		289315,
+		1a7309,
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=339
+		width=500
+		height=100
+	}
+	"basic attribute" {
+		clr=31
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=0
+		width=499
+		height=22
+	}
+	"basic attribute" {
+		clr=14
+	}
+}
+text {
+	object {
+		x=10
+		y=4
+		width=200
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="FBID_SDF_RESTORE"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=256
+		y=4
+		width=200
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_TIME_STRING"
+		clr=2
+		bclr=14
+	}
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=24
+		width=499
+		height=100
+	}
+	"basic attribute" {
+		clr=55
+	}
+}
+"related display" {
+	object {
+		x=27
+		y=25
+		width=448
+		height=20
+	}
+	display[0] {
+		name="TARGET_MEDM/FBID_SDF_TABLE.adl"
+	}
+	clr=0
+	bclr=34
+	label="SDF MONITOR"
+}
+rectangle {
+	object {
+		x=340
+		y=131
+		width=157
+		height=200
+	}
+	"basic attribute" {
+		clr=55
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=131
+		width=330
+		height=200
+	}
+	"basic attribute" {
+		clr=55
+	}
+}
+"message button" {
+	object {
+		x=364
+		y=206
+		width=115
+		height=19
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD"
+		clr=50
+		bclr=54
+	}
+	label="RESET EDB TO TABLE"
+	release_msg="3"
+}
+"message button" {
+	object {
+		x=364
+		y=158
+		width=115
+		height=19
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD"
+		clr=50
+		bclr=54
+	}
+	label="LOAD TABLE + EDB"
+	release_msg="1"
+}
+"message button" {
+	object {
+		x=364
+		y=182
+		width=115
+		height=19
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD"
+		clr=50
+		bclr=54
+	}
+	label="LOAD TABLE ONLY"
+	release_msg="2"
+}
+"shell command" {
+	object {
+		x=84
+		y=160
+		width=200
+		height=20
+	}
+	command[0] {
+		label="BURT Restore"
+		name="/opt/rtcds/LOCATION_NAME/IFO_LC/scripts/fe_load_burt"
+		args="-s LOCATION_NAME -i IFO_LC -d DCU_NODE_ID MODEL_LC &"
+	}
+	clr=0
+	bclr=14
+	label="SDF/BURT REQUEST FILE"
+}
+"text update" {
+	object {
+		x=84
+		y=185
+		width=200
+		height=19
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_NAME"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=25
+		y=218
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="TABLE LOAD"
+	align="horiz. centered"
+}
+byte {
+	object {
+		x=286
+		y=216
+		width=15
+		height=19
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD_STATUS"
+		clr=20
+		bclr=60
+	}
+	sbit=1
+	ebit=1
+}
+"text update" {
+	object {
+		x=84
+		y=276
+		width=200
+		height=15
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD_TIME"
+		clr=0
+		bclr=54
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=25
+		y=277
+		width=50
+		height=14
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="TIME"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=25
+		y=187
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="REQUEST"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=84
+		y=216
+		width=200
+		height=19
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LOADED"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=355
+		y=135
+		width=130
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="SDF RESTORE OPTIONS"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=84
+		y=246
+		width=200
+		height=19
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LOADED_EDB"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=27
+		y=248
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="EDB LOAD"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=84
+		y=135
+		width=200
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="<---- SDF FILE REQUEST / SETTINGS ---->"
+	align="horiz. centered"
+}
+byte {
+	object {
+		x=286
+		y=246
+		width=15
+		height=19
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD_STATUS"
+		clr=20
+		bclr=60
+	}
+	sbit=1
+	ebit=1
+}
+text {
+	object {
+		x=27
+		y=302
+		width=50
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="CHANS"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=84
+		y=300
+		width=50
+		height=19
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FILE_SET_CNT"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"message button" {
+	object {
+		x=364
+		y=246
+		width=115
+		height=19
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD"
+		clr=50
+		bclr=54
+	}
+	label="LOAD EDB ONLY"
+	release_msg="4"
+}
+composite {
+	object {
+		x=28
+		y=52
+		width=446
+		height=68
+	}
+	"composite name"=""
+	children {
+		composite {
+			object {
+				x=424
+				y=52
+				width=50
+				height=47
+			}
+			"composite name"=""
+			children {
+				"text update" {
+					object {
+						x=424
+						y=83
+						width=50
+						height=16
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_ALARM_COUNT"
+						clr=0
+						bclr=14
+					}
+					align="horiz. centered"
+					limits {
+					}
+				}
+				text {
+					object {
+						x=424
+						y=52
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="ALARM"
+					align="horiz. centered"
+				}
+				text {
+					object {
+						x=424
+						y=68
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="SETS"
+					align="horiz. centered"
+				}
+			}
+		}
+		composite {
+			object {
+				x=358
+				y=52
+				width=50
+				height=47
+			}
+			"composite name"=""
+			children {
+				"text update" {
+					object {
+						x=358
+						y=83
+						width=50
+						height=16
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_DROP_CNT"
+						clr=0
+						bclr=14
+					}
+					align="horiz. centered"
+					limits {
+					}
+				}
+				text {
+					object {
+						x=358
+						y=52
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="NOT"
+					align="horiz. centered"
+				}
+				text {
+					object {
+						x=358
+						y=68
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="FOUND"
+					align="horiz. centered"
+				}
+			}
+		}
+		composite {
+			object {
+				x=292
+				y=52
+				width=50
+				height=47
+			}
+			"composite name"=""
+			children {
+				"text update" {
+					object {
+						x=292
+						y=83
+						width=50
+						height=16
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_UNSET_CNT"
+						clr=0
+						bclr=14
+					}
+					align="horiz. centered"
+					limits {
+					}
+				}
+				text {
+					object {
+						x=292
+						y=52
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="NOT"
+					align="horiz. centered"
+				}
+				text {
+					object {
+						x=292
+						y=68
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="INIT"
+					align="horiz. centered"
+				}
+			}
+		}
+		composite {
+			object {
+				x=94
+				y=52
+				width=50
+				height=47
+			}
+			"composite name"=""
+			children {
+				text {
+					object {
+						x=94
+						y=68
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="DIFFS"
+					align="horiz. centered"
+				}
+				"text update" {
+					object {
+						x=94
+						y=83
+						width=50
+						height=16
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_ERR_CNT"
+						clr=0
+						bclr=14
+					}
+					align="horiz. centered"
+					limits {
+					}
+				}
+				text {
+					object {
+						x=94
+						y=52
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="TOTAL"
+					align="horiz. centered"
+				}
+			}
+		}
+		composite {
+			object {
+				x=28
+				y=52
+				width=50
+				height=47
+			}
+			"composite name"=""
+			children {
+				"text update" {
+					object {
+						x=28
+						y=83
+						width=50
+						height=16
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FULL_CNT"
+						clr=0
+						bclr=14
+					}
+					align="horiz. centered"
+					limits {
+					}
+				}
+				text {
+					object {
+						x=28
+						y=52
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="TOTAL"
+					align="horiz. centered"
+				}
+				text {
+					object {
+						x=28
+						y=68
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="SET PTS"
+					align="horiz. centered"
+				}
+			}
+		}
+		composite {
+			object {
+				x=160
+				y=52
+				width=50
+				height=47
+			}
+			"composite name"=""
+			children {
+				text {
+					object {
+						x=160
+						y=68
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="MONITORED"
+					align="horiz. centered"
+				}
+				"text update" {
+					object {
+						x=160
+						y=83
+						width=50
+						height=16
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_MON_CNT"
+						clr=0
+						bclr=14
+					}
+					align="horiz. centered"
+					limits {
+					}
+				}
+				text {
+					object {
+						x=160
+						y=52
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="NOT"
+					align="horiz. centered"
+				}
+			}
+		}
+		composite {
+			object {
+				x=226
+				y=52
+				width=50
+				height=68
+			}
+			"composite name"=""
+			children {
+				"choice button" {
+					object {
+						x=226
+						y=82
+						width=50
+						height=38
+					}
+					control {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_MON_ALL"
+						clr=0
+						bclr=29
+					}
+				}
+				text {
+					object {
+						x=226
+						y=52
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="MONITOR"
+					align="horiz. centered"
+				}
+				text {
+					object {
+						x=226
+						y=68
+						width=50
+						height=16
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="SELECT"
+					align="horiz. centered"
+				}
+			}
+		}
+	}
+}
+text {
+	object {
+		x=5
+		y=372
+		width=60
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="FILE TYPE"
+	align="horiz. centered"
+}
+menu {
+	object {
+		x=84
+		y=369
+		width=200
+		height=25
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SAVE_TYPE"
+		clr=0
+		bclr=60
+	}
+}
+text {
+	object {
+		x=5
+		y=396
+		width=70
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="FILE OPTIONS"
+	align="horiz. centered"
+}
+menu {
+	object {
+		x=84
+		y=397
+		width=200
+		height=25
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SAVE_OPTS"
+		clr=0
+		bclr=60
+	}
+}
+"text entry" {
+	object {
+		x=290
+		y=399
+		width=200
+		height=19
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SAVE_AS_NAME"
+		clr=0
+		bclr=54
+	}
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=290
+		y=372
+		width=200
+		height=19
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LOADED"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=84
+		y=343
+		width=200
+		height=18
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="SDF FIL SAVE"
+	align="horiz. centered"
+}
+"message button" {
+	object {
+		x=338
+		y=343
+		width=115
+		height=19
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SAVE_CMD"
+		clr=50
+		bclr=54
+	}
+	label="SAVE SETTINGS"
+	release_msg="1"
+}
