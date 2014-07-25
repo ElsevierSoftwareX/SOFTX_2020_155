@@ -1381,19 +1381,6 @@ for($ii=0;$ii<32;$ii++)
 	print EPICS "OUTVARIABLE FEC\_$dcuId\_GDS_MON_$ii epicsOutput.gdsMon\[$ii\] int ao 0\n";
 }
 
-# print OUTH "\tint awgtpmanGPS;\n";
-
-#print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD int ao 0\n";
-# print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_STATUS int ao 0\n";
-# print EPICS "DUMMY FEC\_$dcuId\_SDF_FULL_CNT int ao 0\n";
-# print EPICS "DUMMY FEC\_$dcuId\_SDF_SUBSET_CH_COUNT int ao 0\n";
-# print EPICS "DUMMY FEC\_$dcuId\_SDF_MON_CNT int ao 0\n";
-# print EPICS "DUMMY FEC\_$dcuId\_SDF_ALARM_COUNT int ao 0\n";
-# print EPICS "DUMMY FEC\_$dcuId\_SDF_NAME int stringout 0\n";
-# print EPICS "DUMMY FEC\_$dcuId\_SDF_NAME_SUBSET int stringin 0\n";
-# print EPICS "DUMMY FEC\_$dcuId\_SDF_RELOAD_TIME int stringout 0\n";
-# print EPICS "DUMMY FEC\_$dcuId\_SDF_LOADED int stringout 0\n";
-# print EPICS "DUMMY FEC\_$dcuId\_SDF_LOADED_INIT int stringout 0\n";
 
 # The following code is in solely for automated testing.
 if($diagTest > -1)
@@ -2107,6 +2094,10 @@ system("cp $rcg_src_dir/src/epics/util/ALARMS.adl ALARMS.adl");
 system("cat ALARMS.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_ALARM_MONITOR.adl");
 system("cp $rcg_src_dir/src/epics/util/BURT_RESTORE.adl BURT_RESTORE.adl");
 system("cat BURT_RESTORE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_BURT_RESTORE.adl");
+system("cp $rcg_src_dir/src/epics/util/SDF_RESTORE.adl SDF_RESTORE.adl");
+system("cat SDF_RESTORE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_SDF_RESTORE.adl");
+system("cp $rcg_src_dir/src/epics/util/SDF_TABLE.adl SDF_TABLE.adl");
+system("cat SDF_TABLE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_SDF_TABLE.adl");
 
 my $cur_subsys_num = 0;
 
