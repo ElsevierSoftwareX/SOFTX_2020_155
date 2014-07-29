@@ -15,12 +15,9 @@ of this distribution.
 // Check top with full model loads for memory and cpu usage.
 // Add command error checking, command out of range, etc.
 // Check autoBurt, particularly for SDF stuff
+//	- Particularly returns from functions.
 // ADD ability to add channels from larger files.
-// Add file CRC checking.
 // File save on exit.
-// Add code start time to log.
-// Move log to new directory (site/ifo/logs) and change name to include model name. Keep appending??
-// Add time of save and name of file saved messages.
 
 /*
  * Main program for demo sequencer
@@ -1086,6 +1083,7 @@ int main(int argc,char *argv[])
 	long coeffFileCrc;
 	long sdfFileCrc;
 	char modfilemsg[] = "Modified File Detected ";
+	struct stat st = {0};
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -1099,7 +1097,8 @@ int main(int argc,char *argv[])
 	char *targetdir =  getenv("TARGET_DIR");
 	char *daqFile =  getenv("DAQ_FILE");
 	char *coeffFile =  getenv("COEFF_FILE");
-	char *logfile = getenv("LOG_DIR");
+	char *logdir = getenv("LOG_DIR");
+	if(stat(logdir, &st) == -1) mkdir(logdir,0777);
 	// strcat(sdf,"_safe");
 	char sdfile[256];
 	char bufile[256];
@@ -1107,7 +1106,7 @@ int main(int argc,char *argv[])
 	printf("My prefix is %s\n",pref);
 	sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");					// Initialize with BURT_safe.snap
 	sprintf(bufile, "%s%s", sdfDir, "fec.snap");					// Initialize table dump file
-	sprintf(logfilename, "%s%s", logfile, "ioc.log");					// Initialize table dump file
+	sprintf(logfilename, "%s%s", logdir, "/ioc.log");					// Initialize table dump file
 	printf("SDF FILE = %s\n",sdfile);
 	printf("CURRENt FILE = %s\n",bufile);
 	printf("LOG FILE = %s\n",logfilename);
