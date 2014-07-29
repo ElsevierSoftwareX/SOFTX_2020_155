@@ -108,6 +108,7 @@ install: $(DB)
 	for ifo in $(IFO) ; do \
 	  system=`echo $(subst epics,,$(TARGET)) | tr a-z A-Z | cut -c1-3`; \
 	  model=`echo $(subst epics,,$(TARGET))`; \
+	  ucmodel=`echo $(subst epics,,$(TARGET)) | tr a-z A-Z `; \
 	  ifo0=`echo $$ifo | sed 's/[0-9]/0/g'`; \
 	  mkdir -p target/$(TARGET)/db/$$ifo; \
 	  echo "#!/bin/sh" > target/$(TARGET)/startup$$ifo; \
@@ -135,6 +136,8 @@ install: $(DB)
 		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'SWSTAT|DACKILL|record\(ao|record\(string|record\(bi|record\(bo' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0 , $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		\
 		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet DAQ_FILE /opt/rtcds/$(SITE)/${ifo}/chans/daq/$$ucmodel.ini" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet COEFF_FILE /opt/rtcds/$(SITE)/${ifo}/chans/$$ucmodel.txt" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet SDF_DIR /opt/rtcds/$(SITE)/${ifo}/target/$$model/$(TARGET)/burt/" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
                 echo "epicsEnvSet SDF_FILE safe" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
                 echo "epicsEnvSet SDF_MODEL $$model" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
