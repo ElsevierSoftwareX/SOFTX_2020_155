@@ -15,12 +15,9 @@ of this distribution.
 // Check top with full model loads for memory and cpu usage.
 // Add command error checking, command out of range, etc.
 // Check autoBurt, particularly for SDF stuff
+//	- Particularly returns from functions.
 // ADD ability to add channels from larger files.
-// Add file CRC checking.
 // File save on exit.
-// Add code start time to log.
-// Move log to new directory (site/ifo/logs) and change name to include model name. Keep appending??
-// Add time of save and name of file saved messages.
 
 /*
  * Main program for demo sequencer
@@ -116,6 +113,7 @@ int chNotInit = 0;		///< Total number of channels not initialized by the safe.sn
 char timechannel[256];		///< Name of the GPS time channel for timestamping.
 char reloadtimechannel[256];	///< Name of EPICS channel which contains the BURT reload requests.
 struct timespec t;
+char logfilename[128];
 
 CDS_CD_TABLE cdTable[SDF_MAX_TSIZE];		///< Table used to hold EPICS database info for monitoring settings.
 CDS_CD_TABLE cdTableP[SDF_MAX_CHANS];		///< Temp table filled on BURT read and set to EPICS channels.
@@ -177,7 +175,7 @@ void logFileEntry(char *message)
 	dbAddr paddr;
 
 	getSdfTime(timestring);
-	log = fopen("./ioc.log","a");
+	log = fopen(logfilename,"a");
 	fprintf(log,"%s\n%s\n",timestring,message);
 	fprintf(log,"***************************************************\n");
 	fclose(log);
@@ -711,7 +709,6 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 		int command)		///< Read file request type.
 {
 	FILE *cdf;
-	FILE *log;
 	char c;
 	int ii;
 	int lock;
@@ -954,14 +951,12 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 	clock_gettime(CLOCK_REALTIME,&t);
 	totaltime = t.tv_nsec - starttime;
 	if(totaltime < 0) totaltime += 1000000000;
-	log = fopen("./ioc.log","a");
 	if(command == SDF_LOAD_PARTIAL) {
-		fprintf(log,"New SDF request (w/table update): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNumP,(totaltime/1000));
+		sprintf(errMsg,"New SDF request (w/table update): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNumP,(totaltime/1000));
 	} else if(command == SDF_LOAD_DB_ONLY){
-		fprintf(log,"New SDF request (No table update): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNum,(totaltime/1000));
+		sprintf(errMsg,"New SDF request (No table update): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNum,(totaltime/1000));
 	}
-	fprintf(log,"***************************************************\n");
-	fclose(log);
+	logFileEntry(errMsg);
 	status = dbNameToAddr(reloadtimechannel,&paddr);
 	status = dbPutField(&paddr,DBR_STRING,timestring,1);
 	printf("Number of FM = %d\n",fmNum);
@@ -1088,6 +1083,7 @@ int main(int argc,char *argv[])
 	long coeffFileCrc;
 	long sdfFileCrc;
 	char modfilemsg[] = "Modified File Detected ";
+	struct stat st = {0};
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -1101,6 +1097,8 @@ int main(int argc,char *argv[])
 	char *targetdir =  getenv("TARGET_DIR");
 	char *daqFile =  getenv("DAQ_FILE");
 	char *coeffFile =  getenv("COEFF_FILE");
+	char *logdir = getenv("LOG_DIR");
+	if(stat(logdir, &st) == -1) mkdir(logdir,0777);
 	// strcat(sdf,"_safe");
 	char sdfile[256];
 	char bufile[256];
@@ -1108,8 +1106,11 @@ int main(int argc,char *argv[])
 	printf("My prefix is %s\n",pref);
 	sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");					// Initialize with BURT_safe.snap
 	sprintf(bufile, "%s%s", sdfDir, "fec.snap");					// Initialize table dump file
+	sprintf(logfilename, "%s%s", logdir, "/ioc.log");					// Initialize table dump file
 	printf("SDF FILE = %s\n",sdfile);
 	printf("CURRENt FILE = %s\n",bufile);
+	printf("LOG FILE = %s\n",logfilename);
+sleep(2);
 	// Create BURT/SDF EPICS channel names
 	char reloadChan[256]; sprintf(reloadChan, "%s_%s", pref, "SDF_RELOAD");		// Request to load new BURT
 	char reloadStat[256]; sprintf(reloadStat, "%s_%s", pref, "SDF_RELOAD_STATUS");	// Status of last reload
@@ -1321,15 +1322,18 @@ int main(int argc,char *argv[])
 			if(status != daqFileCrc) {
 				daqFileCrc = status;
 				status = dbPutField(&daqmsgaddr,DBR_STRING,modfilemsg,1);
+				logFileEntry("Detected Change to DAQ Config file.");
 			}
 			status = checkFileCrc(coeffFile);
 			if(status != coeffFileCrc) {
 				coeffFileCrc = status;
 				status = dbPutField(&coeffmsgaddr,DBR_STRING,modfilemsg,1);
+				logFileEntry("Detected Change to Filter Coeff file.");
 			}
 			status = checkFileCrc(sdffileloaded);
 			if(status != sdfFileCrc) {
 				sdfFileCrc = status;
+				logFileEntry("Detected Change to SDF file.");
 				status = dbPutField(&reloadtimeaddr,DBR_STRING,modfilemsg,1);
 			}
 		}
