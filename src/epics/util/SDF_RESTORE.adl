@@ -5,10 +5,10 @@ file {
 }
 display {
 	object {
-		x=900
-		y=98
+		x=1127
+		y=44
 		width=500
-		height=460
+		height=510
 	}
 	clr=14
 	bclr=3
@@ -92,7 +92,7 @@ rectangle {
 		x=0
 		y=339
 		width=500
-		height=100
+		height=160
 	}
 	"basic attribute" {
 		clr=31
@@ -278,7 +278,7 @@ byte {
 	object {
 		x=286
 		y=216
-		width=15
+		width=40
 		height=19
 	}
 	monitor {
@@ -286,8 +286,8 @@ byte {
 		clr=20
 		bclr=60
 	}
-	sbit=1
-	ebit=1
+	sbit=0
+	ebit=3
 }
 "text update" {
 	object {
@@ -840,23 +840,10 @@ composite {
 		}
 	}
 }
-text {
-	object {
-		x=5
-		y=372
-		width=60
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="FILE TYPE"
-	align="horiz. centered"
-}
 menu {
 	object {
-		x=84
-		y=369
+		x=36
+		y=403
 		width=200
 		height=25
 	}
@@ -866,23 +853,10 @@ menu {
 		bclr=60
 	}
 }
-text {
-	object {
-		x=5
-		y=396
-		width=70
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="FILE OPTIONS"
-	align="horiz. centered"
-}
 menu {
 	object {
-		x=84
-		y=397
+		x=36
+		y=461
 		width=200
 		height=25
 	}
@@ -895,7 +869,7 @@ menu {
 "text entry" {
 	object {
 		x=290
-		y=399
+		y=409
 		width=200
 		height=19
 	}
@@ -910,7 +884,7 @@ menu {
 "text update" {
 	object {
 		x=290
-		y=372
+		y=364
 		width=200
 		height=19
 	}
@@ -923,31 +897,115 @@ menu {
 	limits {
 	}
 }
-text {
-	object {
-		x=84
-		y=343
-		width=200
-		height=18
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="SDF FIL SAVE"
-	align="horiz. centered"
-}
 "message button" {
 	object {
-		x=338
-		y=343
-		width=115
-		height=19
+		x=36
+		y=345
+		width=200
+		height=20
 	}
 	control {
 		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SAVE_CMD"
 		clr=50
 		bclr=54
 	}
-	label="SAVE SETTINGS"
+	label="SDF SAVE FILE"
 	release_msg="1"
+}
+text {
+	object {
+		x=290
+		y=345
+		width=200
+		height=14
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="OVERWRITE FILE NAME"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=290
+		y=390
+		width=200
+		height=14
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="SAVE AS FILE NAME"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=290
+		y=437
+		width=200
+		height=14
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="LAST FILE SAVED"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=290
+		y=450
+		width=200
+		height=19
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SAVE_FILE"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=290
+		y=471
+		width=200
+		height=19
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SAVE_TIME"
+		clr=50
+		bclr=42
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=36
+		y=387
+		width=200
+		height=14
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="FILE TYPE SELECTION"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=36
+		y=445
+		width=200
+		height=14
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="FILE OPTIONS SELECTION"
+	align="horiz. centered"
 }

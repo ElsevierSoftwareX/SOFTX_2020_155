@@ -873,6 +873,8 @@ print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_ALARM_COUNT\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_NAME\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SAVE_AS_NAME\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_RELOAD_TIME\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SAVE_TIME\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SAVE_FILE\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_LOADED\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_LOADED_EDB\")\n";
 print "grecord(bo,\"%IFO%:FEC-${dcuId}_SDF_MON_ALL\")\n";
