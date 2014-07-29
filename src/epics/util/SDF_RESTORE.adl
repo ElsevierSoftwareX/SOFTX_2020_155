@@ -274,21 +274,6 @@ text {
 	textix="TABLE LOAD"
 	align="horiz. centered"
 }
-byte {
-	object {
-		x=286
-		y=216
-		width=40
-		height=19
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD_STATUS"
-		clr=20
-		bclr=60
-	}
-	sbit=0
-	ebit=3
-}
 "text update" {
 	object {
 		x=84
@@ -401,21 +386,6 @@ text {
 	}
 	textix="<---- SDF FILE REQUEST / SETTINGS ---->"
 	align="horiz. centered"
-}
-byte {
-	object {
-		x=286
-		y=246
-		width=15
-		height=19
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD_STATUS"
-		clr=20
-		bclr=60
-	}
-	sbit=1
-	ebit=1
 }
 text {
 	object {
