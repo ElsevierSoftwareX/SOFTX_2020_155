@@ -19,8 +19,7 @@ of this distribution.
 // Add file CRC checking.
 // File save on exit.
 // Add code start time to log.
-// Move log to new directory. Keep appending??
-// Make sure diffs aren't because of no init.
+// Move log to new directory (site/ifo/logs) and change name to include model name. Keep appending??
 // Add time of save and name of file saved messages.
 
 /*
@@ -32,6 +31,7 @@ of this distribution.
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/stat.h>
 
 #include "iocsh.h"
 #include "dbStaticLib.h"
@@ -52,9 +52,9 @@ of this distribution.
 #define SDF_RESET		3
 #define SDF_LOAD_PARTIAL	1
 
-#define SDF_MAX_CHANS		150000
-#define SDF_MAX_TSIZE		20000
-#define SDF_ERR_TSIZE		40
+#define SDF_MAX_CHANS		15000	///< Maximum number of settings, including alarm settings.
+#define SDF_MAX_TSIZE		20000	///< Maximum number of EPICS settings records (No subfields).
+#define SDF_ERR_TSIZE		40	///< Size of reporting tables.
 
 #if 0
 /// Pointers to status record
@@ -80,6 +80,7 @@ const unsigned int fltrConst[15] = {16, 64, 256, 1024, 4096, 16384,
 			     0x4, 0x8, 0x4000000,0x1000000,0x1 /* in sw, off sw, out sw , limit sw*/
 			     };
 
+/// Structure for holding BURT settings in local memory.
 typedef struct CDS_CD_TABLE {
 	char chname[128];
 	int datatype;
@@ -89,12 +90,14 @@ typedef struct CDS_CD_TABLE {
 	int initialized;
 } CDS_CD_TABLE;
 
+/// Structure for creating/holding filter module switch settings.
 typedef struct FILTER_TABLE {
 	char fname[128];
 	int swreq;
 	int swmask;
 } FILTER_TABLE;
 
+/// Structure for table data to be presented to operators.
 typedef struct SET_ERR_TABLE {
 	char chname[64];
 	char burtset[64];
@@ -102,29 +105,47 @@ typedef struct SET_ERR_TABLE {
 	char timeset[64];
 } SET_ERR_TABLE;
 
-int chNum = 0;
-int chMon = 0;
-int alarmCnt = 0;
-int chNumP = 0;
-int fmNum = 0;
-int fmtInit = 0;
-int chNotFound = 0;
-int chNotInit = 0;
-char timechannel[256];
-char reloadtimechannel[256];
-
-CDS_CD_TABLE cdTable[SDF_MAX_TSIZE];
-CDS_CD_TABLE cdTableP[SDF_MAX_CHANS];
-FILTER_TABLE filterTable[1000];
-SET_ERR_TABLE setErrTable[SDF_ERR_TSIZE];
-SET_ERR_TABLE unknownChans[SDF_ERR_TSIZE];
-SET_ERR_TABLE uninitChans[SDF_ERR_TSIZE];
-SET_ERR_TABLE unMonChans[SDF_ERR_TSIZE];
-
-
+int chNum = 0;			///< Total number of channels held in the local lookup table.
+int chMon = 0;			///< Total number of channels being monitored.
+int alarmCnt = 0;		///< Total number of alarm settings loaded from a BURT file.
+int chNumP = 0;			///< Total number of settings loaded from a BURT file.
+int fmNum = 0;			///< Total number of filter modules found.
+int fmtInit = 0;		///< Flag used to indicate that the filter module table needs to be initiialized on startup.
+int chNotFound = 0;		///< Total number of channels read from BURT file which did not have a database entry.
+int chNotInit = 0;		///< Total number of channels not initialized by the safe.snap BURT file.
+char timechannel[256];		///< Name of the GPS time channel for timestamping.
+char reloadtimechannel[256];	///< Name of EPICS channel which contains the BURT reload requests.
 struct timespec t;
 
-// Quick convert of filter switch settings to match SWMASK
+CDS_CD_TABLE cdTable[SDF_MAX_TSIZE];		///< Table used to hold EPICS database info for monitoring settings.
+CDS_CD_TABLE cdTableP[SDF_MAX_CHANS];		///< Temp table filled on BURT read and set to EPICS channels.
+FILTER_TABLE filterTable[1000];			///< Table for holding filter module switch settings for comparisons.
+SET_ERR_TABLE setErrTable[SDF_ERR_TSIZE];	///< Table used to report settings diffs.
+SET_ERR_TABLE unknownChans[SDF_ERR_TSIZE];	///< Table used to report channels not found in local database.
+SET_ERR_TABLE uninitChans[SDF_ERR_TSIZE];	///< Table used to report channels not initialized by BURT safe.snap.
+SET_ERR_TABLE unMonChans[SDF_ERR_TSIZE];	///< Table used to report channels not being monitored.
+
+
+int checkFileCrc(char *fName)
+{
+char buffer[256];
+FILE *pipePtr;
+struct stat statBuf;
+long chkSum = -99999;
+      	strcpy(buffer, "cksum "); 
+      	strcat(buffer, fName); 
+      	if (!stat(fName, &statBuf) ) { 
+         	if ((pipePtr = popen(buffer, "r")) != NULL) {
+            	fgets(buffer, 256, pipePtr);
+            	pclose(pipePtr); 
+            	sscanf(buffer, "%ld", &chkSum);
+         	} 
+		return(chkSum);
+    	}    
+	return(-1);
+}
+
+/// Quick convert of filter switch settings to match SWMASK
 unsigned int filtCtrlBitConvert(unsigned int v) {
         unsigned int val = 0;
         int i;
@@ -134,7 +155,39 @@ unsigned int filtCtrlBitConvert(unsigned int v) {
         return val;
 }
 
+/// Routine for reading GPS time from model EPICS record.
+void getSdfTime(char *timestring)
+{
 
+	dbAddr paddr;
+	long ropts = 0;
+	long nvals = 1;
+	long status;
+
+	status = dbNameToAddr(timechannel,&paddr);
+	status = dbGetField(&paddr,DBR_STRING,timestring,&ropts,&nvals,NULL);
+}
+
+/// Routine for logging errors to file.
+void logFileEntry(char *message)
+{
+	FILE *log;
+	char timestring[256];
+	long status;
+	dbAddr paddr;
+
+	getSdfTime(timestring);
+	log = fopen("./ioc.log","a");
+	fprintf(log,"%s\n%s\n",timestring,message);
+	fprintf(log,"***************************************************\n");
+	fclose(log);
+	status = dbNameToAddr(reloadtimechannel,&paddr);
+	status = dbPutField(&paddr,DBR_STRING,"ERR - NO FILE FOUND",1);
+
+}
+
+
+/// Function to read all settings from the EPICS database.
 int getEpicsSettings(int numchans)
 {
 dbAddr geaddr;
@@ -167,7 +220,6 @@ int nvals = 1;
 			chcount ++;
 		}
 	}
-printf("Read %d EPICS values in getEpics \n",chcount);
 
 }
 
@@ -176,7 +228,10 @@ printf("Read %d EPICS values in getEpics \n",chcount);
 #define SDF_WITH_INIT_FLAG	0
 #define SDF_FILE_PARAMS_ONLY	1
 #define SDF_FILE_BURT_ONLY	2
-int writeTable2File(char *filename, int ftype, CDS_CD_TABLE myTable[])
+/// Common routine for saving table data to BURT files.
+int writeTable2File(char *filename, 		///< Name of file to write
+		    int ftype, 			///< Type of file to write
+		    CDS_CD_TABLE myTable[])	///< Table to be written.
 {
 int ii;
 FILE *csFile;
@@ -226,11 +281,24 @@ FILE *csFile;
 #define SAVE_OVERWRITE		2
 #define SAVE_AS			3
 
-int savesdffile(int saveType, int saveOpts, char *sdfdir, char *model, char *currentfile, char *saveasfile)
+/// Routine used to decode and handle BURT save requests.
+int savesdffile(int saveType, 		///< Save file format definition.
+		int saveOpts, 		///< Save file options.
+		char *sdfdir, 		///< Directory to save file in.
+		char *model, 		///< Name of the model used to build file name.
+		char *currentfile, 	///< Name of file last read (Used if option is to overwrite).
+		char *saveasfile,	///< Name of file to be saved.
+		char *currentload,
+		dbAddr sfaddr,
+		dbAddr staddr)
 {
 char filename[256];
 char ftype[16];
 int status;
+char filemsg[128];
+char timestring[64];
+char shortfilename[64];
+
 	time_t now = time(NULL);
 	struct tm *mytime  = localtime(&now);
 
@@ -243,14 +311,18 @@ int status;
 		case SAVE_TIME_NOW:
 			sprintf(filename,"%s%s_%s_%d%02d%02d_%02d%02d%02d.snap", sdfdir,model,ftype,
 			(mytime->tm_year - 100),  (mytime->tm_mon + 1),  mytime->tm_mday,  mytime->tm_hour,  mytime->tm_min,  mytime->tm_sec);
+			sprintf(shortfilename,"%s_%s_%d%02d%02d_%02d%02d%02d", model,ftype,
+			(mytime->tm_year - 100),  (mytime->tm_mon + 1),  mytime->tm_mday,  mytime->tm_hour,  mytime->tm_min,  mytime->tm_sec);
 			printf("File to save is TIME NOW: %s\n",filename);
 			break;
 		case SAVE_OVERWRITE:
 			sprintf(filename,"%s",currentfile);
+			sprintf(shortfilename,"%s",currentload);
 			printf("File to save is OVERWRITE: %s\n",filename);
 			break;
 		case SAVE_AS:
 			sprintf(filename,"%s%s_%s.snap",sdfdir,saveasfile,ftype);
+			sprintf(shortfilename,"%s_%s",saveasfile,ftype);
 			printf("File to save is SAVE_AS: %s\n",filename);
 			break;
 
@@ -263,24 +335,35 @@ int status;
 		case SAVE_TABLE_AS_SDF:
 			printf("Save table as sdf\n");
 			status = writeTable2File(filename,SDF_FILE_PARAMS_ONLY,cdTable);
+			sprintf(filemsg,"Save TABLE as SDF: %s",filename);
 			break;
 		case SAVE_TABLE_AS_BURT:
 			printf("Save table as burt\n");
 			status = writeTable2File(filename,SDF_FILE_BURT_ONLY,cdTable);
+			sprintf(filemsg,"Save TABLE as BURT: %s",filename);
 			break;
 		case SAVE_EPICS_AS_SDF:
 			printf("Save epics as sdf\n");
 			status = getEpicsSettings(chNum);
 			status = writeTable2File(filename,SDF_FILE_PARAMS_ONLY,cdTableP);
+			sprintf(filemsg,"Save EPICS as SDF: %s",filename);
 			break;
 		case SAVE_EPICS_AS_BURT:
 			printf("Save epics as burt\n");
 			status = getEpicsSettings(chNum);
 			status = writeTable2File(filename,SDF_FILE_BURT_ONLY,cdTableP);
+			sprintf(filemsg,"Save EPICS as BURT: %s",filename);
 			break;
 		default:
+			sprintf(filemsg,"BAD SAVE REQUEST %s",filename);
+			logFileEntry(filemsg);
 			return(-1);
 	}
+	logFileEntry(filemsg);
+	getSdfTime(timestring);
+	printf(" Time of save = %s\n",timestring);
+	status = dbPutField(&sfaddr,DBR_STRING,shortfilename,1);
+	status = dbPutField(&staddr,DBR_STRING,timestring,1);
 	return(0);
 }
 
@@ -305,28 +388,16 @@ void resetASG(char *name, int lock) {
 }
 #endif
 
+/// Routine used to create local tables for reporting on request.
 void createSortTableEntries(int numEntries)
 {
 int jj;
-long status;
-dbAddr gaddr;
-struct buffer {
-	DBRstatus
-	DBRtime
-	double rval;
-}buffer;
-struct strbuffer {
-	DBRstatus
-	DBRtime
-	char sval[128];;
-}strbuffer;
-long options = DBR_STATUS|DBR_TIME;
-int nvals = 1;
 int notMon = 0;
 
 	chNotInit = 0;
 	chMon = 0;
 
+	// Clear out the uninit and unmon tables.
 	for(jj=0;jj<SDF_ERR_TSIZE;jj++)
 	{
 		sprintf(uninitChans[chNotInit].chname,"%s"," ");
@@ -339,6 +410,7 @@ int notMon = 0;
 		sprintf(unMonChans[notMon].timeset,"%s"," ");
 	}
 
+	// Fill uninit and unmon tables.
 	for(jj=0;jj<numEntries;jj++)
 	{
 		if((!cdTable[jj].initialized) && (chNotInit < SDF_ERR_TSIZE)) {
@@ -354,7 +426,10 @@ int notMon = 0;
 	}
 }
 
-void reportSetErrors(char *pref, int numEntries, SET_ERR_TABLE setErrTable[])
+/// Common routine to load monitoring tables into EPICS channels for MEDM screen.
+void reportSetErrors(char *pref,			///< Channel name prefix from EPICS environment. 
+		     int numEntries, 			///< Number of entries in table to be reported.
+		     SET_ERR_TABLE setErrTable[])	///< Which table to report to EPICS channels.
 {
 
 int ii;
@@ -420,7 +495,8 @@ static int lastcount = 0;
 //	- BURT Setting
 //	- Present Value
 //	- Time the present setting was applied.
-int spChecker(char *pref, int monitorAll)
+/// Setpoint monitoring routine.
+int spChecker(int monitorAll)
 {
    	int errCntr = 0;
 	dbAddr paddr;
@@ -447,7 +523,7 @@ int spChecker(char *pref, int monitorAll)
 
 	     if(chNum) {
 		for(ii=0;ii<chNum;ii++) {
-			if((errCntr < SDF_ERR_TSIZE) && ((cdTable[ii].mask != 0) || (monitorAll)))
+			if((errCntr < SDF_ERR_TSIZE) && ((cdTable[ii].mask != 0) || (monitorAll)) && cdTable[ii].initialized)
 			{
 				localErr = 0;
 				// Find address of channel
@@ -494,7 +570,7 @@ int spChecker(char *pref, int monitorAll)
 	return(errCntr);
 }
 
-// This function sets filter module request fields to aid in decoding errant filter module switch settings.
+/// This function sets filter module request fields to aid in decoding errant filter module switch settings.
 int newfilterstats(int numchans,int command) {
 	dbAddr paddr;
 	long status;
@@ -538,8 +614,11 @@ int newfilterstats(int numchans,int command) {
 	return(myerror);
 }
 
-// This function writes BURT settings to EPICS records.
-int newvalue(int numchans,CDS_CD_TABLE myTable[],int command) {
+/// This function writes BURT settings to EPICS records.
+int newvalue(int numchans,		///< Number of channels to write
+	     CDS_CD_TABLE myTable[],	///< Table with data to be written.
+	     int command) 		///< Write request.
+{
 	dbAddr paddr;
 	long status;
 	double newVal;
@@ -625,40 +704,11 @@ int newvalue(int numchans,CDS_CD_TABLE myTable[],int command) {
 }
 
 
-void getSdfTime(char *timestring)
-{
 
-	dbAddr paddr;
-	long ropts = 0;
-	long nvals = 1;
-	long status;
-
-	status = dbNameToAddr(timechannel,&paddr);
-	status = dbGetField(&paddr,DBR_STRING,timestring,&ropts,&nvals,NULL);
-}
-
-void logFileError(char *filename)
-{
-	FILE *cdf;
-	FILE *log;
-	char timestring[256];
-	long status;
-	dbAddr paddr;
-
-	getSdfTime(timestring);
-	printf("Error - no file found : %s \n",filename);
-	log = fopen("./ioc.log","a");
-	fprintf(log,"New SDF request at %s\n ERROR: FILE %s DOES NOT EXIST\n",timestring,filename);
-	fprintf(log,"***************************************************\n");
-	fclose(log);
-	status = dbNameToAddr(reloadtimechannel,&paddr);
-	status = dbPutField(&paddr,DBR_STRING,"ERR - NO FILE FOUND",1);
-
-}
-
-
-// Function to read BURT files and load data into local tables.
-int readConfig(char *pref,char *sdfile, int command)
+/// Function to read BURT files and load data into local tables.
+int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
+		char *sdfile, 		///< Name of the file to read.
+		int command)		///< Read file request type.
 {
 	FILE *cdf;
 	FILE *log;
@@ -681,6 +731,7 @@ int readConfig(char *pref,char *sdfile, int command)
 	char tempstr[128];
 	int localCtr = 0;
 	int fmatch = 0;
+	char errMsg[128];
 
 	clock_gettime(CLOCK_REALTIME,&t);
 	starttime = t.tv_nsec;
@@ -694,7 +745,8 @@ int readConfig(char *pref,char *sdfile, int command)
 			// printf("LOAD_ONLY = %s\n",sdfile);
 			cdf = fopen(sdfile,"r");
 			if(cdf == NULL) {
-				logFileError(sdfile);
+				sprintf(errMsg,"New SDF request ERROR: FILE %s DOES NOT EXIST\n",sdfile);
+				logFileEntry(errMsg);
 				lderror = 2;
 				return(lderror);
 			}
@@ -729,6 +781,7 @@ int readConfig(char *pref,char *sdfile, int command)
 						cdTableP[chNumP].datatype = 0;
 						// printf("%s %f\n",cdTableP[chNumP].chname,cdTableP[chNumP].chval);
 					}
+					// Count up all the alarm settings in file. These will be set, but not part of monitoring.
 					if((strstr(cdTableP[chNumP].chname,".HIGH") != NULL) || 
 						(strstr(s1,".HIHI") != NULL) || 
 						(strstr(s1,".LOW") != NULL) || 
@@ -745,6 +798,7 @@ int readConfig(char *pref,char *sdfile, int command)
 				
 			}
 			fclose(cdf);
+			// Load values to EPICS records.
 			lderror = newvalue(chNumP,cdTableP,command);
 			break;
 		case SDF_READ_ONLY:
@@ -752,14 +806,18 @@ int readConfig(char *pref,char *sdfile, int command)
 			printf("PARTIAL %s\n",sdfile);
 			cdf = fopen(sdfile,"r");
 			if(cdf == NULL) {
-				logFileError(sdfile);
+				sprintf(errMsg,"New SDF request ERROR: FILE %s DOES NOT EXIST\n",sdfile);
+				logFileEntry(errMsg);
 				lderror = 2;
 				return(lderror);
 			}
 			localCtr = 0;
 			chNumP = 0;
 			alarmCnt = 0;
-			if(!fmtInit) fmNum = 0;
+			if(!fmtInit) {
+				fmNum = 0;
+				logFileEntry("************* Software Restart ************");
+			}
 			strcpy(s4,"x");
 			strncpy(ifo,pref,3);
 			while(fgets(line,sizeof line,cdf) != NULL)
@@ -813,6 +871,7 @@ int readConfig(char *pref,char *sdfile, int command)
 					{
 						alarmCnt ++;
 					} else {
+					// Add settings to local table.
 					for(ii=0;ii<chNum;ii++)
 					{
 						if(strcmp(cdTable[ii].chname,cdTableP[chNumP].chname) == 0)
@@ -909,6 +968,7 @@ int readConfig(char *pref,char *sdfile, int command)
 	return(lderror);
 }
 
+/// Routine used to extract all settings channels from EPICS database to create local settings table on startup.
 void dbDumpRecords(DBBASE *pdbbase)
 {
     DBENTRY  *pdbentry;
@@ -916,6 +976,7 @@ void dbDumpRecords(DBBASE *pdbbase)
     char mytype[4][64];
     int ii;
 
+    // By convention, the RCG produces ai and bi records for settings.
     sprintf(mytype[0],"%s","ai");
     sprintf(mytype[1],"%s","bi");
     sprintf(mytype[2],"%s","stringin");
@@ -995,6 +1056,10 @@ int main(int argc,char *argv[])
 	dbAddr saveasaddr;
 	dbAddr savetypeaddr;
 	dbAddr saveoptsaddr;
+	dbAddr savefileaddr;
+	dbAddr savetimeaddr;
+	dbAddr daqmsgaddr;
+	dbAddr coeffmsgaddr;
 	// Initialize request for file load on startup.
 	int sdfReq = SDF_LOAD_PARTIAL;
 	long status;
@@ -1004,6 +1069,7 @@ int main(int argc,char *argv[])
 	int rdstatus = 0;
 	int burtstatus = 0;
 	char loadedSdf[256];
+	char sdffileloaded[256];
    	int sperror = 0;
 	int noMon;
 	// FILE *csFile;
@@ -1017,6 +1083,11 @@ int main(int argc,char *argv[])
 	char saveTypeString[64];
 	int saveOpts = 0;
 	char saveOptsString[64];
+	int fivesectimer = 0;
+	long daqFileCrc;
+	long coeffFileCrc;
+	long sdfFileCrc;
+	char modfilemsg[] = "Modified File Detected ";
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -1027,13 +1098,16 @@ int main(int argc,char *argv[])
 	char *sdfDir = getenv("SDF_DIR");
 	char *sdf = getenv("SDF_FILE");
 	char *modelname =  getenv("SDF_MODEL");
+	char *targetdir =  getenv("TARGET_DIR");
+	char *daqFile =  getenv("DAQ_FILE");
+	char *coeffFile =  getenv("COEFF_FILE");
 	// strcat(sdf,"_safe");
 	char sdfile[256];
 	char bufile[256];
 	char saveasfilename[128];
 	printf("My prefix is %s\n",pref);
 	sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");					// Initialize with BURT_safe.snap
-	sprintf(bufile, "%s%s", sdfDir, "fec.snap");				// Initialize table dump file
+	sprintf(bufile, "%s%s", sdfDir, "fec.snap");					// Initialize table dump file
 	printf("SDF FILE = %s\n",sdfile);
 	printf("CURRENt FILE = %s\n",bufile);
 	// Create BURT/SDF EPICS channel names
@@ -1048,14 +1122,18 @@ int main(int argc,char *argv[])
 	char fsc[256]; sprintf(fsc, "%s_%s", pref, "SDF_FILE_SET_CNT");		// Channels in Partial BURT file
 	char mcc[256]; sprintf(mcc, "%s_%s", pref, "SDF_MON_CNT");			// Channels in Partial BURT file
 	char tsrname[256]; sprintf(tsrname, "%s_%s", pref, "SDF_SORT");			// SDF Table sorting request
-	char cnfname[256]; sprintf(cnfname, "%s_%s", pref, "SDF_DROP_CNT");		// SDF Table sorting request
-	char cniname[256]; sprintf(cniname, "%s_%s", pref, "SDF_UNSET_CNT");		// SDF Table sorting request
-	char stename[256]; sprintf(stename, "%s_%s", pref, "SDF_TABLE_ENTRIES");	// SDF Table sorting request
-	char monflagname[256]; sprintf(monflagname, "%s_%s", pref, "SDF_MON_ALL");	// SDF Table sorting request
-	char savecmdname[256]; sprintf(savecmdname, "%s_%s", pref, "SDF_SAVE_CMD");	// SDF Table sorting request
-	char saveasname[256]; sprintf(saveasname, "%s_%s", pref, "SDF_SAVE_AS_NAME");	// SDF Table sorting request
-	char savetypename[256]; sprintf(savetypename, "%s_%s", pref, "SDF_SAVE_TYPE");	// SDF Table sorting request
-	char saveoptsname[256]; sprintf(saveoptsname, "%s_%s", pref, "SDF_SAVE_OPTS");	// SDF Table sorting request
+	char cnfname[256]; sprintf(cnfname, "%s_%s", pref, "SDF_DROP_CNT");		// Number of channels not found.
+	char cniname[256]; sprintf(cniname, "%s_%s", pref, "SDF_UNSET_CNT");		// Number of channels not initialized.
+	char stename[256]; sprintf(stename, "%s_%s", pref, "SDF_TABLE_ENTRIES");	// Number of entries in an SDF reporting table.
+	char monflagname[256]; sprintf(monflagname, "%s_%s", pref, "SDF_MON_ALL");	// Request to monitor all channels, not just those marked.
+	char savecmdname[256]; sprintf(savecmdname, "%s_%s", pref, "SDF_SAVE_CMD");	// SDF Save command.
+	char saveasname[256]; sprintf(saveasname, "%s_%s", pref, "SDF_SAVE_AS_NAME");	// SDF Save as file name.
+	char savetypename[256]; sprintf(savetypename, "%s_%s", pref, "SDF_SAVE_TYPE");	// SDF Save file type.
+	char saveoptsname[256]; sprintf(saveoptsname, "%s_%s", pref, "SDF_SAVE_OPTS");	// SDF Save file options.
+	char savefilename[256]; sprintf(savefilename, "%s_%s", pref, "SDF_SAVE_FILE");	// SDF Name of last file saved.
+	char savetimename[256]; sprintf(savetimename, "%s_%s", pref, "SDF_SAVE_TIME");	// SDF Time of last file save.
+	char moddaqfilemsg[256]; sprintf(moddaqfilemsg, "%s_%s", pref, "MSGDAQ");	// SDF Time of last file save.
+	char modcoefffilemsg[256]; sprintf(modcoefffilemsg, "%s_%s", pref, "MSG");	// SDF Time of last file save.
 	// printf("SDF FILE EPICS = %s\n",sdfFileName);
 	sprintf(timechannel,"%s_%s", pref, "TIME_STRING");
 	// printf("timechannel = %s\n",timechannel);
@@ -1071,6 +1149,8 @@ int main(int argc,char *argv[])
 	status = dbNameToAddr(sdfFileName,&sdfname_addr);
 	status = dbPutField(&sdfname_addr,DBR_STRING,sdf,1);
 
+	status = dbNameToAddr(moddaqfilemsg,&daqmsgaddr);
+	status = dbNameToAddr(modcoefffilemsg,&coeffmsgaddr);
 	status = dbNameToAddr(fcc,&fulldbcntaddr);
 	status = dbNameToAddr(fsc,&filesetcntaddr);
 	status = dbNameToAddr(mcc,&monchancntaddr);
@@ -1090,6 +1170,10 @@ int main(int argc,char *argv[])
 	status = dbPutField(&saveasaddr,DBR_STRING,"default",1);
 	status = dbNameToAddr(savetypename,&savetypeaddr);
 	status = dbNameToAddr(saveoptsname,&saveoptsaddr);
+	status = dbNameToAddr(savefilename,&savefileaddr);
+	status = dbPutField(&savefileaddr,DBR_STRING,"",1);
+	status = dbNameToAddr(savetimename,&savetimeaddr);
+	status = dbPutField(&savetimeaddr,DBR_STRING,"",1);
 
 	status = dbNameToAddr(reloadStat,&reloadstat_addr);
 	status = dbPutField(&reloadstat_addr,DBR_LONG,&rdstatus,1);
@@ -1105,10 +1189,13 @@ int main(int argc,char *argv[])
 	status = dbPutField(&alrmchcountaddr,DBR_LONG,&alarmCnt,1);
 
 	sleep(2);
+	daqFileCrc = checkFileCrc(daqFile);
+	coeffFileCrc = checkFileCrc(coeffFile);
 
 	for(;;) {
 		// Following line is from old alarm monitor version.
 		usleep(100000);
+		fivesectimer = (fivesectimer + 1) % 50;
 		// Check for reload request
 		status = dbGetField(&reload_addr,DBR_LONG,&request,&ropts,&nvals,NULL);
 		// Get File Name
@@ -1153,6 +1240,8 @@ int main(int argc,char *argv[])
 			if (rdstatus) burtstatus |= rdstatus;
 			else burtstatus &= ~(6);
 			status = dbPutField(&reloadstat_addr,DBR_LONG,&rdstatus,1);
+			sprintf(sdffileloaded, "%s%s%s", sdfDir, loadedSdf,".snap");
+			sdfFileCrc = checkFileCrc(sdffileloaded);
 			setChans = chNumP - alarmCnt;
 			status = dbPutField(&filesetcntaddr,DBR_LONG,&setChans,1);
 			status = dbPutField(&fulldbcntaddr,DBR_LONG,&chNum,1);
@@ -1190,12 +1279,12 @@ int main(int argc,char *argv[])
 			status = dbGetField(&saveasaddr,DBR_STRING,saveasfilename,&ropts,&nvals,NULL);
 			// Save the file
 			printf("savefile cmd: type = %d  opts = %d\n",saveType,saveOpts);
-			savesdffile(saveType,saveOpts,sdfDir,modelname,sdfile,saveasfilename);
+			savesdffile(saveType,saveOpts,sdfDir,modelname,sdfile,saveasfilename,loadedSdf,savefileaddr,savetimeaddr);
 		}
 		// Check present settings vs BURT settings and report diffs.
 		// Check if MON ALL CHANNELS is set
 		status = dbGetField(&monflagaddr,DBR_LONG,&monFlag,&ropts,&nvals,NULL);
-		sperror = spChecker(pref,monFlag);
+		sperror = spChecker(monFlag);
 		status = dbPutField(&sperroraddr,DBR_LONG,&sperror,1);
 		// Table sorting and presentation
 		status = dbGetField(&tablesortreqaddr,DBR_STRING,tsrString,&ropts,&nvals,NULL);
@@ -1224,6 +1313,25 @@ int main(int argc,char *argv[])
 				reportSetErrors(pref, sperror,setErrTable);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&sperror,1);
 				break;
+		}
+		// Check file CRCs every 5 seconds.
+		// DAQ and COEFF file checking was moved from skeleton.st to here RCG V2.9.
+		if(!fivesectimer) {
+			status = checkFileCrc(daqFile);
+			if(status != daqFileCrc) {
+				daqFileCrc = status;
+				status = dbPutField(&daqmsgaddr,DBR_STRING,modfilemsg,1);
+			}
+			status = checkFileCrc(coeffFile);
+			if(status != coeffFileCrc) {
+				coeffFileCrc = status;
+				status = dbPutField(&coeffmsgaddr,DBR_STRING,modfilemsg,1);
+			}
+			status = checkFileCrc(sdffileloaded);
+			if(status != sdfFileCrc) {
+				sdfFileCrc = status;
+				status = dbPutField(&reloadtimeaddr,DBR_STRING,modfilemsg,1);
+			}
 		}
 	}
 	sleep(0xfffffff);
