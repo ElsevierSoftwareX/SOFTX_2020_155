@@ -102,10 +102,10 @@ sub createGdsMedm
 	$xpos = 375; $ypos = 93; $width = 175; $height = 225;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{yellow},"","","");
 	# BURT Background
-	$xpos = 555; $ypos = 93; $width = 215; $height = 107;
+	$xpos = 555; $ypos = 93; $width = 215; $height = 80;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{yellow},"","","");
 	# Coeff load background
-	$xpos = 555; $ypos = 210; $width = 215; $height = 50;
+	$xpos = 555; $ypos = 194; $width = 215; $height = 50;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{yellow},"","","");
 	# DAQ Reload background
 	$xpos = 555; $ypos = 268; $width = 215; $height = 50;
@@ -128,11 +128,8 @@ sub createGdsMedm
 	# BURT Partial File Loaded
 	$xpos = 562; $ypos = 128; $width = 200; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_LOADED",$ecolors{white},$ecolors{blue},"static");
-	# BURT Reload Status bit 1 FILE NOT FOUND
-	$xpos = 562; $ypos = 146; $width = 200; $height = 10;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_STATUS","1","1",$ecolors{red},$ecolors{green});
 	# BURT Reload Time
-	$xpos = 562; $ypos = 160; $width = 200; $height = 15;
+	$xpos = 562; $ypos = 147; $width = 200; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_TIME",$ecolors{white},$ecolors{blue},"static");
 
 	$xpos = 210; $ypos = 117; $width = 153; $height = 18;
@@ -261,10 +258,10 @@ sub createGdsMedm
 
 
 	# Add Coeff Reload
-	$xpos = 562; $ypos = 212; $width = 200; $height = 18;
-        $medmdata .= ("CDS::medmGen::medmGenMessage") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_LOAD_NEW_COEFF",$ecolors{white},$ecolors{black},"Coeff Load","1");
+	$xpos = 562; $ypos = 200; $width = 200; $height = 18;
+        $medmdata .= ("CDS::medmGen::medmGenMessage") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_LOAD_NEW_COEFF",$ecolors{white},$ecolors{black},"COEFF LOAD","1");
 	# Add Coeff load time Monitor
-	$xpos = 562; $ypos = 232; $width = 200; $height = 18;
+	$xpos = 562; $ypos = 220; $width = 200; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_MSG",$ecolors{white},$ecolors{blue},"static");
 
 	# ************* Create DAQ Status Info Block *****************************************************************
@@ -314,7 +311,7 @@ sub createGdsMedm
 
 	# Add DAQ Reload
 	$xpos = 562; $ypos = 274; $width = 200; $height = 18;
-        $medmdata .= ("CDS::medmGen::medmGenMessage") -> ($xpos,$ypos,$width,$height,"$site\:DAQ-FEC_$dcuid\_LOAD_CONFIG",$ecolors{white},$ecolors{black},"DAQ Reload","1");
+        $medmdata .= ("CDS::medmGen::medmGenMessage") -> ($xpos,$ypos,$width,$height,"$site\:DAQ-FEC_$dcuid\_LOAD_CONFIG",$ecolors{white},$ecolors{black},"DAQ LOAD","1");
 	# Add DAQ load time Monitor
 	$xpos = 562; $ypos = 294; $width = 200; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_MSGDAQ",$ecolors{white},$ecolors{blue},"static");
