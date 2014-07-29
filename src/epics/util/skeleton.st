@@ -249,29 +249,15 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 %% static char ifo[160];
 %% static char daqsys[160];
 
-%% char buffer[264];                                                     /* MA */
 %% char fName[2][256];                                                   /* MA */
 %% char fType[3][10] = {"IIR", "FIR", "IIR & FIR"};                      /* MA */
-%% char bufferDAQ[264];                                                  /* ma */
 %% char fNameDAQ[256];                                                   /* ma */
-
-%% FILE *pipePtr;                                                        /* MA */
-%% FILE *pipePtrDAQ;                                                     /* ma */
 
 #ifdef FIR_FILTERS                                                       /* MA */
 %% int fltrTypes = 2;                                                    /* MA */
 #else                                                                    /* MA */
 %% int fltrTypes = 1;                                                    /* MA */
 #endif                                                                   /* MA */
-
-%% long chkSum[2] = {-99999, -99999};                                    /* MA */
-%% long chkSumDAQ = -99999;                                              /* ma */
-%% long crc;                                                             /* MA */
-%% long crcDAQ;                                                          /* ma */
-
-%% struct stat statBuf;                                                  /* MA */
-%% struct stat statBufDAQ;                                               /* ma */
-
 
 /* %% struct filterThresh thresholds[MAX_MODULES];                          MA */
 
@@ -410,20 +396,6 @@ state init
 %%  }
     pvPut(msg);
 
-#if 0
-%%  for (ii = 0; ii < fltrTypes; ii++) {                                 /* MA */
-%%     strcpy(buffer, "cksum ");                                         /* MA */
-%%     strcat(buffer, fName[ii]);                                        /* MA */
-%%     if (!stat(fName[ii], &statBuf)) {                                 /* MA */
-%%        if ((pipePtr = popen(buffer, "r")) != NULL) {                  /* MA */
-%%           fgets(buffer, 256, pipePtr);                                /* MA */
-%%           pclose(pipePtr);                                            /* MA */
-%%           sscanf(buffer, "%ld", &chkSum[ii]);                         /* MA */
-%%        }                                                              /* MA */
-%%     }                                                                 /* MA */
-%%  }                                                                    /* MA */
-#endif
-
 #if MAX_MODULES > 0
 %%  for(ii=0;ii<MAX_MODULES;ii++) {
 %%	copy_labels(ii);
@@ -476,18 +448,6 @@ state init
       pvPut(swReq[ii]);
       pvPut(swstat_alarm_level[ii]);
 %%  }
-#endif
-
-#if 0
-    swRset[0] = 0;
-    swRset[1] = 0;
-    pvPut(swRset[0]);
-    pvPut(swRset[1]);
-
-    runAcquireWait[0] = 2;
-    pvPut(runAcquireWait[0]);
-    runAcquireWait[1] = 2;
-    pvPut(runAcquireWait[1]);
 #endif
 
     allNewCoeff = 0;
@@ -859,18 +819,6 @@ state daqInit
 %%         /*dataSize = 0;*/
 %%      }
 
-#if 0
-%%      strcpy(bufferDAQ, "cksum ");                                     /* ma */
-%%      strcat(bufferDAQ, fNameDAQ);                                     /* ma */
-%%      if (!stat(fNameDAQ, &statBufDAQ) ) {                             /* ma */
-%%         if ((pipePtrDAQ = popen(bufferDAQ, "r")) != NULL) {           /* ma */
-%%            fgets(bufferDAQ, 256, pipePtrDAQ);                         /* ma */
-%%            pclose(pipePtrDAQ);                                        /* ma */
-%%            sscanf(bufferDAQ, "%ld", &chkSumDAQ);                      /* ma */
-%%         }                                                             /* ma */
-%%      }                                                                /* ma */
-#endif
-
         pvPut(dcmsg);
         pvPut(chnCnt);
         pvPut(epicschnCnt);
@@ -887,29 +835,6 @@ state daqProcess
 %%	static unsigned int cksum_cnt = 0;
 
 %% pthread_mutex_lock (&seq_lock);
-#if 0
-%%      modDAQ = 0;                                                      /* ma */
-%%      strcpy(bufferDAQ, "cksum ");                                     /* ma */
-%%      strcat(bufferDAQ, fNameDAQ);                                     /* ma */
-%%	if (cksum_cnt == 32) {
-%%	 cksum_cnt = 0;
-%%       if (!stat(fNameDAQ, &statBufDAQ) ) {                             /* ma */
-%%         if ((pipePtrDAQ = popen(bufferDAQ, "r")) != NULL) {           /* ma */
-%%            fgets(bufferDAQ, 256, pipePtrDAQ);                         /* ma */
-%%            pclose(pipePtrDAQ);                                        /* ma */
-%%            sscanf(bufferDAQ, "%ld", &crcDAQ);                          /* ma */
-%%            if (crcDAQ != chkSumDAQ) {                                 /* ma */
-%%               chkSumDAQ = crcDAQ;                                     /* ma */
-%%               modDAQ = 1;                                             /* ma */
-%%            }                                                          /* ma */
-%%         }                                                             /* ma */
-%%	 }
-%%       if (modDAQ) {                                                    /* ma */
-           strcpy(msgDAQ, "Modified DAQ file detected");                 /* ma */
-	   pvPut(msgDAQ);                                                /* ma */
-%%       }                                                                /* ma */
-%%      } else cksum_cnt++;
-#endif
 
         pvGet(reload);
         if (reload)
@@ -957,40 +882,8 @@ state filtCoefChk
   when()
     {
 %% 	int mod,ii;
-%%	static unsigned int cksum_cnt = 0;
 %% pthread_mutex_lock (&seq_lock);
 %%  
-#if 0
-%%if (cksum_cnt == 32) {
-%%  cksum_cnt = 0;
-%%  mod = 0;                                                            /* MA */
-%%  for (ii = 0; ii < fltrTypes; ii++) {                                 /* MA */
-%%     strcpy(buffer, "cksum ");                                         /* MA */
-%%     strcat(buffer, fName[ii]);                                        /* MA */
-%%     if (!stat(fName[ii], &statBuf)) {                                 /* MA */
-%%        if ((pipePtr = popen(buffer, "r")) != NULL) {                  /* MA */
-%%           fgets(buffer, 256, pipePtr);                                /* MA */
-%%           pclose(pipePtr);                                            /* MA */
-%%           sscanf(buffer, "%ld", &crc);                                 /* MA */
-%%           if (crc != chkSum[ii]) {                                    /* MA */
-%%              chkSum[ii] = crc;                                        /* MA */
-%%              mod += ii + 1;                                           /* MA */
-%%           }                                                           /* MA */
-%%        }                                                              /* MA */
-%%     }                                                                 /* MA */
-%%  }                                                                    /* MA */
-%%  if (mod) {                                                           /* MA */
-       strcpy(msg, "Modified ");                                         /* MA */
-       strcat(msg, fType[mod - 1]);                                      /* MA */
-       strcat(msg, " file");                                             /* MA */
-%%     if (mod == 3) {                                                   /* MA */
-          strcat(msg, "s");                                              /* MA */
-%%     }                                                                 /* MA */
-       pvPut(msg);                                                       /* MA */
-%%  }                                                                    /* MA */
-%%} else cksum_cnt++;
-#endif
-
    /* Coefficient update request */	
     pvGet(allNewCoeff);
     if(allNewCoeff)
