@@ -193,11 +193,14 @@ void logFileEntry(char *message)
 
 	getSdfTime(timestring);
 	log = fopen(logfilename,"a");
-	fprintf(log,"%s\n%s\n",timestring,message);
-	fprintf(log,"***************************************************\n");
-	fclose(log);
-	status = dbNameToAddr(reloadtimechannel,&paddr);
-	status = dbPutField(&paddr,DBR_STRING,"ERR - NO FILE FOUND",1);
+	if(log == NULL) {
+		status = dbNameToAddr(reloadtimechannel,&paddr);
+		status = dbPutField(&paddr,DBR_STRING,"ERR - NO LOG FILE FOUND",1);
+	} else {
+		fprintf(log,"%s\n%s\n",timestring,message);
+		fprintf(log,"***************************************************\n");
+		fclose(log);
+	}
 
 }
 
