@@ -679,6 +679,7 @@ udelay(1000);
           *packedData = DUMMY_ADC_VAL;
 	  // Set ADC Present Flag
   	  pLocalEpics->epicsOutput.statAdc[jj] = 1;
+	  adcRdTimeErr[jj] = 0;
   }
   printf("ADC setup complete \n");
 #endif
@@ -980,9 +981,9 @@ udelay(1000);
 		    if(adcRdTime[jj] > adcRdTimeMax[jj]) adcRdTimeMax[jj] = adcRdTime[jj];
 
 		    if((jj==0) && (adcRdTimeMax[jj] > MAX_ADC_WAIT_CARD_0)) 
-			pLocalEpics->epicsOutput.stateWord |= FE_ERROR_ADC;
+			adcRdTimeErr[jj] ++;
 		    if((jj!=0) && (adcRdTimeMax[jj] > MAX_ADC_WAIT_CARD_S)) 
-			pLocalEpics->epicsOutput.stateWord |= FE_ERROR_ADC;
+			adcRdTimeErr[jj] ++;
 
 		    /// - --------- If data not ready in time, abort.
 		    /// Either the clock is missing or code is running too slow and ADC FIFO
@@ -1623,6 +1624,13 @@ udelay(1000);
 	  // Flip the onePPS various once/sec as a watchdog monitor.
 	  // pLocalEpics->epicsOutput.onePps ^= 1;
 	  pLocalEpics->epicsOutput.diagWord = diagWord;
+#ifdef ADC_MASTER
+       	  for(jj=0;jj<cdsPciModules.adcCount;jj++) {
+		if(adcRdTimeErr[jj] > MAX_ADC_WAIT_ERR_SEC)
+			pLocalEpics->epicsOutput.stateWord |= FE_ERROR_ADC;
+		adcRdTimeErr[jj] = 0;
+	  }
+#endif
         }
 
 
