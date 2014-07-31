@@ -233,6 +233,7 @@ unsigned int dWordUsed[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];   // ADC chans use
 int overflowAdc[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];          // ADC overflow diagnostics
 int adcRdTime[MAX_ADC_MODULES];
 int adcRdTimeMax[MAX_ADC_MODULES];
+int adcRdTimeErr[MAX_ADC_MODULES];
 
 // DAC Variables
 /// Enables writing of DAC values; Used with DACKILL parts..
