@@ -124,7 +124,7 @@ sub createGdsMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DIFFS",$ecolors{black});
 	# Add Guardian setpoint error  Counter Monitor
 	$xpos = 725; $ypos = 108; $width = 35; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_SP_ERR_CNT",$ecolors{white},$ecolors{black},"alarm");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_DIFF_CNT",$ecolors{white},$ecolors{black},"alarm");
 	# BURT Partial File Loaded
 	$xpos = 562; $ypos = 128; $width = 200; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_LOADED",$ecolors{white},$ecolors{blue},"static");
