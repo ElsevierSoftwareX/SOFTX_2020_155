@@ -3,6 +3,8 @@ Changes for release 2.8.5
 ==================================================================================================
 - Bug fix -> AI chassis keep-alive signal was not being turned off from dackilliop part after
   change to allow killing individual DAC modules.
+- Dataviewer: Update version string for About... popup
+- Bug fix -> dataviewer, bugzilla 683, mean trend data for integer data displays as 0
 ==================================================================================================
 Changes for release 2.8.4
 ==================================================================================================
