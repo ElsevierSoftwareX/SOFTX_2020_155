@@ -1,4 +1,9 @@
 ==================================================================================================
+Changes for release 2.8.5
+==================================================================================================
+- Bug fix -> AI chassis keep-alive signal was not being turned off from dackilliop part after
+  change to allow killing individual DAC modules.
+==================================================================================================
 Changes for release 2.8.4
 ==================================================================================================
 - New GDS TP screen that includes the STATE_WORD. A few items have moved around as well, in 
