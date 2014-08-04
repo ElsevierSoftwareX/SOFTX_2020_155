@@ -431,382 +431,316 @@ text {
 	label="LOAD EDB ONLY"
 	release_msg="4"
 }
+"text update" {
+	object {
+		x=424
+		y=83
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_ALARM_CNT"
+		clr=0
+		bclr=14
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=424
+		y=52
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="ALARM"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=424
+		y=68
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="SETS"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=358
+		y=83
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_DROP_CNT"
+		clr=0
+		bclr=14
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=358
+		y=52
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="NOT"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=358
+		y=68
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="FOUND"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=292
+		y=83
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_UNINIT_CNT"
+		clr=0
+		bclr=14
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=292
+		y=52
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="NOT"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=292
+		y=68
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="INIT"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=94
+		y=68
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="DIFFS"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=94
+		y=83
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_DIFF_CNT"
+		clr=0
+		bclr=14
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=94
+		y=52
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="TOTAL"
+	align="horiz. centered"
+}
 composite {
 	object {
 		x=28
 		y=52
-		width=446
-		height=68
+		width=50
+		height=47
 	}
 	"composite name"=""
 	children {
-		composite {
+		"text update" {
 			object {
-				x=424
-				y=52
+				x=28
+				y=83
 				width=50
-				height=47
+				height=16
 			}
-			"composite name"=""
-			children {
-				"text update" {
-					object {
-						x=424
-						y=83
-						width=50
-						height=16
-					}
-					monitor {
-						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_ALARM_COUNT"
-						clr=0
-						bclr=14
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				text {
-					object {
-						x=424
-						y=52
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="ALARM"
-					align="horiz. centered"
-				}
-				text {
-					object {
-						x=424
-						y=68
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="SETS"
-					align="horiz. centered"
-				}
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FULL_CNT"
+				clr=0
+				bclr=14
+			}
+			align="horiz. centered"
+			limits {
 			}
 		}
-		composite {
-			object {
-				x=358
-				y=52
-				width=50
-				height=47
-			}
-			"composite name"=""
-			children {
-				"text update" {
-					object {
-						x=358
-						y=83
-						width=50
-						height=16
-					}
-					monitor {
-						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_DROP_CNT"
-						clr=0
-						bclr=14
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				text {
-					object {
-						x=358
-						y=52
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="NOT"
-					align="horiz. centered"
-				}
-				text {
-					object {
-						x=358
-						y=68
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="FOUND"
-					align="horiz. centered"
-				}
-			}
-		}
-		composite {
-			object {
-				x=292
-				y=52
-				width=50
-				height=47
-			}
-			"composite name"=""
-			children {
-				"text update" {
-					object {
-						x=292
-						y=83
-						width=50
-						height=16
-					}
-					monitor {
-						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_UNSET_CNT"
-						clr=0
-						bclr=14
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				text {
-					object {
-						x=292
-						y=52
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="NOT"
-					align="horiz. centered"
-				}
-				text {
-					object {
-						x=292
-						y=68
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="INIT"
-					align="horiz. centered"
-				}
-			}
-		}
-		composite {
-			object {
-				x=94
-				y=52
-				width=50
-				height=47
-			}
-			"composite name"=""
-			children {
-				text {
-					object {
-						x=94
-						y=68
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="DIFFS"
-					align="horiz. centered"
-				}
-				"text update" {
-					object {
-						x=94
-						y=83
-						width=50
-						height=16
-					}
-					monitor {
-						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_ERR_CNT"
-						clr=0
-						bclr=14
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				text {
-					object {
-						x=94
-						y=52
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="TOTAL"
-					align="horiz. centered"
-				}
-			}
-		}
-		composite {
+		text {
 			object {
 				x=28
 				y=52
 				width=50
-				height=47
+				height=16
 			}
-			"composite name"=""
-			children {
-				"text update" {
-					object {
-						x=28
-						y=83
-						width=50
-						height=16
-					}
-					monitor {
-						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FULL_CNT"
-						clr=0
-						bclr=14
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				text {
-					object {
-						x=28
-						y=52
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="TOTAL"
-					align="horiz. centered"
-				}
-				text {
-					object {
-						x=28
-						y=68
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="SET PTS"
-					align="horiz. centered"
-				}
+			"basic attribute" {
+				clr=14
 			}
+			textix="TOTAL"
+			align="horiz. centered"
 		}
-		composite {
+		text {
 			object {
-				x=160
-				y=52
+				x=28
+				y=68
 				width=50
-				height=47
+				height=16
 			}
-			"composite name"=""
-			children {
-				text {
-					object {
-						x=160
-						y=68
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="MONITORED"
-					align="horiz. centered"
-				}
-				"text update" {
-					object {
-						x=160
-						y=83
-						width=50
-						height=16
-					}
-					monitor {
-						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_MON_CNT"
-						clr=0
-						bclr=14
-					}
-					align="horiz. centered"
-					limits {
-					}
-				}
-				text {
-					object {
-						x=160
-						y=52
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="NOT"
-					align="horiz. centered"
-				}
+			"basic attribute" {
+				clr=14
+			}
+			textix="SET PTS"
+			align="horiz. centered"
+		}
+	}
+}
+text {
+	object {
+		x=160
+		y=68
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="MONITORED"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=160
+		y=83
+		width=50
+		height=16
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_UNMON_CNT"
+		clr=0
+		bclr=14
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=160
+		y=52
+		width=50
+		height=16
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="NOT"
+	align="horiz. centered"
+}
+composite {
+	object {
+		x=226
+		y=52
+		width=50
+		height=68
+	}
+	"composite name"=""
+	children {
+		"choice button" {
+			object {
+				x=226
+				y=82
+				width=50
+				height=38
+			}
+			control {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_MON_ALL"
+				clr=0
+				bclr=29
 			}
 		}
-		composite {
+		text {
 			object {
 				x=226
 				y=52
 				width=50
-				height=68
+				height=16
 			}
-			"composite name"=""
-			children {
-				"choice button" {
-					object {
-						x=226
-						y=82
-						width=50
-						height=38
-					}
-					control {
-						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_MON_ALL"
-						clr=0
-						bclr=29
-					}
-				}
-				text {
-					object {
-						x=226
-						y=52
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="MONITOR"
-					align="horiz. centered"
-				}
-				text {
-					object {
-						x=226
-						y=68
-						width=50
-						height=16
-					}
-					"basic attribute" {
-						clr=14
-					}
-					textix="SELECT"
-					align="horiz. centered"
-				}
+			"basic attribute" {
+				clr=14
 			}
+			textix="MONITOR"
+			align="horiz. centered"
+		}
+		text {
+			object {
+				x=226
+				y=68
+				width=50
+				height=16
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="SELECT"
+			align="horiz. centered"
 		}
 	}
 }
