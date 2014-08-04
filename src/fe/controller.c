@@ -1944,7 +1944,7 @@ udelay(1000);
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr;
 			if (cycleNum == HKP_DAC_WD_CLK) dacWatchDog ^= 1;
 			dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
-			if(iopDacEnable)
+			if(iopDacEnable && !dacChanErr[jj])
 				dac18bitPtr->digital_io_ports = (dacWatchDog | GSAO_18BIT_DIO_RW);
 
 		}
