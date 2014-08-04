@@ -1119,11 +1119,11 @@ sleep(2);
 	char edbloadedFile[256]; sprintf(edbloadedFile, "%s_%s", pref, "SDF_LOADED_EDB");	// Name of file presently loaded
 	status = dbNameToAddr(edbloadedFile,&edbloadedaddr);		// Get Address
 
-	char speStat[256]; sprintf(speStat, "%s_%s", pref, "SDF_SP_ERR_CNT");		// Setpoint diff counter
+	char speStat[256]; sprintf(speStat, "%s_%s", pref, "SDF_DIFF_CNT");		// Setpoint diff counter
 	status = dbNameToAddr(speStat,&sperroraddr);			// Get Address
 	status = dbPutField(&sperroraddr,DBR_LONG,&sperror,1);		// Init to zero.
 
-	char spaStat[256]; sprintf(spaStat, "%s_%s", pref, "SDF_ALARM_COUNT");		// Number of alarm settings in a BURT file.
+	char spaStat[256]; sprintf(spaStat, "%s_%s", pref, "SDF_ALARM_CNT");		// Number of alarm settings in a BURT file.
 	status = dbNameToAddr(spaStat,&alrmchcountaddr);		// Get Address
 	status = dbPutField(&alrmchcountaddr,DBR_LONG,&alarmCnt,1);	// Init to zero.
 
@@ -1133,7 +1133,7 @@ sleep(2);
 	char fsc[256]; sprintf(fsc, "%s_%s", pref, "SDF_FILE_SET_CNT");			// Number of settings inBURT file
 	status = dbNameToAddr(fsc,&filesetcntaddr);
 
-	char mcc[256]; sprintf(mcc, "%s_%s", pref, "SDF_MON_CNT");			// Number of settings NOT being monitored.
+	char mcc[256]; sprintf(mcc, "%s_%s", pref, "SDF_UNMON_CNT");			// Number of settings NOT being monitored.
 	status = dbNameToAddr(mcc,&monchancntaddr);
 
 	char tsrname[256]; sprintf(tsrname, "%s_%s", pref, "SDF_SORT");			// SDF Table sorting request
@@ -1142,7 +1142,7 @@ sleep(2);
 	char cnfname[256]; sprintf(cnfname, "%s_%s", pref, "SDF_DROP_CNT");		// Number of channels not found.
 	status = dbNameToAddr(cnfname,&chnotfoundaddr);
 
-	char cniname[256]; sprintf(cniname, "%s_%s", pref, "SDF_UNSET_CNT");		// Number of channels not initialized.
+	char cniname[256]; sprintf(cniname, "%s_%s", pref, "SDF_UNINIT_CNT");		// Number of channels not initialized.
 	status = dbNameToAddr(cniname,&chnotinitaddr);
 
 	char stename[256]; sprintf(stename, "%s_%s", pref, "SDF_TABLE_ENTRIES");	// Number of entries in an SDF reporting table.
