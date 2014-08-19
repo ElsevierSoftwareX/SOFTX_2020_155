@@ -46,7 +46,7 @@ of this distribution.
 #define SDF_RESET		3
 #define SDF_LOAD_PARTIAL	1
 
-#define SDF_MAX_CHANS		15000	///< Maximum number of settings, including alarm settings.
+#define SDF_MAX_CHANS		125000	///< Maximum number of settings, including alarm settings.
 #define SDF_MAX_TSIZE		20000	///< Maximum number of EPICS settings records (No subfields).
 #define SDF_ERR_TSIZE		40	///< Size of reporting tables.
 
@@ -275,7 +275,7 @@ FILE *csFile;
 			if(myTable[ii].datatype == 0)
 				fprintf(csFile,"%s%s%d\t%.15e\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].chval,myTable[ii].mask);
 			else
-				fprintf(csFile,"%s%s%d\t%s\t\%dn",myTable[ii].chname,tabs,1,myTable[ii].strval,myTable[ii].mask);
+				fprintf(csFile,"%s%s%d\t%s\t\%d\n",myTable[ii].chname,tabs,1,myTable[ii].strval,myTable[ii].mask);
 			break;
 		   case SDF_FILE_BURT_ONLY:
 			if(myTable[ii].datatype == 0)
@@ -964,7 +964,7 @@ void dbDumpRecords(DBBASE *pdbbase)
     pdbentry = dbAllocEntry(pdbbase);
 
     chNum = 0;
-    for(ii=0;ii<2;ii++) {
+    for(ii=0;ii<3;ii++) {
     status = dbFindRecordType(pdbentry,mytype[ii]);
 
     // status = dbFirstRecordType(pdbentry);
