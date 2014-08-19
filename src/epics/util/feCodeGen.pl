@@ -2079,6 +2079,7 @@ $sed_arg .= "s/MEDMDIR/$skeleton/g;";
 $sed_arg .= "s/IFO_LC/$lsite/g;";
 $sed_arg .= "s/MODEL_LC/$skeleton/g;";
 $sed_arg .= "s/TARGET_MEDM/$medmDir/g;";
+$sed_arg .= "s/RCGDIR/$ffmedm/g;";
 $sitelc = lc($site);
 $mxpt = 215;
 $mypt = 172;

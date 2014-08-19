@@ -1,6 +1,6 @@
 
 file {
-	name="/opt/rtcds/rtscore/branches/branch-2.9/src/epics/util/SDF_RESTORE.adl"
+	name="/opt/rtcds/rtscore/branch-2.9/src/epics/util/SDF_RESTORE.adl"
 	version=030107
 }
 display {
@@ -184,51 +184,6 @@ rectangle {
 		clr=55
 	}
 }
-"message button" {
-	object {
-		x=364
-		y=206
-		width=115
-		height=19
-	}
-	control {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD"
-		clr=50
-		bclr=54
-	}
-	label="RESET EDB TO TABLE"
-	release_msg="3"
-}
-"message button" {
-	object {
-		x=364
-		y=158
-		width=115
-		height=19
-	}
-	control {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD"
-		clr=50
-		bclr=54
-	}
-	label="LOAD TABLE + EDB"
-	release_msg="1"
-}
-"message button" {
-	object {
-		x=364
-		y=182
-		width=115
-		height=19
-	}
-	control {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD"
-		clr=50
-		bclr=54
-	}
-	label="LOAD TABLE ONLY"
-	release_msg="2"
-}
 "shell command" {
 	object {
 		x=84
@@ -243,7 +198,7 @@ rectangle {
 	}
 	clr=0
 	bclr=14
-	label="SDF/BURT REQUEST FILE"
+	label="SELECT REQUEST FILE"
 }
 "text update" {
 	object {
@@ -384,7 +339,7 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="<---- SDF FILE REQUEST / SETTINGS ---->"
+	textix="<- SDF FILE REQUEST / SETTINGS ->"
 	align="horiz. centered"
 }
 text {
@@ -415,21 +370,6 @@ text {
 	align="horiz. centered"
 	limits {
 	}
-}
-"message button" {
-	object {
-		x=364
-		y=246
-		width=115
-		height=19
-	}
-	control {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD"
-		clr=50
-		bclr=54
-	}
-	label="LOAD EDB ONLY"
-	release_msg="4"
 }
 "text update" {
 	object {
@@ -806,7 +746,7 @@ menu {
 		x=36
 		y=345
 		width=200
-		height=20
+		height=25
 	}
 	control {
 		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SAVE_CMD"
@@ -912,4 +852,64 @@ text {
 	}
 	textix="FILE OPTIONS SELECTION"
 	align="horiz. centered"
+}
+"message button" {
+	object {
+		x=348
+		y=273
+		width=140
+		height=19
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD"
+		clr=0
+		bclr=34
+	}
+	label="RESET EDB TO TABLE"
+	release_msg="3"
+}
+"message button" {
+	object {
+		x=348
+		y=158
+		width=140
+		height=19
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD"
+		clr=50
+		bclr=54
+	}
+	label="LOAD TABLE + EDB"
+	release_msg="1"
+}
+"message button" {
+	object {
+		x=348
+		y=182
+		width=140
+		height=19
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD"
+		clr=50
+		bclr=54
+	}
+	label="LOAD TABLE ONLY"
+	release_msg="2"
+}
+"message button" {
+	object {
+		x=348
+		y=206
+		width=140
+		height=19
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD"
+		clr=50
+		bclr=54
+	}
+	label="LOAD EDB ONLY"
+	release_msg="4"
 }
