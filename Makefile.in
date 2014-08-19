@@ -218,20 +218,20 @@ mx:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/mx
 	/bin/mkdir -p build/mx
-	(mysrc=$(srcdir); cd build/mx; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics-3.14.10/base' '--with-framecpp=/opt/rtapps/framecpp' --with-mx && make)
+	(mysrc=$(srcdir); cd build/mx; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics/base' '--with-framecpp=/opt/rtapps/framecpp' --with-mx && make)
 
 mx-symm:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/mx-symm
 	/bin/mkdir -p build/mx-symm
-	(mysrc=$(srcdir); cd build/mx-symm; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics-3.14.10/base' '--with-framecpp=/opt/rtapps/framecpp' --with-mx '--enable-symmetricom' && make)
+	(mysrc=$(srcdir); cd build/mx-symm; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics/base' '--with-framecpp=/opt/rtapps/framecpp' --with-mx '--enable-symmetricom' && make)
 
 
 mx-localtime:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/mx-localtime
 	/bin/mkdir -p build/mx-localtime
-	(mysrc=$(srcdir); cd build/mx-localtime; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics-3.14.10/base' '--with-framecpp=/opt/rtapps/framecpp' --with-mx '--enable-local-timing' && make)
+	(mysrc=$(srcdir); cd build/mx-localtime; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics=/opt/rtapps/epics/base' '--with-framecpp=/opt/rtapps/framecpp' --with-mx '--enable-local-timing' && make)
 
 
 standiop:
