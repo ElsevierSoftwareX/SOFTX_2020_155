@@ -777,6 +777,14 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 						alarmCnt ++;
 					}
 					chNumP ++;
+					if(chNumP >= SDF_MAX_CHANS)
+					{
+						fclose(cdf);
+						sprintf(errMsg,"Number of channels in %s exceeds program limit\n",sdfile);
+						logFileEntry(errMsg);
+						lderror = 2;
+						return(lderror);
+					}
 				}
 				
 			}
@@ -797,8 +805,8 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 			localCtr = 0;
 			chNumP = 0;
 			alarmCnt = 0;
+			fmNum = 0;
 			if(!fmtInit) {
-				fmNum = 0;
 				logFileEntry("************* Software Restart ************");
 			}
 			strcpy(s4,"x");
@@ -874,34 +882,41 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 					}
 					if(!fmatch) printf("NEW channel not found %s\n",cdTableP[chNumP].chname);
 					}
-					if(!fmtInit) {
-						// Following is optional:
-						// Uses the SWREQ AND SWMASK records of filter modules to decode which switch settings are incorrect.
-						// This presently assumes that filter module SW1S will appear before SW2S in the burt files.
-						if((strstr(s1,"_SW1S") != NULL) && (strstr(s1,"_SW1S.") == NULL))
-						{
-							bzero(filterTable[fmNum].fname,strlen(filterTable[fmNum].fname));
-							strncpy(filterTable[fmNum].fname,s1,(strlen(s1)-4));
-							tmpreq = (int)atof(s3);
-						}
-						if((strstr(s1,"_SW2S") != NULL) && (strstr(s1,"_SW2S.") == NULL))
-						{
-							int treq;
-							treq = (int) atof(s3);
-							tmpreq = tmpreq + (treq << 16);
-							filterTable[fmNum].swreq = filtCtrlBitConvert(tmpreq);
-							// printf("%s 0x%x %f %f\n",fTable[fmNum].fname,fTable[fmNum].swreq,tmpreq,atof(s3));
-							tmpreq = 0;
-							fmNum ++;
-						}
+					// Following is optional:
+					// Uses the SWREQ AND SWMASK records of filter modules to decode which switch settings are incorrect.
+					// This presently assumes that filter module SW1S will appear before SW2S in the burt files.
+					if((strstr(s1,"_SW1S") != NULL) && (strstr(s1,"_SW1S.") == NULL))
+					{
+						bzero(filterTable[fmNum].fname,strlen(filterTable[fmNum].fname));
+						strncpy(filterTable[fmNum].fname,s1,(strlen(s1)-4));
+						tmpreq = (int)atof(s3);
+					}
+					if((strstr(s1,"_SW2S") != NULL) && (strstr(s1,"_SW2S.") == NULL))
+					{
+						int treq;
+						treq = (int) atof(s3);
+						tmpreq = tmpreq + (treq << 16);
+						filterTable[fmNum].swreq = filtCtrlBitConvert(tmpreq);
+						// printf("%s 0x%x %f %f\n",fTable[fmNum].fname,fTable[fmNum].swreq,tmpreq,atof(s3));
+						tmpreq = 0;
+						fmNum ++;
 					}
 					localCtr ++;
 					chNumP ++;
+					if(chNumP >= SDF_MAX_CHANS)
+					{
+						fclose(cdf);
+						sprintf(errMsg,"Number of channels in %s exceeds program limit\n",sdfile);
+						logFileEntry(errMsg);
+						lderror = 2;
+						return(lderror);
+					}
 				}
 			}
 			fclose(cdf);
 			lderror = writeEpicsDb(chNumP,cdTableP,command);
-			if(!fmtInit) newfilterstats(fmNum);
+			// if(!fmtInit) newfilterstats(fmNum);
+			newfilterstats(fmNum);
 			fmtInit = 1;
 			break;
 		case SDF_RESET:
@@ -974,7 +989,6 @@ void dbDumpRecords(DBBASE *pdbbase)
         status = dbFirstRecord(pdbentry);
         if (status) printf("  No Records\n"); 
 	int cnt = 0;
-	// if((dbGetRecordTypeName(pdbentry),"ai") == 0){
         while (!status) {
 	    cnt++;
             if (dbIsAlias(pdbentry)) {
@@ -982,7 +996,6 @@ void dbDumpRecords(DBBASE *pdbbase)
             } else {
                 // printf("\n  Record:%s\n",dbGetRecordName(pdbentry));
 		sprintf(cdTable[chNum].chname,"%s",dbGetRecordName(pdbentry));
-		// cdTable[chNum].chname = dbGetRecordName(pdbentry);
 		if(ii == 0) {
 			cdTable[chNum].datatype = 0;
 			cdTable[chNum].chval = 0.0;
@@ -992,12 +1005,6 @@ void dbDumpRecords(DBBASE *pdbbase)
 		}
 		cdTable[chNum].mask = 0;
 		cdTable[chNum].initialized = 0;
-                // status = dbFirstField(pdbentry,TRUE);
-                    // if(status) printf("    No Fields\n");
-                // while(!status) {
-                    // printf("    %s: %s",dbGetFieldName(pdbentry), dbGetString(pdbentry));
-                    // status=dbNextField(pdbentry,TRUE);
-                // }
             }
 	    
 	    cdTable[chNum].mask = 1;
