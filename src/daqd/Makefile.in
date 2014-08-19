@@ -46,7 +46,7 @@ BROADCASTOBJECTS=@BROADCASTOBJECTS@
 
 LDAS_DIR=@LDAS_DIR@
 LDASFLAGS=-I$(LDAS_DIR)/include
-LDASLIBFLAGS=-L$(LDAS_DIR)/linux-x86_64/lib -lgeneral -lframecpp -lframecpp8 -lz -lbz2
+LDASLIBFLAGS=-L$(LDAS_DIR)/linux-x86_64/lib -lgeneral -lframecpp -l framecppcmn -lframecpp3 -lframecpp4 -lframecpp6 -lframecpp7 -lframecpp8 -lz -lbz2
 
 VARIOUS_DEFINES=-DSERVER_VERSION=\"2.0\" "-DPRODUCTION_DATE=\"`date`\"" "-DPRODUCTION_MACHINE=\"`uname -a`\"" ${GDSFLAGS} ${LDASFLAGS} ${EPICSFLAGS} ${MYRINET_FLAGS} ${MX_FLAGS}
 INCLUDEFLAGS=-I. -I@srcdir@ -I$(srcdir)/../../../rts/src/include -I$(srcdir)/../include -I/usr/sfw/include
