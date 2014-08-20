@@ -1184,11 +1184,12 @@ for($ii=0;$ii<$seqCnt;$ii++)
 	{
 		$xx = $seqList[$ii];
 		$processName[$processCnt] = $xpartName[$xx];
-if(($partType[$xx] eq "TERM") || ($partType[$xx] eq "GROUND") || ($partType[$xx] eq "FROM") || ($partType[$xx] eq "GOTO") || ($partType[$xx] eq "EpicsIn") || ($partType[$xx] eq "CONSTANT") || ($partType[$xx] eq "Gps") || ($partType[$xx] eq "StateWord") || ($partType[$xx] eq "ModelRate") || ($partType[$jj] eq "EXC")) 
+
+if(($partType[$xx] eq "TERM") || ($partType[$xx] eq "GROUND") || ($partType[$xx] eq "FROM") || ($partType[$xx] eq "GOTO") || ($partType[$xx] eq "EpicsIn") || ($partType[$xx] eq "CONSTANT") || ($partType[$xx] eq "Gps") || ($partType[$xx] eq "StateWord") || ($partType[$xx] eq "ModelRate") || ($partType[$xx] eq "EXC")) 
 {$ftotal ++;}
 		$processSeqType{$xpartName[$xx]} = $seqType[$ii];
 		$processPartNum[$processCnt] = $xx;
-		#print "******* $processCnt $processName[$processCnt] $processPartNum[$processCnt]\n";
+		#print "******* $processCnt $processName[$processCnt] $processPartNum[$processCnt] $partType[$xx]\n";
 		$processSeqSubsysName[$processCnt] = "__PART__";
 		$processCnt ++;
 	}
