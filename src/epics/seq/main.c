@@ -46,7 +46,7 @@ of this distribution.
 #define SDF_RESET		3
 #define SDF_LOAD_PARTIAL	1
 
-#define SDF_MAX_CHANS		15000	///< Maximum number of settings, including alarm settings.
+#define SDF_MAX_CHANS		125000	///< Maximum number of settings, including alarm settings.
 #define SDF_MAX_TSIZE		20000	///< Maximum number of EPICS settings records (No subfields).
 #define SDF_ERR_TSIZE		40	///< Size of reporting tables.
 
@@ -136,9 +136,43 @@ void newfilterstats(int);
 int writeEpicsDb(int,CDS_CD_TABLE *,int);
 int readConfig( char *,char *,int);
 void dbDumpRecords(DBBASE *);
+int cleanLine(char *,int *,int *);
 
 
 // End Header **********************************************************************************************************
+//
+/// Routine created to handle quotes within a BURT file line
+// Args:
+// 	s = ptr to line.
+// 	qs = number of first word in quotes.
+// 	qe = number of last word in quotes.
+// Returns number of words in line.
+int cleanLine(char *s, int *qs, int *qe) {
+int cntr = 0;
+int last = 1;
+
+while (*s != 0) {
+	// Find and mark quotes
+	if (*s == '\"' && *qs == 0) *qs = cntr+1;
+	else *qe= cntr-1;
+	// Replace quotes/tabs with spaces
+	if (*s == '\"' || *s == '\t')
+		*s = ' ';
+	// Look for space indicating end of word.
+	if (*s != ' ') {
+		if(last ==1)
+		{
+			cntr ++;
+			last = 0;
+		}
+	} else {
+		last = 1;
+		}
+	s++;
+}
+// Return number of words in line.
+return(cntr);
+}
 
 /// Common routine to check file CRC.
 int checkFileCrc(char *fName)
@@ -275,7 +309,7 @@ FILE *csFile;
 			if(myTable[ii].datatype == 0)
 				fprintf(csFile,"%s%s%d\t%.15e\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].chval,myTable[ii].mask);
 			else
-				fprintf(csFile,"%s%s%d\t%s\t\%dn",myTable[ii].chname,tabs,1,myTable[ii].strval,myTable[ii].mask);
+				fprintf(csFile,"%s%s%d\t%s\t\%d\n",myTable[ii].chname,tabs,1,myTable[ii].strval,myTable[ii].mask);
 			break;
 		   case SDF_FILE_BURT_ONLY:
 			if(myTable[ii].datatype == 0)
@@ -432,14 +466,14 @@ int notMon = 0;
 	// Fill uninit and unmon tables.
 	for(jj=0;jj<numEntries;jj++)
 	{
-		if((!cdTable[jj].initialized) && (chNotInit < SDF_ERR_TSIZE)) {
+		if(!cdTable[jj].initialized) {
 			// printf("Chan %s not init %d %d %d\n",cdTable[jj].chname,cdTable[jj].initialized,jj,numEntries);
-			sprintf(uninitChans[chNotInit].chname,"%s",cdTable[jj].chname);
+			if(chNotInit < SDF_ERR_TSIZE) sprintf(uninitChans[chNotInit].chname,"%s",cdTable[jj].chname);
 			chNotInit ++;
 		}
 		if(cdTable[jj].mask) chMon ++;
-		if((!cdTable[jj].mask) && (notMon < SDF_ERR_TSIZE)) {
-			sprintf(unMonChans[notMon].chname,"%s",cdTable[jj].chname);
+		if(!cdTable[jj].mask) {
+			if(notMon < SDF_ERR_TSIZE) sprintf(unMonChans[notMon].chname,"%s",cdTable[jj].chname);
 			notMon ++;
 		}
 	}
@@ -699,7 +733,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 	char c;
 	int ii;
 	int lock;
-	char s1[128],s2[128],s3[128],s4[128];
+	char s1[128],s2[128],s3[128],s4[128],s5[128],s6[128],s7[128],s8[128];
 	dbAddr paddr;
 	long status;
 	int lderror = 0;
@@ -712,202 +746,163 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 	char ifo[4];
 	double tmpreq = 0;
 	char tempstr[128];
-	int localCtr = 0;
 	int fmatch = 0;
 	char errMsg[128];
+	int qs = 0;
+	int qe = 0;
+	int argcount = 0;
 
 	clock_gettime(CLOCK_REALTIME,&t);
 	starttime = t.tv_nsec;
 
 	getSdfTime(timestring);
 
-	switch(command)
-	{
-		case SDF_LOAD_DB_ONLY:
-		// Read the file and set EPICS records. DO NOT update the local setpoints table.
-			// printf("LOAD_ONLY = %s\n",sdfile);
-			cdf = fopen(sdfile,"r");
-			if(cdf == NULL) {
-				sprintf(errMsg,"New SDF request ERROR: FILE %s DOES NOT EXIST\n",sdfile);
-				logFileEntry(errMsg);
-				lderror = 2;
-				return(lderror);
-			}
-			chNumP = 0;
-			alarmCnt = 0;
+	if(command == SDF_RESET) {
+		lderror = writeEpicsDb(chNum,cdTable,command);
+	} else {
+		printf("PARTIAL %s\n",sdfile);
+		cdf = fopen(sdfile,"r");
+		if(cdf == NULL) {
+			sprintf(errMsg,"New SDF request ERROR: FILE %s DOES NOT EXIST\n",sdfile);
+			logFileEntry(errMsg);
+			lderror = 2;
+			return(lderror);
+		}
+		chNumP = 0;
+		alarmCnt = 0;
+		fmNum = 0;
+		strcpy(s4,"x");
+		bzero(s3,strlen(s3));
+		strncpy(ifo,pref,3);
+		while(fgets(line,sizeof line,cdf) != NULL)
+		{
+			int isalarm = 0;
+			qs = 0;
+			qe = 0;
+			argcount = cleanLine(line,&qs,&qe);
+			// printf("%s has %d words\n",line,argcount);
+			// if(qs != 0) printf("Line has quotes from %d to %d\n",qs,qe);
+			// Only 3 = no monit flag
+			// >=4 count be monit flag or string with quotes
+			// Put dummy in s4 as this column may or may not exist.
 			strcpy(s4,"x");
-			strncpy(ifo,pref,3);
-			// Read the settings file
-			while(fgets(line,sizeof line,cdf) != NULL)
+			bzero(s3,strlen(s3));
+			sscanf(line,"%s%s%s%s%s%s",s1,s2,s3,s4,s5,s6);
+			// If 1st three chars match IFO ie checking this this line is not BURT header or channel marked RO
+			if(strncmp(s1,ifo,3) == 0 && 
+			// Don't allow load of SWSTAT or SWMASK, which are set by this program.
+				strstr(s1,"_SWMASK") == NULL &&
+				strstr(s1,"_SDF_NAME") == NULL &&
+				strstr(s1,"_SWREQ") == NULL &&
+				argcount > 2)
 			{
-				// Put dummy in s4 as this column may or may not exist.
-				strcpy(s4,"x");
-				sscanf(line,"%s%s%s%s",s1,s2,s3,s4);
-				// If 1st three chars match IFO ie checking this this line is not BURT header or channel marked RO
-				if(	strncmp(s1,ifo,3) == 0 && 
-					// Don't allow load of SWSTAT or SWMASK, which are set by this program.
-					strstr(s1,"_SWMASK") == NULL &&
-					strstr(s1,"_SDF_NAME") == NULL &&
-					strstr(s1,"_SWREQ") == NULL)
+				// If quotes in line, need to shift words into 3rd word.
+				if(qs!=0) {
+					int qcnt = qe - qs;
+					if(qcnt == 1) {
+					sprintf(s3,"%s %s",s3,s4);
+						sprintf(s4,"%s",s5);
+						}
+					if(qcnt == 2) {
+						sprintf(s3,"%s %s %s",s3,s4,s5);
+						sprintf(s4,"%s",s6);
+						}
+				}
+				// Clear out the local tabel channel name string.
+				bzero(cdTableP[chNumP].chname,strlen(cdTableP[chNumP].chname));
+				// Load channel name into local table.
+				strcpy(cdTableP[chNumP].chname,s1);
+				// Determine if setting (s3) is string or numeric type data.
+				if(isalpha(s3[0]) || ispunct(s3[0])) {
+				// if(1) {
+					// printf("Channel %s is string \n\n",cdTableP[chNumP].chname);
+					cdTableP[chNumP].datatype = 1;
+					strcpy(cdTableP[chNumP].strval,s3);
+				} else {
+					if(s3[0] == '\0') printf("NULL string for6 %s\n",cdTableP[chNumP].chname);
+					cdTableP[chNumP].chval = atof(s3);
+					cdTableP[chNumP].datatype = 0;
+					// printf("%s %f\n",cdTable[chNum].chname,cdTable[chNum].chval);
+				}
+				// Check if s4 (monitor or not) is set (0/1). If doesn/'t exist in file, set to zero in local table.
+				if(isdigit(s4[0])) {
+					// printf("%s %s %s %s\n",s1,s2,s3,s4);
+					cdTableP[chNumP].mask = atoi(s4);
+					if((cdTableP[chNumP].mask < 0) || (cdTableP[chNumP].mask > 1))
+						cdTableP[chNumP].mask = 0;
+				} 
+				// Find channel in full list and replace setting info
+				fmatch = 0;
+				// We can set alarm values, but do not put them in cdTable
+				if((strstr(cdTableP[chNumP].chname,".HIGH") != NULL) || 
+					(strstr(s1,".HIHI") != NULL) || 
+					(strstr(s1,".LOW") != NULL) || 
+					(strstr(s1,".LOLO") != NULL) || 
+					(strstr(s1,".HSV") != NULL) || 
+					(strstr(s1,".OSV") != NULL) || 
+					(strstr(s1,".ZSV") != NULL) || 
+					(strstr(s1,".LSV") != NULL) )
 				{
-					// Clear out the local tabel channel name string.
-					bzero(cdTableP[chNumP].chname,strlen(cdTableP[chNumP].chname));
-					// Load channel name into local table.
-					strcpy(cdTableP[chNumP].chname,s1);
-					// Determine if setting (s3) is string or numeric type data.
-					if(isalpha(s3[0])) {
-						strcpy(cdTableP[chNumP].strval,s3);
-						cdTableP[chNumP].datatype = 1;
-						// printf("%s %s ********************\n",cdTableP[chNumP].chname,cdTableP[chNumP].strval);
-					} else {
-						cdTableP[chNumP].chval = atof(s3);
-						cdTableP[chNumP].datatype = 0;
-						// printf("%s %f\n",cdTableP[chNumP].chname,cdTableP[chNumP].chval);
-					}
-					// Count up all the alarm settings in file. These will be set, but not part of monitoring.
-					if((strstr(cdTableP[chNumP].chname,".HIGH") != NULL) || 
-						(strstr(s1,".HIHI") != NULL) || 
-						(strstr(s1,".LOW") != NULL) || 
-						(strstr(s1,".LOLO") != NULL) || 
-						(strstr(s1,".HSV") != NULL) || 
-						(strstr(s1,".OSV") != NULL) || 
-						(strstr(s1,".ZSV") != NULL) || 
-						(strstr(s1,".LSV") != NULL) )
+					alarmCnt ++;
+					isalarm = 1;
+				} 
+				if(!isalarm && command != SDF_LOAD_DB_ONLY)
+				{
+				   // Add settings to local table.
+				   for(ii=0;ii<chNum;ii++)
+				   {
+					if(strcmp(cdTable[ii].chname,cdTableP[chNumP].chname) == 0)
 					{
-						alarmCnt ++;
+						// printf("NEW channel compare %s\n",cdTable[chNumP].chname);
+						fmatch = 1;
+						if(cdTableP[chNumP].datatype == 1)
+						{
+							strcpy(cdTable[ii].strval,cdTableP[chNumP].strval);
+						} else {
+							cdTable[ii].chval = cdTableP[chNumP].chval;
+						}
+						if(cdTableP[chNumP].mask != -1)
+							cdTable[ii].mask = cdTableP[chNumP].mask;
+						cdTable[ii].initialized = 1;
+					}
+				   }
+				}
+				   if(!fmatch) printf("NEW channel not found %s\n",cdTableP[chNumP].chname);
+				   // Following is optional:
+					// Uses the SWREQ AND SWMASK records of filter modules to decode which switch settings are incorrect.
+					// This presently assumes that filter module SW1S will appear before SW2S in the burt files.
+					if((strstr(s1,"_SW1S") != NULL) && (strstr(s1,"_SW1S.") == NULL))
+					{
+						bzero(filterTable[fmNum].fname,strlen(filterTable[fmNum].fname));
+						strncpy(filterTable[fmNum].fname,s1,(strlen(s1)-4));
+						tmpreq = (int)atof(s3);
+					}
+					if((strstr(s1,"_SW2S") != NULL) && (strstr(s1,"_SW2S.") == NULL))
+					{
+						int treq;
+						treq = (int) atof(s3);
+						tmpreq = tmpreq + (treq << 16);
+						filterTable[fmNum].swreq = filtCtrlBitConvert(tmpreq);
+						// printf("%s 0x%x %f %f\n",fTable[fmNum].fname,fTable[fmNum].swreq,tmpreq,atof(s3));
+						tmpreq = 0;
+						fmNum ++;
 					}
 					chNumP ++;
-				}
-				
-			}
-			fclose(cdf);
-			// Load values to EPICS records.
-			lderror = writeEpicsDb(chNumP,cdTableP,command);
-			break;
-		case SDF_READ_ONLY:
-		case SDF_LOAD_PARTIAL:
-			printf("PARTIAL %s\n",sdfile);
-			cdf = fopen(sdfile,"r");
-			if(cdf == NULL) {
-				sprintf(errMsg,"New SDF request ERROR: FILE %s DOES NOT EXIST\n",sdfile);
-				logFileEntry(errMsg);
-				lderror = 2;
-				return(lderror);
-			}
-			localCtr = 0;
-			chNumP = 0;
-			alarmCnt = 0;
-			if(!fmtInit) {
-				fmNum = 0;
-				logFileEntry("************* Software Restart ************");
-			}
-			strcpy(s4,"x");
-			strncpy(ifo,pref,3);
-			while(fgets(line,sizeof line,cdf) != NULL)
-			{
-				// Put dummy in s4 as this column may or may not exist.
-				strcpy(s4,"x");
-				sscanf(line,"%s%s%s%s",s1,s2,s3,s4);
-				// If 1st three chars match IFO ie checking this this line is not BURT header or channel marked RO
-				if(	strncmp(s1,ifo,3) == 0 && 
-					// Don't allow load of SWSTAT or SWMASK, which are set by this program.
-					strstr(s1,"_SWMASK") == NULL &&
-					strstr(s1,"_SDF_NAME") == NULL &&
-					strstr(s1,"_SWREQ") == NULL)
-				{
-					// Clear out the local tabel channel name string.
-					bzero(cdTableP[chNumP].chname,strlen(cdTableP[chNumP].chname));
-					// Load channel name into local table.
-					strcpy(cdTableP[chNumP].chname,s1);
-					// Determine if setting (s3) is string or numeric type data.
-					if(isalpha(s3[0])) {
-						strcpy(cdTableP[chNumP].strval,s3);
-						cdTableP[chNumP].datatype = 1;
-						// printf("%s %s ********************\n",cdTable[chNum].chname,cdTable[chNum].strval);
-					} else {
-						cdTableP[chNumP].chval = atof(s3);
-						cdTableP[chNumP].datatype = 0;
-						// printf("%s %f\n",cdTable[chNum].chname,cdTable[chNum].chval);
-					}
-					// Check if s4 (monitor or not) is set (0/1). If doesn/'t exist in file, set to zero in local table.
-					if(isdigit(s4[0])) {
-						// printf("%s %s %s %s\n",s1,s2,s3,s4);
-						cdTableP[chNumP].mask = atoi(s4);
-						if((cdTableP[chNumP].mask < 0) || (cdTableP[chNumP].mask > 1))
-							cdTableP[chNumP].mask = 0;
-					} 
-					// else {
-						// printf("%s %s %s \n",s1,s2,s3);
-					//	cdTableP[chNumP].mask = -1;
-					// }
-					// Find channel in full list and replace setting info
-					fmatch = 0;
-					// We can set alarm values, but do not put them in cdTable
-					if((strstr(cdTableP[chNumP].chname,".HIGH") != NULL) || 
-						(strstr(s1,".HIHI") != NULL) || 
-						(strstr(s1,".LOW") != NULL) || 
-						(strstr(s1,".LOLO") != NULL) || 
-						(strstr(s1,".HSV") != NULL) || 
-						(strstr(s1,".OSV") != NULL) || 
-						(strstr(s1,".ZSV") != NULL) || 
-						(strstr(s1,".LSV") != NULL) )
+					if(chNumP >= SDF_MAX_CHANS)
 					{
-						alarmCnt ++;
-					} else {
-					// Add settings to local table.
-					for(ii=0;ii<chNum;ii++)
-					{
-						if(strcmp(cdTable[ii].chname,cdTableP[chNumP].chname) == 0)
-						{
-							// printf("NEW channel compare %s\n",cdTable[chNumP].chname);
-							fmatch = 1;
-							if(cdTableP[chNumP].datatype == 1)
-							{
-								strcpy(cdTable[ii].strval,cdTableP[chNumP].strval);
-							} else {
-								cdTable[ii].chval = cdTableP[chNumP].chval;
-							}
-							if(cdTableP[chNumP].mask != -1)
-								cdTable[ii].mask = cdTableP[chNumP].mask;
-							cdTable[ii].initialized = 1;
-						}
+						fclose(cdf);
+						sprintf(errMsg,"Number of channels in %s exceeds program limit\n",sdfile);
+						logFileEntry(errMsg);
+						lderror = 2;
+						return(lderror);
 					}
-					if(!fmatch) printf("NEW channel not found %s\n",cdTableP[chNumP].chname);
-					}
-					if(!fmtInit) {
-						// Following is optional:
-						// Uses the SWREQ AND SWMASK records of filter modules to decode which switch settings are incorrect.
-						// This presently assumes that filter module SW1S will appear before SW2S in the burt files.
-						if((strstr(s1,"_SW1S") != NULL) && (strstr(s1,"_SW1S.") == NULL))
-						{
-							bzero(filterTable[fmNum].fname,strlen(filterTable[fmNum].fname));
-							strncpy(filterTable[fmNum].fname,s1,(strlen(s1)-4));
-							tmpreq = (int)atof(s3);
-						}
-						if((strstr(s1,"_SW2S") != NULL) && (strstr(s1,"_SW2S.") == NULL))
-						{
-							int treq;
-							treq = (int) atof(s3);
-							tmpreq = tmpreq + (treq << 16);
-							filterTable[fmNum].swreq = filtCtrlBitConvert(tmpreq);
-							// printf("%s 0x%x %f %f\n",fTable[fmNum].fname,fTable[fmNum].swreq,tmpreq,atof(s3));
-							tmpreq = 0;
-							fmNum ++;
-						}
-					}
-					localCtr ++;
-					chNumP ++;
-				}
+			   }
 			}
 			fclose(cdf);
 			lderror = writeEpicsDb(chNumP,cdTableP,command);
-			if(!fmtInit) newfilterstats(fmNum);
+			// if(!fmtInit) newfilterstats(fmNum);
+			newfilterstats(fmNum);
 			fmtInit = 1;
-			break;
-		case SDF_RESET:
-			lderror = writeEpicsDb(chNum,cdTable,command);
-		default:
-			break;
 	}
 /*
 	NOTE: This stub remains for EPICS channel locking using ASG if desired at some point.
@@ -956,7 +951,10 @@ void dbDumpRecords(DBBASE *pdbbase)
     long  status;
     char mytype[4][64];
     int ii;
+    int fc = 0;
+    char errMsg[128];
 
+    logFileEntry("************* Software Restart ************");
     // By convention, the RCG produces ai and bi records for settings.
     sprintf(mytype[0],"%s","ai");
     sprintf(mytype[1],"%s","bi");
@@ -964,7 +962,7 @@ void dbDumpRecords(DBBASE *pdbbase)
     pdbentry = dbAllocEntry(pdbbase);
 
     chNum = 0;
-    for(ii=0;ii<2;ii++) {
+    for(ii=0;ii<3;ii++) {
     status = dbFindRecordType(pdbentry,mytype[ii]);
 
     // status = dbFirstRecordType(pdbentry);
@@ -974,7 +972,6 @@ void dbDumpRecords(DBBASE *pdbbase)
         status = dbFirstRecord(pdbentry);
         if (status) printf("  No Records\n"); 
 	int cnt = 0;
-	// if((dbGetRecordTypeName(pdbentry),"ai") == 0){
         while (!status) {
 	    cnt++;
             if (dbIsAlias(pdbentry)) {
@@ -982,7 +979,8 @@ void dbDumpRecords(DBBASE *pdbbase)
             } else {
                 // printf("\n  Record:%s\n",dbGetRecordName(pdbentry));
 		sprintf(cdTable[chNum].chname,"%s",dbGetRecordName(pdbentry));
-		// cdTable[chNum].chname = dbGetRecordName(pdbentry);
+		if((strstr(cdTable[chNum].chname,"_SW1S") != NULL) && (strstr(cdTable[chNum].chname,"_SW1S.") == NULL))
+			fc ++;
 		if(ii == 0) {
 			cdTable[chNum].datatype = 0;
 			cdTable[chNum].chval = 0.0;
@@ -992,15 +990,8 @@ void dbDumpRecords(DBBASE *pdbbase)
 		}
 		cdTable[chNum].mask = 0;
 		cdTable[chNum].initialized = 0;
-                // status = dbFirstField(pdbentry,TRUE);
-                    // if(status) printf("    No Fields\n");
-                // while(!status) {
-                    // printf("    %s: %s",dbGetFieldName(pdbentry), dbGetString(pdbentry));
-                    // status=dbNextField(pdbentry,TRUE);
-                // }
             }
 	    
-	    cdTable[chNum].mask = 1;
 	    chNum ++;
             status = dbNextRecord(pdbentry);
         }
@@ -1009,6 +1000,9 @@ void dbDumpRecords(DBBASE *pdbbase)
     }
 }
     // }
+    sprintf(errMsg,"Number of filter modules in db = %d \n",fc);
+    // printf("%s",errMsg);
+    logFileEntry(errMsg);
     printf("End of all Records\n");
     dbFreeEntry(pdbentry);
 }
@@ -1075,7 +1069,7 @@ int main(int argc,char *argv[])
     if(argc>=2) {
         iocsh(argv[1]);
 	// printf("Executing post script commands\n");
-	dbDumpRecords(*iocshPpdbbase);
+	// dbDumpRecords(*iocshPpdbbase);
 	// Get environment variables from startup command to formulate EPICS record names.
 	char *pref = getenv("PREFIX");
 	char *sdfDir = getenv("SDF_DIR");
@@ -1187,6 +1181,7 @@ sleep(2);
 	status = dbNameToAddr(reloadtimechannel,&reloadtimeaddr);
 
 
+	dbDumpRecords(*iocshPpdbbase);
 
 	// Initialize DAQ and COEFF file CRC checksums for later compares.
 	daqFileCrc = checkFileCrc(daqFile);
