@@ -12,5 +12,9 @@ fi
 export GRACE_HOME
 export LANG=C
 PATH=${PATH}:${GRACE_HOME}/bin
-$DVPATH/dv -s ${LIGONDSIP} -a $$ -b $DVPATH $*
+if [ $DVPATH ]; then
+xterm -fg black -bg lightyellow -T "Dataviewer Messages" -sb -geometry 100x8+3+3 -e $DVPATH/dv -s ${LIGONDSIP} -a $$ -b $DVPATH $*
+else
+echo "** the variable \$DVPATH is undefined***"
+fi 
 /bin/rm -f -r /tmp/$$DC
