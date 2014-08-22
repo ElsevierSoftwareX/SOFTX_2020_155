@@ -751,6 +751,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 	int qs = 0;
 	int qe = 0;
 	int argcount = 0;
+	int isalarm = 0;
 
 	clock_gettime(CLOCK_REALTIME,&t);
 	starttime = t.tv_nsec;
@@ -776,7 +777,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 		strncpy(ifo,pref,3);
 		while(fgets(line,sizeof line,cdf) != NULL)
 		{
-			int isalarm = 0;
+			isalarm = 0;
 			qs = 0;
 			qe = 0;
 			argcount = cleanLine(line,&qs,&qe);
@@ -813,16 +814,14 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 				// Load channel name into local table.
 				strcpy(cdTableP[chNumP].chname,s1);
 				// Determine if setting (s3) is string or numeric type data.
-				if(isalpha(s3[0]) || ispunct(s3[0])) {
-				// if(1) {
+				if(isalpha(s3[0]) || (ispunct(s3[0]) && s3[0] != '-')) {
 					// printf("Channel %s is string \n\n",cdTableP[chNumP].chname);
 					cdTableP[chNumP].datatype = 1;
 					strcpy(cdTableP[chNumP].strval,s3);
 				} else {
-					if(s3[0] == '\0') printf("NULL string for6 %s\n",cdTableP[chNumP].chname);
+					// if(s3[0] == '\0') printf("NULL string for6 %s\n",cdTableP[chNumP].chname);
 					cdTableP[chNumP].chval = atof(s3);
 					cdTableP[chNumP].datatype = 0;
-					// printf("%s %f\n",cdTable[chNum].chname,cdTable[chNum].chval);
 				}
 				// Check if s4 (monitor or not) is set (0/1). If doesn/'t exist in file, set to zero in local table.
 				if(isdigit(s4[0])) {
@@ -853,7 +852,6 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 				   {
 					if(strcmp(cdTable[ii].chname,cdTableP[chNumP].chname) == 0)
 					{
-						// printf("NEW channel compare %s\n",cdTable[chNumP].chname);
 						fmatch = 1;
 						if(cdTableP[chNumP].datatype == 1)
 						{
@@ -866,8 +864,8 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 						cdTable[ii].initialized = 1;
 					}
 				   }
+				   // if(!fmatch) printf("NEW channel not found %s\n",cdTableP[chNumP].chname);
 				}
-				   if(!fmatch) printf("NEW channel not found %s\n",cdTableP[chNumP].chname);
 				   // Following is optional:
 					// Uses the SWREQ AND SWMASK records of filter modules to decode which switch settings are incorrect.
 					// This presently assumes that filter module SW1S will appear before SW2S in the burt files.
@@ -903,7 +901,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 			// if(!fmtInit) newfilterstats(fmNum);
 			newfilterstats(fmNum);
 			fmtInit = 1;
-	}
+			}
 /*
 	NOTE: This stub remains for EPICS channel locking using ASG if desired at some point.
 	while((c = fscanf(cdf,"%s%s",cdTable[chNum].chname,s1) != EOF))
@@ -926,7 +924,6 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 		chNum ++;
 	}
 */
-
 
 	// Calc time to load settings and make log entry
 	clock_gettime(CLOCK_REALTIME,&t);
@@ -999,7 +996,6 @@ void dbDumpRecords(DBBASE *pdbbase)
        //  status = dbNextRecordType(pdbentry);
     }
 }
-    // }
     sprintf(errMsg,"Number of filter modules in db = %d \n",fc);
     // printf("%s",errMsg);
     logFileEntry(errMsg);
