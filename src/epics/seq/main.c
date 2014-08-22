@@ -149,24 +149,28 @@ int cleanLine(char *,int *,int *);
 // Returns number of words in line.
 int cleanLine(char *s, int *qs, int *qe) {
 int cntr = 0;
-int last = 1;
+int lastwasspace = 1;
+*qs = 0;
+*qe = 0;
 
 while (*s != 0) {
-	// Find and mark quotes
-	if (*s == '\"' && *qs == 0) *qs = cntr+1;
-	else *qe= cntr-1;
 	// Replace quotes/tabs with spaces
 	if (*s == '\"' || *s == '\t')
 		*s = ' ';
 	// Look for space indicating end of word.
 	if (*s != ' ') {
-		if(last ==1)
+		if(lastwasspace)
 		{
 			cntr ++;
-			last = 0;
+			if(cntr > 2 && (isalpha(*s) || (ispunct(*s) && *s != '-'))) 
+			{
+				if(*qs == 0) *qs = cntr;
+				else *qe = cntr;
+			}
+			lastwasspace = 0;
 		}
 	} else {
-		last = 1;
+		lastwasspace = 1;
 		}
 	s++;
 }
@@ -752,6 +756,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 	int qe = 0;
 	int argcount = 0;
 	int isalarm = 0;
+	int qcnt = 0;
 
 	clock_gettime(CLOCK_REALTIME,&t);
 	starttime = t.tv_nsec;
@@ -798,8 +803,9 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 				argcount > 2)
 			{
 				// If quotes in line, need to shift words into 3rd word.
+				qcnt = 0;
 				if(qs!=0) {
-					int qcnt = qe - qs;
+					qcnt = qe - qs;
 					if(qcnt == 1) {
 					sprintf(s3,"%s %s",s3,s4);
 						sprintf(s4,"%s",s5);
@@ -808,6 +814,14 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 						sprintf(s3,"%s %s %s",s3,s4,s5);
 						sprintf(s4,"%s",s6);
 						}
+					if(qcnt == 3) {
+						sprintf(s3,"%s %s %s %s",s3,s4,s5,s6);
+						sprintf(s4,"%s",s7);
+						}
+					if(qcnt == 4) {
+						sprintf(s3,"%s %s %s %s %s",s3,s4,s5,s6,s7);
+						sprintf(s4,"%s",s8);
+						}
 				}
 				// Clear out the local tabel channel name string.
 				bzero(cdTableP[chNumP].chname,strlen(cdTableP[chNumP].chname));
@@ -815,7 +829,6 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 				strcpy(cdTableP[chNumP].chname,s1);
 				// Determine if setting (s3) is string or numeric type data.
 				if(isalpha(s3[0]) || (ispunct(s3[0]) && s3[0] != '-')) {
-					// printf("Channel %s is string \n\n",cdTableP[chNumP].chname);
 					cdTableP[chNumP].datatype = 1;
 					strcpy(cdTableP[chNumP].strval,s3);
 				} else {
@@ -866,42 +879,42 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 				   }
 				   // if(!fmatch) printf("NEW channel not found %s\n",cdTableP[chNumP].chname);
 				}
-				   // Following is optional:
-					// Uses the SWREQ AND SWMASK records of filter modules to decode which switch settings are incorrect.
-					// This presently assumes that filter module SW1S will appear before SW2S in the burt files.
-					if((strstr(s1,"_SW1S") != NULL) && (strstr(s1,"_SW1S.") == NULL))
-					{
-						bzero(filterTable[fmNum].fname,strlen(filterTable[fmNum].fname));
-						strncpy(filterTable[fmNum].fname,s1,(strlen(s1)-4));
-						tmpreq = (int)atof(s3);
-					}
-					if((strstr(s1,"_SW2S") != NULL) && (strstr(s1,"_SW2S.") == NULL))
-					{
-						int treq;
-						treq = (int) atof(s3);
-						tmpreq = tmpreq + (treq << 16);
-						filterTable[fmNum].swreq = filtCtrlBitConvert(tmpreq);
-						// printf("%s 0x%x %f %f\n",fTable[fmNum].fname,fTable[fmNum].swreq,tmpreq,atof(s3));
-						tmpreq = 0;
-						fmNum ++;
-					}
-					chNumP ++;
-					if(chNumP >= SDF_MAX_CHANS)
-					{
-						fclose(cdf);
-						sprintf(errMsg,"Number of channels in %s exceeds program limit\n",sdfile);
-						logFileEntry(errMsg);
-						lderror = 2;
-						return(lderror);
-					}
-			   }
-			}
-			fclose(cdf);
-			lderror = writeEpicsDb(chNumP,cdTableP,command);
-			// if(!fmtInit) newfilterstats(fmNum);
-			newfilterstats(fmNum);
-			fmtInit = 1;
-			}
+				// Following is optional:
+				// Uses the SWREQ AND SWMASK records of filter modules to decode which switch settings are incorrect.
+				// This presently assumes that filter module SW1S will appear before SW2S in the burt files.
+				if((strstr(s1,"_SW1S") != NULL) && (strstr(s1,"_SW1S.") == NULL))
+				{
+					bzero(filterTable[fmNum].fname,strlen(filterTable[fmNum].fname));
+					strncpy(filterTable[fmNum].fname,s1,(strlen(s1)-4));
+					tmpreq = (int)atof(s3);
+				}
+				if((strstr(s1,"_SW2S") != NULL) && (strstr(s1,"_SW2S.") == NULL))
+				{
+					int treq;
+					treq = (int) atof(s3);
+					tmpreq = tmpreq + (treq << 16);
+					filterTable[fmNum].swreq = filtCtrlBitConvert(tmpreq);
+					// printf("%s 0x%x %f %f\n",fTable[fmNum].fname,fTable[fmNum].swreq,tmpreq,atof(s3));
+					tmpreq = 0;
+					fmNum ++;
+				}
+				chNumP ++;
+				if(chNumP >= SDF_MAX_CHANS)
+				{
+					fclose(cdf);
+					sprintf(errMsg,"Number of channels in %s exceeds program limit\n",sdfile);
+					logFileEntry(errMsg);
+					lderror = 2;
+					return(lderror);
+				}
+		   	}
+		}
+		fclose(cdf);
+		lderror = writeEpicsDb(chNumP,cdTableP,command);
+		// if(!fmtInit) newfilterstats(fmNum);
+		newfilterstats(fmNum);
+		fmtInit = 1;
+	}
 /*
 	NOTE: This stub remains for EPICS channel locking using ASG if desired at some point.
 	while((c = fscanf(cdf,"%s%s",cdTable[chNum].chname,s1) != EOF))
