@@ -51,6 +51,8 @@ install:
 	install Control/dc3 $(APPLOC)/dv-${VERSION}/dv
 	sed 's:INSTALL_PATH:$(APPLOC)/dv-${VERSION}:' Control/dataviewer.${BUILD_OS} | sed 's:LOCAL_GRACE:$(APPLOC):' > $(APPLOC)/dv-${VERSION}/dataviewer
 	chmod a+x $(APPLOC)/dv-${VERSION}/dataviewer
+	sed 's:INSTALL_PATH:$(APPLOC)/dv-${VERSION}:' Control/dataviewer_msgwin.${BUILD_OS} | sed 's:LOCAL_GRACE:$(APPLOC):' > $(APPLOC)/dv-${VERSION}/dataviewer_msgwin
+	chmod a+x $(APPLOC)/dv-${VERSION}/dataviewer_msgwin
 	install Display/framer4 $(APPLOC)/dv-${VERSION}
 	install Display/frameMemRead $(APPLOC)/dv-${VERSION}
 	cp Lib/UTC_GPS/leapsecs.dat $(APPLOC)/dv-${VERSION}
