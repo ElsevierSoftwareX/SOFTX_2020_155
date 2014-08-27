@@ -1440,6 +1440,7 @@ sub process {
 	      my $rate = "";
 	      my $type = "";
 	      my $science = "";
+	      my $egu = "";
 
 	      next if ($i =~ "^#");
 	      my @nr = split(/\s+/, $i);
@@ -1461,6 +1462,8 @@ sub process {
 		  $science = $f;
 		} elsif ($f eq "uint32") {
 		  $type = "uint32";
+		} elsif ($f eq "int32") {
+		  $type = "int32";
 	        } elsif ($f =~ /^\d+$/) { # An integer
 		  my @rates = qw(32 64 128 256 512 1024 2048 4096 8192 16384 32768 65536);
 		  my @res = grep {$f == $_} @rates;
@@ -1468,13 +1471,15 @@ sub process {
 		  die "Bad DAQ channel rate specified: $pn, $f\n" unless @res;
 		  print $pn," ", $f, "\n";
 		  $rate = $f;
-	        }
+	        } else {
+		  $egu = $f;
+		}
 	      }
       	      # Add channel name and rate into the hash and print into the _daq file
 	      # fmseq.pl then will open and process the DAQ channel data
 	      die "Duplicated DAQ channel name $pn\n" if defined $::DAQ_Channels{$pn};
 	      $::DAQ_Channels{$pn} = $rate;
-	      print ::DAQ $pn, " $rate $type $science\n";
+	      print ::DAQ $pn, " $rate $type $science $egu\n";
       }
       ${$annot->{FIELDS}}{Name} = "Removed";
     }
