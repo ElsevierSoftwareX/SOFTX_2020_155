@@ -156,6 +156,8 @@ sub processParameterSection  {
          }
 	 return 16;
       }
+      elsif ($line =~ /^units=/)  {
+      }
       else  {
          print "\n***ERROR: Found unidentified/incorrect entry - $line\n";
          $errorCount++;
