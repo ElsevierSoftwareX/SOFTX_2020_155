@@ -1,7 +1,8 @@
 ==================================================================================================
 Post 2.8 changes
 ==================================================================================================
-As of SVN 3694, marked by this file submission to SVN, the reading of BURT files from the FE code
+- Added support for defining DAQ channel eng units in the DAQ Channel part.
+- As of SVN 3694, marked by this file submission to SVN, the reading of BURT files from the FE code
 is supported. This is prodominantly handled by the src/epics/seq/main.c program.
 Bug Fix - DacKillTimed and DacKillIOP parts: Parts ignored reset command while in fault mode,
   however, would remember the reset request and would reset as soon as fault cleared. This fix
