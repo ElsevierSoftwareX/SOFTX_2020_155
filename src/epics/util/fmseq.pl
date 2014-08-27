@@ -119,6 +119,7 @@ sub add_edcu_entry {
 	   && (index($proc_name, "VME_RESET") == -1) && (index($proc_name, "IPC_DIAG_RESET") == -1)
 	   && (index($proc_name, "DIAG_RESET") == -1) && (index($proc_name, "OVERFLOW_RESET") == -1))
 	{
+	# This section handles arrays
 	if($nrow || $ncol) {
 		for(my $ii=1;$ii<($nrow+1);$ii++)
 		{
@@ -738,18 +739,23 @@ while (<IN>) {
     my @nr = split /\s+/;
     next unless length $nr[0];
 
-    my $name, $rate, $type, $science;
+    my $name, $rate, $type, $science,$egu;
     $rate = $gds_datarate;
     $name = shift @nr;
     $type = "float";
     $science = 0;
+    $egu = "";
     foreach $f (@nr) {
       if ($f eq "uint32") {
         $type = "uint32";
       } elsif ($f eq "science") {
         $science = 1;
+      } elsif ($f eq "int32") {
+        $type = "int32";
       } elsif ($f =~ /^\d+$/) { # An integer
         $rate = $f;
+      } else {
+        $egu = $f;
       }
     }
 
@@ -763,6 +769,7 @@ while (<IN>) {
     $DAQ_Channels{$name} = $rate;
     $DAQ_Channels_type{$name} = $type;
     $DAQ_Channels_science{$name} = $science;
+    $DAQ_Channels_egu{$name} = $egu;
     #print $name, " ", $rate, "\n";
 }
 close IN;
@@ -1121,8 +1128,8 @@ ifoid=$ifoid
 datatype=4
 datarate=$gds_datarate
 offset=0
-slope=3.0518e-04
-units=V
+slope=1.0
+units=Undef
 
 END
 ;
@@ -1173,6 +1180,12 @@ foreach (sort @section_names) {
 	    if ($DAQ_Channels_type{$_} eq "uint32") {
 		${$sections{$_}}{"datatype"} = 7;
 	    }
+	    if ($DAQ_Channels_type{$_} eq "int32") {
+		${$sections{$_}}{"datatype"} = 2;
+	    }
+	    if ($DAQ_Channels_egu{$_} ne "") {
+		${$sections{$_}}{"units"} = $DAQ_Channels_egu{$_};
+	    }
 	  } else {
 	    $comment = "#";
           }
@@ -1199,7 +1212,7 @@ foreach (sort @section_names) {
         	print OUTG  "${comment}acquire=$have_daq_spec\n";
 	}
         foreach $sec (keys %{$sections{$_}}) {
-          if ($sec eq "chnnum" || $sec eq "datarate" || $sec eq "datatype") {
+          if ($sec eq "chnnum" || $sec eq "datarate" || $sec eq "datatype" || $sec eq "units") {
                 print OUTG  "${comment}$sec=${$sections{$_}}{$sec}\n";
           }
         }
