@@ -943,7 +943,8 @@ for($ii=0;$ii<$subSys;$ii++)
 			print "Found $counter Inputs for subsystem $ii with $partsRemaining parts*********************************\n";
 			$xx = 0;
 			$ts = 1;
-			until(($partsRemaining < 1) || ($xx > 200))
+			#until(($partsRemaining < 1) || ($xx > 200))
+			until($xx > 100)
 			{
 				$xx ++;
 				$loop = $counter ++;
@@ -990,7 +991,8 @@ for($ii=0;$ii<$subSys;$ii++)
 		for($ii=0;$ii<$nonSubCnt;$ii++)
 		{
 			$xx = $nonSubPart[$ii];
-			if(($partType[$xx] ne "BUSC") && ($partType[$xx] ne "FROM") &&($partType[$xx] ne "GOTO") && ($partType[$xx] ne "BUSS") && ($partType[$xx] ne "Adc"))
+if(($partType[$xx] ne "BUSC") && ($partType[$xx] ne "FROM") &&($partType[$xx] ne "GOTO") && ($partType[$xx] ne "BUSS")
+        && ($partType[$xx] ne "Adc") && ($partUsed[$xx] != 1))
 			{
 				$searchPart[$partsRemaining] = $xx;
 				$searchCnt ++;
