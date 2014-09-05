@@ -56,7 +56,7 @@ sub printEpics {
         print ::EPICS "MATRIX $::xpartName[$i]_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]\n";
         print ::EPICS "MATRIX $::xpartName[$i]_SETTING_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]_SETTING\n";
 	print ::EPICS "MATRIX $::xpartName[$i]_RAMPING_ $matOuts" . "x$matIns $::systemName\.$::xpartName[$i]_RAMPING\n";
-	print ::EPICS "MOMENTARY $::xpartName[$i]_LOAD_MATRIX $::systemName\.$::xpartName[$i]_LOAD_MATRIX int ao 0\n";
+	print ::EPICS "MOMENTARY $::xpartName[$i]_LOAD_MATRIX $::systemName\.$::xpartName[$i]_LOAD_MATRIX double ao 0\n";
     	print ::EPICS "INVARIABLE $::xpartName[$i]\_TRAMP $::systemName\.$::xpartName[$i]\_TRAMP double ai 0 field(PREC,\"1\")\n";
 }
 
