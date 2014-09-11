@@ -814,7 +814,7 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 			         $partInputType[$kk][0] = "PART";
 				$partInNum[$kk][0] = $xx;
 				
-				print "OUTPUT COUNT for $xpartName[$xx] is $partOutCnt[$kk]  ** $mm ** \n";
+				# print "OUTPUT COUNT for $xpartName[$xx] is $partOutCnt[$kk]  ** $mm ** \n";
 				for($ll=0;$ll<$partOutCnt[$kk];$ll++)
 				{
 					$toNum = $partOutNum[$kk][$ll];
@@ -1328,6 +1328,15 @@ for($ii=0;$ii<$dacCnt;$ii++)
 	for($jj=0;$jj<16;$jj++)
 	{
 		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OVERFLOW_$ii\_$jj epicsOutput.overflowDac\[$ii\]\[$jj\] int ao 0\n";
+	}
+}
+
+print OUTH "\tint overflowDacAcc[$dacCnt][16];\n";
+for($ii=0;$ii<$dacCnt;$ii++)
+{
+	for($jj=0;$jj<16;$jj++)
+	{
+		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OVERFLOW_ACC_$ii\_$jj epicsOutput.overflowDacAcc\[$ii\]\[$jj\] int ao 0\n";
 	}
 }
 
