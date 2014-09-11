@@ -1,6 +1,8 @@
 ==================================================================================================
 Post 2.8 changes
 ==================================================================================================
+- Modified FiltCtrl.pm (Filter Module w/Control) such that is requires that all inputs be
+  connected or build process will exit with error message.
 - Modified DAC overrange reporting (Bug #722).
 	- Removed ROLLING_OVERFLOWS compile option, which set EPICS record to report overrange per
 	  second or accumulated overrange count.
