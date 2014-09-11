@@ -85,11 +85,10 @@ sub fromExp {
 sub frontEndCode {
 	my ($i) = @_;
         my $calcExp = "// FILTER MODULE with CONTROL:  $::xpartName[$i]\n";
-	if ($::partInCnt[$i] > 2) {
-		$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_MASK = $::fromExp[2];\n";
-	} else {
-		$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_MASK = 0;\n";
-	}
+	if($::partInCnt[$i] != 3) {
+                die "\n***ERROR: $::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires 3; Only $::partInCnt[$i] provided:  Please ground any unused inputs\n";
+        }
+	$calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_MASK = $::fromExp[2];\n";
         $calcExp .= "\L$::xpartName[$i]";
         $calcExp .= " = ";
         if ($::cpus > 2) {
