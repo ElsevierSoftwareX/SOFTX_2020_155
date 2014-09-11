@@ -15,6 +15,9 @@ of this distribution.
 // Add command error checking, command out of range, etc.
 //	- Particularly returns from functions.
 // File save on exit.
+// Have cleanString load and return the 4 strings instead of not so elegant
+// way it is being handled in readConfig.
+// Add filter masks to main table instead of requiring S1S followed by S2S.
 
 /*
  * Main program for demo sequencer
@@ -74,21 +77,28 @@ const unsigned int fltrConst[15] = {16, 64, 256, 1024, 4096, 16384,
 			     0x4, 0x8, 0x4000000,0x1000000,0x1 /* in sw, off sw, out sw , limit sw*/
 			     };
 
+union Data {
+	double chval;
+	char strval[64];
+};
+
 /// Structure for holding BURT settings in local memory.
 typedef struct CDS_CD_TABLE {
 	char chname[128];
 	int datatype;
-	double chval; 
-	char strval[64];
+	union Data data;
 	int mask;
 	int initialized;
 } CDS_CD_TABLE;
 
 /// Structure for creating/holding filter module switch settings.
 typedef struct FILTER_TABLE {
-	char fname[128];
+	char fname[64];
 	int swreq;
 	int swmask;
+	int sw1;
+	int sw2;
+	int newSet;
 } FILTER_TABLE;
 
 /// Structure for table data to be presented to operators.
@@ -142,11 +152,10 @@ int cleanLine(char *,int *,int *);
 // End Header **********************************************************************************************************
 //
 /// Routine created to handle quotes within a BURT file line
-// Args:
-// 	s = ptr to line.
-// 	qs = number of first word in quotes.
-// 	qe = number of last word in quotes.
-// Returns number of words in line.
+///	@param[in] s	Line to parse
+///	@param[out] *qs	Index of first word in a multi-word string EPICS value.
+///	@param[out] *qe	Index of last word in a multi-word string EPICS value.
+///	@return	Number of words in the line.
 int cleanLine(char *s, int *qs, int *qe) {
 int cntr = 0;
 int lastwasspace = 1;
@@ -179,6 +188,8 @@ return(cntr);
 }
 
 /// Common routine to check file CRC.
+///	@param[in] *fName	Name of file to check.
+///	@return File CRC or -1 if file not found.
 int checkFileCrc(char *fName)
 {
 char buffer[256];
@@ -199,6 +210,8 @@ long chkSum = -99999;
 }
 
 /// Quick convert of filter switch settings to match SWMASK
+///	@param[in] v	UINT32 representation of filter module switch setting.
+///	@return Input value converted to 16 bit representation of filter switch settings.
 unsigned int filtCtrlBitConvert(unsigned int v) {
         unsigned int val = 0;
         int i;
@@ -209,6 +222,7 @@ unsigned int filtCtrlBitConvert(unsigned int v) {
 }
 
 /// Routine for reading GPS time from model EPICS record.
+///	@param[out] timestring 	Pointer to char string in which GPS time is to be written.
 void getSdfTime(char *timestring)
 {
 
@@ -221,7 +235,8 @@ void getSdfTime(char *timestring)
 	status = dbGetField(&paddr,DBR_STRING,timestring,&ropts,&nvals,NULL);
 }
 
-/// Routine for logging errors to file.
+/// Routine for logging messages to ioc.log file.
+/// 	@param[in] message Ptr to string containing message to be logged.
 void logFileEntry(char *message)
 {
 	FILE *log;
@@ -243,7 +258,8 @@ void logFileEntry(char *message)
 }
 
 
-/// Function to read all settings from the EPICS database.
+/// Function to read all settings, listed in main table, from the EPICS database.
+///	@param[in] numchans The number of channels listed in the main table.
 int getEpicsSettings(int numchans)
 {
 dbAddr geaddr;
@@ -257,7 +273,7 @@ int nvals = 1;
 
 	for(ii=0;ii<numchans;ii++)
 	{
-		// Find address of channel
+		// Load main table settings into temp (cdTableP)
 		sprintf(cdTableP[ii].chname,"%s",cdTable[ii].chname);
 		cdTableP[ii].datatype = cdTable[ii].datatype;
 		cdTableP[ii].mask = cdTable[ii].mask;
@@ -268,10 +284,10 @@ int nvals = 1;
 			if(cdTableP[ii].datatype == 0)
 			{
 				statusR = dbGetField(&geaddr,DBR_DOUBLE,&dval,NULL,&nvals,NULL);
-				if(!statusR) cdTableP[ii].chval = dval;
+				if(!statusR) cdTableP[ii].data.chval = dval;
 			} else {
 				statusR = dbGetField(&geaddr,DBR_STRING,&sval,NULL,&nvals,NULL);
-				if(!statusR) sprintf(cdTableP[ii].strval,"%s",sval);
+				if(!statusR) sprintf(cdTableP[ii].data.strval,"%s",sval);
 			}
 			chcount ++;
 		}
@@ -305,21 +321,21 @@ FILE *csFile;
 		{
 		   case SDF_WITH_INIT_FLAG:
 			if(myTable[ii].datatype == 0)
-				fprintf(csFile,"%s%s%d\t%.15e\t\%d\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].chval,myTable[ii].mask,myTable[ii].initialized);
+				fprintf(csFile,"%s%s%d\t%.15e\t\%d\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].data.chval,myTable[ii].mask,myTable[ii].initialized);
 			else
-				fprintf(csFile,"%s%s%d\t%s\t\%d\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].strval,myTable[ii].mask,myTable[ii].initialized);
+				fprintf(csFile,"%s%s%d\t%s\t\%d\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].data.strval,myTable[ii].mask,myTable[ii].initialized);
 			break;
 		   case SDF_FILE_PARAMS_ONLY:
 			if(myTable[ii].datatype == 0)
-				fprintf(csFile,"%s%s%d\t%.15e\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].chval,myTable[ii].mask);
+				fprintf(csFile,"%s%s%d\t%.15e\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].data.chval,myTable[ii].mask);
 			else
-				fprintf(csFile,"%s%s%d\t%s\t\%d\n",myTable[ii].chname,tabs,1,myTable[ii].strval,myTable[ii].mask);
+				fprintf(csFile,"%s%s%d\t%s\t\%d\n",myTable[ii].chname,tabs,1,myTable[ii].data.strval,myTable[ii].mask);
 			break;
 		   case SDF_FILE_BURT_ONLY:
 			if(myTable[ii].datatype == 0)
-				fprintf(csFile,"%s%s%d\t%.15e\n",myTable[ii].chname,tabs,1,myTable[ii].chval);
+				fprintf(csFile,"%s%s%d\t%.15e\n",myTable[ii].chname,tabs,1,myTable[ii].data.chval);
 			else
-				fprintf(csFile,"%s%s%d\t%s\n",myTable[ii].chname,tabs,1,myTable[ii].strval);
+				fprintf(csFile,"%s%s%d\t%s\n",myTable[ii].chname,tabs,1,myTable[ii].data.strval);
 			break;
 		   default:
 			break;
@@ -589,9 +605,9 @@ int spChecker(int monitorAll)
 				if(cdTable[ii].datatype == 0)
 				{
 					status = dbGetField(&paddr,DBR_DOUBLE,&buffer,&options,&nvals,NULL);
-					if(cdTable[ii].chval != buffer.rval)
+					if(cdTable[ii].data.chval != buffer.rval)
 					{
-						sprintf(burtset,"%.6f",cdTable[ii].chval);
+						sprintf(burtset,"%.6f",cdTable[ii].data.chval);
 						sprintf(liveset,"%.6f",buffer.rval);
 						mtime = buffer.time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 						localErr = 1;
@@ -599,9 +615,9 @@ int spChecker(int monitorAll)
 				// If this is a string type, then get as string.
 				} else {
 					status = dbGetField(&paddr,DBR_STRING,&strbuffer,&options,&nvals,NULL);
-					if(strcmp(cdTable[ii].strval,strbuffer.sval) != 0)
+					if(strcmp(cdTable[ii].data.strval,strbuffer.sval) != 0)
 					{
-						sprintf(burtset,"%s",cdTable[ii].strval);
+						sprintf(burtset,"%s",cdTable[ii].data.strval);
 						sprintf(liveset,"%s",strbuffer.sval);
 						mtime = strbuffer.time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 						localErr = 1;
@@ -635,23 +651,32 @@ void newfilterstats(int numchans) {
 	FILE *log;
 	char chname[128];
 	int mask = 0x3fff;
+	int tmpreq;
+	int counter = 0;
 
 	for(ii=0;ii<numchans;ii++) {
-		bzero(chname,strlen(chname));
-		// Find address of channel
-		strcpy(chname,filterTable[ii].fname);
-		strcat(chname,"SWREQ");
-		status = dbNameToAddr(chname,&paddr);
-		if(!status)
-			status = dbPutField(&paddr,DBR_LONG,&filterTable[ii].swreq,1);
-		bzero(chname,strlen(chname));
-		// Find address of channel
-		strcpy(chname,filterTable[ii].fname);
-		strcat(chname,"SWMASK");
-		status = dbNameToAddr(chname,&paddr);
-		if(!status)
-			status = dbPutField(&paddr,DBR_LONG,&mask,1);
+		if(filterTable[ii].newSet) {
+			counter ++;
+			filterTable[ii].newSet = 0;
+			tmpreq = filterTable[ii].sw1 + (filterTable[ii].sw2 << 16);
+			filterTable[ii].swreq = filtCtrlBitConvert(tmpreq);
+			bzero(chname,strlen(chname));
+			// Find address of channel
+			strcpy(chname,filterTable[ii].fname);
+			strcat(chname,"SWREQ");
+			status = dbNameToAddr(chname,&paddr);
+			if(!status)
+				status = dbPutField(&paddr,DBR_LONG,&filterTable[ii].swreq,1);
+			bzero(chname,strlen(chname));
+			// Find address of channel
+			strcpy(chname,filterTable[ii].fname);
+			strcat(chname,"SWMASK");
+			status = dbNameToAddr(chname,&paddr);
+			if(!status)
+				status = dbPutField(&paddr,DBR_LONG,&mask,1);
+		}
 	}
+	printf("Set filter masks for %d filter modules\n",counter);
 }
 
 /// This function writes BURT settings to EPICS records.
@@ -675,18 +700,18 @@ int writeEpicsDb(int numchans,		///< Number of channels to write
 				{
 				   if(myTable[ii].datatype == 0)	// Value if floating point number
 				   {
-					status = dbPutField(&paddr,DBR_DOUBLE,&myTable[ii].chval,1);
+					status = dbPutField(&paddr,DBR_DOUBLE,&myTable[ii].data.chval,1);
 				   } else {			// Value is a string type
-					status = dbPutField(&paddr,DBR_STRING,&myTable[ii].strval,1);
+					status = dbPutField(&paddr,DBR_STRING,&myTable[ii].data.strval,1);
 				   }
 				}
 				else {				// Write errors to chan not found table.
 					if(chNotFound < SDF_ERR_TSIZE) {
 						sprintf(unknownChans[chNotFound].chname,"%s",myTable[ii].chname);
 						if(myTable[ii].datatype == 0)	// Value if floating point number
-							sprintf(unknownChans[chNotFound].burtset,"%.6f",myTable[ii].chval);
+							sprintf(unknownChans[chNotFound].burtset,"%.6f",myTable[ii].data.chval);
 						else
-							sprintf(unknownChans[chNotFound].burtset,"%s",myTable[ii].strval);
+							sprintf(unknownChans[chNotFound].burtset,"%s",myTable[ii].data.strval);
 						sprintf(unknownChans[chNotFound].liveset,"%s"," ");
 						sprintf(unknownChans[chNotFound].timeset,"%s"," ");
 					}
@@ -710,9 +735,9 @@ int writeEpicsDb(int numchans,		///< Number of channels to write
 				{
 				   if(myTable[ii].datatype == 0)	// Value if floating point number
 				   {
-					status = dbPutField(&paddr,DBR_DOUBLE,&myTable[ii].chval,1);
+					status = dbPutField(&paddr,DBR_DOUBLE,&myTable[ii].data.chval,1);
 				   } else {			// Value is a string type
-					status = dbPutField(&paddr,DBR_STRING,&myTable[ii].strval,1);
+					status = dbPutField(&paddr,DBR_STRING,&myTable[ii].data.strval,1);
 				   }
 				}
 			    }
@@ -749,8 +774,9 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 	char *fs;
 	char ifo[4];
 	double tmpreq = 0;
-	char tempstr[128];
+	char fname[128];
 	int fmatch = 0;
+	int fmIndex = 0;
 	char errMsg[128];
 	int qs = 0;
 	int qe = 0;
@@ -776,7 +802,6 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 		}
 		chNumP = 0;
 		alarmCnt = 0;
-		fmNum = 0;
 		strcpy(s4,"x");
 		bzero(s3,strlen(s3));
 		strncpy(ifo,pref,3);
@@ -830,10 +855,10 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 				// Determine if setting (s3) is string or numeric type data.
 				if(isalpha(s3[0]) || (ispunct(s3[0]) && s3[0] != '-')) {
 					cdTableP[chNumP].datatype = 1;
-					strcpy(cdTableP[chNumP].strval,s3);
+					strcpy(cdTableP[chNumP].data.strval,s3);
 				} else {
 					// if(s3[0] == '\0') printf("NULL string for6 %s\n",cdTableP[chNumP].chname);
-					cdTableP[chNumP].chval = atof(s3);
+					cdTableP[chNumP].data.chval = atof(s3);
 					cdTableP[chNumP].datatype = 0;
 				}
 				// Check if s4 (monitor or not) is set (0/1). If doesn/'t exist in file, set to zero in local table.
@@ -868,9 +893,9 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 						fmatch = 1;
 						if(cdTableP[chNumP].datatype == 1)
 						{
-							strcpy(cdTable[ii].strval,cdTableP[chNumP].strval);
+							strcpy(cdTable[ii].data.strval,cdTableP[chNumP].data.strval);
 						} else {
-							cdTable[ii].chval = cdTableP[chNumP].chval;
+							cdTable[ii].data.chval = cdTableP[chNumP].data.chval;
 						}
 						if(cdTableP[chNumP].mask != -1)
 							cdTable[ii].mask = cdTableP[chNumP].mask;
@@ -882,21 +907,29 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 				// Following is optional:
 				// Uses the SWREQ AND SWMASK records of filter modules to decode which switch settings are incorrect.
 				// This presently assumes that filter module SW1S will appear before SW2S in the burt files.
+				fmIndex = -1;
+				if(((strstr(s1,"_SW1S") != NULL) && (strstr(s1,"_SW1S.") == NULL)) ||
+					((strstr(s1,"_SW2S") != NULL) && (strstr(s1,"_SW2S.") == NULL)))
+				{
+				   	bzero(fname,strlen(fname));
+					strncpy(fname,s1,(strlen(s1)-4));
+				   	for(ii=0;ii<fmNum;ii++)
+				   	{
+						if(strcmp(filterTable[ii].fname,fname) == 0) 
+						{
+							fmIndex = ii;
+							filterTable[fmIndex].newSet = 1;
+							break;
+						}
+					}
+				}
 				if((strstr(s1,"_SW1S") != NULL) && (strstr(s1,"_SW1S.") == NULL))
 				{
-					bzero(filterTable[fmNum].fname,strlen(filterTable[fmNum].fname));
-					strncpy(filterTable[fmNum].fname,s1,(strlen(s1)-4));
-					tmpreq = (int)atof(s3);
+					filterTable[fmIndex].sw1 = (int)atof(s3);
 				}
 				if((strstr(s1,"_SW2S") != NULL) && (strstr(s1,"_SW2S.") == NULL))
 				{
-					int treq;
-					treq = (int) atof(s3);
-					tmpreq = tmpreq + (treq << 16);
-					filterTable[fmNum].swreq = filtCtrlBitConvert(tmpreq);
-					// printf("%s 0x%x %f %f\n",fTable[fmNum].fname,fTable[fmNum].swreq,tmpreq,atof(s3));
-					tmpreq = 0;
-					fmNum ++;
+					filterTable[fmIndex].sw2 = (int) atof(s3);
 				}
 				chNumP ++;
 				if(chNumP >= SDF_MAX_CHANS)
@@ -950,7 +983,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 	logFileEntry(errMsg);
 	status = dbNameToAddr(reloadtimechannel,&paddr);
 	status = dbPutField(&paddr,DBR_STRING,timestring,1);
-	printf("Number of FM = %d\n",fmNum);
+	// printf("Number of FM = %d\n",fmNum);
 	return(lderror);
 }
 
@@ -972,6 +1005,7 @@ void dbDumpRecords(DBBASE *pdbbase)
     pdbentry = dbAllocEntry(pdbbase);
 
     chNum = 0;
+    fmNum = 0;
     for(ii=0;ii<3;ii++) {
     status = dbFindRecordType(pdbentry,mytype[ii]);
 
@@ -990,13 +1024,16 @@ void dbDumpRecords(DBBASE *pdbbase)
                 // printf("\n  Record:%s\n",dbGetRecordName(pdbentry));
 		sprintf(cdTable[chNum].chname,"%s",dbGetRecordName(pdbentry));
 		if((strstr(cdTable[chNum].chname,"_SW1S") != NULL) && (strstr(cdTable[chNum].chname,"_SW1S.") == NULL))
-			fc ++;
+		{
+			strncpy(filterTable[fmNum].fname,cdTable[chNum].chname,(strlen(cdTable[chNum].chname)-4));
+			fmNum ++;
+		}
 		if(ii == 0) {
 			cdTable[chNum].datatype = 0;
-			cdTable[chNum].chval = 0.0;
+			cdTable[chNum].data.chval = 0.0;
 		} else {
 			cdTable[chNum].datatype = 1;
-			sprintf(cdTable[chNum].strval,"");
+			sprintf(cdTable[chNum].data.strval,"");
 		}
 		cdTable[chNum].mask = 0;
 		cdTable[chNum].initialized = 0;
@@ -1009,8 +1046,7 @@ void dbDumpRecords(DBBASE *pdbbase)
        //  status = dbNextRecordType(pdbentry);
     }
 }
-    sprintf(errMsg,"Number of filter modules in db = %d \n",fc);
-    // printf("%s",errMsg);
+    sprintf(errMsg,"Number of filter modules in db = %d \n",fmNum);
     logFileEntry(errMsg);
     printf("End of all Records\n");
     dbFreeEntry(pdbentry);
