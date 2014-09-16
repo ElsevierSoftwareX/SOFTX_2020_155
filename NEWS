@@ -1,4 +1,13 @@
 ==================================================================================================
+Changes for release 2.8.6
+==================================================================================================
+Bug fixes for Ramp Matrix part:
+	- Load button was not always received by FE code.
+	- Problem reintroduced in 2.8.4 that EPICS data misaligned when this part was used.
+Bug Fix: Use of EXC part could result in model not compiling.
+Bug Fix: Code would not compile if a source block, such as EpicsIn, constant, ground, if connected
+	directly from a subsystem block to the top level of a model. 
+==================================================================================================
 Changes for release 2.8.5
 ==================================================================================================
 - Bug fix -> AI chassis keep-alive signal was not being turned off from dackilliop part after
