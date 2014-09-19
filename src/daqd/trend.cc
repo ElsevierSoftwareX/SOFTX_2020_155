@@ -1037,19 +1037,19 @@ trender_c::trend_loop_func(int j, int* status_ptr, char* block_ptr)  {
 	   ttb [j].mean = mean / (double)rate;
 	   ttb [j].min.U = min;
 	   ttb [j].max.U = max;
-	} else if (channels [j].data_type == _32bit_integer) { // Treat this data as unsigned
-	  register unsigned int *data = (unsigned int *) (block_ptr + channels [j].offset);
+	} else if (channels [j].data_type == _32bit_integer) { // Treat this data as signed
+	  register int *data = (int *) (block_ptr + channels [j].offset);
 	  
 #ifndef NO_RMS
 	  register double rms = (double) (*data * *data);
 #endif
 	  register double mean = *data;
-	  register unsigned int min = *data;
-	  register unsigned int max = *data;
+	  register int min = *data;
+	  register int max = *data;
 	  
 	  for (register int i = 1; i < rate; i++)
 	    {
-	      register unsigned int test = data [i];
+	      register int test = data [i];
 #ifndef NO_RMS
 	      rms += (double) (test * test);
 #endif
