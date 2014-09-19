@@ -111,8 +111,9 @@ sub add_vproc_entry {
 	$vproc_size++;
 }
 sub add_edcu_entry {
-	($proc_name, $v_type, $out, $v_var, $nrow, $ncol) =  @_;
+	($proc_name, $v_type, $out, $v_var, $egu, $nrow, $ncol) =  @_;
 	#if(($v_type ne "int") || ($v_type ne "double")) {return;}
+	$egu = "Undef" if ! defined $egu;
 	$nrow = 0 if ! defined $nrow;
 	$ncol = 0 if ! defined $ncol;
 	if((index($proc_name, "BURT") == -1) && (index($proc_name, "DACDT_ENABLE") == -1)
@@ -150,6 +151,7 @@ sub add_edcu_entry {
 		$edcuEntryD .= "datarate=16\n";
 		$edcuEntryD .= "datatype=4\n";
 		$edcuEntryD .= "chnnum=$edcuTpNum\n";
+		$edcuEntryD .= "units=$egu\n";
 		$edcuSizeD ++;
 		$edcuTpNum ++;
 	} elsif (($v_type eq "int") && ($ve_type ne "longout")){
@@ -158,6 +160,7 @@ sub add_edcu_entry {
 		$edcuEntryI .= "datarate=16\n";
 		$edcuEntryI .= "datatype=2\n";
 		$edcuEntryI .= "chnnum=$edcuTpNum\n";
+		$edcuEntryI .= "units=$egu\n";
 		$edcuSizeI ++;
 		$edcuTpNum ++;
 	} else {	# This must be unsigned int type
@@ -166,6 +169,7 @@ sub add_edcu_entry {
 		$edcuEntryI .= "datarate=16\n";
 		$edcuEntryI .= "datatype=7\n";
 		$edcuEntryI .= "chnnum=$edcuTpNum\n";
+		$edcuEntryI .= "units=$egu\n";
 		$edcuSizeI ++;
 		$edcuTpNum ++;
 
@@ -306,14 +310,9 @@ while (<IN>) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
 	}
 	$vardb .= "{\n";
-	for($efC=0;$efC<12;$efC++)
-	{
-		if($eFields[$efC])
-		{
-			$vardb .= "    $eFields[$efC]\n";
-		}
+	foreach (@eFields) {
+		$vardb .= "    $_\n";
 	}
-#	$vardb .= "    field(PREC,\"3\")\n";
 	$vardb .= "}\n";
 
     } elsif (substr($_,0,9) eq "WFS_PHASE") {
@@ -377,7 +376,8 @@ while (<IN>) {
 	$vardb .= "    $v_efield3\n";
 	$vardb .= "    $v_efield4\n";
 	$vardb .= "}\n";
-	add_edcu_entry($proc_name, "double", 0, $m_var, 2, 2);
+	$egu = "Undef";
+	add_edcu_entry($proc_name, "double", 0, $m_var, $egu, 2, 2);
     } elsif (substr($_,0,5) eq "PHASE") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
         $phase++;
@@ -423,7 +423,8 @@ while (<IN>) {
 	$vardb .= "}\n";
     } elsif (substr($_,0,9) eq "MOMENTARY") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
-	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
+	#($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
+	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init, @eFields ) = split(/\s+/, $_);
 	$vdecl .= "$v_type evar_$v_name;\n";
         my $top_name = is_top_name($v_name);
    	my $tv_name;
@@ -453,17 +454,23 @@ while (<IN>) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
 	}
 	$vardb .= "{\n";
-#	$vardb .= "    field(PREC,\"3\")\n";
-	$vardb .= "    $v_efield1\n";
-	$vardb .= "    $v_efield2\n";
-	$vardb .= "    $v_efield3\n";
-	$vardb .= "    $v_efield4\n";
+	#Add field defs
+	foreach (@eFields) {
+		$vardb .= "    $_\n";
+	}
 	$vardb .= "}\n";
 	add_edcu_entry($proc_name, $v_type, 1, $v_var);
     } elsif (substr($_,0,11) eq "OUTVARIABLE") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_var, $v_type, $ve_type, $v_init,@eFields ) = split(/\s+/, $_);
-	#print "$v_name = efields $eFields[0] $eFields[1] $eFields[2] $eFields[3] $eFields[4] $eFields[5] $eFields[6]\n";
+	foreach (@eFields) {
+		if(index($_, "EGU") != -1) {
+			my @egustring = split(/"/, $_);
+			$egu = $egustring[1];
+			# print "$v_name = EGU is $egu \n";
+		}
+	}
+	# longout denotes a UINT32 data type is to be used.
 	if ($ve_type eq "longout") {
 	$vdecl .= "unsigned int evar_$v_name;\n";
 	} else {
@@ -482,7 +489,7 @@ while (<IN>) {
 	}
 
 	add_vproc_entry($proc_name, $v_type, 1, $v_var);
-	add_edcu_entry($proc_name, $v_type, 1, $v_var);
+	add_edcu_entry($proc_name, $v_type, 1, $v_var,$egu);
 	#$vproc .= "{\"$proc_name\", "
 		#. ($v_type eq "int"? "0": "1") .
 		#" /* $v_type */ , 1 /* out */, (void *)&(pLocalEpics->$v_var) - (void *)pLocalEpics, 0},\n";
@@ -507,11 +514,16 @@ while (<IN>) {
 	if ($v_type eq "float") {
 		$vardb .= "    field(PREC,\"3\")\n";
 	}
-	for($efC=0;$efC<12;$efC++)
-	{
-		if($eFields[$efC])
-		{
-			$vardb .= "    $eFields[$efC]\n";
+	#for($efC=0;$efC<12;$efC++)
+	#{
+	$egu = "Undef";
+	foreach (@eFields) {
+		$vardb .= "    $_\n";
+		# Determine if Engineering units are defined in the record fields
+		if(index($_, "EGU") != -1) {
+			my @egustring = split(/"/, $_);
+			$egu = $egustring[1];
+			# print "$v_name = EGU is $egu \n";
 		}
 	}
 	$vardb .= "}\n";
@@ -653,8 +665,9 @@ while (<IN>) {
 	}
 
 	my $s = $/; $/="_"; chomp $proc_name; $/ = $s;
+	$egu = "Undef";
 	add_vproc_entry($proc_name, "double", 0, $m_var, $x, $y);
-	add_edcu_entry($proc_name, "double", 0, $m_var, $x, $y);
+	add_edcu_entry($proc_name, "double", 0, $m_var, $egu, $x, $y);
 	#$vproc .= "{\"$proc_name\", 1, ".
 		#"0 /* in */, (void *)&(pLocalEpics->$m_var) - (void *)pLocalEpics, ".
 		#"(void *)&(pLocalEpics->${m_var}_mask) - (void *)pLocalEpics},\n";
