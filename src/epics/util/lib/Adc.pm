@@ -186,7 +186,7 @@ sub createAdcMedm
         print "creating file $medmDir\/$fname \n";
         open(OUTMEDM, ">$medmDir/$fname") || die "cannot open $medmDir/$fname for writing ";
 
-        my $xpos = 0; my $ypos = 0; my $width = 900; my $height = 430;
+        my $xpos = 0; my $ypos = 0; my $width = 1000; my $height = 440;
         $medmdata = ("CDS::medmGen::medmGenFile") -> ($medmDir,$file,$width,$height);
 
 	# ************* Create Banner ******************************************************************************
@@ -194,28 +194,36 @@ sub createAdcMedm
         $height = 22;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{blue},"","","");
         # Add Display Name
-        $xpos = 370; $ypos = 4; $width = 120; $height = 15;        
+        $xpos = 445; $ypos = 4; $width = 120; $height = 15;        
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$mdlName\_MONITOR_ADC$::adcCardNum[$adcNum]",$ecolors{white});
         # Add time string to banner
-        $xpos = 640; $ypos = 4; $width = 200; $height = 15;
+        $xpos = 730; $ypos = 4; $width = 200; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_TIME_STRING",$ecolors{white},$ecolors{blue},"static");
 
 
         # ************* Create Background **************************************************************************
         # Add Background rectangles
-        $xpos = 13; $ypos = 37; $width = 870; $height = 380;
+        $xpos = 13; $ypos = 30; $width = 975; $height = 395;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{gray},"","","");
         $xpos = 300; $ypos = 38; $width = 60; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"VALUE",$ecolors{black});
-	$xpos = 370;
+	$xpos = 400;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"OVERFLOW",$ecolors{black});
         $xpos = 720;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"VALUE",$ecolors{black});
-	$xpos = 790;
+	$xpos = 880;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"OVERFLOW",$ecolors{black});
+        $xpos = 370; $ypos = 53; $width = 60; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"PER SEC",$ecolors{black});
+        $xpos = 440;
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"ACCUM",$ecolors{black});
+        $xpos = 851;
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"PER SEC",$ecolors{black});
+        $xpos = 921;
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"ACCUM",$ecolors{black});
 
         # ************* Add Text  **********************************************************************************
-	$xpos = 100; $ypos = 47; $width = 60; $height = 15;
+	$xpos = 100; $ypos = 62; $width = 60; $height = 15;
 	for($ii=0;$ii<16;$ii++)
 	{
 		if(($ii % 4) == 0) {$ypos += 10;}
@@ -229,24 +237,28 @@ sub createAdcMedm
 			$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$adcChannel[$adcNum][$ii]",$ecolors{white},$ecolors{blue},"static");
 			$xpos = 370;
         		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_ADC_OVERFLOW_$adcNum\_$ii",$ecolors{white},$ecolors{blue},"static");
+			$xpos = 440;
+        		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_ADC_OVERFLOW_ACC_$adcNum\_$ii",$ecolors{white},$ecolors{blue},"static");
 		}
 		$ypos += 20;
 	}
 
-	$xpos = 720; $ypos = 47; $width = 60; $height = 15;
+	$xpos = 720; $ypos = 62; $width = 60; $height = 15;
 	for($ii=16;$ii<32;$ii++)
 	{
 		if(($ii % 4) == 0) {$ypos += 10;}
-		$xpos = 460; $width = 250;
+		$xpos = 510; $width = 250;
 		$labelName = substr $adcChannel[$adcNum][$ii],7;
 		$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$labelName",$ecolors{black});
 		if($labelName ne "") {
-			$xpos = 705; $width = 10;
+			$xpos = 765; $width = 10;
 			$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,$ii,$ecolors{black});
-			$xpos = 720; $width = 60;
+			$xpos = 780; $width = 60;
 			$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$adcChannel[$adcNum][$ii]",$ecolors{white},$ecolors{blue},"static");
-			$xpos = 790;
+			$xpos = 850;
         		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_ADC_OVERFLOW_$adcNum\_$ii",$ecolors{white},$ecolors{blue},"static");
+			$xpos = 920;
+        		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_ADC_OVERFLOW_ACC_$adcNum\_$ii",$ecolors{white},$ecolors{blue},"static");
 		}
 		$ypos += 20;
 	}

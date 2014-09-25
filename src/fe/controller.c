@@ -1073,9 +1073,7 @@ udelay(1000);
 			if((adcData[jj][ii] > limit) || (adcData[jj][ii] < -limit))
 			  {
 				overflowAdc[jj][ii] ++;
-#ifdef ROLLING_OVERFLOWS
-				pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
-#endif
+				pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] ++;
 				overflowAcc ++;
 				adcOF[jj] = 1;
 				odcStateWord |= ODC_ADC_OVF;
@@ -1186,9 +1184,7 @@ udelay(1000);
 			if((adcData[jj][ii] > limit) || (adcData[jj][ii] < -limit))
 			  {
 				overflowAdc[jj][ii] ++;
-#ifdef ROLLING_OVERFLOWS
-				pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
-#endif
+				pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] ++;
 				overflowAcc ++;
 				adcOF[jj] = 1;
 				odcStateWord |= ODC_ADC_OVF;
@@ -1776,6 +1772,8 @@ udelay(1000);
                       for (jj = 0; jj < cdsPciModules.adcCount; jj++) {
                          overflowAdc[jj][ii] = 0;
                          overflowAdc[jj][ii + 16] = 0;
+			pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
+			pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii + 16] = 0;
                       }
 
                       for (jj = 0; jj < cdsPciModules.dacCount; jj++) {
@@ -1836,14 +1834,11 @@ udelay(1000);
 	    for(ii=0;ii<32;ii++)
 	    {
 
-#ifdef ROLLING_OVERFLOWS
-                if (overflowAdc[jj][ii] > OVERFLOW_CNTR_LIMIT) {
-		   overflowAdc[jj][ii] = 0;
+                if (pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] > OVERFLOW_CNTR_LIMIT) {
+		   pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
                 }
-#else
 		pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
 		overflowAdc[jj][ii] = 0;
-#endif
 
 	    }
 	  }
