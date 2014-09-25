@@ -1316,6 +1316,15 @@ for($ii=0;$ii<$adcCnt;$ii++)
 	}
 }
 
+print OUTH "\tint overflowAdcAcc[$adcCnt][32];\n";
+for($ii=0;$ii<$adcCnt;$ii++)
+{
+	for($jj=0;$jj<32;$jj++)
+	{
+		print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_OVERFLOW_ACC_$ii\_$jj epicsOutput.overflowAdcAcc\[$ii\]\[$jj\] int ao 0\n";
+	}
+}
+
 print OUTH "\tint statDac[$dacCnt];\n";
 for($ii=0;$ii<$dacCnt;$ii++)
 {
