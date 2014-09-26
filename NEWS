@@ -1,6 +1,7 @@
 ==================================================================================================
 Changes for 2.9 
 ==================================================================================================
+- Modified ADC overflow reporting, same as done for DAC outputs.
 - Added capability to define engineering units, for both fast/slow channels, to be passed and to
   and recorded by DAQ system.
 - Modified FiltCtrl.pm (Filter Module w/Control) such that is requires that all inputs be
