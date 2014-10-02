@@ -849,6 +849,13 @@ int  seconds, secrate;
 		   (trend+j)->mean = ntohd(*((double *)( DataDaq.tb->data + pos + 2*sizeof(double)*secrate + j*2*sizeof(double) )));
 	        }
                 break;
+	    case 7: /* 32 bit unsigned */
+	       for ( j=0; j<secrate; j++) {
+		  (trend+j)->min = ntohl(*((unsigned int *)( DataDaq.tb->data + pos +j*sizeof(unsigned int) ))) ;
+		  (trend+j)->max = ntohl(*((unsigned int *)( DataDaq.tb->data + pos + sizeof(unsigned int)*secrate + j*sizeof(unsigned int) ))) ;
+		  (trend+j)->mean = ntohd(*((double *)( DataDaq.tb->data + pos + 2*sizeof(unsigned int)*secrate + j*2*sizeof(unsigned int) ))) ;
+	       }
+	       break ;
             default: /* 16 bit-integer */
 	        for ( j=0; j<secrate; j++ ) {
 		   (trend+j)->min = ntohl(*((int *)( DataDaq.tb->data + pos +j*sizeof(int) )));
@@ -895,6 +902,25 @@ int  seconds, secrate;
 		   (trend+j)->max = *((double *)( DataDaq.tb->data + pos + sizeof(double)*secrate + j*sizeof(double) ));
 		   (trend+j)->mean = *((double *)( DataDaq.tb->data + pos + 2*sizeof(double)*secrate + j*2*sizeof(double) ));
 		   (trend+j)->mean = 0;
+	        }
+                break;
+            case 7: /* 32 bit-unsigned integer */
+	        for ( j=0; j<secrate; j++ ) {
+		   unsigned int min1 = *((unsigned int *)( DataDaq.tb->data + pos +j*sizeof(unsigned int) ));
+		   min1 = ntohl(min1);
+		   (trend+j)->min = min1;
+		   {
+		   unsigned int max1 = *((unsigned int *)( DataDaq.tb->data + pos + sizeof(unsigned int)*secrate + j*sizeof(unsigned int) ));
+		   max1 = ntohl(max1);
+		   (trend+j)->max = max1;
+		   }
+		   mean = *((double *)( DataDaq.tb->data + pos + 2*sizeof(unsigned int)*secrate + j*2*sizeof(unsigned int) ));
+#if defined __linux__ || defined __APPLE__
+		   mean1 = ntohd(mean);
+#else
+		   mean1 = mean;
+#endif
+		   (trend+j)->mean = mean1;
 	        }
                 break;
             default: /* 32 bit-integer */
