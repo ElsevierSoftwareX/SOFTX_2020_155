@@ -1,0 +1,23 @@
+#!/sbin/runscript
+
+opts="${opts}"
+hostname=`hostname`
+
+start() {
+	ebegin "Starting Frame Writer"
+    # archive old log files, creating archive if needed
+	cd /opt/rtcds/llo/l1/target/l1daqfw0
+        mkdir -p logs/archive
+	mv -f logs/daqd.log*  logs/archive/
+        
+    # start up frame writer with date-stamped log
+    stamp=`date +%s`
+	start-stop-daemon --start --quiet -b -m --pidfile /var/run/daqd.pid --chuid controls --exec /opt/rtcds/llo/l1/target/l1daqfw0/daqd -- -c /opt/rtcds/llo/l1/target/l1daqfw0/daqdrc -l /opt/rtcds/llo/l1/target/l1daqfw0/logs/daqd.log.${stamp}
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping Frame Writer"
+	start-stop-daemon --stop -s 9 --exec /opt/rtcds/llo/l1/target/l1daqfw0/daqd
+	eend $?
+}

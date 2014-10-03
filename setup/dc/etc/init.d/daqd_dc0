@@ -1,0 +1,52 @@
+#!/sbin/runscript
+
+opts="${opts}"
+hostname=`hostname`
+daqdir="/opt/rtcds/llo/l1/daq"
+
+start() {
+	ebegin "Starting Data Concentrator"
+
+	# Copy INI and PAR files to a secure location and create a master file which references them
+	# This will permit restarts to frame writers and nds machines against the channel configuration
+	# at the time of the data concentrator start, and prevent modified INI and PAR files from being used.
+	# D.Barker 23May2012
+ 
+	# INI and PAR files copied into a directory named by the current date-time
+	# a symlink called running is pointed to the latest directory
+	DATETIME=`date +%d%m%y_%H:%M:%S`
+	#echo "${DATETIME}"
+	mkdir -p ${daqdir}/${DATETIME}
+	rm -rf ${daqdir}/running
+	ln -s ${daqdir}/${DATETIME} ${daqdir}/running
+	for f in `grep "^/opt" /opt/rtcds/llo/l1/target/l1daqdc0/master`
+	do
+	   #echo $f
+	   cp $f ${daqdir}/${DATETIME}
+	done
+
+	# create new master file referencing this running configuration
+	rm -f ${daqdir}/running/master
+	for f in ${daqdir}/running/*
+	do
+	   echo $f >> ${daqdir}/running/master
+	done
+	# End of INI-PAR copy change. DB.
+
+    # archive old log files, creating archive if needed
+    cd /opt/rtcds/llo/l1/target/l1daqdc0
+    mkdir -p logs/archive
+	mv -f logs/daqd.log*  logs/archive/
+        
+    # start up data concentrator with date-stamped log
+    stamp=`date +%s`
+	start-stop-daemon --start -b -m --pidfile /var/run/daqd.pid --exec /opt/rtcds/llo/l1/target/l1daqdc0/daqd -- -c /opt/rtcds/llo/l1/target/l1daqdc0/daqdrc -l /opt/rtcds/llo/l1/target/l1daqdc0/logs/daqd.log.${stamp}
+	chrt -f -p 99 `cat /var/run/daqd.pid`
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping Data Concentrator"
+	start-stop-daemon --stop --signal 9 --exec /opt/rtcds/llo/l1/target/l1daqdc0/daqd
+	eend $?
+}
