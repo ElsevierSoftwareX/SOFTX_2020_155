@@ -1,0 +1,7 @@
+/opt/DIS/sbin/dxtool prepare-shutdown 0
+echo Dolphin prepared for shutdown
+sleep 3
+/etc/init.d/monit stop
+pkill mx_stream
+/opt/open-mx/sbin/omx_init stop
+reboot

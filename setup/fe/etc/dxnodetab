@@ -1,0 +1,5 @@
+# Table of Dolphin nodes
+# <hostname>  <switch> where switch is C,X,Y
+x2lsc0     C
+x2susex    X
+x2seiex    X

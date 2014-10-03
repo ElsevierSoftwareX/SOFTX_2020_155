@@ -1,0 +1,7 @@
+#
+# host	list of control systems to run, starting with IOP
+#
+x2lsc0    x2ioplsc0 x2lsc x2lscaux x2omc
+x2susex   x2iopsusex x2susetmx
+x2seiex   x2iopseiex x2hpietmx x2isietmx
+x2lsctest x2ioplsctest
