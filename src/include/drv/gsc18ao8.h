@@ -38,4 +38,5 @@ typedef struct GSA_18BIT_DAC_REG {
 #define GSAO_18BIT_MASK         0x3ffff
 #define GSAO_18BIT_CHAN_COUNT   8
 #define GSAO_18BIT_DMA_LOCAL_ADDR   0x48
-
+#define GSAO_18BIT_AUTOCAL_SET		(1 << 28)
+#define GSAO_18BIT_AUTOCAL_PASS		(1 << 29)
