@@ -113,7 +113,7 @@ sub add_vproc_entry {
 sub add_edcu_entry {
 	($proc_name, $v_type, $out, $v_var, $egu, $nrow, $ncol) =  @_;
 	#if(($v_type ne "int") || ($v_type ne "double")) {return;}
-	$egu = "Undef" if ! defined $egu;
+	$egu = "undef" if ! defined $egu;
 	$nrow = 0 if ! defined $nrow;
 	$ncol = 0 if ! defined $ncol;
 	if((index($proc_name, "BURT") == -1) && (index($proc_name, "DACDT_ENABLE") == -1)
@@ -376,7 +376,7 @@ while (<IN>) {
 	$vardb .= "    $v_efield3\n";
 	$vardb .= "    $v_efield4\n";
 	$vardb .= "}\n";
-	$egu = "Undef";
+	$egu = "undef";
 	add_edcu_entry($proc_name, "double", 0, $m_var, $egu, 2, 2);
     } elsif (substr($_,0,5) eq "PHASE") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
@@ -516,7 +516,7 @@ while (<IN>) {
 	}
 	#for($efC=0;$efC<12;$efC++)
 	#{
-	$egu = "Undef";
+	$egu = "undef";
 	foreach (@eFields) {
 		$vardb .= "    $_\n";
 		# Determine if Engineering units are defined in the record fields
@@ -665,7 +665,7 @@ while (<IN>) {
 	}
 
 	my $s = $/; $/="_"; chomp $proc_name; $/ = $s;
-	$egu = "Undef";
+	$egu = "undef";
 	add_vproc_entry($proc_name, "double", 0, $m_var, $x, $y);
 	add_edcu_entry($proc_name, "double", 0, $m_var, $egu, $x, $y);
 	#$vproc .= "{\"$proc_name\", 1, ".
@@ -1142,7 +1142,7 @@ datatype=4
 datarate=$gds_datarate
 offset=0
 slope=1.0
-units=Undef
+units=undef
 
 END
 ;
