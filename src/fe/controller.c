@@ -1073,9 +1073,7 @@ udelay(1000);
 			if((adcData[jj][ii] > limit) || (adcData[jj][ii] < -limit))
 			  {
 				overflowAdc[jj][ii] ++;
-#ifdef ROLLING_OVERFLOWS
-				pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
-#endif
+				pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] ++;
 				overflowAcc ++;
 				adcOF[jj] = 1;
 				odcStateWord |= ODC_ADC_OVF;
@@ -1186,9 +1184,7 @@ udelay(1000);
 			if((adcData[jj][ii] > limit) || (adcData[jj][ii] < -limit))
 			  {
 				overflowAdc[jj][ii] ++;
-#ifdef ROLLING_OVERFLOWS
-				pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
-#endif
+				pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] ++;
 				overflowAcc ++;
 				adcOF[jj] = 1;
 				odcStateWord |= ODC_ADC_OVF;
@@ -1321,27 +1317,15 @@ udelay(1000);
 #endif
                         /// - ---- Check output values are within range of DAC \n
                         /// - --------- If overflow, clip at DAC limits and report errors
-                        if(dac_out > limit)
+                        if(dac_out > limit || dac_out < -limit)
                         {
-                                dac_out = limit;
                                 overflowDac[jj][ii] ++;
-#ifdef ROLLING_OVERFLOWS
-				pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
-#endif
+				pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] ++;
                                 overflowAcc ++;
                                 dacOF[jj] = 1;
 				odcStateWord |= ODC_DAC_OVF;;
-                        }
-                        if(dac_out < -limit)
-                        {
-                                dac_out = -limit;
-                                overflowDac[jj][ii] ++;
-#ifdef ROLLING_OVERFLOWS
-				pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
-#endif
-                                overflowAcc ++;
-                                dacOF[jj] = 1;
-				odcStateWord |= ODC_DAC_OVF;;
+				if(dac_out > limit) dac_out = limit;
+				else dac_out = -limit;
                         }
                         /// - ---- If DAQKILL tripped, set output to zero.
                         if(!iopDacEnable) dac_out = 0;
@@ -1437,29 +1421,17 @@ udelay(1000);
                         else dac_in -= 0.5;
                         dac_out = dac_in;
 
-			/// - ---- Check output values are within range of DAC \n
+                        /// - ---- Check output values are within range of DAC \n
                         /// - --------- If overflow, clip at DAC limits and report errors
-                        if(dac_out > limit)
+                        if(dac_out > limit || dac_out < -limit)
                         {
-                                dac_out = limit;
                                 overflowDac[jj][ii] ++;
-#ifdef ROLLING_OVERFLOWS
-				pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
-#endif
+				pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] ++;
                                 overflowAcc ++;
                                 dacOF[jj] = 1;
 				odcStateWord |= ODC_DAC_OVF;;
-                        }
-                        if(dac_out < -limit)
-                        {
-                                dac_out = -limit;
-                                overflowDac[jj][ii] ++;
-#ifdef ROLLING_OVERFLOWS
-				pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
-#endif
-                                overflowAcc ++;
-                                dacOF[jj] = 1;
-				odcStateWord |= ODC_DAC_OVF;;
+				if(dac_out > limit) dac_out = limit;
+				else dac_out = -limit;
                         }
 			/// - ---- If DAQKILL tripped, set output to zero.
                         if(!iopDacEnable) dac_out = 0;
@@ -1616,6 +1588,7 @@ udelay(1000);
 		timeHoldMax = 0;
 	  	diagWord = 0;
 		ipcErrBits = 0;
+		
 		// feStatus = 0;
 #ifdef ADC_MASTER
                for(jj=0;jj<cdsPciModules.adcCount;jj++) adcRdTimeMax[jj] = 0;
@@ -1792,24 +1765,25 @@ udelay(1000);
 	  if(mxStat != 3)
 		feStatus |= FE_ERROR_DAQ;;
 	  usrHoldTime = 0;
-  	  if((pLocalEpics->epicsInput.overflowReset) || (overflowAcc > OVERFLOW_CNTR_LIMIT))
+  	  if(pLocalEpics->epicsInput.overflowReset)
 	  {
-
-#ifdef ROLLING_OVERFLOWS
                 if (pLocalEpics->epicsInput.overflowReset) {
                    for (ii = 0; ii < 16; ii++) {
                       for (jj = 0; jj < cdsPciModules.adcCount; jj++) {
                          overflowAdc[jj][ii] = 0;
                          overflowAdc[jj][ii + 16] = 0;
+			pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
+			pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii + 16] = 0;
                       }
 
                       for (jj = 0; jj < cdsPciModules.dacCount; jj++) {
-                         overflowDac[jj][ii] = 0;
+                         pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] = 0;
                       }
                    }
                 }
-#endif
-
+	  }
+  	  if((pLocalEpics->epicsInput.overflowReset) || (overflowAcc > OVERFLOW_CNTR_LIMIT))
+	  {
 		pLocalEpics->epicsInput.overflowReset = 0;
 		pLocalEpics->epicsOutput.ovAccum = 0;
 		overflowAcc = 0;
@@ -1860,14 +1834,11 @@ udelay(1000);
 	    for(ii=0;ii<32;ii++)
 	    {
 
-#ifdef ROLLING_OVERFLOWS
-                if (overflowAdc[jj][ii] > OVERFLOW_CNTR_LIMIT) {
-		   overflowAdc[jj][ii] = 0;
+                if (pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] > OVERFLOW_CNTR_LIMIT) {
+		   pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
                 }
-#else
 		pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
 		overflowAdc[jj][ii] = 0;
-#endif
 
 	    }
 	  }
@@ -1900,14 +1871,11 @@ udelay(1000);
 	    for(ii=0;ii<MAX_DAC_CHN_PER_MOD;ii++)
 	    {
 
-#ifdef ROLLING_OVERFLOWS
-                if (overflowDac[jj][ii] > OVERFLOW_CNTR_LIMIT) {
-		   overflowDac[jj][ii] = 0;
+                if (pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] > OVERFLOW_CNTR_LIMIT) {
+		   pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] = 0;
                 }
-#else
 		pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
 		overflowDac[jj][ii] = 0;
-#endif
 
 	    }
 	  }

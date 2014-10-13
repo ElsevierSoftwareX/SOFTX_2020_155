@@ -1,0 +1,32 @@
+#
+# host	list of control systems to run, starting with IOP
+#
+l1lsc0  l1ioplsc0 l1lsc l1omc l1lscaux
+#
+l1asc0  l1iopasc0 l1asc l1ascimc l1sushtts l1susauxasc0
+#
+l1oaf0 l1iopoaf0 l1oaf l1pemcs l1tcscs l1odcmaster l1cal
+l1seib1 l1iopseib1 l1isiitmy l1hpiitmy 
+l1seib2 l1iopseib2 l1isibs l1hpibs
+l1seib3 l1iopseib3 l1isiitmx l1hpiitmx 
+l1seih16 l1iopseih16 l1hpiham1 l1hpiham6 l1isiham6
+l1seih23 l1iopseih23 l1hpiham2 l1hpiham3 l1isiham2 l1isiham3
+l1seih45 l1iopseih45 l1hpiham4 l1hpiham5 l1isiham4 l1isiham5
+l1susb123	l1iopsusb123 l1susitmx l1susitmy l1susbs
+l1susauxb123  l1iopsusauxb123 l1susauxb123
+l1sush2a	l1iopsush2a l1susmc1 l1susmc3 l1susprm l1suspr3
+l1sush2b	l1iopsush2b l1susim
+l1susauxh2    l1iopsusauxh2 l1susauxh2
+l1sush34	l1iopsush34 l1susmc2 l1sussr2 l1suspr2
+l1susauxh34	l1iopsusauxh34 l1susauxh34
+l1sush56	l1iopsush56 l1sussr3 l1sussrm l1susomc
+l1susauxh56   l1iopsusauxh56 l1susauxh56
+l1psl0 	l1ioppsl0 l1psldbb l1pslfss l1pslpmc l1psliss
+l1iscex	l1iopiscex l1pemex l1iscex l1odcx
+l1seiex l1iopseiex l1isietmx l1hpietmx
+l1susex l1iopsusex l1susetmx l1sustmsx
+l1susauxex l1iopsusauxex l1susauxex
+l1iscey	l1iopiscey l1pemey l1iscey l1odcy
+l1seiey l1iopseiey l1isietmy l1hpietmy
+l1susey l1iopsusey l1susetmy l1sustmsy
+l1susauxey l1iopsusauxey l1susauxey

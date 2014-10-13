@@ -1,14 +1,14 @@
 
 file {
-	name="/opt/rtcds/rtscore/branch-2.9/src/epics/util/FILTALH.adl"
+	name="/opt/rtcds/rtscore/trunk/src/epics/util/FILTALH.adl"
 	version=030107
 }
 display {
 	object {
-		x=1515
-		y=200
+		x=1140
+		y=209
 		width=701
-		height=145
+		height=130
 	}
 	clr=14
 	bclr=4
@@ -90,7 +90,7 @@ display {
 rectangle {
 	object {
 		x=0
-		y=39
+		y=25
 		width=700
 		height=100
 	}
@@ -103,7 +103,7 @@ rectangle {
 		x=0
 		y=0
 		width=700
-		height=35
+		height=22
 	}
 	"basic attribute" {
 		clr=14
@@ -111,8 +111,48 @@ rectangle {
 }
 text {
 	object {
+		x=226
+		y=1
+		width=200
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="$(FPREFIX)$(FNAME)"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=505
+		y=3
+		width=120
+		height=15
+	}
+	monitor {
+		chan="$(FPREFIX):FEC-$(DCUID)_TIME_STRING"
+		clr=2
+		bclr=14
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=8
+		y=2
+		width=40
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="$(FPREFIX)"
+}
+text {
+	object {
 		x=251
-		y=57
+		y=32
 		width=20
 		height=15
 	}
@@ -124,8 +164,8 @@ text {
 }
 text {
 	object {
-		x=288
-		y=57
+		x=280
+		y=32
 		width=20
 		height=15
 	}
@@ -137,8 +177,8 @@ text {
 }
 text {
 	object {
-		x=454
-		y=42
+		x=434
+		y=32
 		width=20
 		height=15
 	}
@@ -150,8 +190,8 @@ text {
 }
 text {
 	object {
-		x=609
-		y=57
+		x=582
+		y=32
 		width=20
 		height=15
 	}
@@ -163,8 +203,8 @@ text {
 }
 text {
 	object {
-		x=646
-		y=57
+		x=611
+		y=32
 		width=20
 		height=15
 	}
@@ -177,7 +217,7 @@ text {
 byte {
 	object {
 		x=249
-		y=83
+		y=58
 		width=25
 		height=11
 	}
@@ -191,8 +231,8 @@ byte {
 }
 byte {
 	object {
-		x=286
-		y=83
+		x=278
+		y=58
 		width=25
 		height=11
 	}
@@ -206,8 +246,8 @@ byte {
 }
 byte {
 	object {
-		x=328
-		y=83
+		x=308
+		y=58
 		width=128
 		height=11
 	}
@@ -221,8 +261,8 @@ byte {
 }
 byte {
 	object {
-		x=459
-		y=83
+		x=439
+		y=58
 		width=128
 		height=11
 	}
@@ -236,8 +276,8 @@ byte {
 }
 byte {
 	object {
-		x=606
-		y=83
+		x=579
+		y=58
 		width=25
 		height=11
 	}
@@ -251,8 +291,8 @@ byte {
 }
 byte {
 	object {
-		x=643
-		y=83
+		x=608
+		y=58
 		width=25
 		height=11
 	}
@@ -267,7 +307,7 @@ byte {
 text {
 	object {
 		x=188
-		y=83
+		y=58
 		width=20
 		height=15
 	}
@@ -278,8 +318,8 @@ text {
 }
 byte {
 	object {
-		x=328
-		y=71
+		x=308
+		y=46
 		width=128
 		height=11
 	}
@@ -294,7 +334,7 @@ byte {
 byte {
 	object {
 		x=249
-		y=71
+		y=46
 		width=25
 		height=11
 	}
@@ -308,8 +348,8 @@ byte {
 }
 byte {
 	object {
-		x=286
-		y=71
+		x=278
+		y=46
 		width=25
 		height=11
 	}
@@ -323,8 +363,8 @@ byte {
 }
 byte {
 	object {
-		x=459
-		y=71
+		x=439
+		y=46
 		width=128
 		height=11
 	}
@@ -338,8 +378,8 @@ byte {
 }
 byte {
 	object {
-		x=606
-		y=71
+		x=579
+		y=46
 		width=25
 		height=11
 	}
@@ -353,8 +393,8 @@ byte {
 }
 byte {
 	object {
-		x=643
-		y=71
+		x=608
+		y=46
 		width=25
 		height=11
 	}
@@ -369,7 +409,7 @@ byte {
 text {
 	object {
 		x=188
-		y=69
+		y=44
 		width=20
 		height=15
 	}
@@ -380,8 +420,8 @@ text {
 }
 byte {
 	object {
-		x=327
-		y=113
+		x=307
+		y=88
 		width=128
 		height=11
 	}
@@ -396,7 +436,7 @@ byte {
 byte {
 	object {
 		x=248
-		y=113
+		y=88
 		width=25
 		height=11
 	}
@@ -410,8 +450,8 @@ byte {
 }
 byte {
 	object {
-		x=285
-		y=113
+		x=277
+		y=88
 		width=25
 		height=11
 	}
@@ -425,8 +465,8 @@ byte {
 }
 byte {
 	object {
-		x=458
-		y=113
+		x=438
+		y=88
 		width=128
 		height=11
 	}
@@ -440,8 +480,8 @@ byte {
 }
 byte {
 	object {
-		x=605
-		y=113
+		x=578
+		y=88
 		width=25
 		height=11
 	}
@@ -455,8 +495,8 @@ byte {
 }
 byte {
 	object {
-		x=642
-		y=113
+		x=607
+		y=88
 		width=25
 		height=11
 	}
@@ -470,8 +510,8 @@ byte {
 }
 polygon {
 	object {
-		x=334
-		y=95
+		x=314
+		y=70
 		width=11
 		height=16
 	}
@@ -487,16 +527,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(334,95)
-		(345,95)
-		(339,111)
-		(334,95)
+		(314,70)
+		(325,70)
+		(319,86)
+		(314,70)
 	}
 }
 polygon {
 	object {
-		x=359
-		y=95
+		x=339
+		y=70
 		width=11
 		height=16
 	}
@@ -512,16 +552,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(359,95)
-		(370,95)
-		(364,111)
-		(359,95)
+		(339,70)
+		(350,70)
+		(344,86)
+		(339,70)
 	}
 }
 polygon {
 	object {
-		x=385
-		y=95
+		x=365
+		y=70
 		width=11
 		height=16
 	}
@@ -537,16 +577,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(385,95)
-		(396,95)
-		(390,111)
-		(385,95)
+		(365,70)
+		(376,70)
+		(370,86)
+		(365,70)
 	}
 }
 polygon {
 	object {
-		x=410
-		y=95
+		x=390
+		y=70
 		width=11
 		height=16
 	}
@@ -562,16 +602,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(410,95)
-		(421,95)
-		(415,111)
-		(410,95)
+		(390,70)
+		(401,70)
+		(395,86)
+		(390,70)
 	}
 }
 polygon {
 	object {
-		x=436
-		y=95
+		x=416
+		y=70
 		width=11
 		height=16
 	}
@@ -587,16 +627,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(436,95)
-		(447,95)
-		(441,111)
-		(436,95)
+		(416,70)
+		(427,70)
+		(421,86)
+		(416,70)
 	}
 }
 polygon {
 	object {
-		x=466
-		y=95
+		x=446
+		y=70
 		width=11
 		height=16
 	}
@@ -612,16 +652,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(466,95)
-		(477,95)
-		(471,111)
-		(466,95)
+		(446,70)
+		(457,70)
+		(451,86)
+		(446,70)
 	}
 }
 polygon {
 	object {
-		x=492
-		y=95
+		x=472
+		y=70
 		width=11
 		height=16
 	}
@@ -637,16 +677,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(492,95)
-		(503,95)
-		(497,111)
-		(492,95)
+		(472,70)
+		(483,70)
+		(477,86)
+		(472,70)
 	}
 }
 polygon {
 	object {
-		x=517
-		y=95
+		x=497
+		y=70
 		width=11
 		height=16
 	}
@@ -662,16 +702,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(517,95)
-		(528,95)
-		(522,111)
-		(517,95)
+		(497,70)
+		(508,70)
+		(502,86)
+		(497,70)
 	}
 }
 polygon {
 	object {
-		x=541
-		y=95
+		x=521
+		y=70
 		width=11
 		height=16
 	}
@@ -687,16 +727,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(541,95)
-		(552,95)
-		(546,111)
-		(541,95)
+		(521,70)
+		(532,70)
+		(526,86)
+		(521,70)
 	}
 }
 polygon {
 	object {
-		x=566
-		y=95
+		x=546
+		y=70
 		width=11
 		height=16
 	}
@@ -712,16 +752,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(566,95)
-		(577,95)
-		(571,111)
-		(566,95)
+		(546,70)
+		(557,70)
+		(551,86)
+		(546,70)
 	}
 }
 polygon {
 	object {
 		x=255
-		y=95
+		y=70
 		width=11
 		height=16
 	}
@@ -737,16 +777,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(255,95)
-		(266,95)
-		(260,111)
-		(255,95)
+		(255,70)
+		(266,70)
+		(260,86)
+		(255,70)
 	}
 }
 polygon {
 	object {
-		x=291
-		y=95
+		x=283
+		y=70
 		width=11
 		height=16
 	}
@@ -762,16 +802,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(291,95)
-		(302,95)
-		(296,111)
-		(291,95)
+		(283,70)
+		(294,70)
+		(288,86)
+		(283,70)
 	}
 }
 polygon {
 	object {
-		x=612
-		y=95
+		x=585
+		y=70
 		width=11
 		height=16
 	}
@@ -787,16 +827,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(612,95)
-		(623,95)
-		(617,111)
-		(612,95)
+		(585,70)
+		(596,70)
+		(590,86)
+		(585,70)
 	}
 }
 polygon {
 	object {
-		x=650
-		y=95
+		x=615
+		y=70
 		width=11
 		height=16
 	}
@@ -812,16 +852,16 @@ polygon {
 		chanC="$(FPREFIX):$(FNAME)_SWREQ"
 	}
 	points {
-		(650,95)
-		(661,95)
-		(655,111)
-		(650,95)
+		(615,70)
+		(626,70)
+		(620,86)
+		(615,70)
 	}
 }
 text {
 	object {
 		x=32
-		y=81
+		y=56
 		width=20
 		height=15
 	}
@@ -834,7 +874,7 @@ text {
 text {
 	object {
 		x=32
-		y=103
+		y=78
 		width=20
 		height=15
 	}
@@ -847,7 +887,7 @@ text {
 "text update" {
 	object {
 		x=96
-		y=83
+		y=58
 		width=82
 		height=15
 	}
@@ -865,7 +905,7 @@ text {
 "text update" {
 	object {
 		x=96
-		y=67
+		y=42
 		width=82
 		height=15
 	}
@@ -883,7 +923,7 @@ text {
 "text update" {
 	object {
 		x=96
-		y=113
+		y=88
 		width=82
 		height=15
 	}
@@ -901,7 +941,7 @@ text {
 text {
 	object {
 		x=188
-		y=113
+		y=88
 		width=20
 		height=15
 	}
@@ -909,148 +949,4 @@ text {
 		clr=14
 	}
 	textix="SWSTAT"
-}
-"related display" {
-	object {
-		x=10
-		y=5
-		width=681
-		height=24
-	}
-	display[0] {
-		name="$(RDISP)"
-	}
-	clr=0
-	bclr=11
-	label="$(FPREFIX):$(FNAME)"
-}
-text {
-	object {
-		x=330
-		y=57
-		width=20
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="1"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=357
-		y=57
-		width=20
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="2"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=382
-		y=57
-		width=20
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="3"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=408
-		y=57
-		width=20
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="4"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=433
-		y=57
-		width=20
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="5"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=461
-		y=57
-		width=20
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="6"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=488
-		y=57
-		width=20
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="7"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=513
-		y=57
-		width=20
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="8"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=539
-		y=57
-		width=20
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="9"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=564
-		y=57
-		width=20
-		height=15
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="10"
-	align="horiz. centered"
 }

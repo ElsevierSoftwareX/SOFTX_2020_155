@@ -814,7 +814,7 @@ for($ii=0;$ii<$nonSubCnt;$ii++)
 			         $partInputType[$kk][0] = "PART";
 				$partInNum[$kk][0] = $xx;
 				
-				print "OUTPUT COUNT for $xpartName[$xx] is $partOutCnt[$kk]  ** $mm ** \n";
+				# print "OUTPUT COUNT for $xpartName[$xx] is $partOutCnt[$kk]  ** $mm ** \n";
 				for($ll=0;$ll<$partOutCnt[$kk];$ll++)
 				{
 					$toNum = $partOutNum[$kk][$ll];
@@ -905,101 +905,101 @@ for($ii=0;$ii<$subSys;$ii++)
  print "SUB $ii has $partsRemaining parts *******************\n";
 	for($jj=$subSysPartStart[$ii];$jj<$subSysPartStop[$ii];$jj++)
 	{
-		#if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "BUSS") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "FROM") || ($partType[$jj] eq "GOTO") || ($partType[$jj] eq "EpicsIn") || ($partType[$jj] eq "CONSTANT"))
 		if(($partType[$jj] eq "INPUT") || ($partType[$jj] eq "BUSS") || ($partType[$jj] eq "GROUND") || ($partType[$jj] eq "EpicsIn") || ($partType[$jj] eq "CONSTANT") || ($partType[$jj] eq "EzCaRead") || ($partType[$jj] eq "DELAY") || ($partType[$jj] eq "Gps") || ($partType[$jj] eq "StateWord") || ($partType[$jj] eq "ModelRate") || ($partType[$jj] eq "EXC"))
-				{
-					if(($partType[$jj] ne "DELAY"))
-					{
-						$partsRemaining --;
-						$partUsed[$jj] = 1;
-					}
-					for($kk=0;$kk<$partOutCnt[$jj];$kk++)
-					{
-						
-						#if(($partType[$jj] eq "BUSS") && ($partInputType[$jj][0] eq "Adc"))
-						if(($partType[$jj] eq "BUSS"))
-						{
-							#print "BUSS FOUND ****  $xpartName[$jj] $seqNum[0][$counter] $partInputType[$jj][0]\n";
-							$ll = $partOutNum[$jj][$kk];
-							$seqNum[0][$counter] = $ll;
-							$counter ++;
-						}
-						if($partType[$jj] ne "BUSS")
-						{
-							$ll = $partOutNum[$jj][$kk];
-							$seqNum[0][$counter] = $ll;
-							$counter ++;
-						}
-					    
-					}
-				}
-				if(($partType[$jj] eq "OUTPUT") || ($partType[$jj] eq "FROM") || ($partType[$jj] eq "GOTO") ||($partType[$jj] eq "TERM") || ($partType[$jj] eq "BUSC") || ($partType[$jj] eq "Adc"))
-				#if(($partType[$jj] eq "OUTPUT") || ($partType[$jj] eq "TERM") || ($partType[$jj] eq "BUSC") || ($partType[$jj] eq "Adc"))
-				{
-					$partsRemaining --;
-					$partUsed[$jj] = 1;
-				}
-			}
-			print "Found $counter Inputs for subsystem $ii with $partsRemaining parts*********************************\n";
-			$xx = 0;
-			$ts = 1;
-			until(($partsRemaining < 1) || ($xx > 200))
-			{
-				$xx ++;
-				$loop = $counter ++;
-				$counter = 0;
-				if($ts == 1) {
-					$ts = 0;
-					$ns = 1;
-				}
-				else {
-					$ts = 1;
-					$ns = 0;
-				}
-				for($jj=0;$jj<$loop;$jj++)
-				{
-					$mm = $seqNum[$ts][$jj];
-					$partInUsed[$mm] ++;
-					if(($partInUsed[$mm] >= $partInCnt[$mm]) && ($partUsed[$mm] == 0))
-					{
-						$partUsed[$mm] = 1;
-						$partsRemaining --;
-						$seq[$ii][$ssCnt] = $mm;
-						$seqName[$ii][$ssCnt] = $xpartName[$mm];
-						 #print "Sub $ii part $ssCnt = $mm $xpartName[$mm]\n";
-						$ssCnt ++;
-						for($kk=0;$kk<$partOutCnt[$mm];$kk++)
-						{
-							$ll = $partOutNum[$mm][$kk];
-							if(($ll >= $subSysPartStart[$ii]) && ($ll < $subSysPartStop[$ii]))
-							{
-								$seqNum[$ns][$counter] = $ll;
-								$counter ++;
-							}
-						}
-					}
-				}
-
-			}
-			print " ********************* Parts remaining = $partsRemaining\n";
-			$seqParts[$ii] = $ssCnt;
-		}
-		$partsRemaining = 0;
-		$searchCnt = 0;
-#//		- Loop thru all of the parts at model top level.
-		for($ii=0;$ii<$nonSubCnt;$ii++)
 		{
-			$xx = $nonSubPart[$ii];
-			if(($partType[$xx] ne "BUSC") && ($partType[$xx] ne "FROM") &&($partType[$xx] ne "GOTO") && ($partType[$xx] ne "BUSS") && ($partType[$xx] ne "Adc"))
+			if(($partType[$jj] ne "DELAY"))
 			{
-				$searchPart[$partsRemaining] = $xx;
-				$searchCnt ++;
-				$partsRemaining ++;
-				#print "Part num $xx $partName[$xx] is remaining\n";
+				$partsRemaining --;
+				$partUsed[$jj] = 1;
+			}
+			for($kk=0;$kk<$partOutCnt[$jj];$kk++)
+			{
+				
+				#if(($partType[$jj] eq "BUSS") && ($partInputType[$jj][0] eq "Adc"))
+				if(($partType[$jj] eq "BUSS"))
+				{
+					#print "BUSS FOUND ****  $xpartName[$jj] $seqNum[0][$counter] $partInputType[$jj][0]\n";
+					$ll = $partOutNum[$jj][$kk];
+					$seqNum[0][$counter] = $ll;
+					$counter ++;
+				}
+				if($partType[$jj] ne "BUSS")
+				{
+					$ll = $partOutNum[$jj][$kk];
+					$seqNum[0][$counter] = $ll;
+					$counter ++;
+				}
+			    
 			}
 		}
-		$subRemaining = $subSys;
-		$seqCnt = 0;
+		if(($partType[$jj] eq "OUTPUT") || ($partType[$jj] eq "FROM") || ($partType[$jj] eq "GOTO") ||($partType[$jj] eq "TERM") || ($partType[$jj] eq "BUSC") || ($partType[$jj] eq "Adc"))
+		{
+			$partsRemaining --;
+			$partUsed[$jj] = 1;
+		}
+	}
+	print "Found $counter Inputs for subsystem $ii with $partsRemaining parts*********************************\n";
+	$xx = 0;
+	$ts = 1;
+	#until(($partsRemaining < 1) || ($xx > 200))
+	until($xx > 100)
+	{
+		$xx ++;
+		$loop = $counter ++;
+		$counter = 0;
+		if($ts == 1) {
+			$ts = 0;
+			$ns = 1;
+		}
+		else {
+			$ts = 1;
+			$ns = 0;
+		}
+		for($jj=0;$jj<$loop;$jj++)
+		{
+			$mm = $seqNum[$ts][$jj];
+			$partInUsed[$mm] ++;
+			if(($partInUsed[$mm] >= $partInCnt[$mm]) && ($partUsed[$mm] == 0))
+			{
+				$partUsed[$mm] = 1;
+				$partsRemaining --;
+				$seq[$ii][$ssCnt] = $mm;
+				$seqName[$ii][$ssCnt] = $xpartName[$mm];
+				 #print "Sub $ii part $ssCnt = $mm $xpartName[$mm]\n";
+				$ssCnt ++;
+				for($kk=0;$kk<$partOutCnt[$mm];$kk++)
+				{
+					$ll = $partOutNum[$mm][$kk];
+					if(($ll >= $subSysPartStart[$ii]) && ($ll < $subSysPartStop[$ii]))
+					{
+						$seqNum[$ns][$counter] = $ll;
+						$counter ++;
+					}
+				}
+			}
+		}
+
+	}
+	print " ********************* Parts remaining = $partsRemaining\n";
+	$seqParts[$ii] = $ssCnt;
+}
+$partsRemaining = 0;
+$searchCnt = 0;
+#//		- Loop thru all of the parts at model top level.
+for($ii=0;$ii<$nonSubCnt;$ii++)
+{
+			$xx = $nonSubPart[$ii];
+	if(($partType[$xx] ne "BUSC") && ($partType[$xx] ne "FROM") &&($partType[$xx] ne "GOTO") && ($partType[$xx] ne "BUSS")
+        && ($partType[$xx] ne "Adc") && ($partUsed[$xx] != 1))
+	{
+		$searchPart[$partsRemaining] = $xx;
+		$searchCnt ++;
+		$partsRemaining ++;
+		#print "Part num $xx $partName[$xx] is remaining\n";
+	}
+}
+$subRemaining = $subSys;
+$seqCnt = 0;
 
 #//	-  Construct parts linked list \n
 #
@@ -1283,13 +1283,13 @@ if($frate == 15)
 	$frate =  $rate * .85;
 	$brate = $frate;
 }
-print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\") field(EGU,\"usec\")\n";
 
 print OUTH "\tint cpuMeterMax;\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER_MAX epicsOutput.cpuMeterMax int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER_MAX epicsOutput.cpuMeterMax int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(EGU,\"usec\") field(HSV,\"MINOR\")\n";
 
 print OUTH "\tint adcWaitTime;\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT epicsOutput.adcWaitTime int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT epicsOutput.adcWaitTime int ao 0 field(HOPR,\"$rate\") field(EGU,\"usec\") field(LOPR,\"0\")\n";
 
 print OUTH "\tint timeErr;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_ERR epicsOutput.timeErr int ao 0\n";
@@ -1316,6 +1316,15 @@ for($ii=0;$ii<$adcCnt;$ii++)
 	}
 }
 
+print OUTH "\tint overflowAdcAcc[$adcCnt][32];\n";
+for($ii=0;$ii<$adcCnt;$ii++)
+{
+	for($jj=0;$jj<32;$jj++)
+	{
+		print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_OVERFLOW_ACC_$ii\_$jj epicsOutput.overflowAdcAcc\[$ii\]\[$jj\] int ao 0\n";
+	}
+}
+
 print OUTH "\tint statDac[$dacCnt];\n";
 for($ii=0;$ii<$dacCnt;$ii++)
 {
@@ -1328,6 +1337,15 @@ for($ii=0;$ii<$dacCnt;$ii++)
 	for($jj=0;$jj<16;$jj++)
 	{
 		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OVERFLOW_$ii\_$jj epicsOutput.overflowDac\[$ii\]\[$jj\] int ao 0\n";
+	}
+}
+
+print OUTH "\tint overflowDacAcc[$dacCnt][16];\n";
+for($ii=0;$ii<$dacCnt;$ii++)
+{
+	for($jj=0;$jj<16;$jj++)
+	{
+		print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_OVERFLOW_ACC_$ii\_$jj epicsOutput.overflowDacAcc\[$ii\]\[$jj\] int ao 0\n";
 	}
 }
 

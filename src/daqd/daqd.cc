@@ -593,27 +593,27 @@ daqd_c::full_frame(int frame_length_seconds, int science,
       switch (channels [i].data_type) { 
       case _32bit_complex:
 	{
-	  vect = new FrameCPP::Version::FrVect(channels [i].name, 1, dims, new COMPLEX_8[nx], "counts");
+	  vect = new FrameCPP::Version::FrVect(std::string(channels [i].name), 1, dims, new COMPLEX_8[nx], std::string(channels [i].signal_units));
 	  break;
 	}
       case _64bit_double:
 	{
-	  vect = new FrameCPP::Version::FrVect(channels [i].name, 1, dims, new REAL_8[nx], "counts");
+	  vect = new FrameCPP::Version::FrVect(std::string(channels [i].name), 1, dims, new REAL_8[nx], std::string(channels [i].signal_units));
 	  break; 
 	}
       case _32bit_float: 
 	{
-	  vect = new FrameCPP::Version::FrVect(channels [i].name, 1, dims, new REAL_4[nx], "counts");
+	  vect = new FrameCPP::Version::FrVect(std::string(channels [i].name), 1, dims, new REAL_4[nx], std::string(channels [i].signal_units));
 	  break;
 	}
       case _32bit_integer:
 	{
-	  vect = new FrameCPP::Version::FrVect(channels [i].name, 1, dims, new INT_4S[nx], "counts");
+	  vect = new FrameCPP::Version::FrVect(std::string(channels [i].name), 1, dims, new INT_4S[nx], std::string(channels [i].signal_units));
 	  break;
 	}
       case _32bit_uint:
 	{
-	  vect = new FrameCPP::Version::FrVect(channels [i].name, 1, dims, new INT_4U[nx], "counts");
+	  vect = new FrameCPP::Version::FrVect(std::string(channels [i].name), 1, dims, new INT_4U[nx], std::string(channels [i].signal_units));
 	  break;
 	}
       case _64bit_integer:
@@ -622,7 +622,7 @@ daqd_c::full_frame(int frame_length_seconds, int science,
 	}
       default:
 	{
-	  vect = new FrameCPP::Version::FrVect(channels [i].name, 1, dims, new INT_2S[nx], "counts");
+	  vect = new FrameCPP::Version::FrVect(std::string(channels [i].name), 1, dims, new INT_2S[nx], channels [i].signal_units);
 	  break;
 	}
       }

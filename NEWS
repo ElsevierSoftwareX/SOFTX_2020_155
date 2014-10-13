@@ -1,7 +1,20 @@
 ==================================================================================================
-RCG V2.9 changes
+Changes for 2.9 
 ==================================================================================================
-- Added support for defining DAQ channel eng units in the DAQ Channel part.
+- Modified ADC overflow reporting, same as done for DAC outputs.
+- Added capability to define engineering units, for both fast/slow channels, to be passed and to
+  and recorded by DAQ system.
+- Modified FiltCtrl.pm (Filter Module w/Control) such that is requires that all inputs be
+  connected or build process will exit with error message.
+- Modified DAC overrange reporting (Bug #722).
+	- Removed ROLLING_OVERFLOWS compile option, which set EPICS record to report overrange per
+	  second or accumulated overrange count.
+	- Code now reports DAC overflows as both overrange/sec and accumulated overflows since last
+	  overflow reset.
+		- IFO:FEC-DCUID_DAC_OVERFLOW_DAC#_CHAN# = Overflows per second.
+		- IFO:FEC-DCUID_DAC_OVERFLOW_ACC_DAC#_CHAN# = Accumulated overflow.
+- Checking for Coeff and DAQ file changes, based on file CRC checking, has been moved out of the
+  model sequencer code and into the model EPICS main.c program.
 - As of SVN 3694, marked by this file submission to SVN, the reading of BURT files from the FE code
 is supported. This is prodominantly handled by the src/epics/seq/main.c program.
 Bug Fix - DacKillTimed and DacKillIOP parts: Parts ignored reset command while in fault mode,
@@ -19,7 +32,7 @@ channels.  Added new RCG part, updated DAQ code and modified Dataviewer to handl
   applied to Branch-2.8.
 - Bug Fix (621) - ADC part errant code if ADC part named incorrectly. Fix also applied to
   Branch-2.8 (SVN 3645).
-- Bug Fix (595) - FMC2 part compiling improperly if not inputs connected. This bug also fixed
+- Bug Fix (595) - FMC2 part compiling improperly if not all inputs connected. This bug also fixed
   in Branch-2.8.
 - Bug Fix: Model with EXC part fails to compile. Problem was that EXC part was not in
   list of signal sources. Bug also fixed in branch-2.8 (SVN 3621).

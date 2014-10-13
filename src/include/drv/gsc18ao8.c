@@ -20,6 +20,7 @@ int gsc18ao8Init(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
   static unsigned int pci_io_addr;		/// @param pci_io_addr Bus address of PCI card I/O register.
   int pedStatus;				/// @param pedStatus Status return from call to enable device.
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;	/// @param *dac18bitPtr Pointer to DAC control registers.
+  int timer = 0;
 
 	  /// Get index into CDS_HARDWARE struct based on total number of DAC cards found by mapping routine
           /// in map.c
@@ -66,7 +67,18 @@ int gsc18ao8Init(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
           //dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_EXT_TRIG_SRC;
           dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_DIFF_OUTS;
 
-          printk("DAC OUTPUT CONFIG after init = 0x%x\n",dac18bitPtr->OUTPUT_CONFIG);
+	  // Start Calibration
+	  dac18bitPtr->BCR |= GSAO_18BIT_AUTOCAL_SET;
+          do{
+	   	udelay(1000);
+		timer += 1;
+          }while((dac18bitPtr->BCR &  GSAO_18BIT_AUTOCAL_SET) != 0);
+
+	  if(dac18bitPtr->BCR & GSAO_18BIT_AUTOCAL_PASS) 
+		  printk("DAC AUTOCAL SUCCESS in %d milliseconds \n",timer);
+	  else
+		  printk("DAC AUTOCAL FAILED in %d milliseconds \n",timer);
+          printk("DAC OUTPUT CONFIG after init = 0x%x with BCR = 0x%x\n",dac18bitPtr->OUTPUT_CONFIG, dac18bitPtr->BCR);
 
         // TODO: maybe dac_dma_handle should be a separate variable for 18-bit board?
           pHardware->pci_dac[devNum] =

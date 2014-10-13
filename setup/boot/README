@@ -1,0 +1,5 @@
+aLIGO Boot Server setup files
+- files to be added to IFO's boot server
+
+Boot server runs pxe-boot server, Dolphin network manager
+

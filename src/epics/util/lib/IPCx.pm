@@ -514,7 +514,7 @@ $ipcxRcvrCnt = 0;
 		$::ipcxParts[$ii][8] = $eVar;
 		$::ipcxParts[$ii][9] = 0;
 		
-      		 print "IPC $ii is $::ipcxParts[$ii][8] $::systemName $ov $ss \n";
+      		 # print "IPC $ii is $::ipcxParts[$ii][8] $::systemName $ov $ss \n";
                if ( ($::partOutCnt[$kk] < 1) || ($::partOutCnt[$kk] > 2) ) {
                   #die "***ERROR: IPCx RECEIVER component $::ipcxParts[$ii][0] has $::partOutCnt[$kk] output(s)\n";
                   #die "***ERROR: IPCx RECEIVER component $::ipcxParts[$ii][0] has $::partOutCnt[$kk] output(s)\n";
