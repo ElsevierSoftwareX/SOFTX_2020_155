@@ -116,6 +116,7 @@ install: $(DB)
 	  echo "echo Another copy of Epics process running already\!" >> target/$(TARGET)/startup$$ifo; \
 	  echo "exit 1" >> target/$(TARGET)/startup$$ifo; \
 	  echo "fi" >> target/$(TARGET)/startup$$ifo; \
+	  echo "mkdir -p /opt/rtcds/$(SITE)/${ifo}/log/$$model" >> target/$(TARGET)/startup$$ifo; \
 	  echo ./$(TARGET) $(TARGET)$$ifo.cmd \> /opt/rtcds/$(SITE)/${ifo}/log/$$model/ioc$$ifo.log 2\>\&1 \& >> target/$(TARGET)/startup$$ifo ; \
 	  echo echo $(TARGET) $$ifo IOC Server started >> target/$(TARGET)/startup$$ifo ; \
 	  chmod +x target/$(TARGET)/startup$$ifo ; \
