@@ -39,6 +39,6 @@ if '_SW1S' in grdchan or '_SW2S' in grdchan:
 	medmDisplay = basedir + temp3
 	myargs = '"FPREFIX=' + ifo +',FNAME=' + filt +',RDISP=' + medmDisplay
 	#call(["medm","-x","-attach","-macro",myargs,filtalhdisplay])
-	call(["medm","-attach","-macro",myargs,filtalhdisplay])
+	call(["medm","-attach","-x","-macro",myargs,filtalhdisplay])
 else:
 	print 'NOT A SWITCH CHANNEL'
