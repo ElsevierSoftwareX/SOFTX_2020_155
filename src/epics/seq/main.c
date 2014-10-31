@@ -29,7 +29,7 @@ of this distribution.
 #include <unistd.h>
 #include <time.h>
 #include <sys/stat.h>
-
+#include <errno.h>
 #include "iocsh.h"
 #include "dbStaticLib.h"
 #include "crc.h"
@@ -305,11 +305,18 @@ int writeTable2File(char *filename, 		///< Name of file to write
 		    int ftype, 			///< Type of file to write
 		    CDS_CD_TABLE myTable[])	///< Table to be written.
 {
-int ii;
-FILE *csFile;
-
-	// Write out local monitoring table as snap file.
-	csFile = fopen(filename,"w");
+        int ii;
+        FILE *csFile;
+        char filemsg[128];
+    // Write out local monitoring table as snap file.
+        errno=0;
+        csFile = fopen(filename,"w");
+        if (csFile == NULL)
+        {
+            sprintf(filemsg,"ERROR Failed to open %s - %s",filename,strerror(errno));
+            logFileEntry(filemsg);
+	    return(-1);
+        }
 	for(ii=0;ii<chNum;ii++)
 	{
 		// printf("%s datatype is %d\n",myTable[ii].chname,myTable[ii].datatype);
@@ -342,6 +349,19 @@ FILE *csFile;
 		}
 	}
 	fclose(csFile);
+// Make sure group-write bit is set
+        struct stat filestat;
+        int res = stat(filename, &filestat);
+        mode_t filemod = filestat.st_mode | S_IWGRP;
+        errno=0;
+        int setstat = chmod(filename,filemod);
+        if (setstat) 
+        {
+            sprintf(filemsg,"ERROR Unable to set group-write on %s - %s",filename,strerror(errno));
+            logFileEntry(filemsg);
+            return(-2);
+        }
+        return(0);
 }
 // Savetype
 #define SAVE_TABLE_AS_SDF	1
@@ -407,25 +427,61 @@ char shortfilename[64];
 		case SAVE_TABLE_AS_SDF:
 			printf("Save table as sdf\n");
 			status = writeTable2File(filename,SDF_FILE_PARAMS_ONLY,cdTable);
-			sprintf(filemsg,"Save TABLE as SDF: %s",filename);
-			break;
+			if (!status) 
+                        {    
+                            sprintf(filemsg,"Save TABLE as SDF: %s",filename);
+			}
+			else
+                        {
+                            sprintf(filemsg,"FAILED FILE SAVE %s",filename);
+			    logFileEntry(filemsg);
+                            return(-2);
+			}
+                        break;
 		case SAVE_TABLE_AS_BURT:
 			printf("Save table as burt\n");
 			status = writeTable2File(filename,SDF_FILE_BURT_ONLY,cdTable);
-			sprintf(filemsg,"Save TABLE as BURT: %s",filename);
+			if (!status) 
+                        {    
+			    sprintf(filemsg,"Save TABLE as BURT: %s",filename);
+                        }
+			else
+                        {
+                            sprintf(filemsg,"FAILED FILE SAVE %s",filename);
+			    logFileEntry(filemsg);
+                            return(-2);
+			}
 			break;
 		case SAVE_EPICS_AS_SDF:
 			printf("Save epics as sdf\n");
 			status = getEpicsSettings(chNum);
 			status = writeTable2File(filename,SDF_FILE_PARAMS_ONLY,cdTableP);
-			sprintf(filemsg,"Save EPICS as SDF: %s",filename);
-			break;
+			if (!status) 
+                        {    
+			    sprintf(filemsg,"Save EPICS as SDF: %s",filename);
+			}
+			else
+                        {
+                            sprintf(filemsg,"FAILED FILE SAVE %s",filename);
+			    logFileEntry(filemsg);
+                            return(-2);
+			}
+                        break;
 		case SAVE_EPICS_AS_BURT:
 			printf("Save epics as burt\n");
 			status = getEpicsSettings(chNum);
 			status = writeTable2File(filename,SDF_FILE_BURT_ONLY,cdTableP);
-			sprintf(filemsg,"Save EPICS as BURT: %s",filename);
-			break;
+			if (!status)
+                        {
+                            sprintf(filemsg,"Save EPICS as BURT: %s",filename);
+			}
+			else
+                        {
+                            sprintf(filemsg,"FAILED FILE SAVE %s",filename);
+			    logFileEntry(filemsg);
+                            return(-2);
+			}
+                        break;
 		default:
 			sprintf(filemsg,"BAD SAVE REQUEST %s",filename);
 			logFileEntry(filemsg);
