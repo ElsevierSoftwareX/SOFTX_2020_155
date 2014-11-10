@@ -108,6 +108,7 @@ $iopTimeSlave = -1;
 $rfmTimeSlave = -1;
 $diagTest = -1;
 $flipSignals = 0;
+$edcu = 0;
 $pciNet = -1;
 $shmem_daq = 0; # Do not use shared memory DAQ connection
 $no_sync = 0; # Sync up to 1PPS by default
@@ -1294,8 +1295,20 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT epicsOutput.adcWaitTime int ao 0 
 print OUTH "\tint timeErr;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_ERR epicsOutput.timeErr int ao 0\n";
 
+if ($edcu) {
+print OUTH "\tint timeDiag;\n";
+print EPICS "DUMMY FEC\_$dcuId\_TIME_DIAG int ai 0\n";
+print OUTH "\tint daqByteCnt;\n";
+print EPICS "DUMMY FEC\_$dcuId\_DAQ_BYTE_COUNT int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"4000\") field(HHSV,\"MINOR\")\n";
+print EPICS "DUMMY FEC\_$dcuId\_EDCU_CHAN_NOCON int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
+print EPICS "DUMMY FEC\_$dcuId\_EDCU_CHAN_CONN int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
+print EPICS "DUMMY FEC\_$dcuId\_EDCU_CHAN_CNT int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
+}else{
 print OUTH "\tint timeDiag;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_DIAG epicsOutput.timeDiag int ao 0\n";
+print OUTH "\tint daqByteCnt;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.daqByteCnt int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"4000\") field(HHSV,\"MINOR\")\n";
+}
 
 print OUTH "\tint diagWord;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DIAG_WORD epicsOutput.diagWord int ao 0\n";
@@ -1370,8 +1383,8 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_IPC_STAT epicsOutput.ipcStat int ao 0\n";
 print OUTH "\tint fbNetStat;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_FB_NET_STATUS epicsOutput.fbNetStat int ao 0\n";
 
-print OUTH "\tint daqByteCnt;\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.daqByteCnt int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"4000\") field(HHSV,\"MINOR\")\n";
+# print OUTH "\tint daqByteCnt;\n";
+# print EPICS "OUTVARIABLE FEC\_$dcuId\_DAQ_BYTE_COUNT epicsOutput.daqByteCnt int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"4000\") field(HHSV,\"MINOR\")\n";
 
 print OUTH "\tint dacEnable;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_MASTER_STAT epicsOutput.dacEnable int ao 0\n";
@@ -2527,6 +2540,11 @@ sub createEpicsMakefile {
 	print OUTME "$skeleton";
 	print OUTME "\.st\n";
 	print OUTME "\n";
+	if ($edcu) {
+	print OUTME "SRC += $rcg_src_dir/src/epics/seq/edcu.c\n";
+	} else {
+	print OUTME "SRC += $rcg_src_dir/src/epics/seq/main.c\n";
+	}
 	print OUTME "SRC += $rcg_src_dir/src/drv/rfm.c\n";
 	print OUTME "SRC += $rcg_src_dir/src/drv/param.c\n";
 	print OUTME "SRC += $rcg_src_dir/src/drv/crc.c\n";
@@ -2563,6 +2581,10 @@ sub createEpicsMakefile {
 	print OUTME "\U$skeleton";
 	print OUTME "_CODE\n";
 	print OUTME "EXTRA_CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
+	if ($edcu) {
+	  print OUTME "EXTRA_CFLAGS += -DEDCU=1\n";
+	  print OUTME "EXTRA_CFLAGS += -DNO_DAQ_IN_SKELETON=1\n";
+	}
 	print OUTME "\n";
 	print OUTME "LIBFLAGS += -lezca\n";
 	if($systemName eq "sei" || $useFIRs)

@@ -79,7 +79,7 @@ LIBFLAGS += -lpthread  -lreadline -lcurses -lrt
 # and all the rest, which should be C files
 SEQ_SRCS = $(filter %.st, $(SRC))
 CSRCS = $(filter-out %.st, $(SRC))
-CSRCS += $(RCG_SRC_DIR)/src/epics/seq/main.c
+#CSRCS += $(RCG_SRC_DIR)/src/epics/seq/main.c
 # Required Epics files
 CCSRCS += build/$(TARGET)/registerRecordDeviceDriver.cc
 
@@ -138,6 +138,7 @@ install: $(DB)
 		\
 		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet DAQ_FILE /opt/rtcds/$(SITE)/${ifo}/chans/daq/$$ucmodel.ini" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet DAQ_DIR /opt/rtcds/$(SITE)/${ifo}/chans/daq/" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet COEFF_FILE /opt/rtcds/$(SITE)/${ifo}/chans/$$ucmodel.txt" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet LOG_DIR /opt/rtcds/$(SITE)/${ifo}/log/$$model" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet SDF_DIR /opt/rtcds/$(SITE)/${ifo}/target/$$model/$(TARGET)/burt/" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
