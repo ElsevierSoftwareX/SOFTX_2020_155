@@ -45,6 +45,7 @@ of this distribution.
 #include "fb.h"
 #include "../../drv/symmetricom/symmetricom.h"
 
+#define EDCU_MAX_CHANS	10000
 // Gloabl variables		****************************************************************************************
 char timechannel[256];		///< Name of the GPS time channel for timestamping.
 char reloadtimechannel[256];	///< Name of EPICS channel which contains the BURT reload requests.
@@ -63,9 +64,9 @@ typedef struct daqd_c {
 	int con_chans;
 	int val_events;
 	int con_events;
-	double channel_value[10000];
-	char channel_name[10000][64];
-	int channel_status[10000];
+	double channel_value[EDCU_MAX_CHANS];
+	char channel_name[EDCU_MAX_CHANS][64];
+	int channel_status[EDCU_MAX_CHANS];
 	long gpsTime;
 	long epicsSync;
 } daqd_c;
@@ -77,11 +78,11 @@ static struct cdsDaqNetGdsTpNum *shmTpTable;
 static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
 static const int header_size = sizeof(struct rmIpcStr) + sizeof(struct cdsDaqNetGdsTpNum);
 static DAQ_XFER_INFO xferInfo;
-static float dataBuffer[2][10000];
+static float dataBuffer[2][EDCU_MAX_CHANS];
 static int timeIndex;
 static int cycleIndex;
 static int symmetricom_fd = -1;
-int timemarks[16] = {0,62500,125000,187500,250000,312500,375000,437500,500000,562500,625000,687500,750000,812500,875000,937500};
+int timemarks[16] = {1000,63500,126000,188500,251000,313500,376000,438500,501000,563500,626000,688500,751000,813500,876000,938500};
 int nextTrig = 0;
 
 
@@ -202,10 +203,11 @@ long status;
 				status = dbNameToAddr(s,&saddr);
 				status = dbPutField(&saddr,DBR_STRING,"",1);
 	}
+	return(dc);
 }
 
 // **************************************************************************
-void edcuCreateChanFile(char *fdir) {
+void edcuCreateChanFile(char *fdir, char *edcuinifilename, char *fecid) {
 // **************************************************************************
 int i;
 int status;
@@ -215,14 +217,17 @@ FILE *edcuini;
 FILE *edcumaster;
 FILE *edcuheader;
 char masterfile[64]; 
-char edcuinifilename[64]; 
 char edcuheaderfilename[64];
 char line[128];
 char *newname;
 char edcufilename[64];
+char *dcuid;
 
+		dcuid = strtok(fecid,"-");
+		printf("DCUID = %s -- %s\n",dcuid,fecid);
+		dcuid = strtok(NULL,"-");
+		printf("DCUID = %s -- %s\n",dcuid,fecid);
 	sprintf(masterfile, "%s%s", fdir, "edcumaster.txt");
-	sprintf(edcuinifilename, "%s%s", fdir, "EDCU.ini");
 	sprintf(edcuheaderfilename, "%s%s", fdir, "edcuheader.txt");
 
 	// Open the master file which contains list of EDCU files to read channels from.
@@ -238,6 +243,7 @@ char edcufilename[64];
 	        logFileEntry(errMsg);
         }
 
+#if 0
 	// Get .ini file header and write to composite file.
 	edcuheader = fopen(edcuheaderfilename,"r");
 	if(edcuheader == NULL) {
@@ -248,6 +254,19 @@ char edcufilename[64];
 		fprintf(edcuini,"%s",line);
 	}
 	fclose(edcuheader);
+#endif
+
+	// Write standard header into .ini file
+	fprintf(edcuini,"%s","[default] \n");
+	fprintf(edcuini,"%s","gain=1.00 \n");
+	fprintf(edcuini,"%s","datatype=4 \n");
+	fprintf(edcuini,"%s","ifoid=0 \n");
+	fprintf(edcuini,"%s","slope=1 \n");
+	fprintf(edcuini,"%s","acquire=3 \n");
+	fprintf(edcuini,"%s","offset=0 \n");
+	fprintf(edcuini,"%s","units=undef \n");
+	fprintf(edcuini,"%s%s%s","dcuid=",dcuid," \n");
+	fprintf(edcuini,"%s","datarate=16 \n\n");
 
 	// Read the master file entries.
 	while(fgets(line,sizeof line,edcumaster) != NULL) {
@@ -270,33 +289,33 @@ char edcufilename[64];
 }
 
 // **************************************************************************
-void edcuCreateChanList(char *fdir) {
+void edcuCreateChanList(char *daqfilename) {
 // **************************************************************************
 int i;
 int status;
 FILE *daqfileptr;
 FILE *edculog;
 char errMsg[64];
-char daqfile[64];
+// char daqfile[64];
 char line[128];
 char *newname;
 
-	sprintf(daqfile, "%s%s", fdir, "EDCU.ini");
+	// sprintf(daqfile, "%s%s", fdir, "EDCU.ini");
 	daqd_edcu1.num_chans = 0;
-	daqfileptr = fopen(daqfile,"r");
+	daqfileptr = fopen(daqfilename,"r");
 	if(daqfileptr == NULL) {
-		sprintf(errMsg,"DAQ FILE ERROR: FILE %s DOES NOT EXIST\n",daqfile);
+		sprintf(errMsg,"DAQ FILE ERROR: FILE %s DOES NOT EXIST\n",daqfilename);
 	        logFileEntry(errMsg);
         }
 	edculog = fopen(edculogfilename,"w");
 	if(daqfileptr == NULL) {
-		sprintf(errMsg,"DAQ FILE ERROR: FILE %s DOES NOT EXIST\n",daqfile);
+		sprintf(errMsg,"DAQ FILE ERROR: FILE %s DOES NOT EXIST\n",edculogfilename);
 	        logFileEntry(errMsg);
         }
 	while(fgets(line,sizeof line,daqfileptr) != NULL) {
 		fprintf(edculog,"%s",line);
-		if(strncmp(line,"[",1) == 0) {
-			status = strlen(line);
+		status = strlen(line);
+		if(strncmp(line,"[",1) == 0 && status > 0) {
 			newname = strtok(line,"]");
 			// printf("status = %d New name = %s and %s\n",status,line,newname);
 			newname = strtok(line,"[");
@@ -335,6 +354,7 @@ float *daqData;
 int buf_size;
 int ii;
 
+		
 	buf_size = DAQ_DCU_BLOCK_SIZE*DAQ_NUM_SWING_BUFFERS;
 	daqData = (float *)(shmDataPtr + (buf_size * daqBlockNum));
 	for(ii=0;ii<daqd_edcu1.num_chans;ii++) {
@@ -351,7 +371,13 @@ int ii;
 	dipc->bp[daqBlockNum].crc = crcSend;
 	dipc->bp[daqBlockNum].timeSec = (unsigned int) cycle_gps_time;
 	dipc->bp[daqBlockNum].timeNSec = (unsigned int)daqBlockNum;
-	dipc->cycle = daqBlockNum;
+	// DAQ expects data xmission 2 cycles later, so trigger sending of 
+	// data already buffered and ready to go to keep sample time correct.
+	daqBlockNum -= 2;
+	if(daqBlockNum < 0) {
+		daqBlockNum += 16;
+	}
+	dipc->cycle = daqBlockNum;	// Triggers sending of data by mx_stream.
 
 }
 
@@ -515,8 +541,8 @@ sleep(2);
 	
 	sprintf(edculogfilename, "%s%s", logdir, "/edcu.log");
 	edcuInitialize(daqsharedmemname);
-	edcuCreateChanFile(daqDir);
-	edcuCreateChanList(daqDir);
+	edcuCreateChanFile(daqDir,daqFile,pref);
+	edcuCreateChanList(daqFile);
 	status = dbPutField(&chcntaddr,DBR_LONG,&daqd_edcu1.num_chans,1);
 	int datarate = daqd_edcu1.num_chans * 4 / 1000;
 	status = dbPutField(&daqbyteaddr,DBR_LONG,&datarate,1);
@@ -526,7 +552,7 @@ sleep(2);
 	daqd_edcu1.epicsSync = 0;
 
 // End SPECT
-	for (ii=0;ii<2000;ii++) daqd_edcu1.channel_status[ii] = 0xbad;
+	for (ii=0;ii<EDCU_MAX_CHANS;ii++) daqd_edcu1.channel_status[ii] = 0xbad;
 
 	int dropout = 0;
 	int numDC = 0;
