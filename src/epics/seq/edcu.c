@@ -223,10 +223,9 @@ char *newname;
 char edcufilename[64];
 char *dcuid;
 
-		dcuid = strtok(fecid,"-");
-		printf("DCUID = %s -- %s\n",dcuid,fecid);
-		dcuid = strtok(NULL,"-");
-		printf("DCUID = %s -- %s\n",dcuid,fecid);
+	sprintf(errMsg,"%s",fecid);
+	dcuid = strtok(errMsg,"-");
+	dcuid = strtok(NULL,"-");
 	sprintf(masterfile, "%s%s", fdir, "edcumaster.txt");
 	sprintf(edcuheaderfilename, "%s%s", fdir, "edcuheader.txt");
 
@@ -242,19 +241,6 @@ char *dcuid;
 		sprintf(errMsg,"DAQ FILE ERROR: FILE %s DOES NOT EXIST\n",edcuinifilename);
 	        logFileEntry(errMsg);
         }
-
-#if 0
-	// Get .ini file header and write to composite file.
-	edcuheader = fopen(edcuheaderfilename,"r");
-	if(edcuheader == NULL) {
-		sprintf(errMsg,"EDCU HEADER FILE ERROR: FILE %s DOES NOT EXIST\n",edcuheaderfilename);
-	        logFileEntry(errMsg);
-        }
-	while(fgets(line,sizeof line,edcuheader) != NULL) {
-		fprintf(edcuini,"%s",line);
-	}
-	fclose(edcuheader);
-#endif
 
 	// Write standard header into .ini file
 	fprintf(edcuini,"%s","[default] \n");
@@ -533,10 +519,6 @@ sleep(2);
 	char gpstimedisplayname[256]; sprintf(gpstimedisplayname, "%s_%s", pref, "TIME_DIAG");	// SDF Save command.
 	status = dbNameToAddr(gpstimedisplayname,&gpstimedisplayaddr);		// Get Address.
 
-	// Initialize DAQ and COEFF file CRC checksums for later compares.
-	daqFileCrc = checkFileCrc(daqFile);
-	coeffFileCrc = checkFileCrc(coeffFile);
-
 // EDCU STUFF ********************************************************************************************************
 	
 	sprintf(edculogfilename, "%s%s", logdir, "/edcu.log");
@@ -557,6 +539,10 @@ sleep(2);
 	int dropout = 0;
 	int numDC = 0;
 	int cycle = 0;
+
+	// Initialize DAQ and COEFF file CRC checksums for later compares.
+	daqFileCrc = checkFileCrc(daqFile);
+	coeffFileCrc = checkFileCrc(coeffFile);
 	// Start Infinite Loop 		*******************************************************************************
 	for(;;) {
 		// usleep(100000);					// Run loop at 10Hz.
