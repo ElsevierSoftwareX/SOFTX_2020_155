@@ -1288,6 +1288,8 @@ sleep(2);
 	daqFileCrc = checkFileCrc(daqFile);
 	coeffFileCrc = checkFileCrc(coeffFile);
 
+	sleep(1);	// Need to wait before first restore to allow sequencers to do their initialization.
+
 	// Start Infinite Loop 		*******************************************************************************
 	for(;;) {
 		usleep(100000);					// Run loop at 10Hz.
