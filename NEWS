@@ -1,6 +1,9 @@
 ==================================================================================================
 Changes for 2.9 
 ==================================================================================================
+- Bug Fix(758): Removed load matrix reset from being placed at the end of code cycle in RampMuxMatrix.pm.
+  This is already done properly in the matrix part code itself and this added clearing can result
+  in the race condition ie sometimes load matrix command ignored.
 - Modified ADC overflow reporting, same as done for DAC outputs.
 - Added capability to define engineering units, for both fast/slow channels, to be passed and to
   and recorded by DAQ system.
