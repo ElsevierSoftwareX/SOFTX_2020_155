@@ -68,7 +68,6 @@ sub printFrontEndVars  {
     my $matIns = $::partInCnt[$::partInNum[$i][0]];
     print ::OUT "double \L$::xpartName[$i]\[$matOuts\];\n";
     print ::OUT "static RampParamState \L$::xpartName[$i]_state\[$matOuts\]\[$matIns\];\n";
-    $::feTailCode .= "pLocalEpics->" . $::systemName . "\." . "$::xpartName[$i]_LOAD_MATRIX" . " =  0;\n";
     if ($::rampMatrixUsed == 0) {
           print ::OUT "int matrixInputCount, matrixOutputCount;\n";
           $::rampMatrixUsed = 1;
