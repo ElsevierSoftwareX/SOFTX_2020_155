@@ -58,7 +58,7 @@ int checkFileCrc(char *);
 void getSdfTime(char *);
 void logFileEntry(char *);
 
-long daqFileCrc;
+unsigned long daqFileCrc;
 typedef struct daqd_c {
 	int num_chans;
 	int con_chans;
@@ -371,17 +371,13 @@ int ii;
 void edcuInitialize(char *shmem_fname)
 // **************************************************************************
 {
-char filemsg[128];
-volatile void *base;
 
+	// Find start of DAQ shared memory
 	void *dcu_addr = findSharedMemory(shmem_fname);
-	sprintf(filemsg,"DAQ INFO at 0x%lx",dcu_addr);
-	logFileEntry(filemsg);
-	printf("findShared = 0x%lx\n",dcu_addr);
+	// Find the IPC area to communicate with mxstream
 	dipc = (struct rmIpcStr *)((char *)dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
-	printf("dipc = 0x%lx\n",dipc);
+	// Find the DAQ data area.
         shmDataPtr = (char *)((char *)dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
-	printf("shmDataPtr = 0x%lx\n",shmDataPtr);
 }
 
 
@@ -462,6 +458,7 @@ int main(int argc,char *argv[])
 	char modfilemsg[] = "Modified File Detected ";
 	struct stat st = {0};
 	char filemsg[128];
+	char logmsg[256];
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -542,7 +539,10 @@ sleep(2);
 
 	// Initialize DAQ and COEFF file CRC checksums for later compares.
 	daqFileCrc = checkFileCrc(daqFile);
+	printf("DAQ file CRC = %u \n",daqFileCrc);  
 	coeffFileCrc = checkFileCrc(coeffFile);
+	sprintf(logmsg,"%s\n%s = %u\n%s = %d","EDCU code restart","File CRC",daqFileCrc,"Chan Cnt",daqd_edcu1.num_chans);
+	logFileEntry(logmsg);
 	// Start Infinite Loop 		*******************************************************************************
 	for(;;) {
 		// usleep(100000);					// Run loop at 10Hz.
