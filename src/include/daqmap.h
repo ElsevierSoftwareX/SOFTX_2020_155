@@ -37,7 +37,7 @@
 
 #define DAQ_DCU_BLOCK_SIZE	(DAQ_DCU_SIZE/DAQ_NUM_DATA_BLOCKS)	///< Size of one DAQ data block
 
-#define DAQ_DCU_RATE_WARNING	3900	///< KByte to set warning DAQ rate is nearing max of 4MB/sec/model
+#define DAQ_DCU_RATE_WARNING	3999	///< KByte to set warning DAQ rate is nearing max of 4MB/sec/model
 
 /// Structure for maintaining DAQ channel information
 typedef struct DAQ_LKUP_TABLE {
