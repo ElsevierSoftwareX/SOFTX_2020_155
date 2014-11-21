@@ -1,6 +1,9 @@
 ==================================================================================================
 Post 2.9 Changes
 ==================================================================================================
+- Bug Fix (732,765): Correct DAQD output for "status channel 2","status channel 3" to fix 
+    formatting, speed-up - incremented protocol from 12.0 to 12.1
+    - NOTE: Fix also made in branch-2.9
 - Bug Fix (762): DAQ error bit of STATEWORD adjusted to set error at 4MByte/sec, previously 3.5.
 - Bug Fix(758): Removed load matrix reset from being placed at the end of code cycle in RampMuxMatrix.pm.
   This is already done properly in the matrix part code itself and this added clearing can result
