@@ -1253,6 +1253,9 @@ CommandLine: /* Nothing */
 		}
 
 		if ($3 == 3) {
+
+                  *yyout << dec; 
+
 		  if (!schan) {
 		    // Sending nicely formated list of channels
 		    // Add archive channel numbers
@@ -1265,30 +1268,49 @@ CommandLine: /* Nothing */
 		    // ACK field and the total number of channels
 		    //
 		    *yyout << S_DAQD_OK;
-		    *yyout << dec << nchannels << endl;
+		    *yyout << nchannels << endl;
 		  }
 
 		  // DAQ channels
 		  //
 		  for (int i = 0; i < num_channels; i++) {
 		    if (schan) {
-		      *yyout << ((my_lexer *) lexer) -> channels [i].name << endl;
-		    } else {
-		      *yyout << c [i].name << endl;
-		    }
-		    *yyout << c [i].sample_rate << endl;
-		    *yyout << c [i].data_type << endl;
+		      *yyout << ((my_lexer *) lexer) -> channels [i].name << "\n";
+		      *yyout << ((my_lexer *) lexer) -> channels [i].sample_rate << "\n";
+		      *yyout << ((my_lexer *) lexer) -> channels [i].data_type << "\n";
 #ifdef GDS_TESTPOINTS
-		    if (IS_GDS_ALIAS(c [i])) {
-		    	*yyout << c [i].chNum << endl;
-		    } else 
+		      if (IS_GDS_ALIAS(((my_lexer *) lexer) -> channels [i])) {
+		    	*yyout << ((my_lexer *) lexer) -> channels [i].chNum << "\n";
+		      } else {
+		    	*yyout << 0 << "\n";
+		      }
+#else
+		      *yyout << 0 << "\n";
 #endif
-		    	*yyout << 0 << endl;
-		    *yyout << c [i].group_num << endl;
-		    *yyout << c [i].signal_units << endl;
-		    *yyout << c [i].signal_gain << endl;
-		    *yyout << c [i].signal_slope << endl;
-		    *yyout << c [i].signal_offset << endl;
+		      *yyout << ((my_lexer *) lexer) -> channels [i].group_num << "\n";
+		      *yyout << ((my_lexer *) lexer) -> channels [i].signal_units << "\n";
+		      *yyout << ((my_lexer *) lexer) -> channels [i].signal_gain << "\n";
+		      *yyout << ((my_lexer *) lexer) -> channels [i].signal_slope << "\n";
+		      *yyout << ((my_lexer *) lexer) -> channels [i].signal_offset << "\n";
+		    } else {
+		      *yyout << c [i].name << "\n";
+		      *yyout << c [i].sample_rate << "\n";
+		      *yyout << c [i].data_type << "\n";
+#ifdef GDS_TESTPOINTS
+		      if (IS_GDS_ALIAS(c [i])) {
+		    	*yyout << c [i].chNum << "\n";
+		      } else {                      
+ 	                *yyout << 0 << "\n";
+		      }                      
+#else
+		      *yyout << 0 << "\n";
+#endif
+		      *yyout << c [i].group_num << "\n";
+		      *yyout << c [i].signal_units << "\n";
+		      *yyout << c [i].signal_gain << "\n";
+		      *yyout << c [i].signal_slope << "\n";
+		      *yyout << c [i].signal_offset << "\n";
+		    }                      
 		  }
 
 		  if (!schan) {
@@ -1300,24 +1322,27 @@ CommandLine: /* Nothing */
 		    
 		      int trend = a -> data_type == archive_c::secondtrend || a -> data_type == archive_c::minutetrend;
 		      for (unsigned int i = 0; i < a -> nchannels; i++) {
-		    	*yyout <<  a -> channels [i].name << endl;
-		    	*yyout <<  a -> channels [i].rate << endl;
-		    	*yyout <<  a -> channels [i].type << endl;
+		    	*yyout <<  a -> channels [i].name << "\n";
+		    	*yyout <<  a -> channels [i].rate << "\n";
+		    	*yyout <<  a -> channels [i].type << "\n";
 		    	*yyout <<  0 << endl;
 			if (!strcasecmp(a->fsd.get_path(), "obsolete")
 			    || a -> channels [i].old) {
-			  *yyout << channel_t::obsolete_arc_groupn << endl;
+			  *yyout << channel_t::obsolete_arc_groupn << "\n";
 			} else {
-			  *yyout << channel_t::arc_groupn <<endl;
+			  *yyout << channel_t::arc_groupn << "\n";
 			}
-		    	*yyout << " " << endl;
-		    	*yyout << 1 << endl;
-		    	*yyout << 1 << endl;
-		    	*yyout << 0 << endl;
+		    	*yyout << " " << "\n";
+		    	*yyout << 1 << "\n";
+		    	*yyout << 1 << "\n";
+		    	*yyout << 0 << "\n";
 		      }
 		      a -> unlock();
 		    }
 		  }
+
+                  *yyout << flush;
+
 		} else if (((my_lexer *)lexer) -> strict) {
 
 		  if (!schan) {
@@ -1358,54 +1383,96 @@ CommandLine: /* Nothing */
 		    yyout -> setf (ios::left, ios::adjustfield);
 		    if (schan) {
 		      *yyout << setw (channel_t::channel_name_max_len) << setfill (' ') 
-			   << ((my_lexer *) lexer) -> channels [i].name << "\t";
-		    } else {
-		      *yyout << setw (channel_t::channel_name_max_len) << setfill (' ') << daqd.channels [i].name;
-		    }
-		    yyout -> setf (ios::right, ios::adjustfield);
-		    if ($3) {
-		      *yyout << setw (8) << setfill ('0') << hex << c [i].sample_rate;
-		    } else {
+			   << ((my_lexer *) lexer) -> channels [i].name;
+		      if ($3) {
+		        *yyout << setw (8) << setfill ('0') << hex << ((my_lexer *) lexer) -> channels [i].sample_rate;
+		      } else {
 		      /* Limit older clients to 16K rate */
-		      *yyout << setw (4) << setfill ('0') << hex << ((c [i].sample_rate > (16*1024))? (16*1024): c[i].sample_rate);
-		    }
-		    if ($3 > 1) {
-#ifdef GDS_TESTPOINTS
-		      if (IS_GDS_ALIAS(c[i])) {
-		        *yyout << setw (8) << setfill ('0') << hex << c[i].chNum;
-		      } else
-#endif
-		      {
-		        *yyout << setw (8) << setfill ('0') << hex << 0;
+		        *yyout << setw (4) << setfill ('0') << hex << ((((my_lexer *) lexer) -> channels [i].sample_rate > (16*1024))? (16*1024): ((my_lexer *) lexer) -> channels[i].sample_rate);
 		      }
-	 	    } else {
-		      *yyout << setw (4) << setfill ('0') << hex << c[i].chNum;
-		    }
+		      if ($3 > 1) {
 #ifdef GDS_TESTPOINTS
-		    if (IS_GDS_ALIAS(c[i])) {
+                        if (IS_GDS_ALIAS(((my_lexer *) lexer) -> channels[i])) {
+                          *yyout << setw (8) << setfill ('0') << hex << ((my_lexer *) lexer) -> channels[i].chNum;
+                        } else
+#endif
+                          {
+                            *yyout << setw (8) << setfill ('0') << hex << 0;
+                          }
+                      } else {
+                        *yyout << setw (4) << setfill ('0') << hex << ((my_lexer *) lexer) -> channels[i].chNum;
+                      }
+#ifdef GDS_TESTPOINTS
+                      if (IS_GDS_ALIAS(((my_lexer *) lexer) -> channels[i])) {
+		    	*yyout << setw (4) << setfill ('0') << hex << ((my_lexer *) lexer) -> channels[i].tp_node;
+                      } else {
+#endif
+		    	*yyout << setw (4) << setfill ('0') << hex << ((my_lexer *) lexer) -> channels[i].group_num;
+#ifdef GDS_TESTPOINTS
+                      }
+#endif
+                      if ($3 < 2) {
+                        *yyout << setw (4) << setfill ('0') << hex << (((my_lexer *) lexer) -> channels[i].bps > 0xffff? 0:  ((my_lexer *) lexer) -> channels[i].bps);
+                      }
+                      *yyout << setw (4) << setfill ('0') << hex << ((my_lexer *) lexer) -> channels[i].data_type;
+                      // send conversion data
+                      *yyout << setw (8) << setfill ('0') << hex
+                             << *((unsigned int*)&((my_lexer *) lexer) -> channels[i].signal_gain);
+                      *yyout << setw (8) << setfill ('0') << hex
+                             << *((unsigned int*)&((my_lexer *) lexer) -> channels[i].signal_slope);
+                      *yyout << setw (8) << setfill ('0') << hex
+                             << *((unsigned int*)&((my_lexer *) lexer) -> channels[i].signal_offset);
+                      yyout -> setf (ios::left, ios::adjustfield);
+                      *yyout << setw (channel_t::engr_unit_max_len) << setfill (' ')
+                             << ((my_lexer *) lexer) -> channels[i].signal_units;
+                      yyout -> setf (ios::right, ios::adjustfield);
+                    } else {
+		      *yyout << setw (channel_t::channel_name_max_len) << setfill (' ') << daqd.channels [i].name;
+                      yyout -> setf (ios::right, ios::adjustfield);
+                      if ($3) {
+                        *yyout << setw (8) << setfill ('0') << hex << c [i].sample_rate;
+                      } else {
+                        /* Limit older clients to 16K rate */
+                        *yyout << setw (4) << setfill ('0') << hex << ((c [i].sample_rate > (16*1024))? (16*1024): c[i].sample_rate);
+                      }
+                      if ($3 > 1) {
+#ifdef GDS_TESTPOINTS
+                        if (IS_GDS_ALIAS(c[i])) {
+                          *yyout << setw (8) << setfill ('0') << hex << c[i].chNum;
+                        } else
+#endif
+                        {
+                          *yyout << setw (8) << setfill ('0') << hex << 0;
+                        }
+                      } else {
+                        *yyout << setw (4) << setfill ('0') << hex << c[i].chNum;
+                      }
+#ifdef GDS_TESTPOINTS
+                      if (IS_GDS_ALIAS(c[i])) {
 		    	*yyout << setw (4) << setfill ('0') << hex << c[i].tp_node;
-		    } else {
+                      } else {
 #endif
-		    	*yyout << setw (4) << setfill ('0') << hex << c[i].group_num;
+ 		    	*yyout << setw (4) << setfill ('0') << hex << c[i].group_num;
 #ifdef GDS_TESTPOINTS
-		    }
+                      }
 #endif
-		    if ($3 < 2) {
-		      *yyout << setw (4) << setfill ('0') << hex << (c[i].bps > 0xffff? 0:  c[i].bps);
-		    }
-		    *yyout << setw (4) << setfill ('0') << hex << c[i].data_type;
-		    // send conversion data
-		    *yyout << setw (8) << setfill ('0') << hex
-			   << *((unsigned int*)&c[i].signal_gain);
-		    *yyout << setw (8) << setfill ('0') << hex
-			   << *((unsigned int*)&c[i].signal_slope);
-		    *yyout << setw (8) << setfill ('0') << hex
-			   << *((unsigned int*)&c[i].signal_offset);
-		    yyout -> setf (ios::left, ios::adjustfield);
-		    *yyout << setw (channel_t::engr_unit_max_len) << setfill (' ')
-			   << c[i].signal_units;
-		    yyout -> setf (ios::right, ios::adjustfield);
-		  }
+                      if ($3 < 2) {
+                        *yyout << setw (4) << setfill ('0') << hex << (c[i].bps > 0xffff? 0:  c[i].bps);
+                      }
+                      *yyout << setw (4) << setfill ('0') << hex << c[i].data_type;
+                      // send conversion data
+                      *yyout << setw (8) << setfill ('0') << hex
+                             << *((unsigned int*)&c[i].signal_gain);
+                      *yyout << setw (8) << setfill ('0') << hex
+                             << *((unsigned int*)&c[i].signal_slope);
+                      *yyout << setw (8) << setfill ('0') << hex
+                             << *((unsigned int*)&c[i].signal_offset);
+                      yyout -> setf (ios::left, ios::adjustfield);
+                      *yyout << setw (channel_t::engr_unit_max_len) << setfill (' ')
+                             << c[i].signal_units;
+                      yyout -> setf (ios::right, ios::adjustfield);
+                    }
+                  }
 
 		  if (!schan) {
 		    // Send channel names from the archives
