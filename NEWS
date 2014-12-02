@@ -1,6 +1,9 @@
 ==================================================================================================
 Post 2.9 Changes
 ==================================================================================================
+- Bug Fix (764): Modified RampMuxMatrix part to only check load ramp command at 16Hz after a
+  16Hz boundary.  This allows load command to be captured by DAQ before being cleared by the FE
+  code. Fix also applied to V2.9.
 - Bug Fix (732,765): Correct DAQD output for "status channel 2","status channel 3" to fix 
     formatting, speed-up - incremented protocol from 12.0 to 12.1
     - NOTE: Fix also made in branch-2.9

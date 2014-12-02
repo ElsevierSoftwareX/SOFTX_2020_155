@@ -118,7 +118,8 @@ sub frontEndCode {
 
     $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]_mask = 1;\n";
     $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]_RAMPING_mask = 1;\n";
-    $calcExp .= "if (pLocalEpics->". $::systemName . "\." . "$::xpartName[$i]_LOAD_MATRIX" . " == 1)\n";
+    $calcExp .= "if (pLocalEpics->". $::systemName . "\." . "$::xpartName[$i]_LOAD_MATRIX" . " == 1 ";
+    $calcExp .= "&& (cycle % (FE_RATE/16)) == 10)\n";
     $calcExp .= "{\n";
     $calcExp .= "pLocalEpics->". $::systemName . "\." . "$::xpartName[$i]_LOAD_MATRIX = 0;\n";
     $calcExp .= "\tfor (matrixOutputCount = 0; matrixOutputCount < $matOuts; matrixOutputCount++) {\n";
