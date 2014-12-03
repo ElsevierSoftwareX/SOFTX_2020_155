@@ -1,6 +1,7 @@
 ==================================================================================================
 Post 2.9 Changes
 ==================================================================================================
+- Bug Fix (729): Errant value if input to TrueRMS = 0. Bug also fixed in branch-2.9.
 - Bug Fix (764): Modified RampMuxMatrix part to only check load ramp command at 16Hz after a
   16Hz boundary.  This allows load command to be captured by DAQ before being cleared by the FE
   code. Fix also applied to V2.9.
