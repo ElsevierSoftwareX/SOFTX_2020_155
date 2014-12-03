@@ -1,6 +1,7 @@
 ==================================================================================================
-Changes for 2.9 
+Changes for 2.9.1 release 
 ==================================================================================================
+- Bug Fix (729): Errant value if input to TrueRMS = 0.0.
 - Bug Fix (764): Modified RampMuxMatrix part to only check load ramp command at 16Hz after a
   16Hz boundary.  This allows load command to be captured by DAQ before being cleared by the FE
   code.
@@ -10,6 +11,9 @@ Changes for 2.9
 - Bug Fix(758): Removed load matrix reset from being placed at the end of code cycle in RampMuxMatrix.pm.
   This is already done properly in the matrix part code itself and this added clearing can result
   in the race condition ie sometimes load matrix command ignored.
+==================================================================================================
+Changes for 2.9 
+==================================================================================================
 - Modified ADC overflow reporting, same as done for DAC outputs.
 - Added capability to define engineering units, for both fast/slow channels, to be passed and to
   and recorded by DAQ system.

@@ -104,10 +104,13 @@ sub frontEndCode {
 	$calcExp .= " += ";
 	$calcExp .= "\L$::xpartName[$i]\_indatsqrd\[\L$::xpartName[$i]\_index\];\n";
 	$calcExp .= "\t\L$::xpartName[$i]\_sqrval = \L$::xpartName[$i]\_sqrsum\/(double) \L$::xpartName[$i]\_n;\n";
-	$calcExp .= "\tif (\L$::xpartName[$i]\_sqrval > 0.0)  \n";
+	$calcExp .= "\tif (\L$::xpartName[$i]\_sqrval > 0.0)  {\n";
 	$calcExp .= "\t\t\L$::xpartName[$i]";
 	$calcExp .= " = ";
 	$calcExp .= "lsqrt(\L$::xpartName[$i]\_sqrval);\n";
+	$calcExp .= "\t}else{ \n";
+	$calcExp .= "\t\t\L$::xpartName[$i] = 0.0; \n";
+	$calcExp .= "\t}\n";
 	$calcExp .= "}\n";
 	return $calcExp;
 }
