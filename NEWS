@@ -1,6 +1,7 @@
 ==================================================================================================
 Changes for 2.9.1 release 
 ==================================================================================================
+- Bug Fix (732): AUTOCAL of 18bit DAC modules made the default compile option in feCodeGen.pl.
 - Bug Fix (505): Added warning bit (bit 10) to STATEWORD to be set if either the Coeff File or
   DAQ config file has changed.
 - Bug Fix (772,773): SDF save issues bug fixes perfomed in src/epics/seq/main.c.
