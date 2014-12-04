@@ -78,14 +78,16 @@ sub createGdsMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"EXC",$ecolors{white});
 	$xpos = 400; $ypos = 26; $width = 20; $height = 15; 
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"OVF",$ecolors{white});
+	$xpos = 429; $ypos = 26; $width = 20; $height = 15; 
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"CFC",$ecolors{white});
 	$xpos = 78; $ypos = 47; $width = 60; $height = 15; 
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"STATE WORD",$ecolors{white});
 	$xpos = 152; $ypos = 47; $width = 218; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_STATE_WORD","0","7",$ecolors{red},$ecolors{green});
 	$xpos = 369; $ypos = 47; $width = 28; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_STATE_WORD","8","8",$ecolors{blue},$ecolors{green});
-	$xpos = 396; $ypos = 47; $width = 28; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_STATE_WORD","9","9",$ecolors{warning},$ecolors{green});
+	$xpos = 396; $ypos = 47; $width = 56; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_STATE_WORD","9","10",$ecolors{warning},$ecolors{green});
 
 	# ************* Create Background **************************************************************************
 	# Add Background rectangles
