@@ -308,6 +308,7 @@ int writeTable2File(char *filename, 		///< Name of file to write
         int ii;
         FILE *csFile;
         char filemsg[128];
+	char timestring[128];
     // Write out local monitoring table as snap file.
         errno=0;
         csFile = fopen(filename,"w");
@@ -317,32 +318,44 @@ int writeTable2File(char *filename, 		///< Name of file to write
             logFileEntry(filemsg);
 	    return(-1);
         }
+	if(ftype != SDF_WITH_INIT_FLAG) {
+		// Write BURT header
+		getSdfTime(timestring);
+		fprintf(csFile,"%s\n","--- Start BURT header");
+		fprintf(csFile,"%s%s\n","Time:      ",timestring);
+		fprintf(csFile,"%s\n","Login ID: controls ()");
+		fprintf(csFile,"%s\n","Eff  UID: 1001 ");
+		fprintf(csFile,"%s\n","Group ID: 1001 ");
+		fprintf(csFile,"%s\n","Keywords:");
+		fprintf(csFile,"%s\n","Comments:");
+		fprintf(csFile,"%s\n","Type:     Absolute  ");
+		fprintf(csFile,"%s\n","Directory /home/controls ");
+		fprintf(csFile,"%s\n","Req File: autoBurt.req ");
+		fprintf(csFile,"%s\n","--- End BURT header");
+	}
 	for(ii=0;ii<chNum;ii++)
 	{
-		// printf("%s datatype is %d\n",myTable[ii].chname,myTable[ii].datatype);
-		char tabs[8];
-		if(strlen(myTable[ii].chname) > 39) sprintf(tabs,"%s","\t");
-		else sprintf(tabs,"%s","\t\t");
-
+		if(myTable[ii].datatype == 1 && strlen(myTable[ii].data.strval) < 1)
+			sprintf(myTable[ii].data.strval,"%s"," ");
 		switch(ftype)
 		{
 		   case SDF_WITH_INIT_FLAG:
 			if(myTable[ii].datatype == 0)
-				fprintf(csFile,"%s%s%d\t%.15e\t\%d\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].data.chval,myTable[ii].mask,myTable[ii].initialized);
+				fprintf(csFile,"%s %d %.15e %d %d\n",myTable[ii].chname,1,myTable[ii].data.chval,myTable[ii].mask,myTable[ii].initialized);
 			else
-				fprintf(csFile,"%s%s%d\t%s\t\%d\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].data.strval,myTable[ii].mask,myTable[ii].initialized);
+				fprintf(csFile,"%s %d \"%s\" %d %d\n",myTable[ii].chname,1,myTable[ii].data.strval,myTable[ii].mask,myTable[ii].initialized);
 			break;
 		   case SDF_FILE_PARAMS_ONLY:
 			if(myTable[ii].datatype == 0)
-				fprintf(csFile,"%s%s%d\t%.15e\t%d\n",myTable[ii].chname,tabs,1,myTable[ii].data.chval,myTable[ii].mask);
+				fprintf(csFile,"%s %d %.15e %d\n",myTable[ii].chname,1,myTable[ii].data.chval,myTable[ii].mask);
 			else
-				fprintf(csFile,"%s%s%d\t%s\t\%d\n",myTable[ii].chname,tabs,1,myTable[ii].data.strval,myTable[ii].mask);
+				fprintf(csFile,"%s %d \"%s\" %d\n",myTable[ii].chname,1,myTable[ii].data.strval,myTable[ii].mask);
 			break;
 		   case SDF_FILE_BURT_ONLY:
 			if(myTable[ii].datatype == 0)
-				fprintf(csFile,"%s%s%d\t%.15e\n",myTable[ii].chname,tabs,1,myTable[ii].data.chval);
+				fprintf(csFile,"%s %d %.15e\n",myTable[ii].chname,1,myTable[ii].data.chval);
 			else
-				fprintf(csFile,"%s%s%d\t%s\n",myTable[ii].chname,tabs,1,myTable[ii].data.strval);
+				fprintf(csFile,"%s %d \"%s\" \n",myTable[ii].chname,1,myTable[ii].data.strval);
 			break;
 		   default:
 			break;
