@@ -1,6 +1,9 @@
 ==================================================================================================
 Post 2.9 Changes
 ==================================================================================================
+- Added a compile option (DUAL_DAQ_DC) for running with 2 data concentrators. Until I think of
+  a better solution, this is 'hardwired' in feCodeGen.pl by setting daq2dc = 1. If it is desired
+  to run with a single data concentrator, set this to daq2dc = 0 for now.
 - Bug Fix (732): AUTOCAL of 18bit DAC modules made the default compile option in feCodeGen.pl. This
   change also applied in branch 2.9.
 - mx_stream modified to provide additional diagnostics when used in a system with 2 DAQ data

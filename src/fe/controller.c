@@ -252,6 +252,11 @@ double dDacHistory[(MAX_DAC_MODULES * 16)][MAX_HISTRY];
 #define OVERSAMPLE_TIMES 1
 #endif
 
+#ifdef DUAL_DAQ_DC
+	#define MX_OK	15
+#else
+	#define MX_OK	3
+#endif
 
 // Whether run on internal timer (when no ADC cards found)
 int run_on_timer = 0;
@@ -1760,9 +1765,13 @@ udelay(1000);
 	  mxDiagR = daqPtr->status;
 	  if((mxDiag & 1) != (mxDiagR & 1)) mxStat = 1;
 	  if((mxDiag & 2) != (mxDiagR & 2)) mxStat += 2;
+#ifdef DUAL_DAQ_DC
+	  if((mxDiag & 4) != (mxDiagR & 4)) mxStat += 4;
+	  if((mxDiag & 8) != (mxDiagR & 8)) mxStat += 8;
+#endif
 	  pLocalEpics->epicsOutput.fbNetStat = mxStat;
   	  mxDiag = mxDiagR;
-	  if(mxStat != 3)
+	  if(mxStat != MX_OK)
 		feStatus |= FE_ERROR_DAQ;;
 	  usrHoldTime = 0;
   	  if(pLocalEpics->epicsInput.overflowReset)
@@ -2053,7 +2062,7 @@ udelay(1000);
 	  {
 		daqCycle = (daqCycle + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 		if(!(daqCycle % 2)) pLocalEpics->epicsOutput.epicsSync = daqCycle;
-}
+	  }
           if(subcycle == END_OF_DAQ_BLOCK) /*we have reached the 16Hz second barrier*/
             {
               /* Reset the data cycle counter */
