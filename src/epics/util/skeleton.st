@@ -37,6 +37,7 @@ program %SEQUENCER_NAME%
 %% #include "fmReadCoeff.h"
 %% #include "feComms.h"
 %% #include "findSharedMemory.h"
+%% #define FE_ERROR_CFC 0x400
 
 /* Cat string and make upper case */                                     /* MA */
 %% static char *strcat_upper(char *dest, char *src) {                    /* MA */
@@ -475,8 +476,11 @@ state monScreen{
 %%	   && prev_cycle == pEpics->epicsOutput.cycle);
 %%    prev_gps = pEpics->epicsOutput.timeDiag;
 %%    prev_cycle = pEpics->epicsOutput.cycle;
+      pvGet(msg);
+%%    if(strncmp(msg,"Modified",8) == 0) stateWord |= FE_ERROR_CFC;
+      pvGet(msgDAQ);
+%%    if(strncmp(msgDAQ,"Modified",8) == 0) stateWord |= FE_ERROR_CFC;
       pvPut(stateWord);
-
 // If RT Code runs, sync up to it.
 // else just wait 50msec.
 %% if(stateWord & 1) rtruns = 0;

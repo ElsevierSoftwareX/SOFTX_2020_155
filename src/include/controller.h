@@ -8,6 +8,7 @@
 #define FE_ERROR_DAC_ENABLE     0x80    // bit 7
 #define FE_ERROR_EXC_SET        0x100   // bit 8
 #define FE_ERROR_OVERFLOW       0x200   // bit 9
+#define FE_ERROR_CFC	        0x400   // bit 10, used by and also defined in skeleton.st
 
 #define ODC_ADC_OVF		0x1
 #define ODC_DAC_OVF		0x2

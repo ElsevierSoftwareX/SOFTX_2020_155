@@ -1,6 +1,8 @@
 ==================================================================================================
 Changes for 2.9.1 release 
 ==================================================================================================
+- Bug Fix (505): Added warning bit (bit 10) to STATEWORD to be set if either the Coeff File or
+  DAQ config file has changed.
 - Bug Fix (772,773): SDF save issues bug fixes perfomed in src/epics/seq/main.c.
 - Bug Fix (729): Errant value if input to TrueRMS = 0.0.
 - Bug Fix (764): Modified RampMuxMatrix part to only check load ramp command at 16Hz after a
