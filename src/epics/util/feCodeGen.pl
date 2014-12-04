@@ -2697,6 +2697,8 @@ if ($adcMaster > -1) {
   if($dacWdOverride > -1) {
   print OUTM "EXTRA_CFLAGS += -DDAC_WD_OVERRIDE\n";
   }
+  # ADD DAC_AUTOCAL to IOPs
+  print OUTM "EXTRA_CFLAGS += -DDAC_AUTOCAL\n";
 } else {
   print OUTM "#Uncomment to run on an I/O Master \n";
   print OUTM "#EXTRA_CFLAGS += -DADC_MASTER\n";
