@@ -1,6 +1,8 @@
 ==================================================================================================
 Post 2.9 Changes
 ==================================================================================================
+- mx_stream modified to provide additional diagnostics when used in a system with 2 DAQ data
+  concentrators.
 - Bug Fix (505): Added warning bit (bit 10) to STATEWORD to be set if either the Coeff File or
   DAQ config file has changed. This fix also added to branch-2.9.
 - Bug Fix (772,773): SDF save issues bug fixes perfomed in src/epics/seq/main.c. Fix also done in

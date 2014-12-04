@@ -162,8 +162,16 @@ uint32_t filter = FILTER;
 char *dataBuff;
 int sendLength = 0;
 //int myCrc = 0;
+int mxStatBit[2];
 
 mx_set_error_handler(MX_ERRORS_RETURN);
+if(my_dcu == 0) {
+	 mxStatBit[0] = 1;
+	 mxStatBit[1] = 2;
+}else{
+	 mxStatBit[0] = 4;
+	 mxStatBit[1] = 8;
+}
 
 do {
 	int lastCycle = 0;
@@ -177,12 +185,12 @@ do {
 		if (conStat != MX_SUCCESS) {
 			fprintf(stderr, "mx_connect failed %s\n", mx_strerror(conStat));
 			myErrorSignal = 1;
-			for (unsigned int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= 1;
+			for (unsigned int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= mxStatBit[0];
 			exit(1);
 		}
 		else {
 			myErrorSignal = 0;
-			for (unsigned int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= 2;
+			for (unsigned int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= mxStatBit[1];
 			fprintf(stderr, "Connection Made\n");
 			fflush(stderr);
 		}
@@ -227,7 +235,7 @@ do {
 		  // printf("data copy\n");
 
 		  // Copy values from shmmem to MX buffer
-		  if (lastCycle == 0) shmIpcPtr[i]->status ^= 1;
+		  if (lastCycle == 0) shmIpcPtr[i]->status ^= mxStatBit[0];
 		  mxDataBlock.mxIpcData.cycle = shmIpcPtr[i]->cycle;
 		  mxDataBlock.mxIpcData.crc = shmIpcPtr[i]->crc;
 		  mxDataBlock.mxIpcData.dcuId = shmIpcPtr[i]->dcuId;
@@ -317,7 +325,7 @@ again:
 		  mx_total_stats.accumulateNext(stats::cur_time() - lst); // finish the measurement
 		  cur_req = (cur_req + 1) % NUM_SREQ;
 		 // if(lastCycle == 15) myErrorSignal = 1;
-		  if(lastCycle == 15) shmIpcPtr[i]->status ^= 2;
+		  if(lastCycle == 15) shmIpcPtr[i]->status ^= mxStatBit[1];
 		}
 
 	} while(!myErrorSignal);
