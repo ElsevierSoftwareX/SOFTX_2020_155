@@ -127,6 +127,7 @@ $dacKillModCnt[0] = undef;
 $dkTimesCalled = 0;
 $remoteGpsPart = 0;
 $remoteGPS = 0;
+$daq2dc = 1;
 
 # Normally, ARGV !> 2, so the following are not invoked in a standard make
 # This is legacy.
@@ -2358,11 +2359,20 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 #//		- GENERATE IPC SCREENS
    ("CDS::IPCx::createIpcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ipcxCnt);
 #//		- GENERATE GDS_TP SCREEN
-require "lib/medmGenGdsTp.pm";
-my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
-my $scriptTarget = "/opt/rtcds/$location/$lsite/scripts/burt.py";
-my $scriptArgs = "-s $location -i $lsite -m $skeleton -d $dcuId &"; 
-   ("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dacType);
+if(!daq2dc) {
+	require "lib/medmGenGdsTp.pm";
+	my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
+	my $scriptTarget = "/opt/rtcds/$location/$lsite/scripts/burt.py";
+	my $scriptArgs = "-s $location -i $lsite -m $skeleton -d $dcuId &"; 
+	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dacType);
+}
+if(daq2dc) {
+	require "lib/medmGenGdsTp2dc.pm";
+	my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
+	my $scriptTarget = "/opt/rtcds/$location/$lsite/scripts/burt.py";
+	my $scriptArgs = "-s $location -i $lsite -m $skeleton -d $dcuId &"; 
+	("CDS::medmGenGdsTp2dc::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dacType);
+}
 #//		- GENERATE ADC SCREENS
 for($ii=0;$ii<$adcCnt;$ii++)
 {
@@ -2640,6 +2650,9 @@ print OUTM "EXTRA_CFLAGS += -g\n";
 
 if ($adcOver) {
   print OUTM "EXTRA_CFLAGS += -DROLLING_OVERFLOWS\n";
+}
+if ($daq2dc) {
+  print OUTM "EXTRA_CFLAGS += -DDUAL_DAQ_DC\n";
 }
 if ($remoteGPS) {
   print OUTM "EXTRA_CFLAGS += -DREMOTE_GPS\n";
