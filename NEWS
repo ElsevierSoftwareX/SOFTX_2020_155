@@ -1,6 +1,8 @@
 ==================================================================================================
 Post 2.9 Changes
 ==================================================================================================
+- Bug Fix (732): AUTOCAL of 18bit DAC modules made the default compile option in feCodeGen.pl. This
+  change also applied in branch 2.9.
 - mx_stream modified to provide additional diagnostics when used in a system with 2 DAQ data
   concentrators.
 - Bug Fix (505): Added warning bit (bit 10) to STATEWORD to be set if either the Coeff File or
