@@ -9,6 +9,7 @@ Changes for 2.10
 ==================================================================================================
 Post 2.9 Changes, also changed in branch-2.9
 ==================================================================================================
+- Bug Fix (662): Fix Phase part to allow FE DAQ to record user settings.
 - Bug Fix (556): Fix WfsPhase part to allow FE DAQ to record user settings.
 - Bug Fix (732): AUTOCAL of 18bit DAC modules made the default compile option in feCodeGen.pl. This
   change also applied in branch 2.9.
