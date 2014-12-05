@@ -16,6 +16,7 @@ sub partType {
 # Current part number is passed as first argument
 sub printHeaderStruct {
         my ($i) = @_;
+        print ::OUTH "\tdouble $::xpartName[$i]\_E;\n";
         print ::OUTH "\tdouble $::xpartName[$i]\[2\];\n";
 }
 
@@ -31,6 +32,7 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
+        print ::OUT "static double \L$::xpartName[$i]\_E;\n";
         print ::OUT "static double \L$::xpartName[$i]\[2\];\n";
 }
 

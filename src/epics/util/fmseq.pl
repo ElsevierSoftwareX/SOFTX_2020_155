@@ -400,11 +400,14 @@ while (<IN>) {
 		$vdecl .= "assign evar_$v_name to \"{ifo}:${tv_name}\";\n";
 		$proc_name1 = "%SITE%:$tv_name\_SIN";
 		$proc_name2 = "%SITE%:$tv_name\_COS";
+		$proc_name3 = "%SITE%:$tv_name";
 	} else {
 		$vdecl .= "assign evar_$v_name to \"{ifo}:{sys}-{subsys}${v_name}\";\n";
 		$proc_name1 = "%SITE%:%SYS%$v_name\_SIN";
 		$proc_name2 = "%SITE%:%SYS%$v_name\_COS";
+		$proc_name3 = "%SITE%:%SYS%$v_name";
 	}
+	add_edcu_entry($proc_name3, "double", 1, $v_var);
 	add_edcu_entry($proc_name1, "double", 1, $v_var);
 	add_edcu_entry($proc_name2, "double", 1, $v_var);
 
@@ -415,6 +418,7 @@ while (<IN>) {
 	$vinit .= "%%       pEpics->${v_var}[1] = cos(rad_angle);\n";
 
 	$vupdate .= "pvGet(evar_$v_name);\n";
+	$vupdate .= "pEpics->${v_var}_E = evar_${v_name};\n";
         $vupdate .= "%%  rad_angle = (double)((evar_$v_name * M_PI)/180.);\n";
 	$vupdate .= "%% rfm_assign(pEpics->${v_var}[0], sin(rad_angle));\n";
 	$vupdate .= "%% rfm_assign(pEpics->${v_var}[1], cos(rad_angle));\n";
