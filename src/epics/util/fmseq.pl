@@ -111,7 +111,7 @@ sub add_vproc_entry {
 	$vproc_size++;
 }
 sub add_edcu_entry {
-	($proc_name, $v_type, $out, $v_var, $egu, $nrow, $ncol) =  @_;
+	(my $proc_name, my $v_type, my$out, my$v_var, my $egu, $nrow, $ncol) =  @_;
 	#if(($v_type ne "int") || ($v_type ne "double")) {return;}
 	$egu = "undef" if ! defined $egu;
 	$nrow = 0 if ! defined $nrow;
@@ -335,6 +335,8 @@ while (<IN>) {
 	$vinit .= "%% evar_${v_name}_r  = $v_init;\n";
 	$vinit .= "pvPut(evar_${v_name}_d);\n";
 	$vinit .= "pvPut(evar_${v_name}_r);\n";
+	$vinit .= "%%       pEpics->${v_var}_d = 0.0;\n";
+	$vinit .= "%%       pEpics->${v_var}_r = 0.0;\n";
 	$vinit .= "%%       pEpics->${v_var}[0][0] = 0.0;\n";
 	$vinit .= "%%       pEpics->${v_var}[0][1] = 0.0;\n";
 	$vinit .= "%%       pEpics->${v_var}[1][0] = 0.0;\n";
@@ -342,6 +344,8 @@ while (<IN>) {
 
 	$vupdate .= "pvGet(evar_${v_name}_d);\n";
 	$vupdate .= "pvGet(evar_${v_name}_r);\n";
+	$vupdate .= "pEpics->${v_var}_d = evar_${v_name}_d;\n";
+	$vupdate .= "pEpics->${v_var}_r = evar_${v_name}_r;\n";
 	$vupdate .= "evar_${v_name}_r *= M_PI/180.0;\n";
 	$vupdate .= "evar_${v_name}_d *= M_PI/180.0;\n";
 	$vupdate .= "if (evar_${v_name}_d == 0.0) evar_${v_name}_d = .1*(M_PI / 180);\n";
@@ -353,9 +357,13 @@ while (<IN>) {
 	if ($top_name) {
 		$vardb .= "grecord(${ve_type},\"%IFO%:${tv_name}_D\")\n";
 		$proc_name = "%SITE%:$tv_name";
+		$proc_name1 = "%SITE%:$tv_name\_D";
+		$proc_name2 = "%SITE%:$tv_name\_R";
 	} else {
 		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}_D\")\n";
 		$proc_name = "%SITE%:%SYS%$v_name";
+		$proc_name1 = "%SITE%:%SYS%$v_name\_D";
+		$proc_name2 = "%SITE%:%SYS%$v_name\_R";
 	}
 	$vardb .= "{\n";
 #	$vardb .= "    field(PREC,\"3\")\n";
@@ -377,6 +385,8 @@ while (<IN>) {
 	$vardb .= "    $v_efield4\n";
 	$vardb .= "}\n";
 	$egu = "undef";
+	add_edcu_entry($proc_name1, "double", 1, $v_var);
+	add_edcu_entry($proc_name2, "double", 1, $v_var);
 	add_edcu_entry($proc_name, "double", 0, $m_var, $egu, 2, 2);
     } elsif (substr($_,0,5) eq "PHASE") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
