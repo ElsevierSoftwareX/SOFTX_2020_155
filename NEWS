@@ -1,6 +1,13 @@
 ==================================================================================================
 Changes for 2.10
 ==================================================================================================
+- Added monitoring of the filter module 'Decimation' and 'Hold Output' settings as part of the
+  common filter SWSTAT EPICS record. This required changes to:
+  -  main.c, skeleton.st and fm10Gen.c to add the two extra bits. 
+  - In skeleton.st, moved the clr history and status to req diff bit up two to accomodate new
+    switch monitors.
+  - Modified the filter MEDM files to provide RED indicator next to 'GUARDIAN SET' related display
+    icon to indicate when filter switch request != status.
 - Added a compile option (DUAL_DAQ_DC) for running with 2 data concentrators. Until I think of
   a better solution, this is 'hardwired' in feCodeGen.pl by setting daq2dc = 1. If it is desired
   to run with a single data concentrator, set this to daq2dc = 0 for now.

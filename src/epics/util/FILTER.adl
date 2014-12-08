@@ -1430,7 +1430,8 @@ rectangle {
 		width=3
 	}
 	"dynamic attribute" {
-		clr="alarm"
+		vis="calc"
+		calc="A&0x40000"
 		chan="SITE_NAME:FILTERNAME_SWSTAT"
 	}
 }
