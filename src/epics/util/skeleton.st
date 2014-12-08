@@ -571,13 +571,13 @@ state monScreen{
 %%	int smask = swMask[ii];
 %%	int sreq = swReq[ii];
 %%	int sstat = swStatus[ii];
-%%	for(jj = 0; jj<14;jj++)
+%%	for(jj = 0; jj<17;jj++)
 %%	{
 %%		if(smask & 1)
 %%		{
 %%			if((sreq & 1) != (sstat & 1))
 %%			{
-%%				swStatus[ii] |= 0x8000;
+%%				swStatus[ii] |= 0x40000;
 %%			}
 %%		}
 %%		smask >>= 1;
@@ -594,7 +594,7 @@ state monScreen{
 %%	  pFilt->inputs[ii].rset = 2;
 	  swRset[ii] = 0;
 	  pvPut(swRset[ii]);
-	  swStatus[ii] |= 0x4000;
+	  swStatus[ii] |= 0x20000;
 %%      }
 	pvPut(swStatus[ii]);
 
