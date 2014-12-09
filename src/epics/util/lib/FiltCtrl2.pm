@@ -74,7 +74,7 @@ sub fromExp {
              $dsp_ptr = "dsp_ptr";
            }
 	   if ($fromPort == 1) {
-	     $calcExp = "filtCtrlBitConvert($dsp_ptr->inputs[$modNum].opSwitchE)";
+	     $calcExp = "filtCtrlBitConvert($dsp_ptr->inputs[$modNum].opSwitchE) & 0x3fff";
 	   } elsif ($fromPort == 2) { # Offset
 	     $calcExp = "$dsp_ptr->inputs[$modNum].offset";
 	   } elsif ($fromPort == 3) { # Gain
