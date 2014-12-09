@@ -2359,14 +2359,13 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 #//		- GENERATE IPC SCREENS
    ("CDS::IPCx::createIpcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ipcxCnt);
 #//		- GENERATE GDS_TP SCREEN
-if(!daq2dc) {
+if($daq2dc == 0) {
 	require "lib/medmGenGdsTp.pm";
 	my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
 	my $scriptTarget = "/opt/rtcds/$location/$lsite/scripts/burt.py";
 	my $scriptArgs = "-s $location -i $lsite -m $skeleton -d $dcuId &"; 
 	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dacType);
-}
-if(daq2dc) {
+}else {
 	require "lib/medmGenGdsTp2dc.pm";
 	my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
 	my $scriptTarget = "/opt/rtcds/$location/$lsite/scripts/burt.py";
