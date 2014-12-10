@@ -49,9 +49,10 @@ const UINT32 pow2_out[10] = {0x20,0x80,0x200,0x800,0x2000,0x8000,0x20000,
 				    0x80000,0x200000,0x800000};
 
 /// Quick look up table for filter module switch decoding
-const UINT32 fltrConst[15] = {16, 64, 256, 1024, 4096, 16384,
+const UINT32 fltrConst[17] = {16, 64, 256, 1024, 4096, 16384,
                                      65536, 262144, 1048576, 4194304,
-				     0x4, 0x8, 0x4000000,0x1000000,0x1 /* in sw, off sw, out sw , limit sw*/
+				     0x4, 0x8, 0x4000000,0x1000000,0x1, /* in sw, off sw, out sw , limit sw*/
+				     0x2000000,0x8000000
 				     };
 
 #if defined(SERVO16K) || defined(SERVO32K) || defined(SERVO64K) || defined(SERVO128K) || defined(SERVO256K)
@@ -248,7 +249,7 @@ inline unsigned int
 filtCtrlBitConvert(unsigned int v) {
 	unsigned int val = 0;
 	int i;
-	for (i = 0; i < 15; i++) {
+	for (i = 0; i < 17; i++) {
 		if (v & fltrConst[i]) val |= 1<<i;
 	}
 	return val;

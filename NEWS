@@ -1,6 +1,15 @@
 ==================================================================================================
 Changes for 2.9.1 release 
 ==================================================================================================
+- Bug Fix (756): Added monitoring of the filter module 'Decimation' and 'Hold Output' settings as
+  part of the common filter SWSTAT EPICS record. This required changes to:
+  -  main.c, skeleton.st and fm10Gen.c to add the two extra bits.
+  - In skeleton.st, moved the clr history and status to req diff bit up two to accomodate new
+    switch monitors.
+  - Modified the filter MEDM files to provide RED indicator next to 'GUARDIAN SET' related display
+    icon to indicate when filter switch request != status.
+  - Modified FILTALH.adl screen to monitor new bits.
+  - Had to modify FiltCtrl2.pm to NOT pass these bits at control output port.
 - Bug Fix (662): Fix Phase part to allow FE DAQ to record user settings.
 - Bug Fix (556): Fix WfsPhase part to allow FE DAQ to record user settings.
 - Bug Fix (732): AUTOCAL of 18bit DAC modules made the default compile option in feCodeGen.pl.

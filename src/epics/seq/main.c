@@ -72,11 +72,11 @@ DBENTRY  *pdbentry_out_err_cnt = 0;
 #endif
 
 /// Quick look up table for filter module switch decoding
-const unsigned int fltrConst[15] = {16, 64, 256, 1024, 4096, 16384,
-			     65536, 262144, 1048576, 4194304,
-			     0x4, 0x8, 0x4000000,0x1000000,0x1 /* in sw, off sw, out sw , limit sw*/
-			     };
-
+unsigned int fltrConst[17] = {16, 64, 256, 1024, 4096, 16384,
+                              65536, 262144, 1048576, 4194304,
+                              0x4, 0x8, 0x4000000,0x1000000,0x1,
+                              0x2000000,0x8000000
+};
 union Data {
 	double chval;
 	char strval[64];
@@ -215,7 +215,7 @@ long chkSum = -99999;
 unsigned int filtCtrlBitConvert(unsigned int v) {
         unsigned int val = 0;
         int i;
-        for (i = 0; i < 15; i++) {
+        for (i = 0; i < 17; i++) {
                 if (v & fltrConst[i]) val |= 1<<i;
         }
         return val;
@@ -719,7 +719,7 @@ void newfilterstats(int numchans) {
 	int ii;
 	FILE *log;
 	char chname[128];
-	int mask = 0x3fff;
+	int mask = 0x1ffff;
 	int tmpreq;
 	int counter = 0;
 
