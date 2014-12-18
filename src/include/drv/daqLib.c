@@ -524,7 +524,16 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 				excSignal[localTable[ii].fmNum] = *dataPtr;
 			}
 		}
-		else dspPtr->data[localTable[ii].fmNum].exciteInput = 0.0;
+		// else dspPtr->data[localTable[ii].fmNum].exciteInput = 0.0;
+		else {
+			if(localTable[ii].type == DAQ_SRC_FM_EXC)
+			{
+				dspPtr->data[localTable[ii].fmNum].exciteInput = 0.0;
+			} else if (localTable[ii].type == DAQ_SRC_NFM_EXC) {
+				// extra excitation
+				excSignal[localTable[ii].fmNum] = 0.0;
+			}
+		}
   	}
   }
 
@@ -716,15 +725,17 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
         	  if (tpn >= daqRange.filtExMin && tpn < daqRange.filtExMax) {
 		    jj = tpn - daqRange.filtExMin;
 		    localTable[ltSlot].type = DAQ_SRC_FM_EXC;
-          	    localTable[ltSlot].sysNum = jj / daqRange.filtExSize;
+          	    localTable[ltSlot].sysNum = jj / daqRange.filtExSize;	// filtExSize = MAX_MODULES
           	    localTable[ltSlot].fmNum = jj % daqRange.filtExSize;
           	    localTable[ltSlot].sigNum = ii;
 	  	    localTable[ltSlot].decFactor = 1;
+
 		    excTable[slot].sigNum = tpn;
 		    excTable[slot].sysNum = localTable[ltSlot].sysNum;
 		    excTable[slot].fmNum = localTable[ltSlot].fmNum;
-                    // Save the index into the TPman table
                     excTable[slot].offset = i - DAQ_GDS_MAX_TP_ALLOWED;
+
+                    // Save the index into the TPman table
       		    dataInfo.tp[ltSlot].dataType = DAQ_DATATYPE_FLOAT;
 
           	    gdsPtr->tp[_2k_sys_offs][1][slot] = 0;
@@ -733,12 +744,17 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
         	  } else if (tpn >= daqRange.xExMin && tpn < daqRange.xExMax) {
 	 	    jj = tpn - daqRange.xExMin;
 		    localTable[ltSlot].type = DAQ_SRC_NFM_EXC;
+          	    localTable[ltSlot].sysNum = 0;	// filtExSize = MAX_MODULES
           	    localTable[ltSlot].fmNum = jj;
-          	    localTable[ltSlot].sigNum = slot;
+          	    // localTable[ltSlot].sigNum = slot;
+          	    localTable[ltSlot].sigNum = ii;
 	  	    localTable[ltSlot].decFactor = 1;
+
 		    excTable[slot].sigNum = tpn;
 		    excTable[slot].sysNum = localTable[ltSlot].sysNum;
 		    excTable[slot].fmNum = localTable[ltSlot].fmNum;
+                    excTable[slot].offset = i - DAQ_GDS_MAX_TP_ALLOWED;
+
       		    dataInfo.tp[ltSlot].dataType = DAQ_DATATYPE_FLOAT;
 		   // if (slot < 8) gdsMonitor[slot + 24] = tpn;
           	    gdsPtr->tp[_2k_sys_offs][1][slot] = 0;
