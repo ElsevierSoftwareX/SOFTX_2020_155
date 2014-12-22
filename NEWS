@@ -1,6 +1,7 @@
 ==================================================================================================
 Changes for release 2.8.7
 ==================================================================================================
+- Bug Fix (776): EXC part not operating properly under all selection conditions.
 - Bug Fix(758): Removed load matrix reset from being placed at the end of code cycle in RampMuxMatrix.pm.
   This is already done properly in the matrix part code itself and this added clearing can result
   in the race condition ie sometimes load matrix command ignored.
