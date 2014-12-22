@@ -69,14 +69,10 @@ static char *pReadBuffer;	/* Ptr to swing buff to xmit data to FB */
 static int phase;		/* 0-1, switches swing buffers.		*/
 static int daqSlot;		/* 0-sysRate, data slot to write data	*/
 static int excSlot;		/* 0-sysRate, slot to read exc data	*/
-//float *pFloat = 0;		/* Temp ptr to write float data.	*/
-//short *pShort = 0;		/* Temp ptr to write short data.	*/
-//unsigned int *pInteger = 0;	/* Temp ptr to write unsigned int data. */
 char *bufPtr;			/* Ptr to data for crc calculation.	*/
 static unsigned int crcTest;	/* Continuous calc of CRC.		*/
 static unsigned int crcSend;	/* CRC sent to FB.			*/
 static DAQ_INFO_BLOCK dataInfo; /* Local DAQ config info buffer.	*/
-// int decSlot;			/* Tracks decimated data positions.	*/
 static int tpStart;		/* Marks address of first TP data	*/
 static volatile GDS_CNTRL_BLOCK *gdsPtr;  /* Ptr to shm to pass TP info to DAQ */
 static volatile char *exciteDataPtr;	  /* Ptr to EXC data in shmem.	*/
@@ -524,7 +520,16 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 				excSignal[localTable[ii].fmNum] = *dataPtr;
 			}
 		}
-		else dspPtr->data[localTable[ii].fmNum].exciteInput = 0.0;
+		// else dspPtr->data[localTable[ii].fmNum].exciteInput = 0.0;
+		else {
+                        if(localTable[ii].type == DAQ_SRC_FM_EXC)
+                        {
+                                dspPtr->data[localTable[ii].fmNum].exciteInput = 0.0;
+                        } else if (localTable[ii].type == DAQ_SRC_NFM_EXC) {
+                                // extra excitation
+                                excSignal[localTable[ii].fmNum] = 0.0;
+                        }
+                }
   	}
   }
 
@@ -734,11 +739,15 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 	 	    jj = tpn - daqRange.xExMin;
 		    localTable[ltSlot].type = DAQ_SRC_NFM_EXC;
           	    localTable[ltSlot].fmNum = jj;
-          	    localTable[ltSlot].sigNum = slot;
+          	    // localTable[ltSlot].sigNum = slot;
+          	    localTable[ltSlot].sigNum = ii;
 	  	    localTable[ltSlot].decFactor = 1;
+
 		    excTable[slot].sigNum = tpn;
 		    excTable[slot].sysNum = localTable[ltSlot].sysNum;
 		    excTable[slot].fmNum = localTable[ltSlot].fmNum;
+                    excTable[slot].offset = i - DAQ_GDS_MAX_TP_ALLOWED;
+
       		    dataInfo.tp[ltSlot].dataType = DAQ_DATATYPE_FLOAT;
 		   // if (slot < 8) gdsMonitor[slot + 24] = tpn;
           	    gdsPtr->tp[_2k_sys_offs][1][slot] = 0;
