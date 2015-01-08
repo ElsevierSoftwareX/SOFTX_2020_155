@@ -1,5 +1,5 @@
 ==================================================================================================
-Changes for 2.9.1 release 
+Changes for 2.9 release 
 ==================================================================================================
 - Bug Fix (776): EXC part not operating properly under all selection conditions.
 - Bug Fix (756): Added monitoring of the filter module 'Decimation' and 'Hold Output' settings as
