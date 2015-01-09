@@ -9,6 +9,8 @@ Changes for 2.10
 ==================================================================================================
 Post 2.9 Changes, also changed in branch-2.9
 ==================================================================================================
+- Bug Fix (743): Increase ADC0 allowable wait to 20 mu-sec
+- Bug Fix (751): Modified install script.
 - Bug Fix (776): EXC part not operating properly under all selection conditions.
 - Bug Fix (756): Added monitoring of the filter module 'Decimation' and 'Hold Output' settings as
   part of the common filter SWSTAT EPICS record. This required changes to:
