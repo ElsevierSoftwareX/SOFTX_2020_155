@@ -102,7 +102,7 @@ fi
 sudo killall ${system}epics
 sudo /sbin/rmmod ${system} 2&>/dev/null
 
-res=\`ps h -C awgtpman | grep ${system}\`
+res=\`ps h -C awgtpman | grep ${system} \`
 if [ "x\${res}" != x ]; then
 	num=\$(echo \${res} | awk '{print \$1}')
 	sudo kill \$num
