@@ -47,6 +47,16 @@ int vmic5565Init(CDS_HARDWARE *pHardware, struct pci_dev *rfmdev)
 
     printk("Board id = 0x%x\n",p5565Csr[devNum]->BID);
     pHardware->rfmConfig[devNum] = p5565Csr[devNum]->NID;
+
+    // Check switches and such
+    if(p5565Csr[devNum]->LCSR1 & VMIC_5565_REDUNDANT_MODE) printk("VMIC5565 set to redundant transfers\n");
+    else printk("VMIC5565 set to single transfers\n");
+    if(p5565Csr[devNum]->LCSR1 & VMIC_5565_ROGUE_MASTER1) printk("VMIC5565 ROGUE MASTER 1 = ON\n");
+    else printk("VMIC5565 ROGUE MASTER 1 = OFF\n");
+    if(p5565Csr[devNum]->LCSR1 & VMIC_5565_ROGUE_MASTER0) printk("VMIC5565 ROGUE MASTER 0 = ON\n");
+    else printk("VMIC5565 ROGUE MASTER 0 = OFF\n");
+    if(p5565Csr[devNum]->LCSR1 & VMIC_5565_MEM_SIZE) printk("VMIC5565 Memory size = 128MBytes\n");
+    else printk("VMIC5565 Memory size = 64MBytes\n");
     //
     // Find DMA Engine controls in RFM Local Configuration Table 
     pci_read_config_dword(rfmdev,

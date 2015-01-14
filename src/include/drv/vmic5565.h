@@ -10,8 +10,12 @@
 #define VMIC_DMA_CLR            0x8
 
 
-#define TURN_OFF_5565_FAIL      0x80000000
-#define TURN_OFF_5579_FAIL      0x80
+#define TURN_OFF_5565_FAIL      	0x80000000
+#define VMIC_5565_REDUNDANT_MODE      	0x04000000
+#define VMIC_5565_ROGUE_MASTER1      	0x02000000
+#define VMIC_5565_ROGUE_MASTER0      	0x01000000
+#define VMIC_5565_MEM_SIZE      	0x00100000
+#define TURN_OFF_5579_FAIL      	0x80
 typedef struct VMIC5565_CSR{
         unsigned char BRV;      /* 0x0 */
         unsigned char BID;      /* 0x1 */
