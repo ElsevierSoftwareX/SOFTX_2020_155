@@ -378,7 +378,11 @@ daqd_c::configure_channels_files ()
 	 - daqd.num_gds_channel_aliases
 #endif
 	- daqd.num_epics_channels;
-  pvValue[21] = daqd.num_science_channels - daqd.num_epics_channels;
+  pvValue[21] = daqd.num_science_channels
+#ifdef GDS_TESTPOINTS
+	 - daqd.num_gds_channel_aliases
+#endif
+        - daqd.num_epics_channels;
 #endif
   system_log(1, "finished configuring data channels");
   return 0;
