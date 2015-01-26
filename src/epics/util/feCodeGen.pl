@@ -2458,6 +2458,9 @@ $directDacWrite = 0;
 # Set to disable zero padding DAC data
 $noZeroPad = 0;
 
+# Set if doing direct DAC writed (no DMA)
+$optimizeIO = 0;
+
 # Clear the part input and output counters
 # This implies a maximum part count of 2000 per model.
 for ($ii = 0; $ii < 2000; $ii++) {
@@ -2697,6 +2700,12 @@ if ($::noZeroPad) {
   print OUTM "EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
 } else {
   print OUTM "#EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
+}
+
+if ($::optimizeIO) {
+  print OUTM "EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
+} else {
+  print OUTM "#EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
 }
 
 

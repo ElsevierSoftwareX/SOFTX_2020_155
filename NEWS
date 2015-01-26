@@ -1,4 +1,10 @@
 ==================================================================================================
+Changes for release 2.8.8
+==================================================================================================
+- This is a special release for MIT.  To reduce Input to Output delay, a compile option was added
+  to remove the DAC FIFO preloading.  See the V2.8 release notes (LIGO-T1300868-v7) for details
+  on using this option.
+==================================================================================================
 Changes for release 2.8.7
 ==================================================================================================
 - Bug Fix (776): EXC part not operating properly under all selection conditions.

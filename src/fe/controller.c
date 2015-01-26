@@ -717,6 +717,7 @@ udelay(1000);
 		/// - --------- Code runs intrinsically slower first few cycle after startup, so new DAC
 		/// values not written until a few cycle into run. \n
 		/// - --------- DAC timing diags will later check FIFO sizes to verify synchrounous timing.
+#ifndef NO_DAC_PRELOAD
 		for(jj=0;jj<cdsPciModules.dacCount;jj++)
 		{       
 			if(cdsPciModules.dacType[jj] == GSC_18AO8)
@@ -729,6 +730,7 @@ udelay(1000);
 				for(ii=0;ii<GSAO_16BIT_PRELOAD;ii++) dac16bitPtr->ODB = 0;
 			}       
 		}       
+#endif
 		/// - ---- Start the timing clocks\n
 		/// - --------- Send start command to TDS slave.\n
 		/// - --------- TDS slave will begin sending 64KHz clocks synchronous to next 1PPS mark.
@@ -762,6 +764,7 @@ udelay(1000);
 	  	printf("Triggered the DAC\n");
 		break;
 	case SYNC_SRC_1PPS:
+#ifndef NO_DAC_PRELOAD
 		for(jj=0;jj<cdsPciModules.dacCount;jj++)
 		{       
 			if(cdsPciModules.dacType[jj] == GSC_18AO8)
@@ -774,6 +777,7 @@ udelay(1000);
 				for(ii=0;ii<GSAO_16BIT_PRELOAD;ii++) dac16bitPtr->ODB = 0;
 			}       
 		}       
+#endif
 		// Arm ADC modules
 		gsc16ai64Enable(cdsPciModules.adcCount);
 		// Start clocking the DAC outputs
@@ -1278,7 +1282,7 @@ udelay(1000);
                                 if(cycleNum < 100) dac_out = limit / 20;
                                 else dac_out = 0;
                         }
-                        if((ii==0) && (jj == 6))
+                        if((ii==0) && (jj == 5))
                         {
                                 if(cycleNum < 100) dac_out = limit / 20;
                                 else dac_out = 0;
@@ -1918,6 +1922,7 @@ udelay(1000);
 /// area for FIFO empty, quarter full, etc. So, to make these bits useful in 16 bit module,
 /// code must set a proper FIFO size in map.c code.
 // This code runs once per second.
+#ifndef NO_DAC_PRELOAD
        	if (cycleNum >= HKP_DAC_FIFO_CHK && cycleNum < (HKP_DAC_FIFO_CHK + cdsPciModules.dacCount)) 
 	{
 		jj = cycleNum - HKP_DAC_FIFO_CHK;
@@ -1947,6 +1952,7 @@ udelay(1000);
 		}
 	}
 
+#endif
 #endif
 	// Capture end of cycle time.
         rdtscl(cpuClock[CPU_TIME_CYCLE_END]);
