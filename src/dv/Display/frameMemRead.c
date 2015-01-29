@@ -533,6 +533,7 @@ read_block ()
           * frameMemRead program, argument 6.
           */
          (void) snprintf (tempfile, (size_t) FILENAME_MAX, "%s%d", filename, j);
+	 if (debug != 0)
          fprintf (stderr, "read_block() - playMode == PLAYDATA, creating %s\n", tempfile);	/* JCB */
          fd[j] = fopen (tempfile, "w");
          if (fd[j] == NULL)
@@ -693,13 +694,9 @@ read_block ()
                         for (i = 0; i < sRate[j]; i++)
                         {
                            fvalue = chData[i];
-#if 0
-                           if (fvalue == 0.0)
-#else
                            if (fabs (fvalue) < DBL_EPSILON)
-#endif
-                           {
-                              fvalue = ZEROLOG;
+			   {
+			      fvalue = ZEROLOG ;
                               warning = 1;
                            }
                            else
@@ -715,11 +712,7 @@ read_block ()
                         for (i = 0; i < sRate[j]; i++)
                         {
                            fvalue = chData[i];
-#if 0
-                           if (fvalue == 0.0)
-#else
                            if (fabs (fvalue) < DBL_EPSILON)
-#endif
                            {
                               fvalue = ZEROLOG;
                               warning = 1;
@@ -822,11 +815,7 @@ read_block ()
                            for (i = 0; i < irate; i++)
                            {
                               fvalue = trendsec[i].max;
-#if 0
-                              if (fvalue == 0.0)
-#else
                               if (fabs (fvalue) < DBL_EPSILON)
-#endif
                               {
                                  fvalue = ZEROLOG;
                                  warning = 1;
@@ -844,11 +833,7 @@ read_block ()
                            for (i = 0; i < irate; i++)
                            {
                               fvalue = trendsec[i].mean;
-#if 0
-                              if (fvalue == 0.0)
-#else
                               if (fabs (fvalue) < DBL_EPSILON)
-#endif
                               {
                                  fvalue = ZEROLOG;
                                  warning = 1;
@@ -866,11 +851,7 @@ read_block ()
                            for (i = 0; i < irate; i++)
                            {
                               fvalue = trendsec[i].min;
-#if 0
-                              if (fvalue == 0.0)
-#else
                               if (fabs (fvalue) < DBL_EPSILON)
-#endif
                               {
                                  fvalue = ZEROLOG;
                                  warning = 1;
@@ -891,11 +872,7 @@ read_block ()
                            for (i = 0; i < irate; i++)
                            {
                               fvalue = trendsec[i].max;
-#if 0
-                              if (fvalue == 0.0)
-#else
                               if (fabs (fvalue) < DBL_EPSILON)
-#endif
                               {
                                  fvalue = ZEROLOG;
                                  warning = 1;
@@ -912,11 +889,7 @@ read_block ()
                            for (i = 0; i < irate; i++)
                            {
                               fvalue = trendsec[i].mean;
-#if 0
-                              if (fvalue == 0.0)
-#else
                               if (fabs (fvalue) < DBL_EPSILON)
-#endif
                               {
                                  fvalue = ZEROLOG;
                                  warning = 1;
@@ -933,11 +906,7 @@ read_block ()
                            for (i = 0; i < irate; i++)
                            {
                               fvalue = trendsec[i].min;
-#if 0
-                              if (fvalue == 0.0)
-#else
                               if (fabs (fvalue) < DBL_EPSILON)
-#endif
                               {
                                  fvalue = ZEROLOG;
                                  warning = 1;
@@ -1643,17 +1612,17 @@ graphmulti (int width, short skip)
 
    if (playMode == PLAYDATA)
    {
+      xmin = (double) gpstimest;
+      xmax = xmin + (double) duration;
       if (debug != 0)
-         fprintf (stderr, "graphmulti() - playMode == PLAYDATA\n");	/* JCB */
-      xmin = 0.0;
-      xmax = (float) width;
+         fprintf (stderr, "graphmulti() - playMode == PLAYDATA, xmin = %f, xmax = %f line %d\n", xmin, xmax, __LINE__);	/* JCB */
    }
    else if (xaxisFormat == XAXISGTS)
    {
       if (debug != 0)
          fprintf (stderr, "graphmulti() - xaxisFormat == XAXISGTS\n");	/* JCB */
-      xmin = 0.0;
-      xmax = (float) width - 1;
+      xmin = (double) gpstimest;
+      xmax = (double) (gpstimest + duration - 1);
    }
    else
    {
@@ -1729,7 +1698,11 @@ graphmulti (int width, short skip)
    }
    GracePrintf ("xaxis ticklabel char size 0.53");
    if (playMode == PLAYDATA)
-      GracePrintf ("xaxis ticklabel prec 2");
+   {
+      /* X axis is GPS time, print as decimal, not float, 0 precision. */
+      GracePrintf ("xaxis ticklabel format decimal");
+      GracePrintf ("xaxis ticklabel prec 0");
+   }
    else if (xaxisFormat == XAXISGTS)
    {
       GracePrintf ("xaxis ticklabel format decimal");
