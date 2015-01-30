@@ -1702,6 +1702,12 @@ graphmulti (int width, short skip)
       /* X axis is GPS time, print as decimal, not float, 0 precision. */
       GracePrintf ("xaxis ticklabel format decimal");
       GracePrintf ("xaxis ticklabel prec 0");
+      /* Format for the cursor readout. */
+      GracePrintf ("g0 fixedpoint off");
+      GracePrintf ("g0 fixedpoint type 0");
+      GracePrintf ("g0 fixedpoint xy 0.000000, 0.000000");
+      GracePrintf ("g0 fixedpoint format decimal decimal");
+      GracePrintf ("g0 fixedpoint prec 0, 6");
    }
    else if (xaxisFormat == XAXISGTS)
    {
@@ -1710,9 +1716,23 @@ graphmulti (int width, short skip)
          GracePrintf ("xaxis ticklabel prec 1");
       else
          GracePrintf ("xaxis ticklabel prec 0");
+      /* Format for the cursor readout. */
+      GracePrintf ("g0 fixedpoint off");
+      GracePrintf ("g0 fixedpoint type 0");
+      GracePrintf ("g0 fixedpoint xy 0.000000, 0.000000");
+      GracePrintf ("g0 fixedpoint format decimal decimal");
+      GracePrintf ("g0 fixedpoint prec 0, 6");
    }
    else
+   {
       GracePrintf ("xaxis ticklabel format yymmddhms");
+      /* Format for the cursor readout. */
+      GracePrintf ("g0 fixedpoint off");
+      GracePrintf ("g0 fixedpoint type 0");
+      GracePrintf ("g0 fixedpoint xy 0.000000, 0.000000");
+      GracePrintf ("g0 fixedpoint format mmddyyhms decimal");
+      GracePrintf ("g0 fixedpoint prec 6, 6");
+   }
    GracePrintf ("yaxis ticklabel char size 0.43");
    GracePrintf ("yaxis ticklabel format general");
 
