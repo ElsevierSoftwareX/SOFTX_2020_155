@@ -2,7 +2,7 @@ Library {
   Name			  "CDS_PARTS"
   Version		  8.0
   MdlSubVersion		  0
-  SavedCharacterEncoding  "ISO-8859-1"
+  SavedCharacterEncoding  "US-ASCII"
   LibraryType		  "BlockLibrary"
   SaveDefaultBlockParams  on
   ScopeRefreshTime	  0.035000
@@ -19,7 +19,7 @@ Library {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [991.0, 232.0, 928.0, 827.0]
+      Location		      [987.0, 204.0, 936.0, 859.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -41,11 +41,11 @@ Library {
 	$ObjectID		5
 	$ClassName		"Simulink.EditorInfo"
 	IsActive		[1]
-	ViewObjType		"SimulinkTopLevel"
-	LoadSaveID		"0"
-	Extents			[894.0, 665.0]
-	ZoomFactor		[1.3541829554339326]
-	Offset			[-0.088337182448036344, -26.535508083140932]
+	ViewObjType		"SimulinkSubsys"
+	LoadSaveID		"164"
+	Extents			[892.0, 686.0]
+	ZoomFactor		[1.21]
+	Offset			[0.0, -1.570247933884275]
       }
     }
   }
@@ -53,9 +53,9 @@ Library {
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "rolfbork"
+  LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Nov 01 11:56:55 2013"
+  LastModifiedDate	  "Tue Feb 03 13:47:43 2015"
   RTWModifiedTimeStamp	  305027368
   ModelVersionFormat	  "1.%<AutoIncrement:377>"
   ConfigurationManager	  "None"
@@ -884,8 +884,8 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [991, 232, 1919, 1059]
-    Open		    on
+    Location		    [987, 204, 1923, 1063]
+    Open		    off
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
     ScreenColor		    "white"
@@ -4611,8 +4611,8 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"WatchDogs"
-	Location		[1146, 221, 2092, 1013]
-	Open			off
+	Location		[987, 204, 1923, 1063]
+	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -4635,7 +4635,7 @@ Library {
 	  ForegroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.7"
+	  LibraryVersion	  "1.8"
 	  FontName		  "times"
 	  FontSize		  12
 	  SourceBlock		  "cdsDacKill/Subsystem"
@@ -4647,13 +4647,13 @@ Library {
 	  SID			  "348"
 	  Tag			  "cdsDacKillIop"
 	  Description		  "card_num=0,1,2"
-	  Ports			  [4, 2]
+	  Ports			  [4, 3]
 	  Position		  [365, 334, 470, 456]
 	  ZOrder		  2
 	  ForegroundColor	  "red"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.2"
+	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsDacKillIop/Subsystem"
 	  SourceType		  "SubSystem"
 	}
@@ -5234,7 +5234,7 @@ Library {
       BackgroundColor	      "orange"
       DropShadow	      on
       AttributesFormatString  "%<Tag>"
-      LibraryVersion	      "1.5"
+      LibraryVersion	      "1.6"
       SourceBlock	      "cdsParameters/Subsystem"
       SourceType	      "SubSystem"
     }

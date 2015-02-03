@@ -223,6 +223,8 @@ sub frontEndCode {
 	 my $WDOUT = "\L$::xpartName[$i]\[0\]";
 	 #// DKI RESET signal output (1 = RESET, 0 = NOOP)
 	 my $RSETOUT = "\L$::xpartName[$i]\[1\]";
+	 #// DKI STATE signal output (Same as EPICS channel)
+         my $STATEOUT = "\L$::xpartName[$i]\[2\]";
 	 #// BYPASS time remaining 
 	 my $BPTIME_REMAINING = "\L$::xpartName[$i]_remainingTime";
 	 #// Time remaining until WD output trips (goes to zero).
@@ -376,6 +378,8 @@ if ($EPICS_PANIC)
 		$DKSTAT = 2;
 	} 
 }
+
+$STATEOUT = $DKSTAT;
 
 /// On one second mark
 if (!$CYCLE) {
