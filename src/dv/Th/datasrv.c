@@ -144,15 +144,14 @@ int DataChanAdd(const char* chName, int dataRate)
       all = 0;
       index = SearchChList(chName, channelAll, NchannelAll);
       if ( index< 0 ) {
-	 dfprintf( stderr,"datasrv: DataChanAdd: cann't add channel %s\n", chName);
+	 dfprintf( stderr,"datasrv: DataChanAdd: can't add channel %s\n", chName);
 	 fprintf(stderr, "Error: Bad channel name `%s`\n", chName);
 	 return -1;
       }
       if ( dataRate > channelAll[index].rate ) {
 	 dataRate = channelAll[index].rate;
 
-	 dfprintf (stderr,
-		  "rate requested too large, use the sample rate %d\n",
+	 dfprintf (stderr, "rate requested too large, use the sample rate %d\n",
 		  dataRate);
 
       }
