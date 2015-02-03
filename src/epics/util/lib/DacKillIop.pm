@@ -129,7 +129,7 @@ END
 #//
 sub printFrontEndVars  {
         my ($i) = @_;
-        print ::OUT "static int \L$::xpartName[$i]\[2\];\n";
+        print ::OUT "static int \L$::xpartName[$i]\[3\];\n";
         print ::OUT "static int \L$::xpartName[$i]_remainingTime;\n";
         print ::OUT "static int \L$::xpartName[$i]_wdTime;\n";
         print ::OUT "static int \L$::xpartName[$i]_dtTime;\n";
