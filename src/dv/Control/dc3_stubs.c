@@ -5580,7 +5580,11 @@ int signalVerify (int chanNo, char chanV[]) {
   c = DataChanList(allChan);
   //	printf ( "Comparing with %d channels\n", c);
   for ( j=0; j<c; j++ ) {
-    if (strncmp(allChan[j].name, chanV, strlen(allChan[j].name))==0) {
+/*    if (strncmp(allChan[j].name, chanV, strlen(allChan[j].name))==0)  */
+    /* Use strcmp() instead of strncmp() to avoid finding names that are
+     * substrings of other names. Bugzilla 775 */
+    if (strcmp(allChan[j].name, chanV)==0)
+    {
       ch_found = j;
       break;
     } 
