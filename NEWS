@@ -6,6 +6,8 @@ Changes for 2.10
   to run with a single data concentrator, set this to daq2dc = 0 for now.
 - mx_stream modified to provide additional diagnostics when used in a system with 2 DAQ data
   concentrators.
+- Added a third output, STATE, to the DacKillIop part. This is in response to Bug #799. This fix
+  was also made in branch-2.8 and branch-2.9.
 ==================================================================================================
 Post 2.9 Changes, also changed in branch-2.9
 ==================================================================================================
