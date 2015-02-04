@@ -42,7 +42,7 @@ GetOptions("rows=i"=>\$rows,
 $matrix_width  = $cols * ($W + $padx) - $padx;
 $matrix_height = $rows * ($H + $pady) - $pady;
 
-$display_width = 2 * ($x + $matrix_width  + $padx);
+$display_width = ($x + $matrix_width  + $padx);
 $display_height= $y + $matrix_height + $pady;
 
 # Print out the header
@@ -97,16 +97,16 @@ for ($row = 0; $row < $rows; $row ++) {
     #Make green box (equal values)
     make_text_update_with_calc($X, $Y, $W, $H, $channel, $channel, $channelSetting, 14, 60, "calc", "(A=B)&(A#0)");
     #Make grey box (both 0)
-    make_text_update_with_calc($X, $Y, $W, $H, $channel, $channel, $channelSetting, 10, 5, "calc", "!(A|B)");
+    make_text_update_with_calc($X, $Y, $W, $H, $channel, $channel, $channelSetting, 10, 5, "calc", "(A=0&B=0)");
     #make red box (different values)
     make_text_update_with_calc($X, $Y, $W, $H, $channel, $channel, $channelSetting, 14, 20, "calc", "A#B");
     #make yellow box (ramping)
     make_text_update_with_calc($X, $Y, $W, $H, $channel, $channelRamping, $channelRamping, 10, 30, "if not zero", "A");
 
     #Make green box (equal values)
-    make_text_entry_with_calc($X, $Y+22, $W, $H, $channelSetting, $channel, $channelSetting, 14, 60, "calc", "A=B");
+    make_text_entry_with_calc($X, $Y+22, $W, $H, $channelSetting, $channel, $channelSetting, 14, 60, "calc", "(A=B)&(A#0)");
     #Make grey box (both 0)
-    make_text_entry_with_calc($X, $Y+22, $W, $H, $channelSetting, $channel, $channelSetting, 10, 5, "calc", "!(A|B)");
+    make_text_entry_with_calc($X, $Y+22, $W, $H, $channelSetting, $channel, $channelSetting, 10, 5, "calc", "(A=0&B=0)");
     #make red box (different values)
     make_text_entry_with_calc($X, $Y+22, $W, $H, $channelSetting, $channel, $channelSetting, 14, 20, "calc", "A#B");
     #make yellow box (ramping)
