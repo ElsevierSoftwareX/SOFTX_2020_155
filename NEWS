@@ -6,11 +6,13 @@ Changes for 2.10
   to run with a single data concentrator, set this to daq2dc = 0 for now.
 - mx_stream modified to provide additional diagnostics when used in a system with 2 DAQ data
   concentrators.
-- Added a third output, STATE, to the DacKillIop part. This is in response to Bug #799. This fix
-  was also made in branch-2.8 and branch-2.9.
 ==================================================================================================
 Post 2.9 Changes, also changed in branch-2.9
 ==================================================================================================
+- Bug Fix (802): Changed SDF reporting records from string type to waveform type to allow >40
+  character strings to be reported to SDF MEDM screens.
+- Bug Fix (799): Added a third output, STATE, to the DacKillIop part. This fix was also made in 
+  branch-2.8 post release 2.8.8.
 - Bug Fix (791): Raise ADC waits to ADC0 23 mu-sec, others 5 mu-sec
 - Bug Fix (792): Wait for RT startup to complete in start scripts
 - Bug Fix (759): Fix DAQ calculation of science frame 'Fast Chans' on stand-alone

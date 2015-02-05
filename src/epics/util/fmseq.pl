@@ -956,16 +956,22 @@ for(my $ffn = 0;$ffn < 40; $ffn ++)
 {
 	my $strGrdName = "%IFO%:FEC-${dcuId}_SDF_SP_STAT";
 	$strGrdName .= $ffn;
-	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\")\n";
-	print "{\n	field(SCAN,\".5 second\")\n}\n";
-	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\_BURT\")\n";
-	print "{\n	field(SCAN,\".5 second\")\n";
-	print "	}\n";
-	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\_LIVE\")\n";
-	print "{\n	field(SCAN,\".5 second\")\n";
-	print "	}\n";
-	print "grecord(stringout,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\_TIME\")\n";
-	print "{\n	field(SCAN,\".5 second\")\n}\n";
+	print "grecord(waveform,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\")\n";
+	print "{\n	field(NELM,\"64\")\n";
+	print "		field(FTVL,\"CHAR\")\n";
+	print "}\n";
+	print "grecord(waveform,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\_BURT\")\n";
+	print "{\n	field(NELM,\"64\")\n";
+	print "		field(FTVL,\"CHAR\")\n";
+	print "}\n";
+	print "grecord(waveform,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\_LIVE\")\n";
+	print "{\n	field(NELM,\"64\")\n";
+	print "		field(FTVL,\"CHAR\")\n";
+	print "}\n";
+	print "grecord(waveform,\"%IFO%:FEC-${dcuId}_SDF_SP_STAT$ffn\_TIME\")\n";
+	print "{\n	field(NELM,\"64\")\n";
+	print "		field(FTVL,\"CHAR\")\n";
+	print "}\n";
 }
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_RB_STAT0\")\n";
 print "{\n	field(SCAN,\".5 second\")\n}\n";
