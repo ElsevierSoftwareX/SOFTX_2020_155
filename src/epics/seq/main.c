@@ -584,26 +584,28 @@ char s1[64];
 char s2[64];
 char s3[64];
 long status;
-static int lastcount = 0;
+static int lastcount = 40;
+char clearString[65] = "                                                            ";
+int flength = 62;
 
 	if(numEntries > SDF_ERR_TSIZE) numEntries = SDF_ERR_TSIZE;
 	for(ii=0;ii<numEntries;ii++)
 	{
 		sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
 		status = dbNameToAddr(s,&saddr);
-		status = dbPutField(&saddr,DBR_STRING,&setErrTable[ii].chname,1);
+		status = dbPutField(&saddr,DBR_CHAR,&setErrTable[ii].chname,flength);
 
 		sprintf(s1, "%s_%s_STAT%d_BURT", pref,"SDF_SP", ii);
 		status = dbNameToAddr(s1,&baddr);
-		status = dbPutField(&baddr,DBR_STRING,&setErrTable[ii].burtset,1);
+		status = dbPutField(&baddr,DBR_CHAR,&setErrTable[ii].burtset,flength);
 
 		sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"SDF_SP", ii);
 		status = dbNameToAddr(s2,&maddr);
-		status = dbPutField(&maddr,DBR_STRING,&setErrTable[ii].liveset,1);
+		status = dbPutField(&maddr,DBR_CHAR,&setErrTable[ii].liveset,flength);
 
 		sprintf(s3, "%s_%s_STAT%d_TIME", pref,"SDF_SP", ii);
 		status = dbNameToAddr(s3,&taddr);
-		status = dbPutField(&taddr,DBR_STRING,&setErrTable[ii].timeset,1);
+		status = dbPutField(&taddr,DBR_CHAR,&setErrTable[ii].timeset,flength);
 	}
 	// Clear out error fields if present errors < previous errors
 	if(lastcount > numEntries) {
@@ -611,20 +613,20 @@ static int lastcount = 0;
 		{
 			sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
 			status = dbNameToAddr(s,&saddr);
-			status = dbPutField(&saddr,DBR_STRING," ",1);
+			status = dbPutField(&saddr,DBR_CHAR,clearString,flength);
 
 			sprintf(s1, "%s_%s_STAT%d_BURT", pref,"SDF_SP", ii);
 			status = dbNameToAddr(s1,&baddr);
-			status = dbPutField(&baddr,DBR_STRING," ",1);
+			status = dbPutField(&baddr,DBR_CHAR,clearString,flength);
 
 			sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"SDF_SP", ii);
 			status = dbNameToAddr(s2,&maddr);
-			status = dbPutField(&maddr,DBR_STRING," ",1);
+			status = dbPutField(&maddr,DBR_CHAR,clearString,flength);
 
 
 			sprintf(s3, "%s_%s_STAT%d_TIME", pref,"SDF_SP", ii);
 			status = dbNameToAddr(s3,&taddr);
-			status = dbPutField(&taddr,DBR_STRING," ",1);
+			status = dbPutField(&taddr,DBR_CHAR,clearString,flength);
 		}
 	}
 	lastcount = numEntries;
@@ -1300,6 +1302,7 @@ sleep(2);
 	// Initialize DAQ and COEFF file CRC checksums for later compares.
 	daqFileCrc = checkFileCrc(daqFile);
 	coeffFileCrc = checkFileCrc(coeffFile);
+	reportSetErrors(pref, 0,setErrTable);
 
 	sleep(1);       // Need to wait before first restore to allow sequencers time to do their initialization.
 
