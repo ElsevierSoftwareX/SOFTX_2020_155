@@ -79,7 +79,7 @@ LIBFLAGS += -lpthread  -lreadline -lcurses -lrt
 # and all the rest, which should be C files
 SEQ_SRCS = $(filter %.st, $(SRC))
 CSRCS = $(filter-out %.st, $(SRC))
-#CSRCS += $(RCG_SRC_DIR)/src/epics/seq/main.c
+CSRCS += $(RCG_SRC_DIR)/src/epics/seq/main.c
 # Required Epics files
 CCSRCS += build/$(TARGET)/registerRecordDeviceDriver.cc
 
@@ -125,20 +125,19 @@ install: $(DB)
 	  echo 'registerRecordDeviceDriver(pdbbase)' >> target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
 	  for i in $(DB) ; do \
 		cat $$i | sed s/%IFO%/$$ifo/g\;s/%IFO0%/$$ifo0/g\;s/%SYS%/$$system/g > target/$(TARGET)/db/$$ifo/`basename $$i`; \
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'DACKILL|record\(ao|record\(stringout' | egrep -v 'DACKILL_PANIC' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(stringin' | egrep -v 'SDF_NAME' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(ao' | egrep -v 'SWSTAT|DACKILL' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0, $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'DACKILL|record\(ao|record\(stringout' | egrep -v 'DACKILL_PANIC|_SDF_' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(stringin' | egrep -v 'SDF_NAME | _SDF_' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(ao' | egrep -v 'record\(mbbi' | egrep -v 'SWSTAT|DACKILL|_SDF_' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0, $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
                 grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'SWSTAT|DACKILL' | egrep -v 'DACKILL_PANIC' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "RO %s.HSV\nRO %s.LSV\nRO %s.LOW\n", $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		\
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(bo|record\(bi' | sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(bo|record\(bi' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.OSV\n%s.ZSV\n", $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(bo|record\(bi' | egrep -v '_SDF_' | sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(bo|record\(bi' | egrep -v '_SDF_' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.OSV\n%s.ZSV\n", $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		\
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'DACKILL|SDF_RELOAD|record\(ao|record\(string|record\(bi|record\(bo'| sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
-		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'SWSTAT|DACKILL|record\(ao|record\(string|record\(bi|record\(bo' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0 , $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'DACKILL|SDF_RELOAD|_SDF_|record\(ao|record\(string|record\(bi|record\(bo'| sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'SWSTAT|DACKILL|_SDF_|record\(ao|record\(string|record\(bi|record\(bo|record\(mbbi' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0 , $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
 		\
 		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet DAQ_FILE /opt/rtcds/$(SITE)/${ifo}/chans/daq/$$ucmodel.ini" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
-		echo "epicsEnvSet DAQ_DIR /opt/rtcds/$(SITE)/${ifo}/chans/daq/" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet COEFF_FILE /opt/rtcds/$(SITE)/${ifo}/chans/$$ucmodel.txt" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet LOG_DIR /opt/rtcds/$(SITE)/${ifo}/log/$$model" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet SDF_DIR /opt/rtcds/$(SITE)/${ifo}/target/$$model/$(TARGET)/burt/" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
