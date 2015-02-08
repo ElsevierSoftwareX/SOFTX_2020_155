@@ -7,10 +7,17 @@ Changes for 2.10
 - mx_stream modified to provide additional diagnostics when used in a system with 2 DAQ data
   concentrators.
 ==================================================================================================
-Post 2.9 Changes, also changed in branch-2.9
+Changes for 2.9.1
 ==================================================================================================
+- Bug Fix (790): Added difference calc and EPICS records to provide diff between present setpoint
+  and BURT request as added feature to SDF. As part of this fix, also:
+          - Changed the way filter switch setting errors are reported.
+                  - Old: FILTER_NAME_SW1S         Hex of BURT set         Hex of Present set
+                  - New: FILTER_NAME [ERRANT SWITCH NAME]         BURT ON/OFF     PRESENT ON/OFF
+          - Increased display precision to BURT/PRESENT value fields on DIFF Display.
 - Bug Fix (802): Changed SDF reporting records from string type to waveform type to allow >40
   character strings to be reported to SDF MEDM screens.
+- Bug Fix (763):
 - Bug Fix (799): Added a third output, STATE, to the DacKillIop part. This fix was also made in 
   branch-2.8 post release 2.8.8.
 - Bug Fix (791): Raise ADC waits to ADC0 23 mu-sec, others 5 mu-sec
@@ -18,6 +25,9 @@ Post 2.9 Changes, also changed in branch-2.9
 - Bug Fix (759): Fix DAQ calculation of science frame 'Fast Chans' on stand-alone
 - Bug Fix (743): Increase ADC0 allowable wait to 20 mu-sec
 - Bug Fix (751): Modified install script.
+==================================================================================================
+Changes for V2.9
+==================================================================================================
 - Bug Fix (776): EXC part not operating properly under all selection conditions.
 - Bug Fix (756): Added monitoring of the filter module 'Decimation' and 'Hold Output' settings as
   part of the common filter SWSTAT EPICS record. This required changes to:
@@ -49,7 +59,7 @@ Post 2.9 Changes, also changed in branch-2.9
     in the race condition ie sometimes load matrix command ignored.
     - NOTE: Fix also made in branch-2.9 and branch-2.8 at the same time.
 ==================================================================================================
-Changes for 2.9 
+Changes for 2.9  - Initial test release
 ==================================================================================================
 - Modified ADC overflow reporting, same as done for DAC outputs.
 - Added capability to define engineering units, for both fast/slow channels, to be passed and to
