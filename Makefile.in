@@ -87,6 +87,8 @@ clean-%:
 
 install-%:
 	@system=$(subst install-,,$@); $(srcdir)/install $${system} $(srcdir)
+install-nort-%:
+	@system=$(subst install-nort-,,$@); $(srcdir)/install-nort $${system} $(srcdir)
 
 uninstall-%:
 	@system=$(subst uninstall-,,$@); $(srcdir)/uninstall $${system} $(srcdir)
