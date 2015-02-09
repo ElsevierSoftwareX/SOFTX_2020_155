@@ -243,7 +243,7 @@ if test -e /opt/rtcds/$site/${lower_ifo}/medm/${system}; then
 	/bin/cp -a /opt/rtcds/$site/${lower_ifo}/medm/${system} /opt/rtcds/$site/${lower_ifo}/medm/archive/${system}_${cur_date} || exit 1
 fi
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/medm/${system}
-(cd build/${system}epics/medm; ls *.adl | xargs cp -r -t /opt/rtcds/$site/${lower_ifo}/medm/${system};)
+(cd build/${system}epics/medm; find . -name "*.adl" | xargs cp --parents -r -t /opt/rtcds/$site/${lower_ifo}/medm/${system};)
 
 #echo Installing Epics OPI screens
 
