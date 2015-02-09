@@ -39,6 +39,7 @@ of this distribution.
 #include "dbDefs.h"
 #include "dbFldTypes.h"
 #include "dbAccess.h"
+#include "math.h"
 
 #define epicsExportSharedSymbols
 #include "asLib.h"
