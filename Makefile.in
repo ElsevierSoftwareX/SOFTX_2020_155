@@ -85,10 +85,10 @@ clean-%:
         /bin/rm -rf target/$${system}epics build/$${system}epics; \
         (make -siC src/fe/$${system}/Makefile clean 2>/dev/null); echo Done
 
-install-%:
-	@system=$(subst install-,,$@); $(srcdir)/install $${system} $(srcdir)
 install-nort-%:
 	@system=$(subst install-nort-,,$@); $(srcdir)/install-nort $${system} $(srcdir)
+install-%:
+	@system=$(subst install-,,$@); $(srcdir)/install $${system} $(srcdir)
 
 uninstall-%:
 	@system=$(subst uninstall-,,$@); $(srcdir)/uninstall $${system} $(srcdir)
