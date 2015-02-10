@@ -45,7 +45,7 @@ of this distribution.
 #include "fb.h"
 #include "../../drv/symmetricom/symmetricom.h"
 
-#define EDCU_MAX_CHANS	10000
+#define EDCU_MAX_CHANS	30000
 // Gloabl variables		****************************************************************************************
 char timechannel[256];		///< Name of the GPS time channel for timestamping.
 char reloadtimechannel[256];	///< Name of EPICS channel which contains the BURT reload requests.
@@ -174,6 +174,52 @@ void subscriptionHandler(struct event_handler_args args) {
 	}
 }
 
+int edcuClearSdf(char *pref)
+{
+unsigned char clearString[64] = "          ";
+int flength = 62;
+long status;
+dbAddr saddr;
+int ii;
+char s[64];
+char s1[64];
+char s2[64];
+char s3[64];
+char s4[64];
+dbAddr baddr;
+dbAddr maddr;
+dbAddr taddr;
+dbAddr daddr;
+
+
+
+	for(ii=0;ii<40;ii++)
+        {
+	 sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
+	 status = dbNameToAddr(s,&saddr);
+	 status = dbPutField(&saddr,DBR_UCHAR,clearString,16);
+
+	 sprintf(s1, "%s_%s_STAT%d_BURT", pref,"SDF_SP", ii);
+	 status = dbNameToAddr(s1,&baddr);
+	 status = dbPutField(&baddr,DBR_UCHAR,clearString,flength);
+
+	 sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"SDF_SP", ii);
+	 status = dbNameToAddr(s2,&maddr);
+	 status = dbPutField(&maddr,DBR_UCHAR,clearString,flength);
+
+	 sprintf(s3, "%s_%s_STAT%d_TIME", pref,"SDF_SP", ii);
+	 status = dbNameToAddr(s3,&taddr);
+	 status = dbPutField(&taddr,DBR_UCHAR,clearString,flength);
+
+	  sprintf(s4, "%s_%s_STAT%d_DIFF", pref,"SDF_SP", ii);
+	  status = dbNameToAddr(s4,&daddr);
+	  status = dbPutField(&daddr,DBR_UCHAR,clearString,flength);
+
+	 }
+
+
+}
+
 // **************************************************************************
 int edcuReportUnconnChannels(char *pref)
 // **************************************************************************
@@ -183,6 +229,8 @@ dbAddr saddr;
 int dc = 0;
 char s[64];
 long status;
+int flength = 62;
+unsigned char tmpstr[64];
 
 	// printf("In error listing \n");
 	for (ii=0;ii<daqd_edcu1.num_chans;ii++)
@@ -192,16 +240,21 @@ long status;
 			if(dc < 40) {
 				sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", dc);
 				status = dbNameToAddr(s,&saddr);
-				status = dbPutField(&saddr,DBR_STRING,&daqd_edcu1.channel_name[ii],1);
+				sprintf(tmpstr,"%s",daqd_edcu1.channel_name[ii]);
+				// status = dbPutField(&saddr,DBR_STRING,&daqd_edcu1.channel_name[ii],1);
+				// status = dbPutField(&saddr,DBR_CHAR,daqd_edcu1.channel_name[ii],flength);
+				status = dbPutField(&saddr,DBR_UCHAR,tmpstr,flength);
+				// printf("Not found -- %s epics %s\n",tmpstr,daqd_edcu1.channel_name[ii]);
 			}
 			dc ++;
 		}
 	}
 	// Clear out remaining reporting channels.
+	sprintf(tmpstr,"%s","  ");
 	for (ii=dc;ii<40;ii++) {
 				sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
 				status = dbNameToAddr(s,&saddr);
-				status = dbPutField(&saddr,DBR_STRING,"",1);
+				status = dbPutField(&saddr,DBR_UCHAR,tmpstr,flength);
 	}
 	return(dc);
 }
@@ -543,9 +596,9 @@ sleep(2);
 	coeffFileCrc = checkFileCrc(coeffFile);
 	sprintf(logmsg,"%s\n%s = %u\n%s = %d","EDCU code restart","File CRC",daqFileCrc,"Chan Cnt",daqd_edcu1.num_chans);
 	logFileEntry(logmsg);
+	edcuClearSdf(pref);
 	// Start Infinite Loop 		*******************************************************************************
 	for(;;) {
-		// usleep(100000);					// Run loop at 10Hz.
 		dropout = 0;
 		waitGpsTrigger(daqd_edcu1.gpsTime, daqd_edcu1.epicsSync);
 		edcuWriteData(daqd_edcu1.epicsSync, daqd_edcu1.gpsTime);
@@ -558,7 +611,7 @@ sleep(2);
 		status = dbPutField(&eccaddr,DBR_LONG,&conChans,1);
 		// if((conChans != daqd_edcu1.num_chans) || (numDC != 0)) numDC = edcuReportUnconnChannels(pref);
 		// if(conChans != daqd_edcu1.num_chans) numDC = edcuReportUnconnChannels(pref);
-		numDC = edcuReportUnconnChannels(pref);
+		if (daqd_edcu1.epicsSync == 0) numDC = edcuReportUnconnChannels(pref);
 		status = dbPutField(&chnotfoundaddr,DBR_LONG,&numDC,1);
 
         // printf("EDCU C1 = %f status = %d\n",daqd_edcu1.channel_value[2],daqd_edcu1.channel_status[2]);
