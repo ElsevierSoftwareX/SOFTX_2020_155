@@ -692,23 +692,23 @@ int flength = 62;
 	{
 		sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
 		status = dbNameToAddr(s,&saddr);
-		status = dbPutField(&saddr,DBR_CHAR,&setErrTable[ii].chname,flength);
+		status = dbPutField(&saddr,DBR_UCHAR,&setErrTable[ii].chname,flength);
 
 		sprintf(s1, "%s_%s_STAT%d_BURT", pref,"SDF_SP", ii);
 		status = dbNameToAddr(s1,&baddr);
-		status = dbPutField(&baddr,DBR_CHAR,&setErrTable[ii].burtset,flength);
+		status = dbPutField(&baddr,DBR_UCHAR,&setErrTable[ii].burtset,flength);
 
 		sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"SDF_SP", ii);
 		status = dbNameToAddr(s2,&maddr);
-		status = dbPutField(&maddr,DBR_CHAR,&setErrTable[ii].liveset,flength);
+		status = dbPutField(&maddr,DBR_UCHAR,&setErrTable[ii].liveset,flength);
 
 		sprintf(s3, "%s_%s_STAT%d_TIME", pref,"SDF_SP", ii);
 		status = dbNameToAddr(s3,&taddr);
-		status = dbPutField(&taddr,DBR_CHAR,&setErrTable[ii].timeset,flength);
+		status = dbPutField(&taddr,DBR_UCHAR,&setErrTable[ii].timeset,flength);
 
 		sprintf(s4, "%s_%s_STAT%d_DIFF", pref,"SDF_SP", ii);
 		status = dbNameToAddr(s4,&daddr);
-		status = dbPutField(&daddr,DBR_CHAR,&setErrTable[ii].diff,flength);
+		status = dbPutField(&daddr,DBR_UCHAR,&setErrTable[ii].diff,flength);
 	}
 	// Clear out error fields if present errors < previous errors
 	if(lastcount > numEntries) {
@@ -716,24 +716,24 @@ int flength = 62;
 		{
 			sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
 			status = dbNameToAddr(s,&saddr);
-			status = dbPutField(&saddr,DBR_CHAR,clearString,flength);
+			status = dbPutField(&saddr,DBR_UCHAR,clearString,flength);
 
 			sprintf(s1, "%s_%s_STAT%d_BURT", pref,"SDF_SP", ii);
 			status = dbNameToAddr(s1,&baddr);
-			status = dbPutField(&baddr,DBR_CHAR,clearString,flength);
+			status = dbPutField(&baddr,DBR_UCHAR,clearString,flength);
 
 			sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"SDF_SP", ii);
 			status = dbNameToAddr(s2,&maddr);
-			status = dbPutField(&maddr,DBR_CHAR,clearString,flength);
+			status = dbPutField(&maddr,DBR_UCHAR,clearString,flength);
 
 
 			sprintf(s3, "%s_%s_STAT%d_TIME", pref,"SDF_SP", ii);
 			status = dbNameToAddr(s3,&taddr);
-			status = dbPutField(&taddr,DBR_CHAR,clearString,flength);
+			status = dbPutField(&taddr,DBR_UCHAR,clearString,flength);
 
 			sprintf(s4, "%s_%s_STAT%d_DIFF", pref,"SDF_SP", ii);
 			status = dbNameToAddr(s4,&daddr);
-			status = dbPutField(&daddr,DBR_CHAR,clearString,flength);
+			status = dbPutField(&daddr,DBR_UCHAR,clearString,flength);
 		}
 	}
 	lastcount = numEntries;

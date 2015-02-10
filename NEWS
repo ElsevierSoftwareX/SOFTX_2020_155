@@ -9,7 +9,7 @@ Changes for 2.9.1 release
 		- New: FILTER_NAME [ERRANT SWITCH NAME]		BURT ON/OFF	PRESENT ON/OFF
 	- Increased display precision to BURT/PRESENT value fields on DIFF Display.
 - Bug Fix (799) Added a third output, STATE, to the DacKillIop part.
-- Bug Fix (763).
+- Bug Fix (763). rampMuxMatrix fix to screen size and background color for fractional settings.
 - Bug Fix (802): Changed SDF reporting records from string type to waveform type to allow >40
   character strings to be reported to SDF MEDM screens.
 - Bug Fix (791): Raise ADC waits to ADC0 23 mu-sec, others 5 mu-sec
