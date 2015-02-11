@@ -52,6 +52,7 @@ char reloadtimechannel[256];	///< Name of EPICS channel which contains the BURT 
 struct timespec t;
 char logfilename[128];
 char edculogfilename[128];
+unsigned char naughtyList[EDCU_MAX_CHANS][64];
 
 // Function prototypes		****************************************************************************************
 int checkFileCrc(char *);
@@ -220,43 +221,88 @@ dbAddr daddr;
 
 }
 
-// **************************************************************************
-int edcuReportUnconnChannels(char *pref)
-// **************************************************************************
+int edcuFindUnconnChannels()
 {
 int ii;
-dbAddr saddr;
-int dc = 0;
-char s[64];
-long status;
-int flength = 62;
-unsigned char tmpstr[64];
+int dcc = 0;
 
-	// printf("In error listing \n");
 	for (ii=0;ii<daqd_edcu1.num_chans;ii++)
 	{
 		if(daqd_edcu1.channel_status[ii] != 0)
 		{
-			if(dc < 40) {
-				sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", dc);
-				status = dbNameToAddr(s,&saddr);
-				sprintf(tmpstr,"%s",daqd_edcu1.channel_name[ii]);
-				// status = dbPutField(&saddr,DBR_STRING,&daqd_edcu1.channel_name[ii],1);
-				// status = dbPutField(&saddr,DBR_CHAR,daqd_edcu1.channel_name[ii],flength);
-				status = dbPutField(&saddr,DBR_UCHAR,tmpstr,flength);
-				// printf("Not found -- %s epics %s\n",tmpstr,daqd_edcu1.channel_name[ii]);
-			}
-			dc ++;
+			sprintf(naughtyList[dcc],"%s",daqd_edcu1.channel_name[ii]);
+			dcc ++;
+		}
+	}
+	return(dcc);
+}
+// **************************************************************************
+int edcuReportUnconnChannels(char *pref, int dc, int offset)
+// **************************************************************************
+{
+int ii;
+dbAddr saddr;
+dbAddr laddr;
+dbAddr sperroraddr;
+char s[64];
+char sl[64];
+long status;
+int flength = 62;
+unsigned char tmpstr[64];
+int rc = 0;
+int myindex = 0;
+int numDisp = 0;
+int lineNum = 0;
+int erucError = 0;
+
+
+	myindex = offset * 40;
+	if(myindex > dc) {
+		myindex = 0;
+		erucError = -1;
+	}
+	rc = myindex + 40;
+	if(rc > dc) rc = dc;
+	// printf("Naught =  %d to %d\n",myindex,rc);
+	// printf("In error listing \n");
+	for (ii=myindex;ii<rc;ii++)
+	{
+		sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", (ii - myindex));
+		status = dbNameToAddr(s,&saddr);
+		if(status) 
+		{
+			printf("Can't connect to %s\n",s);
+		} else {
+			sprintf(tmpstr,"%s",naughtyList[ii]);
+			status = dbPutField(&saddr,DBR_UCHAR,tmpstr,flength);
+			numDisp ++;
+		}
+		sprintf(sl, "%s_SDF_LINE_%d", pref, (ii - myindex));
+		status = dbNameToAddr(sl,&laddr);
+		if(status) 
+		{
+			printf("Can't connect to %s\n",s);
+		} else {
+			lineNum = ii + 1;
+			status = dbPutField(&laddr,DBR_LONG,&lineNum,1);
 		}
 	}
 	// Clear out remaining reporting channels.
 	sprintf(tmpstr,"%s","  ");
-	for (ii=dc;ii<40;ii++) {
-				sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
-				status = dbNameToAddr(s,&saddr);
-				status = dbPutField(&saddr,DBR_UCHAR,tmpstr,flength);
+	for (ii=numDisp;ii<40;ii++) {
+		sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
+		status = dbNameToAddr(s,&saddr);
+		status = dbPutField(&saddr,DBR_UCHAR,tmpstr,flength);
+		sprintf(sl, "%s_SDF_LINE_%d", pref, (ii - myindex));
+		status = dbNameToAddr(sl,&laddr);
+		lineNum = ii + 1;
+		status = dbPutField(&laddr,DBR_LONG,&lineNum,1);
 	}
-	return(dc);
+	 char speStat[256]; sprintf(speStat, "%s_%s", pref, "SDF_TABLE_ENTRIES");             // Setpoint diff counter
+	 status = dbNameToAddr(speStat,&sperroraddr);                    // Get Address
+	 status = dbPutField(&sperroraddr,DBR_LONG,&dc,1);          // Init to zero.
+
+	return(erucError);
 }
 
 // **************************************************************************
@@ -512,6 +558,7 @@ int main(int argc,char *argv[])
 	struct stat st = {0};
 	char filemsg[128];
 	char logmsg[256];
+	unsigned int pageNum = 0;
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -569,6 +616,10 @@ sleep(2);
 	char gpstimedisplayname[256]; sprintf(gpstimedisplayname, "%s_%s", pref, "TIME_DIAG");	// SDF Save command.
 	status = dbNameToAddr(gpstimedisplayname,&gpstimedisplayaddr);		// Get Address.
 
+	dbAddr pagereqaddr;
+	char pagereqname[256]; sprintf(pagereqname, "%s_%s", pref, "SDF_PAGE");	// SDF Save command.
+	status = dbNameToAddr(pagereqname,&pagereqaddr);		// Get Address.
+
 // EDCU STUFF ********************************************************************************************************
 	
 	sprintf(edculogfilename, "%s%s", logdir, "/edcu.log");
@@ -589,6 +640,7 @@ sleep(2);
 	int dropout = 0;
 	int numDC = 0;
 	int cycle = 0;
+	int numReport = 0;
 
 	// Initialize DAQ and COEFF file CRC checksums for later compares.
 	daqFileCrc = checkFileCrc(daqFile);
@@ -611,7 +663,16 @@ sleep(2);
 		status = dbPutField(&eccaddr,DBR_LONG,&conChans,1);
 		// if((conChans != daqd_edcu1.num_chans) || (numDC != 0)) numDC = edcuReportUnconnChannels(pref);
 		// if(conChans != daqd_edcu1.num_chans) numDC = edcuReportUnconnChannels(pref);
-		if (daqd_edcu1.epicsSync == 0) numDC = edcuReportUnconnChannels(pref);
+		if (daqd_edcu1.epicsSync == 0) {
+			status = dbGetField(&pagereqaddr,DBR_USHORT,&pageNum,&ropts,&nvals,NULL);
+			// printf("Page is %d\n",pageNum);
+			numDC = edcuFindUnconnChannels();
+			numReport = edcuReportUnconnChannels(pref,numDC,pageNum);
+			if(numReport == -1) {
+				pageNum = 0;
+				status = dbPutField(&pagereqaddr,DBR_USHORT,&pageNum,1);		// Init to zero.
+			}
+		}
 		status = dbPutField(&chnotfoundaddr,DBR_LONG,&numDC,1);
 
         // printf("EDCU C1 = %f status = %d\n",daqd_edcu1.channel_value[2],daqd_edcu1.channel_status[2]);

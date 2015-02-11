@@ -5,8 +5,8 @@ file {
 }
 display {
 	object {
-		x=1314
-		y=385
+		x=1369
+		y=340
 		width=1100
 		height=920
 	}
@@ -176,7 +176,7 @@ menu {
 }
 "text update" {
 	object {
-		x=691
+		x=661
 		y=30
 		width=50
 		height=16
@@ -192,7 +192,7 @@ menu {
 }
 text {
 	object {
-		x=541
+		x=511
 		y=31
 		width=100
 		height=18
@@ -3687,534 +3687,707 @@ text {
 	limits {
 	}
 }
+menu {
+	object {
+		x=781
+		y=29
+		width=200
+		height=20
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_PAGE"
+		clr=0
+		bclr=60
+	}
+}
 composite {
 	object {
 		x=13
 		y=81
 		width=25
-		height=200
+		height=405
 	}
 	"composite name"=""
 	children {
-		text {
+		"text update" {
 			object {
 				x=13
 				y=81
 				width=25
 				height=20
 			}
-			"basic attribute" {
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_0"
 				clr=14
+				bclr=50
 			}
-			textix="01"
 			align="horiz. centered"
+			format="string"
+			limits {
+			}
 		}
-		text {
+		"text update" {
 			object {
 				x=13
 				y=101
 				width=25
 				height=20
 			}
-			"basic attribute" {
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_1"
 				clr=14
+				bclr=1
 			}
-			textix="02"
 			align="horiz. centered"
+			format="string"
+			limits {
+			}
 		}
-		text {
+		"text update" {
 			object {
 				x=13
 				y=121
 				width=25
 				height=20
 			}
-			"basic attribute" {
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_2"
 				clr=14
+				bclr=50
 			}
-			textix="03"
 			align="horiz. centered"
+			format="string"
+			limits {
+			}
 		}
-		text {
+		"text update" {
 			object {
 				x=13
 				y=141
 				width=25
 				height=20
 			}
-			"basic attribute" {
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_3"
 				clr=14
+				bclr=1
 			}
-			textix="04"
 			align="horiz. centered"
+			format="string"
+			limits {
+			}
 		}
-		text {
+		"text update" {
 			object {
 				x=13
 				y=161
 				width=25
 				height=20
 			}
-			"basic attribute" {
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_4"
 				clr=14
+				bclr=50
 			}
-			textix="05"
 			align="horiz. centered"
+			format="string"
+			limits {
+			}
 		}
-		text {
+		"text update" {
 			object {
 				x=13
 				y=181
 				width=25
 				height=20
 			}
-			"basic attribute" {
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_5"
 				clr=14
+				bclr=1
 			}
-			textix="06"
 			align="horiz. centered"
+			format="string"
+			limits {
+			}
 		}
-		text {
+		"text update" {
 			object {
 				x=13
 				y=201
 				width=25
 				height=20
 			}
-			"basic attribute" {
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_6"
 				clr=14
+				bclr=50
 			}
-			textix="07"
 			align="horiz. centered"
+			format="string"
+			limits {
+			}
 		}
-		text {
+		"text update" {
 			object {
 				x=13
 				y=221
 				width=25
 				height=20
 			}
-			"basic attribute" {
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_7"
 				clr=14
+				bclr=1
 			}
-			textix="08"
 			align="horiz. centered"
+			format="string"
+			limits {
+			}
 		}
-		text {
+		"text update" {
 			object {
 				x=13
 				y=241
 				width=25
 				height=20
 			}
-			"basic attribute" {
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_8"
 				clr=14
+				bclr=50
 			}
-			textix="09"
 			align="horiz. centered"
+			format="string"
+			limits {
+			}
 		}
-		text {
+		"text update" {
 			object {
 				x=13
 				y=261
 				width=25
 				height=20
 			}
-			"basic attribute" {
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_9"
 				clr=14
+				bclr=1
 			}
-			textix="10"
 			align="horiz. centered"
+			format="string"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=13
+				y=286
+				width=25
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_10"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			format="string"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=13
+				y=306
+				width=25
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_11"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			format="string"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=13
+				y=326
+				width=25
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_12"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			format="string"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=13
+				y=346
+				width=25
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_13"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			format="string"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=13
+				y=366
+				width=25
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_14"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			format="string"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=13
+				y=386
+				width=25
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_15"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			format="string"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=13
+				y=406
+				width=25
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_16"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			format="string"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=13
+				y=426
+				width=25
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_17"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			format="string"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=13
+				y=446
+				width=25
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_18"
+				clr=14
+				bclr=50
+			}
+			align="horiz. centered"
+			format="string"
+			limits {
+			}
+		}
+		"text update" {
+			object {
+				x=13
+				y=466
+				width=25
+				height=20
+			}
+			monitor {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_19"
+				clr=14
+				bclr=1
+			}
+			align="horiz. centered"
+			format="string"
+			limits {
+			}
 		}
 	}
 }
-text {
-	object {
-		x=13
-		y=286
-		width=25
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="11"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=13
-		y=306
-		width=25
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="12"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=13
-		y=326
-		width=25
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="13"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=13
-		y=346
-		width=25
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="14"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=13
-		y=366
-		width=25
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="15"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=13
-		y=386
-		width=25
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="16"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=13
-		y=406
-		width=25
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="17"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=13
-		y=426
-		width=25
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="18"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=13
-		y=446
-		width=25
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="19"
-	align="horiz. centered"
-}
-text {
-	object {
-		x=13
-		y=466
-		width=25
-		height=20
-	}
-	"basic attribute" {
-		clr=14
-	}
-	textix="20"
-	align="horiz. centered"
-}
-text {
+"text update" {
 	object {
 		x=13
 		y=491
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_20"
 		clr=14
+		bclr=50
 	}
-	textix="21"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=511
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_21"
 		clr=14
+		bclr=1
 	}
-	textix="22"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=531
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_22"
 		clr=14
+		bclr=50
 	}
-	textix="23"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=551
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_23"
 		clr=14
+		bclr=1
 	}
-	textix="24"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=571
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_24"
 		clr=14
+		bclr=50
 	}
-	textix="25"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=591
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_25"
 		clr=14
+		bclr=1
 	}
-	textix="26"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=611
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_26"
 		clr=14
+		bclr=50
 	}
-	textix="27"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=631
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_27"
 		clr=14
+		bclr=1
 	}
-	textix="28"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=651
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_28"
 		clr=14
+		bclr=50
 	}
-	textix="29"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=671
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_29"
 		clr=14
+		bclr=1
 	}
-	textix="30"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=697
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_30"
 		clr=14
+		bclr=50
 	}
-	textix="31"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=717
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_31"
 		clr=14
+		bclr=1
 	}
-	textix="32"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=737
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_32"
 		clr=14
+		bclr=50
 	}
-	textix="33"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=757
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_33"
 		clr=14
+		bclr=1
 	}
-	textix="34"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=777
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_34"
 		clr=14
+		bclr=50
 	}
-	textix="35"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=797
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_35"
 		clr=14
+		bclr=1
 	}
-	textix="36"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=817
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_36"
 		clr=14
+		bclr=50
 	}
-	textix="37"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=837
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_37"
 		clr=14
+		bclr=1
 	}
-	textix="38"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=857
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_38"
 		clr=14
+		bclr=50
 	}
-	textix="39"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
-text {
+"text update" {
 	object {
 		x=13
 		y=877
 		width=25
 		height=20
 	}
-	"basic attribute" {
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_39"
 		clr=14
+		bclr=1
 	}
-	textix="40"
 	align="horiz. centered"
+	format="string"
+	limits {
+	}
 }
