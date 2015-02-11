@@ -163,7 +163,7 @@ text {
 }
 menu {
 	object {
-		x=100
+		x=336
 		y=29
 		width=200
 		height=20
@@ -176,8 +176,8 @@ menu {
 }
 "text update" {
 	object {
-		x=661
-		y=30
+		x=242
+		y=31
 		width=50
 		height=16
 	}
@@ -192,7 +192,7 @@ menu {
 }
 text {
 	object {
-		x=511
+		x=50
 		y=31
 		width=100
 		height=18
@@ -3689,9 +3689,9 @@ text {
 }
 menu {
 	object {
-		x=781
+		x=565
 		y=29
-		width=200
+		width=100
 		height=20
 	}
 	control {
@@ -3704,20 +3704,371 @@ composite {
 	object {
 		x=13
 		y=81
-		width=25
-		height=405
+		width=30
+		height=816
 	}
 	"composite name"=""
 	children {
-		"text update" {
+		composite {
 			object {
 				x=13
 				y=81
-				width=25
+				width=30
+				height=405
+			}
+			"composite name"=""
+			children {
+				"text update" {
+					object {
+						x=13
+						y=81
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_0"
+						clr=14
+						bclr=50
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=101
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_1"
+						clr=14
+						bclr=1
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=121
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_2"
+						clr=14
+						bclr=50
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=141
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_3"
+						clr=14
+						bclr=1
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=161
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_4"
+						clr=14
+						bclr=50
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=181
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_5"
+						clr=14
+						bclr=1
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=201
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_6"
+						clr=14
+						bclr=50
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=221
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_7"
+						clr=14
+						bclr=1
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=241
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_8"
+						clr=14
+						bclr=50
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=261
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_9"
+						clr=14
+						bclr=1
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=286
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_10"
+						clr=14
+						bclr=50
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=306
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_11"
+						clr=14
+						bclr=1
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=326
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_12"
+						clr=14
+						bclr=50
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=346
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_13"
+						clr=14
+						bclr=1
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=366
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_14"
+						clr=14
+						bclr=50
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=386
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_15"
+						clr=14
+						bclr=1
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=406
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_16"
+						clr=14
+						bclr=50
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=426
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_17"
+						clr=14
+						bclr=1
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=446
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_18"
+						clr=14
+						bclr=50
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+				"text update" {
+					object {
+						x=13
+						y=466
+						width=30
+						height=20
+					}
+					monitor {
+						chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_19"
+						clr=14
+						bclr=1
+					}
+					align="horiz. centered"
+					format="string"
+					limits {
+					}
+				}
+			}
+		}
+		"text update" {
+			object {
+				x=13
+				y=491
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_0"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_20"
 				clr=14
 				bclr=50
 			}
@@ -3729,12 +4080,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=101
-				width=25
+				y=511
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_1"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_21"
 				clr=14
 				bclr=1
 			}
@@ -3746,12 +4097,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=121
-				width=25
+				y=531
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_2"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_22"
 				clr=14
 				bclr=50
 			}
@@ -3763,12 +4114,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=141
-				width=25
+				y=551
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_3"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_23"
 				clr=14
 				bclr=1
 			}
@@ -3780,12 +4131,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=161
-				width=25
+				y=571
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_4"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_24"
 				clr=14
 				bclr=50
 			}
@@ -3797,12 +4148,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=181
-				width=25
+				y=591
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_5"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_25"
 				clr=14
 				bclr=1
 			}
@@ -3814,12 +4165,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=201
-				width=25
+				y=611
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_6"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_26"
 				clr=14
 				bclr=50
 			}
@@ -3831,12 +4182,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=221
-				width=25
+				y=631
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_7"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_27"
 				clr=14
 				bclr=1
 			}
@@ -3848,12 +4199,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=241
-				width=25
+				y=651
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_8"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_28"
 				clr=14
 				bclr=50
 			}
@@ -3865,12 +4216,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=261
-				width=25
+				y=671
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_9"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_29"
 				clr=14
 				bclr=1
 			}
@@ -3882,12 +4233,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=286
-				width=25
+				y=697
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_10"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_30"
 				clr=14
 				bclr=50
 			}
@@ -3899,12 +4250,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=306
-				width=25
+				y=717
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_11"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_31"
 				clr=14
 				bclr=1
 			}
@@ -3916,12 +4267,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=326
-				width=25
+				y=737
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_12"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_32"
 				clr=14
 				bclr=50
 			}
@@ -3933,12 +4284,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=346
-				width=25
+				y=757
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_13"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_33"
 				clr=14
 				bclr=1
 			}
@@ -3950,12 +4301,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=366
-				width=25
+				y=777
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_14"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_34"
 				clr=14
 				bclr=50
 			}
@@ -3967,12 +4318,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=386
-				width=25
+				y=797
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_15"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_35"
 				clr=14
 				bclr=1
 			}
@@ -3984,12 +4335,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=406
-				width=25
+				y=817
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_16"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_36"
 				clr=14
 				bclr=50
 			}
@@ -4001,12 +4352,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=426
-				width=25
+				y=837
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_17"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_37"
 				clr=14
 				bclr=1
 			}
@@ -4018,12 +4369,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=446
-				width=25
+				y=857
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_18"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_38"
 				clr=14
 				bclr=50
 			}
@@ -4035,12 +4386,12 @@ composite {
 		"text update" {
 			object {
 				x=13
-				y=466
-				width=25
+				y=877
+				width=30
 				height=20
 			}
 			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_19"
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_39"
 				clr=14
 				bclr=1
 			}
@@ -4049,345 +4400,5 @@ composite {
 			limits {
 			}
 		}
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=491
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_20"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=511
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_21"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=531
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_22"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=551
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_23"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=571
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_24"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=591
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_25"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=611
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_26"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=631
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_27"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=651
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_28"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=671
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_29"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=697
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_30"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=717
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_31"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=737
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_32"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=757
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_33"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=777
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_34"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=797
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_35"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=817
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_36"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=837
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_37"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=857
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_38"
-		clr=14
-		bclr=50
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
-	}
-}
-"text update" {
-	object {
-		x=13
-		y=877
-		width=25
-		height=20
-	}
-	monitor {
-		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_LINE_39"
-		clr=14
-		bclr=1
-	}
-	align="horiz. centered"
-	format="string"
-	limits {
 	}
 }
