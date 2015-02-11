@@ -53,7 +53,8 @@ of this distribution.
 
 #define SDF_MAX_CHANS		125000	///< Maximum number of settings, including alarm settings.
 #define SDF_MAX_TSIZE		20000	///< Maximum number of EPICS settings records (No subfields).
-#define SDF_ERR_TSIZE		40	///< Size of reporting tables.
+#define SDF_ERR_DSIZE		40	///< Size of display reporting tables.
+#define SDF_ERR_TSIZE		400	///< Size of error reporting tables.
 
 #if 0
 /// Pointers to status record
@@ -146,7 +147,7 @@ int getEpicsSettings(int);
 int writeTable2File(char *,int,CDS_CD_TABLE *);
 int savesdffile(int,int,char *,char *,char *,char *,char *,dbAddr,dbAddr); 
 void createSortTableEntries(int);
-void reportSetErrors(char *,int,SET_ERR_TABLE *);
+int reportSetErrors(char *,int,SET_ERR_TABLE *,int);
 int spChecker(int);
 void newfilterstats(int);
 int writeEpicsDb(int,CDS_CD_TABLE *,int);
@@ -282,13 +283,13 @@ int sw2record[17] = {0,0,0,0,
 			status = dbGetField(&paddr1,DBR_LONG,&buffer[1],&options,&nvals,NULL);
 			presentVal = buffer[0].rval + (buffer[1].rval << 16);
 			refVal = filtCtrlBitConvert(presentVal);
-			if(refVal != filterTable[ii].swreq && errCnt < 40)
+			if(refVal != filterTable[ii].swreq && errCnt < SDF_ERR_TSIZE)
 			{
 				x = refVal;
 				y = filterTable[ii].swreq;
 				for(jj=0;jj<17;jj++)
 				{
-					if((x & 1) != (y & 1) && errCnt < 40)
+					if((x & 1) != (y & 1) && errCnt < SDF_ERR_TSIZE)
 					{
 						bzero(tmpname,sizeof(tmpname));
 						strncpy(tmpname,filterTable[ii].fname,(strlen(filterTable[ii].fname)-1));
@@ -666,9 +667,10 @@ int notMon = 0;
 }
 
 /// Common routine to load monitoring tables into EPICS channels for MEDM screen.
-void reportSetErrors(char *pref,			///< Channel name prefix from EPICS environment. 
+int reportSetErrors(char *pref,			///< Channel name prefix from EPICS environment. 
 		     int numEntries, 			///< Number of entries in table to be reported.
-		     SET_ERR_TABLE setErrTable[])	///< Which table to report to EPICS channels.
+		     SET_ERR_TABLE setErrTable[],	///< Which table to report to EPICS channels.
+		     int page)				///< Which page of 40 to display.
 {
 
 int ii;
@@ -677,66 +679,101 @@ dbAddr baddr;
 dbAddr maddr;
 dbAddr taddr;
 dbAddr daddr;
+dbAddr laddr;
 char s[64];
 char s1[64];
 char s2[64];
 char s3[64];
 char s4[64];
+char sl[64];
 long status;
-static int lastcount = 40;
 char clearString[62] = "                       ";
 int flength = 62;
+int rc = 0;
+int myindex = 0;
+int numDisp = 0;
+int lineNum = 0;
+int mypage = 0;
+int lineCtr = 0;
 
-	if(numEntries > SDF_ERR_TSIZE) numEntries = SDF_ERR_TSIZE;
-	for(ii=0;ii<numEntries;ii++)
+
+	// Get the page number to display
+	mypage = page;
+	// Calculat start index to the diff table.
+	myindex = page *  SDF_ERR_DSIZE;
+	// If index is > number of entries in the table, then page back.
+        if(myindex > numEntries) {
+		mypage = numEntries / SDF_ERR_DSIZE;
+		myindex = mypage *  SDF_ERR_DSIZE;
+        }
+	// Set the stop index to the diff table.
+	rc = myindex + SDF_ERR_DSIZE;
+	// If stop index beyond last diff table entry, set it to last entry.
+        if(rc > numEntries) rc = numEntries;
+	numDisp = rc - myindex;
+
+	// Fill in table entries.
+	for(ii=myindex;ii<rc;ii++)
 	{
-		sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
+		sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", lineNum);
 		status = dbNameToAddr(s,&saddr);
 		status = dbPutField(&saddr,DBR_UCHAR,&setErrTable[ii].chname,flength);
 
-		sprintf(s1, "%s_%s_STAT%d_BURT", pref,"SDF_SP", ii);
+		sprintf(s1, "%s_%s_STAT%d_BURT", pref,"SDF_SP", lineNum);
 		status = dbNameToAddr(s1,&baddr);
 		status = dbPutField(&baddr,DBR_UCHAR,&setErrTable[ii].burtset,flength);
 
-		sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"SDF_SP", ii);
+		sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"SDF_SP", lineNum);
 		status = dbNameToAddr(s2,&maddr);
 		status = dbPutField(&maddr,DBR_UCHAR,&setErrTable[ii].liveset,flength);
 
-		sprintf(s3, "%s_%s_STAT%d_TIME", pref,"SDF_SP", ii);
+		sprintf(s3, "%s_%s_STAT%d_TIME", pref,"SDF_SP", lineNum);
 		status = dbNameToAddr(s3,&taddr);
 		status = dbPutField(&taddr,DBR_UCHAR,&setErrTable[ii].timeset,flength);
 
-		sprintf(s4, "%s_%s_STAT%d_DIFF", pref,"SDF_SP", ii);
+		sprintf(s4, "%s_%s_STAT%d_DIFF", pref,"SDF_SP", lineNum);
 		status = dbNameToAddr(s4,&daddr);
 		status = dbPutField(&daddr,DBR_UCHAR,&setErrTable[ii].diff,flength);
+
+		sprintf(sl, "%s_SDF_LINE_%d", pref, lineNum);
+		lineNum ++;
+		lineCtr = ii + 1;;
+                status = dbNameToAddr(sl,&laddr);
+                status = dbPutField(&laddr,DBR_LONG,&lineCtr,1);
 	}
-	// Clear out error fields if present errors < previous errors
-	if(lastcount > numEntries) {
-		for(ii=numEntries;ii<lastcount;ii++)
-		{
-			sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
-			status = dbNameToAddr(s,&saddr);
-			status = dbPutField(&saddr,DBR_UCHAR,clearString,flength);
 
-			sprintf(s1, "%s_%s_STAT%d_BURT", pref,"SDF_SP", ii);
-			status = dbNameToAddr(s1,&baddr);
-			status = dbPutField(&baddr,DBR_UCHAR,clearString,flength);
+	// Clear out empty table entries.
+	for(ii=numDisp;ii<40;ii++)
+	{
+		sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
+		status = dbNameToAddr(s,&saddr);
+		status = dbPutField(&saddr,DBR_UCHAR,clearString,flength);
 
-			sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"SDF_SP", ii);
-			status = dbNameToAddr(s2,&maddr);
-			status = dbPutField(&maddr,DBR_UCHAR,clearString,flength);
+		sprintf(s1, "%s_%s_STAT%d_BURT", pref,"SDF_SP", ii);
+		status = dbNameToAddr(s1,&baddr);
+		status = dbPutField(&baddr,DBR_UCHAR,clearString,flength);
+
+		sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"SDF_SP", ii);
+		status = dbNameToAddr(s2,&maddr);
+		status = dbPutField(&maddr,DBR_UCHAR,clearString,flength);
 
 
-			sprintf(s3, "%s_%s_STAT%d_TIME", pref,"SDF_SP", ii);
-			status = dbNameToAddr(s3,&taddr);
-			status = dbPutField(&taddr,DBR_UCHAR,clearString,flength);
+		sprintf(s3, "%s_%s_STAT%d_TIME", pref,"SDF_SP", ii);
+		status = dbNameToAddr(s3,&taddr);
+		status = dbPutField(&taddr,DBR_UCHAR,clearString,flength);
 
-			sprintf(s4, "%s_%s_STAT%d_DIFF", pref,"SDF_SP", ii);
-			status = dbNameToAddr(s4,&daddr);
-			status = dbPutField(&daddr,DBR_UCHAR,clearString,flength);
-		}
+		sprintf(s4, "%s_%s_STAT%d_DIFF", pref,"SDF_SP", ii);
+		status = dbNameToAddr(s4,&daddr);
+		status = dbPutField(&daddr,DBR_UCHAR,clearString,flength);
+
+		lineCtr ++;
+		sprintf(sl, "%s_SDF_LINE_%d", pref, ii);
+		status = dbNameToAddr(sl,&laddr);
+		status = dbPutField(&laddr,DBR_LONG,&lineCtr,1);
+		
 	}
-	lastcount = numEntries;
+	// Return the number of the display page.
+	return(mypage);
 }
 
 // This function checks that present setpoints match those set by BURT if the channel is marked by a mask
@@ -1328,6 +1365,7 @@ int main(int argc,char *argv[])
 	char modfilemsg[] = "Modified File Detected ";
 	struct stat st = {0};
 	int reqValid = 0;
+	int numReport = 0;
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -1443,13 +1481,17 @@ sleep(5);
 	sprintf(reloadtimechannel,"%s_%s", pref, "SDF_RELOAD_TIME");			// Time of last BURT reload
 	status = dbNameToAddr(reloadtimechannel,&reloadtimeaddr);
 
+	unsigned int pageNum = 0;
+	dbAddr pagereqaddr;
+        char pagereqname[256]; sprintf(pagereqname, "%s_%s", pref, "SDF_PAGE"); // SDF Save command.
+        status = dbNameToAddr(pagereqname,&pagereqaddr);                // Get Address.
 
 	dbDumpRecords(*iocshPpdbbase);
 
 	// Initialize DAQ and COEFF file CRC checksums for later compares.
 	daqFileCrc = checkFileCrc(daqFile);
 	coeffFileCrc = checkFileCrc(coeffFile);
-	reportSetErrors(pref, 0,setErrTable);
+	reportSetErrors(pref, 0,setErrTable,0);
 
 	sleep(1);       // Need to wait before first restore to allow sequencers time to do their initialization.
 
@@ -1567,28 +1609,34 @@ sleep(5);
 		else if(strcmp(tsrString,"CHANS NOT INIT") == 0) tsrVal = 2;
 		else if(strcmp(tsrString,"CHANS NOT MON") == 0) tsrVal = 3;
 		else tsrVal = 0;
+		status = dbGetField(&pagereqaddr,DBR_USHORT,&pageNum,&ropts,&nvals,NULL);
 		switch(tsrVal) { 
 			case 0:
-				reportSetErrors(pref, sperror,setErrTable);
+				numReport = reportSetErrors(pref, sperror,setErrTable,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&sperror,1);
 				break;
 			case 1:
-				reportSetErrors(pref, chNotFound,unknownChans);
+				numReport = reportSetErrors(pref, chNotFound,unknownChans,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotFound,1);
 				break;
 			case 2:
-				reportSetErrors(pref, chNotInit, uninitChans);
+				numReport = reportSetErrors(pref, chNotInit, uninitChans,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotInit,1);
 				break;
 			case 3:
-				reportSetErrors(pref, noMon, unMonChans);
+				numReport = reportSetErrors(pref, noMon, unMonChans,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&noMon,1);
 				break;
 			default:
-				reportSetErrors(pref, sperror,setErrTable);
+				numReport = reportSetErrors(pref, sperror,setErrTable,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&sperror,1);
 				break;
 		}
+		if(numReport != pageNum) {
+			pageNum = numReport;
+			status = dbPutField(&pagereqaddr,DBR_USHORT,&pageNum,1);                // Init to zero.
+		}
+
 		// Check file CRCs every 5 seconds.
 		// DAQ and COEFF file checking was moved from skeleton.st to here RCG V2.9.
 		if(!fivesectimer) {
