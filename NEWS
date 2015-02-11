@@ -1,7 +1,9 @@
 ==================================================================================================
 Changes for 2.10
 ==================================================================================================
-- Added a new install script, install-nort (No real-time). This was added to properly generate
+- Added multi-page listing capabilities for unconnected EDCU channels. Presently, still a work
+  in progress.
+- Added a new install script, nort- (No real-time). This was added to properly generate
   the start script for EDCU models, which have no real-time component.
 - Added a compile option (DUAL_DAQ_DC) for running with 2 data concentrators. Until I think of
   a better solution, this is 'hardwired' in feCodeGen.pl by setting daq2dc = 1. If it is desired
