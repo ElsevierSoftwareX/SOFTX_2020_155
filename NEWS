@@ -1,7 +1,6 @@
 ==================================================================================================
 Changes for 2.10
 ==================================================================================================
-- Added multi-page listing capabilities for SDF table reporting. Presently a work in progress.
 - Added multi-page listing capabilities for unconnected EDCU channels. Presently, still a work
   in progress.
 - Added a new install script, nort- (No real-time). This was added to properly generate
@@ -14,6 +13,9 @@ Changes for 2.10
 ==================================================================================================
 Changes for 2.9.1
 ==================================================================================================
+- Bug Fix (796): Added paging capability to SDF_TABLE to allow listing of up to 400 items.
+  Also cleaned up BURT file reader line parsing to pick up on strings.  Was having problems
+  when strings started with a number and a string contained more than one word.
 - Bug Fix (803): Modified Makefile.linux to not add SDF EPICS variables to the autoBurt.req file.
 - Bug Fix (790): Added difference calc and EPICS records to provide diff between present setpoint
   and BURT request as added feature to SDF. As part of this fix, also:
