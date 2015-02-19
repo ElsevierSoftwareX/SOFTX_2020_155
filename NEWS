@@ -13,6 +13,9 @@ Changes for 2.10
 ==================================================================================================
 Changes for 2.9.1
 ==================================================================================================
+Bug Fix (810): Code not properly resetting SW1S and SW2S for FMC parts when in local mode.
+  Operation of the FMC parts was not affected by this bug, but caused issues with SDF
+  reporting.
 - Added read file error checking for filter switch settings (somehow, some settings in file >16
   bits. SDF code now truncates to 16bits and reports a read error to SDF table.
 - Bug Fix (796): Added paging capability to SDF_TABLE to allow listing of up to 400 items.
