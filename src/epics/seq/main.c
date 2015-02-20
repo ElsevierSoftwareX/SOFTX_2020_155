@@ -97,8 +97,7 @@ typedef struct FILTER_TABLE {
 	char fname[64];
 	int swreq;
 	int swmask;
-	int sw1;
-	int sw2;
+	int sw[2];
 	int newSet;
 	int init;
 	int mask;
@@ -111,6 +110,7 @@ typedef struct SET_ERR_TABLE {
 	char liveset[64];
 	char timeset[64];
 	char diff[64];
+	int sigNum;
 } SET_ERR_TABLE;
 
 
@@ -300,9 +300,6 @@ int sw2record[17] = {0,0,0,0,
 			strcat(swname[1],"SW2S");
 			status = dbNameToAddr(swname[0],&paddr);
 			status = dbGetField(&paddr,DBR_LONG,&buffer[0],&options,&nvals,NULL);
-			if(buffer[0].rval > 0xffff)
-			{
-			}
 			status = dbNameToAddr(swname[1],&paddr1);
 			status = dbGetField(&paddr1,DBR_LONG,&buffer[1],&options,&nvals,NULL);
 			for(jj=0;jj<2;jj++) {
@@ -312,6 +309,7 @@ int sw2record[17] = {0,0,0,0,
 					sprintf(setErrTable[errCnt].burtset, "%s", " ");
 					sprintf(setErrTable[errCnt].liveset, "0x%x", buffer[jj].rval);
 					sprintf(setErrTable[errCnt].diff, "%s", "OVERRANGE");
+					setErrTable[errCnt].sigNum = filterTable[ii].sw[jj];
 					mtime = buffer[jj].time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 					strcpy(localtimestring, ctime(&mtime));
 					localtimestring[strlen(localtimestring) - 1] = 0;
@@ -337,6 +335,7 @@ int sw2record[17] = {0,0,0,0,
 						sprintf(setErrTable[errCnt].chname,"%s", tmpname);
 						sprintf(setErrTable[errCnt].burtset, "%s", swstate[(y&1)]);
 						sprintf(setErrTable[errCnt].liveset, "%s", swstate[(x&1)]);
+						setErrTable[errCnt].sigNum = filterTable[ii].sw[sw2record[jj]];
 
 						mtime = buffer[sw2record[jj]].time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 						strcpy(localtimestring, ctime(&mtime));
@@ -908,6 +907,7 @@ int spChecker(int monitorAll)
 					sprintf(setErrTable[errCntr].liveset, "%s", liveset);
 
 					sprintf(setErrTable[errCntr].diff, "%s", diffB2L);
+					setErrTable[errCntr].sigNum = ii;
 
 					strcpy(localtimestring, ctime(&mtime));
 					localtimestring[strlen(localtimestring) - 1] = 0;
@@ -918,6 +918,18 @@ int spChecker(int monitorAll)
 		}
 	     }
 	return(errCntr);
+}
+int resetSelectedValues(int errNum)
+{
+long status;
+int ln = errNum - 1;
+int ii = setErrTable[ln].sigNum;
+dbAddr saddr;
+	
+	status = dbNameToAddr(cdTable[ii].chname,&saddr);
+	if(cdTable[ii].datatype == SDF_NUM) status = dbPutField(&saddr,DBR_DOUBLE,&cdTable[ii].data.chval,1);
+	else status = dbPutField(&saddr,DBR_STRING,&cdTable[ii].data.strval,1);
+	return(0);
 }
 
 /// This function sets filter module request fields to aid in decoding errant filter module switch settings.
@@ -936,8 +948,8 @@ void newfilterstats(int numchans) {
 			counter ++;
 			filterTable[ii].newSet = 0;
 			filterTable[ii].init = 1;
-			tmpreq =  ((unsigned int)cdTable[filterTable[ii].sw1].data.chval & 0xffff) + 
-				(((unsigned int)cdTable[filterTable[ii].sw2].data.chval & 0xffff) << 16);
+			tmpreq =  ((unsigned int)cdTable[filterTable[ii].sw[0]].data.chval & 0xffff) + 
+				(((unsigned int)cdTable[filterTable[ii].sw[1]].data.chval & 0xffff) << 16);
 			filterTable[ii].swreq = filtCtrlBitConvert(tmpreq);
 			bzero(chname,strlen(chname));
 			// Find address of channel
@@ -1322,12 +1334,12 @@ void dbDumpRecords(DBBASE *pdbbase)
 	{
 		strncpy(filterTable[fmNum].fname,cdTable[ii].chname,(strlen(cdTable[ii].chname)-4));
 		sprintf(tmpstr,"%s%s",filterTable[fmNum].fname,"SW2S");
-		filterTable[fmNum].sw1 = ii;
+		filterTable[fmNum].sw[0] = ii;
 		amatch = 0;
     		for(jj=0;jj<chNum;jj++) {
 			if(strcmp(tmpstr,cdTable[jj].chname) == 0)
 			{
-				filterTable[fmNum].sw2 = jj;
+				filterTable[fmNum].sw[1] = jj;
 				amatch = 1;
 			}
 		}
@@ -1370,6 +1382,7 @@ int main(int argc,char *argv[])
 	dbAddr savetimeaddr;
 	dbAddr daqmsgaddr;
 	dbAddr coeffmsgaddr;
+	dbAddr resetoneaddr;
 	// Initialize request for file load on startup.
 	int sdfReq = SDF_LOAD_PARTIAL;
 	long status;
@@ -1521,6 +1534,11 @@ sleep(5);
         char pagereqname[256]; sprintf(pagereqname, "%s_%s", pref, "SDF_PAGE"); // SDF Save command.
         status = dbNameToAddr(pagereqname,&pagereqaddr);                // Get Address.
 
+	unsigned int resetNum = 0;
+	char resetOneName[256]; sprintf(resetOneName, "%s_%s", pref, "SDF_RESET_CHAN");	// SDF reset one value.
+	status = dbNameToAddr(resetOneName,&resetoneaddr);
+	status = dbPutField(&resetoneaddr,DBR_LONG,&resetNum,1);
+
 	dbDumpRecords(*iocshPpdbbase);
 
 	// Initialize DAQ and COEFF file CRC checksums for later compares.
@@ -1670,6 +1688,14 @@ sleep(5);
 		if(numReport != pageNum) {
 			pageNum = numReport;
 			status = dbPutField(&pagereqaddr,DBR_USHORT,&pageNum,1);                // Init to zero.
+		}
+
+		status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
+		if(resetNum) {
+			resetNum += pageNum * SDF_ERR_DSIZE;
+			status = resetSelectedValues(resetNum);
+			resetNum = 0;
+			status = dbPutField(&resetoneaddr,DBR_LONG,&resetNum,1);
 		}
 
 		// Check file CRCs every 5 seconds.
