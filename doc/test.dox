@@ -39,6 +39,7 @@
 	- \ref inputFiltTest "Input Filter (Single pole/zero)"
 \subsection gds GDS
 	- \ref tpTestData "EXC/TP"
+	- \ref xextpTest "EXC/TP Parts"
 \subsection wdt WatchDogs
 	- \ref dackillTest "DACKILL w/OSEM Watchdog Test"
 	- \ref dacKillIopTest "DACKILL IOP w/OSEM Watchdog Test"
