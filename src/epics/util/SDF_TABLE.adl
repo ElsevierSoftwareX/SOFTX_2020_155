@@ -1,13 +1,13 @@
 
 file {
-	name="/opt/rtcds/rtscore/trunk/src/epics/util/SDF_TABLE.adl"
+	name="/opt/rtcds/rtscore/branches/branch-2.9/src/epics/util/SDF_TABLE.adl"
 	version=030107
 }
 display {
 	object {
-		x=1369
-		y=340
-		width=1100
+		x=949
+		y=229
+		width=1140
 		height=920
 	}
 	clr=14
@@ -91,7 +91,7 @@ rectangle {
 	object {
 		x=0
 		y=0
-		width=1100
+		width=1140
 		height=22
 	}
 	"basic attribute" {
@@ -113,7 +113,7 @@ text {
 }
 "text update" {
 	object {
-		x=815
+		x=858
 		y=4
 		width=200
 		height=15
@@ -130,7 +130,7 @@ rectangle {
 	object {
 		x=0
 		y=24
-		width=1100
+		width=1140
 		height=30
 	}
 	"basic attribute" {
@@ -139,9 +139,9 @@ rectangle {
 }
 rectangle {
 	object {
-		x=48
+		x=42
 		y=57
-		width=1045
+		width=1095
 		height=22
 	}
 	"basic attribute" {
@@ -150,7 +150,7 @@ rectangle {
 }
 text {
 	object {
-		x=97
+		x=91
 		y=60
 		width=200
 		height=18
@@ -204,7 +204,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=81
 		width=315
 		height=20
@@ -221,7 +221,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=101
 		width=315
 		height=20
@@ -238,7 +238,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=121
 		width=315
 		height=20
@@ -255,7 +255,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=141
 		width=315
 		height=20
@@ -272,7 +272,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=161
 		width=315
 		height=20
@@ -289,7 +289,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=181
 		width=315
 		height=20
@@ -306,7 +306,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=201
 		width=315
 		height=20
@@ -323,7 +323,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=221
 		width=315
 		height=20
@@ -340,7 +340,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=241
 		width=315
 		height=20
@@ -357,7 +357,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=261
 		width=315
 		height=20
@@ -374,7 +374,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=286
 		width=315
 		height=20
@@ -391,7 +391,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=306
 		width=315
 		height=20
@@ -408,7 +408,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=326
 		width=315
 		height=20
@@ -425,7 +425,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=346
 		width=315
 		height=20
@@ -442,7 +442,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=366
 		width=315
 		height=20
@@ -459,7 +459,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=386
 		width=315
 		height=20
@@ -476,7 +476,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=406
 		width=315
 		height=20
@@ -493,7 +493,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=426
 		width=315
 		height=20
@@ -510,7 +510,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=446
 		width=315
 		height=20
@@ -527,7 +527,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=466
 		width=315
 		height=20
@@ -544,7 +544,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=491
 		width=315
 		height=20
@@ -561,7 +561,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=511
 		width=315
 		height=20
@@ -578,7 +578,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=531
 		width=315
 		height=20
@@ -595,7 +595,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=551
 		width=315
 		height=20
@@ -612,7 +612,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=571
 		width=315
 		height=20
@@ -629,7 +629,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=591
 		width=315
 		height=20
@@ -646,7 +646,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=611
 		width=315
 		height=20
@@ -663,7 +663,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=631
 		width=315
 		height=20
@@ -680,7 +680,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=651
 		width=315
 		height=20
@@ -697,7 +697,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=671
 		width=315
 		height=20
@@ -714,7 +714,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=697
 		width=315
 		height=20
@@ -731,7 +731,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=717
 		width=315
 		height=20
@@ -748,7 +748,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=737
 		width=315
 		height=20
@@ -765,7 +765,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=757
 		width=315
 		height=20
@@ -782,7 +782,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=777
 		width=315
 		height=20
@@ -799,7 +799,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=797
 		width=315
 		height=20
@@ -816,7 +816,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=817
 		width=315
 		height=20
@@ -833,7 +833,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=837
 		width=315
 		height=20
@@ -850,7 +850,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=857
 		width=315
 		height=20
@@ -867,7 +867,7 @@ text {
 }
 "text update" {
 	object {
-		x=48
+		x=42
 		y=877
 		width=315
 		height=20
@@ -882,713 +882,702 @@ text {
 	limits {
 	}
 }
-composite {
+text {
 	object {
-		x=897
+		x=885
 		y=61
 		width=190
-		height=836
+		height=18
 	}
-	"composite name"=""
-	children {
-		text {
-			object {
-				x=897
-				y=61
-				width=190
-				height=18
-			}
-			"basic attribute" {
-				clr=2
-			}
-			textix="TIME OF LAST CHANGE"
-			align="horiz. centered"
-		}
-		"text update" {
-			object {
-				x=897
-				y=81
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT0_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=101
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT1_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=121
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT2_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=141
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT3_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=161
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT4_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=181
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT5_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=201
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT6_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=221
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT7_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=241
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT8_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=261
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT9_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=286
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT10_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=306
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT11_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=326
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT12_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=346
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT13_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=366
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT14_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=386
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT15_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=406
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT16_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=426
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT17_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=446
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT18_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=466
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT19_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=491
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT20_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=511
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT21_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=531
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT22_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=551
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT23_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=571
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT24_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=591
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT25_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=611
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT26_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=631
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT27_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=651
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT28_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=671
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT29_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=697
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT30_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=717
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT31_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=737
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT32_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=757
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT33_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=777
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT34_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=797
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT35_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=817
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT36_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=837
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT37_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=857
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT38_TIME"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=897
-				y=877
-				width=190
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT39_TIME"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
+	"basic attribute" {
+		clr=2
+	}
+	textix="TIME OF LAST CHANGE"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=885
+		y=81
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT0_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=101
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT1_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=121
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT2_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=141
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT3_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=161
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT4_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=181
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT5_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=201
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT6_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=221
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT7_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=241
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT8_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=261
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT9_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=286
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT10_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=306
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT11_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=326
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT12_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=346
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT13_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=366
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT14_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=386
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT15_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=406
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT16_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=426
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT17_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=446
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT18_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=466
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT19_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=491
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT20_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=511
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT21_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=531
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT22_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=551
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT23_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=571
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT24_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=591
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT25_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=611
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT26_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=631
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT27_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=651
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT28_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=671
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT29_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=697
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT30_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=717
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT31_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=737
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT32_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=757
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT33_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=777
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT34_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=797
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT35_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=817
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT36_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=837
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT37_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=857
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT38_TIME"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=885
+		y=877
+		width=190
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT39_TIME"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
 	}
 }
 text {
 	object {
-		x=765
+		x=759
 		y=61
 		width=69
 		height=18
@@ -1599,190 +1588,179 @@ text {
 	textix="DIFF"
 	align="horiz. centered"
 }
-composite {
+"text update" {
 	object {
-		x=719
+		x=710
 		y=81
 		width=170
-		height=200
+		height=20
 	}
-	"composite name"=""
-	children {
-		"text update" {
-			object {
-				x=719
-				y=81
-				width=170
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT0_DIFF"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=719
-				y=101
-				width=170
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT1_DIFF"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=719
-				y=121
-				width=170
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT2_DIFF"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=719
-				y=141
-				width=170
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT3_DIFF"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=719
-				y=161
-				width=170
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT4_DIFF"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=719
-				y=181
-				width=170
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT5_DIFF"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=719
-				y=201
-				width=170
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT6_DIFF"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=719
-				y=221
-				width=170
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT7_DIFF"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=719
-				y=241
-				width=170
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT8_DIFF"
-				clr=14
-				bclr=50
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
-		"text update" {
-			object {
-				x=719
-				y=261
-				width=170
-				height=20
-			}
-			monitor {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT9_DIFF"
-				clr=14
-				bclr=1
-			}
-			align="horiz. centered"
-			format="string"
-			limits {
-			}
-		}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT0_DIFF"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
 	}
 }
 "text update" {
 	object {
-		x=719
+		x=710
+		y=101
+		width=170
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT1_DIFF"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=710
+		y=121
+		width=170
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT2_DIFF"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=710
+		y=141
+		width=170
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT3_DIFF"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=710
+		y=161
+		width=170
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT4_DIFF"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=710
+		y=181
+		width=170
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT5_DIFF"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=710
+		y=201
+		width=170
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT6_DIFF"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=710
+		y=221
+		width=170
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT7_DIFF"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=710
+		y=241
+		width=170
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT8_DIFF"
+		clr=14
+		bclr=50
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=710
+		y=261
+		width=170
+		height=20
+	}
+	monitor {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SP_STAT9_DIFF"
+		clr=14
+		bclr=1
+	}
+	align="horiz. centered"
+	format="string"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=710
 		y=286
 		width=170
 		height=20
@@ -1799,7 +1777,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=306
 		width=170
 		height=20
@@ -1816,7 +1794,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=326
 		width=170
 		height=20
@@ -1833,7 +1811,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=346
 		width=170
 		height=20
@@ -1850,7 +1828,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=366
 		width=170
 		height=20
@@ -1867,7 +1845,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=386
 		width=170
 		height=20
@@ -1884,7 +1862,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=406
 		width=170
 		height=20
@@ -1901,7 +1879,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=426
 		width=170
 		height=20
@@ -1918,7 +1896,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=446
 		width=170
 		height=20
@@ -1935,7 +1913,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=466
 		width=170
 		height=20
@@ -1952,7 +1930,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=491
 		width=170
 		height=20
@@ -1969,7 +1947,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=511
 		width=170
 		height=20
@@ -1986,7 +1964,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=531
 		width=170
 		height=20
@@ -2003,7 +1981,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=551
 		width=170
 		height=20
@@ -2020,7 +1998,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=571
 		width=170
 		height=20
@@ -2037,7 +2015,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=591
 		width=170
 		height=20
@@ -2054,7 +2032,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=611
 		width=170
 		height=20
@@ -2071,7 +2049,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=631
 		width=170
 		height=20
@@ -2088,7 +2066,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=651
 		width=170
 		height=20
@@ -2105,7 +2083,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=671
 		width=170
 		height=20
@@ -2122,7 +2100,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=697
 		width=170
 		height=20
@@ -2139,7 +2117,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=717
 		width=170
 		height=20
@@ -2156,7 +2134,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=737
 		width=170
 		height=20
@@ -2173,7 +2151,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=757
 		width=170
 		height=20
@@ -2190,7 +2168,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=777
 		width=170
 		height=20
@@ -2207,7 +2185,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=797
 		width=170
 		height=20
@@ -2224,7 +2202,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=817
 		width=170
 		height=20
@@ -2241,7 +2219,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=837
 		width=170
 		height=20
@@ -2258,7 +2236,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=857
 		width=170
 		height=20
@@ -2275,7 +2253,7 @@ composite {
 }
 "text update" {
 	object {
-		x=719
+		x=710
 		y=877
 		width=170
 		height=20
@@ -2292,7 +2270,7 @@ composite {
 }
 composite {
 	object {
-		x=544
+		x=535
 		y=61
 		width=170
 		height=836
@@ -2301,7 +2279,7 @@ composite {
 	children {
 		text {
 			object {
-				x=544
+				x=535
 				y=61
 				width=170
 				height=18
@@ -2314,7 +2292,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=81
 				width=170
 				height=20
@@ -2331,7 +2309,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=101
 				width=170
 				height=20
@@ -2348,7 +2326,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=121
 				width=170
 				height=20
@@ -2365,7 +2343,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=141
 				width=170
 				height=20
@@ -2382,7 +2360,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=161
 				width=170
 				height=20
@@ -2399,7 +2377,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=181
 				width=170
 				height=20
@@ -2416,7 +2394,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=201
 				width=170
 				height=20
@@ -2433,7 +2411,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=221
 				width=170
 				height=20
@@ -2450,7 +2428,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=241
 				width=170
 				height=20
@@ -2467,7 +2445,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=261
 				width=170
 				height=20
@@ -2484,7 +2462,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=286
 				width=170
 				height=20
@@ -2501,7 +2479,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=306
 				width=170
 				height=20
@@ -2518,7 +2496,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=326
 				width=170
 				height=20
@@ -2535,7 +2513,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=346
 				width=170
 				height=20
@@ -2552,7 +2530,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=366
 				width=170
 				height=20
@@ -2569,7 +2547,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=386
 				width=170
 				height=20
@@ -2586,7 +2564,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=406
 				width=170
 				height=20
@@ -2603,7 +2581,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=426
 				width=170
 				height=20
@@ -2620,7 +2598,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=446
 				width=170
 				height=20
@@ -2637,7 +2615,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=466
 				width=170
 				height=20
@@ -2654,7 +2632,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=491
 				width=170
 				height=20
@@ -2671,7 +2649,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=511
 				width=170
 				height=20
@@ -2688,7 +2666,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=531
 				width=170
 				height=20
@@ -2705,7 +2683,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=551
 				width=170
 				height=20
@@ -2722,7 +2700,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=571
 				width=170
 				height=20
@@ -2739,7 +2717,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=591
 				width=170
 				height=20
@@ -2756,7 +2734,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=611
 				width=170
 				height=20
@@ -2773,7 +2751,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=631
 				width=170
 				height=20
@@ -2790,7 +2768,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=651
 				width=170
 				height=20
@@ -2807,7 +2785,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=671
 				width=170
 				height=20
@@ -2824,7 +2802,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=697
 				width=170
 				height=20
@@ -2841,7 +2819,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=717
 				width=170
 				height=20
@@ -2858,7 +2836,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=737
 				width=170
 				height=20
@@ -2875,7 +2853,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=757
 				width=170
 				height=20
@@ -2892,7 +2870,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=777
 				width=170
 				height=20
@@ -2909,7 +2887,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=797
 				width=170
 				height=20
@@ -2926,7 +2904,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=817
 				width=170
 				height=20
@@ -2943,7 +2921,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=837
 				width=170
 				height=20
@@ -2960,7 +2938,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=857
 				width=170
 				height=20
@@ -2977,7 +2955,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=544
+				x=535
 				y=877
 				width=170
 				height=20
@@ -2996,7 +2974,7 @@ composite {
 }
 text {
 	object {
-		x=372
+		x=366
 		y=61
 		width=168
 		height=18
@@ -3009,7 +2987,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=81
 		width=168
 		height=20
@@ -3026,7 +3004,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=101
 		width=168
 		height=20
@@ -3043,7 +3021,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=121
 		width=168
 		height=20
@@ -3060,7 +3038,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=141
 		width=168
 		height=20
@@ -3077,7 +3055,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=161
 		width=168
 		height=20
@@ -3094,7 +3072,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=181
 		width=168
 		height=20
@@ -3111,7 +3089,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=201
 		width=168
 		height=20
@@ -3128,7 +3106,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=221
 		width=168
 		height=20
@@ -3145,7 +3123,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=241
 		width=168
 		height=20
@@ -3162,7 +3140,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=261
 		width=168
 		height=20
@@ -3179,7 +3157,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=286
 		width=168
 		height=20
@@ -3196,7 +3174,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=306
 		width=168
 		height=20
@@ -3213,7 +3191,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=326
 		width=168
 		height=20
@@ -3230,7 +3208,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=346
 		width=168
 		height=20
@@ -3247,7 +3225,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=366
 		width=168
 		height=20
@@ -3264,7 +3242,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=386
 		width=168
 		height=20
@@ -3281,7 +3259,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=406
 		width=168
 		height=20
@@ -3298,7 +3276,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=426
 		width=168
 		height=20
@@ -3315,7 +3293,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=446
 		width=168
 		height=20
@@ -3332,7 +3310,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=466
 		width=168
 		height=20
@@ -3349,7 +3327,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=491
 		width=168
 		height=20
@@ -3366,7 +3344,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=511
 		width=168
 		height=20
@@ -3383,7 +3361,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=531
 		width=168
 		height=20
@@ -3400,7 +3378,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=551
 		width=168
 		height=20
@@ -3417,7 +3395,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=571
 		width=168
 		height=20
@@ -3434,7 +3412,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=591
 		width=168
 		height=20
@@ -3451,7 +3429,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=611
 		width=168
 		height=20
@@ -3468,7 +3446,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=631
 		width=168
 		height=20
@@ -3485,7 +3463,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=651
 		width=168
 		height=20
@@ -3502,7 +3480,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=671
 		width=168
 		height=20
@@ -3519,7 +3497,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=697
 		width=168
 		height=20
@@ -3536,7 +3514,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=717
 		width=168
 		height=20
@@ -3553,7 +3531,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=737
 		width=168
 		height=20
@@ -3570,7 +3548,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=757
 		width=168
 		height=20
@@ -3587,7 +3565,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=777
 		width=168
 		height=20
@@ -3604,7 +3582,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=797
 		width=168
 		height=20
@@ -3621,7 +3599,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=817
 		width=168
 		height=20
@@ -3638,7 +3616,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=837
 		width=168
 		height=20
@@ -3655,7 +3633,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=857
 		width=168
 		height=20
@@ -3672,7 +3650,7 @@ text {
 }
 "text update" {
 	object {
-		x=370
+		x=362
 		y=877
 		width=168
 		height=20
@@ -3702,7 +3680,7 @@ menu {
 }
 composite {
 	object {
-		x=13
+		x=7
 		y=81
 		width=30
 		height=816
@@ -3711,7 +3689,7 @@ composite {
 	children {
 		composite {
 			object {
-				x=13
+				x=7
 				y=81
 				width=30
 				height=405
@@ -3720,7 +3698,7 @@ composite {
 			children {
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=81
 						width=30
 						height=20
@@ -3737,7 +3715,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=101
 						width=30
 						height=20
@@ -3754,7 +3732,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=121
 						width=30
 						height=20
@@ -3771,7 +3749,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=141
 						width=30
 						height=20
@@ -3788,7 +3766,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=161
 						width=30
 						height=20
@@ -3805,7 +3783,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=181
 						width=30
 						height=20
@@ -3822,7 +3800,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=201
 						width=30
 						height=20
@@ -3839,7 +3817,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=221
 						width=30
 						height=20
@@ -3856,7 +3834,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=241
 						width=30
 						height=20
@@ -3873,7 +3851,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=261
 						width=30
 						height=20
@@ -3890,7 +3868,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=286
 						width=30
 						height=20
@@ -3907,7 +3885,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=306
 						width=30
 						height=20
@@ -3924,7 +3902,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=326
 						width=30
 						height=20
@@ -3941,7 +3919,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=346
 						width=30
 						height=20
@@ -3958,7 +3936,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=366
 						width=30
 						height=20
@@ -3975,7 +3953,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=386
 						width=30
 						height=20
@@ -3992,7 +3970,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=406
 						width=30
 						height=20
@@ -4009,7 +3987,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=426
 						width=30
 						height=20
@@ -4026,7 +4004,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=446
 						width=30
 						height=20
@@ -4043,7 +4021,7 @@ composite {
 				}
 				"text update" {
 					object {
-						x=13
+						x=7
 						y=466
 						width=30
 						height=20
@@ -4062,7 +4040,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=491
 				width=30
 				height=20
@@ -4079,7 +4057,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=511
 				width=30
 				height=20
@@ -4096,7 +4074,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=531
 				width=30
 				height=20
@@ -4113,7 +4091,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=551
 				width=30
 				height=20
@@ -4130,7 +4108,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=571
 				width=30
 				height=20
@@ -4147,7 +4125,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=591
 				width=30
 				height=20
@@ -4164,7 +4142,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=611
 				width=30
 				height=20
@@ -4181,7 +4159,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=631
 				width=30
 				height=20
@@ -4198,7 +4176,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=651
 				width=30
 				height=20
@@ -4215,7 +4193,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=671
 				width=30
 				height=20
@@ -4232,7 +4210,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=697
 				width=30
 				height=20
@@ -4249,7 +4227,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=717
 				width=30
 				height=20
@@ -4266,7 +4244,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=737
 				width=30
 				height=20
@@ -4283,7 +4261,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=757
 				width=30
 				height=20
@@ -4300,7 +4278,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=777
 				width=30
 				height=20
@@ -4317,7 +4295,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=797
 				width=30
 				height=20
@@ -4334,7 +4312,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=817
 				width=30
 				height=20
@@ -4351,7 +4329,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=837
 				width=30
 				height=20
@@ -4368,7 +4346,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=857
 				width=30
 				height=20
@@ -4385,7 +4363,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=13
+				x=7
 				y=877
 				width=30
 				height=20
@@ -4401,4 +4379,628 @@ composite {
 			}
 		}
 	}
+}
+text {
+	object {
+		x=1067
+		y=61
+		width=69
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="RESET"
+	align="horiz. centered"
+}
+composite {
+	object {
+		x=1080
+		y=82
+		width=45
+		height=198
+	}
+	"composite name"=""
+	children {
+		"message button" {
+			object {
+				x=1080
+				y=82
+				width=45
+				height=18
+			}
+			control {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+				clr=14
+				bclr=50
+			}
+			label="<<RESET"
+			release_msg="1"
+		}
+		"message button" {
+			object {
+				x=1080
+				y=102
+				width=45
+				height=18
+			}
+			control {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+				clr=14
+				bclr=1
+			}
+			label="<<RESET"
+			release_msg="2"
+		}
+		"message button" {
+			object {
+				x=1080
+				y=122
+				width=45
+				height=18
+			}
+			control {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+				clr=14
+				bclr=50
+			}
+			label="<<RESET"
+			release_msg="3"
+		}
+		"message button" {
+			object {
+				x=1080
+				y=142
+				width=45
+				height=18
+			}
+			control {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+				clr=14
+				bclr=1
+			}
+			label="<<RESET"
+			release_msg="4"
+		}
+		"message button" {
+			object {
+				x=1080
+				y=162
+				width=45
+				height=18
+			}
+			control {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+				clr=14
+				bclr=50
+			}
+			label="<<RESET"
+			release_msg="5"
+		}
+		"message button" {
+			object {
+				x=1080
+				y=182
+				width=45
+				height=18
+			}
+			control {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+				clr=14
+				bclr=1
+			}
+			label="<<RESET"
+			release_msg="6"
+		}
+		"message button" {
+			object {
+				x=1080
+				y=202
+				width=45
+				height=18
+			}
+			control {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+				clr=14
+				bclr=50
+			}
+			label="<<RESET"
+			release_msg="7"
+		}
+		"message button" {
+			object {
+				x=1080
+				y=222
+				width=45
+				height=18
+			}
+			control {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+				clr=14
+				bclr=1
+			}
+			label="<<RESET"
+			release_msg="8"
+		}
+		"message button" {
+			object {
+				x=1080
+				y=242
+				width=45
+				height=18
+			}
+			control {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+				clr=14
+				bclr=50
+			}
+			label="<<RESET"
+			release_msg="9"
+		}
+		"message button" {
+			object {
+				x=1080
+				y=262
+				width=45
+				height=18
+			}
+			control {
+				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+				clr=14
+				bclr=1
+			}
+			label="<<RESET"
+			release_msg="10"
+		}
+	}
+}
+"message button" {
+	object {
+		x=1080
+		y=287
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="11"
+}
+"message button" {
+	object {
+		x=1080
+		y=307
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="12"
+}
+"message button" {
+	object {
+		x=1080
+		y=327
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="13"
+}
+"message button" {
+	object {
+		x=1080
+		y=347
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="14"
+}
+"message button" {
+	object {
+		x=1080
+		y=367
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="15"
+}
+"message button" {
+	object {
+		x=1080
+		y=387
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="16"
+}
+"message button" {
+	object {
+		x=1080
+		y=407
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="17"
+}
+"message button" {
+	object {
+		x=1080
+		y=427
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="18"
+}
+"message button" {
+	object {
+		x=1080
+		y=447
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="19"
+}
+"message button" {
+	object {
+		x=1080
+		y=467
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="20"
+}
+"message button" {
+	object {
+		x=1080
+		y=492
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="21"
+}
+"message button" {
+	object {
+		x=1080
+		y=512
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="22"
+}
+"message button" {
+	object {
+		x=1080
+		y=532
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="23"
+}
+"message button" {
+	object {
+		x=1080
+		y=552
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="24"
+}
+"message button" {
+	object {
+		x=1080
+		y=572
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="25"
+}
+"message button" {
+	object {
+		x=1080
+		y=592
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="26"
+}
+"message button" {
+	object {
+		x=1080
+		y=612
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="27"
+}
+"message button" {
+	object {
+		x=1080
+		y=632
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="28"
+}
+"message button" {
+	object {
+		x=1080
+		y=652
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="29"
+}
+"message button" {
+	object {
+		x=1080
+		y=672
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="30"
+}
+"message button" {
+	object {
+		x=1080
+		y=698
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="31"
+}
+"message button" {
+	object {
+		x=1080
+		y=718
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="32"
+}
+"message button" {
+	object {
+		x=1080
+		y=738
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="33"
+}
+"message button" {
+	object {
+		x=1080
+		y=758
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="34"
+}
+"message button" {
+	object {
+		x=1080
+		y=778
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="35"
+}
+"message button" {
+	object {
+		x=1080
+		y=798
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="36"
+}
+"message button" {
+	object {
+		x=1080
+		y=818
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="37"
+}
+"message button" {
+	object {
+		x=1080
+		y=838
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="38"
+}
+"message button" {
+	object {
+		x=1080
+		y=858
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=50
+	}
+	label="<<RESET"
+	release_msg="39"
+}
+"message button" {
+	object {
+		x=1080
+		y=878
+		width=45
+		height=18
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RESET_CHAN"
+		clr=14
+		bclr=1
+	}
+	label="<<RESET"
+	release_msg="40"
 }

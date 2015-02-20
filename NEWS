@@ -1,6 +1,7 @@
 ==================================================================================================
 Changes for 2.9.1 release 
 ==================================================================================================
+- Added individual channel reset to BURT value capability for SDF_TABLE display.
 - Bug Fix (810): Code not properly resetting SW1S and SW2S for FMC parts when in local mode.
   Operation of the FMC parts was not affected by this bug, but caused issues with SDF
   reporting.
