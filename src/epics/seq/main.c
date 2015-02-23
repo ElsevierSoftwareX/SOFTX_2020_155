@@ -1107,9 +1107,6 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 			argcount = parseLine(line,s1,s2,s3,s4,s5,s6);
 			// Only 3 = no monit flag
 			// >=4 count be monit flag or string with quotes
-			// strcpy(s4,"x");
-			// bzero(s3,strlen(s3));
-			// sscanf(line,"%s%s%s%s%s%s",s1,s2,s3,s4,s5,s6);
 			// If 1st three chars match IFO ie checking this this line is not BURT header or channel marked RO
 			if(strncmp(s1,ifo,3) == 0 && 
 			// Don't allow load of SWSTAT or SWMASK, which are set by this program.
@@ -1143,8 +1140,17 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 				{
 					alarmCnt ++;
 					isalarm = 1;
+					if(isdigit(s3[0])) {
+						cdTableP[chNumP].datatype = SDF_NUM;
+						cdTableP[chNumP].data.chval = atof(s3);
+						// printf("Alarm set - %s = %f\n",cdTableP[chNumP].chname,cdTableP[chNumP].data.chval);
+					} else {
+						cdTableP[chNumP].datatype = SDF_STR;
+						strcpy(cdTableP[chNumP].data.strval,s3);
+						// printf("Alarm set - %s = %s\n",cdTableP[chNumP].chname,cdTableP[chNumP].data.strval);
+					}
 				} 
-				if(!isalarm && command != SDF_LOAD_DB_ONLY)
+				if(!isalarm)
 				{
 				   // Add settings to local table.
 				   for(ii=0;ii<chNum;ii++)
@@ -1152,12 +1158,13 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 					if(strcmp(cdTable[ii].chname,cdTableP[chNumP].chname) == 0)
 					{
 						fmatch = 1;
-						if(cdTable[ii].datatype == SDF_STR)
+						if(cdTable[ii].datatype == SDF_STR || (!isdigit(s3[0]) && strncmp(s3,"-",1) != 0))
 						{
-							// printf("quota = %d\n",qcnt);
+							printf("quota = %s = %s\n",cdTableP[chNumP].chname,s3);
 							cdTableP[chNumP].datatype = SDF_STR;
 							strcpy(cdTableP[chNumP].data.strval,s3);
-							strcpy(cdTable[ii].data.strval,cdTableP[chNumP].data.strval);
+							if(command != SDF_LOAD_DB_ONLY)
+								strcpy(cdTable[ii].data.strval,cdTableP[chNumP].data.strval);
 						} else {
 							cdTableP[chNumP].datatype = SDF_NUM;
 							cdTableP[chNumP].data.chval = atof(s3);
@@ -1175,11 +1182,14 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 								}
 								cdTableP[chNumP].data.chval = (int) cdTableP[chNumP].data.chval & 0xffff;
 							}
-							cdTable[ii].data.chval = cdTableP[chNumP].data.chval;
+							if(command != SDF_LOAD_DB_ONLY)
+								cdTable[ii].data.chval = cdTableP[chNumP].data.chval;
 						}
+						if(command != SDF_LOAD_DB_ONLY) {
 						if(cdTableP[chNumP].mask != -1)
 							cdTable[ii].mask = cdTableP[chNumP].mask;
 						cdTable[ii].initialized = 1;
+						}
 					}
 				   }
 				   // if(!fmatch) printf("NEW channel not found %s\n",cdTableP[chNumP].chname);
@@ -1214,34 +1224,13 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 		   	}
 		}
 		fclose(cdf);
+		printf("Loading epics %d\n",chNumP);
 		lderror = writeEpicsDb(chNumP,cdTableP,command);
 		// if(!fmtInit) newfilterstats(fmNum);
 		sleep(2);
 		newfilterstats(fmNum);
 		fmtInit = 1;
 	}
-/*
-	NOTE: This stub remains for EPICS channel locking using ASG if desired at some point.
-	while((c = fscanf(cdf,"%s%s",cdTable[chNum].chname,s1) != EOF))
-	{
-		// Convert setting ascii to float
-		cdTable[chNum].chval = atof(s1);
-		// By default, set the data type in cdTable to floating point.
-		cdTable[chNum].datatype = 0;
-		// if(!strcmp(s2,"L")) cdTable[chNum].chlock = 1;
-		// else cdTable[chNum].chlock = 0;
-		// printf("Channel %s = %f\n",cdTable[chNum].chname, cdTable[chNum].chval);
-		// Determine if chan value is really a string and not a float.
-		if((cdTable[chNum].chval == 0) && (s1[0] != '0')) {
-			// printf("Channel %s is not a number %s\n",cdTable[chNum].chname, s1);
-			// Set data type to string
-			cdTable[chNum].datatype = 1;
-			// Copy string to cdTable string variable.
-			strcpy(cdTable[chNum].strval,s1);
-		}
-		chNum ++;
-	}
-*/
 
 	// Calc time to load settings and make log entry
 	clock_gettime(CLOCK_REALTIME,&t);
@@ -1250,7 +1239,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 	if(command == SDF_LOAD_PARTIAL) {
 		sprintf(errMsg,"New SDF request (w/table update): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNumP,(totaltime/1000));
 	} else if(command == SDF_LOAD_DB_ONLY){
-		sprintf(errMsg,"New SDF request (No table update): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNum,(totaltime/1000));
+		sprintf(errMsg,"New SDF request (No table update): %s\nFile = %s\nTotal Chans = %d with load time = %d usec\n",timestring,sdfile,chNumP,(totaltime/1000));
 	}
 	logFileEntry(errMsg);
 	status = dbNameToAddr(reloadtimechannel,&paddr);
@@ -1663,6 +1652,13 @@ sleep(5);
 			case 0:
 				numReport = reportSetErrors(pref, sperror,setErrTable,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&sperror,1);
+				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
+				if(resetNum) {
+					resetNum += pageNum * SDF_ERR_DSIZE;
+					if(resetNum <= sperror) status = resetSelectedValues(resetNum);
+					resetNum = 0;
+					status = dbPutField(&resetoneaddr,DBR_LONG,&resetNum,1);
+				}
 				break;
 			case 1:
 				numReport = reportSetErrors(pref, chNotFound,unknownChans,pageNum);
@@ -1690,13 +1686,6 @@ sleep(5);
 			status = dbPutField(&pagereqaddr,DBR_USHORT,&pageNum,1);                // Init to zero.
 		}
 
-		status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
-		if(resetNum) {
-			resetNum += pageNum * SDF_ERR_DSIZE;
-			status = resetSelectedValues(resetNum);
-			resetNum = 0;
-			status = dbPutField(&resetoneaddr,DBR_LONG,&resetNum,1);
-		}
 
 		// Check file CRCs every 5 seconds.
 		// DAQ and COEFF file checking was moved from skeleton.st to here RCG V2.9.
