@@ -14,9 +14,12 @@ Changes for 2.9.1 release
 - Bug Fix (803): Modified Makefile.linux to not add SDF EPICS variables to the autoBurt.req file.
 - Bug Fix (790): Added difference calc and EPICS records to provide diff between present setpoint
   and BURT request as added feature to SDF. As part of this fix, also:
+	- Added FILTER_MODULE_SWSTR EPICS record for each filter module. This is a string 
+	  representation of the filter module switch settings. 
   	- Changed the way filter switch setting errors are reported.
-		- Old: FILTER_NAME_SW1S		Hex of BURT set		Hex of Present set
-		- New: FILTER_NAME [ERRANT SWITCH NAME]		BURT ON/OFF	PRESENT ON/OFF
+			CHANNEL NAME	      BURT		PRESENT			DIFF
+		- Old: FILTER_NAME_SW1S	  Hex of BURT set   Hex of Present set
+		- New: FILTER_NAME 	  BURT SWSTR	     Present SWSTR	 Diff String
 	- Increased display precision to BURT/PRESENT value fields on DIFF Display.
 - Bug Fix (799) Added a third output, STATE, to the DacKillIop part.
 - Bug Fix (763). rampMuxMatrix fix to screen size and background color for fractional settings.
