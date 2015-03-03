@@ -1384,6 +1384,7 @@ CommandLine: /* Nothing */
 		    if (schan) {
 		      *yyout << setw (channel_t::channel_name_max_len) << setfill (' ') 
 			   << ((my_lexer *) lexer) -> channels [i].name;
+                      yyout -> setf (ios::right, ios::adjustfield);
 		      if ($3) {
 		        *yyout << setw (8) << setfill ('0') << hex << ((my_lexer *) lexer) -> channels [i].sample_rate;
 		      } else {
@@ -1534,7 +1535,7 @@ CommandLine: /* Nothing */
 		    *yyout << daqd.trender.num_channels << " trend channels" << endl;
 		    *yyout << 1000000/daqd.writer_sleep_usec << "Hz clock" << endl;
 		  }
-		  *yyout << "chnum\tslow\t|name\t\t\t\t|rate\t|trend\t|group\t|bps\t|bytes\t|offset\t|type\t|active" << endl;
+		  *yyout << "chnum\tslow\t|name\t\t\t\t\t\t\t\t|rate\t|trend\t|group\t|bps\t|bytes\t|offset\t|type\t|active" << endl;
 
 		  for (int i = 0; i < num_channels; i++) {
 		    *yyout
