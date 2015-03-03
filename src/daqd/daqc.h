@@ -14,7 +14,7 @@
 #include <limits.h>
 
 #define DAQD_PROTOCOL_VERSION 12
-#define DAQD_PROTOCOL_REVISION 1
+#define DAQD_PROTOCOL_REVISION 2
 
 #define DAQD_PORT 8088
 
