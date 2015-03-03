@@ -1,6 +1,6 @@
 
 file {
-	name="/opt/rtcds/rtscore/branch-2.9/src/epics/util/SDF_RESTORE.adl"
+	name="/opt/rtcds/rtscore/branches/branch-2.9/src/epics/util/SDF_RESTORE.adl"
 	version=030107
 }
 display {
@@ -912,4 +912,52 @@ text {
 	}
 	label="LOAD EDB ONLY"
 	release_msg="4"
+}
+rectangle {
+	object {
+		x=290
+		y=276
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=60
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A==0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD_STATUS"
+	}
+}
+rectangle {
+	object {
+		x=290
+		y=276
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=30
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A==1"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD_STATUS"
+	}
+}
+rectangle {
+	object {
+		x=290
+		y=276
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=20
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A>1"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_RELOAD_STATUS"
+	}
 }
