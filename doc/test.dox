@@ -15,6 +15,7 @@
 	- \ref cpuTimeTest "CPU times by SVN"
 	- \ref decFiltTest "IOP Decimation Filter Test"
 	- \ref daqFiltTest "DAQ (daqLib) Decimation Filter Test"
+	- \ref sdf "Setpoint MonitoringTest"
 \section testpage2 RCG Component Testing 
 \subsection iot I/O Components
 	- \ref ipcTestData "RCG IPC Test"
