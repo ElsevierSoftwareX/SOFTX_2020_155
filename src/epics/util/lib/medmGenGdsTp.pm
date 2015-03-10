@@ -119,7 +119,7 @@ sub createGdsMedm
 	# Add BURT related display
 	$xpos = 562; $ypos = 106; $width = 160; $height = 18;
 	$mdlNamelc = lc($mdlName);
-	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_SDF_RESTORE.adl";
+	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_SDF_TABLE.adl";
         $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"SDF RESTORE");
 	# BURT Diffs Label
 	$xpos = 733; $ypos = 94; $width = 24; $height = 12;
