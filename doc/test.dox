@@ -15,6 +15,7 @@
 	- \ref cpuTimeTest "CPU times by SVN"
 	- \ref decFiltTest "IOP Decimation Filter Test"
 	- \ref daqFiltTest "DAQ (daqLib) Decimation Filter Test"
+	- \ref sdf "Setpoint MonitoringTest"
 \section testpage2 RCG Component Testing 
 \subsection iot I/O Components
 	- \ref ipcTestData "RCG IPC Test"
@@ -39,6 +40,7 @@
 	- \ref inputFiltTest "Input Filter (Single pole/zero)"
 \subsection gds GDS
 	- \ref tpTestData "EXC/TP"
+	- \ref xextpTest "EXC/TP Parts"
 \subsection wdt WatchDogs
 	- \ref dackillTest "DACKILL w/OSEM Watchdog Test"
 	- \ref dacKillIopTest "DACKILL IOP w/OSEM Watchdog Test"
