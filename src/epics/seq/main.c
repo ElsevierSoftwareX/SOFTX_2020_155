@@ -142,6 +142,7 @@ SET_ERR_TABLE unknownChans[SDF_ERR_TSIZE];	///< Table used to report channels no
 SET_ERR_TABLE uninitChans[SDF_ERR_TSIZE];	///< Table used to report channels not initialized by BURT safe.snap.
 SET_ERR_TABLE unMonChans[SDF_ERR_TSIZE];	///< Table used to report channels not being monitored.
 SET_ERR_TABLE readErrTable[SDF_ERR_TSIZE];	///< Table used to report file read errors..
+SET_ERR_TABLE cdTableList[SDF_MAX_TSIZE];	///< Table used to report file read errors..
 
 #define SDF_NUM		0
 #define SDF_STR		1
@@ -156,7 +157,7 @@ int writeTable2File(char *,int,CDS_CD_TABLE *);
 int savesdffile(int,int,char *,char *,char *,char *,char *,dbAddr,dbAddr); 
 int createSortTableEntries(int);
 int reportSetErrors(char *,int,SET_ERR_TABLE *,int);
-int spChecker(int,int,char *);
+int spChecker(int,SET_ERR_TABLE *,int,char *,int,int *);
 void newfilterstats(int);
 int writeEpicsDb(int,CDS_CD_TABLE *,int);
 int readConfig( char *,char *,int,char *);
@@ -824,90 +825,6 @@ int notMon = 0;
 }
 
 /// Common routine to load monitoring tables into EPICS channels for MEDM screen.
-int reportTableEntries(char *pref,			///< Channel name prefix from EPICS environment. 
-		     	int numEntries, 			///< Number of entries in table to be reported.
-		     	int page)				///< Which page of 40 to display.
-{
-int ii;
-dbAddr saddr;
-dbAddr baddr;
-dbAddr maddr;
-dbAddr taddr;
-dbAddr daddr;
-dbAddr laddr;
-char s[64];
-char s1[64];
-char s2[64];
-char s3[64];
-char s4[64];
-char sl[64];
-char sb[64];
-char se[64];
-long status;
-char clearString[62] = "                       ";
-int flength = 62;
-int rc = 0;
-int myindex = 0;
-int numDisp = 0;
-int lineNum = 0;
-int mypage = 0;
-int lineCtr = 0;
-
-	// Get the page number to display
-	mypage = page;
-	// Calculat start index to the diff table.
-	myindex = page *  SDF_ERR_DSIZE;
-	// If index is > number of entries in the table, then page back.
-        if(myindex > numEntries) {
-		mypage = numEntries / SDF_ERR_DSIZE;
-		myindex = mypage *  SDF_ERR_DSIZE;
-        }
-	// Set the stop index to the diff table.
-	rc = myindex + SDF_ERR_DSIZE;
-	// If stop index beyond last diff table entry, set it to last entry.
-        if(rc > numEntries) rc = numEntries;
-	numDisp = rc - myindex;
-
-	status = getEpicsSettings(numEntries);
-	// Fill in table entries.
-	for(ii=myindex;ii<rc;ii++)
-	{
-		sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", lineNum);
-		status = dbNameToAddr(s,&saddr);
-		status = dbPutField(&saddr,DBR_UCHAR,&cdTable[ii].chname,flength);
-
-		if(cdTable[ii].datatype == SDF_NUM) {
-			sprintf(sb,"%.10lf",cdTable[ii].data.chval);
-			sprintf(se,"%.10lf",cdTableP[ii].data.chval);
-		} else {
-			sprintf(sb,"%s",cdTable[ii].data.strval);
-			sprintf(se,"%s",cdTableP[ii].data.strval);
-		}	
-
-		sprintf(s1, "%s_%s_STAT%d_BURT", pref,"SDF_SP", lineNum);
-		status = dbNameToAddr(s1,&baddr);
-		status = dbPutField(&baddr,DBR_UCHAR,sb,flength);
-
-		sprintf(s2, "%s_%s_STAT%d_LIVE", pref,"SDF_SP", lineNum);
-		status = dbNameToAddr(s2,&maddr);
-		status = dbPutField(&maddr,DBR_UCHAR,se,flength);
-
-		sprintf(s2, "%s_SDF_BITS_%d", pref, lineNum);
-                status = dbNameToAddr(s2,&daddr);
-                status = dbPutField(&daddr,DBR_ULONG,&cdTable[ii].mask,1);
-
-		sprintf(sl, "%s_SDF_LINE_%d", pref, lineNum);
-		lineNum ++;
-		lineCtr = ii + 1;;
-                status = dbNameToAddr(sl,&laddr);
-                status = dbPutField(&laddr,DBR_LONG,&lineCtr,1);
-	}
-	// Return the number of the display page.
-	return(mypage);
-}
-
-
-/// Common routine to load monitoring tables into EPICS channels for MEDM screen.
 int reportSetErrors(char *pref,			///< Channel name prefix from EPICS environment. 
 		     int numEntries, 			///< Number of entries in table to be reported.
 		     SET_ERR_TABLE setErrTable[],	///< Which table to report to EPICS channels.
@@ -1034,7 +951,7 @@ int zero = 0;
 //	- Present Value
 //	- Time the present setting was applied.
 /// Setpoint monitoring routine.
-int spChecker(int monitorAll,int wcVal, char *wcstring)
+int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstring, int listAll, int *totalDiffs)
 {
    	int errCntr = 0;
 	dbAddr paddr;
@@ -1064,13 +981,16 @@ int spChecker(int monitorAll,int wcVal, char *wcstring)
 	char *ret;
 
 	// Check filter switch settings first
-	     errCntr = checkFilterSwitches(fmNum,monitorAll);
+	     if(!listAll)
+		     errCntr = checkFilterSwitches(fmNum,monitorAll);
+		*totalDiffs = errCntr;
 	     if(chNum) {
 		for(ii=0;ii<chNum;ii++) {
 			if((errCntr < SDF_ERR_TSIZE) && 		// Within table max size
 			  ((cdTable[ii].mask != 0) || (monitorAll)) && 	// Channel is to be monitored
 			   cdTable[ii].initialized && 			// Channel was set in BURT
-			   cdTable[ii].filterswitch == 0)		// Not a filter switch channel
+			   cdTable[ii].filterswitch == 0 ||		// Not a filter switch channel
+			   listAll)
 			{
 				localErr = 0;
 				// Find address of channel
@@ -1079,7 +999,7 @@ int spChecker(int monitorAll,int wcVal, char *wcstring)
 				if(cdTable[ii].datatype == SDF_NUM)
 				{
 					status = dbGetField(&paddr,DBR_DOUBLE,&buffer,&options,&nvals,NULL);
-					if(cdTable[ii].data.chval != buffer.rval)
+					if(cdTable[ii].data.chval != buffer.rval || listAll)
 					{
 						sdfdiff = fabs(cdTable[ii].data.chval - buffer.rval);
 						sprintf(burtset,"%.10lf",cdTable[ii].data.chval);
@@ -1091,7 +1011,7 @@ int spChecker(int monitorAll,int wcVal, char *wcstring)
 				// If this is a string type, then get as string.
 				} else {
 					status = dbGetField(&paddr,DBR_STRING,&strbuffer,&options,&nvals,NULL);
-					if(strcmp(cdTable[ii].data.strval,strbuffer.sval) != 0)
+					if(strcmp(cdTable[ii].data.strval,strbuffer.sval) != 0 || listAll)
 					{
 						sprintf(burtset,"%s",cdTable[ii].data.strval);
 						sprintf(liveset,"%s",strbuffer.sval);
@@ -1100,6 +1020,7 @@ int spChecker(int monitorAll,int wcVal, char *wcstring)
 						localErr = 1;
 					}
 				}
+				if(localErr) *totalDiffs += 1;
 				if(localErr && wcVal  && (ret = strstr(cdTable[ii].chname,wcstring) == NULL))
 					localErr = 0;
 				// If a diff was found, then write info the EPICS setpoint diff table.
@@ -1635,6 +1556,7 @@ int main(int argc,char *argv[])
 	dbAddr coeffmsgaddr;
 	dbAddr resetoneaddr;
 	dbAddr selectaddr[3];
+	dbAddr pagelockaddr[3];
 	// Initialize request for file load on startup.
 	int sdfReq = SDF_LOAD_PARTIAL;
 	long status;
@@ -1676,6 +1598,8 @@ int main(int argc,char *argv[])
 	int zero = 0;
 	char backupName[64];
 	int lastTable = 0;
+	int cdSort = 0;
+	int diffCnt = 0;
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -1766,6 +1690,10 @@ sleep(5);
 	char savecmdname[256]; sprintf(savecmdname, "%s_%s", pref, "SDF_SAVE_CMD");	// SDF Save command.
 	status = dbNameToAddr(savecmdname,&savecmdaddr);		// Get Address.
 	status = dbPutField(&savecmdaddr,DBR_LONG,&rdstatus,1);		// Init to zero.
+
+	char pagelockname[128]; sprintf(pagelockname, "%s_%s", pref, "SDF_TABLE_LOCK");	// SDF Save command.
+	status = dbNameToAddr(pagelockname,&pagelockaddr);		// Get Address.
+	status = dbPutField(&pagelockaddr,DBR_LONG,&freezeTable,1);		// Init to zero.
 
 	char saveasname[256]; sprintf(saveasname, "%s_%s", pref, "SDF_SAVE_AS_NAME");	// SDF Save as file name.
 	// Clear out the save as file name request
@@ -1951,9 +1879,9 @@ sleep(5);
 		status = dbGetField(&wcstringaddr,DBR_STRING,saveasfilename,&ropts,&nvals,NULL);
 		// Call the diff checking function.
 		if(!freezeTable)
-			sperror = spChecker(monFlag,wcVal,wcstring);
+			sperror = spChecker(monFlag,setErrTable,wcVal,wcstring,0,&diffCnt);
 		// Report number of diffs found.
-		status = dbPutField(&sperroraddr,DBR_LONG,&sperror,1);
+		status = dbPutField(&sperroraddr,DBR_LONG,&diffCnt,1);
 		// Table sorting and presentation
 		status = dbGetField(&tablesortreqaddr,DBR_USHORT,&tsrVal,&ropts,&nvals,NULL);
 		status = dbGetField(&wcreqaddr,DBR_USHORT,&wcVal,&ropts,&nvals,NULL);
@@ -1996,6 +1924,7 @@ sleep(5);
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_OVERWRITE_TABLE,sdfDir,modelname,sdfile,saveasfilename,backupName,savefileaddr,savetimeaddr);
 						status = appendAlarms2File(sdfDir,backupName);
 					}
+					sdfFileCrc = checkFileCrc(sdffileloaded);
 					confirmVal = 0;
 					selectCounter[0] = 0;
 					selectCounter[1] = 0;
@@ -2048,6 +1977,7 @@ sleep(5);
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_OVERWRITE_TABLE,sdfDir,modelname,sdfile,saveasfilename,backupName,savefileaddr,savetimeaddr);
 						status = appendAlarms2File(sdfDir,backupName);
 					}
+					sdfFileCrc = checkFileCrc(sdffileloaded);
 					confirmVal = 0;
 					selectCounter[0] = 0;
 					selectCounter[1] = 0;
@@ -2064,8 +1994,51 @@ sleep(5);
 				lastTable = 3;
 				break;
 			case 4:
-				numReport = reportSetErrors(pref, rderror, readErrTable,pageNum);
-				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&rderror,1);
+				if(lastTable != 4) {
+					confirmVal = 0;
+					selectCounter[0] = 0;
+					selectCounter[1] = 0;
+					selectCounter[2] = 0;
+					for(ii=0;ii<cdSort;ii++) {
+						 cdTableList[ii].chFlag = 0;
+					}
+				}
+				cdSort = spChecker(monFlag,cdTableList,wcVal,wcstring,1,&diffCnt);
+				numReport = reportSetErrors(pref, cdSort, cdTableList,pageNum);
+				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
+				if(resetNum > 200) {
+					decodeChangeSelect(resetNum, numReport, cdSort, cdTableList,selectCounter);
+				}
+				if(resetNum) {
+					resetNum = 0;
+					status = dbPutField(&resetoneaddr,DBR_LONG,&resetNum,1);
+				}
+				if(confirmVal) {
+					if(selectCounter[2]) {
+						// Save present table as timenow.
+						status = dbGetField(&loadedfile_addr,DBR_STRING,backupName,&ropts,&nvals,NULL);
+						printf("BACKING UP: %s\n",backupName);
+						savesdffile(SAVE_TABLE_AS_SDF,SAVE_BACKUP,sdfDir,modelname,sdfile,saveasfilename,backupName,savefileaddr,savetimeaddr);
+						// Overwrite the table with new values
+						status = modifyTable(cdSort,cdTableList);
+						// Overwrite file
+						savesdffile(SAVE_TABLE_AS_SDF,SAVE_OVERWRITE_TABLE,sdfDir,modelname,sdfile,saveasfilename,backupName,savefileaddr,savetimeaddr);
+						status = appendAlarms2File(sdfDir,backupName);
+					}
+					sdfFileCrc = checkFileCrc(sdffileloaded);
+					confirmVal = 0;
+					selectCounter[0] = 0;
+					selectCounter[1] = 0;
+					selectCounter[2] = 0;
+					status = dbPutField(&confirmwordaddr,DBR_LONG,&confirmVal,1);
+					for(ii=0;ii<cdSort;ii++) {
+						 cdTableList[ii].chFlag = 0;
+					}
+					noMon = createSortTableEntries(chNum);
+					// Calculate and report number of channels NOT being monitored.
+					status = dbPutField(&monchancntaddr,DBR_LONG,&noMon,1);
+				}
+				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&cdSort,1);
 				lastTable = 4;
 				break;
 			default:
@@ -2081,6 +2054,7 @@ sleep(5);
 			freezeTable += selectCounter[ii];
 			status = dbPutField(&selectaddr[ii],DBR_LONG,&selectCounter[ii],1);
 		}
+		status = dbPutField(&pagelockaddr,DBR_LONG,&freezeTable,1);
 
 		// Check file CRCs every 5 seconds.
 		// DAQ and COEFF file checking was moved from skeleton.st to here RCG V2.9.

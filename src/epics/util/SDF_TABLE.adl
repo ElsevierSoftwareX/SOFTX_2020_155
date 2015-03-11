@@ -5,8 +5,8 @@ file {
 }
 display {
 	object {
-		x=605
-		y=120
+		x=856
+		y=244
 		width=1280
 		height=970
 	}
@@ -4215,7 +4215,7 @@ rectangle {
 }
 "choice button" {
 	object {
-		x=570
+		x=553
 		y=34
 		width=50
 		height=38
@@ -4228,7 +4228,7 @@ rectangle {
 }
 composite {
 	object {
-		x=508
+		x=491
 		y=36
 		width=50
 		height=32
@@ -4237,7 +4237,7 @@ composite {
 	children {
 		text {
 			object {
-				x=508
+				x=491
 				y=36
 				width=50
 				height=16
@@ -4250,7 +4250,7 @@ composite {
 		}
 		text {
 			object {
-				x=508
+				x=491
 				y=52
 				width=50
 				height=16
@@ -9435,4 +9435,21 @@ rectangle {
 		calc="A&1==1"
 		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_BITS_39"
 	}
+}
+text {
+	object {
+		x=625
+		y=43
+		width=150
+		height=16
+	}
+	"basic attribute" {
+		clr=20
+	}
+	"dynamic attribute" {
+		vis="if not zero"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_TABLE_LOCK"
+	}
+	textix="TABLE UPDATE LOCKED"
+	align="horiz. centered"
 }
