@@ -120,7 +120,7 @@ sub createGdsMedm
 	$xpos = 562; $ypos = 106; $width = 160; $height = 18;
 	$mdlNamelc = lc($mdlName);
 	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_SDF_TABLE.adl";
-        $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"SDF RESTORE");
+        $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"SDF TABLE");
 	# BURT Diffs Label
 	$xpos = 733; $ypos = 94; $width = 24; $height = 12;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DIFFS",$ecolors{black});
