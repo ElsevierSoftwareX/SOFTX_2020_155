@@ -2116,6 +2116,8 @@ system("cp $rcg_src_dir/src/epics/util/BURT_RESTORE.adl BURT_RESTORE.adl");
 system("cat BURT_RESTORE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_BURT_RESTORE.adl");
 system("cp $rcg_src_dir/src/epics/util/SDF_RESTORE.adl SDF_RESTORE.adl");
 system("cat SDF_RESTORE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_SDF_RESTORE.adl");
+system("cp $rcg_src_dir/src/epics/util/SDF_SAVE.adl SDF_SAVE.adl");
+system("cat SDF_SAVE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_SDF_SAVE.adl");
 system("cp $rcg_src_dir/src/epics/util/SDF_TABLE.adl SDF_TABLE.adl");
 system("cat SDF_TABLE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_SDF_TABLE.adl");
 
