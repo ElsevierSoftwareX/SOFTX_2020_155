@@ -169,7 +169,7 @@ int modifyTable(int,SET_ERR_TABLE *);
 void clearTableSelections(int,SET_ERR_TABLE *, int *);
 void setAllTableSelections(int,SET_ERR_TABLE *, int *,int);
 void decodeChangeSelect(int, int, int, SET_ERR_TABLE *, int *);
-void appendAlarms2File(char *,char *,char *);
+int appendAlarms2File(char *,char *,char *);
 
 // End Header **********************************************************************************************************
 //
@@ -650,7 +650,7 @@ int writeTable2File(char *filename, 		///< Name of file to write
 ///	@param[in] sdfdir 	Associated model BURT directory.
 ///	@param[in] sdffile	Name of the file being saved.
 ///	@param[in] currentload	Base file name of the associated alarms.snap file..
-void appendAlarms2File(
+int appendAlarms2File(
 		char *sdfdir,
 		char *sdffile,
 		char *currentload
@@ -667,7 +667,7 @@ int lderror = 0;
 	sprintf(alarmfilename,"%s%s_alarms.snap",sdfdir,currentload);
 	printf("sdffile = %s  \nalarmfile = %s\n",sdffilename,alarmfilename);
 	adf = fopen(alarmfilename,"r");
-	if(adf != NULL) {
+	if(adf == NULL) return(-1);
 		cdf = fopen(sdffilename,"a");
 		if(cdf == NULL) {
 			sprintf(errMsg,"New SDF request ERROR: FILE %s DOES NOT EXIST\n",sdffilename);
@@ -680,8 +680,8 @@ int lderror = 0;
 			fprintf(cdf,"%s",line);
 		}
 		fclose(cdf);
-	}
 	fclose(adf);
+	return(0);
 }
 // Savetype
 #define SAVE_TABLE_AS_SDF	1
@@ -755,33 +755,35 @@ char shortfilename[64];
 		case SAVE_TABLE_AS_SDF:
 			printf("Save table as sdf\n");
 			status = writeTable2File(filename,SDF_FILE_PARAMS_ONLY,cdTable);
-			appendAlarms2File(sdfdir,shortfilename,currentload);
-			if (!status) 
-                        {    
-                            sprintf(filemsg,"Save TABLE as SDF: %s",filename);
-			}
-			else
-                        {
+			if(status != 0) {
                             sprintf(filemsg,"FAILED FILE SAVE %s",filename);
 			    logFileEntry(filemsg);
                             return(-2);
 			}
+			status = appendAlarms2File(sdfdir,shortfilename,currentload);
+			if(status != 0) {
+                            sprintf(filemsg,"FAILED To Append Alarms -  %s",currentload);
+			    logFileEntry(filemsg);
+                            return(-2);
+			}
+		        sprintf(filemsg,"Save TABLE as SDF: %s",filename);
                         break;
 		case SAVE_EPICS_AS_SDF:
 			printf("Save epics as sdf\n");
 			status = getEpicsSettings(chNum);
 			status = writeTable2File(filename,SDF_FILE_PARAMS_ONLY,cdTableP);
-			appendAlarms2File(sdfdir,shortfilename,currentload);
-			if (!status) 
-                        {    
-			    sprintf(filemsg,"Save EPICS as SDF: %s",filename);
-			}
-			else
-                        {
-                            sprintf(filemsg,"FAILED FILE SAVE %s",filename);
+			if(status != 0) {
+                            sprintf(filemsg,"FAILED EPICS SAVE %s",filename);
 			    logFileEntry(filemsg);
                             return(-2);
 			}
+			status = appendAlarms2File(sdfdir,shortfilename,currentload);
+			if(status != 0) {
+                            sprintf(filemsg,"FAILED To Append Alarms -  %s",currentload);
+			    logFileEntry(filemsg);
+                            return(-2);
+			}
+			sprintf(filemsg,"Save EPICS as SDF: %s",filename);
                         break;
 		default:
 			sprintf(filemsg,"BAD SAVE REQUEST %s",filename);
@@ -1922,8 +1924,12 @@ sleep(5);
 			{
 				// Get saveas filename
 				status = dbGetField(&saveasaddr,DBR_STRING,saveasfilename,&ropts,&nvals,NULL);
+				if(saveOpts == SAVE_OVERWRITE) 
+					savesdffile(saveType,SAVE_TIME_NOW,sdfDir,modelname,sdfile,saveasfilename,loadedSdf,savefileaddr,savetimeaddr,reloadtimeaddr);
 				// Save the file
 				savesdffile(saveType,saveOpts,sdfDir,modelname,sdfile,saveasfilename,loadedSdf,savefileaddr,savetimeaddr,reloadtimeaddr);
+				if(saveOpts == SAVE_OVERWRITE) 
+						sdfFileCrc = checkFileCrc(sdffileloaded);
 			} else {
 				logFileEntry("Invalid SAVE File Request");
 			}
