@@ -1,6 +1,6 @@
 
 file {
-	name="/opt/rtcds/rtscore/branches/branch-2.9/src/epics/util/SDF_RESTORE.adl"
+	name="/opt/rtcds/rtscore/branch-2.9/src/epics/util/SDF_RESTORE.adl"
 	version=030107
 }
 display {
@@ -211,7 +211,7 @@ text {
 	"basic attribute" {
 		clr=14
 	}
-	textix="SDF RESTURE FILE TO TABLE"
+	textix="SDF RESTORE TABLE FROM FILE"
 	align="horiz. centered"
 }
 rectangle {
