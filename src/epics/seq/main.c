@@ -13,6 +13,9 @@ of this distribution.
 // TODO:
 // Add command error checking, command out of range, etc.
 //	- Particularly returns from functions.
+//	- Add db pointer to cdTable.
+//	- Add present value to cdTable.
+//	- Fix filter monitor bit settings on change.
 
 /*
  * Main program for demo sequencer
@@ -48,7 +51,7 @@ of this distribution.
 #define SDF_MAX_CHANS		125000	///< Maximum number of settings, including alarm settings.
 #define SDF_MAX_TSIZE		20000	///< Maximum number of EPICS settings records (No subfields).
 #define SDF_ERR_DSIZE		40	///< Size of display reporting tables.
-#define SDF_ERR_TSIZE		400	///< Size of error reporting tables.
+#define SDF_ERR_TSIZE		10000	///< Size of error reporting tables.
 
 #define SDF_TABLE_DIFFS			0
 #define SDF_TABLE_NOT_FOUND		1
@@ -93,6 +96,7 @@ typedef struct CDS_CD_TABLE {
 	int mask;
 	int initialized;
 	int filterswitch;
+	int filterNum;
 	int error;
 	char errMsg[64];
 	int chFlag;
@@ -118,6 +122,8 @@ typedef struct SET_ERR_TABLE {
 	char diff[64];
 	int sigNum;
 	int chFlag;
+	int filtNum;
+	unsigned int sw[2];
 } SET_ERR_TABLE;
 
 
@@ -142,7 +148,7 @@ FILTER_TABLE filterTable[1000];			///< Table for holding filter module switch se
 SET_ERR_TABLE setErrTable[SDF_ERR_TSIZE];	///< Table used to report settings diffs.
 SET_ERR_TABLE unknownChans[SDF_ERR_TSIZE];	///< Table used to report channels not found in local database.
 SET_ERR_TABLE uninitChans[SDF_ERR_TSIZE];	///< Table used to report channels not initialized by BURT safe.snap.
-SET_ERR_TABLE unMonChans[SDF_ERR_TSIZE];	///< Table used to report channels not being monitored.
+SET_ERR_TABLE unMonChans[SDF_MAX_TSIZE];	///< Table used to report channels not being monitored.
 SET_ERR_TABLE readErrTable[SDF_ERR_TSIZE];	///< Table used to report file read errors..
 SET_ERR_TABLE cdTableList[SDF_MAX_TSIZE];	///< Table used to report file read errors..
 
@@ -183,9 +189,11 @@ int parseLine(char *s, char *str1, char *str2, char *str3, char *str4, char *str
 int wc = -1;
 int inQuotes = 0;
 int lastwasspace = 1;
-int ii;
+int ii,jj,kk;
 int mychar = 0;
-char psd[6][64];
+char psd[10][64];
+const char strval0[] = "0";
+const char strval1[] = "1";
 #define IS_A_ALPHA_NUM 	0
 #define IS_A_SPACE 	1
 #define IS_A_QUOTE	2
@@ -221,11 +229,23 @@ char psd[6][64];
 	wc ++;
 	sprintf(str1,"%s",psd[0]);
 	if(inQuotes > 2) return(-1);
+	if(wc > 4 && inQuotes < 1) {
+		if(strcmp(psd[(wc-1)],strval0) == 0 || strcmp(psd[(wc-1)],strval1) == 0) kk = wc - 1;
+		else kk = wc;
+		jj = 0;
+		for(ii=3;ii<kk;ii++) {
+			strcat(psd[2]," ");
+			strcat(psd[2],psd[ii]);
+			jj ++;
+		}
+		if(strcmp(psd[(wc-1)],strval0) == 0 || strcmp(psd[(wc-1)],strval1) == 0) sprintf(psd[3],"%s",psd[(wc - 1)]);
+		wc -= jj;
+		// printf("wc for %s is %d = %s \t with monitor %s\n",psd[0],wc,psd[2],psd[3]);
+	} 
+	if(wc < 4) sprintf(psd[3],"%s","0");
 	sprintf(str2,"%s",psd[1]);
 	sprintf(str3,"%s",psd[2]);
 	sprintf(str4,"%s",psd[3]);
-	sprintf(str5,"%s",psd[4]);
-	sprintf(str6,"%s",psd[5]);
 	// printf("WC = %d\n%s \t%s\t%s\t%s\t%s\n",wc,psd[0],psd[1],psd[2],psd[3],psd[4]);
 	return(wc);
 }
@@ -239,6 +259,7 @@ void clearTableSelections(int numEntries,SET_ERR_TABLE *dcsErrTable, int sc[])
 int ii;
 	for(ii=0;ii<3;ii++) sc[ii] = 0;
 	for(ii=0;ii<numEntries;ii++) dcsErrTable[ii].chFlag = 0;
+	for(ii=0;ii<numEntries;ii++) dcsErrTable[ii].filtNum = -1;
 }
 
 
@@ -463,6 +484,7 @@ long status;
 		x = refVal;
 		status = dbNameToAddr(swname[2],&paddr2);
 		status = dbPutField(&paddr2,DBR_STRING,swstrE,1);
+		setErrTable[errCnt].filtNum = -1;
 		if(refVal != filterTable[ii].swreq && errCnt < SDF_ERR_TSIZE && (filterTable[ii].mask || monitorAll) && filterTable[ii].init)
 		{
 			filtStrBitConvert(1,refVal,swstrE);
@@ -477,6 +499,11 @@ long status;
 			sprintf(setErrTable[errCnt].liveset, "%s", swstrE);
 			sprintf(setErrTable[errCnt].diff, "%s", swstrD);
 			setErrTable[errCnt].sigNum = filterTable[ii].sw[0] + (filterTable[ii].sw[1] * SDF_MAX_TSIZE);
+			setErrTable[errCnt].filtNum = ii;
+			setErrTable[errCnt].sw[0] = buffer[0].rval;;
+			setErrTable[errCnt].sw[1] = buffer[1].rval;;
+			if(filterTable[ii].mask) setErrTable[errCnt].chFlag |= 0x1;
+			else setErrTable[errCnt].chFlag &= 0xe;
 
 			mtime = buffer[0].time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 			strcpy(localtimestring, ctime(&mtime));
@@ -665,7 +692,7 @@ char errMsg[128];
 int lderror = 0;
 	sprintf(sdffilename,"%s%s.snap",sdfdir,sdffile);
 	sprintf(alarmfilename,"%s%s_alarms.snap",sdfdir,currentload);
-	printf("sdffile = %s  \nalarmfile = %s\n",sdffilename,alarmfilename);
+	// printf("sdffile = %s  \nalarmfile = %s\n",sdffilename,alarmfilename);
 	adf = fopen(alarmfilename,"r");
 	if(adf == NULL) return(-1);
 		cdf = fopen(sdffilename,"a");
@@ -722,28 +749,28 @@ char shortfilename[64];
 			(mytime->tm_year - 100),  (mytime->tm_mon + 1),  mytime->tm_mday,  mytime->tm_hour,  mytime->tm_min,  mytime->tm_sec);
 			sprintf(shortfilename,"%s_%d%02d%02d_%02d%02d%02d", currentload,
 			(mytime->tm_year - 100),  (mytime->tm_mon + 1),  mytime->tm_mday,  mytime->tm_hour,  mytime->tm_min,  mytime->tm_sec);
-			printf("File to save is TIME NOW: %s\n",filename);
+			// printf("File to save is TIME NOW: %s\n",filename);
 			break;
 		case SAVE_OVERWRITE:
 			sprintf(filename,"%s",currentfile);
 			sprintf(shortfilename,"%s",currentload);
-			printf("File to save is OVERWRITE: %s\n",filename);
+			// printf("File to save is OVERWRITE: %s\n",filename);
 			break;
 		case SAVE_BACKUP:
 			sprintf(filename,"%s%s_%d%02d%02d_%02d%02d%02d.snap",sdfdir,currentload,
 			(mytime->tm_year - 100),  (mytime->tm_mon + 1),  mytime->tm_mday,  mytime->tm_hour,  mytime->tm_min,  mytime->tm_sec);
 			sprintf(shortfilename,"%s",currentload);
-			printf("File to save is BACKUP: %s\n",filename);
+			// printf("File to save is BACKUP: %s\n",filename);
 			break;
 		case SAVE_OVERWRITE_TABLE:
 			sprintf(filename,"%s%s.snap",sdfdir,currentload);
 			sprintf(shortfilename,"%s",currentload);
-			printf("File to save is BACKUP OVERWRITE: %s\n",filename);
+			// printf("File to save is BACKUP OVERWRITE: %s\n",filename);
 			break;
 		case SAVE_AS:
 			sprintf(filename,"%s%s.snap",sdfdir,saveasfile);
 			sprintf(shortfilename,"%s",saveasfile);
-			printf("File to save is SAVE_AS: %s\n",filename);
+			// printf("File to save is SAVE_AS: %s\n",filename);
 			break;
 
 		default:
@@ -753,7 +780,7 @@ char shortfilename[64];
 	switch(saveType)
 	{
 		case SAVE_TABLE_AS_SDF:
-			printf("Save table as sdf\n");
+			// printf("Save table as sdf\n");
 			status = writeTable2File(filename,SDF_FILE_PARAMS_ONLY,cdTable);
 			if(status != 0) {
                             sprintf(filemsg,"FAILED FILE SAVE %s",filename);
@@ -769,7 +796,7 @@ char shortfilename[64];
 		        sprintf(filemsg,"Save TABLE as SDF: %s",filename);
                         break;
 		case SAVE_EPICS_AS_SDF:
-			printf("Save epics as sdf\n");
+			// printf("Save epics as sdf\n");
 			status = getEpicsSettings(chNum);
 			status = writeTable2File(filename,SDF_FILE_PARAMS_ONLY,cdTableP);
 			if(status != 0) {
@@ -865,8 +892,13 @@ int ret = 0;
 				sprintf(unMonChans[notMon].chname,"%s",cdTable[jj].chname);
 				if(cdTable[jj].datatype == SDF_NUM)
 				{
-					if(cdTable[jj].filterswitch) sprintf(unMonChans[notMon].burtset,"0x%x",(unsigned int)cdTable[jj].data.chval);
-					else sprintf(unMonChans[notMon].burtset,"%.10lf",cdTable[jj].data.chval);
+					if(cdTable[jj].filterswitch) {
+						sprintf(unMonChans[notMon].burtset,"0x%x",(unsigned int)cdTable[jj].data.chval);
+						unMonChans[notMon].filtNum = cdTable[jj].filterNum;
+					} else {
+						sprintf(unMonChans[notMon].burtset,"%.10lf",cdTable[jj].data.chval);
+						unMonChans[notMon].filtNum = -1;
+					}
 				} else {
 					sprintf(unMonChans[notMon].burtset,"%s",cdTable[jj].data.strval);
 				}
@@ -1087,6 +1119,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 
 					sprintf(setErrTable[errCntr].diff, "%s", diffB2L);
 					setErrTable[errCntr].sigNum = ii;
+					setErrTable[errCntr].filtNum = -1;
 
 					strcpy(localtimestring, ctime(&mtime));
 					localtimestring[strlen(localtimestring) - 1] = 0;
@@ -1103,24 +1136,58 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 int modifyTable(int numEntries,SET_ERR_TABLE modTable[])
 {
 int ii,jj;
+char fname[64];
+int fmIndex = 0;
+unsigned int sn,sn1;
+int found = 0;
 	for(ii=0;ii<numEntries;ii++)
 	{
 		if(modTable[ii].chFlag > 3) 
 		{
+			found = 0;
 			for(jj=0;jj<chNum;jj++)
 			{
+				// fmIndex = -1;
 				if(strcmp(cdTable[jj].chname,modTable[ii].chname) == 0 && (modTable[ii].chFlag & 4)) {
 					if(cdTable[jj].datatype == SDF_NUM) cdTable[jj].data.chval = atof(modTable[ii].liveset);
 					else sprintf(cdTable[jj].data.strval,"%s",modTable[ii].liveset);
+					found = 1;
+					fmIndex = cdTable[jj].filterNum;
+					if(fmIndex >= 0) filterTable[fmIndex].newSet = 1;
 				}
 				if(strcmp(cdTable[jj].chname,modTable[ii].chname) == 0 && (modTable[ii].chFlag & 8)) {
 					cdTable[jj].mask ^= 1;
+					// printf("changing mask for %s = %d\n",modTable[ii].chname,cdTable[jj].mask);
+					found = 1;
+					fmIndex = cdTable[jj].filterNum;
+					if(fmIndex >= 0) filterTable[fmIndex].newSet = 1;
+				}
+			}
+			if(modTable[ii].filtNum >= 0 && !found) { 
+				fmIndex = modTable[ii].filtNum;
+				// printf("This is a filter from diffs = %s\n",filterTable[fmIndex].fname);
+				filterTable[fmIndex].newSet = 1;
+				sn = modTable[ii].sigNum;
+				sn1 = sn / SDF_MAX_TSIZE;
+				sn %= SDF_MAX_TSIZE;
+				if(modTable[ii].chFlag & 4) {
+					// printf("Modify Sw1 = %s val = 0x%x\n",cdTable[sn].chname,modTable[ii].sw[0]);
+					// printf("Modify Sw2 = %s val = 0x%x\n",cdTable[sn1].chname,modTable[ii].sw[1]);
+					cdTable[sn].data.chval = modTable[ii].sw[0];
+					cdTable[sn1].data.chval = modTable[ii].sw[1];
+				}
+				if(modTable[ii].chFlag & 8) {
+					filterTable[fmIndex].mask ^= 1;
+				 	cdTable[sn].mask = filterTable[fmIndex].mask;
+				 	cdTable[sn1].mask = filterTable[fmIndex].mask;
 				}
 			}
 		}
 	}
+	newfilterstats(fmNum);
 	return(0);
 }
+
 int resetSelectedValues(int errNum)
 {
 long status;
@@ -1161,14 +1228,20 @@ void newfilterstats(int numchans) {
 	int mask = 0x1ffff;
 	int tmpreq;
 	int counter = 0;
+	int rsw1,rsw2;
 
 	for(ii=0;ii<numchans;ii++) {
 		if(filterTable[ii].newSet) {
 			counter ++;
 			filterTable[ii].newSet = 0;
 			filterTable[ii].init = 1;
-			tmpreq =  ((unsigned int)cdTable[filterTable[ii].sw[0]].data.chval & 0xffff) + 
-				(((unsigned int)cdTable[filterTable[ii].sw[1]].data.chval & 0xffff) << 16);
+			rsw1 = filterTable[ii].sw[0];
+			rsw2 = filterTable[ii].sw[1];
+			filterTable[ii].mask =  cdTable[rsw1].mask | cdTable[rsw2].mask;;
+			cdTable[rsw1].mask = filterTable[ii].mask;
+			cdTable[rsw2].mask = filterTable[ii].mask;
+			tmpreq =  ((unsigned int)cdTable[rsw1].data.chval & 0xffff) + 
+				(((unsigned int)cdTable[rsw2].data.chval & 0xffff) << 16);
 			filterTable[ii].swreq = filtCtrlBitConvert(tmpreq);
 			bzero(chname,strlen(chname));
 			// Find address of channel
@@ -1184,7 +1257,7 @@ void newfilterstats(int numchans) {
 			status = dbNameToAddr(chname,&paddr);
 			if(!status)
 				status = dbPutField(&paddr,DBR_LONG,&mask,1);
-			// printf("New filter %d %s = 0x%x\t0x%x\t0x%x\n",ii,filterTable[ii].fname,filterTable[ii].swreq,filterTable[ii].sw1,filterTable[ii].sw2);
+			// printf("New filter %d %s = 0x%x\t0x%x\t0x%x\n",ii,filterTable[ii].fname,filterTable[ii].swreq,filterTable[ii].sw[0],filterTable[ii].sw[1]);
 		}
 	}
 	printf("Set filter masks for %d filter modules\n",counter);
@@ -1332,6 +1405,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 				sprintf(readErrTable[rderror].diff, "%s", sdfile);
 				sprintf(readErrTable[rderror].timeset, "%s", timestring);
 				rderror ++;
+				printf("Read error --- %s\n",s1);
 				continue;
 			}
 			// Only 3 = no monit flag
@@ -1409,6 +1483,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 									sprintf(readErrTable[rderror].liveset, "%s", "OVERRANGE");
 									sprintf(readErrTable[rderror].diff, "%s", "MAX VAL = 0xffff");
 									sprintf(readErrTable[rderror].timeset, "%s", timestring);
+									printf("Read error --- %s\n", cdTable[ii].chname);
 									rderror ++;
 								}
 								cdTableP[chNumP].data.chval = (int) cdTableP[chNumP].data.chval & 0xffff;
@@ -1438,7 +1513,6 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 						{
 							fmIndex = ii;
 							filterTable[fmIndex].newSet = 1;
-							filterTable[fmIndex].mask =  cdTableP[chNumP].mask;
 							break;
 						}
 					}
@@ -1519,6 +1593,7 @@ void dbDumpRecords(DBBASE *pdbbase)
             } else {
 		sprintf(cdTable[chNum].chname,"%s",dbGetRecordName(pdbentry));
 		cdTable[chNum].filterswitch = 0;
+		cdTable[chNum].filterNum = 0;
 		// Check if this is a filter module
 		// If so, initialize parameters
 		if((strstr(cdTable[chNum].chname,"_SW1S") != NULL) && (strstr(cdTable[chNum].chname,"_SW1S.") == NULL))
@@ -1554,6 +1629,7 @@ void dbDumpRecords(DBBASE *pdbbase)
 		strncpy(filterTable[fmNum].fname,cdTable[ii].chname,(strlen(cdTable[ii].chname)-4));
 		sprintf(tmpstr,"%s%s",filterTable[fmNum].fname,"SW2S");
 		filterTable[fmNum].sw[0] = ii;
+		cdTable[ii].filterNum = fmNum;
 		amatch = 0;
     		for(jj=0;jj<chNum;jj++) {
 			if(strcmp(tmpstr,cdTable[jj].chname) == 0)
@@ -1956,8 +2032,8 @@ sleep(5);
 			status = dbPutField(&pagereqaddr,DBR_LONG,&ropts,1);                // Init to zero.
 		}
 		switch(tsrVal) { 
-			case 0:
-				if(lastTable) {
+			case SDF_TABLE_DIFFS:
+				if(lastTable !=  SDF_TABLE_DIFFS) {
 					clearTableSelections(sperror,setErrTable, selectCounter);
 					confirmVal = 0;
 				}
@@ -1979,7 +2055,7 @@ sleep(5);
 					if((selectCounter[1] || selectCounter[2]) && (confirmVal & 2)) {
 						// Save present table as timenow.
 						status = dbGetField(&loadedfile_addr,DBR_STRING,backupName,&ropts,&nvals,NULL);
-						printf("BACKING UP: %s\n",backupName);
+						// printf("BACKING UP: %s\n",backupName);
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_TIME_NOW,sdfDir,modelname,sdfile,saveasfilename,backupName,
 							    savefileaddr,savetimeaddr,reloadtimeaddr);
 						// Overwrite the table with new values
@@ -1992,6 +2068,8 @@ sleep(5);
 					clearTableSelections(sperror,setErrTable, selectCounter);
 					confirmVal = 0;
 					status = dbPutField(&confirmwordaddr,DBR_LONG,&confirmVal,1);
+					noMon = createSortTableEntries(chNum,wcVal,wcstring);
+					status = dbPutField(&monchancntaddr,DBR_LONG,&chNotMon,1);
 				}
 				lastTable = SDF_TABLE_DIFFS;
 				break;
@@ -2031,7 +2109,7 @@ sleep(5);
 					if(selectCounter[2] && (confirmVal & 2)) {
 						// Save present table as timenow.
 						status = dbGetField(&loadedfile_addr,DBR_STRING,backupName,&ropts,&nvals,NULL);
-						printf("BACKING UP: %s\n",backupName);
+						// printf("BACKING UP: %s\n",backupName);
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_TIME_NOW,sdfDir,modelname,sdfile,saveasfilename,backupName,
 							    savefileaddr,savetimeaddr,reloadtimeaddr);
 						// Overwrite the table with new values
@@ -2055,7 +2133,7 @@ sleep(5);
 					clearTableSelections(cdSort,cdTableList, selectCounter);
 					confirmVal = 0;
 				}
-				cdSort = spChecker(monFlag,cdTableList,wcVal,wcstring,1,&diffCnt);
+				cdSort = spChecker(monFlag,cdTableList,wcVal,wcstring,1,&status);
 				pageDisp = reportSetErrors(pref, cdSort, cdTableList,pageNum);
 				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
 				if(selectAll == 3) {
@@ -2073,7 +2151,7 @@ sleep(5);
 					if(selectCounter[2] && (confirmVal & 2)) {
 						// Save present table as timenow.
 						status = dbGetField(&loadedfile_addr,DBR_STRING,backupName,&ropts,&nvals,NULL);
-						printf("BACKING UP: %s\n",backupName);
+						// printf("BACKING UP: %s\n",backupName);
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_TIME_NOW,sdfDir,modelname,sdfile,saveasfilename,
 							    backupName,savefileaddr,savetimeaddr,reloadtimeaddr);
 						// Overwrite the table with new values
