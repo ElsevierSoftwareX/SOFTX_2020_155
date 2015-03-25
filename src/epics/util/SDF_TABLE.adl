@@ -4056,7 +4056,7 @@ text {
 		clr=14
 		bclr=50
 	}
-	label="<<RESET"
+	label="<REVERT"
 	release_msg="11"
 }
 "message button" {
@@ -4071,7 +4071,7 @@ text {
 		clr=14
 		bclr=1
 	}
-	label="<<RESET"
+	label="<REVERT"
 	release_msg="12"
 }
 "message button" {
@@ -4086,7 +4086,7 @@ text {
 		clr=14
 		bclr=50
 	}
-	label="<<RESET"
+	label="<REVERT"
 	release_msg="13"
 }
 "message button" {
@@ -4101,7 +4101,7 @@ text {
 		clr=14
 		bclr=1
 	}
-	label="<<RESET"
+	label="<REVERT"
 	release_msg="14"
 }
 "message button" {
@@ -4116,7 +4116,7 @@ text {
 		clr=14
 		bclr=50
 	}
-	label="<<RESET"
+	label="<REVERT"
 	release_msg="15"
 }
 "message button" {
@@ -4131,7 +4131,7 @@ text {
 		clr=14
 		bclr=1
 	}
-	label="<<RESET"
+	label="<REVERT"
 	release_msg="16"
 }
 "message button" {
@@ -4146,7 +4146,7 @@ text {
 		clr=14
 		bclr=50
 	}
-	label="<<RESET"
+	label="<REVERT"
 	release_msg="17"
 }
 "message button" {
@@ -4161,7 +4161,7 @@ text {
 		clr=14
 		bclr=1
 	}
-	label="<<RESET"
+	label="<REVERT"
 	release_msg="18"
 }
 "message button" {
@@ -4176,7 +4176,7 @@ text {
 		clr=14
 		bclr=50
 	}
-	label="<<RESET"
+	label="<REVERT"
 	release_msg="19"
 }
 "message button" {
@@ -4191,7 +4191,7 @@ text {
 		clr=14
 		bclr=1
 	}
-	label="<<RESET"
+	label="<REVERT"
 	release_msg="20"
 }
 "message button" {
