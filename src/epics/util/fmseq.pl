@@ -940,7 +940,7 @@ print "grecord(mbbi,\"%IFO%:FEC-${dcuId}_SDF_WILDCARD\")\n";
 print "{\n	field(ZRVL,\"0\")\n";
 print "		field(ONVL,\"1\")\n";
 print "		field(ZRST,\"SHOW ALL\")\n";
-print "		field(TWST,\"SORT ON SUBSTRING\")\n}\n";
+print "		field(ONST,\"SORT ON SUBSTRING\")\n}\n";
 print "grecord(mbbi,\"%IFO%:FEC-${dcuId}_SDF_SORT\")\n";
 print "{\n	field(ZRVL,\"0\")\n";
 print "		field(ONVL,\"1\")\n";

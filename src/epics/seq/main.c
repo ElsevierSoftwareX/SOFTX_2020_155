@@ -271,7 +271,6 @@ int ii;
 void setAllTableSelections(int numEntries,SET_ERR_TABLE *dcsErrTable, int sc[],int selectOpt)
 {
 int ii;
-	for(ii=0;ii<3;ii++) sc[ii] = 0;
 	switch(selectOpt) {
 		case 1:
 			sc[0] = 0;
@@ -854,59 +853,68 @@ int createSortTableEntries(int numEntries,int wcval,char *wcstring)
 int jj;
 int notMon = 0;
 int ret = 0;
+int lna = 0;
+int lnb = 0;
 
 	chNotInit = 0;
 	chNotMon = 0;
 
-	// Clear out the uninit and unmon tables.
-	for(jj=0;jj<SDF_ERR_TSIZE;jj++)
+
+	// Fill uninit and unmon tables.
+//	printf("sort table = %d string %s\n",wcval,wcstring);
+	for(jj=0;jj<numEntries;jj++)
+	{
+		if(!cdTable[jj].initialized) chNotInit += 1;
+		if(cdTable[jj].initialized && !cdTable[jj].mask) chNotMon += 1;
+		if(wcval  && (ret = strstr(cdTable[jj].chname,wcstring) == NULL)) {
+			continue;
+		}
+		if(!cdTable[jj].initialized) {
+			// printf("Chan %s not init %d %d %d\n",cdTable[jj].chname,cdTable[jj].initialized,jj,numEntries);
+			if(lna < SDF_ERR_TSIZE) {
+				sprintf(uninitChans[lna].chname,"%s",cdTable[jj].chname);
+				lna ++;
+			}
+		}
+
+		if(cdTable[jj].initialized && !cdTable[jj].mask) {
+			if(lnb < SDF_ERR_TSIZE) {
+				sprintf(unMonChans[lnb].chname,"%s",cdTable[jj].chname);
+				if(cdTable[jj].datatype == SDF_NUM)
+				{
+					if(cdTable[jj].filterswitch) {
+						sprintf(unMonChans[lnb].burtset,"0x%x",(unsigned int)cdTable[jj].data.chval);
+						unMonChans[lnb].filtNum = cdTable[jj].filterNum;
+					} else {
+						sprintf(unMonChans[lnb].burtset,"%.10lf",cdTable[jj].data.chval);
+						unMonChans[lnb].filtNum = -1;
+					}
+				} else {
+					sprintf(unMonChans[lnb].burtset,"%s",cdTable[jj].data.strval);
+				}
+			}
+			lnb ++;
+		}
+	}
+	// Clear out the uninit tables.
+	for(jj=lna;jj<(lna + 50);jj++)
 	{
 		sprintf(uninitChans[jj].chname,"%s"," ");
 		sprintf(uninitChans[jj].burtset,"%s"," ");
 		sprintf(uninitChans[jj].liveset,"%s"," ");
 		sprintf(uninitChans[jj].timeset,"%s"," ");
 		sprintf(uninitChans[jj].diff,"%s"," ");
+	}
+	// Clear out the unmon tables.
+	for(jj=lnb;jj<(lnb + 50);jj++)
+	{
 		sprintf(unMonChans[jj].chname,"%s"," ");
 		sprintf(unMonChans[jj].burtset,"%s"," ");
 		sprintf(unMonChans[jj].liveset,"%s"," ");
 		sprintf(unMonChans[jj].timeset,"%s"," ");
 		sprintf(unMonChans[jj].diff,"%s"," ");
 	}
-
-	// Fill uninit and unmon tables.
-	for(jj=0;jj<numEntries;jj++)
-	{
-		
-		if(cdTable[jj].initialized && !cdTable[jj].mask) chNotMon += 1;
-		if(!cdTable[jj].initialized) chNotInit += 1;
-		if(wcval  && (ret = strstr(cdTable[jj].chname,wcstring) == NULL)) continue;
-		if(!cdTable[jj].initialized) {
-			printf("Chan %s not init %d %d %d\n",cdTable[jj].chname,cdTable[jj].initialized,jj,numEntries);
-			if(chNotInit < SDF_ERR_TSIZE) sprintf(uninitChans[chNotInit].chname,"%s",cdTable[jj].chname);
-			chNotInit ++;
-		}
-
-
-		if(cdTable[jj].initialized && !cdTable[jj].mask) {
-			if(notMon < SDF_ERR_TSIZE) {
-				sprintf(unMonChans[notMon].chname,"%s",cdTable[jj].chname);
-				if(cdTable[jj].datatype == SDF_NUM)
-				{
-					if(cdTable[jj].filterswitch) {
-						sprintf(unMonChans[notMon].burtset,"0x%x",(unsigned int)cdTable[jj].data.chval);
-						unMonChans[notMon].filtNum = cdTable[jj].filterNum;
-					} else {
-						sprintf(unMonChans[notMon].burtset,"%.10lf",cdTable[jj].data.chval);
-						unMonChans[notMon].filtNum = -1;
-					}
-				} else {
-					sprintf(unMonChans[notMon].burtset,"%s",cdTable[jj].data.strval);
-				}
-			}
-			notMon ++;
-		}
-	}
-	return(notMon);
+	return(lnb);
 }
 
 /// Common routine to load monitoring tables into EPICS channels for MEDM screen.
@@ -2079,6 +2087,8 @@ sleep(5);
 				lastTable = 1;
 				break;
 			case SDF_TABLE_NOT_INIT:
+				if(lastTable !=  SDF_TABLE_NOT_INIT || wcVal)
+					noMon = createSortTableEntries(chNum,wcVal,wcstring);
 				pageDisp = reportSetErrors(pref, chNotInit, uninitChans,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotInit,1);
 				lastTable = SDF_TABLE_NOT_INIT;
