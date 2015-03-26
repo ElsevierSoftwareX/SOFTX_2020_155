@@ -161,7 +161,7 @@ unsigned int filtCtrlBitConvert(unsigned int);
 void getSdfTime(char *);
 void logFileEntry(char *);
 int getEpicsSettings(int);
-int writeTable2File(char *,int,CDS_CD_TABLE *);
+int writeTable2File(char *,char *,int,CDS_CD_TABLE *);
 int savesdffile(int,int,char *,char *,char *,char *,char *,dbAddr,dbAddr,dbAddr); 
 int createSortTableEntries(int,int,char *);
 int reportSetErrors(char *,int,SET_ERR_TABLE *,int);
@@ -597,7 +597,8 @@ int nvals = 1;
 #define SDF_FILE_PARAMS_ONLY	1
 #define SDF_FILE_BURT_ONLY	2
 /// Common routine for saving table data to BURT files.
-int writeTable2File(char *filename, 		///< Name of file to write
+int writeTable2File(char *burtdir,
+		    char *filename, 		///< Name of file to write
 		    int ftype, 			///< Type of file to write
 		    CDS_CD_TABLE myTable[])	///< Table to be written.
 {
@@ -624,7 +625,7 @@ int writeTable2File(char *filename, 		///< Name of file to write
 	fprintf(csFile,"%s\n","Keywords:");
 	fprintf(csFile,"%s\n","Comments:");
 	fprintf(csFile,"%s\n","Type:     Absolute  ");
-	fprintf(csFile,"%s\n","Directory /home/controls ");
+	fprintf(csFile,"%s%s\n","Directory: ",burtdir);
 	fprintf(csFile,"%s\n","Req File: autoBurt.req ");
 	fprintf(csFile,"%s\n","--- End BURT header");
 
@@ -780,7 +781,7 @@ char shortfilename[64];
 	{
 		case SAVE_TABLE_AS_SDF:
 			// printf("Save table as sdf\n");
-			status = writeTable2File(filename,SDF_FILE_PARAMS_ONLY,cdTable);
+			status = writeTable2File(sdfdir,filename,SDF_FILE_PARAMS_ONLY,cdTable);
 			if(status != 0) {
                             sprintf(filemsg,"FAILED FILE SAVE %s",filename);
 			    logFileEntry(filemsg);
@@ -797,15 +798,9 @@ char shortfilename[64];
 		case SAVE_EPICS_AS_SDF:
 			// printf("Save epics as sdf\n");
 			status = getEpicsSettings(chNum);
-			status = writeTable2File(filename,SDF_FILE_PARAMS_ONLY,cdTableP);
+			status = writeTable2File(sdfdir,filename,SDF_FILE_PARAMS_ONLY,cdTableP);
 			if(status != 0) {
                             sprintf(filemsg,"FAILED EPICS SAVE %s",filename);
-			    logFileEntry(filemsg);
-                            return(-2);
-			}
-			status = appendAlarms2File(sdfdir,shortfilename,currentload);
-			if(status != 0) {
-                            sprintf(filemsg,"FAILED To Append Alarms -  %s",currentload);
 			    logFileEntry(filemsg);
                             return(-2);
 			}
@@ -1980,7 +1975,7 @@ sleep(5);
 					// Report number of channels that have not been initialized via a BURT read.
 					status = dbPutField(&chnotinitaddr,DBR_LONG,&chNotInit,1);
 					// Write out local monitoring table as snap file.
-					status = writeTable2File(bufile,SDF_WITH_INIT_FLAG,cdTable);
+					status = writeTable2File(sdfDir,bufile,SDF_WITH_INIT_FLAG,cdTable);
 				}
 			}
 		}
@@ -2073,6 +2068,7 @@ sleep(5);
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_OVERWRITE,sdfDir,modelname,sdfile,saveasfilename,
 							    backupName,savefileaddr,savetimeaddr,reloadtimeaddr);
 						sdfFileCrc = checkFileCrc(sdffileloaded);
+						status = writeTable2File(sdfDir,bufile,SDF_WITH_INIT_FLAG,cdTable);
 					}
 					clearTableSelections(sperror,setErrTable, selectCounter);
 					confirmVal = 0;
@@ -2137,6 +2133,7 @@ sleep(5);
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_OVERWRITE,sdfDir,modelname,sdfile,saveasfilename,
 							    backupName,savefileaddr,savetimeaddr,reloadtimeaddr);
 						sdfFileCrc = checkFileCrc(sdffileloaded);
+						status = writeTable2File(sdfDir,bufile,SDF_WITH_INIT_FLAG,cdTable);
 					}
 					// noMon = createSortTableEntries(chNum,wcVal,wcstring);
 					clearTableSelections(noMon,unMonChans, selectCounter);
@@ -2179,6 +2176,7 @@ sleep(5);
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_OVERWRITE,sdfDir,modelname,sdfile,saveasfilename,
 							    backupName,savefileaddr,savetimeaddr,reloadtimeaddr);
 						sdfFileCrc = checkFileCrc(sdffileloaded);
+						status = writeTable2File(sdfDir,bufile,SDF_WITH_INIT_FLAG,cdTable);
 					}
 					clearTableSelections(cdSort,cdTableList, selectCounter);
 					confirmVal = 0;
