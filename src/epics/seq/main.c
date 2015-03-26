@@ -51,7 +51,7 @@ of this distribution.
 #define SDF_MAX_CHANS		125000	///< Maximum number of settings, including alarm settings.
 #define SDF_MAX_TSIZE		20000	///< Maximum number of EPICS settings records (No subfields).
 #define SDF_ERR_DSIZE		40	///< Size of display reporting tables.
-#define SDF_ERR_TSIZE		10000	///< Size of error reporting tables.
+#define SDF_ERR_TSIZE		20000	///< Size of error reporting tables.
 
 #define SDF_TABLE_DIFFS			0
 #define SDF_TABLE_NOT_FOUND		1
