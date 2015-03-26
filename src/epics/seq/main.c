@@ -2041,6 +2041,7 @@ sleep(5);
 		}
 		switch(tsrVal) { 
 			case SDF_TABLE_DIFFS:
+				// Need to clear selections when moving between tables.
 				if(lastTable !=  SDF_TABLE_DIFFS) {
 					clearTableSelections(sperror,setErrTable, selectCounter);
 					confirmVal = 0;
@@ -2082,13 +2083,21 @@ sleep(5);
 				lastTable = SDF_TABLE_DIFFS;
 				break;
 			case SDF_TABLE_NOT_FOUND:
+				// Need to clear selections when moving between tables.
+				if(lastTable != SDF_TABLE_NOT_FOUND) {
+					clearTableSelections(sperror,setErrTable, selectCounter);
+					confirmVal = 0;
+				}
 				pageDisp = reportSetErrors(pref, chNotFound,unknownChans,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotFound,1);
-				lastTable = 1;
+				lastTable =  SDF_TABLE_NOT_FOUND;
 				break;
 			case SDF_TABLE_NOT_INIT:
-				if(lastTable !=  SDF_TABLE_NOT_INIT || wcVal)
-					noMon = createSortTableEntries(chNum,wcVal,wcstring);
+				if(lastTable != SDF_TABLE_NOT_INIT) {
+					clearTableSelections(sperror,setErrTable, selectCounter);
+					confirmVal = 0;
+				}
+				noMon = createSortTableEntries(chNum,wcVal,wcstring);
 				pageDisp = reportSetErrors(pref, chNotInit, uninitChans,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotInit,1);
 				lastTable = SDF_TABLE_NOT_INIT;
