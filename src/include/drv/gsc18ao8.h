@@ -35,7 +35,7 @@ typedef struct GSA_18BIT_DAC_REG {
 #define GSAO_18BIT_SIMULT_OUT   (1 << 18)
 #define GSAO_18BIT_DIO_RW       0x80    // Set first nibble write, second read for Watchdog
 #define GSAO_18BIT_PRELOAD      64      // Number of data points to preload DAC FIFO on startup (8 chan x 8 values)
-#define GSAO_18BIT_MASK         0x3ffff
+#define GSAO_18BIT_MASK         0xfffff
 #define GSAO_18BIT_CHAN_COUNT   8
 #define GSAO_18BIT_DMA_LOCAL_ADDR   0x48
 #define GSAO_18BIT_AUTOCAL_SET		(1 << 28)
