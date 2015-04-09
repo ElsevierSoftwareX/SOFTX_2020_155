@@ -719,14 +719,15 @@ udelay(1000);
 #ifndef NO_DAC_PRELOAD
 		for(jj=0;jj<cdsPciModules.dacCount;jj++)
 		{       
-			if(cdsPciModules.dacType[jj] == GSC_18AO8)
+			if(cdsPciModules.dacType[jj] == GSC_16AO16)
 			{       
+				dac16bitPtr = dacPtr[jj];
+				printf("writing DAC 16 %d\n",jj);
+				for(ii=0;ii<GSAO_16BIT_PRELOAD;ii++) dac16bitPtr->ODB = 0;
+			}else{  
+				printf("writing DAC 18 %d\n",jj);
 				dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 				for(ii=0;ii<GSAO_18BIT_PRELOAD;ii++) dac18bitPtr->OUTPUT_BUF = 0;
-			}else{  
-				dac16bitPtr = dacPtr[jj];
-				printf("writing DAC %d\n",jj);
-				for(ii=0;ii<GSAO_16BIT_PRELOAD;ii++) dac16bitPtr->ODB = 0;
 			}       
 		}       
 #endif
@@ -766,7 +767,7 @@ udelay(1000);
 #ifndef NO_DAC_PRELOAD
 		for(jj=0;jj<cdsPciModules.dacCount;jj++)
 		{       
-			if(cdsPciModules.dacType[jj] == GSC_18AO8)
+			if(cdsPciModules.dacType[jj] == GSC_18AO8 || cdsPciModules.dacType[jj] == GSC_20AO8)
 			{       
 				dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 				for(ii=0;ii<GSAO_18BIT_PRELOAD;ii++) dac18bitPtr->OUTPUT_BUF = 0;
@@ -1251,7 +1252,7 @@ udelay(1000);
         /// - -- Code will require restart to clear.
         // COMMENT OUT NEX LINE FOR TEST STAND w/bad DAC cards. 
 #ifndef DAC_WD_OVERRIDE
-        if(dacTimingError) iopDacEnable = 0;
+        // if(dacTimingError) iopDacEnable = 0;
 #endif
         // Write out data to DAC modules
 	dkiTrip = 0;
@@ -1278,8 +1279,11 @@ udelay(1000);
                         limit = OVERFLOW_LIMIT_18BIT; // 18 bit limit
                         mask = GSAO_18BIT_MASK;
                         num_outs = GSAO_18BIT_CHAN_COUNT;
-
-
+                }
+                if (cdsPciModules.dacType[jj] == GSC_20AO8) {
+                        limit = OVERFLOW_LIMIT_20BIT; // 20 bit limit
+                        mask = GSAO_20BIT_MASK;
+                        num_outs = GSAO_20BIT_CHAN_COUNT;
                 }
 		/// - -- For each DAC channel
                 for (ii=0; ii < num_outs; ii++)
@@ -1301,7 +1305,7 @@ udelay(1000);
 			/// if DAC duotone is enabled.
                         if((dacDuoEnable) && (ii==(num_outs-1)) && (jj == 0))
                         {
-                                dac_out = adcData[0][ADC_DUOTONE_CHAN];
+                                dac_out = adcData[0][ADC_DUOTONE_CHAN] * 10;
                         }
 // Code below is only for use in DAQ test system.
 #ifdef DIAG_TEST
@@ -1381,8 +1385,11 @@ udelay(1000);
                         limit = OVERFLOW_LIMIT_18BIT; // 18 bit limit
                         mask = GSAO_18BIT_MASK;
                         num_outs = GSAO_18BIT_CHAN_COUNT;
-
-
+                }
+                if (cdsPciModules.dacType[jj] == GSC_20AO8) {
+                        limit = OVERFLOW_LIMIT_20BIT; // 20 bit limit
+                        mask = GSAO_20BIT_MASK;
+                        num_outs = GSAO_20BIT_CHAN_COUNT;
                 }
 		/// - -- If user app < 64k rate (typical), need to upsample from code rate to IOP rate
            	for (kk=0; kk < OVERSAMPLE_TIMES; kk++) {
@@ -1912,7 +1919,7 @@ udelay(1000);
        	if (cycleNum >= HKP_DAC_WD_CLK && cycleNum < (HKP_DAC_WD_CLK + cdsPciModules.dacCount)) 
 	{
 		jj = cycleNum - HKP_DAC_WD_CLK;
-		if(cdsPciModules.dacType[jj] == GSC_18AO8)
+		if(cdsPciModules.dacType[jj] == GSC_18AO8 || cdsPciModules.dacType[jj] == GSC_20AO8)
 		{
 			static int dacWatchDog = 0;
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr;
@@ -1930,7 +1937,7 @@ udelay(1000);
        	if (cycleNum >= HKP_DAC_WD_CHK && cycleNum < (HKP_DAC_WD_CHK + cdsPciModules.dacCount)) 
 	{
 		jj = cycleNum - HKP_DAC_WD_CHK;
-		if(cdsPciModules.dacType[jj] == GSC_18AO8)
+		if(cdsPciModules.dacType[jj] == GSC_18AO8 || cdsPciModules.dacType[jj] == GSC_20AO8)
 		{
 			static int dacWDread = 0;
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
@@ -1954,6 +1961,13 @@ udelay(1000);
        	if (cycleNum >= HKP_DAC_FIFO_CHK && cycleNum < (HKP_DAC_FIFO_CHK + cdsPciModules.dacCount)) 
 	{
 		jj = cycleNum - HKP_DAC_FIFO_CHK;
+		if(cdsPciModules.dacType[jj] == GSC_20AO8)
+		{
+			volatile GSA_18BIT_DAC_REG *dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
+			out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
+			dacOutBufSize[jj] = out_buf_size;
+			pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
+		}
 		if(cdsPciModules.dacType[jj] == GSC_18AO8)
 		{
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);

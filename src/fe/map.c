@@ -65,12 +65,13 @@ int mapPciModules(CDS_HARDWARE *pCds)
   int status;
   int i;
   int modCount = 0;
-  // int fast_adc_cnt = 0;
+//  int fast_adc_cnt = 0;
 #ifndef ADC_SLAVE
   int adc_cnt = 0;
 #endif
   int dac_cnt = 0;
   int dac_18bit_cnt = 0;
+  int dac_20bit_cnt = 0;
   int bo_cnt = 0;
   int use_it;
 
@@ -80,7 +81,7 @@ int mapPciModules(CDS_HARDWARE *pCds)
   // Search system for any module with PLX-9056 and PLX id
   while((dacdev = pci_get_device(PLX_VID, PLX_TID, dacdev))) {
 	// Check if this is an 18bit DAC from General Standards
-	if ((dacdev->subsystem_device == DAC_18BIT_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
+	if ( (dacdev->subsystem_device == DAC_18BIT_SS_ID || dacdev->subsystem_device == DAC_20BIT_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
 	{
 		use_it = 0;
 		if (pCds->cards) {
@@ -95,9 +96,15 @@ int mapPciModules(CDS_HARDWARE *pCds)
 			}
 		}
 		if (use_it) {
-                  printk("18-bit dac card on bus %x; device %x\n",
+		  if(dacdev->subsystem_device == DAC_18BIT_SS_ID) {
+			  printk("18-bit dac card on bus %x; device %x\n",
                         dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
+		  } else {
+                  printk("20-bit dac card on bus %x; device %x\n",
+                        dacdev->bus->number,
+			PCI_SLOT(dacdev->devfn));
+		  }
                   status = gsc18ao8Init(pCds,dacdev);
 		  modCount ++;
 		}

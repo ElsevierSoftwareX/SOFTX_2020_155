@@ -39,7 +39,7 @@
 #define GSC_16AI64SSA		0
 #define GSC_18AISS6C		1
 #define GSC_16AO16		2
-// vacant			3
+#define GSC_20AO8		3
 #define CON_32DO		4
 #define ACS_16DIO		5
 #define ACS_8DIO		6
@@ -69,8 +69,12 @@ typedef struct CDS_REMOTE_NODES {
 #define MAX_IO_MODULES		24
 #define OVERFLOW_LIMIT_16BIT	32760
 #define OVERFLOW_LIMIT_18BIT	131060
+#define OVERFLOW_LIMIT_20BIT	524240
 #define OVERFLOW_CNTR_LIMIT	0x1000000
 #define MAX_ADC_WAIT		1000000		// Max time (usec) to wait for ADC data transfer in iop app
+#define MAX_ADC_WAIT_CARD_0	23		// Max time (usec) to wait for 1st ADC card data ready
+#define MAX_ADC_WAIT_CARD_S	5 		// Max time (usec) to wait for remaining ADC card data ready
+#define MAX_ADC_WAIT_ERR_SEC	3 		// Max number of times ADC time > WAIT per sec before alarm set.
 #define MAX_ADC_WAIT_SLAVE	1000		// Max time (usec) to wait for ADC data transfer in slave app
 #define DUMMY_ADC_VAL		0xf000000	// Dummy value for test last ADC channel has arrived
 #define ADC_1ST_CHAN_MARKER	0xf0000		// Only first ADC channel should have upper bits set as first chan marker.

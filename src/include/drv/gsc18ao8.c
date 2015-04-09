@@ -5,6 +5,7 @@
 ///<    <a href="http://www.generalstandards.com/view-products2.php?BD_family=18ao8">GSC 18AO8 Manual</a>
 
 #include "gsc18ao8.h"
+#include "gsc20ao8.h"
 
 // *****************************************************************************
 /// \brief Routine to initialize GSC 18AO8 DAC modules.
@@ -20,7 +21,9 @@ int gsc18ao8Init(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
   static unsigned int pci_io_addr;		/// @param pci_io_addr Bus address of PCI card I/O register.
   int pedStatus;				/// @param pedStatus Status return from call to enable device.
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;	/// @param *dac18bitPtr Pointer to DAC control registers.
+#ifdef DAC_AUTOCAL
   int timer = 0;
+#endif
 
 	  /// Get index into CDS_HARDWARE struct based on total number of DAC cards found by mapping routine
           /// in map.c
@@ -60,13 +63,15 @@ int gsc18ao8Init(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
           printk("DAC OUTPUT CONFIG = 0x%x\n",dac18bitPtr->OUTPUT_CONFIG);
 
           /// Enable 10 volt output range
-          dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_10VOLT_RANGE;
+	  if(dacdev->subsystem_device == DAC_18BIT_SS_ID)
+		  dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_10VOLT_RANGE;
           // Various bits setup
           //dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_ENABLE_EXT_CLOCK;
           //dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_EXT_CLOCK_SRC;
           //dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_EXT_TRIG_SRC;
           dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_DIFF_OUTS;
 
+#ifdef DAC_AUTOCAL
 	  // Start Calibration
 	  dac18bitPtr->BCR |= GSAO_18BIT_AUTOCAL_SET;
           do{
@@ -78,13 +83,22 @@ int gsc18ao8Init(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 		  printk("DAC AUTOCAL SUCCESS in %d milliseconds \n",timer);
 	  else
 		  printk("DAC AUTOCAL FAILED in %d milliseconds \n",timer);
+#else
+	printk("DAC OUTPUT CONFIG after init = 0x%x\n",dac18bitPtr->OUTPUT_CONFIG);
+#endif
+	  if(dacdev->subsystem_device == DAC_20BIT_SS_ID)
+          	dac18bitPtr->BCR |= GSAO_20BIT_OUTPUT_ENABLE;
           printk("DAC OUTPUT CONFIG after init = 0x%x with BCR = 0x%x\n",dac18bitPtr->OUTPUT_CONFIG, dac18bitPtr->BCR);
 
         // TODO: maybe dac_dma_handle should be a separate variable for 18-bit board?
           pHardware->pci_dac[devNum] =
                 (long) pci_alloc_consistent(dacdev,0x200,&dac_dma_handle[devNum]);
           pHardware->dacConfig[devNum] = (int) (dac18bitPtr->ASY_CONFIG);
-          pHardware->dacType[devNum] = GSC_18AO8;
+	  if(dacdev->subsystem_device == DAC_20BIT_SS_ID) {
+          	pHardware->dacType[devNum] = GSC_20AO8;
+	  } else {
+          	pHardware->dacType[devNum] = GSC_18AO8;
+	  }
           pHardware->dacCount ++;
 
 	  /// Call patch in map.c needed to properly write to native PCIe module version of 16AO16
@@ -103,7 +117,7 @@ int gsc18ao8Enable(CDS_HARDWARE *pHardware)
 
    for (ii = 0; ii < pHardware -> dacCount; ii++)
    {
-      if (pHardware->dacType[ii] == GSC_18AO8) {
+      if (pHardware->dacType[ii] == GSC_18AO8 || pHardware->dacType[ii] == GSC_20AO8) {
         volatile GSA_18BIT_DAC_REG *dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[ii]);
         dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_EXT_CLOCK_SRC;
         dac18bitPtr->BUF_OUTPUT_OPS |= GSAO_18BIT_ENABLE_CLOCK;

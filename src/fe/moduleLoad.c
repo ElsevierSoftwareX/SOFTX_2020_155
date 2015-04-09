@@ -26,8 +26,8 @@ struct proc_dir_entry *proc_epics_dir_entry;
 /// /proc/{sysname}/futures entry
 struct proc_dir_entry *proc_futures_entry;
 
-int create_epics_proc_files(void);
 void remove_epics_proc_files(void);
+int create_epics_proc_files(void);
 
 /// Routine to read the /proc/{model}/status file. \n \n
 ///	 We give all of our information in one go, so if the
@@ -45,7 +45,6 @@ procfile_status_read(char *buffer,
 	      off_t offset, int buffer_length, int *eof, void *data)
 {
 	int ret, i;
-	unsigned int byte_cnt;
 	i = 0;
 	*buffer = 0;
 
@@ -123,7 +122,7 @@ procfile_status_read(char *buffer,
 #ifdef ADC_MASTER
 		/* Output DAC buffer size information */
 		for (i = 0; i < cdsPciModules.dacCount; i++) {
-			if (cdsPciModules.dacType[i] == GSC_18AO8) {
+			if (cdsPciModules.dacType[i] == GSC_18AO8 || cdsPciModules.dacType[i] == GSC_20AO8) {
 				sprintf(b, "DAC #%d 18-bit buf_size=%d\n", i, dacOutBufSize[i]);
 			} else {
 				sprintf(b, "DAC #%d 16-bit fifo_status=%d (%s)\n", i, dacOutBufSize[i],
@@ -144,7 +143,7 @@ procfile_status_read(char *buffer,
 		// which is set to PROC_BLOCK_SIZE. (PAGE_SIZE-1024 = 3072 bytes).
 		// We will simply stop printing at that point.
 #define PROC_BLOCK_SIZE (3*1024)
-		byte_cnt = strlen(buffer) + 1;
+		unsigned int byte_cnt = strlen(buffer) + 1;
 		for (i = 0; i < myIpcCount; i++) {
 	  	  if (ipcInfo[i].errTotal) {
 	  		unsigned int cnt =
@@ -241,8 +240,6 @@ procfile_epics_read(char *buffer,
 double
 simple_strtod(char *start, char **end) {
 	int integer;
-	double frac;
-	int i;
 	if (*start != '.') {
 		integer = simple_strtol(start, end, 10);
         	if (*end == start) return 0.0;
@@ -251,8 +248,9 @@ simple_strtod(char *start, char **end) {
 	if (*start != '.') return integer;
 	else {
 		start++;
-		frac = simple_strtol(start, end, 10);
+		double frac = simple_strtol(start, end, 10);
         	if (*end == start) return integer;
+		int i;
 		for (i = 0; i < (*end - start); i++) frac /= 10.0;
 		return ((double)integer) + frac;
 	}
@@ -268,16 +266,6 @@ procfile_epics_write(struct file *file, const char __user *buf,
         char *page;
         char *start;
  	unsigned int future = 0;
-	char *end;
-	struct proc_epics *pe;
-	double new_double;
-	int new_int;
-	int idx;
-	int ncel;
-	unsigned long cycle;
-	double gps;
-	unsigned long gps_int;
-	int i;
 
         if (count > PROC_BLOCK_SIZE)
                 return -EOVERFLOW;
@@ -289,7 +277,8 @@ procfile_epics_write(struct file *file, const char __user *buf,
                         goto out;
 		page[count] = 0;
 		ret = count;
-		pe = (struct proc_epics *)data;
+		struct proc_epics *pe = (struct proc_epics *)data;
+	        char *end;
 		for(;isspace(*start);start++);
 		// See if this a single-character command
 		switch (*start) {
@@ -307,8 +296,8 @@ procfile_epics_write(struct file *file, const char __user *buf,
 				break;
 		}
 		for(;isspace(*start);start++);
-		new_double = 0.0;
-		new_int = 0;
+		double new_double = 0.0;
+		int new_int = 0;
 		switch (pe -> type) {
 			case 0: /* int */ 
 			        new_int = simple_strtol(start, &end, 10);
@@ -324,8 +313,8 @@ procfile_epics_write(struct file *file, const char __user *buf,
 		}
 	        if (end == start) goto out;
 		// See if this is a matrix
-		idx = 0;
-		ncel = pe->nrow * pe->ncol;
+		int idx = 0;
+		int ncel = pe->nrow * pe->ncol;
 		if (ncel) {
 			// Expect the cell index number next
 			start = end;
@@ -347,22 +336,24 @@ procfile_epics_write(struct file *file, const char __user *buf,
 					break;
 			}
 		} else if ((*((char *)(((void *)pLocalEpics) + pe->mask_idx)))) { // Allow to setup a future only if masked
+			unsigned long cycle;
 			start = end;
 			for(;isspace(*start);start++);
 			// check for gps seconds
-			gps = simple_strtod(start, &end);
+			double gps = simple_strtod(start, &end);
 			if (end == start) {
 				gps = cycle_gps_time + 5;
 				cycle = cycleNum;
 			} else {
 				// Convert gps time
-				gps_int = gps;
+				unsigned long gps_int = gps;
 				gps -= gps_int;
 				cycle = gps * CYCLE_PER_SECOND;
 				gps = gps_int;
 			}
 			// Add new future setpoint
 			// Find first available slot
+			int i;
 			static DEFINE_SPINLOCK(fut_lock);
 			spin_lock(&fut_lock);
 			for (i = 0; (i < MAX_PROC_FUTURES) && proc_futures[i].proc_epics; i++);
@@ -433,7 +424,6 @@ static const ner = sizeof(proc_epics)/sizeof(struct proc_epics);
 int
 create_epics_proc_files() {
 	int i;
-	unsigned int ncel;
 
 	for (i = 0; i < ner; i++) proc_epics_entry[i]  = 0;
 
@@ -457,7 +447,7 @@ create_epics_proc_files() {
 		}
 		proc_epics_entry[i]->uid 	 = PROC_UID;
 		proc_epics_entry[i]->gid 	 = 0;
-		ncel = proc_epics[i].nrow * proc_epics[i].ncol; // Enough space to deal with the matrix
+		unsigned int ncel = proc_epics[i].nrow * proc_epics[i].ncol; // Enough space to deal with the matrix
 		proc_epics_entry[i]->size 	 = ncel? 64 * ncel: 128;
 		proc_epics_entry[i]->data 	 = proc_epics + i;
 	}
@@ -612,7 +602,7 @@ int init_module (void)
                 return -1;
         }
         _epics_shm = (unsigned char *)(kmalloc_area[ret]);
-        printf("Epics shmem set at 0x%p\n", _epics_shm);
+        printf("EPICSM at 0x%x\n", _epics_shm);
         ret =  mbuf_allocate_area("ipc", 4*1024*1024, 0);
         if (ret < 0) {
                 printf("mbuf_allocate_area(ipc) failed; ret = %d\n", ret);
@@ -620,8 +610,9 @@ int init_module (void)
         }
         _ipc_shm = (unsigned char *)(kmalloc_area[ret]);
 
-	printf("IPC at 0x%p\n",_ipc_shm);
+	printf("IPC    at 0x%x\n",_ipc_shm);
   	ioMemData = (IO_MEM_DATA *)(_ipc_shm+ 0x4000);
+	printf("IOMEM  at 0x%x size 0x%x\n",(_ipc_shm + 0x4000),sizeof(IO_MEM_DATA));
 
 
 // If DAQ is via shared memory (Framebuilder code running on same machine or MX networking is used)
@@ -633,7 +624,8 @@ int init_module (void)
                 return -1;
         }
         _daq_shm = (unsigned char *)(kmalloc_area[ret]);
-        printf("Allocated daq shmem; set at 0x%p\n", _daq_shm);
+        // printf("Allocated daq shmem; set at 0x%x\n", _daq_shm);
+	printf("DAQSM at 0x%x\n",_daq_shm);
  	daqPtr = (struct rmIpcStr *) _daq_shm;
 
 	// Find and initialize all PCI I/O modules *******************************************************
@@ -712,12 +704,16 @@ int init_module (void)
 				}
 				break;
 			case GSC_18AO8:
-				if((cdsPciModules.cards_used[jj].type == GSC_18AO8) && 
+			case GSC_20AO8:
+				if((cdsPciModules.cards_used[jj].type == GSC_18AO8 || cdsPciModules.cards_used[jj].type == GSC_20AO8) && 
 					(cdsPciModules.cards_used[jj].instance == dac18Cnt))
 				{
 					printf("Found DAC at %d %d\n",jj,ioMemData->ipc[ii]);
 					kk = cdsPciModules.dacCount;
-					cdsPciModules.dacType[kk] = GSC_18AO8;
+					if(cdsPciModules.cards_used[jj].type == GSC_18AO8)
+						cdsPciModules.dacType[kk] = GSC_18AO8;
+					if(cdsPciModules.cards_used[jj].type == GSC_20AO8)
+						cdsPciModules.dacType[kk] = GSC_20AO8;
 					cdsPciModules.dacConfig[kk] = ioMemData->ipc[ii];
 	   				cdsPciModules.pci_dac[kk] = (long)(ioMemData->iodata[ii]);
 					cdsPciModules.dacCount ++;
@@ -879,6 +875,10 @@ int init_module (void)
 		{
                         printf("\tDAC %d is a GSC_18AO8 module\n",ii);
 		}
+                if(cdsPciModules.dacType[ii] == GSC_20AO8)
+		{
+                        printf("\tDAC %d is a GSC_20AO8 module\n",ii);
+		}
                 if(cdsPciModules.dacType[ii] == GSC_16AO16)
                 {
                         printf("\tDAC %d is a GSC_16AO16 module\n",ii);
@@ -977,7 +977,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 		ioMemData->pci_rfm_dma[ii] = cdsPciModules.pci_rfm_dma[ii];
 #endif
 	}
-	ioMemData->dolphinCount = 0;
+	// ioMemData->dolphinCount = 0;
 #ifdef DOLPHIN_TEST
 	ioMemData->dolphinCount = cdsPciModules.dolphinCount;
 	ioMemData->dolphin[0] = cdsPciModules.dolphin[0];
