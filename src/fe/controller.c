@@ -1018,6 +1018,14 @@ udelay(1000);
 			
 		    }
 
+#ifndef RFM_DIRECT_READ
+                    /// \> If RFM cards, verify DMA is complete
+		    if(jj == 0 && (cycleNum % 4) == 0 && cdsPciModules.pci_rfm[0])
+				vmic5565DMAdone(0);
+		    if(jj == 0 && (cycleNum % 4) == 0 && cdsPciModules.pci_rfm[1])
+				vmic5565DMAdone(1);
+#endif
+
                     /// \> Read adc data
                     packedData = (int *)cdsPciModules.pci_adc[jj];
 		    /// - ---- First, and only first, channel should have upper bit marker set.

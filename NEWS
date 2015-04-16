@@ -1,4 +1,9 @@
 ==================================================================================================
+Changes for 2.9.2 release 
+==================================================================================================
+- Bug Fix: IPC errors when using RFM DMA mode.  Modified controller.c to verify that RFM DMA
+  was complete before triggering user applications. 
+==================================================================================================
 Changes for 2.9.1 release 
 ==================================================================================================
 - Bug Fix (811): NDS1 Version 12.2: Fix byte-ordering in 'status channels 2' 
@@ -8,7 +13,7 @@ Changes for 2.9.1 release
   reporting.
 - Added read file error checking for filter switch settings (somehow, some settings in file >16
   bits. SDF code now truncates to 16bits and reports a read error to SDF table.
-- Bug Fix (796): Added paging capability to SDF_TABLE to allow listing of up to 400 items.
+- Bug Fix (796): Added paging capability to SDF_TABLE to allow listing of up to 15000 items.
   Also cleaned up BURT file reader line parsing to pick up on strings.  Was having problems
   when strings started with a number and a string contained more than one word.
 - Bug Fix (803): Modified Makefile.linux to not add SDF EPICS variables to the autoBurt.req file.
