@@ -11,6 +11,11 @@ Changes for 2.10
 - mx_stream modified to provide additional diagnostics when used in a system with 2 DAQ data
   concentrators.
 ==================================================================================================
+Changes for 2.9.2 release
+==================================================================================================
+- Bug Fix: IPC errors when using RFM DMA mode.  Modified controller.c to verify that RFM DMA
+  was complete before triggering user applications. 
+==================================================================================================
 Changes for 2.9.1
 ==================================================================================================
 - Bug Fix (811): NDS1 Version 12.2: Fix byte-ordering in 'status channels 2' 
