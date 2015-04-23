@@ -39,38 +39,56 @@ int gsc18ao8Init(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 
           /// Get the DAC register address
           pci_read_config_dword(dacdev,PCI_BASE_ADDRESS_2,&pci_io_addr);
+	  // Send some info to dmesg
           printk("dac pci2 = 0x%x\n",pci_io_addr);
           _dac_add = ioremap_nocache((unsigned long)pci_io_addr, 0x200);
+	  // Send some info to dmesg
           printk("DAC I/O address=0x%x  0x%lx\n", pci_io_addr,(long)_dac_add);
 
           dac18bitPtr = (GSA_18BIT_DAC_REG *)_dac_add;
           dacPtr[devNum] = (GSC_DAC_REG *)_dac_add;
 
+	  // Send some info to dmesg
           printk("DAC BCR = 0x%x\n",dac18bitPtr->BCR);
           /// Reset the DAC board and wait for it to finish (3msec)
 
           dac18bitPtr->BCR |= GSAO_18BIT_RESET;
 
           do{
+		// If I uncomment next line, then Autocal wait works, but 
+		// output limited to 9.75V.
+		// udelay(5000);
           }while((dac18bitPtr->BCR & GSAO_18BIT_RESET) != 0);
 
           /// Enable 2s complement by clearing offset binary bit
           dac18bitPtr->BCR &= ~GSAO_18BIT_OFFSET_BINARY;
+	  // Set simultaneous outputs
           dac18bitPtr->BCR |= GSAO_18BIT_SIMULT_OUT;
+	  // Send some info to dmesg
           printk("DAC BCR after init = 0x%x\n",dac18bitPtr->BCR);
           printk("DAC OUTPUT CONFIG = 0x%x\n",dac18bitPtr->OUTPUT_CONFIG);
 
           /// Enable 10 volt output range
 	  if(dacdev->subsystem_device == DAC_18BIT_SS_ID)
 		  dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_10VOLT_RANGE;
-          // Various bits setup
-          //dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_ENABLE_EXT_CLOCK;
-          //dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_EXT_CLOCK_SRC;
-          //dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_EXT_TRIG_SRC;
+          // Set differential outputs
           dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_DIFF_OUTS;
+	  // If 20bit DAC, need to enable outputs.
+	  if(dacdev->subsystem_device == DAC_20BIT_SS_ID)
+          	dac18bitPtr->BCR |= GSAO_20BIT_OUTPUT_ENABLE;
 
 	  // Start Calibration
 	  dac18bitPtr->BCR |= GSAO_18BIT_AUTOCAL_SET;
+	  // Just sleep for 5 seconds.
+	  // Put in temporarily for 20bit DAC, as seems to return immediately from autocal.
+	  timer = 5000;
+          do{
+	   	udelay(1000);
+		timer -= 1;
+          }while(timer > 0);
+
+	  // Wait for autocal to complete
+	  timer = 0;
           do{
 	   	udelay(1000);
 		timer += 1;
@@ -80,14 +98,17 @@ int gsc18ao8Init(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 		  printk("DAC AUTOCAL SUCCESS in %d milliseconds \n",timer);
 	  else
 		  printk("DAC AUTOCAL FAILED in %d milliseconds \n",timer);
+
+	  // If 20bit DAC, need to enable outputs.
 	  if(dacdev->subsystem_device == DAC_20BIT_SS_ID)
           	dac18bitPtr->BCR |= GSAO_20BIT_OUTPUT_ENABLE;
           printk("DAC OUTPUT CONFIG after init = 0x%x with BCR = 0x%x\n",dac18bitPtr->OUTPUT_CONFIG, dac18bitPtr->BCR);
 
-        // TODO: maybe dac_dma_handle should be a separate variable for 18-bit board?
           pHardware->pci_dac[devNum] =
                 (long) pci_alloc_consistent(dacdev,0x200,&dac_dma_handle[devNum]);
           pHardware->dacConfig[devNum] = (int) (dac18bitPtr->ASY_CONFIG);
+
+	  // Return the device type to main code.
 	  if(dacdev->subsystem_device == DAC_20BIT_SS_ID) {
           	pHardware->dacType[devNum] = GSC_20AO8;
 	  } else {
@@ -95,7 +116,7 @@ int gsc18ao8Init(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 	  }
           pHardware->dacCount ++;
 
-	  /// Call patch in map.c needed to properly write to native PCIe module version of 16AO16
+	  /// Call patch in map.c needed to properly write to native PCIe module
           set_8111_prefetch(dacdev);
           return(pedStatus);
 }
