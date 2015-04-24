@@ -1019,11 +1019,13 @@ udelay(1000);
 		    }
 
 #ifndef RFM_DIRECT_READ
+#ifdef FUTURE_RFM_DMA_CHECK
                     /// \> If RFM cards, verify DMA is complete
 		    if(jj == 0 && (cycleNum % 4) == 0 && cdsPciModules.pci_rfm[0])
 				vmic5565DMAdone(0);
 		    if(jj == 0 && (cycleNum % 4) == 0 && cdsPciModules.pci_rfm[1])
 				vmic5565DMAdone(1);
+#endif
 #endif
 
                     /// \> Read adc data

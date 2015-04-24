@@ -2759,6 +2759,14 @@ if ($::rfmDma) {
   print OUTM "EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
 }
 
+if ($::rfmDelay) {
+  print OUTM "#Comment out to run without RFM Delayed by 1 cycle\n";
+  print OUTM "EXTRA_CFLAGS += -DRFM_DELAY=1\n";
+} else {
+  print OUTM "#Clear comment to run with RFM Delayed by 1 cycle\n";
+  print OUTM "#EXTRA_CFLAGS += -DRFM_DELAY=1\n";
+}
+
 print OUTM "\n";
 print OUTM "ifneq (\$(CDIR),)\n";
 print OUTM "override EXTRA_CFLAGS += \$(patsubst %,-I../../../%,\$(CDIR))\n";
