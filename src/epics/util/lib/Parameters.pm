@@ -141,10 +141,10 @@ sub parseParams {
         			die "Invalid remote_ipc_port specified in cdsParamters\n" unless $::remoteIPCport >= 0;
 			} elsif ($spp[0] eq "rfm_dma") {
 				$::rfmDma = 1;
+			} elsif ($spp[0] eq "rfm_delay") {
+				$::rfmDelay = 1;
 			} elsif ($spp[0] eq "flip_signals") { 
 				$::flipSignals = $spp[1];
-			} elsif ($spp[0] eq "edcu") { 
-				$::edcu = $spp[1];
 			} elsif ($spp[0] eq "biquad") { 
 				$::allBiquad = $spp[1];
 				print "AllBiquad set\n";

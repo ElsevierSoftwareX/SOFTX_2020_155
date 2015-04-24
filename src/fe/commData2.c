@@ -44,6 +44,9 @@ int ii;
 
 printf("size of data block = 0x%x\n", sizeof(CDS_IPC_COMMS));
 printf("Dolphin num = %d at 0x%x and 0x%x \n",cdsPciModules.dolphinCount,cdsPciModules.dolphin[0],cdsPciModules.dolphin[1]);
+#ifdef RFM_DELAY
+printf("Model compiled with RFM DELAY !!\n");
+#endif
   for(ii=0;ii<connects;ii++)
   {
 	// Set the sendCycle field, used by all send/rcv to determine IPC data block to write/read
@@ -158,9 +161,16 @@ INLINE void commData2Send(int connects,  	 	// Total number of IPC connections i
   int sendBlock;		///	\param sendBlock Data block data is to be sent to
   int lastPcie = -1;
 
+#ifdef RFM_DELAY
+// Need to write ahead one extra block
+  int mycycle = (cycle + 1);
+  sendBlock = ((mycycle + 1) * (IPC_MAX_RATE / FE_RATE)) % IPC_BLOCKS;
+  dataCycle = ((mycycle + 1) * ipcInfo[0].sendCycle) % IPC_MAX_RATE;
+  if(dataCycle == 0 || dataCycle == ipcInfo[0].sendCycle) syncWord = timeSec + 1;
+  else syncWord = timeSec;
+  syncWord = (syncWord << 32) + dataCycle;
+#else
   sendBlock = ((cycle + 1) * (IPC_MAX_RATE / FE_RATE)) % IPC_BLOCKS;
-  //int num_pcie = 0;
-
 // Calculate the SYNC word to be sent with all data.
 // Determine the cycle count to be sent with the data
   dataCycle = ((cycle + 1) * ipcInfo[0].sendCycle) % IPC_MAX_RATE;
@@ -170,7 +180,9 @@ INLINE void commData2Send(int connects,  	 	// Total number of IPC connections i
   else syncWord = timeSec;
 // Combine GPS seconds and cycle counter into long word.
   syncWord = (syncWord << 32) + dataCycle;
+#endif
 
+// Want to send out RFM signals first to allow maximum time for data delivery.
   for(ii=0;ii<connects;ii++)
   {
 	// If IPC Sender on RFM Network:
@@ -190,6 +202,20 @@ INLINE void commData2Send(int connects,  	 	// Total number of IPC connections i
 		}
   	}
   }
+#ifdef RFM_DELAY
+// We don't want to delay SHMEM or PCIe writes, so calc block as usual,
+// so need to recalc send block and syncWord.
+  sendBlock = ((cycle + 1) * (IPC_MAX_RATE / FE_RATE)) % IPC_BLOCKS;
+// Calculate the SYNC word to be sent with all data.
+// Determine the cycle count to be sent with the data
+  dataCycle = ((cycle + 1) * ipcInfo[0].sendCycle) % IPC_MAX_RATE;
+// Since this is write ahead, need to increment the GPS second if
+// writing to the first block of a new second.
+  if(dataCycle == 0) syncWord = timeSec + 1;
+  else syncWord = timeSec;
+// Combine GPS seconds and cycle counter into long word.
+  syncWord = (syncWord << 32) + dataCycle;
+#endif
 
   for(ii=0;ii<connects;ii++)
   {
