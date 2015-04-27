@@ -42,8 +42,10 @@ if [ -d "${AUTO_RCGDIR}" ] ; then
 #
     USERAPPS_DIR=${userApps}
     cdsModel=${userApps}/cds/${ifo}/models:${userApps}/cds/common/models
+    alsModel=${userApps}/als/${ifo}/models:${userApps}/als/common/models
     aosModel=${userApps}/aos/${ifo}/models:${userApps}/aos/common/models
     ascModel=${userApps}/asc/${ifo}/models:${userApps}/asc/common/models
+    calModel=${userApps}/cal/${ifo}/models:${userApps}/cal/common/models
     hpiModel=${userApps}/hpi/${ifo}/models:${userApps}/hpi/common/models
     iooModel=${userApps}/ioo/${ifo}/models:${userApps}/ioo/common/models
     iscModel=${userApps}/isc/${ifo}/models:${userApps}/isc/common/models
@@ -53,14 +55,18 @@ if [ -d "${AUTO_RCGDIR}" ] ; then
     susModel=${userApps}/sus/${ifo}/models:${userApps}/sus/common/models
     tcsModel=${userApps}/tcs/${ifo}/models:${userApps}/tcs/common/models
     tstModel=${userApps}/cds/test/models
-    export USERAPPS_LIB_PATH=${cdsModel}:${tstModel}:${aosModel}:${ascModel}:${hpiModel}:${iooModel}:${iscModel}:${isiModel}:${lscModel}:${pslModel}:${susModel}:${tcsModel}
+    export USERAPPS_LIB_PATH=${cdsModel}:${tstModel}:${alsModel}:${aosModel}:${ascModel}:${calModel}:${hpiModel}:${iooModel}:${iscModel}:${isiModel}:${lscModel}:${pslModel}:${susModel}:${tcsModel}
 #
     export CDS_SRC=${userApps}/cds/common/src
     export CDS_IFO_SRC=${userApps}/cds/${ifo}/src
+    export ALS_SRC=${userApps}/als/common/src
+    export ALS_IFO_SRC=${userApps}/als/${ifo}/src
     export AOS_SRC=${userApps}/aos/common/src
     export AOS_IFO_SRC=${userApps}/aos/${ifo}/src
     export ASC_SRC=${userApps}/asc/common/src
     export ASC_IFO_SRC=${userApps}/asc/${ifo}/src
+    export CAL_SRC=${userApps}/cal/common/src
+    export CAL_IFO_SRC=${userApps}/cal/${ifo}/src
     export HPI_SRC=${userApps}/hpi/common/src
     export HPI_IFO_SRC=${userApps}/hpi/${ifo}/src
     export IOO_SRC=${userApps}/ioo/common/src
@@ -78,8 +84,10 @@ if [ -d "${AUTO_RCGDIR}" ] ; then
     export CDS_TEST_SRC=${userApps}/cds/test/src
 #
     cdsMedm=${userApps}/cds/common/medm
+    alsMedm=${userApps}/als/common/medm
     aosMedm=${userApps}/aos/common/medm
     ascMedm=${userApps}/asc/common/medm
+    calMedm=${userApps}/cal/common/medm
     hpiMedm=${userApps}/hpi/common/medm
     iooMedm=${userApps}/ioo/common/medm
     iscMedm=${userApps}/isc/common/medm
@@ -88,11 +96,13 @@ if [ -d "${AUTO_RCGDIR}" ] ; then
     pslMedm=${userApps}/psl/common/medm
     susMedm=${userApps}/sus/common/medm
     testMedm=${userApps}/cds/test/medm
-    export USERAPPS_MEDM_PATH=${cdsMedm}:$aosMedm:$ascMedm:$hpiMedm:$iooMedm:$iscMedm:$isiMedm:$lscMedm:$pslMedm:$susMedm:$testMedm
+    export USERAPPS_MEDM_PATH=${cdsMedm}:${alsMedm}:$aosMedm:$ascMedm:${calMedm}:$hpiMedm:$iooMedm:$iscMedm:$isiMedm:$lscMedm:$pslMedm:$susMedm:$testMedm
 #
     cdsScr=${userApps}/cds/common/scripts
+    alsScr=${userApps}/als/common/scripts
     aosScr=${userApps}/aos/common/scripts
     ascScr=${userApps}/asc/common/scripts
+    calScr=${userApps}/cal/common/scripts
     hpiScr=${userApps}/hpi/common/scripts
     iooScr=${userApps}/ioo/common/scripts
     iscScr=${userApps}/isc/common/scripts
@@ -101,7 +111,7 @@ if [ -d "${AUTO_RCGDIR}" ] ; then
     pslScr=${userApps}/psl/common/scripts
     susScr=${userApps}/sus/common/scripts
     testScr=${userApps}/cds/test/scripts
-    export USERAPPS_SCRIPTS_PATH=${cdsScr}:$aosScr:$ascScr:$hpiScr:$iooScr:$iscScr:$isiScr:$lscScr:$pslScr:$susScr:$testScr
+    export USERAPPS_SCRIPTS_PATH=${cdsScr}:${alsScr}:$aosScr:$ascScr:${calScr}:$hpiScr:$iooScr:$iscScr:$isiScr:$lscScr:$pslScr:$susScr:$testScr
   fi
  fi
 #
