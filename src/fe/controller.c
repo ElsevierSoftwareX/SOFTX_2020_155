@@ -780,6 +780,7 @@ udelay(1000);
 	  	printf("Triggered the DAC\n");
 		break;
 	case SYNC_SRC_1PPS:
+#ifndef NO_DAC_PRELOAD
 		for(jj=0;jj<cdsPciModules.dacCount;jj++)
 		{       
 			if(cdsPciModules.dacType[jj] == GSC_18AO8)
@@ -792,9 +793,39 @@ udelay(1000);
 				for(ii=0;ii<GSAO_16BIT_PRELOAD;ii++) dac16bitPtr->ODB = 0;
 			}       
 		}       
+#endif
 		// Arm ADC modules
-		gsc16ai64Enable(cdsPciModules.adcCount);
-		// Start clocking the DAC outputs
+		// This has to be done sequentially, one at a time.
+		kk = 0;
+		for(jj=0;jj<cdsPciModules.adcCount;jj++)
+		{
+		    packedData = (int *)cdsPciModules.pci_adc[0];
+		    packedData += 31;
+		    gsc16ai64Enable1PPS(jj);
+		    rdtscl(cpuClock[jj]);
+		    status = gsc16ai64WaitDmaDone(0, packedData);
+		    kk ++;
+		    udelay(2);
+		    for(ii=0;ii<kk;ii++) {
+		          gsc16ai64DmaEnable(ii);
+		    }
+		}
+		// Need to do some dummy reads here to allow time for last ADC to arm
+		// as it takes two clock cycles past arm to actually deliver data.
+		for(ii=0;ii<cdsPciModules.adcCount;ii++)
+		{
+		    // Want to verify ADC FIFOs are empty to ensure they are in sync.
+		    status = gsc16ai64WaitDmaDone(0, packedData);
+		    cpuClock[ii] = gsc16ai64CheckAdcBuffer(ii);
+		    for(jj=0;jj<cdsPciModules.adcCount;jj++)
+		    {
+		         gsc16ai64DmaEnable(jj);
+	            }
+		}
+		// Print out the FIFO info to dmesg to verify sync.
+		for(jj=0;jj<cdsPciModules.adcCount;jj++) {
+		    printf("ADC buffer %d = %d\n",jj,cpuClock[jj]);
+		}
 		break;
 	default: {
 		    // IRIG-B card not found, so use CPU time to get close to 1PPS on startup
