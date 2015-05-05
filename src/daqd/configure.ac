@@ -1,6 +1,12 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(daqd.hh)
-AC_CONFIG_HEADER(config.h)
+AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_HEADERS(config.h)
+
+dnl Checks for host
+dnl ===================
+AC_CANONICAL_HOST
 
 dnl checks for programs
 dnl ===================
@@ -53,6 +59,164 @@ AC_C_INLINE
 dnl recommended by the autoconf doc, for HEADER_STDC
 AC_CHECK_FUNCS(strchr memcpy fchdir)
 
+dnl======================================================================
+dnl   Check if framecpp is installed
+dnl======================================================================
+have_framecpp=
+PKG_CHECK_MODULES(FRAMECPP, framecpp, have_framecpp="yes", have_framecpp="no")
+if test "${have_framecpp}" = "yes"; then
+  LDASLIBS="$FRAMECPP_LIBS"
+  LDASLIBFLAGS="$LDASLIBS"
+  for specvsn in 8 7 6 4 3 cmn; do
+    LDASLIBFLAGS="$LDASLIBFLAGS -lframecpp$specvsn"
+  done
+  LDASLIBFLAGS="$LDASLIBFLAGS -lgeneral"
+  LDASFLAGS="$FRAMECPP_CFLAGS"
+fi
+if test "${have_framecpp}" = "no"; then
+  LDASFLAGS=
+  LDASLIBFLAGS=
+fi
+
+dnl=====================================================================
+dnl Change location of the FrameCPP
+dnl=====================================================================
+AC_ARG_WITH(framecpp,
+[  --with-framecpp=DIRECTORY           Specify LDAS software directory ],
+[ if test x$withval != x; then
+     LDAS_DIR=$withval
+  else
+     LDAS_DIR="/opt/rtapps/framecpp"
+  fi
+  AC_CHECK_FILE($LDASDIR/lib/linux-x86/libframecpp.so,
+  [ found_framecpp="yes", LDASLIBS="$LDAS_DIR/lib/linux-x86_64"],
+  [ found_framecpp="no"])
+  if test "x$found_framecpp" != "xyes"; then
+      AC_CHECK_FILE($LDASDIR/lib/libframecpp.so,
+      [ found_framecpp="yes", LDASLIBS="$LDAS_DIR/lib"],
+      [ found_framecpp="no", AC_MSG_ERROR([Could not find custom framecpp])])
+  fi
+  if test "x$found_framecpp" = "xyes"; then
+      LDASLIBFLAGS="-L$LDASLIBS -lframecpp"
+      for specvsn in 8 7 6 4 3 cmn; do
+         LDASLIBFLAGS="$LDASLIBFLAGS -lframecpp$specvsn"
+      done
+      LDASLIBFLAGS="$LDASLIBFLAGS -lgeneral"
+      LDASFLAGS="-I$LDASDIR/include"
+  else
+      LDASLIBFLAGS=
+      LDASFLAGS=
+  fi ],
+[])
+AC_SUBST(LDASLIBFLAGS)
+AC_SUBST(LDASFLAGS)
+
+dnl======================================================================
+dnl   Get EPICS HOST and OS architecure
+dnl======================================================================
+host_arch=
+os_arch=
+case $host in
+    *solaris*)
+        osarch=solaris 
+	if test `uname -m` = "i86pc" ;
+	then
+	    host_arch=solaris-x86-gnu
+	else
+	    host_arch=solaris-sparc	
+	fi
+	;;
+    *linux*)
+        osarch=Linux
+	if test `uname -m` = "x86_64" ;
+	then
+	    host_arch=linux-x86_64
+	else
+	    host_arch=linux-x86
+	fi
+	;;
+    *darwin*)
+        osarch=Darwin
+	if test `uname -m` = "x86_64" ;
+	then
+	    host_arch=darwin-x86
+	else
+	    host_arch=darwin-x86
+	fi
+	;;
+    *)
+        osarch=Linux
+        host_arch=linux-x86
+esac
+
+dnl======================================================================
+dnl   Check if EPICS is installed
+dnl======================================================================
+pkg_epics=
+have_epics=
+dnl ========
+dnl  strategy is to check for pkgconfig, then search for it
+dnl ========
+PKG_CHECK_MODULES(EPICSBASE, epics-base, pkg_epics="yes", pkg_epics="no")
+if test "${pkg_epics}" = "yes"; then
+    EPICSLIBS="$EPICSBASE_LIBS"
+    EPICSFLAGS="$EPICSBASE_CFLAGS"
+    have_epics="yes"
+else
+    EPICS_BASE="/opt/rtapps/epics/base"
+    AC_CHECK_FILE(${EPICSDEF}/lib/${host_arch}/libca.a, have_epics="yes", have_epics="no")
+    if test "${have_epics}" = "yes" ; then
+       EPICSLIBS="-L$EPICS_BASE/lib/$host_arch"
+       EPICSFLAGS="-I$EPICS_BASE/include -I$EPICS_BASE/include/os/$osarch"
+    else
+      AC_MSG_ERROR([No EPICS Base in default location])
+    fi
+fi
+
+dnl=====================================================================
+dnl Change location of EPICS
+dnl=====================================================================
+
+found_epics=
+AC_ARG_WITH(epics,
+[  --with-epics=<dir> enable EDCU, IOC server, optional EPICS Base location],
+[ if test x$withval != xno; then
+    EPICS_OBJS=\$\{EPICS_OBJS\}
+    EPICS_SRCS=\$\{EPICS_SRCS\}
+    if test x$withval != xyes; then
+      EPICS_BASE=$withval
+      AC_CHECK_FILE(${EPICS_BASE}/lib/${host_arch}/libca.a, found_epics="yes", found_epics="no")
+      if test $found_epics = "yes"; then
+        have_epics = "yes"
+        EPICSLIBS="L$EPICSTRY/lib/$host_arch"
+        EPICSFLAGS="-I$EPICSTRY/include -I$EPICSTRY/include/os/$osarch"
+      else
+        AC_MSG_ERROR([could not find EPICS base libraries])
+      fi
+    fi
+    if test $have_epics = "yes"; then
+       EPICSLIBFLAGS="$EPICSLIBS -lca -lcas -lasHost -lCom -lgdd -lm -lrecIoc -lsoftDevIoc"
+       AC_DEFINE(EPICS_EDCU)
+    else
+       AC_MSG_ERROR([Do not have EPICS, Skipping EPICS EDUC, IOC in build])
+    fi
+  else
+    EPICSLIBFLAGS=
+    EPICSFLAGS= 
+    EPICS_SRCS=
+    EPICS_OBJS=
+  fi
+],
+[
+   EPICSLIBFLAGS=
+   EPICSFLAGS= 
+   EPICS_SRCS=
+   EPICS_OBJS=
+])
+AC_SUBST(EPICSLIBFLAGS)
+AC_SUBST(EPICSFLAGS)
+AC_SUBST(EPICS_SRCS)
+AC_SUBST(EPICS_OBJS)
 
 dnl Check for configuration options
 dnl ==========================
@@ -60,7 +224,7 @@ dnl ==========================
 AC_ARG_WITH(broadcast,
 [ --with-broadcast            Get data receiving a broadcast],
 [ if test x$withval != xno; then
-   AC_DEFINE(USE_BROADCAST)
+   AC_DEFINE([USE_BROADCAST],[],[Get data receiving a broadcast])
   fi
 ])
 
@@ -122,32 +286,6 @@ AC_ARG_WITH(udp,
 ])
 AC_SUBST(USE_UDP)
 
-AC_ARG_WITH(epics,
-[  --with-epics=EPICS_BASE    Specify location of Epics base and enable EDCU and IOC server],
-[ if test x$withval != xno; then
-    EPICS_BASE=$withval
-    EPICSFLAGS=\$\{CDS_EPICS\}
-    EPICSLIBFLAGS=\$\{CDS_EPICS_LIBS\}
-    EPICS_OBJS=\$\{EPICS_OBJS\}
-    EPICS_SRCS=\$\{EPICS_SRCS\}
-    AC_DEFINE(EPICS_EDCU)
-  fi
-],
-[ EPICS_BASE=/opt/rtapps/epics/base
-  EPICSFLAGS=\$\{CDS_EPICS\}
-  EPICSLIBFLAGS=\$\{CDS_EPICS_LIBS\}
-  EPICS_OBJS=\$\{EPICS_OBJS\}
-  EPICS_SRCS=\$\{EPICS_SRCS\}
-  AC_DEFINE(EPICS_EDCU)
-])
-AC_CHECK_FILE($EPICS_BASE/lib/linux-x86_64/libca.so,,
-	[AC_MSG_ERROR([could not find Epics base libraries])])
-AC_SUBST(EPICS_BASE)
-AC_SUBST(EPICSFLAGS)
-AC_SUBST(EPICSLIBFLAGS)
-AC_SUBST(EPICS_OBJS)
-AC_SUBST(EPICS_SRCS)
-
 AC_ARG_ENABLE(testpoints,
 [  --enable-testpoints         Enable GDS testpoints (default)],
 [if test x$enableval = xyes; then
@@ -185,19 +323,6 @@ AC_SUBST(GDS_ARCHIVE)
 AC_SUBST(GDSFLAGS)
 AC_SUBST(GDSLIBFLAGS)
 AC_SUBST(GDSOBJECTS)
-
-dnl Change default localtion of the FrameCPP
-AC_ARG_WITH(framecpp,
-[  --with-framecpp=DIRECTORY           Specify LDAS software directory ],
-[ if test x$withval != xno; then
-   LDAS_DIR=$withval
-   LDAS_LDFLAGS=\$\{LDASLIBFLAGS\}
-  fi
-], [LDAS_DIR=/opt/rtapps/framecpp])
-AC_CHECK_FILE($LDAS_DIR/linux-x86_64/lib/libframecpp.so,,
-	[AC_MSG_ERROR([could not find framecpp])])
-AC_SUBST(LDAS_DIR)
-AC_SUBST(LDAS_LDFLAGS)
 
 dnl Use Symmetricom GPS card as the timing source
 AC_ARG_ENABLE(symmetricom,

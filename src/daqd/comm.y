@@ -1956,7 +1956,6 @@ status_channels_bailout:
 	}
 	| SYNC  FRAME_SAVER {
 #if EPICS_EDCU == 1
-	   extern unsigned int pvValue[1000];
 	   pvValue[5] = 0;
 	   pvValue[0] = 0;
 #endif
@@ -2026,7 +2025,6 @@ status_channels_bailout:
 	}
 	| SYNC  TREND_FRAME_SAVER {
 #if EPICS_EDCU == 1
-	   extern unsigned int pvValue[1000];
 	   //pvValue[5] = 1000;
 #endif
 	   // Command is used to sync with the `start trend-frame-saver'
@@ -2041,7 +2039,6 @@ status_channels_bailout:
 	}
 	| SYNC  MINUTE_TREND_FRAME_SAVER {
 #if EPICS_EDCU == 1
-	   extern unsigned int pvValue[1000];
 	   //pvValue[5] = 2000;
 #endif
 	   // Command is used to sync with the `start minute-trend-frame-saver'

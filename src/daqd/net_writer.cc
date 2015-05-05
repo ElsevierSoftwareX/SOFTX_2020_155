@@ -22,6 +22,8 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <sys/syscall.h>
+#include <sys/prctl.h>
 
 using namespace std;
 
@@ -928,8 +930,10 @@ net_writer_c::transient_producer ()
 
   // Only if this thread works on main circular buffer
   if (buffptr == daqd.b1) {
-    // Put this  thread into the realtime scheduling class with half the priority
-    daqd_c::realtime ("net_writer transient producer", 2);
+  
+  // Set thread parameters
+    daqd_c::set_thread_priority("Net_writer transient producer","dqnwtr",SAVER_THREAD_PRIORITY,0); 
+
   }
 
   for (;;)

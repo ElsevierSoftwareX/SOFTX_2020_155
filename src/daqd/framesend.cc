@@ -21,14 +21,15 @@ typedef u_int32_t in_addr_t;
 #include <netdb.h>
 #include <unistd.h>
 #include <pthread.h>
-
 #include <memory>
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <sys/syscall.h>
+#include <sys/prctl.h>
 
+#include "debug.h"
 #undef DEBUG
-
 
 #include "framesend.hh"
 
@@ -424,6 +425,7 @@ extern "C"
    
       // set in use variable
       cmnInUseMux.lock();
+
       if (used != 0) {
          *used = true;
       }
@@ -535,7 +537,13 @@ extern "C" {
          sock = -1;
          return;
       }
-   
+      // Name the thread
+      pid_t my_tid;
+      char my_thr_label[16]="dqxmit";
+      my_tid = (pid_t) syscall(SYS_gettid);
+      prctl(PR_SET_NAME,my_thr_label,0, 0, 0);
+      system_log(1, "Broadcast transmit thread - label %s pid=%d\n", my_thr_label, (int) my_tid);
+
      // main loop
       while (1) {
          pthread_testcancel();

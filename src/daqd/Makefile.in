@@ -25,8 +25,6 @@ RELEASEFLAGS=-DNDEBUG -DNPROBE -g -O
 #DEBUGFLAGS=-DNDEBUG -O5 -unroll=16
 DEVFLAGS=@DEVFLAGS@
 
-CDS_EPICS =  -DEPICS_BASE=@EPICS_BASE@ -I@EPICS_BASE@/include -I@EPICS_BASE@/include/os/Linux
-CDS_EPICS_LIBS = -L@EPICS_BASE@/lib/linux-x86_64 -lca -lcas -lasHost -lCom -lgdd -lm -lrecIoc -lsoftDevIoc 
 EPICSFLAGS=@EPICSFLAGS@
 EPICSLIBFLAGS=@EPICSLIBFLAGS@
 
@@ -44,12 +42,11 @@ GDSOBJECTS=@GDSOBJECTS@
 BROADCAST_OBJECTS=framesend.o gdsmutex.o
 BROADCASTOBJECTS=@BROADCASTOBJECTS@
 
-LDAS_DIR=@LDAS_DIR@
-LDASFLAGS=-I$(LDAS_DIR)/include
-LDASLIBFLAGS=-L$(LDAS_DIR)/linux-x86_64/lib -lgeneral -lframecpp -l framecppcmn -lframecpp3 -lframecpp4 -lframecpp6 -lframecpp7 -lframecpp8 -lz -lbz2
+LDASFLAGS=@LDASFLAGS@
+LDASLIBFLAGS=@LDASLIBFLAGS@ -lz -lbz2
 
 VARIOUS_DEFINES=-DSERVER_VERSION=\"2.0\" "-DPRODUCTION_DATE=\"`date`\"" "-DPRODUCTION_MACHINE=\"`uname -a`\"" ${GDSFLAGS} ${LDASFLAGS} ${EPICSFLAGS} ${MYRINET_FLAGS} ${MX_FLAGS}
-INCLUDEFLAGS=-I. -I@srcdir@ -I$(srcdir)/../../../rts/src/include -I$(srcdir)/../include -I/usr/sfw/include
+INCLUDEFLAGS=-I. -I@srcdir@ -I$(srcdir)/../include
 CFLAGS=${VARIOUS_DEFINES} ${DEVFLAGS} -c ${INCLUDEFLAGS} -D_REENTRANT  -DNO_RTL=1
 CCFLAGS=${CFLAGS} @CPPFLAGS@ -g -O
 LEX=flex -+
@@ -173,7 +170,7 @@ exVectorPV.o: exVectorPV.cc
 
 daqd.out: archive.o $(GDSOBJECTS) profiler.o filesys.o producer.o trend.o net_writer.o comm.o daqd.o circ.o $(BROADCASTOBJECTS) edcu.o @EPICS_OBJS@ @MYRINET_OBJS@ @MX_OBJS@ framerecv.o comm-lex.o listener.o
 
-	$(CXX) $(DEBUGFLAGS) -o daqd.out archive.o $(GDSOBJECTS) profiler.o filesys.o producer.o trend.o net_writer.o daqd.o circ.o ./comm.o  $(BROADCASTOBJECTS) edcu.o framerecv.o comm-lex.o listener.o  @EPICS_OBJS@ @MYRINET_OBJS@ @MX_OBJS@ $(EPICSLIBFLAGS) $(SCRAMLIBFLAGS) $(GDSLIBFLAGS) $(EPICSLIBFLAGS) @LDAS_LDFLAGS@ @MYRINET_LDFLAGS@ @MX_LDFLAGS@ -lpthread $(LIBS) @LDFLAGS@
+	$(CXX) $(DEBUGFLAGS) -o daqd.out archive.o $(GDSOBJECTS) profiler.o filesys.o producer.o trend.o net_writer.o daqd.o circ.o ./comm.o  $(BROADCASTOBJECTS) edcu.o framerecv.o comm-lex.o listener.o  @EPICS_OBJS@ @MYRINET_OBJS@ @MX_OBJS@ $(SCRAMLIBFLAGS) $(GDSLIBFLAGS) $(EPICSLIBFLAGS) $(LDASLIBFLAGS) @MYRINET_LDFLAGS@ @MX_LDFLAGS@ -lpthread $(LIBS) @LDFLAGS@
 
 daqcn: daqcn.o daqc_access.o
 	$(CC) $(DEBUGFLAGS) -o daqcn daqcn.o daqc_access.o -lpthread $(LIBS)

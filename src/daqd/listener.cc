@@ -76,11 +76,13 @@ net_listener::listener ()
   const int on = 1;
   int onlen = sizeof (on);
   int srvr_addr_len;
-/* Get Thread ID */
-  pid_t list_tid;
-  list_tid = (pid_t) syscall(SYS_gettid);
+  // Set thread parameters
+  char my_thr_label[16];
   int lport = ntohs (srvr_addr.sin_port);
-  system_log(1, "listener port %d thread pid=%d\n", lport , (int) list_tid);  
+  sprintf(my_thr_label,"dql%.4d",lport);
+  char my_thr_name[80];
+  sprintf (my_thr_name,"listener port %.4d",lport);
+  daqd_c::set_thread_priority(my_thr_name,my_thr_label,0,0); 
 
   if ((listenfd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -135,9 +137,10 @@ net_listener::listener ()
       pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED); /* run the interpreter as the detached thread */
       pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
       int err_no;
+      int pthr_arg = connfd << 16 | dup(connfd);
       if (err_no = pthread_create (&iprt, &attr,
 				       (void *(*)(void *))(strict? strict_interpreter: interpreter),
-				       (void *) (connfd << 16 | dup(connfd)))) {
+				       &pthr_arg)) {
 	system_log(1, "couldn't create interpreter thread; pthread_create() err=%d", err_no);
 	char buf [256];
 	system_log(1, "connection dropped on port %d from %s; fd=%d", srvr_addr.sin_port, net_writer_c::ip_fd_ntoa (connfd, buf), connfd);
@@ -161,17 +164,6 @@ interpreter_no_prompt (void *a)
   my_lexer* lexer;
 
   {
-#if 0
-    ifstream::__filebuf_type* inbuf
-	= new ifstream::__filebuf_type (ai1,
-					"interpreter_no_prompt",
-					ios_base::in);
-    ifstream my_yyin;
-    ifstream::__streambuf_type* oldbuf
-	= ((ofstream::__ios_type* )&my_yyin)->rdbuf (inbuf);
-    delete oldbuf;
-    my_yyin.clear();
-#endif
 
 #if __GNUC__ >= 3
     ofstream my_yyout;
@@ -185,20 +177,7 @@ interpreter_no_prompt (void *a)
         = ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (outbuf);
     //delete oldoutbuf;
 
-#if 0
-    ofstream::__filebuf_type* outbuf
-	= new ofstream::__filebuf_type (ai2,
-					"interpreter_no_prompt",
-					ios_base::out);
-    ofstream::__streambuf_type* oldoutbuf
-	= ((ofstream::__ios_type* )&my_yyout)->rdbuf (outbuf);
-    delete oldoutbuf;
-#endif
-
 #else
-#if 0
-    ofstream my_yyin (ai1);
-#endif
     ofstream my_yyout (ai2);
 #endif
 
@@ -249,18 +228,6 @@ interpreter (void *a)
   my_lexer* lexer;
 
   {
-#if 0
-    ifstream::__filebuf_type* inbuf
-	= new ifstream::__filebuf_type (ai1,
-					"interpreter",
-					ios_base::in);
-    ifstream my_yyin;
-    ifstream::__streambuf_type* oldbuf
-	= ((ifstream::__ios_type* )&my_yyin)->rdbuf
-		((ifstream::__streambuf_type* )inbuf);
-    delete oldbuf;
-    my_yyin.clear();
-#endif
 
 #if  __GNUC__ >= 3
     ofstream my_yyout;
@@ -271,20 +238,7 @@ interpreter (void *a)
         = ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (outbuf);
     //delete oldoutbuf;
     
-#if 0
-    ofstream::__filebuf_type* outbuf
-	= new ofstream::__filebuf_type (ai2,
-					"interpreter",
-					ios_base::in | ios_base::out);
-    ofstream::__streambuf_type* oldoutbuf
-	= ((ofstream::__ios_type* )&my_yyout)->rdbuf
-		((ofstream::__streambuf_type* )outbuf);
-    delete oldoutbuf;
-#endif
 #else
-#if 0
-    ofstream my_yyin (ai1);
-#endif
     ofstream my_yyout (ai2);
 #endif
 
@@ -342,28 +296,6 @@ strict_interpreter (void *a)
   my_lexer* lexer;
 
   {
-#if 0
-    ifstream my_yyin;
-    FILE *cfile = fdopen(ai1,"r"); 
-    std::ifstream::__filebuf_type* outbuf
-        = new std::ifstream::__filebuf_type (cfile, std::ios_base::in);
-    std::ifstream::__streambuf_type* oldoutbuf
-        = ((std::ifstream::__ios_type* )&my_yyin)->rdbuf (outbuf);
-    //delete oldoutbuf;
-
-#if 0
-    ifstream::__filebuf_type* inbuf
-	= new ifstream::__filebuf_type (ai1,
-					"strict_interpreter",
-					ios_base::in);
-    ifstream::__streambuf_type* oldbuf
-	= ((ifstream::__ios_type* )&my_yyin)->rdbuf
-		((ifstream::__streambuf_type* )inbuf);
-    delete oldbuf;
-#endif
-
-    my_yyin.clear();
-#endif
 
 #if __GNUC__ >= 3
     ofstream my_yyout;
@@ -374,36 +306,13 @@ strict_interpreter (void *a)
         = ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (outbuf);
     //delete oldoutbuf;
 
-#if 0
-    ofstream::__filebuf_type* outbuf
-	= new ofstream::__filebuf_type (ai2,
-					"strict_interpreter",
-					ios_base::out);
-    ofstream::__streambuf_type* oldoutbuf
-	= ((ofstream::__ios_type* )&my_yyout)->rdbuf
-		((ofstream::__streambuf_type* )outbuf);
-    delete oldoutbuf;
-#endif
-
 #else
-#if 0
-    ofstream my_yyin (ai1);
-#endif
     ofstream my_yyout (ai2);
 #endif
 
     extern int yyparse (void *);
     
     //  pthread_detach (pthread_self ());
-    
-#if 0
-    // These incantations here don't work
-    // Need to figure out why and how stay portable with C++ compilers
-    
-    my_yyout.width (4);
-    my_yyout.fill ('0');
-    my_yyout.setf (ios::hex, ios::basefield);
-#endif
 
     void *mptr = malloc (sizeof(my_lexer));
     if (!mptr) {

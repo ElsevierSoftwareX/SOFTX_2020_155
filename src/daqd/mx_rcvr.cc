@@ -63,30 +63,24 @@ receiver_mx(int neid)
 	//float *testData;
 	uint32_t match_val=MATCH_VAL_MAIN;
 	mx_request_t req[NUM_RREQ];
-	mx_endpoint_t ep[256];
+	mx_endpoint_t ep[1024];
 
+        // Set thread parameters
+	char my_thr_label[16];
+	snprintf(my_thr_label,16,"dqmx%03x",neid);
+        char my_thr_name[40];
+        snprintf(my_thr_name,40,"mx receiver %03x",neid);
+        daqd_c::set_thread_priority(my_thr_name, my_thr_label, MX_THREAD_PRIORITY,0);
 
-	const struct sched_param param = { 10 };
-   	//seteuid (0);
-   	pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
-   	//seteuid (getuid ());
+	uint32_t board_num = neid >> 8;
+	uint32_t ep_num = neid & 0xff;
 
-	unsigned int board_num = neid >> 8;
-	neid &= 0xff;
-
-        mx_return_t ret = mx_open_endpoint(board_num, neid, FILTER, NULL, 0, &ep[neid]);
+        mx_return_t ret = mx_open_endpoint(board_num, ep_num, FILTER, NULL, 0, &ep[neid]);
         if (ret != MX_SUCCESS) {
-	                fprintf(stderr, "Failed to open endpoint %s\n", mx_strerror(ret));
+	                fprintf(stderr, "Failed to open board %d endpoint%d error %s\n", board_num, ep_num, mx_strerror(ret));
 	                exit(1);
         }
-        printf("MX endpoint %d opened\n", neid);
-	#if 0
-	ret = mx_set_request_timeout(ep[neid], 0, 1);
-        if (ret != MX_SUCCESS) {
-	                fprintf(stderr, "Failed to et request timeout %s\n", mx_strerror(ret));
-			exit(1);
-	}
-	#endif
+        printf("MX endpoint %03x opened\n", neid);
 
 	// Allocate NUM_RREQ MX packet receive buffers
 	int len = sizeof(struct daqMXdata);
@@ -119,26 +113,26 @@ again:
 		mx_return_t ret = mx_wait(ep[neid], &req[cur_req], MX_INFINITE, &stat, &result);
 		myErrorStat = 0;
 		if (ret != MX_SUCCESS) {
-			fprintf(stderr, "mx_cancel() failed with status %s\n", mx_strerror(ret));
+			fprintf(stderr, "mx_cancel() eid=%03x failed with status %s\n", neid, mx_strerror(ret));
 			exit(1); // Not clear what to do in this case; this indicates shortage of memory or resources
 		}
 		if (result == 0) { // Request incomplete
 			goto again; // Restart incomplete request
 		} else { // Request is complete
 			if (stat.code != MX_STATUS_SUCCESS) { // Request completed, but bad code
-				fprintf(stderr, "mx_wait failed in rcvr eid=%d, reqn=%d; wait did not complete; status code is %s\n",
+				fprintf(stderr, "mx_wait failed in rcvr eid=%03x, reqn=%d; wait did not complete; status code is %s\n",
 					neid, count, mx_strstatus(stat.code));
 				//mx_return_t ret = mx_cancel(ep[neid], &req[cur_req], &result);
 				mx_endpoint_addr_t ep_addr;
 				ret = mx_get_endpoint_addr(ep[neid], &ep_addr);
 				if (ret != MX_SUCCESS) {
-					fprintf(stderr, "mx_get_endpoint_addr() failed with status %s\n", mx_strerror(ret));
+					fprintf(stderr, "mx_get_endpoint_addr() eid=%03x failed with status %s\n", neid, mx_strerror(ret));
 				} else {
 					ret = mx_disconnect(ep[neid], ep_addr);
 					if (ret != MX_SUCCESS) {
-						fprintf(stderr, "mx_disconnect() failed with status %s\n", mx_strerror(ret));
+						fprintf(stderr, "mx_disconnect() eid=%03x failed with status %s\n", neid, mx_strerror(ret));
 					} else {
-						fprintf(stderr, "disconnected from the sender on endpoint %d\n", neid);
+						fprintf(stderr, "disconnected from the sender on endpoint %03x\n", neid);
 					}
 				}
 				myErrorStat = 1;
@@ -168,14 +162,6 @@ again:
 		  #endif
 		  int cycle = dataPtr->mxIpcData.cycle;
 		  int len = dataPtr->mxIpcData.dataBlockSize;
-
-#if 0
-		  //if (dcu_id == 9)
-		    printf("data dcuid=%d sec=%d nsec=%d cycle=%d dlen=%d filecrc=0x%x crc=0x%x\n",
-			dcu_id, dataPtr->mxIpcData.bp[cycle].timeSec,
-		 	dataPtr->mxIpcData.bp[cycle].timeNSec, cycle, len,
-			dataPtr->mxIpcData.crc, dataPtr->mxIpcData.bp[cycle].crc);
-#endif
 
 		  char *dataSource = (char *)dataPtr->mxDataBlock;
 		  char *dataDest = (char *)((char *)(directed_receive_buffer[dcu_id]) + buf_size * cycle);
@@ -258,25 +244,6 @@ open_mx(void)
 	/* set up defaults */
 	sysname = NULL;
 	filter = FILTER;
-#if 0
-	my_eid = 1; //DFLT_EID;
-	board_id = MX_ANY_NIC;
-	ret = mx_open_endpoint(board_id, my_eid, FILTER, NULL, 0, &ep[1]);
-	if (ret != MX_SUCCESS) {
-		fprintf(stderr, "Failed to open endpoint %s\n", mx_strerror(ret));
-		exit(1);
-	}
-	printf("MX endpoint opened\n");
-
-        my_eid = 100;
-
-	ret = mx_open_endpoint(board_id, my_eid, FILTER, NULL, 0, &ep[100]);
-	if (ret != MX_SUCCESS) {
-		fprintf(stderr, "Failed to open endpoint %s\n", mx_strerror(ret));
-		exit(1);
-	}
-	printf("100 MX endpoint opened\n");
-#endif
 	ret = mx_get_info(0, MX_MAX_NATIVE_ENDPOINTS, 0, 0, &max_endpoints, sizeof(max_endpoints));
 	if (ret != MX_SUCCESS) {
 		fprintf(stderr, "Failed to do mx_get_info: %s\n", mx_strerror(ret));
@@ -295,8 +262,6 @@ open_mx(void)
 }
 
 void close_mx() {
-	//mx_close_endpoint(ep[0]);
-	//mx_close_endpoint(ep[1]);
 	mx_finalize();
 }
 
