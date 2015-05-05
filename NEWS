@@ -10,6 +10,8 @@ Changes for 2.10
   to run with a single data concentrator, set this to daq2dc = 0 for now.
 - mx_stream modified to provide additional diagnostics when used in a system with 2 DAQ data
   concentrators.
+- Request (691): DAQ builds now detect EPICS, framecpp installs 
+- Request (854): DAQ builds put labels on thread, can set real-time priority, CPU affinity
 ==================================================================================================
 Changes for 2.9.2 release
 ==================================================================================================

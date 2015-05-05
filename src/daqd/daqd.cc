@@ -80,27 +80,6 @@ using namespace std;
 #endif
 #endif
 
-#if 0
-int printf(const char * s,...)
-{
-        int i;
-        va_list ap;
-        time_t t;
-        char buf[32];
-
-        time(&t);
-        ctime_r(&t, buf);
-        buf[strlen(buf)-1]=0;
-        fprintf(stdout, "%s [%d]:", buf, getpid());
-        va_start(ap, s);
-
-        i = vprintf(s, ap);
-        va_end(ap);
-	fflush(stdout);
-        return i;
-}
-#endif
-
 /// Helper function to deal with the archive channels.
 int
 daqd_c::configure_archive_channels(char *archive_name, char *file_name, char *f1) {
@@ -655,19 +634,12 @@ daqd_c::full_frame(int frame_length_seconds, int science,
 void *
 daqd_c::framer (int science)
 {
-/* Get Thread ID */
+// Set thread parameters
   if (science) {
-      pid_t scifr_tid;
-      scifr_tid = (pid_t) syscall(SYS_gettid);
-      system_log(1, "science frame saver thread pid=%d\n", (int) scifr_tid);  
+      daqd_c::set_thread_priority("Science frame saver","dqscifr",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_CPUAFFINITY); 
   } else {
-      pid_t fulfr_tid;
-      fulfr_tid = (pid_t) syscall(SYS_gettid);
-      system_log(1, "full frame saver thread pid=%d\n", (int) fulfr_tid);  
-  }      
-
-  // Put this  thread into the realtime scheduling class with half the priority
-  daqd_c::realtime ("full frame saver", 2);
+      daqd_c::set_thread_priority("Full frame saver","dqfulfr",SAVER_THREAD_PRIORITY,FULL_SAVER_CPUAFFINITY); 
+  }
 
   unsigned long nac = 0; // Number of active channels
   long frame_cntr;
@@ -930,7 +902,14 @@ daqd_c::framer (int science)
           DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
           ofs.Close();
           obuf->close();
-
+#if EPICS_EDCU == 1
+      /* Record frame write time */ 
+          if (science) {
+              pvValue[24] = t;
+          } else {
+              pvValue[23] = t;
+          }
+#endif
 	  if (rename(_tmpf, tmpf)) {
 	    system_log(1, "failed to rename file; errno %d", errno);
             if (science) {
@@ -1660,8 +1639,13 @@ main (int argc, char *argv [])
     }
   }
 
+  int set_nice = nice(-20);
+  if(set_nice != 0){
+        system_log(1, "Unable to set to nice = -20 -error %s\n",strerror(set_nice));
+   } else {
+        system_log(1, "Set daqd to nice = -20\n");
+   }
   // Switch effective to real user ID -- can always switch back to saved effective
-  int error = nice(-20);
   // seteuid (getuid ());
 
 #if defined(GPS_YMDHS_IN_FILENAME)
@@ -1766,7 +1750,8 @@ open_mx();
 	stderr_dup = 2;
 
       int err_no;
-      if (err_no = pthread_create (&startup_iprt, &attr, (void *(*)(void *))interpreter_no_prompt, (void *) (stderr_dup << 16 | stf))) {
+      int pthr_arg = stderr_dup << 16 | stf;
+      if (err_no = pthread_create (&startup_iprt, &attr, (void *(*)(void *))interpreter_no_prompt, &pthr_arg)) {
 	pthread_attr_destroy (&attr);
 	system_log(1, "unable to spawn startup file interpreter: pthread_create() err=%d", err_no);
 	exit (1);

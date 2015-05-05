@@ -40,14 +40,8 @@ extern daqd_c daqd;
 void *
 trender_c::raw_minute_saver ()
 {
-
-/* Get Thread ID */
-  pid_t mtraw_tid;
-  mtraw_tid = (pid_t) syscall(SYS_gettid);
-  system_log(1, "raw minute trend saver thread pid=%d\n", (int) mtraw_tid);  
-
-  // Put this thread into the realtime scheduling class with half the priority
-  daqd_c::realtime ("raw minute trend saver", 2);
+  // Set thread parameters
+  daqd_c::set_thread_priority("Raw minute trend saver","dqmtraw",SAVER_THREAD_PRIORITY,0); 
 
   long minute_put_cntr;
   unsigned int rmp = raw_minute_trend_saving_period;
@@ -171,13 +165,8 @@ trender_c::raw_minute_saver ()
 void *
 trender_c::minute_framer ()
 {
-/* Get Thread ID */
-  pid_t mtrfr_tid;
-  mtrfr_tid = (pid_t) syscall(SYS_gettid);
-  system_log(1, "minute trend frame saver thread pid=%d\n", (int) mtrfr_tid);  
-
-  // Put this thread into the realtime scheduling class with half the priority
-  daqd_c::realtime ("minute trend framer", 2);
+  // Set thread parameters
+  daqd_c::set_thread_priority("Minute trend framer","dqmtrfr",SAVER_THREAD_PRIORITY,MINUTE_SAVER_CPUAFFINITY); 
 
   General::SharedPtr<FrameCPP::Version::FrameH> frame;
   FrameCPP::FrameH::rawData_type rawData (new FrameCPP::FrameH::rawData_type::element_type (""));
@@ -327,12 +316,6 @@ trender_c::minute_framer ()
 		file_prop.cycle = 0;
 	      i += gps_mod/MINPERHOUR;
 	    }
-
-#if 0
-	    // zero out some data that's missing
-	    for (int j = 0; j < num_trend_channels; j++)
-	      memset ( adc_ptr [j], 0, (gps_mod/60) * trend_channels [j].bps );
-#endif
 	  }
 
 	  
@@ -428,16 +411,18 @@ trender_c::minute_framer ()
 	  daqd.set_fault ();
 	}
 	TNF_PROBE_0(minute_trender_c_framer_frame_write_end, "trender_c::framer", "frame write");
+#if EPICS_EDCU == 1
+   /* Record frame write time */ 
+        pvValue[26] = t;
+#endif
       }
 
 
 #if EPICS_EDCU == 1
       /* Epics display: minute trend data look back size in seconds */
-      extern unsigned int pvValue[1000];
       pvValue[11] = minute_fsd.get_max() - minute_fsd.get_min();
 
       /* Epics display: current trend frame directory */
-      extern unsigned int pvValue[1000];
       pvValue[12] = minute_fsd.get_cur_dir();
 #endif
     }
@@ -458,14 +443,8 @@ trender_c::minute_framer ()
 void *
 trender_c::minute_trend ()
 {
-
-/* Get Process ID */
-  pid_t mtrco_tid;
-  mtrco_tid = (pid_t) syscall(SYS_gettid);
-  system_log(1, "minute trend consumer thread pid=%d\n", (int) mtrco_tid);  
-
-  // Put this thread into the realtime scheduling class with half the priority
-  daqd_c::realtime ("minute trender", 2);
+  // Set thread parameters
+  daqd_c::set_thread_priority("Minute trender","dqmtrco",SAVER_THREAD_PRIORITY,0); 
 
   int tblen = mtb -> blocks (); // trend buffer length
   int nc; // number of trend samples accumulated
@@ -614,13 +593,8 @@ trender_c::saver ()
 void *
 trender_c::framer ()
 {
-/* Get Thread ID */
-  pid_t strfr_tid;
-  strfr_tid = (pid_t) syscall(SYS_gettid);
-  system_log(1, "second trend frame saver thread pid=%d\n", (int) strfr_tid);  
-
-  // Put this thread into the realtime scheduling class with half the priority
-  daqd_c::realtime ("trend framer", 2);
+  // Set thread parameters
+  daqd_c::set_thread_priority("Second trend framer","dqstrfr",SAVER_THREAD_PRIORITY,SECOND_SAVER_CPUAFFINITY); 
 
   General::SharedPtr<FrameCPP::Version::FrameH> frame;
   FrameCPP::FrameH::rawData_type rawData (new FrameCPP::FrameH::rawData_type::element_type (""));
@@ -830,21 +804,10 @@ trender_c::framer ()
 	daqd.set_fault ();
       } else {
 	DEBUG(3, cerr << "`" << _tmpf << "' opened" << endl);
-#if 0
-#if defined(DIRECTIO_ON) && defined(DIRECTIO_OFF)
-	if (daqd.do_directio) directio (fd, DIRECTIO_ON);
-#endif
-#endif
 	TNF_PROBE_1(trender_c_framer_frame_write_start, "trender_c::framer",
 		    "frame write",
 		    tnf_long,   frame_number,   frame_cntr);
 
-#if 0
-	if (daqd.cksum_file != "") {
-	  daqd_c::fr_cksum(daqd.cksum_file, tmpf, (unsigned char *)(ost -> str ()), image_size);
-	}
-#endif
-	  
 	  close (fd);
           FrameCPP::Common::FrameBuffer<filebuf>* obuf
             = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
@@ -863,7 +826,6 @@ trender_c::framer ()
           DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
           ofs.Close();
           obuf->close();
-
 	  if (rename(_tmpf, tmpf)) {
 		system_log(1, "framer(): failed to rename file; errno %d", errno);
 		fsd.report_lost_frame ();
@@ -873,16 +835,18 @@ trender_c::framer ()
 	  	// Successful frame write
 	  	fsd.update_dir (file_gps, file_gps_n, frame_length_blocks, dir_num);
 	  }
-	TNF_PROBE_0(trender_c_framer_frame_write_end, "trender_c::framer", "frame write");
+	  TNF_PROBE_0(trender_c_framer_frame_write_end, "trender_c::framer", "frame write");
+#if EPICS_EDCU == 1
+   /* Record frame write time */ 
+          pvValue[25] = t;
+#endif
       }
 
 #if EPICS_EDCU == 1
       /* Epics display: second trend data look back size in seconds */
-      extern unsigned int pvValue[1000];
       pvValue[9] = fsd.get_max() - fsd.get_min();
 
       /* Epics display: current trend frame directory */
-      extern unsigned int pvValue[1000];
       pvValue[10] = fsd.get_cur_dir();
 #endif
     }
@@ -1103,14 +1067,8 @@ trender_c::trend_loop_func(int j, int* status_ptr, char* block_ptr)  {
 void *
 trender_c::trend ()
 {
-/* Get Thread ID */
-  pid_t strco_tid;
-  strco_tid = (pid_t) syscall(SYS_gettid);
-  system_log(1, "second trend consumer thread pid=%d\n", (int) strco_tid);  
-
-  // Put this thread into the realtime scheduling class with half the priority
-  daqd_c::realtime ("trender", 2);
-
+  // Set thread parameters
+  daqd_c::set_thread_priority("Second trend consumer","dqstrco",SAVER_THREAD_PRIORITY,0); 
   int nb;
   circ_buffer *ltb = this -> tb;
   sem_post (&trender_sem);
@@ -1254,10 +1212,8 @@ trender_c::trend ()
 void *
 trender_c::trend_worker ()
 {
-/* Get Thread ID */
-      pid_t strwk_tid;
-      strwk_tid = (pid_t) syscall(SYS_gettid);
-      system_log(1, "second trend worker thread pid=%d\n", (int) strwk_tid);  
+  // Set thread parameters
+  daqd_c::set_thread_priority("Second trend worker","dqstrwk",0,0); 
 
   for (;;)
     {

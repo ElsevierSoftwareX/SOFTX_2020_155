@@ -11,6 +11,8 @@
 #include <string>
 #include "debug.h"
 #include "config.h"
+#include <sys/syscall.h>
+#include <sys/prctl.h>
 
 #include "ldas/ldasconfig.hh"
 #include "framecpp/Common/FrameSpec.hh"
@@ -69,6 +71,24 @@ using namespace std;
 #include "epicsServer.hh"
 /// Epics IOC variable storage
 extern unsigned int pvValue[1000];
+#endif
+
+/// Define real-time thread priorities (mx receiver highest, producer next, frame savers lowest)
+#define MX_THREAD_PRIORITY 10
+#define PROD_THREAD_PRIORITY 5
+#define SAVER_THREAD_PRIORITY 2
+#if defined(USE_BROADCAST)
+#define PROD_CPUAFFINITY 1
+#define FULL_SAVER_CPUAFFINITY -1
+#define SCIENCE_SAVER_CPUAFFINITY -2
+#define SECOND_SAVER_CPUAFFINITY -3
+#define MINUTE_SAVER_CPUAFFINITY -4
+#else
+#define PROD_CPUAFFINITY 0
+#define FULL_SAVER_CPUAFFINITY 0
+#define SCIENCE_SAVER_CPUAFFINITY 0
+#define SECOND_SAVER_CPUAFFINITY 0
+#define MINUTE_SAVER_CPUAFFINITY 0
 #endif
 
 /// Daqd server main class. This is a top-level class, which encloses various objects
@@ -361,86 +381,51 @@ class daqd_c {
 
   int find_channel_group (const char* channel_name);
 
-  /// Put calling thread into the realtime scheduling class, if possible
-  /// Set threads realtime priority to max/`priority_divider'
-  inline static void realtime (char *thread_name, int priority_divider) {
-#if 0
-#ifdef sun
-    seteuid (0); // Try to switch to superuser effective uid
-    if (! geteuid ()) {
-      int ret;
-      pcinfo_t pci;
-      pcparms_t pcp;
-      rtparms_t rtp;
-      
-      strcpy (pci.pc_clname, "RT");
-      ret = priocntl (P_LWPID, _lwp_self(), PC_GETCID, (char *) &pci);
-      if (ret == -1) {
-	system_log(1, "RT class is not configured");
-      } else {
-	DEBUG1(cerr << "RT class id = " << pci.pc_cid << endl);
-	DEBUG1(cerr << "maximum RT priority = " << *((short *) &pci.pc_clinfo [0]) << endl);
-	
-	pcp.pc_cid = pci.pc_cid;
-	rtp.rt_pri = (*((short *) &pci.pc_clinfo [0])) / priority_divider;
-	rtp.rt_tqsecs = 0;// igonored if rt_tqnsecs == RT_TQINF
-	rtp.rt_tqnsecs = RT_TQINF;
-	
-	memcpy ((char *) pcp.pc_clparms, &rtp, sizeof (rtparms_t));
-	ret = priocntl (P_LWPID, _lwp_self(), PC_SETPARMS, (char *) &pcp);
-	if (ret == -1) {
-	  system_log(1, "change to RT class failed; errno=%d", errno);
-	} else if (thread_name) {
-	  system_log(1, "%s is running in RT class", thread_name);
-	}
-      }
-      seteuid (getuid ()); // Go back to real uid
+// (Linux) sets thread name, and optional real-time schedule, cpu_affinity
+inline static void set_thread_priority (char *thread_name, char *thread_abbrev, int rt_priority, int cpu_affinity) {
+   // get thread ID, thread label (limit to 16 characters)
+   pid_t my_tid;
+   char my_thr_label[16];
+   my_tid = (pid_t) syscall(SYS_gettid);
+   strncpy(my_thr_label,thread_abbrev,16);
+   // Name the thread
+   prctl(PR_SET_NAME,my_thr_label,0, 0, 0);
+   system_log(1, "%s thread - label %s pid=%d\n", thread_name, my_thr_label, (int) my_tid);
+   // If priority is non-zero, add to the real-time scheduler at that priority
+   if (rt_priority > 0) {
+       struct sched_param my_sched_param = { rt_priority };
+       int set_stat;   
+       set_stat = pthread_setschedparam(pthread_self(), SCHED_FIFO, &my_sched_param);
+       if(set_stat != 0){
+           system_log(1, "%s thread priority error %s\n",thread_name, strerror(set_stat));
+       } else {
+           system_log(1, "%s thread set to priority %d\n",thread_name, rt_priority);
+       }   
+   }
+   // If cpu affinity is non-zero, set the affinity (if enough CPUs)
+   //  If positive, count from 0, if negative, count from max
+   // count CPUs
+   if (cpu_affinity != 0 ) {
+       int numCPU, cpuId;
+       numCPU = sysconf(_SC_NPROCESSORS_ONLN);
+       if (cpu_affinity < 0) {
+           cpuId = numCPU + cpu_affinity;
+       } else {
+	   cpuId = cpu_affinity;
+       }
+       if( numCPU > 1 && (cpuId > 0  && cpuId < numCPU)){
+           cpu_set_t my_cpu_set;
+           CPU_ZERO(&my_cpu_set);
+           CPU_SET(cpuId,&my_cpu_set);
+           int set_stat;
+	   set_stat = pthread_setaffinity_np(pthread_self(),sizeof(cpu_set_t),&my_cpu_set);
+           if(set_stat != 0){
+              system_log(1, "%s thread setaffinity error %s\n",thread_name, strerror(set_stat));
+           } else {
+	      system_log(1, "%s thread put on CPU %d\n",thread_name, cpuId);
+           }
+       }
     }
-#endif
-#endif //0
-  }
-
-  /// Put calling thread into the timesharing class
-  /// Set time-sharing priority to max/`priority_divider'
-  inline static void time_sharing (char *thread_name, int priority_divider) {
-#if 0
-#ifdef sun
-    seteuid (0); // Try to switch to superuser effective uid
-    if (! geteuid ()) {
-      int ret;
-      pcinfo_t pci;
-      pcparms_t pcp;
-      tsparms_t tsp;
-
-      strcpy (pci.pc_clname, "TS");
-      ret = priocntl (P_LWPID, _lwp_self(), PC_GETCID, (char *) &pci);
-      if (ret == -1) {
-	system_log(1, "TS class is not configured");
-      } else {
-	short max_upri =  *((short *) &pci.pc_clinfo [0]);
-
-	DEBUG1(cerr << "TS class id = " << pci.pc_cid << endl);
-	DEBUG1(cerr << "limit of user priority range = -" << max_upri << " -- +" << max_upri << endl);
-
-	pcp.pc_cid = pci.pc_cid;
-	tsp.ts_uprilim = 2*max_upri / priority_divider;
-	tsp.ts_uprilim -= max_upri;
-	tsp.ts_upri = tsp.ts_uprilim; // Initially set to highest possible value
-
-	DEBUG1(cerr << "setting TS priority ; limit =" << tsp.ts_uprilim << "; initial = " << tsp.ts_upri << endl);
-
-	memcpy ((char *) pcp.pc_clparms, &tsp, sizeof (tsparms_t));
-	ret = priocntl (P_LWPID, _lwp_self(), PC_SETPARMS, (char *) &pcp);
-	if (ret == -1) {
-	  system_log(1, "change to TS class failed; errno=%d", errno);
-	} else if (thread_name) {
-	  system_log(1, "%s is running in TS class", thread_name);
-	}
-      }
-      seteuid (getuid ()); // Go back to real uid
-    }
-#endif
-#endif
   }
 
   char sweptsine_filename [FILENAME_MAX + 1];

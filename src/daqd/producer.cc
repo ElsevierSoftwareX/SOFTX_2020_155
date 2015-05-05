@@ -28,6 +28,7 @@
 #include <fstream>
 #include <algorithm>
 #include <cctype>      // old <ctype.h>
+#include <sys/prctl.h>
 
 #ifdef USE_SYMMETRICOM
 #ifndef USE_IOP
@@ -98,24 +99,7 @@ int controller_cycle = 0;
   /// Pointer to GDS TP tables
   struct cdsDaqNetGdsTpNum *gdsTpNum[2][DCU_COUNT];
 
-#if 0
-#ifdef USE_MX
-void*
-gm_receiver_thread1(void *)
-{
-  void receiver_mx(int);
-  receiver_mx(1);
-}
-#endif
-#endif
-
 #ifdef USE_UDP
-static void
-diep(char *s) {
-  perror(s);
-  exit(1);
-}
-
 struct daqMXdata {
         struct rmIpcStr mxIpcData;
         cdsDaqNetGdsTpNum mxTpTable;
@@ -134,17 +118,6 @@ receiver_udp(int my_dcu_id) {
      struct sockaddr_in si_me, si_other;
      int s, i;
      char buf[buf_size];
-#if 0
-     socklen_t slen = sizeof(si_other);
-    
-     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1) diep("socket");
-    
-     memset((char *) &si_me, 0, sizeof(si_me));
-     si_me.sin_family = AF_INET;
-     si_me.sin_port = htons(PORT);
-     si_me.sin_addr.s_addr = htonl(INADDR_ANY);
-     if (bind(s, (struct sockaddr *)&si_me, sizeof(si_me))==-1) diep("bind");
-#endif
 
      // Open radio receiver on port 7090
      diag::frameRecv* NDS = new diag::frameRecv(0);
@@ -158,10 +131,6 @@ receiver_udp(int my_dcu_id) {
 
      for (i=0;;i++) {
 	int br;
-
-#if 0
-        if ((br = recvfrom(s, buf, buf_size, 0, (struct sockaddr *)&si_other, &slen)) == -1) diep("recvfrom()");
-#endif
 
 	unsigned int seq, gps, gps_n;
 	char *bufptr = buf;
@@ -180,12 +149,6 @@ receiver_udp(int my_dcu_id) {
          	printf("Received packet from th foreign dcu_id %d %s:%d bytes=%d, dcu_id=%d\n\n", dcu_id, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), br, dcu_id);
 		continue;
 	 }
-#if 0
-         printf("Received packet from %s:%d bytes=%d, dcu_id=%d\n\n", 
-			inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), br, dcu_id);
-	
-	continue;
-#endif
 
          int cycle = dataPtr->mxIpcData.cycle;
          int len = dataPtr->mxIpcData.dataBlockSize;
@@ -244,19 +207,6 @@ gm_receiver_thread(void *p)
     if (IS_MYRINET_DCU(j)) {
       std::string s(daqd.fullDcuName[j]);
       std::transform (s.begin(),s.end(), s.begin(), ToLower()); 
- #if 0
-      s = "/rtl_mem_" + s + "_daq";
-      if ((fd = open(s.c_str(), O_RDWR))<0) {
-        system_log(1, "Couldn't open `%s' read/write\n", s.c_str());
-        exit(1);
-      }
-      dcu_addr[j] = (unsigned char *)mmap(0, 64*1024*1024-5000, PROT_READ | PROT_WRITE, MAP_SHARED, fd
-, 0);
-      if (dcu_addr[j] == MAP_FAILED) {
-        system_log(1, "Couldn't mmap `%s'; errno=%d\n", s.c_str(), errno);
-        exit(1);
-      }
-#endif
       s = s + "_daq";
       dcu_addr[j] = (volatile unsigned char *)findSharedMemory((char *)s.c_str());
       if (dcu_addr[j] == 0) {
@@ -272,18 +222,6 @@ gm_receiver_thread(void *p)
   }
 
   // Open the IPC shared memory
-#if 0
-  if ((fd = open("/rtl_mem_ipc", O_RDWR)) < 0) {
-        system_log(1, "Couldn't open /rtl_mem_ipc read/write\n");
-        exit(1);
-  }
-  void *ptr = mmap(0, 64*1024*1024-5000, PROT_READ | PROT_WRITE, MAP_SHARED, fd , 0);
-  if (ptr == MAP_FAILED) {
-     system_log(1, "Couldn't mmap /rtl_mem_ipc; errno=%d\n", errno);
-     exit(1);
-  }
-#endif
-
   volatile void *ptr = findSharedMemory("ipc");
   if (ptr == 0) {
      system_log(1, "Couldn't open shared memory IPC area");
@@ -324,23 +262,15 @@ gm_receiver_thread(void *p)
 void *
 producer::frame_writer ()
 {
-   const struct sched_param param = { 5 };
-   //seteuid (0);
-   pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
-   //seteuid (getuid ());
-
-   daqd_c::realtime("Producer", 1);
-/* Get Thread ID */
-   pid_t prod_tid;
-   prod_tid = (pid_t) syscall(SYS_gettid);
-   system_log(1, "producer thread pid=%d\n", (int) prod_tid);  
-
    unsigned char *read_dest;
    circ_buffer_block_prop_t prop;
 #if defined(USE_SYMMETRICOM) || defined(USE_LOCAL_TIME)
    unsigned long prev_gps, prev_frac;
    unsigned long gps, frac;
 #endif
+
+// Set thread parameters
+   daqd_c::set_thread_priority("Producer","dqprod",PROD_THREAD_PRIORITY,PROD_CPUAFFINITY); 
 
  if (!daqd.no_myrinet) {
 
@@ -400,7 +330,6 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
      pthread_attr_init (&attr);
      pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
      pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-     //  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
      int err_no;
   
      for (int dcu_id = DCU_ID_EDCU; dcu_id < DCU_COUNT; dcu_id++) {
@@ -409,7 +338,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
        if (!IS_MYRINET_DCU(dcu_id)) continue;
 
        if (err_no = pthread_create (&gm_tid, &attr,
-				  gm_receiver_thread, (void *)dcu_id)) {
+				  gm_receiver_thread, &dcu_id)) {
      	  pthread_attr_destroy (&attr);
      	  system_log(1, "pthread_create() err=%d", err_no);
 	  exit(1);
@@ -425,25 +354,8 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
      pthread_attr_init (&attr);
      pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
      pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-     //  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
      int err_no;
   
-  #if 0
-     for (int j = 0; j < DCU_COUNT; j++) {
-       if (daqd.dcuSize[0][j]) {
-           if (!strncasecmp(daqd.dcuName[j], "iop", 3)) {
-     		if (err_no = pthread_create (&gm_tid, &attr,
-				  gm_receiver_thread, (void *)j)) {
-     			pthread_attr_destroy (&attr);
-     			system_log(1, "pthread_create() err=%d", err_no);
-			exit(1);
-     	   	}
-     		system_log(1, "MX receiver dcu=%d thread started", j);
-          }
-       }
-     }
-     #endif
-
      for (int j = 0; j < DCU_COUNT; j++) {
 	class stats s;
      	rcvr_stats.push_back(s);
@@ -451,12 +363,10 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 
    for (int bnum = 0; bnum < nics_available; bnum++) { // Start
      for (int j = 0; j < max_endpoints; j++) {
-       //class stats s;
-       //rcvr_stats.push_back(s);
-       unsigned int bp = j;
-       if (bnum) bp |= 0x100;
+       int bp = j;
+       bp = bp + (bnum*256);
        if (err_no = pthread_create (&gm_tid, &attr,
-                     gm_receiver_thread, (void *)bp)) {
+                     gm_receiver_thread, &bp)) {
                   pthread_attr_destroy (&attr);
                   system_log(1, "pthread_create() err=%d", err_no);
                   exit(1);
@@ -465,28 +375,6 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
    }
      pthread_attr_destroy (&attr);
    }
-#endif
-
-#if 0
-#ifdef USE_MX
-   {
-     pthread_attr_t attr;
-     pthread_attr_init (&attr);
-     pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
-     pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-     //  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
-     int err_no;
-
-     if (err_no = pthread_create (&gm_tid, &attr,
-                                  gm_receiver_thread1, 0)) {
-        pthread_attr_destroy (&attr);
-        system_log(1, "pthread_create() err=%d", err_no);
-        exit(1);
-     }
-     pthread_attr_destroy (&attr);
-     system_log(1, "second MX receiver thread started");
-   }
-#endif
 #endif
 
    sleep(1);
@@ -545,14 +433,6 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 int cycle_delay = daqd.cycle_delay;
    // Wait until a second boundary
    {
-#if 0
-      struct timeb timb;
-      timb.millitm = 1;
-      while (timb.millitm != 0) {
-        ftime(&timb);
-      }
-#endif
-
       if ((daqd.dcu_status_check & 4) == 0) {
 #if defined(USE_SYMMETRICOM) || defined(USE_LOCAL_TIME)
 #ifdef USE_SYMMETRICOM
@@ -595,13 +475,6 @@ int cycle_delay = daqd.cycle_delay;
          	nanosleep (&wait, NULL);
 
  	}
-#if 0
-	// Wait until 2 cycles elapse
-	for (;;) {
-		gps = daqd.symm_gps(&f);
-		if (f >= 1000000000/8) break;
-	}
-#endif
 	prev_gps = gps;
 	prev_frac = c * cycle_delay;
 	frac = c * (cycle_delay+1);
@@ -687,19 +560,6 @@ int cycle_delay = daqd.cycle_delay;
 	        read_src + dcu_cycle*2*DAQ_DCU_BLOCK_SIZE,
 		2*DAQ_DCU_BLOCK_SIZE);
 #endif
-#if 0
-	memcpy((void *)read_dest,
-	       ((char *)directed_receive_buffer[j]) + dcu_cycle*2*DAQ_DCU_BLOCK_SIZE,
-	       read_size);
-	// Copy the rest of the block to testpoints buffer
-        fprintf(stderr, "memcpy(dest=0x%x, src=0x%x, size=0x%x)\n", 
-		(void *)(read_dest + read_size),                ((char *)directed_receive_buffer[j]) + dcu_cycle*2*DAQ_DCU_BLOCK_SIZE + read_size, 2*DAQ_DCU_BLOCK_SIZE - read_size);	
-#endif
-
-#if 0
-	memcpy((void *)(read_dest + read_size),
-	       ((char *)directed_receive_buffer[j]) + dcu_cycle*2*DAQ_DCU_BLOCK_SIZE + read_size, 2*DAQ_DCU_BLOCK_SIZE - read_size);
-#endif
 
       volatile struct rmIpcStr *ipc;
 #if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
@@ -769,12 +629,6 @@ int cycle_delay = daqd.cycle_delay;
       // Update DCU status
       int newStatus = ipc -> status != DAQ_STATE_RUN? 0xbad: 0;
 
-#if 0
-	// out of sync
-	if (dcu_cycle != controller_cycle && ((dcu_cycle + 1) % 16) != controller_cycle) {
-		newStatus = 1;
-	}
-#endif
 #if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
         int newCrc = gmDaqIpc[j].crc;
 #else
@@ -1003,15 +857,6 @@ int cycle_delay = daqd.cycle_delay;
      }
 
 // :TODO: make sure all DCUs configuration matches; restart when the mismatch detected
-
-#if 0
-     for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
-      if (daqd.dcuSize[0][j]) {
-        daqd.dcuStatus[0][j] = 0;
-        daqd.dcuCycle[0][j] = i%16;
-      }
-     }
-#endif
 
      prop.gps = gps;
      prop.gps_n = gps_n;

@@ -66,10 +66,9 @@ main() {
   }
   char *bufptr = buffer;
   unsigned int seq, gps, gps_n;
-/* Get Thread ID */
-  pid_t rcvfr_tid;
-  rcvfr_tid = (pid_t) syscall(SYS_gettid);
-  printf("Opened broadcaster receiver thread pid=%d\n",(int) rcvfr_tid);
+  // Set thread parameters
+  daqd_c::set_thread_priority("Broadcast receiver","dqrecv",0,0); 
+
   while (1) {
     int length = NDS->receive(bufptr, buflen, &seq, &gps, &gps_n);
     printf("len=%d seq=%d gps=%d gps_n=%d data=%d\n", length, seq, gps, gps_n, ntohl(*((unsigned int *)bufptr)));
@@ -226,7 +225,6 @@ namespace diag {
       if (sock >= 0) {
          close();
       }
-   
       // open socket
       sock = socket (PF_INET, SOCK_DGRAM, 0);
       if (sock < 0) {

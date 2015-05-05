@@ -531,9 +531,10 @@ filesys_c::wiper (void *dir_path)
   char *dirname = (char *) dir_path;
   DIR *dirp;
 
+#if defined(sun)
   // Put wiper into the time sharing class with 1/1000th of max priority
   daqd_c::time_sharing ((char *) 0, 1000);
- 
+#endif 
   system_log(3, "wiper thread started on `%s' directory", (char *) dir_path);
   if (! (dirp = opendir (dirname))) {
     system_log(1, "wiper(): couldn't open directory `%s'", dirname);

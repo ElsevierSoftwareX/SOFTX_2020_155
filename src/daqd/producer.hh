@@ -22,19 +22,12 @@ public:
 	dcuStatCycle[i][j] = dcuLastCycle[i][j] == 0;
 	dcuCycleStatus[i][j] = 0;
       }
-#if 0
-    sem_init (&go, 0, 0);
-    sem_init (&done, 0, 0);
-#else
     pthread_mutex_init (&prod_mutex, NULL);
     pthread_cond_init (&prod_cond_go, NULL);
     pthread_cond_init (&prod_cond_done, NULL);
     prod_go = 0;
     prod_done = 0;
-#endif
   };
-  //producer (int a) : pnum (a), pvec_len (0), cycle_input(3), parallel(1) {
-  //};
   void *frame_writer ();
   static void *frame_writer_static (void *a) { return ((producer *)a) -> frame_writer ();};
   void *grabIfoData (int, int, unsigned char *);
@@ -43,16 +36,11 @@ public:
 
   pthread_t tid;
   pthread_t tid1; ///< Parallel producer thread
-#if 0
-  sem_t go;       // Signal for the tid1 to go
-  sem_t done;     // tid1 is signalling back to main producer when done
-#else
   pthread_mutex_t prod_mutex;
   pthread_cond_t prod_cond_go;
   pthread_cond_t prod_cond_done;
   int prod_go;
   int prod_done;
-#endif
 
   int dcuStatus[2][DCU_COUNT];               ///< Internal rep of DCU status 
   unsigned int dcuStatCycle[2][DCU_COUNT];   ///< Cycle count for DCU OK 
@@ -66,14 +54,6 @@ public:
 	os << "Producer: ";
 	stats::print(os);
 	os << endl;
-	#if 0
-	for (vector<class stats>::iterator i = rcvr_stats.begin(); i != rcvr_stats.end(); i++) {
-		if (i->getN()) {
-			os << "DCU " << std::distance(rcvr_stats.begin(), i) << " rcv stats:" << endl;
-			i->print(os);
-		}
-	}
-	#endif
   }
 
   /// Override the clear from class stats

@@ -22,12 +22,11 @@ RELEASEFLAGS=-g -DNDEBUG -DNPROBE
 
 DEVFLAGS=@DEVFLAGS@
 
-LDAS_DIR=@LDAS_DIR@
-LDASFLAGS=-I$(LDAS_DIR)/include
-LDASLIBFLAGS=-L$(LDAS_DIR)/linux-x86_64/lib -lgeneral -lframecpp -l framecppcmn -lframecpp3 -lframecpp4 -lframecpp6 -lframecpp7 -lframecpp8 -lz -lbz2
+LDASFLAGS=@LDASFLAGS@
+LDASLIBFLAGS=@LDASLIBFLAGS@ -lz -lbz2
 
-VARIOUS_DEFINES=-DSERVER_VERSION=\"1.5\" "-DPRODUCTION_DATE=\"`date`\"" "-DPRODUCTION_MACHINE=\"`uname -a`\"" ${EPICSFLAGS} ${SCRAMFLAGS} ${VMICRFMFLAGS} ${GDSFLAGS} ${LDASFLAGS}
-INCLUDEFLAGS=-I. -I@srcdir@ -I@srcdir@/client -I@srcdir@/framelib/src -I@srcdir@/framelib/src/zlib -I@srcdir@/../gds -I/usr/local/include
+VARIOUS_DEFINES=-DSERVER_VERSION=\"1.5\" "-DPRODUCTION_DATE=\"`date`\"" "-DPRODUCTION_MACHINE=\"`uname -a`\"" ${LDASFLAGS}
+INCLUDEFLAGS=-I. -I@srcdir@ -I@srcdir@/client -I@srcdir@/framelib/src -I@srcdir@/framelib/src/zlib -I@srcdir@/../gds
 #CFLAGS=${VARIOUS_DEFINES} ${DEVFLAGS} -c ${INCLUDEFLAGS} -D_POSIX_C_SOURCE=199506L
 CFLAGS=${VARIOUS_DEFINES} ${DEVFLAGS} -c ${INCLUDEFLAGS} -D_REENTRANT
 CCFLAGS=${CFLAGS}
@@ -108,6 +107,6 @@ Interval.o: framedir/Interval.cc
 #---
 
 depend:
-	objdir=`pwd`; cd $(srcdir); /usr/openwin/bin/makedepend -f $$objdir/Makefile  -- -I$$objdir $(CFLAGS) -I/usr/local/lib/g++-include -- $(SRCS)
+	objdir=`pwd`; cd $(srcdir); -f $$objdir/Makefile  -- -I$$objdir $(CFLAGS) -- $(SRCS)
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

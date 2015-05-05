@@ -60,6 +60,10 @@ pvInfo exServer::pvList[] = {
     pvInfo (1, "SCIENCE_FRAME_SIZE", 0xffffffff, 0, excasIoSync, 1, pvValue+20),
     pvInfo (1, "SCIENCE_TOTAL_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+21),
     pvInfo (1, "SCIENCE_CHANS_SAVED", 0xffffffff, 0, excasIoSync, 1, pvValue+22),
+    pvInfo (1, "FRAME_WRITE_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+23),
+    pvInfo (1, "SCIENCE_FRAME_WRITE_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+24),
+    pvInfo (1, "SECOND_FRAME_WRITE_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+25),
+    pvInfo (1, "MINUTE_FRAME_WRITE_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+26)
 };
 
 const unsigned exServer::pvListNElem = NELEMENTS (exServer::pvList);

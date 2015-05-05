@@ -7,14 +7,13 @@
 #include "epicsServer.hh"
 #include "debug.h"
 #include "shutdown.h"
+#include "daqd.hh"
 
 void *
 epicsServer::epics_main ()
 {
-/* Get Thread ID */
-    pid_t epics_tid;
-    epics_tid = (pid_t) syscall(SYS_gettid);
-    system_log(1, "EPICS IOC thread pid=%d", (int) epics_tid);  
+  // Set thread parameters
+    daqd_c::set_thread_priority("EPICS IOC","dqepics",0,0); 
 
     exServer *pCAS;
     try {

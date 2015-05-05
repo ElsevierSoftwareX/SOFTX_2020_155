@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/syscall.h>
 #include "daqd.hh"
 
 extern daqd_c daqd;
@@ -11,10 +10,12 @@ extern daqd_c daqd;
 void *
 profile_c::profiler ()
 {
-/* Get Thread ID */
-  pid_t prof_tid;
-  prof_tid = (pid_t) syscall(SYS_gettid);
-  system_log(1, "%s profiler thread pid=%d", name.c_str(),(int) prof_tid);  
+  // Set thread parameters
+  char my_thr_label[16] = "dqp";
+  strncat(my_thr_label,name.c_str(),5);
+  char my_thr_name[40];
+  snprintf (my_thr_name,40,"%.10s profiler thread",name.c_str());
+  daqd_c::set_thread_priority(my_thr_name,my_thr_label,0,0); 
 
   started = 1;
   period = 0;

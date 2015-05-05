@@ -1,0 +1,12 @@
+#! /bin/sh
+# Use this script to initial DAQ builds
+# Auther: Keith Thorne
+
+## @start 1
+#! /bin/sh
+
+set -x
+aclocal -I config
+libtoolize --force --copy
+automake --foreign --add-missing --copy
+## @end 1

@@ -1,0 +1,15 @@
+New DAQ build scheme
+   May 5, 2015   - Keith Thorne
+ (note that configure.in renamed to configure.ac)
+1) get RCG package
+2) Log onto DAQ computer
+3) cd to RCG package
+4) cd src/gds
+5) make clean, make
+6) cd ../../src/daqd
+7) ./bootstrap
+8) cd ../../src/nds
+9) ./bootstrap
+10) cd to DAQ build area
+11) ${RCG_DIR}/configure
+-- now you can do make for DAQ
