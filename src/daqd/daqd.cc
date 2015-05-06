@@ -1158,8 +1158,8 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
           static unsigned int zero = 0;
           vmic_pv [vmic_pv_len].src_status_addr = &zero;
           vmic_pv [vmic_pv_len].vec_len = tp_size;
-    	  cerr << "Myrinet testpoint " << j << endl;
-    	  cerr << "vmic_pv: " << hex << (unsigned long) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl;
+    	  DEBUG(10, cerr << "Myrinet testpoint " << j << endl);
+    	  DEBUG(10, cerr << "vmic_pv: " << hex << (unsigned long) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
 	  vmic_pv_len++;
 	}
     }
@@ -1745,13 +1745,13 @@ open_mx();
       pthread_attr_init (&attr);
       pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
       pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
-      int stderr_dup = dup (2);
+      /* change to long for 64-bit - KAT 2015-05-06 */
+      long stderr_dup = dup (2);
       if (stderr_dup < 0)
 	stderr_dup = 2;
 
       int err_no;
-      int pthr_arg = stderr_dup << 16 | stf;
-      if (err_no = pthread_create (&startup_iprt, &attr, (void *(*)(void *))interpreter_no_prompt, &pthr_arg)) {
+      if (err_no = pthread_create (&startup_iprt, &attr, (void *(*)(void *))interpreter_no_prompt, (void *) (stderr_dup << 16 | stf))) {
 	pthread_attr_destroy (&attr);
 	system_log(1, "unable to spawn startup file interpreter: pthread_create() err=%d", err_no);
 	exit (1);

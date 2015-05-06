@@ -103,7 +103,7 @@ net_listener::listener ()
       return NULL;
     }
   for (;;) {
-    int	connfd;
+    int connfd;
     struct sockaddr_in raddr;
     socklen_t len = sizeof (raddr);
 
@@ -137,10 +137,10 @@ net_listener::listener ()
       pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED); /* run the interpreter as the detached thread */
       pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
       int err_no;
-      int pthr_arg = connfd << 16 | dup(connfd);
+      long connfd_long = (long) connfd;
       if (err_no = pthread_create (&iprt, &attr,
 				       (void *(*)(void *))(strict? strict_interpreter: interpreter),
-				       &pthr_arg)) {
+				       (void *) (connfd_long << 16 | dup(connfd_long)))) {
 	system_log(1, "couldn't create interpreter thread; pthread_create() err=%d", err_no);
 	char buf [256];
 	system_log(1, "connection dropped on port %d from %s; fd=%d", srvr_addr.sin_port, net_writer_c::ip_fd_ntoa (connfd, buf), connfd);
