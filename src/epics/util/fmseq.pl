@@ -632,7 +632,6 @@ while (<IN>) {
 	} else {
 		$vardb .= "grecord(${ve_type},\"%IFO%:%SYS%-%SUBSYS%${v_name}\")\n";
 	}
-
     } elsif (substr($_,0,6) eq "MATRIX") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $m_name, $m_dims, $m_var ) = split(/\s+/, $_);
@@ -640,6 +639,10 @@ while (<IN>) {
 	($x, $y) = split (/x/, $m_dims);
 #	print "$x $y\n";
 	$xXy = $x * $y;
+	$rect = "ai";
+    	if (substr($_,0,9) eq "MATRIX_RD") {
+		$rect = "ao";
+	}
 
 	$mdecl .= "double matrix${m_name}[$xXy];\n";
 	$mdecl .= "assign matrix${m_name} to { \n";
@@ -653,20 +656,35 @@ while (<IN>) {
 
 	$minit .= "%%    }\n";
 
-	$mupdate .= "%%  {\n";
-	$mupdate .= "%%  unsigned int __lcl_msk = pEpics->${m_var}_mask;\n";
-	$mupdate .= "%%  for (ii = 0; ii < ${x}; ii++)\n";
-	$mupdate .= "%%    for (jj = 0; jj < ${y}; jj++) {\n";
-        $mupdate .= "%%      ij = ii * ${y} + jj;\n";
-	$mupdate .= "%% 	if (__lcl_msk) {\n";
-	$mupdate .= "%%           matrix${m_name}[ij] = pEpics->${m_var}[ii][jj];\n";
-	$mupdate .= "             pvPut(matrix${m_name}[ij]);\n";
-	$mupdate .= "%%		} else {\n";
-	$mupdate .= "             pvGet(matrix${m_name}[ij]);\n";
-	$mupdate .= "%%           rfm_assign(pEpics->${m_var}[ii][jj], matrix${m_name}[ij]);\n";
-	$mupdate .= "%%		} \n";
-	$mupdate .= "%%    }\n";
-	$mupdate .= "%%  }\n";
+    	if (substr($_,0,10) eq "MATRIX_SPM" || substr($_,0,9) eq "MATRIX_RD") {
+		$mupdate .= "%%  {\n";
+		$mupdate .= "%%  for (ii = 0; ii < ${x}; ii++)\n";
+		$mupdate .= "%%    for (jj = 0; jj < ${y}; jj++) {\n";
+		$mupdate .= "%%      ij = ii * ${y} + jj;\n";
+		$mupdate .= "        pvGet(matrix${m_name}[ij]);\n";
+		$mupdate .= "%%      if(matrix${m_name}[ij] != pEpics->${m_var}[ii][jj]) {\n";
+		$mupdate .= "%%        matrix${m_name}[ij] = pEpics->${m_var}[ii][jj];\n";
+		$mupdate .= "          pvPut(matrix${m_name}[ij]);\n";
+		$mupdate .= "%%      }\n";
+		$mupdate .= "%%    }\n";
+		$mupdate .= "%%  }\n";
+	} else {
+
+		$mupdate .= "%%  {\n";
+		$mupdate .= "%%  unsigned int __lcl_msk = pEpics->${m_var}_mask;\n";
+		$mupdate .= "%%  for (ii = 0; ii < ${x}; ii++)\n";
+		$mupdate .= "%%    for (jj = 0; jj < ${y}; jj++) {\n";
+		$mupdate .= "%%      ij = ii * ${y} + jj;\n";
+		$mupdate .= "%% 	if (__lcl_msk) {\n";
+		$mupdate .= "%%           matrix${m_name}[ij] = pEpics->${m_var}[ii][jj];\n";
+		$mupdate .= "             pvPut(matrix${m_name}[ij]);\n";
+		$mupdate .= "%%		} else {\n";
+		$mupdate .= "             pvGet(matrix${m_name}[ij]);\n";
+		$mupdate .= "%%           rfm_assign(pEpics->${m_var}[ii][jj], matrix${m_name}[ij]);\n";
+		$mupdate .= "%%		} \n";
+		$mupdate .= "%%    }\n";
+		$mupdate .= "%%  }\n";
+	}
 
         my $top_name = is_top_name($m_name);
    	my $tv_name;
@@ -701,9 +719,9 @@ while (<IN>) {
 
 		}
         	if ($top_name) {
-			$matdb .= "grecord(ai,\"%IFO%:${tv_name}" . sprintf("%i_%i\")\n", $i, $j);
+			$matdb .= "grecord($rect,\"%IFO%:${tv_name}" . sprintf("%i_%i\")\n", $i, $j);
 		} else {
-			$matdb .= "grecord(ai,\"%IFO%:%SYS%-%SUBSYS%${m_name}" . sprintf("%i_%i\")\n", $i, $j);
+			$matdb .= "grecord($rect,\"%IFO%:%SYS%-%SUBSYS%${m_name}" . sprintf("%i_%i\")\n", $i, $j);
 		}
 		$matdb .= "{\n";
 		$matdb .= "    field(PREC,\"5\")\n";
