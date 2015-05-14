@@ -13,6 +13,10 @@ Changes for 2.10
 - Request (691): DAQ builds now detect EPICS, framecpp installs 
 - Request (854): DAQ builds put labels on thread, can set real-time priority, CPU affinity
 ==================================================================================================
+Changes for 2.9.3 release
+==================================================================================================
+- Bug Fix (850): Fix to RampMuxMatrix part of bug report.:
+==================================================================================================
 Changes for 2.9.2 release
 ==================================================================================================
 - Bug Fix: IPC errors when using RFM DMA mode.  Modified controller.c to verify that RFM DMA
