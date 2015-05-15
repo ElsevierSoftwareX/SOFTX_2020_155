@@ -422,7 +422,7 @@ char bitDefLong[16][8] = {"IN,","OF,","F1,","F2,",
 /// @param[in] fcount	Number of filters in the control model.
 /// @param[in] monitorAll	Global monitoring flag.
 /// @return	Number of errant switch settings found.
-int checkFilterSwitches(int fcount, int monitorAll)
+int checkFilterSwitches(int fcount, SET_ERR_TABLE setErrTable[], int monitorAll, int displayall, int wcflag, char *wcstr, int *diffcntr)
 {
 unsigned int refVal;
 unsigned int presentVal;
@@ -447,6 +447,7 @@ dbAddr paddr1;
 dbAddr paddr2;
 long nvals = 1;
 long status;
+char *ret;
 	for(ii=0;ii<fcount;ii++)
 	{
 		bzero(swname[0],strlen(swname[0]));
@@ -484,7 +485,9 @@ long status;
 		status = dbNameToAddr(swname[2],&paddr2);
 		status = dbPutField(&paddr2,DBR_STRING,swstrE,1);
 		setErrTable[errCnt].filtNum = -1;
-		if(refVal != filterTable[ii].swreq && errCnt < SDF_ERR_TSIZE && (filterTable[ii].mask || monitorAll) && filterTable[ii].init)
+		if((refVal != filterTable[ii].swreq && errCnt < SDF_ERR_TSIZE && (filterTable[ii].mask || monitorAll) && filterTable[ii].init) )
+			*diffcntr += 1;
+		if((refVal != filterTable[ii].swreq && errCnt < SDF_ERR_TSIZE && (filterTable[ii].mask || monitorAll) && filterTable[ii].init) || displayall)
 		{
 			filtStrBitConvert(1,refVal,swstrE);
 			filtStrBitConvert(1,filterTable[ii].swreq,swstrB);
@@ -493,6 +496,7 @@ long status;
 			bzero(tmpname,sizeof(tmpname));
 			strncpy(tmpname,filterTable[ii].fname,(strlen(filterTable[ii].fname)-1));
 
+			if(!wcflag || (wcflag && (ret = strstr(tmpname,wcstr) != NULL))) {
 			sprintf(setErrTable[errCnt].chname,"%s", tmpname);
 			sprintf(setErrTable[errCnt].burtset, "%s", swstrB);
 			sprintf(setErrTable[errCnt].liveset, "%s", swstrE);
@@ -509,6 +513,7 @@ long status;
 			localtimestring[strlen(localtimestring) - 1] = 0;
 			sprintf(setErrTable[errCnt].timeset, "%s", localtimestring);
 			errCnt ++;
+			}
 		}
 	}
 	return(errCnt);
@@ -845,11 +850,12 @@ void resetASG(char *name, int lock) {
 /// Routine used to create local tables for reporting uninitialize and not monitored channels on request.
 int createSortTableEntries(int numEntries,int wcval,char *wcstring)
 {
-int jj;
+int ii,jj;
 int notMon = 0;
 int ret = 0;
 int lna = 0;
 int lnb = 0;
+char tmpname[64];
 
 	chNotInit = 0;
 	chNotMon = 0;
@@ -857,14 +863,35 @@ int lnb = 0;
 
 	// Fill uninit and unmon tables.
 //	printf("sort table = %d string %s\n",wcval,wcstring);
+	for(ii=0;ii<fmNum;ii++) {
+		if(!filterTable[ii].init) chNotInit += 1;
+		if(filterTable[ii].init && !filterTable[ii].mask) chNotMon += 1;
+		if(wcval  && (ret = strstr(cdTable[jj].chname,wcstring) == NULL)) {
+			continue;
+		}
+		bzero(tmpname,sizeof(tmpname));
+		strncpy(tmpname,filterTable[ii].fname,(strlen(filterTable[ii].fname)-1));
+		if(!filterTable[ii].init) {
+			sprintf(uninitChans[lna].chname,"%s",tmpname);
+			uninitChans[lna].filtNum = ii;
+			lna ++;
+		}
+		if(!filterTable[ii].mask) {
+			sprintf(unMonChans[lnb].chname,"%s",tmpname);
+			unMonChans[lnb].filtNum = ii;
+			unMonChans[lnb].sigNum = filterTable[ii].sw[0] + (filterTable[ii].sw[1] * SDF_MAX_TSIZE);
+			lnb ++;
+		}
+	}
 	for(jj=0;jj<numEntries;jj++)
 	{
+		if(cdTable[jj].filterswitch) continue;
 		if(!cdTable[jj].initialized) chNotInit += 1;
 		if(cdTable[jj].initialized && !cdTable[jj].mask) chNotMon += 1;
 		if(wcval  && (ret = strstr(cdTable[jj].chname,wcstring) == NULL)) {
 			continue;
 		}
-		if(!cdTable[jj].initialized) {
+		if(!cdTable[jj].initialized && !cdTable[jj].filterswitch) {
 			// printf("Chan %s not init %d %d %d\n",cdTable[jj].chname,cdTable[jj].initialized,jj,numEntries);
 			if(lna < SDF_ERR_TSIZE) {
 				sprintf(uninitChans[lna].chname,"%s",cdTable[jj].chname);
@@ -872,18 +899,13 @@ int lnb = 0;
 			}
 		}
 
-		if(cdTable[jj].initialized && !cdTable[jj].mask) {
+		if(cdTable[jj].initialized && !cdTable[jj].mask && !cdTable[jj].filterswitch) {
 			if(lnb < SDF_ERR_TSIZE) {
 				sprintf(unMonChans[lnb].chname,"%s",cdTable[jj].chname);
 				if(cdTable[jj].datatype == SDF_NUM)
 				{
-					if(cdTable[jj].filterswitch) {
-						sprintf(unMonChans[lnb].burtset,"0x%x",(unsigned int)cdTable[jj].data.chval);
-						unMonChans[lnb].filtNum = cdTable[jj].filterNum;
-					} else {
-						sprintf(unMonChans[lnb].burtset,"%.10lf",cdTable[jj].data.chval);
-						unMonChans[lnb].filtNum = -1;
-					}
+					sprintf(unMonChans[lnb].burtset,"%.10lf",cdTable[jj].data.chval);
+					unMonChans[lnb].filtNum = -1;
 				} else {
 					sprintf(unMonChans[lnb].burtset,"%s",cdTable[jj].data.strval);
 				}
@@ -1067,18 +1089,18 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 	char swName[64];
 	double sdfdiff = 0.0;
 	char *ret;
+	int filtDiffs;
 
 	// Check filter switch settings first
-	     if(!listAll)
-		     errCntr = checkFilterSwitches(fmNum,monitorAll);
-		*totalDiffs = errCntr;
+	     errCntr = checkFilterSwitches(fmNum,setErrTable,monitorAll,listAll,wcVal,wcstring,&filtDiffs);
+	     *totalDiffs = filtDiffs;
 	     if(chNum) {
 		for(ii=0;ii<chNum;ii++) {
 			if((errCntr < SDF_ERR_TSIZE) && 		// Within table max size
 			  ((cdTable[ii].mask != 0) || (monitorAll)) && 	// Channel is to be monitored
 			   cdTable[ii].initialized && 			// Channel was set in BURT
 			   cdTable[ii].filterswitch == 0 ||		// Not a filter switch channel
-			   listAll)
+			   (listAll && cdTable[ii].filterswitch == 0))
 			{
 				localErr = 0;
 				// Find address of channel
@@ -1964,7 +1986,8 @@ sleep(5);
 					setChans = chNumP - alarmCnt;
 					status = dbPutField(&filesetcntaddr,DBR_LONG,&setChans,1);
 					// Report number of settings in the main table.
-					status = dbPutField(&fulldbcntaddr,DBR_LONG,&chNum,1);
+					setChans = chNum - fmNum;
+					status = dbPutField(&fulldbcntaddr,DBR_LONG,&setChans,1);
 					// Sort channels for data reporting via the MEDM table.
 					noMon = createSortTableEntries(chNum,0,"");
 					// Calculate and report number of channels NOT being monitored.
@@ -2219,10 +2242,15 @@ sleep(5);
 				logFileEntry("Detected Change to Filter Coeff file.");
 			}
 			status = checkFileCrc(sdffileloaded);
+			if(status == -1) {
+				sdfFileCrc = status;
+				logFileEntry("SDF file not found.");
+				dbPutField(&reloadtimeaddr,DBR_STRING,"File Not Found",1);
+			} 
 			if(status != sdfFileCrc) {
 				sdfFileCrc = status;
 				logFileEntry("Detected Change to SDF file.");
-				status = dbPutField(&reloadtimeaddr,DBR_STRING,modfilemsg,1);
+				dbPutField(&reloadtimeaddr,DBR_STRING,modfilemsg,1);
 			}
 		}
 	}
