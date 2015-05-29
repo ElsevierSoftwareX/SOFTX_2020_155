@@ -64,7 +64,7 @@ dnl   Check if framecpp is installed
 dnl======================================================================
 have_framecpp=
 PKG_CHECK_MODULES(FRAMECPP, framecpp, have_framecpp="yes", have_framecpp="no")
-if test "${have_framecpp}" = "yes"; then
+if test "$have_framecpp" = "yes"; then
   LDASLIBS="$FRAMECPP_LIBS"
   LDASLIBFLAGS="$LDASLIBS"
   for specvsn in 8 7 6 4 3 cmn; do
@@ -72,10 +72,32 @@ if test "${have_framecpp}" = "yes"; then
   done
   LDASLIBFLAGS="$LDASLIBFLAGS -lgeneral"
   LDASFLAGS="$FRAMECPP_CFLAGS"
-fi
-if test "${have_framecpp}" = "no"; then
-  LDASFLAGS=
-  LDASLIBFLAGS=
+else
+  LDAS_DEF="/opt/rtapps/framecpp"
+  AC_CHECK_FILE(${LDAS_DEF}/linux-x86_64/lib/libframecpp.so,
+  [found_framecpp="yes"],
+  [found_framecpp="no"])
+  if test "$found_framecpp" = "yes"; then
+    LDASLIBS="-L$LDAS_DEF/linux-x86_64/lib -lframecpp"
+  else
+      AC_CHECK_FILE(${LDAS_DEF}/lib/libframecpp.so,
+      [ found_framecpp="yes"],
+      [ found_framecpp="no", AC_MSG_ERROR([No framecpp in default location])])
+      if test "$found_framecpp" = "yes"; then
+         LDASLIBS="-L$LDAS_DEF/lib -lframecpp"
+      fi
+  fi
+  if test "$found_framecpp" = "yes"; then
+      LDASLIBFLAGS="$LDASLIBS"
+      for specvsn in 8 7 6 4 3 cmn; do
+         LDASLIBFLAGS="$LDASLIBFLAGS -lframecpp$specvsn"
+      done
+      LDASLIBFLAGS="$LDASLIBFLAGS -lgeneral"
+      LDASFLAGS="-I$LDAS_DEF/include"
+  else
+      LDASLIBFLAGS=
+      LDASFLAGS=
+  fi
 fi
 
 dnl=====================================================================
@@ -88,21 +110,21 @@ AC_ARG_WITH(framecpp,
   else
      LDAS_DIR="/opt/rtapps/framecpp"
   fi
-  AC_CHECK_FILE($LDASDIR/lib/linux-x86/libframecpp.so,
-  [ found_framecpp="yes", LDASLIBS="$LDAS_DIR/lib/linux-x86_64"],
+  AC_CHECK_FILE($LDAS_DIR/linux-x86_64/lib/libframecpp.so,
+  [ found_framecpp="yes", LDASLIBS="-L$LDAS_DIR/linux-x86_64/lib -lframecpp"],
   [ found_framecpp="no"])
-  if test "x$found_framecpp" != "xyes"; then
-      AC_CHECK_FILE($LDASDIR/lib/libframecpp.so,
-      [ found_framecpp="yes", LDASLIBS="$LDAS_DIR/lib"],
+  if test "$found_framecpp" = "yes"; then
+      AC_CHECK_FILE($LDAS_DIR/lib/libframecpp.so,
+      [ found_framecpp="yes", LDASLIBS="-L$LDAS_DIR/lib -lframecpp"],
       [ found_framecpp="no", AC_MSG_ERROR([Could not find custom framecpp])])
   fi
-  if test "x$found_framecpp" = "xyes"; then
-      LDASLIBFLAGS="-L$LDASLIBS -lframecpp"
+  if test "$found_framecpp" = "yes"; then
+      LDASLIBFLAGS="$LDASLIBS"
       for specvsn in 8 7 6 4 3 cmn; do
          LDASLIBFLAGS="$LDASLIBFLAGS -lframecpp$specvsn"
       done
       LDASLIBFLAGS="$LDASLIBFLAGS -lgeneral"
-      LDASFLAGS="-I$LDASDIR/include"
+      LDASFLAGS="-I$LDAS_DIR/include"
   else
       LDASLIBFLAGS=
       LDASFLAGS=
@@ -163,11 +185,11 @@ if test "${pkg_epics}" = "yes"; then
     EPICSFLAGS="$EPICSBASE_CFLAGS"
     have_epics="yes"
 else
-    EPICS_BASE="/opt/rtapps/epics/base"
-    AC_CHECK_FILE(${EPICSDEF}/lib/${host_arch}/libca.a, have_epics="yes", have_epics="no")
+    EPICS_DEF="/opt/rtapps/epics/base"
+    AC_CHECK_FILE(${EPICS_DEF}/lib/${host_arch}/libca.a, have_epics="yes", have_epics="no")
     if test "${have_epics}" = "yes" ; then
-       EPICSLIBS="-L$EPICS_BASE/lib/$host_arch"
-       EPICSFLAGS="-I$EPICS_BASE/include -I$EPICS_BASE/include/os/$osarch"
+       EPICSLIBS="-L$EPICS_DEF/lib/$host_arch"
+       EPICSFLAGS="-I$EPICS_DEF/include -I$EPICS_DEF/include/os/$osarch"
     else
       AC_MSG_ERROR([No EPICS Base in default location])
     fi
@@ -184,12 +206,12 @@ AC_ARG_WITH(epics,
     EPICS_OBJS=\$\{EPICS_OBJS\}
     EPICS_SRCS=\$\{EPICS_SRCS\}
     if test x$withval != xyes; then
-      EPICS_BASE=$withval
-      AC_CHECK_FILE(${EPICS_BASE}/lib/${host_arch}/libca.a, found_epics="yes", found_epics="no")
+      EPICS_TRY=$withval
+      AC_CHECK_FILE(${EPICS_TRY}/lib/${host_arch}/libca.a, found_epics="yes", found_epics="no")
       if test $found_epics = "yes"; then
         have_epics = "yes"
-        EPICSLIBS="L$EPICSTRY/lib/$host_arch"
-        EPICSFLAGS="-I$EPICSTRY/include -I$EPICSTRY/include/os/$osarch"
+        EPICSLIBS="L$EPICS_TRY/lib/$host_arch"
+        EPICSFLAGS="-I$EPICS_TRY/include -I$EPICS_TRY/include/os/$osarch"
       else
         AC_MSG_ERROR([could not find EPICS base libraries])
       fi

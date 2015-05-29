@@ -70,7 +70,7 @@ dnl   Check if framecpp is installed
 dnl======================================================================
 have_framecpp=
 PKG_CHECK_MODULES(FRAMECPP, framecpp, have_framecpp="yes", have_framecpp="no")
-if test "${have_framecpp}" = "yes"; then
+if test "$have_framecpp" = "yes"; then
   LDASLIBS="$FRAMECPP_LIBS"
   LDASLIBFLAGS="$LDASLIBS"
   for specvsn in 8 7 6 4 3 cmn; do
@@ -78,14 +78,34 @@ if test "${have_framecpp}" = "yes"; then
   done
   LDASLIBFLAGS="$LDASLIBFLAGS -lgeneral"
   LDASFLAGS="$FRAMECPP_CFLAGS"
-fi
-if test "${have_framecpp}" = "no"; then
-  LDASFLAGS=
-  LDASLIBFLAGS=
+else
+  LDAS_DEF="/opt/rtapps/framecpp"
+  AC_CHECK_FILE(${LDAS_DEF}/linux-x86_64/lib/libframecpp.so,
+  [found_framecpp="yes"],
+  [found_framecpp="no"])
+  if test "$found_framecpp" = "yes"; then
+    LDASLIBS="-L$LDAS_DEF/linux-x86_64/lib -lframecpp"
+  else
+      AC_CHECK_FILE(${LDAS_DEF}/lib/libframecpp.so,
+      [ found_framecpp="yes"],
+      [ found_framecpp="no", AC_MSG_ERROR([No framecpp in default location])])
+      if test "$found_framecpp" = "yes"; then
+         LDASLIBS="-L$LDAS_DEF/lib -lframecpp"
+      fi
+  fi
+  if test "$found_framecpp" = "yes"; then
+      LDASLIBFLAGS="$LDASLIBS"
+      for specvsn in 8 7 6 4 3 cmn; do
+         LDASLIBFLAGS="$LDASLIBFLAGS -lframecpp$specvsn"
+      done
+      LDASLIBFLAGS="$LDASLIBFLAGS -lgeneral"
+      LDASFLAGS="-I$LDAS_DEF/include"
+  else
+      LDASLIBFLAGS=
+      LDASFLAGS=
+  fi
 fi
 
-dnl Check for configuration options
-dnl ==========================
 dnl=====================================================================
 dnl Change location of the FrameCPP
 dnl=====================================================================
@@ -96,21 +116,21 @@ AC_ARG_WITH(framecpp,
   else
      LDAS_DIR="/opt/rtapps/framecpp"
   fi
-  AC_CHECK_FILE($LDASDIR/lib/linux-x86/libframecpp.so,
-  [ found_framecpp="yes", LDASLIBS="$LDAS_DIR/lib/linux-x86_64"],
+  AC_CHECK_FILE($LDAS_DIR/linux-x86_64/lib/libframecpp.so,
+  [ found_framecpp="yes", LDASLIBS="-L$LDAS_DIR/linux-x86_64/lib -lframecpp"],
   [ found_framecpp="no"])
-  if test "x$found_framecpp" != "xyes"; then
-      AC_CHECK_FILE($LDASDIR/lib/libframecpp.so,
-      [ found_framecpp="yes", LDASLIBS="$LDAS_DIR/lib"],
+  if test "$found_framecpp" = "yes"; then
+      AC_CHECK_FILE($LDAS_DIR/lib/libframecpp.so,
+      [ found_framecpp="yes", LDASLIBS="-L$LDAS_DIR/lib -lframecpp"],
       [ found_framecpp="no", AC_MSG_ERROR([Could not find custom framecpp])])
   fi
-  if test "x$found_framecpp" = "xyes"; then
-      LDASLIBFLAGS="-L$LDASLIBS -lframecpp"
+  if test "$found_framecpp" = "yes"; then
+      LDASLIBFLAGS="$LDASLIBS"
       for specvsn in 8 7 6 4 3 cmn; do
          LDASLIBFLAGS="$LDASLIBFLAGS -lframecpp$specvsn"
       done
       LDASLIBFLAGS="$LDASLIBFLAGS -lgeneral"
-      LDASFLAGS="-I$LDASDIR/include"
+      LDASFLAGS="-I$LDAS_DIR/include"
   else
       LDASLIBFLAGS=
       LDASFLAGS=
