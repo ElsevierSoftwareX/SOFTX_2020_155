@@ -1462,6 +1462,8 @@ sub process {
 		  $science = $f;
 		} elsif ($f eq "uint32") {
 		  $type = "uint32";
+		} elsif ($f eq "double") {
+		  $type = "double";
 		} elsif ($f eq "int32") {
 		  $type = "int32";
 	        } elsif ($f =~ /^\d+$/) { # An integer

@@ -56,6 +56,7 @@ int daqWrite(int flag,
 {
 int ii,jj,kk;			/* Loop counters.			*/
 int status;			/* Return value from called routines.	*/
+unsigned int mydatatype;
 double dWord;			/* Temp value for storage of DAQ values */
 static int daqBlockNum;		/* 1-16, tracks DAQ block to write to.	*/
 static int excBlockNum;		/* 1-16, tracks EXC block to read from.	*/
@@ -377,23 +378,27 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
       /// \> Write fast data into the swing buffer.
       if ((daqSlot % localTable[ii].decFactor) == 0) {
-      	if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_16BIT_INT) {
-	  // Write short data; (XOR 1) here provides sample swapping
-	  ((short *)(pWriteBuffer + localTable[ii].offset))[(daqSlot/localTable[ii].decFactor)^1] = (short)dWord;
-
-        } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_INT) {
-	  // Write a 32-bit int (downcast from the double passed)
-	  ((int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (int)dWord;
-        } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_UINT) {
-	  if (localTable[ii].decFactor == 1)
-	    ((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot] = ((unsigned int)dWord);
-	  else 
-	    ((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor]
-		= ((unsigned int)dWord) & *((unsigned int *)(dHistory[ii]));
-	} else {
-	  // Write a 32-bit float (downcast from the double passed)
-	  ((float *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (float)dWord;
-      	}
+      	      mydatatype = dataInfo.tp[ii].dataType;
+	      switch(mydatatype) {
+		case DAQ_DATATYPE_16BIT_INT:
+			// Write short data; (XOR 1) here provides sample swapping
+			((short *)(pWriteBuffer + localTable[ii].offset))[(daqSlot/localTable[ii].decFactor)^1] = (short)dWord;
+			break;
+		case DAQ_DATATYPE_DOUBLE:
+			((double *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = dWord;
+			break;
+		case DAQ_DATATYPE_32BIT_INT:
+			// Write a 32-bit int (downcast from the double passed)
+			((int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (int)dWord;
+			break;
+		case DAQ_DATATYPE_32BIT_UINT:
+			((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot] = ((unsigned int)dWord);
+			break;
+		default:
+			// Write a 32-bit float (downcast from the double passed)
+			((float *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (float)dWord;
+			break;
+	      }
       } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_UINT) {
         if ((daqSlot % localTable[ii].decFactor) == 1)
 	  *((unsigned int *)(dHistory[ii])) = (unsigned int)dWord;
@@ -830,6 +835,7 @@ int ii,jj;      		// Loop counters
 int epicsIntXferSize = 0;	// Size, in bytes, of EPICS integer type data.
 int dataLength = 0;		// Total size, in bytes, of data to be sent
 int status = 0;
+int mydatatype;
 
 /// \> Verify correct channel count before proceeding. \n
 /// - ---- Required to be at least one and not more than DCU_MAX_CHANNELS.
@@ -914,10 +920,8 @@ int status = 0;
       dataInfo->tp[ii].tpnum = pInfo->tp[ii].tpnum;
       dataInfo->tp[ii].dataType = pInfo->tp[ii].dataType;
       dataInfo->tp[ii].dataRate = pInfo->tp[ii].dataRate;
-      if(dataInfo->tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
-        dataLength += 2 * dataInfo->tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS;
-      else
-        dataLength += 4 * dataInfo->tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS;
+      mydatatype = dataInfo->tp[ii].dataType;
+      dataLength += DAQ_DATA_TYPE_SIZE(mydatatype) * dataInfo->tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS;
     }
     /// \> Set DAQ bytes/sec global, which is output to EPICS by controller.c
     curDaqBlockSize = dataLength * DAQ_NUM_DATA_BLOCKS_PER_SECOND;
@@ -945,6 +949,7 @@ int loadLocalTable(DAQ_XFER_INFO *pDxi,
 		  )
 {
 int ii,jj;
+int mydatatype;
 
 
     /// \> Get the .INI file crc checksum to pass to DAQ Framebuilders for config checking */
@@ -988,10 +993,8 @@ for(ii=0;ii<dataInfo->numChans;ii++)
       }
 
       /// - ---- Calc offset into swing buffer for writing data
-      if(dataInfo->tp[ii].dataType == DAQ_DATATYPE_16BIT_INT)
-        pDxi->offsetAccum += (sysRate/localTable[ii].decFactor * 2);
-      else
-        pDxi->offsetAccum += (sysRate/localTable[ii].decFactor * 4);
+      mydatatype = dataInfo->tp[ii].dataType;
+      pDxi->offsetAccum += (sysRate/localTable[ii].decFactor * DAQ_DATA_TYPE_SIZE(mydatatype));
 
       localTable[ii+1].offset = pDxi->offsetAccum;
       /// - ----  Need to determine if data is from a filter module TP or non-FM TP and tag accordingly
