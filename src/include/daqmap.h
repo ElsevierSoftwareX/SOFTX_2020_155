@@ -47,6 +47,7 @@ typedef struct DAQ_LKUP_TABLE {
 	int sigNum;     ///< Which signal within a filter.               
 	int decFactor;  ///< Decimation factor to use.                
 	int offset;     ///< Offset to beginning of next channel in local buff.
+	int decn;	///< FIR filter decimation .
 }DAQ_LKUP_TABLE;
 
 /// Structure for maintaining TP channel number ranges which are valid for this front end. These typically come from gdsLib.h.
@@ -165,7 +166,9 @@ struct rmIpcStr {
 #define DAQ_DATATYPE_COMPLEX    6       ///< Complex data; two 32bit floats
 #define DAQ_DATATYPE_32BIT_UINT  7       ///< Data type unsigned signed 32bit integer 
 
-#define DAQ_DATA_TYPE_SIZE(a) (((a)==DAQ_DATATYPE_16BIT_INT)? 2: 4)
+static const int daqSizeByType[8] = {0,2,4,8,4,8,16,4};
+#define DAQ_DATA_TYPE_SIZE(a) (daqSizeByType[(a)])
+
 
 /*
  * Compatibility definitions
@@ -348,3 +351,6 @@ typedef struct cdsDaqNetGdsTpNum {
 #define GDS_16K_TP_MIN	10001
 
 #endif
+
+#define MAX_DEC                 128
+#define DEC_FILT_LENGTH         21

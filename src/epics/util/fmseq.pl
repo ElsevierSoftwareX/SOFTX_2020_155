@@ -797,6 +797,8 @@ while (<IN>) {
         $science = 1;
       } elsif ($f eq "int32") {
         $type = "int32";
+      } elsif ($f eq "double") {
+        $type = "double";
       } elsif ($f =~ /^\d+$/) { # An integer
         $rate = $f;
       } else {
@@ -1254,6 +1256,9 @@ foreach (sort @section_names) {
 	    }
 	    if ($DAQ_Channels_type{$_} eq "int32") {
 		${$sections{$_}}{"datatype"} = 2;
+	    }
+	    if ($DAQ_Channels_type{$_} eq "double") {
+		${$sections{$_}}{"datatype"} = 5;
 	    }
 	    if ($DAQ_Channels_egu{$_} ne "") {
 		${$sections{$_}}{"units"} = $DAQ_Channels_egu{$_};
