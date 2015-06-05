@@ -192,10 +192,6 @@ listener (void * a)
   int srvr_addr_len;
   daq_t *daq = (daq_t *) a;
 
-  // Set thread parameters
-  daqd_c::set_thread_priority("Daqc listener","dqlist",0,0); 
-  
-/* -- */
   if ((listenfd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
 #ifdef DAQC_ACCESS_VERBOSE_ERRORS
