@@ -121,6 +121,25 @@ fi
 
 sleep 5
 (cd /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics && ./startup${ifo})
+sleep 5
+/opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
+# wait until real-time is active 
+gpsbad=true
+numsec=0
+while [ \$gpsbad = true ] && ((\$numsec < 80))
+do
+  sleep 1
+  numsec=\$((\$numsec+1))
+  if [ -e /proc/${system}/status ]; then
+    GPS=\`cat /proc/${system}/status | grep gps\`
+    if (( "\$GPS" > 0 )); then
+      echo '${system} RT ready in '\$numsec
+      gpsbad=false 
+    fi
+  fi
+done
+#
+sudo killall -q daqd
 touch /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
 chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
 
@@ -204,7 +223,7 @@ if test -e /opt/rtcds/$site/${lower_ifo}/medm/${system}; then
 	/bin/cp -a /opt/rtcds/$site/${lower_ifo}/medm/${system} /opt/rtcds/$site/${lower_ifo}/medm/archive/${system}_${cur_date} || exit 1
 fi
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/medm/${system}
-(cd build/${system}epics/medm; ls *.adl | xargs cp -r -t /opt/rtcds/$site/${lower_ifo}/medm/${system};)
+(cd build/${system}epics/medm; find . -name "*.adl" | xargs cp --parents -r -t /opt/rtcds/$site/${lower_ifo}/medm/${system};)
 
 #echo Installing Epics OPI screens
 
