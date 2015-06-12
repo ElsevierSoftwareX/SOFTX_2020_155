@@ -1067,11 +1067,15 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
 
   main_buffer_size = pmain_buffer_size;
 
-  if (! fsd.get_num_dirs ())
+// If not using GPS defined directories, don't start if number of directories not set
+  if (! filesys_c::gps_time_dirs)
+  {
+    if (! fsd.get_num_dirs ())
     {
       *yyout << "set the number of directories before running main" << endl;
       return 1;
     }
+  }
 
   void *mptr = malloc (sizeof(circ_buffer));
   if (!mptr) {
