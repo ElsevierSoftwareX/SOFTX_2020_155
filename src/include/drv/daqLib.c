@@ -26,6 +26,25 @@ int daqConfig(struct DAQ_INFO_BLOCK *, struct DAQ_INFO_BLOCK *, char *);
 int loadLocalTable(DAQ_XFER_INFO *, DAQ_LKUP_TABLE [], int , DAQ_INFO_BLOCK *, DAQ_RANGE *);
 int daqWrite(int,int,struct DAQ_RANGE,int,double *[],struct FILT_MOD *,int,int [],double [],char *);
 
+inline
+double htond(double in) {
+    double retVal;
+    char* p = (char*)&retVal;
+    char* i = (char*)&in;
+    p[0] = i[7];
+    p[1] = i[6];
+    p[2] = i[5];
+    p[3] = i[4];
+
+    p[4] = i[3];
+    p[5] = i[2];
+    p[6] = i[1];
+    p[7] = i[0];
+
+    return retVal;
+}
+
+
 /* ******************************************************************** */
 /* Routine to connect and write to LIGO DAQ system       		*/
 /* ******************************************************************** */
@@ -97,6 +116,7 @@ int slot;
 int num_tps;
 unsigned int tpnum[DAQ_GDS_MAX_TP_ALLOWED];		// Current TP nums
 unsigned int excnum[DAQ_GDS_MAX_TP_ALLOWED];	// Current EXC nums
+double mydouble;
 
 #ifdef CORE_BIQUAD
 // Decimation filter coefficient definitions.		
@@ -387,24 +407,28 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 		case DAQ_DATATYPE_DOUBLE:
 			((double *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = dWord;
 			break;
-		case DAQ_DATATYPE_32BIT_INT:
-			// Write a 32-bit int (downcast from the double passed)
-			((int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (int)dWord;
-			break;
 		case DAQ_DATATYPE_32BIT_UINT:
-			((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot] = ((unsigned int)dWord);
+			// Write a 32-bit int (downcast from the double passed)
+			if (localTable[ii].decFactor == 1)
+			((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = ((unsigned int)dWord);
+			else
+			((unsigned int *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor]
+			                = ((unsigned int)dWord) & *((unsigned int *)(dHistory[ii]));
+			break;
+		case DAQ_DATATYPE_32BIT_INT:
+			((int *)(pWriteBuffer + localTable[ii].offset))[daqSlot] = (int)dWord;
 			break;
 		default:
 			// Write a 32-bit float (downcast from the double passed)
 			((float *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (float)dWord;
 			break;
 	      }
-      } else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_UINT) {
-        if ((daqSlot % localTable[ii].decFactor) == 1)
-	  *((unsigned int *)(dHistory[ii])) = (unsigned int)dWord;
- 	else
-	  *((unsigned int *)(dHistory[ii])) &= (unsigned int)dWord;
-      }
+      	} else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_UINT) {
+              if ((daqSlot % localTable[ii].decFactor) == 1)
+	          *((unsigned int *)(dHistory[ii])) = (unsigned int)dWord;
+	      else
+	          *((unsigned int *)(dHistory[ii])) &= (unsigned int)dWord;
+	}
     } /* end swing buffer write loop */
 
 /// \> Write EPICS data into swing buffer at 16Hz.
@@ -922,6 +946,7 @@ int mydatatype;
       dataInfo->tp[ii].dataRate = pInfo->tp[ii].dataRate;
       mydatatype = dataInfo->tp[ii].dataType;
       dataLength += DAQ_DATA_TYPE_SIZE(mydatatype) * dataInfo->tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS;
+      if(mydatatype == 5) printf("Found double %d\n",DAQ_DATA_TYPE_SIZE(mydatatype));
     }
     /// \> Set DAQ bytes/sec global, which is output to EPICS by controller.c
     curDaqBlockSize = dataLength * DAQ_NUM_DATA_BLOCKS_PER_SECOND;
@@ -1049,6 +1074,7 @@ for(ii=0;ii<dataInfo->numChans;ii++)
         printf("Invalid chan num found %d = %d\n",ii,dataInfo->tp[ii].tpnum);
         return(-1);
       }
+      // printf("Table %d Offset = %d  Type = %d\n",ii,localTable[ii].offset,dataInfo->tp[ii].dataType);
 }
 return(0);
 /// \> RETURN 0=OK or -1=FAIL
