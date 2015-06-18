@@ -663,6 +663,15 @@ state monScreen{
 */
         pvPut(input[ii]);
 	pvPut(excite[ii]);
+
+	if (msk & 0x8000) { /* Ramp time is controlled locally by the FE */
+%%		gain_ramp_time[ii] = pFilt->inputs[ii].gain_ramp_time;
+		pvPut(gain_ramp_time[ii]);
+	} else {
+		pvGet(gain_ramp_time[ii]);
+%%		rfm_assign(pFilt->inputs[ii].gain_ramp_time, gain_ramp_time[ii]);
+	}
+
 	if (msk & 0x2000) { /* Offset is controlled locally by the FE */
 %%		offset[ii] = pFilt->inputs[ii].offset;
 		pvPut(offset[ii]);
@@ -677,14 +686,6 @@ state monScreen{
 	} else {
 		pvGet(outgain[ii]);
 %%		rfm_assign(pFilt->inputs[ii].outgain, outgain[ii]);
-	}
-
-	if (msk & 0x8000) { /* Ramp time is controlled locally by the FE */
-%%		gain_ramp_time[ii] = pFilt->inputs[ii].gain_ramp_time;
-		pvPut(gain_ramp_time[ii]);
-	} else {
-		pvGet(gain_ramp_time[ii]);
-%%		rfm_assign(pFilt->inputs[ii].gain_ramp_time, gain_ramp_time[ii]);
 	}
 
 	pvGet(limit[ii]);
