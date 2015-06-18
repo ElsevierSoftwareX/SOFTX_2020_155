@@ -17,6 +17,8 @@ Changes for 2.10
 Changes for 2.9.3 release
 ==================================================================================================
 - Bug Fix (850) : SDF changes.
+- As requested for Guardian, changed skeleton.st to read filter module ramp time values before
+  offsets and gains.
 ==================================================================================================
 Changes for 2.9.2 release
 ==================================================================================================
