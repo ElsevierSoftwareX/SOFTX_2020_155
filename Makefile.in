@@ -87,8 +87,10 @@ clean-%:
 
 install-noawg-%:
 	@system=$(subst install-noawg-,,$@); $(srcdir)/install-noawg $${system} $(srcdir)
+
 install-nort-%:
-	@system=$(subst install-noart-,,$@); $(srcdir)/install-nort $${system} $(srcdir)
+	@system=$(subst install-nort-,,$@); $(srcdir)/install-nort $${system} $(srcdir)
+
 install-%:
 	@system=$(subst install-,,$@); $(srcdir)/install $${system} $(srcdir)
 

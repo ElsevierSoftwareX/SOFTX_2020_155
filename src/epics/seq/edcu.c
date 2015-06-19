@@ -449,7 +449,7 @@ int ii;
 	daqData = (float *)(shmDataPtr + (buf_size * daqBlockNum));
 	crcSend = crc_ptr((char *)daqData, xferInfo.crcLength, 0);
 	crcSend = crc_len(xferInfo.crcLength, crcSend);
-	dipc->dcuId = 54;
+	dipc->dcuId = 119;
 	dipc->crc = daqFileCrc;
 	dipc->dataBlockSize = xferInfo.crcLength;
 	dipc->bp[daqBlockNum].cycle = daqBlockNum;
