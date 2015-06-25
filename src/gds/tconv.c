@@ -103,7 +103,7 @@ typedef int confinfo_t;
    There must one entry for every added leap second.
    This list has to be in ascending order of time. */
 
-   static int num_leaps = 24;
+   static int num_leaps = 26;
    static leap_t leaps[100] = 
    {{OFFS_TAI + 182*SECS_PER_DAY, +1}, 			/* Jul. 1, 1972 */
     {OFFS_TAI + (365+1)*SECS_PER_DAY+ 1, +2},		/* Jan. 1, 1973 */
@@ -128,8 +128,9 @@ typedef int confinfo_t;
     {OFFS_TAI + (25*365+7+181)*SECS_PER_DAY+20, +21},	/* Jul. 1, 1997 */
     {OFFS_TAI + (27*365+7)*SECS_PER_DAY+21, +22},	/* Jan. 1, 1999 */
     {OFFS_TAI + (34*365+9)*SECS_PER_DAY+22, +23}, 	/* Jan. 1, 2006 */
-    {OFFS_TAI + (37*365+10)*SECS_PER_DAY+23, +24}};	/* Jan. 1, 2009 */
-
+    {OFFS_TAI + (37*365+10)*SECS_PER_DAY+23,+24},       /* Jan. 1, 2009 */
+    {OFFS_TAI + (40*365+10+182)*SECS_PER_DAY+24,+25},   /* Jul. 1, 2012 */
+    {OFFS_TAI + (43*365+11+181)*SECS_PER_DAY+25,+26}};  /* Jul. 1, 2015 */
 
 #if (defined (_CONFIG_DYNAMIC) || defined (OS_VXWORKS)) &&  \
     defined (_LEAP_DYNAMIC)
