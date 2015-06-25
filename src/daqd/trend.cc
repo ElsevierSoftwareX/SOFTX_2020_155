@@ -168,7 +168,7 @@ trender_c::minute_framer ()
   // Set thread parameters
   daqd_c::set_thread_priority("Minute trend framer","dqmtrfr",SAVER_THREAD_PRIORITY,MINUTE_SAVER_CPUAFFINITY); 
 
-  General::SharedPtr<FrameCPP::Version::FrameH> frame;
+  ldas_frame_h_type frame;
   FrameCPP::FrameH::rawData_type rawData (new FrameCPP::FrameH::rawData_type::element_type (""));
 
   int frame_length_seconds;
@@ -185,7 +185,7 @@ trender_c::minute_framer ()
   // Create minute trend frame
   //
   try {
-    frame = General::SharedPtr<FrameCPP::Version::FrameH> (new FrameCPP::Version::FrameH ("LIGO",
+    frame = ldas_frame_h_type (new FrameCPP::Version::FrameH ("LIGO",
 					     0, // run number ??? buffptr -> block_prop (nb) -> prop.run;
 					     1, // frame number
 					     FrameCPP::Version_6::GPSTime (0, 0),
@@ -596,7 +596,7 @@ trender_c::framer ()
   // Set thread parameters
   daqd_c::set_thread_priority("Second trend framer","dqstrfr",SAVER_THREAD_PRIORITY,SECOND_SAVER_CPUAFFINITY); 
 
-  General::SharedPtr<FrameCPP::Version::FrameH> frame;
+  ldas_frame_h_type frame;
   FrameCPP::FrameH::rawData_type rawData (new FrameCPP::FrameH::rawData_type::element_type (""));
 
   int frame_length_blocks;
@@ -610,7 +610,7 @@ trender_c::framer ()
   // Create trend frame
   //
   try {
-    frame = General::SharedPtr<FrameCPP::Version::FrameH> (new FrameCPP::Version::FrameH ("LIGO",
+    frame = ldas_frame_h_type (new FrameCPP::Version::FrameH ("LIGO",
 					     0, // run number ??? buffptr -> block_prop (nb) -> prop.run;
 					     1, // frame number
 					     FrameCPP::Version_6::GPSTime (0, 0),

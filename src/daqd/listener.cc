@@ -92,7 +92,7 @@ net_listener::listener ()
   setsockopt (listenfd, SOL_SOCKET, SO_REUSEADDR, (const char *) &on, sizeof (on));
 
   srvr_addr_len = sizeof (srvr_addr);
-  if (bind (listenfd, (struct sockaddr *) &(srvr_addr), srvr_addr_len) < 0)
+  if (::bind (listenfd, (struct sockaddr *) &(srvr_addr), srvr_addr_len) < 0)
     {
       system_log(1, "listener: bind(%d); errno=%d", srvr_addr.sin_port, errno);
       return NULL;

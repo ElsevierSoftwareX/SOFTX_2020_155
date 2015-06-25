@@ -48,7 +48,11 @@
 #include <string>
 #include <iostream>
 #if __GNUC__ >= 4
+#ifdef DAQD_CPP11
+#include <unordered_map>
+#else
 #include <ext/hash_map>
+#endif
 #else
 #include <hash_map>
 #endif
@@ -329,7 +333,11 @@ daqd_c::configure_channels_files ()
   // See if we have duplicate names
   {
 #if __GNUC__ >= 4
+#if DAQD_CPP11
+     std::unordered_map<char *, int> m;
+#else
      __gnu_cxx::hash_map<char *, int, __gnu_cxx::hash<char *>, cmp_struct> m;
+#endif
 #else
      hash_map<char *, int, hash<char *>, cmp_struct> m;
 #endif
@@ -490,7 +498,7 @@ int daqd_c::find_channel_group (const char* channel_name)
 }
 
 /// Create full resolution frame object.
-General::SharedPtr<FrameCPP::Version::FrameH>
+ldas_frame_h_type
 daqd_c::full_frame(int frame_length_seconds, int science,
 		   adc_data_ptr_type &dptr)
   throw() {
@@ -502,16 +510,16 @@ daqd_c::full_frame(int frame_length_seconds, int science,
   	nchans = num_active_channels;
   }
   FrameCPP::Version::FrAdcData *adc  = new FrameCPP::Version::FrAdcData[nchans];
-  General::SharedPtr< FrameCPP::Version::FrRawData > rawData 
-  	= General::SharedPtr< FrameCPP::Version::FrRawData > (new FrameCPP::Version::FrRawData);
-  General::SharedPtr<FrameCPP::Version::FrameH> frame;
+  FrameCPP::Version::FrameH::rawData_type rawData
+        =  FrameCPP::Version::FrameH::rawData_type(new FrameCPP::Version::FrRawData);
+  ldas_frame_h_type frame;
   FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-" + string(LDAS_VERSION));
   FrameCPP::Version::FrDetector detector = daqd.getDetector1();
 
   // Create frame
   //
   try {
-    frame = General::SharedPtr<FrameCPP::Version::FrameH> (new FrameCPP::Version::FrameH ("LIGO",
+    frame = ldas_frame_h_type (new FrameCPP::Version::FrameH ("LIGO",
 					     0, // run number ??? buffpt -r> block_prop (nb) -> prop.run;
 					     1, // frame number
 					     FrameCPP::Version::GPSTime (0, 0),
@@ -655,7 +663,7 @@ daqd_c::framer (int science)
   }
 
   adc_data_ptr_type dptr;
-  General::SharedPtr<FrameCPP::Version::FrameH> frame
+  ldas_frame_h_type frame
   	= full_frame (blocks_per_frame, science, dptr);
 
   if (!frame) {
