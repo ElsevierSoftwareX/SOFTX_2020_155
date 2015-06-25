@@ -91,6 +91,12 @@ extern unsigned int pvValue[1000];
 #define MINUTE_SAVER_CPUAFFINITY 0
 #endif
 
+#if LDAS_VERSION_NUMBER >= 200000
+typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+#else
+typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+#endif
+
 /// Daqd server main class. This is a top-level class, which encloses various objects
 /// representing threads of execution.
 class daqd_c {
@@ -534,7 +540,7 @@ inline static void set_thread_priority (char *thread_name, char *thread_abbrev, 
   /// Keep pointers to the data samples for each data channel
   /// An array of two pointers, fast_adc_ptr and aux_data_valid_ptr
   typedef std::vector<std::pair<unsigned char *, INT_2U *> > adc_data_ptr_type;
-  General::SharedPtr<FrameCPP::Version::FrameH> full_frame(int frame_length_seconds, int sience, adc_data_ptr_type &dptr) throw();
+  ldas_frame_h_type full_frame(int frame_length_seconds, int sience, adc_data_ptr_type &dptr) throw();
 
   /// How many full frames to pack in single file
   int frames_per_file;

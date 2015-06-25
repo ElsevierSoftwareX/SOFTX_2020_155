@@ -187,9 +187,9 @@ namespace diag {
          char		myname[256];	// local host name
          hostent 	hostinfo;
          char		buf[1024];
-         int		errno;
+         int		err;
          if ((gethostname (myname, sizeof (myname)) != 0) ||
-            (__gethostbyname_r (myname, &hostinfo, buf, 1023, &errno)) == 0) {
+            (__gethostbyname_r (myname, &hostinfo, buf, 1023, &err)) == 0) {
             return false;
          }
          else {
@@ -278,7 +278,7 @@ namespace diag {
       this->port = port;
       name.sin_port = htons (port);
       name.sin_addr.s_addr = htonl (INADDR_ANY);
-      if (bind (sock, (struct sockaddr*) &name, sizeof (name))) {
+      if (::bind (sock, (struct sockaddr*) &name, sizeof (name))) {
          ::close (sock);
          sock = -1;
       #ifdef DBUG
