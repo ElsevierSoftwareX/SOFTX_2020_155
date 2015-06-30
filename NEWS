@@ -14,6 +14,14 @@ Changes for 2.10
 - Request (854): DAQ builds put labels on thread, can set real-time priority, CPU affinity
 - Bug Fix (494): Remove test for frame directory count when using GPS-time folders
 ==================================================================================================
+Changes for 2.9.4 release
+==================================================================================================
+- Changes to account for June 30, 2015 leap second.
+   - Modified timing.c and spectracom.c files to add leap second. This code should be redone in
+        next major release as it is not well done here.
+   - Dataviewer fixed by adding to leap second list in src/dv/Lib/UTC_GPS/leapsecs.txt
+   - gds/tconv.c modified.
+==================================================================================================
 Changes for 2.9.3 release
 ==================================================================================================
 - Bug Fix (850) : SDF changes.
