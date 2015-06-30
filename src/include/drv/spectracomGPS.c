@@ -96,6 +96,8 @@ for(ii=0;ii<2;ii++)
 	    pHardware->gpsOffset = 31190400 + 15 + 31536000 + 1 + 31622400 + 31536000;
 /* add offset at end of 2014 (31536000 normal year) */
 	    pHardware->gpsOffset = pHardware->gpsOffset + 31536000;
+// add July 1, 2015 leap second
+	     pHardware->gpsOffset += 1;
   } else {
         printk("TSYNC receiving YEAR info\n");
         pHardware->gpsOffset = -315964800;

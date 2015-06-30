@@ -9,7 +9,8 @@ inline unsigned long current_time(void) {
     struct timespec t;
     extern struct timespec current_kernel_time(void);
     	t = current_kernel_time();
-        t.tv_sec += - 315964819 + 33 + 3;
+	// Added leap second for July 1, 2015
+        t.tv_sec += - 315964819 + 33 + 3 + 1;
         return t.tv_sec;
 }
 
