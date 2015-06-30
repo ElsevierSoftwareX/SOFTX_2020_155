@@ -43,11 +43,19 @@ sub createGdsMedm
 	# Put blue rectangle banner at top of screen
 	$height = 22;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{blue},"","","");
+	# Add RCG VERSION label
+	$xpos = 9; $ypos = 4; $width = 45; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"RCG #",$ecolors{white});
+	# Add RCG Number
+	$xpos = 54; $ypos = 4; $width = 35; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_RCG_VERSION",$ecolors{white},$ecolors{blue},"static");
+	$xpos = 100; $ypos = 3; $width = 12; $height = 17; $vis = "calc"; $calc = "(a<1)";
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{warning},$vis,$calc,"$site\:FEC-$dcuid\_RCG_VERSION");
 	# Add SVN label
-	$xpos = 7; $ypos = 4; $width = 45; $height = 15;
+	$xpos = 140; $ypos = 4; $width = 45; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"SVN #",$ecolors{white});
 	# Add SVN Number
-	$xpos = 50; $ypos = 4; $width = 100; $height = 15;
+	$xpos = 183; $ypos = 4; $width = 35; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_BUILD_SVN",$ecolors{white},$ecolors{blue},"static");
 	# Add Display Name
 	$xpos = 270; $ypos = 4; $width = 200; $height = 15;
