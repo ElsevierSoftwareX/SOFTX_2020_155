@@ -2152,6 +2152,8 @@ sub is_top_name {
 };
 
 
+$adcFile = $configFilesDir . "/adcList\.txt";
+open(OUTADC,">".$adcFile) || die "cannot open $adcFile file for writing";
 foreach $cur_part_num (0 .. $partCnt-1) {
 	if ($cur_part_num >= $subSysPartStop[$cur_subsys_num]) {
 		$cur_subsys_num += 1;
@@ -2340,7 +2342,7 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 		  $subsysName = $subSysName[$cur_subsys_num];
 		}
 		#print "ADC input Part $part_name $partType[$cur_part_num] has Adc input \'$partInput[$cur_part_num][0]\'\n";
-		if (($partType[$cur_part_num] eq "Filt") || ($partType[$cur_part_num] eq "FiltCtrl")) {
+		if (($partType[$cur_part_num] eq "Filt") || ($partType[$cur_part_num] eq "FiltCtrl") || ($partType[$cur_part_num] eq "FiltCtrl2")) {
 		  #Get ADC card number
 		  $adcScard = substr $partInput[$cur_part_num][0],4,1;
 		  #Get ADC channel number
@@ -2348,15 +2350,30 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 		  #Get ADC channel name
 		  $adcSname = $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "_INMON";
 		  $adcScreen[$adcScard][$adcSchan] = $adcSname;
+		  print OUTADC "$adcScard\t$adcSchan\t$adcSname \t\t$partType[$cur_part_num]\n";
 		} elsif (($partType[$cur_part_num] eq "EpicsOut") || ($partType[$cur_part_num] eq "EpicsOutLong")) {
 		  $adcScard = substr $partInput[$cur_part_num][0],4,1;
 		  $adcSchan = substr $partInput[$cur_part_num][0],6,2;
 		  $adcSname = $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name;
 		  $adcScreen[$adcScard][$adcSchan] = $adcSname;
+		  print OUTADC "$adcScard\t$adcSchan\t$adcSname \t\t$partType[$cur_part_num]\n";
+                 } elsif($partType[$cur_part_num] ne "BUSS" &&
+                 	$partType[$cur_part_num] ne "INPUT" &&
+                 	$partType[$cur_part_num] ne "BUSC" &&
+                 	$partType[$cur_part_num] ne "OUTPUT") 
+			{
+		  $adcScard = substr $partInput[$cur_part_num][0],4,1;
+		  $adcSchan = substr $partInput[$cur_part_num][0],6,2;
+		  $adcSname = $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name;
+		  print OUTADC "$adcScard\t$adcSchan\t$adcSname \t\t$partType[$cur_part_num]\n";
 		}
         }
 		  $sysname = uc($skeleton);
 }
+close OUTADC;
+$adcFile = $configFilesDir . "/adcList\.txt";
+$adcFileSorted = $configFilesDir . "/adcListSorted\.txt";
+system ("sort $adcFile -k 1,1n -k 2,2n > $adcFileSorted");
 
 #//		- GENERATE IPC SCREENS
    ("CDS::IPCx::createIpcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ipcxCnt);
