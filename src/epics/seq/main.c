@@ -37,6 +37,7 @@ of this distribution.
 #include "dbFldTypes.h"
 #include "dbAccess.h"
 #include "math.h"
+#include "rcgversion.h"
 
 #define epicsExportSharedSymbols
 #include "asLib.h"
@@ -1593,7 +1594,6 @@ void dbDumpRecords(DBBASE *pdbbase)
     int amatch,jj;
 	int cnt = 0;
 
-    logFileEntry("************* Software Restart ************");
     // By convention, the RCG produces ai and bi records for settings.
     sprintf(mytype[0],"%s","ai");
     sprintf(mytype[1],"%s","bi");
@@ -1668,8 +1668,6 @@ void dbDumpRecords(DBBASE *pdbbase)
 	}
     }
 	printf("  %d Records, with %d filters\n", cnt,fmNum);
-    sprintf(errMsg,"Number of filter modules in db = %d \n",fmNum);
-    logFileEntry(errMsg);
     printf("End of all Records\n");
     dbFreeEntry(pdbentry);
 }
@@ -1694,6 +1692,7 @@ int main(int argc,char *argv[])
 	dbAddr sorttableentriesaddr;
 	dbAddr monflagaddr;
 	dbAddr reloadtimeaddr;
+	dbAddr rcgversion_addr;
 	dbAddr msgstraddr;
 	dbAddr edbloadedaddr;
 	dbAddr savecmdaddr;
@@ -1752,6 +1751,7 @@ int main(int argc,char *argv[])
 	int lastTable = 0;
 	int cdSort = 0;
 	int diffCnt = 0;
+    	char errMsg[128];
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -1780,7 +1780,19 @@ int main(int argc,char *argv[])
 	printf("SDF FILE = %s\n",sdfile);
 	printf("CURRENt FILE = %s\n",bufile);
 	printf("LOG FILE = %s\n",logfilename);
-sleep(5);
+sleep(10);
+	char rcgversionname[256]; 
+	int majorversion = RCG_VERSION_MAJOR;
+	int subversion1 = RCG_VERSION_MINOR;
+	int subversion2 = RCG_VERSION_SUB;
+	int myreleased = RCG_VERSION_REL;
+	double myversion;
+	myversion = majorversion + 0.01 * subversion1 + 0.001 * subversion2;
+	if(!myreleased) myversion *= -1.0;
+	sprintf(rcgversionname, "%s_%s", pref, "RCG_VERSION");		// Request to load new BURT
+	status = dbNameToAddr(rcgversionname,&rcgversion_addr);
+	status = dbPutField(&rcgversion_addr,DBR_DOUBLE,&myversion,1);
+
 	// Create BURT/SDF EPICS channel names
 	char reloadChan[256]; sprintf(reloadChan, "%s_%s", pref, "SDF_RELOAD");		// Request to load new BURT
 	// Set request to load safe.snap on startup
@@ -1918,6 +1930,8 @@ sleep(5);
 	status = dbPutField(&confirmwordaddr,DBR_LONG,&resetNum,1);
 
 	dbDumpRecords(*iocshPpdbbase);
+	sprintf(errMsg,"Software Restart \nRCG VERSION: %.2f",myversion);
+	logFileEntry(errMsg);
 
 	// Initialize DAQ and COEFF file CRC checksums for later compares.
 	daqFileCrc = checkFileCrc(daqFile);
