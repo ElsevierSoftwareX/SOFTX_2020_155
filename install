@@ -194,7 +194,8 @@ fi
 /bin/cp -p build/${system}epics/${system}.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par 
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/param
 /bin/cp -p build/${system}epics/${system}.par /opt/rtcds/${site}/${lower_ifo}/target/${system}/param/tpchn_${system}.par
-/bin/cp -p build/${system}epics/config/adcListSorted.txt  /opt/rtcds/${site}/${lower_ifo}/target/${system}/param/${system}_adclist.txt
+/bin/mkdir -p  /opt/rtcds/${site}/${lower_ifo}/chans/adc 
+/bin/cp -p build/${system}epics/config/adcListSorted.txt  /opt/rtcds/${site}/${lower_ifo}/chans/adc/${system}_adclist.txt
 if test ${datarate_mult} -gt 1
 then 
   datarate_mult_flag=-${datarate_mult}
