@@ -4,7 +4,7 @@ Changes for 2.10
 - Request (833): RCG now produces a text file that lists all ADC connections for that model as
   part of the make, make-install process.
   - make command produces build/modelepics/config/adcListSorted.txt
-  - make install-model produces a target/modelname/param/model_adclist.txt file.
+  - make install-model produces a /opt/rtcds/site/ifo/chans/adc/model_adclist.txt file.
 - Added RCG version number to GDSTP screens.
 - Added multi-page listing capabilities for unconnected EDCU channels. Presently, still a work
   in progress.
