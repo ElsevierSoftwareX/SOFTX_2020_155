@@ -857,6 +857,11 @@ int ret = 0;
 int lna = 0;
 int lnb = 0;
 char tmpname[64];
+time_t mtime;
+char localtimestring[256];
+long nvals = 1;
+char liveset[64];
+
 
 	chNotInit = 0;
 	chNotMon = 0;
@@ -874,6 +879,10 @@ char tmpname[64];
 		strncpy(tmpname,filterTable[ii].fname,(strlen(filterTable[ii].fname)-1));
 		if(!filterTable[ii].init) {
 			sprintf(uninitChans[lna].chname,"%s",tmpname);
+			sprintf(uninitChans[lna].liveset,"%s",cdTableList[ii].liveset);
+			uninitChans[lna].sw[0] = cdTableList[ii].sw[0];
+			uninitChans[lna].sw[1] = cdTableList[ii].sw[1];
+			uninitChans[lna].sigNum = filterTable[ii].sw[0] + (filterTable[ii].sw[1] * SDF_MAX_TSIZE);
 			uninitChans[lna].filtNum = ii;
 			lna ++;
 		}
@@ -896,6 +905,12 @@ char tmpname[64];
 			// printf("Chan %s not init %d %d %d\n",cdTable[jj].chname,cdTable[jj].initialized,jj,numEntries);
 			if(lna < SDF_ERR_TSIZE) {
 				sprintf(uninitChans[lna].chname,"%s",cdTable[jj].chname);
+				if(cdTable[jj].datatype == SDF_NUM) {
+					sprintf(liveset,"%.10lf",cdTableP[jj].data.chval);
+				} else {
+					sprintf(liveset,"%s",cdTableP[jj].data.strval);
+				}
+				sprintf(uninitChans[lna].liveset, "%s", liveset);
 				lna ++;
 			}
 		}
@@ -1177,16 +1192,14 @@ int found = 0;
 				if(strcmp(cdTable[jj].chname,modTable[ii].chname) == 0 && (modTable[ii].chFlag & 4)) {
 					if(cdTable[jj].datatype == SDF_NUM) cdTable[jj].data.chval = atof(modTable[ii].liveset);
 					else sprintf(cdTable[jj].data.strval,"%s",modTable[ii].liveset);
+					cdTable[jj].initialized = 1;
 					found = 1;
 					fmIndex = cdTable[jj].filterNum;
-					if(fmIndex >= 0) filterTable[fmIndex].newSet = 1;
 				}
 				if(strcmp(cdTable[jj].chname,modTable[ii].chname) == 0 && (modTable[ii].chFlag & 8)) {
 					cdTable[jj].mask ^= 1;
-					// printf("changing mask for %s = %d\n",modTable[ii].chname,cdTable[jj].mask);
 					found = 1;
 					fmIndex = cdTable[jj].filterNum;
-					if(fmIndex >= 0) filterTable[fmIndex].newSet = 1;
 				}
 			}
 			if(modTable[ii].filtNum >= 0 && !found) { 
@@ -1197,10 +1210,9 @@ int found = 0;
 				sn1 = sn / SDF_MAX_TSIZE;
 				sn %= SDF_MAX_TSIZE;
 				if(modTable[ii].chFlag & 4) {
-					// printf("Modify Sw1 = %s val = 0x%x\n",cdTable[sn].chname,modTable[ii].sw[0]);
-					// printf("Modify Sw2 = %s val = 0x%x\n",cdTable[sn1].chname,modTable[ii].sw[1]);
 					cdTable[sn].data.chval = modTable[ii].sw[0];
 					cdTable[sn1].data.chval = modTable[ii].sw[1];
+					filterTable[fmIndex].init = 1;
 				}
 				if(modTable[ii].chFlag & 8) {
 					filterTable[fmIndex].mask ^= 1;
@@ -1256,6 +1268,7 @@ void newfilterstats(int numchans) {
 	int counter = 0;
 	int rsw1,rsw2;
 
+printf("In newfilterstats\n");
 	for(ii=0;ii<numchans;ii++) {
 		if(filterTable[ii].newSet) {
 			counter ++;
@@ -1939,6 +1952,7 @@ sleep(10);
 	reportSetErrors(pref, 0,setErrTable,0);
 
 	sleep(1);       // Need to wait before first restore to allow sequencers time to do their initialization.
+	cdSort = spChecker(monFlag,cdTableList,wcVal,wcstring,1,&status);
 
 	// Start Infinite Loop 		*******************************************************************************
 	for(;;) {
@@ -2130,9 +2144,45 @@ sleep(10);
 					clearTableSelections(sperror,setErrTable, selectCounter);
 					confirmVal = 0;
 				}
+				getEpicsSettings(chNum);
 				noMon = createSortTableEntries(chNum,wcVal,wcstring);
 				pageDisp = reportSetErrors(pref, chNotInit, uninitChans,pageNum);
+				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
+				if(selectAll == 2) {
+					setAllTableSelections(chNotInit,uninitChans,selectCounter,selectAll);
+					selectAll = 0;
+					status = dbPutField(&selectaddr[3],DBR_LONG,&selectAll,1);
+				}
+				if(resetNum > 100 && resetNum < 200) {
+					decodeChangeSelect(resetNum, pageDisp, chNotInit, uninitChans,selectCounter);
+				}
+				if(resetNum) {
+					resetNum = 0;
+					status = dbPutField(&resetoneaddr,DBR_LONG,&resetNum,1);
+				}
+				if(confirmVal) {
+					if(selectCounter[1] && (confirmVal & 2)) {
+						// Save present table as timenow.
+						status = dbGetField(&loadedfile_addr,DBR_STRING,backupName,&ropts,&nvals,NULL);
+						// printf("BACKING UP: %s\n",backupName);
+						savesdffile(SAVE_TABLE_AS_SDF,SAVE_TIME_NOW,sdfDir,modelname,sdfile,saveasfilename,backupName,
+							    savefileaddr,savetimeaddr,reloadtimeaddr);
+						// Overwrite the table with new values
+						status = modifyTable(chNotInit,uninitChans);
+						// Overwrite file
+						savesdffile(SAVE_TABLE_AS_SDF,SAVE_OVERWRITE,sdfDir,modelname,sdfile,saveasfilename,
+							    backupName,savefileaddr,savetimeaddr,reloadtimeaddr);
+						sdfFileCrc = checkFileCrc(sdffileloaded);
+						status = writeTable2File(sdfDir,bufile,SDF_WITH_INIT_FLAG,cdTable);
+					}
+					// noMon = createSortTableEntries(chNum,wcVal,wcstring);
+					clearTableSelections(chNotInit,uninitChans, selectCounter);
+					confirmVal = 0;
+					status = dbPutField(&confirmwordaddr,DBR_LONG,&confirmVal,1);
+					// Calculate and report number of channels NOT being monitored.
+				}
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotInit,1);
+				status = dbPutField(&chnotinitaddr,DBR_LONG,&chNotInit,1);
 				lastTable = SDF_TABLE_NOT_INIT;
 				break;
 			case SDF_TABLE_NOT_MONITORED:
