@@ -126,9 +126,9 @@ diag::mutex cmnInUseMux;
          char		myname[256];	// local host name
          hostent 	hostinfo;
          char		buf[1024];
-         int		errno;
+         int		my_errno;
          if ((gethostname (myname, sizeof (myname)) != 0) ||
-            (__gethostbyname_r (myname, &hostinfo, buf, 1023, &errno)) == 0) {
+            (__gethostbyname_r (myname, &hostinfo, buf, 1023, &my_errno)) == 0) {
             return false;
          }
          else {
@@ -237,10 +237,10 @@ extern "C"
       struct hostent 	hostinfo;
       in_addr_t		addr;
       char		buf[1024];
-      int		errno;
+      int		my_errno;
    
       if (__gethostbyname_r (dest_addr, &hostinfo, buf, 
-                           1023, &errno) != 0) {
+                           1023, &my_errno) != 0) {
          memcpy (&addr, hostinfo.h_addr_list[0], sizeof (addr));
       }
       else {
