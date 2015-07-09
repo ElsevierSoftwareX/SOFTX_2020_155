@@ -648,10 +648,12 @@ int writeTable2File(char *burtdir,
 				fprintf(csFile,"%s %d \"%s\" %d %d\n",myTable[ii].chname,1,myTable[ii].data.strval,myTable[ii].mask,myTable[ii].initialized);
 			break;
 		   case SDF_FILE_PARAMS_ONLY:
-			if(myTable[ii].datatype == SDF_NUM)
-				fprintf(csFile,"%s %d %.15e %d\n",myTable[ii].chname,1,myTable[ii].data.chval,myTable[ii].mask);
-			else
-				fprintf(csFile,"%s %d \"%s\" %d\n",myTable[ii].chname,1,myTable[ii].data.strval,myTable[ii].mask);
+			if(myTable[ii].initialized) {
+				if(myTable[ii].datatype == SDF_NUM)
+					fprintf(csFile,"%s %d %.15e %d\n",myTable[ii].chname,1,myTable[ii].data.chval,myTable[ii].mask);
+				else
+					fprintf(csFile,"%s %d \"%s\" %d\n",myTable[ii].chname,1,myTable[ii].data.strval,myTable[ii].mask);
+			}
 			break;
 		   case SDF_FILE_BURT_ONLY:
 			if(myTable[ii].datatype == SDF_NUM)
@@ -1211,7 +1213,9 @@ int found = 0;
 				sn %= SDF_MAX_TSIZE;
 				if(modTable[ii].chFlag & 4) {
 					cdTable[sn].data.chval = modTable[ii].sw[0];
+					cdTable[sn].initialized = 1;
 					cdTable[sn1].data.chval = modTable[ii].sw[1];
+					cdTable[sn1].initialized = 1;
 					filterTable[fmIndex].init = 1;
 				}
 				if(modTable[ii].chFlag & 8) {
