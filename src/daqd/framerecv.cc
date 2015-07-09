@@ -187,9 +187,9 @@ namespace diag {
          char		myname[256];	// local host name
          hostent 	hostinfo;
          char		buf[1024];
-         int		err;
+         int		my_errno;
          if ((gethostname (myname, sizeof (myname)) != 0) ||
-            (__gethostbyname_r (myname, &hostinfo, buf, 1023, &err)) == 0) {
+            (__gethostbyname_r (myname, &hostinfo, buf, 1023, &my_errno)) == 0) {
             return false;
          }
          else {
