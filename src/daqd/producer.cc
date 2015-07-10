@@ -182,19 +182,19 @@ receiver_udp(int my_dcu_id) {
 
 /// Data receiving thread
 void*
-gm_receiver_thread(void *p)
+gm_receiver_thread(void *this_p)
 {
 #if defined(USE_GM) || defined(USE_MX) || defined(USE_BROADCAST) || defined(USE_UDP)
-  long dcu_id = (long)p;
 #ifdef USE_GM
   gm_recv();
 #elif defined(USE_MX)
   void receiver_mx(int);
-  long a = (long)p;
-  receiver_mx(a);
+  int this_eid = *static_cast<int*>(this_p);
+  receiver_mx(this_eid);
 #elif defined(USE_UDP)
+  int this_dcu_id = *static_cast<int*>(this_p);
   void receiver_udp(int);
-  receiver_udp(dcu_id);
+  receiver_udp(this_dcu_id);
 #endif
 
 #else
@@ -330,17 +330,17 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
      pthread_attr_init (&attr);
      pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
      pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-     int err_no;
+     int my_err_no;
   
      for (int dcu_id = DCU_ID_EDCU; dcu_id < DCU_COUNT; dcu_id++) {
        int ifo = 0;
        if (daqd.dcuSize[ifo][dcu_id] == 0) continue; // skip unconfigured DCU nodes
        if (!IS_MYRINET_DCU(dcu_id)) continue;
 
-       if (err_no = pthread_create (&gm_tid, &attr,
+       if (my_err_no = pthread_create (&gm_tid, &attr,
 				  gm_receiver_thread, &dcu_id)) {
      	  pthread_attr_destroy (&attr);
-     	  system_log(1, "pthread_create() err=%d", err_no);
+     	  system_log(1, "pthread_create() err=%d", my_err_no);
 	  exit(1);
        }
        system_log(1, "UDP receiver thread started for dcu %d", dcu_id);
@@ -354,21 +354,30 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
      pthread_attr_init (&attr);
      pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
      pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-     int err_no;
+     int my_err_no;
   
      for (int j = 0; j < DCU_COUNT; j++) {
 	class stats s;
      	rcvr_stats.push_back(s);
      }
 
+/* Create array to hold mx thread card+endpoint data
+ We will pass a point to the individual array element.
+ This is to avoid a race condition where the 
+ gm_receiver_thread gets interleaved values 
+ Keith Thorne   2015-07-10 */ 
+   int bp_aray[MX_MAX_BOARDS][MX_MAX_ENDPOINTS];
    for (int bnum = 0; bnum < nics_available; bnum++) { // Start
      for (int j = 0; j < max_endpoints; j++) {
        int bp = j;
        bp = bp + (bnum*256);
-       if (err_no = pthread_create (&gm_tid, &attr,
-                     gm_receiver_thread, &bp)) {
+ /* calculate address within array */  
+       bp_aray[bnum][j] = bp;
+       void *bpPtr = (int *)(bp_aray + bnum) + j;
+       if (my_err_no = pthread_create (&gm_tid, &attr,
+                     gm_receiver_thread, bpPtr)) {
                   pthread_attr_destroy (&attr);
-                  system_log(1, "pthread_create() err=%d", err_no);
+                  system_log(1, "pthread_create() err=%d", my_err_no);
                   exit(1);
        }
      }

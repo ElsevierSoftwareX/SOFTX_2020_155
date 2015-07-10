@@ -63,7 +63,7 @@ receiver_mx(int neid)
 	//float *testData;
 	uint32_t match_val=MATCH_VAL_MAIN;
 	mx_request_t req[NUM_RREQ];
-	mx_endpoint_t ep[1024];
+	mx_endpoint_t ep[MX_MAX_BOARDS*MX_MAX_ENDPOINTS];
 
         // Set thread parameters
 	char my_thr_label[16];
@@ -72,15 +72,14 @@ receiver_mx(int neid)
         snprintf(my_thr_name,40,"mx receiver %03x",neid);
         daqd_c::set_thread_priority(my_thr_name, my_thr_label, MX_THREAD_PRIORITY,0);
 
-	uint32_t board_num = neid >> 8;
+	uint32_t board_num = (neid >> 8);
 	uint32_t ep_num = neid & 0xff;
 
         mx_return_t ret = mx_open_endpoint(board_num, ep_num, FILTER, NULL, 0, &ep[neid]);
         if (ret != MX_SUCCESS) {
-	                fprintf(stderr, "Failed to open board %d endpoint%d error %s\n", board_num, ep_num, mx_strerror(ret));
+	                fprintf(stderr, "Failed to open board %d endpoint %d error %s\n", board_num, ep_num, mx_strerror(ret));
 	                exit(1);
         }
-        printf("MX endpoint %03x opened\n", neid);
 
 	// Allocate NUM_RREQ MX packet receive buffers
 	int len = sizeof(struct daqMXdata);
@@ -256,6 +255,15 @@ open_mx(void)
 		exit(1);
 	}
 	fprintf(stderr, "%d MX NICs available\n", nics_available);
+/// make sure these don't exceed array allocations
+        if(max_endpoints > MX_MAX_ENDPOINTS) {
+        	fprintf(stderr, "ERROR: max end-points of %d exceeds array limit of %d\n",max_endpoints, MX_MAX_ENDPOINTS);      
+	        exit(1);
+        }
+        if(nics_available > MX_MAX_BOARDS) {
+        	fprintf(stderr, "ERROR: available nics of %d exceeds array limit of %d\n",nics_available, MX_MAX_BOARDS);      
+	        exit(1);
+        }
 
 	mx_ep_opened = 1;
 	return max_endpoints | (nics_available << 8);
