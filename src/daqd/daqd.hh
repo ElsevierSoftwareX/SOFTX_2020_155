@@ -91,6 +91,10 @@ extern unsigned int pvValue[1000];
 #define MINUTE_SAVER_CPUAFFINITY 0
 #endif
 
+/// Define max boards, endpoints for mx_rcvr
+#define MX_MAX_BOARDS 4
+#define MX_MAX_ENDPOINTS 32
+
 #if LDAS_VERSION_NUMBER >= 200000
 typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
 #else
@@ -396,16 +400,16 @@ inline static void set_thread_priority (char *thread_name, char *thread_abbrev, 
    strncpy(my_thr_label,thread_abbrev,16);
    // Name the thread
    prctl(PR_SET_NAME,my_thr_label,0, 0, 0);
-   system_log(1, "%s thread - label %s pid=%d\n", thread_name, my_thr_label, (int) my_tid);
+   system_log(1, "%s thread - label %s pid=%d", thread_name, my_thr_label, (int) my_tid);
    // If priority is non-zero, add to the real-time scheduler at that priority
    if (rt_priority > 0) {
        struct sched_param my_sched_param = { rt_priority };
        int set_stat;   
        set_stat = pthread_setschedparam(pthread_self(), SCHED_FIFO, &my_sched_param);
        if(set_stat != 0){
-           system_log(1, "%s thread priority error %s\n",thread_name, strerror(set_stat));
+           system_log(1, "%s thread priority error %s",thread_name, strerror(set_stat));
        } else {
-           system_log(1, "%s thread set to priority %d\n",thread_name, rt_priority);
+           system_log(1, "%s thread set to priority %d",thread_name, rt_priority);
        }   
    }
    // If cpu affinity is non-zero, set the affinity (if enough CPUs)
@@ -426,9 +430,9 @@ inline static void set_thread_priority (char *thread_name, char *thread_abbrev, 
            int set_stat;
 	   set_stat = pthread_setaffinity_np(pthread_self(),sizeof(cpu_set_t),&my_cpu_set);
            if(set_stat != 0){
-              system_log(1, "%s thread setaffinity error %s\n",thread_name, strerror(set_stat));
+              system_log(1, "%s thread setaffinity error %s",thread_name, strerror(set_stat));
            } else {
-	      system_log(1, "%s thread put on CPU %d\n",thread_name, cpuId);
+	      system_log(1, "%s thread put on CPU %d",thread_name, cpuId);
            }
        }
     }
