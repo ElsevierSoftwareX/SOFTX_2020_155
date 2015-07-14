@@ -41,6 +41,24 @@ short         Fast = 1; /* 1 or 16 */
 /* Debug fprintf().  */
 void dfprintf(FILE *file, ...) {}
 
+double bsdouble(double in) {
+    double retVal;
+    char* p = (char*)&retVal;
+    char* i = (char*)&in;
+    p[0] = i[7];
+    p[1] = i[6];
+    p[2] = i[5];
+    p[3] = i[4];
+
+    p[4] = i[3];
+    p[5] = i[2];
+    p[6] = i[1];
+    p[7] = i[0];
+
+    return retVal;
+}
+
+
 /* int DataConnect(char* serverName, int serverPort, int lPort, void* read_data()) */ /* JCB */
 int DataConnect(char* serverName, int serverPort, int lPort, void* (*read_data)())
 {
@@ -670,6 +688,7 @@ int  seconds;
             case 5: /* 64 bit-double */
                 for ( j=0; j<channelAll[index].rate/Fast; j++ ) {
 		   data[j] = *((double *)(DataDaq.tb->data+pos+j*sizeof(double)));
+		   data[j] = bsdouble(data[j]);
                 }
                 break;
             case 2: /* 32 bit-integer */
@@ -744,6 +763,7 @@ int  seconds;
                 for ( j=0; j<chanList[index].rate/Fast; j++ ) {
 		   if (DataDaq.tb_size >= pos+j*sizeof(double)) {
 		     data[j] = *((double *)(DataDaq.tb->data+pos+j*sizeof(double)));
+		     data[j] = bsdouble(data[j]);
 		   }
                 }
                 break;
