@@ -69,7 +69,7 @@ sub frontEndCode {
 	$calcExp .= "\t\L$::xpartName[$i]\_first\_time\_through";
 	$calcExp .= " = 0;\n";
 	$calcExp .= "\t\L$::xpartName[$i]\_n";
-        $calcExp .= " = 0;\n";
+        $calcExp .= " = 1;\n";
 	$calcExp .= "\t\L$::xpartName[$i]";
 	$calcExp .= " = ";
 	$calcExp .= $::fromExp[0];
