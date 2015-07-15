@@ -68,6 +68,8 @@ sub frontEndCode {
 	$calcExp .= "if (\L$::xpartName[$i]\_first\_time\_through) {\n";
 	$calcExp .= "\t\L$::xpartName[$i]\_first\_time\_through";
 	$calcExp .= " = 0;\n";
+	$calcExp .= "\t\L$::xpartName[$i]\_n";
+        $calcExp .= " = 0;\n";
 	$calcExp .= "\t\L$::xpartName[$i]";
 	$calcExp .= " = ";
 	$calcExp .= $::fromExp[0];
