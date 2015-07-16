@@ -22,6 +22,10 @@ Changes for 2.10
 - Bug Fix (494): Remove test for frame directory count when using GPS-time folders
 - Bug Fix (888): Make mx pre-thread inputs non-volatile
 ==================================================================================================
+Changes for 2.9.5 release
+==================================================================================================
+- Bug fix for True RMS part as per and tested by M. Evans.
+==================================================================================================
 Changes for 2.9.4 release
 ==================================================================================================
 - Changes to account for June 30, 2015 leap second.
