@@ -164,7 +164,7 @@ void logFileEntry(char *);
 int getEpicsSettings(int);
 int writeTable2File(char *,char *,int,CDS_CD_TABLE *);
 int savesdffile(int,int,char *,char *,char *,char *,char *,dbAddr,dbAddr,dbAddr); 
-int createSortTableEntries(int,int,char *);
+int createSortTableEntries(int,int,char *,int *);
 int reportSetErrors(char *,int,SET_ERR_TABLE *,int);
 int spChecker(int,SET_ERR_TABLE *,int,char *,int,int *);
 void newfilterstats(int);
@@ -851,7 +851,7 @@ void resetASG(char *name, int lock) {
 #endif
 
 /// Routine used to create local tables for reporting uninitialize and not monitored channels on request.
-int createSortTableEntries(int numEntries,int wcval,char *wcstring)
+int createSortTableEntries(int numEntries,int wcval,char *wcstring,int *noInit)
 {
 int ii,jj;
 int notMon = 0;
@@ -874,7 +874,7 @@ char liveset[64];
 	for(ii=0;ii<fmNum;ii++) {
 		if(!filterTable[ii].init) chNotInit += 1;
 		if(filterTable[ii].init && !filterTable[ii].mask) chNotMon += 1;
-		if(wcval  && (ret = strstr(cdTable[jj].chname,wcstring) == NULL)) {
+		if(wcval  && (ret = strstr(filterTable[ii].fname,wcstring) == NULL)) {
 			continue;
 		}
 		bzero(tmpname,sizeof(tmpname));
@@ -888,7 +888,7 @@ char liveset[64];
 			uninitChans[lna].filtNum = ii;
 			lna ++;
 		}
-		if(!filterTable[ii].mask) {
+		if(filterTable[ii].init && !filterTable[ii].mask) {
 			sprintf(unMonChans[lnb].chname,"%s",tmpname);
 			unMonChans[lnb].filtNum = ii;
 			unMonChans[lnb].sigNum = filterTable[ii].sw[0] + (filterTable[ii].sw[1] * SDF_MAX_TSIZE);
@@ -913,6 +913,8 @@ char liveset[64];
 					sprintf(liveset,"%s",cdTableP[jj].data.strval);
 				}
 				sprintf(uninitChans[lna].liveset, "%s", liveset);
+				sprintf(uninitChans[lna].timeset,"%s"," ");
+				sprintf(uninitChans[lna].diff,"%s"," ");
 				lna ++;
 			}
 		}
@@ -927,6 +929,9 @@ char liveset[64];
 				} else {
 					sprintf(unMonChans[lnb].burtset,"%s",cdTable[jj].data.strval);
 				}
+				sprintf(unMonChans[lnb].liveset,"%s"," ");
+				sprintf(unMonChans[lnb].timeset,"%s"," ");
+				sprintf(unMonChans[lnb].diff,"%s"," ");
 			}
 			lnb ++;
 		}
@@ -949,6 +954,7 @@ char liveset[64];
 		sprintf(unMonChans[jj].timeset,"%s"," ");
 		sprintf(unMonChans[jj].diff,"%s"," ");
 	}
+	*noInit = lna;
 	return(lnb);
 }
 
@@ -988,6 +994,10 @@ int zero = 0;
 	mypage = page;
 	// Calculat start index to the diff table.
 	myindex = page *  SDF_ERR_DSIZE;
+	if(myindex == numEntries && numEntries > 0) {
+		mypage --;
+		myindex = mypage *  SDF_ERR_DSIZE;
+	}
 	// If index is > number of entries in the table, then page back.
         if(myindex > numEntries) {
 		mypage = numEntries / SDF_ERR_DSIZE;
@@ -1736,6 +1746,7 @@ int main(int argc,char *argv[])
 	char sdffileloaded[256];
    	int sperror = 0;
 	int noMon;
+	int noInit;
 	// FILE *csFile;
 	int ii;
 	int setChans = 0;
@@ -1797,7 +1808,6 @@ int main(int argc,char *argv[])
 	printf("SDF FILE = %s\n",sdfile);
 	printf("CURRENt FILE = %s\n",bufile);
 	printf("LOG FILE = %s\n",logfilename);
-sleep(10);
 	char rcgversionname[256]; 
 	int majorversion = RCG_VERSION_MAJOR;
 	int subversion1 = RCG_VERSION_MINOR;
@@ -2021,7 +2031,7 @@ sleep(10);
 					setChans = chNum - fmNum;
 					status = dbPutField(&fulldbcntaddr,DBR_LONG,&setChans,1);
 					// Sort channels for data reporting via the MEDM table.
-					noMon = createSortTableEntries(chNum,0,"");
+					noMon = createSortTableEntries(chNum,0,"",&noInit);
 					// Calculate and report number of channels NOT being monitored.
 					status = dbPutField(&monchancntaddr,DBR_LONG,&chNotMon,1);
 					status = dbPutField(&alrmchcountaddr,DBR_LONG,&alarmCnt,1);
@@ -2128,7 +2138,7 @@ sleep(10);
 					clearTableSelections(sperror,setErrTable, selectCounter);
 					confirmVal = 0;
 					status = dbPutField(&confirmwordaddr,DBR_LONG,&confirmVal,1);
-					noMon = createSortTableEntries(chNum,wcVal,wcstring);
+					noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit);
 					status = dbPutField(&monchancntaddr,DBR_LONG,&chNotMon,1);
 				}
 				lastTable = SDF_TABLE_DIFFS;
@@ -2149,16 +2159,16 @@ sleep(10);
 					confirmVal = 0;
 				}
 				getEpicsSettings(chNum);
-				noMon = createSortTableEntries(chNum,wcVal,wcstring);
-				pageDisp = reportSetErrors(pref, chNotInit, uninitChans,pageNum);
+				noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit);
+				pageDisp = reportSetErrors(pref, noInit, uninitChans,pageNum);
 				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
 				if(selectAll == 2) {
-					setAllTableSelections(chNotInit,uninitChans,selectCounter,selectAll);
+					setAllTableSelections(noInit,uninitChans,selectCounter,selectAll);
 					selectAll = 0;
 					status = dbPutField(&selectaddr[3],DBR_LONG,&selectAll,1);
 				}
 				if(resetNum > 100 && resetNum < 200) {
-					decodeChangeSelect(resetNum, pageDisp, chNotInit, uninitChans,selectCounter);
+					decodeChangeSelect(resetNum, pageDisp, noInit, uninitChans,selectCounter);
 				}
 				if(resetNum) {
 					resetNum = 0;
@@ -2172,20 +2182,18 @@ sleep(10);
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_TIME_NOW,sdfDir,modelname,sdfile,saveasfilename,backupName,
 							    savefileaddr,savetimeaddr,reloadtimeaddr);
 						// Overwrite the table with new values
-						status = modifyTable(chNotInit,uninitChans);
+						status = modifyTable(noInit,uninitChans);
 						// Overwrite file
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_OVERWRITE,sdfDir,modelname,sdfile,saveasfilename,
 							    backupName,savefileaddr,savetimeaddr,reloadtimeaddr);
 						sdfFileCrc = checkFileCrc(sdffileloaded);
 						status = writeTable2File(sdfDir,bufile,SDF_WITH_INIT_FLAG,cdTable);
 					}
-					// noMon = createSortTableEntries(chNum,wcVal,wcstring);
 					clearTableSelections(chNotInit,uninitChans, selectCounter);
 					confirmVal = 0;
 					status = dbPutField(&confirmwordaddr,DBR_LONG,&confirmVal,1);
-					// Calculate and report number of channels NOT being monitored.
 				}
-				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotInit,1);
+				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&noInit,1);
 				status = dbPutField(&chnotinitaddr,DBR_LONG,&chNotInit,1);
 				lastTable = SDF_TABLE_NOT_INIT;
 				break;
@@ -2195,7 +2203,7 @@ sleep(10);
 					confirmVal = 0;
 					status = dbPutField(&confirmwordaddr,DBR_LONG,&confirmVal,1);
 				}
-				noMon = createSortTableEntries(chNum,wcVal,wcstring);
+				noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit);
 				status = dbPutField(&monchancntaddr,DBR_LONG,&chNotMon,1);
 				pageDisp = reportSetErrors(pref, noMon, unMonChans,pageNum);
 				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
@@ -2272,7 +2280,7 @@ sleep(10);
 					clearTableSelections(cdSort,cdTableList, selectCounter);
 					confirmVal = 0;
 					status = dbPutField(&confirmwordaddr,DBR_LONG,&confirmVal,1);
-					noMon = createSortTableEntries(chNum,wcVal,wcstring);
+					noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit);
 					// Calculate and report number of channels NOT being monitored.
 					status = dbPutField(&monchancntaddr,DBR_LONG,&chNotMon,1);
 				}
