@@ -24,12 +24,18 @@ sub printFrontEndVars  {
 	my ($i) = @_;
 	print ::OUTH "#define \U$::xpartName[$i]\_WINSZ \t $::windowSize\n\n";
 	print ::OUT "static int \L$::xpartName[$i]\_first\_time\_through;\n";
+	print ::OUT "static int \L$::xpartName[$i]\_is\_first\_cycle;\n";
 	print ::OUT "int \L$::xpartName[$i]\_index;\n";
-	print ::OUT "int \L$::xpartName[$i]\_n;\n";
-	print ::OUT "double \L$::xpartName[$i];\n";
-	print ::OUT "double \L$::xpartName[$i]\_indatsqrd\[\U$::xpartName[$i]\_WINSZ\];\n";
+	print ::OUT "double \L$::xpartName[$i]\_sqrin;\n";
 	print ::OUT "double \L$::xpartName[$i]\_sqrsum;\n";
+	print ::OUT "double \L$::xpartName[$i]\_sqrsumrun;\n";
+	print ::OUT "double \L$::xpartName[$i]\_indatsqrd\[\U$::xpartName[$i]\_WINSZ\];\n";
 	print ::OUT "double \L$::xpartName[$i]\_sqrval;\n";
+	print ::OUT "double \L$::xpartName[$i];\n";
+
+	print ::OUT "int \L$::xpartName[$i]\_n;\n";
+
+
 }
 
 # Figure out part input code
@@ -46,17 +52,11 @@ sub fromExp {
 # Returns calculated code string
 sub frontEndInitCode {
 	my ($i) = @_;
-	my $calcExp = "\L$::xpartName[$i]";
-	$calcExp .= " = 0.0;\n";
-	$calcExp .= "\L$::xpartName[$i]\_first\_time\_through";
-	$calcExp .= " = 1;\n";
-	$calcExp .= "\L$::xpartName[$i]\_n";
-	$calcExp .= " = ";
-	$calcExp .= "1;\n";
-	$calcExp .= "\L$::xpartName[$i]\_index";
-	$calcExp .= " = ";
-	$calcExp .= "0;\n";
-	return $calcExp;
+$here = <<END;
+\L$::xpartName[$i] = 0.0;
+\L$::xpartName[$i]_first_time_through = 1;
+END
+	return $here;
 }
 
 # Return front end code
@@ -64,56 +64,49 @@ sub frontEndInitCode {
 # Returns calculated code string
 sub frontEndCode {
 	my ($i) = @_;
-	my $calcExp = "// TrueRMS:  $::xpartName[$i]\n";
-	$calcExp .= "if (\L$::xpartName[$i]\_first\_time\_through) {\n";
-	$calcExp .= "\t\L$::xpartName[$i]\_first\_time\_through";
-	$calcExp .= " = 0;\n";
-	$calcExp .= "\t\L$::xpartName[$i]\_n";
-        $calcExp .= " = 1;\n";
-	$calcExp .= "\t\L$::xpartName[$i]";
-	$calcExp .= " = ";
-	$calcExp .= $::fromExp[0];
-	$calcExp .= ";\n";
-	$calcExp .= "\t\L$::xpartName[$i]\_sqrsum";
-	$calcExp .= " = ";
-	$calcExp .= $::fromExp[0];
-	$calcExp .= " * ";
-	$calcExp .= $::fromExp[0];
-	$calcExp .= ";\n";
-	$calcExp .= "\t\L$::xpartName[$i]\_indatsqrd\[0\]";
-	$calcExp .= " = ";
-	$calcExp .= "\L$::xpartName[$i]\_sqrsum;\n";
-	$calcExp .= "}\nelse {\n";
-	$calcExp .= "\tif (\L$::xpartName[$i]\_n < \U$::xpartName[$i]\_WINSZ) {\n";
-	$calcExp .= "\t\t\L$::xpartName[$i]\_index";
-	$calcExp .= " = ";
-	$calcExp .= "\L$::xpartName[$i]\_n++;\n";
-	$calcExp .= "\t}\n\telse {\n";
-	$calcExp .= "\t\t\L$::xpartName[$i]\_index";
-	$calcExp .= " = ";
-	$calcExp .= "(1+\L$::xpartName[$i]\_index)\%\U$::xpartName[$i]\_WINSZ;\n";
-	$calcExp .= "\t\t\L$::xpartName[$i]\_sqrsum";
-	$calcExp .= " -= ";
-	$calcExp .= "\L$::xpartName[$i]\_indatsqrd\[\L$::xpartName[$i]\_index\];\n";
-	$calcExp .= "\t}\n";
-	$calcExp .= "\t\L$::xpartName[$i]\_indatsqrd\[\L$::xpartName[$i]\_index\]";
-	$calcExp .= " = ";
-	$calcExp .= $::fromExp[0];
-	$calcExp .= " * ";
-	$calcExp .= $::fromExp[0];
-	$calcExp .= ";\n";
-	$calcExp .= "\t\L$::xpartName[$i]\_sqrsum";
-	$calcExp .= " += ";
-	$calcExp .= "\L$::xpartName[$i]\_indatsqrd\[\L$::xpartName[$i]\_index\];\n";
-	$calcExp .= "\t\L$::xpartName[$i]\_sqrval = \L$::xpartName[$i]\_sqrsum\/(double) \L$::xpartName[$i]\_n;\n";
-	$calcExp .= "\tif (\L$::xpartName[$i]\_sqrval > 0.0)  {\n";
-	$calcExp .= "\t\t\L$::xpartName[$i]";
-	$calcExp .= " = ";
-	$calcExp .= "lsqrt(\L$::xpartName[$i]\_sqrval);\n";
-	$calcExp .= "\t}else{ \n";
-	$calcExp .= "\t\t\L$::xpartName[$i] = 0.0; \n";
-	$calcExp .= "\t}\n";
-	$calcExp .= "}\n";
-	return $calcExp;
+$here = <<END;
+// TrueRMS:  $::xpartName[$i]
+// Square the input value
+\L$::xpartName[$i]_sqrin = $::fromExp[0] * $::fromExp[0];
+if (\L$::xpartName[$i]_first_time_through) {
+	\L$::xpartName[$i]_first_time_through = 0;
+	\L$::xpartName[$i]_is_first_cycle = 1;
+	\L$::xpartName[$i]_index = 0;
+	\L$::xpartName[$i]_sqrsum = 0.0;
+	\L$::xpartName[$i]_sqrsumrun = \L$::xpartName[$i]_sqrin;
+	\L$::xpartName[$i]_indatsqrd[0] = \L$::xpartName[$i]_sqrin;
+	\L$::xpartName[$i]_sqrval = 0.0;
+	\L$::xpartName[$i] = $::fromExp[0];
+
+} else {
+	// update sums with new input value
+	\L$::xpartName[$i]_sqrsum = \L$::xpartName[$i]_sqrsum + \L$::xpartName[$i]_sqrin;
+	\L$::xpartName[$i]_sqrsumrun = \L$::xpartName[$i]_sqrsumrun +  \L$::xpartName[$i]_sqrin;
+
+	// update running sum
+	\L$::xpartName[$i]_index ++;
+	if(\L$::xpartName[$i]_index < \U$::xpartName[$i]_WINSZ) {
+                \Lif(! \L$::xpartName[$i]_is_first_cycle)
+		    \L$::xpartName[$i]_sqrsumrun = \L$::xpartName[$i]_sqrsumrun - \L$::xpartName[$i]_indatsqrd[\L$::xpartName[$i]_index];
+	} else {
+		\L$::xpartName[$i]_is_first_cycle = 0;
+		\L$::xpartName[$i]_index = 0;
+		\L$::xpartName[$i]_sqrsumrun = \L$::xpartName[$i]_sqrsum;
+		\L$::xpartName[$i]_sqrsum = 0;
+	}
+
+	// store input value squared
+	\L$::xpartName[$i]_indatsqrd[\L$::xpartName[$i]_index] = \L$::xpartName[$i]_sqrin;
+
+	// compute output value
+	\L$::xpartName[$i]_sqrval = \L$::xpartName[$i]_sqrsumrun / \U$::xpartName[$i]_WINSZ;
+	\Lif(\L$::xpartName[$i]_sqrval > 0.0)
+             \L$::xpartName[$i] = lsqrt(\L$::xpartName[$i]_sqrval);
+	else
+             \L$::xpartName[$i] = 0.0;
+}
+	
+END
+	return $here;
 }
 
