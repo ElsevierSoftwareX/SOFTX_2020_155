@@ -1807,7 +1807,7 @@ int main(int argc,char *argv[])
 	printf("SDF FILE = %s\n",sdfile);
 	printf("CURRENt FILE = %s\n",bufile);
 	printf("LOG FILE = %s\n",logfilename);
-
+sleep(5);
 	// Create BURT/SDF EPICS channel names
 	char reloadChan[256]; sprintf(reloadChan, "%s_%s", pref, "SDF_RELOAD");		// Request to load new BURT
 	// Set request to load safe.snap on startup
