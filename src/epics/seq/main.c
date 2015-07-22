@@ -1808,6 +1808,7 @@ int main(int argc,char *argv[])
 	printf("SDF FILE = %s\n",sdfile);
 	printf("CURRENt FILE = %s\n",bufile);
 	printf("LOG FILE = %s\n",logfilename);
+sleep(5);
 	char rcgversionname[256]; 
 	int majorversion = RCG_VERSION_MAJOR;
 	int subversion1 = RCG_VERSION_MINOR;
