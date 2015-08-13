@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# Install one system
+
+if [ "$#" -ne 2 ];then
+	echo "pls state the name of the system to install and the source code directory";
+	exit 1;
+else
+	system=$1;
+	srcdir=$2;
+fi
+
+upper_system=`echo $system | tr a-z A-Z`
+hostname=`grep TARGET_HOST_NAME src/include/${system}.h | head -1 | awk '{print $3}'`
+site=`grep site= target/${system}epics/${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`
+if test ${site}no = no; then echo Please make $system first; exit 1; fi
+upper_site=`echo $site | tr a-z A-Z`
+site_letter=M
+if test ${site} = llo; then site_letter=L; fi
+if test ${site} = lho; then site_letter=H; fi
+if test ${site} = geo; then site_letter=G; fi
+if test ${site} = caltech; then site_letter=C; fi
+if test ${site} = tst; then site_letter=X; fi
+if test ${site} = stn; then site_letter=S; fi
+ifo=`grep ifo= target/${system}epics/${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`
+lower_ifo=`echo $ifo | tr A-Z a-z`
+
+/bin/mkdir -p  /opt/rtcds/${site}/${lower_ifo}/chans/adc 
+/bin/cp -p build/${system}epics/config/adcListSorted.txt  /opt/rtcds/${site}/${lower_ifo}/chans/adc/${system}_adclist.txt
+
