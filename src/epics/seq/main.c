@@ -2249,7 +2249,8 @@ sleep(5);
 					clearTableSelections(cdSort,cdTableList, selectCounter);
 					confirmVal = 0;
 				}
-				cdSort = spChecker(monFlag,cdTableList,wcVal,wcstring,1,&status);
+				if (!freezeTable)
+					cdSort = spChecker(monFlag,cdTableList,wcVal,wcstring,1,&status);
 				pageDisp = reportSetErrors(pref, cdSort, cdTableList,pageNum);
 				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
 				if(selectAll == 3) {
