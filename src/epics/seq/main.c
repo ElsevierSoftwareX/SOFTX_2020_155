@@ -121,6 +121,7 @@ typedef struct SET_ERR_TABLE {
 	char liveset[64];
 	char timeset[64];
 	char diff[64];
+	double liveval;
 	int sigNum;
 	int chFlag;
 	int filtNum;
@@ -470,6 +471,7 @@ char *ret;
 				sprintf(setErrTable[errCnt].burtset, "%s", " ");
 				sprintf(setErrTable[errCnt].liveset, "0x%x", buffer[jj].rval);
 				sprintf(setErrTable[errCnt].diff, "%s", "OVERRANGE");
+				setErrTable[errCnt].liveval = 0.0;
 				setErrTable[errCnt].sigNum = filterTable[ii].sw[jj];
 				mtime = buffer[jj].time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 				strcpy(localtimestring, ctime(&mtime));
@@ -502,6 +504,7 @@ char *ret;
 			sprintf(setErrTable[errCnt].burtset, "%s", swstrB);
 			sprintf(setErrTable[errCnt].liveset, "%s", swstrE);
 			sprintf(setErrTable[errCnt].diff, "%s", swstrD);
+			setErrTable[errCnt].liveval = 0.0;
 			setErrTable[errCnt].sigNum = filterTable[ii].sw[0] + (filterTable[ii].sw[1] * SDF_MAX_TSIZE);
 			setErrTable[errCnt].filtNum = ii;
 			setErrTable[errCnt].sw[0] = buffer[0].rval;;
@@ -863,6 +866,7 @@ time_t mtime;
 char localtimestring[256];
 long nvals = 1;
 char liveset[64];
+double liveval = 0.0;
 
 
 	chNotInit = 0;
@@ -882,6 +886,7 @@ char liveset[64];
 		if(!filterTable[ii].init) {
 			sprintf(uninitChans[lna].chname,"%s",tmpname);
 			sprintf(uninitChans[lna].liveset,"%s",cdTableList[ii].liveset);
+			uninitChans[lna].liveval = cdTableList[ii].liveval;
 			uninitChans[lna].sw[0] = cdTableList[ii].sw[0];
 			uninitChans[lna].sw[1] = cdTableList[ii].sw[1];
 			uninitChans[lna].sigNum = filterTable[ii].sw[0] + (filterTable[ii].sw[1] * SDF_MAX_TSIZE);
@@ -908,11 +913,15 @@ char liveset[64];
 			if(lna < SDF_ERR_TSIZE) {
 				sprintf(uninitChans[lna].chname,"%s",cdTable[jj].chname);
 				if(cdTable[jj].datatype == SDF_NUM) {
-					sprintf(liveset,"%.10lf",cdTableP[jj].data.chval);
+					liveval = cdTableP[jj].data.chval;
+					sprintf(liveset,"%.10lf", liveval);
+
 				} else {
+					liveval = 0.0;
 					sprintf(liveset,"%s",cdTableP[jj].data.strval);
 				}
 				sprintf(uninitChans[lna].liveset, "%s", liveset);
+				uninitChans[lna].liveval = liveval;
 				sprintf(uninitChans[lna].timeset,"%s"," ");
 				sprintf(uninitChans[lna].diff,"%s"," ");
 				lna ++;
@@ -930,6 +939,7 @@ char liveset[64];
 					sprintf(unMonChans[lnb].burtset,"%s",cdTable[jj].data.strval);
 				}
 				sprintf(unMonChans[lnb].liveset,"%s"," ");
+				unMonChans[lnb].liveval = 0.0;
 				sprintf(unMonChans[lnb].timeset,"%s"," ");
 				sprintf(unMonChans[lnb].diff,"%s"," ");
 			}
@@ -942,6 +952,7 @@ char liveset[64];
 		sprintf(uninitChans[jj].chname,"%s"," ");
 		sprintf(uninitChans[jj].burtset,"%s"," ");
 		sprintf(uninitChans[jj].liveset,"%s"," ");
+		uninitChans[jj].liveval = 0.0;
 		sprintf(uninitChans[jj].timeset,"%s"," ");
 		sprintf(uninitChans[jj].diff,"%s"," ");
 	}
@@ -951,6 +962,7 @@ char liveset[64];
 		sprintf(unMonChans[jj].chname,"%s"," ");
 		sprintf(unMonChans[jj].burtset,"%s"," ");
 		sprintf(unMonChans[jj].liveset,"%s"," ");
+		unMonChans[jj].liveval = 0.0;
 		sprintf(unMonChans[jj].timeset,"%s"," ");
 		sprintf(unMonChans[jj].diff,"%s"," ");
 	}
@@ -1116,6 +1128,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 	char diffB2L[64];
 	char swName[64];
 	double sdfdiff = 0.0;
+	double liveval = 0.0;
 	char *ret;
 	int filtDiffs;
 
@@ -1142,6 +1155,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 						sdfdiff = fabs(cdTable[ii].data.chval - buffer.rval);
 						sprintf(burtset,"%.10lf",cdTable[ii].data.chval);
 						sprintf(liveset,"%.10lf",buffer.rval);
+						liveval = buffer.rval;
 						sprintf(diffB2L,"%.8le",sdfdiff);
 						mtime = buffer.time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 						localErr = 1;
@@ -1153,6 +1167,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 					{
 						sprintf(burtset,"%s",cdTable[ii].data.strval);
 						sprintf(liveset,"%s",strbuffer.sval);
+						liveval = 0.0;
 						sprintf(diffB2L,"%s","                                   ");
 						mtime = strbuffer.time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 						localErr = 1;
@@ -1169,7 +1184,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 					sprintf(setErrTable[errCntr].burtset, "%s", burtset);
 
 					sprintf(setErrTable[errCntr].liveset, "%s", liveset);
-
+					setErrTable[errCntr].liveval = liveval;
 					sprintf(setErrTable[errCntr].diff, "%s", diffB2L);
 					setErrTable[errCntr].sigNum = ii;
 					setErrTable[errCntr].filtNum = -1;
@@ -1202,7 +1217,7 @@ int found = 0;
 			{
 				// fmIndex = -1;
 				if(strcmp(cdTable[jj].chname,modTable[ii].chname) == 0 && (modTable[ii].chFlag & 4)) {
-					if(cdTable[jj].datatype == SDF_NUM) cdTable[jj].data.chval = atof(modTable[ii].liveset);
+					if(cdTable[jj].datatype == SDF_NUM) cdTable[jj].data.chval = modTable[ii].liveval;/* atof(modTable[ii].liveset);*/
 					else sprintf(cdTable[jj].data.strval,"%s",modTable[ii].liveset);
 					cdTable[jj].initialized = 1;
 					found = 1;
@@ -1346,6 +1361,7 @@ int writeEpicsDb(int numchans,		///< Number of channels to write
 					if(chNotFound < SDF_ERR_TSIZE) {
 						sprintf(unknownChans[chNotFound].chname,"%s",myTable[ii].chname);
 						sprintf(unknownChans[chNotFound].liveset,"%s"," ");
+						unknownChans[chNotFound].liveval = 0.0;
 						sprintf(unknownChans[chNotFound].timeset,"%s"," ");
 						sprintf(unknownChans[chNotFound].diff,"%s"," ");
 						unknownChans[chNotFound].chFlag = 0;
@@ -1455,6 +1471,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 				sprintf(readErrTable[rderror].chname,"%s", s1);
 				sprintf(readErrTable[rderror].burtset, "%s", "Improper quotations ");
 				sprintf(readErrTable[rderror].liveset, "Line # %d", lineCnt);
+				readErrTable[rderror].liveval = 0.0;
 				sprintf(readErrTable[rderror].diff, "%s", sdfile);
 				sprintf(readErrTable[rderror].timeset, "%s", timestring);
 				rderror ++;
@@ -1534,6 +1551,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 									sprintf(readErrTable[rderror].chname,"%s", cdTable[ii].chname);
 									sprintf(readErrTable[rderror].burtset, "0x%x", (int)cdTableP[chNumP].data.chval);
 									sprintf(readErrTable[rderror].liveset, "%s", "OVERRANGE");
+									readErrTable[rderror].liveval = 0.0;
 									sprintf(readErrTable[rderror].diff, "%s", "MAX VAL = 0xffff");
 									sprintf(readErrTable[rderror].timeset, "%s", timestring);
 									printf("Read error --- %s\n", cdTable[ii].chname);
