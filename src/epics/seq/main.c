@@ -16,7 +16,6 @@ of this distribution.
 //	- Add db pointer to cdTable.
 //	- Add present value to cdTable.
 //	- Fix filter monitor bit settings on change.
-
 /*
  * Main program for demo sequencer
  */
@@ -28,6 +27,11 @@ of this distribution.
 #include <time.h>
 #include <sys/stat.h>
 #include <errno.h>
+
+#ifdef USE_SYSTEM_TIME
+#include <time.h>
+#endif
+
 #include "iocsh.h"
 #include "dbStaticLib.h"
 #include "crc.h"
@@ -44,6 +48,11 @@ of this distribution.
 #include "asCa.h"
 #include "asDbLib.h"
 
+#ifdef CA_SDF
+#include <pthread.h>
+#include "cadef.h"
+#endif
+
 #define SDF_LOAD_DB_ONLY	4
 #define SDF_READ_ONLY		2
 #define SDF_RESET		3
@@ -54,11 +63,19 @@ of this distribution.
 #define SDF_ERR_DSIZE		40	///< Size of display reporting tables.
 #define SDF_ERR_TSIZE		20000	///< Size of error reporting tables.
 
+#define MAX_CHAN_LEN		60
+
 #define SDF_TABLE_DIFFS			0
 #define SDF_TABLE_NOT_FOUND		1
 #define SDF_TABLE_NOT_INIT		2
 #define SDF_TABLE_NOT_MONITORED		3
 #define SDF_TABLE_FULL			4
+
+#define CA_STATE_OFF -1
+#define CA_STATE_IDLE 0
+#define CA_STATE_PARSING 1
+#define CA_STATE_RUNNING 2
+#define CA_STATE_EXIT 3
 
 #if 0
 /// Pointers to status record
@@ -128,6 +145,15 @@ typedef struct SET_ERR_TABLE {
 	unsigned int sw[2];
 } SET_ERR_TABLE;
 
+#ifdef CA_SDF
+/// Structure for holding data from EPICS CA
+typedef struct EPICS_CA_TABLE {
+	int datatype;
+	union Data data;
+	int connected;
+	chid chanid;
+} EPICS_CA_TABLE;
+#endif
 
 // Gloabl variables		****************************************************************************************
 int chNum = 0;			///< Total number of channels held in the local lookup table.
@@ -139,7 +165,9 @@ int fmtInit = 0;		///< Flag used to indicate that the filter module table needs 
 int chNotFound = 0;		///< Total number of channels read from BURT file which did not have a database entry.
 int chNotInit = 0;		///< Total number of channels not initialized by the safe.snap BURT file.
 int rderror = 0;
+#ifndef USE_SYSTEM_TIME
 char timechannel[256];		///< Name of the GPS time channel for timestamping.
+#endif
 char reloadtimechannel[256];	///< Name of EPICS channel which contains the BURT reload requests.
 struct timespec t;
 char logfilename[128];
@@ -154,13 +182,44 @@ SET_ERR_TABLE unMonChans[SDF_MAX_TSIZE];	///< Table used to report channels not 
 SET_ERR_TABLE readErrTable[SDF_ERR_TSIZE];	///< Table used to report file read errors..
 SET_ERR_TABLE cdTableList[SDF_MAX_TSIZE];	///< Table used to report file read errors..
 
+#ifdef CA_SDF
+EPICS_CA_TABLE caTable[SDF_MAX_TSIZE];		///< Table used to hold the data returned by channel access
+
+pthread_t caThread;
+pthread_mutex_t caStateMutex;
+pthread_mutex_t caTableMutex;
+int caThreadState;
+long disconnectedPVs;
+long droppedPVCount;
+
+#define ADDRESS int
+#define SETUP setupCASDF();
+#define CLEANUP cleanupCASDF();
+#define GET_ADDRESS(NAME,ADDRP) getCAIndex((NAME),(ADDRP))
+#define PUT_VALUE(ADDR,TYPE,PVAL) setCAValue((ADDR),(TYPE),(PVAL))
+#define PUT_VALUE_LONG(ADDR,PVAL) setCAValueLong((ADDR),(PVAL))
+#define GET_VALUE_NUM(ADDR,DESTP,TIMEP) syncEpicsDoubleValue((ADDR),(DESTP),(TIMEP))
+#define GET_VALUE_LONG(ADDR,DESTP,TIMEP) syncEpicsLongValue((ADDR),(DESTP),(TIMEP))
+#define GET_VALUE_STR(ADDR,DESTP,LEN,TIMEP) syncEpicsStrValue((ADDR),(DESTP),(LEN),(TIMEP))
+#else
+#define ADDRESS dbAddr
+#define SETUP
+#define CLEANUP
+#define GET_ADDRESS(NAME,ADDRP) dbNameToAddr((NAME),(ADDRP))
+#define PUT_VALUE(ADDR,TYPE,PVAL) dbPutField(&(ADDR),((TYPE)==SDF_NUM ? DBR_DOUBLE : DBR_STRING),(PVAL),1)
+#define PUT_VALUE_LONG(ADDR,PVAL) dbPutField(&(ADDR),DBR_LONG,(PVAL),1);
+#define GET_VALUE_NUM(ADDR,DESTP,TIMEP) getDbValueDouble(&(ADDR),(double*)(DESTP),(TIMEP))
+#define GET_VALUE_LONG(ADDR,DESTP,TIMEP) getDbValueLong(&(ADDR),(unsigned long*)(DESTP),(TIMEP))
+#define GET_VALUE_STR(ADDR,DESTP,LEN,TIMEP) getDbValueString(&(ADDR),(char*)(DESTP),(LEN),(TIMEP))
+#endif
+
 #define SDF_NUM		0
 #define SDF_STR		1
 
 // Function prototypes		****************************************************************************************
 int checkFileCrc(char *);
 unsigned int filtCtrlBitConvert(unsigned int);
-void getSdfTime(char *);
+void getSdfTime(char *, int size);
 void logFileEntry(char *);
 int getEpicsSettings(int);
 int writeTable2File(char *,char *,int,CDS_CD_TABLE *);
@@ -171,13 +230,46 @@ int spChecker(int,SET_ERR_TABLE *,int,char *,int,int *);
 void newfilterstats(int);
 int writeEpicsDb(int,CDS_CD_TABLE *,int);
 int readConfig( char *,char *,int,char *);
-void dbDumpRecords(DBBASE *);
 int parseLine(char *,char *,char *,char *,char *,char *,char *);
 int modifyTable(int,SET_ERR_TABLE *);
 void clearTableSelections(int,SET_ERR_TABLE *, int *);
 void setAllTableSelections(int,SET_ERR_TABLE *, int *,int);
 void decodeChangeSelect(int, int, int, SET_ERR_TABLE *, int *);
 int appendAlarms2File(char *,char *,char *);
+void registerFilters();
+#ifdef CA_SDF
+int getCAIndex(char *, ADDRESS *);
+
+int canFindCAChannel(char *entry);
+int setCAValue(ADDRESS, int, void *);
+int setCAValueLong(ADDRESS, unsigned long *);
+
+int syncEpicsDoubleValue(ADDRESS, double *, time_t *);
+int syncEpicsLongValue(ADDRESS, unsigned long *, time_t *);
+int syncEpicsStrValue(ADDRESS, char *, int, time_t *);
+
+void connectCallback(struct connection_handler_args);
+void subscriptionHandler(struct event_handler_args);
+void registerPV(char *, int);
+int daqToSDFDataType(int);
+void parseIni(char *);
+
+int getCAThreadState();
+void setCAThreadState(int state);
+
+unsigned long getDisconnectedPVCount();
+
+void *caMainLoop(void *);
+
+
+void initCAConnections(char *);
+void setupCASDF();
+void cleanupCASDF();
+#else
+int getDbValueDouble(ADDRESS*,double *,time_t *);
+int getDbValueString(ADDRESS*,char *, int, time_t *);
+void dbDumpRecords(DBBASE *);
+#endif
 
 // End Header **********************************************************************************************************
 //
@@ -439,41 +531,38 @@ char swstrE[64];
 char swstrB[64];
 char swstrD[64];
 struct buffer {
-	DBRstatus
-	DBRtime
-	unsigned int rval;
+	time_t t;
+	unsigned long rval;
 	}buffer[2];
-long options = DBR_STATUS|DBR_TIME;
-dbAddr paddr;
-dbAddr paddr1;
-dbAddr paddr2;
-long nvals = 1;
+ADDRESS paddr;
+ADDRESS paddr1;
+ADDRESS paddr2;
 long status;
 char *ret;
 	for(ii=0;ii<fcount;ii++)
 	{
-		bzero(swname[0],strlen(swname[0]));
-		bzero(swname[1],strlen(swname[1]));
+		bzero(swname[0],sizeof(swname[0]));
+		bzero(swname[1],sizeof(swname[1]));
 		strcpy(swname[0],filterTable[ii].fname);
 		strcat(swname[0],"SW1S");
 		strcpy(swname[1],filterTable[ii].fname);
 		strcat(swname[1],"SW2S");
 		sprintf(swname[2],"%s",filterTable[ii].fname);
 		strcat(swname[2],"SWSTR");
-		status = dbNameToAddr(swname[0],&paddr);
-		status = dbGetField(&paddr,DBR_LONG,&buffer[0],&options,&nvals,NULL);
-		status = dbNameToAddr(swname[1],&paddr1);
-		status = dbGetField(&paddr1,DBR_LONG,&buffer[1],&options,&nvals,NULL);
+		status = GET_ADDRESS(swname[0],&paddr);
+		status = GET_VALUE_LONG(paddr,&(buffer[0].rval),&(buffer[0].t));
+		status = GET_ADDRESS(swname[1],&paddr1);
+		status = GET_VALUE_LONG(paddr,&(buffer[1].rval),&(buffer[1].t));
 		for(jj=0;jj<2;jj++) {
 			if(buffer[jj].rval > 0xffff || buffer[jj].rval < 0)	// Switch setting overrange
 			{
 				sprintf(setErrTable[errCnt].chname,"%s", swname[jj]);
 				sprintf(setErrTable[errCnt].burtset, "%s", " ");
-				sprintf(setErrTable[errCnt].liveset, "0x%x", buffer[jj].rval);
+				sprintf(setErrTable[errCnt].liveset, "0x%lx", buffer[jj].rval);
 				sprintf(setErrTable[errCnt].diff, "%s", "OVERRANGE");
 				setErrTable[errCnt].liveval = 0.0;
 				setErrTable[errCnt].sigNum = filterTable[ii].sw[jj];
-				mtime = buffer[jj].time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
+				mtime = buffer[jj].t;
 				strcpy(localtimestring, ctime(&mtime));
 				localtimestring[strlen(localtimestring) - 1] = 0;
 				sprintf(setErrTable[errCnt].timeset, "%s", localtimestring);
@@ -485,8 +574,8 @@ char *ret;
 		refVal = filtCtrlBitConvert(presentVal);
 		filtStrBitConvert(0,refVal,swstrE);
 		x = refVal;
-		status = dbNameToAddr(swname[2],&paddr2);
-		status = dbPutField(&paddr2,DBR_STRING,swstrE,1);
+		status = GET_ADDRESS(swname[2],&paddr2);
+		status = PUT_VALUE(paddr2,SDF_STR,swstrE);
 		setErrTable[errCnt].filtNum = -1;
 		if((refVal != filterTable[ii].swreq && errCnt < SDF_ERR_TSIZE && (filterTable[ii].mask || monitorAll) && filterTable[ii].init) )
 			*diffcntr += 1;
@@ -512,7 +601,7 @@ char *ret;
 			if(filterTable[ii].mask) setErrTable[errCnt].chFlag |= 0x1;
 			else setErrTable[errCnt].chFlag &= 0xe;
 
-			mtime = buffer[0].time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
+			mtime = buffer[0].t;
 			strcpy(localtimestring, ctime(&mtime));
 			localtimestring[strlen(localtimestring) - 1] = 0;
 			sprintf(setErrTable[errCnt].timeset, "%s", localtimestring);
@@ -521,15 +610,25 @@ char *ret;
 		}
 	}
 	return(errCnt);
-
 }
 
-/// Routine for reading GPS time from model EPICS record.
+/// Routine for reading and formatting the time as a string.
 ///	@param[out] timestring 	Pointer to char string in which GPS time is to be written.
-
-void getSdfTime(char *timestring)
+/// @note This can use the GPS time from the model, or if configured with USE_SYSTEM_TIME the system time.
+void getSdfTime(char *timestring, int size)
 {
+#ifdef USE_SYSTEM_TIME
+	time_t t;
+	struct tm tdata;
 
+	t = time(NULL);
+	localtime_r(&t, &tdata);
+	if (timestring && size > 0) {
+		if (strftime(timestring, size, "%a %b %e %H:%M:%S %Y", &tdata) == 0) {
+			timestring[0] = '\0';
+		}
+	}
+#else
 	dbAddr paddr;
 	long ropts = 0;
 	long nvals = 1;
@@ -537,6 +636,7 @@ void getSdfTime(char *timestring)
 
 	status = dbNameToAddr(timechannel,&paddr);
 	status = dbGetField(&paddr,DBR_STRING,timestring,&ropts,&nvals,NULL);
+#endif
 }
 
 /// Routine for logging messages to ioc.log file.
@@ -548,7 +648,7 @@ void logFileEntry(char *message)
 	long status;
 	dbAddr paddr;
 
-	getSdfTime(timestring);
+	getSdfTime(timestring, 256);
 	log = fopen(logfilename,"a");
 	if(log == NULL) {
 		status = dbNameToAddr(reloadtimechannel,&paddr);
@@ -566,14 +666,13 @@ void logFileEntry(char *message)
 ///	@param[in] numchans The number of channels listed in the main table.
 int getEpicsSettings(int numchans)
 {
-dbAddr geaddr;
 int ii;
 long status;
-long statusR;
-double dval;
-char sval[64];
 int chcount = 0;
-int nvals = 1;
+double dval;
+ADDRESS geaddr;
+long statusR;
+char sval[64];
 
 	for(ii=0;ii<numchans;ii++)
 	{
@@ -583,15 +682,14 @@ int nvals = 1;
 		cdTableP[ii].mask = cdTable[ii].mask;
 		cdTableP[ii].initialized = cdTable[ii].initialized;
 		// Find address of channel
-		status = dbNameToAddr(cdTableP[ii].chname,&geaddr);
+		status = GET_ADDRESS(cdTableP[ii].chname,&geaddr);
 		if(!status) {
 			if(cdTableP[ii].datatype == SDF_NUM)
 			{
-				statusR = dbGetField(&geaddr,DBR_DOUBLE,&dval,NULL,&nvals,NULL);
-				if(!statusR && cdTable[ii].filterswitch) cdTableP[ii].data.chval = (int)dval & 0xffff;
-				if(!statusR && !cdTable[ii].filterswitch) cdTableP[ii].data.chval = dval;
+				statusR = GET_VALUE_NUM(geaddr,&dval,NULL);
+				if (!statusR) cdTableP[ii].data.chval = (cdTable[ii].filterswitch ? (int)dval & 0xffff : dval);
 			} else {
-				statusR = dbGetField(&geaddr,DBR_STRING,&sval,NULL,&nvals,NULL);
+				statusR = GET_VALUE_STR(geaddr,sval,sizeof(sval),NULL);
 				if(!statusR) sprintf(cdTableP[ii].data.strval,"%s",sval);
 			}
 			chcount ++;
@@ -625,7 +723,7 @@ int writeTable2File(char *burtdir,
 	    return(-1);
         }
 	// Write BURT header
-	getSdfTime(timestring);
+	getSdfTime(timestring, 128);
 	fprintf(csFile,"%s\n","--- Start BURT header");
 	fprintf(csFile,"%s%s\n","Time:      ",timestring);
 	fprintf(csFile,"%s\n","Login ID: controls ()");
@@ -823,7 +921,7 @@ char shortfilename[64];
 			return(-1);
 	}
 	logFileEntry(filemsg);
-	getSdfTime(timestring);
+	getSdfTime(timestring, 128);
 	// printf(" Time of save = %s\n",timestring);
 	status = dbPutField(&sfaddr,DBR_STRING,shortfilename,1);
 	status = dbPutField(&staddr,DBR_STRING,timestring,1);
@@ -1104,22 +1202,11 @@ int zero = 0;
 int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstring, int listAll, int *totalDiffs)
 {
    	int errCntr = 0;
-	dbAddr paddr;
+	ADDRESS paddr;
 	long status;
-	long ropts = 0;
-	long nvals = 1;
 	int ii;
-	struct buffer {
-		DBRstatus
-		DBRtime
-		double rval;
-		}buffer;
-	struct strbuffer {
-		DBRstatus
-		DBRtime
-		char sval[128];;
-		}strbuffer;
-	long options = DBR_STATUS|DBR_TIME;
+	double rval;
+	char sval[128];
 	time_t mtime;
 	char localtimestring[256];
 	int localErr = 0;
@@ -1144,32 +1231,31 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 			   (listAll && cdTable[ii].filterswitch == 0))
 			{
 				localErr = 0;
+				mtime = 0;
 				// Find address of channel
-				status = dbNameToAddr(cdTable[ii].chname,&paddr);
+				status = GET_ADDRESS(cdTable[ii].chname,&paddr);
 				// If this is a digital data type, then get as double.
 				if(cdTable[ii].datatype == SDF_NUM)
 				{
-					status = dbGetField(&paddr,DBR_DOUBLE,&buffer,&options,&nvals,NULL);
-					if(cdTable[ii].data.chval != buffer.rval || listAll)
+					status = GET_VALUE_NUM(paddr,&rval,&mtime);
+					if(cdTable[ii].data.chval != rval || listAll)
 					{
-						sdfdiff = fabs(cdTable[ii].data.chval - buffer.rval);
+						sdfdiff = fabs(cdTable[ii].data.chval - rval);
 						sprintf(burtset,"%.10lf",cdTable[ii].data.chval);
-						sprintf(liveset,"%.10lf",buffer.rval);
-						liveval = buffer.rval;
+						sprintf(liveset,"%.10lf",rval);
+						liveval = rval;
 						sprintf(diffB2L,"%.8le",sdfdiff);
-						mtime = buffer.time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 						localErr = 1;
 					}
 				// If this is a string type, then get as string.
 				} else {
-					status = dbGetField(&paddr,DBR_STRING,&strbuffer,&options,&nvals,NULL);
-					if(strcmp(cdTable[ii].data.strval,strbuffer.sval) != 0 || listAll)
+					status = GET_VALUE_STR(paddr,sval,sizeof(sval),&mtime);
+					if(strcmp(cdTable[ii].data.strval,sval) != 0 || listAll)
 					{
 						sprintf(burtset,"%s",cdTable[ii].data.strval);
-						sprintf(liveset,"%s",strbuffer.sval);
+						sprintf(liveset,"%s",sval);
 						liveval = 0.0;
 						sprintf(diffB2L,"%s","                                   ");
-						mtime = strbuffer.time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 						localErr = 1;
 					}
 				}
@@ -1261,7 +1347,7 @@ long status;
 int ii;
 int sn;
 int sn1 = 0;
-dbAddr saddr;
+ADDRESS saddr;
 	
 	for(ii=0;ii<errNum;ii++)
 	{
@@ -1272,13 +1358,13 @@ dbAddr saddr;
 				sn1 = sn / SDF_MAX_TSIZE;
 				sn %= SDF_MAX_TSIZE;
 			}
-			status = dbNameToAddr(cdTable[sn].chname,&saddr);
-			if(cdTable[sn].datatype == SDF_NUM) status = dbPutField(&saddr,DBR_DOUBLE,&cdTable[sn].data.chval,1);
-			else status = dbPutField(&saddr,DBR_STRING,&cdTable[sn].data.strval,1);
+			status = GET_ADDRESS(cdTable[sn].chname,&saddr);
+			if (cdTable[sn].datatype == SDF_NUM) status = PUT_VALUE(saddr,SDF_NUM,&(cdTable[sn].data.chval));
+			else status = PUT_VALUE(saddr,SDF_STR,cdTable[sn].data.strval);;
 
 			if(sn1) {
-				status = dbNameToAddr(cdTable[sn1].chname,&saddr);
-				status = dbPutField(&saddr,DBR_DOUBLE,&cdTable[sn1].data.chval,1);
+				status = GET_ADDRESS(cdTable[sn1].chname,&saddr);
+				status = PUT_VALUE(saddr,SDF_NUM,&(cdTable[sn1].data.chval));
 			}
 		}
 	}
@@ -1287,17 +1373,18 @@ dbAddr saddr;
 
 /// This function sets filter module request fields to aid in decoding errant filter module switch settings.
 void newfilterstats(int numchans) {
-	dbAddr paddr;
+	ADDRESS paddr;
 	long status;
 	int ii;
 	FILE *log;
 	char chname[128];
-	int mask = 0x1ffff;
+	unsigned long mask = 0x1ffff;
 	int tmpreq;
 	int counter = 0;
 	int rsw1,rsw2;
+	unsigned long tmpL = 0;
 
-printf("In newfilterstats\n");
+	printf("In newfilterstats\n");
 	for(ii=0;ii<numchans;ii++) {
 		if(filterTable[ii].newSet) {
 			counter ++;
@@ -1315,16 +1402,19 @@ printf("In newfilterstats\n");
 			// Find address of channel
 			strcpy(chname,filterTable[ii].fname);
 			strcat(chname,"SWREQ");
-			status = dbNameToAddr(chname,&paddr);
-			if(!status)
-				status = dbPutField(&paddr,DBR_LONG,&filterTable[ii].swreq,1);
-			bzero(chname,strlen(chname));
+			status = GET_ADDRESS(chname,&paddr);
+			if(!status) {
+				tmpL = (unsigned long)filterTable[ii].swreq;
+				status = PUT_VALUE_LONG(paddr,&tmpL);
+			}
+			bzero(chname,sizeof(chname));
 			// Find address of channel
 			strcpy(chname,filterTable[ii].fname);
 			strcat(chname,"SWMASK");
-			status = dbNameToAddr(chname,&paddr);
-			if(!status)
-				status = dbPutField(&paddr,DBR_LONG,&mask,1);
+			status = GET_ADDRESS(chname,&paddr);
+			if(!status) {
+				status = PUT_VALUE_LONG(paddr,&mask);
+			}
 			// printf("New filter %d %s = 0x%x\t0x%x\t0x%x\n",ii,filterTable[ii].fname,filterTable[ii].swreq,filterTable[ii].sw[0],filterTable[ii].sw[1]);
 		}
 	}
@@ -1336,7 +1426,7 @@ int writeEpicsDb(int numchans,		///< Number of channels to write
 	         CDS_CD_TABLE myTable[],	///< Table with data to be written.
 	     	 int command) 		///< Write request.
 {
-	dbAddr paddr;
+	ADDRESS paddr;
 	long status;
 	int ii;
 
@@ -1347,15 +1437,15 @@ int writeEpicsDb(int numchans,		///< Number of channels to write
 		case SDF_LOAD_PARTIAL:
 			for(ii=0;ii<numchans;ii++) {
 				// Find address of channel
-				status = dbNameToAddr(myTable[ii].chname,&paddr);
-				if(!status)
+				status = GET_ADDRESS(myTable[ii].chname,&paddr);
+				if (!status)
 				{
-				   if(myTable[ii].datatype == SDF_NUM)	// Value if floating point number
-				   {
-					status = dbPutField(&paddr,DBR_DOUBLE,&myTable[ii].data.chval,1);
-				   } else {			// Value is a string type
-					status = dbPutField(&paddr,DBR_STRING,&myTable[ii].data.strval,1);
-				   }
+					if (myTable[ii].datatype == SDF_NUM)
+					{
+						status = PUT_VALUE(paddr,SDF_NUM,&(myTable[ii].data.chval));
+					} else {
+						status = PUT_VALUE(paddr,SDF_STR,myTable[ii].data.strval);
+					}
 				}
 				else {				// Write errors to chan not found table.
 					if(chNotFound < SDF_ERR_TSIZE) {
@@ -1380,17 +1470,17 @@ int writeEpicsDb(int numchans,		///< Number of channels to write
 			// Only want to set those channels marked by a mask back to their original BURT setting.
 			for(ii=0;ii<numchans;ii++) {
 			    if(myTable[ii].mask) {
-				// Find address of channel
-				status = dbNameToAddr(myTable[ii].chname,&paddr);
-				if(!status)
-				{
-				   if(myTable[ii].datatype == SDF_NUM)	// Value if floating point number
-				   {
-					status = dbPutField(&paddr,DBR_DOUBLE,&myTable[ii].data.chval,1);
-				   } else {			// Value is a string type
-					status = dbPutField(&paddr,DBR_STRING,&myTable[ii].data.strval,1);
-				   }
-				}
+			    	//Find address of channel
+			    	status = GET_ADDRESS(myTable[ii].chname,&paddr);
+			    	if (!status)
+			    	{
+			    		if (myTable[ii].datatype == SDF_NUM)
+						{
+							status = PUT_VALUE(paddr,SDF_NUM,&(myTable[ii].data.chval));
+						} else {
+							status = PUT_VALUE(paddr,SDF_STR,myTable[ii].data.strval);
+						}
+			    	}
 			    }
 			}
 			break;
@@ -1441,7 +1531,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 	clock_gettime(CLOCK_REALTIME,&t);
 	starttime = t.tv_nsec;
 
-	getSdfTime(timestring);
+	getSdfTime(timestring, 256);
 
 	if(command == SDF_RESET) {
 		lderror = writeEpicsDb(chNum,cdTable,command);
@@ -1626,6 +1716,409 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 	return(lderror);
 }
 
+void registerFilters() {
+	int ii = 0;
+	char tmpstr[64];
+	int amatch = 0, jj = 0;
+	fmNum = 0;
+	for(ii=0;ii<chNum;ii++) {
+		if(cdTable[ii].filterswitch == 1)
+		{
+			strncpy(filterTable[fmNum].fname,cdTable[ii].chname,(strlen(cdTable[ii].chname)-4));
+			sprintf(tmpstr,"%s%s",filterTable[fmNum].fname,"SW2S");
+			filterTable[fmNum].sw[0] = ii;
+			cdTable[ii].filterNum = fmNum;
+			amatch = 0;
+			for(jj=0;jj<chNum;jj++) {
+				if(strcmp(tmpstr,cdTable[jj].chname) == 0)
+				{
+					filterTable[fmNum].sw[1] = jj;
+					amatch = 1;
+				}
+			}
+			if(!amatch) printf("No match for %s\n",tmpstr);
+			fmNum ++;
+		}
+	}
+	printf("%d filters\n",fmNum);
+}
+
+#ifdef CA_SDF
+int getCAIndex(char *entry, ADDRESS *addr) {
+	int ii = 0;
+
+	if (!entry) return;
+	for (ii = 0; ii < chNum; ++ii) {
+		if (strcmp(cdTable[ii].chname, entry) == 0) {
+			*addr = ii;
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int setCAValue(ADDRESS ii, int type, void *data)
+{
+	int status = ECA_NORMAL;
+	int result = 1;
+	if (ii >= 0 && ii < chNum) {
+		if (type == SDF_NUM) {
+			status = ca_put_callback(DBR_DOUBLE, caTable[ii].chanid, (double *)data, NULL, NULL);
+		} else {
+			status = ca_put_callback(DBR_STRING, caTable[ii].chanid, (char *)data, NULL, NULL);
+		}
+		result = (status == ECA_NORMAL ? 0 : 1);
+	}
+	return result;
+}
+
+int setCAValueLong(ADDRESS ii, unsigned long *data) {
+	double tmp = 0.0;
+
+	if (!data) return 1;
+	tmp = (double)*data;
+	return setCAValue(ii,SDF_NUM,(void*)&tmp);
+}
+
+int syncEpicsDoubleValue(int index, double *dest, time_t *tp) {
+	if (!dest || index < 0 || index >= chNum) return 1;
+	pthread_mutex_lock(&caTableMutex);
+	if (caTable[index].datatype == SDF_NUM) {
+		*dest = caTable[index].data.chval;
+		if (tp) {
+			time(tp);
+		}
+	}
+	pthread_mutex_unlock(&caTableMutex);
+	return 0;
+}
+
+int syncEpicsLongValue(ADDRESS index, unsigned long *dest, time_t *tp) {
+	double tmp = 0.0;
+	int result = 0;
+
+	if (!dest) return 1;
+	result = syncEpicsDoubleValue(index, &tmp, tp);
+	*dest = (unsigned long)(tmp);
+	return result;
+}
+
+int syncEpicsStrValue(int index, char *dest, int dest_size, time_t *tp) {
+	if (!dest || index < 0 || index >= chNum || dest_size < 1) return 1;
+	pthread_mutex_lock(&caTableMutex);
+	if (caTable[index].datatype == SDF_STR) {
+		strncpy(dest, caTable[index].data.strval, (dest_size < 64 ? dest_size : 64));
+		dest[dest_size-1] = '\0';
+		if (tp) {
+			time(tp);
+		}
+	}
+	pthread_mutex_unlock(&caTableMutex);
+	return 0;
+}
+
+void connectCallback(struct connection_handler_args args) {
+	EPICS_CA_TABLE *entry = (EPICS_CA_TABLE*)ca_puser(args.chid);
+	
+	if (entry) {
+		pthread_mutex_lock(&caTableMutex);
+		entry->connected = (args.op == CA_OP_CONN_UP);
+		disconnectedPVs += (args.op == CA_OP_CONN_UP ? -1 : 1);
+		pthread_mutex_unlock(&caTableMutex);
+	}
+	//	system_log(1, "Epics Connect callback for channel %d", chNum);
+	/*daqd.edcu1.channel_status[chNum] = args.op == CA_OP_CONN_UP? 0: 0xbad;
+	if (args.op == CA_OP_CONN_UP) daqd.edcu1.con_chans++; else daqd.edcu1.con_chans--;
+	daqd.edcu1.con_events++;
+	pvValue[3] = daqd.edcu1.num_chans;
+	pvValue[4] = daqd.edcu1.con_chans;
+	*/
+}
+
+/// Routine to handle subscription callbacks
+void subscriptionHandler(struct event_handler_args args) {
+	float val = 0.0;
+	if (args.status != ECA_NORMAL) {
+		return;
+	}
+	if (args.type == DBR_DOUBLE) {
+		EPICS_CA_TABLE *entry = args.usr;
+		if (entry) {
+			pthread_mutex_lock(&caTableMutex);
+			entry->data.chval = *((double*)args.dbr);
+			pthread_mutex_unlock(&caTableMutex);
+		}
+	}
+}
+
+/// Routine to register a channel
+void registerPV(char *PVname, int sdfType)
+{
+	long status=0;
+	chid chid1;
+
+	if (chNum >= SDF_MAX_TSIZE) {
+		droppedPVCount++;
+		return;
+	}
+	printf("Registering %s %d\n", PVname, sdfType);
+	pthread_mutex_lock(&caTableMutex);
+	disconnectedPVs++;
+	pthread_mutex_unlock(&caTableMutex);
+	status = ca_create_channel(PVname, connectCallback, &(caTable[chNum]), 0, &chid1);
+	status = ca_create_subscription(DBR_DOUBLE, 0, chid1, DBE_VALUE, subscriptionHandler, &(caTable[chNum]), NULL);
+	strncpy(cdTable[chNum].chname, PVname, 128);
+	cdTable[chNum].chname[128-1] = '\0';
+	cdTable[chNum].datatype = sdfType;
+	cdTable[chNum].initialized = 0;
+	cdTable[chNum].filterswitch = 0;
+	cdTable[chNum].filterNum = 0;
+	cdTable[chNum].error = 0;
+	cdTable[chNum].initialized = 0;
+	cdTable[chNum].mask = 0;
+
+	if((strstr(PVname,"_SW1S") != NULL) && (strstr(PVname,"_SW1S.") == NULL))
+	{
+		cdTable[chNum].filterswitch = 1;
+	}
+	if((strstr(PVname,"_SW2S") != NULL) && (strstr(PVname,"_SW2S.") == NULL))
+	{
+		cdTable[chNum].filterswitch = 2;
+	}
+
+	caTable[chNum].chanid = chid1;
+	++chNum;
+}
+
+/// Convert a daq data type to a SDF type
+int daqToSDFDataType(int daqtype) {
+	if (daqtype == 4) {
+		return SDF_NUM;
+	}
+	return SDF_STR;
+}
+
+/// Routine to read in data from an INI file
+void parseIni(char *fname)
+{
+	FILE *f = 0;
+	char buffer[256];
+	char channame[MAX_CHAN_LEN+1];
+	int in_section = 0;
+	int def_type = 0;
+	int cur_type = 0;
+	char *ch = 0;
+	char *end = 0;
+
+	printf("Parsing %s\n", fname);
+	if (!fname) return;
+	f = fopen(fname, "rt");
+	if (!f) return;
+
+	printf("Starting parse\n");
+	channame[0] = '\0';
+	while (fgets(buffer, 256, f)) {
+		/* fgets should always set this, but force a null termination */
+		buffer[256-1] = '\0';
+		/* skip until we reach the first [block] */
+		if (!in_section && buffer[0] != '[') continue;
+		in_section = 1;
+		/* terminate the input at the first \n */
+		for (ch = buffer; *ch; ++ch) {
+			if (*ch == '\n') {
+				*ch = '\0';
+				break;
+			}
+		}
+
+		if (buffer[0] == '[') {
+			/* read in a block, ie a channel */
+			if (strcmp(channame, "") != 0) {
+				if (strcmp(channame, "default") == 0) {
+					printf("found default %d %d\n", cur_type, daqToSDFDataType(cur_type));
+					def_type = cur_type;
+				} else {
+					//printf("registering, %s %d\n", channame, daqToSDFDataType(cur_type));
+					/* now connect to this PV */
+					registerPV(channame, daqToSDFDataType(cur_type));
+				}	
+			}
+			for (ch = buffer+1; *ch && *ch != ']'; ++ch) {}
+			if (*ch != ']') continue;
+			*ch = '\0';
+			/* skip the channel if the name is too long */
+			if (ch - (buffer+1) > MAX_CHAN_LEN) {
+				in_section = 0;
+				channame[0] = '\0';
+				continue;
+			}
+			strncpy(channame, buffer+1, MAX_CHAN_LEN+1);
+			channame[MAX_CHAN_LEN] = '\0';
+			cur_type = def_type;
+		} else {
+			/* read parameters for the given block, we only use datatype */
+			if (strncmp(buffer, "datatype=", strlen("datatype=")) == 0) {
+				ch = buffer+1;
+				// we are guaranteed to not have a '\0' before the '='
+				while (*ch != '=') ++ch;
+				++ch;
+				cur_type = atoi(ch);
+			}
+		}
+	}
+	if (strcmp(channame, "") != 0) {
+		if (strcmp(channame, "default") != 0) {
+			/* one last block/channel to connect to */
+			registerPV(channame, daqToSDFDataType(cur_type));
+		}
+	}
+	fclose(f);
+	ca_flush_io();
+}
+
+/// Routine to get the state of the CA Thread
+int getCAThreadState() {
+	int state = 0;
+	pthread_mutex_lock(&caStateMutex);
+	state = caThreadState;
+	pthread_mutex_unlock(&caStateMutex);
+	return state;
+}
+
+/// Routine to set the state of the CA Thread
+void setCAThreadState(int state) {
+	pthread_mutex_lock(&caStateMutex);
+	caThreadState = state;
+	pthread_mutex_unlock(&caStateMutex);
+}
+
+unsigned long getDisconnectedPVCount() {
+	unsigned long tmp = 0;
+	pthread_mutex_lock(&caTableMutex);
+	tmp = disconnectedPVs;
+	pthread_mutex_unlock(&caTableMutex);
+	return tmp;
+}
+
+/// Main loop of the CA Thread
+void *caMainLoop(void *param)
+{
+	char *fname = (char *)param;
+	if (!param) {
+		setCAThreadState(CA_STATE_EXIT);
+		return NULL;
+	}
+	ca_context_create(ca_enable_preemptive_callback);
+	setCAThreadState(CA_STATE_PARSING);
+	parseIni(fname);
+	registerFilters();
+	printf("Done with parsing, CA thread continuing\n");
+	setCAThreadState(CA_STATE_RUNNING);
+}
+
+/// Routine used to read in all channels to monitor from an INI file and create local connections
+void initCAConnections(char *fname)
+{
+	int err = 0;
+	int state = CA_STATE_OFF;
+	pthread_attr_t attr;
+
+	setCAThreadState(CA_STATE_OFF);
+	// create a thread to handle CA activities
+	pthread_attr_init (&attr);
+	pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
+	err = pthread_create (&caThread, &attr, (void *(*)(void *))caMainLoop, fname);
+	if (err) {
+		// FIXME: handle this
+	}
+	pthread_attr_destroy(&attr);
+
+	state = getCAThreadState();
+	while (state == CA_STATE_OFF || state == CA_STATE_PARSING) {
+		usleep(10);
+		state = getCAThreadState();
+	}
+}
+
+/// Routine to setup mutexes and other resources used by the CA SDF system
+void setupCASDF()
+{
+	int ii;
+
+	// set some defaults
+	for (ii = 0; ii < SDF_MAX_TSIZE; ++ii) {
+		caTable[ii].datatype = SDF_NUM;
+		caTable[ii].data.chval = 0.0;
+		caTable[ii].connected = 0;
+	}
+	disconnectedPVs = 0;
+	droppedPVCount = 0;
+	pthread_mutex_init(&caStateMutex, NULL);	// FIXME check for errors
+	pthread_mutex_init(&caTableMutex, NULL);
+}
+
+/// Routine to tear-down mutexes and other resources used by the CA SDF system
+void cleanupCASDF()
+{
+	pthread_mutex_destroy(&caTableMutex);
+	pthread_mutex_destroy(&caStateMutex);
+}
+#else
+int getDbValueDouble(ADDRESS *paddr,double *dest,time_t *tp) {
+	struct buffer {
+		DBRtime
+		double dval;
+	} buffer;
+	long options = DBR_TIME;
+	long nvals = 1;
+	int result = 1;
+
+	if (dest && paddr) {
+		result = dbGetField(paddr, DBR_DOUBLE, &buffer, &options, &nvals, NULL);
+		*dest = buffer.dval;
+		if (tp) {
+			*tp = buffer.time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
+		}
+	}
+	return result;
+}
+int getDbValueLong(ADDRESS *paddr,unsigned long *dest,time_t *tp) {
+	struct buffer {
+		DBRtime
+		unsigned long dval;
+	} buffer;
+	long options = DBR_TIME;
+	long nvals = 1;
+	int result = 1;
+
+	if (dest && paddr) {
+		result = dbGetField(paddr, DBR_LONG, &buffer, &options, &nvals, NULL);
+		*dest = buffer.dval;
+		if (tp) {
+			*tp = buffer.time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
+		}
+	}
+	return result;
+}
+int getDbValueString(ADDRESS *paddr,char *dest, int max_len, time_t *tp) {
+	struct buffer {
+		DBRtime
+		char sval[128];
+	} strbuffer;
+	long options = DBR_TIME;
+	long nvals = 1;
+	int result = 1;
+	if (dest && paddr && (max_len > 0)) {
+		result = dbGetField(paddr,DBR_STRING,&strbuffer,&options,&nvals,NULL);
+		strncpy(dest, strbuffer.sval, max_len);
+		dest[max_len-1]='\0';
+		if (tp) {
+			*tp = strbuffer.time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
+		}
+	}
+	return result;
+}
+
 /// Routine used to extract all settings channels from EPICS database to create local settings table on startup.
 void dbDumpRecords(DBBASE *pdbbase)
 {
@@ -1633,10 +2126,7 @@ void dbDumpRecords(DBBASE *pdbbase)
     long  status;
     char mytype[4][64];
     int ii;
-    int fc = 0;
-    char errMsg[128];
-    char tmpstr[64];
-    int amatch,jj;
+    int jj;
 	int cnt = 0;
 
     // By convention, the RCG produces ai and bi records for settings.
@@ -1661,6 +2151,7 @@ void dbDumpRecords(DBBASE *pdbbase)
             if (dbIsAlias(pdbentry)) {
                 printf("\n  Alias:%s\n",dbGetRecordName(pdbentry));
             } else {
+		//fprintf(stderr, "processing %s\n", dbGetRecordName(pdbentry));
 		sprintf(cdTable[chNum].chname,"%s",dbGetRecordName(pdbentry));
 		cdTable[chNum].filterswitch = 0;
 		cdTable[chNum].filterNum = 0;
@@ -1692,29 +2183,34 @@ void dbDumpRecords(DBBASE *pdbbase)
 	printf("  %d Records, with %d filters\n", cnt,fmNum);
     }
 }
-    fmNum = 0;
-    for(ii=0;ii<chNum;ii++) {
-	if(cdTable[ii].filterswitch == 1)
-	{
-		strncpy(filterTable[fmNum].fname,cdTable[ii].chname,(strlen(cdTable[ii].chname)-4));
-		sprintf(tmpstr,"%s%s",filterTable[fmNum].fname,"SW2S");
-		filterTable[fmNum].sw[0] = ii;
-		cdTable[ii].filterNum = fmNum;
-		amatch = 0;
-    		for(jj=0;jj<chNum;jj++) {
-			if(strcmp(tmpstr,cdTable[jj].chname) == 0)
-			{
-				filterTable[fmNum].sw[1] = jj;
-				amatch = 1;
-			}
-		}
-		if(!amatch) printf("No match for %s\n",tmpstr);
-		fmNum ++;
-	}
-    }
-	printf("  %d Records, with %d filters\n", cnt,fmNum);
+	registerFilters();
     printf("End of all Records\n");
     dbFreeEntry(pdbentry);
+}
+#endif
+
+void listLocalRecords(DBBASE *pdbbase) {
+	DBENTRY  *pdbentry;
+	long status = 0;
+	int ii = 0;
+
+	pdbentry = dbAllocEntry(pdbbase);
+	status = dbFindRecordType(pdbentry, "ao");
+	if (status) {
+		printf("No record descriptions\n");
+		return;
+	}
+	status = dbFirstRecord(pdbentry);
+	if (status) {
+		printf("No records found\n");
+		return;
+	}
+	while (!status) {
+		printf("%d: %s\n",ii, dbGetRecordName(pdbentry));
+		++ii;
+		status = dbNextRecord(pdbentry);
+	}
+	dbFreeEntry(pdbentry);
 }
 
 /// Called on EPICS startup; This is generic EPICS provided function, modified for LIGO use.
@@ -1727,6 +2223,10 @@ int main(int argc,char *argv[])
 	dbAddr loadedfile_addr;
 	dbAddr sperroraddr;
 	dbAddr alrmchcountaddr;
+#ifdef CA_SDF
+	dbAddr disconnectcountaddr;
+	dbAddr droppedcountaddr;
+#endif
 	dbAddr filesetcntaddr;
 	dbAddr fulldbcntaddr;
 	dbAddr monchancntaddr;
@@ -1754,7 +2254,7 @@ int main(int argc,char *argv[])
 	dbAddr pagelockaddr[3];
 	// Initialize request for file load on startup.
 	int sdfReq = SDF_LOAD_PARTIAL;
-	long status;
+	int status;
 	int request;
 	long ropts = 0;
 	long nvals = 1;
@@ -1833,21 +2333,25 @@ sleep(5);
 	int subversion2 = RCG_VERSION_SUB;
 	int myreleased = RCG_VERSION_REL;
 	double myversion;
+
+
+	listLocalRecords(*iocshPpdbbase);
 	myversion = majorversion + 0.01 * subversion1 + 0.001 * subversion2;
 	if(!myreleased) myversion *= -1.0;
-	sprintf(rcgversionname, "%s_%s", pref, "RCG_VERSION");		// Request to load new BURT
-	status = dbNameToAddr(rcgversionname,&rcgversion_addr);
-	status = dbPutField(&rcgversion_addr,DBR_DOUBLE,&myversion,1);
 
 	// Create BURT/SDF EPICS channel names
 	char reloadChan[256]; sprintf(reloadChan, "%s_%s", pref, "SDF_RELOAD");		// Request to load new BURT
 	// Set request to load safe.snap on startup
 	status = dbNameToAddr(reloadChan,&reload_addr);
+	printf("%d\n", status);
 	status = dbPutField(&reload_addr,DBR_LONG,&sdfReq,1);		// Init request for startup.
 
 	char reloadStat[256]; sprintf(reloadStat, "%s_%s", pref, "SDF_RELOAD_STATUS");	// Status of last reload
+	printf("reloadStat = %s\n", reloadStat);
 	status = dbNameToAddr(reloadStat,&reloadstat_addr);
+	printf("%d\n", status);
 	status = dbPutField(&reloadstat_addr,DBR_LONG,&rdstatus,1);	// Init to zero.
+	printf("managed to set reload stat\n");
 
 	char sdfFileName[256]; sprintf(sdfFileName, "%s_%s", pref, "SDF_NAME");		// Name of file to load next request
 	// Initialize BURT file to be loaded next request = safe.snap
@@ -1876,6 +2380,14 @@ sleep(5);
 
 	char mcc[256]; sprintf(mcc, "%s_%s", pref, "SDF_UNMON_CNT");			// Number of settings NOT being monitored.
 	status = dbNameToAddr(mcc,&monchancntaddr);
+
+#ifdef CA_SDF
+	char dsc[256]; sprintf(dsc, "%s_%s", pref, "SDF_DISCONNECTED_CNT");
+	status = dbNameToAddr(dsc,&disconnectcountaddr);
+
+	char dpdc[256]; sprintf(dpdc, "%s_%s", pref, "SDF_DROPPED_CNT");
+	status = dbNameToAddr(dsc,&droppedcountaddr);
+#endif
 
 	char tsrname[256]; sprintf(tsrname, "%s_%s", pref, "SDF_SORT");			// SDF Table sorting request
 	status = dbNameToAddr(tsrname,&tablesortreqaddr);
@@ -1938,9 +2450,10 @@ sleep(5);
 	status = dbNameToAddr(msgstrname,&msgstraddr);
 	status = dbPutField(&msgstraddr,DBR_STRING,"",1);
 
-
+#ifndef USE_SYSTEM_TIME
 	sprintf(timechannel,"%s_%s", pref, "TIME_STRING");
 	// printf("timechannel = %s\n",timechannel);
+#endif
 	sprintf(reloadtimechannel,"%s_%s", pref, "SDF_RELOAD_TIME");			// Time of last BURT reload
 	status = dbNameToAddr(reloadtimechannel,&reloadtimeaddr);
 
@@ -1975,7 +2488,11 @@ sleep(5);
 	status = dbNameToAddr(confirmwordname,&confirmwordaddr);
 	status = dbPutField(&confirmwordaddr,DBR_LONG,&resetNum,1);
 
+#ifdef CA_SDF
+	initCAConnections("test.ini");
+#else
 	dbDumpRecords(*iocshPpdbbase);
+#endif
 	sprintf(errMsg,"Software Restart \nRCG VERSION: %.2f",myversion);
 	logFileEntry(errMsg);
 
@@ -1996,6 +2513,14 @@ sleep(5);
 		// Get BURT Read File Name
 		status = dbNameToAddr(sdfFileName,&sdfname_addr);
 		status = dbGetField(&sdfname_addr,DBR_STRING,sdf,&ropts,&nvals,NULL);
+
+#ifdef CA_SDF
+		{
+			long disconnect_count = getDisconnectedPVCount();
+			dbPutField(&disconnectcountaddr,DBR_LONG,&disconnect_count,1);
+			dbPutField(&droppedcountaddr,DBR_LONG,&droppedPVCount,1); 
+		}
+#endif
 		//  Create full filename including directory and extension.
 		sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");
 		sprintf(sdalarmfile, "%s%s%s", sdfDir, sdf,"_alarms.snap");
