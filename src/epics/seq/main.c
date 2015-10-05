@@ -151,6 +151,7 @@ typedef struct EPICS_CA_TABLE {
 	int datatype;
 	union Data data;
 	int connected;
+	time_t mod_time;
 	chid chanid;
 } EPICS_CA_TABLE;
 #endif
@@ -215,6 +216,7 @@ long droppedPVCount;
 
 #define SDF_NUM		0
 #define SDF_STR		1
+#define SDF_UNKNOWN	-1
 
 // Function prototypes		****************************************************************************************
 int checkFileCrc(char *);
@@ -1786,7 +1788,7 @@ int syncEpicsDoubleValue(int index, double *dest, time_t *tp) {
 	if (caTable[index].datatype == SDF_NUM) {
 		*dest = caTable[index].data.chval;
 		if (tp) {
-			time(tp);
+			*tp = caTable[index].mod_time;
 		}
 	}
 	pthread_mutex_unlock(&caTableMutex);
@@ -1804,16 +1806,20 @@ int syncEpicsLongValue(ADDRESS index, unsigned long *dest, time_t *tp) {
 }
 
 int syncEpicsStrValue(int index, char *dest, int dest_size, time_t *tp) {
+	static int i = 0;
+
 	if (!dest || index < 0 || index >= chNum || dest_size < 1) return 1;
 	pthread_mutex_lock(&caTableMutex);
 	if (caTable[index].datatype == SDF_STR) {
-		strncpy(dest, caTable[index].data.strval, (dest_size < 64 ? dest_size : 64));
+		const int MAX_STR_LEN = sizeof(caTable[index].data.strval);
+		strncpy(dest, caTable[index].data.strval, (dest_size < MAX_STR_LEN ? dest_size : MAX_STR_LEN));
 		dest[dest_size-1] = '\0';
 		if (tp) {
-			time(tp);
+			*tp = caTable[index].mod_time;
 		}
 	}
 	pthread_mutex_unlock(&caTableMutex);
+	i++;
 	return 0;
 }
 
@@ -1826,29 +1832,28 @@ void connectCallback(struct connection_handler_args args) {
 		disconnectedPVs += (args.op == CA_OP_CONN_UP ? -1 : 1);
 		pthread_mutex_unlock(&caTableMutex);
 	}
-	//	system_log(1, "Epics Connect callback for channel %d", chNum);
-	/*daqd.edcu1.channel_status[chNum] = args.op == CA_OP_CONN_UP? 0: 0xbad;
-	if (args.op == CA_OP_CONN_UP) daqd.edcu1.con_chans++; else daqd.edcu1.con_chans--;
-	daqd.edcu1.con_events++;
-	pvValue[3] = daqd.edcu1.num_chans;
-	pvValue[4] = daqd.edcu1.con_chans;
-	*/
 }
 
 /// Routine to handle subscription callbacks
 void subscriptionHandler(struct event_handler_args args) {
 	float val = 0.0;
-	if (args.status != ECA_NORMAL) {
+	EPICS_CA_TABLE *entry = args.usr;
+	if (args.status != ECA_NORMAL ||  !entry) {
 		return;
 	}
-	if (args.type == DBR_DOUBLE) {
-		EPICS_CA_TABLE *entry = args.usr;
-		if (entry) {
-			pthread_mutex_lock(&caTableMutex);
-			entry->data.chval = *((double*)args.dbr);
-			pthread_mutex_unlock(&caTableMutex);
-		}
+	pthread_mutex_lock(&caTableMutex);
+	if (args.type == DBR_TIME_DOUBLE) {
+		struct dbr_time_double *dVal = (struct dbr_time_double *)args.dbr;
+		entry->data.chval = dVal->value;
+		entry->mod_time = dVal->stamp.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
+	} else if (args.type == DBR_TIME_STRING) {
+		struct dbr_time_string *sVal = (struct dbr_time_string *)args.dbr;
+		const int MAX_STR_LEN = sizeof(entry->data.strval);
+		strncpy(entry->data.strval, sVal->value, MAX_STR_LEN);
+		entry->data.strval[MAX_STR_LEN - 1] = '\0';
+		entry->mod_time = sVal->stamp.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 	}
+	pthread_mutex_unlock(&caTableMutex);
 }
 
 /// Routine to register a channel
@@ -1857,16 +1862,18 @@ void registerPV(char *PVname, int sdfType)
 	long status=0;
 	chid chid1;
 
-	if (chNum >= SDF_MAX_TSIZE) {
+	if (chNum >= SDF_MAX_TSIZE || sdfType == SDF_UNKNOWN) {
 		droppedPVCount++;
 		return;
 	}
-	printf("Registering %s %d\n", PVname, sdfType);
+	//printf("Registering %s %d\n", PVname, sdfType);
 	pthread_mutex_lock(&caTableMutex);
 	disconnectedPVs++;
 	pthread_mutex_unlock(&caTableMutex);
+	caTable[chNum].datatype = sdfType;
+	caTable[chNum].connected = 0;
 	status = ca_create_channel(PVname, connectCallback, &(caTable[chNum]), 0, &chid1);
-	status = ca_create_subscription(DBR_DOUBLE, 0, chid1, DBE_VALUE, subscriptionHandler, &(caTable[chNum]), NULL);
+	status = ca_create_subscription((sdfType == SDF_NUM ? DBR_TIME_DOUBLE : DBR_TIME_STRING), 0, chid1, DBE_VALUE, subscriptionHandler, &(caTable[chNum]), NULL);
 	strncpy(cdTable[chNum].chname, PVname, 128);
 	cdTable[chNum].chname[128-1] = '\0';
 	cdTable[chNum].datatype = sdfType;
@@ -1895,7 +1902,10 @@ int daqToSDFDataType(int daqtype) {
 	if (daqtype == 4) {
 		return SDF_NUM;
 	}
-	return SDF_STR;
+	if (daqtype == 128) {
+		return SDF_STR;
+	}
+	return SDF_UNKNOWN;
 }
 
 /// Routine to read in data from an INI file
@@ -2050,6 +2060,7 @@ void setupCASDF()
 		caTable[ii].datatype = SDF_NUM;
 		caTable[ii].data.chval = 0.0;
 		caTable[ii].connected = 0;
+		caTable[ii].mod_time = (time_t)0;
 	}
 	disconnectedPVs = 0;
 	droppedPVCount = 0;
@@ -2312,6 +2323,9 @@ int main(int argc,char *argv[])
 	char *daqFile =  getenv("DAQ_FILE");
 	char *coeffFile =  getenv("COEFF_FILE");
 	char *logdir = getenv("LOG_DIR");
+#ifdef CA_SDF
+	char *iniFile = getenv("INI_FILE");
+#endif
 	if(stat(logdir, &st) == -1) mkdir(logdir,0777);
 	// strcat(sdf,"_safe");
 	char sdfile[256];
@@ -2489,7 +2503,7 @@ sleep(5);
 	status = dbPutField(&confirmwordaddr,DBR_LONG,&resetNum,1);
 
 #ifdef CA_SDF
-	initCAConnections("test.ini");
+	initCAConnections(iniFile);
 #else
 	dbDumpRecords(*iocshPpdbbase);
 #endif
