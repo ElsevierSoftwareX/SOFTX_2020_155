@@ -240,6 +240,8 @@ void decodeChangeSelect(int, int, int, SET_ERR_TABLE *, int *);
 int appendAlarms2File(char *,char *,char *);
 void registerFilters();
 #ifdef CA_SDF
+void nullCACallback(struct event_handler_args);
+
 int getCAIndex(char *, ADDRESS *);
 
 int canFindCAChannel(char *entry);
@@ -294,6 +296,7 @@ const char strval1[] = "1";
 #define IS_A_SPACE 	1
 #define IS_A_QUOTE	2
 
+    for (ii = 0; ii < 10; ii++) psd[ii][0]='\0';
 	while (*s != 0 && *s != 10) {
 		mychar = IS_A_ALPHA_NUM;
 		if (*s == '\t') *s = ' ';
@@ -541,6 +544,10 @@ ADDRESS paddr1;
 ADDRESS paddr2;
 long status;
 char *ret;
+
+    swstrE[0]='\0';
+    swstrB[0]='\0';
+    swstrD[0]='\0';
 	for(ii=0;ii<fcount;ii++)
 	{
 		bzero(swname[0],sizeof(swname[0]));
@@ -1400,7 +1407,7 @@ void newfilterstats(int numchans) {
 			tmpreq =  ((unsigned int)cdTable[rsw1].data.chval & 0xffff) + 
 				(((unsigned int)cdTable[rsw2].data.chval & 0xffff) << 16);
 			filterTable[ii].swreq = filtCtrlBitConvert(tmpreq);
-			bzero(chname,strlen(chname));
+			bzero(chname,sizeof(chname));
 			// Find address of channel
 			strcpy(chname,filterTable[ii].fname);
 			strcat(chname,"SWREQ");
@@ -1551,7 +1558,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 		alarmCnt = 0;
 		// Put dummy in s4 as this column may or may not exist.
 		strcpy(s4,"x");
-		bzero(s3,strlen(s3));
+		bzero(s3,sizeof(s3));
 		strncpy(ifo,pref,3);
 		while(fgets(line,sizeof line,cdf) != NULL)
 		{
@@ -1668,7 +1675,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 				if(((strstr(s1,"_SW1S") != NULL) && (strstr(s1,"_SW1S.") == NULL)) ||
 					((strstr(s1,"_SW2S") != NULL) && (strstr(s1,"_SW2S.") == NULL)))
 				{
-				   	bzero(fname,strlen(fname));
+				   	bzero(fname,sizeof(fname));
 					strncpy(fname,s1,(strlen(s1)-4));
 				   	for(ii=0;ii<fmNum;ii++)
 				   	{
@@ -1746,16 +1753,19 @@ void registerFilters() {
 }
 
 #ifdef CA_SDF
+void nullCACallback(struct event_handler_args args) {}
+
 int getCAIndex(char *entry, ADDRESS *addr) {
 	int ii = 0;
 
-	if (!entry) return;
+	if (!entry || !addr) return;
 	for (ii = 0; ii < chNum; ++ii) {
 		if (strcmp(cdTable[ii].chname, entry) == 0) {
 			*addr = ii;
 			return 0;
 		}
 	}
+	*addr = -1;
 	return 1;
 }
 
@@ -1763,11 +1773,12 @@ int setCAValue(ADDRESS ii, int type, void *data)
 {
 	int status = ECA_NORMAL;
 	int result = 1;
+	
 	if (ii >= 0 && ii < chNum) {
 		if (type == SDF_NUM) {
-			status = ca_put_callback(DBR_DOUBLE, caTable[ii].chanid, (double *)data, NULL, NULL);
+			status = ca_put_callback(DBR_DOUBLE, caTable[ii].chanid, (double *)data, nullCACallback, NULL);
 		} else {
-			status = ca_put_callback(DBR_STRING, caTable[ii].chanid, (char *)data, NULL, NULL);
+			status = ca_put_callback(DBR_STRING, caTable[ii].chanid, (char *)data, nullCACallback, NULL);
 		}
 		result = (status == ECA_NORMAL ? 0 : 1);
 	}
@@ -2060,6 +2071,7 @@ void setupCASDF()
 		caTable[ii].datatype = SDF_NUM;
 		caTable[ii].data.chval = 0.0;
 		caTable[ii].connected = 0;
+		caTable[ii].chanid = -1;
 		caTable[ii].mod_time = (time_t)0;
 	}
 	disconnectedPVs = 0;
@@ -2310,6 +2322,9 @@ int main(int argc,char *argv[])
 	int diffCnt = 0;
     	char errMsg[128];
 
+    loadedSdf[0] = '\0';
+    sdffileloaded[0] = '\0';
+
     if(argc>=2) {
         iocsh(argv[1]);
 	// printf("Executing post script commands\n");
@@ -2317,7 +2332,7 @@ int main(int argc,char *argv[])
 	// Get environment variables from startup command to formulate EPICS record names.
 	char *pref = getenv("PREFIX");
 	char *sdfDir = getenv("SDF_DIR");
-	char *sdf = getenv("SDF_FILE");
+	char *sdfenv = getenv("SDF_FILE");
 	char *modelname =  getenv("SDF_MODEL");
 	char *targetdir =  getenv("TARGET_DIR");
 	char *daqFile =  getenv("DAQ_FILE");
@@ -2328,11 +2343,16 @@ int main(int argc,char *argv[])
 #endif
 	if(stat(logdir, &st) == -1) mkdir(logdir,0777);
 	// strcat(sdf,"_safe");
+	char sdf[256];
 	char sdfile[256];
 	char sdalarmfile[256];
 	char bufile[256];
 	char saveasfilename[128];
 	char wcstring[64];
+	
+    strncpy(sdf, sdfenv, sizeof(sdf));
+    sdf[sizeof(sdf)-1] = '\0';
+	
 	printf("My prefix is %s\n",pref);
 	sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");					// Initialize with BURT_safe.snap
 	sprintf(bufile, "%s%s", sdfDir, "fec.snap");					// Initialize table dump file
@@ -2347,7 +2367,6 @@ sleep(5);
 	int subversion2 = RCG_VERSION_SUB;
 	int myreleased = RCG_VERSION_REL;
 	double myversion;
-
 
 	listLocalRecords(*iocshPpdbbase);
 	myversion = majorversion + 0.01 * subversion1 + 0.001 * subversion2;
