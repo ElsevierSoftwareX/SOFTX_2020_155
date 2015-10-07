@@ -1226,7 +1226,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 	double sdfdiff = 0.0;
 	double liveval = 0.0;
 	char *ret;
-	int filtDiffs;
+	int filtDiffs=0;
 
 	// Check filter switch settings first
 	     errCntr = checkFilterSwitches(fmNum,setErrTable,monitorAll,listAll,wcVal,wcstring,&filtDiffs);
