@@ -457,7 +457,7 @@ int selectLine;
 int checkFileCrc(char *fName)
 {
 char buffer[256];
-FILE *pipePtr;
+FILE *pipePtr=0;
 struct stat statBuf;
 long chkSum = -99999;
       	strcpy(buffer, "cksum "); 
@@ -523,14 +523,14 @@ char bitDefLong[16][8] = {"IN,","OF,","F1,","F2,",
 /// @return	Number of errant switch settings found.
 int checkFilterSwitches(int fcount, SET_ERR_TABLE setErrTable[], int monitorAll, int displayall, int wcflag, char *wcstr, int *diffcntr)
 {
-unsigned int refVal;
-unsigned int presentVal;
-unsigned int x,y;
-int ii,jj;
+unsigned int refVal=0;
+unsigned int presentVal=0;
+unsigned int x=0,y=0;
+int ii=0,jj=0;
 int errCnt = 0;
 char swname[3][64];
 char tmpname[64];
-time_t mtime;
+time_t mtime=0;
 char localtimestring[256];
 char swstrE[64];
 char swstrB[64];
@@ -542,8 +542,8 @@ struct buffer {
 ADDRESS paddr;
 ADDRESS paddr1;
 ADDRESS paddr2;
-long status;
-char *ret;
+long status=0;
+char *ret=0;
 
     swstrE[0]='\0';
     swstrB[0]='\0';
@@ -627,7 +627,7 @@ char *ret;
 void getSdfTime(char *timestring, int size)
 {
 #ifdef USE_SYSTEM_TIME
-	time_t t;
+	time_t t=0;
 	struct tm tdata;
 
 	t = time(NULL);
@@ -652,9 +652,9 @@ void getSdfTime(char *timestring, int size)
 /// 	@param[in] message Ptr to string containing message to be logged.
 void logFileEntry(char *message)
 {
-	FILE *log;
+	FILE *log=0;
 	char timestring[256];
-	long status;
+	long status=0;
 	dbAddr paddr;
 
 	getSdfTime(timestring, 256);
@@ -678,9 +678,9 @@ int getEpicsSettings(int numchans)
 int ii;
 long status;
 int chcount = 0;
-double dval;
+double dval = 0;
 ADDRESS geaddr;
-long statusR;
+long statusR = 0;
 char sval[64];
 
 	for(ii=0;ii<numchans;ii++)
@@ -719,7 +719,7 @@ int writeTable2File(char *burtdir,
 		    CDS_CD_TABLE myTable[])	///< Table to be written.
 {
         int ii;
-        FILE *csFile;
+        FILE *csFile=0;
         char filemsg[128];
 	char timestring[128];
     // Write out local monitoring table as snap file.
@@ -803,8 +803,8 @@ int appendAlarms2File(
 {
 char sdffilename[256];
 char alarmfilename[256];
-FILE *cdf;
-FILE *adf;
+FILE *cdf=0;
+FILE *adf=0;
 char line[128];
 char errMsg[128];
 int lderror = 0;
@@ -969,8 +969,7 @@ int ret = 0;
 int lna = 0;
 int lnb = 0;
 char tmpname[64];
-time_t mtime;
-char localtimestring[256];
+time_t mtime=0;
 long nvals = 1;
 char liveset[64];
 double liveval = 0.0;
@@ -1097,7 +1096,7 @@ char s2[64];
 char s3[64];
 char s4[64];
 char sl[64];
-long status;
+long status = 0;
 char clearString[62] = "                       ";
 int flength = 62;
 int rc = 0;
@@ -1212,7 +1211,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 {
    	int errCntr = 0;
 	ADDRESS paddr;
-	long status;
+	long status=0;
 	int ii;
 	double rval;
 	char sval[128];
@@ -1299,7 +1298,6 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 int modifyTable(int numEntries,SET_ERR_TABLE modTable[])
 {
 int ii,jj;
-char fname[64];
 int fmIndex = 0;
 unsigned int sn,sn1;
 int found = 0;
@@ -1385,7 +1383,7 @@ void newfilterstats(int numchans) {
 	ADDRESS paddr;
 	long status;
 	int ii;
-	FILE *log;
+	FILE *log=0;
 	char chname[128];
 	unsigned long mask = 0x1ffff;
 	int tmpreq;
@@ -1509,22 +1507,22 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 		int command,		///< Read file request type.
 		char *alarmfile)
 {
-	FILE *cdf;
-	FILE *adf;
-	char c;
-	int ii;
-	int lock;
+	FILE *cdf=0;
+	FILE *adf=0;
+	char c=0;
+	int ii=0;
+	int lock=0;
 	char s1[128],s2[128],s3[128],s4[128],s5[128],s6[128],s7[128],s8[128];
 	char ls[6][64];
 	dbAddr paddr;
-	long status;
+	long status=0;
 	int lderror = 0;
 	int ropts = 0;
 	int nvals = 1;
-	int starttime,totaltime;
+	int starttime=0,totaltime=0;
 	char timestring[256];
 	char line[128];
-	char *fs;
+	char *fs=0;
 	char ifo[4];
 	double tmpreq = 0;
 	char fname[128];
@@ -1535,6 +1533,12 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 	int isalarm = 0;
 	int lineCnt = 0;
 
+	s1[0]=s2[0]=s3[0]=s4[0]=s5[0]=s6[0]=s7[0]=s8[0]='\0';
+	timestring[0]='\0';
+	line[0]='\0';
+	ifo[0]='\0';
+	fname[0]=errMsg[0]='\0';
+	for (ii = 0; ii < 6; ii++) ls[ii][0]='\0';
 	rderror = 0;
 
 	clock_gettime(CLOCK_REALTIME,&t);
@@ -1734,7 +1738,7 @@ void registerFilters() {
 		if(cdTable[ii].filterswitch == 1)
 		{
 			strncpy(filterTable[fmNum].fname,cdTable[ii].chname,(strlen(cdTable[ii].chname)-4));
-			sprintf(tmpstr,"%s%s",filterTable[fmNum].fname,"SW2S");
+			snprintf(tmpstr, sizeof(tmpstr),"%s%s",filterTable[fmNum].fname,"SW2S");
 			filterTable[fmNum].sw[0] = ii;
 			cdTable[ii].filterNum = fmNum;
 			amatch = 0;
@@ -1938,6 +1942,7 @@ void parseIni(char *fname)
 
 	printf("Starting parse\n");
 	channame[0] = '\0';
+	buffer[0] = '\0';
 	while (fgets(buffer, 256, f)) {
 		/* fgets should always set this, but force a null termination */
 		buffer[256-1] = '\0';
@@ -2145,17 +2150,17 @@ int getDbValueString(ADDRESS *paddr,char *dest, int max_len, time_t *tp) {
 /// Routine used to extract all settings channels from EPICS database to create local settings table on startup.
 void dbDumpRecords(DBBASE *pdbbase)
 {
-    DBENTRY  *pdbentry;
-    long  status;
+    DBENTRY  *pdbentry = 0;
+    long  status = 0;
     char mytype[4][64];
     int ii;
-    int jj;
-	int cnt = 0;
+    int cnt = 0;
 
     // By convention, the RCG produces ai and bi records for settings.
     sprintf(mytype[0],"%s","ai");
     sprintf(mytype[1],"%s","bi");
     sprintf(mytype[2],"%s","stringin");
+    mytype[3][0]='\0';
     pdbentry = dbAllocEntry(pdbbase);
 
     chNum = 0;
@@ -2213,7 +2218,7 @@ void dbDumpRecords(DBBASE *pdbbase)
 #endif
 
 void listLocalRecords(DBBASE *pdbbase) {
-	DBENTRY  *pdbentry;
+	DBENTRY  *pdbentry = 0;
 	long status = 0;
 	int ii = 0;
 
@@ -2277,8 +2282,8 @@ int main(int argc,char *argv[])
 	dbAddr pagelockaddr[3];
 	// Initialize request for file load on startup.
 	int sdfReq = SDF_LOAD_PARTIAL;
-	int status;
-	int request;
+	int status = 0;
+	int request = 0;
 	long ropts = 0;
 	long nvals = 1;
 	int rdstatus = 0;
@@ -2286,10 +2291,10 @@ int main(int argc,char *argv[])
 	char loadedSdf[256];
 	char sdffileloaded[256];
    	int sperror = 0;
-	int noMon;
-	int noInit;
+	int noMon = 0;
+	int noInit = 0;
 	// FILE *csFile;
-	int ii;
+	int ii = 0;
 	int setChans = 0;
 	char tsrString[64];
 	int tsrVal = 0;
@@ -2301,17 +2306,17 @@ int main(int argc,char *argv[])
 	int saveOpts = 0;
 	char saveOptsString[64];
 	int fivesectimer = 0;
-	long daqFileCrc;
-	long coeffFileCrc;
-	long sdfFileCrc;
+	long daqFileCrc = 0;
+	long coeffFileCrc = 0;
+	long sdfFileCrc = 0;
 	char modfilemsg[] = "Modified File Detected ";
 	struct stat st = {0};
 	int reqValid = 0;
 	int pageDisp = 0;
-	int resetByte;
-	int resetBit;
-	int confirmVal;
-	int myexp;
+	int resetByte = 0;
+	int resetBit = 0;
+	int confirmVal = 0;
+	int myexp = 0;
 	int selectCounter[4] = {0,0,0,0};
 	int selectAll = 0;
 	int freezeTable = 0;
@@ -2324,6 +2329,11 @@ int main(int argc,char *argv[])
 
     loadedSdf[0] = '\0';
     sdffileloaded[0] = '\0';
+    tsrString[0] = '\0';
+    saveTypeString[0] = '\0';
+    saveOptsString[0] = '\0';
+    backupName[0] = '\0';
+    errMsg[0] = '\0';
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -2376,15 +2386,11 @@ sleep(5);
 	char reloadChan[256]; sprintf(reloadChan, "%s_%s", pref, "SDF_RELOAD");		// Request to load new BURT
 	// Set request to load safe.snap on startup
 	status = dbNameToAddr(reloadChan,&reload_addr);
-	printf("%d\n", status);
 	status = dbPutField(&reload_addr,DBR_LONG,&sdfReq,1);		// Init request for startup.
 
 	char reloadStat[256]; sprintf(reloadStat, "%s_%s", pref, "SDF_RELOAD_STATUS");	// Status of last reload
-	printf("reloadStat = %s\n", reloadStat);
 	status = dbNameToAddr(reloadStat,&reloadstat_addr);
-	printf("%d\n", status);
 	status = dbPutField(&reloadstat_addr,DBR_LONG,&rdstatus,1);	// Init to zero.
-	printf("managed to set reload stat\n");
 
 	char sdfFileName[256]; sprintf(sdfFileName, "%s_%s", pref, "SDF_NAME");		// Name of file to load next request
 	// Initialize BURT file to be loaded next request = safe.snap
