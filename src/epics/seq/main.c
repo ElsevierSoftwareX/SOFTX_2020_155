@@ -232,7 +232,7 @@ int spChecker(int,SET_ERR_TABLE *,int,char *,int,int *);
 void newfilterstats(int);
 int writeEpicsDb(int,CDS_CD_TABLE *,int);
 int readConfig( char *,char *,int,char *);
-int parseLine(char *,char *,char *,char *,char *,char *,char *);
+int parseLine(char *, int,char *,char *,char *,char *,char *,char *);
 int modifyTable(int,SET_ERR_TABLE *);
 void clearTableSelections(int,SET_ERR_TABLE *, int *);
 void setAllTableSelections(int,SET_ERR_TABLE *, int *,int);
@@ -280,73 +280,82 @@ void dbDumpRecords(DBBASE *);
 
 /// Common routine to parse lines read from BURT/SDF files..
 ///	@param[in] *s	Pointer to line of chars to parse.
+///     @param[in] bufSize Size in characters of each output buffer str1 thru str6
 ///	@param[out] str1 thru str6 	String pointers to return individual words from line.
 ///	@return wc	Number of words in the line.
-int parseLine(char *s, char *str1, char *str2, char *str3, char *str4, char *str5,char *str6)
+int parseLine(char *s, int bufSize, char *str1, char *str2, char *str3, char *str4, char *str5,char *str6)
 {
-int wc = -1;
-int inQuotes = 0;
-int lastwasspace = 1;
-int ii,jj,kk;
-int mychar = 0;
-char psd[10][64];
-const char strval0[] = "0";
-const char strval1[] = "1";
-#define IS_A_ALPHA_NUM 	0
-#define IS_A_SPACE 	1
-#define IS_A_QUOTE	2
+  int wc = 0;
+  int ii = 0;
+  int cursize = 0;
+  int lastwasspace = 0;
+  
+  char *lastquote = 0;
+  char *qch = 0;
+  char *out[7];
+  
+  out[0]=str1;
+  out[1]=str2;
+  out[2]=str3;
+  out[3]=str4;
+  out[4]=str5;
+  out[5]=str6;
+  out[6]=0;
+  for (ii = 0; out[ii]; ++ii) { *(out[ii]) = '\0'; }
 
-    for (ii = 0; ii < 10; ii++) psd[ii][0]='\0';
-	while (*s != 0 && *s != 10) {
-		mychar = IS_A_ALPHA_NUM;
-		if (*s == '\t') *s = ' ';
-		if (*s == ' ') mychar = IS_A_SPACE;
-		if (*s == '\"') mychar = IS_A_QUOTE;
-		switch(mychar) {
-			case IS_A_ALPHA_NUM:
-				if(lastwasspace) {
-					wc ++;
-					psd[wc][0] = '\0';
-					}
-				strncat(psd[wc],s,1);
-				lastwasspace = 0;
-				break;
-			case IS_A_SPACE:
-				if(inQuotes == 1) {
-					strncat(psd[wc],s,1);
-				} else {
-					lastwasspace = 1;
-				}
-				break;
-			case IS_A_QUOTE:
-				inQuotes += 1;
-				if(inQuotes == 2) lastwasspace = 1;
-				break;
-		}
-		s ++;
+  while (*s != 0 && *s != '\n') {
+    if (*s == '\t') *s = ' ';
+    if (*s == ' ') {
+      // force the null termination of the output buffer
+      out[wc][bufSize-1] = '\0';
+      if (!lastwasspace) {
+	++wc;
+	// check for the end of the output buffers
+	if (!out[wc]) break;
+      }
+      lastwasspace = 1;
+      cursize = 0;
+    } else if (*s != '"' || !lastwasspace) {
+      // regular character
+      if (cursize < bufSize) {
+	strncat(out[wc], s, 1);
+	cursize++;
+      }
+      lastwasspace = 0;
+    } else {
+      // quote
+      // burt does not escape quotes, you have to look for the last quote and just take it.
+      lastquote = 0;
+      qch = s+1;
+      
+      while (*qch && *qch !='\n') {
+	if (*qch == '"') lastquote = qch;
+	++qch;
+      }
+      if (!lastquote) lastquote = qch;
+      ++s;
+      // copy from (s,qch) then set lastwasspace
+      while (s < lastquote) {
+	if (cursize < bufSize) {
+	  strncat(out[wc], s, 1);
+	  cursize++;
 	}
-	wc ++;
-	sprintf(str1,"%s",psd[0]);
-	if(inQuotes > 2) return(-1);
-	if(wc > 4 && inQuotes < 1) {
-		if(strcmp(psd[(wc-1)],strval0) == 0 || strcmp(psd[(wc-1)],strval1) == 0) kk = wc - 1;
-		else kk = wc;
-		jj = 0;
-		for(ii=3;ii<kk;ii++) {
-			strcat(psd[2]," ");
-			strcat(psd[2],psd[ii]);
-			jj ++;
-		}
-		if(strcmp(psd[(wc-1)],strval0) == 0 || strcmp(psd[(wc-1)],strval1) == 0) sprintf(psd[3],"%s",psd[(wc - 1)]);
-		wc -= jj;
-		// printf("wc for %s is %d = %s \t with monitor %s\n",psd[0],wc,psd[2],psd[3]);
-	} 
-	if(wc < 4) sprintf(psd[3],"%s","0");
-	sprintf(str2,"%s",psd[1]);
-	sprintf(str3,"%s",psd[2]);
-	sprintf(str4,"%s",psd[3]);
-	// printf("WC = %d\n%s \t%s\t%s\t%s\t%s\n",wc,psd[0],psd[1],psd[2],psd[3],psd[4]);
-	return(wc);
+	++s;
+      }
+      ++wc;
+      lastwasspace = 1;
+      if (!(*s) || *s == '\n' || !out[wc]) break;
+    }
+    ++s;
+  }
+  if (out[wc] && out[wc][0]) {
+    out[wc][bufSize-1]='\0';
+    ++wc;
+  }
+  for (ii = 0; out[ii]; ++ii) {
+    if (strcmp(out[ii], "\\0") == 0) strcpy(out[ii], "");
+  }
+  return wc;
 }
 
 /// Common routine to clear all entries for table changes..
@@ -707,6 +716,31 @@ char sval[64];
 
 }
 
+void encodeBURTString(char *src, char *dest, int dest_size) {
+	char *ch = 0;
+	int expand = 0;
+
+	if (!src || !dest || dest_size < 1) return
+	dest[0]='\0';
+	// make sure the destination can handle expansion which is two characters + a NULL
+	if (dest_size < (strlen(src) + 3)) return;
+	if (strlen(src) == 0) {
+		strcpy(dest, "\\0");
+	} else {
+		for (ch = src; *ch; ++ch) {
+			if (*ch == ' ' || *ch == '\t' || *ch == '\n' || *ch == '"') {
+				expand = 1;
+				break;
+			}
+		}
+		// we already bounds check this above
+		if (expand) {
+			sprintf(dest, "\"%s\"", src);
+		} else {
+			strcpy(dest, src);
+		}
+	}
+}
 
 // writeTable2File ftype options:
 #define SDF_WITH_INIT_FLAG	0
@@ -722,8 +756,10 @@ int writeTable2File(char *burtdir,
         FILE *csFile=0;
         char filemsg[128];
 	char timestring[128];
+	char burtString[64+2];
     // Write out local monitoring table as snap file.
         errno=0;
+	burtString[0] = '\0';
         csFile = fopen(filename,"w");
         if (csFile == NULL)
         {
@@ -747,29 +783,33 @@ int writeTable2File(char *burtdir,
 
 	for(ii=0;ii<chNum;ii++)
 	{
-		if(myTable[ii].datatype == SDF_STR && strlen(myTable[ii].data.strval) < 1)
-			sprintf(myTable[ii].data.strval,"%s"," ");
 		switch(ftype)
 		{
 		   case SDF_WITH_INIT_FLAG:
-			if(myTable[ii].datatype == SDF_NUM)
+			if(myTable[ii].datatype == SDF_NUM) {
 				fprintf(csFile,"%s %d %.15e %d %d\n",myTable[ii].chname,1,myTable[ii].data.chval,myTable[ii].mask,myTable[ii].initialized);
-			else
-				fprintf(csFile,"%s %d \"%s\" %d %d\n",myTable[ii].chname,1,myTable[ii].data.strval,myTable[ii].mask,myTable[ii].initialized);
+			} else {
+				encodeBURTString(myTable[ii].data.strval, burtString, sizeof(burtString));
+				fprintf(csFile,"%s %d %s %d %d\n",myTable[ii].chname,1,burtString,myTable[ii].mask,myTable[ii].initialized);
+			}
 			break;
 		   case SDF_FILE_PARAMS_ONLY:
 			if(myTable[ii].initialized) {
-				if(myTable[ii].datatype == SDF_NUM)
+				if(myTable[ii].datatype == SDF_NUM) {
 					fprintf(csFile,"%s %d %.15e %d\n",myTable[ii].chname,1,myTable[ii].data.chval,myTable[ii].mask);
-				else
-					fprintf(csFile,"%s %d \"%s\" %d\n",myTable[ii].chname,1,myTable[ii].data.strval,myTable[ii].mask);
+				} else {
+					encodeBURTString(myTable[ii].data.strval, burtString, sizeof(burtString));
+					fprintf(csFile,"%s %d %s %d\n",myTable[ii].chname,1,burtString,myTable[ii].mask);
+				}
 			}
 			break;
 		   case SDF_FILE_BURT_ONLY:
-			if(myTable[ii].datatype == SDF_NUM)
+			if(myTable[ii].datatype == SDF_NUM) {
 				fprintf(csFile,"%s %d %.15e\n",myTable[ii].chname,1,myTable[ii].data.chval);
-			else
-				fprintf(csFile,"%s %d \"%s\" \n",myTable[ii].chname,1,myTable[ii].data.strval);
+			} else {
+				encodeBURTString(myTable[ii].data.strval, burtString, sizeof(burtString));
+				fprintf(csFile,"%s %d %s \n",myTable[ii].chname,1,burtString);
+			}
 			break;
 		   default:
 			break;
@@ -1024,9 +1064,11 @@ double liveval = 0.0;
 
 				} else {
 					liveval = 0.0;
-					sprintf(liveset,"%s",cdTableP[jj].data.strval);
+					strncpy(liveset, cdTableP[jj].data.strval, sizeof(liveset));
+					liveset[sizeof(liveset)-1] = '\0';
 				}
-				sprintf(uninitChans[lna].liveset, "%s", liveset);
+				strncpy(uninitChans[lna].liveset, liveset, sizeof(uninitChans[lna].liveset));
+				uninitChans[lna].liveset[sizeof(uninitChans[lna].liveset)-1] = '\0';
 				uninitChans[lna].liveval = liveval;
 				sprintf(uninitChans[lna].timeset,"%s"," ");
 				sprintf(uninitChans[lna].diff,"%s"," ");
@@ -1226,6 +1268,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 	double liveval = 0.0;
 	char *ret;
 	int filtDiffs=0;
+	static int i = 0;
 
 	// Check filter switch settings first
 	     errCntr = checkFilterSwitches(fmNum,setErrTable,monitorAll,listAll,wcVal,wcstring,&filtDiffs);
@@ -1569,7 +1612,8 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 			isalarm = 0;
 			lineCnt ++;
 			strcpy(s4,"x");
-			argcount = parseLine(line,s1,s2,s3,s4,s5,s6);
+			argcount = parseLine(line,sizeof(s1),s1,s2,s3,s4,s5,s6);
+			if (strcmp(s4, "") == 0) strcpy(s4, "0");
 			if(argcount == -1) {
 				sprintf(readErrTable[rderror].chname,"%s", s1);
 				sprintf(readErrTable[rderror].burtset, "%s", "Improper quotations ");
@@ -1821,9 +1865,8 @@ int syncEpicsLongValue(ADDRESS index, unsigned long *dest, time_t *tp) {
 }
 
 int syncEpicsStrValue(int index, char *dest, int dest_size, time_t *tp) {
-	static int i = 0;
-
 	if (!dest || index < 0 || index >= chNum || dest_size < 1) return 1;
+	dest[0] = '\0';
 	pthread_mutex_lock(&caTableMutex);
 	if (caTable[index].datatype == SDF_STR) {
 		const int MAX_STR_LEN = sizeof(caTable[index].data.strval);
@@ -1834,7 +1877,6 @@ int syncEpicsStrValue(int index, char *dest, int dest_size, time_t *tp) {
 		}
 	}
 	pthread_mutex_unlock(&caTableMutex);
-	i++;
 	return 0;
 }
 
