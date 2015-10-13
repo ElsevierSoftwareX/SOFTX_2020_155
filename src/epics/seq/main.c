@@ -2340,8 +2340,13 @@ int main(int argc,char *argv[])
 	dbAddr resetoneaddr;
 	dbAddr selectaddr[4];
 	dbAddr pagelockaddr[3];
+#ifdef CA_SDF
+	// CA_SDF does not do a partial load on startup.
+	int sdfReq = SDF_READ_ONLY;
+#else
 	// Initialize request for file load on startup.
 	int sdfReq = SDF_LOAD_PARTIAL;
+#endif
 	int status = 0;
 	int request = 0;
 	long ropts = 0;
