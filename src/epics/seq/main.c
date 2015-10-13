@@ -2120,6 +2120,24 @@ void setupCASDF()
 		caTable[ii].connected = 0;
 		caTable[ii].chanid = -1;
 		caTable[ii].mod_time = (time_t)0;
+
+		bzero((void *)&(cdTable[ii]), sizeof(cdTable[ii]));
+		bzero((void *)&(unMonChans[ii]), sizeof(unMonChans[ii]));
+		bzero((void *)&(cdTableList[ii]), sizeof(cdTableList[ii]));
+	}
+
+	// set more defaults
+	for (ii = 0; ii < SDF_MAX_CHANS; ++ii) {
+		bzero((void *)&(cdTableP[ii]), sizeof(cdTableP[ii]));
+	}
+	for (ii = 0; ii < 1000; ++ii) {
+		bzero((void *)&(filterTable[1000]), sizeof(filterTable[ii]));
+	}
+	for (ii = 0; ii < SDF_ERR_TSIZE; ++ii) {
+		bzero((void *)&(setErrTable[ii]), sizeof(setErrTable[ii]));
+		bzero((void *)&(unknownChans[ii]), sizeof(unknownChans[ii]));
+		bzero((void *)&(uninitChans[ii]), sizeof(uninitChans[ii]));
+		bzero((void *)&(readErrTable[ii]), sizeof(readErrTable[ii]));
 	}
 	disconnectedPVs = 0;
 	droppedPVCount = 0;
@@ -2656,6 +2674,7 @@ sleep(5);
 					setChans = chNum - fmNum;
 					status = dbPutField(&fulldbcntaddr,DBR_LONG,&setChans,1);
 					// Sort channels for data reporting via the MEDM table.
+					getEpicsSettings(chNum);
 					noMon = createSortTableEntries(chNum,0,"",&noInit);
 					// Calculate and report number of channels NOT being monitored.
 					status = dbPutField(&monchancntaddr,DBR_LONG,&chNotMon,1);
