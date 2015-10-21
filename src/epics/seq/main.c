@@ -70,6 +70,9 @@ of this distribution.
 #define SDF_TABLE_NOT_INIT		2
 #define SDF_TABLE_NOT_MONITORED		3
 #define SDF_TABLE_FULL			4
+#ifdef CA_SDF
+#define SDF_TABLE_DISCONNECTED		5
+#endif
 
 #define CA_STATE_OFF -1
 #define CA_STATE_IDLE 0
@@ -118,6 +121,9 @@ typedef struct CDS_CD_TABLE {
 	int error;
 	char errMsg[64];
 	int chFlag;
+#ifdef CA_SDF
+	int connected;
+#endif
 } CDS_CD_TABLE;
 
 /// Structure for creating/holding filter module switch settings.
@@ -184,7 +190,11 @@ SET_ERR_TABLE readErrTable[SDF_ERR_TSIZE];	///< Table used to report file read e
 SET_ERR_TABLE cdTableList[SDF_MAX_TSIZE];	///< Table used to report file read errors..
 
 #ifdef CA_SDF
+SET_ERR_TABLE disconnectChans[SDF_MAX_TSIZE];
 EPICS_CA_TABLE caTable[SDF_MAX_TSIZE];		///< Table used to hold the data returned by channel access
+
+int chDisconnected = 0;		///< Total number of channels that are disconnected.  This is used as the max index for disconnectedChans
+				//// it is distinct from disconnectedPVs as its update cycle is tied to the global EPICS update cycle.
 
 pthread_t caThread;
 pthread_mutex_t caStateMutex;
@@ -199,9 +209,9 @@ long droppedPVCount;
 #define GET_ADDRESS(NAME,ADDRP) getCAIndex((NAME),(ADDRP))
 #define PUT_VALUE(ADDR,TYPE,PVAL) setCAValue((ADDR),(TYPE),(PVAL))
 #define PUT_VALUE_LONG(ADDR,PVAL) setCAValueLong((ADDR),(PVAL))
-#define GET_VALUE_NUM(ADDR,DESTP,TIMEP) syncEpicsDoubleValue((ADDR),(DESTP),(TIMEP))
-#define GET_VALUE_LONG(ADDR,DESTP,TIMEP) syncEpicsLongValue((ADDR),(DESTP),(TIMEP))
-#define GET_VALUE_STR(ADDR,DESTP,LEN,TIMEP) syncEpicsStrValue((ADDR),(DESTP),(LEN),(TIMEP))
+#define GET_VALUE_NUM(ADDR,DESTP,TIMEP,CONNP) syncEpicsDoubleValue((ADDR),(DESTP),(TIMEP),(CONNP))
+#define GET_VALUE_LONG(ADDR,DESTP,TIMEP,CONNP) syncEpicsLongValue((ADDR),(DESTP),(TIMEP),(CONNP))
+#define GET_VALUE_STR(ADDR,DESTP,LEN,TIMEP,CONNP) syncEpicsStrValue((ADDR),(DESTP),(LEN),(TIMEP),(CONNP))
 #else
 #define ADDRESS dbAddr
 #define SETUP
@@ -209,9 +219,9 @@ long droppedPVCount;
 #define GET_ADDRESS(NAME,ADDRP) dbNameToAddr((NAME),(ADDRP))
 #define PUT_VALUE(ADDR,TYPE,PVAL) dbPutField(&(ADDR),((TYPE)==SDF_NUM ? DBR_DOUBLE : DBR_STRING),(PVAL),1)
 #define PUT_VALUE_LONG(ADDR,PVAL) dbPutField(&(ADDR),DBR_LONG,(PVAL),1);
-#define GET_VALUE_NUM(ADDR,DESTP,TIMEP) getDbValueDouble(&(ADDR),(double*)(DESTP),(TIMEP))
-#define GET_VALUE_LONG(ADDR,DESTP,TIMEP) getDbValueLong(&(ADDR),(unsigned long*)(DESTP),(TIMEP))
-#define GET_VALUE_STR(ADDR,DESTP,LEN,TIMEP) getDbValueString(&(ADDR),(char*)(DESTP),(LEN),(TIMEP))
+#define GET_VALUE_NUM(ADDR,DESTP,TIMEP,CONNP) getDbValueDouble(&(ADDR),(double*)(DESTP),(TIMEP))
+#define GET_VALUE_LONG(ADDR,DESTP,TIMEP,CONNP) getDbValueLong(&(ADDR),(unsigned long*)(DESTP),(TIMEP))
+#define GET_VALUE_STR(ADDR,DESTP,LEN,TIMEP,CONNP) getDbValueString(&(ADDR),(char*)(DESTP),(LEN),(TIMEP))
 #endif
 
 #define SDF_NUM		0
@@ -248,9 +258,9 @@ int canFindCAChannel(char *entry);
 int setCAValue(ADDRESS, int, void *);
 int setCAValueLong(ADDRESS, unsigned long *);
 
-int syncEpicsDoubleValue(ADDRESS, double *, time_t *);
-int syncEpicsLongValue(ADDRESS, unsigned long *, time_t *);
-int syncEpicsStrValue(ADDRESS, char *, int, time_t *);
+int syncEpicsDoubleValue(ADDRESS, double *, time_t *, int *);
+int syncEpicsLongValue(ADDRESS, unsigned long *, time_t *, int *);
+int syncEpicsStrValue(ADDRESS, char *, int, time_t *, int *);
 
 void connectCallback(struct connection_handler_args);
 void subscriptionHandler(struct event_handler_args);
@@ -568,9 +578,9 @@ char *ret=0;
 		sprintf(swname[2],"%s",filterTable[ii].fname);
 		strcat(swname[2],"SWSTR");
 		status = GET_ADDRESS(swname[0],&paddr);
-		status = GET_VALUE_LONG(paddr,&(buffer[0].rval),&(buffer[0].t));
+		status = GET_VALUE_LONG(paddr,&(buffer[0].rval),&(buffer[0].t), 0);
 		status = GET_ADDRESS(swname[1],&paddr1);
-		status = GET_VALUE_LONG(paddr,&(buffer[1].rval),&(buffer[1].t));
+		status = GET_VALUE_LONG(paddr,&(buffer[1].rval),&(buffer[1].t), 0);
 		for(jj=0;jj<2;jj++) {
 			if(buffer[jj].rval > 0xffff || buffer[jj].rval < 0)	// Switch setting overrange
 			{
@@ -704,10 +714,10 @@ char sval[64];
 		if(!status) {
 			if(cdTableP[ii].datatype == SDF_NUM)
 			{
-				statusR = GET_VALUE_NUM(geaddr,&dval,NULL);
+				statusR = GET_VALUE_NUM(geaddr,&dval,NULL,&(cdTableP[ii].connected));
 				if (!statusR) cdTableP[ii].data.chval = (cdTable[ii].filterswitch ? (int)dval & 0xffff : dval);
 			} else {
-				statusR = GET_VALUE_STR(geaddr,sval,sizeof(sval),NULL);
+				statusR = GET_VALUE_STR(geaddr,sval,sizeof(sval),NULL,&(cdTableP[ii].connected));
 				if(!statusR) sprintf(cdTableP[ii].data.strval,"%s",sval);
 			}
 			chcount ++;
@@ -720,7 +730,7 @@ void encodeBURTString(char *src, char *dest, int dest_size) {
 	char *ch = 0;
 	int expand = 0;
 
-	if (!src || !dest || dest_size < 1) return
+	if (!src || !dest || dest_size < 1) return;
 	dest[0]='\0';
 	// make sure the destination can handle expansion which is two characters + a NULL
 	if (dest_size < (strlen(src) + 3)) return;
@@ -1006,17 +1016,22 @@ int createSortTableEntries(int numEntries,int wcval,char *wcstring,int *noInit)
 int ii,jj;
 int notMon = 0;
 int ret = 0;
-int lna = 0;
-int lnb = 0;
+int lna = 0;	// line a - uninit chan list index
+int lnb = 0;	// line b - non mon chan list index
+#ifdef CA_SDF
+int lnc = 0;	// line c - disconnected chan list index
+#endif
 char tmpname[64];
 time_t mtime=0;
 long nvals = 1;
 char liveset[64];
 double liveval = 0.0;
 
-
 	chNotInit = 0;
 	chNotMon = 0;
+#ifdef CA_SDF
+	chDisconnected = 0;
+#endif
 
 
 	// Fill uninit and unmon tables.
@@ -1051,6 +1066,9 @@ double liveval = 0.0;
 		if(cdTable[jj].filterswitch) continue;
 		if(!cdTable[jj].initialized) chNotInit += 1;
 		if(cdTable[jj].initialized && !cdTable[jj].mask) chNotMon += 1;
+#ifdef CA_SDF
+		if(!cdTable[jj].connected) chDisconnected += 1;
+#endif
 		if(wcval  && (ret = strstr(cdTable[jj].chname,wcstring) == NULL)) {
 			continue;
 		}
@@ -1090,9 +1108,32 @@ double liveval = 0.0;
 				unMonChans[lnb].liveval = 0.0;
 				sprintf(unMonChans[lnb].timeset,"%s"," ");
 				sprintf(unMonChans[lnb].diff,"%s"," ");
+				lnb ++;
 			}
-			lnb ++;
 		}
+#ifdef CA_SDF
+		if(!cdTable[jj].connected && !cdTable[jj].filterswitch) {
+			if (lnc < SDF_ERR_TSIZE) {
+				sprintf(disconnectChans[lnc].chname, "%s", cdTable[jj].chname);
+				if(cdTable[jj].datatype == SDF_NUM) {
+					liveval = cdTableP[jj].data.chval;
+					sprintf(liveset,"%.10lf", liveval);
+
+				} else {
+					liveval = 0.0;
+					strncpy(liveset, cdTableP[jj].data.strval, sizeof(liveset));
+					liveset[sizeof(liveset)-1] = '\0';
+				}
+				strncpy(disconnectChans[lnc].liveset, liveset, sizeof(disconnectChans[lnc].liveset));
+				disconnectChans[lnc].liveset[sizeof(disconnectChans[lnc].liveset)-1] = '\0';
+				disconnectChans[lnc].liveval = liveval;
+				sprintf(disconnectChans[lnc].timeset,"%s"," ");
+				sprintf(disconnectChans[lnc].diff,"%s"," ");
+				lnc ++;
+
+			}
+		}
+#endif
 	}
 	// Clear out the uninit tables.
 	for(jj=lna;jj<(lna + 50);jj++)
@@ -1114,6 +1155,18 @@ double liveval = 0.0;
 		sprintf(unMonChans[jj].timeset,"%s"," ");
 		sprintf(unMonChans[jj].diff,"%s"," ");
 	}
+#ifdef CA_SDF
+	// Clear out the disconnected tables.
+	for(jj=lnc;jj<(lnc + 50);jj++)
+	{
+		sprintf(disconnectChans[jj].chname,"%s"," ");
+		sprintf(disconnectChans[jj].burtset,"%s"," ");
+		sprintf(disconnectChans[jj].liveset,"%s"," ");
+		disconnectChans[jj].liveval = 0.0;
+		sprintf(disconnectChans[jj].timeset,"%s"," ");
+		sprintf(disconnectChans[jj].diff,"%s"," ");
+	}
+#endif
 	*noInit = lna;
 	return(lnb);
 }
@@ -1138,6 +1191,7 @@ char s2[64];
 char s3[64];
 char s4[64];
 char sl[64];
+//char stmp[128];
 long status = 0;
 char clearString[62] = "                       ";
 int flength = 62;
@@ -1174,6 +1228,7 @@ int zero = 0;
 	{
 		sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", lineNum);
 		status = dbNameToAddr(s,&saddr);
+		//sprintf(stmp, "%s%s", (setErrTable[ii].filtNum >= 0 ? "* " : ""), setErrTable[ii].chname);
 		status = dbPutField(&saddr,DBR_UCHAR,&setErrTable[ii].chname,flength);
 
 		sprintf(s1, "%s_%s_STAT%d_BURT", pref,"SDF_SP", lineNum);
@@ -1268,7 +1323,6 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 	double liveval = 0.0;
 	char *ret;
 	int filtDiffs=0;
-	static int i = 0;
 
 	// Check filter switch settings first
 	     errCntr = checkFilterSwitches(fmNum,setErrTable,monitorAll,listAll,wcVal,wcstring,&filtDiffs);
@@ -1288,7 +1342,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 				// If this is a digital data type, then get as double.
 				if(cdTable[ii].datatype == SDF_NUM)
 				{
-					status = GET_VALUE_NUM(paddr,&rval,&mtime);
+					status = GET_VALUE_NUM(paddr,&rval,&mtime,&(cdTable[ii].connected));
 					if(cdTable[ii].data.chval != rval || listAll)
 					{
 						sdfdiff = fabs(cdTable[ii].data.chval - rval);
@@ -1300,7 +1354,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 					}
 				// If this is a string type, then get as string.
 				} else {
-					status = GET_VALUE_STR(paddr,sval,sizeof(sval),&mtime);
+					status = GET_VALUE_STR(paddr,sval,sizeof(sval),&mtime,&(cdTable[ii].connected));
 					if(strcmp(cdTable[ii].data.strval,sval) != 0 || listAll)
 					{
 						sprintf(burtset,"%s",cdTable[ii].data.strval);
@@ -1841,7 +1895,7 @@ int setCAValueLong(ADDRESS ii, unsigned long *data) {
 	return setCAValue(ii,SDF_NUM,(void*)&tmp);
 }
 
-int syncEpicsDoubleValue(int index, double *dest, time_t *tp) {
+int syncEpicsDoubleValue(int index, double *dest, time_t *tp, int *connp) {
 	if (!dest || index < 0 || index >= chNum) return 1;
 	pthread_mutex_lock(&caTableMutex);
 	if (caTable[index].datatype == SDF_NUM) {
@@ -1849,22 +1903,25 @@ int syncEpicsDoubleValue(int index, double *dest, time_t *tp) {
 		if (tp) {
 			*tp = caTable[index].mod_time;
 		}
+		if (connp) {
+			*connp = caTable[index].connected;
+		}
 	}
 	pthread_mutex_unlock(&caTableMutex);
 	return 0;
 }
 
-int syncEpicsLongValue(ADDRESS index, unsigned long *dest, time_t *tp) {
+int syncEpicsLongValue(ADDRESS index, unsigned long *dest, time_t *tp, int *connp) {
 	double tmp = 0.0;
 	int result = 0;
 
 	if (!dest) return 1;
-	result = syncEpicsDoubleValue(index, &tmp, tp);
+	result = syncEpicsDoubleValue(index, &tmp, tp, connp);
 	*dest = (unsigned long)(tmp);
 	return result;
 }
 
-int syncEpicsStrValue(int index, char *dest, int dest_size, time_t *tp) {
+int syncEpicsStrValue(int index, char *dest, int dest_size, time_t *tp, int *connp) {
 	if (!dest || index < 0 || index >= chNum || dest_size < 1) return 1;
 	dest[0] = '\0';
 	pthread_mutex_lock(&caTableMutex);
@@ -1875,6 +1932,9 @@ int syncEpicsStrValue(int index, char *dest, int dest_size, time_t *tp) {
 		if (tp) {
 			*tp = caTable[index].mod_time;
 		}
+		if (connp) {
+			*connp = caTable[index].connected;
+		}
 	}
 	pthread_mutex_unlock(&caTableMutex);
 	return 0;
@@ -1882,12 +1942,18 @@ int syncEpicsStrValue(int index, char *dest, int dest_size, time_t *tp) {
 
 void connectCallback(struct connection_handler_args args) {
 	EPICS_CA_TABLE *entry = (EPICS_CA_TABLE*)ca_puser(args.chid);
-	
+	long cnt = 0;	
+
 	if (entry) {
 		pthread_mutex_lock(&caTableMutex);
+		usleep(1000);
 		entry->connected = (args.op == CA_OP_CONN_UP);
 		disconnectedPVs += (args.op == CA_OP_CONN_UP ? -1 : 1);
+		cnt = disconnectedPVs;
 		pthread_mutex_unlock(&caTableMutex);
+		if (args.op != CA_OP_CONN_UP) {
+			fprintf(stderr, "chan disconnected %ld\n", cnt);
+		}
 	}
 }
 
@@ -1926,11 +1992,8 @@ void registerPV(char *PVname, int sdfType)
 	//printf("Registering %s %d\n", PVname, sdfType);
 	pthread_mutex_lock(&caTableMutex);
 	disconnectedPVs++;
-	pthread_mutex_unlock(&caTableMutex);
 	caTable[chNum].datatype = sdfType;
 	caTable[chNum].connected = 0;
-	status = ca_create_channel(PVname, connectCallback, &(caTable[chNum]), 0, &chid1);
-	status = ca_create_subscription((sdfType == SDF_NUM ? DBR_TIME_DOUBLE : DBR_TIME_STRING), 0, chid1, DBE_VALUE, subscriptionHandler, &(caTable[chNum]), NULL);
 	strncpy(cdTable[chNum].chname, PVname, 128);
 	cdTable[chNum].chname[128-1] = '\0';
 	cdTable[chNum].datatype = sdfType;
@@ -1940,6 +2003,10 @@ void registerPV(char *PVname, int sdfType)
 	cdTable[chNum].error = 0;
 	cdTable[chNum].initialized = 0;
 	cdTable[chNum].mask = 0;
+	pthread_mutex_unlock(&caTableMutex);
+
+	status = ca_create_channel(PVname, connectCallback, &(caTable[chNum]), 0, &chid1);
+	status = ca_create_subscription((sdfType == SDF_NUM ? DBR_TIME_DOUBLE : DBR_TIME_STRING), 0, chid1, DBE_VALUE, subscriptionHandler, &(caTable[chNum]), NULL);
 
 	if((strstr(PVname,"_SW1S") != NULL) && (strstr(PVname,"_SW1S.") == NULL))
 	{
@@ -2124,6 +2191,7 @@ void setupCASDF()
 		bzero((void *)&(cdTable[ii]), sizeof(cdTable[ii]));
 		bzero((void *)&(unMonChans[ii]), sizeof(unMonChans[ii]));
 		bzero((void *)&(cdTableList[ii]), sizeof(cdTableList[ii]));
+		bzero((void *)&(disconnectChans[ii]), sizeof(disconnectChans[ii]));
 	}
 
 	// set more defaults
@@ -2443,6 +2511,7 @@ sleep(5);
 	int myreleased = RCG_VERSION_REL;
 	double myversion;
 
+	SETUP;
 	listLocalRecords(*iocshPpdbbase);
 	myversion = majorversion + 0.01 * subversion1 + 0.001 * subversion2;
 	if(!myreleased) myversion *= -1.0;
@@ -2490,7 +2559,7 @@ sleep(5);
 	status = dbNameToAddr(dsc,&disconnectcountaddr);
 
 	char dpdc[256]; sprintf(dpdc, "%s_%s", pref, "SDF_DROPPED_CNT");
-	status = dbNameToAddr(dsc,&droppedcountaddr);
+	status = dbNameToAddr(dpdc,&droppedcountaddr);
 #endif
 
 	char tsrname[256]; sprintf(tsrname, "%s_%s", pref, "SDF_SORT");			// SDF Table sorting request
@@ -2621,8 +2690,8 @@ sleep(5);
 #ifdef CA_SDF
 		{
 			long disconnect_count = getDisconnectedPVCount();
-			dbPutField(&disconnectcountaddr,DBR_LONG,&disconnect_count,1);
-			dbPutField(&droppedcountaddr,DBR_LONG,&droppedPVCount,1); 
+			status = dbPutField(&disconnectcountaddr,DBR_LONG,&disconnect_count,1);
+			status = dbPutField(&droppedcountaddr,DBR_LONG,&droppedPVCount,1); 
 		}
 #endif
 		//  Create full filename including directory and extension.
@@ -2937,6 +3006,17 @@ sleep(5);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&cdSort,1);
 				lastTable = SDF_TABLE_FULL;
 				break;
+#ifdef CA_SDF
+			case SDF_TABLE_DISCONNECTED:
+				if(lastTable != SDF_TABLE_FULL) {
+					clearTableSelections(cdSort,cdTableList, selectCounter);
+					confirmVal = 0;
+				}
+				noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit);
+				pageDisp =  reportSetErrors(pref, chDisconnected, disconnectChans, pageNum);
+				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chDisconnected, 1);
+				break;
+#endif
 			default:
 				pageDisp = reportSetErrors(pref, sperror,setErrTable,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&sperror,1);
@@ -2983,5 +3063,6 @@ sleep(5);
 	sleep(0xfffffff);
     } else
     	iocsh(NULL);
+    CLEANUP;
     return(0);
 }
