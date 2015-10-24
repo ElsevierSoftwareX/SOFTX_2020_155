@@ -109,6 +109,7 @@ $rfmTimeSlave = -1;
 $diagTest = -1;
 $flipSignals = 0;
 $edcu = 0;
+$casdf = 0;
 $pciNet = -1;
 $shmem_daq = 0; # Do not use shared memory DAQ connection
 $no_sync = 0; # Sync up to 1PPS by default
@@ -127,7 +128,7 @@ $dacKillModCnt[0] = undef;
 $dkTimesCalled = 0;
 $remoteGpsPart = 0;
 $remoteGPS = 0;
-$daq2dc = 1;
+$daq2dc = 0;
 
 # Normally, ARGV !> 2, so the following are not invoked in a standard make
 # This is legacy.
@@ -1304,6 +1305,11 @@ print EPICS "DUMMY FEC\_$dcuId\_DAQ_BYTE_COUNT int ao 0 field(HOPR,\"4000\") fie
 print EPICS "DUMMY FEC\_$dcuId\_EDCU_CHAN_NOCON int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
 print EPICS "DUMMY FEC\_$dcuId\_EDCU_CHAN_CONN int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
 print EPICS "DUMMY FEC\_$dcuId\_EDCU_CHAN_CNT int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
+}elsif ($casdf) {
+print OUTH "\tint timeDiag;\n";
+print EPICS "DUMMY FEC\_$dcuId\_TIME_DIAG int ai 0\n";
+print OUTH "\tint daqByteCnt;\n";
+print EPICS "DUMMY FEC\_$dcuId\_DAQ_BYTE_COUNT int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"4000\") field(HHSV,\"MINOR\")\n";
 }else{
 print OUTH "\tint timeDiag;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_DIAG epicsOutput.timeDiag int ao 0\n";
@@ -1556,6 +1562,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 	#print EPICS "test_points $::extraTestPoints\n";
 	if ($::extraExcitations) {
 		print EPICS "excitations $::extraExcitations\n";
+	}
+	#//		- for casdf signal that the CA version of the SDF database sould be generated
+	if ($::casdf) {
+		print EPICS "sdf_flavor_ca\n";
 	}
 	#//		- Add GDS info.
 	print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site " . get_freq() . " $dcuId $ifoid\n";
@@ -2132,7 +2142,11 @@ system("cp $rcg_src_dir/src/epics/util/SDF_RESTORE.adl SDF_RESTORE.adl");
 system("cat SDF_RESTORE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_SDF_RESTORE.adl");
 system("cp $rcg_src_dir/src/epics/util/SDF_SAVE.adl SDF_SAVE.adl");
 system("cat SDF_SAVE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_SDF_SAVE.adl");
+if ($::casdf) {
+system("cp $rcg_src_dir/src/epics/util/SDF_TABLE_CA.adl SDF_TABLE.adl");
+} else {
 system("cp $rcg_src_dir/src/epics/util/SDF_TABLE.adl SDF_TABLE.adl");
+}
 system("cat SDF_TABLE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_SDF_TABLE.adl");
 
 my $cur_subsys_num = 0;
@@ -2612,6 +2626,10 @@ sub createEpicsMakefile {
 	if ($edcu) {
 	  print OUTME "EXTRA_CFLAGS += -DEDCU=1\n";
 	  print OUTME "EXTRA_CFLAGS += -DNO_DAQ_IN_SKELETON=1\n";
+	}
+	if ($casdf) {
+	  print OUTME "EXTRA_CFLAGS += -DCA_SDF=1\n";
+	  print OUTME "EXTRA_CFLAGS += -DUSE_SYSTEM_TIME=1\n";
 	}
 	print OUTME "\n";
 	print OUTME "LIBFLAGS += -lezca\n";

@@ -62,6 +62,7 @@ $edcuSizeI = 0;
 $edcuSizeD = 0;
 $edcuTpNum = 40000;
 $edcuFiltNum = 50000;
+$casdf = 0;
 my @eFields;
 
 $names1 = "%TYPE% %NAME%[MAX_MODULES];\nassign %NAME% to\n{\n";
@@ -222,6 +223,8 @@ while (<IN>) {
 	}
 	$gds_exc_dcu_id = 13 + (int ($gds_excnum_base >= 10000)) * 2;
 	$gds_tp_dcu_id = 13 + int ($gds_tpnum_base / 10000);
+    } elsif (substr($_,0,13) eq "sdf_flavor_ca") {
+	$::casdf = 1;
     } elsif (substr($_,0,5) eq "EPICS") {
 	($junk, $epics_type, $epics_filt_var, $epics_coeff_var, $epics_epics_var ) = split(/\s+/, $_);	
 #	print "$junk, $epics_addr, $epics_type\n";
@@ -969,11 +972,22 @@ print "		field(ONVL,\"1\")\n";
 print "		field(TWVL,\"2\")\n";
 print "		field(THVL,\"3\")\n";
 print "		field(FRVL,\"4\")\n";
+if ($::casdf) {
+print "		field(FVVL,\"5\")\n";
+}
 print "		field(ZRST,\"SETTING DIFFS\")\n";
 print "		field(ONST,\"CHANS NOT FOUND\")\n";
 print "		field(TWST,\"CHANS NOT INIT\")\n";
 print "		field(THST,\"CHANS NOT MON\")\n";
-print "		field(FRST,\"FULL TABLE\")\n}\n";
+print "		field(FRST,\"FULL TABLE\")\n";
+if ($::casdf) {
+print "		field(FVST,\"DISCONNECTED CHANS\")\n";
+}
+print "}\n";
+if ($::casdf) {
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_DISCONNECTED_CNT\")\n";
+print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_DROPPED_CNT\")\n";
+}
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_PAGE\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_TABLE_LOCK\")\n";
 print "grecord(mbbi,\"%IFO%:FEC-${dcuId}_SDF_SAVE_TYPE\")\n";
