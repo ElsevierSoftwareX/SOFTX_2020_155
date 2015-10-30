@@ -143,6 +143,8 @@ install: $(DB)
 		echo "epicsEnvSet SDF_DIR /opt/rtcds/$(SITE)/${ifo}/target/$$model/$(TARGET)/burt/" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
                 echo "epicsEnvSet SDF_FILE safe" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
                 echo "epicsEnvSet SDF_MODEL $$model" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet MODEL_SITE $(SITE)" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet MODEL_IFO ${ifo}" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo -n 'epicsEnvSet PREFIX '>> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		grep _GRD_RB_STAT0  target/$(TARGET)/db/$$ifo/`basename $$i` | head -1 | sed 's/[^"]*"\([^"]*\)_GRD_RB_STAT0.*/\1/g' >>  target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 	  done ; \

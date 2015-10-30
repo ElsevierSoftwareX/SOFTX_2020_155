@@ -12,7 +12,8 @@ fi
 
 upper_system=`echo $system | tr a-z A-Z`
 hostname=`grep TARGET_HOST_NAME src/include/${system}.h | head -1 | awk '{print $3}'`
-site=`grep site= target/${system}epics/${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`
+#site=`grep site= target/${system}epics/${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`
+site=`grep MODEL_SITE target/${system}epics/${system}epics*.cmd | sed 's/.*MODEL_SITE \([a-z]*\).*/\1/g'`
 if test ${site}no = no; then echo Please make $system first; exit 1; fi
 upper_site=`echo $site | tr a-z A-Z`
 site_letter=M
@@ -22,8 +23,9 @@ if test ${site} = geo; then site_letter=G; fi
 if test ${site} = caltech; then site_letter=C; fi
 if test ${site} = tst; then site_letter=X; fi
 if test ${site} = stn; then site_letter=S; fi
-ifo=`grep ifo= target/${system}epics/${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`
-lower_ifo=`echo $ifo | tr A-Z a-z`
+#ifo=`grep ifo= target/${system}epics/${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`
+lower_ifo=`grep MODEL_IFO target/${system}epics/${system}epics*.cmd | head -1 |sed 's/.*MODEL_IFO \([a-zA-Z0-9]*\).*/\1/g'`
+ifo=`echo $lower_ifo | tr a-z A-Z`
 
 # Use the GPS seconds (if tconvert is found) or %y%m%d_%H%M%S otherwise
 cur_date=$(tconvert now 2>/dev/null)
@@ -99,8 +101,7 @@ if [ "x\`ps h -C ${system}epics\`" != x ]; then
 	sleep 1
 fi
 
-sudo killall ${system}epics
-sudo /sbin/rmmod ${system} 2&>/dev/null
+killall ${system}epics
 
 EOF
 
@@ -134,6 +135,10 @@ EOF
 
 gds_node=`grep rmid build/${system}epics/${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`
 if [ x$gds_node != "x" ]; then
+# high number DCUIDs/gds_node number cause issues to the DAQ, however there
+# are non-realtime models that are assigned higher numbers, so filter out
+# anything that has a high number (256+)
+ if [ "$gds_node" -lt "256" ]; then
 echo Performing install-daq
 datarate=`grep datarate build/${system}epics/${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`
 targethost=`grep TARGET_HOST_NAME src/include/${system}.h | head -1 | awk '{print $3}'`
@@ -195,6 +200,7 @@ fi
 #fi
 #/bin/cp -p target/${system}epics/db/${ifo}/auto.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/${edcu_name}.ini
 #echo /opt/rtcds/${site}/${lower_ifo}/chans/daq/${edcu_name}.ini
+ fi
 fi
 
 echo Installing Epics MEDM screens
