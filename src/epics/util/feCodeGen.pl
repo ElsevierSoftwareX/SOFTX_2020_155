@@ -2607,9 +2607,12 @@ sub createEpicsMakefile {
 	print OUTME "IFO = $site\n";
 	print OUTME "SITE = $location\n";
 	print OUTME "\n";
+	# The CA SDF build does not need a SEQUENCER added
+	if ($casdf==0) {
 	print OUTME "SEQ += \'";
 	print OUTME "$skeleton";
 	print OUTME ",(\"ifo=$site, site=$location, sys=\U$systemName\, \Lsysnum=$dcuId\, \Lsysfile=\U$skeleton \")\'\n";
+	}
 	#print OUTME "SEQ += \'get_local_time,(\"ifo=$site, sys=\U$systemName\")\'\n";
 	for($ii=0;$ii<$useWd;$ii++)
 	{
