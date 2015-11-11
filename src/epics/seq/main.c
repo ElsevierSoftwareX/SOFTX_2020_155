@@ -590,7 +590,8 @@ char *ret=0;
 				sprintf(setErrTable[errCnt].diff, "%s", "OVERRANGE");
 				setErrTable[errCnt].liveval = 0.0;
 				setErrTable[errCnt].sigNum = filterTable[ii].sw[jj];
-				mtime = buffer[jj].t;
+				// take the latest change time between the SW1S & SW2S channels
+				mtime = (buffer[0].t >= buffer[1].t ? buffer[0].t : buffer[1].t);
 				strcpy(localtimestring, ctime(&mtime));
 				localtimestring[strlen(localtimestring) - 1] = 0;
 				sprintf(setErrTable[errCnt].timeset, "%s", localtimestring);
@@ -629,7 +630,8 @@ char *ret=0;
 			if(filterTable[ii].mask) setErrTable[errCnt].chFlag |= 0x1;
 			else setErrTable[errCnt].chFlag &= 0xe;
 
-			mtime = buffer[0].t;
+			// take the latest change time between the SW1S & SW2S channels
+			mtime = (buffer[0].t >= buffer[1].t ? buffer[0].t : buffer[1].t);
 			strcpy(localtimestring, ctime(&mtime));
 			localtimestring[strlen(localtimestring) - 1] = 0;
 			sprintf(setErrTable[errCnt].timeset, "%s", localtimestring);
