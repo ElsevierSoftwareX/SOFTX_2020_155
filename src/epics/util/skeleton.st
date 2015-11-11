@@ -87,6 +87,9 @@ program %SEQUENCER_NAME%
 string msg;
 assign msg to "{ifo}:FEC-{sysnum}_MSG";
 
+string msg2;
+assign msg2 to "{ifo}:FEC-{sysnum}_MSG2";
+
 string msgDAQ;
 assign msgDAQ to "{ifo}:FEC-{sysnum}_MSGDAQ";
 
@@ -250,9 +253,12 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 %% static char ifo[160];
 %% static char daqsys[160];
 
-%% char fName[2][256];                                                   /* MA */
+%% char fName[3][256];                                                   /* MA */
 %% char fType[3][10] = {"IIR", "FIR", "IIR & FIR"};                      /* MA */
 %% char fNameDAQ[256];                                                   /* ma */
+%% char cpCmd[256];                                                   /* ma */
+%% char cfdir[256];
+%% char cfmodel[256] = "";
 
 #ifdef FIR_FILTERS                                                       /* MA */
 %% int fltrTypes = 2;                                                    /* MA */
@@ -359,7 +365,12 @@ state init
 %% strcat(fName[0], "/");                                          /* MA */
 %% strcat_lower(fName[0], fmc.ifo);                                     /* MA */
 %% strcat(fName[0], "/chans/");                                          /* MA */
+%% strcpy (cfdir,fName[0]);;
+%% strcpy(fName[2],fName[0]);
+%% strcat(fName[2], "tmp/");                                          /* MA */
+%% strcat_upper(fName[2], fmc.system);                                   /* MA */
 %% strcat_upper(fName[0], fmc.system);                                   /* MA */
+%% strcat_upper(cfmodel, fmc.system);                                   /* MA */
 %% if (strlen(fmc.subSys[0].name) > 0) {                                 /* MA */
 %%    strcat(fName[0], "_");                                             /* MA */
 %%    strcat_upper(fName[0], fmc.subSys[0].name);                        /* MA */
@@ -367,10 +378,16 @@ state init
 %% strcat(fName[0], ".");                                                /* MA */
 %% strcpy(fName[1], fName[0]);                                           /* MA */
 %% strcat(fName[0], "txt");                                              /* MA */
+%% strcat(fName[2], ".txt");                                              /* MA */
 %% strcat(fName[1], "fir");                                              /* MA */
+
+%% sprintf(cpCmd,"%s %s %s","cp",fName[0],fName[2]);
+%% printf("copy file with command = %s\n",cpCmd);
 
 %DECL3%
 
+%% int status = system(cpCmd);
+%% printf("copy file with status = %d\n",status);
 %%  fmc.pVmeCoeff = (VME_COEF *)pVmeCoeff; /* Initialize pointer for fmReadCoeffFile() */
 #if MAX_MODULES > 0
 %%  for(ii=0;ii<MAX_MODULES;ii++)
@@ -476,8 +493,8 @@ state monScreen{
 %%	   && prev_cycle == pEpics->epicsOutput.cycle);
 %%    prev_gps = pEpics->epicsOutput.timeDiag;
 %%    prev_cycle = pEpics->epicsOutput.cycle;
-      pvGet(msg);
-%%    if(strncmp(msg,"Modified",8) == 0) stateWord |= FE_ERROR_CFC;
+      pvGet(msg2);
+%%    if(strncmp(msg2,"Modified",8) == 0) stateWord |= FE_ERROR_CFC;
       pvGet(msgDAQ);
 %%    if(strncmp(msgDAQ,"Modified",8) == 0) stateWord |= FE_ERROR_CFC;
       pvPut(stateWord);
@@ -512,6 +529,8 @@ state monScreen{
 %% 	{
 	  strcpy(msg, "Reading coeff file...");
 	  pvPut(msg);
+%%	printf("Calling partial load with: \n\t%s\n\t%s\n\t%s\n",cfdir,cfmodel,fmmap0[ii].name);
+%%	int status = fmCreatePartial(cfdir, cfmodel,fmmap0[ii].name);
 
 %%	  /* printf("About to read file \n"); */
 %%	  if (fmReadCoeffFile(&fmc, 0, pEpics->epicsOutput.timeDiag) != 0) {
@@ -894,10 +913,12 @@ state filtCoefChk
     pvGet(allNewCoeff);
     if(allNewCoeff)
 %%    {
-   pvGet(localtimestring);
-%%              fprintf(stderr, "%s READING COEFF FILE\n",localtimestring);
-	  strcpy(msg, "Reading coeff File...");
-	  pvPut(msg);
+   	pvGet(localtimestring);
+%% 	int status = system(cpCmd);
+%% 	printf("copy file with status = %d\n",status);
+%%      fprintf(stderr, "%s READING COEFF FILE\n",localtimestring);
+%%	 strcpy(msg, "Reading coeff File...");
+	 pvPut(msg);
 
 
 %%        /* printf("About to read file \n"); */

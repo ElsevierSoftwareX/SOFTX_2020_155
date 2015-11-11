@@ -2443,6 +2443,7 @@ int main(int argc,char *argv[])
 	int fivesectimer = 0;
 	long daqFileCrc = 0;
 	long coeffFileCrc = 0;
+	long photonFileCrc = 0;
 	long sdfFileCrc = 0;
 	char modfilemsg[] = "Modified File Detected ";
 	struct stat st = {0};
@@ -2482,6 +2483,7 @@ int main(int argc,char *argv[])
 	char *targetdir =  getenv("TARGET_DIR");
 	char *daqFile =  getenv("DAQ_FILE");
 	char *coeffFile =  getenv("COEFF_FILE");
+	char *photonFile =  getenv("PHOTON_FILE");
 	char *logdir = getenv("LOG_DIR");
 #ifdef CA_SDF
 	char *iniFile = getenv("INI_FILE");
@@ -2618,7 +2620,7 @@ sleep(5);
 	char moddaqfilemsg[256]; sprintf(moddaqfilemsg, "%s_%s", pref, "MSGDAQ");	// Record to write if DAQ file changed.
 	status = dbNameToAddr(moddaqfilemsg,&daqmsgaddr);
 
-	char modcoefffilemsg[128]; sprintf(modcoefffilemsg, "%s_%s", pref, "MSG");	// Record to write if Coeff file changed.
+	char modcoefffilemsg[128]; sprintf(modcoefffilemsg, "%s_%s", pref, "MSG2");	// Record to write if Coeff file changed.
 	status = dbNameToAddr(modcoefffilemsg,&coeffmsgaddr);
 
 	char msgstrname[128]; sprintf(msgstrname, "%s_%s", pref, "SDF_MSG_STR");	// SDF Time of last file save.
@@ -2674,6 +2676,7 @@ sleep(5);
 	// Initialize DAQ and COEFF file CRC checksums for later compares.
 	daqFileCrc = checkFileCrc(daqFile);
 	coeffFileCrc = checkFileCrc(coeffFile);
+	photonFileCrc = checkFileCrc(photonFile);
 	reportSetErrors(pref, 0,setErrTable,0);
 
 	sleep(1);       // Need to wait before first restore to allow sequencers time to do their initialization.
@@ -3043,11 +3046,12 @@ sleep(5);
 				status = dbPutField(&daqmsgaddr,DBR_STRING,modfilemsg,1);
 				logFileEntry("Detected Change to DAQ Config file.");
 			}
-			status = checkFileCrc(coeffFile);
-			if(status != coeffFileCrc) {
-				coeffFileCrc = status;
+			coeffFileCrc = checkFileCrc(coeffFile);
+			photonFileCrc = checkFileCrc(photonFile);
+			if(photonFileCrc != coeffFileCrc) {
 				status = dbPutField(&coeffmsgaddr,DBR_STRING,modfilemsg,1);
-				logFileEntry("Detected Change to Filter Coeff file.");
+			} else {
+				status = dbPutField(&coeffmsgaddr,DBR_STRING,"",1);
 			}
 			status = checkFileCrc(sdffileloaded);
 			if(status == -1) {
