@@ -173,12 +173,14 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n, unsigned long gps) {
   strcat(strcat_lower(fname[0], fmc->ifo),"/");
   strcat(fname[0], "chans/");
   strcpy(archiveFname[0], fname[0]);
+  strcpy(fname[1], fname[0]);
+  strcat(fname[0], "tmp/");
 
   strcat_upper(fname[0], fmc->system);
+  strcat_upper(fname[1], fmc->system);
   if (strlen(fmc->subSys[n].name) > 0) /* Only append non-empty subsystem name */
     strcat_upper(strcat(fname[0], "_"), fmc->subSys[n].name);
 
-  strcpy(fname[1], fname[0]);
 
   strcat(fname[0], ".txt");
   printf("Input %s\n", fname[0]);
@@ -919,7 +921,6 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n, unsigned long gps) {
     /*printf("filt %d BIQUAD FLAG = %d\n", i,fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].biquad);*/
 
     usleep(10000);
-
     fmc->pVmeCoeff->vmeCoeffs[fmc->subSys[n].map[i].fmModNum].bankNum =
                                     fmc->subSys[n].map[i].fmd.bankNum;
   }
@@ -927,6 +928,136 @@ int fmReadCoeffFile(fmReadCoeff *fmc, int n, unsigned long gps) {
   return 0;
 }
 
+int fmCreatePartial(char *cfDir, char *cfName, char *filtName)
+{
+  char searchPattern[64] = "### ";
+  char stopPattern[10] = "########";
+  char fName[NUM_FMC_FILE_TYPES][256];
+  struct stat buf;
+  int lineNo;
+  int lineSize = 1024;
+  char *line = NULL;
+  FILE *fp;
+  FILE *fptmp;
+  size_t len;
+  ssize_t read;
+  int fstart = 0;
+  int fstop = 0;
+  char newcoeffs[50000] = "";
+  int foundFilt = 0;
+  char cpCmd[256];
+  int status;
+
+  strcpy(fName[FMC_PHOTON],cfDir);
+  strcpy(fName[FMC_LOAD],cfDir);
+  strcat(fName[FMC_LOAD],"tmp/");
+  strcpy(fName[FMC_TMP],fName[FMC_LOAD]);
+  strcat(fName[FMC_PHOTON],cfName);
+  strcat(fName[FMC_LOAD],cfName);
+  strcat(fName[FMC_TMP],cfName);
+  strcpy(fName[FIR_PHOTON],fName[0]);
+  strcpy(fName[FIR_TMP],fName[1]);
+
+  strcat(fName[FMC_PHOTON],".txt");
+  strcat(fName[FMC_LOAD],".txt");
+  strcat(fName[FMC_TMP],".tmp");
+  strcat(fName[FIR_LOAD],".fir");
+  strcat(fName[FIR_TMP],".fir");
+
+  strcat(searchPattern,filtName);
+
+  printf("In create partial: \n\t%s\n\t%s\n\t%s\n\t%s\n",fName[FMC_PHOTON],fName[FMC_LOAD],fName[FIR_PHOTON],fName[FIR_LOAD]);
+
+  fp = fopen(fName[FMC_PHOTON],"r");
+  if(fp == NULL) {
+  	printf("Cannot open file %s\n",fName[FMC_PHOTON]);
+        return FM_CANNOT_STAT_INPUT_FILE;
+  }
+
+  // Read the coeff file and pull out lines for single filter module
+  while((read = getline(&line, &len, fp)) != -1) {
+  	// printf("%s\n",line);
+  	if(fstart && fstop < 2) {
+		strcat(newcoeffs,line);
+	}
+	if(strstr(line,searchPattern) != NULL && fstart == 0) {
+		fstart = 1;
+		foundFilt = 1;
+		strcat(newcoeffs,line);
+  		printf("Found the filter %s\n",filtName);
+	}
+	if(fstart > 0 && strstr(line,stopPattern) != NULL) {
+		fstop += 1;
+	}
+	if(fstop == 2) {
+		fstart = 0;
+	}
+  }
+  fclose(fp);
+
+  fstart = 0;
+  fstop = 0;
+
+  fp = fopen(fName[FMC_LOAD],"r");
+  if(fp == NULL) {
+  	printf("Cannot open file %s\n",fName[FMC_LOAD]);
+        return FM_CANNOT_STAT_INPUT_FILE;
+  }
+
+  fptmp = fopen(fName[FMC_TMP],"w");
+  if(fptmp == NULL) {
+  	printf("Cannot open file %s\n",fName[FMC_TMP]);
+	fclose(fp);
+        return FM_CANNOT_STAT_INPUT_FILE;
+  }
+  
+  printf("Creating new file from %s to %s\n",fName[FMC_LOAD],fName[FMC_TMP]);
+  while((read = getline(&line, &len, fp)) != -1) {
+	if(strstr(line,searchPattern) == NULL && fstart == 0) {
+		// No change in this line, so just write it to tmp file
+		fprintf(fptmp,"%s",line);
+	}
+	if(strstr(line,searchPattern) != NULL && fstart == 0) {
+		fstart = 1;
+		foundFilt = 1;
+  		printf("Found the filter %s\n",filtName);
+		// Write all of the new stuff extracted from the Photon file
+		fprintf(fptmp,"%s",newcoeffs);
+	}
+	if(fstart > 0 && strstr(line,stopPattern) != NULL) {
+		fstop += 1;
+	}
+	if(fstop == 2) {
+		// We are done adding new stuff
+		fstart = 0;
+	}
+  }
+  fclose(fp);
+  fclose(fptmp);
+
+  if(line) free(line);
+
+  // Copy the newly formed tmp file to the file to be loaded by fmReadCoeff()
+  sprintf(cpCmd,"%s %s %s","cp",fName[FMC_TMP],fName[FMC_LOAD]);
+  status = system(cpCmd);
+
+  if(foundFilt) {
+  	printf("Found the filter %s\n",filtName);
+	printf("%s\n",newcoeffs);
+	printf("copy status = %d\n",status);
+  }
+
+  int mychksum = checkFileCrc(fName[FMC_LOAD]);
+  int mychksumP = checkFileCrc(fName[FMC_PHOTON]);
+  printf("My load file CRC = %ld \n",mychksum);
+  if(mychksum == mychksumP) printf ("Photon and Load Files Match \n");
+  else printf ("Photon and Load Files DO NOT Match \n");
+
+
+
+  return(0);
+
+}
 /// Test routine which will print out filter coefs to screen.
 ///	@param[in] *fmc		Pointer to filter coef data.
 ///	@param[in] subsystems	Number of subsystems

@@ -115,7 +115,7 @@ sub createGdsMedm
 	$xpos = 555; $ypos = 93; $width = 215; $height = 80;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{yellow},"","","");
 	# Coeff load background
-	$xpos = 555; $ypos = 194; $width = 215; $height = 50;
+	$xpos = 555; $ypos = 184; $width = 215; $height = 70;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{yellow},"","","");
 	# DAQ Reload background
 	$xpos = 555; $ypos = 268; $width = 215; $height = 50;
@@ -268,11 +268,14 @@ sub createGdsMedm
 
 
 	# Add Coeff Reload
-	$xpos = 562; $ypos = 200; $width = 200; $height = 18;
+	$xpos = 562; $ypos = 190; $width = 200; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenMessage") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_LOAD_NEW_COEFF",$ecolors{white},$ecolors{black},"COEFF LOAD","1");
 	# Add Coeff load time Monitor
-	$xpos = 562; $ypos = 220; $width = 200; $height = 18;
+	$xpos = 562; $ypos = 210; $width = 200; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_MSG",$ecolors{white},$ecolors{blue},"static");
+	# Add Coeff load time Monitor
+	$xpos = 562; $ypos = 230; $width = 200; $height = 18;
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_MSG2",$ecolors{white},$ecolors{blue},"static");
 
 	# ************* Create DAQ Status Info Block *****************************************************************
 

@@ -64,4 +64,12 @@ char* fmReadShortErrMsg();
 #define FM_INVALID_INPUT_FILE        6
 #define FM_FCLOSE_FAILED             7
 
+#define NUM_FMC_FILE_TYPES		6
+#define FMC_PHOTON			0
+#define FMC_LOAD			1
+#define FMC_TMP				2
+#define FIR_PHOTON			3
+#define FIR_LOAD			4
+#define FIR_TMP				5
+
 #endif
