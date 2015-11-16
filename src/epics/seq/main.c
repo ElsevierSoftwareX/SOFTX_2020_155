@@ -154,12 +154,21 @@ typedef struct SET_ERR_TABLE {
 #ifdef CA_SDF
 /// Structure for holding data from EPICS CA
 typedef struct EPICS_CA_TABLE {
+	int redirIndex;					// When a connection is in progress writes are redirected as the type may have changed
 	int datatype;
 	union Data data;
 	int connected;
 	time_t mod_time;
 	chid chanid;
+	int chanIndex;					// index of the channel in cdTable, caTable, ...
 } EPICS_CA_TABLE;
+
+/// Structure to hold start up information for the CA thread
+typedef struct CA_STARTUP_INFO {
+	char *fname;		// name of the request file to parse
+	char *prefix;		// ifo name
+} CA_STARTUP_INFO;
+
 #endif
 
 // Gloabl variables		****************************************************************************************
@@ -191,16 +200,27 @@ SET_ERR_TABLE cdTableList[SDF_MAX_TSIZE];	///< Table used to report file read er
 
 #ifdef CA_SDF
 SET_ERR_TABLE disconnectChans[SDF_MAX_TSIZE];
-EPICS_CA_TABLE caTable[SDF_MAX_TSIZE];		///< Table used to hold the data returned by channel access
 
-int chDisconnected = 0;		///< Total number of channels that are disconnected.  This is used as the max index for disconnectedChans
-				//// it is distinct from disconnectedPVs as its update cycle is tied to the global EPICS update cycle.
+// caTable, caConnTAble, chConnNum, chEnumDetermined are protected by the caTableMutex
+EPICS_CA_TABLE caTable[SDF_MAX_TSIZE];		    ///< Table used to hold the data returned by channel access
+EPICS_CA_TABLE caConnTable[SDF_MAX_TSIZE]; ///< Table used to hold new connection data
+EPICS_CA_TABLE caConnEnumTable[SDF_MAX_TSIZE];  ///< Table used to hold enums as their monitoring type (NUM/STR) is determined
+												///< enums are treated as STR records only if they have non-null 0 and 1 strings
+
+// protected by caEvidMutex
+evid caEvid[SDF_MAX_TSIZE];			///< Table to hold the CA subscription id for the channels
+
+int chConnNum = 0;					///< Total number of entries to be processed in caConnTable
+int chEnumDetermined = 0;			///< Total number of enums whos types have been determined
+
+long chDisconnected = 0;		///< Total number of channels that are disconnected.  This is used as the max index for disconnectedChans
 
 pthread_t caThread;
 pthread_mutex_t caStateMutex;
 pthread_mutex_t caTableMutex;
+pthread_mutex_t caEvidMutex;
+
 int caThreadState;
-long disconnectedPVs;
 long droppedPVCount;
 
 #define ADDRESS int
@@ -228,7 +248,9 @@ long droppedPVCount;
 #define SDF_STR		1
 #define SDF_UNKNOWN	-1
 
+
 // Function prototypes		****************************************************************************************
+int isAlarmChannel(char *);
 int checkFileCrc(char *);
 unsigned int filtCtrlBitConvert(unsigned int);
 void getSdfTime(char *, int size);
@@ -262,21 +284,22 @@ int syncEpicsDoubleValue(ADDRESS, double *, time_t *, int *);
 int syncEpicsLongValue(ADDRESS, unsigned long *, time_t *, int *);
 int syncEpicsStrValue(ADDRESS, char *, int, time_t *, int *);
 
-void connectCallback(struct connection_handler_args);
 void subscriptionHandler(struct event_handler_args);
-void registerPV(char *, int);
+void connectCallback(struct connection_handler_args);
+void registerPV(char *);
 int daqToSDFDataType(int);
-void parseIni(char *);
+void parseChannelListReq(char *, char *);
 
 int getCAThreadState();
 void setCAThreadState(int state);
 
-unsigned long getDisconnectedPVCount();
+void copyConnectedCAEntry(EPICS_CA_TABLE *);
+void syncCAConnections(long *);
 
 void *caMainLoop(void *);
 
 
-void initCAConnections(char *);
+void initCAConnections(char *, char *);
 void setupCASDF();
 void cleanupCASDF();
 #else
@@ -287,6 +310,19 @@ void dbDumpRecords(DBBASE *);
 
 // End Header **********************************************************************************************************
 //
+
+/// Given a channel name return 1 if it is an alarm channel, else 1
+int isAlarmChannel(char *chname) {
+	if (!chname) return 0;
+	return ((strstr(chname,".HIGH") != NULL) || 
+		(strstr(chname,".HIHI") != NULL) || 
+		(strstr(chname,".LOW") != NULL) || 
+		(strstr(chname,".LOLO") != NULL) || 
+		(strstr(chname,".HSV") != NULL) || 
+		(strstr(chname,".OSV") != NULL) || 
+		(strstr(chname,".ZSV") != NULL) || 
+		(strstr(chname,".LSV") != NULL) );
+}
 
 /// Common routine to parse lines read from BURT/SDF files..
 ///	@param[in] *s	Pointer to line of chars to parse.
@@ -716,10 +752,10 @@ char sval[64];
 		if(!status) {
 			if(cdTableP[ii].datatype == SDF_NUM)
 			{
-				statusR = GET_VALUE_NUM(geaddr,&dval,NULL,&(cdTableP[ii].connected));
+				statusR = GET_VALUE_NUM(geaddr,&dval,NULL, NULL); //&(cdTableP[ii].connected));
 				if (!statusR) cdTableP[ii].data.chval = (cdTable[ii].filterswitch ? (int)dval & 0xffff : dval);
 			} else {
-				statusR = GET_VALUE_STR(geaddr,sval,sizeof(sval),NULL,&(cdTableP[ii].connected));
+				statusR = GET_VALUE_STR(geaddr,sval,sizeof(sval),NULL, NULL); //&(cdTableP[ii].connected));
 				if(!statusR) sprintf(cdTableP[ii].data.strval,"%s",sval);
 			}
 			chcount ++;
@@ -1344,7 +1380,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 				// If this is a digital data type, then get as double.
 				if(cdTable[ii].datatype == SDF_NUM)
 				{
-					status = GET_VALUE_NUM(paddr,&rval,&mtime,&(cdTable[ii].connected));
+					status = GET_VALUE_NUM(paddr,&rval,&mtime, NULL); //&(cdTable[ii].connected));
 					if(cdTable[ii].data.chval != rval || listAll)
 					{
 						sdfdiff = fabs(cdTable[ii].data.chval - rval);
@@ -1356,7 +1392,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 					}
 				// If this is a string type, then get as string.
 				} else {
-					status = GET_VALUE_STR(paddr,sval,sizeof(sval),&mtime,&(cdTable[ii].connected));
+					status = GET_VALUE_STR(paddr,sval,sizeof(sval),&mtime, NULL); //&(cdTable[ii].connected));
 					if(strcmp(cdTable[ii].data.strval,sval) != 0 || listAll)
 					{
 						sprintf(burtset,"%s",cdTable[ii].data.strval);
@@ -1707,14 +1743,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 				// Find channel in full list and replace setting info
 				fmatch = 0;
 				// We can set alarm values, but do not put them in cdTable
-				if((strstr(cdTableP[chNumP].chname,".HIGH") != NULL) || 
-					(strstr(s1,".HIHI") != NULL) || 
-					(strstr(s1,".LOW") != NULL) || 
-					(strstr(s1,".LOLO") != NULL) || 
-					(strstr(s1,".HSV") != NULL) || 
-					(strstr(s1,".OSV") != NULL) || 
-					(strstr(s1,".ZSV") != NULL) || 
-					(strstr(s1,".LSV") != NULL) )
+				if( isAlarmChannel(cdTableP[chNumP].chname) )
 				{
 					alarmCnt ++;
 					isalarm = 1;
@@ -1942,63 +1971,166 @@ int syncEpicsStrValue(int index, char *dest, int dest_size, time_t *tp, int *con
 	return 0;
 }
 
-void connectCallback(struct connection_handler_args args) {
-	EPICS_CA_TABLE *entry = (EPICS_CA_TABLE*)ca_puser(args.chid);
-	long cnt = 0;	
-
-	if (entry) {
-		pthread_mutex_lock(&caTableMutex);
-		usleep(1000);
-		entry->connected = (args.op == CA_OP_CONN_UP);
-		disconnectedPVs += (args.op == CA_OP_CONN_UP ? -1 : 1);
-		cnt = disconnectedPVs;
-		pthread_mutex_unlock(&caTableMutex);
-		if (args.op != CA_OP_CONN_UP) {
-			fprintf(stderr, "chan disconnected %ld\n", cnt);
-		}
-	}
-}
-
 /// Routine to handle subscription callbacks
 void subscriptionHandler(struct event_handler_args args) {
 	float val = 0.0;
 	EPICS_CA_TABLE *entry = args.usr;
+	EPICS_CA_TABLE *origEntry = entry;
 	if (args.status != ECA_NORMAL ||  !entry) {
 		return;
 	}
 	pthread_mutex_lock(&caTableMutex);
+	// If this entry has just reconnected, then do not write the old copy, write to the temporary/redir dest
+	if (entry->redirIndex >= 0) {
+		if (entry->redirIndex < SDF_MAX_TSIZE) {
+			entry = &(caConnTable[entry->redirIndex]);
+		} else {
+			entry = &(caConnEnumTable[entry->redirIndex - SDF_MAX_TSIZE]);
+		}
+	}
+	// if we are getting data, we must be connected.
+	entry->connected = 1;
+	const int MAX_STR_LEN = sizeof(entry->data.strval);
 	if (args.type == DBR_TIME_DOUBLE) {
 		struct dbr_time_double *dVal = (struct dbr_time_double *)args.dbr;
 		entry->data.chval = dVal->value;
 		entry->mod_time = dVal->stamp.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
 	} else if (args.type == DBR_TIME_STRING) {
 		struct dbr_time_string *sVal = (struct dbr_time_string *)args.dbr;
-		const int MAX_STR_LEN = sizeof(entry->data.strval);
 		strncpy(entry->data.strval, sVal->value, MAX_STR_LEN);
 		entry->data.strval[MAX_STR_LEN - 1] = '\0';
 		entry->mod_time = sVal->stamp.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
+	} else if (args.type == DBR_GR_ENUM && entry->redirIndex >= SDF_MAX_TSIZE) {
+		struct dbr_gr_enum *eVal = (struct dbr_gr_enum *)args.dbr;
+		if (entry->datatype == SDF_UNKNOWN) {
+			// determine the proper type
+			entry->datatype = SDF_NUM;
+			if (eVal->no_str >= 2) {
+				// call it a string if there are two non-null distinct
+				// strings for the first two entries
+				if ((strlen(eVal->strs[0]) > 0 && strlen(eVal->strs[1]) > 0) &&
+					strcmp(eVal->strs[0], eVal->strs[1]) != 0)
+				{
+					entry->datatype = SDF_STR;
+				}
+			}
+			++chEnumDetermined;
+		}
+		if (entry->datatype == SDF_NUM) {
+			entry->data.chval = (double)(eVal->value);
+		} else {
+			strncpy(entry->data.strval, eVal->strs[eVal->value], MAX_STR_LEN);
+			entry->data.strval[MAX_STR_LEN - 1] = '\0';
+		}
+		// The dbr_gr_enum type does not have time information, so we use current time
+		entry->mod_time = time(NULL);
 	}
 	pthread_mutex_unlock(&caTableMutex);
 }
 
+void connectCallback(struct connection_handler_args args) {
+	EPICS_CA_TABLE *entry = (EPICS_CA_TABLE*)ca_puser(args.chid);
+	EPICS_CA_TABLE *connEntry = 0;
+	int dbr_type = -1;
+	int sdf_type = SDF_NUM;
+	int chanIndex = SDF_MAX_TSIZE;
+	int typeChange = 0;
+	int is_enum = 0;
+
+	if (entry) {
+		chanIndex = entry->chanIndex;
+
+		// determine the field type for conn up events
+		// do this outside of the critical section
+		if (args.op == CA_OP_CONN_UP) {
+			dbr_type = dbf_type_to_DBR(ca_field_type(args.chid));
+			if (dbr_type_is_ENUM(dbr_type)) {
+				is_enum = 1;
+				sdf_type = SDF_UNKNOWN;
+			} else if (dbr_type == DBR_STRING) {
+				sdf_type = SDF_STR;
+			}
+		}
+
+		pthread_mutex_lock(&caTableMutex);
+		if (args.op == CA_OP_CONN_UP) {
+			// connection
+			if (is_enum) {
+				entry->redirIndex = entry->chanIndex + SDF_MAX_TSIZE;
+				connEntry = &(caConnEnumTable[entry->chanIndex]);
+			} else {
+				// reserve a new conn table entry if one is not already reserved
+				if (entry->redirIndex < 0) {
+					entry->redirIndex = chConnNum;
+					++chConnNum;
+				}
+				connEntry = &(caConnTable[entry->redirIndex]);
+			}
+			entry->chanid = args.chid;
+
+			// now copy items over to the connection record
+			connEntry->redirIndex = -1;
+
+			connEntry->datatype = sdf_type;
+			connEntry->data.chval = 0.0;
+			entry->connected = 1;
+			connEntry->connected = 1;
+			connEntry->mod_time = 0;
+			connEntry->chanid = args.chid;
+			connEntry->chanIndex = entry->chanIndex;
+			typeChange = (connEntry->datatype != entry->datatype);
+
+		} else {
+			// disconnect
+			entry->connected = 0;
+		}
+		pthread_mutex_unlock(&caTableMutex);
+
+		// now register/clear the subscription callback
+		pthread_mutex_lock(&caEvidMutex);
+		if (args.op == CA_OP_CONN_UP) {
+			// connect
+			// if we are subscribed but the types are wrong, then unsubscribe
+			if (caEvid[chanIndex] && typeChange) {
+				ca_clear_subscription(caEvid[chanIndex]);
+				caEvid[chanIndex] = 0;
+			}
+			// if we are not subscribed become subscribed
+			if (!caEvid[chanIndex]) {
+				chtype subtype = (sdf_type == SDF_NUM ? DBR_TIME_DOUBLE : DBR_TIME_STRING);
+				if (is_enum) {
+					subtype = DBR_GR_ENUM;
+				}
+				ca_create_subscription(subtype, 0, args.chid, DBE_VALUE, subscriptionHandler, entry, &(caEvid[chanIndex]));
+			}
+		} else {
+			// disconnect
+			if (caEvid[chanIndex]) {
+				ca_clear_subscription(caEvid[chanIndex]);
+				caEvid[chanIndex] = 0;
+			}
+		}
+		pthread_mutex_unlock(&caEvidMutex);
+	}
+}
+
 /// Routine to register a channel
-void registerPV(char *PVname, int sdfType)
+void registerPV(char *PVname)
 {
 	long status=0;
 	chid chid1;
 
-	if (chNum >= SDF_MAX_TSIZE || sdfType == SDF_UNKNOWN) {
+	if (chNum >= SDF_MAX_TSIZE) {
 		droppedPVCount++;
 		return;
 	}
-	//printf("Registering %s %d\n", PVname, sdfType);
+	//printf("Registering %s\n", PVname);
 	pthread_mutex_lock(&caTableMutex);
-	disconnectedPVs++;
-	caTable[chNum].datatype = sdfType;
+	caTable[chNum].datatype = SDF_NUM;
 	caTable[chNum].connected = 0;
 	strncpy(cdTable[chNum].chname, PVname, 128);
 	cdTable[chNum].chname[128-1] = '\0';
-	cdTable[chNum].datatype = sdfType;
+	cdTable[chNum].datatype = SDF_NUM;
 	cdTable[chNum].initialized = 0;
 	cdTable[chNum].filterswitch = 0;
 	cdTable[chNum].filterNum = 0;
@@ -2008,7 +2140,6 @@ void registerPV(char *PVname, int sdfType)
 	pthread_mutex_unlock(&caTableMutex);
 
 	status = ca_create_channel(PVname, connectCallback, &(caTable[chNum]), 0, &chid1);
-	status = ca_create_subscription((sdfType == SDF_NUM ? DBR_TIME_DOUBLE : DBR_TIME_STRING), 0, chid1, DBE_VALUE, subscriptionHandler, &(caTable[chNum]), NULL);
 
 	if((strstr(PVname,"_SW1S") != NULL) && (strstr(PVname,"_SW1S.") == NULL))
 	{
@@ -2034,83 +2165,33 @@ int daqToSDFDataType(int daqtype) {
 	return SDF_UNKNOWN;
 }
 
-/// Routine to read in data from an INI file
-void parseIni(char *fname)
-{
+/// Parse an BURT request file and register each channel to be monitored
+/// @input fname - name of the file to open
+/// @input pref - the ifo name, should be 3 characters
+void parseChannelListReq(char *fname, char *pref) {
 	FILE *f = 0;
-	char buffer[256];
-	char channame[MAX_CHAN_LEN+1];
-	int in_section = 0;
-	int def_type = 0;
-	int cur_type = 0;
-	char *ch = 0;
-	char *end = 0;
+	char ifo[4];
+	char line[128];
+	char s1[128],s2[128],s3[128],s4[128],s5[128],s6[128],s7[128],s8[128];
+	int argcount = 0;
 
-	printf("Parsing %s\n", fname);
-	if (!fname) return;
-	f = fopen(fname, "rt");
+	line[0]=s1[0]=s2[0]=s3[0]=s4[0]=s5[0]=s6[0]=s7[0]=s8[0]='\0';
+	strncpy(ifo, pref, 3);
+	ifo[3] = '\0';
+	f = fopen(fname, "r");
 	if (!f) return;
 
-	printf("Starting parse\n");
-	channame[0] = '\0';
-	buffer[0] = '\0';
-	while (fgets(buffer, 256, f)) {
-		/* fgets should always set this, but force a null termination */
-		buffer[256-1] = '\0';
-		/* skip until we reach the first [block] */
-		if (!in_section && buffer[0] != '[') continue;
-		in_section = 1;
-		/* terminate the input at the first \n */
-		for (ch = buffer; *ch; ++ch) {
-			if (*ch == '\n') {
-				*ch = '\0';
-				break;
-			}
-		}
-
-		if (buffer[0] == '[') {
-			/* read in a block, ie a channel */
-			if (strcmp(channame, "") != 0) {
-				if (strcmp(channame, "default") == 0) {
-					printf("found default %d %d\n", cur_type, daqToSDFDataType(cur_type));
-					def_type = cur_type;
-				} else {
-					//printf("registering, %s %d\n", channame, daqToSDFDataType(cur_type));
-					/* now connect to this PV */
-					registerPV(channame, daqToSDFDataType(cur_type));
-				}	
-			}
-			for (ch = buffer+1; *ch && *ch != ']'; ++ch) {}
-			if (*ch != ']') continue;
-			*ch = '\0';
-			/* skip the channel if the name is too long */
-			if (ch - (buffer+1) > MAX_CHAN_LEN) {
-				in_section = 0;
-				channame[0] = '\0';
-				continue;
-			}
-			strncpy(channame, buffer+1, MAX_CHAN_LEN+1);
-			channame[MAX_CHAN_LEN] = '\0';
-			cur_type = def_type;
-		} else {
-			/* read parameters for the given block, we only use datatype */
-			if (strncmp(buffer, "datatype=", strlen("datatype=")) == 0) {
-				ch = buffer+1;
-				// we are guaranteed to not have a '\0' before the '='
-				while (*ch != '=') ++ch;
-				++ch;
-				cur_type = atoi(ch);
-			}
-		}
-	}
-	if (strcmp(channame, "") != 0) {
-		if (strcmp(channame, "default") != 0) {
-			/* one last block/channel to connect to */
-			registerPV(channame, daqToSDFDataType(cur_type));
-		}
+	while (fgets(line, sizeof(line), f) != NULL) {
+		argcount = parseLine(line, sizeof(s1), s1, s2, s3, s4, s5, s6);
+		if (argcount < 1) continue;
+		if (strncmp(s1, ifo, 3) != 0) continue;
+		if (strstr(s1,"_SWMASK") != NULL ||	
+			strstr(s1,"_SDF_NAME") != NULL ||
+			strstr(s1,"_SWREQ") != NULL) continue;
+		if (isAlarmChannel(s1)) continue;
+		registerPV(s1);
 	}
 	fclose(f);
-	ca_flush_io();
 }
 
 /// Routine to get the state of the CA Thread
@@ -2129,42 +2210,101 @@ void setCAThreadState(int state) {
 	pthread_mutex_unlock(&caStateMutex);
 }
 
-unsigned long getDisconnectedPVCount() {
-	unsigned long tmp = 0;
+// copy the given entry (which should be in caConnTable or caConnEnumTable) to caTable
+// update cdTable with type information if needed.
+void copyConnectedCAEntry(EPICS_CA_TABLE *src) {
+	int cdt_jj = 0;
+	EPICS_CA_TABLE *dest = 0;
+
+	if (!src) return;
+
+	dest = &(caTable[src->chanIndex]);
+	src->connected = 1;
+	// just copy the table entry into place
+	memcpy((void *)(dest), (void *)(src), sizeof(*src));
+	
+	// clearing the redir field
+	dest->redirIndex = -1;
+	cdt_jj = src->chanIndex;
+	cdTable[cdt_jj].connected = 1;
+	caTable[cdt_jj].connected = 1;
+	// now update cdTable type information
+	// iff the type is different, clear the data field
+	if (cdTable[cdt_jj].datatype != src->datatype) {
+		cdTable[cdt_jj].datatype = src->datatype;
+		cdTable[cdt_jj].data.chval = 0.0;
+	}
+}
+
+void syncCAConnections(long *disconnected_count)
+{
+	int ii = 0;
+	long tmp = 0;
+
 	pthread_mutex_lock(&caTableMutex);
-	tmp = disconnectedPVs;
+	// sync all non-enum channel connections that have taken place
+	for (ii = 0; ii < chConnNum; ++ii) {
+		copyConnectedCAEntry(&(caConnTable[ii]));
+	}
+	chConnNum = 0;
+
+	// enums take special work, as we must receive an value to determine if we can use it as string or numeric value
+	// try to short circuit the reading of the entire table, most cycles we have nothing to do.
+	if (chEnumDetermined > 0) {
+		for (ii = 0; ii < chNum; ++ii) {
+			if (caConnEnumTable[ii].datatype != SDF_UNKNOWN) {
+				// we have a concrete type here, migrate it over
+				copyConnectedCAEntry(&(caConnEnumTable[ii]));
+				caConnEnumTable[ii].datatype = SDF_UNKNOWN;
+			}
+		}
+	}
+	chEnumDetermined = 0;
+	for (ii = 0 ; ii < chNum ; ++ii)  {
+		cdTable[ii].connected = caTable[ii].connected;
+	}
+	// count the disconnected chans
+	//if (disconnected_count) {
+	//	for (ii = 0; ii < chNum; ++ii) {
+	//		tmp += !caTable[ii].connected;
+	//	}
+	//	*disconnected_count = tmp;
+	//}
 	pthread_mutex_unlock(&caTableMutex);
-	return tmp;
 }
 
 /// Main loop of the CA Thread
 void *caMainLoop(void *param)
 {
-	char *fname = (char *)param;
+	CA_STARTUP_INFO *info = (CA_STARTUP_INFO*)param;
+	
 	if (!param) {
 		setCAThreadState(CA_STATE_EXIT);
 		return NULL;
 	}
 	ca_context_create(ca_enable_preemptive_callback);
 	setCAThreadState(CA_STATE_PARSING);
-	parseIni(fname);
+	parseChannelListReq(info->fname, info->prefix);
 	registerFilters();
 	printf("Done with parsing, CA thread continuing\n");
 	setCAThreadState(CA_STATE_RUNNING);
 }
 
 /// Routine used to read in all channels to monitor from an INI file and create local connections
-void initCAConnections(char *fname)
+void initCAConnections(char *fname, char *prefix)
 {
 	int err = 0;
 	int state = CA_STATE_OFF;
+	CA_STARTUP_INFO param;
 	pthread_attr_t attr;
 
+	param.fname = fname;
+	param.prefix = prefix;
 	setCAThreadState(CA_STATE_OFF);
 	// create a thread to handle CA activities
 	pthread_attr_init (&attr);
 	pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-	err = pthread_create (&caThread, &attr, (void *(*)(void *))caMainLoop, fname);
+	err = pthread_create (&caThread, &attr, (void *(*)(void *))caMainLoop, &param);
 	if (err) {
 		// FIXME: handle this
 	}
@@ -2184,16 +2324,36 @@ void setupCASDF()
 
 	// set some defaults
 	for (ii = 0; ii < SDF_MAX_TSIZE; ++ii) {
+		caTable[ii].redirIndex = -1;
 		caTable[ii].datatype = SDF_NUM;
 		caTable[ii].data.chval = 0.0;
 		caTable[ii].connected = 0;
 		caTable[ii].chanid = -1;
 		caTable[ii].mod_time = (time_t)0;
+		caTable[ii].chanIndex = ii;
+
+		caConnTable[ii].redirIndex = -1;
+		caConnTable[ii].datatype = SDF_NUM;
+		caConnTable[ii].data.chval = 0.0;
+		caConnTable[ii].connected = 0;
+		caConnTable[ii].chanid = -1;
+		caConnTable[ii].mod_time = (time_t)0;
+		caConnTable[ii].chanIndex = 0;
+
+		caConnEnumTable[ii].redirIndex = -1;
+		caConnEnumTable[ii].datatype = SDF_UNKNOWN;
+		caConnEnumTable[ii].data.chval = 0.0;
+		caConnEnumTable[ii].connected = 0;
+		caConnEnumTable[ii].chanid = -1;
+		caConnEnumTable[ii].mod_time = (time_t)0;
+		caConnEnumTable[ii].chanIndex = ii;
 
 		bzero((void *)&(cdTable[ii]), sizeof(cdTable[ii]));
 		bzero((void *)&(unMonChans[ii]), sizeof(unMonChans[ii]));
 		bzero((void *)&(cdTableList[ii]), sizeof(cdTableList[ii]));
 		bzero((void *)&(disconnectChans[ii]), sizeof(disconnectChans[ii]));
+
+		caEvid[ii] = 0;
 	}
 
 	// set more defaults
@@ -2209,15 +2369,16 @@ void setupCASDF()
 		bzero((void *)&(uninitChans[ii]), sizeof(uninitChans[ii]));
 		bzero((void *)&(readErrTable[ii]), sizeof(readErrTable[ii]));
 	}
-	disconnectedPVs = 0;
 	droppedPVCount = 0;
 	pthread_mutex_init(&caStateMutex, NULL);	// FIXME check for errors
 	pthread_mutex_init(&caTableMutex, NULL);
+	pthread_mutex_init(&caEvidMutex, NULL);
 }
 
 /// Routine to tear-down mutexes and other resources used by the CA SDF system
 void cleanupCASDF()
 {
+	pthread_mutex_destroy(&caEvidMutex);
 	pthread_mutex_destroy(&caTableMutex);
 	pthread_mutex_destroy(&caStateMutex);
 }
@@ -2485,9 +2646,7 @@ int main(int argc,char *argv[])
 	char *coeffFile =  getenv("COEFF_FILE");
 	char *photonFile =  getenv("PHOTON_FILE");
 	char *logdir = getenv("LOG_DIR");
-#ifdef CA_SDF
-	char *iniFile = getenv("INI_FILE");
-#endif
+
 	if(stat(logdir, &st) == -1) mkdir(logdir,0777);
 	// strcat(sdf,"_safe");
 	char sdf[256];
@@ -2666,7 +2825,15 @@ sleep(5);
 	status = dbPutField(&confirmwordaddr,DBR_LONG,&resetNum,1);
 
 #ifdef CA_SDF
-	initCAConnections(iniFile);
+	{
+		char *buffer;
+		int len = strlen(sdfDir)+strlen("../monitor.req")+1;
+		buffer = malloc(len);
+		strcpy(buffer, sdfDir);
+		strcat(buffer, "../monitor.req");
+		initCAConnections(buffer, pref);
+		free(buffer);
+	}
 #else
 	dbDumpRecords(*iocshPpdbbase);
 #endif
@@ -2685,6 +2852,13 @@ sleep(5);
 	// Start Infinite Loop 		*******************************************************************************
 	for(;;) {
 		usleep(100000);					// Run loop at 10Hz.
+#ifdef CA_SDF
+		{
+			syncCAConnections(NULL);
+			status = dbPutField(&disconnectcountaddr,DBR_LONG,&chDisconnected,1);
+			status = dbPutField(&droppedcountaddr,DBR_LONG,&droppedPVCount,1); 
+		}
+#endif
 		fivesectimer = (fivesectimer + 1) % 50;		// Increment 5 second timer for triggering CRC checks.
 		// Check for reload request
 		status = dbGetField(&reload_addr,DBR_LONG,&request,&ropts,&nvals,NULL);
@@ -2692,13 +2866,6 @@ sleep(5);
 		status = dbNameToAddr(sdfFileName,&sdfname_addr);
 		status = dbGetField(&sdfname_addr,DBR_STRING,sdf,&ropts,&nvals,NULL);
 
-#ifdef CA_SDF
-		{
-			long disconnect_count = getDisconnectedPVCount();
-			status = dbPutField(&disconnectcountaddr,DBR_LONG,&disconnect_count,1);
-			status = dbPutField(&droppedcountaddr,DBR_LONG,&droppedPVCount,1); 
-		}
-#endif
 		//  Create full filename including directory and extension.
 		sprintf(sdfile, "%s%s%s", sdfDir, sdf,".snap");
 		sprintf(sdalarmfile, "%s%s%s", sdfDir, sdf,"_alarms.snap");
@@ -3013,7 +3180,7 @@ sleep(5);
 				break;
 #ifdef CA_SDF
 			case SDF_TABLE_DISCONNECTED:
-				if(lastTable != SDF_TABLE_FULL) {
+				if(lastTable != SDF_TABLE_DISCONNECTED) {
 					clearTableSelections(cdSort,cdTableList, selectCounter);
 					confirmVal = 0;
 				}
