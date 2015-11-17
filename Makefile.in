@@ -91,6 +91,9 @@ install-noawg-%:
 install-nort-%:
 	@system=$(subst install-nort-,,$@); $(srcdir)/install-nort $${system} $(srcdir)
 
+install-adclist-%:
+	@system=$(subst install-adclist-,,$@); $(srcdir)/install-adclist $${system} $(srcdir)
+
 install-%:
 	@system=$(subst install-,,$@); $(srcdir)/install $${system} $(srcdir)
 
@@ -145,6 +148,9 @@ cleanWorld: $(patsubst %,clean-%,$(MDL_MODELS))
 	@echo Cleaned $(MDL_MODELS)
 
 installWorld: $(patsubst %,install-%,$(MDL_MODELS)) 
+	@echo Installed $(MDL_MODELS)
+
+installAdclistWorld: $(patsubst %,install-adclist-%,$(MDL_MODELS)) 
 	@echo Installed $(MDL_MODELS)
 
 # For test builds of IFO models
