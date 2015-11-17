@@ -2827,14 +2827,15 @@ sleep(5);
 #ifdef CA_SDF
 	{
 		char *buffer=0;
-		int len = strlen(sdfDir)+strlen("../monitor.req")+1;
+		char fname[]="/monitor.req";
+		int len = strlen(sdfDir)+strlen(fname)+1;
 		buffer = malloc(len);
 		if (!buffer) {
 			fprintf(stderr, "Unable to allocate memory to hold the path to monitor.req, aborting!");
 			exit(1);
 		}
 		strcpy(buffer, sdfDir);
-		strcat(buffer, "../monitor.req");
+		strcat(buffer, fname);
 		initCAConnections(buffer, pref);
 		free(buffer);
 	}
