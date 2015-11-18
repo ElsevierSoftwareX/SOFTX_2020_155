@@ -2395,13 +2395,13 @@ system ("sort $adcFile -k 1,1n -k 2,2n > $adcFileSorted");
 if($daq2dc == 0) {
 	require "lib/medmGenGdsTp.pm";
 	my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
-	my $scriptTarget = "/opt/rtcds/$location/$lsite/scripts/burt.py";
+	my $scriptTarget = "/opt/rtcds/$location/$lsite/chans/tmp/$sysname\.diff";
 	my $scriptArgs = "-s $location -i $lsite -m $skeleton -d $dcuId &"; 
 	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dacType);
 }else {
 	require "lib/medmGenGdsTp2dc.pm";
 	my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
-	my $scriptTarget = "/opt/rtcds/$location/$lsite/scripts/burt.py";
+	my $scriptTarget = "/opt/rtcds/$location/$lsite/chans/tmp/$sysname\.diff";
 	my $scriptArgs = "-s $location -i $lsite -m $skeleton -d $dcuId &"; 
 	("CDS::medmGenGdsTp2dc::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dacType);
 }
