@@ -2604,7 +2604,9 @@ int main(int argc,char *argv[])
 	int fivesectimer = 0;
 	long daqFileCrc = 0;
 	long coeffFileCrc = 0;
-	long photonFileCrc = 0;
+	long fotonFileCrc = 0;
+	long prevFotonFileCrc = 0;
+	long prevCoeffFileCrc = 0;
 	long sdfFileCrc = 0;
 	char modfilemsg[] = "Modified File Detected ";
 	struct stat st = {0};
@@ -2644,8 +2646,10 @@ int main(int argc,char *argv[])
 	char *targetdir =  getenv("TARGET_DIR");
 	char *daqFile =  getenv("DAQ_FILE");
 	char *coeffFile =  getenv("COEFF_FILE");
-	char *photonFile =  getenv("PHOTON_FILE");
+	char *fotonFile =  getenv("FOTON_FILE");
+	char *fotonDiffFile = getenv("FOTON_DIFF_FILE");
 	char *logdir = getenv("LOG_DIR");
+	char myDiffCmd[256];
 
 	if(stat(logdir, &st) == -1) mkdir(logdir,0777);
 	// strcat(sdf,"_safe");
@@ -2848,7 +2852,9 @@ sleep(5);
 	// Initialize DAQ and COEFF file CRC checksums for later compares.
 	daqFileCrc = checkFileCrc(daqFile);
 	coeffFileCrc = checkFileCrc(coeffFile);
-	photonFileCrc = checkFileCrc(photonFile);
+	fotonFileCrc = checkFileCrc(fotonFile);
+	prevFotonFileCrc = fotonFileCrc;
+	prevCoeffFileCrc = coeffFileCrc;
 	reportSetErrors(pref, 0,setErrTable,0);
 
 	sleep(1);       // Need to wait before first restore to allow sequencers time to do their initialization.
@@ -3219,11 +3225,15 @@ sleep(5);
 				logFileEntry("Detected Change to DAQ Config file.");
 			}
 			coeffFileCrc = checkFileCrc(coeffFile);
-			photonFileCrc = checkFileCrc(photonFile);
-			if(photonFileCrc != coeffFileCrc) {
+			fotonFileCrc = checkFileCrc(fotonFile);
+			if(fotonFileCrc != coeffFileCrc) {
 				status = dbPutField(&coeffmsgaddr,DBR_STRING,modfilemsg,1);
 			} else {
 				status = dbPutField(&coeffmsgaddr,DBR_STRING,"",1);
+			}
+			if(fotonFileCrc != prevFotonFileCrc || prevCoeffFileCrc != coeffFileCrc) {
+				sprintf(myDiffCmd,"%s %s %s %s %s","diff",fotonFile,coeffFile," > ",fotonDiffFile);
+				status = system(myDiffCmd);
 			}
 			status = checkFileCrc(sdffileloaded);
 			if(status == -1) {

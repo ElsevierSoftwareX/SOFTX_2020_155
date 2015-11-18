@@ -138,7 +138,8 @@ install: $(DB)
 		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet DAQ_FILE /opt/rtcds/$(SITE)/${ifo}/chans/daq/$$ucmodel.ini" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet DAQ_DIR /opt/rtcds/$(SITE)/${ifo}/chans/daq/" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
-		echo "epicsEnvSet PHOTON_FILE /opt/rtcds/$(SITE)/${ifo}/chans/$$ucmodel.txt" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet FOTON_FILE /opt/rtcds/$(SITE)/${ifo}/chans/$$ucmodel.txt" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet FOTON_DIFF_FILE /opt/rtcds/$(SITE)/${ifo}/chans/tmp/$$ucmodel.diff" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet COEFF_FILE /opt/rtcds/$(SITE)/${ifo}/chans/tmp/$$ucmodel.txt" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet LOG_DIR /opt/rtcds/$(SITE)/${ifo}/log/$$model" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
 		echo "epicsEnvSet SDF_DIR /opt/rtcds/$(SITE)/${ifo}/target/$$model/$(TARGET)/burt/" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
