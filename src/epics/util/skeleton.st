@@ -253,10 +253,11 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 %% static char ifo[160];
 %% static char daqsys[160];
 
-%% char fName[3][256];                                                   /* MA */
+%% char fName[4][256];                                                   /* MA */
 %% char fType[3][10] = {"IIR", "FIR", "IIR & FIR"};                      /* MA */
 %% char fNameDAQ[256];                                                   /* ma */
 %% char cpCmd[256];                                                   /* ma */
+%% char diffCmd[256];                                                   /* ma */
 %% char cfdir[256];
 %% char cfmodel[256] = "";
 
@@ -370,6 +371,7 @@ state init
 %% strcat(fName[2], "tmp/");                                          /* MA */
 %% strcat_upper(fName[2], fmc.system);                                   /* MA */
 %% strcat_upper(fName[0], fmc.system);                                   /* MA */
+%% strcpy(fName[3],fName[2]);
 %% strcat_upper(cfmodel, fmc.system);                                   /* MA */
 %% if (strlen(fmc.subSys[0].name) > 0) {                                 /* MA */
 %%    strcat(fName[0], "_");                                             /* MA */
@@ -380,14 +382,17 @@ state init
 %% strcat(fName[0], "txt");                                              /* MA */
 %% strcat(fName[2], ".txt");                                              /* MA */
 %% strcat(fName[1], "fir");                                              /* MA */
+%% strcat(fName[3], ".diff");                                              /* MA */
 
 %% sprintf(cpCmd,"%s %s %s","cp",fName[0],fName[2]);
 %% printf("copy file with command = %s\n",cpCmd);
+%% sprintf(diffCmd,"%s %s %s %s %s","diff",fName[0],fName[2]," > ",fName[3]);
 
 %DECL3%
 
 %% int status = system(cpCmd);
 %% printf("copy file with status = %d\n",status);
+%% status = system(diffCmd);
 %%  fmc.pVmeCoeff = (VME_COEF *)pVmeCoeff; /* Initialize pointer for fmReadCoeffFile() */
 #if MAX_MODULES > 0
 %%  for(ii=0;ii<MAX_MODULES;ii++)

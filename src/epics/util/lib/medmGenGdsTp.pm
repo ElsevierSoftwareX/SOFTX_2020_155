@@ -273,9 +273,12 @@ sub createGdsMedm
 	# Add Coeff load time Monitor
 	$xpos = 562; $ypos = 210; $width = 200; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_MSG",$ecolors{white},$ecolors{blue},"static");
-	# Add Coeff load time Monitor
-	$xpos = 562; $ypos = 230; $width = 200; $height = 18;
+	# Add Coeff Msg2 Monitor
+	$xpos = 562; $ypos = 230; $width = 160; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_MSG2",$ecolors{white},$ecolors{blue},"static");
+	$xpos = 722; $ypos = 230; $width = 40; $height = 18;
+	$arg = "/opt/rtcds/";
+        $medmdata .= ("CDS::medmGen::medmGenShellCmd") -> ($xpos,$ypos,$width,$height,$ecolors{black},$ecolors{yellow},1,"Diff","Coeff Diff","xterm -e view",$scriptTarget);
 
 	# ************* Create DAQ Status Info Block *****************************************************************
 
