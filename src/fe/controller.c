@@ -1985,7 +1985,7 @@ udelay(1000);
 /// area for FIFO empty, quarter full, etc. So, to make these bits useful in 16 bit module,
 /// code must set a proper FIFO size in map.c code.
 // This code runs once per second.
-       	if (cycleNum >= HKP_DAC_FIFO_CHK && cycleNum < (HKP_DAC_FIFO_CHK + cdsPciModules.dacCount)) 
+       	if (cycleNum >= HKP_DAC_FIFO_CHK && cycleNum < (HKP_DAC_FIFO_CHK + cdsPciModules.dacCount) && !dacTimingError) 
 	{
 		jj = cycleNum - HKP_DAC_FIFO_CHK;
 		if(cdsPciModules.dacType[jj] == GSC_18AO8)
@@ -1996,10 +1996,8 @@ udelay(1000);
 			if((out_buf_size < 8) || (out_buf_size > 24))
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
-			    feStatus |= FE_ERROR_DAC;
 			    if(dacTimingErrorPending[jj]) dacTimingError = 1;
   			    dacTimingErrorPending[jj] = 1;
-  			    dacTimingError = 1;
 			} else {
 			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
   			    dacTimingErrorPending[jj] = 0;
@@ -2013,7 +2011,6 @@ udelay(1000);
 			if(status != 2)
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
-			    feStatus |= FE_ERROR_DAC;
 			    if(dacTimingErrorPending[jj]) dacTimingError = 1;
   			    dacTimingErrorPending[jj] = 1;
 			} else {
@@ -2022,6 +2019,7 @@ udelay(1000);
 			}
 		}
 	}
+	if (dacTimingError) feStatus |= FE_ERROR_DAC;
 
 #endif
 	// Capture end of cycle time.
