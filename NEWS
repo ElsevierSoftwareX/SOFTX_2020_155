@@ -22,6 +22,13 @@ Changes for 2.10
 - Bug Fix (494): Remove test for frame directory count when using GPS-time folders
 - Bug Fix (888): Make mx pre-thread inputs non-volatile
 ==================================================================================================
+Changes for 2.9.7 release
+==================================================================================================
+- Bug fix: Modified the DAC timing diagnostic code:
+        - DAC error bit in STATEWORD will now latch.
+        - 18 bit DAC timing fault now requires two consecutive errors detected before performing
+          a DAC kill.
+==================================================================================================
 Changes for 2.9.5 release
 ==================================================================================================
 - Bug fix for True RMS part as per and tested by M. Evans.
