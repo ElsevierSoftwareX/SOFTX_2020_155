@@ -151,6 +151,22 @@ int gsc16ai64Enable(int adcCount)
   return(0);
 }
 
+// *****************************************************************************
+int gsc16ai64Enable1PPS(int ii)
+{
+/// Enable demand DMA mode ie auto DMA data to computer memory when 
+///< GSAI_THRESHOLD data points in ADC FIFO.
+          adcPtr[ii]->BCR &= ~(GSAI_DMA_DEMAND_MODE);
+          /// Set DMA mode and direction in PLX controller chip on module.
+          adcDma[ii]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR | 0x1000;
+          /// Enable DMA
+          adcDma[ii]->DMA_CSR = GSAI_DMA_START;
+          /// Clear the FIFO and set demand DMA to start after all 32 channels have 1 sample
+          adcPtr[ii]->IDBC = (GSAI_CLEAR_BUFFER | GSAI_THRESHOLD);
+          /// Enable sync via external clock input.
+          adcPtr[ii]->BCR |= GSAI_ENABLE_X_SYNC;
+         return(0);
+}
 
 // *****************************************************************************
 /// \brief Function stops ADC acquisition by removing the clocking signal.
