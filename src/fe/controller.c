@@ -460,12 +460,7 @@ void *fe_start(void *arg)
   // Look for DIO card or IRIG-B Card
   // if Contec 1616 BIO present, TDS slave will be used for timing.
   if(cdsPciModules.cDio1616lCount) syncSource = SYNC_SRC_TDS;
-  // if IRIG-B card present, code will use it for startup synchonization
-  if(cdsPciModules.gpsType && (syncSource == SYNC_SRC_NONE)) 
-	syncSource = SYNC_SRC_IRIG_B;
-  	// If no IRIG-B card, will try 1PPS on ADC[0][31] later
-  if(syncSource == SYNC_SRC_NONE) 
-	syncSource = SYNC_SRC_1PPS;
+  else syncSource = SYNC_SRC_1PPS;
 #else
    // SLAVE processes get sync from ADC_MASTER
    syncSource = SYNC_SRC_MASTER;
@@ -763,28 +758,8 @@ udelay(1000);
 		CDIO1616Input[ii] = contec1616WriteOutputRegister(&cdsPciModules, tdsControl[ii], CDIO1616Output[ii]);
 		}
 		break;
-	case SYNC_SRC_IRIG_B:
-		 // If IRIG-B card present, use it for startup synchronization
-		wtmax = 20;
-		wtmin = 5;
-		printf("Waiting until usec = %d to start the ADCs\n", wtmin);
-		do{
-			if(cdsPciModules.gpsType == SYMCOM_RCVR) gps_receiver_locked = getGpsTime(&timeSec,&usec);
-			if(cdsPciModules.gpsType == TSYNC_RCVR) gps_receiver_locked = getGpsTimeTsync(&timeSec,&usec);
-		}while ((usec < wtmin) || (usec > wtmax));
-		// Arm ADC modules
-		gsc16ai64Enable(cdsPciModules.adcCount);
-		// Start clocking the DAC outputs
-		gsc18ao8Enable(&cdsPciModules);
-		gsc16ao16Enable(&cdsPciModules);
-		// Set synched flag so later code will not check for 1PPS
-		sync21pps = 1;
-		// Send IRIG-B locked/not locked diagnostic info
-		if(!gps_receiver_locked)pLocalEpics->epicsOutput.timeErr |= TIME_ERR_IRIGB;
-		printf("Running time %d us\n", usec);
-	  	printf("Triggered the DAC\n");
-		break;
 	case SYNC_SRC_1PPS:
+                printf("Sync src is 1PPS\n");
 #ifndef NO_DAC_PRELOAD
 		for(jj=0;jj<cdsPciModules.dacCount;jj++)
 		{       
@@ -1561,8 +1536,12 @@ udelay(1000);
 /// \> Cycle 16, perform duotone diag calcs.
         if(cycleNum == HKP_DT_CALC)
         {
-                duotoneTime = duotime(DT_SAMPLE_CNT, duotoneMean, duotone);
-                pLocalEpics->epicsOutput.dtTime = duotoneTime;
+		if(syncSource == SYNC_SRC_1PPS) {
+			duotoneTime = 5;
+		} else {
+			duotoneTime = duotime(DT_SAMPLE_CNT, duotoneMean, duotone);
+		}
+		pLocalEpics->epicsOutput.dtTime = duotoneTime;
 		if((duotoneTime < MIN_DT_DIAG_VAL) || (duotoneTime > MAX_DT_DIAG_VAL)) 
 			feStatus |= FE_ERROR_TIMING;
 		duotoneTimeDac = duotime(DT_SAMPLE_CNT, duotoneMeanDac, duotoneDac);

@@ -23,6 +23,7 @@ Changes for 2.10
 - Bug Fix (888): Make mx pre-thread inputs non-volatile
 - Added sequential startup of ADC modules when sync source = 1PPS.  This had been done in branch
   2.9, but not conveyed into the trunk. This change primarily affects AEI.
+- Removed support for startup sync using IRIG-B card. This is old eLIGO, and no one uses it.
 ==================================================================================================
 Changes for 2.9.7 release
 ==================================================================================================
