@@ -2166,8 +2166,6 @@ sub is_top_name {
 };
 
 
-$adcFile = $configFilesDir . "/adcList\.txt";
-open(OUTADC,">".$adcFile) || die "cannot open $adcFile file for writing";
 foreach $cur_part_num (0 .. $partCnt-1) {
 	if ($cur_part_num >= $subSysPartStop[$cur_subsys_num]) {
 		$cur_subsys_num += 1;
@@ -2287,7 +2285,6 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 	     && (not ($partType[$cur_part_num] eq "FiltMuxMatrix")))
 	    || ($partType[$cur_part_num] =~ /^InputFilt/)
 	    || ($partType[$cur_part_num] =~ /^InputFilter1/)) {
-		#print "FILTER No=$cur_part_num Part $partName[$cur_part_num] $partType[$cur_part_num] input partInput=$partInput[$cur_part_num][0] type='$partInputType[$cur_part_num][0]' \n";
 		my $filt_name = $partName[$cur_part_num];
 	if ($partInputType[$cur_part_num][0] eq "Adc") {
 		#exit(1);
@@ -2317,9 +2314,6 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
-				# $sys_name = substr($sys_name, 2, 3);
-		  		# $chanName = $site . "\:$sys_name-" . $subsysName  . ($subsysName eq "" ? "": "_") . $filt_name;
-   				# ("CDS::Filt::createFiltMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$filt_name,$chanNam,$rcg_src_dir);
 			}
 		} else {
 		  	$sys_name = substr($sys_name, 2, 3);
@@ -2336,61 +2330,21 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
 			} else {
 				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$sysname" . "_" . $filt_name . ".adl");
-		  		# $chanName = $site . "\:$sys_name-" . $subsysName  . ($subsysName eq "" ? "": "_") . $filt_name;
-   				# ("CDS::Filt::createFiltMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$filt_name,$chanName,$rcg_src_dir);
 			}
 		}
 	}
-	#print "No=$cur_part_num\n";
-	# Get data from generating ADC Monitor MEDM screens
-	if ($partInputType[$cur_part_num][0] eq "Adc") {
-		  $sysname = uc($skeleton);
-		  $sysname = substr($sysname, 2, 3);
-		my $part_name = $partName[$cur_part_num];
-		my $subsysName = "";
-		if (is_top_name($partSubName[$cur_part_num])) {
-		  $sysname = substr($partSubName[$cur_part_num], 0, 3);
-#print "ADC MONITOR IS TOP =$sysname\n";
-		  $subsysName = substr($subSysName[$cur_subsys_num], 3, 0);
-		} else {
-		  $subsysName = $subSysName[$cur_subsys_num];
-		}
-		#print "ADC input Part $part_name $partType[$cur_part_num] has Adc input \'$partInput[$cur_part_num][0]\'\n";
-		if (($partType[$cur_part_num] eq "Filt") || ($partType[$cur_part_num] eq "FiltCtrl") || ($partType[$cur_part_num] eq "FiltCtrl2")) {
-		  #Get ADC card number
-		  $adcScard = substr $partInput[$cur_part_num][0],4,1;
-		  #Get ADC channel number
-		  $adcSchan = substr $partInput[$cur_part_num][0],6,2;
-		  #Get ADC channel name
-		  $adcSname = $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name . "_INMON";
-		  $adcScreen[$adcScard][$adcSchan] = $adcSname;
-		  print OUTADC "$adcScard\t$adcSchan\t$adcSname \t\t$partType[$cur_part_num]\n";
-		} elsif (($partType[$cur_part_num] eq "EpicsOut") || ($partType[$cur_part_num] eq "EpicsOutLong")) {
-		  $adcScard = substr $partInput[$cur_part_num][0],4,1;
-		  $adcSchan = substr $partInput[$cur_part_num][0],6,2;
-		  $adcSname = $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name;
-		  $adcScreen[$adcScard][$adcSchan] = $adcSname;
-		  print OUTADC "$adcScard\t$adcSchan\t$adcSname \t\t$partType[$cur_part_num]\n";
-                 } elsif($partType[$cur_part_num] ne "BUSS" &&
-                 	$partType[$cur_part_num] ne "INPUT" &&
-                 	$partType[$cur_part_num] ne "BUSC" &&
-                 	$partType[$cur_part_num] ne "OUTPUT") 
-			{
-		  $adcScard = substr $partInput[$cur_part_num][0],4,1;
-		  $adcSchan = substr $partInput[$cur_part_num][0],6,2;
-		  $adcSname = $site . "\:$sysname-" . $subsysName  . ($subsysName eq "" ? "": "_") . $part_name;
-		  print OUTADC "$adcScard\t$adcSchan\t$adcSname \t\t$partType[$cur_part_num]\n";
-		}
-        }
 		  $sysname = uc($skeleton);
 }
-close OUTADC;
-$adcFile = $configFilesDir . "/adcList\.txt";
+# ******************************************************************************************
+#//		- GENERATE SORTED ADC LIST FILE
+$adcFile = "./diags2.txt";
 $adcFileSorted = $configFilesDir . "/adcListSorted\.txt";
 system ("sort $adcFile -k 1,1n -k 2,2n > $adcFileSorted");
 
+# ******************************************************************************************
 #//		- GENERATE IPC SCREENS
    ("CDS::IPCx::createIpcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ipcxCnt);
+# ******************************************************************************************
 #//		- GENERATE GDS_TP SCREEN
 if($daq2dc == 0) {
 	require "lib/medmGenGdsTp.pm";
@@ -2405,11 +2359,42 @@ if($daq2dc == 0) {
 	my $scriptArgs = "-s $location -i $lsite -m $skeleton -d $dcuId &"; 
 	("CDS::medmGenGdsTp2dc::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dacType);
 }
+# ******************************************************************************************
 #//		- GENERATE ADC SCREENS
+# Open the diags2.txt file, which contains list of ADC connections.
+open(my $fh, $adcFile)
+  or die "Could not open file";
+
+# Need the 3 letter system name to complete EPICS channel names.
+$sysname = uc($skeleton);
+$sname = substr($sysname,2,3);
+@adcScreen;
+$ii = 0;
+$jj = 0;
+while (my $line = <$fh>) {
+        chomp($line);
+        my @word = split /\t/,$line;
+        $ii = $word[0];
+        $jj = $word[1];
+	$adcSname = $site . "\:$sname-" . $word[2];
+	# If this is a Filter type part, need to add INMON to get EPICS channel 
+	if (($word[3] =~ /^Filt/)
+	     && (not ($word[3] eq "FiltMuxMatrix"))) {
+		$adcSname .= "_INMON";
+	}
+	# Only place Filter and EpicsOut type parts in the list
+	if (($word[3] =~ /^Filt/ && $word[3] ne "FiltMuxMatrix")
+		|| $word[3] eq "EpicsOut") {
+        	$adcScreen[$ii][$jj] = $adcSname;
+	}
+}
+close($fg);
+
 for($ii=0;$ii<$adcCnt;$ii++)
 {
    ("CDS::Adc::createAdcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii,@adcScreen);
 }
+# ******************************************************************************************
 #//		- GENERATE DAC SCREENS
 for($ii=0;$ii<$dacCnt;$ii++)
 {
@@ -3037,5 +3022,9 @@ for ($ii = 0; $ii < $subSys; $ii++) {
   }
 }
 close(OUTD);
+#Call a python script to create ADC channel list file
+$rcg_parser =  $rcg_src_dir;
+$rcg_parser .= "/src/epics/util/adcparser.py";
+system($rcg_parser);
 # End DIAGNOSTIC
 }

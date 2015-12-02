@@ -1,6 +1,12 @@
 ==================================================================================================
 Changes for 2.10
 ==================================================================================================
+- Bug Fix (948): ADC channel lists are incorrect when model contains MUX/DEMUX parts. It was also
+  noted that this produced incorrect ADC Monitor MEDM screens, which was also corrected as part
+  of this fix.
+- Bug Fix (894 and 896): Having to do with coeff files and their archives, along with diffs 
+  between what is loaded into the real-time code and exists in a modified foton file. For
+  details, see T1500592 in DCC.
 - Request (831): Added support in FE code to acquire double precision 64bit floats.
 - Bug Fix (887): SDF uninitialized table did not allow accepting present settings.
 - Request (833): RCG now produces a text file that lists all ADC connections for that model as
