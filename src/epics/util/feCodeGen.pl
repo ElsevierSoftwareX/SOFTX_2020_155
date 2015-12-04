@@ -115,7 +115,6 @@ $shmem_daq = 0; # Do not use shared memory DAQ connection
 $no_sync = 0; # Sync up to 1PPS by default
 $no_daq = 0; # Enable DAQ by default
 $gdsNodeId = 0;
-$adcOver = 0;
 $ifoid = 0; # Default ifoid for the DAQ
 $nodeid = 0; # Default GDS node id for awgtpman
 $dac_internal_clocking = 0; # Default is DAC external clocking
@@ -2672,9 +2671,6 @@ print OUTM "EXTRA_CFLAGS += -DFIR_FILTERS\n";
 }
 print OUTM "EXTRA_CFLAGS += -g\n";
 
-if ($adcOver) {
-  print OUTM "EXTRA_CFLAGS += -DROLLING_OVERFLOWS\n";
-}
 if ($daq2dc) {
   print OUTM "EXTRA_CFLAGS += -DDUAL_DAQ_DC\n";
 }
