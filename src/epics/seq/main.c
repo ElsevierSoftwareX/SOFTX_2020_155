@@ -2671,7 +2671,6 @@ int main(int argc,char *argv[])
 	printf("CURRENt FILE = %s\n",bufile);
 	printf("LOG FILE = %s\n",logfilename);
 sleep(5);
-	char rcgversionname[256]; 
 	int majorversion = RCG_VERSION_MAJOR;
 	int subversion1 = RCG_VERSION_MINOR;
 	int subversion2 = RCG_VERSION_SUB;
@@ -2682,6 +2681,9 @@ sleep(5);
 	listLocalRecords(*iocshPpdbbase);
 	myversion = majorversion + 0.01 * subversion1 + 0.001 * subversion2;
 	if(!myreleased) myversion *= -1.0;
+	char rcgversionname[256]; sprintf(rcgversionname, "%s_%s", pref, "RCG_VERSION");	// Set RCG Version EPICS
+	status = dbNameToAddr(rcgversionname,&rcgversion_addr);
+	status = dbPutField(&rcgversion_addr,DBR_DOUBLE,&myversion,1);
 
 	// Create BURT/SDF EPICS channel names
 	char reloadChan[256]; sprintf(reloadChan, "%s_%s", pref, "SDF_RELOAD");		// Request to load new BURT
