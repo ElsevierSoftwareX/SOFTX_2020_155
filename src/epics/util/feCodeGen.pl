@@ -128,6 +128,7 @@ $dkTimesCalled = 0;
 $remoteGpsPart = 0;
 $remoteGPS = 0;
 $daq2dc = 0;
+$requireIOcnt = 0;
 
 # Normally, ARGV !> 2, so the following are not invoked in a standard make
 # This is legacy.
@@ -245,6 +246,8 @@ $trigOut = 0;                                                              # ===
 $convDeg2Rad = 0;                                                          # ===  MA  ===
 $groundDecl = 0;                                                           # =+=  MA  =+=
 $groundInit = 0;                                                           # =+=  MA  =+=
+$dac16Cnt = 0;
+$dac18Cnt = 0;
 
 # IPCx PART CODE VARIABLES
 $ipcxCnt = 0;                                                              # ===  IPCx  ===
@@ -1507,6 +1510,22 @@ for($ii=0;$ii<$partCnt;$ii++)
 	print OUTH "\t\U$systemName \L$systemName;\n";
 	print OUTH "} CDS_EPICS;\n";
 	print OUTH "\#define TARGET_HOST_NAME $targetHost\n";
+	if ($requireIOcnt) {
+		print OUTH "\#define TARGET_ADC_COUNT $adcCnt\n";
+		for (0 .. $dacCnt-1) {
+			if($dacType[$_] eq "GSC_16AO16") {
+				$dac16Cnt ++;
+			} else {
+				$dac18Cnt ++;
+			}
+		}
+		print OUTH "\#define TARGET_DAC16_COUNT $dac16Cnt\n";
+		print OUTH "\#define TARGET_DAC18_COUNT $dac18Cnt\n";
+	} else {
+		print OUTH "\#define TARGET_ADC_COUNT 1\n";
+		print OUTH "\#define TARGET_DAC16_COUNT 0\n";
+		print OUTH "\#define TARGET_DAC18_COUNT 0\n";
+	}
 	print OUTH "\#endif\n";
 
 	#//	- Write EPICS database info file for later use by fmseq.pl in generating EPICS code/database.

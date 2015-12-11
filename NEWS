@@ -1,6 +1,8 @@
 ==================================================================================================
 Changes for 2.10
 ==================================================================================================
+- Bug Fix (903): With requireIOcnt=1 set in parameter block of a model, code will not start unless
+  the model required number of ADC and DAC modules exist on the run time computer bus.
 - Bug Fix (948): ADC channel lists are incorrect when model contains MUX/DEMUX parts. It was also
   noted that this produced incorrect ADC Monitor MEDM screens, which was also corrected as part
   of this fix.
