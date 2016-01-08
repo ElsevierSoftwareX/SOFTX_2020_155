@@ -1,4 +1,4 @@
-#  List of Dolphin DX switches and managers and ports
+#  List of Dolphin IX switches and managers and ports
 # <switch>  <hostname>   <portnode>  <portserver> <portfrontend>
 C x2boot 3443 3444 3445
 X x2boot 3643 3644 3645

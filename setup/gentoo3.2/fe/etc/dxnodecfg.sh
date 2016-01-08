@@ -1,5 +1,5 @@
 #!/bin/bash
-# dxnodecfg- determine switch config for front-end node
+# dxnodecfg- determine DX switch config for front-end node
 
 HOSTNAME=`hostname`
 
