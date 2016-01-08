@@ -1,0 +1,21 @@
+# /etc/conf.d/local.start
+
+# This is a good place to load any misc programs
+# on startup (use &>/dev/null to hide output)
+/sbin/sysctl -w net.core.rmem_max=8388608
+
+# Disable interrupt coalescing on eth2
+#ethtool -C eth2 rx-usecs 0
+
+/opt/rtapps/epics/base/bin/linux-x86_64/caRepeater&
+
+# IRIG card removed 2013-09-10
+#/sbin/modprobe symmetricom
+#mknod /dev/symmetricom c `grep symmetricom /proc/devices|awk '{print $1}'` 0
+#chown controls /dev/symmetricom 
+
+insmod /etc/conf.d/myri10ge.ko myri10ge_big_rxring=1
+rmmod myri10ge
+insmod /etc/conf.d/myri10ge.ko myri10ge_big_rxring=1
+
+/etc/init.d/monit start
