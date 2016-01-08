@@ -1,3 +1,3 @@
 #!/bin/bash
-# return 0 exit status if Dolphin PCIE card is present
+# return 0 exit status if Dolphin DX PCIE card is present
 /usr/sbin/lspci -v | grep Stargen >& /dev/null

@@ -1,5 +1,6 @@
 #!/bin/bash
-# dolphin_wait - Wait until the number of dead dolphin nodes is 0
+# dolphin_dx_wait - Wait until the number of dead dolphin DX nodes is 0
+# Updated for Dolphin release 4.4.1 - search for "Number of unreachable nodes"
 
 # get ports for dxadmin call - chunks are host, node port, server port, front-end port
 PORTCFG=`/etc/dxportcfg.sh`
@@ -8,7 +9,7 @@ SVRPORT=`echo $PORTCFG | awk '{print $3}'`
 FEPORT=`echo $PORTCFG | awk '{print $4}'`
 echo Dolphin wait host $DXHOST serverport $SVRPORT feport $FEPORT
 function ndead_dolphin_nodes {
- res=`/opt/DIS/sbin/dxadmin_commandline -fabric 0 -cluster $DXHOST -portserver $SVRPORT -portfrontend $FEPORT get-cluster | grep nbr-dead-nodes | awk '{print $(NF)}'`
+ res=`/opt/DIS/sbin/dxadmin_commandline -fabric 0 -cluster $DXHOST -portserver $SVRPORT -portfrontend $FEPORT get-cluster-info | grep unreachable | awk '{print $(NF)}'`
  if [ -z $res ]; then
     echo 999
  else
@@ -18,7 +19,7 @@ function ndead_dolphin_nodes {
 ndead=$(ndead_dolphin_nodes);
 while [ $ndead -gt 0 ]
 do
-echo $ndead dead Dolphin nodes in fabric, waiting...
+echo $ndead dead Dolphin DX nodes in fabric, waiting...
 sleep 2;
 ndead=$(ndead_dolphin_nodes)
 done

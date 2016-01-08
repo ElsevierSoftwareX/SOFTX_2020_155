@@ -15,17 +15,27 @@ hostname $HOSTNAME
 # DEBUG ONLY/bin/bash
 #
 /bin/mount -na
+/etc/init.d/syslog-ng start > /var/log/syslog.stdout 2>/var/log/syslog.stderr
 /etc/init.d/sshd start
 /sbin/portmap
+
+# Start EPICS caRepeater
 sudo -u controls /opt/rtapps/epics/base/bin/linux-x86_64/caRepeater&
+
+# load mbuf kernel module
 /sbin/modprobe mbuf
 
 #/usr/sbin/syslog-ng
 
-# load dolphin drivers if present
-if /etc/dolphin_present.sh
+# load dolphin DX drivers if present
+if /etc/dolphin_dx_present.sh
 then
-    /etc/load_dolphin_drivers.sh
+    /etc/dolphin_dx_load_drivers.sh
+fi
+# load dolphin IX drivers if present
+if /etc/dolphin_ix_present.sh
+then
+    /etc/dolphin_ix_load_drivers.sh
 fi
 
 # Configure the second interface. OpenMx over Ethernet, no IP
@@ -34,26 +44,42 @@ ifconfig eth1 mtu 9000
 ifconfig eth1 up
 /opt/open-mx/sbin/omx_init  start
 
-# Initialize Dolphin node 
-if /etc/dolphin_config.sh
+# Initialize Dolphin DX node if configured 
+if /etc/dolphin_dx_config.sh
 then
-    /etc/start_dolphin_node.sh
+    /etc/dolphin_dx_start_node.sh
+fi
+# Initialize Dolphin IX node if configured 
+if /etc/dolphin_ix_config.sh
+then
+    /etc/dolphin_ix_start_node.sh
 fi
 
-# Load IRIG-B driver for 2.7
+# Load IRIG-B driver
 /sbin/modprobe symmetricom
 
-# Wait for Dolphin to initialize on all nodes (if present)
+# Wait for Dolphin to initialize on all DX nodes (if present)
 # This script does not work all the time. When we do 
 # a cluster boot it hangs indefinitely.
 #
-if /etc/dolphin_config.sh
+if /etc/dolphin_dx_config.sh
 then
-    /etc/dolphin_wait
+    /etc/dolphin_dx_wait
+fi
+# Wait for Dolphin to initialize on all IX nodes (if present)
+# This script does not work all the time. When we do 
+# a cluster boot it hangs indefinitely.
+#
+if /etc/dolphin_ix_config.sh
+then
+    /etc/dolphin_ix_wait
 fi
 
 # Start OpenMX stream to DAQ
-/etc/init.d/mx_stream start
+#/etc/init.d/mx_stream start
+#  test with two
+/etc/init.d/mx_stream0 start
+/etc/init.d/mx_stream1 start
 
 # start front-end models
 /etc/start_models.sh
@@ -62,9 +88,11 @@ fi
 mkdir -p /var/run/monit.d
 touch /var/run/monit.d/empty
 ln -snf /opt/monit/monit.$HOSTNAME.id /var/log/.monit.id
+ln -snf /opt/monit/monit.$HOSTNAME.state /var/log/.monit.state
 
 # Run service monitoring
 /etc/init.d/monit start
 
 # Run login shell on the console
 exec /bin/bash
+
