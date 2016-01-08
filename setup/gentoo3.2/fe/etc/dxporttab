@@ -1,0 +1,5 @@
+#  List of Dolphin switches and managers and ports
+# <switch>  <hostname>   <portnode>  <portserver> <portfrontend>
+C l1boot 3443 3444 3445
+X l1boot 3643 3644 3645
+Y l1boot 3843 3844 3845
