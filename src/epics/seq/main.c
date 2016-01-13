@@ -805,6 +805,11 @@ int writeTable2File(char *burtdir,
         char filemsg[128];
 	char timestring[128];
 	char burtString[64+2];
+#ifdef CA_SDF
+	int precision = 20;
+#else
+	int precision = 15;
+#endif
     // Write out local monitoring table as snap file.
         errno=0;
 	burtString[0] = '\0';
@@ -835,7 +840,7 @@ int writeTable2File(char *burtdir,
 		{
 		   case SDF_WITH_INIT_FLAG:
 			if(myTable[ii].datatype == SDF_NUM) {
-				fprintf(csFile,"%s %d %.15e %d %d\n",myTable[ii].chname,1,myTable[ii].data.chval,myTable[ii].mask,myTable[ii].initialized);
+				fprintf(csFile,"%s %d %.*e %d %d\n",myTable[ii].chname,1,precision,myTable[ii].data.chval,myTable[ii].mask,myTable[ii].initialized);
 			} else {
 				encodeBURTString(myTable[ii].data.strval, burtString, sizeof(burtString));
 				fprintf(csFile,"%s %d %s %d %d\n",myTable[ii].chname,1,burtString,myTable[ii].mask,myTable[ii].initialized);
@@ -844,7 +849,7 @@ int writeTable2File(char *burtdir,
 		   case SDF_FILE_PARAMS_ONLY:
 			if(myTable[ii].initialized) {
 				if(myTable[ii].datatype == SDF_NUM) {
-					fprintf(csFile,"%s %d %.15e %d\n",myTable[ii].chname,1,myTable[ii].data.chval,myTable[ii].mask);
+					fprintf(csFile,"%s %d %.*e %d\n",myTable[ii].chname,1,precision,myTable[ii].data.chval,myTable[ii].mask);
 				} else {
 					encodeBURTString(myTable[ii].data.strval, burtString, sizeof(burtString));
 					fprintf(csFile,"%s %d %s %d\n",myTable[ii].chname,1,burtString,myTable[ii].mask);
@@ -853,7 +858,7 @@ int writeTable2File(char *burtdir,
 			break;
 		   case SDF_FILE_BURT_ONLY:
 			if(myTable[ii].datatype == SDF_NUM) {
-				fprintf(csFile,"%s %d %.15e\n",myTable[ii].chname,1,myTable[ii].data.chval);
+				fprintf(csFile,"%s %d %.*e\n",myTable[ii].chname,1,precision,myTable[ii].data.chval);
 			} else {
 				encodeBURTString(myTable[ii].data.strval, burtString, sizeof(burtString));
 				fprintf(csFile,"%s %d %s \n",myTable[ii].chname,1,burtString);
