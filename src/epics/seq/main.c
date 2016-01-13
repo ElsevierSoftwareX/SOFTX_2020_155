@@ -3019,8 +3019,6 @@ sleep(5);
 				}
 				if(resetNum) {
 					decodeChangeSelect(resetNum, pageDisp, sperror, setErrTable,selectCounter);
-					resetNum = 0;
-					status = dbPutField(&resetoneaddr,DBR_LONG,&resetNum,1);
 				}
 				if(confirmVal) {
 					if(selectCounter[0] && (confirmVal & 2)) status = resetSelectedValues(sperror);
@@ -3054,6 +3052,9 @@ sleep(5);
 				}
 				pageDisp = reportSetErrors(pref, chNotFound,unknownChans,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotFound,1);
+				if (resetNum > 200) {
+					decodeChangeSelect(resetNum, pageDisp, chNotFound, unknownChans,selectCounter);
+				}
 				lastTable =  SDF_TABLE_NOT_FOUND;
 				break;
 			case SDF_TABLE_NOT_INIT:
@@ -3070,12 +3071,8 @@ sleep(5);
 					selectAll = 0;
 					status = dbPutField(&selectaddr[3],DBR_LONG,&selectAll,1);
 				}
-				if(resetNum > 100 && resetNum < 200) {
-					decodeChangeSelect(resetNum, pageDisp, noInit, uninitChans,selectCounter);
-				}
 				if(resetNum) {
-					resetNum = 0;
-					status = dbPutField(&resetoneaddr,DBR_LONG,&resetNum,1);
+					decodeChangeSelect(resetNum, pageDisp, noInit, uninitChans,selectCounter);
 				}
 				if(confirmVal) {
 					if(selectCounter[1] && (confirmVal & 2)) {
@@ -3115,12 +3112,8 @@ sleep(5);
 					selectAll = 0;
 					status = dbPutField(&selectaddr[3],DBR_LONG,&selectAll,1);
 				}
-				if(resetNum > 200) {
-					decodeChangeSelect(resetNum, pageDisp, noMon, unMonChans,selectCounter);
-				}
 				if(resetNum) {
-					resetNum = 0;
-					status = dbPutField(&resetoneaddr,DBR_LONG,&resetNum,1);
+					decodeChangeSelect(resetNum, pageDisp, noMon, unMonChans,selectCounter);
 				}
 				if(confirmVal) {
 					if(selectCounter[2] && (confirmVal & 2)) {
@@ -3159,12 +3152,8 @@ sleep(5);
 					selectAll = 0;
 					status = dbPutField(&selectaddr[3],DBR_LONG,&selectAll,1);
 				}
-				if(resetNum > 200) {
-					decodeChangeSelect(resetNum, pageDisp, cdSort, cdTableList,selectCounter);
-				}
 				if(resetNum) {
-					resetNum = 0;
-					status = dbPutField(&resetoneaddr,DBR_LONG,&resetNum,1);
+					decodeChangeSelect(resetNum, pageDisp, cdSort, cdTableList,selectCounter);
 				}
 				if(confirmVal) {
 					if(selectCounter[2] && (confirmVal & 2)) {
@@ -3200,12 +3189,19 @@ sleep(5);
 				noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit);
 				pageDisp =  reportSetErrors(pref, chDisconnected, disconnectChans, pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chDisconnected, 1);
+				if (resetNum > 200) {
+					decodeChangeSelect(resetNum, pageDisp, chDisconnected, disconnectChans, selectCounter);
+				}
 				break;
 #endif
 			default:
 				pageDisp = reportSetErrors(pref, sperror,setErrTable,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&sperror,1);
 				break;
+		}
+		if (resetNum) {
+			resetNum = 0;
+			status = dbPutField(&resetoneaddr,DBR_LONG,&resetNum,1);
 		}
 		if(pageDisp != pageNum) {
 			pageNum = pageDisp;
