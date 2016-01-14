@@ -1121,7 +1121,7 @@ double liveval = 0.0;
 				sprintf(uninitChans[lna].chname,"%s",cdTable[jj].chname);
 				if(cdTable[jj].datatype == SDF_NUM) {
 					liveval = cdTableP[jj].data.chval;
-					sprintf(liveset,"%.10lf", liveval);
+					snprintf(liveset, sizeof(liveset),"%.10lf", liveval);
 
 				} else {
 					liveval = 0.0;
@@ -1142,7 +1142,7 @@ double liveval = 0.0;
 				sprintf(unMonChans[lnb].chname,"%s",cdTable[jj].chname);
 				if(cdTable[jj].datatype == SDF_NUM)
 				{
-					sprintf(unMonChans[lnb].burtset,"%.10lf",cdTable[jj].data.chval);
+					snprintf(unMonChans[lnb].burtset, sizeof(unMonChans[lnb].burtset),"%.10lf",cdTable[jj].data.chval);
 					unMonChans[lnb].filtNum = -1;
 				} else {
 					sprintf(unMonChans[lnb].burtset,"%s",cdTable[jj].data.strval);
@@ -1160,7 +1160,7 @@ double liveval = 0.0;
 				sprintf(disconnectChans[lnc].chname, "%s", cdTable[jj].chname);
 				if(cdTable[jj].datatype == SDF_NUM) {
 					liveval = cdTableP[jj].data.chval;
-					sprintf(liveset,"%.10lf", liveval);
+					snprintf(liveset, sizeof(liveset),"%.10lf", liveval);
 
 				} else {
 					liveval = 0.0;
@@ -1389,10 +1389,10 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 					if(cdTable[ii].data.chval != rval || listAll)
 					{
 						sdfdiff = fabs(cdTable[ii].data.chval - rval);
-						sprintf(burtset,"%.10lf",cdTable[ii].data.chval);
-						sprintf(liveset,"%.10lf",rval);
+						snprintf(burtset,sizeof(burtset),"%.10lf",cdTable[ii].data.chval);
+						snprintf(liveset,sizeof(liveset),"%.10lf",rval);
 						liveval = rval;
-						sprintf(diffB2L,"%.8le",sdfdiff);
+						snprintf(diffB2L,sizeof(diffB2L),"%.8le",sdfdiff);
 						localErr = 1;
 					}
 				// If this is a string type, then get as string.
