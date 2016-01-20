@@ -15,4 +15,3 @@ fi
 /etc/init.d/monit stop
 pkill mx_stream
 /opt/open-mx/sbin/omx_init stop
-halt -p

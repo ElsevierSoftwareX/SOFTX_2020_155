@@ -2,32 +2,40 @@
 #
 # Diskless front-end start 
 
+# Set the hostname from the IP addess
+# IP=`ifconfig eth0 | awk '/inet addr:/ { print substr($2,6) }'`
+IP=`hostname -i`
+HOSTNAME=`grep $IP /etc/hosts | head -1 | awk '{ print $2 }'`
+echo ' found host name ' $HOSTNAME
+hostname $HOSTNAME
+
 # Start EPICS caRepeater
 /opt/rtapps/epics/base/bin/linux-x86_64/caRepeater&
 
-# load mbuf kernel module
-/sbin/modprobe mbuf
-
-# Load IRIG-B driver
-/sbin/modprobe symmetricom
-
-# Get the IP of the main port (eth0)
-IP=`hostname -i`
 # Derive IP of DAQ port (eth1)
 DAQIP=`hostname -i | sed 's/10.144.0/10.146.0/g'`
 # Configure the second interface. OpenMx over Ethernet, no IP
-ifconfig eth1 $DAQIP netmask 255.255.255.0 broadcast 10.146.0.255 mtu 9000
-ifconfig eth1 mtu 9000
-ifconfig eth1 up
+/bin/ifconfig eth1 $DAQIP netmask 255.255.255.0 broadcast 10.146.0.255 mtu 9000
+/bin/ifconfig eth1 up
+
+# load mbuf kernel module
+/sbin/modprobe mbuf
+/bin/mknod /dev/mbuf c `grep mbuf /proc/devices | /usr/bin/awk '{print $1}'` 0
+/bin/chown controls /dev/mbuf
+
+# Load IRIG-B driver
+/sbin/modprobe symmetricom
+/bin/mknod /dev/symmetricom c `grep symmetricom /proc/devices | /usr/bin/awk '{print $1}'` 0
+/bin/chown controls /dev/symmetricom
 
 # start open-mx driver
-/opt/open-mx/sbin/omx_init  start
+/opt/open-mx/sbin/omx_init start
 
 # Start OpenMX stream to DAQ
-#/etc/init.d/mx_stream start
+/etc/init.d/mx_stream start
 #  test with two
-/etc/init.d/mx_stream0 start
-/etc/init.d/mx_stream1 start
+#/etc/init.d/mx_stream0 start
+#/etc/init.d/mx_stream1 start
 
 # load dolphin DX drivers if present
 if /etc/dolphin_dx_present.sh
@@ -74,9 +82,10 @@ fi
 # Configure monit to use write-able area (var/log)
 mkdir -p /var/run/monit.d
 touch /var/run/monit.d/empty
+touch /opt/monit/monit.$HOSTNAME.id
+touch /opt/monit/monit.$HOSTNAME.state
 ln -snf /opt/monit/monit.$HOSTNAME.id /var/log/.monit.id
 ln -snf /opt/monit/monit.$HOSTNAME.state /var/log/.monit.state
 
 # Run service monitoring
 /etc/init.d/monit start
-
