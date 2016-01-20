@@ -85,7 +85,10 @@ set eventqueue
 # add mmonit
 #set mmonit http://monit:monit@x2work:8080/collector
 # on diskless system, set monit ID to writable /var/log
+# same with statefile
 set idfile /var/log/.monit.id
+set statefile /var/log/.monit.state
+
 #
 ## Monit has an embedded web server which can be used to view status of 
 ## services monitored, the current configuration, actual services parameters

@@ -15,6 +15,7 @@
 # NFS mounts
 #  don't need / mount - this is done by PXE
 #x2boot1:/diskless/root           /         nfs     sync,hard,intr,ro,nolock,rsize=8192,wsize=8192    0 0
+x2boot1:/usr                     /usr      nfs     async,hard,intr,ro,nolock,rsize=8192,wsize=8192   0 0
 x2boot1:/home                    /home     nfs     async,hard,intr,rw,nolock,rsize=8192,wsize=8192   0 0
 x2boot1:/opt                     /opt      nfs     async,hard,intr,rw,nolock,rsize=8192,wsize=8192   0 0
 # -- other mounts --
