@@ -1417,6 +1417,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 	int filtDiffs=0;
 
 #ifdef VERBOSE_DEBUG
+/*
 	char *__table_name = "setErrTable or unknown";
 	if (setErrTable == unknownChans) __table_name = "unknownChans";
 	else if (setErrTable == uninitChans) __table_name == "uninitChans";
@@ -1424,6 +1425,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 	else if (setErrTable == readErrTable) __table_name == "readErrTable";
 	else if (setErrTable == cdTableList) __table_name == "cdTableList";
 	D("In spChecker cdTable -> '%s' monAll(%d) listAll(%d)\n", __table_name, monitorAll, listAll);
+*/
 #endif
 	// Check filter switch settings first
 	     errCntr = checkFilterSwitches(fmNum,setErrTable,monitorAll,listAll,wcVal,wcstring,&filtDiffs);
@@ -1553,7 +1555,7 @@ int ii;
 int sn;
 int sn1 = 0;
 ADDRESS saddr;
-	
+
 	for(ii=0;ii<errNum;ii++)
 	{
 		if (setErrTable[ii].chFlag & 2)
@@ -1566,7 +1568,6 @@ ADDRESS saddr;
 			status = GET_ADDRESS(cdTable[sn].chname,&saddr);
 			if (cdTable[sn].datatype == SDF_NUM) status = PUT_VALUE(saddr,SDF_NUM,&(cdTable[sn].data.chval));
 			else status = PUT_VALUE(saddr,SDF_STR,cdTable[sn].data.strval);;
-
 			if(sn1) {
 				status = GET_ADDRESS(cdTable[sn1].chname,&saddr);
 				status = PUT_VALUE(saddr,SDF_NUM,&(cdTable[sn1].data.chval));
@@ -2359,25 +2360,13 @@ void initCAConnections(char *fname, char *prefix)
 	int err = 0;
 	int state = CA_STATE_OFF;
 	CA_STARTUP_INFO param;
-	pthread_attr_t attr;
 
 	param.fname = fname;
 	param.prefix = prefix;
-	setCAThreadState(CA_STATE_OFF);
-	// create a thread to handle CA activities
-	pthread_attr_init (&attr);
-	pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-	err = pthread_create (&caThread, &attr, (void *(*)(void *))caMainLoop, &param);
-	if (err) {
-		// FIXME: handle this
-	}
-	pthread_attr_destroy(&attr);
 
-	state = getCAThreadState();
-	while (state == CA_STATE_OFF || state == CA_STATE_PARSING) {
-		usleep(10);
-		state = getCAThreadState();
-	}
+
+	setCAThreadState(CA_STATE_OFF);
+	caMainLoop(&param);
 }
 
 /// Routine to setup mutexes and other resources used by the CA SDF system
@@ -2930,6 +2919,9 @@ sleep(5);
 		usleep(100000);					// Run loop at 10Hz.
 #ifdef CA_SDF
 		{
+			// even with a pre-emptive callback enabled we need to do a ca_poll to get writes to work
+			// see bug 965
+			ca_poll();
 			syncCAConnections(NULL);
 			status = dbPutField(&disconnectcountaddr,DBR_LONG,&chDisconnected,1);
 			status = dbPutField(&droppedcountaddr,DBR_LONG,&droppedPVCount,1); 
