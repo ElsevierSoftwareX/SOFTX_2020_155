@@ -82,6 +82,73 @@ sub fromExp {
 	return "";
 }
 
+#!/usr/bin/perl
+
+# This sub checks if model part num ins/outs matches C code declaration ins/outs
+sub feArgChk {
+        my ($fName,$ins,$outs) = @_;
+        print "C Function = ",$fName," with ",$ins, " inputs and ",$outs,"outputs \n";
+        open(my $fh,"<".$fName) || die "Cannot open $fName \n";
+	my $search = "void";
+	my $search1 = "argin\\[0\\]";
+	my $start = 0;
+	my $inCnt = 0;
+	my $outCnt = 0;
+	my $inargUsed = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	my $outargUsed = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        while (my $line = <$fh>) {
+                chomp $line;
+                if ($start == 1 && $line =~ $invar) {
+                        #print $line," \n";
+			for($ii=0;$ii<20;$ii++) {
+				$jj = $ii + 1;
+                		if ($line =~ $arginsearch[$ii] && $jj > $inCnt) {
+					$inCnt = $jj;
+					$inargUsed[$ii] = 1;
+				}
+
+			}
+		}
+                if ($start == 1 && $line =~ $outvar) {
+                        #print $line," \n";
+			for($ii=0;$ii<20;$ii++) {
+				$jj = $ii + 1;
+                		if ($line =~ $argoutsearch[$ii] && $jj > $outCnt) {
+					$outCnt = $jj;
+					$outargUsed[$ii] = 1;
+				}
+
+			}
+		}
+                if ($start == 0 && $line =~ $search) {
+			#print "Found start of function\n\t";
+			print $line, "\n";
+			my @words = split /[:*(,\s\/]+/,$line;
+			$invar = $words[3];
+			$outvar = $words[7];
+			#print " InargVar = ",$invar, " and OutargVar = ",$outvar,"\n";;
+			for($ii=0;$ii<20;$ii++) {
+				$arginsearch[$ii] = $invar . "\\[" . $ii . "\\]";
+				$argoutsearch[$ii] = $outvar . "\\[" . $ii . "\\]";
+			}
+			#print "BASE SEARCH = ",$search1, " and ", $arginsearch[0], "\n";;
+		$start = 1;
+        	}
+	}
+	my $inused = 0;
+	for($ii=0;$ii<$ins;$ii++) {
+		if($inargUsed[$ii]) { $inused ++; }
+	}
+	my $outused = 0;
+	for($ii=0;$ii<$ins;$ii++) {
+		if($outargUsed[$ii]) { $outused ++; }
+	}
+	if($ins != $inCnt || $outs != $outCnt || $ins != $inused || $outs != $outused) {
+		die "Function Call In/Out parameter mismatch\nModel part has $ins inputs and $outs outputs\nC Code has $inCnt inputs and $outCnt outputs\n";
+	}
+	return($inCnt,$outCnt);
+}
+
 # Return front end code
 # Argument 1 is the part number
 # Returns calculated code string
@@ -101,6 +168,7 @@ sub frontEndCode {
 		# Note the usage of Env, all environment variables were
 		# turned into Perl variables
 		$pathed_name =~ s/(\$\w+)/$1/eeg;
+		my ($Ins,$Outs)  = feArgChk($pathed_name,$::partInCnt[$::partInNum[$i][0]],$::partOutputs[$::partOutNum[$i][0]]);
 		$ret .= "#define CURRENT_SUBSYS $::subSysName[$::partSubNum[$i]]\n";
 		$ret .= "#include \"$pathed_name\"\n";
 		push @::sources, $pathed_name;

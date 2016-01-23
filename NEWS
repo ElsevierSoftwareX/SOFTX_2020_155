@@ -1,6 +1,8 @@
 ==================================================================================================
 Changes for 2.10
 ==================================================================================================
+- Bug Fix (966): RCG FunctionCall.pm now checks that model part has the same number of in/outs as
+  defined in the associated user C code function.
 - Bug Fix (903): With requireIOcnt=1 set in parameter block of a model, code will not start unless
   the model required number of ADC and DAC modules exist on the run time computer bus.
 - Bug Fix (948): ADC channel lists are incorrect when model contains MUX/DEMUX parts. It was also
