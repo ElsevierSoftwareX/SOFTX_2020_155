@@ -102,9 +102,11 @@ sub feArgChk {
                         #print $line," \n";
 			for($ii=0;$ii<20;$ii++) {
 				$jj = $ii + 1;
-                		if ($line =~ $arginsearch[$ii] && $jj > $inCnt) {
-					$inCnt = $jj;
+                		if ($line =~ $arginsearch[$ii]) {
 					$inargUsed[$ii] = 1;
+                                        if ($jj > $inCnt) {
+						$inCnt = $jj;
+					}
 				}
 
 			}
@@ -113,20 +115,22 @@ sub feArgChk {
                         #print $line," \n";
 			for($ii=0;$ii<20;$ii++) {
 				$jj = $ii + 1;
-                		if ($line =~ $argoutsearch[$ii] && $jj > $outCnt) {
-					$outCnt = $jj;
+                		if ($line =~ $argoutsearch[$ii]) {
 					$outargUsed[$ii] = 1;
+ 					if ($jj > $outCnt) {
+						$outCnt = $jj;
+					}
 				}
 
 			}
 		}
                 if ($start == 0 && $line =~ $search) {
 			#print "Found start of function\n\t";
-			print $line, "\n";
+			#print $line, "\n";
 			my @words = split /[:*(,\s\/]+/,$line;
 			$invar = $words[3];
 			$outvar = $words[7];
-			#print " InargVar = ",$invar, " and OutargVar = ",$outvar,"\n";;
+			print " InargVar = ",$invar, " and OutargVar = ",$outvar,"\n";;
 			for($ii=0;$ii<20;$ii++) {
 				$arginsearch[$ii] = $invar . "\\[" . $ii . "\\]";
 				$argoutsearch[$ii] = $outvar . "\\[" . $ii . "\\]";
@@ -144,7 +148,7 @@ sub feArgChk {
 		if($outargUsed[$ii]) { $outused ++; }
 	}
 	if($ins != $inCnt || $outs != $outCnt || $ins != $inused || $outs != $outused) {
-		die "Function Call In/Out parameter mismatch\nModel part has $ins inputs and $outs outputs\nC Code has $inCnt inputs and $outCnt outputs\n";
+		die "Function Call In/Out parameter mismatch\nModel part has $ins inputs and $outs outputs\nC Code has $inCnt inputs and $outCnt outputs\nC Code only uses $inused inputs and $outused outputs\n";
 	}
 	return($inCnt,$outCnt);
 }
