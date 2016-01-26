@@ -269,7 +269,8 @@ int parseLine(char *, int,char *,char *,char *,char *,char *,char *);
 int modifyTable(int,SET_ERR_TABLE *);
 void clearTableSelections(int,SET_ERR_TABLE *, int *);
 void setAllTableSelections(int,SET_ERR_TABLE *, int *,int);
-void decodeChangeSelect(int, int, int, SET_ERR_TABLE *, int *);
+void changeSelectCB_uninit(int, SET_ERR_TABLE *, int *);
+void decodeChangeSelect(int, int, int, SET_ERR_TABLE *, int *, void (*)(int, SET_ERR_TABLE *, int *));
 int appendAlarms2File(char *,char *,char *);
 void registerFilters();
 #ifdef CA_SDF
@@ -482,13 +483,37 @@ int ii;
 	}
 }
 
+/// Callback function to ensure consistency of the select flags for entries in the uninit table
+///	@param[in] index		Number providing the index into the dcsErrTable
+///	@param[in] dcsErrTable		Pointer to table
+///	@param[out] selectCounter	Pointer to change counters
+void changeSelectCB_uninit(int index, SET_ERR_TABLE *dcsErrTable, int selectCounter[])
+{
+	int revertBit = dcsErrTable[index].chFlag & 2;
+	int acceptBit = dcsErrTable[index].chFlag & 4;
+	int monBit = dcsErrTable[index].chFlag & 8;
+	int otherBits = 0; //dcsErrTable[index].chFlag | ~(2 | 4 | 8);
+
+	// revert is not defined on this table
+	if (revertBit) {
+		revertBit = 0;
+		selectCounter[0] --;
+	}
+	// if monitor is set, then accept must be set
+	if (monBit && !acceptBit) {
+		acceptBit = 4;
+		selectCounter[1] ++;
+	} 
+	dcsErrTable[index].chFlag = revertBit | acceptBit | monBit | otherBits;
+}
+
 /// Common routine to set/unset individual entries for table changes..
 ///	@param[in] selNum		Number providing line and column of table entry to change.
 ///	@param[in] page			Number providing the page of table to change.
 ///	@param[in] totalItems		Number items selected for change.
 ///	@param[in] dcsErrtable 		Pointer to table
 ///	@param[out] selectCounter 	Pointer to change counters.
-void decodeChangeSelect(int selNum, int page, int totalItems, SET_ERR_TABLE *dcsErrTable, int selectCounter[])
+void decodeChangeSelect(int selNum, int page, int totalItems, SET_ERR_TABLE *dcsErrTable, int selectCounter[], void (*cb)(int, SET_ERR_TABLE*, int*))
 {
 int selectBit;
 int selectLine;
@@ -525,6 +550,8 @@ int selectLine;
 			default:
 				break;
 		}
+		if (cb)
+			cb(selectLine, dcsErrTable, selectCounter);
 	}
 }
 
@@ -3071,7 +3098,7 @@ sleep(5);
 					setAllTableSelections(sperror,setErrTable, selectCounter,selectAll);
 				}
 				if(resetNum) {
-					decodeChangeSelect(resetNum, pageDisp, sperror, setErrTable,selectCounter);
+					decodeChangeSelect(resetNum, pageDisp, sperror, setErrTable,selectCounter, NULL);
 				}
 				if(confirmVal) {
 					if(selectCounter[0] && (confirmVal & 2)) status = resetSelectedValues(sperror);
@@ -3106,7 +3133,7 @@ sleep(5);
 				pageDisp = reportSetErrors(pref, chNotFound,unknownChans,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotFound,1);
 				if (resetNum > 200) {
-					decodeChangeSelect(resetNum, pageDisp, chNotFound, unknownChans,selectCounter);
+					decodeChangeSelect(resetNum, pageDisp, chNotFound, unknownChans,selectCounter, NULL);
 				}
 				lastTable =  SDF_TABLE_NOT_FOUND;
 				break;
@@ -3122,9 +3149,11 @@ sleep(5);
 				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
 				if(selectAll == 2 || selectAll == 3) {
 					setAllTableSelections(noInit,uninitChans,selectCounter,selectAll);
+					if (selectAll == 3)
+						setAllTableSelections(noInit,uninitChans,selectCounter,2);
 				}
-				if(resetNum) {
-					decodeChangeSelect(resetNum, pageDisp, noInit, uninitChans,selectCounter);
+				if(resetNum > 100) {
+					decodeChangeSelect(resetNum, pageDisp, noInit, uninitChans,selectCounter, changeSelectCB_uninit);
 				}
 				if(confirmVal) {
 					if(selectCounter[1] && (confirmVal & 2)) {
@@ -3166,7 +3195,7 @@ sleep(5);
 					setAllTableSelections(noMon,unMonChans,selectCounter,selectAll);
 				}
 				if(resetNum) {
-					decodeChangeSelect(resetNum, pageDisp, noMon, unMonChans,selectCounter);
+					decodeChangeSelect(resetNum, pageDisp, noMon, unMonChans,selectCounter, NULL);
 				}
 				if(confirmVal) {
 					if(selectCounter[2] && (confirmVal & 2)) {
@@ -3206,7 +3235,7 @@ sleep(5);
 					setAllTableSelections(cdSort,cdTableList,selectCounter,selectAll);
 				}
 				if(resetNum) {
-					decodeChangeSelect(resetNum, pageDisp, cdSort, cdTableList,selectCounter);
+					decodeChangeSelect(resetNum, pageDisp, cdSort, cdTableList,selectCounter, NULL);
 				}
 				if(confirmVal) {
 					if(selectCounter[2] && (confirmVal & 2)) {
@@ -3243,7 +3272,7 @@ sleep(5);
 				pageDisp =  reportSetErrors(pref, chDisconnected, disconnectChans, pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chDisconnected, 1);
 				if (resetNum > 200) {
-					decodeChangeSelect(resetNum, pageDisp, chDisconnected, disconnectChans, selectCounter);
+					decodeChangeSelect(resetNum, pageDisp, chDisconnected, disconnectChans, selectCounter, NULL);
 				}
 				break;
 #endif
