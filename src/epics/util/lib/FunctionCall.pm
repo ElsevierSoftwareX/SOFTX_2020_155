@@ -99,10 +99,16 @@ sub feArgChk {
         my $maxCnt = 25;
         while (my $line = <$fh>) {
                 chomp $line;
+# skip comment lines
+                if ( $line =~ "^\t* *//" || $line =~ "^ *#" ) {
+			next;
+		}
+# skip out if end of function
                 if ( $start == 1 && $line =~ "^}" ) {
 			#print "End of Function\n";
 			last;
 		}
+# skip out if beginning of another function
                 if ( $start == 1 && $line =~ "void " ) {
 			#print "Start of next function\n";
 			last;
