@@ -55,7 +55,7 @@ sub printFrontEndVars  {
         my ($i) = @_;
 	# Only include code if not inlined
 	if ($::inlinedFunctionCall[$i] eq undef) {
-	  print ::OUT "#include \"$::xpartName[$i].c\"\n";
+	  print ::OUT qq(#include "$::xpartName[$i].c"\n);
 	  my $dirname  = dirname($::cFile);
 	  push @::sources, "$dirname/$::xpartName[$i].c";
         }
@@ -86,21 +86,30 @@ sub fromExp {
 
 # This sub checks if model part num ins/outs matches C code declaration ins/outs
 sub feArgChk {
-        my ($fName,$ins,$outs) = @_;
-        print "C Function = ",$fName," with ",$ins, " inputs and ",$outs,"outputs \n";
-        open(my $fh,"<".$fName) || die "Cannot open $fName \n";
-	my $search = "void";
+        my ($fName,$fFile,$ins,$outs) = @_;
+        print "C Function = ",$fName," file ",$fFile," with ",$ins, " inputs and ",$outs," outputs \n";
+        open(my $fh,"<".$fFile) || die "Cannot open $fFile \n";
+	my $search = "void $fName *\\(";
 	my $search1 = "argin\\[0\\]";
 	my $start = 0;
 	my $inCnt = 0;
 	my $outCnt = 0;
-	my $inargUsed = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-	my $outargUsed = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	my $inargUsed = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	my $outargUsed = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        my $maxCnt = 25;
         while (my $line = <$fh>) {
                 chomp $line;
+                if ( $start == 1 && $line =~ "^}" ) {
+			#print "End of Function\n";
+			last;
+		}
+                if ( $start == 1 && $line =~ "void " ) {
+			#print "Start of next function\n";
+			last;
+		}
                 if ($start == 1 && $line =~ $invar) {
                         #print $line," \n";
-			for($ii=0;$ii<20;$ii++) {
+			for($ii=0;$ii<$maxCnt;$ii++) {
 				$jj = $ii + 1;
                 		if ($line =~ $arginsearch[$ii]) {
 					$inargUsed[$ii] = 1;
@@ -113,7 +122,7 @@ sub feArgChk {
 		}
                 if ($start == 1 && $line =~ $outvar) {
                         #print $line," \n";
-			for($ii=0;$ii<20;$ii++) {
+			for($ii=0;$ii<$maxCnt;$ii++) {
 				$jj = $ii + 1;
                 		if ($line =~ $argoutsearch[$ii]) {
 					$outargUsed[$ii] = 1;
@@ -130,12 +139,12 @@ sub feArgChk {
 			my @words = split /[:*(,\s\/]+/,$line;
 			$invar = $words[3];
 			$outvar = $words[7];
-			print " InargVar = ",$invar, " and OutargVar = ",$outvar,"\n";;
-			for($ii=0;$ii<20;$ii++) {
+			#print " InargVar = ",$invar, " and OutargVar = ",$outvar,"\n";
+			for($ii=0;$ii<$maxCnt;$ii++) {
 				$arginsearch[$ii] = $invar . "\\[" . $ii . "\\]";
 				$argoutsearch[$ii] = $outvar . "\\[" . $ii . "\\]";
 			}
-			#print "BASE SEARCH = ",$search1, " and ", $arginsearch[0], "\n";;
+			#print "BASE SEARCH = ",$search1, " and ", $arginsearch[0], "\n";
 		$start = 1;
         	}
 	}
@@ -144,7 +153,7 @@ sub feArgChk {
 		if($inargUsed[$ii]) { $inused ++; }
 	}
 	my $outused = 0;
-	for($ii=0;$ii<$ins;$ii++) {
+	for($ii=0;$ii<$outs;$ii++) {
 		if($outargUsed[$ii]) { $outused ++; }
 	}
 	if($ins != $inCnt || $outs != $outCnt || $ins != $inused || $outs != $outused) {
@@ -172,7 +181,11 @@ sub frontEndCode {
 		# Note the usage of Env, all environment variables were
 		# turned into Perl variables
 		$pathed_name =~ s/(\$\w+)/$1/eeg;
-		my ($Ins,$Outs)  = feArgChk($pathed_name,$::partInCnt[$::partInNum[$i][0]],$::partOutputs[$::partOutNum[$i][0]]);
+                if ( $func_name =~ "RtComm" || $func_name =~ "BLRMS" || $func_name =~ "MASKING\_MATRIX" || $func_name =~ "MULTIPLE\_BITWISE" ) {
+			print "SKIP check of $func_name argument count \n";
+		} else {
+		   my ($Ins,$Outs)  = feArgChk($func_name,$pathed_name,$::partInCnt[$::partInNum[$i][0]],$::partOutputs[$::partOutNum[$i][0]]);
+		}
 		$ret .= "#define CURRENT_SUBSYS $::subSysName[$::partSubNum[$i]]\n";
 		$ret .= "#include \"$pathed_name\"\n";
 		push @::sources, $pathed_name;
