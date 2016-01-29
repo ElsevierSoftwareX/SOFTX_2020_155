@@ -137,17 +137,6 @@ init_dolphin(void) {
   sci_register_session_cb(0,0,session_callback,0);
   cdsPciModules.dolphinCount = 1;
 
-/*
-IRM19_sci_get_device_info(unsigned32 IN local_adapter_number,
-                    unsigned32 IN flags,
-                    sci_device_info_t OUT *info_ptr)
-*/
-  if (ESCI_OK != IRM19_sci_get_device_info(0, 0, &sci_dev_info)) {
-	printk ("Could not do IRM19_sci_get_device_info()\n");
-	return -1;
-  }
-
-  
   return 0;
 }
 
