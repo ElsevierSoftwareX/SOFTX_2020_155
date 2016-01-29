@@ -2067,11 +2067,15 @@ void subscriptionHandler(struct event_handler_args args) {
 	float val = 0.0;
 	EPICS_CA_TABLE *entry = args.usr;
 	EPICS_CA_TABLE *origEntry = entry;
+	int initialRedirIndex = 0;
+
 	if (args.status != ECA_NORMAL ||  !entry) {
 		return;
 	}
+
 	pthread_mutex_lock(&caTableMutex);
 	// If this entry has just reconnected, then do not write the old copy, write to the temporary/redir dest
+	initialRedirIndex = entry->redirIndex;
 	if (entry->redirIndex >= 0) {
 		if (entry->redirIndex < SDF_MAX_TSIZE) {
 			entry = &(caConnTable[entry->redirIndex]);
@@ -2079,6 +2083,7 @@ void subscriptionHandler(struct event_handler_args args) {
 			entry = &(caConnEnumTable[entry->redirIndex - SDF_MAX_TSIZE]);
 		}
 	}
+
 	// if we are getting data, we must be connected.
 	entry->connected = 1;
 	const int MAX_STR_LEN = sizeof(entry->data.strval);
@@ -2091,7 +2096,7 @@ void subscriptionHandler(struct event_handler_args args) {
 		strncpy(entry->data.strval, sVal->value, MAX_STR_LEN);
 		entry->data.strval[MAX_STR_LEN - 1] = '\0';
 		entry->mod_time = sVal->stamp.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
-	} else if (args.type == DBR_GR_ENUM && entry->redirIndex >= SDF_MAX_TSIZE) {
+	} else if (args.type == DBR_GR_ENUM && initialRedirIndex >= SDF_MAX_TSIZE) {
 		struct dbr_gr_enum *eVal = (struct dbr_gr_enum *)args.dbr;
 		if (entry->datatype == SDF_UNKNOWN) {
 			// determine the proper type
