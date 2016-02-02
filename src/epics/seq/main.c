@@ -630,6 +630,7 @@ int checkFilterSwitches(int fcount, SET_ERR_TABLE setErrTable[], int monitorAll,
 unsigned int refVal=0;
 unsigned int presentVal=0;
 unsigned int x=0,y=0;
+int mask = 0;
 int ii=0,jj=0;
 int errCnt = 0;
 char swname[3][64];
@@ -691,10 +692,13 @@ char *ret=0;
 		status = GET_ADDRESS(swname[2],&paddr2);
 		status = PUT_VALUE(paddr2,SDF_STR,swstrE);
 		setErrTable[errCnt].filtNum = -1;
-		if((refVal != filterTable[ii].swreq && errCnt < SDF_ERR_TSIZE && (filterTable[ii].mask || monitorAll) && filterTable[ii].init) )
+
+		mask = filterTable[ii].mask;
+		if(( (refVal & mask) != (filterTable[ii].swreq & mask) && errCnt < SDF_ERR_TSIZE && (mask || monitorAll) && filterTable[ii].init) )
 			*diffcntr += 1;
-		if((refVal != filterTable[ii].swreq && errCnt < SDF_ERR_TSIZE && (filterTable[ii].mask || monitorAll) && filterTable[ii].init) || displayall)
+		if(( (refVal & mask) != (filterTable[ii].swreq & mask) && errCnt < SDF_ERR_TSIZE && (mask || monitorAll) && filterTable[ii].init) || displayall)
 		{
+			// FIXME: print out the right strings
 			filtStrBitConvert(1,refVal,swstrE);
 			filtStrBitConvert(1,filterTable[ii].swreq,swstrB);
 			x = refVal ^ filterTable[ii].swreq;;
@@ -856,6 +860,7 @@ int writeTable2File(char *burtdir,
         FILE *csFile=0;
         char filemsg[128];
 	char timestring[128];
+	char monitorstring[128];
 	char burtString[64+2];
 #ifdef CA_SDF
 	int precision = 20;
@@ -888,23 +893,30 @@ int writeTable2File(char *burtdir,
 
 	for(ii=0;ii<chNum;ii++)
 	{
+		if (myTable[ii].mask == ~0) {
+			strcpy(monitorstring, "1");
+		} else if (myTable[ii].mask == 0) {
+			strcpy(monitorstring, "0");
+		} else {
+			snprintf(monitorstring, sizeof(monitorstring), "0x%x", myTable[ii].mask);
+		}
 		switch(ftype)
 		{
 		   case SDF_WITH_INIT_FLAG:
 			if(myTable[ii].datatype == SDF_NUM) {
-				fprintf(csFile,"%s %d %.*e %d %d\n",myTable[ii].chname,1,precision,myTable[ii].data.chval,myTable[ii].mask,myTable[ii].initialized);
+				fprintf(csFile,"%s %d %.*e %s %d\n",myTable[ii].chname,1,precision,myTable[ii].data.chval,monitorstring,myTable[ii].initialized);
 			} else {
 				encodeBURTString(myTable[ii].data.strval, burtString, sizeof(burtString));
-				fprintf(csFile,"%s %d %s %d %d\n",myTable[ii].chname,1,burtString,myTable[ii].mask,myTable[ii].initialized);
+				fprintf(csFile,"%s %d %s %s %d\n",myTable[ii].chname,1,burtString,monitorstring,myTable[ii].initialized);
 			}
 			break;
 		   case SDF_FILE_PARAMS_ONLY:
 			if(myTable[ii].initialized) {
 				if(myTable[ii].datatype == SDF_NUM) {
-					fprintf(csFile,"%s %d %.*e %d\n",myTable[ii].chname,1,precision,myTable[ii].data.chval,myTable[ii].mask);
+					fprintf(csFile,"%s %d %.*e %s\n",myTable[ii].chname,1,precision,myTable[ii].data.chval,monitorstring);
 				} else {
 					encodeBURTString(myTable[ii].data.strval, burtString, sizeof(burtString));
-					fprintf(csFile,"%s %d %s %d\n",myTable[ii].chname,1,burtString,myTable[ii].mask);
+					fprintf(csFile,"%s %d %s %s\n",myTable[ii].chname,1,burtString,monitorstring);
 				}
 			}
 			break;
@@ -1544,7 +1556,8 @@ int found = 0;
 					fmIndex = cdTable[jj].filterNum;
 				}
 				if(strcmp(cdTable[jj].chname,modTable[ii].chname) == 0 && (modTable[ii].chFlag & 8)) {
-					cdTable[jj].mask ^= 1;
+					// with bit fields being used we should not just twiddle one bit
+					cdTable[jj].mask = (cdTable[jj].mask ? 0 : ~0);
 					found = 1;
 					fmIndex = cdTable[jj].filterNum;
 				}
@@ -1564,7 +1577,7 @@ int found = 0;
 					filterTable[fmIndex].init = 1;
 				}
 				if(modTable[ii].chFlag & 8) {
-					filterTable[fmIndex].mask ^= 1;
+					filterTable[fmIndex].mask = (filterTable[fmIndex].mask ? 0 : ~0);
 				 	cdTable[sn].mask = filterTable[fmIndex].mask;
 				 	cdTable[sn1].mask = filterTable[fmIndex].mask;
 				}
@@ -1702,6 +1715,9 @@ int writeEpicsDb(int numchans,		///< Number of channels to write
 		case SDF_RESET:
 			// Only want to set those channels marked by a mask back to their original BURT setting.
 			for(ii=0;ii<numchans;ii++) {
+				// FIXME: check does this make sense w/ a bitmask in mask?
+				// can filter modules get here?  It seems that they will, so would we need
+				// to mask the value we set ?
 			    if(myTable[ii].mask) {
 			    	//Find address of channel
 			    	status = GET_ADDRESS(myTable[ii].chname,&paddr);
@@ -1825,9 +1841,18 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 				// Check if s4 (monitor or not) is set (0/1). If doesn/'t exist in file, set to zero in local table.
 				if(argcount > 3 && isdigit(s4[0])) {
 					// printf("%s %s %s %s\n",s1,s2,s3,s4);
-					cdTableP[chNumP].mask = atoi(s4);
-					if((cdTableP[chNumP].mask < 0) || (cdTableP[chNumP].mask > 1))
-						cdTableP[chNumP].mask = 0;
+					// 0x... -> bit mask
+					// 0|1 -> 0|0xfffffffff
+					if (s4[1] == 'x') {
+						if (sscanf(s4, "0x%xd", &(cdTableP[chNumP].mask)) <= 0)
+							cdTableP[chNumP].mask = 0;
+					} else {
+						cdTableP[chNumP].mask = atoi(s4);
+						if((cdTableP[chNumP].mask < 0) || (cdTableP[chNumP].mask > 1))	
+							cdTableP[chNumP].mask = 0;
+						if (cdTableP[chNumP].mask > 0) cdTableP[chNumP].mask = ~0;
+					}
+					printf("mask: %d %s\n", cdTableP[chNumP].mask, cdTableP[chNumP].chname);
 				} else {
 					cdTableP[chNumP].mask = 0;
 				}
@@ -1886,7 +1911,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 								cdTable[ii].data.chval = cdTableP[chNumP].data.chval;
 						}
 						if(command != SDF_LOAD_DB_ONLY) {
-							if(cdTableP[chNumP].mask != -1)
+							//if(cdTableP[chNumP].mask != -1)
 								cdTable[ii].mask = cdTableP[chNumP].mask;
 							cdTable[ii].initialized = 1;
 						}
