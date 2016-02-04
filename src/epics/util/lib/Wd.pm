@@ -10,11 +10,11 @@ sub partType {
 # Current part number is passed as first argument
 sub printHeaderStruct {
         my ($i) = @_;
-        print ::OUTH "\tint $::xpartName[$i];\n";
-        print ::OUTH "\tint $::xpartName[$i]_STAT;\n";
-        print ::OUTH "\tint $::xpartName[$i]\_MAX;\n";
+        print ::OUTH "\tdouble $::xpartName[$i];\n";
+        print ::OUTH "\tdouble $::xpartName[$i]_STAT;\n";
+        print ::OUTH "\tdouble $::xpartName[$i]\_MAX;\n";
         print ::OUTH "\tdouble $::xpartName[$i]\_VAR\[$::partInCnt[$i]\];\n";
-	return "\tchar int $::xpartName[$i]\_MAX_mask;\n";
+	return "\tchar $::xpartName[$i]\_MAX_mask;\n";
 }
 
 # Print Epics variable definitions
@@ -22,20 +22,20 @@ sub printHeaderStruct {
 sub printEpics {
         my ($i) = @_;
         #       print EPICS "INVARIABLE $::xpartName[$i] $::systemName\.$::xpartName[$i] int bi 0 field(ZNAM,\"OFF\") field(ONAM,\"ON\")\n";
-        print ::EPICS "MOMENTARY $::xpartName[$i] $::systemName\.$::xpartName[$i] int ao 0\n";
-        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_STAT $::systemName\.$::xpartName[$i]_STAT int ao 0 \n";
+        print ::EPICS "MOMENTARY $::xpartName[$i] $::systemName\.$::xpartName[$i] double ao 0\n";
+        print ::EPICS "OUTVARIABLE $::xpartName[$i]\_STAT $::systemName\.$::xpartName[$i]_STAT double ao 0 \n";
+        print ::EPICS "INVARIABLE $::xpartName[$i]\_MAX $::systemName\.$::xpartName[$i]\_MAX double ai 0 field(PREC,\"0\")\n";
 	for (0 .. $::partInCnt[$i]-1) {
           my $a = 1 + $_;
           print ::EPICS "OUTVARIABLE $::xpartName[$i]\_VAR_$a $::systemName\.$::xpartName[$i]\_VAR\[$_\] double ao 0 field(PREC,\"1\")\n";
         }
-        print ::EPICS "INVARIABLE $::xpartName[$i]\_MAX $::systemName\.$::xpartName[$i]\_MAX int ai 0 field(PREC,\"0\")\n";
 }
 
 # Print variable declarations int front-end file
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
-	print ::OUT "static int \L$::xpartName[$i];\n";
+	print ::OUT "static double \L$::xpartName[$i];\n";
 	print ::OUT "static double \L$::xpartName[$i]\_avg\[$::partInCnt[$i]\];\n";
         print ::OUT "static double \L$::xpartName[$i]\_var\[$::partInCnt[$i]\];\n";
         print ::OUT "double \L$::xpartName[$i]\_vabs;\n";

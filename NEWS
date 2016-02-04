@@ -1,6 +1,8 @@
 ==================================================================================================
 Changes for 2.10
 ==================================================================================================
+- Bug Fix: Old watchdog (Wd.pm) part was never updated to support real-time EPICS DAQ. This fix
+  was also done to branch-2.8, used by PDE at MIT.
 - Bug Fix (966): RCG FunctionCall.pm now checks that model part has the same number of in/outs as
   defined in the associated user C code function.
 - Bug Fix (903): With requireIOcnt=1 set in parameter block of a model, code will not start unless
