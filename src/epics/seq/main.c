@@ -62,6 +62,7 @@ of this distribution.
 #define SDF_MAX_TSIZE		20000	///< Maximum number of EPICS settings records (No subfields).
 #define SDF_ERR_DSIZE		40	///< Size of display reporting tables.
 #define SDF_ERR_TSIZE		20000	///< Size of error reporting tables.
+#define SDF_MAX_FMSIZE		1000	///< Maximum number of filter modules that can be monitored.
 
 #define MAX_CHAN_LEN		60
 
@@ -190,7 +191,7 @@ char logfilename[128];
 
 CDS_CD_TABLE cdTable[SDF_MAX_TSIZE];		///< Table used to hold EPICS database info for monitoring settings.
 CDS_CD_TABLE cdTableP[SDF_MAX_CHANS];		///< Temp table filled on BURT read and set to EPICS channels.
-FILTER_TABLE filterTable[1000];			///< Table for holding filter module switch settings for comparisons.
+FILTER_TABLE filterTable[SDF_MAX_FMSIZE];			///< Table for holding filter module switch settings for comparisons.
 SET_ERR_TABLE setErrTable[SDF_ERR_TSIZE];	///< Table used to report settings diffs.
 SET_ERR_TABLE unknownChans[SDF_ERR_TSIZE];	///< Table used to report channels not found in local database.
 SET_ERR_TABLE uninitChans[SDF_ERR_TSIZE];	///< Table used to report channels not initialized by BURT safe.snap.
@@ -198,6 +199,9 @@ SET_ERR_TABLE unMonChans[SDF_MAX_TSIZE];	///< Table used to report channels not 
 SET_ERR_TABLE readErrTable[SDF_ERR_TSIZE];	///< Table used to report file read errors..
 SET_ERR_TABLE cdTableList[SDF_MAX_TSIZE];	///< Table used to report file read errors..
 time_t timeTable[SDF_MAX_CHANS];		///< Holds timestamps for cdTableP
+
+dbAddr fmMaskChan[SDF_MAX_FMSIZE];		///< We reflect the mask value into these channels
+dbAddr fmMaskChanCtrl[SDF_MAX_FMSIZE];		///< We signal bit changes to the masks on these channels
 
 #ifdef CA_SDF
 SET_ERR_TABLE disconnectChans[SDF_MAX_TSIZE];
@@ -273,6 +277,8 @@ void changeSelectCB_uninit(int, SET_ERR_TABLE *, int *);
 void decodeChangeSelect(int, int, int, SET_ERR_TABLE *, int *, void (*)(int, SET_ERR_TABLE *, int *));
 int appendAlarms2File(char *,char *,char *);
 void registerFilters();
+void setupFMChanArrays(char *,dbAddr*,dbAddr*);
+void processFMChanCommands(dbAddr*,dbAddr*);
 #ifdef CA_SDF
 void nullCACallback(struct event_handler_args);
 
@@ -307,7 +313,7 @@ void cleanupCASDF();
 #else
 int getDbValueDouble(ADDRESS*,double *,time_t *);
 int getDbValueString(ADDRESS*,char *, int, time_t *);
-void dbDumpRecords(DBBASE *);
+void dbDumpRecords(DBBASE *, char *);
 #endif
 
 #ifdef VERBOSE_DEBUG
@@ -1316,12 +1322,14 @@ dbAddr maddr;
 dbAddr taddr;
 dbAddr daddr;
 dbAddr laddr;
+dbAddr faddr;
 char s[64];
 char s1[64];
 char s2[64];
 char s3[64];
 char s4[64];
 char sl[64];
+char sf[64];
 //char stmp[128];
 long status = 0;
 char clearString[62] = "                       ";
@@ -1333,6 +1341,7 @@ int lineNum = 0;
 int mypage = 0;
 int lineCtr = 0;
 int zero = 0;
+int minusOne = -1;
 
 
 	// Get the page number to display
@@ -1382,6 +1391,11 @@ int zero = 0;
                 status = dbNameToAddr(sl,&daddr);
                 status = dbPutField(&daddr,DBR_ULONG,&setErrTable[ii].chFlag,1);
 
+
+		sprintf(sf, "%s_SDF_FM_LINE_%d", pref, lineNum);
+		status = dbNameToAddr(sf,&faddr);
+		status = dbPutField(&faddr,DBR_LONG,&setErrTable[ii].filtNum,1);
+
 		sprintf(sl, "%s_SDF_LINE_%d", pref, lineNum);
 		lineNum ++;
 		lineCtr = ii + 1;;
@@ -1416,6 +1430,10 @@ int zero = 0;
 		sprintf(sl, "%s_SDF_BITS_%d", pref, ii);
                 status = dbNameToAddr(sl,&daddr);
                 status = dbPutField(&daddr,DBR_ULONG,&zero,1);
+
+		sprintf(sf, "%s_SDF_FM_LINE_%d", pref, lineNum);
+		status = dbNameToAddr(sf,&faddr);
+		status = dbPutField(&faddr,DBR_LONG,&minusOne,1);
 
 		lineCtr ++;
 		sprintf(sl, "%s_SDF_LINE_%d", pref, ii);
@@ -2001,6 +2019,69 @@ void registerFilters() {
 	printf("%d filters\n",fmNum);
 }
 
+void setupFMChanArrays(char *pref, dbAddr *fmMaskAddr, dbAddr *fmCtrlAddr) {
+	int ii = 0;
+	long status = 0;
+	char name[256];
+	char ctrl[256];
+	int zero = 0;
+
+	for (ii = 0; ii < SDF_MAX_FMSIZE; ++ii) {
+		// just default this to 0, the correct value will be put into the
+		// fields in the main loop
+		sprintf(name, "%s_SDF_FM_MASK_%d", pref, ii);
+		status = dbNameToAddr(name, &fmMaskAddr[ii]);
+		status = dbPutField(&fmMaskAddr[ii],DBR_LONG,&zero,1);
+
+		sprintf(ctrl, "%s_SDF_FM_MASK_CTRL_%d", pref, ii);
+		status = dbNameToAddr(ctrl, &fmCtrlAddr[ii]);
+		status = dbPutField(&fmCtrlAddr[ii],DBR_LONG,&zero,1);
+
+	} 
+}
+
+void processFMChanCommands(dbAddr *fmMaskAddr, dbAddr *fmCtrlAddr) {
+	int ii = 0;
+	int sw1 = 0, sw2 = 0;
+	long ctrl = 0;
+	long mask = 0;
+	long status = 0;
+	long ropts = 0;
+	long nvals = 1;
+
+
+	for (ii = 0; ii < SDF_MAX_FMSIZE && ii < fmNum; ++ii) {
+		status = dbGetField(&fmCtrlAddr[ii], DBR_LONG, &ctrl, &ropts, &nvals, NULL);
+
+		sw1 = filterTable[ii].sw[0];
+		sw2 = filterTable[ii].sw[1];
+
+		mask = 0;
+		if (sw1 >= 0 && sw1 < SDF_MAX_TSIZE) {
+			mask |= cdTable[sw1].mask;
+		}
+		if (sw2 >= 0 && sw2 < SDF_MAX_TSIZE) {
+			mask |= cdTable[sw2].mask;
+		}
+		
+		mask ^= ctrl;
+		
+		if (sw1 >= 0 && sw1 < SDF_MAX_TSIZE) {
+			cdTable[sw1].mask = mask;
+		}
+		if (sw2 >= 0 && sw2 < SDF_MAX_TSIZE) {
+			cdTable[sw2].mask = mask;
+		}
+
+		dbPutField(&fmMaskAddr[ii],DBR_LONG,&mask,1);
+
+		if (ctrl != 0) {
+			ctrl = 0;
+			dbPutField(&fmCtrlAddr[ii],DBR_LONG,&ctrl,1);
+		}
+	}
+}
+
 #ifdef CA_SDF
 void nullCACallback(struct event_handler_args args) {}
 
@@ -2548,13 +2629,15 @@ int getDbValueString(ADDRESS *paddr,char *dest, int max_len, time_t *tp) {
 }
 
 /// Routine used to extract all settings channels from EPICS database to create local settings table on startup.
-void dbDumpRecords(DBBASE *pdbbase)
+void dbDumpRecords(DBBASE *pdbbase, const char *pref)
 {
     DBENTRY  *pdbentry = 0;
     long  status = 0;
+    char mask_pref[64];
     char mytype[4][64];
     int ii;
     int cnt = 0;
+    size_t pref_len = strlen(pref);
 
     // By convention, the RCG produces ai and bi records for settings.
     sprintf(mytype[0],"%s","ai");
@@ -2562,6 +2645,9 @@ void dbDumpRecords(DBBASE *pdbbase)
     sprintf(mytype[2],"%s","stringin");
     mytype[3][0]='\0';
     pdbentry = dbAllocEntry(pdbbase);
+
+    sprintf(mask_pref, "%s_SDF_FM_MASK_", pref);
+    pref_len = strlen(mask_pref);
 
     chNum = 0;
     fmNum = 0;
@@ -2581,6 +2667,11 @@ void dbDumpRecords(DBBASE *pdbbase)
             } else {
 		//fprintf(stderr, "processing %s\n", dbGetRecordName(pdbentry));
 		sprintf(cdTable[chNum].chname,"%s",dbGetRecordName(pdbentry));
+		// do not monitor the the SDF mask channels, they are part of this IOC
+		if (strncmp(cdTable[chNum].chname, mask_pref, pref_len)==0) {
+            --cnt;
+            continue;
+		}
 		cdTable[chNum].filterswitch = 0;
 		cdTable[chNum].filterNum = 0;
 		// Check if this is a filter module
@@ -2955,10 +3046,13 @@ sleep(5);
 		free(buffer);
 	}
 #else
-	dbDumpRecords(*iocshPpdbbase);
+	dbDumpRecords(*iocshPpdbbase, pref);
 #endif
+	setupFMChanArrays(pref,fmMaskChan,fmMaskChanCtrl);
 	sprintf(errMsg,"Software Restart \nRCG VERSION: %.2f",myversion);
 	logFileEntry(errMsg);
+
+	
 
 	// Initialize DAQ and COEFF file CRC checksums for later compares.
 	daqFileCrc = checkFileCrc(daqFile);
@@ -3328,6 +3422,8 @@ sleep(5);
 			status = dbPutField(&selectaddr[ii],DBR_LONG,&selectCounter[ii],1);
 		}
 		status = dbPutField(&pagelockaddr,DBR_LONG,&freezeTable,1);
+
+		processFMChanCommands(fmMaskChan,fmMaskChanCtrl);
 
 		// Check file CRCs every 5 seconds.
 		// DAQ and COEFF file checking was moved from skeleton.st to here RCG V2.9.
