@@ -313,7 +313,7 @@ void cleanupCASDF();
 #else
 int getDbValueDouble(ADDRESS*,double *,time_t *);
 int getDbValueString(ADDRESS*,char *, int, time_t *);
-void dbDumpRecords(DBBASE *, char *);
+void dbDumpRecords(DBBASE *,const char *);
 #endif
 
 #ifdef VERBOSE_DEBUG
