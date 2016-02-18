@@ -96,6 +96,17 @@ These are all located in the epics/util/lib directory.\n\n
 
 \par Simulink Parts
         - \subpage Fcn "Fcn.pm" \n
+        - \subpage AND "AND.pm" \n
+        - \subpage Abs "Abs.pm" \n
+        - \subpage DEMUX "DEMUX.pm" \n
+        - \subpage Gain "Gain.pm" \n
+        - \subpage Input "Input.pm" \n
+        - \subpage MATH "MATH.pm" \n
+        - \subpage MULTIPLY "MULTIPLY.pm" \n
+        - \subpage MUX "MUX.pm" \n
+        - \subpage RelationalOperator "RelationalOperator.pm" \n
+        - \subpage SATURATE "SATURATE.pm" \n
+        - \subpage SUM "SUM.pm" \n
 
 \par EPICS Parts
         - \subpage EpicsBinIn "EpicsBinIn.pm" \n
@@ -136,5 +147,7 @@ These are all located in the epics/util/lib directory.\n\n
 
 \par Support Modules
         - \subpage medmGen "medmGen.pm" \n
+        - \subpage Tags "Tags.pm" \n
+        - \subpage createPartList "createPartList.pm" \n
 */
 
