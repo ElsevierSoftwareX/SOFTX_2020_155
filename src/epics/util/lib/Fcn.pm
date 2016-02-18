@@ -47,6 +47,41 @@ sub printFrontEndVars  {
         }
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+	my $numin = $::partInNum[$i][0];
+	# Find the MUX that feeds this part.
+	my $muxName = "\L$::xpartName[$::partInNum[$i][0]]";
+	# Determine number of MUX inputs
+	my $muxChans = $::partInCnt[$numin];
+	# Get the function equation
+        my $expr = $::functionExpr[$i];
+        $expr =~ s/\[(\d+)\]/$1-1/eg;
+	# Split up the function string
+	my @words = split /[:*(,\s\/]+/,$expr;
+	my $maxIndex = 0;
+	# Search for u, the function variable, and count indexes
+	foreach my $lc (@words) {
+		if (index($lc, "u") != -1) {
+			# print "$lc \n";
+			my @nw = split /u/,$lc;
+			my $id = int($nw[1]);
+			if($id > $maxIndex) {
+				$maxIndex = $id;
+			}
+		}
+	}
+	$maxIndex ++;
+	# print "Num inputs required = $maxIndex $muxChans\n";
+	# Number of matrix inputs should equal number of variables indexed by function.
+	if($maxIndex != $muxChans) {
+                print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires $maxIndex; Only $muxChans provided. Function defined as: $expr\n";
+        return "ERROR";
+        }
+        return "";
+}
+
 # Return front end initialization code
 # Argument 1 is the part number
 # Returns calculated code string

@@ -111,6 +111,12 @@ sub printFrontEndVars  {
         }
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+        return "";
+}
+
 #// \b sub \b frontEndInitCode ---------------------------------------------------------\n
 #//  Return front end initialization code for all IPC parts on first call\n
 #// Parameters: \n

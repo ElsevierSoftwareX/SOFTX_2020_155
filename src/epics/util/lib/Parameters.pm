@@ -150,6 +150,8 @@ sub parseParams {
 				$::directDacWrite = $spp[1];
 			} elsif ($spp[0] eq "requireIOcnt") { 
 				$::requireIOcnt = $spp[1];
+			} elsif ($spp[0] eq "virtualIOP") { 
+				$::virtualiop = $spp[1];
 			} elsif ($spp[0] eq "no_zero_pad") { 
 				$::noZeroPad = $spp[1];
 			}
@@ -171,6 +173,12 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
+}
+
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+        return "";
 }
 
 # Figure out part input code

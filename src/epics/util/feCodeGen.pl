@@ -7,6 +7,18 @@
 #// \n\n This script is invoked by the auto generated build/src/epics/util/Makefile. \n\n\n
 use File::Path;
 use Cwd;
+require "lib/SUM.pm";
+require "lib/AND.pm";
+require "lib/MULTIPLY.pm";
+require "lib/DIVIDE.pm";
+require "lib/SATURATE.pm";
+require "lib/MUX.pm";
+require "lib/DEMUX.pm";
+require "lib/RelationalOperator.pm";
+require "lib/Switch.pm";
+require "lib/Gain.pm";
+require "lib/Abs.pm";
+require "lib/MATH.pm";
 
 #// \b REQUIRED \b ARGUMENTS: \n
 #//	- Model file name with .mdl extension \n
@@ -108,6 +120,7 @@ $iopTimeSlave = -1;
 $rfmTimeSlave = -1;
 $diagTest = -1;
 $flipSignals = 0;
+$virtualiop = 0;
 $edcu = 0;
 $casdf = 0;
 $pciNet = -1;
@@ -203,6 +216,10 @@ $meFile .= $ARGV[1];
 $meFile .= epics;
 $epicsScreensDir = "../../../build/" . $ARGV[1] . "epics/medm";
 $configFilesDir = "../../../build/" . $ARGV[1] . "epics/config";
+$compileMessageDir = "../../../";
+$warnMsgFile = $compileMessageDir . $ARGV[1] . "_warnings.log";
+$connectErrFile = $compileMessageDir . $ARGV[1] . "_partConnectErrors.log";
+$partConnectFile = $compileMessageDir . $ARGV[1] . "_partConnectionList.txt";
 
 # This is where the various RCG output files are created and opened.
 if (@ARGV == 2) { $skeleton = $ARGV[1]; }
@@ -210,7 +227,9 @@ if (@ARGV == 2) { $skeleton = $ARGV[1]; }
 # Need to open early as Parser3.pm will write filter name info first.
 open(EPICS,">../fmseq/".$ARGV[1]) || die "cannot open output file for writing";
 open(DAQ,">../fmseq/".$ARGV[1]."_daq") || die "cannot open DAQ output file for writing";
-open(WARNINGS,">../../../".$ARGV[1]."_warnings.log") || die "cannot open compile warnings output file for writing";
+# Open compilation message files
+open(WARNINGS,">$warnMsgFile") || die "cannot open compile warnings output file for writing";
+open(CONN_ERRORS,">$connectErrFile") || die "cannot open compile warnings output file for writing";
 mkdir $cFileDirectory, 0755;
 open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
 # Save existing front-end Makefile
@@ -322,21 +341,14 @@ for ($ii = 0; $ii < $partCnt; $ii++) {
 
 #//		- Check that all subsystem INPUT parts are connected; else exit w/error. \n
 $kk = 0;
-for($ii=0;$ii<$partCnt;$ii++)
-{
-	if($partType[$ii] eq "INPUT")
-	{
-		if($partInCnt[$ii] == 0)
-		{
-		print "\nINPUT $xpartName[$ii] is NOT connected \n";
-		$kk ++;
-	 	}
-	}
-}
+require "lib/Input.pm";
+$kk = ("CDS::Input::checkInputConnect") -> ($partCnt,0);
 if($kk > 0)
 {
-         die "\n***ERROR: Found total of ** $kk ** INPUT parts not connected\n\n";
+         die "\n***ERROR: Found total of ** $kk ** INPUT_X parts not connected\n\n";
 }
+
+
 
 #//	
 #//	- Need to process BUSS, FROM and GOTO parts so they can be removed later.
@@ -344,73 +356,10 @@ if($kk > 0)
 #//		- Find all parts which have input from Bus Selector parts and feed thru actual part connections.\n
 #//			- Change part input connect from BUSS to part feeding signal to BUSS.
 #//			- Change output of part feeding BUSS directly to part receiving signal.
-# Loop thru all parts
-for($ii=0;$ii<$partCnt;$ii++)
-{
-	# Loop thru all part input connections
-        for($jj=0;$jj<$partInCnt[$ii];$jj++)
-        {
-	   # Loop thru all parts looking for part name that matches input name
-           for($kk=0;$kk<$partCnt;$kk++)
-           {
-		# If name match
-                if($partInput[$ii][$jj] eq $xpartName[$kk])
-                {
-			# If input is from a BUSS part
-                        if($partType[$kk] eq "BUSS")
-                        {
-				#print "BUSS connect to $xpartName[$ii] port $jj from $xpartName[$kk] \n";
-				$gfrom = $partInputPort[$ii][$jj];
-				$adcName = $partInput[$kk][$gfrom];
-				$adcTest = substr($adcName,0,3);
-				# Check if BUSS is actually an ADC part.
-				if($adcTest eq "adc")	# Make ADC channel connection.
-				{
-    					($var1,$var2) = split(' ',$adcName);
-					# print  "\t this is an adc connect $var1 $var2\n";
-					$partInputType[$kk][$gfrom] = "Adc";
+require "lib/BusSelect.pm";
+("CDS::BusSelect::linkBusSelects") -> ($partCnt);
 
-				} else {	#If BUSS is not ADC part.
-    					($var1,$var2) = split(' ',$adcName);
-					#print "\t $xpartName[$kk] this other part connect $var1 port $var2\n";
-					$partInput[$ii][$jj] = $var1;
-        				for($ll=0;$ll<$partInCnt[$kk];$ll++)
-					{
-						#print "\tInput $ll = $partInput[$kk][$ll]\n";
-                				if($partInput[$kk][$ll] eq $adcName)
-						{
-							$port = $partInputPort[$kk][$ll];
-							 $ports = $partOutputPort[$kk][$ll];
-							$ports = $var2;
-							#print "\t Input port number is $port $ports from $xpartName[$kk]\n";
-							$partInputPort[$ii][$jj] = $ports;
-							for($xx=0;$xx<$partCnt;$xx++)
-							{
-								if($xpartName[$xx] eq $var1)
-								{
-									for($q1=0;$q1<$partOutCnt[$xx];$q1++)
-									{
-										
-										if($partOutput[$xx][$q1] =~ m/Bus/)
-										{
-											# Redefine part output from BUSS to real part.
-											$partOutput[$xx][$q1] = $xpartName[$ii];
-											$partOutputPort[$xx][$q1] = $jj;
-										}
-									}
-								}
-							}
-						}
-					}
-					
-				}
-                        }
-                }
-           }
-        }
-}
-
-
+####################
 #print "Looped thru $partCnt looking for BUSS \n\n\n";
 
 #//		-  FIND and replace all GOTO links
@@ -418,67 +367,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 #//			- This section searches all part inputs for From tags, finds the real name
 #// of the signal being sent to this tag, and substitutes that name at the part input. \n
 
-# Loop thru all parts
-for($ii=0;$ii<$partCnt;$ii++)
-{
-	# Loop thru all part output connections
-        for($jj=0;$jj<$partOutCnt[$ii];$jj++)
-        {
-$xp = 0;
-	   # Loop thru all parts looking for part name that matches output name
-           for($kk=0;$kk<$partCnt;$kk++)
-           {
-		# If name match
-                if($partOutput[$ii][$jj] eq $xpartName[$kk])
-                {
-			# If output is to a GOTO part
-                        if($partType[$kk] eq "GOTO")
-                        {
-				# Search thru all parts looking for a matching FROM tag
-                                for($mm=0;$mm<$partCnt;$mm++)
-                                {
-                                        if(($partType[$mm] eq "FROM") && ($partInput[$mm][3] eq $partOutput[$kk][3]) )
-                                        {
-						# Remove parts input FROM tag name with actual originating part name
-						#print "MATCHED GOTO $xpartName[$kk] with FROM $xpartName[$mm] $partInput[$ii][$jj] to $partInput[$mm][1] $partType[$ii] $partOutCnt[$mm] $partOutput[$mm][0]\n";
-						$partGoto[$mm] = $xpartName[$ii];
-	   					$totalPorts = $partOutCnt[$ii];
-						$xp = 0;
-						for($yy=0;$yy<$partOutCnt[$mm];$yy++)
-						{
-							if($yy > 0)
-							{
-								$port = $totalPorts;
-								$totalPorts ++;
-								$xp ++;
-							} else {
-								$port = $jj;
-							}
-							$partOutput[$ii][$port] = $partOutput[$mm][$yy];
-							if($partType[$ii] eq "OUTPUT")
-							{
-								$partOutputPort[$ii][$port] = $partOutputPort[$mm][$yy]+1;;
-							} else {
-								$partOutputPort[$ii][$port] = $partOutputPort[$mm][$yy];;
-							}
-						#print "\t $partOutput[$ii][$jj] $partOutput[$mm][0] $partOutputPort[$ii][$jj]\n";
-						#print "\t $xpartName[$ii] $partOutput[$ii][$jj] $partOutputPort[$ii][$jj]\n";
-						}
-							$partOutCnt[$mm] = 0;
+require "lib/Tags.pm";
+("CDS::Tags::replaceGoto") -> ($partCnt);
 
-
-                                        }
-                                }
-                        }
-                }
-           }
-        }
-	if($xp > 0) 
-	{
-		  $partOutCnt[$ii]  = $totalPorts;
-		print "\t **** $xpartName[$ii] has new output count $totalParts $partOutCnt[$ii]\n";
-	}
-}
+################
 
 
 #//		- FIND and replace all FROM links \n
@@ -486,40 +378,9 @@ $xp = 0;
 # This section searches all part inputs for From tags, finds the real name
 # of the signal being sent to this tag, and substitutes that name at the part input.
 
-# Loop thru all parts
-for($ii=0;$ii<$partCnt;$ii++)
-{
-        # Loop thru all part input connections
-        for($jj=0;$jj<$partInCnt[$ii];$jj++)
-        {
-           # Loop thru all parts looking for part name that matches input name
-           for($kk=0;$kk<$partCnt;$kk++)
-           {
-                # If name match
-                if($partInput[$ii][$jj] eq $xpartName[$kk])
-                {
-                        # If input is from a FROM part
-                        if($partType[$kk] eq "FROM")
-                        {
-				 #print "Found FROM $partInput[$kk][1] in part $xpartName[$ii]\n";
-                                # Search thru all parts looking for a matching GOTO tag
-                                for($ll=0;$ll<$partCnt;$ll++)
-                                {
-                                        # If GOTO tag matches FROM tag
-                                        if(($partType[$ll] eq "GOTO") && ($partOutput[$ll][3] eq $partInput[$kk][3]) )
-                                        {
-                                                # Remove parts input FROM tag name with actual originating part name
-                                                 #print "\t matched port $jj $partInCnt[$ii] $xpartName[$ii] $partInput[$kk][$jj] to $partOutput[$kk][1] $partInput[$kk][1]\n";
-                                                $partInput[$ii][$jj] = $partGoto[$kk];
-                                        }
-                                }
-                        }
-                }
-           }
-        }
-}
+("CDS::Tags::replaceFrom") -> ($partCnt);
 
-
+##################
 
 
 #//	- Continue to make part connections.
@@ -863,27 +724,38 @@ print "Found $subSys subsystems\n";
 #//	
 #// \n
 #// At this point, all parts should have all of their defined inputs and output connections made.
-#//	- Write a parts and connection list to file <em>(build/src/epics/util/diags.txt)</em> for diagnostics. \n\n
+#//	- Write a parts and connection list to file <em>(build/modelname_partConnectionList.txt)</em> for diagnostics. \n\n
 
 # Diags file will provide list of all parts and their connections. 
-writeDiagsFile();
+writeDiagsFile($partConnectFile);
+
+
+#//	- Verify that all parts now have input connections. If not,
+#//		- Write missing connections list to <em>(build/modelname_partConnectionErrors.log)</em>
+#//		- Exit on error
 $kk = 0;
-for($ii=0;$ii<$partCnt;$ii++)
-{
-	if($partType[$ii] eq "INPUT")
-	{
-		#print "\nINPUT $xpartName[$ii] has input type $partInputType[$ii][0] \n";
-		if(($partInCnt[$ii] == 0) || (length($partInputType[$ii][0]) == 0))
-		#if($partInCnt[$ii] == 0)
-		{
-		print "\nINPUT $xpartName[$ii] is NOT connected \n";
-		$kk ++;
-	 	}
-	}
-}
+# Check all INPUT parts to verify they are all connected.
+require "lib/Input.pm";
+$kk = ("CDS::Input::checkInputConnect") -> ($partCnt,1);
+
 if($kk > 0)
 {
-         die "\n***ERROR: Found total of ** $kk ** INPUT parts not connected\n\n";
+        close CONN_ERRORS;
+        die "\n***ERROR: Found total of ** $kk ** INPUT_Y parts not connected\n\n";
+}
+
+# Check all of the parts to verify they have all their required inputs connected.
+for($ii=0;$ii<$partCnt;$ii++)
+{
+        if ( -e "lib/$partType[$ii].pm") {
+           $mask = ("CDS::" . $partType[$ii] . "::checkInputConnect") -> ($ii);
+           if ($mask eq "ERROR") { $kk ++; }
+        }
+}
+close CONN_ERRORS;
+if($kk > 0)
+{
+         die "\n***ERROR: Found total of ** $kk ** parts with one or more inputs not connected.\nSee $skeleton\_partConnectionErrors.log file for details.\nA complete list of model part connections can be found in $skeleton\_partConnectionList.txt\n\n";
 }
 
 #//	
@@ -1593,27 +1465,30 @@ for($ii=0;$ii<$partCnt;$ii++)
 	#//	- Write C source code file.
 	# Start process of writing .c file. **********************************************************************
 	#//		- Standard opening information.
-	print OUT "// ******* This is a computer generated file *******\n";
-	print OUT "// ******* DO NOT HAND EDIT ************************\n";
-	print OUT "#include \"fe.h\"";
-	print OUT "\n\n";
-	print OUT "\#ifdef SERVO64K\n";
-	print OUT "\t\#define FE_RATE\t65536\n";
-	print OUT "\#endif\n";
-	print OUT "\#ifdef SERVO32K\n";
-	print OUT "\t\#define FE_RATE\t32768\n";
-	print OUT "\#endif\n";
-	print OUT "\#ifdef SERVO16K\n";
-	print OUT "\t\#define FE_RATE\t16384\n";
-	print OUT "\#endif\n";
-	print OUT "\#ifdef SERVO4K\n";
-	print OUT "\t\#define FE_RATE\t4096\n";
-	print OUT "\#endif\n";
-	print OUT "\#ifdef SERVO2K\n";
-	print OUT "\t\#define FE_RATE\t2048\n";
-	print OUT "\#endif\n";
-	print OUT "\n\n";
+	print OUT <<END;
+// ******* This is a computer generated file *******
+// ******* DO NOT HAND EDIT ************************
+#include "fe.h"
 
+#ifdef SERVO64K
+	#define FE_RATE	65536
+#endif
+#ifdef SERVO32K
+	#define FE_RATE	32768
+#endif
+#ifdef SERVO16K
+	#define FE_RATE	16384
+#endif
+#ifdef SERVO4K
+	#define FE_RATE	4096
+#endif
+#ifdef SERVO2K
+	#define FE_RATE	2048
+#endif
+
+
+END
+;
 	@adcCardNum;
 	@dacCardNum;
 	$adcCCtr=0;
@@ -1650,18 +1525,27 @@ for($ii=0;$ii<$partCnt;$ii++)
 
 	#//		- Variable definitions.
 	printVariables();
+
 	#//		- Main user code subroutine call opening information.
 	#//			- <em>feCode(
 	#//				int cycle, double dWord[][32],double dacOut[][16],
 	#//				FILT_MOD *dsp_ptr, COEF *dspCoeff, CDS_EPICS *pLocalEpics,int feInit)</em>
-	print OUT "\nint feCode(int cycle, double dWord[][32],\t\/* ADC inputs *\/\n";
-	print OUT "\t\tdouble dacOut[][16],\t\/* DAC outputs *\/\n";
-	print OUT "\t\tFILT_MOD *dsp_ptr,\t\/* Filter Mod variables *\/\n";
-	print OUT "\t\tCOEF *dspCoeff,\t\t\/* Filter Mod coeffs *\/\n";
-	print OUT "\t\tCDS_EPICS *pLocalEpics,\t\/* EPICS variables *\/\n";
-	print OUT "\t\tint feInit)\t\/* Initialization flag *\/\n";
-	print OUT "{\n\nint ii, dacFault;\n\n";
-	print OUT "if(feInit)\n\{\n";
+	print OUT <<END;
+
+int feCode(int cycle, double dWord[][32],     /* ADC inputs */
+              double dacOut[][16],    /* DAC outputs */
+              FILT_MOD *dsp_ptr,      /* Filter Mod variables */
+              COEF *dspCoeff,         /* Filter Mod coeffs */
+              CDS_EPICS *pLocalEpics, /* EPICS variables */
+              int feInit)     /* Initialization flag */
+{
+
+int ii, dacFault;
+
+if(feInit)
+{
+END
+;
 
 	#//		- Variable declarations and initializations in subroutine which take place on first call at runtime.
 	#//			- For most parts, added by call to <em>::frontEndInitCode</em> in /lib/.pm support module.
@@ -1734,244 +1618,31 @@ for($xx=0;$xx<$processCnt;$xx++)
 	$mm = $processPartNum[$xx];
 	#print "looking for part $mm type=$partType[$mm] name=$xpartName[$mm]\n";
 	$inCnt = $partInCnt[$mm];
-#print "Processing $xpartName[$mm]\n";
 	for($qq=0;$qq<$inCnt;$qq++)
 	{
 		$indone = 0;
 		if ( -e "lib/$partInputType[$mm][$qq].pm" ) {
 		  require "lib/$partInputType[$mm][$qq].pm";
 	  	  $fromExp[$qq] = ("CDS::" . $partInputType[$mm][$qq] . "::fromExp") -> ($mm, $qq);
-#print "%%%%%  index-1 = $qq\n";
-#print "%%%%%  fromExp = $fromExp[$qq]\n";
 	    	  $indone = $fromExp[$qq] ne "";
 		}
 
 		if($indone == 0)
 		{
 			$from = $partInNum[$mm][$qq]; #part number for input $qq
-			if ($partInputType[$mm][$qq] eq "DEMUX") {
-				$fromExp[$qq] = "\L$xpartName[$from]\[$partInputPort[$mm][$qq]\]";
-			} else {
-				$fromExp[$qq] = "\L$xpartName[$from]";
-			}
-#print "%%%%%  index-2 = $qq\n";
-#print "%%%%%  fromExp = $fromExp[$qq]\n";
-			#print "$xpartName[$mm]  $fromExp[$qq] $partInputType[$mm][$qq]\n";
+			$fromExp[$qq] = "\L$xpartName[$from]";
 		}
 
+		# Avoid a bunch of ground signals and combine into one.
                 if ($fromExp[$qq] =~ /ground/)  {
-#                   print "%%%%%  GROUND\n";
                    $fromExp[$qq] = "ground";
                 }
 	}
-	# ******** FILTER *************************************************************************
 
-
-
-	#print "@@@  partType = $partType[$mm]\n";
+	# Create the FE code for this part.
         if ( -e "lib/$partType[$mm].pm" ) {
 	  	  print OUT ("CDS::" . $partType[$mm] . "::frontEndCode") -> ($mm);
 	}	
-
-	if ($partType[$mm] eq "MUX") {
-		print OUT "// MUX\n";
-		my $calcExp;
-		for (0 .. $inCnt - 1) {
-		  $calcExp .= "\L$xpartName[$mm]\[$_\]" . "= $fromExp[$_];\n";
-		}
-		print OUT $calcExp;
-	}
-	if ($partType[$mm] eq "DEMUX" && $::partInputType[$mm][0] ne "FunctionCall") {
-		print OUT "// DEMUX\n";
-		my $calcExp;
-		for (0 .. $partOutputs[$mm]  - 1) {
-		  $calcExp .= "\L$xpartName[$mm]\[$_\]" . "= $fromExp[0]\[". $_ . "\];\n";
-		}
-		print OUT $calcExp;
-	}
-	# Switch
-	if ($partType[$mm] eq "Switch") {
-	  print OUT "// Switch\n";
-	  my $op = $partInputs[$mm];
-	  print OUT "\L$xpartName[$mm]". " = ((($fromExp[1]) $op)? ($fromExp[0]): ($fromExp[2]));";
-	}
-	# Relational Operator
-	if ($partType[$mm] eq "RelationalOperator") {
-	  my $op = $partInputs[$mm];
-	  if ($op eq "~=") { $op = "!="; };
-	  print OUT "// Relational Operator\n";
-	  print OUT "\L$xpartName[$mm]". " = (($fromExp[0]) $op ($fromExp[1]));";
-	}
-	# ******** SUMMING JUNC ********************************************************************
-	if($partType[$mm] eq "SUM")
-	{
-	   print OUT "// SUM\n";
-		#print "\tUsed Sum $xpartName[$mm] $partOutCnt[$mm]\n";
-		$calcExp = "\L$xpartName[$mm]";
-		$calcExp .= " =";
-		#print "Sum $xpartName[$mm] functions are $partInputs[$mm]\n";
-		for (0 .. $inCnt - 1) {
-		    my $op = substr($partInputs[$mm], $_, 1);
-		    if ($op eq "") { $op = "+"; }
-		    if ($_ > 0 || $op eq "-")  { $calcExp .=  " " . $op; } 
-		    $calcExp .= " " . $fromExp[$_];
-		}
-		$calcExp .= ";\n";
-		print OUT "$calcExp";
-	}
-
-	# ******** MULTIPLY ********************************************************************
-	if($partType[$mm] eq "MULTIPLY")
-	{
-	   print OUT "// MULTIPLY\n";
-		#print "\tUsed Sum $xpartName[$mm] $partOutCnt[$mm]\n";
-		$calcExp = "\L$xpartName[$mm]";
-		$calcExp .= " = ";
-		for($qq=0;$qq<$inCnt;$qq++)
-		{
-		    $zz = $qq+1;
-		    if(($zz - $inCnt) == 0)
-	 	    {
-			$calcExp .= $fromExp[$qq];
-			$calcExp .= ";\n";
-		    }
-		    else {
-			$calcExp .= $fromExp[$qq];
-			$calcExp .= " * ";
-		    }
-		}
-		print OUT "$calcExp";
-	}
-	if($partType[$mm] eq "Gain")
-	{
-	   print OUT "// Gain\n";
-	   $calcExp = "\L$xpartName[$mm] = " . $fromExp[0] . " * " . $partInputs[$mm] . ";\n";
-	   print OUT "$calcExp";
-	}
-	if($partType[$mm] eq "Abs")
-	{
-	   print OUT "// Abs\n";
-	   #$calcExp = "\L$xpartName[$mm] = " . $fromExp[0] . " < 0.0? - " . $fromExp[0] . ": " . $fromExp[0] . ";\n";
-	   $calcExp = "\L$xpartName[$mm] = " . "lfabs(" . $fromExp[0] . ");\n";
-	   print OUT "$calcExp";
-	}
-	# ******** AND ********************************************************************
-	if($partType[$mm] eq "AND")
-	{
-		my $op = $blockDescr[$mm];
-		unless ($op) { $op = "AND"; } # The default operator is AND
-	   	print OUT "// Logical $op\n";
-		# print "\tUsed AND $xpartName[$mm] $partOutCnt[$mm]\n";
-		my $calcExp1 = "\L$xpartName[$mm]";
-		my $calcExp = "";
-		my $cop = "";
-		my $cnv = "";
-		my $neg = 0;
-		if ($op eq "AND") { $cop = " && "; }
-		elsif ($op eq "OR") { $cop = " || "; }
-		elsif ($op eq "NAND") { $cop = " && "; $neg = 1; }
-		elsif ($op eq "NOR") { $cop = " || "; $neg = 1; }
-		elsif ($op eq "XOR") { $cop = " ^ "; $cnv = "!!"}
-		elsif ($op eq "NOT") { $cop = " error "; $neg = 1; }
-		else { $cop = " && "; }
-		for ($qq=0; $qq<$inCnt; $qq++) {
-		  $calcExp .= "$cnv(" . $fromExp[$qq] . ")";
-		  if(($qq + 1) < $inCnt) { $calcExp .= " $cop "; }
-		}
-		if ($neg) {
-		  print OUT "$calcExp1 = !($calcExp);\n";
-		} else {
-		  print OUT "$calcExp1 = $calcExp;\n";
-		}
-	}
-        # ******** DIVIDE ********************************************************************
-        if($partType[$mm] eq "DIVIDE")
-        {
-           my $from, $to;
-           if ($partInputs[$mm] eq "*/")  {
-                $from = 0;
-                $to = 1;
-           } else {
-                $from = 1;
-                $to = 0;
-           }
-           print OUT "// DIVIDE\n";
-           $ce =<<HERE
-\L$xpartName[$mm]\E = $fromExp[$from] /
-        (($fromExp[$to] < 0.0)
-                ?
-                (($fromExp[$to] > -1e-20)? -1e-20: $fromExp[$to])
-                :
-                (($fromExp[$to] < 1e-20)? 1e-20: $fromExp[$to]));
-HERE
-           ;
-           # print "\tUsed Divide $xpartName[$mm] $partOutCnt[$mm]\n";
-           print OUT $ce;
-        }
-        # Process Math Function blocks  ========================================  MA  ===
-	if ($partType[$mm] eq "M_SQR") {                                   # ===  MA  ===
-	   print OUT "// MATH FUNCTION - SQUARE\n";                        # ===  MA  ===
-		$calcExp = "\L$xpartName[$mm]";                            # ===  MA  ===
-		$calcExp .= " = ";                                         # ===  MA  ===
-		$calcExp .= $fromExp[0];                                   # ===  MA  ===
-		$calcExp .= " \* ";                                        # ===  MA  ===
-		$calcExp .= $fromExp[0];                                   # ===  MA  ===
-		$calcExp .= ";\n";                                         # ===  MA  ===
-		print OUT "$calcExp";                                      # ===  MA  ===
-	}                                                                  # ===  MA  ===
-	if ($partType[$mm] eq "M_SQT") {                                   # ===  MA  ===
-	   print OUT "// MATH FUNCTION - SQUARE ROOT\n";                   # ===  MA  ===
-		$calcExp = "if \(";                                        # ===  MA  ===
-		$calcExp .= "$fromExp[0] \> 0.0) \{\n";                    # ===  MA  ===
-		print OUT "$calcExp";                                      # ===  MA  ===
-		$calcExp = "\t\L$xpartName[$mm]";                          # ===  MA  ===
-		$calcExp .= " = ";                                         # ===  MA  ===
-		$calcExp .= "lsqrt\($fromExp[0]\);\n";                     # ===  MA  ===
-		print OUT "$calcExp";                                      # ===  MA  ===
-		print OUT "\}\n";                                          # ===  MA  ===
-		print OUT "else \{\n";                                     # ===  MA  ===
-		$calcExp = "\t\L$xpartName[$mm] = 0.0;\n";                 # ===  MA  ===
-		print OUT "$calcExp";                                      # ===  MA  ===
-		print OUT "\}\n";                                          # ===  MA  ===
-	}                                                                  # ===  MA  ===
-	if ($partType[$mm] eq "M_REC") {                                   # ===  MA  ===
-	   print OUT "// MATH FUNCTION - RECIPROCAL\n";                    # ===  MA  ===
-		$calcExp = "if \(";                                        # ===  MA  ===
-		$calcExp .= "$fromExp[0] \!= 0.0) \{\n";                   # ===  MA  ===
-		print OUT "$calcExp";                                      # ===  MA  ===
-		$calcExp = "\t\L$xpartName[$mm]";                          # ===  MA  ===
-		$calcExp .= " = ";                                         # ===  MA  ===
-		$calcExp .= "1.0/$fromExp[0];\n";                          # ===  MA  ===
-		print OUT "$calcExp";                                      # ===  MA  ===
-		print OUT "\}\n";                                          # ===  MA  ===
-		print OUT "else \{\n";                                     # ===  MA  ===
-		$calcExp = "\t\L$xpartName[$mm] = 0.0;\n";                 # ===  MA  ===
-		print OUT "$calcExp";                                      # ===  MA  ===
-		print OUT "\}\n";                                          # ===  MA  ===
-	}                                                                  # ===  MA  ===
-	if ($partType[$mm] eq "M_MOD") {                                   # ===  MA  ===
-	   print OUT "// MATH FUNCTION - MODULO\n";                        # ===  MA  ===
-		$calcExp = "if \(";                                        # ===  MA  ===
-		$calcExp .= "(int) $fromExp[1] \!= 0) \{\n";               # ===  MA  ===
-		print OUT "$calcExp";                                      # ===  MA  ===
-		$calcExp = "\t\L$xpartName[$mm]";                          # ===  MA  ===
-		$calcExp .= " = ";                                         # ===  MA  ===
-		$calcExp .= "(double) ((int) $fromExp[0]\%";               # ===  MA  ===
-                $calcExp .= "(int) $fromExp[1]);\n";                       # ===  MA  ===
-		print OUT "$calcExp";                                      # ===  MA  ===
-		print OUT "\}\n";                                          # ===  MA  ===
-		print OUT "else\ {\n";                                     # ===  MA  ===
-		$calcExp = "\t\L$xpartName[$mm] = 0.0;\n";                 # ===  MA  ===
-		print OUT "$calcExp";                                      # ===  MA  ===
-		print OUT "\}\n";                                          # ===  MA  ===
-	}                                                                  # ===  MA  ===
-	if ($partType[$mm] eq "M_LOG10") {                                   # ===  MA  ===
-	   print OUT "// MATH FUNCTION - LOG10\n";                        # ===  MA  ===
-		$calcExp = "\t\L$xpartName[$mm]";                          # ===  MA  ===
-		$calcExp .= " = ";                                         # ===  MA  ===
-		$calcExp .= "llog10\($fromExp[0]\);\n";                     # ===  MA  ===
-		print OUT "$calcExp";                                      # ===  MA  ===
-	}                                                                  # ===  MA  ===
 
 	# ******** GROUND INPUT ********************************************************************
 	if(($partType[$mm] eq "GROUND") && ($partUsed[$mm] == 0))
@@ -1989,23 +1660,6 @@ HERE
 		$unitDelayCode .= "$calcExp";
 	}
 
-	if($partType[$mm] eq "SATURATE")
-	{
-	   print OUT "// SATURATE\n";
-		my $part_name = "\L$xpartName[$mm]";
-		my $upper_limit = "$partInputs[$mm]";
-		my $lower_limit = "$partInputs1[$mm]";
-		$calcExp = $part_name;
-		$calcExp .= " = ";
-		$calcExp .= $fromExp[0];
-		$calcExp .= ";\n";
-		$calcExp .= "if ($part_name > $upper_limit) {\n";
-		$calcExp .= "  $part_name  = $upper_limit;\n";
-		$calcExp .= "} else if ($part_name < $lower_limit) {\n";
-		$calcExp .= "  $part_name  = $lower_limit;\n";
-		$calcExp .= "};\n";
-		print OUT "$calcExp";
-	}
 print OUT "\n";
 }
 }
@@ -2044,7 +1698,11 @@ print "\tPart number is $remoteGpsPart\n";
 
 }
 
+if($virtualiop == 1) {
+print OUT "#include \"$rcg_src_dir/src/fe/controllerVirtual.c\"\n";
+} else {
 print OUT "#include \"$rcg_src_dir/src/fe/controller.c\"\n";
+}
 
 
 if($partsRemaining != 0) {
@@ -2867,7 +2525,7 @@ close OUTM;
 sub printVariables {
 for($ii=0;$ii<$partCnt;$ii++)
 {
-#       print "DBG: cdsPart = $cdsPart[$ii]   partType = $partType[$ii]\n";          # DBG
+       #print "DBG: cdsPart = $cdsPart[$ii]   partType = $partType[$ii]\n";          # DBG
 	if ($cdsPart[$ii]) {
            if ($partType[$ii] ne "FunctionCall") {
               if ($partType[$ii] =~ /^TrueRMS/) {
@@ -2886,51 +2544,6 @@ for($ii=0;$ii<$partCnt;$ii++)
            }
 	}
 
-	if($partType[$ii] eq "MUX") {
-		$port = $partInCnt[$ii];
-		print OUT "double \L$xpartName[$ii]\[$port\];\n";
-	}
-	if($partType[$ii] eq "DEMUX") {
-		$port = $partOutputs[$ii];
-		print OUT "double \L$xpartName[$ii]\[$port\];\n";
-	}
-	if($partType[$ii] eq "SUM"
-	   || $partType[$ii] eq "Switch"
-	   || $partType[$ii] eq "Gain"
-	   || $partType[$ii] eq "Abs"
-	   || $partType[$ii] eq "RelationalOperator"
-	   || $partType[$ii] eq "SATURATE") {
-		$port = $partInCnt[$ii];
-		print OUT "double \L$xpartName[$ii] = 0.0;\n";
-	}
-	if($partType[$ii] eq "MULTIPLY") {
-		$port = $partInCnt[$ii];
-		print OUT "double \L$xpartName[$ii];\n";
-	}
-	if($partType[$ii] eq "DIVIDE") {
-		$port = $partInCnt[$ii];
-		print OUT "double \L$xpartName[$ii];\n";
-	}
-	if($partType[$ii] eq "M_SQR") {                                    # ===  MA  ===
-		$port = $partInCnt[$ii];                                   # ===  MA  ===
-		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
-	}                                                                  # ===  MA  ===
-	if($partType[$ii] eq "M_SQT") {                                    # ===  MA  ===
-		$port = $partInCnt[$ii];                                   # ===  MA  ===
-		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
-	}                                                                  # ===  MA  ===
-	if($partType[$ii] eq "M_REC") {                                    # ===  MA  ===
-		$port = $partInCnt[$ii];                                   # ===  MA  ===
-		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
-	}                                                                  # ===  MA  ===
-	if($partType[$ii] eq "M_MOD") {                                    # ===  MA  ===
-		$port = $partInCnt[$ii];                                   # ===  MA  ===
-		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
-	}                                                                  # ===  MA  ===
-	if($partType[$ii] eq "M_LOG10") {                                    # ===  MA  ===
-		$port = $partInCnt[$ii];                                   # ===  MA  ===
-		print OUT "double \L$xpartName[$ii];\n";                   # ===  MA  ===
-	}                                                                  # ===  MA  ===
 	if($partType[$ii] eq "DELAY") {
 		print OUT "static double \L$xpartName[$ii] = 0.0;\n";
 	}
@@ -2942,10 +2555,6 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 	if($partType[$ii] eq "CONSTANT")  {
 		print OUT "static double \L$xpartName[$ii];\n";
-	}
-	if($partType[$ii] eq "AND") {
-		$port = $partInCnt[$ii];
-		print OUT "int \L$xpartName[$ii];\n";
 	}
 }
 print OUT "\n\n";
@@ -2979,8 +2588,10 @@ sub system_name_part {
 #// \b sub \b writeDiagsFile \n
 #//  Write file with list of all parts and their connections. \n\n
 sub writeDiagsFile {
-$diag = "./diags\.txt";
-open(OUTD,">".$diag) || die "cannot open diag file for writing";
+my ($fileName) = @_;
+open(OUTD,">$fileName") || die "cannot open compile warnings output file for writing";
+#$diag = "../../../$model\_diags\.txt";
+#open(OUTD,">".$diag) || die "cannot open diag file for writing";
 for ($ll = 0; $ll < $subSys; $ll++) {
   $xx = $subSysPartStop[$ll] - $subSysPartStart[$ll]; # Parts count for this subsystem
   $subCntr[$ll] = 0;
@@ -3039,7 +2650,8 @@ for ($ii = 0; $ii < $subSys; $ii++) {
 close(OUTD);
 #Call a python script to create ADC channel list file
 $rcg_parser =  $rcg_src_dir;
-$rcg_parser .= "/src/epics/util/adcparser.py";
+$rcg_parser .= "/src/epics/util/adcparser.py ";
+$rcg_parser .= $fileName;
 system($rcg_parser);
 # End DIAGNOSTIC
 }

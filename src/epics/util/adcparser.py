@@ -14,6 +14,7 @@ import sys
 import time
 import os
 import string
+import argparse
 
 class RCG_PART(object):
 	"""
@@ -57,7 +58,11 @@ ininputs = 0
 inoutputs = 0
 bustype = 0
 
-f = open('./diags.txt','r')
+parser = argparse.ArgumentParser(description='Create ADC connection list')
+parser.add_argument("fName")
+args = parser.parse_args()
+
+f = open(args.fName,'r')
 
 for line in f:
 	word = line.split()

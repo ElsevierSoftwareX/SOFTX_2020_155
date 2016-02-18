@@ -28,6 +28,16 @@ sub printFrontEndVars  {
         print ::OUT "static double \L$::xpartName[$i]\[2\];\n";
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+	if($::partInCnt[$i] < 2) {
+                print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires 2; Only $::partInCnt[$i] provided: \n";
+        return "ERROR";
+        }
+        return "";
+}
+
 # Figure out part input code
 # Argument 1 is the part number
 # Argument 2 is the input number

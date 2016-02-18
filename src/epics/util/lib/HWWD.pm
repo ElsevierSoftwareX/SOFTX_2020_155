@@ -126,6 +126,16 @@ sub printFrontEndVars  {
         print ::OUT "static int \L$::xpartName[$i]_nxtreq;\n";
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+	if($::partInCnt[$i] < 1) {
+                print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has no input connected.\n\n";
+        return "ERROR";
+        }
+        return "";
+}
+
 # Figure out part input code
 # Returns calculated input code
 #// \b sub \b fromExp \n 

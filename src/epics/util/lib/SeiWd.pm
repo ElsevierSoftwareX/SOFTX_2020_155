@@ -100,6 +100,12 @@ sub printFrontEndVars  {
         print ::OUT "Raw\[20\];\n";
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+        return "";
+}
+
 # Return front end initialization code
 # Argument 1 is the part number
 # Returns calculated code string

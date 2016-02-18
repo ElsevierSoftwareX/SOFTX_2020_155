@@ -47,6 +47,16 @@ sub printFrontEndVars  {
         print ::OUT "double \L$::xpartName[$i] = 0.0;\n";
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+	if($::partInCnt[$i] < 3) {
+                print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires 3; Only $::partInCnt[$i] provided:  Please ground any unused inputs\n";
+        	return "ERROR";
+        }
+        return "";
+}
+
 # Return front end initialization code
 # Argument 1 is the part number
 # Returns calculated code string
