@@ -1,13 +1,13 @@
 
 file {
-	name="/opt-backup/opt/rtcds/jenkins/x1boot/home/workspace/svn_checkouts/rcg_trunk/src/epics/util/SDF_TABLE_CA.adl"
+	name="RCGDIR/src/epics/util/SDF_TABLE_CA.adl"
 	version=030104
 }
 display {
 	object {
 		x=515
 		y=173
-		width=1285
+		width=1305
 		height=1000
 	}
 	clr=14
@@ -91,7 +91,7 @@ rectangle {
 	object {
 		x=0
 		y=0
-		width=1285
+		width=1305
 		height=22
 	}
 	"basic attribute" {
@@ -100,7 +100,7 @@ rectangle {
 }
 rectangle {
 	object {
-		x=905
+		x=924
 		y=22
 		width=375
 		height=125
@@ -141,7 +141,7 @@ rectangle {
 	object {
 		x=0
 		y=26
-		width=900
+		width=920
 		height=60
 	}
 	"basic attribute" {
@@ -474,7 +474,7 @@ composite {
 }
 "message button" {
 	object {
-		x=935
+		x=954
 		y=51
 		width=113
 		height=30
@@ -489,7 +489,7 @@ composite {
 }
 "message button" {
 	object {
-		x=1120
+		x=1139
 		y=51
 		width=113
 		height=30
@@ -504,7 +504,7 @@ composite {
 }
 "text update" {
 	object {
-		x=920
+		x=939
 		y=104
 		width=150
 		height=15
@@ -533,7 +533,7 @@ menu {
 }
 rectangle {
 	object {
-		x=907
+		x=926
 		y=24
 		width=375
 		height=122
@@ -550,7 +550,7 @@ rectangle {
 }
 rectangle {
 	object {
-		x=42
+		x=62
 		y=150
 		width=1239
 		height=22
@@ -561,7 +561,7 @@ rectangle {
 }
 text {
 	object {
-		x=91
+		x=111
 		y=153
 		width=200
 		height=18
@@ -574,7 +574,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=379
 		width=315
 		height=20
@@ -591,7 +591,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=399
 		width=315
 		height=20
@@ -608,7 +608,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=419
 		width=315
 		height=20
@@ -625,7 +625,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=439
 		width=315
 		height=20
@@ -642,7 +642,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=459
 		width=315
 		height=20
@@ -659,7 +659,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=479
 		width=315
 		height=20
@@ -676,7 +676,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=499
 		width=315
 		height=20
@@ -693,7 +693,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=519
 		width=315
 		height=20
@@ -710,7 +710,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=539
 		width=315
 		height=20
@@ -727,7 +727,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=559
 		width=315
 		height=20
@@ -744,7 +744,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=584
 		width=315
 		height=20
@@ -761,7 +761,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=604
 		width=315
 		height=20
@@ -778,7 +778,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=624
 		width=315
 		height=20
@@ -795,7 +795,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=644
 		width=315
 		height=20
@@ -812,7 +812,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=664
 		width=315
 		height=20
@@ -829,7 +829,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=684
 		width=315
 		height=20
@@ -846,7 +846,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=704
 		width=315
 		height=20
@@ -863,7 +863,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=724
 		width=315
 		height=20
@@ -880,7 +880,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=744
 		width=315
 		height=20
@@ -897,7 +897,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=764
 		width=315
 		height=20
@@ -914,7 +914,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=790
 		width=315
 		height=20
@@ -931,7 +931,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=810
 		width=315
 		height=20
@@ -948,7 +948,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=830
 		width=315
 		height=20
@@ -965,7 +965,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=850
 		width=315
 		height=20
@@ -982,7 +982,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=870
 		width=315
 		height=20
@@ -999,7 +999,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=890
 		width=315
 		height=20
@@ -1016,7 +1016,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=910
 		width=315
 		height=20
@@ -1033,7 +1033,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=930
 		width=315
 		height=20
@@ -1050,7 +1050,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=950
 		width=315
 		height=20
@@ -1067,7 +1067,7 @@ text {
 }
 "text update" {
 	object {
-		x=42
+		x=62
 		y=970
 		width=315
 		height=20
@@ -1786,7 +1786,7 @@ composite {
 }
 composite {
 	object {
-		x=42
+		x=62
 		y=174
 		width=315
 		height=200
@@ -1795,7 +1795,7 @@ composite {
 	children {
 		"text update" {
 			object {
-				x=42
+				x=62
 				y=174
 				width=315
 				height=20
@@ -1812,7 +1812,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=42
+				x=62
 				y=194
 				width=315
 				height=20
@@ -1829,7 +1829,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=42
+				x=62
 				y=214
 				width=315
 				height=20
@@ -1846,7 +1846,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=42
+				x=62
 				y=234
 				width=315
 				height=20
@@ -1863,7 +1863,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=42
+				x=62
 				y=254
 				width=315
 				height=20
@@ -1880,7 +1880,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=42
+				x=62
 				y=274
 				width=315
 				height=20
@@ -1897,7 +1897,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=42
+				x=62
 				y=294
 				width=315
 				height=20
@@ -1914,7 +1914,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=42
+				x=62
 				y=314
 				width=315
 				height=20
@@ -1931,7 +1931,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=42
+				x=62
 				y=334
 				width=315
 				height=20
@@ -1948,7 +1948,7 @@ composite {
 		}
 		"text update" {
 			object {
-				x=42
+				x=62
 				y=354
 				width=315
 				height=20
@@ -1967,7 +1967,7 @@ composite {
 }
 text {
 	object {
-		x=873
+		x=893
 		y=154
 		width=190
 		height=18
@@ -1980,7 +1980,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=174
 		width=190
 		height=20
@@ -1997,7 +1997,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=194
 		width=190
 		height=20
@@ -2014,7 +2014,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=214
 		width=190
 		height=20
@@ -2031,7 +2031,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=234
 		width=190
 		height=20
@@ -2048,7 +2048,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=254
 		width=190
 		height=20
@@ -2065,7 +2065,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=274
 		width=190
 		height=20
@@ -2082,7 +2082,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=294
 		width=190
 		height=20
@@ -2099,7 +2099,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=314
 		width=190
 		height=20
@@ -2116,7 +2116,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=334
 		width=190
 		height=20
@@ -2133,7 +2133,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=354
 		width=190
 		height=20
@@ -2150,7 +2150,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=379
 		width=190
 		height=20
@@ -2167,7 +2167,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=399
 		width=190
 		height=20
@@ -2184,7 +2184,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=419
 		width=190
 		height=20
@@ -2201,7 +2201,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=439
 		width=190
 		height=20
@@ -2218,7 +2218,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=459
 		width=190
 		height=20
@@ -2235,7 +2235,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=479
 		width=190
 		height=20
@@ -2252,7 +2252,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=499
 		width=190
 		height=20
@@ -2269,7 +2269,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=519
 		width=190
 		height=20
@@ -2286,7 +2286,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=539
 		width=190
 		height=20
@@ -2303,7 +2303,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=559
 		width=190
 		height=20
@@ -2320,7 +2320,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=584
 		width=190
 		height=20
@@ -2337,7 +2337,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=604
 		width=190
 		height=20
@@ -2354,7 +2354,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=624
 		width=190
 		height=20
@@ -2371,7 +2371,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=644
 		width=190
 		height=20
@@ -2388,7 +2388,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=664
 		width=190
 		height=20
@@ -2405,7 +2405,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=684
 		width=190
 		height=20
@@ -2422,7 +2422,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=704
 		width=190
 		height=20
@@ -2439,7 +2439,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=724
 		width=190
 		height=20
@@ -2456,7 +2456,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=744
 		width=190
 		height=20
@@ -2473,7 +2473,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=764
 		width=190
 		height=20
@@ -2490,7 +2490,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=790
 		width=190
 		height=20
@@ -2507,7 +2507,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=810
 		width=190
 		height=20
@@ -2524,7 +2524,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=830
 		width=190
 		height=20
@@ -2541,7 +2541,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=850
 		width=190
 		height=20
@@ -2558,7 +2558,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=870
 		width=190
 		height=20
@@ -2575,7 +2575,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=890
 		width=190
 		height=20
@@ -2592,7 +2592,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=910
 		width=190
 		height=20
@@ -2609,7 +2609,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=930
 		width=190
 		height=20
@@ -2626,7 +2626,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=950
 		width=190
 		height=20
@@ -2643,7 +2643,7 @@ text {
 }
 "text update" {
 	object {
-		x=873
+		x=893
 		y=970
 		width=190
 		height=20
@@ -2660,7 +2660,7 @@ text {
 }
 text {
 	object {
-		x=747
+		x=767
 		y=154
 		width=69
 		height=18
@@ -2673,7 +2673,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=174
 		width=170
 		height=20
@@ -2690,7 +2690,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=194
 		width=170
 		height=20
@@ -2707,7 +2707,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=214
 		width=170
 		height=20
@@ -2724,7 +2724,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=234
 		width=170
 		height=20
@@ -2741,7 +2741,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=254
 		width=170
 		height=20
@@ -2758,7 +2758,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=274
 		width=170
 		height=20
@@ -2775,7 +2775,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=294
 		width=170
 		height=20
@@ -2792,7 +2792,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=314
 		width=170
 		height=20
@@ -2809,7 +2809,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=334
 		width=170
 		height=20
@@ -2826,7 +2826,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=354
 		width=170
 		height=20
@@ -2843,7 +2843,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=379
 		width=170
 		height=20
@@ -2860,7 +2860,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=399
 		width=170
 		height=20
@@ -2877,7 +2877,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=419
 		width=170
 		height=20
@@ -2894,7 +2894,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=439
 		width=170
 		height=20
@@ -2911,7 +2911,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=459
 		width=170
 		height=20
@@ -2928,7 +2928,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=479
 		width=170
 		height=20
@@ -2945,7 +2945,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=499
 		width=170
 		height=20
@@ -2962,7 +2962,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=519
 		width=170
 		height=20
@@ -2979,7 +2979,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=539
 		width=170
 		height=20
@@ -2996,7 +2996,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=559
 		width=170
 		height=20
@@ -3013,7 +3013,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=584
 		width=170
 		height=20
@@ -3030,7 +3030,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=604
 		width=170
 		height=20
@@ -3047,7 +3047,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=624
 		width=170
 		height=20
@@ -3064,7 +3064,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=644
 		width=170
 		height=20
@@ -3081,7 +3081,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=664
 		width=170
 		height=20
@@ -3098,7 +3098,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=684
 		width=170
 		height=20
@@ -3115,7 +3115,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=704
 		width=170
 		height=20
@@ -3132,7 +3132,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=724
 		width=170
 		height=20
@@ -3149,7 +3149,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=744
 		width=170
 		height=20
@@ -3166,7 +3166,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=764
 		width=170
 		height=20
@@ -3183,7 +3183,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=790
 		width=170
 		height=20
@@ -3200,7 +3200,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=810
 		width=170
 		height=20
@@ -3217,7 +3217,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=830
 		width=170
 		height=20
@@ -3234,7 +3234,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=850
 		width=170
 		height=20
@@ -3251,7 +3251,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=870
 		width=170
 		height=20
@@ -3268,7 +3268,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=890
 		width=170
 		height=20
@@ -3285,7 +3285,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=910
 		width=170
 		height=20
@@ -3302,7 +3302,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=930
 		width=170
 		height=20
@@ -3319,7 +3319,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=950
 		width=170
 		height=20
@@ -3336,7 +3336,7 @@ text {
 }
 "text update" {
 	object {
-		x=698
+		x=718
 		y=970
 		width=170
 		height=20
@@ -3353,7 +3353,7 @@ text {
 }
 text {
 	object {
-		x=528
+		x=548
 		y=154
 		width=165
 		height=18
@@ -3366,7 +3366,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=174
 		width=165
 		height=20
@@ -3383,7 +3383,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=194
 		width=165
 		height=20
@@ -3400,7 +3400,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=214
 		width=165
 		height=20
@@ -3417,7 +3417,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=234
 		width=165
 		height=20
@@ -3434,7 +3434,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=254
 		width=165
 		height=20
@@ -3451,7 +3451,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=274
 		width=165
 		height=20
@@ -3468,7 +3468,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=294
 		width=165
 		height=20
@@ -3485,7 +3485,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=314
 		width=165
 		height=20
@@ -3502,7 +3502,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=334
 		width=165
 		height=20
@@ -3519,7 +3519,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=354
 		width=165
 		height=20
@@ -3536,7 +3536,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=379
 		width=165
 		height=20
@@ -3553,7 +3553,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=399
 		width=165
 		height=20
@@ -3570,7 +3570,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=419
 		width=165
 		height=20
@@ -3587,7 +3587,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=439
 		width=165
 		height=20
@@ -3604,7 +3604,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=459
 		width=165
 		height=20
@@ -3621,7 +3621,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=479
 		width=165
 		height=20
@@ -3638,7 +3638,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=499
 		width=165
 		height=20
@@ -3655,7 +3655,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=519
 		width=165
 		height=20
@@ -3672,7 +3672,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=539
 		width=165
 		height=20
@@ -3689,7 +3689,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=559
 		width=165
 		height=20
@@ -3706,7 +3706,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=584
 		width=165
 		height=20
@@ -3723,7 +3723,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=604
 		width=165
 		height=20
@@ -3740,7 +3740,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=624
 		width=165
 		height=20
@@ -3757,7 +3757,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=644
 		width=165
 		height=20
@@ -3774,7 +3774,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=664
 		width=165
 		height=20
@@ -3791,7 +3791,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=684
 		width=165
 		height=20
@@ -3808,7 +3808,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=704
 		width=165
 		height=20
@@ -3825,7 +3825,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=724
 		width=165
 		height=20
@@ -3842,7 +3842,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=744
 		width=165
 		height=20
@@ -3859,7 +3859,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=764
 		width=165
 		height=20
@@ -3876,7 +3876,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=790
 		width=165
 		height=20
@@ -3893,7 +3893,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=810
 		width=165
 		height=20
@@ -3910,7 +3910,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=830
 		width=165
 		height=20
@@ -3927,7 +3927,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=850
 		width=165
 		height=20
@@ -3944,7 +3944,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=870
 		width=165
 		height=20
@@ -3961,7 +3961,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=890
 		width=165
 		height=20
@@ -3978,7 +3978,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=910
 		width=165
 		height=20
@@ -3995,7 +3995,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=930
 		width=165
 		height=20
@@ -4012,7 +4012,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=950
 		width=165
 		height=20
@@ -4029,7 +4029,7 @@ text {
 }
 "text update" {
 	object {
-		x=528
+		x=548
 		y=970
 		width=165
 		height=20
@@ -4046,7 +4046,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=380
 		width=45
 		height=18
@@ -4061,7 +4061,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=400
 		width=45
 		height=18
@@ -4076,7 +4076,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=420
 		width=45
 		height=18
@@ -4091,7 +4091,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=440
 		width=45
 		height=18
@@ -4106,7 +4106,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=460
 		width=45
 		height=18
@@ -4121,7 +4121,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=480
 		width=45
 		height=18
@@ -4136,7 +4136,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=500
 		width=45
 		height=18
@@ -4151,7 +4151,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=520
 		width=45
 		height=18
@@ -4166,7 +4166,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=540
 		width=45
 		height=18
@@ -4181,7 +4181,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=560
 		width=45
 		height=18
@@ -4196,7 +4196,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=585
 		width=45
 		height=18
@@ -4211,7 +4211,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=605
 		width=45
 		height=18
@@ -4226,7 +4226,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=625
 		width=45
 		height=18
@@ -4241,7 +4241,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=645
 		width=45
 		height=18
@@ -4256,7 +4256,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=665
 		width=45
 		height=18
@@ -4271,7 +4271,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=685
 		width=45
 		height=18
@@ -4286,7 +4286,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=705
 		width=45
 		height=18
@@ -4301,7 +4301,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=725
 		width=45
 		height=18
@@ -4316,7 +4316,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=745
 		width=45
 		height=18
@@ -4331,7 +4331,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=765
 		width=45
 		height=18
@@ -4346,7 +4346,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=791
 		width=45
 		height=18
@@ -4361,7 +4361,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=811
 		width=45
 		height=18
@@ -4376,7 +4376,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=831
 		width=45
 		height=18
@@ -4391,7 +4391,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=851
 		width=45
 		height=18
@@ -4406,7 +4406,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=871
 		width=45
 		height=18
@@ -4421,7 +4421,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=891
 		width=45
 		height=18
@@ -4436,7 +4436,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=911
 		width=45
 		height=18
@@ -4451,7 +4451,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=931
 		width=45
 		height=18
@@ -4466,7 +4466,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=951
 		width=45
 		height=18
@@ -4481,7 +4481,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=971
 		width=45
 		height=18
@@ -4496,7 +4496,7 @@ text {
 }
 text {
 	object {
-		x=366
+		x=386
 		y=154
 		width=161
 		height=18
@@ -4509,7 +4509,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=174
 		width=161
 		height=20
@@ -4526,7 +4526,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=194
 		width=161
 		height=20
@@ -4543,7 +4543,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=214
 		width=161
 		height=20
@@ -4560,7 +4560,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=234
 		width=161
 		height=20
@@ -4577,7 +4577,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=254
 		width=161
 		height=20
@@ -4594,7 +4594,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=274
 		width=161
 		height=20
@@ -4611,7 +4611,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=294
 		width=161
 		height=20
@@ -4628,7 +4628,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=314
 		width=161
 		height=20
@@ -4645,7 +4645,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=334
 		width=161
 		height=20
@@ -4662,7 +4662,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=354
 		width=161
 		height=20
@@ -4679,7 +4679,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=379
 		width=161
 		height=20
@@ -4696,7 +4696,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=399
 		width=161
 		height=20
@@ -4713,7 +4713,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=419
 		width=161
 		height=20
@@ -4730,7 +4730,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=439
 		width=161
 		height=20
@@ -4747,7 +4747,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=459
 		width=161
 		height=20
@@ -4764,7 +4764,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=479
 		width=161
 		height=20
@@ -4781,7 +4781,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=499
 		width=161
 		height=20
@@ -4798,7 +4798,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=519
 		width=161
 		height=20
@@ -4815,7 +4815,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=539
 		width=161
 		height=20
@@ -4832,7 +4832,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=559
 		width=161
 		height=20
@@ -4849,7 +4849,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=584
 		width=161
 		height=20
@@ -4866,7 +4866,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=604
 		width=161
 		height=20
@@ -4883,7 +4883,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=624
 		width=161
 		height=20
@@ -4900,7 +4900,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=644
 		width=161
 		height=20
@@ -4917,7 +4917,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=664
 		width=161
 		height=20
@@ -4934,7 +4934,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=684
 		width=161
 		height=20
@@ -4951,7 +4951,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=704
 		width=161
 		height=20
@@ -4968,7 +4968,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=724
 		width=161
 		height=20
@@ -4985,7 +4985,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=744
 		width=161
 		height=20
@@ -5002,7 +5002,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=764
 		width=161
 		height=20
@@ -5019,7 +5019,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=790
 		width=161
 		height=20
@@ -5036,7 +5036,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=810
 		width=161
 		height=20
@@ -5053,7 +5053,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=830
 		width=161
 		height=20
@@ -5070,7 +5070,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=850
 		width=161
 		height=20
@@ -5087,7 +5087,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=870
 		width=161
 		height=20
@@ -5104,7 +5104,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=890
 		width=161
 		height=20
@@ -5121,7 +5121,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=910
 		width=161
 		height=20
@@ -5138,7 +5138,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=930
 		width=161
 		height=20
@@ -5155,7 +5155,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=950
 		width=161
 		height=20
@@ -5172,7 +5172,7 @@ text {
 }
 "text update" {
 	object {
-		x=362
+		x=382
 		y=970
 		width=161
 		height=20
@@ -5189,7 +5189,7 @@ text {
 }
 "text update" {
 	object {
-		x=1082
+		x=1102
 		y=154
 		width=50
 		height=16
@@ -5206,7 +5206,7 @@ text {
 }
 "text update" {
 	object {
-		x=1150
+		x=1170
 		y=154
 		width=50
 		height=16
@@ -5222,7 +5222,7 @@ text {
 }
 "text update" {
 	object {
-		x=1212
+		x=1232
 		y=154
 		width=50
 		height=16
@@ -5238,7 +5238,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=175
 		width=45
 		height=18
@@ -5253,7 +5253,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=195
 		width=45
 		height=18
@@ -5268,7 +5268,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=215
 		width=45
 		height=18
@@ -5283,7 +5283,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=235
 		width=45
 		height=18
@@ -5298,7 +5298,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=255
 		width=45
 		height=18
@@ -5313,7 +5313,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=275
 		width=45
 		height=18
@@ -5328,7 +5328,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=295
 		width=45
 		height=18
@@ -5343,7 +5343,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=315
 		width=45
 		height=18
@@ -5358,7 +5358,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=335
 		width=45
 		height=18
@@ -5373,7 +5373,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=355
 		width=45
 		height=18
@@ -5388,7 +5388,7 @@ text {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=175
 		width=50
 		height=18
@@ -5403,7 +5403,7 @@ text {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=175
 		width=40
 		height=18
@@ -5418,7 +5418,7 @@ text {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=195
 		width=50
 		height=18
@@ -5433,7 +5433,7 @@ text {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=195
 		width=40
 		height=18
@@ -5448,7 +5448,7 @@ text {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=215
 		width=50
 		height=18
@@ -5463,7 +5463,7 @@ text {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=215
 		width=40
 		height=18
@@ -5478,7 +5478,7 @@ text {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=235
 		width=50
 		height=18
@@ -5493,7 +5493,7 @@ text {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=235
 		width=40
 		height=18
@@ -5508,7 +5508,7 @@ text {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=255
 		width=50
 		height=18
@@ -5523,7 +5523,7 @@ text {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=255
 		width=40
 		height=18
@@ -5538,7 +5538,7 @@ text {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=275
 		width=50
 		height=18
@@ -5553,7 +5553,7 @@ text {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=275
 		width=40
 		height=18
@@ -5568,7 +5568,7 @@ text {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=295
 		width=50
 		height=18
@@ -5583,7 +5583,7 @@ text {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=295
 		width=40
 		height=18
@@ -5598,7 +5598,7 @@ text {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=315
 		width=50
 		height=18
@@ -5613,7 +5613,7 @@ text {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=315
 		width=40
 		height=18
@@ -5628,7 +5628,7 @@ text {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=195
 		width=17
 		height=18
@@ -5644,7 +5644,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=215
 		width=17
 		height=18
@@ -5660,7 +5660,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=235
 		width=17
 		height=18
@@ -5676,7 +5676,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=255
 		width=17
 		height=18
@@ -5692,7 +5692,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=275
 		width=17
 		height=18
@@ -5708,7 +5708,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=175
 		width=17
 		height=18
@@ -5724,7 +5724,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=195
 		width=17
 		height=18
@@ -5740,7 +5740,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=215
 		width=17
 		height=18
@@ -5756,7 +5756,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=235
 		width=17
 		height=18
@@ -5772,7 +5772,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=255
 		width=17
 		height=18
@@ -5788,7 +5788,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=275
 		width=17
 		height=18
@@ -5804,7 +5804,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=295
 		width=17
 		height=18
@@ -5820,7 +5820,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=315
 		width=17
 		height=18
@@ -5836,7 +5836,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=335
 		width=17
 		height=18
@@ -5852,7 +5852,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=195
 		width=17
 		height=18
@@ -5868,7 +5868,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=215
 		width=17
 		height=18
@@ -5884,7 +5884,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=235
 		width=17
 		height=18
@@ -5900,7 +5900,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=255
 		width=17
 		height=18
@@ -5916,7 +5916,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=275
 		width=17
 		height=18
@@ -5932,7 +5932,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=295
 		width=17
 		height=18
@@ -5948,7 +5948,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=315
 		width=17
 		height=18
@@ -5964,7 +5964,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=335
 		width=17
 		height=18
@@ -5980,7 +5980,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=175
 		width=17
 		height=18
@@ -5996,7 +5996,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=175
 		width=17
 		height=18
@@ -6012,7 +6012,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=335
 		width=50
 		height=18
@@ -6027,7 +6027,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=355
 		width=50
 		height=18
@@ -6042,7 +6042,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=335
 		width=40
 		height=18
@@ -6057,7 +6057,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=355
 		width=40
 		height=18
@@ -6072,7 +6072,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=355
 		width=17
 		height=18
@@ -6088,7 +6088,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=355
 		width=17
 		height=18
@@ -6104,7 +6104,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=295
 		width=17
 		height=18
@@ -6120,7 +6120,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=315
 		width=17
 		height=18
@@ -6136,7 +6136,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=335
 		width=17
 		height=18
@@ -6152,7 +6152,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=355
 		width=17
 		height=18
@@ -6168,7 +6168,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=377
 		width=45
 		height=18
@@ -6183,7 +6183,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=397
 		width=45
 		height=18
@@ -6198,7 +6198,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=417
 		width=45
 		height=18
@@ -6213,7 +6213,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=437
 		width=45
 		height=18
@@ -6228,7 +6228,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=457
 		width=45
 		height=18
@@ -6243,7 +6243,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=477
 		width=45
 		height=18
@@ -6258,7 +6258,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=497
 		width=45
 		height=18
@@ -6273,7 +6273,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=517
 		width=45
 		height=18
@@ -6288,7 +6288,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=537
 		width=45
 		height=18
@@ -6303,7 +6303,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1086
+		x=1106
 		y=557
 		width=45
 		height=18
@@ -6318,7 +6318,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=377
 		width=50
 		height=18
@@ -6333,7 +6333,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=377
 		width=40
 		height=18
@@ -6348,7 +6348,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=397
 		width=50
 		height=18
@@ -6363,7 +6363,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=397
 		width=40
 		height=18
@@ -6378,7 +6378,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=417
 		width=50
 		height=18
@@ -6393,7 +6393,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=417
 		width=40
 		height=18
@@ -6408,7 +6408,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=437
 		width=50
 		height=18
@@ -6423,7 +6423,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=437
 		width=40
 		height=18
@@ -6438,7 +6438,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=457
 		width=50
 		height=18
@@ -6453,7 +6453,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=457
 		width=40
 		height=18
@@ -6468,7 +6468,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=477
 		width=50
 		height=18
@@ -6483,7 +6483,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=477
 		width=40
 		height=18
@@ -6498,7 +6498,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=497
 		width=50
 		height=18
@@ -6513,7 +6513,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=497
 		width=40
 		height=18
@@ -6528,7 +6528,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=517
 		width=50
 		height=18
@@ -6543,7 +6543,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=517
 		width=40
 		height=18
@@ -6558,7 +6558,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=397
 		width=17
 		height=18
@@ -6574,7 +6574,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=417
 		width=17
 		height=18
@@ -6590,7 +6590,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=437
 		width=17
 		height=18
@@ -6606,7 +6606,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=457
 		width=17
 		height=18
@@ -6622,7 +6622,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=477
 		width=17
 		height=18
@@ -6638,7 +6638,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=377
 		width=17
 		height=18
@@ -6654,7 +6654,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=397
 		width=17
 		height=18
@@ -6670,7 +6670,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=417
 		width=17
 		height=18
@@ -6686,7 +6686,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=437
 		width=17
 		height=18
@@ -6702,7 +6702,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=457
 		width=17
 		height=18
@@ -6718,7 +6718,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=477
 		width=17
 		height=18
@@ -6734,7 +6734,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=497
 		width=17
 		height=18
@@ -6750,7 +6750,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=517
 		width=17
 		height=18
@@ -6766,7 +6766,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=537
 		width=17
 		height=18
@@ -6782,7 +6782,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=397
 		width=17
 		height=18
@@ -6798,7 +6798,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=417
 		width=17
 		height=18
@@ -6814,7 +6814,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=437
 		width=17
 		height=18
@@ -6830,7 +6830,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=457
 		width=17
 		height=18
@@ -6846,7 +6846,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=477
 		width=17
 		height=18
@@ -6862,7 +6862,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=497
 		width=17
 		height=18
@@ -6878,7 +6878,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=517
 		width=17
 		height=18
@@ -6894,7 +6894,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=537
 		width=17
 		height=18
@@ -6910,7 +6910,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=377
 		width=17
 		height=18
@@ -6926,7 +6926,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=377
 		width=17
 		height=18
@@ -6942,7 +6942,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=537
 		width=50
 		height=18
@@ -6957,7 +6957,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=557
 		width=50
 		height=18
@@ -6972,7 +6972,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=537
 		width=40
 		height=18
@@ -6987,7 +6987,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=557
 		width=40
 		height=18
@@ -7002,7 +7002,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=557
 		width=17
 		height=18
@@ -7018,7 +7018,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=557
 		width=17
 		height=18
@@ -7034,7 +7034,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=497
 		width=17
 		height=18
@@ -7050,7 +7050,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=517
 		width=17
 		height=18
@@ -7066,7 +7066,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=537
 		width=17
 		height=18
@@ -7082,7 +7082,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=557
 		width=17
 		height=18
@@ -7098,7 +7098,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=605
 		width=17
 		height=18
@@ -7114,7 +7114,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=625
 		width=17
 		height=18
@@ -7130,7 +7130,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=645
 		width=17
 		height=18
@@ -7146,7 +7146,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=665
 		width=17
 		height=18
@@ -7162,7 +7162,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=685
 		width=17
 		height=18
@@ -7178,7 +7178,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=585
 		width=17
 		height=18
@@ -7194,7 +7194,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=705
 		width=17
 		height=18
@@ -7210,7 +7210,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=725
 		width=17
 		height=18
@@ -7226,7 +7226,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=745
 		width=17
 		height=18
@@ -7242,7 +7242,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=765
 		width=17
 		height=18
@@ -7258,7 +7258,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=811
 		width=17
 		height=18
@@ -7274,7 +7274,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=831
 		width=17
 		height=18
@@ -7290,7 +7290,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=851
 		width=17
 		height=18
@@ -7306,7 +7306,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=871
 		width=17
 		height=18
@@ -7322,7 +7322,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=891
 		width=17
 		height=18
@@ -7338,7 +7338,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=791
 		width=17
 		height=18
@@ -7354,7 +7354,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=911
 		width=17
 		height=18
@@ -7370,7 +7370,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=931
 		width=17
 		height=18
@@ -7386,7 +7386,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=951
 		width=17
 		height=18
@@ -7402,7 +7402,7 @@ byte {
 }
 byte {
 	object {
-		x=1067
+		x=1087
 		y=971
 		width=17
 		height=18
@@ -7418,7 +7418,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=605
 		width=17
 		height=18
@@ -7434,7 +7434,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=625
 		width=17
 		height=18
@@ -7450,7 +7450,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=645
 		width=17
 		height=18
@@ -7466,7 +7466,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=665
 		width=17
 		height=18
@@ -7482,7 +7482,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=685
 		width=17
 		height=18
@@ -7498,7 +7498,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=585
 		width=17
 		height=18
@@ -7514,7 +7514,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=705
 		width=17
 		height=18
@@ -7530,7 +7530,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=725
 		width=17
 		height=18
@@ -7546,7 +7546,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=745
 		width=17
 		height=18
@@ -7562,7 +7562,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=765
 		width=17
 		height=18
@@ -7578,7 +7578,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=811
 		width=17
 		height=18
@@ -7594,7 +7594,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=831
 		width=17
 		height=18
@@ -7610,7 +7610,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=851
 		width=17
 		height=18
@@ -7626,7 +7626,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=871
 		width=17
 		height=18
@@ -7642,7 +7642,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=891
 		width=17
 		height=18
@@ -7658,7 +7658,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=791
 		width=17
 		height=18
@@ -7674,7 +7674,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=911
 		width=17
 		height=18
@@ -7690,7 +7690,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=931
 		width=17
 		height=18
@@ -7706,7 +7706,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=951
 		width=17
 		height=18
@@ -7722,7 +7722,7 @@ byte {
 }
 byte {
 	object {
-		x=1133
+		x=1153
 		y=971
 		width=17
 		height=18
@@ -7738,7 +7738,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=605
 		width=17
 		height=18
@@ -7754,7 +7754,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=625
 		width=17
 		height=18
@@ -7770,7 +7770,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=645
 		width=17
 		height=18
@@ -7786,7 +7786,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=665
 		width=17
 		height=18
@@ -7802,7 +7802,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=685
 		width=17
 		height=18
@@ -7818,7 +7818,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=585
 		width=17
 		height=18
@@ -7834,7 +7834,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=705
 		width=17
 		height=18
@@ -7850,7 +7850,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=725
 		width=17
 		height=18
@@ -7866,7 +7866,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=745
 		width=17
 		height=18
@@ -7882,7 +7882,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=765
 		width=17
 		height=18
@@ -7898,7 +7898,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=811
 		width=17
 		height=18
@@ -7914,7 +7914,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=831
 		width=17
 		height=18
@@ -7930,7 +7930,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=851
 		width=17
 		height=18
@@ -7946,7 +7946,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=871
 		width=17
 		height=18
@@ -7962,7 +7962,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=891
 		width=17
 		height=18
@@ -7978,7 +7978,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=791
 		width=17
 		height=18
@@ -7994,7 +7994,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=911
 		width=17
 		height=18
@@ -8010,7 +8010,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=931
 		width=17
 		height=18
@@ -8026,7 +8026,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=951
 		width=17
 		height=18
@@ -8042,7 +8042,7 @@ byte {
 }
 byte {
 	object {
-		x=1203
+		x=1223
 		y=971
 		width=17
 		height=18
@@ -8058,7 +8058,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=585
 		width=50
 		height=18
@@ -8073,7 +8073,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=605
 		width=50
 		height=18
@@ -8088,7 +8088,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=625
 		width=50
 		height=18
@@ -8103,7 +8103,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=645
 		width=50
 		height=18
@@ -8118,7 +8118,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=665
 		width=50
 		height=18
@@ -8133,7 +8133,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=685
 		width=50
 		height=18
@@ -8148,7 +8148,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=705
 		width=50
 		height=18
@@ -8163,7 +8163,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=725
 		width=50
 		height=18
@@ -8178,7 +8178,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=745
 		width=50
 		height=18
@@ -8193,7 +8193,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=765
 		width=50
 		height=18
@@ -8208,7 +8208,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=791
 		width=50
 		height=18
@@ -8223,7 +8223,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=811
 		width=50
 		height=18
@@ -8238,7 +8238,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=831
 		width=50
 		height=18
@@ -8253,7 +8253,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=851
 		width=50
 		height=18
@@ -8268,7 +8268,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=871
 		width=50
 		height=18
@@ -8283,7 +8283,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=891
 		width=50
 		height=18
@@ -8298,7 +8298,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=911
 		width=50
 		height=18
@@ -8313,7 +8313,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=931
 		width=50
 		height=18
@@ -8328,7 +8328,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=951
 		width=50
 		height=18
@@ -8343,7 +8343,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1151
+		x=1171
 		y=971
 		width=50
 		height=18
@@ -8358,7 +8358,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=585
 		width=40
 		height=18
@@ -8373,7 +8373,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=605
 		width=40
 		height=18
@@ -8388,7 +8388,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=625
 		width=40
 		height=18
@@ -8403,7 +8403,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=645
 		width=40
 		height=18
@@ -8418,7 +8418,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=665
 		width=40
 		height=18
@@ -8433,7 +8433,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=685
 		width=40
 		height=18
@@ -8448,7 +8448,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=705
 		width=40
 		height=18
@@ -8463,7 +8463,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=725
 		width=40
 		height=18
@@ -8478,7 +8478,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=745
 		width=40
 		height=18
@@ -8493,7 +8493,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=765
 		width=40
 		height=18
@@ -8508,7 +8508,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=791
 		width=40
 		height=18
@@ -8523,7 +8523,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=811
 		width=40
 		height=18
@@ -8538,7 +8538,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=831
 		width=40
 		height=18
@@ -8553,7 +8553,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=851
 		width=40
 		height=18
@@ -8568,7 +8568,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=871
 		width=40
 		height=18
@@ -8583,7 +8583,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=891
 		width=40
 		height=18
@@ -8598,7 +8598,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=911
 		width=40
 		height=18
@@ -8613,7 +8613,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=931
 		width=40
 		height=18
@@ -8628,7 +8628,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=951
 		width=40
 		height=18
@@ -8643,7 +8643,7 @@ byte {
 }
 "message button" {
 	object {
-		x=1222
+		x=1242
 		y=971
 		width=40
 		height=18
@@ -8658,7 +8658,7 @@ byte {
 }
 composite {
 	object {
-		x=1266
+		x=1286
 		y=175
 		width=12
 		height=814
@@ -8667,7 +8667,7 @@ composite {
 	children {
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=175
 				width=12
 				height=18
@@ -8683,7 +8683,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=195
 				width=12
 				height=18
@@ -8699,7 +8699,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=215
 				width=12
 				height=18
@@ -8715,7 +8715,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=235
 				width=12
 				height=18
@@ -8731,7 +8731,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=255
 				width=12
 				height=18
@@ -8747,7 +8747,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=275
 				width=12
 				height=18
@@ -8763,7 +8763,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=295
 				width=12
 				height=18
@@ -8779,7 +8779,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=315
 				width=12
 				height=18
@@ -8795,7 +8795,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=335
 				width=12
 				height=18
@@ -8811,7 +8811,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=355
 				width=12
 				height=18
@@ -8827,7 +8827,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=380
 				width=12
 				height=18
@@ -8843,7 +8843,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=400
 				width=12
 				height=18
@@ -8859,7 +8859,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=420
 				width=12
 				height=18
@@ -8875,7 +8875,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=440
 				width=12
 				height=18
@@ -8891,7 +8891,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=460
 				width=12
 				height=18
@@ -8907,7 +8907,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=480
 				width=12
 				height=18
@@ -8923,7 +8923,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=500
 				width=12
 				height=18
@@ -8939,7 +8939,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=520
 				width=12
 				height=18
@@ -8955,7 +8955,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=540
 				width=12
 				height=18
@@ -8971,7 +8971,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=560
 				width=12
 				height=18
@@ -8987,7 +8987,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=585
 				width=12
 				height=18
@@ -9003,7 +9003,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=605
 				width=12
 				height=18
@@ -9019,7 +9019,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=625
 				width=12
 				height=18
@@ -9035,7 +9035,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=645
 				width=12
 				height=18
@@ -9051,7 +9051,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=665
 				width=12
 				height=18
@@ -9067,7 +9067,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=685
 				width=12
 				height=18
@@ -9083,7 +9083,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=705
 				width=12
 				height=18
@@ -9099,7 +9099,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=725
 				width=12
 				height=18
@@ -9115,7 +9115,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=745
 				width=12
 				height=18
@@ -9131,7 +9131,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=765
 				width=12
 				height=18
@@ -9147,7 +9147,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=791
 				width=12
 				height=18
@@ -9163,7 +9163,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=811
 				width=12
 				height=18
@@ -9179,7 +9179,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=831
 				width=12
 				height=18
@@ -9195,7 +9195,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=851
 				width=12
 				height=18
@@ -9211,7 +9211,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=871
 				width=12
 				height=18
@@ -9227,7 +9227,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=891
 				width=12
 				height=18
@@ -9243,7 +9243,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=911
 				width=12
 				height=18
@@ -9259,7 +9259,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=931
 				width=12
 				height=18
@@ -9275,7 +9275,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=951
 				width=12
 				height=18
@@ -9291,7 +9291,7 @@ composite {
 		}
 		rectangle {
 			object {
-				x=1266
+				x=1286
 				y=971
 				width=12
 				height=18
@@ -9309,7 +9309,7 @@ composite {
 }
 text {
 	object {
-		x=1086
+		x=1105
 		y=101
 		width=176
 		height=14
@@ -9322,7 +9322,7 @@ text {
 }
 "message button" {
 	object {
-		x=1086
+		x=1105
 		y=118
 		width=45
 		height=18
@@ -9337,7 +9337,7 @@ text {
 }
 "message button" {
 	object {
-		x=1151
+		x=1170
 		y=118
 		width=45
 		height=18
@@ -9352,7 +9352,7 @@ text {
 }
 "message button" {
 	object {
-		x=1222
+		x=1241
 		y=118
 		width=40
 		height=18
@@ -9367,7 +9367,7 @@ text {
 }
 text {
 	object {
-		x=935
+		x=954
 		y=87
 		width=115
 		height=14
@@ -9382,7 +9382,7 @@ rectangle {
 	object {
 		x=0
 		y=88
-		width=900
+		width=920
 		height=61
 	}
 	"basic attribute" {
@@ -9477,7 +9477,7 @@ text {
 }
 text {
 	object {
-		x=942
+		x=961
 		y=32
 		width=330
 		height=16
@@ -9507,7 +9507,7 @@ text {
 }
 "text update" {
 	object {
-		x=920
+		x=939
 		y=121
 		width=150
 		height=15
@@ -9551,7 +9551,7 @@ text {
 }
 "text update" {
 	object {
-		x=1071
+		x=1090
 		y=85
 		width=200
 		height=15
@@ -9675,5 +9675,1245 @@ composite {
 			limits {
 			}
 		}
+	}
+}
+composite {
+	object {
+		x=40
+		y=174
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=174
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 0 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_0"
+	}
+}
+composite {
+	object {
+		x=40
+		y=194
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=194
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 1 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_1"
+	}
+}
+composite {
+	object {
+		x=40
+		y=214
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=214
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 2 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_2"
+	}
+}
+composite {
+	object {
+		x=40
+		y=234
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=234
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 3 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_3"
+	}
+}
+composite {
+	object {
+		x=40
+		y=254
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=254
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 4 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_4"
+	}
+}
+composite {
+	object {
+		x=40
+		y=274
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=274
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 5 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_5"
+	}
+}
+composite {
+	object {
+		x=40
+		y=294
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=294
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 6 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_6"
+	}
+}
+composite {
+	object {
+		x=40
+		y=314
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=314
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 7 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_7"
+	}
+}
+composite {
+	object {
+		x=40
+		y=334
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=334
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 8 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_8"
+	}
+}
+composite {
+	object {
+		x=40
+		y=354
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=354
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 9 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_9"
+	}
+}
+composite {
+	object {
+		x=40
+		y=379
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=379
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 10 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_10"
+	}
+}
+composite {
+	object {
+		x=40
+		y=399
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=399
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 11 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_11"
+	}
+}
+composite {
+	object {
+		x=40
+		y=419
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=419
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 12 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_12"
+	}
+}
+composite {
+	object {
+		x=40
+		y=439
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=439
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 13 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_13"
+	}
+}
+composite {
+	object {
+		x=40
+		y=459
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=459
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 14 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_14"
+	}
+}
+composite {
+	object {
+		x=40
+		y=479
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=479
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 15 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_15"
+	}
+}
+composite {
+	object {
+		x=40
+		y=499
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=499
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 16 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_16"
+	}
+}
+composite {
+	object {
+		x=40
+		y=519
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=519
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 17 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_17"
+	}
+}
+composite {
+	object {
+		x=40
+		y=539
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=539
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 18 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_18"
+	}
+}
+composite {
+	object {
+		x=40
+		y=559
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=559
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 19 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_19"
+	}
+}
+composite {
+	object {
+		x=40
+		y=584
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=584
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 20 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_20"
+	}
+}
+composite {
+	object {
+		x=40
+		y=604
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=604
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 21 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_21"
+	}
+}
+composite {
+	object {
+		x=40
+		y=624
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=624
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 22 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_22"
+	}
+}
+composite {
+	object {
+		x=40
+		y=644
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=644
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 23 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_23"
+	}
+}
+composite {
+	object {
+		x=40
+		y=664
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=664
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 24 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_24"
+	}
+}
+composite {
+	object {
+		x=40
+		y=684
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=684
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 25 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_25"
+	}
+}
+composite {
+	object {
+		x=40
+		y=704
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=704
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 26 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_26"
+	}
+}
+composite {
+	object {
+		x=40
+		y=724
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=724
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 27 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_27"
+	}
+}
+composite {
+	object {
+		x=40
+		y=744
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=744
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 28 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_28"
+	}
+}
+composite {
+	object {
+		x=40
+		y=764
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=764
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 29 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_29"
+	}
+}
+composite {
+	object {
+		x=40
+		y=790
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=790
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 30 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_30"
+	}
+}
+composite {
+	object {
+		x=40
+		y=810
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=810
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 31 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_31"
+	}
+}
+composite {
+	object {
+		x=40
+		y=830
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=830
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 32 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_32"
+	}
+}
+composite {
+	object {
+		x=40
+		y=850
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=850
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 33 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_33"
+	}
+}
+composite {
+	object {
+		x=40
+		y=870
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=870
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 34 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_34"
+	}
+}
+composite {
+	object {
+		x=40
+		y=890
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=890
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 35 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_35"
+	}
+}
+composite {
+	object {
+		x=40
+		y=910
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=910
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 36 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_36"
+	}
+}
+composite {
+	object {
+		x=40
+		y=930
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=930
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 37 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_37"
+	}
+}
+composite {
+	object {
+		x=40
+		y=950
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=950
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 38 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_38"
+	}
+}
+composite {
+	object {
+		x=40
+		y=970
+		width=20
+		height=20
+	}
+	"composite name"=""
+	children {
+		"shell command" {
+			object {
+				x=40
+				y=970
+				width=20
+				height=20
+			}
+			command[0] {
+				label="Filter Monitoring"
+				name="RCGDIR/src/epics/util/sdffiltmon.py"
+				args="-p SITE_NAME: -d DCU_NODE_ID -l 39 -m RCGDIR/src/epics/util/"
+			}
+			clr=14
+			bclr=3
+		}
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A >= 0"
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_FM_LINE_39"
 	}
 }

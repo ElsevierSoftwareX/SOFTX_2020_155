@@ -636,7 +636,9 @@ int checkFilterSwitches(int fcount, SET_ERR_TABLE setErrTable[], int monitorAll,
 unsigned int refVal=0;
 unsigned int presentVal=0;
 unsigned int x=0,y=0;
-int mask = 0;
+unsigned int mask = 0;
+unsigned int maskedRefVal = 0;
+unsigned int maskedSwReqVal = 0;
 int ii=0,jj=0;
 int errCnt = 0;
 char swname[3][64];
@@ -699,15 +701,21 @@ char *ret=0;
 		status = PUT_VALUE(paddr2,SDF_STR,swstrE);
 		setErrTable[errCnt].filtNum = -1;
 
-		mask = filterTable[ii].mask;
-		if(( (refVal & mask) != (filterTable[ii].swreq & mask) && errCnt < SDF_ERR_TSIZE && (mask || monitorAll) && filterTable[ii].init) )
+		mask = (unsigned int)filterTable[ii].mask;
+		maskedRefVal = refVal & mask;
+		maskedSwReqVal = filterTable[ii].swreq & mask;
+		if (ii == 0) {
+			D("maskedRef = 0x%x maskedSwreq = 0x%x swreq=0x%x mask=0x%x", maskedRefVal, maskedSwReqVal, filterTable[ii].swreq, filterTable[ii].mask);
+			D(" maskedRef ^ maskedSwReq = 0x%x\n", maskedRefVal ^ maskedSwReqVal);
+		}
+		if(( maskedRefVal != maskedSwReqVal && errCnt < SDF_ERR_TSIZE && (mask || monitorAll) && filterTable[ii].init) )
 			*diffcntr += 1;
-		if(( (refVal & mask) != (filterTable[ii].swreq & mask) && errCnt < SDF_ERR_TSIZE && (mask || monitorAll) && filterTable[ii].init) || displayall)
+		if(( maskedRefVal != maskedSwReqVal && errCnt < SDF_ERR_TSIZE && (mask || monitorAll) && filterTable[ii].init) || displayall)
 		{
 			// FIXME: print out the right strings
 			filtStrBitConvert(1,refVal,swstrE);
 			filtStrBitConvert(1,filterTable[ii].swreq,swstrB);
-			x = refVal ^ filterTable[ii].swreq;;
+			x = maskedRefVal ^ maskedSwReqVal;
 			filtStrBitConvert(1,x,swstrD);
 			bzero(tmpname,sizeof(tmpname));
 			strncpy(tmpname,filterTable[ii].fname,(strlen(filterTable[ii].fname)-1));
@@ -717,6 +725,7 @@ char *ret=0;
 			sprintf(setErrTable[errCnt].burtset, "%s", swstrB);
 			sprintf(setErrTable[errCnt].liveset, "%s", swstrE);
 			sprintf(setErrTable[errCnt].diff, "%s", swstrD);
+			D("%s %s %s %s\n", tmpname, swstrB, swstrE, swstrD);
 			setErrTable[errCnt].liveval = 0.0;
 			setErrTable[errCnt].sigNum = filterTable[ii].sw[0] + (filterTable[ii].sw[1] * SDF_MAX_TSIZE);
 			setErrTable[errCnt].filtNum = ii;
@@ -2072,6 +2081,7 @@ void processFMChanCommands(dbAddr *fmMaskAddr, dbAddr *fmCtrlAddr) {
 		if (sw2 >= 0 && sw2 < SDF_MAX_TSIZE) {
 			cdTable[sw2].mask = mask;
 		}
+		filterTable[ii].mask = mask;
 
 		dbPutField(&fmMaskAddr[ii],DBR_LONG,&mask,1);
 
