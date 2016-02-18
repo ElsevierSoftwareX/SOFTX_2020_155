@@ -64,7 +64,7 @@ sub printFrontEndVars  {
 # Check inputs are connected
 sub checkInputConnect {
         my ($i) = @_;
-	my $headerFile = "/opt/rtcds/userapps/trunk/cds/common/src/ccodeio.h";
+	my $headerFile = "$::rcg_src_dir\/src/include/ccodeio.h";
 	my $found = 0;
 	my $ins = $::partInCnt[$::partInNum[$i][0]];
 	my $outs = $::partOutputs[$::partOutNum[$i][0]];
@@ -164,6 +164,10 @@ sub checkInputConnect {
         for($ii=0;$ii<$outCnt;$ii++) {
                 if($outargUsed[$ii]) { $outused ++; }
         }
+	if($inCnt > 0 && $outCnt > 0 && ($ins != $inCnt || $outs != $outCnt)) {
+                print ::CONN_ERRORS "***\nC function has wrong number of inputs/outputs. \n\t- File is $pathed_name \n\t- Function is: $func_name\n\t- Code requires $inCnt inputs and model has $ins inputs\n\t- Code requires $outCnt outputs and model has $outs outputs\n";
+                return "ERROR";
+	}
 
 	if($ins != $inCnt || $outs != $outCnt || $ins != $inused || $outs != $outused) {
 		if ($::inlinedFunctionCall[$i] ne undef) {
@@ -182,6 +186,8 @@ sub checkInputConnect {
 					# print "Header check: $word[0]  $word[1]  $word[2]  $word[3]  \n";
 					$inCnt = $word[2];
 					$outCnt = $word[3];
+					if($inCnt == -1) {$inCnt = $ins;}
+					if($outCnt == -1) {$outCnt = $outs;}
 					$found = 1;
 				}
 			}
