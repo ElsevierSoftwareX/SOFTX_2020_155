@@ -1,0 +1,790 @@
+
+file {
+	name="/opt/rtcds/rtscore/trunk/src/epics/util/SDF_FILT_MONITOR.adl"
+	version=030104
+}
+display {
+	object {
+		x=1310
+		y=66
+		width=721
+		height=148
+	}
+	clr=14
+	bclr=4
+	cmap=""
+	gridSpacing=5
+	gridOn=0
+	snapToGrid=0
+}
+"color map" {
+	ncolors=65
+	colors {
+		ffffff,
+		ececec,
+		dadada,
+		c8c8c8,
+		bbbbbb,
+		aeaeae,
+		9e9e9e,
+		919191,
+		858585,
+		787878,
+		696969,
+		5a5a5a,
+		464646,
+		2d2d2d,
+		000000,
+		00d800,
+		1ebb00,
+		339900,
+		2d7f00,
+		216c00,
+		fd0000,
+		de1309,
+		be190b,
+		a01207,
+		820400,
+		5893ff,
+		597ee1,
+		4b6ec7,
+		3a5eab,
+		27548d,
+		fbf34a,
+		f9da3c,
+		eeb62b,
+		e19015,
+		cd6100,
+		ffb0ff,
+		d67fe2,
+		ae4ebc,
+		8b1a96,
+		610a75,
+		a4aaff,
+		8793e2,
+		6a73c1,
+		4d52a4,
+		343386,
+		c7bb6d,
+		b79d5c,
+		a47e3c,
+		7d5627,
+		58340f,
+		99ffff,
+		73dfff,
+		4ea5f9,
+		2a63e4,
+		0a00b8,
+		ebf1b5,
+		d4db9d,
+		bbc187,
+		a6a462,
+		8b8239,
+		73ff6b,
+		52da3b,
+		3cb420,
+		289315,
+		1a7309,
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=26
+		width=719
+		height=120
+	}
+	"basic attribute" {
+		clr=56
+	}
+}
+rectangle {
+	object {
+		x=0
+		y=0
+		width=720
+		height=22
+	}
+	"basic attribute" {
+		clr=14
+	}
+}
+text {
+	object {
+		x=226
+		y=1
+		width=200
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="$(FPREFIX)$(FNAME)"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=525
+		y=3
+		width=120
+		height=15
+	}
+	monitor {
+		chan="$(FPREFIX):FEC-$(DCUID)_TIME_STRING"
+		clr=2
+		bclr=14
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=8
+		y=2
+		width=40
+		height=18
+	}
+	"basic attribute" {
+		clr=2
+	}
+	textix="$(FPREFIX)"
+}
+text {
+	object {
+		x=251
+		y=32
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="IN"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=280
+		y=32
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="OSET"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=434
+		y=32
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="FILTERS"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=582
+		y=32
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="LIM"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=611
+		y=32
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="OUT"
+	align="horiz. centered"
+}
+byte {
+	object {
+		x=307
+		y=101
+		width=128
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	sbit=0
+	ebit=4
+}
+byte {
+	object {
+		x=248
+		y=101
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	sbit=10
+	ebit=10
+}
+byte {
+	object {
+		x=277
+		y=101
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	sbit=11
+	ebit=11
+}
+byte {
+	object {
+		x=438
+		y=101
+		width=128
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	sbit=5
+	ebit=9
+}
+byte {
+	object {
+		x=578
+		y=101
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	sbit=13
+	ebit=13
+}
+byte {
+	object {
+		x=607
+		y=101
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	sbit=12
+	ebit=12
+}
+text {
+	object {
+		x=32
+		y=76
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="FILTER"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=32
+		y=98
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="SWITCHES"
+	align="horiz. centered"
+}
+"text update" {
+	object {
+		x=96
+		y=101
+		width=82
+		height=15
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=0
+		bclr=14
+	}
+	clrmod="alarm"
+	align="horiz. centered"
+	format="hexadecimal"
+	limits {
+	}
+}
+text {
+	object {
+		x=185
+		y=101
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="SWSTAT"
+}
+text {
+	object {
+		x=647
+		y=32
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="DEC"
+	align="horiz. centered"
+}
+text {
+	object {
+		x=676
+		y=32
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="HOLD"
+	align="horiz. centered"
+}
+byte {
+	object {
+		x=643
+		y=101
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	ebit=15
+}
+byte {
+	object {
+		x=672
+		y=101
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):$(FNAME)_SWSTAT"
+		clr=50
+		bclr=54
+	}
+	sbit=16
+	ebit=16
+}
+"message button" {
+	object {
+		x=249
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="1024"
+}
+"message button" {
+	object {
+		x=278
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="2048"
+}
+"message button" {
+	object {
+		x=308
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="1"
+}
+"message button" {
+	object {
+		x=334
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="2"
+}
+"message button" {
+	object {
+		x=359
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="4"
+}
+"message button" {
+	object {
+		x=385
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="8"
+}
+"message button" {
+	object {
+		x=411
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="16"
+}
+"message button" {
+	object {
+		x=439
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="32"
+}
+"message button" {
+	object {
+		x=465
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="64"
+}
+"message button" {
+	object {
+		x=490
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="128"
+}
+"message button" {
+	object {
+		x=516
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="256"
+}
+"message button" {
+	object {
+		x=542
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="512"
+}
+"message button" {
+	object {
+		x=579
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="8192"
+}
+"message button" {
+	object {
+		x=608
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="4096"
+}
+"message button" {
+	object {
+		x=644
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="32768"
+}
+"message button" {
+	object {
+		x=673
+		y=50
+		width=25
+		height=14
+	}
+	control {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_CTRL_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	release_msg="65536"
+}
+byte {
+	object {
+		x=308
+		y=68
+		width=128
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	sbit=0
+	ebit=4
+}
+byte {
+	object {
+		x=249
+		y=68
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	sbit=10
+	ebit=10
+}
+byte {
+	object {
+		x=278
+		y=68
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	sbit=11
+	ebit=11
+}
+byte {
+	object {
+		x=439
+		y=68
+		width=128
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	sbit=5
+	ebit=9
+}
+byte {
+	object {
+		x=579
+		y=68
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	sbit=13
+	ebit=13
+}
+byte {
+	object {
+		x=608
+		y=68
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	sbit=12
+	ebit=12
+}
+byte {
+	object {
+		x=644
+		y=68
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	ebit=15
+}
+byte {
+	object {
+		x=673
+		y=68
+		width=25
+		height=11
+	}
+	monitor {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_$(FMNUM)"
+		clr=31
+		bclr=56
+	}
+	sbit=16
+	ebit=16
+}
+text {
+	object {
+		x=185
+		y=65
+		width=20
+		height=15
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="SDF MON"
+}
+"text update" {
+	object {
+		x=96
+		y=64
+		width=82
+		height=15
+	}
+	monitor {
+		chan="$(FPREFIX):FEC-$(DCUID)_SDF_FM_MASK_$(FMNUM)"
+		clr=0
+		bclr=14
+	}
+	clrmod="alarm"
+	align="horiz. centered"
+	format="hexadecimal"
+	limits {
+	}
+}

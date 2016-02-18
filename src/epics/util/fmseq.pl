@@ -1029,6 +1029,8 @@ for(my $ffn = 0;$ffn < 40; $ffn ++)
 	print "}\n";
 	print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_LINE_$ffn\")\n";
 	print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_BITS_$ffn\")\n";
+
+	print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_FM_LINE_$ffn\")\n";
 }
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_GRD_RB_STAT0\")\n";
 print "{\n	field(SCAN,\".5 second\")\n}\n";
@@ -1061,6 +1063,12 @@ print "grecord(stringout,\"%IFO%:FEC-${dcuId}_MSG\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_MSG2\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_MSGDAQ\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_TIME_STRING\")\n";
+
+for(my $fmi = 0; $fmi < 1000; $fmi ++)
+{
+	print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_FM_MASK_$fmi\")\n";
+	print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_FM_MASK_CTRL_$fmi\")\n";
+}
 
 #add matrix records
 print $matdb;
