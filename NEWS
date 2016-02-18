@@ -1,10 +1,33 @@
 ==================================================================================================
-Changes for 2.10
+Changes for 3.0
 ==================================================================================================
+- Bug Fix (895): Attempting to clean up compile, with better error messages with user direction
+  to error files:
+	- Added checkInputConnect() function to all library parts in src/epics/utils/lib.` This
+	  was done to allow for checking of connections prior to going into the code linking
+	  portion of the compiler, which should provide better info to the user as to exactly
+	  which part(s) are not properly connected instead of the old 'search around these 
+	  parts' message.
+	- There are still a number of parts which are handled by code within feCodeGen.pl, instead
+	  of having there own .pm library part. Began the process of moving these out. Those
+	  moved to their own .pm file are:
+		- SUM.pm - Matlab summing part.
+		- MATH.pm - Subset of Matlab MATH parts
+		- AND.pm - Matlab logical operations
+		- DEMUX.pm
+		- MUX.pm
+		- MULTIPLY.pm
+		- RelationalOperator.pm
+		- SATURATE.pm
+		- Switch.pm
+	- Moved some routines out of feCodeGen.pl into /lib files.
+		- BusSelect.pm: Used to help make part connections via busses.
 - Bug Fix: Old watchdog (Wd.pm) part was never updated to support real-time EPICS DAQ. This fix
-  was also done to branch-2.8, used by PDE at MIT.
+  was also done to branch-2.8, used by PDE at MIT, and Branch-2.9.
 - Bug Fix (966): RCG FunctionCall.pm now checks that model part has the same number of in/outs as
   defined in the associated user C code function.
+  	- RCG attempts to parse C code file to determine number of inputs/outputs used.
+	- Failing that, RCG uses new header file 'userapps/trunk/cds/common/ccodeio.h.
 - Bug Fix (903): With requireIOcnt=1 set in parameter block of a model, code will not start unless
   the model required number of ADC and DAC modules exist on the run time computer bus.
 - Bug Fix (948): ADC channel lists are incorrect when model contains MUX/DEMUX parts. It was also
