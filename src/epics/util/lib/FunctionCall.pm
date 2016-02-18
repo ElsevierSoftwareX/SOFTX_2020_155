@@ -76,6 +76,7 @@ sub checkInputConnect {
         my $outargUsed = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
         my $maxCnt = 25;
 	my $diagsTxt = "";
+	my $pendingFail = 0;
 
 	# First, try parsing the C file to determine number of inputs and outputs.
 	if ($::inlinedFunctionCall[$i] ne undef) {
@@ -165,8 +166,7 @@ sub checkInputConnect {
                 if($outargUsed[$ii]) { $outused ++; }
         }
 	if($inCnt > 0 && $outCnt > 0 && ($ins != $inCnt || $outs != $outCnt)) {
-                print ::CONN_ERRORS "***\nC function has wrong number of inputs/outputs. \n\t- File is $pathed_name \n\t- Function is: $func_name\n\t- Code requires $inCnt inputs and model has $ins inputs\n\t- Code requires $outCnt outputs and model has $outs outputs\n";
-                return "ERROR";
+                $pendingFail = 1;
 	}
 
 	if($ins != $inCnt || $outs != $outCnt || $ins != $inused || $outs != $outused) {
@@ -183,7 +183,6 @@ sub checkInputConnect {
 				chomp $line;
 				my @word = split /[:*(,\s\t]+/,$line;
 				if($word[0] eq $pathed_name and $word[1] eq $func_name) {
-					# print "Header check: $word[0]  $word[1]  $word[2]  $word[3]  \n";
 					$inCnt = $word[2];
 					$outCnt = $word[3];
 					if($inCnt == -1) {$inCnt = $ins;}
@@ -193,17 +192,16 @@ sub checkInputConnect {
 			}
 			close($fh2);
 		}
-        } else {
+	} else {
 		$found = 1;
 	}
-
-        if(!$found) {
+        if(!$found && !$pendingFail) {
                 print ::WARNINGS "***\nCannot parse C function $func_name in list. \n\t-File is $pathed_name\n";
                 print ::WARNINGS "\tCannot find C function listed in ccodeio.h file.\n";
                 return "";
         }
         if($ins != $inCnt || $outs != $outCnt) {
-                print ::CONN_ERRORS "***\nC function has wrong number of inputs/outputs. \n\t-File is $func_name\n\t- Code requires $inCnt inputs and model has $ins inputs\n\t- Code requires $outCnt outputs and model has $outs outputs\n";
+                print ::CONN_ERRORS "***\nC function has wrong number of inputs/outputs. \n\t- File is $pathed_name \n\t- Function is: $func_name\n\t- Code requires $inCnt inputs and model has $ins inputs\n\t- Code requires $outCnt outputs and model has $outs outputs\n";
                 return "ERROR";
         }
         return "";
