@@ -137,6 +137,17 @@ sub printFrontEndVars  {
         print ::OUT "static int \L$::xpartName[$i]_dkState;\n";
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+	if($::partInCnt[$i] < 4) {
+                print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires 4; Only $::partInCnt[$i] provided.\n";
+                return "ERROR";
+        }
+        return "";
+}
+
+
 # Figure out part input code
 # Returns calculated input code
 #// \b sub \b fromExp \n 

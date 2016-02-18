@@ -33,6 +33,16 @@ sub printFrontEndVars  {
 	$instance += 1;
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+	if($::partInCnt[$i] < 16) {
+                print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires 16; Only $::partInCnt[$i] provided:  Please ground any unused inputs\n";
+        return "ERROR";
+        }
+        return "";
+}
+
 # Figure out part input code
 # Argument 1 is the part number
 # Argument 2 is the input number

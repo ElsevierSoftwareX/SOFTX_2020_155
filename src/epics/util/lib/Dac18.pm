@@ -97,6 +97,12 @@ sub printFrontEndVars  {
         ;
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+        return "";
+}
+
 #// \b sub \b frontEndInitCode \n 
 #// Required subroutine for RCG \n
 #// Return front end initialization code \n

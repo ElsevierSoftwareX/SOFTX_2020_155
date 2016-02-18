@@ -37,6 +37,16 @@ sub printFrontEndVars  {
         print ::OUT "static int \L$::xpartName[$i]_running_counter;\n";
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+	if($::partInCnt[$i] < 1) {
+                print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has no input connected.\n\n";
+                return "ERROR";
+        }
+        return "";
+}
+
 # Return front end initialization code
 # Argument 1 is the part number
 # Returns calculated code string

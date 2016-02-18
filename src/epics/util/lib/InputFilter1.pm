@@ -52,6 +52,16 @@ sub printFrontEndVars  {
         print ::OUT "double \L$::xpartName[$i]_val;\n";
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+	if($::partInCnt[$i] < 1) {
+                print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has no input connected.\n\n";
+        	return "ERROR";
+        }
+        return "";
+}
+
 sub frontEndInitCode {
         my ($i) = @_;
 	# Initialize from the EPICS records

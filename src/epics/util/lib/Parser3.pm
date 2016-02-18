@@ -511,6 +511,14 @@ sub node_processing {
 	# Save logical operator for Logic blocks
 	if ($block_type eq "AND") {
                 $::blockDescr[$::partCnt] = ${$node->{FIELDS}}{"Operator"};
+		$::partInputs[$::partCnt] = 2;
+		if(${$node->{FIELDS}}{Inputs} ne undef)
+		{
+			$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
+		}
+		if(${$node->{FIELDS}}{"Operator"} eq "NOT") {
+			$::partInputs[$::partCnt] = 1;
+		}
 	}
         if ($block_type ne "SubSystem") {
            my $block_tag = transform_block_type(${$node->{FIELDS}}{"Tag"});
@@ -527,24 +535,7 @@ sub node_processing {
         # Process Math Function blocks  ========================================  MA  ===
         if ($block_type eq "MATH") {                                       # ===  MA  ===
            my $math_op = ${$node->{FIELDS}}{"Operator"};                   # ===  MA  ===
-           if ($math_op eq "square") {                                     # ===  MA  ===
-              $block_type = "M_SQR";                                       # ===  MA  ===
-           }                                                               # ===  MA  ===
-           elsif ($math_op eq "sqrt") {                                    # ===  MA  ===
-              $block_type = "M_SQT";                                       # ===  MA  ===
-           }                                                               # ===  MA  ===
-           elsif ($math_op eq "reciprocal") {                              # ===  MA  ===
-              $block_type = "M_REC";                                       # ===  MA  ===
-           }                                                               # ===  MA  ===
-           elsif ($math_op eq "mod") {                                     # ===  MA  ===
-              $block_type = "M_MOD";                                       # ===  MA  ===
-           }                                                               # ===  MA  ===
-           elsif ($math_op eq "log10") {  
-              $block_type = "M_LOG10";  
-           }                                                               # ===  MA  ===
-           else {                                                          # ===  MA  ===
-              die "*** ERROR: Math operator not supported: $math_op \n";   # ===  MA  ===
-           }                                                               # ===  MA  ===
+	   $::partInputs[$::partCnt] = $math_op;
         }                                                                  # ===  MA  ===
         # Process User-defined Inline Function block  ==========================  MA  ===
         if ($block_type eq "FCN") {                                        # ===  MA  ===
@@ -769,6 +760,7 @@ sub node_processing {
 		}
 	}
 	if ($block_type eq "SATURATE") {
+        	$::cdsPart[$::partCnt] = 1;
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{UpperLimit};
 		if ($::partInputs[$::partCnt] eq undef) {
 			$::partInputs[$::partCnt] = 0.5;
@@ -782,26 +774,49 @@ sub node_processing {
 		if ($::partInputs[$::partCnt] eq undef) {
 			$::partInputs[$::partCnt] = 1;
 		}
+	} elsif ($block_type eq "AND") {
+        	$::cdsPart[$::partCnt] = 1;
+	} elsif ($block_type eq "MUX") {
+        	$::cdsPart[$::partCnt] = 1;
+		if(${$node->{FIELDS}}{Inputs} eq undef)
+		{
+			$::partInputs[$::partCnt] = 4;
+		} else {
+			$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
+		}
+	} elsif ($block_type eq "DEMUX") {
+        	$::cdsPart[$::partCnt] = 1;
 	} elsif ($block_type eq "SUM") {
+        	$::cdsPart[$::partCnt] = 1;
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
 		$::partInputs[$::partCnt] =~ tr/+-//cd; # delete other characters
+	} elsif ($block_type eq "MATH") {
+        	$::cdsPart[$::partCnt] = 1;
 	} elsif ($block_type eq "MULTIPLY" &&
 		 (${$node->{FIELDS}}{Inputs} eq "*\/" ||
 		  ${$node->{FIELDS}}{Inputs} eq "\/*" )) {
 		$::partType[$::partCnt] = "DIVIDE";
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
+        	$::cdsPart[$::partCnt] = 1;
+	} elsif ($block_type eq "MULTIPLY") {
+        	$::cdsPart[$::partCnt] = 1;
+	} elsif ($block_type eq "Abs") {
+        	$::cdsPart[$::partCnt] = 1;
 	} elsif ($block_type eq "Gain") {
+        	$::cdsPart[$::partCnt] = 1;
 		  $::partInputs[$::partCnt] = ${$node->{FIELDS}}{Gain};
 		  if ($::partInputs[$::partCnt] eq undef) {
 			$::partInputs[$::partCnt] = 1;
 		  }
 	} elsif ($block_type eq "RelationalOperator") {
+        	$::cdsPart[$::partCnt] = 1;
 		if (${$node->{FIELDS}}{Operator} eq undef) {
 		  $::partInputs[$::partCnt] = ">=";
 		} else {
 		  $::partInputs[$::partCnt] = ${$node->{FIELDS}}{Operator};
 		}
 	} elsif ($block_type eq "Switch") {
+        	$::cdsPart[$::partCnt] = 1;
 		my $op = ${$node->{FIELDS}}{Criteria};
 		if ($op eq undef) { $op = ">="; }
 		$thresh = ${$node->{FIELDS}}{Threshold};
@@ -1228,10 +1243,10 @@ sub flatten {
 	my $port_num = ${$_->{FIELDS}}{Port};
 	if ($port_num eq undef) { $port_num = 1; }
 	my $port_name = ${$_->{FIELDS}}{Name};
-	print "Processing output port #$port_num name=$port_name\n";
+	# print "Processing output port #$port_num name=$port_name\n";
 	# Find line connected to this output port (if any)
 	my $branch = find_branch($node, $port_name, 1);
-	print_node($branch);
+	# print_node($branch);
 	die "OutPort $port_name disconnected\n" if ($branch eq undef);
 	# Find parent's line connected to this node, output port $port_num
 	my $line = find_line($parent, ${$node->{FIELDS}}{Name}, $port_num);
@@ -1469,9 +1484,9 @@ sub process {
 	        } elsif ($f =~ /^\d+$/) { # An integer
 		  my @rates = qw(32 64 128 256 512 1024 2048 4096 8192 16384 32768 65536);
 		  my @res = grep {$f == $_} @rates;
-		  print $f, " ", @res, "\n";
+		  #print $f, " ", @res, "\n";
 		  die "Bad DAQ channel rate specified: $pn, $f\n" unless @res;
-		  print $pn," ", $f, "\n";
+		  #print $pn," ", $f, "\n";
 		  $rate = $f;
 	        } else {
 		  $egu = $f;

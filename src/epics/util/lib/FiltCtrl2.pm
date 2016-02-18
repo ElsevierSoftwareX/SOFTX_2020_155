@@ -46,6 +46,16 @@ sub printFrontEndVars  {
         print ::OUT "double \L$::xpartName[$i] = 0.0;\n";
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+	if($::partInCnt[$i] < 6) {
+		print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires 6; Only $::partInCnt[$i] provided:  Please ground any unused inputs\n";
+        	return "ERROR";
+	}
+        return "";
+}
+
 # Return front end initialization code
 # Argument 1 is the part number
 # Returns calculated code string
@@ -94,9 +104,6 @@ sub fromExp {
 
 sub frontEndCode {
 	my ($i) = @_;
-	if($::partInCnt[$i] < 5) {
-		die "\n***ERROR: $::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires 5; Only $::partInCnt[$i] provided:  Please ground any unused inputs\n";
-	}
         my $calcExp = "// FILTER MODULE with CONTROL:  $::xpartName[$i]\n";
         $calcExp .= "pLocalEpics->$::systemName\.$::xpartName[$i]\_MASK = ";
         $calcExp .= $::fromExp[2]? $::fromExp[2]: "0";

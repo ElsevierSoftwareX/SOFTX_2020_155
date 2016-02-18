@@ -35,6 +35,12 @@ sub frontEndInitCode {
         return "";
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+        return "";
+}
+
 # Figure out part input code
 # Argument 1 is the part number
 # Argument 2 is the input number

@@ -61,6 +61,148 @@ sub printFrontEndVars  {
         }
 }
 
+# Check inputs are connected
+sub checkInputConnect {
+        my ($i) = @_;
+	my $headerFile = "/opt/rtcds/userapps/trunk/cds/common/src/ccodeio.h";
+	my $found = 0;
+	my $ins = $::partInCnt[$::partInNum[$i][0]];
+	my $outs = $::partOutputs[$::partOutNum[$i][0]];
+        my $search1 = "argin\\[0\\]";
+        my $start = 0;
+        my $inCnt = 0;
+        my $outCnt = 0;
+	my $inargUsed = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        my $outargUsed = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        my $maxCnt = 25;
+	my $diagsTxt = "";
+
+	# First, try parsing the C file to determine number of inputs and outputs.
+	if ($::inlinedFunctionCall[$i] ne undef) {
+		($inline_keyword, $func_name, $pathed_name)
+			= split(/\s/, $::inlinedFunctionCall[$i]);
+		# Expand variables in $pathed_name
+		# Note the usage of Env, all environment variables were
+		# turned into Perl variables
+		$pathed_name =~ s/(\$\w+)/$1/eeg;
+	} else {
+                print ::WARNINGS "***\nNOT A FUNCTION: C function in list. \n\t-File is $pathed_name\n";
+		return "";
+	}
+	my $search = "void $func_name *\\(";
+
+	open(my $fh,"<".$pathed_name) || die "Cannot find $pathed_name \n";
+
+	while (my $line = <$fh>) {
+                chomp $line;
+# skip comment lines
+                if ( $line =~ "^\t* *//" || $line =~ "^ *#" ) {
+                        next;
+                }
+# skip out if end of function
+                if ( $start == 1 && $line =~ "^}" ) {
+                        #print "End of Function\n";
+                        last;
+                }
+# skip out if beginning of another function
+                if ( $start == 1 && $line =~ "void " ) {
+                        #print "Start of next function\n";
+                        last;
+                }
+                if ($start == 1 && $line =~ $invar) {
+                        #print $line," \n";
+                        for($ii=0;$ii<$maxCnt;$ii++) {
+                                $jj = $ii + 1;
+                                if ($line =~ $arginsearch[$ii]) {
+                                        $inargUsed[$ii] = 1;
+                                        if ($jj > $inCnt) {
+                                                $inCnt = $jj;
+                                        }
+                                } 
+
+                        }
+                }
+                if ($start == 1 && $line =~ $outvar) {
+                        #print $line," \n";
+                        for($ii=0;$ii<$maxCnt;$ii++) {
+                                $jj = $ii + 1;
+                                if ($line =~ $argoutsearch[$ii]) {
+                                        $outargUsed[$ii] = 1;
+                                        if ($jj > $outCnt) {
+                                                $outCnt = $jj;
+                                        }
+                                }
+
+                        }
+                }
+                if ($start == 0 && $line =~ $search) {
+                        $diagsTxt .="Found start of function = $search\n\t";
+			$diagsTxt .=  $line;
+			$diagsTxt .= "\n";
+                        #print $line, "\n";
+                        my @words = split /[:*(,\s\/]+/,$line;
+                        $invar = $words[3];
+                        $outvar = $words[7];
+                        # print " InargVar = ",$invar, " and OutargVar = ",$outvar,"\n";
+                        for($ii=0;$ii<$maxCnt;$ii++) {
+                                $arginsearch[$ii] = $invar . "\\[" . $ii . "\\]";
+                                $argoutsearch[$ii] = $outvar . "\\[" . $ii . "\\]";
+                        }
+                        #print "BASE SEARCH = ",$search1, " and ", $arginsearch[0], "\n";
+			$start = 1;
+                }
+        }
+
+
+	close($fh);
+	# print $diagsTxt;
+        $inused = 0;
+        for($ii=0;$ii<$inCnt;$ii++) {
+                if($inargUsed[$ii]) { $inused ++; }
+        }
+        $outused = 0;
+        for($ii=0;$ii<$outCnt;$ii++) {
+                if($outargUsed[$ii]) { $outused ++; }
+        }
+
+	if($ins != $inCnt || $outs != $outCnt || $ins != $inused || $outs != $outused) {
+		if ($::inlinedFunctionCall[$i] ne undef) {
+			($inline_keyword, $func_name, $pathed_name)
+				= split(/\s/, $::inlinedFunctionCall[$i]);
+			# Expand variables in $pathed_name
+			# Note the usage of Env, all environment variables were
+			# turned into Perl variables
+			$pathed_name =~ s/(\$\w+)/$1/eeg;
+
+			open(my $fh2,"<".$headerFile) || die "Cannot open $headerFile \n";
+			while (my $line = <$fh2>) {
+				chomp $line;
+				my @word = split /[:*(,\s\t]+/,$line;
+				if($word[0] eq $pathed_name and $word[1] eq $func_name) {
+					# print "Header check: $word[0]  $word[1]  $word[2]  $word[3]  \n";
+					$inCnt = $word[2];
+					$outCnt = $word[3];
+					$found = 1;
+				}
+			}
+			close($fh2);
+		}
+        } else {
+		$found = 1;
+	}
+
+        if(!$found) {
+                print ::WARNINGS "***\nCannot parse C function $func_name in list. \n\t-File is $pathed_name\n";
+                print ::WARNINGS "\tCannot find C function listed in ccodeio.h file.\n";
+                return "";
+        }
+        if($ins != $inCnt || $outs != $outCnt) {
+                print ::CONN_ERRORS "***\nC function has wrong number of inputs/outputs. \n\t-File is $func_name\n\t- Code requires $inCnt inputs and model has $ins inputs\n\t- Code requires $outCnt outputs and model has $outs outputs\n";
+                return "ERROR";
+        }
+        return "";
+}
+
 # Return front end initialization code
 # Argument 1 is the part number
 # Returns calculated code string
@@ -82,92 +224,6 @@ sub fromExp {
 	return "";
 }
 
-#!/usr/bin/perl
-
-# This sub checks if model part num ins/outs matches C code declaration ins/outs
-sub feArgChk {
-        my ($fName,$fFile,$ins,$outs) = @_;
-        print "C Function = ",$fName," file ",$fFile," with ",$ins, " inputs and ",$outs," outputs \n";
-        open(my $fh,"<".$fFile) || die "Cannot open $fFile \n";
-	my $search = "void $fName *\\(";
-	my $search1 = "argin\\[0\\]";
-	my $start = 0;
-	my $inCnt = 0;
-	my $outCnt = 0;
-	my $inargUsed = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-	my $outargUsed = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-        my $maxCnt = 25;
-        while (my $line = <$fh>) {
-                chomp $line;
-# skip comment lines
-                if ( $line =~ "^\t* *//" || $line =~ "^ *#" ) {
-			next;
-		}
-# skip out if end of function
-                if ( $start == 1 && $line =~ "^}" ) {
-			#print "End of Function\n";
-			last;
-		}
-# skip out if beginning of another function
-                if ( $start == 1 && $line =~ "void " ) {
-			#print "Start of next function\n";
-			last;
-		}
-                if ($start == 1 && $line =~ $invar) {
-                        #print $line," \n";
-			for($ii=0;$ii<$maxCnt;$ii++) {
-				$jj = $ii + 1;
-                		if ($line =~ $arginsearch[$ii]) {
-					$inargUsed[$ii] = 1;
-                                        if ($jj > $inCnt) {
-						$inCnt = $jj;
-					}
-				}
-
-			}
-		}
-                if ($start == 1 && $line =~ $outvar) {
-                        #print $line," \n";
-			for($ii=0;$ii<$maxCnt;$ii++) {
-				$jj = $ii + 1;
-                		if ($line =~ $argoutsearch[$ii]) {
-					$outargUsed[$ii] = 1;
- 					if ($jj > $outCnt) {
-						$outCnt = $jj;
-					}
-				}
-
-			}
-		}
-                if ($start == 0 && $line =~ $search) {
-			#print "Found start of function\n\t";
-			#print $line, "\n";
-			my @words = split /[:*(,\s\/]+/,$line;
-			$invar = $words[3];
-			$outvar = $words[7];
-			#print " InargVar = ",$invar, " and OutargVar = ",$outvar,"\n";
-			for($ii=0;$ii<$maxCnt;$ii++) {
-				$arginsearch[$ii] = $invar . "\\[" . $ii . "\\]";
-				$argoutsearch[$ii] = $outvar . "\\[" . $ii . "\\]";
-			}
-			#print "BASE SEARCH = ",$search1, " and ", $arginsearch[0], "\n";
-		$start = 1;
-        	}
-	}
-	my $inused = 0;
-	for($ii=0;$ii<$ins;$ii++) {
-		if($inargUsed[$ii]) { $inused ++; }
-	}
-	my $outused = 0;
-	for($ii=0;$ii<$outs;$ii++) {
-		if($outargUsed[$ii]) { $outused ++; }
-	}
-	if($ins != $inCnt || $outs != $outCnt || $ins != $inused || $outs != $outused) {
-		die "Function Call In/Out parameter mismatch\nModel part has $ins inputs and $outs outputs\nC Code has $inCnt inputs and $outCnt outputs\nC Code only uses $inused inputs and $outused outputs\n";
-	}
-	return($inCnt,$outCnt);
-}
-
 # Return front end code
 # Argument 1 is the part number
 # Returns calculated code string
@@ -187,11 +243,7 @@ sub frontEndCode {
 		# Note the usage of Env, all environment variables were
 		# turned into Perl variables
 		$pathed_name =~ s/(\$\w+)/$1/eeg;
-                if ( $func_name =~ "RtComm" || $func_name =~ "BLRMS" || $func_name =~ "MASKING\_MATRIX" || $func_name =~ "MULTIPLE\_BITWISE" ) {
-			print "SKIP check of $func_name argument count \n";
-		} else {
-		   my ($Ins,$Outs)  = feArgChk($func_name,$pathed_name,$::partInCnt[$::partInNum[$i][0]],$::partOutputs[$::partOutNum[$i][0]]);
-		}
+
 		$ret .= "#define CURRENT_SUBSYS $::subSysName[$::partSubNum[$i]]\n";
 		$ret .= "#include \"$pathed_name\"\n";
 		push @::sources, $pathed_name;
