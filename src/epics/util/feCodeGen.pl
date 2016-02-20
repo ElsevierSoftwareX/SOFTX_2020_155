@@ -2589,9 +2589,9 @@ sub system_name_part {
 #//  Write file with list of all parts and their connections. \n\n
 sub writeDiagsFile {
 my ($fileName) = @_;
-open(OUTD,">$fileName") || die "cannot open compile warnings output file for writing";
-#$diag = "../../../$model\_diags\.txt";
-#open(OUTD,">".$diag) || die "cannot open diag file for writing";
+#open(OUTD,">$fileName") || die "cannot open compile warnings output file for writing";
+$diag = "./diags\.txt";
+open(OUTD,">".$diag) || die "cannot open diag file for writing";
 for ($ll = 0; $ll < $subSys; $ll++) {
   $xx = $subSysPartStop[$ll] - $subSysPartStart[$ll]; # Parts count for this subsystem
   $subCntr[$ll] = 0;
@@ -2651,7 +2651,11 @@ close(OUTD);
 #Call a python script to create ADC channel list file
 $rcg_parser =  $rcg_src_dir;
 $rcg_parser .= "/src/epics/util/adcparser.py ";
-$rcg_parser .= $fileName;
+#$rcg_parser .= $fileName;
+my $cpcmd = "cp ";
+$cpcmd .= " ./diag.txt ";
+$cpcmd .= $fileName;
 system($rcg_parser);
+system($cpcmd);
 # End DIAGNOSTIC
 }
