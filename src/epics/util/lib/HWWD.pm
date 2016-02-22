@@ -290,6 +290,7 @@ sub frontEndCode {
         return <<END;
 
 // HWWD MODULE
+$SIGNAL = (int)$SIGNAL ^ 15;
 $EPICS_STATE = $SIGNAL;
 $WDOUT = $SIGNAL;
 if(!$CYCLE && !$SIGNAL) $EPICS_TTF_SEI = $EPICS_TIMERD * 60;
