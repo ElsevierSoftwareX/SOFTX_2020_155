@@ -5283,7 +5283,7 @@ Library {
     }
     Annotation {
       SID		      "346"
-      Name		      "Matlab Parts Library for Use with aLIGO Real-time Code Generator - V2.9"
+      Name		      "Matlab Parts Library for Use with aLIGO Real-time Code Generator - V3.0"
       Position		      [330, 30]
       FontName		      "times"
       FontSize		      18
