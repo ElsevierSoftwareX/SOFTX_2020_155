@@ -1,6 +1,8 @@
 ==================================================================================================
 Changes for 3.0
 ==================================================================================================
+- Bug Fix (973): HWWD.pm part updated to reflect new status bit pattern from updated SUS HWWD
+	chassis.
 - Bug Fix (895): Attempting to clean up compile, with better error messages with user direction
   to error files:
 	- Added checkInputConnect() function to all library parts in src/epics/utils/lib.` This
