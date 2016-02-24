@@ -58,8 +58,8 @@ sub partType {
 #// - _TIME_REQ = Requested T2T setting \n
 #// - _RMS_RD = RMS trip point setting read back from HWWD \n
 #// - _TIME_RD = T2T setting read back from HWWD. \n
-#// - _TTF_SEI = Estimated time to SEI trip \n
-#// - _TTF_SUS = Estimated time to SUS trip \n
+#// - _TTF_MIN = Estimated time to SEI trip in minutes.\n
+#// - _TTF_SEC = Estimated time to SEI trip in seconds.\n
 #// - _MODE = Present software state \n
 #//
 
@@ -73,8 +73,8 @@ double $MYNAME\_RMS_REQ;
 double $MYNAME\_TIME_REQ;
 double $MYNAME\_RMS_RD;
 double $MYNAME\_TIME_RD;
-double $MYNAME\_TTF_SEI;
-double $MYNAME\_TTF_SUS;
+double $MYNAME\_TTF_MIN;
+double $MYNAME\_TTF_SEC;
 double $MYNAME\_MODE;
 END
 
@@ -96,12 +96,12 @@ sub printEpics {
 	print ::EPICS <<END;
 OUTVARIABLE $::xpartName[$i]\_STATE $::systemName\.$::xpartName[$i]\_STATE double ai 0 
 MOMENTARY $::xpartName[$i]\_CMD $::systemName\.$::xpartName[$i]\_CMD double ai 0
-INVARIABLE $::xpartName[$i]\_RMS_REQ $::systemName\.$::xpartName[$i]\_RMS_REQ double ai 1 field(PREC,\"1\") field(HOPR,\"3.0\") field(LOPR,\"0.5\")
+INVARIABLE $::xpartName[$i]\_RMS_REQ $::systemName\.$::xpartName[$i]\_RMS_REQ double ai 110 field(PREC,\"1\") field(HOPR,\"3.0\") field(LOPR,\"0.5\")
 INVARIABLE $::xpartName[$i]\_TIME_REQ $::systemName\.$::xpartName[$i]\_TIME_REQ double ai 20 field(PREC,\"1\") field(HOPR,\"30.0\") field(LOPR,\"10.0\")
-OUTVARIABLE $::xpartName[$i]\_RMS_RD $::systemName\.$::xpartName[$i]\_RMS_RD double ao 1 field(PREC,\"1\")
+OUTVARIABLE $::xpartName[$i]\_RMS_RD $::systemName\.$::xpartName[$i]\_RMS_RD double ao 110 field(PREC,\"1\")
 OUTVARIABLE $::xpartName[$i]\_TIME_RD $::systemName\.$::xpartName[$i]\_TIME_RD double ao 20 field(PREC,\"1\") 
-OUTVARIABLE $::xpartName[$i]\_TTF_SEI $::systemName\.$::xpartName[$i]\_TTF_SEI double ao 0 
-OUTVARIABLE $::xpartName[$i]\_TTF_SUS $::systemName\.$::xpartName[$i]\_TTF_SUS double ao 0 
+OUTVARIABLE $::xpartName[$i]\_TTF_MIN $::systemName\.$::xpartName[$i]\_TTF_MIN double ao 0 
+OUTVARIABLE $::xpartName[$i]\_TTF_SEC $::systemName\.$::xpartName[$i]\_TTF_SEC double ao 0 
 OUTVARIABLE $::xpartName[$i]\_MODE $::systemName\.$::xpartName[$i]\_MODE double ao 0 
 END
 }
@@ -124,6 +124,7 @@ sub printFrontEndVars  {
         print ::OUT "static int \L$::xpartName[$i]_cmdack;\n";
         print ::OUT "static int \L$::xpartName[$i]_ackcnt;\n";
         print ::OUT "static int \L$::xpartName[$i]_nxtreq;\n";
+        print ::OUT "static int \L$::xpartName[$i]_time2trip;\n";
 }
 
 # Check inputs are connected
@@ -159,7 +160,6 @@ sub fromExp {
 #// - Returns C code initialization code\n
 #//	- Variable initialization of note: \n
 #//		- _onesecpulse = FE_RATE: Number of code cycles per second for use by timers. \n.
-#//		- _nxtreq = 3: Forces a read of HWWD settings on code startup.
 #//
 sub frontEndInitCode {
 	my ($i) = @_;
@@ -172,7 +172,8 @@ $here = <<END;
 \L$::xpartName[$i]_rmsTime = 0;
 \L$::xpartName[$i]_cmdack = 0;
 \L$::xpartName[$i]_ackcnt = 47;
-\L$::xpartName[$i]_nxtreq = 3;
+\L$::xpartName[$i]_nxtreq = 0;
+\L$::xpartName[$i]_time2trip = 0;
 \L$::xpartName[$i]\[0\] = 0;
 \L$::xpartName[$i]\[1\] = 0;
 END
@@ -274,6 +275,7 @@ sub frontEndCode {
 	 my $WDTIME = "\L$::xpartName[$i]_wdTime";
 	 #// Time remaining until DAC modules are shutdown
 	 my $RMSTIME = "\L$::xpartName[$i]_rmsTime";
+	 my $TTF = "\L$::xpartName[$i]_time2trip";
 	 #// Following are HWWD variables sent to / received from EPICS
 	 my $EPICS_STATE = "pLocalEpics->$::systemName\.$::xpartName[$i]\_STATE";
 	 my $EPICS_CMD_INT = "(int)pLocalEpics->$::systemName\.$::xpartName[$i]\_CMD";
@@ -282,8 +284,8 @@ sub frontEndCode {
 	 my $EPICS_TIMEREQ = "pLocalEpics->$::systemName\.$::xpartName[$i]\_TIME_REQ";
 	 my $EPICS_RMSRD = "pLocalEpics->$::systemName\.$::xpartName[$i]\_RMS_RD";
 	 my $EPICS_TIMERD = "pLocalEpics->$::systemName\.$::xpartName[$i]\_TIME_RD";
-	 my $EPICS_TTF_SEI = "pLocalEpics->$::systemName\.$::xpartName[$i]\_TTF_SEI";
-	 my $EPICS_TTF_SUS = "pLocalEpics->$::systemName\.$::xpartName[$i]\_TTF_SUS";
+	 my $EPICS_TTF_MIN = "pLocalEpics->$::systemName\.$::xpartName[$i]\_TTF_MIN";
+	 my $EPICS_TTF_SEC = "pLocalEpics->$::systemName\.$::xpartName[$i]\_TTF_SEC";
 	 my $EPICS_MODE = "pLocalEpics->$::systemName\.$::xpartName[$i]\_MODE";
 
 	# Write out the C Code
@@ -293,16 +295,11 @@ sub frontEndCode {
 $SIGNAL = (int)$SIGNAL ^ 15;
 $EPICS_STATE = $SIGNAL;
 $WDOUT = $SIGNAL;
-if(!$CYCLE && !$SIGNAL) $EPICS_TTF_SEI = $EPICS_TIMERD * 60;
-if(!$CYCLE && $SIGNAL && ($EPICS_TTF_SEI > 0)) $EPICS_TTF_SEI --;
-if(!$CYCLE && ((int)$SIGNAL & 1)) $EPICS_TTF_SEI = 0;
-if(!$CYCLE && !((int)$SIGNAL & 10)) $EPICS_TTF_SUS = $EPICS_TIMERD * 60 + $EPICS_TTF_SEI;
-if(!$CYCLE && ((int)$SIGNAL & 10) && ($EPICS_TTF_SUS > 0)) $EPICS_TTF_SUS --;
-if(!$CYCLE && ((int)$SIGNAL & 4)) $EPICS_TTF_SUS = 0;
-if(($EPICS_TIMERD > ($EPICS_TIMEREQ * 1.2)) || ($EPICS_TIMERD < ($EPICS_TIMEREQ * .8)))
-	$EPICS_STATE += 16;
-if(($EPICS_RMSRD > ($EPICS_RMSREQ * 1.1)) || ($EPICS_RMSRD < ($EPICS_RMSREQ * .9)))
-	$EPICS_STATE += 32;
+if(!$CYCLE && !$SIGNAL) $TTF = $EPICS_TIMERD * 60;
+if(!$CYCLE && $SIGNAL && ($TTF > 0)) $TTF --;
+if(!$CYCLE && ((int)$SIGNAL & 1)) $TTF = 0;
+$EPICS_TTF_MIN = $TTF / 60;
+$EPICS_TTF_SEC = $TTF % 60;
 if($NXT_REQ  && ($HWWD_MODE == 0))
 {
 	$EPICS_CMD = $NXT_REQ;
