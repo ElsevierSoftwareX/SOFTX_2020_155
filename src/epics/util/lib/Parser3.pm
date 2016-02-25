@@ -799,6 +799,12 @@ sub node_processing {
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
         	$::cdsPart[$::partCnt] = 1;
 	} elsif ($block_type eq "MULTIPLY") {
+		if(${$node->{FIELDS}}{Inputs} eq undef)
+		{
+			$::partInputs[$::partCnt] = 2;
+		} else {
+			$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
+		}
         	$::cdsPart[$::partCnt] = 1;
 	} elsif ($block_type eq "Abs") {
         	$::cdsPart[$::partCnt] = 1;

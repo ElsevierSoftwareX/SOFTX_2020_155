@@ -35,8 +35,9 @@ sub printFrontEndVars  {
 # Check inputs are connected
 sub checkInputConnect {
         my ($i) = @_;
-	if($::partInCnt[$i] < 2) {
-                print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires 2; Only $::partInCnt[$i] provided.\n";
+	my $inCnt = $::partInputs[$i];
+	if($::partInCnt[$i] != $inCnt) {
+                print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires $inCnt; Only $::partInCnt[$i] provided.\n";
 	        return "ERROR";
         }
         return "";
