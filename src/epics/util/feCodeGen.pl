@@ -2653,9 +2653,10 @@ $rcg_parser =  $rcg_src_dir;
 $rcg_parser .= "/src/epics/util/adcparser.py ";
 #$rcg_parser .= $fileName;
 my $cpcmd = "cp ";
-$cpcmd .= " ./diag.txt ";
+$cpcmd .= " ./diags.txt ";
 $cpcmd .= $fileName;
 system($rcg_parser);
+sleep(2);
 system($cpcmd);
 # End DIAGNOSTIC
 }
