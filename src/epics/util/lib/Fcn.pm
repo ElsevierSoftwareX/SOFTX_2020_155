@@ -50,11 +50,12 @@ sub printFrontEndVars  {
 # Check inputs are connected
 sub checkInputConnect {
         my ($i) = @_;
-	my $numin = $::partInNum[$i][0];
-	# Find the MUX that feeds this part.
-	my $muxName = "\L$::xpartName[$::partInNum[$i][0]]";
-	# Determine number of MUX inputs
-	my $muxChans = $::partInCnt[$numin];
+	my $inCnt = $::partInCnt[$i]; 
+	# Do a basic check that part has an input connection.
+	if($inCnt == 0) {
+                print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] is missing an input connection \n";
+        	return "ERROR";
+	}
 	# Get the function equation
         my $expr = $::functionExpr[$i];
         $expr =~ s/\[(\d+)\]/$1-1/eg;
@@ -73,11 +74,15 @@ sub checkInputConnect {
 		}
 	}
 	$maxIndex ++;
-	# print "Num inputs required = $maxIndex $muxChans\n";
-	# Number of matrix inputs should equal number of variables indexed by function.
-	if($maxIndex != $muxChans) {
+	# Typical input is from MUX, so see how many inputs provided to part connected to Fcn input
+	# Get number of inputs to part feeding Fcn
+	my $numin = $::partInNum[$i][0];
+	# Get number of inputs to that part.
+	my $muxChans = $::partInCnt[$numin];
+	# Verify MUX input has at least as many connections into it as used in the Fcn part.
+	if($maxIndex > $muxChans) {
                 print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires $maxIndex; Only $muxChans provided. Function defined as: $expr\n";
-        return "ERROR";
+        	return "ERROR";
         }
         return "";
 }
