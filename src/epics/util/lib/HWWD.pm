@@ -125,6 +125,7 @@ sub printFrontEndVars  {
         print ::OUT "static int \L$::xpartName[$i]_ackcnt;\n";
         print ::OUT "static int \L$::xpartName[$i]_nxtreq;\n";
         print ::OUT "static int \L$::xpartName[$i]_time2trip;\n";
+        print ::OUT "static int \L$::xpartName[$i]_input;\n";
 }
 
 # Check inputs are connected
@@ -254,7 +255,8 @@ END
 sub frontEndCode {
 	my ($i) = @_;
 	 #// SIGNAL = HWWD Sig Input
-	 my $SIGNAL = $::fromExp[0];
+	 my $SIGNAL = "\L$::xpartName[$i]_input";
+	 my $INPUT = $::fromExp[0];
 	 my $CYCLE = "cycle";
 	 #// HWWD signal output (1 = OK, 0 = FAULT)
 	 my $WDOUT = "\L$::xpartName[$i]\[0\]";
@@ -292,7 +294,7 @@ sub frontEndCode {
         return <<END;
 
 // HWWD MODULE
-$SIGNAL = (int)$SIGNAL ^ 15;
+$SIGNAL = (int)$INPUT ^ 15;
 $EPICS_STATE = $SIGNAL;
 $WDOUT = $SIGNAL;
 if(!$CYCLE && !$SIGNAL) $TTF = $EPICS_TIMERD * 60;
