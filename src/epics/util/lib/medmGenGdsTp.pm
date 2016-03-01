@@ -278,7 +278,9 @@ sub createGdsMedm
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_MSG2",$ecolors{white},$ecolors{blue},"static");
 	$xpos = 722; $ypos = 230; $width = 40; $height = 18;
 	$arg = "/opt/rtcds/";
-        $medmdata .= ("CDS::medmGen::medmGenShellCmd") -> ($xpos,$ypos,$width,$height,$ecolors{black},$ecolors{yellow},1,"Diff","Coeff Diff","xterm -e view",$scriptTarget);
+	$fileCmd = $scriptTarget . " &";
+        # $medmdata .= ("CDS::medmGen::medmGenShellCmd") -> ($xpos,$ypos,$width,$height,$ecolors{black},$ecolors{yellow},1,"Diff","Coeff Diff","xterm -e view",$scriptTarget," &");
+        $medmdata .= ("CDS::medmGen::medmGenShellCmd") -> ($xpos,$ypos,$width,$height,$ecolors{black},$ecolors{yellow},1,"Diff","Coeff Diff","xterm -e view",$fileCmd);
 
 	# ************* Create DAQ Status Info Block *****************************************************************
 
