@@ -200,6 +200,8 @@ SET_ERR_TABLE readErrTable[SDF_ERR_TSIZE];	///< Table used to report file read e
 SET_ERR_TABLE cdTableList[SDF_MAX_TSIZE];	///< Table used to report file read errors..
 time_t timeTable[SDF_MAX_CHANS];		///< Holds timestamps for cdTableP
 
+int filterMasks[SDF_MAX_FMSIZE];		///< Filter monitor masks, as manipulated by the user
+
 dbAddr fmMaskChan[SDF_MAX_FMSIZE];		///< We reflect the mask value into these channels
 dbAddr fmMaskChanCtrl[SDF_MAX_FMSIZE];		///< We signal bit changes to the masks on these channels
 
@@ -277,8 +279,9 @@ void changeSelectCB_uninit(int, SET_ERR_TABLE *, int *);
 void decodeChangeSelect(int, int, int, SET_ERR_TABLE *, int *, void (*)(int, SET_ERR_TABLE *, int *));
 int appendAlarms2File(char *,char *,char *);
 void registerFilters();
-void setupFMChanArrays(char *,dbAddr*,dbAddr*);
-void processFMChanCommands(dbAddr*,dbAddr*);
+void setupFMArrays(char *,int*,dbAddr*,dbAddr*);
+void resyncFMArrays(int *,dbAddr*);
+void processFMChanCommands(int*,dbAddr*,dbAddr*,int*,int,SET_ERR_TABLE*);
 #ifdef CA_SDF
 void nullCACallback(struct event_handler_args);
 
@@ -320,14 +323,12 @@ void dbDumpRecords(DBBASE *,const char *);
 #define D_NOW (__output_iter == 0)
 #define D(...) {if (__output_iter == 0) { fprintf(stderr, __VA_ARGS__); } }
 
-#define TEST_CHAN "X1:PSL-ILS_HV_MON_INMON"
+#define TEST_CHAN "X1:FEC-81_DACDT_ENABLE"
 
 int __output_iter = 0;
 int __test_chan_idx = -1;
 void iterate_output_counter()
 {
-	fprintf(stderr,".");
-	fflush(stderr);
 	++__output_iter;
 	if (__output_iter > 10) __output_iter = 0;
 }
@@ -336,6 +337,18 @@ void iterate_output_counter()
 #define D(...) {}
 void iterate_output_counter() {}
 #endif
+
+
+// Some helper macros
+#define CHFLAG_CURRENT_MONITORED_BIT_VAL 1
+#define CHFLAG_REVERT_BIT_VAL 2
+#define CHFLAG_ACCEPT_BIT_VAL 4
+#define CHFLAG_MONITOR_BIT_VAL 8
+
+#define CHFLAG_CURRENT_MONITORED_BIT(x) ((x) & 1)
+#define CHFLAG_REVERT_BIT(x) ((x) & 2)
+#define CHFLAG_ACCEPT_BIT(x) ((x) & 4)
+#define CHFLAG_MONITOR_BIT(x) ((x) & 8)
 
 // End Header **********************************************************************************************************
 //
@@ -454,6 +467,8 @@ int ii;
 void setAllTableSelections(int numEntries,SET_ERR_TABLE *dcsErrTable, int sc[],int selectOpt)
 {
 int ii;
+int filtNum = 0;
+long status = 0;
 	switch(selectOpt) {
 		case 1:
 			sc[0] = 0;
@@ -478,10 +493,17 @@ int ii;
 			}
 			break;
 		case 3:
-			sc[2] = 0;
+			sc[2] = numEntries;
 			for(ii=0;ii<numEntries;ii++) {
 				dcsErrTable[ii].chFlag |= 8;
-				sc[2] ++;
+				
+				filtNum = dcsErrTable[ii].filtNum;
+				if (filtNum >= 0) {
+					if (filterMasks[filtNum] == filterTable[filtNum].mask) {
+						filterMasks[filtNum] = ~0;
+						status = dbPutField(&fmMaskChan[filtNum],DBR_LONG,&(filterMasks[filtNum]),1);
+					}
+				}
 			}
 			break;
 		default:
@@ -549,9 +571,12 @@ int selectLine;
 				}
 				break;
 			case 2:
-				dcsErrTable[selectLine].chFlag ^= 8;
-				if(dcsErrTable[selectLine].chFlag & 8) selectCounter[2] ++;
-				else selectCounter[2] --;
+				/* we only handle non-filter bank entries here */
+				if (dcsErrTable[selectLine].filtNum < 0) {
+					dcsErrTable[selectLine].chFlag ^= 8;
+					if(dcsErrTable[selectLine].chFlag & 8) selectCounter[2] ++;
+					else selectCounter[2] --;
+				}
 				break;
 			default:
 				break;
@@ -704,15 +729,10 @@ char *ret=0;
 		mask = (unsigned int)filterTable[ii].mask;
 		maskedRefVal = refVal & mask;
 		maskedSwReqVal = filterTable[ii].swreq & mask;
-		if (ii == 0) {
-			D("maskedRef = 0x%x maskedSwreq = 0x%x swreq=0x%x mask=0x%x", maskedRefVal, maskedSwReqVal, filterTable[ii].swreq, filterTable[ii].mask);
-			D(" maskedRef ^ maskedSwReq = 0x%x\n", maskedRefVal ^ maskedSwReqVal);
-		}
 		if(( maskedRefVal != maskedSwReqVal && errCnt < SDF_ERR_TSIZE && (mask || monitorAll) && filterTable[ii].init) )
 			*diffcntr += 1;
 		if(( maskedRefVal != maskedSwReqVal && errCnt < SDF_ERR_TSIZE && (mask || monitorAll) && filterTable[ii].init) || displayall)
 		{
-			// FIXME: print out the right strings
 			filtStrBitConvert(1,refVal,swstrE);
 			filtStrBitConvert(1,filterTable[ii].swreq,swstrB);
 			x = maskedRefVal ^ maskedSwReqVal;
@@ -725,12 +745,12 @@ char *ret=0;
 			sprintf(setErrTable[errCnt].burtset, "%s", swstrB);
 			sprintf(setErrTable[errCnt].liveset, "%s", swstrE);
 			sprintf(setErrTable[errCnt].diff, "%s", swstrD);
-			D("%s %s %s %s\n", tmpname, swstrB, swstrE, swstrD);
+			
 			setErrTable[errCnt].liveval = 0.0;
 			setErrTable[errCnt].sigNum = filterTable[ii].sw[0] + (filterTable[ii].sw[1] * SDF_MAX_TSIZE);
 			setErrTable[errCnt].filtNum = ii;
-			setErrTable[errCnt].sw[0] = buffer[0].rval;;
-			setErrTable[errCnt].sw[1] = buffer[1].rval;;
+			setErrTable[errCnt].sw[0] = buffer[0].rval;
+			setErrTable[errCnt].sw[1] = buffer[1].rval;
 			if(filterTable[ii].mask) setErrTable[errCnt].chFlag |= 0x1;
 			else setErrTable[errCnt].chFlag &= 0xe;
 
@@ -1440,8 +1460,9 @@ int minusOne = -1;
                 status = dbNameToAddr(sl,&daddr);
                 status = dbPutField(&daddr,DBR_ULONG,&zero,1);
 
-		sprintf(sf, "%s_SDF_FM_LINE_%d", pref, lineNum);
+		sprintf(sf, "%s_SDF_FM_LINE_%d", pref, ii);
 		status = dbNameToAddr(sf,&faddr);
+		minusOne = -1;
 		status = dbPutField(&faddr,DBR_LONG,&minusOne,1);
 
 		lineCtr ++;
@@ -1561,6 +1582,13 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 	     }
 	return(errCntr);
 }
+
+/// Modify the global cdTable as directed by applying changes from modTable where the channel is marked as apply or monitor
+///
+/// @param numEntries[in] The number of entries in modTable
+/// @param modTable[in] An array of SET_ERR_TABLE entries that hold the current views state to be merged with cdTable
+///
+/// @remark modifies cdTable
 int modifyTable(int numEntries,SET_ERR_TABLE modTable[])
 {
 int ii,jj;
@@ -1569,24 +1597,32 @@ unsigned int sn,sn1;
 int found = 0;
 	for(ii=0;ii<numEntries;ii++)
 	{
+		// if accept or monitor is set
 		if(modTable[ii].chFlag > 3) 
 		{
 			found = 0;
 			for(jj=0;jj<chNum;jj++)
 			{
 				// fmIndex = -1;
-				if(strcmp(cdTable[jj].chname,modTable[ii].chname) == 0 && (modTable[ii].chFlag & 4)) {
-					if(cdTable[jj].datatype == SDF_NUM) cdTable[jj].data.chval = modTable[ii].liveval;/* atof(modTable[ii].liveset);*/
-					else sprintf(cdTable[jj].data.strval,"%s",modTable[ii].liveset);
-					cdTable[jj].initialized = 1;
-					found = 1;
-					fmIndex = cdTable[jj].filterNum;
-				}
-				if(strcmp(cdTable[jj].chname,modTable[ii].chname) == 0 && (modTable[ii].chFlag & 8)) {
-					// with bit fields being used we should not just twiddle one bit
-					cdTable[jj].mask = (cdTable[jj].mask ? 0 : ~0);
-					found = 1;
-					fmIndex = cdTable[jj].filterNum;
+				if (strcmp(cdTable[jj].chname,modTable[ii].chname) == 0) {
+					if ( CHFLAG_ACCEPT_BIT(modTable[ii].chFlag) ) {
+						if(cdTable[jj].datatype == SDF_NUM) cdTable[jj].data.chval = modTable[ii].liveval;/* atof(modTable[ii].liveset);*/
+						else sprintf(cdTable[jj].data.strval,"%s",modTable[ii].liveset);
+						cdTable[jj].initialized = 1;
+						found = 1;
+						fmIndex = cdTable[jj].filterNum;
+					}
+					if(CHFLAG_MONITOR_BIT(modTable[ii].chFlag)) {
+						fmIndex = cdTable[jj].filterNum;
+						if (fmIndex >= 0 && fmIndex < SDF_MAX_FMSIZE) {
+							// filter module use the manualy modified state, cannot just toggle
+							cdTable[jj].mask = filterMasks[fmIndex];
+						} else {
+							// regular channel just toggle on/off state
+							cdTable[jj].mask = (cdTable[jj].mask ? 0 : ~0);
+						}
+						found = 1;
+					}
 				}
 			}
 			if(modTable[ii].filtNum >= 0 && !found) { 
@@ -1596,17 +1632,17 @@ int found = 0;
 				sn = modTable[ii].sigNum;
 				sn1 = sn / SDF_MAX_TSIZE;
 				sn %= SDF_MAX_TSIZE;
-				if(modTable[ii].chFlag & 4) {
+				if(CHFLAG_ACCEPT_BIT(modTable[ii].chFlag)) {
 					cdTable[sn].data.chval = modTable[ii].sw[0];
 					cdTable[sn].initialized = 1;
 					cdTable[sn1].data.chval = modTable[ii].sw[1];
 					cdTable[sn1].initialized = 1;
 					filterTable[fmIndex].init = 1;
 				}
-				if(modTable[ii].chFlag & 8) {
-					filterTable[fmIndex].mask = (filterTable[fmIndex].mask ? 0 : ~0);
-				 	cdTable[sn].mask = filterTable[fmIndex].mask;
-				 	cdTable[sn1].mask = filterTable[fmIndex].mask;
+				if(CHFLAG_MONITOR_BIT(modTable[ii].chFlag)) {
+					filterTable[fmIndex].mask = filterMasks[fmIndex];
+				 	cdTable[sn].mask = filterMasks[fmIndex];
+				 	cdTable[sn1].mask = filterMasks[fmIndex];
 				}
 			}
 		}
@@ -2028,19 +2064,25 @@ void registerFilters() {
 	printf("%d filters\n",fmNum);
 }
 
-void setupFMChanArrays(char *pref, dbAddr *fmMaskAddr, dbAddr *fmCtrlAddr) {
+/// Provide initial values to the filterMasks arrray and the SDF_FM_MASK and SDF_FM_MASK_CTRL variables
+///
+void setupFMArrays(char *pref, int *fmMasks, dbAddr *fmMaskAddr, dbAddr *fmCtrlAddr) {
 	int ii = 0;
+	int sw1 = 0;
+	int sw2 = 0;
 	long status = 0;
 	char name[256];
 	char ctrl[256];
 	int zero = 0;
 
 	for (ii = 0; ii < SDF_MAX_FMSIZE; ++ii) {
-		// just default this to 0, the correct value will be put into the
-		// fields in the main loop
+		sw1 = filterTable[ii].sw[0];
+		sw2 = filterTable[ii].sw[1];
+		fmMasks[ii] = filterTable[ii].mask = cdTable[sw1].mask | cdTable[sw2].mask;
+
 		sprintf(name, "%s_SDF_FM_MASK_%d", pref, ii);
 		status = dbNameToAddr(name, &fmMaskAddr[ii]);
-		status = dbPutField(&fmMaskAddr[ii],DBR_LONG,&zero,1);
+		status = dbPutField(&fmMaskAddr[ii],DBR_LONG,&(fmMasks[ii]),1);
 
 		sprintf(ctrl, "%s_SDF_FM_MASK_CTRL_%d", pref, ii);
 		status = dbNameToAddr(ctrl, &fmCtrlAddr[ii]);
@@ -2049,46 +2091,82 @@ void setupFMChanArrays(char *pref, dbAddr *fmMaskAddr, dbAddr *fmCtrlAddr) {
 	} 
 }
 
-void processFMChanCommands(dbAddr *fmMaskAddr, dbAddr *fmCtrlAddr) {
+/// Copy the filter mask information from cdTable into fmMasks
+///
+void resyncFMArrays(int *fmMasks, dbAddr *fmMaskAddr) {
 	int ii = 0;
-	int sw1 = 0, sw2 = 0;
+	int sw1 = 0;
+	int sw2 = 0;
+	long status = 0;
+
+	printf("!!!!!!!!!resyncFMArrays\n");
+	for (ii = 0; ii < SDF_MAX_FMSIZE; ++ii) {
+		sw1 = filterTable[ii].sw[0];
+		sw2 = filterTable[ii].sw[1];
+		fmMasks[ii] = filterTable[ii].mask = cdTable[sw1].mask | cdTable[sw2].mask;
+
+		status = dbPutField(&fmMaskAddr[ii],DBR_LONG,&(fmMasks[ii]),1);
+	}
+}
+
+/// Process a command to flip or set filter bank monitor bits
+///
+/// @param fMask[in/out] A pointer to a list of int filter monitoring masks
+/// @param fmMaskAddr[in/out] A pointer to the list of monitor masks addresses
+/// @param fmCtrlAddr[in/out] A pointer to the list of control word addresses
+/// @param selectCounter[in/out] A array of 3 ints with the count of changes selected
+/// @param errCnt[in] Number or entries in setErrTable
+/// @param setErrTable[in/out] The array of SET_ERR_TABLE entries to update the chFlag field on
+///
+/// @remark The SDF_FM_MASK_CTRL channels signal a change in filter bank
+/// monitoring.  This checks all of the MASK_CTRL signals and modifies the
+/// filter mask in the fMask array as needed.
+///
+/// @remark Each of the input arrays is expected to have a length of SDF_MAX_FMSIZE
+/// with fmNum in actual use.
+void processFMChanCommands(int *fMask, dbAddr *fmMaskAddr, dbAddr *fmCtrlAddr, int *selectCounter, int errCnt, SET_ERR_TABLE *setErrTable) {
+	int ii = 0;
+	int jj = 0;
+	int refMask = 0;
+	int preMask = 0;
+	int differsPre = 0, differsPost = 0;
 	long ctrl = 0;
-	long mask = 0;
 	long status = 0;
 	long ropts = 0;
 	long nvals = 1;
-
+	int foundCh = 0;
 
 	for (ii = 0; ii < SDF_MAX_FMSIZE && ii < fmNum; ++ii) {
 		status = dbGetField(&fmCtrlAddr[ii], DBR_LONG, &ctrl, &ropts, &nvals, NULL);
 
-		sw1 = filterTable[ii].sw[0];
-		sw2 = filterTable[ii].sw[1];
+		// only do work if there is a change
+		if (!ctrl) continue;
 
-		mask = 0;
-		if (sw1 >= 0 && sw1 < SDF_MAX_TSIZE) {
-			mask |= cdTable[sw1].mask;
-		}
-		if (sw2 >= 0 && sw2 < SDF_MAX_TSIZE) {
-			mask |= cdTable[sw2].mask;
-		}
-		
-		mask ^= ctrl;
-		
-		if (sw1 >= 0 && sw1 < SDF_MAX_TSIZE) {
-			cdTable[sw1].mask = mask;
-		}
-		if (sw2 >= 0 && sw2 < SDF_MAX_TSIZE) {
-			cdTable[sw2].mask = mask;
-		}
-		filterTable[ii].mask = mask;
+		refMask = filterTable[ii].mask;
+		preMask = fMask[ii];
+		differsPre = (refMask != fMask[ii]);
 
-		dbPutField(&fmMaskAddr[ii],DBR_LONG,&mask,1);
+		fMask[ii] ^= ctrl;
 
-		if (ctrl != 0) {
-			ctrl = 0;
-			dbPutField(&fmCtrlAddr[ii],DBR_LONG,&ctrl,1);
+		differsPost = (refMask != fMask[ii]);
+
+		foundCh = 0;
+		/* if there is a change, update4 the selection count) */
+		if (differsPre != differsPost) {
+			for (jj = 0; jj < errCnt && setErrTable[jj].filtNum >= 0 && setErrTable[jj].filtNum != ii; ++jj) {}
+			if (jj < errCnt && setErrTable[jj].filtNum == ii) {
+				setErrTable[jj].chFlag ^= CHFLAG_MONITOR_BIT_VAL;
+				foundCh = setErrTable[jj].chFlag;
+				selectCounter[2] += ( differsPre ? -1 : 1 );
+			}
 		}
+
+		printf("Signal 0x%x set on '%s' ref=0x%x pre=0x%x post=0x%x pre/post diff(%d,%d) chFlag = 0x%x\n", ctrl, filterTable[ii].fname, refMask, preMask, fMask[ii], differsPre, differsPost, foundCh);
+
+		dbPutField(&fmMaskAddr[ii],DBR_LONG,&(fMask[ii]),1);
+
+		ctrl = 0;
+		dbPutField(&fmCtrlAddr[ii],DBR_LONG,&ctrl,1);
 	}
 }
 
@@ -2190,6 +2268,7 @@ void subscriptionHandler(struct event_handler_args args) {
 	}
 
 	pthread_mutex_lock(&caTableMutex);
+
 	// If this entry has just reconnected, then do not write the old copy, write to the temporary/redir dest
 	initialRedirIndex = entry->redirIndex;
 	if (entry->redirIndex >= 0) {
@@ -2212,21 +2291,23 @@ void subscriptionHandler(struct event_handler_args args) {
 		strncpy(entry->data.strval, sVal->value, MAX_STR_LEN);
 		entry->data.strval[MAX_STR_LEN - 1] = '\0';
 		entry->mod_time = sVal->stamp.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
-	} else if (args.type == DBR_GR_ENUM && initialRedirIndex >= SDF_MAX_TSIZE) {
+	} else if (args.type == DBR_GR_ENUM) {
 		struct dbr_gr_enum *eVal = (struct dbr_gr_enum *)args.dbr;
-		if (entry->datatype == SDF_UNKNOWN) {
-			// determine the proper type
-			entry->datatype = SDF_NUM;
-			if (eVal->no_str >= 2) {
-				// call it a string if there are two non-null distinct
-				// strings for the first two entries
-				if ((strlen(eVal->strs[0]) > 0 && strlen(eVal->strs[1]) > 0) &&
-					strcmp(eVal->strs[0], eVal->strs[1]) != 0)
-				{
-					entry->datatype = SDF_STR;
+		if (initialRedirIndex >= SDF_MAX_TSIZE) {			
+			if (entry->datatype == SDF_UNKNOWN) {
+				// determine the proper type
+				entry->datatype = SDF_NUM;
+				if (eVal->no_str >= 2) {
+					// call it a string if there are two non-null distinct
+					// strings for the first two entries
+					if ((strlen(eVal->strs[0]) > 0 && strlen(eVal->strs[1]) > 0) &&
+						strcmp(eVal->strs[0], eVal->strs[1]) != 0)
+					{
+						entry->datatype = SDF_STR;
+					}
 				}
+				++chEnumDetermined;
 			}
-			++chEnumDetermined;
 		}
 		if (entry->datatype == SDF_NUM) {
 			entry->data.chval = (double)(eVal->value);
@@ -2452,6 +2533,8 @@ void syncCAConnections(long *disconnected_count)
 {
 	int ii = 0;
 	long tmp = 0;
+	int chanIndex = SDF_MAX_TSIZE;
+	chtype subtype = DBR_TIME_DOUBLE;
 
 	pthread_mutex_lock(&caTableMutex);
 	// sync all non-enum channel connections that have taken place
@@ -2468,6 +2551,15 @@ void syncCAConnections(long *disconnected_count)
 				// we have a concrete type here, migrate it over
 				copyConnectedCAEntry(&(caConnEnumTable[ii]));
 				caConnEnumTable[ii].datatype = SDF_UNKNOWN;
+
+				chanIndex = caTable[ii].chanIndex;
+				ca_clear_subscription(caEvid[chanIndex]);
+				caEvid[chanIndex] = 0;
+				subtype = (caTable[ii].datatype == SDF_NUM ? DBR_TIME_DOUBLE : DBR_TIME_STRING);
+				ca_create_subscription(subtype, 0, caTable[ii].chanid, DBE_VALUE, subscriptionHandler, &(caTable[ii]), &(caEvid[chanIndex]));
+
+				chanIndex = SDF_MAX_TSIZE;
+				subtype = DBR_TIME_DOUBLE;
 			}
 		}
 	}
@@ -2860,6 +2952,8 @@ int main(int argc,char *argv[])
 	char *fotonDiffFile = getenv("FOTON_DIFF_FILE");
 	char *logdir = getenv("LOG_DIR");
 	char myDiffCmd[256];
+	SET_ERR_TABLE *currentTable = 0;
+	int currentTableCnt = 0;
 
 	if(stat(logdir, &st) == -1) mkdir(logdir,0777);
 	// strcat(sdf,"_safe");
@@ -3058,7 +3152,8 @@ sleep(5);
 #else
 	dbDumpRecords(*iocshPpdbbase, pref);
 #endif
-	setupFMChanArrays(pref,fmMaskChan,fmMaskChanCtrl);
+	setupFMArrays(pref,filterMasks,fmMaskChan,fmMaskChanCtrl);
+
 	sprintf(errMsg,"Software Restart \nRCG VERSION: %.2f",myversion);
 	logFileEntry(errMsg);
 
@@ -3114,6 +3209,7 @@ sleep(5);
 			reqValid = 1;
 			if(reqValid) {
 				rdstatus = readConfig(pref,sdfile,request,sdalarmfile);
+				resyncFMArrays(filterMasks,fmMaskChan);
 				if (rdstatus) burtstatus |= rdstatus;
 				else burtstatus &= ~(6);
 				if(burtstatus < 4) {
@@ -3223,9 +3319,12 @@ sleep(5);
 				// Need to clear selections when moving between tables.
 				if(lastTable !=  SDF_TABLE_DIFFS) {
 					clearTableSelections(sperror,setErrTable, selectCounter);
+					resyncFMArrays(filterMasks,fmMaskChan);
 					confirmVal = 0;
 				}
 				pageDisp = reportSetErrors(pref, sperror,setErrTable,pageNum);
+				currentTable = setErrTable;
+				currentTableCnt = sperror;
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&sperror,1);
 				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
 				if(selectAll) {
@@ -3251,6 +3350,7 @@ sleep(5);
 						status = writeTable2File(sdfDir,bufile,SDF_WITH_INIT_FLAG,cdTable);
 					}
 					clearTableSelections(sperror,setErrTable, selectCounter);
+					resyncFMArrays(filterMasks,fmMaskChan);
 					confirmVal = 0;
 					status = dbPutField(&confirmwordaddr,DBR_LONG,&confirmVal,1);
 					noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit,NULL);
@@ -3262,9 +3362,12 @@ sleep(5);
 				// Need to clear selections when moving between tables.
 				if(lastTable != SDF_TABLE_NOT_FOUND) {
 					clearTableSelections(sperror,setErrTable, selectCounter);
+					resyncFMArrays(filterMasks,fmMaskChan);
 					confirmVal = 0;
 				}
 				pageDisp = reportSetErrors(pref, chNotFound,unknownChans,pageNum);
+				currentTable = unknownChans;
+				currentTableCnt = chNotFound;
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotFound,1);
 				if (resetNum > 200) {
 					decodeChangeSelect(resetNum, pageDisp, chNotFound, unknownChans,selectCounter, NULL);
@@ -3274,12 +3377,15 @@ sleep(5);
 			case SDF_TABLE_NOT_INIT:
 				if(lastTable != SDF_TABLE_NOT_INIT) {
 					clearTableSelections(sperror,setErrTable, selectCounter);
+					resyncFMArrays(filterMasks,fmMaskChan);
 					confirmVal = 0;
 				}
 				if (!freezeTable)
-					getEpicsSettings(chNum,NULL); //timeTable);
-				noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit,NULL); //timeTable);
+					getEpicsSettings(chNum,NULL);
+				noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit,NULL);
 				pageDisp = reportSetErrors(pref, noInit, uninitChans,pageNum);
+				currentTable = uninitChans;
+				currentTableCnt = noInit;
 				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
 				if(selectAll == 2 || selectAll == 3) {
 					setAllTableSelections(noInit,uninitChans,selectCounter,selectAll);
@@ -3305,6 +3411,7 @@ sleep(5);
 						status = writeTable2File(sdfDir,bufile,SDF_WITH_INIT_FLAG,cdTable);
 					}
 					clearTableSelections(chNotInit,uninitChans, selectCounter);
+					resyncFMArrays(filterMasks,fmMaskChan);
 					confirmVal = 0;
 					status = dbPutField(&confirmwordaddr,DBR_LONG,&confirmVal,1);
 				}
@@ -3316,6 +3423,7 @@ sleep(5);
 				D("In not mon\n");
 				if(lastTable != SDF_TABLE_NOT_MONITORED) {
 					clearTableSelections(noMon,unMonChans, selectCounter);
+					resyncFMArrays(filterMasks,fmMaskChan);
 					confirmVal = 0;
 					status = dbPutField(&confirmwordaddr,DBR_LONG,&confirmVal,1);
 				}
@@ -3324,6 +3432,8 @@ sleep(5);
 				noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit,NULL);//timeTable);
 				status = dbPutField(&monchancntaddr,DBR_LONG,&chNotMon,1);
 				pageDisp = reportSetErrors(pref, noMon, unMonChans,pageNum);
+				currentTable = unMonChans;
+				currentTableCnt = noMon;
 				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
 				if(selectAll) {
 					setAllTableSelections(noMon,unMonChans,selectCounter,selectAll);
@@ -3348,6 +3458,7 @@ sleep(5);
 					}
 					// noMon = createSortTableEntries(chNum,wcVal,wcstring);
 					clearTableSelections(noMon,unMonChans, selectCounter);
+					resyncFMArrays(filterMasks,fmMaskChan);
 					confirmVal = 0;
 					status = dbPutField(&confirmwordaddr,DBR_LONG,&confirmVal,1);
 					// Calculate and report number of channels NOT being monitored.
@@ -3356,14 +3467,16 @@ sleep(5);
 				lastTable = SDF_TABLE_NOT_MONITORED;
 				break;
 			case SDF_TABLE_FULL:
-				D("In full table\n");
 				if(lastTable != SDF_TABLE_FULL) {
 					clearTableSelections(cdSort,cdTableList, selectCounter);
+					resyncFMArrays(filterMasks,fmMaskChan);
 					confirmVal = 0;
 				}
 				if (!freezeTable)
 					cdSort = spChecker(monFlag,cdTableList,wcVal,wcstring,1,&status);
 				pageDisp = reportSetErrors(pref, cdSort, cdTableList,pageNum);
+				currentTable = cdTableList;
+				currentTableCnt = cdSort;
 				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
 				if(selectAll == 3) {
 					setAllTableSelections(cdSort,cdTableList,selectCounter,selectAll);
@@ -3387,6 +3500,7 @@ sleep(5);
 						status = writeTable2File(sdfDir,bufile,SDF_WITH_INIT_FLAG,cdTable);
 					}
 					clearTableSelections(cdSort,cdTableList, selectCounter);
+					resyncFMArrays(filterMasks,fmMaskChan);
 					confirmVal = 0;
 					status = dbPutField(&confirmwordaddr,DBR_LONG,&confirmVal,1);
 					noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit,NULL);
@@ -3400,10 +3514,13 @@ sleep(5);
 			case SDF_TABLE_DISCONNECTED:
 				if(lastTable != SDF_TABLE_DISCONNECTED) {
 					clearTableSelections(cdSort,cdTableList, selectCounter);
+					resyncFMArrays(filterMasks,fmMaskChan);
 					confirmVal = 0;
 				}
 				noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit,NULL);
 				pageDisp =  reportSetErrors(pref, chDisconnected, disconnectChans, pageNum);
+				currentTable = disconnectChans;
+				currentTableCnt = chDisconnected;
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chDisconnected, 1);
 				if (resetNum > 200) {
 					decodeChangeSelect(resetNum, pageDisp, chDisconnected, disconnectChans, selectCounter, NULL);
@@ -3413,6 +3530,8 @@ sleep(5);
 			default:
 				pageDisp = reportSetErrors(pref, sperror,setErrTable,pageNum);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&sperror,1);
+				currentTable = setErrTable;
+				currentTableCnt = sperror;
 				break;
 		}
 		if (selectAll) {
@@ -3433,7 +3552,7 @@ sleep(5);
 		}
 		status = dbPutField(&pagelockaddr,DBR_LONG,&freezeTable,1);
 
-		processFMChanCommands(fmMaskChan,fmMaskChanCtrl);
+		processFMChanCommands(filterMasks, fmMaskChan,fmMaskChanCtrl,selectCounter, currentTableCnt, currentTable);
 
 		// Check file CRCs every 5 seconds.
 		// DAQ and COEFF file checking was moved from skeleton.st to here RCG V2.9.
