@@ -1,0 +1,66 @@
+# /etc/conf.d/local.start
+#
+# Diskless front-end start 
+
+# Turn off hyperthreading
+/etc/disable_ht.sh
+
+# Derive IP of DAQ port (eth1) from FE-LAN port
+DAQIP=`hostname -i | sed 's/10.144.0/10.146.0/g'`
+# Configure the second interface. OpenMx over Ethernet, no IP
+/sbin/ifconfig eth1 $DAQIP netmask 255.255.255.0 broadcast 10.146.0.255 mtu 9000
+/sbin/ifconfig eth1 up
+
+# load mbuf kernel module, make controls the owner
+/sbin/modprobe mbuf
+/bin/mknod /dev/mbuf c `grep mbuf /proc/devices | /usr/bin/awk '{print $1}'` 0
+/bin/chown controls /dev/mbuf
+
+# Load IRIG-B driver
+/sbin/modprobe symmetricom
+/bin/mknod /dev/symmetricom c `grep symmetricom /proc/devices | /usr/bin/awk '{print $1}'` 0
+/bin/chown controls /dev/symmetricom
+
+# start open-mx driver
+/etc/init.d/open-mx start
+
+# load dolphin DX drivers if present
+if /etc/dolphin_dx_present.sh
+then
+    /etc/dolphin_dx_load_drivers.sh
+fi
+
+# Initialize Dolphin DX node if configured 
+if /etc/dolphin_dx_config.sh
+then
+    /etc/dolphin_dx_start_node.sh
+fi
+
+# Wait for Dolphin to initialize on all DX nodes (if present)
+# This script does not work all the time. When we do 
+# a cluster boot it hangs indefinitely.
+#
+if /etc/dolphin_dx_config.sh
+then
+    /etc/dolphin_dx_wait
+fi
+
+# Start OpenMX stream to DAQ
+/etc/init.d/mx_stream start
+# testing for dual streams
+#/etc/init.d/mx_stream0 start
+#/etc/init.d/mx_stream1 start
+
+# start front-end models
+/etc/start_models.sh
+
+# Configure monit to use write-able area (var/log)
+mkdir -p /var/run/monit.d
+touch /var/run/monit.d/empty
+touch /opt/monit/monit.$HOSTNAME.id
+touch /opt/monit/monit.$HOSTNAME.state
+ln -snf /opt/monit/monit.$HOSTNAME.id /var/log/.monit.id
+ln -snf /opt/monit/monit.$HOSTNAME.state /var/log/.monit.state
+
+# Run service monitoring
+/etc/init.d/monit start
