@@ -1,0 +1,10 @@
+# /etc/conf.d/hostname
+
+# Set to the hostname of this machine
+# DISKLESS - Set the hostname from the IP address 
+# -- old way --
+# IP=`ifconfig eth0 | awk '/inet addr:/ { print substr($2,6) }'`
+# -- new way --
+IP=`hostname -i`
+HOSTNAME=`grep $IP /etc/hosts | head -1 | awk '{ print $2 }'`
+echo ' found host name ' $HOSTNAME
