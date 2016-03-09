@@ -3369,9 +3369,9 @@ sleep(5);
 				currentTable = unknownChans;
 				currentTableCnt = chNotFound;
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotFound,1);
-				if (resetNum > 200) {
+				/*if (resetNum > 200) {
 					decodeChangeSelect(resetNum, pageDisp, chNotFound, unknownChans,selectCounter, NULL);
-				}
+				}*/
 				lastTable =  SDF_TABLE_NOT_FOUND;
 				break;
 			case SDF_TABLE_NOT_INIT:
@@ -3396,6 +3396,7 @@ sleep(5);
 					decodeChangeSelect(resetNum, pageDisp, noInit, uninitChans,selectCounter, changeSelectCB_uninit);
 				}
 				if(confirmVal) {
+					if(selectCounter[0] && (confirmVal & 2)) status = resetSelectedValues(sperror);
 					if(selectCounter[1] && (confirmVal & 2)) {
 						// Save present table as timenow.
 						status = dbGetField(&loadedfile_addr,DBR_STRING,backupName,&ropts,&nvals,NULL);
@@ -3442,7 +3443,8 @@ sleep(5);
 					decodeChangeSelect(resetNum, pageDisp, noMon, unMonChans,selectCounter, NULL);
 				}
 				if(confirmVal) {
-					if(selectCounter[2] && (confirmVal & 2)) {
+					if(selectCounter[0] && (confirmVal & 2)) status = resetSelectedValues(sperror);
+					if((selectCounter[1] || selectCounter[2]) && (confirmVal & 2)) {
 						// Save present table as timenow.
 						status = dbGetField(&loadedfile_addr,DBR_STRING,backupName,&ropts,&nvals,NULL);
 						// printf("BACKING UP: %s\n",backupName);
@@ -3485,7 +3487,8 @@ sleep(5);
 					decodeChangeSelect(resetNum, pageDisp, cdSort, cdTableList,selectCounter, NULL);
 				}
 				if(confirmVal) {
-					if(selectCounter[2] && (confirmVal & 2)) {
+					if(selectCounter[0] && (confirmVal & 2)) status = resetSelectedValues(sperror);
+					if((selectCounter[1] || selectCounter[2]) && (confirmVal & 2)) {
 						// Save present table as timenow.
 						status = dbGetField(&loadedfile_addr,DBR_STRING,backupName,&ropts,&nvals,NULL);
 						// printf("BACKING UP: %s\n",backupName);
