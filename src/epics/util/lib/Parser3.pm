@@ -799,12 +799,17 @@ sub node_processing {
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
         	$::cdsPart[$::partCnt] = 1;
 	} elsif ($block_type eq "MULTIPLY") {
-		if(${$node->{FIELDS}}{Inputs} eq undef)
-		{
+		if(${$node->{FIELDS}}{Inputs} eq undef) {
 			$::partInputs[$::partCnt] = 2;
-		} else {
+		}
+		if(${$node->{FIELDS}}{Inputs} =~ /^[0-9,.E]+$/ ) {
 			$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
 		}
+		if (index(${$node->{FIELDS}}{Inputs}, "*") != -1) {
+			my $tmpstring = ${$node->{FIELDS}}{Inputs};
+			$tmpstring =~ tr/*//cd; # delete other characters
+			$::partInputs[$::partCnt] = length($tmpstring);
+		} 
         	$::cdsPart[$::partCnt] = 1;
 	} elsif ($block_type eq "Abs") {
         	$::cdsPart[$::partCnt] = 1;
