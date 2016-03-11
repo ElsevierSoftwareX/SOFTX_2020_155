@@ -266,13 +266,14 @@ int getEpicsSettings(int, time_t *);
 int writeTable2File(char *,char *,int,CDS_CD_TABLE *);
 int savesdffile(int,int,char *,char *,char *,char *,char *,dbAddr,dbAddr,dbAddr); 
 int createSortTableEntries(int,int,char *,int *,time_t*);
-int reportSetErrors(char *,int,SET_ERR_TABLE *,int);
+int reportSetErrors(char *,int,SET_ERR_TABLE *,int,int);
 int spChecker(int,SET_ERR_TABLE *,int,char *,int,int *);
 void newfilterstats(int);
 int writeEpicsDb(int,CDS_CD_TABLE *,int);
 int readConfig( char *,char *,int,char *);
 int parseLine(char *, int,char *,char *,char *,char *,char *,char *);
 int modifyTable(int,SET_ERR_TABLE *);
+int resetSelectedValues(int,SET_ERR_TABLE *);
 void clearTableSelections(int,SET_ERR_TABLE *, int *);
 void setAllTableSelections(int,SET_ERR_TABLE *, int *,int);
 void changeSelectCB_uninit(int, SET_ERR_TABLE *, int *);
@@ -467,7 +468,7 @@ int ii;
 void setAllTableSelections(int numEntries,SET_ERR_TABLE *dcsErrTable, int sc[],int selectOpt)
 {
 int ii;
-int filtNum = 0;
+int filtNum = -1;
 long status = 0;
 	switch(selectOpt) {
 		case 1:
@@ -1238,6 +1239,8 @@ double liveval = 0.0;
 				strncpy(uninitChans[lna].liveset, liveset, sizeof(uninitChans[lna].liveset));
 				uninitChans[lna].liveset[sizeof(uninitChans[lna].liveset)-1] = '\0';
 				uninitChans[lna].liveval = liveval;
+				uninitChans[lna].sigNum = jj;
+				uninitChans[lna].filtNum = -1;
 
 				if (times) {
 					snprintf(unMonChans[lna].timeset, sizeof(unMonChans[lna].timeset), "%s", (times ? ctime(&times[jj]) : " "));
@@ -1259,12 +1262,14 @@ double liveval = 0.0;
 					snprintf(unMonChans[lnb].burtset, sizeof(unMonChans[lnb].burtset),"%.10lf",cdTable[jj].data.chval);
 					snprintf(unMonChans[lnb].liveset, sizeof(unMonChans[lnb].liveset),"%.10lf",cdTableP[jj].data.chval);
 					unMonChans[lnb].liveval = cdTableP[jj].data.chval;
-					unMonChans[lnb].filtNum = -1;
 				} else {
 					sprintf(unMonChans[lnb].burtset,"%s",cdTable[jj].data.strval);
 					sprintf(unMonChans[lnb].liveset,"%s",cdTableP[jj].data.strval);
 					unMonChans[lnb].liveval = 0.0;
 				}
+
+                unMonChans[lnb].sigNum = jj;
+				unMonChans[lnb].filtNum = -1;
 
 				if (times) {
 					snprintf(unMonChans[lnb].timeset, sizeof(unMonChans[lnb].timeset), "%s", (times ? ctime(&times[jj]) : " "));
@@ -1293,6 +1298,8 @@ double liveval = 0.0;
 				strncpy(disconnectChans[lnc].liveset, liveset, sizeof(disconnectChans[lnc].liveset));
 				disconnectChans[lnc].liveset[sizeof(disconnectChans[lnc].liveset)-1] = '\0';
 				disconnectChans[lnc].liveval = liveval;
+                disconnectChans[lnc].sigNum = jj;
+				disconnectChans[lnc].filtNum = -1;
 				sprintf(disconnectChans[lnc].timeset,"%s"," ");
 				sprintf(disconnectChans[lnc].diff,"%s"," ");
 				lnc ++;
@@ -1310,6 +1317,8 @@ double liveval = 0.0;
 		uninitChans[jj].liveval = 0.0;
 		sprintf(uninitChans[jj].timeset,"%s"," ");
 		sprintf(uninitChans[jj].diff,"%s"," ");
+        uninitChans[jj].sigNum = 0;         // is this the right value, should it be -1?
+		uninitChans[jj].filtNum = -1;
 	}
 	// Clear out the unmon tables.
 	for(jj=lnb;jj<(lnb + 50);jj++)
@@ -1320,6 +1329,8 @@ double liveval = 0.0;
 		unMonChans[jj].liveval = 0.0;
 		sprintf(unMonChans[jj].timeset,"%s"," ");
 		sprintf(unMonChans[jj].diff,"%s"," ");
+        unMonChans[jj].sigNum = 0;
+		unMonChans[jj].filtNum = -1;
 	}
 #ifdef CA_SDF
 	// Clear out the disconnected tables.
@@ -1331,6 +1342,8 @@ double liveval = 0.0;
 		disconnectChans[jj].liveval = 0.0;
 		sprintf(disconnectChans[jj].timeset,"%s"," ");
 		sprintf(disconnectChans[jj].diff,"%s"," ");
+        disconnectChans[jj].sigNum = 0;
+		disconnectChans[jj].filtNum = -1;
 	}
 #endif
 	*noInit = lna;
@@ -1341,7 +1354,8 @@ double liveval = 0.0;
 int reportSetErrors(char *pref,			///< Channel name prefix from EPICS environment. 
 		     int numEntries, 			///< Number of entries in table to be reported.
 		     SET_ERR_TABLE setErrTable[],	///< Which table to report to EPICS channels.
-		     int page)				///< Which page of 40 to display.
+		     int page,                      ///< Which page of 40 to display.
+             int linkInFilters)				///< Should the SDF_FM_LINE values be set.
 {
 
 int ii;
@@ -1423,7 +1437,7 @@ int minusOne = -1;
 
 		sprintf(sf, "%s_SDF_FM_LINE_%d", pref, lineNum);
 		status = dbNameToAddr(sf,&faddr);
-		status = dbPutField(&faddr,DBR_LONG,&setErrTable[ii].filtNum,1);
+		status = dbPutField(&faddr,DBR_LONG,(linkInFilters ? &setErrTable[ii].filtNum : &minusOne),1);
 
 		sprintf(sl, "%s_SDF_LINE_%d", pref, lineNum);
 		lineNum ++;
@@ -1462,7 +1476,6 @@ int minusOne = -1;
 
 		sprintf(sf, "%s_SDF_FM_LINE_%d", pref, ii);
 		status = dbNameToAddr(sf,&faddr);
-		minusOne = -1;
 		status = dbPutField(&faddr,DBR_LONG,&minusOne,1);
 
 		lineCtr ++;
@@ -1592,7 +1605,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 int modifyTable(int numEntries,SET_ERR_TABLE modTable[])
 {
 int ii,jj;
-int fmIndex = 0;
+int fmIndex = -1;
 unsigned int sn,sn1;
 int found = 0;
 	for(ii=0;ii<numEntries;ii++)
@@ -1603,7 +1616,6 @@ int found = 0;
 			found = 0;
 			for(jj=0;jj<chNum;jj++)
 			{
-				// fmIndex = -1;
 				if (strcmp(cdTable[jj].chname,modTable[ii].chname) == 0) {
 					if ( CHFLAG_ACCEPT_BIT(modTable[ii].chFlag) ) {
 						if(cdTable[jj].datatype == SDF_NUM) cdTable[jj].data.chval = modTable[ii].liveval;/* atof(modTable[ii].liveset);*/
@@ -1651,7 +1663,7 @@ int found = 0;
 	return(0);
 }
 
-int resetSelectedValues(int errNum)
+int resetSelectedValues(int errNum, SET_ERR_TABLE modTable[])
 {
 long status;
 int ii;
@@ -1661,9 +1673,9 @@ ADDRESS saddr;
 
 	for(ii=0;ii<errNum;ii++)
 	{
-		if (setErrTable[ii].chFlag & 2)
+		if (modTable[ii].chFlag & 2)
 		{
-			sn = setErrTable[ii].sigNum;
+			sn = modTable[ii].sigNum;
 			if(sn > SDF_MAX_TSIZE) {
 				sn1 = sn / SDF_MAX_TSIZE;
 				sn %= SDF_MAX_TSIZE;
@@ -1832,7 +1844,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 	double tmpreq = 0;
 	char fname[128];
 	int fmatch = 0;
-	int fmIndex = 0;
+	int fmIndex = -1;
 	char errMsg[128];
 	int argcount = 0;
 	int isalarm = 0;
@@ -2099,7 +2111,6 @@ void resyncFMArrays(int *fmMasks, dbAddr *fmMaskAddr) {
 	int sw2 = 0;
 	long status = 0;
 
-	printf("!!!!!!!!!resyncFMArrays\n");
 	for (ii = 0; ii < SDF_MAX_FMSIZE; ++ii) {
 		sw1 = filterTable[ii].sw[0];
 		sw2 = filterTable[ii].sw[1];
@@ -2426,7 +2437,7 @@ void registerPV(char *PVname)
 	cdTable[chNum].datatype = SDF_NUM;
 	cdTable[chNum].initialized = 0;
 	cdTable[chNum].filterswitch = 0;
-	cdTable[chNum].filterNum = 0;
+	cdTable[chNum].filterNum = -1;
 	cdTable[chNum].error = 0;
 	cdTable[chNum].initialized = 0;
 	cdTable[chNum].mask = 0;
@@ -2775,7 +2786,7 @@ void dbDumpRecords(DBBASE *pdbbase, const char *pref)
             continue;
 		}
 		cdTable[chNum].filterswitch = 0;
-		cdTable[chNum].filterNum = 0;
+		cdTable[chNum].filterNum = -1;
 		// Check if this is a filter module
 		// If so, initialize parameters
 		if((strstr(cdTable[chNum].chname,"_SW1S") != NULL) && (strstr(cdTable[chNum].chname,"_SW1S.") == NULL))
@@ -3165,7 +3176,7 @@ sleep(5);
 	fotonFileCrc = checkFileCrc(fotonFile);
 	prevFotonFileCrc = fotonFileCrc;
 	prevCoeffFileCrc = coeffFileCrc;
-	reportSetErrors(pref, 0,setErrTable,0);
+	reportSetErrors(pref, 0,setErrTable,0,1);
 
 	sleep(1);       // Need to wait before first restore to allow sequencers time to do their initialization.
 	cdSort = spChecker(monFlag,cdTableList,wcVal,wcstring,1,&status);
@@ -3322,7 +3333,7 @@ sleep(5);
 					resyncFMArrays(filterMasks,fmMaskChan);
 					confirmVal = 0;
 				}
-				pageDisp = reportSetErrors(pref, sperror,setErrTable,pageNum);
+				pageDisp = reportSetErrors(pref, sperror,setErrTable,pageNum,1);
 				currentTable = setErrTable;
 				currentTableCnt = sperror;
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&sperror,1);
@@ -3334,7 +3345,7 @@ sleep(5);
 					decodeChangeSelect(resetNum, pageDisp, sperror, setErrTable,selectCounter, NULL);
 				}
 				if(confirmVal) {
-					if(selectCounter[0] && (confirmVal & 2)) status = resetSelectedValues(sperror);
+					if(selectCounter[0] && (confirmVal & 2)) status = resetSelectedValues(sperror, setErrTable);
 					if((selectCounter[1] || selectCounter[2]) && (confirmVal & 2)) {
 						// Save present table as timenow.
 						status = dbGetField(&loadedfile_addr,DBR_STRING,backupName,&ropts,&nvals,NULL);
@@ -3365,7 +3376,7 @@ sleep(5);
 					resyncFMArrays(filterMasks,fmMaskChan);
 					confirmVal = 0;
 				}
-				pageDisp = reportSetErrors(pref, chNotFound,unknownChans,pageNum);
+				pageDisp = reportSetErrors(pref, chNotFound,unknownChans,pageNum,1);
 				currentTable = unknownChans;
 				currentTableCnt = chNotFound;
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chNotFound,1);
@@ -3383,7 +3394,7 @@ sleep(5);
 				if (!freezeTable)
 					getEpicsSettings(chNum,NULL);
 				noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit,NULL);
-				pageDisp = reportSetErrors(pref, noInit, uninitChans,pageNum);
+				pageDisp = reportSetErrors(pref, noInit, uninitChans,pageNum,1);
 				currentTable = uninitChans;
 				currentTableCnt = noInit;
 				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
@@ -3396,7 +3407,7 @@ sleep(5);
 					decodeChangeSelect(resetNum, pageDisp, noInit, uninitChans,selectCounter, changeSelectCB_uninit);
 				}
 				if(confirmVal) {
-					if(selectCounter[0] && (confirmVal & 2)) status = resetSelectedValues(sperror);
+					if(selectCounter[0] && (confirmVal & 2)) status = resetSelectedValues(noInit, uninitChans);
 					if(selectCounter[1] && (confirmVal & 2)) {
 						// Save present table as timenow.
 						status = dbGetField(&loadedfile_addr,DBR_STRING,backupName,&ropts,&nvals,NULL);
@@ -3432,7 +3443,7 @@ sleep(5);
 					getEpicsSettings(chNum,NULL); //timeTable);
 				noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit,NULL);//timeTable);
 				status = dbPutField(&monchancntaddr,DBR_LONG,&chNotMon,1);
-				pageDisp = reportSetErrors(pref, noMon, unMonChans,pageNum);
+				pageDisp = reportSetErrors(pref, noMon, unMonChans,pageNum,1);
 				currentTable = unMonChans;
 				currentTableCnt = noMon;
 				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
@@ -3443,7 +3454,7 @@ sleep(5);
 					decodeChangeSelect(resetNum, pageDisp, noMon, unMonChans,selectCounter, NULL);
 				}
 				if(confirmVal) {
-					if(selectCounter[0] && (confirmVal & 2)) status = resetSelectedValues(sperror);
+					if(selectCounter[0] && (confirmVal & 2)) status = resetSelectedValues(noMon, unMonChans);
 					if((selectCounter[1] || selectCounter[2]) && (confirmVal & 2)) {
 						// Save present table as timenow.
 						status = dbGetField(&loadedfile_addr,DBR_STRING,backupName,&ropts,&nvals,NULL);
@@ -3476,7 +3487,7 @@ sleep(5);
 				}
 				if (!freezeTable)
 					cdSort = spChecker(monFlag,cdTableList,wcVal,wcstring,1,&status);
-				pageDisp = reportSetErrors(pref, cdSort, cdTableList,pageNum);
+				pageDisp = reportSetErrors(pref, cdSort, cdTableList,pageNum,1);
 				currentTable = cdTableList;
 				currentTableCnt = cdSort;
 				status = dbGetField(&resetoneaddr,DBR_LONG,&resetNum,&ropts,&nvals,NULL);
@@ -3487,7 +3498,7 @@ sleep(5);
 					decodeChangeSelect(resetNum, pageDisp, cdSort, cdTableList,selectCounter, NULL);
 				}
 				if(confirmVal) {
-					if(selectCounter[0] && (confirmVal & 2)) status = resetSelectedValues(sperror);
+					if(selectCounter[0] && (confirmVal & 2)) status = resetSelectedValues(cdSort, cdTableList);
 					if((selectCounter[1] || selectCounter[2]) && (confirmVal & 2)) {
 						// Save present table as timenow.
 						status = dbGetField(&loadedfile_addr,DBR_STRING,backupName,&ropts,&nvals,NULL);
@@ -3521,7 +3532,7 @@ sleep(5);
 					confirmVal = 0;
 				}
 				noMon = createSortTableEntries(chNum,wcVal,wcstring,&noInit,NULL);
-				pageDisp =  reportSetErrors(pref, chDisconnected, disconnectChans, pageNum);
+				pageDisp =  reportSetErrors(pref, chDisconnected, disconnectChans, pageNum,0);
 				currentTable = disconnectChans;
 				currentTableCnt = chDisconnected;
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&chDisconnected, 1);
@@ -3531,7 +3542,7 @@ sleep(5);
 				break;
 #endif
 			default:
-				pageDisp = reportSetErrors(pref, sperror,setErrTable,pageNum);
+				pageDisp = reportSetErrors(pref, sperror,setErrTable,pageNum,1);
 				status = dbPutField(&sorttableentriesaddr,DBR_LONG,&sperror,1);
 				currentTable = setErrTable;
 				currentTableCnt = sperror;
