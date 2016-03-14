@@ -1265,10 +1265,12 @@ my $daq_name = "DQ";
 
 my $have_daq_spec = 0;
 $have_daq_spec = 1 if %DAQ_Channels;
+my $dbl_suffix = "DBL";
 
 # Print chnnum, datarate, 
 foreach (sort @section_names) {
 	my $comment;
+	my $dblAdd = 0;
 
 	if ($have_daq_spec) {
 	  if (defined $DAQ_Channels{$_}) {
@@ -1284,6 +1286,7 @@ foreach (sort @section_names) {
 	    }
 	    if ($DAQ_Channels_type{$_} eq "double") {
 		${$sections{$_}}{"datatype"} = 5;
+		$dblAdd = 1;
 	    }
 	    if ($DAQ_Channels_egu{$_} ne "") {
 		${$sections{$_}}{"units"} = $DAQ_Channels_egu{$_};
@@ -1301,7 +1304,11 @@ foreach (sort @section_names) {
 	}
 #        print OUTG "${comment}[${_}_${def_datarate}]\n";
 	my $science = $DAQ_Channels_science{$_};
-        print OUTG "${comment}[${_}_${daq_name}]\n";
+	if($dblAdd) {
+		print OUTG "${comment}[${_}_$dbl_suffix\_${daq_name}]\n";
+	} else {
+		print OUTG "${comment}[${_}_${daq_name}]\n";
+	}
 	if ($science) {
 		my $hds = 0;
 		if ($have_daq_spec) {
