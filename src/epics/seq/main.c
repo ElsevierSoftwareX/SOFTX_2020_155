@@ -235,9 +235,9 @@ long droppedPVCount;
 #define CLEANUP cleanupCASDF();
 #define GET_ADDRESS(NAME,ADDRP) getCAIndex((NAME),(ADDRP))
 #define PUT_VALUE(ADDR,TYPE,PVAL) setCAValue((ADDR),(TYPE),(PVAL))
-#define PUT_VALUE_LONG(ADDR,PVAL) setCAValueLong((ADDR),(PVAL))
+#define PUT_VALUE_INT(ADDR,PVAL) setCAValueLong((ADDR),(PVAL))
 #define GET_VALUE_NUM(ADDR,DESTP,TIMEP,CONNP) syncEpicsDoubleValue((ADDR),(DESTP),(TIMEP),(CONNP))
-#define GET_VALUE_LONG(ADDR,DESTP,TIMEP,CONNP) syncEpicsLongValue((ADDR),(DESTP),(TIMEP),(CONNP))
+#define GET_VALUE_INT(ADDR,DESTP,TIMEP,CONNP) syncEpicsIntValue((ADDR),(DESTP),(TIMEP),(CONNP))
 #define GET_VALUE_STR(ADDR,DESTP,LEN,TIMEP,CONNP) syncEpicsStrValue((ADDR),(DESTP),(LEN),(TIMEP),(CONNP))
 #else
 #define ADDRESS dbAddr
@@ -245,9 +245,9 @@ long droppedPVCount;
 #define CLEANUP
 #define GET_ADDRESS(NAME,ADDRP) dbNameToAddr((NAME),(ADDRP))
 #define PUT_VALUE(ADDR,TYPE,PVAL) dbPutField(&(ADDR),((TYPE)==SDF_NUM ? DBR_DOUBLE : DBR_STRING),(PVAL),1)
-#define PUT_VALUE_LONG(ADDR,PVAL) dbPutField(&(ADDR),DBR_LONG,(PVAL),1);
+#define PUT_VALUE_INT(ADDR,PVAL) dbPutField(&(ADDR),DBR_LONG,(PVAL),1);
 #define GET_VALUE_NUM(ADDR,DESTP,TIMEP,CONNP) getDbValueDouble(&(ADDR),(double*)(DESTP),(TIMEP))
-#define GET_VALUE_LONG(ADDR,DESTP,TIMEP,CONNP) getDbValueLong(&(ADDR),(unsigned long*)(DESTP),(TIMEP))
+#define GET_VALUE_INT(ADDR,DESTP,TIMEP,CONNP) getDbValueLong(&(ADDR),(unsigned int*)(DESTP),(TIMEP))
 #define GET_VALUE_STR(ADDR,DESTP,LEN,TIMEP,CONNP) getDbValueString(&(ADDR),(char*)(DESTP),(LEN),(TIMEP))
 #endif
 
@@ -293,7 +293,7 @@ int setCAValue(ADDRESS, int, void *);
 int setCAValueLong(ADDRESS, unsigned long *);
 
 int syncEpicsDoubleValue(ADDRESS, double *, time_t *, int *);
-int syncEpicsLongValue(ADDRESS, unsigned long *, time_t *, int *);
+int syncEpicsIntValue(ADDRESS, unsigned int *, time_t *, int *);
 int syncEpicsStrValue(ADDRESS, char *, int, time_t *, int *);
 
 void subscriptionHandler(struct event_handler_args);
@@ -676,7 +676,7 @@ char swstrB[64];
 char swstrD[64];
 struct buffer {
 	time_t t;
-	unsigned long rval;
+	unsigned int rval;
 	}buffer[2];
 ADDRESS paddr;
 ADDRESS paddr1;
@@ -689,6 +689,7 @@ char *ret=0;
     swstrD[0]='\0';
 	for(ii=0;ii<fcount;ii++)
 	{
+		bzero(buffer, sizeof(struct buffer)*2);
 		bzero(swname[0],sizeof(swname[0]));
 		bzero(swname[1],sizeof(swname[1]));
 		strcpy(swname[0],filterTable[ii].fname);
@@ -698,9 +699,9 @@ char *ret=0;
 		sprintf(swname[2],"%s",filterTable[ii].fname);
 		strcat(swname[2],"SWSTR");
 		status = GET_ADDRESS(swname[0],&paddr);
-		status = GET_VALUE_LONG(paddr,&(buffer[0].rval),&(buffer[0].t), 0);
+		status = GET_VALUE_INT(paddr,&(buffer[0].rval),&(buffer[0].t), 0);
 		status = GET_ADDRESS(swname[1],&paddr1);
-		status = GET_VALUE_LONG(paddr,&(buffer[1].rval),&(buffer[1].t), 0);
+		status = GET_VALUE_INT(paddr1,&(buffer[1].rval),&(buffer[1].t), 0);
 		for(jj=0;jj<2;jj++) {
 			if(buffer[jj].rval > 0xffff || buffer[jj].rval < 0)	// Switch setting overrange
 			{
@@ -1699,11 +1700,11 @@ void newfilterstats(int numchans) {
 	int ii;
 	FILE *log=0;
 	char chname[128];
-	unsigned long mask = 0x1ffff;
+	unsigned int mask = 0x1ffff;
 	int tmpreq;
 	int counter = 0;
 	int rsw1,rsw2;
-	unsigned long tmpL = 0;
+	unsigned int tmpL = 0;
 
 	printf("In newfilterstats\n");
 	for(ii=0;ii<numchans;ii++) {
@@ -1725,8 +1726,8 @@ void newfilterstats(int numchans) {
 			strcat(chname,"SWREQ");
 			status = GET_ADDRESS(chname,&paddr);
 			if(!status) {
-				tmpL = (unsigned long)filterTable[ii].swreq;
-				status = PUT_VALUE_LONG(paddr,&tmpL);
+				tmpL = (unsigned int)filterTable[ii].swreq;
+				status = PUT_VALUE_INT(paddr,&tmpL);
 			}
 			bzero(chname,sizeof(chname));
 			// Find address of channel
@@ -1734,7 +1735,7 @@ void newfilterstats(int numchans) {
 			strcat(chname,"SWMASK");
 			status = GET_ADDRESS(chname,&paddr);
 			if(!status) {
-				status = PUT_VALUE_LONG(paddr,&mask);
+				status = PUT_VALUE_INT(paddr,&mask);
 			}
 			// printf("New filter %d %s = 0x%x\t0x%x\t0x%x\n",ii,filterTable[ii].fname,filterTable[ii].swreq,filterTable[ii].sw[0],filterTable[ii].sw[1]);
 		}
@@ -2141,7 +2142,7 @@ void processFMChanCommands(int *fMask, dbAddr *fmMaskAddr, dbAddr *fmCtrlAddr, i
 	int refMask = 0;
 	int preMask = 0;
 	int differsPre = 0, differsPost = 0;
-	long ctrl = 0;
+	int ctrl = 0;
 	long status = 0;
 	long ropts = 0;
 	long nvals = 1;
@@ -2238,13 +2239,13 @@ int syncEpicsDoubleValue(int index, double *dest, time_t *tp, int *connp) {
 	return 0;
 }
 
-int syncEpicsLongValue(ADDRESS index, unsigned long *dest, time_t *tp, int *connp) {
+int syncEpicsIntValue(ADDRESS index, unsigned int *dest, time_t *tp, int *connp) {
 	double tmp = 0.0;
 	int result = 0;
 
 	if (!dest) return 1;
 	result = syncEpicsDoubleValue(index, &tmp, tp, connp);
-	*dest = (unsigned long)(tmp);
+	*dest = (unsigned int)(tmp);
 	return result;
 }
 
@@ -2704,10 +2705,10 @@ int getDbValueDouble(ADDRESS *paddr,double *dest,time_t *tp) {
 	}
 	return result;
 }
-int getDbValueLong(ADDRESS *paddr,unsigned long *dest,time_t *tp) {
+int getDbValueLong(ADDRESS *paddr,unsigned int *dest,time_t *tp) {
 	struct buffer {
 		DBRtime
-		unsigned long dval;
+		unsigned int dval;
 	} buffer;
 	long options = DBR_TIME;
 	long nvals = 1;
