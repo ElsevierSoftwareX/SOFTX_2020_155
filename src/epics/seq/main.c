@@ -327,7 +327,7 @@ void dbDumpRecords(DBBASE *,const char *);
 #define D_NOW (__output_iter == 0)
 #define D(...) {if (__output_iter == 0) { fprintf(stderr, __VA_ARGS__); } }
 
-#define TEST_CHAN "X1:FEC-81_DACDT_ENABLE"
+#define TEST_CHAN "X1:PSL-PMC_BOOST_CALI_SW1S"
 
 int __output_iter = 0;
 int __test_chan_idx = -1;
@@ -654,6 +654,39 @@ char bitDefLong[16][8] = {"IN,","OF,","F1,","F2,",
 	filterstring[strlen(filterstring) - 1] = 0;
 	// strcat(filterstring,"\0");
         return(0);
+}
+
+/// Given the a filter table entry print out the bits set in the mask.
+/// @param[in] filter the filter table entry to extract the current value from
+/// @param[out] dest buffer to put the results in. must be >= 64 bytes
+void createSwitchText(FILTER_TABLE *filter, char *dest) {
+#if 1
+	int sw1s=0;
+	int sw2s=0;
+
+	dest[0] = 0;
+	sw1s = (int)cdTableP[filter->sw[0]].data.chval;
+	sw2s = (int)cdTableP[filter->sw[1]].data.chval;
+#else
+	ADDRESS paddr;
+	ADDRESS paddr2;
+	int sw1s=0;
+	int sw2s=0;
+	char name[256];
+	char name2[256];
+	
+	if (snprintf(name, sizeof(name), "%s%s", filter->fname, "SW1S") > sizeof(name)) {	
+		return;
+	}
+	if (snprintf(name2, sizeof(name2), "%s%s", filter->fname, "SW2S") > sizeof(name2)) {	
+		return;
+	}
+	GET_ADDRESS(name, &paddr);
+	GET_ADDRESS(name2, &paddr2);
+	GET_VALUE_INT(paddr, &sw1s, NULL, NULL);
+	GET_VALUE_INT(paddr2, &sw2s, NULL, NULL);
+#endif
+	filtStrBitConvert(1,filtCtrlBitConvert(sw1s + (sw2s << 16)), dest);
 }
 
 /// Routine to check filter switch settings and provide info on switches not set as requested.
@@ -1192,7 +1225,7 @@ double liveval = 0.0;
 //	printf("sort table = %d string %s\n",wcval,wcstring);
 	for(ii=0;ii<fmNum;ii++) {
 		if(!filterTable[ii].init) chNotInit += 1;
-		if(filterTable[ii].init && !filterTable[ii].mask) chNotMon += 1;
+		if(filterTable[ii].init && !(filterTable[ii].mask & ALL_SWSTAT_BITS)) chNotMon += 1;
 		if(wcval  && (ret = strstr(filterTable[ii].fname,wcstring) == NULL)) {
 			continue;
 		}
@@ -1200,18 +1233,24 @@ double liveval = 0.0;
 		strncpy(tmpname,filterTable[ii].fname,(strlen(filterTable[ii].fname)-1));
 		if(!filterTable[ii].init) {
 			sprintf(uninitChans[lna].chname,"%s",tmpname);
-			sprintf(uninitChans[lna].liveset,"%s",cdTableList[ii].liveset);
-			uninitChans[lna].liveval = cdTableList[ii].liveval;
-			uninitChans[lna].sw[0] = cdTableList[ii].sw[0];
-			uninitChans[lna].sw[1] = cdTableList[ii].sw[1];
+			strcpy(uninitChans[lna].burtset,"");
+			uninitChans[lna].liveval = 0.0;
+			uninitChans[lna].sw[0] = (int)cdTableP[filterTable[ii].sw[0]].data.chval;
+			uninitChans[lna].sw[1] = (int)cdTableP[filterTable[ii].sw[1]].data.chval;
 			uninitChans[lna].sigNum = filterTable[ii].sw[0] + (filterTable[ii].sw[1] * SDF_MAX_TSIZE);
 			uninitChans[lna].filtNum = ii;
+			createSwitchText(&(filterTable[ii]),uninitChans[lna].liveset);
 			lna ++;
 		}
-		if(filterTable[ii].init && !filterTable[ii].mask) {
+		if(filterTable[ii].init && !(filterTable[ii].mask & ALL_SWSTAT_BITS)) {
 			sprintf(unMonChans[lnb].chname,"%s",tmpname);
-			unMonChans[lnb].filtNum = ii;
+			unMonChans[lnb].liveval = 0.0;
+			unMonChans[lnb].sw[0] = (int)cdTableP[filterTable[ii].sw[0]].data.chval;
+			unMonChans[lnb].sw[1] = (int)cdTableP[filterTable[ii].sw[1]].data.chval;
 			unMonChans[lnb].sigNum = filterTable[ii].sw[0] + (filterTable[ii].sw[1] * SDF_MAX_TSIZE);
+			unMonChans[lnb].filtNum = ii;
+			filtStrBitConvert(1,filterTable[ii].swreq, unMonChans[lnb].burtset);
+			createSwitchText(&(filterTable[ii]),unMonChans[lnb].liveset);
 			lnb ++;
 		}
 	}
@@ -2234,7 +2273,13 @@ int setCAValueLong(ADDRESS ii, unsigned long *data) {
 }
 
 int syncEpicsDoubleValue(int index, double *dest, time_t *tp, int *connp) {
+	int debug = 0;
 	if (!dest || index < 0 || index >= chNum) return 1;
+#if VERBOSE_DEBUG
+	if (strcmp(cdTable[caTable[index].chanIndex].chname, TEST_CHAN) == 0) {
+		debug=1;
+	}
+#endif
 	pthread_mutex_lock(&caTableMutex);
 	if (caTable[index].datatype == SDF_NUM) {
 		*dest = caTable[index].data.chval;
