@@ -53,6 +53,9 @@ of this distribution.
 #include "cadef.h"
 #endif
 
+///< SWSTAT has 32 bits but only 17 of them are used (what does bit 14 do?)
+#define ALL_SWSTAT_BITS		(0x1bfff)
+
 #define SDF_LOAD_DB_ONLY	4
 #define SDF_READ_ONLY		2
 #define SDF_RESET		3
@@ -501,7 +504,7 @@ long status = 0;
 				filtNum = dcsErrTable[ii].filtNum;
 				if (filtNum >= 0) {
 					if (filterMasks[filtNum] == filterTable[filtNum].mask) {
-						filterMasks[filtNum] = ~0;
+						filterMasks[filtNum] = ((ALL_SWSTAT_BITS & filterMasks[filtNum]) > 0 ? 0 : ~0);
 						status = dbPutField(&fmMaskChan[filtNum],DBR_LONG,&(filterMasks[filtNum]),1);
 					}
 				}
@@ -753,7 +756,7 @@ char *ret=0;
 			setErrTable[errCnt].filtNum = ii;
 			setErrTable[errCnt].sw[0] = buffer[0].rval;
 			setErrTable[errCnt].sw[1] = buffer[1].rval;
-			if(filterTable[ii].mask) setErrTable[errCnt].chFlag |= 0x1;
+			if(filterTable[ii].mask & ALL_SWSTAT_BITS) setErrTable[errCnt].chFlag |= 0x1;
 			else setErrTable[errCnt].chFlag &= 0xe;
 
 			// take the latest change time between the SW1S & SW2S channels
@@ -930,12 +933,19 @@ int writeTable2File(char *burtdir,
 
 	for(ii=0;ii<chNum;ii++)
 	{
-		if (myTable[ii].mask == ~0) {
-			strcpy(monitorstring, "1");
-		} else if (myTable[ii].mask == 0) {
-			strcpy(monitorstring, "0");
+		if (myTable[ii].filterswitch) {
+			if ((myTable[ii].mask & ALL_SWSTAT_BITS)== ~0) {
+				strcpy(monitorstring, "1");
+			} else if ((myTable[ii].mask & ALL_SWSTAT_BITS) == 0) {
+				strcpy(monitorstring, "0");
+			} else {
+				snprintf(monitorstring, sizeof(monitorstring), "0x%x", myTable[ii].mask);
+			}
 		} else {
-			snprintf(monitorstring, sizeof(monitorstring), "0x%x", myTable[ii].mask);
+			if (myTable[ii].mask)
+				strcpy(monitorstring,"1");
+			else
+				strcpy(monitorstring,"0");
 		}
 		switch(ftype)
 		{
@@ -2115,7 +2125,7 @@ void resyncFMArrays(int *fmMasks, dbAddr *fmMaskAddr) {
 	for (ii = 0; ii < SDF_MAX_FMSIZE; ++ii) {
 		sw1 = filterTable[ii].sw[0];
 		sw2 = filterTable[ii].sw[1];
-		fmMasks[ii] = filterTable[ii].mask = cdTable[sw1].mask | cdTable[sw2].mask;
+		fmMasks[ii] = filterTable[ii].mask = (cdTable[sw1].mask | cdTable[sw2].mask) & ALL_SWSTAT_BITS;
 
 		status = dbPutField(&fmMaskAddr[ii],DBR_LONG,&(fmMasks[ii]),1);
 	}
@@ -2156,11 +2166,11 @@ void processFMChanCommands(int *fMask, dbAddr *fmMaskAddr, dbAddr *fmCtrlAddr, i
 
 		refMask = filterTable[ii].mask;
 		preMask = fMask[ii];
-		differsPre = (refMask != fMask[ii]);
+		differsPre = ((refMask & ALL_SWSTAT_BITS) != (fMask[ii] & ALL_SWSTAT_BITS));
 
 		fMask[ii] ^= ctrl;
 
-		differsPost = (refMask != fMask[ii]);
+		differsPost = ((refMask & ALL_SWSTAT_BITS) != (fMask[ii] & ALL_SWSTAT_BITS));
 
 		foundCh = 0;
 		/* if there is a change, update4 the selection count) */
