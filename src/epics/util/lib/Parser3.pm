@@ -793,8 +793,8 @@ sub node_processing {
 	} elsif ($block_type eq "MATH") {
         	$::cdsPart[$::partCnt] = 1;
 	} elsif ($block_type eq "MULTIPLY" &&
-		 (${$node->{FIELDS}}{Inputs} eq "*\/" ||
-		  ${$node->{FIELDS}}{Inputs} eq "\/*" )) {
+		 index(${$node->{FIELDS}}{Inputs} , "*" ) != -1 &&
+		 index(${$node->{FIELDS}}{Inputs} , "\/" ) != -1) {
 		$::partType[$::partCnt] = "DIVIDE";
 		$::partInputs[$::partCnt] = ${$node->{FIELDS}}{Inputs};
         	$::cdsPart[$::partCnt] = 1;
