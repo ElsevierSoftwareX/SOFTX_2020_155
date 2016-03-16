@@ -64,6 +64,36 @@ AC_CHECK_FUNCS(strchr memcpy fchdir)
 dnl checks for system services
 dnl ==========================
 
+dnl======================================================================
+dnl   Check for specific versions of framecpp
+dnl   This is used in the main framecpp section below
+dnl======================================================================
+have_framecpp2=
+PKG_CHECK_MODULES([FRAMECPP2],[framecpp >= 2],[have_framecpp2="yes"],[have_framecpp2="no"])
+have_framecpp2to233=
+PKG_CHECK_MODULES([FRAMECPP2TO233],[framecpp <= 2.3.3 framecpp >= 2],[have_framecpp2to233="yes"],[have_framecpp2to233="no"])
+
+dnl======================================================
+dnl FrameCPP 2 to 2.3.3 do not include -stc=c++0x in the .pc file
+dnl======================================================
+AC_LANG_PUSH([C++])
+have_cxx0x=
+AX_CHECK_COMPILE_FLAG([-std=c++0x],[have_cxx0x="yes"],[have_cxx0x="no"])
+have_cxx11=
+AX_CHECK_COMPILE_FLAG([-std=c++11],[have_cxx11="yes"],[have_cxx11="no"])
+AC_LANG_POP([C++])
+
+if test "$have_framecpp2" = "yes" && test "$have_framecpp2to233" = "yes"; then
+  if test "$have_cxx11" = "yes"; then
+    CPPFLAGS="$CPPFLAGS -std=c++11"
+  elif test "$have_cxx0x" = "yes"; then
+    CPPFLAGS="$CPPFLAGS -std=c++0x"
+  fi
+fi
+
+if test "$have_framecpp2" = "yes"; then
+  CPPFLAGS="$CPPFLAGS -DDAQD_CPP11"
+fi
 
 dnl======================================================================
 dnl   Check if framecpp is installed
@@ -71,14 +101,22 @@ dnl======================================================================
 have_framecpp=
 PKG_CHECK_MODULES(FRAMECPP, framecpp, have_framecpp="yes", have_framecpp="no")
 if test "$have_framecpp" = "yes"; then
+  dnl======================================================
+  dnl  framecpp 2+ supplies the proper set of libs w/ pkg-config, framecpp 1 does not
+  dnl======================================================
   LDASLIBS="$FRAMECPP_LIBS"
   LDASLIBFLAGS="$LDASLIBS"
-  for specvsn in 8 7 6 4 3 cmn; do
-    LDASLIBFLAGS="$LDASLIBFLAGS -lframecpp$specvsn"
-  done
-  LDASLIBFLAGS="$LDASLIBFLAGS -lgeneral"
   LDASFLAGS="$FRAMECPP_CFLAGS"
+  if test "$have_framecpp2" = "no"; then
+    LDASLIBS="$FRAMECPP_LIBS"
+    LDASLIBFLAGS="$LDASLIBS"
+    for specvsn in 8 7 6 4 3 cmn; do
+      LDASLIBFLAGS="$LDASLIBFLAGS -lframecpp$specvsn"
+    done
+    LDASLIBFLAGS="$LDASLIBFLAGS -lgeneral"
+  fi
 else
+  dnl framecpp cannot be found by pkg-config, use defaults for ldas-tools 1.9.x
   LDAS_DEF="/opt/rtapps/framecpp"
   AC_CHECK_FILE(${LDAS_DEF}/linux-x86_64/lib/libframecpp.so,
   [found_framecpp="yes"],
