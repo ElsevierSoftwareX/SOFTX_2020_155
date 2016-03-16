@@ -65,8 +65,12 @@ DEVFLAGS=@DEVFLAGS@
 	@echo The following files were used for this build:
 	@sort src/epics/util/sources.$@ | uniq
 	@echo
-	@echo  Successfully compiled
-	@echo '*********************'
+	@echo  Successfully compiled $@
+	@echo '***********************************************'
+	@echo  Compile Warnings, found in $@_warnings.log:
+	@echo '***********************************************'
+	@cat   $@_warnings.log 
+	@echo '***********************************************'
 
 
 all: 
