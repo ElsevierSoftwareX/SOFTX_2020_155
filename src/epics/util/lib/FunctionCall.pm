@@ -165,7 +165,8 @@ sub checkInputConnect {
         for($ii=0;$ii<$outCnt;$ii++) {
                 if($outargUsed[$ii]) { $outused ++; }
         }
-	if($inCnt > 0 && $outCnt > 0 && ($ins != $inCnt || $outs != $outCnt)) {
+	#if($inCnt > 0 && $outCnt > 0 && ($ins != $inCnt || $outs != $outCnt)) {
+	if($ins != $inCnt || $outs != $outCnt) {
                 $pendingFail = 1;
 	}
 
@@ -195,9 +196,9 @@ sub checkInputConnect {
 	} else {
 		$found = 1;
 	}
-        if(!$found && !$pendingFail) {
-                print ::WARNINGS "***\nCannot parse C function $func_name in list. \n\t-File is $pathed_name\n";
-                print ::WARNINGS "\tCannot find C function listed in ccodeio.h file.\n";
+        if(!$found && $pendingFail) {
+                print ::WARNINGS "***\nCannot verify the number of ins/outs for C function $func_name. \n\tFile is $pathed_name\n";
+                print ::WARNINGS "\tPlease add file and function to userapps/cds/common/src/ccodeio.h file.\n";
                 return "";
         }
         if($ins != $inCnt || $outs != $outCnt) {
