@@ -106,7 +106,7 @@ if test "$have_framecpp" = "yes"; then
   dnl======================================================
   LDASLIBS="$FRAMECPP_LIBS"
   LDASLIBFLAGS="$LDASLIBS"
-  LDASFLAGS="$FRAMECPP_CFLAGS"
+  LDASFLAGS="$CPPFLAGS $FRAMECPP_CFLAGS"
   if test "$have_framecpp2" = "no"; then
     LDASLIBS="$FRAMECPP_LIBS"
     LDASLIBFLAGS="$LDASLIBS"
