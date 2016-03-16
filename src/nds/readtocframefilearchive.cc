@@ -243,8 +243,8 @@ Nds::readTocFrameFileArchive()
       if (first_reader == 0) {
       	first_reader = new FrameCPP::Version_8::IFrameStreamPlan(ibuf, 0);
         new_frame = new FrameCPP::Version::FrameH(*first_reader->ReadFrameH(0, 0));
-        General::SharedPtr< FrameCPP::Version::FrRawData > rawData
-	        = General::SharedPtr< FrameCPP::Version::FrRawData > (new FrameCPP::Version::FrRawData);
+        FrameCPP::Version::FrameH::rawData_type rawData
+	        = FrameCPP::Version::FrameH::rawData_type(new FrameCPP::Version::FrRawData);
         new_frame->SetRawData(rawData);
 
         for (int i = 0; i < num_signals; i++) {
@@ -265,7 +265,7 @@ Nds::readTocFrameFileArchive()
 	  DEBUG(1, printf("Added %s\n", adc->GetName().c_str()));
         }
 	// Set frame time
-	new_frame->SetGTime(General::GPSTime(gps, 0));
+	new_frame->SetGTime(FrameCPP::Version::GPSTime(gps, 0));
       }
 
       t = time(0) - t;
