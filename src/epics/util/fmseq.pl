@@ -921,7 +921,7 @@ foreach $i ( @names ) {
     
 # add msg and load coeff records
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_RCG_VERSION\")\n";
-print "{\n      field(PREC,\"3\")\n}\n";
+print "{\n      field(PREC,\"2\")\n}\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_RELOAD\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_RESET_CHAN\")\n";
 print "grecord(ao,\"%IFO%:FEC-${dcuId}_SDF_MODIFY_CHAN\")\n";
