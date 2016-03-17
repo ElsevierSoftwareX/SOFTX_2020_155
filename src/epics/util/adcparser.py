@@ -63,7 +63,6 @@ bustype = 0
 #args = parser.parse_args()
 
 #f = open(args.fName,'r')
-print 'I am here'
 print os.getcwd()
 time.sleep(10)
 f = open('./diags.txt','r')
