@@ -64,7 +64,8 @@ sub printFrontEndVars  {
 # Check inputs are connected
 sub checkInputConnect {
         my ($i) = @_;
-	my $headerFile = "$::rcg_src_dir\/src/include/ccodeio.h";
+	my $userArea =  $ENV{'CDS_SRC'};
+	my $headerFile = "$userArea\/ccodeio.h";
 	my $found = 0;
 	my $ins = $::partInCnt[$::partInNum[$i][0]];
 	my $outs = $::partOutputs[$::partOutNum[$i][0]];
