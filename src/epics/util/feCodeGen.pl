@@ -755,7 +755,13 @@ for($ii=0;$ii<$partCnt;$ii++)
 close CONN_ERRORS;
 if($kk > 0)
 {
-         die "\n***ERROR: Found total of ** $kk ** parts with one or more inputs not connected.\nSee $skeleton\_partConnectErrors.log file for details.\nA complete list of model part connections can be found in $skeleton\_partConnectionList.txt\n\n";
+	print "***\n***ERROR: Found total of ** $kk ** parts with one or more inputs not connected.\n";
+	my $emsg = "cat ";
+	$emsg .= $compileMessageDir;
+	$emsg .= $skeleton;
+	$emsg .= "_partConnectErrors.log";
+	system($emsg);
+         die "\nSee $skeleton\_partConnectErrors.log file for details.\nA complete list of model part connections can be found in $skeleton\_partConnectionList.txt\n\n";
 }
 
 #//	
