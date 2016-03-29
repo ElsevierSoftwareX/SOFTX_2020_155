@@ -1,4 +1,9 @@
 ==================================================================================================
+Changes for 3.x
+==================================================================================================
+- Bug Fix (999): start script does not error out if real-time model killed 
+- Bug Fix (1000): ccodeio.h now uses environment variables in file paths
+==================================================================================================
 Changes for 3.0
 ==================================================================================================
 - Bug Fix (973): HWWD.pm part updated to reflect new status bit pattern from updated SUS HWWD
