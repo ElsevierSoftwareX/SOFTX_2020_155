@@ -64,8 +64,10 @@ sub printFrontEndVars  {
 # Check inputs are connected
 sub checkInputConnect {
         my ($i) = @_;
-	my $userArea =  $ENV{'CDS_SRC'};
-	my $headerFile = "$userArea\/ccodeio.h";
+	my $cdsCommonArea =  $ENV{'CDS_SRC'};
+	my $headerCommonFile = "$cdsCommonArea\/ccodeio.h";
+	my $cdsIfoArea =  $ENV{'CDS_IFO_SRC'};
+	my $headerIfoFile = "$cdsIfoArea\/ccodeio.h";
 	my $found = 0;
 	my $ins = $::partInCnt[$::partInNum[$i][0]];
 	my $outs = $::partOutputs[$::partOutNum[$i][0]];
@@ -173,18 +175,23 @@ sub checkInputConnect {
 
 	if($ins != $inCnt || $outs != $outCnt || $ins != $inused || $outs != $outused) {
 		if ($::inlinedFunctionCall[$i] ne undef) {
-			($inline_keyword, $func_name, $pathed_name)
+			($inline_keyword, $func_name, $funcfile_name)
 				= split(/\s/, $::inlinedFunctionCall[$i]);
 			# Expand variables in $pathed_name
 			# Note the usage of Env, all environment variables were
 			# turned into Perl variables
+			$pathed_name = $funcfile_name;
 			$pathed_name =~ s/(\$\w+)/$1/eeg;
 
-			open(my $fh2,"<".$headerFile) || die "Cannot open $headerFile \n";
+# First check common header file
+			open(my $fh2,"<".$headerCommonFile) || die "Cannot open $headerCommonFile \n";
 			while (my $line = <$fh2>) {
 				chomp $line;
 				my @word = split /[:*(,\s\t]+/,$line;
-				if($word[0] eq $pathed_name and $word[1] eq $func_name) {
+# Expand variables in this as well
+				my $pathed_word = $word[0];
+			        $pathed_word =~ s/(\$\w+)/$1/eeg;
+				if($pathed_word eq $pathed_name and $word[1] eq $func_name) {
 					$inCnt = $word[2];
 					$outCnt = $word[3];
 					if($inCnt == -1) {$inCnt = $ins;}
@@ -193,13 +200,33 @@ sub checkInputConnect {
 				}
 			}
 			close($fh2);
+
+# First check per-IFO header file
+                        if(!$found) {
+			    open(my $fh3,"<".$headerIfoFile) || die "Cannot open $headerIfoFile \n";
+			    while (my $line = <$fh3>) {
+				chomp $line;
+				my @word = split /[:*(,\s\t]+/,$line;
+# Expand variables in this as well
+				my $pathed_word = $word[0];
+			        $pathed_word =~ s/(\$\w+)/$1/eeg;
+				if($pathed_word eq $pathed_name and $word[1] eq $func_name) {
+					$inCnt = $word[2];
+					$outCnt = $word[3];
+					if($inCnt == -1) {$inCnt = $ins;}
+					if($outCnt == -1) {$outCnt = $outs;}
+					$found = 1;
+				}
+			    }
+			    close($fh3);
+			}
 		}
 	} else {
 		$found = 1;
 	}
         if(!$found && $pendingFail) {
-                print ::WARNINGS "***\nCannot verify the number of ins/outs for C function $func_name. \n\tFile is $pathed_name\n";
-                print ::WARNINGS "\tPlease add file and function to userapps/cds/common/src/ccodeio.h file.\n";
+                print ::WARNINGS "***\nCannot verify the number of ins/outs for C function $func_name. \n\tFile is $funcfile_name\n";
+                print ::WARNINGS "\tPlease add file and function to CDS_SRC or CDS_IFO_SRC ccodeio.h file.\n";
                 return "";
         }
         if($ins != $inCnt || $outs != $outCnt) {
