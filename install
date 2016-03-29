@@ -162,9 +162,15 @@ do
   numsec=\$((\$numsec+1))
   if [ -e /proc/${system}/status ]; then
     GPS=\`cat /proc/${system}/status | grep gps\`
-    if (( "\$GPS" > 0 )); then
-      echo '${system} RT ready in '\$numsec
-      gpsbad=false 
+    if [ \! -z \$GPS ]; then
+      if (( "\$GPS" > 0 )); then
+        echo '${system} RT ready in '\$numsec
+        gpsbad=false 
+      fi
+    else
+      echo '${system} RT not starting'
+      gpsbad=false
+      exit
     fi
   fi
 done
