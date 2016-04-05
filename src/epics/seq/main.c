@@ -718,7 +718,6 @@ ADDRESS paddr;
 ADDRESS paddr1;
 ADDRESS paddr2;
 long status=0;
-char *ret=0;
 
     swstrE[0]='\0';
     swstrB[0]='\0';
@@ -743,7 +742,7 @@ char *ret=0;
 			{
 				sprintf(setErrTable[errCnt].chname,"%s", swname[jj]);
 				sprintf(setErrTable[errCnt].burtset, "%s", " ");
-				sprintf(setErrTable[errCnt].liveset, "0x%lx", buffer[jj].rval);
+				sprintf(setErrTable[errCnt].liveset, "0x%x", buffer[jj].rval);
 				sprintf(setErrTable[errCnt].diff, "%s", "OVERRANGE");
 				setErrTable[errCnt].liveval = 0.0;
 				setErrTable[errCnt].sigNum = filterTable[ii].sw[jj];
@@ -778,7 +777,7 @@ char *ret=0;
 			bzero(tmpname,sizeof(tmpname));
 			strncpy(tmpname,filterTable[ii].fname,(strlen(filterTable[ii].fname)-1));
 
-			if(!wcflag || (wcflag && (ret = strstr(tmpname,wcstr) != NULL))) {
+			if(!wcflag || (wcflag && (strstr(tmpname,wcstr) != NULL))) {
 			sprintf(setErrTable[errCnt].chname,"%s", tmpname);
 			sprintf(setErrTable[errCnt].burtset, "%s", swstrB);
 			sprintf(setErrTable[errCnt].liveset, "%s", swstrE);
@@ -1563,7 +1562,6 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 	char swName[64];
 	double sdfdiff = 0.0;
 	double liveval = 0.0;
-	char *ret;
 	int filtDiffs=0;
 
 #ifdef VERBOSE_DEBUG
@@ -1618,7 +1616,7 @@ int spChecker(int monitorAll, SET_ERR_TABLE setErrTable[],int wcVal, char *wcstr
 					}
 				}
 				if(localErr) *totalDiffs += 1;
-				if(localErr && wcVal  && (ret = strstr(cdTable[ii].chname,wcstring) == NULL))
+				if(localErr && wcVal  && (strstr(cdTable[ii].chname,wcstring) == NULL))
 					localErr = 0;
 				// If a diff was found, then write info the EPICS setpoint diff table.
 				if(localErr)
@@ -2939,7 +2937,7 @@ int main(int argc,char *argv[])
 	dbAddr coeffmsgaddr;
 	dbAddr resetoneaddr;
 	dbAddr selectaddr[4];
-	dbAddr pagelockaddr[3];
+	dbAddr pagelockaddr[3];	// why is this an array of 3.  It looks like we can make this a single value
 #ifdef CA_SDF
 	// CA_SDF does not do a partial load on startup.
 	int sdfReq = SDF_READ_ONLY;
@@ -3127,8 +3125,8 @@ sleep(5);
 	status = dbPutField(&savecmdaddr,DBR_LONG,&rdstatus,1);		// Init to zero.
 
 	char pagelockname[128]; sprintf(pagelockname, "%s_%s", pref, "SDF_TABLE_LOCK");	// SDF Save command.
-	status = dbNameToAddr(pagelockname,&pagelockaddr);		// Get Address.
-	status = dbPutField(&pagelockaddr,DBR_LONG,&freezeTable,1);		// Init to zero.
+	status = dbNameToAddr(pagelockname,&(pagelockaddr[0]));		// Get Address.
+	status = dbPutField(&(pagelockaddr[0]),DBR_LONG,&freezeTable,1);		// Init to zero.
 
 	char saveasname[256]; sprintf(saveasname, "%s_%s", pref, "SDF_SAVE_AS_NAME");	// SDF Save as file name.
 	// Clear out the save as file name request
@@ -3620,7 +3618,7 @@ sleep(5);
 			freezeTable += selectCounter[ii];
 			status = dbPutField(&selectaddr[ii],DBR_LONG,&selectCounter[ii],1);
 		}
-		status = dbPutField(&pagelockaddr,DBR_LONG,&freezeTable,1);
+		status = dbPutField(&(pagelockaddr[0]),DBR_LONG,&freezeTable,1);
 
 		processFMChanCommands(filterMasks, fmMaskChan,fmMaskChanCtrl,selectCounter, currentTableCnt, currentTable);
 

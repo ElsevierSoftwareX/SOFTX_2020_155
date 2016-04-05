@@ -1049,7 +1049,7 @@ int fmCreatePartial(char *cfDir, char *cfName, char *filtName)
 
   int mychksum = checkFileCrc(fName[FMC_LOAD]);
   int mychksumP = checkFileCrc(fName[FMC_PHOTON]);
-  printf("My load file CRC = %ld \n",mychksum);
+  printf("My load file CRC = %d \n",mychksum);
   if(mychksum == mychksumP) printf ("Photon and Load Files Match \n");
   else printf ("Photon and Load Files DO NOT Match \n");
 
