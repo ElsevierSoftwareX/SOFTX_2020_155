@@ -1483,7 +1483,7 @@ void
 shandler (int a) {
         char p[25];
 	system_log(1,"going down on signal %d", a);
-	seteuid (0); // Try to switch to superuser effective uid
+	int ignored_value = seteuid (0); // Try to switch to superuser effective uid
 	sprintf (p,"/bin/gcore %d", getpid());
 	// Works on Gentoo this way:
         //sprintf (p,"gdb --pid=%d --batch -ex gcore", getpid());

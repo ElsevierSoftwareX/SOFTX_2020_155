@@ -694,10 +694,10 @@ unsigned int curDaqBlockSize;
       //int timeSec = ioMemData->gpsSecond;
       //printf("TimeSec=%d; timeCycle=%d,  cycle=%d\n", timeSec, timeCycle, ioMemData->iodata[ll][0].cycle);
        // Send gps seconds to the front-end
-       rmWrite (0, ioMemDataGPS, 0, 4, 0);
+       rmWrite (0, (char *)ioMemDataGPS, 0, 4, 0);
 
        // Read the current DAQ block size from the front-end
-       rmRead (0, &curDaqBlockSize, 4, 4, 0);
+       rmRead (0, (char *)&curDaqBlockSize, 4, 4, 0);
        //printf("curDaqBlockSize=%d\n", curDaqBlockSize);
       }
    }

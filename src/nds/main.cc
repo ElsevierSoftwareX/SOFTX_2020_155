@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <unistd.h>
 #include "nds.hh"
 //#include "framecpp/dictionary.hh"
 

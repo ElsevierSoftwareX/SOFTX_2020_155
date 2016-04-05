@@ -317,8 +317,8 @@ static char *versionId = "Version $Id$" ;
                   cb->name = name;
                   strncpy (cb->arg, arg, 2047);
                   cb->arg [2047] = 0;
-                  printf ("CONF SERVICE: %s (%x)\n", cb->service->user, 
-                         (int)cb->service->user);
+                  printf ("CONF SERVICE: %s (%p)\n", cb->service->user, 
+                         cb->service->user);
                #ifdef OS_VXWORKS
                   serviceCallback (cb);
                #else
