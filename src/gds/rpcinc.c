@@ -15,6 +15,9 @@ static char *versionId = "Version $Id$" ;
 #ifndef _BSD_SOURCE
 #define _BSD_SOURCE
 #endif
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -341,7 +344,7 @@ static char *versionId = "Version $Id$" ;
                      SVCXPRT** transp, int* proto) 
    {
       /* ignore pipe signals */
-   #if defined (__CYGWIN__)
+   #if _POSIX_SOURCE
       struct sigaction action;
       action.sa_flags = 0;
       sigemptyset (&action.sa_mask);

@@ -14,6 +14,9 @@ extern "C" {
 #ifndef _BSD_SOURCE
 #define _BSD_SOURCE
 #endif
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

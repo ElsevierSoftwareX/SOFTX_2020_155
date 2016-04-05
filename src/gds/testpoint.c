@@ -13,6 +13,9 @@ static char *versionId = "Version $Id$" ;
 #ifndef _BSD_SOURCE
 #define _BSD_SOURCE
 #endif
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE
+#endif
 
 #include "dtt/gdsutil.h"
 #ifndef _TESTPOINT_DIRECT

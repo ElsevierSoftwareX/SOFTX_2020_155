@@ -248,15 +248,15 @@ CDS_HARDWARE cdsPciModules;
       sprintf(myParFile, "%s/param/tpchn_%s.par", archive, system_name);
       printf("My config file is %s\n", myParFile);
 
-      printf("IPC at 0x%x\n", rmBoardAddress(2));
+      printf("IPC at 0x%p\n", rmBoardAddress(2));
       ioMemData = (IO_MEM_DATA *)(rmBoardAddress(2) + IO_MEM_DATA_OFFSET);
 
       // Make sure there is no other copy running already
       { 
       	int g,g1;
-        rmRead (0, &g, 0, 4, 0);
+        rmRead (0, (char*)&g, 0, 4, 0);
 	sleep(1);
-        rmRead (0, &g1, 0, 4, 0);
+        rmRead (0, (char*)&g1, 0, 4, 0);
 	if (g != g1) {
 		fprintf(stderr, "Another copy already running! Will not start a second copy.\n");
 		_exit(1);
