@@ -22,7 +22,7 @@
  * DAQ system inter-processor communication definitions.
  */
 
-#define DCU_COUNT 128		///< MAX number of real-time DAQ processes in single control system
+#define DCU_COUNT 256		///< MAX number of real-time DAQ processes in single control system
 #define DAQ_BASE_ADDRESS	0x2000000			///< DAQ base offset from shared mem start
 #define DAQ_DATA_BASE_ADD	(DAQ_BASE_ADDRESS + 0x100000)	///< DAQ data location in shared mem
 
