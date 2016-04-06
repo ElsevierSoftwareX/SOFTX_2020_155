@@ -6,6 +6,7 @@ Changes for 3.1
 ==================================================================================================
 Changes for 3.0
 ==================================================================================================
+- New Decimation filters for IOP to 16K as per T1600066.
 - Bug Fix (973): HWWD.pm part updated to reflect new status bit pattern from updated SUS HWWD
 	chassis.
 - Bug Fix (895): Attempting to clean up compile, with better error messages with user direction
