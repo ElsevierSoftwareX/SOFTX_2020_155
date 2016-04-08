@@ -69,7 +69,8 @@ f = open('./diags.txt','r')
 
 for line in f:
 	word = line.split()
-	if "Part" in line and "Part Name" not in line and "Parameters" not in line:
+	x = len(word)
+	if "Part" in line and "Part Name" not in line and "Parameters" not in line and x > 10:
 		rcgparts[partCnt].name = word[2]
 		rcgparts[partCnt].ptype = word[5]
 		rcgparts[partCnt].inputCnt = word[7]
