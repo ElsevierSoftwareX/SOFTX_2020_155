@@ -37,6 +37,7 @@ sub checkInputConnect {
         my ($i) = @_;
 	# Use the length of the calculation string to determine number of inputs
 	my $nc = length($::partInputs[$i]);
+	print "DIVIDE ins = $::xpartName[$i] $nc  $::partInCnt[$i]\n";
 	if($::partInCnt[$i] != $nc) {
                 print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has missing inputs\nRequires $nc; Only $::partInCnt[$i] provided.\n";
 	        return "ERROR";
@@ -76,6 +77,7 @@ sub frontEndCode {
 	my $ii;
 	my $ptr = 0;
 	my @fn;
+	my @operator;
 	# Find the multiplies first
 	foreach $ii (@chars) {
 		if($ii eq "*") {
@@ -95,6 +97,7 @@ sub frontEndCode {
 		}
 		$jj ++;
 	}
+	print "$::xpartName[$i] PTR = $ptr \n";
 	my $math = "";
 	my $nq = 0;
 	my @quals;
