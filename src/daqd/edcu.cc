@@ -40,7 +40,7 @@ extern long int altzone;
 void connectCallback(struct connection_handler_args args) {
 	unsigned long chnum = (unsigned long)ca_puser(args.chid);
 //	system_log(1, "Epics Connect callback for channel %d", chnum);
-	daqd.edcu1.channel_status[chnum] = args.op == CA_OP_CONN_UP? 0: 0xbad;
+	daqd.edcu1.channel_status[chnum] = (args.op == CA_OP_CONN_UP? 0: 0xbad);
 	if (args.op == CA_OP_CONN_UP) daqd.edcu1.con_chans++; else daqd.edcu1.con_chans--;
 	daqd.edcu1.con_events++;
 	pvValue[3] = daqd.edcu1.num_chans;
@@ -72,9 +72,9 @@ edcu::edcu_main ()
      ca_context_create(ca_enable_preemptive_callback);
      for (int i = fidx; i < (fidx + num_chans); i++) {
 	chid chid1;
-	int status = ca_create_channel(daqd.channels[i].name, connectCallback, &i, 0, &chid1);
+	int status = ca_create_channel(daqd.channels[i].name, connectCallback, (void *)i, 0, &chid1);
 	status = ca_create_subscription(DBR_FLOAT, 0, chid1, DBE_VALUE, 
-					subscriptionHandler, &i, 0);
+					subscriptionHandler, (void *)i, 0);
      }
      system_log(1, "EDCU has %d channels configured; first=%d\n", num_chans, fidx);
 }
