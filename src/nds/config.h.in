@@ -172,9 +172,6 @@
 /* Define if you have the <utime.h> header file.  */
 #undef HAVE_UTIME_H
 
-/* Define if you have the <tnf/probe.h> header file.  */
-#undef HAVE_TNF_PROBE_H
-
 /* Define if you have the sun library (-lsun).  */
 #undef HAVE_LIBSUN
 
