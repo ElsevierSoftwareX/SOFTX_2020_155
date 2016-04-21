@@ -18,8 +18,6 @@
 #include "../drv/mbuf/mbuf.h"
 #endif
 
-#define SHMEM_DAQ 1
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

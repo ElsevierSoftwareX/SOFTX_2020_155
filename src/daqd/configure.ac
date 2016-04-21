@@ -34,7 +34,7 @@ AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(FlexLexer.h arpa/inet.h assert.h ctype.h \
 	errno.h fcntl.h fstream.h iostream.h limits.h math.h \
 	netinet/in.h pthread.h signal.h stdio.h stdlib.h stream.h \
-	string.h sys/socket.h sys/types.h time.h unistd.h tnf/probe.h)
+	string.h sys/socket.h sys/types.h time.h unistd.h)
 AC_HEADER_TIME
 
 

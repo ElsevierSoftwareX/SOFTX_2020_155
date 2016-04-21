@@ -15,18 +15,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#define SHMEM_DAQ 1
 #include "../include/daqmap.h"
 #include "debug.h"
 #include "daqd.hh"
+#include "mx_rcvr.hh"
 
 extern daqd_c daqd;
-#ifndef  USE_SYMMETRICOM
-extern int controller_cycle;
-#endif
-extern struct rmIpcStr gmDaqIpc[DCU_COUNT];
 extern struct cdsDaqNetGdsTpNum * gdsTpNum[2][DCU_COUNT];
-extern void *directed_receive_buffer[DCU_COUNT];
 
 #define FILTER     0x12345
 #define MATCH_VAL  0xabcdef
@@ -294,7 +289,8 @@ main() {
       			exit(1);
     		}
 	}
-	open_mx();
+        unsigned int max_mx_end; 
+	max_mx_end = open_mx();
 	receiver_mx(0);
 }
 #endif

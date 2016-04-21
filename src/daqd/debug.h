@@ -14,15 +14,6 @@ extern int _debug;
 #define	DEBUG(L,EX) if (_debug >= L) {EX;}
 #endif	/* ! NDEBUG */
 
-#if HAVE_TNF_PROBE_H
-#include <tnf/probe.h>
-#else
-// Disable probes if no header file on this system
-#define  TNF_PROBE_0(a,b,c)
-#define  TNF_PROBE_1(a,b,c,d,e,f)
-#define  TNF_PROBE_2(a,b,c,d,e,f,g,h,i)
-#endif /* ! HAVE_TNF_PROBE_H */
-
 
 #include <syslog.h>
 

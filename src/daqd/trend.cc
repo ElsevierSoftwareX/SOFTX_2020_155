@@ -56,9 +56,6 @@ trender_c::raw_minute_saver ()
 
     int nb = mtb -> get (raw_msaver_cnum);
     DEBUG(3, cerr << "raw minute trender saver; block " << nb << endl);
-    TNF_PROBE_1(raw_minute_trender_c_saver_start, "minute_trender_c::raw_saver",
-		"got one block",
-		tnf_long,   block_number,    nb);
     {
       cur_prop[minute_put_cntr % rmp] = mtb -> block_prop (nb) -> prop;
       if (! mtb -> block_prop (nb) -> bytes)
@@ -71,7 +68,6 @@ trender_c::raw_minute_saver ()
       memcpy (cur_blk[minute_put_cntr % rmp],
 	      mtb -> block_ptr (nb), num_channels * sizeof (trend_block_t));
     }
-    TNF_PROBE_0(raw_minute_trender_c_saver_end, "minute_trender_c::raw_saver", "end of block processing");
     mtb -> unlock (raw_msaver_cnum);
 
   if (minute_put_cntr % rmp == (rmp-1)) {
@@ -285,9 +281,6 @@ trender_c::minute_framer ()
 	{
 	  int nb = mtb -> get (msaver_cnum);
 	  DEBUG(3, cerr << "minute trender saver; block " << nb << endl);
-	  TNF_PROBE_1(minute_trender_c_framer_start, "trender_c::framer",
-		      "got one block",
-		      tnf_long,   block_number,    nb);
 	  {
 	    if (! mtb -> block_prop (nb) -> bytes)
 	      {
@@ -301,7 +294,6 @@ trender_c::minute_framer ()
 	      
 	    memcpy (cur_blk, mtb -> block_ptr (nb), num_channels * sizeof (trend_block_t));
 	  }
-	  TNF_PROBE_0(minute_trender_c_framer_end, "trender_c::framer", "end of block processing");
 	  mtb -> unlock (msaver_cnum);
 
 	  // Check if the gps time isn't aligned on an hour boundary
@@ -372,11 +364,14 @@ trender_c::minute_framer ()
 #if defined(DIRECTIO_ON) && defined(DIRECTIO_OFF)
 	if (daqd.do_directio) directio (fd, DIRECTIO_ON);
 #endif
-	TNF_PROBE_1(minute_trender_c_framer_frame_write_start, "trender_c::framer",
-		    "frame write",
-		    tnf_long,   frame_number,   frame_cntr);
-	  
 	close (fd);
+#if !defined(USE_BROADCAST)
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
+        // For framebuilder, add mutex to serialize second, minute trend writing 
+        pthread_mutex_lock (&frame_write_lock);
+        DEBUG(3, cerr << "Get trend frame write mutex for minute frame" << endl);
+#endif
+#endif
         FrameCPP::Common::FrameBuffer<filebuf>* obuf
             = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
         obuf -> open(_tmpf, std::ios::out | std::ios::binary);
@@ -390,27 +385,24 @@ trender_c::minute_framer ()
 				 FrameCPP::FrVect::ZERO_SUPPRESS_OTHERWISE_GZIP, 1,
 		       FrameCPP::Common::CheckSum::CRC);
 
-        t = time(0) - t;
-        DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
         ofs.Close();
         obuf->close();
-	if (1)
-	{
-	  if (rename(_tmpf, tmpf)) {
+#if !defined(USE_BROADCAST)
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
+        pthread_mutex_unlock (&frame_write_lock);
+#endif
+#endif
+        t = time(0) - t;
+        DEBUG(1, cerr << "Minute trend frame write done in " << t << " seconds" << endl);
+	if (rename(_tmpf, tmpf)) {
 		system_log(1, "minute_framer(): failed to rename file; errno %d", errno);
 		minute_fsd.report_lost_frame ();
 		daqd.set_fault ();
-	  } else {
+	} else {
 	  	DEBUG(3, cerr << "minute trend frame " << frame_cntr << " is written out" << endl);
 	  	// Successful frame write
 	  	minute_fsd.update_dir (file_gps, file_gps_n, frame_length_blocks, dir_num);
-	  }
-	} else {
-	  system_log(1, "minute_framer(): failed to write trend frame out; errno %d", errno);
-	  minute_fsd.report_lost_frame ();
-	  daqd.set_fault ();
 	}
-	TNF_PROBE_0(minute_trender_c_framer_frame_write_end, "trender_c::framer", "frame write");
 #if EPICS_EDCU == 1
    /* Record frame write time */ 
         pvValue[26] = t;
@@ -466,9 +458,6 @@ trender_c::minute_trend ()
 	}
       
       nb = tb -> get (mcnum);
-      TNF_PROBE_1(trender_c_minute_trend_start, "trender_c::minute_trend",
-		  "got one block",
-		  tnf_long,   block_no,    nb);
       {
 	trend_block_t *btr = (trend_block_t *) tb -> block_ptr (nb);
 	int bytes;
@@ -533,8 +522,6 @@ trender_c::minute_trend ()
 	    }
 	  }
       }
-      TNF_PROBE_1(trender_c_minute_trend_end, "minute_trender_c::trender", "end of block processing",
-		  tnf_long,   block_timestamp,    prop.gps);
       tb -> unlock (mcnum);
 
       nc++;
@@ -625,7 +612,7 @@ trender_c::framer ()
       frame -> RefDetectProc ().append (detector1);
     }
   } catch (...) {
-    system_log(1, "Couldn't create trend frame");
+    system_log(1, "Couldn't create second trend frame");
     this -> shutdown_trender ();
     return NULL;
   }
@@ -702,16 +689,13 @@ trender_c::framer ()
       for (int i = 0; i < frame_length_blocks; i++)
 	{
 	  int nb = tb -> get (saver_cnum);
-	  DEBUG(3, cerr << "trender saver; block " << nb << endl);
-	  TNF_PROBE_1(trender_c_framer_start, "trender_c::framer",
-		      "got one block",
-		      tnf_long,   block_number,    nb);
+	  DEBUG(3, cerr << "second trender saver; block " << nb << endl);
 	  {
 	    if (! tb -> block_prop (nb) -> bytes)
 	      {
 		tb -> unlock (saver_cnum);
 		eof_flag = 1;
-		DEBUG1(cerr << "trender framer EOF" << endl);
+		DEBUG1(cerr << "second trender framer EOF" << endl);
 		break; // out of the for() loop
 	      }
 	    if (! i)
@@ -719,7 +703,6 @@ trender_c::framer ()
 	      
 	    memcpy (cur_blk, tb -> block_ptr (nb), num_channels * sizeof (trend_block_t));
 	  }
-	  TNF_PROBE_0(trender_c_framer_end, "trender_c::framer", "end of block processing");
 	  tb -> unlock (saver_cnum);
 	  
 	  // Check if the gps time isn't aligned on a frame start time
@@ -736,17 +719,13 @@ trender_c::framer ()
               else
                 file_prop.cycle = 0;
 
-
-#if 1
 	      // zero out some data that's missing
 	      for (int j = 0; j < num_trend_channels; j++)
 		memset ( adc_ptr [j], 0, gps_mod * trend_channels [j].bps );
-#endif
 	    }
 
 	  }
 
-#if 1
 	  for (int j = 0; j < num_channels; j++)
 	    {
 	      if (channels [j].data_type == _64bit_double) {
@@ -772,7 +751,6 @@ trender_c::framer ()
 	      memcpy(adc_ptr [5*j+3] + i*sizeof(REAL_8), &cur_blk [j].rms, sizeof (REAL_8));
 	      memcpy(adc_ptr [5*j+4] + i*sizeof(REAL_8), &cur_blk [j].mean, sizeof (REAL_8));
 	    }
-#endif
 	}
 
       if (eof_flag)
@@ -799,16 +777,19 @@ trender_c::framer ()
 
       int fd = creat (_tmpf, 0644);
       if (fd < 0) {
-	system_log(1, "Couldn't open full trend frame file `%s' for writing; errno %d", tmpf, errno);
-	fsd.report_lost_frame ();
-	daqd.set_fault ();
+	  system_log(1, "Couldn't open full trend frame file `%s' for writing; errno %d", tmpf, errno);
+	  fsd.report_lost_frame ();
+	  daqd.set_fault ();
       } else {
-	DEBUG(3, cerr << "`" << _tmpf << "' opened" << endl);
-	TNF_PROBE_1(trender_c_framer_frame_write_start, "trender_c::framer",
-		    "frame write",
-		    tnf_long,   frame_number,   frame_cntr);
-
+	  DEBUG(3, cerr << "`" << _tmpf << "' opened" << endl);
 	  close (fd);
+#if !defined(USE_BROADCAST)
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
+          // For framebuilder, add mutex to serialize second, minute trend writing 
+          pthread_mutex_lock (&frame_write_lock);
+          DEBUG(3, cerr << "Get trend frame write mutex for second frame" << endl);
+#endif
+#endif
           FrameCPP::Common::FrameBuffer<filebuf>* obuf
             = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
           obuf -> open(_tmpf, std::ios::out | std::ios::binary);
@@ -822,10 +803,15 @@ trender_c::framer ()
 				 FrameCPP::FrVect::ZERO_SUPPRESS_OTHERWISE_GZIP, 1,
                         FrameCPP::Common::CheckSum::CRC);
 
-          t = time(0) - t;
-          DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
           ofs.Close();
           obuf->close();
+#if !defined(USE_BROADCAST)
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
+          pthread_mutex_unlock (&frame_write_lock);
+#endif
+#endif
+          t = time(0) - t;
+          DEBUG(1, cerr << "Second trend frame write done in " << t << " seconds" << endl);
 	  if (rename(_tmpf, tmpf)) {
 		system_log(1, "framer(): failed to rename file; errno %d", errno);
 		fsd.report_lost_frame ();
@@ -835,7 +821,6 @@ trender_c::framer ()
 	  	// Successful frame write
 	  	fsd.update_dir (file_gps, file_gps_n, frame_length_blocks, dir_num);
 	  }
-	  TNF_PROBE_0(trender_c_framer_frame_write_end, "trender_c::framer", "frame write");
 #if EPICS_EDCU == 1
    /* Record frame write time */ 
           pvValue[25] = t;
@@ -1116,9 +1101,6 @@ trender_c::trend ()
 	    }
 
 	  nb = daqd.b1 -> get (cnum);
-	  TNF_PROBE_1(trender_c_trend_start, "trender_c::trend",
-		      "got one block",
-		      tnf_long,   block_no,    nb);
 	  {
 	    char *block_ptr = daqd.b1 -> block_ptr (nb);
 	    unsigned long block_bytes = daqd.b1 -> block_prop (nb) -> bytes;
@@ -1142,10 +1124,6 @@ trender_c::trend ()
 	    // This points to the start of status word area
 	    int *status_ptr = (int *) (block_ptr + daqd.block_size)
 			- 17*daqd.num_channels;
-
-	    TNF_PROBE_1(trender_c_trend_start, "trender_c::trend",
-			"start of trender thread channel processing",
-			tnf_long,   block_no,    nb);
 	    
 	    for (bool finished = false;;) {
 	      pthread_mutex_lock (&worker_lock);
@@ -1171,9 +1149,6 @@ trender_c::trend ()
 		trend_loop_func(j, status_ptr, block_ptr);
 	    }
 
-	    TNF_PROBE_1(trender_c_trend_end, "trender_c::trender", "end of trender thread channel processing",
-			tnf_long,   block_timestamp,    prop.gps);
-
             prop = daqd.b1 -> block_prop (nb) -> prop;
 
 	    // wait for worker thread
@@ -1184,8 +1159,6 @@ trender_c::trend ()
 
 	    DEBUG(3, cerr << "trender finished; next_trender_block=" << next_trender_block << "; next_worker_block=" << next_worker_block << endl);
 	  }
-	  TNF_PROBE_1(trender_c_trend_end, "trender_c::trender", "end of block processing",
-		      tnf_long,   block_timestamp,    prop.gps);
 	  daqd.b1 -> unlock (cnum);
 
 	  DEBUG(3, cerr << "trender consumer " << prop.gps << endl);
@@ -1229,10 +1202,6 @@ trender_c::trend_worker ()
       // This points to the start of status word area
       int *status_ptr = (int *) (block_ptr + daqd.block_size) - 17*daqd.num_channels;
 
-      TNF_PROBE_1(trender_c_trend_start, "trender_c::trend",
-		  "start of trend worker thread channel processing",
-		  tnf_long,   block_no,    nb);
-
       // Calculate MIN, MAX and RMS for all channels
       for (bool finished = false;;) {
 	pthread_mutex_lock (&worker_lock);
@@ -1259,8 +1228,6 @@ trender_c::trend_worker ()
 	if (next_worker_block == 0) // finished
 		break;
       }
-
-      TNF_PROBE_0(trender_c_trend_end, "trender_c::trender", "end of trend worker thread channel processing");
 
       // signal trender thread that we are finished
       pthread_mutex_lock (&worker_lock);
