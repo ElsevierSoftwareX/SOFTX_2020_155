@@ -134,7 +134,6 @@ main (int argc, char *argv[])
     }
 
     if (!send_and_quit) {
-#if 1
     if (i = daq_recv_channels (&daq, channels, MAX_CHANNELS, &num_channels))
       {
 	fprintf (stderr, "Couldn't receive channel data; errno=%d\n", i);
@@ -142,17 +141,16 @@ main (int argc, char *argv[])
       }
 
     printf ("%d channels configured\n", num_channels);
-if(argc == 1) {
-    printf ("name\tgroup\trate\ttpnum\tBPS\ttype\tgain\toffset\tslope\tunits\n");
-    for (i = 0; i < num_channels; i++)
-      printf ("%s\t%d\t%d\t%d\t%d\t%d\t\%f\t%f\t%f\t%s\n",
+    if(argc == 1) {
+      printf ("name\tgroup\trate\ttpnum\tBPS\ttype\tgain\toffset\tslope\tunits\n");
+      for (i = 0; i < num_channels; i++)
+        printf ("%s\t%d\t%d\t%d\t%d\t%d\t\%f\t%f\t%f\t%s\n",
 	      channels [i].name, channels [i].group_num,
 	      channels [i].rate, channels [i].tpnum,
 	      channels [i].bps, channels [i].data_type,
 	      channels [i].s.signal_gain,
 	      channels [i].s.signal_offset, channels [i].s.signal_slope, channels [i].s.signal_units);
-}
-#endif
+    }
  } // ! send_and_quit
     if (listening) {
       if (argc > 1)

@@ -66,6 +66,7 @@ public:
     pthread_cond_destroy (&worker_notempty);
     pthread_mutex_destroy (&worker_lock);
     pthread_mutex_destroy (&lock);
+    pthread_mutex_destroy (&frame_write_lock);
     sem_destroy (&trender_sem);
     sem_destroy (&frame_saver_sem);
     sem_destroy (&minute_frame_saver_sem);
@@ -91,6 +92,7 @@ public:
       pthread_mutex_init (&worker_lock, NULL);
       pthread_cond_init (&worker_notempty, NULL);
       pthread_cond_init (&worker_done, NULL);
+      pthread_mutex_init (&frame_write_lock, NULL);
       trend_block_t tbv;
 #define TB_OFFS(a) (((char *) &tbv.a) - ((char *) &tbv))
       struct sfxs {
@@ -220,6 +222,9 @@ public:
 
   /// Main trender local buffer area
   trend_block_t ttb [max_trend_channels];
+
+  /// prevent two trend frames from being written at the same time
+  pthread_mutex_t frame_write_lock;
 private:
   int shutdown_now;
   int shutdown_minute_now;

@@ -44,7 +44,6 @@ using namespace std;
 #include "daqd.hh"
 #include "sing_list.hh"
 #include "drv/cdsHardware.h"
-#include "gm_rcvr.hh"
 #include <netdb.h>
 #include "net_writer.hh"
 #include "drv/cdsHardware.h"
@@ -80,7 +79,6 @@ int controller_cycle = 0;
 #endif
 
 #if !defined(USE_GM) && !defined(USE_MX) && !defined(USE_UDP)
-#define SHMEM_DAQ 1
 #include "../../src/include/daqmap.h"
 #include "../../src/include/drv/fb.h"
 
@@ -189,7 +187,6 @@ gm_receiver_thread(void *this_p)
 #ifdef USE_GM
   gm_recv();
 #elif defined(USE_MX)
-  void receiver_mx(int);
   int this_eid = *static_cast<int*>(this_p);
   receiver_mx(this_eid);
 #elif defined(USE_UDP)
@@ -282,7 +279,6 @@ producer::frame_writer ()
      exit (1);
    }
 #elif defined(USE_MX)
-   extern unsigned int open_mx(void);
    unsigned int max_endpoints = open_mx();
    unsigned int nics_available = max_endpoints >> 8;
    max_endpoints &= 0xff;
@@ -595,13 +591,9 @@ int cycle_delay = daqd.cycle_delay;
 	    if (dcuStatCycle[ifo][j] == 0) dcuStatus[ifo][j] = DAQ_STATE_SYNC_ERR;
 	    else dcuStatus[ifo][j] = DAQ_STATE_RUN;
 	  }
+	// dcuCycleStatus shows how many matches of cycle number we got
+          DEBUG(4,cerr << "dcuid=" <<j << " dcuCycleStatus=" << dcuCycleStatus[ifo][j] << " dcuStatCycle=" << dcuStatCycle[ifo][j] << endl);
 
-#ifndef NDEBUG
-	if (_debug) {
-		// dcuCycleStatus shows how many matches of cycle number we got
-		printf("dcuid=%d; dcuCycleStatus=%d; dcuStatCycle=%d\n", j, dcuCycleStatus[ifo][j], dcuStatCycle[ifo][j]);
-	}
-#endif
 	  /* Check if DCU running and in sync */
 	  if ((dcuCycleStatus[ifo][j] > 3 || j < 5) && dcuStatCycle[ifo][j] > 4)
 	  {
@@ -609,18 +601,12 @@ int cycle_delay = daqd.cycle_delay;
 	  }
 
 	  if (/* (lastStatus == DAQ_STATE_RUN) && */ (dcuStatus[ifo][j] != DAQ_STATE_RUN)) {
-#ifndef NDEBUG
-	    	  if (_debug > 0)
-	    	    printf("Lost %s (ifo %d; dcu %d); status %d %d\n", daqd.dcuName[j], ifo, j, dcuCycleStatus[ifo][j], dcuStatCycle[ifo][j]);
-#endif
+	    DEBUG(4,cerr << "Lost "<< daqd.dcuName[j] <<"(ifo "<< ifo <<"; dcu "<< j <<"); status "<< dcuCycleStatus[ifo][j] << dcuStatCycle[ifo][j] << endl);
 	    ipc->status = DAQ_STATE_FAULT;
 	  }
 
 	  if ((dcuStatus[ifo][j] == DAQ_STATE_RUN) /* && (lastStatus != DAQ_STATE_RUN) */) {
-#ifndef NDEBUG
-	    	  if (_debug > 0)
-	    	    printf("New %s (dcu %d)\n", daqd.dcuName[j], j);
-#endif
+	    DEBUG(4,cerr << "New "<< daqd.dcuName[j] << " (dcu "<< j <<")" << endl);
 	    ipc->status = DAQ_STATE_RUN;
 	  }
 

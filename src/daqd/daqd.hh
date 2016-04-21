@@ -41,15 +41,13 @@ using namespace std;
 #include "shutdown.h"
 #include "broadcast_daqd.h"
 
-#define SHMEM_DAQ 1
-
-#if !defined(USE_GM) && !defined(USE_MX) 
-#define SHMEM_DAQ 1
-#endif
 #include "../../src/include/daqmap.h"
 #ifdef USE_GM
 #include "../../src/include/drv/gmnet.h"
 #include "gm_rcvr.hh"
+#endif
+#ifdef USE_MX
+#include "mx_rcvr.hh"
 #endif
 
 #if !defined(NO_BROADCAST) || defined(USE_BROADCAST)
@@ -76,21 +74,32 @@ extern unsigned int pvValue[1000];
 /// Define real-time thread priorities (mx receiver highest, producer next, frame savers lowest)
 #define MX_THREAD_PRIORITY 10
 #define PROD_THREAD_PRIORITY 5
-#define SAVER_THREAD_PRIORITY 2
+#define SAVER_THREAD_PRIORITY 0
+/// Only use CPU affinity for systems with dedicated single-machine framebuilders (but not standalone systems)
+/// Thus do not use if USE_BROADCAST set (identifies frame-writers, etc) and only if using a receiver (USE_GM or USE_MX or USE_UDP)
+/// We use negative numbers to count down from the highest CPU (to avoid special things on CPU0)
+/// Science frame is specified to lowest one, as not always used
 #if defined(USE_BROADCAST)
 #define PROD_CPUAFFINITY 0
 #define FULL_SAVER_CPUAFFINITY 0
-#define SCIENCE_SAVER_CPUAFFINITY 0
 #define SECOND_SAVER_CPUAFFINITY 0
 #define MINUTE_SAVER_CPUAFFINITY 0
+#define SCIENCE_SAVER_CPUAFFINITY 0
 #else
+#if !defined(USE_GM) && !defined(USE_MX) && !defined(USE_UDP)
 #define PROD_CPUAFFINITY 0
 #define FULL_SAVER_CPUAFFINITY 0
-#define SCIENCE_SAVER_CPUAFFINITY 0
 #define SECOND_SAVER_CPUAFFINITY 0
 #define MINUTE_SAVER_CPUAFFINITY 0
+#define SCIENCE_SAVER_CPUAFFINITY 0
+#else
+#define PROD_CPUAFFINITY 0
+#define FULL_SAVER_CPUAFFINITY -1
+#define SECOND_SAVER_CPUAFFINITY -2
+#define MINUTE_SAVER_CPUAFFINITY -3
+#define SCIENCE_SAVER_CPUAFFINITY -4
 #endif
-
+#endif
 /// Define max boards, endpoints for mx_rcvr
 #define MX_MAX_BOARDS 4
 #define MX_MAX_ENDPOINTS 32
@@ -434,6 +443,8 @@ inline static void set_thread_priority (char *thread_name, char *thread_abbrev, 
            } else {
 	      system_log(1, "%s thread put on CPU %d",thread_name, cpuId);
            }
+       } else {
+          system_log(1, "%s thread setaffinity error - numCPU %d cpuId %d",thread_name, numCPU, cpuId);
        }
     }
   }

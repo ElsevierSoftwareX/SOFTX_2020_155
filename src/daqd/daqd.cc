@@ -1,25 +1,4 @@
-/*  
-  Use following command to generate TNF trace file for the library calls :-
-  prex -o /tmp/a.tnf -l $TNFHOME/lib/libc_probe.so.1 ./a.out -f ~/40m-frames/C1-97_01_12_18_49_51
-  > trace $all
-  > enable $all
-  > continue
-  Wait 15 seconds and press Ctrl-C
-  > quit
-  Start TNF viewer :-
-  $TNFHOME/bin/tnfview /tmp/a.tnf
-
-  To generate trace on the source code probes only do this:
-
-  setenv LD_PRELOAD libtnfprobe.so.1
-  prex -o /tmp/b.tnf ./a.out -f ~/40m-frames/C1-97_01_12_18_49_51
-  > trace $all
-  > enable $all
-  > continue
-  ...
-  > quit
-  $TNFHOME/bin/tnfview /tmp/b.tnf
-*/
+/* daqd.cc - Main daqd source code file */
 
 #include <config.h>
 #include <fcntl.h>
@@ -710,10 +689,6 @@ daqd_c::framer (int science)
 	{
 	  int cnum = science? daqd.science_cnum: daqd.cnum;
 	  nb = b1 -> get (cnum);
-
-	  TNF_PROBE_1(daqd_c_framer_start, "daqds_c::framer",
-		      "got one block",
-		      tnf_long,   block_number,    nb);
 	  {
 	    circ_buffer_block_t *prop;
 	    char *buf;
@@ -838,8 +813,6 @@ daqd_c::framer (int science)
 //		cerr << "saver; block " << nb << " bytes " << prop -> bytes << endl;
 	      }
 	  }
-	  TNF_PROBE_0(daqd_c_framer_end, "daqd_c::framer", "end of block processing");
-	  b1 -> unlock (cnum);
 	}
 
       /* finish CRC calculation for the fast data */
@@ -883,7 +856,7 @@ daqd_c::framer (int science)
       if (fd < 0) {
 	system_log(1, "Couldn't open full frame file `%s' for writing; errno %d", _tmpf, errno);
         if (science) {
-	  fsd.report_lost_frame ();
+	  science_fsd.report_lost_frame ();
 	} else {
 	  fsd.report_lost_frame ();
 	}
@@ -896,7 +869,11 @@ daqd_c::framer (int science)
           obuf -> open(_tmpf, std::ios::out | std::ios::binary);
           FrameCPP::Common::OFrameStream  ofs(obuf);
           ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
-          DEBUG(1, cerr << "Begin WriteFrame()" << endl);
+          if (science) {
+             DEBUG(1, cerr << "Begin Science WriteFrame()" << endl);
+          } else {
+             DEBUG(1, cerr << "Begin Full WriteFrame()" << endl);
+          }
 	  time_t t = time(0);
           ofs.WriteFrame(frame, 
 			//FrameCPP::Version::FrVect::GZIP, 1,
@@ -906,10 +883,14 @@ daqd_c::framer (int science)
 			//FrameCPP::Version::FrVect::DEFAULT_GZIP_LEVEL, /* 6 */
 			FrameCPP::Common::CheckSum::CRC);
 
-	  t = time(0) - t;
-          DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
           ofs.Close();
           obuf->close();
+	  t = time(0) - t;
+          if (science) {
+             DEBUG(1, cerr << "Science frame write done in " << t << "seconds" << endl);
+          } else {
+             DEBUG(1, cerr << "full frame write done in " << t << "seconds" << endl);
+          }
 #if EPICS_EDCU == 1
       /* Record frame write time */ 
           if (science) {
@@ -919,19 +900,21 @@ daqd_c::framer (int science)
           }
 #endif
 	  if (rename(_tmpf, tmpf)) {
-	    system_log(1, "failed to rename file; errno %d", errno);
             if (science) {
+	      system_log(1, "failed to rename science frame file; errno %d", errno);
 	      science_fsd.report_lost_frame ();
 	    } else {
+	      system_log(1, "failed to rename full frame file; errno %d", errno);
 	      fsd.report_lost_frame ();
 	    }
 	    set_fault ();
 	  } else {
-	    DEBUG(3, cerr << "frame " << frame_cntr << "(" << frame_number << ") is written out" << endl);
 	    // Successful frame write
             if (science) {
+	      DEBUG(3, cerr << "Science frame " << frame_cntr << "(" << frame_number << ") is written out" << endl);
 	      science_fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
 	    } else {
+	      DEBUG(3, cerr << "Full frame " << frame_cntr << "(" << frame_number << ") is written out" << endl);
 	      fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
 	    }
 
@@ -1010,10 +993,6 @@ daqd_c::framer (int science)
 #endif
 
 
-	TNF_PROBE_1(daq_c_framer_frame_write_start, "daqd_c::framer",
-		    "frame write",
-		    tnf_long,   frame_number,   frame_number);
-	  
 	// Calculate md5 check sum
 	if (cksum_file != "") {
 	  unsigned long crc = fr_cksum(cksum_file, tmpf, (unsigned char *)(ost -> str ()), image_size);
@@ -1039,7 +1018,6 @@ daqd_c::framer (int science)
 	}
 
 	close (fd);
-	TNF_PROBE_0(daqc_c_framer_frame_write_end, "daqd_c::framer", "frame write");
       }
 #endif
 
@@ -1736,8 +1714,8 @@ main (int argc, char *argv [])
   pthread_mutex_init (&framelib_lock, NULL);
 
 #ifdef USE_MX
-void open_mx(void);
-open_mx();
+  unsigned int max_mx_end;
+  max_mx_end = open_mx();
 #endif
 
   /* Process startup file */
