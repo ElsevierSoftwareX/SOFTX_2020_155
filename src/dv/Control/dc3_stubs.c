@@ -3405,6 +3405,8 @@ initializeWindows()
 	LongSel(0,0,0);
 	fastSel(0,0,0);
 	SelTimeNow(0,0,0);
+	if (restoreFile)
+	    restore_File(restoreFileName) ;
 }
 
 

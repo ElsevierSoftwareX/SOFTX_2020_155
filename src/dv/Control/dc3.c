@@ -675,7 +675,7 @@ void create_helpWin (Widget parent)
 	helpWin = XmCreateDialogShell ( parent, "helpWin", al, ac );
 	ac = 0;
 	initialise_objects ( helpWin );
-	xmstrings[0] = XmStringCreateLtoR ( "aLIGO DataViewer 2.9.1.2\nFeb 3, 2015", (XmStringCharSet)XmFONTLIST_DEFAULT_TAG );
+	xmstrings[0] = XmStringCreateLtoR ( "aLIGO DataViewer 3.0\nApril 22, 2016", (XmStringCharSet)XmFONTLIST_DEFAULT_TAG );
 	XtSetArg(al[ac], XmNmessageString, xmstrings[0]); ac++;
 	messageBox1 = XmCreateMessageBox ( helpWin, "messageBox1", al, ac );
 	ac = 0;
