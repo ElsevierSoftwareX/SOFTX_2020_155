@@ -813,6 +813,7 @@ daqd_c::framer (int science)
 //		cerr << "saver; block " << nb << " bytes " << prop -> bytes << endl;
 	      }
 	  }
+          b1 -> unlock (cnum);
 	}
 
       /* finish CRC calculation for the fast data */

@@ -72,7 +72,9 @@ extern unsigned int pvValue[1000];
 #endif
 
 /// Define real-time thread priorities (mx receiver highest, producer next, frame savers lowest)
+#ifdef USE_MX
 #define MX_THREAD_PRIORITY 10
+#endif
 #define PROD_THREAD_PRIORITY 5
 #define SAVER_THREAD_PRIORITY 0
 /// Only use CPU affinity for systems with dedicated single-machine framebuilders (but not standalone systems)
@@ -100,9 +102,6 @@ extern unsigned int pvValue[1000];
 #define SCIENCE_SAVER_CPUAFFINITY -4
 #endif
 #endif
-/// Define max boards, endpoints for mx_rcvr
-#define MX_MAX_BOARDS 4
-#define MX_MAX_ENDPOINTS 32
 
 #if LDAS_VERSION_NUMBER >= 200000
 typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
