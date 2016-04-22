@@ -1298,6 +1298,7 @@ char *restoreFileName = (char *)XmTextFieldGetString(restorefile);
     printMessage(tmpstr, 0);
     return;
  } else {
+    saveFileName = restoreFileName ;
     sprintf ( tmpstr, "Restoring DataViewer settings from `%s'", saveFileName );
     printMessage(tmpstr, 0);
  }
