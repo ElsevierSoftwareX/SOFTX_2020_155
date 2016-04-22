@@ -8,5 +8,8 @@ extern struct rmIpcStr gmDaqIpc[DCU_COUNT];
 extern void *directed_receive_buffer[DCU_COUNT];
 unsigned int open_mx(void);
 void receiver_mx(int);
+/// Define max boards, endpoints for mx_rcvr
+#define MX_MAX_BOARDS 4
+#define MX_MAX_ENDPOINTS 32
 
 #endif
