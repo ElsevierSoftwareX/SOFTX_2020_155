@@ -954,7 +954,8 @@ udelay(1000);
 	  /// - ---- If IOP, Increment GPS second
           timeSec ++;
           pLocalEpics->epicsOutput.timeDiag = timeSec;
-	  // printf("cycle = %d  time = %d\n",cycleNum,timeSec);
+	  if (cycle_gps_time == 0) startGpsTime = timeSec;
+	  cycle_gps_time = timeSec;
 #endif
 	}
         for(ll=0;ll<sampleCount;ll++)
@@ -1179,6 +1180,8 @@ udelay(1000);
                                 // kk++;
                         }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (adcWait < MAX_ADC_WAIT_SLAVE));
 			timeSec = ioMemData->iodata[mm][ioMemCntr].timeSec;
+			if (cycle_gps_time == 0) startGpsTime = timeSec;
+			cycle_gps_time = timeSec;
 
 			/// - --------- If data not ready in time, set error, release DAC channel reservation and exit the code.
                         if(adcWait >= MAX_ADC_WAIT_SLAVE)
@@ -1765,8 +1768,6 @@ udelay(1000);
 #ifndef NO_DAQ
 		
 		// Call daqLib
-		if (cycle_gps_time == 0) startGpsTime = timeSec;
-		cycle_gps_time = timeSec; // Time at which ADCs triggered
 		pLocalEpics->epicsOutput.daqByteCnt = 
 			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
 		// Send the current DAQ block size to the awgtpman for TP number checking
