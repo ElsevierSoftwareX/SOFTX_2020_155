@@ -1,5 +1,5 @@
 Library {
-  Name			  "cdsOscFixedPhase"
+  Name			  "cdsOscSetPhase"
   Version		  8.0
   MdlSubVersion		  0
   SavedCharacterEncoding  "US-ASCII"
@@ -19,7 +19,7 @@ Library {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [361.0, 197.0, 727.0, 492.0]
+      Location		      [353.0, 141.0, 743.0, 556.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -43,9 +43,9 @@ Library {
 	IsActive		[1]
 	ViewObjType		"SimulinkTopLevel"
 	LoadSaveID		"0"
-	Extents			[683.0, 319.0]
+	Extents			[699.0, 383.0]
 	ZoomFactor		[1.0]
-	Offset			[-41.5, -81.5]
+	Offset			[-7.0070251822471619, 0.0]
       }
     }
   }
@@ -55,8 +55,8 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "controls"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Apr 22 12:09:11 2016"
-  RTWModifiedTimeStamp	  383227744
+  LastModifiedDate	  "Fri Apr 22 12:01:15 2016"
+  RTWModifiedTimeStamp	  383227253
   ModelVersionFormat	  "1.%<AutoIncrement:10>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
@@ -729,8 +729,8 @@ Library {
     }
   }
   System {
-    Name		    "cdsOscFixedPhase"
-    Location		    [361, 197, 1088, 689]
+    Name		    "cdsOscSetPhase"
+    Location		    [353, 141, 1096, 697]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -747,7 +747,7 @@ Library {
     SIDHighWatermark	    "9"
     Block {
       BlockType		      Inport
-      Name		      "GROUND"
+      Name		      "GPS_PHASE_ZERO"
       SID		      "9"
       Position		      [165, 103, 195, 117]
       ZOrder		      1
@@ -770,7 +770,7 @@ Library {
       MaskHideContents	      off
       System {
 	Name			"Subsystem"
-	Location		[361, 197, 1088, 689]
+	Location		[353, 141, 1096, 697]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -785,7 +785,7 @@ Library {
 	ZoomFactor		"100"
 	Block {
 	  BlockType		  Inport
-	  Name			  "GROUND"
+	  Name			  "GPS_PHASE_ZERO\n"
 	  SID			  "2"
 	  Position		  [30, 73, 60, 87]
 	  ZOrder		  -1
@@ -818,7 +818,7 @@ Library {
 	  IconDisplay		  "Port number"
 	}
 	Line {
-	  SrcBlock		  "GROUND"
+	  SrcBlock		  "GPS_PHASE_ZERO\n"
 	  SrcPort		  1
 	  Points		  [20, 0]
 	  Branch {
@@ -888,7 +888,7 @@ Library {
       DstPort		      1
     }
     Line {
-      SrcBlock		      "GROUND"
+      SrcBlock		      "GPS_PHASE_ZERO"
       SrcPort		      1
       DstBlock		      "Subsystem"
       DstPort		      1
