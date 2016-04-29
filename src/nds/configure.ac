@@ -72,6 +72,8 @@ have_framecpp2=
 PKG_CHECK_MODULES([FRAMECPP2],[framecpp >= 2],[have_framecpp2="yes"],[have_framecpp2="no"])
 have_framecpp2to233=
 PKG_CHECK_MODULES([FRAMECPP2TO233],[framecpp <= 2.3.3 framecpp >= 2],[have_framecpp2to233="yes"],[have_framecpp2to233="no"])
+have_framecpp24=
+PKG_CHECK_MODULES([FRAMECPP24],[framecpp >= 2.4],[have_framecpp24="yes"],[have_framecpp24="no"])
 
 dnl======================================================
 dnl FrameCPP 2 to 2.3.3 do not include -stc=c++0x in the .pc file
