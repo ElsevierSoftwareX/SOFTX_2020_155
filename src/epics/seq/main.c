@@ -3048,7 +3048,7 @@ sleep(5);
 
 	SETUP;
 	listLocalRecords(*iocshPpdbbase);
-	myversion = majorversion + 0.01 * subversion1 + 0.001 * subversion2;
+	myversion = majorversion + 0.1 * subversion1 + 0.01 * subversion2;
 	if(!myreleased) myversion *= -1.0;
 	char rcgversionname[256]; sprintf(rcgversionname, "%s_%s", pref, "RCG_VERSION");	// Set RCG Version EPICS
 	status = dbNameToAddr(rcgversionname,&rcgversion_addr);
