@@ -92,6 +92,8 @@ profile_c::stop_profiler () {
 void
 profile_c::start_profiler (circ_buffer *pcb) {
   pthread_t tprof;
+  // error message buffer
+  char errmsgbuf[80]; 
 
   if (counters)
     free ((void *) counters);
@@ -120,8 +122,9 @@ profile_c::start_profiler (circ_buffer *pcb) {
   //    pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
   int err_no;
   if (err_no = pthread_create (&tprof, &attr, (void *(*)(void *))profiler_static, this)) {
+    strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
     free (counters); counters = 0;
-    system_log(1, "profiler thread not started: pthread_create() err=%d", err_no);
+    system_log(1, "profiler thread not started: pthread_create() err=%s", errmsgbuf);
   }
   pthread_attr_destroy (&attr);
 }

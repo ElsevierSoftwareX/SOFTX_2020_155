@@ -207,11 +207,15 @@ daqd_c::configure_channels_files ()
     }
   }
 
+  // error message buffer
+  char errmsgbuf[80];
+
   // File names are specified in `master_config' file
   FILE *mcf = NULL;
   mcf = fopen(master_config.c_str(), "r");
   if (mcf == NULL) {
-    system_log(1, "failed to open `%s' for reading: errno=%d", master_config.c_str(), errno);
+    strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+    system_log(1, "failed to open `%s' for reading: %s", master_config.c_str(),errmsgbuf);
     return 1;
   }
 
@@ -427,11 +431,6 @@ chanConfigCallback(char *channel_name, struct CHAN_PARAM *params, void *user)
   else
     ccd -> trend = ccd -> active; // Trend all active channels;
 
-#if 0
-  /* Complex channels are not trended */
-  if (ccd -> data_type == _32bit_complex)  ccd -> trend = 0;
-#endif
-
   if (IS_GDS_ALIAS (*ccd)) {
     ccd -> active = 0;
     daqd.num_gds_channel_aliases++;
@@ -641,6 +640,9 @@ daqd_c::framer (int science)
     system_log(1, "Start up science mode frame writer\n");
   }
 
+// error message buffer  
+  char errmsgbuf[80];
+
   adc_data_ptr_type dptr;
   ldas_frame_h_type frame
   	= full_frame (blocks_per_frame, science, dptr);
@@ -838,11 +840,6 @@ daqd_c::framer (int science)
                                      INT_2U leapS, INT_4S localTime)
 */
 
-#if 0
-      fw -> setFrameFileAttributes (run, frame_number, 0,
-				    gps, blocks_per_frame, gps_n,
-				    leap_seconds, altzone);
-#endif
       frame -> SetGTime(FrameCPP::Version::GPSTime (gps, gps_n));
       //frame -> SetULeapS(leap_seconds);
 
@@ -855,7 +852,8 @@ daqd_c::framer (int science)
 
       int fd = creat (_tmpf, 0644);
       if (fd < 0) {
-	system_log(1, "Couldn't open full frame file `%s' for writing; errno %d", _tmpf, errno);
+        strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	system_log(1, "Couldn't open full frame file `%s' for writing; %s", _tmpf, errmsgbuf);
         if (science) {
 	  science_fsd.report_lost_frame ();
 	} else {
@@ -902,10 +900,12 @@ daqd_c::framer (int science)
 #endif
 	  if (rename(_tmpf, tmpf)) {
             if (science) {
-	      system_log(1, "failed to rename science frame file; errno %d", errno);
+              strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	      system_log(1, "failed to rename science frame file; %s", errmsgbuf);
 	      science_fsd.report_lost_frame ();
 	    } else {
-	      system_log(1, "failed to rename full frame file; errno %d", errno);
+              strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	      system_log(1, "failed to rename full frame file; %s", errmsgbuf);
 	      fsd.report_lost_frame ();
 	    }
 	    set_fault ();
@@ -922,12 +922,14 @@ daqd_c::framer (int science)
 	    // Report frame size to the Epics world
             fd = open(tmpf, O_RDONLY);
             if (fd == -1) {
-             	system_log(1, "failed to open file; errno %d", errno);
+                strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+             	system_log(1, "failed to open file; %s", errmsgbuf);
                 exit(1);
             }
             struct stat sb;
             if (fstat(fd, &sb) == -1) {
-              system_log(1, "failed to fstat file; errno %d", errno);
+              strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+              system_log(1, "failed to fstat file; %s", errmsgbuf);
               exit(1);
             }
 	    if (science) pvValue[20] = sb.st_size;
@@ -947,17 +949,20 @@ daqd_c::framer (int science)
 	 //
 	  fd = open(tmpf, O_RDONLY);
           if (fd == -1) {
-            system_log(1, "failed to open file; errno %d", errno);
+            strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+            system_log(1, "failed to open file; %s", errmsgbuf);
             exit(1);
           }
           struct stat sb;
           if (fstat(fd, &sb) == -1) {
-            system_log(1, "failed to fstat file; errno %d", errno);
+            strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+            system_log(1, "failed to fstat file; %s", errmsgbuf);
             exit(1);
           }
           void *addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
           if (addr == MAP_FAILED) {
-            system_log(1, "failed to fstat file; errno %d", errno);
+            strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+            system_log(1, "failed to fstat file; %s", errmsgbuf);
             exit(1);
           }
 
@@ -980,47 +985,6 @@ daqd_c::framer (int science)
 	  set_fault ();
 	}*/
       }
-
-#if 0
-      int fd = creat (_tmpf, 0644);
-      if (fd < 0) {
-	system_log(1, "Couldn't open full frame file `%s' for writing; errno %d", _tmpf, errno);
-	fsd.report_lost_frame ();
-	set_fault ();
-      } else {
-
-#if defined(DIRECTIO_ON) && defined(DIRECTIO_OFF)
-        if (daqd.do_directio) directio (fd, DIRECTIO_ON);
-#endif
-
-
-	// Calculate md5 check sum
-	if (cksum_file != "") {
-	  unsigned long crc = fr_cksum(cksum_file, tmpf, (unsigned char *)(ost -> str ()), image_size);
-	  system_log(5, "%d\t%x\n", gps, crc);
-	}
-
-	/* Write out a frame */
-	int nwritten = write (fd, ost -> str (), image_size);
-        if (nwritten == image_size) {
-	  if (rename(_tmpf, tmpf)) {
-	    system_log(1, "failed to rename file; errno %d", errno);
-	    fsd.report_lost_frame ();
-	    set_fault ();
-	  } else {
-	    DEBUG(3, cerr << "frame " << frame_cntr << "(" << frame_number << ") is written out" << endl);
-	    // Successful frame write
-	    fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
-	  }
-	} else {
-	  system_log(1, "failed to write full frame out; errno %d", errno);
-	  fsd.report_lost_frame ();
-	  set_fault ();
-	}
-
-	close (fd);
-      }
-#endif
 
 #if EPICS_EDCU == 1
       if (!science) {
@@ -1079,6 +1043,9 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
     return 1;
   }
 
+// error message buffer  
+  char errmsgbuf[80];
+
   int s = daqd.block_size / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
   if (s < 128*1024) s = 128*1024;
 #ifdef USE_BROADCAST
@@ -1103,19 +1070,22 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
 #ifdef EDCU_SHMEM
   key_t shmak = ftok("/tmp/foo",0);
   if (shmak == -1) {
-    system_log(1,"couldn't do ftok(); errno=%d", errno);
+   strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+    system_log(1,"couldn't do ftok(); %s", errmsgbuf);
     exit(1);
   }
 
   int shmid = shmget(shmak, edcu_chan_idx[1] - edcu_chan_idx[0] + 8, IPC_CREAT);
   if (shmid == -1) {
-    system_log(1,"couldn't do shmget(); errno=%d", errno);
+    strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+    system_log(1,"couldn't do shmget(); %s", errmsgbuf);
     exit(1);
   }
 
   edcu_shptr = (unsigned char *)shmat(shmid, 0,0);
   if (edcu_shptr == (unsigned char *)-1) {
-    system_log(1,"couldn't do shmat(); errno=%d", errno);
+    strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+    system_log(1,"couldn't do shmat(); %s", errmsgbuf);
     exit(1);
   }
 
@@ -1250,6 +1220,8 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
 int
 daqd_c::start_edcu (ostream *yyout)
 {
+  // error message buffer
+  char errmsgbuf[80];
   pthread_attr_t attr;
   pthread_attr_init (&attr);
   pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
@@ -1260,8 +1232,9 @@ daqd_c::start_edcu (ostream *yyout)
   if (err_no = pthread_create (&edcu1.tid, &attr,
 			       (void *(*)(void *))edcu1.edcu_static,
 			       (void *) &edcu1)) {
+    strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
     pthread_attr_destroy (&attr);
-    system_log(1, "EDCU pthread_create() err=%d", err_no);
+    system_log(1, "EDCU pthread_create() err=%s", errmsgbuf);
     return 1;
   }
   pthread_attr_destroy (&attr);
@@ -1274,6 +1247,8 @@ daqd_c::start_edcu (ostream *yyout)
 int
 daqd_c::start_epics_server (ostream *yyout, char *prefix, char *prefix1, char *prefix2)
 {
+  // error message buffer
+  char errmsgbuf[80];
   pthread_attr_t attr;
   pthread_attr_init (&attr);
   pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
@@ -1287,8 +1262,9 @@ daqd_c::start_epics_server (ostream *yyout, char *prefix, char *prefix1, char *p
   if (err_no = pthread_create (&epics1.tid, &attr,
 			       (void *(*)(void *))epics1.epics_static,
 			       (void *) &epics1)) {
+    strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
     pthread_attr_destroy (&attr);
-    system_log(1, "Epics pthread_create() err=%d", err_no);
+    system_log(1, "Epics pthread_create() err=%s", errmsgbuf);
     return 1;
   } 
   pthread_attr_destroy (&attr);
@@ -1304,6 +1280,8 @@ daqd_c::start_epics_server (ostream *yyout, char *prefix, char *prefix1, char *p
 int
 daqd_c::start_producer (ostream *yyout)
 {
+  // error message buffer
+  char errmsgbuf[80];
   pthread_attr_t attr;
   pthread_attr_init (&attr);
   pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
@@ -1314,8 +1292,9 @@ daqd_c::start_producer (ostream *yyout)
   if (err_no = pthread_create (&producer1.tid, &attr,
 			       (void *(*)(void *))producer1.frame_writer_static,
 			       (void *) &producer1)) {
+    strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
     pthread_attr_destroy (&attr);
-    system_log(1, "producer pthread_create() err=%d", err_no);
+    system_log(1, "producer pthread_create() err=%s", errmsgbuf);
     return 1;
   }
   pthread_attr_destroy (&attr);
@@ -1328,6 +1307,8 @@ int
 daqd_c::start_frame_saver (ostream *yyout, int science)
 {
   assert (b1);
+// error message buffer
+  char errmsgbuf[80];
 #if EPICS_EDCU == 1
   extern unsigned int pvValue[1000];
 #endif
@@ -1349,8 +1330,9 @@ daqd_c::start_frame_saver (ostream *yyout, int science)
         err_no = pthread_create (&consumer [cnum], &attr, (void *(*)(void *)) daqd.framer_static, (void *) this);
       }
       if (err_no) {
+        strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
 	pthread_attr_destroy (&attr);
-	system_log(1, "pthread_create() err=%d", err_no);
+	system_log(1, "pthread_create() err=%s", errmsgbuf);
 	return 1;
       }
 
@@ -1376,22 +1358,6 @@ daqd_c::start_frame_saver (ostream *yyout, int science)
     }
   return 0;
 }
-
-#if 0
-void *
-drain (void *a)
-{
-  int nb;
-  int ai = (int) a;
-  do {
-    nb = daqd.b1 -> get (ai);
-    basic_io::writen (daqd.files [ai], daqd.b1 -> block_ptr (nb), daqd.b1 -> block_prop (nb) -> bytes);
-    daqd.b1 -> unlock (ai);
-  } while (daqd.b1 -> block_prop (nb) -> bytes);
-
-  return NULL;
-}
-#endif
 
 /// Print out usage message and exit
 void
@@ -1472,44 +1438,6 @@ shandler (int a) {
 #ifdef USE_SYMMETRICOM
 
 #ifndef USE_IOP
-#if 0
-  BC_PCI_HANDLE hBC_PCI;
-
-// Get current GPS time from the symmetricom IRIG-B card
-unsigned long
-daqd_c::symm_gps(unsigned long *frac, int *stt) {
-         DWORD min, maj;
-	 time_t t;
-         BYTE stat;
-         struct tm *majtime;
-
- 	 extern BC_PCI_HANDLE hBC_PCI;
-         //bcReadDecTime (hBC_PCI, dectime, &min, &stat);
-	 if ( bcReadBinTime (hBC_PCI, &maj, &min, &stat) == TRUE ) {
-		// TODO: handle leap seconds here
-#if 0
-		printf("%d %d\n", maj, min);
-		t = maj;
-		majtime = gmtime( &t );
-		printf( "\nBinary Time: %02d/%02d/%d %02d:%02d:%02d.%06lu Status: %d\n", majtime->tm_mon+1, majtime->tm_mday, majtime->tm_year+1900, majtime->tm_hour, majtime->tm_min, majtime->tm_sec, min, stat);
-#endif
-	 }
-	maj -= 315964819 - 19;
-	min *= 1000;
-
-	 if (frac) *frac = min;
-	 if (stt) *stt = stat;
-	 return  maj + daqd.symm_gps_offset;
-}
-
-bool
-daqd_c::symm_ok() {
-	int  stat;
-	symm_gps(0,&stat);
-	printf("Symmetricom status %d\n", stat);
-	return stat < 5;
-}
-#endif
 
 int symmetricom_fd = -1;
 
@@ -1558,6 +1486,8 @@ main (int argc, char *argv [])
   int stf;
   pthread_t startup_iprt;
   char startup_fname [filesys_c::filename_max];
+  // error message buffer
+  char errmsgbuf[80];
 
 #ifdef USE_SYMMETRICOM
 #ifndef USE_IOP
@@ -1567,36 +1497,6 @@ main (int argc, char *argv [])
 	exit(1);
   }
 
-#if 0
-  // Start the device
-  hBC_PCI = bcStartPci();
-  if (!hBC_PCI){
-     printf ("Error Opening Symmetricom Device Driver /dev/windrvr6\n");
-     exit(1);
-  }
-
-  // Init the time format
-  BYTE tmfmt;
-  if (bcReqTimeFormat (hBC_PCI, &tmfmt) != TRUE) {
-     printf ("Error Getting Time Format!!!\n");
-     exit(1);
-  }
-
-  // Set the year
-  
-  time_t tm = time(0);
-  struct tm *t = gmtime(&tm);
-  DWORD year = t->tm_year;
-  if (bcSetYear(hBC_PCI, 1900 + year) != TRUE) {
-     printf ("Error Setting the Year on the Symmetricom card.\n");
-     exit(1);
-  }
-
-  if (bcSetYearAutoIncFlag(hBC_PCI, 1) != TRUE) {
-     printf ("Error Setting Year Auto Incr Flag on the Symmetricom card.\n");
-     exit(1);
-  }
-#endif
 #endif
 #endif
 
@@ -1666,41 +1566,9 @@ main (int argc, char *argv [])
     // Want to dump unlimited core for debugging
     setrlimit (RLIMIT_CORE, &ulmt);
 #endif
-#if 0
-    // Setting stack limit to 2G limits process data size to 2G !!!
-    setrlimit (RLIMIT_DATA, &ulmt);
-    setrlimit (RLIMIT_VMEM, &ulmt);
-    setrlimit (RLIMIT_STACK, &small);
-    setrlimit (RLIMIT_AS, &ulmt);
-#endif
   }
 #ifdef DAEMONIC
   {
-
-#if 0
-    if (fork ())
-      exit (0); // parent terminates
-
-    setsid (); // become session leader
-
-    signal (SIGHUP, SIG_IGN);
-
-    if (fork ())
-      exit (0); // first child terminates
-
-    // Want to stay in the current directory to keep the core in it
-    //    chdir ("/");
-
-    //    umask (0);
-
-    for (int j = 0; j < 256; j++)
-      close (j);
-
-    // Keep standard descriptor, so the program can still safely print
-    open("/dev/null", O_RDONLY);
-    open("/dev/null", O_WRONLY);
-    open("/dev/null", O_RDONLY);
-#endif // 0
 
 
     openlog (programname, LOG_PID, LOG_USER);
@@ -1743,8 +1611,9 @@ main (int argc, char *argv [])
 
       int err_no;
       if (err_no = pthread_create (&startup_iprt, &attr, (void *(*)(void *))interpreter_no_prompt, (void *) (stderr_dup << 16 | stf))) {
+        strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
 	pthread_attr_destroy (&attr);
-	system_log(1, "unable to spawn startup file interpreter: pthread_create() err=%d", err_no);
+	system_log(1, "unable to spawn startup file interpreter: pthread_create() err=%s", errmsgbuf);
 	exit (1);
       }
 
@@ -1779,6 +1648,9 @@ shutdown_server ()
   struct sockaddr_in srvr_addr;
   int sockfd;
 
+// error message buffer  
+  char errmsgbuf[80];
+
   // For each listener thread: cancel it then connect to
   // kick off the accept()
   for (int i = 0; i < daqd.num_listeners; i++)
@@ -1791,7 +1663,8 @@ shutdown_server ()
       srvr_addr.sin_addr.s_addr = inet_addr ("127.0.0.1");
       if ((sockfd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
 	{
-	  system_log(1, "shutdown: socket(); errno=%d", errno);
+          strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	  system_log(1, "shutdown: socket(); %s", errmsgbuf);
 	  exit (1);
 	}
       connect (sockfd, (struct sockaddr *) &srvr_addr, sizeof (srvr_addr));
@@ -1811,10 +1684,6 @@ void regerr() { abort();};
 #define ESIZE 1024
 char ipexpbuf [ESIZE];
 char dec_num_expbuf [ESIZE];
-
-#if 0
-char *ipregexp = "^[0-9]\\{1,3\\}\\.[0-9]\\{1,3\\}\\.[0-9]\\{1,3\\}\\.[0-9]\\{1,3\\}$";
-#endif
 
 char *cur_regexp = 0;
 char *ipregexp ="^([0-9]\\{1,3\\}\\.)\\{3\\}[0-9]\\{1,3\\}$";
