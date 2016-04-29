@@ -49,6 +49,8 @@ net_listener::start_listener (ostream *yyout, int port, int pstrict)
 {
   listener_port = port;
   this -> strict = pstrict;
+  // error message buffer
+  char errmsgbuf[80]; 
 
   srvr_addr.sin_family = AF_INET;
   srvr_addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -60,8 +62,9 @@ net_listener::start_listener (ostream *yyout, int port, int pstrict)
   //  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
   int err_no;
   if (err_no = pthread_create (&tid, &attr, (void *(*)(void *))listener_static, (void *) this)) {
+    strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
     pthread_attr_destroy (&attr);
-    system_log(1, "couldn't create listener thread; pthread_create() err=%d", err_no);    
+    system_log(1, "couldn't create listener thread; pthread_create() err = %s", errmsgbuf);    
     return 1;
   }
   pthread_attr_destroy (&attr);
@@ -73,6 +76,9 @@ void *
 net_listener::listener ()
 //listener (void * a)
 {
+  // error message buffer
+  char errmsgbuf[80]; 
+
   const int on = 1;
   int onlen = sizeof (on);
   int srvr_addr_len;
@@ -86,7 +92,8 @@ net_listener::listener ()
 
   if ((listenfd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
-      system_log(1, "listener: socket(); errno=%d", errno);
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      system_log(1, "listener: socket(); err=%s", errmsgbuf);
       return NULL;
     }
   setsockopt (listenfd, SOL_SOCKET, SO_REUSEADDR, (const char *) &on, sizeof (on));
@@ -94,12 +101,14 @@ net_listener::listener ()
   srvr_addr_len = sizeof (srvr_addr);
   if (::bind (listenfd, (struct sockaddr *) &(srvr_addr), srvr_addr_len) < 0)
     {
-      system_log(1, "listener: bind(%d); errno=%d", srvr_addr.sin_port, errno);
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      system_log(1, "listener: bind(%d); err=%s", srvr_addr.sin_port, errmsgbuf);
       return NULL;
     }
   if (listen (listenfd, 2) < 0)
     {
-      system_log(1, "listen(2); errno=%d", errno);
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      system_log(1, "listen(2); err=%s", errmsgbuf);
       return NULL;
     }
   for (;;) {
@@ -122,7 +131,8 @@ net_listener::listener ()
 	  }
 	else
 	  {
-	    system_log(1, "accept(); errno=%d", errno);
+            strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));            
+	    system_log(1, "accept(); err=%s", errmsgbuf);
 	    return NULL;
 	  }
     }
@@ -141,7 +151,8 @@ net_listener::listener ()
       if (err_no = pthread_create (&iprt, &attr,
 				       (void *(*)(void *))(strict? strict_interpreter: interpreter),
 				       (void *) (connfd_long << 16 | dup(connfd_long)))) {
-	system_log(1, "couldn't create interpreter thread; pthread_create() err=%d", err_no);
+        strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+	system_log(1, "couldn't create interpreter thread; pthread_create() err = %s", errmsgbuf);
 	char buf [256];
 	system_log(1, "connection dropped on port %d from %s; fd=%d", srvr_addr.sin_port, net_writer_c::ip_fd_ntoa (connfd, buf), connfd);
 	pthread_attr_destroy (&attr);

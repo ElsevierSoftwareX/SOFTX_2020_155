@@ -46,6 +46,9 @@ trender_c::raw_minute_saver ()
   long minute_put_cntr;
   unsigned int rmp = raw_minute_trend_saving_period;
 
+// error message buffer
+  char errmsgbuf[80];
+
   circ_buffer_block_prop_t *cur_prop = new circ_buffer_block_prop_t[rmp];
   trend_block_t *cur_blk[rmp];
   for (int i = 0; i < rmp; i++)
@@ -97,13 +100,15 @@ trender_c::raw_minute_saver ()
 	  strcat (strcat (tmpf, "/"), channels [j].name);
 	  int fd = open (tmpf, O_CREAT|O_WRONLY|O_APPEND, 0644);
 	  if (fd < 0) {
-	    system_log(1, "Couldn't open raw minute trend file `%s' for writing; errno %d", tmpf, errno);
+	    strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+            system_log(1, "Couldn't open raw minute trend file `%s' for writing; %s", tmpf, errmsgbuf);
 	    daqd.set_fault ();
 	  } else {
 	    struct stat fst;
 	    int check_close = 0;
 	    if (fstat (fd, &fst)) {
-	      system_log(1, "can't stat raw minute trend file `%s'; errno %d", tmpf, errno);
+	      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	      system_log(1, "can't stat raw minute trend file `%s'; %s", tmpf, errmsgbuf);
 	      daqd.set_fault ();	    
 	    } else {
 	      // Will not try writing to improperly sized file
@@ -121,7 +126,8 @@ trender_c::raw_minute_saver ()
 	        int nw = write (fd, &rmtr, wsize);
 	        if (nw != wsize) {
 		  int error = ftruncate (fd, fst.st_size); // to keep data integrity
-		  system_log(1, "failed to write raw minute trend file `%s' out; errno %d", tmpf, errno);
+	          strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+		  system_log(1, "failed to write raw minute trend file `%s' out; %s", tmpf, errmsgbuf);
 		  daqd.set_fault ();
 		}
 		check_close = 1; // verify success of close()
@@ -132,7 +138,8 @@ trender_c::raw_minute_saver ()
 	        if (fsync (fd) != 0) {
                   // No space left in the file system?
                   int error = ftruncate (fd, fst.st_size); // to keep data integrity
-                  system_log(1, "failed to write raw minute trend file `%s' out; in fsync() errno %d", tmpf, errno);
+	          strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+                  system_log(1, "failed to write raw minute trend file `%s' out; in fsync() %s", tmpf, errmsgbuf);
                   daqd.set_fault ();
 		}
 	      }
@@ -206,6 +213,9 @@ trender_c::minute_framer ()
   unsigned char *adc_ptr [num_trend_channels];
   //INT_2U data_valid [num_trend_channels];
   INT_2U *data_valid_ptr [num_trend_channels];
+
+  // error message buffer
+  char errmsgbuf[80];
 
   // Create ADCs
   try {
@@ -356,7 +366,8 @@ trender_c::minute_framer ()
 
       int fd = creat (_tmpf, 0644);
       if (fd < 0) {
-	system_log(1, "Couldn't open minute trend frame file `%s' for writing; errno %d", _tmpf, errno);
+        strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	system_log(1, "Couldn't open minute trend frame file `%s' for writing; %s", _tmpf, errmsgbuf);
 	minute_fsd.report_lost_frame ();
 	daqd.set_fault ();
       } else {
@@ -365,13 +376,10 @@ trender_c::minute_framer ()
 	if (daqd.do_directio) directio (fd, DIRECTIO_ON);
 #endif
 	close (fd);
-#if !defined(USE_BROADCAST)
-#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
         // For framebuilder, add mutex to serialize second, minute trend writing 
         pthread_mutex_lock (&frame_write_lock);
         DEBUG(3, cerr << "Get trend frame write mutex for minute frame" << endl);
-#endif
-#endif
+ 
         FrameCPP::Common::FrameBuffer<filebuf>* obuf
             = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
         obuf -> open(_tmpf, std::ios::out | std::ios::binary);
@@ -387,15 +395,13 @@ trender_c::minute_framer ()
 
         ofs.Close();
         obuf->close();
-#if !defined(USE_BROADCAST)
-#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
         pthread_mutex_unlock (&frame_write_lock);
-#endif
-#endif
+
         t = time(0) - t;
         DEBUG(1, cerr << "Minute trend frame write done in " << t << " seconds" << endl);
 	if (rename(_tmpf, tmpf)) {
-		system_log(1, "minute_framer(): failed to rename file; errno %d", errno);
+                strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+		system_log(1, "minute_framer(): failed to rename file; %s", errmsgbuf);
 		minute_fsd.report_lost_frame ();
 		daqd.set_fault ();
 	} else {
@@ -622,6 +628,9 @@ trender_c::framer ()
   //INT_2U data_valid [num_trend_channels];
   INT_2U *data_valid_ptr [num_trend_channels];
 
+  // error message buffer
+  char errmsgbuf[80]; 
+
   // Create  ADCs
   try {
     for (int i = 0; i < num_trend_channels; i++) {
@@ -777,19 +786,17 @@ trender_c::framer ()
 
       int fd = creat (_tmpf, 0644);
       if (fd < 0) {
-	  system_log(1, "Couldn't open full trend frame file `%s' for writing; errno %d", tmpf, errno);
+          strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	  system_log(1, "Couldn't open full trend frame file `%s' for writing; %s", tmpf, errmsgbuf);
 	  fsd.report_lost_frame ();
 	  daqd.set_fault ();
       } else {
 	  DEBUG(3, cerr << "`" << _tmpf << "' opened" << endl);
 	  close (fd);
-#if !defined(USE_BROADCAST)
-#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
           // For framebuilder, add mutex to serialize second, minute trend writing 
           pthread_mutex_lock (&frame_write_lock);
           DEBUG(3, cerr << "Get trend frame write mutex for second frame" << endl);
-#endif
-#endif
+
           FrameCPP::Common::FrameBuffer<filebuf>* obuf
             = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
           obuf -> open(_tmpf, std::ios::out | std::ios::binary);
@@ -805,15 +812,13 @@ trender_c::framer ()
 
           ofs.Close();
           obuf->close();
-#if !defined(USE_BROADCAST)
-#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
           pthread_mutex_unlock (&frame_write_lock);
-#endif
-#endif
+
           t = time(0) - t;
           DEBUG(1, cerr << "Second trend frame write done in " << t << " seconds" << endl);
 	  if (rename(_tmpf, tmpf)) {
-		system_log(1, "framer(): failed to rename file; errno %d", errno);
+                strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+		system_log(1, "framer(): failed to rename file; %s", errmsgbuf);
 		fsd.report_lost_frame ();
 		daqd.set_fault ();
 	  } else {
@@ -1257,6 +1262,9 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
   trend_buffer_blocks = ptrend_buffer_blocks;
   minute_trend_buffer_blocks = pminute_trend_buffer_blocks;
 
+  // error message buffer
+  char errmsgbuf[80];
+
   // Allocate trend circular buffer
   {
     void *mptr = malloc (sizeof(circ_buffer));
@@ -1338,7 +1346,8 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
       pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
       int err_no;
       if (err_no = pthread_create (&mconsumer, &attr, (void *(*)(void *))minute_trend_static, (void *) this)) {
-	system_log(1, "couldn't create minute trend consumer thread; pthread_create() err=%d", err_no);
+        strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+	system_log(1, "couldn't create minute trend consumer thread; pthread_create() err=%s", errmsgbuf);
 	tb -> delete_consumer (mcnum);
 	mcnum = 0;
 	tb -> ~circ_buffer();
@@ -1378,12 +1387,14 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
       int err_no;
 
       if (err_no = pthread_create (&worker_tid, &attr, (void *(*)(void *))trend_worker_static, (void *) this)) {
-	system_log(1, "couldn't create second trend worker thread; pthread_create() err=%d", err_no);
+        strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+	system_log(1, "couldn't create second trend worker thread; pthread_create() err=%s", errmsgbuf);
 	abort();
       }
 
       if (err_no = pthread_create (&consumer, &attr, (void *(*)(void *))trend_static, (void *) this)) {
-	system_log(1, "couldn't create second trend consumer thread; pthread_create() err=%d", err_no);
+        strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+	system_log(1, "couldn't create second trend consumer thread; pthread_create() err=%s", errmsgbuf);
 
 	// FIXME: have to cancel minute trend thread here first !!!
 	abort();
@@ -1437,6 +1448,8 @@ trender_c::start_raw_minute_trend_saver (ostream *yyout)
       *yyout << "start_raw_trend_saver: too many minute trend consumers, saver was not started" << endl;
       return 1;
     }
+  // error message buffer
+  char errmsgbuf[80];
 
   pthread_attr_t attr;
   pthread_attr_init (&attr);
@@ -1448,7 +1461,8 @@ trender_c::start_raw_minute_trend_saver (ostream *yyout)
   int err_no;
   if (err_no = pthread_create (&mtraw, &attr, (void *(*)(void *))daqd.trender.raw_minute_trend_saver_static,
 			       (void *) this)) {
-    system_log(1, "couldn't create raw minute trend saver thread; pthread_create() err=%d", err_no);
+    strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+    system_log(1, "couldn't create raw minute trend saver thread; pthread_create() err=%s", errmsgbuf);
 
       // FIXME: have to cancel frame saver thread here
     abort();
@@ -1482,6 +1496,9 @@ trender_c::start_minute_trend_saver (ostream *yyout)
 	return 1;
       }
 
+    // error message buffer
+    char errmsgbuf[80];
+
     sem_wait (&minute_frame_saver_sem);
     pthread_attr_t attr;
     pthread_attr_init (&attr);
@@ -1493,7 +1510,8 @@ trender_c::start_minute_trend_saver (ostream *yyout)
     int err_no;
     if (err_no = pthread_create (&mtsaver, &attr, (void *(*)(void *))daqd.trender.minute_trend_framer_static,
 				     (void *) this)) {
-      system_log(1, "couldn't create minute trend framer thread; pthread_create() err=%d", err_no);
+      strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+      system_log(1, "couldn't create minute trend framer thread; pthread_create() err=%s", errmsgbuf);
 
       // FIXME: have to cancel frame saver thread here
       abort();
@@ -1527,6 +1545,9 @@ trender_c::start_trend_saver (ostream *yyout)
       return 1;
     }
 
+  // error message buffer
+  char errmsgbuf[80];
+
   pthread_attr_t attr;
   pthread_attr_init (&attr);
   pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
@@ -1544,7 +1565,8 @@ trender_c::start_trend_saver (ostream *yyout)
       /* Start trend saver consumer thread */
       int err_no;
       if (err_no = pthread_create (&tsaver, &attr, (void *(*)(void *))daqd.trender.saver_static, (void *) this)) {
-	system_log(1, "couldn't create ascii trend saver thread; pthread_create() err=%d", err_no);
+        strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+	system_log(1, "couldn't create ascii trend saver thread; pthread_create() err=%s", errmsgbuf);
 	tb -> delete_consumer (saver_cnum);
 	pthread_attr_destroy (&attr);
 	return 1;
@@ -1559,7 +1581,8 @@ trender_c::start_trend_saver (ostream *yyout)
       /* Start second trend framer thread */
       int err_no;
       if (err_no = pthread_create (&tsaver, &attr, (void *(*)(void *))daqd.trender.trend_framer_static, (void *) this)) {
-	system_log(1, "couldn't create second trend framer thread; pthread_create() err=%d", err_no);
+        strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+	system_log(1, "couldn't create second trend framer thread; pthread_create() err=%s", errmsgbuf);
 	tb -> delete_consumer (saver_cnum);
 	pthread_attr_destroy (&attr);
 	return 1;

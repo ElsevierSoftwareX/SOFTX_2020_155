@@ -49,6 +49,9 @@ using namespace std;
 #ifdef USE_MX
 #include "mx_rcvr.hh"
 #endif
+#ifdef USE_UDP
+#include "udp_rcvr.hh"
+#endif
 
 #if !defined(NO_BROADCAST) || defined(USE_BROADCAST)
 #include <framexmit.hh>
@@ -77,23 +80,23 @@ extern unsigned int pvValue[1000];
 #endif
 #define PROD_THREAD_PRIORITY 5
 #define SAVER_THREAD_PRIORITY 0
-/// Only use CPU affinity for systems with dedicated single-machine framebuilders (but not standalone systems)
-/// Thus do not use if USE_BROADCAST set (identifies frame-writers, etc) and only if using a receiver (USE_GM or USE_MX or USE_UDP)
+/// Only use CPU affinity for systems with dedicated framebuilders (not standalone systems)
+/// Thus we use if USE_BROADCAST set (identifies frame-writers, etc) or if using a receiver (USE_GM or USE_MX or USE_UDP)
 /// We use negative numbers to count down from the highest CPU (to avoid special things on CPU0)
 /// Science frame is specified to lowest one, as not always used
 #if defined(USE_BROADCAST)
 #define PROD_CPUAFFINITY 0
-#define FULL_SAVER_CPUAFFINITY 0
-#define SECOND_SAVER_CPUAFFINITY 0
-#define MINUTE_SAVER_CPUAFFINITY 0
-#define SCIENCE_SAVER_CPUAFFINITY 0
+#define FULL_SAVER_CPUAFFINITY -1
+#define SECOND_SAVER_CPUAFFINITY -2
+#define MINUTE_SAVER_CPUAFFINITY -3
+#define SCIENCE_SAVER_CPUAFFINITY -4
 #else
-#if !defined(USE_GM) && !defined(USE_MX) && !defined(USE_UDP)
+#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
 #define PROD_CPUAFFINITY 0
-#define FULL_SAVER_CPUAFFINITY 0
-#define SECOND_SAVER_CPUAFFINITY 0
-#define MINUTE_SAVER_CPUAFFINITY 0
-#define SCIENCE_SAVER_CPUAFFINITY 0
+#define FULL_SAVER_CPUAFFINITY -1
+#define SECOND_SAVER_CPUAFFINITY -2
+#define MINUTE_SAVER_CPUAFFINITY -3
+#define SCIENCE_SAVER_CPUAFFINITY -4
 #else
 #define PROD_CPUAFFINITY 0
 #define FULL_SAVER_CPUAFFINITY -1

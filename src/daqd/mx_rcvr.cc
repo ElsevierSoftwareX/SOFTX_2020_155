@@ -191,13 +191,6 @@ again:
 		}
 		//daqd.producer1.rcvr_stats[neid].tick();
 		mx_irecv(ep[neid], &seg, 1, match_val, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
-		#if 0
-		if (kk != myErrorStat){
-		  kk = myErrorStat;
-		  if(kk==1) fprintf(stderr, "mx_wait failed in rcvr %d\n",count);
-		  if(kk==0) fprintf(stderr, "RCVR running %d\n",count);
-		}
-		#endif
 	  }
 	} while(1);
 	gettimeofday(&end_time, NULL);

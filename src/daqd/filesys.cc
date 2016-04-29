@@ -39,6 +39,8 @@ extern daqd_c daqd;
 void
 filesys_c::start_wiper (int d)
 {
+  // error message buffer
+  char errmsgbuf[80]; 
   if (wiper_enabled) {
     pthread_t twiper;
     char *dir_path = (char *) malloc (filename_max);
@@ -59,7 +61,8 @@ filesys_c::start_wiper (int d)
     pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
     pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
     if (int err_no = pthread_create (&twiper, &attr, (void *(*)(void *))wiper, (void *) dir_path)) {
-      system_log(1, "couldn't create wiper thread; pthread_create() err=%d", err_no);
+      strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+      system_log(1, "couldn't create wiper thread; pthread_create() err=%s", errmsgbuf);
     } else {
       system_log(3, "wiper for %s created", dir_path);
     }
@@ -68,7 +71,8 @@ filesys_c::start_wiper (int d)
     thread_t tid;
     int err_no;
     if (err_no = thr_create (0,0, (void *(*)(void *))wiper, (void *) dir_path, THR_DETACHED | THR_NEW_LWP, &tid)) {
-      system_log(1, "couldn't create wiper thread; thr_create() err=%d", err_no);
+      strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+      system_log(1, "couldn't create wiper thread; thr_create() err=%s", errmsgbuf);
     } else {
       system_log(3, "wiper for %s created", dir_path);
     }

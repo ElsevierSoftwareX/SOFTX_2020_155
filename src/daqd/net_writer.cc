@@ -69,6 +69,9 @@ net_writer_c::send_files (void)
   static unsigned long last_job_number = 0;
   unsigned long job_num;
 
+  // error message buffer
+  char errmsgbuf[80]; 
+
   // unique job number is generated here (conflicts are possible on restart)
   pthread_mutex_lock (&bm);
   {
@@ -94,7 +97,8 @@ net_writer_c::send_files (void)
 
   if ((socketfd = socket (AF_UNIX, SOCK_STREAM, 0)) < 0)
     {
-      system_log(1, "UNIX socket(); errno=%d\n", errno);
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      system_log(1, "UNIX socket(); %s\n", errmsgbuf);
       return 1;
     }
   memset(&servaddr, 0, sizeof(servaddr));
@@ -103,7 +107,8 @@ net_writer_c::send_files (void)
 
   if (connect (socketfd, (struct sockaddr *) &servaddr, sizeof (servaddr)) < 0)
     {
-      system_log(1, "UNIX connect(); errno=%d pipe=%s\n", errno, pipe.c_str());
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      system_log(1, "UNIX connect(); %s pipe=%s\n", errmsgbuf, pipe.c_str());
       close(socketfd);
       return 1;
     }
@@ -279,27 +284,27 @@ net_writer_c::send_files (void)
     written = basic_io::writen(fileno, rh, sizeof(rh));
     if (written != sizeof(rh)) {
       close(socketfd);
-      system_log(1, "failed to send reconfig header; errno=%d", errno);
+      system_log(1, "failed to send reconfig header; %s", errmsgbuf);
       return 1;
     }
     for (int k = 0; k < num_channels; k++) {
       written = basic_io::writen(fileno, (char *) &channels[k].signal_offset, sizeof(float));
       if (written != sizeof(float)) {
 	close(socketfd);
-	system_log(1, "failed to send reconfig data; errno=%d", errno);
+	system_log(1, "failed to send reconfig data; %s", errmsgbuf);
 	return 1;
       }
       written = basic_io::writen(fileno, (char *) &channels[k].signal_slope, sizeof(float));
       if (written != sizeof(float)) {
 	close(socketfd);
-	system_log(1, "failed to send reconfig data; errno=%d", errno);
+	system_log(1, "failed to send reconfig data; %s", errmsgbuf);
 	return 1;
       }
       unsigned int status = 0;
       written = basic_io::writen(fileno, (char *) &status, sizeof(int));
       if (written != sizeof(int)) {
 	close(socketfd);
-	system_log(1, "failed to send reconfig data; errno=%d", errno);
+	system_log(1, "failed to send reconfig data; %s", errmsgbuf);
 	return false;
       }
     }
@@ -352,10 +357,10 @@ net_writer_c::send_files (void)
   msg.msg_iov = iov;
   msg.msg_iovlen = 1;
 
-  errno = 0;
   int res = sendmsg(socketfd, &msg, 0);
   if (res != 1) {
-    system_log(1,"senmsg() to NDS failed; res=%d; errno=%d", res, errno);
+    strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+    system_log(1,"senmsg() to NDS failed; res=%d; %s", res, errmsgbuf);
     close(socketfd);
     return 1;
   } else {
@@ -365,13 +370,15 @@ net_writer_c::send_files (void)
   // send job spec file name
   char a = strlen(spec_filename.c_str()) + 1;
   if (1 != write(socketfd,&a,1)) {
-    system_log(1,"write(1) to NDS failed; errno=%d", errno);
+    strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+    system_log(1,"write(1) to NDS failed; %s", errmsgbuf);
     close(socketfd);
     return 1;
   }
 
   if (write(socketfd, spec_filename.c_str(),(int)a) != (int)a) {
-    system_log(1,"write(jobn) to NDS failed; errno=%d", errno);
+    strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+    system_log(1,"write(jobn) to NDS failed; %s", errmsgbuf);
     close(socketfd);
     return 1;
   }
@@ -383,7 +390,8 @@ net_writer_c::send_files (void)
   // This call blocks waiting for NDS to complete processing and
   // data transmission to the client
   if (read(socketfd, &seq_num, sizeof(int)) != sizeof(int)) {
-    system_log(1,"read(seq_num) from NDS failed; errno=%d", errno);
+    strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+    system_log(1,"read(seq_num) from NDS failed; %s", errmsgbuf);
     close(socketfd);
     return 1;
   }
@@ -1195,6 +1203,9 @@ net_writer_c::connect_srvr_addr (int ssize)
   } else 
 #endif
 {
+  // error message buffer
+  char errmsgbuf[80]; 
+
   int srvr_addr_len = sizeof (srvr_addr);
   int sockfd;
   const int max_allowed = 64 * 1024; /* 64K seems to be system imposed limit on Solaris */
@@ -1205,13 +1216,15 @@ net_writer_c::connect_srvr_addr (int ssize)
   /* Connect to the destination */
   if ((sockfd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
-      system_log(1, "socket(%s.%d); errno=%d", net_writer_c::inet_ntoa (srvr_addr.sin_addr, buf), srvr_addr.sin_port, errno);
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      system_log(1, "socket(%s.%d); %s", net_writer_c::inet_ntoa (srvr_addr.sin_addr, buf), srvr_addr.sin_port, errmsgbuf);
       return DAQD_SOCKET;
     }
 
   if (setsockopt (sockfd, SOL_SOCKET, SO_SNDBUF, (const char *) &sendbuf_size, sizeof (sendbuf_size)))
     {
-      system_log(1, "setsockopt(%s.%d); errno=%d", net_writer_c::inet_ntoa (srvr_addr.sin_addr, buf), srvr_addr.sin_port, errno);
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      system_log(1, "setsockopt(%s.%d); %s", net_writer_c::inet_ntoa (srvr_addr.sin_addr, buf), srvr_addr.sin_port, errmsgbuf);
       close (sockfd);
       return DAQD_SETSOCKOPT;
     }
@@ -1232,13 +1245,13 @@ net_writer_c::connect_srvr_addr (int ssize)
 #if 0
   int rcvbuf_size = 1024 * 10;  
   if (setsockopt (sockfd, SOL_SOCKET, SO_RCVBUF, (const char *) &rcvbuf_size, sizeof (rcvbuf_size)))
-    fprintf (stderr, "setsockopt(%d, %d); errno=%d\n", sockfd, rcvbuf_size, errno);
+    fprintf (stderr, "setsockopt(%d, %d); %s\n", sockfd, rcvbuf_size, errmsgbuf);
 
   {
     int sendbuf_size_len = 4;
     sendbuf_size = -1;
     if (getsockopt (sockfd, SOL_SOCKET, SO_RCVBUF, (const char *) &sendbuf_size, &sendbuf_size_len))
-      fprintf (stderr, "getsockopt(%d, %d); errno=%d\n", sockfd, sendbuf_size, errno);
+      fprintf (stderr, "getsockopt(%d, %d); %s\n", sockfd, sendbuf_size, errmsgbuf);
     else {
       system_log(1,"RCVBUF size is %d\n", sendbuf_size);
     }
@@ -1247,7 +1260,8 @@ net_writer_c::connect_srvr_addr (int ssize)
   
   if (connect (sockfd, (struct sockaddr *) &srvr_addr, srvr_addr_len) < 0)
     {
-      system_log(1, "connect(%s.%d); errno=%d", net_writer_c::inet_ntoa (srvr_addr.sin_addr, buf), srvr_addr.sin_port, errno);
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      system_log(1, "connect(%s.%d); %s", net_writer_c::inet_ntoa (srvr_addr.sin_addr, buf), srvr_addr.sin_port, errmsgbuf);
       close (sockfd);
       return DAQD_CONNECT;
     }
@@ -1256,7 +1270,8 @@ net_writer_c::connect_srvr_addr (int ssize)
     socklen_t sendbuf_size_len = 4;
     sendbuf_size = -1;
     if (getsockopt (sockfd, SOL_SOCKET, SO_SNDBUF, (char *) &sendbuf_size, &sendbuf_size_len)) {
-      system_log(1, "getsockopt(%d, %d); errno=%d\n", sockfd, sendbuf_size, errno);
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      system_log(1, "getsockopt(%d, %d); %s\n", sockfd, sendbuf_size, errmsgbuf);
     } else {
       DEBUG1(cerr << "SNDBUF size is " << sendbuf_size << endl);
     }
@@ -1273,6 +1288,8 @@ net_writer_c::set_send_buf_size (int sockfd, int ssize)
 {
   const int max_allowed = 64 * 1024; /* 64K seems to be system imposed limit on Solaris */
   int sendbuf_size = (ssize && ssize < max_allowed)? ssize: max_allowed;
+  // error message buffer
+  char errmsgbuf[80]; 
 
   // Do not do this setsockopt if the size is too small
   //
@@ -1281,7 +1298,8 @@ net_writer_c::set_send_buf_size (int sockfd, int ssize)
 
   if (setsockopt (sockfd, SOL_SOCKET, SO_SNDBUF, (const char *) &sendbuf_size, sizeof (sendbuf_size)))
     {
-      system_log(1, "setsockopt(%d, %d); errno=%d", sockfd, sendbuf_size, errno);
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      system_log(1, "setsockopt(%d, %d); %s", sockfd, sendbuf_size, errmsgbuf);
       return -1;
     }
   return 0;
@@ -1310,6 +1328,8 @@ net_writer_c::start_net_writer (ostream *yyout, int ofd, int no_data_connection,
 {
   locker mon (this);   // lock is held as long as the mon exists
   int res;
+  // error message buffer
+  char errmsgbuf[80]; 
 
   DEBUG1(cerr << "start_net_writer() called" << endl);
   /*
@@ -1364,7 +1384,8 @@ net_writer_c::start_net_writer (ostream *yyout, int ofd, int no_data_connection,
       pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
       int err_no;
       if (err_no = pthread_create (&consumer_tid, &attr, (void *(*)(void *)) frame_consumer_static, (void *) this)) {
-	system_log(1, "couldn't create frame net-writer consumer thread; pthread_create() err=%d", err_no);
+        strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+	system_log(1, "couldn't create frame net-writer consumer thread; pthread_create() err=%s", errmsgbuf);
 	disconnect_srvr_addr ();
 	pthread_attr_destroy (&attr);
 	return DAQD_THREAD_CREATE;
@@ -1423,8 +1444,9 @@ net_writer_c::start_net_writer (ostream *yyout, int ofd, int no_data_connection,
 	buffptr = new (mptr) circ_buffer (1, buffer_blocks, block_size, src_buffer -> block_period ());
 	if (! (buffptr -> buffer_ptr ())) {
 	  if (!online_writer) {
-	    system_log(1, "couldn't allocate net_writer buffer data blocks; size=%ld; errno=%d",
-		       buffer_blocks * block_size + sizeof (circ_buffer_t) - 1, errno);
+            strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	    system_log(1, "couldn't allocate net_writer buffer data blocks; size=%ld; %s",
+		       buffer_blocks * block_size + sizeof (circ_buffer_t) - 1, errmsgbuf);
 	    no_consumer_buffer = 1;
 	  }
 	  buffptr -> ~circ_buffer();
@@ -1453,7 +1475,8 @@ net_writer_c::start_net_writer (ostream *yyout, int ofd, int no_data_connection,
 		pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
 		int err_no;
 		if (err_no = pthread_create (&producer_tid, &attr, (void *(*)(void *))producer_static, (void *) this)) {
-		  system_log(1, "couldn't create net-writer producer thread; pthread_create() err=%d", err_no);
+                  strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+		  system_log(1, "couldn't create net-writer producer thread; pthread_create() err = %s", errmsgbuf);
 		  source_buffptr -> delete_consumer (cnum);
 		  cnum = 0;
 		  disconnect_srvr_addr ();
@@ -1503,7 +1526,8 @@ net_writer_c::start_net_writer (ostream *yyout, int ofd, int no_data_connection,
 	  int err_no;
 try_again:
 	  if (err_no = pthread_create (&consumer_tid, &attr1, (void *(*)(void *)) consumer_static, (void *) this)) {
-	    system_log(1, "Couldn't create net-writer consumer thread; pthread_create() err=%d", err_no);
+            strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+	    system_log(1, "Couldn't create net-writer consumer thread; pthread_create() err = %s", errmsgbuf);
 	    if (err_no == EAGAIN || err_no == ENOMEM) {
 		sleep(5);
 		goto try_again;
@@ -1557,7 +1581,8 @@ try_again:
 		pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
 		int err_no;
 		if (err_no = pthread_create (&producer_tid, &attr, (void *(*)(void *)) transient_producer_static, (void *) this)) {
-		  system_log(1, "couldn't create transient net-writer producer thread; pthread_create() err=%d", err_no);
+                  strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+		  system_log(1, "couldn't create transient net-writer producer thread; pthread_create() err = %s", errmsgbuf);
 		  source_buffptr -> delete_consumer (cnum);
 		  cnum = 0;
 		  disconnect_srvr_addr ();
@@ -1650,7 +1675,8 @@ try_again:
 	  // FIXME
 	  int err_no;
 	  if (err_no = pthread_create (&consumer_tid, &attr1, (void *(*)(void *)) transient_consumer_static, (void *) this)) {
-	    system_log(1, "FIXME:producer thread must be cancelled. Couldn't create transient net-writer consumer thread; pthread_create() err=%d", err_no);
+            strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+	    system_log(1, "FIXME:producer thread must be cancelled. Couldn't create transient net-writer consumer thread; pthread_create() err = %s", errmsgbuf);
 	    abort();
 
 	    if (cnum) {
@@ -1762,7 +1788,10 @@ net_writer_c::shutdown_net_writer () {
   // Send some data to the client
 int
 net_writer_c::send_to_client (char *data, unsigned long len, unsigned long gps, int period, int tp) {
+    // error message buffer
+    char errmsgbuf[80]; 
 #ifndef NO_BROADCAST
+
     if (broadcast) {
       // look for a free data buffer
       radio_buffer*        buf = 0;
@@ -1813,8 +1842,9 @@ net_writer_c::send_to_client (char *data, unsigned long len, unsigned long gps, 
 
     if (basic_io::writen (fileno, (char *) data, len) != len)
       {
+        strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
 	// Write failed -- shutdown this thread and destroy this circular buffer
-	DEBUG1(cerr << "net_writer_c::consumer(): write(" << fileno << ") failed; errno=" << errno << endl);
+	DEBUG1(cerr << "net_writer_c::consumer(): write(" << fileno << ") failed; error=" << errmsgbuf << endl);
 	this -> shutdown_net_writer ();
 	return -1;
       }

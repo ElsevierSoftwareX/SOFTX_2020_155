@@ -98,86 +98,6 @@ int controller_cycle = 0;
   /// Pointer to GDS TP tables
   struct cdsDaqNetGdsTpNum *gdsTpNum[2][DCU_COUNT];
 
-#ifdef USE_UDP
-struct daqMXdata {
-        struct rmIpcStr mxIpcData;
-        cdsDaqNetGdsTpNum mxTpTable;
-        char mxDataBlock[DAQ_DCU_BLOCK_SIZE];
-};
-
-static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
-
-/// Experimental UDP data receiver
-void
-receiver_udp(int my_dcu_id) {
-
-      #define BUFLEN 512
-      #define PORT 9930
-    
-     struct sockaddr_in si_me, si_other;
-     int s, i;
-     char buf[buf_size];
-
-     // Open radio receiver on port 7090
-     diag::frameRecv* NDS = new diag::frameRecv(0);
-     //NDS->logging(false);
-     //if (!NDS->open("225.0.0.1", "192.168.1.0", 7090)) {
-     if (!NDS->open("225.0.0.1", "10.12.0.0", 7000 + my_dcu_id)) {
-        perror("Multicast receiver open failed.");
-        exit(1);
-     }
-     printf("Multicast receiver opened on port %d\n", 7000 + my_dcu_id);
-
-     for (i=0;;i++) {
-	int br;
-
-	unsigned int seq, gps, gps_n;
-	char *bufptr = buf;
-    	int length = NDS->receive(bufptr, buf_size, &seq, &gps, &gps_n);
-    	if (length < 0) {
-        	printf("Allocated buffer too small; required %d, size %d\n", -length, buf_size);
-        	exit(1);
-    	}
-    	//printf("%d %d %d %d\n", length, seq, gps, gps_n);
-
-
-         struct daqMXdata *dataPtr = (struct daqMXdata *) buf;
-         int dcu_id = dataPtr->mxIpcData.dcuId;
-	 if (dcu_id != my_dcu_id) {
-
-         	printf("Received packet from th foreign dcu_id %d %s:%d bytes=%d, dcu_id=%d\n\n", dcu_id, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), br, dcu_id);
-		continue;
-	 }
-
-         int cycle = dataPtr->mxIpcData.cycle;
-         int len = dataPtr->mxIpcData.dataBlockSize;
-
-         char *dataSource = (char *)dataPtr->mxDataBlock;
-         char *dataDest = (char *)((char *)(directed_receive_buffer[dcu_id]) + buf_size * cycle);
-
-         // Move the block data into the buffer
-         memcpy (dataDest, dataSource, len);
-
-         // Assign IPC data
-         gmDaqIpc[dcu_id].crc = dataPtr->mxIpcData.crc;
-         gmDaqIpc[dcu_id].dcuId = dataPtr->mxIpcData.dcuId;
-         gmDaqIpc[dcu_id].bp[cycle].timeSec = dataPtr->mxIpcData.bp[cycle].timeSec;
-         gmDaqIpc[dcu_id].bp[cycle].crc = dataPtr->mxIpcData.bp[cycle].crc;
-         gmDaqIpc[dcu_id].bp[cycle].cycle = dataPtr->mxIpcData.bp[cycle].cycle;
-         gmDaqIpc[dcu_id].dataBlockSize = dataPtr->mxIpcData.dataBlockSize;
-
-         // Assign test points table
-         *gdsTpNum[0][dcu_id] = dataPtr->mxTpTable;
-
-         gmDaqIpc[dcu_id].cycle = cycle;
-         if (daqd.controller_dcu == dcu_id)  {
-              controller_cycle = cycle;
-              DEBUG(6, printf("Timing dcu=%d cycle=%d\n", dcu_id, controller_cycle));
-         }
-    }
-    close(s);
-}
-#endif
 
 /// Data receiving thread
 void*
@@ -191,14 +111,15 @@ gm_receiver_thread(void *this_p)
   receiver_mx(this_eid);
 #elif defined(USE_UDP)
   int this_dcu_id = *static_cast<int*>(this_p);
-  void receiver_udp(int);
   receiver_udp(this_dcu_id);
 #endif
 
 #else
 
   int fd;
-
+  // error message buffer
+  char errmsgbuf[80]; 
+   
   // Open and map all "Myrinet" DCUs
   for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
     if (daqd.dcuSize[0][j] == 0) continue; // skip unconfigured DCU nodes
@@ -208,7 +129,8 @@ gm_receiver_thread(void *this_p)
       s = s + "_daq";
       dcu_addr[j] = (volatile unsigned char *)findSharedMemory((char *)s.c_str());
       if (dcu_addr[j] == 0) {
-              system_log(1, "Couldn't mmap `%s'; errno=%d\n", s.c_str(), errno);
+              strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+              system_log(1, "Couldn't mmap `%s'; err = %s\n", s.c_str(), errmsgbuf);
               exit(1);
       }
       system_log(1, "Opened %s\n", s.c_str());
@@ -266,6 +188,8 @@ producer::frame_writer ()
    unsigned long prev_gps, prev_frac;
    unsigned long gps, frac;
 #endif
+  // error message buffer
+  char errmsgbuf[80]; 
 
 // Set thread parameters
    daqd_c::set_thread_priority("Producer","dqprod",PROD_THREAD_PRIORITY,PROD_CPUAFFINITY); 
@@ -281,10 +205,6 @@ producer::frame_writer ()
 #elif defined(USE_MX)
    unsigned int max_endpoints = open_mx();
    unsigned int nics_available = max_endpoints >> 8;
-   max_endpoints &= 0xff;
-#else
-   unsigned int max_endpoints = 1;
-   static const unsigned int nics_available = 1;
    max_endpoints &= 0xff;
 #endif
 
@@ -336,8 +256,9 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 
        if (my_err_no = pthread_create (&gm_tid, &attr,
 				  gm_receiver_thread, &dcu_id)) {
+          strerror_r(my_err_no, errmsgbuf, sizeof(errmsgbuf));
      	  pthread_attr_destroy (&attr);
-     	  system_log(1, "pthread_create() err=%d", my_err_no);
+     	  system_log(1, "pthread_create() err=%s", errmsgbuf);
 	  exit(1);
        }
        system_log(1, "UDP receiver thread started for dcu %d", dcu_id);
@@ -357,28 +278,39 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 	class stats s;
      	rcvr_stats.push_back(s);
      }
-
+#ifdef USE_MX
 /* Create array to hold mx thread card+endpoint data
  We will pass a point to the individual array element.
  This is to avoid a race condition where the 
  gm_receiver_thread gets interleaved values 
  Keith Thorne   2015-07-10 */ 
-   int bp_aray[MX_MAX_BOARDS][MX_MAX_ENDPOINTS];
-   for (int bnum = 0; bnum < nics_available; bnum++) { // Start
-     for (int j = 0; j < max_endpoints; j++) {
-       int bp = j;
-       bp = bp + (bnum*256);
+     int bp_aray[MX_MAX_BOARDS][MX_MAX_ENDPOINTS];
+     for (int bnum = 0; bnum < nics_available; bnum++) { // Start
+       for (int j = 0; j < max_endpoints; j++) {
+         int bp = j;
+         bp = bp + (bnum*256);
  /* calculate address within array */  
-       bp_aray[bnum][j] = bp;
-       void *bpPtr = (int *)(bp_aray + bnum) + j;
-       if (my_err_no = pthread_create (&gm_tid, &attr,
+         bp_aray[bnum][j] = bp;
+         void *bpPtr = (int *)(bp_aray + bnum) + j;
+         if (my_err_no = pthread_create (&gm_tid, &attr,
                      gm_receiver_thread, bpPtr)) {
                   pthread_attr_destroy (&attr);
-                  system_log(1, "pthread_create() err=%d", my_err_no);
+                  strerror_r(my_err_no, errmsgbuf, sizeof(errmsgbuf));
+                  system_log(1, "pthread_create() err=%s", errmsgbuf);
                   exit(1);
+         }
        }
      }
-   }
+#else
+// GM, USE_BROADCAST have a single thread
+    if (my_err_no = pthread_create (&gm_tid, &attr,
+                     gm_receiver_thread, 0)) {
+                  strerror_r(my_err_no, errmsgbuf, sizeof(errmsgbuf));
+                  pthread_attr_destroy (&attr);
+                  system_log(1, "pthread_create() err=%s", errmsgbuf);
+                  exit(1);
+    }
+#endif
      pthread_attr_destroy (&attr);
    }
 #endif

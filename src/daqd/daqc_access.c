@@ -113,7 +113,9 @@ read_server_response_wait(int fd, int wt)
 	{
 	  if (errno != EAGAIN) {
 #ifdef DAQC_ACCESS_VERBOSE_ERRORS
-	    fprintf (stderr, "read(); errno=%d\n", errno);
+            char errmsgbuf[80];
+            strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	    fprintf (stderr, "read(); err=%s\n", errmsgbuf);
 #endif
 	    return -1;
 	  }
@@ -142,7 +144,9 @@ read_long (int fd)
         {
 	  if (errno != EAGAIN) {
 #ifdef DAQC_ACCESS_VERBOSE_ERRORS
-            fprintf (stderr, "read(); errno=%d\n", errno);
+            char errmsgbuf[80];
+            strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+            fprintf (stderr, "read(); err=%s\n", errmsgbuf);
 #endif
 	    return 0;
 	  }
@@ -170,7 +174,9 @@ read_bytes (int fd, char *cptr, int numb)
         {
 	  if (errno != EAGAIN) {
 #ifdef DAQC_ACCESS_VERBOSE_ERRORS
-            fprintf (stderr, "read(); errno=%d\n", errno);
+            char errmsgbuf[80];
+            strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+            fprintf (stderr, "read(); err=%s\n", errmsgbuf);
 #endif
 	    return 0;
 	  }
@@ -190,12 +196,16 @@ listener (void * a)
 {
   int listenfd;
   int srvr_addr_len;
+// error message buffer
+  char errmsgbuf[80];
   daq_t *daq = (daq_t *) a;
 
   if ((listenfd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
 #ifdef DAQC_ACCESS_VERBOSE_ERRORS
-      fprintf (stderr, "socket(); errno=%d\n", errno);
+      char errmsgbuf[80];
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      fprintf (stderr, "socket(); err=%s\n", errmsgbuf);
 #endif
       return NULL;
     }
@@ -252,14 +262,18 @@ listener (void * a)
 	  daq -> listener_addr.sin_port = htons (port);
 	  if (bind (listenfd, (struct sockaddr *) &daq -> listener_addr, sizeof (daq -> listener_addr)) < 0) {
 	    if (errno != EADDRINUSE && errno != 0) {
-	      fprintf (stderr, "bind(); errno=%d\n", errno);
+              char errmsgbuf[80];
+              strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	      fprintf (stderr, "bind(); err=%s\n", errmsgbuf);
 	      return NULL;
 	    }
 	  } else
 	    break;
 	}
       } else {
-	fprintf (stderr, "bind(); errno=%d\n", errno);
+        char errmsgbuf[80];
+        strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	fprintf (stderr, "bind(); err=%s\n", errmsgbuf);
 	return NULL;
       }
     }
@@ -293,7 +307,9 @@ listener (void * a)
 
   if (listen (listenfd, 2) < 0)
     {
-      fprintf (stderr, "listen(); errno=%d\n", errno);
+      char errmsgbuf[80];
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      fprintf (stderr, "listen(); err=%s\n", errmsgbuf);
       return NULL;
     }
 
@@ -317,7 +333,9 @@ listener (void * a)
 	    continue;
 	  else
 	    {
-	      fprintf (stderr, "accept(); errno=%d\n", errno);
+              char errmsgbuf[80];
+              strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	      fprintf (stderr, "accept(); err=%s\n", errmsgbuf);
 	      return NULL;
 	    }
       }
@@ -351,7 +369,8 @@ listener (void * a)
 
       if (err_no = pthread_create (&daq -> interpreter_tid, NULL, (void *(*)(void *))daq -> interpreter, (void *) daq))
 	{
-	  fprintf (stderr, "pthread_create() failed to spawn interpreter thread; err=%d", err_no);
+          strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+	  fprintf (stderr, "pthread_create() failed to spawn interpreter thread; err=%s", errmsgbug);
 	  close (connfd);
 	}
       else
@@ -399,7 +418,9 @@ daq_initialize (daq_t *daq, int *tcp_port, void * (*start_func)(void *))
   /* Start listener thread */
   if (err_no = pthread_create (&daq -> listener_tid, NULL, (void *(*)(void *))listener, (void *) daq))
     {
-      fprintf (stderr, "pthread_create() failed to spawn a listener thread; err=%d", err_no);
+      char errmsgbuf[80];
+      strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
+      fprintf (stderr, "pthread_create() failed to spawn a listener thread; err=%s", errmsgbuf);
       pthread_mutex_unlock (&daq -> lock);
       pthread_mutex_destroy (&daq -> lock);
       return 0;
@@ -434,7 +455,9 @@ daq_disconnect (daq_t *daq)
   if (write (daq -> sockfd, command, strlen (command)) != strlen (command))
     {
 #ifdef DAQC_ACCESS_VERBOSE_ERRORS
-      fprintf (stderr, "write(); errno=%d\n", errno);
+      char errmsgbuf[80];
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      fprintf (stderr, "write(); err=%s\n", errmsgbuf);
 #endif
       return DAQD_WRITE;
     }
@@ -465,7 +488,9 @@ daq_connect (daq_t *daq, char *host, int port)
 
   if ((daq -> sockfd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
-      fprintf (stderr, "socket(); errno=%d\n", errno);
+      char errmsgbuf[80];
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      fprintf (stderr, "socket(); err=%s\n", errmsgbuf);
       return DAQD_SOCKET;
     }
 
@@ -478,7 +503,9 @@ daq_connect (daq_t *daq, char *host, int port)
   if (!hentp) {
     fprintf (stderr, "Can't find hostname `%s'\n", host);
 #ifdef DAQC_ACCESS_VERBOSE_ERRORS
-    fprintf (stderr, "Can't find hostname `%s'; gethostbyname(); error=%d\n", host, h_errno);
+    char errmsgbuf[80];
+    strerror_r(h_errno, errmsgbuf, sizeof(errmsgbuf));
+    fprintf (stderr, "Can't find hostname `%s'; gethostbyname(); err=%s\n", host, h_errno);
 #endif
     close (daq -> sockfd);
     return DAQD_ERROR;
@@ -490,7 +517,9 @@ daq_connect (daq_t *daq, char *host, int port)
   if (! gethostbyname_r (host, &hent, buf, 2048, &gherr)) {
     fprintf (stderr, "Can't find hostname `%s'\n", host);
 #ifdef DAQC_ACCESS_VERBOSE_ERRORS
-    fprintf (stderr, "Can't find hostname `%s'; gethostbyname_r(); error=%d\n", host, gherr);
+    char errmsgbuf[80];
+    strerror_r(gherr, errmsgbuf, sizeof(errmsgbuf));
+    fprintf (stderr, "Can't find hostname `%s'; gethostbyname_r(); err=%s\n", host, errmsgbuf);
 #endif
     close (daq -> sockfd);
     return DAQD_ERROR;
@@ -519,7 +548,9 @@ connect_again:
       }
       if (errno != EISCONN) {
         //printf(" failed errno=%d; EALREADY=%d\n", errno, EALREADY);
-        fprintf (stdout, "connect(); errno=%d\n", errno);
+        char errmsgbuf[80];
+        strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+        fprintf (stdout, "connect(); err=%s\n", errmsgbuf);
         close (daq -> sockfd);
         return DAQD_CONNECT;
       }
@@ -588,7 +619,9 @@ daq_send (daq_t *daq, char *command)
   if (write (daq -> sockfd, command, strlen (command)) != strlen (command))
     {
 #ifdef DAQC_ACCESS_VERBOSE_ERRORS
-      fprintf (stderr, "write(); errno=%d\n", errno);
+      char errmsgbuf[80];
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      fprintf (stderr, "write(); err=%s\n", errmsgbuf);
 #endif
       return DAQD_WRITE;
     }
@@ -596,7 +629,9 @@ daq_send (daq_t *daq, char *command)
   if (write (daq -> sockfd, "\n", 1) != 1)
     {
 #ifdef DAQC_ACCESS_VERBOSE_ERRORS
-      fprintf (stderr, "write(); errno=%d\n", errno);
+      char errmsgbuf[80];
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      fprintf (stderr, "write(); err=%s\n", errmsgbuf);
 #endif
       return DAQD_WRITE;
     }
@@ -637,7 +672,9 @@ daq_shutdown (daq_t *daq)
   if ((sockfd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
     {
 #ifdef DAQC_ACCESS_VERBOSE_ERRORS
-      fprintf (stderr, "socket(); errno=%d\n", errno);
+      char errmsgbuf[80];
+      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+      fprintf (stderr, "socket(); err=%s\n", errmsgbuf);
 #endif
       return DAQD_SOCKET;
     }
@@ -706,7 +743,9 @@ daq_recv_block (daq_t *daq)
       if (daq -> s)
 	daq -> s_size = nchannels;
       else {
-	fprintf (stderr, "malloc(%ld) failed; errno=%d\n", alloc_size, errno);
+        char errmsgbuf[80];
+        strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	fprintf (stderr, "malloc(%ld) failed; err=%s\n", alloc_size, errmsgbuf);
 	daq -> s_size = 0;
 	return -1;
       }
@@ -716,7 +755,9 @@ daq_recv_block (daq_t *daq)
       if (daq -> s)
 	daq -> s_size = nchannels;
       else {
-	fprintf (stderr, "realloc(%ld) failed; errno=%d\n", alloc_size, errno);
+        char errmsgbuf[80];
+        strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	fprintf (stderr, "realloc(%ld) failed; err=%s\n", alloc_size, errmsgbuf);
 	daq -> s_size = 0;
 	return -1;
       }
@@ -747,7 +788,9 @@ daq_recv_block (daq_t *daq)
       if (daq -> tb)
 	daq -> tb_size = bsize;
       else {
-	fprintf (stderr, "malloc(%d) failed; errno=%d\n", bsize, errno);
+        char errmsgbuf[80];
+        strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	fprintf (stderr, "malloc(%d) failed; err=%s\n", bsize, errmsgbuf);
 	daq -> tb_size = 0;
 	return -1;
       }
@@ -757,7 +800,9 @@ daq_recv_block (daq_t *daq)
       if (daq -> tb)
 	daq -> tb_size = bsize;
       else {
-	fprintf (stderr, "realloc(%d) failed; errno=%d\n", bsize, errno);
+        char errmsgbuf[80];
+        strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	fprintf (stderr, "realloc(%d) failed; err=%s\n", bsize, errmsgbuf);
 	daq -> tb_size = 0;
 	return -1;
       }
@@ -792,7 +837,9 @@ daq_recv_block (daq_t *daq)
 	{
 	  if (errno != EAGAIN) {
 #ifdef DAQC_ACCESS_VERBOSE_ERRORS
-	    fprintf (stderr, "read(2) error=%d; oread=%ld;\n", errno, oread);
+            char errmsgbuf[80];
+            strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	    fprintf (stderr, "read(2) error=%s; oread=%ld;\n", errmsgbuf, oread);
 #endif
 	    return -1;
 	  }

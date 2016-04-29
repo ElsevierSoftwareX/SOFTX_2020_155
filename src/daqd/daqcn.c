@@ -69,6 +69,8 @@ main (int argc, char *argv[])
   int num_channels;
   unsigned long nid;
   int stop_this_nonsense;
+  // error message buffer
+  char errmsgbuf[80]; 
 
   for (programname = argv [0] + strlen (argv [0]) - 1;
        programname != argv [0] && *programname != '/';
@@ -130,13 +132,15 @@ main (int argc, char *argv[])
       int rcvbuf_size = 20;
 
       if (setsockopt (daq.sockfd, SOL_SOCKET, SO_RCVBUF, (const char *) &rcvbuf_size, sizeof (rcvbuf_size)))
-	fprintf (stderr, "setsockopt(%d, %d); errno=%d", daq.sockfd, rcvbuf_size, errno);
+        strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+	fprintf (stderr, "setsockopt(%d, %d); err=%s", daq.sockfd, rcvbuf_size, errmsgbuf);
     }
 
     if (!send_and_quit) {
     if (i = daq_recv_channels (&daq, channels, MAX_CHANNELS, &num_channels))
       {
-	fprintf (stderr, "Couldn't receive channel data; errno=%d\n", i);
+        strerror_r(i, errmsgbuf, sizeof(errmsgbuf));
+	fprintf (stderr, "Couldn't receive channel data; err=%s\n", errmsgbuf);
 	exit (1);
       }
 
