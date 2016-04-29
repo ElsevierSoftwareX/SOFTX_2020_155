@@ -183,7 +183,7 @@ nds:
 	(cd $(srcdir)/src/nds; autoconf)
 	/bin/rm -rf build/nds
 	/bin/mkdir -p build/nds
-	(mysrc=$(srcdir); cd build/nds; $$mysrc/src/nds/configure '--with-epics' && make)
+	(mysrc=$(srcdir); cd build/nds; $$mysrc/src/nds/configure  && make)
 
 # Build frame builder data concentrator program
 dc:
