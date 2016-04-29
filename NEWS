@@ -1,8 +1,13 @@
 ==================================================================================================
+Changes for 3.1
+==================================================================================================
+- Bug Fix (472): Better framewriter error messages
+- Bug Fix (985): Fix daqd for single-machine framebuilder in kernel 3.2
+==================================================================================================
 Changes for 3.0.1
 ==================================================================================================
-- Bug Fix: Phase locked oscillator 
-- Bug Fix: GPS part: GPS second being sent to user code 1 cycle late.
+- Bug Fix (957): Phase locked oscillator 
+- Bug Fix (1005): GPS part: GPS second being sent to user code 1 cycle late.
 - Bug Fix (832): Dataviewer -r <restorefile> command line option fixed.
 - Bug Fix (999): start script does not error out if real-time model killed 
 - Bug Fix (1000): ccodeio.h now uses environment variables in file paths
