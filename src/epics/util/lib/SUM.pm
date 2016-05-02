@@ -38,7 +38,7 @@ sub checkInputConnect {
 	my $inCnt = $::partInCnt[$i];
 	my $ops = length($::partInputs[$i]);
 	# Sometimes, Matlab does not write equation field when only 2 values are summed.
-	if ($ops eq "") {
+	if ($ops == 0) {
 		$ops = 2;
 	}
 	if($ops != $inCnt) {

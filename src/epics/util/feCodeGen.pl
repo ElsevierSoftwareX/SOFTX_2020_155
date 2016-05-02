@@ -2059,6 +2059,10 @@ while (my $line = <$fh>) {
         $ii = $word[0];
         $jj = $word[1];
 	$adcSname = $site . "\:$sname-" . $word[2];
+	if (is_top_name($word[2])) {
+                  my $tn = top_name_transform($word[2]);
+                  $adcSname = $site . "\:" . $tn;
+        } 
 	# If this is a Filter type part, need to add INMON to get EPICS channel 
 	if (($word[3] =~ /^Filt/)
 	     && (not ($word[3] eq "FiltMuxMatrix"))) {

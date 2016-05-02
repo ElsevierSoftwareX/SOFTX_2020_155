@@ -1,4 +1,10 @@
 ==================================================================================================
+Changes for 3.0.2
+==================================================================================================
+- Bug Fix to SUM.pm part connection checking.
+- Bug Fix to auto-generated ADC monitor screens. Screens for models which use several top level
+  signal names were not being generated correctly.
+==================================================================================================
 Changes for 3.0.1
 ==================================================================================================
 - Bug Fix: Phase locked oscillator
