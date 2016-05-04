@@ -1,6 +1,9 @@
 ==================================================================================================
-Changes for 3.1
+Changes for 3.0.2
 ==================================================================================================
+- Bug Fix to SUM.pm part connection checking.
+- Bug Fix to auto-generated ADC monitor screens. Screens for models which use several top level
+  signal names were not being generated correctly.
 - Bug Fix (472): Better framewriter error messages
 - Bug Fix (985): Fix daqd for single-machine framebuilder in kernel 3.2
 ==================================================================================================
