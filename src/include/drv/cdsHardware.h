@@ -100,7 +100,8 @@ typedef struct IO_MEM_DATA{
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
 	long pci_rfm_dma[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
         int dolphinCount;
-        volatile unsigned long *dolphin[2]; /* Read and write addresses to the Dolphin memory */
+	volatile unsigned long *dolphinRead[4]; /* read and write Dolphin memory */
+	volatile unsigned long *dolphinWrite[4]; /* read and write Dolphin memory */
 	MEM_DATA_BLOCK iodata[MAX_IO_MODULES][IO_MEMORY_SLOTS];
 	// Combined DAC channels map; used to check on slaves DAC channel allocations
 	unsigned int dacOutUsed[MAX_DAC_MODULES][16];
@@ -223,7 +224,8 @@ typedef struct CDS_HARDWARE{
 	unsigned int gpsType;
 	int gpsOffset;
 	int dolphinCount;		/* the number of Dolphin cards we have  on the system */
-	volatile unsigned long *dolphin[2]; /* read and write Dolphin memory */
+	volatile unsigned long *dolphinRead[4]; /* read and write Dolphin memory */
+	volatile unsigned long *dolphinWrite[4]; /* read and write Dolphin memory */
 
 	/* Variables controlling cards usage */
 	int cards;			/* Sizeof array below */

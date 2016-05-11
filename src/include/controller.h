@@ -44,6 +44,10 @@
         #define DAQ_RATE                (2*8192)
         #define NET_SEND_WAIT           (2*655360)
         #define CYCLE_TIME_ALRM         4
+	#define CYCLE_TIME_ALRM_HI	5
+	#define CYCLE_TIME_ALRM_LO	1
+	#define EPICS_128_SYNC		2048
+	#define DAC_PRELOAD_CNT		0
 #endif
 #ifdef SERVO128K
         #define CYCLE_PER_MINUTE        7864320
@@ -52,6 +56,8 @@
         #define DAQ_RATE                8192
         #define NET_SEND_WAIT           655360
         #define CYCLE_TIME_ALRM         7
+	#define EPICS_128_SYNC		1024
+	#define DAC_PRELOAD_CNT		0
 #endif
 #ifdef SERVO64K
 	#define CYCLE_PER_MINUTE	(2*1966080)

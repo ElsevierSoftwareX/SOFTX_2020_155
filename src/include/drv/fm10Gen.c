@@ -80,6 +80,9 @@ double twoKAvgCoeff[9] = {7.705446e-9,
 #error need to define 2k or 16k or mixed
 #endif
 
+#ifdef SERVO256K
+  #define FE_RATE	262144
+#endif
 #ifdef SERVO64K
   #define FE_RATE 65536
 #endif

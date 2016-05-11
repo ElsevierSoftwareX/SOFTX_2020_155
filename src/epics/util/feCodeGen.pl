@@ -121,6 +121,7 @@ $rfmTimeSlave = -1;
 $diagTest = -1;
 $flipSignals = 0;
 $virtualiop = 0;
+$rfm_via_pcie = 0;
 $edcu = 0;
 $casdf = 0;
 $pciNet = -1;
@@ -180,6 +181,8 @@ if (@ARGV > 4) {
 		$rate = 30;
 	} elsif ($param_speed eq "64K") {
 		$rate = 15;
+	} elsif ($param_speed eq "256K") {
+		$rate = 4;
 	} else  { die "Invalid speed $param_speed specified\n"; }
 }
 
@@ -335,8 +338,13 @@ for ($ii = 0; $ii < $partCnt; $ii++) {
 }
 
 #//		- Process all IPC parts in one go. Requires <em>lib/IPCx.pm</em>, with call to procIpc. \n
+if ($virtualiop < 2) {
   require "lib/IPCx.pm";
    ("CDS::IPCx::procIpc") -> ($partCnt);
+} else {
+  require "lib/IPCmonitor.pm";
+  ("CDS::IPCmonitor::procIpc") -> ($partCnt);
+}
 
 
 #//		- Check that all subsystem INPUT parts are connected; else exit w/error. \n
@@ -1476,6 +1484,12 @@ for($ii=0;$ii<$partCnt;$ii++)
 // ******* DO NOT HAND EDIT ************************
 #include "fe.h"
 
+#ifdef SERVO256K
+	#define FE_RATE	262144
+#endif
+#ifdef SERVO128K
+	#define FE_RATE	131072
+#endif
 #ifdef SERVO64K
 	#define FE_RATE	65536
 #endif
@@ -1528,6 +1542,16 @@ END
 	      }
 	   }
 	}
+	if($virtualiop > 1 && $adcMaster > 0) {
+                $ipcxCnt = 0;
+        }
+        if($virtualiop > 1 && $adcMaster <= 0 ) {
+		(my $ret, my $dum, my $dum2, my $dum3, $::ipcxCnt)   = (CDS::Util::findDefine("src/include/commData3.h", "PCIE_SEG_SIZE"));
+		print "IPCDEFINE = $ret	$dum	$dum2 	$ipcxCnt	\n";
+        }
+	if($virtualiop > 1) {
+		("CDS::IPCmonitor::printFrontEndVars") -> ($ipcxCnt);
+	}
 
 	#//		- Variable definitions.
 	printVariables();
@@ -1571,6 +1595,9 @@ END
 			print OUT "\L$xpartName[$ii] = (double)$partInputs[$ii];\n";
 		}
 	}
+	if($virtualiop > 1) {
+		print OUT ("CDS::IPCmonitor::frontEndInitCode") -> ($ipcxCnt);
+	}
 	print OUT "\} else \{\n";
 	print OUT "// Enabling DAC outs for those who don't have DAC KILL WD \n";
 	print OUT "dacFault = 1;\n";
@@ -1580,10 +1607,13 @@ END
 	#
 	#//			- All IPCx data receives are to occur first in the processing loop
 	#
-	if ($ipcxCnt > 0) {
-	   
-	   print OUT "\ncommData2Receive(myIpcCount, ipcInfo, timeSec , cycle);\n\n";
-
+	if ($ipcxCnt > 0 && $virtualiop < 2) {
+	   print OUT "\ncommData3Receive(myIpcCount, ipcInfo, timeSec , cycle);\n\n";
+	}
+	if ($ipcxCnt > 0 && $virtualiop > 1) {  # PCIE SWITCH CODE
+		my $segment = int($virtualiop - 2) % 10;
+		print OUT "\ncommData3ReceiveSwitch(myIpcCount, ipcInfo, timeSec , cycle, 0, $segment, pLocalEpics->epicsOutput.gdsMon);\n\n";
+		print OUT "\ncommData3ReceiveSwitch(myIpcCount, ipcInfo, timeSec , cycle, 1, $segment, pLocalEpics->epicsOutput.gdsMon);\n\n";
 	}
 	# END IPCx PART CODE
 
@@ -1684,9 +1714,14 @@ print OUT "$feTailCode";
 # The actual sending of IPCx data is to occur
 # as the last step of the processing loop
 #
-if ($ipcxCnt > 0) {
+if ($ipcxCnt > 0 && $virtualiop < 2) {
    print OUT "      if(!cycle && pLocalEpics->epicsInput.ipcDiagReset) pLocalEpics->epicsInput.ipcDiagReset = 0;\n";
-   print OUT "\n    commData2Send(myIpcCount, ipcInfo, timeSec, cycle);\n\n";
+   print OUT "\n    commData3Send(myIpcCount, ipcInfo, timeSec, cycle);\n\n";
+}
+if ($ipcxCnt > 0 && $virtualiop > 1) {
+	my $segment = int($virtualiop - 2) % 10;
+	print OUT "\n	pLocalEpics->epicsOutput.gdsMon[20] = commData2Copy12(myIpcCount, ipcInfo, 0, 1, $segment, cycle) / 1000;\n\n";
+	print OUT "\n	pLocalEpics->epicsOutput.gdsMon[21] = commData2Copy12(myIpcCount, ipcInfo, 1, 0, $segment, cycle) / 1000;\n\n";
 }
 # END IPCx PART CODE
 
@@ -1706,6 +1741,8 @@ print "\tPart number is $remoteGpsPart\n";
 
 if($virtualiop == 1) {
 print OUT "#include \"$rcg_src_dir/src/fe/controllerVirtual.c\"\n";
+} elsif($virtualiop > 1) {
+print OUT "#include \"$rcg_src_dir/src/fe/controllerSwitch.c\"\n";
 } else {
 print OUT "#include \"$rcg_src_dir/src/fe/controller.c\"\n";
 }
@@ -2025,7 +2062,9 @@ system ("sort $adcFile -k 1,1n -k 2,2n > $adcFileSorted");
 
 # ******************************************************************************************
 #//		- GENERATE IPC SCREENS
-   ("CDS::IPCx::createIpcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ipcxCnt);
+   if($virtualiop < 2 ) {
+	("CDS::IPCx::createIpcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ipcxCnt);
+   }
 # ******************************************************************************************
 #//		- GENERATE GDS_TP SCREEN
 if($daq2dc == 0) {
@@ -2120,17 +2159,19 @@ sub debug {
 #// \b sub \b get_freq \n
 #// Determine user code sample rate \n\n
 sub get_freq {
-if($rate == 480) {
-	return 2*1024;
-} elsif ($rate == 240) {
-	return 4*1024;
-} elsif ($rate == 60) {
-	return 16*1024;
-} elsif ($rate == 30) {
-	return 32*1024;
-} elsif ($rate == 15) {
-	return 64*1024;
-}
+	if($rate == 480) {
+		return 2*1024;
+	} elsif ($rate == 240) {
+		return 4*1024;
+	} elsif ($rate == 60) {
+		return 16*1024;
+	} elsif ($rate == 30) {
+		return 32*1024;
+	} elsif ($rate == 15) {
+		return 64*1024;
+	} elsif ($rate == 4) {
+		return 256*1024;
+	}
 }
 
 #// \b sub \b init_vars \n
@@ -2344,6 +2385,8 @@ elsif($rate == 240) { print OUTM "EXTRA_CFLAGS += -DSERVO4K\n"; }
 elsif($rate == 60) { print OUTM "EXTRA_CFLAGS += -DSERVO16K\n"; }
 elsif($rate == 30) { print OUTM "EXTRA_CFLAGS += -DSERVO32K\n"; }
 elsif($rate == 15) { print OUTM "EXTRA_CFLAGS += -DSERVO64K\n"; }
+elsif($rate == 7) { print OUTM "EXTRA_CFLAGS += -DSERVO128K\n"; }
+elsif($rate == 4) { print OUTM "EXTRA_CFLAGS += -DSERVO256K\n"; }
 
 print OUTM "EXTRA_CFLAGS += -D";
 print OUTM "\U$skeleton";
@@ -2388,7 +2431,7 @@ if ($no_daq) {
   print OUTM "EXTRA_CFLAGS += -DSHMEM_DAQ\n";
 
 # Use oversampling code if not 64K system
-if($rate != 15) {
+if($rate > 15) {
   if ($no_oversampling) {
     print OUTM "#Uncomment to oversample A/D inputs\n";
     print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE\n";
@@ -2448,6 +2491,9 @@ if ($iopTimeSlave > -1) {
   print OUTM "#Uncomment to build an IOP time slave\n";
   print OUTM "#EXTRA_CFLAGS += -DIOP_TIME_SLAVE=1\n";
 }
+if($rfm_via_pcie == 1) {
+  print OUTM "EXTRA_CFLAGS += -DRFM_VIA_PCIE=1\n";
+}
 if ($rfmTimeSlave > -1) {
   print OUTM "EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
 } else {
@@ -2465,6 +2511,10 @@ if ($pciNet > -1) {
   print OUTM "#Uncomment to use PCIe RFM Network\n";
   print OUTM "#DISDIR = /home/controls/DIS\n";
   print OUTM "#EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
+}
+if ($pciNet > 1) {
+#This is a Dolphin switch
+  print OUTM "EXTRA_CFLAGS += -DDOLPHIN_SWITCH=1\n";
 }
 if ($specificCpu > -1) {
   print OUTM "#Comment out to run on first available CPU\n";
