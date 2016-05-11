@@ -2,6 +2,9 @@
 ==================================================================================================
 Changes for X.X
 ==================================================================================================
+- Add ability to inter-connect PCIe (Dolphin) switches between corner and end stations.
+	- Deletes need for GeFanuc RFM cards. However, option still remains to use them.
+	- Requires 2 separate computers to act as switches between Dolphin fabrics
 - Bug Fix (472): Better framewriter error messages
 - Bug Fix (985): Fix daqd for single-machine framebuilder in kernel 3.2
 - Bug Fix (1010): Prevent divide-by-zero error in daqd filesys.hh

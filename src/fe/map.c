@@ -11,7 +11,7 @@
 #define printf printk
 #include <drv/cdsHardware.h>
 #include <drv/map.h>
-#include <commData2.h>
+#include <commData3.h>
 
 // Include driver code for all supported I/O cards
 #include <drv/gsc16ai64.c>

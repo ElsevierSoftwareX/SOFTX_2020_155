@@ -67,6 +67,10 @@ sub parseParams {
                 			$::rate = 30;
         			} elsif ($param_speed eq "64K") {
                 			$::rate = 15;
+        			} elsif ($param_speed eq "128K") {
+                			$::rate = 8;
+        			} elsif ($param_speed eq "256K") {
+                			$::rate = 4;
         			} else  { die "Invalid speed $param_speed specified\n"; }
 
 			} elsif ($spp[0] eq "dcuid") {

@@ -22,7 +22,7 @@ sub findDefine {
    close CD2;
    foreach $i (@defs) {
    	my @res = grep /.*define.*$i.*/, @inData;
-   	die "***ERROR: couldn't find $i in commData2.h\n" unless @res;
+   	die "***ERROR: couldn't find $i in commData3.h\n" unless @res;
    	$res[0] =~ s/\D//g;
    	my $ires = 0 + $res[0];
    	die "**ERROR: unable to determine $i\n" unless $ires > 0;
