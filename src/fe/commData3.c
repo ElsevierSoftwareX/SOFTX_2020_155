@@ -89,17 +89,6 @@ printf("Model compiled with RFM DELAY !!\n");
                 ipcInfo[ii].pIpcDataRead[0] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinRead[0]) + ipcMemOffset);
                 // printf("Net Type = PCIE RCV IPC %d at 0x%p  *********************************\n",ipcInfo[ii].sendRate,ipcInfo[ii].pIpcData);
         }
-	// Save pointers to the IPC communications memory locations.
-        if((ipcInfo[ii].netType == IRFM1) && (ipcInfo[ii].mode == ISND) && (cdsPciModules.dolphinWrite[0]))
-	{
-                ipcInfo[ii].pIpcDataWrite[0] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinWrite[0]) + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
-                // printf("Net Type = PCIE SEND IPC at 0x%p  *********************************\n",ipcInfo[ii].pIpcData);
-        }
-        if((ipcInfo[ii].netType == IRFM0) && (ipcInfo[ii].mode == IRCV) && (cdsPciModules.dolphinRead[0]))
-	{
-                ipcInfo[ii].pIpcDataRead[0] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinRead[0]) + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
-                // printf("Net Type = PCIE RCV IPC %d at 0x%p  *********************************\n",ipcInfo[ii].sendRate,ipcInfo[ii].pIpcData);
-        }
 #else
 // Use traditional RFM network
 
