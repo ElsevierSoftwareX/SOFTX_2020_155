@@ -342,7 +342,7 @@ double tmp;			// Temp location for data for checking NaN
 			// If IPC syncword != local syncword, data is BAD
 			} else {
 				// ipcInfo[ii].data = ipcInfo[ii].pIpcData->data[ipcIndex];
-				ipcInfo[ii].data = tmp;
+				// ipcInfo[ii].data = tmp;
 				ipcInfo[ii].errFlag ++;
 			}
 		} else {
