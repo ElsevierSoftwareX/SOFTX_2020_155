@@ -655,6 +655,10 @@ int init_module (void)
 	cdsPciModules.dolphinWrite[0] = ioMemData->dolphinWrite[0];
 	cdsPciModules.dolphinRead[1] = ioMemData->dolphinRead[1];
 	cdsPciModules.dolphinWrite[1] = ioMemData->dolphinWrite[1];
+	printf("dr0 = 0x%lx \n",(unsigned long) cdsPciModules.dolphinRead[0]);
+	printf("dw0 = 0x%lx \n",(unsigned long) cdsPciModules.dolphinWrite[0]);
+	printf("dr1 = 0x%lx \n",(unsigned long) cdsPciModules.dolphinRead[1]);
+	printf("dw1 = 0x%lx \n",(unsigned long) cdsPciModules.dolphinWrite[1]);
 	if (cdsPciModules.dolphinCount != 2) {
 		return -1;
 	}

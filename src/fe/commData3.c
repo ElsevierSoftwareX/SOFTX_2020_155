@@ -393,12 +393,13 @@ printf("Model compiled with RFM DELAY !!\n");
 
         // Save pointers to the IPC communications memory locations.
         ipcInfo[0].pIpcDataRead[0] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinRead[0]) + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
-        ipcInfo[0].pIpcDataWrite[0] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinWrite[0]) + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
         ipcInfo[0].pIpcDataRead[1] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinRead[1]) + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
+        ipcInfo[0].pIpcDataWrite[0] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinWrite[0]) + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
         ipcInfo[0].pIpcDataWrite[1] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinWrite[1]) + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
-        ipcInfo[0].pIpcDataRead[2] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinRead[0]) + IPC_PCIE_BASE_OFFSET);
-        printf("Base address Read 0  = %lx\n",(unsigned long)ipcInfo[0].pIpcDataRead[2]);
-        printf("Actual address Read 0  = %lx\n",(unsigned long)ipcInfo[0].pIpcDataRead[0]);
+        printf("Base address Read 0  = %lx\n",(unsigned long)ipcInfo[0].pIpcDataRead[0]);
+        printf("Base address Read 1  = %lx\n",(unsigned long)ipcInfo[0].pIpcDataRead[1]);
+        printf("Base address Rite 0  = %lx\n",(unsigned long)ipcInfo[0].pIpcDataWrite[0]);
+        printf("Base address Rite 1  = %lx\n",(unsigned long)ipcInfo[0].pIpcDataWrite[1]);
 
 }
 INLINE void commData3ReceiveSwitch(int connects,              // Total number of IPC connections in the application
@@ -491,7 +492,7 @@ if(ipcInfo[0].pIpcDataRead[netFrom] != NULL && ipcInfo[0].pIpcDataWrite[netTo] !
                 for(ii=0;ii<connects;ii++) {
                         kk = ii + offset;
                         // Loop thru connection list
-                        if(ipcInfo[ii].errFlagS[netFrom]) {
+                        // if(ipcInfo[ii].errFlagS[netFrom]) {
                                 for(jj=0;jj<IPC_BLOCKS;jj++) {
                                     if((jj % 2) == 0) {
                                         // Read Net 1 data for this connect
@@ -510,7 +511,7 @@ if(ipcInfo[0].pIpcDataRead[netFrom] != NULL && ipcInfo[0].pIpcDataWrite[netTo] !
                                         }
                                     }
                                 }
-                        }
+                        // }
                 }
         }
 
