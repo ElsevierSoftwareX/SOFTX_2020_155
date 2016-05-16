@@ -10,13 +10,13 @@
 ///
 
 ///	Defines max number of IPC allowed per network type
-#define MAX_IPC		608
+#define MAX_IPC		96
 ///	Defines max number of IPC allowed on a RFM network if using DMA 
 #define MAX_IPC_RFM	96
 /// The number of data blocks buffered per IPC channel
 #define IPC_BLOCKS 	64
-#define RFM0_CHAN0	512
-#define RFM1_CHAN0	560
+#define RFM0_CHAN0	96
+#define RFM1_CHAN0	128
 #define PCIE_SEG_SIZE	16
 
 
@@ -87,9 +87,9 @@ typedef struct CDS_IPC_KEY_LIST {
 #define IPC_BUFFER_SIZE		sizeof(struct CDS_IPC_COMMS)
 #define IPC_BASE_OFFSET		0x80000
 #define IPC_PCIE_BASE_OFFSET	0x100
-#define IPC_TOTAL_ALLOC_SIZE	(IPC_PCIE_BASE_OFFSET + sizeof(CDS_IPC_COMMS))
-#define RFM0_OFFSET		(IPC_BLOCKS * RFM0_CHAN0 * sizeof(struct CDS_IPC_XMIT))
-#define RFM1_OFFSET		(IPC_BLOCKS * RFM1_CHAN0 * sizeof(struct CDS_IPC_XMIT))
+#define IPC_TOTAL_ALLOC_SIZE	(IPC_PCIE_BASE_OFFSET + (3 * sizeof(CDS_IPC_COMMS)))
+#define RFM0_OFFSET		((1 * sizeof(CDS_IPC_COMMS)))
+#define RFM1_OFFSET		((2 * sizeof(CDS_IPC_COMMS)))
 #define IPC_PCIE_READ	2
 #define IPC_PCIE_WRITE	3
 #define IPC_MAX_RATE		65536
