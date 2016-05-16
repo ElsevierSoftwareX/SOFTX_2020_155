@@ -492,7 +492,7 @@ if(ipcInfo[0].pIpcDataRead[netFrom] != NULL && ipcInfo[0].pIpcDataWrite[netTo] !
                 for(ii=0;ii<connects;ii++) {
                         kk = ii + offset;
                         // Loop thru connection list
-                        // if(ipcInfo[ii].errFlagS[netFrom]) {
+                        if(ipcInfo[ii].errFlagS[netFrom]) {
                                 for(jj=0;jj<IPC_BLOCKS;jj++) {
                                     if((jj % 2) == 0) {
                                         // Read Net 1 data for this connect
@@ -511,7 +511,7 @@ if(ipcInfo[0].pIpcDataRead[netFrom] != NULL && ipcInfo[0].pIpcDataWrite[netTo] !
                                         }
                                     }
                                 }
-                        // }
+                        }
                 }
         }
 
