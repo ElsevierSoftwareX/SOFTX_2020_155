@@ -147,16 +147,27 @@ printf("Model compiled with RFM DELAY !!\n");
                 ipcInfo[ii].pIpcDataWrite[0] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinWrite[0]) + IPC_PCIE_BASE_OFFSET);
                 // printf("Net Type = PCIE SEND IPC at 0x%p  *********************************\n",ipcInfo[ii].pIpcData);
         }
-#if 0
+	#if 0
 	// Following for diags, if desired. Otherwise, leave out as it fills dmesg
+	if(ipcInfo[ii].mode == ISND && ipcInfo[ii].netType != ISHME) {
         printf("IPC Number = %d\n",ipcInfo[ii].ipcNum);
         printf("IPC Name = %s\n",ipcInfo[ii].name);
         printf("Sender Model Name = %s\n",ipcInfo[ii].senderModelName);
         printf("RCV Rate  = %d\n",ipcInfo[ii].rcvRate);
         printf("Send Computer Number  = %d\n",ipcInfo[ii].sendNode);
-#endif
+        printf("Send address  = %lx\n",(unsigned long)&ipcInfo[ii].pIpcDataWrite[0]->dBlock[0][ipcInfo[ii].ipcNum].data);
+	}
+	#endif
 
     }
+  for(ii=0;ii<connects;ii++)
+  {
+	if(ipcInfo[ii].mode == ISND && ipcInfo[ii].netType != ISHME) {
+        printf("IPC Name = %s \t%d\t%d\t%lx\t%lx\n",ipcInfo[ii].name,ipcInfo[ii].netType,ipcInfo[ii].ipcNum,
+		(unsigned long)&ipcInfo[ii].pIpcDataWrite[0]->dBlock[0][ipcInfo[ii].ipcNum].data,
+		(unsigned long)&ipcInfo[ii].pIpcDataWrite[0]->dBlock[63][ipcInfo[ii].ipcNum].timestamp);
+	}
+  }
 }
 
 // *************************************************************************************************
@@ -220,16 +231,19 @@ INLINE void commData3Send(int connects,  	 	// Total number of IPC connections i
                 	ipcInfo[ii].pIpcDataWrite[0]->dBlock[sendBlock][ipcIndex].data = ipcInfo[ii].data;
 			// Write timestamp/cycle counter word
                 	ipcInfo[ii].pIpcDataWrite[0]->dBlock[sendBlock][ipcIndex].timestamp = syncWord;
+			#ifdef RFM_VIA_PCIE
 			lastPcie = ii;
+			#endif
 		}
   	}
   }
-#ifdef RFM_VIA_PCIE
   // Flush out the last PCIe transmission
+  #ifdef RFM_VIA_PCIE
   if (lastPcie >= 0) {
 		clflush_cache_range (&(ipcInfo[lastPcie].pIpcDataWrite[0]->dBlock[sendBlock][ipcInfo[lastPcie].ipcNum].data), 16);
   }
-#endif
+  lastPcie = -1;
+  #endif
 #ifdef RFM_DELAY
 // We don't want to delay SHMEM or PCIe writes, so calc block as usual,
 // so need to recalc send block and syncWord.
@@ -382,6 +396,9 @@ printf("Model compiled with RFM DELAY !!\n");
         ipcInfo[0].pIpcDataWrite[0] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinWrite[0]) + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
         ipcInfo[0].pIpcDataRead[1] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinRead[1]) + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
         ipcInfo[0].pIpcDataWrite[1] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinWrite[1]) + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
+        ipcInfo[0].pIpcDataRead[2] = (CDS_IPC_COMMS *)((volatile char *)(cdsPciModules.dolphinRead[0]) + IPC_PCIE_BASE_OFFSET);
+        printf("Base address Read 0  = %lx\n",(unsigned long)ipcInfo[0].pIpcDataRead[2]);
+        printf("Actual address Read 0  = %lx\n",(unsigned long)ipcInfo[0].pIpcDataRead[0]);
 
 }
 INLINE void commData3ReceiveSwitch(int connects,              // Total number of IPC connections in the application
