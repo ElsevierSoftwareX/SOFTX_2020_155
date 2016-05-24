@@ -5,8 +5,9 @@
 #include <vector>
 #include <list>
 #include <map>
+#ifdef USE_LDAS_VERSION
 #include "ldas/ldasconfig.hh"
-#include "ldas/ldasconfig.hh"
+#endif
 #include "framecpp/Common/FrameSpec.hh"
 #include "framecpp/Common/CheckSum.hh"
 #include "framecpp/Common/IOStream.hh"
