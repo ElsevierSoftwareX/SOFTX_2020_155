@@ -14,7 +14,9 @@
 #include <sys/syscall.h>
 #include <sys/prctl.h>
 
+#ifdef USE_LDAS_VERSION
 #include "ldas/ldasconfig.hh"
+#endif
 #include "framecpp/Common/FrameSpec.hh"
 #include "framecpp/Common/CheckSum.hh"
 #include "framecpp/Common/IOStream.hh"
@@ -85,31 +87,45 @@ extern unsigned int pvValue[1000];
 /// We use negative numbers to count down from the highest CPU (to avoid special things on CPU0)
 /// Science frame is specified to lowest one, as not always used
 #if defined(USE_BROADCAST)
-#define PROD_CPUAFFINITY 0
 #define FULL_SAVER_CPUAFFINITY -1
 #define SECOND_SAVER_CPUAFFINITY -2
 #define MINUTE_SAVER_CPUAFFINITY -3
-#define SCIENCE_SAVER_CPUAFFINITY -4
+#define PROD_CPUAFFINITY -4
+#define SCIENCE_SAVER_CPUAFFINITY -5
 #else
 #if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
-#define PROD_CPUAFFINITY 0
 #define FULL_SAVER_CPUAFFINITY -1
 #define SECOND_SAVER_CPUAFFINITY -2
 #define MINUTE_SAVER_CPUAFFINITY -3
+#define PROD_CPUAFFINITY 0
 #define SCIENCE_SAVER_CPUAFFINITY -4
 #else
-#define PROD_CPUAFFINITY 0
 #define FULL_SAVER_CPUAFFINITY -1
 #define SECOND_SAVER_CPUAFFINITY -2
 #define MINUTE_SAVER_CPUAFFINITY -3
+#define PROD_CPUAFFINITY 0
 #define SCIENCE_SAVER_CPUAFFINITY -4
 #endif
 #endif
 
+
+// as of ldas_tools 2.5, the LDAS_VERSION is no longer provided. Instead use FRAMECPP_VERSION_NUMBER
+#if USE_LDAS_VERSION
 #if LDAS_VERSION_NUMBER >= 200000
 typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
 #else
 typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+#endif
+#else
+#if USE_FRAMECPP_VERSION
+#if FRAMECPP_VERSION_NUMBER >= 200000
+typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+#else
+typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+#endif
+#else
+typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+#endif
 #endif
 
 /// Daqd server main class. This is a top-level class, which encloses various objects

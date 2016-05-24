@@ -491,7 +491,15 @@ daqd_c::full_frame(int frame_length_seconds, int science,
   FrameCPP::Version::FrameH::rawData_type rawData
         =  FrameCPP::Version::FrameH::rawData_type(new FrameCPP::Version::FrRawData);
   ldas_frame_h_type frame;
+#if USE_LDAS_VERSION
   FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-" + string(LDAS_VERSION));
+#else
+#if USE_FRAMECPP_VERSION
+  FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-2.5.1");
+#else
+  FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-" + string(LDAS_VERSION));
+#endif
+#endif
   FrameCPP::Version::FrDetector detector = daqd.getDetector1();
 
   // Create frame
