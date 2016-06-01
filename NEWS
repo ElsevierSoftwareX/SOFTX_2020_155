@@ -11,6 +11,10 @@ Changes for X.X
 - Bug Fix (513): Cleanup debug schemes.  Also created separate udp_rcvr files, fixed mx_rcvr header
 - Bug Fix (1015): Update daqd,nds build for ldas-tools 2.5
 ==================================================================================================
+Changes for 3.0.3
+==================================================================================================
+- Bug Fix for loading individual filter coeffs (#1008 and #1014).
+==================================================================================================
 Changes for 3.0.2
 ==================================================================================================
 - Bug Fix to SUM.pm part connection checking.
