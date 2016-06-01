@@ -947,6 +947,9 @@ int fmCreatePartial(char *cfDir, char *cfName, char *filtName)
   int foundFilt = 0;
   char cpCmd[256];
   int status;
+  char *words[10];
+  int nwords;
+  char myline[100];
 
   strcpy(fName[FMC_PHOTON],cfDir);
   strcpy(fName[FMC_LOAD],cfDir);
@@ -980,11 +983,16 @@ int fmCreatePartial(char *cfDir, char *cfName, char *filtName)
   	if(fstart && fstop < 2) {
 		strcat(newcoeffs,line);
 	}
-	if(strstr(line,searchPattern) != NULL && fstart == 0) {
-		fstart = 1;
-		foundFilt = 1;
-		strcat(newcoeffs,line);
-  		printf("Found the filter %s\n",filtName);
+	if(strstr(line,searchPattern) != NULL && fstart == 0 ) {
+		strcpy(myline,line);
+		nwords = getwords(myline,words,10);
+		if(strcmp(filtName,words[1]) == 0) {
+			fstart = 1;
+			foundFilt = 1;
+			strcat(newcoeffs,line);
+			printf("Found the filter %s  %s\n",filtName,line);
+			printf("Found %d words = %s %s\n",nwords,words[0],words[1]);
+		}
 	}
 	if(fstart > 0 && strstr(line,stopPattern) != NULL) {
 		fstop += 1;
@@ -1018,11 +1026,17 @@ int fmCreatePartial(char *cfDir, char *cfName, char *filtName)
 		fprintf(fptmp,"%s",line);
 	}
 	if(strstr(line,searchPattern) != NULL && fstart == 0) {
-		fstart = 1;
-		foundFilt = 1;
-  		printf("Found the filter %s\n",filtName);
-		// Write all of the new stuff extracted from the Photon file
-		fprintf(fptmp,"%s",newcoeffs);
+		strcpy(myline,line);
+		nwords = getwords(myline,words,10);
+		if(strcmp(filtName,words[1]) == 0) {
+			fstart = 1;
+			foundFilt = 1;
+			printf("Found the filter %s\n",filtName);
+			// Write all of the new stuff extracted from the Photon file
+			fprintf(fptmp,"%s",newcoeffs);
+		} else {
+			fprintf(fptmp,"%s",line);
+		}
 	}
 	if(fstart > 0 && strstr(line,stopPattern) != NULL) {
 		fstop += 1;
@@ -1094,6 +1108,34 @@ printCoefs(fmReadCoeff *fmc, int subsystems) {
       }
     }
   }
+}
+
+getwords(char *line, char *words[], int maxwords)
+{
+char *p = line;
+int nwords = 0;
+
+while(1)
+	{
+	while(isspace(*p))
+		p++;
+
+	if(*p == '\0')
+		return nwords;
+
+	words[nwords++] = p;
+
+	while(!isspace(*p) && *p != '\0')
+		p++;
+
+	if(*p == '\0')
+		return nwords;
+
+	*p++ = '\0';
+
+	if(nwords >= maxwords)
+		return nwords;
+	}
 }
 
 #ifdef unix_test

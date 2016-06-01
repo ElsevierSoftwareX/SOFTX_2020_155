@@ -3641,6 +3641,8 @@ sleep(5);
 			if(fotonFileCrc != prevFotonFileCrc || prevCoeffFileCrc != coeffFileCrc) {
 				sprintf(myDiffCmd,"%s %s %s %s %s","diff",fotonFile,coeffFile," > ",fotonDiffFile);
 				status = system(myDiffCmd);
+				prevFotonFileCrc = fotonFileCrc;
+				prevCoeffFileCrc = coeffFileCrc;
 			}
 			status = checkFileCrc(sdffileloaded);
 			if(status == -1) {
