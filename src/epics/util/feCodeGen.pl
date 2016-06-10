@@ -121,7 +121,7 @@ $rfmTimeSlave = -1;
 $diagTest = -1;
 $flipSignals = 0;
 $virtualiop = 0;
-$rfm_via_pcie = 0;
+$rfm_via_pcie = 1;
 $edcu = 0;
 $casdf = 0;
 $pciNet = -1;
@@ -1408,10 +1408,15 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUTH "\#define TARGET_DAC16_COUNT $dac16Cnt\n";
 		print OUTH "\#define TARGET_DAC18_COUNT $dac18Cnt\n";
 	} else {
-		print OUTH "\#define TARGET_ADC_COUNT 1\n";
+		if($virtualiop) {
+			print OUTH "\#define TARGET_ADC_COUNT 0\n";
+		} else {
+			print OUTH "\#define TARGET_ADC_COUNT 1\n";
+		}
 		print OUTH "\#define TARGET_DAC16_COUNT 0\n";
 		print OUTH "\#define TARGET_DAC18_COUNT 0\n";
 	}
+	print OUTH "\#define TARGET_DAQ_FLAG $no_daq\n";
 	print OUTH "\#endif\n";
 
 	#//	- Write EPICS database info file for later use by fmseq.pl in generating EPICS code/database.
@@ -1543,9 +1548,10 @@ END
 	   }
 	}
 	if($virtualiop > 1 && $adcMaster > 0) {
-                $ipcxCnt = 0;
+                $ipcxCnt = 64;
         }
         if($virtualiop > 1 && $adcMaster <= 0 ) {
+        #if($virtualiop > 1) {
 		(my $ret, my $dum, my $dum2, my $dum3, $::ipcxCnt)   = (CDS::Util::findDefine("src/include/commData3.h", "PCIE_SEG_SIZE"));
 		print "IPCDEFINE = $ret	$dum	$dum2 	$ipcxCnt	\n";
         }
@@ -1610,10 +1616,15 @@ END
 	if ($ipcxCnt > 0 && $virtualiop < 2) {
 	   print OUT "\ncommData3Receive(myIpcCount, ipcInfo, timeSec , cycle);\n\n";
 	}
-	if ($ipcxCnt > 0 && $virtualiop > 1) {  # PCIE SWITCH CODE
+	if ($ipcxCnt > 0 && $virtualiop > 1 && $adcMaster < 1) {  # PCIE SWITCH CODE
 		my $segment = int($virtualiop - 2) % 10;
 		print OUT "\ncommData3ReceiveSwitch(myIpcCount, ipcInfo, timeSec , cycle, 0, $segment, pLocalEpics->epicsOutput.gdsMon);\n\n";
 		print OUT "\ncommData3ReceiveSwitch(myIpcCount, ipcInfo, timeSec , cycle, 1, $segment, pLocalEpics->epicsOutput.gdsMon);\n\n";
+	}
+	if ($ipcxCnt > 0 && $virtualiop > 1 && $adcMaster == 1) {  # PCIE SWITCH CODE
+		my $segment = int($virtualiop - 2) % 10;
+		print OUT "\ncommData3ReceiveIop(myIpcCount, ipcInfo, timeSec , cycle, 0, $segment, pLocalEpics->epicsOutput.gdsMon);\n\n";
+		print OUT "\ncommData3ReceiveIop(myIpcCount, ipcInfo, timeSec , cycle, 1, $segment, pLocalEpics->epicsOutput.gdsMon);\n\n";
 	}
 	# END IPCx PART CODE
 
@@ -1718,7 +1729,7 @@ if ($ipcxCnt > 0 && $virtualiop < 2) {
    print OUT "      if(!cycle && pLocalEpics->epicsInput.ipcDiagReset) pLocalEpics->epicsInput.ipcDiagReset = 0;\n";
    print OUT "\n    commData3Send(myIpcCount, ipcInfo, timeSec, cycle);\n\n";
 }
-if ($ipcxCnt > 0 && $virtualiop > 1) {
+if ($ipcxCnt > 0 && $virtualiop > 1 && $adcMaster != 1) {
 	my $segment = int($virtualiop - 2) % 10;
 	print OUT "\n	pLocalEpics->epicsOutput.gdsMon[20] = commData2Copy12(myIpcCount, ipcInfo, 0, 1, $segment, cycle) / 1000;\n\n";
 	print OUT "\n	pLocalEpics->epicsOutput.gdsMon[21] = commData2Copy12(myIpcCount, ipcInfo, 1, 0, $segment, cycle) / 1000;\n\n";
