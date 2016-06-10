@@ -105,6 +105,7 @@ typedef struct IO_MEM_DATA{
 	MEM_DATA_BLOCK iodata[MAX_IO_MODULES][IO_MEMORY_SLOTS];
 	// Combined DAC channels map; used to check on slaves DAC channel allocations
 	unsigned int dacOutUsed[MAX_DAC_MODULES][16];
+	unsigned int ipcDetect[2][8];
 }IO_MEM_DATA;
 
 
