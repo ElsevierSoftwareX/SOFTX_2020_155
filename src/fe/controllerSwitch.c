@@ -358,22 +358,6 @@ void *fe_start(void *arg)
   memset(dDacHistory, 0, sizeof(dDacHistory));
 #endif
 
-  /// \> Zero out DAC outputs
-#if 0
-  for (ii = 0; ii < MAX_DAC_MODULES; ii++)
-  {
-    dacTimingErrorPending[ii] = 0;
-    for (jj = 0; jj < 16; jj++) {
- 	dacOut[ii][jj] = 0.0;
- 	dacOutUsed[ii][jj] = 0;
-	dacOutBufSize[ii] = 0;
-	// Zero out DAC channel map in the shared memory
-	// to be used to check on slaves' channel allocation
-	// ioMemData->dacOutUsed[ii][jj] = 0;
-    }
-  }
-#endif
-
   /// \> Set pointers to filter module data buffers. \n
   /// - ---- Prior to V2.8, separate local/shared memories for FILT_MOD data.\n
   /// - ---- V2.8 and later, code uses EPICS shared memory only. This was done to: \n
@@ -555,8 +539,8 @@ udelay(1000);
   	rdtscll(clk);
 	  // Pause until next cycle begins
 	  if (cycleNum == 0) {
-	  	pLocalEpics->epicsOutput.awgStat = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
-		if(pLocalEpics->epicsOutput.awgStat) feStatus |= FE_ERROR_AWG;
+	  	// pLocalEpics->epicsOutput.awgStat = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
+		// if(pLocalEpics->epicsOutput.awgStat) feStatus |= FE_ERROR_AWG;
 		  /// - ---- Check if DAC outputs are enabled, report error.
 		if(!iopDacEnable || dkiTrip) feStatus |= FE_ERROR_DAC_ENABLE;
 		  // Increment GPS second on cycle 0
@@ -580,6 +564,29 @@ udelay(1000);
         rdtscl(cpuClock[CPU_TIME_USR_START]);
  	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
         rdtscl(cpuClock[CPU_TIME_USR_END]);
+#ifdef ADC_MASTER
+	if(cycleNum == 5) {
+		ioMemData->ipcDetect[0][0] = pLocalEpics->epicsOutput.gdsMon[0];
+		ioMemData->ipcDetect[0][1] = pLocalEpics->epicsOutput.gdsMon[1];
+		ioMemData->ipcDetect[0][2] = pLocalEpics->epicsOutput.gdsMon[2];
+		ioMemData->ipcDetect[0][3] = pLocalEpics->epicsOutput.gdsMon[3];
+		ioMemData->ipcDetect[1][0] = pLocalEpics->epicsOutput.gdsMon[4];
+		ioMemData->ipcDetect[1][1] = pLocalEpics->epicsOutput.gdsMon[5];
+		ioMemData->ipcDetect[1][2] = pLocalEpics->epicsOutput.gdsMon[6];
+		ioMemData->ipcDetect[1][3] = pLocalEpics->epicsOutput.gdsMon[7];
+	}
+#else
+	if(cycleNum == 15) {
+		pLocalEpics->epicsOutput.gdsMon[10] = ioMemData->ipcDetect[0][0];
+		pLocalEpics->epicsOutput.gdsMon[11] = ioMemData->ipcDetect[0][1];
+		pLocalEpics->epicsOutput.gdsMon[12] = ioMemData->ipcDetect[0][2];
+		pLocalEpics->epicsOutput.gdsMon[13] = ioMemData->ipcDetect[0][3];
+		pLocalEpics->epicsOutput.gdsMon[14] = ioMemData->ipcDetect[1][0];
+		pLocalEpics->epicsOutput.gdsMon[15] = ioMemData->ipcDetect[1][1];
+		pLocalEpics->epicsOutput.gdsMon[16] = ioMemData->ipcDetect[1][2];
+		pLocalEpics->epicsOutput.gdsMon[17] = ioMemData->ipcDetect[1][3];
+	}
+#endif
 
   	odcStateWord = 0;
 /// WRITE DAC OUTPUTS ***************************************** \n
@@ -608,7 +615,7 @@ udelay(1000);
         {
 	  pLocalEpics->epicsOutput.cpuMeter = timeHold;
 	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
-  	  pLocalEpics->epicsOutput.dacEnable = dacEnable;
+  	  // pLocalEpics->epicsOutput.dacEnable = dacEnable;
           timeHoldHold = timeHold;
           timeHold = 0;
 	  timeHoldWhenHold = timeHoldWhen;
@@ -618,7 +625,6 @@ udelay(1000);
 	  memset(cycleHist, 0, sizeof(cycleHist));
 	  memcpy(cycleHistWhenHold, cycleHistWhen, sizeof(cycleHistWhen));
 	  memset(cycleHistWhen, 0, sizeof(cycleHistWhen));
-#endif
 	  if (timeSec % 4 == 0) pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeMin;
 	  else if (timeSec % 4 == 1)
 		pLocalEpics->epicsOutput.adcWaitTime =  adcHoldTimeMax;
@@ -634,12 +640,13 @@ udelay(1000);
 		feStatus |= FE_ERROR_TIMING;
 	  
 	  }
+#endif
 	  if(timeHoldMax > CYCLE_TIME_ALRM) 
 	  {
 	  	diagWord |= FE_PROC_TIME_ERR;
 		feStatus |= FE_ERROR_TIMING;
 	  }
-	  pLocalEpics->epicsOutput.stateWord = feStatus;
+	  // pLocalEpics->epicsOutput.stateWord = feStatus;
   	  feStatus = 0;
   	  if(pLocalEpics->epicsInput.diagReset || initialDiagReset)
 	  {
@@ -728,12 +735,6 @@ udelay(1000);
 
         /// \> Update internal cycle counters
           cycleNum += 1;
-#ifdef DIAG_TEST
-          if(pLocalEpics->epicsInput.bumpCycle != 0) {
-	  	cycleNum += pLocalEpics->epicsInput.bumpCycle;
-		pLocalEpics->epicsInput.bumpCycle = 0;
-	  }
-#endif
           cycleNum %= CYCLE_PER_SECOND;
 	  clock1Min += 1;
 	  clock1Min %= CYCLE_PER_MINUTE;

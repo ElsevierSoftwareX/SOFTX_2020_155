@@ -402,7 +402,8 @@ printf("Model compiled with RFM DELAY !!\n");
         printf("Base address Rite 1  = %lx\n",(unsigned long)ipcInfo[0].pIpcDataWrite[1]);
 
 }
-INLINE void commData3ReceiveSwitch(int connects,              // Total number of IPC connections in the application
+
+INLINE void commData3ReceiveIop(int connects,              // Total number of IPC connections in the application
                              CDS_IPC_INFO ipcInfo[],    // IPC information structure
                              int timeSec,               // Present GPS Second
                              int cycle,                 // Application cycle count (0 to FE_CODE_RATE)
@@ -410,14 +411,15 @@ INLINE void commData3ReceiveSwitch(int connects,              // Total number of
                              int segment,
                              int netStat[])
 
-// This routine receives all IPC data marked as a read (RCV) channel in the IPC INFO list.
+// This routine is used by the LRPS IOP to determine active channels on a Dolphin Switch.
+// Information is later passed on by the controllerSwitch code to the various LRPS switching modules..
 {
 unsigned long syncWord;         // Combined GPS timestamp and cycle counter word received with data
 unsigned long mySyncWord;       // Local version of syncWord for comparison and error detection
 int ipcIndex;                   // Pointer to next IPC data buffer
 int ii,jj,kk;
 int rcvBlock;                   // Which of the IPC_BLOCKS IPC data blocks to read from
-int word,bit;
+int word,bit,gds;
 double tmp;                     // Temp location for data for checking NaN
 int offset;
 
@@ -429,26 +431,35 @@ int offset;
   {
           // for(kk=0;kk<20;kk++) netStat[kk] = 0;
           jj = netFrom;
-	  netStat[jj] = 0;
+	// Network 0 uses gds mons 0 thru 3
+        if(jj==0) {
+          netStat[0] = 0;
+          netStat[1] = 0;;
+          netStat[2] = 0;;
+          netStat[3] = 0;
+        } else {
+	// Network 1 uses gds mons 4 thru 7
+          netStat[4] = 0;
+          netStat[5] = 0;
+          netStat[6] = 0;
+          netStat[7] = 0;
+        }
           for(ii=0;ii<connects;ii++)
           {
-             // for(jj=0;jj<2;jj++) {
-                // Determine which data block to read when RCVR runs faster than sender
-                // if(ipcInfo[ii].rcvCycle > 1) ipcIndex = (cycle / ipcInfo[ii].rcvCycle) % 60;
-
-                // Data block to read if RCVR runs same speed or slower than sender
-                // else ipcIndex = (cycle * ipcInfo[ii].rcvRate) % 60;
-
                 if(ipcInfo[0].pIpcDataRead[jj] != NULL)
                 {
                         kk = ii + offset;
+			// Read IPC sync word from first data block
                         syncWord = ipcInfo[0].pIpcDataRead[jj]->dBlock[rcvBlock][kk].timestamp;
+			// Determine if the word has changed
                         if(syncWord != ipcInfo[ii].lastSyncWord[jj])
                         {
+				// If so, mark it in the gds mon, whic will be passed to actual switching code.
                                 ipcInfo[ii].lastSyncWord[jj] = syncWord;
                                 ipcInfo[ii].errFlagS[jj] = 1;
-                                bit = ii % 30;
-                                netStat[jj] |= (ipcInfo[ii].errFlagS[jj] << bit);
+                                bit = ii % 16;
+                                gds = ii/16 + (jj*4);
+                                netStat[gds] |= (ipcInfo[ii].errFlagS[jj] << bit);
                         } else {
 
                                 ipcInfo[ii].errFlagS[jj] = 0;
@@ -462,6 +473,61 @@ int offset;
   }
 }
 
+INLINE void commData3ReceiveSwitch(int connects,              // Total number of IPC connections in the application
+                             CDS_IPC_INFO ipcInfo[],    // IPC information structure
+                             int timeSec,               // Present GPS Second
+                             int cycle,                 // Application cycle count (0 to FE_CODE_RATE)
+                             int netFrom,
+                             int segment,
+                             int netStat[])
+
+// This routine gets network activity info from the LRPN switch IOP to determine which channels are active and therefore
+// must be transferred from one network to the othere..
+{
+unsigned long syncWord;         // Combined GPS timestamp and cycle counter word received with data
+unsigned long mySyncWord;       // Local version of syncWord for comparison and error detection
+int ipcIndex;                   // Pointer to next IPC data buffer
+int ii,jj,kk;
+int rcvBlock;                   // Which of the IPC_BLOCKS IPC data blocks to read from
+int word,bit;
+double tmp;                     // Temp location for data for checking NaN
+int offset;
+int gdsWord;
+int statlocal;
+int statWord;
+int newstat = 0;
+
+
+  // Determine which block to read, based on present code cycle
+  rcvBlock = 0;
+  offset = segment * PCIE_SEG_SIZE;
+  word = netFrom + 10;;
+  if(cycle == word) // Time to rcv
+  {
+        jj = netFrom;
+	gdsWord = jj * 4 + 10 + segment;
+	statlocal = jj + 5;
+	statWord = netStat[gdsWord];
+
+	for(ii=0;ii<connects;ii++)
+	{
+		if(statWord & 1) {
+			ipcInfo[ii].errFlagS[jj] = 1;
+			bit = ii % 30;
+			newstat |= (ipcInfo[ii].errFlagS[jj] << bit);
+		} else {
+
+			ipcInfo[ii].errFlagS[jj] = 0;
+		}
+		statWord >>= 1;
+	}
+
+	statWord = netStat[gdsWord];
+	netStat[statlocal] = newstat;
+	netStat[jj] = newstat;
+  }
+}
+
 INLINE double commData2Copy12   (int connects,            // Total number of IPC connections in the application
                              CDS_IPC_INFO ipcInfo[],    // IPC information structure
 			     int netFrom,
@@ -469,7 +535,7 @@ INLINE double commData2Copy12   (int connects,            // Total number of IPC
                              int segment,
                              int cycle)                 // Application cycle count (0 to FE_CODE_RATE)
 
-// This routine receives all IPC data marked as a read (RCV) channel in the IPC INFO list.
+// This routine perfroms the copy of IPC data from one network to the other..
 {
 int ii,jj,kk;
 static unsigned long syncArray[2][IPC_BLOCKS][MAX_IPC];
@@ -515,6 +581,7 @@ if(ipcInfo[0].pIpcDataRead[netFrom] != NULL && ipcInfo[0].pIpcDataWrite[netTo] !
                 }
         }
 
+// Have to flush the cache to ensure data is actually transferred to the Dolphin.
 if (ttcache) clflush_cache_range (&(ipcInfo[0].pIpcDataWrite[netTo]->dBlock[cblock][dblock].data), 16);
    if(cycle == 200 && cps != 0) {
                 cpsHold = cps;
