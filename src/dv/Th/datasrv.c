@@ -41,7 +41,10 @@ short         Fast = 1; /* 1 or 16 */
 /* Debug fprintf().  */
 void dfprintf(FILE *file, ...) {}
 
-double bsdouble(double in) {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+
+inline
+double ntohd(double in) {
     double retVal;
     char* p = (char*)&retVal;
     char* i = (char*)&in;
@@ -57,6 +60,9 @@ double bsdouble(double in) {
 
     return retVal;
 }
+#else
+#define ntohd(a) a
+#endif
 
 
 /* int DataConnect(char* serverName, int serverPort, int lPort, void* read_data()) */ /* JCB */
@@ -687,8 +693,7 @@ int  seconds;
 		break;
             case 5: /* 64 bit-double */
                 for ( j=0; j<channelAll[index].rate/Fast; j++ ) {
-		   data[j] = *((double *)(DataDaq.tb->data+pos+j*sizeof(double)));
-		   data[j] = bsdouble(data[j]);
+		   data[j] = ntohd(*((double *)(DataDaq.tb->data+pos+j*sizeof(double))));
                 }
                 break;
             case 2: /* 32 bit-integer */
@@ -762,8 +767,7 @@ int  seconds;
             case 5: /* 64 bit-double */
                 for ( j=0; j<chanList[index].rate/Fast; j++ ) {
 		   if (DataDaq.tb_size >= pos+j*sizeof(double)) {
-		     data[j] = *((double *)(DataDaq.tb->data+pos+j*sizeof(double)));
-		     data[j] = bsdouble(data[j]);
+		     data[j] = ntohd(*((double *)(DataDaq.tb->data+pos+j*sizeof(double))));
 		   }
                 }
                 break;
@@ -790,29 +794,6 @@ int  seconds;
 	  return rateActual[index];
        }
 }
-
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-
-inline
-double ntohd(double in) {
-    double retVal;
-    char* p = (char*)&retVal;
-    char* i = (char*)&in;
-    p[0] = i[7];
-    p[1] = i[6];
-    p[2] = i[5];
-    p[3] = i[4];
-
-    p[4] = i[3];
-    p[5] = i[2];
-    p[6] = i[1];
-    p[7] = i[0];
-
-    return retVal;
-}
-#else
-#define ntohd(a) a
-#endif
 
 int    DataTrendGetCh(const char* chName, struct DTrend *trend)
 {
@@ -917,9 +898,9 @@ int  seconds, secrate;
                 break;
             case 5: /* 64 bit-double */
 	        for ( j=0; j<secrate; j++ ) {
-		   (trend+j)->min = *((double *)( DataDaq.tb->data + pos +j*sizeof(double) ));
-		   (trend+j)->max = *((double *)( DataDaq.tb->data + pos + sizeof(double)*secrate + j*sizeof(double) ));
-		   (trend+j)->mean = *((double *)( DataDaq.tb->data + pos + 2*sizeof(double)*secrate + j*2*sizeof(double) ));
+		   (trend+j)->min = ntohd(*((double *)( DataDaq.tb->data + pos +j*sizeof(double) )));
+		   (trend+j)->max = ntohd(*((double *)( DataDaq.tb->data + pos + sizeof(double)*secrate + j*sizeof(double) )));
+		   (trend+j)->mean = ntohd(*((double *)( DataDaq.tb->data + pos + 2*sizeof(double)*secrate + j*2*sizeof(double) )));
 		   (trend+j)->mean = 0;
 	        }
                 break;
