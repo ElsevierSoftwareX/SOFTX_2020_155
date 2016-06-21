@@ -370,7 +370,7 @@ listener (void * a)
       if (err_no = pthread_create (&daq -> interpreter_tid, NULL, (void *(*)(void *))daq -> interpreter, (void *) daq))
 	{
           strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
-	  fprintf (stderr, "pthread_create() failed to spawn interpreter thread; err=%s", errmsgbug);
+	  fprintf (stderr, "pthread_create() failed to spawn interpreter thread; err=%s", errmsgbuf);
 	  close (connfd);
 	}
       else
