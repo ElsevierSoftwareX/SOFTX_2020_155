@@ -725,8 +725,14 @@ int init_module (void)
 	// ioMemData->dolphinCount = 0;
 // Clear Dolphin pointers so the slave sees NULLs
 	ioMemData->dolphinCount = 0;
-        ioMemData->dolphin[0] = 0;
-        ioMemData->dolphin[1] = 0;
+        ioMemData->dolphinRead[0] = 0;
+        ioMemData->dolphinRead[1] = 0;
+        ioMemData->dolphinRead[2] = 0;
+        ioMemData->dolphinRead[3] = 0;
+        ioMemData->dolphinWrite[0] = 0;
+        ioMemData->dolphinWrite[1] = 0;
+        ioMemData->dolphinWrite[2] = 0;
+        ioMemData->dolphinWrite[3] = 0;
         printf("***************************************************************************\n");
   	if (cdsPciModules.gps) {
 	printf("IRIG-B card found %d\n",cdsPciModules.gpsType);
