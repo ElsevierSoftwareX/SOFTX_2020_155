@@ -3003,6 +3003,17 @@ int main(int argc,char *argv[])
 
     if(argc>=2) {
         iocsh(argv[1]);
+
+	for (ii = 2; ii < argc; ++ii) {
+		if (strcmp(argv[ii], "--no-sdf-restore") == 0) {
+			sdfReq = SDF_READ_ONLY;
+			printf("The SDF system will not force a restore of EPICS values at startup\n");
+		} else if (strcmp(argv[ii], "--sdf-restore") == 0) {
+			sdfReq = SDF_LOAD_PARTIAL;
+			printf("The SDF system will force a restore of EPICS values at startup\n");
+		}
+	}
+
 	// printf("Executing post script commands\n");
 	// dbDumpRecords(*iocshPpdbbase);
 	// Get environment variables from startup command to formulate EPICS record names.
