@@ -377,6 +377,10 @@ trender_c::minute_framer ()
 		    tnf_long,   frame_number,   frame_cntr);
 	  
 	close (fd);
+        // For framebuilder, add mutex to serialize second, minute trend writing 
+        pthread_mutex_lock (&frame_write_lock);
+        DEBUG(3, cerr << "Get trend frame write mutex for minute frame" << endl);
+ 
         FrameCPP::Common::FrameBuffer<filebuf>* obuf
             = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
         obuf -> open(_tmpf, std::ios::out | std::ios::binary);
@@ -390,10 +394,12 @@ trender_c::minute_framer ()
 				 FrameCPP::FrVect::ZERO_SUPPRESS_OTHERWISE_GZIP, 1,
 		       FrameCPP::Common::CheckSum::CRC);
 
-        t = time(0) - t;
-        DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
         ofs.Close();
         obuf->close();
+        pthread_mutex_unlock (&frame_write_lock);
+
+        t = time(0) - t;
+        DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
 	if (1)
 	{
 	  if (rename(_tmpf, tmpf)) {
@@ -809,6 +815,10 @@ trender_c::framer ()
 		    tnf_long,   frame_number,   frame_cntr);
 
 	  close (fd);
+          // For framebuilder, add mutex to serialize second, minute trend writing 
+          pthread_mutex_lock (&frame_write_lock);
+          DEBUG(3, cerr << "Get trend frame write mutex for second frame" << endl);
+
           FrameCPP::Common::FrameBuffer<filebuf>* obuf
             = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
           obuf -> open(_tmpf, std::ios::out | std::ios::binary);
@@ -822,10 +832,12 @@ trender_c::framer ()
 				 FrameCPP::FrVect::ZERO_SUPPRESS_OTHERWISE_GZIP, 1,
                         FrameCPP::Common::CheckSum::CRC);
 
-          t = time(0) - t;
-          DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
           ofs.Close();
           obuf->close();
+          pthread_mutex_unlock (&frame_write_lock);
+
+          t = time(0) - t;
+          DEBUG(1, cerr << "Second trend frame write done in " << t << " seconds" << endl);
 	  if (rename(_tmpf, tmpf)) {
 		system_log(1, "framer(): failed to rename file; errno %d", errno);
 		fsd.report_lost_frame ();
