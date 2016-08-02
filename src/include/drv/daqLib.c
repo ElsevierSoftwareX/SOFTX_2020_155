@@ -9,10 +9,7 @@ extern long daqBuffer;			///< Address of daqLib swing buffers.
 extern char *_daq_shm;			///< Pointer to DAQ base address in shared memory.
 struct rmIpcStr *dipc;			///< Pointer to DAQ IPC data in shared memory.
 struct cdsDaqNetGdsTpNum *tpPtr;	///< Pointer to TP table in shared memory.
-char *mcPtr;				///< Pointer to current DAQ data in shared memory.
-char *lmPtr;				///< Pointer to current DAQ data in local memory data buffer.
 char *daqShmPtr;			///< Pointer to DAQ data in shared memory.
-int fillSize;				///< Amount of data to copy local to shared memory.
 char *pEpicsIntData;			///< Pointer to EPICS integer type data in shared memory.
 char *pEpicsDblData;			///< Pointer to EPICS double type data in shared memory.
 unsigned int curDaqBlockSize;		///< Total DAQ data rate diag
@@ -85,8 +82,8 @@ static int xferDone;
 static char *pDaqBuffer[DAQ_NUM_SWING_BUFFERS];	/* Pointers to local swing buffers.	*/
 static DAQ_LKUP_TABLE localTable[DCU_MAX_CHANNELS];
 static DAQ_LKUP_TABLE excTable[DCU_MAX_CHANNELS];
-static char *pWriteBuffer;	/* Ptr to swing buff to write data	*/
-static char *pReadBuffer;	/* Ptr to swing buff to xmit data to FB */
+static volatile char *pWriteBuffer;	/* Ptr to swing buff to write data	*/
+static volatile char *pReadBuffer;	/* Ptr to swing buff to xmit data to FB */
 static int phase;		/* 0-1, switches swing buffers.		*/
 static int daqSlot;		/* 0-sysRate, data slot to write data	*/
 static int excSlot;		/* 0-sysRate, slot to read exc data	*/
@@ -235,25 +232,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     excBlockNum = 0;
 
     /// ** INITIALIZATION **************\n
-    /// \> Two local memory swing buffers will be used to store acquired data, each containing
-    /// 1/16 sec of data.\n
-    /// ----  One for writing ie copying/filtering data from shared memory on each cycle. \n
-    /// ----  One for reading data ie copying data from local memory to memory shared with 
-    /// DAQ network communication software. \n
-    /// \> Buffers switch roles every 1/16 sec. \n
-    /// \> Introduces 1/16 sec delay on delivery of data to network. However, this is done for
-    /// performance reasons ie it takes too long to perform CRC checksum on full data set and
-    /// to get the data out. With this method, the computing load can be spread out on a per
-    /// per cycle basis. \n
-    /// \>\> Allocate memory for two local data swing buffers
-    for(ii=0;ii<DAQ_NUM_SWING_BUFFERS;ii++) 
-    {
-      pDaqBuffer[ii] = (char *)daqBuffer;
-      pDaqBuffer[ii] += DAQ_DCU_SIZE * ii;
-    }
-    /// \>\> Set pointers to two swing buffers
-    pWriteBuffer = (char *)pDaqBuffer[phase^1];
-    pReadBuffer = (char *)pDaqBuffer[phase];
     daqSlot = -1;
     excSlot = 0;
 
@@ -267,16 +245,14 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     /// \> Setup Pointers to the various shared memories:\n
     /// ----  Assign Ptr to data shared memory to network driver (mx_stream) \n
     daqShmPtr = _daq_shm + CDS_DAQ_NET_DATA_OFFSET;
-    buf_size = DAQ_DCU_BLOCK_SIZE*DAQ_NUM_SWING_BUFFERS;
+    buf_size = DAQ_DCU_BLOCK_SIZE*2;
+    pWriteBuffer = (volatile char *)daqShmPtr;
+    pReadBuffer = (volatile char *)daqShmPtr;
     /// ----  Setup Ptr to interprocess comms with network driver
     dipc = (struct rmIpcStr *)(_daq_shm + CDS_DAQ_NET_IPC_OFFSET);
     /// ----  Setup Ptr to awgtpman shared memory (TP number table)
     tpPtr = (struct cdsDaqNetGdsTpNum *)(_daq_shm + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
-    mcPtr = daqShmPtr;		// Set daq2net data ptr to start of daq2net shared memory.
-    lmPtr = pReadBuffer;	// Set read buffer ptr to start of read buffer..
 
-    // Set mem cpy size evenly over all code cycles.
-    fillSize = DAQ_DCU_BLOCK_SIZE / sysRate;
     /// ----  Set up pointer to DAQ configuration information in shmem */
     pInfo = (DAQ_INFO_BLOCK *)(_epics_shm + DAQ_INFO_ADDRESS);
     /// ----  Set pointer to shared mem to pass GDS info to DAQ
@@ -334,6 +310,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     /// \> Calc data offset into current write swing buffer 
     daqSlot = (daqSlot + 1) % sysRate;
 
+#if 0
     /// \> At start of 1/16 sec. data block, reset the xfer sizes and done bit */
     if(daqSlot == 0)
     {
@@ -350,6 +327,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 	if(xferInfo.xferSize <= 0)  xferDone = 1;
 
     }
+#endif
 
 
     /// \> Write data into local swing buffer 
@@ -515,29 +493,6 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 	}
 }
 
-    /// \> Copy data from read buffer to DAQ network shared memory on each code cycle.
-    /// - ---- Entire buffer is moved during 1/16sec period, in equal amounts each cycle, even though
-    /// entire buffer is not full of data.
-    memcpy(mcPtr,lmPtr,fillSize);
-    mcPtr += fillSize;
-    lmPtr += fillSize;
-
-  /// - ----  Perform CRC checksum on data moved from read buffer to DAQ network shared memory.
-  if(!xferDone)
-  {
-    /* Do CRC check sum calculation */
-    bufPtr = (char *)pReadBuffer + daqSlot * xferInfo.xferSize1;
-    if(daqSlot == 0) crcTest = crc_ptr(bufPtr, xferInfo.xferSize, 0);
-    else crcTest = crc_ptr(bufPtr, xferInfo.xferSize, crcTest);
-    xferInfo.xferLength -= xferInfo.xferSize;
-  }
-  if(daqSlot == (sysRate - 1))
-  /* Done with 1/16 second data block */
-  {
-      /* Complete CRC checksum calc */
-      crcTest = crc_len(xferInfo.crcLength, crcTest);
-      crcSend = crcTest;
-  }
 
   /// \> Read in any selected EXC signals. \n
   /// --- NOTE: EXC signals have to be read and loaded in advance by 1 cycle ie must be loaded and
@@ -588,11 +543,6 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
     /* Done with 1/16 second DAQ data block */
     {
 
-      /// - -- Swap swing buffers 
-      phase = (phase + 1) % DAQ_NUM_SWING_BUFFERS;
-      pReadBuffer = (char *)pDaqBuffer[phase];
-      pWriteBuffer = (char *)pDaqBuffer[(phase^1)];
-
 	/// - -- Fill in the IPC table for DAQ network driver (mx_stream) \n
         dipc->dcuId = dcuId; /// -   ------ DCU id of this system
         dipc->crc = xferInfo.fileCrc; /// -   ------ Checksum of the configuration file
@@ -623,12 +573,12 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
       /// - -- Increment the 1/16 sec block counter
       daqBlockNum = (daqBlockNum + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
-      /// - -- Reset pointers to DAQ net shared memory and local read buffer.
-      mcPtr = daqShmPtr;
-      mcPtr += buf_size * daqBlockNum;
-      lmPtr = pReadBuffer;
+      /// - -- Set data write ptr to next block in shmem
+      pWriteBuffer = (char *)daqShmPtr;
+      pWriteBuffer += buf_size * daqBlockNum;
+      pReadBuffer = pWriteBuffer;
 
-      /// - -- Check for reconfig request at start of each second
+      //  - -- Check for reconfig request at start of each second
       if((pInfo->reconfig == 1) && (daqBlockNum == 0))
       {
 	    printf("New daq config\n");
@@ -878,7 +828,8 @@ int mydatatype;
 /// \> Verify correct channel count before proceeding. \n
 /// - ---- Required to be at least one and not more than DCU_MAX_CHANNELS.
     status = pInfo->numChans;
-    if((status < 1) || (status > DCU_MAX_CHANNELS))
+    // if((status < 1) || (status > DCU_MAX_CHANNELS))
+    if(status > DCU_MAX_CHANNELS)
     {   
 	printf("Invalid num daq chans = %d\n",status);
 	return(-1);
@@ -1001,17 +952,14 @@ int mydatatype;
 
     printf (" xfer sizes = %d %d %d %d \n",sysRate,pDxi->xferSize1,pDxi->totalSize,pDxi->crcLength);
     
-    if (pDxi->xferSize1 == 0) {
-	printf("DAQ size too small\n");
-	return -1;
-    }
-
+#if 0
     /// \> Maintain 8 byte data boundaries for writing data, particularly important
     ///    when DMA xfers are used on 5565 RFM modules. Note that this usually results
     ///    in data not being written on every 2048/16384 cycle and last data xfer
     ///    in a 1/16 sec block well may be shorter than the rest.	
  	pDxi->xferSize1 = ((pDxi->xferSize1/8) + 1) * 8;
 	printf("DAQ resized %d\n", pDxi->xferSize1);
+#endif
 
    /// \> Find first memory location for fast data in read/write swing buffers.
     pDxi->offsetAccum = 4 * dataInfo->numEpicsTotal;

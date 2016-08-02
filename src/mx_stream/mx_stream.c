@@ -161,7 +161,7 @@ uint32_t filter = FILTER;
 //struct timeval start_time;
 char *dataBuff;
 int sendLength = 0;
-//int myCrc = 0;
+unsigned int myCrc = 0;
 int mxStatBit[2];
 
 mx_set_error_handler(MX_ERRORS_RETURN);
@@ -237,21 +237,23 @@ do {
 		  // Copy values from shmmem to MX buffer
 		  if (lastCycle == 0) shmIpcPtr[i]->status ^= mxStatBit[0];
 		  mxDataBlock.mxIpcData.cycle = shmIpcPtr[i]->cycle;
-		  mxDataBlock.mxIpcData.crc = shmIpcPtr[i]->crc;
 		  mxDataBlock.mxIpcData.dcuId = shmIpcPtr[i]->dcuId;
+		  mxDataBlock.mxIpcData.crc = shmIpcPtr[i]->crc;
 		  mxDataBlock.mxIpcData.dataBlockSize = shmIpcPtr[i]->dataBlockSize;
 		  if (mxDataBlock.mxIpcData.dataBlockSize > DAQ_DCU_BLOCK_SIZE)
 		  	mxDataBlock.mxIpcData.dataBlockSize = DAQ_DCU_BLOCK_SIZE;
 		  mxDataBlock.mxIpcData.bp[lastCycle].timeSec = shmIpcPtr[i]->bp[lastCycle].timeSec;
 		  mxDataBlock.mxIpcData.bp[lastCycle].timeNSec = shmIpcPtr[i]->bp[lastCycle].timeNSec;
 		  mxDataBlock.mxIpcData.bp[lastCycle].cycle = shmIpcPtr[i]->bp[lastCycle].cycle;
-		  mxDataBlock.mxIpcData.bp[lastCycle].crc = shmIpcPtr[i]->bp[lastCycle].crc;
 
+		  /// Copy data from shmem to xmit buffer
 		  dataBuff = (char *)(shmDataPtr[i] + lastCycle * buf_size);
 		  memcpy((void *)&mxDataBlock.mxDataBlock[0],dataBuff,mxDataBlock.mxIpcData.dataBlockSize);
-		  //myCrc = crc_ptr((char *)&mxDataBlock.mxDataBlock[0],mxDataBlock.mxIpcData.dataBlockSize,0);
-		  //myCrc = crc_len(mxDataBlock.mxIpcData.dataBlockSize,myCrc);
-		  //if(myCrc != mxDataBlock.mxIpcData.bp[lastCycle].crc) printf("CRC error in sender\n");
+		  /// Calculate CRC checksum on data
+		  myCrc = crc_ptr((char *)&mxDataBlock.mxDataBlock[0],mxDataBlock.mxIpcData.dataBlockSize,0);
+		  myCrc = crc_len(mxDataBlock.mxIpcData.dataBlockSize,myCrc);
+		  mxDataBlock.mxIpcData.bp[lastCycle].crc = myCrc;
+
 		  sendLength = header_size + mxDataBlock.mxIpcData.dataBlockSize;
 		  if (do_verbose) 
  		  	printf("send length = %d  total length = %ld\n",sendLength,sizeof(struct daqMXdata));
