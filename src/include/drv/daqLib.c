@@ -550,7 +550,7 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
         /// -   ------  Data block number
         dipc->bp[daqBlockNum].cycle = daqBlockNum;
         /// -   ------  Data block CRC
-        dipc->bp[daqBlockNum].crc = crcSend;
+        dipc->bp[daqBlockNum].crc = xferInfo.crcLength;
 	/// -   ------ Timestamp GPS Second
 	if (daqBlockNum == DAQ_NUM_DATA_BLOCKS_PER_SECOND - 1) {
         	dipc->bp[daqBlockNum].timeSec = ((unsigned int) cycle_gps_time - 1);

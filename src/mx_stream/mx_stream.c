@@ -250,8 +250,8 @@ do {
 		  dataBuff = (char *)(shmDataPtr[i] + lastCycle * buf_size);
 		  memcpy((void *)&mxDataBlock.mxDataBlock[0],dataBuff,mxDataBlock.mxIpcData.dataBlockSize);
 		  /// Calculate CRC checksum on data
-		  myCrc = crc_ptr((char *)&mxDataBlock.mxDataBlock[0],mxDataBlock.mxIpcData.dataBlockSize,0);
-		  myCrc = crc_len(mxDataBlock.mxIpcData.dataBlockSize,myCrc);
+		  myCrc = crc_ptr((char *)&mxDataBlock.mxDataBlock[0],shmIpcPtr[i]->bp[lastCycle].crc,0);
+		  myCrc = crc_len(shmIpcPtr[i]->bp[lastCycle].crc,myCrc);
 		  mxDataBlock.mxIpcData.bp[lastCycle].crc = myCrc;
 
 		  sendLength = header_size + mxDataBlock.mxIpcData.dataBlockSize;
