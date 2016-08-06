@@ -74,7 +74,8 @@ int ii,jj,kk;			/* Loop counters.			*/
 int status;			/* Return value from called routines.	*/
 unsigned int mydatatype;
 double dWord;			/* Temp value for storage of DAQ values */
-static int daqBlockNum;		/* 1-16, tracks DAQ block to write to.	*/
+static int daqBlockNum;		/* 1-16, tracks DAQ cycle.		*/
+static int daqXmitBlockNum;	/* 1-16, tracks shmem DAQ block to write to.	*/
 static int excBlockNum;		/* 1-16, tracks EXC block to read from.	*/
 static int excDataSize;
 static DAQ_XFER_INFO xferInfo;
@@ -83,7 +84,6 @@ static char *pDaqBuffer[DAQ_NUM_SWING_BUFFERS];	/* Pointers to local swing buffe
 static DAQ_LKUP_TABLE localTable[DCU_MAX_CHANNELS];
 static DAQ_LKUP_TABLE excTable[DCU_MAX_CHANNELS];
 static volatile char *pWriteBuffer;	/* Ptr to swing buff to write data	*/
-static volatile char *pReadBuffer;	/* Ptr to swing buff to xmit data to FB */
 static int phase;		/* 0-1, switches swing buffers.		*/
 static int daqSlot;		/* 0-sysRate, data slot to write data	*/
 static int excSlot;		/* 0-sysRate, slot to read exc data	*/
@@ -229,6 +229,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     /* First block to write out is last from previous second */
     phase = 0;
     daqBlockNum = (DAQ_NUM_DATA_BLOCKS - 1);
+    daqXmitBlockNum = 0;
     excBlockNum = 0;
 
     /// ** INITIALIZATION **************\n
@@ -247,7 +248,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     daqShmPtr = _daq_shm + CDS_DAQ_NET_DATA_OFFSET;
     buf_size = DAQ_DCU_BLOCK_SIZE*2;
     pWriteBuffer = (volatile char *)daqShmPtr;
-    pReadBuffer = (volatile char *)daqShmPtr;
+      pWriteBuffer += buf_size * 15;
     /// ----  Setup Ptr to interprocess comms with network driver
     dipc = (struct rmIpcStr *)(_daq_shm + CDS_DAQ_NET_IPC_OFFSET);
     /// ----  Setup Ptr to awgtpman shared memory (TP number table)
@@ -548,17 +549,13 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
         dipc->crc = xferInfo.fileCrc; /// -   ------ Checksum of the configuration file
         dipc->dataBlockSize = xferInfo.totalSizeNet; /// -   ------ Actual data size
         /// -   ------  Data block number
-        dipc->bp[daqBlockNum].cycle = daqBlockNum;
+        dipc->bp[daqXmitBlockNum].cycle = daqXmitBlockNum;
         /// -   ------  Data block CRC
-        dipc->bp[daqBlockNum].crc = xferInfo.crcLength;
+        dipc->bp[daqXmitBlockNum].crc = xferInfo.crcLength;
 	/// -   ------ Timestamp GPS Second
-	if (daqBlockNum == DAQ_NUM_DATA_BLOCKS_PER_SECOND - 1) {
-        	dipc->bp[daqBlockNum].timeSec = ((unsigned int) cycle_gps_time - 1);
-	} else {
-        	dipc->bp[daqBlockNum].timeSec = (unsigned int) cycle_gps_time;
-	}
-	/// -   ------ Timestamp GPS nanoSecond
-        dipc->bp[daqBlockNum].timeNSec = (unsigned int)daqBlockNum;
+	dipc->bp[daqXmitBlockNum].timeSec = (unsigned int) cycle_gps_time;
+	/// -   ------ Timestamp GPS nanoSecond - Actually cycle number
+        dipc->bp[daqXmitBlockNum].timeNSec = (unsigned int)daqXmitBlockNum;
 
         /// - ------ Write test point info to DAQ net shared memory
         tpPtr->count = validTpNet | validEx;
@@ -567,16 +564,15 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
         // As the last step set the cycle counter
         // Frame builder is looking for cycle change
 	/// - ------ Write IPC cycle number. This will trigger DAQ network driver to send data to DAQ
-        dipc->cycle =daqBlockNum; // Ready cycle (16 Hz)
-
+        dipc->cycle =daqXmitBlockNum; // Ready cycle (16 Hz)
 
       /// - -- Increment the 1/16 sec block counter
       daqBlockNum = (daqBlockNum + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+      daqXmitBlockNum = (daqXmitBlockNum + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
       /// - -- Set data write ptr to next block in shmem
       pWriteBuffer = (char *)daqShmPtr;
-      pWriteBuffer += buf_size * daqBlockNum;
-      pReadBuffer = pWriteBuffer;
+      pWriteBuffer += buf_size * daqXmitBlockNum;
 
       //  - -- Check for reconfig request at start of each second
       if((pInfo->reconfig == 1) && (daqBlockNum == 0))
