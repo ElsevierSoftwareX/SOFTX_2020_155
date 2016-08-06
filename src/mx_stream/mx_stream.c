@@ -327,7 +327,7 @@ again:
 		  mx_total_stats.accumulateNext(stats::cur_time() - lst); // finish the measurement
 		  cur_req = (cur_req + 1) % NUM_SREQ;
 		 // if(lastCycle == 15) myErrorSignal = 1;
-		  if(lastCycle == 15) shmIpcPtr[i]->status ^= mxStatBit[1];
+		  if(lastCycle == 0) shmIpcPtr[i]->status ^= mxStatBit[1];
 		}
 
 	} while(!myErrorSignal);
