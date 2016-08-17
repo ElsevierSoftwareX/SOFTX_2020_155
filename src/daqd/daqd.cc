@@ -77,6 +77,8 @@ using namespace std;
 #include <time.h>
 #include <string.h>
 
+#include "epics_pvs.hh"
+
 #ifdef USE_SYMMETRICOM
 #ifndef USE_IOP
 //#include <bcuser.h>
@@ -359,17 +361,21 @@ daqd_c::configure_channels_files ()
 
 #if EPICS_EDCU == 1
   /* Epics display */
-  extern unsigned int pvValue[1000];
-  pvValue[1] = daqd.num_channels
+  {
+    int chan_count_total = daqd.num_channels
 #ifdef GDS_TESTPOINTS
 	 - daqd.num_gds_channel_aliases
 #endif
 	- daqd.num_epics_channels;
-  pvValue[21] = daqd.num_science_channels
+    PV::set_pv(PV::PV_TOTAL_CHANS, chan_count_total);
+
+    int chan_count_science = daqd.num_science_channels
 #ifdef GDS_TESTPOINTS
 	 - daqd.num_gds_channel_aliases
 #endif
         - daqd.num_epics_channels;
+    PV::set_pv(PV::PV_SCIENCE_TOTAL_CHANS, chan_count_science);
+  }
 #endif
   system_log(1, "finished configuring data channels");
   return 0;
@@ -642,13 +648,17 @@ daqd_c::full_frame(int frame_length_seconds, int science,
 void *
 daqd_c::framer (int science)
 {
+  const int STATE_NORMAL = 0;
+  const int STATE_WRITTING = 1;
 // Set thread parameters
   if (science) {
       daqd_c::set_thread_priority("Science frame saver","dqscifr",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_CPUAFFINITY); 
   } else {
       daqd_c::set_thread_priority("Full frame saver","dqfulfr",SAVER_THREAD_PRIORITY,FULL_SAVER_CPUAFFINITY); 
   }
+  enum PV::PV_NAME epics_state_var = (science ? PV::PV_SCIENCE_FW_STATE : PV::PV_RAW_FW_STATE);
 
+  PV::set_pv(epics_state_var, STATE_NORMAL);
   unsigned long nac = 0; // Number of active channels
   long frame_cntr;
   int nb;
@@ -845,8 +855,7 @@ daqd_c::framer (int science)
       /* finish CRC calculation for the fast data */
 #if EPICS_EDCU == 1
       /* Send fast data CRC to Epics for display and checking */
-      extern unsigned int pvValue[1000];
-      pvValue[13] = crc_len (fast_data_length, fast_data_crc);
+    PV::set_pv(PV::PV_FAST_DATA_CRC, crc_len (fast_data_length, fast_data_crc));
 #endif
 
       if (eof_flag)
@@ -891,13 +900,17 @@ daqd_c::framer (int science)
       } else {
 	close (fd);
 	/*try*/ {
+
+      PV::set_pv(epics_state_var, STATE_WRITTING);
+          time_t t = 0;
+	  {
           FrameCPP::Common::FrameBuffer<filebuf>* obuf
 	    = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
           obuf -> open(_tmpf, std::ios::out | std::ios::binary);
           FrameCPP::Common::OFrameStream  ofs(obuf);
           ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
           DEBUG(1, cerr << "Begin WriteFrame()" << endl);
-	  time_t t = time(0);
+	  t = time(0);
           ofs.WriteFrame(frame, 
 			//FrameCPP::Version::FrVect::GZIP, 1,
                         daqd.no_compression? FrameCPP::FrVect::RAW:
@@ -906,16 +919,18 @@ daqd_c::framer (int science)
 			//FrameCPP::Version::FrVect::DEFAULT_GZIP_LEVEL, /* 6 */
 			FrameCPP::Common::CheckSum::CRC);
 
-	  t = time(0) - t;
-          DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
           ofs.Close();
           obuf->close();
+	  }
+	  t = time(0) - t;
+      PV::set_pv(epics_state_var, STATE_NORMAL);
+          DEBUG(1, cerr << (science ? "Science" : "Full") << " frame done in " << t << " seconds" << endl);
 #if EPICS_EDCU == 1
       /* Record frame write time */ 
           if (science) {
-              pvValue[24] = t;
+              PV::set_pv(PV::PV_SCIENCE_FRAME_WRITE_SEC, t);
           } else {
-              pvValue[23] = t;
+              PV::set_pv(PV::PV_FRAME_WRITE_SEC, t);
           }
 #endif
 	  if (rename(_tmpf, tmpf)) {
@@ -946,16 +961,16 @@ daqd_c::framer (int science)
               system_log(1, "failed to fstat file; errno %d", errno);
               exit(1);
             }
-	    if (science) pvValue[20] = sb.st_size;
-	    else pvValue[19] = sb.st_size;
+        if (science) PV::set_pv(PV::PV_SCIENCE_FRAME_SIZE, sb.st_size);
+        else PV::set_pv(PV::PV_FRAME_SIZE, sb.st_size);
 	    close(fd);
 	  }
 
 	  // Update the EPICS_SAVED value
 	  if (!science) {
-  	 	 pvValue[18] = nac;
+         PV::set_pv(PV::PV_CHANS_SAVED, nac);
 	  } else {
-  	 	 pvValue[22] = nac;
+         PV::set_pv(PV::PV_SCIENCE_CHANS_SAVED, nac);
 	  }
 
 #ifndef NO_BROADCAST
@@ -1046,14 +1061,12 @@ daqd_c::framer (int science)
 #if EPICS_EDCU == 1
       if (!science) {
         /* Epics display: full res data look back size in seconds */
-        extern unsigned int pvValue[1000];
-        pvValue[7] = fsd.get_max() - fsd.get_min();
+        PV::set_pv(PV::PV_LOOKBACK_FULL, fsd.get_max() - fsd.get_min());
       }
 
       if (science) {
         /* Epics display: current full frame saving directory */
-        extern unsigned int pvValue[1000];
-        pvValue[8] = science_fsd.get_cur_dir();
+          PV::set_pv(PV::PV_LOOKBACK_DIR, science_fsd.get_cur_dir());
       }
 #endif
 
@@ -1100,166 +1113,21 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
     return 1;
   }
 
-  int s = daqd.block_size / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-  if (s < 128*1024) s = 128*1024;
-#ifdef USE_BROADCAST
-  // Broadcast has 4096 byte header, so we allocate space for it here
-  s += BROADCAST_HEADER_SIZE;
-  // Broadcast needs extra room for its own header
-  s += 100*1024;
-#endif
-  move_buf = (unsigned char *) malloc (s);
-  if (! move_buf) {
-    system_log(1,"out of memory allocating move buffer");
-    exit (1);
-  }
-  memset (move_buf, 255, s);
-  printf("Allocated move buffer size %d bytes\n", s);
-#ifdef USE_BROADCAST
-  move_buf += BROADCAST_HEADER_SIZE; // Keep broadcast header space in front of data space
-#endif
-
-  unsigned long  status_ptr = block_size - 17 * sizeof(int) * num_channels;   // Index to the start of signal status memory area
-
-#ifdef EDCU_SHMEM
-  key_t shmak = ftok("/tmp/foo",0);
-  if (shmak == -1) {
-    system_log(1,"couldn't do ftok(); errno=%d", errno);
-    exit(1);
-  }
-
-  int shmid = shmget(shmak, edcu_chan_idx[1] - edcu_chan_idx[0] + 8, IPC_CREAT);
-  if (shmid == -1) {
-    system_log(1,"couldn't do shmget(); errno=%d", errno);
-    exit(1);
-  }
-
-  edcu_shptr = (unsigned char *)shmat(shmid, 0,0);
-  if (edcu_shptr == (unsigned char *)-1) {
-    system_log(1,"couldn't do shmat(); errno=%d", errno);
-    exit(1);
-  }
-
-  /* Set bad status for all EDCU channels in the shared memory */
-  for (int i = 0; i < (edcu_chan_idx[1] - edcu_chan_idx[0])/8 + 1; i+=2) {
-    ((unsigned int *) edcu_shptr)[i] = 0xbad;
-  }
-
-#endif
-
-  int cur_dcu = -1;
-  for (int i = 0; i < num_channels + 1; i++) {
-    int t = 0;
-    if (i == num_channels) t = 1;
-    else t = cur_dcu != -1 && cur_dcu != channels[i].dcu_id;
-
-    // Finished with cur_dcu: channels sorted by dcu_id
-#ifdef USE_BROADCAST
-    if (IS_MYRINET_DCU(cur_dcu) && t) {
-	int rate = 4 * dcuRate[0][cur_dcu];
-	int tp_size = rate/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-	int n_add = DAQ_GDS_MAX_TP_ALLOWED;
-
-	int actual = 2*DAQ_DCU_BLOCK_SIZE / tp_size;
-	if (actual < n_add) n_add = actual;
-
-	for (int j = 0; j < n_add; j++) {
-          vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + dcuTPOffsetRmem[0][cur_dcu] + j*tp_size;
-          vmic_pv [vmic_pv_len].dest_vec_idx = dcuTPOffset[0][cur_dcu] + j*tp_size*DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-          vmic_pv [vmic_pv_len].dest_status_idx = 0xffffffff;
-          static unsigned int zero = 0;
-          vmic_pv [vmic_pv_len].src_status_addr = &zero;
-          vmic_pv [vmic_pv_len].vec_len = tp_size;
-    	  DEBUG(10, cerr << "Myrinet testpoint " << j << endl);
-    	  DEBUG(10, cerr << "vmic_pv: " << hex << (unsigned long) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
-	  vmic_pv_len++;
-	}
-    }
-#else
-    if (IS_MYRINET_DCU(cur_dcu) && t) {
-	// Add testpoints
-	int rate = 4 * dcuRate[0][cur_dcu];
-	int tp_size = rate/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-	int n_add = (2*DAQ_DCU_BLOCK_SIZE - dcuDAQsize[0][cur_dcu]) / tp_size;
-        if (n_add > DAQ_GDS_MAX_TP_ALLOWED) n_add = DAQ_GDS_MAX_TP_ALLOWED;
-	for (int j = 0; j < n_add; j++) {
-          vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + dcuTPOffsetRmem[0][cur_dcu] + j*tp_size;
-          vmic_pv [vmic_pv_len].dest_vec_idx = dcuTPOffset[0][cur_dcu] + j*tp_size*DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-          vmic_pv [vmic_pv_len].dest_status_idx = 0xffffffff;
-          static unsigned int zero = 0;
-          vmic_pv [vmic_pv_len].src_status_addr = &zero;
-          vmic_pv [vmic_pv_len].vec_len = rate/16;
-    	DEBUG(10, cerr << "Myrinet testpoint " << j << endl);
-    	DEBUG(10, cerr << "vmic_pv: " << hex << (long int) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
-	  vmic_pv_len++;
-	}
-    }
-#endif
-    if (i == num_channels) continue;
-    cur_dcu = channels[i].dcu_id;
-
-#ifdef GDS_TESTPOINTS
-    // Skip alias channels, they are not physical signals
-    if (channels [i].gds & 2) {
-      continue;
-    }
-#endif
-
-#ifdef EDCU_SHMEM
-    if (channels [i].dcu_id == ADCU_PMC_40_ID) {
-      /* Slow channels point into shared memory partition */
-      vmic_pv [vmic_pv_len].src_pvec_addr = edcu_shptr + channels [i].rm_offset - edcu_chan_idx[0];
-    } else {
-      vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + channels [i].rm_offset;
-    }
-#else
-    vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + channels [i].rm_offset;
-    vmic_pv [vmic_pv_len].dest_vec_idx = channels [i].offset;
-    vmic_pv [vmic_pv_len].dest_status_idx = status_ptr + 17 * sizeof(int) * i;
-#if EPICS_EDCU == 1
-    if (IS_EPICS_DCU(channels [i].dcu_id)) {
-      vmic_pv [vmic_pv_len].src_status_addr = edcu1.channel_status + i;
-    } else
-#endif
-#ifdef USE_BROADCAST
-    // Zero out the EXC status as well
-    if (IS_TP_DCU(channels [i].dcu_id) || IS_EXC_DCU(channels [i].dcu_id)) 
-#else
-    if (IS_EXC_DCU(channels [i].dcu_id)) {
-      /* The AWG DCUs are using older data format with status word included in front of the data */
-      vmic_pv [vmic_pv_len].src_status_addr = (unsigned int *)(vmic_pv[vmic_pv_len].src_pvec_addr - 4);
-    } else if (IS_TP_DCU(channels [i].dcu_id)) 
-#endif
-    {
-      /* :TODO: need to pass real DCU status depending on the current test point selection */
-      static unsigned int zero = 0;
-      vmic_pv [vmic_pv_len].src_status_addr = &zero;
-    } else {
-      vmic_pv [vmic_pv_len].src_status_addr = dcuStatus[channels [i].ifoid] + channels [i].dcu_id;
-    }
-#endif
-    vmic_pv [vmic_pv_len].vec_len = channels [i].bytes/16;
-    // Byteswap all Myrinet data on Sun
-    vmic_pv [vmic_pv_len].bsw = 0;
-    DEBUG(10, cerr << channels [i].name << endl);
-    DEBUG(10, cerr << "vmic_pv: " << hex << (unsigned long) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
-    vmic_pv_len++;
-  }
-
 #if EPICS_EDCU == 1
   /* Epics display (Kb/Sec) */
-  extern unsigned int pvValue[1000];
 
-  // Want to have the size of DAQ data only
-  pvValue[2] = 0;
-  for (int i = 0; i < 2; i++) // Ifo number
-     for (int j = 0; j < DCU_COUNT; j++)
-          pvValue[2] += dcuDAQsize[i][j];
-  pvValue[2] *= 16;
-  pvValue[2] /= 1024; // make it kilobytes
-
+  {
+      unsigned int data_rate = 0;
+      // Want to have the size of DAQ data only
+      for (int i = 0; i < 2; i++) // Ifo number
+         for (int j = 0; j < DCU_COUNT; j++)
+              data_rate += dcuDAQsize[i][j];
+      data_rate *= 16;
+      data_rate /= 1024; // make it kilobytes
+      PV::set_pv(PV::PV_DATA_RATE, data_rate);
+  }
   /* Epics display: memory buffer look back */
-  pvValue[6] = main_buffer_size;
+  PV::set_pv(PV::PV_LOOKBACK_RAM, main_buffer_size);
 #endif
 
   return 0;
@@ -1349,9 +1217,6 @@ int
 daqd_c::start_frame_saver (ostream *yyout, int science)
 {
   assert (b1);
-#if EPICS_EDCU == 1
-  extern unsigned int pvValue[1000];
-#endif
   int cn = 0;
   if ((cn = b1 -> add_consumer ()) >= 0)
     {
@@ -1396,6 +1261,162 @@ daqd_c::start_frame_saver (ostream *yyout, int science)
       return 1;
     }
   return 0;
+}
+
+void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_dpvec *vmic_pv)
+{
+    int vmic_pv_len = 0;
+    unsigned char *move_buf = 0;
+
+    locker mon(this);
+
+    int s = daqd.block_size / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+    if (s < 128*1024) s = 128*1024;
+  #ifdef USE_BROADCAST
+    // Broadcast has 4096 byte header, so we allocate space for it here
+    s += BROADCAST_HEADER_SIZE;
+    // Broadcast needs extra room for its own header
+    s += 100*1024;
+  #endif
+    move_buf = (unsigned char *) malloc (s);
+    if (! move_buf) {
+      system_log(1,"out of memory allocating move buffer");
+      exit (1);
+    }
+    memset (move_buf, 255, s);
+    printf("Allocated move buffer size %d bytes\n", s);
+  #ifdef USE_BROADCAST
+    move_buf += BROADCAST_HEADER_SIZE; // Keep broadcast header space in front of data space
+  #endif
+
+    unsigned long  status_ptr = block_size - 17 * sizeof(int) * num_channels;   // Index to the start of signal status memory area
+
+#ifdef EDCU_SHMEM
+  key_t shmak = ftok("/tmp/foo",0);
+  if (shmak == -1) {
+    system_log(1,"couldn't do ftok(); errno=%d", errno);
+    exit(1);
+  }
+
+  int shmid = shmget(shmak, edcu_chan_idx[1] - edcu_chan_idx[0] + 8, IPC_CREAT);
+  if (shmid == -1) {
+    system_log(1,"couldn't do shmget(); errno=%d", errno);
+    exit(1);
+  }
+
+  edcu_shptr = (unsigned char *)shmat(shmid, 0,0);
+  if (edcu_shptr == (unsigned char *)-1) {
+    system_log(1,"couldn't do shmat(); errno=%d", errno);
+    exit(1);
+  }
+
+  /* Set bad status for all EDCU channels in the shared memory */
+  for (int i = 0; i < (edcu_chan_idx[1] - edcu_chan_idx[0])/8 + 1; i+=2) {
+    ((unsigned int *) edcu_shptr)[i] = 0xbad;
+  }
+
+#endif
+
+  int cur_dcu = -1;
+  for (int i = 0; i < num_channels + 1; i++) {
+    int t = 0;
+    if (i == num_channels) t = 1;
+    else t = cur_dcu != -1 && cur_dcu != channels[i].dcu_id;
+
+    // Finished with cur_dcu: channels sorted by dcu_id
+#ifdef USE_BROADCAST
+    if (IS_MYRINET_DCU(cur_dcu) && t) {
+        int rate = 4 * dcuRate[0][cur_dcu];
+        int tp_size = rate/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+        int n_add = DAQ_GDS_MAX_TP_ALLOWED;
+
+        int actual = 2*DAQ_DCU_BLOCK_SIZE / tp_size;
+        if (actual < n_add) n_add = actual;
+
+        for (int j = 0; j < n_add; j++) {
+          vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + dcuTPOffsetRmem[0][cur_dcu] + j*tp_size;
+          vmic_pv [vmic_pv_len].dest_vec_idx = dcuTPOffset[0][cur_dcu] + j*tp_size*DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+          vmic_pv [vmic_pv_len].dest_status_idx = 0xffffffff;
+          static unsigned int zero = 0;
+          vmic_pv [vmic_pv_len].src_status_addr = &zero;
+          vmic_pv [vmic_pv_len].vec_len = tp_size;
+          DEBUG(10, cerr << "Myrinet testpoint " << j << endl);
+          DEBUG(10, cerr << "vmic_pv: " << hex << (unsigned long) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
+          vmic_pv_len++;
+        }
+    }
+#else
+    if (IS_MYRINET_DCU(cur_dcu) && t) {
+        // Add testpoints
+        int rate = 4 * dcuRate[0][cur_dcu];
+        int tp_size = rate/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+        int n_add = (2*DAQ_DCU_BLOCK_SIZE - dcuDAQsize[0][cur_dcu]) / tp_size;
+        if (n_add > DAQ_GDS_MAX_TP_ALLOWED) n_add = DAQ_GDS_MAX_TP_ALLOWED;
+        for (int j = 0; j < n_add; j++) {
+          vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + dcuTPOffsetRmem[0][cur_dcu] + j*tp_size;
+          vmic_pv [vmic_pv_len].dest_vec_idx = dcuTPOffset[0][cur_dcu] + j*tp_size*DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+          vmic_pv [vmic_pv_len].dest_status_idx = 0xffffffff;
+          static unsigned int zero = 0;
+          vmic_pv [vmic_pv_len].src_status_addr = &zero;
+          vmic_pv [vmic_pv_len].vec_len = rate/16;
+        DEBUG(10, cerr << "Myrinet testpoint " << j << endl);
+        DEBUG(10, cerr << "vmic_pv: " << hex << (long int) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
+          vmic_pv_len++;
+        }
+    }
+#endif
+    if (i == num_channels) continue;
+    cur_dcu = channels[i].dcu_id;
+
+#ifdef GDS_TESTPOINTS
+    // Skip alias channels, they are not physical signals
+    if (channels [i].gds & 2) {
+      continue;
+    }
+#endif
+
+#ifdef EDCU_SHMEM
+    if (channels [i].dcu_id == ADCU_PMC_40_ID) {
+      /* Slow channels point into shared memory partition */
+      vmic_pv [vmic_pv_len].src_pvec_addr = edcu_shptr + channels [i].rm_offset - edcu_chan_idx[0];
+    } else {
+      vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + channels [i].rm_offset;
+    }
+#else
+    vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + channels [i].rm_offset;
+    vmic_pv [vmic_pv_len].dest_vec_idx = channels [i].offset;
+    vmic_pv [vmic_pv_len].dest_status_idx = status_ptr + 17 * sizeof(int) * i;
+#if EPICS_EDCU == 1
+    if (IS_EPICS_DCU(channels [i].dcu_id)) {
+      vmic_pv [vmic_pv_len].src_status_addr = edcu1.channel_status + i;
+    } else
+#endif
+#ifdef USE_BROADCAST
+    // Zero out the EXC status as well
+    if (IS_TP_DCU(channels [i].dcu_id) || IS_EXC_DCU(channels [i].dcu_id))
+#else
+    if (IS_EXC_DCU(channels [i].dcu_id)) {
+      /* The AWG DCUs are using older data format with status word included in front of the data */
+      vmic_pv [vmic_pv_len].src_status_addr = (unsigned int *)(vmic_pv[vmic_pv_len].src_pvec_addr - 4);
+    } else if (IS_TP_DCU(channels [i].dcu_id))
+#endif
+    {
+      /* :TODO: need to pass real DCU status depending on the current test point selection */
+      static unsigned int zero = 0;
+      vmic_pv [vmic_pv_len].src_status_addr = &zero;
+    } else {
+      vmic_pv [vmic_pv_len].src_status_addr = dcuStatus[channels [i].ifoid] + channels [i].dcu_id;
+    }
+#endif
+    vmic_pv [vmic_pv_len].vec_len = channels [i].bytes/16;
+    // Byteswap all Myrinet data on Sun
+    vmic_pv [vmic_pv_len].bsw = 0;
+    DEBUG(10, cerr << channels [i].name << endl);
+    DEBUG(10, cerr << "vmic_pv: " << hex << (unsigned long) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
+    vmic_pv_len++;
+  }
+  *_move_buf = move_buf;
+  *_vmic_pv_len = vmic_pv_len;
 }
 
 #if 0
@@ -1753,6 +1774,19 @@ open_mx();
 
   if ((stf = open (startup_fname, O_RDONLY)) >= 0)
     {
+#ifdef USE_GM
+      cerr << "daqd built with USE_GM" << endl;
+#endif
+#ifdef USE_MX
+      cerr << "daqd built with USE_MX" << endl;
+#endif
+#ifdef USE_UDP
+      cerr << "daqd built with USE_UDP" << endl;
+#endif
+#ifdef USE_BROADCAST
+      cerr << "daqd built with USE_BROADCAST" << endl;
+#endif
+
       pthread_attr_t attr;
       pthread_attr_init (&attr);
       pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
@@ -1829,6 +1863,14 @@ shutdown_server ()
 }
 
 void regerr() { abort();};
+/*
+ * This is a funny way of doing this, as the target platforms for daqd currently
+ * support regexp.h, but it is also being developed on systems that do not.
+ * So for now the goal is to allow it to work with the old depricated (but tested in
+ * production) code unless it cannot.
+ */
+#ifdef HAVE_REGEXP_H
+
 #define ESIZE 1024
 char ipexpbuf [ESIZE];
 char dec_num_expbuf [ESIZE];
@@ -1978,13 +2020,45 @@ daqd_c::is_valid_ip_address (char *str)
   return step (str, ipexpbuf);
 }
 
+#else
+#ifdef HAVE_REGEX_H
+
+/* this code replaces the depricated regexp.h code, but still needs to be tested */
+
+regex_t ip_regex;
+//regex_t dec_num_regex;
+
+char *ipregexp ="^([0-9]\\{1,3\\}\\.)\\{3\\}[0-9]\\{1,3\\}$";
+//char *dec_num_regexp = "^[0-9]\\{1,\\}$";
+
+
+void
+daqd_c::compile_regexp ()
+{
+  (void)regcomp(&ip_regex, ipregexp, REG_NOSUB);
+  //(void)regcomp(&dec_num_regex, dec_num_regexp, REG_NOSUB);
+}
+
+/// See if the IP address is valid
+int
+daqd_c::is_valid_ip_address (char *str)
+{
+  return regexec(&ip_regex, str, 0, NULL, 0) == 0;
+}
+
+
+
+#else
+#error Some form of regexp is still required, either <regexp.h> (depricated) or <regex.h>
+#endif
+#endif
+
 int
 daqd_c::is_valid_dec_number (char *str)
 {
-  // Somehow the regular expression stuff is broken on amd64 linux... 
+  // Somehow the regular expression stuff is broken on amd64 linux...
   char *endptr;
   long int res = strtol(str, &endptr, 10);
   return endptr == (str + strlen(str));
   //return step (str, dec_num_expbuf);
 }
-

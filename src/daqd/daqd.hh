@@ -69,22 +69,24 @@ using namespace std;
 #if EPICS_EDCU == 1
 #include "edcu.hh"
 #include "epicsServer.hh"
-/// Epics IOC variable storage
-extern unsigned int pvValue[1000];
+#include "epics_pvs.hh"
 #endif
 
 /// Define real-time thread priorities (mx receiver highest, producer next, frame savers lowest)
 #define MX_THREAD_PRIORITY 10
 #define PROD_THREAD_PRIORITY 5
+#define PROD_CRC_THREAD_PRIORITY 5
 #define SAVER_THREAD_PRIORITY 2
 #if defined(USE_BROADCAST)
 #define PROD_CPUAFFINITY 0
+#define PROD_CRC_CPUAFFINITY 0
 #define FULL_SAVER_CPUAFFINITY 0
 #define SCIENCE_SAVER_CPUAFFINITY 0
 #define SECOND_SAVER_CPUAFFINITY 0
 #define MINUTE_SAVER_CPUAFFINITY 0
 #else
 #define PROD_CPUAFFINITY 0
+#define PROD_CRC_CPUAFFINITY 0
 #define FULL_SAVER_CPUAFFINITY 0
 #define SCIENCE_SAVER_CPUAFFINITY 0
 #define SECOND_SAVER_CPUAFFINITY 0
@@ -317,6 +319,9 @@ class daqd_c {
   int start_edcu (ostream *);
   int start_epics_server (ostream *, char *, char *, char *);
 #endif
+
+  void initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, struct put_dpvec *vmic_pv);
+
   sem_t frame_saver_sem;
   sem_t science_frame_saver_sem;
 
@@ -365,9 +370,6 @@ class daqd_c {
 
   int           data_feeds;             /* The number of data feeds: 1 -default; 2 -Hanford (2 ifos) */
 
-  unsigned char *move_buf;
-  int vmic_pv_len;
-  struct put_dpvec vmic_pv [max_channels];
   unsigned int  dcu_status_check;       /* 1 - check ifo 0; 2- ifo 1; 3 - both; 0 - none */
 
   inline static int
@@ -459,18 +461,18 @@ inline static void set_thread_priority (char *thread_name, char *thread_abbrev, 
 
   void set_fault () { 
 #if EPICS_EDCU == 1
-	pvValue[14] = 1;
+    PV::set_pv(PV::PV_FAULT, 1);
 #endif
 	_exit(1);
   }
   void clear_fault () {
 #if EPICS_EDCU == 1
-	pvValue[14] = 0;
+    PV::set_pv(PV::PV_FAULT, 0);
 #endif
   }
   int is_fault () {
 #if EPICS_EDCU == 1
-	return pvValue[14];
+    return PV::pv(PV::PV_FAULT);
 #else
 	return 0;
 #endif

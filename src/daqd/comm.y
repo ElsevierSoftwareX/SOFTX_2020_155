@@ -45,6 +45,7 @@ using namespace std;
 #include "asDbLib.h"
 #include "iocInit.h"
 #include "iocsh.h"
+#include "epics_pvs.hh"
 //extern "C" int softIoc_registerRecordDeviceDriver(struct dbBase *);
 #endif
 
@@ -1956,14 +1957,14 @@ status_channels_bailout:
 	}
 	| SYNC  FRAME_SAVER {
 #if EPICS_EDCU == 1
-	   pvValue[5] = 0;
-	   pvValue[0] = 0;
+       PV::set_pv(PV::PV_UPTIME_SECONDS, 0);
+       PV::set_pv(PV::PV_CYCLE, 0);
 #endif
 	   // Command is used to sync with the `start frame-saver'
 	   for (;sem_trywait (&daqd.frame_saver_sem);) {
 #if EPICS_EDCU == 1
-	     //pvValue[5]++;
-	     pvValue[0]++;
+         //PV::pv(PV::PV_UPTIME_SECONDS)++;
+           PV::pv(PV::PV_CYCLE)++;
 #endif
 	     system_log(1, "waiting on frame_saver semaphore");
 	     sleep(1);
@@ -2025,13 +2026,13 @@ status_channels_bailout:
 	}
 	| SYNC  TREND_FRAME_SAVER {
 #if EPICS_EDCU == 1
-	   //pvValue[5] = 1000;
+       //PV::set_pv(PV::PV_UPTIME_SECONDS, 1000);
 #endif
 	   // Command is used to sync with the `start trend-frame-saver'
 	   for (;sem_trywait (&daqd.trender.frame_saver_sem);) {
 #if EPICS_EDCU == 1
-	     //pvValue[5]++;
-	     pvValue[0]++;
+         //PV::pv(PV::PV_UPTIME_SECONDS)++;
+         PV::pv(PV::PV_CYCLE)++;
 #endif
 	     sleep(1);
 	   }
@@ -2039,13 +2040,13 @@ status_channels_bailout:
 	}
 	| SYNC  MINUTE_TREND_FRAME_SAVER {
 #if EPICS_EDCU == 1
-	   //pvValue[5] = 2000;
+       //PV::set_pv(PV::PV_UPTIME_SECONDS, 2000)
 #endif
 	   // Command is used to sync with the `start minute-trend-frame-saver'
 	   for (;sem_trywait (&daqd.trender.minute_frame_saver_sem);) {
 #if EPICS_EDCU == 1
-	     //pvValue[5]++;
-	     pvValue[0]++;
+           //PV::pv(PV::PV_UPTIME_SECONDS)++;
+           PV::pv(PV::PV_CYCLE)++;
 #endif
 	     sleep(1);
 	   }
