@@ -82,7 +82,11 @@ pvInfo exServer::pvList[] = {
     pvInfo (1, "PRDCR_CRC_TIME_XFER_MAX_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_CRC_TIME_XFER_MAX_MS),
     pvInfo (1, "PROFILER_FREE_SEGMENTS_MAIN_BUF", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PROFILER_FREE_SEGMENTS_MAIN_BUF),
     pvInfo (1, "RAW_FW_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_RAW_FW_STATE),
+    pvInfo (1, "RAW_FW_DATA_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_RAW_FW_DATA_STATE),
+    pvInfo (1, "RAW_FW_DATA_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_RAW_FW_DATA_SEC),
     pvInfo (1, "SCIENCE_FW_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_FW_STATE),
+    pvInfo (1, "SCIENCE_FW_DATA_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_FW_DATA_STATE),
+    pvInfo (1, "SCIENCE_FW_DATA_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_FW_DATA_SEC),
     pvInfo (1, "STREND_FW_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_STREND_FW_STATE),
     pvInfo (1, "MTREND_FW_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_MTREND_FW_STATE)
 };

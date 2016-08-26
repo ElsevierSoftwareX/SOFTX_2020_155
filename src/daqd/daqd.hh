@@ -77,20 +77,31 @@ using namespace std;
 #define PROD_THREAD_PRIORITY 5
 #define PROD_CRC_THREAD_PRIORITY 5
 #define SAVER_THREAD_PRIORITY 2
-#if defined(USE_BROADCAST)
-#define PROD_CPUAFFINITY 0
-#define PROD_CRC_CPUAFFINITY 0
-#define FULL_SAVER_CPUAFFINITY 0
-#define SCIENCE_SAVER_CPUAFFINITY 0
-#define SECOND_SAVER_CPUAFFINITY 0
-#define MINUTE_SAVER_CPUAFFINITY 0
+
+#if 0
+#define PROD_CPUAFFINITY 2
+#define PROD_CRC_CPUAFFINITY 3
+#define FULL_SAVER_CPUAFFINITY 4
+#define FULL_SAVER_IO_CPUAFFINITY 6
+#define SCIENCE_SAVER_CPUAFFINITY 5
+#define SCIENCE_SAVER_IO_CPUAFFINITY 7
+#define SECOND_SAVER_CPUAFFINITY 14
+#define MINUTE_SAVER_CPUAFFINITY 15
+#define SECOND_TRENDER_CPUAFFINITY 16
+#define MINUTE_TRENDER_CPUAFFINITY 17
+#define SECOND_TREND_WORKER_CPUAFFINITY 18
 #else
 #define PROD_CPUAFFINITY 0
 #define PROD_CRC_CPUAFFINITY 0
 #define FULL_SAVER_CPUAFFINITY 0
+#define FULL_SAVER_IO_CPUAFFINITY 0
 #define SCIENCE_SAVER_CPUAFFINITY 0
+#define SCIENCE_SAVER_IO_CPUAFFINITY 0
 #define SECOND_SAVER_CPUAFFINITY 0
 #define MINUTE_SAVER_CPUAFFINITY 0
+#define SECOND_TRENDER_CPUAFFINITY 0
+#define MINUTE_TRENDER_CPUAFFINITY 0
+#define SECOND_TREND_WORKER_CPUAFFINITY 0
 #endif
 
 /// Define max boards, endpoints for mx_rcvr
@@ -102,6 +113,7 @@ typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
 #else
 typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
 #endif
+
 
 /// Daqd server main class. This is a top-level class, which encloses various objects
 /// representing threads of execution.
@@ -116,7 +128,8 @@ class daqd_c {
   };
 
  private:
-
+    void *_framer_work_queue;
+    void *_science_framer_work_queue;
   /*
     Locking on the instance of the class can be done with the
     scoped locking.
@@ -141,7 +154,9 @@ class daqd_c {
   };
 
  public:
-  daqd_c () :
+  daqd_c () :\
+    _framer_work_queue(0),
+    _science_framer_work_queue(0),
     b1 (0), producer1 (0),
     num_channels (0),
     num_active_channels (0),
@@ -161,6 +176,8 @@ class daqd_c {
 
     frame_saver_tid(0),
     science_frame_saver_tid(0),
+    frame_saver_io_tid(0),
+    science_frame_saver_io_tid(0),
     data_feeds(1),
     dcu_status_check(0),
 
@@ -288,10 +305,14 @@ class daqd_c {
   int cnum; ///< Consumer number for the frame saver
   int science_cnum; ///< Consumer number for the science frame saver 
   void *framer (int); ///< Full resolution frames saver thread
+  void *framer_io (int); ///< IO for the full resolution frame saver
   static void *framer_static (void *a) { return ((daqd_c *)a) -> framer (0); };
   /// Science-mode frame saver thread.
   static void *science_framer_static (void *a) { return ((daqd_c *)a) -> framer (1); };
-
+  /// framer io thread
+  static void *framer_io_static (void *a) { return ((daqd_c *)a) -> framer_io(0); };
+  /// science-mode frame saver io thread
+  static void *science_framer_io_static (void *a) { return ((daqd_c *)a) -> framer_io(1); };
 
 #ifdef GDS_TESTPOINTS
   int num_gds_channels;
@@ -327,6 +348,8 @@ class daqd_c {
 
   pthread_t frame_saver_tid;
   pthread_t science_frame_saver_tid;
+  pthread_t frame_saver_io_tid;
+  pthread_t science_frame_saver_io_tid;
 
   long writer_sleep_usec; /* pause in usecs for the main producer (-s option) */
   long main_buffer_size; ///< number of blocks in main circular buffer 

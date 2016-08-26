@@ -58,6 +58,7 @@
 #endif
 #include <fstream>
 #include <vector>
+#include <memory>
 
 using namespace std;
 
@@ -78,6 +79,7 @@ using namespace std;
 #include <string.h>
 
 #include "epics_pvs.hh"
+#include "work_queue.hh"
 
 #ifdef USE_SYMMETRICOM
 #ifndef USE_IOP
@@ -85,6 +87,23 @@ using namespace std;
 #include <../drv/symmetricom/symmetricom.h>
 #endif
 #endif
+
+namespace {
+    struct framer_buf {
+        daqd_c::adc_data_ptr_type dptr;
+        ldas_frame_h_type frame;
+        time_t gps, gps_n;
+        unsigned long nac;
+        int frame_file_length_seconds;
+        unsigned int frame_number;
+        int dir_num;
+        // buffers for filenames
+        char tmpf [filesys_c::filename_max + 10];
+        char _tmpf [filesys_c::filename_max + 10];
+    };
+
+    typedef work_queue::work_queue<framer_buf> framer_work_queue;
+}
 
 /// Helper function to deal with the archive channels.
 int
@@ -644,21 +663,212 @@ daqd_c::full_frame(int frame_length_seconds, int science,
   return frame;
 }
 
+/// IO Thread for the full resolution frame saver
+/// This is the thread that does the actual writing
+void *
+daqd_c::framer_io(int science)
+{
+   const int STATE_NORMAL = 0;
+   const int STATE_WRITING = 1;
+   const int STATE_BROADCAST = 2;
+
+   framer_work_queue *_work_queue = 0;
+   if (science) {
+       daqd_c::set_thread_priority("Science frame saver IO","dqscifrio",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_IO_CPUAFFINITY);
+       daqd_c::locker(this);
+       _work_queue = reinterpret_cast<framer_work_queue*>(_science_framer_work_queue);
+   } else {
+       daqd_c::set_thread_priority("Frame saver IO","dqfulfrio",SAVER_THREAD_PRIORITY,FULL_SAVER_IO_CPUAFFINITY);
+       daqd_c::locker(this);
+       _work_queue = reinterpret_cast<framer_work_queue*>(_framer_work_queue);
+   }
+   enum PV::PV_NAME epics_state_var = (science ? PV::PV_SCIENCE_FW_STATE : PV::PV_RAW_FW_STATE);
+
+   PV::set_pv(epics_state_var, STATE_NORMAL);
+   for (long frame_cntr = 0;; frame_cntr++) {
+       framer_buf *cur_buf = _work_queue->get_from_queue(1);
+
+       DEBUG(1, cerr << "About to write " << (science ? "science" : "full") << " frame @" << cur_buf->gps << endl);
+       if (science) {
+           cur_buf->dir_num = science_fsd.getDirFileNames (cur_buf->gps,
+                                                           cur_buf->_tmpf,
+                                                           cur_buf->tmpf,
+                                                           frames_per_file,
+                                                           blocks_per_frame);
+       } else {
+           cur_buf->dir_num = fsd.getDirFileNames (cur_buf->gps,
+                                                   cur_buf->_tmpf,
+                                                   cur_buf->tmpf,
+                                                   frames_per_file,
+                                                   blocks_per_frame);
+       }
+
+
+       int fd = creat (cur_buf->_tmpf, 0644);
+       if (fd < 0) {
+           system_log(1, "Couldn't open full frame file `%s' for writing; errno %d", cur_buf->_tmpf, errno);
+           if (science) {
+               science_fsd.report_lost_frame ();
+           } else {
+               fsd.report_lost_frame ();
+           }
+           set_fault ();
+       } else {
+           close (fd);
+           /*try*/
+           {
+
+               PV::set_pv(epics_state_var, STATE_WRITING);
+               time_t t = 0;
+               {
+                   FrameCPP::Common::FrameBuffer<filebuf>* obuf
+                            = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
+                   obuf -> open(cur_buf->_tmpf, std::ios::out | std::ios::binary);
+                   FrameCPP::Common::OFrameStream  ofs(obuf);
+                   ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
+                   DEBUG(1, cerr << "Begin WriteFrame()" << endl);
+                   t = time(0);
+                   ofs.WriteFrame(cur_buf->frame,
+                            //FrameCPP::Version::FrVect::GZIP, 1,
+                            daqd.no_compression? FrameCPP::FrVect::RAW:
+                            FrameCPP::FrVect::ZERO_SUPPRESS_OTHERWISE_GZIP, 1,
+                            //FrameCPP::Compression::MODE_ZERO_SUPPRESS_SHORT,
+                            //FrameCPP::Version::FrVect::DEFAULT_GZIP_LEVEL, /* 6 */
+                            FrameCPP::Common::CheckSum::CRC);
+
+                   ofs.Close();
+                   obuf->close();
+               }
+               t = time(0) - t;
+               PV::set_pv(epics_state_var, STATE_NORMAL);
+               DEBUG(1, cerr << (science ? "Science" : "Full") << " frame done in " << t << " seconds" << endl);
+               /* Record frame write time */
+               if (science) {
+                   PV::set_pv(PV::PV_SCIENCE_FRAME_WRITE_SEC, t);
+               } else {
+                   PV::set_pv(PV::PV_FRAME_WRITE_SEC, t);
+               }
+
+               if (rename(cur_buf->_tmpf, cur_buf->tmpf)) {
+                   system_log(1, "failed to rename file; errno %d", errno);
+                   if (science) {
+                       science_fsd.report_lost_frame ();
+                   } else {
+                       fsd.report_lost_frame ();
+                   }
+                   set_fault ();
+               } else {
+
+                   DEBUG(3, cerr << "frame " << frame_cntr << "(" << cur_buf->frame_number << ") is written out" << endl);
+                   // Successful frame write
+                   if (science) {
+                       science_fsd.update_dir (cur_buf->gps, cur_buf->gps_n, cur_buf->frame_file_length_seconds, cur_buf->dir_num);
+                   } else {
+                       fsd.update_dir (cur_buf->gps, cur_buf->gps_n, cur_buf->frame_file_length_seconds, cur_buf->dir_num);
+                   }
+
+                   // Report frame size to the Epics world
+                   fd = open(cur_buf->tmpf, O_RDONLY);
+                   if (fd == -1) {
+                       system_log(1, "failed to open file; errno %d", errno);
+                       exit(1);
+                   }
+                   struct stat sb;
+                   if (fstat(fd, &sb) == -1) {
+                       system_log(1, "failed to fstat file; errno %d", errno);
+                       exit(1);
+                   }
+                   if (science) PV::set_pv(PV::PV_SCIENCE_FRAME_SIZE, sb.st_size);
+                   else PV::set_pv(PV::PV_FRAME_SIZE, sb.st_size);
+                   close(fd);
+               }
+
+               // Update the EPICS_SAVED value
+               if (!science) {
+                  PV::set_pv(PV::PV_CHANS_SAVED, cur_buf->nac);
+               } else {
+                  PV::set_pv(PV::PV_SCIENCE_CHANS_SAVED, cur_buf->nac);
+               }
+
+  #ifndef NO_BROADCAST
+               // We are compiled to be a DMT broadcaster
+               //
+               fd = open(cur_buf->tmpf, O_RDONLY);
+               if (fd == -1) {
+                   system_log(1, "failed to open file; errno %d", errno);
+                   exit(1);
+               }
+               struct stat sb;
+               if (fstat(fd, &sb) == -1) {
+                   system_log(1, "failed to fstat file; errno %d", errno);
+                   exit(1);
+               }
+               void *addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+               if (addr == MAP_FAILED) {
+                   system_log(1, "failed to fstat file; errno %d", errno);
+                   exit(1);
+               }
+
+               net_writer_c *nw = (net_writer_c *)net_writers.first();
+               assert(nw);
+               assert(nw->broadcast);
+
+               PV::set_pv(epics_state_var, STATE_BROADCAST);
+               if (nw->send_to_client ((char *) addr, sb.st_size, gps, b1 -> block_period ())) {
+                   system_log(1, "failed to broadcast data frame");
+                   exit(1);
+               }
+               PV::set_pv(epics_state_var, STATE_NORMAL);
+               munmap(addr, sb.st_size);
+               close(fd);
+               unlink(cur_buf->tmpf);
+  #endif
+           } /*catch (...) {
+        system_log(1, "failed to write full frame out");
+        fsd.report_lost_frame ();
+        set_fault ();
+       }*/
+       }
+
+       if (!science) {
+           /* Epics display: full res data look back size in seconds */
+           PV::set_pv(PV::PV_LOOKBACK_FULL, fsd.get_max() - fsd.get_min());
+       }
+
+       if (science) {
+           /* Epics display: current full frame saving directory */
+           PV::set_pv(PV::PV_LOOKBACK_DIR, science_fsd.get_cur_dir());
+       }
+       _work_queue->add_to_queue(0, cur_buf);
+   }
+   return NULL;
+}
+
 /// Full resolution frame saving thread.
 void *
 daqd_c::framer (int science)
 {
   const int STATE_NORMAL = 0;
-  const int STATE_WRITTING = 1;
+  const int STATE_PROCESSING = 1;
+  enum PV::PV_NAME epics_state_var = (science ? PV::PV_SCIENCE_FW_DATA_STATE : PV::PV_RAW_FW_DATA_STATE);
+  enum PV::PV_NAME epics_sec_var = (science ? PV::PV_SCIENCE_FW_DATA_SEC : PV::PV_RAW_FW_DATA_SEC);
+
+  framer_work_queue *_work_queue = 0;
 // Set thread parameters
   if (science) {
       daqd_c::set_thread_priority("Science frame saver","dqscifr",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_CPUAFFINITY); 
+      daqd_c::locker _l(this);
+      if (!_science_framer_work_queue)
+          _science_framer_work_queue = reinterpret_cast<void *>(new framer_work_queue(2));
+      _work_queue = reinterpret_cast<framer_work_queue *>(_science_framer_work_queue);
   } else {
       daqd_c::set_thread_priority("Full frame saver","dqfulfr",SAVER_THREAD_PRIORITY,FULL_SAVER_CPUAFFINITY); 
+      daqd_c::locker _l(this);
+      if (!_framer_work_queue)
+          _framer_work_queue = reinterpret_cast<void *>(new framer_work_queue(2));
+      _work_queue = reinterpret_cast<framer_work_queue *>(_framer_work_queue);
   }
-  enum PV::PV_NAME epics_state_var = (science ? PV::PV_SCIENCE_FW_STATE : PV::PV_RAW_FW_STATE);
 
-  PV::set_pv(epics_state_var, STATE_NORMAL);
   unsigned long nac = 0; // Number of active channels
   long frame_cntr;
   int nb;
@@ -667,26 +877,59 @@ daqd_c::framer (int science)
 	abort();
   }
 
-  int frame_file_length_seconds = frames_per_file * blocks_per_frame;
   if (science) {
     system_log(1, "Start up science mode frame writer\n");
   }
 
-  adc_data_ptr_type dptr;
-  ldas_frame_h_type frame
-  	= full_frame (blocks_per_frame, science, dptr);
+  // create buffers for the queue
+  for (int i = 0; i < 2; ++i) {
+      auto_ptr<framer_buf> _buf(new framer_buf);
+      _buf->frame_file_length_seconds = frames_per_file * blocks_per_frame;
+      _buf->dir_num = -1;
+      _buf->frame = full_frame (blocks_per_frame, science, _buf->dptr);
 
-  if (!frame) {
-    // Have to free all already allocated ADC structures at this point
-    // to avoid memory leaks, if not shutting down here
-    shutdown_server ();
-    return NULL;
+      if (!(_buf->frame)) {
+        // Have to free all already allocated ADC structures at this point
+        // to avoid memory leaks, if not shutting down here
+        shutdown_server ();
+        return NULL;
+      }
+      _work_queue->add_to_queue(0, _buf.get());
+      _buf.release();
+  }
+
+  // Startup the IO thread
+  {
+      DEBUG(4, cerr << "starting " << (science ? "science" : "full") << " framer IO thread" << endl);
+      pthread_attr_t attr;
+      pthread_attr_init(&attr);
+      pthread_attr_setstacksize(&attr, daqd.thread_stack_size);
+      pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
+
+      int err = 0;
+      if (science) {
+          err = pthread_create( &science_frame_saver_io_tid, &attr,
+                               (void *(*)(void *))daqd_c::science_framer_io_static,
+                               (void *)this);
+      } else {
+          err = pthread_create( &frame_saver_io_tid, &attr,
+                               (void *(*)(void *))daqd_c::framer_io_static,
+                               (void *)this);
+      }
+      if (err) {
+          pthread_attr_destroy(&attr);
+          system_log(1, "pthread_create() err=%d while creating %s IO thread", err, (science ? "science" : "full"));
+          exit(1);
+      }
+      pthread_attr_destroy(&attr);
   }
 
   // done creating a frame
   if (!science) {
     sem_post (&frame_saver_sem);
     sem_post (&frame_saver_sem);
+
+
   } else {
     sem_post (&science_frame_saver_sem);
     sem_post (&science_frame_saver_sem);
@@ -695,24 +938,23 @@ daqd_c::framer (int science)
   // Store data in the frame 
   // write frame files
 
-  int dir_num = -1;
-  //  int tdir_num;
-
   unsigned long status_ptr = block_size - 17 * sizeof(int) * num_channels;   // Index to the start of signal status memory area
 
   bool skip_done = false;
   for (frame_cntr = 0;; frame_cntr++)
     {
+      framer_buf *cur_buf = _work_queue->get_from_queue(0);
       int eof_flag = 0;
       unsigned long fast_data_crc = 0;
       unsigned long fast_data_length = 0;
       time_t frame_start;
-      unsigned int run, frame_number;
+      unsigned int run;
       time_t gps, gps_n;
       int altzone, leap_seconds;
       struct tm tms;
-      char tmpf [filesys_c::filename_max + 10];
-      char _tmpf [filesys_c::filename_max + 10];
+
+      time_t tdata = time(0);
+      PV::set_pv(epics_state_var, STATE_PROCESSING);
 
     /* Accumulate frame adc data */
     for (int i = 0; i < 1 /*frames_per_file */; i++)
@@ -760,7 +1002,7 @@ daqd_c::framer (int science)
 		    //		    frame_start = prop -> timestamp;
 		    frame_start = gps;
 		    // Frame number is based upon the cycle counter
-		    frame_number = prop -> prop.cycle / 16 / (frames_per_file * blocks_per_frame);
+            cur_buf->frame_number = prop -> prop.cycle / 16 / (frames_per_file * blocks_per_frame);
 		  }
 
 		nac = 0;
@@ -779,7 +1021,7 @@ daqd_c::framer (int science)
 			} else {
 				continue; // Skip it, it is not active
 			}
-		  unsigned char *fast_adc_ptr = dptr[nac].first;
+          unsigned char *fast_adc_ptr = cur_buf->dptr[nac].first;
 #ifdef USE_BROADCAST
 		  // Tested at the 40m on 11 jun 08
 		  // Short data needed to be sample swapped
@@ -814,14 +1056,14 @@ daqd_c::framer (int science)
 
 		  // Reset data valid to zero in the begining of a second
 		  if (! bnum) {
-		  	frame -> GetRawData () -> RefFirstAdc ()[nac] -> SetDataValid(0);
+            cur_buf->frame -> GetRawData () -> RefFirstAdc ()[nac] -> SetDataValid(0);
 		  }
 
 		  // Assign data valid if not zero, so once it gets set it sticks for the duration of a second
 		  if (data_valid) {
-		  	frame -> GetRawData () -> RefFirstAdc ()[nac] -> SetDataValid(data_valid);
+            cur_buf->frame -> GetRawData () -> RefFirstAdc ()[nac] -> SetDataValid(data_valid);
 		  }
-		  data_valid = frame -> GetRawData () -> RefFirstAdc ()[nac] -> GetDataValid();
+          data_valid = cur_buf->frame -> GetRawData () -> RefFirstAdc ()[nac] -> GetDataValid();
 
 		  /* Calculate CRC on fast data only */
 		  /* Do not calculate CRC on bad data */
@@ -833,7 +1075,7 @@ daqd_c::framer (int science)
 	            fast_data_length += channels [j].bytes;
 		  }
 
-		  INT_2U *aux_data_valid_ptr = dptr[nac].second;
+          INT_2U *aux_data_valid_ptr = cur_buf->dptr[nac].second;
 		  if (aux_data_valid_ptr) {
 		    stptr += 4;
 		    for (int k = 0; k < 16; k++)  {
@@ -873,203 +1115,19 @@ daqd_c::framer (int science)
                                      INT_2U leapS, INT_4S localTime)
 */
 
-#if 0
-      fw -> setFrameFileAttributes (run, frame_number, 0,
-				    gps, blocks_per_frame, gps_n,
-				    leap_seconds, altzone);
-#endif
-      frame -> SetGTime(FrameCPP::Version::GPSTime (gps, gps_n));
+      cur_buf->frame -> SetGTime(FrameCPP::Version::GPSTime (gps, gps_n));
       //frame -> SetULeapS(leap_seconds);
 
-      DEBUG(1, cerr << "about to write frame @ " << gps << endl);
-      if (science) {
-      	dir_num = science_fsd.getDirFileNames (gps, _tmpf, tmpf, frames_per_file, blocks_per_frame);
-      } else {
-      	dir_num = fsd.getDirFileNames (gps, _tmpf, tmpf, frames_per_file, blocks_per_frame);
-      }
+      DEBUG(1, cerr << "adding frame @ " << gps << " to " << (science ? "science" : "full") << " frame queue" << endl);
 
-      int fd = creat (_tmpf, 0644);
-      if (fd < 0) {
-	system_log(1, "Couldn't open full frame file `%s' for writing; errno %d", _tmpf, errno);
-        if (science) {
-	  fsd.report_lost_frame ();
-	} else {
-	  fsd.report_lost_frame ();
-	}
-	set_fault ();
-      } else {
-	close (fd);
-	/*try*/ {
+      cur_buf->gps = gps;
+      cur_buf->gps_n = gps_n;
+      cur_buf->nac = nac;
 
-      PV::set_pv(epics_state_var, STATE_WRITTING);
-          time_t t = 0;
-	  {
-          FrameCPP::Common::FrameBuffer<filebuf>* obuf
-	    = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
-          obuf -> open(_tmpf, std::ios::out | std::ios::binary);
-          FrameCPP::Common::OFrameStream  ofs(obuf);
-          ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
-          DEBUG(1, cerr << "Begin WriteFrame()" << endl);
-	  t = time(0);
-          ofs.WriteFrame(frame, 
-			//FrameCPP::Version::FrVect::GZIP, 1,
-                        daqd.no_compression? FrameCPP::FrVect::RAW:
-				 FrameCPP::FrVect::ZERO_SUPPRESS_OTHERWISE_GZIP, 1,
-			//FrameCPP::Compression::MODE_ZERO_SUPPRESS_SHORT,
-			//FrameCPP::Version::FrVect::DEFAULT_GZIP_LEVEL, /* 6 */
-			FrameCPP::Common::CheckSum::CRC);
-
-          ofs.Close();
-          obuf->close();
-	  }
-	  t = time(0) - t;
+      _work_queue->add_to_queue(1, cur_buf);
+      cur_buf = 0;
       PV::set_pv(epics_state_var, STATE_NORMAL);
-          DEBUG(1, cerr << (science ? "Science" : "Full") << " frame done in " << t << " seconds" << endl);
-#if EPICS_EDCU == 1
-      /* Record frame write time */ 
-          if (science) {
-              PV::set_pv(PV::PV_SCIENCE_FRAME_WRITE_SEC, t);
-          } else {
-              PV::set_pv(PV::PV_FRAME_WRITE_SEC, t);
-          }
-#endif
-	  if (rename(_tmpf, tmpf)) {
-	    system_log(1, "failed to rename file; errno %d", errno);
-            if (science) {
-	      science_fsd.report_lost_frame ();
-	    } else {
-	      fsd.report_lost_frame ();
-	    }
-	    set_fault ();
-	  } else {
-	    DEBUG(3, cerr << "frame " << frame_cntr << "(" << frame_number << ") is written out" << endl);
-	    // Successful frame write
-            if (science) {
-	      science_fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
-	    } else {
-	      fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
-	    }
-
-	    // Report frame size to the Epics world
-            fd = open(tmpf, O_RDONLY);
-            if (fd == -1) {
-             	system_log(1, "failed to open file; errno %d", errno);
-                exit(1);
-            }
-            struct stat sb;
-            if (fstat(fd, &sb) == -1) {
-              system_log(1, "failed to fstat file; errno %d", errno);
-              exit(1);
-            }
-        if (science) PV::set_pv(PV::PV_SCIENCE_FRAME_SIZE, sb.st_size);
-        else PV::set_pv(PV::PV_FRAME_SIZE, sb.st_size);
-	    close(fd);
-	  }
-
-	  // Update the EPICS_SAVED value
-	  if (!science) {
-         PV::set_pv(PV::PV_CHANS_SAVED, nac);
-	  } else {
-         PV::set_pv(PV::PV_SCIENCE_CHANS_SAVED, nac);
-	  }
-
-#ifndef NO_BROADCAST
-	 // We are compiled to be a DMT broadcaster
-	 //
-	  fd = open(tmpf, O_RDONLY);
-          if (fd == -1) {
-            system_log(1, "failed to open file; errno %d", errno);
-            exit(1);
-          }
-          struct stat sb;
-          if (fstat(fd, &sb) == -1) {
-            system_log(1, "failed to fstat file; errno %d", errno);
-            exit(1);
-          }
-          void *addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-          if (addr == MAP_FAILED) {
-            system_log(1, "failed to fstat file; errno %d", errno);
-            exit(1);
-          }
-
-          net_writer_c *nw = (net_writer_c *)net_writers.first();
-          assert(nw);
-          assert(nw->broadcast);
-
-          if (nw->send_to_client ((char *) addr, sb.st_size, gps, b1 -> block_period ())) {
-            system_log(1, "failed to broadcast data frame");
-            exit(1);
-          }
-          munmap(addr, sb.st_size);
-          close(fd);
-          unlink(tmpf);
-
-#endif 
-  	} /*catch (...) {
-	  system_log(1, "failed to write full frame out");
-	  fsd.report_lost_frame ();
-	  set_fault ();
-	}*/
-      }
-
-#if 0
-      int fd = creat (_tmpf, 0644);
-      if (fd < 0) {
-	system_log(1, "Couldn't open full frame file `%s' for writing; errno %d", _tmpf, errno);
-	fsd.report_lost_frame ();
-	set_fault ();
-      } else {
-
-#if defined(DIRECTIO_ON) && defined(DIRECTIO_OFF)
-        if (daqd.do_directio) directio (fd, DIRECTIO_ON);
-#endif
-
-
-	TNF_PROBE_1(daq_c_framer_frame_write_start, "daqd_c::framer",
-		    "frame write",
-		    tnf_long,   frame_number,   frame_number);
-	  
-	// Calculate md5 check sum
-	if (cksum_file != "") {
-	  unsigned long crc = fr_cksum(cksum_file, tmpf, (unsigned char *)(ost -> str ()), image_size);
-	  system_log(5, "%d\t%x\n", gps, crc);
-	}
-
-	/* Write out a frame */
-	int nwritten = write (fd, ost -> str (), image_size);
-        if (nwritten == image_size) {
-	  if (rename(_tmpf, tmpf)) {
-	    system_log(1, "failed to rename file; errno %d", errno);
-	    fsd.report_lost_frame ();
-	    set_fault ();
-	  } else {
-	    DEBUG(3, cerr << "frame " << frame_cntr << "(" << frame_number << ") is written out" << endl);
-	    // Successful frame write
-	    fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
-	  }
-	} else {
-	  system_log(1, "failed to write full frame out; errno %d", errno);
-	  fsd.report_lost_frame ();
-	  set_fault ();
-	}
-
-	close (fd);
-	TNF_PROBE_0(daqc_c_framer_frame_write_end, "daqd_c::framer", "frame write");
-      }
-#endif
-
-#if EPICS_EDCU == 1
-      if (!science) {
-        /* Epics display: full res data look back size in seconds */
-        PV::set_pv(PV::PV_LOOKBACK_FULL, fsd.get_max() - fsd.get_min());
-      }
-
-      if (science) {
-        /* Epics display: current full frame saving directory */
-          PV::set_pv(PV::PV_LOOKBACK_DIR, science_fsd.get_cur_dir());
-      }
-#endif
-
+      PV::set_pv(epics_sec_var, (int)(time(0) - tdata));
     }
 
   return NULL;
@@ -1504,7 +1562,7 @@ void
 shandler (int a) {
         char p[25];
 	system_log(1,"going down on signal %d", a);
-	seteuid (0); // Try to switch to superuser effective uid
+    int unused = seteuid (0); // Try to switch to superuser effective uid
 	sprintf (p,"/bin/gcore %d", getpid());
 	// Works on Gentoo this way:
         //sprintf (p,"gdb --pid=%d --batch -ex gcore", getpid());

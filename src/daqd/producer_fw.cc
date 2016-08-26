@@ -50,6 +50,7 @@ using namespace std;
 #include "conv.hh"
 
 #include "raii.hh"
+#include "work_queue.hh"
 
 extern daqd_c daqd;
 extern int shutdown_server();
@@ -73,124 +74,7 @@ namespace {
         unsigned int gps_n;
     };
 
-    class producer_work_queue {
-        pthread_mutex_t _lock;
-        pthread_cond_t _wait;
-
-        typedef producer_buf* queue_entry;
-        typedef std::stack<queue_entry, std::vector<queue_entry> > queue;
-
-        std::vector<queue> _queues;
-
-        producer_work_queue(const producer_work_queue &other);
-        producer_work_queue operator=(const producer_work_queue &other);
-    public:
-        producer_work_queue(size_t num_queues): _queues(num_queues) {
-            pthread_mutex_init(&_lock, NULL);
-            pthread_cond_init(&_wait, NULL);
-        }
-
-        ~producer_work_queue() {
-            pthread_mutex_destroy(&_lock);
-        }
-
-        void add_to_queue(size_t index, queue_entry entry) {
-            if (!entry)
-                return;
-            raii::lock_guard<pthread_mutex_t> lock(_lock);
-            _queues.at(index).push(entry);
-            pthread_cond_broadcast(&_wait);
-        }
-
-        queue_entry get_from_queue(size_t index) {
-            raii::lock_guard<pthread_mutex_t> lock(_lock);
-            while (_queues.at(index).empty())
-                pthread_cond_wait(&_wait, &_lock);
-            queue &cur_queue = _queues.at(index);
-            queue_entry val = cur_queue.top();
-            cur_queue.pop();
-            return val;
-        }
-
-        void dump_status(ostream &out) {
-            raii::lock_guard<pthread_mutex_t> lock(_lock);
-            int counter = 0;
-            out << "work queue status" << endl;
-            for (std::vector<queue>::iterator cur = _queues.begin(); cur != _queues.end(); ++cur) {
-                out << "\tqueue " << counter++ << cur->size() << endl;
-            }
-        }
-    };
-
-    class dbl_buf_state {
-        producer_buf _buffers[2];
-
-        int _wait_count;
-        pthread_mutex_t _lock;
-        pthread_cond_t _wait;
-
-        time_t _gps;
-        time_t _gps_n;
-    public:
-        dbl_buf_state(): _wait_count(0), _gps(0), _gps_n(0) {
-            pthread_mutex_init(&_lock, NULL);
-            pthread_cond_init(&_wait, NULL);
-        }
-        ~dbl_buf_state() {
-            pthread_mutex_destroy(&_lock);
-        }
-
-        void set_buffers(producer_buf buf1, producer_buf buf2) {
-            _buffers[0] = buf1;
-            _buffers[1] = buf2;
-        }
-
-        producer_buf *get_buffer(int index) {
-            if (index < 0 || index >= 2) {
-                cerr << "Attempting to retreive an invalid buffer from the double buffer" << endl;
-                exit(1);
-            }
-            return &_buffers[index];
-        }
-
-        /// The double buffer has two working threads that must sync.
-        /// when they are finished with work.
-        /// This should be called by both threads at the synchronization point.
-        void wait_crc(time_t &gps, time_t &gps_n) {
-            raii::lock_guard<pthread_mutex_t> lock(_lock);
-            // if no one is done prior to this call (ie only me)
-            if (_wait_count == 0) {
-                _wait_count = 1;
-                while (_wait_count > 0)
-                    pthread_cond_wait(&_wait, &_lock);
-            } else {
-                // the other thead is done, signal it and go on
-                _wait_count = 0;
-                pthread_cond_broadcast(&_wait);
-            }
-            gps = _gps;
-            gps_n = _gps_n;
-        }
-
-        /// The double buffer has two working threads that must sync.
-        /// when they are finished with work.
-        /// This should be called by both threads at the synchronization point.
-        void wait_recv(time_t gps, time_t gps_n) {
-            raii::lock_guard<pthread_mutex_t> lock(_lock);
-            _gps = gps;
-            _gps_n = gps;
-            // if no one is done prior to this call (ie only me)
-            if (_wait_count == 0) {
-                _wait_count = 1;
-                while (_wait_count > 0)
-                    pthread_cond_wait(&_wait, &_lock);
-            } else {
-                // the other thead is done, signal it and go on
-                _wait_count = 0;
-                pthread_cond_broadcast(&_wait);
-            }
-        }
-    };
+    typedef work_queue::work_queue<producer_buf> producer_work_queue;
 
 }
 
@@ -381,12 +265,6 @@ void *producer::frame_writer() {
             PV::set_pv(PV::PV_PRDCR_TIME_RECV_MAX_MS, conv::s_to_ms_int(stat_recv.getMax()));
             PV::set_pv(PV::PV_PRDCR_TIME_RECV_MEAN_MS, conv::s_to_ms_int(stat_recv.getMean()));
 
-            DEBUG(5, {
-                cout << "producer thread timings" << endl;
-                cout << " recv min:" << stat_recv.getMin()
-                     << " mean:" << stat_recv.getMean()
-                     << " max:" << stat_recv.getMax() << endl;
-            });
             stat_recv.clearStats();
             stat_cycles = 0;
         }
@@ -566,18 +444,6 @@ void *producer::frame_writer_crc() {
             PV::set_pv(PV::PV_PRDCR_CRC_TIME_XFER_MAX_MS, conv::s_to_ms_int(stat_transfer.getMax()));
             PV::set_pv(PV::PV_PRDCR_CRC_TIME_XFER_MEAN_MS, conv::s_to_ms_int(stat_transfer.getMean()));
 
-            DEBUG(5, {
-                cout << "producer crc thread timings" << endl;
-                cout << " full min:" << stat_full.getMin()
-                     << " mean:" << stat_full.getMean()
-                     << " max:" << stat_full.getMax() << endl;
-                cout << " crc  min:" << stat_crc.getMin()
-                     << " mean:" << stat_crc.getMean()
-                     << " max:" << stat_crc.getMax() << endl;
-                cout << " xfer min:" << stat_transfer.getMin()
-                     << " mean:" << stat_transfer.getMean()
-                     << " max:" << stat_transfer.getMax() << endl;
-            });
             stat_full.clearStats();
             stat_crc.clearStats();
             stat_transfer.clearStats();

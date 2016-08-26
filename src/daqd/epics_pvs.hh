@@ -54,8 +54,12 @@ enum PV_NAME {
     // Profiler buffer values
     PV_PROFILER_FREE_SEGMENTS_MAIN_BUF,
     // Sate informatino for frame writers
-    PV_RAW_FW_STATE,
+    PV_RAW_FW_STATE,            // frame writer IO thread state
+    PV_RAW_FW_DATA_STATE,       // frame writer data thread state
+    PV_RAW_FW_DATA_SEC,         // processing time for fw data thread
     PV_SCIENCE_FW_STATE,
+    PV_SCIENCE_FW_DATA_STATE,
+    PV_SCIENCE_FW_DATA_SEC,
     PV_STREND_FW_STATE,
     PV_MTREND_FW_STATE,
     MAX_PV

@@ -472,7 +472,7 @@ void *
 trender_c::minute_trend ()
 {
   // Set thread parameters
-  daqd_c::set_thread_priority("Minute trender","dqmtrco",SAVER_THREAD_PRIORITY,0); 
+  daqd_c::set_thread_priority("Minute trender","dqmtrco",SAVER_THREAD_PRIORITY,MINUTE_TRENDER_CPUAFFINITY);
 
   int tblen = mtb -> blocks (); // trend buffer length
   int nc; // number of trend samples accumulated
@@ -1120,7 +1120,7 @@ void *
 trender_c::trend ()
 {
   // Set thread parameters
-  daqd_c::set_thread_priority("Second trend consumer","dqstrco",SAVER_THREAD_PRIORITY,0); 
+  daqd_c::set_thread_priority("Second trend consumer","dqstrco",SAVER_THREAD_PRIORITY,SECOND_TRENDER_CPUAFFINITY);
   int nb;
   circ_buffer *ltb = this -> tb;
   sem_post (&trender_sem);
@@ -1265,7 +1265,7 @@ void *
 trender_c::trend_worker ()
 {
   // Set thread parameters
-  daqd_c::set_thread_priority("Second trend worker","dqstrwk",0,0); 
+  daqd_c::set_thread_priority("Second trend worker","dqstrwk",0,SECOND_TREND_WORKER_CPUAFFINITY);
 
   for (;;)
     {
