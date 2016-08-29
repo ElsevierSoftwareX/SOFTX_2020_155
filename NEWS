@@ -10,6 +10,16 @@ Changes for X.X
 - Bug Fix (1010): Prevent divide-by-zero error in daqd filesys.hh
 - Bug Fix (513): Cleanup debug schemes.  Also created separate udp_rcvr files, fixed mx_rcvr header
 - Bug Fix (1015): Update daqd,nds build for ldas-tools 2.5
+==================================================================================================
+Changes for 3.1
+==================================================================================================
+- Per ECR LIGO-E1600234, modified front end daq code to run without any fast channels. Previously,
+  DAQ required minimum of 2 channels at full rate.  This resulted in a lot of useless DAQ data
+  traffic, particuarly from IOP models, which were creating 550KByte/sec of raw network traffic
+  for signals not of interest or acquired. While not significant for smaller systems, for LIGO
+  production systems this accounted for ~25% of the 70MByte/sec DAQ network traffic. The code
+  changes made to implement this also reduce the latency of front end data transmission to 1/16
+  of a second from the previous 1/8 second.
 - Bug Fix (1022): Allow dataviewer to display trends of double precision channels.
 ==================================================================================================
 Changes for 3.0.3
