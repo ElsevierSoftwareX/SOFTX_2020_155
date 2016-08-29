@@ -1,4 +1,14 @@
 ==================================================================================================
+Changes for 3.1
+==================================================================================================
+- Per ECR LIGO-E1600234, modified front end daq code to run without any fast channels. Previously,
+  DAQ required minimum of 2 channels at full rate.  This resulted in a lot of useless DAQ data
+  traffic, particuarly from IOP models, which were creating 550KByte/sec of raw network traffic
+  for signals not of interest or acquired. While not significant for smaller systems, for LIGO
+  production systems this accounted for ~25% of the 70MByte/sec DAQ network traffic. The code 
+  changes made to implement this also reduce the latency of front end data transmission to 1/16
+  of a second from the previous 1/8 second. 
+==================================================================================================
 Changes for 3.0.4
 ==================================================================================================
 - Bug Fix (1022) to allow dataviewer to display trends of double precision channels.
