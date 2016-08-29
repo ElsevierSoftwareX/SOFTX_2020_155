@@ -1295,12 +1295,7 @@ foreach (sort @section_names) {
 	    $comment = "#";
           }
         } else  {
-	  if ($cnt < 2 && m/_OUT$/) {
-		$comment = "";
-		$cnt++;
-	  } else {
 		$comment = "#";
-	  }
 	}
 #        print OUTG "${comment}[${_}_${def_datarate}]\n";
 	my $science = $DAQ_Channels_science{$_};
