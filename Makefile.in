@@ -211,7 +211,7 @@ fw:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/fw
 	/bin/mkdir -p build/fw
-	(mysrc=$(srcdir); cd build/fw; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-epics' '--enable-fw' --disable-testpoints  && make)
+	(mysrc=$(srcdir); cd build/fw; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-epics' --disable-testpoints  && make)
 
 #
 # Build DMT 1-second frame broadcaster

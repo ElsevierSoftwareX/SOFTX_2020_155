@@ -16,7 +16,7 @@ typedef struct {
 #define IS_GDS_SIGNAL(a) ((a).gds & 1)
 
 /// Channel name structure
-typedef struct channel_t {
+typedef struct {
   /// archive channels group number is the same for all archived channels (except "obsolete" archive)
   const static int arc_groupn = 1000;
 

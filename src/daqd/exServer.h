@@ -53,7 +53,6 @@ public:
             hopr(hoprIn), lopr(loprIn), ioType(ioTypeIn), 
             elementCount(countIn), pPV(0), valPtr(vptr)
     {
-        *valPtr = 0;
     }
 
     ~pvInfo ();

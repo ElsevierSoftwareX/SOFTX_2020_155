@@ -69,39 +69,26 @@ using namespace std;
 #if EPICS_EDCU == 1
 #include "edcu.hh"
 #include "epicsServer.hh"
-#include "epics_pvs.hh"
+/// Epics IOC variable storage
+extern unsigned int pvValue[1000];
 #endif
 
 /// Define real-time thread priorities (mx receiver highest, producer next, frame savers lowest)
 #define MX_THREAD_PRIORITY 10
 #define PROD_THREAD_PRIORITY 5
-#define PROD_CRC_THREAD_PRIORITY 5
 #define SAVER_THREAD_PRIORITY 2
-
-#if 0
-#define PROD_CPUAFFINITY 2
-#define PROD_CRC_CPUAFFINITY 3
-#define FULL_SAVER_CPUAFFINITY 4
-#define FULL_SAVER_IO_CPUAFFINITY 6
-#define SCIENCE_SAVER_CPUAFFINITY 5
-#define SCIENCE_SAVER_IO_CPUAFFINITY 7
-#define SECOND_SAVER_CPUAFFINITY 14
-#define MINUTE_SAVER_CPUAFFINITY 15
-#define SECOND_TRENDER_CPUAFFINITY 16
-#define MINUTE_TRENDER_CPUAFFINITY 17
-#define SECOND_TREND_WORKER_CPUAFFINITY 18
-#else
+#if defined(USE_BROADCAST)
 #define PROD_CPUAFFINITY 0
-#define PROD_CRC_CPUAFFINITY 0
 #define FULL_SAVER_CPUAFFINITY 0
-#define FULL_SAVER_IO_CPUAFFINITY 0
 #define SCIENCE_SAVER_CPUAFFINITY 0
-#define SCIENCE_SAVER_IO_CPUAFFINITY 0
 #define SECOND_SAVER_CPUAFFINITY 0
 #define MINUTE_SAVER_CPUAFFINITY 0
-#define SECOND_TRENDER_CPUAFFINITY 0
-#define MINUTE_TRENDER_CPUAFFINITY 0
-#define SECOND_TREND_WORKER_CPUAFFINITY 0
+#else
+#define PROD_CPUAFFINITY 0
+#define FULL_SAVER_CPUAFFINITY 0
+#define SCIENCE_SAVER_CPUAFFINITY 0
+#define SECOND_SAVER_CPUAFFINITY 0
+#define MINUTE_SAVER_CPUAFFINITY 0
 #endif
 
 /// Define max boards, endpoints for mx_rcvr
@@ -113,7 +100,6 @@ typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
 #else
 typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
 #endif
-
 
 /// Daqd server main class. This is a top-level class, which encloses various objects
 /// representing threads of execution.
@@ -128,8 +114,7 @@ class daqd_c {
   };
 
  private:
-    void *_framer_work_queue;
-    void *_science_framer_work_queue;
+
   /*
     Locking on the instance of the class can be done with the
     scoped locking.
@@ -154,9 +139,7 @@ class daqd_c {
   };
 
  public:
-  daqd_c () :\
-    _framer_work_queue(0),
-    _science_framer_work_queue(0),
+  daqd_c () :
     b1 (0), producer1 (0),
     num_channels (0),
     num_active_channels (0),
@@ -176,8 +159,6 @@ class daqd_c {
 
     frame_saver_tid(0),
     science_frame_saver_tid(0),
-    frame_saver_io_tid(0),
-    science_frame_saver_io_tid(0),
     data_feeds(1),
     dcu_status_check(0),
 
@@ -305,14 +286,10 @@ class daqd_c {
   int cnum; ///< Consumer number for the frame saver
   int science_cnum; ///< Consumer number for the science frame saver 
   void *framer (int); ///< Full resolution frames saver thread
-  void *framer_io (int); ///< IO for the full resolution frame saver
   static void *framer_static (void *a) { return ((daqd_c *)a) -> framer (0); };
   /// Science-mode frame saver thread.
   static void *science_framer_static (void *a) { return ((daqd_c *)a) -> framer (1); };
-  /// framer io thread
-  static void *framer_io_static (void *a) { return ((daqd_c *)a) -> framer_io(0); };
-  /// science-mode frame saver io thread
-  static void *science_framer_io_static (void *a) { return ((daqd_c *)a) -> framer_io(1); };
+
 
 #ifdef GDS_TESTPOINTS
   int num_gds_channels;
@@ -340,16 +317,11 @@ class daqd_c {
   int start_edcu (ostream *);
   int start_epics_server (ostream *, char *, char *, char *);
 #endif
-
-  void initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, struct put_dpvec *vmic_pv);
-
   sem_t frame_saver_sem;
   sem_t science_frame_saver_sem;
 
   pthread_t frame_saver_tid;
   pthread_t science_frame_saver_tid;
-  pthread_t frame_saver_io_tid;
-  pthread_t science_frame_saver_io_tid;
 
   long writer_sleep_usec; /* pause in usecs for the main producer (-s option) */
   long main_buffer_size; ///< number of blocks in main circular buffer 
@@ -393,6 +365,9 @@ class daqd_c {
 
   int           data_feeds;             /* The number of data feeds: 1 -default; 2 -Hanford (2 ifos) */
 
+  unsigned char *move_buf;
+  int vmic_pv_len;
+  struct put_dpvec vmic_pv [max_channels];
   unsigned int  dcu_status_check;       /* 1 - check ifo 0; 2- ifo 1; 3 - both; 0 - none */
 
   inline static int
@@ -484,18 +459,18 @@ inline static void set_thread_priority (char *thread_name, char *thread_abbrev, 
 
   void set_fault () { 
 #if EPICS_EDCU == 1
-    PV::set_pv(PV::PV_FAULT, 1);
+	pvValue[14] = 1;
 #endif
 	_exit(1);
   }
   void clear_fault () {
 #if EPICS_EDCU == 1
-    PV::set_pv(PV::PV_FAULT, 0);
+	pvValue[14] = 0;
 #endif
   }
   int is_fault () {
 #if EPICS_EDCU == 1
-    return PV::pv(PV::PV_FAULT);
+	return pvValue[14];
 #else
 	return 0;
 #endif

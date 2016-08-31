@@ -2,7 +2,6 @@
 #include <errno.h>
 #include <sys/types.h>
 #include "daqd.hh"
-#include "epics_pvs.hh"
 
 extern daqd_c daqd;
 /*
@@ -53,7 +52,6 @@ profile_c::profiler ()
 	abort ();
       }
     }
-    PV::set_pv(PV::PV_PROFILER_FREE_SEGMENTS_MAIN_BUF, bfree);
 
     if (counters)
       counters[bfree]++;

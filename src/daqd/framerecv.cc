@@ -49,8 +49,6 @@ typedef u_int32_t in_addr_t;
 #include <fcntl.h>
 #include "shutdown.h"
 
-#include "epics_pvs.hh"
-
 #include "debug.h"
    using namespace std;
 
@@ -843,8 +841,6 @@ int drop_seq = 0; // sequence to drop (for debugging)
 */
                system_log(1, "Ask for retransmission of %i packets; port %d", n, port);		
             }
-            if (n > 0)
-                PV::pv(PV::PV_RETRANSMIT_TOTAL) += n;
          #ifdef DBUG
             cout << "ask for retransmission " << n << " (rate " <<
                newRetransmissionRate << "; seq " << newseq << ") at " << endl;
