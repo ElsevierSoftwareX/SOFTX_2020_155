@@ -90,6 +90,7 @@ sub frontEndInitCode {
         my ($i) = @_;
         my $matOuts = $::partOutputs[$::partOutNum[$i][0]];
         my $matIns = $::partInCnt[$::partInNum[$i][0]];
+	$calcExp = "pLocalEpics->". $::systemName . "\." . "$::xpartName[$i]_LOAD_MATRIX = 1;\n";
         for ($input = 0; $input < $matIns; $input++) {
             for ($output = 0; $output < $matOuts; $output++) {
                 $calcExp .= "RampParamInit(&\L$::xpartName[$i]_state\[$output\]\[$input\],0, ";
