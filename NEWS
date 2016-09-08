@@ -11,6 +11,10 @@ Changes for X.X
 - Bug Fix (513): Cleanup debug schemes.  Also created separate udp_rcvr files, fixed mx_rcvr header
 - Bug Fix (1015): Update daqd,nds build for ldas-tools 2.5
 ==================================================================================================
+Changes for 3.1.1
+==================================================================================================
+- Bug Fix for loading of RampMuxMatrix on startup (1030).
+==================================================================================================
 Changes for 3.1
 ==================================================================================================
 - Per ECR LIGO-E1600234, modified front end daq code to run without any fast channels. Previously,
