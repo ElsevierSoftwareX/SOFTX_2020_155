@@ -27,9 +27,12 @@ using namespace std;
 #include "daqd.hh"
 #include "sing_list.hh"
 
+#include "epics_pvs.hh"
+
 extern daqd_c daqd;
 
 #include "crc8.cc"
+#include "raii.hh"
 
 /* Define duration of trend quantities */
 #define SECPERMIN 60 // # of seconds per minute
@@ -165,6 +168,8 @@ trender_c::raw_minute_saver ()
 void *
 trender_c::minute_framer ()
 {
+  const int STATE_NORMAL = 0;
+  const int STATE_WRITTING = 1;
   // Set thread parameters
   daqd_c::set_thread_priority("Minute trend framer","dqmtrfr",SAVER_THREAD_PRIORITY,MINUTE_SAVER_CPUAFFINITY); 
 
@@ -273,6 +278,7 @@ trender_c::minute_framer ()
 
   sem_post (&minute_frame_saver_sem);
   
+  PV::set_pv(PV::PV_MTREND_FW_STATE, STATE_NORMAL);
   long frame_cntr;
   for (frame_cntr = 0;; frame_cntr++)
     {
@@ -387,6 +393,8 @@ trender_c::minute_framer ()
         FrameCPP::Common::OFrameStream  ofs(obuf);
         ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
         DEBUG(1, cerr << "Begin minute trend WriteFrame()" << endl);
+
+        PV::set_pv(PV::PV_MTREND_FW_STATE, STATE_WRITTING);
         time_t t = time(0);
 
         ofs.WriteFrame(frame, //FrameCPP::Common::CheckSum::NONE,
@@ -399,6 +407,7 @@ trender_c::minute_framer ()
         pthread_mutex_unlock (&frame_write_lock);
 
         t = time(0) - t;
+        PV::set_pv(PV::PV_MTREND_FW_STATE, STATE_NORMAL);
         DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
 	if (1)
 	{
@@ -419,18 +428,31 @@ trender_c::minute_framer ()
 	TNF_PROBE_0(minute_trender_c_framer_frame_write_end, "trender_c::framer", "frame write");
 #if EPICS_EDCU == 1
    /* Record frame write time */ 
-        pvValue[26] = t;
+    PV::set_pv(PV::PV_MINUTE_FRAME_WRITE_SEC, t);
 #endif
       }
 
 
 #if EPICS_EDCU == 1
       /* Epics display: minute trend data look back size in seconds */
-      pvValue[11] = minute_fsd.get_max() - minute_fsd.get_min();
+      PV::set_pv(PV::PV_LOOKBACK_MTREND, minute_fsd.get_max() - minute_fsd.get_min());
 
       /* Epics display: current trend frame directory */
-      pvValue[12] = minute_fsd.get_cur_dir();
+      PV::set_pv(PV::PV_LOOKBACK_MTREND_DIR, minute_fsd.get_cur_dir());
 #endif
+
+      // get the frame size as well
+      {
+          unsigned int fsize = 0;
+          raii::file_handle fd(open(tmpf, O_RDONLY));
+          if (fd.get() >= 0) {
+            struct stat finfo;
+            if (fstat(fd.get(), &finfo) >= 0) {
+                fsize = finfo.st_size;
+            }
+          }
+          PV::set_pv(PV::PV_MINUTE_FRAME_SIZE, fsize);
+      }
     }
 
   // signal to the producer that we are done
@@ -450,7 +472,7 @@ void *
 trender_c::minute_trend ()
 {
   // Set thread parameters
-  daqd_c::set_thread_priority("Minute trender","dqmtrco",SAVER_THREAD_PRIORITY,0); 
+  daqd_c::set_thread_priority("Minute trender","dqmtrco",SAVER_THREAD_PRIORITY,MINUTE_TRENDER_CPUAFFINITY);
 
   int tblen = mtb -> blocks (); // trend buffer length
   int nc; // number of trend samples accumulated
@@ -599,6 +621,8 @@ trender_c::saver ()
 void *
 trender_c::framer ()
 {
+  const int STATE_NORMAL = 0;
+  const int STATE_WRITTING = 1;
   // Set thread parameters
   daqd_c::set_thread_priority("Second trend framer","dqstrfr",SAVER_THREAD_PRIORITY,SECOND_SAVER_CPUAFFINITY); 
 
@@ -697,6 +721,7 @@ trender_c::framer ()
 
   sem_post (&frame_saver_sem);
 
+  PV::set_pv(PV::PV_STREND_FW_STATE, STATE_NORMAL);
   long frame_cntr;
   for (frame_cntr = 0;; frame_cntr++)
     {
@@ -825,6 +850,7 @@ trender_c::framer ()
           FrameCPP::Common::OFrameStream  ofs(obuf);
           ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
           DEBUG(1, cerr << "Begin second trend WriteFrame()" << endl);
+          PV::set_pv(PV::PV_STREND_FW_STATE, STATE_WRITTING);
           time_t t = time(0);
 
           ofs.WriteFrame(frame, //FrameCPP::Common::CheckSum::NONE,
@@ -837,6 +863,7 @@ trender_c::framer ()
           pthread_mutex_unlock (&frame_write_lock);
 
           t = time(0) - t;
+          PV::set_pv(PV::PV_STREND_FW_STATE, STATE_NORMAL);
           DEBUG(1, cerr << "Second trend frame write done in " << t << " seconds" << endl);
 	  if (rename(_tmpf, tmpf)) {
 		system_log(1, "framer(): failed to rename file; errno %d", errno);
@@ -850,16 +877,29 @@ trender_c::framer ()
 	  TNF_PROBE_0(trender_c_framer_frame_write_end, "trender_c::framer", "frame write");
 #if EPICS_EDCU == 1
    /* Record frame write time */ 
-          pvValue[25] = t;
+      PV::set_pv(PV::PV_SECOND_FRAME_WRITE_SEC, t);
 #endif
       }
 
 #if EPICS_EDCU == 1
       /* Epics display: second trend data look back size in seconds */
-      pvValue[9] = fsd.get_max() - fsd.get_min();
+      PV::set_pv(PV::PV_LOOKBACK_STREND, fsd.get_max() - fsd.get_min());
 
       /* Epics display: current trend frame directory */
-      pvValue[10] = fsd.get_cur_dir();
+      PV::set_pv(PV::PV_LOOKBACK_STREND_DIR, fsd.get_cur_dir());
+
+      // get the frame size as well
+      {
+          unsigned int fsize = 0;
+          raii::file_handle fd(open(tmpf, O_RDONLY));
+          if (fd.get() >= 0) {
+            struct stat finfo;
+            if (fstat(fd.get(), &finfo) >= 0) {
+                fsize = finfo.st_size;
+            }
+          }
+          PV::set_pv(PV::PV_SECOND_FRAME_SIZE, fsize);
+      }
 #endif
     }
 
@@ -1080,7 +1120,7 @@ void *
 trender_c::trend ()
 {
   // Set thread parameters
-  daqd_c::set_thread_priority("Second trend consumer","dqstrco",SAVER_THREAD_PRIORITY,0); 
+  daqd_c::set_thread_priority("Second trend consumer","dqstrco",SAVER_THREAD_PRIORITY,SECOND_TRENDER_CPUAFFINITY);
   int nb;
   circ_buffer *ltb = this -> tb;
   sem_post (&trender_sem);
@@ -1225,7 +1265,7 @@ void *
 trender_c::trend_worker ()
 {
   // Set thread parameters
-  daqd_c::set_thread_priority("Second trend worker","dqstrwk",0,0); 
+  daqd_c::set_thread_priority("Second trend worker","dqstrwk",0,SECOND_TREND_WORKER_CPUAFFINITY);
 
   for (;;)
     {

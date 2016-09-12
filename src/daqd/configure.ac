@@ -34,7 +34,8 @@ AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(FlexLexer.h arpa/inet.h assert.h ctype.h \
 	errno.h fcntl.h fstream.h iostream.h limits.h math.h \
 	netinet/in.h pthread.h signal.h stdio.h stdlib.h stream.h \
-	string.h sys/socket.h sys/types.h time.h unistd.h tnf/probe.h)
+    string.h sys/socket.h sys/types.h time.h unistd.h tnf/probe.h \
+    regex.h regexp.h)
 AC_HEADER_TIME
 
 
@@ -221,11 +222,13 @@ have_epics=
 dnl ========
 dnl  strategy is to check for pkgconfig, then search for it
 dnl ========
+have_epics315=
 PKG_CHECK_MODULES(EPICSBASE, epics-base, pkg_epics="yes", pkg_epics="no")
 if test "${pkg_epics}" = "yes"; then
     EPICSLIBS="$EPICSBASE_LIBS"
     EPICSFLAGS="$EPICSBASE_CFLAGS"
     have_epics="yes"
+    PKG_CHECK_MODULES([EPICSBASE315],[epics-base >= 3.15.1.0],[have_epics315="yes"],[have_epics315="no"])
 else
     EPICS_DEF="/opt/rtapps/epics/base"
     AC_CHECK_FILE(${EPICS_DEF}/lib/${host_arch}/libca.a, have_epics="yes", have_epics="no")
@@ -259,7 +262,11 @@ AC_ARG_WITH(epics,
       fi
     fi
     if test $have_epics = "yes"; then
-       EPICSLIBFLAGS="$EPICSLIBS -lca -lcas -lasHost -lCom -lgdd -lm -lrecIoc -lsoftDevIoc"
+       if test $have_epics315 = "yes"; then
+         EPICSLIBFLAGS="$EPICSLIBS -lca -lcas -lCom -lgdd -lm"
+       else
+         EPICSLIBFLAGS="$EPICSLIBS -lca -lcas -lasHost -lCom -lgdd -lm -lrecIoc -lsoftDevIoc"
+       fi
        AC_DEFINE(EPICS_EDCU)
     else
        AC_MSG_ERROR([Do not have EPICS, Skipping EPICS EDUC, IOC in build])
@@ -284,6 +291,30 @@ AC_SUBST(EPICS_OBJS)
 
 dnl Check for configuration options
 dnl ==========================
+
+AC_ARG_ENABLE([fw],
+[ --enable-fw                 Build daqd with framewriter specific producer])
+
+BUILD_MODE=""
+BUILD_MODE_FLAGS=""
+PRODUCER_CC="producer.cc"
+PRODUCER_O="producer.o"
+AS_IF([test "x$enable_fw" != "xno" ], [
+    dnl Enable all framewriter build flags
+    dnl --disable-broadcast
+    dnl --enable-debug
+    dnl --with-broadcast
+    dnl --without-myrinet
+    dnl --with-epics
+    BUILD_MODE="fw"
+    BUILD_MODE_FLAGS="-DDAQD_BUILD_FW"
+    PRODUCER_CC="producer_fw.cc"
+    PRODUCER_O="producer_fw.o"
+])
+AC_SUBST(BUILD_MODE)
+AC_SUBST(BUILD_MODE_FLAGS)
+AC_SUBST(PRODUCER_CC)
+AC_SUBST(PRODUCER_O)
 
 AC_ARG_WITH(broadcast,
 [ --with-broadcast            Get data receiving a broadcast],

@@ -58,6 +58,7 @@
 #endif
 #include <fstream>
 #include <vector>
+#include <memory>
 
 using namespace std;
 
@@ -77,12 +78,32 @@ using namespace std;
 #include <time.h>
 #include <string.h>
 
+#include "epics_pvs.hh"
+#include "work_queue.hh"
+
 #ifdef USE_SYMMETRICOM
 #ifndef USE_IOP
 //#include <bcuser.h>
 #include <../drv/symmetricom/symmetricom.h>
 #endif
 #endif
+
+namespace {
+    struct framer_buf {
+        daqd_c::adc_data_ptr_type dptr;
+        ldas_frame_h_type frame;
+        time_t gps, gps_n;
+        unsigned long nac;
+        int frame_file_length_seconds;
+        unsigned int frame_number;
+        int dir_num;
+        // buffers for filenames
+        char tmpf [filesys_c::filename_max + 10];
+        char _tmpf [filesys_c::filename_max + 10];
+    };
+
+    typedef work_queue::work_queue<framer_buf> framer_work_queue;
+}
 
 /// Helper function to deal with the archive channels.
 int
@@ -359,17 +380,21 @@ daqd_c::configure_channels_files ()
 
 #if EPICS_EDCU == 1
   /* Epics display */
-  extern unsigned int pvValue[1000];
-  pvValue[1] = daqd.num_channels
+  {
+    int chan_count_total = daqd.num_channels
 #ifdef GDS_TESTPOINTS
 	 - daqd.num_gds_channel_aliases
 #endif
 	- daqd.num_epics_channels;
-  pvValue[21] = daqd.num_science_channels
+    PV::set_pv(PV::PV_TOTAL_CHANS, chan_count_total);
+
+    int chan_count_science = daqd.num_science_channels
 #ifdef GDS_TESTPOINTS
 	 - daqd.num_gds_channel_aliases
 #endif
         - daqd.num_epics_channels;
+    PV::set_pv(PV::PV_SCIENCE_TOTAL_CHANS, chan_count_science);
+  }
 #endif
   system_log(1, "finished configuring data channels");
   return 0;
@@ -638,15 +663,210 @@ daqd_c::full_frame(int frame_length_seconds, int science,
   return frame;
 }
 
+/// IO Thread for the full resolution frame saver
+/// This is the thread that does the actual writing
+void *
+daqd_c::framer_io(int science)
+{
+   const int STATE_NORMAL = 0;
+   const int STATE_WRITING = 1;
+   const int STATE_BROADCAST = 2;
+
+   framer_work_queue *_work_queue = 0;
+   if (science) {
+       daqd_c::set_thread_priority("Science frame saver IO","dqscifrio",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_IO_CPUAFFINITY);
+       daqd_c::locker(this);
+       _work_queue = reinterpret_cast<framer_work_queue*>(_science_framer_work_queue);
+   } else {
+       daqd_c::set_thread_priority("Frame saver IO","dqfulfrio",SAVER_THREAD_PRIORITY,FULL_SAVER_IO_CPUAFFINITY);
+       daqd_c::locker(this);
+       _work_queue = reinterpret_cast<framer_work_queue*>(_framer_work_queue);
+   }
+   enum PV::PV_NAME epics_state_var = (science ? PV::PV_SCIENCE_FW_STATE : PV::PV_RAW_FW_STATE);
+
+   PV::set_pv(epics_state_var, STATE_NORMAL);
+   for (long frame_cntr = 0;; frame_cntr++) {
+       framer_buf *cur_buf = _work_queue->get_from_queue(1);
+
+       DEBUG(1, cerr << "About to write " << (science ? "science" : "full") << " frame @" << cur_buf->gps << endl);
+       if (science) {
+           cur_buf->dir_num = science_fsd.getDirFileNames (cur_buf->gps,
+                                                           cur_buf->_tmpf,
+                                                           cur_buf->tmpf,
+                                                           frames_per_file,
+                                                           blocks_per_frame);
+       } else {
+           cur_buf->dir_num = fsd.getDirFileNames (cur_buf->gps,
+                                                   cur_buf->_tmpf,
+                                                   cur_buf->tmpf,
+                                                   frames_per_file,
+                                                   blocks_per_frame);
+       }
+
+
+       int fd = creat (cur_buf->_tmpf, 0644);
+       if (fd < 0) {
+           system_log(1, "Couldn't open full frame file `%s' for writing; errno %d", cur_buf->_tmpf, errno);
+           if (science) {
+               science_fsd.report_lost_frame ();
+           } else {
+               fsd.report_lost_frame ();
+           }
+           set_fault ();
+       } else {
+           close (fd);
+           /*try*/
+           {
+
+               PV::set_pv(epics_state_var, STATE_WRITING);
+               time_t t = 0;
+               {
+                   FrameCPP::Common::FrameBuffer<filebuf>* obuf
+                            = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
+                   obuf -> open(cur_buf->_tmpf, std::ios::out | std::ios::binary);
+                   FrameCPP::Common::OFrameStream  ofs(obuf);
+                   ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
+                   DEBUG(1, cerr << "Begin WriteFrame()" << endl);
+                   t = time(0);
+                   ofs.WriteFrame(cur_buf->frame,
+                            //FrameCPP::Version::FrVect::GZIP, 1,
+                            daqd.no_compression? FrameCPP::FrVect::RAW:
+                            FrameCPP::FrVect::ZERO_SUPPRESS_OTHERWISE_GZIP, 1,
+                            //FrameCPP::Compression::MODE_ZERO_SUPPRESS_SHORT,
+                            //FrameCPP::Version::FrVect::DEFAULT_GZIP_LEVEL, /* 6 */
+                            FrameCPP::Common::CheckSum::CRC);
+
+                   ofs.Close();
+                   obuf->close();
+               }
+               t = time(0) - t;
+               PV::set_pv(epics_state_var, STATE_NORMAL);
+               DEBUG(1, cerr << (science ? "Science" : "Full") << " frame done in " << t << " seconds" << endl);
+               /* Record frame write time */
+               if (science) {
+                   PV::set_pv(PV::PV_SCIENCE_FRAME_WRITE_SEC, t);
+               } else {
+                   PV::set_pv(PV::PV_FRAME_WRITE_SEC, t);
+               }
+
+               if (rename(cur_buf->_tmpf, cur_buf->tmpf)) {
+                   system_log(1, "failed to rename file; errno %d", errno);
+                   if (science) {
+                       science_fsd.report_lost_frame ();
+                   } else {
+                       fsd.report_lost_frame ();
+                   }
+                   set_fault ();
+               } else {
+
+                   DEBUG(3, cerr << "frame " << frame_cntr << "(" << cur_buf->frame_number << ") is written out" << endl);
+                   // Successful frame write
+                   if (science) {
+                       science_fsd.update_dir (cur_buf->gps, cur_buf->gps_n, cur_buf->frame_file_length_seconds, cur_buf->dir_num);
+                   } else {
+                       fsd.update_dir (cur_buf->gps, cur_buf->gps_n, cur_buf->frame_file_length_seconds, cur_buf->dir_num);
+                   }
+
+                   // Report frame size to the Epics world
+                   fd = open(cur_buf->tmpf, O_RDONLY);
+                   if (fd == -1) {
+                       system_log(1, "failed to open file; errno %d", errno);
+                       exit(1);
+                   }
+                   struct stat sb;
+                   if (fstat(fd, &sb) == -1) {
+                       system_log(1, "failed to fstat file; errno %d", errno);
+                       exit(1);
+                   }
+                   if (science) PV::set_pv(PV::PV_SCIENCE_FRAME_SIZE, sb.st_size);
+                   else PV::set_pv(PV::PV_FRAME_SIZE, sb.st_size);
+                   close(fd);
+               }
+
+               // Update the EPICS_SAVED value
+               if (!science) {
+                  PV::set_pv(PV::PV_CHANS_SAVED, cur_buf->nac);
+               } else {
+                  PV::set_pv(PV::PV_SCIENCE_CHANS_SAVED, cur_buf->nac);
+               }
+
+  #ifndef NO_BROADCAST
+               // We are compiled to be a DMT broadcaster
+               //
+               fd = open(cur_buf->tmpf, O_RDONLY);
+               if (fd == -1) {
+                   system_log(1, "failed to open file; errno %d", errno);
+                   exit(1);
+               }
+               struct stat sb;
+               if (fstat(fd, &sb) == -1) {
+                   system_log(1, "failed to fstat file; errno %d", errno);
+                   exit(1);
+               }
+               void *addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+               if (addr == MAP_FAILED) {
+                   system_log(1, "failed to fstat file; errno %d", errno);
+                   exit(1);
+               }
+
+               net_writer_c *nw = (net_writer_c *)net_writers.first();
+               assert(nw);
+               assert(nw->broadcast);
+
+               PV::set_pv(epics_state_var, STATE_BROADCAST);
+               if (nw->send_to_client ((char *) addr, sb.st_size, gps, b1 -> block_period ())) {
+                   system_log(1, "failed to broadcast data frame");
+                   exit(1);
+               }
+               PV::set_pv(epics_state_var, STATE_NORMAL);
+               munmap(addr, sb.st_size);
+               close(fd);
+               unlink(cur_buf->tmpf);
+  #endif
+           } /*catch (...) {
+        system_log(1, "failed to write full frame out");
+        fsd.report_lost_frame ();
+        set_fault ();
+       }*/
+       }
+
+       if (!science) {
+           /* Epics display: full res data look back size in seconds */
+           PV::set_pv(PV::PV_LOOKBACK_FULL, fsd.get_max() - fsd.get_min());
+       }
+
+       if (science) {
+           /* Epics display: current full frame saving directory */
+           PV::set_pv(PV::PV_LOOKBACK_DIR, science_fsd.get_cur_dir());
+       }
+       _work_queue->add_to_queue(0, cur_buf);
+   }
+   return NULL;
+}
+
 /// Full resolution frame saving thread.
 void *
 daqd_c::framer (int science)
 {
+  const int STATE_NORMAL = 0;
+  const int STATE_PROCESSING = 1;
+  enum PV::PV_NAME epics_state_var = (science ? PV::PV_SCIENCE_FW_DATA_STATE : PV::PV_RAW_FW_DATA_STATE);
+  enum PV::PV_NAME epics_sec_var = (science ? PV::PV_SCIENCE_FW_DATA_SEC : PV::PV_RAW_FW_DATA_SEC);
+
+  framer_work_queue *_work_queue = 0;
 // Set thread parameters
   if (science) {
       daqd_c::set_thread_priority("Science frame saver","dqscifr",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_CPUAFFINITY); 
+      daqd_c::locker _l(this);
+      if (!_science_framer_work_queue)
+          _science_framer_work_queue = reinterpret_cast<void *>(new framer_work_queue(2));
+      _work_queue = reinterpret_cast<framer_work_queue *>(_science_framer_work_queue);
   } else {
       daqd_c::set_thread_priority("Full frame saver","dqfulfr",SAVER_THREAD_PRIORITY,FULL_SAVER_CPUAFFINITY); 
+      daqd_c::locker _l(this);
+      if (!_framer_work_queue)
+          _framer_work_queue = reinterpret_cast<void *>(new framer_work_queue(2));
+      _work_queue = reinterpret_cast<framer_work_queue *>(_framer_work_queue);
   }
 
   unsigned long nac = 0; // Number of active channels
@@ -657,26 +877,59 @@ daqd_c::framer (int science)
 	abort();
   }
 
-  int frame_file_length_seconds = frames_per_file * blocks_per_frame;
   if (science) {
     system_log(1, "Start up science mode frame writer\n");
   }
 
-  adc_data_ptr_type dptr;
-  ldas_frame_h_type frame
-  	= full_frame (blocks_per_frame, science, dptr);
+  // create buffers for the queue
+  for (int i = 0; i < 2; ++i) {
+      auto_ptr<framer_buf> _buf(new framer_buf);
+      _buf->frame_file_length_seconds = frames_per_file * blocks_per_frame;
+      _buf->dir_num = -1;
+      _buf->frame = full_frame (blocks_per_frame, science, _buf->dptr);
 
-  if (!frame) {
-    // Have to free all already allocated ADC structures at this point
-    // to avoid memory leaks, if not shutting down here
-    shutdown_server ();
-    return NULL;
+      if (!(_buf->frame)) {
+        // Have to free all already allocated ADC structures at this point
+        // to avoid memory leaks, if not shutting down here
+        shutdown_server ();
+        return NULL;
+      }
+      _work_queue->add_to_queue(0, _buf.get());
+      _buf.release();
+  }
+
+  // Startup the IO thread
+  {
+      DEBUG(4, cerr << "starting " << (science ? "science" : "full") << " framer IO thread" << endl);
+      pthread_attr_t attr;
+      pthread_attr_init(&attr);
+      pthread_attr_setstacksize(&attr, daqd.thread_stack_size);
+      pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
+
+      int err = 0;
+      if (science) {
+          err = pthread_create( &science_frame_saver_io_tid, &attr,
+                               (void *(*)(void *))daqd_c::science_framer_io_static,
+                               (void *)this);
+      } else {
+          err = pthread_create( &frame_saver_io_tid, &attr,
+                               (void *(*)(void *))daqd_c::framer_io_static,
+                               (void *)this);
+      }
+      if (err) {
+          pthread_attr_destroy(&attr);
+          system_log(1, "pthread_create() err=%d while creating %s IO thread", err, (science ? "science" : "full"));
+          exit(1);
+      }
+      pthread_attr_destroy(&attr);
   }
 
   // done creating a frame
   if (!science) {
     sem_post (&frame_saver_sem);
     sem_post (&frame_saver_sem);
+
+
   } else {
     sem_post (&science_frame_saver_sem);
     sem_post (&science_frame_saver_sem);
@@ -685,24 +938,23 @@ daqd_c::framer (int science)
   // Store data in the frame 
   // write frame files
 
-  int dir_num = -1;
-  //  int tdir_num;
-
   unsigned long status_ptr = block_size - 17 * sizeof(int) * num_channels;   // Index to the start of signal status memory area
 
   bool skip_done = false;
   for (frame_cntr = 0;; frame_cntr++)
     {
+      framer_buf *cur_buf = _work_queue->get_from_queue(0);
       int eof_flag = 0;
       unsigned long fast_data_crc = 0;
       unsigned long fast_data_length = 0;
       time_t frame_start;
-      unsigned int run, frame_number;
+      unsigned int run;
       time_t gps, gps_n;
       int altzone, leap_seconds;
       struct tm tms;
-      char tmpf [filesys_c::filename_max + 10];
-      char _tmpf [filesys_c::filename_max + 10];
+
+      time_t tdata = time(0);
+      PV::set_pv(epics_state_var, STATE_PROCESSING);
 
     /* Accumulate frame adc data */
     for (int i = 0; i < 1 /*frames_per_file */; i++)
@@ -750,7 +1002,7 @@ daqd_c::framer (int science)
 		    //		    frame_start = prop -> timestamp;
 		    frame_start = gps;
 		    // Frame number is based upon the cycle counter
-		    frame_number = prop -> prop.cycle / 16 / (frames_per_file * blocks_per_frame);
+            cur_buf->frame_number = prop -> prop.cycle / 16 / (frames_per_file * blocks_per_frame);
 		  }
 
 		nac = 0;
@@ -769,7 +1021,7 @@ daqd_c::framer (int science)
 			} else {
 				continue; // Skip it, it is not active
 			}
-		  unsigned char *fast_adc_ptr = dptr[nac].first;
+          unsigned char *fast_adc_ptr = cur_buf->dptr[nac].first;
 #ifdef USE_BROADCAST
 		  // Tested at the 40m on 11 jun 08
 		  // Short data needed to be sample swapped
@@ -804,14 +1056,14 @@ daqd_c::framer (int science)
 
 		  // Reset data valid to zero in the begining of a second
 		  if (! bnum) {
-		  	frame -> GetRawData () -> RefFirstAdc ()[nac] -> SetDataValid(0);
+            cur_buf->frame -> GetRawData () -> RefFirstAdc ()[nac] -> SetDataValid(0);
 		  }
 
 		  // Assign data valid if not zero, so once it gets set it sticks for the duration of a second
 		  if (data_valid) {
-		  	frame -> GetRawData () -> RefFirstAdc ()[nac] -> SetDataValid(data_valid);
+            cur_buf->frame -> GetRawData () -> RefFirstAdc ()[nac] -> SetDataValid(data_valid);
 		  }
-		  data_valid = frame -> GetRawData () -> RefFirstAdc ()[nac] -> GetDataValid();
+          data_valid = cur_buf->frame -> GetRawData () -> RefFirstAdc ()[nac] -> GetDataValid();
 
 		  /* Calculate CRC on fast data only */
 		  /* Do not calculate CRC on bad data */
@@ -823,7 +1075,7 @@ daqd_c::framer (int science)
 	            fast_data_length += channels [j].bytes;
 		  }
 
-		  INT_2U *aux_data_valid_ptr = dptr[nac].second;
+          INT_2U *aux_data_valid_ptr = cur_buf->dptr[nac].second;
 		  if (aux_data_valid_ptr) {
 		    stptr += 4;
 		    for (int k = 0; k < 16; k++)  {
@@ -845,8 +1097,7 @@ daqd_c::framer (int science)
       /* finish CRC calculation for the fast data */
 #if EPICS_EDCU == 1
       /* Send fast data CRC to Epics for display and checking */
-      extern unsigned int pvValue[1000];
-      pvValue[13] = crc_len (fast_data_length, fast_data_crc);
+    PV::set_pv(PV::PV_FAST_DATA_CRC, crc_len (fast_data_length, fast_data_crc));
 #endif
 
       if (eof_flag)
@@ -864,199 +1115,19 @@ daqd_c::framer (int science)
                                      INT_2U leapS, INT_4S localTime)
 */
 
-#if 0
-      fw -> setFrameFileAttributes (run, frame_number, 0,
-				    gps, blocks_per_frame, gps_n,
-				    leap_seconds, altzone);
-#endif
-      frame -> SetGTime(FrameCPP::Version::GPSTime (gps, gps_n));
+      cur_buf->frame -> SetGTime(FrameCPP::Version::GPSTime (gps, gps_n));
       //frame -> SetULeapS(leap_seconds);
 
-      DEBUG(1, cerr << "about to write frame @ " << gps << endl);
-      if (science) {
-      	dir_num = science_fsd.getDirFileNames (gps, _tmpf, tmpf, frames_per_file, blocks_per_frame);
-      } else {
-      	dir_num = fsd.getDirFileNames (gps, _tmpf, tmpf, frames_per_file, blocks_per_frame);
-      }
+      DEBUG(1, cerr << "adding frame @ " << gps << " to " << (science ? "science" : "full") << " frame queue" << endl);
 
-      int fd = creat (_tmpf, 0644);
-      if (fd < 0) {
-	system_log(1, "Couldn't open full frame file `%s' for writing; errno %d", _tmpf, errno);
-        if (science) {
-	  fsd.report_lost_frame ();
-	} else {
-	  fsd.report_lost_frame ();
-	}
-	set_fault ();
-      } else {
-	close (fd);
-	/*try*/ {
-          FrameCPP::Common::FrameBuffer<filebuf>* obuf
-	    = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
-          obuf -> open(_tmpf, std::ios::out | std::ios::binary);
-          FrameCPP::Common::OFrameStream  ofs(obuf);
-          ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
-          DEBUG(1, cerr << "Begin WriteFrame()" << endl);
-	  time_t t = time(0);
-          ofs.WriteFrame(frame, 
-			//FrameCPP::Version::FrVect::GZIP, 1,
-                        daqd.no_compression? FrameCPP::FrVect::RAW:
-				 FrameCPP::FrVect::ZERO_SUPPRESS_OTHERWISE_GZIP, 1,
-			//FrameCPP::Compression::MODE_ZERO_SUPPRESS_SHORT,
-			//FrameCPP::Version::FrVect::DEFAULT_GZIP_LEVEL, /* 6 */
-			FrameCPP::Common::CheckSum::CRC);
+      cur_buf->gps = gps;
+      cur_buf->gps_n = gps_n;
+      cur_buf->nac = nac;
 
-	  t = time(0) - t;
-          DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
-          ofs.Close();
-          obuf->close();
-#if EPICS_EDCU == 1
-      /* Record frame write time */ 
-          if (science) {
-              pvValue[24] = t;
-          } else {
-              pvValue[23] = t;
-          }
-#endif
-	  if (rename(_tmpf, tmpf)) {
-	    system_log(1, "failed to rename file; errno %d", errno);
-            if (science) {
-	      science_fsd.report_lost_frame ();
-	    } else {
-	      fsd.report_lost_frame ();
-	    }
-	    set_fault ();
-	  } else {
-	    DEBUG(3, cerr << "frame " << frame_cntr << "(" << frame_number << ") is written out" << endl);
-	    // Successful frame write
-            if (science) {
-	      science_fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
-	    } else {
-	      fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
-	    }
-
-	    // Report frame size to the Epics world
-            fd = open(tmpf, O_RDONLY);
-            if (fd == -1) {
-             	system_log(1, "failed to open file; errno %d", errno);
-                exit(1);
-            }
-            struct stat sb;
-            if (fstat(fd, &sb) == -1) {
-              system_log(1, "failed to fstat file; errno %d", errno);
-              exit(1);
-            }
-	    if (science) pvValue[20] = sb.st_size;
-	    else pvValue[19] = sb.st_size;
-	    close(fd);
-	  }
-
-	  // Update the EPICS_SAVED value
-	  if (!science) {
-  	 	 pvValue[18] = nac;
-	  } else {
-  	 	 pvValue[22] = nac;
-	  }
-
-#ifndef NO_BROADCAST
-	 // We are compiled to be a DMT broadcaster
-	 //
-	  fd = open(tmpf, O_RDONLY);
-          if (fd == -1) {
-            system_log(1, "failed to open file; errno %d", errno);
-            exit(1);
-          }
-          struct stat sb;
-          if (fstat(fd, &sb) == -1) {
-            system_log(1, "failed to fstat file; errno %d", errno);
-            exit(1);
-          }
-          void *addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-          if (addr == MAP_FAILED) {
-            system_log(1, "failed to fstat file; errno %d", errno);
-            exit(1);
-          }
-
-          net_writer_c *nw = (net_writer_c *)net_writers.first();
-          assert(nw);
-          assert(nw->broadcast);
-
-          if (nw->send_to_client ((char *) addr, sb.st_size, gps, b1 -> block_period ())) {
-            system_log(1, "failed to broadcast data frame");
-            exit(1);
-          }
-          munmap(addr, sb.st_size);
-          close(fd);
-          unlink(tmpf);
-
-#endif 
-  	} /*catch (...) {
-	  system_log(1, "failed to write full frame out");
-	  fsd.report_lost_frame ();
-	  set_fault ();
-	}*/
-      }
-
-#if 0
-      int fd = creat (_tmpf, 0644);
-      if (fd < 0) {
-	system_log(1, "Couldn't open full frame file `%s' for writing; errno %d", _tmpf, errno);
-	fsd.report_lost_frame ();
-	set_fault ();
-      } else {
-
-#if defined(DIRECTIO_ON) && defined(DIRECTIO_OFF)
-        if (daqd.do_directio) directio (fd, DIRECTIO_ON);
-#endif
-
-
-	TNF_PROBE_1(daq_c_framer_frame_write_start, "daqd_c::framer",
-		    "frame write",
-		    tnf_long,   frame_number,   frame_number);
-	  
-	// Calculate md5 check sum
-	if (cksum_file != "") {
-	  unsigned long crc = fr_cksum(cksum_file, tmpf, (unsigned char *)(ost -> str ()), image_size);
-	  system_log(5, "%d\t%x\n", gps, crc);
-	}
-
-	/* Write out a frame */
-	int nwritten = write (fd, ost -> str (), image_size);
-        if (nwritten == image_size) {
-	  if (rename(_tmpf, tmpf)) {
-	    system_log(1, "failed to rename file; errno %d", errno);
-	    fsd.report_lost_frame ();
-	    set_fault ();
-	  } else {
-	    DEBUG(3, cerr << "frame " << frame_cntr << "(" << frame_number << ") is written out" << endl);
-	    // Successful frame write
-	    fsd.update_dir (gps, gps_n, frame_file_length_seconds, dir_num);
-	  }
-	} else {
-	  system_log(1, "failed to write full frame out; errno %d", errno);
-	  fsd.report_lost_frame ();
-	  set_fault ();
-	}
-
-	close (fd);
-	TNF_PROBE_0(daqc_c_framer_frame_write_end, "daqd_c::framer", "frame write");
-      }
-#endif
-
-#if EPICS_EDCU == 1
-      if (!science) {
-        /* Epics display: full res data look back size in seconds */
-        extern unsigned int pvValue[1000];
-        pvValue[7] = fsd.get_max() - fsd.get_min();
-      }
-
-      if (science) {
-        /* Epics display: current full frame saving directory */
-        extern unsigned int pvValue[1000];
-        pvValue[8] = science_fsd.get_cur_dir();
-      }
-#endif
-
+      _work_queue->add_to_queue(1, cur_buf);
+      cur_buf = 0;
+      PV::set_pv(epics_state_var, STATE_NORMAL);
+      PV::set_pv(epics_sec_var, (int)(time(0) - tdata));
     }
 
   return NULL;
@@ -1100,166 +1171,21 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
     return 1;
   }
 
-  int s = daqd.block_size / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-  if (s < 128*1024) s = 128*1024;
-#ifdef USE_BROADCAST
-  // Broadcast has 4096 byte header, so we allocate space for it here
-  s += BROADCAST_HEADER_SIZE;
-  // Broadcast needs extra room for its own header
-  s += 100*1024;
-#endif
-  move_buf = (unsigned char *) malloc (s);
-  if (! move_buf) {
-    system_log(1,"out of memory allocating move buffer");
-    exit (1);
-  }
-  memset (move_buf, 255, s);
-  printf("Allocated move buffer size %d bytes\n", s);
-#ifdef USE_BROADCAST
-  move_buf += BROADCAST_HEADER_SIZE; // Keep broadcast header space in front of data space
-#endif
-
-  unsigned long  status_ptr = block_size - 17 * sizeof(int) * num_channels;   // Index to the start of signal status memory area
-
-#ifdef EDCU_SHMEM
-  key_t shmak = ftok("/tmp/foo",0);
-  if (shmak == -1) {
-    system_log(1,"couldn't do ftok(); errno=%d", errno);
-    exit(1);
-  }
-
-  int shmid = shmget(shmak, edcu_chan_idx[1] - edcu_chan_idx[0] + 8, IPC_CREAT);
-  if (shmid == -1) {
-    system_log(1,"couldn't do shmget(); errno=%d", errno);
-    exit(1);
-  }
-
-  edcu_shptr = (unsigned char *)shmat(shmid, 0,0);
-  if (edcu_shptr == (unsigned char *)-1) {
-    system_log(1,"couldn't do shmat(); errno=%d", errno);
-    exit(1);
-  }
-
-  /* Set bad status for all EDCU channels in the shared memory */
-  for (int i = 0; i < (edcu_chan_idx[1] - edcu_chan_idx[0])/8 + 1; i+=2) {
-    ((unsigned int *) edcu_shptr)[i] = 0xbad;
-  }
-
-#endif
-
-  int cur_dcu = -1;
-  for (int i = 0; i < num_channels + 1; i++) {
-    int t = 0;
-    if (i == num_channels) t = 1;
-    else t = cur_dcu != -1 && cur_dcu != channels[i].dcu_id;
-
-    // Finished with cur_dcu: channels sorted by dcu_id
-#ifdef USE_BROADCAST
-    if (IS_MYRINET_DCU(cur_dcu) && t) {
-	int rate = 4 * dcuRate[0][cur_dcu];
-	int tp_size = rate/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-	int n_add = DAQ_GDS_MAX_TP_ALLOWED;
-
-	int actual = 2*DAQ_DCU_BLOCK_SIZE / tp_size;
-	if (actual < n_add) n_add = actual;
-
-	for (int j = 0; j < n_add; j++) {
-          vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + dcuTPOffsetRmem[0][cur_dcu] + j*tp_size;
-          vmic_pv [vmic_pv_len].dest_vec_idx = dcuTPOffset[0][cur_dcu] + j*tp_size*DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-          vmic_pv [vmic_pv_len].dest_status_idx = 0xffffffff;
-          static unsigned int zero = 0;
-          vmic_pv [vmic_pv_len].src_status_addr = &zero;
-          vmic_pv [vmic_pv_len].vec_len = tp_size;
-    	  DEBUG(10, cerr << "Myrinet testpoint " << j << endl);
-    	  DEBUG(10, cerr << "vmic_pv: " << hex << (unsigned long) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
-	  vmic_pv_len++;
-	}
-    }
-#else
-    if (IS_MYRINET_DCU(cur_dcu) && t) {
-	// Add testpoints
-	int rate = 4 * dcuRate[0][cur_dcu];
-	int tp_size = rate/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-	int n_add = (2*DAQ_DCU_BLOCK_SIZE - dcuDAQsize[0][cur_dcu]) / tp_size;
-        if (n_add > DAQ_GDS_MAX_TP_ALLOWED) n_add = DAQ_GDS_MAX_TP_ALLOWED;
-	for (int j = 0; j < n_add; j++) {
-          vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + dcuTPOffsetRmem[0][cur_dcu] + j*tp_size;
-          vmic_pv [vmic_pv_len].dest_vec_idx = dcuTPOffset[0][cur_dcu] + j*tp_size*DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-          vmic_pv [vmic_pv_len].dest_status_idx = 0xffffffff;
-          static unsigned int zero = 0;
-          vmic_pv [vmic_pv_len].src_status_addr = &zero;
-          vmic_pv [vmic_pv_len].vec_len = rate/16;
-    	DEBUG(10, cerr << "Myrinet testpoint " << j << endl);
-    	DEBUG(10, cerr << "vmic_pv: " << hex << (long int) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
-	  vmic_pv_len++;
-	}
-    }
-#endif
-    if (i == num_channels) continue;
-    cur_dcu = channels[i].dcu_id;
-
-#ifdef GDS_TESTPOINTS
-    // Skip alias channels, they are not physical signals
-    if (channels [i].gds & 2) {
-      continue;
-    }
-#endif
-
-#ifdef EDCU_SHMEM
-    if (channels [i].dcu_id == ADCU_PMC_40_ID) {
-      /* Slow channels point into shared memory partition */
-      vmic_pv [vmic_pv_len].src_pvec_addr = edcu_shptr + channels [i].rm_offset - edcu_chan_idx[0];
-    } else {
-      vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + channels [i].rm_offset;
-    }
-#else
-    vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + channels [i].rm_offset;
-    vmic_pv [vmic_pv_len].dest_vec_idx = channels [i].offset;
-    vmic_pv [vmic_pv_len].dest_status_idx = status_ptr + 17 * sizeof(int) * i;
-#if EPICS_EDCU == 1
-    if (IS_EPICS_DCU(channels [i].dcu_id)) {
-      vmic_pv [vmic_pv_len].src_status_addr = edcu1.channel_status + i;
-    } else
-#endif
-#ifdef USE_BROADCAST
-    // Zero out the EXC status as well
-    if (IS_TP_DCU(channels [i].dcu_id) || IS_EXC_DCU(channels [i].dcu_id)) 
-#else
-    if (IS_EXC_DCU(channels [i].dcu_id)) {
-      /* The AWG DCUs are using older data format with status word included in front of the data */
-      vmic_pv [vmic_pv_len].src_status_addr = (unsigned int *)(vmic_pv[vmic_pv_len].src_pvec_addr - 4);
-    } else if (IS_TP_DCU(channels [i].dcu_id)) 
-#endif
-    {
-      /* :TODO: need to pass real DCU status depending on the current test point selection */
-      static unsigned int zero = 0;
-      vmic_pv [vmic_pv_len].src_status_addr = &zero;
-    } else {
-      vmic_pv [vmic_pv_len].src_status_addr = dcuStatus[channels [i].ifoid] + channels [i].dcu_id;
-    }
-#endif
-    vmic_pv [vmic_pv_len].vec_len = channels [i].bytes/16;
-    // Byteswap all Myrinet data on Sun
-    vmic_pv [vmic_pv_len].bsw = 0;
-    DEBUG(10, cerr << channels [i].name << endl);
-    DEBUG(10, cerr << "vmic_pv: " << hex << (unsigned long) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
-    vmic_pv_len++;
-  }
-
 #if EPICS_EDCU == 1
   /* Epics display (Kb/Sec) */
-  extern unsigned int pvValue[1000];
 
-  // Want to have the size of DAQ data only
-  pvValue[2] = 0;
-  for (int i = 0; i < 2; i++) // Ifo number
-     for (int j = 0; j < DCU_COUNT; j++)
-          pvValue[2] += dcuDAQsize[i][j];
-  pvValue[2] *= 16;
-  pvValue[2] /= 1024; // make it kilobytes
-
+  {
+      unsigned int data_rate = 0;
+      // Want to have the size of DAQ data only
+      for (int i = 0; i < 2; i++) // Ifo number
+         for (int j = 0; j < DCU_COUNT; j++)
+              data_rate += dcuDAQsize[i][j];
+      data_rate *= 16;
+      data_rate /= 1024; // make it kilobytes
+      PV::set_pv(PV::PV_DATA_RATE, data_rate);
+  }
   /* Epics display: memory buffer look back */
-  pvValue[6] = main_buffer_size;
+  PV::set_pv(PV::PV_LOOKBACK_RAM, main_buffer_size);
 #endif
 
   return 0;
@@ -1349,9 +1275,6 @@ int
 daqd_c::start_frame_saver (ostream *yyout, int science)
 {
   assert (b1);
-#if EPICS_EDCU == 1
-  extern unsigned int pvValue[1000];
-#endif
   int cn = 0;
   if ((cn = b1 -> add_consumer ()) >= 0)
     {
@@ -1398,6 +1321,162 @@ daqd_c::start_frame_saver (ostream *yyout, int science)
   return 0;
 }
 
+void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_dpvec *vmic_pv)
+{
+    int vmic_pv_len = 0;
+    unsigned char *move_buf = 0;
+
+    locker mon(this);
+
+    int s = daqd.block_size / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+    if (s < 128*1024) s = 128*1024;
+  #ifdef USE_BROADCAST
+    // Broadcast has 4096 byte header, so we allocate space for it here
+    s += BROADCAST_HEADER_SIZE;
+    // Broadcast needs extra room for its own header
+    s += 100*1024;
+  #endif
+    move_buf = (unsigned char *) malloc (s);
+    if (! move_buf) {
+      system_log(1,"out of memory allocating move buffer");
+      exit (1);
+    }
+    memset (move_buf, 255, s);
+    printf("Allocated move buffer size %d bytes\n", s);
+  #ifdef USE_BROADCAST
+    move_buf += BROADCAST_HEADER_SIZE; // Keep broadcast header space in front of data space
+  #endif
+
+    unsigned long  status_ptr = block_size - 17 * sizeof(int) * num_channels;   // Index to the start of signal status memory area
+
+#ifdef EDCU_SHMEM
+  key_t shmak = ftok("/tmp/foo",0);
+  if (shmak == -1) {
+    system_log(1,"couldn't do ftok(); errno=%d", errno);
+    exit(1);
+  }
+
+  int shmid = shmget(shmak, edcu_chan_idx[1] - edcu_chan_idx[0] + 8, IPC_CREAT);
+  if (shmid == -1) {
+    system_log(1,"couldn't do shmget(); errno=%d", errno);
+    exit(1);
+  }
+
+  edcu_shptr = (unsigned char *)shmat(shmid, 0,0);
+  if (edcu_shptr == (unsigned char *)-1) {
+    system_log(1,"couldn't do shmat(); errno=%d", errno);
+    exit(1);
+  }
+
+  /* Set bad status for all EDCU channels in the shared memory */
+  for (int i = 0; i < (edcu_chan_idx[1] - edcu_chan_idx[0])/8 + 1; i+=2) {
+    ((unsigned int *) edcu_shptr)[i] = 0xbad;
+  }
+
+#endif
+
+  int cur_dcu = -1;
+  for (int i = 0; i < num_channels + 1; i++) {
+    int t = 0;
+    if (i == num_channels) t = 1;
+    else t = cur_dcu != -1 && cur_dcu != channels[i].dcu_id;
+
+    // Finished with cur_dcu: channels sorted by dcu_id
+#ifdef USE_BROADCAST
+    if (IS_MYRINET_DCU(cur_dcu) && t) {
+        int rate = 4 * dcuRate[0][cur_dcu];
+        int tp_size = rate/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+        int n_add = DAQ_GDS_MAX_TP_ALLOWED;
+
+        int actual = 2*DAQ_DCU_BLOCK_SIZE / tp_size;
+        if (actual < n_add) n_add = actual;
+
+        for (int j = 0; j < n_add; j++) {
+          vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + dcuTPOffsetRmem[0][cur_dcu] + j*tp_size;
+          vmic_pv [vmic_pv_len].dest_vec_idx = dcuTPOffset[0][cur_dcu] + j*tp_size*DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+          vmic_pv [vmic_pv_len].dest_status_idx = 0xffffffff;
+          static unsigned int zero = 0;
+          vmic_pv [vmic_pv_len].src_status_addr = &zero;
+          vmic_pv [vmic_pv_len].vec_len = tp_size;
+          DEBUG(10, cerr << "Myrinet testpoint " << j << endl);
+          DEBUG(10, cerr << "vmic_pv: " << hex << (unsigned long) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
+          vmic_pv_len++;
+        }
+    }
+#else
+    if (IS_MYRINET_DCU(cur_dcu) && t) {
+        // Add testpoints
+        int rate = 4 * dcuRate[0][cur_dcu];
+        int tp_size = rate/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+        int n_add = (2*DAQ_DCU_BLOCK_SIZE - dcuDAQsize[0][cur_dcu]) / tp_size;
+        if (n_add > DAQ_GDS_MAX_TP_ALLOWED) n_add = DAQ_GDS_MAX_TP_ALLOWED;
+        for (int j = 0; j < n_add; j++) {
+          vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + dcuTPOffsetRmem[0][cur_dcu] + j*tp_size;
+          vmic_pv [vmic_pv_len].dest_vec_idx = dcuTPOffset[0][cur_dcu] + j*tp_size*DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+          vmic_pv [vmic_pv_len].dest_status_idx = 0xffffffff;
+          static unsigned int zero = 0;
+          vmic_pv [vmic_pv_len].src_status_addr = &zero;
+          vmic_pv [vmic_pv_len].vec_len = rate/16;
+        DEBUG(10, cerr << "Myrinet testpoint " << j << endl);
+        DEBUG(10, cerr << "vmic_pv: " << hex << (long int) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
+          vmic_pv_len++;
+        }
+    }
+#endif
+    if (i == num_channels) continue;
+    cur_dcu = channels[i].dcu_id;
+
+#ifdef GDS_TESTPOINTS
+    // Skip alias channels, they are not physical signals
+    if (channels [i].gds & 2) {
+      continue;
+    }
+#endif
+
+#ifdef EDCU_SHMEM
+    if (channels [i].dcu_id == ADCU_PMC_40_ID) {
+      /* Slow channels point into shared memory partition */
+      vmic_pv [vmic_pv_len].src_pvec_addr = edcu_shptr + channels [i].rm_offset - edcu_chan_idx[0];
+    } else {
+      vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + channels [i].rm_offset;
+    }
+#else
+    vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + channels [i].rm_offset;
+    vmic_pv [vmic_pv_len].dest_vec_idx = channels [i].offset;
+    vmic_pv [vmic_pv_len].dest_status_idx = status_ptr + 17 * sizeof(int) * i;
+#if EPICS_EDCU == 1
+    if (IS_EPICS_DCU(channels [i].dcu_id)) {
+      vmic_pv [vmic_pv_len].src_status_addr = edcu1.channel_status + i;
+    } else
+#endif
+#ifdef USE_BROADCAST
+    // Zero out the EXC status as well
+    if (IS_TP_DCU(channels [i].dcu_id) || IS_EXC_DCU(channels [i].dcu_id))
+#else
+    if (IS_EXC_DCU(channels [i].dcu_id)) {
+      /* The AWG DCUs are using older data format with status word included in front of the data */
+      vmic_pv [vmic_pv_len].src_status_addr = (unsigned int *)(vmic_pv[vmic_pv_len].src_pvec_addr - 4);
+    } else if (IS_TP_DCU(channels [i].dcu_id))
+#endif
+    {
+      /* :TODO: need to pass real DCU status depending on the current test point selection */
+      static unsigned int zero = 0;
+      vmic_pv [vmic_pv_len].src_status_addr = &zero;
+    } else {
+      vmic_pv [vmic_pv_len].src_status_addr = dcuStatus[channels [i].ifoid] + channels [i].dcu_id;
+    }
+#endif
+    vmic_pv [vmic_pv_len].vec_len = channels [i].bytes/16;
+    // Byteswap all Myrinet data on Sun
+    vmic_pv [vmic_pv_len].bsw = 0;
+    DEBUG(10, cerr << channels [i].name << endl);
+    DEBUG(10, cerr << "vmic_pv: " << hex << (unsigned long) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
+    vmic_pv_len++;
+  }
+  *_move_buf = move_buf;
+  *_vmic_pv_len = vmic_pv_len;
+}
+
 #if 0
 void *
 drain (void *a)
@@ -1413,6 +1492,60 @@ drain (void *a)
   return NULL;
 }
 #endif
+
+
+void daqd_c::set_thread_priority (char *thread_name, char *thread_abbrev, int rt_priority, int cpu_affinity) {
+    // get thread ID, thread label (limit to 16 characters)
+    pid_t my_tid;
+    char my_thr_label[16];
+    my_tid = (pid_t) syscall(SYS_gettid);
+    strncpy(my_thr_label,thread_abbrev,16);
+    // Name the thread
+    prctl(PR_SET_NAME,my_thr_label,0, 0, 0);
+
+    std::string affinity_key = std::string(thread_abbrev) + std::string("_cpu");
+    std::string priority_key = std::string(thread_abbrev) + std::string("_priority");
+
+    cpu_affinity = daqd.parameters().get<int>(affinity_key, cpu_affinity);
+    rt_priority = daqd.parameters().get<int>(priority_key, rt_priority);
+
+    system_log(1, "%s thread - label %s pid=%d", thread_name, my_thr_label, (int) my_tid);
+    // If priority is non-zero, add to the real-time scheduler at that priority
+    if (rt_priority > 0) {
+        struct sched_param my_sched_param = { rt_priority };
+        int set_stat;
+        set_stat = pthread_setschedparam(pthread_self(), SCHED_FIFO, &my_sched_param);
+        if(set_stat != 0){
+            system_log(1, "%s thread priority error %s",thread_name, strerror(set_stat));
+        } else {
+            system_log(1, "%s thread set to priority %d",thread_name, rt_priority);
+        }
+    }
+    // If cpu affinity is non-zero, set the affinity (if enough CPUs)
+    //  If positive, count from 0, if negative, count from max
+    // count CPUs
+    if (cpu_affinity != 0 ) {
+        int numCPU, cpuId;
+        numCPU = sysconf(_SC_NPROCESSORS_ONLN);
+        if (cpu_affinity < 0) {
+            cpuId = numCPU + cpu_affinity;
+        } else {
+        cpuId = cpu_affinity;
+        }
+        if( numCPU > 1 && (cpuId > 0  && cpuId < numCPU)){
+            cpu_set_t my_cpu_set;
+            CPU_ZERO(&my_cpu_set);
+            CPU_SET(cpuId,&my_cpu_set);
+            int set_stat;
+        set_stat = pthread_setaffinity_np(pthread_self(),sizeof(cpu_set_t),&my_cpu_set);
+            if(set_stat != 0){
+               system_log(1, "%s thread setaffinity error %s",thread_name, strerror(set_stat));
+            } else {
+           system_log(1, "%s thread put on CPU %d",thread_name, cpuId);
+            }
+        }
+     }
+}
 
 /// Print out usage message and exit
 void
@@ -1483,7 +1616,7 @@ void
 shandler (int a) {
         char p[25];
 	system_log(1,"going down on signal %d", a);
-	seteuid (0); // Try to switch to superuser effective uid
+    int unused = seteuid (0); // Try to switch to superuser effective uid
 	sprintf (p,"/bin/gcore %d", getpid());
 	// Works on Gentoo this way:
         //sprintf (p,"gdb --pid=%d --batch -ex gcore", getpid());
@@ -1753,6 +1886,19 @@ open_mx();
 
   if ((stf = open (startup_fname, O_RDONLY)) >= 0)
     {
+#ifdef USE_GM
+      cerr << "daqd built with USE_GM" << endl;
+#endif
+#ifdef USE_MX
+      cerr << "daqd built with USE_MX" << endl;
+#endif
+#ifdef USE_UDP
+      cerr << "daqd built with USE_UDP" << endl;
+#endif
+#ifdef USE_BROADCAST
+      cerr << "daqd built with USE_BROADCAST" << endl;
+#endif
+
       pthread_attr_t attr;
       pthread_attr_init (&attr);
       pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
@@ -1829,6 +1975,14 @@ shutdown_server ()
 }
 
 void regerr() { abort();};
+/*
+ * This is a funny way of doing this, as the target platforms for daqd currently
+ * support regexp.h, but it is also being developed on systems that do not.
+ * So for now the goal is to allow it to work with the old depricated (but tested in
+ * production) code unless it cannot.
+ */
+#ifdef HAVE_REGEXP_H
+
 #define ESIZE 1024
 char ipexpbuf [ESIZE];
 char dec_num_expbuf [ESIZE];
@@ -1978,13 +2132,45 @@ daqd_c::is_valid_ip_address (char *str)
   return step (str, ipexpbuf);
 }
 
+#else
+#ifdef HAVE_REGEX_H
+
+/* this code replaces the depricated regexp.h code, but still needs to be tested */
+
+regex_t ip_regex;
+//regex_t dec_num_regex;
+
+char *ipregexp ="^([0-9]\\{1,3\\}\\.)\\{3\\}[0-9]\\{1,3\\}$";
+//char *dec_num_regexp = "^[0-9]\\{1,\\}$";
+
+
+void
+daqd_c::compile_regexp ()
+{
+  (void)regcomp(&ip_regex, ipregexp, REG_NOSUB);
+  //(void)regcomp(&dec_num_regex, dec_num_regexp, REG_NOSUB);
+}
+
+/// See if the IP address is valid
+int
+daqd_c::is_valid_ip_address (char *str)
+{
+  return regexec(&ip_regex, str, 0, NULL, 0) == 0;
+}
+
+
+
+#else
+#error Some form of regexp is still required, either <regexp.h> (depricated) or <regex.h>
+#endif
+#endif
+
 int
 daqd_c::is_valid_dec_number (char *str)
 {
-  // Somehow the regular expression stuff is broken on amd64 linux... 
+  // Somehow the regular expression stuff is broken on amd64 linux...
   char *endptr;
   long int res = strtol(str, &endptr, 10);
   return endptr == (str + strlen(str));
   //return step (str, dec_num_expbuf);
 }
-

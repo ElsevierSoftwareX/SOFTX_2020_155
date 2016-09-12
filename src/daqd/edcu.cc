@@ -20,6 +20,7 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include "epics_pvs.hh"
 
 using namespace std;
 
@@ -43,8 +44,8 @@ void connectCallback(struct connection_handler_args args) {
 	daqd.edcu1.channel_status[chnum] = (args.op == CA_OP_CONN_UP? 0: 0xbad);
 	if (args.op == CA_OP_CONN_UP) daqd.edcu1.con_chans++; else daqd.edcu1.con_chans--;
 	daqd.edcu1.con_events++;
-	pvValue[3] = daqd.edcu1.num_chans;
-	pvValue[4] = daqd.edcu1.con_chans;
+    PV::set_pv(PV::PV_EDCU_CHANS, daqd.edcu1.num_chans);
+    PV::set_pv(PV::PV_EDCU_CONN_CHANS, daqd.edcu1.con_chans);
 }
 
 void subscriptionHandler(struct event_handler_args args) {

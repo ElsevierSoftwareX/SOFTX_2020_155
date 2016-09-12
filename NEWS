@@ -1,4 +1,13 @@
 ==================================================================================================
+Changes for 3.x.x
+==================================================================================================
+- Bug Fix (1033): Daqd frame writer changes:
+  Split the producer thread into multiple parts to free up a thread to only receive data.
+  Split the raw frame writer thread into two compoments to allow it to catch up better to
+  when there is a slow down on frame writes.
+  Cleaned up some of the EPICS code.
+  Added more EPICS channels to give metrics on daqd.
+==================================================================================================
 Changes for 3.1.1
 ==================================================================================================
 - Bug Fix for loading of RampMuxMatrix on startup (1030).

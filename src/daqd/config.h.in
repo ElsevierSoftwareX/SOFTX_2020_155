@@ -175,6 +175,12 @@
 /* Define if you have the <tnf/probe.h> header file.  */
 #undef HAVE_TNF_PROBE_H
 
+/* Define if you have the <regexp.h> header file. */
+#undef HAVE_REGEXP_H
+
+/* Define if you have the <regex.h> header file. */
+#undef HAVE_REGEX_H
+
 /* Define if no RMS in trend frames */
 #undef NO_RMS
 
